@@ -39,9 +39,6 @@
 #define P3110_MEMORY_SIZE_SM 20
 #define P3110_MEMORY_SIZE_ME 0
 
-/* 2 seconds idle timeout */
-#define P3110_KEEPALIVE_TIMEOUT 20;
-
 /* Number of times to try resending SMS (empirical) */
 #define P3110_SMS_SEND_RETRY_COUNT 4
 

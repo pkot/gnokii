@@ -203,11 +203,6 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 static bool SimAvailable = false;
 static int user_data_count = 0;
 
-/* These are related to keepalive functionality */
-static bool RequestTerminate;
-static bool DisableKeepAlive;
-static int KeepAliveTimer;
-
 /* Initialise is the only function allowed to 'use' state */
 static gn_error P3110_Initialise(struct gn_statemachine *state)
 {
@@ -240,10 +235,6 @@ static gn_error P3110_Initialise(struct gn_statemachine *state)
 	gn_data_clear(&data);
 	if (sm_block(0x16, &data, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
-	/* Start sending keepalive messages in separate thread */
-	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
-	RequestTerminate = false;
-	DisableKeepAlive = false;
 	return GN_ERR_NONE;
 }
 
@@ -251,7 +242,6 @@ static gn_error P3110_Initialise(struct gn_statemachine *state)
 static gn_error P3110_GetSMSInfo(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting SMS info...\n");
-	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 	if (sm_message_send(0, 0x3f, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return sm_block(0x41, data, state);
 }
@@ -259,7 +249,6 @@ static gn_error P3110_GetSMSInfo(gn_data *data, struct gn_statemachine *state)
 static gn_error P3110_GetPhoneInfo(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting phone info...\n");
-	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 	if (sm_message_send(0, 0x4c, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return sm_block(0x4d, data, state);
 }
@@ -267,7 +256,6 @@ static gn_error P3110_GetPhoneInfo(gn_data *data, struct gn_statemachine *state)
 static gn_error P3110_GetStatusInfo(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting phone status...\n");
-	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 	if (sm_message_send(0, 0x4a, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return sm_block(0x4b, data, state);
 }
@@ -295,7 +283,6 @@ static gn_error P3110_Identify(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Identifying...\n");
 	pnok_manufacturer_get(data->manufacturer);
-	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 	if (sm_message_send(0, 0x4c, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	sm_block(0x4d, data, state);
 
@@ -312,8 +299,6 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 	gn_error error = GN_ERR_INTERNALERROR;
 
 	dprintf("Getting SMS message...\n");
-
-	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
@@ -384,8 +369,6 @@ static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *st
 	gn_error error = GN_ERR_INTERNALERROR;
 
 	dprintf("Deleting SMS message...\n");
-
-	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 
 	/* Set memory type and location in the request */
 	memory_type = get_memory_type(data->raw_sms->memory_type);
@@ -477,8 +460,6 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 	retry_count = P3110_SMS_SEND_RETRY_COUNT;
 
 	while (retry_count > 0) {
-		KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
-
 		if (sm_message_send(hsize, msgtype, hreq, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
 		error = sm_block(msgtype, data, state);
