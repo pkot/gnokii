@@ -1377,19 +1377,19 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   switch (SMS->Class) {
 
     case 0: /* flash SMS */
-      req[21] = req[21] | 0x10;
+      req[21] = req[21] | 0xf0;
       break;
 
     case 1:
-      req[21] = req[21] | 0x11;
+      req[21] = req[21] | 0xf1;
       break;
 
     case 2:
-      req[21] = req[21] | 0x12;
+      req[21] = req[21] | 0xf2;
       break;
 
     case 3:
-      req[21] = req[21] | 0x13;
+      req[21] = req[21] | 0xf3;
       break;
 
   }
@@ -1398,7 +1398,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
 
   /* FIXME: 8 bit data is currently not supported so the following line
      is commented out */
-/*  if (SMS->EightBit) req[21] = req[21] | 0x02; */
+  if (SMS->EightBit) req[21] = req[21] | 0xf4;
   
   /* Mask for compression */
   /* FIXME: Compression is currently not supported so following line is commented out */
