@@ -135,6 +135,7 @@ clean:
                gnokii $(GNOKII_OBJS) \
                gnokiid $(GNOKIID_OBJS) \
                xgnokii $(XGNOKII_OBJS) \
+               mgnokiidev $(MGNOKIIDEV_OBJS) \
                gnokii-${VERSION}.tar.gz
 
 dist:	clean

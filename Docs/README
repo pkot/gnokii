@@ -216,13 +216,6 @@ Series. Perhaps the first draft of the protocol for communication between
 Nokia mobile phones and PCs was not so general to support the newest features
 of Nokia's phones.
 
-The 6110 protocol seems to use some magic in the communication (the phone
-responds with different bytes each time and the next answer from the PC
-is dependant on the previous `magic' answer from the phone). We do not
-get the magic so we are not able to display the message "Accesory connected!"
-on the display as Nokia Cellular DataSuite does. But hopefully we will be
-able in the future. We are hopeful of getting some help from Nokia :-)
-
 
 - To Do -
 

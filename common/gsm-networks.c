@@ -46,9 +46,7 @@ GSM_Network GSM_Networks[] =
   { "222 88", "Wind Telecomunicazioni SpA" },
   { "226 01", "CONNEX GSM" },
   { "226 10", "DIALOG" },
-  /* FIXME */
   { "228 01", "NATEL International" },
-  { "228 01", "NATEL city" },
   { "228 02", "diAx Mobile AG" },
   { "230 01", "Paegas" },
   { "230 02", "EuroTel" },
@@ -74,9 +72,7 @@ GSM_Network GSM_Networks[] =
   { "242 01", "Telenor Mobil" },
   { "242 02", "NetCom GSM" },
   { "244 03", "Telia City (Finland)" },
-  /* FIXME */
   { "244 05", "Alands Mobiltelefon AB" },
-  { "244 05", "RADIOLINJA" },
   { "244 09", "Finnet" },
   { "244 91", "Sonera" },
   { "246 01", "OMNITEL" },
@@ -89,13 +85,9 @@ GSM_Network GSM_Networks[] =
   { "250 01", "Mobile Telesystems" },
   { "250 02", "North-West GSM" },
   { "250 05", "Siberian Cellular Systems 900" },
-  /* FIXME */
   { "250 07", "BM Telecom" },
-  { "250 07", "Smarts" },
   { "250 10", "Don Telecom" },
-  /* FIXME */
   { "250 12", "FECS-900" },
-  { "250 12", "GSM" },
   { "250 13", "Kuban GSM" },
   { "250 39", "Uraltel" },
   { "250 44", "North Caucasian GSM" },
@@ -146,10 +138,6 @@ GSM_Network GSM_Networks[] =
   { "310 27", "Powertel" },
   { "310 31", "AERIAL" },
   { "310 77", "Iowa Wireless Services LP" },
-  /* FIXME */
-  { "310 xx", "DigiPH" },
-  /* FIXME */
-  { "310 xx", "Pinpoint PCS" },
   { "340 01", "AMERIS" },
   { "400 01", "AZERCELL GSM" },
   { "400 02", "Bakcell GSM 2000" },
@@ -231,8 +219,6 @@ GSM_Network GSM_Networks[] =
   { "546 01", "Mobilis" },
   { "547 20", "VINI" },
   { "602 01", "MobiNil" },
-  /* FIXME */
-  { "602 02", "CLICK GSM" },
   { "602 02", "Tunicell" },
   { "603 01", "ALGERIAN MOBILE NETWORK" },
   { "604 01", "I A M" },

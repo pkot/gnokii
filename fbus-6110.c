@@ -1182,8 +1182,6 @@ GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
   return (CurrentSMSMessageError);
 }
 
-/* FIXME: This is not tested yet. */
-
 GSM_Error FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
 {
 
@@ -1844,13 +1842,29 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x06:
 
-      /* FIXME: Probably MessageBuffer[4] is the reason for failure. */
+      switch (MessageBuffer[4]) {
+
+	/* FIXME: other errors? When I send the phonebook with index of 350 it
+           still report error 0x7d :-( */
+
+      case 0x7d:
 
 #ifdef DEBUG
-      printf(_("Message: Phonebook not written - name is too long.\n"));
+	printf(_("Message: Phonebook not written - name is too long.\n"));
 #endif DEBUG
 
-      CurrentPhonebookError = GE_PHBOOKNAMETOOLONG;
+	CurrentPhonebookError = GE_PHBOOKNAMETOOLONG;
+
+	break;
+
+      default:
+
+#ifdef DEBUG
+	printf(_("   Unknown error!\n"));
+#endif DEBUG
+
+	CurrentPhonebookError = GE_INTERNALERROR;
+      }
 
       break;
 
@@ -2081,14 +2095,6 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x63:
 
-#ifdef DEBUG
-      printf(_("Message: Date and time\n"));
-      printf(_("   Time: %02d:%02d:%02d\n"), MessageBuffer[12], MessageBuffer[13], MessageBuffer[14]);
-      printf(_("   Date: %4d/%02d/%02d\n"), 256*MessageBuffer[8]+MessageBuffer[9], MessageBuffer[10], MessageBuffer[11]);
-#endif DEBUG
-
-      /* FIXME: (PJ) we should count this before printing above ... */
-
       CurrentDateTime->Year=256*MessageBuffer[8]+MessageBuffer[9];
       CurrentDateTime->Month=MessageBuffer[10];
       CurrentDateTime->Day=MessageBuffer[11];
@@ -2096,6 +2102,12 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       CurrentDateTime->Hour=MessageBuffer[12];
       CurrentDateTime->Minute=MessageBuffer[13];
       CurrentDateTime->Second=MessageBuffer[14];
+
+#ifdef DEBUG
+      printf(_("Message: Date and time\n"));
+      printf(_("   Time: %02d:%02d:%02d\n"), CurrentDateTime->Hour, CurrentDateTime->Minute, CurrentDateTime->Second);
+      printf(_("   Date: %4d/%02d/%02d\n"), CurrentDateTime->Year, CurrentDateTime->Month, CurrentDateTime->Day);
+#endif DEBUG
 
       CurrentDateTimeError=GE_NONE;
 
@@ -2409,12 +2421,14 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       printf(_("Message: SMS Status error, probably not authorized by PIN\n"));
 #endif DEBUG
 
+      CurrentSMSStatusError = GE_INTERNALERROR;
+
       break;
 	  
     default:
     
-      /* FIXME: Here should be some error handling */
-      
+      CurrentSMSStatusError = GE_INTERNALERROR;
+
       break;
 
     }
