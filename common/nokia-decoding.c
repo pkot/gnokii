@@ -64,10 +64,10 @@ GSM_Error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data,
 						data->SpeedDial->MemoryType = GMT_XX;
 						break;
 					}
+					dprintf("Speed dial pointer: %i in %s\n", data->SpeedDial->Location, str);
+				} else {
+					dprintf("NULL entry?\n");
 				}
-
-				dprintf("Speed dial pointer: %i in %s\n", data->SpeedDial->Location, str);
-
 				break;
 			default:
 				/* FIXME: is it possible? */
@@ -224,7 +224,7 @@ static GSM_Error GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 {
 	unsigned char *block;
-	int alarm, year;
+	int alarm;
 
 	block = message + 12;
 
@@ -255,7 +255,6 @@ GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 		break;
 	case PNOKIA_NOTE_BIRTHDAY:
 		data->CalendarNote->Type = GCN_BIRTHDAY;
-		data->CalendarNote->Time.Year = year;
 		data->CalendarNote->Time.Hour = 23;
 		data->CalendarNote->Time.Minute = 59;
 		data->CalendarNote->Time.Second = 58;
@@ -288,4 +287,3 @@ GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 	}
 	return GE_NONE;
 }
-
