@@ -12,6 +12,7 @@
  * AT driver updates
     o add more workarounds for SonyEricssons            (Hugo Haas)
     o add Nokia Premicell support                    (Jonas Berlin)
+    o clear empty flag when phonebook entry read   (BORBELY Zoltan)
  * gnapplet driver updates
     o fix incorrect bracketing                           (Greg Alt)
     o deletesms support                            (BORBELY Zoltan)
@@ -26,6 +27,7 @@
     o gettodo support                              (BORBELY Zoltan)
     o writetodo support                            (BORBELY Zoltan)
     o deletealltodos support                       (BORBELY Zoltan)
+    o clear empty flag when phonebook entry read   (BORBELY Zoltan)
  * gnokii updates
     o initialize error variables                             (SuSE)
     o make --writephonebook --find-free work            (Pawel Kot)
@@ -38,6 +40,7 @@
                                                         (Pawel Kot)
     o --getphonebook end stops after every entry read
                                      (Marco Canini, BORBELY Zoltan)
+    o search for an empty phonebook entry fixed    (BORBELY Zoltan)
  * libgnokii updates
     o fbus echo cancellation and statemachine fix  (BORBELY Zoltan)
     o todo vcalendar import/export functions was mixed
@@ -68,7 +71,7 @@
     o add Nokia 7210 support                       (BORBELY Zoltan)
     o IrDA disabled for Nokia 6610i and 7210       (BORBELY Zoltan)
     o add Nokia 6230 support                       (BORBELY Zoltan)
-    o clear empty flag when phonebook entry read        (Pawel Kot)
+    o empty phonebook was reported as an error     (BORBELY Zoltan)
  * portability changes
     o NetBSD also fall into unices category     (Richard M Kreuter)
     o NetBSD needs the same tricks as OpenBSD and FreeBSD in

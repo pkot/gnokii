@@ -1462,6 +1462,7 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char blocks;
+	int memtype;
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */
@@ -1497,6 +1498,21 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		if (message[6] == 0x0f) { /* not found */
 			switch (message[10]) {
 			case 0x30:
+				if (data->phonebook_entry)
+					memtype = data->phonebook_entry->memory_type;
+				else
+					memtype = GN_MT_XX;
+				/*
+				 * this message has two meanings: "invalid
+				 * location" and "memory is empty"
+				 */
+				switch (memtype) {
+				case GN_MT_SM:
+				case GN_MT_ME:
+					return GN_ERR_EMPTYLOCATION;
+				default:
+					break;
+				}
 				return GN_ERR_INVALIDMEMORYTYPE;
 			case 0x33:
 				return GN_ERR_EMPTYLOCATION;
@@ -1507,9 +1523,6 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			}
 		}
 		dprintf("Received phonebook info\n");
-		if (data->phonebook_entry) {
-			data->phonebook_entry->empty = false;
-		}
 		blocks     = message[21];
 		return phonebook_decode(message + 22, length - 21, data, blocks, message[11], 12);
 	case 0x0c: /* Write memory location */

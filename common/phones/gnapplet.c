@@ -694,13 +694,14 @@ static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *mess
 
 	case GNAPPLET_MSG_PHONEBOOK_READ_RESP:
 		if (!(entry = data->phonebook_entry)) return GN_ERR_INTERNALERROR;
-		entry->empty = false;
+		entry->empty = true;
 		entry->caller_group = 5;
 		entry->name[0] = '\0';
 		entry->number[0] = '\0';
 		entry->subentries_count = 0;
 		memset(&entry->date, 0, sizeof(entry->date));
 		if (error != GN_ERR_NONE) return error;
+		entry->empty = false;
 		n = pkt_get_uint16(&pkt);
 		assert(n < GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER);
 		for (i = 0; i < n; i++) {

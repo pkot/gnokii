@@ -3483,7 +3483,7 @@ static int writephonebook(int argc, char *args[])
 				if (error != GN_ERR_NONE && error != GN_ERR_EMPTYLOCATION) {
 					break;
 				}
-				if (aux.empty) {
+				if (aux.empty || error == GN_ERR_EMPTYLOCATION) {
 					entry.location = aux.location;
 					error = GN_ERR_NONE;
 					break;
