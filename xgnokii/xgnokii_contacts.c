@@ -2161,7 +2161,7 @@ static void SaveContacts(void)
 		for (i = 0; i < memoryStatus.MaxME; i++) {
 			pbEntry = g_ptr_array_index(contactsMemory, i);
 #ifdef XDEBUG
-			g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.Empty, pbEntry->entry.name,
+			g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
 				pbEntry->entry.number, (int) pbEntry->entry.memory_type,
 				pbEntry->entry.caller_group, (int) pbEntry->status);
 #endif
@@ -2199,7 +2199,7 @@ static void SaveContacts(void)
 			pbEntry = g_ptr_array_index(contactsMemory, i);
 
 #ifdef XDEBUG
-			g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.Empty, pbEntry->entry.name,
+			g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
 				pbEntry->entry.number, (int) pbEntry->entry.memory_type,
 				pbEntry->entry.caller_group, (int) pbEntry->status);
 #endif
@@ -2331,7 +2331,7 @@ void GUI_RefreshContacts(void)
 			gtk_clist_set_row_data(GTK_CLIST(clist), row_i++, (gpointer) pbEntry);
 		}
 #ifdef XDEBUG
-		g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.Empty, pbEntry->entry.name,
+		g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
 			pbEntry->entry.number, (int) pbEntry->entry.memory_type,
 			pbEntry->entry.caller_group, (int) pbEntry->status);
 #endif
