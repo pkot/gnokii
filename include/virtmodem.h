@@ -1,42 +1,39 @@
 /*
 
-	G N O K I I
+  G N O K I I
 
-	A Linux/Unix toolset and driver for Nokia mobile phones.
-	Copyright (C) Hugh Blemings, 1999.
+  A Linux/Unix toolset and driver for Nokia mobile phones.
 
-	Released under the terms of the GNU GPL, see file COPYING for more details.
+  Copyright (C) 1999,2000 Hugh Blemings & Pavel Janík ml.
 
-	virtmodem.h - Header file for virtmodem code in virtmodem.c
+  Released under the terms of the GNU GPL, see file COPYING for more details.
 
+  Header file for virtmodem code in virtmodem.c
+
+  Last modification: Mon Mar 13 21:12:10 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
 
 #ifndef __virtmodem_h
 #define __virtmodem_h
 
-	/* Prototypes */
-bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType connection, bool debug_mode);
-int			VM_PtySetup(void);
-void		VM_ThreadLoop(void);
-void    	VM_CharHandler(void);
-int			VM_GetMasterPty(char **name);
-void		VM_Terminate(void);
-GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection);
+/* Prototypes */
 
-	/* All defines and prototypes from here down are specific to 
-	   the virtual modem code and so are #ifdef out if __virtmodem_c isn't 
-	   defined. */
-#ifdef	__virtmodem_c
-
-
-
-
-
-
-
-
-
-#endif	/* __virtmodem_c */
+bool VM_Initialise(char *model,
+		   char *port,
+		   char *initlength,
+		   GSM_ConnectionType connection,
+		   char *bindir,
+		   bool debug_mode);
+int  VM_PtySetup(char *bindir);
+void VM_ThreadLoop(void);
+void VM_CharHandler(void);
+int  VM_GetMasterPty(char **name);
+void VM_Terminate(void);
+GSM_Error VM_GSMInitialise(char *model,
+			   char *port,
+			   char *initlength,
+			   GSM_ConnectionType connection);
 
 #endif	/* __virtmodem_h */

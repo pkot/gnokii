@@ -4,3 +4,6 @@
 * Sun Mar  5 14:02:38 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - Date of SMSC response fixed (Gary Reuter)
 
+* Mon Mar 13 21:15:28 CET 2000
+- virtmodem.h cleaned-up, mgnokiid should be in bindir (Marcel Holtmann)
+

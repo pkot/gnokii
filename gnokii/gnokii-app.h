@@ -8,7 +8,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Header file for test utility.	
+  Header file for test utility.
 
   Last modification: Wed Nov  3 21:47:35 CET 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
