@@ -71,6 +71,11 @@ typedef enum {
   GNT_INTERNATIONAL=0x91 /* International number */
 } GSM_NumberType;
 
+
+/* Maximum length of SMS center name */
+
+#define GSM_MAX_SMS_CENTER_NAME_LENGTH	(20)
+
 /* Limits of SMS messages. */
 
 #define GSM_MAX_SMS_CENTER_LENGTH  (40)
@@ -120,7 +125,7 @@ typedef enum {
 
 typedef struct {
   int No;        /* Number of the SMSC in the phone memory */
-  char Name[20]; /* Name of the SMSC */
+  char Name[GSM_MAX_SMS_CENTER_NAME_LENGTH]; /* Name of the SMSC */
   GSM_SMSMessageFormat Format; /* SMS is sent as text/fax/paging/email. */
   GSM_SMSMessageValidity Validity; /* Validity of SMS Message. */
   char Number[GSM_MAX_SMS_CENTER_LENGTH]; /* Number of the SMSC */

@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1_pre25
+VERSION = 0.3.1_pre26
 
 #
 # Compiler to use.
@@ -20,7 +20,7 @@ CC = gcc
 # developers and testers.
 #
 
-# DEBUG=-DDEBUG
+DEBUG=-DDEBUG
 
 #
 # Model of the mobile phone.  This is now only used as a default
@@ -54,6 +54,12 @@ PORT=-DPORT="\"/dev/ttyS0\""
 # PORT=-DPORT="\"COM1:\""
 
 #
+# Under FreeBSD, uncomment this
+#
+
+# PORT=-DPORT="\"/dev/ttyd0\""
+
+#
 # I18N - comment this line if you do not have GNU gettext installed
 #
 
@@ -83,7 +89,8 @@ GTKLDFLAGS=`gtk-config --libs`
 # Destination directory
 #
 
-DESTDIR=/tmp/usr/local
+DESTDIR=/usr/local
+XGNOKIIDIR=${DESTDIR}/lib/xgnokii
 
 #
 # Install utility
@@ -105,7 +112,7 @@ INSTALL=install
 # Set up compilation/linking flags for Linux.
 #
 
-export CC MODEL PORT GETTEXT DEBUG VERSION WIN32 SECURITY GTKCFLAGS GTKLDFLAGS
+export CC MODEL PORT GETTEXT DEBUG VERSION WIN32 SECURITY GTKCFLAGS GTKLDFLAGS XGNOKIIDIR
 
 COMMON=-Wall -O2 \
        ${MODEL} ${PORT} \
@@ -205,7 +212,7 @@ dist:	clean
 install: gnokii gnokiid xgnokii xlogos xkeyb
 	@echo "Installing files..."
 
-	@mkdir -p $(DESTDIR)/bin $(DESTDIR)/sbin $(DESTDIR)/lib/gnokii
+	@mkdir -p $(DESTDIR)/bin $(DESTDIR)/sbin $(DESTDIR)/lib/gnokii $(XGNOKIIDIR)/help
 
 	@$(INSTALL) gnokii $(DESTDIR)/bin
 	@echo " $(DESTDIR)/bin/gnokii"
@@ -230,6 +237,9 @@ install: gnokii gnokiid xgnokii xlogos xkeyb
 
 	@$(INSTALL) pixmaps/6150.xpm $(DESTDIR)/lib/gnokii/6150.xpm
 	@echo " $(DESTDIR)/lib/gnokii/6150.xpm"
+
+	@echo "Installing help files for xgnokii..."
+	@$(INSTALL) -m 0444 xgnokii/docs/help/* $(XGNOKIIDIR)/help
 
 	@echo "done."
 

@@ -2068,7 +2068,7 @@ int identify( void )
   GSM->GetRevision(rev);
   GSM->GetModel(model);
 
-  printf(  "IMEI:     %s\n", imei);
+  printf(_("IMEI:     %s\n"), imei);
   printf(_("Model:    %s\n"), model);
   printf(_("Revision: %s\n"), rev);
 
