@@ -52,10 +52,14 @@ void readconfig(void);
 
 char		*Model;		/* Model from .gnokiirc file. */
 char		*Port;		/* Serial port from .gnokiirc file */
+char		*Connection;	/* Connection type from .gnokiirc file */
 
 	/* Local variables */
 char		*DefaultModel = MODEL;	/* From Makefile */
 char		*DefaultPort = PORT;
+
+char		*DefaultConnection = "serial";
+
 void version(void)
 {
 
@@ -135,10 +139,14 @@ void fbusinit(bool enable_monitoring)
 {
   int count=0;
   GSM_Error error;
+  GSM_ConnectionType connection=GCT_Serial;
 
+  if (!strcmp(Connection, "infrared"))
+    connection=GCT_Infrared;
+    
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(Model, Port, enable_monitoring);
+  error = GSM_Initialise(Model, Port, connection, enable_monitoring);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -867,4 +875,8 @@ void	readconfig(void)
 		Port = DefaultPort;
     }
 
+    Connection = CFG_Get(cfg_info, "global", "connection");
+    if (Connection == NULL) {
+		Connection = DefaultConnection;
+    }
 }

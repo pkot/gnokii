@@ -130,8 +130,11 @@ bool					SMSHeaderAckReceived;		/* Set when header ack'd */
 	/* The following functions are made visible to gsm-api.c and friends. */
 
 	/* Initialise variables and state machine. */
-GSM_Error	FB38_Initialise(char *port_device, bool enable_monitoring)
+GSM_Error	FB38_Initialise(char *port_device, GSM_ConnectionType connection, bool enable_monitoring)
 {
+
+	/* ConnectionType is ignored in 3810 code. */
+
 	int		rtn;
 
 	RequestTerminate = false;

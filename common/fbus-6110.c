@@ -138,7 +138,9 @@ int PortFD; /* Filedescriptor of the mobile phone's device */
 
 char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
 
-bool IRMode = false; /* for gnokiis ir-mode */
+/* This is the connection type used in gnokii. */
+
+GSM_ConnectionType CurrentConnectionType;
 
 int BufferCount;
 
@@ -209,7 +211,7 @@ char               CurrentIncomingCall[20];
 
 /* Initialise variables and state machine. */
 
-GSM_Error FB61_Initialise(char *port_device, bool enable_monitoring)
+GSM_Error FB61_Initialise(char *port_device, GSM_ConnectionType connection, bool enable_monitoring)
 {
 
   int rtn;
@@ -218,6 +220,8 @@ GSM_Error FB61_Initialise(char *port_device, bool enable_monitoring)
   FB61_LinkOK = false;
 
   strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
+
+  CurrentConnectionType = connection;
 
   /* Create and start main thread. */
 
@@ -519,14 +523,7 @@ void FB61_ThreadLoop(void)
 
   CurrentPhonebookEntry = NULL;  
 
-  /* If the user wants the infrared communication, we just define IRMode
-     to be true here. */
-
-#ifdef INFRARED
-  IRMode = true;
-#endif INFRARED
-
-  if ( IRMode ) {
+  if ( CurrentConnectionType == GCT_Infrared ) {
 
 #ifdef DEBUG
     printf ("Starting IR mode...!\n");
@@ -539,7 +536,7 @@ void FB61_ThreadLoop(void)
       return;
     }
 
-  } else {
+  } else { /* CurrentConnectionType == GCT_Serial */
 
     /* Try to open serial port, if we fail we sit here and don't proceed to the
        main loop. */
@@ -2531,7 +2528,7 @@ void FB61_RX_StateMachine(char rx_byte) {
 
   case FB61_RX_Sync:
 
-    if (IRMode) {
+    if ( CurrentConnectionType == GCT_Infrared ) {
       if (rx_byte == FB61_IR_FRAME_ID) {
 	BufferCount = 0;
 	RX_State = FB61_RX_GetDestination;
@@ -2540,7 +2537,7 @@ void FB61_RX_StateMachine(char rx_byte) {
 	checksum[0] = FB61_IR_FRAME_ID;
 	checksum[1] = 0;
       }
-    } else {
+    } else { /* CurrentConnectionType == GCT_Serial */
       if (rx_byte == FB61_FRAME_ID) {
 	BufferCount = 0;
 	RX_State = FB61_RX_GetDestination;
@@ -2682,9 +2679,9 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 
   /* Now construct the message header. */
 
-  if (IRMode)
+  if (CurrentConnectionType == GCT_Infrared)
     out_buffer[current++] = FB61_IR_FRAME_ID; /* Start of the IR frame indicator */
-  else
+  else /* CurrentConnectionType == GCT_Serial */
     out_buffer[current++] = FB61_FRAME_ID;    /* Start of the frame indicator */
 
   out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
@@ -2760,9 +2757,9 @@ int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
   /* Now construct the Ack header. */
 
-  if (IRMode)
+  if (CurrentConnectionType == GCT_Infrared)
     out_buffer[current++] = FB61_IR_FRAME_ID; /* Start of the IR frame indicator */
-  else
+  else /* CurrentConnectionType == GCT_Serial */
     out_buffer[current++] = FB61_FRAME_ID;    /* Start of the frame indicator */
 
   out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */

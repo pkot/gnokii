@@ -114,7 +114,7 @@ extern GSM_Information FB61_Information;
 
 /* Prototypes for the functions designed to be used externally. */
 
-GSM_Error FB61_Initialise(char *port_device, bool enable_monitoring);
+GSM_Error FB61_Initialise(char *port_device, GSM_ConnectionType connection, bool enable_monitoring);
 bool      FB61_OpenSerial(void);
 bool      FB61_Open_Ir_Serial(void);
 void      FB61_Terminate(void);

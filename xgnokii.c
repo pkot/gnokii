@@ -43,12 +43,15 @@ static GdkPixmap *SMSPixmap = NULL;
 /* Pixmap used for alarm picture. */
 static GdkPixmap *AlarmPixmap = NULL;
 
-char *Model; /* Model from .gnokiirc file. */
-char *Port;  /* Serial port from .gnokiirc file */
+char *Model;      /* Model from .gnokiirc file. */
+char *Port;       /* Serial port from .gnokiirc file */
+char *Connection; /* Connection type from .gnokiirc file */
 
 /* Local variables */
 char *DefaultModel = MODEL; /* From Makefile */
 char *DefaultPort = PORT;
+
+char *DefaultConnection = "serial";
 
 /* Variables which contain current signal and battery. */
 static float rflevel=-1, batterylevel=-1;
@@ -60,11 +63,15 @@ GSM_Error fbusinit(bool enable_monitoring)
 {
   int count=0;
   static GSM_Error error=GE_NOLINK;
+  GSM_ConnectionType connection=GCT_Serial;
 
+  if (!strcmp(Connection, "infrared"))
+    connection=GCT_Infrared;
+    
   /* Initialise the code for the GSM interface. */     
 
   if (error==GE_NOLINK)
-    error = GSM_Initialise(Model, Port, enable_monitoring);
+    error = GSM_Initialise(Model, Port, connection, enable_monitoring);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -376,6 +383,9 @@ void GUI_ReadConfig(void)
   if (Port == NULL)
     Port = DefaultPort;
 
+  Connection = CFG_Get(cfg_info, "global", "connection");
+  if (Connection == NULL)
+    Connection = DefaultConnection;
 }
 
 int main (int argc, char *argv[])

@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.0-pre6
+VERSION = 0.3.0-pre7
 
 #
 # Compiler to use.
@@ -48,13 +48,6 @@ PORT=-DPORT="\"/dev/ttyS0\""
 # PORT=-DPORT="\"/dev/ttyS1\""
 
 #
-# IR communication - uncomment this line if you have IR port that can be setup
-# to emulate COM port in BIOS.
-#
-
-# INFRARED=-DINFRARED
-
-#
 # I18N - comment this line if you do not have GNU gettext installed
 #
 
@@ -79,7 +72,6 @@ GTKLDFLAGS=`gtk-config --libs`
 
 COMMON=-Wall -g -O0 \
        ${MODEL} ${PORT} \
-       ${INFRARED} \
        ${GETTEXT} \
        ${DEBUG} \
        -DVERSION=\"${VERSION}\"

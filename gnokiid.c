@@ -37,10 +37,13 @@ void	read_config(void);
 bool		DebugMode;	/* When true, run in debug mode */
 char		*Model;		/* Model from .gnokiirc file. */
 char		*Port;		/* Serial port from .gnokiirc file */
+char		*Connection;	/* Connection type from .gnokiirc file */
 
 	/* Local variables */
 char		*DefaultModel = MODEL;	/* From Makefile */
 char		*DefaultPort = PORT;
+
+char		*DefaultConnection = "serial";
 
 void version(void)
 {
@@ -73,6 +76,8 @@ void usage(void)
 int main(int argc, char *argv[])
 {
 
+    GSM_ConnectionType connection = GCT_Serial;
+
 		/* For GNU gettext */
 
 	#ifdef GNOKII_GETTEXT
@@ -102,8 +107,10 @@ int main(int argc, char *argv[])
 		DebugMode = false;	
 	}
 
+	if (!strcmp(Connection, "infrared"))
+		connection=GCT_Infrared;
 
-	if (VM_Initialise(Model, Port, DebugMode) == false) {
+	if (VM_Initialise(Model, Port, connection, DebugMode) == false) {
 		exit (-1);
 	}
 	while (1) {
@@ -138,4 +145,8 @@ void	read_config(void)
 		Port = DefaultPort;
     }
 
+    Connection = CFG_Get(cfg_info, "global", "connection");
+    if (Connection == NULL) {
+		Connection = DefaultConnection;
+    }
 }

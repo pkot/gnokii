@@ -9,6 +9,9 @@ port = /dev/ttyS0
 # Set model to the model number of your phone
 model = 3810
 
+# The type of the connection, for IR set this to infrared
+connection = serial
+
 # Set bindir to point to the location of the various gnokii binaries.
 # In particular ensure that mgnokiidev is in this location, with
 # permissions 4754, owned by root, group gnokii.  Ensure you

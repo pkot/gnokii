@@ -18,6 +18,14 @@
 #ifndef __gsm_common_h
 #define __gsm_common_h
 
+/* Type of connection. Now we support serial connection with FBUS cable and
+   IR (only with 61x0 models) */
+
+typedef enum {
+  GCT_Serial,  /* Serial connection. */
+  GCT_Infrared /* Infrared connection. */
+} GSM_ConnectionType;
+
 /* Maximum length of device name for serial port */
 
 #define GSM_MAX_DEVICE_NAME_LENGTH (100)
@@ -239,7 +247,8 @@ typedef struct {
 
   /* FIXME: comment this. */
 
-  GSM_Error (*Initialise)( char *port_device, bool enable_monitoring );
+  GSM_Error (*Initialise)( char *port_device, GSM_ConnectionType connection,
+                           bool enable_monitoring );
 
   void (*Terminate)(void);	
 
