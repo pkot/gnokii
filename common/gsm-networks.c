@@ -33,7 +33,7 @@
 #include <string.h>
 #include "gsm-networks.h"
 
-GSM_Country GSM_Countries[] = {
+gn_country countries[] = {
 	{ "202", "Greece" },
 	{ "204", "Netherlands" },
 	{ "206", "Belgium" },
@@ -154,7 +154,7 @@ GSM_Country GSM_Countries[] = {
 	{ "undefined", "unknown" }
 };
 
-GSM_Network GSM_Networks[] = {
+gn_network networks[] = {
 	{ "202 01", "Cosmote" },
 	{ "202 05", "PANAFON" },
 	{ "202 10", "TELESTET" },
@@ -403,42 +403,42 @@ GSM_Network GSM_Networks[] = {
 	{ "undefined", "unknown" }
 };
 
-API char *GSM_GetNetworkName(char *NetworkCode)
+API char *gn_get_network_name(char *network_code)
 {
 	int index = 0;
 
-	while (strcmp(GSM_Networks[index].Code, NetworkCode) &&
-		strcmp(GSM_Networks[index].Code, "undefined")) index++;
+	while (strcmp(networks[index].code, network_code) &&
+		strcmp(networks[index].code, "undefined")) index++;
 
-	return GSM_Networks[index].Name;
+	return networks[index].name;
 }
 
-API char *GSM_GetNetworkCode(char *NetworkName)
+API char *gn_get_network_code(char *network_name)
 {
 	int index = 0;
 
-	while (strcmp(GSM_Networks[index].Name, NetworkName) &&
-		strcmp(GSM_Networks[index].Code, "undefined")) index++;
+	while (strcmp(networks[index].name, network_name) &&
+		strcmp(networks[index].code, "undefined")) index++;
 
-	return GSM_Networks[index].Code;
+	return networks[index].code;
 }
 
-API char *GSM_GetCountryName(char *CountryCode)
+API char *gn_get_country_name(char *country_code)
 {
 	int index = 0;
 
-	while (strncmp(GSM_Countries[index].Code, CountryCode, 3) &&
-		strcmp(GSM_Countries[index].Code, "undefined")) index++;
+	while (strncmp(countries[index].code, country_code, 3) &&
+		strcmp(countries[index].code, "undefined")) index++;
 
-	return GSM_Countries[index].Name;
+	return countries[index].name;
 }
 
-API char *GSM_GetCountryCode(char *CountryName)
+API char *gn_get_country_code(char *country_name)
 {
 	int index = 0;
 
-	while (strcmp(GSM_Countries[index].Name, CountryName) &&
-		strcmp(GSM_Countries[index].Code, "undefined")) index++;
+	while (strcmp(countries[index].name, country_name) &&
+		strcmp(countries[index].code, "undefined")) index++;
 
-	return GSM_Countries[index].Code;
+	return countries[index].code;
 }
