@@ -11,12 +11,14 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.2  2001-08-20 23:27:37  pkot
+  Revision 1.3  2001-11-27 12:19:01  pkot
+  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+
+  Revision 1.2  2001/08/20 23:27:37  pkot
   Add hardware shakehand to the link layer (Manfred Jonsson)
 
   Revision 1.1  2001/02/21 19:57:12  chris
   More fiddling with the directory layout
-
 
 */
 
@@ -24,12 +26,12 @@
 #define __devices_unixserial_h
 
 #ifdef WIN32
-  #include <stddef.h>
+#  include <stddef.h>
   /* FIXME: this should be solved in config.h in 0.4.0 */
-  #define __const const
-  typedef void * __ptr_t;
+#  define __const const
+	typedef void * __ptr_t;
 #else
-  #include <unistd.h>
+#  include <unistd.h>
 #endif	/* WIN32 */
 
 #include "misc.h"
@@ -48,7 +50,3 @@ size_t serial_write(int __fd, __const __ptr_t __buf, size_t __n);
 int serial_select(int fd, struct timeval *timeout);
 
 #endif  /* __devices_unixserial_h */
-
-
-
-

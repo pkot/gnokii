@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.13  2001-11-17 20:14:15  pkot
+  Revision 1.14  2001-11-27 12:19:01  pkot
+  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+
+  Revision 1.13  2001/11/17 20:14:15  pkot
   Nasty bug with counting message length. Workaround applied. Needs fixing.
 
   Revision 1.12  2001/11/15 12:04:05  pkot
@@ -101,13 +104,13 @@
 #include "links/utils.h"
 
 #ifndef WIN32
-  #include "device.h"
+#  include "device.h"
 #else
-  #include "win32/winserial.h"
-  #define device_write(a, b) WriteCommBlock(a, b)
-  #define device_read(a, b) ReadCommBlock(a, b)
-  #define sleep(x) Sleep((x) * 1000)
-  #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#  include "win32/winserial.h"
+#  define device_write(a, b) WriteCommBlock(a, b)
+#  define device_read(a, b) ReadCommBlock(a, b)
+#  define sleep(x) Sleep((x) * 1000)
+#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif
 
 #define __links_fbus_c

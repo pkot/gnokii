@@ -15,7 +15,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.6  2001-11-20 16:22:22  pkot
+  Revision 1.7  2001-11-27 12:19:01  pkot
+  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+
+  Revision 1.6  2001/11/20 16:22:22  pkot
   First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
 
   Revision 1.5  2001/11/19 13:03:18  pkot
@@ -49,10 +52,10 @@
 #include "phones/nokia.h"
 
 #ifndef WIN32
-  #include <unistd.h>
+#  include <unistd.h>
 #else
-  #define snprintf _snprintf
-  #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#  define snprintf _snprintf
+#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif
 
 /* Some globals */

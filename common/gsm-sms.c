@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.13  2001-11-23 22:07:44  machek
+  Revision 1.14  2001-11-27 12:19:00  pkot
+  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+
+  Revision 1.13  2001/11/23 22:07:44  machek
   Fix SMS receiving to work, again. Unfortunately, it is not possible to
   reuse much of gsm-sms.c...
 
@@ -112,7 +115,7 @@ static int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType typ
 	   the Type-of-Address. This field is described in the official GSM
 	   specification 03.40 version 6.1.0, section 9.1.2.5, page 33. We support
 	   only international and unknown number. */
-	
+
 	*OUT++ = type;
 	if (type == SMS_International) IN++; /* Skip '+' */
 	if ((type == SMS_Unknown) && (*IN == '+')) IN++; /* Optional '+' in Unknown number type */
@@ -142,12 +145,12 @@ static int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType typ
 
 char *GetBCDNumber(u8 *Number)
 {
-        static char Buffer[20] = "";
-        int length = Number[0]; /* This is the length of BCD coded number */
-        int count, Digit;
+	static char Buffer[20] = "";
+	int length = Number[0]; /* This is the length of BCD coded number */
+	int count, Digit;
 
 	memset(Buffer, 0, 20);
-        switch (Number[1]) {
+	switch (Number[1]) {
 	case SMS_Alphanumeric:
 		Unpack7BitCharacters(0, length, length, Number+2, Buffer);
 		Buffer[length] = 0;
@@ -166,45 +169,45 @@ char *GetBCDNumber(u8 *Number)
 			Digit = Number[count+2] >> 4;
 			if (Digit < 10) sprintf(Buffer, "%s%d", Buffer, Digit);
 		}
-                break;
-        }
-        return Buffer;
+		break;
+	}
+	return Buffer;
 }
 
 static char *PrintDateTime(u8 *Number) 
 {
-        static char Buffer[23] = "";
+	static char Buffer[23] = "";
 
 	memset(Buffer, 0, 23);
 	if (Number[0] < 70) sprintf(Buffer, "20");
 	else sprintf(Buffer, "19");
-        sprintf(Buffer, "%s%d%d-", Buffer, Number[0] & 0x0f, Number[0] >> 4);
-        sprintf(Buffer, "%s%d%d-", Buffer, Number[1] & 0x0f, Number[1] >> 4);
-        sprintf(Buffer, "%s%d%d ", Buffer, Number[2] & 0x0f, Number[2] >> 4);
-        sprintf(Buffer, "%s%d%d:", Buffer, Number[3] & 0x0f, Number[3] >> 4);
-        sprintf(Buffer, "%s%d%d:", Buffer, Number[4] & 0x0f, Number[4] >> 4);
-        sprintf(Buffer, "%s%d%d",  Buffer, Number[5] & 0x0f, Number[5] >> 4);
+	sprintf(Buffer, "%s%d%d-", Buffer, Number[0] & 0x0f, Number[0] >> 4);
+	sprintf(Buffer, "%s%d%d-", Buffer, Number[1] & 0x0f, Number[1] >> 4);
+	sprintf(Buffer, "%s%d%d ", Buffer, Number[2] & 0x0f, Number[2] >> 4);
+	sprintf(Buffer, "%s%d%d:", Buffer, Number[3] & 0x0f, Number[3] >> 4);
+	sprintf(Buffer, "%s%d%d:", Buffer, Number[4] & 0x0f, Number[4] >> 4);
+	sprintf(Buffer, "%s%d%d",  Buffer, Number[5] & 0x0f, Number[5] >> 4);
 	if (Number[6] & 0x08) 
 		sprintf(Buffer, "%s-", Buffer);
 	else
 		sprintf(Buffer, "%s+", Buffer);
 	sprintf(Buffer, "%s%02d00", Buffer, (10 * (Number[6] & 0x07) + (Number[6] >> 4)) / 4);
 
-        return Buffer;
+	return Buffer;
 }
 
 SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
 {
-        dt->Year     =  10 * (Number[0] & 0x0f) + (Number[0] >> 4);
+	dt->Year     =  10 * (Number[0] & 0x0f) + (Number[0] >> 4);
 	if (dt->Year < 70) dt->Year += 2000;
 	else dt->Year += 1900;
-        dt->Month    =  10 * (Number[1] & 0x0f) + (Number[1] >> 4);
-        dt->Day      =  10 * (Number[2] & 0x0f) + (Number[2] >> 4);
-        dt->Hour     =  10 * (Number[3] & 0x0f) + (Number[3] >> 4);
-        dt->Minute   =  10 * (Number[4] & 0x0f) + (Number[4] >> 4);
-        dt->Second   =  10 * (Number[5] & 0x0f) + (Number[5] >> 4);
-        dt->Timezone = (10 * (Number[6] & 0x07) + (Number[6] >> 4)) / 4;
-        if (Number[6] & 0x08) dt->Timezone = -dt->Timezone;
+	dt->Month    =  10 * (Number[1] & 0x0f) + (Number[1] >> 4);
+	dt->Day      =  10 * (Number[2] & 0x0f) + (Number[2] >> 4);
+	dt->Hour     =  10 * (Number[3] & 0x0f) + (Number[3] >> 4);
+	dt->Minute   =  10 * (Number[4] & 0x0f) + (Number[4] >> 4);
+	dt->Second   =  10 * (Number[5] & 0x0f) + (Number[5] >> 4);
+	dt->Timezone = (10 * (Number[6] & 0x07) + (Number[6] >> 4)) / 4;
+	if (Number[6] & 0x08) dt->Timezone = -dt->Timezone;
 
 	return dt;
 }
@@ -672,7 +675,7 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 {
 	/* Short Message Type */
-        switch (SMS->Type = message[2]) {
+	switch (SMS->Type = message[2]) {
 	case SMS_Deliver:
 		dprintf("Mobile Terminated message:\n");
 		break;
@@ -694,20 +697,20 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	dprintf("\tLocation: %d\n", SMS->Number);
 
 	/* Short Message Center */
-        strcpy(SMS->MessageCenter.Number, GetBCDNumber(message + 3));
-        dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
-        SMS->ReplyViaSameSMSC = false;
-        if (SMS->RemoteNumber.number[0] == 0 && (message[6] & 0x80)) {
+	strcpy(SMS->MessageCenter.Number, GetBCDNumber(message + 3));
+	dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
+	SMS->ReplyViaSameSMSC = false;
+	if (SMS->RemoteNumber.number[0] == 0 && (message[6] & 0x80)) {
 		SMS->ReplyViaSameSMSC = true;
 	}
 
-        /* Remote number */
-        message[15+DataOffset[SMS->Type]] = ((message[15+DataOffset[SMS->Type]])+1)/2+1;
-        dprintf("\tRemote number (recipient or sender): %s\n", GetBCDNumber(message + 15 + DataOffset[SMS->Type]));
-        strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + 15 + DataOffset[SMS->Type]));
+	/* Remote number */
+	message[15+DataOffset[SMS->Type]] = ((message[15+DataOffset[SMS->Type]])+1)/2+1;
+	dprintf("\tRemote number (recipient or sender): %s\n", GetBCDNumber(message + 15 + DataOffset[SMS->Type]));
+	strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + 15 + DataOffset[SMS->Type]));
 
 	UnpackDateTime(message + 27 + DataOffset[SMS->Type], &(SMS->Time));
-        dprintf("\tDate: %s\n", PrintDateTime(message + 27 + DataOffset[SMS->Type]));
+	dprintf("\tDate: %s\n", PrintDateTime(message + 27 + DataOffset[SMS->Type]));
 
 	/* Message length */
 	SMS->Length = message[14+DataOffset[SMS->Type]];
@@ -719,7 +722,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		SMS->DCS.Type = 0;
 
 	/* User Data Header */
-        if (message[15] & 0x40) { /* UDH header available */
+	if (message[15] & 0x40) { /* UDH header available */
 		dprintf("UDH found\n");
 		DecodeUDH(message + 34 + DataOffset[SMS->Type], SMS);
 	} else {                    /* No UDH */
@@ -768,12 +771,12 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 		SMS->MessageText[SMS->Length] = 0;
 		break;
 	}
-	
+
 	return GE_NONE;
 }
 
 /* This function does simple SMS decoding - no PDU coding */
 GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS)
 {
-        return GE_NONE;
+	return GE_NONE;
 }

@@ -15,7 +15,10 @@
   Header file for CRC24 (aka FCS) implementation in RLP.
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:11  chris
+  Revision 1.2  2001-11-27 12:19:01  pkot
+  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+
+  Revision 1.1  2001/02/21 19:57:11  chris
   More fiddling with the directory layout
 
 
@@ -25,7 +28,7 @@
 #define __data_rlp_crc24_h
 
 #ifndef __misc_h
-  #include    "misc.h"
+#  include    "misc.h"
 #endif
 
 /* Prototypes for functions */

@@ -13,7 +13,10 @@
   Include file for SMS library.
 
   $Log$
-  Revision 1.6  2001-11-22 17:56:53  pkot
+  Revision 1.7  2001-11-27 12:19:01  pkot
+  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+
+  Revision 1.6  2001/11/22 17:56:53  pkot
   smslib update. sms sending
 
   Revision 1.5  2001/11/20 16:22:23  pkot
@@ -198,12 +201,12 @@ typedef struct {
 /* Validity of SMS Messages. */
 
 typedef enum {
-        SMS_V1H   = 0x0b,
-        SMS_V6H   = 0x47,
-        SMS_V24H  = 0xa7,
-        SMS_V72H  = 0xa9,
-        SMS_V1W   = 0xad,
-        SMS_VMax  = 0xff
+	SMS_V1H   = 0x0b,
+	SMS_V6H   = 0x47,
+	SMS_V24H  = 0xa7,
+	SMS_V72H  = 0xa9,
+	SMS_V1W   = 0xad,
+	SMS_VMax  = 0xff
 } SMS_ValidityPeriod;
 
 typedef struct {
@@ -303,7 +306,7 @@ typedef enum {
 	GMT_F19 = 0xB9,
 	GMT_F20 = 0xC1 /* 20th CUSTOM FOLDER in 6210/7110 */
 } SMS_MemoryType;
-        
+
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
 typedef struct {
 	/* Specification fields */
@@ -333,7 +336,7 @@ typedef struct {
 	SMS_DateTime Time;                             /* Discharge Time (9.2.3.13) */
 
 	/* Other fields */
-        SMS_MemoryType MemoryType;                     /* memoryType (for 6210/7110: folder indicator */
+	SMS_MemoryType MemoryType;                     /* memoryType (for 6210/7110: folder indicator */
 	SMS_MessageStatus Status;                      /* Status of the message: sent/read or unsent/unread */
 
 //	SMS_CommandType Command;                       /* Command Type - 8 bits (9.2.3.19); FIXME: use it!!!! */

@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2001-02-21 19:57:11  chris
+ * Revision 1.2  2001-11-27 12:19:01  pkot
+ * Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+ *
+ * Revision 1.1  2001/02/21 19:57:11  chris
  * More fiddling with the directory layout
  *
  * Revision 1.1  2001/02/09 18:12:54  chris
@@ -36,16 +39,15 @@
 #define __devices_tekram_h
 
 #ifdef WIN32
-  #include <stddef.h>
+#  include <stddef.h>
   /* FIXME: this should be solved in config.h in 0.4.0 */
-  #define __const const
-  typedef void * __ptr_t;
+#  define __const const
+	typedef void * __ptr_t;
 #else
-  #include <unistd.h>
+#  include <unistd.h>
 #endif	/* WIN32 */
 
 #include "misc.h"
-
 
 #define TEKRAM_B115200 0x00
 #define TEKRAM_B57600  0x01
@@ -54,7 +56,6 @@
 #define TEKRAM_B9600   0x04
 
 #define TEKRAM_PW      0x10 /* Pulse select bit */
-
 
 int tekram_open(__const char *__file);
 void tekram_close(int __fd);
@@ -68,7 +69,3 @@ size_t tekram_write(int __fd, __const __ptr_t __buf, size_t __n);
 int tekram_select(int fd, struct timeval *timeout);
 
 #endif  /* __devices_tekram_h */
-
-
-
-

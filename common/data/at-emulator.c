@@ -15,7 +15,10 @@
   kernel AT Emulator IDSN code by Fritz Elfert and others.
   
   $Log$
-  Revision 1.5  2001-11-08 16:34:19  pkot
+  Revision 1.6  2001-11-27 12:19:01  pkot
+  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+
+  Revision 1.5  2001/11/08 16:34:19  pkot
   Updates to work with new libsms
 
   Revision 1.4  2001/07/03 15:27:03  pkot
@@ -45,7 +48,7 @@
 
 #ifndef WIN32
 
-  #include <termios.h>
+#  include <termios.h>
 
 #endif
 

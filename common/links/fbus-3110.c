@@ -16,7 +16,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.2  2001-11-09 14:25:04  pkot
+  Revision 1.3  2001-11-27 12:19:01  pkot
+  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
+
+  Revision 1.2  2001/11/09 14:25:04  pkot
   DEBUG cleanups
 
   Revision 1.1  2001/11/09 12:55:07  pkot
@@ -42,13 +45,13 @@
 #include "links/utils.h"
 
 #ifndef WIN32
-  #include "device.h"
+#  include "device.h"
 #else
-  #include "win32/winserial.h"
-  #define device_write(a, b) WriteCommBlock(a, b)
-  #define device_read(a, b) ReadCommBlock(a, b)
-  #define sleep(x) Sleep((x) * 1000)
-  #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#  include "win32/winserial.h"
+#  define device_write(a, b) WriteCommBlock(a, b)
+#  define device_read(a, b) ReadCommBlock(a, b)
+#  define sleep(x) Sleep((x) * 1000)
+#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif
 
 #define __links_fbus_3110_c
