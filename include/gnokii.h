@@ -33,33 +33,84 @@
 #ifndef _gnokii_gsm_api_h
 #define _gnokii_gsm_api_h
 
+#include "gsm-sms.h"
+#include "gsm-call.h"
+#include "gsm-common.h"
 #include "gsm-data.h"
-#include "data/rlp-common.h"
 #include "gsm-statemachine.h"
 
+API struct gn_cfg_header *gn_cfg_info;
+
+/* SMS */
+API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state);
+API gn_error gn_sms_save(gn_data *data, struct gn_statemachine *state);
+API gn_error gn_sms_get(gn_data *data, struct gn_statemachine *state);
+API gn_error gn_sms_get_no_validate(gn_data *data, struct gn_statemachine *state);
+API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemachine *state,
+				       int has_folders);
+API gn_error gn_sms_delete(gn_data *data, struct gn_statemachine *state);
+API gn_error gn_sms_delete_no_validate(gn_data *data, struct gn_statemachine *state);
+API void gn_sms_default_submit(gn_sms *sms);
+API void gn_sms_default_deliver(gn_sms *sms);
+
+/* Call */
+API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
+API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state);
+API gn_call *gn_call_get_active(int call_id);
+API gn_error gn_call_answer(int call_id);
+API gn_error gn_call_cancel(int call_id);
+
+/* Statemachine */
+API gn_state gn_sm_loop(struct gn_statemachine *state, int timeout);
+API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemachine *sm);
+
 /* Define these as externs so that app code can pick them up. */
-extern API GSM_Information *gn_gsm_info;
-extern API gn_error (*gn_gsm_f)(GSM_Operation op, GSM_Data *data,
-				GSM_Statemachine *state);
+API gn_phone *gn_gsm_info;
+API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
+				struct gn_statemachine *state);
 
 /* Prototype for the functions actually provided by gsm-api.c. */
 API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
-			       const char *connection, GSM_Statemachine *sm);
+			       gn_connection_type connection,
+			       void (*rlp_handler)(gn_rlp_f96_frame *frame),
+			       struct gn_statemachine *sm);
 
-/* SMS Functions */
-API gn_error gn_sms_send(GSM_Data *data, GSM_Statemachine *state);
-API gn_error gn_sms_save(GSM_Data *data, GSM_Statemachine *state);
-API gn_error gn_sms_get(GSM_Data *data, GSM_Statemachine *state);
-API gn_error gn_sms_get_no_validate(GSM_Data *data, GSM_Statemachine *state);
-API gn_error gn_sms_get_folder_changes(GSM_Data *data, GSM_Statemachine *state,
-				       int has_folders);
-API gn_error gn_sms_delete(GSM_Data *data, GSM_Statemachine *state);
-API gn_error gn_sms_delete_no_validate(GSM_Data *data, GSM_Statemachine *state);
-API void gn_sms_default_submit(GSM_API_SMS *sms);
-API void gn_sms_default_deliver(GSM_API_SMS *sms);
+/* Bitmaps */
+API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info);
+API void gn_bmp_set_point(gn_bmp *bmp, int x, int y);
+API void gn_bmp_clear_point(gn_bmp *bmp, int x, int y);
+API bool gn_bmp_is_point(gn_bmp *bmp, int x, int y);
+API void gn_bmp_clear(gn_bmp *bmp);
+API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info);
+API void gn_bmp_print(gn_bmp *bitmap, FILE *f);
 
-/* Not exported */
-gn_error sms_parse(GSM_Data *data, int offset);
-gn_error sms_request(GSM_Data *data, GSM_Statemachine *state);
+/* SMS bitmap functions */
+API int gn_bmp_encode_sms(gn_bmp *bitmap, unsigned char *message);
+API gn_error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap);
+
+API gn_memory_type gn_str_to_memory_type(const char *s);
+
+API void gn_data_clear(gn_data *data);
+
+API bool gn_char_def_alphabet(unsigned char *string);
+
+API char *gn_error_print(gn_error e);
+API gn_error isdn_cause_to_gn_error(char **src, char **msg, unsigned char loc, unsigned char cause);
+
+/* These functions are used to search the structure defined above.*/
+API char *gn_get_network_name(char *network_code);
+API char *gn_get_network_code(char *network_name);
+
+API char *gn_get_country_name(char *country_code);
+API char *gn_get_country_code(char *country_name);
+
+API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength);
+API gn_error gn_ringtone_unpack(gn_ringtone *ringtone, unsigned char *package, int maxlength);
+
+API int gn_get_note(int number);
+
+/* Functions */
+API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
+API int gn_cfg_readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
 
 #endif	/* _gnokii_gsm_api_h */
