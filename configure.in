@@ -65,32 +65,31 @@ debug="yes"
 xdebug="yes"
 rlpdebug="yes"
 
+AC_ARG_ENABLE(fulldebug, 
+	[  --enable-fulldebug      compile with full debugging support],
+	[ if test x$enable_fulldebug = xyes; then
+		if test "x$GCC" = "xyes"; then
+			CFLAGS="-ggdb3 -Wall"
+		fi
+	  fi ]
+)
+
 AC_ARG_ENABLE(debug, 
 	[  --enable-debug          compile with debug code],
 	[ if test x$enable_debug = xno; then debug="no"; fi ],
-	[ debug="yes"  ]
+	[ debug="yes" ]
 )
 
 AC_ARG_ENABLE(xdebug,
 	[  --enable-xdebug         compile with xdebug code],
 	[ if test x$enable_xdebug = xno; then xdebug="no"; fi ],
-	[ xdebug="yes"  ]
+	[ xdebug="yes" ]
 )
 
 AC_ARG_ENABLE(rlpdebug,
 	[  --enable-rlpdebug       compile with RLP debug code],
 	[ if test x$enable_rlpdebug = xno; then rlpdebug="no"; fi ],
-	[ rlpdebug="yes"  ]
-)
-
-AC_ARG_ENABLE(fulldebug, 
-	[  --enable-fulldebug      compile with full debugging support],
-	[ if test "x$GCC" = "xyes"; then
-		CFLAGS="-ggdb3 -Wall"
-	  fi
-	  debug="yes"
-	  rlpdebug="yes"
-	  xdebug="yes"]
+	[ rlpdebug="yes" ]
 )
 
 if test $debug = "yes"; then
@@ -425,8 +424,12 @@ dnl ======================== Additional switches
 
 AC_ARG_ENABLE(security,
    [  --enable-security       enable all security features ],
-   [ AC_DEFINE(SECURITY)
-     security="yes" ],
+   [ if test x$enable_security = xyes; then
+	AC_DEFINE(SECURITY)
+     	security="yes"
+     else
+	security="no"
+     fi ],
    [ security="no"  ]
 )
 
@@ -444,14 +447,18 @@ fi
 
 AC_ARG_ENABLE(win32,
    [  --enable-win32          if you want win32 suport ],
-   [ AC_DEFINE(WIN32)
-     WIN32=1
-     if test x$cross_compiling = xyes; then
-	AC_DEFINE(WIN32_CROSS, 1, [Define if you cross compile win32.])
-	WIN32_CROSS=1
-	win32="cross"
+   [ if test x$enable_win32 = xyes; then
+	AC_DEFINE(WIN32)
+	WIN32=1
+	if test x$cross_compiling = xyes; then
+		AC_DEFINE(WIN32_CROSS, 1, [Define if you cross compile win32.])
+		WIN32_CROSS=1
+		win32="cross"
+	else
+ 		win32="yes"
+	fi
      else
-        win32="yes"
+	win32="no"
      fi ],
    [ win32="no"]
 )

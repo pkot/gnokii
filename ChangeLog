@@ -53,6 +53,8 @@
     o add $(LDLIBS) to libgnokii.a target               (Pawel Kot,
                                                     Bastien Nocera)
     o UNIX98 pty detection cross-compileable         (David Vrabel)
+    o correctly handle --disable options to configure script
+                                                        (Pawel Kot)
  * xgnokii updates
     o in the logo manager, in the operator drop down list, notice
       the country origin for each operator (to let choose the right
