@@ -57,30 +57,30 @@ static GSM_Error P3110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P3110_DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingCallAnswered(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingCallEstablished(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingRestart(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSSend(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSSendError(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSError(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSDelete(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P3110_IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingCallAnswered(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingCallEstablished(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingRestart(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSSend(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSSendError(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSError(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSDelete(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P3110_IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 void P3110_KeepAliveLoop(GSM_Statemachine *state);
 void P3110_DecodeTime(unsigned char *b, GSM_DateTime *dt);
 int P3110_bcd2int(u8 x);
@@ -629,14 +629,14 @@ static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 }
 
 
-static GSM_Error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	return GE_NONE;
 }
 
 /* 0x0b messages are sent by phone when an incoming call occurs,
    this message must be acknowledged. */
-static GSM_Error P3110_IncomingCall(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingCall(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int     count;
 	char    buffer[256];
@@ -657,7 +657,7 @@ static GSM_Error P3110_IncomingCall(int messagetype, unsigned char *message, int
 	return GE_NONE;
 }
 
-static GSM_Error P3110_IncomingCallAnswered(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingCallAnswered(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("Incoming call answered from phone.\n");
 
@@ -666,7 +666,7 @@ static GSM_Error P3110_IncomingCallAnswered(int messagetype, unsigned char *mess
 
 /* Fairly self explanatory these two, though the outgoing
    call message has three (unexplained) data bytes. */
-static GSM_Error P3110_IncomingCallEstablished(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingCallEstablished(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("%s call established - status bytes %02x %02x.\n",
 		(message[2] == 0x05 ? "voice":"data(?)"), message[3], message[4]);
@@ -676,7 +676,7 @@ static GSM_Error P3110_IncomingCallEstablished(int messagetype, unsigned char *m
 
 /* 0x10 messages are sent by the phone when an outgoing
    call terminates. */
-static GSM_Error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("Call terminated from phone (0x10 message).\n");
 	/* FIXME: Tell datapump code that the call has terminated. */
@@ -690,7 +690,7 @@ static GSM_Error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char 
 /* 0x11 messages are sent by the phone when an incoming call
    terminates.  There is some other data in the message,
    purpose as yet undertermined. */
-static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("Call terminated from opposite end of line (or from network).\n");
 
@@ -706,7 +706,7 @@ static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char 
    end of an outgoing call.  Significance of two messages
    versus the one at the end of an incoming call  is as
    yet undertermined. */
-static GSM_Error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("Call terminated from phone (0x12 message).\n");
 
@@ -722,7 +722,7 @@ static GSM_Error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char
 /* 0x13 messages are sent after the phone restarts.
    Re-initialise */
 
-static GSM_Error P3110_IncomingRestart(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingRestart(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	/* FIXME: send 0x15 message somehow */
 	return GE_NONE;
@@ -732,7 +732,7 @@ static GSM_Error P3110_IncomingRestart(int messagetype, unsigned char *message, 
 /* 0x15 messages are sent by the phone in response to the
    init sequence sent so we don't acknowledge them! */
 
-static GSM_Error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	return GE_NONE;
 }
@@ -746,7 +746,7 @@ static GSM_Error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *me
    and 0x01 when not (e.g. when SIM card isn't inserted to phone or when
    it is waiting for PIN) */
 
-static GSM_Error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	SimAvailable = (message[2] == 0x02);
 	dprintf("SIM available: %s.\n", (SimAvailable ? "Yes" : "No"));
@@ -754,7 +754,7 @@ static GSM_Error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *me
 }
 
 
-static GSM_Error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("0x17 Registration Response: Failure!\n");
 	return GE_NONE;
@@ -766,7 +766,7 @@ static GSM_Error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *me
    to the phone with message text in it or they could
    contain message text for a message we requested. */
 
-static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int count;
 
@@ -804,7 +804,7 @@ static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *messa
    TP-MR is send from phone within 0x32 message. TP-MR is increased
    by phone after each sent SMS */
 
-static GSM_Error P3110_IncomingSMSSend(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSSend(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("SMS send OK (0x%02hhx)\n", message[2]);
 	data->SMSMessage->Number = (int) message[2];
@@ -818,7 +818,7 @@ static GSM_Error P3110_IncomingSMSSend(int messagetype, unsigned char *message, 
    the particular phone.  0x65 0x26 was observed too, whereupon
    the message was retried. */
 
-static GSM_Error P3110_IncomingSMSSendError(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSSendError(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("SMS send failed (0x%02hhx 0x%02hhx)\n", message[2], message[3]);
 	return GE_SMSSENDFAILED;
@@ -830,7 +830,7 @@ static GSM_Error P3110_IncomingSMSSendError(int messagetype, unsigned char *mess
    as the 0x30 notification but with one extra.  Immediately after
    the 0x2c nessage, the phone sends 0x27 message(s) */
 
-static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (!data->SMSMessage) return GE_INTERNALERROR;
 
@@ -950,7 +950,7 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 /* 0x2d messages are generated when an SMS message is requested
    that does not exist or is empty. */
 
-static GSM_Error P3110_IncomingSMSError(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSError(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (message[2] == 0x74)
 		return GE_INVALIDSMSLOCATION;
@@ -962,7 +962,7 @@ static GSM_Error P3110_IncomingSMSError(int messagetype, unsigned char *message,
 /* 0x2e messages are generated when an SMS message is deleted
    successfully. */
 
-static GSM_Error P3110_IncomingSMSDelete(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSDelete(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	return GE_NONE;
 }
@@ -972,7 +972,7 @@ static GSM_Error P3110_IncomingSMSDelete(int messagetype, unsigned char *message
    that does not exist.  Unlike responses to a getsms message
    no error is returned when the entry is already empty */
 
-static GSM_Error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	/* Note 0x74 is the only value that has been seen! */
 	if (message[2] == 0x74)
@@ -985,7 +985,7 @@ static GSM_Error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *me
 /* 0x32 messages are generated when delivery notification arrives
    to phone from network */
 
-static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	static GSM_SMSMessage sms;
 /*	u8 dest_length, smsc_length, l;*/
@@ -1039,7 +1039,7 @@ static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *mess
 /* 0x40 Messages are sent to response to an 0x3f request.
    e.g. when phone is waiting for PIN */
 
-static GSM_Error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("SMS Message Center Data not reachable.\n");
 	return GE_NOTREADY;
@@ -1049,7 +1049,7 @@ static GSM_Error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *message
 /* Handle 0x41 message which is sent by phone in response to an
    0x3f request.  Contains data about the Message Center in use */
 
-static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	u8 center_number_length;
 	u8 option_number_length;
@@ -1134,7 +1134,7 @@ static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, 
    message is received and the PIN (if any) has been entered
    correctly. */
 
-static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	SimAvailable = true;
 	dprintf("PIN [possibly] entered.\n");
@@ -1146,7 +1146,7 @@ static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *messag
    alive packet.  We must acknowledge these it seems by sending a
    response with the "sequence number" byte loaded appropriately. */
 
-static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	/* Strings for the status byte received from phone. */
 	char *StatusStr[] = {
@@ -1186,7 +1186,7 @@ static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *messag
 
 /* 0x4d Message provides IMEI, Revision and Model information. */
 
-static GSM_Error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	size_t imei_length, rev_length, model_length;
 

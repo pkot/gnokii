@@ -119,7 +119,7 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 	while (state->Phone.IncomingFunctions[c].Functions) {
 		if (state->Phone.IncomingFunctions[c].MessageType == messagetype) {
 			dprintf("Received message type %02x\n", messagetype);
-			res = state->Phone.IncomingFunctions[c].Functions(messagetype, message, messagesize, data);
+			res = state->Phone.IncomingFunctions[c].Functions(messagetype, message, messagesize, data, state);
 			temp = 0;
 			break;
 		}
@@ -132,7 +132,7 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 		SM_DumpUnhandledFrame(state, messagetype, message, messagesize);
 	if (temp != 0) {
 		dprintf("Unknown Frame Type %02x\n", messagetype);
-		state->Phone.DefaultFunction(messagetype, message, messagesize);
+		state->Phone.DefaultFunction(messagetype, message, messagesize, state);
 
 		return;
 	}

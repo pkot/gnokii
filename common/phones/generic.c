@@ -43,7 +43,7 @@
 #include "links/utils.h"
 
 /* If we do not support a message type, print out some debugging info */
-GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length)
+GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state)
 {
 	dprintf("Unknown Message received [type (%02x) length (%d): \n", messagetype, length);
 	SM_DumpMessage(messagetype, buffer, length);

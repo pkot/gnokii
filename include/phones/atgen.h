@@ -49,7 +49,7 @@ typedef enum {
 	CHARUCS2
 } GSMAT_Charset;
 
-typedef GSM_Error (*GSM_RecvFunctionType)(int type, unsigned char *buffer, int length, GSM_Data *data);
+typedef GSM_Error (*GSM_RecvFunctionType)(int type, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 typedef GSM_Error (*AT_SendFunctionType)(GSM_Data *data, GSM_Statemachine *s);
 
 typedef struct {

@@ -125,25 +125,25 @@ static GSM_Error GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 #endif
 
-static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
-static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 #endif
 
 static int GetMemoryType(GSM_MemoryType memory_type);
@@ -490,7 +490,7 @@ static GSM_Error GetPowersource(GSM_Data *data, GSM_Statemachine *state)
 	return GetPhoneStatus(data, state);
 }
 
-static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	float csq_map[5] = {0, 8, 16, 24, 31};
 
@@ -649,7 +649,7 @@ static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x03);
 }
 
-static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_PhonebookEntry *pe;
 	GSM_Bitmap *bmp;
@@ -887,7 +887,7 @@ static GSM_Error Authentication(GSM_Statemachine *state, char *imei)
 	return GE_NONE;
 }
 
-static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[3]) {
 	/* Phone ID recvd */
@@ -927,7 +927,7 @@ static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int 
 	return GE_NONE;
 }
 
-static GSM_Error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *pos;
 
@@ -1159,7 +1159,7 @@ static GSM_Error SetOnSMS(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
-static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	SMS_MessageCenter *smsc;
 	GSM_CBMessage cbmsg;
@@ -1371,7 +1371,7 @@ static GSM_Error DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x14);
 }
 
-static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int i;
 
@@ -1500,7 +1500,7 @@ static GSM_Error GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x0a);
 }
 
-static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[3]) {
 	/* Network info */
@@ -1832,7 +1832,7 @@ static GSM_Error SetRingtone(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x05);
 }
 
-static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Bitmap *bmp;
 	GSM_Profile *prof;
@@ -2099,7 +2099,7 @@ static GSM_Error SetAlarm(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x11);
 }
 
-static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_DateTime *date;
 	unsigned char *pos;
@@ -2246,7 +2246,7 @@ static GSM_Error DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x13);
 }
 
-static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_CalendarNote *note;
 	unsigned char *pos;
@@ -2360,7 +2360,7 @@ static GSM_Error DisplayOutput(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x0d);
 }
 
-static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int state_table[8] = { 1 << DS_Call_In_Progress, 1 << DS_Unknown,
 			       1 << DS_Unread_SMS, 1 << DS_Voice_Call,
@@ -2538,7 +2538,7 @@ static GSM_Error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x40);
 }
 
-static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[2]) {
 	/* FIXME: maybe "Enable extended cmds" reply? - bozo */
@@ -2729,7 +2729,7 @@ static GSM_Error SendDTMF(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x01);
 }
 
-static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_CallInfo cinfo;
 	unsigned char *pos;
@@ -2872,7 +2872,7 @@ static GSM_Error SetRLPRXCallback(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
-static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	RLP_F96Frame frame;
 
@@ -2983,7 +2983,7 @@ static GSM_Error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x08);
 }
 
-static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[3]) {
 	/* change security code ok */
@@ -3188,7 +3188,7 @@ static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
-static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *pos;
 
@@ -3233,7 +3233,7 @@ static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length
 }
 
 
-static GSM_Error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (messagetype == 0xda && message[0] == 0x00 && message[1] == 0x00)
 	{

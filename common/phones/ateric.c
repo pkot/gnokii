@@ -59,7 +59,7 @@ static GSM_Error GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
 }
 
 
-static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;

@@ -64,9 +64,9 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state);
 #ifdef  SECURITY
 #endif
 
-static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 #endif
@@ -230,7 +230,7 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x40);
 }
 
-static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_PhonebookEntry *pe;
 	unsigned char *pos;
@@ -302,7 +302,7 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
-static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *pos;
 
@@ -361,7 +361,7 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
-static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int x, i;
 	unsigned char b;

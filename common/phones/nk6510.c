@@ -116,27 +116,27 @@ static GSM_Error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state
 static GSM_Error P6510_GetToDo(GSM_Data *data, GSM_Statemachine *state);
 
 
-static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 /*
-static GSM_Error P6510_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 */
-static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingSubscribe(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingSubscribe(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
-static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 #endif
 
 
@@ -358,7 +358,7 @@ static GSM_Error P6510_Initialise(GSM_Statemachine *state)
 /* IDENTIFY FUNCTIONS */
 /**********************/
 
-static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[3]) {
 	case 0x01:
@@ -606,7 +606,7 @@ static void ParseLayout(unsigned char *message, GSM_Data *data)
 }
 
 /* handle messages of type 0x14 (SMS Handling, Folders, Logos.. */
-static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int i, j, status;
 
@@ -962,7 +962,7 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 /* SMS HANDLING */
 /****************/
 
-static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error	e = GE_NONE;
 	unsigned int parts_no, offset, i;
@@ -1193,7 +1193,7 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 /* PHONEBOOK HANDLING */
 /**********************/
 
-static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char blocks;
 
@@ -1549,7 +1549,7 @@ static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 /* CLOCK HANDLING */
 /******************/
 
-static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 	/*
@@ -1624,7 +1624,7 @@ static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 /* CALENDAR HANDLING */
 /********************/
 
-static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error			e = GE_NONE;
 	int				i, year;
@@ -1964,7 +1964,7 @@ static GSM_Error P6510_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *stat
 /* INCOMING NETWORK */
 /********************/
 
-static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *blockstart, *operatorname;
 	int i;
@@ -2155,7 +2155,7 @@ static GSM_Error SetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
 /* INCOMING BATTERY */
 /*********************/
 
-static GSM_Error P6510_IncomingBattLevel(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingBattLevel(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[3]) {
 	case 0x0B:
@@ -2186,7 +2186,7 @@ static GSM_Error P6510_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state)
 /* RINGTONES */
 /*************/
 
-static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int i, j, index;
 
@@ -2226,7 +2226,7 @@ static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state)
 /* START UP  */
 /*************/
 
-static GSM_Error P6510_IncomingStartup(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingStartup(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	/*
 UNHANDLED FRAME RECEIVED
@@ -2353,7 +2353,7 @@ static GSM_Error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 /***************/
 /*   PROFILES **/
 /***************/
-static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *blockstart;
 	int i;
@@ -2644,7 +2644,7 @@ static GSM_Error P6510_SetProfile(GSM_Data *data, GSM_Statemachine *state)
 /*** RADIO  **/
 /*************/
 
-static GSM_Error P6510_IncomingRadio(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingRadio(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	/*
 00 01 00 0D 00 00
@@ -2669,7 +2669,7 @@ static GSM_Error P6510_IncomingRadio(int messagetype, unsigned char *message, in
 /*** KEYPRESS  ***/
 /*****************/
 
-static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[4]) {
 	default:
@@ -2703,7 +2703,7 @@ static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state
 /*** SECURITY  ***/
 /*****************/
 
-static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	/*
 	  01 4e 00 12 05 12 02 00 00 00
@@ -2801,7 +2801,7 @@ static GSM_Error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state
 /*** SUBSCRIBE ***/
 /*****************/
 
-static GSM_Error P6510_IncomingSubscribe(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingSubscribe(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[3]) {
 	default:
@@ -2831,7 +2831,7 @@ static GSM_Error P6510_Subscribe(GSM_Data *data, GSM_Statemachine *state)
 /*** COMMSTATUS ***/
 /*****************/
 
-static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *dummy;
 
@@ -2903,7 +2903,7 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 /****** WAP ******/
 /*****************/
 
-static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int tmp;
 
@@ -2944,7 +2944,7 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 /***** ToDo *********/
 /********************/
 
-static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int i;
 

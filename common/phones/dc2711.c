@@ -77,7 +77,7 @@ static void Terminate()
 
 /* ----------------------------------------------------------------------------------- */
 
-static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	printf("[ack]");
 	return GE_NONE;

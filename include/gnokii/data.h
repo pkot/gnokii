@@ -108,11 +108,13 @@ typedef struct {
 	GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, unsigned char *message);
 } GSM_Link;
 
+typedef struct _GSM_Statemachine GSM_Statemachine;
+
 /* Small structure used in GSM_Phone */
 /* Messagetype is passed to the function in case it is a 'generic' one */
 typedef struct {
 	u8 MessageType;
-	GSM_Error (*Functions)(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+	GSM_Error (*Functions)(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 } GSM_IncomingFunctionType;
 
 typedef enum {
@@ -192,12 +194,10 @@ typedef enum {
 /* This structure contains the 'callups' needed by the statemachine */
 /* to deal with messages from the phone and other information */
 
-typedef struct _GSM_Statemachine GSM_Statemachine;
-
 typedef struct {
 	/* These make up a list of functions, one for each message type and NULL terminated */
 	GSM_IncomingFunctionType *IncomingFunctions;
-	GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length);
+	GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
 	GSM_Information Info;
 	GSM_Error (*Functions)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 } GSM_Phone;

@@ -93,16 +93,16 @@ static GSM_Error P7110_GetUnreadMessages(GSM_Data *data, GSM_Statemachine *state
 static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 
-static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -326,7 +326,7 @@ static GSM_Error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_BATTERY, 4);
 }
 
-static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[3]) {
 	case 0x03:
@@ -359,7 +359,7 @@ static GSM_Error P7110_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_NETSTATUS, 4);
 }
 
-static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *blockstart;
 	int i;
@@ -440,7 +440,7 @@ static GSM_Error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_PHONEBOOK, 6);
 }
 
-static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *blockstart;
 	unsigned char blocks;
@@ -533,7 +533,7 @@ static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
-static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[3]) {
 	case 0x02:
@@ -606,7 +606,7 @@ static inline unsigned int getdata(SMS_MessageType T, unsigned int a,
  *  o 0xc9 -- unknown command?
  *  o 0xca -- phone not ready?
  */
-static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned int i, j, T, offset = 47;
 	int nextfolder = 0x10;
@@ -926,7 +926,7 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 }
 
 /* handle messages of type 0x02 (SMS Handling) */
-static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error	e = GE_NONE;
 
@@ -1004,7 +1004,7 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 	return e;
 }
 
-static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error	e = GE_NONE;
 
@@ -1102,7 +1102,7 @@ static GSM_Error P7110_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 	return e;
 }
 
-static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error			e = GE_NONE;
 	int				i, year;
@@ -1662,7 +1662,7 @@ static GSM_Error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_STLOGO, 5);
 }
 
-static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	/*
 	  01 13 00 ed 1c 00 39 35 32 37 32 00
@@ -1955,7 +1955,7 @@ static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_SECURITY, 5);
 }
 
-static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (!data || !data->NetMonitor) return GE_INTERNALERROR;
 	switch (message[3]) {

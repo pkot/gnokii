@@ -50,20 +50,20 @@
 
 static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state);
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-/* static GSM_Error ReplyDeleteSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data); */
-static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+/* static GSM_Error ReplyDeleteSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state); */
+static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
@@ -728,7 +728,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 }
 
 
-static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos, *endpos;
@@ -809,7 +809,7 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 	return GE_NONE;
 }
 
-static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	unsigned char *pos, *aux;
@@ -853,7 +853,7 @@ static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int l
 	return GE_NONE;
 }
 
-static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
@@ -888,7 +888,7 @@ static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int l
 }
 
 
-static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
@@ -922,7 +922,7 @@ static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int len
 }
 
 
-static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos1, *pos2;
@@ -949,7 +949,7 @@ static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int len
 }
 
 
-static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 
@@ -967,7 +967,7 @@ static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int lengt
 	return GE_NONE;
 }
 
-static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int i;
 	for (i = 0; i < length; i++) {
@@ -977,13 +977,13 @@ static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int len
 	return GE_NONE;
 }
 
-static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (buffer[0] == GEAT_PROMPT) return GE_NONE;
 	return GE_INTERNALERROR;
 }
 
-static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 
@@ -1004,7 +1004,7 @@ static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length
 	return GE_NONE;
 }
 
-static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	unsigned int sms_len, l, offset = 0;
@@ -1057,7 +1057,7 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
  * GSM_Data has no field for charset so you must misuse Model. the Model
  * string must be initialized with a length of 256 bytes.
  */
-static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
@@ -1086,7 +1086,7 @@ static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int len
 }
 
 
-static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
@@ -1134,7 +1134,7 @@ static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buff
 /* General reply function for phone responses. buffer[0] holds the compiled
  * success of the result (OK, ERROR, ... ). see links/atbus.h and links/atbus.c 
  * for reference */
-static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (buffer[0] != GEAT_OK)
 		return GE_UNKNOWN;

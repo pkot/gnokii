@@ -46,7 +46,7 @@ size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *s
 /* Common functions for misc Nokia drivers */
 /* Call divert: nk6100, nk7110 */
 GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state);
-GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
+GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 GSM_Error PNOK_FBUS_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 
 #endif

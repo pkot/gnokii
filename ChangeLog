@@ -32,6 +32,8 @@
       set                                                 (Pawel Kot)
  * create nokia-decoding.c for decoding functions generic to newer
    NOKIA phones (phonebook, calendar for now)          (Markus Plail)
+ * statemachine pointer added to the incoming functions of the
+   phone drivers                                     (BORBELY Zoltan)
 
 0.4.2a
 ======
