@@ -157,6 +157,14 @@ Options:
 	'phone'. This behaviour give you possibility to run one instance
 	of smsd for every phone you have at the same time.
 
+-i, --interval interval    
+	Polling interval for incoming sms's in seconds. Default is 1 second.
+
+-s, --maxsms number    
+	When phone driver doesn't support sms status it is possible
+	to specify number of sms's supported by phone. Default is 10.
+	If driver support sms status this option is ignored.
+
 -v, --version
 	Shows smsd version.
 

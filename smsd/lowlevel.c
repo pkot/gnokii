@@ -354,6 +354,7 @@ gint (*DoAction[])(gpointer) = {
 
 void *Connect (void *phone)
 {
+  static gint status = 1;
   gn_data *data;
   gn_sms_status SMSStatus = {0, 0, 0, 0};
   gn_sms_folder SMSFolder;
@@ -380,7 +381,7 @@ void *Connect (void *phone)
     {
       data->sms_folder = &SMSFolder;
       SMSFolder.folder_id = GN_MT_IN;
-      if ((error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, &sm)) == GN_ERR_NONE)
+      if (status && (error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, &sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.number != SMSFolder.number)
         {
@@ -391,12 +392,21 @@ void *Connect (void *phone)
         phoneMonitor.sms.unRead = 0;
       }
       else
-        g_print (_("GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\n"), __LINE__, __FILE__, error);
+      {
+        if (status)
+        {
+          g_print (_("GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\nEntering dumb mode."), __LINE__, __FILE__, error);
+          status = 0;
+        }
+        phoneMonitor.working = TRUE;
+        RefreshSMS (smsdConfig.maxSMS);
+        phoneMonitor.working = FALSE;
+      }
     }
     else
     {
       data->sms_status = &SMSStatus;
-      if ((error = gn_sm_functions (GN_OP_GetSMSStatus, data, &sm)) == GN_ERR_NONE)
+      if (status && (error = gn_sm_functions (GN_OP_GetSMSStatus, data, &sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.unRead != SMSStatus.unread ||
             phoneMonitor.sms.number != SMSStatus.number)
@@ -408,7 +418,16 @@ void *Connect (void *phone)
         phoneMonitor.sms.unRead = SMSStatus.unread;
       }
       else
-        g_print (_("GN_OP_GetSMSStatus at line %d in file %s returns error %d\n"), __LINE__, __FILE__, error);
+      {
+        if (status)
+        {
+          g_print (_("GN_OP_GetSMSStatus at line %d in file %s returns error %d\nEntering dumb mode."), __LINE__, __FILE__, error);
+          status = 0;
+        }
+        phoneMonitor.working = TRUE;
+        RefreshSMS (smsdConfig.maxSMS);
+        phoneMonitor.working = FALSE;
+      }
     }
 
     while ((event = RemoveEvent ()) != NULL)
@@ -421,7 +440,7 @@ void *Connect (void *phone)
       g_free (event);
     }
     
-    sleep (1);
+    sleep (smsdConfig.refreshInt);
   }
   
   free (data);

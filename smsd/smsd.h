@@ -43,6 +43,8 @@ typedef struct {
   gchar *libDir;
   gchar *logFile;
   gchar *phone;
+  gint   refreshInt;
+  gint   maxSMS;
   gint   smsSets:4;
 } SmsdConfig;
 

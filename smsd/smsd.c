@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <getopt.h>
 #include <time.h>
@@ -156,7 +157,7 @@ gint LoadDB (void)
 
 static void Version (void)
 {
-  g_print ("\nsmsd - version 1.2-cvs		(20031005)\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n");
+  g_print ("\nsmsd - version 1.3-cvs		(20041011)\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n");
 }
 
 
@@ -172,6 +173,8 @@ static void Usage (gchar *p)
              "            -l, --libdir path_to_db_module\n"
              "            -f, --logfile file\n"
              "            -t, --phone phone_number\n"
+             "            -i, --interval polling_interval_for_incoming_sms's_in_seconds\n"
+             "            -s, --maxsms number_of_sms's (only in dumb mode)\n"
              "            -v, --version\n"
              "            -h, --help\n"), p);
 }
@@ -220,6 +223,8 @@ static void ReadConfig (gint argc, gchar *argv[])
   smsdConfig.libDir = g_strdup (MODULES_DIR);
   smsdConfig.logFile = NULL;
   smsdConfig.phone = g_strdup ("");
+  smsdConfig.refreshInt = 1;     // Phone querying interval in seconds
+  smsdConfig.maxSMS = 10;        // Smsd uses it if GetSMSStatus isn't implemented
   smsdConfig.smsSets = 0;
 
   while (1)
@@ -237,10 +242,13 @@ static void ReadConfig (gint argc, gchar *argv[])
       {"logfile", 1, 0, 'f'},
       {"phone", 1, 0, 't'},
       {"version", 0, 0, 'v'},
-      {"help", 0, 0, 'h'}
+      {"interval", 1, 0, 'i'},
+      {"maxsms", 1, 0, 's'},
+      {"help", 0, 0, 'h'},
+      {0, 0, 0, 0}
     };
     
-    c = getopt_long (argc, argv, "u:p:d:c:m:l:f:t:vh", longOptions, &optionIndex);
+    c = getopt_long (argc, argv, "u:p:d:c:m:l:f:t:vi:s:h", longOptions, &optionIndex);
     if (c == EOF)
       break;
     switch (c)
@@ -289,6 +297,14 @@ static void ReadConfig (gint argc, gchar *argv[])
         if (smsdConfig.phone)
           g_free (smsdConfig.phone);
         smsdConfig.phone = g_strdup (optarg);
+        break;
+
+      case 'i':
+        smsdConfig.refreshInt = atoi (optarg);
+        break;
+
+      case 's':
+        smsdConfig.maxSMS = atoi (optarg);
         break;
 
       case 'v':

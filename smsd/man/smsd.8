@@ -243,6 +243,16 @@ of smsd for every phone you have at the same time.
 .RE
 
 .TP
+.BR -i,\ --interval\ interval
+Polling interval for incoming sms's in seconds. Default is 1 second.
+
+.TP
+.BR -s,\ --maxsms\ number
+When phone driver doesn't support sms status it is possible to specify
+number of sms's supported by phone. Default is 10. If driver support
+sms status this option is ignored.
+
+.TP
 .BR -v,\ --version
 Shows smsd version.
 
