@@ -8,16 +8,15 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sun Dec 17 2000
-  Modified by Jan Derfinak
-
+  $Id$
+  
 */
 
 #ifndef DB_H
 #define DB_H
 
 #include <glib.h>
-#include "gsm-common.h"
+#include "gsm-sms.h"
 
 extern void DB_Bye (void);
 extern gint DB_ConnectInbox (const gchar * const);

@@ -8,9 +8,8 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sun Dec 17 2000
-  Modified by Jan Derfinak
-
+  $Id$
+  
 */
 
 #include <string.h>
@@ -66,14 +65,20 @@ gint DB_ConnectOutbox (const gchar * const conninfo)
 gint DB_InsertSMS (const GSM_SMSMessage * const data)
 {
   GString *buf;
+  gchar *text;
   PGresult *res;
     
-  buf = g_string_sized_new (128);
-  g_string_sprintf (buf, "INSERT INTO inbox VALUES ('%s',
+  text = strEscape (data->UserData[0].u.Text);
+  
+  buf = g_string_sized_new (256);
+  g_string_sprintf (buf, "INSERT INTO inbox (\"number\", \"smsdate\", \"insertdate\",\
+                    \"text\", \"processed\") VALUES ('%s',
                     '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', 'f')",
                     data->RemoteNumber.number, data->Time.Year + 2000, data->Time.Month,
                     data->Time.Day, data->Time.Hour, data->Time.Minute,
-                    data->Time.Second, data->UserData[0].u.Text);
+                    data->Time.Second, text);
+  g_free (text);
+  
   res = PQexec(connIn, buf->str);
   g_string_free(buf, TRUE);
   if (!res || PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -140,7 +145,7 @@ void DB_Look (void)
     sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
 
 #ifdef XDEBUG
-    g_print ("%s, %s\n", sms.RemoteNumber.Number, sms.UserData[0].u.Text);
+    g_print ("%s, %s\n", sms.RemoteNumber.number, sms.UserData[0].u.Text);
 #endif
     
     if (WriteSMS (&sms) != 0)

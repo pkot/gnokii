@@ -8,9 +8,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sun Dec 17 2000
-  Modified by Jan Derfinak
-
+  $Id$
 */
 
 #include <string.h>
@@ -60,6 +58,30 @@ static gchar *connect;
 static pthread_t db_monitor_th;
 pthread_mutex_t db_monitorMutex;
 static volatile bool db_monitor;
+
+/* Escapes ' and \ with \. */
+/* Returned value needs to be free with g_free(). */
+gchar *strEscape (const gchar *const s)
+{
+  GString *str = g_string_new (s);
+  register gint i = 0;
+  gchar *ret;
+  
+  g_print ("%s\n", str->str);
+  while (str->str[i] != '\0')
+  {
+    if (str->str[i] == '\\' || str->str[i] == '\'')
+      g_string_insert_c (str, i++, '\\');
+    i++;
+  }
+  
+  g_print ("%s\n", str->str);
+  ret = str->str;
+  g_string_free (str, FALSE);
+  
+  return (ret);
+}
+
 
 static void Usage (gchar *p)
 {
@@ -119,7 +141,7 @@ static void ReadConfig (gint argc, gchar *argv[])
 
 
 
-static void *SendSMS (void *a)
+static void *SendSMS2 (void *a)
 {
   if (DB_ConnectOutbox (connect))
   {
@@ -161,7 +183,7 @@ gint WriteSMS (GSM_SMSMessage *sms)
 
 #ifdef XDEBUG
   g_print ("Address: %s\nText: %s\n",
-  sms->RemoteNumber.Number,
+  sms->RemoteNumber.number,
   sms->UserData[0].u.Text);
 #endif
 
@@ -192,7 +214,7 @@ static void ReadSMS (gpointer d, gpointer userData)
     else
     { 
 #ifdef XDEBUG 
-      g_print ("%d. %s   ", data->Location, data->Sender);
+      g_print ("%d. %s   ", data->Number, data->RemoteNumber.number);
       g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->Time.Year + 2000,
                data->Time.Month, data->Time.Day, data->Time.Hour,
                data->Time.Minute, data->Time.Second, data->Time.Timezone,
@@ -209,7 +231,7 @@ static void ReadSMS (gpointer d, gpointer userData)
 }
 
 
-static void GetSMS (void)
+static void GetSMS2 (void)
 {
   while (1)
   {
@@ -269,8 +291,8 @@ static void Run (void)
   pthread_create (&monitor_th, NULL, Connect, NULL);
   db_monitor = TRUE;
   pthread_mutex_init (&db_monitorMutex, NULL);
-  pthread_create (&db_monitor_th, NULL, SendSMS, NULL);
-  GetSMS ();
+  pthread_create (&db_monitor_th, NULL, SendSMS2, NULL);
+  GetSMS2 ();
 }
 
 

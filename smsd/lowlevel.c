@@ -10,20 +10,6 @@
 
   $Id$
   
-  $Log$
-  Revision 1.5  2001-12-03 15:34:54  pkot
-  Update to libsms and new structure
-
-  Revision 1.4  2001/05/30 14:36:47  pkot
-  Fix smsd to use StateMachine and let it compile.
-
-  Revision 1.3  2001/03/29 08:42:59  ja
-  Enabling compilation of smsd.
-
-  Revision 1.2  2001/02/02 08:09:57  ja
-  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
-
-  
 */
 
 #include <unistd.h>
@@ -48,7 +34,7 @@ pthread_mutex_t sendSMSMutex;
 pthread_cond_t  sendSMSCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
-
+static GSM_Statemachine sm;
 
 inline void InsertEvent (PhoneEvent *event)
 {
@@ -82,44 +68,43 @@ inline static PhoneEvent *RemoveEvent (void)
 
 static void InitModelInf (void)
 {
+  GSM_Data data;
   gchar buf[64];
   GSM_Error error;
-  register gint i = 0;
+  char imei[64], model[64], rev[64], manufacturer[64];
 
-  while ((error = GSM->GetModel(buf)) != GE_NONE && i++ < 15)
-    sleep(1);
+  data.Manufacturer = manufacturer;
+  data.Model = model;
+  data.Revision = rev;
+  data.Imei = imei;
+                          
+  sleep(2);
+  
+  error = SM_Functions(GOP_GetModel, &data, &sm);
 
   if (error == GE_NONE)
   {
     g_free (phoneMonitor.phone.model);
-    phoneMonitor.phone.version = g_strdup (buf);
-    phoneMonitor.phone.model = GetModel (buf);
+    phoneMonitor.phone.version = g_strdup (model);
+    phoneMonitor.phone.model = GetPhoneModel (buf)->model;
     if (phoneMonitor.phone.model == NULL)
       phoneMonitor.phone.model = g_strdup (_("unknown"));
 
-    phoneMonitor.supported = GetPhoneModel(buf)->flags;
+    phoneMonitor.supported = GetPhoneModel (buf)->flags;
   }
 
-  i = 0;
-  while ((error = GSM->GetRevision (buf)) != GE_NONE && i++ < 5)
-    sleep(1);
+  g_free (phoneMonitor.phone.revision);
+  phoneMonitor.phone.revision = g_strdup (rev);
 
-  if (error == GE_NONE)
-  {
-    g_free (phoneMonitor.phone.revision);
-    phoneMonitor.phone.revision = g_strdup (buf);
-  }
-
-  i = 0;
-  while ((error = GSM->GetIMEI (buf)) != GE_NONE && i++ < 5)
-    sleep(1);
+  sleep(2);
+  
+  error = SM_Functions (GOP_Identify, &data, &sm);
 
   if (error == GE_NONE)
   {
     g_free (phoneMonitor.phone.imei);
-    phoneMonitor.phone.imei = g_strdup (buf);
+    phoneMonitor.phone.imei = g_strdup (imei);
   }
-
 
 #ifdef XDEBUG
   g_print ("Version: %s\n", phoneMonitor.phone.version);
@@ -130,12 +115,12 @@ static void InitModelInf (void)
 }
 
 
-static GSM_Error fbusinit(bool enable_monitoring)
+static GSM_Error fbusinit (bool enable_monitoring)
 {
-  int count=0;
-  static GSM_Error error=GE_NOLINK;
-  GSM_ConnectionType connection=GCT_Serial;
-  static GSM_Statemachine sm;
+  int count = 0;
+  GSM_Error error = GE_NOLINK;
+  GSM_ConnectionType connection = GCT_Serial;
+  
 
   if (!strcmp(smsdConfig.connection, "infrared"))
     connection = GCT_Infrared;
@@ -205,9 +190,11 @@ static inline void FreeArray (GSList **array)
 
 static void RefreshSMS (const gint number)
 {
+  GSM_Data data;
   GSM_Error error;
   GSM_SMSMessage *msg;
   register gint i;
+  
 
 # ifdef XDEBUG
   g_print ("RefreshSMS is running...\n");
@@ -221,11 +208,13 @@ static void RefreshSMS (const gint number)
   i = 0;
   while (1)
   {
+    GSM_DataClear (&data);
     msg = g_malloc (sizeof (GSM_SMSMessage));
     msg->MemoryType = GMT_SM;
     msg->Number = ++i;
+    data.SMSMessage = msg;
 
-    if ((error = GSM->GetSMSMessage (msg)) == GE_NONE)
+    if ((error = SM_Functions(GOP_GetSMS, &data, &sm)) == GE_NONE)
     {
   //    pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
@@ -306,11 +295,13 @@ gint (*DoAction[])(gpointer) = {
 
 void *Connect (void *a)
 {
+  GSM_Data data;
   GSM_SMSMemoryStatus SMSStatus = {0, 0};
   PhoneEvent *event;
   GSM_Error error;
 
-
+  data.SMSStatus = &SMSStatus;
+  
 # ifdef XDEBUG
   g_print ("Initializing connection...\n");
 # endif
@@ -326,8 +317,11 @@ void *Connect (void *a)
   {
     phoneMonitor.working = FALSE;
 
-    if (GSM->GetSMSStatus (&SMSStatus) == GE_NONE)
+    g_print ("Pred: %d, %d\n", SMSStatus.Unread, SMSStatus.Number);
+    if ((error = SM_Functions (GOP_GetSMSStatus, &data, &sm)) == GE_NONE)
     {
+      g_print ("Po: %d, %d\n", SMSStatus.Unread, SMSStatus.Number);
+      
       if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
           phoneMonitor.sms.number != SMSStatus.Number)
       {
@@ -339,6 +333,8 @@ void *Connect (void *a)
       phoneMonitor.sms.unRead = SMSStatus.Unread;
     }
 
+    g_print ("error: %d\n", error);
+    
     while ((event = RemoveEvent ()) != NULL)
     {
 #     ifdef XDEBUG      
@@ -350,5 +346,7 @@ void *Connect (void *a)
           g_print (_("Event %d failed with return code %d!\n"), event->event, error);
       g_free (event);
     }
+    
+    sleep (2);
   }
 }

@@ -10,11 +10,6 @@
 
   $Id$
   
-  $Log$
-  Revision 1.2  2001-02-02 08:09:57  ja
-  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
-
-  
 */
 
 #ifndef XGNOKII_LOWLEVEL_H
