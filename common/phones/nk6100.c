@@ -2059,13 +2059,16 @@ static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state)
 	int size;
 
 	if (!data || !data->ringtone) return GN_ERR_INTERNALERROR;
+	if (data->ringtone->location < 0) data->ringtone->location = 17;
 
-	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NBS_UPLOAD)
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NBS_UPLOAD) {
+		data->ringtone->location = -1;
 		return NBSUpload(data, state, GN_SMS_DATA_Ringtone);
+	}
 
 	size = GN_RINGTONE_PACKAGE_MAX_LENGTH;
 	gn_ringtone_pack(data->ringtone, req + 7, &size);
-	req[4] = data->ringtone->location;
+	req[4] = data->ringtone->location - 17;
 
 	if (sm_message_send(7 + size, 0x05, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x05, data, state);
@@ -2761,8 +2764,9 @@ static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 
 	if (!data || !data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
+	if (data->ringtone->location < 0) return GN_ERR_INVALIDLOCATION;
 
-	req[3] = data->ringtone->location;
+	req[3] = data->ringtone->location - 17;
 
 	if ((error = pnok_extended_cmds_enable(0x01, data, state))) return error;
 
@@ -2781,8 +2785,9 @@ static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state)
 
 	if (!data || !data->ringtone || !data->raw_data || !data->raw_data->data)
 		return GN_ERR_INTERNALERROR;
+	if (data->ringtone->location < 0) data->ringtone->location = 17;
 
-	req[3] = data->ringtone->location;
+	req[3] = data->ringtone->location - 17;
 	snprintf(req + 8, 13, "%s", data->ringtone->name);
 	memcpy(req + 24, data->raw_data->data, data->raw_data->length);
 
@@ -2874,12 +2879,12 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		case 0x00:
 			break;
 		case 0x0a:
-			return GN_ERR_UNKNOWN;
+			return GN_ERR_INVALIDLOCATION;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		if (!data->ringtone) return GN_ERR_INTERNALERROR;
-		data->ringtone->location = message[3];
+		data->ringtone->location = message[3] + 17;
 		snprintf(data->ringtone->name, sizeof(data->ringtone->name), "%s", message + 8);
 		if (data->raw_data && data->raw_data->data) {
 			memcpy(data->raw_data->data, message + 24, length - 24);
@@ -3705,7 +3710,7 @@ static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
 	rl->userdef_count = 0;
 
 	if (!memcmp(state->config.model, "61", 2)) {
-		rl->userdef_location = 0;
+		rl->userdef_location = 17;
 		rl->userdef_count = 1;
 		ADDRINGTONE(18, "Ring ring");
 		ADDRINGTONE(19, "Low");
@@ -3748,7 +3753,62 @@ static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
 		memset(&ringtone, 0, sizeof(ringtone));
 		gn_data_clear(&d);
 		d.ringtone = &ringtone;
-		ringtone.location = 0;
+		ringtone.location = 17;
+		if (GetRingtone(&d, state) == GN_ERR_NONE) {
+			rl->ringtone[rl->count].location = ringtone.location;
+			strcpy(rl->ringtone[rl->count].name, ringtone.name);
+			rl->ringtone[rl->count].user_defined = 1;
+			rl->ringtone[rl->count].readable = 1;
+			rl->ringtone[rl->count].writable = 1;
+			rl->count++;
+		}
+	} else if (!memcmp(state->config.model, "51", 2)) {
+		rl->userdef_location = 17;
+		rl->userdef_count = 1;
+		ADDRINGTONE(18, "Ring ring");
+		ADDRINGTONE(19, "Low");
+		ADDRINGTONE(20, "Fly");
+		ADDRINGTONE(21, "Mosquito");
+		ADDRINGTONE(22, "Bee");
+		ADDRINGTONE(23, "Intro");
+		ADDRINGTONE(24, "Etude");
+		ADDRINGTONE(25, "Hunt");
+		ADDRINGTONE(26, "Going up");
+		ADDRINGTONE(27, "City Bird");
+		ADDRINGTONE(30, "Chase");
+		ADDRINGTONE(32, "Scifi");
+		ADDRINGTONE(34, "Kick");
+		ADDRINGTONE(35, "Do-mi-so");
+		ADDRINGTONE(36, "Robo N1X");
+		ADDRINGTONE(37, "Dizzy");
+		ADDRINGTONE(39, "Playground");
+		ADDRINGTONE(43, "That's it!");
+		ADDRINGTONE(47, "Knock knock");
+		ADDRINGTONE(48, "Grande valse");
+		ADDRINGTONE(49, "Helan");
+		ADDRINGTONE(50, "Fuga");
+		ADDRINGTONE(51, "Ode to Joy");
+		ADDRINGTONE(52, "Elise");
+		ADDRINGTONE(54, "Mozart 40");
+		ADDRINGTONE(56, "William Tell");
+		ADDRINGTONE(57, "Badinerie");
+		ADDRINGTONE(58, "Polka");
+		ADDRINGTONE(59, "Attraction");
+		ADDRINGTONE(60, "Down");
+		ADDRINGTONE(62, "Persuasion");
+		ADDRINGTONE(67, "Tick tick");
+		ADDRINGTONE(69, "Samba");
+		ADDRINGTONE(71, "Orient");
+		ADDRINGTONE(72, "Charleston");
+		ADDRINGTONE(73, "Songette");
+		ADDRINGTONE(74, "Jumping");
+		ADDRINGTONE(75, "Lamb");
+		ADDRINGTONE(80, "Tango");
+
+		memset(&ringtone, 0, sizeof(ringtone));
+		gn_data_clear(&d);
+		d.ringtone = &ringtone;
+		ringtone.location = 17;
 		if (GetRingtone(&d, state) == GN_ERR_NONE) {
 			rl->ringtone[rl->count].location = ringtone.location;
 			strcpy(rl->ringtone[rl->count].name, ringtone.name);

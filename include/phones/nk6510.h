@@ -185,4 +185,6 @@ typedef enum {
 #define NK6510_SUBSEC_ENABLE_EXTENDED_CMDS	0x64	/* Enable extended commands */
 #define NK6510_SUBSEC_NETMONITOR         	0x7e	/* Netmonitor */
 
+#define	NK6510_RINGTONE_USERDEF_LOCATION	231
+
 #endif  /* _gnokii_phones_nk6510_h */

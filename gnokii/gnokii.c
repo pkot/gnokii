@@ -350,6 +350,8 @@ static gn_data data;
 static gn_cb_message cb_queue[16];
 static int cb_ridx = 0;
 static int cb_widx = 0;
+static gn_ringtone_list ringtone_list;
+static int ringtone_list_initialised = 0;
 
 
 static void busterminate(void)
@@ -487,6 +489,42 @@ static gn_error loadbitmap(gn_bmp *bitmap, char *s, int type)
 		return error;
 	}
 	return GN_ERR_NONE;
+}
+
+static void init_ringtone_list(void)
+{
+	gn_error error;
+
+	if (ringtone_list_initialised) return;
+
+	memset(&ringtone_list, 0, sizeof(ringtone_list));
+	data.ringtone_list = &ringtone_list;
+
+	error = gn_sm_functions(GN_OP_GetRingtoneList, &data, &state);
+
+	data.ringtone_list = NULL;
+
+	if (error != GN_ERR_NONE) {
+		ringtone_list.count = 0;
+		ringtone_list.userdef_location = 0;
+		ringtone_list.userdef_count = 0;
+		ringtone_list_initialised = -1;
+	} else
+		ringtone_list_initialised = 1;
+}
+
+static char *get_ringtone_name(int id)
+{
+	int i;
+
+	init_ringtone_list();
+
+	for (i = 0; i < ringtone_list.count; i++) {
+		if (ringtone_list.ringtone[i].location == id)
+			return ringtone_list.ringtone[i].name;
+	}
+
+	return "Unknown";
 }
 
 /* Send  SMS messages. */
@@ -2896,11 +2934,7 @@ static int getprofile(int argc, char *argv[])
 			fprintf(stdout, "%d. \"%s\"\n", p.number, p.name);
 			if (p.default_name == -1) fprintf(stdout, _(" (name defined)\n"));
 			fprintf(stdout, _("Incoming call alert: %s\n"), profile_get_call_alert_string(p.call_alert));
-			/* For different phones different ringtones names */
-			if (!strcmp(model, "NSE-3"))
-				fprintf(stdout, _("Ringing tone: %s (%d)\n"), RingingTones[p.ringtone], p.ringtone);
-			else
-				fprintf(stdout, _("Ringtone number: %d\n"), p.ringtone);
+			fprintf(stdout, _("Ringing tone: %s (%d)\n"), get_ringtone_name(p.ringtone), p.ringtone);
 			fprintf(stdout, _("Ringing volume: %s\n"), profile_get_volume_string(p.volume));
 			fprintf(stdout, _("Message alert tone: %s\n"), profile_get_message_tone_string(p.message_tone));
 			fprintf(stdout, _("Keypad tones: %s\n"), profile_get_keypad_tone_string(p.keypad_tone));
@@ -4019,7 +4053,12 @@ static int getringtone(int argc, char *argv[])
 		return -1;
 	}
 
-	ringtone.location = (argc > optind + 1) ? atoi(argv[optind + 1]) : 0;
+	if (argc > optind + 1) {
+		ringtone.location = atoi(argv[optind + 1]);
+	} else {
+		init_ringtone_list();
+		ringtone.location = ringtone_list.userdef_location;
+	}
 
 	if (raw)
 		error = gn_sm_functions(GN_OP_GetRawRingtone, &data, &state);
@@ -4097,7 +4136,7 @@ static int setringtone(int argc, char *argv[])
 		return -1;
 	}
 
-	ringtone.location = (argc > optind + 1) ? atoi(argv[optind + 1]) : 0;
+	ringtone.location = (argc > optind + 1) ? atoi(argv[optind + 1]) : -1;
 
 	if (raw) {
 		FILE *f;
@@ -4238,26 +4277,25 @@ static int ringtoneconvert(int argc, char *argv[])
 static int getringtonelist(void)
 {
 	gn_error error;
-	gn_ringtone_list rlist;
 	int i;
 
-	memset(&rlist, 0, sizeof(rlist));
-	gn_data_clear(&data);
-	data.ringtone_list = &rlist;
+	init_ringtone_list();
 
-	if ((error = gn_sm_functions(GN_OP_GetRingtoneList, &data, &state)) != GN_ERR_NONE) {
-		fprintf(stderr, _("Failed to get the list of ringtones: %s\n"), gn_error_print(error));
-		return error;
+	if (ringtone_list_initialised < 0) {
+		fprintf(stderr, _("Failed to get the list of ringtones\n"));
+		return GN_ERR_UNKNOWN;
 	}
 
-	printf("First user defined ringtone location: %3d\n", rlist.userdef_location);
-	printf("Number of user defined ringtones: %d\n\n", rlist.userdef_count);
+	printf("First user defined ringtone location: %3d\n", ringtone_list.userdef_location);
+	printf("Number of user defined ringtones: %d\n\n", ringtone_list.userdef_count);
 	printf("loc   rwu   name\n");
 	printf("===============================\n");
-	for (i = 0; i < rlist.count; i++) {
-		printf("%3d   %d%d%d   %-20s\n", rlist.ringtone[i].location,
-			rlist.ringtone[i].readable, rlist.ringtone[i].writable, rlist.ringtone[i].user_defined,
-			rlist.ringtone[i].name);
+	for (i = 0; i < ringtone_list.count; i++) {
+		printf("%3d   %d%d%d   %-20s\n", ringtone_list.ringtone[i].location,
+			ringtone_list.ringtone[i].readable,
+			ringtone_list.ringtone[i].writable,
+			ringtone_list.ringtone[i].user_defined,
+			ringtone_list.ringtone[i].name);
 	}
 
 	return GN_ERR_NONE;

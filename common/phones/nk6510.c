@@ -2474,7 +2474,7 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 		dprintf("List of ringtones received!\n");
 		if (!(rl = data->ringtone_list)) return GN_ERR_INTERNALERROR;
 		rl->count = 256 * message[4] + message[5];
-		rl->userdef_location = 0; //FIXME
+		rl->userdef_location = NK6510_RINGTONE_USERDEF_LOCATION;
 		rl->userdef_count = 10;
 		if (rl->count > GN_RINGTONE_MAX_COUNT) rl->count = GN_RINGTONE_MAX_COUNT;
 		i = 6;
@@ -2554,6 +2554,8 @@ static gn_error NK6510_SetRawRingtone(gn_data *data, struct gn_statemachine *sta
 	unsigned char *pos;
 
 	if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
+	/* FIXME: where is the location field? */
+	if (data->ringtone->location < 0) data->ringtone->location = NK6510_RINGTONE_USERDEF_LOCATION;
 
 	dprintf("Setting raw ringtone %d...\n", data->ringtone->location);
 	pos = req + 7;

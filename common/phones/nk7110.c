@@ -277,7 +277,7 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 	case GN_OP_ReleasePhoneKey:
 		return NK7110_PressOrReleaseKey(data, state, false);
 	case GN_OP_SetRingtone:
-		return NBSUpload(data, state, GN_SMS_DATA_Ringtone);
+		return NK7110_SetRingtone(data, state);
 	case GN_OP_PlayTone:
 		return pnok_play_tone(data, state);
 	case GN_OP_GetLocksInfo:
@@ -2558,6 +2558,18 @@ static gn_error NK7110_GetProfile(gn_data *data, struct gn_statemachine *state)
 	}
 
 	return GN_ERR_NONE;
+}
+
+/*****************************/
+/********* RINGTONE **********/
+/*****************************/
+static gn_error NK7110_SetRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data->ringtone) return GN_ERR_INTERNALERROR;
+
+	data->ringtone->location = -1;
+
+	return NBSUpload(data, state, GN_SMS_DATA_Ringtone);
 }
 
 
