@@ -4,13 +4,13 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   This file provides support for ringtones.
 
-  Last modification: Sat Jul 10 17:26:23 CEST 1999
+  Last modification: Mon Mar 20 21:51:59 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */

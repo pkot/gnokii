@@ -3,13 +3,14 @@
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
-  Copyright (C) Hugh Blemings, 1999.
+
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   Header file for miscellaneous defines, typedefs etc.
 
-  Last modification: Thu May  6 00:51:04 CEST 1999
+  Last modification: Mon Mar 20 21:44:24 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */

@@ -71,7 +71,7 @@ clean:
 	fi
 	@echo "done"
 
-distclean:
+distclean:	clean
 	$(RM) Makefile.global config.cache config.log config.status \
         packaging/RedHat/gnokii.spec
 

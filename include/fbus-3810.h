@@ -1,12 +1,19 @@
-    /* G N O K I I
-       A Linux/Unix toolset and driver for Nokia mobile phones.
-       Copyright (C) Hugh Blemings, 1999  Released under the terms of 
-       the GNU GPL, see file COPYING for more details.
-    
-       This file:  fbus-3810.h   Version 0.3.1
+/*
 
-       Header file for the various functions, definitions etc. used
-       to implement the handset interface.  See fbus-3810.c for more details. */
+  G N O K I I
+
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+  Header file for 3810 code.
+	
+  Last modification: Mon Mar 20 21:40:04 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+*/
 
 #ifndef     __fbus_3810_h
 #define     __fbus_3810_h

@@ -22,3 +22,7 @@
   Xgnokii-*.rpm contains all X11 depended files.
 - removed xkeyb directory. Xkeyb is now a part of xgnokii. Also removed xkeyb
   from Makefile.
+
+* Mon Mar 20 21:51:59 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- copyrights unified in the sources.
+

@@ -3,7 +3,8 @@
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
-  Copyright (C) Hugh Blemings, 1999.
+
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
@@ -17,7 +18,7 @@
   Unless otherwise noted, all functions herein block until they complete.  The
   functions themselves are defined in a structure in gsm-common.h.
 
-  Last modification: Sun May 16 21:05:42 CEST 1999
+  Last modification: Mon Mar 20 22:02:15 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */

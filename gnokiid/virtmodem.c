@@ -1,19 +1,21 @@
 /*
 
-	G N O K I I
+  G N O K I I
 
-	A Linux/Unix toolset and driver for Nokia mobile phones.
-	Copyright (C) Hugh Blemings, 1999.
+  A Linux/Unix toolset and driver for Nokia mobile phones.
 
-	Released under the terms of the GNU GPL, see file COPYING for more details.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
-	virtmodem.c - provides a virtual modem interface to the GSM
-	phone by calling code in gsm-api.c, at-emulator.c and datapump.c
+  Released under the terms of the GNU GPL, see file COPYING for more details.
 
-	The code here provides the overall framework and coordinates
-	switching between command mode (AT-emulator) and "online" mode
-	where the data pump code translates data from/to the GSM handset
-	and the modem data/fax stream.
+  This file provides a virtual modem interface to the GSM phone by calling
+  code in gsm-api.c, at-emulator.c and datapump.c. The code here provides
+  the overall framework and coordinates switching between command mode
+  (AT-emulator) and "online" mode where the data pump code translates data
+  from/to the GSM handset and the modem data/fax stream.
+
+  Last modification: Mon Mar 20 21:40:04 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
 

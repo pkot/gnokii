@@ -4,7 +4,7 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -12,7 +12,7 @@
 
   Header file for CRC24 (aka FCS) implementation in RLP.
 
-  Last modification: Sun Oct 24 17:52:32 CEST 1999
+  Last modification: Mon Mar 20 21:40:04 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */

@@ -1,18 +1,19 @@
+/*
 
+  G N O K I I
 
-/* G N O K I I
-	   A Linux/Unix toolset and driver for Nokia mobile phones.
-	   Copyright (C) Hugh Blemings, Pavel Janík ml and others 1999
-	   Released under the terms of the GNU GPL, see file COPYING
-	   for more details.
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+  Header file for 640 code.
 	
-	   This file:  mbus-640.c  Version 0.3.?
-	   
-	   ... a starting point for whoever wants to take a crack
-	   at 640 support!
-	
-	   Header file for the various functions, definitions etc. used
-	   to implement the handset interface.  See mbus-640.c for more details. */
+  Last modification: Mon Mar 20 21:40:04 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+*/
 
 #ifndef		__mbus_640_h
 #define		__mbus_640_h
@@ -76,7 +77,7 @@ GSM_Error	MB640_SetDateTime(GSM_DateTime *date_time);
 GSM_Error	MB640_GetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	MB640_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	MB640_DialVoice(char *Number);
-GSM_Error	MB640_DialData(char *Number);
+GSM_Error	MB640_DialData(char *Number, char type);
 GSM_Error	MB640_GetIncomingCallNr(char *Number);
 GSM_Error	MB640_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 GSM_Error	MB640_GetCalendarNote(GSM_CalendarNote *CalendarNote);

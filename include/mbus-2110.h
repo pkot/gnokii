@@ -1,18 +1,19 @@
+/*
 
+  G N O K I I
 
-/* G N O K I I
-	   A Linux/Unix toolset and driver for Nokia mobile phones.
-	   Copyright (C) Hugh Blemings, Pavel Janík ml and others 1999
-	   Released under the terms of the GNU GPL, see file COPYING
-	   for more details.
-	
-	   This file:  mbus-2110.c  Version 0.3.?
-	   
-	   ... a starting point for whoever wants to take a crack
-	   at 2110 support!
-	
-	   Header file for the various functions, definitions etc. used
-	   to implement the handset interface.  See mbus-2110.c for more details. */
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+  Header file for 2110 code.	
+
+  Last modification: Mon Mar 20 21:40:04 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+*/
 
 #ifndef		__mbus_2110_h
 #define		__mbus_2110_h

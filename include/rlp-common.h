@@ -3,7 +3,8 @@
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
-  Copyright (C) Hugh Blemings & Pavel Janík ml., 1999.
+
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -14,7 +15,7 @@
 
   Header file for RLP protocol.
 
-  Last modification: Sat Dec  4 03:15:55 AEDT 1999
+  Last modification: Mon Mar 20 21:40:04 CET 2000
   Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */

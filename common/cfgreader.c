@@ -1,17 +1,21 @@
 /*
 
-	G N O K I I
+  G N O K I I
 
-	A Linux/Unix toolset and driver for Nokia mobile phones.
-	Copyright (C) Hugh Blemings, 1999.
+  A Linux/Unix toolset and driver for Nokia mobile phones.
 
-	Released under the terms of the GNU GPL, see file COPYING for more details.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
-	cfgreader.c - provides generic functions to read the ~/.gnokiirc
-	Modified from code by Tim Potter.
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+  Config file (/etc/gnokiirc and ~/.gnokiirc) reader.
+
+  Modified from code by Tim Potter.
+	
+  Last modification: Mon Mar 20 21:40:04 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
-
 
 #include <stdio.h>
 #include <stdlib.h>

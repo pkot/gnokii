@@ -32,36 +32,20 @@ AC_ARG_ENABLE(debug,
         [ debug="no"  ]
 )
 
-AC_ARG_ENABLE(xdebug, 
+AC_ARG_ENABLE(xdebug,
 	[  --enable-xdebug         compile with xdebug code],
 	[ CFLAGS="$CFLAGS -DXDEBUG"
           xdebug="yes" ],
         [ xdebug="no"  ]
 )
 
-dnl ======================= GTK
-
-AC_ARG_ENABLE(gtk, 
-	[  --disable-gtk           compile without GTK code],
-	[ gtk=no ],
-	[ gtk="yes"]	
+AC_ARG_ENABLE(rlpdebug, 
+	[  --enable-rlpdebug       compile with RLP debug code],
+	[ CFLAGS="$CFLAGS -DRLP_DEBUG"
+          rlpdebug="yes" ],
+        [ rlpdebug="no"  ]
 )
 
-if test "$gtk" = yes
-then
-	AC_PATH_X
-	AC_PATH_PROG(GTK_CONFIG, gtk-config, no)
-	if test "$GTK_CONFIG" = no
-	then
-		AC_MSG_ERROR(Cannot find gtk-config.)
-	else
-		GTK_CFLAGS=`$GTK_CONFIG --cflags`
-		GTK_LIBS=`$GTK_CONFIG --libs`
-	fi
-else
-	GTK_CFLAGS=""
-	GTK_LIBS=""
-fi
 
 dnl ======================== Checks for libraries.
 
@@ -89,17 +73,36 @@ AC_CHECK_LIB(pthread, pthread_create, [
 	[ AC_MSG_ERROR(not found library: pthread !!!) ]
 )
 
-AC_CHECK_LIB(intl,gettext)
+
+dnl ======================== Checks for X base support 
 
 if test "$no_x" = yes -o "$with_x" = "no"
 then
-	xpm="no"
+	x_support="no"
 	XPM_CFLAGS=""
 	XPM_LIBS=""
+	GTK_CFLAGS=""
+	GTK_LIBS=""
 else
-	xpm="yes"	
-	XPM_CFLAGS="-DXPM"
-	XPM_LIBS="-L$x_libraries -lX11 -lXpm"
+	AC_PATH_X
+
+	AC_CHECK_LIB(Xpm, XpmWriteFileFromPixmap, [
+			XPM_CFLAGS="-DXPM"
+			XPM_LIBS="-L$x_libraries -lX11 -lXpm"
+		],
+		[ AC_MSG_ERROR(not found library: libXpm !!!) ],
+		[ -L$x_libraries -lX11 ]
+	) 
+
+	AC_PATH_PROG(GTK_CONFIG, gtk-config, no)
+	if test "$GTK_CONFIG" = no
+	then
+		AC_MSG_ERROR(Cannot find gtk-config.)
+	else
+		GTK_CFLAGS=`$GTK_CONFIG --cflags`
+		GTK_LIBS=`$GTK_CONFIG --libs`
+	fi	
+	x_support="yes"	
 fi
 
 
@@ -107,14 +110,17 @@ dnl ======================== Additional switches
 
 AC_ARG_ENABLE(security, 
 	[  --enable-security       enable all security features ],
-	[ security="-DSECURITY" ],
-	[ security=""]
+	[ CFLAGS="$CFLAGS -DSECURITY"
+	  security="yes" ],
+	[ security="no"  ]
 )
 
 AC_ARG_ENABLE(gettext, 
 	[  --enable-gettext        if you want gettext suport ],
-	[ gettext="-DGNOKII_GETTEXT" ],
-	[ gettext=""]
+	[ CFLAGS="$CFLAGS -DGNOKII_GETTEXT"
+	  AC_CHECK_LIB(intl,gettext)
+	  gettext="yes" ],
+	[ gettext="no"  ]
 )
 
 AC_ARG_ENABLE(win32, 
@@ -161,8 +167,6 @@ AC_SUBST(VERSION)
 AC_SUBST(XVERSION)
 AC_SUBST(model)
 AC_SUBST(port)
-AC_SUBST(gettext)
-AC_SUBST(security)
 AC_SUBST(win32)
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
@@ -195,10 +199,10 @@ echo "
     Xgnokii version:	$XVERSION
     Phone model:        $model
     Serial port:        $port
-    GTK:                $gtk
-    Xpm support:        $xpm
+    X (GTK) support:    $x_support
     Debug:              $debug
     XDebug:             $xdebug
+    RLPDebug:           $rlpdebug
     Gettext:            $gettext
     Security:           $security
     Win32:              $win32 

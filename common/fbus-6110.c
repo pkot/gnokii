@@ -4,7 +4,7 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -14,7 +14,7 @@
   The various routines are called FB61 (whatever) as a concatenation of FBUS
   and 6110.
 
-  Last modification: Wed Nov 24 16:18:58 CET 1999
+  Last modification: Mon Mar 20 21:03:09 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -2835,6 +2835,20 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       memcpy(CurrentPhonebookEntry->Number, MessageBuffer + i, count);
       CurrentPhonebookEntry->Number[count] = 0x00;
       CurrentPhonebookEntry->Group = MessageBuffer[i+count];
+      
+      CurrentPhonebookEntry->Date.Year = MessageBuffer[i+count+2]*256+MessageBuffer[i+count+3];
+      CurrentPhonebookEntry->Date.Month = MessageBuffer[i+count+4];
+      CurrentPhonebookEntry->Date.Day = MessageBuffer[i+count+5];
+      CurrentPhonebookEntry->Date.Hour = MessageBuffer[i+count+6];
+      CurrentPhonebookEntry->Date.Minute = MessageBuffer[i+count+7];
+      CurrentPhonebookEntry->Date.Second = MessageBuffer[i+count+8];
+
+#ifdef DEBUG
+      fprintf(stdout, _("   Date: "));
+      fprintf(stdout, "%02u-%02u-%04u\n", CurrentPhonebookEntry->Date.Day,CurrentPhonebookEntry->Date.Month,CurrentPhonebookEntry->Date.Year);
+      fprintf(stdout, _("   Time: "));
+      fprintf(stdout, "%02u-%02u-%02u\n", CurrentPhonebookEntry->Date.Hour,CurrentPhonebookEntry->Date.Minute,CurrentPhonebookEntry->Date.Second);
+#endif /* DEBUG */
 
       /* Signal no error to calling code. */
 

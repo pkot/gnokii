@@ -1,21 +1,19 @@
-/* G N O K I I
-    A Linux/Unix toolset and driver for Nokia mobile phones.
-       Copyright (C) Hugh Blemings, 1999  Released under the terms of 
-       the GNU GPL, see file COPYING for more details.
-    
-       This file:  fbus-3810.c  Version 0.3.1
-    
-       Provides an API for accessing functions on the 3810 and
-       similar phones.  Most testing has been done on the 3810
-       so far.  The code relies on the pthread library to allow
-       communications to the phone to be run independantly of 
-       mailine code.
+/*
 
-       The various routines are called FB38 (whatever) as a
-       concatenation of FBUS and 3810.
-      
-       These functions are only ever called through the GSM_Functions
-       structure defined in gsm-common.h and set up in gsm-api.c */
+  G N O K I I
+
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+  This file contains the main code for 3810 support.
+	
+  Last modification: Mon Mar 20 21:40:04 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+*/
 
 #define     __fbus_3810_c   /* "Turn on" prototypes in fbus-3810.h */
 

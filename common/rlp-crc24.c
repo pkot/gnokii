@@ -3,15 +3,14 @@
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
-  Copyright (C) Hugh Blemings & Pavel Janík ml., 1999.
+
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file:  rlp-crc24.c   Version 0.3.1
-
   CRC24 (aka FCS) implementation in RLP.
 
-  Last modification: Sun Oct 24 17:55:27 CEST 1999
+  Last modification: Mon Mar 20 22:06:04 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */

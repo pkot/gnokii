@@ -33,3 +33,8 @@
   
 * Fri Mar 17 12:51:36 EST 2000 Hugh Blemings <hugh@linuxcare.com>
 - Added Harri's 3810/8110 functions.
+
+* Mon Mar 20 21:03:09 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- Call registers has date and time associated with the phone and gnokii can
+  get it now (Marcin).
+- RLP debugging is now configure option.

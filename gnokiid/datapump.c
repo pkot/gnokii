@@ -1,15 +1,19 @@
 /*
 
-	G N O K I I
+  G N O K I I
 
-	A Linux/Unix toolset and driver for Nokia mobile phones.
-	Copyright (C) Hugh Blemings, 1999.
+  A Linux/Unix toolset and driver for Nokia mobile phones.
 
-	Released under the terms of the GNU GPL, see file COPYING for more details.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
-	datapump.c - provides routines to handle processing of data
-	when connected in fax or data mode.  Converts data from/to
-	GSM phone to virtual modem interface.
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+  This file provides routines to handle processing of data when connected in
+  fax or data mode. Converts data from/to GSM phone to virtual modem
+  interface.
+
+  Last modification: Mon Mar 20 21:40:04 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
 

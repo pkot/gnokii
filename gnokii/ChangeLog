@@ -28,3 +28,7 @@
 
 * Thu Mar 16 17:42:13 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - WIN32 rcfile changes
+
+* Mon Mar 20 20:54:35 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- setdatetime can be used without args (Marcin)
+

@@ -4,7 +4,7 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
@@ -15,7 +15,7 @@
   wait for GUI application. Well, our test tool is now really powerful and
   useful :-)
 
-  Last modification: Tue Feb 22 18:58:16 CET 2000
+  Last modification: Mon Mar 20 21:40:04 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -230,7 +230,7 @@ int usage(void)
 "                 [--long n]\n"
 "          gnokii --getsmsc message_center_number\n"
 "          gnokii --sendoplogoviasms destionation logofile [network code]\n"
-"          gnokii --setdatetime [YYYY MM DD HH MM]\n"
+"          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
 "          gnokii --getdatetime\n"
 "          gnokii --setalarm HH MM\n"
 "          gnokii --getalarm\n"
@@ -548,7 +548,7 @@ int main(int argc, char *argv[])
     { OPT_ENTERSECURITYCODE, 1, 1, 0 },
 #endif
 
-    { OPT_SETDATETIME,       0, 5, GAL_XOR },
+    { OPT_SETDATETIME,       0, 5, 0 },
     { OPT_SETALARM,          2, 2, 0 },
     { OPT_DIALVOICE,         1, 1, 0 },
     { OPT_DIALDATA,          1, 1, 0 },
@@ -1915,28 +1915,35 @@ int setdatetime(int argc, char *argv[])
 
   fbusinit(NULL);
 
-  if (argc==5) {
-    Date.Year = atoi (argv[2]);
-    Date.Month = atoi (argv[3]);
-    Date.Day = atoi (argv[4]);
-    Date.Hour = atoi (argv[5]);
-    Date.Minute = atoi (argv[6]);
-    }
-  else {
-    nowh=time(NULL);
-    now=localtime(&nowh);
-    if (now->tm_year>90) {
-      Date.Year = now->tm_year+1900;
-      }
-    else {
-      Date.Year = now->tm_year+2000;
-    } 
+  nowh=time(NULL);
+  now=localtime(&nowh);
+  
+  Date.Year = now->tm_year;
+  Date.Month = now->tm_mon+1;
+  Date.Day = now->tm_mday;
+  Date.Hour = now->tm_hour;
+  Date.Minute = now->tm_min;
+  Date.Second = now->tm_sec;
 
-    Date.Month = now->tm_mon+1;
-    Date.Day = now->tm_mday;
-    Date.Hour = now->tm_hour;
-    Date.Minute = now->tm_min;
-    Date.Second = now->tm_sec;
+  if (argc>0) Date.Year = atoi (argv[0]);
+  if (argc>1) Date.Month = atoi (argv[1]);
+  if (argc>2) Date.Day = atoi (argv[2]);
+  if (argc>3) Date.Hour = atoi (argv[3]);
+  if (argc>4) Date.Minute = atoi (argv[4]);
+
+  if (Date.Year<1900)
+  {
+
+    /* Well, this thing is copyrighted in U.S. This technique is known as
+       Windowing and you can read something about it in LinuxWeekly News:
+       http://lwn.net/1999/features/Windowing.phtml. This thing is beeing
+       written in Czech republic and Poland where algorhitms are not allowed
+       to be patented. */
+
+    if (Date.Year>90)
+      Date.Year = Date.Year+1900;
+    else
+      Date.Year = Date.Year+2000;
   }
 
   /* FIXME: Error checking should be here. */
@@ -1947,7 +1954,7 @@ int setdatetime(int argc, char *argv[])
   return 0;
 }
 
-/* In this mode we receive the date and time from mobile phone */
+/* In this mode we receive the date and time from mobile phone. */
 
 int getdatetime(void) {
 
@@ -2186,7 +2193,11 @@ int getmemory(char *argv[])
     error=GSM->GetMemoryLocation(&entry);
  
     if (error == GE_NONE)
+    {
       fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
+      if (entry.MemoryType == GMT_MC || entry.MemoryType == GMT_DC || entry.MemoryType == GMT_RC)
+        fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.Date.Day, entry.Date.Month, entry.Date.Year, entry.Date.Hour, entry.Date.Minute, entry.Date.Second);
+    }  
     else {
       if (error == GE_NOTIMPLEMENTED) {
 	fprintf(stderr, _("Function not implemented in %s model!\n"), model);
@@ -2525,21 +2536,6 @@ int foogle(char *argv[])
 
   fbusinit(RLP_DisplayF96Frame);
   
-  /* Initialise RLP code. */
-  
-  // RLP_Initialise(GSM->SendRLPFrame);
-
-  sleep(5); /* Wait for phone initialisation. */
-
-  /* Hugh's number */
-  // GSM->DialData("62401000", 0);
-
-  /* Pavel's one */
-  //GSM->DialData("01717157106", 0);
-  GSM->DialData("01223576101", 0);
-
-  // RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
-
 #if 0
   for (i = 0; i <= 6; i++) {
 
@@ -2560,7 +2556,6 @@ int foogle(char *argv[])
     printf("\n");
   }
 #endif
-  sleep(20);
  
   GSM->Terminate();
 

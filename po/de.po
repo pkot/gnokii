@@ -2253,7 +2253,7 @@ msgstr ""
 
 #: gnokii.c:938 gnokii.c:1135 gnokii.c:1860 gnokii.c:2023
 msgid "Unknown memory type %s!\n"
-msgstr "Unbekannter Speichertyp %2!\n"
+msgstr "Unbekannter Speichertyp %s!\n"
 
 #: fbus-6110.c:3283
 msgid "Unknown message of type 0x0d.\n"
@@ -2390,7 +2390,7 @@ msgstr "[Erhielt Bestätigung vom Typ %02x, Seq: %2x]\n"
 
 #: fbus-6110.c:4570
 msgid "[Sending Ack of type %02x, seq: %x]\n"
-msgstr "[Sende Bestätigung vom Typ %02x, Seq: %s]\n"
+msgstr "[Sende Bestätigung vom Typ %02x, Seq: %x]\n"
 
 #: fbus-6110.c:3235
 msgid "automatic"

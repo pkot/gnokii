@@ -4,14 +4,14 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
   Header file for the definitions, enums etc. that are used by all models of
   handset.
 
-  Last modification: Thu Jul  1 21:28:36 CEST 1999
+  Last modification: Mon Mar 20 21:45:41 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -89,7 +89,7 @@ typedef enum {
    255 * 153 = 39015 default alphabet characters */
 #define GSM_MAX_CONCATENATED_SMS_LENGTH	(39015)
 
-/* FIXME: what value should be here? (Pawel Kot, 1999.12.25) */
+/* FIXME: what value should be here? (Pawel Kot) */
 #define GSM_MAX_USER_DATA_HEADER_LENGTH (10)
 
 /* Define datatype for SMS Message Type */
@@ -251,6 +251,8 @@ typedef struct {
   GSM_MemoryType MemoryType;                        /* Type of memory */
   int Group;                                        /* Group */
   int Location;                                     /* Location */
+  GSM_DateTime Date;                                /* The record date and time
+                                                       of the number. */
 } GSM_PhonebookEntry;
 
 /* This define speed dialing entries. */

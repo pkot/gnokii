@@ -3,19 +3,18 @@
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
-  Copyright (C) Hugh Blemings & Pavel Janík ml., 1999.
 
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   The development of RLP protocol is sponsored by SuSE CR, s.r.o. (Pavel use
   the SIM card from SuSE for testing purposes).
 
-  This file:  rlp-common.c   Version 0.3.1
-
   Actual implementation of RLP protocol.
 
-  Last modification: Sat Dec  4 03:15:55 AEDT 1999
-  Modified by Hugh Blemings <hugh@linuxcare.com>
+  Last modification: Mon Mar 20 21:40:04 CET 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
 
@@ -28,12 +27,6 @@
 #include "rlp-crc24.h"
 #include "gsm-common.h" /* For GSM error and RLP send function. */
 #include "misc.h" /* For u8, u32 etc. */
-
-
-/* We should force rlp_debug for now until it is more stable and then */
-/* it can become an option in configure */
-/* This way only interesting information (and not passwords) is recorded */
-//#define RLP_DEBUG
 
 /* Our state machine which handles all of nine possible states of RLP
    machine. */

@@ -25,16 +25,19 @@ enable you to edit your contacts book, send/read SMS's from/in
 computer and more other features.
 
 %prep
+
 %setup -q
-%configure --prefix=/usr
 
 %build
+./configure --prefix=/usr --enable-gettext
 make
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
 make prefix=${RPM_BUILD_ROOT}/usr install
+
+mkdir -p ${RPM_BUILD_ROOT}/etc/
 install -m 444 Docs/sample/sample.gnokiirc ${RPM_BUILD_ROOT}/etc/gnokiirc
 
 %pre
@@ -59,11 +62,12 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 /usr/bin/xgnokii
 /usr/bin/xlogos
-/usr/lib/xgnokii/*
+/usr/lib/xgnokii
 
 %changelog
 * Mon Mar 20 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - mkdir of directories in install removed
+- xgnokii package should contain lib/xgnokii directory
 
 * Mon Mar 20 2000 Jan Derfinak <ja@mail.upjs.sk>
 - split package into gnokii and xgnokii

@@ -4,14 +4,14 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
   Header file for the various functions, definitions etc. used to implement
   the handset interface.  See gsm-api.c for more details.
 
-  Last modification: Sun May 16 21:05:42 CEST 1999
+  Last modification: Mon Mar 20 21:51:59 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
