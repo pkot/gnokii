@@ -201,7 +201,7 @@ gn_driver driver_nokia_6510 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"6510|6310|8310|6310i",      /* Supported models */
+		"6510|6310|8310|6310i|6360",      /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GN_RF_Percentage,      /* RF level units */
