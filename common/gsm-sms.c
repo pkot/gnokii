@@ -989,12 +989,17 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type)
 	case SMS_MultipartMessage:
 		UDH[0] += headers[type].length;
 		memcpy(UDH+pos+1, headers[type].header, headers[type].length);
-		rawsms->UserDataLength += headers[type].length + 1;	/* FIXME: I don't know why + 1 is needed */
-		rawsms->Length += headers[type].length + 1;	/* FIXME: I don't know why + 1 is needed */
+		rawsms->UserDataLength += headers[type].length;
+		rawsms->Length += headers[type].length;
 		break;
 	default:
 		dprintf("Not supported User Data Header type\n");
 		break;
+	}
+	if (!rawsms->UDHIndicator) {
+		rawsms->UDHIndicator = 1;
+		rawsms->Length++;		/* Length takes one byte, too */
+		rawsms->UserDataLength++;
 	}
 	return GE_NONE;
 }
@@ -1002,8 +1007,6 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type)
 static GSM_Error EncodeConcatHeader(GSM_SMSMessage *rawsms, int this, int total)
 {
 	EncodeUDH(rawsms, SMS_ConcatenatedMessages);
-	rawsms->Length --;
-	rawsms->UserDataLength --;
 	rawsms->UserData[ 9] = 0xce;
 	rawsms->UserData[10] = total;
 	rawsms->UserData[11] = this;
@@ -1082,7 +1085,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 
 	rawsms->Length = rawsms->UserDataLength = 0;
 
-	for (i=0; i<3; i++) {
+	for (i=0; i<SMS_MAX_PART_NUMBER; i++) {
 		switch (sms->UserData[i].Type) {
 		case SMS_BitmapData:
 			error = GE_NONE;
@@ -1156,7 +1159,6 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			rawsms->DCS = 0xf5;
-			rawsms->UDHIndicator = 1;
 			break;
 
 		case SMS_RingtoneData:
@@ -1166,7 +1168,6 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			rawsms->DCS = 0xf5;
-			rawsms->UDHIndicator = 1;
 			break;
 
 		case SMS_NoData:
