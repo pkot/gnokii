@@ -1193,7 +1193,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			break;
 
 		case SMS_Concat:
-			printf("Encoding concat header\n");
+			dprintf("Encoding concat header\n");
 			al = SMS_8bit;
 			rawsms->DCS = 0xf5;
 			EncodeConcatHeader(rawsms, sms->UserData[i].u.Concat.this, sms->UserData[i].u.Concat.total);
@@ -1233,18 +1233,18 @@ GSM_Error PrepareSMS(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 	return GE_NONE;
 }
 
-void DumpRawSMS(GSM_SMSMessage *rawsms)
+static void DumpRawSMS(GSM_SMSMessage *rawsms)
 {
 	char buf[10240];
 
 	memset(buf, 0, 10240);
 
-	printf("DCS: 0x%x\n", rawsms->DCS);
-	printf("Length: 0x%x\n", rawsms->Length);
-	printf("UserDataLength: 0x%x\n", rawsms->UserDataLength);
-	printf("ValidityIndicator: %d\n", rawsms->ValidityIndicator);
+	dprintf("DCS: 0x%x\n", rawsms->DCS);
+	dprintf("Length: 0x%x\n", rawsms->Length);
+	dprintf("UserDataLength: 0x%x\n", rawsms->UserDataLength);
+	dprintf("ValidityIndicator: %d\n", rawsms->ValidityIndicator);
 	bin2hex(buf, rawsms->UserData, rawsms->UserDataLength);
-	printf("UserData: %s\n", buf);
+	dprintf("UserData: %s\n", buf);
 }
 
 GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state);
