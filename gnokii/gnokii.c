@@ -3003,9 +3003,9 @@ static int getphonebook(int argc, char *argv[])
 				if (entry.memory_type == GN_MT_MC || entry.memory_type == GN_MT_DC || entry.memory_type == GN_MT_RC)
 					fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);
 			} else if (vcard) {
-				char buf[10240];
-				sprintf(buf, "X_GSM_STORE_AT:%s%d\n", memory_type_string, entry.location);
-				gn_phonebook2vcard(stdout, &entry, buf);
+				char location[32];
+				sprintf(location, "%s%d", memory_type_string, entry.location);
+				gn_phonebook2vcard(stdout, &entry, location);
 			} else {
 				fprintf(stdout, _("%d. Name: %s\nNumber: %s\nGroup id: %d\n"), entry.location, entry.name, entry.number, entry.caller_group);
 				for (i = 0; i < entry.subentries_count; i++) {

@@ -1,3 +1,7 @@
+0.5.0 (not released yet)
+ * general updates
+    o fix vcard export                              (Florian Lohoff)
+
 0.5.0rc4
 ========
  * portability updates

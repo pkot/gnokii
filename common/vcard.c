@@ -34,19 +34,16 @@
 #include "compat.h"
 #include "gnokii.h"
 
-API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *addon)
+API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 {
-	char buf2[1024];
 	int i;
 
 	fprintf(f, "BEGIN:VCARD\n");
 	fprintf(f, "VERSION:3.0\n");
 	fprintf(f, "FN:%s\n", entry->name);
 	fprintf(f, "TEL;VOICE:%s\n", entry->number);
-
-	fprintf(f, "X_GSM_STORE_AT:%s\n", buf2);
+	fprintf(f, "X_GSM_STORE_AT:%s\n", location);
 	fprintf(f, "X_GSM_CALLERGROUP:%d\n", entry->caller_group);
-	fprintf(f, "%s", addon);
 
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {

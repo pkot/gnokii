@@ -2610,7 +2610,7 @@ inline void GUI_ShowContacts(void)
 
 static void ExportVCARD(FILE * f)
 {
-	gchar buf2[1024];
+	gchar location[32];
 	register gint i;
 	PhonebookEntry *pbEntry;
 
@@ -2621,14 +2621,11 @@ static void ExportVCARD(FILE * f)
 			continue;
 
 		if (pbEntry->entry.memory_type == GN_MT_ME)
-			sprintf(buf2, "X_GSM_STORE_AT:ME%d\n", i + 1);
+			sprintf(location, "ME%d", i + 1);
 		else
-			sprintf(buf2, "X_GSM_STORE_AT:SM%d\n", i - memoryStatus.MaxME + 1);
+			sprintf(location, "SM%d", i - memoryStatus.MaxME + 1);
 
-		fprintf(f, "X_GSM_STORE_AT:%s\n", buf2);
-		fprintf(f, "X_GSM_CALLERGROUP:%d\n", pbEntry->entry.caller_group);
-
-		gn_phonebook2vcard(f, &pbEntry->entry, buf2);
+		gn_phonebook2vcard(f, &pbEntry->entry, location);
 	}
 
 	fclose(f);
