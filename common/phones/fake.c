@@ -44,7 +44,7 @@ static const SMSMessage_Layout at_deliver = {
 
 static const SMSMessage_Layout at_submit = {
 	true,						/* Is the SMS type supported */
-	 0, true, false,				/* SMSC */
+	-1, true, false,				/* SMSC */
 	-1,  1,  1,  1, -1,  2,  4, -1,  7,  5,  1,
 	 6, -1, -1,					/* Validity */
 	 3, true, false,				/* Remote Number */
@@ -110,21 +110,20 @@ static GSM_Error Pfake_Initialise(GSM_Statemachine *state)
 
 static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 {
-	unsigned char req[256];
-	GSM_Error error;
+	unsigned char req[10240];
 	int length, i;
 
 	if (!data->RawData) return GE_INTERNALERROR;
 
-	printf("In PDU mode: ");
-	dprintf("AT mode set\n");
-	/* 6 is the frame header as above */
 	length = data->RawData->Length;
-	printf("(%d bytes)\n", length);
-	for (i = 0; i < length; i++) {
-		printf("%02x ", data->RawData->Data[i]);
-	}
-	printf("\n");
+
+	if (length < 0) return GE_SMSWRONGFORMAT;
+	fprintf(stdout, "AT+%s=%d\n", cmd, length - data->RawData->Data[0] - 1);
+
+	bin2hex(req, data->RawData->Data, data->RawData->Length);
+	req[data->RawData->Length * 2] = 0x1a;
+	req[data->RawData->Length * 2 + 1] = 0;
+	fprintf(stdout, "%s\n", req);
 	return GE_NONE;
 }
 
