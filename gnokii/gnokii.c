@@ -18,7 +18,11 @@
   useful :-)
 
   $Log$
-  Revision 1.108  2000-12-19 16:18:16  pkot
+  Revision 1.109  2000-12-29 15:39:07  pkot
+  Reverted a change in fbus-3810.c which broke compling with --enable-debug.
+  Small fixes in gnokii.c
+
+  Revision 1.108  2000/12/19 16:18:16  pkot
   configure script updates and added shared function for configfile reading
 
   
@@ -1767,44 +1771,40 @@ int sendlogo(int argc, char *argv[])
 
 GSM_Error SaveBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap)
 {
-  int confirm,confirm2;
-  char ans[4];
-  struct stat buf;
-  GSM_Error error;
+	int confirm;
+	char ans[4];
+	struct stat buf;
+	GSM_Error error;
 
-  /* Ask before overwriting */
-  while (stat(FileName, &buf) == 0) {
+	/* Ask before overwriting */
+	while (stat(FileName, &buf) == 0) {
+		confirm = 0;
+		while (!confirm) {
+			fprintf(stderr, _("Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "), FileName);
+			GetLine(stdin, ans, 4);
+			if (!strcmp(ans, "O") || !strcmp(ans, "o")) confirm = 1;
+			if (!strcmp(ans, "N") || !strcmp(ans, "n")) confirm = 2;
+			if (!strcmp(ans, "S") || !strcmp(ans, "s")) return GE_USERCANCELED;
+		}  
+		if (confirm == 1) break;
+		if (confirm == 2) {
+			fprintf(stderr, _("Enter name of new file: "));
+			GetLine(stdin, FileName, 50);
+			if (!FileName || (*FileName == 0)) return GE_USERCANCELED;
+		}
+	}
   
-    confirm=-1;
-    confirm2=-1;
-    
-    while (confirm < 0) {
-      fprintf(stderr, _("Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "),FileName);
-      GetLine(stdin, ans, 4);
-      if (!strcmp(ans, "O") || !strcmp(ans, "o")) confirm = 1;
-      if (!strcmp(ans, "N") || !strcmp(ans, "n")) confirm = 2;
-      if (!strcmp(ans, "S") || !strcmp(ans, "s")) return GE_USERCANCELED;
-    }  
-    if (confirm==1) break;
-    if (confirm==2) {
-      while (confirm2 < 0) {
-        fprintf(stderr, _("Enter name of new file: "));
-        GetLine(stdin, FileName, 50);
-        if (&FileName[0]==0) return GE_USERCANCELED;
-	confirm2=1;
-      }  
-    }
-  }
+	error = GSM_SaveBitmapFile(FileName, bitmap);
   
-  error=GSM_SaveBitmapFile(FileName,bitmap);
+	switch (error) {
+	case GE_CANTOPENFILE:
+		fprintf(stderr, _("Failed to write file \"%s\"\n"), FileName);
+		break;
+	default:
+		break;
+	}
   
-  switch (error) {
-    case GE_CANTOPENFILE:        fprintf(stderr, _("Failed to write file \"%s\"\n"),FileName);
-                                 break;
-    default:                     break;
-  }
-  
-  return error;
+	return error;
 }
 
 

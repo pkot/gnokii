@@ -13,7 +13,11 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.72  2000-12-19 16:18:15  pkot
+  Revision 1.73  2000-12-29 15:39:06  pkot
+  Reverted a change in fbus-3810.c which broke compling with --enable-debug.
+  Small fixes in gnokii.c
+
+  Revision 1.72  2000/12/19 16:18:15  pkot
   configure script updates and added shared function for configfile reading
 
   
@@ -2750,10 +2754,9 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 {
     u8      center_number_length;
     u8      option_number_length;
-	 /*    u8      opt_num[64];
+	 /*    u8      opt_num[64]; */
 
-			 int     count; To aviod the compilation warnings.
-			 See the next FIXME */
+    int     count; /* It will generate a warring when compiled without --enable-debug */
     
         /* As usual, acknowledge first. */
     if (!FB38_TX_SendStandardAcknowledge(0x41)) {
