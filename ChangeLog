@@ -75,6 +75,7 @@
     o IrDA blacklist handling generalized          (BORBELY Zoltan)
     o add Nokia 7250 and 7250i support             (BORBELY Zoltan)
     o Nokia 7250 and 7250i blacklisted             (BORBELY Zoltan)
+    o Nokia 5100 blacklisted                       (BORBELY Zoltan)
  * portability changes
     o NetBSD also fall into unices category     (Richard M Kreuter)
     o NetBSD needs the same tricks as OpenBSD and FreeBSD in

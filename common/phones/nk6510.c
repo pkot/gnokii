@@ -404,6 +404,8 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 				  "NHL-4",	/* 7210 */
 				  "NHL-4J",	/* 7250 -- I'm not sure, but don't risk it -- bozo */
 				  "NHL-4JX",	/* 7250i */
+				  "NPM-6",	/* 5100 */
+				  "NPM-6X",	/* 5100 */
 				  NULL};
 
 	/* Copy in the phone info */
