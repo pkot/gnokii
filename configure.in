@@ -81,8 +81,6 @@ if test "$USE_NLS" = "yes"; then
    AC_CHECK_FUNCS(setlocale)
    AC_SUBST(HAVE_LOCALE_H)  
 
-   NLS_LIBS="$NLS_LIBS -lintl"
-
    CPPFLAGS="$CPPFLAGS $NLS_CFLAGS"
    AC_TRY_CPP([#include <libintl.h>],
               [ AC_DEFINE(HAVE_LIBINTL_H)
@@ -91,7 +89,7 @@ if test "$USE_NLS" = "yes"; then
 
   AC_CHECK_FUNC(gettext,
                 AC_DEFINE(HAVE_LIBINTL),
-                AC_CHECK_LIB(intl, gettext,
+                AC_CHECK_LIB(intl, gettext, NLS_LIBS="$NLS_LIBS -lintl",
                              AC_DEFINE(HAVE_LIBINTL),
                              AC_MSG_ERROR(not found library: intl !!!)))
 
