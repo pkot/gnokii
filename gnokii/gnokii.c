@@ -385,7 +385,7 @@ static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 	/* Initialise the code for the GSM interface. */
 	error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler, &State);
 	if (error != GE_NONE) {
-		fprintf(stderr, _("Telephone interface init failed! Quitting.\n"));
+		fprintf(stderr, _("Telephone interface init failed: %s Quitting.\n"), print_error(error));
 		exit(2);
 	}
 }
