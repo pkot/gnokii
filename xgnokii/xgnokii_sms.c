@@ -171,33 +171,29 @@ static gint CListCompareFunc(GtkCList * clist, gconstpointer ptr1, gconstpointer
 		struct tm bdTime;
 		time_t time1, time2;
 
-		bdTime.tm_sec = atoi(text1 + 15);
-		bdTime.tm_min = atoi(text1 + 12);
-		bdTime.tm_hour = atoi(text1 + 9);
+		bdTime.tm_sec = atoi(text1 + 17);
+		bdTime.tm_min = atoi(text1 + 14);
+		bdTime.tm_hour = atoi(text1 + 11);
 		bdTime.tm_mday = atoi(text1);
 		bdTime.tm_mon = atoi(text1 + 3) - 1;
-		bdTime.tm_year = atoi(text1 + 6);
-		if (bdTime.tm_year < 70)
-			bdTime.tm_year += 100;
+		bdTime.tm_year = atoi(text1 + 6) - 1900;
 #ifdef HAVE_TM_GMTON
-		if (text1[17] != '\0')
-			bdTime.tm_gmtoff = atoi(text1 + 18) * 3600;
+		if (text1[19] != '\0')
+			bdTime.tm_gmtoff = atoi(text1 + 20) * 3600;
 #endif
 		bdTime.tm_isdst = -1;
 
 		time1 = mktime(&bdTime);
 
-		bdTime.tm_sec = atoi(text2 + 15);
-		bdTime.tm_min = atoi(text2 + 12);
-		bdTime.tm_hour = atoi(text2 + 9);
+		bdTime.tm_sec = atoi(text2 + 17);
+		bdTime.tm_min = atoi(text2 + 14);
+		bdTime.tm_hour = atoi(text2 + 11);
 		bdTime.tm_mday = atoi(text2);
 		bdTime.tm_mon = atoi(text2 + 3) - 1;
-		bdTime.tm_year = atoi(text2 + 6);
-		if (bdTime.tm_year < 70)
-			bdTime.tm_year += 100;
+		bdTime.tm_year = atoi(text2 + 6) - 1900;
 #ifdef HAVE_TM_GMTON
-		if (text2[17] != '\0')
-			bdTime.tm_gmtoff = atoi(text2 + 18) * 3600;
+		if (text2[19] != '\0')
+			bdTime.tm_gmtoff = atoi(text2 + 20) * 3600;
 #endif
 		bdTime.tm_isdst = -1;
 
