@@ -85,20 +85,20 @@ static unsigned char pnok_uni_to_nokia(wchar_t wch)
 	switch (wch) {
 	case 0x00e1: return 0x82; /* LATIN SMALL LETTER A WITH ACUTE */
 	case 0x00c1: return 0x1c; /* LATIN CAPITAL LETTER A WITH ACUTE */
-	case 0x00e9: return 0x05; /* LATIN SMALL LETTER E WITH ACUTE (!) */
-	case 0x00c9: return 0x1f; /* LATIN CAPITAL LETTER E WITH ACUTE (!) */
+	case 0x00e9: return 0xe9; /* LATIN SMALL LETTER E WITH ACUTE (!) */
+	case 0x00c9: return 0xc9; /* LATIN CAPITAL LETTER E WITH ACUTE (!) */
 	case 0x00ed: return 0x8a; /* LATIN SMALL LETTER I WITH ACUTE */
 	case 0x00cd: return 0x5e; /* LATIN CAPITAL LETTER I WITH ACUTE */
 	case 0x00f3: return 0x90; /* LATIN SMALL LETTER O WITH ACUTE */
 	case 0x00d3: return 0x7d; /* LATIN CAPITAL LETTER O WITH ACUTE */
-	case 0x00f6: return 0x7c; /* LATIN SMALL LETTER O WITH DIAERESIS (!) */
-	case 0x00d6: return 0x5c; /* LATIN CAPITAL LETTER O WITH DIAERESIS (!) */
+	case 0x00f6: return 0xf6; /* LATIN SMALL LETTER O WITH DIAERESIS (!) */
+	case 0x00d6: return 0xd6; /* LATIN CAPITAL LETTER O WITH DIAERESIS (!) */
 	case 0x0151: return 0x96; /* LATIN SMALL LETTER O WITH DOUBLE ACUTE */
 	case 0x0150: return 0x95; /* LATIN CAPITAL LETTER O WITH DOUBLE ACUTE */
 	case 0x00fa: return 0x97; /* LATIN SMALL LETTER U WITH ACUTE */
 	case 0x00da: return 0x80; /* LATIN CAPITAL LETTER U WITH ACUTE */
-	case 0x00fc: return 0x7e; /* LATIN SMALL LETTER U WITH DIAERESIS (!) */
-	case 0x00dc: return 0x5e; /* LATIN CAPITAL LETTER U WITH DIAERESIS (!) */
+	case 0x00fc: return 0xfc; /* LATIN SMALL LETTER U WITH DIAERESIS (!) */
+	case 0x00dc: return 0xdc; /* LATIN CAPITAL LETTER U WITH DIAERESIS (!) */
 	case 0x0171: return 0xce; /* LATIN SMALL LETTER U WITH DOUBLE ACUTE */
 	case 0x0170: return 0xcc; /* LATIN CAPITAL LETTER U WITH DOUBLE ACUTE */
 	default: return char_def_alphabet_encode((unsigned char)wch);
