@@ -74,13 +74,6 @@ serial_baudrate = 19200
 #connect_script = /absolute/path/to/gnokii/Docs/sample/cimd-connect
 #disconnect_script =
 
-# Any entries in the following two sections will be set as environment
-# variables when running the scripts.
-# Handy for use for $VAR substitutions in your chat(8) script.
-[connect_script]
-TELEPHONE = 12345678
-[disconnect_script]
-
 # When sending SMS you can experience timeouts. This is the feature of the
 # overloaded SMSCs. The phones waits for the response from the SMSC confirming
 # that it received the short message. When the SMSC is DoSed with many requests
@@ -88,4 +81,11 @@ TELEPHONE = 12345678
 # value is given in seconds to wait. Defaults to 10 seconds. Set to 0 to wait
 # forever.
 smsc_timeout = 10
+
+# Any entries in the following two sections will be set as environment
+# variables when running the scripts.
+# Handy for use for $VAR substitutions in your chat(8) script.
+[connect_script]
+TELEPHONE = 12345678
+[disconnect_script]
 
