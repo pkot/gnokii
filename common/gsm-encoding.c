@@ -587,12 +587,13 @@ static const char *get_langinfo_codeset(void)
 }
 
 /* UTF-8 conversion functions */
-int utf8_decode(char *outstring, int outlen, const char *instring, int inlen)
+int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inlen)
 {
 	size_t nconv;
 
 #if defined(HAVE_ICONV)
-	char *pin, *pout;
+	ICONV_CONST char *pin;
+	char *pout;
 	iconv_t cd;
 
 	pin = (char *)instring;
@@ -645,7 +646,8 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
 #if defined(HAVE_ICONV)
 	size_t outleft, inleft, nconv;
-	char *pin, *pout;
+	ICONV_CONST char *pin;
+	char *pout;
 	iconv_t cd;
 
 	outleft = outlen;

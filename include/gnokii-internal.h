@@ -148,7 +148,7 @@ int cfg_file_write(struct gn_cfg_header *cfg, const char *filename);
 
 gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause);
 
-int utf8_decode(char *dest, int destlen, const char *src, int inlen);
+int utf8_decode(char *dest, size_t destlen, const char *src, size_t inlen);
 int utf8_encode(char *dest, int destlen, const char *src, int inlen);
 
 int string_base64(const char *instring);
