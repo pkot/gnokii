@@ -340,7 +340,7 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS(mktime select strdup strstr strtol snprintf)
+AC_CHECK_FUNCS(mktime select strdup strstr strtol strtok strsep snprintf)
 
 PACKAGE=gnokii
 VERSION=`cat VERSION`

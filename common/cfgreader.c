@@ -59,7 +59,7 @@ struct CFG_Header *CFG_ReadFile(char *filename)
     if ((handle = fopen(filename, "r")) == NULL) {
 #ifdef DEBUG
 		fprintf( stderr, "CFG_ReadFile - open %s: %s\n", filename, strerror(errno));
-#endif DEBUG
+#endif /* DEBUG */
 		return NULL;
     }
 #ifdef DEBUG
@@ -105,6 +105,7 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 	    	line++;
 	    	line[strlen(line) - 1] = '\0';
 
+		/* FIXME: strdup is not ANSI C compliant. */
 	    	heading->section = strdup(line);
 
 	    		/* Add to tail of list  */
@@ -135,6 +136,7 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 
 		/* Process key/value line */
 
+		/* FIXME: index is not ANSI C compliant. */
 		if ((index(line, '=') != NULL) && cfg_info != NULL) {
 	    	struct CFG_Entry *entry;
 	    	char *value;
@@ -151,8 +153,9 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 
 	    	memset(entry, '\0', sizeof(*entry));
 
+		/* FIXME: index is not ANSI C compliant. */
 	    	value = index(line, '=');
-	  		*value = '\0';                /* Split string */
+		*value = '\0';                /* Split string */
 	    	value++;
 	    
 	    	while(isspace((int) *value)) {      /* Remove leading white */
@@ -165,9 +168,10 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 				line[strlen(line) - 1] = '\0';  /* Remove trailing white */
 	    	}
 
+		/* FIXME: strdup is not ANSI C compliant. */
 	    	entry->key = strdup(line);
 
-	    		/* Add to head of list */
+		/* Add to head of list */
 
 	    	entry->next = cfg_info->entries;
 
@@ -269,6 +273,7 @@ char *CFG_Set(struct CFG_Header *cfg, char *section, char *key,
 		    		/* Found - set value */
 
 		    		free(e->key);
+				/* FIXME: strdup is not ANSI C compliant. */
 		    		e->key = strdup(value);
 
 		    		return e->value;

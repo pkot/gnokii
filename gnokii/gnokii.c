@@ -427,11 +427,11 @@ int main(int argc, char *argv[])
     { "getprofile",         optional_argument, NULL, OPT_GETPROFILE },
 
     // Show texts from phone's display
-    { "displayoutput",      no_argument, NULL, OPT_DISPLAYOUTPUT },
+    { "displayoutput",      no_argument,       NULL, OPT_DISPLAYOUTPUT },
 
 #ifndef WIN32
     // For development purposes: insert you function calls here
-    { "foogle",             no_argument, NULL, OPT_FOOGLE },
+    { "foogle",             no_argument,       NULL, OPT_FOOGLE },
 #endif
 
     { 0, 0, 0, 0},

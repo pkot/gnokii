@@ -20,6 +20,7 @@
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <string.h>
+#include    <unistd.h>
 
 #ifdef WIN32
 
@@ -1381,8 +1382,6 @@ void    FB38_RX_StateMachine(char rx_byte)
                 }
                 CalculatedCSum ^= rx_byte;
                 break;
-
-        default:
     }
 }
 
@@ -2710,8 +2709,8 @@ void    FB38_RX_Handle0x46_MemoryLocationData(void)
        0x4c request.  Provides IMEI, Revision and Model information. */
 void    FB38_RX_Handle0x4d_IMEIRevisionModelData(void)
 {
-    int     imei_length;
-    int     rev_length;
+    size_t     imei_length;
+    size_t     rev_length;
 
         /* As usual, acknowledge first. */
     if (!FB38_TX_SendStandardAcknowledge(0x4d)) {
@@ -2774,11 +2773,15 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 
 	option_number_length = MessageBuffer[12]; // Dont know meaning of
 						  // this number string
+	/* FIXME: Why do we read this when we do not use this anymore? */
+
+	/*
 	if (option_number_length != 0) {
 	        for (count = 0; count < option_number_length; count++) {
 				opt_num[count] = MessageBuffer[13 + count];
 			}
 	}
+	*/
 
 	center_number_length = MessageBuffer[13 + option_number_length];
 
