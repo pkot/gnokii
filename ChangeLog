@@ -13,6 +13,8 @@
     o add support for DeletePhonebook              (BORBELY Zoltan)
  * gnokii updates
     o GNOKIIDLL_IMPORTS required on win32 platform (BORBELY Zoltan)
+    o set default values of memory type and location to the sane
+      values when using --writephonebook                (Pawel Kot)
 
 0.5.10
 ======
