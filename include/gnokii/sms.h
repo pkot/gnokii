@@ -13,7 +13,10 @@
   Include file for SMS library.
 
   $Log$
-  Revision 1.3  2001-11-18 00:54:32  pkot
+  Revision 1.4  2001-11-19 13:09:40  pkot
+  Begin work on sms sending
+
+  Revision 1.3  2001/11/18 00:54:32  pkot
   Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
 
   Revision 1.2  2001/11/13 16:12:21  pkot
@@ -207,20 +210,6 @@ typedef struct {
 } SMS_MessageValidity;
 
 
-/*** MESSAGE CENTER ***/
-
-typedef struct {
-	int			No;					/* Number of the SMSC in the phone memory. */
-	char			Name[GSM_MAX_SMS_CENTER_NAME_LENGTH];	/* Name of the SMSC. */
-	SMS_IndicationType	Format;					/* SMS is sent as text/fax/paging/email. */
-	SMS_ValidityPeriod	Validity;				/* Validity of SMS Message. */
-	char			Number[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the SMSC. */
-	char			Recipient[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the default recipient. */
-} SMS_MessageCenter;
-
-
-/*** SHORT MESSAGE CORE ***/
-
 /* This data-type is used to specify the type of the number. See the official
    GSM specification 03.40, version 6.1.0, section 9.1.2.5, page 35-37. */
 typedef enum {
@@ -232,6 +221,20 @@ typedef enum {
 	SMS_Alphanumeric  = 0xd0, /* Alphanumeric number */
 	SMS_Abbreviated   = 0xe1  /* Abbreviated number */
 } SMS_NumberType;
+
+/*** MESSAGE CENTER ***/
+
+typedef struct {
+	int			No;					/* Number of the SMSC in the phone memory. */
+	SMS_NumberType          Type;
+	char			Name[GSM_MAX_SMS_CENTER_NAME_LENGTH];	/* Name of the SMSC. */
+	SMS_IndicationType	Format;					/* SMS is sent as text/fax/paging/email. */
+	SMS_ValidityPeriod	Validity;				/* Validity of SMS Message. */
+	char			Number[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the SMSC. */
+	char			Recipient[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the default recipient. */
+} SMS_MessageCenter;
+
+/*** SHORT MESSAGE CORE ***/
 
 typedef struct {
 	SMS_NumberType type;

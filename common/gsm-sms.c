@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.9  2001-11-18 00:54:32  pkot
+  Revision 1.10  2001-11-19 13:09:40  pkot
+  Begin work on sms sending
+
+  Revision 1.9  2001/11/18 00:54:32  pkot
   Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
 
   Revision 1.8  2001/11/17 20:19:29  pkot
@@ -68,13 +71,13 @@ static unsigned short DataOffset[] = {
 /* User data headers */
 static struct udh_data headers[] = {
 	{ 0x00, "" },
-	{ 0x05, "\x00\x03\x01\x00\x00" }, /* Concatenated messages */
+	{ 0x05, "\x00\x03\x01\x00\x00" },     /* Concatenated messages */
 	{ 0x06, "\x05\x04\x15\x82\x00\x00" }, /* Operator logos */
 	{ 0x06, "\x05\x04\x15\x83\x00\x00" }, /* Caller logos */
 	{ 0x06, "\x05\x04\x15\x81\x00\x00" }, /* Ringtones */
-	{ 0x04, "\x03\x01\x00\x00" }, /* Voice Messages */
-	{ 0x04, "\x03\x01\x01\x00" }, /* Fax Messages */
-	{ 0x04, "\x03\x01\x02\x00" }, /* Email Messages */
+	{ 0x04, "\x03\x01\x00\x00" },         /* Voice Messages */
+	{ 0x04, "\x03\x01\x01\x00" },         /* Fax Messages */
+	{ 0x04, "\x03\x01\x02\x00" },         /* Email Messages */
 	{ 0x06, "\x05\x04\x23\xf4\x00\x00" }, /* Business Card */
 	{ 0x00, "" }
 };
@@ -84,22 +87,67 @@ static struct udh_data headers[] = {
  *** Util functions
  ***/
 
+/* This function implements packing of numbers (SMS Center number and
+   destination number) for SMS sending function. */
+static int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
+{
+	unsigned char *IN = Number;  /* Pointer to the input number */
+	unsigned char *OUT = Output; /* Pointer to the output */
+	int count = 0; /* This variable is used to notify us about count of already
+			  packed numbers. */
+
+	/* The first byte in the Semi-octet representation of the address field is
+	   the Type-of-Address. This field is described in the official GSM
+	   specification 03.40 version 6.1.0, section 9.1.2.5, page 33. We support
+	   only international and unknown number. */
+	
+	*OUT++ = type;
+	if (type == SMS_International) IN++; /* Skip '+' */
+	if ((type == SMS_Unknown) && (*IN == '+')) IN++; /* Optional '+' in Unknown number type */
+
+	/* The next field is the number. It is in semi-octet representation - see
+	   GSM scpecification 03.40 version 6.1.0, section 9.1.2.3, page 31. */
+	while (*IN) {
+		if (count & 0x01) {
+			*OUT = *OUT | ((*IN - '0') << 4);
+			OUT++;
+		}
+		else
+			*OUT = *IN - '0';
+		count++; IN++;
+	}
+
+	/* We should also fill in the most significant bits of the last byte with
+	   0x0f (1111 binary) if the number is represented with odd number of
+	   digits. */
+	if (count & 0x01) {
+		*OUT = *OUT | 0xf0;
+		OUT++;
+	}
+
+	return (2 * (OUT - Output - 1) - (count % 2));
+}
+
 static char *GetBCDNumber(u8 *Number)
 {
         static char Buffer[20] = "";
         int length = Number[0]; /* This is the length of BCD coded number */
         int count, Digit;
 
+	Buffer[0] = 0;
         switch (Number[1]) {
-	case 0xd0:
+	case SMS_Alphanumeric:
 		Unpack7BitCharacters(0, length, length, Number+2, Buffer);
 		Buffer[length] = 0;
 		break;
+	case SMS_International:
+		sprintf(Buffer, "+");
+	case SMS_Unknown:
+	case SMS_National:
+	case SMS_Network:
+	case SMS_Subscriber:
+	case SMS_Abbreviated:
 	default:
-		if (Number[1] == SMS_International)
-			sprintf(Buffer, "+");
-		else
-			Buffer[0] = '\0';
 		for (count = 0; count < length - 1; count++) {
 			Digit = Number[count+2] & 0x0f;
 			if (Digit < 10) sprintf(Buffer, "%s%d", Buffer, Digit);
@@ -153,6 +201,60 @@ static SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
  *** ENCODING SMS
  ***/
 
+static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message)
+{
+	SMS_AlphabetType al;
+	unsigned short length = strlen(SMS->MessageText);
+
+	switch (SMS->DCS.Type) {
+	case SMS_GeneralDataCoding:
+		switch (SMS->DCS.u.General.Class) {
+		case 1: dcs[0] |= 0xf0; break;
+		case 2: dcs[0] |= 0xf1; break;
+		case 3: dcs[0] |= 0xf2; break;
+		case 4: dcs[0] |= 0xf3; break;
+		default: break;
+		}
+		if (SMS->DCS.u.General.Compressed) {
+			/* Compression not supported yet */
+			/* dcs[0] |= 0x20; */
+		}
+		al = SMS->DCS.u.General.Alphabet;
+		break;
+	case SMS_MessageWaiting:
+		al = SMS->DCS.u.MessageWaiting.Alphabet;
+		if (SMS->DCS.u.MessageWaiting.Discard) dcs[0] |= 0xc0;
+		else if (SMS->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) dcs[0] |= 0xe0;
+		else dcs[0] |= 0xd0;
+
+		if (SMS->DCS.u.MessageWaiting.Active) dcs[0] |= 0x08;
+		dcs[0] |= (SMS->DCS.u.MessageWaiting.Type & 0x03);
+
+		break;
+	default:
+		return GE_SMSWRONGFORMAT;
+	}
+	switch (al) {
+	case SMS_DefaultAlphabet:
+		Pack7BitCharacters((7 - (SMS->UDH_Length % 7)) % 7, SMS->MessageText, message);
+		SMS->Length = 8 * SMS->UDH_Length + (7 - (SMS->UDH_Length % 7)) % 7 + length;
+		break;
+	case SMS_8bit:
+		dcs[0] |= 0xf4;
+		memcpy(message, SMS->MessageText + 1, SMS->MessageText[0]);
+		SMS->Length = SMS->UDH_Length + SMS->MessageText[0];
+		break;
+	case SMS_UCS2:
+		dcs[0] |= 0x08;
+		EncodeUnicode(message, SMS->MessageText, length);
+		SMS->Length = length;
+		break;
+	default:
+		return GE_SMSWRONGFORMAT;
+	}
+	return GE_NONE;
+}
+
 /* This function encodes the UserDataHeader as described in:
    - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
    - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
@@ -178,7 +280,7 @@ static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, char *UDH)
 		memcpy(UDH+pos+1, headers[UDHi.Type].header, headers[UDHi.Type].length);
 		break;
 	default:
-		fprintf(stderr, _("Not supported User Data Header type\n"));
+		dprintf("Not supported User Data Header type\n");
 		break;
 	}
 	return GE_NONE;
@@ -187,22 +289,15 @@ static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, char *UDH)
 static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 {
 	GSM_Error error = GE_NONE;
-	int i;
-
-	/* SMS Center */
 
 	/* Reply Path */
 	if (SMS->ReplyViaSameSMSC) frame[13] |= 0x80;
 
-	/* User Data Header */
-	for (i = 0; SMS->UDH[i].Type != SMS_NoUDH; i++) {
-		frame[13] |= 0x40;
-		error = EncodeUDH(SMS->UDH[i], frame);
-		if (error != GE_NONE) return error;
-	}
+	/* User Data Header Indicator */
+	if (SMS->UDH_No) frame[13] |= 0x40;
 
 	/* Status (Delivery) Report Request */
-	if (SMS->Report) frame[13] |= 0x20;
+	if (SMS->ReportStatus) frame[13] |= 0x20;
 
 	/* Validity Period Format: mask - 0x00, 0x10, 0x08, 0x18 */
 	frame[13] |= ((SMS->Validity.VPF & 0x03) << 3);
@@ -218,7 +313,7 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 	/* Protocol Identifier */
 	/* FIXME: allow to change this in better way.
 	   currently only 0x5f == `Return Call Message' is used */
-	frame[16] = SMS->PID;
+	if (SMS->PID) frame[16] = SMS->PID;
 
 	/* Data Coding Scheme */
 	switch (SMS->DCS.Type) {
@@ -235,12 +330,9 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 		frame[17] |= (SMS->DCS.u.MessageWaiting.Type & 0x03);
 		break;
 	default:
-		fprintf(stderr, _("Wrong Data Coding Scheme (DCS) format\n"));
+		dprintf("Wrong Data Coding Scheme (DCS) format\n");
 		return GE_SMSWRONGFORMAT;
 	}
-
-	/* User Data Length */
-	/* Will be filled later. */
 
 	/* Destination Address */
 
@@ -256,7 +348,7 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 		break;
 	}
 
-	return GE_NONE;
+	return error;
 }
 
 static GSM_Error EncodeSMSDeliverHeader()
@@ -274,7 +366,7 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 	case SMS_Submit: /* we send SMS or save it in Outbox */
 		return EncodeSMSSubmitHeader(SMS, frame);
 	case SMS_Deliver: /* we save SMS in Inbox */
-		return EncodeSMSSubmitHeader(SMS, frame);
+		return EncodeSMSDeliverHeader(SMS, frame);
 	default: /* we don't create other formats of SMS */
 		return GE_SMSWRONGFORMAT;
 	}
@@ -283,45 +375,36 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 /* This function encodes SMS as described in:
    - GSM 03.40 version 6.1.0 Release 1997, section 9
 */
-GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *frame)
+GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 {
 	GSM_Error error = GE_NONE;
 	int i;
 
-	/* Short Message Data info element id */
+	/* Clear all */
+	memset(message, 0, 200);
 
-	/* Length of Short Message Data */
-
-	/* Short Message Reference value */
-	if (SMS->Number) frame[3] = SMS->Number;
-
-	/* Short Message status */
-	if (SMS->Status) frame[1] = SMS->Status;
-
-	/* Message Type */
+	dprintf("Sending SMS to %s via message center %s\n", SMS->RemoteNumber.number, SMS->MessageCenter.Number);
 
 	/* SMSC number */
 	if (SMS->MessageCenter.Number) {
-//		error = GSM->GetSMSCenter(&SMS->MessageCenter);
-		
-		if (error != GE_NONE)
-			return error;
-		strcpy(SMS->MessageCenter.Number, "0");
+		message[0] = SemiOctetPack(SMS->MessageCenter.Number, message + 1, SMS->MessageCenter.Type);
+		if (message[0] % 2) message[0]++;
+		message[0] = message[0] / 2;
 	}
-	dprintf("Sending SMS to %s via message center %s\n", SMS->RemoteNumber.number, SMS->MessageCenter.Number);
 
-	/* Header coding */
-//	EncodeUDH(SMS, frame);
-//	if (error != GE_NONE) return error;
+	/* Common Header */
+	error = EncodeSMSHeader(SMS, message + 11);
+	if (error != GE_NONE) return error;
 
 	/* User Data Header - if present */
-	for (i = 0; SMS->UDH[i].Type != SMS_NoUDH; i++) {
-		error = EncodeUDH(SMS->UDH[i], frame);
+	for (i = 0; i < SMS->UDH_No; i++) {
+		error = EncodeUDH(SMS->UDH[i], message + 24);
 		if (error != GE_NONE) return error;
 	}
 
 	/* User Data */
-	//	EncodeData(&(SMS->MessageText), &(SMS->DCS), frame);
+	EncodeData(SMS, message + 14, message + 24 + SMS->UDH_Length);
+	message[15] = SMS->Length;
 
 	return error;
 }
@@ -649,7 +732,6 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 			   DataOffset[SMS->Type] - /* offset */
 			   SMS->UDH_Length -       /* UDH Length */
 			   5;                      /* checksum */
-		dprintf("UDH Len : %d\n", SMS->UDH_Length);
 		DecodeData(message + 34 + DataOffset[SMS->Type] + SMS->UDH_Length,
 			   (unsigned char *)&(SMS->MessageText),
 			   SMS->Length, size, SMS->UDH_Length, SMS->DCS);
