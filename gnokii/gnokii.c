@@ -1530,6 +1530,15 @@ static int sendlogo(int argc, char *argv[])
 		sms.UserData[2].Type = SMS_NoData;
 	}
 
+	data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
+	data.MessageCenter->No = 1;
+	if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE)
+		strcpy(sms.SMSC.Number, data.MessageCenter->Number);
+	free(data.MessageCenter);
+
+	if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
+	else sms.SMSC.Type = SMS_Unknown;
+
 	/* Send the message. */
 	data.SMS = &sms;
 	error = SendSMS(&data, &State);

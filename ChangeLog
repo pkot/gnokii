@@ -45,6 +45,7 @@
     o fixes for getsms() to not output the text twice and correctly
       use SMSCTime and Time fields                        (Pawel Kot)
     o fixes for getsms() to correctly get SMSC number     (Pawel Kot)
+    o read SMSC number in sendlogo()                      (Pawel Kot)
  * gnokiid updates:
     o ATH can terminate initiated calls              (BORBELY Zoltan)
     o incoming calls can be answered                 (BORBELY Zoltan)
