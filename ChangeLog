@@ -39,6 +39,7 @@
     o compare folder and number not just number for the
       incoming/deleted messages                        (Ulrich Hopp)
     o mark read messages as read                       (Ulrich Hopp)
+    o sort sms alphabetically                          (Ulrich Hopp)
  * documentation updates
     o new Estonian translation                       (Hans Motshärg)
     o man page update for gnokii --getlocksinfo     (Bertrik Sikken)

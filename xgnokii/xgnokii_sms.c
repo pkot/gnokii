@@ -442,7 +442,8 @@ static void ClickEntry(GtkWidget * clist,
 	if (gtk_clist_get_text(GTK_CLIST(clist), row, 0, &(text1))) {
 		dprintf("*text1: %s *text2: %s \n", text1, text2);
 
-		if (*text1 == *text2) {
+		/* strcpm(text1,text2) = 0 if text1 is the same string as text2 */
+		if (!(strcmp(text1, text2) )) {
 
 			/* Store the read status in phoneMonitor.sms.messages */
 
