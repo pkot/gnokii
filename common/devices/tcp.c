@@ -43,7 +43,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-#if unices
+#ifdef HAVE_SYS_FILE_H
 #  include <sys/file.h>
 #endif
 

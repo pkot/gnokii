@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
-#if __unices__
+#ifdef HAVE_STRINGS_H
 #  include <strings.h>	/* for memset */
 #endif
 #include <time.h>
