@@ -233,7 +233,9 @@ if test "$no_x" = yes -o "$with_x" = "no"; then
    GTK_LIBS=""
 else
    AC_PATH_X
-   CPPFLAGS="$CPPFLAGS -I$x_includes"
+   if test "x$x_includes" != "x"; then
+      CPPFLAGS="$CPPFLAGS -I$x_includes"
+   fi
    AC_CHECK_HEADERS(X11/xpm.h)
 
    if test "x$x_libraries" = "xNONE"; then

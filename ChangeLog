@@ -7,6 +7,11 @@
     o CREDITS - again, thanks to everyone who helped     (Pawel Kot)
     o bring dpkg build scripts up to date                (Pawel Kot)
     o bring gnokii.spec up to date                       (Pawel Kot)
+ * Build system fixes
+    o fix a stupid bug in configure that made configure not detect
+      many functions/types when user didn't explicitely give
+      --without-x and X headers were not found by configure
+      (CPPFLAGS became to have value '-I')               (Pawel Kot)
 
 0.5.0pre4
 =========
