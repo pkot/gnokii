@@ -51,6 +51,7 @@
 
 /* FIXME: we should get rid on it */
 static GSM_Statemachine *State = NULL;
+static int logoslice;
 
 /* static functions prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
@@ -58,12 +59,14 @@ static GSM_Error Initialise(GSM_Statemachine *state);
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 #endif
 
 static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 #ifdef  SECURITY
 #endif
@@ -73,6 +76,7 @@ static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int 
 static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0xd2, IncomingPhoneInfo },
 	{ 0x40, IncomingPhonebook },
+	{ 0xdd, IncomingStartupLogo },
 #ifdef	SECURITY
 #endif
 	{ 0, NULL}
@@ -83,7 +87,7 @@ GSM_Phone phone_nokia_6160 = {
 	PGEN_IncomingDefault,
 	/* Mobile phone information */
 	{
-		"6160", /* Supported models */
+		"6160|5120",           /* Supported models */
 		4,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GRF_Arbitrary,         /* RF level units */
@@ -117,6 +121,8 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return ReadPhonebook(data, state);
 	case GOP_WritePhonebook:
 		return WritePhonebook(data, state);
+	case GOP_GetBitmap:
+		return GetBitmap(data, state);
 #ifdef	SECURITY
 #endif
 	default:
@@ -309,6 +315,69 @@ static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int 
 		if ((pos = strchr(data->Revision, '\n')) != NULL) *pos = 0;
 	}
 	dprintf("Phone info:\n%s\n", message + 4);
+	return GE_NONE;
+}
+
+
+static GSM_Error GetStartupSlice(GSM_Data *data, GSM_Statemachine *state, int s)
+{
+	unsigned char req[] = {0x00, 0x01, 0x07, 0x07, 0x08, 0x00};
+
+	logoslice = s;
+	req[5] = (unsigned char)s + 1;
+
+	if (SM_SendMessage(state, 6, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0xdd);
+}
+
+static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Error error;
+	int i;
+
+	if (!data->Bitmap) return GE_INTERNALERROR;
+
+	switch (data->Bitmap->type) {
+	case GSM_StartupLogo:
+		data->Bitmap->height = phone_nokia_6160.Info.StartupLogoH;
+		data->Bitmap->width = phone_nokia_6160.Info.StartupLogoW;
+		data->Bitmap->size = ceiling_to_octet(data->Bitmap->height * data->Bitmap->width);
+		GSM_ClearBitmap(data->Bitmap);
+		for (i = 0; i < 6; i++)
+			if ((error = GetStartupSlice(data, state, i)) != GE_NONE)
+				return error;
+		break;
+	case GSM_WelcomeNoteText:
+	case GSM_DealerNoteText:
+	case GSM_OperatorLogo:
+	case GSM_CallerLogo:
+	case GSM_None:
+	case GSM_PictureMessage:
+		return GE_NOTSUPPORTED;
+
+	default:
+		return GE_INTERNALERROR;
+	}
+
+	return GE_NONE;
+}
+
+static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	int x, i;
+	unsigned char b;
+
+	if (message[0] != 0x01 || message[1] != 0x00 || message[2] != 0x07 || message[3] != 0x08)
+		return GE_UNHANDLEDFRAME;
+
+	if (!data->Bitmap || data->Bitmap->type != GSM_StartupLogo)
+		return GE_INTERNALERROR;
+
+	for (x = 0; x < 84; x++)
+		for (b = message[5 + x], i = 0; b != 0; b >>= 1, i++)
+			if ( b & 0x01 )
+				GSM_SetPointBitmap(data->Bitmap, x, 8 * logoslice + i);
+
 	return GE_NONE;
 }
 

@@ -28,6 +28,9 @@
  * Docs updates:
     o add --keysequence hints to FAQ                   (Pavel Machek)
     o add vcal problems to FAQ                            (Pawel Kot)
+ * 6160 series updates:
+    o Nokia 5120 (NSC-1) added to misc.c             (BORBELY Zoltan)
+    o Startup logo reading implemented               (BORBELY Zoltan)
 
 0.4.0
 =====
