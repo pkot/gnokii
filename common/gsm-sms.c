@@ -41,6 +41,8 @@
 
 #include "sms-nokia.h"
 
+#define ERROR() do { if (error != GE_NONE) return error; } while (0)
+
 struct udh_data {
 	unsigned int length;
 	char *header;
@@ -577,7 +579,7 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 	GSM_Error error;
 
 	error = DecodeSMSHeader(rawsms, sms, &sms->UDH);
-	if (error != GE_NONE) return error;
+	ERROR();
 	switch (sms->Type) {
 	case SMS_Delivery_Report:
 		SMSStatus(rawsms->ReportStatus, sms);
@@ -688,8 +690,8 @@ API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	rawsms.MemoryType = data->SMS->MemoryType;
 	data->RawSMS = &rawsms;
 	error = RequestSMS(data, state);
+	ERROR();
 	data->SMS->Status = rawsms.Status;
-	if (error != GE_NONE) return error;
 	return ParseSMS(data);
 }
 
@@ -737,9 +739,8 @@ static GSM_Error FindUnreadSMS(GSM_Data *data, GSM_Statemachine *state, int *las
 		data->RawSMS->Number = i;
 		data->RawSMS->MemoryType = GMT_IN;
 		error = SM_Functions(GOP_GetSMS, data, state);
-		dprintf("ERROR: %d (%s)\n", error, print_error(error));
 		if (error == GE_EMPTYSMSLOCATION) continue;
-		if (error != GE_NONE) return error;
+		ERROR();
 		if (data->RawSMS->Status == SMS_Unread) {
 			dprintf("Got unread %d\n", i);
 			*last = i + 1;
@@ -848,14 +849,13 @@ GSM_Error GetUnreadMessages(GSM_Data *data, GSM_Statemachine *state, SMS_Folder 
 	dprintf("GetUnreadMessages: sorting finished! Trying to get %i unread mails\n",dummy);
 	for (i = 0; i < dummy; i++) {
 		error = FindUnreadSMS(data, state, &last, folder.Locations, folder.Number);
-		if (error == GE_NONE) {
-			dprintf("Found new (unread) message!\n");
-			data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Location = data->RawSMS->Number;
-			data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Type = SMS_NotRead;
-			data->FolderStats[current_folder]->Used++;
-			data->FolderStats[current_folder]->Changed++;
-			data->SMSStatus->Changed++;
-		} else return error;
+		ERROR();
+		dprintf("Found new (unread) message!\n");
+		data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Location = data->RawSMS->Number;
+		data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Type = SMS_NotRead;
+		data->FolderStats[current_folder]->Used++;
+		data->FolderStats[current_folder]->Changed++;
+		data->SMSStatus->Changed++;
 	}
 	return GE_NONE;
 }
@@ -918,7 +918,7 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 	dprintf("GetFolderChanges: Old status: %d %d\n", data->SMSStatus->Number, data->SMSStatus->Unread);
 
 	error = SM_Functions(GOP_GetSMSStatus, data, state);	/* Check overall SMS Status */
-	if (error != GE_NONE) return error;
+	ERROR();
 	dprintf("GetFolderChanges: Status: %d %d\n", data->SMSStatus->Number, data->SMSStatus->Unread);
 
 	if (!has_folders) {
@@ -930,35 +930,42 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 	}
 
 	data->SMSFolderList = &SMSFolderList;
-	if ((error = SM_Functions(GOP_GetSMSFolders, data, state)) != GE_NONE) return error;
+	error = SM_Functions(GOP_GetSMSFolders, data, state);
+	ERROR();
 
 	data->SMSStatus->NumberOfFolders = data->SMSFolderList->Number;
 	memcpy(&tmp_list, data->SMSFolderList, sizeof(SMS_FolderList));	/* We need it because data->SMSFolderlist can get garbled */
 
 	for (i = 0; i < data->SMSStatus->NumberOfFolders; i++) {
 		dprintf("GetFolderChanges: Freeing deleted messages for folder #%i\n", i);
-		if ((error = FreeDeletedMessages(data, i)) != GE_NONE) return error;
+		error = FreeDeletedMessages(data, i);
+		ERROR();
 
 		data->SMSFolder = &SMSFolder;
 		data->SMSFolder->FolderID = (GSM_MemoryType) i + 12;
 		dprintf("GetFolderChanges: Getting folder status for folder #%i\n", data->SMSFolder->FolderID);
-		if ((error = SM_Functions(GOP_GetSMSFolderStatus, data, state)) != GE_NONE) return error;
+		error = SM_Functions(GOP_GetSMSFolderStatus, data, state);
+		ERROR();
 		memcpy(&tmp_folder, data->SMSFolder, sizeof(SMS_Folder));	/* We need it because data->SMSFolder can get garbled */
 		tmp_folder.FolderID = i;	/* so we don't need to do a modulo 8 each time */
 
 		if (i == 0) {
-			dprintf("GetFolderChanges: Reading unread messages for folder #%i\n", i);	/* Only for INBOX */
-			if ((error = GetUnreadMessages(data, state, tmp_folder)) != GE_NONE) return error;
+			dprintf("GetFolderChanges: Reading unread messages for folder #%i\n", i); /* Only for INBOX */
+			error = GetUnreadMessages(data, state, tmp_folder);
+			ERROR();
 		}
 
 		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->SMSFolder->Number, i);
-		if ((error = GetReadMessages(data, tmp_folder)) != GE_NONE) return error;
+		error = GetReadMessages(data, tmp_folder);
+		ERROR();
 
 		dprintf("GetFolderChanges: Getting deleted messages for folder #%i\n", i);
-		if ((error = GetDeletedMessages(data, tmp_folder)) != GE_NONE) return error;
+		error = GetDeletedMessages(data, tmp_folder);
+		ERROR();
 
 		dprintf("GetFolderChanges: Verifying messages for folder #%i\n", i);
-		if ((error = VerifyMessagesStatus(data, tmp_folder)) != GE_NONE) return error;
+		error = VerifyMessagesStatus(data, tmp_folder);
+		ERROR();
 	}
 	return GE_NONE;
 }
@@ -1177,7 +1184,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			size = sms->UserData[0].Length;
 			if (!EncodeUDH(rawsms, SMS_MultipartMessage)) return GE_NOTSUPPORTED;
 			error = EncodeConcatHeader(rawsms, sms->UserData[i].u.Multi.this, sms->UserData[i].u.Multi.total);
-			if (error != GE_NONE) return error;
+			ERROR();
 
 			memcpy(rawsms->UserData + rawsms->UserDataLength, sms->UserData[i].u.Multi.Binary, MAX_SMS_PART);
 			rawsms->Length += size;
@@ -1267,7 +1274,7 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	if (data->SMS->MessageCenter.No) {
 		data->MessageCenter = &data->SMS->MessageCenter;
 		error = SM_Functions(GOP_GetSMSCenter, data, state);
-		if (error != GE_NONE) return error;
+		ERROR();
 	}
 #endif
 
@@ -1279,17 +1286,20 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	data->RawData->Data = calloc(10240, 1);
 
 	error = PrepareSMS(data, 0);
-	if (error != GE_NONE) return error;
+	ERROR();
 
 	if (data->RawSMS->Length > 171) {
 		dprintf("SMS is too long? %d\n", data->RawSMS->Length);
-		return SendLongSMS(data, state);
+		error = SendLongSMS(data, state);
+		goto cleanup;
 	}
 
 	error = SM_Functions(GOP_SendSMS, data, state);
 
-	free(data->RawData->Data);
 
+ cleanup:
+	free(data->RawSMS);
+	free(data->RawData->Data);
 	data->RawData = NULL;
 	return error;
 }
@@ -1318,7 +1328,7 @@ API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
 		sms.UserData[1].Type = SMS_NoData;
 		data->SMS = &sms;
 		error = SendSMS(data, state);
-		if (error != GE_NONE) return error;
+		ERROR();
 	}
 	return GE_NONE;
 }
