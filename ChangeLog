@@ -5,6 +5,7 @@
                                                    (Marcel Holtmann)
     o s/Janík/Janik/ in the translatable strings         (Pawel Kot)
     o don't use u8 type in the exported headers          (Pawel Kot)
+    o add string.h to mgnokiidev                  (Troy Korjuslommi)
 
 0.5.0rc1
 ========
