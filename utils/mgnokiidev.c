@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
 {
 	int count, err, aux;
 	char dev_name[DEVLEN];
+	struct stat st;
 
 	/* Check we have one and only one command line argument. */
 	if (argc != 2) {
@@ -50,6 +51,9 @@ int main(int argc, char *argv[])
 		exit (-2);
 	}
 
+	if (argv[1][0] != '/') snprintf(dev_name, DEVLEN, "/dev/%s", argv[1]);
+	else strncpy(dev_name, argv[1], DEVLEN);
+
 	/* Check for suspicious characters. */
 	for (count = 0; count < aux; count++)
 		if (!(isalnum(dev_name[count]) || dev_name[count] == '/')) {
@@ -57,7 +61,16 @@ int main(int argc, char *argv[])
 			exit (-2);
 		}
 
-	snprintf("/dev/%s", DEVLEN, argv[1]);
+	/* Error conditions */
+	if (stat(dev_name, &st) == -1) {
+		fprintf(stderr, "Cannot stat file %s.\n", dev_name);
+		exit(-2);
+	}
+
+	if (!S_ISCHR(st.st_mode)) {
+ 		fprintf(stderr, "Given file is not a valid character device.\n");
+ 		exit(-2);
+	}
 
 	/* Now become root */
 	setuid(0);
