@@ -18,6 +18,7 @@
     o getringtonelist command added                (BORBELY Zoltan)
  * libgnokii updates
     o Nokia 6250 has irda                               (Pawel Kot)
+    o utf8, base64 and LDIF export fix            (Martin Goldhahn)
 
 0.5.5
 =====

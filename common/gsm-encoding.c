@@ -360,9 +360,9 @@ void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
 
 	buf[4] = '\0';
 	for (i_len = 0; i_len < len ; i_len++) {
-		buf[0] = *(src + i_len * 4); 
+		buf[0] = *(src + i_len * 4);
 		buf[1] = *(src + i_len * 4 + 1);
-		buf[2] = *(src + i_len * 4 + 2); 
+		buf[2] = *(src + i_len * 4 + 2);
 		buf[3] = *(src + i_len * 4 + 3);
 		switch (length = char_uni_alphabet_decode(strtol(buf, NULL, 16), dest + o_len)) {
 		case -1:
@@ -381,7 +381,7 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 {
 	wchar_t wc;
 	int i_len = 0, o_len, length;
- 
+
 	for (o_len = 0; i_len < len ; o_len++) {
 		switch (length = char_uni_alphabet_encode(src + i_len, &wc)) {
 		case -1:
@@ -391,7 +391,7 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 			i_len += length;
 			break;
 		}
-		sprintf(dest + (o_len << 2), "%lx", wc); 
+		sprintf(dest + (o_len << 2), "%lx", wc);
 	}
 	return;
 }
@@ -551,36 +551,49 @@ char *char_bcd_number_get(u8 *number)
 }
 
 /* UTF-8 conversion functions */
-int utf8_decode(char *outstring, const char *instring, int inlen)
+int utf8_decode(char *outstring, int outlen, const char *instring, int inlen)
 {
-	int outlen = inlen;
+	size_t nconv;
+	char *pin, *pout;
+
 #ifdef HAVE_ICONV
 	iconv_t cd;
-	char *iter = (char *)instring;
+
+	pin = (char *)instring;
+	pout = outstring;
 
 	cd = iconv_open(nl_langinfo(CODESET), "UTF-8");
-	outlen = iconv(cd, &iter, (size_t *)&inlen, &outstring, (size_t *)&outlen);
+	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	iconv_close(cd);
-	outstring[outlen] = 0;
+	*pout = 0;
+#else
+#	error "iconv missing"
 #endif
-	return outlen;
+	return (nconv < 0) ?  -1 : pout - outstring;
 }
 
-int utf8_encode(char *outstring, const char *instring, int inlen)
+int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
-	int aux = inlen;
-	int outlen = inlen * 2;
-	int len = 0;
+	size_t outleft, inleft, nconv;
+	char *pin, *pout;
+
+	outleft = outlen;
+	inleft = inlen;
+	pin = (char *)instring;
+	pout = outstring;
+
 #ifdef HAVE_ICONV
 	iconv_t cd;
-	char *iter = (char *)instring;
 
 	cd = iconv_open("UTF-8", nl_langinfo(CODESET));
-	len = iconv(cd, &iter, &inlen, &outstring, &outlen);
+
+	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
+	*pout = 0;
 	iconv_close(cd);
+#else
+#	error "iconv is missing"
 #endif
-	if (len < 0) return -1;
-	else return 2 * aux - outlen;
+	return (nconv < 0) ?  -1 : pout - outstring;
 }
 
 
@@ -595,28 +608,15 @@ int string_base64(const char *instring)
 
 /*
    encodes a null-terminated input string with base64 encoding.
-   convertToUTF8 is necessary for Mozilla, but might not be appropriate for
-   other programs that use the LDIF format, base64 encoding is compliant with the LDIF format
    the buffer outstring needs to be at least 1.333 times bigger than the input string length
-   *outlen contains the actual length of the converted string
 */
-int base64_encode(char *outstring, const char *instring, int convertToUTF8)
+int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
 	char *in1, *pin, *pout;
 	char *outtemp = NULL;
-	int inleft, inlen, outleft, inprocessed, outlen;
+	int inleft, outleft, inprocessed;
 	unsigned int i1, i2, i3, i4;
 
-	/* convert to UTF-8 if necessary */
-	if (convertToUTF8) {
-		inlen = strlen(instring);
-		outtemp = malloc(inlen);
-		outlen = utf8_encode(outtemp, instring, inlen);
-		instring = outtemp;
-		inlen = outlen;
-	} else {
-		inlen = strlen(instring);
-	}
 
 	/* copy the input string, need multiple of 3 chars */
 	in1 = malloc(inlen + 3);
@@ -626,7 +626,6 @@ int base64_encode(char *outstring, const char *instring, int convertToUTF8)
 	pout = outstring;
 	inleft = inlen;
 	outleft = outlen;
-	outleft = 1000;
 	inprocessed = 0;
 	pin = in1;
 
@@ -661,27 +660,25 @@ int base64_encode(char *outstring, const char *instring, int convertToUTF8)
 
 		/* update the counters */
 		inprocessed += 3;
-		outlen += 4;
 		outleft -= 4;
 	}
 
+	if (outleft > 0) *pout = 0;
 	if (outtemp)
 		free(outtemp);
 
 	free(in1);
 
-	return 1;
+	return pout - outstring;
 }
 
-int base64_decode(char *dest, const char *source, int length)
+int base64_decode(char *dest, int destlen, const char *source, int inlen)
 {
 	int dtable[256];
 	int i, c, retval;
 	int dpos = 0;
 	int spos = 0;
-	char *aux;
 
-	aux = calloc(length, sizeof(char));
 	for (i = 0; i < 255; i++) {
 		dtable[i] = 0x80;
 	}
@@ -703,7 +700,7 @@ int base64_decode(char *dest, const char *source, int length)
 		int a[4], b[4], o[3];
 
 		for (i = 0; i < 4; i++) {
-			if (spos >= length) {
+			if (spos >= inlen || dpos >= destlen) {
 				goto endloop;
 			}
 			c = source[spos++];
@@ -726,16 +723,44 @@ int base64_decode(char *dest, const char *source, int length)
 		o[1] = (b[1] << 4) | (b[2] >> 2);
 		o[2] = (b[2] << 6) | b[3];
         	i = a[2] == '=' ? 1 : (a[3] == '=' ? 2 : 3);
-		if (i >= 1) aux[dpos++] = o[0];
-		if (i >= 2) aux[dpos++] = o[1];
-		if (i >= 3) aux[dpos++] = o[2];
-		aux[dpos] = 0;
+		if (i >= 1) dest[dpos++] = o[0];
+		if (i >= 2) dest[dpos++] = o[1];
+		if (i >= 3) dest[dpos++] = o[2];
+		dest[dpos] = 0;
 		if (i < 3) {
 			goto endloop;
 		}
 	}
 endloop:
-	retval = utf8_decode(dest, aux, dpos);
+	return dpos;
+}
+
+int utf8_base64_encode(char *dest, int destlen, const char *in, int inlen)
+{
+	char *aux;
+	int retval;
+
+	aux = calloc(destlen + 1, sizeof(char));
+
+	retval = utf8_encode(aux, destlen, in, inlen);
+	if (retval >= 0)
+		retval = base64_encode(dest, destlen, aux, retval);
+
+	free(aux);
+	return retval;
+}
+
+int utf8_base64_decode(char *dest, int destlen, const char *in, int inlen)
+{
+	char *aux;
+	int retval;
+
+	aux = calloc(destlen + 1, sizeof(char));
+
+	retval = base64_decode(aux, destlen, in, inlen);
+	if (retval >= 0)
+		retval = utf8_decode(dest, destlen, aux, retval);
+
 	free(aux);
 	return retval;
 }

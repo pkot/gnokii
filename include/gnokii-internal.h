@@ -147,11 +147,14 @@ int cfg_file_write(struct gn_cfg_header *cfg, const char *filename);
 
 gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause);
 
-int utf8_decode(char *dest, const char *src, int inlen);
-int utf8_encode(char *dest, const char *src, int inlen);
+int utf8_decode(char *dest, int destlen, const char *src, int inlen);
+int utf8_encode(char *dest, int destlen, const char *src, int inlen);
 
 int string_base64(const char *instring);
-int base64_decode(char *dest, const char *src, int length);
-int base64_encode(char *dest, const char *src, int convertToUTF8);
+int base64_decode(char *dest, int destlen, const char *src, int inlen);
+int base64_encode(char *dest, int destlen, const char *src, int inlen);
+
+int utf8_base64_decode(char *dest, int destlen, const char *src, int inlen);
+int utf8_base64_encode(char *dest, int destlen, const char *src, int inlen);
 
 #endif /* _gnokii_internal_h */

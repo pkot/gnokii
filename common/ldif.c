@@ -37,14 +37,34 @@
 #include "gnokii.h"
 #include "gnokii-internal.h"
 
-/* a utility function to reuse code */
+/* write the string value to the file and convert it to base64 if necessary
+   convertToUTF8 is necessary for Mozilla, but might not be appropriate for
+   other programs that use the LDIF format, base64 encoding is compliant with the LDIF format
+*/
 static int ldif_entry_write(FILE *f, const char *parameter, const char *value, int convertToUTF8)
 {
-	char *buf = NULL;
+	char *buf;
+	int n, inlen, buflen;
 
 	if (string_base64(value)) {
-		base64_encode(buf, value, convertToUTF8);
+		inlen = strlen(value);
+		buf = NULL;
+		n = 3 * inlen;
+
+		do {
+			buflen = n;
+			if (buf) free(buf);
+			buf = malloc(buflen + 1);
+			if (convertToUTF8)
+				n = utf8_base64_encode(buf, buflen, value, inlen);
+			else
+				n = base64_encode(buf, buflen, value, inlen);
+		} while (n >= buflen);
+
 		fprintf(f, "%s:: %s\n", parameter, buf);
+
+		free(buf);
+
 	} else {
 		fprintf(f, "%s: %s\n", parameter, value);
 	}
@@ -56,6 +76,9 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 	char *aux;
 	int i;
 
+	/* this works for the import, but mozilla exports strings that contain chars >= 0x80 as
+		dn:: <utf-8+base64 encoded: cn=entryname>
+	*/
 	fprintf(f, "dn: cn=%s\n", entry->name);
 	fprintf(f, "objectclass: top\n");
 	fprintf(f, "objectclass: person\n");
@@ -118,7 +141,7 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
 #define STORE2(a, b, c) if (BEGINS(a)) { c; strncpy(b, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
-#define STORE2_BASE64(a, b, c) if (BEGINS(a)) { c; base64_decode(b, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
+#define STORE2_BASE64(a, b, c) if (BEGINS(a)) { c; utf8_base64_decode(b, GN_PHONEBOOK_NAME_MAX_LENGTH, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
 
 #define STORE(a, b) STORE2(a, b, (void) 0)
 #define STORE_BASE64(a, b) STORE2_BASE64(a, b, (void) 0)
