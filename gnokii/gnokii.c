@@ -109,6 +109,7 @@ typedef enum {
 	OPT_DIALVOICE,
 	OPT_ANSWERCALL,
 	OPT_HANGUP,
+	OPT_GETTODO,
 	OPT_GETCALENDARNOTE,
 	OPT_WRITECALENDARNOTE,
 	OPT_DELCALENDARNOTE,
@@ -269,6 +270,7 @@ static int usage(FILE *f)
 		     "          gnokii --dialvoice number\n"
 		     "          gnokii --answercall callid\n"
 		     "          gnokii --hangup callid\n"
+		     "          gnokii --gettodo start [end] [-v]\n"
 		     "          gnokii --getcalendarnote start [end] [-v]\n"
 		     "          gnokii --writecalendarnote vcardfile number\n"
 		     "          gnokii --deletecalendarnote start [end]\n"
@@ -1851,6 +1853,74 @@ static int viewlogo(char *filename)
 	return error;
 }
 
+/* ToDo notes receiving. */
+static int gettodo(int argc, char *argv[])
+{
+	GSM_ToDoList	ToDoList;
+	GSM_ToDo	ToDo;
+	GSM_Data	data;
+	GSM_Error	error = GE_NONE;
+	int		i, first_location, last_location;
+
+	struct option options[] = {
+		{ "vCard",   optional_argument, NULL, '1'},
+		{ NULL,      0,                 NULL, 0}
+	};
+
+	optarg = NULL;
+	optind = 0;
+
+	first_location = last_location = atoi(argv[0]);
+	if ((argc > 1) && (argv[1][0] != '-')) {
+		last_location = atoi(argv[1]);
+	}
+
+	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
+		switch (i) {
+		case 'v':
+			//			vCal = true;
+			break;
+		default:
+			usage(stderr); /* Would be better to have an calendar_usage() here. */
+			return -1;
+		}
+	}
+
+	for (i = first_location; i <= last_location; i++) {
+		ToDo.Location = i;
+
+		GSM_DataClear(&data);
+		data.ToDo = &ToDo;
+		data.ToDoList = &ToDoList;
+
+		error = SM_Functions(GOP_GetToDo, &data, &State);
+		switch (error) {
+		case GE_NONE:
+			fprintf(stdout, _("Todo: %s\n"), ToDo.Text);
+			fprintf(stdout, _("Priority: "));
+			switch (ToDo.Priority) {
+			case GTD_LOW:
+				fprintf(stdout, _("low\n"));
+				break;
+			case GTD_MEDIUM:
+				fprintf(stdout, _("medium\n"));
+				break;
+			case GTD_HIGH:
+				fprintf(stdout, _("high\n"));
+				break;
+			default:
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			break;
+		default:
+			fprintf(stderr, _("The ToDo note could not be read: %s\n"), print_error(error));
+			break;
+		}
+	}
+	return error;
+}
+
 /* Calendar notes receiving. */
 static int getcalendarnote(int argc, char *argv[])
 {
@@ -2432,9 +2502,11 @@ static int displayoutput(void)
 			char buf[105];
 			memset(&buf[0], 0, 102);
 			while (read(0, buf, 100) > 0) {
-//				fprintf(stderr, _("handling keys (%d).\n"), strlen(buf));
-//				if (GSM && GSM->HandleString && GSM->HandleString(buf) != GE_NONE)
-//					fprintf(stdout, _("Key press simulation failed.\n"));
+				/*
+				fprintf(stderr, _("handling keys (%d).\n"), strlen(buf));
+				if (GSM && GSM->HandleString && GSM->HandleString(buf) != GE_NONE)
+					fprintf(stdout, _("Key press simulation failed.\n"));
+				*/
 				memset(buf, 0, 102);
 			}
 			SM_Loop(&State, 1);
@@ -3668,6 +3740,9 @@ int main(int argc, char *argv[])
 		/* Hangup call */
 		{ "hangup",             required_argument, NULL, OPT_HANGUP },
 
+		/* Get ToDo note mode */
+		{ "gettodo",		required_argument, NULL, OPT_GETTODO },
+
 		/* Get calendar note mode */
 		{ "getcalendarnote",    required_argument, NULL, OPT_GETCALENDARNOTE },
 
@@ -3788,6 +3863,7 @@ int main(int argc, char *argv[])
 		{ OPT_DIALVOICE,         1, 1, 0 },
 		{ OPT_ANSWERCALL,        1, 1, 0 },
 		{ OPT_HANGUP,            1, 1, 0 },
+		{ OPT_GETTODO,           1, 3, 0 },
 		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
 		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
@@ -3927,6 +4003,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_HANGUP:
 			rc = hangup(optarg);
+			break;
+		case OPT_GETTODO:
+			rc = gettodo(nargc, nargv);
 			break;
 		case OPT_GETCALENDARNOTE:
 			rc = getcalendarnote(nargc, nargv);

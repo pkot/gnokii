@@ -278,23 +278,45 @@ typedef enum {
 
 /* Calendar note type */
 
+#define MAX_CALENDAR_NOTES (500) /* FIXME how many are possible? */
+#define MAX_CALENDAR_NOTES_LENGTH (257)
+#define MAX_CALENDAR_CALL_LENGTH (49)
+
 typedef struct {
 	int Location;			/* The number of the note in the phone memory */
 	GSM_CalendarNoteType Type;		/* The type of the note */
 	GSM_DateTime Time;		/* The time of the note */
 	GSM_DateTime Alarm;		/* The alarm of the note */
-	char Text[20];		/* The text of the note */
-	char Phone[20];		/* For Call only: the phone number */
+	char Text[MAX_CALENDAR_NOTES_LENGTH];		/* The text of the note */
+	char Phone[MAX_CALENDAR_CALL_LENGTH];		/* For Call only: the phone number */
 	GSM_CalendarRecurrences Recurrence;	/* Recurrence of the note */
 } GSM_CalendarNote;
 
 /* List of Calendar Notes in phone */
-#define MAX_CALENDAR_NOTES (500) /* FIXME how many are possible? */
-
 typedef struct {
 	int Number;		/* The number of notes in phone */
 	int Location[MAX_CALENDAR_NOTES];	/* Location of the nth note */
 } GSM_CalendarNotesList;
+
+/* ToDo */
+typedef enum {
+	GTD_LOW = 3,
+	GTD_MEDIUM = 2,
+	GTD_HIGH = 1
+} GSM_ToDoPriority;
+
+typedef struct {
+	int Location;			/* The number of the note in the phone memory */
+	char Text[MAX_CALENDAR_NOTES_LENGTH];		/* The text of the note */
+	GSM_ToDoPriority Priority;
+} GSM_ToDo;
+
+/* List of ToDo Notes in phone */
+typedef struct {
+	int Number;		/* The number of notes in phone */
+	int Location[MAX_CALENDAR_NOTES];	/* Location of the nth note */
+} GSM_ToDoList;
+
 
 /* This structure is provided to allow common information about the particular
    model to be looked up in a model independant way. Some of the values here

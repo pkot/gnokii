@@ -65,6 +65,7 @@ extern bool P6510_LinkOK;
 #define P6510_MSG_NOTKNOWN	0x3E	/*          */
 #define P6510_MSG_WAP		0x3E	/* WAP */
 #define P6510_MSG_RADIO    	0x43	/* Radio (6510/8310) */
+#define P6510_MSG_TODO    	0x55	/* ToDo */
 #define P6510_MSG_STLOGO	0x7a	/* Startup logo */
 #define P6510_MSG_VERREQ	0xd1	/* HW&SW version request */
 #define P6510_MSG_VERRESP	0xd2	/* HW&SW version response */

@@ -103,7 +103,7 @@ static GSM_Error P6510_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_SetProfile(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P6510_GetStartupGreeting(GSM_Data *data, GSM_Statemachine *state);
+
 static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 static GSM_Error P6510_Subscribe(GSM_Data *data, GSM_Statemachine *state);
@@ -112,6 +112,7 @@ static GSM_Error P6510_Subscribe(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 #endif
+static GSM_Error P6510_GetToDo(GSM_Data *data, GSM_Statemachine *state);
 
 
 static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -131,6 +132,7 @@ static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, 
 static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingSubscribe(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 #ifdef  SECURITY
 static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -165,6 +167,7 @@ static GSM_IncomingFunctionType P6510_IncomingFunctions[] = {
 #endif
 	{ P6510_MSG_SUBSCRIBE,	P6510_IncomingSubscribe },
 	{ P6510_MSG_COMMSTATUS,	P6510_IncomingCommStatus },
+	{ P6510_MSG_TODO,	P6510_IncomingToDo },
 	{ 0, NULL }
 };
 
@@ -235,6 +238,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	case GOP_GetAlarm:
 		return P6510_GetClock(P6510_SUBCLO_GET_ALARM, data, state);
 		*/
+	case GOP_GetToDo:
+		return P6510_GetToDo(data, state);
 	case GOP_GetCalendarNote:
 		return P6510_GetCalendarNote(data, state);
 	case GOP_WriteCalendarNote:
@@ -2565,7 +2570,7 @@ static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, count);
 }
 
-static GSM_Error P6510_GetStartupGreeting(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error GetWelcomeNoteText(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x01, 0x00};
 
@@ -3180,6 +3185,72 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 }
 
 
+/********************/
+/***** ToDo *********/
+/********************/
+
+static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	int i;
+
+	switch (message[3]) {
+	case 0x04:
+		dprintf("ToDo received!\n");
+		if ((message[4] > 0) && (message[4] < 4)) {
+			data->ToDo->Priority = message[4];
+		}
+		dprintf("Priority: %i\n", message[4]);
+		DecodeUnicode(data->ToDo->Text, message + 14, length - 16);
+		dprintf("Text: \"%s\"\n", data->ToDo->Text);
+		break;
+	case 0x16:
+		dprintf("ToDo locations received!\n");
+		data->ToDoList->Number = (message[6] << 8) | message[7];
+		dprintf("Number of Entries: %i\n", data->ToDoList->Number);
+
+		dprintf("Locations: ");
+		for (i = 0; i < data->ToDoList->Number; i++) {
+			data->ToDoList->Location[i] = (message[12 + (i * 4)] << 8) | message[(i * 4) + 13];
+			dprintf("%i ", data->ToDoList->Location[i]);
+		}
+		dprintf("\n");
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x01 (%d)\n", message[3]);
+		return GE_UNHANDLEDFRAME;
+		break;
+	}
+	return GE_NONE;
+}
+
+
+static GSM_Error P6510_GetToDoLocations(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {	FBUS_FRAME_HEADER, 0x15, 
+				0x01, 0x00, 0x00,
+				0x00, 0x00, 0x00};
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_TODO, 10);
+}
+
+static GSM_Error P6510_GetToDo(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER,0x03, 
+			       0x00, 0x00, 0x80, 0x00,
+			       0x00, 0x01};		/* Location */
+	GSM_Error error;
+
+
+	error = P6510_GetToDoLocations(data, state);
+	if (error != GE_NONE) return error;
+
+	req[8] = data->ToDoList->Location[data->ToDo->Location - 1] / 256;
+	req[9] = data->ToDoList->Location[data->ToDo->Location - 1] % 256;
+
+	dprintf("Getting ToDo\n");
+	SEND_MESSAGE_BLOCK(P6510_MSG_TODO, 10);
+}
+
 /********************************/
 /* NOT FRAME SPECIFIC FUNCTIONS */
 /********************************/
@@ -3187,6 +3258,8 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	switch(data->Bitmap->type) {
+	case GSM_WelcomeNoteText:
+		return GetWelcomeNoteText(data, state);
 	case GSM_CallerLogo:
 		return GetCallerBitmap(data, state);
 	case GSM_NewOperatorLogo:
