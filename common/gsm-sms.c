@@ -801,8 +801,8 @@ static gn_error sms_free_deleted(gn_data *data, int folder)
 		if (data->message_list[i][folder]->status == GN_SMS_FLD_ToBeRemoved) {	/* previously deleted and read message */
 			dprintf("Found deleted message, which will now be freed! %i , %i\n",
 					i, data->message_list[i][folder]->location);
-			data->folder_stats[folder]->used--;
 			for (j = i; j < data->folder_stats[folder]->used; j++) {
+				data->folder_stats[folder]->used--;
 				memcpy(data->message_list[j][folder], data->message_list[j + 1][folder],
 						sizeof(gn_sms_message_list));
 			}
@@ -919,7 +919,7 @@ API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemachine *st
 
 		data->sms_folder = &sms_folder;
 		data->sms_folder->folder_id = (gn_memory_type) i + 12;
-		dprintf("GetFolderChanges: Getting folder status for folder #%i\n", data->sms_folder->folder_id);
+		dprintf("GetFolderChanges: Getting folder status for folder #%i\n", i);
 		error = gn_sm_functions(GN_OP_GetSMSFolderStatus, data, state);
 		ERROR();
 
