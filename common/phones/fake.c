@@ -42,28 +42,6 @@
 
 static GSM_Error Pfake_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
-static const SMSMessage_Layout at_deliver = {
-	true,						/* Is the SMS type supported */
-	 1, true, false,				/* SMSC */
-	 2,  2, -1,  2, -1, -1,  4, -1, 13,  5,  2,
-	 -1, -1, -1,					/* Validity */
-	 3, true, false,				/* Remote Number */
-	 6, -1,						/* Time */
-	-1, -1,						/* Nonstandard fields */
-	14, true					/* User Data */
-};
-
-static const SMSMessage_Layout at_submit = {
-	true,						/* Is the SMS type supported */
-	-1, true, false,				/* SMSC */
-	-1,  1,  1,  1, -1,  2,  4, -1,  7,  5,  1,
-	 6, -1, -1,					/* Validity */
-	 3, true, false,				/* Remote Number */
-	-1, -1,						/* Time */
-	-1, -1,						/* Nonstandard fields */
-	 8, true					/* User Data */
-};
-
 GSM_Phone phone_fake = {
 	NULL,
 	PGEN_IncomingDefault,
@@ -109,20 +87,41 @@ static GSM_Error Pfake_Initialise(GSM_Statemachine *state)
 
 static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 {
-	unsigned char req[10240];
-	int length;
+	unsigned char req[10240], req2[5120];
+	int length, tmp, offset = 0;
 
-	EncodeByLayout(data, &at_submit, 0);
-	if (!data->RawData) return GE_INTERNALERROR;
+	if (!data->RawSMS) return GE_INTERNALERROR;
 
-	length = data->RawData->Length;
+	/* Prepare the message and count the size */
+	memcpy(req2, data->RawSMS->MessageCenter, data->RawSMS->MessageCenter[0] + 1);
+	offset += data->RawSMS->MessageCenter[0];
 
-	if (length < 0) return GE_SMSWRONGFORMAT;
-	fprintf(stdout, "AT+%s=%d\n", cmd, length - data->RawData->Data[0] - 1);
+	req2[offset + 1] = 0x01 | 0x10; /* Validity period in relative format */
+	if (data->RawSMS->RejectDuplicates) req2[offset + 1] |= 0x04;
+	if (data->RawSMS->Report) req2[offset + 1] |= 0x20;
+	if (data->RawSMS->UDHIndicator) req2[offset + 1] |= 0x40;
+	if (data->RawSMS->ReplyViaSameSMSC) req2[offset + 1] |= 0x80;
+	req2[offset + 2] = 0x00; /* Message Reference */
 
-	bin2hex(req, data->RawData->Data, data->RawData->Length);
-	req[data->RawData->Length * 2] = 0x1a;
-	req[data->RawData->Length * 2 + 1] = 0;
+	tmp = data->RawSMS->RemoteNumber[0];
+	if (tmp % 2) tmp++;
+	tmp /= 2;
+	memcpy(req2 + offset + 3, data->RawSMS->RemoteNumber, tmp + 2);
+	offset += tmp + 1;
+
+	req2[offset + 4] = data->RawSMS->PID;
+	req2[offset + 5] = data->RawSMS->DCS;
+	req2[offset + 6] = 0xaa; /* Validity period */
+	req2[offset + 7] = data->RawSMS->Length;
+	memcpy(req2 + offset + 8, data->RawSMS->UserData, data->RawSMS->Length);
+
+	length = data->RawSMS->Length + offset + 8;
+
+	fprintf(stdout, "AT+%s=%d\n", cmd, length - data->RawSMS->MessageCenter[0] - 1);
+
+	bin2hex(req, req2, length);
+	req[length * 2] = 0x1a;
+	req[length * 2 + 1] = 0;
 	fprintf(stdout, "%s\n", req);
 	return GE_NONE;
 }

@@ -90,6 +90,8 @@
  * AT series updates:
     o Security functions for AT phones              (Manfred Jonsson)
     o new SMS layer compability                           (Pawel Kot)
+ * fake driver updates:
+    o new SMS layer compability                           (Pawel Kot)
  * device driver updates:
     o device_nreceived, device_flush added           (BORBELY Zoltan)
     o serial_nreceived, serial_flush added           (BORBELY Zoltan)
