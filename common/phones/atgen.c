@@ -570,6 +570,9 @@ static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	char req[64];
 	gn_error ret;
 
+	if (!data->phonebook_entry)
+		return GN_ERR_INTERNALERROR;
+
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;

@@ -31,6 +31,7 @@
     o manufacturer for +CGMI request can be quoted    (Ron Yorston)
     o name string with phonebook entry may not be quoted
                                                       (Ron Yorston)
+    o avoid crash in AT_DeletePhonebook                 (Pawel Kot)
  * 6510 series updates
     o don't require to have any subentries filled in when writing
       phonebook entry                                   (Pawel Kot)
