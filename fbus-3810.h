@@ -26,8 +26,9 @@ GSM_Error	FB38_Initialise(char *port_device, bool enable_monitoring);
 bool		FB38_OpenSerial(void);
 void		FB38_Terminate(void);
 
-GSM_Error	FB38_GetPhonebookLocation(GSM_MemoryType memory_type, int location,
-				GSM_PhonebookEntry *entry);
+int		FB38_GetMemoryType(GSM_MemoryType memory_type);
+
+GSM_Error	FB38_GetMemoryLocation(int location, GSM_PhonebookEntry *entry);
 
 GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry);
 

@@ -1,6 +1,6 @@
 %define name gnokii
 %define version @@VERSION@@
-%define release 2
+%define release 1
 
 Summary: Linux/Unix tool suite for Nokia mobile phones
 Name: %{name}

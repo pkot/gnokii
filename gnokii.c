@@ -36,7 +36,7 @@
 /* Prototypes. */
 void monitormode(void);
 void enterpin(void);
-void getphonebook(char *argv[]);
+void getmemory(char *argv[]);
 void writephonebook(void);
 void getsms(char *argv[]);
 void deletesms(char *argv[]);
@@ -64,7 +64,7 @@ void usage(void)
 {
 
   fprintf(stdout, _("   usage: gnokii {--help|--monitor|--version}
-          gnokii [--getphonebook] [memory type] [start] [end]
+          gnokii [--getmemory] [memory type] [start] [end]
           gnokii [--writephonebook]
           gnokii [--getsms] [memory type] [start] [end]
           gnokii [--deletesms] [memory type] [start] [end]
@@ -84,11 +84,9 @@ void usage(void)
 
           --enterpin        sends the entered PIN to the mobile phone.
 
-          --getphonebook    gets phonebook entries from specified memory type
-                            ('A' or 'B') starting at entry [start] and
-                            ending at [end].  Entries are dumped to stdout in
-                            format suitable for editing and passing back to
-                            writephonebook command.
+          --getmemory       reads specificed memory location from phone.
+                            Valid memory types are:
+                            ME, SM, FD, ON, EN, DC, RC, MC, LD
 
           --writephonebook  reads data from stdin and writes to phonebook.
                             Uses the same format as provided by the output of
@@ -221,9 +219,9 @@ int main(int argc, char *argv[])
     dialdata(argv);
   }
 
-  /* Get phonebook command. */
-  if (argc == 5 && strcmp(argv[1], "--getphonebook") == 0)
-    getphonebook(argv);
+  /* Get memory command. */
+  if (argc == 5 && strcmp(argv[1], "--getmemory") == 0)
+    getmemory(argv);
 
   /* Write phonebook command. */
   if (strcmp(argv[1], "--writephonebook") == 0)
@@ -308,13 +306,15 @@ void getsms(char *argv[])
 
   /* Handle command line args that set type, start and end locations. */
 
+  /* FIXME: do not specify memory type, use fixed value - Pawel... */
+
   if (strcmp(argv[2], "B") == 0) {
-    memory_type = GMT_INTERNAL;
+    memory_type = GMT_ME;
     memory_type_string = "B";
   }
   else
     if (strcmp(argv[2], "A") == 0) {
-      memory_type = GMT_SIM;
+      memory_type = GMT_SM;
       memory_type_string = "A";
     }
     else {
@@ -386,12 +386,12 @@ void deletesms(char *argv[])
   /* Handle command line args that set type, start and end locations. */
 
   if (strcmp(argv[2], "B") == 0) {
-    memory_type = GMT_INTERNAL;
+    memory_type = GMT_ME;
     memory_type_string = "B";
   }
   else
     if (strcmp(argv[2], "A") == 0) {
-      memory_type = GMT_SIM;
+      memory_type = GMT_SM;
       memory_type_string = "A";
     }
     else {
@@ -564,8 +564,8 @@ void monitormode(void)
   GSM_RFUnits rf_units = GRF_Arbitrary;
   GSM_BatteryUnits batt_units = GBU_Arbitrary;
 
-  GSM_MemoryStatus SIMMemoryStatus = {GMT_SIM, 0, 0};
-  GSM_MemoryStatus PhoneMemoryStatus = {GMT_INTERNAL, 0, 0};
+  GSM_MemoryStatus SIMMemoryStatus = {GMT_SM, 0, 0};
+  GSM_MemoryStatus PhoneMemoryStatus = {GMT_ME, 0, 0};
 
   GSM_SMSStatus SMSStatus = {0, 0};
 
@@ -619,16 +619,14 @@ void monitormode(void)
   exit(0);
 }
 
-/* Get requested range of phonebook entries and output to stdout in format
-   suitable for editing and subsequent writing back to phone with
-   writephonebook. */
+/* Get requested range of memory storage entries and output to stdout in
+   easy-to-parse format */
 
-void	getphonebook(char *argv[])
+void getmemory(char *argv[])
 {
 
   GSM_PhonebookEntry entry;
   int count;
-  GSM_MemoryType memory_type;
   GSM_Error error;
   char *memory_type_string;
   int start_entry;
@@ -636,19 +634,59 @@ void	getphonebook(char *argv[])
 
   /* Handle command line args that set type, start and end locations. */
 
-  if (strcmp(argv[2], "B") == 0) {
-    memory_type = GMT_INTERNAL;
-    memory_type_string = "B";
+  if (strcmp(argv[2], "ME") == 0) {
+    entry.MemoryType = GMT_ME;
+    memory_type_string = "ME";
   }
   else
-    if (strcmp(argv[2], "A") == 0) {
-      memory_type = GMT_SIM;
-      memory_type_string = "A";
+    if (strcmp(argv[2], "SM") == 0) {
+      entry.MemoryType = GMT_SM;
+      memory_type_string = "SM";
     }
-    else {
-      fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
-      exit (-1);
+  else
+    if (strcmp(argv[2], "FD") == 0) {
+      entry.MemoryType = GMT_FD;
+      memory_type_string = "FD";
     }
+  else
+    if (strcmp(argv[2], "ON") == 0) {
+      entry.MemoryType = GMT_ON;
+      memory_type_string = "ON";
+    }
+  else
+    if (strcmp(argv[2], "EN") == 0) {
+      entry.MemoryType = GMT_EN;
+      memory_type_string = "EN";
+    }
+  else
+    if (strcmp(argv[2], "DC") == 0) {
+      entry.MemoryType = GMT_DC;
+      memory_type_string = "DC";
+    }
+  else
+    if (strcmp(argv[2], "RC") == 0) {
+      entry.MemoryType = GMT_RC;
+      memory_type_string = "RC";
+     }
+  else
+    if (strcmp(argv[2], "MC") == 0) {
+      entry.MemoryType = GMT_MC;
+      memory_type_string = "MC";
+    }
+  else
+    if (strcmp(argv[2], "LD") == 0) {
+      entry.MemoryType = GMT_LD;
+      memory_type_string = "LD";
+    }
+  else
+    if (strcmp(argv[2], "MT") == 0) {
+      entry.MemoryType = GMT_MT;
+      memory_type_string = "MT";
+    }
+  else {
+    fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
+    exit (-1);
+  }
 
   start_entry = atoi (argv[3]);
   end_entry = atoi (argv[4]);
@@ -661,7 +699,7 @@ void	getphonebook(char *argv[])
 
   for (count = start_entry; count <= end_entry; count ++) {
 
-    error=GSM->GetPhonebookLocation(memory_type, count, &entry);
+    error=GSM->GetMemoryLocation(count, &entry);
  
     if (error == GE_NONE)
       fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, count, entry.Group);
@@ -736,12 +774,12 @@ void writephonebook(void)
 
     if (*ptr == 'B') {
       memory_type_string = "int";
-      entry.MemoryType = GMT_INTERNAL;
+      entry.MemoryType = GMT_ME;
     }
     else {
       if (*ptr == 'A') {
 	memory_type_string = "sim";
-	entry.MemoryType = GMT_SIM;
+	entry.MemoryType = GMT_SM;
       }
       else
 	fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);

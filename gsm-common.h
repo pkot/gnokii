@@ -10,7 +10,7 @@
   Header file for the definitions, enums etc. that are used by all models of
   handset.
 
-  Last modification: Sun May 16 21:05:42 CEST 1999
+  Last modification: Thu Jul  1 21:28:36 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -25,23 +25,28 @@
 /* Define an enum for specifying memory types for retrieving phonebook
    entries, SMS messages etc. This type is not mobile specific - the model
    code should take care of translation to mobile specific numbers - see 6110
-   code */
+   code.
+   01/07/99:  Two letter codes follow GSM 07.07 release 6.2.0
+*/
 
 typedef enum {
-  GMT_INTERNAL,   /* Internal memory of the mobile equipment */
-  GMT_SIM,        /* SIM card memory */
-  GMT_FIXED,      /* Fixed dial numbers */
-  GMT_OWN,        /* Own numbers */
-  GMT_EN_UNKNOWN, /* Emergency numbers */
-  GMT_DIALED,     /* Dialled numbers */
-  GMT_RECEIVED,   /* Received numbers */
-  GMT_MISSED,     /* Missed numbers */
+  GMT_ME, /* Internal memory of the mobile equipment */
+  GMT_SM, /* SIM card memory */
+  GMT_FD, /* Fixed dial numbers */
+  GMT_ON, /* Own numbers */
+  GMT_EN, /* Emergency numbers */
+  GMT_DC, /* Dialled numbers */
+  GMT_RC, /* Received numbers */
+  GMT_MC, /* Missed numbers */
+  GMT_LD, /* Last dialed */
+  GMT_MT, /* combined ME and SIM phonebook */
+  GMT_TA, /* for compatibility only: TA=computer memory */
 } GSM_MemoryType;
 
 /* Power source types */
 
 typedef enum {
-  GPS_ACDC=1,     /* AC/DC powered (charging) */
+  GPS_ACDC=1, /* AC/DC powered (charging) */
   GPS_BATTERY /* Internal battery */
 } GSM_PowerSource;
 
@@ -55,10 +60,10 @@ typedef enum {
 
 /* Limits of SMS messages. */
 
-#define GSM_MAX_SMS_CENTRE_LENGTH (40)
-#define GSM_MAX_SENDER_LENGTH (40)
+#define GSM_MAX_SMS_CENTRE_LENGTH  (40)
+#define GSM_MAX_SENDER_LENGTH      (40)
 #define GSM_MAX_DESTINATION_LENGHT (40)
-#define GSM_MAX_SMS_LENGTH (160)
+#define GSM_MAX_SMS_LENGTH         (160)
 
 /* Define datatype for SMS messages, used for getting SMS messages from the
    phones memory. */
@@ -71,7 +76,7 @@ typedef struct {
   char MessageText[GSM_MAX_SMS_LENGTH + 1]; /* Room for null term. */
   char MessageCentre[GSM_MAX_SMS_CENTRE_LENGTH + 1]; /* SMS Centre. */
   char Sender[GSM_MAX_SENDER_LENGTH + 1];   /* Sender of the SMS message. */
-  char Destination[GSM_MAX_DESTINATION_LENGHT + 1]; /* Destination of the SMS message. */
+  char Destination[GSM_MAX_DESTINATION_LENGHT + 1]; /* Destination of the message. */
   int MessageNumber;                        /* Location in the memory. */
   GSM_MemoryType MemoryType;                /* Type of memory message is stored in. */
 } GSM_SMSMessage;
@@ -79,7 +84,7 @@ typedef struct {
 /* Limits for sizing of array in GSM_PhonebookEntry. Individual handsets may
    not support these lengths so they have their own limits set. */
 
-#define GSM_MAX_PHONEBOOK_NAME_LENGTH (40)
+#define GSM_MAX_PHONEBOOK_NAME_LENGTH   (40)
 #define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (40)
 
 /* Here is a macro for models that do not support caller groups. */
@@ -109,7 +114,7 @@ typedef struct {
   bool Empty;                                       /* Is this entry empty? */
   char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];     /* Plus 1 for null terminator. */
   char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
-  GSM_MemoryType MemoryType;                        /* Type of memory (SIM/internal) */
+  GSM_MemoryType MemoryType;                        /* Type of memory */
   int Group;                                        /* Group */
 } GSM_PhonebookEntry;
 
@@ -168,17 +173,16 @@ typedef struct {
 /* Minimum and maximum levels for RF signal strength. Units are as per the
    setting of RFLevelUnits.  The setting of RFLevelUnits indicates the 
    default or "native" units used.  In the case of the 3110 and 6110 series
-   these are arbitrary, ranging from 0 to 4 */
+   these are arbitrary, ranging from 0 to 4. */
 
   float MaxRFLevel;
   float MinRFLevel;
   GSM_RFUnits RFLevelUnits;
 
-/* Minimum anx maximum levels for battery level. Again, units are as per the
-   setting of GSM_BatteryLevelUnits.  The value that BatteryLevelUnits is
-   set to indicates the "native" or default value that the phone supports. 
-   In the case of the 3110 and 6110 series these are arbitrary,
-    ranging from 0 to 4*/
+/* Minimum and maximum levels for battery level. Again, units are as per the
+   setting of GSM_BatteryLevelUnits.  The value that BatteryLevelUnits is set
+   to indicates the "native" or default value that the phone supports.  In the
+   case of the 3110 and 6110 series these are arbitrary, ranging from 0 to 4. */
 
   float MaxBatteryLevel;
   float MinBatteryLevel;
@@ -239,8 +243,7 @@ typedef struct {
 
   void (*Terminate)(void);	
 
-  GSM_Error (*GetPhonebookLocation)( GSM_MemoryType memory_type,
-				     int location, GSM_PhonebookEntry *entry );
+  GSM_Error (*GetMemoryLocation)( int location, GSM_PhonebookEntry *entry );
 
   GSM_Error (*WritePhonebookLocation)( int location, GSM_PhonebookEntry *entry );
 

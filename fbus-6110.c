@@ -55,7 +55,7 @@ bool FB61_LinkOK;
 GSM_Functions FB61_Functions = {
   FB61_Initialise,
   FB61_Terminate,
-  FB61_GetPhonebookLocation,
+  FB61_GetMemoryLocation,
   FB61_WritePhonebookLocation,
   FB61_GetMemoryStatus,
   FB61_GetSMSStatus,
@@ -81,7 +81,7 @@ GSM_Functions FB61_Functions = {
 /* Mobile phone information */
 
 GSM_Information FB61_Information = {
-  "6110|6130|6150|6190|5110|5130", /* Supported models */
+  "6110|6130|6150|6190|5110|5130|5190", /* Supported models */
   4,                     /* Max RF Level */
   0,                     /* Min RF Level */
   GRF_Arbitrary,         /* RF level units */
@@ -230,6 +230,61 @@ GSM_Error FB61_TX_SendStatusRequest(void)
   return (GE_NONE);
 }
 
+/* This function translates GMT_MemoryType to FB61_MEMORY_xx */
+
+int FB61_GetMemoryType(GSM_MemoryType memory_type)
+{
+
+  int result;
+
+  switch (memory_type) {
+
+     case GMT_MT:
+	result = FB61_MEMORY_MT;
+        break;
+
+     case GMT_ME:
+	result = FB61_MEMORY_ME;
+        break;
+
+     case GMT_SM:
+	result = FB61_MEMORY_SM;
+        break;
+
+     case GMT_FD:
+	result = FB61_MEMORY_FD;
+        break;
+
+     case GMT_ON:
+	result = FB61_MEMORY_ON;
+        break;
+
+     case GMT_EN:
+	result = FB61_MEMORY_EN;
+        break;
+
+     case GMT_DC:
+	result = FB61_MEMORY_DC;
+        break;
+
+     case GMT_RC:
+	result = FB61_MEMORY_RC;
+        break;
+
+     case GMT_MC:
+	result = FB61_MEMORY_MC;
+        break;
+
+     default:
+        result=FB61_MEMORY_UNKNOWN;
+   }
+
+   return (result);
+}
+
+
+
+
 /* This function is used to get storage status from the phone. It currently
    supports two different memory areas - internal and SIM. */
 
@@ -241,22 +296,11 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
                           0x00, /* MemoryType */
                           0x01};
   int timeout=20;
-  int memory_area;
 
   CurrentMemoryStatus = Status;
   CurrentMemoryStatusError = GE_BUSY;
 
-  /* FIXME: some memorytype parsing function? */
-
-  if (Status->MemoryType == GMT_INTERNAL)
-    memory_area = FB61_MEMORY_PHONE;
-  else
-    if (Status->MemoryType == GMT_SIM)
-      memory_area = FB61_MEMORY_SIM;
-    else
-      return (GE_INVALIDMEMORYTYPE);
-
-  req[4] = memory_area;
+  req[4] = FB61_GetMemoryType(Status->MemoryType);
 
   FB61_TX_SendMessage(0x06, 0x03, req);
 
@@ -856,24 +900,15 @@ GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
    application.  Will block until location is retrieved or a timeout/error
    occurs. */
 
-GSM_Error FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry) {
+GSM_Error FB61_GetMemoryLocation(int location, GSM_PhonebookEntry *entry) {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00, 0x01};
   int timeout=20; /* 2 seconds for command to complete */
-  int memory_area;
 
   CurrentPhonebookEntry = entry;
   CurrentPhonebookError = GE_BUSY;
 
-  if (memory_type == GMT_INTERNAL)
-    memory_area = FB61_MEMORY_PHONE;
-  else
-    if (memory_type == GMT_SIM)
-      memory_area = FB61_MEMORY_SIM;
-    else
-      return (GE_INVALIDMEMORYTYPE);
-
-  req[4] = memory_area;
+  req[4] = FB61_GetMemoryType(entry->MemoryType);
   req[5] = location;
 
   FB61_TX_SendMessage(0x08, 0x03, req);
@@ -897,20 +932,12 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 {
 
   unsigned char req[128] = {FB61_FRAME_HEADER, 0x04, 0x00, 0x00};
-  int i=0, current=0, memory_area;
+  int i=0, current=0;
   int timeout=50;
 
   CurrentPhonebookError=GE_BUSY;
 
-  if (entry->MemoryType == GMT_INTERNAL)
-    memory_area = FB61_MEMORY_PHONE;
-  else
-    if (entry->MemoryType == GMT_SIM)
-      memory_area = FB61_MEMORY_SIM;
-    else
-      return (GE_INVALIDMEMORYTYPE);
-
-  req[4] = memory_area;
+  req[4] = FB61_GetMemoryType(entry->MemoryType);
   req[5] = location;
 
   req[6] = strlen(entry->Name);
@@ -949,7 +976,6 @@ GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
 {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x07, 0x00, 0x00, 0x01, 0x64, 0x01};
-  int memory_area;
   int timeout = 60; /* 5 seconds for command to complete */
 
   /* State machine code writes data to these variables when it comes in. */
@@ -957,15 +983,7 @@ GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
   CurrentSMSMessage = message;
   CurrentSMSMessageError = GE_BUSY;
 
-  if (memory_type == GMT_INTERNAL)
-    memory_area = FB61_MEMORY_PHONE;
-  else
-    if (memory_type == GMT_SIM)
-      memory_area = FB61_MEMORY_SIM;
-    else
-      return (GE_INVALIDMEMORYTYPE);
-
-  req[4] = memory_area;
+  req[4] = FB61_GetMemoryType(memory_type);
   req[5] = location;
 
   /* Send request */
@@ -990,20 +1008,11 @@ GSM_Error FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
 {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x01};
-  int memory_area;
   int timeout = 50; /* 5 seconds for command to complete */
 
   CurrentSMSMessageError = GE_BUSY;
 
-  if (memory_type == GMT_INTERNAL)
-    memory_area = FB61_MEMORY_PHONE;
-  else
-    if (memory_type == GMT_SIM)
-      memory_area = FB61_MEMORY_SIM;
-    else
-      return (GE_INVALIDMEMORYTYPE);
-
-  req[4] = memory_area;
+  req[4] = FB61_GetMemoryType(memory_type);
   req[5] = location;
 
   FB61_TX_SendMessage(0x07, 0x14, req);
@@ -1669,7 +1678,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 #ifdef DEBUG
       printf(_("Message: Memory status received:\n"));
-      printf(_("   Memory Type: %s\n"), (MessageBuffer[4]==FB61_MEMORY_PHONE)?_("int"):_("sim"));
+
+      /* FIXME: Should have some generic function for this... */
+
+      printf(_("   Memory Type: %s\n"), (MessageBuffer[4]==FB61_MEMORY_ME)?_("int"):_("sim"));
       printf(_("   Used: %d\n"), MessageBuffer[6]);
       printf(_("   Free: %d\n"), MessageBuffer[5]);
 #endif DEBUG

@@ -268,6 +268,7 @@ is the Australian mirror, there will be one nearby to you too :)
 6110 Series
 
 6190/Microcel (Canada) (GSM 1900)
+6150/Viag Interkom (Germany) (GSM 1800)
 6150/Omnitel (Italy)
 6150/Beeline (Vympelkom) (Moscow, Russia)
 6150/MTS (Moscow, Russia)
@@ -279,6 +280,18 @@ is the Australian mirror, there will be one nearby to you too :)
 5110/Paegas (Czech Republic)
 5130/IDEA Centertel (Poland) (GSM 1800)
 5190/Microcel (Canada) (GSM 1900)
+
+
+- Gnokii and Perl -
+
+There is a perlmodule available for gnokii. It gives access to all
+the routines that are defined in gsm-common.h from a perl-program. It
+is intended for application developers who want to use their favourite
+language in interfacing the phone data with databases, ldap-directories
+and (in the future) different calendar applications. It is written by
+Konstantin Agouros (konstantin@agouros.de) and support starts with
+revision 0.2.6-pre3 of gnokii.
+
 
 - Credits -
 
@@ -322,6 +335,8 @@ Thank you to, in no particular order...
    and typing GSM_Default_Alphabet.
 
 *  Pawe³ Kot for EnterPIN on 6110 Series changes and other things.
+
+*  Konstantinos Agouros for gnokii-perl module.
 
 *  Czech Linux Users' group for it's CVS server which hosts our
    development repository.

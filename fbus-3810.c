@@ -42,7 +42,7 @@ bool					FB38_LinkOK;
 GSM_Functions			FB38_Functions = {
 		FB38_Initialise,
 		FB38_Terminate,
-		FB38_GetPhonebookLocation,
+		FB38_GetMemoryLocation,
 		FB38_WritePhonebookLocation,
 		FB38_GetMemoryStatus,
 		FB38_GetSMSStatus,
@@ -175,7 +175,7 @@ void		FB38_Terminate(void)
 	/* Routine to get specifed phone book location.  Designed to 
 	   be called by application.  Will block until location is
 	   retrieved or a timeout/error occurs. */
-GSM_Error	FB38_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry)
+GSM_Error	FB38_GetMemoryLocation(int location, GSM_PhonebookEntry *entry)
 {
 	int		memory_area;
 	int		timeout;
@@ -185,11 +185,11 @@ GSM_Error	FB38_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GS
 	CurrentPhonebookEntry = entry;
 	CurrentPhonebookError = GE_BUSY;
 
-	if (memory_type == GMT_INTERNAL) {
+	if (entry->MemoryType == GMT_ME) {
 		memory_area = 1;
 	}
 	else {
-		if (memory_type == GMT_SIM) {
+		if (entry->MemoryType == GMT_SM) {
 			memory_area = 2;
 		}
 		else {
@@ -232,11 +232,11 @@ GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 
 		/* Make sure neither name or number is too long.  We assume (as
 		   has been reported that memory_area 1 is internal, 2 is the SIM */
-	if (entry->MemoryType == GMT_INTERNAL) {
+	if (entry->MemoryType == GMT_ME) {
 		memory_area = 1;
 	}
 	else {
-		if (entry->MemoryType == GMT_SIM) {
+		if (entry->MemoryType == GMT_SM) {
 			memory_area = 2;
 		}
 		else {
@@ -287,11 +287,11 @@ GSM_Error	FB38_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
 	int		timeout;
 	int		memory_area;
 
-	if (memory_type == GMT_INTERNAL) {
+	if (memory_type == GMT_ME) {
 		memory_area = 1;
 	}
 	else {
-		if (memory_type == GMT_SIM) {
+		if (memory_type == GMT_SM) {
 			memory_area = 2;
 		}
 		else {
@@ -332,11 +332,11 @@ GSM_Error	FB38_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
 	int		timeout;
 	int		memory_area;
 
-	if (memory_type == GMT_INTERNAL) {
+	if (memory_type == GMT_ME) {
 		memory_area = 1;
 	}
 	else {
-		if (memory_type == GMT_SIM) {
+		if (memory_type == GMT_SM) {
 			memory_area = 2;
 		}
 		else {

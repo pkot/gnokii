@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.0-pre2
+VERSION = 0.3.0-pre3
 
 #
 # Compiler to use.
@@ -125,12 +125,12 @@ clean:
                gnokii-${VERSION}.tar.gz
 
 dist:	clean
-	@rm -rf /tmp/gnokii-${VERSION}
 	@mkdir -p /tmp/gnokii-${VERSION}
 	@cp -r * /tmp/gnokii-${VERSION}
 	@sed 's#@@VERSION@@#${VERSION}#' gnokii.spec >/tmp/gnokii-${VERSION}/gnokii.spec
-	@rm -rf /tmp/gnokii-${VERSION}/{patches,CVS}
+	@rm -rf /tmp/gnokii-${VERSION}/CVS /tmp/gnokii-${VERSION}/*/CVS 
 	@cd /tmp; tar cfz gnokii-${VERSION}.tar.gz gnokii-${VERSION}
+	@rm -rf /tmp/gnokii-${VERSION}
 	@mv /tmp/gnokii-${VERSION}.tar.gz .
 
 rpm:	dist
