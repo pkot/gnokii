@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.12  2001-10-21 22:23:56  machek
+  Revision 1.13  2001-11-09 13:17:11  pkot
+  Update 2110 to a new libsms api
+
+  Revision 1.12  2001/10/21 22:23:56  machek
   Use symbolic constants instead of numbers
 
   At least detect when we get other message than we asked for
@@ -84,6 +87,7 @@
 #include "mbus-2110.h"
 #include "phones/nokia.h"
 #include "device.h"
+#include "gsm-sms.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -354,8 +358,7 @@ SMS(GSM_SMSMessage *message, int command)
 	PacketOK = false;
 	pkt[1] = command;
 	pkt[2] = 1; /* == LM_SMS_MEM_TYPE_DEFAULT or LM_SMS_MEM_TYPE_SIM or LM_SMS_MEM_TYPE_ME */
-	pkt[3] = message->Location;
-	message->MessageNumber = message->Location;
+	pkt[3] = message->Number;
 
 	SendCommand(pkt, LM_SMS_COMMAND, sizeof(pkt));
 	msleep_poll(300);	/* We have to keep acknowledning phone's data */
@@ -367,8 +370,8 @@ SMS(GSM_SMSMessage *message, int command)
 		eprintf("Something is very wrong with SMS\n");
 		return GE_BUSY; /* FIXME */
 	}
-	if ((SMSData[2]) && (SMSData[2] != message->Location)) {
-		eprintf("Wanted message @%d, got message at @%d!\n", message->Location, SMSData[2]);
+	if ((SMSData[2]) && (SMSData[2] != message->Number)) {
+		eprintf("Wanted message @%d, got message at @%d!\n", message->Number, SMSData[2]);
 		return GE_BUSY;
 	}
 	return (GE_NONE);
@@ -378,7 +381,13 @@ SMS(GSM_SMSMessage *message, int command)
 static GSM_Error
 DecodeIncomingSMS(GSM_SMSMessage *m)
 {
-	int i, len;
+	GSM_Error error;
+
+	/* FIXME: Where do you keep the size of the received data??? */
+	/* FIXME: Probably we should use DecodeTextSMS here. Am I right? */
+	error = DecodePDUSMS((unsigned char *)SMSData, m, 256 /* This is wrong */);
+
+/*	Moved to gsm-sms.c
 	ddprintf("Status: " );
 	switch (SMSData[3]) {
 	case 7: m->Type = GST_MO; m->Status = GSS_NOTSENTREAD; ddprintf("not sent\n"); break;
@@ -387,7 +396,7 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; ddprintf("read\n"); break;
 	}
 
-	/* Date is at SMSData[7]; this code is copied from fbus-6110.c*/
+	Date is at SMSData[7]; this code is copied from fbus-6110.c
 	{
 		int offset = -32 + 7;
 		m->Time.Year=10*(SMSData[32+offset]&0x0f)+(SMSData[32+offset]>>4);
@@ -412,10 +421,10 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 	m->Length = len;
 	ddprintf("Text is %s\n", m->MessageText);
 
-	/* Originator address is at 15+i,
-	   followed by message center addres (?) */
+	Originator address is at 15+i,
+	   followed by message center addres (?)
 	{
-		char *s = (char *) &SMSData[15+i];	/* We discard volatile. Make compiler quiet. */
+		char *s = (char *) &SMSData[15+i];	We discard volatile. Make compiler quiet.
 		strcpy(m->Sender, s);
 		s+=strlen(s)+1;
 		strcpy(m->MessageCenter.Number, s);
@@ -425,14 +434,14 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 	m->MessageCenter.No = 0;
 	strcpy(m->MessageCenter.Name, "(unknown)");
 	m->UDHType = GSM_NoUDH;
-	return GE_NONE;
+*/
+	return error;
 }
 
 static GSM_Error
 GetSMSMessage(GSM_SMSMessage *m)
 {
-	int i, len;
-	if (m->Location > 10)
+	if (m->Number > 10)
 		return GE_INVALIDSMSLOCATION;
 
 	if (SMS(m, LM_SMS_READ_STORED_DATA) != GE_NONE)
@@ -454,7 +463,7 @@ GetSMSMessage(GSM_SMSMessage *m)
 static GSM_Error
 SendSMSMessage(GSM_SMSMessage *m)
 {
-	if (m->Location > 10)
+	if (m->Number > 10)
 		return GE_INVALIDSMSLOCATION;
 
 	if (SMSData[0] != 0x0b) {
@@ -1007,7 +1016,7 @@ static GSM_Error SMS_Reserve(GSM_Statemachine *sm)
 		eprintf("Bad reply trying to reserve SMS-es\n");
 	if (SMSData[0] != LM_SMS_PP_RESERVE_COMPLETE)
 		eprintf("Not okay trying to reserve SMS-es (%d)\n", SMSData[0]);
-
+	return GE_NONE;
 }
 
 static GSM_Error SMS_Slave(GSM_Statemachine *sm)
@@ -1034,7 +1043,7 @@ static GSM_Error SMS_Slave(GSM_Statemachine *sm)
 				eprintf("New message indicated @%d\n", SMSData[2]);
 				msleep_poll(200);
 				memset(&m, 0, sizeof(m));
-				m.Location = SMSData[2];
+				m.Number = SMSData[2];
 				m.MemoryType = GMT_ME;
 				if (GetSMSMessage(&m) != GE_NONE)
 					eprintf("Could not find promissed message?\n");
@@ -1165,9 +1174,9 @@ WritePhonebookLocation(GSM_PhonebookEntry *entry)
 }
 
 static GSM_Error
-GetSMSStatus(GSM_SMSStatus *Status)
+GetSMSStatus(GSM_SMSMemoryStatus *Status)
 {
-	Status->UnRead = 0;
+	Status->Unread = 0;
 	Status->Number = 5;
 	return GE_NONE;
 }
