@@ -549,16 +549,8 @@ char *char_bcd_number_get(u8 *number)
 	return buffer;
 }
 
-/* BASE64 functions */
-int string_base64(const char *instring)
-{
-	for (; *instring; instring++)
-		if (*instring & 0x80)
-			return 1;
-	return 0;
-}
-
-int utf82ascii(char *outstring, char *instring, int inlen)
+/* UTF-8 conversion functions */
+int utf8_decode(char *outstring, char *instring, int inlen)
 {
 	int outlen = inlen;
 #ifdef HAVE_ICONV
@@ -572,7 +564,7 @@ int utf82ascii(char *outstring, char *instring, int inlen)
 	return outlen;
 }
 
-int ascii2utf8(char *outstring, unsigned char *instring, int inlen)
+int utf8_encode(char *outstring, char *instring, int inlen)
 {
 	int aux = inlen;
 	int retval, outlen = inlen * 2;
@@ -584,6 +576,16 @@ int ascii2utf8(char *outstring, unsigned char *instring, int inlen)
 	iconv_close(cd);
 #endif
 	return 2 * aux - outlen;
+}
+
+
+/* BASE64 functions */
+int string_base64(const char *instring)
+{
+	for (; *instring; instring++)
+		if (*instring & 0x80)
+			return 1;
+	return 0;
 }
 
 /*
@@ -605,7 +607,7 @@ int base64_encode(char *outstring, char *instring, int convertToUTF8)
 
 		inlen = strlen(instring);
 		outtemp = malloc(inlen);
-		outlen = ascii2utf8(outtemp, instring, inlen);
+		outlen = utf8_encode(outtemp, instring, inlen);
 		instring = outtemp;
 		inlen = outlen;
 	} else {
@@ -729,7 +731,7 @@ int base64_decode(char *dest, char *source, int length)
 		}
 	}
 endloop:
-	retval = utf82ascii(dest, aux, dpos);
+	retval = utf8_decode(dest, aux, dpos);
 	free(aux);
 	return retval;
 }
