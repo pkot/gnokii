@@ -12,14 +12,6 @@
 
   Header file device access code.
 
-  $Log$
-  Revision 1.10  2001-08-20 23:27:37  pkot
-  Add hardware shakehand to the link layer (Manfred Jonsson)
-
-  Revision 1.9  2001/06/28 00:28:45  pkot
-  Small docs updates (Pawel Kot)
-
-
 */
 
 #ifndef __device_h

@@ -54,7 +54,7 @@ char *print_error(GSM_Error e)
 	case GE_INVALIDIMAGESIZE:         return "Invalid size of bitmap (in file, sms etc.)";
 	case GE_NOTSUPPORTED:             return "Function not supported by the phone";
 	case GE_BUSY:                     return "Command is still being executed.";
-	case GE_USERCANCELED:             return "User has cancelled the action.";   
+	case GE_USERCANCELED:             return "User has cancelled the action.";
 	case GE_UNKNOWN:                  return "Unknown error - well better than nothing!!";
 	case GE_MEMORYFULL:               return "Memory is full";
 	case GE_NOTWAITING:               return "Not waiting for a response from the phone";

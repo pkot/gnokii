@@ -11,7 +11,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides useful functions for all phones  
+  This file provides useful functions for all phones
   See README for more details on supported mobile phones.
 
   The various routines are called PGEN_(whatever).
@@ -30,9 +30,9 @@
 GSM_Error PGEN_DebugMessage(int type, unsigned char *mes, int len)
 {
 	int i;
-  
+
 	dprintf("Message debug (type %02x):\n", type);
-	for (i = 0; i < len; i++) 
+	for (i = 0; i < len; i++)
 		if (isprint(mes[i])) dprintf("[%02x%c]", mes[i], mes[i]);
 		else dprintf("[%02x ]", mes[i]);
 	dprintf("\n");

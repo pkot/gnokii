@@ -15,25 +15,19 @@
 */
 
 #ifndef __data_datapump_h
-#define __data_datapump_h 
+#define __data_datapump_h
 
-	/* Prototypes */
+/* Prototypes */
 
 void    DP_CallFinished(void);
 bool	DP_Initialise(int read_fd, int write_fd);
 int     DP_CallBack(RLP_UserInds ind, u8 *buffer, int length);
 void    DP_CallPassup(char c);
 
-	/* All defines and prototypes from here down are specific to 
-	   the datapump code and so are #ifdef out if __datapump_c isn't 
+	/* All defines and prototypes from here down are specific to
+	   the datapump code and so are #ifdef out if __datapump_c isn't
 	   defined. */
 #ifdef	__data_datapump_c
-
-
-
-
-
-
 
 #endif	/* __data_datapump_c */
 

@@ -11,22 +11,10 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides an API for accessing functions via fbus over irda. 
+  This file provides an API for accessing functions via fbus over irda.
   See README for more details on supported mobile phones.
 
   The various routines are called PHONET_(whatever).
-
-  $Log$
-  Revision 1.2  2001-03-21 23:36:07  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.1  2001/02/21 19:57:12  chris
-  More fiddling with the directory layout
-
-  Revision 1.1  2001/02/06 21:15:37  chris
-  Preliminary irda support for 7110 etc.  Not well tested!
-
 
 */
 
@@ -48,14 +36,14 @@ GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
 
 #ifdef __links_fbus_phonet_c  /* Prototype functions for fbus-phonet.c only */
 
-typedef struct{
-  int BufferCount;
-  enum FBUS_RX_States state;
-  int MessageSource;
-  int MessageDestination;
-  int MessageType;
-  int MessageLength;
-  char MessageBuffer[PHONET_MAX_FRAME_LENGTH];
+typedef struct {
+	int BufferCount;
+	enum FBUS_RX_States state;
+	int MessageSource;
+	int MessageDestination;
+	int MessageType;
+	int MessageLength;
+	char MessageBuffer[PHONET_MAX_FRAME_LENGTH];
 } PHONET_IncomingMessage;
 
 

@@ -11,7 +11,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides functions specific to the 3110 series. 
+  This file provides functions specific to the 3110 series.
   See README for more details on supported mobile phones.
 
 */
@@ -91,14 +91,14 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x4a, P3110_IncomingNothing },
 	{ 0x4b, P3110_IncomingStatusInfo },
 	{ 0x4c, P3110_IncomingNothing },
-        { 0x4d, P3110_IncomingPhoneInfo },
+	{ 0x4d, P3110_IncomingPhoneInfo },
 	{ 0, NULL}
 };
 
 GSM_Phone phone_nokia_3110 = {
 	IncomingFunctions,
 	PGEN_IncomingDefault,
-        /* Mobile phone information */
+	/* Mobile phone information */
 	{
 		"3110|3810|8110|8110i",	/* Models */
 		4,			/* Max RF Level */
@@ -183,7 +183,7 @@ static GSM_Error P3110_Initialise(GSM_Statemachine *state)
 	nk3110_layout.DeliveryReport = nk3110_deliver;
 	nk3110_layout.Picture = nk3110_deliver;
 	layout = nk3110_layout;
-	
+
 	/* Only serial connection is supported */
 	if (state->Link.ConnectionType != GCT_Serial) return GE_NOTSUPPORTED;
 
@@ -197,9 +197,9 @@ static GSM_Error P3110_Initialise(GSM_Statemachine *state)
 	SM_Initialise(state);
 
 	/* 0x15 messages are sent by the PC during the initialisation phase.
-	   Anyway, the contents of the message are not understood so we 
-	   simply send the same sequence observed between the W95 PC and 
-	   the phone.  The init sequence may still be a bit flaky and is not 
+	   Anyway, the contents of the message are not understood so we
+	   simply send the same sequence observed between the W95 PC and
+	   the phone.  The init sequence may still be a bit flaky and is not
 	   fully understood. */
 	if (SM_SendMessage(state, 20, 0x15, init_sequence) != GE_NONE) return GE_NOTREADY;
 
@@ -227,7 +227,7 @@ static GSM_Error P3110_GetSMSInfo(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P3110_GetPhoneInfo(GSM_Data *data, GSM_Statemachine *state)
 {
-      	dprintf("Getting phone info...\n");
+	dprintf("Getting phone info...\n");
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 	if (SM_SendMessage(state, 0, 0x4c, NULL) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x4d);
@@ -235,7 +235,7 @@ static GSM_Error P3110_GetPhoneInfo(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P3110_GetStatusInfo(GSM_Data *data, GSM_Statemachine *state)
 {
-      	dprintf("Getting phone status...\n");
+	dprintf("Getting phone status...\n");
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 	if (SM_SendMessage(state, 0, 0x4a, NULL) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x4b);
@@ -243,7 +243,7 @@ static GSM_Error P3110_GetStatusInfo(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P3110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-      	dprintf("Getting memory status...\n");
+	dprintf("Getting memory status...\n");
 
 	/* Check if this type of memory is available */
 	switch (data->MemoryStatus->MemoryType) {
@@ -265,8 +265,8 @@ static GSM_Error P3110_Identify(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("Identifying...\n");
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 	if (SM_SendMessage(state, 0, 0x4c, NULL) != GE_NONE) return GE_NOTREADY;
-       	SM_Block(state, data, 0x4d);
-	
+	SM_Block(state, data, 0x4d);
+
 	/* Check that we are back at state Initialised */
 	if (SM_Loop(state, 0) != Initialised) return GE_UNKNOWN;
 	return GE_NONE;
@@ -294,14 +294,14 @@ static GSM_Error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 		break;
 	default:
 		return (GE_INVALIDMEMORYTYPE);
-        }
+	}
 
 	/* Set memory type and location in the request */
 	request[0] = data->SMSMessage->MemoryType;
 	request[1] = data->SMSMessage->Number;
 
 	/* 0x25 messages requests the contents of an SMS message
-	   from the phone.  The first byte has only ever been 
+	   from the phone.  The first byte has only ever been
 	   observed to be 0x02 - could be selecting internal versus
 	   external memory.  Specifying memory 0x00 may request the
 	   first location?  Phone replies with 0x2c and 0x27 messages
@@ -318,7 +318,7 @@ static GSM_Error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 		timeout--;
 	} while ((timeout > 0) && state->NumReceived == 0);
 
-	/* timeout */ 
+	/* timeout */
 	if (state->NumReceived == 0) return GE_TIMEOUT;
 
 	/* find response in state machine */
@@ -372,13 +372,13 @@ static GSM_Error P3110_DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 		break;
 	default:
 		return (GE_INVALIDMEMORYTYPE);
-        }
+	}
 
 	/* Set memory type and location in the request */
 	request[0] = data->SMSMessage->MemoryType;
 	request[1] = data->SMSMessage->Number;
 
-	/* 0x26 message deletes an SMS message from the phone. 
+	/* 0x26 message deletes an SMS message from the phone.
 	   The first byte has only ever been observed to be 0x02
 	   but is assumed to be selecting internal versus
 	   external memory.  Phone replies with 0x2e for valid locations,
@@ -396,7 +396,7 @@ static GSM_Error P3110_DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 		timeout--;
 	} while ((timeout > 0) && state->NumReceived == 0);
 
-	/* timeout */ 
+	/* timeout */
 	if (state->NumReceived == 0) return GE_TIMEOUT;
 
 	/* find response in state machine */
@@ -442,48 +442,48 @@ static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("Sending SMS to %s via message center %s\n", data->SMSMessage->RemoteNumber.number, data->SMSMessage->MessageCenter.Number);
 
 /*
-  Moved to gsm-sms.c
-  if (data->SMSMessage->UDH[0].Type) {
-  userdata_offset = 1 + data->SMSMessage->udhlen;
-  memcpy(userdata, data->SMSMessage->UserData[0].u.Text, userdata_offset);
-  fo |= FO_UDHI;
-  } else {
-  userdata_offset = 0;
-  }
+	Moved to gsm-sms.c
+	if (data->SMSMessage->UDH[0].Type) {
+		userdata_offset = 1 + data->SMSMessage->udhlen;
+		memcpy(userdata, data->SMSMessage->UserData[0].u.Text, userdata_offset);
+		fo |= FO_UDHI;
+	} else {
+		userdata_offset = 0;
+	}
 */
 
 /*
-  Moved to gsm-sms.c
-  if (data->SMSMessage->EightBit) {
-  memcpy(userdata + userdata_offset, data->SMSMessage->UserData[0].u.Text, data->SMSMessage->Length);
-  userdata_length = data->SMSMessage->Length + userdata_offset;
-  max_userdata_length = GSM_MAX_SMS_8_BIT_LENGTH;
-  dcs = DCS_DATA | DCS_CLASS1;
-  } else {
-  userdata_length = strlen(data->SMSMessage->UserData[0].u.Text);
-  memcpy(userdata + userdata_offset, data->SMSMessage->UserData[0].u.Text, userdata_length);
-  userdata_length += userdata_offset;
-  max_userdata_length = GSM_MAX_SMS_LENGTH;
-  }
+	Moved to gsm-sms.c
+	if (data->SMSMessage->EightBit) {
+		memcpy(userdata + userdata_offset, data->SMSMessage->UserData[0].u.Text, data->SMSMessage->Length);
+		userdata_length = data->SMSMessage->Length + userdata_offset;
+		max_userdata_length = GSM_MAX_SMS_8_BIT_LENGTH;
+		dcs = DCS_DATA | DCS_CLASS1;
+	} else {
+		userdata_length = strlen(data->SMSMessage->UserData[0].u.Text);
+		memcpy(userdata + userdata_offset, data->SMSMessage->UserData[0].u.Text, userdata_length);
+		userdata_length += userdata_offset;
+		max_userdata_length = GSM_MAX_SMS_LENGTH;
+	}
 */
 
 /*
-  Moved to gsm-sms.c
-  request[0] = fo;
-  request[1] = PID_DEFAULT;
-  request[2] = dcs;
-  request[3] = GSMV_Max_Time;
-  request[4] = 0x00;
-  request[5] = 0x00;
-  request[6] = 0x00;
-  request[7] = 0x00;
-  request[8] = 0x00;
-  request[9] = 0x00;
-  request[10] = userdata_length;
-  request[11] = smsc_length;
-  memcpy(request+12, data->SMSMessage->MessageCenter.Number, smsc_length);
-  request[12+smsc_length] = dest_length;
-  memcpy(request+13+smsc_length, data->SMSMessage->Destination, dest_length);
+	Moved to gsm-sms.c
+	request[0] = fo;
+	request[1] = PID_DEFAULT;
+	request[2] = dcs;
+	request[3] = GSMV_Max_Time;
+	request[4] = 0x00;
+	request[5] = 0x00;
+	request[6] = 0x00;
+	request[7] = 0x00;
+	request[8] = 0x00;
+	request[9] = 0x00;
+	request[10] = userdata_length;
+	request[11] = smsc_length;
+	memcpy(request+12, data->SMSMessage->MessageCenter.Number, smsc_length);
+	request[12+smsc_length] = dest_length;
+	memcpy(request+13+smsc_length, data->SMSMessage->Destination, dest_length);
 */
 
 	/* error = EncodePDUSMS(data->SMSMessage, request); */
@@ -547,7 +547,7 @@ static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 			timeout--;
 		} while ((timeout > 0) && state->NumReceived == 0);
 
-		/* timeout */ 
+		/* timeout */
 		if (state->NumReceived == 0) return GE_TIMEOUT;
 
 		/* find response in state machine */
@@ -593,16 +593,16 @@ static GSM_Error P3110_IncomingCall(int messagetype, unsigned char *message, int
 	int     count;
 	char    buffer[256];
 
-        /* Get info out of message.  At present, first three bytes are 
-	   unknown (though third seems to correspond to length of 
-	   number).  Remaining bytes are the phone number, ASCII 
+	/* Get info out of message.  At present, first three bytes are
+	   unknown (though third seems to correspond to length of
+	   number).  Remaining bytes are the phone number, ASCII
 	   encoded. */
 	for (count = 0; count < message[4]; count ++) {
 		buffer[count] = message[5 + count];
 	}
 	buffer[count] = 0x00;
 
-        /* Now display incoming call message. */
+	/* Now display incoming call message. */
 	dprintf("Incoming call - Type: %s. %02x, Number %s.\n",
 		(message[2] == 0x05 ? "Voice":"Data?"), message[3], buffer);
 
@@ -616,7 +616,7 @@ static GSM_Error P3110_IncomingCallAnswered(int messagetype, unsigned char *mess
 	return GE_NONE;
 }
 
-/* Fairly self explanatory these two, though the outgoing 
+/* Fairly self explanatory these two, though the outgoing
    call message has three (unexplained) data bytes. */
 static GSM_Error P3110_IncomingCallEstablished(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
@@ -640,7 +640,7 @@ static GSM_Error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char 
 }
 
 /* 0x11 messages are sent by the phone when an incoming call
-   terminates.  There is some other data in the message, 
+   terminates.  There is some other data in the message,
    purpose as yet undertermined. */
 static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
@@ -654,9 +654,9 @@ static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char 
 	return GE_NONE;
 }
 
-/* 0x12 messages are sent after the 0x10 message at the 
+/* 0x12 messages are sent after the 0x10 message at the
    end of an outgoing call.  Significance of two messages
-   versus the one at the end of an incoming call  is as 
+   versus the one at the end of an incoming call  is as
    yet undertermined. */
 static GSM_Error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
@@ -671,7 +671,7 @@ static GSM_Error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char
 }
 
 
-/* 0x13 messages are sent after the phone restarts. 
+/* 0x13 messages are sent after the phone restarts.
    Re-initialise */
 
 static GSM_Error P3110_IncomingRestart(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -690,12 +690,12 @@ static GSM_Error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *me
 }
 
 
-/* 0x16 messages are sent by the phone during initialisation, to response 
+/* 0x16 messages are sent by the phone during initialisation, to response
    to the 0x15 message.
-   Sequence bytes have been observed to change with differing software 
-   versions: V06.61 (19/08/97) sends 0x10 0x02, V07.02 (17/03/98) sends 
+   Sequence bytes have been observed to change with differing software
+   versions: V06.61 (19/08/97) sends 0x10 0x02, V07.02 (17/03/98) sends
    0x30 0x02. The actual data byte is 0x02 when SIM memory is available,
-   and 0x01 when not (e.g. when SIM card isn't inserted to phone or when 
+   and 0x01 when not (e.g. when SIM card isn't inserted to phone or when
    it is waiting for PIN) */
 
 static GSM_Error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -721,15 +721,15 @@ static GSM_Error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *me
 static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	int count;
-    
+
 	/* First see if it was an acknowledgement to one of our messages,
-           if so then nothing to do */
+	   if so then nothing to do */
 	if (length == 0x02) return GE_NONE;
 
-        /* Copy into current SMS message as long as it's non-NULL */
+	/* Copy into current SMS message as long as it's non-NULL */
 	if (!data->RawData) return GE_INTERNALERROR;
 
-        /* If this is the first block, reset accumulated message length. */
+	/* If this is the first block, reset accumulated message length. */
 	if (message[2] == 1) user_data_count = 0;
 
 	count = data->RawData->Length + length - 3;
@@ -777,9 +777,9 @@ static GSM_Error P3110_IncomingSMSSendError(int messagetype, unsigned char *mess
 }
 
 
-/* 0x2c messages are generated by the phone when we request an SMS 
-   message with an 0x25 message.  Appears to have the same fields 
-   as the 0x30 notification but with one extra.  Immediately after 
+/* 0x2c messages are generated by the phone when we request an SMS
+   message with an 0x25 message.  Appears to have the same fields
+   as the 0x30 notification but with one extra.  Immediately after
    the 0x2c nessage, the phone sends 0x27 message(s) */
 
 static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -826,7 +826,7 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 	  3810 series has limited support for different SMS "mailboxes"
 	   to the extent that the only know differentiation is between
 	   received messages 0x01, 0x04 and written messages 0x07 0x01.
-	   No flag has been found (yet) that indicates whether the 
+	   No flag has been found (yet) that indicates whether the
 	   message has been sent or not.
 
 	Default to unknown message type
@@ -864,7 +864,7 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 	else
 		data->SMSMessage->EightBit = false;
 
-	Extract date and time information which is packed in to 
+	Extract date and time information which is packed in to
 	   nibbles of each byte in reverse order.  Thus day 28 would be
 	   encoded as 0x82
 	P3110_DecodeTime(message+8, &(data->SMSMessage->Time));
@@ -1095,8 +1095,8 @@ static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *messag
 }
 
 
-/* 0x4b messages are sent by phone in response (it seems) to the keep 
-   alive packet.  We must acknowledge these it seems by sending a 
+/* 0x4b messages are sent by phone in response (it seems) to the keep
+   alive packet.  We must acknowledge these it seems by sending a
    response with the "sequence number" byte loaded appropriately. */
 
 static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -1112,29 +1112,29 @@ static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *messag
 	};
 #endif
 
-        /* There are three data bytes in the status message, two have been
-           attributed to signal level, the third is presently unknown. 
-           Unknown byte has been observed to be 0x01 when connected to normal
-           network, 0x04 when no network available.   Steps through 0x02, 0x03
-           when incoming or outgoing calls occur...*/   
+	/* There are three data bytes in the status message, two have been
+	   attributed to signal level, the third is presently unknown.
+	   Unknown byte has been observed to be 0x01 when connected to normal
+	   network, 0x04 when no network available.   Steps through 0x02, 0x03
+	   when incoming or outgoing calls occur...*/
 	/* FB38_LinkOK = true; */
 
-        /* Note: GetRFLevel function in fbus-3810.c does conversion 
+	/* Note: GetRFLevel function in fbus-3810.c does conversion
 	   into required units. */
 	if (data->RFLevel) {
 		*(data->RFUnits) = GRF_Arbitrary;
 		*(data->RFLevel) = message[3];
 	}
 
-        /* Note: GetBatteryLevel function in fbus-3810.c does conversion 
+	/* Note: GetBatteryLevel function in fbus-3810.c does conversion
 	   into required units. */
-	if (data->BatteryLevel) { 
+	if (data->BatteryLevel) {
 		*(data->BatteryUnits) = GBU_Arbitrary;
 		*(data->BatteryLevel) = message[4];
 	}
 
-        /* Only output connection status byte now as the RF and Battery
-           levels are displayed by the main gnokii code. */
+	/* Only output connection status byte now as the RF and Battery
+ 	   levels are displayed by the main gnokii code. */
 	dprintf("Status: %s, Battery level: %d, RF level: %d.\n",
 		StatusStr[message[2]], message[4], message[3]);
 	return GE_NONE;
@@ -1167,9 +1167,6 @@ static GSM_Error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message
 	return GE_NONE;
 }
 
-
-/*
- */
 
 void P3110_KeepAliveLoop(GSM_Statemachine *state)
 {

@@ -31,43 +31,43 @@
 
 static GSM_Error GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
 {
-        char req[128];
-        GSM_Error ret;
- 
-        ret = AT_SetMemoryType(data->MemoryStatus->MemoryType,  state);
-        if (ret != GE_NONE)
-                return ret;
-        sprintf(req, "AT+CPBR=?\r\n");
-        if (SM_SendMessage(state, 11, GOP_GetMemoryStatus, req) != GE_NONE)
-                return GE_NOTREADY;
-        ret = SM_Block(state, data, GOP_GetMemoryStatus);
-        return ret;
+	char req[128];
+	GSM_Error ret;
+
+	ret = AT_SetMemoryType(data->MemoryStatus->MemoryType,  state);
+	if (ret != GE_NONE)
+		return ret;
+	sprintf(req, "AT+CPBR=?\r\n");
+	if (SM_SendMessage(state, 11, GOP_GetMemoryStatus, req) != GE_NONE)
+		return GE_NOTREADY;
+	ret = SM_Block(state, data, GOP_GetMemoryStatus);
+	return ret;
 }
 
 
 static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	AT_LineBuffer buf;
-        char *pos;
- 
+	char *pos;
+
 	buf.line1 = buffer;
-	buf.length= length;
+	buf.length = length;
 	splitlines(&buf);
 	if (buf.line1 == NULL)
-                return GE_INVALIDMEMORYTYPE;
-        if (data->MemoryStatus) {
-                if (strstr(buf.line2,"+CPBR")) {
-                        pos = strchr(buf.line2, '-');
-                        if (pos) {
-                                data->MemoryStatus->Used = atoi(++pos);
-                                data->MemoryStatus->Free = 0;
-                        } else {
-                                return GE_NOTSUPPORTED;
-                        }
-                }
-        }
-        return GE_NONE;
-} 
+		return GE_INVALIDMEMORYTYPE;
+	if (data->MemoryStatus) {
+		if (strstr(buf.line2, "+CPBR")) {
+			pos = strchr(buf.line2, '-');
+			if (pos) {
+				data->MemoryStatus->Used = atoi(++pos);
+				data->MemoryStatus->Free = 0;
+			} else {
+				return GE_NOTSUPPORTED;
+			}
+		}
+	}
+	return GE_NONE;
+}
 
 
 void AT_InitEricsson(GSM_Statemachine *state, char *foundmodel, char *setupmodel)

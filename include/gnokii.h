@@ -9,7 +9,7 @@
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
-	
+
   Header file for the various functions, definitions etc. used to implement
   the handset interface.  See gsm-api.c for more details.
 

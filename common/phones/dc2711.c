@@ -28,23 +28,23 @@
 
 static GSM_Link link;
 static GSM_IncomingFunctionType D2711_IncomingFunctions[];
- 
+
 #define INFO \
 { \
-	"dancall|2711|2713", /* Supported models */ \
-                7,                     /* Max RF Level */ \
-                0,                     /* Min RF Level */ \
-                GRF_Percentage,        /* RF level units */ \
-                7,                     /* Max Battery Level */ \
-                0,                     /* Min Battery Level */ \
-                GBU_Percentage,        /* Battery level units */ \
-                0,                     /* Have date/time support */ \
-                0,                     /* Alarm supports time only */ \
-                1,                     /* Alarms available - FIXME */ \
-                60, 96,                /* Startup logo size */ \
-                21, 78,                /* Op logo size */ \
-                14, 72                 /* Caller logo size */ \
-		}
+	"dancall|2711|2713",	/* Supported models */ \
+	7,			/* Max RF Level */ \
+	0,			/* Min RF Level */ \
+	GRF_Percentage,		/* RF level units */ \
+	7,			/* Max Battery Level */ \
+	0,			/* Min Battery Level */ \
+	GBU_Percentage,		/* Battery level units */ \
+	0,			/* Have date/time support */ \
+	0,			/* Alarm supports time only */ \
+	1,			/* Alarms available - FIXME */ \
+	60, 96,			/* Startup logo size */ \
+	21, 78,			/* Op logo size */ \
+	14, 72			/* Caller logo size */ \
+}
 
 GSM_Information D2711_Information = INFO;
 
@@ -60,7 +60,7 @@ bool D2711_LinkOK = true;
 char reply_buf[10240];
 
 static void Terminate()
-{  
+{
 	return;
 };
 
@@ -104,7 +104,7 @@ GSM_Error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
 		return GE_EMPTYSMSLOCATION;
 	if (!strncmp(s, "+CMS ERROR: ", 11))
 		return GE_INTERNALERROR;
-		
+
 	printf("Got %s [%s] as reply for cmgr\n", s, t);
 	{
 		m->Time.Year=0;
@@ -177,7 +177,7 @@ static GSM_Error Initialise(char *port_device, char *initlength,
 		printf("Link UP\n");
 	}
 
-  	return GE_NONE;
+	return GE_NONE;
 }
 
 static GSM_Error
@@ -238,7 +238,7 @@ GSM_Functions D2711_Functions = {
 	UNIMPLEMENTED, /* SetBitmap */
 	UNIMPLEMENTED, /* SetRingtone */
 	UNIMPLEMENTED, /* SendRingtone */
-	UNIMPLEMENTED, /* Reset */ 
+	UNIMPLEMENTED, /* Reset */
 	UNIMPLEMENTED, /* GetProfile */
 	UNIMPLEMENTED, /* SetProfile */
 	UNIMPLEMENTED, /* SendRLPFrame */

@@ -10,7 +10,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Header file for 2110 code.	
+  Header file for 2110 code.
 
 */
 

@@ -1,17 +1,17 @@
 /*
 
   $Id$
-  
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001       Pavel Machek
-  Copyright (C) 2001       Pawe³ Kot
+  Copyright (C) 2001-2002  Pawe³ Kot
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
-	
+
   Mainline code for gnokii utility.  Handles command line parsing and
   reading/writing phonebook entries and other stuff.
 
@@ -198,7 +198,7 @@ static void version(void)
 	fprintf(stderr, _("Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 			  "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
-			  "Copyright (C) Pawe³ Kot <pkot@linuxnews.pl>, 2001\n"
+			  "Copyright (C) Pawe³ Kot <pkot@linuxnews.pl>, 2001-2002\n"
 			  "gnokii is free software, covered by the GNU General Public License, and you are\n"
 			  "welcome to change it and/or distribute copies of it under certain conditions.\n"
 			  "There is absolutely no warranty for gnokii.  See GPL for details.\n"

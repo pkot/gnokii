@@ -45,7 +45,7 @@ struct CFG_Header *CFG_ReadFile(const char *filename)
 	if ((buf = (char *)malloc(255)) == NULL) {
 		return NULL;
 	}
-    
+
 	/* Open file */
 	if ((handle = fopen(filename, "r")) == NULL) {
 		dprintf("CFG_ReadFile - open %s: %s\n", filename, strerror(errno));
@@ -81,7 +81,7 @@ struct CFG_Header *CFG_ReadFile(const char *filename)
 
 			/* Fill in fields */
 			memset(heading, '\0', sizeof(*heading));
-	    
+
 			line++;
 			line[strlen(line) - 1] = '\0';
 
@@ -123,7 +123,7 @@ struct CFG_Header *CFG_ReadFile(const char *filename)
 			value = strchr(line, '=');
 			*value = '\0';		/* Split string */
 			value++;
-	    
+
 			while(isspace((int) *value)) {      /* Remove leading white */
 				value++;
 			}
@@ -169,9 +169,9 @@ int CFG_WriteFile(struct CFG_Header *cfg, const char *filename)
 	return 0;
 }
 
-/* 
+/*
  * Find the value of a key in a config file.  Return value associated
- * with key or NULL if no such key exists. 
+ * with key or NULL if no such key exists.
  */
 
 char *CFG_Get(struct CFG_Header *cfg, const char *section, const char *key)
@@ -199,7 +199,7 @@ char *CFG_Get(struct CFG_Header *cfg, const char *section, const char *key)
 	return NULL;
 }
 
-/* 
+/*
  * Return all the entries of the fiven section.
  */
 
@@ -225,13 +225,13 @@ void CFG_GetForeach(struct CFG_Header *cfg, const char *section, CFG_GetForeach_
 /*  Set the value of a key in a config file.  Return the new value if
     the section/key can be found, else return NULL.  */
 
-char *CFG_Set(struct CFG_Header *cfg, const char *section, const char *key, 
+char *CFG_Set(struct CFG_Header *cfg, const char *section, const char *key,
 		const char *value)
 {
 	struct CFG_Header *h;
 	struct CFG_Entry *e;
 
-	if ((cfg == NULL) || (section == NULL) || (key == NULL) || 
+	if ((cfg == NULL) || (section == NULL) || (key == NULL) ||
 	    (value == NULL)) {
 		return NULL;
 	}
@@ -252,7 +252,7 @@ char *CFG_Set(struct CFG_Header *cfg, const char *section, const char *key,
 		}
 	}
 	/* Key not found in section */
-	return NULL;    
+	return NULL;
 }
 
 int readconfig(char **model, char **port, char **initlength,

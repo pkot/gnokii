@@ -11,38 +11,10 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides an API for accessing functions via fbus. 
+  This file provides an API for accessing functions via fbus.
   See README for more details on supported mobile phones.
 
   The various routines are called FBUS_(whatever).
-
-  $Log$
-  Revision 1.5  2001-11-15 12:04:06  pkot
-  Faster initialization for 6100 series (don't check for dlr3 cable)
-
-  Revision 1.4  2001/03/21 23:36:08  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.3  2001/03/19 23:44:57  pkot
-  DLR3 cable support
-
-  Revision 1.2  2001/03/13 01:23:19  pkot
-  Windows updates (Manfred Jonsson)
-
-  Revision 1.1  2001/02/21 19:57:12  chris
-  More fiddling with the directory layout
-
-  Revision 1.3  2001/02/06 21:15:36  chris
-  Preliminary irda support for 7110 etc.  Not well tested!
-
-  Revision 1.2  2001/01/17 02:54:55  chris
-  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
-  I can now edit my phonebook in xgnokii but it is 'work in progress'.
-
-  Revision 1.1  2001/01/14 22:47:01  chris
-  Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
-
 
 */
 
@@ -149,11 +121,3 @@ int FBUS_TX_SendAck(u8 message_type, u8 message_seq);
 #endif   /* #ifdef __links_fbus_c */
 
 #endif   /* #ifndef __links_fbus_h */
-
-
-
-
-
-
-
-

@@ -10,7 +10,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides functions specific to the 2110 series. 
+  This file provides functions specific to the 2110 series.
   See README for more details on supported mobile phones.
 
   The various routines are called P2110_(whatever).

@@ -11,7 +11,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides useful functions for all phones  
+  This file provides useful functions for all phones
   See README for more details on supported mobile phones.
 
   The various routines are called PGEN_...

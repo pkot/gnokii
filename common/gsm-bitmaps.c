@@ -6,12 +6,12 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml. 
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
-	
+
   Functions for common bitmap operations.
- 
+
 */
 
 #include <stdio.h>
@@ -74,7 +74,7 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Informati
 
 	/* Copy into the backup */
 	memcpy(&backup, bitmap, sizeof(GSM_Bitmap));
-      
+
 	if (target == GSM_StartupLogo) {
 		bitmap->width = info->StartupLogoW;
 		bitmap->height = info->StartupLogoH;
@@ -108,10 +108,9 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Informati
 		copyheight = bitmap->height;
 		dprintf("We lost some part of image - it's cut (height from %i to %i) !\n", backup.height, bitmap->height);
 	} else copyheight = backup.height;
-  
 
 	GSM_ClearBitmap(bitmap);
-  
+
 	for (y = 0; y < copyheight; y++) {
 		for (x = 0; x < copywidth; x++)
 			if (GSM_IsPointBitmap(&backup, x, y)) GSM_SetPointBitmap(bitmap, x, y);
@@ -163,7 +162,7 @@ GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bit
 	}
 	bitmap->width = message[0];
 	bitmap->height = message[1];
-  
+
 	bitmap->size = (bitmap->width * bitmap->height) / 8;
 	memcpy(bitmap->bitmap, message + offset + 2, bitmap->size);
 
@@ -199,10 +198,10 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 		dprintf("gulp?\n");
 		break;
 	}
-        
+
 	/* Info field */
 	message[current++] = 0x00;
-	
+
 	/* Logo size */
 	message[current++] = bitmap->width;
 	message[current++] = bitmap->height;
@@ -211,7 +210,7 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 	message[current++] = 0x01;
 
 	memcpy(message + current, bitmap->bitmap, bitmap->size);
-	
+
 	return (current + bitmap->size);
 }
 
@@ -228,7 +227,7 @@ int GSM_SaveSMSBitmap(GSM_SMSMessage *message, GSM_Bitmap *bitmap)
 					0x00};
 
 	char Data[7] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-  
+
 	/* Default settings for SMS message:
 	   - no delivery report
 	   - Class Message 1
@@ -256,7 +255,7 @@ int GSM_SaveSMSBitmap(GSM_SMSMessage *message, GSM_Bitmap *bitmap)
 	case GSM_OperatorLogo:
 		message->UDH[0].Type = SMS_OpLogo;
 		UserDataHeader[4] = 0x82; /* NBS port 0x1582 */
-      
+
 		/* Set the network code */
 		Data[current++] = ((bitmap->netcode[1] & 0x0f) << 4) | (bitmap->netcode[0] & 0xf);
 		Data[current++] = 0xf0 | (bitmap->netcode[2] & 0x0f);
@@ -270,7 +269,7 @@ int GSM_SaveSMSBitmap(GSM_SMSMessage *message, GSM_Bitmap *bitmap)
 	default: /* error */
 		break;
 	}
-        
+
 	/* Set the logo size */
 	current++;
 	Data[current++] = bitmap->width;

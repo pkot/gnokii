@@ -6,10 +6,10 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml. 
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
-	
+
   Functions to read and write common file types.
 
 */
@@ -84,7 +84,7 @@ GSM_Error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 	FILE *file;
 	GSM_Error error;
 	GSM_Filetypes filetype;
-  
+
 	file = fopen(FileName, "rb");
 
 	if (!file)
@@ -95,7 +95,7 @@ GSM_Error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 
 	filetype = RTTL;
 	if (strstr(FileName, ".ott")) filetype = OTT; /* OTT files saved by NCDS3 */
-  
+
 	error = GE_NONE;
 
 	rewind(file);  /* Not necessary for now but safer */
@@ -122,7 +122,7 @@ GSM_Error loadott(FILE *file, GSM_Ringtone *ringtone)
 {
 	char Buffer[2000];
 	int i;
-  
+
 	i = fread(Buffer, 1, 2000, file);
 	if (!feof(file)) return GE_FILETOOLONG;
 	return GSM_UnPackRingtone(ringtone, Buffer, i);
@@ -153,7 +153,7 @@ GSM_Error loadrttl(FILE *file, GSM_Ringtone *ringtone)
 	}
 
 	ptr = strtok(def, ", ");
-        /* Parsing the <defaults> section. */
+	/* Parsing the <defaults> section. */
 	ringtone->tempo = 63;
 
 	while (ptr) {
@@ -179,7 +179,7 @@ GSM_Error loadrttl(FILE *file, GSM_Ringtone *ringtone)
 	dprintf("DefNoteDuration = %d\n", DefNoteDuration);
 	dprintf("DefNoteScale = %d\n", DefNoteScale);
 
-        /* Parsing the <note-command>+ section. */
+	/* Parsing the <note-command>+ section. */
 	ptr = strtok(notes, ", ");
 	while (ptr && (NrNote < MAX_RINGTONE_NOTES)) {
 
@@ -203,7 +203,7 @@ GSM_Error loadrttl(FILE *file, GSM_Ringtone *ringtone)
 			ringtone->notes[NrNote].note -= 14;
 
 		ptr++;
-    
+
 		if (*ptr == '#') {
 			ringtone->notes[NrNote].note++;
 			if ((ringtone->notes[NrNote].note == 5) || (ringtone->notes[NrNote].note == 13))
@@ -248,15 +248,14 @@ GSM_Error loadrttl(FILE *file, GSM_Ringtone *ringtone)
 /* Confirming must be done before this is called */
 GSM_Error GSM_SaveRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 {
-	FILE *file; 
+	FILE *file;
 	GSM_Error error;
 
 	file = fopen(FileName, "wb");
-  
-	if (!file)
-		return(GE_CANTOPENFILE);
-  
-	/* FIXME... */ 
+
+	if (!file) return(GE_CANTOPENFILE);
+
+	/* FIXME... */
 	/* We need a way of passing these functions a filetype rather than rely on the extension */
 	if (strstr(FileName, ".ott")) {
 		error = saveott(file, ringtone);
@@ -271,8 +270,8 @@ GSM_Error GSM_SaveRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 GSM_Error saveott(FILE *file, GSM_Ringtone *ringtone)
 {
 	char Buffer[2000];
-	int i=2000;
-  
+	int i = 2000;
+
 	/* PackRingtone writes up to i chars and returns in i the number written */
 	GSM_PackRingtone(ringtone, Buffer, &i);
 
@@ -289,35 +288,35 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 	int DefDuration, DefScale = 2, CurrentNote;
 	int buffer[6];
 	int i, j, k = 0;
-  
+
 	/* Saves ringtone name */
 	fprintf(file, "%s:", ringtone->name);
 
 	/* Find the most frequently used duration and use this for the default */
- 	for (i = 0; i < 6; i++) buffer[i] = 0;
+	for (i = 0; i < 6; i++) buffer[i] = 0;
 	for (i = 0; i < ringtone->NrNotes; i++) {
 		switch (ringtone->notes[i].duration) {
 		case 192:
 			buffer[0]++; break;
-		case 128: 
+		case 128:
 			buffer[0]++; break;
-		case 96:	
+		case 96:
 			buffer[1]++; break;
-		case 64: 
+		case 64:
 			buffer[1]++; break;
 		case 48:
 			buffer[2]++; break;
-		case 32: 
+		case 32:
 			buffer[2]++; break;
 		case 24:
 			buffer[3]++; break;
-		case 16: 
+		case 16:
 			buffer[3]++; break;
 		case 12:
 			buffer[4]++; break;
-		case 8: 
+		case 8:
 			buffer[4]++; break;
-		case 6: 
+		case 6:
 			buffer[5]++; break;
 		case 4:
 			buffer[5]++; break;
@@ -328,7 +327,7 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 	j = 0;
 	for (i = 0; i < 6; i++) {
 		if (buffer[i] > j) {
-			k = i; 
+			k = i;
 			j = buffer[i];
 		}
 	}
@@ -338,32 +337,32 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 	case 0:
 		DefDuration = 128;
 		fprintf(file, "d=1,");
-		break;	
+		break;
 	case 1:
 		DefDuration = 64;
 		fprintf(file, "d=2,");
-		break;	
+		break;
 	case 2:
 		DefDuration = 32;
 		fprintf(file, "d=4,");
-		break;	
+		break;
 	case 3:
 		DefDuration = 16;
 		fprintf(file, "d=8,");
-		break;	
+		break;
 	case 4:
 		DefDuration = 8;
 		fprintf(file, "d=16,");
-		break;	
+		break;
 	case 5:
 		DefDuration = 4;
 		fprintf(file, "d=32,");
-		break;	
+		break;
 	default:
 		DefDuration = 16;
 		fprintf(file, "d=8,");
-		break;	
-	}  
+		break;
+	}
 
 	/* Find the most frequently used scale and use this for the default */
 	for (i = 0; i < 6; i++) buffer[i] = 0;
@@ -419,11 +418,11 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 				fprintf(file, "32"); break;
 			case 4:
 				fprintf(file, "32"); break;
-			default: 
+			default:
 				break;
 			}
 		}
-    
+
 		/* Now save the actual note */
 		switch (GSM_GetNote(CurrentNote)) {
 		case Note_C  :fprintf(file, "c"); break;
@@ -449,15 +448,14 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 		    ringtone->notes[i].duration == 8 * 1.5 ||
 		    ringtone->notes[i].duration == 4 * 1.5)
 			fprintf(file, ".");
-    
+
 		/* This note has a scale different than the default, so save it */
 		if ( (CurrentNote != 255) && (CurrentNote/14 != DefScale))
 			fprintf(file, "%i",(CurrentNote/14) + 4);
-    
-		/* And a separator before next note */
-		if (i!=ringtone->NrNotes - 1)
-			fprintf(file, ",");
 
+		/* And a separator before next note */
+		if (i != ringtone->NrNotes - 1)
+			fprintf(file, ",");
 	}
 
 	return GE_NONE;
@@ -492,12 +490,12 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 		filetype = NLM;
 	} else if (memcmp(buffer, "BM", 2) == 0) {         /* BMP, I61 and GGP files have 'BM' at the start */
 		filetype = BMP;
-	} else if (memcmp(buffer, "/* XPM */", 9) == 0) {  /* XPM files have 'XPM' at the start */  
+	} else if (memcmp(buffer, "/* XPM */", 9) == 0) {  /* XPM files have 'XPM' at the start */
 		filetype = XPMF;
 	}
 
 	if ((filetype == None) && strstr(FileName, ".otb")) filetype = OTA; /* OTA files saved by NCDS3 */
-  
+
 	rewind(file);
 
 	switch (filetype) {
@@ -560,7 +558,7 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 		break;
 	}
 
-	if (image.ncolors != 2) return GE_WRONGNUMBEROFCOLORS; 
+	if (image.ncolors != 2) return GE_WRONGNUMBEROFCOLORS;
 
 	/* All xpms are loaded as startup logos - but can be resized later */
 
@@ -576,7 +574,7 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 	}
 
 	GSM_ClearBitmap(bitmap);
-  
+
 	for (y = 0; y < image.height; y++) {
 		for (x = 0; x < image.width; x++) {
 			if (image.data[y * image.width + x] == 0) GSM_SetPointBitmap(bitmap, x, y);
@@ -605,7 +603,7 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 	bitmap->size = bitmap->width * bitmap->height / 8;
 
 	GSM_ClearBitmap(bitmap);
-  
+
 	fread(buffer, 1, 34, file); /* required part of header */
 
 	h = buffer[22] + 256 * buffer[21]; /* height of image in the file */
@@ -649,7 +647,7 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 
 	pos = buffer[10] - 34;
 	fread(buffer, 1, pos, file); /* the rest of the header (if exists) and the color palette */
-  
+
 	dprintf("First color in BMP file: %i %i %i ", buffer[pos-8], buffer[pos-7], buffer[pos-6]);
 	if (buffer[pos-8] == 0x00 && buffer[pos-7] == 0x00 && buffer[pos-6] == 0x00) dprintf("(white)");
 	if (buffer[pos-8] == 0xff && buffer[pos-7] == 0xff && buffer[pos-6] == 0xff) dprintf("(black)");
@@ -659,11 +657,11 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 	dprintf("Second color in BMP file: %i %i %i ", buffer[pos-4], buffer[pos-3], buffer[pos-2]);
 	if (buffer[pos-4] == 0x00 && buffer[pos-3] == 0x00 && buffer[pos-2] == 0x00) dprintf("(white)");
 	if (buffer[pos-4] == 0xff && buffer[pos-3] == 0xff && buffer[pos-2] == 0xff) dprintf("(black)");
-	dprintf("\n");  
+	dprintf("\n");
 
 	first_white = true;
 	if (buffer[pos-8] != 0 || buffer[pos-7] != 0 || buffer[pos-6] != 0) first_white = false;
- 
+
 	sizeimage = 0;
 	pos = 7;
 	for (y = h-1; y >= 0; y--) { /* the lines are written from the last one to the first one */
@@ -731,7 +729,7 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap)
 		dprintf("Fileinfo: %c", buffer[0]);
 		while (fread(buffer, 1, 1, file) == 1) {
 			if (buffer[0] != 0x0A) dprintf("%c",buffer[0]);
-		}  
+		}
 		dprintf("\n");
 	}
 	return(GE_NONE);
@@ -770,7 +768,7 @@ GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap)
 	        dprintf("Fileinfo: %c",buffer[0]);
 		while (fread(buffer, 1, 1, file) == 1) {
 			if (buffer[0] != 0x0A) dprintf("%c", buffer[0]);
-		}  
+		}
 		dprintf("\n");
 	}
 	return(GE_NONE);
@@ -782,7 +780,7 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 	int block_size, count;
 
 	bitmap->size = 0;
-  
+
 	while (fread(block, 1, 6, file) == 6) {
 		block_size = block[4] * 256 + block[5];
 		dprintf("Block %c%c%c%c, size %i\n", block[0], block[1], block[2], block[3], block_size);
@@ -799,8 +797,8 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 				if (!strncmp(block, "VERS", 4)) dprintf("  File saved by: %s\n", buffer);
 				if (!strncmp(block, "MODL", 4)) dprintf("  Logo saved from: %s\n", buffer);
 				if (!strncmp(block, "COMM", 4)) dprintf("  Phone was connected to COM port: %s\n", buffer);
-	
-				if (!strncmp(block, "NSLD", 4)) {          
+
+				if (!strncmp(block, "NSLD", 4)) {
 					bitmap->type = GSM_StartupLogo;
 					bitmap->height = 48;
 					bitmap->width = 84;
@@ -842,7 +840,7 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 	default:
 		return(GE_SUBFORMATNOTSUPPORTED);
 	}
-  
+
 	fread(buffer, 1, 4, file);
 	bitmap->width = buffer[1];
 	bitmap->height = buffer[2];
@@ -850,12 +848,12 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 
 	division = div(bitmap->width, 8);
 	if (division.rem != 0) division.quot++; /* For startup logos */
-  
+
 	if (fread(buffer, 1, (division.quot * bitmap->height), file) != (division.quot * bitmap->height))
 		return(GE_FILETOOSHORT);
-    
+
 	GSM_ClearBitmap(bitmap);
-  
+
 	pos = 0; pos2 = 7;
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
@@ -888,7 +886,7 @@ GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap)
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
 		return GE_INVALIDIMAGESIZE;
 	}
-  	if (fread(bitmap->bitmap,1,bitmap->size,file) != bitmap->size)
+	if (fread(bitmap->bitmap,1,bitmap->size,file) != bitmap->size)
 		return(GE_FILETOOSHORT);
 	return(GE_NONE);
 }
@@ -900,25 +898,24 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 	bool done = false;
 
 	/* XPMs are a bit messy because we have to pass it the filename */
-  
+
 #ifdef XPM
 	if (strstr(FileName, ".xpm")) {
 		savexpm(FileName, bitmap);
 	} else {
-#endif    
-   
+#endif
+
 		file = fopen(FileName, "wb");
-      
-		if (!file)
-			return(GE_CANTOPENFILE);
-  	
+
+		if (!file) return(GE_CANTOPENFILE);
+
 		if (strstr(FileName, ".nlm")) {
 			savenlm(file, bitmap);
 			done = true;
 		}
 		if (strstr(FileName, ".ngg")) {
 			savengg(file, bitmap);
-			done = true;    
+			done = true;
 		}
 		if (strstr(FileName, ".nsl")) {
 			savensl(file, bitmap);
@@ -938,7 +935,7 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 			savebmp(file, bitmap);
 			done = true;
 		}
-   
+
 		if (!done) {
 			switch (bitmap->type) {
 			case GSM_CallerLogo:
@@ -959,12 +956,12 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 				break;
 			case GSM_None:
 				break;
-			}      
+			}
 		}
 		fclose(file);
 #ifdef XPM
 	}
-#endif    
+#endif
 	return GE_NONE;
 }
 
@@ -989,7 +986,7 @@ int GSM_SaveTextFile(char *FileName, char *text, int mode)
 			GetLine(stdin, ans, 4);
 			if (!strcmp(ans, _("yes"))) confirm = 1;
 			else if (!strcmp(ans, _("no"))) confirm = 0;
-		}  
+		}
 		if (!confirm) return -1;
 	}
 
@@ -1029,7 +1026,7 @@ void savexpm(char *filename, GSM_Bitmap *bitmap)
 			else
 				data[y * image.width + x] = 1;
 	}
-  
+
 	XpmWriteFileFromXpmImage(filename, &image, NULL);
 }
 #endif
@@ -1041,34 +1038,37 @@ void savebmp(FILE *file, GSM_Bitmap *bitmap)
 	int x, y, pos, i, sizeimage;
 	unsigned char buffer[1];
 	div_t division;
-  
+
 	char header[] = {
-/*1'st header*/   'B','M',             /* BMP file ID */
-                  0x00,0x00,0x00,0x00, /* Size of file */
-		  0x00,0x00,           /* Reserved for future use */
-		  0x00,0x00,           /* Reserved for future use */
-		  62,0x00,0x00,0x00, /* Offset for image data */
-		 
-/*2'nd header*/     40,0x00,0x00,0x00, /* Length of this part of header */
-		  0x00,0x00,0x00,0x00, /* Width of image */
-		  0x00,0x00,0x00,0x00, /* Height of image */		 
-		  1,0x00,           /* How many planes in target device */
-		  1,0x00,           /* How many colors in image. 1 means 2^1=2 colors */
-		  0x00,0x00,0x00,0x00, /* Type of compression. 0 means no compression */
-/*Sometimes */    0x00,0x00,0x00,0x00, /* Size of part with image data */
-/*ttttttt...*/    0xE8,0x03,0x00,0x00, /* XPelsPerMeter */
-/*hhiiiiissss*/   0xE8,0x03,0x00,0x00, /* YPelsPerMeter */		  
-/*part of header*/2,0x00,0x00,0x00, /* How many colors from palette is used */
-/*doesn't exist*/ 0x00,0x00,0x00,0x00, /* How many colors from palette is required to display image. 0 means all */
-		 
-/*Color palette*/ 0x00,0x00,0x00,      /* First color in palette in Blue, Green, Red. Here white */
-		  0x00,                /* Each color in palette is end by 4'th byte */
-                  0xFF,0xFF,0xFF,      /* Second color in palette in Blue, Green, Red. Here black */
-		  0x00};               /* Each color in palette is end by 4'th byte */
+/*1'st header*/	'B','M',             /* BMP file ID */
+		0x00,0x00,0x00,0x00, /* Size of file */
+		0x00,0x00,           /* Reserved for future use */
+		0x00,0x00,           /* Reserved for future use */
+		62,0x00,0x00,0x00, /* Offset for image data */
+
+/*2'nd header*/	40,0x00,0x00,0x00, /* Length of this part of header */
+		0x00,0x00,0x00,0x00, /* Width of image */
+		0x00,0x00,0x00,0x00, /* Height of image */
+		1,0x00,           /* How many planes in target device */
+		1,0x00,           /* How many colors in image. 1 means 2^1=2 colors */
+		0x00,0x00,0x00,0x00, /* Type of compression. 0 means no compression */
+/* Sometimes */	0x00,0x00,0x00,0x00, /* Size of part with image data */
+/* ttttttt...*/	0xE8,0x03,0x00,0x00, /* XPelsPerMeter */
+/*hhiiiiissss*/	0xE8,0x03,0x00,0x00, /* YPelsPerMeter */
+/* part of the
+   header */	2,0x00,0x00,0x00, /* How many colors from palette is used */
+/* doesn't
+   exist */	0x00,0x00,0x00,0x00, /* How many colors from palette is required to display image. 0 means all */
+
+/* Color
+   palette */	0x00,0x00,0x00,      /* First color in palette in Blue, Green, Red. Here white */
+		0x00,                /* Each color in palette is end by 4'th byte */
+		0xFF,0xFF,0xFF,      /* Second color in palette in Blue, Green, Red. Here black */
+		0x00};               /* Each color in palette is end by 4'th byte */
 
 	header[22] = bitmap->height;
 	header[18] = bitmap->width;
-  
+
 	pos = 7;
 	sizeimage = 0;
 	for (y = bitmap->height - 1; y >= 0; y--) { //lines are written from the last to the first
@@ -1092,13 +1092,13 @@ void savebmp(FILE *file, GSM_Bitmap *bitmap)
 	division = div(sizeimage, 256);
 	header[35] = division.quot;
 	header[34] = sizeimage - (division.quot * 256);
-  
+
 	sizeimage = sizeimage + sizeof(header);
 	dprintf("Size of BMP file: %i\n", sizeimage);
 	division = div(sizeimage, 256);
 	header[3] = division.quot;
 	header[2] = sizeimage - (division.quot * 256);
-       
+
 	fwrite(header, 1, sizeof(header), file);
 
 	pos = 7;
@@ -1134,7 +1134,7 @@ void savengg(FILE *file, GSM_Bitmap *bitmap)
 		         0x01,0x00,0x01,0x00,
 		         0x00,                /* Unknown.Can't be checksum - for */
 		         /* the same logo files can be different */
-		         0x00}; 
+		         0x00};
 
 	char buffer[8];
 	int i, j;
@@ -1158,7 +1158,7 @@ void savengg(FILE *file, GSM_Bitmap *bitmap)
 		fwrite(buffer, 1, 8, file);
 	}
 }
-  
+
 void savenol(FILE *file, GSM_Bitmap *bitmap)
 {
 
@@ -1188,7 +1188,7 @@ void savenol(FILE *file, GSM_Bitmap *bitmap)
 	header[12] = bitmap->height;
 
 	fwrite(header, 1, sizeof(header), file);
-  
+
 	for (i = 0; i < bitmap->size; i++) {
 		for (j = 7; j >= 0; j--)
 			if ((bitmap->bitmap[i] & (1 << j)) > 0) {
@@ -1224,7 +1224,7 @@ void saveota(FILE *file, GSM_Bitmap *bitmap)
 
 	header[1] = bitmap->width;
 	header[2] = bitmap->height;
-    
+
 	fwrite(header, 1, sizeof(header), file);
 
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
@@ -1240,7 +1240,7 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 		         0x00,        /* Width. */
 		         0x00,        /* Height. */
 		         0x01};
-		 
+
 	unsigned char buffer[11 * 48];
 	int x, y, pos, pos2;
 	div_t division;
@@ -1265,24 +1265,24 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 	case GSM_None:
 		break;
 	}
-  
+
 	header[7] = bitmap->width;
 	header[8] = bitmap->height;
-  
+
 	pos = 0; pos2 = 7;
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
 			if (pos2 == 7) buffer[pos] = 0;
-      			if (GSM_IsPointBitmap(bitmap, x, y)) buffer[pos] |= (1 << pos2);
-      			pos2--;
+			if (GSM_IsPointBitmap(bitmap, x, y)) buffer[pos] |= (1 << pos2);
+			pos2--;
 			if (pos2 < 0) {pos2 = 7; pos++;} //going to new line
 		}
 		if (pos2 != 7) {pos2 = 7; pos++;} //for startup logos - new line with new byte
 	}
-  
+
 	division = div(bitmap->width, 8);
 	if (division.rem != 0) division.quot++; /* For startup logos */
-  
+
 	fwrite(header, 1, sizeof(header), file);
 
 	fwrite(buffer,1,(division.quot*bitmap->height),file);
@@ -1316,8 +1316,8 @@ GSM_Error GSM_ShowBitmapFile(char *FileName)
 		filetype = BMP;
 	} else if (memcmp(buffer, "XPM", 3) == 0) {
 		filetype = XPMF;
-	} else filetype = None;  
-	
+	} else filetype = None;
+
 	if (strstr(FileName, ".otb")) filetype = OTA;
 
 	rewind(file);
@@ -1352,7 +1352,7 @@ GSM_Error GSM_ShowBitmapFile(char *FileName)
 	default:
 		error = GE_INVALIDFILEFORMAT;
 		break;
-	}  
+	}
 
 	if (error != GE_NONE)
 		return (error);

@@ -1,5 +1,6 @@
+/* FIXME: Use it *ONLY* under Linux */
 /*********************************************************************
- *                
+ *
  * Filename:      irda.h
  * Version:       1.0
  * Description:   IrDA header file to be used by IrDA applications
@@ -8,16 +9,16 @@
  * Created at:    Mon Mar  8 14:06:12 1999
  * Modified at:   Sat Dec 25 16:07:54 1999
  * Modified by:   Dag Brattli <dagb@cs.uit.no>
- * 
+ *
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
- *      
- *     This program is free software; you can redistribute it and/or 
- *     modify it under the terms of the GNU General Public License as 
- *     published by the Free Software Foundation; either version 2 of 
+ *
+ *     This program is free software; you can redistribute it and/or
+ *     modify it under the terms of the GNU General Public License as
+ *     published by the Free Software Foundation; either version 2 of
  *     the License, or (at your option) any later version.
- *  
+ *
  *     Neither Dag Brattli nor University of Tromsø admit liability nor
- *     provide warranty for any of this software. This material is 
+ *     provide warranty for any of this software. This material is
  *     provided "AS-IS" and at no charge.
  *
  ********************************************************************/
@@ -26,14 +27,7 @@
  * $Id$
  *
  * GNOKII modifications:
- *
- * $Log$
- * Revision 1.3  2001-07-05 10:54:53  pkot
- * Solaris 2.7 fixes - should be harmless for other OSes (Michael Wiedmann)
- *
- * Revision 1.2  2001/07/03 00:03:37  pkot
- * Small fixes to let gnokii compile and work under solaris (thanks to Artur Kubiak)
- *
+ * Fixes for Solaris compile (Artur Kubiak and Michael Wiedmann)
  */
 
 #ifndef IRDA_H
@@ -157,8 +151,7 @@ struct irda_ias_set {
 			unsigned char string[IAS_MAX_STRING];
 		} irda_attrib_string;
 	} attribute;
-        uint32_t       daddr;
-
+	uint32_t       daddr;
 };
 
 /* Some private IOCTL's (max 16) */
@@ -174,7 +167,7 @@ struct irda_ias_set {
 #define SIOCGQOS       (SIOCDEVPRIVATE + 9)
 
 /* No reason to include <linux/if.h> just because of this one ;-) */
-#define IRNAMSIZ 16 
+#define IRNAMSIZ 16
 
 /* IrDA quality of service information (must not exceed 16 bytes) */
 struct if_irda_qos {
@@ -198,7 +191,7 @@ struct if_irda_req {
 	union {
 		char ifrn_name[IRNAMSIZ];  /* if name, e.g. "irda0" */
 	} ifr_ifrn;
-	
+
 	/* Data part */
 	union {
 		struct if_irda_line ifru_line;
@@ -211,7 +204,7 @@ struct if_irda_req {
 };
 
 #define ifr_baudrate  ifr_ifru.ifru_qos.baudrate
-#define ifr_receiving ifr_ifru.ifru_receiving 
+#define ifr_receiving ifr_ifru.ifru_receiving
 #define ifr_dongle    ifr_ifru.ifru_dongle
 #define ifr_mode      ifr_ifru.ifru_mode
 #define ifr_dtr       ifr_ifru.ifru_line.dtr

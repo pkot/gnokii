@@ -36,11 +36,11 @@ typedef GSM_Error (*GSM_RecvFunctionType)(int type, unsigned char *buffer, int l
 typedef GSM_Error (*AT_SendFunctionType)(GSM_Data *data, GSM_Statemachine *s);
 
 typedef struct {
-        char *line1;
-        char *line2;
-        char *line3;
-        char *line4; /* When reading SMS there are 4 ouput lines. Maybe create a table here? */
-        int length;
+	char *line1;
+	char *line2;
+	char *line3;
+	char *line4; /* When reading SMS there are 4 ouput lines. Maybe create a table here? */
+	int length;
 } AT_LineBuffer;
 
 GSM_RecvFunctionType AT_InsertRecvFunction(int type, GSM_RecvFunctionType func);

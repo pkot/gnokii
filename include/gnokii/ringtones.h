@@ -47,7 +47,6 @@ typedef struct {
 	u8 NrNotes;
 	GSM_RingtoneNote notes[MAX_RINGTONE_NOTES];
 } GSM_Ringtone;
-  
 
 #define GetBit(Stream,BitNr) Stream[(BitNr)/8] & 1<<(7-((BitNr)%8))
 #define SetBit(Stream,BitNr) Stream[(BitNr)/8] |= 1<<(7-((BitNr)%8))

@@ -10,15 +10,10 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides an API for accessing functions via fbus. 
+  This file provides an API for accessing functions via fbus.
   See README for more details on supported mobile phones.
 
   The various routines are called FB3110_(whatever).
-
-  $Log$
-  Revision 1.1  2001-11-09 12:55:07  pkot
-  Forgot about fbus support for 3110. FIXME: is it really needed?
-
 
 */
 

@@ -6,10 +6,10 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml. 
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
-  
+
   Functions for common bitmap operations.
 
 */
@@ -44,7 +44,7 @@ typedef struct {
 	char text[256];          /* Text used for welcome-note or callergroup name */
 	char dealertext[256];    /* Text used for dealer welcome-note */
 	bool dealerset;          /* Is dealer welcome-note set now ? */
-	unsigned char bitmap[GSM_MAX_BITMAP_SIZE]; /* Actual Bitmap */ 
+	unsigned char bitmap[GSM_MAX_BITMAP_SIZE]; /* Actual Bitmap */
 	char number;             /* Caller group number */
 	char ringtone;           /* Ringtone no sent with caller group */
 } GSM_Bitmap;

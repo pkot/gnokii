@@ -12,31 +12,10 @@
 
   Header file for miscellaneous defines, typedefs etc.
 
-  $Log$
-  Revision 1.29  2002-01-21 15:15:39  pkot
-  Avoid names conflict. Rename Bozo's eprintf() to dump()
-
-  Revision 1.28  2002/01/21 11:53:57  pkot
-  New dump logging facility for libgnokii (BORBELY Zoltan)
-
-  Revision 1.27  2001/11/26 18:06:08  pkot
-  Checking for *printf functions, N_(x) for localization, generic ARRAY_LEN, SAFE_STRNCPY, G_GNUC_PRINTF (Jan Kratochvil)
-
-  Revision 1.26  2001/11/14 10:46:12  pkot
-  Small cleanup with __unices__
-
-  Revision 1.25  2001/07/03 15:27:14  pkot
-  AT commands for SMS handling support (Tamas Bondar)
-  Small at-emulator code cleanup (me)
-
-  Revision 1.24  2001/06/28 00:28:46  pkot
-  Small docs updates (Pawel Kot)
-
-
 */
 
 #ifndef __misc_h
-#define __misc_h    
+#define __misc_h
 
 #include "config.h"
 
@@ -50,7 +29,7 @@
 #  define true (!false)
 #endif
 
-#ifndef bool    
+#ifndef bool
 #  define bool int
 #endif
 
@@ -80,7 +59,7 @@
 #ifndef DEBUG
 #  define dprintf(a...) do { } while (0)
 #else
-#  define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
+#  define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0)
 #endif
 
 #include <stdarg.h>
@@ -89,7 +68,7 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 
 /* Use it for error reporting */
 
-#define dump(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0) 
+#define dump(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0)
 
 /* Use gsprintf instead of sprintf and sprintf */
 #ifdef HAVE_SNPRINTF
@@ -158,7 +137,7 @@ extern int gvasprintf(char **destp, const char *fmt, va_list ap);
 #  ifndef s64
 	typedef signed long long s64;
 #  endif
-#endif 
+#endif
 
 /* This one is for FreeBSD and similar systems without __ptr_t_ */
 /* FIXME: autoconf should take care of this. */

@@ -59,7 +59,7 @@ typedef struct {
 /* A structure to hold information about the particular link */
 /* The link comes 'under' the phone */
 typedef struct {
-	char PortDevice[20];   /* The port device */
+	char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];   /* The port device */
 	int InitLength;        /* Number of chars sent to sync the serial port */
 	GSM_ConnectionType ConnectionType;   /* Connection type, serial, ir etc */
 
@@ -125,7 +125,7 @@ typedef enum {
 /* This structure contains the 'callups' needed by the statemachine */
 /* to deal with messages from the phone and other information */
 
-typedef struct _GSM_Statemachine GSM_Statemachine; 
+typedef struct _GSM_Statemachine GSM_Statemachine;
 
 typedef struct {
 	/* These make up a list of functions, one for each message type and NULL terminated */
@@ -141,7 +141,7 @@ typedef struct {
 typedef enum {
 	Startup,            /* Not yet initialised */
 	Initialised,        /* Ready! */
-	MessageSent,        /* A command has been sent to the link(phone) */ 
+	MessageSent,        /* A command has been sent to the link(phone) */
 	WaitingForResponse, /* We are waiting for a response from the link(phone) */
 	ResponseReceived    /* A response has been received - waiting for the phone layer to collect it */
 } GSM_State;

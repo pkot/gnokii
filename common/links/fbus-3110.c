@@ -10,21 +10,10 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides an API for accessing functions via fbus. 
+  This file provides an API for accessing functions via fbus.
   See README for more details on supported mobile phones.
 
   The various routines are called FBUS_(whatever).
-
-  $Log$
-  Revision 1.3  2001-11-27 12:19:01  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.2  2001/11/09 14:25:04  pkot
-  DEBUG cleanups
-
-  Revision 1.1  2001/11/09 12:55:07  pkot
-  Forgot about fbus support for 3110. FIXME: is it really needed?
-
 
 */
 
@@ -97,23 +86,23 @@ void FB3110_RX_StateMachine(unsigned char rx_byte)
 
 	switch (i->State) {
 
-		/* Phone is currently off.  Wait for 0x55 before
-		   restarting */
-        case FB3110_RX_Discarding:
-                if (rx_byte != 0x55)
+	/* Phone is currently off.  Wait for 0x55 before
+	   restarting */
+	case FB3110_RX_Discarding:
+		if (rx_byte != 0x55)
 			break;
 
-                /* Seen 0x55, restart at 0x04 */
-                i->State = FB3110_RX_Sync;
+		/* Seen 0x55, restart at 0x04 */
+		i->State = FB3110_RX_Sync;
 
 		dprintf("restarting.\n");
 
-                /* FALLTHROUGH */
+		/* FALLTHROUGH */
 
-		/* Messages from the phone start with an 0x04 during
-		   "normal" operation, 0x03 when in data/fax mode.  We
-		   use this to "synchronise" with the incoming data
-		   stream. */
+	/* Messages from the phone start with an 0x04 during
+	   "normal" operation, 0x03 when in data/fax mode.  We
+	   use this to "synchronise" with the incoming data
+	   stream. */
 	case FB3110_RX_Sync:
 		if (rx_byte == 0x04 || rx_byte == 0x03) {
 			i->FrameType = rx_byte;
@@ -122,18 +111,18 @@ void FB3110_RX_StateMachine(unsigned char rx_byte)
 		}
 		break;
 
-		/* Next byte is the length of the message including
-		   the message type byte but not including the checksum. */
-        case FB3110_RX_GetLength:
+	/* Next byte is the length of the message including
+	   the message type byte but not including the checksum. */
+	case FB3110_RX_GetLength:
 		i->FrameLength = rx_byte;
 		i->BufferCount = 0;
 		i->Checksum ^= rx_byte;
-                i->State = FB3110_RX_GetMessage;
-                break;
+		i->State = FB3110_RX_GetMessage;
+		break;
 
-		/* Get each byte of the message.  We deliberately
-		   get one too many bytes so we get the checksum
-		   here as well. */
+	/* Get each byte of the message.  We deliberately
+	   get one too many bytes so we get the checksum
+	   here as well. */
 	case FB3110_RX_GetMessage:
 		i->Buffer[i->BufferCount] = rx_byte;
 		i->BufferCount++;
@@ -217,8 +206,8 @@ GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_by
 	int count, current = 0;
 	unsigned char checksum;
 
-        /* Check message isn't too long, once the necessary
-           header and trailer bytes are included. */
+	/* Check message isn't too long, once the necessary
+	   header and trailer bytes are included. */
 	if ((message_length + 5) > FB3110_MAX_TRANSMIT_LENGTH) {
 		fprintf(stderr, _("FB3110_TX_SendFrame - message too long!\n"));
 		return (GE_INTERNALERROR);
@@ -236,8 +225,8 @@ GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_by
 		current += message_length;
 	}
 
-        /* Now calculate checksum over entire message 
-           and append to message. */
+	/* Now calculate checksum over entire message
+	   and append to message. */
 	checksum = 0;
 	for (count = 0; count < current; count++)
 		checksum ^= out_buffer[count];
@@ -282,7 +271,7 @@ void FB3110_TX_SendAck(u8 *message, int length)
 	case 0x0a:
 		/* We send 0x0a messages to make a call so don't ack. */
 	case 0x0c:
-		/* We send 0x0c message to answer to incoming call 
+		/* We send 0x0c message to answer to incoming call
 		   so don't ack */
 	case 0x0f:
 		/* We send 0x0f message to hang up so don't ack */
@@ -305,7 +294,7 @@ void FB3110_TX_SendAck(u8 *message, int length)
 		   so it's not acknowledged. */
 	case 0x3f:
 		/* We send an 0x3f message to the phone to request a different
-		   type of status dump - this one seemingly concerned with 
+		   type of status dump - this one seemingly concerned with
 		   SMS message center details.  Phone responds with an ack to
 		   our 0x3f request then sends an 0x41 message that has the
 		   actual data in it. */
@@ -362,8 +351,8 @@ GSM_Error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 
 	if (!FB3110_OpenSerial()) return GE_DEVICEOPENFAILED;
 
-	/* Send init string to phone, this is a bunch of 0x55 characters. 
-	   Timing is empirical. I believe that we need/can do this for any 
+	/* Send init string to phone, this is a bunch of 0x55 characters.
+	   Timing is empirical. I believe that we need/can do this for any
 	   phone to get the UART synced */
 	for (count = 0; count < glink->InitLength; count++) {
 		usleep(1000);
@@ -385,9 +374,8 @@ GSM_Error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 
 void FB3110_UpdateSequenceNumber(void)
 {
-    flink.RequestSequenceNumber++;
+	flink.RequestSequenceNumber++;
 
-    if (flink.RequestSequenceNumber > 0x17 || flink.RequestSequenceNumber < 0x10) {
-        flink.RequestSequenceNumber = 0x10;
-    }
+	if (flink.RequestSequenceNumber > 0x17 || flink.RequestSequenceNumber < 0x10)
+		flink.RequestSequenceNumber = 0x10;
 }

@@ -19,8 +19,8 @@ GSM_Error SM_Initialise(GSM_Statemachine *state)
 {
 	state->CurrentState = Initialised;
 	state->NumWaitingFor = 0;
-	state->NumReceived = 0; 
-	
+	state->NumReceived = 0;
+
 	return GE_NONE;
 }
 
@@ -64,7 +64,7 @@ void SM_Reset(GSM_Statemachine *state)
 	if (state->CurrentState != Startup) {
 		state->CurrentState = Initialised;
 		state->NumWaitingFor = 0;
-		state->NumReceived = 0;       
+		state->NumReceived = 0;
 	}
 }
 
@@ -81,13 +81,12 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 
 	/* See if we need to pass the function the data struct */
 	if (state->CurrentState == WaitingForResponse)
-		for (c = 0; c < state->NumWaitingFor; c++) 
+		for (c = 0; c < state->NumWaitingFor; c++)
 			if (state->WaitingFor[c] == messagetype) {
 				data = state->Data[c];
 				waitingfor = c;
 			}
-		       
-      
+
 	/* Pass up the message to the correct phone function, with data if necessary */
 	c = 0;
 	while (state->Phone.IncomingFunctions[c].Functions) {
@@ -113,12 +112,11 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 			state->ResponseError[waitingfor] = res;
 			state->NumReceived++;
 		}
-		
+
 		/* Check if all waitingfors have been received */
 		if (state->NumReceived == state->NumWaitingFor) {
-			state->CurrentState = ResponseReceived;	
+			state->CurrentState = ResponseReceived;
 		}
-		
 	}
 }
 
@@ -127,7 +125,7 @@ GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 {
 	int c, d;
 	GSM_Error error = GE_NOTREADY;
-	
+
 	if (state->CurrentState == ResponseReceived) {
 		for (c = 0; c < state->NumReceived; c++)
 			if (state->WaitingFor[c] == messagetype) {
@@ -146,7 +144,7 @@ GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 			state->CurrentState = Initialised;
 		}
 	}
-	
+
 	return error;
 }
 
@@ -159,7 +157,7 @@ GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char mess
 	/* If we've received a response, we have to call SM_GetError first */
 	if ((state->CurrentState == Startup) || (state->CurrentState == ResponseReceived))
 		return GE_NOTREADY;
-	
+
 	if (state->NumWaitingFor == SM_MAXWAITINGFOR) return GE_NOTREADY;
 	state->WaitingFor[state->NumWaitingFor] = messagetype;
 	state->Data[state->NumWaitingFor] = data;
@@ -173,7 +171,7 @@ GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char mess
 
 /* This function is for convinience only */
 /* It is called after SM_SendMessage and blocks until a response is received */
-GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor) 
+GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 {
 	int retry, timeout;
 	GSM_State s;
@@ -182,13 +180,13 @@ GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 	for (retry = 0; retry < 3; retry++) {
 		timeout = 30;
 		err = SM_WaitFor(state, data, waitfor);
-		if (err != GE_NONE) return err; 
+		if (err != GE_NONE) return err;
 
 		do {            /* ~3secs timeout */
 			s = SM_Loop(state, 1);  /* Timeout=100ms */
 			timeout--;
 		} while ((timeout > 0) && (s == WaitingForResponse));
-		
+
 		if (s == ResponseReceived) return SM_GetError(state, waitfor);
 
 		dprintf("SM_Block Retry - %d\n", retry);
@@ -209,13 +207,13 @@ GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 	for (retry = 0; retry < 3; retry++) {
 		timeout = 30;
 		err = SM_WaitFor(state, data, waitfor);
-		if (err != GE_NONE) return err; 
+		if (err != GE_NONE) return err;
 
 		do {            /* ~3secs timeout */
 			s = SM_Loop(state, 1);  /* Timeout=100ms */
 			timeout--;
 		} while ((timeout > 0) && (s == WaitingForResponse));
-		
+
 		if (s == ResponseReceived) return SM_GetError(state, waitfor);
 	}
 

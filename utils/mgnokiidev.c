@@ -1,7 +1,7 @@
 /*
 
   $Id$
-  
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -13,14 +13,6 @@
   Mgnokiidev gets passed a slave pty name by gnokiid and uses this
   information to create a symlink from the pty to /dev/gnokii.
 
-  $Log$
-  Revision 1.7  2001-09-14 12:38:00  pkot
-  More cleanups
-
-  Revision 1.6  2000/12/27 10:54:15  pkot
-  Added Unix98 PTYs support (Michael Mráka).
-
-  
 */
 
 #include <stdio.h>
@@ -41,67 +33,67 @@
 
 int main(int argc, char *argv[])
 {
-  int count, err, aux;
-  char dev_name[DEVLEN];
+	int count, err, aux;
+	char dev_name[DEVLEN];
 
-  /* Check we have one and only one command line argument. */
-  if (argc != 2) {
-    fprintf(stderr, "mgnokiidev takes one and only one argument!\n");
-    exit(-2);
-  }
+	/* Check we have one and only one command line argument. */
+	if (argc != 2) {
+		fprintf(stderr, "mgnokiidev takes one and only one argument!\n");
+		exit(-2);
+	}
 
-  /* Check if argument has a reasonable length (less than MAXLEN characters) */
-  if (strlen(argv[1]) >= MAXLEN) {
-    fprintf(stderr, "Argument must be less than %d characters.\n", MAXLEN);
-    exit (-2);
-  }
+	/* Check if argument has a reasonable length (less than MAXLEN characters) */
+	if (strlen(argv[1]) >= MAXLEN) {
+		fprintf(stderr, "Argument must be less than %d characters.\n", MAXLEN);
+		exit (-2);
+	}
 
-  strncpy(dev_name, argv[1], DEVLEN);
+	strncpy(dev_name, argv[1], DEVLEN);
 
-  /* Check for suspicious characters. */
-  aux = strlen(dev_name);
-  for (count = 0; count < aux; count ++)
-    if (!(isalnum(dev_name[count]) || dev_name[count]=='/')) {
-      fprintf(stderr, "Suspicious character at index %d in argument.\n", count);
-      exit (-2);
-    }
+	/* Check for suspicious characters. */
+	aux = strlen(dev_name);
+	for (count = 0; count < aux; count ++)
+		if (!(isalnum(dev_name[count]) || dev_name[count]=='/')) {
+			fprintf(stderr, "Suspicious character at index %d in argument.\n", count);
+			exit (-2);
+		}
 
-  /* Now become root */
-  setuid(0);
+	/* Now become root */
+	setuid(0);
 
-  /* Change group of slave pty to group of mgnokiidev */
-  err = chown(dev_name, -1, getgid());
+	/* Change group of slave pty to group of mgnokiidev */
+	err = chown(dev_name, -1, getgid());
 
-  if (err < 0) {
-    perror("mgnokiidev - chown: ");
-    exit (-2);
-  }
+	if (err < 0) {
+		perror("mgnokiidev - chown: ");
+		exit (-2);
+	}
 
-  /* Change permissions to rw by group */
-  err = chmod(dev_name, S_IRGRP | S_IWGRP | S_IRUSR | S_IWUSR);
-	
-  if (err < 0) {
-    perror("mgnokiidev - chmod: ");
-    exit (-2);
-  }
+	/* Change permissions to rw by group */
+	err = chmod(dev_name, S_IRGRP | S_IWGRP | S_IRUSR | S_IWUSR);
 
-  /* FIXME: Possible bug - should check that /dev/gnokii doesn't already exist
-     in case multiple users are trying to run gnokii. Well, but will be
-     mgnokiidev called then? I do not think so - you will probably got the
-     message serialport in use or similar. Don't you. I haven't tested it
-     though. */
+	if (err < 0) {
+		perror("mgnokiidev - chmod: ");
+		exit (-2);
+	}
 
-  /* Remove symlink in case it already exists. Don't care if it fails.  */
-  unlink ("/dev/gnokii");
+	/* FIXME: Possible bug - should check that /dev/gnokii doesn't already exist
+		 in case multiple users are trying to run gnokii. Well, but will be
+		 mgnokiidev called then? I do not think so - you will probably got the
+		 message serialport in use or similar. Don't you. I haven't tested it
+		 though. */
 
-  /* Create symlink */
-  err = symlink(dev_name, "/dev/gnokii");
+	/* Remove symlink in case it already exists. Don't care if it fails.	*/
+	unlink ("/dev/gnokii");
 
-  if (err < 0) {
-    perror("mgnokiidev - symlink: ");
-    exit (-2);
-  }
+	/* Create symlink */
+	err = symlink(dev_name, "/dev/gnokii");
 
-  /* Done */
-  exit (0);
+	if (err < 0) {
+		perror("mgnokiidev - symlink: ");
+		exit (-2);
+	}
+
+	/* Done */
+	exit (0);
 }

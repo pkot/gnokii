@@ -17,14 +17,12 @@
 
 */
 
-#define		__virtmodem_c
-
 #include <config.h>
 
 /* This is the right way to include stdlib with __USE_XOPEN defined */
 #ifdef USE_UNIX98PTYS
-# define _XOPEN_SOURCE 500
-# include <features.h>
+#  define _XOPEN_SOURCE 500
+#  include <features.h>
 #endif
 
 #include <stdio.h>
@@ -54,21 +52,20 @@
 extern bool TerminateThread;
 int ConnectCount;
 
-	/* Local variables */
+/* Local variables */
 
-int		PtyRDFD;	/* File descriptor for reading and writing to/from */
-int		PtyWRFD;	/* pty interface - only different in debug mode. */ 
+int PtyRDFD;	/* File descriptor for reading and writing to/from */
+int PtyWRFD;	/* pty interface - only different in debug mode. */
 
-bool	UseSTDIO;	/* Use STDIO for debugging purposes instead of pty */
-bool	CommandMode;
+bool UseSTDIO;	/* Use STDIO for debugging purposes instead of pty */
+bool CommandMode;
 
-pthread_t		Thread;
-bool			RequestTerminate;
-
+pthread_t Thread;
+bool RequestTerminate;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
-bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode, bool GSMInit)
+bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode, bool GSMInit)
 {
 	int rtn;
 	GSM_Statemachine sm;
@@ -78,25 +75,24 @@ bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 
 	if (debug_mode == true) {
 		UseSTDIO = true;
-	}
-	else {
+	} else {
 		UseSTDIO = false;
 	}
 
 	if (GSMInit) {
-	  dprintf("Initialising GSM\n");
-	  if ((VM_GSMInitialise(model, port, initlength, connection) != GE_NONE)) {
-		fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
-		return (false);
-	  }
+		dprintf("Initialising GSM\n");
+		if ((VM_GSMInitialise(model, port, initlength, connection) != GE_NONE)) {
+			fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
+			return (false);
+		}
 	}
-	GSMInit=false;
+	GSMInit = false;
 
 	if (VM_PtySetup(bindir) < 0) {
 		fprintf (stderr, _("VM_Initialise - VM_PtySetup failed!\n"));
 		return (false);
 	}
-    
+
 	if (ATEM_Initialise(PtyRDFD, PtyWRFD, &sm) != true) {
 		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n"));
 		return (false);
@@ -110,13 +106,13 @@ bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 		/* Create and start thread, */
 	rtn = pthread_create(&Thread, NULL, (void *) VM_ThreadLoop, (void *)NULL);
 
-    if (rtn == EAGAIN || rtn == EINVAL) {
-        return (false);
-    }
+	if (rtn == EAGAIN || rtn == EINVAL) {
+		return (false);
+	}
 	return (true);
 }
 
-void	VM_ThreadLoop(void)
+void VM_ThreadLoop(void)
 {
 	int res;
 	struct pollfd ufds;
@@ -156,9 +152,8 @@ void	VM_ThreadLoop(void)
 
 /* Application should call VM_Terminate to shut down
    the virtual modem thread */
-void		VM_Terminate(void)
+void VM_Terminate(void)
 {
-     
 	/* Request termination of thread */
 	RequestTerminate = true;
 
@@ -173,12 +168,12 @@ void		VM_Terminate(void)
 
 /* Open pseudo tty interface and (in due course create a symlink
    to be /dev/gnokii etc. ) */
-int		VM_PtySetup(char *bindir)
+int VM_PtySetup(char *bindir)
 {
-	int			err;
-	char		mgnokiidev[200];
-	char		*slave_name;
-	char		cmdline[200];
+	int err;
+	char mgnokiidev[200];
+	char *slave_name;
+	char cmdline[200];
 
 	if (bindir) {
 		strncpy(mgnokiidev, bindir, 200);
@@ -191,7 +186,7 @@ int		VM_PtySetup(char *bindir)
 		PtyWRFD = STDOUT_FILENO;
 		return (0);
 	}
-	
+
 	PtyRDFD = VM_GetMasterPty(&slave_name);
 	if (PtyRDFD < 0) {
 		fprintf (stderr, _("Couldn't open pty!\n"));
@@ -211,63 +206,57 @@ int		VM_PtySetup(char *bindir)
 	/* Create command line, something line ./mkgnokiidev ttyp0 */
 	sprintf(cmdline, "%s %s", mgnokiidev, slave_name);
 
-	/* And use system to call it. */	
+	/* And use system to call it. */
 	err = system (cmdline);
-	
+
 	return (err);
 }
 
 /* Handler called when characters received from serial port.
    calls state machine code to process it. */
-void    VM_CharHandler(void)
+void VM_CharHandler(void)
 {
-	unsigned char   buffer[255];
-	int             res;
+	unsigned char buffer[255];
+	int res;
 
 	/* If we are in command mode, get the character, otherwise leave it */
 
 	if (CommandMode && ATEM_Initialised) {
-      
 		res = read(PtyRDFD, buffer, 255);
-      
 		/* A returned value of -1 means something serious has gone wrong - so quit!! */
 		/* Note that file closure etc. should have been dealt with in ThreadLoop */
-      
-		if (res < 0) {	
+		if (res < 0) {
 			TerminateThread = true;
 			return;
 		}
 
 		ATEM_HandleIncomingData(buffer, res);
-	}	
-}     
+	}
+}
 
 /* Initialise GSM interface, returning GSM_Error as appropriate  */
-GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection)
+GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection)
 {
-	int 		count = 0;
-	GSM_Error 	error;
+	int count = 0;
+	GSM_Error error;
 	static GSM_Statemachine sm;
 
-	/* Initialise the code for the GSM interface. */     
-
+	/* Initialise the code for the GSM interface. */
 	error = GSM_Initialise(model, port, initlength, connection, RLP_DisplayF96Frame, &sm);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
-    		return (error);
+		return (error);
 	}
 
-		/* First (and important!) wait for GSM link to be active. We allow 10
-		   seconds... */
-
-	while (count++ < 200 && *GSM_LinkOK == false) {
-    		usleep(50000);
-	}
+	/* First (and important!) wait for GSM link to be active. We allow 10
+	   seconds... */
+	while (count++ < 200 && *GSM_LinkOK == false)
+		usleep(50000);
 
 	if (*GSM_LinkOK == false) {
 		fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting. \n"));
-   		return (GE_NOLINK); 
+		return (GE_NOLINK);
 	}
 
 	return (GE_NONE);
@@ -279,11 +268,10 @@ GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Conne
    error has occurred.  Otherwise, it has returned the master pty
    file descriptor, and fills in *name with the name of the
    corresponding slave pty.  Once the slave pty has been opened,
-   you are responsible to free *name.  Code is from Developling Linux
+   you are responsible to free *name.  Code is from Developing Linux
    Applications by Troan and Johnson */
-
-int	VM_GetMasterPty(char **name)
-{ 
+int VM_GetMasterPty(char **name)
+{
 #ifdef USE_UNIX98PTYS
 	int master, err;
 

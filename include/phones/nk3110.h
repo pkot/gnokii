@@ -1,4 +1,3 @@
-
 /*
 
   $Id$
@@ -12,16 +11,8 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides functions specific to the 3110 series. 
+  This file provides functions specific to the 3110 series.
   See README for more details on supported mobile phones.
-
-  $Log$
-  Revision 1.2  2001-12-31 09:35:47  pkot
-  libsms update. Will break sms reading/sending on all models not using libsms. libsms is getting now a middle layer. More updates soon. Cleanups.
-
-  Revision 1.1  2001/11/08 16:39:09  pkot
-  3810/3110 support for the new structure (Tamas Bondar)
-
 
 */
 

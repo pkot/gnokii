@@ -11,7 +11,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides an API for accessing functions via fbus. 
+  This file provides an API for accessing functions via fbus.
   See README for more details on supported mobile phones.
 
   The various routines are called FBUS_(whatever).
@@ -251,7 +251,7 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 		i->MessageBuffer[i->BufferCount] = rx_byte;
 		i->BufferCount++;
-		
+
 		if (i->BufferCount > FBUS_MAX_FRAME_LENGTH) {
 			dprintf("FBUS: Message buffer overun - resetting\n");
 			i->state = FBUS_RX_Sync;
@@ -324,7 +324,6 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 					/* Send an ack (for all for now) */
 
 					FBUS_TX_SendAck(i->MessageType, seq_num & 0x0f);
-					
 				}
 			} else {
 				dprintf("Bad checksum!\n");
@@ -531,8 +530,8 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type)
 		if (!FBUS_OpenIR())
 			return GE_DEVICEOPENFAILED;
 	} else {		/* ConnectionType == GCT_Serial */
-                /* FBUS_OpenSerial(0) - try dau-9p
-                 * FBUS_OpenSerial(n != 0) - try dlr-3p */
+		/* FBUS_OpenSerial(0) - try dau-9p
+		 * FBUS_OpenSerial(n != 0) - try dlr-3p */
 		if (!FBUS_OpenSerial(type))
 			return GE_DEVICEOPENFAILED;
 	}

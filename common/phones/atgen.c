@@ -243,7 +243,7 @@ static GSM_Error SetEcho(GSM_Data *data, GSM_Statemachine *state)
  * charset and store the result for future referece. we don't do a full
  * initialization for speed reason. at further processing we can chose
  * a working charset if needed.
- * 
+ *
  * see also AT_SetCharset, AT_GetCharset
  *
  * GSM_Data has no field for charset so i misuse Model.
@@ -288,8 +288,8 @@ GSM_Error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
  *
  * before we start sending or receiving phonebook entries from the phone,
  * we should set a charset. this is done once before the first read or write.
- * 
- * we try to chose a charset with hexadecimal representation. first ucs2 
+ *
+ * we try to chose a charset with hexadecimal representation. first ucs2
  * (which is a hexencoded unicode charset) is tested and set if available.
  * if this fails for any reason, it is checked if the original charset is
  * GSM. if this is true, we try to set HEX (a hexencoded GSM charset). if
@@ -477,14 +477,14 @@ static GSM_Error AT_GetBattery(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state)
 {
 	char req[128];
- 
+
 	sprintf(req, "AT+CSQ\r\n");
- 	if (SM_SendMessage(state, 8, GOP_GetRFLevel, req) != GE_NONE)
+	if (SM_SendMessage(state, 8, GOP_GetRFLevel, req) != GE_NONE)
 		return GE_NOTREADY;
- 	return SM_Block(state, data, GOP_GetRFLevel);
+	return SM_Block(state, data, GOP_GetRFLevel);
 }
- 
- 
+
+
 static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
 {
 	char req[128];
@@ -571,7 +571,7 @@ static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[12];
-	
+
 	sprintf(req, "AT+CMGF=0\r\n");
 	if (SM_SendMessage(state, 11, GOPAT_SetPDUMode, req) != GE_NONE)
 		return GE_NOTREADY;
@@ -651,7 +651,7 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 
 	if (strncmp(buffer, "AT+CPBR", 7)) {
 		return GE_NONE; /* FIXME */
- 	}
+	}
 
 	if (!strncmp(buf.line2, "OK", 2)) {
 		if (data->PhonebookEntry) {
@@ -724,7 +724,7 @@ static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int l
 
 	buf.line1 = buffer;
 	buf.length= length;
-	
+
 	splitlines(&buf);
 	if (buf.line1 == NULL)
 		return GE_INVALIDMEMORYTYPE;
@@ -822,7 +822,7 @@ static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int lengt
 		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MM", data->Model);
 		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MI", data->Manufacturer);
 		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MR", data->Revision);
- 	}
+	}
 	return GE_NONE;
 }
 
@@ -871,7 +871,7 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 
 	buf.line1 = buffer;
 	buf.length = length;
-	
+
 	splitlines(&buf);
 	if (buf.line1 == NULL)
 		return GE_INTERNALERROR;
@@ -888,7 +888,7 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 
 /* ReplyGetCharset
  *
- * parses the reponse from a check for the actual charset or the 
+ * parses the reponse from a check for the actual charset or the
  * available charsets. a bracket in the response is taken as a request
  * for available charsets.
  *
@@ -916,7 +916,7 @@ static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int len
 		}
 		/* skip leading +CSCS: and quotation */
 		pos = strchr(buf.line2 + 8, '\"');
-                if (pos) *pos = '\0';
+		if (pos) *pos = '\0';
 		strncpy(data->Model, buf.line2 + 8, 255);
 		(data->Model)[255] = '\0';
 	}
@@ -1014,7 +1014,7 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
- 
+
 void splitlines(AT_LineBuffer *buf)
 {
 	char *pos;
@@ -1051,17 +1051,17 @@ void splitlines(AT_LineBuffer *buf)
  * increments the argument until a char unequal to
  * <cr> or <lf> is found. returns the new position.
  */
- 
+
 char *skipcrlf(unsigned char *str)
 {
-        if (str == NULL)
-                return str;
-        while ((*str == '\n') || (*str == '\r') || (*str > 127))
-                str++;
-        return str;
+	if (str == NULL)
+		return str;
+	while ((*str == '\n') || (*str == '\r') || (*str > 127))
+		str++;
+	return str;
 }
- 
- 
+
+
 /*
  * searches for <cr> or <lf> and returns the first
  * occurrence. if test is set, the gsm char @ which
@@ -1069,16 +1069,16 @@ char *skipcrlf(unsigned char *str)
  * return NULL if no <cr> or <lf> was found in the
  * range of max bytes.
  */
- 
+
 char *findcrlf(unsigned char *str, int test, int max)
 {
-        if (str == NULL)
-                return str;
-        while ((*str != '\n') && (*str != '\r') && ((*str != '\0') || test) && (max > 0)) {
-                str++;
+	if (str == NULL)
+		return str;
+	while ((*str != '\n') && (*str != '\r') && ((*str != '\0') || test) && (max > 0)) {
+		str++;
 		max--;
 	}
-        if ((*str == '\0') || ((max == 0) && (*str != '\n') && (*str != '\r')))
-                return NULL;
-        return str;
+	if ((*str == '\0') || ((max == 0) && (*str != '\n') && (*str != '\r')))
+		return NULL;
+	return str;
 }

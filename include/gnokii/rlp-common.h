@@ -87,9 +87,9 @@ typedef enum {
 /* Frame definition for TCH/F9.6 frame. */
 typedef struct {
 	u8 Header[2];
-	u8 Data[25];    
+	u8 Data[25];
 	u8 FCS[3];
-} RLP_F96Frame;   
+} RLP_F96Frame;
 
 /* Header data "split up" for TCH/F9.6 frame. */
 typedef struct {
@@ -155,7 +155,7 @@ typedef enum {
 } RLP_StateVariable;
 
 /* RLP Data */
-typedef struct { 
+typedef struct {
 	u8 Data[25];
 	RLP_StateVariable State;
 } RLP_Data;

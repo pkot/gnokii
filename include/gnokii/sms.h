@@ -318,7 +318,7 @@ typedef struct {
 	SMS_UserData UserData[SMS_MAX_PART_NUMBER];    /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
 	SMS_DataCodingScheme DCS;                      /* Data Coding Scheme (9.2.3.10) */
 	SMS_MessageValidity Validity;                  /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
-  
+
 	unsigned short UDH_No;                         /* Number of present UDHs */
 	unsigned int UDH_Length;                       /* Length of the whole UDH */
 	SMS_UDHInfo UDH[SMS_MAX_UDH_NUMBER];           /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
@@ -409,16 +409,16 @@ extern SMSMessage_PhoneLayout layout;
 typedef struct {
 	char Name[15];     /* Name for SMS folder */
 	bool SMSData;      /* if folder contains sender, SMSC number and sending date */
-	u8 locations[160]; /* locations of SMS messages in that folder (6210 specific) */
-	u8 number;         /* number of SMS messages in that folder*/
-	u8 FolderID;       /* ID od fthe current folder */
+	unsigned int locations[160]; /* locations of SMS messages in that folder (6210 specific) */
+	unsigned int number;         /* number of SMS messages in that folder*/
+	unsigned int FolderID;       /* ID od fthe current folder */
 } SMS_Folder;
 
 typedef struct {
 	SMS_Folder Folder[MAX_SMS_FOLDERS];
-	u8 FolderID[MAX_SMS_FOLDERS]; /* ID specific for this folder and phone. */
+	unsigned int FolderID[MAX_SMS_FOLDERS]; /* ID specific for this folder and phone. */
 	                               /* Used in internal functions. Do not use it. */
-	u8 number;                     /* number of SMS folders */
+	unsigned int number;                     /* number of SMS folders */
 } SMS_FolderList;
 
 /*** CELL BROADCAST ***/

@@ -1,7 +1,7 @@
 /*
 
   $Id$
-  
+
   G N O K I I
 
   A Linux/Unix toolset and driver for mobile phones.
@@ -10,19 +10,8 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Log$
-  Revision 1.3  2001-11-19 13:03:18  pkot
-  nk3110.c cleanup
-
-  Revision 1.2  2001/08/20 23:27:37  pkot
-  Add hardware shakehand to the link layer (Manfred Jonsson)
-
-  Revision 1.1  2001/07/27 00:02:22  pkot
-  Generic AT support for the new structure (Manfred Jonsson)
-
-
 */
-                
+
 #ifndef __atbus_h
 #define __atbus_h
 

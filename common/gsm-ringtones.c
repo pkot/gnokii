@@ -103,8 +103,8 @@ int GetTempo(int Beats)
 		i++;
 	}
 
-	return i<<3;
-}    
+	return (i << 3);
+}
 
 int BitPackByte(unsigned char *Dest, int CurrentBit, unsigned char Command, int Bits)
 {
@@ -124,51 +124,51 @@ int GSM_GetDuration(int number, unsigned char *spec)
 	switch (number) {
 
 	case 128*3/2:
-		duration=Duration_Full; *spec=DottedNote; break;  
+		duration=Duration_Full; *spec=DottedNote; break;
 	case 128*2/3:
-		duration=Duration_Full; *spec=Length_2_3; break;  
+		duration=Duration_Full; *spec=Length_2_3; break;
 	case 128:
-		duration=Duration_Full; *spec=NoSpecialDuration; break;  
+		duration=Duration_Full; *spec=NoSpecialDuration; break;
 	case 64*9/4:
-		duration=Duration_1_2; *spec=DoubleDottedNote; break;    
+		duration=Duration_1_2; *spec=DoubleDottedNote; break;
 	case 64*3/2:
-		duration=Duration_1_2; *spec=DottedNote; break;  
+		duration=Duration_1_2; *spec=DottedNote; break;
 	case 64*2/3:
-		duration=Duration_1_2; *spec=Length_2_3; break;  
+		duration=Duration_1_2; *spec=Length_2_3; break;
 	case 64:
-		duration=Duration_1_2; *spec=NoSpecialDuration; break;  
+		duration=Duration_1_2; *spec=NoSpecialDuration; break;
 	case 32*9/4:
-		duration=Duration_1_4; *spec=DoubleDottedNote; break;    
+		duration=Duration_1_4; *spec=DoubleDottedNote; break;
 	case 32*3/2:
-		duration=Duration_1_4; *spec=DottedNote; break;  
+		duration=Duration_1_4; *spec=DottedNote; break;
 	case 32*2/3:
-		duration=Duration_1_4; *spec=Length_2_3; break;  
+		duration=Duration_1_4; *spec=Length_2_3; break;
 	case 32:
-		duration=Duration_1_4; *spec=NoSpecialDuration; break;  
+		duration=Duration_1_4; *spec=NoSpecialDuration; break;
 	case 16*9/4:
-		duration=Duration_1_8; *spec=DoubleDottedNote; break;    
+		duration=Duration_1_8; *spec=DoubleDottedNote; break;
 	case 16*3/2:
-		duration=Duration_1_8; *spec=DottedNote; break;  
+		duration=Duration_1_8; *spec=DottedNote; break;
 	case 16*2/3:
-		duration=Duration_1_8; *spec=Length_2_3; break;  
+		duration=Duration_1_8; *spec=Length_2_3; break;
 	case 16:
-		duration=Duration_1_8; *spec=NoSpecialDuration; break;  
+		duration=Duration_1_8; *spec=NoSpecialDuration; break;
 	case 8*9/4:
-		duration=Duration_1_16; *spec=DoubleDottedNote; break;    
+		duration=Duration_1_16; *spec=DoubleDottedNote; break;
 	case 8*3/2:
-		duration=Duration_1_16; *spec=DottedNote; break;  
+		duration=Duration_1_16; *spec=DottedNote; break;
 	case 8*2/3:
-		duration=Duration_1_16; *spec=Length_2_3; break;  
+		duration=Duration_1_16; *spec=Length_2_3; break;
 	case 8:
-		duration=Duration_1_16; *spec=NoSpecialDuration; break;  
+		duration=Duration_1_16; *spec=NoSpecialDuration; break;
 	case 4*9/4:
-		duration=Duration_1_32; *spec=DoubleDottedNote; break;    
+		duration=Duration_1_32; *spec=DoubleDottedNote; break;
 	case 4*3/2:
-		duration=Duration_1_32; *spec=DottedNote; break;  
+		duration=Duration_1_32; *spec=DottedNote; break;
 	case 4*2/3:
-		duration=Duration_1_32; *spec=Length_2_3; break;  
+		duration=Duration_1_32; *spec=Length_2_3; break;
 	case 4:
-		duration=Duration_1_32; *spec=NoSpecialDuration; break;  
+		duration=Duration_1_32; *spec=NoSpecialDuration; break;
 	}
 
 	return duration;
@@ -177,12 +177,11 @@ int GSM_GetDuration(int number, unsigned char *spec)
 
 int GSM_GetNote(int number)
 {
-	int note=0;
- 
-	if (number!=255) {
-		note=number%14;
-		switch (note) {
+	int note = 0;
 
+	if (number != 255) {
+		note = number % 14;
+		switch (note) {
 		case 0:
 			note=Note_C; break;
 		case 1:
@@ -267,7 +266,7 @@ u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
 
 	/* Info, how long is contents for SMS */
 	HowLong=30+8*strlen(ringtone->name)+17+8+8+13;
-  
+
 	/* Calculate the number of instructions in the tune.
 	   Each Note contains Note and (sometimes) Scale.
 	   Default Tempo and Style are instructions too. */
@@ -277,11 +276,11 @@ u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
 
 		/* PC Composer 2.0.010 doesn't like, when we start ringtone from pause:
 		   it displays that the format is invalid and
-		   hangs, when you move mouse over place, where pause is */       
+		   hangs, when you move mouse over place, where pause is */
 		if (GSM_GetNote(ringtone->notes[i].note)==Note_Pause && oldscale==10) {
 			StartNote++;
 		} else {
-      
+
 			/* we don't write Scale info before "Pause" note - it saves space */
 			if (GSM_GetNote(ringtone->notes[i].note)!=Note_Pause &&
 			    oldscale!=(newscale=GSM_GetScale(ringtone->notes[i].note))) {
@@ -295,7 +294,7 @@ u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
 					break;
 				}
 			}
-    
+
 			/* We calculate, if we have space to add next note instruction */
 			if (((HowLong+12)/8)<=(*maxlength-1)) {
 				HowMany++;
@@ -306,7 +305,7 @@ u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
 			}
 		}
 
-		/* If we are sure, we pack it for SMS or setting to phone, not for OTT file */    
+		/* If we are sure, we pack it for SMS or setting to phone, not for OTT file */
 		if (*maxlength<1000) {
 			/* Pc Composer gives this as the phone limitation */
 			if ((EndNote-StartNote)==GSM_MAX_RINGTONE_NOTES-1) break;
@@ -328,7 +327,7 @@ u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
 
 	/* Notes packing */
 	for(i=StartNote; i<(EndNote+StartNote); i++) {
-    
+
 		/* we don't write Scale info before "Pause" note - it saves place */
 		if (GSM_GetNote(ringtone->notes[i].note)!=Note_Pause &&
 		    oldscale!=(newscale=GSM_GetScale(ringtone->notes[i].note))) {
@@ -347,11 +346,11 @@ u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
 	StartBit=OctetAlign(package, StartBit);
 
 	StartBit=BitPackByte(package, StartBit, CommandEnd, 8);
-  
+
 	if (StartBit!=OctetAlignNumber(HowLong))
 		dprintf("Error in PackRingtone - StartBit different to HowLong %d - %d)\n", StartBit,OctetAlignNumber(HowLong));
 
-	*maxlength=StartBit/8;  
+	*maxlength=StartBit/8;
 
 	return(EndNote+StartNote);
 }
@@ -381,7 +380,7 @@ int BitUnPackInt(unsigned char *Src, int CurrentBit, int *integer, int Bits)
 	}
 
 	*integer=l;
-  
+
 	return CurrentBit+i;
 }
 
@@ -415,7 +414,7 @@ GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlengt
 		dprintf("Not RingingToneProgramming\n");
 		return GE_SUBFORMATNOTSUPPORTED;
 	}
-    
+
 /* The page 3-23 of the specs says that <command-part> is always
    octet-aligned. */
 	StartBit = OctetUnAlign(StartBit);
@@ -440,10 +439,10 @@ GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlengt
 	StartBit = BitUnPack(package, StartBit, ringtone->name, 8*l);
 	ringtone->name[l] = 0;
 
-	StartBit = BitUnPackInt(package, StartBit, &l, 8);    
+	StartBit = BitUnPackInt(package, StartBit, &l, 8);
 	if (l != 1) return GE_SUBFORMATNOTSUPPORTED; //we support only one song pattern
 
-	StartBit = BitUnPackInt(package, StartBit, &l, 3);          
+	StartBit = BitUnPackInt(package, StartBit, &l, 3);
 	if (l != PatternHeaderId) {
 		dprintf("Not PatternHeaderId\n");
 		return GE_SUBFORMATNOTSUPPORTED;
@@ -451,14 +450,14 @@ GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlengt
 
 	StartBit += 2; //Pattern ID - we ignore it
 
-	StartBit = BitUnPackInt(package, StartBit, &l, 4);          
-    
+	StartBit = BitUnPackInt(package, StartBit, &l, 4);
+
 	HowMany = 0;
 	StartBit = BitUnPackInt(package, StartBit, &HowMany, 8);
 
 	scale = 0;
 	ringtone->NrNotes = 0;
-    
+
 	for (i = 0; i < HowMany; i++) {
 
 		StartBit = BitUnPackInt(package, StartBit, &q, 3);
@@ -497,13 +496,13 @@ GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlengt
 			case Note_H   :ringtone->notes[ringtone->NrNotes].note = 12;  break;
 			default       :ringtone->notes[ringtone->NrNotes].note = 255; break; //Pause ?
 			}
-      
+
 			if (ringtone->notes[ringtone->NrNotes].note != 255)
 				ringtone->notes[ringtone->NrNotes].note = ringtone->notes[ringtone->NrNotes].note + scale*14;
 
 			StartBit = BitUnPackInt(package, StartBit, &duration, 3);
 
-			StartBit = BitUnPackInt(package, StartBit, &spec, 2);    
+			StartBit = BitUnPackInt(package, StartBit, &spec, 2);
 
 			if (duration==Duration_Full && spec==DottedNote)
 				ringtone->notes[ringtone->NrNotes].duration=128*3/2;
@@ -543,13 +542,13 @@ GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlengt
 				ringtone->notes[ringtone->NrNotes].duration=4;
 
 			if (ringtone->NrNotes==MAX_RINGTONE_NOTES) break;
-	
+
 			ringtone->NrNotes++;
 			break;
 		default:
 			dprintf("Unsupported block\n");
 			return GE_SUBFORMATNOTSUPPORTED;
-		} 
+		}
 	}
 
 	return GE_NONE;
@@ -564,16 +563,15 @@ GSM_Error GSM_ReadRingtoneFromSMS(GSM_SMSMessage *message, GSM_Ringtone *rington
 }
 
 int GSM_EncodeSMSRingtone(char *message, GSM_Ringtone *ringtone)
-{  
+{
 	int j = GSM_MAX_8BIT_SMS_LENGTH;
-  
 	return GSM_PackRingtone(ringtone, message, &j);
 }
 
 int GSM_SaveRingtoneToSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
-{  
+{
 	int i, j = GSM_MAX_8BIT_SMS_LENGTH;
-  
+
 	char UserDataHeader[7]= { 0x06,  /* User Data Header Length */
 				  0x05,  /* IEI: application port addressing scheme, 16 bit address */
 				  0x04,  /* IEDL (IED length ?) */
@@ -607,11 +605,11 @@ int GSM_SaveRingtoneToSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
 
 	message->UDH_No = 1;
 	message->UDH[0].Type = SMS_Ringtone;
-  
+
 	message->Length = j;
-  
+
 	memcpy(message->UserData[0].u.Text, UserDataHeader, 7);
 	i = GSM_PackRingtone(ringtone, message->UserData[0].u.Text + 7, &j);
-  
+
 	return i;
 }

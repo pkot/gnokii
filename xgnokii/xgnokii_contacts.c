@@ -2688,7 +2688,7 @@ static bool ParseLine (GSM_PhonebookEntry *entry, gint *num, gchar *buf)
       buf += (i + 1);
       i = 0;
       len = strlen (buf);
-      while (i < len && i < GSM_MAX_PHONEBOOK_TEXT_LENGTH && buf[i] != ';')
+      while (i < len && i < GSM_MAX_PHONEBOOK_NUMBER_LENGTH && buf[i] != ';')
       {
         entry->SubEntries[entry->SubEntriesCount].data.Number[i] = buf[i];
         i++;

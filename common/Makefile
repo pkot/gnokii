@@ -24,7 +24,7 @@ OBJS =	cfgreader.o \
 	gsm-networks.o \
 	vcal.o \
 	misc.o \
-        gsm-sms.o \
+	gsm-sms.o \
 	gsm-bitmaps.o \
 	gsm-common.o \
 	gsm-encoding.o \

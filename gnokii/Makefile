@@ -10,13 +10,13 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 ifdef XPM_LIBS
-    LDFLAGS +=$(XPM_LIBS)
+	LDFLAGS +=$(XPM_LIBS)
 endif
 
 OBJS =	gnokii.o
 
 ifdef OWN_GETOPT
-    OBJS += $(TOPDIR)/getopt/libgetopt.a
+	OBJS += $(TOPDIR)/getopt/libgetopt.a
 endif
 
 LDFLAGS += -L$(TOPDIR)/common -lgnokii

@@ -10,7 +10,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Notice that this code was (partly) converted to "new" structure, but it 
+  Notice that this code was (partly) converted to "new" structure, but it
   does not have code for bus separated. I think that separating it would
   be waste of effort... 					--pavel
 
@@ -31,23 +31,18 @@
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
+#include <string.h>
 
 #undef DEBUG
 #include "misc.h"
 #include "gsm-common.h"
 #include "mbus-2110.h"
-#include "phones/nokia.h"
 #include "device.h"
 #include "gsm-sms.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#include "misc.h"
-#include "gsm-common.h"
+#include "gsm-statemachine.h"
 #include "phones/generic.h"
 #include "phones/nk2110.h"
+#include "phones/nokia.h"
 
 #define MYID 0x78
 #define ddprintf(x...)
@@ -149,7 +144,7 @@ do { \
 	while ((!(condition)) && (limit > GetTime())) { \
 		yield(); \
 		POLLIT; \
-        } \
+	} \
 	if (!(limit > GetTime())) eprintf("???? TIMEOUT!"); \
 } while(0)
 
@@ -362,7 +357,7 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 
 	ddprintf("Text is %s\n", m->UserData[0].u.Text);
 
-	/* 
+	/*
 	Originator address is at 15+i,
 	   followed by message center addres (?)
 	*/
@@ -390,7 +385,7 @@ GetSMSMessage(GSM_SMSMessage *m)
 	if (SMS(m, LM_SMS_READ_STORED_DATA) != GE_NONE)
 		return GE_BUSY; /* FIXME */
 	ddprintf("Have message?\n");
-	
+
 	if (DecodeIncomingSMS(m) != GE_NONE)
 		return GE_BUSY;
 
@@ -447,7 +442,7 @@ GetValue(u8 index, u8 type)
 
 	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xe6) ||
-	    (PacketData[4] != index) || 
+	    (PacketData[4] != index) ||
 	    (PacketData[5] != type))
 		dprintf("Something is very wrong with GetValue\n");
 	val = PacketData[7];
@@ -620,7 +615,7 @@ HandlePacket(void)
 		if (OutputFn)
 			OutputFn(&drawmsg);
 #if 0
-// Please convert it. I didn't managed to convert the rest... :-( - bozo
+/* Please convert it. I didn't managed to convert the rest... :-( - bozo */
 		char buf[10240], *s = buf;
 #undef COPY
 #define COPY(x, y, z) s = Display(PacketData[x], y, z, s)
@@ -678,12 +673,12 @@ HandlePacket(void)
 		return ((PacketData[4] & 0xf) != 0);
 		/* Make all but last fragment "secret" */
 
-	default: dprintf("Unknown response %dx\n", PacketData[3]); 
+	default: dprintf("Unknown response %dx\n", PacketData[3]);
 	         return 0;
-	}	
+	}
 }
 
-/* Handler called when characters received from serial port. 
+/* Handler called when characters received from serial port.
  * and process them. */
 static void
 SigHandler(int status)
@@ -698,7 +693,7 @@ SigHandler(int status)
 	if( res < 0 ) return;
 	for(i = 0; i < res ; i++) {
 		b = buffer[i];
-//	 dprintf("(%x)", b, Index);
+/*	 dprintf("(%x)", b, Index); */
 		if (!Index && b != MYID && b != 0xf8 && b != 0x00) /* MYID is code of computer */ {
 			/* something strange goes from phone. Just ignore it */
 			ddprintf("Get [%02X %c]\n", b, b >= 0x20 ? b : '.' );
@@ -785,7 +780,7 @@ bool OpenSerial(void)
 	ddprintf(_("Setting MBUS communication with 2110...\n"));
 
 	result = device_open(PortDevice, true, false, false, GCT_Serial);
- 	if (!result) { 
+	if (!result) {
 		fprintf(stderr, "Failed to open %s ...\n", PortDevice);
 		return (false);
 	}
@@ -1011,7 +1006,7 @@ EnableDisplayOutput(GSM_Statemachine *sm)
 	fprintf(stderr, "\nGrabbing display");
 	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xcd) ||
-	    (PacketData[2] != 1) || 
+	    (PacketData[2] != 1) ||
 	    (PacketData[4] != 1 /* LN_UC_REQUEST_OK */))
 		fprintf(stderr, "Something is very wrong with GrabDisplay\n");
 	fprintf(stderr, "Display grabbed okay (waiting)\n");
@@ -1062,7 +1057,7 @@ RegisterMe(void)
 }
 
 /* Initialise variables and state machine. */
-static GSM_Error   
+static GSM_Error
 Initialise(GSM_Statemachine *state)
 {
 	GSM_Data data;
@@ -1075,7 +1070,7 @@ Initialise(GSM_Statemachine *state)
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
 	memset(VersionInfo, 0, sizeof(VersionInfo));
-	strncpy(PortDevice, "/dev/ttyS0", GSM_MAX_DEVICE_NAME_LENGTH);
+	strcpy(PortDevice, state->Link.PortDevice);
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
 		RegisterMe();
@@ -1103,7 +1098,7 @@ GetPhonebookLocation(GSM_PhonebookEntry *entry)
 
 	pkt[1] = 3 + (entry->MemoryType != GMT_ME);
 	pkt[2] = entry->Location;
-	
+
 	PacketOK = false;
 	SendCommand(pkt, LN_LOC_COMMAND, 3);
 	waitfor(PacketOK, 0);
@@ -1144,7 +1139,7 @@ WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	pkt[2] = entry->Location;
 	strcpy(&pkt[3], entry->Name);
 	strcpy(&pkt[3+strlen(entry->Name)+1], entry->Number);
-	
+
 	PacketOK = false;
 	SendCommand(pkt, LN_LOC_COMMAND, 3+strlen(entry->Number)+strlen(entry->Name)+2);
 	waitfor(PacketOK, 0);
@@ -1232,7 +1227,7 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 			CheckIncomingSMS(5);
 			err = SMS_Reserve(state);
 		}
-		break;		
+		break;
 	case GOP_PollSMS:			/* Our phone is able to notify us... but we do not want to burn 100% CPU polling */
 		{
 			struct timeval tm;

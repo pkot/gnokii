@@ -34,7 +34,7 @@ typedef enum {
 
 /* Maximum length of device name for serial port */
 
-#define GSM_MAX_DEVICE_NAME_LENGTH (100)
+#define GSM_MAX_DEVICE_NAME_LENGTH (32)
 
 /* Define an enum for specifying memory types for retrieving phonebook
    entries, SMS messages etc. This type is not mobile specific - the model
@@ -94,13 +94,12 @@ typedef struct {
 /* Limits for sizing of array in GSM_PhonebookEntry. Individual handsets may
    not support these lengths so they have their own limits set. */
 
-#define GSM_MAX_PHONEBOOK_NAME_LENGTH   (50)   /* For 7110 */
-#define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (48)   /* For 7110 */
-#define GSM_MAX_PHONEBOOK_TEXT_LENGTH   (60)   /* For 7110 */
-#define GSM_MAX_PHONEBOOK_SUB_ENTRIES   (8)    /* For 7110 */
-                                               /* 7110 is able to in one
-						* entry 5 numbers and 2
-						* texts [email,notice,postal] */
+#define GSM_MAX_PHONEBOOK_NAME_LENGTH   (50)	/* For 7110 */
+#define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (48)	/* For 7110 */
+#define GSM_MAX_PHONEBOOK_SUB_ENTRIES   (8)	/* For 7110 */
+						/* 7110 is able to in one
+						 * entry 5 numbers and 2
+						 * texts [email,notice,postal] */
 
 /* Here is a macro for models that do not support caller groups. */
 
@@ -150,7 +149,7 @@ typedef struct {
 	GSM_EntryType   EntryType;
 	GSM_Number_Type NumberType;
 	union {
-		char Number[GSM_MAX_PHONEBOOK_TEXT_LENGTH + 1]; /* Number */
+		char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
 		GSM_DateTime Date;                         /* or the last calls list */
 	} data;
 	int             BlockNumber;
@@ -244,11 +243,10 @@ typedef struct {
    allow model specific code to set them during initialisation */
 
 typedef struct {
-	 	
 	char *Models; /* Models covered by this type, pipe '|' delimited. */
 
 /* Minimum and maximum levels for RF signal strength. Units are as per the
-   setting of RFLevelUnits.  The setting of RFLevelUnits indicates the 
+   setting of RFLevelUnits.  The setting of RFLevelUnits indicates the
    default or "native" units used.  In the case of the 3110 and 6110 series
    these are arbitrary, ranging from 0 to 4. */
 

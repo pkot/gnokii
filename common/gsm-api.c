@@ -1,7 +1,7 @@
 /*
 
   $Id$
-  
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -9,7 +9,7 @@
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
-	
+
   Provides a generic API for accessing functions on the phone, wherever
   possible hiding the model specific details.
 
@@ -71,28 +71,28 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 }
 
 #define REGISTER_PHONE(x, y) { \
-        extern GSM_Phone phone_##x; \
-        if ((ret = register_phone(&phone_##x, model, y, sm)) != GE_UNKNOWNMODEL) \
-                return ret; \
- } 
+	extern GSM_Phone phone_##x; \
+	if ((ret = register_phone(&phone_##x, model, y, sm)) != GE_UNKNOWNMODEL) \
+		return ret; \
+}
 
- 
 GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
 {
-        GSM_Error ret;
+	GSM_Error ret;
 #ifndef WIN32  /* MB21 not supported in win32 */
 
-        GSM_LinkOK = &LinkAlwaysOK;
-        sm->Link.ConnectionType=connection;
-        sm->Link.InitLength=atoi(initlength);
-        strcpy(sm->Link.PortDevice,device);
- 
-        REGISTER_PHONE(nokia_7110, NULL);
+	GSM_LinkOK = &LinkAlwaysOK;
+	sm->Link.ConnectionType = connection;
+	sm->Link.InitLength = atoi(initlength);
+	memset(&sm->Link.PortDevice, 0, sizeof(sm->Link.PortDevice));
+	strncpy(sm->Link.PortDevice, device, sizeof(sm->Link.PortDevice) - 1);
+
+	REGISTER_PHONE(nokia_7110, NULL);
 	REGISTER_PHONE(nokia_6100, NULL);
 	REGISTER_PHONE(nokia_3110, NULL);
 	REGISTER_PHONE(nokia_2110, NULL);
 	REGISTER_PHONE(at, model);
 
-#endif /* WIN32 */ 
-        return (GE_UNKNOWNMODEL);
+#endif /* WIN32 */
+	return (GE_UNKNOWNMODEL);
 }

@@ -18,11 +18,11 @@ LDFLAGS += $(PTHREAD_LIBS) \
 LDFLAGS += -g -rdynamic -L$(TOPDIR)/common -lgnokii -ldl
 
 ifdef XPM_LIBS
-    LDFLAGS +=$(XPM_LIBS)
+	LDFLAGS +=$(XPM_LIBS)
 endif
 
 OBJS = 	smsd.o \
-        lowlevel.o
+	lowlevel.o
 
 all: smsd
 

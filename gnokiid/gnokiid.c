@@ -1,7 +1,7 @@
 /*
 
   $Id$
-  
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -13,17 +13,6 @@
   Mainline code for gnokiid daemon. Handles command line parsing and
   various daemon functions.
 
-  $Log$
-  Revision 1.19  2001-06-28 00:28:45  pkot
-  Small docs updates (Pawel Kot)
-
-  Revision 1.18  2001/02/21 19:57:09  chris
-  More fiddling with the directory layout
-
-  Revision 1.17  2000/12/19 16:18:18  pkot
-  configure script updates and added shared function for configfile reading
-
-  
 */
 
 #include <stdio.h>
@@ -44,34 +33,37 @@
 
 
 /* Global variables */
-bool     DebugMode;       /* When true, run in debug mode */
-char     *Model;          /* Model from .gnokiirc file. */
-char     *Port;           /* Serial port from .gnokiirc file */
-char     *Initlength;     /* Init length from .gnokiirc file */
-char     *Connection;     /* Connection type from .gnokiirc file */
-char     *BinDir;         /* Directory of the mgnokiidev command */
-bool     TerminateThread;
+bool DebugMode;		/* When true, run in debug mode */
+char *Model;		/* Model from .gnokiirc file. */
+char *Port;		/* Serial port from .gnokiirc file */
+char *Initlength;	/* Init length from .gnokiirc file */
+char *Connection;	/* Connection type from .gnokiirc file */
+char *BinDir;		/* Directory of the mgnokiidev command */
+bool TerminateThread;
 
 /* Local variables */
-char     *DefaultConnection = "serial";
-char     *DefaultBinDir = "/usr/local/sbin";
+char *DefaultConnection = "serial";
+char *DefaultBinDir = "/usr/local/sbin";
 
-void version(void)
+static void short_version()
 {
+	fprintf(stderr, _("GNOKIID Version %s\n"), VERSION);
+}
 
-        fprintf(stdout, _("gnokiid Version %s\n"
-"Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999\n"
-"Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999\n"
-"Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
+static void version()
+{
+	fprintf(stderr, _("Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999\n"
+			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999\n"
+			  "Built %s %s for %s on %s \n"),
+			  __TIME__, __DATE__, Model, Port);
 }
 
 /* The function usage is only informative - it prints this program's usage and
    command-line options.*/
-
-void usage(void)
+static void usage()
 {
 
-        fprintf(stdout, _("   usage: gnokiid {--help|--version}\n"
+	fprintf(stderr, _("   usage: gnokiid {--help|--version}\n"
 "          --help            display usage information."
 "          --version         displays version and copyright information."
 "          --debug           uses stdin/stdout for virtual modem comms.\n"));
@@ -82,56 +74,53 @@ void usage(void)
 
 int main(int argc, char *argv[])
 {
+	GSM_ConnectionType connection = GCT_Serial;
 
-        GSM_ConnectionType connection = GCT_Serial;
-
-        /* For GNU gettext */
-
+	/* For GNU gettext */
 #ifdef USE_NLS
-        textdomain("gnokii");
+	textdomain("gnokii");
 #endif
 
-        if (readconfig(&Model, &Port, &Initlength, &Connection, &BinDir) < 0) {
-                exit(-1);
-        }
+	short_version();
 
+	if (readconfig(&Model, &Port, &Initlength, &Connection, &BinDir) < 0) {
+		exit(-1);
+	}
 
-        /* Handle command line arguments. */
+	/* Handle command line arguments. */
+	if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
+		usage();
+		exit(0);
+	}
 
-        if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
-                usage();
-                exit(0);
-        }
+	/* Display version, copyright and build information. */
+	if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
+		version();
+		exit(0);
+	}
 
-        /* Display version, copyright and build information. */
+	if (argc >= 2 && strcmp(argv[1], "--debug") == 0) {
+		DebugMode = true;
+	} else {
+		DebugMode = false;
+	}
 
-        if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
-                version();
-                exit(0);
-        }
+	if (!strcmp(Connection, "infrared")) {
+		connection = GCT_Infrared;
+	}
 
-        if (argc >= 2 && strcmp(argv[1], "--debug") == 0) {
-                DebugMode = true;
-        } else {
-                DebugMode = false;
-        }
+	TerminateThread=false;
 
-        if (!strcmp(Connection, "infrared")) {
-                connection=GCT_Infrared;
-        }
+	if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode, true) == false) {
+		exit (-1);
+	}
 
-        TerminateThread=false;
-
-        if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode, true) == false) {
-                exit (-1);
-        }
-
-        while (1) {
-                if (TerminateThread==true) {
-                        VM_Terminate();
-                        exit(1);
-                }
-                sleep (1);
-        }
-        exit (0);
+	while (1) {
+		if (TerminateThread == true) {
+			VM_Terminate();
+			exit(1);
+		}
+		sleep (1);
+	}
+	exit (0);
 }

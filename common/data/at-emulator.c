@@ -13,7 +13,7 @@
   This file provides a virtual modem or "AT" interface to the GSM phone by
   calling code in gsm-api.c. Inspired by and in places copied from the Linux
   kernel AT Emulator IDSN code by Fritz Elfert and others.
-  
+
 */
 
 #define		__data_at_emulator_c
@@ -59,7 +59,7 @@ static 	char imei[64], model[64], revision[64], manufacturer[64];
 
 /* Local variables */
 int	PtyRDFD;	/* File descriptor for reading and writing to/from */
-int	PtyWRFD;	/* pty interface - only different in debug mode. */ 
+int	PtyWRFD;	/* pty interface - only different in debug mode. */
 
 u8	ModemRegisters[MAX_MODEM_REGISTERS];
 char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
@@ -124,7 +124,7 @@ bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
 
 
 /* Initialise the "registers" used by the virtual modem. */
-void	ATEM_InitRegisters(void) 
+void	ATEM_InitRegisters(void)
 {
 
 	ModemRegisters[REG_RINGATA] = 0;
@@ -144,7 +144,7 @@ void	ATEM_InitRegisters(void)
 void ATEM_CallPassup(char c)
 {
 	if ((c >= 0) && (c < 9)) {
-		ATEM_ModemResult(MR_RING);		
+		ATEM_ModemResult(MR_RING);
 		IncomingCallNo = c;
 	}
 }
@@ -155,7 +155,7 @@ void ATEM_CallPassup(char c)
 void	ATEM_HandleIncomingData(char *buffer, int length)
 {
 	int count;
-	unsigned char out_buf[3];	
+	unsigned char out_buf[3];
 
 	for (count = 0; count < length ; count++) {
 
@@ -196,7 +196,7 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 			}
 		}
 	}
-}     
+}
 
 
 /* Parser for standard AT commands.  cmd_buffer must be null terminated. */
@@ -270,7 +270,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				return;
 			}
 			break;
-			
+
 		  /* Handle AT* commands (Nokia proprietary I think) */
 		case '*':
 			buf++;
@@ -285,7 +285,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				}
 			}
 			break;
-			
+
 		/* + is the precursor to another set of commands */
 		case '+':
 			buf++;
@@ -294,30 +294,30 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				buf++;
 				/* Returns true if error occured */
 				if (ATEM_CommandPlusC(&buf) == true) {
-					return;	
+					return;
 				}
 				break;
-				
+
 			case 'G':
 				buf++;
 				/* Returns true if error occured */
 				if (ATEM_CommandPlusG(&buf) == true) {
-					return;	
+					return;
 				}
 				break;
-				
+
 			default:
 				ATEM_ModemResult(MR_ERROR);
 				return;
 			}
 			break;
-			
-		default: 
+
+		default:
 			ATEM_ModemResult(MR_ERROR);
 			return;
 		}
 	}
-	
+
 	ATEM_ModemResult(MR_OK);
 }
 
@@ -388,7 +388,7 @@ void	ATEM_ParseSMS(char *buff)
 		Parser = ATEM_ParseAT;
 		ATEM_ModemResult(MR_OK);
 		return;
-	} 
+	}
 	ATEM_ModemResult(MR_ERROR);
 }
 
@@ -761,7 +761,7 @@ bool	ATEM_CommandPlusG(char **buf)
 
 /* Send a result string back.  There is much work to do here, see
    the code in the isdn driver for an idea of where it's heading... */
-void	ATEM_ModemResult(int code) 
+void	ATEM_ModemResult(int code)
 {
 	char	buffer[16];
 
@@ -770,7 +770,7 @@ void	ATEM_ModemResult(int code)
 		ATEM_StringOut(buffer);
 	} else {
 		switch (code) {
-			case MR_OK:	
+			case MR_OK:
 					ATEM_StringOut("\n\rOK\n\r");
 					break;
 

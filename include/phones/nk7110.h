@@ -11,7 +11,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  This file provides functions specific to the 7110 series. 
+  This file provides functions specific to the 7110 series.
   See README for more details on supported mobile phones.
 
   The various routines are called P7110_(whatever).
@@ -29,7 +29,7 @@ typedef enum {
 	GOP7110_GetPicture,
 	GOP7110_Max       /* don't append anything after this entry */
 } GSM7110_Operation;
-                                
+
 extern bool P7110_LinkOK;
 
 /* Message types */

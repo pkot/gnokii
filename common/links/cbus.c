@@ -10,7 +10,7 @@
   Copyright (C) 2001 Michl Ladislav <xmichl03@stud.fee.vutbr.cz>
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
- 
+
  */
 
 /* System header files */
@@ -104,8 +104,7 @@ static int xwrite(unsigned char *d, int len)
 	return 0;
 }
 
-static void
-say(unsigned char *c, int len)
+static void say(unsigned char *c, int len)
 {
 	unsigned char d[10240];
 
@@ -117,11 +116,10 @@ say(unsigned char *c, int len)
 		for (i=0; i<len; i++)
 			printf("%x ", d[i]);
 		printf("\n");
-	}			
+	}
 }
 
-static int
-waitack(void)
+static int waitack(void)
 {
 	unsigned char c;
 	printf("Waiting ack\n");
@@ -134,8 +132,7 @@ waitack(void)
 	return 0;
 }
 
-static void
-sendpacket(unsigned char *msg, int len, unsigned short cmd)
+static void sendpacket(unsigned char *msg, int len, unsigned short cmd)
 {
 	unsigned char p[10240], csum = 0;
 	int pos;
@@ -147,7 +144,7 @@ sendpacket(unsigned char *msg, int len, unsigned short cmd)
 	p[4] = len & 0xff;
 	p[5] = len >> 8;
 	memcpy(p+6, msg, len);
-	
+
 	pos = 6+len;
 	{
 		int i;
@@ -196,12 +193,11 @@ static GSM_Error PhoneReply(int messagetype, unsigned char *buffer, int length)
 	return GE_NONE;
 }
 
-void
-sendat(char *msg)
+void sendat(char *msg)
 {
 	usleep(10000);
 	printf("AT command: %s\n", msg);
-        CBUS_SendMessage(strlen(msg), 0x3c, msg);
+	CBUS_SendMessage(strlen(msg), 0x3c, msg);
 	seen_okay = 0;
 	while (!seen_okay)
 		CBUS_Loop(NULL);
@@ -214,8 +210,7 @@ sendat(char *msg)
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
-void
-internal_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
+void internal_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 {
 	switch(type) {
 	case '=': CommandAck(type, buf, len);
@@ -258,8 +253,8 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 			i->checksum = i->prev_rx_byte ^ rx_byte;
 		}
 		break;
-	
-	/* FIXME: Do you know exact meaning? just mail me. ladis. */ 
+
+	/* FIXME: Do you know exact meaning? just mail me. ladis. */
 	case CBUS_RX_FrameType1:
 		i->FrameType1 = rx_byte;
 		i->state = CBUS_RX_FrameType2;
@@ -267,7 +262,7 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 
 	/* FIXME: Do you know exact meaning? just mail me. ladis. */
 	case CBUS_RX_FrameType2:
-		i->FrameType2 = rx_byte; 
+		i->FrameType2 = rx_byte;
 		i->state = CBUS_RX_GetLengthLB;
 		break;
 
@@ -276,14 +271,14 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 		i->MessageLength = rx_byte;
 		i->state = CBUS_RX_GetLengthHB;
 		break;
-	
+
 	/* message length - high byte */
 	case CBUS_RX_GetLengthHB:
 		i->MessageLength = i->MessageLength | rx_byte << 8;
 		/* there are also empty commands */
-		if (i->MessageLength == 0) 
+		if (i->MessageLength == 0)
 			i->state = CBUS_RX_GetCSum;
-		else 
+		else
 			i->state = CBUS_RX_GetMessage;
 		break;
 
@@ -296,8 +291,8 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 			i->state = CBUS_RX_Header;
 			break;
 		}
-		
-		if (i->BufferCount == i->MessageLength) 
+
+		if (i->BufferCount == i->MessageLength)
 			i->state = CBUS_RX_GetCSum;
 		break;
 
@@ -312,7 +307,7 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 			if (ack != 0xa5)
 				printf("ack lost, expect armagedon!\n");
 
-			/* Got checksum, matches calculated one, so  
+			/* Got checksum, matches calculated one, so
 			 * now pass to appropriate dispatch handler. */
 			i->buffer[i->MessageLength + 1] = 0;
 			/* FIXME: really call it :-) */
@@ -328,16 +323,16 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 				} else
 					printf("Unknown message\n");
 			}
-		} else { 
+		} else {
 			/* checksum doesn't match so ignore. */
 			dprintf("CBUS: Checksum error; expected: %02x, got: %02x", i->checksum, rx_byte);
 		}
-		
+
 		i->state = CBUS_RX_Header;
 		break;
-		
+
 	default:
-	}			
+	}
 	i->prev_rx_byte = rx_byte;
 }
 
@@ -390,8 +385,8 @@ int CBUS_TX_SendAck(u8 message_type, u8 message_seq)
 
 GSM_Error CBUS_Initialise(GSM_Statemachine *state)
 {
-        setvbuf(stdout, NULL, _IONBF, 0);
-        setvbuf(stderr, NULL, _IONBF, 0);
+	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stderr, NULL, _IONBF, 0);
 
 	/* 'Copy in' the global structures */
 	glink = &(state->Link);
@@ -417,7 +412,7 @@ GSM_Error CBUS_Initialise(GSM_Statemachine *state)
 	}
 	usleep(10000);
 	dprintf("second hello...");
-    	{
+	{
 		char init1[] = { 0x38, 0x19, 0x90, 0x70, 0x01, 0x00, 0x1f, 0xdf };
 		say( init1, 8 );
 		if (!waitack())

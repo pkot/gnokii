@@ -1,5 +1,5 @@
 /*
-  
+
   $Id$
 
   G N O K I I
@@ -94,9 +94,9 @@ static int device_script(int fd, const char *section)
 		return(-1);
 
 	case 0: /* child */
-		CFG_GetForeach(CFG_Info,section,device_script_cfgfunc);
+		CFG_GetForeach(CFG_Info, section, device_script_cfgfunc);
 		errno = 0;
-		if (dup2(fd,0) != 0 || dup2(fd,1) != 1 || close(fd)) {
+		if (dup2(fd, 0) != 0 || dup2(fd, 1) != 1 || close(fd)) {
 			fprintf(stderr, _("device_script(\"%s\"): file descriptor prepare: %s\n"), scriptname, strerror(errno));
 			_exit(-1);
 		}
@@ -164,8 +164,8 @@ int serial_open(__const char *__file, int __oflag)
 	}
 
 	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
-		if (serial_close_all_openfds[i]==-1 || serial_close_all_openfds[i]==__fd) {
-			serial_close_all_openfds[i]=__fd;
+		if (serial_close_all_openfds[i] == -1 || serial_close_all_openfds[i] == __fd) {
+			serial_close_all_openfds[i] = __fd;
 			break;
 		}
 
@@ -200,7 +200,7 @@ int serial_close(int __fd)
 #else
 		serial_termios.c_cflag &= ~HUPCL;	/* debugging  == 0 */
 #endif
- 
+
 		tcsetattr(__fd, TCSANOW, &serial_termios);
 	}
 
@@ -235,8 +235,8 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 		__with_hw_handshake = false;
 	}
 
- 	/* Open device */
- 
+	/* Open device */
+
 	/* O_NONBLOCK MUST be used here as the CLOCAL may be currently off
 	 * and if DCD is down the "open" syscall would be stuck wating for DCD.
 	 */
@@ -328,7 +328,7 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 		serial_close(fd);
 		return(-1);
 	}
-	
+
 	return fd;
 }
 

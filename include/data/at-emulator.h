@@ -9,7 +9,7 @@
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
-	
+
   Header file for AT emulator code.
 
 */
@@ -37,7 +37,7 @@ bool	ATEM_Initialised;
 	/* Definition of modem result codes - these are returned to "terminal"
        numerically or as a string depending on the setting of S12 */
 
-	/* FIX ME - Numeric values for everything except OK and ERROR 
+	/* FIX ME - Numeric values for everything except OK and ERROR
 	   are guesses as I've not got an AT reference handy.   HAB */
 
 #define 	MR_OK			(0)
@@ -47,8 +47,8 @@ bool	ATEM_Initialised;
 #define		MR_CONNECT		(3)
 #define         MR_RING                 (6)
 
-	/* All defines and prototypes from here down are specific to 
-	   the at-emulator code and so are #ifdef out if __at_emulator_c isn't 
+	/* All defines and prototypes from here down are specific to
+	   the at-emulator code and so are #ifdef out if __at_emulator_c isn't
 	   defined. */
 #ifdef	__data_at_emulator_c
 

@@ -28,8 +28,8 @@ static unsigned char GSM_DefaultAlphabet[NUMBER_OF_7_BIT_ALPHABET_ELEMENTS] = {
 	/* Characters in hex position 10, [12 to 1a] and 24 are not present on
 	   latin1 charset, so we cannot reproduce on the screen, however they are
 	   greek symbol not present even on my Nokia */
-	
-	'@',  0xa3, '$',  0xa5, 0xe8, 0xe9, 0xf9, 0xec, 
+
+	'@',  0xa3, '$',  0xa5, 0xe8, 0xe9, 0xf9, 0xec,
 	0xf2, 0xc7, '\n', 0xd8, 0xf8, '\r', 0xc5, 0xe5,
 	'?',  '_',  '?',  '?',  '?',  '?',  '?',  '?',
 	'?',  '?',  '?',  '?',  0xc6, 0xe6, 0xdf, 0xc9,
@@ -99,76 +99,76 @@ static unsigned char DecodeWithUnicodeAlphabet(wchar_t value)
 int Unpack7BitCharacters(int offset, int in_length, int out_length,
 			 unsigned char *input, unsigned char *output)
 {
-        unsigned char *OUT = output; /* Current pointer to the output buffer */
-        unsigned char *IN  = input;  /* Current pointer to the input buffer */
-        unsigned char Rest = 0x00;
-        int Bits;
+	unsigned char *OUT = output; /* Current pointer to the output buffer */
+	unsigned char *IN  = input;  /* Current pointer to the input buffer */
+	unsigned char Rest = 0x00;
+	int Bits;
 
-        Bits = offset ? offset : 7;
+	Bits = offset ? offset : 7;
 
-        while ((IN - input) < in_length) {
+	while ((IN - input) < in_length) {
 
-                *OUT = ((*IN & ByteMask) << (7 - Bits)) | Rest;
-                Rest = *IN >> Bits;
+		*OUT = ((*IN & ByteMask) << (7 - Bits)) | Rest;
+		Rest = *IN >> Bits;
 
-                /* If we don't start from 0th bit, we shouldn't go to the
-                   next char. Under *OUT we have now 0 and under Rest -
-                   _first_ part of the char. */
-                if ((IN != input) || (Bits == 7)) OUT++;
-                IN++;
+		/* If we don't start from 0th bit, we shouldn't go to the
+		   next char. Under *OUT we have now 0 and under Rest -
+		   _first_ part of the char. */
+		if ((IN != input) || (Bits == 7)) OUT++;
+		IN++;
 
-                if ((OUT - output) >= out_length) break;
+		if ((OUT - output) >= out_length) break;
 
-                /* After reading 7 octets we have read 7 full characters but
-                   we have 7 bits as well. This is the next character */
-                if (Bits == 1) {
-                        *OUT = Rest;
-                        OUT++;
-                        Bits = 7;
-                        Rest = 0x00;
-                } else {
-                        Bits--;
-                }
-        }
+		/* After reading 7 octets we have read 7 full characters but
+		   we have 7 bits as well. This is the next character */
+		if (Bits == 1) {
+			*OUT = Rest;
+			OUT++;
+			Bits = 7;
+			Rest = 0x00;
+		} else {
+			Bits--;
+		}
+	}
 
-        return OUT - output;
+	return OUT - output;
 }
 
 int Pack7BitCharacters(int offset, unsigned char *input, unsigned char *output)
 {
 
-        unsigned char *OUT = output; /* Current pointer to the output buffer */
-        unsigned char *IN  = input;  /* Current pointer to the input buffer */
-        int Bits;                    /* Number of bits directly copied to
-                                        the output buffer */
+	unsigned char *OUT = output; /* Current pointer to the output buffer */
+	unsigned char *IN  = input;  /* Current pointer to the input buffer */
+	int Bits;		     /* Number of bits directly copied to
+					the output buffer */
 
-        Bits = (7 + offset) % 8;
+	Bits = (7 + offset) % 8;
 
-        /* If we don't begin with 0th bit, we will write only a part of the
-           first octet */
-        if (offset) {
-                *OUT = 0x00;
-                OUT++;
-        }
+	/* If we don't begin with 0th bit, we will write only a part of the
+	   first octet */
+	if (offset) {
+		*OUT = 0x00;
+		OUT++;
+	}
 
-        while ((IN - input) < strlen(input)) {
+	while ((IN - input) < strlen(input)) {
 
-                unsigned char Byte = EncodeWithDefaultAlphabet(*IN);
-                *OUT = Byte >> (7 - Bits);
-                /* If we don't write at 0th bit of the octet, we should write
-                   a second part of the previous octet */
-                if (Bits != 7)
-                        *(OUT-1) |= (Byte & ((1 << (7-Bits)) - 1)) << (Bits+1);
+		unsigned char Byte = EncodeWithDefaultAlphabet(*IN);
+		*OUT = Byte >> (7 - Bits);
+		/* If we don't write at 0th bit of the octet, we should write
+		   a second part of the previous octet */
+		if (Bits != 7)
+			*(OUT-1) |= (Byte & ((1 << (7-Bits)) - 1)) << (Bits+1);
 
-                Bits--;
+		Bits--;
 
-                if (Bits == -1) Bits = 7;
-                else OUT++;
+		if (Bits == -1) Bits = 7;
+		else OUT++;
 
-                IN++;
-        }
+		IN++;
+	}
 
-        return (OUT - output);
+	return (OUT - output);
 }
 
 void DecodeAscii (unsigned char* dest, const unsigned char* src, int len)

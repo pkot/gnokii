@@ -46,7 +46,7 @@ extern bool CommandMode;
 
 /* Local variables */
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
-int		PtyWRFD;	/* pty interface - only different in debug mode. */ 
+int		PtyWRFD;	/* pty interface - only different in debug mode. */
 struct pollfd ufds;
 u8 pluscount;
 bool connected;
@@ -101,7 +101,7 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 			/* Note that the call will still be in progress, */
 			/* as with a normal modem (I think) */
 
-			if (ufds.revents != POLLIN) { 
+			if (ufds.revents != POLLIN) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
 /*				GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
@@ -114,7 +114,7 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 
 			/* This will only check +++ and the beginning of a read */
 			/* But there should be a pause before it anyway */
-      
+
 			if (buffer[0] == '+') {
 				pluscount++;
 				if (temp > 1) {
@@ -127,7 +127,7 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 					}
 				}
 			} else pluscount = 0;
-      
+
 			if (pluscount == 3) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
@@ -135,7 +135,7 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 				ATEM_ModemResult(MR_OK);
 				break;
 			}
-      
+
 			return temp;
 		}
 		break;
