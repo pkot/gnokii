@@ -122,10 +122,26 @@ bool ATBUS_OpenSerial(int hw_handshake, char *device)
 	}
 	device_changespeed(19200);
 	if (hw_handshake) {
+		/* make 7110 with dlr-3 happy. the nokia dlr-3 cable     */
+		/* provides hardware handshake lines but is, at least at */
+		/* initialization, slow. to be properly detected, state  */
+		/* changes must be longer than 700 milli seconds. if the */
+		/* timing is to fast all commands after dtr high will be */
+		/* ignored by the phone until dtr is toggled again.      */
+		/* to reset the phone and set a sane state, dtr must     */
+		/* pulled low. when irda is turned on in the phone, dtr  */
+		/* must pulled high to switch on the serial line of the  */
+		/* phone (this will switch of irda). only set it high    */
+		/* after serial line initialization (when it probably    */
+		/* was low before) is not enough. so we do high, low and */
+		/* high again, always with one second apply time. also   */
+		/* wait one second before sending commands or init will  */
+		/* fail. */
+		device_setdtrrts(1, 1);
+		sleep(1);
 		device_setdtrrts(0, 1);
 		sleep(1);
 		device_setdtrrts(1, 1);
-		/* make 7110 happy */
 		sleep(1);
 	} else {
 		device_setdtrrts(1, 1);
