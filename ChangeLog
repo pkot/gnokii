@@ -21,6 +21,9 @@
     o rttl is rtttl (ringing tone text transfer language (changes
       internal API                                 (Torsten Kunkel,
                                                          Pawel Kot)
+    o country and operator codes and names updated from
+      www.gsmworld.com                         (Krzysztof Koziarek,
+                                                         Pawel Kot)
  * AT series updates
     o support for make call command                    (Igor Popik)
  * gnokii changes
