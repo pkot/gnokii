@@ -264,7 +264,8 @@ is the Australian mirror, there will be one nearby to you too :)
 6110/Panafon (Greece)
 6110/Paegas (Czech Republic)
 5110/Paegas (Czech Republic)
-
+6150/Omnitel (Italy)
+5110/Omnitel (Italy)
 
 - Credits -
 
@@ -294,20 +295,24 @@ Thank you to, in no particular order...
 *  Colin Paton for his mail with subject "Dumps of phone<>PC traffic".
    It helped a lot.
 
-*  Czech Linux Users' group for it's CVS server which hosts our
-   development repository.
-
 *  Juan Altmayer Pizzorno for his help with MBUS/FBUS and other
    debugging.
 
 *  Gary Reuter for his help when looking for a bug in phone numbers,
    for the set-time function debugging.
- 
+
+*  Jiri Meloun for voice calling.
+
+*  Emilio Brambilla for SMS notification fixes.
+
+*  Czech Linux Users' group for it's CVS server which hosts our
+   development repository.
+
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this :)
-  
+
 *  Last not least: Mirka for allowing Pavel to work on gnokii...
-  
+
 
 - Release Notes -
 
