@@ -20,6 +20,8 @@
                                                          Pawel Kot)
  * AT series updates
     o support for make call command                    (Igor Popik)
+ * gnokii changes
+    o handle argument correctness to getphonebook       (Pawel Kot)
 
 0.5.7
 =====

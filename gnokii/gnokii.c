@@ -3081,6 +3081,10 @@ static int getphonebook(int argc, char *argv[])
 			*/
 	bool all = false;
 
+	if (argc < 2) {
+		usage(stderr, -1);
+	}
+
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
 	entry.memory_type = gn_str2memory_type(memory_type_string);
