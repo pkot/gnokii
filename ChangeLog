@@ -3,6 +3,8 @@
     o sys/filio.h included for FIONREAD              (BORBELY Zoltan)
  * gnokii changes
     o fix potential segfault in writephonebook()    (Jan de Cuveland)
+    o fix warning on architectures where char defaults to unsigned
+      char                                                (Pawel Kot)
  * docs updates
     o describe install, install-suid, install-strip and install-ss
       targets                                             (Pawel Kot)

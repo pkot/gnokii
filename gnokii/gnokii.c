@@ -1903,9 +1903,9 @@ static int setlogo(int argc, char *argv[])
 		if ((argc > 1) && (ReadBitmapFileDialog(argv[1], &bitmap, info) != GN_ERR_NONE)) return -1;
 		gn_bmp_resize(&bitmap, GN_BMP_CallerLogo, info);
 		if (argc > 2) {
-			bitmap.number = argv[2][0] - '0';
+			bitmap.number = (argv[2][0] < '0') ? 0 : argv[2][0] - '0';
+			if (bitmap.number > 9) bitmap.number = 0;
 			dprintf("%i \n", bitmap.number);
-			if ((bitmap.number < 0) || (bitmap.number > 9)) bitmap.number = 0;
 			oldbit.type = GN_BMP_CallerLogo;
 			oldbit.number = bitmap.number;
 			data.Bitmap = &oldbit;
