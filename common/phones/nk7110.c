@@ -560,7 +560,7 @@ static gn_error SetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 
 	if ((data->bitmap->width != state->driver.phone.operator_logo_width) ||
 	    (data->bitmap->height != state->driver.phone.operator_logo_height)) {
-		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n", 
+		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",
 			state->driver.phone.operator_logo_height, state->driver.phone.operator_logo_width, data->bitmap->height, data->bitmap->width);
 		return GN_ERR_INVALIDSIZE;
 	}
@@ -1216,7 +1216,7 @@ static gn_error NK7110_GetSMSStatus(gn_data *data, struct gn_statemachine *state
 	 * SMSStatus does not change! Workaround: get Templates folder status, which
 	 * does show these messages.
 	 */
-	
+
 	old_fld = data->sms_folder;
 
 	data->sms_folder = &status_fld;
@@ -1266,7 +1266,7 @@ static gn_error NK7110_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 			data->sms_folder->number++;
 		}
 		return GN_ERR_NONE;
-	} 
+	}
 
 	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, 7);
 }
@@ -1285,9 +1285,9 @@ static gn_error NK7110_SaveSMS(gn_data *data, struct gn_statemachine *state)
 	switch (data->raw_sms->type) {
 	case GN_SMS_MT_Submit:
 		if (data->raw_sms->status == GN_SMS_Sent)
-			req[4] = 0x05; 
+			req[4] = 0x05;
 		else
-			req[4] = 0x07; 
+			req[4] = 0x07;
 		req[8] = 0x02;
 		break;
 	case GN_SMS_MT_Deliver:
@@ -1501,7 +1501,6 @@ static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message,
 	if (!data || !data->calnote) return GN_ERR_INTERNALERROR;
 
 	year = data->calnote->time.year;
-	dprintf("year: %i\n", data->calnote->time.year);
 	switch (message[3]) {
 	case NK7110_SUBCAL_NOTE_RCVD:
 		calnote_decode(message, length, data);
@@ -1529,11 +1528,15 @@ static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message,
 	case NK7110_SUBCAL_ADD_CALL_RESP:
 	case NK7110_SUBCAL_ADD_BIRTHDAY_RESP:
 	case NK7110_SUBCAL_ADD_REMINDER_RESP:
-		dprintf("Succesfully written calendar note: %i!\n", (message[4] << 8) | message[5]);
+		if (message[6]) e = GN_ERR_FAILED;
+		dprintf("Attepmpt to write calendar note at %i. Status: %i\n",
+			(message[4] << 8) | message[5],
+			1 - message[6]);
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", NK7110_MSG_CALENDAR, message[3]);
-		return GN_ERR_UNHANDLEDFRAME;
+		e = GN_ERR_UNHANDLEDFRAME;
+		break;
 	}
 	return e;
 }
@@ -1586,7 +1589,7 @@ static gn_error NK7110_FirstCalendarFreePos(gn_data *data, struct gn_statemachin
 
 static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[200] = { FBUS_FRAME_HEADER,
+	unsigned char req[512] = { FBUS_FRAME_HEADER,
 				   0x01,       /* note type ... */
 				   0x00, 0x00, /* location */
 				   0x00,       /* entry type */
@@ -1600,31 +1603,37 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	long seconds, minutes;
 	gn_error error;
 
+	if (!data->calnote) return GN_ERR_INTERNALERROR;
 	calnote = data->calnote;
 
 	/* 6210/7110 needs to seek the first free pos to inhabit with next note */
 	error = NK7110_FirstCalendarFreePos(data, state);
 	if (error != GN_ERR_NONE) return error;
 
-
 	/* Location */
 	req[4] = calnote->location >> 8;
 	req[5] = calnote->location & 0xff;
 
+	dprintf("Location: %d\n", calnote->location);
+
 	switch (calnote->type) {
 	case GN_CALNOTE_MEETING:
+		dprintf("Type: meeting\n");
 		req[6] = 0x01;
 		req[3] = 0x01;
 		break;
 	case GN_CALNOTE_CALL:
+		dprintf("Type: call\n");
 		req[6] = 0x02;
 		req[3] = 0x03;
 		break;
 	case GN_CALNOTE_BIRTHDAY:
+		dprintf("Type: birthday\n");
 		req[6] = 0x04;
 		req[3] = 0x05;
 		break;
 	case GN_CALNOTE_REMINDER:
+		dprintf("Type: reminder\n");
 		req[6] = 0x08;
 		req[3] = 0x07;
 		break;
@@ -1732,7 +1741,7 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 				req[count++] = (seconds >> 8) & 0xff;      /* Field 16 */
 				req[count++] = seconds & 0xff;             /* Field 17 */
 			}
-		}	
+		}
 
 		req[count++] = 0x00; /* FIXME: calnote->AlarmType; 0x00 tone, 0x01 silent 18 */
 
@@ -1756,6 +1765,8 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		req[count++] = strlen(calnote->text);    /* Field 14 */
 		/* fixed 0x00 */
 		req[count++] = 0x00; /* Field 15 */
+		dprintf("Count before encode = %d\n", count);
+		dprintf("Reminder Text is = \"%s\"\n", calnote->text);
 		/* Text */
 		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
 		count = count + 2 * strlen(calnote->text);
@@ -1767,7 +1778,7 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 
 	dprintf("Count after padding = %d\n", count);
 
-	SEND_MESSAGE_WAITFOR(NK7110_MSG_CALENDAR, count);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, count);
 }
 
 static gn_error NK7110_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state)
@@ -1796,12 +1807,12 @@ static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 				req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
 				req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
 				data->calnote->time.year = tmptime.year;
-			} else 
+			} else
 				return GN_ERR_UNKNOWN; /* FIXME */
-		} else 
+		} else
 
 			return GN_ERR_INVALIDLOCATION;
-	} else 
+	} else
 		return error;
 
 	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 6);
@@ -2050,7 +2061,7 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 				data->wap_setting->bearer = GN_WAP_BEARER_USSD;
 				break;
 			}
-			if (message[pos + 12] == 0x01) 	
+			if (message[pos + 12] == 0x01)
 				data->wap_setting->security = true;
 			else
 				data->wap_setting->security = false;
@@ -2157,7 +2168,7 @@ static gn_error FinishWAP(gn_data *data, struct gn_statemachine *state)
 static int PackWAPString(unsigned char *dest, unsigned char *string, int length_size)
 {
 	int length;
-	
+
 	length = strlen(string);
 	if (length_size == 2) {
 		dest[0] = length / 256;
@@ -2222,7 +2233,7 @@ static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *st
 		memset(req1 + pos, 0, 200 - pos);
 		if (i == 0 || i== 2) {  /* SMS/USSD */
 			req1[pos++] = data->wap_setting->successors[i];
-			req1[pos++] = 0x02; 
+			req1[pos++] = 0x02;
 			req1[pos++] = 0x00; /* SMS */
 			/* SMS Service */
 			pos += PackWAPString(req1 + pos, data->wap_setting->sms_service_number, 1);
@@ -2230,7 +2241,7 @@ static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *st
 			pos += PackWAPString(req1 + pos, data->wap_setting->sms_server_number, 1);
 		} else {  /* GSMdata */
 			req1[pos++] = data->wap_setting->successors[i];
-			req1[pos++] = 0x02; 
+			req1[pos++] = 0x02;
 			req1[pos++] = 0x01; /* GSMdata */
 			req1[pos++] = data->wap_setting->gsm_data_authentication;
 			req1[pos++] = data->wap_setting->call_type;
@@ -2353,7 +2364,7 @@ static gn_error NK7110_GetWAPSetting(gn_data *data, struct gn_statemachine *stat
 		error = sm_block(NK7110_MSG_WAP, data, state);
 		if (error) return error;
 	}
-	
+
 	return FinishWAP(data, state);
 }
 
@@ -2419,7 +2430,7 @@ static gn_error NK7110_ReleaseKey(gn_data *data, struct gn_statemachine *state)
 
 static gn_error NK7110_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press)
 {
-	if (press) 
+	if (press)
 		return NK7110_PressKey(data, state);
 	else
 		return NK7110_ReleaseKey(data, state);

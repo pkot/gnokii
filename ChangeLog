@@ -47,6 +47,7 @@
       group number' and 'logofile' arguments             (Pawel Kot)
  * 7110 series updates:
     o dropping duplicated frames during pb read     (BORBELY Zoltan)
+    o fix calendar notes write support                   (Pawel Kot)
  * 6100 series updates:
     o better fix for busy (0xc9) frame              (BORBELY Zoltan)
     o Nokia CardPhone support updated                 (Georg Moritz)
