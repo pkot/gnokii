@@ -527,6 +527,9 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 	}
 	udh->number = nr;
 
+	/* We need to add the length field itself */
+	udh->length++;
+
 	return GN_ERR_NONE;
 }
 

@@ -3,6 +3,7 @@
     o fix vcard export                              (Florian Lohoff)
     o fix IrDA connection (broken by Bluetooth updates)  (Pawel Kot)
     o fix SMS sending                                    (Pawel Kot)
+    o fix SMS reading                                    (Pawel Kot)
  * documentation updates
     o mention that we support Bluetooth            (Marcel Holtmann)
  * portability updates
