@@ -1513,6 +1513,8 @@ static int sendlogo(int argc, char *argv[])
 	/* The second argument is the destination, ie the phone number of recipient. */
 	memset(&sms.Remote.Number, 0, sizeof(sms.Remote.Number));
 	strncpy(sms.Remote.Number, argv[1], sizeof(sms.Remote.Number) - 1);
+	if (sms.Remote.Number[0] == '+') sms.Remote.Type = SMS_International;
+	else sms.Remote.Type = SMS_Unknown;
 
 	if (loadbitmap(&sms.UserData[0].u.Bitmap, argv[2], type) != GE_NONE)
 		return -1;
