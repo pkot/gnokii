@@ -36,6 +36,7 @@
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
+#include "gnokii-internal.h"
 
 #ifdef HAVE_ICONV
 #  include <iconv.h>
@@ -550,7 +551,7 @@ char *char_bcd_number_get(u8 *number)
 }
 
 /* UTF-8 conversion functions */
-int utf8_decode(char *outstring, char *instring, int inlen)
+int utf8_decode(char *outstring, const char *instring, int inlen)
 {
 	int outlen = inlen;
 #ifdef HAVE_ICONV
@@ -567,7 +568,7 @@ int utf8_decode(char *outstring, char *instring, int inlen)
 int utf8_encode(char *outstring, char *instring, int inlen)
 {
 	int aux = inlen;
-	int retval, outlen = inlen * 2;
+	int outlen = inlen * 2;
 #ifdef HAVE_ICONV
 	iconv_t cd;
 
@@ -595,16 +596,15 @@ int string_base64(const char *instring)
    the buffer outstring needs to be at least 1.333 times bigger than the input string length
    *outlen contains the actual length of the converted string
 */
-int base64_encode(char *outstring, char *instring, int convertToUTF8)
+int base64_encode(char *outstring, const char *instring, int convertToUTF8)
 {
 	char *in1, *pin, *pout;
+	char *outtemp = NULL;
 	int inleft, inlen, outleft, inprocessed, outlen;
 	unsigned int i1, i2, i3, i4;
 
 	/* convert to UTF-8 if necessary */
 	if (convertToUTF8) {
-		char *outtemp = NULL;
-
 		inlen = strlen(instring);
 		outtemp = malloc(inlen);
 		outlen = utf8_encode(outtemp, instring, inlen);
@@ -661,15 +661,15 @@ int base64_encode(char *outstring, char *instring, int convertToUTF8)
 		outleft -= 4;
 	}
 
-	if (convertToUTF8)
-		free(instring);
+	if (outtemp)
+		free(outtemp);
 
 	free(in1);
 
 	return 1;
 }
 
-int base64_decode(char *dest, char *source, int length)
+int base64_decode(char *dest, const char *source, int length)
 {
 	int dtable[256];
 	int i, c, retval;

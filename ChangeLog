@@ -1,7 +1,8 @@
 0.5.4 (not released yet)
 ========================
  * win32 port updates
-    o bump the version number
+    o bump the version number                           (Pawel Kot)
+    o fix compilation warnings                          (Pawel Kot)
 
 0.5.3
 =====
