@@ -105,6 +105,9 @@ static gn_error gnapplet_sms_message_move_nv(gn_data *data, struct gn_statemachi
 static gn_error gnapplet_sms_message_move(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_center_write(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_calendar_note_read(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_calendar_note_write(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_calendar_note_delete(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -112,6 +115,7 @@ static gn_error gnapplet_incoming_netinfo(int messagetype, unsigned char *messag
 static gn_error gnapplet_incoming_power(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_INFO,		gnapplet_incoming_info },
@@ -120,6 +124,7 @@ static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_POWER,		gnapplet_incoming_power },
 	{ GNAPPLET_MSG_DEBUG,		gnapplet_incoming_debug },
 	{ GNAPPLET_MSG_SMS,		gnapplet_incoming_sms },
+	{ GNAPPLET_MSG_CALENDAR,	gnapplet_incoming_calendar },
 	{ 0,				NULL}
 };
 
@@ -459,6 +464,12 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_sms_center_read(data, state);
 	case GN_OP_SetSMSCenter:
 		return gnapplet_sms_center_write(data, state);
+	case GN_OP_GetCalendarNote:
+		return gnapplet_calendar_note_read(data, state);
+	case GN_OP_WriteCalendarNote:
+		return gnapplet_calendar_note_write(data, state);
+	case GN_OP_DeleteCalendarNote:
+		return gnapplet_calendar_note_delete(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -1234,6 +1245,100 @@ static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, i
 		if (!(smsc=data->message_center)) return GN_ERR_INTERNALERROR;
 		if (error != GN_ERR_NONE) return error;
 		smsc->id = pkt_get_uint16(&pkt) + 1;
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
+}
+
+
+static gn_error gnapplet_calendar_note_read(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->calnote) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CALENDAR_NOTE_READ_REQ);
+	pkt_put_uint32(&pkt, data->calnote->location);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CALENDAR);
+}
+
+
+static gn_error gnapplet_calendar_note_write(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->calnote) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CALENDAR_NOTE_WRITE_REQ);
+	pkt_put_uint32(&pkt, data->calnote->location);
+	pkt_put_uint8(&pkt, data->calnote->type);
+	pkt_put_timestamp(&pkt, &data->calnote->time);
+	if (data->calnote->alarm.enabled)
+		pkt_put_timestamp(&pkt, &data->calnote->alarm.timestamp);
+	else {
+		gn_timestamp null_ts;
+		memset(&null_ts, 0, sizeof(null_ts));
+		pkt_put_timestamp(&pkt, &null_ts);
+	}
+	pkt_put_string(&pkt, data->calnote->text);
+	pkt_put_string(&pkt, data->calnote->phone_number);
+	pkt_put_uint16(&pkt, data->calnote->recurrence);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CALENDAR);
+}
+
+
+static gn_error gnapplet_calendar_note_delete(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->calnote) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CALENDAR_NOTE_DELETE_REQ);
+	pkt_put_uint32(&pkt, data->calnote->location);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CALENDAR);
+}
+
+
+static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	gn_calnote *cal;
+	REPLY_DEF;
+
+	switch (code) {
+
+	case GNAPPLET_MSG_CALENDAR_NOTE_READ_RESP:
+		if (!(cal = data->calnote)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		cal->location = pkt_get_uint32(&pkt);
+		cal->type = pkt_get_uint8(&pkt);
+		pkt_get_timestamp(&cal->time, &pkt);
+		cal->alarm.enabled = pkt_get_bool(&pkt);
+		pkt_get_timestamp(&cal->alarm.timestamp, &pkt);
+		pkt_get_string(cal->text, sizeof(cal->text), &pkt);
+		pkt_get_string(cal->phone_number, sizeof(cal->phone_number), &pkt);
+		cal->recurrence = pkt_get_uint16(&pkt);
+		break;
+
+	case GNAPPLET_MSG_CALENDAR_NOTE_WRITE_RESP:
+		if (!(cal = data->calnote)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		cal->location = pkt_get_uint32(&pkt);
+		break;
+
+	case GNAPPLET_MSG_CALENDAR_NOTE_DELETE_RESP:
+		if (!(cal = data->calnote)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		cal->location = pkt_get_uint32(&pkt);
 		break;
 
 	default:

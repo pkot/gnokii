@@ -16,6 +16,9 @@
     o unfinished movesms support                   (BORBELY Zoltan)
     o setsmscenter support                         (BORBELY Zoltan)
     o getsmscenter set the id field incorrectly    (BORBELY Zoltan)
+    o getcalendarnote support                      (BORBELY Zoltan)
+    o writecalendarnote support                    (BORBELY Zoltan)
+    o deletecalendarnote support                   (BORBELY Zoltan)
  * gnokii updates
     o initialize error variables                             (SuSE)
 
