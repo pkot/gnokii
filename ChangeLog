@@ -6,6 +6,7 @@
                                                          (Pawel Kot)
     o small cleanups in the links includes               (Pawel Kot)
     o add make install target for includes subdir        (Pawel Kot)
+    o move win32/gnokii_v6 to win32/MSVC6                (Pawel Kot)
  * Docs updates
     o add dancall.txt                               (Ladislav Michl)
  * SMSD updates
