@@ -111,10 +111,10 @@ PhoneModel *GetPhoneModel (const char *num)
 
 	while (models[i].number != NULL) {
 		if (strcmp(num, models[i].number) == 0) {
-			dprintf("Found model\n");
+			dprintf("Found model \"%s\"\n", num);
 			return (&models[i]);
 		} else {
-			dprintf("comparing %s and %s\n", num, models[i].number);
+			dprintf("comparing \"%s\" and \"%s\"\n", num, models[i].number);
 		}
 		i++;
 	}
