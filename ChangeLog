@@ -49,6 +49,9 @@
  * gnokiid updates
     o ATH can terminate initiated calls              (BORBELY Zoltan)
     o incoming calls can be answered                 (BORBELY Zoltan)
+ * Build system updates:
+    o fixed Makefile to install libgnokii.so for all install*
+      targets                                             (Pawel Kot)
 
 0.4.0pre20
 ==========

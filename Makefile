@@ -113,9 +113,9 @@ test:
 
 install: all
 	@for dir in $(DIRS); do \
-	    if [ -e $$dir/Makefile ]; then \
-		$(MAKE) -C $$dir install; \
-	    fi; \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install; \
+		fi; \
 	done
 	@if [ "x$(USE_NLS)" = xyes ]; then \
 		$(MAKE) -C $(PO_DIR) install; \
@@ -135,11 +135,14 @@ install-docs:
 	@echo "done"
 
 install-strip:
-	@for dir in $(BIN_DIRS); do \
+	@for dir in $(DIRS); do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir install-strip; \
 		fi; \
 	done
+	@if [ "x$(USE_NLS)" = xyes ]; then \
+		$(MAKE) -C $(PO_DIR) install; \
+	fi
 
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
@@ -151,11 +154,14 @@ install-strip:
 	@echo "done"
 
 install-suid:
-	@for dir in $(BIN_DIRS); do \
+	@for dir in $(DIRS); do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir install-suid; \
 		fi; \
 	done
+	@if [ "x$(USE_NLS)" = xyes ]; then \
+		$(MAKE) -C $(PO_DIR) install; \
+	fi
 
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
@@ -167,11 +173,14 @@ install-suid:
 	@echo "done"
 
 install-ss:
-	@for dir in $(BIN_DIRS); do \
+	@for dir in $(DIRS); do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir install-ss; \
 		fi; \
 	done
+	@if [ "x$(USE_NLS)" = xyes ]; then \
+		$(MAKE) -C $(PO_DIR) install; \
+	fi
 
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
