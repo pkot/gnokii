@@ -132,7 +132,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		    rx_byte != FBUS_PHONET_DKU2_DEVICE_PC &&
 		    rx_byte != FBUS_PHONET_BLUETOOTH_DEVICE_PC) {
 			i->state = FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x0c, got 0x%2x\n", rx_byte);
+			dprintf("The fbus stream is out of sync - expected 0x0c, got 0x%02x\n", rx_byte);
 		}
 		break;
 
@@ -143,7 +143,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 
 		if (rx_byte != FBUS_DEVICE_PHONE) {
 			i->state = FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x00, got 0x%2x\n", rx_byte);
+			dprintf("The fbus stream is out of sync - expected 0x00, got 0x%02x\n", rx_byte);
 		}
 
 		break;
@@ -166,7 +166,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 
 		i->message_length = i->message_length + rx_byte;
 		i->state = FBUS_RX_GetMessage;
-		i->buffer_count=0;
+		i->buffer_count = 0;
 
 		break;
 
