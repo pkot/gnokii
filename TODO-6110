@@ -23,3 +23,5 @@ This is a to-do list for 6110 series.
 - how NCDS saves names with ";" in it?
 
 - make util directory with support utilities, clean up the source tree...
+
+- Wait for ack of Auth message

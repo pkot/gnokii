@@ -59,6 +59,7 @@ GSM_Error	FB38_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	FB38_DialVoice(char *Number);
 GSM_Error	FB38_DialData(char *Number);
 GSM_Error	FB38_GetIncomingCallNr(char *Number);
+GSM_Error	FB38_SendBitmap(char *NetworkCode, int width, int height, unsigned char *bitmap);
 
 
 	/* All defines and prototypes from here down are specific to 

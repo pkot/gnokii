@@ -76,7 +76,8 @@ GSM_Functions FB61_Functions = {
   FB61_SetAlarm,
   FB61_DialVoice,
   FB61_DialData,
-  FB61_GetIncomingCallNr
+  FB61_GetIncomingCallNr,
+  FB61_SendBitmap
 };
 
 /* Mobile phone information */
@@ -1341,6 +1342,61 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   }
 
   return (CurrentSMSMessageError);
+}
+
+/* This function sends Logo bitmap to the phone. If NetworkCode is NULL, it
+   is GroupLogo, otherwise OperatorLogo. */
+
+GSM_Error FB61_SendBitmap(char *NetworkCode, int width, int height, unsigned char *bitmap)
+{
+
+  int length;
+  int current=9;
+  unsigned char req[255] = { 0x0c, 0x01,
+
+			     /* Next bytes are from Smart Messaging
+				Specification version 2.0.0 */
+
+			     0x06,       /* User Data Header Length */
+			     0x05,       /* IEI */
+			     0x04,       /* IEDL */
+			     0x00, 0x00, /* Destination port */
+			     0xde, 0xad  /* Originator port */
+  };
+
+  /* Here we specify destination port. It is 0x1582 for OperatorLogos and
+     0x1583 for GroupLogos. */
+
+  req[5]=0x15;
+
+  if (NetworkCode) { /* Operator Logo request must contain NetworkCode */
+    req[6]=0x82;
+
+    /* Here we pack Network code to the request. For example Czech operator
+       Peagas has NetworkCode "230 01", so the result will be 0x32, 0xf0,
+       0x10. */
+
+    req[current++]= ((NetworkCode[1] & 0x0f) << 4) | (NetworkCode[0] & 0x0f);
+    req[current++]= 0xf0 | (NetworkCode[2] & 0x0f);
+    req[current++]= ((NetworkCode[5] & 0x0f) << 4) | (NetworkCode[4] & 0x0f);
+
+  } else
+    req[6]=0x83;
+
+  req[current++]= 0; /* For future extensions (dream on Nokia) */
+  req[current++]= width;
+  req[current++]= height;
+  req[current++]= 1; /* We don't have grey shades, just B&W */
+
+  length = (width * height) / 8;
+
+  memcpy(req + current, bitmap, length);
+
+  FB61_TX_SendMessage(length + current, 0x12, req);
+
+  /* FIXME: error checking */
+
+  return (GE_NONE);
 }
 
 void FB61_DumpSerial(void)

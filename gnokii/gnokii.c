@@ -48,6 +48,8 @@ void setalarm(char *argv[]);
 void getalarm(void);
 void dialvoice(char *argv[]);
 void dialdata(char *argv[]);
+void sendoplogo(char *argv[]);
+void sendclicon(char *argv[]);
 void readconfig(void);
 
 char		*Model;		/* Model from .gnokiirc file. */
@@ -87,6 +89,8 @@ void usage(void)
           gnokii [--getalarm]
           gnokii [--dialvoice] [number]
           gnokii [--dialdata] [number]
+          gnokii [--sendoplogo] [logofile] [network code]
+          gnokii [--sendclicon] [logofile]
 
           --help            display usage information.
 
@@ -128,6 +132,10 @@ void usage(void)
 
           --dialdata        initiate data call.
 
+          --sendoplogo      send operator logo.
+
+          --sendclicon      send CL icon.
+
           \n"));
 }
 
@@ -162,6 +170,44 @@ void fbusinit(bool enable_monitoring)
     fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting. \n"));
     exit(-1);
   }
+}
+
+int ReadBitmapFile(char *FileName, char *NetworkCode, unsigned char *logo, int *width, int *height)
+{
+
+  FILE *file;
+  unsigned char buffer[2000];
+  int i,j;
+
+  file = fopen(FileName, "r");
+
+  if (!file)
+    return(-1);
+  
+  fread(buffer, 1, 6, file); /* Read the header of the file. */
+
+  if (!strncmp(buffer, "NOL", 3)) { /* NOL files have network code in the header. */
+    fread(buffer, 1, 4, file);
+    if (NetworkCode)
+      sprintf(NetworkCode, "%d %02d", buffer[0]+256*buffer[1], buffer[2]);
+  }
+
+  fread(buffer, 1, 4, file); /* Width and height of the icon. */
+  *width=buffer[0];
+  *height=buffer[2];
+
+  fread(buffer, 1, 6, file); /* Unknown bytes. */
+
+  for (i=0; i<( (*width * *height) /8); i++) {
+    fread(buffer, 1, 8, file);
+
+    for (j=7; j>=0;j--)
+      if (buffer[7-j] == '1') logo[i]|=(1<<j);
+  }
+
+  fclose(file);
+
+  return 0;
 }
 
 /* Main function - handles command line arguments, passes them to separate
@@ -233,6 +279,16 @@ int main(int argc, char *argv[])
   /* Data call mode. */
   if (strcmp(argv[1], "--dialdata") == 0) {
     dialdata(argv);
+  }
+
+  /* Send operator log mode. */
+  if (strcmp(argv[1], "--sendoplogo") == 0) {
+    sendoplogo(argv);
+  }
+
+  /* Send CL icon mode. */
+  if (strcmp(argv[1], "--sendclicon") == 0) {
+    sendclicon(argv);
   }
 
   /* Get memory command. */
@@ -575,6 +631,50 @@ void dialdata(char *argv[])
     GSM->DialData(argv[2]);
 
   sleep(10);
+
+  GSM->Terminate();
+  exit(0);
+}
+
+void sendoplogo(char *argv[])
+{
+
+  char *NetworkCode=(char *)malloc(10);
+  unsigned char *logo=(unsigned char *)malloc(256);
+  int width, height;
+
+  if (argv[2] && !ReadBitmapFile(argv[2], NetworkCode, logo, &width, &height)) {
+    fbusinit(false);
+
+    if (argv[3])
+      NetworkCode=argv[3];
+
+    fprintf(stdout, _("Sending operator logo for %s\n"), NetworkCode);
+    GSM->SendBitmap(NetworkCode, width, height, logo);
+  }
+  else {
+    fprintf(stdout, _("File does not exist or can not be opened\n"));
+    exit(-1);
+  }
+
+  GSM->Terminate();
+  exit(0);
+}
+
+void sendclicon(char *argv[])
+{
+
+  unsigned char *logo=(unsigned char *)malloc(256);
+  int width, height;
+
+  if (argv[2] && !ReadBitmapFile(argv[2], NULL, logo, &width, &height)) {
+    fbusinit(false);
+    GSM->SendBitmap(NULL, width, height, logo);
+  }
+  else {
+    fprintf(stdout, _("File does not exist or can not be opened\n"));
+    exit(-1);
+  }
 
   GSM->Terminate();
   exit(0);

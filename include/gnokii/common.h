@@ -299,6 +299,9 @@ typedef struct {
   GSM_Error (*DialData)( char *Number);
 
   GSM_Error (*GetIncomingCallNr)( char *Number );
+
+  GSM_Error (*SendBitmap) ( char *NetworkCode, int width, int height, unsigned char *bitmap);
+
 } GSM_Functions;
 
 #endif	/* __gsm_common_h */
