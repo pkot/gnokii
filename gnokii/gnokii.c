@@ -248,6 +248,14 @@ int usage(void)
 "          gnokii --setlogo text [startup text]\n"
 "          gnokii --getlogo logofile {caller|op|startup} [caller group number]\n"
 "          gnokii --reset [soft|hard]\n"
+  ));
+#ifdef SECURITY
+  fprintf(stdout, _(
+"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
+"          gnokii --getsecuritycodestatus\n"
+  ));
+#endif
+  fprintf(stdout, _(
 "\n"
 "          --help            display usage information.\n\n"
 
@@ -322,7 +330,13 @@ int usage(void)
 "          --setlogo         set caller, startup or operator logo\n\n"
 "          --getlogo         get caller, startup or operator logo\n\n"
 "          --reset [soft|hard] resets the phone.\n\n"
-));
+  ));
+#ifdef SECURITY
+  fprintf(stdout, _(
+"          --entersecuritycode asks for the code and sends it to the phone\n\n"
+"          --getsecuritycodestatus show if a security code is needed\n\n"
+  ));
+#endif
 
   return 0;
 }
@@ -1406,7 +1420,7 @@ static void interrupted(int sig)
 
 int entersecuritycode(char *type)
 {
-
+  GSM_Error test;
   GSM_SecurityCode SecurityCode;
 
   if (!strcmp(type,"PIN"))
@@ -1434,10 +1448,15 @@ int entersecuritycode(char *type)
 
   fbusinit(NULL);
 
-  if (GSM->EnterSecurityCode(SecurityCode) == GE_INVALIDSECURITYCODE)
-    fprintf(stdout, _("Error: invalid code\n"));
-  else
+  test = GSM->EnterSecurityCode(SecurityCode);
+  if (test == GE_INVALIDSECURITYCODE)
+    fprintf(stdout, _("Error: invalid code.\n"));
+  else if (test == GE_NONE)
     fprintf(stdout, _("Code ok.\n"));
+  else if (test == GE_NOTIMPLEMENTED)
+    fprintf(stdout, _("Not implemented.\n"));
+  else
+    fprintf(stdout, _("Other error.\n"));
 
   GSM->Terminate();
 

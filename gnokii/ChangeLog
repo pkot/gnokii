@@ -10,3 +10,8 @@
 
 * Tue Feb 22 22:27:32 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - do not believe getenv anymore and check it's output - thx to Jason Garret
+
+* Sun Feb 27 12:43:20 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- documentation of SECURITY functions added (Manfred Jonsson)
+- securitycode error checking (Manfred Jonsson)
+
