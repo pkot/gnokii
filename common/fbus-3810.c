@@ -2297,6 +2297,7 @@ void    FB38_RX_Handle0x27_SMSMessageText(void)
 void    FB38_RX_Handle0x4b_Status(void)
 {
 		/* Strings for the status byte received from phone. */
+#ifdef DEBUG
 	char *StatusStr[] = {
 		"Unknown",
 		"Ready",
@@ -2304,6 +2305,7 @@ void    FB38_RX_Handle0x4b_Status(void)
 		"Call in progress",
 		"No SIM access"
 	};
+#endif
 
         /* First, send acknowledge. */
     if (FB38_TX_SendStandardAcknowledge(0x4b) != true) {
