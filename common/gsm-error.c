@@ -42,7 +42,7 @@ API char *gn_error_print(gn_error e)
 	case GN_ERR_INVALIDSECURITYCODE:   return "Invalid Security code.";
 	case GN_ERR_INTERNALERROR:         return "Problem occured internal to model specific code.";
 	case GN_ERR_NOTIMPLEMENTED:        return "Command called isn't implemented in model.";
-	case GN_ERR_NOTSUPPORTED:          return "Function not supported by the phone";
+	case GN_ERR_NOTSUPPORTED:          return "Function or connection type not supported by the phone.";
 	case GN_ERR_USERCANCELED:          return "User aborted the action.";
 	case GN_ERR_UNKNOWN:               return "Unknown error - well better than nothing!!";
 	case GN_ERR_MEMORYFULL:            return "The specified memory is full.";
@@ -55,14 +55,14 @@ API char *gn_error_print(gn_error e)
 	case GN_ERR_INVALIDLOCATION:       return "The given memory location is invalid.";
 	case GN_ERR_INVALIDMEMORYTYPE:     return "Invalid type of memory.";
 	case GN_ERR_EMPTYLOCATION:         return "The given location is empty.";
-	case GN_ERR_ENTRYTOOLONG:          return "The given entry is too long";
-	case GN_ERR_WRONGDATAFORMAT:       return "Data format is not valid";
-	case GN_ERR_INVALIDSIZE:           return "Wrong size of the object";
-	case GN_ERR_LINEBUSY:              return "Outgoing call requested reported line busy";
-	case GN_ERR_NOCARRIER:             return "No Carrier error during data call setup ?";
-	case GN_ERR_UNHANDLEDFRAME:        return "The current frame isn't handled by the incoming function";
+	case GN_ERR_ENTRYTOOLONG:          return "The given entry is too long.";
+	case GN_ERR_WRONGDATAFORMAT:       return "Data format is not valid.";
+	case GN_ERR_INVALIDSIZE:           return "Wrong size of the object.";
+	case GN_ERR_LINEBUSY:              return "Outgoing call requested reported line busy.";
+	case GN_ERR_NOCARRIER:             return "No Carrier error during data call setup?";
+	case GN_ERR_UNHANDLEDFRAME:        return "The current frame isn't handled by the incoming function.";
 	case GN_ERR_UNSOLICITED:           return "Unsolicited message received.";
-	case GN_ERR_NONEWCBRECEIVED:       return "Attempt to read CB when no new CB received";
+	case GN_ERR_NONEWCBRECEIVED:       return "Attempt to read CB when no new CB received.";
 	default:                           return "Unknown error.";
 	}
 }

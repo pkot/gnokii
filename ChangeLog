@@ -19,6 +19,7 @@
  * gnokii updates
     o --[gs]etactiveprofile added                   (BORBELY Zoltan)
     o --monitor accepts delay as an argument        (BORBELY Zoltan)
+    o error messages cleanups                            (Pawel Kot)
  * 6110 series updates
     o GN_OP_[GS]etActiveProfile implemented         (BORBELY Zoltan)
  * xgnokii fixes

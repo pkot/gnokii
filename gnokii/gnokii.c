@@ -371,7 +371,7 @@ static void businit(void)
 	if (aux && !strcmp(aux, "yes")) {
 		lockfile = gn_device_lock(state.config.port_device);
 		if (lockfile == NULL) {
-			fprintf(stderr, _("Lock file error. Exiting\n"));
+			fprintf(stderr, _("Lock file error. Exiting.\n"));
 			exit(1);
 		}
 	}
@@ -379,7 +379,7 @@ static void businit(void)
 	/* Initialise the code for the GSM interface. */
 	error = gn_gsm_initialise(&state);
 	if (error != GN_ERR_NONE) {
-		fprintf(stderr, _("Telephone interface init failed: %s Quitting.\n"), gn_error_print(error));
+		fprintf(stderr, _("Telephone interface init failed: %s\nQuitting.\n"), gn_error_print(error));
 		exit(2);
 	}
 }
@@ -4759,7 +4759,8 @@ int main(int argc, char *argv[])
 #endif
 
 		/* Initialise the code for the GSM interface. */
-		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE && c != OPT_LISTNETWORKS) businit();
+		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE && c != OPT_LISTNETWORKS)
+			businit();
 
 		switch(c) {
 		case OPT_MONITOR:
