@@ -33,6 +33,8 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #ifdef WIN32
 #  include <windows.h>
 #  include <string.h>
