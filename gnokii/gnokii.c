@@ -4286,8 +4286,6 @@ static int ringtoneconvert(int argc, char *argv[])
 {
 	gn_ringtone ringtone;
 	gn_error error;
-	unsigned char buff[512];
-	int i, ulen;
 
 	memset(&ringtone, 0, sizeof(ringtone));
 	gn_data_clear(&data);
@@ -4309,12 +4307,11 @@ static int ringtoneconvert(int argc, char *argv[])
 
 	fprintf(stderr, _("%d note(s) converted.\n"), ringtone.notes_count);
 
-	return GN_ERR_NONE;
+	return error;
 }
 
 static int getringtonelist(void)
 {
-	gn_error error;
 	int i;
 
 	init_ringtone_list();
