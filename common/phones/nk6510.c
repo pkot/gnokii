@@ -363,25 +363,25 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	char model[10];
 	gn_error err;
 	bool connected = false;
-	int try = 0;
+	int attempt = 0;
 
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_nokia_6510, sizeof(gn_driver));
 
 	dprintf("Connecting\n");
 	while (!connected) {
-		if (try > 2) break;
+		if (attempt > 2) break;
 		switch (state->config.connection_type) {
 		case GN_CT_DAU9P:
-			try++;
+			attempt++;
 		case GN_CT_DLR3P:
-			if (try > 1) {
-				try = 3;
+			if (attempt > 1) {
+				attempt = 3;
 				break;
 			}
 		case GN_CT_Serial:
 		case GN_CT_Bluetooth:
-			err = fbus_initialise(try++, state);
+			err = fbus_initialise(attempt++, state);
 			break;
 		case GN_CT_Infrared:
 		case GN_CT_Irda:

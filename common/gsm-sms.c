@@ -1017,13 +1017,13 @@ static char *sms_udh_encode(gn_sms_raw *rawsms, int type)
  * This function adds sequent part of the concatenated messages header. Note
  * that this header should be the first of all headers.
  */
-static gn_error sms_concat_header_encode(gn_sms_raw *rawsms, int this, int total)
+static gn_error sms_concat_header_encode(gn_sms_raw *rawsms, int curr, int total)
 {
 	char *header = sms_udh_encode(rawsms, GN_SMS_UDH_ConcatenatedMessages);
 	if (!header) return GN_ERR_NOTSUPPORTED;
 	header[2] = 0xce;		/* Message serial number. Is 0xce value somehow special? -- pkot */
 	header[3] = total;
-	header[4] = this;
+	header[4] = curr;
 	return GN_ERR_NONE;
 }
 
@@ -1163,7 +1163,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 		case GN_SMS_DATA_Multi:
 			size = sms->user_data[0].length;
 			if (!sms_udh_encode(rawsms, GN_SMS_UDH_MultipartMessage)) return GN_ERR_NOTSUPPORTED;
-			error = sms_concat_header_encode(rawsms, sms->user_data[i].u.multi.this, sms->user_data[i].u.multi.total);
+			error = sms_concat_header_encode(rawsms, sms->user_data[i].u.multi.curr, sms->user_data[i].u.multi.total);
 			ERROR();
 
 			memcpy(rawsms->user_data + rawsms->user_data_length, sms->user_data[i].u.multi.binary, MAX_SMS_PART);
@@ -1193,7 +1193,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 			dprintf("Encoding concat header\n");
 			al = GN_SMS_DCS_8bit;
 			rawsms->dcs = 0xf5;
-			sms_concat_header_encode(rawsms, sms->user_data[i].u.concat.this, sms->user_data[i].u.concat.total);
+			sms_concat_header_encode(rawsms, sms->user_data[i].u.concat.curr, sms->user_data[i].u.concat.total);
 			break;
 
 		case GN_SMS_DATA_None:
@@ -1306,7 +1306,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 		if (i + 1 == count)
 			sms.user_data[0].length = rawsms->user_data_length % MAX_SMS_PART;
 		memcpy(sms.user_data[0].u.multi.binary, rawsms->user_data + i*MAX_SMS_PART, MAX_SMS_PART);
-		sms.user_data[0].u.multi.this = i + 1;
+		sms.user_data[0].u.multi.curr = i + 1;
 		sms.user_data[0].u.multi.total = count;
 		sms.user_data[1].type = GN_SMS_DATA_None;
 		data->sms = &sms;

@@ -523,7 +523,7 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 /* Initialise variables and start the link */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-gn_error fbus_initialise(int try, struct gn_statemachine *state)
+gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 {
 	unsigned char init_char = 0x55;
 	int count;
@@ -549,10 +549,10 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 		connection = fbus_ir_open(state);
 		break;
 	case GN_CT_Serial:
-		switch (try) {
+		switch (attempt) {
 		case 0:
 		case 1:
-			connection = fbus_serial_open(1 - try, state);
+			connection = fbus_serial_open(1 - attempt, state);
 			break;
 		case 2:
 			connection = at2fbus_serial_open(state);
@@ -565,7 +565,7 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 		connection = fbus_serial_open(0, state);
 		break;
 	case GN_CT_DLR3P:
-		switch (try) {
+		switch (attempt) {
 		case 0:
 			connection = at2fbus_serial_open(state);
 			break;

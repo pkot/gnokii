@@ -332,11 +332,11 @@ typedef struct {
 
 typedef struct {
 	unsigned char binary[GN_SMS_MAX_LENGTH];
-	int this, total;	/* Number of this part, total number of parts */
+	int curr, total;	/* Number of this part, total number of parts */
 } gn_sms_multi;
 
 typedef struct {
-	int this, total, serial;
+	int curr, total, serial;
 } gn_sms_concat;
 
 typedef struct {
@@ -437,7 +437,7 @@ typedef struct {
 typedef struct {
 	int channel;                                      /* channel number */
 	char message[GN_CM_MESSAGE_MAX_LENGTH + 1];
-	int new;
+	int is_new;
 } gn_cb_message;
 
 #endif /* _gnokii_gsm_sms_h */

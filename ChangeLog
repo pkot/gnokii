@@ -21,6 +21,8 @@
       message class)                                     (Pawel Kot)
     o GN_ERR_INVALIDLOCATION is invalid and not empty location
                                                      (Osma Suominen)
+    o fix other C++ namespace clashes: try, new, this
+                                                  (Marcus Godehardt)
  * statemachine changes
     o allow sm_block and friends to be used not only directly after
       sm_message_send but also with sm_reset in between, which sets
