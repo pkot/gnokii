@@ -1,0 +1,35 @@
+# This is a sample ~/.gnokiirc file.  Copy it into your
+# home directory and name it .gnokiirc.
+#
+
+[global]
+
+# Set port to the physical serial port used to connect to your phone
+port = /dev/null
+#port = /dev/ttyS0
+
+# Set model to the model number of your phone
+model = fake
+#model = 2110
+#model = 6110
+#model = AT-HW
+
+# Initlength controls the number of characters sent to the
+# phone during initialisation.  You can either set it to
+# the word "default" or a positive integer.
+# 
+# You can try setting this value if you want to connect
+# to the phone quicker.  If you've never noticed the
+# connection to be slow, it is suggested that you 
+# leave this alone.  Read the initialisation code in fbus-xxxx
+# to understand what this changes if you're curious.
+initlength = default
+
+# The type of the connection, for IR set this to infrared
+connection = serial
+
+# Set bindir to point to the location of the various gnokii binaries.
+# In particular ensure that mgnokiidev is in this location, with
+# permissions 4754, owned by root, group gnokii.  Ensure you
+# are in the gnokii group and that the group exists...
+bindir = /usr/local/sbin/
