@@ -118,6 +118,10 @@ SOURCE=..\..\common\links\atbus.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\common\links\gnbus.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\common\phones\ateric.c
 # End Source File
 # Begin Source File
@@ -151,6 +155,10 @@ SOURCE=..\..\common\compat.c
 # Begin Source File
 
 SOURCE=..\..\common\device.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\vcal.c
 # End Source File
 # Begin Source File
 
