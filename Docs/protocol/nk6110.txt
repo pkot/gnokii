@@ -65,8 +65,14 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     s Hang up               { 0x0008, seqnr, 0x85 }
     r terminated call       { 0x0009, seqnr }
     r call msg              { 0x000a, seqnr }
+    s Get call status       { 0x0020 }
+    r Get call status       { 0x0021, num of calls, callinfo }
+                            where callinfo: {0x64, blklen - 2 (0x17), seqnr,
+			        channel (1-2), state, prevstate, ?, ?, ?, ?,
+				namelen, name (13 chars + 0x00) }
     r call held             { 0x0023, seqnr, 0x01 }
     r call resumed          { 0x0025, seqnr, 0x01 }
+    r call switch           { 0x0027, 0xff, 0x01 }
     r Send DTMF/voice call  { 0x0040}
     s Answer call part 1    { 0x0042,0x05,0x01,0x07,0xa2,0x88,0x81,0x21,0x15,0x63,0xa8,0x00,0x00,
 				     0x07,0xa3,0xb8,0x81,0x20,0x15,0x63,0x80 }

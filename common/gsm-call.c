@@ -190,7 +190,7 @@ API gn_error gn_call_check_active(struct gn_statemachine *state)
 	data.call_active = active;
 
 	if ((err = gn_sm_functions(GN_OP_GetActiveCalls, &data, state)) != GN_ERR_NONE)
-		return err == GN_ERR_NOTIMPLEMENTED ? GN_ERR_NONE : err;
+		return (err == GN_ERR_NOTIMPLEMENTED || err == GN_ERR_NOTSUPPORTED) ? GN_ERR_NONE : err;
 
 	/* delete terminated calls */
 	for (j = 0; j < GN_CALL_MAX_PARALLEL; j++) {

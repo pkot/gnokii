@@ -100,10 +100,12 @@ static gn_error PollDisplay(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSMSCenter(gn_data *data, struct gn_statemachine *state);
 static gn_error SetSMSCenter(gn_data *data, struct gn_statemachine *state);
 static gn_error SetCellBroadcast(gn_data *data, struct gn_statemachine *state);
+static gn_error GetActiveCalls1(gn_data *data, struct gn_statemachine *state);
 static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state);
 static gn_error AnswerCall1(gn_data *data, struct gn_statemachine *state);
 static gn_error CancelCall1(gn_data *data, struct gn_statemachine *state);
 static gn_error SetCallNotification(gn_data *data, struct gn_statemachine *state);
+static gn_error GetActiveCalls(gn_data *data, struct gn_statemachine *state);
 static gn_error MakeCall(gn_data *data, struct gn_statemachine *state);
 static gn_error AnswerCall(gn_data *data, struct gn_statemachine *state);
 static gn_error CancelCall(gn_data *data, struct gn_statemachine *state);
@@ -316,6 +318,8 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return SetCellBroadcast(data, state);
 	case GN_OP_NetMonitor:
 		return pnok_netmonitor(data, state);
+	case GN_OP_GetActiveCalls:
+		return GetActiveCalls(data, state);
 	case GN_OP_MakeCall:
 		return MakeCall(data, state);
 	case GN_OP_AnswerCall:
@@ -2991,6 +2995,16 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 	return GN_ERR_NONE;
 }
 
+static gn_error GetActiveCalls1(gn_data *data, struct gn_statemachine *state)
+{
+	char req[] = {FBUS_FRAME_HEADER, 0x20};
+
+	if (!data->call_active) return GN_ERR_INTERNALERROR;
+
+	if (sm_message_send(4, 0x01, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x01, data, state);
+}
+
 static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01};
@@ -3135,6 +3149,14 @@ static gn_error SetCallNotification(gn_data *data, struct gn_statemachine *state
 	return GN_ERR_NONE;
 }
 
+static gn_error GetActiveCalls(gn_data *data, struct gn_statemachine *state)
+{
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_OLD_CALL_API)
+		return GN_ERR_NOTSUPPORTED;
+	else
+		return GetActiveCalls1(data, state);
+}
+
 static gn_error MakeCall(gn_data *data, struct gn_statemachine *state)
 {
 	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_OLD_CALL_API)
@@ -3179,7 +3201,9 @@ static gn_error SendDTMF(gn_data *data, struct gn_statemachine *state)
 static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_call_info cinfo;
+	gn_call_active *ca;
 	unsigned char *pos;
+	int i;
 
 	switch (message[3]) {
 	/* Call going msg */
@@ -3247,6 +3271,41 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 	case 0x0a:
 		return GN_ERR_UNSOLICITED;
 
+	/* call status */
+	case 0x21:
+		if (!data->call_active) return GN_ERR_INTERNALERROR;
+		pos = message + 5;
+		ca = data->call_active;
+		memset(ca, 0x00, 2 * sizeof(gn_call_active));
+		for (i = 0; i < message[4]; i++) {
+			if (pos[0] != 0x64) return GN_ERR_UNHANDLEDFRAME;
+			ca[i].call_id = pos[2];
+			ca[i].channel = pos[3];
+			switch (pos[4]) {
+			case 0x00: ca[i].state = GN_CALL_Idle; break;
+			case 0x02: ca[i].state = GN_CALL_Dialing; break;
+			case 0x03: ca[i].state = GN_CALL_Ringing; break;
+			case 0x04: ca[i].state = GN_CALL_Incoming; break;
+			case 0x05: ca[i].state = GN_CALL_Established; break;
+			case 0x06: ca[i].state = GN_CALL_Held; break;
+			case 0x07: ca[i].state = GN_CALL_RemoteHangup; break;
+			default: return GN_ERR_UNHANDLEDFRAME;
+			}
+			switch (pos[5]) {
+			case 0x00: ca[i].prev_state = GN_CALL_Idle; break;
+			case 0x02: ca[i].prev_state = GN_CALL_Dialing; break;
+			case 0x03: ca[i].prev_state = GN_CALL_Ringing; break;
+			case 0x04: ca[i].prev_state = GN_CALL_Incoming; break;
+			case 0x05: ca[i].prev_state = GN_CALL_Established; break;
+			case 0x06: ca[i].prev_state = GN_CALL_Held; break;
+			case 0x07: ca[i].prev_state = GN_CALL_RemoteHangup; break;
+			default: return GN_ERR_UNHANDLEDFRAME;
+			}
+			pnok_string_decode(ca[i].name, sizeof(ca[i].name), pos + 11, pos[10]);
+			pos += pos[1] + 2;
+		}
+		break;
+
 	/* call held */
 	case 0x23:
 		memset(&cinfo, 0, sizeof(cinfo));
@@ -3261,6 +3320,10 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		cinfo.call_id = message[4];
 		if (DRVINSTANCE(state)->call_notification)
 			DRVINSTANCE(state)->call_notification(GN_CALL_Resumed, &cinfo, state);
+		return GN_ERR_UNSOLICITED;
+
+	/* call switch */
+	case 0x27:
 		return GN_ERR_UNSOLICITED;
 
 	case 0x40:
