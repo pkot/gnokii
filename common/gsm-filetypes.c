@@ -131,7 +131,6 @@ int GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 #ifdef DEBUG
   printf("DefNoteDuration=%d\n", DefNoteDuration);
   printf("DefNoteScale=%d\n", DefNoteScale);
-  printf("DefBeats=%d\n", DefBeats);
 #endif
 
   /* Parsing the <note-command>+ section. */
