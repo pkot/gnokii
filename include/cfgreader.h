@@ -51,7 +51,7 @@ struct CFG_Header {
 
 /* Global variables */
 
-API struct CFG_Header *CFG_Info;
+extern API struct CFG_Header *CFG_Info;
 
 /* Function prototypes */
 
