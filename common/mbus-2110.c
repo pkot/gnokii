@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.35  2001-02-25 19:15:33  machek
+  Revision 1.36  2001-02-27 22:16:25  machek
+  Kill unneccessary variable and annoying warning.
+
+  Revision 1.35  2001/02/25 19:15:33  machek
   Fixed udelay() to work w.r.t. signals.
 
   Revision 1.34  2001/02/21 19:56:58  chris
@@ -214,7 +217,6 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	while( !EchoOK && current-- ) 
 		usleep(1300);
 	if( !EchoOK ) {
-		int i;
 		fprintf(stderr, "no echo?!");
 		usleep(1000000);
 		return (GE_TIMEOUT);
