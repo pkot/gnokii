@@ -31,8 +31,6 @@
 #ifndef _gnokii_sms_nokia_h
 #define _gnokii_sms_nokia_h
 
-#include "gsm-bitmaps.h"
-
 /* There are type values for the different parts of the Nokia Multipart
  * Messages */
 #define GN_SMS_MULTIPART_DEFAULT      0
@@ -42,10 +40,5 @@
 #define GN_SMS_MULTIPART_PROFILENAME  4 /* This is sick. Isn't it? */
 #define GN_SMS_MULTIPART_RESERVED     5 /* I am really afraid what else can appear here... */
 #define GN_SMS_MULTIPART_SCREENSAVER  6
-
-int sms_nokia_pack_smart_message_part(unsigned char *msg, unsigned int size,
-				      unsigned int type, bool first);
-int sms_nokia_encode_text(unsigned char *text, unsigned char *message, bool first);
-int sms_nokia_encode_bitmap(gn_bmp *bitmap, unsigned char *message, bool first);
 
 #endif /* _gnokii_sms_nokia_h */
