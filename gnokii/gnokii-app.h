@@ -25,7 +25,7 @@ int monitormode(void);
 #endif
 
 int getmemory(char *argv[]);
-int writephonebook(void);
+int writephonebook(int argc, char *argv[]);
 int getspeeddial(char *number);
 int setspeeddial(char *argv[]);
 int getsms(char *argv[]);

@@ -64,3 +64,6 @@
 
 * Sat Jun 10 19:57:21 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - translation of VCARD keywords is not good(tm)! (Stano)
+
+* Thu Jun 29 00:38:33 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
+- new option for --writephonebook and some null poiner checking added

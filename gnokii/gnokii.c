@@ -181,7 +181,7 @@ int usage(void)
 
   fprintf(stdout, _("   usage: gnokii [--help|--monitor|--version]\n"
 "          gnokii --getmemory memory_type start end\n"
-"          gnokii --writephonebook\n"
+"          gnokii --writephonebook [-i]\n"
 "          gnokii --getspeeddial number\n"
 "          gnokii --setspeeddial number memory_type location\n"
 "          gnokii --getsms memory_type start end\n"
@@ -234,6 +234,8 @@ int usage(void)
 "                            ME, SM, FD, ON, EN, DC, RC, MC, LD\n\n"
 
 "          --writephonebook  reads data from stdin and writes to phonebook.\n"
+"                            When -i option is used, refuses to overwrite\n"
+"                            existing entries.\n"
 "                            Uses the same format as provided by the output of\n"
 "                            the getphonebook command.\n\n"
 
@@ -459,7 +461,7 @@ int main(int argc, char *argv[])
     { "getmemory",          required_argument, NULL, OPT_GETMEMORY },
 
     // Write phonebook (memory) mode
-    { "writephonebook",     no_argument,       NULL, OPT_WRITEPHONEBOOK },
+    { "writephonebook",     optional_argument, NULL, OPT_WRITEPHONEBOOK },
 
     // Get speed dial mode
     { "getspeeddial",       required_argument, NULL, OPT_GETSPEEDDIAL },
@@ -556,6 +558,7 @@ int main(int argc, char *argv[])
     { OPT_SETRINGTONE,       1, 1, 0 },
     { OPT_RESET,             0, 1, 0 },
     { OPT_GETPROFILE,        0, 1, 0 },
+    { OPT_WRITEPHONEBOOK,    0, 1, 0 },
 
     { 0, 0, 0, 0 },
   };
@@ -663,7 +666,7 @@ int main(int argc, char *argv[])
 
     case OPT_WRITEPHONEBOOK:
 
-      rc = writephonebook();
+      rc = writephonebook(nargc, nargv);
       break;
 	
       // Now, options with arguments
@@ -2434,7 +2437,7 @@ int GetLine(FILE *File, char *Line) {
 /* Read data from stdin, parse and write to phone.  The parsing is relatively
    crude and doesn't allow for much variation from the stipulated format. */
 
-int writephonebook(void)
+int writephonebook(int argc, char *args[])
 {
 
   GSM_PhonebookEntry entry;
@@ -2445,6 +2448,13 @@ int writephonebook(void)
   char *Line, OLine[100], BackLine[100];
   char *ptr;
 
+  /* Check argument */
+  if (argc) {
+    if (strcmp("-i", args[0])) {
+      usage();
+      return 0;
+    }
+  }
   /* Initialise fbus code */
 
   fbusinit(NULL);
@@ -2460,18 +2470,24 @@ int writephonebook(void)
     line_count++;
 
 #ifdef __svr4__
-    ptr=strtok(Line, ";"); strcpy(entry.Name, ptr);
+    ptr=strtok(Line, ";"); if (ptr) strcpy(entry.Name, ptr);
 
-    ptr=strtok(NULL, ";"); strcpy(entry.Number, ptr);
+    ptr=strtok(NULL, ";"); if (ptr) strcpy(entry.Number, ptr);
 
     ptr=strtok(NULL, ";");
 #else
-    ptr=strsep(&Line, ";"); strcpy(entry.Name, ptr);
+    ptr=strsep(&Line, ";"); if (ptr) strcpy(entry.Name, ptr);
 
-    ptr=strsep(&Line, ";"); strcpy(entry.Number, ptr);
+    ptr=strsep(&Line, ";"); if (ptr) strcpy(entry.Number, ptr);
 
     ptr=strsep(&Line, ";");
 #endif
+
+    if (!ptr) {
+      fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
+      Line = OLine;
+      continue;
+    }
 
     if (!strncmp(ptr,"ME", 2)) {
       memory_type_string = "int";
@@ -2479,26 +2495,54 @@ int writephonebook(void)
     }
     else {
       if (!strncmp(ptr,"SM", 2)) {
-	memory_type_string = "sim";
-	entry.MemoryType = GMT_SM;
+        memory_type_string = "sim";
+        entry.MemoryType = GMT_SM;
       }
       else {
-	fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
+        fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
         break;
       }
     }
 
 #ifdef __svr4__
-    ptr=strtok(NULL, ";"); entry.Location=atoi(ptr);
+    ptr=strtok(NULL, ";"); if (ptr) entry.Location=atoi(ptr);
 
-    ptr=strtok(NULL, ";"); entry.Group=atoi(ptr);
+    ptr=strtok(NULL, ";"); if (ptr) entry.Group=atoi(ptr);
 #else
-    ptr=strsep(&Line, ";"); entry.Location=atoi(ptr);
+    ptr=strsep(&Line, ";"); if (ptr) entry.Location=atoi(ptr);
 
-    ptr=strsep(&Line, ";"); entry.Group=atoi(ptr);
+    ptr=strsep(&Line, ";"); if (ptr) entry.Group=atoi(ptr);
 #endif
 
     Line = OLine;
+
+    if (!ptr) {
+      fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
+      continue;
+    }
+
+    if (argc) {
+      error = GSM->GetMemoryLocation(&entry);
+      if (error == GE_NONE) {
+        if (!entry.Empty) {
+          int confirm = -1;
+          char ans[100];
+
+          fprintf(stderr, _("Location busy. "));
+          while (confirm < 0) {
+            fprintf(stderr, _("Overwrite? (yes/no) "));
+            GetLine(stdin, ans);
+            if (!strcmp(ans, "yes")) confirm = 1;
+            else if (!strcmp(ans, "no")) confirm = 0;
+          }
+          if (!confirm) continue;
+        }
+      } else {
+        fprintf(stderr, _("Unknown error (%d)\n"), error);
+        GSM->Terminate();
+        return 0;
+      }
+    }
 
     /* Do write and report success/failure. */
 
