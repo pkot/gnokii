@@ -533,7 +533,7 @@ static int sendsms(int argc, char *argv[])
 			char *s = buf, *t;
 			strcpy(buf, optarg);
 			sms.UserData[curpos].Type = SMS_AnimationData;
-			for (i=0; i<4; i++) {
+			for (i = 0; i < 4; i++) {
 				t = strchr(s, ';');
 				if (t)
 					*t++ = 0;
@@ -546,12 +546,12 @@ static int sendsms(int argc, char *argv[])
 		}
 
 		case 'o': /* Concat header */ {
-			printf("Adding concat header\n");
+			dprintf("Adding concat header\n");
 			sms.UserData[curpos].Type = SMS_Concat;
 			if (3 != sscanf(optarg, "%d;%d;%d", &sms.UserData[curpos].u.Concat.this, 
 					&sms.UserData[curpos].u.Concat.total, 
 					&sms.UserData[curpos].u.Concat.serial)) {
-				fprintf(stderr, "Wrong --concat option\n");
+				fprintf(stderr, _("Incorrect --concat option\n"));
 				break;
 			}
 			curpos++;
@@ -705,8 +705,7 @@ static int savesms(int argc, char *argv[])
 				return 0;
 			}
 			else break;
-		case GE_EMPTYLOCATION:
-			dprintf("Location %d empty. Saving\n", sms.Number);
+		case GE_EMPTYLOCATION: /* OK. We can save now. */
 			break;
 		default:
 			fprintf(stderr, _("Error: %s\n"), print_error(error));
@@ -854,7 +853,7 @@ static int getsmsc(int argc, char *argv[])
 				break;
 			}
 
-			printf("\n");
+			fprintf(stdout, "\n");
 			fprintf(stdout, _("Message validity is "));
 
 			switch (MessageCenter.Validity) {
@@ -1239,7 +1238,7 @@ static void interrupted(int sig)
 int get_password(const char *prompt, char *pass, int length)
 {
 #ifdef WIN32
-	printf("%s", prompt);
+	fprintf(stdout, "%s", prompt);
 	fgets(pass, length, stdin);
 #else
 	/* FIXME: manual says: Do not use it */
@@ -1600,7 +1599,6 @@ static int getlogo(int argc, char *argv[])
 		data.Bitmap = &bitmap;
 		error = SM_Functions(GOP_GetBitmap, &data, &State);
 
-		dprintf("\n");
 		GSM_PrintBitmap(&bitmap, stdout);
 		switch (error) {
 		case GE_NONE:
@@ -2328,7 +2326,7 @@ static void NewOutputFn(GSM_DrawMessage *DrawMessage)
 		init = true;
 	}
 
-	printf(ESC "[1;1H");
+	fprintf(stdout, ESC "[1;1H");
 
 	switch (DrawMessage->Command) {
 	case GSM_Draw_ClearScreen:
@@ -3264,7 +3262,7 @@ static void presskey(void)
 	error = SM_Functions(GOP_PressPhoneKey, &data, &State);
 	if (error == GE_NONE)
 		error = SM_Functions(GOP_ReleasePhoneKey, &data, &State);
-	fprintf(stdout, "Failed to press key: %s\n", print_error(error));
+	fprintf(stdout, _("Failed to press key: %s\n"), print_error(error));
 }
 
 static int presskeysequence(void)
@@ -3317,7 +3315,7 @@ static int enterchar(void)
 			data.Character = ch;
 			error = SM_Functions(GOP_EnterChar, &data, &State);
 			if (error != GE_NONE)
-				printf("Error entering char: %s\n", print_error(error));
+				fprintf(stderr, _("Error entering char: %s\n"), print_error(error));
 			break;
 		}
 	}
@@ -3444,7 +3442,7 @@ static int divert(int argc, char **argv)
 		} else
 			fprintf(stdout, _("Divert isn't active.\n"));
 	} else {
-		fprintf(stderr, "Error: %s\n", print_error(error));
+		fprintf(stderr, _("Error: %s\n"), print_error(error));
 	}
 	return 0;
 }
@@ -3542,9 +3540,9 @@ static int getsecuritycode()
 	
 	memset(&sc.Code, 0, 10 * sizeof(char));
 	data.SecurityCode = &sc;
-	printf("Getting security code... \n");
+	fprintf(stderr, _("Getting security code... \n"));
 	error = SM_Functions(GOP_GetSecurityCode, &data, &State);
-	printf("Security code is: %s \n", &sc.Code[0]);
+	fprintf(stdout, _("Security code is: %s\n"), &sc.Code[0]);
 	return error;
 }
 
@@ -3579,7 +3577,7 @@ static int install_log_handler(void)
 #ifdef WIN32
 		home = ".";
 #else
-		fprintf(stderr, "HOME variable missing\n");
+		fprintf(stderr, _("HOME variable missing\n"));
 		return -1;
 #endif
 	}
