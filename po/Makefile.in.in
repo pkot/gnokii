@@ -95,7 +95,7 @@ all-no:
 $(PACKAGE).pot: $(POTFILES)
 	if test -n "$(XGETTEXT)"; then \
 		$(XGETTEXT) --default-domain=$(PACKAGE) --directory=$(srcdir)/.. \
-	               --keyword=_  --files-from=$(srcdir)/POTFILES.in; \
+	               --c++ --keyword=_  --files-from=$(srcdir)/POTFILES.in; \
 		mv $(PACKAGE).po $(PACKAGE).pot; \
 	else \
 		echo "xgettext not available: $(PACKAGE).pot not updated" 1>&2; \
