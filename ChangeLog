@@ -16,8 +16,9 @@
     o copy writecalendar stuff from 7110               (Markus Plail)
     o minor fixes (RF/battery level)                   (Markus Plail)
     o copy startup stuff from 7110                     (Markus Plail)
-    * cleanup: delete functions IncomingSecurity, netmonitor...
+    o cleanup: delete functions IncomingSecurity, netmonitor...
       as they won't work with this series.             (Markus Plail)
+    o add profile reading                              (Markus Plail)
  * 7110 series
     o typo in P7110_WritePhonebookLocation             (Markus Plail)
  * New supported phones:
