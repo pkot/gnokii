@@ -45,6 +45,7 @@
 #include <unistd.h>
 #include <sys/uio.h>
 #include <errno.h>
+#include <sys/param.h>
 
 static int gwrite(int fd, void *ptr, size_t nbytes, int sendfd)
 {

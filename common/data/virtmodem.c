@@ -56,6 +56,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <sys/uio.h>
+#include <sys/param.h>
 
 #include "misc.h"
 #include "gsm-api.h"

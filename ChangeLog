@@ -13,6 +13,7 @@
       many functions/types when user didn't explicitely give
       --without-x and X headers were not found by configure
       (CPPFLAGS became to have value '-I')               (Pawel Kot)
+    o fix FreeBSD build  (Alexander V. Ribchansky, Peter Kolmisoppi)
  * libsms fixes
     o fix sms_free_deleted()                           (Ulrich Hopp)
  * xgnokii fixes
