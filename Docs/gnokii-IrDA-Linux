@@ -141,6 +141,19 @@ gnokii --monitor should now function.
   has recv() in irda_open of common/devices/unixirda.c.  Just comment out
   that line, recompile and try again.
 
+Possible problems
+=================
+
+- If you are absolutly sure you set up everything fine, you are using a
+  FIR driver, your phone can be seen in the discovery log but you are not
+  able to use either minicom or gnokii it can be a speed negotiation
+  problem between your IrDA stack and your phone. Probably the reason is
+  that the FIR driver and your phone support faster communication than
+  115200 baud and they manage to negotiate a speed which one of the parties
+  cannot handle correctly. Try to limit the negotiated speed to 115200 baud:
+
+  echo 115200 > /proc/sys/net/irda/max_baud_rate
+
 
 Credits
 =======

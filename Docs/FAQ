@@ -119,6 +119,10 @@ A. In general yes, but it depends on hardware -- your serial port
    to work with gnokii.  Earlier Sparc machines (IPC, IPX, Classic) probably
    won't work due to hardware limitations.
 
+   If your hardware doesn't support 115200 baud rate you can try the M2BUS
+   mode (don't forget it needs an M2BUS capable cable). It is much slower
+   but it should work.
+
 -------------------------------------------------------------------------------
 Q. Could you tell me the key for on, off and select menu in
 
