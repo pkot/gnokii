@@ -47,3 +47,7 @@
 * Sat Apr 15 13:18:39 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - RTTTL without name supported
 - minor spelling fixes
+
+* Sun Apr 16 20:17:09 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- non-conforming RTTTL (with note B) supported
+- minor pointer stuff :-)

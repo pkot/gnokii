@@ -542,7 +542,7 @@ int main(int argc, char *argv[])
 
 #ifndef WIN32
     // For development purposes: insert you function calls here
-    { "foogle",             optional_argument, NULL, OPT_FOOGLE },
+    { "foogle",             no_argument, NULL, OPT_FOOGLE },
 #endif
 
     { 0, 0, 0, 0},
@@ -2583,7 +2583,7 @@ int foogle(char *argv[])
 
   /* Initialise the code for the GSM interface. */     
 
-  fbusinit(RLP_DisplayF96Frame);
+  fbusinit(NULL);
   
 #if 0
   for (i = 0; i <= 6; i++) {
@@ -2605,6 +2605,8 @@ int foogle(char *argv[])
     printf("\n");
   }
 #endif
+
+  FB61_SendRingtoneRTTL("/tmp/q.txt");
 
   sleep(5);
  

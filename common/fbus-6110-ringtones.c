@@ -248,16 +248,17 @@ int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName)
 #define RTTTL_SEP ":"
 
   /* This is for buggy RTTTL ringtones without name. */
-  if (!strncmp(buffer, RTTTL_SEP, 1)) {
+  if (buffer[0] != RTTTL_SEP[0]) {
     strtok(buffer, RTTTL_SEP);
     sprintf(Name, "%s", buffer);
+    def=strtok(NULL, RTTTL_SEP);
+    notes=strtok(NULL, RTTTL_SEP);
   }
-  else
-    strcpy(Name, "GNOKII");
-
-  def=strtok(NULL, RTTTL_SEP);
-
-  notes=strtok(NULL, RTTTL_SEP);
+  else {
+    sprintf(Name, "GNOKII");
+    def=strtok(buffer, RTTTL_SEP);
+    notes=strtok(NULL, RTTTL_SEP);
+  }
 
   ptr=strtok(def, ", ");
   /* Parsing the <defaults> section. */
@@ -280,6 +281,12 @@ int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName)
 
     ptr=strtok(NULL,", ");
   }
+
+#ifdef DEBUG
+  printf("DefNoteDuration=%d\n", DefNoteDuration);
+  printf("DefNoteScale=%d\n", DefNoteScale);
+  printf("DefBeats=%d\n", DefBeats);
+#endif
 
   /* Parsing the <note-command>+ section. */
   ptr=strtok(notes, ", ");
@@ -347,8 +354,14 @@ int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName)
       break;
     case 'h':
     case 'H':
+      /* FIXME: What is this? Non-conforming RTTTL? Is B really H? */
+    case 'b':
+    case 'B':
       Notes[NrNotes].NoteID=Note_H;
       break;
+    default:
+
+      Notes[NrNotes].NoteID=Note_Pause;
     }
     ptr++;
 
