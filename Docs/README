@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2002 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2002 Pawe³ Kot
-                  Last update 10 Jul 2002    Version 0.4.0
+                  Last update 14 Jul 2002    Version 0.4.1
 
 - Contents - 			   
 
@@ -24,7 +24,7 @@
 			   
 - 1.0 Introduction -
 
-This is version 0.4.0 of gnokii, a Linux/Unix tool suite and modem
+This is version 0.4.1 of gnokii, a Linux/Unix tool suite and modem
 driver for Nokia mobile phones, released under the GPL.  Please
 see COPYING for more details on license/copying issues, the lack of
 warranty and where to send a postcard if you like gnokii :).
@@ -132,7 +132,7 @@ it in the conventional manner for the package type in question.
 For example if you downloaded a .rpm file you can install it by
 running the following as root.
 
-rpm -i gnokii-0.4.0-i386.rpm
+rpm -i gnokii-0.4.1-i386.rpm
 
 If you are using a Debian based system, you can use dpackage
 to do the installation. On Slackware you use installpkg or pkgtool.
@@ -362,6 +362,13 @@ to recognise those who have helped so far!
 
 
 - 15.0 Release Notes -
+20020714 Version 0.4.1
+Minor but valuable updates. Many improvments in nk6310 driver (Nokia 6310,
+6510 and 8310), small improvements in nk6160 and nk7110 drivers, more
+verbose output for gnokii command line output, documentation updates
+containing FAQ updates, SMS sending timeout is now configurable, flex will
+not be required to build gnokii from the tarball and other minor fixes.
+
 20020710 Version 0.4.0
 Major rewrite. Internal API completly changed. Added support fot the new
 phones, maily Nokia 6210, Nokia 7110, Nokia 6310, Nokia 6510 and AT
