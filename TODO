@@ -30,8 +30,8 @@
 - getsecuritycode patch
 - international characters in SMS messages and phonebooks - see the mailing
   list messages in archive
-- Calendar notes and bussines card sending via SMS (I do not know if it is
-  already implemented or not)
+- Bussines card sending via SMS (I do not know if it is already implemented or
+  not)
 - if GNU getopt is not available in the system, use compile getopt from
   source tree (move it from win32/)
 - gnokiid and other AT commands.
