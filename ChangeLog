@@ -55,10 +55,12 @@
     o packet dump was incorrect when len % 16 == 0 (BORBELY Zoltan)
     o gnokii_strsplit() crash bug fixed            (BORBELY Zoltan)
     o use libical as the primary vCal handling way      (Pawel Kot,
-                                                   Martin GoldHahn)
+                                                   Martin Goldhahn)
     o split up shared part of !HAVE_IRDA to a separate file
                                                         (Pawel Kot)
     o clean up irda code: headers usage, etc            (Pawel Kot)
+    o add support for writing calendar and todo entries in vCal
+      format even if there's no libical in the system   (Pawel Kot)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

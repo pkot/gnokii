@@ -166,8 +166,64 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	}
 	return GN_ERR_NONE;
 #else
-#  warning "writing VCALENDAR is not yet supported"
-	return GN_ERR_NOTIMPLEMENTED;
+	fprintf(f, "BEGIN:VCALENDAR\r\n"); 	 
+	fprintf(f, "VERSION:1.0\r\n"); 	 
+	fprintf(f, "BEGIN:VEVENT\r\n"); 	 
+	fprintf(f, "CATEGORIES:"); 	 
+	switch (calnote->type) { 	 
+	case GN_CALNOTE_REMINDER: 	 
+		fprintf(f, "MISCELLANEOUS\r\n"); 	 
+		break; 	 
+	case GN_CALNOTE_CALL: 	 
+		fprintf(f, "PHONE CALL\r\n"); 	 
+		fprintf(f, "SUMMARY:%s\r\n", calnote->phone_number); 	 
+		fprintf(f, "DESCRIPTION:%s\r\n", calnote->text); 	 
+		break; 	 
+	case GN_CALNOTE_MEETING: 	 
+		fprintf(f, "MEETING\r\n"); 	 
+		break; 	 
+	case GN_CALNOTE_BIRTHDAY: 	 
+		fprintf(f, "SPECIAL OCCASION\r\n"); 	 
+		break; 	 
+	default: 	 
+		fprintf(f, "UNKNOWN\r\n"); 	 
+		break; 	
+	} 	 
+	if (calnote->type != GN_CALNOTE_CALL)
+		fprintf(f, "SUMMARY:%s\r\n", calnote->text); 	 
+	fprintf(f, "DTSTART:%04d%02d%02dT%02d%02d%02d\r\n", calnote->time.year, 	 
+		calnote->time.month, calnote->time.day, calnote->time.hour, 	 
+		calnote->time.minute, calnote->time.second); 	 
+	if (calnote->alarm.enabled) { 	 
+		fprintf(f, "AALARM:%04d%02d%02dT%02d%02d%02d\r\n", calnote->alarm.timestamp.year, 	 
+		calnote->alarm.timestamp.month, calnote->alarm.timestamp.day, calnote->alarm.timestamp.hour, 	 
+		calnote->alarm.timestamp.minute, calnote->alarm.timestamp.second); 	 
+	} 	 
+	switch (calnote->recurrence) { 	 
+	case GN_CALNOTE_NEVER: 	 
+		break; 	 
+	case GN_CALNOTE_DAILY: 	 
+		fprintf(f, "RRULE:FREQ=DAILY\r\n"); 	 
+		break; 	 
+	case GN_CALNOTE_WEEKLY: 	 
+		fprintf(f, "RRULE:FREQ=WEEKLY\r\n"); 	 
+		break; 	 
+	case GN_CALNOTE_2WEEKLY: 	 
+		fprintf(f, "RRULE:FREQ=WEEKLY;INTERVAL=2\r\n"); 	 
+		break; 	
+	case GN_CALNOTE_MONTHLY: 	 
+		fprintf(f, "RRULE:FREQ=MONTHLY\r\n"); 	 
+		break; 	 
+	case GN_CALNOTE_YEARLY: 	 
+		fprintf(f, "RRULE:FREQ=YEARLY\r\n"); 	 
+		break; 	
+	default: 	 
+		fprintf(f, "RRULE:FREQ=HOURLY;INTERVAL=%d\r\n", calnote->recurrence); 	 
+		break; 	 
+	} 	 
+	fprintf(f, "END:VEVENT\r\n"); 	 
+	fprintf(f, "END:VCALENDAR\r\n");
+	return GN_ERR_NONE;
 #endif /* HAVE_LIBICAL */
 }
 
@@ -394,7 +450,14 @@ API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
 
 	return GN_ERR_NONE;
 #else
-	return GN_ERR_NOTIMPLEMENTED;
+	fprintf(f, "BEGIN:VCALENDAR\r\n");
+	fprintf(f, "VERSION:1.0\r\n"); 	 
+	fprintf(f, "BEGIN:VTODO\r\n"); 	 
+	fprintf(f, "PRIORITY:%i\r\n", ctodo->priority); 	 
+	fprintf(f, "SUMMARY:%s\r\n", ctodo->text); 	 
+	fprintf(f, "END:VTODO\r\n"); 	 
+	fprintf(f, "END:VCALENDAR\r\n");
+	return GN_ERR_NONE;
 #endif /* HAVE_LIBICAL */
 }
 
