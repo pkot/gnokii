@@ -33,7 +33,8 @@ DIRS =  common/phones \
 GTK_DIRS =	xgnokii
 
 INSTALL_DIRS =	$(BIN_DIRS) \
-		common
+		common \
+		po
 
 DOCS_DIR = 	Docs
 INCLUDE_DIR =	include
