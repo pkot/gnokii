@@ -44,3 +44,6 @@
 * Mon May  1 10:34:44 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - USE_NLS change
 
+* Tue May  9 21:13:08 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- support for dealernote (Marcin)
+

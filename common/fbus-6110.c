@@ -2169,11 +2169,21 @@ GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
     req[count++]=0x01; /* Only one block */
     
     if (Bitmap->size==0x00) {
-      req[count++]=0x02; /* Welcome text */
       textlen=strlen(Bitmap->text);
-      req[count++]=textlen;
-      memcpy(req+count,Bitmap->text,textlen);
-      count+=textlen;
+      if (textlen!=0)
+      {
+        req[count++]=0x02; /* Welcome text */
+        req[count++]=textlen;
+        memcpy(req+count,Bitmap->text,textlen);
+        count+=textlen;
+      } else
+      {
+        req[count++]=0x03; /* Dealer Welcome Note */
+        textlen=strlen(Bitmap->dealertext);
+        req[count++]=textlen;
+        memcpy(req+count,Bitmap->dealertext,textlen);
+        count+=textlen;
+      }
     }
     else
       {
@@ -3256,7 +3266,16 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
 	fprintf(stdout, _("Message: Startup Logo received.\n"));
 #endif
+       
+       GetBitmap->height=0; //in some phones (5110, 5130) we don't have 01 block
+       GetBitmap->width=0; //and it's better to set bitmap to 'default'
+       GetBitmap->size=0;
+
+       GetBitmap->text[0]=0;
+       GetBitmap->dealertext[0]=0;
+       
        count=5;
+       
        for (tmp=0;tmp<MessageBuffer[4];tmp++){
 	 switch (MessageBuffer[count++]) {
 	 case 0x01:
@@ -3269,14 +3288,19 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	 case 0x02:
 	   memcpy(GetBitmap->text,MessageBuffer+count+1,MessageBuffer[count]);
 	   GetBitmap->text[MessageBuffer[count]]=0;
-	   count+=MessageBuffer[count];
+	   count+=MessageBuffer[count]+1;
 #ifdef DEBUG
 	   fprintf(stdout, _("Startup Text: %s\n"),GetBitmap->text);
 #endif
 	   break;
 	 case 0x03:
-	   count++;
-	   break;
+	   memcpy(GetBitmap->dealertext,MessageBuffer+count+1,MessageBuffer[count]);
+	   GetBitmap->dealertext[MessageBuffer[count]]=0;
+	   count+=MessageBuffer[count]+1;
+#ifdef DEBUG
+	   fprintf(stdout, _("Dealer welcome note: %s\n"),GetBitmap->dealertext);
+#endif
+           break;
 	 }
        }
        GetBitmapError=GE_NONE;

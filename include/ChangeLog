@@ -16,3 +16,6 @@
 * Mon May  1 10:34:44 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - FreeBSD patch for __ptr_t
 
+* Tue May  9 21:13:08 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- dealernote support added (Marcin)
+

@@ -246,6 +246,7 @@ int usage(void)
 "          gnokii --setlogo logofile [network code]\n"
 "          gnokii --setlogo logofile [caller group number] [group name]\n"
 "          gnokii --setlogo text [startup text]\n"
+"          gnokii --setlogo dealer [dealer startup text]\n"
 "          gnokii --getlogo logofile {caller|op|startup} [caller group number]\n"
 "          gnokii --sendringtone destionation rtttlfile\n"
 "          gnokii --reset [soft|hard]\n"
@@ -1742,11 +1743,17 @@ int setlogo(char *argv[])
     }
   }
   else {
-    if (strcmp(argv[0],"text")==0){
+    if (strcmp(argv[0],"text")==0 || strcmp(argv[0],"dealer")==0){
       bitmap.type=GSM_StartupLogo;
+      bitmap.text[0]=0x00;
+      bitmap.dealertext[0]=0x00;
       if (argv[1]) {
-	strncpy(bitmap.text,argv[1],255);
-      } else bitmap.text[0]=0x00;
+        if (strcmp(argv[0],"text")==0) {
+	  strncpy(bitmap.text,argv[1],255);
+	} else {
+          strncpy(bitmap.dealertext,argv[1],255);
+	}
+      }
       bitmap.size=0;
     } else {
       fprintf(stdout, _("Logo file error.\n"));

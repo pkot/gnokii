@@ -309,6 +309,6 @@ echo "
     Win32:              $win32 
     Prefix:             $prefix
 
-  Type 'make' for compilation.
+  Type '${MAKE}' for compilation.
  
 "

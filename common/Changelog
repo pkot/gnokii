@@ -51,3 +51,9 @@
 * Sun Apr 16 20:17:09 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - non-conforming RTTTL (with note B) supported
 - minor pointer stuff :-)
+
+* Tue May  9 21:13:08 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- dealernote support added (Marcin)
+
+* Wed May 10 10:46:15 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- new network code

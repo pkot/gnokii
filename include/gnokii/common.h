@@ -418,6 +418,7 @@ typedef struct {
   GSM_Bitmap_Types type;   /* Bitmap type */
   char netcode[7];         /* Network operator code */
   char text[256];          /* Text used for welcome-note or callergroup name */
+  char dealertext[256];    /* Text used for dealer welcome-note */
   unsigned char bitmap[504]; /* Actual Bitmap (84*48/8=504) */ 
   char number;             /* Caller group number */
   char ringtone;           /* Ringtone no sent with caller group */

@@ -160,6 +160,7 @@ GSM_Network GSM_Networks[] =
   { "214 03", "Retevision Movil" },
   { "214 07", "MOVISTAR" },
   { "216 01", "Pannon GSM" },
+  { "216 70", "Vodafone" },
   { "216 30", "Westel 900" },
   { "218 90", "GSMBIH" },
   { "219 01", "CRONET" },
