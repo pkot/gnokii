@@ -35,6 +35,7 @@
 #ifndef _gnokii_phones_nk7110_h
 #define _gnokii_phones_nk7110_h
 
+#include "misc.h"
 #include "gnokii/data.h"
 
 typedef enum {

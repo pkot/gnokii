@@ -34,8 +34,6 @@
 #ifndef _gnokii_data_rlp_common_h
 #define _gnokii_data_rlp_common_h
 
-#include "misc.h"
-
 /* Typedef for frame type - they are the same for RLP version 0, 1 and 2. */
 typedef enum {
 	RLP_FT_X, /* Unknown. */
