@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.126  2001-03-07 21:46:12  pkot
+  Revision 1.127  2001-03-08 00:18:13  pkot
+  Fixed writephonebook once again. Someone kick me please...
+
+  Revision 1.126  2001/03/07 21:46:12  pkot
   Fixed writephonebook patch
 
   Revision 1.125  2001/03/06 22:19:14  pkot
@@ -2595,14 +2598,16 @@ int writephonebook(int argc, char *args[])
 		Line = OLine;
 
 		if (argc) {
+			GSM_PhonebookEntry aux;
+
+			aux.Location = entry.Location;
+			error = GSM->GetMemoryLocation(&aux);
+			
 			if (error == GE_NONE) {
-				if (!entry.Empty) {
+				if (!aux.Empty) {
 					int confirm = -1;
 					char ans[8];
-					GSM_PhonebookEntry aux;
 
-					aux.Location = entry.location;
-					error = GSM->GetMemoryLocation(&aux);
 					fprintf(stdout, _("Location busy. "));
 					while (confirm < 0) {
 						fprintf(stdout, _("Overwrite? (yes/no) "));
