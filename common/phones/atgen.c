@@ -652,6 +652,8 @@ static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[16];
 	sprintf(req, "AT+CMGR=%d\r", data->SMS->Number);
 	dprintf("%s", req);
+	data->RawSMS->Number = data->SMS->Number;
+	data->RawSMS->MemoryType = data->SMS->MemoryType;
 	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GE_NONE)
 		return GE_NOTREADY;
 	return SM_Block(state, data, GOP_GetSMS);
@@ -979,6 +981,8 @@ static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	AT_LineBuffer buf;
+	unsigned int sms_len, l, offset = 0;
+	char *tmp = NULL;
 
 	if (buffer[0] != GEAT_OK)
 		return GE_INTERNALERROR;
@@ -988,12 +992,33 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 
 	splitlines(&buf);
 
-	if (!data->RawData) return GE_INTERNALERROR;
-	data->RawData->Length = strlen(buf.line3) / 2 + 1;
-	data->RawData->Data = calloc(data->RawData->Length, 1);
+	if (!data->RawSMS) return GE_INTERNALERROR;
+	
+	sms_len = strlen(buf.line3) / 2;
+	tmp = calloc(sms_len, 1);
 	dprintf("%s\n", buf.line3);
-	data->RawData->Data[0] = SMS_Deliver;
-	hex2bin(data->RawData->Data + 1, buf.line3, data->RawData->Length - 1);
+	hex2bin(tmp, buf.line3, sms_len);
+	memcpy(data->RawSMS->MessageCenter, tmp, tmp[offset] + 1);
+	offset += tmp[offset] + 1;
+	data->RawSMS->Type             = tmp[offset] & 0x03;
+	data->RawSMS->UDHIndicator     = tmp[offset];
+	data->RawSMS->MoreMessages     = tmp[offset];
+	data->RawSMS->ReportStatus     = tmp[offset];
+	l = (tmp[offset + 1] % 2) ? tmp[offset + 1] + 1 : tmp[offset + 1] ;
+	l = l / 2 + 2;
+	memcpy(data->RawSMS->RemoteNumber, tmp + offset + 1, l);
+	offset += l;
+	data->RawSMS->ReplyViaSameSMSC = 0;
+	data->RawSMS->RejectDuplicates = 0;
+	data->RawSMS->Report           = 0;
+	data->RawSMS->Reference        = 0;
+	data->RawSMS->PID              = tmp[offset + 2];
+	data->RawSMS->DCS              = tmp[offset + 3];
+	memcpy(data->RawSMS->SMSCTime, tmp + offset + 4, 7);
+	data->RawSMS->Length           = tmp[offset + 10];
+	dprintf("sms len: %02x\n", data->RawSMS->Length);
+	memcpy(data->RawSMS->UserData, tmp + offset + 11, sms_len - offset - 11);
+	free(tmp);
 	return GE_NONE;
 }
 
