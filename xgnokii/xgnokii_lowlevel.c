@@ -1153,6 +1153,46 @@ static gint A_SetRingtone(gpointer data)
 	return d->status;
 }
 
+static gint A_DeleteRingtone(gpointer data)
+{
+	D_Ringtone *d = (D_Ringtone *) data;
+	gn_data gdat;
+
+	gn_data_clear(&gdat);
+
+	pthread_mutex_lock(&ringtoneMutex);
+	gdat.ringtone = d->ringtone;
+
+	d->status = gn_sm_functions(GN_OP_DeleteRingtone, &gdat, &statemachine);
+
+	pthread_cond_signal(&ringtoneCond);
+	pthread_mutex_unlock(&ringtoneMutex);
+
+	return d->status;
+}
+
+static gint A_GetRingtoneList(gpointer data)
+{
+	gn_ringtone_list *d = (gn_ringtone_list *) data;
+	gn_data gdat;
+
+	gn_data_clear(&gdat);
+
+	pthread_mutex_lock(&ringtoneMutex);
+	gdat.ringtone_list = d;
+
+	if (gn_sm_functions(GN_OP_GetRingtoneList, &gdat, &statemachine) != GN_ERR_NONE) {
+		d->count = 0;
+		d->userdef_location = 0;
+		d->userdef_count = 0;
+	}
+
+	pthread_cond_signal(&ringtoneCond);
+	pthread_mutex_unlock(&ringtoneMutex);
+
+	return GN_ERR_NONE;
+}
+
 static gint A_Exit(gpointer data)
 {
 	pthread_exit(0);
@@ -1191,6 +1231,8 @@ gint(*DoAction[])(gpointer) = {
 	    A_PlayTone,
 	    A_GetRingtone,
 	    A_SetRingtone,
+	    A_DeleteRingtone,
+	    A_GetRingtoneList,
 	    A_Exit};
 
 

@@ -75,6 +75,8 @@ typedef enum {
 	Event_PlayTone,
 	Event_GetRingtone,
 	Event_SetRingtone,
+	Event_DeleteRingtone,
+	Event_GetRingtoneList,
 	Event_Exit
 } PhoneAction;
 

@@ -34,6 +34,9 @@
     o dct3/4 raw ringtones handled differently     (BORBELY Zoltan)
  * Documentation updates
     o nk6510 ringtone handling messages updated    (BORBELY Zoltan)
+ * xgnokii updates
+    o ringtone editor crash bug fixed              (BORBELY Zoltan)
+    o ringtone editor enhanced                     (BORBELY Zoltan)
 
 0.5.5
 =====
