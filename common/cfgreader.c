@@ -312,7 +312,7 @@ static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_c
 			cfg->connection_type = GN_CT_Tekram;
 #endif
 		else {
-			fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "connection", val);
+			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "connection", val);
 			return false;
 		}
 	}
@@ -323,7 +323,7 @@ static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_c
 		if (!strcasecmp(val, "default"))
 			cfg->init_length = 0;
 		else if (sscanf(val, " %d %c", &cfg->init_length, &ch) != 1) {
-			fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "initlength", val);
+			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "initlength", val);
 			return false;
 		}
 	}
@@ -331,14 +331,14 @@ static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_c
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "serial_baudrate")))
 		cfg->serial_baudrate = def->serial_baudrate;
 	else if (sscanf(val, " %d %c", &cfg->serial_baudrate, &ch) != 1) {
-		fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "serial_baudrate", val);
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "serial_baudrate", val);
 		return false;
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "serial_write_usleep")))
 		cfg->serial_write_usleep = def->serial_write_usleep;
 	else if (sscanf(val, " %d %c", &cfg->serial_write_usleep, &ch) != 1) {
-		fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "serial_write_usleep", val);
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "serial_write_usleep", val);
 		return false;
 	}
 
@@ -357,7 +357,7 @@ static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_c
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "require_dcd")))
 		cfg->require_dcd = def->require_dcd;
 	else if (sscanf(val, " %d %c", &cfg->require_dcd, &ch) != 1) {
-		fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "require_dcd", val);
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "require_dcd", val);
 		return false;
 	}
 
@@ -366,7 +366,7 @@ static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_c
 	else if (sscanf(val, " %d %c", &cfg->smsc_timeout, &ch) == 1)
 		cfg->smsc_timeout *= 10;
 	else {
-		fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "smsc_timeout", val);
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "smsc_timeout", val);
 		return false;
 	}
 

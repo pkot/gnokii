@@ -56,6 +56,8 @@
     o static and global variables have been eliminated from the
       fbus sources, passing state to everywhere     (BORBELY Zoltan)
     o link driver initialisation cleanup            (BORBELY Zoltan)
+ * misc cleanups
+    o format the output when config file is incorrect    (Pawel Kot)
 
 0.5.0pre2
 =========
