@@ -81,6 +81,7 @@
 #include "gsm-bitmaps.h"
 #include "gsm-ringtones.h"
 #include "gsm-statemachine.h"
+#include "gsm-call.h"
 
 #define MAX_INPUT_LINE_LEN 512
 
@@ -1504,6 +1505,8 @@ static void callnotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_
 	default:
 		break;
 	}
+
+	GN_CallNotifier(CallStatus, CallInfo, state);
 }
 
 /* Voice dialing mode. */
@@ -1511,6 +1514,7 @@ static int dialvoice(char *Number)
 {
     	GSM_CallInfo CallInfo;
 	GSM_Error error;
+	int CallId;
 
 	memset(&CallInfo, 0, sizeof(CallInfo));
 	snprintf(CallInfo.Number, sizeof(CallInfo.Number), "%s", Number);
@@ -1520,12 +1524,12 @@ static int dialvoice(char *Number)
 	GSM_DataClear(&data);
 	data.CallInfo = &CallInfo;
 
-	if ((error = SM_Functions(GOP_MakeCall, &data, &State)) != GE_NONE) {
+	if ((error = GN_CallDial(&CallId, &data, &State)) != GE_NONE) {
 		fprintf(stderr, _("Dialing failed: %s\n"), print_error(error));
 	    	return error;
 	}
 
-	fprintf(stdout, _("Dialled call, id: %d\n"), CallInfo.CallID);
+	fprintf(stdout, _("Dialled call, id: %d (lowlevel id: %d)\n"), CallId, CallInfo.CallID);
 
 	return 0;
 }
@@ -2399,6 +2403,47 @@ static GSM_Error ReadCBMessage(GSM_CBMessage *Message)
 	return GE_NONE;
 }
 
+static void DisplayCall(int CallId)
+{
+	GN_API_Call *call;
+	struct timeval now, delta;
+	char *s;
+
+	if ((call = GN_CallGetActive(CallId)) == NULL)
+	{
+		fprintf(stdout, _("CALL%d: IDLE\n"), CallId);
+		return;
+	}
+
+	gettimeofday(&now, NULL);
+	switch (call->Status) {
+	case GN_API_CS_Ringing:
+		s = "RINGING";
+		timersub(&now, &call->StartTime, &delta);
+		break;
+	case GN_API_CS_Dialing:
+		s = "DIALING";
+		timersub(&now, &call->StartTime, &delta);
+		break;
+	case GN_API_CS_Established:
+		s = "ESTABLISHED";
+		timersub(&now, &call->AnswerTime, &delta);
+		break;
+	case GN_API_CS_Held:
+		s = "ON HOLD";
+		timersub(&now, &call->AnswerTime, &delta);
+		break;
+	default:
+		s = "UNKNOWN STATE";
+		memset(&delta, 0, sizeof(delta));
+		break;
+	}
+
+	fprintf(stderr, _("CALL%d: %s %s(%s) (duration: %d sec)\n"), CallId, s,
+		call->RemoteNumber, call->RemoteName,
+		(int)delta.tv_sec);
+}
+
 /* In monitor mode we don't do much, we just initialise the fbus code.
    Note that the fbus code no longer has an internal monitor mode switch,
    instead compile with DEBUG enabled to get all the gumpf. */
@@ -2409,6 +2454,7 @@ static int monitormode(void)
 	GSM_RFUnits rf_units = GRF_Arbitrary;
 	GSM_BatteryUnits batt_units = GBU_Arbitrary;
 	GSM_Data data;
+	int i;
 
 	GSM_NetworkInfo NetworkInfo;
 	GSM_CBMessage CBMessage;
@@ -2505,6 +2551,9 @@ static int monitormode(void)
 
 		if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE)
 			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC[0], NetworkInfo.LAC[1], NetworkInfo.CellID[0], NetworkInfo.CellID[1]);
+
+		for (i = 0; i < GN_MAX_PARALLEL_CALL; i++)
+			DisplayCall(i);
 
 		if (ReadCBMessage(&CBMessage) == GE_NONE)
 			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), CBMessage.Channel, CBMessage.Message);

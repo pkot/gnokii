@@ -13,10 +13,13 @@
     o implement WAP (all but writing settings)         (Markus Plail)
  * Call management subsystem updates:
     o state pointer added to CallNotification        (BORBELY Zoltan)
+    o call management API added to the repository    (BORBELY Zoltan)
  * xgnokii updates:
     o remove unnecessary GSM_Data declarations         (Markus Plail)
- * gnokii updates
+ * gnokii updates:
     o remove SMSFolder hack from getsms                (Markus Plail)
+    o call status display added                      (BORBELY Zoltan)
+    o dialvoice uses the call management API         (BORBELY Zoltan)
  * nokia-decoding updates:
     o name can be assigned to both bitmap and phonebook entry
                                                        (Markus Plail)
