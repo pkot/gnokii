@@ -20,7 +20,9 @@ include $(TOPDIR)/Makefile.global
 CFLAGS += $(PTHREAD_CFLAGS)
 
 OBJS =	fbus.o \
-	fbus-phonet.o
+	fbus-phonet.o \
+	cbus.o \
+	utils.o
 
 all: LINKS.o
 

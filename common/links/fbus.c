@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:06  chris
+  Revision 1.2  2001-03-11 11:18:39  machek
+  Made fbus link_dispatch (and fixed minor memory leak)
+
+  Revision 1.1  2001/02/21 19:57:06  chris
   More fiddling with the directory layout
 
   Revision 1.1  2001/02/16 14:29:52  chris
@@ -100,7 +103,7 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 	struct timeval time_diff;
 	FBUS_IncomingFrame *i = &flink.i;
-	int frm_num, seq_num, temp, c;
+	int frm_num, seq_num, c;
 	FBUS_IncomingMessage *m;
 
 	//  if (isprint(rx_byte))
@@ -279,23 +282,10 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 					/* Finally dispatch if ready */
 
 					if (m->FramesToGo == 0) {
-						temp = 1;
-						for (c = 0; c < gphone->IncomingFunctionNum; c++) 
-							if (gphone->IncomingFunctions[c].MessageType == i->MessageType) {
-								gphone->IncomingFunctions[c].Functions(i->MessageType, m->MessageBuffer, m->MessageLength);
-								dprintf("Received message type %02x\n\r", i->MessageType);
-
-								/* FIXME - Hmm, what do we do with the return value.. */
-								free(m->MessageBuffer);
-								m->MessageBuffer = NULL;
-								m->Malloced = 0;
-								temp = 0;
-							}
-
-						if (temp != 0) {
-							dprintf("Unknown Frame Type %02x\n\r", i->MessageType);
-							gphone->DefaultFunction(i->MessageType, m->MessageBuffer, m->MessageLength);
-						}
+						link_dispatch(glink, gphone, i->MessageType, m->MessageBuffer, m->MessageLength);
+						free(m->MessageBuffer);
+						m->MessageBuffer = NULL;
+						m->Malloced = 0;
 					}
 
 					/* Send an ack (for all for now) */
