@@ -8,6 +8,8 @@
     o F_SETOWN disabled for OpenBSD                      (Pawel Kot)
     o u8 removed from gn_ringtone_pack                (Helge Deller)
     o updates to spec file; rpm 4.x required    (Tom G. Christensen)
+    o get rid of HAVE_BLUETOOTH in the exported header   (Pawel Kot,
+                                                    Marcel Holtmann)
  * cbus update                                      (Ladislav Michl)
  * nk7110 driver updates
     o get rid of global variables                   (Ladislav Michl)
