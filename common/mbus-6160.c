@@ -375,7 +375,7 @@ void	MB61_ThreadLoop(void)
 {
     unsigned char       init_char[1] = {0x04};
     int                 count, idle_timer;
-	char foogle[] = {0x00, 0x00, 0x00, 0x0d};
+	char foogle[] = {0x0d};
 
         /* Initialise RX state machine. */
     //BufferCount = 0;
@@ -391,9 +391,20 @@ void	MB61_ThreadLoop(void)
         }
         return;
     }
+
     fprintf(stdout, "Sending init...\n");
+
+		/* Need to "toggle" the dtr/rts lines in the right
+           sequence it seems for the interface to work. */
+    device_setdtrrts(0, 1);
+	usleep(500000);
+    device_setdtrrts(1, 0);
+	usleep(200000);
+    device_setdtrrts(0, 1);
+	usleep(500000);
+
     
-	WRITEPHONE(PortFD, foogle, 4);
+	//WRITEPHONE(PortFD, foogle, 1);
 
         /* Initialise sequence number used when sending messages
            to phone. */
@@ -410,25 +421,55 @@ void	MB61_ThreadLoop(void)
 
     idle_timer = 0;
 
+	usleep(500000);
+    RequestSequenceNumber ++;
+	MB61_TX_SendMessage(0x00, 0x1d, 0xd0, RequestSequenceNumber, 1, init_char);
+
+
+	usleep(900000);
+	fprintf(stdout, "Wait...\n");
+	fflush(stdout);
+
+	usleep(900000);
+	fprintf(stdout, "Wait...\n");
+	fflush(stdout);
+
+	MB61_TX_SendPhoneIDRequest();
+
     while (!RequestTerminate) {
         if (idle_timer == 0) {
             idle_timer = 20;
         }
         else {
             idle_timer --;
+			fprintf(stdout, ".");fflush(stdout);
         }
 
         usleep(100000);     /* Avoid becoming a "busy" loop. */
     }
 
-		/* Do initialisation stuff */
+		/* Drop DTR and RTS lines before exiting */
+    device_setdtrrts(0, 0);
+}
 
-	while (!RequestTerminate) {
-
-		usleep(100000);		/* Avoid becoming a "busy" loop. */
-	}
+void		MB61_TX_SendPhoneIDRequest(void)
+{
+	u8		message[5] = {0x00, 0x01, 0x00, 0x03, 0x00};
+	
+	MB61_UpdateSequenceNumber();
+	MB61_TX_SendMessage(0x00, 0x1d, 0xd0, RequestSequenceNumber, 5, message);
 
 }
+
+void		MB61_UpdateSequenceNumber(void)
+{
+	RequestSequenceNumber ++;
+	if (RequestSequenceNumber > 63) {
+		RequestSequenceNumber = 2;
+	}
+}
+		
+	
 
     /* Called by initialisation code to open comm port in
        asynchronous mode. */
@@ -453,8 +494,6 @@ bool        MB61_OpenSerial(void)
 	fprintf(stdout, "Opened MB61 device\n");
 
     device_changespeed(9600);
-    device_setdtrrts(1, 1);
-
     return (true);
 }
 
@@ -471,6 +510,7 @@ void    MB61_SigHandler(int status)
 		fprintf(stdout, "{%02x}", buffer[count]);
        // MB61_RX_StateMachine(buffer[count]);
     }
+	fprintf(stdout, "\n");
 	fflush(stdout);
 }
 

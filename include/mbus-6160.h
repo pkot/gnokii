@@ -103,6 +103,10 @@ bool  		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 void	MB61_ThreadLoop(void);
 void    MB61_SigHandler(int status);
 void    MB61_ThreadLoop(void);
+void	MB61_UpdateSequenceNumber(void);
+
+int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_byte, int message_length, u8 *buffer);
+void	MB61_TX_SendPhoneIDRequest(void);
 
 
 #endif	/* __mbus_6160_c */
