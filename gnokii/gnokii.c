@@ -1342,14 +1342,20 @@ GSM_Error ReadBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap)
 
 static int setlogo(int argc, char *argv[])
 {
-	GSM_Bitmap bitmap,oldbit;
+	GSM_Bitmap bitmap, oldbit;
 	GSM_NetworkInfo NetworkInfo;
 	GSM_Error error = GE_NOTSUPPORTED;
+	GSM_Information *info = &State.Phone.Info;
+	GSM_Data data;
 
 	bool ok = true;
 	int i;
 
-	if (!strcmp(argv[0],"text") || !strcmp(argv[0],"dealer")) {
+	GSM_DataClear(&data);
+	data.Bitmap = &bitmap;
+	data.NetworkInfo = &NetworkInfo;
+
+	if (!strcmp(argv[0], "text") || !strcmp(argv[0], "dealer")) {
 		if (!strcmp(argv[0], "text")) bitmap.type = GSM_WelcomeNoteText;
 		else bitmap.type = GSM_DealerNoteText;
 		bitmap.text[0] = 0x00;
@@ -1357,16 +1363,14 @@ static int setlogo(int argc, char *argv[])
 	} else {
 		if (!strcmp(argv[0], "op") || !strcmp(argv[0], "startup") || !strcmp(argv[0], "caller")) {
 			if (argc > 1) {
-				if (ReadBitmapFileOnConsole(argv[1], &bitmap) != GE_NONE) {
-					if (GSM && GSM->Terminate) GSM->Terminate();
+				if (ReadBitmapFileOnConsole(argv[1], &bitmap) != GE_NONE)
 					return(-1);
-				}
 
 				if (!strcmp(argv[0], "op")) {
 					if (bitmap.type != GSM_OperatorLogo || argc < 3) {
-						if (GSM && GSM->GetNetworkInfo && GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE) strncpy(bitmap.netcode, NetworkInfo.NetworkCode, 7);
+						if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE) strncpy(bitmap.netcode, NetworkInfo.NetworkCode, 7);
 					}
-					GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, GSM_Info);
+					GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, info);
 					if (argc == 3) {
 						strncpy(bitmap.netcode, argv[2], 7);
 						if (!strcmp(GSM_GetNetworkName(bitmap.netcode), "unknown")) {
@@ -1376,10 +1380,10 @@ static int setlogo(int argc, char *argv[])
 					}
 				}
 				if (!strcmp(argv[0], "startup")) {
-					GSM_ResizeBitmap(&bitmap, GSM_StartupLogo, GSM_Info);
+					GSM_ResizeBitmap(&bitmap, GSM_StartupLogo, info);
 				}
 				if (!strcmp(argv[0],"caller")) {
-					GSM_ResizeBitmap(&bitmap, GSM_CallerLogo, GSM_Info);
+					GSM_ResizeBitmap(&bitmap, GSM_CallerLogo, info);
 					if (argc > 2) {
 						bitmap.number = argv[2][0] - '0';
 						if ((bitmap.number < 0) || (bitmap.number > 9)) bitmap.number = 0;
@@ -1388,7 +1392,8 @@ static int setlogo(int argc, char *argv[])
 					}
 					oldbit.type = GSM_CallerLogo;
 					oldbit.number = bitmap.number;
-					if (GSM && GSM->GetBitmap && GSM->GetBitmap(&oldbit) == GE_NONE) {
+					data.Bitmap = &oldbit;
+					if (SM_Functions(GOP_GetBitmap, &data, &State) == GE_NONE) {
 						/* We have to get the old name and ringtone!! */
 						bitmap.ringtone = oldbit.ringtone;
 						strncpy(bitmap.text, oldbit.text, 255);
@@ -1397,9 +1402,8 @@ static int setlogo(int argc, char *argv[])
 				}
 				fprintf(stdout, _("Setting Logo.\n"));
 			} else {
-				/* FIX ME: is it possible to permanently remove op logo ? */
-				if (!strcmp(argv[0], "op"))
-				{
+				/* FIXME: is it possible to permanently remove op logo ? */
+				if (!strcmp(argv[0], "op")) {
 					bitmap.type = GSM_OperatorLogo;
 					strncpy(bitmap.netcode, "000 00", 7);
 					bitmap.width = 72;
@@ -1407,23 +1411,24 @@ static int setlogo(int argc, char *argv[])
 					bitmap.size = bitmap.width * bitmap.height / 8;
 					GSM_ClearBitmap(&bitmap);
 				}
-				/* FIX ME: how to remove startup and group logos ? */
+				/* FIXME: how to remove startup and group logos ? */
 				fprintf(stdout, _("Removing Logo.\n"));
 			}  
 		} else {
 			fprintf(stderr, _("What kind of logo do you want to set ?\n"));
-			if (GSM && GSM->Terminate) GSM->Terminate();
 			return -1;
 		}
 	}
 
-	if (GSM && GSM->SetBitmap) error = GSM->SetBitmap(&bitmap);
+	data.Bitmap = &bitmap;
+	error = SM_Functions(GOP_SetBitmap, &data, &State);
 
 	switch (error) {
 	case GE_NONE:
 		oldbit.type = bitmap.type;
 		oldbit.number = bitmap.number;
-		if (GSM && GSM->GetBitmap && GSM->GetBitmap(&oldbit) == GE_NONE) {
+		data.Bitmap = &oldbit;
+		if (SM_Functions(GOP_GetBitmap, &data, &State) == GE_NONE) {
 			if (bitmap.type == GSM_WelcomeNoteText ||
 			    bitmap.type == GSM_DealerNoteText) {
 				if (strcmp(bitmap.text, oldbit.text)) {
@@ -1444,13 +1449,16 @@ static int setlogo(int argc, char *argv[])
 					/* When we make it correct, we don't have this mistake */
 			
 					strcpy(oldbit.text, "!\0");
-					if (GSM && GSM->SetBitmap) GSM->SetBitmap(&oldbit);
-					if (GSM && GSM->GetBitmap) GSM->GetBitmap(&oldbit);
+					data.Bitmap = &oldbit;
+					SM_Functions(GOP_SetBitmap, &data, &State);
+					SM_Functions(GOP_GetBitmap, &data, &State);
 					if (oldbit.text[0]!='!') {
 						fprintf(stderr, _("SIM card and PIN is required\n"));
 					} else {
-						if (GSM && GSM->SetBitmap) GSM->SetBitmap(&bitmap);
-						if (GSM && GSM->GetBitmap) GSM->GetBitmap(&oldbit);
+						data.Bitmap = &bitmap;
+						SM_Functions(GOP_SetBitmap, &data, &State);
+						data.Bitmap = &oldbit;
+						SM_Functions(GOP_GetBitmap, &data, &State);
 						fprintf(stderr, _("too long, truncated to \"%s\" (length %i)\n"),oldbit.text,strlen(oldbit.text));
 					}
 					ok = false;
@@ -1479,8 +1487,6 @@ static int setlogo(int argc, char *argv[])
 		fprintf(stderr, _("Error !\n"));
 		break;
 	}
-
-	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }

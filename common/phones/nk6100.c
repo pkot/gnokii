@@ -91,6 +91,7 @@ static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetPowersource(GSM_Data *data, GSM_Statemachine *state);
@@ -159,6 +160,8 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return Identify(data, state);
 	case GOP_GetBitmap:
 		return GetBitmap(data, state);
+	case GOP_SetBitmap:
+		return SetBitmap(data, state);
 	case GOP_GetBatteryLevel:
 		return GetBatteryLevel(data, state);
 	case GOP_GetRFLevel:
@@ -472,9 +475,10 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			return GE_PHBOOKNAMETOOLONG;
 		case 0x74:
 			return GE_INVALIDPHBOOKLOCATION;
+		default:
+			dprintf("Invalid GetMemoryLocation reply: 0x%02x\n", message[4]);
+			return GE_UNKNOWN;
 		}
-		dprintf("Invalid GetMemoryLocation reply: 0x%02x\n", message[4]);
-		return GE_UNKNOWN;
 	case 0x08:
 		dprintf("\tMemory location: %d\n", data->MemoryStatus->MemoryType);
 		dprintf("\tUsed: %d\n", message[6]);
@@ -493,9 +497,10 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			return GE_INTERNALERROR;
 		case 0x8d:
 			return GE_INVALIDSECURITYCODE;
+		default:
+			dprintf("Invalid GetMemoryStatus reply: 0x%02x\n", message[4]);
+			return GE_UNKNOWN;
 		}
-		dprintf("Invalid GetMemoryStatus reply: 0x%02x\n", message[4]);
-		return GE_UNKNOWN;
 	case 0x11:
 		if (data->Bitmap) {
 			bmp = data->Bitmap;
@@ -514,12 +519,26 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			pos++;
 			n = bmp->height * bmp->width / 8;
 			if (bmp->size > n) bmp->size = n;
+			if (bmp->size > sizeof(bmp->bitmap)) {
+				dprintf("bitmap is too long\n");
+				return GE_INTERNALERROR;
+			}
 			memcpy(bmp->bitmap, pos, bmp->size);
 		}
 		break;
 	case 0x12:
 		dprintf("Invalid GetCallerGroupData reply: 0x%02x\n", message[4]);
 		return GE_UNKNOWN;
+	case 0x14:
+		break;
+	case 0x15:
+		switch (message[4]) {
+		case 0x7d:
+			return GE_INVALIDPHBOOKLOCATION;
+		default:
+			dprintf("Invalid SetCallerGroupData reply: 0x%02x\n", message[4]);
+			return GE_UNKNOWN;
+		}
 	default:
 		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
 		return GE_UNKNOWN;
@@ -809,6 +828,124 @@ static GSM_Error GetOperatorLogo(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x05);
 }
 
+static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[512+GSM_MAX_BITMAP_SIZE] = {FBUS_FRAME_HEADER};
+	GSM_Bitmap *bmp;
+	unsigned char *pos;
+	int len;
+      
+	bmp = data->Bitmap;
+	pos = req+3;
+
+	switch (bmp->type) {
+	case GSM_WelcomeNoteText:
+		len = strlen(bmp->text);
+		if (len > 255) {
+			dprintf("WelcomeNoteText is too long\n");
+			return GE_INTERNALERROR;
+		}
+		*pos++ = 0x18;
+		*pos++ = 0x01;	/* one block */
+		*pos++ = 0x02;
+		*pos = PNOK_EncodeString(pos+1, len, bmp->text);
+		pos += *pos+1;
+		if (SM_SendMessage(state, pos-req, 0x05, req) != GE_NONE) return GE_NOTREADY;
+		return SM_Block(state, data, 0x05);
+
+	case GSM_DealerNoteText:
+		len = strlen(bmp->text);
+		if (len > 255) {
+			dprintf("DealerNoteText is too long\n");
+			return GE_INTERNALERROR;
+		}
+		*pos++ = 0x18;
+		*pos++ = 0x01;	/* one block */
+		*pos++ = 0x03;
+		*pos = PNOK_EncodeString(pos+1, len, bmp->text);
+		pos += *pos+1;
+		if (SM_SendMessage(state, pos-req, 0x05, req) != GE_NONE) return GE_NOTREADY;
+		return SM_Block(state, data, 0x05);
+
+	case GSM_StartupLogo:
+		if (bmp->size > GSM_MAX_BITMAP_SIZE) {
+			dprintf("StartupLogo is too long\n");
+			return GE_INTERNALERROR;
+		}
+		*pos++ = 0x18;
+		*pos++ = 0x01;	/* one block */
+		*pos++ = 0x01;
+		*pos++ = bmp->height;
+		*pos++ = bmp->width;
+		memcpy(pos, bmp->bitmap, bmp->size);
+		pos += bmp->size;
+		if (SM_SendMessage(state, pos-req, 0x05, req) != GE_NONE) return GE_NOTREADY;
+		return SM_Block(state, data, 0x05);
+
+	case GSM_OperatorLogo:
+		if (bmp->size > GSM_MAX_BITMAP_SIZE) {
+			dprintf("OperatorLogo is too long\n");
+			return GE_INTERNALERROR;
+		}
+		*pos++ = 0x30;	/* Store Op Logo */
+		*pos++ = 0x01;	/* location */
+		*pos++ = ((bmp->netcode[1] & 0x0f) << 4) | (bmp->netcode[0] & 0x0f);
+		*pos++ = 0xf0 | (bmp->netcode[2] & 0x0f);
+		*pos++ = ((bmp->netcode[5] & 0x0f) << 4) | (bmp->netcode[4] & 0x0f);
+		*pos++ = (bmp->size + 4) >> 8;
+		*pos++ = (bmp->size + 4) & 0xff;
+		*pos++ = 0x00;	/* infofield */
+		*pos++ = bmp->width;
+		*pos++ = bmp->height;
+		*pos++ = 0x01;	/* Just BW */
+		memcpy(pos, bmp->bitmap, bmp->size);
+		pos += bmp->size;
+		if (SM_SendMessage(state, pos-req, 0x05, req) != GE_NONE) return GE_NOTREADY;
+		return SM_Block(state, data, 0x05);
+
+	case GSM_CallerLogo:
+		len = strlen(bmp->text);
+		if (len > 255) {
+			dprintf("Callergroup name is too long\n");
+			return GE_INTERNALERROR;
+		}
+		if (bmp->size > GSM_MAX_BITMAP_SIZE) {
+			dprintf("CallerLogo is too long\n");
+			return GE_INTERNALERROR;
+		}
+		*pos++ = 0x13;
+		*pos++ = bmp->number;
+		*pos = PNOK_EncodeString(pos+1, len, bmp->text);
+		pos += *pos+1;
+		*pos++ = bmp->ringtone;
+		*pos++ = 0x01;	/* Graphic on. You can use other values as well:
+				   0x00 - Off
+				   0x01 - On
+				   0x02 - View Graphics
+				   0x03 - Send Graphics
+				   0x04 - Send via IR
+				   You can even set it higher but Nokia phones (my
+				   6110 at least) will not show you the name of this
+				   item in menu ;-)) Nokia is really joking here. */
+		*pos++ = (bmp->size + 4) >> 8;
+		*pos++ = (bmp->size + 4) & 0xff;
+		*pos++ = 0x00;	/* Future extensions! */
+		*pos++ = bmp->width;
+		*pos++ = bmp->height;
+		*pos++ = 0x01;	/* Just BW */
+		memcpy(pos, bmp->bitmap, bmp->size);
+		pos += bmp->size;
+		if (SM_SendMessage(state, pos-req, 0x03, req) != GE_NONE) return GE_NOTREADY;
+		return SM_Block(state, data, 0x03);
+		
+	case GSM_None:
+	case GSM_PictureImage:
+		return GE_NOTSUPPORTED;
+	default:
+		return GE_INTERNALERROR;
+	}
+}
+
 static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Bitmap *bmp;
@@ -833,6 +970,10 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 					bmp->height = *pos++;
 					bmp->width = *pos++;
 					bmp->size = bmp->height * bmp->width / 8;
+					if (bmp->size > sizeof(bmp->bitmap)) {
+						dprintf("bitmap is too long\n");
+						return GE_INTERNALERROR;
+					}
 					memcpy(bmp->bitmap, pos, bmp->size);
 					pos += bmp->size;
 					break;
@@ -852,12 +993,26 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 					PNOK_DecodeString(bmp->text, sizeof(bmp->text), pos+1, *pos);
 					pos += *pos + 1;
 					break;
+				default:
+					break;
 				}
 				found = true;
 			}
 			if (!found) return GE_NOTSUPPORTED;
 		}
 		break;
+	case 0x19:
+		break;
+	case 0x31:
+		break;
+	case 0x32:
+		switch (message[4]) {
+		case 0x7d:
+			return GE_INVALIDPHBOOKLOCATION;
+		default:
+			dprintf("Invalid SetOperatorLogo reply: 0x%02x\n", message[4]);
+			return GE_UNKNOWN;
+		}
 	case 0x34:
 		if (data->Bitmap) {
 			bmp = data->Bitmap;
@@ -878,6 +1033,10 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 			pos++;
 			i = bmp->height * bmp->width / 8;
 			if (bmp->size > i) bmp->size = i;
+			if (bmp->size > sizeof(bmp->bitmap)) {
+				dprintf("bitmap is too long\n");
+				return GE_INTERNALERROR;
+			}
 			memcpy(bmp->bitmap, pos, bmp->size);
 		}
 		break;
