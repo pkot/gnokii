@@ -644,7 +644,7 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 
 	/* Length in AT mode is the length of the full message minus
 	 * SMSC field length */
-	sprintf(req, "AT+%s=%d\r", cmd, length - 1);
+	sprintf(req, "AT+%s=%d\r", cmd, length - data->raw_sms->message_center[0] - 1);
 	dprintf("Sending initial sequence\n");
 	if (sm_message_send(strlen(req), GN_OP_AT_Prompt, req, state))
 		return GN_ERR_NOTREADY;
