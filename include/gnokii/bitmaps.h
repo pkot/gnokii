@@ -51,7 +51,7 @@ typedef enum {
 	GSM_EMSAnimation2,		/* ...second, third and fourth should have this type */
 } GSM_Bitmap_Types;
 
-#define GSM_MAX_BITMAP_SIZE 864
+#define GSM_MAX_BITMAP_SIZE 1000
 
 /* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
 
