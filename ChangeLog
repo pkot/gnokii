@@ -27,6 +27,7 @@
     o GetMemoryStatus returns invalid memory type instead of
       internal error if type isn't supported        (BORBELY Zoltan)
     o prepaid info message marked unsolicited       (BORBELY Zoltan)
+    o sms status message can crash the driver       (BORBELY Zoltan)
  * xgnokii fixes
     o do not free message previously added to GSList  (Josef Zlomek)
 

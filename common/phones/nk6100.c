@@ -1690,6 +1690,7 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 		dprintf("Message: SMS Status Received\n");
 		dprintf("\tThe number of messages: %d\n", message[10]);
 		dprintf("\tUnread messages: %d\n", message[11]);
+		if (!data->sms_status) return GN_ERR_INTERNALERROR;
 		data->sms_status->unread = message[11];
 		data->sms_status->number = message[10];
 		break;
