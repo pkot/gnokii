@@ -117,7 +117,8 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 	switch (i->state) {
 	case FBUS_RX_Sync:
 		if (rx_byte == FBUS_PHONET_FRAME_ID ||
-		    rx_byte == FBUS_PHONET_BLUETOOTH_FRAME_ID) {
+		    rx_byte == FBUS_PHONET_BLUETOOTH_FRAME_ID ||
+		    rx_byte == FBUS_PHONET_DKU2_FRAME_ID) {
 			i->state = FBUS_RX_GetDestination;
 		}
 		break;
@@ -128,6 +129,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->state = FBUS_RX_GetSource;
 
 		if (rx_byte != FBUS_DEVICE_PC &&
+		    rx_byte != FBUS_PHONET_DKU2_DEVICE_PC &&
 		    rx_byte != FBUS_PHONET_BLUETOOTH_DEVICE_PC) {
 			i->state = FBUS_RX_Sync;
 			dprintf("The fbus stream is out of sync - expected 0x0c, got 0x%2x\n", rx_byte);
@@ -239,6 +241,10 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_FRAME_ID;
 		out_buffer[current++] = FBUS_DEVICE_PHONE;
 		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_DEVICE_PC;
+	} else if (state->config.connection_type == GN_CT_DKU2) {
+		out_buffer[current++] = FBUS_PHONET_DKU2_FRAME_ID;
+		out_buffer[current++] = FBUS_DEVICE_PHONE;
+		out_buffer[current++] = FBUS_PHONET_DKU2_DEVICE_PC;
 	} else {
 		out_buffer[current++] = FBUS_PHONET_FRAME_ID;
 		out_buffer[current++] = FBUS_DEVICE_PHONE; /* Destination */
@@ -292,6 +298,7 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	switch (state->config.connection_type) {
 	case GN_CT_Infrared:
 	case GN_CT_Irda:
+	case GN_CT_DKU2:
 	case GN_CT_Bluetooth:
 		if (phonet_open(state) == true)
 			error = GN_ERR_NONE;

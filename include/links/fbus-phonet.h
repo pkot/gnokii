@@ -46,6 +46,9 @@
    family phones. */
 #define FBUS_PHONET_BLUETOOTH_FRAME_ID  0x19
 
+#define FBUS_PHONET_DKU2_FRAME_ID  0x1b
+#define FBUS_PHONET_DKU2_DEVICE_PC  0x0c
+
 /* Our PC in the Nokia 6310 family over Bluetooth. */
 #define FBUS_PHONET_BLUETOOTH_DEVICE_PC 0x10
 

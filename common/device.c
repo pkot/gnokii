@@ -56,6 +56,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	dprintf("Serial device: opening device %s\n", file);
 
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		state->device.fd = serial_opendevice(file, with_odd_parity, with_async, with_hw_handshake, state);
@@ -86,6 +87,7 @@ void device_close(struct gn_statemachine *state)
 	dprintf("Serial device: closing device\n");
 
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		serial_close(state->device.fd, state);
@@ -124,6 +126,7 @@ void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 	dprintf("Serial device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
 
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		serial_setdtrrts(state->device.fd, dtr, rts, state);
@@ -148,6 +151,7 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 	dprintf("Serial device: setting speed to %d\n", speed);
 
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		serial_changespeed(state->device.fd, speed, state);
@@ -171,6 +175,7 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 {
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		return (serial_read(state->device.fd, buf, nbytes, state));
@@ -193,6 +198,7 @@ size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		return (serial_write(state->device.fd, buf, n, state));
@@ -215,6 +221,7 @@ size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 int device_select(struct timeval *timeout, struct gn_statemachine *state)
 {
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		return serial_select(state->device.fd, timeout, state);
@@ -239,6 +246,7 @@ gn_error device_nreceived(int *n, struct gn_statemachine *state)
 	*n = -1;
 
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		return serial_nreceived(state->device.fd, n, state);
@@ -250,6 +258,7 @@ gn_error device_nreceived(int *n, struct gn_statemachine *state)
 gn_error device_flush(struct gn_statemachine *state)
 {
 	switch (state->device.type) {
+	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		return serial_flush(state->device.fd, state);

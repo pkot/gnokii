@@ -1,0 +1,46 @@
+*** README-DKU2                                               ***
+*** Notes, Install, bugs etc for the DKU2 Linux kernel module ***
+
+
+* Notes *
+
+The DKU2 cable, supplied for example with the nokia 7600, is a straight-through lead which connects the phone to a USB port.  By default, the usb device exposes two endpoints which provide AT-like modem emulation.  This kernel module sets an alternative configuration to enable two further endpoints which enable Fbus communication.
+
+Patches are in gnokii/patches.  So far only for 2.4.22 - I expect it'll work with most 2.4 kernels.
+
+The driver connects two ttys - after connecting the phone dmesg gives:
+  Nokia AT Port:
+  usbserial.c: Nokia 7600/DKU2 driver converter now attached to ttyUSB0 (or usb/tts/0 for devfs)
+  Nokia FBUS Port:
+  usbserial.c: Nokia 7600/DKU2 driver converter now attached to ttyUSB1 (or usb/tts/1 for devfs)
+gnokii must be configured to use the second of these - in this case /dev/ttyUSB1
+
+
+* Install *
+
+- Get / configure / build a set of kernel sources.
+- cd /usr/src/linux/drivers/usb/serial
+- patch < patch_file
+- cd ../../..
+- make xconfig
+- Enable the module (USB support / USB serial converter support / USB Nokia Serial Driver)
+- make modules
+- Become root
+- make modules_install
+- modprobe nokia_dku2
+- dmesg
+- Look for the lines as shown above!
+- Edit .gnokiirc to include port=/dev/ttyUSB.. and connection=dku2 
+
+
+* Known Bugs *
+
+None...let me know!
+
+
+* Disclaimer *
+
+No warranty, you are on your own. If you have questions or remarks,
+please let me know on my email address mentioned below.
+
+Author: Chris Kemp (ck231@cam.ac.uk)
