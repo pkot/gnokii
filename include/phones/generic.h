@@ -17,7 +17,10 @@
   The various routines are called PGEN_...
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:12  chris
+  Revision 1.2  2001-03-11 11:12:21  machek
+  Added header for PGEN_IncomingDefault.
+
+  Revision 1.1  2001/02/21 19:57:12  chris
   More fiddling with the directory layout
 
   Revision 1.4  2001/01/29 17:14:44  chris
@@ -45,10 +48,12 @@
 GSM_Error PGEN_CommandResponse(GSM_Link *link, void *message, int *messagesize, int messagetype, int waitfor, int messagealloc);
 
 GSM_Error PGEN_CommandResponseReceive(GSM_Link *link, int MessageType, void *Message, int MessageLength);
-
 GSM_Error PGEN_DebugMessage(int type, unsigned char *mes, int len);
+GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length);
+
 
 #endif
+
 
 
 
