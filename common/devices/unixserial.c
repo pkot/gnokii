@@ -453,8 +453,7 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine 
 		got = write(fd, buf + r, bs);
 		if (got == 0) {
 			dprintf("Serial write: oops, zero byte has written!\n");
-		}
-		else if (got < 0) {
+		} else if (got < 0) {
 			if (errno == EINTR) continue;
 			if (errno != EAGAIN) {
 				dprintf("Serial write: write error %d\n", errno);
