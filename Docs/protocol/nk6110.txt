@@ -763,7 +763,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r SetdownloadedOpNameOK?{ 0x8b, 0x00, 0x01 }
     s Get downloaded OpName { 0x8c, 0x00 }
     r Get downloaded OpName { 0x8c, 0x00, 0x01, MCC1, MCC2, MNC, Name, 0x00,...}
-    s Buzzer pitch          { 0x8f, volume, hzLO, hzHI }
+    s Buzzer pitch          { 0x8f, volume, hzHI, hzLO }
                             if volume and hz is 0, it's off
     r Buzzer pitch          { 0x8f}
     s ACD Readings ?        { 0x91, parameter?(0x02,0x03,0x04,0x05,0x07) }

@@ -3,6 +3,8 @@
  * translation updates
     o gettext 0.12.x requires MSGID_BUGS_ADDRESS variable in
       po/Makevars                                       (Pawel Kot)
+ * 6110 series updates
+    o PlayTone message and documentation fixed     (BORBELY Zoltan)
 
 0.5.4
 =====

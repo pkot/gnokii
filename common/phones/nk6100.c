@@ -2826,9 +2826,9 @@ static gn_error play_tone(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x8f, 0x00, 0x00, 0x00};
 
-	req[3] = data->tone->frequency % 256;
+	req[3] = data->tone->volume;
 	req[4] = data->tone->frequency / 256;
-	req[5] = data->tone->volume;
+	req[5] = data->tone->frequency % 256;
 
 	if (sm_message_send(6, 0x40, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x40, data, state);
