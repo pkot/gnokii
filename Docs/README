@@ -388,7 +388,7 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
-200404XX Version 0.6.1
+20040413 Version 0.6.1
 With this version gnokii starts to support Symbian phones. This consists of
 gnokii symbian phone driver (called gnapplet) and Symbian application to be
 installed and run from the phone. Minor fixes and build system updates.
