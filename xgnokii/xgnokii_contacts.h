@@ -32,7 +32,7 @@
 
 #include <gtk/gtk.h>
 #include "misc.h"
-#include "gsm-common.h"
+#include "gsm-api.h"
 
 #define IO_BUF_LEN	160
 

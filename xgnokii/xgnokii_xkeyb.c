@@ -30,7 +30,7 @@
 #include <string.h>
 #include <gtk/gtk.h>
 #include "misc.h"
-#include "links/fbus.h"
+#include "gsm-api.h"
 #include "xgnokii_common.h"
 #include "xgnokii.h"
 #include "xgnokii_lowlevel.h"

@@ -34,7 +34,7 @@
 #include "xgnokii.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii_data.h"
-#include "data/virtmodem.h"
+//#include "data/virtmodem.h"
 
 static GtkWidget *GUI_DataWindow;
 bool GTerminateThread = false;
@@ -70,7 +70,7 @@ inline void GUI_ShowData(void)
 		return;
 
 	if (GTerminateThread) {
-		vm_terminate();
+		gn_vm_terminate();
 		enabled = false;
 		GTerminateThread = false;
 	}
@@ -87,7 +87,7 @@ inline void GUI_HideData(void)
 
 static inline void DisableData(GtkWidget * widget, gpointer data)
 {
-	vm_terminate();
+	gn_vm_terminate();
 	enabled = false;
 	UpdateStatus();
 }
@@ -97,7 +97,7 @@ static inline void EnableData(GtkWidget * widget, gpointer data)
 {
 
 	GTerminateThread = false;
-	vm_initialise(xgnokiiConfig.model, xgnokiiConfig.port,
+	gn_vm_initialise(xgnokiiConfig.model, xgnokiiConfig.port,
 		      0, 0, xgnokiiConfig.bindir, false, false);
 	enabled = true;
 	UpdateStatus();

@@ -48,14 +48,7 @@
 #include <gtk/gtk.h>
 
 #include "misc.h"
-#include "gsm-common.h"
-#include "gsm-statemachine.h"
 #include "gsm-api.h"
-#include "cfgreader.h"
-#include "phones/nk7110.h"
-#include "phones/nk6100.h"
-#include "phones/nk3110.h"
-#include "phones/nk2110.h"
 #include "xgnokii.h"
 #include "xgnokii_common.h"
 #include "xgnokii_lowlevel.h"

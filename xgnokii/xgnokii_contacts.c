@@ -43,7 +43,6 @@
 #include <string.h>
 #include <gtk/gtk.h>
 
-#include "gsm-common.h"
 #include "gsm-api.h"
 #include "xgnokii_contacts.h"
 #include "xgnokii.h"
