@@ -1,3 +1,6 @@
+* Tue Jan 25 2005 Jan Derfinak <ja@mail.upjs.sk>
+- Improved db modules handling in Makefile by David Vrabel.
+
 * Tue Jan 25 2005 David Vrabel
 - Make configurable where to look for the new messages.
 

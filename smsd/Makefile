@@ -32,17 +32,21 @@ LDLIBS += -rdynamic $(TOPDIR)/common/libgnokii.la -ldl
 
 OBJS = 	smsd.lo \
 	lowlevel.lo
+DB_OBJS = pq.lo mysql.lo file.lo
+
+# A list of database modules to build.
+# FIXME: detect which ones to build in configure
+#DB_LIBS = libfile.la libpq.la libmysql.la
+DB_LIBS := libfile.la
 
 all: smsd
 
 
-smsd: $(OBJS) $(TOPDIR)/common/libgnokii.la
+smsd: $(OBJS) $(TOPDIR)/common/libgnokii.la $(DB_LIBS)
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 
 ### DB Modules
-# Change this according to your system
-# FIXME: detect it in configure
 
 # PostgreSQL support
 pq.lo: smsd.h pq.c
@@ -80,14 +84,14 @@ $(TOPDIR)/common/libgnokii.la:
 	$(MAKE) -C $(TOPDIR)/common libgnokii.la
 
 clean:
-	$(LIBTOOL) --mode=clean $(RM) smsd libpq.la libmysql.la libfile.la $(OBJS)
+	$(LIBTOOL) --mode=clean $(RM) smsd $(DB_LIBS) $(OBJS) $(DB_OBJS)
 	$(RM) *~ depend *.so core*
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(LIBTOOL) --mode=install $(INSTALL) -m 755 smsd $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)${libdir}/smsd
-	for f in lib*.la ; do \
+	for f in $(DB_LIBS) ; do \
 	$(LIBTOOL) --mode=install $(INSTALL) $$f $(DESTDIR)${libdir}/smsd ; \
 	done
 	$(LIBTOOL) --mode=finish ${libdir}/smsd
