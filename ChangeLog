@@ -40,6 +40,9 @@
  * libsms fixes
     o update sms number in gn_sms struct with the one returned by
       the phone from gn_sms_raw                      (Osma Suominen)
+ * nk3110 driver fixes
+    o handle memory types more nicely -- introduce get_memory_type()
+                                                     (Osma Suominen)
 
 0.5.0pre6
 =========

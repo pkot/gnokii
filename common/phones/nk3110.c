@@ -88,6 +88,7 @@ static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *buffer,
 static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 
 static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req, int ulength, bool save_sms);
+static int get_memory_type(gn_memory_type memory_type);
 
 static gn_incoming_function_type incoming_functions[] = {
 	{ 0x0a, P3110_IncomingNothing },
@@ -306,7 +307,7 @@ static gn_error P3110_Identify(gn_data *data, struct gn_statemachine *state)
 
 static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
-	int timeout, c;
+	int timeout, c, memory_type;
 	u8 response = 0, request[2];
 	gn_error error = GN_ERR_INTERNALERROR;
 
@@ -316,19 +317,10 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
-	switch(data->raw_sms->memory_type) {
-	case GN_MT_ME:
-		data->raw_sms->memory_type = 1; /* 3 in 8110, 1 is GMT_CB */
-		break;
-	case GN_MT_SM:
-		data->raw_sms->memory_type = 2;
-		break;
-	default:
-		return  GN_ERR_INVALIDMEMORYTYPE;
-	}
-
 	/* Set memory type and location in the request */
-	request[0] = data->raw_sms->memory_type;
+	memory_type = get_memory_type(data->raw_sms->memory_type);
+	if (memory_type == 0) return GN_ERR_INVALIDMEMORYTYPE;
+	request[0] = memory_type;
 	request[1] = data->raw_sms->number;
 
 	/* 0x25 messages requests the contents of an SMS message
@@ -387,7 +379,7 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 
 static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
-	int timeout, c;
+	int timeout, c, memory_type;
 	u8 response = 0, request[2];
 	gn_error error = GN_ERR_INTERNALERROR;
 
@@ -395,19 +387,10 @@ static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *st
 
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 
-	switch(data->raw_sms->memory_type) {
-	case GN_MT_ME:
-		data->raw_sms->memory_type = 1; /* 3 in 8110, 1 is GMT_CB */
-		break;
-	case GN_MT_SM:
-		data->raw_sms->memory_type = 2;
-		break;
-	default:
-		return  GN_ERR_INVALIDMEMORYTYPE;
-	}
-
 	/* Set memory type and location in the request */
-	request[0] = data->raw_sms->memory_type;
+	memory_type = get_memory_type(data->raw_sms->memory_type);
+	if (memory_type == 0) return GN_ERR_INVALIDMEMORYTYPE;
+	request[0] = memory_type;
 	request[1] = data->raw_sms->number;
 
 	/* 0x26 message deletes an SMS message from the phone.
@@ -530,7 +513,7 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 
 		/* Now wait for response from network which will see
 		   CurrentSMSMessageError change from busy. */
-		if(save_sms) {
+		if (save_sms) {
 			sm_wait_for(0x2a, data, state);
 			sm_wait_for(0x2b, data, state);
 		} else {
@@ -835,7 +818,7 @@ static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message,
 	 * unknown (at least it's not just read/unread status - the value
 	 * seems not to change for a given message). */
 
-	if(message[5] != 0x01) {
+	if (message[5] != 0x01) {
 		memcpy(data->raw_sms->smsc_time, message + 8, 7);
 
 		/* Now get remote and message center length & type */
@@ -1165,15 +1148,14 @@ static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsig
 
 	dprintf("smsc:'%s' remote:'%s'", smsc, remote);
 	
-	if(save_sms) { /* make header for saving SMS */
-/*		req[pos++] = data->raw_sms->memory_type; */
-		req[pos++] = 0x02;	/* FIXME MT always SIM for now */
+	if (save_sms) { /* make header for saving SMS */
+		req[pos++] = get_memory_type(data->raw_sms->memory_type);
 		req[pos++] = data->raw_sms->status;
 		req[pos++] = 0x01;	/* status byte for "saved SMS" */
 	} else { /* make header for sending SMS */
 		/* the magic "first octet" or FO */
 		fo = 0x31;	/* FO_SUBMIT | FO_VPF_REL | FO_SRR */
-		if(data->raw_sms->udh_indicator)	fo |= 0x40;
+		if (data->raw_sms->udh_indicator)	fo |= 0x40;
 		req[pos++] = fo;
 	}
 
@@ -1211,8 +1193,22 @@ static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsig
 	 * remote number type, according to Docs/protocol/nk3110.txt
 	 * Sent SMS messages don't. */
 
-	if(save_sms)
+	if (save_sms)
 		req[pos++] = data->raw_sms->remote_number[1]; /* number type */
 
 	return pos;	/* length of encoded header is returned */
+}
+
+static int get_memory_type(gn_memory_type memory_type)
+{
+	int result;
+
+	switch (memory_type) {
+	case GN_MT_CB:	result = 0x01; break;
+	case GN_MT_SM:	result = 0x02; break;
+	case GN_MT_ME:	result = 0x03; break;
+	case GN_MT_ON:	result = 0x04; break;
+	default:	result = 0; break;	/* error code */
+	}
+	return result;
 }
