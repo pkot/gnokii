@@ -8,9 +8,10 @@
                                                     Ernest Beinrohr)
     o retransmission occurs only if the phone won't transmit
       the acknowledge frame                         (BORBELY Zoltan)
-    o implement access to network and country names
-                                                    (Ladislav Michl)
+    o implement access to network and country names (Ladislav Michl)
     o new operator in Singapore                      (Fabrice MARIE)
+    o fix inclusion of snprintf and vsnprintf prototype definitions 
+                                                  (Marcus Godehardt)
  * build system updated
     o avoid problems with recursive loop when installing
       locales in xgnokii                          (Malte Schünemann)
