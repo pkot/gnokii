@@ -48,7 +48,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc COPYING CREDITS MANIFEST README README-3810 README-6110 sample.gnokiirc gettext-howto gnokii.nol gnokii-ir-howto.txt
+%doc COPYING CREDITS MANIFEST README README-3810 README-6110 README-WIN32 sample.gnokiirc gettext-howto gnokii.nol gnokii-ir-howto.txt
 /usr/bin/*
 /usr/lib/gnokii/*
 %attr(4754, root, gnokii) /usr/sbin/*
