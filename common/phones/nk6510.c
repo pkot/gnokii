@@ -420,8 +420,9 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 static void DeliverLayout(unsigned char *message, GSM_Data *data)
 {
+	dprintf("Deliver layout\n");
 	data->RawSMS->MoreMessages     = 0;
-	data->RawSMS->ReplyViaSameSMSC = message[16];
+	data->RawSMS->ReplyViaSameSMSC = 0;
 	data->RawSMS->RejectDuplicates = 0;
 	data->RawSMS->Report           = 0;
 
@@ -429,14 +430,14 @@ static void DeliverLayout(unsigned char *message, GSM_Data *data)
 	data->RawSMS->PID              = 0;
 	data->RawSMS->ReportStatus     = 0;
 	
-	memcpy(data->RawSMS->SMSCTime,      message, 0);
+	memcpy(data->RawSMS->SMSCTime,      message + 19, 7);
 	memcpy(data->RawSMS->Time,          message + 19, 7);
-	memcpy(data->RawSMS->MessageCenter, message + 46,  12);
+	memcpy(data->RawSMS->MessageCenter, message + 46, 12);
 	memcpy(data->RawSMS->RemoteNumber,  message + 34, 12);
 	
-	data->RawSMS->DCS              = message[54];
+	data->RawSMS->DCS              = 0;
 	data->RawSMS->Length           = message[57];
-	data->RawSMS->UDHIndicator     = message[53];
+	data->RawSMS->UDHIndicator     = 0;
 	memcpy(data->RawSMS->UserData, message + 58, data->RawSMS->Length);
 	
 	data->RawSMS->ValidityIndicator = 0;
@@ -445,6 +446,7 @@ static void DeliverLayout(unsigned char *message, GSM_Data *data)
 
 static void SubmitStoredLayout(unsigned char *message, GSM_Data *data)
 {
+	dprintf("Submit stored layout\n");
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
 	data->RawSMS->RejectDuplicates = 0;
@@ -470,6 +472,7 @@ static void SubmitStoredLayout(unsigned char *message, GSM_Data *data)
 
 static void SubmitSentLayout(unsigned char *message, GSM_Data *data)
 {
+	dprintf("Submit sent layout\n");
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
 	data->RawSMS->RejectDuplicates = 0;
@@ -495,6 +498,7 @@ static void SubmitSentLayout(unsigned char *message, GSM_Data *data)
 
 static void TextTemplateLayout(unsigned char *message, GSM_Data *data)
 {
+	dprintf("Text template layout\n");
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
 	data->RawSMS->RejectDuplicates = 0;
@@ -520,6 +524,7 @@ static void TextTemplateLayout(unsigned char *message, GSM_Data *data)
 
 static void PictureTemplateLayout(unsigned char *message, GSM_Data *data)
 {
+	dprintf("Picture template layout\n");
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
 	data->RawSMS->RejectDuplicates = 0;
@@ -545,8 +550,9 @@ static void PictureTemplateLayout(unsigned char *message, GSM_Data *data)
 
 static void DeliveryReportLayout(unsigned char *message, GSM_Data *data)
 {
+	dprintf("Delivery report layout\n");
 	data->RawSMS->MoreMessages     = 0;
-	data->RawSMS->ReplyViaSameSMSC = 16;
+	data->RawSMS->ReplyViaSameSMSC = 0;
 	data->RawSMS->RejectDuplicates = 0;
 	data->RawSMS->Report           = 0;
 
@@ -554,15 +560,15 @@ static void DeliveryReportLayout(unsigned char *message, GSM_Data *data)
 	data->RawSMS->PID              = 0;
 	data->RawSMS->ReportStatus     = 0;
 	
-	memcpy(data->RawSMS->SMSCTime,      message + 45, 7);
-	memcpy(data->RawSMS->Time,          message + 52, 7);
-	memcpy(data->RawSMS->MessageCenter, message + 18, 12);
-	memcpy(data->RawSMS->RemoteNumber,  message + 34, 12);
+	memcpy(data->RawSMS->SMSCTime,      message + 19, 7);
+	memcpy(data->RawSMS->Time,          message + 26, 7);
+	memcpy(data->RawSMS->MessageCenter, message + 50, 12);
+	memcpy(data->RawSMS->RemoteNumber,  message + 38, 12);
 	
-	data->RawSMS->DCS              = message[31];
-	data->RawSMS->Length           = message[32];
-	data->RawSMS->UDHIndicator     = message[30];
-	memcpy(data->RawSMS->UserData, message + 38, data->RawSMS->Length);
+	data->RawSMS->DCS              = 0;
+	data->RawSMS->Length           = 0;
+	data->RawSMS->UDHIndicator     = 0;
+	memcpy(data->RawSMS->UserData, message, 0);
 	
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
@@ -570,6 +576,7 @@ static void DeliveryReportLayout(unsigned char *message, GSM_Data *data)
 
 static void PictureLayout(unsigned char *message, GSM_Data *data)
 {
+	dprintf("Picture layout\n");
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = message[16];
 	data->RawSMS->RejectDuplicates = 0;
