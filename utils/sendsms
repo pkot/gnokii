@@ -284,14 +284,6 @@ if [ $SW_SKIPGNOKITST = no ] ; then
 	echo "Pre release versions are kept here, maintained by Pawel Kot"
 	echo "urtica.linuxnews.pl located in Warsaw, Poland"
 	echo
-	echo "MYGNOKII (can handle other newer Nokia models...)"
-	echo "--------"
-	echo "Marcin Wiacek -> mailto:marcin-wiacek@topnet.pl"
-	echo "http://marcin-wiacek.topnet.pl (http://www.fkn.pl/marcinw) -> netmonitor,"
-	echo "firmware, mygnokii (GSM & Nokia)"
-	echo "http://grumble.zereau.com/gnokii/ &"
-	echo "http://www.mds.mdh.se/~cel95eig/mygnokii/ -> mygnokii mirrors"
-	echo
 	exit 1
 	fi
 fi

@@ -2,6 +2,9 @@
 ======
  * maintainance updates
     o ftp.gnokii.org does not exist                     (Pawel Kot)
+    o mygnokii apparently does not exist (it is called gammu now),
+      and it seems that it may be not compatible with sendsms
+                                                        (Pawel Kot)
  * build system updates
     o update spec file to install all libs              (Pawel Kot)
  * libgnokii updates
