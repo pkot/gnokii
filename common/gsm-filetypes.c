@@ -1394,6 +1394,7 @@ API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *oline)
 	char backline[MAX_INPUT_LINE_LEN];
 
 	strcpy(backline, line);
+	entry->empty = true;
 
 	ptr = strsep(&line, ";");
 	if (ptr) strncpy(entry->name, ptr, sizeof(entry->name) - 1);
@@ -1406,7 +1407,7 @@ API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *oline)
 	if (!ptr) {
 		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
 		line = oline;
-		return 0;
+		return GN_ERR_WRONGDATAFORMAT;
 	}
 
 	if (!strncmp(ptr, "ME", 2)) {
@@ -1416,7 +1417,7 @@ API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *oline)
 			entry->memory_type = GN_MT_SM;
 		} else {
 			fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-			return 0;
+			return GN_ERR_WRONGDATAFORMAT;
 		}
 	}
 
@@ -1432,6 +1433,8 @@ API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *oline)
 		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
 		return GN_ERR_WRONGDATAFORMAT;
 	}
+
+	entry->empty = false;
 
 	for (entry->subentries_count = 0; ; entry->subentries_count++) {
 		ptr = strsep(&line, ";");

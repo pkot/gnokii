@@ -488,6 +488,9 @@ API int gn_cfg_read(char **bindir)
 	if (!cfg_get_log_target(&gn_log_rlpdebug_mask, "rlpdebug")) return -2;
 	if (!cfg_get_log_target(&gn_log_xdebug_mask, "xdebug")) return -2;
 
+	gn_log_debug("LOG: debug mask is 0x%x\n", gn_log_debug_mask);
+	gn_log_rlpdebug("LOG: rlpdebug mask is 0x%x\n", gn_log_rlpdebug_mask);
+	gn_log_xdebug("LOG: xdebug mask is 0x%x\n", gn_log_xdebug_mask);
 	return 0;
 }
 

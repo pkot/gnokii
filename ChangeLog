@@ -6,6 +6,8 @@
     o update gn_phone_model[] from
       http://homepage.mac.com/alvinmok/nokia/firmware.html
                                         (BORBELY Zoltan, Pawel Kot)
+    o gn_file_phonebook_read marks entry non-empty (BORBELY Zoltan)
+    o log settings will be printed                 (BORBELY Zoltan)
  * build system updates
     o require flex at rpm build time            (Olivier Kaloudoff)
     o it appears that we had backward compatibility problem since
@@ -25,6 +27,8 @@
  * documentation updates
     o update TODO to reflect real issues                (Pawel Kot)
     o mention default caller groups in the manpage   (Reiner Steib)
+ * xgnokii updates
+    o contacts won't save a trailing semicolon     (BORBELY Zoltan)
 
 0.6.0
 =====
