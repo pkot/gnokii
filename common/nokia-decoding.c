@@ -224,7 +224,7 @@ static GSM_Error GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 {
 	unsigned char *block;
-	int i, alarm, year;
+	int alarm, year;
 
 	block = message + 12;
 
@@ -288,3 +288,4 @@ GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 	}
 	return GE_NONE;
 }
+
