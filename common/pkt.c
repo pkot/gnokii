@@ -37,6 +37,7 @@
 #include <assert.h>
 
 #include "gnokii.h"
+#include "gnokii-internal.h"
 #include "pkt.h"
 
 
@@ -192,7 +193,6 @@ char *pkt_get_string(char *s, int slen, pkt_buffer *buf)
 {
 	uint16_t l;
 	uint8_t *b;
-	int n;
 
 	l = pkt_get_uint16(buf);
 	b = buffer_expand(buf, 2 * l);
