@@ -98,15 +98,6 @@ used by gnokiid to create on demand a symbolic link between
 modem interface.  It's operation is transparent under normal
 usage as gnokiid takes care of calling it when required.
 
-You should be aware of a minor security hole in mgnokiidev -
-members of the 'gnokii' group may be able to use it as a way
-to access pseudottys in use by other users on the system.  If
-you are the only user on your system, or you trust anyone that
-you put into group gnokii you have no problem.  If this isn't 
-the case contact one of the authors who will try and suggest
-a workaround.  It is expected that this problem will be fixed
-in the next release of gnokii.
-
 
 - 3.0  Notes for specific model phones -
   
@@ -266,8 +257,14 @@ http://savannah.gnu.org/cgi-bin/viewcvs/gnokii/
 
 Once you have the sources, you will need to run the following commands
 
+	autoheader
 	autoconf
 	./configure
+	make
+
+or just issue
+
+	sh autogen.sh
 	make
 
 to build the sources.
@@ -312,15 +309,17 @@ The web site for this project is at;
 
 	http://gnokii.org
 
+Project page on savannah is at
+
+	http://savannah.gnu.org/projects/gnokii
+
 The mailing list devoted to the gnokii project is
 
-	<gnokii@net.lut.ac.uk>
+	<gnokii-users@mail.freesoftware.fsf.org>
 
-You can subscribe by sending an email to
+You can subscribe at
 
-	<gnokii-request@net.lut.ac.uk>
-
-with the word subscribe in the body.
+	http://mail.freesoftware.fsf.org/mailman/listinfo/gnokii-users
 
 The serial programming how-to was valuable in cobbling together
 serial code for both monitoring and the tools themselves.  This

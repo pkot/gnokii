@@ -26,6 +26,8 @@
     o correctly count UDH length            (Pavel Machek, Pawel Kot)
     o SendSMS returns with error upon GetSMSCenter failure
                                                      (BORBELY Zoltan)
+ * Docs updates
+    o reflect changes in email and web addresses     (BORBELY Zoltan)
 
 0.4.0pre19
 ==========
