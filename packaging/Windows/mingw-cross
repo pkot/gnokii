@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# $Id$
+#
+
+[ -r VERSION ] || exit 1
+
+VERSION=`cat VERSION`
+BUILD_ROOT=/tmp/gnokii-$VERSION-win32-build
+ZIPFILE=`pwd`/gnokii-$VERSION-win32.zip
+
+rm -r $BUILD_ROOT
+win32/mingw-cross/mingw-cross.sh
+make
+
+make DESTDIR=$BUILD_ROOT includedir=/include -C include install
+
+install -d $BUILD_ROOT/lib
+install common/gnokii.lib $BUILD_ROOT/lib
+install common/gnokii.def $BUILD_ROOT/lib
+
+install -d $BUILD_ROOT/bin
+install common/gnokii.dll $BUILD_ROOT/bin
+install gnokii/gnokii.exe $BUILD_ROOT/bin
+
+install COPYRIGHT $BUILD_ROOT
+install COPYING $BUILD_ROOT
+make DESTDIR=$BUILD_ROOT docdir=/doc -C Docs install
+
+cd $BUILD_ROOT
+zip -r "$ZIPFILE" .

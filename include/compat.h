@@ -192,7 +192,7 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 #  define inline /* Not supported */
 #  define strcasecmp stricmp
 #  define strncasecmp strnicmp
-#  ifndef HAVE_UNISTD_H
+#  if !defined(HAVE_UNISTD_H) || defined(__MINGW32__)
 #    define sleep(x) Sleep((x) * 1000)
 #    define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #  endif /* HAVE_UNISTD_H */

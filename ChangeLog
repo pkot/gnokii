@@ -48,6 +48,8 @@
     o ringtone editor enhanced                     (BORBELY Zoltan)
  * translation updates
     o updated French translation                (Olivier Kaloudoff)
+ * build system updates
+    o packaging file for mingw-cross build         (BORBELY Zoltan)
 
 0.5.5
 =====

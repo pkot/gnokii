@@ -35,6 +35,9 @@ s%@USE_NLS@%no%g
 s%@XPM_LIBS@%%g
 s%@GTK_LIBS@%%g
 s%@PTHREAD_CFLAGS@%%g
+s%@LIBICONV@%%g
+s%@INSTALL@%install%g
+s%@INSTALL_DATA@%install%g
 EOF
 sed -f $confsubst <Makefile.global.in > Makefile.global
 
