@@ -199,56 +199,63 @@ void MB640_Terminate(void)
 	   be called by application.  Will block until location is
 	   retrieved or a timeout/error occurs. */
 GSM_Error	MB640_GetMemoryLocation(GSM_PhonebookEntry *entry)
-{int timeout,i,len;
+{int  timeout,i,len;
+ u8   pkt[] = {0x0f, 0x2d, 3, 0, 7, 0x1f, 0x7f, 0xf0, 0, 0, 0, 0}, digit;
+ char *digit_map = " 1234567890*#pw+";
 
+  if(!entry->Location) return (GE_INVALIDPHBOOKLOCATION);
   switch(entry->MemoryType)
   {
     case GMT_ME:
-    {u8 pkt[] = {0xe5, 0x0f, 0x2d, 3, 0, 7, 0x1f, 0x7f, 0xf0, 0, 0, 0, 0},
-        digit;
-     char *digit_map = " 1234567890*#pw+";
+/*      if(entry->Location > 100) return (GE_INVALIDPHBOOKLOCATION); */
+      pkt[9] = entry->Location - 1;
+      break;
+    case GMT_LD: 
+      if(entry->Location > 5) return (GE_INVALIDPHBOOKLOCATION);
+      pkt[9] = entry->Location + 99;
+      break;
+    case GMT_ON: 
+      if(entry->Location > 1) return (GE_INVALIDPHBOOKLOCATION);
+      pkt[9] = 115;
+      break;
+    default: return (GE_INVALIDMEMORYTYPE);
+  }
 
-      pkt[10] = entry->Location - 1;
-      /* entry->MemoryType must be GMT_ME */
-      MB640_PacketOK = false;
-      MB640_ACKOK    = false;
-      timeout        = 3;
-      while(!MB640_PacketOK)
-      {
-        if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
-        if(!--timeout || RequestTerminate)
-        {
-          return(GE_TIMEOUT);
-        }
-        usleep(100000);
-      }
-      entry->Empty = (PacketData[18] == 0 && PacketData[34] == 0);
-      if( !entry->Empty )
-      {
-        for( i = 0; PacketData[34 + i] && i < 16; i++ )
-        {
-          entry->Name[i] = MB640_2_KOI8[ PacketData[34 + i] ];
-        }
-        entry->Name[i] = 0;
-
-        len = PacketData[18];
-        for( i = 0; i < len; i++ )
-        {
-          digit = PacketData[19 + i/2];
-          entry->Number[i] = digit_map[((i % 2) ? digit : digit >> 4) & 0x0F];
-        }
-        entry->Number[i] = 0;
-        entry->Group = PacketData[50];
-      }
-      else
-      {
-        entry->Name[0] = 0;
-        entry->Number[0] = 0;
-        entry->Group = 255;
-      }
+  MB640_PacketOK = false;
+  MB640_ACKOK    = false;
+  timeout        = 3;
+  while(!MB640_PacketOK)
+  {
+    if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+    if(!--timeout || RequestTerminate)
+    {
+      return(GE_TIMEOUT);
     }
-    break;
-    default: return (GE_NOTIMPLEMENTED);
+    usleep(100000);
+  }
+  entry->Empty = (PacketData[18] == 0 && PacketData[34] == 0);
+  if( !entry->Empty )
+  {
+    for( i = 0; PacketData[34 + i] && i < 16; i++ )
+    {
+      entry->Name[i] = MB640_2_KOI8[ PacketData[34 + i] ];
+    }
+    entry->Name[i] = 0;
+
+    len = PacketData[18];
+    for( i = 0; i < len; i++ )
+    {
+      digit = PacketData[19 + i/2];
+      entry->Number[i] = digit_map[((i % 2) ? digit : digit >> 4) & 0x0F];
+    }
+    entry->Number[i] = 0;
+    entry->Group = PacketData[50];
+  }
+  else
+  {
+    entry->Name[0] = 0;
+    entry->Number[0] = 0;
+    entry->Group = 255;
   }
 	return (GE_NONE);
 }
@@ -262,32 +269,31 @@ GSM_Error	MB640_WritePhonebookLocation(GSM_PhonebookEntry *entry)
   switch(entry->MemoryType)
   {
     case GMT_ME:
-      {u8 pkt[48], digit;
+      {u8 pkt[47], digit;
        char *s;
 
-        pkt[0]  = 0xE5;
-        pkt[1]  = 0x10;
-        pkt[2]  = 0x08;
-        pkt[3]  = 0x03;
-        pkt[4]  = 0x00;
-        pkt[5]  = 0x07;
-        pkt[6]  = 0x1F;
-        pkt[7]  = 0x7F;
-        pkt[8]  = 0xF0;
-        pkt[9]  = 0x00;
-        pkt[10] = entry->Location - 1;
+        pkt[0]  = 0x10;
+        pkt[1]  = 0x08;
+        pkt[2]  = 0x03;
+        pkt[3]  = 0x00;
+        pkt[4]  = 0x07;
+        pkt[5]  = 0x1F;
+        pkt[6]  = 0x7F;
+        pkt[7]  = 0xF0;
+        pkt[8]  = 0x00;
+        pkt[9]  = entry->Location - 1;
+        pkt[10] = 0x00;
         pkt[11] = 0x00;
         pkt[12] = 0x00;
-        pkt[13] = 0x00;
-        pkt[14] = 0x21;
-        memset(&pkt[15],0,32);
-        pkt[47] = 0x05/*entry->Group*/;
+        pkt[13] = 0x21;
+        memset(&pkt[14],0,32);
+        pkt[46] = 0x05/*entry->Group*/;
 
         for( i = 0; entry->Name[i] && i < 15; i++ )
         {
-          pkt[31 + i] = KOI8_2_MB640[ (u8)entry->Name[i] ];
+          pkt[30 + i] = KOI8_2_MB640[ (u8)entry->Name[i] ];
         }
-        pkt[31 + i] = 0;
+        pkt[30 + i] = 0;
 
         
         for( i = 0, s = entry->Number; *s && i < 30; s++ )
@@ -303,10 +309,10 @@ GSM_Error	MB640_WritePhonebookLocation(GSM_PhonebookEntry *entry)
             case '+':       digit = 0xF;      break;
             default: continue;
           }
-          pkt[16 + i/2] |= (i % 2) ? digit : digit << 4;
+          pkt[15 + i/2] |= (i % 2) ? digit : digit << 4;
           i++;
         }
-        pkt[15] = i;
+        pkt[14] = i;
 
         /* And write it! */
         MB640_PacketOK = false;
@@ -360,7 +366,10 @@ GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 	   that we don't actually need the keepalive at all but
 	   will await the official doco before taking it out.  HAB19990511 */
 GSM_Error	MB640_GetRFLevel(GSM_RFUnits *units, float *level)
-{u8  pkt[] = {0xe5, 0x19, 2, 1, 7};
+{u8  pkt[] = 
+     /*{0x0f, 0x5A, 3, 0, 7, 0x39, 0x7f, 0xf0, 0, 0, 0, 0}*/
+     {0x19, 2, 1, 7}
+     /*{0,3,0}*/;
  int timeout;
 
   MB640_PacketOK = false;
@@ -375,14 +384,14 @@ GSM_Error	MB640_GetRFLevel(GSM_RFUnits *units, float *level)
     }
     usleep(100000);
   }
-  *level = (float)(PacketData[6] * 256 + PacketData[7]) / 256.0;
+  *level = 0/*(float)(PacketData[6] * 256 + PacketData[7]) / 256.0*/;
 	return (GE_NONE);
 }
 
 	/* MB640_GetBatteryLevel - get value from ADC #0
 	   FIXME (see above...) */
 GSM_Error	MB640_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
-{u8  pkt[] = {0xe5, 0x19, 2, 1, 0};
+{u8  pkt[] = {0x19, 2, 1, 0};
  int timeout;
 
   if (*units == GBU_Arbitrary)
@@ -408,7 +417,7 @@ GSM_Error	MB640_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 /* Really there are no IMEI in NMT phones. Equivalent IMHO is phone
  * Serial Number */
 GSM_Error	MB640_GetIMEI(char *imei)
-{u8  pkt[] = {0xe5, 0x0f, 0x19, 3, 0, 0x01, 0x0b, 0, 0};
+{u8  pkt[] = {0x0f, 0x19, 3, 0, 0x01, 0x0b, 0, 0};
  int timeout;
 
   MB640_PacketOK = false;
@@ -430,7 +439,7 @@ GSM_Error	MB640_GetIMEI(char *imei)
 }
 
 GSM_Error	MB640_GetRevision(char *revision)
-{u8   pkt[] = {0xe5, 0, 3, 0};
+{u8   pkt[] = {0, 3, 0};
  int  timeout;
  char *s;
 
@@ -455,7 +464,7 @@ GSM_Error	MB640_GetRevision(char *revision)
 }
 
 GSM_Error	MB640_GetModel(char *model)
-{u8  pkt[] = {0xe5, 0x0f, 0x19, 3, 0, 0x05, 0x39, 0, 0};
+{u8  pkt[] = {0x0f, 0x19, 3, 0, 0x05, 0x39, 0, 0};
  int timeout;
 
   MB640_PacketOK = false;
@@ -497,6 +506,14 @@ GSM_Error	MB640_GetMemoryStatus(GSM_MemoryStatus *Status)
     case GMT_ME:
       Status->Used = 0;
       Status->Free = 100;
+    break;
+    case GMT_LD:
+      Status->Used = 5;
+      Status->Free = 0;
+    break;
+    case GMT_ON:
+      Status->Used = 1;
+      Status->Free = 0;
     break;
     case GMT_SM:
       Status->Used = 0;
@@ -598,17 +615,90 @@ GSM_Error	MB640_SendDTMF(char *String)
 }
 
 GSM_Error	MB640_GetBitmap(GSM_Bitmap *Bitmap)
-{
-    return (GE_NOTIMPLEMENTED);
+{int timeout;
+
+  switch(Bitmap->type)
+  {
+    case GSM_StartupLogo:
+    {u8  pkt[] = {0x0f, 0x60, 3, 0, 7, 0x3A, 0x7f, 0xf0, 0, 0, 0, 0};
+     int i;
+
+      for(i = 0; i < 6; i++)
+      {
+        pkt[9] = i;
+        MB640_PacketOK = false;
+        MB640_ACKOK    = false;
+        timeout        = 10;
+        while(!MB640_PacketOK)
+        {
+          if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+          if(!--timeout || RequestTerminate)
+          {
+            return(GE_TIMEOUT);
+          }
+          usleep(100000);
+        }
+        memcpy(&Bitmap->bitmap[i * 84],&PacketData[18],84);
+      }
+      Bitmap->width  = 84;
+      Bitmap->height = 48;
+      Bitmap->size   = 84*48/8;
+    }
+    break;
+    default: return (GE_NOTIMPLEMENTED);
+  }
+	return (GE_NONE);
 }
 
 GSM_Error	MB640_SetBitmap(GSM_Bitmap *Bitmap)
-{
-    return (GE_NOTIMPLEMENTED);
+{int timeout,i;
+
+  switch(Bitmap->type)
+  {
+    case GSM_StartupLogo:
+      {u8 pkt[98];
+
+        pkt[0]  = 0x10;
+        pkt[1]  = 0x08;
+        pkt[2]  = 0x03;
+        pkt[3]  = 0x00;
+        pkt[4]  = 0x07;
+        pkt[5]  = 0x3A;
+        pkt[6]  = 0x7F;
+        pkt[7]  = 0xF0;
+        pkt[8]  = 0x00;
+        pkt[10] = 0x00;
+        pkt[11] = 0x00;
+        pkt[12] = 0x00;
+        pkt[13] = 0x54;
+
+        for(i = 0; i < 6; i++)
+        {
+          pkt[9]  = i;
+          memcpy(&pkt[14],&Bitmap->bitmap[i * 84],84);
+
+          MB640_PacketOK = false;
+          MB640_ACKOK    = false;
+          timeout        = 10;
+          while(!MB640_PacketOK)
+          {
+            if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+            if(!--timeout || RequestTerminate)
+            {
+              return(GE_TIMEOUT);
+            }
+            usleep(100000);
+          }
+        }
+      }
+    break;
+    default: return (GE_NOTIMPLEMENTED);
+  }
+  return (GE_NONE);
 }
 
 GSM_Error	MB640_Reset(unsigned char type)
-{u8        pkt[] = { 0xE5, 0x43, 0x00, 0x00 };
+{u8        pkt[] = { 0x43, 0x00, 0x00 };
  int       timeout;
 
   /* send packet */
@@ -657,10 +747,13 @@ u8 MB640_GetChecksum( u8 * packet )
  * and process them. */
 void MB640_SigHandler(int status)
 {unsigned char        buffer[256],ack[5],b;
- int                  i,j,res;
+ int                  i,res;
  static unsigned int  Index = 0,
                       Length = 5;
  static unsigned char pkt[256];
+#ifdef DEBUG
+ int                  j;
+#endif
 
   res = read(PortFD, buffer, 256);
   if( res < 0 ) return;
@@ -671,7 +764,7 @@ void MB640_SigHandler(int status)
     {
       /* something strange goes from phone. Just ignore it */
 #ifdef DEBUG
-      fprintf( stdout, "Get [%02X %c]\n", b, b > 0x20 ? b : '.' );
+      fprintf( stdout, "Get [%02X %c]\n", b, b >= 0x20 ? b : '.' );
 #endif /* DEBUG */
       continue;
     }
@@ -688,7 +781,7 @@ void MB640_SigHandler(int status)
           for( j = 0; j < Length; j++ )
           {
             b = pkt[j];
-            fprintf( stdout, "[%02X %c]", b, b > 0x20 ? b : '.' );
+            fprintf( stdout, "[%02X %c]", b, b >= 0x20 ? b : '.' );
           }
           fprintf( stdout, "\n" );
 #endif /* DEBUG */
@@ -718,7 +811,7 @@ void MB640_SigHandler(int status)
               for( j = 0; j < 5; j++ )
               {
                 b = ack[j];
-                fprintf( stdout, "[%02X %c]", b, b > 0x20 ? b : '.' );
+                fprintf( stdout, "[%02X %c]", b, b >= 0x20 ? b : '.' );
               }
               fprintf( stdout, "\n" );
 #endif /* DEBUG */
@@ -799,25 +892,29 @@ bool MB640_OpenSerial(void)
 }
 
 GSM_Error MB640_SendPacket( u8 *buffer, u8 length )
-{u8             pkt[256], b;
- int            i, current = 0;
+{u8             pkt[256];
+ int            current = 0;
 
   /* FIXME - we should check for the message length ... */
   pkt[current++] = 0x00;                     /* Construct the header.      */
   pkt[current++] = 0xE9;
-  pkt[current++] = length - 1;               /* Set data size              */
+  pkt[current++] = length;                   /* Set data size              */
+  pkt[current++] = 0xE5;
   memcpy( pkt + current, buffer, length );   /* Copy in data.              */
   current += length;
   pkt[current++] = MB640_TXPacketNumber;         /* Set packet number          */
   pkt[current++] = MB640_GetChecksum( pkt ); /* Calculate and set checksum */
 #ifdef DEBUG
-  fprintf( stdout, _("PC   : ") );
-  for( i = 0; i < current; i++ )
-  {
-    b = pkt[i];
-    fprintf( stdout, "[%02X %c]", b, b > 0x20 ? b : '.' );
+  {int i;
+   u8  b;
+    fprintf( stdout, _("PC   : ") );
+    for( i = 0; i < current; i++ )
+    {
+      b = pkt[i];
+      fprintf( stdout, "[%02X %c]", b, b > 0x20 ? b : '.' );
+    }
+    fprintf( stdout, "\n" );
   }
-  fprintf( stdout, "\n" );
 #endif /* DEBUG */
   /* Send it out... */
   MB640_EchoOK = false;
@@ -840,8 +937,7 @@ GSM_Error MB640_SendPacket( u8 *buffer, u8 length )
 	   is called a thread is created to run this loop.  This loop is
 	   exited when the application calls the MB21_Terminate function. */
 void	MB640_ThreadLoop(void)
-{GSM_Error          err;
- char               model[64];
+{
 	/* Do initialisation stuff */
   if (MB640_OpenSerial() != true)
   {
@@ -852,24 +948,6 @@ void	MB640_ThreadLoop(void)
     }
     return;
   }
-#if 0
-  err = MB640_GetModel(model);
-  if(err == GE_NONE)
-  {
-    fprintf( stdout, "\nConnected to phone. model: %s", model );
-  }
-  /* Check connection and get phone info */
-  MB640_PacketOK = false;
-  MB640_ACKOK    = false;
-  timeout        = 3;
-  while(!MB640_PacketOK)
-  {
-    if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
-    if(!--timeout || RequestTerminate) return;
-    usleep(100000);
-  }
-  fprintf( stdout, "\nPhone type: \n%s\n", PacketData + 6 );
-#endif
   MB640_LinkOK = true;
 
 	while (!RequestTerminate) {
