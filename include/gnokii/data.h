@@ -112,6 +112,7 @@ typedef enum {
 	GOP_SetDateTime,
 	GOP_GetProfile,
 	GOP_SetProfile,
+	GOP_WriteCalendarNote,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

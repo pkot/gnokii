@@ -104,6 +104,7 @@ typedef enum {
 	OPT_VIEWLOGO,
 	OPT_SETRINGTONE,
 	OPT_GETPROFILE,
+	OPT_SETPROFILE,
 	OPT_DISPLAYOUTPUT,
 	OPT_KEYPRESS,
 	OPT_DIVERT,
@@ -244,7 +245,8 @@ static int usage(void)
 			  "          gnokii --viewlogo logofile\n"
 			  "          gnokii --setringtone rtttlfile\n"
 			  "          gnokii --reset [soft|hard]\n"
-			  "          gnokii --getprofile [number]\n"
+			  "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
+			  "          gnokii --setprofile\n"
 			  "          gnokii --displayoutput\n"
 			  "          gnokii --keysequence\n"
 			  "          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
@@ -1642,19 +1644,23 @@ static int getcalendarnote(int argc, char *argv[])
 static int writecalendarnote(char *argv[])
 {
 	GSM_CalendarNote CalendarNote;
+	GSM_Data data;
+
+	GSM_DataClear(&data);
+	data.CalendarNote = &CalendarNote;
 
 	if (GSM_ReadVCalendarFile(argv[0], &CalendarNote, atoi(argv[1]))) {
 		fprintf(stdout, _("Failed to load vCalendar file.\n"));
-		return(-1);
+		return -1;
 	}
 
 	/* Error 22=Calendar full ;-) */
-	if (GSM && GSM->WriteCalendarNote && GSM->WriteCalendarNote(&CalendarNote) == GE_NONE)
+	if (SM_Functions(GOP_WriteCalendarNote, &data, &State) == GE_NONE)
 		fprintf(stdout, _("Succesfully written!\n"));
-	else
+	else {
 		fprintf(stdout, _("Failed to write calendar note!\n"));
-
-	if (GSM && GSM->Terminate) GSM->Terminate();
+		return -1;
+	}
 
 	return 0;
 }
@@ -2034,113 +2040,181 @@ static int getprofile(int argc, char *argv[])
 {
 	int max_profiles;
 	int start, stop, i;
-	GSM_Profile profile;
+	GSM_Profile p;
 	GSM_Error error = GE_NOTSUPPORTED;
 	GSM_Data data;
 
 	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
 	char model[GSM_MAX_MODEL_LENGTH];
+	bool raw = false;
+	struct option options[] = {
+		{ "raw",    no_argument, NULL, 'r'},
+		{ NULL,     0,           NULL, 0}
+	};
+	
+	optarg = NULL;
+	optind = 0;
+	argv++;
+	argc--;
 
-	profile.Number = 0;
-	GSM_DataClear(&data);
-	data.Profile = &profile;
-	error = SM_Functions(GOP_GetProfile, &data, &State);
-
-	if (error == GE_NONE) {
-
-		GSM_DataClear(&data);
-		data.Model = model;
-		while (SM_Functions(GOP_GetModel, &data, &State) != GE_NONE)
-			sleep(1);
-
-		max_profiles = 7; /* This is correct for 6110 (at least my). How do we get
-				     the number of profiles? */
-
-		/* For N5110 */
-		/* FIXME: It should be set to 3 for N5130 and 3210 too */
-		if (!strcmp(model, "NSE-1"))
-			max_profiles = 3;
-
-		if (argc > 0) {
-			profile.Number = atoi(argv[0]) - 1;
-			start = profile.Number;
-			stop = start + 1;
-
-			if (profile.Number < 0) {
-				fprintf(stderr, _("Profile number must be value from 1 to %d!\n"), max_profiles);
-				if (GSM && GSM->Terminate) GSM->Terminate();
-				return -1;
-			}
-
-			if (profile.Number >= max_profiles) {
-				fprintf(stderr, _("This phone supports only %d profiles!\n"), max_profiles);
-				if (GSM && GSM->Terminate) GSM->Terminate();
-				return -1;
-			}
-		} else {
-			start = 0;
-			stop = max_profiles;
-		}
-
-		GSM_DataClear(&data);
-		data.Profile = &profile;
-
-		i = start;
-		while (i < stop) {
-			profile.Number = i;
-
-			if (profile.Number != 0)
-				SM_Functions(GOP_GetProfile, &data, &State);
-
-			fprintf(stdout, "%d. \"%s\"\n", profile.Number + 1, profile.Name);
-			if (profile.DefaultName == -1) fprintf(stdout, _(" (name defined)\n"));
-
-			fprintf(stdout, _("Incoming call alert: %s\n"), GetProfileCallAlertString(profile.CallAlert));
-
-			/* For different phones different ringtones names */
-
-			if (!strcmp(model, "NSE-3"))
-				fprintf(stdout, _("Ringing tone: %s (%d)\n"), RingingTones[profile.Ringtone], profile.Ringtone);
-			else
-				fprintf(stdout, _("Ringtone number: %d\n"), profile.Ringtone);
-
-			fprintf(stdout, _("Ringing volume: %s\n"), GetProfileVolumeString(profile.Volume));
-
-			fprintf(stdout, _("Message alert tone: %s\n"), GetProfileMessageToneString(profile.MessageTone));
-
-			fprintf(stdout, _("Keypad tones: %s\n"), GetProfileKeypadToneString(profile.KeypadTone));
-
-			fprintf(stdout, _("Warning and game tones: %s\n"), GetProfileWarningToneString(profile.WarningTone));
-
-			/* FIXME: Light settings is only used for Car */
-			if (profile.Number == (max_profiles - 2)) fprintf(stdout, _("Lights: %s\n"), profile.Lights ? _("On") : _("Automatic"));
-
-			fprintf(stdout, _("Vibration: %s\n"), GetProfileVibrationString(profile.Vibration));
-
-			/* FIXME: it will be nice to add here reading caller group name. */
-			if (max_profiles != 3) fprintf(stdout, _("Caller groups: 0x%02x\n"), profile.CallerGroups);
-
-			/* FIXME: Automatic answer is only used for Car and Headset. */
-			if (profile.Number >= (max_profiles - 2)) fprintf(stdout, _("Automatic answer: %s\n"), profile.AutomaticAnswer ? _("On") : _("Off"));
-
-			fprintf(stdout, "\n");
-
-			i++;
-		}
-	} else {
-		if (error == GE_NOTIMPLEMENTED) {
-			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-			if (GSM && GSM->Terminate) GSM->Terminate();
-			return -1;
-		} else {
-			fprintf(stderr, _("Unspecified error\n"));
-			if (GSM && GSM->Terminate) GSM->Terminate();
+	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
+		switch (i) {       
+		case 'r':
+			raw = true;
+			break;
+		default:
+			usage(); /* FIXME */
 			return -1;
 		}
 	}
 
-	if (GSM && GSM->Terminate) GSM->Terminate();
+	GSM_DataClear(&data);
+	data.Model = model;
+	while (SM_Functions(GOP_GetModel, &data, &State) != GE_NONE)
+		sleep(1);
+
+	p.Number = 0;
+	GSM_DataClear(&data);
+	data.Profile = &p;
+	error = SM_Functions(GOP_GetProfile, &data, &State);
+
+	switch (error) {
+	case GE_NONE:
+		break;
+	case GE_NOTIMPLEMENTED:
+		fprintf(stderr, _("Function not implemented in %s model!\n"), model);
+		return -1;
+	default:
+		fprintf(stderr, _("Unspecified error\n"));
+		return -1;
+	}
+
+	max_profiles = 7; /* This is correct for 6110 (at least my). How do we get
+			     the number of profiles? */
+
+	/* For N5110 */
+	/* FIXME: It should be set to 3 for N5130 and 3210 too */
+	if (!strcmp(model, "NSE-1"))
+		max_profiles = 3;
+
+	if (argc > optind) {
+		start = atoi(argv[optind]);
+		stop = (argc > optind+1) ? atoi(argv[optind+1]) : start;
+
+		if (start > stop) {
+			fprintf(stderr, _("Starting profile number is greater than stop\n"));
+			return -1;
+		}
+
+		if (start < 0) {
+			fprintf(stderr, _("Profile number must be value from 0 to %d!\n"), max_profiles-1);
+			return -1;
+		}
+
+		if (stop >= max_profiles) {
+			fprintf(stderr, _("This phone supports only %d profiles!\n"), max_profiles);
+			return -1;
+		}
+	} else {
+		start = 0;
+		stop = max_profiles - 1;
+	}
+
+	GSM_DataClear(&data);
+	data.Profile = &p;
+
+	for (i = start; i <= stop; i++) {
+		p.Number = i;
+
+		if (p.Number != 0) {
+			error = SM_Functions(GOP_GetProfile, &data, &State);
+			if (error != GE_NONE ) {
+				fprintf(stderr, _("Cannot get profile %d\n"), i);
+				return -1;
+			}
+		}
+
+		if (raw) {
+			fprintf(stdout, "%d;%s;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n",
+				p.Number, p.Name, p.DefaultName, p.KeypadTone,
+				p.Lights, p.CallAlert, p.Ringtone, p.Volume,
+				p.MessageTone, p.Vibration, p.WarningTone,
+				p.CallerGroups, p.AutomaticAnswer);
+		} else {
+			fprintf(stdout, "%d. \"%s\"\n", p.Number, p.Name);
+			if (p.DefaultName == -1) fprintf(stdout, _(" (name defined)\n"));
+
+			fprintf(stdout, _("Incoming call alert: %s\n"), GetProfileCallAlertString(p.CallAlert));
+
+			/* For different phones different ringtones names */
+
+			if (!strcmp(model, "NSE-3"))
+				fprintf(stdout, _("Ringing tone: %s (%d)\n"), RingingTones[p.Ringtone], p.Ringtone);
+			else
+				fprintf(stdout, _("Ringtone number: %d\n"), p.Ringtone);
+
+			fprintf(stdout, _("Ringing volume: %s\n"), GetProfileVolumeString(p.Volume));
+
+			fprintf(stdout, _("Message alert tone: %s\n"), GetProfileMessageToneString(p.MessageTone));
+
+			fprintf(stdout, _("Keypad tones: %s\n"), GetProfileKeypadToneString(p.KeypadTone));
+
+			fprintf(stdout, _("Warning and game tones: %s\n"), GetProfileWarningToneString(p.WarningTone));
+
+			/* FIXME: Light settings is only used for Car */
+			if (p.Number == (max_profiles - 2)) fprintf(stdout, _("Lights: %s\n"), p.Lights ? _("On") : _("Automatic"));
+
+			fprintf(stdout, _("Vibration: %s\n"), GetProfileVibrationString(p.Vibration));
+
+			/* FIXME: it will be nice to add here reading caller group name. */
+			if (max_profiles != 3) fprintf(stdout, _("Caller groups: 0x%02x\n"), p.CallerGroups);
+
+			/* FIXME: Automatic answer is only used for Car and Headset. */
+			if (p.Number >= (max_profiles - 2)) fprintf(stdout, _("Automatic answer: %s\n"), p.AutomaticAnswer ? _("On") : _("Off"));
+
+			fprintf(stdout, "\n");
+		}
+	}
+
 	return 0;
+}
+
+/* Writes profiles to phone */
+static int setprofile()
+{
+	int n;
+	GSM_Profile p;
+	GSM_Error error = GE_NONE;
+	GSM_Data data;
+	char line[256], ch;
+
+	GSM_DataClear(&data);
+	data.Profile = &p;
+
+	while (fgets(line, sizeof(line), stdin)) {
+		n = strlen(line);
+		if (n > 0 && line[n-1] == '\n') {
+			line[--n] = 0;
+		}
+
+		n = sscanf(line, "%d;%39[^;];%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d%c",
+			    &p.Number, p.Name, &p.DefaultName, &p.KeypadTone,
+			    &p.Lights, &p.CallAlert, &p.Ringtone, &p.Volume,
+			    &p.MessageTone, &p.Vibration, &p.WarningTone,
+			    &p.CallerGroups, &p.AutomaticAnswer, &ch);
+		if (n != 13) {
+			fprintf(stderr, _("Input line format isn't valid\n"));
+			return GE_UNKNOWN;
+		}
+
+		error = SM_Functions(GOP_SetProfile, &data, &State);
+		if (error != GE_NONE) {
+			fprintf(stderr, _("Cannot set profile %d\n"), p.Number);
+			return error;
+		}
+	}
+
+	return error;
 }
 
 /* Get requested range of memory storage entries and output to stdout in
@@ -2804,7 +2878,6 @@ static int smsreader(void)
 	return 0;
 }
 
-
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 #ifndef WIN32
@@ -2936,6 +3009,9 @@ int main(int argc, char *argv[])
 		// Show profile
 		{ "getprofile",         optional_argument, NULL, OPT_GETPROFILE },
 
+		// Set profile
+		{ "setprofile",         no_argument,       NULL, OPT_SETPROFILE },
+
 		// Show texts from phone's display
 		{ "displayoutput",      no_argument,       NULL, OPT_DISPLAYOUTPUT },
 
@@ -2988,7 +3064,8 @@ int main(int argc, char *argv[])
 		{ OPT_VIEWLOGO,          1, 1, 0 },
 		{ OPT_SETRINGTONE,       1, 1, 0 },
 		{ OPT_RESET,             0, 1, 0 },
-		{ OPT_GETPROFILE,        0, 1, 0 },
+		{ OPT_GETPROFILE,        0, 3, 0 },
+		{ OPT_SETPROFILE,        0, 0, 0 },
 		{ OPT_WRITEPHONEBOOK,    0, 1, 0 },
 		{ OPT_DIVERT,            6, 10, 0 },
 
@@ -3147,7 +3224,10 @@ int main(int argc, char *argv[])
 			rc = sendringtone(nargc, nargv);
 			break;
 		case OPT_GETPROFILE:
-			rc = getprofile(nargc, nargv);
+			rc = getprofile(argc, argv);
+			break;
+		case OPT_SETPROFILE:
+			rc = setprofile();
 			break;
 		case OPT_DISPLAYOUTPUT:
 			rc = displayoutput();

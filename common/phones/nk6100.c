@@ -105,6 +105,7 @@ static GSM_Error GetAlarm(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetAlarm(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetProfile(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -114,6 +115,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error Incoming0x17(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -123,6 +125,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x03, IncomingPhonebook },
 	{ 0x05, IncomingProfile },
 	{ 0x11, IncomingPhoneClockAndAlarm },
+	{ 0x13, IncomingCalendar },
 
 	{ 0x64, IncomingPhoneInfo },
 	{ 0xd2, IncomingModelInfo },
@@ -200,6 +203,8 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetProfile(data, state);
 	case GOP_SetProfile:
 		return SetProfile(data, state);
+	case GOP_WriteCalendarNote:
+		return WriteCalendarNote(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -1098,7 +1103,7 @@ static GSM_Error SetProfile(GSM_Data *data, GSM_Statemachine *state)
 		 * of the General profile, because it's language dependent.
 		 * But without SetProfileName we aren't able to set features.
 		 */
-		dprintf("You cannot rename General profile\n"); 
+		dprintf("You cannot rename General profile\n");
 		return GE_NOTSUPPORTED;
 	} else if (prof->DefaultName > -1) {
 		prof->Name[0] = 0;
@@ -1141,10 +1146,10 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 		case 0x01:
 			break;
 		case 0x7d:
-			dprintf(_("Cannot set profile feature\n"));
+			dprintf("Cannot set profile feature\n");
 			return GE_UNKNOWN;
 		default:
-			dprintf(_("Invalid SetProfileFeature reply: 0x%02x\n"), message[4]);
+			dprintf("Invalid SetProfileFeature reply: 0x%02x\n", message[4]);
 			return GE_UNKNOWN;
 		}
 		break;
@@ -1387,7 +1392,6 @@ static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *mess
 	GSM_DateTime *date;
 	unsigned char *pos;
 
-
 	switch (message[3]) {
 	/* Date and time set */
 	case 0x61:
@@ -1448,6 +1452,86 @@ static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *mess
 
 	default:
 		dprintf("Unknown subtype of type 0x11 (%d)\n", message[3]);
+		return GE_UNKNOWN;
+	}
+
+	return GE_NONE;
+}
+
+
+static GSM_Error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x64, 0x01, 0x10,
+				 0x00,	/* Length of the rest of the frame. */
+				 0x00};	/* The type of calendar note */
+	GSM_CalendarNote *note;
+	unsigned char *pos;
+	unsigned int numlen;
+      
+	if (!data->CalendarNote)
+		return GE_UNKNOWN;
+
+	note = data->CalendarNote;
+	pos = req + 7;
+	numlen = strlen(note->Phone);
+	if (numlen > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+		return GE_UNKNOWN;
+	}
+
+	*pos++ = note->Type;
+
+	*pos++ = note->Time.Year >> 8;
+	*pos++ = note->Time.Year & 0xff;
+	*pos++ = note->Time.Month;
+	*pos++ = note->Time.Day;
+	*pos++ = note->Time.Hour;
+	*pos++ = note->Time.Minute;
+	*pos++ = note->Time.Timezone;
+
+	if (note->Alarm.Year) {
+		*pos++ = note->Alarm.Year >> 8;
+		*pos++ = note->Alarm.Year & 0xff;
+		*pos++ = note->Alarm.Month;
+		*pos++ = note->Alarm.Day;
+		*pos++ = note->Alarm.Hour;
+		*pos++ = note->Alarm.Minute;
+		*pos++ = note->Alarm.Timezone;
+	} else {
+		memset(pos, 0x00, 7);
+		pos += 7;
+	}
+
+	*pos = PNOK_EncodeString(pos+1, 255, note->Text);
+	pos += *pos+1;
+
+	*pos++ = numlen;
+	memcpy(pos, note->Phone, numlen);
+	pos += numlen;
+
+/*	req[6] = pos-req-7; */
+
+	if (SM_SendMessage(state, pos-req, 0x13, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x13);
+}
+
+static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	/* Write cal.note report */
+	case 0x65:
+		switch (message[4]) {
+			case 0x01:
+				return GE_NONE;
+			case 0x73:
+			case 0x7d:
+				return GE_UNKNOWN;
+			default:
+			    dprintf("Invalid WriteCalendarNote reply: 0x%02x\n", message[4]);
+			    return GE_UNKNOWN;
+		}
+
+	default:
+		dprintf("Unknown subtype of type 0x13 (%d)\n", message[3]);
 		return GE_UNKNOWN;
 	}
 
