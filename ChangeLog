@@ -71,6 +71,8 @@
                                                      (David Vrabel)
  * gnokiid updates
     o use correct time field from the sms structure (Daniele Forsi)
+ * gnapplet driver updates
+    o getprofile support                           (BORBELY Zoltan)
 
 0.6.4
 =====

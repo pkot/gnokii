@@ -116,6 +116,7 @@ static gn_error gnapplet_clock_datetime_read(gn_data *data, struct gn_statemachi
 static gn_error gnapplet_clock_datetime_write(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_clock_alarm_read(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_clock_alarm_write(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_profile_read(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -125,6 +126,7 @@ static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message,
 static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_clock(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_incoming_profile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_INFO,		gnapplet_incoming_info },
@@ -135,6 +137,7 @@ static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_SMS,		gnapplet_incoming_sms },
 	{ GNAPPLET_MSG_CALENDAR,	gnapplet_incoming_calendar },
 	{ GNAPPLET_MSG_CLOCK,		gnapplet_incoming_clock },
+	{ GNAPPLET_MSG_PROFILE,		gnapplet_incoming_profile },
 	{ 0,				NULL}
 };
 
@@ -494,6 +497,8 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_clock_alarm_read(data, state);
 	case GN_OP_SetAlarm:
 		return gnapplet_clock_alarm_write(data, state);
+	case GN_OP_GetProfile:
+		return gnapplet_profile_read(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -1554,6 +1559,53 @@ static gn_error gnapplet_incoming_clock(int messagetype, unsigned char *message,
 	case GNAPPLET_MSG_CLOCK_ALARM_WRITE_RESP:
 		if (data->alarm) return GN_ERR_INTERNALERROR;
 		if (error != GN_ERR_NONE) return error;
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
+}
+
+
+static gn_error gnapplet_profile_read(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->profile) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_PROFILE_READ_REQ);
+	pkt_put_uint16(&pkt, data->profile->number);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_PROFILE);
+}
+
+
+static gn_error gnapplet_incoming_profile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	gn_profile *profile;
+	REPLY_DEF;
+
+	switch (code) {
+
+	case GNAPPLET_MSG_PROFILE_READ_RESP:
+		if (!(profile = data->profile)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		profile->number = pkt_get_uint16(&pkt);
+		pkt_get_string(profile->name, sizeof(profile->name), &pkt);
+		profile->default_name = pkt_get_int16(&pkt);
+		profile->keypad_tone = pkt_get_uint8(&pkt);
+		profile->lights = 0;
+		profile->call_alert = pkt_get_uint8(&pkt);
+		profile->ringtone = 0; //!!!FIXME
+		profile->volume = pkt_get_uint8(&pkt);
+		profile->message_tone = 0;
+		profile->warning_tone = pkt_get_uint8(&pkt);
+		profile->vibration = pkt_get_uint8(&pkt);
+		profile->caller_groups = 0;
+		profile->automatic_answer = 0;
 		break;
 
 	default:
