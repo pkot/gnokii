@@ -11,6 +11,7 @@
     o add nokia 3390 to supported models           (BORBELY Zoltan)
     o GetRingtoneList for 61xx models added        (BORBELY Zoltan)
     o ringtone handling unified                    (BORBELY Zoltan)
+    o datacall cleanup                             (BORBELY Zoltan)
  * 7110 series updates
     o ringtone handling unified                    (BORBELY Zoltan)
  * gnokiid updates

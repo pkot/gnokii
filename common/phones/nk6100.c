@@ -2978,6 +2978,7 @@ static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state)
 	unsigned char *pos;
 	int n;
 	gn_data dtemp;
+	gn_error err;
 
 	n = strlen(data->call_info->number);
 	if (n > GN_PHONEBOOK_NUMBER_MAX_LENGTH) {
@@ -2987,7 +2988,7 @@ static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state)
 
 	/*
 	 * FIXME:
-	 * Ugly hack. The phone seems to drop the SendSMS message if the link
+	 * Ugly hack. The phone seems to drop the dial message if the link
 	 * had been idle too long. -- bozo
 	 */
 	gn_data_clear(&dtemp);
@@ -3028,7 +3029,8 @@ static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state)
 		memcpy(pos, data_nondigital_end, ARRAY_LEN(data_nondigital_end));
 		pos += ARRAY_LEN(data_nondigital_end);
 		if (sm_message_send(pos - req, 0x01, req, state)) return GN_ERR_NOTREADY;
-		usleep(10000);
+		if (sm_block_ack(state)) return GN_ERR_NOTREADY;
+		gn_sm_loop(5, state);
 		dprintf("after nondigital1\n");
 		if (sm_message_send(ARRAY_LEN(data_nondigital_final), 0x01, data_nondigital_final, state)) return GN_ERR_NOTREADY;
 		dprintf("after nondigital2\n");
@@ -3037,10 +3039,12 @@ static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state)
 	case GN_CALL_DigitalData:
 		dprintf("Digital Data Call\n");
 		if (sm_message_send(ARRAY_LEN(data_digital_pred1), 0x01, data_digital_pred1, state)) return GN_ERR_NOTREADY;
-		usleep(500000);
+		if (sm_block_ack(state)) return GN_ERR_NOTREADY;
+		gn_sm_loop(5, state);
 		dprintf("after digital1\n");
 		if (sm_message_send(ARRAY_LEN(data_digital_pred2), 0x01, data_digital_pred2, state)) return GN_ERR_NOTREADY;
-		usleep(500000);
+		if (sm_block_ack(state)) return GN_ERR_NOTREADY;
+		gn_sm_loop(5, state);
 		dprintf("after digital2\n");
 		memcpy(pos, data_digital_end, ARRAY_LEN(data_digital_end));
 		pos += ARRAY_LEN(data_digital_end);
@@ -3053,7 +3057,9 @@ static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_INTERNALERROR;
 	}
 
-	return sm_block_no_retry_timeout(0x01, 500, data, state);
+	err = sm_block_no_retry_timeout(0x01, 500, data, state);
+	gn_sm_loop(5, state);
+	return err;
 }
 
 static gn_error AnswerCall1(gn_data *data, struct gn_statemachine *state)
