@@ -260,7 +260,7 @@ static void version(void)
 
 /* The function usage is only informative - it prints this program's usage and
    command-line options. */
-static int usage(FILE *f)
+static int usage(FILE *f, int retval)
 {
 	fprintf(f, _("   usage: gnokii [--help|--monitor|--version]\n"
 		     "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
@@ -337,7 +337,7 @@ static int usage(FILE *f)
 		     "          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 		));
 #endif
-	exit(-1);
+	exit(retval);
 }
 
 /* businit is the generic function which waits for the FBUS link. The limit
@@ -435,7 +435,7 @@ static void sendsms_usage()
 			  "   --long n    - read n bytes from the input; default is 160\n"
 			  "\n"
 		));
-	exit(1);
+	exit(-1);
 }
 
 static gn_error readtext(SMS_UserData *udata, int input_len)
@@ -777,7 +777,7 @@ static int savesms(int argc, char *argv[])
 			sms.Type = SMS_Deliver;
 			break;
 		default:
-			usage(stderr);
+			usage(stderr, -1);
 			return -1;
 		}
 	}
@@ -886,7 +886,7 @@ static int getsmsc(int argc, char *argv[])
 			raw = true;
 			break;
 		default:
-			usage(stderr); /* FIXME */
+			usage(stderr, -1); /* FIXME */
 			return -1;
 		}
 	}
@@ -1142,10 +1142,10 @@ static int getsms(int argc, char *argv[])
 					strncpy(filename, optarg, sizeof(filename) - 1);
 					if (strlen(optarg) > sizeof(filename) - 1)
 						fprintf(stderr, _("Filename too long - will be truncated to 63 characters.\n"));
-				} else usage(stderr);
+				} else usage(stderr, -1);
 				break;
 			default:
-				usage(stderr);
+				usage(stderr, -1);
 			}
 		}
 	}
@@ -1432,7 +1432,7 @@ static int entersecuritycode(char *type)
 		SecurityCode.Type = GSCT_SecurityCode;
 	*/
 	else
-		usage(stderr);
+		usage(stderr, -1);
 
 	memset(&SecurityCode.Code, 0, sizeof(SecurityCode.Code));
 	get_password(_("Enter your code: "), SecurityCode.Code, sizeof(SecurityCode.Code));
@@ -1513,7 +1513,7 @@ static int changesecuritycode(char *type)
 		SecurityCode.Type = GSCT_SecurityCode;
 	*/
 	else
-		usage(stderr);
+		usage(stderr, -1);
 
 	get_password(_("Enter your code: "), SecurityCode.Code, sizeof(SecurityCode.Code));
 	get_password(_("Enter new code: "), SecurityCode.NewCode, sizeof(SecurityCode.NewCode));
@@ -2031,7 +2031,7 @@ static int gettodo(int argc, char *argv[])
 			vCal = true;
 			break;
 		default:
-			usage(stderr); /* Would be better to have an calendar_usage() here. */
+			usage(stderr, -1); /* Would be better to have an calendar_usage() here. */
 			return -1;
 		}
 	}
@@ -2156,7 +2156,7 @@ static int getcalendarnote(int argc, char *argv[])
 			vCal = true;
 			break;
 		default:
-			usage(stderr); /* Would be better to have an calendar_usage() here. */
+			usage(stderr, -1); /* Would be better to have an calendar_usage() here. */
 			return -1;
 		}
 	}
@@ -2808,7 +2808,7 @@ static int getprofile(int argc, char *argv[])
 			raw = true;
 			break;
 		default:
-			usage(stderr); /* FIXME */
+			usage(stderr, -1); /* FIXME */
 			return -1;
 		}
 	}
@@ -2976,14 +2976,14 @@ static int getphonebook(int argc, char *argv[])
 		if (!strcmp(argv[3], "-r") || !strcmp(argv[3], "--raw")) raw = true;
 		else 
 			if (!strcmp(argv[3], "-v") || !strcmp(argv[3], "--vcard")) vcard = true;
-			else usage(stderr);
+			else usage(stderr, -1);
 	case 3:
 		if (!strcmp(argv[2], "end")) all = true;
 		else if (!strcmp(argv[2], "-r") || !strcmp(argv[2], "--raw")) raw = true;
 		else end_entry = atoi(argv[2]);
 		break;
 	default:
-		usage(stderr);
+		usage(stderr, -1);
 		break;
 	}
 
@@ -3193,7 +3193,7 @@ static int writephonebook(int argc, char *args[])
 
 	/* Check argument */
 	if (argc && (strcmp("-i", args[0])) && (strcmp("-v", args[0])))
-		usage(stderr);
+		usage(stderr, -1);
 
 	if (!strcmp("-v", args[0]))
 		vcard = 1;
@@ -3294,7 +3294,7 @@ static int writewapbookmark(int nargc, char *nargv[])
 	GSM_DataClear(&data);
 	data.WAPBookmark = &WAPBookmark;
 
-	if (nargc != 2) usage(stderr);
+	if (nargc != 2) usage(stderr, -1);
 
 	snprintf(&WAPBookmark.Name[0], MAX_WAP_NAME_LENGTH, nargv[0]);
 	snprintf(&WAPBookmark.URL[0], MAX_WAP_URL_LENGTH, nargv[1]);
@@ -3355,7 +3355,7 @@ static int getwapsetting(int argc, char *argv[])
 		if (!strcmp(argv[1], "-r") || !strcmp(argv[1], "--raw")) 
 			raw = true;
 		else 
-			usage(stderr);
+			usage(stderr, -1);
 		break;
 	}
 
@@ -3834,7 +3834,7 @@ static int getringtone(int argc, char *argv[])
 			raw = true;
 			break;
 		default:
-			usage(stderr); /* FIXME */
+			usage(stderr, -1); /* FIXME */
 			return -1;
 		}
 	}
@@ -3847,7 +3847,7 @@ static int getringtone(int argc, char *argv[])
 	data.RawData = &rawdata;
 
 	if (argc <= optind) {
-		usage(stderr);
+		usage(stderr, -1);
 		return -1;
 	}
 
@@ -3912,7 +3912,7 @@ static int setringtone(int argc, char *argv[])
 			snprintf(name, sizeof(name), "%s", optarg);
 			break;
 		default:
-			usage(stderr); /* FIXME */
+			usage(stderr, -1); /* FIXME */
 			return -1;
 		}
 	}
@@ -3925,7 +3925,7 @@ static int setringtone(int argc, char *argv[])
 	data.RawData = &rawdata;
 
 	if (argc <= optind) {
-		usage(stderr);
+		usage(stderr, -1);
 		return -1;
 	}
 
@@ -4073,7 +4073,7 @@ static int divert(int argc, char **argv)
 			} else if (!strcmp("query", optarg)) {
 				cd.Operation = GSM_CDV_Query;
 			} else {
-				usage(stderr);
+				usage(stderr, -1);
 				return -1;
 			}
 			break;
@@ -4089,7 +4089,7 @@ static int divert(int argc, char **argv)
 			} else if (!strcmp("notavail", optarg)) {
 				cd.DType = GSM_CDV_NotAvailable;
 			} else {
-				usage(stderr);
+				usage(stderr, -1);
 				return -1;
 			}
 			break;
@@ -4103,7 +4103,7 @@ static int divert(int argc, char **argv)
 			} else if (!strcmp("data", optarg)) {
 				cd.CType = GSM_CDV_DataCalls;
 			} else {
-				usage(stderr);
+				usage(stderr, -1);
 				return -1;
 			}
 			break;
@@ -4116,7 +4116,7 @@ static int divert(int argc, char **argv)
 			else cd.Number.Type = SMS_Unknown;
 			break;
 		default:
-			usage(stderr);
+			usage(stderr, -1);
 			return -1;
 		}
 	}
@@ -4583,17 +4583,17 @@ int main(int argc, char *argv[])
 	/* Handle command line arguments. */
 	c = getopt_long(argc, argv, "", long_options, NULL);
 	if (c == -1) 		/* No argument given - we should display usage. */
-		usage(stderr);
+		usage(stderr, -1);
 
 	switch(c) {
 	/* First, error conditions */
 	case '?':
 	case ':':
 		fprintf(stderr, _("Use '%s --help' for usage information.\n"), argv[0]);
-		exit(0);
+		exit(-1);
 	/* Then, options with no arguments */
 	case OPT_HELP:
-		usage(stdout);
+		usage(stdout, 0);
 	case OPT_VERSION:
 		version();
 		exit(0);
@@ -4610,7 +4610,7 @@ int main(int argc, char *argv[])
 
 		if (checkargs(c, gals, nargc)) {
 			free(nargv); /* Wrong number of arguments - we should display usage. */
-			usage(stderr);
+			usage(stderr, -1);
 		}
 
 #ifdef __svr4__

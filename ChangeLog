@@ -76,6 +76,7 @@
     o gnokii --listnetworks added                    (BORBELY Zoltan)
     o correctly set memory_type_string in writephonebook()
                                                     (Jan de Cuveland)
+    o pass the retval to the usage()                      (Pawel Kot)
  * nokia-decoding updates:
     o name can be assigned to both bitmap and phonebook entry
                                                        (Markus Plail)
