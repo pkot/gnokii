@@ -437,8 +437,8 @@ typedef enum {
 #define MAX_BCD_STRING_LENGTH		40
 
 typedef struct {
-	SMS_NumberType type;
-	char number[MAX_BCD_STRING_LENGTH];
+	SMS_NumberType Type;
+	char Number[MAX_BCD_STRING_LENGTH];
 } SMS_Number;
 
 typedef struct {

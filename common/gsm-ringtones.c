@@ -569,10 +569,10 @@ API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxl
 }
 
 
-GSM_Error GSM_ReadRingtoneFromSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
+GSM_Error GSM_ReadRingtoneFromSMS(GSM_API_SMS *message, GSM_Ringtone *ringtone)
 {
-	if (message->UDH[0].Type==SMS_Ringtone) {
-		return GSM_UnPackRingtone(ringtone, message->UserData[0].u.Text, message->Length);
+	if (message->UDH.UDH[0].Type == SMS_Ringtone) {
+		return GSM_UnPackRingtone(ringtone, message->UserData[0].u.Text, message->UserData[0].Length);
 	} else return GE_SUBFORMATNOTSUPPORTED;
 }
 

@@ -414,7 +414,7 @@ static void sendsms_usage()
 /* Send  SMS messages. */
 static int sendsms(int argc, char *argv[])
 {
-	GSM_SMSMessage SMS;
+	GSM_API_SMS sms;
 	GSM_Error error;
 	/* The maximum length of an uncompressed concatenated short message is
 	   255 * 153 = 39015 default alphabet characters */
@@ -434,12 +434,12 @@ static int sendsms(int argc, char *argv[])
 	input_len = GSM_MAX_SMS_LENGTH;
 
 	/* The memory is zeroed here */
-	DefaultSubmitSMS(&SMS);
+	DefaultSubmitSMS(&sms);
 
-	memset(&SMS.RemoteNumber.number, 0, sizeof(SMS.RemoteNumber.number));
-	strncpy(SMS.RemoteNumber.number, argv[0], sizeof(SMS.RemoteNumber.number) - 1);
-	if (SMS.RemoteNumber.number[0] == '+') SMS.RemoteNumber.type = SMS_International;
-	else SMS.RemoteNumber.type = SMS_Unknown;
+	memset(&sms.Remote.Number, 0, sizeof(sms.Remote.Number));
+	strncpy(sms.Remote.Number, argv[0], sizeof(sms.Remote.Number) - 1);
+	if (sms.Remote.Number[0] == '+') sms.Remote.Type = SMS_International;
+	else sms.Remote.Type = SMS_Unknown;
 
 	optarg = NULL;
 	optind = 0;
@@ -447,18 +447,18 @@ static int sendsms(int argc, char *argv[])
 	while ((i = getopt_long(argc, argv, "r8cC:v:", options, NULL)) != -1) {
 		switch (i) {       /* -8 is for 8-bit data, -c for compression. both are not yet implemented. */
 		case '1': /* SMSC number */
-			SMS.MessageCenter.No = 0;
-			strncpy(SMS.MessageCenter.Number, optarg, sizeof(SMS.MessageCenter.Number) - 1);
-			if (SMS.MessageCenter.Number[0] == '+') SMS.MessageCenter.Type = SMS_International;
-			else SMS.MessageCenter.Type = SMS_Unknown;
+			strncpy(sms.SMSC.Number, optarg, sizeof(sms.SMSC.Number) - 1);
+			if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
+			else sms.SMSC.Type = SMS_Unknown;
 			break;
 
 		case '2': /* SMSC number index in phone memory */
-			SMS.MessageCenter.No = atoi(optarg);
-			if (SMS.MessageCenter.No < 1 || SMS.MessageCenter.No > 5)
+			data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
+			data.MessageCenter->No = atoi(optarg);
+			if (data.MessageCenter->No < 1 || data.MessageCenter->No > 5)
 				sendsms_usage();
-			data.MessageCenter = &SMS.MessageCenter;
-			error = SM_Functions(GOP_GetSMSCenter, &data, &State);
+			if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE)
+				strcpy(sms.SMSC.Number, data.MessageCenter->Number);
 			break;
 
 		case '3': /* we send long message */
@@ -470,28 +470,28 @@ static int sendsms(int argc, char *argv[])
 			break;
 
 		case '4': /* we send multipart message - picture message */
-			SMS.UDH_No = 1;
+			sms.UDH.Number = 1;
 			break;
 
 		case 'r': /* request for delivery report */
-			SMS.Report = true;
+			sms.DeliveryReport = true;
 			break;
 
 		case 'C': /* class Message */
 			switch (*optarg) {
-			case '0': SMS.DCS.u.General.Class = 1; break;
-			case '1': SMS.DCS.u.General.Class = 2; break;
-			case '2': SMS.DCS.u.General.Class = 3; break;
-			case '3': SMS.DCS.u.General.Class = 4; break;
+			case '0': sms.DCS.u.General.Class = 1; break;
+			case '1': sms.DCS.u.General.Class = 2; break;
+			case '2': sms.DCS.u.General.Class = 3; break;
+			case '3': sms.DCS.u.General.Class = 4; break;
 			default: sendsms_usage();
 			}
 			break;
 
 		case 'v':
-			SMS.Validity.u.Relative = atoi(optarg);
+			sms.Validity = atoi(optarg);
 			break;
 		case '8':
-			SMS.DCS.u.General.Alphabet = SMS_8bit;
+			sms.DCS.u.General.Alphabet = SMS_8bit;
 			input_len = GSM_MAX_8BIT_SMS_LENGTH;
 			break;
 		default:
@@ -507,7 +507,7 @@ static int sendsms(int argc, char *argv[])
 	if (chars_read == 0) {
 		fprintf(stderr, _("Couldn't read from stdin!\n"));
 		return -1;
-	} else if (chars_read > input_len || chars_read > sizeof(SMS.UserData[0].u.Text) - 1) {
+	} else if (chars_read > input_len || chars_read > sizeof(sms.UserData[0].u.Text) - 1) {
 		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, input_len);
 		return -1;
 	}
@@ -519,11 +519,11 @@ static int sendsms(int argc, char *argv[])
 		fprintf(stderr, _("Empty message. Quitting.\n"));
 		return -1;
 	}
-	SMS.UserData[0].Type = SMS_PlainText;
-	strncpy(SMS.UserData[0].u.Text, message_buffer, chars_read);
-	SMS.UserData[0].u.Text[chars_read] = 0;
-	SMS.UserData[1].Type = SMS_NoData;
-	data.SMSMessage = &SMS;
+	sms.UserData[0].Type = SMS_PlainText;
+	strncpy(sms.UserData[0].u.Text, message_buffer, chars_read);
+	sms.UserData[0].u.Text[chars_read] = 0;
+	sms.UserData[1].Type = SMS_NoData;
+	data.SMS = &sms;
 
 	/* Send the message. */
 	error = SendSMS(&data, &State);
@@ -539,7 +539,7 @@ static int sendsms(int argc, char *argv[])
 
 static int savesms(int argc, char *argv[])
 {
-	GSM_SMSMessage SMS;
+	GSM_API_SMS sms;
 	GSM_Error error = GE_INTERNALERROR;
 	/* The maximum length of an uncompressed concatenated short message is
 	   255 * 153 = 39015 default alphabet characters */
@@ -549,14 +549,14 @@ static int savesms(int argc, char *argv[])
 	int interactive = 0;
 	char ans[8];
 
-	DefaultSubmitSMS(&SMS);
+	DefaultSubmitSMS(&sms);
 
 	/* the nokia 7110 will choke if no number is present when we */
 	/* try to store a SMS on the phone. maybe others do too */
 	/* TODO should this be handled here? report an error instead */
 	/* of setting an default? */
-	strcpy(SMS.RemoteNumber.number, "0");
-	SMS.RemoteNumber.type = SMS_Unknown;
+	strcpy(sms.Remote.Number, "0");
+	sms.Remote.Type = SMS_Unknown;
 	
 	input_len = GSM_MAX_SMS_LENGTH;
 
@@ -564,20 +564,20 @@ static int savesms(int argc, char *argv[])
 	while ((i = getopt(argc, argv, "ml:in:s:c:")) != -1) {
 		switch (i) {
 		case 'm': /* mark the message as sent */
-			SMS.Status = SMS_Sent;
+			sms.Status = SMS_Sent;
 			break;
 		case 'l': /* Specify the location */
-			SMS.Number = atoi(optarg);
+			sms.Number = atoi(optarg);
 			break;
 		case 'i': /* Ask before overwriting */
 			interactive = 1;
 			break;
 		case 'n': /* Specify the from number */
 			if (*optarg == '+')
-				SMS.RemoteNumber.type = SMS_International;
+				sms.Remote.Type = SMS_International;
 			else
-				SMS.RemoteNumber.type = SMS_Unknown;
-			strncpy(SMS.RemoteNumber.number, optarg, sizeof(SMS.RemoteNumber.number));
+				sms.Remote.Type = SMS_Unknown;
+			strncpy(sms.Remote.Number, optarg, sizeof(sms.Remote.Number));
 			break;
 		case 's': /* Specify the smsc number */
 			break;
@@ -590,10 +590,10 @@ static int savesms(int argc, char *argv[])
 	}
 
 	if (interactive) {
-		GSM_SMSMessage aux;
+		GSM_API_SMS aux;
 
-		aux.Number = SMS.Number;
-		data.SMSMessage = &aux;
+		aux.Number = sms.Number;
+		data.SMS = &aux;
 		error = SM_Functions(GOP_GetSMS, &data, &State);
 		switch (error) {
 		case GE_NONE:
@@ -612,7 +612,7 @@ static int savesms(int argc, char *argv[])
 			fprintf(stderr, _("Invalid location\n"));
 			return -1;
 		default:
-			dprintf("Location %d empty. Saving\n", SMS.Number);
+			dprintf("Location %d empty. Saving\n", sms.Number);
 			break;
 		}
 	}
@@ -626,7 +626,7 @@ static int savesms(int argc, char *argv[])
 	if (chars_read == 0) {
 		fprintf(stderr, _("Couldn't read from stdin!\n"));
 		return -1;
-	} else if (chars_read > input_len || chars_read > sizeof(SMS.UserData[0].u.Text) - 1) {
+	} else if (chars_read > input_len || chars_read > sizeof(sms.UserData[0].u.Text) - 1) {
 		fprintf(stderr, _("Input too long!\n"));
 		return -1;
 	}
@@ -637,16 +637,16 @@ static int savesms(int argc, char *argv[])
 		return -1;
 	}
 
-	SMS.UserData[0].Type = SMS_PlainText;
-	strncpy(SMS.UserData[0].u.Text, message_buffer, chars_read);
-	SMS.UserData[0].u.Text[chars_read] = 0;
-	SMS.UserData[1].Type = SMS_NoData;
+	sms.UserData[0].Type = SMS_PlainText;
+	strncpy(sms.UserData[0].u.Text, message_buffer, chars_read);
+	sms.UserData[0].u.Text[chars_read] = 0;
+	sms.UserData[1].Type = SMS_NoData;
 
-	data.SMSMessage = &SMS;
+	data.SMS = &sms;
 	error = SaveSMS(&data, &State);
 
 	if (error == GE_NONE) {
-		fprintf(stdout, _("Saved to %d!\n"), SMS.Number);
+		fprintf(stdout, _("Saved to %d!\n"), sms.Number);
 	} else {
 		fprintf(stdout, _("Saving failed (error=%d)\n"), error);
 	}
@@ -848,7 +848,7 @@ static int getsms(int argc, char *argv[])
 	int del = 0;
 	SMS_Folder folder;
 	SMS_FolderList folderlist;
-	GSM_SMSMessage message;
+	GSM_API_SMS message;
 	char *memory_type_string;
 	int start_message, end_message, count, mode = 1;
 	char filename[64];
@@ -902,11 +902,12 @@ static int getsms(int argc, char *argv[])
 	folder.FolderID = 0;
 	/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count ++) {
+		bool done;
 		int offset = 0;
 
 		message.MemoryType = StrToMemoryType(memory_type_string);
 		message.Number = count;
-		data.SMSMessage = &message;
+		data.SMS = &message;
 		data.SMSFolder = &folder;
 		data.SMSFolderList = &folderlist;
 		dprintf("MemoryType (gnokii.c) : %i\n", message.MemoryType);
@@ -962,7 +963,7 @@ static int getsms(int argc, char *argv[])
 						fprintf(stdout,_("%02d00"),message.SMSCTime.Timezone);
 				}
 				fprintf(stdout, "\n");
-				fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.RemoteNumber.number, message.MessageCenter.Number);
+				fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.Remote.Number, message.SMSC.Number);
 				fprintf(stdout, _("Text: %s\n\n"), message.UserData[0].u.Text);
 				break;
 			case SMS_Picture:
@@ -977,7 +978,7 @@ static int getsms(int argc, char *argv[])
 						fprintf(stdout,_("%02d00"),message.Time.Timezone);
 				}
 				fprintf(stdout, "\n");
-				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.RemoteNumber.number, message.MessageCenter.Number);
+				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Remote.Number, message.SMSC.Number);
 				fprintf(stdout, _("Bitmap:\n"));
 				GSM_PrintBitmap(&message.UserData[0].u.Bitmap);
 				fprintf(stdout, _("Text:\n"));
@@ -1012,17 +1013,22 @@ static int getsms(int argc, char *argv[])
 						fprintf(stdout,_("%02d00"),message.Time.Timezone);
 				}
 				fprintf(stdout, "\n");
-				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.RemoteNumber.number, message.MessageCenter.Number);
-				switch (message.UDH[0].Type) {
+				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Remote.Number, message.SMSC.Number);
+				/* No UDH */
+				if (!message.UDH.Number) message.UDH.UDH[0].Type = SMS_NoUDH;
+				switch (message.UDH.UDH[0].Type) {
+				case SMS_NoUDH:
+					fprintf(stdout, _("Text:\n%s\n\n"), message.UserData[0].u.Text);
+					break;
 				case SMS_OpLogo:
 					fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
-					if (!strcmp(message.RemoteNumber.number, "+998000005") && !strcmp(message.MessageCenter.Number, "+886935074443")) fprintf(stdout, _("Saved by Logo Express\n"));
-					if (!strcmp(message.RemoteNumber.number, "+998000002") || !strcmp(message.RemoteNumber.number, "+998000003")) fprintf(stdout, _("Saved by Operator Logo Uploader by Thomas Kessler\n"));
+					if (!strcmp(message.Remote.Number, "+998000005") && !strcmp(message.SMSC.Number, "+886935074443")) fprintf(stdout, _("Saved by Logo Express\n"));
+					if (!strcmp(message.Remote.Number, "+998000002") || !strcmp(message.Remote.Number, "+998000003")) fprintf(stdout, _("Saved by Operator Logo Uploader by Thomas Kessler\n"));
 					offset = 3;
 				case SMS_CallerIDLogo:
 					fprintf(stdout, ("Logo:\n"));
 					/* put bitmap into bitmap structure */
-					GSM_ReadSMSBitmap(GSM_OperatorLogo, message.UserData[0].u.Text+2+offset, message.UserData[0].u.Text, &bitmap);
+					GSM_ReadSMSBitmap(GSM_OperatorLogo, message.UserData[0].u.Text + 2 + offset, message.UserData[0].u.Text, &bitmap);
 					GSM_PrintBitmap(&bitmap);
 					if (*filename) {
 						error = GE_NONE;
@@ -1036,42 +1042,43 @@ static int getsms(int argc, char *argv[])
 						} else error = GSM_SaveBitmapFile(filename, &bitmap, info);
 						if (error != GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
 					}
+					done = true;
 					break;
 				case SMS_Ringtone:
 					fprintf(stdout, _("Ringtone\n"));
+					done = true;
 					break;
 				case SMS_ConcatenatedMessages:
 					fprintf(stdout, _("Linked (%d/%d):\n"),
-						message.UDH[0].u.ConcatenatedShortMessage.CurrentNumber,
-						message.UDH[0].u.ConcatenatedShortMessage.MaximumNumber);
-				case SMS_NoUDH:
-					fprintf(stdout, _("Text:\n%s\n\n"), message.UserData[0].u.Text);
-					if ((mode != -1) && *filename) {
-						char buf[1024];
-						sprintf(buf, "%s%d", filename, count);
-						mode = GSM_SaveTextFile(buf, message.UserData[0].u.Text, mode);
-					}
-					break;
+						message.UDH.UDH[0].u.ConcatenatedShortMessage.CurrentNumber,
+						message.UDH.UDH[0].u.ConcatenatedShortMessage.MaximumNumber);
 				case SMS_WAPvCard:
-					fprintf(stdout, _("WAP vCard:\n%s"), message.UserData[0].u.Text);
+					fprintf(stdout, _("WAP vCard:\n"));
 					break;
 				case SMS_WAPvCalendar:
-					fprintf(stdout, _("WAP vCalendar:\n%s"), message.UserData[0].u.Text);
+					fprintf(stdout, _("WAP vCalendar:\n"));
 					break;
 				case SMS_WAPvCardSecure:
-					fprintf(stdout, _("WAP vCardSecure:\n%s"), message.UserData[0].u.Text);
+					fprintf(stdout, _("WAP vCardSecure:\n"));
 					break;
 				case SMS_WAPvCalendarSecure:
-					fprintf(stdout, _("WAP vCalendarSecure:\n%s"), message.UserData[0].u.Text);
+					fprintf(stdout, _("WAP vCalendarSecure:\n"));
 					break;
 				default:
 					fprintf(stderr, _("Unknown\n"));
 					break;
 				}
+				if (done) break;
+				fprintf(stdout, "%s\n", message.UserData[0].u.Text);
+				if ((mode != -1) && *filename) {
+					char buf[1024];
+					sprintf(buf, "%s%d", filename, count);
+					mode = GSM_SaveTextFile(buf, message.UserData[0].u.Text, mode);
+				}
 				break;
 			}
 			if (del) {
-				data.SMSMessage = &message;
+				data.SMS = &message;
 				if (GE_NONE != SM_Functions(GOP_DeleteSMS, &data, &State))
 					fprintf(stdout, _("(delete failed)\n"));
 				else
@@ -1099,7 +1106,7 @@ static int getsms(int argc, char *argv[])
 /* Delete SMS messages. */
 static int deletesms(int argc, char *argv[])
 {
-	GSM_SMSMessage message;
+	GSM_API_SMS message;
 	char *memory_type_string;
 	int start_message, end_message, count;
 	GSM_Error error;
@@ -1118,7 +1125,7 @@ static int deletesms(int argc, char *argv[])
 	/* Now delete the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
 		message.Number = count;
-		data.SMSMessage = &message;
+		data.SMS = &message;
 		error = SM_Functions(GOP_DeleteSMS, &data, &State);
 
 		if (error == GE_NONE)
@@ -1388,34 +1395,14 @@ static GSM_Bitmap_Types set_bitmap_type(char *s)
 /* The following function allows to send logos using SMS */
 static int sendlogo(int argc, char *argv[])
 {
-	GSM_SMSMessage SMS;
+	GSM_API_SMS sms;
 	GSM_Error error;
 	GSM_Information *info = &State.Phone.Info;
 
-	/* Default settings for SMS message:
-	   - no delivery report
-	   - Class Message 1
-	   - no compression
-	   - 8 bit data
-	   - SMSC no. 1
-	   - validity 3 days
-	   - set UserDataHeaderIndicator
-	*/
-	SMS.Type = SMS_Submit;
-	SMS.DCS.Type = SMS_GeneralDataCoding;
-	SMS.DCS.u.General.Compressed = false;
-	SMS.DCS.u.General.Alphabet = SMS_8bit;
-	SMS.DCS.u.General.Class = 2;
-	SMS.MessageCenter.No = 1;
-	SMS.Validity.VPF = SMS_RelativeFormat;
-	SMS.Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
-	SMS.UDH_No = 1;
-	SMS.Status = SMS_Unsent;
-	SMS.Number = 0;
+	DefaultSubmitSMS(&sms);
 
 	/* The first argument is the type of the logo. */
-	SMS.UDH[0].Type = SMS.UserData[0].u.Bitmap.type = set_bitmap_type(argv[0]);
-	switch (SMS.UDH[0].Type) {
+	switch (sms.UserData[0].u.Bitmap.type = set_bitmap_type(argv[0])) {
 	case GSM_OperatorLogo:
 		fprintf(stderr, _("Sending operator logo.\n"));
 		break;
@@ -1430,43 +1417,43 @@ static int sendlogo(int argc, char *argv[])
 		return (-1);
 	}
 
-	SMS.UserData[0].Type = SMS_BitmapData;
+	sms.UserData[0].Type = SMS_BitmapData;
 
 	/* The second argument is the destination, ie the phone number of recipient. */
-	memset(&SMS.RemoteNumber.number, 0, sizeof(SMS.RemoteNumber.number));
-	strncpy(SMS.RemoteNumber.number, argv[1], sizeof(SMS.RemoteNumber.number) - 1);
+	memset(&sms.Remote.Number, 0, sizeof(sms.Remote.Number));
+	strncpy(sms.Remote.Number, argv[1], sizeof(sms.Remote.Number) - 1);
 
 	/* The third argument is the bitmap file. */
-	error = GSM_ReadBitmapFile(argv[2], &SMS.UserData[0].u.Bitmap, info);
+	error = GSM_ReadBitmapFile(argv[2], &sms.UserData[0].u.Bitmap, info);
 	if (error != GE_NONE) {
 		fprintf(stdout, _("Could not load bitmap: %d (%m)\n"), error);
 		return -1;
 	}
 
 	/* If we are sending op logo we can rewrite network code. */
-	if (SMS.UDH[0].Type == GSM_OperatorLogo) {
+	if (sms.UserData[0].u.Bitmap.type == GSM_OperatorLogo) {
 		/*
 		 * The fourth argument, if present, is the Network code of the operator.
 		 * Network code is in this format: "xxx yy".
 		 */
 		if (argc > 3) {
-			memset(SMS.UserData[0].u.Bitmap.netcode, 0, sizeof(SMS.UserData[0].u.Bitmap.netcode));
-			strncpy(SMS.UserData[0].u.Bitmap.netcode, argv[3], sizeof(SMS.UserData[0].u.Bitmap.netcode) - 1);
+			memset(sms.UserData[0].u.Bitmap.netcode, 0, sizeof(sms.UserData[0].u.Bitmap.netcode));
+			strncpy(sms.UserData[0].u.Bitmap.netcode, argv[3], sizeof(sms.UserData[0].u.Bitmap.netcode) - 1);
 			dprintf("Operator code: %s\n", argv[3]);
 		}
 	}
 
 	/* FIXME: read from the stdin */
-	if (SMS.UDH[0].Type == GSM_PictureImage) {
-		SMS.UserData[1].Type = SMS_PlainText;
-		SMS.UserData[2].Type = SMS_NoData;
-		strcpy(SMS.UserData[1].u.Text, "testtest");
+	if (sms.UserData[0].u.Bitmap.type == GSM_PictureImage) {
+		sms.UserData[1].Type = SMS_PlainText;
+		sms.UserData[2].Type = SMS_NoData;
+		strcpy(sms.UserData[1].u.Text, "testtest");
 	} else {
-		SMS.UserData[1].Type = SMS_NoData;
+		sms.UserData[1].Type = SMS_NoData;
 	}
 
 	/* Send the message. */
-	data.SMSMessage = &SMS;
+	data.SMS = &sms;
 
 	error = SendSMS(&data, &State);
 
@@ -3328,9 +3315,9 @@ static int divert(int argc, char **argv)
 			cd.Timeout = atoi(optarg);
 			break;
 		case 'n':
-			strncpy(cd.Number.number, optarg, sizeof(cd.Number.number) - 1);
-			if (cd.Number.number[0] == '+') cd.Number.type = SMS_International;
-			else cd.Number.type = SMS_Unknown;
+			strncpy(cd.Number.Number, optarg, sizeof(cd.Number.Number) - 1);
+			if (cd.Number.Number[0] == '+') cd.Number.Type = SMS_International;
+			else cd.Number.Type = SMS_Unknown;
 			break;
 		default:
 			usage(stderr);
@@ -3359,8 +3346,8 @@ static int divert(int argc, char **argv)
 		case GSM_CDV_DataCalls: fprintf(stdout, _("data\n")); break;
 		default: fprintf(stdout, _("unknown(0x%02x)\n"), cd.CType);
 		}
-		if (cd.Number.number[0]) {
-			fprintf(stdout, _("Number: %s\n"), cd.Number.number);
+		if (cd.Number.Number[0]) {
+			fprintf(stdout, _("Number: %s\n"), cd.Number.Number);
 			fprintf(stdout, _("Timeout: %d\n"), cd.Timeout);
 		} else
 			fprintf(stdout, _("Divert isn't active.\n"));
@@ -3370,7 +3357,7 @@ static int divert(int argc, char **argv)
 	return 0;
 }
 
-static GSM_Error smsslave(GSM_SMSMessage *message)
+static GSM_Error smsslave(GSM_API_SMS *message)
 {
 	FILE *output;
 	char *s = message->UserData[0].u.Text;
@@ -3379,7 +3366,7 @@ static GSM_Error smsslave(GSM_SMSMessage *message)
 	int i1, i2, msgno, msgpart;
 	static int unknown = 0;
 	char c, number[MAX_BCD_STRING_LENGTH];
-	char *p = message->RemoteNumber.number;
+	char *p = message->Remote.Number;
 
 	if (p[0] == '+') {
 		p++;

@@ -22,9 +22,9 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2001 Pawe³ Kot <pkot@linuxnews.pl>
+  Copyright (C) 2001-2002 Pawe³ Kot <pkot@linuxnews.pl>
 
-  Include file for SMS library.
+  Include file for the SMS library.
 
 */
 
@@ -53,6 +53,12 @@
 /* Maximal number of SMS folders */
 #define MAX_SMS_FOLDERS 24
 #define MAX_SMS_MESSAGES 190
+
+#define MAX_DATETIME_LENGTH   7
+#define MAX_SMSC_NAME_LEN    16
+#define MAX_NUMBER_LEN       12
+#define SMS_USER_DATA_LEN   160
+#define MAX_VALIDITY_LENGTH   8
 
 /*** MEMORY INFO ***/
 
@@ -118,12 +124,19 @@ typedef struct {
 		} SpecialSMSMessageIndication; /* SMS_VoiceMessage, SMS_FaxMessage, SMS_EmailMessage, SMS_OtherMessage */
 		struct {
 			char NetworkCode[6];
+			unsigned int width, height;
 		} Logo; /* SMS_OpLogo, SMS_CallerIDLogo */
 		struct {
-			char _dummy; /* FIXME: don't leave structs empty */
+			unsigned int notes; /* Number of the notes */
 		} Ringtone; /* SMS_Ringtone */
 	} u;
 } SMS_UDHInfo;
+
+typedef struct {
+	unsigned int Number; /* Number of the present UDH */
+	unsigned int Length;
+	SMS_UDHInfo UDH[SMS_MAX_UDH_NUMBER];
+} SMS_UserDataHeader;
 
 typedef enum {
 	SMS_PID, /* Set Protocol Identifier to `Return Call Message' */
@@ -327,130 +340,80 @@ typedef struct {
 	} u;
 } SMS_UserData;
 
+/* Define datatype for SMS messages exported to the user applications. */
+typedef struct {
+	/* General fields */
+	SMS_MessageType Type;            /* Type of the message. */
+	bool DeliveryReport;             /* Do we request the delivery report? Only for setting. */
+	SMS_MessageStatus Status;        /* Status of the message read/unread/sent/unsent. */
+	unsigned int Validity;           /* Message validity in minutes. Only for setting. */
+	GSM_MemoryType MemoryType;       /* Memory type where the message is/should be stored. */
+	unsigned int Number;             /* Location of the message in the memory/folder. */
+
+	/* Number related fields */
+	SMS_Number SMSC;                 /* SMSC Number. */
+	SMS_Number Remote;               /* Remote (sender/receipient) number. */
+
+	/* Data format fields */
+	SMS_DataCodingScheme DCS;        /* Data Coding Scheme. */
+	SMS_UserData UserData[SMS_MAX_PART_NUMBER]; /* User Data. */
+	SMS_UserDataHeader UDH;
+
+	/* Date fields */
+	SMS_DateTime SMSCTime;           /* SMSC Timestamp. Only for reading. */
+	SMS_DateTime Time;               /* Delivery timestamp. Only for reading. */
+} GSM_API_SMS;
+
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
 typedef struct {
-	/* Caller to smsssend() has to fill in these */
-	SMS_MessageType Type;                          /* Message Type Indicator - 2 bits (9.2.3.1) */
+	unsigned int Type;                             /* Message Type Indicator - 2 bits (9.2.3.1) */
 	bool MoreMessages;                             /* More Messages to Send (9.2.3.2) */
 	bool ReplyViaSameSMSC;                         /* Reply Path (9.2.3.17) - `Reply via same centre' in the phone */
 	bool RejectDuplicates;                         /* Reject Duplicates (9.2.3.25) */
 	bool Report;                                   /* Status Report (9.2.3.4, 9.2.3.5 & 9.2.3.26) - `Delivery reports' in the phone */
 
-	unsigned short Number;                         /* Message Number - 8 bits (9.2.3.18) */
-	unsigned short Reference;                      /* Message Reference - 8 bit (9.2.3.6) */
-	unsigned short PID;                            /* Protocol Identifier - 8 bit (9.2.3.9) */
-	unsigned short ReportStatus;                   /* Status - 8 bit (9.2.3.15), Failure Cause (9.2.3.22) */
-	unsigned short Length;                         /* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
+	unsigned int Number;                           /* Message Number - 8 bits (9.2.3.18) */
+	unsigned int Reference;                        /* Message Reference - 8 bit (9.2.3.6) */
+	unsigned int PID;                              /* Protocol Identifier - 8 bit (9.2.3.9) */
+	unsigned int ReportStatus;                     /* Status - 8 bit (9.2.3.15), Failure Cause (9.2.3.22) */
 
-	SMS_MessageCenter MessageCenter;               /* SMSC Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
-	SMS_Number RemoteNumber;                       /* Origination, destination, Recipient Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
-	SMS_UserData UserData[SMS_MAX_PART_NUMBER];    /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
-	SMS_DataCodingScheme DCS;                      /* Data Coding Scheme (9.2.3.10) */
-	SMS_MessageValidity Validity;                  /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
+	unsigned char SMSCTime[MAX_DATETIME_LENGTH];   /* Service Centre Time Stamp (9.2.3.11) */
+	unsigned char Time[MAX_DATETIME_LENGTH];       /* Discharge Time (9.2.3.13) */
+	unsigned char MessageCenter[MAX_SMSC_NAME_LEN];/* SMSC Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
+	unsigned char RemoteNumber[MAX_NUMBER_LEN];    /* Origination, destination, Recipient Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
 
-	/* This is for internal use by smsssend() */
-	unsigned short UDH_No;                         /* Number of present UDHs */
-	unsigned int UDH_Length;                       /* Length of the whole UDH */
-	SMS_UDHInfo UDH[SMS_MAX_UDH_NUMBER];           /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
+	unsigned int DCS;                              /* Data Coding Scheme (9.2.3.10) */
+	unsigned int Length;                           /* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
+	bool UDHIndicator;
+	unsigned char UserData[SMS_USER_DATA_LEN];     /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
 
-	SMS_DateTime SMSCTime;                         /* Service Centre Time Stamp (9.2.3.11) */
-	SMS_DateTime Time;                             /* Discharge Time (9.2.3.13) */
+	bool ValidityIndicator;
+	unsigned char Validity[MAX_VALIDITY_LENGTH];   /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
+
 
 	/* Other fields */
-	GSM_MemoryType MemoryType;                     /* memoryType (for 6210/7110: folder indicator */
-	SMS_MessageStatus Status;                      /* Status of the message: sent/read or unsent/unread */
-	int Verify;				 /* Should we verify reading of messages? (only 6210 at the moment */
-
-//	SMS_CommandType Command;                       /* Command Type - 8 bits (9.2.3.19); FIXME: use it!!!! */
-//	unsigned char Parameter[???];                  /* Parameter Indicator (9.2.3.27); FIXME: how to use it??? */
+	unsigned int MemoryType;                       /* MemoryType (for 6210/7110): folder indicator */
+	unsigned int Status;                           /* Status of the message: sent/read or unsent/unread */
 } GSM_SMSMessage;
 
-/* Define the layout of the SMS message header */
-/* Misc notes:
- *   - value -1 indicates in the location field means that the field is not
- *     supported,
- *   - when SMSC/Remote numbers have variable width all other fields should
- *     contain values as its value was 1 ('0x00' as the length) -- if field X
- *     follows SMSCNumber, X's locations would be SMSC's location + 1,
- *   - see the examples in common/phones/7110.c, commmon/phones/6100.c,
- *     common/phones/atgen.c.
- */
-typedef struct {
-	bool IsSupported;		/* Indicates if SMS is supported */
-
-	short MessageCenter;		/* Location of the MessageCenter */
-	bool IsMessageCenterCoded;	/* Indicates if the MessageCenter address is BCD coded */
-	bool HasMessageCenterFixedLen;	/* Indicates if the MessageCenter field has always the fixed length */
-
-	short MoreMessages;		/* Location of the MoreMessages bit */
-	short ReplyViaSameSMSC;		/* Location of the ReplyPath bit */
-	short RejectDuplicates;		/* Location of the RejectDuplicates bit */
-	short Report;			/* Location of the Report bit */
-	short Number;			/* Location of the MessageReference number */
-	short Reference;		/* Location of the Reference bit */
-	short PID;			/* Location of the ProtocolIdentifier bit */
-	short ReportStatus;		/* Location of the ReportStatus bit */
-	short Length;			/* Location of the UserDataLength field */
-	short DataCodingScheme;		/* Location of the DataCodingScheme field */
-	short UserDataHeader;		/* Location of the UserDataHeader indicator bit */
-
-	short ValidityIndicator;	/* Location of the ValidityType Indicator field */
-	short Validity;			/* Location of the Validity field */
-	short ValidityLen;		/* Length ot the Validity field. -1 if the length is variable (as with GSM SPEC) */
-
-	short RemoteNumber;		/* Location of the RemoteNumber */
-	bool IsRemoteNumberCoded;	/* Indicates if the RemoteNumber address is BCD coded */
-	bool HasRemoteNumberFixedLen;	/* Indicates if the MessageCenter field has always the fixed length */
-
-	short SMSCTime;			/* Location of the SMSC Response time */
-	short Time;			/* Location of the Delivery time */
-
-	short MemoryType;		/* Location of the Memory Type field */
-	short Status;			/* Location of the Status field */
-	short UserData;			/* Location of the UserData field */
-	bool IsUserDataCoded;		/* Indicates if the UserData should be PDU coded */
-} SMSMessage_Layout;
-
-/* Define set of SMS Headers for the phone series */
-typedef struct {
-	unsigned short Type;
-	/* These are used to distinct between frames:
-	 *    - saved in outbox/templates
-	 *    - used to send message
-	 * The only difference between them is the header length. We can
-	 * distinct these two layouts only by the function from which we
-	 * call it.
-	 */
-	unsigned short SendHeader;
-	unsigned short ReadHeader;
-	SMSMessage_Layout Deliver;
-	SMSMessage_Layout Submit;
-	SMSMessage_Layout DeliveryReport;
-	SMSMessage_Layout Picture;
-	SMSMessage_Layout TextTemplate;
-	SMSMessage_Layout PictureTemplate;
-	SMSMessage_Layout SubmitSent;
-} SMSMessage_PhoneLayout;
-
-extern SMSMessage_PhoneLayout layout;
 
 /*** FOLDERS ***/
 
 /* Datatype for SMS folders ins 6210/7110 */
 #define MAX_SMS_FOLDER_NAME_LENGTH 16	/* Max name length is 15 characters and trailing \0 */
 typedef struct {
-	char Name[MAX_SMS_FOLDER_NAME_LENGTH];	/* Name for SMS folder. */
-	bool SMSData;      /* if folder contains sender, SMSC number and sending date */
+	char Name[MAX_SMS_FOLDER_NAME_LENGTH];    /* Name for SMS folder. */
+	bool SMSData;                             /* if folder contains sender, SMSC number and sending date */
 	unsigned int locations[MAX_SMS_MESSAGES]; /* locations of SMS messages in that folder (6210 specific) */
-	unsigned int number;         /* number of SMS messages in that folder*/
-	unsigned int FolderID;       /* ID od fthe current folder */
+	unsigned int number;                      /* number of SMS messages in that folder*/
+	unsigned int FolderID;                    /* ID od fthe current folder */
 } SMS_Folder;
 
 typedef struct {
 	SMS_Folder Folder[MAX_SMS_FOLDERS];
-	unsigned int FolderID[MAX_SMS_FOLDERS]; /* ID specific for this folder and phone. */
-	                               /* Used in internal functions. Do not use it. */
-	unsigned int number;                     /* number of SMS folders */
+	unsigned int FolderID[MAX_SMS_FOLDERS]; /* ID specific for this folder and phone.
+	                                         * Used in internal functions. Do not use it. */
+	unsigned int number;                    /* number of SMS folders */
 } SMS_FolderList;
 
 /*** CELL BROADCAST ***/

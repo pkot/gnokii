@@ -1,5 +1,6 @@
 0.4.0pre21 (not released yet)
 ==========
+ * Rewrite of the SMS subsystem                           (Pawel Kot)
  * Security functions for AT phones                 (Manfred Jonsson)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
@@ -14,6 +15,7 @@
  * Support Nokia Card Phone RPM-1              (Friedrich Lobenstock)
  * More verbose reporting when detecting the model
                                                (Friedrich Lobenstock)
+ * Cleanups in the 7110 diriver                           (Pawel Kot)
 
 0.4.0pre20
 ==========

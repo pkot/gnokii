@@ -40,7 +40,7 @@
 typedef enum {
 	GOP7110_GetSMSFolders = GOP_Max,
 	GOP7110_GetSMSFolderStatus,
-	GOP7110_GetPicture,
+	GOP7110_GetPictureList,
 	GOP7110_Max       /* don't append anything after this entry */
 } GSM7110_Operation;
 
@@ -69,8 +69,12 @@ extern bool P7110_LinkOK;
 #define P7110_SUBSMS_SET_SMSC		0x30	/* Set SMS center */
 #define P7110_SUBSMS_GET_SMSC		0x33	/* Get SMS center */
 /* SMS handling message subtypes (recv) */
-#define P7110_SUBSMS_SMS_SENT		0x02	/* SMS sent */
+#define P7110_SUBSMS_SEND_OK		0x02	/* SMS sent */
 #define P7110_SUBSMS_SEND_FAIL		0x03	/* SMS send failed */
+#define P7110_SUBSMS_READ_OK		0x08	/* SMS read */
+#define P7110_SUBSMS_READ_FAIL		0x09	/* SMS read failed */
+#define P7110_SUBSMS_DELETE_OK		0x0b	/* SMS deleted */
+#define P7110_SUBSMS_DELETE_FAIL	0x0c	/* SMS delete failed */
 #define P7110_SUBSMS_SMS_RCVD		0x10	/* SMS received */
 #define P7110_SUBSMS_CELLBRD_OK		0x21	/* Set cell broadcast success*/
 #define P7110_SUBSMS_CELLBRD_FAIL	0x22	/* Set cell broadcast failure */
@@ -79,6 +83,10 @@ extern bool P7110_LinkOK;
 #define P7110_SUBSMS_SMSC_FAIL		0x32	/* Set SMS center failure */
 #define P7110_SUBSMS_SMSC_RCVD		0x34	/* SMS center received */
 #define P7110_SUBSMS_SMSC_RCVFAIL	0x35	/* SMS center receive failure */
+#define P7110_SUBSMS_SMS_STATUS_OK	0x37	/* SMS status received */
+#define P7110_SUBSMS_FOLDER_STATUS_OK	0x6c	/* SMS folder status received */
+#define P7110_SUBSMS_FOLDER_LIST_OK	0x7b	/* SMS folder list received */
+#define P7110_SUBSMS_PICTURE_LIST_OK	0x97	/* Picture messages list received */
 
 /* Clock handling message subtypes (send) */
 #define P7110_SUBCLO_GET_DATE		0x62	/* Get date & time */

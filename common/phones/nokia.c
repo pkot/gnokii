@@ -89,7 +89,7 @@ GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 		req[4] = 0x03;
 		length = 0x37;
 		req[8] = 0x01;
-		req[9] = SemiOctetPack(data->CallDivert->Number.number, req + 10, data->CallDivert->Number.type);
+		req[9] = SemiOctetPack(data->CallDivert->Number.Number, req + 10, data->CallDivert->Number.Type);
 		req[54] = data->CallDivert->Timeout;
 		break;
 	case GSM_CDV_Erasure:
@@ -169,11 +169,11 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 		if (message[4] == 0x04 && pos[0] == 0x00) {
 			return GE_EMPTYMEMORYLOCATION;
 		} else if (message[4] == 0x04 || (pos[0] == 0x01 && pos[1] == 0x00)) {
-			cd->Number.type = SMS_Unknown;
-			memset(cd->Number.number, 0, sizeof(cd->Number.number));
+			cd->Number.Type = SMS_Unknown;
+			memset(cd->Number.Number, 0, sizeof(cd->Number.Number));
 		} else if (pos[0] == 0x02 && pos[1] == 0x01) {
 			pos += 2;
-			snprintf(cd->Number.number, sizeof(cd->Number.number), "%-*.*s", *pos+1, *pos+1, GetBCDNumber(pos+1));
+			snprintf(cd->Number.Number, sizeof(cd->Number.Number), "%-*.*s", *pos+1, *pos+1, GetBCDNumber(pos+1));
 			pos += 12 + 22;
 			cd->Timeout = *pos++;
 		}

@@ -31,3 +31,12 @@ AFTER 0.4.0 THINGS:
  * GNOME/KDE support
 
  * Full Smart Messaging Specification 3.0, EMS, etc.
+
+
+CONTRIB THINGS (do it when you are bored, but you can't live without your
+computer ;-)
+
+ * vccd - vCard/vCalendar daemon listening to the IrDA device and receiving
+any transmission from the phone (mainly vCards and vCalendars)
+
+ * 
