@@ -262,6 +262,14 @@ SOURCE=..\..\common\devices\bluetooth.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\common\devices\unixbluetooth.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\devices\osxbluetooth.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\common\devices\unixirda.c
 # End Source File
 # Begin Source File

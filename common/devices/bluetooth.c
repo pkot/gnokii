@@ -31,11 +31,11 @@
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
+#include "devices/unixbluetooth.h"
 
 #ifdef HAVE_BLUETOOTH
 
-#include "devices/unixbluetooth.h"
-
+#if 0
 static char *phone[] = {
 	"Nokia 3650",
 	"Nokia 6210",
@@ -44,11 +44,6 @@ static char *phone[] = {
 	"Nokia 7650",
 	"Nokia 8910"
 };
-
-#ifdef HAVE_BLUETOOTH_MACOSX
-#  include "osxbluetooth.c"
-#else
-#  include "unixbluetooth.c"
 #endif
 
 #else /* HAVE_BLUETOOTH */

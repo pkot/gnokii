@@ -27,7 +27,15 @@
 
 */
 
+#include "config.h"
+
+#ifdef HAVE_BLUETOOTH_MACOSX
+
+#include "compat.h"
 #include "devices/osxbluetooth.h"
+#include "misc.h"
+#include "gnokii.h"
+#include "devices/unixbluetooth.h"
 
 /* ----- bluetooth io thread ----- */
 
@@ -209,3 +217,5 @@ int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *st
 
 	return nRetVal;
 }
+
+#endif	/* HAVE_BLUETOOTH_MACOSX */

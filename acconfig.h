@@ -55,7 +55,7 @@
 /* Define if you want IrDA support. Linux only */
 #undef HAVE_IRDA
 
-/* Define if you want Bluetooth support. Linux only */
+/* Define if you want Bluetooth support. Cross platform */
 #undef HAVE_BLUETOOTH
 
 /***** Compiler specific *****/

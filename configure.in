@@ -240,6 +240,7 @@ AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_so
 USE_BLUETOOTH="no"
 if test $ac_cv_have_sockaddr_rc = yes; then
 	AC_DEFINE(HAVE_BLUETOOTH)
+	AC_DEFINE(HAVE_BLUETOOTH_BLUEZ,[],[Compile on Linux])
 	USE_BLUETOOTH="yes"
 	LIBS="$LIBS -lbluetooth"
 fi

@@ -19,7 +19,9 @@ include $(TOPDIR)/Makefile.global
 
 OBJS =	tekram.o \
 	unixirda.o \
-	bluetooth.o
+	bluetooth.o \
+	unixbluetooth.o \
+	osxbluetooth.o
 
 ifdef WIN32
 	OBJS += winserial.o

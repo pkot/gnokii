@@ -27,6 +27,14 @@
 
 */
 
+#include "config.h"
+#include "compat.h"
+#include "misc.h"
+#include "gnokii.h"
+#include "devices/unixbluetooth.h"
+
+#if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH)
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -72,7 +80,7 @@ static int bt_aton(const char *str, bdaddr_t *ba)
 	return 1;
 }
 
-#endif
+#endif	/* HAVE_BT_ATON */
 
 static int str2ba(const char *str, bdaddr_t *ba)
 {
@@ -149,3 +157,5 @@ int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *st
 
 	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
+
+#endif	/* HAVE_BLUETOOTH_BLUEZ || HAVE_BLUETOOTH_NETGRAPH */
