@@ -36,6 +36,15 @@
     o added (De)Activate SMS reading in SMS window menu
     o changed the default size of SMS windows          (Markus Plail)
  * Cygwin compilation error fixed                    (BORBELY Zoltan)
+ * xgnokii updates
+    o speeded up reading contacts (skip locations after all
+      contacts are read (according to memory status))
+    o hopefully fixed a bug when reading contacts from SIM
+      failed (as reported by Michal Kochanowicz)
+    o decreased the time the splash screen is visible  (Markus Plail)
+ * 6510 series update
+    o added GetMemoryStatus (thanks to Michael Moosbauer for
+      the info)                                        (Markus Plail)
 
 0.4.0pre16
 ==========
