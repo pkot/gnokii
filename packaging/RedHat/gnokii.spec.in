@@ -6,7 +6,7 @@ Summary: Linux/Unix tool suite for Nokia mobile phones
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Copyright: GPL
+License: GNU GPL
 Packager: Pavel Janik ml. <Pavel.Janik@linux.cz>, Jan Derfinak <ja@mail.upjs.sk>
 Group: Applications/Communications
 Source: ftp://ftp.gnokii.org/pub/gnokii/%{name}-%{version}.tar.gz
@@ -72,6 +72,9 @@ rm -rf ${RPM_BUILD_ROOT}
 /usr/share/xgnokii
 
 %changelog
+
+* Fri Apr 12 2002 Pawel Kot <pkot@linuxnews.pl>
+- replace 'Copyright' with 'License' (submitted by Rui Miguel Silva Seabra)
 
 * Fri Sep 28 2001 Pawel Kot <pkot@linuxnews.pl>
 - last minute fixes.
