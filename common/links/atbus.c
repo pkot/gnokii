@@ -44,7 +44,7 @@
 #include "links/atbus.h"
 
 static GSM_Error ATBUS_Loop(struct timeval *timeout);
-static bool ATBUS_OpenSerial(int hw_handshake, char *device);
+static bool ATBUS_OpenSerial(int mode, char *device);
 static void ATBUS_RX_StateMachine(unsigned char rx_char);
 
 /* FIXME - pass device_* the link stuff?? */
@@ -141,16 +141,16 @@ static void ATBUS_RX_StateMachine(unsigned char rx_char)
 }
 
 
-static bool ATBUS_OpenSerial(int hw_handshake, char *device)
+static bool ATBUS_OpenSerial(int mode, char *device)
 {
 	int result;
-	result = device_open(device, false, false, hw_handshake, GCT_Serial);
+	result = device_open(device, false, false, mode, GCT_Serial);
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
 		return (false);
 	}
-	device_changespeed(19200);
-	if (hw_handshake) {
+	device_changespeed(mode == 2 ? 9600 : 19200);
+	if (mode) {
 		/* make 7110 with dlr-3 happy. the nokia dlr-3 cable     */
 		/* provides hardware handshake lines but is, at least at */
 		/* initialization, slow. to be properly detected, state  */
@@ -201,7 +201,7 @@ static GSM_Error ATBUS_Loop(struct timeval *timeout)
 /* Initialise variables and start the link */
 /* Fixme we allow serial and irda for connection to reduce */
 /* bug reports. this is pretty silly for /dev/ttyS?. */
-GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
+GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int mode)
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
@@ -215,7 +215,7 @@ GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
 
 	if ((state->Link.ConnectionType == GCT_Serial) ||
 	    (state->Link.ConnectionType == GCT_Irda)) {
-		if (!ATBUS_OpenSerial(hw_handshake, state->Link.PortDevice))
+		if (!ATBUS_OpenSerial(mode, state->Link.PortDevice))
 			return GE_DEVICEOPENFAILED;
 	} else {
 		fprintf(stderr, "Device not supported by ATBUS\n");

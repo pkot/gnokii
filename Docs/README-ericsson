@@ -10,5 +10,5 @@ are writing their own firmware with arkanoid, for example.
 
 * Its quite easy to flash firmware there.
 
-* Currently does not work with gnokii
+* Works with gnokii, use AT-9600 as hardware type.
 

@@ -29,7 +29,7 @@
 #ifndef __atbus_h
 #define __atbus_h
 
-GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake);
+GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int mode);
 
 /* Define some result/error codes internal to the AT command functions.
    Also define a code for an unterminated message. */

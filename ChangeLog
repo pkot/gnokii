@@ -1,5 +1,6 @@
 0.4.0pre20 (Not released yet)
 ==========
+ * Added support for AT-9600,needed for ericsson a1018 (Pavel Machek)
  * Added short docs about ericsson phones              (Pavel Machek)
  * Added testsuite				       (Pavel Machek)
  * 6110 series updates
