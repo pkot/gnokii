@@ -12,9 +12,7 @@
 
 SHELL          = @SHELL@
 
-LD             = @LD@
-LDREL          = -r
-LDOUT          = -o
+LD             = @CC@ -Xlinker -r -nostdlib -nodefaultlibs -o
 
 PACKAGE        = gnokii
 
