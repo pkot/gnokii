@@ -23,6 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2002 	   Pavel Machek <pavel@ucw.cz>
 
   Functions for common bitmap operations.
 
@@ -54,21 +55,24 @@ GSM_Error GSM_NullBitmap(GSM_Bitmap *bmp, GSM_Information *info)
 
 API void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
-	if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8);
-	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8));
-
-	/* Testing only! */
-	if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8));
+	switch (bmp->type) {
+	case GSM_StartupLogo:  bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8); break;
+	case GSM_OperatorLogo:
+	case GSM_CallerLogo:   bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8)); break;
+		               /* Testing only! */	
+	case GSM_PictureImage: bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8)); break;
+	}
 }
 
 API void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
-	if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] &= 255 - (1 << (y%8));
-	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo)
-		bmp->bitmap[(y*bmp->width+x)/8] &= 255 - (1 << (7-((y*bmp->width+x)%8)));
-
-	/* Testing only ! */
-	if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] &= 255 - (1 << (7-(x%8)));
+	switch (bmp->type) {
+	case GSM_StartupLogo:  bmp->bitmap[((y/8)*bmp->width)+x] &= ~(1 << (y%8)); break;
+	case GSM_OperatorLogo:
+	case GSM_CallerLogo:   bmp->bitmap[(y*bmp->width+x)/8] &= ~(1 << (7-((y*bmp->width+x)%8))); break;
+		               /* Testing only! */	
+	case GSM_PictureImage: bmp->bitmap[9*y + (x/8)] &= ~(1 << (7-(x%8))); break;
+	}
 }
 
 API bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
@@ -212,14 +216,14 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 	unsigned short size, current = 0;
 
 	switch (bitmap->type) {
-	case SMS_OpLogo:
+	case GSM_OperatorLogo:
 		/* Set the network code */
 		dprintf("Operator Logo\n");
 		message[current++] = ((bitmap->netcode[1] & 0x0f) << 4) | (bitmap->netcode[0] & 0xf);
 		message[current++] = 0xf0 | (bitmap->netcode[2] & 0x0f);
 		message[current++] = ((bitmap->netcode[5] & 0x0f) << 4) | (bitmap->netcode[4] & 0xf);
 		break;
-	case SMS_MultipartMessage:
+	case GSM_PictureImage:
 		dprintf("Picture Image\n");
 		/* Type of multipart message - picture image */
 		message[current++] = 0x02;
@@ -228,20 +232,34 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 		message[current++] = (size & 0xff00) >> 8;
 		message[current++] = size & 0x00ff;
 		break;
+	case GSM_EMSPicture:
+		dprintf("EMS picture\n");
+		if (bitmap->width % 8) {
+			fprintf(stderr, "EMS needs bitmap size 8, 16, 24, ... \n");
+			return GE_NOTSUPPORTED;
+		}
+		message[current++] = bitmap->width/8; /* Horizontal size / 8 */
+		message[current++] = bitmap->height;
+		break;
 	default: /* error */
 		dprintf("gulp?\n");
 		break;
 	}
 
-	/* Info field */
-	message[current++] = 0x00;
+	switch (bitmap->type) {
+	case GSM_EMSPicture:
+		break;
+	default:			/* Add common nokia headers */
+		/* Info field */
+		message[current++] = 0x00;
 
-	/* Logo size */
-	message[current++] = bitmap->width;
-	message[current++] = bitmap->height;
+		/* Logo size */
+		message[current++] = bitmap->width;
+		message[current++] = bitmap->height;
 
-	/* Number of colors */
-	message[current++] = 0x01;
+		/* Number of colors */
+		message[current++] = 0x01;
+	}
 
 	memcpy(message + current, bitmap->bitmap, bitmap->size);
 
