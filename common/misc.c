@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.16  2001-03-21 23:36:04  chris
+  Revision 1.17  2001-08-09 12:34:34  pkot
+  3330 and 6250 support - I have no idea if it does work (mygnokii)
+
+  Revision 1.16  2001/03/21 23:36:04  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -57,6 +60,7 @@ static PhoneModel models[] = {
 	{"3210",  "NSE-8", PM_SMS | PM_DTMF },
 	{"3210",  "NSE-9", PM_SMS | PM_DTMF },
 	{"3310",  "NHM-5", PM_SMS | PM_DTMF },
+	{"3330",  "NHM-6", PM_SMS | PM_DTMF },
 	{"3810",  "0305" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-9 */
 	{"5110",  "NSE-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"5130",  "NSK-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
@@ -70,6 +74,7 @@ static PhoneModel models[] = {
 	{"6185",  "NSD-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"6190",  "NSB-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_EXTPBK },
+	{"6250",  "NHM-3", PM_CALLERGROUP | PM_CALENDAR | PM_EXTPBK },
 	{"7110",  "NSE-5", PM_CALLERGROUP | PM_SPEEDDIAL | PM_EXTPBK },
 	{"8810",  "NSE-6", PM_SMS | PM_DTMF | PM_DATA },
 	{"8110i", "0423",  PM_SMS | PM_DTMF | PM_DATA }, /* Guess for NHE-6 */

@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.134  2001-06-10 11:24:57  machek
+  Revision 1.135  2001-08-09 12:34:33  pkot
+  3330 and 6250 support - I have no idea if it does work (mygnokii)
+
+  Revision 1.134  2001/06/10 11:24:57  machek
   Kill "slash star" inside comment.
 
   Revision 1.133  2001/03/19 23:43:46  pkot
@@ -216,7 +219,7 @@ GSM_Functions FB61_Functions = {
 /* Mobile phone information */
 
 GSM_Information FB61_Information = {
-	"6110|6130|6150|6190|5110|5130|5190|3210|3310", /* Supported models */
+	"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330", /* Supported models */
 	4,                     /* Max RF Level */
 	0,                     /* Min RF Level */
 	GRF_Arbitrary,         /* RF level units */

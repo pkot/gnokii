@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.1  2001-07-09 23:55:35  pkot
+  Revision 1.2  2001-08-09 12:34:34  pkot
+  3330 and 6250 support - I have no idea if it does work (mygnokii)
+
+  Revision 1.1  2001/07/09 23:55:35  pkot
   Initial support for 6100 series in the new structure (me)
 
 */
@@ -54,7 +57,7 @@ GSM_Phone phone_nokia_6100 = {
 	PGEN_IncomingDefault,
         /* Mobile phone information */
 	{
-		"6110|6130|6150|6190|5110|5130|5190|3210|3310", /* Supported models */
+		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330", /* Supported models */
 		4,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GRF_Arbitrary,         /* RF level units */

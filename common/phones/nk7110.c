@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.11  2001-07-05 10:54:53  pkot
+  Revision 1.12  2001-08-09 12:34:34  pkot
+  3330 and 6250 support - I have no idea if it does work (mygnokii)
+
+  Revision 1.11  2001/07/05 10:54:53  pkot
   Solaris 2.7 fixes - should be harmless for other OSes (Michael Wiedmann)
 
   Revision 1.10  2001/06/27 23:52:49  pkot
@@ -121,7 +124,7 @@ GSM_Phone phone_nokia_7110 = {
 	PGEN_IncomingDefault,
         /* Mobile phone information */
 	{
-		"7110|6210", /* Supported models */
+		"7110|6210|6250", /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GRF_Percentage,        /* RF level units */
