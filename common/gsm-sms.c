@@ -44,6 +44,7 @@
 #include "gnokii-internal.h"
 #include "gsm-api.h"
 
+#undef ERROR
 #define ERROR() do { if (error != GN_ERR_NONE) return error; } while (0)
 
 struct sms_udh_data {
