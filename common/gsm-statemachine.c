@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.6  2001-11-08 16:49:19  pkot
+  Revision 1.7  2001-11-17 20:16:42  pkot
+  Cleanup
+
+  Revision 1.6  2001/11/08 16:49:19  pkot
   Cleanups
 
   Revision 1.5  2001/09/09 21:45:49  machek
@@ -44,20 +47,20 @@
 
 GSM_Error SM_Initialise(GSM_Statemachine *state)
 {
-	state->CurrentState=Initialised;
-	state->NumWaitingFor=0;
-	state->NumReceived=0; 
+	state->CurrentState = Initialised;
+	state->NumWaitingFor = 0;
+	state->NumReceived = 0; 
 	
 	return GE_NONE;
 }
 
 GSM_Error SM_SendMessage(GSM_Statemachine *state, u16 messagesize, u8 messagetype, void *message)
 {
-	if (state->CurrentState!=Startup) {
-		state->LastMsgSize=messagesize;
-		state->LastMsgType=messagetype;
-		state->LastMsg=message;
-		state->CurrentState=MessageSent;
+	if (state->CurrentState != Startup) {
+		state->LastMsgSize = messagesize;
+		state->LastMsgType = messagetype;
+		state->LastMsg = message;
+		state->CurrentState = MessageSent;
 
 		/* FIXME - clear KeepAlive timer */
 		return state->Link.SendMessage(messagesize, messagetype, message);
@@ -74,7 +77,7 @@ GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
 	loop_timeout.tv_usec = 100000;
 
 	if (!state->Link.Loop) {
-		fprintf(stderr, "No Loop function. Aborting.\n");
+		dprintf("No Loop function. Aborting.\n");
 		abort();
 	}
 	for (i = 0; i < timeout; i++) {
@@ -82,18 +85,16 @@ GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
 	}
 
 	/* FIXME - add calling a KeepAlive function here */
-
 	return state->CurrentState;
 }
 
 void SM_Reset(GSM_Statemachine *state)
 {
 	/* Don't reset to initialised if we aren't! */
-	
-	if (state->CurrentState!=Startup) {
-		state->CurrentState=Initialised;
-		state->NumWaitingFor=0;
-		state->NumReceived=0;       
+	if (state->CurrentState != Startup) {
+		state->CurrentState = Initialised;
+		state->NumWaitingFor = 0;
+		state->NumReceived = 0;       
 	}
 }
 
@@ -102,30 +103,30 @@ void SM_Reset(GSM_Statemachine *state)
 void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message, u16 messagesize)
 {
 	int c;
-	int temp=1;
+	int temp = 1;
 	GSM_Data emptydata;
-	GSM_Data *data=&emptydata;
-	GSM_Error res=GE_INTERNALERROR;
-	int waitingfor=-1;
+	GSM_Data *data = &emptydata;
+	GSM_Error res = GE_INTERNALERROR;
+	int waitingfor = -1;
 
 	GSM_DataClear(&emptydata);
 
 	/* See if we need to pass the function the data struct */
-	if (state->CurrentState==WaitingForResponse)
-		for (c=0; c<state->NumWaitingFor; c++) 
-			if (state->WaitingFor[c]==messagetype) {
-				data=state->Data[c];
-				waitingfor=c;
+	if (state->CurrentState == WaitingForResponse)
+		for (c = 0; c < state->NumWaitingFor; c++) 
+			if (state->WaitingFor[c] == messagetype) {
+				data = state->Data[c];
+				waitingfor = c;
 			}
 		       
       
 	/* Pass up the message to the correct phone function, with data if necessary */
-	c=0;
+	c = 0;
 	while (state->Phone.IncomingFunctions[c].Functions) {
 		if (state->Phone.IncomingFunctions[c].MessageType == messagetype) {
 			dprintf("Received message type %02x\n\r", messagetype);
-			res=state->Phone.IncomingFunctions[c].Functions(messagetype, message, messagesize, data);
-			temp=0;
+			res = state->Phone.IncomingFunctions[c].Functions(messagetype, message, messagesize, data);
+			temp = 0;
 		}
 		c++;
 	}
@@ -136,17 +137,16 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 		return;
 	}
 
-	if (state->CurrentState==WaitingForResponse) {
-		
+	if (state->CurrentState == WaitingForResponse) {
 		/* Check if we were waiting for a response and we received it */
-		if (waitingfor!=-1) {
-			state->ResponseError[waitingfor]=res;
+		if (waitingfor != -1) {
+			state->ResponseError[waitingfor] = res;
 			state->NumReceived++;
 		}
 		
 		/* Check if all waitingfors have been received */
-		if (state->NumReceived==state->NumWaitingFor) {
-			state->CurrentState=ResponseReceived;	
+		if (state->NumReceived == state->NumWaitingFor) {
+			state->CurrentState = ResponseReceived;	
 		}
 		
 	}
@@ -157,25 +157,25 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 
 GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 {
-	int c,d;
-	GSM_Error error=GE_NOTREADY;
+	int c, d;
+	GSM_Error error = GE_NOTREADY;
 	
 	if (state->CurrentState==ResponseReceived) {
-		for(c=0; c < state->NumReceived; c++)
-			if (state->WaitingFor[c]==messagetype) {
-				error=state->ResponseError[c];
-				for( d=c+1 ; d < state->NumReceived; d++){
-					state->ResponseError[d-1]=state->ResponseError[d];
-					state->WaitingFor[d-1]=state->WaitingFor[d];
-					state->Data[d-1]=state->Data[d];
+		for(c = 0; c < state->NumReceived; c++)
+			if (state->WaitingFor[c] == messagetype) {
+				error = state->ResponseError[c];
+				for(d = c + 1 ;d < state->NumReceived; d++){
+					state->ResponseError[d-1] = state->ResponseError[d];
+					state->WaitingFor[d-1] = state->WaitingFor[d];
+					state->Data[d-1] = state->Data[d];
 				}
 				state->NumReceived--;
 				state->NumWaitingFor--;
 				c--; /* For neatness continue in the correct place */
 			}
-		if (state->NumReceived==0) {
-			state->NumWaitingFor=0;
-			state->CurrentState=Initialised;
+		if (state->NumReceived == 0) {
+			state->NumWaitingFor = 0;
+			state->CurrentState = Initialised;
 		}
 	}
 	
@@ -191,15 +191,15 @@ GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char mess
 {
 
 	/* If we've received a response, we have to call SM_GetError first */
-	if ((state->CurrentState==Startup) || (state->CurrentState==ResponseReceived)) 
+	if ((state->CurrentState == Startup) || (state->CurrentState == ResponseReceived))
 		return GE_NOTREADY;
 	
-	if (state->NumWaitingFor==SM_MAXWAITINGFOR) return GE_NOTREADY;
-	state->WaitingFor[state->NumWaitingFor]=messagetype;
-	state->Data[state->NumWaitingFor]=data;
-	state->ResponseError[state->NumWaitingFor]=GE_BUSY;
+	if (state->NumWaitingFor == SM_MAXWAITINGFOR) return GE_NOTREADY;
+	state->WaitingFor[state->NumWaitingFor] = messagetype;
+	state->Data[state->NumWaitingFor] = data;
+	state->ResponseError[state->NumWaitingFor] = GE_BUSY;
 	state->NumWaitingFor++;
-	state->CurrentState=WaitingForResponse;
+	state->CurrentState = WaitingForResponse;
 
 	return GE_NONE;
 }
@@ -215,17 +215,17 @@ GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 	GSM_State s;
 	GSM_Error err;
 
-	for (retry=0; retry<3; retry++) {
-		timeout=30;
-		err=SM_WaitFor(state,data,waitfor);
-		if (err!=GE_NONE) return err; 
+	for (retry = 0; retry < 3; retry++) {
+		timeout = 30;
+		err = SM_WaitFor(state, data, waitfor);
+		if (err != GE_NONE) return err; 
 
 		do {            /* ~3secs timeout */
-			s=SM_Loop(state, 1);  /* Timeout=100ms */
+			s = SM_Loop(state, 1);  /* Timeout=100ms */
 			timeout--;
-		} while ((timeout>0) && (s==WaitingForResponse));
+		} while ((timeout > 0) && (s == WaitingForResponse));
 		
-		if (s==ResponseReceived) return SM_GetError(state, waitfor);
+		if (s == ResponseReceived) return SM_GetError(state, waitfor);
 
 		dprintf("SM_Block Retry - %d\n\r", retry);
 		SM_Reset(state);
@@ -241,7 +241,7 @@ GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm)
 {
 	if (!sm->Phone.Functions) {
-		fprintf(stderr, "Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!\n");
+		dprintf("Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!\n");
 		return GE_INTERNALERROR;
 	}
 	return sm->Phone.Functions(op, data, sm);
