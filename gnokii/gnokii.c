@@ -739,7 +739,6 @@ static int getsms(int argc, char *argv[])
 		message.Number = count;
 		data.SMSMessage = &message;
 		dprintf("MemoryType (gnokii.c) : %i\n", message.MemoryType);
-/*		error = SM_Functions(GOP_GetSMS, &data, &State);*/
 		error = GetSMS(&data, &State);
 
 		switch (error) {
@@ -893,7 +892,7 @@ static int getsms(int argc, char *argv[])
 			fprintf(stderr, _("SMS location %s %d empty.\n"), memory_type_string, count);
 			break;
 		default:
-			fprintf(stdout, _("GetSMS %s %d failed!(%s)\n\n"), memory_type_string, count, print_error(error));
+			fprintf(stdout, _("GetSMS %s %d failed! (%s)\n\n"), memory_type_string, count, print_error(error));
 			break;
 		}
 	}
@@ -2662,7 +2661,7 @@ static int divert(int argc, char **argv)
 	return 0;
 }
 
-static int smsslave(GSM_SMSMessage *message)
+static GSM_Error smsslave(GSM_SMSMessage *message)
 {
 	FILE *output;
 	char *s = message->UserData[0].u.Text;
@@ -2674,14 +2673,14 @@ static int smsslave(GSM_SMSMessage *message)
 
 	while (*s == 'W')
 		s++;
-	fprintf(stderr, "Got message %d: %s\n", i, s);
-	if ((sscanf(s, "%d/%d:%d-%c-", &i1, &i2, &msgno, &c)==4) && (c == 'X'))
+	fprintf(stderr, _("Got message %d: %s\n"), i, s);
+	if ((sscanf(s, "%d/%d:%d-%c-", &i1, &i2, &msgno, &c) == 4) && (c == 'X'))
 		sprintf(buf, "/tmp/sms/mail_%d_", msgno);
-	else if (sscanf(s, "%d/%d:%d-%d-", &i1, &i2, &msgno, &msgpart)==4)
+	else if (sscanf(s, "%d/%d:%d-%d-", &i1, &i2, &msgno, &msgpart) == 4)
 		sprintf(buf, "/tmp/sms/mail_%d_%03d", msgno, msgpart);
 	else	sprintf(buf, "/tmp/sms/unknown_%d_%d", getpid(), unknown++);
 	if ((output = fopen(buf, "r"))) {
-		fprintf(stderr, "### Exists?!\n");
+		fprintf(stderr, _("### Exists?!\n"));
 		fclose(output);
 	}
 	output = fopen(buf, "w+");
@@ -2698,6 +2697,7 @@ static int smsslave(GSM_SMSMessage *message)
 		fprintf(output, "%s", s);
 	}
 	fclose(output);
+	return GE_NONE;
 }
 
 static int smsreader(void)
@@ -2711,7 +2711,7 @@ static int smsreader(void)
 	if (error == GE_NONE) {
 		/* We do not want to see texts forever - press Ctrl+C to stop. */
 		signal(SIGINT, interrupted);    
-		fprintf (stderr, _("Entered sms reader mode...\n"));
+		fprintf(stderr, _("Entered sms reader mode...\n"));
 
 		/* Loop here indefinitely - allows you to read texts from phone's
 		   display. The loops ends after pressing the Ctrl+C. */
@@ -2719,18 +2719,17 @@ static int smsreader(void)
 			SM_Loop(sm, 1);
 			usleep(1000);
 		}
-		fprintf (stderr, "Shutting down\n");
+		fprintf(stderr, _("Shutting down\n"));
 
-		fprintf (stderr, _("Exiting sms reader mode...\n"));
+		fprintf(stderr, _("Exiting sms reader mode...\n"));
 		data.OnSMS = NULL;
 
 		error = SM_Functions(GOP_OnSMS, &data, sm);
 		if (error != GE_NONE)
-			fprintf (stderr, _("Error!\n"));
+			fprintf(stderr, _("Error!\n"));
 	} else
-		fprintf (stderr, _("Error!\n"));
+		fprintf(stderr, _("Error!\n"));
 
-	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 
