@@ -48,7 +48,7 @@ PORT=-DPORT="\"/dev/ttyS0\""
 # PORT=-DPORT="\"/dev/ttyS1\""
 
 #
-# Under Windows, use this syntax
+# Under Windows, uncomment this
 #
 
 # PORT=-DPORT="\"COM1:\""
@@ -116,6 +116,11 @@ COMMON=-Wall -O2 \
        -DVERSION=\"${VERSION}\"
 
 CFLAGS = -D_REENTRANT ${COMMON} ${GTKCFLAGS}
+
+#
+# Comment this for WIN32 ;-)
+#
+
 LDFLAGS = -s -lpthread ${GTKLDFLAGS}
 
 #
@@ -135,7 +140,8 @@ COMMON_OBJS = gsm-api.o \
               fbus-3810.o \
               mbus-2110.o \
               fbus-6110.o fbus-6110-auth.o fbus-6110-ringtones.o \
-              gsm-networks.o cfgreader.o gsm-filetypes.o
+              gsm-networks.o cfgreader.o gsm-filetypes.o \
+              win32/winserial.o
 
 #
 # RLP objects - only needed for data calls
@@ -157,17 +163,15 @@ GNOKIID_OBJS = gnokiid.o at-emulator.o virtmodem.o datapump.o
 
 MGNOKIIDEV_OBJS = mgnokiidev.o
 
-WIN32_OBJS = win32/winserial.o
-
 # Build executable
 all: gnokii gnokiid mgnokiidev xgnokii xlogos xkeyb
 
-gnokii: $(GNOKII_OBJS) $(COMMON_OBJS) $(WIN32_OBJS)
+gnokii: $(GNOKII_OBJS) $(COMMON_OBJS)
 
 gnokiid: $(GNOKIID_OBJS) $(COMMON_OBJS)
 
 xgnokii: $(COMMON_OBJS)
-	@make -sC xgnokii
+	@make -C xgnokii
 
 xlogos: $(XLOGOS_OBJS) $(COMMON_OBJS)
 
@@ -179,14 +183,13 @@ mgnokiidev: $(MGNOKIIDEV_OBJS)
 
 # Misc targets
 clean:
-	@rm -f core *~ *% *.bak \
+	@rm -f core *.exe *~ *% *.bak \
                $(COMMON_OBJS) \
                gnokii $(GNOKII_OBJS) \
                gnokiid $(GNOKIID_OBJS) \
                xlogos $(XLOGOS_OBJS) \
                xkeyb $(XKEYB_OBJS) \
                mgnokiidev $(MGNOKIIDEV_OBJS) \
-               $(WIN32_OBJS) \
                gnokii-${VERSION}.tar.gz
 	@make -sC xgnokii clean
 
