@@ -1,6 +1,8 @@
 0.5.0pre
  * Compability changes:
     o sys/filio.h included for FIONREAD              (BORBELY Zoltan)
+    o replaced AM_GNU_GETTEXT with AM_GNU_GETTEXT([external]) in
+      configure.in                                    (Mariusz Mazur)
  * gnokii changes:
     o fix potential segfault in writephonebook()    (Jan de Cuveland)
     o fix warning on architectures where char defaults to unsigned

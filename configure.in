@@ -26,7 +26,7 @@ AC_PROG_INSTALL
 
 dnl ======================== Default setting
 ALL_LINGUAS="cs de et fi nl sk pl it sl"
-AM_GNU_GETTEXT
+AM_GNU_GETTEXT([external])
 
 dnl ======================== Check for include/config.h.in
 AC_MSG_CHECKING([for include/config.h.in])
