@@ -46,6 +46,8 @@
  * nk6510 series updates
     o handle correctly the case with more then 50 calendar entries
       in the phone; previous fix missed some chunks     (Pawel Kot)
+    o Nokia 8310 has different logo sizes and battery indicator
+                                                   (The Ribena Kid)
  * xgnokii changes
     o be compatible with gnokii -- use ME/SM instead of A/B for
       phone/simcard memory when saving/reading phonebook entry
