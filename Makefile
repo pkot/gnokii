@@ -53,7 +53,7 @@ all: intl $(DIRS)
 	@echo "##########################################"
 	@echo "###"
 	@echo "### It is strongly recommended to run:"
-	@echo "### make install"
+	@echo "### $(MAKE) install"
 	@echo "### now. Otherwise gnokii may not work."
 	@echo "###"
 	@echo "##########################################"
