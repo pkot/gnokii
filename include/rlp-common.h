@@ -75,8 +75,6 @@ typedef struct {
 	/* Prototypes for functions */
 void    RLP_DisplayF96Frame(RLP_F96Frame *frame);
 void    RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header);
-void    RLP_CalculateCRC24Checksum(u8 *data, int length, u8 *crc);
-bool    RLP_CheckCRC24FCS(u8 *data, int length);
 void    RLP_DisplayXID(u8 *frame);
 
 

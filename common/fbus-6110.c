@@ -1888,7 +1888,12 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   unsigned char SMSText[256];
 
 #ifdef DEBUG
-  FB61_RX_DisplayMessage();
+
+  /* Do not debug Ack and RLP frames to detail. */
+
+  if (MessageType != FB61_FRTYPE_ACK && MessageType != 0xf1)
+    FB61_RX_DisplayMessage();
+
 #endif DEBUG
 
   /* Switch on the basis of the message type byte */
@@ -2533,11 +2538,27 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x61:
 
+      switch (MessageBuffer[4]) {
+
+      case 0x01:
+
 #ifdef DEBUG
-      printf(_("Message: Date and time set correctly\n"));
+        printf(_("Message: Date and time set correctly\n"));
 #endif DEBUG
 
-      CurrentSetDateTimeError=GE_NONE;
+        CurrentSetDateTimeError=GE_NONE;
+
+        break;
+      
+      default:
+
+#ifdef DEBUG
+        printf(_("Message: Date and time set error\n"));
+#endif DEBUG
+
+        CurrentSetDateTimeError=GE_INVALIDDATETIME;
+
+      }
 
       break;
 
@@ -2563,11 +2584,27 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x6c:
 
+      switch (MessageBuffer[4]) {
+
+      case 0x01:
+
 #ifdef DEBUG
-      printf(_("Message: Alarm set correctly\n"));
+        printf(_("Message: Alarm set correctly\n"));
 #endif DEBUG
 
-      CurrentSetAlarmError=GE_NONE;
+        CurrentSetAlarmError=GE_NONE;
+
+        break;
+      
+      default:
+
+#ifdef DEBUG
+        printf(_("Message: Date and time set error\n"));
+#endif DEBUG
+
+        CurrentSetAlarmError=GE_INVALIDDATETIME;
+
+      }
 
       break;
 
@@ -2622,6 +2659,16 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       break;
       
       case 0x73:
+
+#ifdef DEBUG
+        fprintf(stdout, _("Message: Calendar note write failed!\n"));
+#endif DEBUG      
+
+        CurrentCalendarNoteError=GE_INTERNALERROR;
+
+       break;
+
+      case 0x7d:
 
 #ifdef DEBUG
         fprintf(stdout, _("Message: Calendar note write failed!\n"));
@@ -3321,13 +3368,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     break;
 
-  case 0xf1:
-
     /* RLP frame received. */
 
-#ifdef DEBUG
-    printf(_("Message: RLP frame received.\n"));
- #endif DEBUG
+  case 0xf1:
 
     FB61_RX_HandleRLPMessage();
  
@@ -3444,12 +3487,13 @@ void FB61_RX_StateMachine(char rx_byte) {
 
       if (checksum[0] == checksum[1]) {
 
+	FB61_RX_DispatchMessage();
+
       /* We do not want to send ACK of ACKs and ACK of RLP frames. */
 
 	if (MessageType != FB61_FRTYPE_ACK && MessageType != 0xf1)
 	  FB61_TX_SendAck(MessageType, MessageBuffer[MessageLength-1] & 0x0f);
 
-	FB61_RX_DispatchMessage();
       }
 
 #ifdef DEBUG
@@ -3478,11 +3522,11 @@ enum FB61_RX_States FB61_RX_HandleRLPMessage(void)
   frame.Header[1] = MessageBuffer[3];
     
   for (count = 0; count < 25; count ++)
-    frame.Data[count] = MessageBuffer[3 + count];
-    
-  frame.FCS[0] = MessageBuffer[28];
-  frame.FCS[1] = MessageBuffer[29];
-  frame.FCS[2] = MessageBuffer[30];
+    frame.Data[count] = MessageBuffer[4 + count];
+
+  frame.FCS[0] = MessageBuffer[29];
+  frame.FCS[1] = MessageBuffer[30];
+  frame.FCS[2] = MessageBuffer[31];
     
   RLP_RXCallback(&frame);
 

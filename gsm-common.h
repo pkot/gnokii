@@ -294,6 +294,7 @@ typedef enum {
   GE_INVALIDMEMORYTYPE,     /* Invalid type of memory. */
   GE_INVALIDSPEEDDIALLOCATION, /* Invalid speed dial location. */
   GE_INVALIDCALNOTELOCATION,/* Invalid calendar note location. */
+  GE_INVALIDDATETIME,       /* Invalid date, time or alarm specification. */
   GE_EMPTYSMSLOCATION,      /* SMS location is empty. */
   GE_PHBOOKNAMETOOLONG,     /* Phonebook name is too long. */
   GE_PHBOOKNUMBERTOOLONG,   /* Phonebook number is too long. */

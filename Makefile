@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1_pre9
+VERSION = 0.3.1_pre10
 
 #
 # Compiler to use.
@@ -20,7 +20,7 @@ CC = gcc
 # developers and testers.
 #
 
-# DEBUG=-DDEBUG
+DEBUG=-DDEBUG
 
 #
 # Model of the mobile phone.  This is now only used as a default
@@ -101,10 +101,16 @@ COMMON_OBJS = gsm-api.o \
               gsm-networks.o cfgreader.o
 
 #
+# RLP objects - only needed for data calls
+#
+
+RLP_OBJS = rlp-common.o rlp-crc24.o
+
+#
 # Object files for each utility
 #
 
-GNOKII_OBJS = gnokii.o rlp-common.o
+GNOKII_OBJS = gnokii.o ${RLP_OBJS}
 
 XLOGOS_OBJS = xlogos.o
 

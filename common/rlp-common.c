@@ -12,8 +12,8 @@
 
 
 #include    "rlp-common.h"
+#include    "rlp-crc24.h"
 #include    "misc.h"        /* For u8, u32 etc. */
-#include    "crc24table.h"
 
 
 void    RLP_DisplayF96Frame(RLP_F96Frame *frame)
@@ -21,9 +21,12 @@ void    RLP_DisplayF96Frame(RLP_F96Frame *frame)
     int             count;
     RLP_F96Header   header;
 
-    RLP_DecodeF96Header(frame, &header);
+        /* Check FCS */
+    if (RLP_CheckCRC24FCS((u8 *)frame, 30) == true) {
 
-    switch (header.Type) {
+        RLP_DecodeF96Header(frame, &header);
+
+        switch (header.Type) {
         case RLPFT_U:
             fprintf(stdout, _("Unnumbered Frame M=%02x "), header.M);
             switch (header.M) {
@@ -77,9 +80,9 @@ void    RLP_DisplayF96Frame(RLP_F96Frame *frame)
         default:
             fprintf(stdout, _("Info+Supervisory Frame S=%x N(S)=%02x N(R)=%02x"), header.S, header.Ns, header.Nr);
             break;
-    }   
+        }   
 
-    fprintf(stdout, _(" P/F=%d C/R=%d \n"), header.PF, header.CR);
+        fprintf(stdout, _(" P/F=%d C/R=%d \n"), header.PF, header.CR);
     
     for (count = 0; count < 25; count ++) {
         if (isprint(frame->Data[count])) {
@@ -95,12 +98,9 @@ void    RLP_DisplayF96Frame(RLP_F96Frame *frame)
     
     fprintf (stdout, _(" FCS: %02x %02x %02x"), frame->FCS[0], frame->FCS[1], frame->FCS[2]);
 
-        /* Check FCS */
-    if (RLP_CheckCRC24FCS(frame, 30) == true) {
-        fprintf (stdout, _(" (OK)"));
     }
     else {
-        fprintf (stdout, _(" (Failed!)"));
+        /* RLP Checksum failed - don't we need some statistics about these failures? */
     }
 
     fprintf(stdout, "\n\n");
@@ -225,47 +225,3 @@ void    RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header)
     header->S = (frame->Header[0] >> 1) & 0x03;
 
 }
-
-void    RLP_CalculateCRC24Polinomial(u8 *data, int length, u32 *polinomial)
-{
-
-    int     i;
-    u8      cur;
-
-    *polinomial = 0x00ffffff;
-
-    for (i = 0; i < length; i++) {
-        cur = (*polinomial & 0x0000ffff) ^ data[i];
-        *polinomial = (*polinomial >> 8) ^ CRC24_Table[cur];
-    }
-
-    *polinomial = ((~*polinomial) & 0x00ffffff);
-}
-
-
-void    RLP_CalculateCRC24Checksum(u8 *data, int length, u8 *crc)
-{
-    u32     polinomial;
-
-    RLP_CalculateCRC24Polinomial(data, length, &polinomial);
-    crc[0] = polinomial & 0x0000ffff;
-    crc[1] = (polinomial >> 8) & 0x0000ffff;
-    crc[2] = (polinomial >> 16) & 0x0000ffff;
-
-}
-
-bool    RLP_CheckCRC24FCS(u8 *data, int length)
-{
-
-    u8     crc[] = { 0x00, 0x00, 0x00 };
-
-    RLP_CalculateCRC24Checksum(data, length - 3, crc);
-
-    if (((data[length - 3] == crc[0]) &&
-        (data[length - 2] == crc[1]) &&
-        (data[length - 1] == crc[2]))) {
-        return (true);
-    }
-    return (false);
-}
-

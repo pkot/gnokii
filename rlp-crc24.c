@@ -1,20 +1,24 @@
+/*
 
-	/* G N O K I I
-	   A Linux/Unix toolset and driver for Nokia mobile phones.
-	   Copyright (C) Hugh Blemings, 1999  Released under the terms of 
-       the GNU GPL, see file COPYING for more details.
-	
-	   This file:  crc24table.h   Version 0.3.1
+  G N O K I I
 
-       Table used in CRC-24 calculations.  In separate file to keep code
-       a little cleaner. */
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+  Copyright (C) Hugh Blemings & Pavel Janík ml., 1999.
 
-#ifndef		__crc24table_h
-#define		__crc24table_h
+  Released under the terms of the GNU GPL, see file COPYING for more details.
 
-#ifndef     __misc_h
-    #include    "misc.h"
-#endif
+  This file:  rlp-crc24.c   Version 0.3.1
+
+  CRC24 (aka FCS) implementation in RLP.
+
+  Last modification: Sun Oct 24 17:55:27 CEST 1999
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+*/
+
+#include "rlp-crc24.h"
+
+/* CRC-24 table is used for computation of RLP checksum. */
 
 const u32 CRC24_Table[256] = {
     0x00000000, 0x00D6A776, 0x00F64557, 0x0020E221, 0x00B78115, 0x00612663,
@@ -62,4 +66,45 @@ const u32 CRC24_Table[256] = {
     0x006D7F0C, 0x00BBD87A, 0x009B3A5B, 0x004D9D2D
 };
 
-#endif
+void    RLP_CalculateCRC24Polinomial(u8 *data, int length, u32 *polinomial)
+{
+
+    int     i;
+    u8      cur;
+
+    *polinomial = 0x00ffffff;
+
+    for (i = 0; i < length; i++) {
+        cur = (*polinomial & 0x0000ffff) ^ data[i];
+        *polinomial = (*polinomial >> 8) ^ CRC24_Table[cur];
+    }
+
+    *polinomial = ((~*polinomial) & 0x00ffffff);
+}
+
+
+void    RLP_CalculateCRC24Checksum(u8 *data, int length, u8 *crc)
+{
+    u32     polinomial;
+
+    RLP_CalculateCRC24Polinomial(data, length, &polinomial);
+    crc[0] = polinomial & 0x0000ffff;
+    crc[1] = (polinomial >> 8) & 0x0000ffff;
+    crc[2] = (polinomial >> 16) & 0x0000ffff;
+
+}
+
+bool    RLP_CheckCRC24FCS(u8 *data, int length)
+{
+
+    u8     crc[] = { 0x00, 0x00, 0x00 };
+
+    RLP_CalculateCRC24Checksum(data, length - 3, crc);
+
+    if (((data[length - 3] == crc[0]) &&
+        (data[length - 2] == crc[1]) &&
+        (data[length - 1] == crc[2]))) {
+        return (true);
+    }
+    return (false);
+}

@@ -1523,7 +1523,14 @@ void foogle(char *argv[])
 
   fbusinit(true, RLP_DisplayF96Frame);
 
-  GSM->DialData("62401000");
+  sleep(5); /* Wait for phone initialisation. */
+
+  /* Hugh's number */
+
+  // GSM->DialData("62401000");
+
+  /* Pavel's one */
+  GSM->DialData("4670");
   
   sleep (60);
   GSM->Terminate();
