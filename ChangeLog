@@ -2,6 +2,7 @@
 ========================
  * 6510 series updates
     o GetRawRingtone reply differs on 6310         (BORBELY Zoltan)
+    o GetSMSFolders hardcoded blocklen fixed  (Michael H. Warfield)
  * gnokiid updates
     o double free bug eliminated from mgnokiidev   (BORBELY Zoltan)
     o traditional pty support fixed                (BORBELY Zoltan)

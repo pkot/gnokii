@@ -292,8 +292,8 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
 					  0x07 - stored/not sent
 
     s Get folder names      { 0x12, 0x00, 0x00}
-    r Get folder names      { 0x13, 0x00, number of strings, 0x01, 0x28, folderID, length, 0x00, name1, 0x00, 
-			    0x55[40-length(name1)], 01 28, folderID, length, 0x00, name2, 0x00, 0x55[dito] ... }
+    r Get folder names      { 0x13, 0x00, number of blocks, blocks... }
+			    where block is: { 0x01, blocklen, folderID, length, 0x00, 0x00, padding... }
                                where: folderID = 0x02 - Inbox
                                                  0x03 - Outbox
                                                  0x04 - Archive
@@ -302,6 +302,10 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                                             0x07 - second "My folders"
                                             0x08 - third -"-
                                             and so on
+				      blocklen = length of the block including
+				                 the 0x01 and blocklen itself
+						 e.g.: 0x28 - 6510
+						       0x58 - 6610
 
 
 0x17: BATTERY

@@ -834,16 +834,18 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		data->sms_folder_list->number = message[5];
 		dprintf("Message: %d SMS Folders received:\n", data->sms_folder_list->number);
 
+		i = 6;
 		for (j = 0; j < data->sms_folder_list->number; j++) {
 			int len;
 			strcpy(data->sms_folder_list->folder[j].name, "               ");
 
-			i = 10 + (j * 40);
-			data->sms_folder_list->folder_id[j] = message[i - 2];
-			dprintf("Folder(%i) name: ", message[i - 2]);
-			len = message[i - 1] << 1;
-			char_unicode_decode(data->sms_folder_list->folder[j].name, message + i, len);
+			if (message[i] != 0x01) return GN_ERR_UNHANDLEDFRAME;
+			data->sms_folder_list->folder_id[j] = message[i + 2];
+			dprintf("Folder(%i) name: ", message[i + 2]);
+			len = message[i + 3] << 1;
+			char_unicode_decode(data->sms_folder_list->folder[j].name, message + i + 4, len);
 			dprintf("%s\n", data->sms_folder_list->folder[j].name);
+			i += message[i + 1];
 		}
 		break;
 
