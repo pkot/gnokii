@@ -2258,15 +2258,13 @@ static void ReadConfig (void)
       if ((xgnokiiConfig.locale = getenv ("LANG")) == NULL)
         xgnokiiConfig.locale = "POSIX";
 #endif
- 
-    /* Try opening .gnokirc from users home directory first */
-  if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
-      /* It failed so try for /etc/gnokiirc */
-    if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL ) {
-        /* That failed too so go with defaults... */
-      g_print (_("Couldn't open %s or /etc/gnokiirc, using default config\n"), rcfile);
-    }
-  }
+
+  /* Try opening .gnokirc from users home directory first */
+  if ((cfg_info = CFG_ReadFile (rcfile)) == NULL)
+    /* It failed so try for /etc/gnokiirc */
+    if ( (cfg_info = CFG_ReadFile ("/etc/gnokiirc")) == NULL )
+      /* That failed too so go with defaults... */
+      g_print (_("Couldn't open %s or /etc/gnokiirc, using default config!\n"), rcfile);
 
   g_free (rcfile);
 
@@ -2327,7 +2325,7 @@ static void ReadConfig (void)
 int main (int argc, char *argv[])
 {
 #ifdef USE_NLS
-  textdomain("xgnokii");
+  textdomain("gnokii");
 #endif
 
   (void) gtk_set_locale ();

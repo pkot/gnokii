@@ -84,7 +84,7 @@ static QuestMark questMark;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/sms.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/sms/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }
@@ -160,7 +160,9 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     bdTime.tm_year = atoi (text1 + 6);
     if (bdTime.tm_year < 70)
       bdTime.tm_year += 100;
+#ifdef TM_GMT
     bdTime.tm_gmtoff = atoi (text1 + 21);
+#endif
     bdTime.tm_isdst = -1;
 
     time1 = mktime (&bdTime);
@@ -173,7 +175,9 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     bdTime.tm_year = atoi (text2 + 6);
     if (bdTime.tm_year < 70)
       bdTime.tm_year += 100;
+#ifdef TM_GMT
     bdTime.tm_gmtoff = atoi (text2 + 21);
+#endif
     bdTime.tm_isdst = -1;
 
     time2 = mktime (&bdTime);
@@ -1367,8 +1371,6 @@ static GtkItemFactoryEntry menu_items[] = {
   { NULL,		NULL,		NULL,		0, "<Branch>"},
   { NULL,		"<control>S",	NULL,		0, NULL},
   { "/File/sep1",	NULL,		NULL,		0, "<Separator>"},
-//  { NULL,		"<control>X",	GUI_RefreshSMS,	0, NULL},
-//  { "/File/sep2",	NULL,		NULL,		0, "<Separator>"},
   { NULL,		"<control>W",	CloseSMS,	0, NULL},
   { NULL,		NULL,		NULL,		0, "<Branch>"},
   { NULL,		"<control>N",	NewSMS,		0, NULL},
@@ -1595,7 +1597,7 @@ void GUI_CreateSMSWindow (void)
   SMS.colour.green = 0;
   SMS.colour.blue = 0;
   if (!gdk_color_alloc (cmap, &(SMS.colour)))
-    g_error ("couldn't allocate colour");
+    g_error (_("couldn't allocate colour"));
 
   questMark.pixmap = gdk_pixmap_create_from_xpm_d (GUI_SMSWindow->window,
                          &questMark.mask,

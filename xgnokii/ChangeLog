@@ -1,3 +1,9 @@
+* Sun May 21 22:33:19 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- New English online help. <(Marcin Wiacek
+  <Marcin-Wiacek@topnet.pl>)
+- Added notes viewer in Calendar window.
+- Added function which get and show notes in phone.
+
 * Wed May 17 17:51:07 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
 - New install procedure for online documetation. (Brad Guillory
   <round@baileylink.net>)

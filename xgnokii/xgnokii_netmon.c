@@ -36,7 +36,7 @@ static GtkWidget *tableProgress[7];
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/netmon.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/netmon/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }

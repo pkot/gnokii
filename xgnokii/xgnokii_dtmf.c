@@ -33,7 +33,7 @@ static gchar *saveFileName;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/dtmf.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/dtmf/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }

@@ -91,7 +91,7 @@ inline bool GUI_ContactsIsIntialized (void)
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/contacts.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/contacts/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }

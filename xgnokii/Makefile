@@ -54,6 +54,9 @@ install: all
 	  find ./ -type f \! -path "*CVS*" \
 	       -exec $(INSTALL) -m 0444 {} $(xgnokii_libdir)/help/{} \; \
 	)
+	$(INSTALL) -d $(xgnokii_libdir)/help/en_US/{devel,sample}
+	$(INSTALL) -m 0444 ../Docs/sample/sample.gnokiirc $(xgnokii_libdir)/help/en_US/sample
+	$(INSTALL) -m 0444 ../Docs/{README-3810,README-6110,gettext-howto,packaging-howto} $(xgnokii_libdir)/help/en_US/devel
 	(cd $(xgnokii_libdir)/help; ln -s en_US C; ln -s en_US POSIX)
 	$(INSTALL) -d $(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6110.xpm $(xgnokii_libdir)/xpm

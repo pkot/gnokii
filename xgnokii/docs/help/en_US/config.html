@@ -1,0 +1,175 @@
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Marcin Wiacek">
+   <title>Configuration</title>
+   <link REL=stylesheet HREF="styl.css" TYPE="text/css">
+</head>
+<body>
+
+<a NAME="Top"></a>
+<p align="RIGHT"><a class="autoremail" href="index.html">Main page</a></p>
+<center><font color="#1F409F" size=+2 class="tytul">Configuration</font></center>
+
+<p><hr size="2" noshade width="60%" align="center" style="color: #004080">
+
+<p><font color="#1F409F" size=+2 class="dzial">How to install it from the source ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>gnokii makes use of autoconf/automake which allows you to configure
+the source tree for your system by typing 
+
+<p><i>./configure</i>
+
+<p>You can also run configure with the --help flag to get a list of 
+available options.  There are about a dozen or so that are specific
+to gnokii, --with-model and --with-port being particularly
+relevant as they specify the defaults used in the absence of
+a .gnokiirc file.
+
+<p>Once you've run ./configure successfully, you should be able to
+simply do a make and make install to compile and install your 
+binaries respectively.
+
+<p><i>make</i>
+
+<p><i>make install</i>
+
+<p>With this done you've built and installed your binaries, and
+should proceed to the configuration section below.
+
+<p><font color="#1F409F" size=+2 class="dzial">How to install it from binaries ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>If you downloaded gnokii as a pre-built binary you should install
+it in the conventional manner for the package type in question.
+For example if you downloaded a .rpm file you can install it by
+running the following as root.
+
+<p>rpm -i gnokii-0.3.2-i386.rpm
+
+<p>If you are using a Debian based system, you can use dpackage
+to do the installation (FIXME - is this correct ?)
+
+<p><font color="#1F409F" size=+2 class="dzial">How to make connection with phone ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>There are three ways to make it:
+
+<ul>
+<li>connecting phone with computer using cable. All phones allow to make it
+(even 3210 - connector is inside). If you want to know more
+about creating your own cable, read <a href=cables/cables.html>cables faq</a>.</li>
+<li>using IrDa port in phone and computer. Notice, that your computer
+and phone must have it (only some series of Nokia phones has it - for example,
+6110, 6150)</li>
+<li>connecting to phone special device called "dongle" (it has IrDa port)
+and making IrDa connection between it and phone. Current gnokii cas use
+Tekram IRmate 210 - see patches</li>
+</ul>
+
+<p><font color="#1F409F" size=+2 class="dzial">How to configure gnokii ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>You could copy the <a href=sample/sample.gnokiirc>sample.gnokiirc</a>
+file from the Docs/en_US/samples directory to your
+home directory and name it .gnokiirc or copy it into /etc directory
+and name .gnokiirc.
+
+<p>Using your favorite
+editor ensure that the settings are correct for your system,
+the sample file has details of the various options available.
+
+<p>Note that you will need read/write permissions on whatever
+serial port you specify in .gnokiirc.  You can now use gnokii
+and xgnokii.
+
+<p><font color="#1F409F" size=+2 class="dzial">How to configure infrared connection ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>
+<ul>
+
+<li>Go into configuration of your IrDa port (the most often it's made in
+BIOS, sometimes using program provided by computer's producer):
+
+<p>
+<ul>
+<li>Enable it</li>
+<li>Setup the COM-Port on which it should work.
+Here are addresses:
+<br>ttyS0 (COM1): 3F8, IRQ: 4
+<br>ttyS1 (COM2): 2F8, IRQ: 3
+<br>ttyS2 (COM3): 3E8, IRQ: 4
+<br>ttyS3 (COM4): 2E8, IRQ: 3
+<br>&nbsp;
+</li>
+</ul>
+</li>
+
+<li>Configure gnokii (see previous question)
+setting type of connection to
+infrared.</li>
+
+<li>If you are using linux, put linux-irda off (you can't use gnokii over infrared and
+linux-irda at the same time - it means too, if you want use
+linux-irda you must close all gnokii-applications what
+use the infrared-port in moment).
+</li>
+</ul>
+
+<p><font color="#1F409F" size=+2 class="dzial">How to configure gnokii driver for data connection ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>After installing and configuring gnokii you should make another group
+and allow mgnokiidev to use it. For example (if you have installed gnokii
+into /usr/local):
+
+<p>
+<i>groupadd gnokii<br>
+chown root:gnokii /usr/local/sbin/mgnokiidev<br>
+chmod 4750 /usr/local/sbin/mgnokiidev</i>
+
+<p>Then connect your phone to your PC and then run gnokiid:
+
+<p><i># gnokiid</i>
+
+<p>If successful, you should see a message saying that mgnokiidev has been
+run to create /dev/gnokii.  If you're using a 5110/6110 series phone
+you should hear a beep and see an "accessory connected" message on
+the phone.  If you're using a 3810 series phone you won't see anything
+on the phones LCD.
+
+<p>[I run gnokiid as root; it will probably work for another user who is
+in group gnokii, as long as the serial port is accessible to that
+user as well.  It's not recommended that you run gnokiid as root
+permanently however!]
+
+<p>Use /dev/gnokii as a modem:
+
+<p><i>e.g. ppp session<br>
+--------------- /etc/ppp/peers/demon-gnokii ---------------------<br>
+/dev/gnokii 115200<br>
+modem crtscts defaultroute<br>
+connect 'chat -v ABORT BUSY ABORT ERROR ABORT "NO CARRIER" "" AT OK-AT-OK ATD02083389666 CONNECT'<br>
+user XXXX.demon.co.uk<br>
+noauth<br>
+mtu 296<br>
+debug<br>
+----------------------------------------------------------------<br>
+--------------- /etc/ppp/pap-secrets ---------------------------<br>
+XXXX.demon.co.uk	demon-gnokii	<yourpassword><br>
+----------------------------------------------------------------<br>
+</i>
+
+<p>Then "pppd call demon-gnokii" should connect
+<br>('tail -f /var/log/messages' to see what is happening)
+
+<p>If a call terminates you should get 'NO CARRIER' and gnokiid should
+continue to work, but this is early code and you may find you have to
+Ctrl-C and restart gnokiid (especially if the phone says the terminal
+connection has been lost)
+
+</div>
+</body>
+</html>

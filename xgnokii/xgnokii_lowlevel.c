@@ -445,19 +445,16 @@ static gint A_GetCalendarNoteAll (gpointer data)
 {
   GSM_CalendarNote entry;
   D_CalendarNoteAll *cna = (D_CalendarNoteAll *) data;
+  GSM_Error e;
   register gint i = 1;
 
   pthread_mutex_lock (&calendarMutex);
   while (1)
   {
-    GSM_Error e;
     entry.Location = i++;
 
     if ((e = GSM->GetCalendarNote (&entry)) != GE_NONE)
-    {
-      g_print ("%d\n", e);
       break;
-    }
 
     if (cna->InsertEntry (&entry) != GE_NONE)
       break;
@@ -465,7 +462,10 @@ static gint A_GetCalendarNoteAll (gpointer data)
 
   pthread_mutex_unlock (&calendarMutex);
   g_free (cna);
-  return (GE_NONE);
+  if (e == GE_INVALIDCALNOTELOCATION)
+    return (GE_NONE);
+  else
+    return (e);
 }
 
 
