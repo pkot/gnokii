@@ -195,30 +195,29 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 	return GE_NONE;
 }
 
-GSM_Error PNOK_FBUS_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+int PNOK_FBUS_EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *req)
 {
-	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
-	GSM_Error error;
+	int pos = 0;
 
-	memset(req + 6, 0, 249);
-	memcpy(req + 6, data->RawSMS->MessageCenter, 12);
-	req[18] = 0x01; /* SMS Submit */
-	if (data->RawSMS->ReplyViaSameSMSC)  req[18] |= 0x80;
-	if (data->RawSMS->RejectDuplicates)  req[18] |= 0x04;
-	if (data->RawSMS->Report)            req[18] |= 0x20;
-	if (data->RawSMS->UDHIndicator)      req[18] |= 0x40;
-	if (data->RawSMS->ValidityIndicator) req[18] |= 0x10;
-	req[19] = data->RawSMS->Reference;
-	req[20] = data->RawSMS->PID;
-	req[21] = data->RawSMS->DCS;
-	req[22] = data->RawSMS->Length;
-	memcpy(req + 23, data->RawSMS->RemoteNumber, 12);
-	memcpy(req + 35, data->RawSMS->Validity, 7);
-	memcpy(req + 42, data->RawSMS->UserData, data->RawSMS->UserDataLength);
-	dprintf("Sending SMS...(%d)\n", 42 + data->RawSMS->UserDataLength);
-	if (SM_SendMessage(state, 42 + data->RawSMS->UserDataLength, PNOK_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
-	do {
-		error = SM_BlockNoRetryTimeout(state, data, PNOK_MSG_SMS, state->Link.SMSTimeout);
-	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
-	return error;
+	memcpy(req, data->RawSMS->MessageCenter, 12);
+	pos += 12;
+	req[pos] = 0x01; /* SMS Submit */
+	if (data->RawSMS->ReplyViaSameSMSC)  req[pos] |= 0x80;
+	if (data->RawSMS->RejectDuplicates)  req[pos] |= 0x04;
+	if (data->RawSMS->Report)            req[pos] |= 0x20;
+	if (data->RawSMS->UDHIndicator)      req[pos] |= 0x40;
+	if (data->RawSMS->ValidityIndicator) req[pos] |= 0x10;
+	pos++;
+	req[pos++] = data->RawSMS->Reference;
+	req[pos++] = data->RawSMS->PID;
+	req[pos++] = data->RawSMS->DCS;
+	req[pos++] = data->RawSMS->Length;
+	memcpy(req + pos, data->RawSMS->RemoteNumber, 12);
+	pos += 12;
+	memcpy(req + pos, data->RawSMS->Validity, 7);
+	pos+= 7;
+	memcpy(req + pos, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+	pos += data->RawSMS->UserDataLength;
+
+	return pos;
 }

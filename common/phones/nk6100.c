@@ -1179,7 +1179,10 @@ static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
 	GSM_Data dtemp;
+	GSM_Error error;
+	int len;
 
 	/*
 	 * FIXME:
@@ -1189,7 +1192,16 @@ static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	GSM_DataClear(&dtemp);
 	GetNetworkInfo(&dtemp, state);
 
-	return PNOK_FBUS_SendSMS(data, state);
+
+	len = PNOK_FBUS_EncodeSMS(data, state, req + 6);
+	len += 6;
+
+	if (SM_SendMessage(state, len, PNOK_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
+	do {
+		error = SM_BlockNoRetryTimeout(state, data, PNOK_MSG_SMS, state->Link.SMSTimeout);
+	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
+
+	return error;
 }
 
 static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)

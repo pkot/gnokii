@@ -81,6 +81,7 @@ static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_PollSMS(GSM_Data *data, GSM_Statemachine *state);
@@ -214,7 +215,7 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		if (NewSMS) return GE_NONE; /* FIXME P7110_GetIncomingSMS(data, state); */
 		break;
 	case GOP_SendSMS:
-		return PNOK_FBUS_SendSMS(data, state);
+		return P7110_SendSMS(data, state);
 	case GOP_DeleteSMSnoValidate:
 		return P7110_DeleteSMSnoValidate(data, state);
 	case GOP_DeleteSMS:
@@ -1310,6 +1311,22 @@ static GSM_Error P7110_PollSMS(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_SMS, 8);
 }
 
+static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
+	GSM_Error error;
+	int len;
+
+	len = PNOK_FBUS_EncodeSMS(data, state, req + 6);
+	len += 6;
+
+	if (SM_SendMessage(state, len, PNOK_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
+	do {
+		error = SM_BlockNoRetryTimeout(state, data, PNOK_MSG_SMS, state->Link.SMSTimeout);
+	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
+
+	return error;
+}
 
 /**********************************/
 /************* CLOCK **************/
@@ -1367,39 +1384,6 @@ static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 /**********************************/
 /*********** CALENDAR *************/
 /**********************************/
-static GSM_Error P7110_GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *alarm)
-{
-	time_t				t_alarm;
-	struct tm			tm_time;
-	struct tm			*tm_alarm;
-	GSM_Error			e = GE_NONE;
-
-	if (!time || !alarm) return GE_INTERNALERROR;
-
-	memset(&tm_time, 0, sizeof(tm_time));
-	tm_time.tm_year = time->Year - 1900;
-	tm_time.tm_mon = time->Month - 1;
-	tm_time.tm_mday = time->Day;
-	tm_time.tm_hour = time->Hour;
-	tm_time.tm_min = time->Minute;
-
-	tzset();
-	t_alarm = mktime(&tm_time);
-	t_alarm -= alarmdiff;
-	t_alarm += timezone;
-
-	tm_alarm = localtime(&t_alarm);
-
-	alarm->Year = tm_alarm->tm_year + 1900;
-	alarm->Month = tm_alarm->tm_mon + 1;
-	alarm->Day = tm_alarm->tm_mday;
-	alarm->Hour = tm_alarm->tm_hour;
-	alarm->Minute = tm_alarm->tm_min;
-	alarm->Second = tm_alarm->tm_sec;
-
-	return e;
-}
-
 static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error			e = GE_NONE;
