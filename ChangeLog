@@ -1,5 +1,6 @@
 0.4.0pre21 (not released yet)
 ==========
+ * Security functions for AT phones                 (Manfred Jonsson)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
     o added Terminate to GOP functions
