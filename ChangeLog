@@ -28,6 +28,8 @@
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
     o implement WAP                                    (Markus Plail)
+ * AT series updates:
+    o fix SMS reading                       (Pavel Machek, Pawel Kot)
  * Call management subsystem updates:
     o state pointer added to CallNotification        (BORBELY Zoltan)
     o call management API added to the repository    (BORBELY Zoltan)

@@ -1027,7 +1027,7 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 	hex2bin(tmp, buf.line3, sms_len);
 	memcpy(data->RawSMS->MessageCenter, tmp, tmp[offset] + 1);
 	offset += tmp[offset] + 1;
-	data->RawSMS->Type             = tmp[offset] & 0x03;
+	data->RawSMS->Type             = (tmp[offset] & 0x03) << 1;
 	data->RawSMS->UDHIndicator     = tmp[offset];
 	data->RawSMS->MoreMessages     = tmp[offset];
 	data->RawSMS->ReportStatus     = tmp[offset];
