@@ -29,6 +29,7 @@
 
 DWORD FAR PASCAL CommWatchProc(LPSTR lpData);
 DWORD FAR PASCAL KeepAliveProc(LPSTR lpData);
+BOOL SetupConnection();
 #define MAXBLOCK 1024
 
 //---------------------------------------------------------------------------
@@ -157,7 +158,6 @@ BOOL OpenConnection(char *szPort, sigcallback fn, keepalive ka)
 BOOL SetupConnection()
 {
     BOOL       fRetVal;
-    BYTE       bSet;
     DCB        dcb;
 
     dcb.DCBlength = sizeof(DCB);
@@ -437,7 +437,7 @@ DWORD FAR PASCAL CommWatchProc(LPSTR lpData)
 
 	if ((dwEvtMask & EV_RXCHAR) == EV_RXCHAR) {
 	    do {
-		if (nLength = ReadCommBlock((LPSTR) abIn, MAXBLOCK)) {
+		if ((nLength = ReadCommBlock((LPSTR) abIn, MAXBLOCK))) {
 		    int i;
 
 		    for (i = 0; i < nLength; i++)
