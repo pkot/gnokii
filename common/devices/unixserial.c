@@ -61,6 +61,10 @@
 #  include <sys/modem.h>
 #endif
 
+#ifdef HAVE_SYS_FILIO_H
+#  include <sys/filio.h>
+#endif
+
 /* If the target operating system does not have cfsetspeed, we can emulate
    it. */
 
