@@ -33,6 +33,12 @@
     o fix deleting SMS messages                        (Markus Plail)
     o fix date when saving SMS messages to mailbox     (Markus Plail)
     o use correct xgnokiidir in xgnokii    (Pawel Kot, Tor Petterson)
+    o fix changing memory type with newer phones
+                                          (Markus Plail, Paul Vriens)
+    o fix name disappearing after editing numbers
+                                          (Markus Plail, Paul Vriens)
+    o fix number disappearing when changin memory type
+                                          (Markus Plail, Paul Vriens)
  * gnokii updates:
     o remove SMSFolder hack from getsms                (Markus Plail)
     o call status display added                      (BORBELY Zoltan)
