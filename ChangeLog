@@ -31,6 +31,7 @@
     o contacts won't save a trailing semicolon     (BORBELY Zoltan)
  * gnapplet series updates
     o gnapplet support added                       (BORBELY Zoltan)
+    o minimal phonebook reading support            (BORBELY Zoltan)
 
 0.6.0
 =====

@@ -33,6 +33,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <assert.h>
 
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
@@ -245,26 +246,47 @@ static gn_error gnapplet_read_phonebook(gn_data *data, struct gn_statemachine *s
 
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	int i, n;
-	char name[64], val[64];
+	int i, n, type;
 	gn_phonebook_entry *entry;
+	gn_phonebook_subentry *se;
 	REPLY_DEF;
 
 	switch (code) {
 
 	case GNAPPLET_MSG_PHONEBOOK_READ_RESP:
 		if (!(entry = data->phonebook_entry)) return GN_ERR_INTERNALERROR;
-		entry->empty = true;
+		entry->empty = false;
 		entry->caller_group = 5;
 		entry->name[0] = '\0';
 		entry->number[0] = '\0';
 		entry->subentries_count = 0;
 		if (error != GN_ERR_NONE) return error;
 		n = pkt_get_uint16(&pkt);
+		assert(n < GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER);
 		for (i = 0; i < n; i++) {
-			pkt_get_string(name, sizeof(name), &pkt);
-			pkt_get_string(val, sizeof(val), &pkt);
-			dprintf("name: [%s] val: [%s]\n", name, val);
+			se = entry->subentries + entry->subentries_count;
+			type = pkt_get_uint16(&pkt);
+			switch (type) {
+			case GN_PHONEBOOK_ENTRY_Name:
+				pkt_get_string(entry->name, sizeof(entry->name), &pkt);
+				break;
+			case GN_PHONEBOOK_ENTRY_Number:
+				if (!entry->number[0]) {
+					pkt_get_string(entry->number, sizeof(entry->number), &pkt);
+				} else {
+					se->entry_type = type;
+					se->number_type = 0;
+					pkt_get_string(se->data.number, sizeof(se->data.number), &pkt);
+					entry->subentries_count++;
+				}
+				break;
+			default:
+				se->entry_type = type;
+				se->number_type = 0;
+				pkt_get_string(se->data.number, sizeof(se->data.number), &pkt);
+				entry->subentries_count++;
+				break;
+			}
 		}
 		break;
 
