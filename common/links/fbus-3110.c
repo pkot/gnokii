@@ -48,10 +48,11 @@
 #include "links/fbus-3110.h"
 
 static bool fb3110_serial_open(struct gn_statemachine *state);
+static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemachine *state);
 static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachine *state);
-static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state);
+static gn_error fb3110_tx_frame_send(u8 frame_type, u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state);
 static gn_error fb3110_message_send(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
-static void fb3110_tx_ack_send(u8 *message, int length, struct gn_statemachine *state);
+static void fb3110_tx_ack_send(u8 messagetype, u8 checksum, struct gn_statemachine *state);
 static void fb3110_sequence_number_update(struct gn_statemachine *state);
 static int fb3110_message_type_fold(int type);
 
@@ -74,6 +75,46 @@ static bool fb3110_serial_open(struct gn_statemachine *state)
 	return true;
 }
 
+/*
+ * Handles one complete frame. What to do with it depends on the frame
+ * type. Frames are acknowledged if needed and information about them is
+ * passed to the main statemachine.
+ */
+ 
+static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemachine *state)
+{
+	int count;
+
+	dprintf("--> %02x:%02x:", i->frame_type, i->frame_len);
+	for (count = 0; count < i->buffer_count; count++)
+		dprintf("%02hhx:", i->buffer[count]);
+	dprintf("\n");
+
+	if (i->frame_type == FB3110_FRAME_TYPE_IN_RLP) { /* RLP frame */
+
+		/* Transfer RLP frame to state machine. The messagetype
+		 * should always be 0x02 in this case, so the frame type
+		 * doesn't have to be passed to the statemachine and on to
+		 * the driver - RLP frames can be told apart by messagetype.
+		 * But check message type anyway just to make sure. */
+
+		if (i->buffer[0] != 0x02)
+			dprintf("RLP frame with non-0x02 message type (0x%02x) received!\n", i->buffer[0]);
+
+		sm_incoming_function(i->buffer[0], i->buffer, i->frame_len, state);
+
+	} else if (i->buffer[1] >= 0x30) { /* msg frame */
+
+		/* Send an ack */
+		fb3110_tx_ack_send(i->buffer[0], i->buffer[1], state);
+		/* Transfer message to state machine */
+		sm_incoming_function(fb3110_message_type_fold(i->buffer[0]), i->buffer, i->frame_len, state);
+
+	} else { /* ack frame */
+		sm_incoming_acknowledge(state);
+	}
+}
+
 
 /* 
  * RX_State machine for receive handling.
@@ -82,7 +123,6 @@ static bool fb3110_serial_open(struct gn_statemachine *state)
 static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachine *state)
 {
 	fb3110_incoming_frame *i = &FBUSINST(state)->i;
-	int count;
 
 	switch (i->state) {
 
@@ -127,7 +167,7 @@ static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachin
 		i->buffer[i->buffer_count] = rx_byte;
 		i->buffer_count++;
 
-		if (i->buffer_count > FB3110_FRAME_MAX_LENGTH) {
+		if (i->buffer_count >= FB3110_FRAME_MAX_LENGTH) {
 			dprintf("FBUS: Message buffer overun - resetting\n");
 			i->state = FB3110_RX_Sync;
 			break;
@@ -138,22 +178,8 @@ static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachin
 
 			/* Is the checksum correct? */
 			if (rx_byte == i->checksum) {
-
-				if (i->frame_type == 0x03) {
-					/* FIXME: modify Buffer[0] to code FAX frame types */
-				}
-
-				dprintf("--> %02x:%02x:", i->frame_type, i->frame_len);
-				for (count = 0; count < i->buffer_count; count++)
-					dprintf("%02hhx:", i->buffer[count]);
-				dprintf("\n");
-				/* Transfer message to state machine */
-				sm_incoming_acknowledge(state);
-				sm_incoming_function(fb3110_message_type_fold(i->buffer[0]), i->buffer, i->frame_len, state);
-
-				/* Send an ack */
-				fb3110_tx_ack_send(i->buffer, i->frame_len, state);
-
+				/* Frame received OK, deal with it! */
+				fb3110_rx_frame_handle(i, state);
 			} else {
 				/* Checksum didn't match so ignore. */
 				dprintf("Bad checksum!\n");
@@ -191,13 +217,12 @@ static gn_error fb3110_loop(struct timeval *timeout, struct gn_statemachine *sta
 }
 
 
-
 /* 
  * Prepares the message header and sends it, prepends the message start
  * byte (0x01) and other values according the value specified when called.
  * Calculates checksum and then sends the lot down the pipe... 
  */
-static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state)
+static gn_error fb3110_tx_frame_send(u8 frame_type, u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state)
 {
 
 	u8 out_buffer[FB3110_TRANSMIT_MAX_LENGTH];
@@ -212,7 +237,7 @@ static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequ
 	}
 
 	/* Now construct the message header. */
-	out_buffer[current++] = FB3110_FRAME_ID;    /* Start of frame */
+	out_buffer[current++] = frame_type;         /* Start of frame */
 	out_buffer[current++] = message_length + 2; /* Length */
 	out_buffer[current++] = message_type;       /* Type */
 	out_buffer[current++] = sequence_byte;      /* Sequence number */
@@ -248,79 +273,32 @@ static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequ
  */
 static gn_error fb3110_message_send(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
-	u8 seqnum;
+	u8 seqnum, frame_type;
 
-	fb3110_sequence_number_update(state);
-	seqnum = FBUSINST(state)->request_sequence_number;
+	/* Data (RLP) frame always have message type 0x01 */
+	if (messagetype == 0x01) {
+		seqnum = 0xd9; /* always constant for RLP frames */
+		frame_type = FB3110_FRAME_TYPE_OUT_RLP;
+	} else { /* normal command frame */
+		fb3110_sequence_number_update(state);
+		seqnum = FBUSINST(state)->request_sequence_number;
+		frame_type = FB3110_FRAME_TYPE_OUT_CMD;
+	}
 
-	return fb3110_tx_frame_send(messagesize, messagetype, seqnum, message, state);
+	return fb3110_tx_frame_send(frame_type, messagesize, messagetype, seqnum, message, state);
 }
 
 
 /* 
  * Sends the "standard" acknowledge message back to the phone in response to
  * a message it sent automatically or in response to a command sent to it.
- * The ack algorithm isn't 100% understood at this time. 
  */
-static void fb3110_tx_ack_send(u8 *message, int length, struct gn_statemachine *state)
+static void fb3110_tx_ack_send(u8 messagetype, u8 seqno, struct gn_statemachine *state)
 {
-	u8 t = message[0];
-
-	switch (t) {
-	case 0x0a:
-		/* We send 0x0a messages to make a call so don't ack. */
-	case 0x0c:
-		/* We send 0x0c message to answer to incoming call
-		   so don't ack */
-	case 0x0f:
-		/* We send 0x0f message to hang up so don't ack */
-	case 0x15:
-		/* 0x15 messages are sent by the phone in response to the
-		   init sequence sent so we don't acknowledge them! */
-	case 0x20:
-		/* We send 0x20 message to phone to send DTFM, so don't ack */
-	case 0x23:
-		/* We send 0x23 messages to phone as a header for outgoing SMS
-		   messages.  So we don't acknowledge it. */
-	case 0x24:
-		/* We send 0x24 messages to phone as a header for storing SMS
-		   messages in memory. So we don't acknowledge it. :) */
-	case 0x25:
-		/* We send 0x25 messages to phone to request an SMS message
-		   be dumped.  Thus we don't acknowledge it. */
-	case 0x26:
-		/* We send 0x26 messages to phone to delete an SMS message
-		   so it's not acknowledged. */
-	case 0x3f:
-		/* We send an 0x3f message to the phone to request a different
-		   type of status dump - this one seemingly concerned with
-		   SMS message center details.  Phone responds with an ack to
-		   our 0x3f request then sends an 0x41 message that has the
-		   actual data in it. */
-	case 0x42:
-		/* ack for phonebook write */
-	case 0x43:
-		/* ack for phonebook read */
-	case 0x4a:
-		/* 0x4a message is a response to our 0x4a request, assumed to
-		   be a keepalive message of sorts.  No response required. */
-	case 0x4c:
-		/* We send 0x4c to request IMEI, Revision and Model info. */
-		break;
-	case 0x27:
-		/* 0x27 messages are a little different in that both ends of
-		   the link send them.  So, first we have to check if this
-		   is an acknowledgement or a message to be acknowledged */
-		if (length == 0x02) break;
-	default:
-		/* Standard acknowledge seems to be to return an empty message
-		   with the sequence number set to equal the sequence number
-		   sent minus 0x08. */
-		if (fb3110_tx_frame_send(0, t, (message[1] & 0x1f) - 0x08, NULL, state))
-			dprintf("Failed to acknowledge message type %02x.\n", t);
-		else
-			dprintf("Acknowledged message type %02x.\n", t);
-	}
+	if (fb3110_tx_frame_send(FB3110_FRAME_TYPE_OUT_CMD, 0, messagetype, (seqno & 0x1f) - 0x08, NULL, state))
+		dprintf("Failed to acknowledge message type %02x.\n", messagetype);
+	else
+		dprintf("Acknowledged message type %02x.\n", messagetype);
 }
 
 
@@ -375,7 +353,7 @@ gn_error fb3110_initialise(struct gn_statemachine *state)
 
 
 /* Any command we originate must have a unique SequenceNumber. Observation to
- * date suggests that these values startx at 0x10 and cycle up to 0x17
+ * date suggests that these values start at 0x10 and cycle up to 0x17
  * before repeating again. Perhaps more accurately, the numbers cycle
  * 0,1,2,3..7 with bit 4 of the byte premanently set. 
  */

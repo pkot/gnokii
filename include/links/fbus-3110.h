@@ -47,10 +47,11 @@
 #define FB3110_TRANSMIT_MAX_LENGTH	256
 #define FB3110_CONTENT_MAX_LENGTH	120
 
-/* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
-   phones.  This may have to become a phone dependant parameter... */
-#define FB3110_FRAME_ID 0x01
-
+/* Frame types (first byte of FBUS v1 frame) */
+#define FB3110_FRAME_TYPE_OUT_CMD 0x01
+#define FB3110_FRAME_TYPE_OUT_RLP 0x02
+#define FB3110_FRAME_TYPE_IN_RLP  0x03
+#define FB3110_FRAME_TYPE_IN_CMD  0x04
 
 /* States for receive code. */
 

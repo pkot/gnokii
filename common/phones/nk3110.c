@@ -449,7 +449,7 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 	while (retry_count > 0) {
 		if (sm_message_send(hsize, msgtype, hreq, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
-		error = sm_block(msgtype, data, state);
+		error = sm_block_ack(state);
 		if (error != GN_ERR_NONE) return error;
 
 		/* Now send as many blocks of maximum 55 characters as required
@@ -471,15 +471,18 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 
 			/* Send block */
 			if (sm_message_send(blength+1, 0x27, req, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-			error = sm_block(0x27, data, state);
-			if (error != GN_ERR_NONE) return error;
-
 			/* update remaining and offset values for next block */
 			uremain -= blength;
 			uoffset += blength;
-		}
 
-		sm_reset(state);
+			/* for blocks other than the last one, wait for ack;
+			 * for last block, wait for reply message instead */
+			 
+			if (uremain == 0) break;
+
+			error = sm_block_ack(state);
+			if (error != GN_ERR_NONE) return error;
+		}
 
 		dprintf("SMS data sent, waiting for result...\n");
 		if (save_sms) {
@@ -492,7 +495,7 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 				retry_count--;
 				/* After an empirically determined pause... */
 				usleep(500000); /* 0.5 seconds. */
-				break;
+				continue;
 			}
 		}
 		return error;

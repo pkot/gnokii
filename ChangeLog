@@ -3,6 +3,13 @@
  * code cleanups
     o change error paths in getactiveprofile/setactiveprofile
                                                          (Pawel Kot)
+ * statemachine changes
+    o add function sm_block_ack(), needed by nk3110  (Osma Suominen)
+ * 3110 series updates
+    o rewrite of fbus-3110 code: differentiate properly between
+      acks and commands, initial support for RLP frames, bugfixes,
+      acks recognized by seqno not by message type   (Osma Suominen)
+    o use sm_block_ack(), avoiding some races        (Osma Suominen)
 
 0.5.2
 =====
