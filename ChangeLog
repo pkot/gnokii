@@ -44,6 +44,10 @@
     o fix deleting calendar notes from phones with cal. notes index
                                                        (Markus Plail)
     o fix recurrence display                           (Markus Plail)
+    o fix contacts being saved although cancel was pressed
+                                                       (Markus Plail)
+    o fix phone number getting lost when changing memory type
+                                                       (Markus Plail)
  * gnokii updates:
     o remove SMSFolder hack from getsms                (Markus Plail)
     o call status display added                      (BORBELY Zoltan)
