@@ -676,7 +676,7 @@ API GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state)
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
- * This function is the fronend for reading SMS. Note that SMS field
+ * This function is the frotnend for reading SMS. Note that SMS field
  * in the GSM_Data structure must be initialized.
  */
 API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
@@ -693,6 +693,27 @@ API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	ERROR();
 	data->SMS->Status = rawsms.Status;
 	return ParseSMS(data);
+}
+
+/**
+ * DeleteSMS - High-level function for delting SMS
+ * @data: GSM data for the phone driver
+ * @state: current statemachine state
+ *
+ * This function is the frontend for deleting SMS. Note that SMS field
+ * in the GSM_Data structure must be initialized.
+ */
+API GSM_Error DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Error error;
+	GSM_SMSMessage rawsms;
+
+	if (!data->SMS) return GE_INTERNALERROR;
+	memset(&rawsms, 0, sizeof(GSM_SMSMessage));
+	rawsms.Number = data->SMS->Number;
+	rawsms.MemoryType = data->SMS->MemoryType;
+	data->RawSMS = &rawsms;
+	return SM_Functions(GOP_DeleteSMS, data, state);
 }
 
 /***
