@@ -440,6 +440,23 @@ static GSM_Error readtext(SMS_UserData *udata, int input_len)
 	return GE_NONE;
 }
 
+static GSM_Error loadbitmap(GSM_Bitmap *bitmap, char *s, int type)
+{
+	GSM_Error error;
+	bitmap->type = type;
+	error = GSM_NullBitmap(bitmap, &State.Phone.Info);	
+	if (error != GE_NONE) {
+		fprintf(stdout, _("Could not null bitmap: %d (%m)\n"), error);
+		return error;
+	}
+	error = GSM_ReadBitmapFile(s, bitmap, &State.Phone.Info);
+	if (error != GE_NONE) {
+		fprintf(stdout, _("Could not load bitmap from %s: %d (%m)\n"), s, error);
+		return error;
+	}
+	return GE_NONE;
+}
+
 /* Send  SMS messages. */
 static int sendsms(int argc, char *argv[])
 {
@@ -447,8 +464,7 @@ static int sendsms(int argc, char *argv[])
 	GSM_Error error;
 	/* The maximum length of an uncompressed concatenated short message is
 	   255 * 153 = 39015 default alphabet characters */
-	int input_len;
-	int i;
+	int input_len, i, curpos = 0;
 
 	struct option options[] = {
 		{ "smsc",    required_argument, NULL, '1'},
@@ -509,25 +525,16 @@ static int sendsms(int argc, char *argv[])
 			char buf[10240];
 			char *s = buf, *t;
 			strcpy(buf, optarg);
-			sms.UserData[0].Type = SMS_AnimationData;
+			sms.UserData[curpos].Type = SMS_AnimationData;
 			for (i=0; i<4; i++) {
-				error = GSM_NullBitmap(&sms.UserData[0].u.Animation[i], &State.Phone.Info);
-				sms.UserData[0].u.Animation[i].type = i ? GSM_EMSAnimation2 : GSM_EMSAnimation;
-				if (error != GE_NONE) {
-					fprintf(stdout, _("Could not null bitmap: %d (%m)\n"), error);
-					return -1;
-				}
 				t = strchr(s, ';');
 				if (t)
 					*t++ = 0;
-				printf("Loading from %s\n", s);
-				error = GSM_ReadBitmapFile(s, &sms.UserData[0].u.Animation[i], &State.Phone.Info);
-				if (error != GE_NONE) {
-					fprintf(stdout, _("Could not load bitmap: %d (%m)\n"), error);
-					return -1;
-				}
+				loadbitmap(&sms.UserData[curpos].u.Animation[i], s, i ? GSM_EMSAnimation2 : GSM_EMSAnimation);
 				s = t;
 			}
+			sms.UserData[++curpos].Type = SMS_NoData;
+			curpos = -1;
 			break;
 		}
 
@@ -559,12 +566,14 @@ static int sendsms(int argc, char *argv[])
 			sendsms_usage();
 		}
 	}
-	
-	error = readtext(&sms.UserData[0], input_len);
-	if (error != GE_NONE) return -1;
-	if (sms.UserData[0].Length < 1) {
-		fprintf(stderr, _("Empty message. Quitting.\n"));
-		return -1;
+
+	if (curpos != -1) {
+		error = readtext(&sms.UserData[curpos], input_len);
+		if (error != GE_NONE) return -1;
+		if (sms.UserData[curpos].Length < 1) {
+			fprintf(stderr, _("Empty message. Quitting.\n"));
+			return -1;
+		}
 	}
 
 	data.SMS = &sms;
@@ -1443,12 +1452,12 @@ static int sendlogo(int argc, char *argv[])
 {
 	GSM_API_SMS sms;
 	GSM_Error error;
-	GSM_Information *info = &State.Phone.Info;
+	int type;
 
 	DefaultSubmitSMS(&sms);
 
 	/* The first argument is the type of the logo. */
-	switch (sms.UserData[0].u.Bitmap.type = set_bitmap_type(argv[0])) {
+	switch (type = set_bitmap_type(argv[0])) {
 	case GSM_OperatorLogo: fprintf(stderr, _("Sending operator logo.\n")); break;
 	case GSM_CallerLogo:   fprintf(stderr, _("Sending caller line identification logo.\n")); break;
 	case GSM_PictureMessage:fprintf(stderr,_("Sending Multipart Message: Picture Message.\n")); break;
@@ -1458,30 +1467,23 @@ static int sendlogo(int argc, char *argv[])
 	}
 
 	sms.UserData[0].Type = SMS_BitmapData;
-	GSM_NullBitmap(&sms.UserData[0].u.Bitmap, info);
 
 	/* The second argument is the destination, ie the phone number of recipient. */
 	memset(&sms.Remote.Number, 0, sizeof(sms.Remote.Number));
 	strncpy(sms.Remote.Number, argv[1], sizeof(sms.Remote.Number) - 1);
 
-	/* The third argument is the bitmap file. */
-	error = GSM_ReadBitmapFile(argv[2], &sms.UserData[0].u.Bitmap, info);
-	if (error != GE_NONE) {
-		fprintf(stdout, _("Could not load bitmap: %d (%m)\n"), error);
+	if (loadbitmap(&sms.UserData[0].u.Bitmap, argv[2], type) != GE_NONE)
 		return -1;
-	}
 
 	/* If we are sending op logo we can rewrite network code. */
-	if (sms.UserData[0].u.Bitmap.type == GSM_OperatorLogo) {
+	if ((sms.UserData[0].u.Bitmap.type == GSM_OperatorLogo) && (argc > 3)) {
 		/*
 		 * The fourth argument, if present, is the Network code of the operator.
 		 * Network code is in this format: "xxx yy".
 		 */
-		if (argc > 3) {
-			memset(sms.UserData[0].u.Bitmap.netcode, 0, sizeof(sms.UserData[0].u.Bitmap.netcode));
-			strncpy(sms.UserData[0].u.Bitmap.netcode, argv[3], sizeof(sms.UserData[0].u.Bitmap.netcode) - 1);
-			dprintf("Operator code: %s\n", argv[3]);
-		}
+		memset(sms.UserData[0].u.Bitmap.netcode, 0, sizeof(sms.UserData[0].u.Bitmap.netcode));
+		strncpy(sms.UserData[0].u.Bitmap.netcode, argv[3], sizeof(sms.UserData[0].u.Bitmap.netcode) - 1);
+		dprintf("Operator code: %s\n", argv[3]);
 	}
 
 	sms.UserData[1].Type = SMS_NoData;

@@ -1112,7 +1112,6 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			int j;
 			error = GE_NONE;
 			for (j=0; j<4; j++) {
-				printf("UserdataLength = %d\n", rawsms->UserDataLength);
 				size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Animation[j]), rawsms->UserData + rawsms->UserDataLength);
 				rawsms->Length += size;
 				rawsms->UserDataLength += size;
