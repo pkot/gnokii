@@ -29,6 +29,7 @@
 #undef HAVE_STDLIB_H
 #undef HAVE_STDARG_H
 #undef HAVE_SYS_TIME_H
+#undef HAVE_STDDEF_H
 
 /* Define if your compiler supports long long */
 #undef HAVE_LONG_LONG

@@ -56,30 +56,32 @@
  **************************************************************/
 
 #ifndef NO_CONFIG_H /* for some tests */
-#include "config.h"
+#  include "config.h"
 #endif
 
 #ifdef HAVE_STRING_H
-#include <string.h>
+#  include <string.h>
 #endif
 
 #ifdef HAVE_STRINGS_H
-#include <strings.h>
+#  include <strings.h>
 #endif
 #ifdef HAVE_CTYPE_H
-#include <ctype.h>
+#  include <ctype.h>
 #endif
 #include <sys/types.h>
-#include <stdarg.h>
+#ifdef HAVE_STDARD_H
+#  include <stdarg.h>
+#endif
 #ifdef HAVE_STDLIB_H
-#include <stdlib.h>
+#  include <stdlib.h>
 #endif
 
 #if defined(HAVE_SNPRINTF) && defined(HAVE_VSNPRINTF) && defined(HAVE_C99_VSNPRINTF)
 /* only include stdio.h if we are not re-defining snprintf or vsnprintf */
-#include <stdio.h>
- /* make the compiler happy with an empty file */
- void dummy_snprintf(void) {} 
+#  include <stdio.h>
+/* make the compiler happy with an empty file */
+void dummy_snprintf(void) {} 
 #else
 
 #ifdef HAVE_LONG_DOUBLE
