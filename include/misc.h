@@ -13,7 +13,10 @@
   Header file for miscellaneous defines, typedefs etc.
 
   $Log$
-  Revision 1.28  2002-01-21 11:53:57  pkot
+  Revision 1.29  2002-01-21 15:15:39  pkot
+  Avoid names conflict. Rename Bozo's eprintf() to dump()
+
+  Revision 1.28  2002/01/21 11:53:57  pkot
   New dump logging facility for libgnokii (BORBELY Zoltan)
 
   Revision 1.27  2001/11/26 18:06:08  pkot
@@ -86,7 +89,7 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 
 /* Use it for error reporting */
 
-#define eprintf(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0) 
+#define dump(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0) 
 
 /* Use gsprintf instead of sprintf and sprintf */
 #ifdef HAVE_SNPRINTF

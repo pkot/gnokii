@@ -2478,20 +2478,21 @@ static int setspeeddial(char *argv[])
 /* Getting the status of the display. */
 static int getdisplaystatus(void)
 { 
-	int Status;
+	int Status = 0;
+	GSM_Error error = GE_INTERNALERROR;
 
-//	if (GSM && GSM->GetDisplayStatus) GSM->GetDisplayStatus(&Status);
+	if (error == GE_NONE) {
+		fprintf(stdout, _("Call in progress: %s\n"), Status & (1<<DS_Call_In_Progress)?_("on"):_("off"));
+		fprintf(stdout, _("Unknown: %s\n"),          Status & (1<<DS_Unknown)?_("on"):_("off"));
+		fprintf(stdout, _("Unread SMS: %s\n"),       Status & (1<<DS_Unread_SMS)?_("on"):_("off"));
+		fprintf(stdout, _("Voice call: %s\n"),       Status & (1<<DS_Voice_Call)?_("on"):_("off"));
+		fprintf(stdout, _("Fax call active: %s\n"),  Status & (1<<DS_Fax_Call)?_("on"):_("off"));
+		fprintf(stdout, _("Data call active: %s\n"), Status & (1<<DS_Data_Call)?_("on"):_("off"));
+		fprintf(stdout, _("Keyboard lock: %s\n"),    Status & (1<<DS_Keyboard_Lock)?_("on"):_("off"));
+		fprintf(stdout, _("SMS storage full: %s\n"), Status & (1<<DS_SMS_Storage_Full)?_("on"):_("off"));
+	}
 
-	fprintf(stdout, _("Call in progress: %s\n"), Status & (1<<DS_Call_In_Progress)?_("on"):_("off"));
-	fprintf(stdout, _("Unknown: %s\n"),          Status & (1<<DS_Unknown)?_("on"):_("off"));
-	fprintf(stdout, _("Unread SMS: %s\n"),       Status & (1<<DS_Unread_SMS)?_("on"):_("off"));
-	fprintf(stdout, _("Voice call: %s\n"),       Status & (1<<DS_Voice_Call)?_("on"):_("off"));
-	fprintf(stdout, _("Fax call active: %s\n"),  Status & (1<<DS_Fax_Call)?_("on"):_("off"));
-	fprintf(stdout, _("Data call active: %s\n"), Status & (1<<DS_Data_Call)?_("on"):_("off"));
-	fprintf(stdout, _("Keyboard lock: %s\n"),    Status & (1<<DS_Keyboard_Lock)?_("on"):_("off"));
-	fprintf(stdout, _("SMS storage full: %s\n"), Status & (1<<DS_SMS_Storage_Full)?_("on"):_("off"));
-
-	return 0;
+	return error;
 }
 
 static int netmonitor(char *Mode)
