@@ -24,9 +24,9 @@ INSTALL_DOCS = 	README \
 		packaging-howto \
 		sample.gnokiirc
 
-GNOKII1_MAN = "man/gnokii.1 man/todologo.1"
-GNOKII8_MAN = "man/gnokiid.8 man/mgnokiidev.8"
-XGNOKII_MAN = man/xgnokii.1x
+GNOKII1_MAN=man/gnokii.1 man/todologo.1
+GNOKII8_MAN=man/gnokiid.8 man/mgnokiidev.8
+XGNOKII_MAN=man/xgnokii.1x
 
 all:
 	@echo
@@ -40,8 +40,8 @@ install:
 	done
 	$(INSTALL) $(GNOKII1_MAN) $(man1dir)
 	$(INSTALL) $(GNOKII8_MAN) $(man8dir)
-	if [ "x$HAVE_XGNOKII" = xyes ]; then \
-		$(INSTALL) $(XGNOKII_MAN) $(xmandir) \
+	if [ "x$(HAVE_XGNOKII)" = "xyes" ]; then \
+		$(INSTALL) $(XGNOKII_MAN) $(xmandir); \
 	fi
 	@echo "done"
 
