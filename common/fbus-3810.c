@@ -13,7 +13,14 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.74  2001-01-02 09:09:07  pkot
+  Revision 1.75  2001-01-10 16:32:15  pkot
+  Documentation updates.
+  FreeBSD fix for 3810 code.
+  Added possibility for deleting SMS just after reading it in gnokii.
+  2110 code updates.
+  Many cleanups.
+
+  Revision 1.74  2001/01/02 09:09:07  pkot
   Misc fixes and updates.
 
   Revision 1.73  2000/12/29 15:39:06  pkot
@@ -70,6 +77,11 @@
     /* Global variables used by code in gsm-api.c to expose the
        functions supported by this model of phone.  */
 bool                    FB38_LinkOK;
+
+#if defined(__svr4__) || defined(__FreeBSD__)
+	/* fd opened in device.c */
+	extern int device_portfd;
+#endif
 
 #ifdef WIN32
 
@@ -169,6 +181,9 @@ u8                      RequestSequenceNumber;
 #ifndef WIN32
 pthread_t               Thread;
 #endif /* WIN32 */
+#if defined(__svr4__) || defined(__FreeBSD__)
+pthread_t		selThread;
+#endif
 bool                    RequestTerminate;
 bool                    DisableKeepalive;
 float                   CurrentRFLevel;
@@ -1211,31 +1226,70 @@ void    FB38_ThreadLoop(void)
 
 }
 
+/* FB38_SelectLoop copied from fbus-6110.c, lets not reinvent the wheel */
+#if defined(__svr4__) || defined(__FreeBSD__)
+/* thread for handling incoming data */
+void FB38_SelectLoop() {
+	int err;
+	fd_set readfds;
+	struct timeval timeout;
+
+	FD_ZERO(&readfds);
+	FD_SET(device_portfd,&readfds);
+	/* set timeout to 15 seconds */
+	timeout.tv_sec=15;
+	timeout.tv_usec=0;
+	while (!RequestTerminate) {
+		err = select(device_portfd+1, &readfds, NULL, NULL, &timeout);
+		if ( err > 0 )
+			/* call singal handler to process incoming data */
+			FB38_SigHandler(0);
+		else {
+			if (err == -1)
+				perror("Error in SelectLoop");
+		}
+	}
+}
+#endif
 
     /* Called by initialisation code to open comm port in
        asynchronous mode. */
-bool        FB38_OpenSerial(void)
+bool	FB38_OpenSerial(void)
 {
-    int                     result;
-    struct sigaction        sig_io;
+	int result;
+  
+#if defined(__svr4__) || defined(__FreeBSD__)
+	int rtn;
+#else
+	struct sigaction sig_io;
 
-    /* Set up and install handler before enabling async IO on port. */
 
-    sig_io.sa_handler = FB38_SigHandler;
-    sig_io.sa_flags = 0;
-    sigaction (SIGIO, &sig_io, NULL);
+	/* Set up and install handler before enabling async IO on port. */
 
-        /* Open device. */
-    result = device_open(PortDevice, false);
+	sig_io.sa_handler = FB38_SigHandler;
+	sig_io.sa_flags = 0;
+	sigaction (SIGIO, &sig_io, NULL);
+#endif
 
-    if (!result) {
-        perror(_("Couldn't open FB38 device: "));
-        return (false);
-    }
+	/* Open device. */
 
-    device_changespeed(115200);
+	result = device_open(PortDevice, false);
 
-    return (true);
+	if (!result) {
+		perror(_("Couldn't open FB38 device"));
+		return false;
+	}
+
+#if defined(__svr4__) || defined(__FreeBSD__)
+	/* create a thread to handle incoming data from mobile phone */
+	rtn = pthread_create(&selThread, NULL, (void*)FB38_SelectLoop, (void*)NULL);
+	if (rtn != 0)
+		return false;
+#endif
+
+	device_changespeed(115200);
+
+	return (true);
 }
 
     /* Handler called when characters received from serial port. 

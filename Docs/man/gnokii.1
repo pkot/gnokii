@@ -74,11 +74,12 @@ delete the note with number [\fIindex\fR] from calendar.
 
 .SS SMS
 .TP
-.BR "--getsms \fImemory_type\fR \fIstart\fP [\fIend\fP] [-f \fIfile\fP]"
+.BR "--getsms \fImemory_type\fR \fIstart\fP [\fIend\fP] [-f \fIfile\fP] [-d]"
 gets SMS messages from specified \fImemory type\fR starting at entry [\fIstart\fR] and ending at [\fIend\fR].
 If [\fIend\fR] is not specified only one location - [\fIstart\fR] is read.
 If [-f \fIfile\fR] is used entries are saved in \fIfile\fR.
 Otherwise they are dumped to stdout.
+If [-d] switch is used, a message is deleted after reading.
 .TP
 .BR "--deletesms \fImemory_type\fP \fIstart\fP [\fIend\fP]"
 deletes SMS messages from specified \fImemory type\fR starting at entry [\fIstart\fR] and ending at [\fIend\fR].

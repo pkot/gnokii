@@ -110,7 +110,17 @@ extern int GetLine(FILE *File, char *Line, int count);
 typedef struct {
   char *model;
   char *number;
+  int flags;
 } PhoneModel;
+
+#define PM_CALLERGROUP	0x01
+#define PM_NETMONITOR	0x02
+#define PM_KEYBOARD	0x04
+#define PM_SMS		0x08
+#define PM_CALENDAR	0x10
+#define PM_DTMF		0x20
+#define PM_DATA		0x40
+#define PM_SPEEDDIAL	0x80
 
 extern char *GetModel (const char *);
 extern int CallerGroupSupported (const char *);

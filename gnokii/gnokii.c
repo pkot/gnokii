@@ -18,7 +18,14 @@
   useful :-)
 
   $Log$
-  Revision 1.110  2001-01-08 15:11:37  pkot
+  Revision 1.111  2001-01-10 16:32:18  pkot
+  Documentation updates.
+  FreeBSD fix for 3810 code.
+  Added possibility for deleting SMS just after reading it in gnokii.
+  2110 code updates.
+  Many cleanups.
+
+  Revision 1.110  2001/01/08 15:11:37  pkot
   Documentation updates.
   Fixed some bugs and removed FIXMEs.
   We need to move some stuff from configure.in to aclocal.m4
@@ -199,7 +206,7 @@ int usage(void)
 "          gnokii --writephonebook [-i]\n"
 "          gnokii --getspeeddial number\n"
 "          gnokii --setspeeddial number memory_type location\n"
-"          gnokii --getsms memory_type start [end] [-f file]\n"
+"          gnokii --getsms memory_type start [end] [-f file] [-d]\n"
 "          gnokii --deletesms memory_type start [end]\n"
 "          gnokii --sendsms destination [--smsc message_center_number |\n"
 "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
@@ -510,7 +517,6 @@ int main(int argc, char *argv[])
   c = getopt_long(argc, argv, "", long_options, NULL);
 
   if (c == -1) {
-
     /* No argument given - we should display usage. */
     usage();
     exit(-1);
@@ -1156,7 +1162,7 @@ int getsmsc(char *MessageCenterNumber)
 /* Get SMS messages. */
 int getsms(int argc, char *argv[])
 {
-
+  int del = 0;
   GSM_SMSMessage message;
   char *memory_type_string;
   int start_message, end_message, count, mode = 1;
@@ -1238,8 +1244,11 @@ int getsms(int argc, char *argv[])
     }
 
 	 /* parse all options (beginning with '-' */
-	 while ((i = getopt(argc, argv, "f:")) != -1) {
+	 while ((i = getopt(argc, argv, "f:d")) != -1) {
 		switch (i) {
+		case 'd':
+		  del = 1;
+		  break;
 		case 'f':
 		  if (optarg) {
 #ifdef DEBUG
@@ -1281,7 +1290,6 @@ int getsms(int argc, char *argv[])
     switch (error) {
 
     case GE_NONE:
-
       switch (message.Type) {
 
         case GST_MO:
@@ -1408,7 +1416,12 @@ int getsms(int argc, char *argv[])
 
           break;
       }
-
+      if (del) {
+	if (GE_NONE != GSM->DeleteSMSMessage(&message))
+	  fprintf(stdout, _("(delete failed)\n"));
+        else
+	  fprintf(stdout, _("(message deleted)\n"));
+      }
       break;
 
     case GE_NOTIMPLEMENTED:

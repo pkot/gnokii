@@ -12,7 +12,14 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.23  2001-01-02 09:09:08  pkot
+  Revision 1.24  2001-01-10 16:32:17  pkot
+  Documentation updates.
+  FreeBSD fix for 3810 code.
+  Added possibility for deleting SMS just after reading it in gnokii.
+  2110 code updates.
+  Many cleanups.
+
+  Revision 1.23  2001/01/02 09:09:08  pkot
   Misc fixes and updates.
 
   Revision 1.22  2000/12/20 09:11:19  pkot
@@ -47,7 +54,11 @@
 #define MYID 0x78
 
 #undef DEBUG
-#define dprintf(a...) 
+#ifndef DEBUG
+#define dprintf(a...) do { } while (0)
+#else
+#define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
+#endif
 
 /* Global variables used by code in gsm-api.c to expose the
    functions supported by this model of phone.  */
@@ -155,33 +166,6 @@ Terminate(void)
 	}
 }
 
-/* Routine to get specifed phone book location.  Designed to 
-	   be called by application.  Will block until location is
-	   retrieved or a timeout/error occurs. */
-static GSM_Error
-GetMemoryLocation(GSM_PhonebookEntry *entry)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-/* Routine to write phonebook location in phone. Designed to 
-	   be called by application code.  Will block until location
-	   is written or timeout occurs.  */
-static GSM_Error	WritePhonebookLocation(GSM_PhonebookEntry *entry)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetSpeedDial(GSM_SpeedDial *entry)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	SetSpeedDial(GSM_SpeedDial *entry)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
 static GSM_Error
 SMS(GSM_SMSMessage *message, int command)
 {
@@ -199,12 +183,12 @@ SMS(GSM_SMSMessage *message, int command)
 	message->MessageNumber = message->Location;
 
 	while (!ACKOK) {
-		fprintf(stderr, ":");
+		dprintf(":");
 		usleep(100000);
 		SendCommand(pkt, 0x38 /* LN_SMS_COMMAND */, sizeof(pkt));
 	}
 	while(!PacketOK) {
-		fprintf(stderr, ".");
+		dprintf(".");
 		usleep(100000);
 		if(0) {
 			fprintf(stderr, _("Impossible timeout?\n"));
@@ -225,10 +209,12 @@ GetSMSMessage(GSM_SMSMessage *m)
 	if (SMS(m, 2) != GE_NONE)
 		return GE_BUSY; /* FIXME */
 	dprintf("Have message?\n");
+	if (m->Location > 10)
+		return GE_INVALIDSMSLOCATION;
 
 	if (SMSData[0] != 0x0b) {
-		fprintf(stdout, "No sms there? (%x/%d)\n", SMSData[0], SMSpos);
-		return GE_BUSY;
+		dprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
+		return GE_EMPTYSMSLOCATION;
 	}
 	dprintf("Status: " );
 	switch (SMSData[3]) {
@@ -260,18 +246,8 @@ GetSMSMessage(GSM_SMSMessage *m)
 
 static GSM_Error	DeleteSMSMessage(GSM_SMSMessage *message)
 {
-	printf("deleting..."); fflush(stdout);
+	dprintf("deleting...");
 	return SMS(message, 3);
-}
-
-static GSM_Error	SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	CancelCall(void)
-{
-	return (GE_NOTIMPLEMENTED);
 }
 
 /* GetRFLevel */
@@ -287,10 +263,10 @@ GetValue(u8 index, u8 type)
 	PacketOK = false;
 	ACKOK    = false;
 	timeout  = 10;
+	usleep(1000000);
 	while(!PacketOK) {
-		fprintf(stderr, "\nRequesting value");
-		usleep(1000000);
-		if(!ACKOK) SendCommand(pkt, 0xe5, 3);
+		dprintf("\nRequesting value(%d)", index);
+		if(!ACKOK) { SendCommand(pkt, 0xe5, 3); continue; }
 		usleep(1000000);
 		if(!--timeout || RequestTerminate)
 			return(-1);
@@ -300,15 +276,15 @@ GetValue(u8 index, u8 type)
 	    (PacketData[5] != type))
 		fprintf(stderr, "Something is very wrong with GetValue\n");
 	val = PacketData[7];
-	fprintf(stderr, "Value = %d\n", val );
-	return (GE_NONE);
+	dprintf( "Value = %d\n", val );
+	return (val);
 }
 
 static GSM_Error
 GetRFLevel(GSM_RFUnits *units, float *level)
 {
 	int val = GetValue(0x84, 2);
-	*level = (float) val / 99.0;	/* This should be / 60.0 for 2110 */
+	*level = (100* (float) val) / 60.0;	/* This should be / 99.0 for some models other than nokia-2110 */
 	*units = GRF_Arbitrary;
 	return (GE_NONE);
 }
@@ -317,15 +293,9 @@ static GSM_Error
 GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 {
 	int val = GetValue(0x85, 2);
-	*level = (float) val / 90.0;	/* 5..first bar, 10..second bar, 90..third bar */
+	*level = (100 * (float) val) / 90.0;	/* 5..first bar, 10..second bar, 90..third bar */
 	*units = GBU_Arbitrary;
 	return (GE_NONE);
-}
-
-/* Do not know how to fetch IMEI */
-static GSM_Error	GetIMEI(char *imei)
-{
-	return GE_NOTIMPLEMENTED;
 }
 
 static GSM_Error GetVersionInfo()
@@ -368,25 +338,13 @@ static GSM_Error	GetModel2110(char *model)
 	return err;
 }
 
-/* This function sends to the mobile phone a request for the SMS Center */
-
-static GSM_Error	GetSMSCenter(GSM_MessageCenter *MessageCenter)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	SetSMSCenter(GSM_MessageCenter *MessageCenter)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
 /* Our "Not implemented" functions */
 static GSM_Error	GetMemoryStatus(GSM_MemoryStatus *Status)
 {
 	switch(Status->MemoryType) {
 	case GMT_ME:
 		Status->Used = 0;
-		Status->Free = 100;
+		Status->Free = 10;
 		break;
 	case GMT_LD:
 		Status->Used = 5;
@@ -398,127 +356,12 @@ static GSM_Error	GetMemoryStatus(GSM_MemoryStatus *Status)
 		break;
 	case GMT_SM:
 		Status->Used = 0;
-		Status->Free = 0;
+		Status->Free = 10;
 		break;
 	default:
 		return (GE_NOTIMPLEMENTED);
 	}
 	return (GE_NONE);
-}
-
-static GSM_Error	GetSMSStatus(GSM_SMSStatus *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetPowerSource(GSM_PowerSource *source)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetDisplayStatus(int *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	EnterSecurityCode(GSM_SecurityCode SecurityCode)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetSecurityCodeStatus(int *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetDateTime(GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	SetDateTime(GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetAlarm(int alarm_number, GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	SetAlarm(int alarm_number, GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	DialVoice(char *Number)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	DialData(char *Number, char type, void (* callpassup)(char c))
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetIncomingCallNr(char *Number)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetNetworkInfo (GSM_NetworkInfo *NetworkInfo)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	WriteCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	Netmonitor(unsigned char mode, char *Screen)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	SendDTMF(char *String)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetBitmap(GSM_Bitmap *Bitmap)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	SetBitmap(GSM_Bitmap *Bitmap)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	Reset(unsigned char type)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	GetProfile(GSM_Profile *Profile)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-static GSM_Error	SetProfile(GSM_Profile *Profile)
-{
-	return (GE_NOTIMPLEMENTED);
 }
 
 static bool
@@ -544,7 +387,6 @@ Display(u8 b, int shift, char *s)
 	case 3: printf("%s ", s);
 	}
 }
-
 static int
 HandlePacket(void)
 {
@@ -797,11 +639,6 @@ static void PressKey(char c, int i)
 	X(PLUS, 16)
 	X(MINUS, 17)
 	X(CLR, 18)
-
-#if 0
-	X(STO, 19)
-	X(RCL, 20)
-#endif
 	X(MENU, 21)
 	X(ALPHA, 22)
 	X(PREV, 23)
@@ -809,9 +646,11 @@ static void PressKey(char c, int i)
 	X(SOFTA, 25)
 	X(SOFTB, 26)
 #if 0
+	X(STO, 19)	/* These are not present on 2110, so I can't test this. Enable once tested. */
+	X(RCL, 20)
 	X(MUTE, 28)
 #endif
-	default: printf("Unknown key %d\n", c);
+	default: fprintf(stderr, "Unknown key %d\n", c);
 	}
 #undef X
 }
@@ -1055,52 +894,145 @@ static GSM_Error   Initialise(char *port_device, char *initlength,
 	return (GE_NONE);
 }
 
+
+/* Routine to get specifed phone book location.  Designed to be called by
+   application.  Will block until location is retrieved or a timeout/error
+   occurs. */
+
+GSM_Error GetPhonebookLocation(GSM_PhonebookEntry *entry)
+{
+	u8  pkt[] = {0x1a, 0 /* 1 == phone */, 0};
+	int timeout;
+	int i;
+
+	pkt[1] = 3 + (entry->MemoryType != GMT_ME);
+	pkt[2] = entry->Location;
+	
+	PacketOK = false;
+	ACKOK    = false;
+	timeout  = 10;
+	usleep(1000000);
+	while(!PacketOK) {
+		dprintf("\Getting phonebook (%d)", entry->Location);
+		if(!ACKOK) { SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3); continue; }
+		usleep(1000000);
+		if(!--timeout || RequestTerminate)
+			return(-1);
+	}
+	if ((PacketData[3] != 0xc9) ||
+	    (PacketData[4] != 0x1a)) {
+		fprintf(stderr, "Something is very wrong with GetPhonebookLocation\n");
+		return GE_BUSY;
+	}
+	printf("type= %x\n", PacketData[5]);
+	printf("location= %x\n", PacketData[6]);
+	printf("status= %x\n", PacketData[7]);
+	for (i=8; PacketData[i]; i++) {
+		printf("%c", PacketData[i]);
+	}
+	strcpy(entry->Name, (void *)&PacketData[8]);
+	i++;
+	strcpy(entry->Number, (void *)&PacketData[i]);
+	for (; PacketData[i]; i++) {
+		printf("%c", PacketData[i]);
+	}
+	printf("\n");
+	entry->Empty = false;
+
+	return (GE_NONE);
+}
+
+/* Routine to write phonebook location in phone. Designed to be called by
+   application code. Will block until location is written or timeout
+   occurs. */
+
+GSM_Error WritePhonebookLocation(GSM_PhonebookEntry *entry)
+{
+	u8  pkt[999] = {0x1b, 0 /* 1 == phone */, 0};
+	int timeout;
+
+	pkt[1] = 3 + (entry->MemoryType != GMT_ME);
+	pkt[2] = entry->Location;
+	strcpy(&pkt[3], entry->Name);
+	strcpy(&pkt[3+strlen(entry->Name)+1], entry->Number);
+	
+	PacketOK = false;
+	ACKOK    = false;
+	timeout  = 10;
+	usleep(1000000);
+	while(!PacketOK) {
+		dprintf("\Writing phonebook (%d)", entry->Location);
+		if(!ACKOK) { SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3+strlen(entry->Number)+strlen(entry->Name)+2); continue; }
+		usleep(1000000);
+		if(!--timeout || RequestTerminate)
+			return(-1);
+	}
+	printf("okay?\n");
+	if ((PacketData[3] != 0xc9) ||
+	    (PacketData[4] != 0x1b)) {
+		fprintf(stderr, "Something is very wrong with WritePhonebookLocation\n");
+		return GE_BUSY;
+	}
+	printf("type= %x\n", PacketData[5]);
+	printf("location= %x\n", PacketData[6]);
+	printf("status= %x\n", PacketData[7]);
+	return (GE_NONE);
+}
+
+GSM_Error GetSMSStatus(GSM_SMSStatus *Status)
+{
+	Status->UnRead = 0;
+	Status->Number = 5;
+	return GE_NONE;
+}
+
+
 GSM_Functions MB21_Functions = {
 	Initialise,
 	Terminate,
-	GetMemoryLocation,
+	GetPhonebookLocation,
 	WritePhonebookLocation,
-	GetSpeedDial,
-	SetSpeedDial,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
 	GetMemoryStatus,
 	GetSMSStatus,
-	GetSMSCenter,
-	SetSMSCenter,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
 	GetSMSMessage,
 	DeleteSMSMessage,
-	SendSMSMessage,
+	UNIMPLEMENTED,
 	UNIMPLEMENTED,
 	GetRFLevel,
 	GetBatteryLevel,
-	GetPowerSource,
-	GetDisplayStatus,
-	EnterSecurityCode,
-	GetSecurityCodeStatus,
-	GetIMEI,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
 	GetRevision,
 	GetModel2110,
-	GetDateTime,
-	SetDateTime,
-	GetAlarm,
-	SetAlarm,
-	DialVoice,
-	DialData,
-	GetIncomingCallNr,
-	GetNetworkInfo,
-	GetCalendarNote,
-	WriteCalendarNote,
-	DeleteCalendarNote,
-	Netmonitor,
-	SendDTMF,
-	GetBitmap,
-	SetBitmap,
 	UNIMPLEMENTED,
 	UNIMPLEMENTED,
-	Reset,
-	GetProfile,
-	SetProfile,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
 	SendRLPFrame,
-	CancelCall,
+	UNIMPLEMENTED,
 	EnableDisplayOutput,
 	UNIMPLEMENTED,
 	UNIMPLEMENTED,

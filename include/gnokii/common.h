@@ -357,6 +357,8 @@ typedef struct {
   float MinBatteryLevel;
   GSM_BatteryUnits BatteryLevelUnits;
 
+/* FIXME: some very similar code is in common/misc.c */
+
 /* Information about date, time and alarm support. In case of alarm
    information we provide value for the number of alarms supported. */
 

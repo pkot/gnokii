@@ -17,7 +17,14 @@
   and 6110.
 
   $Log$
-  Revision 1.118  2001-01-08 15:11:36  pkot
+  Revision 1.119  2001-01-10 16:32:16  pkot
+  Documentation updates.
+  FreeBSD fix for 3810 code.
+  Added possibility for deleting SMS just after reading it in gnokii.
+  2110 code updates.
+  Many cleanups.
+
+  Revision 1.118  2001/01/08 15:11:36  pkot
   Documentation updates.
   Fixed some bugs and removed FIXMEs.
   We need to move some stuff from configure.in to aclocal.m4
@@ -156,7 +163,7 @@ GSM_Functions FB61_Functions = {
 /* Mobile phone information */
 
 GSM_Information FB61_Information = {
-  "6110|6130|6150|6190|5110|5130|5190", /* Supported models */
+  "6110|6130|6150|6190|5110|5130|5190|3210", /* Supported models */
   4,                     /* Max RF Level */
   0,                     /* Min RF Level */
   GRF_Arbitrary,         /* RF level units */

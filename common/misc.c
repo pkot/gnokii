@@ -16,225 +16,110 @@
 #include <string.h>
 #include "misc.h"
 
-int GetLine(FILE *File, char *Line, int count) {
+int GetLine(FILE *File, char *Line, int count)
+{
+	char *ptr;
 
-  char *ptr;
+	if (fgets(Line, count, File)) {
+		ptr = Line + strlen(Line) - 1;
 
-  if (fgets(Line, count, File)) {
-    ptr=Line+strlen(Line)-1;
+		while ( (*ptr == '\n' || *ptr == '\r') && ptr>=Line)
+			*ptr--='\0';
 
-    while ( (*ptr == '\n' || *ptr == '\r') && ptr>=Line)
-      *ptr--='\0';
-
-      return strlen(Line);
-  }
-  else
-    return 0;
+		return strlen(Line);
+	}
+	else
+		return 0;
 }
 
 /* jano: Functions for detecting phone capabiltes. For explanation how  */
 /* to use these functions look into xgnokii_lowlevel.c                  */
 
 static PhoneModel models[] = {
-  {"1611",  "NHE-5"},
-  {"2110i", "NHE-4"},
-  {"2148i", "NHK-4"},
-  {"8810",  "NSE-6"},
-  {"8110i", "NHE-6"},
-  {"3110",  "0310" /*"NHE-8"*/ },
-  {"3210",  "NSE-8"},
-  {"3810",  "NHE-9"},
-  {"5110",  "NSE-1"},
-  {"5130",  "NSK-1"},
-  {"5160",  "NSW-1"},
-  {"5190",  "NSB-1"},
-  {"6110",  "NSE-3"},
-  {"6120",  "NSC-3"},
-  {"6130",  "NSK-3"},
-  {"6150",  "NSM-1"},
-  {"616x",  "NSW-3"},
-  {"6185",  "NSD-3"},
-  {"6190",  "NSB-3"},
-  {"7110",  "NSE-5"},
-  {"9000i", "RAE-4"},
-  {"9110",  "RAE-2"},
-  {"550",   "THF-10"},
-  {"540",   "THF-11"},
-  {"650",   "THF-12"},
-  {"640",   "THF-13"},
-  {NULL,    NULL}
+	{NULL,    "", 0 },
+	{"1611",  "NHE-5", 0 },
+	{"2110i", "NHE-4", 0 },
+	{"2148i", "NHK-4", 0 },
+	{"8810",  "NSE-6", PM_SMS | PM_DTMF | PM_DATA },
+	{"8110i", "NHE-6", PM_SMS | PM_DTMF | PM_DATA },
+	{"3110",  "0310" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-8 */
+	{"3210",  "NSE-8", PM_SMS | PM_DTMF },
+	{"3810",  "NHE-9", PM_SMS | PM_DTMF | PM_DATA },
+	{"5110",  "NSE-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"5130",  "NSK-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"5160",  "NSW-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"5190",  "NSB-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"6110",  "NSE-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"6120",  "NSC-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"6130",  "NSK-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"6150",  "NSM-1", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"616x",  "NSW-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"6185",  "NSD-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"6190",  "NSB-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
+	{"7110",  "NSE-5", PM_DATA },
+	{"9000i", "RAE-4", 0 },
+	{"9110",  "RAE-2", 0 },
+	{"550",	  "THF-10", 0 },
+	{"540",   "THF-11", 0 },
+	{"650",   "THF-12", 0 },
+	{"640",   "THF-13", 0 },
+	{NULL,    NULL, 0}
 };
+
+PhoneModel *GetPhoneModel (const char *num)
+{
+	register int i = 0;
+
+	while (models[i].number != NULL) {
+		if (strcmp (num, models[i].number) == 0)
+			return (&models[i]);
+		i++;
+	}
+
+	return (&models[0]);
+}
 
 char *GetModel (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-      return (models[i].model);
-    i++;
-  }
-
-  return (NULL);
+	return GetPhoneModel(num)->model;
 }
-
 
 int CallerGroupSupported (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 11 && i < 19)
-        return (1);
-      else
-        return (0);
-    }
-    i++;
-  }
-
-  return (0);
+	return GetPhoneModel(num)->flags & PM_CALLERGROUP;
 }
-
 
 int CalendarSupported (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 11 && i < 19)
-        return (1);
-      else
-        return (0);
-    }
-    i++;
-  }
-
-  return (0);
+	return GetPhoneModel(num)->flags & PM_CALENDAR;
 }
-
 
 int NetmonitorSupported (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 7 && i < 19)
-        return (1);
-      else
-        return (0);
-    }
-    i++;
-  }
-
-  return (0);
+	return GetPhoneModel(num)->flags & PM_NETMONITOR;
 }
-
 
 int KeyboardSupported (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 7 && i < 19)
-        return (1);
-      else
-        return (0);
-    }
-    i++;
-  }
-
-  return (0);
+	return GetPhoneModel(num)->flags & PM_KEYBOARD;
 }
-
 
 int SMSSupported (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 2 && i < 19)
-        return (1);
-      else
-        return (0);
-    }
-    i++;
-  }
-
-  return (0);
+	return GetPhoneModel(num)->flags & PM_SMS;
 }
-
 
 int DTMFSupported (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 2 && i < 19)
-        return (1);
-      else
-        return (0);
-    }
-    i++;
-  }
-
-  return (0);
+	return GetPhoneModel(num)->flags & PM_DTMF;
 }
-
 
 int DataSupported (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if ((i > 2 && i < 6) || (i > 6 && i < 20))
-        return (1);
-      else
-        return (0);
-    }
-    i++;
-  }
-
-  return (0);
+	return GetPhoneModel(num)->flags & PM_DATA;
 }
-
 
 int SpeedDialSupported (const char *num)
 {
-  register int i = 0;
-
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 7 && i < 19)
-        return (1);
-      else
-        return (0);
-    }
-    i++;
-  }
-
-  return (0);
+	return GetPhoneModel(num)->flags & PM_SPEEDDIAL;
 }

@@ -55,79 +55,22 @@ GSM_Information		*GSM_Info;
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
 
+#define MODULE(x) \
+	if (strstr(x##_Information.Models, model) != NULL) { \
+		GSM = & x##_Functions; \
+	        GSM_Info = & x##_Information; \
+		GSM_LinkOK = & x##_LinkOK; \
+		return (GSM->Initialise(device, initlength, connection, rlp_callback)); \
+	}
 
 GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame))
 {
-  bool found_match=false;
-
-  /* Scan through the models supported by the FB38 code and see if we get a
-     match. */
-
-  if (strstr(FB38_Information.Models, model) != NULL) {
-    found_match = true;
-
-    /* Set pointers to relevant FB38 addresses */
-
-    GSM = &FB38_Functions;
-    GSM_Info = &FB38_Information;
-    GSM_LinkOK = &FB38_LinkOK;
-  }
-  else
-
-  /* Scan through the models supported by the FB61 code and see if we get a
-     match. */
-
-    if (strstr(FB61_Information.Models, model) != NULL) {
-      found_match = true;
-
-      /* Set pointers to relevant FB61 addresses */
-
-      GSM = &FB61_Functions;
-      GSM_Info = &FB61_Information;
-      GSM_LinkOK = &FB61_LinkOK;
-    }
+  MODULE(FB38)
+  MODULE(FB61)
 #ifndef WIN32	/* MB21 not supported in win32 */
-    else 
-	/* Scan through models supported by the MB21 code... */
-    if (strstr(MB21_Information.Models, model) != NULL) {
-      found_match = true;
-
-      /* Set pointers to relevant MB21 addresses */
-
-      GSM = &MB21_Functions;
-      GSM_Info = &MB21_Information;
-      GSM_LinkOK = &MB21_LinkOK;
-    }
-    else 
-	/* Scan through models supported by the MB6160 code... */
-    if (strstr(MB61_Information.Models, model) != NULL) {
-      found_match = true;
-
-      /* Set pointers to relevant MB61 addresses */
-
-      GSM = &MB61_Functions;
-      GSM_Info = &MB61_Information;
-      GSM_LinkOK = &MB61_LinkOK;
-    }
-    else 
-	/* Scan through models supported by the MB640 code... */
-    if (strstr(MB640_Information.Models, model) != NULL) {
-      found_match = true;
-
-      /* Set pointers to relevant MB640 addresses */
-
-      GSM = &MB640_Functions;
-      GSM_Info = &MB640_Information;
-      GSM_LinkOK = &MB640_LinkOK;
-    }
+  MODULE(MB21)
+  MODULE(MB61)
+  MODULE(MB640)
 #endif /* WIN32 */ 
-
-  /* If we didn't get a model match, return error code. */
-
-  if (found_match == false)
-    return (GE_UNKNOWNMODEL);
-
-  /* Now call model specific initialisation code. */
-
-  return (GSM->Initialise(device, initlength, connection, rlp_callback));
+  return (GE_UNKNOWNMODEL);
 }
