@@ -683,7 +683,7 @@ static GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned int n
 		if (SMS->UDH[i].Type == SMS_MultipartMessage) mm = 1;
 		if (error != GE_NONE) return error;
 	}
-	SMS->UDH_Length = ((SMS->UDH_No > 0) ? message[llayout.UserData] : 0);
+	SMS->UDH_Length = ((SMS->UDH_No > 0) ? message[llayout.UserData]+1 : 0);
 
 	/* User Data */
 	EncodeData(SMS, message + llayout.DataCodingScheme, message + llayout.UserData + SMS->UDH_Length, mm, &clen);
