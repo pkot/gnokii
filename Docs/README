@@ -221,6 +221,7 @@ they be aired on the mailing list so that a consensus can be reached
 when appropriate.  This is particularly important if you intend making
 large changes and/or submitting big patches.
 
+
 - 10.0 gnokii by CVS -
 
 The source of gnokii aplications is in the CVS server.  The server's
@@ -242,13 +243,11 @@ Just install the cvs package for your distribution and follow these steps:
 
 	   If you have different shell, use different command (e.g. setenv).
 
-
 	2. Log in to the CVS server as anonymous reader by typing
 
 	cvs login
 
 	   Use the empty password.
-
 
 	3. If you are logged in you are ready to checkout the latest sources:
 
@@ -287,9 +286,11 @@ Our thanks go to the Czech Linux Users Group for hosting the original
 CVS repository at cvs.linux.cz and then to the Samba Team who kept hosting
 our CVS for the several years at cvs.samba.org.
 
+
 - 11.0 Protocol Details -
 
 You'll find the detailed protocol description in Docs/protocol/ directory.
+
 
 - 12.0 References -
 
@@ -359,9 +360,12 @@ Nokia 640 Series
  - deprecated
 
 AT series
- - Nokia 6210/7110/8210/6310/6510
- - Motorola Timeport P7389i (L series)
- - Siemens S25/SL45i
+ + Bosch 908/909
+ + Motorola Timeport P7389i (L series)
+ + Nokia 6210/7110/8210/6310/6510
+ + Siemens S25/SL45i
+ + Sony Ericsson T68i
+
 
 - 14.0 Credits -
   
@@ -370,6 +374,7 @@ to recognise those who have helped so far!
 
 
 - 15.0 Release Notes -
+
 200301?? Version 0.5.0
 The external API was rewritten. Now it should be easier to write any
 external application using libgnokii. Many bugfixes and code cleanups.
