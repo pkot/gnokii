@@ -52,7 +52,7 @@
 
 static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error m2bus_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
-static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state);
+static gn_error m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state);
 
 /* FIXME - win32 stuff! */
 
@@ -62,6 +62,9 @@ static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state);
 static bool m2bus_serial_open(struct gn_statemachine *state)
 {
 	int type;
+
+	if (!state)
+		return false;
 
 	if (state->config.connection_type == GN_CT_TCP)
 		type = GN_CT_TCP;
@@ -87,6 +90,9 @@ static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine 
 {
 	struct timeval time_diff;
 	m2bus_incoming_message *i = &M2BUSINST(state)->i;
+
+	if (!i)
+		return;
 
 #if 0
 	dprintf("rx_byte: %02x, state: %d\n", rx_byte, i->state);
@@ -312,6 +318,9 @@ static gn_error m2bus_send_message(unsigned int messagesize, unsigned char messa
 	int count, i = 0;
 	u8 checksum;
 
+	if (!state)
+		return GN_ERR_FAILED;
+
 	if (messagesize > 0xffff) {
 		dprintf("M2BUS: message is too big to transmit, size: %d bytes\n", messagesize);
 		return GN_ERR_MEMORYFULL;
@@ -400,9 +409,12 @@ static gn_error m2bus_send_message(unsigned int messagesize, unsigned char messa
 
 
 
-static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
+static gn_error m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
 {
 	u8 out_buffer[6];
+
+	if (!state)
+		return GN_ERR_FAILED;
 
 	dprintf("[Sending Ack, seq: %x]\n", message_seq);
 
@@ -439,6 +451,9 @@ static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
 gn_error m2bus_initialise(struct gn_statemachine *state)
 {
 	gn_error err;
+
+	if (!state)
+		return GN_ERR_FAILED;
 
 	/* Fill in the link functions */
 	state->link.loop = m2bus_loop;

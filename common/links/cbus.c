@@ -154,6 +154,9 @@ static void dump_packet(cbus_instance *bi)
 static void cbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state)
 {
 	cbus_instance *bi = CBUSINST(state);
+
+	if (!bi)
+		return;
 	
 	if (bi->state != CBUS_RX_CSum) bi->csum ^= rx_byte;
 
@@ -318,6 +321,9 @@ gn_error cbus_initialise(struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	cbus_instance *businst;
+
+	if (!state)
+		return GN_ERR_FAILED;
 
 	if (!(businst = malloc(sizeof(cbus_instance))))
 		return GN_ERR_FAILED;

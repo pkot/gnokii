@@ -73,6 +73,9 @@ static bool phonet_open(struct gn_statemachine *state)
 					 FBUS_PHONET_BLUETOOTH_INITSEQ,
 					 0x05};
 
+	if (!state)
+		return;
+
 	memset(&init_resp, 0, 7);
 
 	/* Open device. */
@@ -103,13 +106,15 @@ static bool phonet_open(struct gn_statemachine *state)
 
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
-
 static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state)
 {
 	phonet_incoming_message *i = FBUSINST(state);
 
-	switch (i->state) {
+	/* FIXME: perhaps we should return something here */
+	if (!i)
+		return;
 
+	switch (i->state) {
 	case FBUS_RX_Sync:
 		if (rx_byte == FBUS_PHONET_FRAME_ID ||
 		    rx_byte == FBUS_PHONET_BLUETOOTH_FRAME_ID) {
@@ -223,6 +228,9 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 	int current = 0;
 	int total, sent;
 
+	if (!state)
+		return GN_ERR_FAILED;
+
 	/* FIXME - we should check for the message length ... */
 
 	/* Now construct the message header. */
@@ -270,6 +278,9 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 gn_error phonet_initialise(struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_FAILED;
+
+	if (!state)
+		return error;
 
 	/* Fill in the link functions */
 	state->link.loop = &phonet_loop;

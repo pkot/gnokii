@@ -65,6 +65,9 @@ static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 {
 	int type;
 
+	if (!state)
+		return false;
+
 	if (state->config.connection_type == GN_CT_TCP)
 		type = GN_CT_TCP;
 	else
@@ -90,6 +93,9 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
 	unsigned char end_init_char = 0xc1;
 	int count, res;
 	unsigned char buffer[255];
+
+	if (!state)
+		return false;
 
 	/* Open device. */
 	if (!device_open(state->config.port_device, false, false, false, type, state)) {
@@ -132,6 +138,9 @@ static bool fbus_ir_open(struct gn_statemachine *state)
 	unsigned char end_init_char = 0xc1;
 	unsigned char connect_seq[] = { FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02 };
 	unsigned int count, retry;
+
+	if (!state)
+		return false;
 
 	if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
 		perror(_("Couldn't open FBUS device"));
@@ -180,6 +189,9 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 	int frm_num, seq_num;
 	fbus_incoming_message *m;
 	unsigned char *message_buffer;
+
+	if (!i)
+		return;
 
 	/* XOR the byte with the current checksum */
 	i->checksum[i->buffer_count & 1] ^= rx_byte;
@@ -478,6 +490,9 @@ static gn_error fbus_send_message(unsigned int messagesize, unsigned char messag
 	u8 nom, lml;		/* number of messages, last message len */
 	int i;
 
+	if (!FBUSINST(state))
+		return GN_ERR_FAILED;
+
 	seqnum = 0x40 + FBUSINST(state)->request_sequence_number;
 	FBUSINST(state)->request_sequence_number =
 	    (FBUSINST(state)->request_sequence_number + 1) & 0x07;
@@ -540,6 +555,9 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 	unsigned char init_char = 0x55;
 	int count;
 	bool connection = false;
+
+	if (!state)
+		return GN_ERR_FAILED;
 
 	/* Fill in the link functions */
 	state->link.loop = &fbus_loop;

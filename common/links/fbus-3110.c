@@ -65,6 +65,9 @@ static int fb3110_message_type_fold(int type);
 
 static bool fb3110_serial_open(struct gn_statemachine *state)
 {
+	if (!state)
+		return false;
+
 	/* Open device. */
 	if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
 		perror(_("Couldn't open FBUS device"));
@@ -84,6 +87,9 @@ static bool fb3110_serial_open(struct gn_statemachine *state)
 static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemachine *state)
 {
 	int count;
+
+	if (!i)
+		return;
 
 	dprintf("--> %02x:%02x:", i->frame_type, i->frame_len);
 	for (count = 0; count < i->buffer_count; count++)
@@ -133,6 +139,9 @@ static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemach
 static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachine *state)
 {
 	fb3110_incoming_frame *i = &FBUSINST(state)->i;
+
+	if (!i)
+		return;
 
 	switch (i->state) {
 
@@ -326,6 +335,9 @@ gn_error fb3110_initialise(struct gn_statemachine *state)
 	unsigned char init_char = 0x55;
 	unsigned char count;
 	static int try = 0;
+
+	if (!state)
+		return GN_ERR_FAILED;
 
 	try++;
 	if (try > 2) return GN_ERR_FAILED;

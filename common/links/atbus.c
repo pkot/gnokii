@@ -133,6 +133,9 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 {
 	int error;
 	atbus_instance *bi = AT_BUSINST(sm);
+
+	if (!bi)
+		return;
 	
 	bi->rbuf[bi->rbuf_pos++] = rx_char;
 	bi->rbuf[bi->rbuf_pos] = '\0';
@@ -190,8 +193,9 @@ static gn_error atbus_loop(struct timeval *timeout, struct gn_statemachine *sm)
 	res = device_select(timeout, sm);
 	if (res > 0) {
 		res = device_read(buffer, 255, sm);
-		for (count = 0; count < res; count++)
+		for (count = 0; count < res; count++) {
 			atbus_rx_statemachine(buffer[count], sm);
+		}
 	} else
 		return GN_ERR_TIMEOUT;
 	/* This traps errors from device_read */
@@ -209,6 +213,9 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	atbus_instance *businst;
+
+	if (!state)
+		return GN_ERR_FAILED;
 
 	if (!(businst = malloc(sizeof(atbus_instance))))
 		return GN_ERR_FAILED;
@@ -242,7 +249,6 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 		error = GN_ERR_FAILED;
 		goto err;
 	}
-
 	goto out;
 err:
 	dprintf("AT bus initialization failed (%d)\n", error);
