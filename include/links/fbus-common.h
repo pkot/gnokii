@@ -49,7 +49,12 @@ enum fbus_rx_state {
 	FBUS_RX_GetType,
 	FBUS_RX_GetLength1,
 	FBUS_RX_GetLength2,
-	FBUS_RX_GetMessage
+	FBUS_RX_GetMessage,
+	FBUS_RX_EchoSource,
+	FBUS_RX_EchoType,
+	FBUS_RX_EchoLength1,
+	FBUS_RX_EchoLength2,
+	FBUS_RX_EchoMessage
 };
 
 #endif /* _gnokii_links_fbus_common_h */

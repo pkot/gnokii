@@ -22,6 +22,8 @@
     o various minor calendar handling fixes        (BORBELY Zoltan)
  * gnokii updates
     o initialize error variables                             (SuSE)
+ * libgnokii updates
+    o fbus echo cancellation and statemachine fix  (BORBELY Zoltan)
 
 0.6.3
 =====

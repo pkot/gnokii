@@ -252,9 +252,12 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 		/* Then all sorts of horrible things happen because the packet length etc is wrong... */
 		/* Therefore we test here for a destination of 0x0c and return to the top if it is not */
 
-		if (rx_byte != 0x0c) {
+		if (rx_byte == 0x00) {
+			i->state = FBUS_RX_EchoSource;
+
+		} else if (rx_byte != 0x0c) {
 			i->state = FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x0c, got %2x\n", rx_byte);
+			dprintf("The fbus stream is out of sync - expected 0x0c, got 0x%02x\n", rx_byte);
 		}
 
 		break;
@@ -268,7 +271,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 
 		if (rx_byte != 0x00) {
 			i->state = FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x00, got %2x\n",rx_byte);
+			dprintf("The fbus stream is out of sync - expected 0x00, got 0x%02x\n", rx_byte);
 		}
 
 		break;
@@ -325,6 +328,8 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 					sm_incoming_function(i->message_type, i->message_buffer,
 							     i->frame_length - 2, state);
 				} else {	/* Normal message type */
+
+					sm_incoming_acknowledge(state);
 
 					/* Add data to the relevant Message buffer */
 					/* having checked the sequence number */
@@ -385,6 +390,56 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 				dprintf("Bad checksum!\n");
 			}
 		}
+		break;
+
+	case FBUS_RX_EchoSource:
+
+		i->message_source = rx_byte;
+		i->state = FBUS_RX_EchoType;
+
+		if (rx_byte != 0x0c) {
+			i->state = FBUS_RX_Sync;
+			dprintf("The fbus stream is out of sync - expected 0x0c, got 0x%02x\n", rx_byte);
+		}
+
+		break;
+
+	case FBUS_RX_EchoType:
+
+		i->message_type = rx_byte;
+		i->state = FBUS_RX_EchoLength1;
+
+		break;
+
+	case FBUS_RX_EchoLength1:
+
+		i->state = FBUS_RX_EchoLength2;
+
+		break;
+
+	case FBUS_RX_EchoLength2:
+
+		i->frame_length = rx_byte;
+		i->state = FBUS_RX_EchoMessage;
+		i->buffer_count = 0;
+
+		break;
+
+	case FBUS_RX_EchoMessage:
+
+		if (i->buffer_count >= FBUS_FRAME_MAX_LENGTH) {
+			dprintf("FBUS: Message buffer overun - resetting\n");
+			i->state = FBUS_RX_Sync;
+			break;
+		}
+
+		i->buffer_count++;
+
+		if (i->buffer_count == i->frame_length + (i->frame_length % 2) + 2) {
+			i->state = FBUS_RX_Sync;
+			dprintf("[Echo cancelled]\n");
+		}
+
 		break;
 	}
 }
