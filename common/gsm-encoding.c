@@ -565,7 +565,7 @@ int utf8_decode(char *outstring, const char *instring, int inlen)
 	return outlen;
 }
 
-int utf8_encode(char *outstring, char *instring, int inlen)
+int utf8_encode(char *outstring, const char *instring, int inlen)
 {
 	int aux = inlen;
 	int outlen = inlen * 2;
