@@ -524,6 +524,14 @@ static int savesms(int argc, char *argv[])
 	SMS.Status = SMS_Unsent;
 	SMS.Number = 0;
 
+	/* the nokia 7110 will choke if no number is present when we */
+	/* try to store a SMS on the phone. maybe others do too */
+	/* TODO should this be handled here? report an error instead */
+	/* of setting an default? */
+	memset(&SMS.RemoteNumber.number, 0, sizeof(SMS.RemoteNumber.number));
+	strcpy(SMS.RemoteNumber.number, "0");
+	SMS.RemoteNumber.type = SMS_Unknown;
+	
 	input_len = GSM_MAX_SMS_LENGTH;
 
 	/* Option parsing */
@@ -539,6 +547,11 @@ static int savesms(int argc, char *argv[])
 			interactive = 1;
 			break;
 		case 'n': /* Specify the from number */
+			if (*optarg == '+')
+				SMS.RemoteNumber.type = SMS_International;
+			else
+				SMS.RemoteNumber.type = SMS_Unknown;
+			strncpy(SMS.RemoteNumber.number, optarg, sizeof(SMS.RemoteNumber.number));
 			break;
 		case 's': /* Specify the smsc number */
 			break;
@@ -577,7 +590,12 @@ static int savesms(int argc, char *argv[])
 			break;
 		}
 	}
+
+	fprintf(stdout,_("please enter sms text. end your input with <cr><control-D>:"));
+
 	chars_read = fread(message_buffer, 1, input_len, stdin);
+
+	fprintf(stdout,_("storing sms"));
 
 	if (chars_read == 0) {
 
@@ -589,6 +607,12 @@ static int savesms(int argc, char *argv[])
 		fprintf(stderr, _("Input too long!\n"));
 		return -1;
 
+	}
+
+	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
+	if (chars_read < 1) {
+		fprintf(stderr, _("Empty message. Quitting"));
+		return -1;
 	}
 
 	SMS.UserData[0].Type = SMS_PlainText;

@@ -20,9 +20,6 @@
 
 /* Various header file */
 #include "config.h"
-#ifndef DEBUG
-#define DEBUG
-#endif
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-ringtones.h"
@@ -37,6 +34,7 @@
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
 
+static void at_printf(char *prefix, char *buf, int len);
 
 /* FIXME - when sending an AT command while another one is still in */
 /*         progress, the old command is aborted and the new ignored. */
@@ -54,6 +52,9 @@ static int reply_buf_pos = 0;
 static int xwrite(unsigned char *d, int len)
 {
 	int res;
+
+	at_printf("write: ", d, len);
+
 	while (len) {
 		res = device_write(d, len);
 		if (res == -1) {
@@ -88,7 +89,12 @@ void ATBUS_RX_StateMachine(unsigned char rx_char)
 
 	if (reply_buf_pos >= binlength) {
 		if (((reply_buf_pos > 3) && (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4)))
-		|| ((reply_buf_pos > 6) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))) {
+		|| ((reply_buf_pos > 6) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))
+		|| ((reply_buf_pos > 3) && (!strncmp(reply_buf+reply_buf_pos-4, "\r\n> ", 4)))) {
+
+
+			at_printf("read : ", reply_buf, reply_buf_pos);
+
 			SM_IncomingFunction(statemachine, statemachine->LastMsgType, reply_buf, reply_buf_pos);
 			reply_buf_pos = 0;
 			binlength = 0;
@@ -169,4 +175,37 @@ GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
 	}
 
 	return GE_NONE;
+}
+
+static void at_printf(char *prefix, char *buf, int len)
+{
+#ifdef DEBUG
+	int in = 0, out = 0;
+	char *pos = prefix;
+	char debug_buf[1024];
+
+	while (*pos)
+		debug_buf[out++] = *pos++;
+	debug_buf[out++] ='[';
+	while ((in < len) && (out < 1016)) {
+		if (buf[in] == '\n') {
+			sprintf(debug_buf + out,"<lf>");
+			in++;
+			out += 4;
+		} else if (buf[in] == '\r') {
+			sprintf(debug_buf + out,"<cr>");
+			in++;
+			out += 4;
+		} else if (buf[in] < 32) {
+			debug_buf[out++] = '^';
+			debug_buf[out++] = buf[in++] + 64;
+		} else {
+			debug_buf[out++] = buf[in++];
+		}
+	}
+	debug_buf[out++] =']';
+	debug_buf[out++] ='\n';
+	debug_buf[out] ='\0';
+	dprintf(debug_buf);
+#endif
 }
