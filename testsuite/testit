@@ -7,7 +7,7 @@
 )
 export HOME=`pwd`
 GNOKII=../common/gnokii-debug
-for A in test.?.*; do
+for A in test.?.* test.10.*; do
     echo -n "Doing $A... "
     B=`echo $A | sed s/test/out/`
     source $A 2>&1 | grep -v ^GNOKII | grep -v '^Doing operation' > my$B
