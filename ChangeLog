@@ -10,6 +10,8 @@
     o set the default smsc timeout to 10 seconds and use the
       correct form (smsc_timeout in the [global] section instead
       of timeout in [sms] section) in sample gnokiirc    (Pawel Kot)
+    o changing smsc_timeout from unsigned int to int, this was
+      the real reason of the invalid smsc_timeout   (BORBELY Zoltan)
  * Build system fixes
     o fix a stupid bug in configure that made configure not detect
       many functions/types when user didn't explicitely give
