@@ -1332,6 +1332,10 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 	case 0x21:
 		break;
 
+	/* Set CellBroadcast error */
+	case 0x22:
+		break;
+
 	/* Read CellBroadcast */
 	case 0x23:
 		if (DRVINSTANCE(state)->OnCellBroadcast) {

@@ -13,6 +13,7 @@
  * 6110 series updates:
     o non-ASCII character set support experimental version
                                                      (BORBELY Zoltan)
+    o "SetCellBroadcast error" frame documented      (BORBELY Zoltan)
  * typos in et.po                                       (Ulrich Hopp)
  * gnokiid updates:
     o threads eliminated from gnokiid                (BORBELY Zoltan)

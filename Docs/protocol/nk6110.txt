@@ -104,6 +104,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
                                       for disable cell broadcast ?
     r Set CellBroadcast OK  { 0x0021, 0x01 }
+    r Set CellBroadcast err { 0x0022, 0x01 } ???
     r Read CellBroadcast    { 0x0023, ?, ?, ?, channel, ?, message... } ?
     s Set SMS center        { 0x0030, 0x64, priority, checksum? ,0?, format,
                                       validity, {DefaultRecipient no.}[12], 
