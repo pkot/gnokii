@@ -30,6 +30,7 @@
 typedef enum {
   GCT_Serial,   /* Serial connection. */
   GCT_Infrared, /* Infrared connection. */
+  GCT_Tekram,   /* Tekram Ir-Dongle */
   GCT_Irda
 } GSM_ConnectionType;
 

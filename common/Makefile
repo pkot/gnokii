@@ -41,7 +41,8 @@ OBJS =	cfgreader.o \
 	phone-nokia.o \
 	phone-7110.o \
 	unixirda.o \
-	fbus-phonet.o
+	fbus-phonet.o \
+	tekram.o
 
 DATA_OBJS = virtmodem.o \
 	at-emulator.o \
