@@ -734,6 +734,7 @@ static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[16];
 	gn_error err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
+
 	if (err)
 		return err;
 	sprintf(req, "AT+CMGR=%d\r", data->raw_sms->number);
@@ -966,7 +967,7 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 
 	splitlines(&buf);
 
-	if (data->memory_status && strstr(buf.line2,"+CPBS")) {
+	if (data->memory_status && strstr(buf.line2, "+CPBS")) {
 		pos = strchr(buf.line2, ',');
 		if (pos) {
 			data->memory_status->used = atoi(++pos);
@@ -1031,7 +1032,7 @@ static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int leng
 	
 	splitlines(&buf);
 
-	if (data->rf_unit && !strncmp(buf.line1, "AT+CSQ", 6)) { /*FIXME realy needed? */
+	if (data->rf_unit && !strncmp(buf.line1, "AT+CSQ", 6)) { /* FIXME realy needed? */
 		*(data->rf_unit) = GN_RF_CSQ;
 		pos1 = buf.line2 + 6;
 		pos2 = strchr(buf.line2, ',');
@@ -1134,6 +1135,11 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	splitlines(&buf);
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+
+	tmp = strrchr(buf.line2, ',');
+	sms_len = atoi(tmp+1);
+	if (sms_len == 0)
+		return GN_ERR_EMPTYLOCATION;
 	
 	sms_len = strlen(buf.line3) / 2;
 	tmp = calloc(sms_len, 1);

@@ -2,6 +2,8 @@
 ======
  * libgnokii updates
     o added 5210 information                            (Pawel Kot)
+ * AT series updates
+    o try to handle correctly sms empty location        (Pawel Kot)
 
 0.5.10
 ======
