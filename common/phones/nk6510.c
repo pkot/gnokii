@@ -833,7 +833,7 @@ static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 
 	error = P6510_GetSMSMessageStatus(data, state);
 
-	dprintf("Getting SMS...\n");
+	dprintf("Getting SMS (no validate) ...\n");
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	req[7] = data->RawSMS->Number;
@@ -883,7 +883,6 @@ static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 				   0x0F, 0x55};
 	GSM_Error error;
 
-	// 00 01 00 04 01 02 00 08 0F 55
 	dprintf("Deleting SMS...\n");
 
 	error = ValidateSMS(data, state);
@@ -915,7 +914,15 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number + 1) req[4] = 0x01;
 	data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
 
-	return P6510_GetSMSnoValidate(data, state);
+	error = P6510_GetSMSMessageStatus(data, state);
+
+	dprintf("Getting SMS...\n");
+
+	req[5] = GetMemoryType(data->RawSMS->MemoryType);
+	req[7] = data->RawSMS->Number;
+
+	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
 
@@ -2860,24 +2867,25 @@ static GSM_Error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state
 static GSM_Error P6510_IncomingSubscribe(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	switch (message[3]) {
-	case 0x1e:
-		dprintf("Subscribing succesful\n");
-		break;
 	default:
 		dprintf("Unknown subtype of type 0x3c (%d)\n", message[3]);
 		return GE_UNHANDLEDFRAME;
 		break;
 	}
+	return GE_NONE;
 }
 
 static GSM_Error P6510_Subscribe(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10,
-			       0x05, /* number of groups */
+	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x10,
+			       0x34, /* number of groups */
 			       0x01, 0x0a, 0x02, 0x14, 0x15};
+	int i;
 
 	dprintf("Subscribing to various channels!\n");
-	if (SM_SendMessage(state, 10, P6510_MSG_SUBSCRIBE, req) != GE_NONE) return GE_NOTREADY;
+	for (i = 1; i < 35; i++) req[4 + i] = i;
+
+	if (SM_SendMessage(state, 39, P6510_MSG_SUBSCRIBE, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_SUBSCRIBE);
 }
 
@@ -3084,3 +3092,21 @@ static int GetMemoryType(GSM_MemoryType memory_type)
 	}
 	return (result);
 }
+/*
+01 33 00 17 05 01 05 08 04 00 01 00 00 00
+01 33 00 17 05 01 05 08 04 00 01 00 00 00
+
+0x0b / 0x000e
+01 33 00 17 05 01 05 08 05 00 01 00 00 00
+0x0b / 0x000e
+01 33 00 17 05 01 05 08 04 00 01 00 00 00
+0x0b / 0x000e
+01 33 00 17 05 01 05 08 04 00 01 00 00 00
+0x0b / 0x000e
+01 33 00 17 05 01 05 08 05 00 01 00 00 00
+
+0x0e / 0x000e
+01 42 00 68 55 01 01 08 00 32 01 55 55 55
+0x0e / 0x000e
+01 42 00 68 55 01 01 08 00 32 01 55 55 55
+*/
