@@ -42,12 +42,20 @@ OBJS =	gsm-api.o \
 	misc.o \
 	snprintf.o
 
+ifndef WIN32_CROSS
 ifdef NO_SHARED
 GNOKII_LIB=libgnokii.a
 else
 GNOKII_LIB  =libgnokii.so
 GNOKII_LIBM =$(GNOKII_LIB).$(MAJOR_NUMBER)
 GNOKII_LIBMM=$(GNOKII_LIBM).$(MINOR_NUMBER)
+endif
+else
+ifdef NO_SHARED
+GNOKII_LIB=gnokii.lib
+else
+GNOKII_LIB=gnokii.dll
+endif
 endif
 
 all: $(GNOKII_LIB)
@@ -70,15 +78,23 @@ libgnokii.so: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	ln -sf $(GNOKII_LIBM) $(GNOKII_LIB)
 
 libgnokii.a: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	rm -f libgnokii.a
+	$(RM) libgnokii.a
 	$(AR) rc libgnokii.a $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o 
-	ranlib libgnokii.a
+	$(RANLIB) libgnokii.a
+
+gnokii.dll: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(CC) -mwindows -shared -o $@ $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o -Wl,--output-def,gnokii.def,--out-implib,gnokii.lib
+
+gnokii.lib: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(RM) gnokii.lib
+	$(AR) rc gnokii.lib $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(RANLIB) gnokii.lib
 
 vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so* phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so* gnokii.lib gnokii.dll gnokii.def phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 distclean:
 	$(RM) vcal.c

@@ -15,10 +15,20 @@ ifdef OWN_GETOPT
 	OBJS += $(TOPDIR)/getopt/libgetopt.a
 endif
 
+ifndef WIN32_CROSS
 ifdef NO_SHARED
 	GNOKII_LIB=libgnokii.a
 else
 	GNOKII_LIB=libgnokii.so
+endif
+PRGNAME=gnokii
+else
+ifdef NO_SHARED
+	GNOKII_LIB=gnokii.lib
+else
+	GNOKII_LIB=gnokii.dll
+endif
+PRGNAME=gnokii.exe
 endif
 
 LDLIBS += -L$(TOPDIR)/common -lgnokii
@@ -27,10 +37,13 @@ ifdef XPM_LIBS
 	LDLIBS += $(XPM_LIBS)
 endif
 
-all: gnokii
+all: $(PRGNAME)
 
 gnokii: $(OBJS) $(TOPDIR)/common/$(GNOKII_LIB)
 	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
+
+gnokii.exe: $(OBJS) $(TOPDIR)/common/$(GNOKII_LIB)
+	$(CC) -mconsole $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 $(TOPDIR)/getopt/libgetopt.a:
 	$(MAKE) -C $(TOPDIR)/getopt

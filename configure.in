@@ -22,6 +22,8 @@ AC_PROG_LEX
 AC_PATH_PROG(RM, rm, no)
 AC_PATH_PROG(FIND, find, no)
 AC_CHECK_PROGS(MAKE, gmake make)
+AC_CHECK_PROGS(AR, ar)
+AC_PROG_RANLIB
 AC_PROG_INSTALL
 
 dnl ======================== Default setting
@@ -518,6 +520,7 @@ AC_SUBST(XPM_CFLAGS)
 AC_SUBST(XPM_LIBS)
 AC_SUBST(HAVE_XGNOKII)
 AC_SUBST(WIN32)
+AC_SUBST(WIN32_CROSS)
 
 AC_OUTPUT(
    Makefile.global

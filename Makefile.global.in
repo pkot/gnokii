@@ -49,6 +49,8 @@ CFLAGS         = @CFLAGS@
 CPPFLAGS       = @CPPFLAGS@
 LIBS           = @LIBS@
 LEX            = @LEX@
+AR             = @AR@
+RANLIB         = @RANLIB@
 
 GTK_CFLAGS     = @GTK_CFLAGS@
 GTK_LIBS       = @GTK_LIBS@
@@ -61,6 +63,7 @@ NO_SHARED      = @NO_SHARED@
 
 HAVE_XGNOKII   = @HAVE_XGNOKII@
 WIN32          = @WIN32@
+WIN32_CROSS    = @WIN32_CROSS@
 
 DESTDIR        =
 

@@ -48,6 +48,7 @@
                                                          (Pawel Kot)
     o linux/irda.h requires linux/types.h too       (BORBELY Zoltan)
     o use INSTALL_DATA instead of INSTALL for xgnokii (Ville Skyttä)
+    o mingw cross compilation support               (BORBELY Zoltan)
  * libsms fixes
     o allow to input more then 160 characters for the text sms
                                                          (Pawel Kot)
