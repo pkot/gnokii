@@ -669,8 +669,8 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		switch (message[4]) {
 		case 0x00:
 			dprintf("SMS successfully saved\n");
-			dprintf("Saved in folder %i at location %i\n", message[8], (message[6] << 8) | message[7]);
-			data->raw_sms->number = (message[6] << 8) | message[7];
+			dprintf("Saved in folder %i at location %i\n", message[8], message[6] * 256 + message[7]);
+			data->raw_sms->number = message[6] * 256 + message[7];
 			break;
 		case 0x02:
 			printf("SMS saving failed: Invalid location\n");
@@ -683,6 +683,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
+
 	/* getsms */
 	case 0x03:
 		dprintf("Trying to get message # %i in folder # %i\n", message[9], message[7]);
@@ -693,11 +694,12 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		ParseLayout(message + 13, data);
 
 		/* Number of SMS in folder */
-		data->raw_sms->number = (message[8] << 8) | message[9];
+		data->raw_sms->number = message[8] * 256 + message[9];
 
 		/* MessageType/folder_id */
 		data->raw_sms->memory_type = message[7];
 		break;
+
 	/* delete sms */
 	case 0x05:
 		switch (message[4]) {
@@ -715,6 +717,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
+
 	/* delete sms failed */
 	case 0x06:
 		switch (message[4]) {
@@ -730,10 +733,10 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 	case 0x09:
 		dprintf("SMS Status received\n");
 		if (!data->sms_status) return GN_ERR_INTERNALERROR;
-		data->sms_status->number = ((message[12] << 8) | message[13]) + 
-			((message[24] << 8) | message[25]) + data->sms_folder->number;
-		data->sms_status->unread = ((message[14] << 8) | message[15]) +
-			((message[26] << 8) | message[27]);
+		data->sms_status->number = (message[12] * 256 + message[13]) + 
+			(message[24] * 256 + message[25]) + data->sms_folder->number;
+		data->sms_status->unread = (message[14] * 256 + message[15]) +
+			(message[26] * 256 + message[27]);
 		break;
 
 	/* getfolderstatus */
@@ -748,15 +751,16 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Message: Number of Entries: %i\n" , data->sms_folder->number);
 		dprintf("Message: IDs of Entries : ");
 		for (i = 0; i < data->sms_folder->number; i++) {
-			data->sms_folder->locations[i] = (message[(i * 2) + 8] << 8) | message[(i * 2) + 9];
+			data->sms_folder->locations[i] = message[(i * 2) + 8] * 256 + message[(i * 2) + 9];
 			dprintf("%d, ", data->sms_folder->locations[i]);
 		}
 		dprintf("\n");
 		break;
+
 	/* get message status */
 	case 0x0f:
 		dprintf("Message: SMS message(%i in folder %i) status received: %i\n", 
-			(message[10] << 8) | message[11],  message[12], message[13]);
+			message[10] * 256 + message[11],  message[12], message[13]);
 
 		if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
@@ -764,6 +768,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		data->raw_sms->status = message[13];
 
 		break;
+
 	/* create folder */
 	case 0x11:
 		dprintf("Create SMS folder status received..\n");
@@ -784,6 +789,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			break;
 		}
 		break;
+
 	/* getfolders */
 	case 0x13:
 		if (!data->sms_folder_list) return GN_ERR_INTERNALERROR;
@@ -804,6 +810,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("%s\n", data->sms_folder_list->folder[j].name);
 		}
 		break;
+
 	/* delete folder */
 	case 0x15:
 		switch (message[4]) {
@@ -824,12 +831,15 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			break;
 		}
 		break;
+
 	case 0x17:
 		break;
+
 	/* get list of SMS pictures */
 	case 0x97:
 		dprintf("Getting list of SMS pictures...\n");
 		break;
+
 
 	/* Some errors */
 	case 0xc9:
@@ -1882,7 +1892,7 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 	case NK6510_SUBCAL_ADD_REMINDER_RESP:
 		if (message[6]) e = GN_ERR_FAILED;
 		dprintf("Attempt to write calendar note at %i. Status: %i\n",
-			(message[4] << 8) | message[5],
+			message[4] * 256 + message[5],
 			1 - message[6]);
 		break;
 	default:
@@ -2496,7 +2506,7 @@ reply: 0x7a / 0x0036
 			data->bitmap->type = GN_BMP_StartupLogo;
 			data->bitmap->height = message[13];
 			data->bitmap->width = message[17];
-			data->bitmap->size = (message[20] << 8) | message[21];
+			data->bitmap->size = message[20] * 256 + message[21];
 				
 			memcpy(data->bitmap->bitmap, message + 22, data->bitmap->size);
 			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->bitmap->height, data->bitmap->width);
@@ -3620,7 +3630,7 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 	case 0x10:
 		dprintf("Next free ToDo location received!\n");
 		if (!data->todo) return GN_ERR_INTERNALERROR;
-		data->todo->location = (message[8] << 8) | message[9];
+		data->todo->location = message[8] * 256 + message[9];
 		dprintf("   location: %i\n", data->todo->location);
 		break;
 	case 0x12:
@@ -3629,12 +3639,12 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 	case 0x16:
 		dprintf("ToDo locations received!\n");
 		if (!data->todo) return GN_ERR_INTERNALERROR;
-		data->todo_list->number = (message[6] << 8) | message[7];
+		data->todo_list->number = message[6] * 256 + message[7];
 		dprintf("Number of Entries: %i\n", data->todo_list->number);
 
 		dprintf("Locations: ");
 		for (i = 0; i < data->todo_list->number; i++) {
-			data->todo_list->location[i] = (message[12 + (i * 4)] << 8) | message[(i * 4) + 13];
+			data->todo_list->location[i] = message[12 + (i * 4)] * 256 + message[(i * 4) + 13];
 			dprintf("%i ", data->todo_list->location[i]);
 		}
 		dprintf("\n");
