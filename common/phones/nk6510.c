@@ -401,6 +401,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 				break;
 			}
 		case GN_CT_Serial:
+		case GN_CT_TCP:
 			err = fbus_initialise(attempt++, state);
 			break;
 		case GN_CT_Bluetooth:

@@ -32,6 +32,7 @@
     o RLP fixes (SABM retransmission, Conn_Req)    (BORBELY Zoltan)
     o AT emulator improved                         (BORBELY Zoltan)
     o dct3/4 raw ringtones handled differently     (BORBELY Zoltan)
+    o TCP device added to the phone drivers        (BORBELY Zoltan)
  * Documentation updates
     o nk6510 ringtone handling messages updated    (BORBELY Zoltan)
  * xgnokii updates

@@ -523,6 +523,7 @@ static gn_error Initialise(struct gn_statemachine *state)
 	case GN_CT_Infrared:
 	case GN_CT_DAU9P:
 	case GN_CT_Tekram:
+	case GN_CT_TCP:
 		err = fbus_initialise(0, state);
 		break;
 	case GN_CT_Irda:

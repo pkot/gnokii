@@ -63,9 +63,16 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 
 static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 {
+	int type;
+
+	if (state->config.connection_type == GN_CT_TCP)
+		type = GN_CT_TCP;
+	else
+		type = GN_CT_Serial;
+
 	if (dlr3) dlr3 = 1;
 	/* Open device. */
-	if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
+	if (!device_open(state->config.port_device, false, false, false, type, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -107,7 +114,7 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
  
 	device_changespeed(115200, state);
 
-	if (type != GN_CT_Bluetooth) { 
+	if (type != GN_CT_Bluetooth && type != GN_CT_TCP) { 
 		for (count = 0; count < 32; count++) {
 			device_write(&init_char, 1, state);
 		}
@@ -554,13 +561,14 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 		connection = fbus_ir_open(state);
 		break;
 	case GN_CT_Serial:
+	case GN_CT_TCP:
 		switch (attempt) {
 		case 0:
 		case 1:
 			connection = fbus_serial_open(1 - attempt, state);
 			break;
 		case 2:
-			connection = at2fbus_serial_open(state, GN_CT_Serial);
+			connection = at2fbus_serial_open(state, state->config.connection_type);
 			break;
 		default:
 			break;
@@ -599,7 +607,7 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 	   empirical. */
 	/* I believe that we need/can do this for any phone to get the UART synced */
 
-	if (state->config.connection_type != GN_CT_Bluetooth) {
+	if (state->config.connection_type != GN_CT_Bluetooth && state->config.connection_type != GN_CT_TCP) {
 		for (count = 0; count < state->config.init_length; count++) {
 			usleep(100);
 			device_write(&init_char, 1, state);

@@ -146,6 +146,7 @@ static gn_error initialise(struct gn_statemachine *state)
 	switch (state->config.connection_type) {
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
+	case GN_CT_TCP:
 		error = m2bus_initialise(state);
 		break;
 	case GN_CT_DLR3P:
