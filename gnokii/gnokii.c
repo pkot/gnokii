@@ -1387,7 +1387,7 @@ static GSM_Bitmap_Types set_bitmap_type(char *s)
 	if (!strcmp(s, "op")) return GSM_OperatorLogo;
 	if (!strcmp(s, "startup")) return GSM_StartupLogo;
 	if (!strcmp(s, "caller")) return GSM_CallerLogo;
-	if (!strcmp(s, "picture")) return GSM_PictureImage;
+	if (!strcmp(s, "picture")) return GSM_PictureMessage;
 	if (!strcmp(s, "emspicture")) return GSM_EMSPicture;
 	if (!strcmp(s, "emsanimation")) return GSM_EMSAnimation;
 	return GSM_None;
@@ -1407,7 +1407,7 @@ static int sendlogo(int argc, char *argv[])
 	switch (sms.UserData[0].u.Bitmap.type = set_bitmap_type(argv[0])) {
 	case GSM_OperatorLogo: fprintf(stderr, _("Sending operator logo.\n")); break;
 	case GSM_CallerLogo:   fprintf(stderr, _("Sending caller line identification logo.\n")); break;
-	case GSM_PictureImage: fprintf(stderr, _("Sending Multipart Message: Picture Message.\n")); break;
+	case GSM_PictureMessage:fprintf(stderr,_("Sending Multipart Message: Picture Message.\n")); break;
 	case GSM_EMSPicture:   fprintf(stderr, _("Sending EMS-compliant Picture Message.\n")); break;
 	case GSM_EMSAnimation: fprintf(stderr, _("Sending EMS-compliant Animation.\n")); break;
 	default: 	       fprintf(stderr, _("You should specify what kind of logo to send!\n")); return (-1);
@@ -1442,7 +1442,7 @@ static int sendlogo(int argc, char *argv[])
 
 	/* FIXME: read from the stdin */
 	sms.UserData[1].Type = SMS_NoData;
-	if (sms.UserData[0].u.Bitmap.type == GSM_PictureImage) {
+	if (sms.UserData[0].u.Bitmap.type == GSM_PictureMessage) {
 		sms.UserData[1].Type = SMS_PlainText;
 		sms.UserData[2].Type = SMS_NoData;
 		strcpy(sms.UserData[1].u.Text, "testtest");
