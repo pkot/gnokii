@@ -1204,12 +1204,12 @@ void writephonebook(void)
 
     ptr=strtok(NULL, ";");
 
-    if (*ptr == 'B') {
+    if (!strncmp(ptr,"ME", 2)) {
       memory_type_string = "int";
       entry.MemoryType = GMT_ME;
     }
     else {
-      if (*ptr == 'A') {
+      if (!strncmp(ptr,"SM", 2)) {
 	memory_type_string = "sim";
 	entry.MemoryType = GMT_SM;
       }

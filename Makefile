@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.0-pre13
+VERSION = 0.3.0-pre14
 
 #
 # Compiler to use.
@@ -110,7 +110,7 @@ GNOKIID_OBJS = gnokiid.o at-emulator.o virtmodem.o datapump.o
 MGNOKIIDEV_OBJS = mgnokiidev.o
 
 # Build executable
-all: gnokii gnokiid xgnokii mgnokiidev
+all: gnokii gnokiid mgnokiidev xgnokii
 
 gnokii: $(GNOKII_OBJS) $(COMMON_OBJS)
 
