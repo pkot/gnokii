@@ -21,6 +21,8 @@
  * Updated TODO                           (BORBELY Zoltan, Pawel Kot)
  * code cleanups
     o minor portability fixes        (Jan Kratochvil, BORBELY Zoltan)
+ * libsms updates
+    o correctly count UDH length            (Pavel Machek, Pawel Kot)
 
 0.4.0pre19
 ==========
