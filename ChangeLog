@@ -51,6 +51,8 @@
       group number' and 'logofile' arguments             (Pawel Kot)
     o fix deletecalendarnote for nk7110 and nk6510 drivers
                                                          (Pawel Kot)
+    o Please enter SMS text... message displays only when
+      stdin is a terminal                           (BORBELY Zoltan)
  * smsd fixes
     o FreeBSD doesn't have libdl and smsd can be complied there
       without -ldl                                (Peter Kolmisoppi)

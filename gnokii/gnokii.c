@@ -434,7 +434,10 @@ static gn_error readtext(gn_sms_user_data *udata, int input_len)
 	char message_buffer[255 * GN_SMS_MAX_LENGTH];
 	int chars_read;
 
-	fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
+#ifndef	WIN32
+	if (isatty(0))
+#endif
+		fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
 
 	/* Get message text from stdin. */
 	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
