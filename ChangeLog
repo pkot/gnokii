@@ -1,10 +1,13 @@
 0.5.0 (not released yet)
- * general updates
+ * portability updates
     o include <sys/types.h> in compat.h -- should cleanup
       compilation on some systems (eg OpenBSD)           (Pawel Kot)
     o uint8_t will be defined only if there's no stdint.h
       and inttypes.h                                (BORBELY Zoltan)
     o abort configure if libiconv.h cannot be found (BORBELY Zoltan)
+ * api changes
+    o don't use UpperCase variable names in API but lower_case
+                                                         (Pawel Kot)
 
 0.5.0rc3
 ========

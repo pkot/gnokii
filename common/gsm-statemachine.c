@@ -103,7 +103,7 @@ void sm_incoming_function(u8 messagetype, void *message, u16 messagesize, struct
 	dump("Message received: ");
 	sm_message_dump(messagetype, message, messagesize);
 #endif
-	edata = calloc(1, sizeof(gn_data));
+	edata = (gn_data *)calloc(1, sizeof(gn_data));
 	data = edata;
 
 	/* See if we need to pass the function the data struct */
@@ -141,7 +141,7 @@ void sm_incoming_function(u8 messagetype, void *message, u16 messagesize, struct
 	if (state->current_state == GN_SM_WaitingForResponse) {
 		/* Check if we were waiting for a response and we received it */
 		if (waitingfor != -1) {
-			state->ResponseError[waitingfor] = res;
+			state->response_error[waitingfor] = res;
 			state->received_number++;
 		}
 
@@ -162,9 +162,9 @@ gn_error sm_error_get(unsigned char messagetype, struct gn_statemachine *state)
 	if (state->current_state == GN_SM_ResponseReceived) {
 		for (c = 0; c < state->received_number; c++)
 			if (state->waiting_for[c] == messagetype) {
-				error = state->ResponseError[c];
+				error = state->response_error[c];
 				for (d = c + 1 ; d < state->received_number; d++) {
-					state->ResponseError[d-1] = state->ResponseError[d];
+					state->response_error[d-1] = state->response_error[d];
 					state->waiting_for[d-1] = state->waiting_for[d];
 					state->data[d-1] = state->data[d];
 				}
@@ -194,7 +194,7 @@ gn_error sm_wait_for(unsigned char messagetype, gn_data *data, struct gn_statema
 	if (state->waiting_for_number == GN_SM_WAITINGFOR_MAX_NUMBER) return GN_ERR_NOTREADY;
 	state->waiting_for[state->waiting_for_number] = messagetype;
 	state->data[state->waiting_for_number] = data;
-	state->ResponseError[state->waiting_for_number] = GN_ERR_BUSY;
+	state->response_error[state->waiting_for_number] = GN_ERR_BUSY;
 	state->waiting_for_number++;
 
 	return GN_ERR_NONE;
