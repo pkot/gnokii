@@ -102,7 +102,7 @@ int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *st
 
 #else /* HAVE_BLUETOOTH */
 
-int bluetooth_open(bdaddr_t *bdaddr, int channel, struct gn_statemachine *state) { return -1; }
+int bluetooth_open(void *bdaddr, int channel, struct gn_statemachine *state) { return -1; }
 int bluetooth_close(int fd, struct gn_statemachine *state) { return -1; }
 int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
 int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
