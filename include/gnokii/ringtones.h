@@ -29,8 +29,8 @@
 
 */
 
-#ifndef _gnokii_gsm_ringtones_h
-#define _gnokii_gsm_ringtones_h
+#ifndef _gnokii_ringtones_h
+#define _gnokii_ringtones_h
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -150,4 +150,11 @@ typedef struct {
 /* From PC Composer help */
 #define GN_RINGTONE_NOTES_MAX_NUMBER 130
 
-#endif	/* _gnokii_gsm_ringtones_h */
+API gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone);
+API gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone);
+
+API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength);
+API gn_error gn_ringtone_unpack(gn_ringtone *ringtone, unsigned char *package, int maxlength);
+API int gn_note_get(int number);
+
+#endif	/* _gnokii_ringtones_h */

@@ -31,8 +31,8 @@
 
 */
 
-#ifndef _gnokii_data_rlp_common_h
-#define _gnokii_data_rlp_common_h
+#ifndef _gnokii_rlp_common_h
+#define _gnokii_rlp_common_h
 
 /* Typedef for frame type - they are the same for RLP version 0, 1 and 2. */
 typedef enum {
@@ -171,4 +171,4 @@ void rlp_link_vars_init(void);
 void rlp_user_request_set(rlp_user_requests type, int value);
 void rlp_send(char *buffer, int length);
 
-#endif	/* _gnokii_data_rlp_common_h */
+#endif	/* _gnokii_rlp_common_h */

@@ -28,8 +28,8 @@
 
 */
 
-#ifndef _gnokii_gsm_statemachine_h
-#define _gnokii_gsm_statemachine_h
+#ifndef _gnokii_statemachine_h
+#define _gnokii_statemachine_h
 
 #include <gnokii/error.h>
 #include <gnokii/data.h>
@@ -87,4 +87,7 @@ struct gn_statemachine {
 	gn_data *data[GN_SM_WAITINGFOR_MAX_NUMBER];
 };
 
-#endif	/* _gnokii_gsm_statemachine_h */
+API gn_state gn_sm_loop(int timeout, struct gn_statemachine *state);
+API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemachine *sm);
+
+#endif	/* _gnokii_statemachine_h */

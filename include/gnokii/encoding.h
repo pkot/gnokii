@@ -28,7 +28,9 @@
 
 */
 
-#ifndef _gnokii_gsm_encoding_h
-#define _gnokii_gsm_encoding_h
+#ifndef _gnokii_encoding_h
+#define _gnokii_encoding_h
 
-#endif /* _gnokii_gsm_encoding_h */
+API int gn_char_def_alphabet(unsigned char *string);
+
+#endif /* _gnokii_encoding_h */

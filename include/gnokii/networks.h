@@ -28,8 +28,8 @@
 
 */
 
-#ifndef _gnokii_gsm_networks_h
-#define _gnokii_gsm_networks_h
+#ifndef _gnokii_networks_h
+#define _gnokii_networks_h
 
 /* This type is used to hold information about various GSM networks. */
 typedef struct {
@@ -43,4 +43,13 @@ typedef struct {
 	char *name; /* GSM country name */
 } gn_country;
 
-#endif	/* _gnokii_gsm_networks_h */
+API char *gn_network_name_get(char *network_code);
+API char *gn_network_code_get(char *network_name);
+
+API char *gn_country_name_get(char *country_code);
+API char *gn_country_code_get(char *country_name);
+
+API int gn_network_get(gn_network *network, int index);
+API int gn_country_get(gn_country *country, int index);
+
+#endif	/* _gnokii_networks_h */

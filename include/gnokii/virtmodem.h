@@ -28,8 +28,8 @@
 
 */
 
-#ifndef _gnokii_data_virtmodem_h
-#define _gnokii_data_virtmodem_h
+#ifndef _gnokii_virtmodem_h
+#define _gnokii_virtmodem_h
 
 struct vm_queue {
 	int n;
@@ -48,4 +48,4 @@ API int gn_vm_initialise(const char *iname,
 API void gn_vm_loop(void);
 API void gn_vm_terminate(void);
 
-#endif	/* _gnokii_data_virtmodem_h */
+#endif	/* _gnokii_virtmodem_h */
