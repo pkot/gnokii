@@ -57,6 +57,15 @@ typedef unsigned char uint8_t;
 #  endif
 #endif
 
+#define LIBGNOKII_VERSION_STRING "2.1.0"
+#define LIBGNOKII_VERSION_MAJOR 2
+#define LIBGNOKII_VERSION_MINOR 1
+#define LIBGNOKII_VERSION_RELEASE 0
+#define LIBGNOKII_MAKE_VERSION( a,b,c ) (((a) << 16) | ((b) << 8) | (c))
+
+#define LIBGNOKII_VERSION \
+  LIBGNOKII_MAKE_VERSION(LIBGNOKII_VERSION_MAJOR,LIBGNOKII_VERSION_MINOR,LIBGNOKII_VERSION_RELEASE)
+
 struct gn_statemachine;
 
 #include <gnokii/error.h>
