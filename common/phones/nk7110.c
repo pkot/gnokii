@@ -60,6 +60,7 @@ static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -159,6 +160,7 @@ GSM_Phone phone_nokia_7110 = {
 
 static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
+	if (!data || !state) return GE_INTERNALERROR;
 	switch (op) {
 	case GOP_Init:
 		return P7110_Initialise(state);
@@ -200,6 +202,8 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_GetSMS(data, state);
 	case GOP_SendSMS:
 		return P7110_SendSMS(data, state);
+	case GOP_GetSMSStatus:
+		return P7110_GetSMSStatus(data, state);
 	case GOP_CallDivert:
 		return P7110_CallDivert(data, state);
 	case GOP7110_GetSMSFolders:
@@ -889,6 +893,14 @@ static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("Getting SMS Folders...\n");
 	if (SM_SendMessage(state, 6, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
+}
+
+static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	if (!data->SMSFolder) data->SMSFolder = (SMS_Folder *)calloc(sizeof(SMS_Folder), 1);
+	/* We need the status of the Inbox */
+	data->SMSFolder->FolderID = 0x08;
+	return P7110_GetSMSFolderStatus(data, state);
 }
 
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state)
