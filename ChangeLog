@@ -1,6 +1,8 @@
 0.5.0 (not released yet)
- * general updates
+ * general fixes
     o fix vcard export                              (Florian Lohoff)
+    o fix IrDA connection (broken by Bluetooth updates)  (Pawel Kot)
+    o fix SMS sending                                    (Pawel Kot)
  * documentation updates
     o mention that we support Bluetooth            (Marcel Holtmann)
  * portability updates
