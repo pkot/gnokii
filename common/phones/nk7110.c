@@ -1019,7 +1019,6 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Error	e = GE_NONE;
-	int		digits, bytes;
 
 	if (!data) return GE_INTERNALERROR;
 
@@ -1030,12 +1029,13 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		data->MessageCenter->No = message[4];
 		data->MessageCenter->Format = message[6];
 		data->MessageCenter->Validity = message[8];  /* due to changes in format */
-		digits = message[9];
-		bytes = message[21] - 1;
 
 		sprintf(data->MessageCenter->Name, "%s", message + 33);
 		data->MessageCenter->DefaultName = -1;	/* FIXME */
 
+		if (message[9] % 2) message[9]++;
+		message[9] = message[9] / 2 + 1;
+		dprintf("%d\n", message[9]);
 		snprintf(data->MessageCenter->Recipient.Number,
 			 sizeof(data->MessageCenter->Recipient.Number),
 			 "%s", GetBCDNumber(message + 9));

@@ -936,6 +936,8 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 			case 0x82: /* Number */
 				switch (message[offset + 2]) {
 				case 0x01: /* Default number */
+					if (message[offset + 4] % 2) message[offset + 4]++;
+					message[offset + 4] = message[offset + 4] / 2 + 1;
 					snprintf(data->MessageCenter->Recipient.Number,
 						 sizeof(data->MessageCenter->Recipient.Number),
 						 "%s", GetBCDNumber(message + offset + 4));
