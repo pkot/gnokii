@@ -259,11 +259,11 @@ SOURCE=..\..\common\devices\tekram.c
 # End Source File
 # Begin Source File
 
-SOURCE=\gnokii\common\devices\unixbluetooth.c
+SOURCE=..\..\common\devices\unixbluetooth.c
 # End Source File
 # Begin Source File
 
-SOURCE=\gnokii\common\devices\unixirda.c
+SOURCE=..\..\common\devices\unixirda.c
 # End Source File
 # Begin Source File
 
@@ -272,6 +272,10 @@ SOURCE=..\..\common\links\utils.c
 # Begin Source File
 
 SOURCE=..\..\common\vcard.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\ldif.c
 # End Source File
 # Begin Source File
 

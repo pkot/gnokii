@@ -6,6 +6,7 @@
     o read() needs #include <io.h>                      (Pawel Kot)
     o use \033 escape sequence instead of \e            (Pawel Kot)
     o fix incorrect paths in libgnokii.dsp              (Pawel Kot)
+    o add ldif.c to libgnokii.dsp                       (Pawel Kot)
  * libgnokii fixes
     o fix the argument order in base64_encode() caller  (Pawel Kot)
  * gnokii fixes
