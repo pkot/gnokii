@@ -154,7 +154,7 @@ static void OkSaveDialog(GtkWidget * w, GtkFileSelection * fs)
 {
 	FILE *f;
 	static YesNoDialog dialog = { NULL, NULL };
-	gchar err[80];
+	gchar err[255];
 
 	saveFileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
@@ -164,7 +164,7 @@ static void OkSaveDialog(GtkWidget * w, GtkFileSelection * fs)
 		if (dialog.dialog == NULL) {
 			CreateYesNoDialog(&dialog, YesSaveDialog, CancelDialog, GUI_DTMFWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
-			g_snprintf(err, 80, _("File %s already exist.\nOverwrite?"), saveFileName);
+			g_snprintf(err, 255, _("File %s already exist.\nOverwrite?"), saveFileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
 		}
 		gtk_widget_show(dialog.dialog);

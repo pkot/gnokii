@@ -37,6 +37,8 @@
       found                               (Ville Skyttä, Pawel Kot)
     o SMS window will be automatically refreshed   (BORBELY Zoltan)
     o config saving and restoring fixed            (BORBELY Zoltan)
+    o enlarge room for text in 'Overwrite file?' dialogs to 255
+      characters                                        (Pawel Kot)
  * 6100 driver updates
     o calendar entry types was mixed    (Pawel Kot, BORBELY Zoltan)
  * 6510 driver updates

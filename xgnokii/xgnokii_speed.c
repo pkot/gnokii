@@ -449,7 +449,7 @@ static void OkExportDialog(GtkWidget * w, GtkFileSelection * fs)
 {
 	static YesNoDialog dialog = { NULL, NULL };
 	FILE *f;
-	gchar err[80];
+	gchar err[255];
 
 
 	exportDialogData.fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
@@ -461,7 +461,7 @@ static void OkExportDialog(GtkWidget * w, GtkFileSelection * fs)
 			CreateYesNoDialog(&dialog, YesExportDialog, CancelDialog,
 					  GUI_SpeedDialWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
-			g_snprintf(err, 80, _("File %s already exist.\nOverwrite?"),
+			g_snprintf(err, 255, _("File %s already exist.\nOverwrite?"),
 				   exportDialogData.fileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
 		}
