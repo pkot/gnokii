@@ -11,7 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.8  2001-06-16 10:00:41  machek
+  Revision 1.9  2001-06-17 16:42:59  machek
+  Created another level of error message (ddprintf), fixed code not to
+  exit on error condition. Now it is actualy usable on my Philips Velo.
+
+  Revision 1.8  2001/06/16 10:00:41  machek
   Implement timeouts on waiting for SMS.
 
   Revision 1.7  2001/06/10 23:49:49  pkot
@@ -77,6 +81,8 @@
 #include "phones/generic.h"
 
 #define MYID 0x78
+#define ddprintf dprintf
+#define eprintf(x...) fprintf(stderr, x)
 
 static GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
@@ -169,12 +175,12 @@ Wait2(long long from, int msec)
 #define waitfor(condition, maxtime) \
 do { \
 	long long limit = GetTime() + maxtime*1000; \
-	if (!maxtime) limit = 0x7fffffffffffffff; \
+	if (!maxtime) limit = 0x7fffffffffffffffULL; \
 	while ((!(condition)) && (limit > GetTime())) { \
 		yield(); \
 		POLLIT; \
         } \
-	if (!(limit > GetTime())) fprintf(stderr, "???? TIMEOUT!"); \
+	if (!(limit > GetTime())) eprintf("???? TIMEOUT!"); \
 } while(0)
 
 /* Checksum calculation */
@@ -197,13 +203,13 @@ static int xread(unsigned char *d, int len)
 		res = device_read(d, len);
 		if (res == -1) {
 			if (errno != EAGAIN) {
-				printf("I/O error : %m?!\n");
+				dprintf("I/O error : %m?!\n");
 				return -1;
 			} else device_select(NULL);
 		} else {
 			d += res;
 			len -= res;
-			printf("(%d)", len);
+			dprintf("(%d)", len);
 		}
 	}
 	return 0;
@@ -216,13 +222,13 @@ static int xwrite(unsigned char *d, int len)
 		res = device_write(d, len);
 		if (res == -1) {
 			if (errno != EAGAIN) {
-				printf("I/O error : %m?!\n");
+				dprintf("I/O error : %m?!\n");
 				return -1;
 			}
 		} else {
 			d += res;
 			len -= res;
-			printf("<%d>", len);
+			dprintf("<%d>", len);
 		}
 	}
 	return 0;
@@ -257,19 +263,19 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	}
 #endif /* DEBUG */
 	/* Send it out... */
-	dprintf("(");
+	ddprintf("(");
 	Wait2(LastChar, 3);
 	/* I should put my messages at least 2msec apart... */
-	dprintf(")");
-	printf("writing...");
+	ddprintf(")");
+	dprintf("writing...");
 	LastChar = GetTime();
 	if (xwrite(pkt, current) == -1)
 		return (GE_INTERNALERROR);
 	if (xread(pkt2, current) == -1)
 		return (GE_INTERNALERROR);
-	printf("echook");
+	dprintf("echook");
 	if (memcmp(pkt, pkt2, current)) {
-		fprintf(stderr, "Bad echo?!");
+		eprintf("Bad echo?!");
 		msleep(1000);
 		return (GE_TIMEOUT);
 	}
@@ -286,11 +292,11 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 	while ((time = device_read(pkt, 10240)) != -1) {
 		int j;
 		char b;
-		printf("Spurious? (%d)", time);
-					printf( _("Phone: ") );
+		dprintf("Spurious? (%d)", time);
+					dprintf( _("Phone: ") );
 					for( j = 0; j < time; j++ ) {
 						b = pkt[j];
-						printf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
+						dprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
 					}
 		msleep(2);
 	}
@@ -308,11 +314,10 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 			POLLIT;
 		}
 		time = 50;		/* 5 seems to be enough */
-		fprintf(stderr, "[resend]");
+		dprintf("[resend]");
 	}
-	fprintf(stderr, "Command not okay after 10 retries!\n");
-	exit(5);
-	return GE_NONE;
+	eprintf("Command not okay after 10 retries!\n");
+	return GE_BUSY;
 }
 
 /* Applications should call Terminate to close the serial port. */
@@ -340,11 +345,11 @@ SMS(GSM_SMSMessage *message, int command)
 	SendCommand(pkt, 0x38 /* LN_SMS_COMMAND */, sizeof(pkt));
 	waitfor(PacketOK, 1000);
 	if (!PacketOK) {
-		fprintf(stderr, "No reply came within second!\n");
+		dprintf(stderr, "No reply came within second!\n");
 	}
 		
 	if (PacketData[3] != 0x37 /* LN_SMS_EVENT */) {
-		fprintf(stderr, _("Something is very wrong with GetValue\n"));
+		eprintf("Something is very wrong with SMS\n");
 		return GE_BUSY; /* FIXME */
 	}
 	return (GE_NONE);
@@ -356,20 +361,20 @@ GetSMSMessage(GSM_SMSMessage *m)
 	int i, len;
 	if (SMS(m, 2) != GE_NONE)
 		return GE_BUSY; /* FIXME */
-	dprintf("Have message?\n");
+	ddprintf("Have message?\n");
 	if (m->Location > 10)
 		return GE_INVALIDSMSLOCATION;
 
 	if (SMSData[0] != 0x0b) {
-		dprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
+		ddprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
 		return GE_EMPTYSMSLOCATION;
 	}
-	dprintf("Status: " );
+	ddprintf("Status: " );
 	switch (SMSData[3]) {
-	case 7: m->Type = GST_MO; m->Status = GSS_NOTSENTREAD; dprintf("not sent\n"); break;
-	case 5: m->Type = GST_MO; m->Status = GSS_SENTREAD; dprintf("sent\n"); break;
-	case 3: m->Type = GST_MT; m->Status = GSS_NOTSENTREAD; dprintf("not read\n"); break;
-	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; dprintf("read\n"); break;
+	case 7: m->Type = GST_MO; m->Status = GSS_NOTSENTREAD; ddprintf("not sent\n"); break;
+	case 5: m->Type = GST_MO; m->Status = GSS_SENTREAD; ddprintf("sent\n"); break;
+	case 3: m->Type = GST_MT; m->Status = GSS_NOTSENTREAD; ddprintf("not read\n"); break;
+	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; ddprintf("read\n"); break;
 	}
 
 	/* Date is at SMSData[7]; this code is copied from fbus-6110.c*/
@@ -385,17 +390,17 @@ GetSMSMessage(GSM_SMSMessage *m)
 	}
 
 	len = SMSData[14];
-	dprintf("%d bytes: ", len );
+	ddprintf("%d bytes: ", len );
 	for (i = 0; i<len; i++)
-		dprintf("%c", SMSData[15+i]);
-	dprintf("\n");
+		ddprintf("%c", SMSData[15+i]);
+	ddprintf("\n");
 
 	if (len>160)
-		fprintf(stderr, "Magic not allowed\n");
+		eprintf("Magic not allowed\n");
 	memset(m->MessageText, 0, 161);
 	strncpy(m->MessageText, (void *) &SMSData[15], len);
 	m->Length = len;
-	dprintf("Text is %s\n", m->MessageText);
+	ddprintf("Text is %s\n", m->MessageText);
 
 	/* Originator address is at 15+i,
 	   followed by message center addres (?) */
@@ -404,7 +409,7 @@ GetSMSMessage(GSM_SMSMessage *m)
 		strcpy(m->Sender, s);
 		s+=strlen(s)+1;
 		strcpy(m->MessageCenter.Number, s);
-		dprintf("Sender = %s, MessageCenter = %s\n", m->Sender, m->MessageCenter.Name);
+		ddprintf("Sender = %s, MessageCenter = %s\n", m->Sender, m->MessageCenter.Name);
 	}
 
 	m->MessageCenter.No = 0;
@@ -422,15 +427,15 @@ SendSMSMessage(GSM_SMSMessage *m)
 		return GE_INVALIDSMSLOCATION;
 
 	if (SMSData[0] != 0x0b) {
-		dprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
+		ddprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
 		return GE_EMPTYSMSLOCATION;
 	}
-	dprintf("Status: " );
+	ddprintf("Status: " );
 	switch (SMSData[3]) {
-	case 7: m->Type = GST_MO; m->Status = GSS_NOTSENTREAD; dprintf("not sent\n"); break;
-	case 5: m->Type = GST_MO; m->Status = GSS_SENTREAD; dprintf("sent\n"); break;
-	case 3: m->Type = GST_MT; m->Status = GSS_NOTSENTREAD; dprintf("not read\n"); break;
-	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; dprintf("read\n"); break;
+	case 7: m->Type = GST_MO; m->Status = GSS_NOTSENTREAD; ddprintf("not sent\n"); break;
+	case 5: m->Type = GST_MO; m->Status = GSS_SENTREAD; ddprintf("sent\n"); break;
+	case 3: m->Type = GST_MT; m->Status = GSS_NOTSENTREAD; ddprintf("not read\n"); break;
+	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; ddprintf("read\n"); break;
 	}
 	return (GE_NONE);
 }
@@ -438,7 +443,7 @@ SendSMSMessage(GSM_SMSMessage *m)
 
 static GSM_Error	DeleteSMSMessage(GSM_SMSMessage *message)
 {
-	dprintf("deleting...");
+	ddprintf("deleting...");
 	return SMS(message, 3);
 }
 
@@ -454,16 +459,16 @@ GetValue(u8 index, u8 type)
 
 	PacketOK = false;
 
-	dprintf("\nRequesting value(%d)", index);
+	ddprintf("\nRequesting value(%d)", index);
 	SendCommand(pkt, 0xe5, 3);
 
 	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xe6) ||
 	    (PacketData[4] != index) || 
 	    (PacketData[5] != type))
-		fprintf(stderr, "Something is very wrong with GetValue\n");
+		dprintf("Something is very wrong with GetValue\n");
 	val = PacketData[7];
-	dprintf( "Value = %d\n", val );
+	ddprintf( "Value = %d\n", val );
 	return (val);
 }
 
@@ -514,7 +519,7 @@ GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 static GSM_Error GetVersionInfo(void)
 {
 	char *s = VersionInfo;
-	dprintf("Getting version info...\n");
+	ddprintf("Getting version info...\n");
 	if (GetValue(0x11, 0x03) == -1)
 		return GE_TIMEOUT;
 
@@ -526,7 +531,7 @@ static GSM_Error GetVersionInfo(void)
 	*s++ = 0;
 	for( Model        = s; *s != 0x0A; s++ ) if( !*s ) return (GE_NONE);
 	*s++ = 0;
-	dprintf("Revision %s, Date %s, Model %s\n", Revision, RevisionDate, Model );
+	ddprintf("Revision %s, Date %s, Model %s\n", Revision, RevisionDate, Model );
 	return (GE_NONE);
 }
 
@@ -609,12 +614,12 @@ HandlePacket(void)
 	}
 	case 0x37:
 		/* copy bytes 5+ to smsbuf */
-		dprintf("SMSdata:");
+		ddprintf("SMSdata:");
 		{
 			int i;
 			for (i=5; i<PacketData[2]+4; i++) {
 				SMSData[SMSpos++] = PacketData[i];
-				dprintf("%c", PacketData[i]);
+				ddprintf("%c", PacketData[i]);
 			}
 			fflush(stdout);
 		}
@@ -640,10 +645,10 @@ SigHandler(int status)
 	if( res < 0 ) return;
 	for(i = 0; i < res ; i++) {
 		b = buffer[i];
-//	 fprintf(stderr, "(%x)", b, Index);
+//	 dprintf("(%x)", b, Index);
 		if (!Index && b != MYID && b != 0xf8 && b != 0x00) /* MYID is code of computer */ {
 			/* something strange goes from phone. Just ignore it */
-			dprintf( "Get [%02X %c]\n", b, b >= 0x20 ? b : '.' );
+			ddprintf( "Get [%02X %c]\n", b, b >= 0x20 ? b : '.' );
 			continue;
 		} else {
 			pkt[Index++] = b;
@@ -654,30 +659,30 @@ SigHandler(int status)
 			}
 			if(Index >= Length) {
 				if((pkt[0] == MYID || pkt[0]==0xf8) && pkt[1] == 0x00) /* packet from phone */ {
-					dprintf( _("Phone: ") );
+					ddprintf( _("Phone: ") );
 					for( j = 0; j < Length; j++ ) {
 						b = pkt[j];
-						dprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
+						ddprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
 					}
-					dprintf( "\n" );
+					ddprintf( "\n" );
 					/* ensure that we received valid packet */
 					if(pkt[Length - 1] != GetChecksum(pkt, Length-1)) {
-						fprintf( stderr, "***bad checksum***");
+						eprintf( "***bad checksum***");
 					} else {
 						if((pkt[2] == 0x7F) || (pkt[2] == 0x7E)) /* acknowledge by phone */ {
 							if (pkt[2] == 0x7F) {
-								fprintf( stderr, "[ack]" );
+								dprintf( "[ack]" );
 								/* Set ACKOK flag */
 								ACKOK    = true;
 								/* Increase TX packet number */
 							} else {
-								fprintf( stderr, "[registration ack]" );
+								dprintf( "[registration ack]" );
 								N2110_LinkOK = true;
 							}
 							TXPacketNumber++;
 						} else {
 							/* Copy packet data  */
-							fprintf( stderr, "[data]" );
+							dprintf( "[data]" );
 							memcpy((void *) PacketData,pkt,Length);
 							/* send acknowledge packet to phone */
 							msleep(10);
@@ -686,12 +691,12 @@ SigHandler(int status)
 							ack[2] = 0x7F;                     /* Set special size value  */
 							ack[3] = pkt[Length - 2];          /* Send back packet number */
 							ack[4] = GetChecksum( ack, 4); /* Set checksum            */
-							dprintf( _("PC   : ") );
+							ddprintf( _("PC   : ") );
 							for( j = 0; j < 5; j++ ) {
 								b = ack[j];
-								dprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
+								ddprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
 							}
-							dprintf( "\n" );
+							ddprintf( "\n" );
 							LastChar = GetTime();
 							if( xwrite( ack, 5 ) == -1 )
 								perror( _("Write error!\n") );
@@ -704,7 +709,7 @@ SigHandler(int status)
 						}
 					}
 				} else
-					fprintf(stderr, "Got my own echo? That should not be possible!\n");
+					eprintf("Got my own echo? That should not be possible!\n");
 				/* Look for new packet */
 				Index  = 0;
 				Length = 5;
@@ -718,7 +723,7 @@ bool OpenSerial(void)
 {
 	int result;
 
-	dprintf(_("Setting MBUS communication with 2110...\n"));
+	ddprintf(_("Setting MBUS communication with 2110...\n"));
 
 	result = device_open(PortDevice, true, false, GCT_Serial);
  	if (!result) { 
@@ -726,7 +731,7 @@ bool OpenSerial(void)
 		return (false);
 	}
 
-	dprintf("%s opened...\n", PortDevice);
+	ddprintf("%s opened...\n", PortDevice);
 
 	device_changespeed(9600);
 	device_setdtrrts(1, 1);
@@ -739,7 +744,7 @@ SetKey(int c, int up)
 	u8 reg[] = { 0x7a /* RPC_UI_KEY_PRESS or RPC_UI_KEY_RELEASE */, 0, 1, 0 /* key code */ };
 	reg[0] += up;
 	reg[3] = c;
-	fprintf(stderr, "\n Pressing %d\n", c );
+	dprintf("\n Pressing %d\n", c );
 	PacketOK = false;
 	SendCommand( reg, 0xe5, 4 );
 	waitfor(PacketOK, 0);
@@ -1024,19 +1029,19 @@ GetPhonebookLocation(GSM_PhonebookEntry *entry)
 		fprintf(stderr, "Something is very wrong with GetPhonebookLocation\n");
 		return GE_BUSY;
 	}
-	dprintf("type= %x\n", PacketData[5]);
-	dprintf("location= %x\n", PacketData[6]);
-	dprintf("status= %x\n", PacketData[7]);
+	ddprintf("type= %x\n", PacketData[5]);
+	ddprintf("location= %x\n", PacketData[6]);
+	ddprintf("status= %x\n", PacketData[7]);
 	for (i=8; PacketData[i]; i++) {
-		dprintf("%c", PacketData[i]);
+		ddprintf("%c", PacketData[i]);
 	}
 	strcpy(entry->Name, (void *)&PacketData[8]);
 	i++;
 	strcpy(entry->Number, (void *)&PacketData[i]);
 	for (; PacketData[i]; i++) {
-		dprintf("%c", PacketData[i]);
+		ddprintf("%c", PacketData[i]);
 	}
-	dprintf("\n");
+	ddprintf("\n");
 	entry->Empty = false;
 	entry->Group = 0;
 
