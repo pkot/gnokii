@@ -3195,7 +3195,7 @@ static int writephonebook(int argc, char *args[])
 	if (argc && (strcmp("-i", args[0])) && (strcmp("-v", args[0])))
 		usage(stderr, -1);
 
-	if (!strcmp("-v", args[0]))
+	if (argc && !strcmp("-v", args[0]))
 		vcard = 1;
 
 	Line = OLine;
