@@ -94,7 +94,7 @@ static char *DefaultPort = PORT;
 static char *DefaultBindir = "/usr/sbin/";
 static char *DefaultConnection = "serial";
 static char *DefaultXGnokiiDir = XGNOKIIDIR;
-
+static bool SMSSettingsInitialized = FALSE;
 static gint hiddenCallDialog;
 
 static struct CallDialog {
@@ -318,6 +318,7 @@ void CreateInCallDialog ()
 gint GUI_Update (gpointer data)
 {
   static gchar callNum[20];
+  static gchar lastCallNum[20] = "";
   static gchar callBuf[80];
   static gchar timeBuf[10];
   static gchar anonym[] = "anonymous";
@@ -327,7 +328,7 @@ gint GUI_Update (gpointer data)
   static gint callTimerStart = 0;
   gint callTimer = 0;
   time_t t;
-  gchar *name;
+  static gchar *name;
   gint status;
     
 
@@ -421,8 +422,10 @@ gint GUI_Update (gpointer data)
     
     if (*callNum == '\0')
       name = anonym;
-    else
+    else if (strncmp (callNum, lastCallNum, 20))
     {
+      strncpy (lastCallNum, callNum, 20);
+      lastCallNum[19] = '\0';
       name = GUI_GetName (callNum);
       if (!name)
         name = callNum;
@@ -440,6 +443,7 @@ gint GUI_Update (gpointer data)
   else
   {  
     callTimerStart = callTimer = 0;
+    *lastCallNum = '\0';
     if (GTK_WIDGET_VISIBLE (inCallDialog.dialog))
       gtk_widget_hide (inCallDialog.dialog);
     hiddenCallDialog = 0;
@@ -486,8 +490,9 @@ static void ParseSMSCenters ()
     gchar *row[4];
     if (*(configDialogData.sms.smsSetting[i].Name) == '\0')
     {
-      row[0] = (gchar *) g_malloc (10);
-      g_snprintf (row[0], GSM_MAX_SMS_CENTER_NAME_LENGTH, _("Set %d"), i + 1);
+ //     row[0] = (gchar *) g_malloc (GSM_MAX_SMS_CENTER_NAME_LENGTH);
+ //     g_snprintf (row[0], GSM_MAX_SMS_CENTER_NAME_LENGTH, _("Set %d"), i + 1);
+      row[0] = g_strdup_printf (_("Set %d"), i + 1);
     }
     else
       row[0] = g_strdup (configDialogData.sms.smsSetting[i].Name);
@@ -557,7 +562,7 @@ static void ParseSMSCenters ()
   gtk_clist_thaw (GTK_CLIST (SMSClist));
 }
   
-static void RefreshUserStatus()
+static void RefreshUserStatus (void)
 {
   gchar buf[8];
   configDialogData.user.used = GTK_ENTRY (configDialogData.user.name)->text_length
@@ -576,7 +581,30 @@ static void RefreshUserStatus()
   gtk_label_set_text (GTK_LABEL (configDialogData.user.status), buf);
 }
 
-static void GUI_ShowOptions()
+void GUI_InitSMSSettings (void)
+{
+  register gint i;
+  
+  if (SMSSettingsInitialized)
+    return;
+    
+  for (i = 1; i <= MAX_SMS_CENTER; i++)
+  {
+    xgnokiiConfig.smsSetting[i - 1].No = i;
+    if (GSM->GetSMSCenter (&(xgnokiiConfig.smsSetting[i - 1])) != GE_NONE)
+      break;
+    
+    configDialogData.sms.smsSetting[i - 1] = xgnokiiConfig.smsSetting[i - 1];
+  }
+  
+  xgnokiiConfig.smsSets = i - 1;
+  
+  ParseSMSCenters ();
+  
+  SMSSettingsInitialized = TRUE;
+}
+
+static void GUI_ShowOptions ()
 {
   GSM_DateTime date_time;
   register gint i;
@@ -625,23 +653,12 @@ static void GUI_ShowOptions()
     gtk_spin_button_set_value (GTK_SPIN_BUTTON (configDialogData.alarm.alarmMin), date_time.Minute);
   }
   
-  /* SMS */
-  for (i = 1; i <= MAX_SMS_CENTER; i++)
-  {
-    xgnokiiConfig.smsSetting[i - 1].No = i;
-    if (GSM->GetSMSCenter (&(xgnokiiConfig.smsSetting[i - 1])) != GE_NONE)
-      break;
-    
-    configDialogData.sms.smsSetting[i - 1] = xgnokiiConfig.smsSetting[i - 1];
-  }
-  
-  xgnokiiConfig.smsSets = i - 1;
-  
-  ParseSMSCenters ();
 
+  /* SMS */
+  GUI_InitSMSSettings ();
+  
   
   /* BUSINESS CARD */
-  
   gtk_entry_set_text (GTK_ENTRY (configDialogData.user.name),
                       xgnokiiConfig.user.name);
   gtk_entry_set_text (GTK_ENTRY (configDialogData.user.title),
@@ -746,7 +763,7 @@ void GUI_Refresh() {
 }
 
 
-void optionsApplyCallback( GtkWidget *widget, gpointer data )
+void optionsApplyCallback (GtkWidget *widget, gpointer data )
 {
   GSM_DateTime date_time;
   register gint i;
@@ -755,16 +772,17 @@ void optionsApplyCallback( GtkWidget *widget, gpointer data )
   /* From fbus-6110.c 
      FIXME: we should also allow to set the alarm off :-) */  
   if (xgnokiiConfig.alarmSupported 
-      && GTK_TOGGLE_BUTTON(configDialogData.alarm.alarmSwitch)->active) 
+      && GTK_TOGGLE_BUTTON (configDialogData.alarm.alarmSwitch)->active) 
   {
     date_time.Hour = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (configDialogData.alarm.alarmHour));
     date_time.Minute = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (configDialogData.alarm.alarmMin));
-    GSM->SetAlarm(0, &date_time);
+    GSM->SetAlarm (0, &date_time);
   }
   
   /* SMS */
   for (i = 0; i < xgnokiiConfig.smsSets; i++)
     xgnokiiConfig.smsSetting[i] = configDialogData.sms.smsSetting[i];
+  GUI_RefreshSMSCenterMenu ();
   
   /* BUSINESS CARD */
   g_free(xgnokiiConfig.user.name);
@@ -791,6 +809,7 @@ void optionsApplyCallback( GtkWidget *widget, gpointer data )
               MAX_CALLER_GROUP_LENGTH);
       xgnokiiConfig.callerGroups[i][MAX_CALLER_GROUP_LENGTH] = '\0';
     }
+  GUI_RefreshGroupMenu ();
   
   /* Help */
   g_free(xgnokiiConfig.helpviewer);
@@ -1002,7 +1021,7 @@ static inline gint RefreshUserStatusCallBack(GtkWidget   *widget,
                                              GdkEventKey *event,
                                              gpointer     callback_data)
 {
-  RefreshUserStatus();
+  RefreshUserStatus ();
   if (GTK_EDITABLE (widget)->editable == FALSE)
     return (FALSE);
   if (event->keyval == GDK_BackSpace || event->keyval == GDK_Clear ||
@@ -2027,7 +2046,7 @@ int GUI_RemoveSplash (GtkWidget *Win)
   return FALSE;
 }
 
-void GUI_ReadConfig(void)
+void GUI_ReadConfig (void)
 {
 
   struct CFG_Header *cfg_info;

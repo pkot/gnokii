@@ -32,6 +32,7 @@
 #include "../gsm-common.h"
 #include "../gsm-api.h"
 #include "xgnokii_contacts.h"
+#include "xgnokii.h"
 #include "xgnokii_common.h"
 #include "xgnokii_sms.h"
 #include "../pixmaps/Read.xpm"
@@ -48,6 +49,11 @@
 #include "../pixmaps/quest.xpm"
 
 
+typedef struct {
+  GtkWidget *dialog;
+  GtkWidget *entry;
+} DialVoiceDialog;
+
 static GtkWidget *GUI_ContactsWindow;
 static bool contactsMemoryInitialized;
 static MemoryStatus memoryStatus;
@@ -60,15 +66,19 @@ static FindEntryStruct findEntryStruct = { "", 0};
 static ExportDialogData exportDialogData = {NULL};
 static MemoryPixmaps memoryPixmaps;
 static QuestMark questMark;
+static EditEntryData newEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static EditEntryData editEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static EditEntryData duplicateEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
 
 /* return != 0 if user has unsaved changes in contacts memory */
-inline gint GUI_ContactsIsChanged()
+inline gint GUI_ContactsIsChanged (void)
 {
   return statusInfo.ch_ME | statusInfo.ch_SM;
 }
 
 /* return TRUE if Contacts memory was read from phone or from file */
-inline bool GUI_ContactsIsIntialized()
+inline bool GUI_ContactsIsIntialized (void)
 {
   return contactsMemoryInitialized;
 }
@@ -78,7 +88,7 @@ static inline void Help1 (GtkWidget *w, gpointer data)
   Help (w, _("/help/contacts.html"));
 }
 
-void RefreshStatusInfo()
+void RefreshStatusInfo (void)
 {
   char p,s;
   
@@ -97,37 +107,37 @@ void RefreshStatusInfo()
   gtk_label_set_text(GTK_LABEL (statusInfo.label), statusInfo.text);
 }
 
-static inline void SetGroup0( GtkWidget *item, gpointer data)
+static inline void SetGroup0 (GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 0;
 }
 
-static inline void SetGroup1( GtkWidget *item, gpointer data)
+static inline void SetGroup1 (GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 1;
 }
 
-static inline void SetGroup2( GtkWidget *item, gpointer data)
+static inline void SetGroup2 (GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 2;
 }
 
-static inline void SetGroup3( GtkWidget *item, gpointer data)
+static inline void SetGroup3 (GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 3;
 }
 
-static inline void SetGroup4( GtkWidget *item, gpointer data)
+static inline void SetGroup4 (GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 4;
 }
 
-static inline void SetGroup5( GtkWidget *item, gpointer data)
+static inline void SetGroup5 (GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 5;
 }
 
-PhonebookEntry *FindFreeEntry(GSM_MemoryType type)
+PhonebookEntry *FindFreeEntry (GSM_MemoryType type)
 {
   PhonebookEntry *entry;
   gint start, end;
@@ -158,24 +168,24 @@ PhonebookEntry *FindFreeEntry(GSM_MemoryType type)
   return NULL;
 }
 
-static void CloseContacts(GtkWidget *w, gpointer data)
+static void CloseContacts (GtkWidget *w, gpointer data)
 {
-  gtk_widget_hide(GUI_ContactsWindow);
+  gtk_widget_hide (GUI_ContactsWindow);
 }
 
 
 /* I don't want allow window close */
-static void ProgressDialogDeleteEvent(GtkWidget *w, gpointer data)
+static void ProgressDialogDeleteEvent (GtkWidget *w, gpointer data)
 {
   return;
 }
 
-static void CancelEditDialog(GtkWidget *widget, gpointer data )
+static void CancelEditDialog (GtkWidget *widget, gpointer data )
 {
   gtk_widget_hide(GTK_WIDGET(((EditEntryData*) data)->dialog));
 }
 
-static void OkEditEntryDialog(GtkWidget *widget, gpointer data)
+static void OkEditEntryDialog (GtkWidget *widget, gpointer data)
 {
   gchar *clist_row[4];
   PhonebookEntry *entry;
@@ -186,7 +196,7 @@ static void OkEditEntryDialog(GtkWidget *widget, gpointer data)
     if ((entry = FindFreeEntry(GMT_ME)) == NULL)
     {
       gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Can't change memory type!"));  
-      gtk_widget_show(errorDialog.dialog);
+      gtk_widget_show (errorDialog.dialog);
       return;
     }
     strncpy(entry->entry.Name, 
@@ -219,7 +229,7 @@ static void OkEditEntryDialog(GtkWidget *widget, gpointer data)
     if ((entry = FindFreeEntry(GMT_SM)) == NULL)
     {
       gtk_label_set_text(GTK_LABEL (errorDialog.text), _("Can't change memory type!"));
-      gtk_widget_show(errorDialog.dialog);
+      gtk_widget_show (errorDialog.dialog);
       return;
     }
     strncpy(entry->entry.Name, 
@@ -231,7 +241,7 @@ static void OkEditEntryDialog(GtkWidget *widget, gpointer data)
     {
       gtk_label_set_text( GTK_LABEL (errorDialog.text), _("Sorry, phonebook name will be truncated,\n\
 because you save it into SIM memory!"));
-      gtk_widget_show( errorDialog.dialog);
+      gtk_widget_show (errorDialog.dialog);
     }
  
     strncpy(entry->entry.Number,
@@ -276,9 +286,9 @@ because you save it into SIM memory!"));
   
       if (strlen(gtk_entry_get_text(GTK_ENTRY (((EditEntryData*) data)->name))) > max_phonebook_sim_name_length)
       {
-        gtk_label_set_text( GTK_LABEL (errorDialog.text), _("Sorry, phonebook name will be truncated,\n\
+        gtk_label_set_text (GTK_LABEL (errorDialog.text), _("Sorry, phonebook name will be truncated,\n\
 because you save it into SIM memory!"));
-        gtk_widget_show( errorDialog.dialog);
+        gtk_widget_show (errorDialog.dialog);
       }
       
       strncpy(((EditEntryData*) data)->pbEntry->entry.Number,
@@ -299,7 +309,7 @@ because you save it into SIM memory!"));
   
   gtk_widget_hide(GTK_WIDGET(((EditEntryData*) data)->dialog));
   
-  RefreshStatusInfo();
+  RefreshStatusInfo ();
   
   gtk_clist_freeze(GTK_CLIST (clist));
   gtk_clist_remove(GTK_CLIST (clist), ((EditEntryData*) data)->row);
@@ -362,7 +372,7 @@ static void OkDeleteEntryDialog(GtkWidget *widget, gpointer data )
     gtk_clist_remove(GTK_CLIST (clist), row);
   }
   
-  RefreshStatusInfo();
+  RefreshStatusInfo ();
   
   gtk_widget_hide(GTK_WIDGET (data));
   
@@ -377,10 +387,10 @@ static void OkNewEntryDialog(GtkWidget *widget, gpointer data )
   if (GTK_TOGGLE_BUTTON(((EditEntryData*) data)->memoryTypePhone)->active &&
       ((EditEntryData*) data)->pbEntry->entry.MemoryType == GMT_SM)
   {
-    if ((entry = FindFreeEntry(GMT_ME)) == NULL)
+    if ((entry = FindFreeEntry (GMT_ME)) == NULL)
     {
-      gtk_label_set_text(GTK_LABEL (errorDialog.text), _("Can't change memory type!"));
-      gtk_widget_show(errorDialog.dialog);
+      gtk_label_set_text (GTK_LABEL (errorDialog.text), _("Can't change memory type!"));
+      gtk_widget_show (errorDialog.dialog);
       return;
     }
     strncpy(entry->entry.Name, 
@@ -402,22 +412,22 @@ static void OkNewEntryDialog(GtkWidget *widget, gpointer data )
   else if (GTK_TOGGLE_BUTTON(((EditEntryData*) data)->memoryTypeSIM)->active &&
       ((EditEntryData*) data)->pbEntry->entry.MemoryType == GMT_ME)
   {
-    if ((entry = FindFreeEntry(GMT_SM)) == NULL)
+    if ((entry = FindFreeEntry (GMT_SM)) == NULL)
     {
-      gtk_label_set_text(GTK_LABEL (errorDialog.text), _("Can't change memory type!"));
-      gtk_widget_show(errorDialog.dialog);
+      gtk_label_set_text (GTK_LABEL (errorDialog.text), _("Can't change memory type!"));
+      gtk_widget_show (errorDialog.dialog);
       return;
     }
     strncpy(entry->entry.Name, 
-            gtk_entry_get_text(GTK_ENTRY (((EditEntryData*) data)->name)),
+            gtk_entry_get_text (GTK_ENTRY (((EditEntryData*) data)->name)),
             max_phonebook_sim_name_length);
     entry->entry.Name[max_phonebook_sim_name_length] = '\0';
 
-    if (strlen(gtk_entry_get_text(GTK_ENTRY (((EditEntryData*) data)->name))) > max_phonebook_sim_name_length)
+    if (strlen(gtk_entry_get_text (GTK_ENTRY (((EditEntryData*) data)->name))) > max_phonebook_sim_name_length)
     {
-      gtk_label_set_text( GTK_LABEL (errorDialog.text), _("Sorry, phonebook name will be truncated\n\
+      gtk_label_set_text (GTK_LABEL (errorDialog.text), _("Sorry, phonebook name will be truncated\n\
 because you save it into SIM memory!"));
-      gtk_widget_show( errorDialog.dialog);
+      gtk_widget_show (errorDialog.dialog);
     }
     
     strncpy(entry->entry.Number,
@@ -447,19 +457,19 @@ because you save it into SIM memory!"));
     }
     else
     { 
-      strncpy(((EditEntryData*) data)->pbEntry->entry.Name, 
+      strncpy (((EditEntryData*) data)->pbEntry->entry.Name, 
               gtk_entry_get_text(GTK_ENTRY (((EditEntryData*) data)->name)),
               max_phonebook_sim_name_length);
       ((EditEntryData*) data)->pbEntry->entry.Name[max_phonebook_sim_name_length] = '\0';
       
-      if (strlen(gtk_entry_get_text(GTK_ENTRY (((EditEntryData*) data)->name))) > max_phonebook_sim_name_length)
+      if (strlen(gtk_entry_get_text (GTK_ENTRY (((EditEntryData*) data)->name))) > max_phonebook_sim_name_length)
       {
-        gtk_label_set_text( GTK_LABEL (errorDialog.text), _("Sorry, phonebook name will be truncated\n\
+        gtk_label_set_text (GTK_LABEL (errorDialog.text), _("Sorry, phonebook name will be truncated\n\
 because you save it into SIM memory!"));
-        gtk_widget_show( errorDialog.dialog);
+        gtk_widget_show (errorDialog.dialog);
       }
   
-      strncpy(((EditEntryData*) data)->pbEntry->entry.Number,
+      strncpy (((EditEntryData*) data)->pbEntry->entry.Number,
               gtk_entry_get_text (GTK_ENTRY(((EditEntryData*) data)->number)),
               max_phonebook_sim_number_length);
       ((EditEntryData*) data)->pbEntry->entry.Name[max_phonebook_sim_number_length] = '\0';
@@ -485,7 +495,7 @@ because you save it into SIM memory!"));
 
   gtk_widget_hide(GTK_WIDGET(((EditEntryData*) data)->dialog));
   
-  RefreshStatusInfo();
+  RefreshStatusInfo ();
   
   gtk_clist_freeze(GTK_CLIST (clist));
     
@@ -528,17 +538,17 @@ static void OkChangeEntryDialog( GtkWidget *widget, gpointer data)
 
   while (sel != NULL)
   {
-    row = GPOINTER_TO_INT(sel->data);
+    row = GPOINTER_TO_INT (sel->data);
     oldPbEntry = (PhonebookEntry *) gtk_clist_get_row_data(GTK_CLIST (clist), row);
 
     sel = sel->next;
     
     if (oldPbEntry->entry.MemoryType == GMT_SM)
     {
-      if ((newPbEntry = FindFreeEntry(GMT_ME)) == NULL)
+      if ((newPbEntry = FindFreeEntry (GMT_ME)) == NULL)
       {
-        gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Can't change memory type!"));  
-        gtk_widget_show(errorDialog.dialog);
+        gtk_label_set_text (GTK_LABEL (errorDialog.text), _("Can't change memory type!"));  
+        gtk_widget_show (errorDialog.dialog);
         return;
       }
     
@@ -560,7 +570,7 @@ static void OkChangeEntryDialog( GtkWidget *widget, gpointer data)
       if ((newPbEntry = FindFreeEntry(GMT_SM)) == NULL)
       {
         gtk_label_set_text(GTK_LABEL (errorDialog.text), _("Can't change memory type!"));
-        gtk_widget_show(errorDialog.dialog);
+        gtk_widget_show (errorDialog.dialog);
         return;
       }
 
@@ -591,23 +601,23 @@ static void OkChangeEntryDialog( GtkWidget *widget, gpointer data)
       clist_row[3] = xgnokiiConfig.callerGroups[newPbEntry->entry.Group];
     else
       clist_row[3] = "";
-    gtk_clist_insert(GTK_CLIST (clist), row, clist_row);
+    gtk_clist_insert (GTK_CLIST (clist), row, clist_row);
     if (newPbEntry->entry.MemoryType == GMT_ME)
-      gtk_clist_set_pixmap( GTK_CLIST (clist), row, 2,
+      gtk_clist_set_pixmap (GTK_CLIST (clist), row, 2,
                             memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
     else
-      gtk_clist_set_pixmap( GTK_CLIST (clist), row, 2,
+      gtk_clist_set_pixmap (GTK_CLIST (clist), row, 2,
                             memoryPixmaps.simMemPix, memoryPixmaps.mask);
 
-    gtk_clist_set_row_data(GTK_CLIST (clist), row, (gpointer) newPbEntry);
+    gtk_clist_set_row_data (GTK_CLIST (clist), row, (gpointer) newPbEntry);
   }
   
-  RefreshStatusInfo();  
-  gtk_clist_sort(GTK_CLIST (clist));
-  gtk_clist_thaw(GTK_CLIST (clist));
+  RefreshStatusInfo ();  
+  gtk_clist_sort (GTK_CLIST (clist));
+  gtk_clist_thaw (GTK_CLIST (clist));
 }
 
-static void SearchEntry()
+static void SearchEntry (void)
 {
   gchar *buf;
   gchar *entry;
@@ -625,8 +635,8 @@ static void SearchEntry()
   
   while (findEntryStruct.lastRow != i)
   {
-    buf = g_strdup(entry);
-    g_strup(buf);
+    buf = g_strdup (entry);
+    g_strup (buf);
     
     if (strstr( buf, findEntryStruct.pattern))
     {
@@ -643,25 +653,25 @@ static void SearchEntry()
       return;
     }
     g_free(buf);
-    gtk_clist_get_text( GTK_CLIST (clist), i, findEntryStruct.type, &entry);
+    gtk_clist_get_text (GTK_CLIST (clist), i, findEntryStruct.type, &entry);
    
     
     i = (i + 1) % (memoryStatus.MaxME + memoryStatus.MaxSM);
   }
 
-  gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Can't find pattern!"));
-  gtk_widget_show(errorDialog.dialog);  
+  gtk_label_set_text (GTK_LABEL (errorDialog.text), _("Can't find pattern!"));
+  gtk_widget_show (errorDialog.dialog);  
 }
 
-static void OkFindEntryDialog( GtkWidget *widget, gpointer data)
+static void OkFindEntryDialog (GtkWidget *widget, gpointer data)
 {
-  if (GTK_TOGGLE_BUTTON(((FindEntryData*) data)->nameB)->active)
+  if (GTK_TOGGLE_BUTTON (((FindEntryData*) data)->nameB)->active)
     findEntryStruct.type = FIND_NAME;
   else
     findEntryStruct.type = FIND_NUMBER;
     
   strncpy(findEntryStruct.pattern, 
-          gtk_entry_get_text(GTK_ENTRY (((FindEntryData*) data)->pattern)),
+          gtk_entry_get_text (GTK_ENTRY (((FindEntryData*) data)->pattern)),
           max_phonebook_number_length);
   findEntryStruct.pattern[max_phonebook_number_length] = '\0';
   
@@ -669,15 +679,86 @@ static void OkFindEntryDialog( GtkWidget *widget, gpointer data)
   
   gtk_widget_hide( ((FindEntryData*) data)->dialog);
   
-  SearchEntry();
+  SearchEntry ();
+}
+
+void CreateGroupMenu (EditEntryData *data)
+{
+  GtkWidget *item;
+  
+  if (data->groupMenu)
+  {
+    gtk_option_menu_remove_menu (GTK_OPTION_MENU (data->group));
+    if (GTK_IS_WIDGET (data->groupMenu))
+      gtk_widget_destroy (GTK_WIDGET (data->groupMenu));
+    data->groupMenu = NULL;
+  }
+  
+  data->groupMenu = gtk_menu_new ();
+
+  item = gtk_menu_item_new_with_label (xgnokiiConfig.callerGroups[0]);
+  gtk_signal_connect (GTK_OBJECT (item), "activate",
+                      GTK_SIGNAL_FUNC (SetGroup0),
+                      (gpointer) data);
+  gtk_widget_show (item);
+  gtk_menu_append (GTK_MENU (data->groupMenu), item);
+  
+  item = gtk_menu_item_new_with_label (xgnokiiConfig.callerGroups[1]);
+  gtk_signal_connect (GTK_OBJECT (item), "activate",
+                      GTK_SIGNAL_FUNC (SetGroup1),
+                      (gpointer) data);
+  gtk_widget_show (item);
+  gtk_menu_append (GTK_MENU (data->groupMenu), item);
+
+  item = gtk_menu_item_new_with_label (xgnokiiConfig.callerGroups[2]);
+  gtk_signal_connect (GTK_OBJECT (item), "activate",
+                      GTK_SIGNAL_FUNC (SetGroup2),
+                      (gpointer) data);
+  gtk_widget_show (item);
+  gtk_menu_append (GTK_MENU (data->groupMenu), item);
+
+  item = gtk_menu_item_new_with_label (xgnokiiConfig.callerGroups[3]);
+  gtk_signal_connect (GTK_OBJECT (item), "activate",
+                      GTK_SIGNAL_FUNC (SetGroup3),
+                      (gpointer) data);
+  gtk_widget_show (item);
+  gtk_menu_append (GTK_MENU (data->groupMenu), item);
+
+  item = gtk_menu_item_new_with_label (xgnokiiConfig.callerGroups[4]);
+  gtk_signal_connect (GTK_OBJECT (item), "activate",
+                      GTK_SIGNAL_FUNC (SetGroup4),
+                      (gpointer) data);
+  gtk_widget_show (item);
+  gtk_menu_append (GTK_MENU (data->groupMenu), item);
+
+  item = gtk_menu_item_new_with_label (xgnokiiConfig.callerGroups[5]);
+  gtk_signal_connect (GTK_OBJECT (item), "activate",
+                      GTK_SIGNAL_FUNC (SetGroup5),
+                      (gpointer) data);
+  gtk_widget_show (item);
+  gtk_menu_append (GTK_MENU (data->groupMenu), item);
+    
+  gtk_option_menu_set_menu (GTK_OPTION_MENU (data->group), data->groupMenu);
+}
+  
+inline void GUI_RefreshGroupMenu (void)
+{
+  if (newEditEntryData.group)
+    CreateGroupMenu (&newEditEntryData);
+    
+  if (editEditEntryData.group)
+    CreateGroupMenu (&editEditEntryData);
+    
+  if (duplicateEditEntryData.group)
+    CreateGroupMenu (&duplicateEditEntryData);
 }
 
 static void CreateEditDialog( EditEntryData *editEntryData, gchar *title,
                               GtkSignalFunc okFunc)
 {
-  GtkWidget *button, *label, *hbox, *menu, *item;
+  GtkWidget *button, *label, *hbox;
   
-  editEntryData->dialog = gtk_dialog_new();
+  editEntryData->dialog = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (editEntryData->dialog), title);
   gtk_window_set_modal(GTK_WINDOW (editEntryData->dialog), TRUE);
   gtk_container_set_border_width (GTK_CONTAINER (editEntryData->dialog), 10);
@@ -750,56 +831,13 @@ static void CreateEditDialog( EditEntryData *editEntryData, gchar *title,
     gtk_widget_show (hbox);
   
     label = gtk_label_new (_("Caller group:"));
-    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
     gtk_widget_show (label);
 
-    editEntryData->group = gtk_option_menu_new();
-    menu = gtk_menu_new();
-
-    item = gtk_menu_item_new_with_label( xgnokiiConfig.callerGroups[0]);
-    gtk_signal_connect (GTK_OBJECT (item), "activate",
-                        GTK_SIGNAL_FUNC(SetGroup0),
-                        (gpointer) editEntryData);
-    gtk_widget_show(item);
-    gtk_menu_append (GTK_MENU (menu), item);
-  
-    item = gtk_menu_item_new_with_label( xgnokiiConfig.callerGroups[1]);
-    gtk_signal_connect (GTK_OBJECT (item), "activate",
-                        GTK_SIGNAL_FUNC(SetGroup1),
-                        (gpointer) editEntryData);
-    gtk_widget_show(item);
-    gtk_menu_append (GTK_MENU (menu), item);
-
-    item = gtk_menu_item_new_with_label( xgnokiiConfig.callerGroups[2]);
-    gtk_signal_connect (GTK_OBJECT (item), "activate",
-                        GTK_SIGNAL_FUNC(SetGroup2),
-                        (gpointer) editEntryData);
-    gtk_widget_show(item);
-    gtk_menu_append (GTK_MENU (menu), item);
-
-    item = gtk_menu_item_new_with_label( xgnokiiConfig.callerGroups[3]);
-    gtk_signal_connect (GTK_OBJECT (item), "activate",
-                        GTK_SIGNAL_FUNC(SetGroup3),
-                        (gpointer) editEntryData);
-    gtk_widget_show(item);
-    gtk_menu_append (GTK_MENU (menu), item);
-
-    item = gtk_menu_item_new_with_label( xgnokiiConfig.callerGroups[4]);
-    gtk_signal_connect (GTK_OBJECT (item), "activate",
-                        GTK_SIGNAL_FUNC(SetGroup4),
-                        (gpointer) editEntryData);
-    gtk_widget_show(item);
-    gtk_menu_append (GTK_MENU (menu), item);
-
-    item = gtk_menu_item_new_with_label( xgnokiiConfig.callerGroups[5]);
-    gtk_signal_connect (GTK_OBJECT (item), "activate",
-                        GTK_SIGNAL_FUNC(SetGroup5),
-                        (gpointer) editEntryData);
-    gtk_widget_show(item);
-    gtk_menu_append (GTK_MENU (menu), item);
+    editEntryData->group = gtk_option_menu_new ();
     
-    gtk_option_menu_set_menu(GTK_OPTION_MENU (editEntryData->group), menu);
-
+    CreateGroupMenu (editEntryData);
+    
     gtk_box_pack_start (GTK_BOX (hbox), editEntryData->group, TRUE, TRUE, 0);
     gtk_widget_show (editEntryData->group);
   }
@@ -807,38 +845,36 @@ static void CreateEditDialog( EditEntryData *editEntryData, gchar *title,
 
 static void EditPbEntry(PhonebookEntry *pbEntry, gint row)
 {
-  static EditEntryData editEntryData = {NULL, NULL};
+  if (editEditEntryData.dialog == NULL)
+    CreateEditDialog(&editEditEntryData, _("Edit entry"), OkEditEntryDialog);
   
-  if (editEntryData.dialog == NULL)
-    CreateEditDialog(&editEntryData, _("Edit entry"), OkEditEntryDialog);
+  editEditEntryData.pbEntry = pbEntry;
+  editEditEntryData.newGroup = pbEntry->entry.Group;
+  editEditEntryData.row = row;
   
-  editEntryData.pbEntry = pbEntry;
-  editEntryData.newGroup = pbEntry->entry.Group;
-  editEntryData.row = row;
+  gtk_entry_set_text (GTK_ENTRY (editEditEntryData.name), pbEntry->entry.Name);
   
-  gtk_entry_set_text (GTK_ENTRY (editEntryData.name), pbEntry->entry.Name);
-  
-  gtk_entry_set_text (GTK_ENTRY (editEntryData.number), pbEntry->entry.Number);
+  gtk_entry_set_text (GTK_ENTRY (editEditEntryData.number), pbEntry->entry.Number);
   
   if (pbEntry->entry.MemoryType == GMT_ME)
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editEntryData.memoryTypePhone), TRUE);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editEditEntryData.memoryTypePhone), TRUE);
   else
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editEntryData.memoryTypeSIM), TRUE);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editEditEntryData.memoryTypeSIM), TRUE);
     
-  gtk_option_menu_set_history( GTK_OPTION_MENU (editEntryData.group),
+  gtk_option_menu_set_history( GTK_OPTION_MENU (editEditEntryData.group),
                                pbEntry->entry.Group);
     
-  gtk_widget_show(GTK_WIDGET (editEntryData.dialog));
+  gtk_widget_show(GTK_WIDGET (editEditEntryData.dialog));
 }
 
-void DeletePbEntry()
+void DeletePbEntry (void)
 {
   static GtkWidget *dialog = NULL;
   GtkWidget *button, *hbox, *label, *pixmap;
   
   if (dialog == NULL)
   {
-    dialog = gtk_dialog_new();
+    dialog = gtk_dialog_new ();
     gtk_window_set_title (GTK_WINDOW (dialog), _("Delete entries"));
     gtk_window_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
     gtk_window_set_modal(GTK_WINDOW (dialog), TRUE);
@@ -881,53 +917,49 @@ void DeletePbEntry()
 
 void NewPbEntry(PhonebookEntry *pbEntry)
 {
-  static EditEntryData editEntryData = {NULL, NULL};
+  if (newEditEntryData.dialog == NULL)
+    CreateEditDialog (&newEditEntryData, _("New entry"), OkNewEntryDialog);
   
-  if (editEntryData.dialog == NULL)
-    CreateEditDialog (&editEntryData, _("New entry"), OkNewEntryDialog);
+  newEditEntryData.pbEntry = pbEntry;
+  newEditEntryData.newGroup = 5;
   
-  editEntryData.pbEntry = pbEntry;
-  editEntryData.newGroup = 5;
-  
-  gtk_entry_set_text (GTK_ENTRY (editEntryData.name), "");
-  gtk_entry_set_text (GTK_ENTRY (editEntryData.number), "");
+  gtk_entry_set_text (GTK_ENTRY (newEditEntryData.name), "");
+  gtk_entry_set_text (GTK_ENTRY (newEditEntryData.number), "");
   
   if (pbEntry->entry.MemoryType == GMT_ME)
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editEntryData.memoryTypePhone), TRUE);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (newEditEntryData.memoryTypePhone), TRUE);
   else
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editEntryData.memoryTypeSIM), TRUE);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (newEditEntryData.memoryTypeSIM), TRUE);
     
-  gtk_option_menu_set_history( GTK_OPTION_MENU (editEntryData.group),
+  gtk_option_menu_set_history( GTK_OPTION_MENU (newEditEntryData.group),
                                pbEntry->entry.Group);
   
-  gtk_widget_show(GTK_WIDGET (editEntryData.dialog));
+  gtk_widget_show(GTK_WIDGET (newEditEntryData.dialog));
 }
 
 void DuplicatePbEntry (PhonebookEntry *pbEntry)
 {
-  static EditEntryData editEntryData = {NULL, NULL};
+  if (duplicateEditEntryData.dialog == NULL)
+    CreateEditDialog (&duplicateEditEntryData, _("Duplicate entry"), OkNewEntryDialog);
   
-  if (editEntryData.dialog == NULL)
-    CreateEditDialog (&editEntryData, _("Duplicate entry"), OkNewEntryDialog);
+  duplicateEditEntryData.pbEntry = pbEntry;
+  duplicateEditEntryData.newGroup = pbEntry->entry.Group;
   
-  editEntryData.pbEntry = pbEntry;
-  editEntryData.newGroup = pbEntry->entry.Group;
-  
-  gtk_entry_set_text (GTK_ENTRY (editEntryData.name), pbEntry->entry.Name);
-  gtk_entry_set_text (GTK_ENTRY (editEntryData.number), pbEntry->entry.Number);
+  gtk_entry_set_text (GTK_ENTRY (duplicateEditEntryData.name), pbEntry->entry.Name);
+  gtk_entry_set_text (GTK_ENTRY (duplicateEditEntryData.number), pbEntry->entry.Number);
   
   if (pbEntry->entry.MemoryType == GMT_ME)
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editEntryData.memoryTypePhone), TRUE);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (duplicateEditEntryData.memoryTypePhone), TRUE);
   else
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (editEntryData.memoryTypeSIM), TRUE);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (duplicateEditEntryData.memoryTypeSIM), TRUE);
   
-  gtk_option_menu_set_history( GTK_OPTION_MENU (editEntryData.group),
+  gtk_option_menu_set_history( GTK_OPTION_MENU (duplicateEditEntryData.group),
                                pbEntry->entry.Group);
     
-  gtk_widget_show(GTK_WIDGET (editEntryData.dialog));
+  gtk_widget_show(GTK_WIDGET (duplicateEditEntryData.dialog));
 }
 
-static void EditEntry()
+static void EditEntry (void)
 {
   if (contactsMemoryInitialized)
   {
@@ -940,7 +972,7 @@ static void EditEntry()
   }
 }
 
-static void DuplicateEntry()
+static void DuplicateEntry (void)
 {
   PhonebookEntry *new, *old;
   
@@ -979,7 +1011,7 @@ static void DuplicateEntry()
   }
 }
 
-static void NewEntry ()
+static void NewEntry (void)
 {
   PhonebookEntry *entry;
   
@@ -1008,18 +1040,18 @@ static void ClickEntry (GtkWidget      *clist,
                 row);
 }
 
-void DeleteEntry()
+void DeleteEntry (void)
 {
   if (contactsMemoryInitialized)
   {
     if (GTK_CLIST (clist)->selection == NULL)
       return;
     
-    DeletePbEntry();
+    DeletePbEntry ();
   }
 }
 
-void ChMemType()
+void ChMemType (void)
 {
   static GtkWidget *dialog = NULL;
   GtkWidget *button, *hbox, *label;
@@ -1031,7 +1063,7 @@ void ChMemType()
     
     if (dialog == NULL)
     {
-      dialog = gtk_dialog_new();
+      dialog = gtk_dialog_new ();
       gtk_window_set_title (GTK_WINDOW (dialog), _("Changing memory type"));
       gtk_window_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
       gtk_window_set_modal(GTK_WINDOW (dialog), TRUE);
@@ -1069,7 +1101,7 @@ void ChMemType()
   }
 }
 
-void FindFirstEntry ()
+void FindFirstEntry (void)
 {
   static FindEntryData findEntryData = { NULL };
   GtkWidget *button, *label, *hbox;
@@ -1135,25 +1167,72 @@ void FindFirstEntry ()
   }
 }
 
-static void SelectAll ()
+static void SelectAll (void)
 {
   gtk_clist_select_all (GTK_CLIST (clist));
 }
 
-static void DialVoice ()
+static inline void OkDialVoiceDialog (GtkWidget *w, gpointer data)
 {
+  gchar *buf = gtk_entry_get_text (GTK_ENTRY (((DialVoiceDialog *) data)->entry));
+  
+  if (strlen (buf) > 0)
+    GSM->DialVoice (buf);
+    
+  gtk_widget_hide (((DialVoiceDialog *) data)->dialog);
+}
+
+static void DialVoice (void)
+{
+  static DialVoiceDialog dialVoiceDialog = {NULL, NULL};
+  GtkWidget *button, *label;
   PhonebookEntry *pbEntry;
   
-  if (contactsMemoryInitialized)
+  if (dialVoiceDialog.dialog == NULL)
   {
-    if (GTK_CLIST (clist)->selection == NULL)
-      return;
+    dialVoiceDialog.dialog = gtk_dialog_new ();
+    gtk_window_set_title (GTK_WINDOW (dialVoiceDialog.dialog), _("Dial voice"));
+    gtk_window_set_modal(GTK_WINDOW (dialVoiceDialog.dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (dialVoiceDialog.dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (dialVoiceDialog.dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
     
-    pbEntry = (PhonebookEntry *) gtk_clist_get_row_data (GTK_CLIST (clist),
-                GPOINTER_TO_INT (GTK_CLIST (clist)->selection->data));
-                
-    GSM->DialVoice (pbEntry->entry.Number);
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialVoiceDialog.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkDialVoiceDialog), (gpointer) &dialVoiceDialog);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);                               
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+    
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialVoiceDialog.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) dialVoiceDialog.dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (dialVoiceDialog.dialog)->vbox), 5);
+   
+    label = gtk_label_new (_("Number:"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialVoiceDialog.dialog)->vbox), label, FALSE, FALSE, 5);
+    gtk_widget_show (label);
+    
+    dialVoiceDialog.entry = gtk_entry_new_with_max_length (GSM_MAX_PHONEBOOK_NUMBER_LENGTH);
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialVoiceDialog.dialog)->vbox), dialVoiceDialog.entry, FALSE, FALSE, 5);
+    gtk_widget_show (dialVoiceDialog.entry);
   }
+  
+  if (GTK_CLIST (clist)->selection != NULL)
+  {
+    pbEntry = (PhonebookEntry *) gtk_clist_get_row_data (GTK_CLIST (clist),
+               GPOINTER_TO_INT (GTK_CLIST (clist)->selection->data));
+    
+    gtk_entry_set_text (GTK_ENTRY (dialVoiceDialog.entry), pbEntry->entry.Number);
+  }
+  
+  gtk_widget_show (dialVoiceDialog.dialog);  
 }
 
 static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer ptr2)
@@ -1265,7 +1344,7 @@ static void CreateProgressDialog (gint maxME, gint maxSM)
   gtk_widget_show (progressDialog.pbarSM);
 }
 
-static void SaveContacts ()
+static void SaveContacts (void)
 {
   register gint i;
   PhonebookEntry *pbEntry;
@@ -1408,7 +1487,7 @@ static GtkWidget *CreateSaveQuestionDialog (GtkSignalFunc SaveFunc,
   return dialog;
 }
 
-void GUI_RefreshContacts ()
+void GUI_RefreshContacts (void)
 {
   PhonebookEntry *pbEntry;
   gint row_i = 0;
@@ -1459,7 +1538,7 @@ void GUI_RefreshContacts ()
   gtk_clist_thaw (GTK_CLIST (clist));
 }
 
-static void ReadContactsMain()
+static void ReadContactsMain (void)
 {
   GSM_MemoryStatus gsm_MemoryStatus;
   PhonebookEntry *pbEntry;
@@ -1647,7 +1726,7 @@ static void ReadDontSaveCallback (GtkWidget *widget, gpointer data)
   ReadContactsMain ();
 }
 
-static void ReadSaveContacts ()
+static void ReadSaveContacts (void)
 {
   static GtkWidget *dialog = NULL;
   
@@ -1657,7 +1736,7 @@ static void ReadSaveContacts ()
   gtk_widget_show (dialog);
 }
 
-static void ReadContacts ()
+static void ReadContacts (void)
 {
   if (contactsMemoryInitialized == TRUE && (statusInfo.ch_ME || statusInfo.ch_SM))
     ReadSaveContacts ();
@@ -1666,24 +1745,24 @@ static void ReadContacts ()
 }
  
 
-inline void GUI_ReadContacts ()
+inline void GUI_ReadContacts (void)
 {
   ReadContacts ();
 }
 
-inline void GUI_SaveContacts ()
+inline void GUI_SaveContacts (void)
 {
   SaveContacts ();
 }
 
-inline void GUI_ShowContacts ()
+inline void GUI_ShowContacts (void)
 {
   gtk_widget_show (GUI_ContactsWindow);
 //  if (!contactsMemoryInitialized)
-//    ReadContacts();
+//    ReadContacts ();
 }
 
-void GUI_HideContacts ()
+void GUI_HideContacts (void)
 {
   gtk_widget_hide (GUI_ContactsWindow);
 }
@@ -1779,7 +1858,7 @@ static void OkExportDialog (GtkWidget *w, GtkFileSelection *fs)
 }    
 
 
-static void ExportContacts ()
+static void ExportContacts (void)
 {
   static GtkWidget *fileDialog = NULL;
   
@@ -2084,8 +2163,8 @@ Setting max SIM entries set to 100!\n"));
   }
   
   contactsMemoryInitialized = TRUE;
-  RefreshStatusInfo();
-  GUI_RefreshContacts();
+  RefreshStatusInfo ();
+  GUI_RefreshContacts ();
   GUI_RefreshMessageWindow ();
 }
 
@@ -2120,7 +2199,7 @@ static void ImportDontSaveCallback (GtkWidget *widget, gpointer data)
   ImportContactsFileDialog ();
 }
 
-void static ImportSaveContacts ()
+void static ImportSaveContacts (void)
 {
   static GtkWidget *dialog = NULL;
   
@@ -2130,7 +2209,7 @@ void static ImportSaveContacts ()
   gtk_widget_show (dialog);
 }
 
-static void ImportContacts ()
+static void ImportContacts (void)
 {
   if (contactsMemoryInitialized == TRUE && (statusInfo.ch_ME || statusInfo.ch_SM))
     ImportSaveContacts ();
@@ -2152,7 +2231,7 @@ static void QuitDontSaveCallback (GtkWidget *widget, gpointer data)
   gtk_main_quit ();
 }
 
-void GUI_QuitSaveContacts ()
+void GUI_QuitSaveContacts (void)
 {
   static GtkWidget *dialog = NULL;
   
@@ -2203,6 +2282,50 @@ gchar *GUI_GetName (gchar *number)
   return NULL;
 }
 
+gchar *GUI_GetNameExact (gchar *number)
+{
+  PhonebookEntry *pbEntry;
+  register gint i;
+  
+  if (contactsMemoryInitialized == FALSE || number == NULL)
+    return (gchar *)NULL;
+  
+  for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
+  {
+    pbEntry = g_ptr_array_index (contactsMemory, i);
+    
+    if (pbEntry->status == E_Empty || pbEntry->status == E_Deleted)
+      continue;
+    
+    if (strcmp (pbEntry->entry.Number, number) == 0)
+      return pbEntry->entry.Name;
+  }
+    
+  return NULL;
+}
+
+gchar *GUI_GetNumber (gchar *name)
+{
+  PhonebookEntry *pbEntry;
+  register gint i;
+  
+  if (contactsMemoryInitialized == FALSE || name == NULL || *name == '\0')
+    return (gchar *)NULL;
+  
+  for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
+  {
+    pbEntry = g_ptr_array_index (contactsMemory, i);
+    
+    if (pbEntry->status == E_Empty || pbEntry->status == E_Deleted)
+      continue;
+    
+    if (strcmp (pbEntry->entry.Name, name) == 0)
+      return pbEntry->entry.Number;
+  }
+    
+  return NULL;
+}
+
 static void SelectDialogClickEntry (GtkWidget        *clist,
                                     gint              row,
                                     gint              column,
@@ -2213,69 +2336,7 @@ static void SelectDialogClickEntry (GtkWidget        *clist,
     gtk_signal_emit_by_name(GTK_OBJECT (data->okButton), "clicked");
 }
 
-/**************************************************************************
-Function SelectContactDialog() show dialog with contacts and let you select
-entries.
-
-Sample signals and events handlers for SelectContactDialog.
-
-static void DeleteSelectContactDialog (GtkWidget *widget, GdkEvent *event,
-                                       SelectNumberData *data)
-{
-  gtk_widget_destroy (GTK_WIDGET (data->clist));
-  gtk_widget_destroy (GTK_WIDGET (data->clistScrolledWindow));
-  gtk_widget_destroy (GTK_WIDGET (widget));
-}
-
-static void CancelSelectContactDialog (GtkWidget *widget,
-                                       SelectContactData *data)
-{
-  gtk_widget_destroy (GTK_WIDGET (data->clist));
-  gtk_widget_destroy (GTK_WIDGET (data->clistScrolledWindow));
-  gtk_widget_destroy (GTK_WIDGET (data->dialog));
-}
-
-static void OkSelectContactDialog (GtkWidget *widget,
-                                   SelectContactData *data)
-{
-  GList *sel;
-  PhonebookEntry *pbEntry;
-  
-  if ((sel = GTK_CLIST (data->clist)->selection) != NULL)
-    while (sel != NULL)
-    {
-      pbEntry = gtk_clist_get_row_data (GTK_CLIST (clist),
-                                        GPOINTER_TO_INT (sel->data));
-      g_print ("%s\n", pbEntry->entry.Name);
-      
-      sel = sel->next;
-    }
-  
-  gtk_widget_destroy (GTK_WIDGET (data->clist));
-  gtk_widget_destroy (GTK_WIDGET (data->clistScrolledWindow));
-  gtk_widget_destroy (GTK_WIDGET (data->dialog));
-}
-
-
-Create Select contact dialog and connect signals and events
-void aaa ()
-{
-  SelectContactData *r;
-  
-  if ((r = GUI_SelectContactDialog ()) == NULL)
-    return;
-    
-  gtk_signal_connect (GTK_OBJECT (r->dialog), "delete_event",
-                      GTK_SIGNAL_FUNC (DeleteSelectContactDialog), (gpointer) r);
-    
-  gtk_signal_connect (GTK_OBJECT (r->okButton), "clicked",
-                      GTK_SIGNAL_FUNC (OkSelectContactDialog), (gpointer) r);
-  gtk_signal_connect (GTK_OBJECT (r->cancelButton), "clicked",
-                      GTK_SIGNAL_FUNC (CancelSelectContactDialog), (gpointer) r);
-}
-***************************************************************************/
-
-SelectContactData *GUI_SelectContactDialog ()
+SelectContactData *GUI_SelectContactDialog (void)
 {
   PhonebookEntry *pbEntry;
   static SelectContactData selectContactData;
@@ -2354,7 +2415,7 @@ SelectContactData *GUI_SelectContactDialog ()
     gchar *row[4];
     
     pbEntry = g_ptr_array_index (contactsMemory, i);
-    if (pbEntry->status != E_Empty)
+    if (pbEntry->status != E_Empty && pbEntry->status != E_Deleted)
     {
       row[0] = pbEntry->entry.Name;
       row[1] = pbEntry->entry.Number;
@@ -2416,7 +2477,7 @@ static GtkItemFactoryEntry menu_items[] = {
 };
   
 
-void GUI_CreateContactsWindow ()
+void GUI_CreateContactsWindow (void)
 {
   int nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
   GtkItemFactory *item_factory;

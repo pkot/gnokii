@@ -15,7 +15,9 @@
 
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include "../misc.h"
 #include "../gsm-api.h"
 #include "xgnokii_common.h"
@@ -24,17 +26,44 @@
 #include "xgnokii_sms.h"
 #include "../pixmaps/Edit.xpm"
 #include "../pixmaps/Delete.xpm"
+#include "../pixmaps/Forward.xpm"
+#include "../pixmaps/Reply.xpm"
+#include "../pixmaps/Send.xpm"
+#include "../pixmaps/SendSMS.xpm"
+#include "../pixmaps/Check.xpm"
+#include "../pixmaps/Names.xpm"
 #include "../pixmaps/quest.xpm"
 
+typedef struct {
+  gchar *number;
+  gchar *name;
+  gint used:1;
+} AddressPar;
+
+typedef struct {
+  GtkWidget *smsClist;
+  GtkWidget *smsText;
+  GSList    *messages;
+  GdkColor   colour;
+  gint       row_i;
+  gint       currentBox;
+} SMSWidget;
+  
+typedef struct {
+  GtkWidget *SMSSendWindow;
+  GtkWidget *smsSendText;
+  GtkWidget *addr;
+  GtkWidget *status;
+  GtkWidget *report;
+  GtkWidget *smscOptionMenu;
+  gint       center;
+  GSList    *addressLine;
+} SendSMSWidget;
+
 static GtkWidget *GUI_SMSWindow;
-static GtkWidget *smsClist;
-static GtkWidget *smsText;
-static GSList* messages = NULL;
+static SMSWidget SMS = {NULL, NULL, NULL};
+static SendSMSWidget sendSMS = {NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
 static ErrorDialog errorDialog = {NULL, NULL};
-static gint row_i;
-static gint currentBox;
-static GdkColormap *cmap;
-static GdkColor colour;
 static QuestMark questMark;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
@@ -42,9 +71,19 @@ static inline void Help1 (GtkWidget *w, gpointer data)
   Help (w, _("/help/sms.html"));
 }
 
+static inline void Help2 (GtkWidget *w, gpointer data)
+{
+  Help (w, _("/help/sms_send.html"));
+}
+
 static inline void CloseSMS (GtkWidget *w, gpointer data)
 {
   gtk_widget_hide (GUI_SMSWindow);
+}
+
+static inline void CloseSMSSend (GtkWidget *w, gpointer data)
+{
+  gtk_widget_hide (sendSMS.SMSSendWindow);
 }
 
 static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer ptr2)
@@ -85,7 +124,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
   if (!text1)
     return -1;
 
-  if (clist->sort_column == 1 && !currentBox)
+  if (clist->sort_column == 1 && !SMS.currentBox)
   {
     struct tm bdTime;
     time_t time1, time2;
@@ -173,24 +212,24 @@ static void InsertInboxElement (gpointer d, gpointer userData)
       row[2] = data->Sender;
     row[3] = data->MessageText;
       
-    gtk_clist_append( GTK_CLIST (smsClist), row);
-    gtk_clist_set_row_data (GTK_CLIST (smsClist), row_i++,
+    gtk_clist_append( GTK_CLIST (SMS.smsClist), row);
+    gtk_clist_set_row_data (GTK_CLIST (SMS.smsClist), SMS.row_i++,
                             GINT_TO_POINTER (data->MessageNumber));
     g_free (row[0]);
     g_free (row[1]);
   }
 }
                               
-static inline void RefreshInbox ()
+static inline void RefreshInbox (void)
 {
-  gtk_clist_freeze (GTK_CLIST (smsClist));
-  gtk_clist_clear (GTK_CLIST (smsClist));
+  gtk_clist_freeze (GTK_CLIST (SMS.smsClist));
+  gtk_clist_clear (GTK_CLIST (SMS.smsClist));
   
-  row_i = 0;
-  g_slist_foreach (messages, InsertInboxElement, (gpointer) NULL);
+  SMS.row_i = 0;
+  g_slist_foreach (SMS.messages, InsertInboxElement, (gpointer) NULL);
   
-  gtk_clist_sort (GTK_CLIST (smsClist));
-  gtk_clist_thaw (GTK_CLIST (smsClist));
+  gtk_clist_sort (GTK_CLIST (SMS.smsClist));
+  gtk_clist_thaw (GTK_CLIST (SMS.smsClist));
 }
 
 static void InsertOutboxElement (gpointer d, gpointer userData)
@@ -210,32 +249,32 @@ static void InsertOutboxElement (gpointer d, gpointer userData)
     row[1] = row[2] = g_strdup ("");
     row[3] = data->MessageText;
       
-    gtk_clist_append( GTK_CLIST (smsClist), row);
-    gtk_clist_set_row_data (GTK_CLIST (smsClist), row_i++,
+    gtk_clist_append( GTK_CLIST (SMS.smsClist), row);
+    gtk_clist_set_row_data (GTK_CLIST (SMS.smsClist), SMS.row_i++,
                             GINT_TO_POINTER (data->MessageNumber));
     g_free (row[0]);
     g_free (row[1]);
   }
 }
                               
-static inline void RefreshOutbox ()
+static inline void RefreshOutbox (void)
 {
-  gtk_clist_freeze (GTK_CLIST (smsClist));
-  gtk_clist_clear (GTK_CLIST (smsClist));
+  gtk_clist_freeze (GTK_CLIST (SMS.smsClist));
+  gtk_clist_clear (GTK_CLIST (SMS.smsClist));
   
-  row_i = 0;
-  g_slist_foreach (messages, InsertOutboxElement, (gpointer) NULL);
+  SMS.row_i = 0;
+  g_slist_foreach (SMS.messages, InsertOutboxElement, (gpointer) NULL);
   
-  gtk_clist_sort (GTK_CLIST (smsClist));
-  gtk_clist_thaw (GTK_CLIST (smsClist));
+  gtk_clist_sort (GTK_CLIST (SMS.smsClist));
+  gtk_clist_thaw (GTK_CLIST (SMS.smsClist));
 }
 
-inline void GUI_RefreshMessageWindow ()
+inline void GUI_RefreshMessageWindow (void)
 {
   if (!GTK_WIDGET_VISIBLE (GUI_SMSWindow))
     return;
     
-  if (currentBox)
+  if (SMS.currentBox)
     RefreshOutbox ();
   else
     RefreshInbox ();
@@ -243,16 +282,16 @@ inline void GUI_RefreshMessageWindow ()
 
 static void SelectTreeItem (GtkWidget *item, gpointer data)
 {
-  currentBox = GPOINTER_TO_INT (data);
+  SMS.currentBox = GPOINTER_TO_INT (data);
   GUI_RefreshMessageWindow ();
 }
 
-void GUI_RefreshSMS ()
+void GUI_RefreshSMS (void)
 {
   GSM_SMSMessage *msg;
   register gint i;
   
-  FreeArray (&messages);
+  FreeArray (&(SMS.messages));
   
   for (i = 1; i <= 10; i++)
   {
@@ -261,7 +300,7 @@ void GUI_RefreshSMS ()
     msg->Location = i;
     
     if (GSM->GetSMSMessage (msg) == GE_NONE)
-      messages = g_slist_append (messages, msg);
+      SMS.messages = g_slist_append (SMS.messages, msg);
   }
   GUI_RefreshMessageWindow ();
 }
@@ -276,42 +315,42 @@ static void ClickEntry (GtkWidget      *clist,
   {
     gchar *buf;
     
-    gtk_text_freeze (GTK_TEXT (smsText));
+    gtk_text_freeze (GTK_TEXT (SMS.smsText));
     
-    gtk_text_set_point (GTK_TEXT (smsText), 0);
-    gtk_text_forward_delete (GTK_TEXT (smsText), gtk_text_get_length (GTK_TEXT (smsText)));
+    gtk_text_set_point (GTK_TEXT (SMS.smsText), 0);
+    gtk_text_forward_delete (GTK_TEXT (SMS.smsText), gtk_text_get_length (GTK_TEXT (SMS.smsText)));
     
-    gtk_text_insert (GTK_TEXT (smsText), NULL, &colour, NULL,
+    gtk_text_insert (GTK_TEXT (SMS.smsText), NULL, &(SMS.colour), NULL,
                      _("From: "), -1);
     gtk_clist_get_text (GTK_CLIST (clist), row, 2, &buf);
-    gtk_text_insert (GTK_TEXT (smsText), NULL, &smsText->style->black, NULL,
+    gtk_text_insert (GTK_TEXT (SMS.smsText), NULL, &(SMS.smsText->style->black), NULL,
                      buf, -1);
-    gtk_text_insert (GTK_TEXT (smsText), NULL, &smsText->style->black, NULL,
+    gtk_text_insert (GTK_TEXT (SMS.smsText), NULL, &(SMS.smsText->style->black), NULL,
                      "\n", -1);
     
-    gtk_text_insert (GTK_TEXT (smsText), NULL, &colour, NULL,
+    gtk_text_insert (GTK_TEXT (SMS.smsText), NULL, &(SMS.colour), NULL,
                      _("Date: "), -1);
     gtk_clist_get_text (GTK_CLIST (clist), row, 1, &buf);
-    gtk_text_insert (GTK_TEXT (smsText), NULL, &smsText->style->black, NULL,
+    gtk_text_insert (GTK_TEXT (SMS.smsText), NULL, &(SMS.smsText->style->black), NULL,
                      buf, -1);
-    gtk_text_insert (GTK_TEXT (smsText), NULL, &smsText->style->black, NULL,
+    gtk_text_insert (GTK_TEXT (SMS.smsText), NULL, &(SMS.smsText->style->black), NULL,
                      "\n\n", -1);                 
     
     gtk_clist_get_text (GTK_CLIST (clist), row, 3, &buf);
-    gtk_text_insert (GTK_TEXT (smsText), NULL, &smsText->style->black, NULL,
+    gtk_text_insert (GTK_TEXT (SMS.smsText), NULL, &(SMS.smsText->style->black), NULL,
                      buf, -1);
     
-    gtk_text_thaw (GTK_TEXT (smsText));
+    gtk_text_thaw (GTK_TEXT (SMS.smsText));
   }
 }
 
-inline void GUI_ShowSMS ()
+inline void GUI_ShowSMS (void)
 {
   gtk_widget_show (GUI_SMSWindow);
   GUI_RefreshMessageWindow ();
 }
 
-static void OkDeleteSMSDialog(GtkWidget *widget, gpointer data )
+static void OkDeleteSMSDialog (GtkWidget *widget, gpointer data)
 {
   GSM_SMSMessage message;
   GList *sel;
@@ -319,14 +358,14 @@ static void OkDeleteSMSDialog(GtkWidget *widget, gpointer data )
   gint row;
   
   
-  sel = GTK_CLIST (smsClist)->selection;
+  sel = GTK_CLIST (SMS.smsClist)->selection;
   
-  gtk_clist_freeze(GTK_CLIST (smsClist));
+  gtk_clist_freeze(GTK_CLIST (SMS.smsClist));
 
   while (sel != NULL)
   {
     row = GPOINTER_TO_INT(sel->data); 
-    message.Location = GPOINTER_TO_INT (gtk_clist_get_row_data(GTK_CLIST (smsClist), row));
+    message.Location = GPOINTER_TO_INT (gtk_clist_get_row_data(GTK_CLIST (SMS.smsClist), row));
     sel = sel->next;
     
     message.MemoryType = GMT_SM;
@@ -350,10 +389,10 @@ static void OkDeleteSMSDialog(GtkWidget *widget, gpointer data )
   
   gtk_widget_hide(GTK_WIDGET (data));
   
-  gtk_clist_thaw(GTK_CLIST (smsClist));
+  gtk_clist_thaw(GTK_CLIST (SMS.smsClist));
 }
 
-void DeleteSMS()
+void DeleteSMS(void)
 {
   static GtkWidget *dialog = NULL;
   GtkWidget *button, *hbox, *label, *pixmap;
@@ -401,22 +440,600 @@ void DeleteSMS()
   gtk_widget_show(GTK_WIDGET (dialog));
 }
 
+
+static void DeleteSelectContactDialog (GtkWidget *widget, GdkEvent *event,
+                                       SelectContactData *data)
+{
+  gtk_widget_destroy (GTK_WIDGET (data->clist));
+  gtk_widget_destroy (GTK_WIDGET (data->clistScrolledWindow));
+  gtk_widget_destroy (GTK_WIDGET (widget));
+}
+
+static void CancelSelectContactDialog (GtkWidget *widget,
+                                       SelectContactData *data)
+{
+  gtk_widget_destroy (GTK_WIDGET (data->clist));
+  gtk_widget_destroy (GTK_WIDGET (data->clistScrolledWindow));
+  gtk_widget_destroy (GTK_WIDGET (data->dialog));
+}
+
+static void OkSelectContactDialog (GtkWidget *widget,
+                                   SelectContactData *data)
+{
+  GList *sel;
+  PhonebookEntry *pbEntry;
+  
+  if ((sel = GTK_CLIST (data->clist)->selection) != NULL)
+    while (sel != NULL)
+    {
+      AddressPar *ap = g_malloc (sizeof (AddressPar));
+      
+      pbEntry = gtk_clist_get_row_data (GTK_CLIST (data->clist),
+                                        GPOINTER_TO_INT (sel->data));
+      ap->number = g_strdup (pbEntry->entry.Number);
+      ap->name = g_strdup (pbEntry->entry.Name);
+      ap->used = 1;
+      sendSMS.addressLine = g_slist_append (sendSMS.addressLine, ap);
+      if (strlen (gtk_entry_get_text (GTK_ENTRY (sendSMS.addr))) > 0)
+        gtk_entry_append_text (GTK_ENTRY (sendSMS.addr), ", ");
+      gtk_entry_append_text (GTK_ENTRY (sendSMS.addr), ap->name);
+      
+      sel = sel->next;
+    }
+  
+  gtk_widget_destroy (GTK_WIDGET (data->clist));
+  gtk_widget_destroy (GTK_WIDGET (data->clistScrolledWindow));
+  gtk_widget_destroy (GTK_WIDGET (data->dialog));
+}
+
+static void ShowSelectContactsDialog (void)
+{
+  SelectContactData *r;
+  
+  if ((r = GUI_SelectContactDialog ()) == NULL)
+    return;
+    
+  gtk_signal_connect (GTK_OBJECT (r->dialog), "delete_event",
+                      GTK_SIGNAL_FUNC (DeleteSelectContactDialog), (gpointer) r);
+    
+  gtk_signal_connect (GTK_OBJECT (r->okButton), "clicked",
+                      GTK_SIGNAL_FUNC (OkSelectContactDialog), (gpointer) r);
+  gtk_signal_connect (GTK_OBJECT (r->cancelButton), "clicked",
+                      GTK_SIGNAL_FUNC (CancelSelectContactDialog), (gpointer) r);
+}
+
+static inline void RefreshSMSStatus (void)
+{
+  gchar *buf;
+  guint l, m;
+  
+  l = gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText));
+  
+  m = l % 160;
+  buf = g_strdup_printf ("%d/%d", l == 0 ? 1 : ((l - 1) / 160) + 1, l > 0 && !m ? 160 : m); 
+  gtk_frame_set_label (GTK_FRAME (sendSMS.status), buf);
+  g_free (buf);
+}
+
+static inline gint RefreshSMSLength (GtkWidget   *widget,
+                                     GdkEventKey *event,
+                                     gpointer     callback_data)
+{
+  RefreshSMSStatus ();
+  if (GTK_EDITABLE (widget)->editable == FALSE)
+    return (FALSE);
+  if (event->keyval == GDK_BackSpace || event->keyval == GDK_Clear ||
+      event->keyval == GDK_Insert || event->keyval == GDK_Delete ||
+      event->keyval == GDK_Home || event->keyval == GDK_End ||
+      event->keyval == GDK_Left || event->keyval == GDK_Right ||
+      event->keyval == GDK_Up || event->keyval == GDK_Down ||
+      event->keyval == GDK_Return ||
+      (event->keyval >= 0x20 && event->keyval <= 0xFF))
+    return (TRUE);
+  
+  return (FALSE);
+}
+ 
+static inline void SetActiveCenter (GtkWidget *item, gpointer data)
+{
+  sendSMS.center = GPOINTER_TO_INT (data);
+}
+
+void GUI_RefreshSMSCenterMenu (void)
+{
+  static GtkWidget *smscMenu = NULL;
+  GtkWidget *item;
+  register gint i;
+  
+  if (!sendSMS.smscOptionMenu)
+    return;
+    
+  if (smscMenu)
+  {
+    gtk_option_menu_remove_menu (GTK_OPTION_MENU (sendSMS.smscOptionMenu));
+    if (GTK_IS_WIDGET (smscMenu))
+      gtk_widget_destroy (GTK_WIDGET (smscMenu));
+    smscMenu = NULL;
+  }
+  
+  smscMenu = gtk_menu_new();
+  
+  for (i = 0; i < xgnokiiConfig.smsSets; i++)
+  {
+    if (*(xgnokiiConfig.smsSetting[i].Name) == '\0')
+    {
+      gchar *buf = g_strdup_printf (_("Set %d"), i + 1);
+      item = gtk_menu_item_new_with_label (buf);
+      g_free (buf);
+    }
+    else
+      item = gtk_menu_item_new_with_label (xgnokiiConfig.smsSetting[i].Name);
+    
+    gtk_signal_connect (GTK_OBJECT (item), "activate",
+                        GTK_SIGNAL_FUNC (SetActiveCenter),
+                        (gpointer) i);
+    
+    gtk_widget_show (item);
+    gtk_menu_append (GTK_MENU (smscMenu), item);
+  }
+  gtk_option_menu_set_menu (GTK_OPTION_MENU (sendSMS.smscOptionMenu), smscMenu);
+}
+
+static inline void InitAddressLine (gpointer d, gpointer userData)
+{
+  ((AddressPar *) d)->used = 0;
+}
+
+#ifdef XDEBUG
+static inline void PrintAddressLine (gpointer d, gpointer userData)
+{
+  g_print ("Name: %s\nNumber: %s\nUsed: %d\n",
+           ((AddressPar *) d)->name,
+           ((AddressPar *) d)->number,
+           ((AddressPar *) d)->used);
+}
+#endif
+
+static inline gint CompareAddressLineName (gconstpointer a, gconstpointer b)
+{
+  return strcmp (((AddressPar *) a)->name, ((AddressPar *) b)->name);
+}
+
+static inline gint CompareAddressLineUsed (gconstpointer a, gconstpointer b)
+{
+  return !(((AddressPar *) a)->used == ((AddressPar *) b)->used);
+}
+
+static gint CheckAddressMain (void)
+{
+  AddressPar aps;
+  GSList *r;
+  register gint i = 0;
+  gint ret = 0;
+  gchar *buf;
+  gchar **strings = g_strsplit (gtk_entry_get_text (GTK_ENTRY (sendSMS.addr)), ",", 0);
+  
+  gtk_entry_set_text (GTK_ENTRY (sendSMS.addr), "");
+  g_slist_foreach (sendSMS.addressLine, InitAddressLine, (gpointer) NULL);
+
+  while (strings[i])
+  {
+    g_strstrip (strings[i]);
+    if (*strings[i] == '\0')
+    { 
+      i++;
+      continue;
+    }
+    if ((buf = GUI_GetNameExact (strings[i])) != NULL)
+    {
+      AddressPar *ap = g_malloc (sizeof (AddressPar));
+      ap->number = g_strdup (strings[i]);
+      ap->name = g_strdup (buf);
+      ap->used = 1;
+      sendSMS.addressLine = g_slist_append (sendSMS.addressLine, ap);
+      gtk_entry_append_text (GTK_ENTRY (sendSMS.addr), buf);
+    }
+    else 
+    if (GUI_GetNumber (strings[i]) != NULL)
+    {
+      aps.name = strings[i];
+      r = g_slist_find_custom (sendSMS.addressLine, &aps, CompareAddressLineName);
+      if (r)
+        ((AddressPar *) r->data)->used = 1;
+      gtk_entry_append_text (GTK_ENTRY (sendSMS.addr), strings[i]);
+    }
+    else
+    {
+      gint len = strlen (strings[i]);
+      gint j;
+      
+      for (j = 0; j < len; j++)
+        if (strings[i][j] != '*' && strings[i][j] != '#' && strings[i][j] != '+'
+            && (strings[i][j] < '0' || strings[i][j] > '9'))
+          ret = 1;
+      gtk_entry_append_text (GTK_ENTRY (sendSMS.addr), strings[i]);
+    }
+    if (strings[i + 1] != NULL)
+      gtk_entry_append_text (GTK_ENTRY (sendSMS.addr), ", ");  
+    i++;
+  }
+  
+  aps.used = 0;
+  while ((r = g_slist_find_custom (sendSMS.addressLine, &aps, CompareAddressLineUsed)))
+    sendSMS.addressLine = g_slist_remove (sendSMS.addressLine, r->data);
+  
+#ifdef XDEBUG  
+  g_slist_foreach (sendSMS.addressLine, PrintAddressLine, (gpointer) NULL);
+#endif
+
+  g_strfreev (strings);
+  return ret;
+}
+
+static inline void CheckAddress (void)
+{
+  if (CheckAddressMain ())
+  {
+    gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Address line contains illegal address!"));
+    gtk_widget_show(errorDialog.dialog);
+  }
+}
+
+static void SendSMS (void)
+{
+  GSM_SMSMessage sms;
+  GSM_Error error;
+  AddressPar aps;
+  GSList *r;
+  gchar *text, *number;
+  gchar **addresses;
+  register gint i = 0;
+  
+  if (CheckAddressMain ())
+  {
+    gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Address line contains illegal address!"));
+    gtk_widget_show(errorDialog.dialog);
+    return;
+  }
+  
+  text = gtk_editable_get_chars (GTK_EDITABLE (sendSMS.smsSendText), 0, -1);
+  
+  addresses = g_strsplit (gtk_entry_get_text (GTK_ENTRY (sendSMS.addr)), ",", 0);
+  
+  while (addresses[i])
+  {
+    g_strstrip (addresses[i]);
+    if ((number = GUI_GetNumber (addresses[i])))
+    {
+      aps.name = addresses[i];
+      if ((r = g_slist_find_custom (sendSMS.addressLine, &aps, CompareAddressLineName)))
+        number = ((AddressPar *) r->data)->number;
+      else
+        number = addresses[i];
+    }
+    else
+      number = addresses[i];
+    
+    sms.MessageCenter = xgnokiiConfig.smsSetting[sendSMS.center];
+    sms.MessageCenter.No = 0;
+    
+    if (GTK_TOGGLE_BUTTON (sendSMS.report)->active)
+      sms.Type = GST_DR;
+    else
+      sms.Type = GST_MO;
+    
+    sms.Class = -1;
+    sms.Compression = false;
+    sms.EightBit = false;
+    sms.Validity = sms.MessageCenter.Validity;
+    sms.UserDataHeaderIndicator = false;
+    
+    strncpy (sms.Destination, number, GSM_MAX_DESTINATION_LENGTH + 1);
+    sms.Destination[GSM_MAX_DESTINATION_LENGTH] = '\0';
+    
+    /* FIX ME - What about long messages? */
+    strncpy (sms.MessageText, text, GSM_MAX_SMS_LENGTH + 1);
+    sms.MessageText[GSM_MAX_SMS_LENGTH] = '\0';
+    
+    error = GSM->SendSMSMessage(&sms);
+    
+    if (error != GE_SMSSENDOK)
+    {
+      gchar *buf = g_strdup_printf (_("SMS send failed (error=%d)"), error);
+      gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
+      gtk_widget_show(errorDialog.dialog);
+      g_free (buf);
+    }
+    
+    i++;
+
+#ifdef XDEBUG    
+    g_print ("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
+            number,
+            text,
+            GTK_TOGGLE_BUTTON (sendSMS.report)->active,
+            sendSMS.center);
+#endif
+  }
+  
+  g_strfreev (addresses);
+  
+  g_free (text);
+}
+
+static GtkItemFactoryEntry send_menu_items[] = {
+  {"/_File",		NULL,		NULL,		0, "<Branch>"},
+  {"/File/Sen_d",	"<control>X",	SendSMS,	0, NULL},
+  {"/File/_Save",	"<control>S",	NULL,		0, NULL},
+  {"/File/sep1",	NULL,		NULL,		0, "<Separator>"},
+  {"/File/Check _Names",	"<control>N",	CheckAddress,	0, NULL},
+  {"/File/C_ontacts",	"<control>C",	ShowSelectContactsDialog,	0, NULL},
+  {"/File/sep2",	NULL,		NULL,		0, "<Separator>"},
+  {"/File/_Close",	"<control>W",	CloseSMSSend,	0, NULL},
+  {"/_Help",		NULL,		NULL,		0, "<LastBranch>"},
+  {"/Help/_Help",	NULL,		Help2,		0, NULL},
+  {"/Help/_About",	NULL,		GUI_ShowAbout,	0, NULL},
+};
+
+static void CreateSMSSendWindow (void)
+{
+  int nmenu_items = sizeof (send_menu_items) / sizeof (send_menu_items[0]);
+  GtkItemFactory *item_factory;
+  GtkAccelGroup *accel_group;
+  GtkWidget *menubar;
+  GtkWidget *main_vbox;
+  GtkWidget *hbox, *vbox;
+  GtkWidget *button;
+  GtkWidget *pixmap;
+  GtkWidget *label;
+  GtkWidget *toolbar;
+  GtkWidget *scrolledWindow;
+  GtkTooltips *tooltips;
+  
+  if (sendSMS.SMSSendWindow)
+    return;
+    
+  sendSMS.SMSSendWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  
+  //gtk_widget_set_usize (GTK_WIDGET (sendSMS.SMSSendWindow), 436, 220);
+  gtk_signal_connect (GTK_OBJECT (sendSMS.SMSSendWindow), "delete_event",
+                      GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+  gtk_widget_realize (sendSMS.SMSSendWindow);
+  
+  accel_group = gtk_accel_group_new ();
+  item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", 
+                                       accel_group);
+                                       
+  gtk_item_factory_create_items (item_factory, nmenu_items, send_menu_items, NULL);
+  
+  gtk_accel_group_attach (accel_group, GTK_OBJECT (sendSMS.SMSSendWindow));
+  
+  /* Finally, return the actual menu bar created by the item factory. */ 
+  menubar = gtk_item_factory_get_widget (item_factory, "<main>");
+    
+  main_vbox = gtk_vbox_new (FALSE, 1);
+  gtk_container_border_width (GTK_CONTAINER (main_vbox), 1);
+  gtk_container_add (GTK_CONTAINER (sendSMS.SMSSendWindow), main_vbox);
+  gtk_widget_show (main_vbox);
+        
+  gtk_box_pack_start (GTK_BOX (main_vbox), menubar, FALSE, FALSE, 0);
+  gtk_widget_show (menubar);
+  
+  /* Create the toolbar */
+  
+  toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+  gtk_toolbar_set_button_relief (GTK_TOOLBAR (toolbar), GTK_RELIEF_NORMAL);
+  
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Send message"), NULL,
+                           NewPixmap(SendSMS_xpm, GUI_SMSWindow->window,
+                           &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
+                           (GtkSignalFunc) SendSMS, NULL);
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Save message to outbox"), NULL,
+                           NewPixmap(Send_xpm, GUI_SMSWindow->window,
+                           &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
+                           (GtkSignalFunc) NULL, NULL);
+  
+  gtk_toolbar_append_space (GTK_TOOLBAR (toolbar));
+  
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Check names"), NULL,
+                           NewPixmap(Check_xpm, GUI_SMSWindow->window,
+                           &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
+                           (GtkSignalFunc) CheckAddress, NULL);
+  
+  gtk_box_pack_start (GTK_BOX (main_vbox), toolbar, FALSE, FALSE, 0);
+  gtk_widget_show (toolbar);
+  
+  /* Address line */
+  hbox = gtk_hbox_new (FALSE, 3);
+  gtk_box_pack_start (GTK_BOX (main_vbox), hbox, FALSE, FALSE, 3);
+  gtk_widget_show (hbox);
+  
+  label = gtk_label_new (_("To:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  gtk_widget_show (label);
+  
+  sendSMS.addr = gtk_entry_new ();
+  gtk_box_pack_start (GTK_BOX (hbox), sendSMS.addr, TRUE, TRUE, 1);
+  gtk_widget_show (sendSMS.addr);
+  
+  button = gtk_button_new ();
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                      GTK_SIGNAL_FUNC (ShowSelectContactsDialog), (gpointer) NULL);
+  
+  pixmap = NewPixmap(Names_xpm, sendSMS.SMSSendWindow->window,
+                     &sendSMS.SMSSendWindow->style->bg[GTK_STATE_NORMAL]);
+  gtk_container_add (GTK_CONTAINER (button), pixmap);
+  gtk_widget_show (pixmap);
+  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 5);
+  
+  tooltips = gtk_tooltips_new ();
+  gtk_tooltips_set_tip (tooltips, button, _("Select contacts"), NULL);
+  
+  gtk_widget_show (button);
+  
+  hbox = gtk_hbox_new (FALSE, 3);
+  gtk_box_pack_end (GTK_BOX (main_vbox), hbox, TRUE, TRUE, 3);
+  gtk_widget_show (hbox);
+  
+  /* Edit SMS widget */
+  vbox = gtk_vbox_new (FALSE, 3);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 3);
+  gtk_widget_show (vbox);
+  
+  sendSMS.status = gtk_frame_new ("1/0");
+  gtk_frame_set_label_align (GTK_FRAME (sendSMS.status), 1.0, 0.0);
+  gtk_frame_set_shadow_type (GTK_FRAME (sendSMS.status), GTK_SHADOW_OUT);
+  
+  gtk_box_pack_end (GTK_BOX (vbox), sendSMS.status, TRUE, TRUE, 5);
+  gtk_widget_show (sendSMS.status);
+  
+  sendSMS.smsSendText = gtk_text_new (NULL, NULL);
+  gtk_widget_set_usize (GTK_WIDGET (sendSMS.smsSendText), 0, 120);
+  gtk_text_set_editable (GTK_TEXT (sendSMS.smsSendText), TRUE);
+  gtk_text_set_word_wrap (GTK_TEXT (sendSMS.smsSendText), TRUE);
+  gtk_signal_connect_after (GTK_OBJECT (sendSMS.smsSendText),
+                      "key_press_event",
+                      GTK_SIGNAL_FUNC(RefreshSMSLength), (gpointer) NULL);
+  gtk_signal_connect_after (GTK_OBJECT (sendSMS.smsSendText),
+                      "button_press_event",
+                      GTK_SIGNAL_FUNC(RefreshSMSLength), (gpointer) NULL);
+  
+  scrolledWindow = gtk_scrolled_window_new (NULL, NULL);
+  gtk_container_set_border_width (GTK_CONTAINER (scrolledWindow), 5);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledWindow),
+                                  GTK_POLICY_NEVER,
+                                  GTK_POLICY_AUTOMATIC);
+  
+  gtk_container_add (GTK_CONTAINER (scrolledWindow), sendSMS.smsSendText);
+  gtk_container_add (GTK_CONTAINER (sendSMS.status), scrolledWindow);
+  
+  gtk_widget_show (sendSMS.smsSendText);
+  gtk_widget_show (scrolledWindow);
+  
+  /* Options widget */
+  vbox = gtk_vbox_new (FALSE, 3);
+  gtk_box_pack_end (GTK_BOX (hbox), vbox, FALSE, FALSE, 5);
+  gtk_widget_show (vbox);
+  
+  sendSMS.report = gtk_check_button_new_with_label (_("Delivery report"));
+  gtk_box_pack_start (GTK_BOX (vbox), sendSMS.report, FALSE, FALSE, 3);
+  gtk_widget_show (sendSMS.report);
+  
+  label = gtk_label_new (_("SMS Center:"));
+  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 1);
+  gtk_widget_show (label);
+  
+  GUI_InitSMSSettings ();
+  sendSMS.smscOptionMenu = gtk_option_menu_new();
+  
+  GUI_RefreshSMSCenterMenu ();
+  
+  gtk_box_pack_start (GTK_BOX (vbox), sendSMS.smscOptionMenu, FALSE, FALSE, 1);
+  gtk_widget_show (sendSMS.smscOptionMenu);
+}
+
+static void NewSMS (void)
+{
+  if (!sendSMS.SMSSendWindow)
+    CreateSMSSendWindow ();
+  
+  gtk_window_set_title (GTK_WINDOW (sendSMS.SMSSendWindow), _("New Message"));
+
+  gtk_text_freeze (GTK_TEXT (sendSMS.smsSendText));
+  gtk_text_set_point (GTK_TEXT (sendSMS.smsSendText), 0);
+  gtk_text_forward_delete (GTK_TEXT (sendSMS.smsSendText), gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText)));
+  gtk_text_thaw (GTK_TEXT (sendSMS.smsSendText));
+
+  gtk_entry_set_text (GTK_ENTRY (sendSMS.addr), "");
+  
+  RefreshSMSStatus ();
+  
+  gtk_widget_show (sendSMS.SMSSendWindow);
+}
+
+static void ForwardSMS (void)
+{
+  gchar *buf;
+  
+  if (GTK_CLIST (SMS.smsClist)->selection == NULL)
+    return;
+  
+  if (!sendSMS.SMSSendWindow)
+    CreateSMSSendWindow ();
+  
+  gtk_window_set_title (GTK_WINDOW (sendSMS.SMSSendWindow), _("Forward Message"));
+
+  gtk_text_freeze (GTK_TEXT (sendSMS.smsSendText));
+  gtk_text_set_point (GTK_TEXT (sendSMS.smsSendText), 0);
+  gtk_text_forward_delete (GTK_TEXT (sendSMS.smsSendText), gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText)));
+  gtk_clist_get_text (GTK_CLIST (SMS.smsClist),
+                      GPOINTER_TO_INT(GTK_CLIST (SMS.smsClist)->selection->data),
+                      3, &buf);
+    
+  gtk_text_insert (GTK_TEXT (sendSMS.smsSendText), NULL, &(sendSMS.smsSendText->style->black), NULL,
+                   buf, -1);
+    
+  gtk_text_thaw (GTK_TEXT (sendSMS.smsSendText));
+
+  gtk_entry_set_text (GTK_ENTRY (sendSMS.addr), "");
+  
+  RefreshSMSStatus ();
+  
+  gtk_widget_show (sendSMS.SMSSendWindow);
+}
+
+static void ReplySMS (void)
+{
+  gchar *buf;
+  
+  if (GTK_CLIST (SMS.smsClist)->selection == NULL)
+    return;
+  
+  if (!sendSMS.SMSSendWindow)
+    CreateSMSSendWindow ();
+  
+  gtk_window_set_title (GTK_WINDOW (sendSMS.SMSSendWindow), _("Forward Message"));
+
+  gtk_text_freeze (GTK_TEXT (sendSMS.smsSendText));
+  gtk_text_set_point (GTK_TEXT (sendSMS.smsSendText), 0);
+  gtk_text_forward_delete (GTK_TEXT (sendSMS.smsSendText), gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText)));
+  gtk_clist_get_text (GTK_CLIST (SMS.smsClist),
+                      GPOINTER_TO_INT(GTK_CLIST (SMS.smsClist)->selection->data),
+                      3, &buf);
+    
+  gtk_text_insert (GTK_TEXT (sendSMS.smsSendText), NULL, &(sendSMS.smsSendText->style->black), NULL,
+                   buf, -1);
+    
+  gtk_text_thaw (GTK_TEXT (sendSMS.smsSendText));
+
+  gtk_clist_get_text (GTK_CLIST (SMS.smsClist),
+                      GPOINTER_TO_INT(GTK_CLIST (SMS.smsClist)->selection->data),
+                      2, &buf);
+  gtk_entry_set_text (GTK_ENTRY (sendSMS.addr), buf);
+  
+  RefreshSMSStatus ();
+  
+  gtk_widget_show (sendSMS.SMSSendWindow);
+}
+
 static GtkItemFactoryEntry menu_items[] = {
   {"/_File",		NULL,		NULL,		0, "<Branch>"},
   {"/File/_Save",	"<control>S",	NULL,		0, NULL},
   {"/File/sep1",	NULL,		NULL,		0, "<Separator>"},
+  {"/File/_Refresh",	"<control>R",	GUI_RefreshSMS,	0, NULL},
+  {"/File/sep2",	NULL,		NULL,		0, "<Separator>"},
   {"/File/_Close",	"<control>W",	CloseSMS,	0, NULL},
   {"/_Messages",	NULL,		NULL,		0, "<Branch>"},
-  {"/Messages/_New",	NULL,		NULL,		0, NULL},
-  {"/Messages/_Forward",NULL,		NULL,		0, NULL},
-  {"/Messages/_Reply",	NULL,		NULL,		0, NULL},
+  {"/Messages/_New",	NULL,		NewSMS,	0, NULL},
+  {"/Messages/_Forward",NULL,		ForwardSMS,	0, NULL},
+  {"/Messages/_Reply",	NULL,		ReplySMS,	0, NULL},
   {"/Messages/_Delete",	"<control>D",	DeleteSMS,	0, NULL},
   {"/_Help",		NULL,		NULL,		0, "<LastBranch>"},
   {"/Help/_Help",	NULL,		Help1,		0, NULL},
   {"/Help/_About",	NULL,		GUI_ShowAbout,	0, NULL},
 };
 
-void GUI_CreateSMSWindow ()
+void GUI_CreateSMSWindow (void)
 {
   int nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
   GtkItemFactory *item_factory;
@@ -428,6 +1045,7 @@ void GUI_CreateSMSWindow ()
   GtkWidget *vpaned, *hpaned;
   GtkWidget *tree, *treeSMSItem, *treeInboxItem, *treeOutboxItem, *subTree;
   SortColumn *sColumn;
+  GdkColormap *cmap;
   register gint i;
   gchar *titles[4] = { _("Status"), _("Date / Time"), _("Sender"), _("Message")};
   
@@ -466,15 +1084,15 @@ void GUI_CreateSMSWindow ()
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("New message"), NULL,
                            NewPixmap(Edit_xpm, GUI_SMSWindow->window,
                            &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) NewSMS, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Forward Message"), NULL,
-                           NewPixmap(Delete_xpm, GUI_SMSWindow->window,
+                           NewPixmap(Forward_xpm, GUI_SMSWindow->window,
                            &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) ForwardSMS, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Reply message"), NULL,
-                           NewPixmap(Delete_xpm, GUI_SMSWindow->window,
+                           NewPixmap(Reply_xpm, GUI_SMSWindow->window,
                            &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) ReplySMS, NULL);
   
   gtk_toolbar_append_space (GTK_TOOLBAR (toolbar));
   
@@ -538,10 +1156,10 @@ void GUI_CreateSMSWindow ()
   
   
   /* Message viewer */
-  smsText = gtk_text_new (NULL, NULL);
-  gtk_text_set_editable (GTK_TEXT (smsText), FALSE);
-  gtk_text_set_word_wrap (GTK_TEXT (smsText), FALSE);
-  gtk_text_set_line_wrap (GTK_TEXT (smsText), TRUE);
+  SMS.smsText = gtk_text_new (NULL, NULL);
+  gtk_text_set_editable (GTK_TEXT (SMS.smsText), FALSE);
+  gtk_text_set_word_wrap (GTK_TEXT (SMS.smsText), TRUE);
+  //gtk_text_set_line_wrap (GTK_TEXT (SMS.smsText), TRUE);
  
   scrolledWindow = gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledWindow),
@@ -550,21 +1168,21 @@ void GUI_CreateSMSWindow ()
   
   gtk_paned_add2 (GTK_PANED (hpaned), scrolledWindow);
   
-  gtk_container_add (GTK_CONTAINER (scrolledWindow), smsText);
+  gtk_container_add (GTK_CONTAINER (scrolledWindow), SMS.smsText);
   gtk_widget_show_all (scrolledWindow);
   
   /* Messages list */
-  smsClist = gtk_clist_new_with_titles (4, titles);
-  gtk_clist_set_shadow_type (GTK_CLIST (smsClist), GTK_SHADOW_OUT);
-  gtk_clist_set_compare_func (GTK_CLIST (smsClist), CListCompareFunc);
-  gtk_clist_set_sort_column (GTK_CLIST (smsClist), 1);
-  gtk_clist_set_sort_type (GTK_CLIST (smsClist), GTK_SORT_ASCENDING);
-  gtk_clist_set_auto_sort (GTK_CLIST (smsClist), FALSE);
+  SMS.smsClist = gtk_clist_new_with_titles (4, titles);
+  gtk_clist_set_shadow_type (GTK_CLIST (SMS.smsClist), GTK_SHADOW_OUT);
+  gtk_clist_set_compare_func (GTK_CLIST (SMS.smsClist), CListCompareFunc);
+  gtk_clist_set_sort_column (GTK_CLIST (SMS.smsClist), 1);
+  gtk_clist_set_sort_type (GTK_CLIST (SMS.smsClist), GTK_SORT_ASCENDING);
+  gtk_clist_set_auto_sort (GTK_CLIST (SMS.smsClist), FALSE);
   
-  //gtk_clist_set_column_width (GTK_CLIST (smsClist), 0, 150);
-  gtk_clist_set_column_width (GTK_CLIST (smsClist), 1, 155);
-  gtk_clist_set_column_width (GTK_CLIST (smsClist), 2, 135);
-  //gtk_clist_set_column_justification (GTK_CLIST (smsClist), 2, GTK_JUSTIFY_CENTER);
+  //gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 0, 150);
+  gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 1, 155);
+  gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 2, 135);
+  //gtk_clist_set_column_justification (GTK_CLIST (SMS.smsClist), 2, GTK_JUSTIFY_CENTER);
   
   for (i = 0; i < 4; i++)
   {
@@ -573,24 +1191,24 @@ void GUI_CreateSMSWindow ()
       g_print (_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
       gtk_main_quit ();
     }
-    sColumn->clist = smsClist;
+    sColumn->clist = SMS.smsClist;
     sColumn->column = i;
-    gtk_signal_connect (GTK_OBJECT (GTK_CLIST (smsClist)->column[i].button), "clicked",
+    gtk_signal_connect (GTK_OBJECT (GTK_CLIST (SMS.smsClist)->column[i].button), "clicked",
                         GTK_SIGNAL_FUNC (SetSortColumn), (gpointer) sColumn);
   }
                      
-  gtk_signal_connect (GTK_OBJECT (smsClist), "select_row",
+  gtk_signal_connect (GTK_OBJECT (SMS.smsClist), "select_row",
                       GTK_SIGNAL_FUNC (ClickEntry), NULL);
   
   scrolledWindow = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_set_usize (scrolledWindow, 550, 100);
-  gtk_container_add (GTK_CONTAINER (scrolledWindow), smsClist);
+  gtk_container_add (GTK_CONTAINER (scrolledWindow), SMS.smsClist);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledWindow),
                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
   
   gtk_paned_add2 (GTK_PANED (vpaned), scrolledWindow);
   
-  gtk_widget_show (smsClist);
+  gtk_widget_show (SMS.smsClist);
   gtk_widget_show (scrolledWindow);
   
   CreateErrorDialog (&errorDialog, GUI_SMSWindow);
@@ -598,10 +1216,10 @@ void GUI_CreateSMSWindow ()
   gtk_signal_emit_by_name(GTK_OBJECT (treeSMSItem), "expand");
   
   cmap = gdk_colormap_get_system();
-  colour.red = 0xffff;
-  colour.green = 0;
-  colour.blue = 0;
-  if (!gdk_color_alloc (cmap, &colour))
+  SMS.colour.red = 0xffff;
+  SMS.colour.green = 0;
+  SMS.colour.blue = 0;
+  if (!gdk_color_alloc (cmap, &(SMS.colour)))
     g_error ("couldn't allocate colour");
   
   questMark.pixmap = gdk_pixmap_create_from_xpm_d (GUI_SMSWindow->window,

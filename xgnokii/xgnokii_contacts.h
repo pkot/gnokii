@@ -20,7 +20,6 @@
 #include "../misc.h"
 #include "../gsm-common.h"
 #include "../gsm-api.h"
-#include "xgnokii.h"
 
 #define IO_BUF_LEN	160
 
@@ -60,6 +59,7 @@ typedef struct {
   GtkWidget *memoryTypePhone;
   GtkWidget *memoryTypeSIM;
   GtkWidget *group;
+  GtkWidget *groupMenu;
   gint      newGroup;
   gint      row;
 } EditEntryData;
@@ -132,34 +132,39 @@ typedef struct {
   GdkBitmap *mask;
 } QuestMark;
 
-extern void GUI_CreateContactsWindow();
+extern void GUI_CreateContactsWindow (void);
 
-extern void GUI_ShowContacts();
+extern void GUI_ShowContacts (void);
 
 /* return != 0 if user has unsaved changes in contacts memory */ 
-extern gint GUI_ContactsIsChanged();
+extern gint GUI_ContactsIsChanged (void);
 
 /* return TRUE if Contacts memory was read from phone or from file */
-extern bool GUI_ContactsIsIntialized();
+extern bool GUI_ContactsIsIntialized (void);
 
 /* Read contacts from phone */
-extern void GUI_ReadContacts();
+extern void GUI_ReadContacts (void);
 
 /* Save contacts to phone */
-extern void GUI_SaveContacts();
+extern void GUI_SaveContacts (void);
 
 /* Create save question dialog and can end application */
-extern void GUI_QuitSaveContacts();
+extern void GUI_QuitSaveContacts (void);
 
-extern void GUI_RefreshContacts();
+extern void GUI_RefreshContacts (void);
 
 /* Function take number and return name belonged to number.
    If no name is found, return NULL;
    Do not modify returned name!					*/
-extern gchar *GUI_GetName(gchar *number);
+extern gchar *GUI_GetName (gchar *number);
 
+extern gchar *GUI_GetNameExact (gchar *number);
+
+extern gchar *GUI_GetNumber (gchar *name);
 /* Function show dialog with contacts and let select entries.
    See xgnokii_contacts.c for sample of use.			*/
-extern SelectContactData *GUI_SelectContactDialog();
+extern SelectContactData *GUI_SelectContactDialog (void);
+
+extern void GUI_RefreshGroupMenu (void);
 
 #endif

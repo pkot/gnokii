@@ -16,12 +16,14 @@
 #ifndef XGNOKII_SMS_H
 #define XGNOKII_SMS_H
 
-extern void GUI_CreateSMSWindow ();
+extern void GUI_CreateSMSWindow (void);
 
-extern void GUI_ShowSMS ();
+extern void GUI_ShowSMS (void);
 
-extern void GUI_RefreshSMS ();
+extern void GUI_RefreshSMS (void);
 
-extern void GUI_RefreshMessageWindow ();
+extern void GUI_RefreshMessageWindow (void);
+
+extern void GUI_RefreshSMSCenterMenu (void);
 
 #endif

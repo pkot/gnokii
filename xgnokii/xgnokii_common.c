@@ -44,6 +44,7 @@ void CreateErrorDialog (ErrorDialog *errorDialog, GtkWidget *window)
   errorDialog->dialog = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (errorDialog->dialog), _("Error"));
   gtk_window_set_modal (GTK_WINDOW (errorDialog->dialog), TRUE);
+  gtk_window_position (GTK_WINDOW (errorDialog->dialog), GTK_WIN_POS_MOUSE);
   gtk_container_set_border_width (GTK_CONTAINER (errorDialog->dialog), 5);
   gtk_signal_connect (GTK_OBJECT (errorDialog->dialog), "delete_event",
                       GTK_SIGNAL_FUNC (DeleteEvent), NULL);
