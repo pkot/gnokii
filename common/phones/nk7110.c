@@ -459,7 +459,7 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 	case 0x08:  /* Read Memory response */
 		if (data->PhonebookEntry) {
 			data->PhonebookEntry->Empty = true;
-			data->PhonebookEntry->Group = 0;
+			data->PhonebookEntry->Group = 5; /* no group */
 			data->PhonebookEntry->Name[0] = '\0';
 			data->PhonebookEntry->Number[0] = '\0';
 			data->PhonebookEntry->SubEntriesCount = 0;
