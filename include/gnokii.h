@@ -24,7 +24,6 @@
 
 /* Define these as externs so that app code can pick them up. */
 
-extern bool *GSM_LinkOK;
 extern GSM_Information *GSM_Info;
 extern GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 

@@ -181,7 +181,6 @@ static void InitModelInf (void)
 
 static GSM_Error fbusinit(bool enable_monitoring)
 {
-  int count=0;
   static GSM_Error error=GE_NOLINK;
   GSM_ConnectionType connection=GCT_Serial;
 
@@ -202,21 +201,14 @@ static GSM_Error fbusinit(bool enable_monitoring)
 #endif
 
   if (error != GE_NONE) {
-    g_print (_("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
+    g_print (_("GSM/FBUS init failed!\n"));
     /* FIXME: should popup some message... */
     return (error);
   }
 
-  while (count++ < 40 && *GSM_LinkOK == false)
-    usleep(50000);
-#ifdef XDEBUG
-  g_print("After usleep. GSM_LinkOK: %d\n", *GSM_LinkOK);
-#endif
+  InitModelInf ();
 
-  if (*GSM_LinkOK == true)
-    InitModelInf ();
-
-  return *GSM_LinkOK;
+  return GE_NONE;
 }
 
 

@@ -255,8 +255,6 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	}
 }
 
-/* static bool LinkOK = true; */
-
 /* Initialise is the only function allowed to 'use' state */
 static GSM_Error Initialise(GSM_Statemachine *state)
 {

@@ -156,7 +156,6 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	}
 }
 
-static bool LinkOK = false;
 static bool SimAvailable = false;
 static int user_data_count = 0;
 
@@ -206,9 +205,6 @@ static GSM_Error P3110_Initialise(GSM_Statemachine *state)
 	/* Wait for response to 0x15 sequence */
 	GSM_DataClear(&data);
 	if (SM_Block(state, &data, 0x16) != GE_NONE) return GE_NOTREADY;
-
-	/* Most probably link is OK now */
-	LinkOK = true;
 
 	/* Start sending keepalive messages in separate thread */
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
@@ -1116,7 +1112,6 @@ static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *messag
 	   Unknown byte has been observed to be 0x01 when connected to normal
 	   network, 0x04 when no network available.   Steps through 0x02, 0x03
 	   when incoming or outgoing calls occur...*/
-	/* FB38_LinkOK = true; */
 
 	/* Note: GetRFLevel function in fbus-3810.c does conversion
 	   into required units. */

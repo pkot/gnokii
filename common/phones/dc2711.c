@@ -55,8 +55,6 @@ static GSM_Phone phone = {
 	INFO
 };
 
-/* LinkOK is always true for now... */
-bool D2711_LinkOK = true;
 char reply_buf[10240];
 
 static void Terminate()

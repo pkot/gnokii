@@ -166,9 +166,6 @@ static char *memorynames[] = {
 	"CB", /* Currently selected memory */
 };
 
-/* LinkOK is always true for now... */
-bool ATGEN_LinkOK = true;
-
 
 GSM_RecvFunctionType AT_InsertRecvFunction(int type, GSM_RecvFunctionType func)
 {

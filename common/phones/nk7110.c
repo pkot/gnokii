@@ -245,9 +245,6 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	return GE_NONE;
 }
 
-/* LinkOK is always true for now... */
-bool P7110_LinkOK = true;
-
 /* Initialise is the only function allowed to 'use' state */
 static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 {

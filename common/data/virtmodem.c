@@ -237,29 +237,16 @@ void VM_CharHandler(void)
 /* Initialise GSM interface, returning GSM_Error as appropriate  */
 GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection)
 {
-	int count = 0;
 	GSM_Error error;
 	static GSM_Statemachine sm;
 
 	/* Initialise the code for the GSM interface. */
 	error = GSM_Initialise(model, port, initlength, connection, RLP_DisplayF96Frame, &sm);
 
-	if (error != GE_NONE) {
-		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
-		return (error);
-	}
+	if (error != GE_NONE)
+		fprintf(stderr, _("GSM/FBUS init failed!\n"));
 
-	/* First (and important!) wait for GSM link to be active. We allow 10
-	   seconds... */
-	while (count++ < 200 && *GSM_LinkOK == false)
-		usleep(50000);
-
-	if (*GSM_LinkOK == false) {
-		fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting. \n"));
-		return (GE_NOLINK);
-	}
-
-	return (GE_NONE);
+	return (error);
 }
 
 /* VM_GetMasterPty()

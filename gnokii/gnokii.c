@@ -286,7 +286,6 @@ static int cb_widx = 0;
 
 static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 {
-	int count = 0;
 	GSM_Error error;
 	GSM_ConnectionType connection = GCT_Serial;
 	char *aux;
@@ -309,18 +308,7 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! Quitting.\n"));
 		if (lockfile) unlock_device(lockfile);
-		exit(-1);
-	}
-
-	/* First (and important!) wait for GSM link to be active. We allow 10
-	   seconds... */
-	while (count++ < 200 && *GSM_LinkOK == false)
-		usleep(50000);
-
-	if (*GSM_LinkOK == false) {
-		fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting.\n"));
-		if (lockfile) unlock_device(lockfile);
-		exit(-1);
+		exit(2);
 	}
 }
 
