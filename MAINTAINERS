@@ -23,6 +23,7 @@ link layer		Chris Kemp, BORBELY Zoltan, Ladislav Michl
 device layer		Manfred Jonsson, Chris Kemp
 documentation		Pawel Kot
 autoconf		Pawel Kot, BORBELY Zoltan
+win32 port		Marcus Godehardt, Ladislav Michl
 
 maintainer		e-mail address
 =============================================================================
@@ -34,3 +35,4 @@ Markus Plail		plail (at) web (dot) de
 Pavel Machek		pavel (at) suse (dot) cz
 Pawel Kot		pkot (at) linuxnews (dot) pl
 Ladislav Michl		ladis (at) linux-mips (dot) org
+Marcus Godehardt	godehardt (at) teleaction (dot)com
