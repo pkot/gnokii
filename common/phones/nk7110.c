@@ -657,6 +657,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 	case 0x0c:
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
+			case 0x34: return GN_ERR_FAILED; /* invalid location ? */
 			case 0x3d: return GN_ERR_FAILED;
 			case 0x3e: return GN_ERR_FAILED;
 			default:   return GN_ERR_UNHANDLEDFRAME;
