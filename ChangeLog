@@ -9,6 +9,9 @@
       in smsd Makefile; taken from FreeBSD port       (Guido Falsi)
     o do make install only in the dirs where there's something
       to install; inspired by FreeBSD port patches      (Pawel Kot)
+    o let make gnokii-debug in common/ with debug and xpm enabled
+                                                        (Pawel Kot)
+    o build and install libgnokii.a unconditionally     (Pawel Kot)
  * 6510 series updates
     o added Nokia 3510i to the supported phones list
                                                     (Rafal Czlonka)

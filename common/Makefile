@@ -44,9 +44,8 @@ OBJS =	gsm-api.o \
 	snprintf.o
 
 ifndef WIN32_CROSS
-ifdef NO_SHARED
-GNOKII_LIB=libgnokii.a
-else
+GNOKII_STATIC=libgnokii.a
+ifndef NO_SHARED
 GNOKII_LIB  =libgnokii.so
 GNOKII_LIBM =$(GNOKII_LIB).$(MAJOR_NUMBER)
 GNOKII_LIBMM=$(GNOKII_LIBM).$(MINOR_NUMBER)
@@ -59,7 +58,7 @@ GNOKII_LIB=gnokii.dll
 endif
 endif
 
-all: $(GNOKII_LIB)
+all: $(GNOKII_LIB) $(GNOKII_STATIC)
 
 phones/PHONES.o:
 	$(MAKE) -C phones PHONES.o
@@ -71,7 +70,7 @@ devices/DEVICES.o:
 	$(MAKE) -C devices DEVICES.o
 
 gnokii-debug: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/gnokii.o
-	$(CC) -o gnokii-debug $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/gnokii.o
+	$(CC) -o gnokii-debug $(LIBS) $(XPM_LIBS) $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/gnokii.o
 
 libgnokii.so: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	$(CC) -shared -Wl,-soname,$(GNOKII_LIBM) -o $(GNOKII_LIBMM) $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
@@ -102,9 +101,12 @@ distclean:
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(libdir)
+	$(INSTALL) $(GNOKII_STATIC) $(DESTDIR)$(libdir)
+ifndef NO_SHARED
 	$(INSTALL) $(GNOKII_LIBMM) $(DESTDIR)$(libdir)
 	cd $(DESTDIR)$(libdir) && ln -sf $(GNOKII_LIBMM) $(GNOKII_LIBM)
 	cd $(DESTDIR)$(libdir) && ln -sf $(GNOKII_LIBM) $(GNOKII_LIB)
+endif
 	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL_DATA) gnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	@echo
