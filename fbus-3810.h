@@ -55,6 +55,7 @@ GSM_Error	FB38_SetDateTime(GSM_DateTime *date_time);
 GSM_Error	FB38_GetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	FB38_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	FB38_DialVoice(char *Number);
+GSM_Error	FB38_DialData(char *Number);
 GSM_Error	FB38_GetIncomingCallNr(char *Number);
 
 

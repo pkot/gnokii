@@ -61,6 +61,7 @@ GSM_Functions			FB38_Functions = {
 		FB38_GetAlarm,
 		FB38_SetAlarm,
 		FB38_DialVoice,
+		FB38_DialData,
 		FB38_GetIncomingCallNr
 };
 
@@ -607,6 +608,11 @@ GSM_Error	FB38_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 }
 
 GSM_Error	FB38_DialVoice(char *Number)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_DialData(char *Number)
 {
 	return (GE_NOTIMPLEMENTED);
 }
