@@ -39,5 +39,4 @@ This is a to-do list for 6110 series.
 
 - add IR support
 
-- make util directory with support utilities
-
+- make util directory with support utilities, clean up the source tree...
