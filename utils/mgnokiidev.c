@@ -14,7 +14,10 @@
   information to create a symlink from the pty to /dev/gnokii.
 
   $Log$
-  Revision 1.6  2000-12-27 10:54:15  pkot
+  Revision 1.7  2001-09-14 12:38:00  pkot
+  More cleanups
+
+  Revision 1.6  2000/12/27 10:54:15  pkot
   Added Unix98 PTYs support (Michael Mráka).
 
   
@@ -38,7 +41,7 @@
 
 int main(int argc, char *argv[])
 {
-  int count, err;
+  int count, err, aux;
   char dev_name[DEVLEN];
 
   /* Check we have one and only one command line argument. */
@@ -56,7 +59,8 @@ int main(int argc, char *argv[])
   strncpy(dev_name, argv[1], DEVLEN);
 
   /* Check for suspicious characters. */
-  for (count = 0; count < strlen(dev_name); count ++)
+  aux = strlen(dev_name);
+  for (count = 0; count < aux; count ++)
     if (!(isalnum(dev_name[count]) || dev_name[count]=='/')) {
       fprintf(stderr, "Suspicious character at index %d in argument.\n", count);
       exit (-2);
