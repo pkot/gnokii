@@ -74,10 +74,11 @@ static GSM_Error P6510_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P6510_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
-/*
 static GSM_Error P6510_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
-*/
+static GSM_Error P6510_SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
+
+static GSM_Error P6510_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
+
 static GSM_Error P6510_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
@@ -198,10 +199,10 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_WritePhonebookLocation(data, state);
 	case GOP_GetNetworkInfo:
 		return P6510_GetNetworkInfo(data, state);
-		/*
 	case GOP_GetSpeedDial:
 		return P6510_GetSpeedDial(data, state);
-		*/
+	case GOP_SetSpeedDial:
+		return P6510_SetSpeedDial(data, state);
 	case GOP_GetSMSCenter:
 		return P6510_GetSMSCenter(data, state);
 	case GOP_GetDateTime:
@@ -1084,7 +1085,7 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 				case P6510_MEMORY_SPEEDDIALS:	/* Speed dial numbers */
 					if ((data != NULL) && (data->SpeedDial != NULL)) {
 						data->SpeedDial->Location = (((unsigned int)blockstart[6]) << 8) + blockstart[7];
-						switch(blockstart[8]) {
+						switch(blockstart[12]) {
 						case 0x05:
 							data->SpeedDial->MemoryType = GMT_ME;
 							str = "phone";
@@ -1216,8 +1217,6 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x02, 0x00, 0x55, 0x55, 0x55, 0x00};
-	/* 00 01 00 07 00 00 FE 00 */
-	/* #$03#$02+chr(abook)+#$55#$55#$55#$00,1,false) */
 
 	dprintf("Getting memory status...\n");
 
@@ -1226,34 +1225,78 @@ static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, P6510_MSG_PHONEBOOK);
 }
 
-
-static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error P6510_ReadPhonebookLocation(GSM_Data *data, GSM_Statemachine *state, int memtype, int location)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x04, 0x01, 0x00, 0x01,
-			       0x02, 0x05, /* memory type */ //02,05
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
+			       0x02, 0x05, /* memory type */
 			       0x00, 0x00, 0x00, 0x00, 
 			       0x00, 0x01, /*location */
 			       0x00, 0x00};
 
-	/*       00 01 00 07 01 01 00 01 
-		FE 10 
-		00 00 
-		00 00 00 04 00 00    get caller group number
+	dprintf("Reading phonebook location (%d)\n", location);
 
-		00 01 00 07 04 01 00 01 
-		02 05 
-		00 00 
-		00 00 00 01 00 00   get phonebook
-	*/
-
-	dprintf("Reading phonebook location (%d)\n", data->PhonebookEntry->Location);
-
-	req[9] = GetMemoryType(data->PhonebookEntry->MemoryType);
-	req[14] = data->PhonebookEntry->Location >> 8;
-	req[15] = data->PhonebookEntry->Location & 0xff;
+	req[9] = memtype;
+	req[14] = location >> 8;
+	req[15] = location & 0xff;
 
 	if (SM_SendMessage(state, 20, P6510_MSG_PHONEBOOK, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_PHONEBOOK);
+}
+
+static GSM_Error P6510_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
+{
+	return P6510_ReadPhonebookLocation(data, state, P6510_MEMORY_SPEEDDIALS, data->SpeedDial->Number);
+}
+
+static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
+{
+	*(block++) = id;
+	*(block++) = 0;
+	*(block++) = 0;
+	*(block++) = size + 6;
+	*(block++) = no;
+	memcpy(block, buf, size);
+	block += size;
+	*(block++) = 0;
+	return (size + 6);
+}
+
+static GSM_Error P6510_SetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[40] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x01, 0x01, 0x00, 0x00, 0x10, 
+				 0xFF, 0x0E, 
+				 0x00, 0x06, /* number */
+				 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+				 0x01}; /* blocks */
+	char string[40];
+
+	req[13] = (data->SpeedDial->Number >> 8);
+	req[13] = data->SpeedDial->Number & 0xff;
+
+	string[0] = 0xFF;
+	string[1] = 0x00;
+	string[2] = data->SpeedDial->Location;
+	memcpy(string + 3, "\x00\x00\x00\x00", 4);
+
+	if (data->SpeedDial->MemoryType == GMT_SM) 
+		string[7] = 0x06;
+	else
+		string[7] = 0x05;
+	memcpy(string + 8, "\x0B\x02", 2);
+
+	PackBlock(0x1a, 10, 1, string, req + 22);
+
+	if (SM_SendMessage(state, 38, P6510_MSG_PHONEBOOK, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_PHONEBOOK);
+}
+
+static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
+{
+	int memtype;
+
+	memtype = GetMemoryType(data->PhonebookEntry->MemoryType);
+
+	return P6510_ReadPhonebookLocation(data, state, memtype, data->PhonebookEntry->Location);
 }
 
 static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
@@ -1282,9 +1325,6 @@ static GSM_Error P6510_DeletePhonebookLocation(GSM_Data *data, GSM_Statemachine 
 			       0x00,  /* memory type */
 			       0x00, 0x00, 0x00};
 
-	/*
-	  00 01 00 1F 00 01 15 00 00 08 05 00 00 00
-	*/
 	GSM_PhonebookEntry *entry;
 
 	if (data->PhonebookEntry) 
@@ -1292,26 +1332,11 @@ static GSM_Error P6510_DeletePhonebookLocation(GSM_Data *data, GSM_Statemachine 
 	else 
 		return GE_TRYAGAIN;
 
-	/* Two octets for the memory location */
-
 	req[12] = (entry->Location >> 8);
 	req[13] = entry->Location & 0xff;
 	req[14] = GetMemoryType(entry->MemoryType);
 
 	SEND_MESSAGE_BLOCK(P6510_MSG_PHONEBOOK, 18);
-}
-
-static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
-{
-	*(block++) = id;
-	*(block++) = 0;
-	*(block++) = 0;
-	*(block++) = size + 6;
-	*(block++) = no;
-	memcpy(block, buf, size);
-	block += size;
-	*(block++) = 0;
-	return (size + 6);
 }
 
 static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state)
@@ -2092,7 +2117,7 @@ static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message,
 		index = 13;
 		for (j = 0; j < message[7]; j++) {
 
-			dprintf("Ringtone (#%03i) name: ", message[index - 4], message[index]);
+			dprintf("Ringtone (#%03i) name: ", message[index - 4]);
 			for (i = 0; i < message[index]; i++) {
 				dprintf("%c", message[index + (2 * (i + 1))]);
 			}
