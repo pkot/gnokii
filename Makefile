@@ -30,9 +30,10 @@ DIRS =  common/phones \
 	common \
 	$(BIN_DIRS)
 
-GTK_DIRS =  xgnokii
+GTK_DIRS =	xgnokii
 
 DOCS_DIR = 	Docs
+INCLUDE_DIR =	include
 
 all: $(DIRS)
 	@if [ "$(GTK_LIBS)" ]; then \
@@ -124,6 +125,7 @@ install: all
 		    fi; \
 		done \
 	fi
+	$(MAKE) -C $(INCLUDE_DIR) install
 	@echo "done"
 
 install-docs:
@@ -144,6 +146,7 @@ install-strip:
 			fi; \
 		done \
 	fi
+	$(MAKE) -C $(INCLUDE_DIR) install
 	@echo "done"
 
 install-suid:
@@ -160,6 +163,7 @@ install-suid:
 			fi; \
 		done \
 	fi
+	$(MAKE) -C $(INCLUDE_DIR) install
 	@echo "done"
 
 install-ss:
@@ -176,6 +180,7 @@ install-ss:
 			fi; \
 		done \
 	fi
+	$(MAKE) -C $(INCLUDE_DIR) install
 	@echo "done"
 
 .PHONY: all install clean distclean dep depend install-docs
