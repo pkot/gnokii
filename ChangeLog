@@ -10,6 +10,7 @@
       to work ok                       (Pawel Kot, Costin Grigoras)
     o add support for repeat (recurrence) for meeting and call
       calendar events (when reading)                    (Pawel Kot)
+    o correctle read bitmap names from the phone        (Pawel Kot)
  * AT series updates
     o try to handle correctly sms empty location        (Pawel Kot)
     o use actual encoding when reading network information
