@@ -1215,13 +1215,13 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
   return ret;      
 }
 
-static void SetSortColumn( GtkWidget *widget, SortColumn *data)
+static void SetSortColumn (GtkWidget *widget, SortColumn *data)
 {
-  gtk_clist_set_sort_column(GTK_CLIST (data->clist), data->column);
-  gtk_clist_sort(GTK_CLIST (data->clist));
+  gtk_clist_set_sort_column (GTK_CLIST (data->clist), data->column);
+  gtk_clist_sort (GTK_CLIST (data->clist));
 }
 
-static void CreateProgressDialog(gint maxME, gint maxSM)
+static void CreateProgressDialog (gint maxME, gint maxSM)
 {
   GtkWidget *vbox, *label;
   GtkAdjustment *adj;
@@ -2502,7 +2502,7 @@ void GUI_CreateContactsWindow ()
                            &GUI_ContactsWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) DialVoice, NULL);
   
-  gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
+//  gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
   
   gtk_box_pack_start (GTK_BOX (main_vbox), toolbar, FALSE, FALSE, 0);
   

@@ -42,6 +42,7 @@
 #include "xgnokii_common.h"
 #include "xgnokii_contacts.h"
 #include "xgnokii_sms.h"
+#include "xgnokii_netmon.h"
 #include "xgnokii_cfg.h"
 
 #include "../pixmaps/logo.xpm"
@@ -286,16 +287,18 @@ gint GUI_Update(gpointer data) {
   }
 
   if (smsreceived >= 0) {
-    GUI_DrawSMSReceived(data);
+    GUI_DrawSMSReceived (data);
     smsreceived--;
   }
 
-  gtk_widget_draw(data,NULL);
+  gtk_widget_draw (data,NULL);
 
 /*#ifdef XDEBUG
   g_print("GUI_Update leave.\n");
 #endif*/
-
+  
+  GUI_RefreshNetmon ();
+  
   return TRUE;
 }
 
@@ -634,6 +637,13 @@ GtkWidget *GUI_CreateMenu ()
                              GTK_SIGNAL_FUNC (GUI_ShowCards), NULL);
   gtk_widget_show (menu_items);
 */  
+  
+  menu_items = gtk_menu_item_new_with_label (_("Net Monitor"));
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowNetmon), NULL);
+  gtk_widget_show (menu_items);
+
   menu_items = gtk_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), menu_items);
   gtk_widget_show (menu_items);
@@ -1388,6 +1398,7 @@ void GUI_TopLevelWindow () {
   GUI_CreateSMSWindow ();
   GUI_CreateContactsWindow ();
   GUI_CardWindow = GUI_CreateCardWindow ();
+  GUI_CreateNetmonWindow ();
   CreateErrorDialog (&errorDialog, GUI_MainWindow);
   
   gtk_widget_show_all (GUI_MainWindow);
@@ -1536,6 +1547,8 @@ int main (int argc, char *argv[])
   textdomain("xgnokii");
 #endif
 
+  (void) gtk_set_locale ();
+  
   gtk_init (&argc, &argv);
 
   /* Show the splash screen. */

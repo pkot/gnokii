@@ -1,3 +1,8 @@
+xgnokii-19991116
+- Added Net monitor. I thank Andreas Schmidt <mail@aschmidt.de> for idea
+  about graphical representation of Net monitor data. I thank also Norbert
+  Hüttisch (nobbi@nobbi.com) for his great web pages about Nokia Net Monitor.
+
 xgnokii-19991110
 - Added support for gettext() and messages catalogs.
 - Added Win32 support. (Acquadro Daniele <acquadro.daniele@logicasiel.it>)

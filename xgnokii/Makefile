@@ -1,4 +1,4 @@
-XVERSION = 19991110
+XVERSION = 19991116
 BIN = ../bin
 LN = /bin/ln
 
@@ -45,7 +45,8 @@ COMMON_OBJS = ../gsm-api.o \
 # Object files for each utility
 #
 
-XGNOKII_OBJS = xgnokii.o xgnokii_common.o xgnokii_contacts.o xgnokii_sms.o xgnokii_cfg.o
+XGNOKII_OBJS = xgnokii.o xgnokii_common.o xgnokii_contacts.o xgnokii_sms.o \
+               xgnokii_netmon.o xgnokii_cfg.o
 
 # Build executable
 all: xgnokii
@@ -62,8 +63,9 @@ clean:
                xgnokii $(BIN)/xgnokii $(XGNOKII_OBJS)
 
 # Dependencies - simplified for now
-xgnokii.o: xgnokii.c xgnokii.h xgnokii_common.h xgnokii_cfg.h ../gsm-api.c ../gsm-api.h ../misc.h ../gsm-common.h
+xgnokii.o: xgnokii.c xgnokii.h xgnokii_common.h xgnokii_netmon.h xgnokii_cfg.h ../gsm-api.c ../gsm-api.h ../misc.h ../gsm-common.h
 xgnokii_contacts.o: xgnokii_contacts.c xgnokii_contacts.h xgnokii_common.h xgnokii.h ../misc.h ../gsm-api.c ../gsm-api.h ../gsm-common.h
 xgnokii_sms.o: xgnokii_sms.c xgnokii_sms.h xgnokii_common.h xgnokii.h ../misc.h ../gsm-api.h ../gsm-api.c ../gsm-common.h
 xgnokii_common.o: xgnokii_common.c xgnokii_common.h
-xgnokii_cfg.o: xgnokii_cfg.c xgnokii_cfg.h xgnokii.h
+xgnokii_cfg.o: xgnokii_cfg.c xgnokii_cfg.h xgnokii.h ../misc.h
+xgnokii_netmon.o: xgnokii_netmon.c xgnokii_netmon.h xgnokii.h xgnokii_common.h ../misc.h ../gsm-api.h
