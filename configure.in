@@ -22,7 +22,6 @@ dnl ======================== Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_LEX
-AC_PATH_PROG(LD, ld, no)
 AC_PATH_PROG(RM, rm, no)
 AC_PATH_PROG(FIND, find, no)
 AC_CHECK_PROGS(MAKE, gmake make)
