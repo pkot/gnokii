@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.14  2001-11-09 13:49:12  pkot
+  Revision 1.15  2001-11-15 12:10:57  pkot
+  Removed a warning from 2110 compilation
+
+  Revision 1.14  2001/11/09 13:49:12  pkot
   Pavel! You haven't implemented slave_process() function!
 
   Revision 1.13  2001/11/09 13:17:11  pkot
@@ -670,7 +673,7 @@ HandlePacket(void)
 		return ((PacketData[4] & 0xf) != 0);
 		/* Make all but last fragment "secret" */
 
-	default: dprintf("Unknown response %lx\n", PacketData[3]); 
+	default: dprintf("Unknown response %dx\n", PacketData[3]); 
 	         return 0;
 	}	
 }
