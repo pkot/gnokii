@@ -28,7 +28,7 @@ LDLIBS += $(PTHREAD_LIBS) \
 
 LDLIBS += -rdynamic $(TOPDIR)/common/libgnokii.la -ldl
 # Some systems, eg. FreeBSD don't have libdl. Use this:
-# LDLIBS += -s -rdynamic -L$(TOPDIR)/common -lgnokii
+# LDLIBS += -s -rdynamic -L$(TOPDIR)/common -lgnokii -pthread -L../getopt -lgetopt
 
 OBJS = 	smsd.lo \
 	lowlevel.lo

@@ -1,3 +1,7 @@
+* Tue Aug  3 2004 Jan Derfinak <ja@mail.upjs.sk>
+- Changed LDLIBS for FreeBSD. Idea from <robert@dk-hostmaster.dk>.
+
+
 * Sat Jul 10 2004 Pawel Kot <pkot@bezsensu.pl>
 - Use pq_config instead of hardcoding paths in Makefile
 
