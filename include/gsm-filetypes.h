@@ -22,7 +22,11 @@ int GetvCalTime(GSM_DateTime *dt, char *time);
 int FillCalendarNote(GSM_CalendarNote *note, char *type,
   char *text, char *time, char *alarm);
 
-int GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
+
+/* Ringtone Files */
+
+GSM_Error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
+GSM_Error GSM_SaveRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
 
 int GetScale (char *num);
 int GetDuration (char *num);
@@ -30,25 +34,40 @@ int GetDuration (char *num);
 /* Defines the character that separates fields in rtttl files. */
 #define RTTTL_SEP ":"
 
+GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone);
+GSM_Error saveott(FILE *file, GSM_Ringtone *ringtone);
 
-int GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap);
-int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap);
+GSM_Error loadrttl(FILE *file, GSM_Ringtone *ringtone);
+GSM_Error loadott(FILE *file, GSM_Ringtone *ringtone);
+
+
+/* Bitmap Files */
+
+GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap);
+GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap);
 int GSM_SaveTextFile(char *FileName, char *text, int mode);
-void GSM_ReadBitmap(char *source, GSM_Bitmap *bitmap, GSM_UDH type);
-void GSM_PrintBitmap(GSM_Bitmap *bitmap);
 
 void savenol(FILE *file, GSM_Bitmap *bitmap);
 void savengg(FILE *file, GSM_Bitmap *bitmap);
 void savensl(FILE *file, GSM_Bitmap *bitmap);
 void savenlm(FILE *file, GSM_Bitmap *bitmap);
-void savexpm(char *filename, GSM_Bitmap *bitmap);
+void saveota(FILE *file, GSM_Bitmap *bitmap);
+void savebmp(FILE *file, GSM_Bitmap *bitmap);
 
-int loadngg(FILE *file, GSM_Bitmap *bitmap);
-int loadnol(FILE *file, GSM_Bitmap *bitmap);
-int loadnsl(FILE *file, GSM_Bitmap *bitmap);
-int loadnlm(FILE *file, GSM_Bitmap *bitmap);
-int loadota(FILE *file, GSM_Bitmap *bitmap);
-int loadxpm(char *filename, GSM_Bitmap *bitmap);
+#ifdef XPM
+  void savexpm(char *filename, GSM_Bitmap *bitmap);
+#endif
+
+GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap);
+GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap);
+GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap);
+GSM_Error loadnlm(FILE *file, GSM_Bitmap *bitmap);
+GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap);
+GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap);
+
+#ifdef XPM
+  GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap);
+#endif
 
 typedef enum {
   None=0,
@@ -56,5 +75,9 @@ typedef enum {
   NGG,
   NSL,
   NLM,
-  XPMF
+  BMP,
+  OTA,
+  XPMF,
+  RTTL,
+  OTT
 } GSM_Filetypes;

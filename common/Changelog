@@ -114,3 +114,6 @@
 
 * Sun Jul 30 21:11:28 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
 - function for logo printing in text mode
+
+* Sun 19 Nov 2000 Chris Kemp <ck231@cam.ac.uk>
+- gsm-filetype changes (Marcin)	

@@ -102,6 +102,12 @@
 #define DoubleDottedNote  (0x02<<6) /* binary 10 */
 #define Length_2_3        (0x03<<6) /* binary 11 */
 
+/* Pattern ID Encoding */
+#define A_part (0x00<<6) /* binary 00 */
+#define B_part (0x01<<6) /* binary 01 */
+#define C_part (0x02<<6) /* binary 10 */
+#define D_part (0x03<<6) /* binary 11 */
+
 /* Command-End */
 
 #define CommandEnd (0x00) /* binary 00000000 */
@@ -117,7 +123,11 @@ typedef struct {
 
 #define FB61_MAX_RINGTONE_PACKAGE_LENGTH 200
 
-u8 FB61_PackRingtone(GSM_Ringtone *ringtone, char *package);
+/* From PC Composer help */
+#define FB61_MAX_RINGTONE_NOTES 130
+
+u8 FB61_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength);
+GSM_Error FB61_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlength);
 int FB61_GetDuration(int number, unsigned char *spec);
 int FB61_GetNote(int number);
 int FB61_GetScale(int number);

@@ -31,7 +31,8 @@ OBJS =	cfgreader.o \
 	rlp-common.o \
 	rlp-crc24.o \
 	vcal.o \
-	misc.o 
+	misc.o \
+	gsm-bitmaps.o
 
 DATA_OBJS = virtmodem.o \
 	at-emulator.o \

@@ -92,3 +92,7 @@
 - Many modification in source code and config stuff for Solaris.
 - Patch from Christopher Kemp <ck231@cam.ac.uk> to enable data mode in
   xgnokii.
+
+* Sun 19 Nov 2000 Chris Kemp <ck231@cam.ac.uk>
+- gsm-filetype changes (Marcin)		
+

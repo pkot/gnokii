@@ -36,3 +36,7 @@
 
 * Tue Jul  4 23:26:47 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
 - config.h support added
+
+* Sun 19 Nov 2000 Chris Kemp <ck231@cam.ac.uk>
+- gsm-filetype changes (Marcin)	
+

@@ -218,6 +218,7 @@ typedef struct {
   bool EightBit;                            /* Indicates whether SMS contains 8 bit data */
   bool Compression;                         /* Indicates whether SMS contains compressed data */
   int Location;                             /* Location in the memory. */
+  bool ReplyViaSameSMSC;                    /* Indicates whether "Reply via same center" is set */
 } GSM_SMSMessage;
 
 /* This structure is used to get the current network status */
@@ -389,10 +390,18 @@ typedef enum {
   GE_SMSTOOLONG,            /* SMS message too long. */
   GE_NONEWCBRECEIVED,       /* Attempt to read CB when no new CB received */
   GE_INTERNALERROR,         /* Problem occured internal to model specific code. */
+  GE_CANTOPENFILE,          /* Can't open file with bitmap/ringtone */
+  GE_WRONGNUMBEROFCOLORS,   /* Wrong number of colors in specified bitmap file */
+  GE_WRONGCOLORS,           /* Wrong colors in bitmap file */
+  GE_INVALIDFILEFORMAT,     /* Invalid format of file */
+  GE_SUBFORMATNOTSUPPORTED, /* Subformat of file not supported */
+  GE_FILETOOSHORT,          /* Too short file to read */
+  GE_FILETOOLONG,           /* Too long file to read */
+  GE_INVALIDIMAGESIZE,      /* Invalid size of bitmap (in file, sms etc.) */
+
   GE_BUSY,                  /* Command is still being executed. */
   GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
   GE_MEMORYFULL,
-  GE_CANTOPENFILE,
 
   /* The following are here in anticipation of data call requirements. */
 
@@ -420,7 +429,10 @@ typedef enum {
   GSM_None=0,
   GSM_StartupLogo,
   GSM_OperatorLogo,
-  GSM_CallerLogo
+  GSM_CallerLogo,
+  GSM_PictureImage,
+  GSM_WelcomeNoteText,
+  GSM_DealerNoteText
 } GSM_Bitmap_Types;
 
 /* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
@@ -445,6 +457,8 @@ typedef struct {
 /* ie. c#=1 and 5 and 13 are invalid */
 /* note=255 means a pause */
 
+#define MAX_RINGTONE_NOTES 256
+
 /* Structure to hold note of ringtone. */
 
 typedef struct {
@@ -458,7 +472,7 @@ typedef struct {
   char name[20];
   u8 tempo;
   u8 NrNotes;
-  GSM_RingtoneNote notes[256];
+  GSM_RingtoneNote notes[MAX_RINGTONE_NOTES];
 } GSM_Ringtone;
   
 /* Structure to hold profile entries. */

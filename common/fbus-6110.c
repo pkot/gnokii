@@ -2461,34 +2461,49 @@ GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
   SetBitmapError = GE_BUSY;
 
   switch (Bitmap->type) {
+  case GSM_WelcomeNoteText:
+    req[count++]=0x18;
+    req[count++]=0x01; /* Only one block */
+    
+    req[count++]=0x02; /* Welcome text */
+				      
+    textlen=strlen(Bitmap->text);
+    req[count++]=textlen;
+    memcpy(req+count,Bitmap->text,textlen);
+      
+    count+=textlen;
+
+    FB61_TX_SendMessage(count, 0x05, req);
+    
+    break;
+
+  case GSM_DealerNoteText:
+    req[count++]=0x18;
+    req[count++]=0x01; /* Only one block */
+    
+    req[count++]=0x03; /* Dealer Welcome Note */
+				      
+    textlen=strlen(Bitmap->text);
+    req[count++]=textlen;
+    memcpy(req+count,Bitmap->text,textlen);
+      
+    count+=textlen;
+
+    FB61_TX_SendMessage(count, 0x05, req);
+    
+    break;
+
   case GSM_StartupLogo:
     req[count++]=0x18;
     req[count++]=0x01; /* Only one block */
     
-    if (Bitmap->size==0x00) {
-      if (!Bitmap->dealerset)
-      {
-        req[count++]=0x02; /* Welcome text */
-        textlen=strlen(Bitmap->text);
-        req[count++]=textlen;
-        memcpy(req+count,Bitmap->text,textlen);
-      } else
-      {
-        req[count++]=0x03; /* Dealer Welcome Note */
-        textlen=strlen(Bitmap->dealertext);
-        req[count++]=textlen;
-        memcpy(req+count,Bitmap->dealertext,textlen);
-      }
-      count+=textlen;
-    }
-    else
-      {
-	req[count++]=0x01;
-	req[count++]=Bitmap->height;
-	req[count++]=Bitmap->width;
-    	memcpy(req+count,Bitmap->bitmap,Bitmap->size);
-	count+=Bitmap->size;
-      }
+  
+    req[count++]=0x01;
+    req[count++]=Bitmap->height;
+    req[count++]=Bitmap->width;
+    memcpy(req+count,Bitmap->bitmap,Bitmap->size);
+    count+=Bitmap->size;
+
     FB61_TX_SendMessage(count, 0x05, req);
     
     break;
@@ -2534,6 +2549,11 @@ GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
     memcpy(req+count,Bitmap->bitmap,Bitmap->size);
     FB61_TX_SendMessage(count+Bitmap->size, 0x03, req);
     break;
+
+  case GSM_PictureImage:
+    return (GE_NOTIMPLEMENTED);
+    break;
+
   case GSM_None:
     break;
   }
@@ -2630,9 +2650,9 @@ GSM_Error FB61_SetRingTone(GSM_Ringtone *ringtone)
 		   to fill in the two
 		   bytes :-) */
   };
-  u8 size;
+  int size=FB61_MAX_RINGTONE_PACKAGE_LENGTH;
   
-  size=FB61_PackRingtone(ringtone, package+9);
+  FB61_PackRingtone(ringtone, package+9, &size);
   package[size+9]=0x01;
 
   FB61_TX_SendMessage((size+10), 0x12, package);
@@ -2646,7 +2666,7 @@ GSM_Error FB61_SendRingTone(GSM_Ringtone *ringtone, char *dest)
   GSM_SMSMessage SMS;
   GSM_Error error;
 
-  int size=0;
+  int size=FB61_MAX_RINGTONE_PACKAGE_LENGTH;
   char Package[FB61_MAX_RINGTONE_PACKAGE_LENGTH];
   char udh[]= {
     0x06,       /* User Data Header Length */
@@ -2680,7 +2700,7 @@ GSM_Error FB61_SendRingTone(GSM_Ringtone *ringtone, char *dest)
 
   strcpy(SMS.Destination,dest);
 
-  size=FB61_PackRingtone(ringtone, Package);
+  FB61_PackRingtone(ringtone, Package, &size);
 
   memcpy(SMS.UDH,udh,7);
   memcpy(SMS.MessageText,Package,size);

@@ -44,6 +44,7 @@
   #include <sys/types.h>
   #include <sys/time.h>
   #include <getopt.h>
+  #include <sys/stat.h>
 
 #endif
 
@@ -54,6 +55,7 @@
 #include "cfgreader.h"
 #include "gnokii.h"
 #include "gsm-filetypes.h"
+#include "gsm-bitmaps.h"
 
 char *model;      /* Model from .gnokiirc file. */
 char *Port;       /* Serial port from .gnokiirc file */
@@ -1146,6 +1148,8 @@ int getsms(int argc, char *argv[])
   char filename[64];
   GSM_Error error;
   GSM_Bitmap bitmap;
+  char ans[5];
+  struct stat buf;
 
   /* Handle command line args that set type, start and end locations. */
 
@@ -1355,15 +1359,22 @@ int getsms(int argc, char *argv[])
             fprintf(stdout, ("Logo:\n"));
 
             /* put bitmap into bitmap structure */
-            GSM_ReadBitmap(message.MessageText, &bitmap, message.UDHType);
+            GSM_ReadSMSBitmap(&message, &bitmap);
 
             GSM_PrintBitmap(&bitmap);
 
             if (*filename) {
-              error = GSM_SaveBitmapFile(filename, &bitmap);
-
-              fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
-            }
+	        error = GE_NONE;
+	        if ((stat(filename, &buf) == 0)) {
+		  fprintf(stdout, _("File %s exists.\n"), filename);
+		  fprintf(stderr, _("Overwrite? (yes/no) "));
+		  GetLine(stdin, ans, 4);
+		  if (!strcmp(ans, "yes")) {
+		    error = GSM_SaveBitmapFile(filename, &bitmap);
+		  }
+		} else error = GSM_SaveBitmapFile(filename, &bitmap);	       
+		if (error!=GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
+	    }
 
             break;
           case GSM_RingtoneUDH:
@@ -1751,6 +1762,9 @@ int sendlogo(int argc, char *argv[])
 int getlogo(char *argv[])
 {
   GSM_Bitmap bitmap;
+  char ans[5];
+  struct stat buf;
+  GSM_Error error;
 
   sleep(1);
 
@@ -1779,8 +1793,18 @@ int getlogo(char *argv[])
   if (bitmap.type!=GSM_None) {
     fprintf(stdout, _("Getting Logo.\n"));
     if (GSM->GetBitmap(&bitmap)==GE_NONE && bitmap.width!=0){
-      GSM_SaveBitmapFile(argv[0], &bitmap);
+      error = GE_NONE;
+      if ((stat(argv[0], &buf) == 0)) {
+	fprintf(stdout, _("File %s exists.\n"), argv[0]);
+	fprintf(stderr, _("Overwrite? (yes/no) "));
+	GetLine(stdin, ans, 4);
+	if (!strcmp(ans, "yes")) {
+	  error = GSM_SaveBitmapFile(argv[0], &bitmap);
+	}
+      } else error = GSM_SaveBitmapFile(argv[0], &bitmap);	       
+      if (error!=GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), argv[0]);
     }
+    
   }
 
   GSM->Terminate();
