@@ -509,8 +509,7 @@ char **gnokii_strsplit(const char *string, const char *delimiter, int tokens)
 	if (!string || !delimiter || !tokens)
 		return NULL;
 
-	strings = malloc(sizeof(char *) * (tokens + 1));
-	strings[tokens] = NULL; /* last element in array */
+	strings = calloc(tokens + 1, sizeof(char *));
 
 	while ((tmp = strstr(left, delimiter)) != NULL && (count < tokens)) {
 		str = malloc((tmp - left) + 1);

@@ -48,6 +48,7 @@
                                                    (BORBELY Zoltan)
     o new error codes for SIM related problems     (BORBELY Zoltan)
     o packet dump was incorrect when len % 16 == 0 (BORBELY Zoltan)
+    o gnokii_strsplit() crash bug fixed            (BORBELY Zoltan)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)
@@ -64,6 +65,8 @@
     o network code can be specified without quotes (BORBELY Zoltan)
     o GetSecurityCodeStatus fixed                  (BORBELY Zoltan)
     o extended error handling (CME and CMS erros)  (BORBELY Zoltan)
+    o SetPDUMode was missing from GetSMS           (BORBELY Zoltan)
+    o GetNetworkInfo won't crash if there's no net (BORBELY Zoltan)
 
 0.6.1
 =====

@@ -921,6 +921,14 @@ static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 
 	if (err)
 		return err;
+
+	err = state->driver.functions(GN_OP_AT_SetPDUMode, data, state);
+	if (err) {
+		dprintf("PDU mode not supported\n");
+		return err;
+	}
+	dprintf("PDU mode set\n");
+
 	sprintf(req, "AT+CMGR=%d\r", data->raw_sms->number);
 	dprintf("%s", req);
 	if (sm_message_send(strlen(req), GN_OP_GetSMS, req, state))
@@ -1017,7 +1025,8 @@ static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+CREG?\r", state))
 		return GN_ERR_NOTREADY;
 
-	error = sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+	if ((error = sm_block_no_retry(GN_OP_GetNetworkInfo, data, state)) != GN_ERR_NONE)
+		return error;
 
 	if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+COPS?\r", state))
 		return GN_ERR_NOTREADY;
@@ -1496,6 +1505,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 	char *pos;
 	char **strings;
 	gn_error error;
+	int i;
 
 	if (!data->network_info)
 		return GN_ERR_INTERNALERROR;
@@ -1511,37 +1521,39 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		char tmp[3] = {0, 0, 0};
 
 		strings = gnokii_strsplit(buf.line2, ",", 4);
+		i = strings[3] ? 2 : 1;
 
-		if (strings[2] && strlen(strings[2]) >= 6) {
-			pos = strings[2];
-			pos++;
-
-			tmp[0] = pos[0];
-			tmp[1] = pos[1];
-
-			data->network_info->LAC[0] = strtol(tmp, NULL, 16);
-
-			tmp[0] = pos[2];
-			tmp[1] = pos[3];
-
-			data->network_info->LAC[1] = strtol(tmp, NULL, 16);
+		if (!strings[i] || strlen(strings[i]) < 6 || !strings[i + 1] || strlen(strings[i + 1]) < 6) {
+			gnokii_strfreev(strings);
+			return GN_ERR_FAILED;
 		}
 
-		if (strings[3] && strlen(strings[3]) >= 6) {
+		pos = strings[i];
+		pos++;
 
-			pos = strings[3];
-			pos++;
+		tmp[0] = pos[0];
+		tmp[1] = pos[1];
 
-			tmp[0] = pos[0];
-			tmp[1] = pos[1];
+		data->network_info->LAC[0] = strtol(tmp, NULL, 16);
 
-			data->network_info->cell_id[0] = strtol(tmp, NULL, 16);
+		tmp[0] = pos[2];
+		tmp[1] = pos[3];
 
-			tmp[0] = pos[2];
-			tmp[1] = pos[3];
+		data->network_info->LAC[1] = strtol(tmp, NULL, 16);
 
-			data->network_info->cell_id[1] = strtol(tmp, NULL, 16);
-		}
+
+		pos = strings[i + 1];
+		pos++;
+
+		tmp[0] = pos[0];
+		tmp[1] = pos[1];
+
+		data->network_info->cell_id[0] = strtol(tmp, NULL, 16);
+
+		tmp[0] = pos[2];
+		tmp[1] = pos[3];
+
+		data->network_info->cell_id[1] = strtol(tmp, NULL, 16);
 
 		gnokii_strfreev(strings);
 
