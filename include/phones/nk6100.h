@@ -62,7 +62,7 @@ typedef struct {
 
 typedef struct {
 	void (*OnCellBroadcast)(GSM_CBMessage *Message);
-	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
+	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state);
 	void (*RLP_RXCallback)(RLP_F96Frame *Frame);
 	GSM_Error (*OnSMS)(GSM_API_SMS *Message);
 

@@ -1479,7 +1479,7 @@ static int changesecuritycode(char *type)
 
 #endif
 
-static void callnotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
+static void callnotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state)
 {
 	switch (CallStatus) {
 	case GSM_CS_IncomingCall:

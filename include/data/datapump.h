@@ -33,6 +33,6 @@
 
 /* Prototypes */
 bool	DP_Initialise(int read_fd, int write_fd);
-void    DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
+void    DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state);
 
 #endif	/* __data_datapump_h */

@@ -159,7 +159,7 @@ void	ATEM_InitRegisters(void)
 
 
 /* This gets called to indicate an incoming call */
-void ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
+void ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state)
 {
 	dprintf("ATEM_CallPassup called with %d\n", CallStatus);
 
@@ -263,7 +263,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				data.CallInfo->Type = GSM_CT_NonDigitalDataCall;
 			data.CallInfo->SendNumber = GSM_CSN_Default;
 			if (SM_Functions(GOP_MakeCall, &data, sm) != GE_NONE)
-				DP_CallPassup(GSM_CS_RemoteHangup, NULL);
+				DP_CallPassup(GSM_CS_RemoteHangup, NULL, NULL);
 			else {
 				RLP_SetUserRequest(Conn_Req, true);
 				IncomingCallNo = data.CallInfo->CallID;

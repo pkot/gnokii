@@ -7,6 +7,8 @@
     o make ValidateSMS more robust                     (Markus Plail)
  * 7110 series updates
     o make ValidateSMS more robust                     (Markus Plail)
+ * Call management subsystem updates:
+    o state pointer added to CallNotification        (BORBELY Zoltan)
 
 0.4.3
 =====

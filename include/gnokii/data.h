@@ -34,6 +34,8 @@
 #include "gsm-error.h"
 #include "data/rlp-common.h"
 
+typedef struct _GSM_Statemachine GSM_Statemachine;
+
 /* This is a generic holder for high level information - eg a GSM_Bitmap */
 typedef struct {
 	SMS_Folder *SMSFolder;
@@ -76,7 +78,7 @@ typedef struct {
 	void (*OnCellBroadcast)(GSM_CBMessage *Message);
 	GSM_NetMonitor *NetMonitor;
 	GSM_CallInfo *CallInfo;
-	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
+	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state);
 	RLP_F96Frame *RLP_Frame;
 	bool RLP_OutDTX;
 	void (*RLP_RX_Callback)(RLP_F96Frame *Frame);
@@ -109,8 +111,6 @@ typedef struct {
 	/* This is used by the phone specific code to send a message over the link */
 	GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, unsigned char *message);
 } GSM_Link;
-
-typedef struct _GSM_Statemachine GSM_Statemachine;
 
 /* Small structure used in GSM_Phone */
 /* Messagetype is passed to the function in case it is a 'generic' one */

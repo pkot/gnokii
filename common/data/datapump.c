@@ -187,7 +187,7 @@ static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 	return 0;
 }
 
-void DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
+void DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state)
 {
 	dprintf("DP_CallPassup called with %d\n", CallStatus);
 

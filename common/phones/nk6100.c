@@ -2970,7 +2970,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.CallID = message[4];
 		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_Established, &cinfo);
+			DRVINSTANCE(state)->CallNotification(GSM_CS_Established, &cinfo, state);
 		if (!data->CallInfo) return GE_UNSOLICITED;
 		data->CallInfo->CallID = message[4];
 		break;
@@ -2985,7 +2985,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.CallID = message[4];
 		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_RemoteHangup, &cinfo);
+			DRVINSTANCE(state)->CallNotification(GSM_CS_RemoteHangup, &cinfo, state);
 		return GE_UNSOLICITED;
 
 	/* incoming call alert */
@@ -3003,7 +3003,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 		memcpy(cinfo.Name, pos + 1, *pos);
 		pos += *pos + 1;
 		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_IncomingCall, &cinfo);
+			DRVINSTANCE(state)->CallNotification(GSM_CS_IncomingCall, &cinfo, state);
 		return GE_UNSOLICITED;
 	
 	/* answered call */
@@ -3015,7 +3015,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.CallID = message[4];
 		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_LocalHangup, &cinfo);
+			DRVINSTANCE(state)->CallNotification(GSM_CS_LocalHangup, &cinfo, state);
 		if (!data->CallInfo) return GE_UNSOLICITED;
 		data->CallInfo->CallID = message[4];
 		break;
@@ -3029,7 +3029,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.CallID = message[4];
 		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_CallHeld, &cinfo);
+			DRVINSTANCE(state)->CallNotification(GSM_CS_CallHeld, &cinfo, state);
 		return GE_UNSOLICITED;
 
 	/* call resumed */
@@ -3037,7 +3037,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.CallID = message[4];
 		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_CallResumed, &cinfo);
+			DRVINSTANCE(state)->CallNotification(GSM_CS_CallResumed, &cinfo, state);
 		return GE_UNSOLICITED;
 
 	case 0x40:

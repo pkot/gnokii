@@ -43,7 +43,7 @@ bool	ATEM_CommandPlusC(char **buf);
 bool	ATEM_CommandPlusG(char **buf);
 int	ATEM_GetNum(char **p);
 void	ATEM_ModemResult(int code);
-void    ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
+void    ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state);
 
 	/* Global variables */
 extern bool ATEM_Initialised;
