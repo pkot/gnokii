@@ -17,6 +17,7 @@
     o fix SMSFolder mess                               (Markus Plail)
     o add create/delete SMS folder                     (Markus Plail)
     o add save SMS (may be dangerous)                  (Markus Plail)
+    o add initial dialvoice support                    (Markus Plail)
  * 7110 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
