@@ -2302,12 +2302,14 @@ int writephonebook(void)
   char *memory_type_string;
   int line_count=0;
 
-  char Line[100], BackLine[100];
+  char *Line, OLine[100], BackLine[100];
   char *ptr;
 
   /* Initialise fbus code */
 
   fbusinit(NULL);
+
+  Line = OLine;
 
   /* Go through data from stdin. */
 
@@ -2317,11 +2319,11 @@ int writephonebook(void)
 
     line_count++;
 
-    ptr=strtok(Line, ";"); strcpy(entry.Name, ptr);
+    ptr=strsep(&Line, ";"); strcpy(entry.Name, ptr);
 
-    ptr=strtok(NULL, ";"); strcpy(entry.Number, ptr);
+    ptr=strsep(&Line, ";"); strcpy(entry.Number, ptr);
 
-    ptr=strtok(NULL, ";");
+    ptr=strsep(&Line, ";");
 
     if (!strncmp(ptr,"ME", 2)) {
       memory_type_string = "int";
@@ -2338,9 +2340,10 @@ int writephonebook(void)
       }
     }
 
-    ptr=strtok(NULL, ";"); entry.Location=atoi(ptr);
+    ptr=strsep(&Line, ";"); entry.Location=atoi(ptr);
 
-    ptr=strtok(NULL, ";"); entry.Group=atoi(ptr);
+    ptr=strsep(&Line, ";"); entry.Group=atoi(ptr);
+    Line = OLine;
 
     /* Do write and report success/failure. */
 

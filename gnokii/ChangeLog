@@ -47,3 +47,6 @@
 * Tue May  9 21:13:08 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - support for dealernote (Marcin)
 
+* Wed May 10 12:33:23 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- strsep is used instead of strtok (Robert R. Wal)
+
