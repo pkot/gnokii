@@ -1,5 +1,5 @@
-0.5.0pre (not released yet)
-========
+0.5.0pre8
+=========
  * nk3110 driver updates
     o remove keepalive stuff -- now obsoleted        (Osma Suominen)
     o don't use the global variables; move them to the driver
