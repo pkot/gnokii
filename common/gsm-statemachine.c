@@ -225,9 +225,6 @@ static gn_error __sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_
 		err = sm_wait_for(waitfor, data, state);
 		if (err != GN_ERR_NONE) return err;
 
-		/* if no packet has been sent, don't wait for ack */
-		if (s == GN_SM_Initialised) break;
-
 		timeradd(&now, &timeout, &next);
 		do {
 			s = gn_sm_loop(1, state);  /* Timeout=100ms */

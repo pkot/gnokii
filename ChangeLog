@@ -5,6 +5,9 @@
                                                          (Pawel Kot)
  * statemachine changes
     o add function sm_block_ack(), needed by nk3110  (Osma Suominen)
+    o remove hack that made it possible to call sm_block*
+      independently of sm_message_send(), as doing so creates a
+      race condition                                 (Osma Suominen)
  * 3110 series updates
     o rewrite of fbus-3110 code: differentiate properly between
       acks and commands, initial support for RLP frames, bugfixes,
