@@ -512,6 +512,7 @@ static int sendsms(int argc, char *argv[])
 	SMS.UserData[0].Type = SMS_PlainText;
 	strncpy(SMS.UserData[0].u.Text, message_buffer, chars_read);
 	SMS.UserData[0].u.Text[chars_read] = 0;
+	SMS.UserData[1].Type = SMS_NoData;
 	data.SMSMessage = &SMS;
 
 	/* Send the message. */
@@ -629,6 +630,7 @@ static int savesms(int argc, char *argv[])
 	SMS.UserData[0].Type = SMS_PlainText;
 	strncpy(SMS.UserData[0].u.Text, message_buffer, chars_read);
 	SMS.UserData[0].u.Text[chars_read] = 0;
+	SMS.UserData[1].Type = SMS_NoData;
 
 	data.SMSMessage = &SMS;
 	error = SaveSMS(&data, &State);
