@@ -1,4 +1,4 @@
-0.4.0pre18 (not released yet)
+0.4.0pre18
 ==========
  * Add TCP connection        (Jan Kratochvil, hacked by Pavel Machek)
  * Fake phone driver added (for debugging)	       (Pavel Machek)
