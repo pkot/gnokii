@@ -25,6 +25,9 @@
     o --help switch should work when there's no config file
       (suggested by Pavel Janik)                         (Pawel Kot)
     o --playringtone implemented       (Tomi Ollila, BORBELY Zoltan)
+    o when printing vCal file and date field, separate date and time
+     fields with capital T; small t caused Mozilla Calendar to
+     confuse                                             (Pawel Kot)
  * 6110 series updates
     o PlayTone implemented                          (BORBELY Zoltan)
     o GetMemoryStatus returns invalid memory type instead of
