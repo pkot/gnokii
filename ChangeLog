@@ -7,6 +7,9 @@
     o caller logo sending fixed                   (Anton V.Dorofeev)
     o missing <stdarg.h> include in gnokii.h (for va_list)
                                                          (Pawel Kot)
+    o fix segfault when using locking and bluetooth connection
+      (in general -- when there's no '/' char in the port config
+      variable)                                          (Pawel Kot)
  * 6110 series updates
     o "calendar functions busy" messages handled    (BORBELY Zoltan)
  * gnokii updates

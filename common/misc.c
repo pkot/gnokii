@@ -170,16 +170,25 @@ API char *gn_device_lock(const char* port)
 	char *lock_file = NULL;
 	char buffer[BUFFER_MAX_LENGTH];
 	const char *aux = strrchr(port, '/');
-	int fd, len = strlen(aux) + strlen(lock_path);
+	int fd, len;
+
+	if (!port) {
+		fprintf(stderr, _("Cannot lock NULL device.\n"));
+		return NULL;
+	}
 
 	/* Remove leading '/' */
-	if (aux) aux++;
-	else aux = port;
+	if (aux)
+		aux++;
+	else
+		aux = port;
+
+	len = strlen(aux) + strlen(lock_path);
 
 	memset(buffer, 0, sizeof(buffer));
 	lock_file = calloc(len + 1, 1);
 	if (!lock_file) {
-		fprintf(stderr, _("Out of memory error while locking device\n"));
+		fprintf(stderr, _("Out of memory error while locking device.\n"));
 		return NULL;
 	}
 	/* I think we don't need to use strncpy, as we should have enough
@@ -210,8 +219,8 @@ API char *gn_device_lock(const char* port)
 				fprintf(stderr, _("Lockfile %s is stale. Overriding it..\n"), lock_file);
 				sleep(1);
 				if (unlink(lock_file) == -1) {
-					fprintf(stderr, _("Overriding failed, please check the permissions\n"));
-					fprintf(stderr, _("Cannot lock device\n"));
+					fprintf(stderr, _("Overriding failed, please check the permissions.\n"));
+					fprintf(stderr, _("Cannot lock device.\n"));
 					goto failed;
 				}
 			} else {
@@ -226,7 +235,7 @@ API char *gn_device_lock(const char* port)
 		if (n == 0) {
 			fprintf(stderr, _("Unable to read lockfile %s.\n"), lock_file);
 			fprintf(stderr, _("Please check for reason and remove the lockfile by hand.\n"));
-			fprintf(stderr, _("Cannot lock device\n"));
+			fprintf(stderr, _("Cannot lock device.\n"));
 			goto failed;
 		}
 	}
@@ -235,14 +244,15 @@ API char *gn_device_lock(const char* port)
 	fd = open(lock_file, O_CREAT | O_EXCL | O_WRONLY, 0644);
 	if (fd == -1) {
 		if (errno == EEXIST)
-			fprintf(stderr, _("Device seems to be locked by unknown process\n"));
+			fprintf(stderr, _("Device seems to be locked by unknown process.\n"));
 		else if (errno == EACCES)
-			fprintf(stderr, _("Please check permission on lock directory\n"));
+			fprintf(stderr, _("Please check permission on lock directory.\n"));
 		else if (errno == ENOENT)
-			fprintf(stderr, _("Cannot create lockfile %s. Please check for existence of path"), lock_file);
+			fprintf(stderr, _("Cannot create lockfile %s. Please check for existence of the path."), lock_file);
 		goto failed;
 	}
 	sprintf(buffer, "%10ld gnokii\n", (long)getpid());
+	/* Probably we should add some error checking in here */
 	write(fd, buffer, strlen(buffer));
 	close(fd);
 	return lock_file;
