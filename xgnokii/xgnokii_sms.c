@@ -55,11 +55,12 @@
 #include "xpm/quest.xpm"
 
 typedef struct {
-	gint count;		// Messages count
-	gint number;		// Number of tail in Long SMS;
-	gint *msgPtr;		// Array of MessageNumber;
+	gint count;		/* Messages count */
+	gint number;		/* Number of tail in Long SMS */
+	gint *msgPtr;		/* Array of MessageNumber */
 	gint validity;
 	gint class;
+	gint memory;
 	gchar sender[MAX_BCD_STRING_LENGTH + 1];
 } MessagePointers;
 
@@ -333,7 +334,9 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 			row[3] = g_strdup_printf("Picture Message: %s", data->UserData[1].u.Text);
 		else
 			row[3] = data->UserData[0].u.Text;
+
 		gtk_clist_append(GTK_CLIST(SMS.smsClist), row);
+
 		msgPtrs = (MessagePointers *) g_malloc(sizeof(MessagePointers));
 		msgPtrs->count = msgPtrs->number = 1;
 		msgPtrs->validity = data->Validity;
@@ -341,6 +344,8 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		strcpy(msgPtrs->sender, data->Remote.Number);
 		msgPtrs->msgPtr = (gint *) g_malloc(sizeof(gint));
 		*(msgPtrs->msgPtr) = (int) data->Number;
+		msgPtrs->memory = data->MemoryType;
+
 		gtk_clist_set_row_data_full(GTK_CLIST(SMS.smsClist), SMS.row_i++,
 					    msgPtrs, DestroyMsgPtrs);
 		g_free(row[0]);
@@ -438,9 +443,7 @@ static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 	GSM_API_SMS *message;
 	PhoneEvent *e;
 	GList *sel;
-//  GSM_Error error;
-	gint row;
-	gint count;
+	gint row, count, number;
 
 
 	sel = GTK_CLIST(SMS.smsClist)->selection;
@@ -450,45 +453,35 @@ static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 	while (sel != NULL) {
 		row = GPOINTER_TO_INT(sel->data);
 		sel = sel->next;
-		for (count = 0;
-		     count <
-		     ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->
-		     count; count++) {
-			int number;
+		for (count = 0; 
+		     count < ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->count; 
+		     count++) {
 			message = (GSM_API_SMS *) g_malloc(sizeof(GSM_API_SMS));
-			number =
-			    *(((MessagePointers *)
-			       gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist),
-						      row))->msgPtr + count);
+			number = *(((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->msgPtr + count);
 			if (number == -1) {
 				g_free(message);
 				continue;
 			}
 			message->Number = number;
-			message->MemoryType = GMT_SM;
+			message->MemoryType = ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->memory;
 
 			e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 			e->event = Event_DeleteSMSMessage;
 			e->data = message;
 			GUI_InsertEvent(e);
-
 			/*
-      error = DeleteSMS();
-
-      if (error != GE_NONE)
-      {
-        if (error == GE_NOTIMPLEMENTED)
-        {
-          gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Function not implemented!"));  
-          gtk_widget_show(errorDialog.dialog);
-        }
-        else
-        {
-          gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Delete SMS failed!"));  
-          gtk_widget_show(errorDialog.dialog);
-        }
-      }
-*/
+			if (e->status != GE_NONE) {
+				if (e->status == GE_NOTIMPLEMENTED) {
+					gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Function not implemented!"));  
+					gtk_widget_show(errorDialog.dialog);
+				}
+				else
+					{
+						gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Delete SMS failed!"));  
+						gtk_widget_show(errorDialog.dialog);
+					}
+			}
+			*/
 		}
 	}
 
@@ -556,7 +549,7 @@ static void SaveToMailbox(void)
 	struct flock lock;
 	time_t caltime;
 	gint row;
-	gchar *number, *text, *loc;
+	gchar *number, *text, *loc, dummy;
 
 
 	if ((f = fopen(xgnokiiConfig.mailbox, "a")) == NULL) {
@@ -600,16 +593,20 @@ static void SaveToMailbox(void)
 		row = GPOINTER_TO_INT(sel->data);
 		sel = sel->next;
 		gtk_clist_get_text(GTK_CLIST(SMS.smsClist), row, 1, &text);
-		t.tm_sec = atoi(text + 15);
-		t.tm_min = atoi(text + 12);
-		t.tm_hour = atoi(text + 9);
-		t.tm_mday = atoi(text);
-		t.tm_mon = atoi(text + 3) - 1;
-		t.tm_year = atoi(text + 6);
-		if (t.tm_year < 70)
-			t.tm_year += 100;
+		snprintf(&dummy, 3, "%s", text + 17);
+		t.tm_sec = atoi(&dummy);
+		snprintf(&dummy, 3, "%s", text + 14);
+		t.tm_min = atoi(&dummy);
+		snprintf(&dummy, 3, "%s", text + 11);
+		t.tm_hour = atoi(&dummy);
+		snprintf(&dummy, 3, "%s", text);
+		t.tm_mday = atoi(&dummy);
+		snprintf(&dummy, 3, "%s", text + 3);
+		t.tm_mon = atoi(&dummy) - 1;
+		snprintf(&dummy, 5, "%s", text + 6);
+		t.tm_year = atoi(&dummy) - 1900;
 #ifdef HAVE_TM_GMTON
-		if (text[17] != '\0')
+		if (text[19] != '\0')
 			t.tm_gmtoff = atoi(text + 18) * 3600;
 #endif
 
@@ -1009,12 +1006,12 @@ static void DoSendSMS(void)
 			if (longSMS) {
 				sms.UserData[0].Type = SMS_ConcatenatedMessages;
 				nr_msg = ((l - 1) / 153) + 1;
-				udh[0] = 0x05;	// UDH length
-				udh[1] = 0x00;	// concatenated messages (IEI)
-				udh[2] = 0x03;	// IEI data length
-				udh[3] = 0x01;	// reference number
-				udh[4] = nr_msg;	// number of messages
-				udh[5] = 0x00;	// message reference number
+				udh[0] = 0x05;	/* UDH length */
+				udh[1] = 0x00;	/* concatenated messages (IEI) */
+				udh[2] = 0x03;	/* IEI data length */
+				udh[3] = 0x01;	/* reference number */
+				udh[4] = nr_msg;	/* number of messages */
+				udh[5] = 0x00;	/* message reference number */
 				offset = 6;
 
 				for (j = 0; j < nr_msg; j++) {
@@ -1045,7 +1042,7 @@ static void DoSendSMS(void)
 				sms.UDH.Length = 0;
 				sms.UserData[0].Type = SMS_PlainText;
 				nr_msg = ((l - 1) / 153) + 1;
-				if (nr_msg > 99)	// We have place only for 99 messages in header.
+				if (nr_msg > 99)	/* We have place only for 99 messages in header. */
 					nr_msg = 99;
 				for (j = 0; j < nr_msg; j++) {
 					gchar header[8];
@@ -1153,7 +1150,9 @@ static void CreateSMSSendWindow(void)
 	sendSMS.SMSSendWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_wmclass(GTK_WINDOW(sendSMS.SMSSendWindow), "SMSSendWindow", "Xgnokii");
 
-	//gtk_widget_set_usize (GTK_WIDGET (sendSMS.SMSSendWindow), 436, 220);
+	/*
+	gtk_widget_set_usize (GTK_WIDGET (sendSMS.SMSSendWindow), 436, 220);
+	*/
 	gtk_signal_connect(GTK_OBJECT(sendSMS.SMSSendWindow), "delete_event",
 			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 	gtk_widget_realize(sendSMS.SMSSendWindow);
@@ -1366,8 +1365,10 @@ static inline gint CompareSMSMessageLocation (gconstpointer a, gconstpointer b)
 static void ReplySMS(void)
 {
 	gchar *buf;
-//  GSList *r;
-//  GSM_API_SMS msg;
+	/*
+	GSList *r;
+	GSM_API_SMS msg;
+	*/
 
 	if (GTK_CLIST(SMS.smsClist)->selection == NULL)
 		return;
@@ -1389,11 +1390,13 @@ static void ReplySMS(void)
 
 	gtk_text_thaw(GTK_TEXT(sendSMS.smsSendText));
 
-	//msg.Number = *(((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST (SMS.smsClist),
-	//               GPOINTER_TO_INT (GTK_CLIST (SMS.smsClist)->selection->data)))->msgPtr);
+	/*
+	msg.Number = *(((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST (SMS.smsClist),
+	               GPOINTER_TO_INT (GTK_CLIST (SMS.smsClist)->selection->data)))->msgPtr);
 
-	//r = g_slist_find_custom (SMS.messages, &msg, CompareSMSMessageLocation);
-	//if (r)
+	r = g_slist_find_custom (SMS.messages, &msg, CompareSMSMessageLocation);
+	if (r)
+	*/
 	gtk_entry_set_text(GTK_ENTRY(sendSMS.addr),
 			   ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist),
 								       GPOINTER_TO_INT(GTK_CLIST
@@ -1554,7 +1557,9 @@ void GUI_CreateSMSWindow(void)
 	GUI_SMSWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_wmclass(GTK_WINDOW(GUI_SMSWindow), "SMSWindow", "Xgnokii");
 	gtk_window_set_title(GTK_WINDOW(GUI_SMSWindow), _("Short Message Service"));
-	//gtk_widget_set_usize (GTK_WIDGET (GUI_SMSWindow), 436, 220);
+	/*
+	gtk_widget_set_usize (GTK_WIDGET (GUI_SMSWindow), 436, 220);
+	*/
 	gtk_signal_connect(GTK_OBJECT(GUI_SMSWindow), "delete_event",
 			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 	gtk_widget_realize(GUI_SMSWindow);
@@ -1650,7 +1655,9 @@ void GUI_CreateSMSWindow(void)
 	SMS.smsText = gtk_text_new(NULL, NULL);
 	gtk_text_set_editable(GTK_TEXT(SMS.smsText), FALSE);
 	gtk_text_set_word_wrap(GTK_TEXT(SMS.smsText), TRUE);
-	//gtk_text_set_line_wrap (GTK_TEXT (SMS.smsText), TRUE);
+	/*
+	gtk_text_set_line_wrap (GTK_TEXT (SMS.smsText), TRUE);
+	*/
 
 	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
@@ -1673,8 +1680,9 @@ void GUI_CreateSMSWindow(void)
 	gtk_clist_set_column_width(GTK_CLIST(SMS.smsClist), 0, 70);
 	gtk_clist_set_column_width(GTK_CLIST(SMS.smsClist), 1, 142);
 	gtk_clist_set_column_width(GTK_CLIST(SMS.smsClist), 2, 135);
-	//gtk_clist_set_column_justification (GTK_CLIST (SMS.smsClist), 2, GTK_JUSTIFY_CENTER);
-
+	/*
+	gtk_clist_set_column_justification (GTK_CLIST (SMS.smsClist), 2, GTK_JUSTIFY_CENTER);
+	*/
 	for (i = 0; i < 4; i++) {
 		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
 			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__,
