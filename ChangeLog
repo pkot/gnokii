@@ -28,6 +28,8 @@
                                                       (Ron Yorston)
  * smsd updates
     o libtoolization finished                      (BORBELY Zoltan)
+ * 3110 series updates
+    o fix alternate range of sequence numbers       (Osma Suominen)
 
 0.5.9
 =====
