@@ -39,6 +39,8 @@
                                                         (Pawel Kot)
     o accept long phonebook lines (import and export)   (Pawel Kot)
     o fix mixed name/number entry field usage        (Peter Grandi)
+ * nk6510 series updates
+    o added Nokia 3595 to the supported models  (Gunnar Sigurdsson)
 
 0.6.1
 =====
