@@ -1435,7 +1435,7 @@ static int sendlogo(int argc, char *argv[])
 	/* Send the message. */
 	data.SMSMessage = &SMS;
 
-	SendSMS(&data, &State);
+	error = SendSMS(&data, &State);
 
 	if (error == GE_NONE)
 		fprintf(stdout, _("Send succeeded!\n"));
