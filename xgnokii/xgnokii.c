@@ -2335,6 +2335,8 @@ static void ReadConfig(void)
 	asprintf(&xgnokiiConfig.initlength, "%d", statemachine.config.init_length);
 	xgnokiiConfig.connection = statemachine.config.connection_type;
 
+	max_phonebook_number_length = max_phonebook_sim_number_length =
+	    GN_PHONEBOOK_NUMBER_MAX_LENGTH;
 	GUI_ReadXConfig();
 	max_phonebook_name_length = atoi(xgnokiiConfig.maxPhoneLen);
 	max_phonebook_sim_name_length = atoi(xgnokiiConfig.maxSIMLen);
@@ -2342,8 +2344,6 @@ static void ReadConfig(void)
 #ifndef WIN32
 	xgnokiiConfig.xgnokiidir = DefaultXGnokiiDir;
 #endif
-	max_phonebook_number_length = max_phonebook_sim_number_length =
-	    GN_PHONEBOOK_NUMBER_MAX_LENGTH;
 
 	xgnokiiConfig.callerGroups[0] = xgnokiiConfig.callerGroups[1] =
 	    xgnokiiConfig.callerGroups[2] = xgnokiiConfig.callerGroups[3] =
