@@ -1,10 +1,10 @@
                             - G N O K I I -
                (C) Hugh Blemings, hugh@vsb.com.au 1999
-               Last update 12 March 1999  Version 0.2.3
+               Last update 26 March 1999  Version 0.2.4
 
 - Introduction -
 
-This is version 0.2.3 of gnokii, a Linux/Unix tool suite and (eventually)
+This is version 0.2.4 of gnokii, a Linux/Unix tool suite and (eventually)
 modem/fax driver for Nokia mobile phones, released under the GPL.  Please
 see COPYING for more details on license/copying issues.
 
@@ -12,21 +12,29 @@ At present only 3110, 3810 and 8110 phones with the DAU-4F cable have
 been tested.  Other cables, including home made ones will very likely
 work.  Details of other handsets and networks are provided below.
 
-This version of the software has had a number of changes made to the
-source code to allow support for other phones to be readily incorporated.
-The files fbus-6110.c and fbus-6110.h are provided as a starting point
-for work on supporting this range of phones. A group are presently
-working on providing this support, their efforts will be incorporated
-into gnokii in the not to distant future.
+Code for the 6110 phones has been tested with the DAU-9F ???? cable.
+Note that the 6110 code is still under heavy development and
+may not work with your particular firmware.
 
-The code supplied is still relatively new and hence has had limited 
-testing.  Bugs where know are detailed in the file BUGS...  Play around
+Bugs where known are detailed in the file BUGS...  Play around
 with it, hack at it and see what you discover but please do so in the
 knowledge that it comes with no warranty or guarantee - you use
 it at your own risk.
 
-The resulting executable allows you to read/write phonebook entries,
-send SMS messages to the network, dump SMS messages from the phone
+In the following notes, "3810 Series" referes to the 3110 3810 and
+8110 models.  "6110 Series" refers to the 6110, xxxx, yyy, zzz ?
+
+- Notes for 3810 Series -
+
+The 3810 was the phone used for initial gnokii development and
+hence it is somewhat better supported than the 6110.  This in
+no way reflects on the folk working on the 6110 code, indeed
+the 3810 series have a considerably simpler protocol as it
+turns out.
+
+When built with 3810 support, the resulting executable allows you
+to read/write phonebook entries, send SMS messages to the network,
+retrive SMS messages from the phone, delete SMS messages from the phone
 and enter a monitor mode to look at the protocol and any unknown
 messages that may occur.  The latter are printed in hexadecimal form
 and are provided to help with understanding of the protocol.
@@ -62,23 +70,30 @@ a distant land or just not work at all.
 A number of people have now tested SMS sending on various networks
 around the world and in the main have found it to work correctly.
 
+- Notes for 6110 Series -
+
+Over to our guest commentator and super coder - Pavel Janik ml.
+
+
+
+
+
 - Installation -
 
 Review gnokii.c, and make sure that the MODEL and PORT defines
 are correct for your setup.  You'll need r/w permissions on the 
 port you select.  If you set MODEL to 6110 you will see lots
-of "Not implemented" errors unless you've added the corresponding
-routines to fbus-6110.c!
+of "Not implemented" messages unless that functionality has
+been completed. 
 
-If your SIM card allows names longer than 10 character, modify
-FB38_DEFAULT_SIM_PHONEBOOK_NAME_LENGTH in fbus-3810.h accordingly.
+For 3810 series users if your SIM card allows names longer than
+10 character, modify FB38_DEFAULT_SIM_PHONEBOOK_NAME_LENGTH in
+fbus-3810.h accordingly.
 
 Type make, all should build from there, it's pretty simple code
 so you shouldn't have any problems.  Note that you need pthread
 libraries, they are standard on most modern Linux distributions.
 
-If you are going to use --sendsms, read the notes above as it
-may not work for you.
 
 - Known Bugs -
 
@@ -97,11 +112,7 @@ Suggestions on changes to the code are welcome, the preference is that
 they be aired on the mailing list so that a consensus can be reached
 when appropriate.
 
-Internationalisation is desirable for a program such as gnokii, if
-you would like to assist in providing translations into other
-languages please let me know.
-
-- Protocol Details (3810 series) -
+- Protocol Details (3810 Series) -
 
 The protocol used between the phone and the PC has been worked out
 by a mixture of trial and error, monitoring the data that goes between
@@ -126,8 +137,6 @@ At the present, the user interface, error reporting and such like
 is hardly what one would call user friendly.  This too will improve
 as the project progresses.
 
-Incorporate the GNU gettext Internationalisation library to assist
-with making gnokii multi lingual.
 
 - References -
 
@@ -144,14 +153,18 @@ is the Australian mirror, there will be one nearby to you too :)
 - Handsets/Networks tested -
 
 3110/Sonera (Finland)
+3110/Telefonica (Spain)
 3810/Telstra (Australia)
 3810/Optus [Actually Hutchison] (Australia)
+3810/Mobile One (Singapore)
+3810/SingTel Mobile (Singapore)
 8110/Proximus (Belgium)
 8110/D2 Privat (Germany)
 8110i/MTN (South Africa)
-3810/Mobile One (Singapore)
-3810/SingTel Mobile (Singapore)
 8110/Beeline Vympelkom (Russia)
+
+[Note 6110 support is still under heavy development]
+6110/Panafon (Greece)
 
 - Credits -
 
@@ -160,12 +173,13 @@ Thank you to, in no particular order...
 *  Everyone on the linux-nokia mailing list for their interest
    and input into the project.
 
+*  Pavel Janík ml. for the majority of work on gnokii 6110 series
+   support, spelling corrections and miscellaneous code cleanups.
+
 *  Francois Dessart, Brendan O'Dea, Tony Lindstrom, Steffan Henke
    and Cobus Van Eeden for dumps (and in some cases interpretation!)
    of unknown messages, bug reports and prompt feedback of being
    able to build new releases.
-
-*  Pavel Janik for spelling corrections and a few code cleanups.
 
 *  Staffan Ulfberg for taking care of the website and for instigating
    the 6110 project which has now been merged with the gnokii effort.
@@ -179,6 +193,13 @@ Thank you to, in no particular order...
    work on this :)
 
 - Release Notes -
+199903xx Version 0.2.4
+Largely a synchronisation release to incorporate Pavel's numerous
+patches for 6110 support and internationalisation.
+
+Added SMS delete function for 3810 series.
+
+
 19990305 Version 0.2.3
 Added gsm-api.c/.h and gsm-common.h as a standard interface and
 set of datatypes that can be used across multiple models.  This

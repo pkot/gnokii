@@ -3,7 +3,7 @@
 	   Copyright (C) Hugh Blemings, 1999  Released under the terms of 
        the GNU GPL, see file COPYING for more details.
 	
-	   This file:  fbus-3810.c  Version 0.2.3
+	   This file:  fbus-3810.c  Version 0.2.4
 	
 	   Provides an API for accessing functions on the 3810 and
 	   similar phones.  Most testing has been done on the 3810

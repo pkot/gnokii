@@ -66,9 +66,14 @@ GSM_Information			FB61_Information = {
 
 	/* Local variables */
 int						PortFD;
+int BufferCount;
+u8						MessageBuffer[FB61_MAX_RECEIVE_LENGTH];
+unsigned char MessageLength, MessageType, MessageDestination, MessageSource, MessageUnknown;
 char					PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
+u8						RequestSequenceNumber=0x00;
 pthread_t				Thread;
 bool					RequestTerminate;
+bool					DisableKeepalive=false;
 struct termios			OldTermios;	/* To restore termio on close. */
 bool					EnableMonitoringOutput;
 
@@ -78,7 +83,7 @@ GSM_Error	FB61_Initialise(char *port_device, bool enable_monitoring)
 	int		rtn;
 
 	RequestTerminate = false;
-	FB61_LinkOK = false;
+	FB61_LinkOK = true;
 	EnableMonitoringOutput = enable_monitoring;
 
 	strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
@@ -94,29 +99,40 @@ GSM_Error	FB61_Initialise(char *port_device, bool enable_monitoring)
 
 }
 
+GSM_Error FB61_TX_Send0x04Message()
+{
+
+	unsigned char request[] = {0x00, 0x01, 0x00, 0x01, 0x01};
+
+	FB61_TX_SendMessage(0x05, 0x04, request);
+
+	return (GE_NONE);
+}
+
 	/* This is the main loop for the FB61 functions.  When FB61_Initialise
 	   is called a thread is created to run this loop.  This loop is
 	   exited when the application calls the FB61_Terminate function. */
 void	FB61_ThreadLoop(void)
 {
-		/* Initialise things... */
-	unsigned char 		init_string[4] = {0x55, 0x55, 0x55, 0x55};
-	unsigned char 		connect1[9] = {0x00, 0x01, 0x00, 0x0d, 0x00, 0x00, 0x02, 0x01, 0x40};
-	unsigned char 		connect2[7] = {0x00, 0x01, 0x00, 0x20, 0x02, 0x01, 0x40};
+		/* Initialize things... */
+	unsigned char 		init_char[1] = {0x55};
+	unsigned char 		connect1[] = {0x00, 0x01, 0x00, 0x0d, 0x00, 0x00, 0x02, 0x01};
+	unsigned char 		connect2[] = {0x00, 0x01, 0x00, 0x20, 0x02, 0x01};
+ 
+	unsigned char 		connect3[] = {0x00, 0x01, 0x00, 0x0d, 0x01, 0x00, 0x02, 0x01};
+	unsigned char 		connect4[] = {0x00, 0x01, 0x00, 0x10, 0x01};
+ 
+	//	unsigned char 		connect5[] = {0x00, 0x01, 0x00, 0x42, 0x05, 0x01, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x55, 0x63, 0xa8, 0x00, 0x00, 0x07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80, 0x01};
+ 
+	//	unsigned char       connect6[] = {0x00, 0x01, 0x00, 0x12, 0x65, 0x40, 0x36, 0x76, 0x10, 0x66, 0x50, 0x14, 0xba, 0xff, 0x66, 0x62, 0x40, 0xf9, 0xde, 0xdf, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x26, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x20, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x79, 0x00, 0x00, 0x00, 0x00, 0x01};
 
-	unsigned char 		connect3[9] = {0x00, 0x01, 0x00, 0x0d, 0x01, 0x00, 0x02, 0x01, 0x41};
-	unsigned char 		connect4[6] = {0x00, 0x01, 0x00, 0x10, 0x01, 0x62};
-
-	unsigned char 		connect5[0x1a] = {0x00, 0x01, 0x00, 0x42, 0x05, 0x01, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x55, 0x63, 0xa8, 0x00, 0x00, 07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80, 0x01, 0x63};
-
-	unsigned char       connect6[0x2f] = {0x00, 0x01, 0x00, 0x12, 0x65, 0x40, 0x36, 0x76, 0x10, 0x66, 0x50, 0x14, 0xba, 0xff, 0x66, 0x62, 0x40, 0xf9, 0xde, 0xdf, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x26, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x20, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x79, 0x00, 0x00, 0x00, 0x00, 0x01, 0x44};
-
-	int					count;
+	int					count, idle_timer;
 
 		/* Try to open serial port, if we fail we sit here and don't proceed
 		   to the main loop. */
 	if (FB61_OpenSerial() != true) {
 		FB61_LinkOK = false;
+
 			/* Fail so sit here till calling code works out there is a
 			   problem. */		
 		while (!RequestTerminate) {
@@ -124,46 +140,58 @@ void	FB61_ThreadLoop(void)
 		}
 		return;
 	}
-
+	
 		/* Initialise link with phone or what have you */
 		/* Send init string to phone, this is a bunch of 0x55
 		   characters.  Timing is empirical. */
-	for (count = 0; count < 100; count ++) {
-		usleep(1000);
-		write(PortFD, init_string, 1);
+	for (count = 0; count < 250; count ++) {
+		usleep(100);
+		write(PortFD, init_char, 1);
 	}
 
-	FB61_TX_SendMessage(9, 0x02, connect1);
-
-		usleep(10000);
-
-	FB61_TX_SendMessage(7, 0x02, connect2);
-
-		usleep(10000);
-
-	FB61_TX_SendMessage(9, 0x02, connect3);
-
-		usleep(10000);
-
-	FB61_TX_SendMessage(6, 0x64, connect4);
+	FB61_TX_Send0x04Message();
 
 		usleep(1000);
 
-	FB61_TX_SendMessage(0x1a, 0x01, connect5);
+	FB61_TX_SendMessage(8, 0x02, connect1);
 
 		usleep(1000);
 
-	FB61_TX_SendMessage(0x2f, 0x64, connect6);
+	FB61_TX_SendMessage(6, 0x02, connect2);
+
+		usleep(1000);
+
+	FB61_TX_SendMessage(8, 0x02, connect3);
+
+		usleep(1000);
+
+	FB61_TX_SendMessage(5, 0x64, connect4);
+
+	//	FB61_TX_SendMessage(0x19, 0x01, connect5);
+
+	// 	FB61_TX_SendMessage(0x2e, 0x64, connect6);
+
+	usleep(10000);
+
+	 	FB61_GetPhonebookLocation(GMT_SIM,1,NULL);
+
+		idle_timer=0;
 
 		/* Now enter main loop */
-	while (!RequestTerminate) {
+	 	while (!RequestTerminate) {
 
-			/* Do things... */
+		  if (idle_timer == 0) {
+			/* Dont send keepalive packets when doing other transactions. */
+			if (!DisableKeepalive)
+			  FB61_TX_Send0x04Message();
+			
+			idle_timer = 20;
+		  }
+		  else
+			idle_timer--;
 
-
-		usleep(100000);		/* Avoid becoming a "busy" loop. */
-	}
-
+		  usleep(100000);		/* Avoid becoming a "busy" loop. */
+	 	}
 }
 
 	/* Applications should call FB61_Terminate to shut down
@@ -197,7 +225,16 @@ GSM_Error	FB61_GetBatteryLevel(float *level)
 
 GSM_Error	FB61_EnterPin(char *pin)
 {
-	return (GE_NOTIMPLEMENTED);
+	unsigned char pin_req[] = {0x00, 0x01, 0x00, 0x0a, 0x02, '0', '0', '0', '0', 0x00, 0x00, 0x01};
+
+	pin_req[5]=pin[0];
+	pin_req[6]=pin[1];
+	pin_req[7]=pin[2];
+	pin_req[8]=pin[3];
+
+	FB61_TX_SendMessage(0x0c, 0x08, pin_req);
+
+	return (GE_NONE);
 }
 
 GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code)
@@ -210,7 +247,11 @@ GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code)
 	   retrieved or a timeout/error occurs. */
 GSM_Error	FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry) {
 
-	return (GE_NOTIMPLEMENTED);
+	unsigned char entry_req[] = {0x00, 0x01, 0x00, 0x01, 0x02, 0x01, 0x00, 0x01};
+
+	FB61_TX_SendMessage(0x09, 0x03, entry_req);
+
+	return (GE_NONE);
 }
 
 	/* Routine to write phonebook location in phone. Designed to 
@@ -274,47 +315,249 @@ bool		FB61_OpenSerial(void)
 	return (true);
 }
 
-void 	  FB61_HandleReceived(unsigned char *buffer, int count){
-
-  int current;
-
-  if (buffer[count+3] != FB61_FRTYPE_ACK) {
-
-	printf("Phone: ");
-
-	for (current=0; current<buffer[count+5]+8; current++)
-	  printf("[%2x]", buffer[count+current]);
-
-	printf("\n");
-
-	FB61_TX_SendAck(buffer[count+3]);
-
-  }
-  else {
-	printf("Received Ack of type %2x, seq %2x\n", buffer[count+6], buffer[count+7]);
-  }
-
-}
-
-	/* Handler called when characters received from serial port. 
-	   calls state machine code to process it. */
 void	FB61_SigHandler(int status)
 {
 	unsigned char 	buffer[255];
 	int				count,res;
 
 	res = read(PortFD, buffer, 255);
-	count=0;
 
-	while (res) {
+	for (count = 0; count < res ; count ++) {
+		FB61_RX_StateMachine(buffer[count]);
+	}
+}
 
-	  int length=8+buffer[count+5]+(buffer[count+5] % 2);
+enum FB61_RX_States		FB61_RX_DispatchMessage(void)
+{
 
-	  FB61_HandleReceived(buffer, count);
-	  count=count+length;
-	  res=res-length;
+	int tmp, count;
+
+	/* Uncomment this if you want all messages in raw form. */
+	FB61_RX_DisplayMessage();
+
+		/* Switch on the basis of the message type byte */
+	switch (MessageType) {
+
+	case 0x01:
+	  printf("Message: Incoming call alert:\n");
+	  printf("   Number: ");
+	  count=MessageBuffer[6];
+	  
+	  for (tmp=0; tmp <count; tmp++)
+	  	printf("%c", MessageBuffer[7+tmp]);
+
+	  printf("\n");
+
+	  printf("   Name: ");
+	  for (tmp=0; tmp <MessageBuffer[7+count]; tmp++)
+	  	printf("%c", MessageBuffer[8+count+tmp]);
+
+	  printf("\n");
+	break;
+	  
+	case 0x04:
+	  printf(_("Message: Phone status received:\n"));
+
+	  printf("   Mode: ");
+
+	  switch (MessageBuffer[4]) {
+
+	  case 0x01:
+		printf("registered within the network\n");
+		break;
+
+	  case 0x03:
+		printf("waiting for pin\n");
+		break;
+
+	  case 0x04:
+		printf("powered off\n");
+		break;
+
+	  default:
+		printf("unknown\n");
+	  }
+
+	  printf("   Power source: ");
+
+	  switch (MessageBuffer[7]) {
+
+	  case 0x01:
+		printf("AC/DC\n");
+		break;
+		
+	  case 0x02:
+		printf("battery\n");
+		break;
+
+	  default:
+		printf("unknown\n");
+	  }
+
+
+	  printf("   Battery Level: %d\n", MessageBuffer[8]);
+
+   	  printf("   Signal strength: %d\n", MessageBuffer[5]);
+	  break;
+
+	case 0x08:
+
+	  printf("Message: PIN:\n");
+
+	  if (MessageBuffer[3] != 0x0c)
+		printf("   Code Accepted\n");
+	  else
+	  	printf("   Code Error\n   You're not my big owner :-)\n");
+	break;
+
+	case 0x0a:
+
+	  printf("Message: Network registration:\n");
+
+	  printf("   CellID: %02x%2x\n", MessageBuffer[10], MessageBuffer[11]);
+	  printf("   LAC: %02x%02x\n", MessageBuffer[12], MessageBuffer[13]);
+	  printf("   Network: %x%x%x-%x%x\n", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
+	  break;
+
+	case 0x64:
+	  printf("Message: Mobile phone identification received:\n");
+
+	  printf("   Serial No. %s\n", MessageBuffer+4);
+
+	  /* What is this? My phone reports: NSE-3 */
+	  printf("   %s\n", MessageBuffer+25);
+
+	  /* What is this? My phone reports: 0501505 */
+	  printf("   %s\n", MessageBuffer+31);
+
+	  /* What is this? My phone reports: 4200. This could be the internetional number of the country - I;m in the Czech republic - our code is +420*/
+	  printf("   %s\n", MessageBuffer+39);
+
+	  printf("   Firmware: %s\n", MessageBuffer+44);
+
+	  /* These bytes are probably the source of the "Accessory not connected"
+         messages on the phone when trying to emulate NCDS... I hope... */
+   	  printf("   Magic byte1: %02x\n", MessageBuffer[50]);
+   	  printf("   Magic byte2: %02x\n", MessageBuffer[51]);
+   	  printf("   Magic byte3: %02x\n", MessageBuffer[52]);
+   	  printf("   Magic byte4: %02x\n", MessageBuffer[53]);
+
+	  break;
+	  
+
+	case 0x7f:
+	  printf(_("Message: Received Ack of type %02x, seq: %2x\n"), MessageBuffer[0], MessageBuffer[1]);
+	  break;
+
+	case 0xd0:
+	  printf(_("Message: The phone is powered on - seq 1.\n"));
+	  FB61_RX_DisplayMessage();
+	  break;
+
+	case 0xf4:
+	  printf(_("Message: The phone is powered on - seq 2.\n"));
+	  FB61_RX_DisplayMessage();
+	  break;
+
+	default:
+	  FB61_RX_DisplayMessage();
+
+}
+
+	return FB61_RX_Sync;
+}
+
+enum FB61_RX_States         RX_State;
+
+	/* RX_State machine for receive handling.  Called once for each
+	   character received from the phone/phone. */
+void	FB61_RX_StateMachine(char rx_byte)
+{
+
+	switch (RX_State) {
+	
+					/* Messages from the phone start with an 0x1e.  We
+					   use this to "synchronise" with the incoming data
+					   stream. */		
+		case FB61_RX_Sync:
+				if (rx_byte == FB61_FRAME_ID) {
+					BufferCount = 0;
+					RX_State = FB61_RX_GetDestination;
+				}
+				break;
+
+		case FB61_RX_GetDestination:
+		  MessageDestination=rx_byte;
+		  RX_State = FB61_RX_GetSource;
+		  break;
+
+		case FB61_RX_GetSource:
+		  MessageSource=rx_byte;
+		  RX_State = FB61_RX_GetType;
+		  break;
+
+		case FB61_RX_GetType:
+		  MessageType=rx_byte;
+		  RX_State = FB61_RX_GetUnknown;
+		  break;
+
+		case FB61_RX_GetUnknown:
+		  MessageUnknown=rx_byte;
+		  RX_State = FB61_RX_GetLength;
+		  break;
+		
+		case FB61_RX_GetLength:
+				MessageLength = rx_byte;
+				RX_State = FB61_RX_GetMessage;
+				break;
+
+		case FB61_RX_GetMessage:
+				MessageBuffer[BufferCount] = rx_byte;
+				BufferCount ++;
+
+				/* If this is the last byte, it's the checksum */
+
+				if (BufferCount == MessageLength+(MessageLength%2)+2) {
+
+				  if (MessageType != FB61_FRTYPE_ACK)
+					FB61_TX_SendAck(MessageType, MessageBuffer[MessageLength-1] & 0x0f);
+
+		  FB61_RX_DispatchMessage();
+
+		  RX_State = FB61_RX_Sync;
+		}
+
+					
+				break;
+
+		default:
+	}
+}
+
+	/* FB61_RX_DisplayMessage
+	   Called when a message we don't know about is received so that
+	   the user can see what is going back and forth, and perhaps shed
+	   some more light/explain another message type! */
+	
+void	FB61_RX_DisplayMessage(void)
+{
+	int		count;
+
+	fprintf(stdout, _("Msg Destination: %02x\n"), MessageDestination);
+	fprintf(stdout, _("Msg Source: %02x\n"), MessageSource);
+	fprintf(stdout, _("Msg Type: %02x\n"), MessageType);
+	fprintf(stdout, _("Msg Unknown: %02x\n"), MessageUnknown);
+	fprintf(stdout, _("Msg Len: %02x\nPhone: "), MessageLength);
+
+	for (count = 0; count < MessageLength+(MessageLength%2)+2; count ++) {
+	  if (isprint(MessageBuffer[count]))
+		fprintf(stdout, "[%02x%c]", MessageBuffer[count], MessageBuffer[count]);
+	  else
+		fprintf(stdout, "[%02x ]", MessageBuffer[count]);
 	}
 
+	fprintf(stdout, "\n");
+	fflush(stdout);
 }
 
 	/* Prepares the message header and sends it, prepends the
@@ -327,14 +570,9 @@ int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 	int			count, current=0;
 	unsigned char			checksum;
 
-		/* Check message isn't too long, once the necessary
-		   header and trailer bytes are included. */
-	/* FIXME */
-	if ((message_length + 5) > FB61_MAX_TRANSMIT_LENGTH) {
+	/* FIXME - we should check for the message length ... */
 
-		return (false);
-	}
-		/* Now construct the message header. */
+	/* Now construct the message header. */
 	out_buffer[current++] = FB61_FRAME_ID;	/* Start of message indicator */
 
 	out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
@@ -343,7 +581,7 @@ int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 	out_buffer[current++] = message_type; /* Type */
 
 	out_buffer[current++] = 0; /* Unknown */
-	out_buffer[current++] = message_length; /* Length */
+	out_buffer[current++] = message_length+1; /* Length + 1 for seq. nr*/
 
 		/* Copy in data if any. */	
 	if (message_length != 0) {
@@ -351,8 +589,12 @@ int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 		current+=message_length;
 	}
 
+	out_buffer[current++]=0x40+RequestSequenceNumber;
+
+	RequestSequenceNumber=(RequestSequenceNumber+1) & 0x07;
+
 	/* If the message length is odd we should add pad byte 0x00 */
-	if (message_length % 2)
+	if ( (message_length+1) % 2)
 	  out_buffer[current++]=0x00;
 
 		/* Now calculate checksums over entire message 
@@ -374,6 +616,8 @@ int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 	}
 	out_buffer[current++] = checksum;
 
+	/* Uncoment this to see what is PC sending to the phone
+
 	printf("PC: ");
 
 	for (count = 0; count < current; count++) {
@@ -382,6 +626,8 @@ int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 
 	printf("\n");
 
+	*/
+
 		/* Send it out... */
 	if (write(PortFD, out_buffer, current) != current) {
 		return (false);
@@ -389,14 +635,13 @@ int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 	return (true);
 }
 
-int		FB61_TX_SendAck(u8 message_type) {
+int		FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
-  static sequence=0;
 	u8			out_buffer[FB61_MAX_TRANSMIT_LENGTH + 5];
   int count, current=0;
 	unsigned char			checksum;
 
-	printf("Sending Ack of type %2x\n", message_type);
+	printf("Sending Ack of type %02x, seq: %x\n", message_type, message_seq);
 
   /* Now construct the Ack header. */
     out_buffer[current++] = FB61_FRAME_ID;	/* Start of message indicator */
@@ -409,12 +654,8 @@ int		FB61_TX_SendAck(u8 message_type) {
 	out_buffer[current++] = 0; /* Unknown */
 	out_buffer[current++] = 2; /* Ack is always of 2 bytes */
 
-	out_buffer[current++] = sequence++; /* Sequence number */
-
-	printf("sequence: %x\n", sequence);
-
-	if (sequence == 7)
-	  sequence=0;
+	out_buffer[current++] = message_type; /* Type */
+	out_buffer[current++] = message_seq; /* Sequence number */
 
 		/* Now calculate checksums over entire message 
 		   and append to message. */

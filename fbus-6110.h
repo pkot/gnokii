@@ -16,6 +16,7 @@
 #endif
 
 #define         FB61_MAX_TRANSMIT_LENGTH                        (256)
+#define		FB61_MAX_RECEIVE_LENGTH 			(512)
 
 
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
@@ -38,30 +39,6 @@
 /* Acknowledge of the received frame. */
 #define FB61_FRTYPE_ACK 0x7f
 
-/* This structure will represent each frame on the cable. */
-
-typedef struct {
-
-  u8 ID; /* Frame identification - should always be FB61_FRAME_ID (0x1e) */
-
-  u8 Destination; /* The frame destination */
-  u8 Source; /* The frame source - this should be FB61_DEVICE_PC when sending */
-
-  u8 Type; /* The frame type */
-
-  u8 Unknown1; /* Unknown - this should be MSB of the frame length */
-  u8 Length; /* Length of the frame */
-
-  u8 *Message; /* Message */
-
-  /* The frame checksum */
-
-  u8 CheckSumOdd; /* Checksum of odd bytes */
-  u8 CheckSumEven; /* Checksum of even bytes */
-
-} FB61_Frame;
-
-
 	/* Global variables */
 extern bool					FB61_LinkOK;
 extern GSM_Functions		FB61_Functions;
@@ -73,7 +50,7 @@ GSM_Error	FB61_Initialise(char *port_device, bool enable_monitoring);
 bool		FB61_OpenSerial(void);
 void		FB61_Terminate(void);
 int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer);
-int		FB61_TX_SendAck(u8 message_type);
+int		FB61_TX_SendAck(u8 message_type, u8 message_seq);
 
 GSM_Error	FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location,
 				GSM_PhonebookEntry *entry);
@@ -97,12 +74,23 @@ GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code);
 	   defined. */
 #ifdef	__fbus_6110_c
 
+	/* States for receive code. */
+enum	FB61_RX_States {FB61_RX_Sync,
+			FB61_RX_GetDestination,
+			FB61_RX_GetSource,
+			FB61_RX_GetType,
+			FB61_RX_GetUnknown,
+			FB61_RX_GetLength,
+			FB61_RX_GetMessage};
+
 #define		FB61_BAUDRATE		(B115200)
 
 void		FB61_Terminate(void);
 void		FB61_ThreadLoop(void);
 bool		FB61_OpenSerial(void);
 void		FB61_SigHandler(int status);
+void	FB61_RX_StateMachine(char rx_byte);
+void        FB61_RX_DisplayMessage(void);
 
 	/* Insert code here as required ? */
 

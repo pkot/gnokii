@@ -27,6 +27,7 @@
 	/* Prototypes. */
 void	usage(void);
 void	monitormode(void);
+void	enterpin(void);
 void	getphonebook(char *argv[]);
 void	writephonebook(void);
 void	fbusinit(bool enable_monitoring);
@@ -58,6 +59,11 @@ int	main(int argc, char *argv[])
 		/* Enter monitor mode. */
 	if (strcmp(argv[1], "--monitor") == 0) {
 		monitormode();
+	}
+
+		/* Enter pin. */
+	if (strcmp(argv[1], "--enterpin") == 0) {
+		enterpin();
 	}
 
 		/* Get phonebook command. */
@@ -207,6 +213,25 @@ static void interrupted(int sig)
     signal(sig, SIG_IGN);
     fprintf(stdout, _("Interrupted\n"));
     shutdown = true;
+}
+
+	/* In this mode we get the pin from the keyboard and send it to the
+	   mobile phone */
+
+void	enterpin(void)
+{
+	char *pin=getpass("Enter your PIN: ");
+
+	fbusinit(true);
+
+	sleep(1);
+
+	GSM->EnterPin(pin);
+
+	sleep(2);
+
+	GSM->Terminate();
+	exit(0);
 }
 
 	/* In monitor mode we don't do much, just initialise the fbus code
@@ -423,6 +448,7 @@ void	usage(void)
 	fprintf(stdout, "          --monitor         continually updates phone status to stderr.\n\n");
 	fprintf(stdout, "          --version         displays version and copyright information.\n\n");
 
+	fprintf(stdout, "          --enterpin        send the entered PIN to the phone.\n\n");
 	fprintf(stdout, "          --getphonebook    gets phonebook entries from specified memory type\n");
  	fprintf(stdout, "                            ('int' or 'sim') starting at entry [start] and\n");
 	fprintf(stdout, "                            ending at [end].  Entries are dumped to stdout in\n");
