@@ -1,66 +1,125 @@
+$Id$
 
- Common information:
-	
-	For more install/compilation information see the INSTALL file.
-	
-	(!) Makefiles support make install prefix=<your_directory> 
-	    for package building. You can use it example in for .spec:
-		
-		./configure --prefix=/usr
-		make install prefix=$RPM_BUILD_ROOT/usr
-
-	    (You not need create any dirs - all make make install.)
-
-	    For a installation procedure is used 'make install' or
-	    'make install prefix=', and all outputs from this routine must be 
-	    correct. Please, not make any correction in your package specific 
-	    build system (example use 'cp' in package routines - .spec - 
-	    it is job for Makefiles). Write more different routines for 
-	    instalation is good way to hell...
-	
-	 'make install' not install documentation, because for this use 
-	 any distribution itself routines. If you want install docs via
-	 Makefile you must type 'make install-docs'  
-
- Debian:
-	
-	1/ Add new lines to Debian/changelog and set corect verion in this
-           file.
-
-	2/ Check files: rules, menu, docs
-
-	3/ Well, because gnokii's debian directory is in subdirectory 
-	   'packaging' and it is total non-standard for Debian package 
-	   building system, you must firstly type in top directory:
-
-	   # ln -s packaging/Debian debian	
-  
-	3/ In source type:
-
-	   # debian/rules binary
-	   # debian/rules clean
-
-	4/ Delete symlink
-
-           # rm debian
-
- 
-
- FreeBSD:
-
- 
-
- RedHat:
-
-        Just type:
-	   # rpm -ta gnokii-$VERSION.tar.gz
-	where $VERSION is version of gnokii distribution you have.
+The gnokii Packaging HOWTO
 
 
+PURPOSE
 
- Slackware:
- 
- 
- 
- Win32:
-	
+Read this document if you want to build gnokii binary packages for your
+system or repackage gnokii for a system that is not yet supported.
+
+
+GENERAL POLICY
+
+For more install/compilation information see the INSTALL file.
+
+Makefiles support 'make install prefix=<your_directory>' for package
+building.  For example, in .spec:
+
+	./configure --prefix=/usr
+
+	make install prefix=$RPM_BUILD_ROOT/usr
+
+(You do not need to create any directories - just 'make && make install'.)
+
+For installation procedures use 'make install' or 'make install prefix=',
+and verify that all outputs from the procedure are correct.
+
+Please, DO NOT make any corrections using your package-specific build
+system (for example, using 'cp' in packaging scripts like .spec).
+Installation is a job for Makefiles.  Writing different installation
+procedures for different packaging systems is the road to hell...
+
+The only exception to the above rule is documentation.	'make install'
+does not install documentation - one should use each distributions'
+packaging routines for this job.  If you want to install docs via a
+Makefile use 'make install-docs'.
+
+
+SYSTEM-SPECIFIC INFORMATION
+
+Debian:
+
+1) Add new lines to Debian/changelog and set the correct version number
+in this file.
+
+2) Check the following files:
+
+	rules, menu, docs, *.manpages
+
+3) Since gnokii's debian directory is in the subdirectory 'packaging'
+which is totally non-standard for the Debian package building system,
+you must first 'cd' to the top gnokii directory and type:
+
+	ln -s packaging/Debian debian
+
+4) In the top gnokii directory type:
+
+	debian/rules binary
+
+5) And then clean up:
+
+	debian/rules clean
+
+	rm debian
+
+The .deb packages will appear in the directory ABOVE the top gnokii
+directory.
+
+
+RedHat:
+
+Just type:
+
+	rpm -ta gnokii-$VERSION.tar.gz
+
+where $VERSION is the version of the gnokii distribution that you are
+packaging.
+
+
+Slackware:
+
+1) Create a gnokii directory and put the gnokii tarball there:
+
+	mkdir gnokii
+
+	cp gnokii-X.Y.Z.tar.gz gnokii
+
+2) Extract SlackBuild from the tarball and copy it into the gnokii
+directory, eg.:
+
+	tar xzf gnokii-X.Y.Z.tar.gz
+
+	cp gnokii-X.Y.Z/packaging/Slackware/SlackBuild gnokii
+
+3) Run SlackBuild:
+
+	cd gnokii
+
+	chmod 755 ./SlackBuild ; ./SlackBuild
+
+4) A Slackware package is now located in /tmp/gnokii.tgz.
+
+
+FreeBSD:
+
+
+Win32:
+
+
+DOCUMENT HISTORY
+
+2001-04-20 
+
+Erik Rossen <rossen@freesurf.ch>
+
+* fixing English grammar and spelling errors, but no change of information
+
+* changing to a flatter format for easier editing: sections separated
+by double spacing and only system commands indented with a tab
+
+* file is always treated with GNU 'fmt' with no options
+
+Pawel Kot <pkot@linuxnews.pl>
+
+* Slackware build instructions added
