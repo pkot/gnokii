@@ -16,6 +16,8 @@
       GN_RINGTONE_MAX_NOTES which is 256                (Pawel Kot)
  * AT series updates
     o getnetworkinfo always terminates the result  (BORBELY Zoltan)
+ * smsd updates
+    o libtoolization finished                      (BORBELY Zoltan)
 
 0.5.9
 =====

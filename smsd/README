@@ -185,7 +185,7 @@ autoheader                # only for CVS copies
 cd smsd
 vi Makefile (edit paths in "DB Modules" section)
 make
-make libpq.so OR make libmysql.so OR make libfile.so
+make libpq.la OR make libmysql.la OR make libfile.la
 make install
 
 Note that you can build all of the modules (libpq, libmysql and libfile) but

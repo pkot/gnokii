@@ -1,3 +1,8 @@
+* Wed Jan 22 2004 BORBELY Zoltan <bozo@andrews.hu>
+- libtoolization finished
+- Update README to reflect libtoolization
+
+
 * Sun Jan 04 2004 Pawel Kot <pkot@linuxnews.pl>
 - Update README with some modules clarification
 

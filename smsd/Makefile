@@ -53,19 +53,34 @@ smsd: $(OBJS) $(TOPDIR)/common/libgnokii.la
 # FIXME: detect it in configure
 
 # PostgreSQL support
-libpq.la: smsd.h pq.c
-	$(LIBTOOL) --mode=link $(CC) -o libpq.la $(CFLAGS) -I../include \
-	-I/usr/include/pgsql pq.c $(shell $(GLIBLDLIBS)) -lpq -avoid-version -rpath $(libdir)/smsd
+pq.lo: smsd.h pq.c
+	$(LIBTOOL) --mode=compile $(CC) -o pq.lo $(CFLAGS) $(CPPFLAGS) \
+	-I../include -I/usr/include/pgsql -c pq.c
+
+libpq.la: pq.lo
+	$(LIBTOOL) --mode=link $(CC) -o libpq.la pq.lo \
+	$(shell $(GLIBLDLIBS)) -lpq \
+	-export-dynamic -avoid-version -rpath ${libdir}/smsd
 
 # MySQL support
-libmysql.la: smsd.h mysql.c
-	$(LIBTOOL) --mode=link $(CC) -o libmysql.la $(CFLAGS) -I../include \
-	$(shell mysql_config --cflags) mysql.c $(shell $(GLIBLDLIBS)) $(shell mysql_config --libs)
+mysql.lo: smsd.h mysql.c
+	$(LIBTOOL) --mode=compile $(CC) -o mysql.lo $(CFLAGS) $(CPPFLAGS) \
+	-I../include $(shell mysql_config --cflags) -c mysql.c
+
+libmysql.la: mysql.lo
+	$(LIBTOOL) --mode=link $(CC) -o libmysql.la mysql.lo \
+	$(shell $(GLIBLDLIBS)) $(shell mysql_config --libs) \
+	-export-dynamic -avoid-version -rpath ${libdir}/smsd
 
 # File support
-libfile.la: smsd.h file.c
-	$(LIBTOOL) --mode=link $(CC) -o libfile.so $(CFLAGS) -I../include \
-        file.c $(shell $(GLIBLDLIBS))
+file.lo: smsd.h file.c
+	$(LIBTOOL) --mode=compile $(CC) -o file.lo $(CFLAGS) $(CPPFLAGS) \
+	-I../include -c file.c
+
+libfile.la: file.lo
+	$(LIBTOOL) --mode=link $(CC) -o libfile.la file.lo \
+	$(shell $(GLIBLDLIBS)) \
+	-export-dynamic -avoid-version -rpath ${libdir}/smsd
 
 ### End of DB Modules
 
@@ -83,6 +98,7 @@ install: all
 	for f in lib*.la ; do \
 	$(LIBTOOL) --mode=install $(INSTALL) $$f $(DESTDIR)${libdir}/smsd ; \
 	done
+	$(LIBTOOL) --mode=finish ${libdir}/smsd
 	$(INSTALL) -d $(DESTDIR)$(man8dir)
 	$(INSTALL_DATA) $(SMSD_MAN) $(DESTDIR)$(man8dir)
 
