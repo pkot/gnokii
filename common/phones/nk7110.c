@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.17  2001-11-14 10:48:03  pkot
+  Revision 1.18  2001-11-15 12:04:06  pkot
+  Faster initialization for 6100 series (don't check for dlr3 cable)
+
+  Revision 1.17  2001/11/14 10:48:03  pkot
   6210/7110 debug cleanups
 
   Revision 1.16  2001/11/13 16:12:21  pkot
@@ -234,8 +237,9 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 	while (!connected) {
 		switch (state->Link.ConnectionType) {
 		case GCT_Serial:
+			dprintf("try: %d\n", try);
 			if (try > 1) return GE_NOTSUPPORTED;
-			err = FBUS_Initialise(&(state->Link), state);
+			err = FBUS_Initialise(&(state->Link), state, 1 - try);
 			break;
 		case GCT_Infrared:
 		case GCT_Irda:

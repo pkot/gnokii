@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.11  2001-09-09 21:45:49  machek
+  Revision 1.12  2001-11-15 12:04:05  pkot
+  Faster initialization for 6100 series (don't check for dlr3 cable)
+
+  Revision 1.11  2001/09/09 21:45:49  machek
   Cleanups from Ladislav Michl <ladis@psi.cz>:
 
   *) do *not* internationalize debug messages
@@ -525,14 +528,12 @@ int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
 /* newlink is actually part of state - but the link code should not anything about state */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
+GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type)
 {
 	unsigned char init_char = 0x55;
 	unsigned char count;
-	static int try = 0;
 
-	try++;
-	if (try > 2) return GE_DEVICEOPENFAILED;
+	if (type > 2) return GE_DEVICEOPENFAILED;
 	/* 'Copy in' the global structures */
 	glink = newlink;
 	statemachine = state;
@@ -554,7 +555,7 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	} else {		/* ConnectionType == GCT_Serial */
                 /* FBUS_OpenSerial(0) - try dau-9p
                  * FBUS_OpenSerial(n != 0) - try dlr-3p */
-		if (!FBUS_OpenSerial(2 - try))
+		if (!FBUS_OpenSerial(type))
 			return GE_DEVICEOPENFAILED;
 	}
 

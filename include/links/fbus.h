@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.4  2001-03-21 23:36:08  chris
+  Revision 1.5  2001-11-15 12:04:06  pkot
+  Faster initialization for 6100 series (don't check for dlr3 cable)
+
+  Revision 1.4  2001/03/21 23:36:08  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -132,8 +135,7 @@ typedef struct{
 	u8 RequestSequenceNumber;
 } FBUS_Link;
 
-GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
-
+GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type);
 
 
 #ifdef __links_fbus_c  /* Prototype functions for fbus-generic.c only */

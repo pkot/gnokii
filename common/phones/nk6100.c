@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.3  2001-08-17 00:01:53  pkot
+  Revision 1.4  2001-11-15 12:04:06  pkot
+  Faster initialization for 6100 series (don't check for dlr3 cable)
+
+  Revision 1.3  2001/08/17 00:01:53  pkot
   Fixed a typo in 6100.c (me)
 
   Revision 1.2  2001/08/09 12:34:34  pkot
@@ -118,40 +121,37 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	GSM_Data data;
 	char model[10];
 	GSM_Error err;
-	int try = 0, connected = 0;
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_6100, sizeof(GSM_Phone));
 
-	while (!connected) {
-		switch (state->Link.ConnectionType) {
-		case GCT_Serial:
-			if (try > 1) return GE_NOTSUPPORTED;
-			err = FBUS_Initialise(&(state->Link), state);
-			break;
-		case GCT_Infrared:
-			if (try > 0) return GE_NOTSUPPORTED;
-			err = PHONET_Initialise(&(state->Link), state);
-			break;
-		default:
-			return GE_NOTSUPPORTED;
-			break;
-		}
-
-		if (err != GE_NONE) {
-			dprintf("Error in link initialisation\n");
-			try++;
-			continue;
-		}
-
-		SM_Initialise(state);
-
-		/* Now test the link and get the model */
-		GSM_DataClear(&data);
-		data.Model = model;
-		if (state->Phone.Functions(GOP_GetModel, &data, state) != GE_NONE) try++;
-		else connected = 1;
+	dprintf("bt 0\n");
+	switch (state->Link.ConnectionType) {
+	case GCT_Serial:
+		dprintf("bt 1\n");
+		err = FBUS_Initialise(&(state->Link), state, 0);
+		break;
+	case GCT_Infrared:
+		dprintf("bt 2\n");
+		err = PHONET_Initialise(&(state->Link), state);
+		break;
+	default:
+		dprintf("bt 3\n");
+		return GE_NOTSUPPORTED;
+		break;
 	}
+
+	if (err != GE_NONE) {
+		dprintf("Error in link initialisation\n");
+		return GE_NOTSUPPORTED;
+	}
+	
+	SM_Initialise(state);
+
+	/* Now test the link and get the model */
+	GSM_DataClear(&data);
+	data.Model = model;
+	if (state->Phone.Functions(GOP_GetModel, &data, state) != GE_NONE) return GE_NOTSUPPORTED;
   	return GE_NONE;
 }
 
