@@ -26,6 +26,8 @@
                                                          Pawel Kot)
  * AT series updates
     o support for make call command                    (Igor Popik)
+    o set data->phonebook_entry->empty when the phonebook location
+      is empty                                         (Igor Popik)
  * gnokii changes
     o handle argument correctness to getphonebook       (Pawel Kot)
     o gnokii --help didn't show the real --writephonbook usage

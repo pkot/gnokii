@@ -778,6 +778,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 			*(data->phonebook_entry->name) = '\0';
 			data->phonebook_entry->caller_group = 0;
 			data->phonebook_entry->subentries_count = 0;
+			data->phonebook_entry->empty = true;
 		}
 		return GN_ERR_NONE;
 	}
