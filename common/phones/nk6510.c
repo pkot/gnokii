@@ -667,7 +667,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		/* FIXME: Don't count messages in fixed locations together with other */
 		data->SMSStatus->Number = ((message[10] << 8) | message[11]) +
 					  ((message[14] << 8) | message[15]) +
-					  (data->SMSFolder->number);
+					  (data->SMSFolder->Number);
 		data->SMSStatus->Unread = ((message[12] << 8) | message[13]) +
 					  ((message[16] << 8) | message[17]);
 		break;
@@ -677,12 +677,12 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Message: SMS Folder status received\n" );
 		if (!data->SMSFolder) return GE_INTERNALERROR;
 		memset(data->SMSFolder, 0, sizeof(SMS_Folder));
-		data->SMSFolder->number = (message[6] << 8) | message[7];
-		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->number);
+		data->SMSFolder->Number = (message[6] << 8) | message[7];
+		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->Number);
 		dprintf("Message: IDs of Entries : ");
-		for (i = 0; i < data->SMSFolder->number; i++) {
-			data->SMSFolder->locations[i] = (message[(i * 2) + 8] << 8) | message[(i * 2) + 9];
-			dprintf("%d, ", data->SMSFolder->locations[i]);
+		for (i = 0; i < data->SMSFolder->Number; i++) {
+			data->SMSFolder->Locations[i] = (message[(i * 2) + 8] << 8) | message[(i * 2) + 9];
+			dprintf("%d, ", data->SMSFolder->Locations[i]);
 		}
 		dprintf("\n");
 		break;
@@ -703,10 +703,10 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		if (!data->SMSFolderList) return GE_INTERNALERROR;
 		memset(data->SMSFolderList, 0, sizeof(SMS_FolderList));
 
-		data->SMSFolderList->number = message[5];
-		dprintf("Message: %d SMS Folders received:\n", data->SMSFolderList->number);
+		data->SMSFolderList->Number = message[5];
+		dprintf("Message: %d SMS Folders received:\n", data->SMSFolderList->Number);
 
-		for (j = 0; j < data->SMSFolderList->number; j++) {
+		for (j = 0; j < data->SMSFolderList->Number; j++) {
 			int len;
 			strcpy(data->SMSFolderList->Folder[j].Name, "               ");
 
@@ -808,8 +808,9 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	    ((data->SMSFolder) &&
 	     (data->RawSMS->MemoryType != data->SMSFolder->FolderID))) {
 		if ((error = P6510_GetSMSFolders(data, state)) != GE_NONE) return error;
-		if ((GetMemoryType(data->RawSMS->MemoryType) >
-		     data->SMSFolderList->FolderID[data->SMSFolderList->number - 1]) ||
+
+		if ((GetMemoryType(data->RawSMS->MemoryType) > 
+		     data->SMSFolderList->FolderID[data->SMSFolderList->Number - 1]) ||
 		    (data->RawSMS->MemoryType < 12))
 			return GE_INVALIDMEMORYTYPE;
 		data->SMSFolder->FolderID = data->RawSMS->MemoryType;

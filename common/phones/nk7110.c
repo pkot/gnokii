@@ -761,7 +761,7 @@ static inline unsigned int getdata(SMS_MessageType T, unsigned int a,
  */
 static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	int i, j, T, len = 47;
+	unsigned int i, j, T, offset = 47;
 	int nextfolder = 0x10;
 
 	/* Message suptype */
@@ -794,8 +794,9 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		/* This is ugly hack. But the picture message format in 6210
 		 * is the real pain in the ass. */
 		if (T == SMS_Picture && (message[47] == 0x48) && (message[48] == 0x1c))
-			len = 303;
-		data->RawSMS->Length           = message[getdata(T, 24, 25, 0, len)];
+			/* 47 (User Data offset) + 256 (72 * 28 / 8 + 4) = 303 */
+			offset = 303;
+		data->RawSMS->Length           = message[getdata(T, 24, 25, 0, offset)];
 		if (T == SMS_Picture) data->RawSMS->Length += 256;
 		data->RawSMS->UDHIndicator     = message[getdata(T, 21, 22, 0, 18)];
 		memcpy(data->RawSMS->UserData,      message + getdata(T, 44, 45, 0, 47), data->RawSMS->Length);
@@ -813,8 +814,8 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		 */
 		if (data->SMSFolder) {
 			bool found = false;
-			for (i = 0; i < data->SMSFolder->number; i++) {
-				if (data->RawSMS->Number == data->SMSFolder->locations[i])
+			for (i = 0; i < data->SMSFolder->Number; i++) {
+				if (data->RawSMS->Number == data->SMSFolder->Locations[i])
 					found = true;
 			}
 			if (!found && data->RawSMS->Status != SMS_Unread) {
@@ -860,7 +861,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		/* FIXME: Don't count messages in fixed locations together with other */
 		data->SMSStatus->Number = ((message[10] << 8) | message[11]) +
 					  ((message[14] << 8) | message[15]) +
-					  (data->SMSFolder->number);
+					  (data->SMSFolder->Number);
 		data->SMSStatus->Unread = ((message[12] << 8) | message[13]) +
 					  ((message[16] << 8) | message[17]);
 		break;
@@ -872,14 +873,13 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		memset(data->SMSFolder, 0, sizeof(SMS_Folder));
 
 		data->SMSFolder->FolderID = i;
-		data->SMSFolder->number = (message[4] << 8) | message[5];
-		
-/*		if (data->SMSStatus) data->SMSStatus->Number = data->SMSFolder->number; */
-		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->number);
+		data->SMSFolder->Number = (message[4] << 8) | message[5];
+
+		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->Number);
 		dprintf("Message: IDs of Entries : ");
-		for (i = 0; i < data->SMSFolder->number; i++) {
-			data->SMSFolder->locations[i] = (message[(i * 2) + 6] << 8) | message[(i * 2) + 7];
-			dprintf("%d, ", data->SMSFolder->locations[i]);
+		for (i = 0; i < data->SMSFolder->Number; i++) {
+			data->SMSFolder->Locations[i] = (message[(i * 2) + 6] << 8) | message[(i * 2) + 7];
+			dprintf("%d, ", data->SMSFolder->Locations[i]);
 		}
 		dprintf("\n");
 		break;
@@ -891,7 +891,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Message: %d SMS Folders received:\n", message[4]);
 
 		strcpy(data->SMSFolderList->Folder[1].Name, "               ");
-		data->SMSFolderList->number = message[4];
+		data->SMSFolderList->Number = message[4];
 
 		for (j = 0; j < message[4]; j++) {
 			int len;
@@ -965,20 +965,20 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	     (data->RawSMS->MemoryType != data->SMSFolder->FolderID))) {
 		if ((error = P7110_GetSMSFolders(data, state)) != GE_NONE) return error;
 		if ((GetMemoryType(data->RawSMS->MemoryType) >
-		     data->SMSFolderList->FolderID[data->SMSFolderList->number - 1]) ||
+		     data->SMSFolderList->FolderID[data->SMSFolderList->Number - 1]) ||
 		    (data->RawSMS->MemoryType < 12))
 			return GE_INVALIDMEMORYTYPE;
 		data->SMSFolder->FolderID = data->RawSMS->MemoryType;
 		if ((error = P7110_GetSMSFolderStatus(data, state)) != GE_NONE) return error;
 	}
 
-	if (data->SMSFolder->number + 2 < data->RawSMS->Number) {
+	if (data->SMSFolder->Number + 2 < data->RawSMS->Number) {
 		if (data->RawSMS->Number > MAX_SMS_MESSAGES)
 			return GE_INVALIDSMSLOCATION;
 		else
 			return GE_EMPTYSMSLOCATION;
 	} else {
-		data->RawSMS->Number = data->SMSFolder->locations[data->RawSMS->Number - 1];
+		data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
 	}
 
 	return P7110_GetSMSnoValidate(data, state);

@@ -455,8 +455,8 @@ typedef struct {
 typedef struct {
 	char Name[MAX_SMS_FOLDER_NAME_LENGTH];    /* Name for SMS folder. */
 	bool SMSData;                             /* if folder contains sender, SMSC number and sending date */
-	unsigned int locations[MAX_SMS_MESSAGES]; /* locations of SMS messages in that folder (6210 specific) */
-	unsigned int number;                      /* number of SMS messages in that folder*/
+	unsigned int Locations[MAX_SMS_MESSAGES]; /* locations of SMS messages in that folder (6210 specific) */
+	unsigned int Number;                      /* number of SMS messages in that folder*/
 	unsigned int FolderID;                    /* ID od fthe current folder */
 } SMS_Folder;
 
@@ -464,7 +464,7 @@ typedef struct {
 	SMS_Folder Folder[MAX_SMS_FOLDERS];
 	unsigned int FolderID[MAX_SMS_FOLDERS]; /* ID specific for this folder and phone.
 	                                         * Used in internal functions. Do not use it. */
-	unsigned int number;                    /* number of SMS folders */
+	unsigned int Number;                    /* number of SMS folders */
 } SMS_FolderList;
 
 /*** CELL BROADCAST ***/

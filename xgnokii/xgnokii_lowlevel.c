@@ -116,8 +116,8 @@ GSM_Error GUI_InitSMSFolders(void)
 
 		if ((error = SM_Functions(GOP_GetSMSFolders, &gdat, &statemachine)) != GE_NONE)
 			return error;
-		foldercount = gdat.SMSFolderList->number;
-		for (i = 0; i < gdat.SMSFolderList->number; i++) {
+		foldercount = gdat.SMSFolderList->Number;
+		for (i = 0; i < gdat.SMSFolderList->Number; i++) {
 			strcpy(folders[i], gdat.SMSFolderList->Folder[i].Name);
 		}
 	} else {

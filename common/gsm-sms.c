@@ -789,15 +789,15 @@ GSM_Error GetReadMessages(GSM_Data *data, SMS_Folder folder)
 
 	if (!data->MessagesList || !data->FolderStats) return GE_INTERNALERROR;
 
-	for (i = 0; i < folder.number; i++) {		/* cycle through all messages in phone */
+	for (i = 0; i < folder.Number; i++) {		/* cycle through all messages in phone */
 		found = 0;
 		for (j = 0; j < data->FolderStats[folder.FolderID]->Used; j++) {		/* and compare them to those alread in list */
-			if (data->SMSFolder->locations[i] == data->MessagesList[j][folder.FolderID]->Location) found = 1;
+			if (data->SMSFolder->Locations[i] == data->MessagesList[j][folder.FolderID]->Location) found = 1;
 		}
 		if (!found) {
 			dprintf("Found new (read) message. Will store it at #%i!\n", data->FolderStats[folder.FolderID]->Used);
-			dprintf("%i\n", folder.locations[i]);
-			data->MessagesList[data->FolderStats[folder.FolderID]->Used][folder.FolderID]->Location = folder.locations[i];
+			dprintf("%i\n", folder.Locations[i]);
+			data->MessagesList[data->FolderStats[folder.FolderID]->Used][folder.FolderID]->Location = folder.Locations[i];
 			data->MessagesList[data->FolderStats[folder.FolderID]->Used][folder.FolderID]->Type = SMS_New;
 			data->FolderStats[folder.FolderID]->Used++;
 			data->FolderStats[folder.FolderID]->Changed++;
@@ -822,8 +822,8 @@ GSM_Error GetUnreadMessages(GSM_Data *data, GSM_Statemachine *state, SMS_Folder 
 	for (i = 0; i < data->FolderStats[current_folder]->Used; i++) {		/* cycle through all saved position */
 		if ((data->MessagesList[i][current_folder]->Type == SMS_NotRead) ||
 		    (data->MessagesList[i][current_folder]->Type == SMS_NotReadHandled)) {	/* add already found new SMS to SMSFolder */
-			folder.locations[folder.number] = data->MessagesList[i][current_folder]->Location;
-			folder.number++;
+			folder.Locations[folder.Number] = data->MessagesList[i][current_folder]->Location;
+			folder.Number++;
 			previous_unread++;
 		}
 	}
@@ -833,11 +833,11 @@ GSM_Error GetUnreadMessages(GSM_Data *data, GSM_Statemachine *state, SMS_Folder 
 		return GE_NONE;
 	}
 	dprintf("GetUnreadMessages: sorting... previous unread: %i\n", previous_unread);
-	sort((int *)folder.locations, folder.number);
+	sort((int *)folder.Locations, folder.Number);
 
 	dprintf("GetUnreadMessages: sorting finished! Trying to get %i unread mails\n",dummy);
 	for (i = 0; i < dummy; i++) {
-		error = FindUnreadSMS(data, state, &last, folder.locations, folder.number);
+		error = FindUnreadSMS(data, state, &last, folder.Locations, folder.Number);
 		if (error == GE_NONE) {
 			dprintf("Found new (unread) message!\n");
 			data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Location = data->RawSMS->Number;
@@ -857,8 +857,8 @@ GSM_Error GetDeletedMessages(GSM_Data *data, SMS_Folder folder)
 	for (i = 0; i < data->FolderStats[folder.FolderID]->Used; i++) {		/* for all previously found locations in folder */
 		found = 0;
 
-		for (j = 0; j < folder.number; j++) {	/* see if there is a corresponding message in phone */
-			if (data->MessagesList[i][folder.FolderID]->Location == folder.locations[j]) found = 1;
+		for (j = 0; j < folder.Number; j++) {	/* see if there is a corresponding message in phone */
+			if (data->MessagesList[i][folder.FolderID]->Location == folder.Locations[j]) found = 1;
 		}
 		if ((found == 0) && (data->MessagesList[i][folder.FolderID]->Type == SMS_Old)) {	/* we have found a deleted message */
 			dprintf("found a deleted message!!!! i: %i, loc: %i, MT: %i \n",
@@ -880,8 +880,8 @@ GSM_Error VerifyMessagesStatus(GSM_Data *data, SMS_Folder folder)
 		found = 0;
 		if ((data->MessagesList[i][folder.FolderID]->Type == SMS_NotRead) ||	/* if it is a unread one, i.e. not in folderstatus */
 				(data->MessagesList[i][folder.FolderID]->Type == SMS_NotReadHandled)) {
-			for (j = 0; j < folder.number; j++) {
-				if (data->MessagesList[i][folder.FolderID]->Location == folder.locations[j]) {
+			for (j = 0; j < folder.Number; j++) {
+				if (data->MessagesList[i][folder.FolderID]->Location == folder.Locations[j]) {
 					/* We have a found a formerly unread message which has been read in the meantime */
 					dprintf("Found a formerly unread message which has been read in the meantime: loc: %i\n",
 							data->MessagesList[i][folder.FolderID]->Location);
@@ -922,7 +922,7 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 	data->SMSFolderList = &SMSFolderList;
 	if ((error = SM_Functions(GOP_GetSMSFolders, data, state)) != GE_NONE) return error;
 
-	data->SMSStatus->NumberOfFolders = data->SMSFolderList->number;
+	data->SMSStatus->NumberOfFolders = data->SMSFolderList->Number;
 	memcpy(&tmp_list, data->SMSFolderList, sizeof(SMS_FolderList));	/* We need it because data->SMSFolderlist can get garbled */
 
 	for (i = 0; i < data->SMSStatus->NumberOfFolders; i++) {
@@ -941,7 +941,7 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 			if ((error = GetUnreadMessages(data, state, tmp_folder)) != GE_NONE) return error;
 		}
 
-		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->SMSFolder->number, i);
+		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->SMSFolder->Number, i);
 		if ((error = GetReadMessages(data, tmp_folder)) != GE_NONE) return error;
 
 		dprintf("GetFolderChanges: Getting deleted messages for folder #%i\n", i);
