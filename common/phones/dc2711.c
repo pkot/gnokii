@@ -23,199 +23,89 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright 2001 Pavel Machek <pavel@ucw.cz>
+  Copyright 2002 Ladislav Michl <ladis@linux-mips.org>
 
-  This file provides functions specific to the dancall 2711.
+  This file provides functions specific to the Dancall 2711.
   See README for more details on supported mobile phones.
 
 */
 
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-statemachine.h"
 #include "phones/generic.h"
-#include "links/cbus.h"
+#include "phones/atgen.h"
+#include "links/atbus.h"
 
-/* Mobile phone information */
-
-static GSM_Link link;
-static GSM_IncomingFunctionType D2711_IncomingFunctions[];
-
-#define INFO \
-{ \
-	"dancall|2711|2713",	/* Supported models */ \
-	7,			/* Max RF Level */ \
-	0,			/* Min RF Level */ \
-	GRF_Percentage,		/* RF level units */ \
-	7,			/* Max Battery Level */ \
-	0,			/* Min Battery Level */ \
-	GBU_Percentage,		/* Battery level units */ \
-	0,			/* Have date/time support */ \
-	0,			/* Alarm supports time only */ \
-	1,			/* Alarms available - FIXME */ \
-	60, 96,			/* Startup logo size */ \
-	21, 78,			/* Op logo size */ \
-	14, 72			/* Caller logo size */ \
-}
-
-GSM_Information D2711_Information = INFO;
-
-
-GSM_Phone phone_dancall_2711 = {
-	D2711_IncomingFunctions,
-	PGEN_IncomingDefault,
-	INFO,
-	NULL
-};
-
-static void Terminate()
+static gn_error GetCharset(gn_data *data, struct gn_statemachine *state)
 {
-	return;
-};
-
-/* ----------------------------------------------------------------------------------- */
-
-static gn_error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
-{
-	printf("[ack]");
+	AT_DRVINST(state)->charset = AT_CHAR_GSM;
+	strcpy(data->model, "GSM");
 	return GN_ERR_NONE;
 }
 
-extern int seen_okay;
-extern char reply_buf[];
-
-static char *Request(char *c)
+static gn_error SetCharset(gn_data *data, struct gn_statemachine *state)
 {
-	link.SendMessage(strlen(c), 0, c);
-	while(!seen_okay)
-		link.Loop(NULL);
-	return reply_buf;
-}
-
-/* ----------------------------------- SMS stuff ------------------------------------- */
-
-
-#if 0
-gn_error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
-{
-	gn_error test = GN_ERR_NONE;
-	char writecmd[128];
-	char *s, *t;
-
-	// Set memory
-	m->MemoryType = GMT_SM;     // Type of memory message is stored in.
-	// Send get request
-	sprintf(writecmd, "AT+CMGR=%d\r", m->Location);
-	s = Request(writecmd);
-	if (!s)
-		return GN_ERR_BUSY;
-	t = strchr(s, '\n')+1;
-	if (!strncmp(s, "+CMS ERROR: 321", 15))
-		return GN_ERR_EMPTYSMSLOCATION;
-	if (!strncmp(s, "+CMS ERROR: ", 11))
-		return GN_ERR_INTERNALERROR;
-
-	printf("Got %s [%s] as reply for cmgr\n", s, t);
-	{
-		m->Time.Year=0;
-		m->Time.Month=0;
-		m->Time.Day=0;
-		m->Time.Hour=0;
-		m->Time.Minute=0;
-		m->Time.Second=0;
-		m->Time.Timezone=0;
-	}
-	memset(m->UserData[0].u.Text, 0, 161);
-	strncpy(m->UserData[0].u.Text, (void *) t, 161);
-	m->Length = strlen(t);
-	strcpy(m->MessageCenter.Number, "(unknown)");
-	strcpy(m->MessageCenter.Name, "(unknown)");
-	m->MessageCenter.No = 0;
-	strcpy(m->Sender, "(sender unknown)");
-	m->UDHType = GSM_NoUDH;
-	return test;
-}
-
-
-gn_error ATGSM_DeleteSMSMessage(GSM_SMSMessage * message)
-{
-	char writecmd[128];
-
-	sprintf(writecmd, "AT+CMGD=%d\r", message->Location);
-
-	Request(writecmd);
 	return GN_ERR_NONE;
 }
 
-
-gn_error ATGSM_SendSMSMessage(GSM_SMSMessage * SMS, int size)
+static gn_error GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 {
-	return  GN_ERR_NOTIMPLEMENTED);
+	if (sm_message_send(18, GN_OP_GetSMSStatus, "AT+CPMS=\"SM\",\"SM\"\r", state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_GetSMSStatus, data, state);
 }
-#endif
 
-/* ----------------------------------------------------------------------------------- */
-
-static gn_error Initialise(GSM_Statemachine *state)
+static gn_error ReplyGetSMSStatus(int type, unsigned char *buffer, int length,
+				  gn_data *data, struct gn_statemachine *state)
 {
-	/* char model[10]; */
+	int i, j, k, l;
 
-	memcpy(&(state->Phone), &phone_dancall_2711, sizeof(GSM_Phone));
+	if (buffer[0] != GN_AT_OK)
+		return GN_ERR_FAILED;
+	if (sscanf(buffer + 1, "+CPMS: \"SM\",%d,%d,\"SM\",%d,%d",
+		   &i, &j, &k, &l) != 4)
+		return GN_ERR_FAILED;
+	data->sms_status->unread = i;
+	data->sms_status->number = k;
+	return GN_ERR_NONE;
+}
 
-	fprintf(stderr, "Initializing dancall...\n");
-	switch (state->Link.ConnectionType) {
-	case GCT_Serial:
-		CBUS_Initialise(state);
-		break;
-	default:
-		return GN_ERR_NOTSUPPORTED;
-		break;
-	}
-	sendat("AT+CPMS=\"SM\",\"SM\"\r");
-	printf("Waiting spurious...\n");
-	if (strncmp(reply_buf, "+CPMS", 5)) {
-		while (strncmp(reply_buf, "+CPMS", 5))
-			link.Loop(NULL);
-		seen_okay = 0;
-		printf("Waiting OKAY\n");
-		while (!seen_okay)
-			link.Loop(NULL);
-		printf("Link UP\n");
-	}
+/*
+ * FIXME: SMSs are not ready for text mode :-(
+ * 
+ * message looks like this one (stupid and lying advertisment by Eurotel):
+ * +CMGR: "REC READ","999102",,"02/12/20,10:17:57+40"<cr><lf>Prejeme Vam vesele Vanoce a stastny novy rok 2003. I v pristim roce muzete ocekavat spoustu zajimavych nabidek a prekvapeni od Go Clubu.<cr><lf>
+*/
+static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
+			    gn_data *data, struct gn_statemachine *state)
+{
+	if (buffer[0] != GN_AT_OK)
+		return GN_ERR_FAILED;
+	
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+
+	data->raw_sms->time[0] = 0;
+	data->raw_sms->smsc_time[0] = 0;
+	strncpy(data->raw_sms->user_data, buffer, GN_SMS_LONG_MAX_LENGTH);
+	data->raw_sms->length = 161;
 
 	return GN_ERR_NONE;
 }
 
-#if 0
-static gn_error
-GetSMSStatus(GSM_SMSStatus *Status)
+static gn_error Unsupported(gn_data *data, struct gn_statemachine *state)
 {
-	int i,j,k,l;
-	char *message = Request("AT+CPMS=\"SM\",\"SM\"\r");
-	if (sscanf(message, "+CPMS: \"SM\",%d,%d,\"SM\",%d,%d", &i, &j, &k, &l)!=4)
-		return GN_ERR_BUSY;
-	Status->UnRead = i;
-	Status->Number = k;
-	return GN_ERR_NONE;
+	return GN_ERR_NOTSUPPORTED;
 }
-#endif
 
-/* Here we initialise model specific functions called by 'gnokii'. */
-/* This too needs fixing .. perhaps pass the link a 'request' of certain */
-/* type and the link then searches the phone functions.... */
-
-static GSM_IncomingFunctionType D2711_IncomingFunctions[] = {
-	{ 0, Reply },
-	{ 0, Reply },
-	{ 0, Reply },
-	{ 0, Reply },
-	{ 0, Reply },
-	{ 0, Reply },
-	{ 0, Reply },
-	{ 0, Reply },
-	{ 0, Reply },
-	{ 0, NULL }
-};
+void dc2711_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
+{
+	at_insert_send_function(GN_OP_AT_GetCharset, GetCharset, state);
+	at_insert_send_function(GN_OP_AT_SetCharset, SetCharset, state);
+	at_insert_send_function(GN_OP_GetSMSStatus, GetSMSStatus, state);
+	at_insert_recv_function(GN_OP_GetSMSStatus, ReplyGetSMSStatus, state);
+	at_insert_recv_function(GN_OP_GetSMS, ReplyGetSMS, state);
+}

@@ -38,5 +38,6 @@
 #include "gsm-statemachine.h"
 
 gn_error link_terminate(struct gn_statemachine *state);
+void at_dprintf(char *prefix, char *buf, int len);
 
 #endif

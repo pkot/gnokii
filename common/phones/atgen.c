@@ -42,10 +42,9 @@
 #include "phones/ateric.h"
 #include "phones/atnok.h"
 #include "phones/atsie.h"
+#include "phones/dc2711.h"
 #include "links/atbus.h"
-#ifndef WIN32
-#  include "links/cbus.h"
-#endif
+#include "links/cbus.h"
 
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state);
 static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
@@ -1221,6 +1220,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	/* Dancall is crap and not real AT phone */
 	if (!strcmp(setupdata->model, "dancall")) {
 		data.manufacturer = "dancall";
+		dc2711_init(model, setupdata->model, state);
 		dprintf("Dancall initialisation completed\n");
 		goto out;
 	}

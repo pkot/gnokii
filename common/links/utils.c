@@ -38,7 +38,6 @@
 #include "links/utils.h"
 #include "device.h"
 
-
 gn_error link_terminate(struct gn_statemachine *state)
 {
 	/* device_close(&(state->Device)); */
@@ -48,4 +47,37 @@ gn_error link_terminate(struct gn_statemachine *state)
 	}
 	device_close(state);
 	return GN_ERR_NONE; /* FIXME */
+}
+
+void at_dprintf(char *prefix, char *buf, int len)
+{
+#ifdef DEBUG
+	int in = 0, out = 0;
+	char *pos = prefix;
+	char debug_buf[1024];
+
+	while (*pos)
+		debug_buf[out++] = *pos++;
+	debug_buf[out++] ='[';
+	while ((in < len) && (out < 1016)) {
+		if (buf[in] == '\n') {
+			sprintf(debug_buf + out,"<lf>");
+			in++;
+			out += 4;
+		} else if (buf[in] == '\r') {
+			sprintf(debug_buf + out,"<cr>");
+			in++;
+			out += 4;
+		} else if (buf[in] < 32) {
+			debug_buf[out++] = '^';
+			debug_buf[out++] = buf[in++] + 64;
+		} else {
+			debug_buf[out++] = buf[in++];
+		}
+	}
+	debug_buf[out++] =']';
+	debug_buf[out++] ='\n';
+	debug_buf[out] ='\0';
+	fprintf(stderr, debug_buf);
+#endif
 }

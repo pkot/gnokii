@@ -21,14 +21,15 @@ OBJS =	generic.o \
 	nokia.o \
 	nk7110.o \
 	nk6510.o \
+	nk6160.o \
 	nk6100.o \
 	atgen.o \
 	atbosch.o \
 	ateric.o \
 	atnok.o \
 	atsie.o \
-	fake.o \
-	nk6160.o
+	dc2711.o \
+	fake.o
 
 #	nk3110.o \
 #	nk2110.o \

@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright 2002 Ladislav Michl <ladis@psi.cz>
+  Copyright (C) 2002 Ladislav Michl <ladis@linux-mips.org>
 
   This file provides functions specific to at commands on ericsson
   phones. See README for more details on supported mobile phones.
