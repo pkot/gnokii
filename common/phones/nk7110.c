@@ -92,7 +92,6 @@ static gn_error P7110_GetPictureList(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 
@@ -239,7 +238,13 @@ static gn_error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachi
 	case GOP_CallDivert:
 		return PNOK_CallDivert(data, state);
 	case GOP_NetMonitor:
-		return P7110_NetMonitor(data, state);
+		return PNOK_netmonitor(data, state);
+	case GOP_MakeCall:
+		return PNOK_make_call(data, state);
+	case GOP_AnswerCall:
+		return PNOK_answer_call(data, state);
+	case GOP_CancelCall:
+		return PNOK_cancel_call(data, state);
 	case GOP_GetSecurityCode:
 		return P7110_GetSecurityCode(data, state);
 	case GOP_GetSMSFolders:
@@ -1957,43 +1962,12 @@ static gn_error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 /*****************************/
 static gn_error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
-	if (!data || !data->NetMonitor) return GN_ERR_INTERNALERROR;
 	switch(message[2]) {
-	case P7110_SUBSEC_ENABLE_EXTENDED_CMDS:
-		dprintf("Extended commands enabled\n");
-		break;
-	case P7110_SUBSEC_NETMONITOR:
-		switch(message[3]) {
-		case 0x00:
-			dprintf("Message: Netmonitor correctly set.\n");
-			break;
-		default:
-			dprintf("Message: Netmonitor menu %d received:\n", message[3]);
-			dprintf("%s\n", message + 5);
-			snprintf(data->NetMonitor->Screen, sizeof(data->NetMonitor->Screen), "%s", message + 5);
-			break;
-		}
-		break;
 	default:
 		dprintf("Unknown security command\n");
-		break;
+		return PNOK_IncomingSecurity(messagetype, message, length, data, state);
 	}
 	return GN_ERR_NONE;
-}
-
-static gn_error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req0[] = {0x00, 0x01,
-				P7110_SUBSEC_ENABLE_EXTENDED_CMDS, 0x01};
-	unsigned char req[] = {0x00, 0x01, 
-				P7110_SUBSEC_NETMONITOR, 0x01};
-	gn_error error = GN_ERR_NONE;
-
-	req[3] = data->NetMonitor->Field;
-
-	if (SM_SendMessage(state, 4, P7110_MSG_SECURITY, req0) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_SECURITY);
-	SEND_MESSAGE_BLOCK(P7110_MSG_SECURITY, 4);
 }
 
 /*****************/

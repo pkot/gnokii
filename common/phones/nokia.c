@@ -293,3 +293,140 @@ int PNOK_FBUS_EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *
 
 	return pos;
 }
+
+/* security commands */
+
+gn_error PNOK_enable_extended_cmds(GSM_Data *data, GSM_Statemachine *state, unsigned char type)
+{
+	unsigned char req[] = {0x00, 0x01, 0x64, 0x00};
+
+	if (type == 0x06) {
+		dump(_("Tried to activate CONTACT SERVICE\n"));
+		return GN_ERR_INTERNALERROR;
+	}
+
+	req[3] = type;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+gn_error PNOK_make_call(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[5 + GSM_MAX_PHONEBOOK_NUMBER_LENGTH] = {0x00, 0x01, 0x7c, 0x01};
+	int n;
+	gn_error err;
+
+	if (!data->CallInfo) return GN_ERR_INTERNALERROR;
+
+	switch (data->CallInfo->Type) {
+	case GSM_CT_VoiceCall:
+		break;
+
+	case GSM_CT_NonDigitalDataCall:
+	case GSM_CT_DigitalDataCall:
+		dprintf("Unsupported call type %d\n", data->CallInfo->Type);
+		return GN_ERR_NOTSUPPORTED;
+
+	default:
+		dprintf("Invalid call type %d\n", data->CallInfo->Type);
+		return GN_ERR_INTERNALERROR;
+	}
+
+	n = strlen(data->CallInfo->Number);
+	if (n > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+		dprintf("number too long\n");
+		return GN_ERR_ENTRYTOOLONG;
+	}
+
+	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+		return err;
+
+	strcpy(req + 4, data->CallInfo->Number);
+
+	if (SM_SendMessage(state, 5 + n, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+gn_error PNOK_answer_call(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[4] = {0x00, 0x01, 0x7c, 0x02};
+	gn_error err;
+
+	if (!data->CallInfo) return GN_ERR_INTERNALERROR;
+
+	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+		return err;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+gn_error PNOK_cancel_call(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[4] = {0x00, 0x01, 0x7c, 0x03};
+	gn_error err;
+
+	if (!data->CallInfo) return GN_ERR_INTERNALERROR;
+
+	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+		return err;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+gn_error PNOK_netmonitor(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x7e, 0x00};
+	gn_error err;
+
+	if (!data->NetMonitor) return GN_ERR_INTERNALERROR;
+
+	req[3] = data->NetMonitor->Field;
+
+	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE) return err;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+gn_error PNOK_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+{
+	switch (message[2]) {
+	/* Enable extended commands */
+	case 0x64:
+		dprintf("Message: Extended commands enabled.\n");
+		break;
+
+	/* Call management (old style) */
+	case 0x7c:
+		switch (message[3]) {
+			case 0x01: dprintf("Message: CallMgmt (old): dial\n"); break;
+			case 0x02: dprintf("Message: CallMgmt (old): answer\n"); break;
+			case 0x03: dprintf("Message: CallMgmt (old): release\n"); break;
+			default: return GN_ERR_UNHANDLEDFRAME;
+		}
+		break;
+
+	/* Netmonitor */
+	case 0x7e:
+		switch (message[3]) {
+		case 0x00:
+			dprintf("Message: Netmonitor correctly set.\n");
+			break;
+		default:
+			dprintf("Message: Netmonitor menu %d received:\n", message[3]);
+			dprintf("%s\n", message + 4);
+			if (data->NetMonitor)
+				snprintf(data->NetMonitor->Screen, sizeof(data->NetMonitor->Screen), "%s", message + 4);
+			break;
+		}
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
+}

@@ -16,6 +16,11 @@
     o "SetCellBroadcast error" frame documented      (BORBELY Zoltan)
     o GetSecurityCode implemented                    (BORBELY Zoltan)
     o recognize Delivery Report type                      (Pawel Kot)
+    o netmonitor and old style phone handling moved to
+      nokia.c                                        (BORBELY Zoltan)
+ * 7110 series updates:
+    o netmonitor moved to nokia.c                    (BORBELY Zoltan)
+    o old style call management commands called      (BORBELY Zoltan)
  * typos in et.po                                       (Ulrich Hopp)
  * gnokiid updates:
     o threads eliminated from gnokiid                (BORBELY Zoltan)

@@ -99,7 +99,6 @@ static gn_error PollDisplay(GSM_Data *data, GSM_Statemachine *state);
 static gn_error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static gn_error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static gn_error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state);
-static gn_error NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 static gn_error MakeCall1(GSM_Data *data, GSM_Statemachine *state);
 static gn_error AnswerCall1(GSM_Data *data, GSM_Statemachine *state);
 static gn_error CancelCall1(GSM_Data *data, GSM_Statemachine *state);
@@ -114,9 +113,6 @@ static gn_error Reset(GSM_Data *data, GSM_Statemachine *state);
 static gn_error SetRingtone(GSM_Data *data, GSM_Statemachine *state);
 static gn_error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
 static gn_error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
-static gn_error MakeCall2(GSM_Data *data, GSM_Statemachine *state);
-static gn_error AnswerCall2(GSM_Data *data, GSM_Statemachine *state);
-static gn_error CancelCall2(GSM_Data *data, GSM_Statemachine *state);
 static gn_error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 static gn_error EnterChar(GSM_Data *data, GSM_Statemachine *state);
 static gn_error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType type);
@@ -306,7 +302,7 @@ static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 	case GOP_SetCellBroadcast:
 		return SetCellBroadcast(data, state);
 	case GOP_NetMonitor:
-		return NetMonitor(data, state);
+		return PNOK_netmonitor(data, state);
 	case GOP_MakeCall:
 		return MakeCall(data, state);
 	case GOP_AnswerCall:
@@ -2620,40 +2616,12 @@ static gn_error IncomingDisplay(int messagetype, unsigned char *message, int len
 }
 
 
-static gn_error EnableExtendedCmds(GSM_Data *data, GSM_Statemachine *state, unsigned char type)
-{
-	unsigned char req[] = {0x00, 0x01, 0x64, 0x00};
-
-	if (type == 0x06) {
-		dump(_("Tried to activate CONTACT SERVICE\n"));
-		return GN_ERR_INTERNALERROR;
-	}
-
-	req[3] = type;
-
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
-}
-
-static gn_error NetMonitor(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[] = {0x00, 0x01, 0x7e, 0x00};
-	gn_error error;
-
-	req[3] = data->NetMonitor->Field;
-
-	if ((error = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE) return error;
-
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
-}
-
 static gn_error Reset(GSM_Data *data, GSM_Statemachine *state)
 {
 	if (!data) return GN_ERR_INTERNALERROR;
 	if (data->ResetType != 0x03 && data->ResetType != 0x04) return GN_ERR_INTERNALERROR;
 
-	return EnableExtendedCmds(data, state, data->ResetType);
+	return PNOK_enable_extended_cmds(data, state, data->ResetType);
 }
 
 static gn_error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
@@ -2665,7 +2633,7 @@ static gn_error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
 
 	req[3] = data->Ringtone->Location;
 
-	if ((error = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE) return error;
+	if ((error = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE) return error;
 
 	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_Block(state, data, 0x40);
@@ -2687,68 +2655,9 @@ static gn_error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
 	snprintf(req + 8, 13, "%s", data->Ringtone->name);
 	memcpy(req + 24, data->RawData->Data, data->RawData->Length);
 
-	if ((error = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE) return error;
+	if ((error = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE) return error;
 
 	if (SM_SendMessage(state, 24 + data->RawData->Length, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
-}
-
-static gn_error MakeCall2(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[5 + GSM_MAX_PHONEBOOK_NUMBER_LENGTH] = {0x00, 0x01, 0x7c, 0x01};
-	int n;
-	gn_error err;
-
-	switch (data->CallInfo->Type) {
-	case GSM_CT_VoiceCall:
-		break;
-
-	case GSM_CT_NonDigitalDataCall:
-	case GSM_CT_DigitalDataCall:
-		dprintf("Unsupported call type %d\n", data->CallInfo->Type);
-		return GN_ERR_NOTSUPPORTED;
-
-	default:
-		dprintf("Invalid call type %d\n", data->CallInfo->Type);
-		return GN_ERR_INTERNALERROR;
-	}
-
-	n = strlen(data->CallInfo->Number);
-	if (n > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
-		dprintf("number too long\n");
-		return GN_ERR_ENTRYTOOLONG;
-	}
-
-	if ((err = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE)
-		return err;
-
-	strcpy(req + 4, data->CallInfo->Number);
-
-	if (SM_SendMessage(state, 5 + n, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
-}
-
-static gn_error AnswerCall2(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[4] = {0x00, 0x01, 0x7c, 0x02};
-	gn_error err;
-
-	if ((err = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE)
-		return err;
-
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
-}
-
-static gn_error CancelCall2(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[4] = {0x00, 0x01, 0x7c, 0x03};
-	gn_error err;
-
-	if ((err = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE)
-		return err;
-
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_Block(state, data, 0x40);
 }
 
@@ -2757,7 +2666,7 @@ static gn_error get_imei(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[] = {0x00, 0x01, 0x66};
 	gn_error err;
 
-	if ((err = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
 	if (SM_SendMessage(state, 3, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
@@ -2769,7 +2678,7 @@ static gn_error get_phone_info(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[] = {0x00, 0x01, 0xc8, 0x01};
 	gn_error err;
 
-	if ((err = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
 	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
@@ -2781,7 +2690,7 @@ static gn_error get_hw(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[] = {0x00, 0x01, 0xc8, 0x05};
 	gn_error err;
 
-	if ((err = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
 	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
@@ -2797,7 +2706,7 @@ static gn_error get_security_code(GSM_Data *data, GSM_Statemachine *state)
 	if (!data->SecurityCode) return GN_ERR_INTERNALERROR;
 	req[3] = data->SecurityCode->Type;
 
-	if ((err = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
 	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
@@ -2810,10 +2719,6 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 	char *aux, *aux2;
 
 	switch (message[2]) {
-	/* FIXME: maybe "Enable extended cmds" reply? - bozo */
-	case 0x64:
-		break;
-
 	/* IMEI */
 	case 0x66:
 		if (data->Imei) {
@@ -2832,18 +2737,6 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		}
 		break;
 #endif
-
-	/* call management (old style) */
-	case 0x7c:
-		if (message[3] < 0x01 || message[3] > 0x03)
-			return GN_ERR_UNHANDLEDFRAME;
-		break;
-
-	/* Netmonitor */
-	case 0x7e:
-		if (message[3] != 0x00 && data->NetMonitor)
-			snprintf(data->NetMonitor->Screen, sizeof(data->NetMonitor->Screen), "%s", message + 4);
-		break;
 
 	/* Get bin ringtone */
 	case 0x9e:
@@ -2917,7 +2810,7 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		break;
 
 	default:
-		return GN_ERR_UNHANDLEDFRAME;
+		return PNOK_IncomingSecurity(messagetype, message, length, data, state);
 	}
 
 	return GN_ERR_NONE;
@@ -3064,7 +2957,7 @@ static gn_error SetCallNotification(GSM_Data *data, GSM_Statemachine *state)
 static gn_error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 {
 	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
-		return MakeCall2(data, state);
+		return PNOK_make_call(data, state);
 	else
 		return MakeCall1(data, state);
 }
@@ -3072,7 +2965,7 @@ static gn_error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 static gn_error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
 {
 	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
-		return AnswerCall2(data, state);
+		return PNOK_answer_call(data, state);
 	else
 		return AnswerCall1(data, state);
 }
@@ -3080,7 +2973,7 @@ static gn_error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
 static gn_error CancelCall(GSM_Data *data, GSM_Statemachine *state)
 {
 	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
-		return CancelCall2(data, state);
+		return PNOK_cancel_call(data, state);
 	else
 		return CancelCall1(data, state);
 }
