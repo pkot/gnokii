@@ -298,9 +298,9 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                               0x05: 5 second
                               0x0a: 10 second
                               0x0f: 15 second
-                              0x1e: 20 second
-                              0x14: 25 second
-                              0x19: 30 second
+                              0x14: 20 second
+                              0x19: 25 second
+                              0x1e: 30 second
                             where divtype:
                               0x02: all diverts for all call types ?
                                     Found only, when deactivate all diverts for all call types (with call type 0x00)
