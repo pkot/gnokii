@@ -245,7 +245,7 @@ memory_type
 .IP "" .5i
 entry_location
 .IP "" .5i
-caller_group
+caller_group_number
 .IP "" .5i
 subentry_type
 .IP "" .5i
@@ -254,6 +254,30 @@ subentry_number_type
 subentry_id
 .IP "" .5i
 subentry_text
+.PP
+Possible values of
+.B caller_group_number
+and the corresponding caller groups are (these are defaults, you are able to
+change these manually in your phone):
+.IP
+.B 0
+Family
+.IP
+.B 1
+VIP
+.IP
+.B 2
+Friends
+.IP
+.B 3
+Colleagues
+.IP
+.B 4
+Other
+.IP
+.B 5
+No group
+.IP
 .PP
 Possible subentry types are described in the \fIgnokii/common.h\fR file:
 .IP

@@ -18,6 +18,7 @@
     o accept range in --deletephonebook            (BORBELY Zoltan)
  * documentation updates
     o update TODO to reflect real issues                (Pawel Kot)
+    o mention default caller groups in the manpage   (Reiner Steib)
 
 0.6.0
 =====
