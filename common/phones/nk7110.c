@@ -83,7 +83,8 @@ static int GetMemoryType(GSM_MemoryType memory_type);
 static const SMSMessage_Layout nk7110_deliver = {
 	true,						/* Is the SMS type supported */
 	 5, true, true,					/* SMSC */
-	-1, 17, -1, -1,  3, -1, -1, -1, 20, 19, -1, 17,
+	-1, 17, -1, -1,  3, -1, -1, -1, 20, 19, 17,
+	-1, -1, -1,					/* Validity */
 	21, true, true,					/* Remote Number */
 	33, -1,						/* Time */
 	 1,  0,						/* Nonstandard fields */
@@ -93,7 +94,8 @@ static const SMSMessage_Layout nk7110_deliver = {
 static const SMSMessage_Layout nk7110_submit = {
 	true,
 	 5, true, true,
-	-1, 17, 17, 17, -1, 18, 19, -1, 21, 20, 17, 17,
+	-1, 17, 17, 17, -1, 18, 19, -1, 21, 20, 17,
+	17, -1, -1,
 	22, true, true,
 	-1, -1,
 	-1, -1,
@@ -103,7 +105,8 @@ static const SMSMessage_Layout nk7110_submit = {
 static const SMSMessage_Layout nk7110_delivery_report = {
 	true,
 	 5, true, true,
-	-1, -1, -1, -1,  3, -1, -1, -1, 19, 18, -1, 17,
+	-1, -1, -1, -1,  3, -1, -1, -1, 19, 18, 17,
+	-1, -1, -1,
 	20, true, true,
 	32, 39,
 	 1,  0,
@@ -113,7 +116,8 @@ static const SMSMessage_Layout nk7110_delivery_report = {
 static const SMSMessage_Layout nk7110_picture = {
 	true,
 	 5, true, true,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1,
 	18, true, true,
 	30, -1,
 	-1, -1,
@@ -686,52 +690,6 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	bool found;
 
 	switch (message[3]) {
-	/* getfolders */
-	case 0x7B:
-		i = 5;
-		memset(data->SMSFolderList, 0, sizeof(SMS_FolderList));
-		dprintf("Message: %d SMS Folders received:\n", message[4]);
-
-		strcpy(data->SMSFolderList->Folder[1].Name, "               ");
-		data->SMSFolderList->number = message[4];
-      
-		for (j = 0; j < message[4]; j++) {
-			int len;
-			strcpy(data->SMSFolderList->Folder[j].Name, "               ");
-			data->SMSFolderList->FolderID[j] = message[i];
-			dprintf("Folder Index: %d", data->SMSFolderList->FolderID[j]);
-			i += 2;
-			dprintf("   Folder name: ");
-			len = 0;
-			/* search for next folder's index number, i.e. length of folder name */
-			while (message[i+1] != nextfolder && i < length) {
-				i += 2;
-				len++;
-			}
-			/* see nk7110.txt */
-			nextfolder += 0x08;
-			if (nextfolder == 0x28) nextfolder++;
-			i -= 2 * len +1;
-			DecodeUnicode(data->SMSFolderList->Folder[j].Name, message + i, len);
-			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
-			i += 2 * len + 2;
-		}
-		break;
-
-	/* getfolderstatus */
-	case 0x6C:
-		dprintf("Message: SMS Folder status received: \n" );
-		data->SMSFolder->number = (message[5] * 256) + message[5];
-		if (data->SMSStatus) data->SMSStatus->Number = data->SMSFolder->number;
-		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->number);
-		dprintf("Message: IDs of Entries : ");
-		for (i = 0; i < message[4] * 256 + message[5]; i++) {
-			data->SMSFolder->locations[i] = message[6+(i*2)] * 256 + message[(i*2)+7];
-			dprintf("%d, ", data->SMSFolder->locations[i]);
-		}
-		dprintf("\n");
-		break;
-
 	/* getsms */    
 	case 0x08:
 		for (i = 0; i < length; i ++)
@@ -746,7 +704,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
 
 		/* Number of SMS in folder */
-		data->SMSMessage->Number = message[7];
+		data->SMSMessage->Number = (message[6] << 8) | message[7];
 
 		/* MessageType/FolderID */
 		data->SMSMessage->MemoryType = message[5];
@@ -808,9 +766,71 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			return GE_EMPTYSMSLOCATION;
 		default:
 			dprintf("\tUnknown reason.\n");
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
-		
+
+	/* delete sms */
+	case 0x0b:
+		dprintf("SMS deleted\n");
+		break;
+
+	/* delete sms failed */
+	case 0x0c:
+		switch (message[4]) {
+		case 0x02: 
+			dprintf("Invalid location\n");
+			return GE_INVALIDSMSLOCATION;
+		default:
+			dprintf("Unknown reason.\n");
+			return GE_UNHANDLEDFRAME;
+		}
+
+	/* getfolderstatus */
+	case 0x6C:
+		dprintf("Message: SMS Folder status received: \n" );
+		data->SMSFolder->number = (message[5] * 256) + message[5];
+		if (data->SMSStatus) data->SMSStatus->Number = data->SMSFolder->number;
+		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->number);
+		dprintf("Message: IDs of Entries : ");
+		for (i = 0; i < message[4] * 256 + message[5]; i++) {
+			data->SMSFolder->locations[i] = message[6+(i*2)] * 256 + message[(i*2)+7];
+			dprintf("%d, ", data->SMSFolder->locations[i]);
+		}
+		dprintf("\n");
+		break;
+
+	/* getfolders */
+	case 0x7B:
+		i = 5;
+		memset(data->SMSFolderList, 0, sizeof(SMS_FolderList));
+		dprintf("Message: %d SMS Folders received:\n", message[4]);
+
+		strcpy(data->SMSFolderList->Folder[1].Name, "               ");
+		data->SMSFolderList->number = message[4];
+      
+		for (j = 0; j < message[4]; j++) {
+			int len;
+			strcpy(data->SMSFolderList->Folder[j].Name, "               ");
+			data->SMSFolderList->FolderID[j] = message[i];
+			dprintf("Folder Index: %d", data->SMSFolderList->FolderID[j]);
+			i += 2;
+			dprintf("   Folder name: ");
+			len = 0;
+			/* search for next folder's index number, i.e. length of folder name */
+			while (message[i+1] != nextfolder && i < length) {
+				i += 2;
+				len++;
+			}
+			/* see nk7110.txt */
+			nextfolder += 0x08;
+			if (nextfolder == 0x28) nextfolder++;
+			i -= 2 * len +1;
+			DecodeUnicode(data->SMSFolderList->Folder[j].Name, message + i, len);
+			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
+			i += 2 * len + 2;
+		}
+		break;
+
 	/* get list of SMS pictures */
 	case 0x97:
 		dprintf("Getting list of SMS pictures...\n");
@@ -821,6 +841,10 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 				dprintf("[%02x ]", message[i]);
 		dprintf("\n");
 		break;
+
+	/* Some errors */
+	case 0xc9:
+	case 0xca:
 	default:
 
 		for (i = 0; i < length; i ++)
@@ -829,8 +853,8 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			else
 				dprintf("[%02x ]", message[i]);
 		dprintf("\n");
-		dprintf("Message: Unknown message of type 14 : %d  length: %d\n", message[3], length);
-		return GE_UNKNOWN;
+		dprintf("Message: Unknown message of type 14 : %02x  length: %d\n", message[3], length);
+		return GE_UNHANDLEDFRAME;
 	}
 	return GE_NONE;
 }
@@ -875,8 +899,8 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	dprintf("Getting SMS...\n");
-	req_sms[4] = data->SMSMessage->MemoryType;
-	req_sms[6] = data->SMSMessage->Number;
+	req_sms[5] = (data->SMSMessage->Number & 0xff00) >> 8;
+	req_sms[6] = data->SMSMessage->Number & 0x00ff;
 	if (SM_SendMessage(state, 10, 0x14, req_sms) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
@@ -905,13 +929,14 @@ static GSM_Error P7110_GetIncomingSMS(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P7110_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x0a, 0x00, 0x00, 0x00, 0x01};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x00, 0x01};
 
 	if (!data->SMSMessage) return GE_INTERNALERROR;
 	dprintf("Removing SMS %d\n", data->SMSMessage->Number);
-	req[5] = data->SMSMessage->MemoryType;
-	req[7] = data->SMSMessage->Number;
-	if (SM_SendMessage(state, 9, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	req[4] = data->SMSMessage->MemoryType;
+	req[5] = (data->SMSMessage->Number & 0xff00) >> 8;
+	req[6] = data->SMSMessage->Number & 0x00ff;
+	if (SM_SendMessage(state, 8, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
 

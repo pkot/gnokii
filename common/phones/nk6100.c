@@ -38,7 +38,8 @@
 static const SMSMessage_Layout nk6100_deliver = {
 	true,
 	 4, true, true,
-	-1,  7, -1, -1,  2, -1, -1, -1, 19, 18, -1, 16,
+	-1,  7, -1, -1,  2, -1, -1, -1, 19, 18, 16,
+	-1, -1, -1,
 	20, true, true,
 	32, -1,
 	 1,  0,
@@ -48,7 +49,8 @@ static const SMSMessage_Layout nk6100_deliver = {
 static const SMSMessage_Layout nk6100_submit = {
 	true,
 	 4, true, true,
-	-1, 16, 16, 16,  2, 17, 18, -1, 20, 19, 16, 16,
+	-1, 16, 16, 16,  2, 17, 18, -1, 20, 19, 16,
+	16, -1, -1,
 	21, true, true,
 	33, -1,
 	-1, -1,
@@ -58,7 +60,8 @@ static const SMSMessage_Layout nk6100_submit = {
 static const SMSMessage_Layout nk6100_delivery_report = {
 	true,
 	 4, true, true,
-	-1, -1, -1, -1,  2, -1, -1, -1, 18, 17, -1, 16,
+	-1, -1, -1, -1,  2, -1, -1, -1, 18, 17, 16,
+	-1, -1, -1,
 	20, true, true,
 	31, 38,
 	 1,  0,
@@ -68,7 +71,8 @@ static const SMSMessage_Layout nk6100_delivery_report = {
 static const SMSMessage_Layout nk6100_picture = {
 	false,
 	-1, true, true,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1,
 	-1, true, true,
 	-1, -1,
 	-1, -1,

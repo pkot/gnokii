@@ -40,7 +40,8 @@
 static SMSMessage_Layout nk3110_deliver = {
 	true, /* IsSupported */
 	16, false, false, /* MessageCenter */
-	-1, -1, -1, -1,  3, -1, -1, -1, 15,  7, -1,  5,
+	-1, -1, -1, -1,  3, -1, -1, -1, 15,  7,  5,
+	-1, -1, -1, /* Validity */
 	17, false, false, /* RemoteNumber */
 	 8, /* SMSC Time */
 	-1, /* Time */

@@ -120,9 +120,10 @@ GSM_Phone phone_at = {
 
 static const SMSMessage_Layout at_deliver = {
 	true,						/* Is the SMS type supported */
-	 1, true, false,					/* SMSC */
-	 2,  2, -1,  2, -1, -1,  4, -1, 13,  5, -1,  2,
-	 3, true, false,					/* Remote Number */
+	 1, true, false,				/* SMSC */
+	 2,  2, -1,  2, -1, -1,  4, -1, 13,  5,  2,
+	 -1, -1, -1,					/* Validity */
+	 3, true, false,				/* Remote Number */
 	 6, -1,						/* Time */
 	-1, -1,						/* Nonstandard fields */
 	14, true					/* User Data */
@@ -130,9 +131,10 @@ static const SMSMessage_Layout at_deliver = {
 
 static const SMSMessage_Layout at_submit = {
 	true,						/* Is the SMS type supported */
-	 0, true, false,					/* SMSC */
-	-1,  1,  1,  1, -1,  2,  4, -1,  7,  5,  6,  1,
-	 3, true, false,					/* Remote Number */
+	 0, true, false,				/* SMSC */
+	-1,  1,  1,  1, -1,  2,  4, -1,  7,  5,  1,
+	 6, -1, -1,					/* Validity */
+	 3, true, false,				/* Remote Number */
 	-1, -1,						/* Time */
 	-1, -1,						/* Nonstandard fields */
 	 8, true					/* User Data */

@@ -995,12 +995,6 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		dprintf("\tDelivery date: %s\n", PrintDateTime(message + llayout.Time));
 	}
 
-	/* Short Message location in memory */
-	if (llayout.Number > -1) {
-		SMS->Number = message[llayout.Number];
-		dprintf("\tLocation: %d\n", SMS->Number);
-	}
-
 	/* Short Message Center */
 	if (llayout.MessageCenter > -1) {
 		if (llayout.IsMessageCenterCoded) {
