@@ -61,6 +61,8 @@ pthread_mutex_t setBitmapMutex;
 pthread_cond_t setBitmapCond;
 pthread_mutex_t getNetworkInfoMutex;
 pthread_cond_t getNetworkInfoCond;
+pthread_mutex_t ringtoneMutex;
+pthread_cond_t ringtoneCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
 
@@ -290,6 +292,8 @@ void GUI_InitPhoneMonitor(void)
 	pthread_cond_init(&setBitmapCond, NULL);
 	pthread_mutex_init(&getNetworkInfoMutex, NULL);
 	pthread_cond_init(&getNetworkInfoCond, NULL);
+	pthread_mutex_init(&ringtoneMutex, NULL);
+	pthread_cond_init(&ringtoneCond, NULL);
 }
 
 static gint compare_number(const gn_sms * a, const gn_sms * b)
@@ -1074,6 +1078,81 @@ static gint A_GetNetworkInfo(gpointer data)
 	return error;
 }
 
+static gint A_PlayTone(gpointer data)
+{
+	D_PlayTone *d = (D_PlayTone *) data;
+	gn_tone tone;
+	gn_data gdat;
+	gn_error error;
+	static int uadj = -1;
+
+	gn_data_clear(&gdat);
+
+	pthread_mutex_lock(&ringtoneMutex);
+	tone.frequency = d->frequency;
+	tone.volume = d->volume;
+	gdat.tone = &tone;
+
+	if (uadj < 0) {
+		struct timeval t1, t2, dt;
+
+		gettimeofday(&t1, NULL);
+		error = gn_sm_functions(GN_OP_PlayTone, &gdat, &statemachine);
+		gettimeofday(&t2, NULL);
+		timersub(&t2, &t1, &dt);
+		uadj = 2 * dt.tv_usec;
+	} else {
+		error = gn_sm_functions(GN_OP_PlayTone, &gdat, &statemachine);
+	}
+	if (d->usec > 0) {
+		if (d->usec > uadj) usleep(d->usec - uadj);
+		tone.frequency = 0;
+		tone.volume = 0;
+		gn_sm_functions(GN_OP_PlayTone, &gdat, &statemachine);
+	}
+
+	pthread_cond_signal(&ringtoneCond);
+	pthread_mutex_unlock(&ringtoneMutex);
+
+	return error;
+}
+
+static gint A_GetRingtone(gpointer data)
+{
+	D_Ringtone *d = (D_Ringtone *) data;
+	gn_data gdat;
+
+	gn_data_clear(&gdat);
+
+	pthread_mutex_lock(&ringtoneMutex);
+	gdat.ringtone = d->ringtone;
+
+	d->status = gn_sm_functions(GN_OP_GetRingtone, &gdat, &statemachine);
+
+	pthread_cond_signal(&ringtoneCond);
+	pthread_mutex_unlock(&ringtoneMutex);
+
+	return d->status;
+}
+
+static gint A_SetRingtone(gpointer data)
+{
+	D_Ringtone *d = (D_Ringtone *) data;
+	gn_data gdat;
+
+	gn_data_clear(&gdat);
+
+	pthread_mutex_lock(&ringtoneMutex);
+	gdat.ringtone = d->ringtone;
+
+	d->status = gn_sm_functions(GN_OP_SetRingtone, &gdat, &statemachine);
+
+	pthread_cond_signal(&ringtoneCond);
+	pthread_mutex_unlock(&ringtoneMutex);
+
+	return d->status;
+}
+
 static gint A_Exit(gpointer data)
 {
 	pthread_exit(0);
@@ -1109,6 +1188,9 @@ gint(*DoAction[])(gpointer) = {
 	    A_GetBitmap,
 	    A_SetBitmap,
 	    A_GetNetworkInfo,
+	    A_PlayTone,
+	    A_GetRingtone,
+	    A_SetRingtone,
 	    A_Exit};
 
 

@@ -72,6 +72,9 @@ typedef enum {
 	Event_GetBitmap,
 	Event_SetBitmap,
 	Event_GetNetworkInfo,
+	Event_PlayTone,
+	Event_GetRingtone,
+	Event_SetRingtone,
 	Event_Exit
 } PhoneAction;
 
@@ -148,6 +151,17 @@ typedef struct {
 } D_NetworkInfo;
 
 typedef struct {
+	int frequency;
+	int volume;
+	int usec;
+} D_PlayTone;
+
+typedef struct {
+	gn_ringtone *ringtone;
+	gn_error status;
+} D_Ringtone;
+
+typedef struct {
 	gfloat rfLevel;
 	gfloat batteryLevel;
 	gn_power_source powerSource;
@@ -204,6 +218,8 @@ extern pthread_mutex_t setBitmapMutex;
 extern pthread_cond_t setBitmapCond;
 extern pthread_mutex_t getNetworkInfoMutex;
 extern pthread_cond_t getNetworkInfoCond;
+extern pthread_mutex_t ringtoneMutex;
+extern pthread_cond_t ringtoneCond;
 extern struct gn_statemachine statemachine;
 extern void GUI_InitPhoneMonitor(void);
 extern void *GUI_Connect(void *a);

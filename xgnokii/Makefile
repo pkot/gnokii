@@ -36,6 +36,7 @@ OBJS = 	xgnokii.o \
 	xgnokii_xkeyb.o \
 	xgnokii_calendar.o \
 	xgnokii_logos.o \
+	xgnokii_xring.o \
 	xgnokii_lowlevel.o \
 	xgnokii_data.o
 

@@ -69,6 +69,7 @@
 #include "xgnokii_xkeyb.h"
 #include "xgnokii_calendar.h"
 #include "xgnokii_logos.h"
+#include "xgnokii_xring.h"
 #include "xgnokii_cfg.h"
 #include "xgnokii_data.h"
 
@@ -111,6 +112,7 @@ static GtkWidget *logos_menu_item;
 static GtkWidget *dtmf_menu_item;
 static GtkWidget *speedDial_menu_item;
 static GtkWidget *xkeyb_menu_item;
+static GtkWidget *xring_menu_item;
 static GtkWidget *cg_names_option_frame;
 static GtkWidget *sms_option_frame;
 static GtkWidget *mail_option_frame;
@@ -856,6 +858,8 @@ static void ShowMenu(GdkEventButton * event)
 	else
 		gtk_widget_hide(data_menu_item);
 
+	gtk_widget_show(xring_menu_item);
+
 	gtk_menu_popup(GTK_MENU(Menu), NULL, NULL, NULL, NULL, bevent->button, bevent->time);
 }
 
@@ -1127,6 +1131,11 @@ static GtkWidget *CreateMenu(void)
 	gtk_menu_append(GTK_MENU(menu), netmon_menu_item);
 	gtk_signal_connect_object(GTK_OBJECT(netmon_menu_item), "activate",
 				  GTK_SIGNAL_FUNC(GUI_ShowNetmon), NULL);
+
+	xring_menu_item = gtk_menu_item_new_with_label(_("Ringtone"));
+	gtk_menu_append(GTK_MENU(menu), xring_menu_item);
+	gtk_signal_connect_object(GTK_OBJECT(xring_menu_item), "activate",
+				  GTK_SIGNAL_FUNC(GUI_ShowXring), NULL);
 
 	data_menu_item = gtk_menu_item_new_with_label(_("Data calls"));
 	gtk_menu_append(GTK_MENU(menu), data_menu_item);
@@ -2218,6 +2227,7 @@ static void TopLevelWindow(void)
 	GUI_CreateXkeybWindow();
 	GUI_CreateCalendarWindow();
 	GUI_CreateLogosWindow();
+	GUI_CreateXringWindow();
 	GUI_CreateDataWindow();
 	CreateErrorDialog(&errorDialog, GUI_MainWindow);
 	CreateInfoDialog(&infoDialog, GUI_MainWindow);
