@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
 	short_version();
 
-	if (gn_readconfig(&Model, &Port, &Initlength, &Connection, &BinDir) < 0) {
+	if (gn_cfg_readconfig(&Model, &Port, &Initlength, &Connection, &BinDir) < 0) {
 		exit(-1);
 	}
 
