@@ -90,7 +90,7 @@ GSM_Phone phone_at = {
 	IncomingFunctions,
 	PGEN_IncomingDefault,
 	{
-		"AT|AT-HW|dancall",			/* Supported models */
+		"AT|AT-HW|dancall",	/* Supported models */
 		99,			/* Max RF Level */
 		0,			/* Min RF Level */
 		GRF_CSQ,		/* RF level units */

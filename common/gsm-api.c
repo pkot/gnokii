@@ -20,39 +20,6 @@
   Unless otherwise noted, all functions herein block until they complete.  The
   functions themselves are defined in a structure in gsm-common.h.
 
-  $Log$
-  Revision 1.33  2001-12-28 16:00:30  pkot
-  Misc cleanup. Some usefull functions
-
-  Revision 1.32  2001/11/14 11:26:18  pkot
-  Getting SMS in 6210/7110 does finally work in some cases :)
-
-  Revision 1.31  2001/11/08 16:45:58  pkot
-  Obsolete old structure, kill treads where possible and make shared library
-
-  Revision 1.30  2001/08/09 11:51:38  pkot
-  Generic AT support updates and cleanup (Manfred Jonsson)
-
-  Revision 1.29  2001/07/27 00:02:20  pkot
-  Generic AT support for the new structure (Manfred Jonsson)
-
-  Revision 1.28  2001/06/06 09:05:56  machek
-  Convert Grab/Release display to new structure.
-
-  Revision 1.27  2001/05/07 14:13:06  machek
-  nokia-2110 module converted to suit new API better. --identify now works.
-
-  Revision 1.26  2001/04/25 12:54:47  machek
-  Partly converted nokia 2110 to "new" form, and moved it to phone
-  directory.
-
-  Revision 1.25  2001/03/26 23:39:21  pkot
-  Minor updates:
-   - Windows INLINE patch (Manfred Jonsson)
-   - patch to configure.in to compile under FreeBSD (Panagiotis Astithas)
-   - other cleanups (me)
-
-  
 */
 
 #include <stdio.h>

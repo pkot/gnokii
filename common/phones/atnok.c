@@ -13,13 +13,6 @@
   This file provides functions specific to at commands on nokia
   phones. See README for more details on supported mobile phones.
 
-  $Log$
-  Revision 1.2  2001-12-14 23:47:52  pkot
-  Fixed fatal linker error -- global symbol conflict of writephonebook (Jan Kratochvil)
-
-  Revision 1.1  2001/11/19 13:03:18  pkot
-  nk3110.c cleanup
-
 */
 
 #include <string.h>
@@ -35,9 +28,7 @@
 #include "links/atbus.h"
 #include "links/cbus.h"
 
-
 static AT_SendFunctionType writephonebook;
-
 
 static GSM_Error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
 {
@@ -49,7 +40,8 @@ static GSM_Error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
 }
 
 
-void AT_InitNokia(GSM_Statemachine *state, char *foundmodel, char *setupmodel) {
+void AT_InitNokia(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
+{
 	/* block writing of phone memory on nokia phones other than */
 	/* 8210. if you write to the phonebook of a eg 7110 all extended */
 	/* information will be lost. */

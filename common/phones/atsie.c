@@ -13,13 +13,6 @@
   This file provides functions specific to at commands on siemens
   phones. See README for more details on supported mobile phones.
 
-  $Log$
-  Revision 1.2  2001-12-14 23:47:52  pkot
-  Fixed fatal linker error -- global symbol conflict of writephonebook (Jan Kratochvil)
-
-  Revision 1.1  2001/11/19 13:03:18  pkot
-  nk3110.c cleanup
-
 */
 
 #include <string.h>
@@ -35,9 +28,7 @@
 #include "links/atbus.h"
 #include "links/cbus.h"
 
-
 static AT_SendFunctionType writephonebook;
-
 
 static GSM_Error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
 {
@@ -56,7 +47,8 @@ static GSM_Error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
 }
 
 
-void AT_InitSiemens(GSM_Statemachine *state, char *foundmodel, char *setupmodel) {
+void AT_InitSiemens(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
+{
 	/* names for s35 etc must be escaped */
 /*
 	if (foundmodel && !strncasecmp("35", foundmodel + 1, 2))

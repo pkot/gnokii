@@ -13,23 +13,6 @@
   This file provides functions specific to the dancall 2711.
   See README for more details on supported mobile phones.
 
-  $Log$
-  Revision 1.5  2001-07-27 00:02:21  pkot
-  Generic AT support for the new structure (Manfred Jonsson)
-
-  Revision 1.4  2001/04/25 12:53:07  machek
-  Added error handling to SMS receive function.
-
-  Revision 1.3  2001/03/23 13:40:23  chris
-  Pavel's patch and a few fixes.
-
-  Revision 1.2  2001/03/13 01:24:03  pkot
-  Code cleanup - no warnings during compilation
-
-  Revision 1.1  2001/03/11 11:26:15  machek
-  Dancall support, now actually works enough to get sms messages.
-
-
 */
 
 #include <string.h>
@@ -55,10 +38,10 @@ static GSM_IncomingFunctionType D2711_IncomingFunctions[];
                 7,                     /* Max Battery Level */ \
                 0,                     /* Min Battery Level */ \
                 GBU_Percentage,        /* Battery level units */ \
-                0,                        /* Have date/time support */ \
-                0,                       /* Alarm supports time only */ \
+                0,                     /* Have date/time support */ \
+                0,                     /* Alarm supports time only */ \
                 1,                     /* Alarms available - FIXME */ \
-                60, 96,                /* Startup logo size - 7110 is fixed at init*/ \
+                60, 96,                /* Startup logo size */ \
                 21, 78,                /* Op logo size */ \
                 14, 72                 /* Caller logo size */ \
 		}
@@ -132,8 +115,8 @@ GSM_Error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
 		m->Time.Second=0;
 		m->Time.Timezone=0;
 	}
-	memset(m->MessageText, 0, 161);
-	strncpy(m->MessageText, (void *) t, 161);
+	memset(m->UserData[0].u.Text, 0, 161);
+	strncpy(m->UserData[0].u.Text, (void *) t, 161);
 	m->Length = strlen(t);
 	strcpy(m->MessageCenter.Number, "(unknown)");
 	strcpy(m->MessageCenter.Name, "(unknown)");

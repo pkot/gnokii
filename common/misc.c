@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -7,44 +9,6 @@
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
-
-  $Id$
-  
-  $Log$
-  Revision 1.21  2001-12-28 16:00:31  pkot
-  Misc cleanup. Some usefull functions
-
-  Revision 1.20  2001/11/26 18:06:08  pkot
-  Checking for *printf functions, N_(x) for localization, generic ARRAY_LEN, SAFE_STRNCPY, G_GNUC_PRINTF (Jan Kratochvil)
-
-  Revision 1.19  2001/11/22 17:56:53  pkot
-  smslib update. sms sending
-
-  Revision 1.18  2001/09/09 21:45:49  machek
-  Cleanups from Ladislav Michl <ladis@psi.cz>:
-
-  *) do *not* internationalize debug messages
-
-  *) some whitespace fixes, do not use //
-
-  *) break is unneccessary after return
-
-  Revision 1.17  2001/08/09 12:34:34  pkot
-  3330 and 6250 support - I have no idea if it does work (mygnokii)
-
-  Revision 1.16  2001/03/21 23:36:04  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.15  2001/03/06 10:38:52  machek
-  Dancall models added to the global list.
-
-  Revision 1.14  2001/02/06 13:55:23  pkot
-  Enabled authentication in 51xx models
-
-  Revision 1.13  2001/02/02 08:09:56  ja
-  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
-
 
 */
 
@@ -59,13 +23,13 @@ int GetLine(FILE *File, char *Line, int count)
 	if (fgets(Line, count, File)) {
 		ptr = Line + strlen(Line) - 1;
 
-		while ( (*ptr == '\n' || *ptr == '\r') && ptr >= Line)
+		while ((*ptr == '\n' || *ptr == '\r') && ptr >= Line)
 			*ptr-- = '\0';
 
 		return strlen(Line);
-	}
-	else
+	} else {
 		return 0;
+	}
 }
 
 static PhoneModel models[] = {
@@ -113,11 +77,10 @@ PhoneModel *GetPhoneModel (const char *num)
 	register int i = 0;
 
 	while (models[i].number != NULL) {
-		if (strcmp (num, models[i].number) == 0) {
+		if (strcmp(num, models[i].number) == 0) {
 			dprintf("Found model\n");
 			return (&models[i]);
-		}
-		else {
+		} else {
 			dprintf("comparing %s and %s\n", num, models[i].number);
 		}
 		i++;
@@ -166,12 +129,12 @@ int gvasprintf(char **destp, const char *fmt, va_list ap)
 #endif
 
 #ifndef HAVE_ASPRINTF
-int gasprintf(char **destp, const char *fmt,...)
+int gasprintf(char **destp, const char *fmt, ...)
 {
 	va_list ap;
 	int r;
 
-	va_start(ap,fmt);
+	va_start(ap, fmt);
 	r = gvasprintf(destp, fmt, ap);
 	va_end(ap);
 	return(r);

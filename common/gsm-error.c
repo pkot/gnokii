@@ -12,17 +12,6 @@
 
   Error codes.
 
-  $Log$
-  Revision 1.3  2001-12-14 14:37:41  pkot
-  Cleanups. Call divert support for at and 7110 series
-
-  Revision 1.2  2001/11/08 16:34:19  pkot
-  Updates to work with new libsms
-
-  Revision 1.1  2001/10/24 22:33:01  pkot
-  Moved error codes to a separate files
-
-
 */
 
 #include "gsm-error.h"

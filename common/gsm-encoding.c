@@ -12,23 +12,6 @@
 
   Functions for encoding SMS, calendar and other things.
 
-  $Log$
-  Revision 1.5  2001-12-28 16:00:30  pkot
-  Misc cleanup. Some usefull functions
-
-  Revision 1.4  2001/11/22 17:56:53  pkot
-  smslib update. sms sending
-
-  Revision 1.3  2001/11/17 20:15:31  pkot
-  Typo in default alphabet
-
-  Revision 1.2  2001/11/08 16:34:19  pkot
-  Updates to work with new libsms
-
-  Revision 1.1  2001/10/24 22:37:25  pkot
-  Moved encoding functions to a separate file
-
-
 */
 
 #include <stdlib.h>

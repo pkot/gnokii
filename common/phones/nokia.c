@@ -16,24 +16,6 @@
 
   The various routines are called PNOK_(whatever).
 
-  $Log$
-  Revision 1.2  2001-11-15 12:12:34  pkot
-  7110 and 6110 series phones introduce as Nokia
-
-  Revision 1.1  2001/02/21 19:57:07  chris
-  More fiddling with the directory layout
-
-  Revision 1.1  2001/02/16 14:29:53  chris
-  Restructure of common/.  Fixed a problem in fbus-phonet.c
-  Lots of dprintfs for Marcin
-  Any size xpm can now be loaded (eg for 7110 startup logos)
-  nk7110 code detects 7110/6210 and alters startup logo size to suit
-  Moved Marcin's extended phonebook code into gnokii.c
-
-  Revision 1.1  2001/02/01 15:19:41  pkot
-  Fixed --identify and added Manfred's manufacturer patch
-
-
 */
 
 #include <string.h>
