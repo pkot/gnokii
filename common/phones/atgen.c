@@ -14,7 +14,10 @@
   phones. See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.6  2001-11-19 13:03:18  pkot
+  Revision 1.7  2001-11-26 18:06:08  pkot
+  Checking for *printf functions, N_(x) for localization, generic ARRAY_LEN, SAFE_STRNCPY, G_GNUC_PRINTF (Jan Kratochvil)
+
+  Revision 1.6  2001/11/19 13:03:18  pkot
   nk3110.c cleanup
 
   Revision 1.5  2001/11/08 16:49:19  pkot
@@ -49,9 +52,6 @@
 #include "phones/atnok.h"
 #include "links/atbus.h"
 #include "links/cbus.h"
-
-
-#define ARRAY_LEN(x) (sizeof((x))/sizeof((x)[0]))
 
 
 static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state);

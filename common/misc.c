@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.19  2001-11-22 17:56:53  pkot
+  Revision 1.20  2001-11-26 18:06:08  pkot
+  Checking for *printf functions, N_(x) for localization, generic ARRAY_LEN, SAFE_STRNCPY, G_GNUC_PRINTF (Jan Kratochvil)
+
+  Revision 1.19  2001/11/22 17:56:53  pkot
   smslib update. sms sending
 
   Revision 1.18  2001/09/09 21:45:49  machek
@@ -43,6 +46,7 @@
 */
 
 #include <string.h>
+#include <stdlib.h>
 #include "misc.h"
 
 int GetLine(FILE *File, char *Line, int count)
@@ -52,8 +56,8 @@ int GetLine(FILE *File, char *Line, int count)
 	if (fgets(Line, count, File)) {
 		ptr = Line + strlen(Line) - 1;
 
-		while ( (*ptr == '\n' || *ptr == '\r') && ptr>=Line)
-			*ptr--='\0';
+		while ( (*ptr == '\n' || *ptr == '\r') && ptr >= Line)
+			*ptr-- = '\0';
 
 		return strlen(Line);
 	}
@@ -123,4 +127,49 @@ inline char *GetModel (const char *num)
 	return (GetPhoneModel(num)->model);
 }
 
+#ifndef HAVE_VASPRINTF
+/* Adapted from snprintf(3) man page: */
+int gvasprintf(char **destp, const char *fmt, va_list ap)
+{
+	int n, size = 0x100;
+	char *p, *pnew;
 
+	if (!(p = malloc(size))) {
+		*destp = NULL;
+		return(-1);
+	}
+	for (;;) {
+		/* Try to print in the allocated space. */
+		n = gvsprintf(p, size, fmt, ap);
+		/* If that worked, return the string. */
+		if (n > -1 && n < size) {
+			*destp = p;
+			return(n);
+		}
+		/* Else try again with more space. */
+		if (n > -1)	/* glibc 2.1 */
+			size = n + 1;	/* precisely what is needed */
+		else		/* glibc 2.0 */
+			size *= 2;	/* twice the old size */
+		if (!(pnew = realloc(p, size))) {
+			free(p);
+			*destp = NULL;
+			return(-1);
+		}
+		p = pnew;
+	}
+}
+#endif
+
+#ifndef HAVE_ASPRINTF
+int gasprintf(char **destp, const char *fmt,...)
+{
+	va_list ap;
+	int r;
+
+	va_start(ap,fmt);
+	r = gvasprintf(destp, fmt, ap);
+	va_end(ap);
+	return(r);
+}
+#endif
