@@ -33,12 +33,8 @@
 #include "gsm-statemachine.h"
 #include "links/utils.h"
 
-#ifndef WIN32
-#  include "device.h"
-#else
-#  include "win32/winserial.h"
-#  define device_write(a, b) WriteCommBlock(a, b)
-#  define device_read(a, b) ReadCommBlock(a, b)
+#include "device.h"
+#ifdef WIN32
 #  define sleep(x) Sleep((x) * 1000)
 #  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif
@@ -62,11 +58,7 @@ static FB3110_Link flink;		/* FBUS specific stuff, internal to this file */
 bool FB3110_OpenSerial(void)
 {
 	/* Open device. */
-#ifdef WIN32
-	if (OpenConnection(glink->PortDevice, FB3110_RX_StateMachine, NULL)) {
-#else
 	if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
-#endif
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -170,7 +162,6 @@ void FB3110_RX_StateMachine(unsigned char rx_byte)
 
 GSM_Error FB3110_Loop(struct timeval *timeout)
 {
-#ifndef WIN32
 	unsigned char buffer[255];
 	int count, res;
 
@@ -187,9 +178,6 @@ GSM_Error FB3110_Loop(struct timeval *timeout)
 		return GE_NONE;
 	else
 		return GE_INTERNALERROR;
-#else
-	return GE_NONE;
-#endif
 }
 
 

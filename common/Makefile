@@ -29,7 +29,8 @@ OBJS =	cfgreader.o \
 	gsm-common.o \
 	gsm-encoding.o \
 	gsm-error.o \
-	gsm-statemachine.o
+	gsm-statemachine.o \
+	compat.o
 
 ifdef NO_SHARED
 GNOKII_LIB=libgnokii.a

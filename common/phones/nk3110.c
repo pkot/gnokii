@@ -1096,7 +1096,6 @@ static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *messag
 
 static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-#ifdef DEBUG
 	/* Strings for the status byte received from phone. */
 	char *StatusStr[] = {
 		"Unknown",
@@ -1105,7 +1104,6 @@ static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *messag
 		"Call in progress",
 		"No network access"
 	};
-#endif
 
 	/* There are three data bytes in the status message, two have been
 	   attributed to signal level, the third is presently unknown.

@@ -123,7 +123,7 @@ static int device_script(int fd, const char *section)
 }
 
 int serial_close_all_openfds[0x10];	/* -1 when entry not used, fd otherwise */
-int serial_close(int __fd);
+int serial_close(int fd);
 
 static void serial_close_all(void)
 {
@@ -144,9 +144,9 @@ static void unixserial_interrupted(int signo)
 #endif
 
 /* Open the serial port and store the settings. */
-int serial_open(__const char *__file, int __oflag)
+int serial_open(const char *file, int oflag)
 {
-	int __fd;
+	int fd;
 	int retcode, i;
 	static bool atexit_registered = false;
 
@@ -159,61 +159,61 @@ int serial_open(__const char *__file, int __oflag)
 		atexit_registered = true;
 	}
 
-	__fd = open(__file, __oflag);
-	if (__fd == -1) {
+	fd = open(file, oflag);
+	if (fd == -1) {
 		perror("Gnokii serial_open: open");
 		return (-1);
 	}
 
 	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
-		if (serial_close_all_openfds[i] == -1 || serial_close_all_openfds[i] == __fd) {
-			serial_close_all_openfds[i] = __fd;
+		if (serial_close_all_openfds[i] == -1 || serial_close_all_openfds[i] == fd) {
+			serial_close_all_openfds[i] = fd;
 			break;
 		}
 
-	retcode = tcgetattr(__fd, &serial_termios);
+	retcode = tcgetattr(fd, &serial_termios);
 	if (retcode == -1) {
 		perror("Gnokii serial_open:tcgetattr");
 		/* Don't call serial_close since serial_termios is not valid */
-		close(__fd);
+		close(fd);
 		return (-1);
 	}
 
-	return __fd;
+	return fd;
 }
 
 /* Close the serial port and restore old settings. */
-int serial_close(int __fd)
+int serial_close(int fd)
 {
 	int i;
 
 	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
-		if (serial_close_all_openfds[i] == __fd)
+		if (serial_close_all_openfds[i] == fd)
 			serial_close_all_openfds[i] = -1;		/* fd closed */
 
 	/* handle config file disconnect_script:
 	 */
-	if (device_script(__fd, "disconnect_script") == -1)
+	if (device_script(fd, "disconnect_script") == -1)
 		fprintf(stderr, _("Gnokii serial_close: disconnect_script\n"));
 
-	if (__fd >= 0) {
+	if (fd >= 0) {
 #if 1 /* HACK */
 		serial_termios.c_cflag |= HUPCL;	/* production == 1 */
 #else
 		serial_termios.c_cflag &= ~HUPCL;	/* debugging  == 0 */
 #endif
 
-		tcsetattr(__fd, TCSANOW, &serial_termios);
+		tcsetattr(fd, TCSANOW, &serial_termios);
 	}
 
-	return (close(__fd));
+	return (close(fd));
 }
 
 /* Open a device with standard options.
- * Use value (-1) for "__with_hw_handshake" if its specification is required from the user.
+ * Use value (-1) for "with_hw_handshake" if its specification is required from the user.
  */
-int serial_opendevice(__const char *__file, int __with_odd_parity,
-		      int __with_async, int __with_hw_handshake)
+int serial_opendevice(const char *file, int with_odd_parity,
+		      int with_async, int with_hw_handshake)
 {
 	int fd;
 	int retcode, baudrate = 0;
@@ -224,17 +224,17 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 	s = CFG_Get(CFG_Info, "global", "handshake");
 
 	if (s && (!strcasecmp(s, "software") || !strcasecmp(s, "rtscts")))
-		__with_hw_handshake = false;
+		with_hw_handshake = false;
 	else if (s && (!strcasecmp(s, "hardware") || !strcasecmp(s, "xonxoff")))
-		__with_hw_handshake = true;
+		with_hw_handshake = true;
 	else if (s)
 		fprintf(stderr, _("Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value, ignoring!"),
 				 "global", "handshake", "software", "hardware");
 
-	if (__with_hw_handshake == -1) {
+	if (with_hw_handshake == -1) {
 		fprintf(stderr, _("[%s] option \"%s\" not found, trying to use \"%s\" value!"),
 				  "global", "handshake", "software");
-		__with_hw_handshake = false;
+		with_hw_handshake = false;
 	}
 
 	/* Open device */
@@ -242,7 +242,7 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 	/* O_NONBLOCK MUST be used here as the CLOCAL may be currently off
 	 * and if DCD is down the "open" syscall would be stuck wating for DCD.
 	 */
-	fd = serial_open(__file, O_RDWR | O_NOCTTY | O_NONBLOCK);
+	fd = serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
 	if (fd < 0) return fd;
 
@@ -251,12 +251,12 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 
 	/* Set port settings for canonical input processing */
 	tp.c_cflag = B0 | CS8 | CLOCAL | CREAD | HUPCL;
-	if (__with_odd_parity) {
+	if (with_odd_parity) {
 		tp.c_cflag |= (PARENB | PARODD);
 		tp.c_iflag = 0;
 	} else
 		tp.c_iflag = IGNPAR;
-	if (__with_hw_handshake)
+	if (with_hw_handshake)
 		tp.c_cflag |= CRTSCTS;
 	else
 		tp.c_cflag &= ~CRTSCTS;
@@ -324,7 +324,7 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 	/* We need to supply FNONBLOCK (or O_NONBLOCK) again as it would get reset
 	 * by F_SETFL as a side-effect!
 	 */
-	retcode = fcntl(fd, F_SETFL, (__with_async ? FASYNC : 0) | FNONBLOCK);
+	retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | FNONBLOCK);
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
 		serial_close(fd);
@@ -335,23 +335,23 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 }
 
 /* Set the DTR and RTS bit of the serial device. */
-void serial_setdtrrts(int __fd, int __dtr, int __rts)
+void serial_setdtrrts(int fd, int dtr, int rts)
 {
 	unsigned int flags;
 
 	flags = TIOCM_DTR;
 
-	if (__dtr)
-		ioctl(__fd, TIOCMBIS, &flags);
+	if (dtr)
+		ioctl(fd, TIOCMBIS, &flags);
 	else
-		ioctl(__fd, TIOCMBIC, &flags);
+		ioctl(fd, TIOCMBIC, &flags);
 
 	flags = TIOCM_RTS;
 
-	if (__rts)
-		ioctl(__fd, TIOCMBIS, &flags);
+	if (rts)
+		ioctl(fd, TIOCMBIS, &flags);
 	else
-		ioctl(__fd, TIOCMBIC, &flags);
+		ioctl(fd, TIOCMBIC, &flags);
 }
 
 
@@ -369,7 +369,7 @@ int serial_select(int fd, struct timeval *timeout)
 /* Change the speed of the serial device.
  * RETURNS: Success
  */
-GSM_Error serial_changespeed(int __fd, int __speed)
+GSM_Error serial_changespeed(int fd, int speed)
 {
 	GSM_Error retcode = GE_NONE;
 #ifndef SGTTY
@@ -377,9 +377,9 @@ GSM_Error serial_changespeed(int __fd, int __speed)
 #else
 	struct sgttyb t;
 #endif
-	int speed = B9600;
+	int new_speed = B9600;
 
-	switch (__speed) {
+	switch (speed) {
 	case 9600:
 		speed = B9600;
 		break;
@@ -396,46 +396,46 @@ GSM_Error serial_changespeed(int __fd, int __speed)
 		speed = B115200;
 		break;
 	default:
-		fprintf(stderr, _("Serial port speed %d not supported!\n"), __speed);
+		fprintf(stderr, _("Serial port speed %d not supported!\n"), speed);
 		return(GE_NOTSUPPORTED);
 	}
 
 #ifndef SGTTY
-	if (tcgetattr(__fd, &t)) retcode = GE_INTERNALERROR;
+	if (tcgetattr(fd, &t)) retcode = GE_INTERNALERROR;
 
-	if (cfsetspeed(&t, speed) == -1) {
+	if (cfsetspeed(&t, new_speed) == -1) {
 		dprintf("Serial port speed setting failed\n");
 		retcode = GE_INTERNALERROR;
 	}
 
-	tcsetattr(__fd, TCSADRAIN, &t);
+	tcsetattr(fd, TCSADRAIN, &t);
 #else
-	if (ioctl(__fd, TIOCGETP, &t)) retcode = GE_INTERNALERROR;
+	if (ioctl(fd, TIOCGETP, &t)) retcode = GE_INTERNALERROR;
 
-	t.sg_ispeed = speed;
-	t.sg_ospeed = speed;
+	t.sg_ispeed = new_speed;
+	t.sg_ospeed = new_speed;
 
-	if (ioctl(__fd, TIOCSETN, &t)) retcode = GE_INTERNALERROR;
+	if (ioctl(fd, TIOCSETN, &t)) retcode = GE_INTERNALERROR;
 #endif
 	return(retcode);
 }
 
 /* Read from serial device. */
-size_t serial_read(int __fd, __ptr_t __buf, size_t __nbytes)
+size_t serial_read(int fd, __ptr_t buf, size_t nbytes)
 {
-	return (read(__fd, __buf, __nbytes));
+	return (read(fd, buf, nbytes));
 }
 
 #if !defined(TIOCMGET) && defined(TIOCMODG)
 #  define TIOCMGET TIOCMODG
 #endif
 
-static void check_dcd(int __fd)
+static void check_dcd(int fd)
 {
 #ifdef TIOCMGET
 	int mcs;
 
-	if (ioctl(__fd, TIOCMGET, &mcs) || !(mcs & TIOCM_CAR)) {
+	if (ioctl(fd, TIOCMGET, &mcs) || !(mcs & TIOCM_CAR)) {
 		fprintf(stderr, _("ERROR: Modem DCD is down and global/require_dcd parameter is set!\n"));
 		exit(EXIT_FAILURE);		/* Hard quit of all threads */
 	}
@@ -445,7 +445,7 @@ static void check_dcd(int __fd)
 }
 
 /* Write to serial device. */
-size_t serial_write(int __fd, __const __ptr_t __buf, size_t __n)
+size_t serial_write(int fd, const __ptr_t buf, size_t n)
 {
 	size_t r = 0;
 	ssize_t got;
@@ -468,17 +468,17 @@ size_t serial_write(int __fd, __const __ptr_t __buf, size_t __n)
 	}
 
 	if (require_dcd)
-		check_dcd(__fd);
+		check_dcd(fd);
 
 	if (serial_write_usleep < 0)
-		return(write(__fd, __buf, __n));
+		return(write(fd, buf, n));
 
-	while (__n > 0) {
-		got = write(__fd, __buf, 1);
+	while (n > 0) {
+		got = write(fd, buf, 1);
 		if (got <= 0)
 			return((!r ? -1 : r));
-		__buf++;
-		__n--;
+		buf++;
+		n--;
 		r++;
 		if (serial_write_usleep)
 			usleep(serial_write_usleep);

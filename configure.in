@@ -240,9 +240,17 @@ AC_TRY_LINK([#include <time.h>],
 dnl The following is taken from inn sources
 AC_MSG_CHECKING(for timersub)
 AC_TRY_LINK([#include <sys/time.h>],
-        [timersub(NULL, NULL, NULL)],
+        [struct timeval tv; timersub(&tv, &tv, &tv)],
         [AC_DEFINE(HAVE_TIMEOPS)
          AC_DEFINE(HAVE_TIMEOPS)
+         AC_MSG_RESULT(yes)],
+        [AC_MSG_RESULT(no)])
+
+AC_MSG_CHECKING(for gettimeofday)
+AC_TRY_LINK([#include <sys/time.h>],
+        [gettimeofday(0, 0)],
+        [AC_DEFINE(HAVE_GETTIMEOFDAY)
+         AC_DEFINE(HAVE_GETTIMEOFDAY)
          AC_MSG_RESULT(yes)],
         [AC_MSG_RESULT(no)])
 

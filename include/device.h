@@ -14,8 +14,8 @@
 
 */
 
-#ifndef __device_h
-#define __device_h
+#ifndef __device_h_
+#define __device_h_
 
 #include <unistd.h>
 #include "misc.h"
@@ -23,16 +23,24 @@
 
 int device_getfd(void);
 
-int device_open(__const char *__file, int __with_odd_parity, int __with_async, int __with_hw_handshake, GSM_ConnectionType device_type);
+int device_open(const char *file, int with_odd_parity, int with_async, int with_hw_handshake, GSM_ConnectionType device_type);
 void device_close(void);
 void device_reset(void);
 
-void device_setdtrrts(int __dtr, int __rts);
-void device_changespeed(int __speed);
+void device_setdtrrts(int dtr, int rts);
+void device_changespeed(int speed);
 
-size_t device_read(__ptr_t __buf, size_t __nbytes);
-size_t device_write(__const __ptr_t __buf, size_t __n);
+size_t device_read(__ptr_t buf, size_t nbytes);
+size_t device_write(const __ptr_t buf, size_t n);
 
 int device_select(struct timeval *timeout);
 
-#endif  /* __device_h */
+#ifndef WIN32
+#  include "devices/unixserial.h"
+#  include "devices/unixirda.h"
+#  include "devices/tekram.h"
+#else
+#  include "devices/winserial.h"
+#endif
+
+#endif  /* __device_h_ */

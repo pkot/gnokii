@@ -31,39 +31,39 @@
 #include <string.h>
 
 #ifndef WIN32
-#include "devices/unixserial.h"
+#  include "devices/unixserial.h"
 #else
-#include "winserial.h"
+#  include "winserial.h"
 #endif
 
 #include "devices/tekram.h"
 
-int tekram_open(__const char *__file)
+int tekram_open(const char *file)
 {
-	return (serial_open(__file, O_RDWR | O_NOCTTY | O_NONBLOCK));
+	return (serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK));
 }
 
-void tekram_close(int __fd)
+void tekram_close(int fd)
 {
-	serial_setdtrrts(__fd, 0, 0);
-	serial_close(__fd);
+	serial_setdtrrts(fd, 0, 0);
+	serial_close(fd);
 }
 
-void tekram_reset(int __fd)
+void tekram_reset(int fd)
 {
-	serial_setdtrrts(__fd, 0, 0);
+	serial_setdtrrts(fd, 0, 0);
 	usleep(50000);
-	serial_setdtrrts(__fd, 1, 0);
+	serial_setdtrrts(fd, 1, 0);
 	usleep(1000);
-	serial_setdtrrts(__fd, 1, 1);
+	serial_setdtrrts(fd, 1, 1);
 	usleep(50);
-	serial_changespeed(__fd, 9600);
+	serial_changespeed(fd, 9600);
 }
 
-void tekram_changespeed(int __fd, int __speed)
+void tekram_changespeed(int fd, int speed)
 {
 	unsigned char speedbyte;
-	switch (__speed) {
+	switch (speed) {
 	default:
 	case 9600:	speedbyte = TEKRAM_PW | TEKRAM_B9600;   break;
 	case 19200:	speedbyte = TEKRAM_PW | TEKRAM_B19200;  break;
@@ -71,23 +71,23 @@ void tekram_changespeed(int __fd, int __speed)
 	case 57600:	speedbyte = TEKRAM_PW | TEKRAM_B57600;  break;
 	case 115200:	speedbyte = TEKRAM_PW | TEKRAM_B115200; break;
 	}
-	tekram_reset(__fd);
-	serial_setdtrrts(__fd, 1, 0);
+	tekram_reset(fd);
+	serial_setdtrrts(fd, 1, 0);
 	usleep(7);
-	serial_write(__fd, &speedbyte, 1);
+	serial_write(fd, &speedbyte, 1);
 	usleep(100000);
-	serial_setdtrrts(__fd, 1, 1);
-	serial_changespeed(__fd, __speed);
+	serial_setdtrrts(fd, 1, 1);
+	serial_changespeed(fd, speed);
 }
 
-size_t tekram_read(int __fd, __ptr_t __buf, size_t __nbytes)
+size_t tekram_read(int fd, __ptr_t buf, size_t nbytes)
 {
-	return (serial_read(__fd, __buf, __nbytes));
+	return (serial_read(fd, buf, nbytes));
 }
 
-size_t tekram_write(int __fd, __const __ptr_t __buf, size_t __n)
+size_t tekram_write(int fd, const __ptr_t buf, size_t n)
 {
-	return (serial_write(__fd, __buf, __n));
+	return (serial_write(fd, buf, n));
 }
 
 int tekram_select(int fd, struct timeval *timeout)

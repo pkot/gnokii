@@ -1279,6 +1279,7 @@ static void callnotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
 		fprintf(stdout, "CALL %d RETRIEVED FROM HOLD\n", CallInfo->CallID);
 		break;
 	default:
+		break;
 	}
 }
 
@@ -2333,7 +2334,9 @@ static int displayoutput(void)
 
 	error = SM_Functions(GOP_DisplayOutput, &data, &State);
 	console_raw();
+#ifndef WIN32
 	fcntl(fileno(stdin), F_SETFL, O_NONBLOCK);
+#endif
 
 	if (error == GE_NONE) {
 

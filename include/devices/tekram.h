@@ -30,9 +30,6 @@
 
 #ifdef WIN32
 #  include <stddef.h>
-  /* FIXME: this should be solved in config.h in 0.4.0 */
-#  define __const const
-	typedef void * __ptr_t;
 #else
 #  include <unistd.h>
 #endif	/* WIN32 */
@@ -47,14 +44,14 @@
 
 #define TEKRAM_PW      0x10 /* Pulse select bit */
 
-int tekram_open(__const char *__file);
-void tekram_close(int __fd);
+int tekram_open(const char *file);
+void tekram_close(int fd);
 
-void tekram_setdtrrts(int __fd, int __dtr, int __rts);
-void tekram_changespeed(int __fd, int __speed);
+void tekram_setdtrrts(int fd, int dtr, int rts);
+void tekram_changespeed(int fd, int speed);
 
-size_t tekram_read(int __fd, __ptr_t __buf, size_t __nbytes);
-size_t tekram_write(int __fd, __const __ptr_t __buf, size_t __n);
+size_t tekram_read(int fd, __ptr_t buf, size_t nbytes);
+size_t tekram_write(int fd, const __ptr_t buf, size_t n);
 
 int tekram_select(int fd, struct timeval *timeout);
 

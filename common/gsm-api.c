@@ -74,7 +74,6 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
 {
 	GSM_Error ret;
-#ifndef WIN32  /* MB21 not supported in win32 */
 
 	sm->Link.ConnectionType = connection;
 	sm->Link.InitLength = atoi(initlength);
@@ -85,9 +84,10 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
 	REGISTER_PHONE(nokia_6510, NULL);
 	REGISTER_PHONE(nokia_6100, NULL);
 	REGISTER_PHONE(nokia_3110, NULL);
+#ifndef WIN32
 	REGISTER_PHONE(nokia_2110, NULL);
+#endif
 	REGISTER_PHONE(at, model);
 
-#endif /* WIN32 */
 	return (GE_UNKNOWNMODEL);
 }

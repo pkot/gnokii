@@ -18,6 +18,7 @@
 #define __misc_h
 
 #include "config.h"
+#include "compat.h"
 
 /* Some general defines. */
 
@@ -57,25 +58,21 @@
 
 /* A define to make debug printfs neat */
 #ifdef __GNUC__
+#  /* Use it for error reporting */
+#  define dump(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0)
 #  ifndef DEBUG
 #    define dprintf(a...) do { } while (0)
 #  else
 #    define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0)
 #  endif /* DEBUG */
 #else
-#    define dprintf printf
+#  define dump printf
+#  define dprintf printf
 #endif /* __GNUC__ */
 
 #include <stdarg.h>
 extern void (*GSM_ELogHandler)(const char *fmt, va_list ap);
 extern void GSM_WriteErrorLog(const char *fmt, ...);
-
-/* Use it for error reporting */
-#ifdef __GNUC__
-#  define dump(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0)
-#else
-#  define dump printf
-#endif
 
 /* Use gsprintf instead of sprintf and sprintf */
 #ifdef HAVE_SNPRINTF
@@ -146,49 +143,16 @@ extern int gvasprintf(char **destp, const char *fmt, va_list ap);
 #  endif
 #endif
 
+#include <sys/types.h>
+#ifndef _BSD_SOURCE
+	typedef unsigned char u_char;
+#endif
+
 /* This one is for FreeBSD and similar systems without __ptr_t_ */
 /* FIXME: autoconf should take care of this. */
 #ifndef __ptr_t
 	typedef void * __ptr_t;
 #endif /* __ptr_t */
-
-
-/* Add here any timer operations which are not supported by libc5 */
-
-#ifndef HAVE_TIMEOPS
-#  ifdef WIN32
-
-#    include <windows.h>
-#    include <sys/timeb.h>
-#    define timersub(a, b, result)
-	do {
-		(result)->tv_sec = (a)->time - (b)->time;
-		(result)->tv_usec = ((a)->millitm - (b)->millitm) * 1000;
-		if ((result)->tv_usec < 0) {
-			--(result)->tv_sec;
-			(result)->tv_usec += 1000000;
-		}
-	} while (0)
-#    define gettimeofday(a, b) _ftime(a)
-
-#  else /* !WIN32 */
-#    include <sys/time.h>
-
-#    ifndef timersub
-#      define timersub(a, b, result)                               \
-	do {                                                       \
-		(result)->tv_sec = (a)->tv_sec - (b)->tv_sec;      \
-		(result)->tv_usec = (a)->tv_usec - (b)->tv_usec;   \
-		if ((result)->tv_usec < 0) {                       \
-			--(result)->tv_sec;                        \
-			(result)->tv_usec += 1000000;              \
-		}                                                  \
-	} while (0)
-#    endif /* timersub */
-
-#  endif /* WIN32 */
-#endif /* HAVE_TIMEOPS */
-
 
 #include <stdio.h>
 extern int GetLine(FILE *File, char *Line, int count);
@@ -217,5 +181,6 @@ extern PhoneModel *GetPhoneModel (const char *);
 
 extern char *lock_device(const char*);
 extern bool unlock_device(char *);
+
 
 #endif /* __misc_h */

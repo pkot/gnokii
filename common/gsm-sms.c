@@ -59,6 +59,7 @@ static struct udh_data headers[] = {
    destination number) for SMS sending function. */
 int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
 {
+#ifndef WIN32
 	unsigned char *IN = Number;  /* Pointer to the input number */
 	unsigned char *OUT = Output; /* Pointer to the output */
 	int count = 0; /* This variable is used to notify us about count of already
@@ -94,6 +95,7 @@ int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
 	}
 
 	return (2 * (OUT - Output - 1) - (count % 2));
+#endif
 }
 
 char *GetBCDNumber(u8 *Number)

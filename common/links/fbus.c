@@ -34,12 +34,8 @@
 #include "gsm-statemachine.h"
 #include "links/utils.h"
 
-#ifndef WIN32
-#  include "device.h"
-#else
-#  include "win32/winserial.h"
-#  define device_write(a, b) WriteCommBlock(a, b)
-#  define device_read(a, b) ReadCommBlock(a, b)
+#include "device.h"
+#ifdef WIN32
 #  define sleep(x) Sleep((x) * 1000)
 #  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif
@@ -64,11 +60,7 @@ bool FBUS_OpenSerial(bool dlr3)
 {
 	if (dlr3) dlr3 = 1;
 	/* Open device. */
-#ifdef WIN32
-	if (OpenConnection(glink->PortDevice, FBUS_RX_StateMachine, NULL)) {
-#else
 	if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
-#endif
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -131,7 +123,6 @@ bool FBUS_OpenIR(void)
 
 void FBUS_RX_StateMachine(unsigned char rx_byte)
 {
-
 	struct timeval time_diff;
 	FBUS_IncomingFrame *i = &flink.i;
 	int frm_num, seq_num;
@@ -333,7 +324,6 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 GSM_Error FBUS_Loop(struct timeval *timeout)
 {
-#ifndef WIN32
 	unsigned char buffer[255];
 	int count, res;
 
@@ -350,9 +340,6 @@ GSM_Error FBUS_Loop(struct timeval *timeout)
 		return GE_NONE;
 	else
 		return GE_INTERNALERROR;
-#else
-	return GE_NONE;
-#endif
 }
 
 
@@ -363,7 +350,6 @@ GSM_Error FBUS_Loop(struct timeval *timeout)
 
 int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 * buffer)
 {
-
 	u8 out_buffer[FBUS_MAX_TRANSMIT_LENGTH + 5];
 	int count, current = 0;
 	unsigned char checksum;
@@ -429,7 +415,6 @@ int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 * buffer)
 
 GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message)
 {
-
 	u8 seqnum, frame_buffer[FBUS_MAX_CONTENT_LENGTH + 2];
 	u8 nom, lml;		/* number of messages, last message len */
 	int i;
@@ -477,7 +462,6 @@ GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message)
 
 int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
 {
-
 	unsigned char request[2];
 
 	request[0] = message_type;

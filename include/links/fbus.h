@@ -23,10 +23,11 @@
 
 #include <time.h>
 #include "gsm-statemachine.h"
+#include "config.h"
+#include "compat.h"
 
 #ifdef WIN32
-#include <sys/types.h>
-#include <sys/timeb.h>
+#  include <sys/types.h>
 #endif
 
 #define FBUS_MAX_FRAME_LENGTH 256
@@ -72,13 +73,8 @@ enum FBUS_RX_States {
 typedef struct{
 	int checksum[2];
 	int BufferCount;
-#ifndef WIN32
 	struct timeval time_now;
 	struct timeval time_last;
-#else
-	struct _timeb time_now;
-	struct _timeb time_last;
-#endif
 	enum FBUS_RX_States state;
 	int MessageSource;
 	int MessageDestination;

@@ -24,6 +24,9 @@
 /* Define if you have timersub() */
 #undef HAVE_TIMEOPS
 
+/* Define if you have gettimeofday() */
+#undef HAVE_GETTIMEOFDAY
+
 /* Define if you have tm_gmtoff field in tm structure */
 #undef HAVE_TM_GMTON
 

@@ -29,8 +29,9 @@
 #include "phones/atsie.h"
 #include "phones/atnok.h"
 #include "links/atbus.h"
+#ifndef WIN32
 #include "links/cbus.h"
-
+#endif
 
 static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state);
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);

@@ -17,9 +17,11 @@
 
 */
 
-#include <config.h>
+#include "config.h"
 
-/* This is the right way to include stdlib with __USE_XOPEN defined */
+/* This is the correct way to include stdlib with __USE_XOPEN defined.
+ * Needed for clean unlockpt() declaration.
+ */
 #ifdef USE_UNIX98PTYS
 #  define _XOPEN_SOURCE 500
 #  include <features.h>

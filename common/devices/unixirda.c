@@ -145,14 +145,14 @@ int irda_close(int fd)
 	return close(fd);
 }
 
-int irda_write(int __fd, __const __ptr_t __bytes, int __size)
+int irda_write(int fd, const __ptr_t bytes, int size)
 {
-	return (send(__fd, __bytes, __size, 0));
+	return (send(fd, bytes, size, 0));
 }
 
-int irda_read(int __fd, __ptr_t __bytes, int __size)
+int irda_read(int fd, __ptr_t bytes, int size)
 {
-	return (recv(__fd, __bytes, __size, 0));
+	return (recv(fd, bytes, size, 0));
 }
 
 int irda_select(int fd, struct timeval *timeout)

@@ -15,6 +15,9 @@
 
 */
 
+#ifndef __atgen_h_
+#define __atgen_h_
+
 typedef enum {
 	GOPAT_GetCharset = GOP_Max,
 	GOPAT_SetPDUMode,
@@ -53,3 +56,4 @@ void splitlines(AT_LineBuffer *buf);
 char *skipcrlf(unsigned char *str);
 char *findcrlf(unsigned char *str, int test, int maxlength);
 
+#endif

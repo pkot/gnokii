@@ -20,7 +20,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <unistd.h>
+#ifndef WIN32
+#  include <unistd.h>
+#endif
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -33,7 +35,7 @@
 #include "gsm-api.h"
 
 #ifdef WIN32
-#define snprintf _snprintf
+#  define snprintf _snprintf
 #endif
 
 /* Some globals */

@@ -1,4 +1,4 @@
-0.4.0pre15(not released yet)
+0.4.0pre15
 ==========
  * Really apply all fixes from Jan Kratochvil             (Pawel Kot)
  * 6110 series updates
@@ -53,6 +53,8 @@
     o initial revision                                 (Markus Plail)
  * 7110 series updates
     o potentially fix SendSMS problem                     (Pawel Kot)
+ * win32 fixes                                        (Marcin Wiacek)
+ * timersub fixes                                    (BORBELY Zoltan)
 
 0.4.0pre14
 ==========
