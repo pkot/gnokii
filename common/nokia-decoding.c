@@ -38,7 +38,7 @@
 gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			  int blocks, int memtype, int speeddial_pos)
 {
-	int subblock_count = 0, i, j;
+	int subblock_count = 0, i;
 	gn_phonebook_subentry* subentry = NULL;
 
 

@@ -243,7 +243,6 @@ void gn_atem_cid_out(gn_call_info *CallInfo)
 	struct tm *now;
 	time_t nowh;
 	char buf[14]; /* 7 for "DATE = " + 4 digits + \n + \r + \0 */
-	int i;
 
 	nowh = time(NULL);
 	now = localtime(&nowh);
