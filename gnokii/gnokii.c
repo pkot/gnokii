@@ -158,6 +158,8 @@ typedef enum {
 	OPT_WRITEWAPSETTING,
 	OPT_ACTIVATEWAPSETTING,
 	OPT_DELETEWAPBOOKMARK,
+	OPT_DELETESMSFOLDER,
+	OPT_CREATESMSFOLDER,
 } opt_index;
 
 static char *model;      /* Model from .gnokiirc file. */
@@ -271,6 +273,8 @@ static int usage(FILE *f)
 		     "          gnokii --activatewapsetting number\n"
 		     "          gnokii --getspeeddial number\n"
 		     "          gnokii --setspeeddial number memory_type location\n"
+		     "          gnokii --createsmsfolder name\n"
+		     "          gnokii --deletesmsfolder number\n"
 		     "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
 		     "          gnokii --deletesms memory_type start [end]\n"
 		     "          gnokii --sendsms destination [--smsc message_center_number |\n"
@@ -694,7 +698,7 @@ static int savesms(int argc, char *argv[])
 		{ NULL,       0,                 NULL, 0}
 	};
 
-
+	dprintf("first argument: %s\n", argv[0]);
 	gn_sms_default_submit(&sms);
 
 	/* the nokia 7110 will choke if no number is present when we */
@@ -702,15 +706,17 @@ static int savesms(int argc, char *argv[])
 	/* TODO should this be handled here? report an error instead */
 	/* of setting an default? */
 	strcpy(sms.Remote.Number, "0");
-	sms.Remote.Type = SMS_Unknown;
+	sms.Remote.Type = SMS_International;
 	sms.Number = 0;
 	input_len = GSM_MAX_SMS_LENGTH;
 
 	optarg = NULL;
 	optind = 0;
+	argv--;
+	argc++;
 
 	/* Option parsing */
-	while ((i = getopt_long(argc, argv, "rsf:id", options, NULL)) != -1) {
+	while ((i = getopt_long(argc, argv, "0:1:2:3:rsf:id", options, NULL)) != -1) {
 		switch (i) {
 		case '0': /* SMSC number */
 			snprintf(sms.SMSC.Number, sizeof(sms.SMSC.Number) - 1, "%s", optarg);
@@ -737,10 +743,12 @@ static int savesms(int argc, char *argv[])
 				sms.Remote.Type = SMS_International;
 			else
 				sms.Remote.Type = SMS_Unknown;
-			strncpy(sms.Remote.Number, optarg, sizeof(sms.Remote.Number));
+			snprintf(sms.Remote.Number, MAX_NUMBER_LEN, "%s", optarg);
+			dprintf("Remote number: %s\n", sms.Remote.Number);
 			break;
 		case '3': /* location to write to */
 			sms.Number = atoi(optarg);
+			dprintf("Location: %i\n", sms.Number);
 			break;
 		case 's': /* mark the message as sent */
 		case 'r': /* mark the message as read */
@@ -798,7 +806,8 @@ static int savesms(int argc, char *argv[])
 		data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
 		data.MessageCenter->No = 1;
 		if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE) {
-			strcpy(sms.SMSC.Number, data.MessageCenter->SMSC.Number);
+			snprintf(sms.SMSC.Number, MAX_NUMBER_LEN, "%s", data.MessageCenter->SMSC.Number);
+			dprintf("SMSC number: %s\n", sms.SMSC.Number);
 			sms.SMSC.Type = data.MessageCenter->SMSC.Type;
 		}
 		free(data.MessageCenter);
@@ -827,7 +836,7 @@ static int savesms(int argc, char *argv[])
 	}
 	if (memory_type[0] != '\0')
 		sms.MemoryType = StrToMemoryType(memory_type);
-	dprintf("mt: %s\n", memory_type);
+	dprintf("\nmt: %s\n", memory_type);
 
 	sms.UserData[0].Type = SMS_PlainText;
 	strncpy(sms.UserData[0].u.Text, message_buffer, chars_read);
@@ -1030,6 +1039,51 @@ static int setsmsc()
 		}
 	}
 
+	return GE_NONE;
+}
+
+/* Creating SMS folder. */
+static int createsmsfolder(char *Name)
+{
+	SMS_Folder	folder;
+	GSM_Data	data;
+	GSM_Error	error;
+
+	GSM_DataClear(&data);
+
+	snprintf(folder.Name, MAX_SMS_FOLDER_NAME_LENGTH, "%s", Name);
+	data.SMSFolder = &folder;
+
+	error = SM_Functions(GOP_CreateSMSFolder, &data, &State);
+	if (error != GE_NONE) {
+		fprintf(stderr, _("Error: %s\n"), print_error(error));
+		return error;
+	} else 
+		fprintf(stderr, _("Folder with name: %s successfully created!\n"), folder.Name);
+	return GE_NONE;
+}
+
+/* Creating SMS folder. */
+static int deletesmsfolder(char *Number)
+{
+	SMS_Folder	folder;
+	GSM_Data	data;
+	GSM_Error	error;
+
+	GSM_DataClear(&data);
+
+	folder.FolderID = atoi(Number);
+	if (folder.Number > 0 && folder.Number < MAX_SMS_FOLDERS + 1)
+		data.SMSFolder = &folder;
+	else
+		fprintf(stderr, _("Error: Number must be between 1 and %i!\n"), MAX_SMS_FOLDERS);
+
+	error = SM_Functions(GOP_DeleteSMSFolder, &data, &State);
+	if (error != GE_NONE) {
+		fprintf(stderr, _("Error: %s\n"), print_error(error));
+		return error;
+	} else 
+		fprintf(stderr, _("Number %i of 'My Folders' successfully deleted!\n"), folder.Number);
 	return GE_NONE;
 }
 
@@ -4303,6 +4357,12 @@ int main(int argc, char *argv[])
 		/* Set speed dial mode */
 		{ "setspeeddial",       required_argument, NULL, OPT_SETSPEEDDIAL },
 
+		/* Create SMS folder mode */
+		{ "createsmsfolder",    required_argument, NULL, OPT_CREATESMSFOLDER },
+
+		/* Delete SMS folder mode */
+		{ "deletesmsfolder",    required_argument, NULL, OPT_DELETESMSFOLDER },
+
 		/* Get SMS message mode */
 		{ "getsms",             required_argument, NULL, OPT_GETSMS },
 
@@ -4425,6 +4485,8 @@ int main(int argc, char *argv[])
 		{ OPT_GETPHONEBOOK,      2, 4, 0 },
 		{ OPT_GETSPEEDDIAL,      1, 1, 0 },
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
+		{ OPT_CREATESMSFOLDER,      1, 1, 0 },
+		{ OPT_DELETESMSFOLDER,      1, 1, 0 },
 		{ OPT_GETSMS,            2, 5, 0 },
 		{ OPT_DELETESMS,         2, 3, 0 },
 		{ OPT_SENDSMS,           1, 10, 0 },
@@ -4590,6 +4652,12 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_SETSPEEDDIAL:
 			rc = setspeeddial(nargv);
+			break;
+		case OPT_CREATESMSFOLDER:
+			rc = createsmsfolder(optarg);
+			break;
+		case OPT_DELETESMSFOLDER:
+			rc = deletesmsfolder(optarg);
 			break;
 		case OPT_GETSMS:
 			rc = getsms(argc, argv);
