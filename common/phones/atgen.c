@@ -629,15 +629,12 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	/* Prepare the message and count the size */
 	memcpy(req2, data->RawSMS->MessageCenter, data->RawSMS->MessageCenter[0] + 1);
 	offset += data->RawSMS->MessageCenter[0];
-	dprintf("offset: %d\n", offset);
 
 	req2[offset + 1] = 0x01 | 0x10; /* Validity period in relative format */
-	dprintf("%02x\n", req2[offset + 1]);
-	if (data->RawSMS->RejectDuplicates) { req2[offset + 1] |= 0x04; dprintf("dupa1\n"); }
-	if (data->RawSMS->Report) { req2[offset + 1] |= 0x20; dprintf("dupa2\n"); }
-	if (data->RawSMS->UDHIndicator) { req2[offset + 1] |= 0x40; dprintf("dupa3\n"); }
-	if (data->RawSMS->ReplyViaSameSMSC) { req2[offset + 1] |= 0x80; dprintf("dupa4\n"); }
-	dprintf("%02x\n", req2[offset + 1]);
+	if (data->RawSMS->RejectDuplicates) req2[offset + 1] |= 0x04;
+	if (data->RawSMS->Report) req2[offset + 1] |= 0x20;
+	if (data->RawSMS->UDHIndicator) req2[offset + 1] |= 0x40;
+	if (data->RawSMS->ReplyViaSameSMSC) req2[offset + 1] |= 0x80;
 	req2[offset + 2] = 0x00; /* Message Reference */
 
 	tmp = data->RawSMS->RemoteNumber[0];
@@ -645,7 +642,6 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	tmp /= 2;
 	memcpy(req2 + offset + 3, data->RawSMS->RemoteNumber, tmp + 2);
 	offset += tmp + 1;
-	dprintf("offset: %d\n", offset);
 
 	req2[offset + 4] = data->RawSMS->PID;
 	req2[offset + 5] = data->RawSMS->DCS;
