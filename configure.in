@@ -85,12 +85,7 @@ if test "$USE_NLS" = "yes"; then
 	AC_SUBST(HAVE_LOCALE_H)  
 
 	CPPFLAGS="$CPPFLAGS $NLS_CFLAGS"
-	AC_TRY_CPP([#include <libintl.h>],
-		   [ AC_DEFINE(HAVE_LIBINTL_H)
-		     AC_MSG_RESULT([checking for libintl.h... yes]) ],
-		   [ AC_MSG_WARN(not found header file: libintl.h !!!)
-		     USE_NLS=no ]
-	)
+	AC_CHECK_HEADERS(libintl.h,, USE_NLS=no)
 fi
 
 if test "$USE_NLS" = "yes"; then
@@ -230,56 +225,58 @@ if test "x$PTHREAD_LIBS" = xerror; then
       AC_MSG_ERROR(not found library: pthread !!!))
 fi
 
-dnl The following is taken from inn sources
-AC_MSG_CHECKING(for tm_gmtoff in struct tm)
-AC_TRY_LINK([#include <time.h>],
-        [struct tm t; t.tm_gmtoff = 0],
-        [AC_MSG_RESULT(yes)
-         AC_DEFINE(HAVE_TM_GMTON)],
-        [AC_MSG_RESULT(no)])
+AC_CACHE_CHECK(for tm_gmtoff in struct tm, ac_cv_have_tm_gmtoff,
+	[AC_TRY_LINK([#include <time.h>],
+		[struct tm t; t.tm_gmtoff = 0],
+		ac_cv_have_tm_gmtoff=yes,
+		ac_cv_have_tm_gmtoff=no)])
+if test $ac_cv_have_tm_gmtoff = yes; then
+	AC_DEFINE(HAVE_TM_GMTON)
+fi
 
-dnl The following is taken from inn sources
-AC_MSG_CHECKING(for timer operations)
-AC_TRY_LINK([#include <sys/time.h>],
-        [struct timeval tv; timerisset(&tv); timerclear(&tv); timercmp(&tv, &tv, <); timeradd(&tv, &tv, &tv); timersub(&tv, &tv, &tv); ],
-        [AC_DEFINE(HAVE_TIMEOPS)
-         AC_MSG_RESULT(yes)],
-        [AC_MSG_RESULT(no)])
-
-AC_MSG_CHECKING(for gettimeofday)
-AC_TRY_LINK([#include <sys/time.h>],
-        [gettimeofday(0, 0)],
-        [AC_DEFINE(HAVE_GETTIMEOFDAY)
-         AC_MSG_RESULT(yes)],
-        [AC_MSG_RESULT(no)])
+AC_CACHE_CHECK(for timer operations, ac_cv_have_timeops,
+	[AC_TRY_LINK([#include <sys/time.h>],
+		[struct timeval tv; timerisset(&tv); timerclear(&tv); timercmp(&tv, &tv, <); timeradd(&tv, &tv, &tv); timersub(&tv, &tv, &tv); ],
+		ac_cv_have_timeops=yes,
+		ac_cv_have_timeops=no)])
+if test $ac_cv_have_timeops = yes; then
+        AC_DEFINE(HAVE_TIMEOPS)
+fi
 
 have_termios="no"
 dnl Checking for setspeed in termios.h
-AC_MSG_CHECKING(for cfsetspeed in termios.h)
-AC_TRY_LINK([#include <termios.h>],
-        [struct termios t; cfsetspeed(&t, B9600);],
-        [AC_DEFINE(HAVE_CFSETSPEED)
-         have_termios="yes"
-         AC_MSG_RESULT(yes)],
-        AC_MSG_RESULT(no))
+AC_CACHE_CHECK(for cfsetspeed in termios.h, ac_cv_have_cfsetspeed,
+	[AC_TRY_LINK([#include <termios.h>],
+		[struct termios t; cfsetspeed(&t, B9600);],
+		ac_cv_have_cfsetspeed=yes,
+		ac_cv_have_cfsetspeed=no)])
+if test $ac_cv_have_cfsetspeed = yes; then
+        AC_DEFINE(HAVE_CFSETSPEED)
+        have_termios="yes"
+fi
 
 if test $have_termios = "no"; then
-   AC_MSG_CHECKING(for cfsetispeed and cfsetospeed in termios.h)
-   AC_TRY_LINK([#include <termios.h>],
-               [struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);],
-               [AC_DEFINE(HAVE_CFSETISPEED)
-                have_termios="yes"
-                AC_MSG_RESULT(yes)],
-               [AC_MSG_RESULT(no)])
+	AC_CACHE_CHECK(for cfsetispeed and cfsetospeed in termios.h, ac_cv_have_cfsetiospeed,
+		[AC_TRY_LINK([#include <termios.h>],
+			[struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);],
+			ac_cv_have_cfsetiospeed=yes,
+			ac_cv_have_cfsetiospeed=no)])
+	if test $ac_cv_have_cfsetiospeed = yes; then
+		AC_DEFINE(HAVE_CFSETISPEED)
+		AC_DEFINE(HAVE_CFSETOSPEED)
+		have_termios="yes"
+	fi
+fi
 
-   if test $have_termios = "no"; then
-      AC_MSG_CHECKING(for c_ispeed and c_ospeed in struct termios)
-      AC_TRY_LINK([#include <termios.h>],
-                  [struct termios t; t.c_iflag = B9600; t.c_oflag = B9600;],
-                  [AC_DEFINE(HAVE_TERMIOS_CSPEED)
-                   AC_MSG_RESULT(yes)],
-                  [AC_MSG_RESULT(no)])
-   fi
+if test $have_termios = "no"; then
+	AC_CACHE_CHECK(for c_ispeed and c_ospeed in struct termios, ac_cv_have_c_iospeed,
+		[AC_TRY_COMPILE([#include <termios.h>],
+			[struct termios t; t.c_iflag = B9600; t.c_oflag = B9600;],
+			ac_cv_have_c_iospeed=yes,
+			ac_cv_have_c_iospeed=yes)])
+	if test ac_cv_have_c_iospeed = yes; then
+		AC_DEFINE(HAVE_TERMIOS_CSPEED)
+	fi
 fi
 
 dnl ======================== Checks for getopt_long support 
@@ -479,7 +476,8 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS(mktime select strdup strstr strtol strtok strsep asprintf vasprintf)
+AC_CHECK_FUNCS(mktime gettimeofday select poll)
+AC_CHECK_FUNCS(strdup strstr strtol strtok strsep asprintf vasprintf)
 AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf,
 	[AC_TRY_RUN([
 #include <stdio.h>

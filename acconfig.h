@@ -46,9 +46,6 @@
 
 /**** Platform specific *****/
 
-/* Define if you have gettimeofday */
-#undef HAVE_GETTIMEOFDAY
-
 /* Define if you have timerisset, timerclear, timercmp, timeradd and timersub */
 #undef HAVE_TIMEOPS
 
@@ -60,6 +57,7 @@
 
 /* Define if you have cfsetispeed and cfsetospeed */
 #undef HAVE_CFSETISPEED
+#undef HAVE_CFSETOSPEED
 
 /* Define if you have c_ispeed and c_ospeed in struct termios */
 #undef HAVE_TERMIOS_CSPEED
@@ -81,9 +79,6 @@
 
 /* Define if you compile for M$ Windows */
 #undef WIN32
-
-/* Define if you have the <libintl.h> header file. */
-#undef HAVE_LIBINTL_H
 
 /* Define if you have the intl library (-lintl). */
 #undef HAVE_LIBINTL
