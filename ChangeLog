@@ -26,6 +26,7 @@
                                                    Marcus Godehardt)
     o ugly hack: networks[] needs to be exportted to gnokii
                                                   (Marcus Godehardt)
+    o VC6 does not have mkdir()                   (Marcus Godehardt)
 
 0.5.0pre6
 =========

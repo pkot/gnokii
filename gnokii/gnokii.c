@@ -4180,7 +4180,11 @@ static gn_error smsslave(gn_sms *message)
 		fprintf(stderr, _("### Exists?!\n"));
 		return GN_ERR_FAILED;
 	}
+#ifndef WIN32
 	mkdir(smsdir, 0700);
+#else
+	_mkdir(smsdir);
+#endif
 	if ((output = fopen(buf, "w+")) == NULL) {
 		fprintf(stderr, _("### Cannot create file %s\n"), buf);
 		return GN_ERR_FAILED;
