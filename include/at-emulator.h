@@ -16,14 +16,18 @@
 #define __at_emulator_h
 
 	/* Prototypes */
-bool	ATEM_Initialise(bool debug_mode);
-int		ATEM_PtySetup(void);
-void    ATEM_SigHandler(int status);
+bool	ATEM_Initialise(int read_fd, int write_fd);
+void	ATEM_HandleIncomingData(char *buffer, int length);
 void	ATEM_InitRegisters(void);
 void	ATEM_StringOut(char *buffer);
 void	ATEM_ParseAT(char *cmd_buffer);
+bool	ATEM_CommandPlusC(char **buf);
 int		ATEM_GetNum(char **p);
 void	ATEM_ModemResult(int code);
+
+	/* Global variables */
+bool	ATEM_Initialised;
+
 
 	/* All defines and prototypes from here down are specific to 
 	   the at-emulator code and so are #ifdef out if __at_emulator_c isn't 

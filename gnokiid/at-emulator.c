@@ -33,17 +33,17 @@
 
 #include "misc.h"
 #include "gsm-common.h"
+#include "gsm-api.h"
 #include "at-emulator.h"
 
-
 	/* Global variables */
+bool	ATEM_Initialised = false;	/* Set to true once initialised */
 
 	/* Local variables */
 
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
 int		PtyWRFD;	/* pty interface - only different in debug mode. */ 
-bool	UseSTDIO;	/* Use STDIO for debugging purposes instead of pty */
-bool	CommandMode;	/* True when in AT mode, false when connected */
+
 u8		ModemRegisters[MAX_MODEM_REGISTERS];
 char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
 int		CurrentCmdBuffer;
@@ -53,10 +53,10 @@ int		CurrentCmdBufferIndex;
 
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
-bool	ATEM_Initialise(bool debug_mode)
+bool	ATEM_Initialise(int read_fd, int write_fd)
 {
-		/* Start in command mode */
-	CommandMode = true;		
+	PtyRDFD = read_fd;
+	PtyWRFD = write_fd;
 
 		/* Initialise command buffer variables */
 	CurrentCmdBuffer = 0;
@@ -65,14 +65,9 @@ bool	ATEM_Initialise(bool debug_mode)
 		/* Initialise registers */
 	ATEM_InitRegisters();
 
-	if (debug_mode == true) {
-		UseSTDIO = true;
-	}
-	else {
-		UseSTDIO = false;
-	}
-
-	ATEM_PtySetup();
+		/* We're ready to roll... */
+	ATEM_Initialised = true;
+	return (true);
 }
 
 	/* Initialise the "registers" used by the virtual modem. */
@@ -91,109 +86,47 @@ void	ATEM_InitRegisters(void)
 }
 
 
-	/* Open pseudo tty interface and (in due course create a symlink
-	   to be /dev/gnokii etc. ) */
-
-int		ATEM_PtySetup(void)
-{
-	int						err;
-    struct termios          new_termios;
-    struct sigaction        sig_io;
-	char					*slave_name;
-
-	if (UseSTDIO) {
-		PtyRDFD = STDIN_FILENO;
-		PtyWRFD = STDOUT_FILENO;
-	}
-	else {
-		PtyRDFD = ATEM_GetMasterPty(&slave_name);
-		if (PtyRDFD < 0) {
-			fprintf (stderr, "Couldn't open pty!\n\r");
-			exit(-1);
-		}
-		PtyWRFD = PtyRDFD;
-
-		fprintf (stderr, "Slave pty is %s.\n\r", slave_name);
-		/* Here we'd setup the symlink for /dev/gnokii etc. etc. */
- 
-	}
-
-
-        /* Set up and install handler before enabling async IO on port. */
-    sig_io.sa_handler = ATEM_SigHandler;
-    sig_io.sa_flags = 0;
-    sigaction (SIGIO, &sig_io, NULL);                 
-
-        /* Allow process/thread to receive SIGIO */
-    err = fcntl(PtyRDFD, F_SETOWN, getpid());
-
-	if (err == -1) {
-		fprintf(stderr, "ATEM_PtySetup F_SETOWN failed!\n");
-	}
-
-        /* Make filedescriptor asynchronous. */
-    err = fcntl(PtyRDFD, F_SETFL, FASYNC | FNONBLOCK);       
-
-	if (err == -1) {
-		fprintf(stderr, "ATEM_PtySetup F_SETOWN failed!\n");
-	}
-
-}
 
     /* Handler called when characters received from serial port.
        calls state machine code to process it. */
-void    ATEM_SigHandler(int status)
+
+void	ATEM_HandleIncomingData(char *buffer, int length)
 {
-    unsigned char   buffer[255];
-    int             count,res;
+    int             count;
 	unsigned char	out_buf[3];	
 
-    res = read(PtyRDFD, buffer, 255);
+    for (count = 0; count < length ; count ++) {
+			/* Echo character if appropriate. */
+		if (ModemRegisters[REG_ECHO] & BIT_ECHO) {
+			out_buf[0] = buffer[count];
+			out_buf[1] = 0;
+			ATEM_StringOut(out_buf);
+		}
 
-	fprintf(stdout, "sig");
+			/* If it's a command terminator character, go to next
+			   buffer. */
+		if (buffer[count] == ModemRegisters[REG_CR] ||
+		    buffer[count] == ModemRegisters[REG_LF]) {
 
-    for (count = 0; count < res ; count ++) {
+			CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = 0x00;
+			ATEM_ParseAT(CmdBuffer[CurrentCmdBuffer]);
 
-			/* If we're in command mode, look for line termination
-			   characters in stream and pass to parsing code if found. */
-		if (CommandMode) {
-
-				/* Echo character if appropriate. */
-			if (ModemRegisters[REG_ECHO] & BIT_ECHO) {
-				out_buf[0] = buffer[count];
-				out_buf[1] = 0;
-				ATEM_StringOut(out_buf);
+			CurrentCmdBuffer ++;
+			if (CurrentCmdBuffer >= MAX_CMD_BUFFERS) {
+				CurrentCmdBuffer = 0;
 			}
-
-				/* If it's a command terminator character, go to next
-				   buffer. */
-			if (buffer[count] == ModemRegisters[REG_CR] ||
-			    buffer[count] == ModemRegisters[REG_LF]) {
-
-				CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = 0x00;
-				//fprintf(stderr, "Command: %s\n\r", CmdBuffer[CurrentCmdBuffer]);
-				ATEM_ParseAT(&CmdBuffer[CurrentCmdBuffer]);
-
-				CurrentCmdBuffer ++;
-				if (CurrentCmdBuffer >= MAX_CMD_BUFFERS) {
-					CurrentCmdBuffer = 0;
-				}
-				CurrentCmdBufferIndex = 0;
-			}
-			else {
-				CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = buffer[count];
-				CurrentCmdBufferIndex ++;
-				if (CurrentCmdBufferIndex >= CMD_BUFFER_LENGTH) {
-					CurrentCmdBufferIndex = CMD_BUFFER_LENGTH;
-				}
-					
+			CurrentCmdBufferIndex = 0;
+		}
+		else {
+			CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = buffer[count];
+			CurrentCmdBufferIndex ++;
+			if (CurrentCmdBufferIndex >= CMD_BUFFER_LENGTH) {
+				CurrentCmdBufferIndex = CMD_BUFFER_LENGTH;
 			}
 		}
     }
 }     
 
-#define PARSE_ERROR { fprintf(stderr, "Parse error\n\r"); return; }
-						
 
 	/* Parse commands in buffer, cmd_buffer must be null terminated. */
 void	ATEM_ParseAT(char *cmd_buffer)
@@ -226,6 +159,24 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				}
 				break;
 
+			case '+':
+				/* + is the precursor to another set of commands +CSQ, +FCLASS etc. */
+				buf++;
+				switch (*buf) {
+					case 'C':
+						buf++;
+							/* Returns true if error occured */
+						if (ATEM_CommandPlusC(&buf) == true) {
+							return;	
+						}
+						break;
+
+					default:
+						ATEM_ModemResult(4);
+						return;
+				}
+				break;
+
 			default: 
 				ATEM_ModemResult(4);
 				return;
@@ -233,6 +184,34 @@ void	ATEM_ParseAT(char *cmd_buffer)
 	}
 
 	ATEM_ModemResult(0);
+}
+
+
+	/* Handle AT+C commands, this is a quick hack together at this
+	   stage. */
+bool	ATEM_CommandPlusC(char **buf)
+{
+	float		rflevel;
+	char		buffer[20];
+
+	if (strncmp(*buf, "SQ", 2) == 0) {
+		buf[0] ++;
+		buf[0] ++;
+
+    	if (GSM->GetRFLevel(&rflevel) == GE_NONE) {
+			sprintf(buffer, "%f, 99", rflevel);
+			ATEM_StringOut(buffer);
+			return (false);
+		}
+		else {
+			return (true);
+		}
+			
+	}
+	return (true);
+	
+
+
 }
 
 	/* Send a result string back.  There is much work to do here, see
@@ -299,50 +278,3 @@ void	ATEM_StringOut(char *buffer)
 }
 
 
-/* ATEM_GetMasterPty()
-   Takes a double-indirect character pointer in which to put a slave
-   name, and returns an integer file descriptor.  If it returns < 0, an
-   error has occurred.  Otherwise, it has returned the master pty
-   file descriptor, and fills in *name with the name of the
-   corresponding slave pty.  Once the slave pty has been opened,
-   you are responsible to free *name.  Code is from Developling Linux
-   Applications by Troan and Johnson */
-
-
-int	ATEM_GetMasterPty(char **name) { 
-
-   int i, j;
-   /* default to returning error */
-   int master = -1;
-
-   /* create a dummy name to fill in */
-   *name = strdup("/dev/ptyXX");
-
-   /* search for an unused pty */
-   for (i=0; i<16 && master <= 0; i++) {
-      for (j=0; j<16 && master <= 0; j++) {
-         (*name)[8] = "pqrstuvwxyzPQRST"[i];
-         (*name)[9] = "0123456789abcdef"[j];
-         /* open the master pty */
-         if ((master = open(*name, O_RDWR | O_NOCTTY | O_NONBLOCK )) < 0) {
-            if (errno == ENOENT) {
-               /* we are out of pty devices */
-               free (*name);
-               return (master);
-            }
-         }
-      }
-   }
-   if ((master < 0) && (i == 16) && (j == 16)) {
-      /* must have tried every pty unsuccessfully */
-      free (*name);
-      return (master);
-   }
-
-   /* By substituting a letter, we change the master pty
-    * name into the slave pty name.
-    */
-   (*name)[5] = 't';
-
-   return (master);
-}

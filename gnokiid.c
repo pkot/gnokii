@@ -26,7 +26,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
-#include "at-emulator.h"
+#include "virtmodem.h"
 
 /* Prototypes. */
 
@@ -94,9 +94,12 @@ int main(int argc, char *argv[])
 		/* FIXME Debug mode forced for now! */
 //	DebugMode = true;
 
-	ATEM_Initialise(DebugMode);
+	if (VM_Initialise(DebugMode) == false) {
+		exit (-1);
+	}
 	while (1) {
-		sleep (1);
+		VM_ThreadLoop();
+		/*sleep (1);*/
 	}
 	exit (0);
 }

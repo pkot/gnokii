@@ -77,7 +77,7 @@ LDFLAGS = -lpthread
 
 GNOKII_OBJS = gnokii.o gsm-api.o fbus-3810.o fbus-6110.o gsm-networks.o
 
-GNOKIID_OBJS = gnokiid.o at-emulator.o gsm-api.o fbus-3810.o fbus-6110.o
+GNOKIID_OBJS = gnokiid.o virtmodem.o datapump.o at-emulator.o gsm-api.o fbus-3810.o fbus-6110.o
 
 # Build executable
 all: gnokii gnokiid
@@ -105,6 +105,8 @@ rpm:	dist
 # Dependencies - simplified for now
 gnokii.o: gnokii.c gsm-api.c gsm-api.h misc.h gsm-common.h
 gnokiid.o: gnokiid.c gsm-api.c gsm-api.h misc.h gsm-common.h
+virtmodem.o: virtmodem.c at-emulator.c gsm-api.c gsm-api.h misc.h gsm-common.h
+datapump.o: datapump.c gsm-api.c gsm-api.h misc.h gsm-common.h
 at-emulator.o: at-emulator.c gsm-api.c gsm-api.h misc.h gsm-common.h
 gsm-api.o: gsm-api.c fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-3810.o: fbus-3810.c fbus-3810.h misc.h gsm-common.h
