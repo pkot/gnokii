@@ -9,6 +9,7 @@ Assembled by
 	Pavel Janik <Pavel@Janik.cz>
 	Pawel Kot <pkot@linuxnews.pl>
 	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)
+	Harri Yli-Torkko <hyt@surfeu.fi>
 	... and other members of gnokii mailing list
             and authors of some WWW pages.
 
@@ -348,6 +349,58 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                0x00 = Off
                0x01 = Confirm first
                0x02 = On
+
+	The following frames are valid only in Nokia 6110
+	 0x16 Anykey answer:
+               0x00 = Off
+	       0x01 = On
+	 0x17 ???
+	 0x18 Memory in use:
+	       0x00 = Phone
+	       0x01 = SIM card
+	 0x19 Network selection:
+	       0x00 = Automatic
+	       0x01 = Manual
+	 0x1a Automatic redial:
+	       0x00 = Off
+	       0x01 = On
+	 0x1b ???
+	 0x1c ???
+	 0x1d Speed dialling:
+	       0x00 = Off
+	       0x01 = On
+	 0x1e Own number sending:
+	       0x00 = Preset
+	       0x01 = On
+	       0x02 = Off
+	 0x1f Cell info display:
+	       0x00 = Off
+	       0x01 = On
+	 0x21 Language:
+	       0x00 = English
+	       0x01 = Deutsch
+	       0x02 = Francais
+	       0x03 = Italiano
+	       0x06 = Nederlands
+	       0x07 = Dansk
+	       0x08 = Svenska
+	       0x09 = Suomi
+	       0x0e = Norsk
+	       0x10 = Automatic
+	 0x26 Reply via same centre:
+	       0x00 = No
+	       0x01 = Yes
+	 0x27 Delivery reports:
+	       0x00 = No
+	       0x01 = Yes
+         0x28 Hide clock:
+	       0x00 = Show clock
+	       0x01 = Hide clock
+	 0x29 Time format:
+	       0x00 = 24-hour
+	       0x01 = 12-hour
+	 0x2a Selected profile:
+	       see "Get profile feature"
 
     s Get welcome message   { 0x0016 }
     r Get welcome message   { 0x0017, no.of blocks, { block } * }

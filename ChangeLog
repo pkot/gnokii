@@ -3,6 +3,8 @@
  * 6110 series updates
     o PollSMS race condition eliminated              (BORBELY Zoltan)
     o SMS sending error codes updated                (BORBELY Zoltan)
+    o explicitly name 3360 in misc.h (for xgnokii) and in unixirda.c
+      (for irda connections)                           (Kevin Thayer)
  * Add GPL compatible preamble in tcp.[ch] files          (Pawel Kot)
  * Make tcp.[ch] compatible with gnokii coding style      (Pawel Kot)
  * SMSD updates
@@ -13,9 +15,6 @@
     o give the consistant information about --with-gnugetopt
                                                           (Pawel Kot)
     o autogen.sh added                               (BORBELY Zoltan)
- * 6110 series updates
-    o explicitly name 3360 in misc.h (for xgnokii) and in unixirda.c
-      (for irda connections)                           (Kevin Thayer)
  * bitmap support
     o begin cleaning up bitmap code; rewrite bitmap handling in
       gnokii.c in the readable way                        (Pawel Kot)
@@ -31,6 +30,7 @@
                                                      (BORBELY Zoltan)
  * Docs updates
     o reflect changes in email and web addresses     (BORBELY Zoltan)
+    o protocol updates for 6110                    (Harri Yli-Torkko)
  * Translation updates
     o Estonian translation for the pre19 release      (Hans Motsharg)
     o Slovenian translation for the pre19 release    (Bostjan Muller)
