@@ -3169,6 +3169,15 @@ static int setringtone(int argc, char *argv[])
 	return 0;
 }
 
+static void presskey(void)
+{
+	GSM_Error error;
+	error = SM_Functions(GOP_PressPhoneKey, &data, &State);
+	if (error == GE_NONE)
+		error = SM_Functions(GOP_ReleasePhoneKey, &data, &State);
+	fprintf(stdout, "Failed to press key: %d\n", error);
+}
+
 static int presskeysequence(void)
 {
 	unsigned char *syms = "0123456789#*PGR+-UDMN";
@@ -3189,9 +3198,7 @@ static int presskeysequence(void)
 			data.KeyCode = keys[pos - syms];
 		else
 			continue;
-		
-		SM_Functions(GOP_PressPhoneKey, &data, &State);
-		SM_Functions(GOP_ReleasePhoneKey, &data, &State);
+		presskey();
 	}
 
 	return 0;
@@ -3200,6 +3207,7 @@ static int presskeysequence(void)
 static int enterchar(void)
 {
 	unsigned char ch;
+	GSM_Error error;
 
 	GSM_DataClear(&data);
 	console_raw();
@@ -3210,17 +3218,17 @@ static int enterchar(void)
 			break;
 		case '\n':
 			data.KeyCode = GSM_KEY_MENU;
-			SM_Functions(GOP_PressPhoneKey, &data, &State);
-			SM_Functions(GOP_ReleasePhoneKey, &data, &State);
+			presskey();
 			break;
 		case '\e':
 			data.KeyCode = GSM_KEY_NAMES;
-			SM_Functions(GOP_PressPhoneKey, &data, &State);
-			SM_Functions(GOP_ReleasePhoneKey, &data, &State);
+			presskey();
 			break;
 		default:
 			data.Character = ch;
-			SM_Functions(GOP_EnterChar, &data, &State);
+			error = SM_Functions(GOP_EnterChar, &data, &State);
+			if (error != GE_NONE)
+				printf("Error entering char: %d\n", error);
 			break;
 		}
 	}
