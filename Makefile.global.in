@@ -50,7 +50,7 @@ LIBS           = @LIBS@
 LEX            = @LEX@
 AR             = @AR@
 RANLIB         = @RANLIB@
-LIBTOOL        = @LIBTOOL@ --tag CXX
+LIBTOOL        = @LIBTOOL@
 
 GTK_CFLAGS     = @GTK_CFLAGS@
 GTK_LIBS       = @GTK_LIBS@

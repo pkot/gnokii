@@ -10,9 +10,6 @@
       win32 version too                            (BORBELY Zoltan)
     o add irda support for Windows systems             (Phil Ashby)
  * build system updates
-    o use libtool --tag=CXX to be able to build gnokii with distcc
-      or ccache (and probably crosscompile with newer autotools)
-                                                        (Pawel Kot)
     o update Slackware build scripts; we have now 2 scripts to
       to build with and without X11 support             (Pawel Kot)
     o add the information about possibility to have smaller
