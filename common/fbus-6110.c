@@ -229,9 +229,6 @@ GSM_Error          DisplayStatusError;
 char               *CurrentNetmonitor;
 GSM_Error          CurrentNetmonitorError;
 
-char               *CurrentSecurityCode;
-GSM_Error          CurrentSecurityCodeError;
-
 unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
 unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
 unsigned char      Model[FB61_MAX_MODEL_LENGTH];
@@ -1107,37 +1104,6 @@ GSM_Error FB61_EnterPin(char *pin)
   }
 
   return (PINError);
-}
-
-GSM_Error FB61_GetSecurityCode(unsigned char *code)
-{
-
-  unsigned char req1[] = { 0x00, 0x01, 0x64, 0x00 };
-  unsigned char req2[] = { 0x00, 0x01, 0x6e, 0x01 };
-
-  int timeout=20; /* 2 seconds for command to complete */
-
-  /* PJ: FIXME: This is to allow extended commands - we should make some
-     function to allow sending this and also to disable extended commands
-     again. This function should be called also at the end of this function -
-     we should not leave extended commands enabled. */
-
-  req1[3] = 0x01;
-  FB61_TX_SendMessage(4, 0x40, req1);
-
-  CurrentSecurityCode = code;
-  CurrentSecurityCodeError = GE_BUSY;
-  FB61_TX_SendMessage(4, 0x40, req2);
-
-  while (timeout != 0 && CurrentSecurityCodeError == GE_BUSY) {
-
-    if (--timeout == 0)
-     return (GE_TIMEOUT);
-
-    usleep (100000);
-  }
-
-  return CurrentSecurityCodeError;
 }
 
 GSM_Error FB61_GetDateTime(GSM_DateTime *date_time)
@@ -3440,32 +3406,6 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   case 0x40:
 
     switch(MessageBuffer[2]) {
-
-    case 0x6e:
-
-      switch (MessageBuffer[3]) {
-
-      case 0x01:
-
-        memcpy(CurrentSecurityCode, MessageBuffer + 5, 6);
-
-#ifdef DEBUG
-        printf(_("Message: Security code received.\n"));
-        printf(_("   Security code: %s\n"), CurrentSecurityCode);
-#endif DEBUG
-
-        CurrentSecurityCodeError = GE_NONE;
-        break;
-
-      default:
-
-#ifdef DEBUG
-        printf(_("Unknown message of type 0x40, subtype 0x6e.\n"));
-#endif DEBUG
-
-      }
-
-    break;
 
     case 0x7e:
 
