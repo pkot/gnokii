@@ -20,7 +20,7 @@ clean:
 
 install:
 	$(INSTALL) -d $(sbindir)
-	$(INSTALL) -u root -g gnokii -m 4750 mgnokiidev $(sbindir)
+	$(INSTALL) -o root -g gnokii -m 4750 mgnokiidev $(sbindir)
 	$(INSTALL) todologo $(bindir)
 
 depend dep:
