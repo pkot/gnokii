@@ -11,6 +11,7 @@
     o keyboard emulation isn't working, only up and down messages
       are known                                    (BORBELY Zoltan)
     o call management functions implemented        (BORBELY Zoltan)
+    o add 3510 to the supported models list             (Dirk Meul)
  * AT series updates
     o GetSMSStatus implemented                     (BORBELY Zoltan)
  * portability fixes
