@@ -12,6 +12,8 @@
                                                     Marcel Holtmann)
     o #ifdef @HAVE_BLUETOOTH_EXP@ should be
       #if @HAVE_BLUETOOTH_EXP@                           (Pawel Kot)
+    o information about ldconfig, /etc/ld.so.conf and such
+      after issuing 'make install'                       (Pawel Kot)
  * cbus update                                      (Ladislav Michl)
  * nk7110 driver updates
     o get rid of global variables                   (Ladislav Michl)

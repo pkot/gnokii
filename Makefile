@@ -127,6 +127,14 @@ install: all
 	fi
 	$(MAKE) -C $(INCLUDE_DIR) install
 	@echo "done"
+	@echo "#####################################################"
+	@echo "###"
+	@echo "### Please make sure to have $(libdir) in"
+	@echo "### the system defaults or in /etc/ld.so.conf and run"
+	@echo "### /sbin/ldconfig at some time. Otherwise gnokii may"
+	@echo "### not work."
+	@echo "###"
+	@echo "#####################################################"
 
 install-docs:
 	$(MAKE) -C $(DOCS_DIR) install
