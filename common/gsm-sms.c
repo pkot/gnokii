@@ -745,23 +745,29 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 
 static GSM_Error DecodeData(char *message, char *output, int length, int size, int udhlen, SMS_DataCodingScheme dcs)
 {
-	/* Unicode */
-	if ((dcs.Type & 0x08) == 0x08) {
-		dprintf("Unicode message\n");
-		length = (length - udhlen)/2;
-		DecodeUnicode(output, message, length);
-	} else {
-		/* 8bit SMS */
-		if ((dcs.Type & 0xf4) == 0xf4) {
-			dprintf("8bit message\n");
-			memcpy(output, message, length);
-		/* 7bit SMS */
+	/* PDU SMS */
+	if (llayout.IsUserDataCoded) {
+		/* Unicode */
+		if ((dcs.Type & 0x08) == 0x08) {
+			dprintf("Unicode message\n");
+			length = (length - udhlen)/2;
+			DecodeUnicode(output, message, length);
 		} else {
-			dprintf("Default Alphabet\n");
-			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
-			Unpack7BitCharacters((7-udhlen)%7, size, length, message, output);
-			DecodeAscii(output, output, length);
+			/* 8bit SMS */
+			if ((dcs.Type & 0xf4) == 0xf4) {
+				dprintf("8bit message\n");
+				memcpy(output, message, length);
+			/* 7bit SMS */
+			} else {
+				dprintf("Default Alphabet\n");
+				length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
+				Unpack7BitCharacters((7-udhlen)%7, size, length, message, output);
+				DecodeAscii(output, output, length);
+			}
 		}
+	/* Text SMS */
+	} else {
+		strncpy(output, message, length);
 	}
 	dprintf("%s\n", output);
 	return GE_NONE;
@@ -914,19 +920,36 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 
 	/* Short Message Center */
 	if (llayout.MessageCenter > -1) {
-		strcpy(SMS->MessageCenter.Number, GetBCDNumber(message + llayout.MessageCenter));
-		dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
-		SMS->ReplyViaSameSMSC = false;
-		if (SMS->RemoteNumber.number[0] == 0 && (message[llayout.ReplyViaSameSMSC] & 0x80)) {
-			SMS->ReplyViaSameSMSC = true;
+		if (llayout.IsMessageCenterCoded) {
+			strcpy(SMS->MessageCenter.Number, GetBCDNumber(message + llayout.MessageCenter));
+			dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
+			SMS->ReplyViaSameSMSC = false;
+			if (SMS->RemoteNumber.number[0] == 0 && (message[llayout.ReplyViaSameSMSC] & 0x80)) {
+				SMS->ReplyViaSameSMSC = true;
+			}
+		} else {
+			/* SMS struct should be zeroed for now, so there's no
+			 * need to add an extra '\0' at the end of the string */
+			strncpy(SMS->MessageCenter.Number,
+				message + 1 + llayout.MessageCenter,
+				message[llayout.MessageCenter] < GSM_MAX_SMS_CENTER_LENGTH ? message[llayout.MessageCenter] : GSM_MAX_SMS_CENTER_LENGTH);
+			SMS->ReplyViaSameSMSC = false;
 		}
 	}
 
 	/* Remote number */
 	if (llayout.RemoteNumber > -1) {
-		message[llayout.RemoteNumber] = ((message[llayout.RemoteNumber])+1)/2+1;
-		strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber));
-		dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
+		if (llayout.IsRemoteNumberCoded) {
+			message[llayout.RemoteNumber] = ((message[llayout.RemoteNumber])+1)/2+1;
+			strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber));
+			dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
+		} else {
+			/* SMS struct should be zeroed for now, so there's no
+			 * need to add an extra '\0' at the end of the string */
+			strncpy(SMS->RemoteNumber.number,
+				message + 1 + llayout.RemoteNumber,
+				message[llayout.RemoteNumber] < GSM_MAX_SMS_CENTER_LENGTH ? message[llayout.RemoteNumber] : GSM_MAX_SMS_CENTER_LENGTH);
+		}
 	}
 	
 	/* Sending time */

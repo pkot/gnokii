@@ -402,6 +402,7 @@ typedef struct {
 } GSM_CallDivert;
 
 typedef struct {
+	bool Full; /* indicates if we have full data read */
 	unsigned int Length;
 	unsigned char *Data;
 } GSM_RawData;
