@@ -42,6 +42,7 @@
 #include "phones/ateric.h"
 #include "phones/atnok.h"
 #include "phones/atsie.h"
+#include "phones/atsoer.h"
 #include "links/atbus.h"
 
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state);
@@ -137,7 +138,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetNetworkInfo,        AT_GetNetworkInfo,        ReplyGetNetworkInfo },
 };
 
-static char *strip_quotes(char *s)
+char *strip_quotes(char *s)
 {
 	char *t;
 
@@ -200,7 +201,7 @@ gn_driver driver_at = {
 	NULL
 };
 
-static char *memorynames[] = {
+char *memorynames[] = {
 	"ME", /* Internal memory of the mobile equipment */
 	"SM", /* SIM card memory */
 	"FD", /* Fixed dial numbers */
@@ -243,7 +244,8 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 }
 
 /* Functions to encode and decode strings */
-static int at_encode(int charset, char *dst, char *src, int len) {
+int at_encode(int charset, char *dst, char *src, int len)
+{
 	switch (charset) {
 	case AT_CHAR_GSM:
 		len = char_ascii_encode(dst, src, len);
@@ -264,7 +266,8 @@ static int at_encode(int charset, char *dst, char *src, int len) {
 	return len;
 }
 
-static void at_decode(int charset, char *dst, char *src, int len) {
+void at_decode(int charset, char *dst, char *src, int len)
+{
 	switch (charset) {
 	case AT_CHAR_GSM:
 		char_ascii_decode(dst, src, len);
@@ -1691,6 +1694,8 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 		at_nokia_init(model, setupdata->model, state);
 	else if (!strncasecmp(manufacturer, "siemens", 7))
 		at_siemens_init(model, setupdata->model, state);
+	else if (!strncasecmp(manufacturer, "sony ericsson", 14))
+		at_sonyericsson_init(model, setupdata->model, state);
 	
 	StoreDefaultCharset(state);
 
