@@ -516,6 +516,14 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     s Key duplication on/off{ 0x0044, on? 0x01: 0x02 }
     s get used network      { 0x0070 }
     r network registration  { 0x0071, ?,?,?,length,netstatus,netsel,cellIDH,cellIDL,lacH,lacL,netcode,netcode,netcode }
+                            where netstatus: 0x00: home network
+			                     0x01: roaming network
+					     0x02: no service searching
+					     0x03: no service not searching
+					     0x04: no service no sim
+		                  netsel: 0x00: manual
+				          0x01: automatic
+					  0xff: unknown
 0x0c: Keys (Nokia 3310 seems to not respond to these frames)
     s Get key assignments   { 0x0040, 0x01 }
     r Get key assignments   { 0x0041, {key '1'}, 0x00, {key '2'} ... {key '0'}, 0,0,0, {symbols}, 0 }

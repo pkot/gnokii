@@ -180,6 +180,14 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
     r get used network      { 0x0071, available,?,?,length,netstatus,netsel,cellIDH,
                                       cellIDL,lacH,lacL,MCC+MNC[3],{Opstr}, 4?,
                                       len, xlen(78), ylen(21), 0, {bitmap} }
+                            where netstatus: 0x00: home network
+			                     0x01: roaming network
+					     0x02: no service searching
+					     0x03: no service not searching
+					     0x04: no service no sim
+		                  netsel: 0x00: manual
+				          0x01: automatic
+					  0xff: unknown
                               where {Opstr}: namelen, {operator name(unicode)}
                                     len: {xlen, ylen, 0, {bitmap} + 2
                                     {bitmap}: bitmaplen, 0, 0, {OTA bitmap}

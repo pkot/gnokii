@@ -28,6 +28,8 @@
     o call management API updated                  (BORBELY Zoltan)
  * gnokii updates
     o phone keyboard emulation reports only errors (BORBELY Zoltan)
+ * Documentation updates
+    o network registration message updated         (Rodolfo Hansen)
 
 0.5.6
 =====
