@@ -54,6 +54,7 @@
 
 #define	P6100_CAP_OLD_CALL_API	1
 #define	P6100_CAP_NBS_UPLOAD	2
+#define P6100_CAP_PB_UNICODE	4
 
 typedef struct {
 	GSM_KeyCode Key;
