@@ -15,6 +15,8 @@
       libgnokii as gn_file_phonebook_raw()              (Pawel Kot)
     o better debugging support                     (BORBELY Zoltan)
     o reset character enc/dec state    (Bao Haojun, BORBELY Zoltan)
+    o better unicode encoded sms length calculation
+                            (Bao Haojun, Pawel Kot, BORBELY Zoltan)
  * AT series updates
     o try to handle correctly sms empty location        (Pawel Kot)
     o use actual encoding when reading network information
