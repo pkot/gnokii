@@ -5,6 +5,7 @@
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
     o add --gettodo                                    (Markus Plail)
+    o don't use hardcoded values               (Len Trigg, Pawel Kot)
  * xgnokii updates:
     o fix speeddial writing                            (Markus Plail)
     o fix logos                                        (Markus Plail)
