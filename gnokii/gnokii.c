@@ -29,6 +29,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <getopt.h>
+#include <time.h>
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -45,7 +46,7 @@ void getsms(char *argv[]);
 void deletesms(char *argv[]);
 void sendsms(int argc, char *argv[]);
 void getsmsc(char *argv[]);
-void setdatetime(char *argv[]);
+void setdatetime(int argc, char *argv[]);
 void getdatetime(void);
 void setalarm(char *argv[]);
 void getalarm(void);
@@ -90,7 +91,7 @@ void usage(void)
           gnokii [--sendsms] [destination] [--smsc message_center_number |
                   --smscno message_center_index] [-r] [-C n] [-v n]
           gnokii [--getsmsc] [message_center_number]
-          gnokii [--setdatetime] [YYYY] [MM] [DD] [HH] [MM]
+          gnokii [--setdatetime] [YYYY MM DD HH MM]]
           gnokii [--getdatetime]
           gnokii [--setalarm] [HH] [MM]
           gnokii [--getalarm]
@@ -270,8 +271,8 @@ int main(int argc, char *argv[])
   }
 
   /* Set Date and Time. */
-  if (strcmp(argv[1], "--setdatetime") == 0 && argc==7) {
-    setdatetime(argv);
+  if (strcmp(argv[1], "--setdatetime") == 0 && (argc==7 || argc==2)) {
+    setdatetime(argc, argv);
   }
 
   /* Get date/time mode. */
@@ -885,18 +886,36 @@ void sendclicon(char *argv[])
   exit(0);
 }
 
-void setdatetime(char *argv[])
+void setdatetime(int argc, char *argv[])
 {
-
+  struct tm *now;
+  time_t nowh;
   GSM_DateTime Date;
 
   fbusinit(false);
 
-  Date.Year = atoi (argv[2]);
-  Date.Month = atoi (argv[3]);
-  Date.Day = atoi (argv[4]);
-  Date.Hour = atoi (argv[5]);
-  Date.Minute = atoi (argv[6]);
+  if (argc==7) {
+    Date.Year = atoi (argv[2]);
+    Date.Month = atoi (argv[3]);
+    Date.Day = atoi (argv[4]);
+    Date.Hour = atoi (argv[5]);
+    Date.Minute = atoi (argv[6]);
+    }
+  else {
+    nowh=time(NULL);
+    now=localtime(&nowh);
+    if (now->tm_year>90) {
+      Date.Year = now->tm_year+1900;
+      }
+    else {
+      Date.Year = now->tm_year+2000;
+      } 
+    Date.Month = now->tm_mon+1;
+    Date.Day = now->tm_mday;
+    Date.Hour = now->tm_hour;
+    Date.Minute = now->tm_min;
+    Date.Second = now->tm_sec;
+    }
 
   GSM->SetDateTime(&Date);
 
