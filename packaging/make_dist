@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#
+# This script is used for preparing the tarballs.
+# Do not use it, please.
+#
+
+#
+# DeMorgan rules appled :-) I like math...
+#
+
+if [ "x`whoami`" != xpavel -a "x`whoami`" != xhugh ]
+then
+   echo "No way to test this :-)"
+fi
+
+VERSION=`cat ../VERSION`
+
+rm -rf /tmp/gnokii-${VERSION}
+cp -r ../../gnokii /tmp/gnokii-${VERSION}
+
+# Some files in CVS are useless
+rm -rf /tmp/gnokii-${VERSION}/xkeyb
+
+(
+   cd /tmp/gnokii-${VERSION}
+   ./configure
+   cp packaging/RedHat/gnokii.spec .
+   make distclean
+   chmod 755 mkinstalldirs
+)
+
+tar cvfz /tmp/gnokii-${VERSION}.tar.gz /tmp/gnokii-${VERSION} --exclude CVS
+
+rm -rf /tmp/gnokii-${VERSION}
+
+echo "Distribution generated in /tmp/gnokii-${VERSION}.tar.gz"
