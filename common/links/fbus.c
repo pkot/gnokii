@@ -17,7 +17,11 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.8  2001-05-07 16:24:03  pkot
+  Revision 1.9  2001-05-28 09:25:16  pkot
+  Fixed autodetecting of the cable type in 6110 and 7110 series. DLR-3 is
+  tried first now. Seems to work ok with either 6130 or 6210.
+
+  Revision 1.8  2001/05/07 16:24:03  pkot
   DLR-3P temporary fix. How should I do it better?
 
   Revision 1.7  2001/03/22 16:17:05  chris
@@ -106,17 +110,13 @@ static FBUS_Link flink;		/* FBUS specific stuff, internal to this file */
 
 bool FBUS_OpenSerial(bool dlr3)
 {
-	int result;
-
+	if (dlr3) dlr3 = 1;
 	/* Open device. */
-
 #ifdef WIN32
-	result = ! OpenConnection(glink->PortDevice, FBUS_RX_StateMachine, NULL);
+	if (OpenConnection(glink->PortDevice, FBUS_RX_StateMachine, NULL)) {
 #else
-	result = device_open(glink->PortDevice, false, false, GCT_Serial);
+	if (!device_open(glink->PortDevice, false, false, GCT_Serial)) {
 #endif
-
-	if (!result) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -518,6 +518,7 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	static int try = 0;
 
 	try++;
+	if (try > 2) return GE_DEVICEOPENFAILED;
 	/* 'Copy in' the global structures */
 	glink = newlink;
 	statemachine = state;
@@ -538,7 +539,9 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 		/* FIXME!! */
 		return GE_DEVICEOPENFAILED;
 	} else {		/* ConnectionType == GCT_Serial */
-		if (!FBUS_OpenSerial(try - 1))
+                /* FBUS_OpenSerial(0) - try dau-9p
+                 * FBUS_OpenSerial(n != 0) - try dlr-3p */
+		if (!FBUS_OpenSerial(2 - try))
 			return GE_DEVICEOPENFAILED;
 	}
 
