@@ -73,9 +73,11 @@ struct termios serial_termios;
 
 /* Script handling: */
 
-static void device_script_cfgfunc(const char *section,const char *key,const char *value)
+static void device_script_cfgfunc(const char *section, const char *key, const char *value)
 {
+#if !defined(__svr4__)
 	setenv(key, value, 1 /* overwrite */); /* errors ignored */
+#endif
 }
 
 static int device_script(int fd, const char *section)
