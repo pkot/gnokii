@@ -19,12 +19,13 @@ BIN_DIRS = gnokii
 
 ifndef WIN32
 BIN_DIRS += gnokiid utils
+DATA_DIR = common/data
 endif
 
 DIRS =  common/phones \
 	common/links \
 	common/devices \
-	common/data \
+	$(DATA_DIR) \
 	po \
 	common \
 	$(BIN_DIRS)
