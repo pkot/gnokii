@@ -1235,54 +1235,9 @@ static gn_error SetSMSCenter(gn_data *data, struct gn_statemachine *state)
 	pos = req+5;
 	*pos++ = smsc->id;
 	pos++;
-	switch (smsc->format) {
-		case GN_SMS_MF_Text:
-			*pos++ = 0x00;
-			break;
-		case GN_SMS_MF_Fax:
-			*pos++ = 0x22;
-			break;
-		case GN_SMS_MF_Voice:
-			*pos++ = 0x24;
-			break;
-		case GN_SMS_MF_ERMES:
-			*pos++ = 0x25;
-			break;
-		case GN_SMS_MF_Paging:
-			*pos++ = 0x26;
-			break;
-		case GN_SMS_MF_X400:
-			*pos++ = 0x31;
-			break;
-		case GN_SMS_MF_Email:
-			*pos++ = 0x32;
-			break;
-		default:
-			return GN_ERR_NOTSUPPORTED;
-	}
+	*pos++ = smsc->format;
 	pos++;
-	switch (smsc->validity) {
-		case GN_SMS_VP_1H:
-			*pos++ = 0x0b;
-			break;
-		case GN_SMS_VP_6H:
-			*pos++ = 0x47;
-			break;
-		case GN_SMS_VP_24H:
-			*pos++ = 0xa7;
-			break;
-		case GN_SMS_VP_72H:
-			*pos++ = 0xa9;
-			break;
-		case GN_SMS_VP_1W:
-			*pos++ = 0xad;
-			break;
-		case GN_SMS_VP_Max:
-			*pos++ = 0xff;
-			break;
-		default:
-			return GN_ERR_NOTSUPPORTED;
-	}
+	*pos++ = smsc->validity;
 	*pos = (char_semi_octet_pack(smsc->recipient.number, pos + 1, smsc->recipient.type) + 1) / 2 + 1;
 	pos += 12;
 	*pos = (char_semi_octet_pack(smsc->smsc.number, pos + 1, smsc->smsc.type) + 1) / 2 + 1;
@@ -1490,55 +1445,9 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 			pos = message + 4;
 			smsc->id = *pos++;
 			pos++;
-			switch (*pos++) {
-			case 0x00:	/* text */
-				smsc->format = GN_SMS_MF_Text;
-				break;
-			case 0x22:	/* fax */
-				smsc->format = GN_SMS_MF_Fax;
-				break;
-			case 0x24:	/* voice */
-				smsc->format = GN_SMS_MF_Voice;
-				break;
-			case 0x25:	/* ERMES */
-				smsc->format = GN_SMS_MF_ERMES;
-				break;
-			case 0x26:	/* paging */
-				smsc->format = GN_SMS_MF_Paging;
-				break;
-			case 0x31:	/* X.400 */
-				smsc->format = GN_SMS_MF_X400;
-				break;
-			case 0x32:	/* email */
-				smsc->format = GN_SMS_MF_Email;
-				break;
-			default:
-				return GN_ERR_UNHANDLEDFRAME;
-			}
+			smsc->format = *pos++;
 			pos++;
-			switch (*pos++) {
-			case 0x0b:	/*  1 hour */
-				smsc->validity = GN_SMS_VP_1H;
-				break;
-			case 0x47:	/*  6 hours */
-				smsc->validity = GN_SMS_VP_6H;
-				break;
-			case 0xa7:	/* 24 hours */
-				smsc->validity = GN_SMS_VP_24H;
-				break;
-			case 0xa9:	/* 72 hours */
-				smsc->validity = GN_SMS_VP_72H;
-				break;
-			case 0xad:	/*  1 week */
-				smsc->validity = GN_SMS_VP_1W;
-				break;
-			case 0xff:	/* max.time */
-				smsc->validity = GN_SMS_VP_Max;
-				break;
-			default:	/* Probably some error, but better treat it as 24h */
-				smsc->validity = GN_SMS_VP_24H;
-				break;
-			}
+			smsc->validity = *pos++;
 			if (pos[0] % 2) pos[0]++;
 			pos[0] = pos[0] / 2 + 1;
 			snprintf(smsc->recipient.number, sizeof(smsc->recipient.number), "%s", char_bcd_number_get(pos));
