@@ -8,6 +8,9 @@
       than using hardcoded numbers                     (Markus Plail)
     o SendSMS updated, almost all magic numbers are gone
 	                                               (Markus Plail)
+    o now all magic numbers have gone thanks to Pawel  (Markus Plail)
+    o fix handling of different INBOX memory types     (Markus Plail)
+    o speed up reading of multiple messages            (Markus Plail)
  * New supported phones:
     o Nokia 6310i                                      (Markus Plail)
     o Nokia 7650 (hope it works with nk6510 driver)       (Pawel Kot)
