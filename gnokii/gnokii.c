@@ -452,6 +452,11 @@ static int sendsms(int argc, char *argv[])
 
 	/*  Null terminate. */
 	message_buffer[chars_read] = 0x00;
+	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
+	if (chars_read < 1) {
+		fprintf(stderr, _("Empty message. Quitting"));
+		return -1;
+	}
 	SMS.UserData[0].Type = SMS_PlainText;
 	strncpy(SMS.UserData[0].u.Text, message_buffer, chars_read);
 	data.SMSMessage = &SMS;

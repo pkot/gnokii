@@ -300,9 +300,9 @@ void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len)
 	for (i = 0; i < len; i++) {
 		dest[2 * i] = (src[i] & 0xf0) >> 4;
 		if (dest[2 * i] < 10) dest[2 * i] += '0';
-		else dest[2 * i] += ('a' - 10);
+		else dest[2 * i] += ('A' - 10);
 		dest[2 * i + 1] = src[i] & 0x0f;
 		if (dest[2 * i + 1] < 10) dest[2 * i + 1] += '0';
-		else dest[2 * i + 1] += ('a' - 10);
+		else dest[2 * i + 1] += ('A' - 10);
 	}
 }

@@ -591,6 +591,7 @@ static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 		dprintf("PDU mode not supported\n");
 		return error;
 	}
+	dprintf("AT mode set\n");
 	/* 6 is the frame header as above */
 	length = data->RawData->Length;
 	dprintf("Sending SMS...(%d)\n", length);
@@ -600,11 +601,14 @@ static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("\n");
 	if (length < 0) return GE_SMSWRONGFORMAT;
 	sprintf(req, "AT+CMGS=%d\r\n", length - data->RawData->Data[0] - 1);
+	dprintf("Sending initial sequence\n");
 	if (SM_SendMessage(state, strlen(req), GOPAT_Prompt, req) != GE_NONE) return GE_NOTREADY;
+//	error = SM_BlockNoRetry(state, data, GOPAT_Prompt);
+	dprintf("Got response %d\n", error);
 	bin2hex(req, data->RawData->Data, data->RawData->Length);
 	req[data->RawData->Length * 2] = 0x1a;
 	req[data->RawData->Length * 2 + 1] = 0;
-	dprintf("%s\n", req);
+	dprintf("Sending frame: %s\n", req);
 	if (SM_SendMessage(state, strlen(req), GOP_SendSMS, req) != GE_NONE) return GE_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_SendSMS);
 }
@@ -838,14 +842,25 @@ static GSM_Error ReplySetPDUMode(int messagetype, unsigned char *buffer, int len
 
 static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
-	if (buffer[0] == '>') return GE_NONE;
+	if (!strncmp(buffer, "> \r\n", 4)) return GE_NONE;
 	return GE_INTERNALERROR;
 }
 
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
+	AT_LineBuffer buf;
+
+	buf.line1 = buffer;
+	buf.length = length;
 	dprintf("%s\n", buffer);
-	return GE_NONE;
+	splitlines(&buf);
+
+	if ((buf.line1 && !strncmp("OK", buf.line1, 2)) ||
+	    (buf.line2 && !strncmp("OK", buf.line2, 2)) ||
+	    (buf.line3 && !strncmp("OK", buf.line3, 2)) ||
+	    (buf.line4 && !strncmp("OK", buf.line4, 2)))
+		return GE_SMSSENDOK;
+	return GE_SMSSENDFAILED;
 }
 
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
@@ -853,7 +868,7 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 	AT_LineBuffer buf;
 
 	buf.line1 = buffer;
-	buf.length= length;
+	buf.length = length;
 	
 	splitlines(&buf);
 	if (buf.line1 == NULL)

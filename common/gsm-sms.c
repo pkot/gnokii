@@ -339,7 +339,6 @@ static void change_offsets_struct(SMS_MessageCenter mc, SMS_Number rn)
 		rn_len /= 2;
 		rn_len++;
 	}
-	dprintf("%d %d\n", mc_len, rn_len);
 	if (llayout.MessageCenter < llayout.RemoteNumber) {
 		if (!llayout.HasMessageCenterFixedLen && llayout.MessageCenter > -1)
 			change_offsets2(llayout.MessageCenter, mc_len);
@@ -596,7 +595,6 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 	default:
 		break;
 	}
-
 	return error;
 }
 
@@ -672,7 +670,7 @@ static int EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num)
 	/* User Data */
 	EncodeData(SMS, message + llayout.DataCodingScheme, message + llayout.UserData + SMS->UDH_Length, mm);
 	message[llayout.Length] = SMS->Length;
-	return SMS->Length + llayout.UserData - 1;
+	return SMS->Length + llayout.UserData;
 }
 
 GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
