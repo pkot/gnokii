@@ -160,7 +160,25 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 		row[2] = g_strdup_printf("%02d/%02d/%04d", note->Time.Day,
 					 note->Time.Month, note->Time.Year);
 		row[5] = "";
-		row[6] = g_strdup_printf("%04d",note->Recurrence);
+		switch (note->Recurrence) {
+		case GCN_NEVER:
+			row[6] = _("never");
+			break;
+		case GCN_DAILY:
+			row[6] = _("daily");
+			break;
+		case GCN_WEEKLY:
+			row[6] = _("weekly");
+			break;
+		case GCN_2WEEKLY:
+			row[6] = _("every two weeks");
+			break;
+		case GCN_YEARLY:
+			row[6] = _("yearly");
+			break;
+		default:
+			row[6] = g_strdup_printf("every %d hours", note->Recurrence);
+		}
 		break;
 
 	case GCN_CALL:
@@ -169,7 +187,25 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 					 note->Time.Month, note->Time.Year,
 					 note->Time.Hour, note->Time.Minute);
 		row[5] = note->Phone;
-		row[6] = g_strdup_printf("%04d",note->Recurrence);
+		switch (note->Recurrence) {
+		case GCN_NEVER:
+			row[6] = _("never");
+			break;
+		case GCN_DAILY:
+			row[6] = _("daily");
+			break;
+		case GCN_WEEKLY:
+			row[6] = _("weekly");
+			break;
+		case GCN_2WEEKLY:
+			row[6] = _("every two weeks");
+			break;
+		case GCN_YEARLY:
+			row[6] = _("yearly");
+			break;
+		default:
+			row[6] = g_strdup_printf("every %d hours", note->Recurrence);
+		}
 		break;
 
 	case GCN_MEETING:
@@ -178,7 +214,25 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 					 note->Time.Month, note->Time.Year,
 					 note->Time.Hour, note->Time.Minute);
 		row[5] = "";
-		row[6] = g_strdup_printf("%04d",note->Recurrence);
+		switch (note->Recurrence) {
+		case GCN_NEVER:
+			row[6] = _("never");
+			break;
+		case GCN_DAILY:
+			row[6] = _("daily");
+			break;
+		case GCN_WEEKLY:
+			row[6] = _("weekly");
+			break;
+		case GCN_2WEEKLY:
+			row[6] = _("every two weeks");
+			break;
+		case GCN_YEARLY:
+			row[6] = _("yearly");
+			break;
+		default:
+			row[6] = g_strdup_printf("every %d hours", note->Recurrence);
+		}
 		break;
 
 	case GCN_BIRTHDAY:
@@ -1233,6 +1287,7 @@ static void AddBirthday(void)
 
 	if (addBirthdayDialogData.dialog == NULL) {
 		addBirthdayDialogData.dialog = gtk_dialog_new();
+
 		gtk_window_set_title(GTK_WINDOW(addBirthdayDialogData.dialog), _("Add birthday"));
 		gtk_window_position(GTK_WINDOW(addBirthdayDialogData.dialog), GTK_WIN_POS_MOUSE);
 		gtk_window_set_modal(GTK_WINDOW(addBirthdayDialogData.dialog), TRUE);
@@ -1632,7 +1687,7 @@ void GUI_CreateCalendarWindow()
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 2, 110);
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 3, 130);
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 4, 110);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 5, 52);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 5, 110);
 	gtk_clist_set_column_justification(GTK_CLIST(cal.notesClist), 0, GTK_JUSTIFY_RIGHT);
 
 	for (i = 0; i < 7; i++) {
@@ -1651,7 +1706,7 @@ void GUI_CreateCalendarWindow()
 			   GTK_SIGNAL_FUNC(ClickEntry), NULL);
 
 	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
-	gtk_widget_set_usize(scrolledWindow, 550, 100);
+	gtk_widget_set_usize(scrolledWindow, 600, 150);
 	gtk_container_add(GTK_CONTAINER(scrolledWindow), cal.notesClist);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
