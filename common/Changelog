@@ -61,3 +61,5 @@
 * Thu May 11 01:00:00 CET 2000 Chris Kemp
 - Minor changes to GetBitmap to avoid interrupted mulitframe packets.
 
+* Thu May 11 16:40:43 CEST 2000 Chris Kemp
+- allow reseting the startup text to null

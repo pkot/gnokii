@@ -503,6 +503,31 @@ GSM_Error FB61_GetProfile(GSM_Profile *Profile)
 
   }
 
+  if (Profile->DefaultName > -1)
+  {
+    if (Profile->Ringtone==48)
+    {
+      switch (Profile->DefaultName) {
+        case 0x00: sprintf(Profile->Name, "Personal");break;
+        case 0x01: sprintf(Profile->Name, "Car");break;
+        case 0x02: sprintf(Profile->Name, "Headset");break;
+        default: sprintf(Profile->Name, "Unknown (%i)", Profile->DefaultName);break;
+      }
+    } else
+    {
+      switch (Profile->DefaultName) {
+        case 0x00: sprintf(Profile->Name, "General");break;
+        case 0x01: sprintf(Profile->Name, "Silent");break;
+        case 0x02: sprintf(Profile->Name, "Meeting");break;
+        case 0x03: sprintf(Profile->Name, "Outdoor");break;
+        case 0x04: sprintf(Profile->Name, "Pager");break;
+        case 0x05: sprintf(Profile->Name, "Car");break;
+        case 0x06: sprintf(Profile->Name, "Headset");break;
+        default: sprintf(Profile->Name, "Unknown (%i)", Profile->DefaultName);break;
+      }
+    }
+  }
+  
   return (GE_NONE);
 
 }
@@ -2169,11 +2194,12 @@ GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
     req[count++]=0x01; /* Only one block */
     
     if (Bitmap->size==0x00) {
-      textlen=strlen(Bitmap->text);
-      if (textlen!=0)
+      textlen=strlen(Bitmap->dealertext);
+      if (textlen==0)
       {
         req[count++]=0x02; /* Welcome text */
-        req[count++]=textlen;
+       textlen=strlen(Bitmap->text);
+       req[count++]=textlen;
         memcpy(req+count,Bitmap->text,textlen);
         count+=textlen;
       } else
@@ -3334,18 +3360,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x1b:   /* Incoming profile name */
 
       if (MessageBuffer[9] == 0x00) {
-        switch (MessageBuffer[8]) {
-        case 0x00: sprintf(CurrentProfile->Name, "General"); break;
-        case 0x01: sprintf(CurrentProfile->Name, "Silent"); break;
-        case 0x02: sprintf(CurrentProfile->Name, "Meeting"); break;
-        case 0x03: sprintf(CurrentProfile->Name, "Outdoor"); break;
-        case 0x04: sprintf(CurrentProfile->Name, "Pager"); break;
-        case 0x05: sprintf(CurrentProfile->Name, "Car"); break;
-        case 0x06: sprintf(CurrentProfile->Name, "Headset"); break;
-        default: sprintf(CurrentProfile->Name, "Unknown"); break;
-        }
+        CurrentProfile->DefaultName=MessageBuffer[8];
       }
       else {
+        CurrentProfile->DefaultName=-1;
         sprintf(CurrentProfile->Name, MessageBuffer + 10, MessageBuffer[9]);
         CurrentProfile->Name[MessageBuffer[9]] = '\0';
       }
