@@ -42,6 +42,7 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state);
@@ -54,6 +55,7 @@ static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 
 typedef struct {
 	int gop;
@@ -78,7 +80,8 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_GetMemoryStatus, AT_GetMemoryStatus, ReplyMemoryStatus },
 	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
 	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert },
-	{ GOP_SendSMS, AT_SendSMS, ReplySendSMS }
+	{ GOP_SendSMS, AT_SendSMS, ReplySendSMS },
+	{ GOP_GetSMS, AT_GetSMS, ReplyGetSMS }
 };
 
 
@@ -145,7 +148,7 @@ GSM_RecvFunctionType AT_InsertRecvFunction(int type, GSM_RecvFunctionType func)
 		pos++;
 		return NULL;
 	}
-	for (i=0; i < pos; i++) {
+	for (i = 0; i < pos; i++) {
 		if (IncomingFunctions[i].MessageType == type) {
 			oldfunc = IncomingFunctions[i].Functions;
 			IncomingFunctions[i].Functions = func;
@@ -391,6 +394,11 @@ static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
+static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	return GE_NONE;
+}
+
 
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
@@ -577,6 +585,11 @@ static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int len
 }
 
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	return GE_NONE;
+}
+
+static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	return GE_NONE;
 }
