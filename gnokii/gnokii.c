@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.116  2001-01-24 20:19:55  machek
+  Revision 1.117  2001-01-31 23:45:27  pkot
+  --identify should work ok now
+
+  Revision 1.116  2001/01/24 20:19:55  machek
   Do not retry identification, if it is not implemented, it is bad idea.
 
   Revision 1.115  2001/01/22 01:25:10  hugh
@@ -3096,7 +3099,9 @@ int identify( void )
 
   fbusinit(NULL);
 
-  /* Retrying is bad idea: what if function is simply not implemented? */
+  /* Retrying is bad idea: what if function is simply not implemented?
+     Anyway let's wait 2 seconds for the right packet from the phone. */
+  sleep(2);
 
   strcpy(imei, "(unknown)");
   strcpy(model, "(unknown)");
