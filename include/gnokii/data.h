@@ -218,6 +218,8 @@ typedef enum {
 	GN_OP_ActivateWAPSetting,
 	GN_OP_WriteWAPSetting,
 	GN_OP_GetLocksInfo,
+	GN_OP_GetActiveProfile,
+	GN_OP_SetActiveProfile,
 	GN_OP_Max,	/* don't append anything after this entry */
 } gn_operation;
 

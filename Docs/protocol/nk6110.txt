@@ -198,6 +198,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                   feature: see 0x05/0x0014
                                   a: see 0x05/0x0014
     r Set profile feat. OK  { 0x0011, 1 }
+    r Set profile feat. ERR { 0x0012, reason }
     s Get profile feature   { 0x0013, 1, nr, feature, 1 }
                             where nr is profile number (general=0, silent, meeting, outdoor, pager, car, headset=6)
                                   feature: see 0x05/0x0014

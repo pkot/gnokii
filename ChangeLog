@@ -16,6 +16,10 @@
                                                       (Ville Skyttä)
  * smsd updates
     o make smsd install compliant with FHS            (Ville Skyttä)
+ * gnokii updates
+    o --[gs]etactiveprofile added                   (BORBELY Zoltan)
+ * 6110 series updates
+    o GN_OP_[GS]etActiveProfile implemented         (BORBELY Zoltan)
 
 0.5.1
 =====

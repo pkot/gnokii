@@ -89,6 +89,8 @@ static gn_error GetAlarm(gn_data *data, struct gn_statemachine *state);
 static gn_error SetAlarm(gn_data *data, struct gn_statemachine *state);
 static gn_error GetProfile(gn_data *data, struct gn_statemachine *state);
 static gn_error SetProfile(gn_data *data, struct gn_statemachine *state);
+static gn_error GetActiveProfile(gn_data *data, struct gn_statemachine *state);
+static gn_error SetActiveProfile(gn_data *data, struct gn_statemachine *state);
 static gn_error GetCalendarNote(gn_data *data, struct gn_statemachine *state);
 static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state);
 static gn_error DeleteCalendarNote(gn_data *data, struct gn_statemachine *state);
@@ -288,6 +290,10 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return GetProfile(data, state);
 	case GN_OP_SetProfile:
 		return SetProfile(data, state);
+	case GN_OP_GetActiveProfile:
+		return GetActiveProfile(data, state);
+	case GN_OP_SetActiveProfile:
+		return SetActiveProfile(data, state);
 	case GN_OP_GetCalendarNote:
 		return GetCalendarNote(data, state);
 	case GN_OP_WriteCalendarNote:
@@ -2032,6 +2038,23 @@ static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state)
 	return sm_block(0x05, data, state);
 }
 
+static gn_error GetActiveProfile(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data->profile)
+		return GN_ERR_UNKNOWN;
+	data->profile->number = 0;
+
+	return GetProfileFeature(0x2a, data, state);
+}
+
+static gn_error SetActiveProfile(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data->profile)
+		return GN_ERR_UNKNOWN;
+
+	return SetProfileFeature(data, state, 0x2a, data->profile->number);
+}
+
 static gn_error IncomingProfile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_bmp *bmp;
@@ -2043,12 +2066,24 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 	switch (message[3]) {
 	/* Set profile feat. OK */
 	case 0x11:
+		if (length == 4) break;	/* non profile specific, e.g. set active profile */
 		switch (message[4]) {
 		case 0x01:
 			break;
 		case 0x7d:
 			dprintf("Cannot set profile feature\n");
 			return GN_ERR_UNKNOWN;
+		default:
+			return GN_ERR_UNHANDLEDFRAME;
+		}
+		break;
+
+	/* Set profile feat. ERR */
+	case 0x12:
+		switch (message[4]) {
+		case 0x7d:
+			dprintf("Cannot set profile feature\n");
+			return GN_ERR_INVALIDLOCATION;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -2088,6 +2123,9 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 				break;
 			case 0x09:
 				prof->automatic_answer = message[8];
+				break;
+			case 0x2a:
+				prof->number = message[8];
 				break;
 			default:
 				return GN_ERR_UNHANDLEDFRAME;

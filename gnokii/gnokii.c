@@ -136,6 +136,8 @@ typedef enum {
 	OPT_SETRINGTONE,
 	OPT_GETPROFILE,
 	OPT_SETPROFILE,
+	OPT_GETACTIVEPROFILE,
+	OPT_SETACTIVEPROFILE,
 	OPT_DISPLAYOUTPUT,
 	OPT_KEYPRESS,
 	OPT_ENTERCHAR,
@@ -309,6 +311,8 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --reset [soft|hard]\n"
 		     "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
 		     "          gnokii --setprofile\n"
+		     "          gnokii --getactiveprofile\n"
+		     "          gnokii --setactiveprofile profile_number\n"
 		     "          gnokii --displayoutput\n"
 		     "          gnokii --keysequence\n"
 		     "          gnokii --enterchar\n"
@@ -2945,6 +2949,51 @@ static int setprofile()
 	return error;
 }
 
+/* Queries the active profile */
+static int getactiveprofile()
+{
+	gn_profile p;
+	gn_error error;
+	gn_data data;
+
+	gn_data_clear(&data);
+	data.profile = &p;
+
+	error = gn_sm_functions(GN_OP_GetActiveProfile, &data, &state);
+	if (error != GN_ERR_NONE) {
+		fprintf(stderr, _("Cannot get active profile: %s\n"), gn_error_print(error));
+		return error;
+	}
+
+	error = gn_sm_functions(GN_OP_GetProfile, &data, &state);
+	if (error != GN_ERR_NONE) {
+		fprintf(stderr, _("Cannot get profile %d\n"), p.number);
+		return error;
+	}
+
+	fprintf(stdout, _("Active profile: %d (%s)\n"), p.number, p.name);
+
+	return GN_ERR_NONE;
+}
+
+/* Select the specified profile */
+static int setactiveprofile(int argc, char *argv[])
+{
+	gn_profile p;
+	gn_error error;
+	gn_data data;
+
+	gn_data_clear(&data);
+	data.profile = &p;
+	p.number = atoi(argv[0]);
+
+	error = gn_sm_functions(GN_OP_SetActiveProfile, &data, &state);
+	if (error != GN_ERR_NONE) {
+		fprintf(stderr, _("Cannot set active profile to %d: %s\n"), p.number, gn_error_print(error));
+		return error;
+	}
+}
+
 /* Get requested range of memory storage entries and output to stdout in
    easy-to-parse format */
 static int getphonebook(int argc, char *argv[])
@@ -4538,6 +4587,12 @@ int main(int argc, char *argv[])
 		/* Set profile */
 		{ "setprofile",         no_argument,       NULL, OPT_SETPROFILE },
 
+		/* Gets the active profile */
+		{ "getactiveprofile",   no_argument,       NULL, OPT_GETACTIVEPROFILE },
+
+		/* Sets the active profile */
+		{ "setactiveprofile",   required_argument, NULL, OPT_SETACTIVEPROFILE },
+
 		/* Show texts from phone's display */
 		{ "displayoutput",      no_argument,       NULL, OPT_DISPLAYOUTPUT },
 
@@ -4629,6 +4684,7 @@ int main(int argc, char *argv[])
 		{ OPT_SETRINGTONE,       1, 5, 0 },
 		{ OPT_RESET,             0, 1, 0 },
 		{ OPT_GETPROFILE,        0, 3, 0 },
+		{ OPT_SETACTIVEPROFILE,  1, 1, 0 },
 		{ OPT_WRITEPHONEBOOK,    0, 1, 0 },
 		{ OPT_DIVERT,            6, 10, 0 },
 		{ OPT_GETWAPBOOKMARK,    1, 1, 0 },
@@ -4834,6 +4890,12 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_SETPROFILE:
 			rc = setprofile();
+			break;
+		case OPT_GETACTIVEPROFILE:
+			rc = getactiveprofile();
+			break;
+		case OPT_SETACTIVEPROFILE:
+			rc = setactiveprofile(nargc, nargv);
 			break;
 		case OPT_DISPLAYOUTPUT:
 			rc = displayoutput();
