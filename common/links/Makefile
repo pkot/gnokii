@@ -17,13 +17,14 @@
 TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
-OBJS =	fbus.o \
+OBJS =	atbus.o \
+	fbus.o \
 	fbus-phonet.o \
-	cbus.o \
-	atbus.o \
 	fbus-3110.o \
 	m2bus.o \
 	utils.o
+
+#	cbus.o
 
 all: LINKS.o
 

@@ -10,11 +10,19 @@ expensive, in fact it is $10 more than it is worth.
 
 OTOH, dancalls try to speak something like AT-commands over serial
 cable, which made their decoding pretty easy. And they include netmon
-by default (just type *#9993#).
+by default (just type *#9993#). 
+Look at http://info.lantanet.cz/gsm/en_dancall_2711.html for complete
+list. Phone contains sw modem and it was one of the best phones in the
+market in its time.
 
 You *need* setserial /dev/ttyS0 low_latency in order for dancall
 support to work.
 
 * Known Bugs *
 
+Dancall support is disabled in gnokii 0.5. Proper support will require
+some statemachine changes which will be done after 0.5.
+
 * To-do *
+
+Revive it in full glory ;-)

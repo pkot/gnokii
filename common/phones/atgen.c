@@ -42,9 +42,7 @@
 #include "phones/ateric.h"
 #include "phones/atnok.h"
 #include "phones/atsie.h"
-#include "phones/dc2711.h"
 #include "links/atbus.h"
-#include "links/cbus.h"
 
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state);
 static gn_error Terminate(gn_data *data, struct gn_statemachine *state);
@@ -129,7 +127,7 @@ gn_driver driver_at = {
 	NULL,
 	pgen_incoming_default,
 	{
-		"AT|AT-HW|dancall",	/* Supported models */
+		"AT|AT-HW",		/* Supported models */
 		99,			/* Max RF Level */
 		0,			/* Min RF Level */
 		GN_RF_CSQ,		/* RF level units */
@@ -1189,9 +1187,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	case GN_CT_Serial:
 	case GN_CT_Bluetooth:
 	case GN_CT_Irda:
-		if (!strcmp(setupdata->model, "dancall"))
-			ret = cbus_initialise(state);
-		else if (!strcmp(setupdata->model, "AT-HW"))
+		if (!strcmp(setupdata->model, "AT-HW"))
 			ret = atbus_initialise(true, state);
 		else
 			ret = atbus_initialise(false, state);
@@ -1205,14 +1201,6 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 
 	sm_initialise(state);
 
-	/* Dancall is crap and not real AT phone */
-	if (!strcmp(setupdata->model, "dancall")) {
-		data.manufacturer = "dancall";
-		dc2711_init(model, setupdata->model, state);
-		dprintf("Dancall initialisation completed\n");
-		goto out;
-	}
-	
 	SoftReset(&data, state);
 	SetEcho(&data, state);
 
