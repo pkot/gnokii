@@ -1239,9 +1239,9 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 	return GN_ERR_NONE;
 }
 
-#ifdef DEBUG
 static void sms_dump_raw(gn_sms_raw *rawsms)
 {
+#ifdef DEBUG
 	char buf[10240];
 
 	memset(buf, 0, 10240);
@@ -1252,10 +1252,8 @@ static void sms_dump_raw(gn_sms_raw *rawsms)
 	dprintf("ValidityIndicator: %d\n", rawsms->validity_indicator);
 	bin2hex(buf, rawsms->user_data, rawsms->user_data_length);
 	dprintf("user_data: %s\n", buf);
-}
-#else
-static void sms_dump_raw(gn_sms_raw *rawsms) {}
 #endif
+}
 
 static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state);
 
@@ -1290,7 +1288,8 @@ API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 
 	sms_dump_raw(data->raw_sms);
 	if (data->raw_sms->user_data_length > MAX_SMS_PART) {
-		dprintf("SMS is too long? %d\n", data->raw_sms->length);
+		dprintf("SMS is too long? %d\n", data->raw_sms->user_data_length);
+		sleep(5);
 		error = sms_send_long(data, state);
 		goto cleanup;
 	}
@@ -1335,6 +1334,9 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 		case GN_SMS_DCS_DefaultAlphabet:
 			total += ((data->sms->udh.length+1) % 8 + data->sms->user_data[i].length) * 7 / 8;
 			break;
+		case GN_SMS_DCS_UCS2:
+			total += (data->sms->user_data[i].length * 2);
+			break;
 		default:
 			total += data->sms->user_data[i].length;
 			break;
@@ -1361,6 +1363,23 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 			copied = (ud[0].length - start) % ((MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7);
 			if (copied == 0)
 				copied = ((MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7);
+			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
+			data->sms->user_data[0].type = ud[0].type;
+			data->sms->user_data[0].length = copied;
+			memcpy(data->sms->user_data[0].u.text, ud[0].u.text+start, copied);
+			break;
+		case GN_SMS_DCS_UCS2:
+			start += copied;
+			copied = (ud[0].length - start) % ((MAX_SMS_PART - (data->sms->udh.length+1)));
+			if (copied == 0)
+				copied = (MAX_SMS_PART - (data->sms->udh.length+1));
+			if (copied > (MAX_SMS_PART - (data->sms->udh.length+1)) / 2) {
+				copied = copied / 2;
+				if (copied < (MAX_SMS_PART - (data->sms->udh.length+1)) / 2)
+					copied = (MAX_SMS_PART - (data->sms->udh.length+1)) / 2;
+
+			}
+			dprintf("%d\n", copied);
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
 			data->sms->user_data[0].type = ud[0].type;
 			data->sms->user_data[0].length = copied;

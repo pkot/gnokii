@@ -22,6 +22,7 @@
     o various ringtone fixes                       (BORBELY Zoltan)
     o nokia raw ringtone handling improved a lot, it can parse
       most of the built-in ringtones of the 6610   (BORBELY Zoltan)
+    o fix concatenated sms support for unicode text     (Pawel Kot)
  * Documentation updates
     o nk7110 profile reading messages updated      (BORBELY Zoltan)
     o nk6510 raw ringtone get/set messages added   (BORBELY Zoltan)
