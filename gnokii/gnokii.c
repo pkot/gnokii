@@ -4252,7 +4252,7 @@ static int getsecuritycode()
 
 static void list_gsm_networks(void)
 {
-	extern gn_network networks[];
+	API extern gn_network networks[];
 	int i;
 
 	printf("Network  Name\n");

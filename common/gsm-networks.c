@@ -154,7 +154,7 @@ static gn_country countries[] = {
 	{ "undefined", "unknown" }
 };
 
-gn_network networks[] = {
+API gn_network networks[] = {
 	{ "202 01", "Cosmote" },
 	{ "202 05", "Vodafone (PANAFON)" },
 	{ "202 10", "TELESTET" },
