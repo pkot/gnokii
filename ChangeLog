@@ -53,6 +53,7 @@
     o some minor fixes in contacts                     (Markus Plail)
     o update to compile with the new SMS subsystem     (Markus Plail)
     o add support for recurrence in calendar           (Markus Plail)
+    o minor fixes for recurrence in calendar           (Markus Plail)
  * gnokii updates:
     o let gnokii display usage instruction to stdout when it's
       called with --help or -h and to stderr otherwise    (Pawel Kot)
@@ -61,6 +62,7 @@
     o fixes for getsms() to correctly get SMSC number     (Pawel Kot)
     o read SMSC number in sendlogo()                      (Pawel Kot)
     o change --getmemory to --getphonebook                (Pawel Kot)
+    o added getsecuritycode                            (Markus Plail)
  * gnokiid updates:
     o ATH can terminate initiated calls              (BORBELY Zoltan)
     o incoming calls can be answered                 (BORBELY Zoltan)
@@ -71,7 +73,8 @@
       this code                                           (Pawel Kot)
     o support for the new SMS subsystem                   (Pawel Kot)
     o fixes for SMSC reading                              (Pawel Kot)
-    o read Recurrence from phone                       (Markus Plail)
+    o fix reading Recurrence from phone                (Markus Plail)
+    o added getsecuritycode                            (Markus Plail)
  * 6510 series updates:
     o update to work with new SMS subsystem            (Markus Plail)
     o capitalization caused compilation problem      (BORBELY Zoltan)
@@ -110,6 +113,7 @@
     o M2BUS idle channel check and channel flushing added
                                                      (BORBELY Zoltan)
  * ISDN cause decoding added to gsm-error            (BORBELY Zoltan)
+ * GOP_GetSecurityCode added                           (Markus Plail)
 
 0.4.0pre20
 ==========
