@@ -6,6 +6,8 @@
     o ease a bit compilation procedure on MacOS X   (Ruotger Skupin)
     o cz and sk operator names changes             (Vitezslav Samel,
                                                     Ernest Beinrohr)
+    o retransmission occurs only if the phone won't transmit
+      the acknowledge frame                         (BORBELY Zoltan)
  * build system updated
     o avoid problems with recursive loop when installing
       locales in xgnokii                          (Malte Schünemann)

@@ -146,6 +146,7 @@ static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachin
 					dprintf("%02hhx:", i->buffer[count]);
 				dprintf("\n");
 				/* Transfer message to state machine */
+				sm_incoming_acknowledge(state);
 				sm_incoming_function(i->buffer[0], i->buffer, i->frame_len, state);
 
 				/* Send an ack */

@@ -406,6 +406,7 @@ static gn_error cbus_loop(struct timeval *timeout, struct gn_statemachine *sm)
 	error = get_cmd_reply(sm);
 	if (error)
 		return error;
+	sm_incoming_acknowledge(sm);
 	sm_incoming_function(sm->last_msg_type, bi->at_reply, strlen(bi->at_reply), sm);
 	return GN_ERR_NONE;
 }

@@ -199,9 +199,13 @@ gn_error sm_wait_for(unsigned char messagetype, gn_data *data, struct gn_statema
 	state->data[state->waiting_for_number] = data;
 	state->ResponseError[state->waiting_for_number] = GN_ERR_BUSY;
 	state->waiting_for_number++;
-	state->current_state = GN_SM_WaitingForResponse;
 
 	return GN_ERR_NONE;
+}
+
+void sm_incoming_acknowledge(struct gn_statemachine *state)
+{
+	state->current_state = GN_SM_WaitingForResponse;
 }
 
 
@@ -210,54 +214,54 @@ gn_error sm_wait_for(unsigned char messagetype, gn_data *data, struct gn_statema
 
    t is in tenths of second
 */
-static gn_error __sm_block_timeout(int waitfor, int t, int noretry, gn_data *data, struct gn_statemachine *state)
+gn_error sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state)
 {
 	int retry, timeout;
 	gn_state s;
 	gn_error err;
-	int tfact[3] = {50, 100, 150};
 
-	for (retry = 0; retry < 3; retry++) {
-		timeout = (t * tfact[retry]) / 100;
-		if (timeout < 1) timeout = 1;
+	for (retry = 0; retry < 2; retry++) {
+		timeout = 20;
 		err = sm_wait_for(waitfor, data, state);
 		if (err != GN_ERR_NONE) return err;
 
 		do {
 			s = gn_sm_loop(1, state);  /* Timeout=100ms */
 			timeout--;
-		} while ((timeout > 0) && (s == GN_SM_WaitingForResponse));
+		} while ((timeout > 0) && (s == GN_SM_MessageSent));
 
-		if (s == GN_SM_ResponseReceived) return sm_error_get(waitfor, state);
+		if (s != GN_SM_MessageSent) break;
 
 		dprintf("SM_Block Retry - %d\n", retry);
 		sm_reset(state);
-		if ((retry < 2) && (!noretry)) 
-			sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
+		sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
 	}
+
+	timeout = t;
+	do {
+		s = gn_sm_loop(1, state);  /* Timeout=100ms */
+		timeout--;
+	} while ((timeout > 0) && (s == GN_SM_WaitingForResponse));
+
+	if (s == GN_SM_ResponseReceived) return sm_error_get(waitfor, state);
 
 	return GN_ERR_TIMEOUT;
 }
 
-gn_error sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state)
-{
-	return __sm_block_timeout(waitfor, t, 0, data, state);
-}
-
 gn_error sm_block(int waitfor, gn_data *data, struct gn_statemachine *state)
 {
-	return __sm_block_timeout(waitfor, 30, 0, data, state);
+	return sm_block_timeout(waitfor, 30, data, state);
 }
 
 /* This function is equal to SM_Block except it does not retry the message */
 gn_error sm_block_no_retry_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state)
 {
-	return __sm_block_timeout(waitfor, t, 1, data, state);
+	return sm_block_timeout(waitfor, t, data, state);
 }
 
 gn_error sm_block_no_retry(int waitfor, gn_data *data, struct gn_statemachine *state)
 {
-	return __sm_block_timeout(waitfor, 100, 1, data, state);
+	return sm_block_timeout(waitfor, 100, data, state);
 }
 
 /* Just to do things neatly */

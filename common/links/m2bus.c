@@ -230,6 +230,7 @@ static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine 
 					/* echo */
 				} else if (i->message_type == 0x7f) {
 					dprintf("[Received Ack, seq: %2x]\n", i->message_buffer[0]);
+					sm_incoming_acknowledge(state);
 
 				} else {	/* Normal message type */
 

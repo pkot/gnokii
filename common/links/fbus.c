@@ -298,6 +298,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 				if (i->message_type == 0x7f) {
 					dprintf("[Received Ack of type %02x, seq: %2x]\n",
 						i->message_buffer[0], (unsigned char) i->message_buffer[1]);
+					sm_incoming_acknowledge(state);
 
 				} else if (i->message_type == 0xf1) {
 					sm_incoming_function(i->message_type, i->message_buffer,

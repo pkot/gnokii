@@ -230,6 +230,8 @@ static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned ch
 		else current += sent;
 	} while (current < total);
 
+	sm_incoming_acknowledge(state);
+
 	return GN_ERR_NONE;
 }
 
