@@ -40,11 +40,11 @@
 #include "phones/atgen.h"
 #include "phones/atsie.h"
 #include "links/atbus.h"
-#include "links/cbus.h"
+
 
 static AT_SendFunctionType writephonebook;
 
-static gn_error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
+static gn_error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_PhonebookEntry newphone;
 	char *rptr, *wptr;
@@ -60,10 +60,9 @@ static gn_error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
 	return (*writephonebook)(data, state);
 }
 
-
 void AT_InitSiemens(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
 {
 	/* names for s35 etc must be escaped */
 	if (foundmodel && !strncasecmp("35", foundmodel + 1, 2))
-		writephonebook = AT_InsertSendFunction(GOP_WritePhonebook, WritePhonebook);
+		writephonebook = AT_InsertSendFunction(GOP_WritePhonebook, WritePhonebook, state);
 }

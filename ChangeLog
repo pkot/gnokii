@@ -34,6 +34,7 @@
     o Bosch support. Tested with Bosch 909 Dual S    (Ladislav Michl)
     o implement SetCharset                           (Ladislav Michl)
     o implement WritePhonebook                       (Ladislav Michl)
+    o get rid of global variables & cleanup          (Ladislav Michl)
  * cbus updates/clanups                              (Ladislav Michl)
 
 0.5.0pre1

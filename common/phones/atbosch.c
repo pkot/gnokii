@@ -41,8 +41,10 @@
 #include "phones/atbosch.h"
 #include "links/atbus.h"
 
+
 static gn_error GetCharset(GSM_Data *data, GSM_Statemachine *state)
 {
+	AT_DRVINST(state)->charset = CHARGSM;
 	strcpy(data->Model, "GSM");
 	return GN_ERR_NONE;
 }
@@ -110,15 +112,15 @@ static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
 
 void AT_InitBosch(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
 {
-	AT_InsertRecvFunction(GOPAT_GetCharset, NULL);
-	AT_InsertSendFunction(GOPAT_GetCharset, GetCharset);
-	AT_InsertRecvFunction(GOPAT_SetCharset, NULL);
-	AT_InsertSendFunction(GOPAT_SetCharset, SetCharset);
-	replygetsms = AT_InsertRecvFunction(GOP_GetSMS, ReplyGetSMS);
+	AT_InsertRecvFunction(GOPAT_GetCharset, NULL, state);
+	AT_InsertSendFunction(GOPAT_GetCharset, GetCharset, state);
+	AT_InsertRecvFunction(GOPAT_SetCharset, NULL, state);
+	AT_InsertSendFunction(GOPAT_SetCharset, SetCharset, state);
+	replygetsms = AT_InsertRecvFunction(GOP_GetSMS, ReplyGetSMS, state);
 	/* phone lacks many usefull commands :( */
-	AT_InsertSendFunction(GOP_GetBatteryLevel, Unsupported);
-	AT_InsertSendFunction(GOP_GetRFLevel, Unsupported);
-	AT_InsertSendFunction(GOP_GetSecurityCodeStatus, Unsupported);
-	AT_InsertSendFunction(GOP_EnterSecurityCode, Unsupported);
-	AT_InsertSendFunction(GOP_SaveSMS, Unsupported);
+	AT_InsertSendFunction(GOP_GetBatteryLevel, Unsupported, state);
+	AT_InsertSendFunction(GOP_GetRFLevel, Unsupported, state);
+	AT_InsertSendFunction(GOP_GetSecurityCodeStatus, Unsupported, state);
+	AT_InsertSendFunction(GOP_EnterSecurityCode, Unsupported, state);
+	AT_InsertSendFunction(GOP_SaveSMS, Unsupported, state);
 }

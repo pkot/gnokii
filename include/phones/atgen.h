@@ -53,6 +53,22 @@ typedef enum {
 typedef gn_error (*GSM_RecvFunctionType)(int type, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 typedef gn_error (*AT_SendFunctionType)(GSM_Data *data, GSM_Statemachine *s);
 
+GSM_RecvFunctionType AT_InsertRecvFunction(int type, GSM_RecvFunctionType func, GSM_Statemachine *state);
+AT_SendFunctionType AT_InsertSendFunction(int type, AT_SendFunctionType func, GSM_Statemachine *state);
+
+typedef struct {
+	AT_SendFunctionType Functions[GOPAT_Max];
+	GSM_IncomingFunctionType IncomingFunctions[GOPAT_Max];
+	int if_pos;
+
+	GSM_MemoryType memorytype;
+	GSM_MemoryType smsmemorytype;
+	GSMAT_Charset defaultcharset;
+	GSMAT_Charset charset;
+} AT_DriverInstance;
+
+#define AT_DRVINST(s) ((AT_DriverInstance *)((s)->Phone.DriverInstance))
+
 typedef struct {
 	char *line1;
 	char *line2;
@@ -60,9 +76,6 @@ typedef struct {
 	char *line4; /* When reading SMS there are 4 ouput lines. Maybe create a table here? */
 	int length;
 } AT_LineBuffer;
-
-GSM_RecvFunctionType AT_InsertRecvFunction(int type, GSM_RecvFunctionType func);
-AT_SendFunctionType AT_InsertSendFunction(int type, AT_SendFunctionType func);
 
 gn_error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state);
 

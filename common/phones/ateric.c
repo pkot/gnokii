@@ -40,24 +40,19 @@
 #include "phones/atgen.h"
 #include "phones/ateric.h"
 #include "links/atbus.h"
-#include "links/cbus.h"
 
 
-static gn_error GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
+static gn_error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-	char req[128];
 	gn_error ret;
-
-	ret = AT_SetMemoryType(data->MemoryStatus->MemoryType,  state);
-	if (ret != GN_ERR_NONE)
+	
+	ret = AT_SetMemoryType(data->MemoryStatus->MemoryType, state);
+	if (ret)
 		return ret;
-	sprintf(req, "AT+CPBR=?\r\n");
-	if (SM_SendMessage(state, 11, GOP_GetMemoryStatus, req) != GN_ERR_NONE)
+	if (SM_SendMessage(state, 11, GOP_GetMemoryStatus, "AT+CPBR=?\r\n"))
 		return GN_ERR_NOTREADY;
-	ret = SM_Block(state, data, GOP_GetMemoryStatus);
-	return ret;
+	return SM_Block(state, data, GOP_GetMemoryStatus);
 }
-
 
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
@@ -83,9 +78,8 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 	return GN_ERR_NONE;
 }
 
-
 void AT_InitEricsson(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
 {
-	AT_InsertRecvFunction(GOP_GetMemoryStatus, ReplyMemoryStatus);
-	AT_InsertSendFunction(GOP_GetMemoryStatus, GetMemoryStatus);
+	AT_InsertRecvFunction(GOP_GetMemoryStatus, ReplyMemoryStatus, state);
+	AT_InsertSendFunction(GOP_GetMemoryStatus, GetMemoryStatus, state);
 }
