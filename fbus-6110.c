@@ -3158,56 +3158,14 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 
 int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
-  unsigned char out_buffer[10]; /* Acks are always 10 char */
-  int count, current=0;
-  unsigned char checksum;
+  unsigned char request[2];
+
+  request[0] = message_type;
+  request[1] = message_seq;
 
 #ifdef DEBUG
-
   printf(_("[Sending Ack of type %02x, seq: %x]\n"), message_type, message_seq);
-
 #endif DEBUG
 
-  /* Now construct the Ack header. */
-
-  if (CurrentConnectionType == GCT_Infrared)
-    out_buffer[current++] = FB61_IR_FRAME_ID; /* Start of the IR frame indicator */
-  else /* CurrentConnectionType == GCT_Serial */
-    out_buffer[current++] = FB61_FRAME_ID;    /* Start of the frame indicator */
-
-  out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
-  out_buffer[current++] = FB61_DEVICE_PC;    /* Source */
-
-  out_buffer[current++] = FB61_FRTYPE_ACK; /* Ack */
-
-  out_buffer[current++] = 0; /* Unknown */
-  out_buffer[current++] = 2; /* Ack is always of 2 bytes */
-
-  out_buffer[current++] = message_type; /* Type */
-  out_buffer[current++] = message_seq;  /* Sequence number */
-
-  /* Now calculate checksums over entire message and append to message. */
-
-  /* Odd bytes */
-
-  checksum = 0;
-  for (count = 0; count < current; count+=2)
-    checksum ^= out_buffer[count];
-
-  out_buffer[current++] = checksum;
-
-  /* Even bytes */
-
-  checksum = 0;
-  for (count = 1; count < current; count+=2)
-    checksum ^= out_buffer[count];
-
-  out_buffer[current++] = checksum;
-
-  /* Send it out... */
-
-  if (write(PortFD, out_buffer, current) != current)
-    return (false);
-
-  return true;  
+  return FB61_TX_SendMessage(2, FB61_FRTYPE_ACK, request);
 }
