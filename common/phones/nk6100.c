@@ -82,6 +82,8 @@ static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 /* static functions prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Initialise(GSM_Statemachine *state);
+static GSM_Error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetModelName(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRevision(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state);
@@ -108,6 +110,8 @@ static GSM_Error SetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetDisplayStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error DisplayOutput(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -118,6 +122,7 @@ static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, in
 static GSM_Error Incoming0x17(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -128,6 +133,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x05, IncomingProfile },
 	{ 0x11, IncomingPhoneClockAndAlarm },
 	{ 0x13, IncomingCalendar },
+	{ 0x0d, IncomingDisplay },
 
 	{ 0x64, IncomingPhoneInfo },
 	{ 0xd2, IncomingModelInfo },
@@ -163,6 +169,10 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	switch (op) {
 	case GOP_Init:
 		return Initialise(state);
+	case GOP_GetSpeedDial:
+		return GetSpeedDial(data, state);
+	case GOP_SetSpeedDial:
+		return SetSpeedDial(data, state);
 	case GOP_GetModel:
 		return GetModelName(data, state);
 	case GOP_GetRevision:
@@ -211,6 +221,10 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return WriteCalendarNote(data, state);
 	case GOP_DeleteCalendarNote:
 		return DeleteCalendarNote(data, state);
+	case GOP_GetDisplayStatus:
+		return GetDisplayStatus(data, state);
+	case GOP_DisplayOutput:
+		return DisplayOutput(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -462,6 +476,28 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	}
 }
 
+static GSM_Error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x16, 0x00};
+      
+	req[4] = data->SpeedDial->Number;
+
+	if (SM_SendMessage(state, 5, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
+}
+
+static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x19, 0x00, 0x00, 0x00};
+      
+	req[4] = data->SpeedDial->Number;
+	req[5] = GetMemoryType(data->SpeedDial->MemoryType);
+	req[6] = data->SpeedDial->Location;
+
+	if (SM_SendMessage(state, 7, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
+}
+
 static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_PhonebookEntry *pe;
@@ -570,6 +606,36 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
+	
+	/* Get speed dial OK */
+	case 0x17:
+		if (data->SpeedDial) {
+			switch (message[4]) {
+			case P6100_MEMORY_ME:
+				data->SpeedDial->MemoryType = GMT_ME;
+				break;
+			case P6100_MEMORY_SM:
+				data->SpeedDial->MemoryType = GMT_SM;
+				break;
+			default:
+				return GE_UNHANDLEDFRAME;
+			}
+			data->SpeedDial->Location = message[5];
+		}
+		break;
+	
+	/* Get speed dial error */
+	case 0x18:
+		return GE_INVALIDSPEEDDIALLOCATION;
+	
+	/* Set speed dial OK */
+	case 0x1a:
+		return GE_NONE;
+
+	/* Set speed dial error */
+	case 0x1b:
+		return GE_INVALIDSPEEDDIALLOCATION;
+
 	default:
 		return GE_UNHANDLEDFRAME;
 	}
@@ -1603,6 +1669,83 @@ static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int l
 			break;
 		case 0x93:
 			return GE_EMPTYMEMORYLOCATION;
+		default:
+			return GE_UNHANDLEDFRAME;
+		}
+		break;
+
+	default:
+		return GE_UNHANDLEDFRAME;
+	}
+
+	return GE_NONE;
+}
+
+static GSM_Error GetDisplayStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x51};
+
+	if (SM_SendMessage(state, 4, 0x0d, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x0d);
+}
+
+static GSM_Error DisplayOutput(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x53, 0x00};
+
+	req[4] = data->OutputFn ? 0x01 : 0x02;
+
+	if (SM_SendMessage(state, 5, 0x0d, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x0d);
+}
+
+static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	int state_table[8] = { 1 << DS_Call_In_Progress, 1 << DS_Unknown,
+			       1 << DS_Unread_SMS, 1 << DS_Voice_Call,
+			       1 << DS_Fax_Call, 1 << DS_Data_Call,
+			       1 << DS_Keyboard_Lock, 1 << DS_SMS_Storage_Full };
+	unsigned char *pos;
+	int n;
+
+	switch (message[3]) {
+	/* Display output */
+	case 0x50:
+		if (data->OutputFn) {
+			switch (message[4]) {
+			case 0x01:
+				break;
+			default:
+				return GE_UNHANDLEDFRAME;
+			}
+			pos = message + 5;
+			dprintf("(x,y): %d/%d, len: %d, data: ", pos[1], pos[0], pos[2]);
+			n = pos[2];
+			pos += 3;
+			for ( ; n > 0; n--, pos += 2) dprintf("%c", pos[1]);
+			dprintf("\n");
+		}
+		break;
+
+	/* Display status */
+	case 0x52:
+		if (data->DisplayStatus) {
+			*data->DisplayStatus = 0;
+			pos = message + 4;
+			for ( n = *pos++; n > 0; n--, pos += 2) {
+				if ((pos[0] < 1) || (pos[0] > 8))
+					return GE_UNHANDLEDFRAME;
+				if (pos[1] == 0x02)
+					*data->DisplayStatus |= state_table[pos[0] - 1];
+			}
+		}
+		break;
+	
+	/* Display status ack */
+	case 0x54:
+		switch (message[4]) {
+		case 0x01:
+			break;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}

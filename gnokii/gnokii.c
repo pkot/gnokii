@@ -2449,16 +2449,20 @@ static int getspeeddial(char *Number)
 static int setspeeddial(char *argv[])
 {
 	GSM_SpeedDial entry;
-
+	GSM_Data data;
+	GSM_Error error;
 	char *memory_type_string;
+
+	GSM_DataClear(&data);
+	data.SpeedDial = &entry;
 
 	/* Handle command line args that set type, start and end locations. */
 
 	if (strcmp(argv[1], "ME") == 0) {
-		entry.MemoryType = 0x02;
+		entry.MemoryType = GMT_ME;
 		memory_type_string = "ME";
 	} else if (strcmp(argv[1], "SM") == 0) {
-		entry.MemoryType = 0x03;
+		entry.MemoryType = GMT_SM;
 		memory_type_string = "SM";
 	} else {
 		fprintf(stderr, _("Unknown memory type %s!\n"), argv[1]);
@@ -2468,19 +2472,23 @@ static int setspeeddial(char *argv[])
 	entry.Number = atoi(argv[0]);
 	entry.Location = atoi(argv[2]);
 
-/*	if (GSM && GSM->SetSpeedDial && GSM->SetSpeedDial(&entry) == GE_NONE) {
+	if ((error = SM_Functions(GOP_SetSpeedDial, &data, &State)) == GE_NONE )
 		fprintf(stdout, _("Succesfully written!\n"));
-	}*/
 
-	return 0;
+	return error;
 }
 
 /* Getting the status of the display. */
 static int getdisplaystatus(void)
 { 
-	int Status = 0;
 	GSM_Error error = GE_INTERNALERROR;
+	int Status;
+	GSM_Data data;
 
+	GSM_DataClear(&data);
+	data.DisplayStatus = &Status;
+
+	error = SM_Functions(GOP_GetDisplayStatus, &data, &State);
 	if (error == GE_NONE) {
 		fprintf(stdout, _("Call in progress: %s\n"), Status & (1<<DS_Call_In_Progress)?_("on"):_("off"));
 		fprintf(stdout, _("Unknown: %s\n"),          Status & (1<<DS_Unknown)?_("on"):_("off"));
@@ -2848,82 +2856,33 @@ static void  gnokii_error_logger(const char *fmt, va_list ap) {
 
 static int install_log_handler(void)
 {
-#ifdef	WIN32
-	if ((logfile = fopen("gnokii-errors", "a")) == NULL) {
+	char logname[256];
+	char *home;
+#ifdef WIN32
+	char *file = "gnokii-errors";
+#else
+	char *file = ".gnokii-errors";
+#endif
+
+	if ((home = getenv("HOME")) == NULL) {
+#ifdef WIN32
+		home = ".";
+#else
+		fprintf(stderr, "HOME variable missing\n");
+		return -1;
+#endif
+	}
+
+	snprintf(logname, sizeof(logname), "%s/%s", home, file);
+
+	if ((logfile = fopen(logname, "a")) == NULL) {
 		perror("fopen");
 		return -1;
 	}
 
-	return 0;
-#else
-	int log_fd;
-	struct stat st1, st2;
-	uid_t euid;
-	gid_t egid;
-	char logname[256];
-
-	if (getenv("HOME") == NULL) {
-		fprintf(stderr, "HOME variable missing\n");
-		return -1;
-	}
-	snprintf(logname, sizeof(logname), "%s/.gnokii-errors", getenv("HOME"));
-
-	memset(&st1, 0, sizeof(struct stat));
-	memset(&st2, 0, sizeof(struct stat));
-	log_fd = -1;
-	euid = geteuid();
-	egid = getegid();
-	if (setegid(getgid()) || seteuid(getuid())) {
-		perror("seteuid/setegid");
-		exit(1);
-	}
-
-	if (lstat(logname, &st1) == 0) {
-		if (!S_ISREG(st1.st_mode)) {
-			fprintf(stderr, "logfile isn't a regular file\n");
-			goto fail;
-		}
-		log_fd = open(logname, O_WRONLY | O_APPEND);
-		if (log_fd < 0) {
-			perror("cannot open logfile");
-			goto fail;
-		}
-		fstat(log_fd, &st2);
-	} else {
-		log_fd = open(logname, O_WRONLY | O_CREAT | O_EXCL, 0600);
-		if (log_fd < 0) {
-			perror("cannot create logfile");
-			goto fail;
-		}
-		fstat(log_fd, &st2);
-		memcpy(&st1, &st2, sizeof(struct stat));
-	}
-	if ((st1.st_dev != st2.st_dev) || (st1.st_ino != st2.st_ino) || (st2.st_nlink != 1) || (st1.st_mode != st2.st_mode)) {
-		fprintf(stderr, "something strange happened with logfile\n");
-		goto fail;
-	}
-	if ((st2.st_uid != getuid()) || (st2.st_gid != getgid())) {
-		fprintf(stderr, "invalid logfile owner/group\n");
-		goto fail;
-	}
-
-	if ((logfile = fdopen(log_fd, "a")) == NULL) {
-		perror("fdopen");
-		goto fail;
-	}
-
 	GSM_ELogHandler = gnokii_error_logger;
 
-	seteuid(euid);
-	setegid(egid);
 	return 0;
-
-fail:
-	close(log_fd);
-	seteuid(euid);
-	setegid(egid);
-	return -1;
-#endif
 }
 
 /* Main function - handles command line arguments, passes them to separate
