@@ -19,6 +19,19 @@ dnl ======================== Default setting
 CFLAGS="-O2 -Wall"
 ALL_LINGUAS="cs de et fi nl sk pl it sl"
 
+dnl ======================== Check for include/config.h.in
+AC_MSG_CHECKING([for include/config.h.in])
+if test -f include/config.h.in; then
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+	echo '*************************************************'
+	echo 'include/config.h.in missing, run autoheader first'
+	echo 'autoheader is part of the autoconf package'
+	echo '*************************************************'
+	exit 1
+fi
+
 dnl ======================== Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP

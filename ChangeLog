@@ -19,6 +19,8 @@
     o give the consistant information about --with-gnugetopt
                                                           (Pawel Kot)
     o autogen.sh added                               (BORBELY Zoltan)
+    o configure will abort when include/config.h.in is missing
+                                                     (BORBELY Zoltan)
  * bitmap support
     o begin cleaning up bitmap code; rewrite bitmap handling in
       gnokii.c in the readable way                        (Pawel Kot)
