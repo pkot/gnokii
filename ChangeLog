@@ -22,6 +22,8 @@
     o fix the bug reported by Peter Gervai that gnokii is unable to
       read calendar with more then 220 entries; fix corrects
       nk6510 and nk7110 drivers                         (Pawel Kot)
+    o __declspec(dllimport) is required if someone using a
+      win32 gnokii.dll                             (BORBELY Zoltan)
 
 0.5.8
 =====

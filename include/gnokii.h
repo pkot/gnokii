@@ -50,7 +50,11 @@ typedef unsigned char uint8_t;
 #include <stdarg.h>
 	
 #ifndef API
-#  define API
+#  if defined(WIN32) && defined(GNOKIIDLL_IMPORTS)
+#    define API __declspec(dllimport)
+#  else
+#    define API
+#  endif
 #endif
 
 struct gn_statemachine;
