@@ -958,15 +958,18 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
  * @SMS: SMS structure with the data source
  * @UDH: phone frame where to save User Data Header
  *
+ * returns pointer to data it added;
+ *
  * This function encodes the UserDataHeader as described in:
  *  o GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
  *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  *  o Smart Messaging Specification, Revision 3.0.0
  */
-static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type)
+static char *EncodeUDH(GSM_SMSMessage *rawsms, int type)
 {
 	unsigned char pos;
 	char *UDH = rawsms->UserData;
+	char *res;
 
 	pos = UDH[0];
 
@@ -976,7 +979,7 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type)
 	case SMS_VoiceMessage:
 	case SMS_FaxMessage:
 	case SMS_EmailMessage:
-		return GE_NOTSUPPORTED;
+		return NULL;
 #if 0
 		UDH[pos+4] = UDHi.u.SpecialSMSMessageIndication.MessageCount;
 		if (UDHi.u.SpecialSMSMessageIndication.Store) UDH[pos+3] |= 0x80;
@@ -988,7 +991,8 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type)
 	case SMS_Ringtone:
 	case SMS_MultipartMessage:
 		UDH[0] += headers[type].length;
-		memcpy(UDH+pos+1, headers[type].header, headers[type].length);
+		res = UDH+pos+1;
+		memcpy(res, headers[type].header, headers[type].length);
 		rawsms->UserDataLength += headers[type].length;
 		rawsms->Length += headers[type].length;
 		break;
@@ -1001,15 +1005,16 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type)
 		rawsms->Length++;		/* Length takes one byte, too */
 		rawsms->UserDataLength++;
 	}
-	return GE_NONE;
+	return res;
 }
 
 static GSM_Error EncodeConcatHeader(GSM_SMSMessage *rawsms, int this, int total)
 {
-	EncodeUDH(rawsms, SMS_ConcatenatedMessages);
-	rawsms->UserData[ 9] = 0xce;
-	rawsms->UserData[10] = total;
-	rawsms->UserData[11] = this;
+	char *header = EncodeUDH(rawsms, SMS_ConcatenatedMessages);
+	if (!header) return GE_NOTSUPPORTED;
+	header[2] = 0xce;		/* Message serial number */
+	header[3] = total;
+	header[4] = this;
 	return GE_NONE;
 }
 
@@ -1090,7 +1095,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		case SMS_BitmapData:
 			error = GE_NONE;
 			switch (sms->UserData[0].u.Bitmap.type) {
-			case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo); break;
+			case GSM_OperatorLogo: if (!EncodeUDH(rawsms, SMS_OpLogo)) return GE_NOTSUPPORTED; break;
 			case GSM_PictureMessage: 
 			case GSM_EMSPicture:
 			case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
@@ -1115,7 +1120,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			break;
 
 		case SMS_PlainText: {
-			unsigned int length, offset = 0;
+			unsigned int length, offset = rawsms->UserDataLength;
 
 			length = strlen(sms->UserData[0].u.Text);
 			switch (al) {
@@ -1160,8 +1165,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 
 		case SMS_MultiData:
 			size = sms->UserData[0].Length;
-			error = EncodeUDH(rawsms, SMS_MultipartMessage);
-			if (error != GE_NONE) return error;
+			if (!EncodeUDH(rawsms, SMS_MultipartMessage)) return GE_NOTSUPPORTED;
 			error = EncodeConcatHeader(rawsms, sms->UserData[i].u.Multi.this, sms->UserData[i].u.Multi.total);
 			if (error != GE_NONE) return error;
 
@@ -1172,8 +1176,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			break;
 
 		case SMS_RingtoneData:
-			error = EncodeUDH(rawsms, SMS_Ringtone); 
-			if (error != GE_NONE) return error;
+			if (!EncodeUDH(rawsms, SMS_Ringtone)) return GE_NOTSUPPORTED;
 			size = GSM_EncodeSMSRingtone(rawsms->UserData + rawsms->Length, &sms->UserData[i].u.Ringtone);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
