@@ -1,0 +1,19 @@
+#!/bin/bash
+(
+	cd ..
+	make
+	cd common
+	make gnokii-debug
+)
+export HOME=`pwd`
+GNOKII=../common/gnokii-debug
+for A in test.*; do
+    echo -n "Doing $A... "
+    source $A 2>&1 | grep -v ^GNOKII | grep -v '^Doing operation' > /tmp/delme
+    B=`echo $A | sed s/test/out/`
+    if cmp /tmp/delme $B > /dev/null 2>&1; then
+	echo ok
+    else
+	echo '*** FAILED'
+    fi
+done

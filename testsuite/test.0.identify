@@ -1,0 +1,2 @@
+# This is really no good test at all, but we want to know binary works
+$GNOKII --identify
