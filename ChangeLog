@@ -12,6 +12,7 @@
  * gnokii updates
     o --keysequence updated to the new API           (BORBELY Zoltan)
     o --enterchar implemented                        (BORBELY Zoltan)
+ * Makefiles' fixes                                       (Pawel Kot)
 
 
 0.4.0pre14

@@ -140,7 +140,7 @@ install-strip:
 	done
 
 	@if [ "$(GTK_LIBS)" ]; then \
-		@for dir in $(GTK_DIRS); do \
+		for dir in $(GTK_DIRS); do \
 			if [ -e $$dir/Makefile ]; then \
 				$(MAKE) -C $$dir install-strip; \
 			fi; \
@@ -154,8 +154,9 @@ install-suid:
 			$(MAKE) -C $$dir install-suid; \
 		fi; \
 	done
+
 	@if [ "$(GTK_LIBS)" ]; then \
-		@for dir in $(GTK_DIRS); do \
+		for dir in $(GTK_DIRS); do \
 			if [ -e $$dir/Makefile ]; then \
 				$(MAKE) -C $$dir install-suid; \
 			fi; \
