@@ -120,6 +120,7 @@ typedef struct {
 typedef struct {
 	gint min;
 	gint max;
+	gint used;
 	GSM_MemoryType type;
 	gint status;
 	gint(*InsertEntry) (GSM_PhonebookEntry *);
@@ -210,4 +211,5 @@ extern void *GUI_Connect(void *a);
 extern void GUI_InsertEvent(PhoneEvent * event);
 extern GSM_Error GUI_InitSMSFolders(void);
 extern int isSMSactivated;
+
 #endif

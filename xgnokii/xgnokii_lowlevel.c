@@ -472,7 +472,7 @@ static gint A_GetMemoryLocationAll(gpointer data)
 	GSM_PhonebookEntry entry;
 	GSM_Error error;
 	D_MemoryLocationAll *mla = (D_MemoryLocationAll *) data;
-	register gint i, missed = 0;
+	register gint i, j, read = 0;
 
 	error = mla->status = GE_NONE;
 	entry.MemoryType = mla->type;
@@ -484,7 +484,7 @@ static gint A_GetMemoryLocationAll(gpointer data)
 		entry.Location = i;
 		error = SM_Functions(GOP_ReadPhonebook, &gdat, &statemachine);
 		if (error != GE_NONE && error != GE_INVALIDPHBOOKLOCATION &&
-		    error != GE_EMPTYMEMORYLOCATION) {
+		    error != GE_EMPTYMEMORYLOCATION && error != GE_INVALIDMEMORYTYPE) {
 			gint err_count = 0;
 
 			while (error != GE_NONE) {
@@ -501,30 +501,35 @@ static gint A_GetMemoryLocationAll(gpointer data)
 				error = SM_Functions(GOP_ReadPhonebook, &gdat, &statemachine);
 				sleep(2);
 			}
-		}
+		} else {
+			if (error == GE_INVALIDMEMORYTYPE) {
 
-		/* If the phonebook location was invalid - just fill up the rest */
-		/* This works on a 7110 anyway... */
-		/* No it does not, at least on my 6210 (Markus) */
-		/*
-		  if ((error == GE_INVALIDPHBOOKLOCATION) || (error == GE_EMPTYMEMORYLOCATION)) {
-			mla->InsertEntry(&entry);
-			continue;
-			}*/
-			/*			entry.Empty = true;
-			entry.Name[0] = 0;
-			entry.Number[0] = 0;
-			for (i = mla->min; i <= mla->max; i++) {
-				error = mla->InsertEntry(&entry);
-				if (error != GE_NONE)
-					break;
+		/* If the memory type was invalid - just fill up the rest */
+		/* (Markus) */
+		
+				entry.Empty = true;
+				entry.Name[0] = 0;
+				entry.Number[0] = 0;
+				for (j = mla->min; j <= mla->max; j++) error = mla->InsertEntry(&entry);
+				return GE_NONE;
 			}
-			*/
-
+		}
+		if (error == GE_NONE) read++;
 		error = mla->InsertEntry(&entry); 
 		/* FIXME: It only works this way at the moment */
 		/*		if (error != GE_NONE)
 				break;*/
+		if (read == mla->used) {
+			mla->status = error;
+			entry.Empty = true;
+			entry.Name[0] = 0;
+			entry.Number[0] = 0;
+			for (j = i + 1; j <= mla->max; j++) error = mla->InsertEntry(&entry);
+			pthread_cond_signal(&memoryCond);
+			pthread_mutex_unlock(&memoryMutex);
+			return GE_NONE;
+		}
+
 	}
 	mla->status = error;
 	pthread_cond_signal(&memoryCond);

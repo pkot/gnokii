@@ -2340,7 +2340,7 @@ int main(int argc, char *argv[])
 	TopLevelWindow();
 
 	splashRemoveHandler =
-	    gtk_timeout_add(5000, (GtkFunction) RemoveSplash, (gpointer) SplashWindow);
+	    gtk_timeout_add(2000, (GtkFunction) RemoveSplash, (gpointer) SplashWindow);
 
 	gtk_main();
 
