@@ -41,7 +41,6 @@ extern "C" {
 #  include <sys/time.h>
 #elif defined(_MSC_VER) && defined(WIN32)
 #  include <Winsock2.h>
-#else
 typedef unsigned char uint8_t;
 #endif
 	
