@@ -22,6 +22,18 @@
  * portability cleanup in various functions          (BORBELY Zoltan)
  * Replaces ugly ifs from gsm-bitmaps.c::GSM_IsPointBitmap()
  with a switch                                            (Pawel Kot)
+ * Fix using bitmap types from different places (gsm-sms.h and
+ gsm-bitmap.h                                          (Markus Plail)
+ * extend GetBCDNumber by a parameter (maxlen) to avoid memory
+ corruption                                            (Markus Plail)
+ * added GetSMSnoValidate to 7110 code, to be able to read SMS
+ faster if you know their location                     (Markus Plail)
+ * fixed folder handling in 7110 code -> all function expect
+ GMT_?? as MemoryType                                  (Markus Plail)
+ * xgnokii updates
+    o extended AddCall to accept text and phone number
+    o added (De)Activate SMS reading in SMS window menu
+    o changed the default size of SMS windows          (Markus Plail)
 
 0.4.0pre16
 ==========
