@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2001-02-06 21:15:37  chris
+ * Revision 1.4  2001-02-20 21:55:12  pkot
+ * Small #include updates
+ *
+ * Revision 1.3  2001/02/06 21:15:37  chris
  * Preliminary irda support for 7110 etc.  Not well tested!
  *
  * Revision 1.2  2001/02/06 15:15:25  pkot
@@ -43,7 +46,6 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/poll.h>
-#include <sys/select.h>
 #include <sys/socket.h>
 
 #include "linuxirda.h"

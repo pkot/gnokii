@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.122  2001-02-16 14:29:53  chris
+  Revision 1.123  2001-02-20 21:55:11  pkot
+  Small #include updates
+
+  Revision 1.122  2001/02/16 14:29:53  chris
   Restructure of common/.  Fixed a problem in fbus-phonet.c
   Lots of dprintfs for Marcin
   Any size xpm can now be loaded (eg for 7110 startup logos)
@@ -77,6 +80,8 @@
 
   
 */
+
+#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>

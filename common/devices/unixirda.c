@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2001-02-16 14:29:52  chris
+ * Revision 1.2  2001-02-20 21:55:10  pkot
+ * Small #include updates
+ *
+ * Revision 1.1  2001/02/16 14:29:52  chris
  * Restructure of common/.  Fixed a problem in fbus-phonet.c
  * Lots of dprintfs for Marcin
  * Any size xpm can now be loaded (eg for 7110 startup logos)
@@ -48,7 +51,6 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/poll.h>
-#include <sys/select.h>
 #include <sys/socket.h>
 
 #include "unixirda.h"
