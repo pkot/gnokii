@@ -1307,20 +1307,25 @@ static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x04, 0x05, 0x02, 0x00, 0x02};
-	int length;
 
-	if (!data->RawData || !data->RawData->Data) return GE_INTERNALERROR;
-	if (data->RawData->Length < 0) return GE_SMSWRONGFORMAT;
+	if (!data->RawSMS) return GE_INTERNALERROR;
 
-	length = data->RawData->Length - 4;
-	if (8 + length > sizeof(req)) return GE_SMSWRONGFORMAT;
+	if (44 + data->RawSMS->UserDataLength > sizeof(req))
+		return GE_SMSWRONGFORMAT;
 
 	if (data->RawSMS->Status == SMS_Unsent)
 		req[4] |= 0x02;
 	req[6] = data->RawSMS->Number;
-	memcpy(req + 8, data->RawData->Data + 4, length);
 
-	if (SM_SendMessage(state, 8 + length, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	req[20] = 0x01; /* SMS Submit */
+	if (data->RawSMS->UDHIndicator)		req[20] |= 0x40;
+	if (data->RawSMS->ValidityIndicator)	req[20] |= 0x10;
+
+	req[24] = data->RawSMS->UserDataLength;
+	memcpy(req + 37, data->RawSMS->Validity, 7);
+	memcpy(req + 44, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+
+	if (SM_SendMessage(state, 44 + data->RawSMS->UserDataLength, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
 

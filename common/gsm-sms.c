@@ -1283,6 +1283,7 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	error = SM_Functions(GOP_SendSMS, data, state);
  cleanup:
 	free(data->RawSMS);
+	data->RawSMS = NULL;
 	return error;
 }
 
@@ -1317,5 +1318,24 @@ API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
 
 API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NOTIMPLEMENTED;
+	GSM_Error error = GE_NONE;
+	GSM_SMSMessage rawsms;
+
+	data->RawSMS = &rawsms;
+	memset(&rawsms, 0, sizeof(rawsms));
+	data->RawSMS->Number = data->SMS->Number;
+	data->RawSMS->Status = data->SMS->Status;
+
+	error = PrepareSMS(data->SMS, data->RawSMS);
+	ERROR();
+
+	if (data->RawSMS->Length > GSM_MAX_SMS_LENGTH) {
+		dprintf("SMS is too long? %d\n", data->RawSMS->Length);
+		goto cleanup;
+	}
+
+	error = SM_Functions(GOP_SaveSMS, data, state);
+ cleanup:
+	data->RawSMS = NULL;
+	return error;
 }
