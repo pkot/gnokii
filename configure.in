@@ -509,7 +509,7 @@ echo "
     Win32:              $win32 
     Prefix:             $prefix
 
-  Type '${MAKE}' for compilation. Before doing '${MAKE} install', add gnokii
-  group typing 'groupadd gnokii' as root.
- 
+  Type '${MAKE}' for compilation and then '${MAKE} install',
+  '${MAKE} install-suid', '${MAKE} install-strip' or '${MAKE} install-ss' to
+  install gnokii.
 "

@@ -84,7 +84,11 @@ Thank you to, in no particular order...
 
 *  Gabriele Zappi for testing, general help and bug fixes.
 
-*  Erik Rossen for help with documentation
+*  Erik Rossen for help with documentation and debian packaging support.
+
+*  Marian Jancar for patches on 7110 series.
+
+*  Tamar Bondar for updates on SMS handling on 3810 series.
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this.  Rachael for new parent induced insomnia...
