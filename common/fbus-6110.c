@@ -2210,13 +2210,21 @@ GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
     memcpy(req+count,Bitmap->text,req[count-1]);
     count+=req[count-1];
     req[count++]=Bitmap->ringtone;
-    req[count++]=0x01;  /* Graphic on */
+    req[count++]=0x01;  /* Graphic on. You can use other values as well:
+                           0x00 - Off
+                           0x01 - On
+                           0x02 - View Graphics
+                           0x03 - Send Graphics
+                           0x04 - Send via IR
+                           You can even set it higher but Nokia phones (my
+                           6110 at least) will not show you the name of this
+                           item in menu ;-)) Nokia is really joking here. */
     req[count++]=(Bitmap->size+4)>>8;
     req[count++]=(Bitmap->size+4)%0xff;
     req[count++]=0x00;  /* Future extensions! */
     req[count++]=Bitmap->width;
     req[count++]=Bitmap->height;
-    req[count++]=0x01;  /* Just BW */    
+    req[count++]=0x01;  /* Just BW */
     memcpy(req+count,Bitmap->bitmap,Bitmap->size);
     FB61_TX_SendMessage(count+Bitmap->size, 0x03, req);
     break;
@@ -4553,7 +4561,7 @@ void FB61_RX_StateMachine(char rx_byte) {
     if ((RX_Multiple == true) && (MessageType != rx_byte)) {
 
 #ifdef DEBUG
-      fprintf(stdout, _("Interrupted MultiFrame-Message - Ingnoring it !!!\n"));
+      fprintf(stdout, _("Interrupted MultiFrame-Message - Ignoring it !!!\n"));
       fprintf(stdout, _("Please report it ...\n"));
 #endif /* DEBUG */
 

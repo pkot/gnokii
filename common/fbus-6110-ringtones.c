@@ -247,9 +247,13 @@ int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName)
 
 #define RTTTL_SEP ":"
 
-  strtok(buffer, RTTTL_SEP);
-
-  sprintf(Name, "%s", buffer);
+  /* This is for buggy RTTTL ringtones without name. */
+  if (!strncmp(buffer, RTTTL_SEP, 1)) {
+    strtok(buffer, RTTTL_SEP);
+    sprintf(Name, "%s", buffer);
+  }
+  else
+    strcpy(Name, "GNOKII");
 
   def=strtok(NULL, RTTTL_SEP);
 
