@@ -43,6 +43,9 @@
     o power source and battery level support added (BORBELY Zoltan)
  * link layer updates
     o gnbus treats IrDA as serial                  (BORBELY Zoltan)
+ * AT series updates
+    o simplify code adding at_decode and at_encode functions doing
+      the right thing for the given encoding            (Hugo Hass)
 
 0.6.0
 =====

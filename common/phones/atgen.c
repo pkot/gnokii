@@ -238,6 +238,48 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 	return GN_ERR_NOTIMPLEMENTED;
 }
 
+/* Functions to encode and decode strings */
+static int at_encode(int charset, char *dst, char *src, int len) {
+	switch (charset) {
+	case AT_CHAR_GSM:
+		len = char_ascii_encode(dst, src, len);
+		break;
+	case AT_CHAR_HEXGSM:
+		char_hex_encode(dst, src, len);
+		len *= 2;
+		break;
+	case AT_CHAR_UCS2:
+		char_ucs2_encode(dst, src, len);
+		len *= 4;
+		break; 
+	default:
+		memcpy(dst, src, len);
+		break;
+	}
+	dst[len] = '\0';
+	return len;
+}
+
+static void at_decode(int charset, char *dst, char *src, int len) {
+	switch (charset) {
+	case AT_CHAR_GSM:
+		char_ascii_decode(dst, src, len);
+		break;
+	case AT_CHAR_HEXGSM:
+		char_hex_decode(dst, src, len);
+		len *= 2;
+		break;
+	case AT_CHAR_UCS2:
+		char_ucs2_decode(dst, src, len);
+		len *= 4;
+		break;
+	default:
+		memcpy(dst, src, len);
+		break;
+	}
+	dst[len] = '\0';
+}
+
 at_recv_function_type at_insert_recv_function(int type, at_recv_function_type func, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -569,22 +611,7 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 			      data->phonebook_entry->number[0] == '+' ? "145" : "129");
 		len = strlen(data->phonebook_entry->name);
 		tmp = req + ofs;
-		switch (drvinst->charset) {
-		case AT_CHAR_GSM:
-			len = char_ascii_encode(tmp, data->phonebook_entry->name, len);
-			break;
-		case AT_CHAR_HEXGSM:
-			char_hex_encode(tmp, data->phonebook_entry->name, 2 * len);
-			len *= 2;
-			break;
-		case AT_CHAR_UCS2:
-			char_ucs2_encode(tmp, data->phonebook_entry->name, len);
-			len *= 4;
-			break; 
-		default:
-			memcpy(tmp, data->phonebook_entry->name, len);
-			break;
-		}
+		len = at_encode(drvinst->charset, tmp, data->phonebook_entry->name, len);
 		tmp[len++] = '"'; tmp[len++] = '\r';
 		len += ofs;
 	} 
@@ -917,22 +944,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 		endpos = NULL;
 		if (pos) {
 			pos = strip_quotes(pos+1);
-			l = strlen(pos);
-			switch (drvinst->charset) {
-			case AT_CHAR_GSM:
-				char_ascii_decode(data->phonebook_entry->name, pos, l);
-				break;
-			case AT_CHAR_HEXGSM:
-				char_hex_decode(data->phonebook_entry->name, pos, l);
-				break;
-			case AT_CHAR_UCS2:
-				char_ucs2_decode(data->phonebook_entry->name, pos, l);
-				break;
-			default:
-				memcpy(data->phonebook_entry->name, pos, l);
-				*(data->phonebook_entry->name + l) = 0;
-				break;
-			}
+			at_decode(drvinst->charset, data->phonebook_entry->name, pos, strlen(pos));
 		}
 	}
 	return GN_ERR_NONE;
@@ -1406,21 +1418,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 			pos = strings[2];
 			pos++;
 			pos = strtok(pos, "\"");
-			l = strlen(pos);
-			switch (drvinst->charset) {
-				case AT_CHAR_GSM:
-				    char_ascii_decode(tmp, pos, l);
-				    break;
-				case AT_CHAR_HEXGSM:
-				    char_hex_decode(tmp, pos, l);
-				    break;
-				case AT_CHAR_UCS2:
-				    char_ucs2_decode(tmp, pos, l);
-				    break;
-				default:
-				    memcpy(tmp, pos, l);
-				    break;
-			}
+			at_decode(drvinst->charset, tmp, pos, strlen(pos));
 			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), gn_network_code_get(tmp));
 			break;
 		case 2: /* network operator code given */
