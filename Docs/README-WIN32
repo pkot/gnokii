@@ -2,121 +2,20 @@
 README-WIN32
 ============
 
-The Win32 port of Gnokii currently supports only Gnokii for the Nokia 6110 
-phone. Other phones in the 51xx and 61xx familie are likely to work also with 
-this version. The graphical X version, the AT-emulater and virtual device are 
-not ported to Win32. This might change in the future but as far as I know no 
-work is in progress. Ofcourse the effort of porting only makes sense if there is 
-a need. Do you have the need for extended Win32 functionality don't ask me but 
-let us all know on the Gnokii mailing list.
+The graphical X version, the AT-emulator and virtual device are not ported to
+Win32. This might change in the future but as far as I know no work is in
+progress. Of course the effort of porting only makes sense if there is a need.
+Do you have the need for extended Win32 functionality don't ask me but let us
+all know on the Gnokii mailing list.
 
-Update: Allthough not finished I did explore the possibility to compile Xgnokii 
-using the Win32 port of GTK+. It seems to compile fine but right after the 
-splash screen the program crashes. This means no luck since I do not have time 
-to go into detail (aka debugging).
-
-The following sections describe what I did to compile Gnokii on Win32 using two 
-(completely) different tools. I am aware of the fact that more ways may lead to 
-the same result. I just think these two are two most logical methods. The first 
-method is the graphical Windows way of working with M$ software tools. The 
-second option is the freaky Unix command prompt way utilizing a GPL'ed software 
-development environment.
-
-	* Microsoft Visual Studio and Visual C++ 
-	* Cygwin B20 
-
-
-Compile using Microsoft Visual Studio and Visual C++
+Compile using Microsoft Visual C++
 ====================================================
 
-Below a description of how I compiled Gnokii with the Microsoft Visual Studio 
-6.0 and Visual C++ 6.0. It is not the only solution but it is how I typically 
-work with Visual Studio. I also think this method relates more to the average 
-Windows programmer. It is assumed you have some basic knowledge about workspaces 
-and projects in Microsoft Visual Studio. If not, please go back to the 
-documentation as this page has no intention to learn you the details about this.
+Below a description how to compile Gnokii with the Microsoft Visual C++ 6.0.
 
-0. Put the Gnokii sources somewhere.
-
-Put the Gnokii source in <path>\gnokii\gnokii src. Please do not use a version 
-in the path. This wil cause problems as you have to modify the project any time 
-you get new sources. In case you want to use CVS you need to check out the 
-sources in <path>\gnokii\gnokii src.
-
-1. First create a blank workspace called Gnokii.
-
-Visual Studio appends the the workspace name to the location, please keep this 
-default. As location <path> is assumed. The combined location should now read 
-<path>\gnokii.
-
-2. Create project 'Gnokii lib'.
-
-The project has to be of type 'win32 static library'. Add this project to the 
-current workspace, this is the one you just created. The location will now be 
-<path>\gnokii\gnokii lib. Do not check 'pre-compiled header' and 'MFC support' 
-in the window appearing next. Click finish and Ok to create the project.
-Add the files below to the project. (Menu: Project -> Add To Project -> Files 
-...) Open the directory gnokii src and select the files below, click OK to add 
-the files to the project.
-
-  cfgreader.c 
-  cfgreader.h 
-  fbus-3810.c 
-  fbus-3810.h 
-  fbus-6110-auth.c 
-  fbus-6110-auth.h 
-  fbus-6110-ringtones.c 
-  fbus-6110-ringtones.h 
-  fbus-6110.c 
-  fbus-6110.h 
-  win32\getopt.c 
-  win32\getopt.h 
-  gsm-api.c 
-  gsm-api.h 
-  gsm-common.h 
-  gsm-filetypes.c 
-  gsm-filetypes.h 
-  gsm-networks.c 
-  gsm-networks.h 
-  mbus-2110.c 
-  mbus-2110.h 
-  win32\winserial.c 
-  win32\winserial.h 
-
-To really finish the project change it's settings (Menu: Project -> Settings 
-...). On the tab C/C++ the box with 'Preprocessor definitions:' should be 
-changed to:
-WIN32,_DEBUG,_CONSOLE,_MBCS,VERSION=\"win32\",MODEL=\"6110\",PORT=\"COM1\",DEBUG
-for the Win32 Debug version. For the Win 32 Release version leave out the DEBUG. 
-This way the version is fixed to win32 and there is no easy way to automate 
-this. Please change the version after you have installed new sources.
-
-3. Project Gnokii rlp (win32 static library).
-
-Repeat step 2 but now for the following files.
-(location: <path>\gnokii\gnokii rlp).
-
-  rlp-common.c 
-  rlp-common.h 
-  rlp-crc24.c 
-  rlp-crc24.h 
-
-4. Project Gnokii.
-
-This step is simular to the previous steps but instead make this project a win32 
-console application. (location: <path>\gnokii\gnokii)
-
-  gnokii.c 
-  gnokii.h 
-
-The project has to be dependent on 'Gnokii lib' and 'Gnokii rlp'.
-
-5. The final step.
-
-The last step is to make 'Gnokii' the 'active project'. Now building Gnokii will 
-also build the library and rlp stuff because of the dependencies. The final 
-result is an executable file with the name gnokii.exe.
-
+1) Put the Gnokii source in <path>\gnokii\gnokii src.
+2) Copy <path>\win32\MSVC6\config.h into <path>\include\
+3) Open <path>\win32\MSVC6\gnokii.dsw and compile :)
 
 Compile with Cygwin (B20)
 =========================
@@ -132,13 +31,4 @@ this strips debug information and keeps your executable lean.
 Disclaimer
 ==========
 
-No warranty, you are on your own. If you have questions or remarks, please let me
-know on my email address mentioned below.
-
-Author:	Feico de Boer (mailto:feico.de.boer@hetnet.nl)
-Date:	December 6th, 1999
-
-Pre-compiled Gnokii binaries are available on:
-	http://www.homepages.hetnet.nl/~fdboerhetnet/
-
-Here you will also find the latest edition of the README-WIN32.
+No warranty, you are on your own. We are looking for maintainer of Win32 port.
