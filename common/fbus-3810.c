@@ -2704,8 +2704,8 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 	CurrentMessageCenter->Format = MessageBuffer[7];
 	CurrentMessageCenter->Validity = MessageBuffer[9];
 
-	option_number_length = MessageBuffer[12];	// Don't know meaning of
-												// this number string
+	option_number_length = MessageBuffer[12]; // Don't know meaning of
+						  // this number string
 	if (option_number_length != 0) {
 	        for (count = 0; count < option_number_length; count++) {
 				opt_num[count] = MessageBuffer[13 + count];

@@ -2217,7 +2217,7 @@ GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
     	memcpy(req+count,Bitmap->bitmap,Bitmap->size);
 	count+=Bitmap->size;
       }
-    FB61_TX_SendMessage(count, 0x05, req);    
+    FB61_TX_SendMessage(count, 0x05, req);
     
     break;
 
@@ -3303,8 +3303,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
      if (GetBitmap!=NULL) {
        
-       GetBitmap->height=0; //in some phones (5110, 5130) we don't have 01 block
-       GetBitmap->width=0; //and it's better to set bitmap to 'default'
+       GetBitmap->height=0; // in some phones (51?0) we have no 01 block
+       GetBitmap->width=0; // and it is better to set bitmap to 'default'
        GetBitmap->size=0;
 
        GetBitmap->text[0]=0;
