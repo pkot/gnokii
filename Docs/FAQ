@@ -114,6 +114,12 @@ A. Generally yes, but in fact it depends on hardware -- your serial port
    to work with gnokii.
 
 -------------------------------------------------------------------------------
+Q. Could somebody tell me the key for on, off and select menu in
+    gnokii --keysequence function?
+
+A. Menu is M, power is P. Usefull keys are "0123456789#*PGR+-UDMN".
+
+-------------------------------------------------------------------------------
 Q. I get 'undefined symbol: GSM_ELogHandler' when runnig gnokii. What's
    wrong?
 
