@@ -3370,8 +3370,20 @@ static GSM_Error smsslave(GSM_SMSMessage *message)
 	int i = message->Number;
 	int i1, i2, msgno, msgpart;
 	static int unknown = 0;
-	char c;
+	char c, number[MAX_BCD_STRING_LENGTH];
+	char *p = message->RemoteNumber.number;
 
+	if (p[0] == '+') {
+		p++;
+	}
+	strcpy(number, p);
+	fprintf(stderr, _("SMS received from number: %s\n"), number);
+
+	/* From Pavel Machek's email to the gnokii-ml (msgid: <20020414212455.GB9528@elf.ucw.cz>):
+	 *  It uses fixed format of provider in CR. If your message matches
+	 *  WWW1/1:1234-5678 where 1234 is msgno and 5678 is msgpart, it should
+	 *  work.
+	 */
 	while (*s == 'W')
 		s++;
 	fprintf(stderr, _("Got message %d: %s\n"), i, s);
@@ -3379,13 +3391,15 @@ static GSM_Error smsslave(GSM_SMSMessage *message)
 		sprintf(buf, "/tmp/sms/mail_%d_", msgno);
 	else if (sscanf(s, "%d/%d:%d-%d-", &i1, &i2, &msgno, &msgpart) == 4)
 		sprintf(buf, "/tmp/sms/mail_%d_%03d", msgno, msgpart);
-	else	sprintf(buf, "/tmp/sms/unknown_%d_%d", getpid(), unknown++);
+	else	sprintf(buf, "/tmp/sms/sms_%s_%d_%d", number, getpid(), unknown++);
 	if ((output = fopen(buf, "r")) != NULL) {
 		fprintf(stderr, _("### Exists?!\n"));
 		return GE_CANTOPENFILE;
 	}
 	output = fopen(buf, "w+");
-	if (strstr(buf, "unknown"))
+
+	/* Skip formatting chars */
+	if (!strstr(buf, "mail"))
 		fprintf(output, "%s", message->UserData[0].u.Text);
 	else {
 		s = message->UserData[0].u.Text;

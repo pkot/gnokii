@@ -5,6 +5,8 @@
                                                           (Pawel Kot)
  * gnokii fixes
     o fixed wrong check in smsreader                      (Pawel Kot)
+    o replace unknown with sender number when saving SMS not
+      matching given pattern                         (Bostjan Muller)
  * xgnokii fixes
     o some strange problem with xgnokii linking (reported
       by few people)                                      (Pawel Kot)
