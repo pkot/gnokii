@@ -13,22 +13,13 @@
   This file provides functions specific to generic at command compatible
   phones. See README for more details on supported mobile phones.
 
-  $Log$
-  Revision 1.3  2002-01-11 11:11:46  pkot
-  Character set setting in AT mode (Manfred Jonsson)
-
-  Revision 1.2  2002/01/10 10:14:09  pkot
-  Reading SMS in AT mode
-
-  Revision 1.1  2001/11/19 13:03:18  pkot
-  nk3110.c cleanup
-
-
 */
 
 typedef enum {
 	GOPAT_GetCharset = GOP_Max,
-	GOPAT_Max,	/* don't append anything after this entry */
+	GOPAT_SetPDUMode,
+	GOPAT_Prompt,
+	GOPAT_Max	/* don't append anything after this entry */
 } GSMAT_Operation;
 
 typedef enum {
@@ -38,7 +29,7 @@ typedef enum {
 	CHARCP437,
 	CHARHEXGSM,
 	CHARHEX437,
-	CHARUCS2,
+	CHARUCS2
 } GSMAT_Charset;
 
 typedef GSM_Error (*GSM_RecvFunctionType)(int type, unsigned char *buffer, int length, GSM_Data *data);
@@ -60,5 +51,5 @@ GSM_Error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state);
 void splitlines(AT_LineBuffer *buf);
 
 char *skipcrlf(unsigned char *str);
-char *findcrlf(char *str, int test, int maxlength);
+char *findcrlf(unsigned char *str, int test, int maxlength);
 

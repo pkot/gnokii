@@ -41,6 +41,8 @@ static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int len
 static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplySetPDUMode(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -55,6 +57,7 @@ static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
@@ -82,6 +85,8 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_GetMemoryStatus, AT_GetMemoryStatus, ReplyMemoryStatus },
 	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
 	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert },
+	{ GOPAT_SetPDUMode, AT_SetPDUMode, ReplySetPDUMode },
+	{ GOPAT_Prompt, NULL, ReplyGetPrompt },
 	{ GOP_SendSMS, AT_SendSMS, ReplySendSMS },
 	{ GOP_GetSMS, AT_GetSMS, ReplyGetSMS },
 	{ GOPAT_GetCharset, AT_GetCharset, ReplyGetCharset }
@@ -561,14 +566,52 @@ static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 	return SM_WaitFor(state, data, GOP_CallDivert);
 }
 
+static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[12];
+	
+	sprintf(req, "AT+CMGF=0\r\n");
+	if (SM_SendMessage(state, 11, GOPAT_SetPDUMode, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_WaitFor(state, data, GOPAT_SetPDUMode);
+}
+
 static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NONE;
+	unsigned char req[256];
+	GSM_Error error;
+	int length, i;
+
+	if (!data->RawData) return GE_INTERNALERROR;
+
+	/* Select PDU mode */
+	sprintf(req, "AT+CMGF=0\r\n");
+	error = Functions(GOPAT_SetPDUMode, data, state);
+	if (error != GE_NONE) {
+		dprintf("PDU mode not supported\n");
+		return error;
+	}
+	/* 6 is the frame header as above */
+	length = data->RawData->Length;
+	dprintf("Sending SMS...(%d)\n", length);
+	for (i = 0; i < length; i++) {
+		dprintf("%02x ", data->RawData->Data[i]);
+	}
+	dprintf("\n");
+	if (length < 0) return GE_SMSWRONGFORMAT;
+	sprintf(req, "AT+CMGS=%d\r\n", length - data->RawData->Data[0] - 1);
+	if (SM_SendMessage(state, strlen(req), GOPAT_Prompt, req) != GE_NONE) return GE_NOTREADY;
+	bin2hex(req, data->RawData->Data, data->RawData->Length);
+	req[data->RawData->Length * 2] = 0x1a;
+	req[data->RawData->Length * 2 + 1] = 0;
+	dprintf("%s\n", req);
+	if (SM_SendMessage(state, strlen(req), GOP_SendSMS, req) != GE_NONE) return GE_NOTREADY;
+	return SM_BlockNoRetry(state, data, GOP_SendSMS);
 }
 
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	char req[16];
+	unsigned char req[16];
 	sprintf(req, "AT+CMGR=%d\r\n", data->SMSMessage->Number);
 	dprintf("%s", req);
 	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GE_NONE)
@@ -787,8 +830,21 @@ static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int len
 	return GE_NONE;
 }
 
+static GSM_Error ReplySetPDUMode(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	if (strncmp(buffer, "OK", 2)) return GE_NOTSUPPORTED;
+	return GE_NONE;
+}
+
+static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	if (buffer[0] == '>') return GE_NONE;
+	return GE_INTERNALERROR;
+}
+
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
+	dprintf("%s\n", buffer);
 	return GE_NONE;
 }
 
@@ -997,7 +1053,7 @@ char *skipcrlf(unsigned char *str)
  * range of max bytes.
  */
  
-char *findcrlf(char *str, int test, int max)
+char *findcrlf(unsigned char *str, int test, int max)
 {
         if (str == NULL)
                 return str;

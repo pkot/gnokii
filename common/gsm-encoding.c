@@ -261,3 +261,48 @@ void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len)
 	}
 	return;
 }
+
+/* Conversion bin -> hex and hex -> bin */
+void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len)
+{
+	int i;
+
+	if (!dest) return;
+
+	for (i = 0; i < len; i++) {
+		unsigned aux;
+
+		if (src[2 * i] >= '0' && src[2 * i] <= '9') aux = src[2 * i] - '0';
+		else if (src[2 * i] >= 'a' && src[2 * i] <= 'f') aux = src[2 * i] - 'a' + 10;
+		else if (src[2 * i] >= 'A' && src[2 * i] <= 'F') aux = src[2 * i] - 'A' + 10;
+		else {
+			dest[0] = 0;
+			return;
+		}
+		dest[i] = aux << 4;
+		if (src[2 * i + 1] >= '0' && src[2 * i + 1] <= '9') aux = src[2 * i + 1] - '0';
+		else if (src[2 * i + 1] >= 'a' && src[2 * i + 1] <= 'f') aux = src[2 * i + 1] - 'a' + 10;
+		else if (src[2 * i + 1] >= 'A' && src[2 * i + 1] <= 'F') aux = src[2 * i + 1] - 'A' + 10;
+		else {
+			dest[0] = 0;
+			return;
+		}
+		dest[i] |= aux;
+	}
+}
+
+void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len)
+{
+	int i;
+
+	if (!dest) return;
+
+	for (i = 0; i < len; i++) {
+		dest[2 * i] = (src[i] & 0xf0) >> 4;
+		if (dest[2 * i] < 10) dest[2 * i] += '0';
+		else dest[2 * i] += ('a' - 10);
+		dest[2 * i + 1] = src[i] & 0x0f;
+		if (dest[2 * i + 1] < 10) dest[2 * i + 1] += '0';
+		else dest[2 * i + 1] += ('a' - 10);
+	}
+}

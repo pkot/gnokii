@@ -13,7 +13,15 @@
   Include file for encoding functions.
 
   $Log$
-  Revision 1.3  2002-01-11 11:11:46  pkot
+  Revision 1.4  2002-01-15 12:01:02  pkot
+  SMS sending for AT mode. It does nt work yet, but putting it into CVS gives
+  more opportunity for the code to get tested ;-)
+  Fixes to the commit I made tonight that broke compile. Commits at 2 am are
+  not A Good Thing (tm).
+  Moved bin2hex and hex2bin functions to gsm-encoding.c.
+  Cleanups.
+
+  Revision 1.3  2002/01/11 11:11:46  pkot
   Character set setting in AT mode (Manfred Jonsson)
 
   Revision 1.2  2001/11/08 16:34:20  pkot
@@ -27,6 +35,9 @@
 
 #ifndef __gsm_encoding_h_
 #define __gsm_encoding_h_
+
+extern void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len);
+extern void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len);
 
 int Unpack7BitCharacters(int offset, int in_length, int out_length,
                            unsigned char *input, unsigned char *output);
