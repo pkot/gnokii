@@ -191,11 +191,12 @@ static void ReadSpeedDial(void)
 	gtk_clist_freeze(GTK_CLIST(clist));
 	gtk_clist_clear(GTK_CLIST(clist));
 
-	for (i = 1; i < 10; i++) {
+	for (i = 2; i < 10; i++) {
 		if ((d = (D_SpeedDial *) g_malloc(sizeof(D_SpeedDial))) == NULL) {
 			g_print(_("Cannot allocate memory!"));
 			return;
 		}
+		memset(d, 0, sizeof(D_SpeedDial));
 		d->entry.Number = i;
 		if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {
 			g_print(_("Cannot allocate memory!"));
@@ -208,15 +209,18 @@ static void ReadSpeedDial(void)
 		pthread_mutex_lock(&speedDialMutex);
 		pthread_cond_wait(&speedDialCond, &speedDialMutex);
 		pthread_mutex_unlock(&speedDialMutex);
-
-		if (d->status != GE_NONE)
+		if (d->status != GE_NONE) {
 			g_print("Cannot read speed dial key %d!\n", i);
-		else {
+			*buf = i + '0';
+			row[0] = buf;
+			row[1] = '\0';
+			row[2] = '\0';
+		} else {
 			if (d->entry.Location == 0)
 				location = i;
 			else
 				location = d->entry.Location;
-			if ((pbEntry = GUI_GetEntry(d->entry.MemoryType - 2, location)) == NULL) {
+			if ((pbEntry = GUI_GetEntry(d->entry.MemoryType, location)) == NULL) {
 				g_free(d);
 				continue;
 			}
@@ -225,11 +229,13 @@ static void ReadSpeedDial(void)
 			row[1] = pbEntry->entry.Name;
 			row[2] = pbEntry->entry.Number;
 
-			gtk_clist_append(GTK_CLIST(clist), row);
-			gtk_clist_set_row_data_full(GTK_CLIST(clist), row_i++,
-						    (gpointer) d, DestroyCListData);
 		}
-		//GUI_Refresh ();
+		gtk_clist_append(GTK_CLIST(clist), row);
+		gtk_clist_set_row_data_full(GTK_CLIST(clist), row_i++,
+					    (gpointer) d, DestroyCListData);
+		/*
+		GUI_Refresh ();
+		*/
 		gtk_widget_hide(infoDialog.dialog);
 	}
 
@@ -246,34 +252,38 @@ static void SaveSpeedDial(void)
 	PhoneEvent *e;
 	register gint i;
 
-	if (speedDialInitialized)
+	if (speedDialInitialized) {
 		for (i = 1; i < 10; i++) {
 			if ((d = (D_SpeedDial *) gtk_clist_get_row_data(GTK_CLIST(clist), i - 1))) {
+				dprintf("locaction: %i\n", d->entry.Location);
 				if (d->entry.Location == 0)
 					continue;
 				if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {
 					g_print(_("Cannot allocate memory!"));
 					return;
 				}
+
 				e->event = Event_SendSpeedDial;
 				e->data = d;
 				GUI_InsertEvent(e);
-/*        pthread_mutex_lock (&speedDialMutex);
-        pthread_cond_wait (&speedDialCond, &speedDialMutex);
-        pthread_mutex_unlock (&speedDialMutex);
+				pthread_mutex_lock (&speedDialMutex);
+				pthread_cond_wait (&speedDialCond, &speedDialMutex);
+				pthread_mutex_unlock (&speedDialMutex);
 
-        if (d->status != GE_NONE)
-        {
-          g_snprintf (buf, 80, _("Error writing speed\ndial for key %d!\n"),
-                      d->entry.Number);
-          gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
-          gtk_widget_show (errorDialog.dialog);
-        } */
+				if (d->status != GE_NONE) {
+					g_print(_("Error writing speed dial for key %d!\n"), d->entry.Number);
+					/*
+					  gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+					  gtk_widget_show (errorDialog.dialog);
+					*/
+				}
+				/*
+				GUI_Refresh ();
+				*/
 			}
-//      GUI_Refresh ();
 		}
+	}
 }
-
 
 static bool ParseLine(D_SpeedDial * d, gchar * buf)
 {

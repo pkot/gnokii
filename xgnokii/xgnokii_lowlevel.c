@@ -837,15 +837,16 @@ static gint A_SendSpeedDial(gpointer data)
 {
 	D_SpeedDial *d = (D_SpeedDial *) data;
 	GSM_Error error;
+	GSM_Data gdat;
 
 	error = d->status = GE_UNKNOWN;
 
 	if (d) {
-		//pthread_mutex_lock (&speedDialMutex);
-//    error = d->status = GSM->SetSpeedDial (&(d->entry));
-		g_free(d);
-		//pthread_cond_signal (&speedDialCond);
-		//pthread_mutex_unlock (&speedDialMutex);
+		gdat.SpeedDial = &d->entry;
+		pthread_mutex_lock(&speedDialMutex);
+		error = d->status = SM_Functions(GOP_SetSpeedDial, &gdat, &statemachine);
+		pthread_cond_signal(&speedDialCond);
+		pthread_mutex_unlock(&speedDialMutex);
 	}
 
 	return (error);
@@ -986,6 +987,7 @@ static gint A_SetBitmap(gpointer data)
 	GSM_Data gdat;
 
 /* GSM_DataClear(&gdat); */
+
 	pthread_mutex_lock(&setBitmapMutex);
 	if (d->bitmap->type == GSM_CallerLogo) {
 		bitmap.type = d->bitmap->type;
