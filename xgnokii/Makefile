@@ -21,7 +21,7 @@ CFLAGS += $(PTHREAD_CFLAGS) \
 	  $(GTK_CFLAGS)
 
 LDFLAGS += $(PTHREAD_LIBS) \
-	   $(GTK_LIBS)
+	   $(GTK_LIBS) -L../common -lgnokii
 
 OBJS = 	xgnokii.o \
 	xgnokii_common.o \
@@ -43,10 +43,10 @@ HELP_DIR = docs/help
 all: xgnokii
 
 
-xgnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o
+xgnokii: $(OBJS) $(TOPDIR)/common/lignokii.so $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o
 
-$(TOPDIR)/common/COMMON.o:
-	$(MAKE) -C $(TOPDIR)/common COMMON.o
+$(TOPDIR)/common/libgnokii.so:
+	$(MAKE) -C $(TOPDIR)/common libgnokii.so
 
 $(TOPDIR)/common/data/DATA.o:
 	$(MAKE) -C $(TOPDIR)/common/data DATA.o

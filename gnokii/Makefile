@@ -9,10 +9,6 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-
-CFLAGS	+= $(PTHREAD_CFLAGS)
-LDFLAGS += $(PTHREAD_LIBS)
-
 ifdef XPM_LIBS
     LDFLAGS +=$(XPM_LIBS)
 endif
@@ -25,10 +21,13 @@ endif
 
 all: gnokii
 
-gnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/gsm-filetypes.o
+LDFLAGS += -L$(TOPDIR)/common -lgnokii
 
-$(TOPDIR)/common/COMMON.o:
-	$(MAKE) -C $(TOPDIR)/common COMMON.o
+gnokii: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o
+	$(LD) gnokii $(LDFLAGS) $(OBJS) $(TOPDIR)/common/gsm-filetypes.o
+
+$(TOPDIR)/common/libgnokii.so:
+	$(MAKE) -C $(TOPDIR)/common libgnokii.so
 
 $(TOPDIR)/common/gsm-filetypes.o:
 	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o

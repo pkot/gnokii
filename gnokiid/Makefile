@@ -10,16 +10,16 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 CFLAGS	+= $(PTHREAD_CFLAGS)
-LDFLAGS += $(PTHREAD_LIBS)
+LDFLAGS += $(PTHREAD_LIBS) -L../common -lgnokii
 
 OBJS =	gnokiid.o
 
 all: gnokiid
 
-gnokiid: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/data/DATA.o
+gnokiid: $(OBJS) $(TOPDIR)/common/libgnokii.so $(TOPDIR)/common/data/DATA.o
 
-$(TOPDIR)/common/COMMON.o:
-	$(MAKE) -C $(TOPDIR)/common COMMON.o
+$(TOPDIR)/common/libgnokii.so:
+	$(MAKE) -C $(TOPDIR)/common libgnokii.so
 
 $(TOPDIR)/common/data/DATA.o:
 	$(MAKE) -C $(TOPDIR)/common/data DATA.o

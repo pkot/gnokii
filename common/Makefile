@@ -17,24 +17,20 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-CFLAGS += $(PTHREAD_CFLAGS)
 OBJS =	cfgreader.o \
 	device.o \
-	fbus-3810.o \
-	fbus-6110-auth.o \
 	gsm-ringtones.o \
-	fbus-6110.o \
 	gsm-api.o \
 	gsm-networks.o \
-	mbus-6160.o \
-	mbus-640.o \
 	vcal.o \
 	misc.o \
+        gsm-sms.o \
 	gsm-bitmaps.o \
 	gsm-common.o \
+	gsm-encoding.o \
 	gsm-statemachine.o
 
-all: COMMON.o gsm-filetypes.o
+all: libgnokii.o gsm-filetypes.o
 
 phones/PHONES.o:
 	$(MAKE) -C phones PHONES.o
@@ -45,8 +41,8 @@ links/LINKS.o:
 devices/DEVICES.o:
 	$(MAKE) -C devices DEVICES.o
 
-COMMON.o: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	$(LD) COMMON.o $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+libgnokii.o: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(CC) -shared -o libgnokii.so $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 gsm-filetypes.o: gsm-filetypes.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(XPM_CFLAGS) -c gsm-filetypes.c
@@ -58,6 +54,8 @@ clean:
 	$(RM) $(OBJS) *~ depend COMMON.o gsm-filetypes.o vcal.c phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 install:
+	$(INSTALL) -d $(libdir)
+	$(INSTALL) libgnokii.so $(libdir)
 	@echo
 
 depend dep:

@@ -21,7 +21,10 @@
   functions themselves are defined in a structure in gsm-common.h.
 
   $Log$
-  Revision 1.30  2001-08-09 11:51:38  pkot
+  Revision 1.31  2001-11-08 16:45:58  pkot
+  Obsolete old structure, kill treads where possible and make shared library
+
+  Revision 1.30  2001/08/09 11:51:38  pkot
   Generic AT support updates and cleanup (Manfred Jonsson)
 
   Revision 1.29  2001/07/27 00:02:20  pkot
@@ -53,12 +56,10 @@
 #include "gsm-common.h"
 #include "data/rlp-common.h"
 #include "gsm-statemachine.h"
-#include "fbus-3810.h"
-#include "fbus-6110.h"
-#include "mbus-2110.h"
-#include "mbus-6160.h"
-#include "mbus-640.h"
 #include "phones/nk7110.h"
+#include "phones/nk6100.h"
+#include "phones/nk3110.h"
+#include "phones/nk2110.h"
 
 GSM_Statemachine GSM_SM;
 GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
@@ -123,12 +124,7 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
 {
         GSM_Error ret;
-        MODULE(FB38);
-        MODULE(FB61);
 #ifndef WIN32  /* MB21 not supported in win32 */
-        MODULE(MB61);
-        MODULE(MB640);
-        /* MODULE(D2711); */
 	if (strstr("2110", model)) {
 		extern GSM_Phone phone_nokia_2110;
 		memcpy(&(sm->Phone), &phone_nokia_2110, sizeof(GSM_Phone));
@@ -143,6 +139,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
  
         REGISTER_PHONE(nokia_7110, NULL);
         REGISTER_PHONE(at, model);
+	REGISTER_PHONE(nokia_3110, NULL);
 
 #endif /* WIN32 */ 
         return (GE_UNKNOWNMODEL);

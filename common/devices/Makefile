@@ -17,8 +17,6 @@
 TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
-CFLAGS += $(PTHREAD_CFLAGS)
-
 OBJS =	tekram.o
 
 ifdef WIN32

@@ -12,7 +12,8 @@ CFLAGS += $(PTHREAD_CFLAGS) \
 	  `glib-config --cflags`
 
 LDFLAGS += $(PTHREAD_LIBS) \
-	   `glib-config --libs` -lpq
+	   `glib-config --libs` -lpq \
+	   -L../common -lgnokii
 
 ifdef XPM_LIBS
     LDFLAGS +=$(XPM_LIBS)
@@ -25,10 +26,10 @@ OBJS = 	db.o \
 all: smsd
 
 
-smsd: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o
+smsd: $(OBJS) $(TOPDIR)/common/libgnokii.o $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o
 
-$(TOPDIR)/common/COMMON.o:
-	$(MAKE) -C $(TOPDIR)/common COMMON.o
+$(TOPDIR)/common/libgnokii.so:
+	$(MAKE) -C $(TOPDIR)/common libgnokii.so
 
 $(TOPDIR)/common/data/DATA.o:
 	$(MAKE) -C $(TOPDIR)/common/data DATA.o

@@ -17,11 +17,11 @@
 TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
-CFLAGS += $(PTHREAD_CFLAGS)
-
 OBJS =	generic.o \
 	nokia.o \
 	nk7110.o \
+	nk6100.o \
+	nk3110.o \
 	nk2110.o \
 	atgen.o
 #	dc2711.o
