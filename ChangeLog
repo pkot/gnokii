@@ -1,14 +1,27 @@
 0.4.4 (Not released yet)
 =====
- * 6110 series updates
+ * 6110 series updates:
     o Nokia 8290 is known to work with the driver             (Roger)
     o fix default number reading with the smsc info       (Pawel Kot)
- * 6510 series updates
+    o remove translatable strings from some dprintfs   (Markus Plail)
+ * 6510 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
- * 7110 series updates
+    o fix SMSFolder mess                               (Markus Plail)
+ * 7110 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
+    o fix SMSFolder mess                               (Markus Plail)
  * Call management subsystem updates:
     o state pointer added to CallNotification        (BORBELY Zoltan)
+ * xgnokii updates:
+    o remove unnecessary GSM_Data declarations         (Markus Plail)
+ * gnokii updates
+    o remove SMSFolder hack from getsms                (Markus Plail)
+ * nokia-decoding updates:
+    o name can be assigned to both bitmap and phonebook entry
+                                                       (Markus Plail)
+ * libsms updates:
+    o remove SMSFolder hacks in GetFolderChanges       (Markus Plail)
+ * change strncpys to snprintfs in vcal.lx             (Markus Plail)
 
 0.4.3
 =====
