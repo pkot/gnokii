@@ -525,8 +525,11 @@ static gint AddCalendarNote(gn_calnote * cnote)
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
-	} else
+#ifdef XDEBUG
+	} else {
 		g_print("Note saved\n");
+#endif
+	}
 
 	return (error);
 }
