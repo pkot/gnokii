@@ -61,6 +61,7 @@ void writecalendarnote(char *argv[]);
 void deletecalendarnote(char *argv[]);
 void getdisplaystatus();
 void netmonitor(char *argv[]);
+void getsecuritycode();
 void foogle(char *argv[]);
 void pmon(char *argv[]);
 void readconfig(void);
@@ -114,6 +115,7 @@ void usage(void)
           gnokii [--deletecalendarnote] [index]
           gnokii [--getdisplaystatus]
           gnokii [--netmonitor] [reset|off|field|devel|next|nr]
+          gnokii [--getsecuritycode]
 
           --help            display usage information.
 
@@ -183,6 +185,8 @@ void usage(void)
           --getdisplaystatus shows what icons are displayed.
 
           --netmonitor      setting/querying netmonitor mode.
+
+          --getsecuritycode get the security code from the phone.
 "));  /*"*/
 }
 
@@ -390,6 +394,11 @@ int main(int argc, char *argv[])
   /* NetMonitor mode. */
   if (argc==3 && strcmp(argv[1], "--netmonitor") == 0) {
     netmonitor(argv);
+  }
+
+  /* Get security code mode. */
+  if (strcmp(argv[1], "--getsecuritycode") == 0) {
+    getsecuritycode(argv);
   }
 
   /* Foogle function - insert you own function calls here 
@@ -1581,6 +1590,23 @@ void netmonitor(char *argv[])
 
   if (Screen)
     printf("%s\n", Screen);
+
+  GSM->Terminate();
+
+  exit(0);
+}
+
+void getsecuritycode(char *argv[])
+{
+
+  char code[6];
+
+  fbusinit(true, NULL);
+
+  FB61_GetSecurityCode(code);
+
+  if (code)
+    printf(_("Security code: %s\n"), code);
 
   GSM->Terminate();
 

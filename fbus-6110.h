@@ -182,6 +182,7 @@ GSM_Error FB61_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error FB61_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
 
 GSM_Error FB61_NetMonitor(unsigned char mode, char *Screen);
+GSM_Error FB61_GetSecurityCode(unsigned char *code);
 
 /* States for receive code. */
 
