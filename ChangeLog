@@ -8,6 +8,8 @@
     o fix incorrect paths in libgnokii.dsp              (Pawel Kot)
     o add ldif.c to libgnokii.dsp                       (Pawel Kot)
     o *.dsp files need \r\n line terminating            (Pawel Kot)
+    o gnokiid.lib needs to be in $(ProjDir) not in $(ProjDir)\lib
+                                                        (Pawel Kot)
  * libgnokii fixes
     o fix the argument order in base64_encode() caller  (Pawel Kot)
  * gnokii fixes

@@ -88,15 +88,14 @@ SOURCE="$(InputPath)"
 
 BuildCmds= \
 	echo on \
-	md $(ProjDir)\lib \
-	copy $(OutDir)\gnokiid.lib $(ProjDir)\lib\gnokiid.lib \
+	copy $(OutDir)\gnokiid.lib $(ProjDir)\gnokiid.lib \
 	copy $(OutDir)\gnokiid.dll $(ProjDir)\gnokiid.dll \
 	
 
 "$(ProjDir)\gnokiid.dll" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 
-"$(ProjDir)\lib\gnokiid.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+"$(ProjDir)\gnokiid.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 # End Custom Build
 
