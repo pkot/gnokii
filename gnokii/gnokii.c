@@ -36,6 +36,7 @@
 */
 
 #include "misc.h"
+#include "compat.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,7 +55,6 @@
 
 #  include <windows.h>
 #  include <process.h>
-#  include <dirent.h>
 #  include "win32/getopt.h"
 
 #else
@@ -2459,6 +2459,8 @@ static gn_error readcbmessage(gn_cb_message *message)
 
 static void displaycall(int call_id)
 {
+/* FIXME!!! */
+#ifndef WIN32
 	gn_call *call;
 	struct timeval now, delta;
 	char *s;
@@ -2495,6 +2497,7 @@ static void displaycall(int call_id)
 	fprintf(stderr, _("CALL%d: %s %s(%s) (duration: %d sec)\n"), call_id, s,
 		call->remote_number, call->remote_name,
 		(int)delta.tv_sec);
+#endif
 }
 
 /* In monitor mode we don't do much, we just initialise the fbus code.
@@ -4181,11 +4184,7 @@ static gn_error smsslave(gn_sms *message)
 		fprintf(stderr, _("### Exists?!\n"));
 		return GN_ERR_FAILED;
 	}
-#ifndef WIN32
 	mkdir(smsdir, 0700);
-#else
-	_mkdir(smsdir);
-#endif
 	if ((output = fopen(buf, "w+")) == NULL) {
 		fprintf(stderr, _("### Cannot create file %s\n"), buf);
 		return GN_ERR_FAILED;
@@ -4257,13 +4256,14 @@ static int getsecuritycode()
 
 static void list_gsm_networks(void)
 {
-	API extern gn_network networks[];
-	int i;
+
+	gn_network network;
+	int i = 0;
 
 	printf("Network  Name\n");
 	printf("-----------------------------------------\n");
-	for (i = 0; strcmp(networks[i].name, "unknown"); i++)
-		printf("%-7s  %s\n", networks[i].code, networks[i].name);
+	while (gn_network_get(&network, i++))
+		printf("%-7s  %s\n", network.code, network.name);
 }
 
 static int getnetworkinfo(void)

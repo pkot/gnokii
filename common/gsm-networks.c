@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "compat.h"
+#include "misc.h"
 #include <string.h>
 #include "gsm-networks.h"
 
@@ -151,10 +152,10 @@ static gn_country countries[] = {
 	{ "730", "Chile" },
 	{ "734", "Venezuela" },
 
-	{ "undefined", "unknown" }
+	{ NULL, NULL }
 };
 
-API gn_network networks[] = {
+static gn_network networks[] = {
 	{ "202 01", "Cosmote" },
 	{ "202 05", "Vodafone (PANAFON)" },
 	{ "202 10", "TELESTET" },
@@ -400,45 +401,62 @@ API gn_network networks[] = {
 	{ "730 10", "Entel PCS" },
 	{ "734 01", "Infonet" },
 
-	{ "undefined", "unknown" }
+	{ NULL, NULL }
 };
 
 API char *gn_network_name_get(char *network_code)
 {
 	int index = 0;
 
-	while (strcmp(networks[index].code, network_code) &&
-		strcmp(networks[index].code, "undefined")) index++;
+	while (networks[index].code &&
+	       strcmp(networks[index].code, network_code)) index++;
 
-	return networks[index].name;
+	/* for now be compacrapatible ;) */
+	return networks[index].name ? networks[index].name : "unknown";
 }
 
 API char *gn_network_code_get(char *network_name)
 {
 	int index = 0;
 
-	while (strcmp(networks[index].name, network_name) &&
-		strcmp(networks[index].code, "undefined")) index++;
+	while (networks[index].name &&
+	       strcmp(networks[index].name, network_name)) index++;
 
-	return networks[index].code;
+	return networks[index].code ? networks[index].code : "undefined";
 }
 
 API char *gn_country_name_get(char *country_code)
 {
 	int index = 0;
 
-	while (strncmp(countries[index].code, country_code, 3) &&
-		strcmp(countries[index].code, "undefined")) index++;
+	while (countries[index].code &&
+	       strncmp(countries[index].code, country_code, 3)) index++;
 
-	return countries[index].name;
+	return countries[index].name ? countries[index].name : "unknown";
 }
 
 API char *gn_country_code_get(char *country_name)
 {
 	int index = 0;
 
-	while (strcmp(countries[index].name, country_name) &&
-		strcmp(countries[index].code, "undefined")) index++;
+	while (countries[index].name &&
+	       strcmp(countries[index].name, country_name)) index++;
 
-	return countries[index].code;
+	return countries[index].code ? countries[index].code : "undefined";
+}
+
+API bool gn_network_get(gn_network *network, int index)
+{
+	if (index < 0 || index >= ARRAY_LEN(networks) - 1)
+		return false;
+	*network = networks[index];
+	return true;
+}
+
+API bool gn_country_get(gn_country *country, int index)
+{
+	if (index < 0 || index >= ARRAY_LEN(countries) - 1)
+		return false;
+	*country = countries[index];
+	return true;
 }

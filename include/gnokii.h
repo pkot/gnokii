@@ -102,12 +102,15 @@ API bool gn_char_def_alphabet(unsigned char *string);
 /* Errors */
 API char *gn_error_print(gn_error e);
 
-/* These functions are used to search the structure defined above.*/
+/* These functions are used to search for network info. */
 API char *gn_network_name_get(char *network_code);
 API char *gn_network_code_get(char *network_name);
 
 API char *gn_country_name_get(char *country_code);
 API char *gn_country_code_get(char *country_name);
+
+API bool gn_network_get(gn_network *network, int index);
+API bool gn_country_get(gn_country *country, int index);
 
 /* Ringtones */
 API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength);
