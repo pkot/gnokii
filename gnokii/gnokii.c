@@ -1423,16 +1423,16 @@ static int entersecuritycode(char *type)
 	gn_security_code security_code;
 
 	if (!strcmp(type, "PIN"))
-		security_code.type = GSCT_Pin;
+		security_code.type = GN_SCT_Pin;
 	else if (!strcmp(type, "PUK"))
-		security_code.type = GSCT_Puk;
+		security_code.type = GN_SCT_Puk;
 	else if (!strcmp(type, "PIN2"))
-		security_code.type = GSCT_Pin2;
+		security_code.type = GN_SCT_Pin2;
 	else if (!strcmp(type, "PUK2"))
-		security_code.type = GSCT_Puk2;
+		security_code.type = GN_SCT_Puk2;
 	/* FIXME: Entering of security_code does not work :-(
 	else if (!strcmp(type, "security_code"))
-		security_code.type = GSCT_security_code;
+		security_code.type = GN_SCT_security_code;
 	*/
 	else
 		usage(stderr, -1);
@@ -1443,7 +1443,7 @@ static int entersecuritycode(char *type)
 	gn_data_clear(&data);
 	data.security_code = &security_code;
 
-	error = gn_sm_functions(GN_OP_Entersecurity_code, &data, &state);
+	error = gn_sm_functions(GN_OP_EnterSecurityCode, &data, &state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -1463,27 +1463,27 @@ static int getsecuritycodestatus(void)
 	gn_data_clear(&data);
 	data.security_code = &security_code;
 
-	if (gn_sm_functions(GN_OP_Getsecurity_codeStatus, &data, &state) == GN_ERR_NONE) {
+	if (gn_sm_functions(GN_OP_GetSecurityCodeStatus, &data, &state) == GN_ERR_NONE) {
 
 		fprintf(stdout, _("Security code status: "));
 
 		switch(security_code.type) {
-		case GSCT_security_code:
+		case GN_SCT_SecurityCode:
 			fprintf(stdout, _("waiting for Security Code.\n"));
 			break;
-		case GSCT_Pin:
+		case GN_SCT_Pin:
 			fprintf(stdout, _("waiting for PIN.\n"));
 			break;
-		case GSCT_Pin2:
+		case GN_SCT_Pin2:
 			fprintf(stdout, _("waiting for PIN2.\n"));
 			break;
-		case GSCT_Puk:
+		case GN_SCT_Puk:
 			fprintf(stdout, _("waiting for PUK.\n"));
 			break;
-		case GSCT_Puk2:
+		case GN_SCT_Puk2:
 			fprintf(stdout, _("waiting for PUK2.\n"));
 			break;
-		case GSCT_None:
+		case GN_SCT_None:
 			fprintf(stdout, _("nothing to enter.\n"));
 			break;
 		default:
@@ -1504,16 +1504,16 @@ static int changesecuritycode(char *type)
 	memset(&security_code, 0, sizeof(security_code));
 
 	if (!strcmp(type, "PIN"))
-		security_code.type = GSCT_Pin;
+		security_code.type = GN_SCT_Pin;
 	else if (!strcmp(type, "PUK"))
-		security_code.type = GSCT_Puk;
+		security_code.type = GN_SCT_Puk;
 	else if (!strcmp(type, "PIN2"))
-		security_code.type = GSCT_Pin2;
+		security_code.type = GN_SCT_Pin2;
 	else if (!strcmp(type, "PUK2"))
-		security_code.type = GSCT_Puk2;
+		security_code.type = GN_SCT_Puk2;
 	/* FIXME: Entering of security_code does not work :-(
 	else if (!strcmp(type, "security_code"))
-		security_code.type = GSCT_security_code;
+		security_code.type = GN_SCT_security_code;
 	*/
 	else
 		usage(stderr, -1);
@@ -1529,7 +1529,7 @@ static int changesecuritycode(char *type)
 	gn_data_clear(&data);
 	data.security_code = &security_code;
 
-	error = gn_sm_functions(GN_OP_Changesecurity_code, &data, &state);
+	error = gn_sm_functions(GN_OP_ChangeSecurityCode, &data, &state);
 	switch (error) {
 	case GN_ERR_NONE:
 		fprintf(stderr, _("Code changed.\n"));
