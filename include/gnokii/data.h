@@ -96,6 +96,7 @@ typedef struct {
 	gn_key_code key_code;
 	unsigned char character;
 	gn_phone_model *phone;
+	gn_locks_info *locks_info;
 } gn_data;
 
 /* 
@@ -215,6 +216,7 @@ typedef enum {
 	GN_OP_GetWAPSetting,
 	GN_OP_ActivateWAPSetting,
 	GN_OP_WriteWAPSetting,
+	GN_OP_GetLocksInfo,
 	GN_OP_Max,	/* don't append anything after this entry */
 } gn_operation;
 

@@ -90,7 +90,7 @@ struct gnokii_arg_len {
 #define GAL_XOR 0x01
 
 typedef enum {
-	OPT_HELP,
+	OPT_HELP = 256,
 	OPT_VERSION,
 	OPT_MONITOR,
 	OPT_ENTERSECURITYCODE,
@@ -152,7 +152,8 @@ typedef enum {
 	OPT_DELETESMSFOLDER,
 	OPT_CREATESMSFOLDER,
 	OPT_LISTNETWORKS,
-	OPT_GETNETWORKINFO
+	OPT_GETNETWORKINFO,
+	OPT_GETLOCKSINFO
 } opt_index;
 
 static char *bindir;     /* Binaries directory from .gnokiirc file - not used here yet */
@@ -318,6 +319,7 @@ static int usage(FILE *f, int retval)
 		     "                 [{--number|-n} number]\n"
 		     "          gnokii --listnetworks\n"
 		     "          gnokii --getnetworkinfo\n"
+		     "          gnokii --getlocksinfo\n"
 		));
 #ifdef SECURITY
 	fprintf(f, _("          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
@@ -4277,6 +4279,30 @@ static int getnetworkinfo(void)
 	return 0;
 }
 
+static int getlocksinfo(void)
+{
+	gn_locks_info locks_info[4];
+	char *locks_names[] = {"MCC+MNC", "GID1", "GID2", "MSIN"};
+	int i;
+
+	gn_data_clear(&data);
+	data.locks_info = locks_info;
+
+	if (gn_sm_functions(GN_OP_GetLocksInfo, &data, &state) != GN_ERR_NONE) {
+		return -1;
+	}
+
+	for (i = 0; i < 4; i++) {
+		fprintf(stdout, _("%7s : %10s, %7s, %6s, counter %d\n"),
+			locks_names[i],
+			locks_info[i].data,
+			locks_info[i].userlock ? "user" : "factory",
+			locks_info[i].closed ? "CLOSED" : "open",
+			locks_info[i].counter);
+	}
+	return 0;
+}
+
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 #ifndef WIN32
@@ -4523,6 +4549,9 @@ int main(int argc, char *argv[])
 
 		/* Get network info */
 		{ "getnetworkinfo",     no_argument,       NULL, OPT_GETNETWORKINFO },
+
+		/* Get (sim)lock info */
+		{ "getlocksinfo",       no_argument,       NULL, OPT_GETLOCKSINFO },
 
 		{ 0, 0, 0, 0},
 	};
@@ -4817,6 +4846,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_GETNETWORKINFO:
 			rc = getnetworkinfo();
+			break;
+		case OPT_GETLOCKSINFO:
+			rc = getlocksinfo();
 			break;
 #ifndef WIN32
 		case OPT_FOOGLE:

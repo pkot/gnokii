@@ -590,4 +590,11 @@ typedef struct {
 	char screen[50];
 } gn_netmonitor;
 
+typedef struct {
+	bool  userlock;		/* TRUE = user lock, FALSE = factory lock */
+	bool  closed;
+	char  data[12];
+	int   counter;
+} gn_locks_info;
+
 #endif	/* _gnokii_gsm_common_h */

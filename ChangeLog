@@ -24,6 +24,7 @@
     o --getnetworkinfo displays the LAC and cell id fields as
       a zero padded four digit hex number           (BORBELY Zoltan)
     o correctly handle memory types in writephonebook() (Pat Sewall)
+    o add --getlocksinfo along with 6100 driver     (Bertrik Sikken)
 
 0.5.0pre4
 =========

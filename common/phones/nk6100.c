@@ -124,6 +124,7 @@ static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *sta
 static gn_error ChangeSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error get_security_code(gn_data *data, struct gn_statemachine *state);
 #endif
+static gn_error get_locks_info(gn_data *data, struct gn_statemachine *state);
 
 static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -323,6 +324,8 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 	case GN_OP_GetSecurityCode:
 		return get_security_code(data, state);
 #endif
+	case GN_OP_GetLocksInfo:
+		return get_locks_info(data, state);
 	case GN_OP_SendDTMF:
 		return SendDTMF(data, state);
 	case GN_OP_Reset:
@@ -1103,12 +1106,16 @@ static int get_memory_type(gn_memory_type memory_type)
 
 static gn_error GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error error;
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x33, 0x64, 0x00};
 
 	req[5] = data->message_center->id;
 
 	if (sm_message_send(6, 0x02, req, state)) return GN_ERR_NOTREADY;
-	return sm_block(0x02, data, state);
+	do {
+		error = sm_block(0x02, data, state);
+	} while (error == GN_ERR_BUSY);
+	return error;
 }
 
 static gn_error SetSMSCenter(gn_data *data, struct gn_statemachine *state)
@@ -1446,6 +1453,10 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
+
+	case 0xc9:
+		dprintf("Still waiting....\n");
+		return GN_ERR_BUSY;
 
 	default:
 		return GN_ERR_UNHANDLEDFRAME;
@@ -2714,9 +2725,19 @@ static gn_error get_security_code(gn_data *data, struct gn_statemachine *state)
 }
 #endif
 
+static gn_error get_locks_info(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x8a, 0x00};
+
+	if (sm_message_send(4, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
+}
+
 static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	char *aux, *aux2;
+	char  tmp[24];
+	int i;
 
 	switch (message[2]) {
 	/* IMEI */
@@ -2737,6 +2758,35 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		}
 		break;
 #endif
+
+	/* Get (sim)lock info */
+	case 0x8A:
+		for (i = 0; i < 4; i++) {
+			memset(&data->locks_info[i], 0, sizeof(gn_locks_info));
+		}
+
+		data->locks_info[0].userlock = ((message[5] & 0x01) != 0);
+		data->locks_info[1].userlock = ((message[5] & 0x02) != 0);
+		data->locks_info[2].userlock = ((message[5] & 0x04) != 0);
+		data->locks_info[3].userlock = ((message[5] & 0x08) != 0);
+
+		data->locks_info[0].closed = ((message[6] & 0x01) != 0);
+		data->locks_info[1].closed = ((message[6] & 0x02) != 0);
+		data->locks_info[2].closed = ((message[6] & 0x04) != 0);
+		data->locks_info[3].closed = ((message[6] & 0x08) != 0);
+
+		bin2hex(tmp, message + 9, 12);
+
+		strncpy(data->locks_info[0].data, tmp, 5);
+		strncpy(data->locks_info[1].data, tmp + 16, 4);
+		strncpy(data->locks_info[2].data, tmp + 20, 4);
+		strncpy(data->locks_info[3].data, tmp + 5, 10);
+
+		data->locks_info[0].counter = message[21];
+		data->locks_info[1].counter = message[22];
+		data->locks_info[2].counter = message[23];
+		data->locks_info[3].counter = message[24];
+		break;
 
 	/* Get bin ringtone */
 	case 0x9e:
