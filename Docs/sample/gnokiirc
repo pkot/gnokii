@@ -87,6 +87,5 @@ TELEPHONE = 12345678
 # it will take more time to get the response. Adjust it to your needs. The
 # value is given in seconds to wait. Defaults to 10 seconds. Set to 0 to wait
 # forever.
-[sms]
-timeout = 10
+smsc_timeout = 10
 
