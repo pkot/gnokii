@@ -253,7 +253,7 @@ static void version(void)
    command-line options. */
 static int usage(FILE *f, int retval)
 {
-	fprintf(f, _("   usage: gnokii [--help|--monitor|--version]\n"
+	fprintf(f, _("   usage: gnokii [--help|--monitor [delay]|--version]\n"
 		     "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
 		     "                 [-r|--raw]\n"
 		     "          gnokii --writephonebook [-iv]\n"
@@ -2506,7 +2506,7 @@ static void displaycall(int call_id)
 /* In monitor mode we don't do much, we just initialise the fbus code.
    Note that the fbus code no longer has an internal monitor mode switch,
    instead compile with DEBUG enabled to get all the gumpf. */
-static int monitormode(void)
+static int monitormode(int argc, char *argv[])
 {
 	float rflevel = -1, batterylevel = -1;
 	gn_power_source powersource = -1;
@@ -2514,7 +2514,7 @@ static int monitormode(void)
 	gn_battery_unit battunit = GN_BU_Arbitrary;
 	gn_data data;
 	gn_error error;
-	int i;
+	int i, d;
 
 	gn_network_info networkinfo;
 	gn_cb_message cbmessage;
@@ -2559,6 +2559,8 @@ static int monitormode(void)
 	cb_ridx = 0;
 	cb_widx = 0;
 	gn_sm_functions(GN_OP_SetCellBroadcast, &data, &state);
+
+	d = argc ? atoi(argv[0]) : 1;
 
 	while (!bshutdown) {
 		if (gn_sm_functions(GN_OP_GetRFLevel, &data, &state) == GN_ERR_NONE)
@@ -2618,7 +2620,7 @@ static int monitormode(void)
 		if (readcbmessage(&cbmessage) == GN_ERR_NONE)
 			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), cbmessage.channel, cbmessage.message);
 
-		sleep(1);
+		sleep(d);
 	}
 
 	data.on_cell_broadcast = NULL;
@@ -4452,7 +4454,7 @@ int main(int argc, char *argv[])
 		{ "version",            no_argument,       NULL, OPT_VERSION },
 
 		/* Monitor mode */
-		{ "monitor",            no_argument,       NULL, OPT_MONITOR },
+		{ "monitor",            optional_argument, NULL, OPT_MONITOR },
 
 #ifdef SECURITY
 
@@ -4692,6 +4694,7 @@ int main(int argc, char *argv[])
 		{ OPT_DELETEWAPBOOKMARK, 1, 1, 0 },
 		{ OPT_GETWAPSETTING,     1, 2, 0 },
 		{ OPT_ACTIVATEWAPSETTING,1, 1, 0 },
+		{ OPT_MONITOR,           0, 1, 0 },
 
 		{ 0, 0, 0, 0 },
 	};
@@ -4760,7 +4763,7 @@ int main(int argc, char *argv[])
 
 		switch(c) {
 		case OPT_MONITOR:
-			rc = monitormode();
+			rc = monitormode(nargc, nargv);
 			break;
 #ifdef SECURITY
 		case OPT_ENTERSECURITYCODE:
