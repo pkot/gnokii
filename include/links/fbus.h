@@ -17,7 +17,11 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.3  2001-03-19 23:44:57  pkot
+  Revision 1.4  2001-03-21 23:36:08  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.3  2001/03/19 23:44:57  pkot
   DLR3 cable support
 
   Revision 1.2  2001/03/13 01:23:19  pkot
@@ -43,6 +47,7 @@
 #define __links_fbus_h
 
 #include <time.h>
+#include "gsm-statemachine.h"
 
 #ifdef WIN32
 #include <sys/types.h>
@@ -127,7 +132,7 @@ typedef struct{
 	u8 RequestSequenceNumber;
 } FBUS_Link;
 
-GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Phone *newphone);
+GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
 
 
 

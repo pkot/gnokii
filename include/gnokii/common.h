@@ -23,7 +23,6 @@
 
 #include "data/rlp-common.h"
 
-
 /* Type of connection. Now we support serial connection with FBUS cable and
    IR (only with 61x0 models) */
 
@@ -468,6 +467,7 @@ typedef enum {
   GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
   GE_MEMORYFULL,
   GE_NOTWAITING,            /* Not waiting for a response from the phone */
+  GE_NOTREADY,
 
   /* The following are here in anticipation of data call requirements. */
 
@@ -594,6 +594,36 @@ typedef struct {
 #define DCS_CLASS2      0xf2
 #define DCS_CLASS3      0xf3
 
+/* Limits for IMEI, Revision and Model string storage. */
+
+#define GSM_MAX_IMEI_LENGTH     (20)
+#define GSM_MAX_REVISION_LENGTH (6)
+#define GSM_MAX_MODEL_LENGTH    (6)
+
+
+
+/* This is a generic holder for high level information - eg a GSM_Bitmap */
+
+typedef struct {
+	GSM_SMSMessage *SMSMessage;
+	GSM_PhonebookEntry *PhonebookEntry;
+	GSM_SpeedDial *SpeedDial;
+	GSM_MemoryStatus *MemoryStatus;
+	GSM_SMSStatus *SMSStatus;
+	GSM_MessageCenter *MessageCenter;
+	char *Imei;
+	char *Revision;
+	char *Model;
+	GSM_NetworkInfo *NetworkInfo;
+	GSM_CalendarNote *CalendarNote;
+	GSM_Bitmap *Bitmap;
+	GSM_Ringtone *Ringtone;
+	GSM_Profile *Profile;
+	GSM_BatteryUnits *BatteryUnits;
+	float *BatteryLevel;
+	GSM_RFUnits *RFUnits;
+	float *RFLevel;
+} GSM_Data;
 
 
 /* Global structures intended to be independant of phone etc */
@@ -616,12 +646,6 @@ typedef struct {
   /* This is used by the phone specific code to send a message over the link */
   GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, void *message);
 
-  /* These provide support for command/response exchanges */
-  /* See phone-generic.c for useage */
-  void *CR_message;
-  int CR_messagelength;   /* Size allocated in CR_message */
-  int CR_waitfor;
-  int CR_error;
 } GSM_Link;
 
 
@@ -629,19 +653,69 @@ typedef struct {
 /* Messagetype is passed to the function in case it is a 'generic' one */
 typedef struct {
   u8 MessageType;
-  GSM_Error (*Functions)(int messagetype, unsigned char *buffer, int length);
+  GSM_Error (*Functions)(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 } GSM_IncomingFunctionType;
 
+typedef enum {
+	GOP_Init,
+	GOP_GetModel,
+	GOP_GetRevision,
+	GOP_GetImei,
+	GOP_Identify,
+	GOP_GetBitmap,
+	GOP_SetBitmap,
+	GOP_GetBatteryLevel,
+	GOP_GetRFLevel,
+	GOP_GetMemoryStatus
+} GSM_Operation;
 
-/* This structure contains the 'callups' needed by the link */
-/* to deal with messages from the phone */
+/* This structure contains the 'callups' needed by the statemachine */
+/* to deal with messages from the phone and other information */
 
 typedef struct {
-  /* These make up a list of functions, one for each message type */
-  int IncomingFunctionNum;
+  /* These make up a list of functions, one for each message type and NULL terminated */
   GSM_IncomingFunctionType *IncomingFunctions;
   GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length);
+  GSM_Information Info;
+  GSM_Error (*Functions)(GSM_Operation op, GSM_Data *data, void *state);
 } GSM_Phone;
+
+
+/* The states the statemachine can take */
+
+typedef enum {
+	Startup,            /* Not yet initialised */
+	Initialised,        /* Ready! */
+	MessageSent,        /* A command has been sent to the link(phone) */ 
+	WaitingForResponse, /* We are waiting for a response from the link(phone) */
+	ResponseReceived    /* A response has been received - waiting for the phone layer to collect it */
+} GSM_State;
+
+/* How many message types we can wait for at one */
+#define SM_MAXWAITINGFOR 3
+
+
+/* All properties of the state machine */
+
+typedef struct {
+	GSM_State CurrentState;
+	GSM_Link Link;
+	GSM_Phone Phone;
+	
+	/* Store last message for resend purposes */
+	u8 LastMsgType;
+	u16 LastMsgSize;
+	void *LastMsg;
+
+	/* The responses we are waiting for */
+	unsigned char NumWaitingFor;
+	unsigned char NumReceived;
+	unsigned char WaitingFor[SM_MAXWAITINGFOR];
+	GSM_Error ResponseError[SM_MAXWAITINGFOR];
+	/* Data structure to be filled in with the response */
+	GSM_Data *Data[SM_MAXWAITINGFOR];
+} GSM_Statemachine;
+
 
  
 /* Define the structure used to hold pointers to the various API functions.
@@ -789,5 +863,7 @@ extern unsigned char DecodeWithDefaultAlphabet(unsigned char);
 extern wchar_t EncodeWithUnicodeAlphabet(unsigned char);
 extern unsigned char DecodeWithUnicodeAlphabet(wchar_t);
 extern GSM_MemoryType StrToMemoryType (const char *s);
+
+void GSM_DataClear(GSM_Data *data);
 
 #endif	/* __gsm_common_h */

@@ -16,7 +16,11 @@
   from/to the GSM handset and the modem data/fax stream.
 
   $Log$
-  Revision 1.2  2001-02-21 19:57:02  chris
+  Revision 1.3  2001-03-21 23:36:04  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.2  2001/02/21 19:57:02  chris
   More fiddling with the directory layout
 
   Revision 1.1  2001/02/16 14:29:51  chris
@@ -293,10 +297,11 @@ GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Conne
 {
 	int 		count=0;
 	GSM_Error 	error;
+	static GSM_Statemachine sm;
 
 		/* Initialise the code for the GSM interface. */     
 
-	error = GSM_Initialise(model,port, initlength, connection, RLP_DisplayF96Frame);
+	error = GSM_Initialise(model,port, initlength, connection, RLP_DisplayF96Frame, &sm);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));

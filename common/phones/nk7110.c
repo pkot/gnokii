@@ -17,7 +17,11 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.3  2001-03-13 01:24:03  pkot
+  Revision 1.4  2001-03-21 23:36:06  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.3  2001/03/13 01:24:03  pkot
   Code cleanup - no warnings during compilation
 
   Revision 1.2  2001/03/13 01:23:18  pkot
@@ -78,136 +82,95 @@
 #endif
 
 /* Some globals */
-/* Note that these could be created in initialise */
-/* which would enable multiphone support */
 
-GSM_Link link;
-GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
-	{ 0x01, PGEN_DebugMessage },
-	{ 0x03, P7110_GenericCRHandler },
-	{ 0x0a, P7110_GenericCRHandler },
-	{ 0x17, P7110_GenericCRHandler },
-	{ 0x1b, P7110_GenericCRHandler },
-	{ 0x40, P7110_GenericCRHandler },
-	{ 0x79, P7110_GenericCRHandler },
-	{ 0x7a, P7110_GenericCRHandler }
+static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
+	{ 0x1b, P7110_Incoming0x1b },
+	{ 0x03, P7110_Incoming0x03 },
+	{ 0x0a, P7110_Incoming0x0a },
+	{ 0x17, P7110_Incoming0x17 },
+	{ 0, NULL}
 };
-GSM_Phone phone = {
-	8,  /* No of functions in array */
+
+static GSM_Phone phone = {
 	P7110_IncomingFunctions,
-	P7110_IncomingDefault
+	P7110_IncomingDefault,
+        /* Mobile phone information */
+	{
+		"7110|6210", /* Supported models */
+		7,                     /* Max RF Level */
+		0,                     /* Min RF Level */
+		GRF_Percentage,        /* RF level units */
+		7,                     /* Max Battery Level */
+		0,                     /* Min Battery Level */
+		GBU_Percentage,        /* Battery level units */
+		GDT_DateTime,          /* Have date/time support */
+		GDT_TimeOnly,	         /* Alarm supports time only */
+		1,                     /* Alarms available - FIXME */
+		60, 96,                /* Startup logo size - 7110 is fixed at init*/
+		21, 78,                /* Op logo size */
+		14, 72                 /* Caller logo size */
+	},
 };
 
 
-/* Mobile phone information */
+/* FIXME - a little macro would help here... */
+/* Is there a way of not having state as a void?? */
 
-GSM_Information P7110_Information = {
-	"7110|6210", /* Supported models */
-	7,                     /* Max RF Level */
-	0,                     /* Min RF Level */
-	GRF_Percentage,        /* RF level units */
-	7,                     /* Max Battery Level */
-	0,                     /* Min Battery Level */
-	GBU_Percentage,        /* Battery level units */
-	GDT_DateTime,          /* Have date/time support */
-	GDT_TimeOnly,	         /* Alarm supports time only */
-	1,                     /* Alarms available - FIXME */
-	60, 96,                /* Startup logo size - 7110 is fixed at init*/
-	21, 78,                /* Op logo size */
-	14, 72                 /* Caller logo size */
-};
-
-
-/* Here we initialise model specific functions called by 'gnokii'. */
-/* This too needs fixing .. perhaps pass the link a 'request' of certain */
-/* type and the link then searches the phone functions.... */
-
-GSM_Functions P7110_Functions = {
-	P7110_Initialise,
-	P7110_Terminate,
-	P7110_ReadPhonebook, /* GetMemoryLocation */
-	P7110_WritePhonebookLocation, /* WritePhonebookLocation */
-	UNIMPLEMENTED, /* GetSpeedDial */
-	UNIMPLEMENTED, /* SetSpeedDial */
-	P7110_GetMemoryStatus, /* GetMemoryStatus */
-	UNIMPLEMENTED, /* GetSMSStatus */
-	UNIMPLEMENTED, /* GetSMSCentre */
-	UNIMPLEMENTED, /* SetSMSCentre */
-	UNIMPLEMENTED, /* GetSMSMessage */
-	UNIMPLEMENTED, /* DeleteSMSMessage */
-	UNIMPLEMENTED, /* SendSMSMessage */
-	UNIMPLEMENTED, /* SaveSMSMessage */
-	P7110_GetRFLevel, /* GetRFLevel */
-	P7110_GetBatteryLevel, /* GetBatteryLevel */
-	UNIMPLEMENTED, /* GetPowerSource */
-	UNIMPLEMENTED, /* GetDisplayStatus */
-	UNIMPLEMENTED, /* EnterSecurityCode */
-	UNIMPLEMENTED, /* GetSecurityCodeStatus */
-	P7110_GetIMEI,        /* GetIMEI */
-	P7110_GetRevision,    /* GetRevision */
-	P7110_GetModel,       /* GetModel */
-	PNOK_GetManufacturer, /* GetManufacturer */
-	UNIMPLEMENTED, /* GetDateTime */
-	UNIMPLEMENTED, /* SetDateTime */
-	UNIMPLEMENTED, /* GetAlarm */
-	UNIMPLEMENTED, /* SetAlarm */
-	P7110_DialVoice, /* DialVoice */
-	UNIMPLEMENTED, /* DialData */
-	UNIMPLEMENTED, /* GetIncomingCallNr */
-	UNIMPLEMENTED, /* GetNetworkInfo */
-	UNIMPLEMENTED, /* GetCalendarNote */
-	UNIMPLEMENTED, /* WriteCalendarNote */
-	UNIMPLEMENTED, /* DeleteCalendarNote */
-	UNIMPLEMENTED, /* NetMonitor */
-	UNIMPLEMENTED, /* SendDTMF */
-	P7110_GetBitmap, /* GetBitmap */
-	P7110_SetBitmap, /* SetBitmap */
-	UNIMPLEMENTED, /* SetRingtone */
-	UNIMPLEMENTED, /* SendRingtone */
-	UNIMPLEMENTED, /* Reset */ 
-	UNIMPLEMENTED, /* GetProfile */
-	UNIMPLEMENTED, /* SetProfile */
-	P7110_SendRLPFrame,   /* SendRLPFrame */
-	UNIMPLEMENTED, /* CancelCall */
-	UNIMPLEMENTED, /* EnableDisplayOutput */
-	UNIMPLEMENTED, /* DisableDisplayOutput */
-	UNIMPLEMENTED, /* EnableCellBroadcast */
-	UNIMPLEMENTED, /* DisableCellBroadcast */
-	UNIMPLEMENTED  /* ReadCellBroadcast */
-};
+GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, void *state)
+{
+	switch (op) {
+	case GOP_Init:
+		return P7110_Initialise(state);
+		break;
+	case GOP_GetModel:
+		return P7110_GetModel(data, state);
+		break;
+	case GOP_GetRevision:
+		return P7110_GetRevision(data, state);
+		break;
+	case GOP_GetImei:
+		return P7110_GetIMEI(data, state);
+		break;
+	case GOP_Identify:
+		return P7110_Identify(data, state);
+		break;
+	case GOP_GetBatteryLevel:
+		return P7110_GetBatteryLevel(data, state);
+		break;
+	case GOP_GetRFLevel:
+		return P7110_GetRFLevel(data, state);
+		break;
+	case GOP_GetMemoryStatus:
+		return P7110_GetMemoryStatus(data, state);
+		break;
+	default:
+		return GE_NOTIMPLEMENTED;
+		break;
+	}
+}
 
 /* LinkOK is always true for now... */
 bool P7110_LinkOK = true;
 
-static void P7110_Terminate()
-{  
-	return;
-};
 
+/* Initialise is the only function allowed to 'use' state */
 
-static bool P7110_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx) 
+static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 {
-	return false;
-}
-
-
-GSM_Error P7110_Initialise(char *port_device, char *initlength,
-			   GSM_ConnectionType connection,
-			   void (*rlp_callback)(RLP_F96Frame *frame))
-
-{
+	GSM_Data data;
 	char model[10];
+	GSM_Error err;
 
-	strncpy(link.PortDevice, port_device, 20);
-	link.InitLength = atoi(initlength);
-	link.ConnectionType = connection;
+	/* Copy in the phone info */
+	memcpy(&(state->Phone), &phone, sizeof(GSM_Phone));
+	state->Phone.Functions=P7110_Functions;
 
-	switch (connection) {
+	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
-		FBUS_Initialise(&link, &phone);
+		err=FBUS_Initialise(&(state->Link), state);
 		break;
 	case GCT_Irda:
-		PHONET_Initialise(&link, &phone);
+		err=PHONET_Initialise(&(state->Link), state);
 		break;
 	case GCT_Infrared:
 	default:
@@ -215,24 +178,195 @@ GSM_Error P7110_Initialise(char *port_device, char *initlength,
 		break;
 	}
 
+	if (err!=GE_NONE) {
+		dprintf("Error in link initialisation\n\r");
+		return err;
+	}
+
+	SM_Initialise(state);
+
 	/* Now test the link and get the model */
-  
-	if (P7110_GetModel(model)!=GE_NONE) return GE_NOTSUPPORTED ;
-	
+
+	GSM_DataClear(&data);
+	data.Model=model;
+	if (P7110_Functions(GOP_GetModel, &data, state)!=GE_NONE) return GE_NOTSUPPORTED ;
+
 	/* Check for 7110 and alter the startup logo size */
 	if (strcmp(model,"NSE-5")==0) {
-		P7110_Information.StartupLogoH=65;
+	        state->Phone.Info.StartupLogoH=65;
 		dprintf("7110 detected - startup logo height set to 65\n\r");
 	}
   	return GE_NONE;
 }
 
 
-static GSM_Error P7110_GenericCRHandler(int messagetype, unsigned char *buffer, int length)
+static GSM_Error P7110_GetModel(GSM_Data *data, GSM_Statemachine *state)
 {
-	return PGEN_CommandResponseReceive(&link, messagetype, buffer, length);
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
+  
+	dprintf("Getting model...\n\r");
+	if (SM_SendMessage(state, 6, 0x1b, req)!=GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x1b);
 }
 
+static GSM_Error P7110_GetRevision(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
+  
+	dprintf("Getting revision...\n\r");
+	if (SM_SendMessage(state, 6, 0x1b, req)!=GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x1b);
+}
+
+static GSM_Error P7110_GetIMEI(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
+  
+	dprintf("Getting imei...\n\r");
+	if (SM_SendMessage(state, 4, 0x1b, req)!=GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x1b);
+}
+
+
+static GSM_Error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02};
+
+	dprintf("Getting battery level...\n\r");
+	if (SM_SendMessage(state, 4, 0x17, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x17);
+}
+
+
+static GSM_Error P7110_Incoming0x17(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	case 0x03:
+		if (data->BatteryLevel) { 
+			*(data->BatteryUnits) = GBU_Percentage;
+			*(data->BatteryLevel) = message[5];
+			dprintf("Battery level %f\n\r",*(data->BatteryLevel));
+		}
+		return GE_NONE;
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x17 (%d)\n", message[3]);
+		return GE_UNKNOWN;
+		break;
+	}
+}
+
+static GSM_Error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x81};
+
+	dprintf("Getting rf level...\n\r");
+	if (SM_SendMessage(state, 4, 0x0a, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x0a);
+}
+
+static GSM_Error P7110_Incoming0x0a(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	case 0x82:
+		if (data->RFLevel) { 
+			*(data->RFUnits) = GRF_Percentage;
+			*(data->RFLevel) = message[4];
+			dprintf("RF level %f\n\r",*(data->RFLevel));
+		}
+		return GE_NONE;
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
+		return GE_UNKNOWN;
+		break;
+	}
+}
+
+static GSM_Error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x00, 0x00};
+      
+	dprintf("Getting memory status...\n\r");
+	req[5] = GetMemoryType(data->MemoryStatus->MemoryType);
+	if (SM_SendMessage(state, 6, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
+}
+
+static GSM_Error P7110_Incoming0x03(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	case 0x04:
+		if (data->MemoryStatus) {
+			if (message[5] != 0xff) {
+				data->MemoryStatus->Used = (message[16] << 8) + message[17];
+				data->MemoryStatus->Free = ((message[14] << 8) + message[15]) - data->MemoryStatus->Used;
+				dprintf(_("Memory status - location = %d\n\r"), (message[8] << 8) + message[9]);
+				return GE_NONE;
+			} else {
+				dprintf("Unknown error getting mem status\n\r");
+				return GE_NOTIMPLEMENTED;
+				
+			}
+		}
+		return GE_NONE;
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
+		return GE_UNKNOWN;
+		break;
+	}
+}
+
+
+/* Just as an example.... */
+/* But note that both requests are the same type which isn't very 'proper' */ 
+static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
+	unsigned char req2[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
+  
+	dprintf("Identifying...\n\r");
+	if (SM_SendMessage(state, 4, 0x1b, req)!=GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 6, 0x1b, req2)!=GE_NONE) return GE_NOTREADY;
+	SM_WaitFor(state, data, 0x1b);
+       	SM_Block(state, data, 0x1b); /* waits for all requests - returns req2 error */
+	SM_GetError(state, 0x1b);
+	
+	/* Check that we are back at state Initialised */
+	if (SM_Loop(state,0)!=Initialised) return GE_UNKNOWN;
+	return GE_NONE;
+}
+
+
+static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	case 02:
+		if (data->Imei) { 
+			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
+			dprintf("Received imei %s\n\r",data->Imei);
+		}
+		return GE_NONE;
+		break;
+	case 04:
+		if (data->Model) { 
+			snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 22);
+			dprintf("Received model %s\n\r",data->Model);
+		}
+		if (data->Revision) { 
+			snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "%s", message + 7);
+			dprintf("Received revision %s\n\r",data->Revision);
+		}
+		return GE_NONE;
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x1b (%d)\n", message[3]);
+		return GE_UNKNOWN;
+		break;
+	}
+
+}
 
 /* If we do not support a message type, print out some debugging info */
 
@@ -244,33 +378,53 @@ static GSM_Error P7110_IncomingDefault(int messagetype, unsigned char *buffer, i
 	return GE_NONE;
 }
 
-static GSM_Error P7110_GetIMEI(char *imei)
+
+static int GetMemoryType(GSM_MemoryType memory_type)
 {
-	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01};
-	int len = 4;
-  
-	dprintf("Getting IMEI...\n\r");
-	if (PGEN_CommandResponse(&link, req, &len, 0x1b, 0x1b, 100) == GE_NONE) {
-		snprintf(imei, P7110_MAX_IMEI_LENGTH, "%s", req + 4);
-		dprintf("Received imei %s\n\r",imei);
-		return GE_NONE;
-	} else return GE_NOTIMPLEMENTED;
+	int result;
+
+	switch (memory_type) {
+	case GMT_MT:
+		result = P7110_MEMORY_MT;
+		break;
+	case GMT_ME:
+		result = P7110_MEMORY_ME;
+		break;
+	case GMT_SM:
+		result = P7110_MEMORY_SM;
+		break;
+	case GMT_FD:
+		result = P7110_MEMORY_FD;
+		break;
+	case GMT_ON:
+		result = P7110_MEMORY_ON;
+		break;
+	case GMT_EN:
+		result = P7110_MEMORY_EN;
+		break;
+	case GMT_DC:
+		result = P7110_MEMORY_DC;
+		break;
+	case GMT_RC:
+		result = P7110_MEMORY_RC;
+		break;
+	case GMT_MC:
+		result = P7110_MEMORY_MC;
+		break;
+	default:
+		result = P7110_MEMORY_XX;
+		break;
+	}
+	return (result);
 }
 
 
-static GSM_Error P7110_GetModel(char *model)
-{
-	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
-	int len = 6;
-  
-	dprintf("Getting model...\n\r");
-	if (PGEN_CommandResponse(&link, req, &len, 0x1b, 0x1b, 100) == GE_NONE) {
-		snprintf(model, P7110_MAX_MODEL_LENGTH, "%s", req + 22);
-		dprintf("Received model %s\n\r",model);
-		return GE_NONE;
-	} else return GE_NOTIMPLEMENTED;
-}
 
+
+
+
+
+#if 0
 
 static GSM_Error P7110_DialVoice(char *Number)
 {
@@ -614,50 +768,6 @@ static GSM_Error P7110_SetBitmap(GSM_Bitmap *bitmap)
 }
 
 
-static GSM_Error P7110_GetRevision(char *revision)
-{
-	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
-	int len = 6;
-
-	dprintf("Getting revision...\n\r");
-	if (PGEN_CommandResponse(&link, req, &len, 0x1b, 0x1b, 100) == GE_NONE) {
-		snprintf(revision, P7110_MAX_REVISION_LENGTH, "%s", req + 7);
-		dprintf("Revision received %s\n\r",revision);
-		return GE_NONE;
-	} else return GE_NOTIMPLEMENTED;
-}
-
-
-static GSM_Error P7110_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
-{
-	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x02};
-	int len = 4;
-
-	dprintf("Getting battery level...\n\r");
-	if (PGEN_CommandResponse(&link, req, &len, 0x17, 0x17, 100) == GE_NONE) {
-		*units = GBU_Percentage;
-		*level = req[5];
-		dprintf("Battery level %f\n\r",*level);
-		return GE_NONE;
-	} else return GE_NOTIMPLEMENTED;
-}
-
-
-static GSM_Error P7110_GetRFLevel(GSM_RFUnits *units, float *level)
-{
-	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x81};
-	int len = 4;
-
-	dprintf("Getting rf level...\n\r");
-	if (PGEN_CommandResponse(&link, req, &len, 0x0a, 0x0a, 100) == GE_NONE) {
-		*units = GRF_Percentage;
-		*level = req[4];
-		dprintf("RF level %f\n\r",*level);
-		return GE_NONE;
-	} else return GE_NOTIMPLEMENTED;
-}
-
-
 static GSM_Error P7110_GetMemoryStatus(GSM_MemoryStatus *status)
 {
 	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x03, 0x00, 0x00};
@@ -886,6 +996,6 @@ static GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry)
 	} else return GE_NOTIMPLEMENTED;
 }
 
-
+#endif
 
 

@@ -11,7 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.13  2001-03-05 10:42:03  ja
+  Revision 1.14  2001-03-21 23:36:09  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.13  2001/03/05 10:42:03  ja
   Pavel Machek's vcard and finegrained indicators patch.
 
   Revision 1.12  2001/02/02 08:09:57  ja
@@ -159,6 +163,10 @@ static GSM_Error fbusinit(bool enable_monitoring)
   int count=0;
   static GSM_Error error=GE_NOLINK;
   GSM_ConnectionType connection=GCT_Serial;
+  static GSM_Statemachine statemachine;
+
+  /* FIXME - don't really know what should own the statemachine in */
+  /* the xgnokii scheme of things - Chris */
 
   if (!strcmp(xgnokiiConfig.connection, "infrared"))
     connection = GCT_Infrared;
@@ -167,7 +175,7 @@ static GSM_Error fbusinit(bool enable_monitoring)
 
   if (error == GE_NOLINK)
     error = GSM_Initialise (xgnokiiConfig.model, xgnokiiConfig.port,
-                            xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame);
+                            xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame, &statemachine);
 
 #ifdef XDEBUG
   g_print ("fbusinit: error %d\n", error);

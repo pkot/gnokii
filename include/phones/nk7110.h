@@ -17,7 +17,11 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:13  chris
+  Revision 1.2  2001-03-21 23:36:08  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.1  2001/02/21 19:57:13  chris
   More fiddling with the directory layout
 
   Revision 1.1  2001/02/16 14:29:54  chris
@@ -48,17 +52,9 @@
 #define __phones_nk7110_h
 
 #include <gsm-common.h>
+#include "gsm-statemachine.h"
 
-extern GSM_Functions P7110_Functions;
 extern bool P7110_LinkOK;
-extern GSM_Information P7110_Information;
-
-/* Limits for IMEI, Revision and Model string storage. */
-
-#define P7110_MAX_IMEI_LENGTH     (20)
-#define P7110_MAX_REVISION_LENGTH (6)
-#define P7110_MAX_MODEL_LENGTH    (6)
-
 
 /* Phone Memory types */
 
@@ -85,9 +81,28 @@ extern GSM_Information P7110_Information;
 #define P7110_ENTRYTYPE_DATE   0x13   /* Date for a Called List */
 #define P7110_ENTRYTYPE_GROUP  0x1e   /* Group number for phonebook entry */
 
+GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, void *state);
 
 #ifdef __phones_nk7110_c  /* Prototype functions for phone-7110.c only */
 
+static GSM_Error P7110_Initialise(GSM_Statemachine *state);
+static GSM_Error P7110_GetModel(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetRevision(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_Incoming0x03(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_Incoming0x0a(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_Incoming0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingDefault(int messagetype, unsigned char *message, int length);
+
+
+static int GetMemoryType(GSM_MemoryType memory_type);
+
+#if 0
 static GSM_Error P7110_Initialise(char *port_device, char *initlength,
 		 GSM_ConnectionType connection,
 		 void (*rlp_callback)(RLP_F96Frame *frame));
@@ -104,11 +119,11 @@ static GSM_Error P7110_GetRFLevel(GSM_RFUnits *units, float *level);
 static GSM_Error P7110_GetBitmap(GSM_Bitmap *bitmap);
 static GSM_Error P7110_SetBitmap(GSM_Bitmap *bitmap);
 static GSM_Error P7110_DialVoice(char *Number);
-
 static void P7110_Terminate();
 static bool P7110_SendRLPFrame( RLP_F96Frame *frame, bool out_dtx );
 
-static int GetMemoryType(GSM_MemoryType memory_type);
+#endif
+
 
 #endif  /* #ifdef __phones_nk7110_c */
 

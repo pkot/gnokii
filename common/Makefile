@@ -32,7 +32,8 @@ OBJS =	cfgreader.o \
 	vcal.o \
 	misc.o \
 	gsm-bitmaps.o \
-	gsm-common.o
+	gsm-common.o \
+	gsm-statemachine.o
 
 all: COMMON.o gsm-filetypes.o
 

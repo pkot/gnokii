@@ -17,7 +17,11 @@
   The various routines are called PHONET_(whatever).
 
   $Log$
-  Revision 1.2  2001-02-21 19:57:06  chris
+  Revision 1.3  2001-03-21 23:36:05  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.2  2001/02/21 19:57:06  chris
   More fiddling with the directory layout
 
   Revision 1.1  2001/02/16 14:29:52  chris
@@ -59,7 +63,7 @@
 /* Some globals */
 
 GSM_Link *glink;
-GSM_Phone *gphone;
+GSM_Statemachine *statemachine;
 PHONET_IncomingMessage imessage;
 
 
@@ -165,22 +169,7 @@ void PHONET_RX_StateMachine(unsigned char rx_byte) {
 		/* Is that it? */
 
 		if (i->BufferCount == i->MessageLength) {
-	  
-			temp=1;
-			for (c=0;c<gphone->IncomingFunctionNum;c++)
-				if (gphone->IncomingFunctions[c].MessageType==i->MessageType){
-					gphone->IncomingFunctions[c].Functions(i->MessageType,i->MessageBuffer,i->MessageLength);
-					dprintf("Received message type %02x\n\r",i->MessageType);
-					temp=0;
-		
-					/* FIXME - Hmm, what do we do with the return value.. */
-				}
-	    
-			if (temp!=0) {
-				fprintf(stdout,"Unknown Frame Type %02x\n\r", i->MessageType);
-				gphone->DefaultFunction(i->MessageType, i->MessageBuffer, i->MessageLength);
-			}
-      
+			SM_IncomingFunction(statemachine, i->MessageType, i->MessageBuffer, i->MessageLength);
 			i->state = FBUS_RX_Sync;
 		}
 		break;
@@ -275,13 +264,13 @@ GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message) {
 
 /* Initialise variables and start the link */
 
-GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Phone *newphone)
+GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 {
 	GSM_Error error=GE_INTERNALERROR;
 
 	/* 'Copy in' the global structures */
 	glink=newlink;
-	gphone=newphone;
+	statemachine = state;
 
 	/* Fill in the link functions */
 	glink->Loop=&PHONET_Loop;

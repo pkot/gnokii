@@ -29,6 +29,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "data/rlp-common.h"
+#include "gsm-statemachine.h"
 #include "fbus-3810.h"
 #include "fbus-6110.h"
 #include "mbus-2110.h"
@@ -36,10 +37,15 @@
 #include "mbus-640.h"
 #include "phones/nk7110.h"
 
+GSM_Statemachine GSM_SM;
+GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+
+
 /* GSM_LinkOK is set to true once normal communications with the phone have
    been established. */
 
 bool *GSM_LinkOK;
+bool LinkAlwaysOK = true;
 
 /* Define pointer to the GSM_Functions structure used by external code to call
    relevant API functions. This structure is defined in gsm-common.h. */
@@ -68,7 +74,7 @@ GSM_Information		*GSM_Info;
 	} \
 }
 
-GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame))
+GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
 {
   MODULE(FB38)
   MODULE(FB61)
@@ -76,8 +82,20 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
   MODULE(MB21)
   MODULE(MB61)
   MODULE(MB640)
-  MODULE(P7110)
   MODULE(D2711)
+
+ 
+	  /* FIXME - how do we get the models...*/
+	  /* For now statemachine will owned by gsm-api.c */
+	  
+	  if (strstr("7110|6210", model) != NULL) {   
+		  GSM_LinkOK = &LinkAlwaysOK; 
+		  sm->Link.ConnectionType=connection;
+		  sm->Link.InitLength=atoi(initlength);
+		  strcpy(sm->Link.PortDevice,device);
+		  return P7110_Functions(GOP_Init, NULL, sm); 
+	  }
+
 #endif /* WIN32 */ 
   return (GE_UNKNOWNMODEL);
 }

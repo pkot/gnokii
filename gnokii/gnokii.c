@@ -17,8 +17,12 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.131  2001-03-19 23:43:46  pkot
-  Solaris/*BSD '#if defined' cleanup
+  Revision 1.132  2001-03-21 23:36:06  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.131  2001/03/19 23:43:46  pkot
+  Solaris / BSD '#if defined' cleanup
 
   Revision 1.130  2001/03/13 01:23:18  pkot
   Windows updates (Manfred Jonsson)
@@ -152,6 +156,7 @@
 #include "gsm-filetypes.h"
 #include "gsm-bitmaps.h"
 #include "gsm-ringtones.h"
+#include "gsm-statemachine.h"
 
 char *model;      /* Model from .gnokiirc file. */
 char *Port;       /* Serial port from .gnokiirc file */
@@ -329,11 +334,12 @@ int usage(void)
 /* fbusinit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
 
-void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
+GSM_Statemachine *fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 {
 	int count=0;
 	GSM_Error error;
 	GSM_ConnectionType connection=GCT_Serial;
+	static GSM_Statemachine sm;
 
 	if (!strcmp(Connection, "infrared")) {
 		connection=GCT_Infrared;
@@ -344,7 +350,7 @@ void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 
 	/* Initialise the code for the GSM interface. */     
 
-	error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler);
+	error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler, &sm);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -361,6 +367,8 @@ void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 		fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting.\n"));
 		exit(-1);
 	}
+
+	return &sm;
 }
 
 /* This function checks that the argument count for a given options is withing
@@ -2187,6 +2195,8 @@ int monitormode(void)
 	GSM_PowerSource powersource = -1;
 	GSM_RFUnits rf_units = GRF_Arbitrary;
 	GSM_BatteryUnits batt_units = GBU_Arbitrary;
+	GSM_Statemachine *sm;
+	GSM_Data data;
 
 	GSM_NetworkInfo NetworkInfo;
 	GSM_CBMessage CBMessage;
@@ -2204,6 +2214,8 @@ int monitormode(void)
 	GSM_SMSStatus SMSStatus = {0, 0};
 
 	char Number[20];
+	
+	GSM_DataClear(&data);
 
 	/* We do not want to monitor serial line forever - press Ctrl+C to stop the
 	   monitoring mode. */
@@ -2213,69 +2225,83 @@ int monitormode(void)
 	fprintf (stderr, _("Initialising GSM interface...\n"));
 
 	/* Initialise the code for the GSM interface. */     
-	fbusinit(NULL);
+	sm=fbusinit(NULL);
 
-	sleep(1);
-	GSM->EnableCellBroadcast();
+	//sleep(1);
+	//GSM->EnableCellBroadcast();
 
 	/* Loop here indefinitely - allows you to see messages from GSM code in
 	   response to unknown messages etc. The loops ends after pressing the
 	   Ctrl+C. */
+	data.RFUnits=&rf_units;
+	data.RFLevel=&rflevel;
+	data.BatteryUnits=&batt_units;
+	data.BatteryLevel=&batterylevel;
+
 	while (!bshutdown) {
-		if (GSM->GetRFLevel(&rf_units, &rflevel) == GE_NONE)
+		if (SM_Functions(GOP_GetRFLevel,&data,sm) == GE_NONE)
 			fprintf(stdout, _("RFLevel: %d\n"), (int)rflevel);
 
-		if (GSM->GetBatteryLevel(&batt_units, &batterylevel) == GE_NONE)
+		if (SM_Functions(GOP_GetBatteryLevel,&data,sm) == GE_NONE)
 			fprintf(stdout, _("Battery: %d\n"), (int)batterylevel);
 
-		if (GSM->GetPowerSource(&powersource) == GE_NONE)
-			fprintf(stdout, _("Power Source: %s\n"), (powersource==GPS_ACDC)?_("AC/DC"):_("battery"));
+//		if (GSM->GetPowerSource(&powersource) == GE_NONE)
+//			fprintf(stdout, _("Power Source: %s\n"), (powersource==GPS_ACDC)?_("AC/DC"):_("battery"));
 
-		if (GSM->GetMemoryStatus(&SIMMemoryStatus) == GE_NONE)
+		data.MemoryStatus=&SIMMemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("SIM: Used %d, Free %d\n"), SIMMemoryStatus.Used, SIMMemoryStatus.Free);
 
-		if (GSM->GetMemoryStatus(&PhoneMemoryStatus) == GE_NONE)
+		data.MemoryStatus=&PhoneMemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("Phone: Used %d, Free %d\n"), PhoneMemoryStatus.Used, PhoneMemoryStatus.Free);
 
-		if (GSM->GetMemoryStatus(&DC_MemoryStatus) == GE_NONE)
+		data.MemoryStatus=&DC_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("DC: Used %d, Free %d\n"), DC_MemoryStatus.Used, DC_MemoryStatus.Free);
 
-		if (GSM->GetMemoryStatus(&EN_MemoryStatus) == GE_NONE)
+		data.MemoryStatus=&EN_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("EN: Used %d, Free %d\n"), EN_MemoryStatus.Used, EN_MemoryStatus.Free);
 
-		if (GSM->GetMemoryStatus(&FD_MemoryStatus) == GE_NONE)
+		data.MemoryStatus=&FD_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("FD: Used %d, Free %d\n"), FD_MemoryStatus.Used, FD_MemoryStatus.Free);
 
-		if (GSM->GetMemoryStatus(&LD_MemoryStatus) == GE_NONE)
+		data.MemoryStatus=&LD_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("LD: Used %d, Free %d\n"), LD_MemoryStatus.Used, LD_MemoryStatus.Free);
 
-		if (GSM->GetMemoryStatus(&MC_MemoryStatus) == GE_NONE)
+		data.MemoryStatus=&MC_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("MC: Used %d, Free %d\n"), MC_MemoryStatus.Used, MC_MemoryStatus.Free);
 
-		if (GSM->GetMemoryStatus(&ON_MemoryStatus) == GE_NONE)
+		data.MemoryStatus=&ON_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("ON: Used %d, Free %d\n"), ON_MemoryStatus.Used, ON_MemoryStatus.Free);
 
-		if (GSM->GetMemoryStatus(&RC_MemoryStatus) == GE_NONE)
+		data.MemoryStatus=&RC_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
 			fprintf(stdout, _("RC: Used %d, Free %d\n"), RC_MemoryStatus.Used, RC_MemoryStatus.Free);
 
-		if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE)
-			fprintf(stdout, _("SMS Messages: UnRead %d, Number %d\n"), SMSStatus.UnRead, SMSStatus.Number);
+//		if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE)
+//			fprintf(stdout, _("SMS Messages: UnRead %d, Number %d\n"), SMSStatus.UnRead, SMSStatus.Number);
 
-		if (GSM->GetIncomingCallNr(Number) == GE_NONE)
-			fprintf(stdout, _("Incoming call: %s\n"), Number);
+//		if (GSM->GetIncomingCallNr(Number) == GE_NONE)
+//			fprintf(stdout, _("Incoming call: %s\n"), Number);
 
-		if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE)
-			fprintf(stdout, _("Network: %s (%s), LAC: %s, CellID: %s\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC, NetworkInfo.CellID);
+//		if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE)
+//			fprintf(stdout, _("Network: %s (%s), LAC: %s, CellID: %s\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC, NetworkInfo.CellID);
 
-		if (GSM->ReadCellBroadcast(&CBMessage) == GE_NONE)
-			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), CBMessage.Channel, CBMessage.Message);
+//		if (GSM->ReadCellBroadcast(&CBMessage) == GE_NONE)
+//			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), CBMessage.Channel, CBMessage.Message);
 	    
 		sleep(1);
 	}
 
 	fprintf (stderr, _("Leaving monitor mode...\n"));
 
-	GSM->Terminate();
+	//GSM->Terminate();
 
 	return 0;
 }
@@ -2759,8 +2785,15 @@ int identify( void )
 {
 	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
 	char imei[64], model[64], rev[64], manufacturer[64];
+	GSM_Data data;
+	GSM_Statemachine *sm;
 
-	fbusinit(NULL);
+	GSM_DataClear(&data);
+	data.Model=model;
+	data.Revision=rev;
+	data.Imei=imei;
+
+	sm=fbusinit(NULL);
 
 	/* Retrying is bad idea: what if function is simply not implemented?
 	   Anyway let's wait 2 seconds for the right packet from the phone. */
@@ -2770,17 +2803,16 @@ int identify( void )
 	strcpy(manufacturer, "(unknown)");
 	strcpy(model, "(unknown)");
 	strcpy(rev, "(unknown)");
-	GSM->GetManufacturer(manufacturer);
-	GSM->GetIMEI(imei);
-	GSM->GetRevision(rev);
-	GSM->GetModel(model);
+	//GSM->GetManufacturer(manufacturer);
+
+	SM_Functions(GOP_Identify, &data, sm);
 
 	fprintf(stdout, _("IMEI:     %s\n"), imei);
 	fprintf(stdout, _("Manufacturer: %s\n"), manufacturer);
 	fprintf(stdout, _("Model:    %s\n"), model);
 	fprintf(stdout, _("Revision: %s\n"), rev);
 
-	GSM->Terminate();
+	//GSM->Terminate();
 
 	return 0;
 }
@@ -2829,9 +2861,10 @@ int pmon()
 
 	GSM_Error error;
 	GSM_ConnectionType connection=GCT_Serial;
+	GSM_Statemachine sm;
 
 	/* Initialise the code for the GSM interface. */     
-	error = GSM_Initialise(model, Port, Initlength, connection, NULL);
+	error = GSM_Initialise(model, Port, Initlength, connection, NULL, &sm);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));

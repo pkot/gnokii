@@ -17,7 +17,11 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.1  2001-03-06 10:40:32  machek
+  Revision 1.2  2001-03-21 23:36:05  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.1  2001/03/06 10:40:32  machek
   Added file with functions usefull for different links.
 
 
@@ -39,6 +43,8 @@
 #include "gsm-networks.h"
 #include "device.h"
 
+#ifdef 0
+
 void
 link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 {
@@ -54,3 +60,5 @@ link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 	dprintf("Unknown Frame Type %02x\n\r", type);
 	gphone->DefaultFunction(type, buf, len);
 }
+
+#endif

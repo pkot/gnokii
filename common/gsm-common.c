@@ -11,7 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.3  2001-02-28 21:26:51  machek
+  Revision 1.4  2001-03-21 23:36:04  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.3  2001/02/28 21:26:51  machek
   Added StrToMemoryType utility function
 
   Revision 1.2  2001/02/03 23:56:15  chris
@@ -152,4 +156,13 @@ GSM_MemoryType StrToMemoryType(const char *s)
 	X(MT);
 	return GMT_XX;
 #undef X
+}
+
+
+/* FIXME - a better way?? */
+void GSM_DataClear(GSM_Data *data)
+{
+	int c;
+
+	for (c=0;c<sizeof(GSM_Data);c++) ((unsigned char *)data)[c]=0;
 }

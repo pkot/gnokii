@@ -17,7 +17,11 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.5  2001-03-19 23:44:56  pkot
+  Revision 1.6  2001-03-21 23:36:05  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.5  2001/03/19 23:44:56  pkot
   DLR3 cable support
 
   Revision 1.4  2001/03/13 01:24:02  pkot
@@ -65,6 +69,7 @@
 #include "gsm-common.h"
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
+#include "gsm-statemachine.h"
 #include "links/utils.h"
 
 #ifndef WIN32
@@ -86,9 +91,9 @@
 
 /* Some globals */
 
-GSM_Link *glink;
-GSM_Phone *gphone;
-FBUS_Link flink;		/* FBUS specific stuff, internal to this file */
+static GSM_Link *glink;
+static GSM_Statemachine *statemachine;
+static FBUS_Link flink;		/* FBUS specific stuff, internal to this file */
 
 
 /*--------------------------------------------*/
@@ -129,10 +134,10 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 	int frm_num, seq_num;
 	FBUS_IncomingMessage *m;
 
-	//  if (isprint(rx_byte))
-	//  fprintf(stderr, "[%02x%c]", (unsigned char) rx_byte, rx_byte);
-	//else
-	//  fprintf(stderr, "[%02x ]", (unsigned char) rx_byte);
+//      if (isprint(rx_byte))
+//	  fprintf(stderr, "[%02x%c]", (unsigned char) rx_byte, rx_byte);
+//	else
+//	  fprintf(stderr, "[%02x ]", (unsigned char) rx_byte);
 
 	/* XOR the byte with the current checksum */
 	i->checksum[i->BufferCount & 1] ^= rx_byte;
@@ -305,7 +310,7 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 					/* Finally dispatch if ready */
 
 					if (m->FramesToGo == 0) {
-						link_dispatch(glink, gphone, i->MessageType, m->MessageBuffer, m->MessageLength);
+						SM_IncomingFunction(statemachine, i->MessageType, m->MessageBuffer, m->MessageLength);
 						free(m->MessageBuffer);
 						m->MessageBuffer = NULL;
 						m->Malloced = 0;
@@ -478,7 +483,7 @@ GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message)
 		FBUS_TX_SendFrame(messagesize + 2, messagetype,
 				  frame_buffer);
 	}
-	return (true);
+	return (GE_NONE);
 }
 
 
@@ -497,16 +502,17 @@ int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
 
 
 /* Initialise variables and start the link */
+/* newlink is actually part of state - but the link code should not anything about state */
+/* state is only passed around to allow for muliple state machines (one day...) */
 
-GSM_Error FBUS_Initialise(GSM_Link * newlink, GSM_Phone * newphone)
+GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 {
 	unsigned char init_char = 0x55;
 	unsigned char count;
-	GSM_Error error = GE_INTERNALERROR;
 
 	/* 'Copy in' the global structures */
 	glink = newlink;
-	gphone = newphone;
+	statemachine = state;
 
 	/* Fill in the link functions */
 	glink->Loop = &FBUS_Loop;
@@ -547,5 +553,5 @@ GSM_Error FBUS_Initialise(GSM_Link * newlink, GSM_Phone * newphone)
 		flink.messages[count].MessageLength = 0;
 	}
 
-	return error;
+	return GE_NONE;
 }

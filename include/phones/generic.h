@@ -17,7 +17,11 @@
   The various routines are called PGEN_...
 
   $Log$
-  Revision 1.2  2001-03-11 11:12:21  machek
+  Revision 1.3  2001-03-21 23:36:08  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.2  2001/03/11 11:12:21  machek
   Added header for PGEN_IncomingDefault.
 
   Revision 1.1  2001/02/21 19:57:12  chris
@@ -45,9 +49,6 @@
 
 /* Generic Functions */
 
-GSM_Error PGEN_CommandResponse(GSM_Link *link, void *message, int *messagesize, int messagetype, int waitfor, int messagealloc);
-
-GSM_Error PGEN_CommandResponseReceive(GSM_Link *link, int MessageType, void *Message, int MessageLength);
 GSM_Error PGEN_DebugMessage(int type, unsigned char *mes, int len);
 GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length);
 

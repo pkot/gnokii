@@ -11,7 +11,11 @@
   $Id$
   
   $Log$
-  Revision 1.15  2001-03-06 10:38:52  machek
+  Revision 1.16  2001-03-21 23:36:04  chris
+  Added the statemachine
+  This will break gnokii --identify and --monitor except for 6210/7110
+
+  Revision 1.15  2001/03/06 10:38:52  machek
   Dancall models added to the global list.
 
   Revision 1.14  2001/02/06 13:55:23  pkot
@@ -101,3 +105,5 @@ inline char *GetModel (const char *num)
 {
 	return (GetPhoneModel(num)->model);
 }
+
+
