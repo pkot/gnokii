@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1_pre8
+VERSION = 0.3.1_pre9
 
 #
 # Compiler to use.
@@ -96,7 +96,7 @@ LDFLAGS = -lpthread ${GTKLDFLAGS}
 
 COMMON_OBJS = gsm-api.o \
               fbus-3810.o \
-			  mbus-2110.o \
+              mbus-2110.o \
               fbus-6110.o fbus-6110-auth.o fbus-6110-ringtones.o \
               gsm-networks.o cfgreader.o
 

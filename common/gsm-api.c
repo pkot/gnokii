@@ -70,7 +70,6 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
     GSM = &FB38_Functions;
     GSM_Info = &FB38_Information;
     GSM_LinkOK = &FB38_LinkOK;
-    //FB38_RLP_RXCallback = rlp_callback;
   }
   else
 

@@ -115,9 +115,9 @@ extern GSM_Information FB61_Information;
 /* Prototypes for the functions designed to be used externally. */
 
 GSM_Error FB61_Initialise(char *port_device, char *initlength,
-                            GSM_ConnectionType connection,
-                            bool enable_monitoring,
-                            void (*rlp_callback)(RLP_F96Frame *frame));
+                          GSM_ConnectionType connection,
+                          bool enable_monitoring,
+                          void (*rlp_callback)(RLP_F96Frame *frame));
 
 bool      FB61_OpenSerial(void);
 bool      FB61_Open_Ir_Serial(void);
@@ -125,6 +125,8 @@ void      FB61_Terminate(void);
 void      FB61_ThreadLoop(void);
 void      FB61_SigHandler(int status);
 void      FB61_RX_StateMachine(char rx_byte);
+enum FB61_RX_States FB61_RX_DispatchMessage(void);
+enum FB61_RX_States FB61_RX_HandleRLPMessage(void);
 void      FB61_RX_DisplayMessage(void);
 
 int       FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer);

@@ -60,6 +60,7 @@ void getcalendarnote(char *argv[]);
 void writecalendarnote(char *argv[]);
 void deletecalendarnote(char *argv[]);
 void foogle(char *argv[]);
+void pmon(char *argv[]);
 void readconfig(void);
 
 char		*Model;		/* Model from .gnokiirc file. */
@@ -369,16 +370,16 @@ int main(int argc, char *argv[])
   if (argc == 3 && strcmp(argv[1], "--getsmsc") == 0)
     getsmsc(argv);
 
-  /* Run in passive monitoring mode (for development porpoises. */
+  /* Run in passive monitoring mode (for development purposes). */
   if (strcmp(argv[1], "--pmon") == 0) {
-	  pmon(argv);
+    pmon(argv);
   }
 
-    /* Foogle function - insert you own function calls here 
+  /* Foogle function - insert you own function calls here 
      when testing stuff.  This is for the developer/hackers
      convenience only :) */
   if (strcmp(argv[1], "--foogle") == 0) {
-	  foogle(argv);
+    foogle(argv);
   }
 
   /* Either an unknown command or wrong number of args! */
@@ -1513,21 +1514,16 @@ void	readconfig(void)
     }
 }
 
-	/* This is a "convenience" function to allow quick test of new
-	   API stuff which doesn't warrant a "proper" command line
-	   function.  Most recently used by Hugh to test 3810
-	   GetSMSCenter function... */
+/* This is a "convenience" function to allow quick test of new
+   API stuff which doesn't warrant a "proper" command line
+   function. */
 void foogle(char *argv[])
 { 
-  int count=0;
-  GSM_Error error;
-  GSM_ConnectionType connection=GCT_Serial;
-
   /* Initialise the code for the GSM interface. */     
 
   fbusinit(true, RLP_DisplayF96Frame);
 
-  GSM->DialData("62401000");
+  GSM->DialData("4670");
   
   sleep (60);
   GSM->Terminate();
@@ -1539,13 +1535,11 @@ void foogle(char *argv[])
   exit(0);
 }
 
-
-	/* pmon allows fbus code to run in a passive state - it doesn't
-	   worry about whether comms are established with the phone.
-	   A debugging/development tool. */
+/* pmon allows fbus code to run in a passive state - it doesn't
+   worry about whether comms are established with the phone.
+   A debugging/development tool. */
 void pmon(char *argv[])
 { 
-  int count=0;
   GSM_Error error;
   GSM_ConnectionType connection=GCT_Serial;
 

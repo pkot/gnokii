@@ -1112,6 +1112,7 @@ enum FB38_RX_States     FB38_RX_HandleRLPMessage(void)
     return (FB38_RX_Sync);
 
 }
+
     /* FB38_RX_DispatchMessage
        Once we've received a message from the phone, the command/message
        type byte is used to call an appropriate handler routine or

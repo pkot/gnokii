@@ -30,7 +30,7 @@ typedef enum {
 }   RLP_FrameType;
 
     /* Define the various Unnumbered frame types.  Numbering is
-       as we receive it - bit reveresed relative to ETSI 04.22 */ 
+       as we receive it - bit reversed relative to ETSI 04.22 */ 
 typedef enum {
     RLPU_SABM   = 0x07,     /* Set Asynchronous Balanced Mode */
     RLPU_UA     = 0x0c,     /* Unnumbered Acknowledge */

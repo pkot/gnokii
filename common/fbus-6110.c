@@ -227,8 +227,9 @@ unsigned char      Model[FB61_MAX_MODEL_LENGTH];
 
 char               CurrentIncomingCall[20];
 
-    /* Pointer to callback function in user code to be called when
-       RLP frames are received. */
+/* Pointer to callback function in user code to be called when RLP frames
+   are received. */
+
 void               (*RLP_RXCallback)(RLP_F96Frame *frame);
 
 /* Every (well, almost every) frame from the computer starts with this
@@ -239,15 +240,16 @@ void               (*RLP_RXCallback)(RLP_F96Frame *frame);
 /* Initialise variables and state machine. */
 
 GSM_Error FB61_Initialise(char *port_device, char *initlength,
-                            GSM_ConnectionType connection,
-                            bool enable_monitoring,
-                            void (*rlp_callback)(RLP_F96Frame *frame))
+                          GSM_ConnectionType connection,
+                          bool enable_monitoring,
+                          void (*rlp_callback)(RLP_F96Frame *frame))
 {
 
   int rtn;
 
   RequestTerminate = false;
   FB61_LinkOK = false;
+  RLP_RXCallback = rlp_callback;
 
   strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -2468,30 +2470,45 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     break;
 
-    /* Network Info received. */
+    /* Network Info */
 
   case 0x0a:
 
-    if (CurrentNetworkInfo) {
-      sprintf(CurrentNetworkInfo->NetworkCode, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
+    switch (MessageBuffer[3]) {
 
-      sprintf(CurrentNetworkInfo->CellID, "%02x%02x", MessageBuffer[10], MessageBuffer[11]);
+    case 0x71:
 
-      sprintf(CurrentNetworkInfo->LAC, "%02x%02x", MessageBuffer[12], MessageBuffer[13]);
+      if (CurrentNetworkInfo) {
+
+        sprintf(CurrentNetworkInfo->NetworkCode, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
+
+        sprintf(CurrentNetworkInfo->CellID, "%02x%02x", MessageBuffer[10], MessageBuffer[11]);
+
+        sprintf(CurrentNetworkInfo->LAC, "%02x%02x", MessageBuffer[12], MessageBuffer[13]);
 
 #ifdef DEBUG
-      printf(_("Message: Network informations:\n"));
+        printf(_("Message: Network informations:\n"));
 
-      printf(_("   CellID: %s\n"), CurrentNetworkInfo->CellID);
-      printf(_("   LAC: %s\n"), CurrentNetworkInfo->LAC);
-      printf(_("   Network code: %s\n"), CurrentNetworkInfo->NetworkCode);
-      printf(_("   Network name: %s (%s)\n"), GSM_GetNetworkName(CurrentNetworkInfo->NetworkCode), GSM_GetCountryName(CurrentNetworkInfo->NetworkCode));
+        printf(_("   CellID: %s\n"), CurrentNetworkInfo->CellID);
+        printf(_("   LAC: %s\n"), CurrentNetworkInfo->LAC);
+        printf(_("   Network code: %s\n"), CurrentNetworkInfo->NetworkCode);
+        printf(_("   Network name: %s (%s)\n"),
+                     GSM_GetNetworkName(CurrentNetworkInfo->NetworkCode),
+                     GSM_GetCountryName(CurrentNetworkInfo->NetworkCode));
+#endif DEBUG
+      }
+
+      CurrentNetworkInfoError = GE_NONE;
+
+    break;
+
+    default:
+#ifdef DEBUG
+      printf(_("Message: Unknown message of type 0x0a\n"));
 #endif DEBUG
     }
 
-    CurrentNetworkInfoError = GE_NONE;
-
-    break;
+  break;
 
     /* Keyboard lock */
 
@@ -3311,6 +3328,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
     printf(_("Message: RLP frame received.\n"));
  #endif DEBUG
+
+    FB61_RX_HandleRLPMessage();
  
     break;
 
@@ -3328,6 +3347,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
        other messages - please let us know. */
 
   default:
+
+#ifdef DEBUG
+      printf(_("Message: Unknown message.\n"));
+#endif DEBUG
 
     FB61_RX_DisplayMessage();
   }
@@ -3421,9 +3444,9 @@ void FB61_RX_StateMachine(char rx_byte) {
 
       if (checksum[0] == checksum[1]) {
 
-      /* We do not want to send ACK of ACKs. */
+      /* We do not want to send ACK of ACKs and ACK of RLP frames. */
 
-	if (MessageType != FB61_FRTYPE_ACK)
+	if (MessageType != FB61_FRTYPE_ACK && MessageType != 0xf1)
 	  FB61_TX_SendAck(MessageType, MessageBuffer[MessageLength-1] & 0x0f);
 
 	FB61_RX_DispatchMessage();
@@ -3440,6 +3463,30 @@ void FB61_RX_StateMachine(char rx_byte) {
     break;
     
   }
+}
+
+enum FB61_RX_States FB61_RX_HandleRLPMessage(void)
+{
+
+  RLP_F96Frame    frame;
+  int             count;
+    
+  if (RLP_RXCallback == NULL)
+    return (FB61_RX_Sync);
+    
+  frame.Header[0] = MessageBuffer[2];
+  frame.Header[1] = MessageBuffer[3];
+    
+  for (count = 0; count < 25; count ++)
+    frame.Data[count] = MessageBuffer[3 + count];
+    
+  frame.FCS[0] = MessageBuffer[28];
+  frame.FCS[1] = MessageBuffer[29];
+  frame.FCS[2] = MessageBuffer[30];
+    
+  RLP_RXCallback(&frame);
+
+  return (FB61_RX_Sync);
 }
 
 char *FB61_PrintDevice(int Device)
