@@ -12,11 +12,6 @@
 
   CRC24 (aka FCS) implementation in RLP.
 
-  $Log$
-  Revision 1.2  2001-02-21 19:57:02  chris
-  More fiddling with the directory layout
-
-
 */
 
 #include "data/rlp-crc24.h"

@@ -14,17 +14,6 @@
   fax or data mode. Converts data from/to GSM phone to virtual modem
   interface.
 
-  $Log$
-  Revision 1.4  2001-11-17 16:41:35  pkot
-  Cleanup
-
-  Revision 1.3  2001/02/21 19:57:00  chris
-  More fiddling with the directory layout
-
-  Revision 1.2  2001/02/17 22:40:51  chris
-  ATA support
-
-
 */
 
 #define		__data_datapump_c
@@ -68,7 +57,7 @@ bool DP_Initialise(int read_fd, int write_fd)
 	PtyWRFD = write_fd;
 	ufds.fd = PtyRDFD;
 	ufds.events = POLLIN;
-	RLP_Initialise(GSM->SendRLPFrame, DP_CallBack);
+	RLP_Initialise(/* GSM->SendRLPFrame */ NULL, DP_CallBack);
 	RLP_SetUserRequest(Attach_Req, true);
 	pluscount = 0;
 	connected = false;

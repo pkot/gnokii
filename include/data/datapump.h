@@ -11,11 +11,6 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   Header file for data pump code.
-	
-  $Log$
-  Revision 1.1  2001-02-21 19:57:11  chris
-  More fiddling with the directory layout
-
 
 */
 

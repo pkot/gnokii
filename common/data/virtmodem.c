@@ -15,36 +15,6 @@
   (AT-emulator) and "online" mode where the data pump code translates data
   from/to the GSM handset and the modem data/fax stream.
 
-  $Log$
-  Revision 1.4  2001-04-14 23:23:43  pkot
-  Fixed problems with grantpt
-
-  Revision 1.3  2001/03/21 23:36:04  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.2  2001/02/21 19:57:02  chris
-  More fiddling with the directory layout
-
-  Revision 1.1  2001/02/16 14:29:51  chris
-  Restructure of common/.  Fixed a problem in fbus-phonet.c
-  Lots of dprintfs for Marcin
-  Any size xpm can now be loaded (eg for 7110 startup logos)
-  nk7110 code detects 7110/6210 and alters startup logo size to suit
-  Moved Marcin's extended phonebook code into gnokii.c
-
-  Revision 1.5  2001/01/08 15:11:37  pkot
-  Documentation updates.
-  Fixed some bugs and removed FIXMEs.
-  We need to move some stuff from configure.in to aclocal.m4
-
-  Revision 1.4  2001/01/02 09:09:09  pkot
-  Misc fixes and updates.
-
-  Revision 1.3  2000/12/27 10:54:14  pkot
-  Added Unix98 PTYs support (Michael Mráka).
-
-  
 */
 
 #define		__virtmodem_c

@@ -12,22 +12,13 @@
 	
   Header file for AT emulator code.
 
-  $Log$
-  Revision 1.2  2001-07-03 15:27:24  pkot
-  AT commands for SMS handling support (Tamas Bondar)
-  Small at-emulator code cleanup (me)
-
-  Revision 1.1  2001/02/21 19:57:11  chris
-  More fiddling with the directory layout
-
-
 */
 
 #ifndef __data_at_emulator_h
 #define __data_at_emulator_h
 
 	/* Prototypes */
-bool	ATEM_Initialise(int read_fd, int write_fd, char *model, char *port);
+bool	ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *sm);
 void	ATEM_HandleIncomingData(char *buffer, int length);
 void	ATEM_InitRegisters(void);
 void	ATEM_StringOut(char *buffer);
@@ -74,6 +65,8 @@ bool	ATEM_Initialised;
 #define REG_LF        4
 #define REG_BS        5
 #define S35           6
+#define REG_CTRLZ     7
+#define REG_ESCAPE    8
 
 #define REG_RESP     12
 #define BIT_RESP      1

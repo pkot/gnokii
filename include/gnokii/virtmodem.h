@@ -12,11 +12,6 @@
 
   Header file for virtmodem code in virtmodem.c
 
-  $Log$
-  Revision 1.1  2001-02-21 19:57:11  chris
-  More fiddling with the directory layout
-
-
 */
 
 #ifndef __data_virtmodem_h

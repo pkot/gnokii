@@ -47,11 +47,14 @@
 
 	/* Global variables */
 bool ATEM_Initialised = false;	/* Set to true once initialised */
-extern bool    CommandMode;
+extern bool CommandMode;
 extern int ConnectCount;
 
-char ModelName[80]; /* This seems to be needed to avoid seg-faults */
-char PortName[80];
+static GSM_Statemachine *sm;
+
+static GSM_Data data;
+static GSM_SMSMessage sms;
+static 	char imei[64], model[64], revision[64], manufacturer[64];
 
 
 	/* Local variables */
@@ -66,7 +69,7 @@ bool	VerboseResponse; 	/* Switch betweek numeric (4) and text responses (ERROR) 
 char    IncomingCallNo;
 int     MessageFormat;          /* Message Format (text or pdu) */
 
- 	/* Current command parser */
+	/* Current command parser */
 void 	(*Parser)(char *);
 //void 	(*Parser)(char *) = ATEM_ParseAT; /* Current command parser */
 
@@ -75,38 +78,46 @@ int 	SMSNumber;
 
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
-bool	ATEM_Initialise(int read_fd, int write_fd, char *model, char *port)
+bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
 {
 	PtyRDFD = read_fd;
 	PtyWRFD = write_fd;
 
-	strncpy(ModelName,model,80);
-	strncpy(PortName,port,80);
+	GSM_DataClear(&data);
+	memset(&sms, 0, sizeof(GSM_SMSMessage));
 
-		/* Initialise command buffer variables */
+	data.SMSMessage = &sms;
+	data.Manufacturer = manufacturer;
+	data.Model = model;
+	data.Revision = revision;
+	data.Imei = imei;
+
+	sm = vmsm;
+
+	/* Initialise command buffer variables */
 	CurrentCmdBuffer = 0;
 	CurrentCmdBufferIndex = 0;
-	
-		/* Default to verbose reponses */
+
+	/* Default to verbose reponses */
 	VerboseResponse = true;
 
-		/* Initialise registers */
+	/* Initialise registers */
 	ATEM_InitRegisters();
-	
-		/* Initial parser is AT routine */
+
+	/* Initial parser is AT routine */
 	Parser = ATEM_ParseAT;
-	
-		/* Setup defaults for AT*C interpreter. */
+
+	/* Setup defaults for AT*C interpreter. */
 	SMSNumber = 1;
 	SMSType = GMT_ME;
 
-		/* Default message format is PDU */
+	/* Default message format is PDU */
 	MessageFormat = PDU_MODE;
 
 	/* Set the call passup so that we get notified of incoming calls */
-        GSM->DialData(NULL,-1,&ATEM_CallPassup);
+	/*GSM->DialData(NULL,-1,&ATEM_CallPassup);*/
 
-		/* We're ready to roll... */
+	/* We're ready to roll... */
 	ATEM_Initialised = true;
 	return (true);
 }
@@ -123,7 +134,8 @@ void	ATEM_InitRegisters(void)
 	ModemRegisters[REG_BS] = 8;
 	ModemRegisters[S35]=7;
 	ModemRegisters[REG_ECHO] = BIT_ECHO;
-
+	ModemRegisters[REG_CTRLZ] = 26;
+	ModemRegisters[REG_ESCAPE] = 27;
 }
 
 
@@ -147,19 +159,21 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 	unsigned char out_buf[3];	
 
 	for (count = 0; count < length ; count++) {
-			/* Echo character if appropriate. */
-		if (ModemRegisters[REG_ECHO] & BIT_ECHO) {
-			out_buf[0] = buffer[count];
-			out_buf[1] = 0;
-			ATEM_StringOut(out_buf);
-		}
 
-			/* If it's a command terminator character, parse what
-			   we have so far then go to next buffer. */
+		/* If it's a command terminator character, parse what
+		   we have so far then go to next buffer. */
 		if (buffer[count] == ModemRegisters[REG_CR] ||
-		    buffer[count] == ModemRegisters[REG_LF]) {
+		    buffer[count] == ModemRegisters[REG_LF] ||
+		    buffer[count] == ModemRegisters[REG_CTRLZ] ||
+		    buffer[count] == ModemRegisters[REG_ESCAPE]) {
+
+			/* Save CTRL-Z and ESCAPE for the parser */
+			if (buffer[count] == ModemRegisters[REG_CTRLZ] ||
+			    buffer[count] == ModemRegisters[REG_ESCAPE])
+				CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex++] = buffer[count];
 
 			CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = 0x00;
+
 			Parser(CmdBuffer[CurrentCmdBuffer]);
 
 			CurrentCmdBuffer++;
@@ -167,9 +181,17 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 				CurrentCmdBuffer = 0;
 			}
 			CurrentCmdBufferIndex = 0;
+
 		} else {
-			CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = buffer[count];
-			CurrentCmdBufferIndex++;
+			/* Echo character if appropriate. */
+			if (ModemRegisters[REG_ECHO] & BIT_ECHO) {
+				out_buf[0] = buffer[count];
+				out_buf[1] = 0;
+				ATEM_StringOut(out_buf);
+			}
+
+			/* Collect it to command buffer */
+			CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex++] = buffer[count];
 			if (CurrentCmdBufferIndex >= CMD_BUFFER_LENGTH) {
 				CurrentCmdBufferIndex = CMD_BUFFER_LENGTH;
 			}
@@ -265,7 +287,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			}
 			break;
 			
-				/* + is the precursor to another set of commands +CSQ, +FCLASS etc. */
+		/* + is the precursor to another set of commands */
 		case '+':
 			buf++;
 			switch (toupper(*buf)) {
@@ -300,16 +322,6 @@ void	ATEM_ParseAT(char *cmd_buffer)
 	ATEM_ModemResult(MR_OK);
 }
 
-static GSM_Error ATEM_ReadSMS(int number, GSM_MemoryType type, GSM_SMSMessage *message)
-{
-	GSM_Error error;
-
-	message->MemoryType = type;
-	message->Number = number;
-	error = GSM->GetSMSMessage(message);
-
-	return error;
-}
 
 static void ATEM_PrintSMS(char *line, GSM_SMSMessage *message, int mode)
 {
@@ -333,29 +345,19 @@ static void ATEM_PrintSMS(char *line, GSM_SMSMessage *message, int mode)
 	}
 }
 
-static void ATEM_EraseSMS(int number, GSM_MemoryType type)
-{
-	GSM_SMSMessage message;
-	message.MemoryType = type;
-	message.Number = number;
-	if (GSM->DeleteSMSMessage(&message) == GE_NONE) {
-		ATEM_ModemResult(MR_OK);
-	} else {
-		ATEM_ModemResult(MR_ERROR);
-	}
-}
-
 
 static void ATEM_HandleSMS()
 {
-	GSM_SMSMessage	message;
 	GSM_Error	error;
 	char		buffer[MAX_LINE_LENGTH];
 
-	error = ATEM_ReadSMS(SMSNumber, SMSType, &message);
+	data.SMSMessage->MemoryType = SMSType;
+	data.SMSMessage->Number = SMSNumber;
+	error = GetSMS(&data, sm);
+
 	switch (error) {
 	case GE_NONE:
-		ATEM_PrintSMS(buffer, &message, INTERACT_MODE);
+		ATEM_PrintSMS(buffer, data.SMSMessage, INTERACT_MODE);
 		ATEM_StringOut(buffer);
 		break;
 	default:
@@ -404,7 +406,13 @@ void	ATEM_ParseDIR(char *buff)
 			ATEM_HandleSMS();
 			return;
 		case 'D':
-			ATEM_EraseSMS(SMSNumber, SMSType);
+			data.SMSMessage->MemoryType = SMSType;
+			data.SMSMessage->Number = SMSNumber;
+			if (SM_Functions(GOP_DeleteSMS, &data, sm) == GE_NONE) {
+				ATEM_ModemResult(MR_OK);
+			} else {
+				ATEM_ModemResult(MR_ERROR);
+			}
 			return;
 		case 'Q':
 			Parser= ATEM_ParseSMS;
@@ -413,23 +421,73 @@ void	ATEM_ParseDIR(char *buff)
 	}
 	ATEM_ModemResult(MR_ERROR);
 }
- 
+
+	/* Parser for entering message content (+CMGS) */
+void	ATEM_ParseSMSText(char *buff)
+{
+	static int index = 0;
+	int i, length;
+	char buffer[MAX_LINE_LENGTH];
+	GSM_Error error;
+
+	length = strlen(buff);
+
+	for (i=0; i < length; i++) {
+
+		if (buff[i] == ModemRegisters[REG_CTRLZ]) {
+			/* Exit SMS text mode with sending */
+			sms.MessageText[index] = 0;
+			index = 0;
+			Parser = ATEM_ParseAT;
+#ifdef DEBUG
+			dprintf("Sending SMS to %s (text: %s)\n", data.SMSMessage->Destination, data.SMSMessage->MessageText);
+#endif
+			/* FIXME: set more SMS fields before sending */
+			error = SendSMS(&data, sm);
+
+			if (error == GE_NONE || error == GE_SMSSENDOK) {
+				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMSMessage->MessageNumber);
+				ATEM_StringOut(buffer);
+				ATEM_ModemResult(MR_OK);
+			} else {
+				ATEM_ModemResult(MR_ERROR);
+			}
+			return;
+		} else if (buff[i] == ModemRegisters[REG_ESCAPE]) {
+			/* Exit SMS text mode without sending */
+			sms.MessageText[index] = 0;
+			index = 0;
+			Parser = ATEM_ParseAT;
+			ATEM_ModemResult(MR_OK);
+			return;
+		} else {
+			/* Appent next char to message text */
+			sms.MessageText[index++] = buff[i];
+		}
+	}
+
+	/* reached the end of line so insert \n and wait for more */
+	sms.MessageText[index++] = '\n';
+	ATEM_StringOut("\n\r> ");
+}
+
 	/* Handle AT+C commands, this is a quick hack together at this
 	   stage. */
 bool	ATEM_CommandPlusC(char **buf)
 {
-	float		rflevel;
+	float		rflevel = -1;
 	GSM_RFUnits	rfunits = GRF_CSQ;
 	char		buffer[MAX_LINE_LENGTH], buffer2[MAX_LINE_LENGTH];
 	int		status, index;
 	GSM_Error	error;
-	GSM_SMSMessage	message;
 
 	if (strncasecmp(*buf, "SQ", 2) == 0) {
 		buf[0] += 2;
 
-	    	if (GSM->GetRFLevel(&rfunits, &rflevel) == GE_NONE) {
-			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CSQ: %0.0f, 99", rflevel);
+		data.RFUnits = &rfunits;
+		data.RFLevel = &rflevel;
+		if (SM_Functions(GOP_GetRFLevel, &data, sm) == GE_NONE) {
+			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CSQ: %0.0f, 99", *(data.RFLevel));
 			ATEM_StringOut(buffer);
 			return (false);
 		} else {
@@ -447,8 +505,9 @@ bool	ATEM_CommandPlusC(char **buf)
 		/* AT+CGSN is IMEI */
 	if (strncasecmp(*buf, "GSN", 3) == 0) {
 		buf[0] += 3;
-		if (GSM->GetIMEI(buffer2) == GE_NONE) {
-			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", buffer2);
+		strcpy(data.Imei, "+CME ERROR: 0");
+		if (SM_Functions(GOP_GetImei, &data, sm) == GE_NONE) {
+			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Imei);
 			ATEM_StringOut(buffer);
 			return (false);
 		} else {
@@ -459,8 +518,9 @@ bool	ATEM_CommandPlusC(char **buf)
 		/* AT+CGMR is Revision (hardware) */
 	if (strncasecmp(*buf, "GMR", 3) == 0) {
 		buf[0] += 3;
-		if (GSM->GetRevision(buffer2) == GE_NONE) {
-			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", buffer2);
+		strcpy(data.Revision, "+CME ERROR: 0");
+		if (SM_Functions(GOP_GetRevision, &data, sm) == GE_NONE) {
+			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Revision);
 			ATEM_StringOut(buffer);
 			return (false);
 		} else {
@@ -471,13 +531,42 @@ bool	ATEM_CommandPlusC(char **buf)
 		/* AT+CGMM is Model code  */
 	if (strncasecmp(*buf, "GMM", 3) == 0) {
 		buf[0] += 3;
-		if (GSM->GetModel(buffer2) == GE_NONE) {
-			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", buffer2);
+		strcpy(data.Model, "+CME ERROR: 0");
+		if (SM_Functions(GOP_GetModel, &data, sm) == GE_NONE) {
+			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Model);
 			ATEM_StringOut(buffer);
 			return (false);
 		} else {
 			return (true);
 		}
+	}
+
+		/* AT+CMGD is deleting a message */
+	if (strncasecmp(*buf, "MGD", 3) == 0) {
+		buf[0] += 3;
+		switch (**buf) {
+		case '=':
+			buf[0]++;
+			sscanf(*buf, "%d", &index);
+			buf[0] += strlen(*buf);
+
+			data.SMSMessage->MemoryType = SMSType;
+			data.SMSMessage->Number = index;
+			error = SM_Functions(GOP_DeleteSMS, &data, sm);
+
+			switch (error) {
+			case GE_NONE:
+				break;
+			default:
+				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMS ERROR: %d\n\r", error);
+				ATEM_StringOut(buffer);
+				return (true);
+			}
+			break;
+		default:
+			return (true);
+		}
+		return (false);
 	}
 
 		/* AT+CMGF is mode selection for message format  */
@@ -519,10 +608,13 @@ bool	ATEM_CommandPlusC(char **buf)
 			sscanf(*buf, "%d", &index);
 			buf[0] += strlen(*buf);
 
-			error = ATEM_ReadSMS(index, SMSType, &message);
+			data.SMSMessage->MemoryType = SMSType;
+			data.SMSMessage->Number = index;
+			error = GetSMS(&data, sm);
+
 			switch (error) {
 			case GE_NONE:
-				ATEM_PrintSMS(buffer2, &message, MessageFormat);
+				ATEM_PrintSMS(buffer2, data.SMSMessage, MessageFormat);
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGR: %s", buffer2);
 				ATEM_StringOut(buffer);
 				break;
@@ -532,6 +624,24 @@ bool	ATEM_CommandPlusC(char **buf)
 				return (true);
 			}
 			break;
+		default:
+			return (true);
+		}
+		return (false);
+	}
+
+		/* AT+CMGS is sending a message */
+	if (strncasecmp(*buf, "MGS", 3) == 0) {
+		buf[0] += 3;
+		switch (**buf) {
+		case '=':
+			buf[0]++;
+			if (sscanf(*buf, "\"%[+0-9a-zA-Z ]\"", sms.Destination)) {
+				Parser = ATEM_ParseSMSText;
+				buf[0] += strlen(*buf);
+				ATEM_StringOut("\n\r> ");
+			}
+			return (true);
 		default:
 			return (true);
 		}
@@ -569,12 +679,16 @@ bool	ATEM_CommandPlusC(char **buf)
 
 			/* check all message storages */
 			for (index = 1; index <= 20; index++) {
-				error = ATEM_ReadSMS(index, SMSType, &message);
+
+				data.SMSMessage->MemoryType = SMSType;
+				data.SMSMessage->Number = index;
+				error = GetSMS(&data, sm);
+
 				switch (error) {
 				case GE_NONE:
 					/* print messsage if it has the required status */
-					if (message.Status == status || status == 4 /* ALL */) {
-						ATEM_PrintSMS(buffer2, &message, MessageFormat);
+					if (data.SMSMessage->Status == status || status == 4 /* ALL */) {
+						ATEM_PrintSMS(buffer2, data.SMSMessage, MessageFormat);
 						gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGL: %d,%s", index, buffer2);
 						ATEM_StringOut(buffer);
 					}
@@ -625,7 +739,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	if (strncasecmp(*buf, "MM", 3) == 0) {
 		buf[0] += 2;
 
-		gsprintf(buffer, MAX_LINE_LENGTH, _("\n\rgnokii configured for %s on %s"), ModelName, PortName);
+		gsprintf(buffer, MAX_LINE_LENGTH, _("\n\rgnokii configured on %s for models %s"), sm->Link.PortDevice, sm->Phone.Info.Models);
 		ATEM_StringOut(buffer);
 		return (false);
 	}
