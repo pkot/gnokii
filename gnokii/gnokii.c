@@ -2462,8 +2462,7 @@ static void displaycall(int call_id)
 	struct timeval now, delta;
 	char *s;
 
-	if ((call = gn_call_get_active(call_id)) == NULL)
-	{
+	if ((call = gn_call_get_active(call_id)) == NULL) {
 		fprintf(stdout, _("CALL%d: IDLE\n"), call_id);
 		return;
 	}
