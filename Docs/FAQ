@@ -104,3 +104,11 @@ A. Generally yes, but in fact it depends on hardware -- your serial port
 must support at least 115200 baud rate. Sun Enterprise 250 machine is known
 to work with gnokii.
 
+-------------------------------------------------------------------------------
+Q. I get "Sorry, phone has not yet been converted to new style.
+   Phone.Functions == NULL!" message. What's wrong?
+
+A. Don't worry. Nothing's wrong with your phone. Gnokii internal structure is
+   changing to be more flexible. It is quite complex process so it may take
+   some time to get everything to work. You may help us to do it -- you'll get
+   more functionality sooner.
