@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.4  2001-03-13 01:21:38  pkot
+  Revision 1.5  2001-03-19 23:43:46  pkot
+  Solaris/*BSD '#if defined' cleanup
+
+  Revision 1.4  2001/03/13 01:21:38  pkot
   *BSD updates (Bert Driehuis)
 
   Revision 1.3  2001/03/06 22:27:46  pkot
@@ -25,6 +28,8 @@
 
 /* Do not compile this file under Win32 systems. */
 
+#include "misc.h"
+
 #ifndef WIN32
 
 #include <stdio.h>
@@ -32,7 +37,7 @@
 #include <sys/ioctl.h>
 #include <string.h>
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 #  include <sys/file.h>
 #endif
 

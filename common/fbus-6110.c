@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.132  2001-03-13 01:23:17  pkot
+  Revision 1.133  2001-03-19 23:43:46  pkot
+  Solaris/*BSD '#if defined' cleanup
+
+  Revision 1.132  2001/03/13 01:23:17  pkot
   Windows updates (Manfred Jonsson)
 
   Revision 1.131  2001/03/13 01:21:38  pkot
@@ -137,7 +140,7 @@ extern HANDLE hPhone;
 
 bool FB61_LinkOK;
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 /* fd opened in device.c */
 extern int device_portfd;
 #endif
@@ -297,7 +300,7 @@ u8        CallSequenceNumber; /* Used to disconnect the call */
 #ifndef WIN32
 
 pthread_t Thread;
-# if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+# if __unices__
 pthread_t selThread;
 # endif
 
@@ -436,7 +439,7 @@ GSM_Error FB61_Initialise(char *port_device, char *initlength,
 	return (GE_NONE);
 }
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 /* thread for handling incoming data */
 void FB61_SelectLoop()
 {
@@ -819,7 +822,7 @@ bool FB61_OpenIR(void)
 	bool ret = false;
 	u8 i = 0;
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 	int rtn;
 #else
 	struct sigaction sig_io;  
@@ -840,7 +843,7 @@ bool FB61_OpenIR(void)
 		return false;
 	}
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 	/* create a thread to handle incoming data from mobile phone */
 	rtn = pthread_create(&selThread, NULL, (void*)FB61_SelectLoop, (void*)NULL);
 	if (rtn != 0) return false;
@@ -2173,7 +2176,7 @@ bool FB61_OpenSerial(void)
 {
 	int result;
   
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 	int rtn;
 #else
 	struct sigaction sig_io;
@@ -2194,7 +2197,7 @@ bool FB61_OpenSerial(void)
 		return false;
 	}
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 	/* create a thread to handle incoming data from mobile phone */
 	rtn = pthread_create(&selThread, NULL, (void*)FB61_SelectLoop, (void*)NULL);
 	if (rtn != 0) return false;

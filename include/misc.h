@@ -41,9 +41,10 @@
 #define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
 #endif
 
+/* Get rid of long defines. Use #if __unices__ */
+#define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 
 /* This one is for NLS. */
-
 #ifdef USE_NLS
   #include <libintl.h>
   #define _(x) gettext(x)

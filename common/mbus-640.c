@@ -19,6 +19,8 @@
 
 #define		__mbus_640_c	/* "Turn on" prototypes in mbus-640.h */
 
+#include	"misc.h"
+
 #include	<termios.h>
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -30,7 +32,7 @@
 #include	<sys/time.h>
 #include	<sys/ioctl.h>
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 #  include <sys/file.h>
 #endif
 
@@ -38,7 +40,6 @@
 #include	<pthread.h>
 #include	<errno.h>
 
-#include	"misc.h"
 #include	"gsm-common.h"
 #include	"mbus-640.h"
 #include	"phones/nokia.h"

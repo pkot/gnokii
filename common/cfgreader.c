@@ -15,7 +15,10 @@
   Modified from code by Tim Potter.
 
   $Log$
-  Revision 1.13  2001-03-13 01:21:38  pkot
+  Revision 1.14  2001-03-19 23:43:45  pkot
+  Solaris/*BSD '#if defined' cleanup
+
+  Revision 1.13  2001/03/13 01:21:38  pkot
   *BSD updates (Bert Driehuis)
 
   Revision 1.12  2001/01/08 15:11:36  pkot
@@ -32,17 +35,18 @@
 
 */
 
+#include "misc.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 #  include <strings.h>
 #endif
 #include <ctype.h>
 #include <errno.h>
 
 #include "cfgreader.h"
-#include "misc.h"
 
 /* Read configuration information from a ".INI" style file */
 struct CFG_Header *CFG_ReadFile(char *filename)

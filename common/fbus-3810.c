@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.86  2001-03-13 01:23:17  pkot
+  Revision 1.87  2001-03-19 23:43:45  pkot
+  Solaris/*BSD '#if defined' cleanup
+
+  Revision 1.86  2001/03/13 01:23:17  pkot
   Windows updates (Manfred Jonsson)
 
   Revision 1.85  2001/03/13 01:21:38  pkot
@@ -115,7 +118,7 @@
        functions supported by this model of phone.  */
 bool	FB38_LinkOK;
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 	/* fd opened in device.c */
 	extern int device_portfd;
 #endif
@@ -225,7 +228,7 @@ u8                      RequestSequenceNumber;
 #ifndef WIN32
 pthread_t               Thread;
 #endif /* WIN32 */
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 pthread_t		selThread;
 #endif
 bool                    RequestTerminate;
@@ -1274,7 +1277,7 @@ void    FB38_ThreadLoop(void)
 }
 
 /* FB38_SelectLoop copied from fbus-6110.c, lets not reinvent the wheel */
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 /* thread for handling incoming data */
 void FB38_SelectLoop() {
 	int err;
@@ -1305,7 +1308,7 @@ bool	FB38_OpenSerial(void)
 {
 	int result;
   
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 	int rtn;
 #else
 	struct sigaction sig_io;
@@ -1327,7 +1330,7 @@ bool	FB38_OpenSerial(void)
 		return false;
 	}
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 	/* create a thread to handle incoming data from mobile phone */
 	rtn = pthread_create(&selThread, NULL, (void*)FB38_SelectLoop, (void*)NULL);
 	if (rtn != 0)

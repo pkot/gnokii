@@ -32,6 +32,8 @@
 
 #include <glib.h>
 
+#include "misc.h"
+
 #include "gsm-common.h"
 #include "gsm-api.h"
 #include "fbus-6110.h"
@@ -250,7 +252,7 @@ static void Run (void)
   sigaction (SIGTERM, &act, NULL);
   sigaction (SIGINT, &act, NULL);
 
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
   act.sa_handler = SIG_IGN;
   sigemptyset (&(act.sa_mask));
   sigaction (SIGALRM, &act, NULL);

@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.130  2001-03-13 01:23:18  pkot
+  Revision 1.131  2001-03-19 23:43:46  pkot
+  Solaris/*BSD '#if defined' cleanup
+
+  Revision 1.130  2001/03/13 01:23:18  pkot
   Windows updates (Manfred Jonsson)
 
   Revision 1.129  2001/03/13 01:21:39  pkot
@@ -107,12 +110,13 @@
 */
 
 #include "config.h"
+#include "misc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
-#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
 #  include <strings.h>	/* for memset */
 #endif
 #include <time.h>
@@ -140,7 +144,6 @@
 #include <locale.h>
 #endif
 
-#include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
 #include "gsm-networks.h"
