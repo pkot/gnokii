@@ -671,7 +671,6 @@ static void save_ringtone_as(GtkWidget *w)
 
 static void save_ringtone(GtkWidget *w)
 {
-	gchar *file_name;
 	gn_error err;
 
 	get_ringtone_info(&gi.ringtone);

@@ -380,7 +380,7 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "rfcomm_channel")))
 		cfg->rfcomm_cn = def->rfcomm_cn;
-	else if (sscanf(val, " %d %c", &cfg->rfcomm_cn, &ch) != 1) {
+	else if (sscanf(val, " %hhu %c", &cfg->rfcomm_cn, &ch) != 1) {
 		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "rfcomm_channel", val);
 		return false;
 	}

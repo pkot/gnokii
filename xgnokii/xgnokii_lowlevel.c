@@ -296,15 +296,6 @@ void GUI_InitPhoneMonitor(void)
 	pthread_cond_init(&ringtoneCond, NULL);
 }
 
-static gint compare_number(const gn_sms * a, const gn_sms * b)
-{
-	dprintf("a: %i b:%i\n", a->number, b->number);
-	if (a->number == b->number)
-		return 0;
-	else
-		return 1;
-}
-
 static gint compare_folder_and_number(const gn_sms *a, const gn_sms *b)
 {
 	dprintf("memory type a: %i memory type b: %i\n", a->memory_type, b->memory_type);

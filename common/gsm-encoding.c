@@ -724,7 +724,7 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 int base64_decode(char *dest, int destlen, const char *source, int inlen)
 {
 	int dtable[256];
-	int i, c, retval;
+	int i, c;
 	int dpos = 0;
 	int spos = 0;
 

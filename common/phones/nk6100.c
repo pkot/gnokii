@@ -2894,7 +2894,6 @@ static gn_error get_security_code(gn_data *data, struct gn_statemachine *state)
 static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	char *aux, *aux2;
-	int i;
 
 	switch (message[2]) {
 	/* IMEI */
