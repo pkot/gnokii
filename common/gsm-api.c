@@ -54,19 +54,20 @@
 
 
 #if defined(WIN32) && defined(_USRDLL)
-/*	GnokiiDll.cpp : Defines the entry point for the DLL application.
+/* 
+ * Define the entry point for the DLL application.
  *	
- *	We don't do anything special here (yet) but the code is needed
- *	in order to create a DLL.
- *
+ * We don't do anything special here (yet) but the code is needed
+ * in order to create a DLL.
  */
 BOOL APIENTRY DllMain(HANDLE hModule, 
 		      DWORD  ul_reason_for_call, 
 		      LPVOID lpReserved)
 {
-	/*	For now this is enough to satisfy the compiler
-	 *	and linker. Currently no extra code is needed
-	 *	for initializing or deinitializing of the DLL.
+	/* 
+	 * For now this is enough to satisfy the compiler and linker.
+	 * Currently no extra code is needed for initializing or
+	 * deinitializing of the DLL.
 	 */
 	switch (ul_reason_for_call) {
 	case DLL_PROCESS_ATTACH:
@@ -145,7 +146,6 @@ API gn_error gn_gsm_initialise(struct gn_statemachine *sm)
 	REGISTER_DRIVER(nokia_3110, NULL);
 #ifndef WIN32
 	REGISTER_DRIVER(nokia_2110, NULL);
-	REGISTER_DRIVER(dancall_2711, NULL);
 #endif
 #endif
 	REGISTER_DRIVER(fake, NULL);
