@@ -4,6 +4,8 @@
     o added 5210 information                            (Pawel Kot)
  * AT series updates
     o try to handle correctly sms empty location        (Pawel Kot)
+    o use actual encoding when reading network information
+                                                       (Igor Popik)
 
 0.5.10
 ======

@@ -1276,6 +1276,7 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
 
 static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
 	char *pos;
 	char **strings;
@@ -1330,7 +1331,10 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		gnokii_strfreev(strings);
 
 	} else if (!strncmp(buf.line1, "AT+COPS?", 8)) {
-		int format;
+		char tmp[128];
+		int format, l;
+
+		memset(tmp, 0, sizeof(tmp));
 		strings = gnokii_strsplit(buf.line2, ",", 3);
 		format = atoi(strings[1]);
 		switch (format) {
@@ -1338,7 +1342,22 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 			pos = strings[2];
 			pos++;
 			pos = strtok(pos, "\"");
-			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), gn_network_code_get(pos));
+			l = strlen(pos);
+			switch (drvinst->charset) {
+				case AT_CHAR_GSM:
+				    char_ascii_decode(tmp, pos, l);
+				    break;
+				case AT_CHAR_HEXGSM:
+				    char_hex_decode(tmp, pos, l);
+				    break;
+				case AT_CHAR_UCS2:
+				    char_ucs2_decode(tmp, pos, l);
+				    break;
+				default:
+				    memcpy(tmp, pos, l);
+				    break;
+			}
+			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), gn_network_code_get(tmp));
 			break;
 		case 2: /* network operator code given */
 			if (strlen(strings[2]) >= 6) { 
