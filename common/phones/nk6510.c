@@ -263,7 +263,6 @@ static GSM_Error P6510_Initialise(GSM_Statemachine *state)
 			break;
 		default:
 			return GE_NOTSUPPORTED;
-			break;
 		}
 
 		if (err != GE_NONE) {

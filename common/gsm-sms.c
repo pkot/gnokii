@@ -1137,7 +1137,6 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			case SMS_DefaultAlphabet:
 #define UDH_Length 0
 				size = Pack7BitCharacters((7 - (UDH_Length % 7)) % 7, sms->UserData[i].u.Text, rawsms->UserData + offset);
-				// sms->Length = 8 * 0 + (7 - (0 % 7)) % 7 + length + offset;
 				rawsms->Length = strlen(sms->UserData[i].u.Text);
 				rawsms->UserDataLength = size + offset;
 				break;
@@ -1300,7 +1299,7 @@ API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
 	count = (rawsms->UserDataLength + MAX_SMS_PART - 1) / MAX_SMS_PART;
 	dprintf("Will need %d sms-es\n", count);
 	for (i = 0; i < count; i++) {
-		printf("Sending sms #%d\n", i);
+		dprintf("Sending sms #%d\n", i);
 		sms.UserData[0].Type = SMS_MultiData;
 		sms.UserData[0].Length = MAX_SMS_PART;
 		if (i + 1 == count)
