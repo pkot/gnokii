@@ -35,6 +35,7 @@
 #include <libpq-fe.h>
 #include "smsd.h"
 #include "gnokii.h"
+#include "compat.h"
 
 static PGconn *connIn = NULL;
 static PGconn *connOut = NULL;

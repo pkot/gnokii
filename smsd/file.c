@@ -37,6 +37,7 @@
 #include <glib.h>
 #include "smsd.h"
 #include "gnokii.h"
+#include "compat.h"
 
 static gchar *action;
 static gchar *spool;

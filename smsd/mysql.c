@@ -35,6 +35,7 @@
 #include <mysql.h>
 #include "smsd.h"
 #include "gnokii.h"
+#include "compat.h"
 
 static MYSQL mysqlIn;
 static MYSQL mysqlOut;
