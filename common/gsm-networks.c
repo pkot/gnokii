@@ -164,6 +164,7 @@ GSM_Network GSM_Networks[] = {
 	{ "219 10", "VIP" },
 	{ "220 01", "MOBTEL" },
 	{ "220 02", "ProMonte GSM" },
+	{ "220 03", "Telekom Srbije" },
 	{ "222 01", "Telecom Italia Mobile" },
 	{ "222 10", "OMNITEL" },
 	{ "222 88", "Wind Telecomunicazioni SpA" },
