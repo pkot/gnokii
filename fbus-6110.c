@@ -2243,7 +2243,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     default:
 
+#ifdef DEBUG
       printf(_("Message: Unknown message of type 0x11\n"));
+#endif /* DEBUG */
 
     }
 

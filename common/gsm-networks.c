@@ -195,7 +195,7 @@ GSM_Network GSM_Networks[] =
   { "242 01", "Telenor Mobil" },
   { "242 02", "NetCom GSM" },
   { "244 03", "Telia City (Finland)" },
-  { "244 05", "Alands Mobiltelefon AB" },
+  { "244 05", "Radiolinja" },
   { "244 09", "Finnet" },
   { "244 91", "Sonera" },
   { "246 01", "OMNITEL" },
