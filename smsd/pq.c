@@ -104,9 +104,9 @@ gint DB_InsertSMS (const GSM_API_SMS * const data)
   g_string_sprintf (buf, "INSERT INTO inbox (\"number\", \"smsdate\", \"insertdate\",\
                     \"text\", \"processed\") VALUES ('%s', \
                     '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', 'f')",
-                    data->Remote.Number, data->Time.Year, data->Time.Month,
-                    data->Time.Day, data->Time.Hour, data->Time.Minute,
-                    data->Time.Second, text);
+                    data->Remote.Number, data->SMSCTime.Year, data->SMSCTime.Month,
+                    data->SMSCTime.Day, data->SMSCTime.Hour, data->SMSCTime.Minute,
+                    data->SMSCTime.Second, text);
   g_free (text);
   
   res = PQexec(connIn, buf->str);
@@ -156,7 +156,9 @@ void DB_Look (void)
   {
     GSM_API_SMS sms;
     
+//    memset (&sms, 0, sizeof (GSM_API_SMS));
     DefaultSubmitSMS (&sms);
+    memset (&sms.Remote.Number, 0, sizeof (sms.Remote.Number));
     sms.DeliveryReport = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
     strncpy (sms.Remote.Number, PQgetvalue (res1, i, 1), MAX_BCD_STRING_LENGTH + 1);
@@ -168,6 +170,9 @@ void DB_Look (void)
     
     strncpy (sms.UserData[0].u.Text, PQgetvalue (res1, i, 2), GSM_MAX_SMS_LENGTH + 1);
     sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
+    sms.UserData[0].Length = strlen (sms.UserData[0].u.Text);
+    sms.UserData[0].Type = SMS_PlainText;
+    sms.UserData[1].Type = SMS_NoData;
 
 #ifdef XDEBUG
     g_print ("%s, %s\n", sms.Remote.Number, sms.UserData[0].u.Text);

@@ -246,6 +246,7 @@ static void RefreshSMS (const gint number)
   {
 //    GSM_DataClear (&data);
     msg = g_malloc (sizeof (GSM_API_SMS));
+    memset (msg, 0, sizeof (GSM_API_SMS));
     msg->MemoryType = GMT_SM;
     msg->Number = ++i;
     data.SMS = msg;
