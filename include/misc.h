@@ -32,7 +32,6 @@
 #define __misc_h
 
 #include <stdio.h>
-#include <stdarg.h>
 #include <sys/types.h>
 
 #include "config.h"
@@ -92,26 +91,10 @@ extern void (*GSM_ELogHandler)(const char *fmt, va_list ap);
 extern void GSM_WriteErrorLog(const char *fmt, ...);
 
 /* Use gsprintf instead of sprintf and sprintf */
-#ifdef HAVE_SNPRINTF
-#  define gsprintf	       snprintf
-#else
-#  define gsprintf(a, b, c...) sprintf(a, c)
-#endif
-#ifdef HAVE_VSNPRINTF
-#  define gvsprintf	        vsnprintf
-#else
-#  define gvsprintf(a, b, c...) vsprintf(a, c)
-#endif
-#ifdef HAVE_ASPRINTF
-#  define gasprintf		asprintf
-#else
-extern int gasprintf(char **destp, const char *fmt,...);
-#endif
-#ifdef HAVE_VASPRINTF
-#  define gvasprintf            vasprintf
-#else
-extern int gvasprintf(char **destp, const char *fmt, va_list ap);
-#endif
+#define gsprintf		snprintf
+#define gvsprintf		vsnprintf
+#define gasprintf		asprintf
+#define gvasprintf		vasprintf
 
 /* Get rid of long defines. Use #if __unices__ */
 #define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)

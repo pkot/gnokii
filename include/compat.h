@@ -37,6 +37,11 @@
 #  include <string.h>
 #endif
 
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+#endif
+
+
 #ifndef	HAVE_TIMEOPS
 
 #undef timerisset
@@ -79,6 +84,22 @@
 
 #ifndef	HAVE_GETTIMEOFDAY
 int gettimeofday(struct timeval *tv, void *tz);
+#endif
+
+#if !defined(HAVE_SNPRINTF) && !defined(HAVE_C99_SNPRINTF)
+int snprintf(char *str, size_t size, const char *format, ...);
+#endif
+
+#if !defined(HAVE_VSNPRINTF) && !defined(HAVE_C99_VSNPRINTF)
+int vsnprintf(char *str, size_t size, const char *format, va_list ap);
+#endif
+
+#ifndef HAVE_ASPRINTF
+int asprintf(char **ptr, const char *format, ...);
+#endif
+
+#ifndef HAVE_VASPRINTF
+int vasprintf(char **ptr, const char *format, va_list ap);
 #endif
 
 #ifdef WIN32

@@ -30,7 +30,8 @@ OBJS =	cfgreader.o \
 	gsm-encoding.o \
 	gsm-error.o \
 	gsm-statemachine.o \
-	compat.o
+	compat.o \
+	snprintf.o
 
 ifdef NO_SHARED
 GNOKII_LIB=libgnokii.a

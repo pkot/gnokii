@@ -28,9 +28,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#ifndef WIN32
-#  include <unistd.h>
-#endif
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -38,6 +35,10 @@
 #include <signal.h>
 
 #include "misc.h"
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 void (*GSM_ELogHandler)(const char *fmt, va_list ap) = NULL;
 

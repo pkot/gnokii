@@ -41,7 +41,7 @@
 #include "links/fbus-3110.h"
 #include "phones/nokia.h"
 
-#ifndef WIN32
+#ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
 

@@ -21,6 +21,20 @@
 #define XVERSION   "@XVERSION@"
 #define XGNOKIIDIR "@XGNOKIIPATH@/@XPACKAGE@"
 
+/* Define if you have the following headers */
+#undef HAVE_UNISTD_H
+#undef HAVE_STRING_H
+#undef HAVE_STRINGS_H
+#undef HAVE_CTYPE_H
+#undef HAVE_STDLIB_H
+#undef HAVE_STDARG_H
+
+/* Define if your compiler supports long long */
+#undef HAVE_LONG_LONG
+
+/* Define if your compiler supports long double */
+#undef HAVE_LONG_DOUBLE
+
 /* Define if you have timersub() */
 #undef HAVE_TIMEOPS
 
@@ -36,8 +50,19 @@
 #undef HAVE_CFSETOSPEED
 #undef HAVE_TERMIOS_CSPEED
 
-/* Define if you have snprintf */
+/* Define both if you have ISO C99 compliant snprintf */
 #undef HAVE_SNPRINTF
+#undef HAVE_C99_SNPRINTF
+
+/* Define both if you have ISO C99 compliant vsnprintf */
+#undef HAVE_VSNPRINTF
+#undef HAVE_C99_VSNPRINTF
+
+/* Define if you have asprintf */
+#undef HAVE_ASPRINTF
+
+/* Define if you have vasprintf */
+#undef HAVE_VASPRINTF
 
 /* Define debug level */
 #undef DEBUG

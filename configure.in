@@ -3,6 +3,7 @@ dnl  Makefile for the GNOKII tool suite.
 dnl 
 dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 dnl                2000 Karel Zak, Pawe³ Kot
+dnl                2002 BORBELY Zoltan
 dnl
 dnl  $Id$
 dnl
@@ -448,6 +449,7 @@ dnl ======================== Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h)
+AC_CHECK_HEADERS(string.h strings.h ctype.h stdlib.h stdarg.h)
 
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -456,13 +458,70 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 AC_STRUCT_TM
+AC_CACHE_CHECK(for long long, ac_cv_c_long_long,
+	[AC_TRY_RUN([int main() { long long foo = 0; exit(sizeof(long long) < sizeof(long)); }],
+		ac_cv_c_long_long=yes, ac_cv_c_long_long=no, ac_cv_c_long_long=no)])
+if test $ac_cv_c_long_long = yes; then
+	AC_DEFINE(HAVE_LONG_LONG)
+fi
+AC_CACHE_CHECK(for long double, ac_cv_c_long_double,
+	[AC_TRY_RUN([int main() { long double foo = 0.0; exit(sizeof(long double) < sizeof(double)); }],
+		ac_cv_c_long_double=yes, ac_cv_c_long_double=no, ac_cv_c_long_double=no)])
+if test $ac_cv_c_long_double = yes; then
+	AC_DEFINE(HAVE_LONG_DOUBLE)
+fi
+
+
 
 dnl ======================== Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS(mktime select strdup strstr strtol strtok strsep snprintf vsnprintf asprintf vasprintf)
+AC_CHECK_FUNCS(mktime select strdup strstr strtol strtok strsep asprintf vasprintf)
+AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf,
+	[AC_TRY_RUN([
+#include <stdio.h>
+
+int main()
+{
+	char buf[] = {0, 0, 0, 0};
+
+	snprintf(buf, 3, "ABC");
+	exit ((buf[2] != 0) || (snprintf(NULL, 0, "%d", 100) != 3));
+}],ac_cv_func_snprintf=yes,ac_cv_func_snprintf=no,ac_cv_func_snprintf=no)])
+if test $ac_cv_func_snprintf = yes; then
+	AC_DEFINE(HAVE_SNPRINTF)
+	AC_DEFINE(HAVE_C99_SNPRINTF)
+fi
+AC_CACHE_CHECK(for ISO C99 compliant vsnprintf,ac_cv_func_vsnprintf,
+	[AC_TRY_RUN([
+#include <stdio.h>
+#include <stdarg.h>
+
+int doit(char *buf, int len, const char *s, ...)
+{
+	va_list ap;
+	int r;
+
+	va_start(ap, s);
+	r = vsnprintf(buf, len, s, ap);
+	va_end(ap);
+
+	return r;
+}
+
+int main()
+{
+	char buf[] = {0, 0, 0, 0};
+
+	doit(buf, 3, "ABC");
+	exit ((buf[2] != 0) || (doit(NULL, 0, "%d", 100) != 3));
+}],ac_cv_func_vsnprintf=yes,ac_cv_func_vsnprintf=no,ac_cv_func_vsnprintf=no)])
+if test $ac_cv_func_vsnprintf = yes; then
+	AC_DEFINE(HAVE_VSNPRINTF)
+	AC_DEFINE(HAVE_C99_VSNPRINTF)
+fi
 
 CFLAGS="$CFLAGS $NLS_CFLAGS"
 LIBS="$LIBS $NLS_LIBS"
@@ -527,7 +586,7 @@ echo "
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999-2000  The Gnokii Development Team.
+  Copyright (C) 1999-2002  The Gnokii Development Team.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

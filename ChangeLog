@@ -16,6 +16,9 @@
     o prepare to be able to compile libsms without bitmaps or
       ringtones support                                   (Pawel Kot)
  * win32 fixes                                        (Marcin Wiacek)
+ * asprintf, vasprintf and C99 compliant snprintf and vsnprintf
+   functions provided if not present                 (BORBELY Zoltan)
+ * portability cleanup in various functions          (BORBELY Zoltan)
 
 0.4.0pre16
 ==========

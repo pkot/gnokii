@@ -31,12 +31,12 @@
 #ifndef __device_h_
 #define __device_h_
 
-#ifndef WIN32
-#  include <unistd.h>
-#endif
-
 #include "misc.h"
 #include "gsm-common.h"
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 int device_getfd(void);
 
