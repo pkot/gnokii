@@ -28,7 +28,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
 # include <strings.h>
 #endif
 #include <gtk/gtk.h>

@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
 #  include <strings.h>	/* for bzero */
 #endif
 #include <time.h>
@@ -2574,7 +2574,7 @@ int writephonebook(int argc, char *args[])
 
     line_count++;
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
     ptr=strtok(Line, ";"); if (ptr) strcpy(entry.Name, ptr);
 
     ptr=strtok(NULL, ";"); if (ptr) strcpy(entry.Number, ptr);
@@ -2609,7 +2609,7 @@ int writephonebook(int argc, char *args[])
       }
     }
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
     ptr=strtok(NULL, ";"); if (ptr) entry.Location=atoi(ptr);
 
     ptr=strtok(NULL, ";"); if (ptr) entry.Group=atoi(ptr);

@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
 #  include <sys/file.h>
 #endif
 

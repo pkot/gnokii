@@ -75,7 +75,7 @@
 
 bool FB61_LinkOK;
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
   /* fd opened in device.c */
   extern int device_portfd;
 #endif
@@ -228,7 +228,7 @@ u8        CallSequenceNumber; /* Used to disconnect the call */
 #ifndef WIN32
 
   pthread_t Thread;
-# ifdef __svr4__
+# if defined(__svr4__) || defined(__FreeBSD__)
   pthread_t selThread;
 # endif
 
@@ -367,7 +367,7 @@ GSM_Error FB61_Initialise(char *port_device, char *initlength,
   return (GE_NONE);
 }
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
 /* thread for handling incoming data */
 void FB61_SelectLoop() {
 int err;
@@ -920,7 +920,7 @@ bool FB61_OpenIR(void)
   bool ret = false;
   u8 i = 0;
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
   int rtn;
 #else
   struct sigaction sig_io;  
@@ -941,7 +941,7 @@ bool FB61_OpenIR(void)
     return false;
   }
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
   /* create a thread to handle incoming data from mobile phone */
   rtn=pthread_create(&selThread,NULL,(void*)FB61_SelectLoop,(void*)NULL);
   if (rtn != 0)
@@ -2798,7 +2798,7 @@ bool FB61_OpenSerial(void)
 {
   int result;
   
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
   int rtn;
 #else
   struct sigaction sig_io;
@@ -2820,7 +2820,7 @@ bool FB61_OpenSerial(void)
     return false;
   }
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
   /* create a thread to handle incoming data from mobile phone */
   rtn=pthread_create(&selThread,NULL,(void*)FB61_SelectLoop,(void*)NULL);
   if (rtn != 0)

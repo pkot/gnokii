@@ -2280,7 +2280,7 @@ static void TopLevelWindow (void)
   act.sa_flags = SA_NOCLDSTOP;
   sigaction (SIGCHLD, &act, NULL);
 
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__FreeBSD__)
   act.sa_handler = SIG_IGN;
   sigemptyset (&(act.sa_mask));
   sigaction (SIGALRM, &act, NULL);
