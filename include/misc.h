@@ -92,7 +92,7 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 extern int gasprintf(char **destp, const char *fmt,...);
 #endif
 #ifdef HAVE_VASPRINTF
-#  define gvasprintf            vasprintf(a)
+#  define gvasprintf            vasprintf
 #else
 extern int gvasprintf(char **destp, const char *fmt, va_list ap);
 #endif
