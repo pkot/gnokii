@@ -49,6 +49,7 @@ bool	ATEM_Initialised;
 #define REG_CR        3
 #define REG_LF        4
 #define REG_BS        5
+#define S35           6
 
 #define REG_RESP     12
 #define BIT_RESP      1

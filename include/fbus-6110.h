@@ -178,7 +178,7 @@ GSM_Error FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 
 GSM_Error FB61_DialVoice(char *Number);
-GSM_Error FB61_DialData(char *Number);
+GSM_Error FB61_DialData(char *Number, char type);
 
 GSM_Error FB61_GetIncomingCallNr(char *Number);
 
@@ -204,6 +204,7 @@ GSM_Error FB61_GetProfile(GSM_Profile *Profile);
 GSM_Error FB61_SetProfile(GSM_Profile *Profile);
 bool      FB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 
+GSM_Error FB61_CancelCall();
 
 /* States for receive code. */
 

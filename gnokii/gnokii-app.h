@@ -39,7 +39,7 @@ int setalarm(char *argv[]);
 int getalarm(void);
 int dialvoice(char *number);
 int dialdata(char *number);
-int getcalendarnote(char *argv[]);
+int getcalendarnote(int argc, char *argv[]);
 int writecalendarnote(char *argv[]);
 int deletecalendarnote(char *index);
 int getdisplaystatus();

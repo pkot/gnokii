@@ -122,7 +122,8 @@ GSM_Functions FB61_Functions = {
   FB61_Reset,
   FB61_GetProfile,
   FB61_SetProfile,
-  FB61_SendRLPFrame
+  FB61_SendRLPFrame,
+  FB61_CancelCall
 };
 
 /* Mobile phone information */
@@ -207,6 +208,7 @@ u8        RequestSequenceNumber = 0x00;
 bool      RequestTerminate;
 bool      DisableKeepalive = false;
 int       InitLength;
+u8        CallSequenceNumber; /* Used to disconnect the call */
 
 #ifndef WIN32
 
@@ -1312,29 +1314,57 @@ GSM_Error FB61_DialVoice(char *Number) {
   return(GE_NONE);
 }
 
-GSM_Error FB61_DialData(char *Number) {
+
+/* Dial a data call - type specifies request to use: 
+     type 0 should normally be used
+     type 1 should be used when calling a digital line - corresponds to ats35=0
+     Maybe one day we'll know what they mean!
+*/
+
+GSM_Error FB61_DialData(char *Number, char type) {
 
   unsigned char req[100]  = { FB61_FRAME_HEADER, 0x01 };
-  unsigned char req_end[] = { 0x01,  /* make a data call = type 0x01 */
+  unsigned char *req_end;
+  unsigned char req_end0[] = { 0x01,  /* make a data call = type 0x01 */
                               0x02,0x01,0x05,0x81,0x01,0x00,0x00,0x01,0x02,0x0a,
                               0x07,0xa2,0x88,0x81,0x21,0x15,0x63,0xa8,0x00,0x00
                             };
+  unsigned char req_end1[] = { 0x01,
+			       0x02,0x01,0x05,0x81,0x01,0x00,0x00,0x01,0x02,0x0a,
+			       0x07,0xa1,0x88,0x89,0x21,0x15,0x63,0xa0,0x00,0x06,
+			       0x88,0x90,0x21,0x48,0x40,0xbb};
+			       
 
   unsigned char req2[]    = { FB61_FRAME_HEADER, 0x42,0x05,0x01,
                               0x07,0xa2,0xc8,0x81,0x21,0x15,0x63,0xa8,0x00,0x00,
                               0x07,0xa3,0xb8,0x81,0x20,0x15,0x63,0x80,0x01,0x60
                             };
   int i=0;
+  u8 size;
+
+  switch (type) {
+  case 0:
+    req_end=req_end0;
+    size=sizeof(req_end0);
+    break;
+  case 1:
+    req_end=req_end1;
+    size=sizeof(req_end1);
+    break;
+  default:
+    req_end=req_end0;
+    size=sizeof(req_end0);
+  }
 
   req[4]=strlen(Number);
 
   for(i=0; i < strlen(Number) ; i++)
    req[5+i]=Number[i];
 
-  memcpy(req+5+strlen(Number), req_end, 23);
+  memcpy(req+5+strlen(Number), req_end, size);
 
-  FB61_TX_SendMessage(26+strlen(Number), 0x01, req);
-  FB61_TX_SendMessage(26, 0x01, req2);
+  FB61_TX_SendMessage(5+size+strlen(Number), 0x01, req);
+  if (type!=1) FB61_TX_SendMessage(26, 0x01, req2);
 
   return(GE_NONE);
 }
@@ -1349,6 +1379,18 @@ GSM_Error FB61_GetIncomingCallNr(char *Number)
   else
     return GE_BUSY;
 }
+
+GSM_Error FB61_CancelCall()
+{
+  unsigned char req[] = { FB61_FRAME_HEADER, 0x08, 0x00, 0x85};
+  
+  req[4]=CallSequenceNumber;
+  FB61_TX_SendMessage(6, 0x01, req);
+  
+  return GE_NONE;
+}  
+  
+
 
 GSM_Error FB61_EnterSecurityCode(GSM_SecurityCode SecurityCode)
 {
@@ -2466,6 +2508,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
       fprintf(stdout, _("   Exact meaning not known yet, sorry :-(\n"));
 #endif /* DEBUG */
+      CallSequenceNumber=MessageBuffer[4];
 
       break;
 

@@ -12,6 +12,10 @@ include $(TOPDIR)/Makefile.global
 CFLAGS	+= $(PTHREAD_CFLAGS)
 LDFLAGS += $(PTHREAD_LIBS)
 
+ifdef XPM_LIBS
+	LDFLAGS +=$(XPM_LIBS)
+endif
+
 OBJS =	at-emulator.o \
 	datapump.o \
 	gnokiid.o \

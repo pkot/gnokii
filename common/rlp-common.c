@@ -20,7 +20,9 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #include "rlp-common.h"
 #include "rlp-crc24.h"
@@ -43,52 +45,189 @@ RLP_State      NextState;
 /* Pointer to Send function that sends frame to phone. */
 bool      (*RLPSendFunction)(RLP_F96Frame *frame, bool out_dtx);
 
-bool RLP_UserEvent(x) {
+/* Pointer to Passup function which returns data/inds */
+void      (*RLP_Passup)(RLP_UserInds ind, u8 *buffer, int length);
 
-  bool result=x;
-
-  if ( x == true )
-    x=false;
-
-  return result;
-}
 
 /* State variables - see GSM 04.22, Annex A, section A.1.2 */
 
 RLP_StateVariable UA_State;
 RLP_StateVariable UI_State;
-RLP_StateVariable XID_R_State;
+RLP_StateVariable Ackn_State;
+RLP_StateVariable Poll_State;
+RLP_StateVariable SABM_State;
+RLP_StateVariable DISC_State;
+RLP_StateVariable DM_State;  /* FIXME - not handled */
+RLP_StateVariable XI_R_State;
 RLP_StateVariable XID_C_State;
+RLP_StateVariable XID_R_State;
 RLP_StateVariable TEST_R_State;
+
+u8 VR=0;
+u8 VA=0;
+u8 VS=0;
+u8 VD=0;
+u8 DISC_Count;
+
+u8 DTX_VR;
+RLP_FrameTypes DTX_SF;
+
+#define RLP_M_max 62
+
+RLP_Data R[RLP_M_max];
+RLP_Data S[RLP_M_max];
 
 RLP_StateVariable SABM_State;
 int SABM_Count;
 
-/* Attach immediately. */
-bool Attach_Req=true;
-
-/* Connection request. */
-bool Conn_Req=false;
+RLP_UserRequestStore UserRequests;
 
 bool Poll_xchg;
+u8 Poll_Count=0;
 
 int T;
-
-
-
-
+int T_RCVR=0;
+int T_RCVS[RLP_M_max];
 
 bool UA_FBit=true;
+bool Ackn_FBit=false;
+bool DM_FBit=false;  /* FIXME - not handled */
+bool RRReady=false;
+bool LRReady=true;
+bool DataToTransmit=false;
+bool DISC_PBit=false;
+
+u8 LastStatus=0;   /* Last Status byte */
 
 
 /* RLP Constants. */
 
 u8 RLP_M = 62; /* Number of different sequence numbers (modulus) */
-
 u8 RLP_N2 = 15; /* Maximum number of retransmisions. GSM spec says 6 here, but
                    Nokia will XID this. */
+u8 RLP_Timeout1_Limit = 55;
+u8 RLP_VersionNumber=0;
+u8 RLP_T2=0;
 
-u8 Timeout1_Limit = 55;
+
+/* Send Ring Buffer */
+#define SendRingBufferSize 1024
+u16 SendHead;
+u16 SendTail;
+u8 *SendRingBuffer;
+
+
+/****** Externally called functions ********/
+/*******************************************/
+
+
+/* Function to initialise RLP code.  Main purpose for now is
+   to set the address of the RLP send function in the API code. */
+
+void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx), void (*rlp_passup)(RLP_UserInds ind, u8 *buffer, int length))
+{
+  RLPSendFunction = rlp_send_function;
+  RLP_Passup=rlp_passup;
+  UserRequests.Conn_Req=false;
+  UserRequests.Attach_Req=false;
+  UserRequests.Conn_Req_Neg=false;
+  UserRequests.Reset_Resp=false;
+  UserRequests.Disc_Req=false;
+  SendRingBuffer=(u8 *)malloc(SendRingBufferSize);
+  /* FIXME - return something if no memory */
+  if (SendRingBuffer==NULL) fprintf(stdout,"Not enough memory for the Send ring buffer!\n");
+  SendTail=0;
+  SendHead=0;
+}
+
+
+
+/* Set a user event */
+/* Called by user program for now */
+
+void RLP_SetUserRequest(RLP_UserRequests type, bool value) {
+
+  switch (type) {
+    case Conn_Req:
+      UserRequests.Conn_Req=value;
+      break;
+  case Attach_Req:
+      UserRequests.Attach_Req=value;
+      break;
+  case Conn_Req_Neg:
+      UserRequests.Conn_Req_Neg=value;
+      break;
+  case Reset_Resp:
+      UserRequests.Reset_Resp=value;
+      break;
+  case Disc_Req:
+      UserRequests.Disc_Req=value;
+      break;
+  default:
+  }
+}
+
+
+
+/* Add supplied data to the internal ring buffer */
+
+void RLP_Send(char *buffer, int length)
+{
+  int i;
+
+  /* FIXME - is there a better way to do this? */
+  /* FIXME - do something sensible if there is no room */
+
+  
+  for(i=0; i<length; i++){
+    *(SendRingBuffer+SendHead)=buffer[i];
+    SendHead=(SendHead+1)%SendRingBufferSize;
+    if (SendHead==SendTail) {
+    fprintf(stdout, "Out of room in the send-ring-buffer!!\n");
+    return;
+    }
+  }
+}
+  
+
+
+/***** Internal functions **********/
+/***********************************/
+
+
+/* Check whether a user event is set */
+
+bool RLP_GetUserRequest(RLP_UserRequests type) {
+
+  bool result=false, *x;
+
+  switch (type) {
+    case Conn_Req:
+      x=&UserRequests.Conn_Req;
+      break;
+  case Attach_Req:
+      x=&UserRequests.Attach_Req;
+      break;
+  case Conn_Req_Neg:
+      x=&UserRequests.Conn_Req_Neg;
+      break;
+  case Reset_Resp:
+      x=&UserRequests.Reset_Resp;
+      break;
+  case Disc_Req:
+      x=&UserRequests.Disc_Req;
+      break;
+  default:
+      x=&result;
+  }
+
+  result=*x;
+
+  if ( *x == true )
+    *x=false;
+
+  return result;
+}
 
 
 /* Previous sequence number. */
@@ -106,6 +245,60 @@ u8 Incr(x) {
     return (x+1) % RLP_M;
 }
 
+
+void RLP_Init_link_vars(void)
+{
+  int i;
+  
+  Ackn_State=_idle;
+  Poll_State=_idle;
+  Poll_Count=0;
+  Poll_xchg=_idle;
+  SABM_State=_idle;
+  DISC_State=_idle;
+  RRReady=true;  /* This seems a bit strange but it's what the spec says... */
+  VA=0;
+  VR=0;
+  VS=0;
+  VD=0;  
+
+  for(i=0;i<RLP_M;i++) {
+    R[i].State=_idle;
+    S[i].State=_idle;
+  }
+  
+}
+
+
+void RLP_AddRingBufferDataToSlots()
+{
+  int size;
+  u8 i;
+ 
+  while ((SendHead!=SendTail) && (S[VD].State==_idle)) {
+    memset(S[VD].Data,0xff,25);    /* FIXME - this isn't necessary - but makes debugging easier! */
+    if (SendHead>SendTail) size=SendHead-SendTail;
+    else size=SendRingBufferSize-SendTail+SendHead;
+    if (size>23) {
+      S[VD].Data[0]=0x1e;
+      size=24;
+    }
+    else S[VD].Data[0]=size;
+    
+    for(i=0;i<size;i++) {
+      S[VD].Data[i+1]=*(SendRingBuffer+SendTail);
+      SendTail=(SendTail+1)%SendRingBufferSize;
+    }
+    
+    if (size!=24) S[VD].Data[size+1]=0x1f;
+
+    S[VD].State=_send;
+    VD=Incr(VD);
+    DataToTransmit=true;
+  }  
+}
+
+
 /* FIXME: Remove this after finishing. */
 
 void X(RLP_F96Frame *frame) {
@@ -117,13 +310,14 @@ void X(RLP_F96Frame *frame) {
    
 }
 
-/* Function to initialise RLP code.  Main purpose for now is
-   to set the address of the RLP send function in the API code. */
-void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx))
-{
-  RLPSendFunction = rlp_send_function;
 
+ 
+void ResetAllT_RCVS(void)
+{
+  int i;
+  for (i=0;i<RLP_M;i++) T_RCVS[i]=0; 
 }
+
 
 
 /* This function is used for sending RLP frames to the phone. */
@@ -374,7 +568,9 @@ void RLP_SendF96Frame(RLP_FrameTypes FrameType,
 void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 {
 
+#ifdef DEBUG
   int           count;
+#endif
   RLP_F96Header header;
 
   /*
@@ -669,7 +865,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
     fflush(stdout);
 
-#endif
+    #endif
 
   }
   else {
@@ -698,21 +894,87 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 void TEST_Handling() {
 }
 
-/* FIXME: real XID_handling - this will only answer to XID command. */
+
+
+/* FIXME: better XID_handling - but this will answer a XID command. */
 
 bool XID_Handling (RLP_F96Frame *frame, RLP_F96Header *header) {
+  
+  u8 count;
+  u8 type;
+  u8 length;
 
   if (CurrentFrameType == RLPFT_U_XID) {
+    
+    count=0;
+    
+    while (frame->Data[count] !=0) {
 
-    u8 Data[25];
-    int i;
+      type=frame->Data[count] >> 4;
+      length=frame->Data[count] & 0x0f;
+      count++;
+      
+      switch (type) {
 
-#ifdef DEBUG
-    for (i=0; i<25; i++) {
-      printf("XID data[%02d]: %02x\n", i, frame->Data[i]);
-      Data[i]=frame->Data[i];
+      case 0x01: /* RLP Version Number */
+	RLP_VersionNumber=frame->Data[count];
+	count+=length;
+	break;  
+      case 0x02: /* IWF to MS window size */
+	if (frame->Data[count]<RLP_M-1) RLP_M=frame->Data[count]+1;
+	count+=length;
+	break;
+      case 0x03: /* MS to IWF window size */
+	if (frame->Data[count]<RLP_M-1) RLP_M=frame->Data[count]+1;
+	count+=length;
+	break;
+      case 0x04: /* Acknowledgement Timer (T1). */
+	RLP_Timeout1_Limit=frame->Data[count];
+	count+=length;
+	break;
+      case 0x05: /* Retransmission attempts (N2). */
+	RLP_N2=frame->Data[count];
+	count+=length;
+	break;
+      case 0x06: /* Reply delay (T2). */
+	RLP_T2=frame->Data[count];
+	count+=length;
+	break;
+      case 0x07: /* Compression - not yet! */
+	break;
+      default:
+	count+=length;
+	break;
+      }
     }
-#endif
+
+    /* Now reassemble a reply */
+    
+    count=0;
+    memset(frame->Data,0x00,25);  /* Makes debugging easier */
+    
+    /* Version Number - force to 0 for now */
+    RLP_VersionNumber=0;
+    frame->Data[count++]=0x11;
+    frame->Data[count++]=RLP_VersionNumber;
+    
+    /* Window sizes - both equal */
+    frame->Data[count++]=0x21;
+    frame->Data[count++]=RLP_M-1;
+    frame->Data[count++]=0x31;
+    frame->Data[count++]=RLP_M-1;
+    
+    /* Acknowledgement Timer (T1). */
+    frame->Data[count++]=0x41;
+    frame->Data[count++]=RLP_Timeout1_Limit;
+
+    /* Retransmission attempts (N2). */
+    frame->Data[count++]=0x51;
+    frame->Data[count++]=RLP_N2;
+
+    /* Reply delay (T2). */
+    frame->Data[count++]=0x61;
+    frame->Data[count++]=RLP_T2;
 
     XID_R_State = _send;
 
@@ -721,6 +983,7 @@ bool XID_Handling (RLP_F96Frame *frame, RLP_F96Header *header) {
 
   return false;
 }
+
 
 bool Send_TXU(RLP_F96Frame *frame, RLP_F96Header *header) {
 
@@ -745,6 +1008,15 @@ bool Send_TXU(RLP_F96Frame *frame, RLP_F96Header *header) {
     return true;
   }
 
+  
+  /* This isn't in the spec but I suppose it goes here */
+
+  else if (DISC_State==_send){
+    RLP_SendF96Frame(RLPFT_U_DISC, true, DISC_PBit, 0, 0, NULL, false);
+    DISC_State = _wait;
+    return true;
+  }
+
   /*
 
   else if (XID_C_State == _send ) && !Poll_xchg ) {
@@ -763,7 +1035,279 @@ bool Send_TXU(RLP_F96Frame *frame, RLP_F96Header *header) {
   return false;
 }
 
+
+/* Deliver data */
+
+void RLP_DeliverAllInSeqIF()
+{
+  int i,j;
+
+  do {
+
+    if ((R[VR].Data[0] & 0xE0)!=LastStatus) {
+      LastStatus=(R[VR].Data[0] & 0xE0);
+      RLP_Passup(StatusChange,&LastStatus,0);
+    }
+    
+    j=0;
+    i=R[VR].Data[0] & 0x1f;
+    if (i==0x1e) j=24;
+    if (i<0x18) j=i;
+
+    /* FIXME - should check for more data in the frame */
+    
+    RLP_Passup(Data,R[VR].Data+1,j);
+ 
+    R[VR].State=_idle;
+    VR=Incr(VR);
+
+  } while (R[VR].State==_rcvd);
+}
+
+
+/* Mark any missing information frames between VR and Ns*/
+void RLP_MarkMissingIF(u8 Ns)
+{
+  u8 i;
+  for (i=VR; i!=Ns; i=Incr(i)) {
+    if (R[i].State==_idle) R[i].State=_send;
+  }
+}
+
+
+/* Information frame handler */
+
+bool RLP_I_Handler(RLP_F96Frame *frame, RLP_F96Header *header)
+{
+
+  if (((header->CR) && (header->PF)) || (header->Ns >= RLP_M)) {
+    return true;
+  }
+  if (header->Ns==VR) {
+    R[VR].State=_rcvd;
+    memcpy(R[VR].Data,frame->Data,25);
+    RLP_DeliverAllInSeqIF();
+    Ackn_State=true;
+  }
+  else {  /* Use SREJ */
+    if (R[header->Ns].State==_wait) T_RCVS[header->Ns]=0;
+    R[header->Ns].State=_rcvd;
+    memcpy(R[header->Ns].Data,frame->Data,25);
+    RLP_MarkMissingIF(header->Ns);
+  }
+    
+  return false;
+}
+
+
+/* Mark acknowledged send frames */
+
+void RLP_AdvanceVA(u8 Nr)
+{
+  while (VA!=Nr) {
+    S[VA].State=_idle;
+    VA=Incr(VA);
+  }
+}
+
+
+/* Decrease VS back down to Nr since these have not been acknowledged */
+
+void RLP_DecreaseVS(u8 Nr)
+{
+  while (VS!=Nr) {
+    VS=Decr(VS);
+    S[VS].State=_send;
+  }
+}
+
+/* Supervisory frame handling */
+
+void RLP_S_Handler(RLP_F96Frame *frame, RLP_F96Header *header)
+{
+  u8 i;
+
+  if ((header->CR) && (header->PF)) {
+    /* Special exchange (ie. error) - counter? */
+    Ackn_State=true;
+    Ackn_FBit=true;
+    for (i=0; i<RLP_M; i++) R[i].State=_idle;
+    ResetAllT_RCVS();
+    T_RCVR=0;
+  }
+  if (Poll_State!=_idle) {
+    if (header->PF==0) return;
+    if ((CurrentFrameType==RLPFT_S_SREJ) || (CurrentFrameType==RLPFT_S_REJ) ||
+	(CurrentFrameType==RLPFT_SI_SREJ) || (CurrentFrameType==RLPFT_SI_REJ)) return;
+    RLP_DecreaseVS(header->Nr);
+  }
+  switch (CurrentFrameType){
+    
+  case RLPFT_S_RR:
+  case RLPFT_SI_RR:
+    RLP_AdvanceVA(header->Nr);
+    RRReady=true;
+    break;
+  case RLPFT_S_RNR:
+  case RLPFT_SI_RNR:
+    RLP_AdvanceVA(header->Nr);
+    RRReady=false;
+    break;
+  case RLPFT_S_REJ:
+  case RLPFT_SI_REJ:
+    RLP_AdvanceVA(header->Nr);
+    RRReady=true;
+    RLP_DecreaseVS(header->Nr);
+  case RLPFT_S_SREJ:
+  case RLPFT_SI_SREJ:
+    S[header->Nr].State=_srej;
+    T=0;
+    break;
+  default:
+  }
+
+}
+
+
+/* Find the first srej frame */
+
+bool RLP_SREJSlot(u8 *x)
+{
+  u8 i;
+
+  for (i=0; i<RLP_M-1; i++) if (R[i].State==_srej) {
+    *x=i;
+    return true;
+  }
+  
+  return false;
+}
+
+
+
+/* Check if any SREJ frames need sending, if not send the next in line */
+
+u8 RLP_PrepareDataToTransmit()
+{
+  u8 i,j;
+
+  j=Incr(VS);
+  for (i=0; i<RLP_M-1;i++) if (S[j].State==_srej) {
+    S[j].State=_wait;
+    T=1;
+    return j;
+  } else j=Incr(j);
+  j=VS;
+  S[VS].State=_wait;
+  VS=Incr(VS);
+  if (VS==VD) DataToTransmit=false;
+  return j;
+}
+
+
+
+/* Send a SREJ command */
+
+void RLP_SendSREJ(u8 x)
+{
+  u8 k;
+  
+  if ((!Poll_xchg) && (Poll_State==_send)) {
+    RLP_SendF96Frame(RLPFT_S_SREJ, true, true, x , 0 , NULL, false);    
+    R[x].State=_wait;
+    T_RCVS[x]=1;
+    Poll_Count++;
+    Poll_State=_wait;
+    Poll_xchg=true;
+    T=1;
+    Ackn_State=false;  /* Serge does not have these */
+  }
+  else if (DataToTransmit && RRReady) {
+    k=RLP_PrepareDataToTransmit();
+    RLP_SendF96Frame(RLPFT_SI_SREJ, true, false, x , k , S[k].Data, false); 
+    R[x].State=_wait;
+    T_RCVS[x]=1;
+    Ackn_State=false; /* Serge does not have these */
+  }
+  else {
+    RLP_SendF96Frame(RLPFT_S_SREJ, true, false, x , 0 , NULL, false); 
+    R[x].State=_wait;
+    T_RCVS[x]=1;
+    Ackn_State=false;  /* Serge does not have these */
+  }
+}
+
+
+/* Send a command */
+
+void RLP_Send_XX_Cmd(RLP_FrameTypes type)
+{
+ u8 k;
+
+ if ((!Poll_xchg) && (Poll_State==_send)) {
+    RLP_SendF96Frame(RLPFT_S_SREJ, true, true, VR , 0 , NULL, false);    
+    Poll_Count++;
+    Poll_State=_wait;
+    Poll_xchg=true;
+    T=1;
+    Ackn_State=false;
+  }
+  else if (DataToTransmit && RRReady) {
+    k=RLP_PrepareDataToTransmit();
+    RLP_SendF96Frame(type+4, true, false, VR , k , S[k].Data, false); 
+    Ackn_State=false;
+  }
+  else {
+    RLP_SendF96Frame(type, true, false, VR , 0 , NULL, false); 
+    Ackn_State=false;
+    DTX_SF=type;
+    DTX_VR=VR;   /* As Serge, not as spec */
+  }
+}
+
+
+/* Send a Response */
+
+void RLP_Send_XX_Resp(RLP_FrameTypes type)
+{
+  u8 k;
+  
+  if (DataToTransmit && RRReady) {
+    k=RLP_PrepareDataToTransmit();
+    RLP_SendF96Frame(type+4, false, true, VR , k , S[k].Data, false); 
+    Ackn_State=false;
+    Ackn_FBit=false;
+    /* Set T=1 in spec */
+  }
+  else {
+    RLP_SendF96Frame(type, true, false, VR , 0 , NULL, false); 
+    Ackn_State=false;
+    Ackn_FBit=false;
+  }
+}
+
+
+/* Decide which frame to use and send it - currently only used in state 4 */
+
+void RLP_SendData()
+{
+  u8 x;
+
+  if (UA_State==_send) {
+    RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0 , 0 , NULL, false);    
+    UA_State=_idle;
+  }
+  else if (Ackn_FBit==1) {
+    if (LRReady) RLP_Send_XX_Resp(RLPFT_S_RR);
+    else RLP_Send_XX_Resp(RLPFT_S_RNR);
+  }
+  else if (RLP_SREJSlot(&x)) RLP_SendSREJ(x); 
+  else if (LRReady) RLP_Send_XX_Cmd(RLPFT_S_RR);
+  else RLP_Send_XX_Cmd(RLPFT_S_RNR);
+}
+
 void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
+
 
   switch (CurrentState) {
 
@@ -797,14 +1341,14 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 
     default:
       RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
-      if (RLP_UserEvent(Attach_Req)) {
+      if (RLP_GetUserRequest(Attach_Req)) {
 	NextState=RLP_S1;
 	UA_State=_idle;
       }
     }
 
     break;
-
+  
     /***** RLP State 1. *****/
 
     /* ADM and Attached.
@@ -830,12 +1374,9 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	TEST_Handling();
 	break;
 
-      case RLPFT_BAD:
-	break;
-
       case RLPFT_U_SABM:
-	// Conn_Ind=true;
-	NextState=3;
+	RLP_Passup(Conn_Ind,NULL,0);
+	NextState=RLP_S3;
 	break;
 
       case RLPFT_U_DISC:
@@ -843,45 +1384,47 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	UA_FBit=header->PF;
 	break;
 
+      case RLPFT_BAD:  /* If we get a bad frame we can still respond with SABM */
       default:
-	if (RLP_UserEvent(Conn_Req)) {
+	if (RLP_GetUserRequest(Conn_Req)) {
 	  SABM_State=_send;
 	  SABM_Count=0;
-	  NextState=2;
+	  NextState=RLP_S2;
 	}
 	break;
       }
 
-      if (!Send_TXU(frame, header)) {
-
-	if (UA_State == _send) {
-	  RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
-	  UA_State=_idle;
-	}
-	else
-	  RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
-      }
     }
-
-
+    if (!Send_TXU(frame, header)) {
+      
+      if (UA_State == _send) {
+	RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
+	UA_State=_idle;
+      }
+      else
+	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
+    }
+    
+    
+    
     {
-
+      
       /* This is only used for setting Conn_Req to true. */
-
+      
       static int FIXMEcounter=0;
 
       FIXMEcounter++;
-      printf("FIXMEcounter=%d\n", FIXMEcounter);
+      //      printf("FIXMEcounter=%d\n", FIXMEcounter);
       
       if (FIXMEcounter==500) {
-	Conn_Req=true;
+	RLP_SetUserRequest(Conn_Req,true);
       }
     }
 
-
+  
 
     break;
-
+  
     /***** RLP State 2. *****/
 
   case RLP_S2:
@@ -941,7 +1484,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	break;
 
       default:
-	if (T == Timeout1_Limit) {
+	if (T == RLP_Timeout1_Limit) {
 	  Poll_xchg=false;
 	  if (SABM_Count>RLP_N2)
 	    NextState=RLP_S8;
@@ -963,6 +1506,15 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
     }
 
+    if (RLP_GetUserRequest(Disc_Req)) {
+      T=0;
+      T_RCVR=0;
+      DISC_State=_send;
+      DISC_Count=0;
+      DISC_PBit=Poll_xchg;
+      NextState=5;
+    }
+  
     break;
 
     /***** RLP State 3. *****/
@@ -973,24 +1525,264 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     fprintf(stdout, _("RLP state 3.\n"));
 #endif
 
+    if (!XID_Handling(frame, header)) {
+    
+      switch(CurrentFrameType) {
+
+      case RLPFT_U_TEST:
+	TEST_Handling();
+	break;
+	
+      case RLPFT_U_DISC:
+	RLP_Passup(Disc_Ind,NULL,0);
+	UA_State=_send;
+	UA_FBit=header->PF;
+	NextState=RLP_S1;
+	break;
+
+      default:
+	if (RLP_GetUserRequest(Conn_Req)) {
+	  UA_State=_send;
+	  UA_FBit=true;
+	  NextState=RLP_S4;
+	  RLP_Init_link_vars();
+	} else if (RLP_GetUserRequest(Conn_Req_Neg)) {
+	  DM_State=_send;  /* FIXME - code to handle DM_State - missing from spec? */
+	  DM_FBit=true;
+	  NextState=RLP_S1;
+	}
+      }
+    }
+    
+    if (!Send_TXU(frame, header)) {
+      
+      if (UA_State == _send) {
+	RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
+	UA_State=_idle;
+      }
+	else
+	  RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
+    }
+    
+
+    if (RLP_GetUserRequest(Disc_Req)) {
+      T=0;
+      T_RCVR=0;
+      DISC_State=_send;
+      DISC_Count=0;
+      DISC_PBit=Poll_xchg;
+      NextState=5;
+    }
+    
     break;
-
+    
     /***** RLP State 4. *****/
-
+  
   case RLP_S4:
 
 #ifdef DEBUG
     fprintf(stdout, _("RLP state 4.\n"));
 #endif
+    
+    if (!XID_Handling(frame, header)) {
+
+      switch (CurrentFrameType) {
+	
+      case RLPFT_U_TEST:
+	TEST_Handling();
+	break;
+      case RLPFT_U_DISC:
+	T=0;
+	T_RCVR=0;
+	ResetAllT_RCVS();
+	RLP_Passup(Disc_Ind,NULL,0);
+	UA_State=_send;
+	UA_FBit=header->PF;
+	NextState=RLP_S1;
+	break;
+      case RLPFT_U_SABM:
+	T=0;
+	T_RCVR=0;
+	ResetAllT_RCVS();
+	RLP_Passup(Reset_Ind,NULL,0);
+	NextState=RLP_S7;
+	break;
+      case RLPFT_S_RR:
+      case RLPFT_S_RNR:
+      case RLPFT_S_REJ:
+      case RLPFT_S_SREJ:
+	if ((!header->PF) && (header->Nr < RLP_M)) RLP_S_Handler(frame,header);  /* Check as Serge, the spec is more thorough */
+	break;
+      case RLPFT_SI_RR:
+      case RLPFT_SI_RNR:
+      case RLPFT_SI_REJ:
+      case RLPFT_SI_SREJ:
+	if ((!header->PF) && (header->Nr < RLP_M)) /* Check as Serge, spec more thorough */
+	  if (!RLP_I_Handler(frame,header)) RLP_S_Handler(frame,header);
+	break;
+      default:
+      }
+    }    
+    
+    
+    /* FIXME - deal with timeouts */
+
+
+    if (!Send_TXU(frame,header)) {
+      if (UA_State == _send) {
+	RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
+	UA_State=_idle;
+      }
+      else  RLP_SendData();
+    }      
+
+
+    /* Load any data from the Send ringbuffer into the send slots */
+    if (SendHead!=SendTail) RLP_AddRingBufferDataToSlots();
+
+    printf("SendHead=%d, SendTail=%d, VD=%d, VA=%d\n",SendHead,SendTail,VD,VA);
+    
+    if (RLP_GetUserRequest(Disc_Req)) {
+      T=0;
+      T_RCVR=0;
+      DISC_State=_send;
+      DISC_Count=0;
+      DISC_PBit=Poll_xchg;
+      NextState=5;
+    }
+
+    break;
+    
+
+    /***** RLP State 5. *****/
+  
+  case RLP_S5:
+
+#ifdef DEBUG
+    fprintf(stdout, _("RLP state 5.\n"));
+#endif
+    
+    if (!XID_Handling(frame, header)) {
+    
+      switch (CurrentFrameType) {
+    
+      case RLPFT_U_UA:
+      case RLPFT_U_DM:
+	if ((DISC_State==_wait) && (DISC_PBit==header->PF)) {
+	  if (DISC_PBit==true) Poll_xchg=false;
+	  T=0;
+	  NextState=1;
+	}
+	break;
+      case RLPFT_U_DISC:
+	T=0;
+	UA_State=_send;
+	UA_FBit=header->PF;
+	NextState=1;
+	break;
+      default:
+
+      }
+    }
+    
+    if (!Send_TXU(frame,header)) {
+      if (UA_State == _send) {
+	RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
+	UA_State=_idle;
+      }
+      else
+	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
+    }
+    
+    /* FIXME - Deal with a timeout from T */
+    
+    break;
+
+    /***** RLP State 6. *****/
+    /* We should only get here after a Reset_Req which is not yet supported */
+
+  case RLP_S6:
+
+#ifdef DEBUG
+    fprintf(stdout, _("RLP state 6 - not yet implemented!\n"));
+#endif
+    
+    if (!XID_Handling(frame, header)) {
+
+      switch (CurrentFrameType) {
+      default:
+      }
+
+    }
+
+    if (!Send_TXU(frame,header)) {
+    }
+
+    if (RLP_GetUserRequest(Disc_Req)) {
+      T=0;
+      T_RCVR=0;
+      DISC_State=_send;
+      DISC_Count=0;
+      DISC_PBit=Poll_xchg;
+      NextState=5;
+    }
 
     break;
 
 
-
-  default:
+    /***** RLP State 7. *****/
+  
+  case RLP_S7:
 
 #ifdef DEBUG
-    fprintf(stdout, _("DEBUG: RLP state %d.\n"), CurrentState);
+    fprintf(stdout, _("RLP state 7.\n"));
+#endif
+    
+    if (!XID_Handling(frame, header)) {
+
+      switch (CurrentFrameType) {
+      case RLPFT_U_DISC:
+	RLP_Passup(Disc_Ind,NULL,0);
+	UA_State=_send;
+	UA_FBit=header->PF;
+	NextState=RLP_S1;
+	break;
+      default:
+      }
+    }
+
+    if (RLP_GetUserRequest(Reset_Resp)){
+      UA_State=_send;
+      UA_FBit=1;
+      RLP_Init_link_vars();
+      NextState=RLP_S4;
+    }
+
+    if (!Send_TXU(frame,header)) {
+      if (UA_State == _send) {
+	RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
+	UA_State=_idle;
+      }
+      else
+	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
+    }
+
+    if (RLP_GetUserRequest(Disc_Req)) {
+      T=0;
+      T_RCVR=0;
+      DISC_State=_send;
+      DISC_Count=0;
+      DISC_PBit=Poll_xchg;
+      NextState=5;
+    }
+    
+    break;
+
+
+  default:
+    
+#ifdef DEBUG
+   fprintf(stdout, _("DEBUG: Unknown RLP state!\n"));
 #endif
 
     break;

@@ -17,6 +17,10 @@
 
 	/* Prototypes */
 
+bool	DP_Initialise(int read_fd, int write_fd);
+void	DP_HandleIncomingData(u8 *buffer, int length);
+void    DP_CallBack(RLP_UserInds ind, u8 *buffer, int length);
+
 	/* All defines and prototypes from here down are specific to 
 	   the datapump code and so are #ifdef out if __datapump_c isn't 
 	   defined. */

@@ -13,3 +13,8 @@
 * Sun Mar  5 19:20:56 EST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - change to ignore unsolicited NetworkInfo frames in 6110 (Gary Reuter)
 
+* Fri Mar 10 22:10:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
+- RLP code largely functional, data calls possible.
+
+* Fri Mar 10 22:10:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
+- CancelCall function in fbus-6110.c to end the call.

@@ -1618,7 +1618,7 @@ int dialdata(char *Number)
 
   sleep(10);
 
-  GSM->DialData(Number);
+  GSM->DialData(Number, 0);
 
   GSM->Terminate();
 
@@ -2507,7 +2507,7 @@ int reset( char *type)
 
 #ifndef WIN32
 int foogle(char *argv[])
-{ 
+{
 
 #if 0
   int i;
@@ -2520,15 +2520,16 @@ int foogle(char *argv[])
   
   /* Initialise RLP code. */
   
-  RLP_Initialise(GSM->SendRLPFrame);
+  // RLP_Initialise(GSM->SendRLPFrame);
 
   sleep(5); /* Wait for phone initialisation. */
 
   /* Hugh's number */
-  // GSM->DialData("62401000");
+  // GSM->DialData("62401000", 0);
 
   /* Pavel's one */
-  GSM->DialData("4670");
+  //GSM->DialData("01717157106", 0);
+  GSM->DialData("01223576101", 0);
 
   // RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
 
@@ -2552,8 +2553,8 @@ int foogle(char *argv[])
     printf("\n");
   }
 #endif
-
-  sleep (60);
+  sleep(20);
+ 
   GSM->Terminate();
 
   return 0;

@@ -4,3 +4,6 @@
 * Fri Mar  3 10:12:58 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - XPM support (Christopher Kemp)
 
+* Fri Mar 10 22:10:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
+- RLP code largely functional, data calls possible.
+

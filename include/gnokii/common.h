@@ -505,7 +505,7 @@ typedef struct {
 
   GSM_Error (*DialVoice)( char *Number);
 
-  GSM_Error (*DialData)( char *Number);
+  GSM_Error (*DialData)( char *Number, char type);
 
   GSM_Error (*GetIncomingCallNr)( char *Number );
 
@@ -532,6 +532,8 @@ typedef struct {
   GSM_Error (*SetProfile) ( GSM_Profile *Profile );
   
   bool      (*SendRLPFrame) ( RLP_F96Frame *frame, bool out_dtx );
+
+  GSM_Error (*CancelCall) ();
 
 } GSM_Functions;
 

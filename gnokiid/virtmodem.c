@@ -41,7 +41,7 @@
 #include "at-emulator.h"
 #include "datapump.h"
 #include "virtmodem.h"
-
+#include "rlp-common.h"
 
 	/* Global variables */
 
@@ -87,6 +87,12 @@ bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType
 		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n"));
 		return (false);
 	}
+
+	if (DP_Initialise(PtyRDFD, PtyWRFD) != true) {
+		fprintf (stderr, _("VM_Initialise - DP_Initialise failed!\n"));
+		return (false);
+	}
+
 
 		/* Create and start thread, */
 	rtn = pthread_create(&Thread, NULL, (void *) VM_ThreadLoop, (void *)NULL);
@@ -164,7 +170,7 @@ int		VM_PtySetup(void)
 	int			err;
 	char		*slave_name;
 	//char		*mgnokiidev = "/home/hugh/work/gnokii/mgnokiidev";			
-	char		*mgnokiidev = "./mgnokiidev";			
+	char		*mgnokiidev = "../utils/mgnokiidev";			
 	char		cmdline[200];
 	int			pty_number;
 
@@ -209,6 +215,7 @@ void    VM_CharHandler(void)
 {
     unsigned char   buffer[255];
     int             res;
+    int i;
 
     res = read(PtyRDFD, buffer, 255);
 
@@ -218,15 +225,20 @@ void    VM_CharHandler(void)
 		return;
 	}
 
+
+        if (!CommandMode) {
+        	DP_HandleIncomingData((u8 *)&buffer, res);
+	}
+
 		/* If we're in command mode and the AT emulator is initialised,
 		   pass byte to it for processing. */
-	if (CommandMode && ATEM_Initialised) {
-		ATEM_HandleIncomingData(buffer, res);
-	}
-	
-	//if (!CommandModem && VM_Initialised) {
-	//	VM_HandleIncomingData(&buffer, res);
-	//}
+	else if (CommandMode && ATEM_Initialised) {
+	  /*	  printf("VM Debug: ");
+		  for (i=0;i<res;i++) printf("%c",buffer[i]);
+		  printf("\n"); */
+	  ATEM_HandleIncomingData(buffer, res);
+	}	
+
 }     
 
 	/* Initialise GSM interface, returning GSM_Error as appropriate  */
@@ -237,7 +249,7 @@ GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Conne
 
 		/* Initialise the code for the GSM interface. */     
 
-	error = GSM_Initialise(model, port, initlength, connection, NULL);
+	error = GSM_Initialise(model, port, initlength, connection, RLP_DisplayF96Frame);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));

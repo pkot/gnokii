@@ -29,7 +29,7 @@
 /* Global variables */
 
 /* Defines */
-  
+
 /* Data types */
 
 /* Typedef for frame type - they are the same for RLP version 0, 1 and 2. */
@@ -108,6 +108,34 @@ typedef struct {
   RLP_FrameType Type; /* Frame type. */
 } RLP_F96Header;
 
+
+/* RLP User requests */
+
+typedef struct {
+  bool Conn_Req;
+  bool Attach_Req;
+  bool Conn_Req_Neg;
+  bool Reset_Resp;
+  bool Disc_Req;
+} RLP_UserRequestStore;
+
+typedef enum {
+  Conn_Req,
+  Attach_Req,
+  Conn_Req_Neg,
+  Reset_Resp,
+  Disc_Req
+} RLP_UserRequests;
+
+typedef enum {
+  Conn_Ind,
+  Conn_Conf,
+  Disc_Ind,
+  Reset_Ind,
+  Data,
+  StatusChange
+} RLP_UserInds;
+
 /* RLP (main) states. See GSM specification 04.22 Annex A, Section A.1.1. */
 
 typedef enum {
@@ -134,11 +162,24 @@ typedef enum {
   _srej
 } RLP_StateVariable;
 
+
+/* RLP Data */
+
+typedef struct { 
+  u8 Data[25];
+  RLP_StateVariable State;
+} RLP_Data;
+
+
+
 /* Prototypes for functions. */
 
 void RLP_DisplayF96Frame(RLP_F96Frame *frame);
 void RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header);
 void RLP_DisplayXID(u8 *frame);
-void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx));
+void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx), void (*rlp_passup)(RLP_UserInds ind, u8 *buffer, int length));
+void RLP_Init_link_vars(void);
+void RLP_SetUserRequest(RLP_UserRequests type, bool value);
+void RLP_Send(char *buffer, int length);
 
 #endif	/* __rlp_common_h */

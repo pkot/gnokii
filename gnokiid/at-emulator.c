@@ -39,9 +39,11 @@
 #include "gsm-common.h"
 #include "gsm-api.h"
 #include "at-emulator.h"
+#include "virtmodem.h"
 
 	/* Global variables */
-bool	ATEM_Initialised = false;	/* Set to true once initialised */
+bool ATEM_Initialised = false;	/* Set to true once initialised */
+extern bool    CommandMode;
 
 extern char *Model;
 extern char *Port;	/* Hmm, this is a bit iffy ? */
@@ -99,7 +101,7 @@ void	ATEM_InitRegisters(void)
 	ModemRegisters[REG_CR] = 10;
 	ModemRegisters[REG_LF] = 13;
 	ModemRegisters[REG_BS] = 8;
-
+	ModemRegisters[S35]=7;
 	ModemRegisters[REG_ECHO] = BIT_ECHO;
 
 }
@@ -151,6 +153,7 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 void	ATEM_ParseAT(char *cmd_buffer)
 {
 	char *buf;
+	char number[30];
 
 	if (strncmp (cmd_buffer, "AT", 2) != 0) {
 		ATEM_ModemResult(4);
@@ -160,6 +163,37 @@ void	ATEM_ParseAT(char *cmd_buffer)
 	for (buf = &cmd_buffer[2]; *buf;) {
 		switch (*buf) {
 
+		case 'Z':
+		  buf++;
+		  break;
+		case 'D':
+		  /* Dial Data :-) */
+		  /* FIXME - should parse this better */
+		  buf++;
+		  if (*buf=='T') buf++;
+		  if (*buf==' ') buf++;
+		  strncpy(number,buf,30);
+		   if (ModemRegisters[S35]==0) GSM->DialData(number,1);
+		   else GSM->DialData(number,0);
+		   ATEM_StringOut("\n\r");
+		   CommandMode=false;
+		   return;
+		   break;
+		case 'H':
+		  /* Hang Up */
+		  buf++;
+		  RLP_SetUserRequest(Disc_Req,true);
+		  GSM->CancelCall();
+		  break;
+		case 'S':
+		  /* Change registers - only no. 35 for now */
+		  buf++;
+		  if (memcmp(buf,"35=",3)==0) {
+		    buf+=3;
+		    ModemRegisters[S35]=*buf-'0';
+		    buf++;
+		  }
+		  break;
 				/* E - Turn Echo on/off */
 			case 'E':
 				buf++;
