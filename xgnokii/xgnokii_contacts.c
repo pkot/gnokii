@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.25  2001-02-12 15:13:46  chris
+  Revision 1.26  2001-03-05 10:42:03  ja
+  Pavel Machek's vcard and finegrained indicators patch.
+
+  Revision 1.25  2001/02/12 15:13:46  chris
   Fixed my bug in xgnokii_contacts.c and added <string.h> to tekram.c
 
   Revision 1.24  2001/02/02 08:09:57  ja
@@ -871,6 +874,24 @@ inline void GUI_RefreshGroupMenu (void)
 }
 
 
+static void EditSubEntries (GtkWidget      *clist,
+                            gint            row,
+                            gint            column,
+                            GdkEventButton *event,
+                            gpointer        data )
+{
+  if(event && event->type == GDK_2BUTTON_PRESS)
+//    EditPbEntry((PhonebookEntry *) gtk_clist_get_row_data(GTK_CLIST (clist), row),
+//                row);
+  {
+    gchar *buf;
+
+    gtk_clist_get_text (GTK_CLIST (clist), row, 1, &buf);
+    g_print (buf);
+  }
+}
+
+
 static void EditNumbers (GtkWidget *widget, void *data)
 {
   GtkWidget *button, *clistScrolledWindow;
@@ -920,8 +941,8 @@ static void EditNumbers (GtkWidget *widget, void *data)
     gtk_clist_set_column_width (GTK_CLIST (editNumbersData.clist), 2, 10);
     //gtk_clist_set_column_justification (GTK_CLIST (editNumbersData.clist), 2, GTK_JUSTIFY_CENTER);
 
-    //gtk_signal_connect (GTK_OBJECT (editNumbersData.clist), "select_row",
-    //                    GTK_SIGNAL_FUNC (ClickEntry), NULL);
+    gtk_signal_connect (GTK_OBJECT (editNumbersData.clist), "select_row",
+                        GTK_SIGNAL_FUNC (EditSubEntries), NULL);
 
     clistScrolledWindow = gtk_scrolled_window_new (NULL, NULL);
     gtk_container_add (GTK_CONTAINER (clistScrolledWindow), editNumbersData.clist);
@@ -2321,21 +2342,53 @@ inline void GUI_ShowContacts (void)
 //    ReadContacts ();
 }
 
-
-static void ExportContactsMain (gchar *name)
+static void ExportVCARD (FILE *f)
 {
-  FILE *f;
+  gchar buf2[10];
+  register gint i,j;
+  PhonebookEntry *pbEntry;
+
+  for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
+  {
+    pbEntry = g_ptr_array_index (contactsMemory, i);
+
+    if (pbEntry->status == E_Deleted || pbEntry->status == E_Empty)
+      continue;
+
+    fprintf (f, "BEGIN:VCARD\n");
+    fprintf (f, "FN:%s\n", pbEntry->entry.Name);
+    fprintf (f, "TEL;PREF:%s\n", pbEntry->entry.Number);
+
+    if (pbEntry->entry.MemoryType == GMT_ME)
+      sprintf (buf2, "ME%d", i + 1);
+    else
+      sprintf (buf2, "SM%d", i - memoryStatus.MaxME + 1);
+
+    fprintf (f, "X_GSM_STORE_AT:%s\n", buf2);
+    fprintf (f, "X_GSM_CALLERGROUP:%d\n", pbEntry->entry.Group);
+
+    /* Add ext. pbk info if required */
+    if (phoneMonitor.supported & PM_EXTPBK)
+      for (j = 0; j < pbEntry->entry.SubEntriesCount; j++)
+      {
+	if (pbEntry->entry.SubEntries[j].EntryType == GSM_Number)
+          fprintf (f, "TEL;UNKNOWN_%d:%s\n", pbEntry->entry.SubEntries[j].NumberType,
+                   pbEntry->entry.SubEntries[j].data.Number);
+      }
+
+    fprintf (f, "END:VCARD\n\n");
+  }
+  
+  fclose (f);
+}
+
+
+static void ExportNative (FILE *f)
+{
   gchar buf[IO_BUF_LEN], buf2[10];
   register gint i,j;
   PhonebookEntry *pbEntry;
 
-  if ((f = fopen( name, "w")) == NULL)
-  {
-    g_snprintf (buf, IO_BUF_LEN, _("Can't open file %s for writing!"), name);
-    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
-    gtk_widget_show (errorDialog.dialog);
-    return;
-  }
 
   for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
   {
@@ -2374,34 +2427,52 @@ static void ExportContactsMain (gchar *name)
       strcat (buf, buf2);
 
       /* Add ext. pbk info if required */
+      if (phoneMonitor.supported & PM_EXTPBK)
+      {
+        for (j = 0; j < pbEntry->entry.SubEntriesCount; j++)
+          if (pbEntry->entry.SubEntries[j].EntryType==GSM_Number)
+          {
+            sprintf(buf2,"%d;",pbEntry->entry.SubEntries[j].NumberType);
+            strcat(buf,buf2);
 
-      if (phoneMonitor.supported & PM_EXTPBK){
-	
-	for (j=0;j<pbEntry->entry.SubEntriesCount;j++){
-	  if (pbEntry->entry.SubEntries[j].EntryType==GSM_Number){
-	    
-	    sprintf(buf2,"%d;",pbEntry->entry.SubEntries[j].NumberType);
-	    strcat(buf,buf2);
-	    
 	    if (index (pbEntry->entry.SubEntries[j].data.Number, ';') != NULL)
-	      {
-		strcat (buf, "\"");
-		strcat (buf, pbEntry->entry.SubEntries[j].data.Number);
-		strcat (buf, "\";");
-	      }
+	    {
+              strcat (buf, "\"");
+              strcat (buf, pbEntry->entry.SubEntries[j].data.Number);
+              strcat (buf, "\";");
+            }
 	    else
-	      {
-		strcat (buf, pbEntry->entry.SubEntries[j].data.Number);
-		strcat (buf, ";");
-	      }
+	    {
+              strcat (buf, pbEntry->entry.SubEntries[j].data.Number);
+              strcat (buf, ";");
+            }
 	  }
-	}
       }
       fprintf (f, "%s\n", buf);
     }
   }
   
   fclose(f);
+}
+
+
+static void ExportContactsMain (gchar *name)
+{
+  FILE *f;
+  gchar buf[IO_BUF_LEN];
+
+  if ((f = fopen (name, "w")) == NULL)
+  {
+    g_snprintf (buf, IO_BUF_LEN, _("Can't open file %s for writing!"), name);
+    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+    gtk_widget_show (errorDialog.dialog);
+    return;
+  }
+
+  if (strstr (name, ".vcard") || strstr (name, ".gcrd"))
+    ExportVCARD (f);
+  else
+    ExportNative (f);
 }
 
 

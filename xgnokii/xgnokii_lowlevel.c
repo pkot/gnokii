@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.12  2001-02-02 08:09:57  ja
+  Revision 1.13  2001-03-05 10:42:03  ja
+  Pavel Machek's vcard and finegrained indicators patch.
+
+  Revision 1.12  2001/02/02 08:09:57  ja
   New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
 
   Revision 1.11  2001/01/29 15:22:20  machek
@@ -859,8 +862,8 @@ gint (*DoAction[])(gpointer) = {
 void *GUI_Connect (void *a)
 {
   /* Define required unit types for RF and Battery level meters. */
-  GSM_RFUnits rf_units = GRF_Arbitrary;
-  GSM_BatteryUnits batt_units = GBU_Arbitrary;
+  GSM_RFUnits rf_units = GRF_Percentage;
+  GSM_BatteryUnits batt_units = GBU_Percentage;
 
   GSM_DateTime Alarm;
   GSM_SMSStatus SMSStatus = {0, 0};
@@ -888,16 +891,20 @@ void *GUI_Connect (void *a)
 
     if (GSM->GetRFLevel (&rf_units, &phoneMonitor.rfLevel) != GE_NONE)
       phoneMonitor.rfLevel = -1;
-    if (rf_units == GRF_Percentage)
-      phoneMonitor.rfLevel /= 20.0;
-    
-    if (GSM->GetPowerSource(&phoneMonitor.powerSource) == GE_NONE 
+
+    if (rf_units == GRF_Arbitrary)
+      phoneMonitor.rfLevel *= 25;
+
+    if (GSM->GetPowerSource (&phoneMonitor.powerSource) == GE_NONE 
         && phoneMonitor.powerSource == GPS_ACDC)
-      phoneMonitor.batteryLevel = ((gint) phoneMonitor.batteryLevel + 1) % 5;
-    else if (GSM->GetBatteryLevel (&batt_units, &phoneMonitor.batteryLevel) != GE_NONE)
-      phoneMonitor.batteryLevel = -1;
-    if (batt_units == GBU_Percentage)
-      phoneMonitor.batteryLevel /= 20;
+      phoneMonitor.batteryLevel = ((gint) phoneMonitor.batteryLevel + 25) % 125;
+    else
+    {
+      if (GSM->GetBatteryLevel (&batt_units, &phoneMonitor.batteryLevel) != GE_NONE)
+        phoneMonitor.batteryLevel = -1;
+      if (batt_units == GBU_Arbitrary)
+        phoneMonitor.batteryLevel *= 25;
+    }
 
     if (GSM->GetAlarm (0, &Alarm) == GE_NONE && Alarm.AlarmEnabled != 0)
       phoneMonitor.alarm = TRUE;

@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.30  2001-01-29 15:22:20  machek
+  Revision 1.31  2001-03-05 10:42:02  ja
+  Pavel Machek's vcard and finegrained indicators patch.
+
+  Revision 1.30  2001/01/29 15:22:20  machek
   Use integer as bitfield instead of struct of int:1.
 
   Be able to read phonebook saved in gnokii format from xgnokii.
@@ -272,14 +275,20 @@ static inline void DrawNetwork (GtkWidget *data, int rflevel)
 {
   int i;
 
-  if (rflevel > 4)
-    rflevel = 4;
-  for (i=1; i<=rflevel; i++)
-    gdk_draw_rectangle (Pixmap,
-		        GTK_WIDGET(data)->style->white_gc,
-		        TRUE,
-		        network_levels[4*(i-1)], network_levels[4*(i-1)+1],
-		        network_levels[4*(i-1)+2], network_levels[4*(i-1)+3]);
+  if (rflevel > 100)
+    rflevel = 100;
+  for (i = 0; (i * 25) <= rflevel; i++)
+  {
+    float percent = ((float) rflevel - i * 25) / 25;
+    
+    if (percent > 1)
+      percent = 1;
+    gdk_draw_rectangle (Pixmap, GTK_WIDGET (data)->style->white_gc, TRUE,
+                        network_levels[4 * i] + network_levels[4 * i + 2] * (1 - percent),
+                        network_levels[4 * i + 1],
+                        network_levels[4 * i + 2] * percent,
+                        network_levels[4 * i + 3]);
+  }
 }
 
 
@@ -295,16 +304,21 @@ static inline void DrawBattery (GtkWidget *data, int batterylevel)
 {
   int i;
 
-  if (batterylevel >= 0)
+  g_print ("%d\n", batterylevel);
+  if (batterylevel < 0)
+    return;
+  if (batterylevel > 100)
+    batterylevel = 100;
+  for (i = 0; (i * 25) <= batterylevel; i++)
   {
-    if (batterylevel > 4)
-      batterylevel = 4;
-    for (i = 1; i <= batterylevel; i++)
-      gdk_draw_rectangle (Pixmap,
-			  GTK_WIDGET (data)->style->white_gc,
-			  TRUE,
-			  battery_levels[4*(i-1)], battery_levels[4*(i-1)+1],
-			  battery_levels[4*(i-1)+2], battery_levels[4*(i-1)+3]);
+    float percent = ((float) batterylevel - i * 25) / 25;
+    if (percent > 1)
+      percent = 1;
+    gdk_draw_rectangle (Pixmap, GTK_WIDGET (data)->style->white_gc, TRUE,
+                        battery_levels[4 * i] + battery_levels[4 * i + 2] * (1 - percent),
+                        battery_levels[4 * i + 1],
+                        battery_levels[4 * i + 2] * percent,
+                        battery_levels[4 * i + 3]);
   }
 }
 

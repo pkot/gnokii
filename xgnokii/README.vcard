@@ -1,0 +1,7 @@
+Vcard support in xgnokii.
+
+Xgnokii is capable to save contatcs in vcard format (Thanks to Pavel Machek
+<pavel@ucw.cz>). If you want to save contacts in vcard format you must in
+export dialog write file name with .vcard or .gcrd extension.
+
+				Jan Derfinak <ja@mail.upjs.sk>
