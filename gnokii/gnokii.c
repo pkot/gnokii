@@ -3204,7 +3204,7 @@ static int writephonebook(int argc, char *args[])
 		if (argc) {
 			gn_phonebook_entry aux;
 
-			aux.location = entry.location;
+			memcpy(&aux, &entry, sizeof(gn_phonebook_entry));
 	      		data.phonebook_entry = &aux;
 			error = gn_sm_functions(GN_OP_ReadPhonebook, &data, &state);
 
