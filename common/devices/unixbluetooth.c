@@ -42,7 +42,7 @@ static char *phone[] = {
 	"Nokia 8910"
 };
 
-int bluetooth_open(bdaddr_t *bdaddr, int channel, struct gn_statemachine *state)
+int bluetooth_open(bdaddr_t *bdaddr, uint8_t channel, struct gn_statemachine *state)
 {
 	struct sockaddr_rc laddr, raddr;
 	int fd;
@@ -52,20 +52,19 @@ int bluetooth_open(bdaddr_t *bdaddr, int channel, struct gn_statemachine *state)
 		return -1;
 	}
 
+	memset(&laddr, 0, sizeof(laddr));
 	laddr.rc_family = AF_BLUETOOTH;
 	bacpy(&laddr.rc_bdaddr, BDADDR_ANY);
-	laddr.rc_channel = 0;
-
 	if (bind(fd, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
 		perror("Can't bind socket");
 		close(fd);
 		return -1;
 	}
 
+	memset(&raddr, 0, sizeof(raddr));
 	raddr.rc_family = AF_BLUETOOTH;
 	bacpy(&raddr.rc_bdaddr, bdaddr);
-	raddr.rc_channel = htobs(channel);
-
+	raddr.rc_channel = channel;
 	if (connect(fd, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
 		perror("Can't connect");
 		close(fd);
@@ -102,7 +101,7 @@ int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *st
 
 #else /* HAVE_BLUETOOTH */
 
-int bluetooth_open(void *bdaddr, int channel, struct gn_statemachine *state) { return -1; }
+int bluetooth_open(void *bdaddr, uint8_t channel, struct gn_statemachine *state) { return -1; }
 int bluetooth_close(int fd, struct gn_statemachine *state) { return -1; }
 int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
 int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }

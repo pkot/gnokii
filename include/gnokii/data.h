@@ -131,7 +131,7 @@ typedef struct {
 	char connect_script[256];			/* Script to run when device connection established */
 	char disconnect_script[256];			/* Script to run when device connection closed */
 #ifdef HAVE_BLUETOOTH
-	int rfcomm_cn;					/* RFCOMM channel number to connect */
+	uint8_t rfcomm_cn;				/* RFCOMM channel number to connect */
 	bdaddr_t bt_address;				/* Bluetooth device address */
 #endif
 } gn_config;

@@ -23,6 +23,7 @@
                                                      (Osma Suominen)
     o fix other C++ namespace clashes: try, new, this
                                                   (Marcus Godehardt)
+    o rfcomm channel has uint8_t type              (Marcel Holtmann)
  * statemachine changes
     o allow sm_block and friends to be used not only directly after
       sm_message_send but also with sm_reset in between, which sets
