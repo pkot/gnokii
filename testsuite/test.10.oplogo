@@ -1,1 +1,1 @@
-$GNOKII --sendlogo op 0800123456 ../Docs/sample/ringtone/gnokii.nol "203 01"
+$GNOKII --sendlogo op 0800123456 ../Docs/gnokii.nol "203 01"

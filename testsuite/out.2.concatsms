@@ -1,5 +1,3 @@
-Adding concat header
-Please enter SMS text. End your input with <cr><control-D>:Encoding concat header
-AT+???=51
+Please enter SMS text. End your input with <cr><control-D>:AT+???=51
 0051000A81800021436500F50026050003CE0201546869732069732062656767696E696E67206F6620746865206D657373616765
 Send succeeded!

@@ -1,5 +1,6 @@
 #
 # Send pacman to 0604343103
-# 
-$GNOKII --sendsms 0604343103 -p ../Docs/sample/logo/pacman.xpm
+#
+echo Gnokii does not yet understand this syntax; test disabled
+#$GNOKII --sendsms 0604343103 -p ../Docs/sample/logo/pacman.xpm
 

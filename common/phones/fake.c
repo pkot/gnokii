@@ -93,8 +93,8 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 
 	if (!data->RawSMS) return GE_INTERNALERROR;
 
-	/* Prepare the message and count the size */
-	req[offset] = 0x00; /* Message Center */
+	/* Do not fill message center so we don't have to emulate that */
+	offset += 0;
 
 	req2[offset + 1] = 0x01 | 0x10; /* Validity period in relative format */
 	if (data->RawSMS->RejectDuplicates) req2[offset + 1] |= 0x04;
@@ -117,7 +117,8 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 
 	length = data->RawSMS->UserDataLength + offset + 8;
 
-	fprintf(stdout, "AT+%s=%d\n", cmd, length - data->RawSMS->MessageCenter[0] - 1);
+	/* Length in AT mode is the length of the full message minus SMSC field length */
+	fprintf(stdout, "AT+%s=%d\n", cmd, length - 1);
 
 	bin2hex(req, req2, length);
 	req[length * 2] = 0x1a;
