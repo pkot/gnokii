@@ -87,6 +87,7 @@ GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time);
 GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time);
 GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time);
+GSM_Error	FB61_DialVoice(char *Number);
 
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __fbus_6110_c isn't 

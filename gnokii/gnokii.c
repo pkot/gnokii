@@ -42,6 +42,9 @@ void writephonebook(void);
 void getsms(char *argv[]);
 void deletesms(char *argv[]);
 void sendsms(char *argv[]);
+void getdatetime(void);
+void getalarm(void);
+void dialvoice(char *argv[]);
 
 void version(void)
 {
@@ -64,6 +67,9 @@ void usage(void)
           gnokii [--getsms] [memory type] [start] [end]
           gnokii [--deletesms] [memory type] [start] [end]
           gnokii [--sendsms] [destination] [message centre]
+          gnokii [--getdatetime]
+          gnokii [--getalarm]
+          gnokii [--dialvoice] [number]
 
           --help            display usage information.
 
@@ -94,7 +100,13 @@ void usage(void)
           --sendsms         sends an SMS message to [destination] via
                             [message centre].  Message text is taken from
                             stdin.  This function has had limited testing
-                            and may not work at all on your network.\n"));
+                            and may not work at all on your network.
+
+          --getdatetime     shows current date and time in the phone.
+
+          --getalarm        shows current alarm.
+
+          --dialvoice       initiate voice call.\n"));
 }
 
 /* fbusinit is the generic function which waits for the FBUS link. The limit
@@ -162,6 +174,21 @@ int main(int argc, char *argv[])
 
   if (strcmp(argv[1], "--enterpin") == 0) {
     enterpin();
+  }
+
+  /* Get date/time mode. */
+  if (strcmp(argv[1], "--getdatetime") == 0) {
+    getdatetime();
+  }
+
+  /* Get alarm mode. */
+  if (strcmp(argv[1], "--getalarm") == 0) {
+    getalarm();
+  }
+
+  /* Voice call mode. */
+  if (strcmp(argv[1], "--dialvoice") == 0) {
+    dialvoice(argv);
   }
 
 		/* Get phonebook command. */
@@ -261,8 +288,6 @@ void	getsms(char *argv[])
 
 		/* Initialise the code for the GSM interface. */     
 	fbusinit(true);
-
-	sleep(5);
 
 		/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count ++) {
@@ -380,6 +405,48 @@ void	enterpin(void)
 	exit(0);
 }
 
+void dialvoice(char *argv[])
+{
+
+  fbusinit(false);
+
+  if (argv[2])
+    GSM->DialVoice(argv[2]);
+
+  GSM->Terminate();
+  exit(0);
+}
+
+	/* In this mode we receive the date and time from mobile phone */
+
+void	getdatetime(void) {
+
+  GSM_DateTime date_time;
+
+	fbusinit(false);
+
+	if (GSM->GetDateTime(&date_time)==GE_NONE) {
+		fprintf(stdout, "Date: %4d/%02d/%02d\n", date_time.Year, date_time.Month, date_time.Day);
+		fprintf(stdout, "Time: %02d:%02d:%02d\n", date_time.Hour, date_time.Minute, date_time.Second);
+	}
+
+	GSM->Terminate(); exit(0);
+}
+
+void	getalarm(void) {
+
+  GSM_DateTime date_time;
+
+	fbusinit(false);
+
+	if (GSM->GetAlarm(0, &date_time)==GE_NONE) {
+		fprintf(stdout, "Alarm: %s\n", (date_time.AlarmEnabled==0)?"off":"on");
+		fprintf(stdout, "Time: %02d:%02d\n", date_time.Hour, date_time.Minute);
+	}
+
+	GSM->Terminate(); exit(0);
+}
+
 /* In monitor mode we don't do much, we just initialise the fbus code with
    monitoring enabled and print status informations. */
 
@@ -472,6 +539,9 @@ void	getphonebook(char *argv[])
 	/* Read data from stdin, parse and write to phone.  The parsing
 	   is relatively crude and doesn't allow for much variation
 	   from the stipulated format. */
+
+/* FIXME: can not parse group now...*/
+
 void	writephonebook(void)
 {
 	GSM_PhonebookEntry		entry;
