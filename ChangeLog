@@ -4,6 +4,7 @@
     o move ppp examples from samples directory do samples/ppp
                                                          (Pawel Kot)
     o add gsm-filetypes.o to libgnokii.so/libgnokii.a    (Pawel Kot)
+    o fix install-docs target                            (Pawel Kot)
 
 0.5.0pre3
 =========
