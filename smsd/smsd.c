@@ -28,6 +28,7 @@
 */
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <pthread.h>
 #include <getopt.h>
@@ -174,6 +175,34 @@ static void Usage (gchar *p)
              "            -f, --logfile file\n"
              "            -v, --version\n"
              "            -h, --help\n"), p);
+}
+
+
+static void LogFile (gchar *str, ...)
+{
+  FILE *f;
+  va_list ap;
+  time_t cas;
+  gchar buf[50];
+  
+  if (smsdConfig.logFile == NULL)
+    return;
+
+  if ((f = fopen (smsdConfig.logFile, "a")) == NULL)
+  {
+    g_print (_("Warning: Cannot open file %s for appendig.\n"), smsdConfig.logFile);
+    return;
+  }
+
+  cas = time (NULL);
+  strftime (buf, 50, "%e %b %Y %T", localtime (&cas));
+  fprintf (f, "%s: ", buf);
+
+  va_start (ap, str);
+  vfprintf (f, str, ap);
+  va_end (ap);
+  fclose (f);
+  return;
 }
 
 
@@ -336,23 +365,10 @@ gint WriteSMS (gn_sms *sms)
 
   if (smsdConfig.logFile)
   {
-    FILE *f;
-    time_t cas;
-    gchar buf[50];
-    
-    if ((f = fopen (smsdConfig.logFile, "a")) == NULL)
-      g_print (_("Warning: Cannot open file %s for appendig.\n"), smsdConfig.logFile);
+    if (error)
+      LogFile (_("Sending to %s unsuccessful. Error %d\n"), sms->remote.number, error);
     else
-    {
-      cas = time (NULL);
-      strftime (buf, 50, "%e %b %Y %T", localtime (&cas));
-      fprintf (f, "%s: ", buf);
-      if (error)
-        fprintf (f, _("Sending to %s unsuccessful. Error %d\n"), sms->remote.number, error);
-      else
-        fprintf (f, _("Sending to %s successful.\n"), sms->remote.number);
-      fclose (f);
-    }
+      LogFile (_("Sending to %s successful.\n"), sms->remote.number);
   }
 
   return (error);
@@ -386,23 +402,10 @@ static void ReadSMS (gpointer d, gpointer userData)
     
     if (smsdConfig.logFile)
     {
-      FILE *f;
-      time_t cas;
-      gchar buf[50];
-
-      if ((f = fopen (smsdConfig.logFile, "a")) == NULL)
-        g_print (_("Warning: Cannot open file %s for appendig.\n"), smsdConfig.logFile);
+      if (error)
+        LogFile (_("Inserting sms from %s unsuccessful.\n"), data->remote.number);
       else
-      {
-        cas = time (NULL);
-        strftime (buf, 50, "%e %b %Y %T", localtime (&cas));
-        fprintf (f, "%s: ", buf);
-        if (error)
-          fprintf (f, _("Inserting sms from %s unsuccessful.\n"), data->remote.number);
-        else
-          fprintf (f, _("Inserting sms from %s successful.\n"), data->remote.number);
-        fclose (f);
-      }
+        LogFile (_("Inserting sms from %s successful.\n"), data->remote.number);
     }
     
     e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));

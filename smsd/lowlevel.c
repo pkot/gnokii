@@ -118,37 +118,42 @@ static gn_error InitModelInf (void)
 }
 
 
-static void busterminate(void)
+static void busterminate (void)
 {
-	gn_sm_functions(GN_OP_Terminate, NULL, &sm);
-	if (lockfile) gn_device_unlock(lockfile);
+  gn_sm_functions (GN_OP_Terminate, NULL, &sm);
+  if (lockfile)
+    gn_device_unlock (lockfile);
 }
 
 
-static gn_error fbusinit (const char *iname, bool enable_monitoring)
+static gn_error fbusinit (const char * const iname)
 {
   gn_error error = GN_ERR_NOLINK;
   char *aux;
   static bool atexit_registered = false;
   
-	/* register cleanup function */
-	if (!atexit_registered) {
-		atexit_registered = true;
-		atexit(busterminate);
-	}
-	/* signal(SIGINT, bussignal); */
+  /* register cleanup function */
+  if (!atexit_registered)
+  {
+    atexit_registered = true;
+    atexit (busterminate);
+  }
+  /* signal(SIGINT, bussignal); */
 
-	if (!gn_cfg_phone_load(iname, &sm)) exit(-1);
+  if (!gn_cfg_phone_load (iname, &sm))
+    exit (-1);
 
-	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
-	/* Defaults to 'no' */
-	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_device_lock(sm.config.port_device);
-		if (lockfile == NULL) {
-			fprintf(stderr, _("Lock file error. Exiting\n"));
-			exit(1);
-		}
-	}
+  aux = gn_cfg_get (gn_cfg_info, "global", "use_locking");
+  /* Defaults to 'no' */
+  if (aux && !strcmp (aux, "yes"))
+  {
+    lockfile = gn_device_lock (sm.config.port_device);
+    if (lockfile == NULL)
+    {
+      fprintf (stderr, _("Lock file error. Exiting\n"));
+      exit(1);
+    }
+  }
 
   /* Initialise the code for the GSM interface. */     
 
@@ -158,7 +163,8 @@ static gn_error fbusinit (const char *iname, bool enable_monitoring)
   g_print ("fbusinit: error %d\n", error);
 #endif
 
-  if (error != GN_ERR_NONE) {
+  if (error != GN_ERR_NONE)
+  {
     g_print (_("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
     return (error);
   }
@@ -365,7 +371,7 @@ void *Connect (void *a)
   g_print ("Initializing connection...\n");
 # endif
 
-  if (fbusinit ("", true) != GN_ERR_NONE)
+  if (fbusinit ("") != GN_ERR_NONE)
   {
     free (data);
     exit (1);
