@@ -47,11 +47,11 @@ smsd: $(OBJS) $(TOPDIR)/common/libgnokii.la
 # PostgreSQL support
 pq.lo: smsd.h pq.c
 	$(LIBTOOL) --mode=compile $(CC) -o pq.lo $(CFLAGS) $(CPPFLAGS) \
-	-I../include -I/usr/include/pgsql -c pq.c
+	-I../include -I$(shell pg_config --includedir) -c pq.c
 
 libpq.la: pq.lo
 	$(LIBTOOL) --mode=link $(CC) -o libpq.la pq.lo \
-	$(shell $(GLIBLDLIBS)) -lpq \
+	$(shell $(GLIBLDLIBS)) -L$(shell pg_config --libdir) -lpq \
 	-export-dynamic -avoid-version -rpath ${libdir}/smsd
 
 # MySQL support
