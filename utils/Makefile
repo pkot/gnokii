@@ -21,6 +21,7 @@ clean:
 install:
 	$(INSTALL) -d $(sbindir)
 	$(INSTALL) mgnokiidev $(sbindir)
+	$(INSTALL) todologo $(bindir)
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

@@ -64,9 +64,13 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 /usr/bin/xgnokii
 /usr/bin/xlogos
+/usr/bin/todologo
 /usr/lib/xgnokii
 
 %changelog
+* Fri Oct 27 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- todologo added to the package
+
 * Mon May 15 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - proper access rights for gnokiid, gnokii and mgnokiidev
 
