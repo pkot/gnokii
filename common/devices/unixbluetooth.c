@@ -37,6 +37,7 @@
 #include "devices/unixbluetooth.h"
 
 static char *phone[] = {
+	"Nokia 3650",
 	"Nokia 6210",
 	"Nokia 6310",
 	"Nokia 6310i",
