@@ -19,6 +19,7 @@ ifndef WIN32_CROSS
 PRGNAME=gnokii
 else
 PRGNAME=gnokii.exe
+TARGET=-mconsole
 endif
 
 LDLIBS += $(TOPDIR)/common/libgnokii.la
@@ -31,13 +32,10 @@ ifdef ICONV_LIBS
 	LDLIBS += $(ICONV_LIBS)
 endif
 
-all: $(PRGNAME)
+all: gnokii
 
 gnokii: $(OBJS) $(TOPDIR)/common/libgnokii.la
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
-
-gnokii.exe: $(OBJS) $(TOPDIR)/common/$(GNOKII_LIB)
-	$(LIBTOOL) --mode=link $(CC) -mconsole $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
+	$(LIBTOOL) --mode=link $(CC) $(TARGET) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(PRGNAME)
 
 $(TOPDIR)/getopt/libgetopt.a:
 	$(MAKE) -C $(TOPDIR)/getopt
@@ -48,7 +46,7 @@ clean:
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(LIBTOOL) --mode=install $(INSTALL) gnokii $(DESTDIR)$(bindir)
+	$(LIBTOOL) --mode=install $(INSTALL) $(PRGNAME) $(DESTDIR)$(bindir)
 
 install-strip: all
 	$(INSTALL) -d $(DESTDIR)$(bindir)

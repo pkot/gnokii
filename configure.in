@@ -24,6 +24,7 @@ AC_PATH_PROG(FIND, find, no)
 AC_CHECK_PROGS(MAKE, gmake make)
 AC_CHECK_PROGS(AR, ar)
 AC_LIBTOOL_WIN32_DLL
+define([AC_PROVIDE_AC_LIBTOOL_WIN32_DLL])
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
@@ -378,13 +379,24 @@ if test x$enable_shared = xyes ; then
 else
 	shared="no"
 fi
+if test x$enable_static = xyes ; then
+	static="yes"
+else
+	static="no"
+fi
 
 AC_ARG_ENABLE(win32, 
    [  --enable-win32          if you want win32 suport ],
    [ AC_DEFINE(WIN32)
      WIN32=1
-     win32="-DWIN32" ],
-   [ win32=""]
+     if test x$cross_compiling = xyes; then
+	AC_DEFINE(WIN32_CROSS, 1, [Define if you cross compile win32.])
+	WIN32_CROSS=1
+	win32="cross"
+     else
+        win32="yes"
+     fi ],
+   [ win32="no"]
 )
 
 AC_CHECK_FUNC(grantpt,
@@ -611,6 +623,7 @@ echo "
     Bluetooth:          $USE_BLUETOOTH
     Security:           $security
     Build Shared Lib:   $shared
+    Build Static Lib:   $static
     Win32:              $win32 
     Prefix:             $prefix
 
