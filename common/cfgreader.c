@@ -41,6 +41,10 @@
 #include "cfgreader.h"
 #include "gnokii-internal.h"
 
+#ifdef HAVE_BLUETOOTH
+#  include <bluetooth/bluetooth.h>
+#endif
+
 API struct gn_cfg_header *gn_cfg_info;
 static gn_config gn_config_default, gn_config_global;
 
@@ -301,6 +305,10 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 		else if (!strcasecmp(val, "irda"))
 			cfg->connection_type = GN_CT_Irda;
 #endif
+#ifdef HAVE_BLUETOOTH
+		else if (!strcasecmp(val, "bluetooth"))
+			cfg->connection_type = GN_CT_Bluetooth;
+#endif
 #ifndef WIN32
 		else if (!strcasecmp(val, "tcp"))
 			cfg->connection_type = GN_CT_TCP;
@@ -451,6 +459,17 @@ API int gn_cfg_read(char **bindir)
 
 	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
 	if (!*bindir) (char *)*bindir = default_bindir;
+
+#ifdef HAVE_BLUETOOTH
+	if (!(val = gn_cfg_get(gn_cfg_info, "bluetooth", "rfcomm_cn")))
+		gn_config_global.rfcomm_cn = 1;
+	else
+		gn_config_global.rfcomm_cn = atoi(val);
+	if (!(val = gn_cfg_get(gn_cfg_info, "bluetooth", "bt_address")))
+		bacpy(&gn_config_global.bt_address, BDADDR_LOCAL);
+	else
+		bacpy(&gn_config_global.bt_address, strtoba(val));
+#endif
 
 	return 0;
 }

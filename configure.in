@@ -203,8 +203,8 @@ AC_ARG_WITH(bluetooth,
 	[ if test x$withval = xyes; then
 		AC_MSG_WARN(Usage is: --with-bluetooth=DIR)
 	  else
-		LDLIBS="-L$withval/lib/"
-		CFLAGS="-I$withval/include/"
+		LDLIBS="$LDLIBS -L$withval/lib"
+		CFLAGS="$CFLAGS -I$withval/include"
 	  fi
 	]
 )
@@ -221,6 +221,7 @@ AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_so
 if test $ac_cv_have_sockaddr_rc = yes; then
 	AC_DEFINE(HAVE_BLUETOOTH)
 	USE_BLUETOOTH="yes"
+	LIBS="$LIBS -lbluetooth"
 fi
 
 dnl ======================== Checks for X base support 

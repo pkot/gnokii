@@ -46,6 +46,7 @@ typedef enum {
 	GN_CT_DLR3P,    /* Serial connection using DLR3P cable */
 	GN_CT_Infrared, /* Infrared connection. */
 	GN_CT_Irda,     /* Linux IrDA support */
+	GN_CT_Bluetooth,/* Linux Bluetooth support */
 	GN_CT_Tekram,   /* Tekram Ir-Dongle */
 	GN_CT_TCP,      /* TCP network connection */
 	GN_CT_M2BUS	/* Serial connection with M2BUS protocol */

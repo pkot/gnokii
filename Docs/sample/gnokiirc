@@ -92,3 +92,7 @@ smsc_timeout = 10
 TELEPHONE = 12345678
 [disconnect_script]
 
+[bluetooth]
+# Bluetooth settings
+rfcomm_cn = 1
+bt_address = aa:bb:cc:dd:ee:ff

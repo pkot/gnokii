@@ -1,12 +1,19 @@
 0.5.0pre (not released yet)
 ========
  * nk3110 driver updates
-    o remove keepalive stuff -- now obsoleted       (Osma Suominen)
+    o remove keepalive stuff -- now obsoleted        (Osma Suominen)
     o don't use the global variables; move them to the driver
-      instance                                      (Osma Suominen)
+      instance                                       (Osma Suominen)
+ * win32 compability changes
     o removed exports for non gn_ functions, helper functions
       need to be linked statically if u use libarary
-      under Win32                                (Marcus Godehardt)   
+      under Win32                                 (Marcus Godehardt)
+ * libgnokii changes
+    o prepare to support the connection over Bluetooth; make the
+      appropriate changes in: device.c, cfgreader, fbus.c, nk6510.c
+      (currently the only driver that will support bluetooth); note
+      the [bluetooth] section in .gnokiirc; it DOES NOT work yet
+                                                         (Pawel Kot)
 
 0.5.0pre7
 =========
