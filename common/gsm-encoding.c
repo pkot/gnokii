@@ -190,7 +190,7 @@ int char_7bit_unpack(unsigned int offset, unsigned int in_length, unsigned int o
 		rest = *in_num >> bits;
 
 		/* If we don't start from 0th bit, we shouldn't go to the
-		   next char. Under *OUT we have now 0 and under Rest -
+		   next char. Under *out_num we have now 0 and under Rest -
 		   _first_ part of the char. */
 		if ((in_num != input) || (bits == 7)) out_num++;
 		in_num++;
