@@ -1,11 +1,11 @@
 # Nokia DataSuite asendaja Linux keskkonnas GNOKII eestindus.
-# Copyright (C) 2000 Hans Mõtshärg <hans.motsharg@mail.ee>
+# Copyright (C) 2000-2003 Hans Mõtshärg <hans.motsharg@mail.ee>
 # from GNOKII-0.4.3
 msgid ""
 msgstr ""
 "Project-Id-Version: gnokii\n"
-"POT-Creation-Date: 2002-12-10 00:12+0100\n"
-"PO-Revision-Date: 2002-10-23 13:00:00+0300\n"
+"POT-Creation-Date: 2003-01-04 16:01+0200\n"
+"PO-Revision-Date: 2003-01-04 18:03:00+0200\n"
 "Last-Translator: Hans Mõtshärg <hans.motsharg@mail.ee>\n"
 "Language-Team: gnokii\n"
 "MIME-Version: 1.0\n"
@@ -15,244 +15,243 @@ msgstr ""
 "Files: fbus-3810.h fbus-6110.h gsm-api.h gsm-common.h misc.h fbus-3810.c "
 "fbus-6110.c gnokii.c gsm-api.c\n"
 
-#: common/cfgreader.c:304
+#: common/cfgreader.c:311 common/cfgreader.c:322 common/cfgreader.c:330
+#: common/cfgreader.c:337 common/cfgreader.c:356 common/cfgreader.c:365
+#, c-format
+msgid "Unsupported [%s] %s value \"%s\"\n"
+msgstr "Toetamata [%s] %s väärtus \"%s\"\n"
+
+#: common/cfgreader.c:348
+#, c-format
+msgid "Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value\n"
+msgstr "Tundmatu [%s] määrang  \"%s\", kasuta \"%s\" või \"%s\" väärtust\n"
+
+#. That failed too so exit
+#: common/cfgreader.c:413
 #, c-format
 msgid "Couldn't open %s or gnokiirc. Exiting now...\n"
 msgstr "Ei suuda %s avada ega ka gnokiirc. Lõpetan....\n"
 
-#: common/cfgreader.c:314
+#. That failed too so exit
+#: common/cfgreader.c:423
 #, c-format
 msgid "Couldn't open %s or /etc/gnokiirc. Exiting now...\n"
 msgstr "Ei suuda %s avada ega ka /etc/gnokiirc. Lõpetan....\n"
 
-#: common/cfgreader.c:322
-msgid "Config error - no model specified. Exiting now...\n"
-msgstr "Konfiguratsiooni viga - mudel defineerimata. Lõpetan....\n"
+#: common/cfgreader.c:471
+msgid "Config error - no model specified.\n"
+msgstr "Konfiguratsiooni viga - mudel defineerimata.\n"
 
-#: common/cfgreader.c:328
-msgid "Config error - no port specified. Exiting now...\n"
-msgstr "Konfiguratsiooni viga - port defineerimata. Lõpetan....\n"
+#: common/cfgreader.c:475
+msgid "Config error - no port specified.\n"
+msgstr "Konfiguratsiooni viga - port defineerimata.\n"
 
-#: common/data/virtmodem.c:123
-msgid "VM_Initialise - VM_GSMInitialise failed!\n"
+#: common/data/virtmodem.c:120
+msgid "gn_vm_initialise - VM_GSMInitialise failed!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:130
-msgid "VM_Initialise - VM_PtySetup failed!\n"
+#: common/data/virtmodem.c:127
+msgid "gn_vm_initialise - VM_PtySetup failed!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:135
-msgid "VM_Initialise - ATEM_Initialise failed!\n"
+#: common/data/virtmodem.c:132
+msgid "gn_vm_initialise - gn_atem_initialise failed!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:140
-msgid "VM_Initialise - DP_Initialise failed!\n"
+#: common/data/virtmodem.c:137
+msgid "gn_vm_Initialise - dp_Initialise failed!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:339
+#: common/data/virtmodem.c:336
 #, c-format
 msgid "Cannot access %s, check the bindir in your gnokiirc!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:346
+#: common/data/virtmodem.c:343
 msgid "Couldn't open pty!\n"
-msgstr ""
+msgstr "Ei suuda avada pty!\n"
 
-#: common/data/virtmodem.c:363 xgnokii/xgnokii_lowlevel.c:249
+#: common/data/virtmodem.c:360 xgnokii/xgnokii_lowlevel.c:243
 msgid "GSM/FBUS init failed!\n"
 msgstr "GSM/FBUS initsialiseerimine ebaõnnestus!\n"
 
-#: common/devices/unixserial.c:123
+#: common/devices/unixserial.c:121
 #, c-format
 msgid "device_script(\"%s\"): fork() failure: %s!\n"
 msgstr ""
 
-#: common/devices/unixserial.c:130
+#: common/devices/unixserial.c:128
 #, c-format
 msgid "device_script(\"%s\"): file descriptor prepare: %s\n"
 msgstr ""
 
-#: common/devices/unixserial.c:136
+#: common/devices/unixserial.c:134
 #, c-format
 msgid "device_script(\"%s\"): execute script: %s\n"
 msgstr ""
 
-#: common/devices/unixserial.c:143
+#: common/devices/unixserial.c:141
 #, c-format
 msgid "device_script(\"%s\"): child script failure: %s, exit code=%d\n"
 msgstr ""
 
-#: common/devices/unixserial.c:144
+#: common/devices/unixserial.c:142
 msgid "normal exit"
 msgstr "normaalne lõpp"
 
-#: common/devices/unixserial.c:144
+#: common/devices/unixserial.c:142
 msgid "abnormal exit"
 msgstr "ebanormaalne lõpp"
 
-#: common/devices/unixserial.c:186
+#: common/devices/unixserial.c:184
 msgid "Gnokii serial_close: disconnect_script\n"
 msgstr ""
 
-#: common/devices/unixserial.c:220
-#, c-format
-msgid "Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value, ignoring!"
-msgstr ""
-
-#: common/devices/unixserial.c:224
-#, c-format
-msgid "[%s] option \"%s\" not found, trying to use \"%s\" value!"
-msgstr ""
-
-#: common/devices/unixserial.c:400
+#: common/devices/unixserial.c:375
 #, c-format
 msgid "Serial port speed %d not supported!\n"
 msgstr "Serialpordi kiirus %d pole toetatud!\n"
 
-#: common/devices/unixserial.c:440
+#: common/devices/unixserial.c:415
 msgid "ERROR: Modem DCD is down and global/require_dcd parameter is set!\n"
 msgstr ""
 
-#: common/devices/unixserial.c:467
+#: common/devices/unixserial.c:431
 msgid ""
 "WARNING: global/require_dcd argument was set but it is not supported on this "
 "system!\n"
 msgstr ""
 
-#: common/gsm-filetypes.c:1012 gnokii/gnokii.c:1286
+#: common/gsm-filetypes.c:1015 gnokii/gnokii.c:1275
 #, c-format
 msgid "File %s exists.\n"
 msgstr "Fail %s on olemas.\n"
 
-#: common/gsm-filetypes.c:1014 gnokii/gnokii.c:795 gnokii/gnokii.c:1287
-#: gnokii/gnokii.c:3229
+#: common/gsm-filetypes.c:1017 gnokii/gnokii.c:784 gnokii/gnokii.c:1276
+#: gnokii/gnokii.c:3218
 msgid "Overwrite? (yes/no) "
 msgstr "Kas kirjutan üle? (yes/no)"
 
-#: common/gsm-filetypes.c:1016 gnokii/gnokii.c:797 gnokii/gnokii.c:1289
-#: gnokii/gnokii.c:3231
+#: common/gsm-filetypes.c:1019 gnokii/gnokii.c:786 gnokii/gnokii.c:1278
+#: gnokii/gnokii.c:3220
 msgid "yes"
 msgstr "Jah"
 
-#: common/gsm-filetypes.c:1017 gnokii/gnokii.c:798 gnokii/gnokii.c:3232
+#: common/gsm-filetypes.c:1020 gnokii/gnokii.c:787 gnokii/gnokii.c:3221
 msgid "no"
 msgstr "ei"
 
-#: common/gsm-filetypes.c:1026
+#: common/gsm-filetypes.c:1029
 #, c-format
 msgid "Failed to write file %s\n"
 msgstr "Faili %s kirjutamine ebaõnnestus!\n"
 
-#: common/links/cbus.c:483
+#: common/links/cbus.c:380
 msgid "Couldn't open CBUS device"
 msgstr "Ei suuda avada CBUS seadet"
 
-#: common/links/fbus.c:79 common/links/fbus.c:99 common/links/fbus.c:138
+#: common/links/fbus.c:76 common/links/fbus.c:96 common/links/fbus.c:135
 msgid "Couldn't open FBUS device"
 msgstr "Ei suuda avada FBUS seadet"
 
-#: common/links/fbus-phonet.c:76
+#: common/links/fbus-phonet.c:72
 msgid "Couldn't open PHONET device"
 msgstr "Ei suuda avada PHONET seadet"
 
-#: common/misc.c:176
+#: common/misc.c:175
 msgid "Out of memory error while locking device\n"
 msgstr ""
 
-#: common/misc.c:204
+#: common/misc.c:203
 #, c-format
 msgid "Lockfile %s is stale. Overriding it..\n"
 msgstr ""
 
-#: common/misc.c:207
+#: common/misc.c:206
 msgid "Overriding failed, please check the permissions\n"
 msgstr ""
 
-#: common/misc.c:208 common/misc.c:223
+#: common/misc.c:207 common/misc.c:222
 msgid "Cannot lock device\n"
-msgstr ""
+msgstr "Ei suuda seadet lukustada\n"
 
-#: common/misc.c:212
+#: common/misc.c:211
 msgid "Device already locked.\n"
-msgstr ""
+msgstr "Seade on juba lukus!\n"
 
-#: common/misc.c:221
+#: common/misc.c:220
 #, c-format
 msgid "Unable to read lockfile %s.\n"
-msgstr ""
+msgstr "Ei suuda lugeda lukufaili %s.\n"
 
-#: common/misc.c:222
+#: common/misc.c:221
 msgid "Please check for reason and remove the lockfile by hand.\n"
-msgstr ""
+msgstr "Palun uuri põhjusi ja eemalda lukufail käsitsi.\n"
 
-#: common/misc.c:232
+#: common/misc.c:231
 msgid "Device seems to be locked by unknown process\n"
-msgstr ""
+msgstr "Seade tundub olevt lukustatud tundmatu protsessi poolt\n"
 
-#: common/misc.c:234
+#: common/misc.c:233
 msgid "Please check permission on lock directory\n"
 msgstr ""
 
-#: common/misc.c:236
+#: common/misc.c:235
 #, c-format
 msgid "Cannot create lockfile %s. Please check for existence of path"
 msgstr ""
 
-#: common/misc.c:258
+#: common/misc.c:257
 msgid "Cannot unlock device\n"
 msgstr "Ei suuda lukku vabastada\n"
 
-#: common/phones/nk6100.c:454
-#, c-format
-msgid "Unsupported phone model \"%s\"\n"
-msgstr ""
-
-#: common/phones/nk6100.c:455
-msgid "Please read Docs/Reporting-HOWTO and send a bug report!\n"
-msgstr ""
-
-#: common/phones/nk6100.c:1430 xgnokii/xgnokii.c:520 xgnokii/xgnokii_sms.c:708
+#: common/phones/nk6100.c:1437 xgnokii/xgnokii.c:522 xgnokii/xgnokii_sms.c:708
 #, c-format
 msgid "Set %d"
-msgstr "Sea %d"
+msgstr "Seade %d"
 
-#: common/phones/nk6100.c:1872
+#: common/phones/nk6100.c:1879
 msgid "Personal"
 msgstr "Isiklik"
 
-#: common/phones/nk6100.c:1875 common/phones/nk6100.c:1902
+#: common/phones/nk6100.c:1882 common/phones/nk6100.c:1909
 msgid "Car"
 msgstr "Auto"
 
-#: common/phones/nk6100.c:1878 common/phones/nk6100.c:1905
+#: common/phones/nk6100.c:1885 common/phones/nk6100.c:1912
 msgid "Headset"
 msgstr ""
 
-#: common/phones/nk6100.c:1881 common/phones/nk6100.c:1908
+#: common/phones/nk6100.c:1888 common/phones/nk6100.c:1915
 #, c-format
 msgid "Unknown (%d)"
-msgstr "Tundmatu viga (%d)"
+msgstr "Tundmatu (%d)"
 
-#: common/phones/nk6100.c:1887
+#: common/phones/nk6100.c:1894
 msgid "General"
 msgstr "Üldine"
 
-#: common/phones/nk6100.c:1890
+#: common/phones/nk6100.c:1897
 msgid "Silent"
 msgstr "Vaikne"
 
-#: common/phones/nk6100.c:1893 xgnokii/xgnokii_calendar.c:195
+#: common/phones/nk6100.c:1900 xgnokii/xgnokii_calendar.c:195
 msgid "Meeting"
 msgstr "Koosolek"
 
-#: common/phones/nk6100.c:1896
+#: common/phones/nk6100.c:1903
 msgid "Outdoor"
 msgstr "Õues"
 
-#: common/phones/nk6100.c:1899
+#: common/phones/nk6100.c:1906
 msgid "Pager"
 msgstr "Piipar"
 
+#. Construct the header.
+#. Send back id
+#. Set special size value
+#. Send back packet number
+#. Set checksum
 #: common/phones/nk2110.c:247 common/phones/nk2110.c:776
 msgid "PC   : "
 msgstr "PC   : "
@@ -275,31 +274,30 @@ msgstr "Sean MBUS ühendust mudeliga 2110...\n"
 
 #: common/vcal.lx:230 common/vcal.lx:286
 msgid "File cannot be opened!\n"
-msgstr "Faili pole v]imalik avada!\n"
+msgstr "Faili pole võimalik avada!\n"
 
 #: common/vcal.lx:237 common/vcal.lx:293
 msgid "Error parsing vCalendar file!\n"
 msgstr ""
 
-#: gnokiid/gnokiid.c:65
+#: gnokiid/gnokiid.c:55
 #, c-format
 msgid "GNOKIID Version %s\n"
 msgstr "GNOKIID Versioon %s\n"
 
-#: gnokiid/gnokiid.c:70
-#, fuzzy, c-format
+#: gnokiid/gnokiid.c:60
+#, c-format
 msgid ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999\n"
 "Copyright (C) Pavel Jank ml. <Pavel.Janik@suse.cz>, 1999\n"
-"Built %s %s for %s on %s \n"
+"Built %s %s\n"
 msgstr ""
-"GNOKII Versioon %s\n"
 "Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999, 2000\n"
 "Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999, 2000\n"
-"Eestikeelne tõlge Hans Mõtshärg <hans.motsharg@mail.ee>, 2000\n"
-"Kompileeritud %s %s telefonimudelile %s, ühendus pordis %s \n"
+"Eestikeelne tõlge Hans Mõtshärg <hans.motsharg@mail.ee>\n"
+"Kompileeritud %s %s\n"
 
-#: gnokiid/gnokiid.c:81
+#: gnokiid/gnokiid.c:71
 msgid ""
 "   usage: gnokiid {--help|--version}\n"
 "          --help            display usage information\n"
@@ -307,18 +305,18 @@ msgid ""
 "          --debug           uses stdin/stdout for virtual modem comms\n"
 msgstr ""
 
-#: gnokiid/gnokiid.c:142 gnokii/gnokii.c:379 smsd/lowlevel.c:153
-#: xgnokii/xgnokii_lowlevel.c:234
+#: gnokiid/gnokiid.c:134 gnokii/gnokii.c:368 smsd/lowlevel.c:148
+#: xgnokii/xgnokii_lowlevel.c:230
 msgid "Lock file error. Exiting\n"
-msgstr "Lukufaili faili viga. Lõpetan\n"
+msgstr "Lukufaili faili viga. Väljun\n"
 
-#: gnokii/gnokii.c:243
+#: gnokii/gnokii.c:231
 #, c-format
 msgid "GNOKII Version %s\n"
 msgstr "GNOKII Versioon %s\n"
 
-#: gnokii/gnokii.c:250
-#, fuzzy, c-format
+#: gnokii/gnokii.c:238
+#, c-format
 msgid ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 "Copyright (C) Pavel Jank ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
@@ -330,22 +328,20 @@ msgid ""
 "welcome to change it and/or distribute copies of it under certain "
 "conditions.\n"
 "There is absolutely no warranty for gnokii.  See GPL for details.\n"
-"Built %s %s for %s on %s \n"
+"Built %s %s\n"
 msgstr ""
-"GNOKII Versioon %s\n"
 "Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999, 2000\n"
 "Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999, 2000\n"
 "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
-"Copyright (C) Pawe³ Kot <pkot@linuxnews.pl>, 2001-2002\n"
+"Copyright (C) Pawe Kot <pkot@linuxnews.pl>, 2001-2002\n"
 "Copyright (C) BORBELY Zoltan <bozo@andrews.hu>, 2002\n"
 "gnokii on vabavara, GNU General Public License alusel, \n"
-"seda võib muuta ja/või levitada programmi koopiaid vastavlt reeglitele.\n"
-"gnokii ei oma mitte mingisugust garantiid toimivuse kohta.  Vaata GPL "
-"tingimusi.\n"
-"Eestikeelne tõlge Hans Mõtshärg <hans.motsharg@mail.ee>, 2000\n"
-"Kompileeritud %s %s telefonimudelile %s, ühendus pordis %s \n"
+"programmi koodi võib muuta ja/või levitada vastavalt GPL reeglitele.\n"
+"gnokii ei oma mitte mingisugust garantiid toimivuse kohta. Vaata GPL tingimusi.\n"
+"Eestikeelne tõlge Hans Mõtshärg <hans.motsharg@mail>.\n"
+"Kompileeritud %s %s\n"
 
-#: gnokii/gnokii.c:265
+#: gnokii/gnokii.c:253
 msgid ""
 "   usage: gnokii [--help|--monitor|--version]\n"
 "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
@@ -418,22 +414,23 @@ msgid ""
 "                 [{--timeout|-m} time_in_seconds]\n"
 "                 [{--number|-n} number]\n"
 "          gnokii --listnetworks\n"
+"          gnokii --getnetworkinfo\n"
 msgstr ""
 
-#: gnokii/gnokii.c:334
+#: gnokii/gnokii.c:323
 msgid ""
 "          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 "          gnokii --getsecuritycodestatus\n"
-"          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 "          gnokii --getsecuritycode\n"
+"          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 msgstr ""
 
-#: gnokii/gnokii.c:387
+#: gnokii/gnokii.c:376
 #, c-format
 msgid "Telephone interface init failed: %s Quitting.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:424
+#: gnokii/gnokii.c:413
 msgid ""
 " usage: gnokii --sendsms destination\n"
 "               [--smsc message_center_number | --smscno "
@@ -452,231 +449,231 @@ msgid ""
 "\n"
 msgstr ""
 
-#: gnokii/gnokii.c:446 gnokii/gnokii.c:825
+#: gnokii/gnokii.c:435 gnokii/gnokii.c:814
 msgid "Please enter SMS text. End your input with <cr><control-D>:"
 msgstr "Palun sisesta SMS tekst. Lõpetamiseks <cr><control-D>:"
 
-#: gnokii/gnokii.c:452 gnokii/gnokii.c:832
+#: gnokii/gnokii.c:441 gnokii/gnokii.c:821
 msgid "Couldn't read from stdin!\n"
 msgstr "Ei suuda lugeda standard sisendist!\n"
 
-#: gnokii/gnokii.c:455
+#: gnokii/gnokii.c:444
 #, c-format
 msgid "Input too long! (%d, maximum is %d)\n"
 msgstr "Sisend on liiga pikk! (%d, maksimum on %d)\n"
 
-#: gnokii/gnokii.c:476
+#: gnokii/gnokii.c:465
 #, c-format
 msgid "Could not null bitmap: %s\n"
 msgstr "Ei suuda pilti %s nullida\n"
 
-#: gnokii/gnokii.c:481
+#: gnokii/gnokii.c:470
 #, c-format
 msgid "Could not load bitmap from %s: %s\n"
 msgstr "Ei suuda laadida pilti asukohast %s: %s\n"
 
-#: gnokii/gnokii.c:550 gnokii/gnokii.c:835
+#: gnokii/gnokii.c:539 gnokii/gnokii.c:824
 msgid "Input too long!\n"
 msgstr "Sisend on liiga pikk!\n"
 
-#: gnokii/gnokii.c:583
+#: gnokii/gnokii.c:572
 msgid "Incorrect --concat option\n"
 msgstr ""
 
-#: gnokii/gnokii.c:619 gnokii/gnokii.c:645
+#: gnokii/gnokii.c:608 gnokii/gnokii.c:634
 msgid "Empty message. Quitting.\n"
-msgstr ""
+msgstr "Tühi teade. Lõpetan.\n"
 
-#: gnokii/gnokii.c:660 gnokii/gnokii.c:1702 gnokii/gnokii.c:3805
-#: gnokii/gnokii.c:3958
+#: gnokii/gnokii.c:649 gnokii/gnokii.c:1691 gnokii/gnokii.c:3791
+#: gnokii/gnokii.c:3944
 msgid "Send succeeded!\n"
 msgstr "Saatmine õnnestus!\n"
 
-#: gnokii/gnokii.c:662 gnokii/gnokii.c:1703 gnokii/gnokii.c:3807
+#: gnokii/gnokii.c:651 gnokii/gnokii.c:1692 gnokii/gnokii.c:3793
 #, c-format
 msgid "SMS Send failed (%s)\n"
 msgstr "SMS saatmine ebaõnnestus (%s)\n"
 
-#: gnokii/gnokii.c:772 gnokii/gnokii.c:1115 gnokii/gnokii.c:1364
-#: gnokii/gnokii.c:2967
+#: gnokii/gnokii.c:761 gnokii/gnokii.c:1104 gnokii/gnokii.c:1353
+#: gnokii/gnokii.c:2956
 #, c-format
 msgid "Unknown memory type %s (use ME, SM, ...)!\n"
 msgstr "Tundmatu mälu tüüp %s (kasuta ME,SM, ...)!\n"
 
-#: gnokii/gnokii.c:793
+#: gnokii/gnokii.c:782
 msgid "Message at specified location exists. "
 msgstr "Määratud asukohas eksisteerib teade. "
 
-#: gnokii/gnokii.c:807 gnokii/gnokii.c:924 gnokii/gnokii.c:1043
-#: gnokii/gnokii.c:1065 gnokii/gnokii.c:1089 gnokii/gnokii.c:1450
-#: gnokii/gnokii.c:1535 gnokii/gnokii.c:1825 gnokii/gnokii.c:1989
-#: gnokii/gnokii.c:2385 gnokii/gnokii.c:2436 gnokii/gnokii.c:2773
-#: gnokii/gnokii.c:2776 gnokii/gnokii.c:2830 gnokii/gnokii.c:3075
-#: gnokii/gnokii.c:3279 gnokii/gnokii.c:3309 gnokii/gnokii.c:3335
-#: gnokii/gnokii.c:3520 gnokii/gnokii.c:3590 gnokii/gnokii.c:3616
-#: gnokii/gnokii.c:4150 gnokii/gnokii.c:4233 gnokii/gnokii.c:4235
+#: gnokii/gnokii.c:796 gnokii/gnokii.c:913 gnokii/gnokii.c:1032
+#: gnokii/gnokii.c:1054 gnokii/gnokii.c:1078 gnokii/gnokii.c:1439
+#: gnokii/gnokii.c:1524 gnokii/gnokii.c:1814 gnokii/gnokii.c:1978
+#: gnokii/gnokii.c:2376 gnokii/gnokii.c:2426 gnokii/gnokii.c:2762
+#: gnokii/gnokii.c:2765 gnokii/gnokii.c:2819 gnokii/gnokii.c:3064
+#: gnokii/gnokii.c:3268 gnokii/gnokii.c:3298 gnokii/gnokii.c:3324
+#: gnokii/gnokii.c:3509 gnokii/gnokii.c:3579 gnokii/gnokii.c:3605
+#: gnokii/gnokii.c:4136 gnokii/gnokii.c:4219 gnokii/gnokii.c:4221
 #, c-format
 msgid "Error: %s\n"
 msgstr "Viga: %s\n"
 
-#: gnokii/gnokii.c:829
+#: gnokii/gnokii.c:818
 msgid "storing sms"
 msgstr "salvestan SMS"
 
-#: gnokii/gnokii.c:841
+#: gnokii/gnokii.c:830
 msgid "Empty message. Quitting"
-msgstr ""
+msgstr "Tühi teade. Väljun"
 
-#: gnokii/gnokii.c:858
+#: gnokii/gnokii.c:847
 #, c-format
 msgid "Saved to %d!\n"
 msgstr "Salvestatud %d!\n"
 
-#: gnokii/gnokii.c:860
+#: gnokii/gnokii.c:849
 #, c-format
 msgid "Saving failed (%s)\n"
 msgstr "Salvestamine ebaõnnestus (%s)\n"
 
-#: gnokii/gnokii.c:899
+#: gnokii/gnokii.c:888
 msgid "Starting SMS center number is greater than stop\n"
 msgstr ""
 
-#: gnokii/gnokii.c:904
+#: gnokii/gnokii.c:893
 msgid "SMS center number must be greater than 1\n"
 msgstr "SMS keskuse number peab olema suurem kui 1\n"
 
-#: gnokii/gnokii.c:937
+#: gnokii/gnokii.c:926
 #, c-format
 msgid "No. %d: \"%s\" (defined name)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:939
+#: gnokii/gnokii.c:928
 #, c-format
 msgid "No. %d: \"%s\" (default name)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:940
+#: gnokii/gnokii.c:929
 #, c-format
 msgid "SMS center number is %s\n"
 msgstr "SMS keskuse number on %s\n"
 
-#: gnokii/gnokii.c:941
+#: gnokii/gnokii.c:930
 #, c-format
 msgid "Default recipient number is %s\n"
 msgstr "Saaja numbri vaikeväärtus on %s\n"
 
-#: gnokii/gnokii.c:942
+#: gnokii/gnokii.c:931
 msgid "Messages sent as "
 msgstr "Sõnum saadetud nagu "
 
-#: gnokii/gnokii.c:946 xgnokii/xgnokii.c:528 xgnokii/xgnokii.c:557
-#: xgnokii/xgnokii.c:1400 xgnokii/xgnokii_calendar.c:1549
+#: gnokii/gnokii.c:935 xgnokii/xgnokii.c:530 xgnokii/xgnokii.c:559
+#: xgnokii/xgnokii.c:1402 xgnokii/xgnokii_calendar.c:1549
 msgid "Text"
 msgstr "Tekst"
 
-#: gnokii/gnokii.c:949
+#: gnokii/gnokii.c:938
 msgid "VoiceMail"
 msgstr "KõnePost"
 
-#: gnokii/gnokii.c:952 xgnokii/xgnokii.c:536 xgnokii/xgnokii.c:1406
+#: gnokii/gnokii.c:941 xgnokii/xgnokii.c:538 xgnokii/xgnokii.c:1408
 msgid "Fax"
 msgstr "Faks"
 
-#: gnokii/gnokii.c:956
+#: gnokii/gnokii.c:945
 msgid "Email"
 msgstr ""
 
-#: gnokii/gnokii.c:959 xgnokii/xgnokii.c:545
+#: gnokii/gnokii.c:948 xgnokii/xgnokii.c:547
 msgid "ERMES"
 msgstr ""
 
-#: gnokii/gnokii.c:962 xgnokii/xgnokii.c:549
+#: gnokii/gnokii.c:951 xgnokii/xgnokii.c:551
 msgid "X.400"
 msgstr ""
 
-#: gnokii/gnokii.c:965 gnokii/gnokii.c:992 xgnokii/xgnokii_calendar.c:230
+#: gnokii/gnokii.c:954 gnokii/gnokii.c:981 xgnokii/xgnokii_calendar.c:230
 msgid "Unknown"
 msgstr "Tundmatu"
 
-#: gnokii/gnokii.c:970
+#: gnokii/gnokii.c:959
 msgid "Message validity is "
-msgstr "Sõnumi kehtivus on"
+msgstr "Sõnumi kehtivus on "
 
-#: gnokii/gnokii.c:974
+#: gnokii/gnokii.c:963
 msgid "1 hour"
 msgstr "1 tund"
 
-#: gnokii/gnokii.c:977
+#: gnokii/gnokii.c:966
 msgid "6 hours"
 msgstr "6 tundi"
 
-#: gnokii/gnokii.c:980
+#: gnokii/gnokii.c:969
 msgid "24 hours"
 msgstr "24 tundi"
 
-#: gnokii/gnokii.c:983
+#: gnokii/gnokii.c:972
 msgid "72 hours"
 msgstr "72 tundi"
 
-#: gnokii/gnokii.c:986 xgnokii/xgnokii.c:579 xgnokii/xgnokii.c:1470
+#: gnokii/gnokii.c:975 xgnokii/xgnokii.c:581 xgnokii/xgnokii.c:1472
 msgid "1 week"
 msgstr "1 nädal"
 
-#: gnokii/gnokii.c:989
+#: gnokii/gnokii.c:978
 msgid "Maximum time"
 msgstr "Maksimaalne aeg"
 
-#: gnokii/gnokii.c:1037 gnokii/gnokii.c:2939 gnokii/gnokii.c:3558
+#: gnokii/gnokii.c:1026 gnokii/gnokii.c:2928 gnokii/gnokii.c:3547
 msgid "Input line format isn't valid\n"
 msgstr "Sisendrea formaat pole kehtiv\n"
 
-#: gnokii/gnokii.c:1068
+#: gnokii/gnokii.c:1057
 #, c-format
 msgid "Folder with name: %s successfully created!\n"
-msgstr ""
+msgstr "Kaust nimega %s loomine õnnestus!\n"
 
-#: gnokii/gnokii.c:1085
+#: gnokii/gnokii.c:1074
 #, c-format
 msgid "Error: Number must be between 1 and %i!\n"
-msgstr ""
+msgstr "VIGA: Number peab olema vahemikus 1 kuni %i!\n"
 
-#: gnokii/gnokii.c:1092
+#: gnokii/gnokii.c:1081
 #, c-format
 msgid "Number %i of 'My Folders' successfully deleted!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1140
+#: gnokii/gnokii.c:1129
 #, c-format
 msgid "Saving into %s\n"
 msgstr "Salvestan %s\n"
 
-#: gnokii/gnokii.c:1144
+#: gnokii/gnokii.c:1133
 msgid "Filename too long - will be truncated to 63 characters.\n"
 msgstr "Falinimi liiga pikk - lühendan 63 tähemärgini.\n"
 
-#: gnokii/gnokii.c:1170
+#: gnokii/gnokii.c:1159
 #, c-format
 msgid "%d. MO Message "
 msgstr ""
 
-#: gnokii/gnokii.c:1173 gnokii/gnokii.c:1185 gnokii/gnokii.c:1193
-#: gnokii/gnokii.c:1241 gnokii/gnokii.c:1253
+#: gnokii/gnokii.c:1162 gnokii/gnokii.c:1174 gnokii/gnokii.c:1182
+#: gnokii/gnokii.c:1230 gnokii/gnokii.c:1242
 msgid "(read)\n"
 msgstr "(loetud)\n"
 
-#: gnokii/gnokii.c:1176 gnokii/gnokii.c:1244
+#: gnokii/gnokii.c:1165 gnokii/gnokii.c:1233
 msgid "(unread)\n"
 msgstr "(lugemata)\n"
 
-#: gnokii/gnokii.c:1179 gnokii/gnokii.c:1247
+#: gnokii/gnokii.c:1168 gnokii/gnokii.c:1236
 msgid "(sent)\n"
 msgstr "(saadetud)\n"
 
-#: gnokii/gnokii.c:1182 gnokii/gnokii.c:1250
+#: gnokii/gnokii.c:1171 gnokii/gnokii.c:1239
 msgid "(unsent)\n"
 msgstr "(saatmata)\n"
 
-#: gnokii/gnokii.c:1188 gnokii/gnokii.c:1217
+#: gnokii/gnokii.c:1177 gnokii/gnokii.c:1206
 #, c-format
 msgid ""
 "Text: %s\n"
@@ -685,147 +682,150 @@ msgstr ""
 "Tekst: %s\n"
 "\n"
 
-#: gnokii/gnokii.c:1191
+#: gnokii/gnokii.c:1180
 #, c-format
 msgid "%d. Delivery Report "
 msgstr "%d. Saateraport "
 
-#: gnokii/gnokii.c:1195
+#: gnokii/gnokii.c:1184
 msgid "(not read)\n"
 msgstr "(ei loetud)\n"
 
-#: gnokii/gnokii.c:1196
+#: gnokii/gnokii.c:1185
 #, c-format
 msgid "Sending date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr "Saatmise kuupäev/kellaaeg: %02d/%02d/%04d %02d:%02d:%02d "
 
-#: gnokii/gnokii.c:1201 gnokii/gnokii.c:1211 gnokii/gnokii.c:1226
-#: gnokii/gnokii.c:1261
+#: gnokii/gnokii.c:1190 gnokii/gnokii.c:1200 gnokii/gnokii.c:1215
+#: gnokii/gnokii.c:1250
 #, c-format
 msgid "+%02d00"
 msgstr ""
 
-#: gnokii/gnokii.c:1203 gnokii/gnokii.c:1213 gnokii/gnokii.c:1228
-#: gnokii/gnokii.c:1263
+#: gnokii/gnokii.c:1192 gnokii/gnokii.c:1202 gnokii/gnokii.c:1217
+#: gnokii/gnokii.c:1252
 #, c-format
 msgid "%02d00"
 msgstr ""
 
-#: gnokii/gnokii.c:1206
+#: gnokii/gnokii.c:1195
 #, c-format
 msgid "Response date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr "Vastuse kuupäev/kellaaeg: %02d/%02d/%04d %02d:%02d:%02d "
 
-#: gnokii/gnokii.c:1216
+#: gnokii/gnokii.c:1205
 #, c-format
 msgid "Receiver: %s Msg Center: %s\n"
 msgstr "Saaja: %s Msg keskus: %s\n"
 
-#: gnokii/gnokii.c:1220
+#: gnokii/gnokii.c:1209
 msgid "Picture Message\n"
 msgstr "Pildisõnum\n"
 
-#: gnokii/gnokii.c:1221 gnokii/gnokii.c:1256
+#: gnokii/gnokii.c:1210 gnokii/gnokii.c:1245
 #, c-format
 msgid "Date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr "Kuupäv/kellaeg: %02d/%02d/%04d %02d:%02d:%02d "
 
-#: gnokii/gnokii.c:1231 gnokii/gnokii.c:1266
+#: gnokii/gnokii.c:1220
 #, c-format
-msgid "Sender: %s Msg Center: %s\n"
-msgstr "Saatja: %s Msg kekus: %s\n"
+msgid "Sender: %s Msg center: %s\n"
+msgstr "Saatja: %s Msg keskus: %s\n"
 
-#: gnokii/gnokii.c:1232
+#: gnokii/gnokii.c:1221
 msgid "Bitmap:\n"
 msgstr "Pilt:\n"
 
-#: gnokii/gnokii.c:1234 gnokii/gnokii.c:1271
+#: gnokii/gnokii.c:1223 gnokii/gnokii.c:1260
 msgid "Text:\n"
 msgstr "Tekst:\n"
 
-#: gnokii/gnokii.c:1238
+#: gnokii/gnokii.c:1227
 #, c-format
 msgid "%d. Inbox Message "
 msgstr "%d. Saabunud Sõnumid "
 
-#: gnokii/gnokii.c:1274
+#: gnokii/gnokii.c:1255
+#, c-format
+msgid "Sender: %s Msg Center: %s\n"
+msgstr "Saatja: %s Msg keskus: %s\n"
+
+#: gnokii/gnokii.c:1263
 #, c-format
 msgid "GSM operator logo for %s (%s) network.\n"
 msgstr "GSM Operaatori Logo võrgule %s (%s).\n"
 
-#: gnokii/gnokii.c:1275
+#: gnokii/gnokii.c:1264
 msgid "Saved by Logo Express\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1276
+#: gnokii/gnokii.c:1265
 msgid "Saved by Operator Logo Uploader by Thomas Kessler\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1279
+#: gnokii/gnokii.c:1268
 msgid "Logo:\n"
 msgstr "Logod:\n"
 
-#: gnokii/gnokii.c:1293
+#: gnokii/gnokii.c:1282
 #, c-format
 msgid "Couldn't save logofile %s!\n"
 msgstr "Ei suuda logofaili %s salvestada!\n"
 
-#: gnokii/gnokii.c:1298
+#: gnokii/gnokii.c:1287
 msgid "Ringtone\n"
 msgstr "Helin\n"
 
-#: gnokii/gnokii.c:1302
+#: gnokii/gnokii.c:1291
 #, c-format
 msgid "Linked (%d/%d):\n"
 msgstr "Seotud (%d/%d):\n"
 
-#: gnokii/gnokii.c:1307
+#: gnokii/gnokii.c:1296
 msgid "WAP vCard:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1310
+#: gnokii/gnokii.c:1299
 msgid "WAP vCalendar:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1313
+#: gnokii/gnokii.c:1302
 msgid "WAP vCardSecure:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1316
+#: gnokii/gnokii.c:1305
 msgid "WAP vCalendarSecure:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1319 gnokii/gnokii.c:2227
+#: gnokii/gnokii.c:1308 gnokii/gnokii.c:2216
 msgid "Unknown\n"
 msgstr "Tundmatu\n"
 
-#: gnokii/gnokii.c:1334
+#: gnokii/gnokii.c:1323
 msgid "(delete failed)\n"
 msgstr "(kustutamine ebaõnnestus)\n"
 
-#: gnokii/gnokii.c:1336
+#: gnokii/gnokii.c:1325
 msgid "(message deleted)\n"
 msgstr "(teade kustutatud)\n"
 
-#: gnokii/gnokii.c:1340
-#, fuzzy, c-format
+#: gnokii/gnokii.c:1329
+#, c-format
 msgid "GetSMS %s %d failed! (%s)\n"
-msgstr ""
-"LaeSMS %s %d ebõnnestus!(%s)\n"
-"\n"
+msgstr "LaeSMS %s %d ebõnnestus!(%s)\n"
 
-#: gnokii/gnokii.c:1342
+#: gnokii/gnokii.c:1331
 msgid ""
 "See the gnokii manual page for the supported memory types with the phone\n"
-"you use\n"
+"you use.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1380
+#: gnokii/gnokii.c:1369
 #, c-format
 msgid "Deleted SMS %s %d\n"
 msgstr "Kustutatud SMS %s %d\n"
 
-#: gnokii/gnokii.c:1382
+#: gnokii/gnokii.c:1371
 #, c-format
 msgid ""
 "DeleteSMS %s %d failed!(%s)\n"
@@ -834,1193 +834,1212 @@ msgstr ""
 "KustutaSMS %s %d ei õnnestunud!(%s)\n"
 "\n"
 
-#: gnokii/gnokii.c:1438 gnokii/gnokii.c:1518
+#: gnokii/gnokii.c:1427 gnokii/gnokii.c:1507
 msgid "Enter your code: "
 msgstr "Sisesta oma kood: "
 
-#: gnokii/gnokii.c:1447
+#: gnokii/gnokii.c:1436
 msgid "Code ok.\n"
 msgstr "Kood OK.\n"
 
-#: gnokii/gnokii.c:1465
+#: gnokii/gnokii.c:1454
 msgid "Security code status: "
-msgstr "Turvakoodi olek:"
+msgstr "Turvakoodi olek: "
 
-#: gnokii/gnokii.c:1469
+#: gnokii/gnokii.c:1458
 msgid "waiting for Security Code.\n"
 msgstr "ootan Security koodi.\n"
 
-#: gnokii/gnokii.c:1472
+#: gnokii/gnokii.c:1461
 msgid "waiting for PIN.\n"
 msgstr "ootan PIN koodi.\n"
 
-#: gnokii/gnokii.c:1475
+#: gnokii/gnokii.c:1464
 msgid "waiting for PIN2.\n"
 msgstr "ootan PIN2 koodi.\n"
 
-#: gnokii/gnokii.c:1478
+#: gnokii/gnokii.c:1467
 msgid "waiting for PUK.\n"
 msgstr "ootan PUK koodi.\n"
 
-#: gnokii/gnokii.c:1481
+#: gnokii/gnokii.c:1470
 msgid "waiting for PUK2.\n"
 msgstr "ootan PUK2 koodi.\n"
 
-#: gnokii/gnokii.c:1484
+#: gnokii/gnokii.c:1473
 msgid "nothing to enter.\n"
 msgstr "pole midagi sisestada.\n"
 
-#: gnokii/gnokii.c:1487
+#: gnokii/gnokii.c:1476
 msgid "Unknown!\n"
 msgstr "Tundmatu!\n"
 
-#: gnokii/gnokii.c:1519
+#: gnokii/gnokii.c:1508
 msgid "Enter new code: "
 msgstr "Sisesta uus kood: "
 
-#: gnokii/gnokii.c:1520
+#: gnokii/gnokii.c:1509
 msgid "Retype new code: "
 msgstr "Uus kood veelkord: "
 
-#: gnokii/gnokii.c:1522
+#: gnokii/gnokii.c:1511
 msgid "Error: new code differ\n"
 msgstr "VIGA: Uue koodi seisestuse viga\n"
 
-#: gnokii/gnokii.c:1532
+#: gnokii/gnokii.c:1521
 msgid "Code changed.\n"
 msgstr "Kood Muudetud.\n"
 
-#: gnokii/gnokii.c:1548
+#: gnokii/gnokii.c:1537
 #, c-format
 msgid "INCOMING CALL: ID: %d, Number: %s, Name: \"%s\"\n"
-msgstr "SAABUV KÕNE: ID: %d, Number: %s, Nimi:  \"%s\"\n"
+msgstr "SAABUV KÕNE: ID: %d, Number: %s, Nimi: \"%s\"\n"
 
-#: gnokii/gnokii.c:1551
+#: gnokii/gnokii.c:1540
 #, c-format
 msgid "CALL %d TERMINATED (LOCAL)\n"
-msgstr ""
+msgstr "KÕNE %d LÕPETATUD (KOHALIK)\n"
 
-#: gnokii/gnokii.c:1554
+#: gnokii/gnokii.c:1543
 #, c-format
 msgid "CALL %d TERMINATED (REMOTE)\n"
-msgstr ""
+msgstr "KÕNE %d LÕPETATUD (TEINE POOL)\n"
 
-#: gnokii/gnokii.c:1557
+#: gnokii/gnokii.c:1546
 #, c-format
 msgid "CALL %d ACCEPTED BY THE REMOTE SIDE\n"
-msgstr ""
+msgstr "KÕNE %d TEINE POOL AKSEPTEERIS KÕNE\n"
 
-#: gnokii/gnokii.c:1560
+#: gnokii/gnokii.c:1549
 #, c-format
 msgid "CALL %d PLACED ON HOLD\n"
-msgstr ""
+msgstr "KÕNE %d PANDUD OOTELE\n"
 
-#: gnokii/gnokii.c:1563
+#: gnokii/gnokii.c:1552
 #, c-format
 msgid "CALL %d RETRIEVED FROM HOLD\n"
-msgstr ""
+msgstr "KÕNE %d OOTELT VÕETUD\n"
 
-#: gnokii/gnokii.c:1588
+#: gnokii/gnokii.c:1577
 #, c-format
 msgid "Dialing failed: %s\n"
 msgstr "Numbrivalimine ebaõnnestus: %s\n"
 
-#: gnokii/gnokii.c:1592
-#, fuzzy, c-format
+#: gnokii/gnokii.c:1581
+#, c-format
 msgid "Dialled call, id: %d (lowlevel id: %d)\n"
-msgstr "Valitud kõne, id: %d\n"
+msgstr "Valitud kõne, id: %d (madalamataseme id: %d)\n"
 
-#: gnokii/gnokii.c:1651
+#: gnokii/gnokii.c:1640
 msgid "Sending operator logo.\n"
 msgstr "Saadan operaatori logo.\n"
 
-#: gnokii/gnokii.c:1652
+#: gnokii/gnokii.c:1641
 msgid "Sending caller line identification logo.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1653
+#: gnokii/gnokii.c:1642
 msgid "Sending Multipart Message: Picture Message.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1654
+#: gnokii/gnokii.c:1643
 msgid "Sending EMS-compliant Picture Message.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1655
+#: gnokii/gnokii.c:1644
 msgid "Sending EMS-compliant Animation.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1656
+#: gnokii/gnokii.c:1645
 msgid "You should specify what kind of logo to send!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1720
+#: gnokii/gnokii.c:1709
 #, c-format
 msgid "Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "
-msgstr ""
+msgstr "Salvestan logo. Fail \"%s\" on olemas. (O)verwrite, create (n)ew or (s)kip ? "
 
-#: gnokii/gnokii.c:1722
+#: gnokii/gnokii.c:1711
 msgid "O"
 msgstr "J"
 
-#: gnokii/gnokii.c:1722
+#: gnokii/gnokii.c:1711
 msgid "o"
 msgstr "j"
 
-#: gnokii/gnokii.c:1723
+#: gnokii/gnokii.c:1712
 msgid "N"
 msgstr "E"
 
-#: gnokii/gnokii.c:1723
+#: gnokii/gnokii.c:1712
 msgid "n"
 msgstr "e"
 
-#: gnokii/gnokii.c:1724
+#: gnokii/gnokii.c:1713
 msgid "S"
 msgstr ""
 
-#: gnokii/gnokii.c:1724
+#: gnokii/gnokii.c:1713
 msgid "s"
 msgstr ""
 
-#: gnokii/gnokii.c:1728
+#: gnokii/gnokii.c:1717
 msgid "Enter name of new file: "
 msgstr "Sisesta uue faili nimi: "
 
-#: gnokii/gnokii.c:1738
+#: gnokii/gnokii.c:1727
 #, c-format
 msgid "Failed to write file \"%s\"\n"
-msgstr "Faili \"%s\" kirjutamine ebaännestus\n"
+msgstr "Faili \"%s\" kirjutamine ebaõnnestus\n"
 
-#: gnokii/gnokii.c:1771
+#: gnokii/gnokii.c:1760
 msgid "Dealer welcome note "
 msgstr ""
 
-#: gnokii/gnokii.c:1772 gnokii/gnokii.c:1777
+#: gnokii/gnokii.c:1761 gnokii/gnokii.c:1766
 #, c-format
 msgid "currently set to \"%s\"\n"
 msgstr "hetkel seatud \"%s\"\n"
 
-#: gnokii/gnokii.c:1773 gnokii/gnokii.c:1778
+#: gnokii/gnokii.c:1762 gnokii/gnokii.c:1767
 msgid "currently empty\n"
 msgstr "hetkel tühi\n"
 
-#: gnokii/gnokii.c:1776
+#: gnokii/gnokii.c:1765
 msgid "Welcome note "
 msgstr ""
 
-#: gnokii/gnokii.c:1783
+#: gnokii/gnokii.c:1772
 #, c-format
 msgid "Operator logo for %s (%s) network got succesfully\n"
-msgstr ""
+msgstr "Operaatori logo %s (%s) võrgule saamine õnnestus\n"
 
-#: gnokii/gnokii.c:1788 gnokii/gnokii.c:1799 gnokii/gnokii.c:1810
-#: gnokii/gnokii.c:1893
+#: gnokii/gnokii.c:1777 gnokii/gnokii.c:1788 gnokii/gnokii.c:1799
+#: gnokii/gnokii.c:1882
 #, c-format
 msgid "Sorry, gnokii doesn't know %s network !\n"
-msgstr ""
+msgstr "Vabandust, gnokii ei tunne %s võrku!\n"
 
-#: gnokii/gnokii.c:1795
+#: gnokii/gnokii.c:1784
 msgid "Startup logo got successfully\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1806
+#: gnokii/gnokii.c:1795
 msgid "Caller logo got successfully\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1816
+#: gnokii/gnokii.c:1805
 msgid "Unknown bitmap type.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1819
+#: gnokii/gnokii.c:1808
 msgid "Your phone doesn't have logo uploaded !\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1829
+#: gnokii/gnokii.c:1818
 msgid "What kind of logo do you want to get ?\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1847
+#: gnokii/gnokii.c:1836
 #, c-format
 msgid "Error while reading file \"%s\": %s\n"
 msgstr "Viga faili \"%s\": %s lugemisel!\n"
 
-#: gnokii/gnokii.c:1921
+#: gnokii/gnokii.c:1910
 msgid "What kind of logo do you want to set ?\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1938
+#: gnokii/gnokii.c:1927
 msgid "Error setting"
 msgstr ""
 
-#: gnokii/gnokii.c:1939
+#: gnokii/gnokii.c:1928
 msgid " dealer"
 msgstr ""
 
-#: gnokii/gnokii.c:1940
+#: gnokii/gnokii.c:1929
 msgid " welcome note - "
 msgstr ""
 
-#: gnokii/gnokii.c:1960
+#: gnokii/gnokii.c:1949
 msgid "SIM card and PIN is required\n"
 msgstr "Vaja on SIM kaarti ja PIN koodi\n"
 
-#: gnokii/gnokii.c:1966
+#: gnokii/gnokii.c:1955
 #, c-format
 msgid "too long, truncated to \"%s\" (length %i)\n"
 msgstr "liiga pikk, lühendatud \"%s\" (pikkus %i)\n"
 
-#: gnokii/gnokii.c:1974
+#: gnokii/gnokii.c:1963
 msgid "Error setting startup logo - SIM card and PIN is required\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1975
+#: gnokii/gnokii.c:1964
 #, c-format
 msgid "i: %i, %2x %2x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1986
+#: gnokii/gnokii.c:1975
 msgid "Done.\n"
 msgstr "Tehtud.\n"
 
-#: gnokii/gnokii.c:2001
+#: gnokii/gnokii.c:1990
 #, c-format
 msgid "Could not load bitmap: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2058
+#: gnokii/gnokii.c:2047
 #, c-format
 msgid "Todo: %s\n"
 msgstr "Teha: %s\n"
 
-#: gnokii/gnokii.c:2059
+#: gnokii/gnokii.c:2048
 msgid "Priority: "
 msgstr "Prioriteet:"
 
-#: gnokii/gnokii.c:2062
+#: gnokii/gnokii.c:2051
 msgid "low\n"
 msgstr "madal\n"
 
-#: gnokii/gnokii.c:2065
+#: gnokii/gnokii.c:2054
 msgid "medium\n"
 msgstr "keskmine\n"
 
-#: gnokii/gnokii.c:2068
+#: gnokii/gnokii.c:2057
 msgid "high\n"
-msgstr "k6rge\n"
+msgstr "kõrge\n"
 
-#: gnokii/gnokii.c:2071 gnokii/gnokii.c:3391 gnokii/gnokii.c:3414
-#: gnokii/gnokii.c:3427 gnokii/gnokii.c:3439 gnokii/gnokii.c:3454
-#: gnokii/gnokii.c:3466 gnokii/gnokii.c:3483 gnokii/gnokii.c:3495
-#: gnokii/gnokii.c:3507
+#: gnokii/gnokii.c:2060 gnokii/gnokii.c:3380 gnokii/gnokii.c:3403
+#: gnokii/gnokii.c:3416 gnokii/gnokii.c:3428 gnokii/gnokii.c:3443
+#: gnokii/gnokii.c:3455 gnokii/gnokii.c:3472 gnokii/gnokii.c:3484
+#: gnokii/gnokii.c:3496
 msgid "unknown\n"
 msgstr "tundmatu\n"
 
-#: gnokii/gnokii.c:2077
+#: gnokii/gnokii.c:2066
 #, c-format
 msgid "The ToDo note could not be read: %s\n"
 msgstr "ToDo kirjet ei saa lugeda: %s\n"
 
-#: gnokii/gnokii.c:2097 gnokii/gnokii.c:2277
+#: gnokii/gnokii.c:2086 gnokii/gnokii.c:2268
 #, c-format
 msgid "Failed to load vCalendar file: %s\n"
 msgstr "vCalendri faili %s laadimine ebaõnnestus!\n"
 
-#: gnokii/gnokii.c:2104 gnokii/gnokii.c:2284 gnokii/gnokii.c:3651
+#: gnokii/gnokii.c:2093 gnokii/gnokii.c:2275 gnokii/gnokii.c:3640
 msgid "Succesfully written!\n"
 msgstr "Edukalt kirjutatud!\n"
 
-#: gnokii/gnokii.c:2106 gnokii/gnokii.c:2124 gnokii/gnokii.c:2286
+#: gnokii/gnokii.c:2095 gnokii/gnokii.c:2113 gnokii/gnokii.c:2277
 #, c-format
 msgid "Failed to write calendar note: %s\n"
 msgstr "Kalendri kirje %s kirjutamine ebaõnnestus!\n"
 
-#: gnokii/gnokii.c:2122
+#: gnokii/gnokii.c:2111
 msgid "Succesfully deleted all ToDo notes!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2211
+#. not vcal
+#: gnokii/gnokii.c:2200
 msgid "   Type of the note: "
-msgstr "   Märke tüüp :"
+msgstr "   Märke tüüp: "
 
-#: gnokii/gnokii.c:2215
+#: gnokii/gnokii.c:2204
 msgid "Reminder\n"
 msgstr "Meeldetuletus\n"
 
-#: gnokii/gnokii.c:2218
+#: gnokii/gnokii.c:2207
 msgid "Call\n"
 msgstr "Kõne\n"
 
-#: gnokii/gnokii.c:2221
+#: gnokii/gnokii.c:2210
 msgid "Meeting\n"
 msgstr "Koosolek\n"
 
-#: gnokii/gnokii.c:2224
+#: gnokii/gnokii.c:2213
 msgid "Birthday\n"
 msgstr "Sünnipäev\n"
 
-#: gnokii/gnokii.c:2231
+#: gnokii/gnokii.c:2220
 #, c-format
 msgid "   Date: %d-%02d-%02d\n"
 msgstr "   Kuupäev: %d-%02d-%02d\n"
 
-#: gnokii/gnokii.c:2235
+#: gnokii/gnokii.c:2224
 #, c-format
 msgid "   Time: %02d:%02d:%02d\n"
 msgstr "   Kellaaeg: %02d:%02d:%02d\n"
 
-#: gnokii/gnokii.c:2240
+#: gnokii/gnokii.c:2229
 #, c-format
 msgid "   Alarm date: %d-%02d-%02d\n"
 msgstr "   Äratuse kuupäev: %d-%02d-%02d\n"
 
-#: gnokii/gnokii.c:2244
+#: gnokii/gnokii.c:2234
 #, c-format
 msgid "   Alarm time: %02d:%02d:%02d\n"
 msgstr "   Äratusaeg: %02d:%02d:%02d\n"
 
-#: gnokii/gnokii.c:2249
+#: gnokii/gnokii.c:2240
 #, c-format
 msgid "   Text: %s\n"
 msgstr "   Tekst: %s\n"
 
-#: gnokii/gnokii.c:2252
+#: gnokii/gnokii.c:2243
 #, c-format
 msgid "   Phone: %s\n"
 msgstr "   Telefon: %s\n"
 
-#: gnokii/gnokii.c:2256
+#: gnokii/gnokii.c:2247
 #, c-format
 msgid "The calendar note can not be read: %s\n"
 msgstr "Kalendri kirjet %s ei saa lugeda\n"
 
-#: gnokii/gnokii.c:2312
+#: gnokii/gnokii.c:2303
 msgid "Calendar note deleted.\n"
 msgstr "Kalendri kirje kustutatud.\n"
 
-#: gnokii/gnokii.c:2314
+#: gnokii/gnokii.c:2305
 #, c-format
 msgid "The calendar note cannot be deleted: %s\n"
 msgstr "Kalendri kirjet %s ei saa kustutada\n"
 
-#: gnokii/gnokii.c:2381
+#: gnokii/gnokii.c:2372
 #, c-format
 msgid "Date: %4d/%02d/%02d\n"
 msgstr "Kuupäev: %4d/%02d/%02d\n"
 
-#: gnokii/gnokii.c:2382
+#: gnokii/gnokii.c:2373
 #, c-format
 msgid "Time: %02d:%02d:%02d\n"
 msgstr "Kellaaeg: %02d:%02d:%02d\n"
 
-#: gnokii/gnokii.c:2432
+#: gnokii/gnokii.c:2422
 #, c-format
 msgid "Alarm: %s\n"
 msgstr "Äratus: %s\n"
 
-#: gnokii/gnokii.c:2433
+#: gnokii/gnokii.c:2423
 #, c-format
 msgid "Time: %02d:%02d\n"
 msgstr "Kellaaeg: %02d:%02d\n"
 
-#: gnokii/gnokii.c:2474
+#: gnokii/gnokii.c:2464
 #, c-format
 msgid "CALL%d: IDLE\n"
-msgstr ""
+msgstr "KÕNE%d: OOTAN\n"
 
-#: gnokii/gnokii.c:2502
+#: gnokii/gnokii.c:2492
 #, c-format
 msgid "CALL%d: %s %s(%s) (duration: %d sec)\n"
-msgstr ""
+msgstr "KÕNE%d: %s %s(%s) (kestus: %d sekundit)\n"
 
-#: gnokii/gnokii.c:2541
+#: gnokii/gnokii.c:2531
 msgid "Entering monitor mode...\n"
 msgstr "Siirdun monitooringu olekusse...\n"
 
-#: gnokii/gnokii.c:2565
+#: gnokii/gnokii.c:2555
 #, c-format
 msgid "RFLevel: %d\n"
 msgstr "Väljatugevus: %d \"pulka\"\n"
 
-#: gnokii/gnokii.c:2568
+#: gnokii/gnokii.c:2558
 #, c-format
 msgid "Battery: %d\n"
 msgstr "Aku: %d \"pulka\"\n"
 
-#: gnokii/gnokii.c:2571
+#: gnokii/gnokii.c:2561
 #, c-format
 msgid "Power Source: %s\n"
 msgstr "Toiteallikas: %s\n"
 
-#: gnokii/gnokii.c:2571
+#: gnokii/gnokii.c:2561
 msgid "AC/DC"
 msgstr "Vahelduvvool/Alalisvool"
 
-#: gnokii/gnokii.c:2571
+#: gnokii/gnokii.c:2561
 msgid "battery"
 msgstr "aku"
 
-#: gnokii/gnokii.c:2575
+#: gnokii/gnokii.c:2565
 #, c-format
 msgid "SIM: Used %d, Free %d\n"
-msgstr ""
-"Kaardi mälukasutus  : kasutusel on %d mälupesa, kasutamata %d mälupesa.\n"
+msgstr "Kaardi mälukasutus       : kasutusel on %d mälupesa, kasutamata %d mälupesa.\n"
 
-#: gnokii/gnokii.c:2579
+#: gnokii/gnokii.c:2569
 #, c-format
 msgid "Phone: Used %d, Free %d\n"
-msgstr ""
-"Telefoni mälukasutus: kasutusel on %d mälupesa, kasutamata %d mälupesa.\n"
+msgstr "Telefoni mälukasutus     : kasutusel on %d mälupesa, kasutamata %d mälupesa.\n"
 
-#: gnokii/gnokii.c:2583
+#: gnokii/gnokii.c:2573
 #, c-format
 msgid "DC: Used %d, Free %d\n"
-msgstr "DC: Kasutusel %d, Vaba %d\n"
+msgstr "Valitud kõnede register  : kasutusel on %d mälupesa, kasutamata %d mälupesa\n"
 
-#: gnokii/gnokii.c:2587
+#: gnokii/gnokii.c:2577
 #, c-format
 msgid "EN: Used %d, Free %d\n"
 msgstr "EN: Kasutusel %d, Vaba %d\n"
 
-#: gnokii/gnokii.c:2591
+#: gnokii/gnokii.c:2581
 #, c-format
 msgid "FD: Used %d, Free %d\n"
 msgstr "FD: Kasutusel %d, Vaba %d\n"
 
-#: gnokii/gnokii.c:2595
+#: gnokii/gnokii.c:2585
 #, c-format
 msgid "LD: Used %d, Free %d\n"
 msgstr "LD: Kasutusel %d, Vaba %d\n"
 
-#: gnokii/gnokii.c:2599
+#: gnokii/gnokii.c:2589
 #, c-format
 msgid "MC: Used %d, Free %d\n"
-msgstr "MC: Kasutusel %d, Vaba %d\n"
+msgstr "Vastamata kõnede register: kasutusel on %d mälupesa, kasutamata %d mälupesa\n"
 
-#: gnokii/gnokii.c:2603
+#: gnokii/gnokii.c:2593
 #, c-format
 msgid "ON: Used %d, Free %d\n"
 msgstr "ON: Kasutusel %d, Vaba %d\n"
 
-#: gnokii/gnokii.c:2607
+#: gnokii/gnokii.c:2597
 #, c-format
 msgid "RC: Used %d, Free %d\n"
-msgstr "RC: Kasutusel %d, Vaba %d\n"
+msgstr "Vastatud kõnede register : kasutusel on %d mälupesa, kasutamata %d mälupesa\n"
 
-#: gnokii/gnokii.c:2610
+#: gnokii/gnokii.c:2600
 #, c-format
 msgid "SMS Messages: Unread %d, Number %d\n"
 msgstr "Tekstisõnumid: lugemata sõnumeid %d, kokku sõnumeid %d.\n"
 
-#: gnokii/gnokii.c:2613
+#: gnokii/gnokii.c:2603
 #, c-format
 msgid "Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"
 msgstr "Võrk:  %s (%s), LAC: %02x%02x, KärjeID: %02x%02x\n"
 
-#: gnokii/gnokii.c:2619
+#: gnokii/gnokii.c:2609
 #, c-format
 msgid "Cell broadcast received on channel %d: %s\n"
 msgstr "Kanalil %d: saabus võrguteade %s\n"
 
-#: gnokii/gnokii.c:2627
+#: gnokii/gnokii.c:2617
 msgid "Leaving monitor mode...\n"
 msgstr "Lahkun monitooringu olekust...\n"
 
-#: gnokii/gnokii.c:2635
+#: gnokii/gnokii.c:2624
 #, c-format
 msgid "Call in progress: %-3s\n"
 msgstr "Kõne on käimas: %-3s\n"
 
-#: gnokii/gnokii.c:2636 gnokii/gnokii.c:2638 gnokii/gnokii.c:2640
-#: gnokii/gnokii.c:2642 gnokii/gnokii.c:2644 gnokii/gnokii.c:2646
-#: gnokii/gnokii.c:2648 gnokii/gnokii.c:2650
+#: gnokii/gnokii.c:2625 gnokii/gnokii.c:2627 gnokii/gnokii.c:2629
+#: gnokii/gnokii.c:2631 gnokii/gnokii.c:2633 gnokii/gnokii.c:2635
+#: gnokii/gnokii.c:2637 gnokii/gnokii.c:2639
 msgid "on"
 msgstr "sisse"
 
-#: gnokii/gnokii.c:2636 gnokii/gnokii.c:2638 gnokii/gnokii.c:2640
-#: gnokii/gnokii.c:2642 gnokii/gnokii.c:2644 gnokii/gnokii.c:2646
-#: gnokii/gnokii.c:2648 gnokii/gnokii.c:2650
+#: gnokii/gnokii.c:2625 gnokii/gnokii.c:2627 gnokii/gnokii.c:2629
+#: gnokii/gnokii.c:2631 gnokii/gnokii.c:2633 gnokii/gnokii.c:2635
+#: gnokii/gnokii.c:2637 gnokii/gnokii.c:2639
 msgid "off"
 msgstr "välja"
 
-#: gnokii/gnokii.c:2637
+#: gnokii/gnokii.c:2626
 #, c-format
 msgid "Unknown: %-3s\n"
 msgstr "Tundmatu: %-3s\n"
 
-#: gnokii/gnokii.c:2639
+#: gnokii/gnokii.c:2628
 #, c-format
 msgid "Unread SMS: %-3s\n"
 msgstr "Lugemata SMS: %-3s\n"
 
-#: gnokii/gnokii.c:2641
+#: gnokii/gnokii.c:2630
 #, c-format
 msgid "Voice call: %-3s\n"
 msgstr "Saabuv kõne: %-3s\n"
 
-#: gnokii/gnokii.c:2643
+#: gnokii/gnokii.c:2632
 #, c-format
 msgid "Fax call active: %-3s\n"
 msgstr "Faxi kõne aktiivne: %-3s\n"
 
-#: gnokii/gnokii.c:2645
+#: gnokii/gnokii.c:2634
 #, c-format
 msgid "Data call active: %-3s\n"
 msgstr "Andmekõne aktiivne: %-3s\n"
 
-#: gnokii/gnokii.c:2647
+#: gnokii/gnokii.c:2636
 #, c-format
 msgid "Keyboard lock: %-3s\n"
 msgstr "Klaviatuuri lukk: %-3s\n"
 
-#: gnokii/gnokii.c:2649
+#: gnokii/gnokii.c:2638
 #, c-format
 msgid "SMS storage full: %-3s\n"
 msgstr "SMS varamu on täis: %-3s\n"
 
-#: gnokii/gnokii.c:2747
+#: gnokii/gnokii.c:2736
 msgid "Entered display monitoring mode...\n"
 msgstr "Siirdun monitooringu olekusse...\n"
 
-#: gnokii/gnokii.c:2766 gnokii/gnokii.c:4226
+#: gnokii/gnokii.c:2755 gnokii/gnokii.c:4212
 msgid "Shutting down\n"
 msgstr "Lülitan välja\n"
 
-#: gnokii/gnokii.c:2768
+#: gnokii/gnokii.c:2757
 msgid "Leaving display monitor mode...\n"
 msgstr "Lahkun monitooringu olekust...\n"
 
-#: gnokii/gnokii.c:2847
+#: gnokii/gnokii.c:2836
 msgid "Starting profile number is greater than stop\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2852
+#: gnokii/gnokii.c:2841
 #, c-format
 msgid "Profile number must be value from 0 to %d!\n"
 msgstr "Profiili number peab olema vahemikust 0 kuni %d!\n"
 
-#: gnokii/gnokii.c:2857
+#: gnokii/gnokii.c:2846
 #, c-format
 msgid "This phone supports only %d profiles!\n"
 msgstr "See telefon toetab ainult %d profiile!\n"
 
-#: gnokii/gnokii.c:2874
+#: gnokii/gnokii.c:2863
 #, c-format
 msgid "Cannot get profile %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2887
+#: gnokii/gnokii.c:2876
 msgid " (name defined)\n"
-msgstr ""
+msgstr " (nimi määratud)\n"
 
-#: gnokii/gnokii.c:2888
+#: gnokii/gnokii.c:2877
 #, c-format
 msgid "Incoming call alert: %s\n"
 msgstr "Saabuv kõne: %s\n"
 
-#: gnokii/gnokii.c:2891
+#: gnokii/gnokii.c:2880
 #, c-format
 msgid "Ringing tone: %s (%d)\n"
-msgstr ""
+msgstr "Helin: %s (%d)\n"
 
-#: gnokii/gnokii.c:2893
+#: gnokii/gnokii.c:2882
 #, c-format
 msgid "Ringtone number: %d\n"
-msgstr ""
+msgstr "Helina number: %d\n"
 
-#: gnokii/gnokii.c:2894
+#: gnokii/gnokii.c:2883
 #, c-format
 msgid "Ringing volume: %s\n"
-msgstr ""
+msgstr "Helina tugevus: %s\n"
 
-#: gnokii/gnokii.c:2895
+#: gnokii/gnokii.c:2884
 #, c-format
 msgid "Message alert tone: %s\n"
-msgstr ""
+msgstr "Sõnumi hääl: %s\n"
 
-#: gnokii/gnokii.c:2896
+#: gnokii/gnokii.c:2885
 #, c-format
 msgid "Keypad tones: %s\n"
-msgstr "Klaviatuuri piiksud: %s\n"
+msgstr "Klaviatuuri hääled: %s\n"
 
-#: gnokii/gnokii.c:2897
+#: gnokii/gnokii.c:2886
 #, c-format
 msgid "Warning and game tones: %s\n"
-msgstr ""
+msgstr "Hoiatus- ja mängu hääled: %s\n"
 
-#: gnokii/gnokii.c:2900
+#. FIXME: Light settings is only used for Car
+#: gnokii/gnokii.c:2889
 #, c-format
 msgid "Lights: %s\n"
 msgstr "Valgus: %s\n"
 
-#: gnokii/gnokii.c:2900 gnokii/gnokii.c:2907
+#: gnokii/gnokii.c:2889 gnokii/gnokii.c:2896
 msgid "On"
 msgstr ""
 
-#: gnokii/gnokii.c:2900
+#: gnokii/gnokii.c:2889
 msgid "Automatic"
 msgstr "automaatne"
 
-#: gnokii/gnokii.c:2901
+#: gnokii/gnokii.c:2890
 #, c-format
 msgid "Vibration: %s\n"
 msgstr "Vibra: %s\n"
 
-#: gnokii/gnokii.c:2904
+#. FIXME: it will be nice to add here reading caller group name.
+#: gnokii/gnokii.c:2893
 #, c-format
 msgid "Caller groups: 0x%02x\n"
-msgstr ""
+msgstr "Helistajagrupid: 0x%02x\n"
 
-#: gnokii/gnokii.c:2907
+#. FIXME: Automatic answer is only used for Car and Headset.
+#: gnokii/gnokii.c:2896
 #, c-format
 msgid "Automatic answer: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2907
+#: gnokii/gnokii.c:2896
 msgid "Off"
 msgstr "välja"
 
-#: gnokii/gnokii.c:2945
+#: gnokii/gnokii.c:2934
 #, c-format
 msgid "Cannot set profile: %s\n"
 msgstr "Ei suuda seada profiili %s\n"
 
-#: gnokii/gnokii.c:3015
+#: gnokii/gnokii.c:3004
 #, c-format
 msgid ""
 "%d. Name: %s\n"
 "Number: %s\n"
 "Group id: %d\n"
 msgstr ""
+"%d. Nimi: %s\n"
+"Number: %s\n"
+"Grupi id: %d\n"
 
-#: gnokii/gnokii.c:3019
+#: gnokii/gnokii.c:3008
 msgid "Email address: "
-msgstr "Emaili aadress:"
+msgstr "Emaili aadress: "
 
-#: gnokii/gnokii.c:3022
+#: gnokii/gnokii.c:3011
 msgid "Address: "
 msgstr "Aadress: "
 
-#: gnokii/gnokii.c:3025
+#: gnokii/gnokii.c:3014
 msgid "Notes: "
 msgstr "Märkused: "
 
-#: gnokii/gnokii.c:3030
+#: gnokii/gnokii.c:3019
 msgid "Home number: "
 msgstr "Kodune number: "
 
-#: gnokii/gnokii.c:3033
+#: gnokii/gnokii.c:3022
 msgid "Cellular number: "
 msgstr "Mobiili number: "
 
-#: gnokii/gnokii.c:3036
+#: gnokii/gnokii.c:3025
 msgid "Fax number: "
 msgstr "Faxi number: "
 
-#: gnokii/gnokii.c:3039
+#: gnokii/gnokii.c:3028
 msgid "Business number: "
 msgstr "Töönumber: "
 
-#: gnokii/gnokii.c:3042
+#: gnokii/gnokii.c:3031
 msgid "Preferred number: "
-msgstr "Eelistatud number:"
+msgstr "Eelistatud number: "
 
-#: gnokii/gnokii.c:3045 gnokii/gnokii.c:3053
+#: gnokii/gnokii.c:3034 gnokii/gnokii.c:3042
 #, c-format
 msgid "Unknown (%d): "
-msgstr "Tundmatu viga (%d): "
+msgstr "Tundmatu (%d): "
 
-#: gnokii/gnokii.c:3050
+#: gnokii/gnokii.c:3039
 msgid "WWW address: "
 msgstr "WWW Aadress: "
 
-#: gnokii/gnokii.c:3059
+#: gnokii/gnokii.c:3048
 #, c-format
 msgid "Date: %02u.%02u.%04u %02u:%02u:%02u\n"
 msgstr "Kuupäev/kellaeg: %02u.%02u.%04u %02u:%02u:%02u\n"
 
-#: gnokii/gnokii.c:3063
+#: gnokii/gnokii.c:3052
 msgid "Empty memory location. Skipping.\n"
 msgstr "Tühi SMS mälupesa. Jätan vahele.\n"
 
-#: gnokii/gnokii.c:3066
+#: gnokii/gnokii.c:3055
 #, c-format
 msgid "Error reading from the location %d in memory %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3103 gnokii/gnokii.c:3116 gnokii/gnokii.c:3130
-#, fuzzy, c-format
+#: gnokii/gnokii.c:3092 gnokii/gnokii.c:3105 gnokii/gnokii.c:3119
+#, c-format
 msgid "Format problem on line [%s]\n"
-msgstr "Formaadi probleem real %d [%s]\n"
+msgstr "Formaadi probleem real [%s]\n"
 
-#: gnokii/gnokii.c:3147
+#: gnokii/gnokii.c:3136
 #, c-format
 msgid "Missing phone number type on line %d entry [%s]\n"
-msgstr ""
+msgstr "Real %d puudub telefoninumbri tüüp, kirje %s\n"
 
-#: gnokii/gnokii.c:3161
+#: gnokii/gnokii.c:3150
 #, c-format
 msgid "There is no phone number on line [%s] entry %d\n"
-msgstr ""
+msgstr "Real [%s] puudub telefoninumber, kirje %d\n"
 
-#: gnokii/gnokii.c:3227
+#: gnokii/gnokii.c:3216
 msgid "Location busy. "
-msgstr ""
+msgstr "Asukoht hõivatud. "
 
-#: gnokii/gnokii.c:3237
+#: gnokii/gnokii.c:3226
 #, c-format
 msgid "Error (%s)\n"
 msgstr "Viga (%s)\n"
 
-#: gnokii/gnokii.c:3248
+#: gnokii/gnokii.c:3237
 #, c-format
 msgid "Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"
-msgstr ""
-"Salvestamine õnnestus: mälu tüüp: %s, asukoht: %d, nimi: %s, number: %s\n"
+msgstr "Salvestamine õnnestus: mälu tüüp: %s, asukoht: %d, nimi: %s, number: %s\n"
 
-#: gnokii/gnokii.c:3251
+#: gnokii/gnokii.c:3240
 #, c-format
 msgid "Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"
-msgstr ""
-"Salvestamine(%s) EBAÕNNESTUS: mälu tüüp: %s, asukoht: %d, nimi: %s, number: %"
-"s\n"
+msgstr "Salvestamine(%s) EBAÕNNESTUS: mälu tüüp: %s, asukoht: %d, nimi: %s, number: %s\n"
 
-#: gnokii/gnokii.c:3273 gnokii/gnokii.c:3379
+#: gnokii/gnokii.c:3262 gnokii/gnokii.c:3368
 #, c-format
 msgid "WAP bookmark nr. %d:\n"
-msgstr ""
+msgstr "WAP järjehoidja nr. %d:\n"
 
-#: gnokii/gnokii.c:3274 gnokii/gnokii.c:3380
+#: gnokii/gnokii.c:3263 gnokii/gnokii.c:3369
 #, c-format
 msgid "Name: %s\n"
 msgstr "Nimi: %s\n"
 
-#: gnokii/gnokii.c:3275
-#, fuzzy, c-format
+#: gnokii/gnokii.c:3264
+#, c-format
 msgid "URL: %s\n"
-msgstr "Valgus: %s\n"
+msgstr ""
 
-#: gnokii/gnokii.c:3306
+#: gnokii/gnokii.c:3295
 #, c-format
 msgid "WAP bookmark nr. %d succesfully written!\n"
 msgstr "WAP järjehoidja nr. %d edukalt kirjutatud!\n"
 
-#: gnokii/gnokii.c:3332
+#: gnokii/gnokii.c:3321
 #, c-format
 msgid "WAP bookmark nr. %d deleted!\n"
 msgstr "WAP järjehoidja nr. %d kustutatud!\n"
 
-#: gnokii/gnokii.c:3381
+#: gnokii/gnokii.c:3370
 #, c-format
 msgid "Home: %s\n"
-msgstr "Kodu Number: %s\n"
+msgstr "Kodune Number: %s\n"
 
-#: gnokii/gnokii.c:3382
+#: gnokii/gnokii.c:3371
 msgid "Session mode: "
 msgstr ""
 
-#: gnokii/gnokii.c:3385
+#: gnokii/gnokii.c:3374
 msgid "temporary\n"
 msgstr "ajutine\n"
 
-#: gnokii/gnokii.c:3388
+#: gnokii/gnokii.c:3377
 msgid "permanent\n"
 msgstr "püsiv\n"
 
-#: gnokii/gnokii.c:3394
+#: gnokii/gnokii.c:3383
 msgid "Connection security: "
 msgstr "Ühenduse turvalisus: "
 
-#: gnokii/gnokii.c:3396
+#: gnokii/gnokii.c:3385
 msgid "yes\n"
 msgstr "Jah\n"
 
-#: gnokii/gnokii.c:3398
+#: gnokii/gnokii.c:3387
 msgid "no\n"
 msgstr "ei\n"
 
-#: gnokii/gnokii.c:3399
+#: gnokii/gnokii.c:3388
 msgid "Data bearer: "
 msgstr ""
 
-#: gnokii/gnokii.c:3402 gnokii/gnokii.c:3417
+#: gnokii/gnokii.c:3391 gnokii/gnokii.c:3406
 msgid "GSM data\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3405 gnokii/gnokii.c:3473
+#: gnokii/gnokii.c:3394 gnokii/gnokii.c:3462
 msgid "GPRS\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3408 gnokii/gnokii.c:3514
-#, fuzzy
+#: gnokii/gnokii.c:3397 gnokii/gnokii.c:3503
 msgid "SMS\n"
-msgstr "Lühisõnumid"
+msgstr "Lühisõnumid\n"
 
-#: gnokii/gnokii.c:3411
+#: gnokii/gnokii.c:3400
 msgid "USSD\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3418 gnokii/gnokii.c:3486
+#: gnokii/gnokii.c:3407 gnokii/gnokii.c:3475
 msgid "   Authentication type: "
-msgstr ""
+msgstr "   Autoriseerimise tüüp: "
 
-#: gnokii/gnokii.c:3421 gnokii/gnokii.c:3489
+#: gnokii/gnokii.c:3410 gnokii/gnokii.c:3478
 msgid "normal\n"
 msgstr "normaalne lõpp\n"
 
-#: gnokii/gnokii.c:3424 gnokii/gnokii.c:3492
+#: gnokii/gnokii.c:3413 gnokii/gnokii.c:3481
 msgid "secure\n"
 msgstr "turvaline\n"
 
-#: gnokii/gnokii.c:3430
+#: gnokii/gnokii.c:3419
 msgid "   Data call type: "
 msgstr "   Andmekõne tüüp: "
 
-#: gnokii/gnokii.c:3433
+#: gnokii/gnokii.c:3422
 msgid "analogue\n"
 msgstr "analoog\n"
 
-#: gnokii/gnokii.c:3436
+#: gnokii/gnokii.c:3425
 msgid "ISDN\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3442
+#: gnokii/gnokii.c:3431
 msgid "   Data call speed: "
 msgstr "   Andmekõne kiirus: "
 
-#: gnokii/gnokii.c:3445 gnokii/gnokii.c:3463 gnokii/gnokii.c:3504
+#: gnokii/gnokii.c:3434 gnokii/gnokii.c:3452 gnokii/gnokii.c:3493
 msgid "automatic\n"
 msgstr "automaatne\n"
 
-#: gnokii/gnokii.c:3448
+#: gnokii/gnokii.c:3437
 msgid "9600\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3451
+#: gnokii/gnokii.c:3440
 msgid "14400\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3457 gnokii/gnokii.c:3498
+#: gnokii/gnokii.c:3446 gnokii/gnokii.c:3487
 msgid "   Login type: "
 msgstr ""
 
-#: gnokii/gnokii.c:3460 gnokii/gnokii.c:3501
+#: gnokii/gnokii.c:3449 gnokii/gnokii.c:3490
 msgid "manual\n"
 msgstr "käsiraamat\n"
 
-#: gnokii/gnokii.c:3469 gnokii/gnokii.c:3511
+#: gnokii/gnokii.c:3458 gnokii/gnokii.c:3500
 #, c-format
 msgid "   IP: %s\n"
 msgstr "   IP: %s\n"
 
-#: gnokii/gnokii.c:3470
+#: gnokii/gnokii.c:3459
 #, c-format
 msgid "   Number: %s\n"
 msgstr "   Number: %s\n"
 
-#: gnokii/gnokii.c:3471 gnokii/gnokii.c:3512
+#: gnokii/gnokii.c:3460 gnokii/gnokii.c:3501
 #, c-format
 msgid "   Username: %s\n"
 msgstr "   Kasutajanimi: %s\n"
 
-#: gnokii/gnokii.c:3472 gnokii/gnokii.c:3513
+#: gnokii/gnokii.c:3461 gnokii/gnokii.c:3502
 #, c-format
 msgid "   Password: %s\n"
 msgstr "   Parool: %s\n"
 
-#: gnokii/gnokii.c:3474
+#: gnokii/gnokii.c:3463
 msgid "   connection: "
 msgstr "   ühendus: "
 
-#: gnokii/gnokii.c:3477
+#: gnokii/gnokii.c:3466
 msgid "when needed\n"
 msgstr "kui vaja\n"
 
-#: gnokii/gnokii.c:3480
+#: gnokii/gnokii.c:3469
 msgid "always\n"
 msgstr "alati\n"
 
-#: gnokii/gnokii.c:3510
+#: gnokii/gnokii.c:3499
 #, c-format
 msgid "   Access point: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3515
-#, fuzzy, c-format
+#: gnokii/gnokii.c:3504
+#, c-format
 msgid "   Service number: %s\n"
-msgstr "   Number: %s\n"
+msgstr "   Teenusenumber: %s\n"
 
-#: gnokii/gnokii.c:3516
-#, fuzzy, c-format
+#: gnokii/gnokii.c:3505
+#, c-format
 msgid "   Server number: %s\n"
-msgstr "   Number: %s\n"
+msgstr "   Serveri number: %s\n"
 
-#: gnokii/gnokii.c:3565
+#: gnokii/gnokii.c:3554
 #, c-format
 msgid "Cannot write WAP setting: %s\n"
-msgstr ""
+msgstr "Ei suuda kirjutada WAP seadet: %s\n"
 
-#: gnokii/gnokii.c:3587
+#: gnokii/gnokii.c:3576
 #, c-format
 msgid "WAP setting nr. %d activated!\n"
-msgstr ""
+msgstr "WAP seade nr. %d aktiveeritud!\n"
 
-#: gnokii/gnokii.c:3613
+#: gnokii/gnokii.c:3602
 #, c-format
 msgid "SpeedDial nr. %d: %d:%d\n"
 msgstr "Kiirvalik nr. %d: %d:%d\n"
 
-#: gnokii/gnokii.c:3643
+#: gnokii/gnokii.c:3632
 #, c-format
 msgid "Unknown memory type %s!\n"
 msgstr "Tundmatu mälu tüüp %s!\n"
 
-#: gnokii/gnokii.c:3715 gnokii/gnokii.c:3716 gnokii/gnokii.c:3717
-#: gnokii/gnokii.c:3718
+#: gnokii/gnokii.c:3702 gnokii/gnokii.c:3703 gnokii/gnokii.c:3704
+#: gnokii/gnokii.c:3705
 msgid "(unknown)"
 msgstr "(tundmatu)"
 
-#: gnokii/gnokii.c:3722
+#: gnokii/gnokii.c:3709
 #, c-format
 msgid "IMEI         : %s\n"
 msgstr "IMEI         : %s\n"
 
-#: gnokii/gnokii.c:3723
+#: gnokii/gnokii.c:3710
 #, c-format
 msgid "Manufacturer : %s\n"
 msgstr "Tootja       : %s\n"
 
-#: gnokii/gnokii.c:3724
+#: gnokii/gnokii.c:3711
 #, c-format
 msgid "Model        : %s\n"
-msgstr "Mudel:        : %s\n"
+msgstr "Mudel        : %s\n"
 
-#: gnokii/gnokii.c:3725
+#: gnokii/gnokii.c:3712
 #, c-format
 msgid "Revision     : %s\n"
 msgstr "Versioon     : %s\n"
 
-#: gnokii/gnokii.c:3751
+#: gnokii/gnokii.c:3738
 msgid "What kind of reset do you want??\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3771
+#: gnokii/gnokii.c:3757
 msgid "GSM/FBUS init failed! (Unknown model?). Quitting.\n"
-msgstr ""
-"GSM/FBUS initsialiseerimine ebaõnnestus! (Tundmatu mudel?). Lõpetan....)\n"
+msgstr "GSM/FBUS initsialiseerimine ebaõnnestus! (Tundmatu mudel?). Lõpetan....)\n"
 
-#: gnokii/gnokii.c:3792 gnokii/gnokii.c:3938 gnokii/gnokii.c:3950
+#: gnokii/gnokii.c:3778 gnokii/gnokii.c:3924 gnokii/gnokii.c:3936
 msgid "Failed to load ringtone.\n"
 msgstr "Helina laadimine ebaõnnestus.\n"
 
-#: gnokii/gnokii.c:3861
+#: gnokii/gnokii.c:3847
 #, c-format
 msgid "Getting ringtone %d failed: %s\n"
 msgstr "Helina %d saamine ebaõnnestus: %s\n"
 
-#: gnokii/gnokii.c:3864
+#: gnokii/gnokii.c:3850
 #, c-format
 msgid "Getting ringtone %d (\"%s\") succeeded!\n"
 msgstr "Helina saamine %d (\"%s\") õnnestus!\n"
 
-#: gnokii/gnokii.c:3870
+#: gnokii/gnokii.c:3856
 msgid "Failed to save ringtone.\n"
 msgstr "Helina salvestamine ebaõnnestus!\n"
 
-#: gnokii/gnokii.c:3877
+#: gnokii/gnokii.c:3863
 #, c-format
 msgid "Failed to save ringtone: %s\n"
 msgstr "Helina %s salvestamine ebaõnnestus!\n"
 
-#: gnokii/gnokii.c:3960
+#: gnokii/gnokii.c:3946
 #, c-format
 msgid "Send failed: %s\n"
 msgstr "Saatmine ebaõnnestus: %s\n"
 
-#: gnokii/gnokii.c:3971
+#: gnokii/gnokii.c:3957
 #, c-format
 msgid "Failed to press key: %s\n"
 msgstr "%s Klahvivajutus ebaõnnestus\n"
 
-#: gnokii/gnokii.c:4024
+#: gnokii/gnokii.c:4010
 #, c-format
 msgid "Error entering char: %s\n"
 msgstr "Viga tähemärgi %s sisestamiselisel\n"
 
-#: gnokii/gnokii.c:4127
+#: gnokii/gnokii.c:4113
 msgid "Divert type: "
 msgstr "Suunamise tüüp: "
 
-#: gnokii/gnokii.c:4129 gnokii/gnokii.c:4138
+#: gnokii/gnokii.c:4115 gnokii/gnokii.c:4124
 msgid "all\n"
 msgstr "Kõik\n"
 
-#: gnokii/gnokii.c:4130
+#: gnokii/gnokii.c:4116
 msgid "busy\n"
 msgstr "hõivatud\n"
 
-#: gnokii/gnokii.c:4131
+#: gnokii/gnokii.c:4117
 msgid "noans\n"
 msgstr "ei vasta\n"
 
-#: gnokii/gnokii.c:4132
+#: gnokii/gnokii.c:4118
 msgid "outofreach\n"
 msgstr "ei ulatu\n"
 
-#: gnokii/gnokii.c:4133
+#: gnokii/gnokii.c:4119
 msgid "notavail\n"
 msgstr "ei saa kätte\n"
 
-#: gnokii/gnokii.c:4134 gnokii/gnokii.c:4142
+#: gnokii/gnokii.c:4120 gnokii/gnokii.c:4128
 #, c-format
 msgid "unknown(0x%02x)\n"
 msgstr "Tundmatu(0x%02x)\n"
 
-#: gnokii/gnokii.c:4136
+#: gnokii/gnokii.c:4122
 msgid "Call type: "
-msgstr ""
+msgstr "Kõne tüüp: "
 
-#: gnokii/gnokii.c:4139
+#: gnokii/gnokii.c:4125
 msgid "voice\n"
 msgstr "Kõne\n"
 
-#: gnokii/gnokii.c:4140
+#: gnokii/gnokii.c:4126
 msgid "fax\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4141
+#: gnokii/gnokii.c:4127
 msgid "data\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4145
+#: gnokii/gnokii.c:4131
 #, c-format
 msgid "Number: %s\n"
 msgstr "Number: %s\n"
 
-#: gnokii/gnokii.c:4146
+#: gnokii/gnokii.c:4132
 #, c-format
 msgid "Timeout: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4148
+#: gnokii/gnokii.c:4134
 msgid "Divert isn't active.\n"
 msgstr "Suunamine pole aktiivne.\n"
 
-#: gnokii/gnokii.c:4170
+#: gnokii/gnokii.c:4156
 #, c-format
 msgid "SMS received from number: %s\n"
 msgstr "Saabus SMS numbrilt: %s\n"
 
-#: gnokii/gnokii.c:4179
+#: gnokii/gnokii.c:4165
 #, c-format
 msgid "Got message %d: %s\n"
-msgstr ""
+msgstr "Sain teate %d: %s\n"
 
-#: gnokii/gnokii.c:4186
+#: gnokii/gnokii.c:4172
 msgid "### Exists?!\n"
-msgstr ""
+msgstr "### On olemas?!\n"
 
-#: gnokii/gnokii.c:4218
+#: gnokii/gnokii.c:4204
 msgid "Entered sms reader mode...\n"
 msgstr "Siirdun SMS lugemise olekusse...\n"
 
-#: gnokii/gnokii.c:4228
+#: gnokii/gnokii.c:4214
 msgid "Exiting sms reader mode...\n"
 msgstr "Lahkun SMS lugemise olekust...\n"
 
-#: gnokii/gnokii.c:4249
+#: gnokii/gnokii.c:4235
 msgid "Getting security code... \n"
 msgstr "Võtan turvakoodi... \n"
 
-#: gnokii/gnokii.c:4251
+#: gnokii/gnokii.c:4237
 #, c-format
 msgid "Security code is: %s\n"
-msgstr "Turvakoodi on: %s\n"
+msgstr "Turvakood on: %s\n"
 
-#: gnokii/gnokii.c:4298
-msgid "HOME variable missing\n"
-msgstr "HOME muutuja puudub\n"
+#: gnokii/gnokii.c:4270
+#, c-format
+msgid "Network      : %s %s\n"
+msgstr "Võrgu nimi   : %s %s\n"
 
-#: gnokii/gnokii.c:4565
-msgid "WARNING: cannot open logfile, logs will be directed to stderr\n"
+#: gnokii/gnokii.c:4273
+#, c-format
+msgid "Network code : %s\n"
+msgstr "Võrgu kood   : %s\n"
+
+#: gnokii/gnokii.c:4274
+#, c-format
+msgid "LAC          : %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4593
+#: gnokii/gnokii.c:4275
+#, c-format
+msgid "Cell id      : %d\n"
+msgstr "Kärje id     : %d\n"
+
+#: gnokii/gnokii.c:4312
+msgid "HOME variable missing\n"
+msgstr "\"HOME\" muutuja puudub\n"
+
+#: gnokii/gnokii.c:4582
+msgid "WARNING: cannot open logfile, logs will be directed to stderr\n"
+msgstr "HOIATUS: Ei suuda avada logifaili, logid saadetakse stderr\n"
+
+#: gnokii/gnokii.c:4611
 #, c-format
 msgid "Use '%s --help' for usage information.\n"
-msgstr "Kasuta '%s --help' kasutusinfo saamiseks.\n"
+msgstr "Kasuta '%s --help' kasutusvihjete saamiseks.\n"
 
-#: gnokii/gnokii.c:4806
+#: gnokii/gnokii.c:4827
 #, c-format
 msgid "Unknown option: %d\n"
 msgstr "Tundmatu valik: %d\n"
 
-#: gnokii/gnokii.c:4813
+#: gnokii/gnokii.c:4834
 msgid "Wrong number of arguments\n"
 msgstr "Vale argumentide kogus\n"
 
-#: smsd/lowlevel.c:110 smsd/lowlevel.c:184 smsd/lowlevel.c:186
-#: xgnokii/xgnokii_lowlevel.c:168 xgnokii/xgnokii_lowlevel.c:260
-#: xgnokii/xgnokii_lowlevel.c:262 xgnokii/xgnokii_lowlevel.c:263
+#: smsd/lowlevel.c:103 smsd/lowlevel.c:178 smsd/lowlevel.c:180
+#: xgnokii/xgnokii_lowlevel.c:164 xgnokii/xgnokii_lowlevel.c:254
+#: xgnokii/xgnokii_lowlevel.c:256 xgnokii/xgnokii_lowlevel.c:257
 #: xgnokii/xgnokii_sms.c:308
 msgid "unknown"
 msgstr "tundmatu"
 
-#: smsd/lowlevel.c:168
+#: smsd/lowlevel.c:162
 msgid "GSM/FBUS init failed! (Unknown model ?). Quitting.\n"
-msgstr ""
-"GSM/FBUS initsialiseerimine ebaõnnestus! (Tundmatu mudel?). Lõpetan....)\n"
+msgstr "GSM/FBUS initsialiseerimine ebaõnnestus! (Tundmatu mudel?). Lõpetan....)\n"
 
-#: smsd/lowlevel.c:427 xgnokii/xgnokii_lowlevel.c:1216
+#: smsd/lowlevel.c:421 xgnokii/xgnokii_lowlevel.c:1212
 #, c-format
 msgid "Event %d failed with return code %d!\n"
 msgstr "Tegevus %d ebaõnnestus, veakood %d!\n"
 
-#: xgnokii/xgnokii.c:215
+#: xgnokii/xgnokii.c:217
 msgid "Reading caller groups names ..."
 msgstr "Loen helistajagruppide nimesid...."
 
-#: xgnokii/xgnokii.c:219 xgnokii/xgnokii.c:1014
+#: xgnokii/xgnokii.c:221 xgnokii/xgnokii.c:1016
 msgid "Family"
 msgstr "Perekond"
 
-#: xgnokii/xgnokii.c:220 xgnokii/xgnokii.c:1026
+#: xgnokii/xgnokii.c:222 xgnokii/xgnokii.c:1028
 msgid "VIP"
 msgstr ""
 
-#: xgnokii/xgnokii.c:221 xgnokii/xgnokii.c:1038
+#: xgnokii/xgnokii.c:223 xgnokii/xgnokii.c:1040
 msgid "Friends"
 msgstr "Sõbrad"
 
-#: xgnokii/xgnokii.c:222 xgnokii/xgnokii.c:1050
+#: xgnokii/xgnokii.c:224 xgnokii/xgnokii.c:1052
 msgid "Colleagues"
 msgstr "Kolleegid"
 
-#: xgnokii/xgnokii.c:223 xgnokii/xgnokii.c:1062
+#: xgnokii/xgnokii.c:225 xgnokii/xgnokii.c:1064
 msgid "Other"
 msgstr "Muud"
 
-#: xgnokii/xgnokii.c:224
+#: xgnokii/xgnokii.c:226
 msgid "No group"
 msgstr "Grupita"
 
-#: xgnokii/xgnokii.c:345
+#: xgnokii/xgnokii.c:347
 msgid "Short Message received"
 msgstr "Saabus Lühisõnum"
 
-#: xgnokii/xgnokii.c:351
+#: xgnokii/xgnokii.c:353
 msgid "Working ..."
 msgstr "Toimetan ..."
 
-#: xgnokii/xgnokii.c:368
+#: xgnokii/xgnokii.c:370
 msgid "Call in progress"
 msgstr "kõne käimas"
 
-#: xgnokii/xgnokii.c:381
+#: xgnokii/xgnokii.c:383
 msgid "Hide"
 msgstr "Peida"
 
-#: xgnokii/xgnokii.c:469
+#: xgnokii/xgnokii.c:471
 #, c-format
 msgid ""
 "Outgoing call in progress:\n"
@@ -2029,7 +2048,7 @@ msgstr ""
 "Kõne on käimas:\n"
 "Aeg: %s"
 
-#: xgnokii/xgnokii.c:471
+#: xgnokii/xgnokii.c:473
 #, c-format
 msgid ""
 "Incomming call from: %s\n"
@@ -2038,115 +2057,115 @@ msgstr ""
 "Saabuv kõne: %s\n"
 "Kellaaeg: %s"
 
-#: xgnokii/xgnokii.c:532 xgnokii/xgnokii.c:1412
+#: xgnokii/xgnokii.c:534 xgnokii/xgnokii.c:1414
 msgid "Paging"
 msgstr "Piipar"
 
-#: xgnokii/xgnokii.c:541 xgnokii/xgnokii.c:1418
+#: xgnokii/xgnokii.c:543 xgnokii/xgnokii.c:1420
 msgid "E-Mail"
 msgstr ""
 
-#: xgnokii/xgnokii.c:553
+#: xgnokii/xgnokii.c:555
 msgid "Voice"
 msgstr "Kõne"
 
-#: xgnokii/xgnokii.c:563 xgnokii/xgnokii.c:1446
+#: xgnokii/xgnokii.c:565 xgnokii/xgnokii.c:1448
 msgid "1 h"
 msgstr "1 t"
 
-#: xgnokii/xgnokii.c:567 xgnokii/xgnokii.c:1452
+#: xgnokii/xgnokii.c:569 xgnokii/xgnokii.c:1454
 msgid "6 h"
 msgstr "6 t"
 
-#: xgnokii/xgnokii.c:571 xgnokii/xgnokii.c:587 xgnokii/xgnokii.c:1458
+#: xgnokii/xgnokii.c:573 xgnokii/xgnokii.c:589 xgnokii/xgnokii.c:1460
 msgid "24 h"
 msgstr "24 t"
 
-#: xgnokii/xgnokii.c:575 xgnokii/xgnokii.c:1464
+#: xgnokii/xgnokii.c:577 xgnokii/xgnokii.c:1466
 msgid "72 h"
 msgstr "72 t"
 
-#: xgnokii/xgnokii.c:583
+#: xgnokii/xgnokii.c:585
 msgid "Max. time"
 msgstr "Max. aeg"
 
-#: xgnokii/xgnokii.c:630
+#: xgnokii/xgnokii.c:632
 msgid "Reading SMS centers ..."
 msgstr "Laadin SMS keskusi ..."
 
-#: xgnokii/xgnokii.c:879
+#: xgnokii/xgnokii.c:881
 msgid "SMS not supported!"
 msgstr "SMS pole toetatud!"
 
-#: xgnokii/xgnokii.c:884
+#: xgnokii/xgnokii.c:886
 msgid "Calendar not supported!"
 msgstr "Kalender pole toetatud!"
 
-#: xgnokii/xgnokii.c:1075
+#: xgnokii/xgnokii.c:1077
 msgid "Error writing configuration file!"
 msgstr "Viga konfiguratsioonifaili salvestamisel!"
 
-#: xgnokii/xgnokii.c:1087 xgnokii/xgnokii_contacts.c:3480
+#: xgnokii/xgnokii.c:1089 xgnokii/xgnokii_contacts.c:3482
 msgid "Contacts"
 msgstr "Kontaktid"
 
-#: xgnokii/xgnokii.c:1093 xgnokii/xgnokii.c:1832
+#: xgnokii/xgnokii.c:1095 xgnokii/xgnokii.c:1834
 msgid "SMS"
 msgstr "Lühisõnumid"
 
-#: xgnokii/xgnokii.c:1098 xgnokii/xgnokii_calendar.c:1556
+#: xgnokii/xgnokii.c:1100 xgnokii/xgnokii_calendar.c:1556
 msgid "Calendar"
 msgstr "Kalender"
 
-#: xgnokii/xgnokii.c:1103 xgnokii/xgnokii_logos.c:1541
+#: xgnokii/xgnokii.c:1105 xgnokii/xgnokii_logos.c:1536
 msgid "Logos"
 msgstr "Logod"
 
-#: xgnokii/xgnokii.c:1109
+#: xgnokii/xgnokii.c:1111
 msgid "DTMF"
 msgstr "DTMF"
 
-#: xgnokii/xgnokii.c:1114 xgnokii/xgnokii_speed.c:556
+#: xgnokii/xgnokii.c:1116 xgnokii/xgnokii_speed.c:556
 msgid "Speed Dial"
 msgstr "Kiirvalik"
 
-#: xgnokii/xgnokii.c:1119
+#: xgnokii/xgnokii.c:1121
 msgid "Keyboard"
 msgstr "Klaviatuur"
 
-#: xgnokii/xgnokii.c:1124 xgnokii/xgnokii_netmon.c:323
+#: xgnokii/xgnokii.c:1126 xgnokii/xgnokii_netmon.c:323
 msgid "Net Monitor"
 msgstr "Võrgu Monitor"
 
-#: xgnokii/xgnokii.c:1129
+#: xgnokii/xgnokii.c:1131
 msgid "Data calls"
 msgstr "Andmekõned"
 
-#: xgnokii/xgnokii.c:1138 xgnokii/xgnokii.c:1560
+#: xgnokii/xgnokii.c:1140 xgnokii/xgnokii.c:1562
 msgid "Options"
 msgstr "Valikud"
 
-#: xgnokii/xgnokii.c:1148 xgnokii/xgnokii.c:2129
+#: xgnokii/xgnokii.c:1150 xgnokii/xgnokii.c:2131
 msgid "Help"
 msgstr "Abi"
 
-#: xgnokii/xgnokii.c:1153 xgnokii/xgnokii.c:1170
+#: xgnokii/xgnokii.c:1155 xgnokii/xgnokii.c:1172
 msgid "About"
 msgstr "Üldist"
 
-#: xgnokii/xgnokii.c:1173 xgnokii/xgnokii.c:1343
+#: xgnokii/xgnokii.c:1175 xgnokii/xgnokii.c:1345
 #: xgnokii/xgnokii_calendar.c:706 xgnokii/xgnokii_calendar.c:752
 #: xgnokii/xgnokii_calendar.c:899 xgnokii/xgnokii_calendar.c:1019
 #: xgnokii/xgnokii_calendar.c:1159 xgnokii/xgnokii_calendar.c:1292
 #: xgnokii/xgnokii_calendar.c:1449 xgnokii/xgnokii_contacts.c:1086
-#: xgnokii/xgnokii_contacts.c:1328 xgnokii/xgnokii_contacts.c:1462
-#: xgnokii/xgnokii_contacts.c:1613 xgnokii/xgnokii_contacts.c:1991
-#: xgnokii/xgnokii_contacts.c:3301 xgnokii/xgnokii_sms.c:508
+#: xgnokii/xgnokii_contacts.c:1330 xgnokii/xgnokii_contacts.c:1464
+#: xgnokii/xgnokii_contacts.c:1615 xgnokii/xgnokii_contacts.c:1993
+#: xgnokii/xgnokii_contacts.c:3303 xgnokii/xgnokii_sms.c:508
 msgid "Ok"
 msgstr "Ok"
 
-#: xgnokii/xgnokii.c:1184
-#, fuzzy, c-format
+#: xgnokii/xgnokii.c:1186
+#, c-format
 msgid ""
 "xgnokii version: %s\n"
 "gnokii version: %s\n"
@@ -2159,243 +2178,248 @@ msgid ""
 "conditions.\n"
 "There is absolutely no waranty for xgnokii. See GPL for details.\n"
 msgstr ""
-"GNOKII Versioon %s\n"
-"Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999, 2000\n"
-"Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999, 2000\n"
-"Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
-"Copyright (C) Pawe³ Kot <pkot@linuxnews.pl>, 2001-2002\n"
-"Copyright (C) BORBELY Zoltan <bozo@andrews.hu>, 2002\n"
-"gnokii on vabavara, GNU General Public License alusel, \n"
-"seda võib muuta ja/või levitada programmi koopiaid vastavlt reeglitele.\n"
-"gnokii ei oma mitte mingisugust garantiid toimivuse kohta.  Vaata GPL "
+"xgnokii versioon: %s\n"
+"gnokii versioon: %s\n"
+"\n"
+"Copyright (C) 1999,2000 Pavel Janík ml.,\n"
+"Hugh Blemings, Jan Derfinak ja teised\n"
+"xgnokii on vabavara, GNU General Public License alusel, \n"
+"programmi koodi võib muuta ja/või levitada vastavalt GPL reeglitele.\n"
+"xgnokii ei oma mitte mingisugust garantiid toimivuse kohta. Vaata GPL "
 "tingimusi.\n"
-"Eestikeelne tõlge Hans Mõtshärg <hans.motsharg@mail.ee>, 2000\n"
-"Kompileeritud %s %s telefonimudelile %s, ühendus pordis %s \n"
+"Eestikeelne tõlge Hans Mõtshärg <hans.motsharg@mail.ee>\n"
 
-#: xgnokii/xgnokii.c:1337
+#: xgnokii/xgnokii.c:1339
 msgid "Edit SMS Setting"
 msgstr "Muuda SMS seadeid"
 
-#: xgnokii/xgnokii.c:1351 xgnokii/xgnokii_calendar.c:715
+#: xgnokii/xgnokii.c:1353 xgnokii/xgnokii_calendar.c:715
 #: xgnokii/xgnokii_calendar.c:761 xgnokii/xgnokii_calendar.c:908
 #: xgnokii/xgnokii_calendar.c:1028 xgnokii/xgnokii_calendar.c:1168
 #: xgnokii/xgnokii_calendar.c:1301 xgnokii/xgnokii_calendar.c:1457
 #: xgnokii/xgnokii_common.c:78 xgnokii/xgnokii_common.c:160
-#: xgnokii/xgnokii_contacts.c:1097 xgnokii/xgnokii_contacts.c:1470
-#: xgnokii/xgnokii_contacts.c:1621 xgnokii/xgnokii_contacts.c:1858
-#: xgnokii/xgnokii_contacts.c:1905 xgnokii/xgnokii_contacts.c:2001
-#: xgnokii/xgnokii_contacts.c:2269 xgnokii/xgnokii_contacts.c:3308
+#: xgnokii/xgnokii_contacts.c:1097 xgnokii/xgnokii_contacts.c:1472
+#: xgnokii/xgnokii_contacts.c:1623 xgnokii/xgnokii_contacts.c:1860
+#: xgnokii/xgnokii_contacts.c:1907 xgnokii/xgnokii_contacts.c:2003
+#: xgnokii/xgnokii_contacts.c:2271 xgnokii/xgnokii_contacts.c:3310
 #: xgnokii/xgnokii_sms.c:516
 msgid "Cancel"
 msgstr "Tühista"
 
-#: xgnokii/xgnokii.c:1364
+#: xgnokii/xgnokii.c:1366
 msgid "Set's name:"
 msgstr "Seade nimi:"
 
-#: xgnokii/xgnokii.c:1378
+#: xgnokii/xgnokii.c:1380
 msgid "Center:"
 msgstr "Keskus:"
 
-#: xgnokii/xgnokii.c:1392
+#: xgnokii/xgnokii.c:1394
 msgid "Sending Format:"
-msgstr "Saate Formaat:"
+msgstr "Saatmise Formaat:"
 
-#: xgnokii/xgnokii.c:1432
+#: xgnokii/xgnokii.c:1434
 msgid "Validity Period:"
-msgstr "Kehtivus periood:"
+msgstr "Kehtivusaeg:"
 
-#: xgnokii/xgnokii.c:1440
+#: xgnokii/xgnokii.c:1442
 msgid "Max. Time"
 msgstr "Max. Aeg"
 
-#: xgnokii/xgnokii.c:1557
+#: xgnokii/xgnokii.c:1559
 msgid "Set's name"
 msgstr "Seade nimi"
 
-#: xgnokii/xgnokii.c:1557
+#: xgnokii/xgnokii.c:1559
 msgid "Center number"
 msgstr "Keskuse number"
 
-#: xgnokii/xgnokii.c:1557
+#: xgnokii/xgnokii.c:1559
 msgid "Format"
 msgstr "Formaat"
 
-#: xgnokii/xgnokii.c:1557
+#: xgnokii/xgnokii.c:1559
 msgid "Validity"
 msgstr "Kehtivus"
 
-#: xgnokii/xgnokii.c:1565
+#: xgnokii/xgnokii.c:1567
 msgid "Apply"
 msgstr "Kehtesta"
 
-#: xgnokii/xgnokii.c:1573 xgnokii/xgnokii_contacts.c:2255
+#: xgnokii/xgnokii.c:1575 xgnokii/xgnokii_contacts.c:2257
 #: xgnokii/xgnokii_dtmf.c:181
 msgid "Save"
 msgstr "Salvesta"
 
-#: xgnokii/xgnokii.c:1579
+#: xgnokii/xgnokii.c:1581
 msgid "Close"
 msgstr "Sulge"
 
-#: xgnokii/xgnokii.c:1593
+#. **  Connection notebook  **
+#: xgnokii/xgnokii.c:1595
 msgid "Phone and connection type"
 msgstr "Telefon ja ühenduse tüüp"
 
-#: xgnokii/xgnokii.c:1600
+#: xgnokii/xgnokii.c:1602
 msgid "Connection"
 msgstr "Ühendus"
 
-#: xgnokii/xgnokii.c:1607
+#: xgnokii/xgnokii.c:1609
 msgid "Port:"
 msgstr "Pordis:"
 
-#: xgnokii/xgnokii.c:1621 xgnokii/xgnokii.c:1700
+#: xgnokii/xgnokii.c:1623 xgnokii/xgnokii.c:1702
 msgid "Model:"
 msgstr "Mudel:"
 
-#: xgnokii/xgnokii.c:1635
+#: xgnokii/xgnokii.c:1637
 msgid "Init length:"
 msgstr "Init pikkus:"
 
-#: xgnokii/xgnokii.c:1649
+#: xgnokii/xgnokii.c:1651
 msgid "Bindir:"
 msgstr "BIN kataloog:"
 
-#: xgnokii/xgnokii.c:1663
+#: xgnokii/xgnokii.c:1665
 msgid "Connection:"
 msgstr "Ühendus:"
 
-#: xgnokii/xgnokii.c:1667
+#: xgnokii/xgnokii.c:1669
 msgid "infrared"
 msgstr "infrapunane"
 
-#: xgnokii/xgnokii.c:1674
+#: xgnokii/xgnokii.c:1676
 msgid "serial"
 msgstr "kaabliga"
 
-#: xgnokii/xgnokii.c:1681
+#: xgnokii/xgnokii.c:1683
 msgid "irda"
 msgstr "irDA"
 
-#: xgnokii/xgnokii.c:1686
+#. **  Phone notebook  **
+#: xgnokii/xgnokii.c:1688
 msgid "Phone information"
 msgstr "Telefoni info"
 
-#: xgnokii/xgnokii.c:1693
+#: xgnokii/xgnokii.c:1695
 msgid "Phone"
 msgstr "Telefon"
 
-#: xgnokii/xgnokii.c:1714
+#: xgnokii/xgnokii.c:1716
 msgid "Version:"
 msgstr "Versioon:"
 
-#: xgnokii/xgnokii.c:1728
+#: xgnokii/xgnokii.c:1730
 msgid "Revision:"
 msgstr "Revision:"
 
-#: xgnokii/xgnokii.c:1742
+#: xgnokii/xgnokii.c:1744
 msgid "IMEI:"
 msgstr "IMEI:"
 
-#: xgnokii/xgnokii.c:1756
+#: xgnokii/xgnokii.c:1758
 msgid "Names length:"
 msgstr "Nime pikkus:"
 
-#: xgnokii/xgnokii.c:1764
+#: xgnokii/xgnokii.c:1766
 msgid "SIM:"
 msgstr "Kaardil:"
 
-#: xgnokii/xgnokii.c:1782
+#: xgnokii/xgnokii.c:1784
 msgid "Phone:"
 msgstr "Telefonis:"
 
-#: xgnokii/xgnokii.c:1789
+#: xgnokii/xgnokii.c:1791
 msgid "Alarm setting"
 msgstr "Äratuse seaded"
 
-#: xgnokii/xgnokii.c:1796 xgnokii/xgnokii.c:1803
+#: xgnokii/xgnokii.c:1798 xgnokii/xgnokii.c:1805
 #: xgnokii/xgnokii_calendar.c:975 xgnokii/xgnokii_calendar.c:1107
 #: xgnokii/xgnokii_calendar.c:1236 xgnokii/xgnokii_calendar.c:1368
 #: xgnokii/xgnokii_calendar.c:1550
 msgid "Alarm"
 msgstr "Meenutus"
 
-#: xgnokii/xgnokii.c:1826 xgnokii/xgnokii_sms.c:1559
+#. **  SMS notebook     **
+#: xgnokii/xgnokii.c:1828 xgnokii/xgnokii_sms.c:1559
 msgid "Short Message Service"
 msgstr "Lühisõnumi teenus"
 
-#: xgnokii/xgnokii.c:1859
+#: xgnokii/xgnokii.c:1861
 msgid "Edit"
 msgstr "Redigeeri"
 
-#: xgnokii/xgnokii.c:1871
+#. **  Business notebook  **
+#: xgnokii/xgnokii.c:1873
 msgid "Business Card"
 msgstr "Visiitkaart"
 
-#: xgnokii/xgnokii.c:1877
+#: xgnokii/xgnokii.c:1879
 msgid "User"
 msgstr "Kasutaja"
 
-#: xgnokii/xgnokii.c:1895 xgnokii/xgnokii_calendar.c:1224
-#: xgnokii/xgnokii_calendar.c:1356 xgnokii/xgnokii_contacts.c:1483
+#: xgnokii/xgnokii.c:1897 xgnokii/xgnokii_calendar.c:1224
+#: xgnokii/xgnokii_calendar.c:1356 xgnokii/xgnokii_contacts.c:1485
 msgid "Name:"
 msgstr "Nimi:"
 
-#: xgnokii/xgnokii.c:1920
+#: xgnokii/xgnokii.c:1922
 msgid "Title:"
 msgstr "Amet:"
 
-#: xgnokii/xgnokii.c:1945
+#: xgnokii/xgnokii.c:1947
 msgid "Company:"
 msgstr "Ettevõte:"
 
-#: xgnokii/xgnokii.c:1970
+#: xgnokii/xgnokii.c:1972
 msgid "Telephone:"
 msgstr "Telefon:"
 
-#: xgnokii/xgnokii.c:1996
+#: xgnokii/xgnokii.c:1998
 msgid "Fax:"
 msgstr "Fax:"
 
-#: xgnokii/xgnokii.c:2021
+#: xgnokii/xgnokii.c:2023
 msgid "E-Mail:"
 msgstr "E-Mail:"
 
-#: xgnokii/xgnokii.c:2046
+#: xgnokii/xgnokii.c:2048
 msgid "Address:"
 msgstr "Aadress:"
 
-#: xgnokii/xgnokii.c:2069
+#. **  Groups notebook  **
+#: xgnokii/xgnokii.c:2071
 msgid "Caller groups names"
 msgstr "Helistaja grupi nimi"
 
-#: xgnokii/xgnokii.c:2076
+#: xgnokii/xgnokii.c:2078
 msgid "Groups"
 msgstr "Grupid"
 
-#: xgnokii/xgnokii.c:2084
+#: xgnokii/xgnokii.c:2086
 #, c-format
 msgid "Group %d:"
 msgstr "Grupp %d:"
 
-#: xgnokii/xgnokii.c:2097
+#. Mail
+#: xgnokii/xgnokii.c:2099
 msgid "Mailbox"
-msgstr ""
+msgstr "Postkast"
 
-#: xgnokii/xgnokii.c:2104
+#: xgnokii/xgnokii.c:2106
 msgid "Mail"
 msgstr ""
 
-#: xgnokii/xgnokii.c:2111
+#: xgnokii/xgnokii.c:2113
 msgid "Path to mailbox:"
-msgstr ""
+msgstr "Rada postkastini:"
 
-#: xgnokii/xgnokii.c:2122
+#. Help
+#: xgnokii/xgnokii.c:2124
 msgid "Help viewer"
 msgstr "Abi lehitseja"
 
-#: xgnokii/xgnokii.c:2136
+#: xgnokii/xgnokii.c:2138
 msgid "Viewer:"
 msgstr "Lehitseja:"
 
@@ -2406,7 +2430,7 @@ msgstr "Meeldetuletus"
 #: xgnokii/xgnokii_calendar.c:148 xgnokii/xgnokii_calendar.c:175
 #: xgnokii/xgnokii_calendar.c:202
 msgid "never"
-msgstr ""
+msgstr "mitte kunagi"
 
 #: xgnokii/xgnokii_calendar.c:151 xgnokii/xgnokii_calendar.c:178
 #: xgnokii/xgnokii_calendar.c:205
@@ -2477,6 +2501,12 @@ msgstr "Vali kuupäev"
 msgid "Alarm time:"
 msgstr "Meenutuse aeg:"
 
+#.
+#. gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Edit note"), NULL,
+#. NewPixmap(Edit_xpm, GUI_CalendarWindow->window,
+#. &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
+#. (GtkSignalFunc) NULL, NULL);
+#.
 #: xgnokii/xgnokii_calendar.c:892 xgnokii/xgnokii_calendar.c:1618
 msgid "Add reminder"
 msgstr "Lisa meenutus"
@@ -2494,8 +2524,8 @@ msgstr "Teema:"
 msgid "Add Call"
 msgstr "Lisa kõne"
 
-#: xgnokii/xgnokii_calendar.c:1082 xgnokii/xgnokii_contacts.c:1496
-#: xgnokii/xgnokii_contacts.c:2012
+#: xgnokii/xgnokii_calendar.c:1082 xgnokii/xgnokii_contacts.c:1498
+#: xgnokii/xgnokii_contacts.c:2014
 msgid "Number:"
 msgstr "Number:"
 
@@ -2523,26 +2553,26 @@ msgstr "Kustuta kalendri kirje"
 msgid "Do you want to delete selected note(s)?"
 msgstr "Kas soovid valitud kirje(d) kustutada?"
 
-#: xgnokii/xgnokii_calendar.c:1511 xgnokii/xgnokii_contacts.c:3434
-#: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1491
+#: xgnokii/xgnokii_calendar.c:1511 xgnokii/xgnokii_contacts.c:3436
+#: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1486
 #: xgnokii/xgnokii_netmon.c:264 xgnokii/xgnokii_sms.c:1117
 #: xgnokii/xgnokii_sms.c:1520 xgnokii/xgnokii_speed.c:523
 #: xgnokii/xgnokii_xkeyb.c:241
 msgid "/_File"
 msgstr "/_Fail"
 
-#: xgnokii/xgnokii_calendar.c:1512 xgnokii/xgnokii_contacts.c:3435
+#: xgnokii/xgnokii_calendar.c:1512 xgnokii/xgnokii_contacts.c:3437
 #: xgnokii/xgnokii_speed.c:524
 msgid "/File/_Read from phone"
 msgstr "/Fail/Loe telefonist"
 
-#: xgnokii/xgnokii_calendar.c:1513 xgnokii/xgnokii_contacts.c:3436
+#: xgnokii/xgnokii_calendar.c:1513 xgnokii/xgnokii_contacts.c:3438
 #: xgnokii/xgnokii_speed.c:525
 msgid "/File/_Save to phone"
 msgstr "/Fail/_Salvesta telefoni"
 
-#: xgnokii/xgnokii_calendar.c:1514 xgnokii/xgnokii_contacts.c:3437
-#: xgnokii/xgnokii_dtmf.c:223 xgnokii/xgnokii_logos.c:1495
+#: xgnokii/xgnokii_calendar.c:1514 xgnokii/xgnokii_contacts.c:3439
+#: xgnokii/xgnokii_dtmf.c:223 xgnokii/xgnokii_logos.c:1490
 #: xgnokii/xgnokii_sms.c:1120 xgnokii/xgnokii_sms.c:1523
 #: xgnokii/xgnokii_speed.c:526
 msgid "/File/Sep1"
@@ -2552,18 +2582,18 @@ msgstr "/Fail/Sep1"
 msgid "/File/Send via S_MS"
 msgstr "/Fail/Saada S_MS abil"
 
-#: xgnokii/xgnokii_calendar.c:1516 xgnokii/xgnokii_contacts.c:3440
-#: xgnokii/xgnokii_logos.c:1499 xgnokii/xgnokii_sms.c:1123
+#: xgnokii/xgnokii_calendar.c:1516 xgnokii/xgnokii_contacts.c:3442
+#: xgnokii/xgnokii_logos.c:1494 xgnokii/xgnokii_sms.c:1123
 #: xgnokii/xgnokii_speed.c:529
 msgid "/File/Sep2"
 msgstr "/Fail/Sep2"
 
-#: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3438
+#: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3440
 #: xgnokii/xgnokii_speed.c:527
 msgid "/File/_Import from file"
 msgstr "/Fail/_Impordi failist"
 
-#: xgnokii/xgnokii_calendar.c:1518 xgnokii/xgnokii_contacts.c:3439
+#: xgnokii/xgnokii_calendar.c:1518 xgnokii/xgnokii_contacts.c:3441
 #: xgnokii/xgnokii_speed.c:528
 msgid "/File/_Export to file"
 msgstr "/Fail/Salv_esta faili"
@@ -2572,16 +2602,16 @@ msgstr "/Fail/Salv_esta faili"
 msgid "/File/Sep3"
 msgstr "/Fail/Sep3"
 
-#: xgnokii/xgnokii_calendar.c:1520 xgnokii/xgnokii_contacts.c:3441
-#: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1500
+#: xgnokii/xgnokii_calendar.c:1520 xgnokii/xgnokii_contacts.c:3443
+#: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1495
 #: xgnokii/xgnokii_netmon.c:265 xgnokii/xgnokii_sms.c:1124
 #: xgnokii/xgnokii_sms.c:1524 xgnokii/xgnokii_speed.c:530
 #: xgnokii/xgnokii_xkeyb.c:242
 msgid "/File/_Close"
 msgstr "/Fail/Sulge"
 
-#: xgnokii/xgnokii_calendar.c:1521 xgnokii/xgnokii_contacts.c:3442
-#: xgnokii/xgnokii_logos.c:1501 xgnokii/xgnokii_speed.c:531
+#: xgnokii/xgnokii_calendar.c:1521 xgnokii/xgnokii_contacts.c:3444
+#: xgnokii/xgnokii_logos.c:1496 xgnokii/xgnokii_speed.c:531
 msgid "/_Edit"
 msgstr "/R_edigeeri"
 
@@ -2601,34 +2631,37 @@ msgstr "/Redigeeri/Lisa koosolek"
 msgid "/Edit/Add _birthday"
 msgstr "/Redigeeri/Lisa sünnipäev"
 
-#: xgnokii/xgnokii_calendar.c:1529 xgnokii/xgnokii_contacts.c:3446
+#.
+#. menu_items[15].path = g_strdup(_("/Edit/_Edit"));
+#.
+#: xgnokii/xgnokii_calendar.c:1529 xgnokii/xgnokii_contacts.c:3448
 msgid "/Edit/_Delete"
 msgstr "/Redigeeri/Kustuta"
 
-#: xgnokii/xgnokii_calendar.c:1530 xgnokii/xgnokii_contacts.c:3449
-#: xgnokii/xgnokii_logos.c:1509
+#: xgnokii/xgnokii_calendar.c:1530 xgnokii/xgnokii_contacts.c:3451
+#: xgnokii/xgnokii_logos.c:1504
 msgid "/Edit/Sep4"
 msgstr "/Redigeeri/Sep4"
 
-#: xgnokii/xgnokii_calendar.c:1531 xgnokii/xgnokii_contacts.c:3453
+#: xgnokii/xgnokii_calendar.c:1531 xgnokii/xgnokii_contacts.c:3455
 msgid "/Edit/Select _all"
 msgstr "/Redigeeri/V_ali kõik"
 
-#: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3456
+#: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3458
 #: xgnokii/xgnokii_dtmf.c:225 xgnokii/xgnokii_netmon.c:269
 #: xgnokii/xgnokii_sms.c:1125 xgnokii/xgnokii_sms.c:1533
 #: xgnokii/xgnokii_speed.c:533 xgnokii/xgnokii_xkeyb.c:243
 msgid "/_Help"
 msgstr "/Abi"
 
-#: xgnokii/xgnokii_calendar.c:1533 xgnokii/xgnokii_contacts.c:3457
+#: xgnokii/xgnokii_calendar.c:1533 xgnokii/xgnokii_contacts.c:3459
 #: xgnokii/xgnokii_dtmf.c:226 xgnokii/xgnokii_netmon.c:270
 #: xgnokii/xgnokii_sms.c:1126 xgnokii/xgnokii_sms.c:1534
 #: xgnokii/xgnokii_speed.c:534 xgnokii/xgnokii_xkeyb.c:244
 msgid "/Help/_Help"
 msgstr "/Abi/Abi"
 
-#: xgnokii/xgnokii_calendar.c:1534 xgnokii/xgnokii_contacts.c:3458
+#: xgnokii/xgnokii_calendar.c:1534 xgnokii/xgnokii_contacts.c:3460
 #: xgnokii/xgnokii_dtmf.c:227 xgnokii/xgnokii_netmon.c:271
 #: xgnokii/xgnokii_sms.c:1127 xgnokii/xgnokii_sms.c:1535
 #: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:245
@@ -2647,21 +2680,21 @@ msgstr "Tüüp"
 msgid "Date"
 msgstr "Kuupäev"
 
-#: xgnokii/xgnokii_calendar.c:1550 xgnokii/xgnokii_contacts.c:1944
-#: xgnokii/xgnokii_contacts.c:3474 xgnokii/xgnokii_speed.c:550
+#: xgnokii/xgnokii_calendar.c:1550 xgnokii/xgnokii_contacts.c:1946
+#: xgnokii/xgnokii_contacts.c:3476 xgnokii/xgnokii_speed.c:550
 msgid "Number"
 msgstr "Number"
 
 #: xgnokii/xgnokii_calendar.c:1550
 msgid "Recurrence"
-msgstr ""
+msgstr "Kordused"
 
-#: xgnokii/xgnokii_calendar.c:1584 xgnokii/xgnokii_contacts.c:3510
+#: xgnokii/xgnokii_calendar.c:1584 xgnokii/xgnokii_contacts.c:3512
 #: xgnokii/xgnokii_speed.c:586
 msgid "Read from phone"
 msgstr "Loe telefonist"
 
-#: xgnokii/xgnokii_calendar.c:1588 xgnokii/xgnokii_contacts.c:3514
+#: xgnokii/xgnokii_calendar.c:1588 xgnokii/xgnokii_contacts.c:3516
 #: xgnokii/xgnokii_speed.c:590
 msgid "Save to phone"
 msgstr "Salvesta telefoni"
@@ -2670,13 +2703,13 @@ msgstr "Salvesta telefoni"
 msgid "Send via SMS"
 msgstr "Saada SMS abil"
 
-#: xgnokii/xgnokii_calendar.c:1602 xgnokii/xgnokii_contacts.c:3521
-#: xgnokii/xgnokii_logos.c:1588 xgnokii/xgnokii_speed.c:597
+#: xgnokii/xgnokii_calendar.c:1602 xgnokii/xgnokii_contacts.c:3523
+#: xgnokii/xgnokii_logos.c:1583 xgnokii/xgnokii_speed.c:597
 msgid "Import from file"
-msgstr "Ava fail"
+msgstr "Lae failist"
 
-#: xgnokii/xgnokii_calendar.c:1606 xgnokii/xgnokii_contacts.c:3525
-#: xgnokii/xgnokii_logos.c:1592 xgnokii/xgnokii_speed.c:601
+#: xgnokii/xgnokii_calendar.c:1606 xgnokii/xgnokii_contacts.c:3527
+#: xgnokii/xgnokii_logos.c:1587 xgnokii/xgnokii_speed.c:601
 msgid "Export to file"
 msgstr "Salvesta fail"
 
@@ -2688,8 +2721,8 @@ msgstr "Lisa kõne"
 msgid "Delete note"
 msgstr "Kustuta kirje"
 
-#: xgnokii/xgnokii_calendar.c:1697 xgnokii/xgnokii_contacts.c:3331
-#: xgnokii/xgnokii_contacts.c:3578 xgnokii/xgnokii_sms.c:1688
+#: xgnokii/xgnokii_calendar.c:1697 xgnokii/xgnokii_contacts.c:3333
+#: xgnokii/xgnokii_contacts.c:3580 xgnokii/xgnokii_sms.c:1688
 #: xgnokii/xgnokii_speed.c:631
 #, c-format
 msgid "Error: %s: line %d: Can't allocate memory!\n"
@@ -2783,61 +2816,61 @@ msgstr "Number/Tekst:"
 msgid "Type:"
 msgstr "Tüüp:"
 
-#: xgnokii/xgnokii_contacts.c:1171 xgnokii/xgnokii_contacts.c:1563
-#: xgnokii/xgnokii_contacts.c:3540 xgnokii/xgnokii_speed.c:608
+#: xgnokii/xgnokii_contacts.c:1171 xgnokii/xgnokii_contacts.c:1565
+#: xgnokii/xgnokii_contacts.c:3542 xgnokii/xgnokii_speed.c:608
 msgid "Edit entry"
 msgstr "Muuda kirjet"
 
-#: xgnokii/xgnokii_contacts.c:1320
+#: xgnokii/xgnokii_contacts.c:1322
 msgid "Numbers"
 msgstr "Numbrid"
 
-#: xgnokii/xgnokii_contacts.c:1340
+#: xgnokii/xgnokii_contacts.c:1342
 msgid "New"
 msgstr "Uus"
 
-#: xgnokii/xgnokii_contacts.c:1522
+#: xgnokii/xgnokii_contacts.c:1524
 msgid "Memory:"
 msgstr "Mälu:"
 
-#: xgnokii/xgnokii_contacts.c:1526
+#: xgnokii/xgnokii_contacts.c:1528
 msgid "phone"
 msgstr "telefon"
 
-#: xgnokii/xgnokii_contacts.c:1543
+#: xgnokii/xgnokii_contacts.c:1545
 msgid "Caller group:"
 msgstr "Helistajagrupp:"
 
-#: xgnokii/xgnokii_contacts.c:1606
+#: xgnokii/xgnokii_contacts.c:1608
 msgid "Delete entries"
 msgstr "Kustuta kirjed"
 
-#: xgnokii/xgnokii_contacts.c:1638
+#: xgnokii/xgnokii_contacts.c:1640
 msgid "Do you want to delete selected entries?"
 msgstr "Kas soovid valitud kirje kustutada?"
 
-#: xgnokii/xgnokii_contacts.c:1656 xgnokii/xgnokii_contacts.c:3532
+#: xgnokii/xgnokii_contacts.c:1658 xgnokii/xgnokii_contacts.c:3534
 msgid "New entry"
 msgstr "Uus kirje"
 
-#: xgnokii/xgnokii_contacts.c:1700 xgnokii/xgnokii_contacts.c:3536
+#: xgnokii/xgnokii_contacts.c:1702 xgnokii/xgnokii_contacts.c:3538
 msgid "Duplicate entry"
 msgstr "Kopeeri kirjet"
 
-#: xgnokii/xgnokii_contacts.c:1769 xgnokii/xgnokii_contacts.c:1777
-#: xgnokii/xgnokii_contacts.c:1805
+#: xgnokii/xgnokii_contacts.c:1771 xgnokii/xgnokii_contacts.c:1779
+#: xgnokii/xgnokii_contacts.c:1807
 msgid "Can't find free memory."
 msgstr "Ei leia vaba mälu."
 
-#: xgnokii/xgnokii_contacts.c:1842
+#: xgnokii/xgnokii_contacts.c:1844
 msgid "Changing memory type"
 msgstr "Muudan mälu tüüpi"
 
-#: xgnokii/xgnokii_contacts.c:1849
+#: xgnokii/xgnokii_contacts.c:1851
 msgid "Continue"
 msgstr "Jätka"
 
-#: xgnokii/xgnokii_contacts.c:1871
+#: xgnokii/xgnokii_contacts.c:1873
 msgid ""
 "If you change from phone memory to SIM memory\n"
 "some entries may be truncated."
@@ -2845,54 +2878,54 @@ msgstr ""
 "Kirje muutmisel telefonimälust SIM kaardile\n"
 "võivad mõned kirjed muutuda lühemaks."
 
-#: xgnokii/xgnokii_contacts.c:1889 xgnokii/xgnokii_contacts.c:1895
+#: xgnokii/xgnokii_contacts.c:1891 xgnokii/xgnokii_contacts.c:1897
 msgid "Find"
 msgstr "Otsi"
 
-#: xgnokii/xgnokii_contacts.c:1921
+#: xgnokii/xgnokii_contacts.c:1923
 msgid "Pattern:"
 msgstr "Mask:"
 
-#: xgnokii/xgnokii_contacts.c:1936 xgnokii/xgnokii_contacts.c:3474
+#: xgnokii/xgnokii_contacts.c:1938 xgnokii/xgnokii_contacts.c:3476
 #: xgnokii/xgnokii_speed.c:550
 msgid "Name"
 msgstr "Nimi"
 
-#: xgnokii/xgnokii_contacts.c:1985 xgnokii/xgnokii_contacts.c:3551
+#: xgnokii/xgnokii_contacts.c:1987 xgnokii/xgnokii_contacts.c:3553
 msgid "Dial voice"
 msgstr "Helista"
 
-#: xgnokii/xgnokii_contacts.c:2117
+#: xgnokii/xgnokii_contacts.c:2119
 msgid "Phone memory..."
 msgstr "Telefoni mälu..."
 
-#: xgnokii/xgnokii_contacts.c:2128
+#: xgnokii/xgnokii_contacts.c:2130
 msgid "SIM memory..."
 msgstr "SIM (kaardi) mälu..."
 
-#: xgnokii/xgnokii_contacts.c:2155
+#: xgnokii/xgnokii_contacts.c:2157
 msgid "Saving entries"
 msgstr "Salvestan kirjeid"
 
-#: xgnokii/xgnokii_contacts.c:2186
+#: xgnokii/xgnokii_contacts.c:2188
 #, c-format
 msgid "%s: line: %d: Can't write ME memory entry number %d! Error: %d\n"
 msgstr "%s: rida %d: Ei suuda kirjutada ME mälupessa %d! Viga: %d\n"
 
-#: xgnokii/xgnokii_contacts.c:2225
+#: xgnokii/xgnokii_contacts.c:2227
 #, c-format
 msgid "%s: line %d:Can't write SM memory entry number %d! Error: %d\n"
 msgstr "%s: rida %d:Ei suuda kirjutada SM mälupessa %d! Viga: %d\n"
 
-#: xgnokii/xgnokii_contacts.c:2249
+#: xgnokii/xgnokii_contacts.c:2251
 msgid "Save changes?"
 msgstr "Salvesta muudatused?"
 
-#: xgnokii/xgnokii_contacts.c:2263
+#: xgnokii/xgnokii_contacts.c:2265
 msgid "Don't save"
 msgstr "Ära salvesta"
 
-#: xgnokii/xgnokii_contacts.c:2285
+#: xgnokii/xgnokii_contacts.c:2287
 msgid ""
 "You have made changes in your\n"
 "contacts directory.\n"
@@ -2906,13 +2939,14 @@ msgstr ""
 "\n"
 "Kas soovid muudatused telefoni salvestada?\n"
 
-#: xgnokii/xgnokii_contacts.c:2348 xgnokii/xgnokii_contacts.c:2374
-#: xgnokii/xgnokii_contacts.c:3024 xgnokii/xgnokii_contacts.c:3046
+#: xgnokii/xgnokii_contacts.c:2350 xgnokii/xgnokii_contacts.c:2376
+#: xgnokii/xgnokii_contacts.c:3026 xgnokii/xgnokii_contacts.c:3048
 #, c-format
 msgid "%s: line %d: Can't allocate memory!\n"
 msgstr "%s: rida %d: Ei suuda mälu eraldada!\n"
 
-#: xgnokii/xgnokii_contacts.c:2463
+#. I try to recognize memoryStatus.UsedSM while reading
+#: xgnokii/xgnokii_contacts.c:2465
 msgid ""
 "Can't get SM memory status!\n"
 "\n"
@@ -2922,42 +2956,42 @@ msgstr ""
 "\n"
 "oletan max SIM kirjete arvuks 100!\n"
 
-#: xgnokii/xgnokii_contacts.c:2485
+#: xgnokii/xgnokii_contacts.c:2487
 msgid "Getting entries"
 msgstr "Loen kirjeid ...."
 
-#: xgnokii/xgnokii_contacts.c:2710 xgnokii/xgnokii_dtmf.c:135
+#: xgnokii/xgnokii_contacts.c:2712 xgnokii/xgnokii_dtmf.c:135
 #: xgnokii/xgnokii_speed.c:423
 #, c-format
 msgid "Can't open file %s for writing!"
 msgstr "Ei suuda faili %s kirjutamiseks avada!"
 
-#: xgnokii/xgnokii_contacts.c:2744 xgnokii/xgnokii_dtmf.c:166
-#: xgnokii/xgnokii_logos.c:1367 xgnokii/xgnokii_speed.c:463
+#: xgnokii/xgnokii_contacts.c:2746 xgnokii/xgnokii_dtmf.c:166
+#: xgnokii/xgnokii_logos.c:1362 xgnokii/xgnokii_speed.c:463
 msgid "Overwrite file?"
 msgstr "Kas kirjutan faili üle?"
 
-#: xgnokii/xgnokii_contacts.c:2745 xgnokii/xgnokii_dtmf.c:167
-#: xgnokii/xgnokii_logos.c:1368 xgnokii/xgnokii_speed.c:464
+#: xgnokii/xgnokii_contacts.c:2747 xgnokii/xgnokii_dtmf.c:167
+#: xgnokii/xgnokii_logos.c:1363 xgnokii/xgnokii_speed.c:464
 #, c-format
 msgid ""
 "File %s already exist.\n"
 "Overwrite?"
 msgstr ""
-"Fail %s on olemas.\n"
+"Fail %s on juba olemas.\n"
 "Kas kirjutan üle?"
 
-#: xgnokii/xgnokii_contacts.c:2761 xgnokii/xgnokii_speed.c:480
+#: xgnokii/xgnokii_contacts.c:2763 xgnokii/xgnokii_speed.c:480
 msgid "Export"
 msgstr "Ekspordi"
 
-#: xgnokii/xgnokii_contacts.c:2953 xgnokii/xgnokii_dtmf.c:99
+#: xgnokii/xgnokii_contacts.c:2955 xgnokii/xgnokii_dtmf.c:99
 #: xgnokii/xgnokii_speed.c:330
 #, c-format
 msgid "Can't open file %s for reading!"
 msgstr "Ei suuda faili %s lugemiseks avada!"
 
-#: xgnokii/xgnokii_contacts.c:3003
+#: xgnokii/xgnokii_contacts.c:3005
 msgid ""
 "Can't get SM memory status!\n"
 "\n"
@@ -2967,63 +3001,63 @@ msgstr ""
 "\n"
 "max SIM kirjete arv on 100!\n"
 
-#: xgnokii/xgnokii_contacts.c:3105 xgnokii/xgnokii_speed.c:401
+#: xgnokii/xgnokii_contacts.c:3107 xgnokii/xgnokii_speed.c:401
 msgid "Import"
 msgstr "Impordi"
 
-#: xgnokii/xgnokii_contacts.c:3298 xgnokii/xgnokii_sms.c:1231
+#: xgnokii/xgnokii_contacts.c:3300 xgnokii/xgnokii_sms.c:1231
 msgid "Select contacts"
 msgstr "Vali kontaktid"
 
-#: xgnokii/xgnokii_contacts.c:3443
+#: xgnokii/xgnokii_contacts.c:3445
 msgid "/Edit/_New"
 msgstr "/Redigeeri/Uus"
 
-#: xgnokii/xgnokii_contacts.c:3444
+#: xgnokii/xgnokii_contacts.c:3446
 msgid "/Edit/D_uplicate"
 msgstr "/Redigeeri/Palj_unda"
 
-#: xgnokii/xgnokii_contacts.c:3445 xgnokii/xgnokii_speed.c:532
+#: xgnokii/xgnokii_contacts.c:3447 xgnokii/xgnokii_speed.c:532
 msgid "/Edit/_Edit"
 msgstr "/Redigeeri/Paranda"
 
-#: xgnokii/xgnokii_contacts.c:3447 xgnokii/xgnokii_logos.c:1504
+#: xgnokii/xgnokii_contacts.c:3449 xgnokii/xgnokii_logos.c:1499
 msgid "/Edit/Sep3"
 msgstr "/Redigeeri/Sep3"
 
-#: xgnokii/xgnokii_contacts.c:3448
+#: xgnokii/xgnokii_contacts.c:3450
 msgid "/Edit/_Change memory type"
 msgstr "/Redigeeri/Muuda mälu tüüp"
 
-#: xgnokii/xgnokii_contacts.c:3450
+#: xgnokii/xgnokii_contacts.c:3452
 msgid "/Edit/_Find"
 msgstr "/Redigeeri/Leia"
 
-#: xgnokii/xgnokii_contacts.c:3451
+#: xgnokii/xgnokii_contacts.c:3453
 msgid "/Edit/Find ne_xt"
 msgstr "/Redigeeri/Leia järgmine"
 
-#: xgnokii/xgnokii_contacts.c:3452
+#: xgnokii/xgnokii_contacts.c:3454
 msgid "/Edit/Sep5"
 msgstr "/Redigeeri/Sep5"
 
-#: xgnokii/xgnokii_contacts.c:3454
+#: xgnokii/xgnokii_contacts.c:3456
 msgid "/_Dial"
 msgstr "/Vali numbri_d"
 
-#: xgnokii/xgnokii_contacts.c:3455
+#: xgnokii/xgnokii_contacts.c:3457
 msgid "/Dial/Dial _voice"
 msgstr "/Vali numbrid/_Vali kõne"
 
-#: xgnokii/xgnokii_contacts.c:3474
+#: xgnokii/xgnokii_contacts.c:3476
 msgid "Memory"
 msgstr "Mälu"
 
-#: xgnokii/xgnokii_contacts.c:3474
+#: xgnokii/xgnokii_contacts.c:3476
 msgid "Group"
 msgstr "Grupp"
 
-#: xgnokii/xgnokii_contacts.c:3544
+#: xgnokii/xgnokii_contacts.c:3546
 msgid "Delete entry"
 msgstr "Kustuta kirje"
 
@@ -3047,15 +3081,15 @@ msgstr ""
 "Lubatud\n"
 " "
 
-#: xgnokii/xgnokii_data.c:113
+#: xgnokii/xgnokii_data.c:112
 msgid "Virtual Modem"
 msgstr ""
 
-#: xgnokii/xgnokii_data.c:131
+#: xgnokii/xgnokii_data.c:130
 msgid "Enable"
 msgstr "Luba"
 
-#: xgnokii/xgnokii_data.c:135
+#: xgnokii/xgnokii_data.c:134
 msgid "Disable"
 msgstr "Keela"
 
@@ -3063,20 +3097,20 @@ msgstr "Keela"
 msgid "Load"
 msgstr "Laadi"
 
-#: xgnokii/xgnokii_dtmf.c:221 xgnokii/xgnokii_logos.c:1492
+#: xgnokii/xgnokii_dtmf.c:221 xgnokii/xgnokii_logos.c:1487
 msgid "/File/_Open"
 msgstr "/Fail/Ava"
 
-#: xgnokii/xgnokii_dtmf.c:222 xgnokii/xgnokii_logos.c:1493
+#: xgnokii/xgnokii_dtmf.c:222 xgnokii/xgnokii_logos.c:1488
 #: xgnokii/xgnokii_sms.c:1119 xgnokii/xgnokii_sms.c:1521
 msgid "/File/_Save"
 msgstr "/Fail/_Salvesta"
 
 #: xgnokii/xgnokii_dtmf.c:249
 msgid "Dial Tone"
-msgstr "Vali toon"
+msgstr "Vali toon?"
 
-#: xgnokii/xgnokii_logos.c:996
+#: xgnokii/xgnokii_logos.c:991
 #, c-format
 msgid ""
 "Error getting network info\n"
@@ -3085,7 +3119,7 @@ msgstr ""
 "Võrguinfo saamise viga\n"
 "(viga=%d)"
 
-#: xgnokii/xgnokii_logos.c:1037
+#: xgnokii/xgnokii_logos.c:1032
 #, c-format
 msgid ""
 "Error getting bitmap\n"
@@ -3094,7 +3128,7 @@ msgstr ""
 "Pildi saamise viga\n"
 "(viga=%d)"
 
-#: xgnokii/xgnokii_logos.c:1085
+#: xgnokii/xgnokii_logos.c:1080
 #, c-format
 msgid ""
 "Error setting bitmap\n"
@@ -3103,7 +3137,7 @@ msgstr ""
 "Pildi seadmise viga\n"
 "(viga=%d)"
 
-#: xgnokii/xgnokii_logos.c:1340
+#: xgnokii/xgnokii_logos.c:1335
 #, c-format
 msgid ""
 "Error saving file\n"
@@ -3112,12 +3146,12 @@ msgstr ""
 "Faili salvestamise viga\n"
 "(viga=%d)"
 
-#: xgnokii/xgnokii_logos.c:1389
+#: xgnokii/xgnokii_logos.c:1384
 #, c-format
 msgid "Can't open file %s for reading !"
 msgstr "Ei suuda faili %s lugemiseks avada!"
 
-#: xgnokii/xgnokii_logos.c:1399
+#: xgnokii/xgnokii_logos.c:1394
 #, c-format
 msgid ""
 "Error reading file\n"
@@ -3126,132 +3160,132 @@ msgstr ""
 "Faili lugemise viga\n"
 "(viga=%d)"
 
-#: xgnokii/xgnokii_logos.c:1426
+#: xgnokii/xgnokii_logos.c:1421
 msgid "Save logo as ..."
 msgstr "Salvesta nagu ..."
 
-#: xgnokii/xgnokii_logos.c:1451
+#: xgnokii/xgnokii_logos.c:1446
 msgid "Open logo..."
 msgstr "Ava logo..."
 
-#: xgnokii/xgnokii_logos.c:1494
+#: xgnokii/xgnokii_logos.c:1489
 msgid "/File/Save _as ..."
 msgstr "/Fail/Salvest_a nagu ..."
 
-#: xgnokii/xgnokii_logos.c:1496
+#: xgnokii/xgnokii_logos.c:1491
 msgid "/File/_Get operator"
 msgstr "/Fail/Tuvasta operaator"
 
-#: xgnokii/xgnokii_logos.c:1497
+#: xgnokii/xgnokii_logos.c:1492
 msgid "/File/Get _logo"
 msgstr "/Fail/Võta _logo"
 
-#: xgnokii/xgnokii_logos.c:1498
+#: xgnokii/xgnokii_logos.c:1493
 msgid "/File/Se_t logo"
 msgstr "/Fail/Sea logo"
 
-#: xgnokii/xgnokii_logos.c:1502
+#: xgnokii/xgnokii_logos.c:1497
 msgid "/Edit/_Clear"
 msgstr "/Redigeeri/Tühjenda"
 
-#: xgnokii/xgnokii_logos.c:1503
+#: xgnokii/xgnokii_logos.c:1498
 msgid "/Edit/_Invert"
 msgstr "/Redigeeri/Peegelpilt"
 
-#: xgnokii/xgnokii_logos.c:1505
+#: xgnokii/xgnokii_logos.c:1500
 msgid "/Edit/_Up logo"
 msgstr "/Redigeeri/Pilt samm üles"
 
-#: xgnokii/xgnokii_logos.c:1506
+#: xgnokii/xgnokii_logos.c:1501
 msgid "/Edit/_Down logo"
 msgstr "/Redigeeri/Pilt samm alla"
 
-#: xgnokii/xgnokii_logos.c:1507
+#: xgnokii/xgnokii_logos.c:1502
 msgid "/Edit/_Left logo"
 msgstr "/Redigeeri/Pi_lt samm vasakule"
 
-#: xgnokii/xgnokii_logos.c:1508
+#: xgnokii/xgnokii_logos.c:1503
 msgid "/Edit/_Right logo"
 msgstr "/Redigeeri/Pilt samm pa_remale"
 
-#: xgnokii/xgnokii_logos.c:1510
+#: xgnokii/xgnokii_logos.c:1505
 msgid "/Edit/Flip _horizontal"
 msgstr "/Redigeeri/Pööra _horisontaalis"
 
-#: xgnokii/xgnokii_logos.c:1511
+#: xgnokii/xgnokii_logos.c:1506
 msgid "/Edit/Flip _vertical"
 msgstr "/Redigeeri/Pööra _vertikaalis"
 
-#: xgnokii/xgnokii_logos.c:1569
+#: xgnokii/xgnokii_logos.c:1564
 msgid "Clear logo"
 msgstr "Tühjenda logo"
 
-#: xgnokii/xgnokii_logos.c:1576
+#: xgnokii/xgnokii_logos.c:1571
 msgid "Get logo"
 msgstr "Võta logo"
 
-#: xgnokii/xgnokii_logos.c:1581
+#: xgnokii/xgnokii_logos.c:1576
 msgid "Set logo"
 msgstr "Sea logo"
 
-#: xgnokii/xgnokii_logos.c:1601
+#: xgnokii/xgnokii_logos.c:1596
 msgid "Startup logo"
-msgstr "Startup Logo"
+msgstr "Startup logo"
 
-#: xgnokii/xgnokii_logos.c:1610
+#: xgnokii/xgnokii_logos.c:1605
 msgid "Operator logo"
 msgstr "Operaatori logo"
 
-#: xgnokii/xgnokii_logos.c:1620
+#: xgnokii/xgnokii_logos.c:1615
 msgid "Caller logo"
 msgstr "Helistajagrupi logo"
 
-#: xgnokii/xgnokii_logos.c:1741
+#: xgnokii/xgnokii_logos.c:1736
 msgid "Brush tool"
-msgstr ""
+msgstr "Vabajoone vahend"
 
-#: xgnokii/xgnokii_logos.c:1752
+#: xgnokii/xgnokii_logos.c:1747
 msgid "Line tool"
-msgstr ""
+msgstr "Sirgjoone vahend"
 
-#: xgnokii/xgnokii_logos.c:1762
+#: xgnokii/xgnokii_logos.c:1757
 msgid "Rectangle tool"
-msgstr ""
+msgstr "Ristküliku vahend"
 
-#: xgnokii/xgnokii_logos.c:1772
+#: xgnokii/xgnokii_logos.c:1767
 msgid "Filled rectangle tool"
-msgstr ""
+msgstr "Täidetud ristküliku vahend"
+
+#: xgnokii/xgnokii_logos.c:1776
+msgid "Invert logo"
+msgstr "Peegelda logo"
 
 #: xgnokii/xgnokii_logos.c:1781
-msgid "Invert logo"
-msgstr ""
+msgid "Horizontal flip"
+msgstr "Horisontaalne peegeldus"
 
 #: xgnokii/xgnokii_logos.c:1786
-msgid "Horizontal flip"
-msgstr ""
-
-#: xgnokii/xgnokii_logos.c:1791
 msgid "Vertical flip"
-msgstr ""
+msgstr "Vertikaalne peegeldus"
 
-#: xgnokii/xgnokii_logos.c:1846
+#: xgnokii/xgnokii_logos.c:1841
 msgid "Load preview pixmap error, feature disabled."
 msgstr "Eelvaate pildi laadimise viga, omadust ei kasutata."
 
-#: xgnokii/xgnokii_lowlevel.c:507
+#: xgnokii/xgnokii_lowlevel.c:501
 #, c-format
 msgid "%s: line %d: Can't get memory entry number %d from memory %d! %d\n"
 msgstr ""
 
-#: xgnokii/xgnokii_lowlevel.c:1122
+#: xgnokii/xgnokii_lowlevel.c:1117
 msgid "Connecting..."
 msgstr "Kontakteerun...."
 
-#: xgnokii/xgnokii_lowlevel.c:1213
+#: xgnokii/xgnokii_lowlevel.c:1209
 msgid "Working..."
 msgstr "Toimetan..."
 
-#: xgnokii/xgnokii_lowlevel.c:1264
+#: xgnokii/xgnokii_lowlevel.c:1260
 msgid "Refreshing SMSes..."
 msgstr "Uuendan SMS'e ..."
 
@@ -3576,7 +3610,7 @@ msgstr "/Fail/Saa_da"
 
 #: xgnokii/xgnokii_sms.c:1121
 msgid "/File/Check _Names"
-msgstr "/Fail/_Nime kontroll"
+msgstr "/Fail/_Nimede kontroll"
 
 #: xgnokii/xgnokii_sms.c:1122
 msgid "/File/C_ontacts"
@@ -3640,7 +3674,7 @@ msgstr "/Sõnu_mid/(De)_aktiveeri SMS lugemine"
 
 #: xgnokii/xgnokii_sms.c:1527
 msgid "/_Messages/_New"
-msgstr "/Sõnu_mid/Uus sõnum"
+msgstr "/Sõnu_mid/Uus sõ_num"
 
 #: xgnokii/xgnokii_sms.c:1528
 msgid "/_Messages/_Forward"
@@ -3710,7 +3744,7 @@ msgstr "Ei suuda mälu eraldada!"
 #: xgnokii/xgnokii_speed.c:274
 #, c-format
 msgid "Error writing speed dial for key %d!\n"
-msgstr ""
+msgstr "Võtmel %d kiirvaliku salvestamine ebaõnnestus\n"
 
 #: xgnokii/xgnokii_speed.c:346
 msgid "Cannot allocate memory!\n"
@@ -3731,887 +3765,3 @@ msgstr "Ei suuda laadida taustapilti!"
 #: xgnokii/xgnokii_xkeyb.c:260
 msgid "XGnokii Keyboard"
 msgstr "XGnokii Klaviatuur"
-
-#~ msgid "Unknown!!! "
-#~ msgstr "Tundmatu!!!"
-
-#~ msgid "Invalid location\n"
-#~ msgstr "Vale asukoht\n"
-
-#~ msgid "Function not implemented in %s model!\n"
-#~ msgstr "%s mudelis pole see funktsioon rakendatud!\n"
-
-#, fuzzy
-#~ msgid "SMS center %d can not be found\n"
-#~ msgstr "Kalendri kirjet ei saa lugeda\n"
-
-#~ msgid "Cannot set SMS center %d\n"
-#~ msgstr "Ei suuda seada SMS keskust %d\n"
-
-#~ msgid ""
-#~ "Text:\n"
-#~ "%s\n"
-#~ "\n"
-#~ msgstr ""
-#~ "Tekst:\n"
-#~ "%s\n"
-#~ "\n"
-
-#~ msgid "Invalid location: %s %d\n"
-#~ msgstr "Sobimatu asukoht: %s %d\n"
-
-#~ msgid "SMS location %s %d empty.\n"
-#~ msgstr "SMS asukoht %s %d on tühi.\n"
-
-#~ msgid "Error: invalid code.\n"
-#~ msgstr "VIGA: Vale kood.\n"
-
-#~ msgid "Other error.\n"
-#~ msgstr "Muu viga.\n"
-
-#~ msgid "SMS Send failed (error=%d)\n"
-#~ msgstr "SMS saatmine ebaõnnestus (viga=%d)\n"
-
-#~ msgid "Getting Logo\n"
-#~ msgstr "Võtan logo\n"
-
-#~ msgid "Function not implemented !\n"
-#~ msgstr "See funktsioon pole rakendatud!\n"
-
-#~ msgid "This kind of logo is not supported !\n"
-#~ msgstr "Sellist tüüpi logo toetus pole rakendatud !\n"
-
-#~ msgid ""
-#~ "Wrong number of colors in \"%s\" logofile (accepted only 2-colors "
-#~ "files) !\n"
-#~ msgstr ""
-#~ "Vale värvide kogus \"%s\" logofailis (toetatud on ainult 2 värvi)!\n"
-
-#~ msgid "Wrong colors in \"%s\" logofile !\n"
-#~ msgstr "\"%s\" logofailis on valed värvid !\n"
-
-#~ msgid "Invalid format of \"%s\" logofile !\n"
-#~ msgstr "Sobimatu formaat \"%s\" logofailile !\n"
-
-#~ msgid "\"%s\" logofile is too short !\n"
-#~ msgstr "\"%s\" logofail on liiga lühike !\n"
-
-#~ msgid "Setting Logo.\n"
-#~ msgstr "Määran logo.\n"
-
-#~ msgid "Removing Logo.\n"
-#~ msgstr "Eemaldan logo.\n"
-
-#~ msgid "Function not implemented.\n"
-#~ msgstr "See funktsioon pole rakendatud.\n"
-
-#~ msgid "Function not implemented in %s !\n"
-#~ msgstr "%s mudelis pole see funktsioon rakendatud!\n"
-
-#~ msgid "Internal error\n"
-#~ msgstr "Sisemine viga\n"
-
-#~ msgid "Error!\n"
-#~ msgstr "Viga!\n"
-
-#~ msgid "Unspecified error\n"
-#~ msgstr "Dokumenteerimata viga\n"
-
-#~ msgid "Memory type %s not supported!\n"
-#~ msgstr "Mälu tüüp %s pole toetatud!\n"
-
-#~ msgid "%s|%d|Bad location or other error!(%d)\n"
-#~ msgstr "%s|%d|Vale asukoht või muu viga!(%d)\n"
-
-#~ msgid "Unknown error (%d)\n"
-#~ msgstr "Tundmatu viga (%d)\n"
-
-#~ msgid "Familly"
-#~ msgstr "Perekond"
-
-#~ msgid "Edit note"
-#~ msgstr "Muuda kirjet"
-
-#~ msgid "Which Extended Phonebook Entry?"
-#~ msgstr "Milline laienadatud telefoniraamatu kirje?"
-
-#~ msgid "Mobile"
-#~ msgstr "Mobiil"
-
-#~ msgid "Work"
-#~ msgstr "Tööl"
-
-#~ msgid "Home"
-#~ msgstr "Kodus"
-
-#~ msgid "Picture Message"
-#~ msgstr "Pildisõnum"
-
-#~ msgid "SMS Send attempt failed, trying again (%d of %d)\n"
-#~ msgstr "SMS saatmine ebaõnnestus, proovin veel (katse %d %d-st)\n"
-
-#~ msgid "restarting.\n"
-#~ msgstr "käivitun uuesti.\n"
-
-#~ msgid "MT Fail %02x"
-#~ msgstr "MT Viga %02x"
-
-#~ msgid "CS Fail %02x != %02x"
-#~ msgstr "CS Viga %02x != %02x"
-
-#~ msgid "0x15 Registration Response 0x%02x\n"
-#~ msgstr "0x15 Registreerimise vastus 0x%02x\n"
-
-#~ msgid "0x16 Registration Response 0x%02x\n"
-#~ msgstr "0x15 Registreerimise vastus 0x%02x\n"
-
-#~ msgid "SMS Stored into location 0x%02x\n"
-#~ msgstr "SMS salvestatud 0x%02x\n"
-
-#~ msgid "SMS Store failed: 0x%02x\n"
-#~ msgstr "SMS salvestamine 0x%02x ebaõnnestus\n"
-
-#~ msgid "PIN [possibly] entered.\n"
-#~ msgstr "PIN [tõenäoliselt] sisestatud.\n"
-
-#~ msgid "Phone powering off..."
-#~ msgstr "Telefon lülitub välja"
-
-#~ msgid "Unknown: "
-#~ msgstr "Tundmatu: "
-
-#~ msgid "Msg Type: %02x "
-#~ msgstr "Msg Tüüp: %02x "
-
-#~ msgid "Msg Len: %02x "
-#~ msgstr "Msg pikkus: %02x"
-
-#~ msgid "Sequence Number: %02x "
-#~ msgstr "Järjenumber: %02x "
-
-#~ msgid ""
-#~ "Checksum: %02x \n"
-#~ "   "
-#~ msgstr ""
-#~ "Kontrollsumma: %02x \n"
-#~ "   "
-
-#~ msgid "0x4a Write failed!"
-#~ msgstr "0x4a Kirjutamine ebaõnnestus!"
-
-#~ msgid "0x3f Write failed!"
-#~ msgstr "0x3f Kirjutamine ebaõnnestus!"
-
-#~ msgid "Send SMS header failed!"
-#~ msgstr "SMS päise saatmine ebaõnnestus!"
-
-#~ msgid "Store SMS header failed!"
-#~ msgstr "SMS päise salvestamine ebaõnnestus!"
-
-#~ msgid "Delete SMS Mem Loc write failed!"
-#~ msgstr "SMS kustutamine mälupesast ebaõnnestus!"
-
-#~ msgid "0x15 Write failed!"
-#~ msgstr "0x15 Kirjutamine ebaõnnestus!"
-
-#~ msgid "TX_SendMessage - message too long!\n"
-#~ msgstr "TX_SendMessage - sõnum on liiga pikk!\n"
-
-#~ msgid "TX_SendMessage - write:"
-#~ msgstr "TX_SendMessage - kirjuta:"
-
-#~ msgid "Write failed!"
-#~ msgstr "Kirjutamine ebaõnnestus!"
-
-#~ msgid "Incoming call - Type: %s. %02x, Number %s.\n"
-#~ msgstr "Saabuv kõne - Tüüp: %s. %02x, Number %s.\n"
-
-#~ msgid "0x27 Write failed!"
-#~ msgstr "0x27 Kirjutamine ebaõnnestus!"
-
-#~ msgid "0x4b Write failed!"
-#~ msgstr "0x4b Kirjutamine ebaõnnestus!"
-
-#~ msgid "Status: %s. Batt %02x RF %02x.\n"
-#~ msgstr "Olek: %s Batt %02x RF %02x.\n"
-
-#~ msgid "0x10 Write failed!"
-#~ msgstr "0x10 Kirjutamine ebaõnnestus!"
-
-#~ msgid "Call terminated from phone (0x10 message).\n"
-#~ msgstr "Kõne telefonilt katkestatud (0x10 teade).\n"
-
-#~ msgid "Call terminated from opposite end of line (or from network).\n"
-#~ msgstr "Kõne katkestatud vastuvõtja või võrgu poolt.\n"
-
-#~ msgid "Call terminated from phone (0x12 message).\n"
-#~ msgstr "Väljuv kõne katkestatud (0x12 teade).\n"
-
-#~ msgid "Incoming call answered from phone.\n"
-#~ msgstr "Saabuv kõne vastatud.\n"
-
-#~ msgid "%s call established - status bytes %02x %02x.\n"
-#~ msgstr "%s kõne moodustatud - staatuse bitid %02x %02x.\n"
-
-#~ msgid "0x2c Write failed!"
-#~ msgstr "0x2c Kirjutamine ebaõnnestus!"
-
-#~ msgid "PID:%02x DCS:%02x Timezone:%02x Stat1:%02x Stat2:%02x\n"
-#~ msgstr "PID:%02x DCS:%02x Ajavöönd:%02x Stat1:%02x Stat2:%02x\n"
-
-#~ msgid ""
-#~ "Incoming SMS %d/%d/%d %d:%02d:%02d tz:0x%02x Sender: %s(Type %02x) Msg "
-#~ "Center: %s\n"
-#~ msgstr ""
-#~ "Saabuv SMS sõnum %d/%d/%d %d:%02d:%02d AV:0x%02x Saatja: %s(%02x tüüpi) "
-#~ "Msg Keskus: %s\n"
-
-#~ msgid ""
-#~ "   Msg Length %d, Msg memory %d Msg number %d,  PID: %02x DCS: %02x "
-#~ "Unknown: %02x\n"
-#~ msgstr ""
-#~ "   Msg pikkus %d, Msg mälukoht %d Msg number %d, PID: %02x DCS: %02x "
-#~ "Tundmatud baidid: %02x\n"
-
-#~ msgid "Mobile phone identification received:\n"
-#~ msgstr "Mobiiltelefeni identifikaator saabus:\n"
-
-#~ msgid "   Model:    %s\n"
-#~ msgstr "   Mudel:    %s\n"
-
-#~ msgid "SMS Message Center Data:\n"
-#~ msgstr "SMS Keskuse info: \n"
-
-#~ msgid "Selected memory: 0x%02x\n"
-#~ msgstr "Valitud mälu: 0x%02x\n"
-
-#~ msgid "Messages in Phone: 0x%02x Unread: 0x%02x\n"
-#~ msgstr "Lühisõnumeid Telefonis: 0x%02x Lugemata: 0x%02x\n"
-
-#~ msgid "Messages in SIM: 0x%02x Unread: 0x%02x\n"
-#~ msgstr "Lühisõnumeid SIM kaardil: 0x%02x Lugemata: 0x%02x\n"
-
-#~ msgid "Delivery reports: 0x%02x (%s)\n"
-#~ msgstr "Saateraport: 0x%02x (%s)\n"
-
-#~ msgid "Messages sent as: 0x%02x\n"
-#~ msgstr "Sõnum saadetud nagu 0x%02x\n"
-
-#~ msgid "Message validity: 0x%02x\n"
-#~ msgstr "Sõnumi kehtivus on 0x%02x\n"
-
-#~ msgid "UnknownNumber field empty."
-#~ msgstr "TundmatuNumber väli on tühi."
-
-#~ msgid "UnknownNumber: "
-#~ msgstr "TundmatuNumber: "
-
-#~ msgid "Number field empty."
-#~ msgstr "Numbriväli on tühi."
-
-#~ msgid "Couldn't open FB61 infrared device"
-#~ msgstr "Ei suuda avada FB61 IR-seadet"
-
-#~ msgid "Starting IR mode...!\n"
-#~ msgstr "Alustan IR ühendust...!\n"
-
-#~ msgid "Serial flags dump:\n"
-#~ msgstr "Serialpordi lippude olek:\n"
-
-#~ msgid "DTR is %s.\n"
-#~ msgstr "DTR on %s.\n"
-
-#~ msgid "up"
-#~ msgstr "püsti"
-
-#~ msgid "down"
-#~ msgstr "pikali"
-
-#~ msgid "RTS is %s.\n"
-#~ msgstr "RTS on %s.\n"
-
-#~ msgid "CAR is %s.\n"
-#~ msgstr "CAR on %s.\n"
-
-#~ msgid "CTS is %s.\n"
-#~ msgstr "CTS on %s.\n"
-
-#~ msgid "Couldn't open FB61 device"
-#~ msgstr "Ei suuda avada FB61 seadet"
-
-#~ msgid "Message: Call message, type 0x02:"
-#~ msgstr "Teade: Kõneteade, tüüp 0x02:"
-
-#~ msgid "   Exact meaning not known yet, sorry :-(\n"
-#~ msgstr "   Täpne tagamõte hetkel tundmatu ... :-(\n"
-
-#~ msgid "Message: Call message, type 0x03:"
-#~ msgstr "Teade: Kõneteade, tüüp 0x03:"
-
-#~ msgid "   Sequence nr. of the call: %d\n"
-#~ msgstr "   Kõne järjenumber: %d\n"
-
-#~ msgid "Message: Remote end hang up.\n"
-#~ msgstr "Teade: Teine pool katkestas kõne.\n"
-
-#~ msgid "Message: Incoming call alert:\n"
-#~ msgstr "Teade: Saabuva kõne hoiatus:\n"
-
-#~ msgid "   Name: "
-#~ msgstr "   Nimi: "
-
-#~ msgid "Message: Call answered.\n"
-#~ msgstr "Sõnum: Kõne vastatud.\n"
-
-#~ msgid "Message: Call ended by your phone.\n"
-#~ msgstr "Teade: Kõne lõpetatud oma telefoni poolt.\n"
-
-#~ msgid "Message: Call message, type 0x0a:"
-#~ msgstr "Teade: Kõneteade, tüüp 0x0a:"
-
-#~ msgid "Message: Unknown message of type 0x01\n"
-#~ msgstr "Teade: Tundmatu 0x01 tüüpi sõnum\n"
-
-#~ msgid "Message: SMS Message correctly sent.\n"
-#~ msgstr "Teade: SMS sõnum korrektselt saadetud.\n"
-
-#~ msgid "Message: Sending SMS Message failed.\n"
-#~ msgstr "Teade: SMS sõnumi saatmine ebaõnnestus.\n"
-
-#~ msgid "Message: SMS Message Received\n"
-#~ msgstr "Teade: SMS sõnum saabus\n"
-
-#~ msgid "   SMS: "
-#~ msgstr "   SMS: "
-
-#~ msgid "Message: channel number %i\n"
-#~ msgstr "Teade: kanal number %i\n"
-
-#~ msgid "Message: SMS Center correctly set.\n"
-#~ msgstr "Teade: SMS keskus korrektselt paigas.\n"
-
-#~ msgid "Message: SMS Center received:\n"
-#~ msgstr "Teade: SMS keskus saabus:\n"
-
-#~ msgid "   %d. SMS Center name is %s\n"
-#~ msgstr "   %d. SMS Keskuse nimi on %s\n"
-
-#~ msgid "   SMS Center message format is "
-#~ msgstr "   SMS keskuse teate formaat on "
-
-#~ msgid "   SMS Center message validity is "
-#~ msgstr "   SMS keskuse teate kehtivusaeg on "
-
-#~ msgid "Message: SMS Center error received:\n"
-#~ msgstr "Teade: SMS keskuse viga saabus:\n"
-
-#~ msgid "   The request for SMS Center failed.\n"
-#~ msgstr "   Sõnumikeskuse päring ebaõnnestus.\n"
-
-#~ msgid "Unknown message!\n"
-#~ msgstr "Tundmatu sõnum!\n"
-
-#~ msgid "Message: Phonebook entry received:\n"
-#~ msgstr "Teade: Telefoniraamatu kirje saabus:\n"
-
-#~ msgid "   Date: "
-#~ msgstr "   Kuupäev: "
-
-#~ msgid "   Time: "
-#~ msgstr "  Kellaaeg: "
-
-#~ msgid "Message: Phonebook read entry error received:\n"
-#~ msgstr "Teade: Telefoniraamatu lugemise viga saabus:\n"
-
-#~ msgid "   Invalid memory type!\n"
-#~ msgstr "   Vale mälu tüüp!\n"
-
-#~ msgid "   Unknown error!\n"
-#~ msgstr "   Tundmatu viga!\n"
-
-#~ msgid "Message: Phonebook written correctly.\n"
-#~ msgstr "Teade: Telefoniraamat korrektselt kirjutatud.\n"
-
-#~ msgid "Message: Phonebook not written - name is too long.\n"
-#~ msgstr "Teade: Telefoniraamatusse ei kirjutatud - nimi on liiga pikk.\n"
-
-#~ msgid "Message: Memory status received:\n"
-#~ msgstr "Teade: Mälu olek saabus:\n"
-
-#~ msgid "   Memory Type: %s\n"
-#~ msgstr "   Mälu tüüp: %s\n"
-
-#~ msgid "   Used: %d\n"
-#~ msgstr "   Kasutatud: %d\n"
-
-#~ msgid "   Free: %d\n"
-#~ msgstr "   Vaba: %d\n"
-
-#~ msgid "Message: Memory status error, phone is probably powered off.\n"
-#~ msgstr "Teade: Mälu oleku viga, telefon on tõenäoliselt väljalülitatud.\n"
-
-#~ msgid ""
-#~ "Message: Memory status error, memory type not supported by phone model.\n"
-#~ msgstr "Teade: Mälu oleku viga, mälu tüüp pole telefoni poolt toetatud.\n"
-
-#~ msgid "Message: Memory status error, waiting for security code.\n"
-#~ msgstr "Teade: Mälu oleku viga, ootan turvakoodi.\n"
-
-#~ msgid "Message: Caller group logo etc.\n"
-#~ msgstr "Teade: Helistaja grupi Logo jms.\n"
-
-#~ msgid "Caller group name: %s\n"
-#~ msgstr "Helistaja grupi nimi: %s\n"
-
-#~ msgid "Message: Caller group data received but not requested!\n"
-#~ msgstr "Teade: Helistaja grupi andmed saabusid kuid polnud küsitud!\n"
-
-#~ msgid "Message: Error attempting to get caller group data.\n"
-#~ msgstr "Teade: Helistajagrupi andmete saamise viga.\n"
-
-#~ msgid "Message: Caller group data set correctly.\n"
-#~ msgstr "Teade: Helistaja grupi andmed korrektselt seatud.\n"
-
-#~ msgid "Message: Error attempting to set caller group data\n"
-#~ msgstr "Teade: Helistajagrupi andmete seadmise viga.\n"
-
-#~ msgid "Message: Speed dial entry received:\n"
-#~ msgstr "Teade: kiirvalimise kirje saabus:\n"
-
-#~ msgid "   Location: %d\n"
-#~ msgstr "   Asukoht: %d\n"
-
-#~ msgid "   MemoryType: %s\n"
-#~ msgstr "   Mälu tüüp: %s\n"
-
-#~ msgid "Message: Speed dial entry error\n"
-#~ msgstr "Teade: kiirvalimise sisestuse viga\n"
-
-#~ msgid "Message: Speed dial entry set.\n"
-#~ msgstr "Teade: kiirvalimise kirje seatud.\n"
-
-#~ msgid "Message: Speed dial entry setting error.\n"
-#~ msgstr "Teade: kiirvalimise kirje seade viga.\n"
-
-#~ msgid "Message: Unknown message of type 0x03\n"
-#~ msgstr "Teade: Tundmatu 0x03 tüüpi sõnum\n"
-
-#~ msgid "Message: Phone status received:\n"
-#~ msgstr "Teade: Telefoni olek saabunud:\n"
-
-#~ msgid "   Mode: "
-#~ msgstr "   Olek: "
-
-#~ msgid "registered within the network\n"
-#~ msgstr "registreeritud võrkku\n"
-
-#~ msgid "call in progress\n"
-#~ msgstr "kõne käimas\n"
-
-#~ msgid "powered off\n"
-#~ msgstr "toide välja\n"
-
-#~ msgid "   Power source: "
-#~ msgstr "   Toiteallikas: "
-
-#~ msgid "AC/DC\n"
-#~ msgstr "Vahelduvvool/Alalisvool\n"
-
-#~ msgid "battery\n"
-#~ msgstr "aku\n"
-
-#~ msgid "   Battery Level: %d\n"
-#~ msgstr "   Aku laadumus: %d\n"
-
-#~ msgid "   Signal strength: %d\n"
-#~ msgstr "   Signaali väljatugevus: %d\n"
-
-#~ msgid "Message: Unknown message of type 0x04\n"
-#~ msgstr "Teade: Tundmatu 0x04 tüüpi sõnum\n"
-
-#~ msgid "Message: Profile feature change result.\n"
-#~ msgstr "Teade: Profiili omadus muutis tulemust.\n"
-
-#~ msgid ""
-#~ "Message: Startup Logo, welcome note and dealer welcome note received.\n"
-#~ msgstr ""
-#~ "Teade: Saabusid Startup Logo, Teretere teade ja diileri tervitusteade.\n"
-
-#~ msgid "currently set\n"
-#~ msgstr "hetkel seatud\n"
-
-#~ msgid "Startup Text supported - "
-#~ msgstr "Startup Tekst on toetatud - "
-
-#~ msgid "currently set to \""
-#~ msgstr "hetkel seatud \""
-
-#~ msgid "Message: Startup logo received but not requested!\n"
-#~ msgstr "Teade: Startup logo saabus, kuid pole küsitud!\n"
-
-#~ msgid "Message: Operator logo correctly set.\n"
-#~ msgstr "Teade: Operaatori Logo korrektselt paigas.\n"
-
-#~ msgid "Message: Error setting operator logo!\n"
-#~ msgstr "Teade: Viga operaatori logo kehtestamisel!\n"
-
-#~ msgid "Message: Operator Logo for %s (%s) network received.\n"
-#~ msgstr "Teade: Saabus Operaatori Logo võrgule %s (%s).\n"
-
-#~ msgid "Message: Operator logo received but not requested!\n"
-#~ msgstr "Teade: Operaatori Logo saabunud, kuid mitte küsitud!\n"
-
-#~ msgid "Message: Error getting operator logo!\n"
-#~ msgstr "Teade: Viga operaatori logo võtmisel!\n"
-
-#~ msgid "Message: Security Code status received: "
-#~ msgstr "Teade: Security koodi olek saabus: "
-
-#~ msgid "Message: Security code accepted.\n"
-#~ msgstr "Teade: Security kood aksepteeritud.\n"
-
-#~ msgid "Message: Security code is wrong. You're not my big owner :-)\n"
-#~ msgstr "Teade: Security kood on vale. Sa pole telefoni õige omanik :-)\n"
-
-#~ msgid "Message: Network information:\n"
-#~ msgstr "Teade: Võrgu informatsioon:\n"
-
-#~ msgid "   CellID: %s\n"
-#~ msgstr "   KärjeID: %s\n"
-
-#~ msgid "   Network code: %s\n"
-#~ msgstr "   Võrgu kood: %s\n"
-
-#~ msgid "   Network name: %s (%s)\n"
-#~ msgstr "   Võrgu nimi: %s (%s)\n"
-
-#~ msgid "   Status: "
-#~ msgstr "   Olek: "
-
-#~ msgid "home network selected"
-#~ msgstr "koduvõrk valitud"
-
-#~ msgid "roaming network"
-#~ msgstr "roaming võrk"
-
-#~ msgid "requesting network"
-#~ msgstr "võrgupäring"
-
-#~ msgid "not registered in the network"
-#~ msgstr "pole võrkku registreerunud"
-
-#~ msgid "   Network selection: %s\n"
-#~ msgstr "   Võrgu valik: %s\n"
-
-#~ msgid "Message: Unknown message of type 0x0a\n"
-#~ msgstr "Teade: Tundmatu 0x0a tüüpi sõnum\n"
-
-#~ msgid "Unknown message of type 0x0d.\n"
-#~ msgstr "Tundmatu 0x0d tüüpi sõnum.\n"
-
-#~ msgid "Message: Date and time set correctly\n"
-#~ msgstr "Teade: Kuupäev ja kellaaeg seatud korrektselt\n"
-
-#~ msgid "Message: Date and time set error\n"
-#~ msgstr "Teade: Kuupäeva ja kellaaja seade viga\n"
-
-#~ msgid "Message: Date and time\n"
-#~ msgstr "Teade: Kuupäev ja kellaaeg\n"
-
-#~ msgid "   Date: %4d/%02d/%02d\n"
-#~ msgstr "   Kuupäev: %4d/%02d/%02d\n"
-
-#~ msgid "Message: Alarm set correctly\n"
-#~ msgstr "Teade: Äratus seatud õieti\n"
-
-#~ msgid "Message: Alarm\n"
-#~ msgstr "Teade: Äratus\n"
-
-#~ msgid "   Alarm: %02d:%02d\n"
-#~ msgstr "   Äratus: %02d:%02d\n"
-
-#~ msgid "   Alarm is %s\n"
-#~ msgstr "   Äratus on %s\n"
-
-#~ msgid "Message: Unknown message of type 0x11\n"
-#~ msgstr "Teade: Tundmatu 0x11 tüüpi sõnum\n"
-
-#~ msgid "Message: Calendar note write failed!\n"
-#~ msgstr "Teade: Kalendri teate kirjutamine ebaõnnestus!\n"
-
-#~ msgid "Unknown message of type 0x13 and subtype 0x65\n"
-#~ msgstr "Tundmatu 0x13 tüüpi ja 0x65 alamtüüpi sõnum.\n"
-
-#~ msgid "Message: Calendar note received.\n"
-#~ msgstr "Teade: Kalendri teade saabus\n"
-
-#~ msgid "   Type: %d\n"
-#~ msgstr "   Tüüp: %d\n"
-
-#~ msgid "Message: Calendar note not available\n"
-#~ msgstr "Teade: Kalendri teade pole võimalik\n"
-
-#~ msgid "Message: Calendar note deleted\n"
-#~ msgstr "Teade: Kalendri teade kustutatud\n"
-
-#~ msgid "Message: Calendar note can't be deleted\n"
-#~ msgstr "Teade: Kalendri teadet ei saa kustutada\n"
-
-#~ msgid "Message: Calendar note deleting error\n"
-#~ msgstr "Teade: Kalendri teate kustutamise viga\n"
-
-#~ msgid "Message: Calendar Alarm active\n"
-#~ msgstr "Teade: Kalendri alarm aktiivne\n"
-
-#~ msgid "Message: Unknown message of type 0x13\n"
-#~ msgstr "Teade: Tundmatu 0x13 tüüpi sõnum\n"
-
-#~ msgid "Not sent\n"
-#~ msgstr "Saatmata\n"
-
-#~ msgid "Message: Received SMS (mobile terminated)\n"
-#~ msgstr "Teade: SMS sõnum saabus (telefon katkestas)\n"
-
-#~ msgid "Delivery Report\n"
-#~ msgstr "Saateraport\n"
-
-#~ msgid "Read\n"
-#~ msgstr "Loe\n"
-
-#~ msgid "   Date: %s "
-#~ msgstr "   Kuupäev: %s "
-
-#~ msgid "   SMSC response date: %s "
-#~ msgstr "   SMSC vastuse kuupäev: %s "
-
-#~ msgid "Delivered"
-#~ msgstr "Saadetud"
-
-#~ msgid "Failed"
-#~ msgstr "Ebaõnnestus"
-
-#~ msgid "Temporary error, SC is not making any more transfer attempts\n"
-#~ msgstr "Ajutine viga, SC ei proovi enam uuesti saata\n"
-
-#~ msgid "No response from SME"
-#~ msgstr "SME ei vasta..."
-
-#~ msgid "Service rejected"
-#~ msgstr "Teenus tagasilykatud"
-
-#~ msgid "Error in SME"
-#~ msgstr "Viga SME-s"
-
-#~ msgid "Permanent error, SC is not making any more transfer attempts\n"
-#~ msgstr "Püsiv viga, SC ei proovi enam saatmist korrata\n"
-
-#~ msgid "Incompatibile destination"
-#~ msgstr "Kokkusobimatu sihtpunkt"
-
-#~ msgid "Connection rejected by SME"
-#~ msgstr "Ühendusest keelduti SME poolt"
-
-#~ msgid "Not obtainable"
-#~ msgstr "Ei saa kätte"
-
-#~ msgid "Pending"
-#~ msgstr "Ootel"
-
-#~ msgid "Temporary error, SC still trying to transfer SM\n"
-#~ msgstr "Ajutine viga, SC püüab ikkagi saata SM'i\n"
-
-#~ msgid "   Invalid location!\n"
-#~ msgstr "   Vale asukoht!\n"
-
-#~ msgid "   Unknown error.\n"
-#~ msgstr "   Tundmatu viga.\n"
-
-#~ msgid "Message: SMS reading failed.\n"
-#~ msgstr "Teade: SMS lugemine ebaõnnestus.\n"
-
-#~ msgid "Message: SMS deleted successfully.\n"
-#~ msgstr "Teade: SMS kustutamine õnnestus.\n"
-
-#~ msgid "Message: SMS Status Received\n"
-#~ msgstr "Teade: SMS olek saabus\n"
-
-#~ msgid "   The number of messages: %d\n"
-#~ msgstr "   Sõnumite arv: %d\n"
-
-#~ msgid "   Unread messages: %d\n"
-#~ msgstr "   Lugemata sõnumeid: %d\n"
-
-#~ msgid "Message: SMS Status error, probably not authorized by PIN\n"
-#~ msgstr "Teade: SMS oleku viga, tõenäoliselt PIN koodiga autoriseerimata\n"
-
-#~ msgid "Message: Netmonitor correctly set.\n"
-#~ msgstr "Teade: Võrgumonitor korrektselt paigas.\n"
-
-#~ msgid "Message: Netmonitor menu %d received:\n"
-#~ msgstr "Teade: Võrgumonitori menüü %d saabunud:\n"
-
-#~ msgid "Unknown message of type 0x40.\n"
-#~ msgstr "Tundmatu 0x40 tüüpi sõnum.\n"
-
-#~ msgid "Message: Mobile phone identification received:\n"
-#~ msgstr "Teade: Mobiiltelefoni identiteet saabunud:\n"
-
-#~ msgid "   Production Code: %s\n"
-#~ msgstr "   Valmistuskood: %s\n"
-
-#~ msgid "   HW: %s\n"
-#~ msgstr "   HW: %s\n"
-
-#~ msgid "   Firmware: %s\n"
-#~ msgstr "   Riistvara: %s\n"
-
-#~ msgid "   Magic bytes: %02x %02x %02x %02x\n"
-#~ msgstr "   Maagilised baidid: %02x %02x %02x %02x\n"
-
-#~ msgid ""
-#~ "Phone info:\n"
-#~ "%s\n"
-#~ msgstr ""
-#~ "Telefoni info:\n"
-#~ "%s\n"
-
-#~ msgid "Message: Unknown message.\n"
-#~ msgstr "Teade: Tundmatu sõnum.\n"
-
-#~ msgid "Please report it ...\n"
-#~ msgstr "Palun teata sellest ... \n"
-
-#~ msgid "Bad checksum!\n"
-#~ msgstr "Vale kontrollsumma!\n"
-
-#~ msgid "Msg Dest: %s\n"
-#~ msgstr "Msg sihtpunkt: %s\n"
-
-#~ msgid "Msg Source: %s\n"
-#~ msgstr "Msg allikas: %s\n"
-
-#~ msgid "Msg Type: %02x\n"
-#~ msgstr "Msg tüüp: %02x\n"
-
-#~ msgid "Msg Unknown: %02x\n"
-#~ msgstr "Msg tundmatu: %02x\n"
-
-#~ msgid ""
-#~ "Msg Len: %02x\n"
-#~ "Phone: "
-#~ msgstr ""
-#~ "Msg pikkus: %02x\n"
-#~ "Telefon: "
-
-#~ msgid "Couldn't open MB61 device: "
-#~ msgstr "Ei suuda avada MB61 seadet: "
-
-#~ msgid "Frame FCS is bad. Ignoring...\n"
-#~ msgstr "FCS blokk on vigane. Ignoreerin ...\n"
-
-#~ msgid "Hmmm... GSM_LinkOK never went true. Quitting.\n"
-#~ msgstr "Hmmm... GSM_LinkOK ei tekkinud. Lõpetan.\n"
-
-#~ msgid "Location %d empty. Saving\n"
-#~ msgstr "Asukoht %d on tühi. Salvestan\n"
-
-#~ msgid "%d. SMS center (%s) number is %s\n"
-#~ msgstr "%d. SMS keskuse (%s) number on %s\n"
-
-#~ msgid "Operator code: %s\n"
-#~ msgstr "Operaatori kood: %s\n"
-
-#~ msgid "Initialising GSM interface...\n"
-#~ msgstr "Initsialiseerin GSM liidest...\n"
-
-#~ msgid "gnokiid should not be installed setuid root!\n"
-#~ msgstr "gnokiid ei tohiks setuid root õigusega installerida!\n"
-
-#~ msgid "Hmmm... GSM_LinkOK never went true. Quitting. \n"
-#~ msgstr "Hmmm... GSM_LinkOK ei tekkinud. Lõpetan. \n"
-
-#~ msgid "Extended:"
-#~ msgstr "Laiendatud:"
-
-#~ msgid "Inbox"
-#~ msgstr "Saadud lühisõnumid"
-
-#~ msgid "Alarm date:"
-#~ msgstr "Meenutuse kuupäev:"
-
-#~ msgid "Message: Result of key "
-#~ msgstr " "
-
-#~ msgid "press\n"
-#~ msgstr "vajuta\n"
-
-#~ msgid "release\n"
-#~ msgstr "vabasta\n"
-
-#~ msgid "press or release - error\n"
-#~ msgstr "vajuta või vabasta - viga\n"
-
-#~ msgid "Message: Unknown message of type 0x0c\n"
-#~ msgstr "Teade: Tundmatu 0x0c tüüpi sõnum\n"
-
-#~ msgid "Message: Security code received: "
-#~ msgstr "Teade: Turvakood saabus: "
-
-#~ msgid "Security code"
-#~ msgstr "Turvakood"
-
-#~ msgid "unknown !"
-#~ msgstr "tundmatu !"
-
-#~ msgid "Unknown key: %c !\n"
-#~ msgstr "Tundmatu võti: %c !\n"
-
-#~ msgid "Can't press key !\n"
-#~ msgstr "Nuppu ei saa vajutada?! \n"
-
-#~ msgid "Can't release key !\n"
-#~ msgstr "Nuppu ei saa vabastada?! \n"
-
-#~ msgid "security code"
-#~ msgstr "Turvakood"
-
-#~ msgid " not allowed\n"
-#~ msgstr " pole lubatud\n"
-
-#~ msgid "Files can't have the same names !\n"
-#~ msgstr "Failidel ei saa olla sama nimi !!\n"
-
-#~ msgid "Error saving SMS centers!"
-#~ msgstr "Viga SMS keskuste salvestamisel!"
-
-#~ msgid "Couldn't open %s or /etc/gnokiirc, using default config!\n"
-#~ msgstr ""
-#~ "Ei suuda %s avada ega ka /etc/gnokiirc, kasutan konfiguratsiooni "
-#~ "vaikeväärtusi!\n"
-
-#~ msgid "Sending Logo.\n"
-#~ msgstr "Saadan Logo.\n"
-
-#~ msgid "   Date: %s GMT"
-#~ msgstr "   Kuupäev: %s GMT"
-
-#~ msgid "   usage: gnokiid {--help|--version}"
-#~ msgstr "   kasutus: gnokiid {--help|--version}"
-
-#~ msgid "%s: line %d: Can't get SM memory entry number %d! %d\n"
-#~ msgstr "%s: rida %d: Ei saa kätte SM mälu asukoha numbrit %d! %d\n"
-
-#~ msgid "0x16 Registration Response 0x%02x 0x%02x\n"
-#~ msgstr "0x16 Registreerimise vastus 0x%02x 0x%02x\n"
-
-#~ msgid "Groups names"
-#~ msgstr "Gruppide nimed"
-
-#~ msgid "Incoming call terminated.\n"
-#~ msgstr "Saabuv kõne katkestatud. \n"
-
-#~ msgid "Message: Startup Logo received.\n"
-#~ msgstr "Teade: Startup Logo saabus.\n"
-
-#~ msgid "Message: the rest of the SMS message received.\n"
-#~ msgstr "Teade: ülejäänud SMS sõnum saabus.\n"

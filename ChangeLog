@@ -18,6 +18,8 @@
     o indexes with messages list were switched         (Ulrich Hopp)
     o fix problems with choosing names from the addressbook on
       sms sending                                      (Ulrich Hopp)
+ * documentation updates
+    o new Estonian translation                       (Hans Motshärg)
 
 0.5.0pre4
 =========
