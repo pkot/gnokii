@@ -3386,8 +3386,9 @@ static int writephonebook(int argc, char *args[])
 				error = GN_ERR_WRONGDATAFORMAT;
 			break;
 		default:
-			if (!gn_line_get(stdin, line, MAX_INPUT_LINE_LEN) ||
-			    (decodephonebook(&entry, oline) == 0))
+			if (!gn_line_get(stdin, line, MAX_INPUT_LINE_LEN))
+				return 0; /* it means we read an empty line, but that's not an error */
+			else if (decodephonebook(&entry, oline) == 0)
 				error = GN_ERR_WRONGDATAFORMAT;
 			break;
 		}
@@ -3472,7 +3473,7 @@ static int writephonebook(int argc, char *args[])
 			fprintf (stderr, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
 				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 	}
-	return -1;
+	return error;
 }
 
 /* Getting WAP bookmarks. */

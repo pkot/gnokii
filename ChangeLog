@@ -32,6 +32,8 @@
                                                         (Pawel Kot)
     o gnokii --writephonebook for multiple addresses was
       interrupted on the first error                    (Pawel Kot)
+    o gnokii --writephonebook does not return an error with the
+      last line (which is empty)                        (Pawel Kot)
 
 0.5.7
 =====
