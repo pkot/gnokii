@@ -189,5 +189,5 @@ extern pthread_cond_t  getNetworkInfoCond;
 extern void GUI_InitPhoneMonitor (void);
 extern void *GUI_Connect (void *a);
 extern void GUI_InsertEvent (PhoneEvent *event);
-
+extern void GUI_InitSMSFolders (void);
 #endif

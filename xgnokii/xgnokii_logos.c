@@ -1170,55 +1170,55 @@ gint ToolTypeEvent(GtkWidget *widget) {
 }
 
 /* this is launched when logo type was change by buttons on toolbar */
-gint LogoTypeEvent(GtkWidget *widget) {
-  int clear = 0;
+gint LogoTypeEvent(GtkWidget *widget) 
+{
+	int clear = 0;
+	g_print("LogoTypeEvent called!\n");
+	/* is startupLogo? */
+	/* Resize and clear anyway - CK */
+	if (GTK_TOGGLE_BUTTON(buttonStartup)->active) {
+		/* look for old bitmap type, clean if another */
+		clear = 1;
+		GSM_ResizeBitmap(&bitmap,GSM_StartupLogo, &statemachine.Phone.Info);
+	}
 
-  /* is startupLogo? */
-  /* Resize and clear anyway - CK */
-  if (GTK_TOGGLE_BUTTON(buttonStartup)->active) {
-    /* look for old bitmap type, clean if another */
-    clear = 1;
-    GSM_ResizeBitmap(&bitmap,GSM_StartupLogo, &statemachine.Phone.Info);
-  }
+	/* has phone support for callerGroups? */
+	if (phoneMonitor.supported & PM_CALLERGROUP) {
+		if (GTK_TOGGLE_BUTTON(buttonCaller)->active && bitmap.type != GSM_CallerLogo) {
+			/* previous was startup? clear and draw batteries, signal, ... */      
+			/* Clear anyway for 7110...CK */
+			clear = 1;
+			GSM_ResizeBitmap(&bitmap,GSM_CallerLogo, &statemachine.Phone.Info);
+		}
+	}
 
-  /* has phone support for callerGroups? */
-  if (phoneMonitor.supported & PM_CALLERGROUP) {
-    if (GTK_TOGGLE_BUTTON(buttonCaller)->active && bitmap.type != GSM_CallerLogo) {
-      /* previous was startup? clear and draw batteries, signal, ... */      
-	    /* Clear anyway for 7110...CK */
-      clear = 1;
-      GSM_ResizeBitmap(&bitmap,GSM_CallerLogo, &statemachine.Phone.Info);
-    }
-  }
+	/* is new type operatorLogo? */
+	if (GTK_TOGGLE_BUTTON(buttonOperator)->active && bitmap.type != GSM_OperatorLogo) {
+		/* previous startup? clear and draw batteries, signal, ... */      
+		/* Clear anyway for 7110..CK */
+		clear = 1;
+		GSM_ResizeBitmap(&bitmap,GSM_OperatorLogo, &statemachine.Phone.Info);
+	}
 
-  /* is new type operatorLogo? */
-  if (GTK_TOGGLE_BUTTON(buttonOperator)->active && bitmap.type != GSM_OperatorLogo) {
-    /* previous startup? clear and draw batteries, signal, ... */      
-	  /* Clear anyway for 7110..CK */
-    clear = 1;
-    GSM_ResizeBitmap(&bitmap,GSM_OperatorLogo, &statemachine.Phone.Info);
-  }
+	/* must clear? */
+	if (clear) {
+		if (previewAvailable) {
+			/* configure event reload pixmap from disk and redraws */
+			gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
+					previewPixmapWidth,previewPixmapHeight);
+		}   
+		/* change new drawingArea size */
+		drawingAreaWidth = bitmap.width * (POINTSIZE+1)+1;
+		drawingAreaHeight = bitmap.height * (POINTSIZE+1)+1;
 
-  /* must clear? */
-  if (clear) {
-    if (previewAvailable) {
-      /* configure event reload pixmap from disk and redraws */
-      gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
-                            previewPixmapWidth,previewPixmapHeight);
-    }   
-
-    /* change new drawingArea size */
-    drawingAreaWidth = bitmap.width * (POINTSIZE+1)+1;
-    drawingAreaHeight = bitmap.height * (POINTSIZE+1)+1;
-
-    gtk_drawing_area_size(GTK_DRAWING_AREA(drawingArea),
-                          drawingAreaWidth,drawingAreaHeight);
-  }
-
-  return 0;
+		gtk_drawing_area_size(GTK_DRAWING_AREA(drawingArea),
+		drawingAreaWidth,drawingAreaHeight);
+	}
+	return 0;
 }
 
-inline void CloseLogosWindow (void) {
+inline void CloseLogosWindow (void)
+{
   gtk_widget_hide(GUI_LogosWindow);
 }
 
@@ -1408,101 +1408,102 @@ void InitLogosMenu (void) {
 }
 
 void GUI_CreateLogosWindow (void) {
-  int nMenuItems = sizeof (logosMenuItems) / sizeof (logosMenuItems[0]);
-  GtkAccelGroup *accelGroup;
-  GtkItemFactory *itemFactory;
-  GtkWidget *menuBar;
-  GtkWidget *toolBar, *vertToolBar;
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *drawingBox;
-  GtkWidget *separator;
-  GdkBitmap *mask;
+	
+	int nMenuItems = sizeof (logosMenuItems) / sizeof (logosMenuItems[0]);
+	GtkAccelGroup *accelGroup;
+	GtkItemFactory *itemFactory;
+	GtkWidget *menuBar;
+	GtkWidget *toolBar, *vertToolBar;
+	GtkWidget *vbox;
+	GtkWidget *hbox;
+	GtkWidget *drawingBox;
+	GtkWidget *separator;
+	GdkBitmap *mask;
 
-  GList *glistNetwork = NULL;
+	GList *glistNetwork = NULL;
 
-  int i = 0;
+	int i = 0;
  
-  previewPixmapWidth = PREVIEWWIDTH;
-  previewPixmapHeight = PREVIEWHEIGHT;
+	previewPixmapWidth = PREVIEWWIDTH;
+	previewPixmapHeight = PREVIEWHEIGHT;
   
-  InitLogosMenu();
+	InitLogosMenu();
 
-  /* realize top level window for logos */
-  GUI_LogosWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_wmclass(GTK_WINDOW(GUI_LogosWindow), "LogosWindow", "Xgnokii");
-  gtk_window_set_policy(GTK_WINDOW(GUI_LogosWindow), 1, 1, 1);
-  gtk_window_set_title(GTK_WINDOW(GUI_LogosWindow), _("Logos"));
-  gtk_signal_connect(GTK_OBJECT(GUI_LogosWindow), "delete_event",
+/* realize top level window for logos */
+	GUI_LogosWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_wmclass(GTK_WINDOW(GUI_LogosWindow), "LogosWindow", "Xgnokii");
+	gtk_window_set_policy(GTK_WINDOW(GUI_LogosWindow), 1, 1, 1);
+	gtk_window_set_title(GTK_WINDOW(GUI_LogosWindow), _("Logos"));
+	gtk_signal_connect(GTK_OBJECT(GUI_LogosWindow), "delete_event",
                      GTK_SIGNAL_FUNC(DeleteEvent), NULL);
-  gtk_widget_realize(GUI_LogosWindow);
+	gtk_widget_realize(GUI_LogosWindow);
 
-  CreateErrorDialog(&errorDialog, GUI_LogosWindow);
-  CreateInfoDialog(&infoDialog, GUI_LogosWindow);
+	CreateErrorDialog(&errorDialog, GUI_LogosWindow);
+	CreateInfoDialog(&infoDialog, GUI_LogosWindow);
 
-  accelGroup = gtk_accel_group_new();
-  gtk_accel_group_attach(accelGroup, GTK_OBJECT(GUI_LogosWindow));
+	accelGroup = gtk_accel_group_new();
+	gtk_accel_group_attach(accelGroup, GTK_OBJECT(GUI_LogosWindow));
   
-  /* create main vbox */
-  vbox = gtk_vbox_new(FALSE, 1);
-  gtk_container_add(GTK_CONTAINER(GUI_LogosWindow), vbox);
-  gtk_widget_show(vbox);
+/* create main vbox */
+	vbox = gtk_vbox_new(FALSE, 1);
+	gtk_container_add(GTK_CONTAINER(GUI_LogosWindow), vbox);
+	gtk_widget_show(vbox);
  
-  itemFactory = gtk_item_factory_new(GTK_TYPE_MENU_BAR, "<main>", accelGroup);
-  gtk_item_factory_create_items(itemFactory, nMenuItems, logosMenuItems, NULL);
-  menuBar = gtk_item_factory_get_widget(itemFactory, "<main>");
+	itemFactory = gtk_item_factory_new(GTK_TYPE_MENU_BAR, "<main>", accelGroup);
+	gtk_item_factory_create_items(itemFactory, nMenuItems, logosMenuItems, NULL);
+	menuBar = gtk_item_factory_get_widget(itemFactory, "<main>");
 
-  gtk_box_pack_start(GTK_BOX(vbox), menuBar, FALSE, FALSE, 0);
-  gtk_widget_show(menuBar);
+	gtk_box_pack_start(GTK_BOX(vbox), menuBar, FALSE, FALSE, 0);
+	gtk_widget_show(menuBar);
 
-  /* toolbar */
-  toolBar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-  gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolBar), GTK_RELIEF_NORMAL);
-  gtk_toolbar_set_style(GTK_TOOLBAR(toolBar), GTK_TOOLBAR_ICONS);
+/* toolbar */
+	toolBar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolBar), GTK_RELIEF_NORMAL);
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolBar), GTK_TOOLBAR_ICONS);
 
-  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Clear logo"), NULL,
+	gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Clear logo"), NULL,
 		  NewPixmap(New_xpm, GUI_LogosWindow->window,
 		  &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
 		  (GtkSignalFunc)ClearLogoEvent, toolBar);
 
-  gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
 
-  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Get logo"), NULL,
+	gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Get logo"), NULL,
                  NewPixmap(Read_xpm, GUI_LogosWindow->window,
                  &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
                  (GtkSignalFunc)GetLogoEvent, toolBar);
 
-  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Set logo"), NULL,
+	gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Set logo"), NULL,
                  NewPixmap(Send_xpm, GUI_LogosWindow->window,
                  &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
                  (GtkSignalFunc)SetLogoEvent, toolBar);
 
-  gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolBar), NULL, _("Import from file"), NULL,
+	gtk_toolbar_append_item (GTK_TOOLBAR (toolBar), NULL, _("Import from file"), NULL,
                            NewPixmap(Open_xpm, GUI_LogosWindow->window,
                            &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) OpenLogo, NULL);
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolBar), NULL, _("Export to file"), NULL,
+	gtk_toolbar_append_item (GTK_TOOLBAR (toolBar), NULL, _("Export to file"), NULL,
                            NewPixmap(Save_xpm, GUI_LogosWindow->window,
                            &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) SaveLogo, NULL);
 
-  gtk_toolbar_append_space (GTK_TOOLBAR (toolBar));
+	gtk_toolbar_append_space (GTK_TOOLBAR (toolBar));
 
-  buttonStartup = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
+	buttonStartup = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
 		  GTK_TOOLBAR_CHILD_RADIOBUTTON, NULL, NULL, _("Startup logo"),
 		  "", NewPixmap(Startup_logo_xpm, GUI_LogosWindow->window,
                   &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
 		  GTK_SIGNAL_FUNC(LogoTypeEvent), NULL);
 
-  buttonOperator = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
+	buttonOperator = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
                   GTK_TOOLBAR_CHILD_RADIOBUTTON, buttonStartup, NULL, _("Operator logo"),
 		  "", NewPixmap(Operator_logo_xpm, GUI_LogosWindow->window,
 		  &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
 		  GTK_SIGNAL_FUNC(LogoTypeEvent), NULL);
 
-  buttonCaller = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
+	buttonCaller = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
                  GTK_TOOLBAR_CHILD_RADIOBUTTON,
 		 buttonOperator,
 		 NULL, _("Caller logo"),
@@ -1510,74 +1511,75 @@ void GUI_CreateLogosWindow (void) {
 	         &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
 		 GTK_SIGNAL_FUNC(LogoTypeEvent), NULL);
 
-  gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
+	gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
   
-  networkCombo = gtk_combo_new();
-  gtk_combo_set_use_arrows_always(GTK_COMBO(networkCombo), 1);
-  while (strcmp(GSM_Networks[i].Name, "unknown"))
-    glistNetwork = g_list_insert_sorted(glistNetwork, GSM_Networks[i++].Name,
-                   (GCompareFunc)strcmp);
-  gtk_combo_set_popdown_strings(GTK_COMBO(networkCombo), glistNetwork);
-  gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(networkCombo)->entry), FALSE);
-  gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), networkCombo, "", "");
-  gtk_widget_show(networkCombo);
-  g_list_free(glistNetwork);
+	networkCombo = gtk_combo_new();
+	gtk_combo_set_use_arrows_always(GTK_COMBO(networkCombo), 1);
+	while (strcmp(GSM_Networks[i].Name, "unknown"))
+		glistNetwork = g_list_insert_sorted(glistNetwork, 
+			GSM_Networks[i++].Name,(GCompareFunc)strcmp);
+	gtk_combo_set_popdown_strings(GTK_COMBO(networkCombo), glistNetwork);
+	gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(networkCombo)->entry), FALSE);
+	gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), networkCombo, "", "");
+	gtk_widget_show(networkCombo);
+	g_list_free(glistNetwork);
 
-  callerCombo = gtk_combo_new();
-  gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(callerCombo)->entry), FALSE);
-  gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), callerCombo, "", "");
-  gtk_widget_show(callerCombo);
+	callerCombo = gtk_combo_new();
+	gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(callerCombo)->entry), FALSE);
+	gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), callerCombo, "", "");
+	gtk_widget_show(callerCombo);
   
-  gtk_box_pack_start(GTK_BOX(vbox), toolBar, FALSE, FALSE, 0);
-  gtk_widget_show(toolBar); 
+	gtk_box_pack_start(GTK_BOX(vbox), toolBar, FALSE, FALSE, 0);
+	gtk_widget_show(toolBar); 
 
-  /* vertical separator */
-  separator = gtk_hseparator_new();
-  gtk_box_pack_start(GTK_BOX(vbox),GTK_WIDGET(separator),FALSE,FALSE,0);
+	/* vertical separator */
+	separator = gtk_hseparator_new();
+	gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(separator), FALSE, FALSE, 0);
   
-  /* create horizontal box for preview and drawing areas */
-  hbox = gtk_hbox_new(FALSE,5);
-  gtk_box_pack_start(GTK_BOX(vbox),hbox,FALSE,FALSE,0);
-  gtk_widget_show(hbox);
+	/* create horizontal box for preview and drawing areas */
+	hbox = gtk_hbox_new(FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_show(hbox);
  
-  /* set GSM_Bitmap width,height needed for creating drawinArea
-   * we are starting, default is startupLogo
-   */
-  bitmap.type = GSM_StartupLogo;
-  bitmap.height = 48;
-  bitmap.width = 84;
-  bitmap.size = bitmap.height * bitmap.width / 8;
-  drawingAreaWidth = bitmap.width * (POINTSIZE+1)+1;
-  drawingAreaHeight = bitmap.height * (POINTSIZE+1)+1;
+	/* set GSM_Bitmap width,height needed for creating drawinArea
+	 * we are starting, default is startupLogo
+	 */
+	bitmap.type = GSM_StartupLogo;
+	bitmap.height = 48;
+	bitmap.width = 84;
+	bitmap.size = bitmap.height * bitmap.width / 8;
+	drawingAreaWidth = bitmap.width * (POINTSIZE+1) + 1;
+	drawingAreaHeight = bitmap.height * (POINTSIZE+1) + 1;
  
-  /* previewArea */
-  previewPixmap = GetPreviewPixmap(GUI_LogosWindow);
+	/* previewArea */
+	previewPixmap = GetPreviewPixmap(GUI_LogosWindow);
+	
+	if (previewPixmap != NULL) {
+		previewArea = gtk_drawing_area_new();
+		gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
+		previewPixmapWidth,previewPixmapHeight);
 
-  if (previewPixmap != NULL) {
-    previewArea = gtk_drawing_area_new();
-    gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
-                          previewPixmapWidth,previewPixmapHeight);
+		greenPixelPixmap = gdk_pixmap_create_from_xpm_d(GUI_LogosWindow->window,
+			&mask,&GUI_LogosWindow->style->bg[GTK_STATE_NORMAL],
+			Green_pixel_xpm);
+
+		gtk_signal_connect(GTK_OBJECT(previewArea), "expose_event",
+			(GtkSignalFunc)PreviewAreaExposeEvent, NULL);
+		gtk_signal_connect(GTK_OBJECT(previewArea), "configure_event",
+			(GtkSignalFunc)PreviewAreaConfigureEvent, NULL);
+		gtk_signal_connect(GTK_OBJECT(previewArea), "button_press_event",
+			(GtkSignalFunc)PreviewAreaButtonPressEvent, NULL);
+
+		gtk_widget_set_events(previewArea,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK );
+
+		gtk_box_pack_start(GTK_BOX(hbox), previewArea, FALSE, FALSE, 0);
+		gtk_widget_show(previewArea);
     
-    greenPixelPixmap = gdk_pixmap_create_from_xpm_d(GUI_LogosWindow->window,
-                       &mask,&GUI_LogosWindow->style->bg[GTK_STATE_NORMAL],
-                       Green_pixel_xpm);
+		/* clear battery, signal, menu & names from preview phone */
+		UpdatePreviewPoints (); 
 
-    gtk_signal_connect(GTK_OBJECT(previewArea),"expose_event",
-  		       (GtkSignalFunc)PreviewAreaExposeEvent,NULL);
-    gtk_signal_connect(GTK_OBJECT(previewArea),"configure_event",
-                       (GtkSignalFunc)PreviewAreaConfigureEvent,NULL);
-    gtk_signal_connect(GTK_OBJECT(previewArea),"button_press_event",
-                       (GtkSignalFunc)PreviewAreaButtonPressEvent,NULL);
-
-    gtk_widget_set_events(previewArea,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK );
-
-    gtk_box_pack_start(GTK_BOX(hbox),previewArea,FALSE,FALSE,0);
-    gtk_widget_show(previewArea);
-    
-    /* clear battery, signal, menu & names from preview phone */
-    UpdatePreviewPoints (); 
-
-  } else previewAvailable = 0;
+	} 
+	else previewAvailable = 0;
 
   /* drawingArea */
   greenPointPixmap = gdk_pixmap_create_from_xpm_d(GUI_LogosWindow->window,
@@ -1666,48 +1668,52 @@ void GUI_CreateLogosWindow (void) {
   GUIEventAdd(GUI_EVENT_CALLERS_GROUPS_CHANGED,&GUI_RefreshLogosGroupsCombo);
 }
 
-void GUI_RefreshLogosGroupsCombo (void) {
-  GList *callerList = NULL;
-  int i;
+void GUI_RefreshLogosGroupsCombo (void)
+{
+	GList *callerList = NULL;
+	int i;
   
-  for (i = 0;i < 6;i++)
-    callerList = g_list_insert(callerList,xgnokiiConfig.callerGroups[i],i);
+  	/* All groups + no group */
+	for (i = 0; i < GSM_MAX_CALLER_GROUPS + 1; i++)
+ 		callerList = g_list_insert(callerList, xgnokiiConfig.callerGroups[i], i);
   
-  gtk_combo_set_popdown_strings(GTK_COMBO(callerCombo),callerList);
-  g_list_free(callerList);
+	gtk_combo_set_popdown_strings(GTK_COMBO(callerCombo), callerList);
+	g_list_free(callerList);
 
-  if (!callersGroupsInitialized) callersGroupsInitialized = 1;
+	if (!callersGroupsInitialized) callersGroupsInitialized = 1;
 }
 
-void GUI_ShowLogosWindow (void) {
-  /* Set network name taken from the phone */
-  GetNetworkInfoEvent(NULL);
-  /* if phone support caller groups, read callerGroups names */
-  if (phoneMonitor.supported & PM_CALLERGROUP) {
-    if (xgnokiiConfig.callerGroups[0] == NULL) {
-      GUI_Refresh(); 
-      GUI_InitCallerGroupsInf ();
-    }
-    if (!callersGroupsInitialized) GUI_RefreshLogosGroupsCombo (); 
-    gtk_widget_show(buttonCaller);
-    gtk_widget_show(callerCombo); 
-  } else {
-    /* if not supported, hide widget for handling callerGroups */
-    gtk_widget_hide(buttonCaller);
-    gtk_widget_hide(callerCombo); 
-  }        
+void GUI_ShowLogosWindow (void)
+{
+	/* Set network name taken from the phone */
+	GetNetworkInfoEvent(NULL);
+	/* if phone support caller groups, read callerGroups names */
+	if (phoneMonitor.supported & PM_CALLERGROUP) {
+		if (xgnokiiConfig.callerGroups[0] == NULL) {
+			GUI_Refresh(); 
+			GUI_InitCallerGroupsInf ();
+			GUI_RefreshLogosGroupsCombo ();
+		}
+		if (!callersGroupsInitialized) GUI_RefreshLogosGroupsCombo (); 
+		gtk_widget_show(buttonCaller);
+		gtk_widget_show(callerCombo); 
+	} else {
+		/* if not supported, hide widget for handling callerGroups */
+		gtk_widget_hide(buttonCaller);
+		gtk_widget_hide(callerCombo); 
+	}        
 
-  /* Call to reset Startup logo size */
-  LogoTypeEvent(GUI_LogosWindow);
+	/* Call to reset Startup logo size */
+	LogoTypeEvent(GUI_LogosWindow);
+	g_print("width: %i, height: %i\n",bitmap.width, bitmap.height);
+	gtk_widget_show(GUI_LogosWindow);
 
-  gtk_widget_show(GUI_LogosWindow);
+	if (!previewAvailable && showPreviewErrorDialog) {
+		gchar *buf = g_strdup(_("Load preview pixmap error, feature disabled."));
+		gtk_label_set_text(GTK_LABEL(errorDialog.text),buf);
+		gtk_widget_show(errorDialog.dialog);
+		g_free(buf);
 
-  if (!previewAvailable && showPreviewErrorDialog) {
-    gchar *buf = g_strdup(_("Load preview pixmap error, feature disabled."));
-    gtk_label_set_text(GTK_LABEL(errorDialog.text),buf);
-    gtk_widget_show(errorDialog.dialog);
-    g_free(buf);
-
-    showPreviewErrorDialog = 0;
-  }
+		showPreviewErrorDialog = 0;
+	}
 }

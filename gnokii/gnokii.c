@@ -2107,7 +2107,7 @@ static int monitormode(void)
 }
 
 
-static void  PrintDisplayStatus(int Status)
+static void PrintDisplayStatus(int Status)
 {
 	fprintf(stdout, _("Call in progress: %-3s\n"),
 		Status & (1 << DS_Call_In_Progress) ? _("on") : _("off"));

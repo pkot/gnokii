@@ -57,6 +57,8 @@ typedef struct {
 /* Hold main configuration data for xgnokii */
 extern XgnokiiConfig xgnokiiConfig;
 
+extern gint lastfoldercount, foldercount;
+extern char folders[MAX_SMS_FOLDERS][15];
 extern gint max_phonebook_name_length;
 extern gint max_phonebook_number_length;
 extern gint max_phonebook_sim_name_length;

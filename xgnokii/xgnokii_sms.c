@@ -81,7 +81,7 @@ static SendSMSWidget sendSMS = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
 static ErrorDialog errorDialog = {NULL, NULL};
 static InfoDialog infoDialog = {NULL, NULL};
 static QuestMark questMark;
-
+static GtkWidget *treeFolderItem[MAX_SMS_FOLDERS], *subTree;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
@@ -199,160 +199,128 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
 
 static inline void DestroyMsgPtrs (gpointer data)
 {
-  g_free (((MessagePointers *) data)->msgPtr);
-  g_free ((MessagePointers *) data);
+	g_free (((MessagePointers *) data)->msgPtr);
+	g_free ((MessagePointers *) data);
 }
 
-
-static void InsertInboxElement (gpointer d, gpointer userData)
+static int IsValidSMSforFolder (gpointer d, gpointer userData) 
 {
-  GSM_SMSMessage *data = (GSM_SMSMessage *) d;
-  MessagePointers *msgPtrs;
-  SMS_DateTime *dt;
+	GSM_SMSMessage *data = (GSM_SMSMessage *) d;
+	int folder_idx;
 
-  if (data->Type == SMS_Deliver || data->Type == SMS_Delivery_Report)
-  {
-/*    if (data->Type == GST_MT && data->UDHType == GSM_ConcatenatedMessages)
-    {
-      //FIX ME
-
-      msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
-      msgPtrs->count = data->UDH[4];
-      msgPtrs->number = data->UDH[5];
-      msgPtrs->validity = data->Validity;
-      msgPtrs->class = data->Class;
-      strcpy (msgPtrs->sender, data->Sender);
-      msgPtrs->msgPtr = (gint *) g_malloc (msgPtrs->count * sizeof (gint));
-      *(msgPtrs->msgPtr + msgPtrs->number - 1) = data->MessageNumber;
-    }
-    else */
-    {
-      gchar *row[4];
-
-      if (data->Type == SMS_Delivery_Report)
-      {
-        row[0] = g_strdup (_("report"));
-        dt = &(data->SMSCTime);
-      }
-      else if (data->Status)
-      {
-        row[0] = g_strdup (_("read"));
-        dt = &(data->Time);
-      }
-      else
-      {
-        row[0] = g_strdup (_("unread"));
-        dt = &(data->Time);
-      }
-
-      if (dt->Timezone)
-        row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d %c%02d00",
-                                  dt->Day, dt->Month, dt->Year,
-                                  dt->Hour, dt->Minute, dt->Second,
-                                  dt->Timezone > 0 ? '+' : '-', abs (dt->Timezone));
-      else
-        row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d",
-                                  dt->Day, dt->Month, dt->Year,
-                                  dt->Hour, dt->Minute, dt->Second);
-
-      row[2] = GUI_GetName (data->RemoteNumber.number);
-      if (row[2] == NULL)
-        row[2] = data->RemoteNumber.number;
-      row[3] = data->UserData[0].u.Text;
-
-      gtk_clist_append (GTK_CLIST (SMS.smsClist), row);
-      msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
-      msgPtrs->count = msgPtrs->number = 1;
-      msgPtrs->validity = data->Validity.u.Relative;
-      //      msgPtrs->class = data->Class;
-      strcpy (msgPtrs->sender, data->RemoteNumber.number);
-      msgPtrs->msgPtr = (gint *) g_malloc (sizeof (gint));
-      *(msgPtrs->msgPtr) = (int)data->Number;
-      gtk_clist_set_row_data_full (GTK_CLIST (SMS.smsClist), SMS.row_i++,
-                                   msgPtrs, DestroyMsgPtrs);
-      g_free (row[0]);
-      g_free (row[1]);
-    }
-  }
+	if (data->MemoryType) {
+		folder_idx = data->MemoryType / 8;
+		folder_idx--;
+		if (folder_idx == SMS.currentBox) return 1;
+	}
+	else {
+		if ((data->Type == SMS_Deliver && !SMS.currentBox) ||
+		(data->Type == SMS_Delivery_Report && !SMS.currentBox) || 
+		(data->Type == SMS_Submit && SMS.currentBox)) return 1;
+	}
+	return 0;
 }
+		
 
-
-static inline void RefreshInbox (void)
+static void InsertFolderElement (gpointer d, gpointer userData) 
 {
-  gtk_clist_freeze (GTK_CLIST (SMS.smsClist));
+	GSM_SMSMessage *data = (GSM_SMSMessage *) d;
+	MessagePointers *msgPtrs;
+	SMS_DateTime *dt = NULL;
+	gint valid;
 
-  gtk_clist_clear (GTK_CLIST (SMS.smsClist));
+	if ((valid = IsValidSMSforFolder(d, userData))) {
 
-  SMS.row_i = 0;
-  g_slist_foreach (phoneMonitor.sms.messages, InsertInboxElement, (gpointer) NULL);
+/*		if (data->Type == GST_MT && data->UDHType == GSM_ConcatenatedMessages) {
+//FIXME
 
-  gtk_clist_sort (GTK_CLIST (SMS.smsClist));
-  gtk_clist_thaw (GTK_CLIST (SMS.smsClist));
+			msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
+			msgPtrs->count = data->UDH[4];
+			msgPtrs->number = data->UDH[5];
+			msgPtrs->validity = data->Validity;
+			msgPtrs->class = data->Class;
+			strcpy (msgPtrs->sender, data->Sender);
+			msgPtrs->msgPtr = (gint *) g_malloc (msgPtrs->count * sizeof (gint));
+			*(msgPtrs->msgPtr + msgPtrs->number - 1) = data->MessageNumber;
+		}
+		else { */
+		gchar *row[4];
+		if (data->Type == SMS_Delivery_Report) {
+			if (data->Status == SMS_Read) 
+				row[0] = g_strdup (_("read report"));
+			else 
+				row[0] = g_strdup (_("unread report"));
+			dt = &(data->SMSCTime);
+		} else if (data->Type == SMS_Picture) {
+			if (data->Status == SMS_Read) row[0] = g_strdup (_("seen picture"));
+			if (data->Status == SMS_Unread) row[0] = g_strdup (_("unseen picture"));  
+			if (data->Status == SMS_Sent) row[0] = g_strdup (_("sent picture"));  
+			if (data->Status == SMS_Unsent) row[0] = g_strdup (_("not sent picture"));
+		} else {
+			if (data->Status == SMS_Read) row[0] = g_strdup (_("read"));
+			if (data->Status == SMS_Unread) row[0] = g_strdup (_("unread"));  
+			if (data->Status == SMS_Sent) row[0] = g_strdup (_("sent"));  
+			if (data->Status == SMS_Unsent) row[0] = g_strdup (_("not sent"));
+			dt = &(data->Time);
+		}
+
+		if (dt) {
+			if (dt->Timezone)
+				row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d %c%02d00",
+						dt->Day, dt->Month, dt->Year,
+						dt->Hour, dt->Minute, dt->Second,
+						dt->Timezone > 0 ? '+' : '-', abs (dt->Timezone));
+			else
+				row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d",
+						dt->Day, dt->Month, dt->Year,
+						dt->Hour, dt->Minute, dt->Second);
+		}
+
+		row[2] = GUI_GetName (data->RemoteNumber.number);
+		if (row[2] == NULL) row[2] = data->RemoteNumber.number;
+		if (data->Type == SMS_Picture) 
+			row[3] = g_strdup(_("Picture Message"));
+		else
+			row[3] = data->UserData[0].u.Text;
+		gtk_clist_append (GTK_CLIST (SMS.smsClist), row);
+		msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
+		msgPtrs->count = msgPtrs->number = 1;
+		msgPtrs->validity = data->Validity.u.Relative;
+/*		msgPtrs->class = data->Class; */
+		strcpy (msgPtrs->sender, data->RemoteNumber.number);
+		msgPtrs->msgPtr = (gint *) g_malloc (sizeof (gint));
+		*(msgPtrs->msgPtr) = (int)data->Number;
+		gtk_clist_set_row_data_full (GTK_CLIST (SMS.smsClist), SMS.row_i++,
+						msgPtrs, DestroyMsgPtrs);
+		g_free (row[0]);
+		if (row[1]) g_free (row[1]);
+	}
 }
 
-
-static void InsertOutboxElement (gpointer d, gpointer userData)
+static inline void RefreshFolder(void)
 {
-  GSM_SMSMessage *data = (GSM_SMSMessage *) d;
-  MessagePointers *msgPtrs;
+	gtk_clist_freeze (GTK_CLIST (SMS.smsClist));
 
-  if (data->Type == SMS_Submit)
-  {
-    gchar *row[4];
+	gtk_clist_clear (GTK_CLIST (SMS.smsClist));
 
-    if (data->Status)
-      row[0] = g_strdup (_("sent"));
-    else
-      row[0] = g_strdup (_("unsent"));
+	SMS.row_i = 0;
+	g_slist_foreach (phoneMonitor.sms.messages, InsertFolderElement, (gpointer) NULL);
 
-    row[1] = row[2] = g_strdup ("");
-    row[3] = data->UserData[0].u.Text;
-
-    gtk_clist_append( GTK_CLIST (SMS.smsClist), row);
-    msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
-    msgPtrs->count = msgPtrs->number = 1;
-    msgPtrs->validity = data->Validity.u.Relative;
-    //    msgPtrs->class = data->Class;
-    strcpy (msgPtrs->sender, data->RemoteNumber.number);
-    msgPtrs->msgPtr = (gint *) g_malloc (sizeof (gint));
-    *(msgPtrs->msgPtr) = (int)data->Number;
-    gtk_clist_set_row_data_full (GTK_CLIST (SMS.smsClist), SMS.row_i++,
-                                 msgPtrs, DestroyMsgPtrs);
-    g_free (row[0]);
-    g_free (row[1]);
-  }
+	gtk_clist_sort (GTK_CLIST (SMS.smsClist));
+	gtk_clist_thaw (GTK_CLIST (SMS.smsClist));
 }
-
-
-static inline void RefreshOutbox (void)
-{
-  gtk_clist_freeze (GTK_CLIST (SMS.smsClist));
-  gtk_clist_clear (GTK_CLIST (SMS.smsClist));
-
-  SMS.row_i = 0;
-  g_slist_foreach (phoneMonitor.sms.messages, InsertOutboxElement, (gpointer) NULL);
-
-  gtk_clist_sort (GTK_CLIST (SMS.smsClist));
-  gtk_clist_thaw (GTK_CLIST (SMS.smsClist));
-}
-
 
 inline void GUI_RefreshMessageWindow (void)
 {
-  if (!GTK_WIDGET_VISIBLE (GUI_SMSWindow))
-    return;
-
-  if (SMS.currentBox)
-    RefreshOutbox ();
-  else
-    RefreshInbox ();
+	if (!GTK_WIDGET_VISIBLE (GUI_SMSWindow)) return;
+	RefreshFolder ();
 }
 
 
 static void SelectTreeItem (GtkWidget *item, gpointer data)
 {
-  SMS.currentBox = GPOINTER_TO_INT (data);
-  GUI_RefreshMessageWindow ();
+	SMS.currentBox = GPOINTER_TO_INT (data);
+	GUI_RefreshMessageWindow ();
 }
 
 
@@ -364,7 +332,7 @@ static void ClickEntry (GtkWidget      *clist,
 {
   gchar *buf;
 
-  /* FIXME - We must mark SMS as readed */
+  /* FIXME - We must mark SMS as read */
   gtk_text_freeze (GTK_TEXT (SMS.smsText));
 
   gtk_text_set_point (GTK_TEXT (SMS.smsText), 0);
@@ -396,8 +364,25 @@ static void ClickEntry (GtkWidget      *clist,
 
 inline void GUI_ShowSMS (void)
 {
-  gtk_widget_show (GUI_SMSWindow);
-  GUI_RefreshMessageWindow ();
+	gint i, j;
+	GUI_InitSMSFolders();
+	
+	for (i=0; i < foldercount ; i++) {
+		if (i > lastfoldercount - 1) {
+			treeFolderItem[i] = gtk_tree_item_new_with_label (_(folders[i]));
+			gtk_tree_append (GTK_TREE (subTree), treeFolderItem[i]);
+			gtk_signal_connect (GTK_OBJECT (treeFolderItem[i]), "select",
+					GTK_SIGNAL_FUNC (SelectTreeItem), GINT_TO_POINTER (i));
+			gtk_widget_show (treeFolderItem[i]);
+		} 
+		else {
+			gtk_widget_set_name(treeFolderItem[i],_(folders[i])); 
+		}
+	}
+	for (j = i + 1; j < lastfoldercount; j++) gtk_widget_hide (treeFolderItem[j-1]); 
+	lastfoldercount = foldercount;
+	gtk_widget_show (GUI_SMSWindow);
+	GUI_RefreshMessageWindow ();
 }
 
 
@@ -617,21 +602,20 @@ static void SaveToMailbox (void)
 
 static inline void RefreshSMSStatus (void)
 {
-  gchar *buf;
-  guint l, m;
+	gchar *buf;
+	guint l, m;
 
-  l = gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText));
+	l = gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText));
 
-  if (l <= GSM_MAX_SMS_LENGTH)
-    buf = g_strdup_printf ("%d/1", l);
-  else
-  {
-    m = l % 153;
-    buf = g_strdup_printf ("%d/%d", l > 0 && !m ? 153 : m, l == 0 ? 1 : ((l - 1) / 153) + 1);
-  }
+	if (l <= GSM_MAX_SMS_LENGTH)
+		buf = g_strdup_printf ("%d/1", l);
+	else {
+		m = l % 153;
+		buf = g_strdup_printf ("%d/%d", l > 0 && !m ? 153 : m, l == 0 ? 1 : ((l - 1) / 153) + 1);
+	}
 
-  gtk_frame_set_label (GTK_FRAME (sendSMS.status), buf);
-  g_free (buf);
+	gtk_frame_set_label (GTK_FRAME (sendSMS.status), buf);
+	g_free (buf);
 }
 
 
@@ -639,19 +623,17 @@ static inline gint RefreshSMSLength (GtkWidget   *widget,
                                      GdkEventKey *event,
                                      gpointer     callback_data)
 {
-  RefreshSMSStatus ();
-  if (GTK_EDITABLE (widget)->editable == FALSE)
-    return (FALSE);
-  if (event->keyval == GDK_BackSpace || event->keyval == GDK_Clear ||
-      event->keyval == GDK_Insert || event->keyval == GDK_Delete ||
-      event->keyval == GDK_Home || event->keyval == GDK_End ||
-      event->keyval == GDK_Left || event->keyval == GDK_Right ||
-      event->keyval == GDK_Up || event->keyval == GDK_Down ||
-      event->keyval == GDK_Return ||
-      (event->keyval >= 0x20 && event->keyval <= 0xFF))
-    return (TRUE);
+	RefreshSMSStatus ();
+	if (GTK_EDITABLE (widget)->editable == FALSE) return (FALSE);
+	if (event->keyval == GDK_BackSpace || event->keyval == GDK_Clear ||
+		event->keyval == GDK_Insert || event->keyval == GDK_Delete ||
+		event->keyval == GDK_Home || event->keyval == GDK_End ||
+		event->keyval == GDK_Left || event->keyval == GDK_Right ||
+		event->keyval == GDK_Up || event->keyval == GDK_Down ||
+		event->keyval == GDK_Return ||
+		(event->keyval >= 0x20 && event->keyval <= 0xFF))  return (TRUE);
   
-  return (FALSE);
+	return (FALSE);
 }
 
 
@@ -1538,7 +1520,7 @@ void GUI_CreateSMSWindow (void)
   GtkWidget *toolbar;
   GtkWidget *scrolledWindow;
   GtkWidget *vpaned, *hpaned;
-  GtkWidget *tree, *treeSMSItem, *treeInboxItem, *treeOutboxItem, *subTree;
+  GtkWidget *tree, *treeSMSItem; /* , *subTree; */
   SortColumn *sColumn;
   GdkColormap *cmap;
   register gint i;
@@ -1630,18 +1612,6 @@ void GUI_CreateSMSWindow (void)
   gtk_tree_set_selection_mode (GTK_TREE (subTree), GTK_SELECTION_SINGLE);
   gtk_tree_set_view_mode (GTK_TREE (subTree), GTK_TREE_VIEW_ITEM);
   gtk_tree_item_set_subtree (GTK_TREE_ITEM (treeSMSItem), subTree);
-
-  treeInboxItem = gtk_tree_item_new_with_label (_("Inbox"));
-  gtk_tree_append (GTK_TREE (subTree), treeInboxItem);
-  gtk_signal_connect (GTK_OBJECT (treeInboxItem), "select",
-                      GTK_SIGNAL_FUNC (SelectTreeItem), GINT_TO_POINTER (0));
-  gtk_widget_show (treeInboxItem);
-
-  treeOutboxItem = gtk_tree_item_new_with_label (_("Outbox"));
-  gtk_tree_append (GTK_TREE (subTree), treeOutboxItem);
-  gtk_signal_connect (GTK_OBJECT (treeOutboxItem), "select",
-                      GTK_SIGNAL_FUNC (SelectTreeItem), GINT_TO_POINTER (1));
-  gtk_widget_show (treeOutboxItem);
 
   scrolledWindow = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_set_usize (scrolledWindow, 75, 80);

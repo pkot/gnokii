@@ -36,6 +36,7 @@
 
 #include "misc.h"
 #include "gsm-common.h"
+#include "gsm-statemachine.h"
 #include "gsm-api.h"
 #include "cfgreader.h"
 #include "phones/nk7110.h"
@@ -108,6 +109,9 @@ gint max_phonebook_name_length;
 gint max_phonebook_number_length;
 gint max_phonebook_sim_name_length;
 gint max_phonebook_sim_number_length;
+char folders[MAX_SMS_FOLDERS][15];
+gint foldercount = 0, lastfoldercount = 0;
+static GSM_Statemachine state;
 
 /* Local variables */
 static char *DefaultXGnokiiDir = XGNOKIIDIR;
@@ -190,48 +194,45 @@ static inline void Help1 (GtkWidget *w, gpointer data)
 
 void GUI_InitCallerGroupsInf (void)
 {
-  D_CallerGroup *cg;
-  PhoneEvent *e;
-  register gint i;
+	D_CallerGroup *cg;
+	PhoneEvent *e;
+	register gint i;
 
-  if (CallersGroupsInitialized)
-    return;
+	if (CallersGroupsInitialized) return;
 
-  gtk_label_set_text (GTK_LABEL (infoDialog.text), _("Reading caller groups names ..."));
-  gtk_widget_show_now (infoDialog.dialog);
-  GUI_Refresh ();
+	gtk_label_set_text (GTK_LABEL (infoDialog.text), _("Reading caller groups names ..."));
+	gtk_widget_show_now (infoDialog.dialog);
+	GUI_Refresh ();
 
-  xgnokiiConfig.callerGroups[0] = g_strndup( _("Familly"), MAX_CALLER_GROUP_LENGTH);
-  xgnokiiConfig.callerGroups[1] = g_strndup( _("VIP"), MAX_CALLER_GROUP_LENGTH);
-  xgnokiiConfig.callerGroups[2] = g_strndup( _("Friends"), MAX_CALLER_GROUP_LENGTH);
-  xgnokiiConfig.callerGroups[3] = g_strndup( _("Colleagues"), MAX_CALLER_GROUP_LENGTH);
-  xgnokiiConfig.callerGroups[4] = g_strndup( _("Other"), MAX_CALLER_GROUP_LENGTH);
-  xgnokiiConfig.callerGroups[5] = g_strndup( _("No group"), MAX_CALLER_GROUP_LENGTH);
+	xgnokiiConfig.callerGroups[0] = g_strndup( _("Family"), MAX_CALLER_GROUP_LENGTH);
+	xgnokiiConfig.callerGroups[1] = g_strndup( _("VIP"), MAX_CALLER_GROUP_LENGTH);
+	xgnokiiConfig.callerGroups[2] = g_strndup( _("Friends"), MAX_CALLER_GROUP_LENGTH);
+	xgnokiiConfig.callerGroups[3] = g_strndup( _("Colleagues"), MAX_CALLER_GROUP_LENGTH);
+	xgnokiiConfig.callerGroups[4] = g_strndup( _("Other"), MAX_CALLER_GROUP_LENGTH);
+	xgnokiiConfig.callerGroups[5] = g_strndup( _("No group"), MAX_CALLER_GROUP_LENGTH);
 
-  if (phoneMonitor.supported & PM_CALLERGROUP)
-    for (i = 0; i < 5; i++)
-    {
-      cg = (D_CallerGroup *) g_malloc (sizeof (D_CallerGroup));
-      cg->number = i;
-      e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-      e->event = Event_GetCallerGroup;
-      e->data = cg;
-      GUI_InsertEvent (e);
-      pthread_mutex_lock (&callerGroupMutex);
-      pthread_cond_wait (&callerGroupCond, &callerGroupMutex);
-      pthread_mutex_unlock (&callerGroupMutex);
+	if (phoneMonitor.supported & PM_CALLERGROUP) {
+		for (i = 0; i < GSM_MAX_CALLER_GROUPS; i++) {
+			cg = (D_CallerGroup *) g_malloc (sizeof (D_CallerGroup));
+			cg->number = i;
+			e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
+			e->event = Event_GetCallerGroup;
+			e->data = cg;
+			GUI_InsertEvent (e);
+			pthread_mutex_lock (&callerGroupMutex);
+			pthread_cond_wait (&callerGroupCond, &callerGroupMutex);
+			pthread_mutex_unlock (&callerGroupMutex);
 
-      if (*cg->text != '\0' && cg->status == GE_NONE)
-      {
-        g_free (xgnokiiConfig.callerGroups[i]);
-        xgnokiiConfig.callerGroups[i] = g_strndup (cg->text, MAX_CALLER_GROUP_LENGTH);
-      }
-      g_free (cg);
-    }
-
-  CallersGroupsInitialized = TRUE;
-  gtk_widget_hide (infoDialog.dialog);
-  GUIEventSend (GUI_EVENT_CALLERS_GROUPS_CHANGED);
+			if (*cg->text != '\0' && cg->status == GE_NONE) {
+				g_free (xgnokiiConfig.callerGroups[i]);
+				xgnokiiConfig.callerGroups[i] = g_strndup (cg->text, MAX_CALLER_GROUP_LENGTH);
+			}
+			g_free (cg);
+		}
+	}
+	CallersGroupsInitialized = TRUE;
+	gtk_widget_hide (infoDialog.dialog);
+	GUIEventSend (GUI_EVENT_CALLERS_GROUPS_CHANGED);
 }
 
 
