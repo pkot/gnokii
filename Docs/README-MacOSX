@@ -2,9 +2,8 @@ README for MacOS X
 ==================
 
 Status
-The MacOS X port of Gnokii currently supports only Gnokii for the Nokia 
-6210 phone. Other phones in the 7110 family are likely to work also with 
-this version.
+The MacOS X port of Gnokii has successfully been tested on some phones.
+I expect all phones supported by gnokii to work (famous last words...)
 
 XGnokii, and others
 The graphical X version, the AT-emulater and virtual device are not ported
@@ -13,12 +12,24 @@ in progress. Of course the effort of porting only makes sense if there is a
 need. Do you have the need for extended MacOS X functionality don't ask me
 but let us all know on the Gnokii mailing list.
 
-Hardware
-So far Gnokii has only been tested with a Keyspan USA-28Xb USB to Serial
-adapter and a Nokia dlr-3p cable.
+Successfully tested hardware
+USB to Serial adapters:
+ - Keyspan USA-28Xb
+ - BAFO technologies BF-810
 
-IrDA 
-The MacOS X version *does not* work with IrDA (and probably never will). 
+Cables:
+ - dlr3p
+
+Phones:
+ - 3410
+ - 6210
+ - 6310
+
+Please report any new hardware not in this list on the Gnokii mailing list
+<gnokii-users@nongnu.org>
+
+IrDA
+The MacOS X version *does not* work with IrDA (and probably never will).
 This is not a problem of Gnokii but a problem with Apple. The MacOS X IrDA
 protocol stack is completely undocumented thus unusable. Unless they change
 this or someone ports the IrDA stack from linux we're out of luck, sorry.
@@ -31,16 +42,18 @@ connection = dlr3p
 #require_dcd = 1
 use_locking = no
 
-Important: 
+Notes:
 Always set "use_locking = no" otherwise gnokii won't work.
+USB to serial adapters always introduce two new device files in /dev per
+serial port. Use the one starting with "cu.".
 
 Compiling
 =========
 
 This was only tested under 10.2. May not work with older versions. The
-base directory of gnokii will be called <gnokii_dir>. 
+base directory of gnokii will be called <gnokii_dir>.
 
-1. get and install fink (http://fink.sourceforge.net). Apart from the base 
+1. get and install fink (http://fink.sourceforge.net). Apart from the base
 package (= the installer) nothing is needed.
 
 2. copy the contents of /sw/share/aclocal to /usr/share/aclocal. You need
@@ -50,7 +63,7 @@ to be root to do this
 
 4. call 'sh autogen.sh --disable-shared --disable-nls'
 
-5. call 'make' 
+5. call 'make'
 
 If after some time you now see
 "##########################################
@@ -60,14 +73,14 @@ If after some time you now see
  ### now. Otherwise gnokii may not work.
  ###
  ##########################################"
- 
+
 gnokii should be built OK
 
 
 Disclaimer
 ==========
 
-No warranty, you are on your own. If you have questions or remarks, 
+No warranty, you are on your own. If you have questions or remarks,
 please let me know on my email address mentioned below.
 
 Author:	Ruotger Skupin (Ruotger.Skupin@berlin.de)
