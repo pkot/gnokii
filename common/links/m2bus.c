@@ -238,6 +238,8 @@ static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine 
 
 					m2bus_tx_send_ack(i->message_buffer[i->message_length], state);
 
+					sm_incoming_acknowledge(state);
+
 					/* Finally dispatch if ready */
 
 					sm_incoming_function(i->message_type, i->message_buffer, i->message_length, state);

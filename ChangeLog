@@ -13,6 +13,7 @@
     o fix inclusion of snprintf and vsnprintf prototype definitions 
                                                   (Marcus Godehardt)
     o sys/filio.h required on Solaris systems       (BORBELY Zoltan)
+    o retransmission based solely on timeouts       (BORBELY Zoltan)
  * build system updated
     o avoid problems with recursive loop when installing
       locales in xgnokii                          (Malte Schünemann)
