@@ -18,6 +18,8 @@
     o SendSMS was moved from nk7110.c to nokia.c     (BORBELY Zoltan)
     o change MessageCenter structure; update all drivers to
       reflect this change                                 (Pawel Kot)
+    o change the type of the ValidityIndicator field in
+      GSM_SMSMessage                                      (Pawel Kot)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
     o added Terminate to GOP functions

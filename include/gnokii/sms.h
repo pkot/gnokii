@@ -454,7 +454,7 @@ typedef struct {
 	unsigned char UserData[GSM_MAX_LONG_LENGTH];   /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
 	int UserDataLength;                            /* Length of just previous field */
 
-	bool ValidityIndicator;
+	SMS_ValidityPeriodFormat ValidityIndicator;
 	unsigned char Validity[MAX_VALIDITY_LENGTH];   /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
 
 
