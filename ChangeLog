@@ -5,6 +5,8 @@
     o mention that we support Bluetooth            (Marcel Holtmann)
  * portability updates
     o stdlib.h included from compat.h                    (Pawel Kot)
+ * gnokii updates
+    o GetSMSCenter called for sendringtone          (BORBELY Zoltan)
 
 0.5.0rc4
 ========

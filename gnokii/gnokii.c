@@ -3795,6 +3795,19 @@ static int sendringtone(int argc, char *argv[])
 	else
 		sms.remote.type = GN_GSM_NUMBER_Unknown;
 
+	/* Get the SMS Center */
+	if (!sms.smsc.number[0]) {
+		data.message_center = calloc(1, sizeof(gn_sms_message_center));
+		data.message_center->id = 1;
+		if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
+			strcpy(sms.smsc.number, data.message_center->smsc.number);
+			sms.smsc.type = data.message_center->smsc.type;
+		}
+		free(data.message_center);
+	}
+
+	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
+
 	/* Send the message. */
 	data.sms = &sms;
 	error = gn_sms_send(&data, &state);
