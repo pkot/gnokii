@@ -1,5 +1,15 @@
-Getting gnokii to work with a 6210 under linux
-==============================================
+Getting gnokii to work with a modern phone over IrDA under linux
+================================================================
+
+The following guide explains how to get a modern phone like a nokia 7110, 
+nokia 6210, siemens s25, ericsson t39 etc to work with gnokii. The guide 
+is divided into 3 parts: kernel configuration and setup, checking the
+connection and gnokii configuration.
+
+This guide is not for nokia 6110/6150. See gnokii-ir-howto instead.
+
+Part 1 Kernel configuration and setup
+=====================================
 
 - Compile your kernel with IrDA support for your chipset.
 
@@ -31,6 +41,13 @@ CONFIG_NSC_FIR=m
   Then just irattach irda0 -s 1 which *should* load all the modules you need
   and start it doing irda discovery.
   The modules I have loaded at this point are: nsc-ircc and irda.
+
+Part 2 Checking the connection
+==============================
+
+On some distributions irdadump is broken and segfaults. If this happens
+skip the next two steps and go to discovery.
+
 - Run irdadump to see that it is indeed attempting to discover something.
   You should see messages like:
 15:24:07.380360 xid:cmd 0c57083d > ffffffff S=6 s=0 (14)
@@ -52,6 +69,27 @@ CONFIG_NSC_FIR=m
 15:26:07.830293 xid:cmd 0c57083d > ffffffff S=6 s=5 (14)
 15:26:07.920283 xid:cmd 0c57083d > ffffffff S=6 s=* langly hint=0400 [ Computer
 ] (22)
+- With the phone still in front of your infrared port, check if the discovery
+  of the infrared port works. Do a 
+  bash-2.03$ cat /proc/net/irda/discovery
+
+  a response could be:
+
+  IrLMP: Discovery log:
+
+  nickname: T39, hint: 0x9124, saddr: 0xe4fe8166, daddr: 0x48611661
+
+  If this doesn't work try if discovery is on:
+  bash-2.03$ cat /proc/sys/net/irda/discovery
+  this should give:
+  1
+  if it returns:
+  0
+  check if irattach is running:
+  bash-2.03$ ps aux|grep iratt
+  a possible return is:
+  root       271  0.0  0.0  1288  192 ?        S    20:49   0:00 irattach /dev/ttyS1
+  if you don't see the irattach process, go back to kernel configuration.
 - Now try using ircomm to talk to the phone.  Try minicom /dev/ircomm0 (you
   may need to setup a default profile for this port as the root user with
   minicom -s /dev/ircomm0).
@@ -64,11 +102,27 @@ alias char-major-161 ircomm-tty
   Debian testing/unstable gets this right.
   If these don't work you may need to load ircomm and ircomm-tty manually.
 - minicom /dev/ircomm0 should now work and AT commands should function.
-- With a .gnokiirc modified as follows:
+  simply type the following in the terminal program:
+  AT<CR>
+  you get the response:
+  OK
+- If minicom blocks, try a different terminal program. On my box minicom works
+  perfect with a serial cable but not with IrDA. seyon works with both, cable
+  and IrDA.
+
+Part 3 gnokii configuration
+===========================
+
+Depending on your phone, you need to set some gnokii options. for a nokia 6210
+or a nokia 7110 you would set the following in .gnokiirc:
 	port = /dev/ircomm0
 	model = 6210
 	connection = irda
-  gnokii --monitor should now function.
+For a siemens or a ericsson phone the following should work:
+        port = /dev/ircomm0
+        model = AT
+        connection = serial
+gnokii --monitor should now function.
 
 	[huggie@langly ~]$ gnokii --monitor
 	Entering monitor mode...
@@ -84,4 +138,10 @@ alias char-major-161 ircomm-tty
   that line, recompile and try again.
 
 
+Credits
+=======
+
+Initial version by:
 Simon Huggins <huggie-gnokii@earth.li>
+small enhancements by:
+Manfred Jonsson	<manfred.jonsson@gmx.de>
