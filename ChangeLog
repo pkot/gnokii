@@ -17,6 +17,7 @@
       install-sh, mkinstalldirs                          (Pawel Kot)
     o fix vCalendar file reading: not only alpha chars may be in
       the body, correctly use snprintf                   (Pawel Kot)
+    o *.bmp is not necessarily a startup logo                (Polik)
  * Build system fixes
     o fix a stupid bug in configure that made configure not detect
       many functions/types when user didn't explicitely give

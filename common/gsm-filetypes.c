@@ -607,11 +607,6 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 	bool first_white;
 	int w, h, pos, y, x, i, sizeimage;
 
-	bitmap->type = GN_BMP_StartupLogo;
-	bitmap->width = 84;
-	bitmap->height = 48;
-	bitmap->size = bitmap->width * bitmap->height / 8;
-
 	gn_bmp_clear(bitmap);
 
 	fread(buffer, 1, 34, file); /* required part of header */
@@ -619,6 +614,9 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 	h = buffer[22] + 256 * buffer[21]; /* height of image in the file */
 	w = buffer[18] + 256 * buffer[17]; /* width of image in the file */
 	dprintf("Image Size in BMP file: %dx%d\n", w, h);
+	bitmap->width = w;
+	bitmap->height = h;
+	bitmap->size = bitmap->width * bitmap->height / 8;
 
 	dprintf("Number of colors in BMP file: ");
 	switch (buffer[28]) {
