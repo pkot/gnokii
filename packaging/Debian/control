@@ -1,14 +1,62 @@
 Source: gnokii
 Section: comm
 Priority: optional
-Build-Depends: debhelper, libc6-dev, xlibs-dev, xutils, libglib1.2-dev, libgtk1.2-dev, libbluetooth1-dev, autotools-dev (>=20020621)
-Maintainer: Erik Rossen (Linux consultant) <rossen@freesurf.ch>
-Standards-Version: 3.1.0.0
+Maintainer: Bradley Marshall <brad@humbug.org.au>
+Build-Depends: debhelper (>> 3.0.0), xlibs-dev, xutils, libglib1.2-dev, libgtk1.2-dev, gettext, flex, libmysqlclient10-dev, postgresql-dev, autotools-dev (>=20020621)
+Standards-Version: 3.6.1.0
 
 Package: gnokii
 Architecture: any
-Depends: adduser, ${shlibs:Depends}
-Description: Linux/Unix tool suite for Nokia mobile phones
- Gnokii is a Linux/Unix tool suite and (eventually) modem/fax driver
- for Nokia mobile phones, released under the GPL.
+Depends: ${shlibs:Depends}, liblockfile1, timeout
+Conflicts: smstools
+Description: Datasuite for Nokia mobile phones (console & X)
+ Gnokii is a suite of programs linked against a backend library that allows
+ communication with Nokia phones. It current supports the Nokia 6130, 6150,
+ 6190, 5110, 5130, 5190, 3210, 3310, 3330, 8210, 7110, 6210, 6250, 6310, 6510,
+ and AT capable phones.
 
+Package: gnokii-smsd
+Architecture: any
+Depends: ${shlibs:Depends}, gnokii (= ${Source-Version})
+Description: SMS Daemon for Nokia mobile phones
+ Gnokii is a suite of programs linked against a backend library that allows
+ communication with Nokia phones. It current supports the Nokia 6130, 6150,
+ 6190, 5110, 5130, 5190, 3210, 3310, 3330, 8210, 7110, 6210, 6250, 6310, 6510,
+ and AT capable phones.
+ .
+ The SMSD (SMS daemon) handles automated sending and receiving of short messages
+ using an SQL backend. It is designed to use modules (plugins) to work with the
+ SQL server, and shares Gnokii's runtime configuration and libraries.
+ .
+ This package contains the actual daemon. You will need to install the
+ appropriate module packages to add support for a particular RDBMS.
+
+Package: gnokii-smsd-mysql
+Architecture: any
+Depends: ${shlibs:Depends}, gnokii-smsd (= ${Source-Version})
+Description: SMSD plugin for the MySQL RDBMS
+ Gnokii is a suite of programs linked against a backend library that allows
+ communication with Nokia phones. It current supports the Nokia 6130, 6150,
+ 6190, 5110, 5130, 5190, 3210, 3310, 3330, 8210, 7110, 6210, 6250, 6310, 6510,
+ and AT capable phones.
+ .
+ The SMSD (SMS daemon) handles automated sending and receiving of short messages
+ using an SQL backend. It is designed to use modules (plugins) to work with the
+ SQL server, and shares Gnokii's runtime configuration and libraries.
+ .
+ This package provides support for the MySQL RDBMS.
+
+Package: gnokii-smsd-pgsql
+Architecture: any
+Depends: ${shlibs:Depends}, gnokii-smsd (= ${Source-Version})
+Description: SMSD plugin for the PostgreSQL RDBMS
+ Gnokii is a suite of programs linked against a backend library that allows
+ communication with Nokia phones. It current supports the Nokia 6130, 6150,
+ 6190, 5110, 5130, 5190, 3210, 3310, 3330, 8210, 7110, 6210, 6250, 6310, 6510,
+ and AT capable phones.
+ .
+ The SMSD (SMS daemon) handles automated sending and receiving of short messages
+ using an SQL backend. It is designed to use modules (plugins) to work with the
+ SQL server, and shares Gnokii's runtime configuration and libraries.
+ .
+ This package provides support for the PostgreSQL RDBMS.

@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+if getent group gnokii; then
+    /usr/sbin/groupdel gnokii
+else
+    echo "Group 'gnokii' not found, not deleting..."
+fi
+
+#DEBHELPER#

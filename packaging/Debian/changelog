@@ -1,3 +1,9 @@
+gnokii (0.5.10pre) unstable; urgency=low
+
+  * sync with Debian mainstream package
+
+ -- Pawel Kot <pkot@linuxnews.pl>  Tue, 20 Jan 2004 23:26:51 +0100
+
 gnokii (0.5.9) unstable; urgency=low
 
   * upgrade to 0.5.9
