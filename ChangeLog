@@ -6,6 +6,7 @@
                                                       (Ville Skyttä)
  * translations updates
     o Estonian translation updated                   (Hans Motshärg)
+    o added French translation                   (Olivier Kaloudoff)
  * 3110 series updates
     o Phonebook support added                        (Osma Suominen)
     o Prevent race condition in getsms code          (Osma Suominen)

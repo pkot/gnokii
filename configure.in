@@ -25,7 +25,7 @@ AC_CHECK_PROGS(MAKE, gmake make)
 AC_PROG_INSTALL
 
 dnl ======================== Default setting
-ALL_LINGUAS="cs de et fi nl sk pl it sl"
+ALL_LINGUAS="cs de et fi nl sk pl it sl fr"
 AC_CHECK_HEADERS(libintl.h)
 AM_GNU_GETTEXT
 if test x$USE_NLS = xyes -a x$ac_cv_header_libintl_h != xyes; then
