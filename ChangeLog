@@ -20,6 +20,7 @@
     o add EnterSecurityCode (only PIN)                 (Markus Plail)
     o add IncomingSubscribe/Subscribe                  (Markus Plail)
     o add IncomingCommStatus                           (Markus Plail)
+    o return NULL if no SMSC name is found             (Markus Plail)
  * 7110 series updates
     o move GetUnreadMessages from gsm-sms.c            (Markus Plail)
     o change GOP7110_* to GOP_*                        (Markus Plail)
@@ -27,6 +28,7 @@
       of type SMS_Submit                               (Markus Plail)
     o change behaviour of DeleteSMS to be consistant with GetSMS
                                                        (Markus Plail)
+    o return NULL if no SMSC name is found             (Markus Plail)
  * gnokii fixes:
     o change deletesms() to reflect changes in API     (Markus Plail)
  * xgnokii fixes:
@@ -35,6 +37,7 @@
     o fix RF/battery level display for 6110 series     (Markus Plail)
     o make SMS stuff work again                        (Markus Plail)
     o rename DeleteSMS to not conflict with new API    (Markus Plail)
+    o make SMS sending work again                      (Markus Plail)
  * libsms fixes
     o fix GSM_ReadSMSnoValidate                        (Markus Plail)
     o remove GetUnreadMessages and friends             (Markus Plail)
