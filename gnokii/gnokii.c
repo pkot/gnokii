@@ -567,7 +567,7 @@ int main(int argc, char *argv[])
     { OPT_NETMONITOR,        1, 1, 0 },
     { OPT_SENDDTMF,          1, 1, 0 },
     { OPT_SETLOGO,           1, 3, 0 },
-    { OPT_GETLOGO,           1, 3, 0 },
+    { OPT_GETLOGO,           2, 3, 0 },
     { OPT_RESET,             0, 1, 0 },
 
     { 0, 0, 0, 0 },
@@ -1647,19 +1647,25 @@ int getlogo(char *argv[])
   if (strcmp(argv[1],"op")==0)
     bitmap.type=GSM_OperatorLogo;
   if (strcmp(argv[1],"caller")==0) {
+    /* There is caller group number missing in argument list. */
+    if (!argv[2]) {
+      usage();
+      exit(-1);
+    }
     bitmap.number=argv[2][0]-'0';
     bitmap.type=GSM_CallerLogo;
     if ((bitmap.type<0)||(bitmap.type>9)) bitmap.type=0;
     }
   if (strcmp(argv[1],"startup")==0)
     bitmap.type=GSM_StartupLogo;
-  
+
   if (bitmap.type!=GSM_None) {
     fprintf(stdout, _("Getting Logo.\n"));
     if (GSM->GetBitmap(&bitmap)==GE_NONE){
       GSM_SaveBitmapFile(argv[0], &bitmap);
     }
   }
+
   GSM->Terminate();
 
   return 0;

@@ -32,3 +32,5 @@
 * Mon Mar 20 20:54:35 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - setdatetime can be used without args (Marcin)
 
+* Sun Apr  2 15:18:10 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- arguments checking for getlogo
