@@ -260,7 +260,7 @@ gn_error sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_statemach
 	int retry;
 	gn_error err;
 
-	for(retry = 0; retry < 3; retry++) {
+	for (retry = 0; retry < 3; retry++) {
 		err = __sm_block_timeout(waitfor, t, data, state);
 		if (err == GN_ERR_NONE || err != GN_ERR_TIMEOUT) return err;
 		if (retry < 2)
@@ -274,15 +274,16 @@ gn_error sm_block(int waitfor, gn_data *data, struct gn_statemachine *state)
 	return sm_block_timeout(waitfor, 40, data, state);
 }
 
-/* This function is equal to SM_Block except it does not retry the message */
+/* This function is equal to sm_block_timeout except it does not retry the message */
 gn_error sm_block_no_retry_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state)
 {
 	return __sm_block_timeout(waitfor, t, data, state);
 }
 
+/* This function is equal to sm_block except it does not retry the message */
 gn_error sm_block_no_retry(int waitfor, gn_data *data, struct gn_statemachine *state)
 {
-	return __sm_block_timeout(waitfor, 100, data, state);
+	return sm_block_no_retry_timeout(waitfor, 100, data, state);
 }
 
 /* Just to do things neatly */
