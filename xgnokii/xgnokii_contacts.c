@@ -2645,10 +2645,24 @@ static void ExportVCARD(FILE * f)
 	fclose(f);
 }
 
+static char *escape_semicolon(char *src)
+{
+	int i, j, len = strlen(src);
+	char *dest;
+
+	dest = calloc(2 * len, sizeof(char));
+	for (i = 0, j = 0; i < len; i++, j++) {
+		if (src[i] == ';')
+			dest[j++] = '\\';
+		dest[j] = src[i];
+	}
+	dest[j] = 0;
+	return dest;
+}
 
 static void ExportNative(FILE * f)
 {
-	gchar buf[IO_BUF_LEN], buf2[10];
+	gchar buf[IO_BUF_LEN], buf2[16];
 	register gint i, j;
 	PhonebookEntry *pbEntry;
 
@@ -2657,23 +2671,14 @@ static void ExportNative(FILE * f)
 		pbEntry = g_ptr_array_index(contactsMemory, i);
 
 		if (pbEntry->status != E_Deleted && pbEntry->status != E_Empty) {
-			if (strchr(pbEntry->entry.name, ';') != NULL) {
-				strcpy(buf, "\"");
-				strcat(buf, pbEntry->entry.name);
-				strcat(buf, "\";");
-			} else {
-				strcpy(buf, pbEntry->entry.name);
-				strcat(buf, ";");
-			}
+			char *aux;
+			aux = escape_semicolon(pbEntry->entry.name);
+			strcpy(buf, aux);
+			strcat(buf, ";");
+			free(aux);
 
-			if (strchr(pbEntry->entry.number, ';') != NULL) {
-				strcat(buf, "\"");
-				strcat(buf, pbEntry->entry.number);
-				strcat(buf, "\";");
-			} else {
-				strcat(buf, pbEntry->entry.number);
-				strcat(buf, ";");
-			}
+			strcat(buf, pbEntry->entry.number);
+			strcat(buf, ";");
 
 			if (pbEntry->entry.memory_type == GN_MT_ME)
 				sprintf(buf2, "ME;%d;%d", i + 1, pbEntry->entry.caller_group);
@@ -2685,24 +2690,21 @@ static void ExportNative(FILE * f)
 			/* Add ext. pbk info if required */
 			if (phoneMonitor.supported & PM_EXTPBK) {
 				for (j = 0; j < pbEntry->entry.subentries_count; j++)
-					if (pbEntry->entry.subentries[j].entry_type == GN_PHONEBOOK_ENTRY_Number) {
-						sprintf(buf2, ";%d;",
-							pbEntry->entry.subentries[j].number_type);
+					switch (pbEntry->entry.subentries[j].entry_type) {
+					case GN_PHONEBOOK_ENTRY_Date:
+						break;
+					default:
+						sprintf(buf2, ";%d;%d;%d;",
+							pbEntry->entry.subentries[j].entry_type,
+							pbEntry->entry.subentries[j].number_type,
+							pbEntry->entry.subentries[j].id);
 						strcat(buf, buf2);
 
-						if (strchr
-						    (pbEntry->entry.subentries[j].data.number,
-						     ';') != NULL) {
-							strcat(buf, "\"");
-							strcat(buf,
-							       pbEntry->entry.subentries[j].data.
-							       number);
-							strcat(buf, "\"");
-						} else {
-							strcat(buf,
-							       pbEntry->entry.subentries[j].data.
-							       number);
-						}
+						aux = escape_semicolon(pbEntry->entry.subentries[j].data.number);
+						strcat(buf,
+						       pbEntry->entry.subentries[j].data.number);
+						free(aux);
+						break;
 					}
 			}
 			fprintf(f, "%s\n", buf);
@@ -2911,7 +2913,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 
 
 	while (fgets(buf, IO_BUF_LEN, f)) {
-		if (gn_file_phonebook_raw(&gsmEntry, buf) == GN_ERR_NONE) {
+		if (gn_file_phonebook_raw_parse(&gsmEntry, buf) == GN_ERR_NONE) {
 			i = gsmEntry.location;
 			if (gsmEntry.memory_type == GN_MT_ME && memoryStatus.FreeME > 0
 			    && i > 0 && i <= memoryStatus.MaxME) {

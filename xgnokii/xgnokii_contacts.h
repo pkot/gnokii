@@ -34,7 +34,7 @@
 #include "misc.h"
 #include "gnokii.h"
 
-#define IO_BUF_LEN	160
+#define IO_BUF_LEN	1024
 
 /* Structure to keep memory status information */
 typedef struct {
