@@ -113,7 +113,10 @@
     o add serial_nreceived() and serial_flush() functions
       to winserial.c                                    (Mark Lakata)
     o don't use alloca(3)                                 (Pawel Kot)
- * proper unicode support in gsm-encoding     (Hu Gang, Markus Plail)
+ * gsm-encoding changes
+    o proper unicode support                  (Hu Gang, Markus Plail)
+    o don't return -1 but 1 when wctomb() or mbtowc() fails
+                                                    (Jan de Cuveland)
  * tekram dongle support reimplemented               (BORBELY Zoltan)
  * docs updates:
     o mention 'make DESTDIR=<dir> install' in the packaging howto

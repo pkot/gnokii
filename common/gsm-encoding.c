@@ -324,7 +324,7 @@ static int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
 	case -1:
 		dprintf("Error calling mctowb!\n");
 		*dest = '?';
-		return -1;
+		length = 1;
 	default:
 		return length;
 	}
@@ -338,7 +338,7 @@ static int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
 	case -1:
 		dprintf("Error calling wctomb!\n");
 		*dest = '?';
-		return -1;
+		length = 1;
 	default:
 		return length;
 	}
@@ -400,23 +400,23 @@ unsigned int char_decode_unicode(unsigned char* dest, const unsigned char* src, 
 
 unsigned int char_encode_unicode(unsigned char* dest, const unsigned char* src, int len)
 {
-        int i, length, offset = 0, pos = 0;
-	wchar_t   wc;
+	int length, offset = 0, pos = 0;
+	wchar_t  wc;
 
-        for (i = 0; offset < len; i++) {
-                switch (length = char_encode_uni_alphabet(src + offset, &wc)) {
+	while (offset < len) {
+		switch (length = char_encode_uni_alphabet(src + offset, &wc)) {
 		case -1:
 			dest[pos++] =  wc >> 8 & 0xFF;
-                        dest[pos++] =  wc & 0xFF;
+			dest[pos++] =  wc & 0xFF;
 			offset++;
 			break;
-                default:
+		default:
 			dest[pos++] =  wc >> 8 & 0xFF;
-                        dest[pos++] =  wc & 0xFF;
+			dest[pos++] =  wc & 0xFF;
 			offset += length;
 			break;
-                }
-        }
+		}
+	}
 	return pos;
 }
 
