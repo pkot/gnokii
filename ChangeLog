@@ -4,6 +4,9 @@
     o don't use stdout as the diagnostic output           (Pawel Kot)
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
+ * xgnokii updates:
+    o fix speeddial writing                            (Markus Plail)
+    o fix logos                                        (Markus Plail)
  * 6510 series updates:
     o add bitmap writing                               (Markus Plail)
  * bitmap support
