@@ -9,6 +9,8 @@
                                                  (Adam Go³êbiowski)
  * 6510 driver updates
     o correctly read SMS datetime                       (Pawel Kot)
+ * 7110 driver updates
+    o ringtone list will return fix entries too    (BORBELY Zoltan)
 
 0.6.4
 =====

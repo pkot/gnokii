@@ -2837,6 +2837,42 @@ static gn_error NK7110_GetRingtoneList(gn_data *data, struct gn_statemachine *st
 	rl->userdef_location = DRVINSTANCE(state)->userdef_location;
 	rl->userdef_count = 5;
 
+	/* tested on 6210 -- bozo */
+	ADDRINGTONE(65, "Ring ring");
+	ADDRINGTONE(66, "Low");
+	ADDRINGTONE(67, "Do-mi-so");
+	ADDRINGTONE(68, "Bee");
+	ADDRINGTONE(69, "Cicada");
+	ADDRINGTONE(70, "Trio");
+	ADDRINGTONE(71, "Intro");
+	ADDRINGTONE(72, "Persuasion");
+	ADDRINGTONE(73, "Attraction");
+	ADDRINGTONE(74, "Playground");
+	ADDRINGTONE(75, "Mosquito");
+	ADDRINGTONE(76, "Circles");
+	ADDRINGTONE(77, "Nokia tune");
+	ADDRINGTONE(78, "Sunny walks");
+	ADDRINGTONE(79, "Samba");
+	ADDRINGTONE(80, "Basic rock");
+	ADDRINGTONE(81, "Reveille");
+	ADDRINGTONE(82, "Groovy Blue");
+	ADDRINGTONE(83, "Brave Scotland");
+	ADDRINGTONE(84, "Matilda");
+	ADDRINGTONE(85, "Bumblebee");
+	ADDRINGTONE(86, "Menuet");
+	ADDRINGTONE(87, "Elise");
+	ADDRINGTONE(88, "William Tell");
+	ADDRINGTONE(89, "Charleston");
+	ADDRINGTONE(90, "Fuga");
+	ADDRINGTONE(91, "Etude");
+	ADDRINGTONE(92, "Hungarian");
+	ADDRINGTONE(93, "Valkyrie");
+	ADDRINGTONE(94, "Badinerie");
+	ADDRINGTONE(95, "Bach #3");
+	ADDRINGTONE(96, "Toreador");
+	ADDRINGTONE(97, "9th Symphony");
+	ADDRINGTONE(98, "WalzeBrilliant");
+
 	memset(&ringtone, 0, sizeof(ringtone));
 	gn_data_clear(&d);
 	d.ringtone = &ringtone;
