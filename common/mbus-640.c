@@ -1,6 +1,6 @@
 /* G N O K I I
 	   A Linux/Unix toolset and driver for Nokia mobile phones.
-	   Copyright (C) Hugh Blemings, Pavel Janmk ml and others 1999
+	   Copyright (C) Hugh Blemings, Pavel Janík ml and others 1999
 	   Released under the terms of the GNU GPL, see file COPYING
 	   for more details.
 	
@@ -91,7 +91,7 @@ GSM_Information			MB640_Information = {
 		4, 						/* Max RF Level */
 		0,						/* Min RF Level */
 		GRF_Arbitrary,			/* RF level units */
-		4, 						/* Max Battery Level */
+		4,    				/* Max Battery Level */
 		0,						/* Min Battery Level */
 		GBU_Arbitrary,			/* Battery level units */
 		GDT_None,				/* No date/time support */
@@ -99,12 +99,60 @@ GSM_Information			MB640_Information = {
 		0						/* Max alarms = 0 */
 };
 
+char MB640_2_KOI8[] = 
+{
+  ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+  ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+  ' ','!','"','#','$','&','%','\'','(',')','*','+',',','-','.','/',
+  '0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?',
+
+  '!','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
+  'P','Q','R','S','T','U','V','W','X','Y','Z','[','\\',']','^','_',
+  '?','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
+  'p','q','r','s','t','u','v','w','x','y','z','{','|','}','~',' ',
+  ' ',' ',' ','á','â','÷','ç','ä','å','ö','ú','é','ê','ë','ì','í',
+  'î','ï','ð','ò','ó','ô','õ','æ','è','ã','þ','û','ý','ÿ','ù','ø',
+  ' ',' ',' ','Á','Â','×','Ç','Ä','Å','Ö','Ú','É','Ê','Ë','Ì','Í',
+  'Î','Ï','Ð','Ò','Ó','Ô','Õ','Æ','È','Ã','Þ','Û','Ý','ß','Ù','Ø',
+
+  ' ','ü','à','ñ',' ','Ü','À','Ñ',' ',' ',' ',' ',' ',' ',' ',' ',
+  ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+  ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+  ' ',' ',' ',' ',' ',' ',' ',' ','E',' ',' ','@','$','L','Y',' ',
+};
+
+char KOI8_2_MB640[] = 
+{
+   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+   ' ','!','"','#',0xFC,'&','%','\'','(',')','*','+',',','-','.','/',
+   '0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?',
+
+   0xFB,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
+   'P','Q','R','S','T','U','V','W','X','Y','Z','[','\\',']','^','_',
+   '?','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
+   'p','q','r','s','t','u','v','w','x','y','z','{','|','}','~',' ',
+
+   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+   ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+/*  À    Á    Â    Ã    Ä    Å    Æ    Ç    È    É    Ê    Ë    Ì    Í    Î    Ï*/
+  0xC6,0xA3,0xA4,0xB9,0xA7,0xA8,0xB7,0xA6,0xB8,0xAB,0xBC,0xAD,0xAE,0xAF,0xB0,0xB1,
+/*  Ð    Ñ    Ò    Ó    Ô    Õ    Ö    ×    Ø    Ù    Ú    Û    Ü    Ý    Þ    ß*/
+  0xB2,0xC7,0xB3,0xB4,0xB5,0xB6,0xA9,0xA5,0xBD,0xBE,0xAA,0xBB,0xC5,0xBC,0xBA,0xBF,
+/*  à    á    â    ã    ä    å    æ    ç    è    é    ê    ë    ì    í    î    ï*/
+  0xC2,0x83,0x84,0x99,0x87,0x88,0x97,0x86,0x98,0x8B,0x8C,0x8D,0x8E,0x8F,0x90,0x91,
+/*  ð    ñ    ò    ó    ô    õ    ö    ÷    ø    ù    ú    û    ü    ý    þ    ÿ*/
+  0x92,0xC3,0x93,0x94,0x95,0x96,0x89,0x85,0x9D,0x9E,0x8A,0x9B,0xC1,0x9C,0x9A,0x9F,
+};
+
 /* Local variables */
 pthread_t      Thread;
 bool					 RequestTerminate;
 int            PortFD;
 struct termios old_termios; /* old termios */
-u8             MB640_TXPacketNumber = 4;
+u8             MB640_TXPacketNumber = 0x00;
 char           Model[MB640_MAX_MODEL_LENGTH];
 bool           ModelValid     = false;
 unsigned char  PacketData[256];
@@ -151,16 +199,133 @@ void MB640_Terminate(void)
 	   be called by application.  Will block until location is
 	   retrieved or a timeout/error occurs. */
 GSM_Error	MB640_GetMemoryLocation(GSM_PhonebookEntry *entry)
-{
-	return (GE_NOTIMPLEMENTED);
+{int timeout,i,len;
+
+  switch(entry->MemoryType)
+  {
+    case GMT_ME:
+    {u8 pkt[] = {0xe5, 0x0f, 0x2d, 3, 0, 7, 0x1f, 0x7f, 0xf0, 0, 0, 0, 0},
+        digit;
+     char *digit_map = " 1234567890*#pw+";
+
+      pkt[10] = entry->Location - 1;
+      /* entry->MemoryType must be GMT_ME */
+      MB640_PacketOK = false;
+      MB640_ACKOK    = false;
+      timeout        = 3;
+      while(!MB640_PacketOK)
+      {
+        if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+        if(!--timeout || RequestTerminate)
+        {
+          return(GE_TIMEOUT);
+        }
+        usleep(100000);
+      }
+      entry->Empty = (PacketData[18] == 0 && PacketData[34] == 0);
+      if( !entry->Empty )
+      {
+        for( i = 0; PacketData[34 + i] && i < 16; i++ )
+        {
+          entry->Name[i] = MB640_2_KOI8[ PacketData[34 + i] ];
+        }
+        entry->Name[i] = 0;
+
+        len = PacketData[18];
+        for( i = 0; i < len; i++ )
+        {
+          digit = PacketData[19 + i/2];
+          entry->Number[i] = digit_map[((i % 2) ? digit : digit >> 4) & 0x0F];
+        }
+        entry->Number[i] = 0;
+        entry->Group = PacketData[50];
+      }
+      else
+      {
+        entry->Name[0] = 0;
+        entry->Number[0] = 0;
+        entry->Group = 255;
+      }
+    }
+    break;
+    default: return (GE_NOTIMPLEMENTED);
+  }
+	return (GE_NONE);
 }
 
 	/* Routine to write phonebook location in phone. Designed to 
 	   be called by application code.  Will block until location
 	   is written or timeout occurs.  */
 GSM_Error	MB640_WritePhonebookLocation(GSM_PhonebookEntry *entry)
-{
-	return (GE_NOTIMPLEMENTED);
+{int timeout,i;
+
+  switch(entry->MemoryType)
+  {
+    case GMT_ME:
+      {u8 pkt[48], digit;
+       char *s;
+
+        pkt[0]  = 0xE5;
+        pkt[1]  = 0x10;
+        pkt[2]  = 0x08;
+        pkt[3]  = 0x03;
+        pkt[4]  = 0x00;
+        pkt[5]  = 0x07;
+        pkt[6]  = 0x1F;
+        pkt[7]  = 0x7F;
+        pkt[8]  = 0xF0;
+        pkt[9]  = 0x00;
+        pkt[10] = entry->Location - 1;
+        pkt[11] = 0x00;
+        pkt[12] = 0x00;
+        pkt[13] = 0x00;
+        pkt[14] = 0x21;
+        memset(&pkt[15],0,32);
+        pkt[47] = 0x05/*entry->Group*/;
+
+        for( i = 0; entry->Name[i] && i < 15; i++ )
+        {
+          pkt[31 + i] = KOI8_2_MB640[ (u8)entry->Name[i] ];
+        }
+        pkt[31 + i] = 0;
+
+        
+        for( i = 0, s = entry->Number; *s && i < 30; s++ )
+        {
+          switch(*s)
+          {
+            case '1'...'9': digit = *s - '0'; break;
+            case '0':       digit = 0xA;      break;
+            case '*':       digit = 0xB;      break;
+            case '#':       digit = 0xC;      break;
+            case 'p':       digit = 0xD;      break;
+            case 'w':       digit = 0xE;      break;
+            case '+':       digit = 0xF;      break;
+            default: continue;
+          }
+          pkt[16 + i/2] |= (i % 2) ? digit : digit << 4;
+          i++;
+        }
+        pkt[15] = i;
+
+        /* And write it! */
+        MB640_PacketOK = false;
+        MB640_ACKOK    = false;
+        timeout        = 3;
+        while(!MB640_PacketOK)
+        {
+          if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+          if(!--timeout || RequestTerminate)
+          {
+            return(GE_TIMEOUT);
+          }
+          usleep(100000);
+        }
+      }
+    break;
+    default: return (GE_NOTIMPLEMENTED);
+  }
+  return (GE_NONE);
 }
 
 GSM_Error	MB640_GetSpeedDial(GSM_SpeedDial *entry)
@@ -183,7 +348,7 @@ GSM_Error	MB640_DeleteSMSMessage(GSM_SMSMessage *message)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS)
+GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 {
 	return (GE_NOTIMPLEMENTED);
 }
@@ -195,33 +360,121 @@ GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS)
 	   that we don't actually need the keepalive at all but
 	   will await the official doco before taking it out.  HAB19990511 */
 GSM_Error	MB640_GetRFLevel(GSM_RFUnits *units, float *level)
-{
-	return (GE_NOTIMPLEMENTED);
+{u8  pkt[] = {0xe5, 0x19, 2, 1, 7};
+ int timeout;
+
+  MB640_PacketOK = false;
+  MB640_ACKOK    = false;
+  timeout        = 3;
+  while(!MB640_PacketOK)
+  {
+    if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+    if(!--timeout || RequestTerminate)
+    {
+      return(GE_TIMEOUT);
+    }
+    usleep(100000);
+  }
+  *level = (float)(PacketData[6] * 256 + PacketData[7]) / 256.0;
+	return (GE_NONE);
 }
 
-	/* MB640_GetBatteryLevel
+	/* MB640_GetBatteryLevel - get value from ADC #0
 	   FIXME (see above...) */
 GSM_Error	MB640_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
-{
-	return (GE_NOTIMPLEMENTED);
+{u8  pkt[] = {0xe5, 0x19, 2, 1, 0};
+ int timeout;
+
+  if (*units == GBU_Arbitrary)
+  {
+    MB640_PacketOK = false;
+    MB640_ACKOK    = false;
+    timeout        = 3;
+    while(!MB640_PacketOK)
+    {
+      if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+      if(!--timeout || RequestTerminate)
+      {
+        return(GE_TIMEOUT);
+      }
+      usleep(100000);
+    }
+    *level = (float)(PacketData[6] * 256 + PacketData[7]) / 256.0;
+    return (GE_NONE);
+  }
+  return (GE_INTERNALERROR);
 }
 
+/* Really there are no IMEI in NMT phones. Equivalent IMHO is phone
+ * Serial Number */
 GSM_Error	MB640_GetIMEI(char *imei)
-{
-  strcpy(imei, "N/A");
+{u8  pkt[] = {0xe5, 0x0f, 0x19, 3, 0, 0x01, 0x0b, 0, 0};
+ int timeout;
+
+  MB640_PacketOK = false;
+  MB640_ACKOK    = false;
+  timeout        = 3;
+  while(!MB640_PacketOK)
+  {
+    if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+    if(!--timeout || RequestTerminate)
+    {
+      return(GE_TIMEOUT);
+    }
+    usleep(100000);
+  }
+
+  memcpy(imei,&PacketData[14],PacketData[13]);
+  imei[PacketData[13]] = 0;
 	return (GE_NONE);
 }
 
 GSM_Error	MB640_GetRevision(char *revision)
-{
-  strcpy(revision,"N/A");
+{u8   pkt[] = {0xe5, 0, 3, 0};
+ int  timeout;
+ char *s;
+
+  MB640_PacketOK = false;
+  MB640_ACKOK    = false;
+  timeout        = 3;
+  while(!MB640_PacketOK)
+  {
+    if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+    if(!--timeout || RequestTerminate)
+    {
+      return(GE_TIMEOUT);
+    }
+    usleep(100000);
+  }
+
+  strncpy(revision,&PacketData[6],63);
+  revision[63] = 0;
+  for(s = revision; *s; s++) if(*s == 0x0A) *s = ';';
+
 	return (GE_NONE);
 }
 
 GSM_Error	MB640_GetModel(char *model)
-{
-  strcpy( model, "N/A" );
-  return (GE_NONE);
+{u8  pkt[] = {0xe5, 0x0f, 0x19, 3, 0, 0x05, 0x39, 0, 0};
+ int timeout;
+
+  MB640_PacketOK = false;
+  MB640_ACKOK    = false;
+  timeout        = 3;
+  while(!MB640_PacketOK)
+  {
+    if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+    if(!--timeout || RequestTerminate)
+    {
+      return(GE_TIMEOUT);
+    }
+    usleep(100000);
+  }
+
+  memcpy(model,&PacketData[14],PacketData[13]);
+  model[PacketData[13]] = 0;
+
+	return (GE_NONE);
 }
 
 /* This function sends to the mobile phone a request for the SMS Center */
@@ -239,7 +492,19 @@ GSM_Error	MB640_SetSMSCenter(GSM_MessageCenter *MessageCenter)
 	/* Our "Not implemented" functions */
 GSM_Error	MB640_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
-	return (GE_NOTIMPLEMENTED);
+  switch(Status->MemoryType)
+  {
+    case GMT_ME:
+      Status->Used = 0;
+      Status->Free = 100;
+    break;
+    case GMT_SM:
+      Status->Used = 0;
+      Status->Free = 0;
+    break;
+    default: return (GE_NOTIMPLEMENTED);
+  }
+	return (GE_NONE);
 }
 
 GSM_Error	MB640_GetSMSStatus(GSM_SMSStatus *Status)
@@ -343,11 +608,20 @@ GSM_Error	MB640_SetBitmap(GSM_Bitmap *Bitmap)
 }
 
 GSM_Error	MB640_Reset(unsigned char type)
-{GSM_Error err = GE_NONE;
- u8        pkt[] = { 0xE5, 0x43, 0x00, 0x00 };
+{u8        pkt[] = { 0xE5, 0x43, 0x00, 0x00 };
+ int       timeout;
 
   /* send packet */
-  return err;
+  MB640_PacketOK = false;
+  MB640_ACKOK    = false;
+  timeout        = 3;
+  while(!MB640_PacketOK)
+  {
+    if(!MB640_ACKOK) MB640_SendPacket(pkt, 4);
+    if(!--timeout) return (GE_TIMEOUT);
+    usleep(250000);
+  }
+  return (GE_NONE);
 }
 
 GSM_Error	MB640_GetProfile(GSM_Profile *Profile)
@@ -382,14 +656,14 @@ u8 MB640_GetChecksum( u8 * packet )
 /* Handler called when characters received from serial port. 
  * and process them. */
 void MB640_SigHandler(int status)
-{unsigned char        buffer[256],b;
- int                  i,res,j;
+{unsigned char        buffer[256],ack[5],b;
+ int                  i,j,res;
  static unsigned int  Index = 0,
                       Length = 5;
  static unsigned char pkt[256];
 
   res = read(PortFD, buffer, 256);
-
+  if( res < 0 ) return;
   for(i = 0; i < res ; i++)
   {
     b = buffer[i];
@@ -423,19 +697,37 @@ void MB640_SigHandler(int status)
           {
             if(pkt[2] == 0x7F) /* acknowledge by phone */
             {
-              MB640_ACKOK = true;
+              /* Set ACKOK flag */
+              MB640_ACKOK    = true;
+              /* Increase TX packet number */
+              MB640_TXPacketNumber++;
             }
             else
             {
               /* Copy packet data  */
               memcpy(PacketData,pkt,Length);
+              /* send acknowledge packet to phone */
+              usleep(1000);
+              ack[0] = 0x00;                     /* Construct the header.   */
+              ack[1] = pkt[0];                   /* Send back id            */
+              ack[2] = 0x7F;                     /* Set special size value  */
+              ack[3] = pkt[Length - 2];          /* Send back packet number */
+              ack[4] = MB640_GetChecksum( ack ); /* Set checksum            */
+#ifdef DEBUG
+              fprintf( stdout, _("PC   : ") );
+              for( j = 0; j < 5; j++ )
+              {
+                b = ack[j];
+                fprintf( stdout, "[%02X %c]", b, b > 0x20 ? b : '.' );
+              }
+              fprintf( stdout, "\n" );
+#endif /* DEBUG */
+              if( write( PortFD, ack, 5 ) != 5 )
+              {
+                perror( _("Write error!\n") );
+              }
               /* Set validity flag */
               MB640_PacketOK = true;
-              /* send acknowledge  */
-              usleep(1000);
-              MB640_SendACK(pkt[Length - 2]);
-              /* Increase TX packet number */
-              MB640_TXPacketNumber++;
             }
           }
         }
@@ -493,7 +785,9 @@ bool MB640_OpenSerial(void)
   tcflush(PortFD, TCIFLUSH);
   tcsetattr(PortFD, TCSANOW, &new_termios);
   /* setting the RTS & DTR bit */
-  flags = TIOCM_DTR | TIOCM_RTS;
+  flags = TIOCM_DTR;
+  ioctl(PortFD, TIOCMBIC, &flags);
+  flags = TIOCM_RTS;
   ioctl(PortFD, TIOCMBIS, &flags);
 #ifdef DEBUG
   ioctl(PortFD, TIOCMGET, &flags);
@@ -514,8 +808,7 @@ GSM_Error MB640_SendPacket( u8 *buffer, u8 length )
   pkt[current++] = length - 1;               /* Set data size              */
   memcpy( pkt + current, buffer, length );   /* Copy in data.              */
   current += length;
-  pkt[current++] = MB640_TXPacketNumber;         /* Set packet number          *
-/
+  pkt[current++] = MB640_TXPacketNumber;         /* Set packet number          */
   pkt[current++] = MB640_GetChecksum( pkt ); /* Calculate and set checksum */
 #ifdef DEBUG
   fprintf( stdout, _("PC   : ") );
@@ -542,39 +835,13 @@ GSM_Error MB640_SendPacket( u8 *buffer, u8 length )
   return (GE_NONE);
 }
 
-GSM_Error MB640_SendACK( u8 packet_number )
-{u8  b,pkt[5];
- int i;
-
-  pkt[0] = 0x00;                     /* Construct the header.   */
-  pkt[1] = 0xE9;
-  pkt[2] = 0x7F;                     /* Set special size value  */
-  pkt[3] = packet_number;            /* Send back packet number */
-  pkt[4] = MB640_GetChecksum( pkt ); /* Set checksum            */
-  if( write( PortFD, pkt, 5 ) != 5 )
-  {
-    perror( _("Write error!\n") );
-    return (GE_INTERNALERROR);
-  }
-#ifdef DEBUG
-  fprintf( stdout, _("PC   : ") );
-  for( i = 0; i < 5; i++ )
-  {
-    b = pkt[i];
-    fprintf( stdout, "[%02X %c]", b, b > 0x20 ? b : '.' );
-  }
-  fprintf( stdout, "\n" );
-#endif /* DEBUG */
-  return (GE_NONE);
-}
 
 	/* This is the main loop for the MB21 functions.  When MB21_Initialise
 	   is called a thread is created to run this loop.  This loop is
 	   exited when the application calls the MB21_Terminate function. */
 void	MB640_ThreadLoop(void)
-{int timeout;
- u8  /* pkt0[] = {0xe5, 0x43, 0x00, 0x00}, */
-     pkt1[] = {0xe5, 0x00, 0x03, 0x00};
+{GSM_Error          err;
+ char               model[64];
 	/* Do initialisation stuff */
   if (MB640_OpenSerial() != true)
   {
@@ -585,20 +852,24 @@ void	MB640_ThreadLoop(void)
     }
     return;
   }
-
-  /* Get phone info */
+#if 0
+  err = MB640_GetModel(model);
+  if(err == GE_NONE)
+  {
+    fprintf( stdout, "\nConnected to phone. model: %s", model );
+  }
+  /* Check connection and get phone info */
   MB640_PacketOK = false;
+  MB640_ACKOK    = false;
   timeout        = 3;
   while(!MB640_PacketOK)
   {
-    MB640_SendPacket(pkt1, 4);
-    if(!--timeout || RequestTerminate)
-    {
-      return;
-    }
-    usleep(250000);
+    if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
+    if(!--timeout || RequestTerminate) return;
+    usleep(100000);
   }
-  fprintf( stdout, "\nConnected to phone:\n%s\n\n", PacketData + 6 );
+  fprintf( stdout, "\nPhone type: \n%s\n", PacketData + 6 );
+#endif
   MB640_LinkOK = true;
 
 	while (!RequestTerminate) {

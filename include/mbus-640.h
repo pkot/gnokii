@@ -2,7 +2,7 @@
 
 /* G N O K I I
 	   A Linux/Unix toolset and driver for Nokia mobile phones.
-	   Copyright (C) Hugh Blemings, Pavel Janmk ml and others 1999
+	   Copyright (C) Hugh Blemings, Pavel Janík ml and others 1999
 	   Released under the terms of the GNU GPL, see file COPYING
 	   for more details.
 	
@@ -55,7 +55,7 @@ GSM_Error	MB640_SetSMSCenter(GSM_MessageCenter *MessageCenter);
 
 GSM_Error	MB640_DeleteSMSMessage(GSM_SMSMessage *message);
 
-GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS);
+GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS, int data_size);
 
 GSM_Error	MB640_GetRFLevel(GSM_RFUnits *units, float *level);
 
@@ -103,7 +103,6 @@ void	    MB640_ThreadLoop(void);
 void      MB640_SigHandler(int status);
 bool      MB640_OpenSerial(void);
 GSM_Error MB640_SendPacket( u8 *buffer, u8 length );
-GSM_Error MB640_SendACK( u8 packet_number );
 
 
 #endif	/* __mbus_640_c */

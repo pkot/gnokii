@@ -31,6 +31,7 @@
 #include "fbus-3810.h"
 #include "fbus-6110.h"
 #include "mbus-2110.h"
+#include "mbus-640.h"
 
 /* GSM_LinkOK is set to true once normal communications with the phone have
    been established. */
@@ -94,6 +95,17 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
       GSM = &MB21_Functions;
       GSM_Info = &MB21_Information;
       GSM_LinkOK = &MB21_LinkOK;
+    }
+    else 
+	/* Scan through models supported by the MB640 code... */
+    if (strstr(MB640_Information.Models, model) != NULL) {
+      found_match = true;
+
+      /* Set pointers to relevant MB640 addresses */
+
+      GSM = &MB640_Functions;
+      GSM_Info = &MB640_Information;
+      GSM_LinkOK = &MB640_LinkOK;
     }
 #endif /* WIN32 */ 
 

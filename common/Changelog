@@ -21,3 +21,6 @@
   
 * Thu Mar 16 15:27:00 EST 2000 Hugh Blemings <hugh@linuxcare.com>
 - Wrote/tested SendRLPFrame in fbus-3810.c Data calls now work :)
+  
+* Thu Mar 16 16:48:33 EST 2000 Hugh Blemings <hugh@linuxcare.com>
+- Added Andrew Kozin's latest NMT-450 code.
