@@ -11,6 +11,7 @@ all: libgetopt.a
 
 libgetopt.a: $(OBJS)
 	$(AR) cq $@ $(OBJS)
+	ranlib libgetopt.a
 
 depend dep:
 	$(CPP) -M $(CFLAGS) $(SRCS) > depend
