@@ -113,6 +113,7 @@ typedef enum {
 	OPT_HANGUP,
 	OPT_GETTODO,
 	OPT_WRITETODO,
+	OPT_DELETEALLTODOS,
 	OPT_GETCALENDARNOTE,
 	OPT_WRITECALENDARNOTE,
 	OPT_DELCALENDARNOTE,
@@ -151,7 +152,10 @@ typedef enum {
 	OPT_FOOGLE,
 	OPT_GETSECURITYCODE,
 	OPT_GETWAPBOOKMARK,
+	OPT_WRITEWAPBOOKMARK,
 	OPT_GETWAPSETTING,
+	OPT_WRITEWAPSETTING,
+	OPT_ACTIVATEWAPSETTING,
 	OPT_DELETEWAPBOOKMARK,
 } opt_index;
 
@@ -259,8 +263,11 @@ static int usage(FILE *f)
 		     "                 [-r|--raw]\n"
 		     "          gnokii --writephonebook [-i]\n"
 		     "          gnokii --getwapbookmark number\n"
+		     "          gnokii --writewapbookmark name URL\n"
 		     "          gnokii --deletewapbookmark number\n"
 		     "          gnokii --getwapsetting number [-r]\n"
+		     "          gnokii --writewapsetting\n"
+		     "          gnokii --activatewapsetting number\n"
 		     "          gnokii --getspeeddial number\n"
 		     "          gnokii --setspeeddial number memory_type location\n"
 		     "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
@@ -281,6 +288,7 @@ static int usage(FILE *f)
 		     "          gnokii --hangup callid\n"
 		     "          gnokii --gettodo start [end] [-v]\n"
 		     "          gnokii --writetodo vcardfile number\n"
+		     "          gnokii --deletealltodos\n"
 		     "          gnokii --getcalendarnote start [end] [-v]\n"
 		     "          gnokii --writecalendarnote vcardfile number\n"
 		     "          gnokii --deletecalendarnote start [end]\n"
@@ -1942,6 +1950,7 @@ static int gettodo(int argc, char *argv[])
 	return error;
 }
 
+/* ToDo notes writing */
 static int writetodo(char *argv[])
 {
 	GSM_ToDo ToDo;
@@ -1962,6 +1971,24 @@ static int writetodo(char *argv[])
 	error = SM_Functions(GOP_WriteToDo, &data, &State);
 	if (error == GE_NONE)
 		fprintf(stderr, _("Succesfully written!\n"));
+	else {
+		fprintf(stderr, _("Failed to write calendar note: %s\n"), print_error(error));
+		return -1;
+	}
+	return 0;
+}
+
+/* Deleting all ToDo notes */
+static int deletealltodos()
+{
+	GSM_Data data;
+	GSM_Error error;
+
+	GSM_DataClear(&data);
+
+	error = SM_Functions(GOP_DeleteAllToDos, &data, &State);
+	if (error == GE_NONE)
+		fprintf(stdout, _("Succesfully deleted all ToDo notes!\n"));
 	else {
 		fprintf(stderr, _("Failed to write calendar note: %s\n"), print_error(error));
 		return -1;
@@ -3019,11 +3046,12 @@ static int writephonebook(int argc, char *args[])
 
 		if (error == GE_NONE)
 			fprintf (stderr, 
-				 _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\nPress enter to continue"), 
+				 _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), 
 				 memory_type_string, entry.Location, entry.Name, entry.Number);
 		else
 			fprintf (stderr, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
 				 print_error(error), memory_type_string, entry.Location, entry.Name, entry.Number);
+		return error;
 	}
 	return 0;
 }
@@ -3045,6 +3073,36 @@ static int getwapbookmark(char *Number)
 	switch (error) {
 	case GE_NONE:
 		fprintf(stderr, _("WAP bookmark nr. %d:\n"), WAPBookmark.Location);
+		break;
+	default:
+		fprintf(stderr, _("Error: %s\n"), print_error(error));
+		break;
+	}
+
+	return error;
+}
+
+/* Writing WAP bookmarks. */
+static int writewapbookmark(int nargc, char *nargv[])
+{
+	GSM_WAPBookmark	WAPBookmark;
+	GSM_Data	data;
+	GSM_Error	error;
+
+
+	GSM_DataClear(&data);
+	data.WAPBookmark = &WAPBookmark;
+
+	if (nargc != 2) usage(stderr);
+
+	snprintf(&WAPBookmark.Name[0], MAX_WAP_NAME_LENGTH, nargv[0]);
+	snprintf(&WAPBookmark.URL[0], MAX_WAP_URL_LENGTH, nargv[1]);
+
+	error = SM_Functions(GOP_WriteWAPBookmark, &data, &State);
+
+	switch (error) {
+	case GE_NONE:
+		fprintf(stderr, _("WAP bookmark nr. %d succesfully written!\n"), WAPBookmark.Location);
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), print_error(error));
@@ -3086,7 +3144,7 @@ static int getwapsetting(int argc, char *argv[])
 	GSM_WAPSetting	WAPSetting;
 	GSM_Data	data;
 	GSM_Error	error;
-	bool		raw;
+	bool		raw = false;
 
 	WAPSetting.Location = atoi(argv[0]);
 	switch (argc) {
@@ -3107,137 +3165,210 @@ static int getwapsetting(int argc, char *argv[])
 
 	switch (error) {
 	case GE_NONE:
-		fprintf(stdout, _("WAP bookmark nr. %d:\n"), WAPSetting.Location);
-		fprintf(stdout, _("Name: %s\n"), WAPSetting.Name);
-		fprintf(stdout, _("Home: %s\n"), WAPSetting.Home);
-		fprintf(stdout, _("Session mode: "));
-		switch (WAPSetting.Session) {
-		case GWP_TEMPORARY: 
-			fprintf(stdout, _("temporary\n"));
-			break;
-		case GWP_PERMANENT: 
-			fprintf(stdout, _("permanent\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
-		}
-		fprintf(stdout, _("Connection security: "));
-		if (WAPSetting.Security)
-			fprintf(stdout, _("yes\n"));
-		else
-			fprintf(stdout, _("no\n"));
-
-		fprintf(stdout, _("Data bearer: "));
-		switch (WAPSetting.Bearer) {
-		case GWP_GSMDATA: 
+		if (raw) {
+			fprintf(stdout, ("%i;%s;%s;%i;%i;%i;%i;%i;%i;%i;%s;%s;%s;%s;%i;%i;%i;%s;%s;%s;%s;\n"), 
+				WAPSetting.Location, WAPSetting.Name, WAPSetting.Home, WAPSetting.Session, 
+				WAPSetting.Security, WAPSetting.Bearer, WAPSetting.GSMdataAuthentication, 
+				WAPSetting.CallType, WAPSetting.CallSpeed, WAPSetting.GSMdataLogin, WAPSetting.GSMdataIP, 
+				WAPSetting.Number, WAPSetting.GSMdataUsername, WAPSetting.GSMdataPassword, 
+				WAPSetting.GPRSConnection, WAPSetting.GPRSAuthentication, WAPSetting.GPRSLogin, 
+				WAPSetting.AccessPoint, WAPSetting.GPRSIP,  WAPSetting.GPRSUsername, WAPSetting.GPRSPassword);
+		} else {
+			fprintf(stdout, _("WAP bookmark nr. %d:\n"), WAPSetting.Location);
+			fprintf(stdout, _("Name: %s\n"), WAPSetting.Name);
+			fprintf(stdout, _("Home: %s\n"), WAPSetting.Home);
+			fprintf(stdout, _("Session mode: "));
+			switch (WAPSetting.Session) {
+			case GWP_TEMPORARY: 
+				fprintf(stdout, _("temporary\n"));
+				break;
+			case GWP_PERMANENT: 
+				fprintf(stdout, _("permanent\n"));
+				break;
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			fprintf(stdout, _("Connection security: "));
+			if (WAPSetting.Security)
+				fprintf(stdout, _("yes\n"));
+			else
+				fprintf(stdout, _("no\n"));
+			fprintf(stdout, _("Data bearer: "));
+			switch (WAPSetting.Bearer) {
+			case GWP_GSMDATA: 
+				fprintf(stdout, _("GSM data\n"));
+				break;
+			case GWP_GPRS: 
+				fprintf(stdout, _("GPRS\n"));
+				break;
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
 			fprintf(stdout, _("GSM data\n"));
-			break;
-		case GWP_GPRS: 
+			fprintf(stdout, _("   Authentication type: "));
+			switch (WAPSetting.GSMdataAuthentication) {
+			case GWP_NORMAL: 
+				fprintf(stdout, _("normal\n"));
+				break;
+			case GWP_SECURE: 
+				fprintf(stdout, _("secure\n"));
+				break;
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			fprintf(stdout, _("   Data call type: "));
+			switch (WAPSetting.CallType) {
+			case GWP_ANALOGUE: 
+				fprintf(stdout, _("analogue\n"));
+				break;
+			case GWP_ISDN: 
+				fprintf(stdout, _("ISDN\n"));
+				break;
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			fprintf(stdout, _("   Data call speed: "));
+			switch (WAPSetting.CallSpeed) {
+			case GWP_AUTOMATIC: 
+				fprintf(stdout, _("automatic\n"));
+				break;
+			case GWP_9600: 
+				fprintf(stdout, _("9600\n"));
+				break;
+			case GWP_14400: 
+				fprintf(stdout, _("14400\n"));
+				break;	
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			fprintf(stdout, _("   Login type: "));
+			switch (WAPSetting.GSMdataLogin) {
+			case GWP_MANUAL: 
+				fprintf(stdout, _("manual\n"));
+				break;
+			case GWP_AUTOLOG: 
+				fprintf(stdout, _("automatic\n"));
+				break;
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			fprintf(stdout, _("   IP: %s\n"), WAPSetting.GSMdataIP);
+			fprintf(stdout, _("   Number: %s\n"), WAPSetting.Number);
+			fprintf(stdout, _("   Username: %s\n"), WAPSetting.GSMdataUsername);
+			fprintf(stdout, _("   Password: %s\n"), WAPSetting.GSMdataPassword);
 			fprintf(stdout, _("GPRS\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
+			fprintf(stdout, _("   connection: "));
+			switch (WAPSetting.GPRSConnection) {
+			case GWP_NEEDED: 
+				fprintf(stdout, _("when needed\n"));
+				break;
+			case GWP_ALWAYS: 
+				fprintf(stdout, _("always\n"));
+				break;
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			fprintf(stdout, _("   Authentication type: "));
+			switch (WAPSetting.GPRSAuthentication) {
+			case GWP_NORMAL: 
+				fprintf(stdout, _("normal\n"));
+				break;
+			case GWP_SECURE: 
+				fprintf(stdout, _("secure\n"));
+				break;
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			fprintf(stdout, _("   Login type: "));
+			switch (WAPSetting.GPRSLogin) {
+			case GWP_MANUAL: 
+				fprintf(stdout, _("manual\n"));
+				break;
+			case GWP_AUTOLOG: 
+				fprintf(stdout, _("automatic\n"));
+				break;
+			default: 
+				fprintf(stdout, _("unknown\n"));
+				break;
+			}
+			fprintf(stdout, _("   Access point: %s\n"), WAPSetting.AccessPoint);
+			fprintf(stdout, _("   IP: %s\n"), WAPSetting.GPRSIP);
+			fprintf(stdout, _("   Username: %s\n"), WAPSetting.GPRSUsername);
+			fprintf(stdout, _("   Password: %s\n"), WAPSetting.GPRSPassword);
+		}
+		break;
+	default:
+		fprintf(stderr, _("Error: %s\n"), print_error(error));
+		break;
+	}
+
+	return error;
+}
+
+/* Writes WAP settings to phone */
+static int writewapsetting()
+{
+	int n;
+	GSM_WAPSetting WAPSetting;
+	GSM_Error error = GE_NONE;
+	GSM_Data data;
+	char line[1000];
+
+	GSM_DataClear(&data);
+	data.WAPSetting = &WAPSetting;
+
+	while (fgets(line, sizeof(line), stdin)) {
+		n = strlen(line);
+		if (n > 0 && line[n-1] == '\n') {
+			line[--n] = 0;
 		}
 
-		fprintf(stdout, _("GSM data\n"));
-		fprintf(stdout, _("   Authentication type: "));
-		switch (WAPSetting.GSMdataAuthentication) {
-		case GWP_NORMAL: 
-			fprintf(stdout, _("normal\n"));
-			break;
-		case GWP_SECURE: 
-			fprintf(stdout, _("secure\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
+		n = sscanf(line, "%d;%50[^;];%256[^;];%d;%d;%d;%d;%d;%d;%d;%50[^;];%50[^;];%32[^;];%20[^;];%d;%d;%d;%100[^;];%20[^;];%32[^;];%20[^;];", 
+				&WAPSetting.Location, WAPSetting.Name, WAPSetting.Home, (int*)&WAPSetting.Session, 
+			        (int*)&WAPSetting.Security, (int*)&WAPSetting.Bearer, (int*)&WAPSetting.GSMdataAuthentication, 
+				(int*)&WAPSetting.CallType, (int*)&WAPSetting.CallSpeed, (int*)&WAPSetting.GSMdataLogin, WAPSetting.GSMdataIP, 
+				WAPSetting.Number, WAPSetting.GSMdataUsername, WAPSetting.GSMdataPassword, 
+				(int*)&WAPSetting.GPRSConnection, (int*)&WAPSetting.GPRSAuthentication, (int*)&WAPSetting.GPRSLogin, 
+				WAPSetting.AccessPoint, WAPSetting.GPRSIP,  WAPSetting.GPRSUsername, WAPSetting.GPRSPassword);
+
+		if (n != 21) {
+			fprintf(stderr, _("Input line format isn't valid\n"));
+			return GE_UNKNOWN;
 		}
-		fprintf(stdout, _("   Data call type: "));
-		switch (WAPSetting.CallType) {
-		case GWP_ANALOGUE: 
-			fprintf(stdout, _("analogue\n"));
-			break;
-		case GWP_ISDN: 
-			fprintf(stdout, _("ISDN\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
-		}
-		fprintf(stdout, _("   Data call speed: "));
-		switch (WAPSetting.CallSpeed) {
-		case GWP_AUTOMATIC: 
-			fprintf(stdout, _("automatic\n"));
-			break;
-		case GWP_9600: 
-			fprintf(stdout, _("9600\n"));
-			break;
-		case GWP_14400: 
-			fprintf(stdout, _("14400\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
-		}
-		fprintf(stdout, _("   Login type: "));
-		switch (WAPSetting.GSMdataLogin) {
-		case GWP_MANUAL: 
-			fprintf(stdout, _("manual\n"));
-			break;
-		case GWP_AUTOLOG: 
-			fprintf(stdout, _("automatic\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
-		}
-		fprintf(stdout, _("   IP: %s\n"), WAPSetting.GSMdataIP);
-		fprintf(stdout, _("   Number: %s\n"), WAPSetting.Number);
-		fprintf(stdout, _("   Username: %s\n"), WAPSetting.GSMdataUsername);
-		fprintf(stdout, _("   Password: %s\n"), WAPSetting.GSMdataPassword);
-		fprintf(stdout, _("GPRS\n"));
-		fprintf(stdout, _("   connection: "));
-		switch (WAPSetting.GPRSConnection) {
-		case GWP_NEEDED: 
-			fprintf(stdout, _("when needed\n"));
-			break;
-		case GWP_ALWAYS: 
-			fprintf(stdout, _("always\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
-		}
-		fprintf(stdout, _("   Authentication type: "));
-		switch (WAPSetting.GPRSAuthentication) {
-		case GWP_NORMAL: 
-			fprintf(stdout, _("normal\n"));
-			break;
-		case GWP_SECURE: 
-			fprintf(stdout, _("secure\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
-		}
-		fprintf(stdout, _("   Login type: "));
-		switch (WAPSetting.GPRSLogin) {
-		case GWP_MANUAL: 
-			fprintf(stdout, _("manual\n"));
-			break;
-		case GWP_AUTOLOG: 
-			fprintf(stdout, _("automatic\n"));
-			break;
-		default: 
-			fprintf(stdout, _("unknown\n"));
-			break;
-		}
-		fprintf(stdout, _("   Access point: %s\n"), WAPSetting.AccessPoint);
-		fprintf(stdout, _("   IP: %s\n"), WAPSetting.GPRSIP);
-		fprintf(stdout, _("   Username: %s\n"), WAPSetting.GPRSUsername);
-		fprintf(stdout, _("   Password: %s\n"), WAPSetting.GPRSPassword);
+
+		error = SM_Functions(GOP_WriteWAPSetting, &data, &State);
+		if (error != GE_NONE) 
+			fprintf(stderr, _("Cannot write WAP setting: %s\n"), print_error(error));
+		return error;
+	}
+	return error;
+}
+
+/* Deleting WAP bookmarks. */
+static int activatewapsetting(char *Number)
+{
+	GSM_WAPSetting	WAPSetting;
+	GSM_Data	data;
+	GSM_Error	error;
+
+	WAPSetting.Location = atoi(Number);
+
+	GSM_DataClear(&data);
+	data.WAPSetting = &WAPSetting;
+
+	error = SM_Functions(GOP_ActivateWAPSetting, &data, &State);
+
+	switch (error) {
+	case GE_NONE:
+		fprintf(stderr, _("WAP setting nr. %d activated!\n"), WAPSetting.Location);
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), print_error(error));
@@ -4013,6 +4144,9 @@ int main(int argc, char *argv[])
 		/* Write ToDo note mode */
 		{ "writetodo",          required_argument, NULL, OPT_WRITETODO },
 
+		/* Delete all ToDo notes mode */
+		{ "deletealltodos",     no_argument,       NULL, OPT_DELETEALLTODOS },
+
 		/* Get calendar note mode */
 		{ "getcalendarnote",    required_argument, NULL, OPT_GETCALENDARNOTE },
 
@@ -4116,16 +4250,25 @@ int main(int argc, char *argv[])
 		{ "foogle",             no_argument,       NULL, OPT_FOOGLE },
 
 		/* Get Security Code */
-		{ "getsecuritycode",  no_argument,   	   NULL, OPT_GETSECURITYCODE },
+		{ "getsecuritycode",    no_argument,   	   NULL, OPT_GETSECURITYCODE },
 
 		/* Get WAP bookmark */
 		{ "getwapbookmark",     required_argument, NULL, OPT_GETWAPBOOKMARK },
+
+		/* Write WAP bookmark */
+		{ "writewapbookmark",   required_argument, NULL, OPT_WRITEWAPBOOKMARK },
 
 		/* Delete WAP bookmark */
 		{ "deletewapbookmark",  required_argument, NULL, OPT_DELETEWAPBOOKMARK },
 
 		/* Get WAP setting */
 		{ "getwapsetting",      required_argument, NULL, OPT_GETWAPSETTING },
+
+		/* Write WAP setting */
+		{ "writewapsetting",    no_argument, 	   NULL, OPT_WRITEWAPSETTING },
+
+		/* Activate WAP setting */
+		{ "activatewapsetting", required_argument, NULL, OPT_ACTIVATEWAPSETTING },
 
 		{ 0, 0, 0, 0},
 	};
@@ -4171,8 +4314,10 @@ int main(int argc, char *argv[])
 		{ OPT_WRITEPHONEBOOK,    0, 1, 0 },
 		{ OPT_DIVERT,            6, 10, 0 },
 		{ OPT_GETWAPBOOKMARK,    1, 1, 0 },
+		{ OPT_WRITEWAPBOOKMARK,  2, 2, 0 },
 		{ OPT_DELETEWAPBOOKMARK, 1, 1, 0 },
 		{ OPT_GETWAPSETTING,     1, 2, 0 },
+		{ OPT_ACTIVATEWAPSETTING,1, 1, 0 },
 
 		{ 0, 0, 0, 0 },
 	};
@@ -4293,6 +4438,9 @@ int main(int argc, char *argv[])
 		case OPT_WRITETODO:
 			rc = writetodo(nargv);
 			break;
+		case OPT_DELETEALLTODOS:
+			rc = deletealltodos();
+			break;
 		case OPT_GETCALENDARNOTE:
 			rc = getcalendarnote(nargc, nargv);
 			break;
@@ -4386,11 +4534,20 @@ int main(int argc, char *argv[])
 		case OPT_GETWAPBOOKMARK:
 			rc = getwapbookmark(optarg);
 			break;
+		case OPT_WRITEWAPBOOKMARK:
+			rc = writewapbookmark(nargc, nargv);
+			break;
 		case OPT_DELETEWAPBOOKMARK:
 			rc = deletewapbookmark(optarg);
 			break;
 		case OPT_GETWAPSETTING:
 			rc = getwapsetting(nargc, nargv);
+			break;
+		case OPT_WRITEWAPSETTING:
+			rc = writewapsetting();
+			break;
+		case OPT_ACTIVATEWAPSETTING:
+			rc = activatewapsetting(optarg);
 			break;
 #ifndef WIN32
 		case OPT_FOOGLE:

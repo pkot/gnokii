@@ -164,6 +164,7 @@ typedef enum {
 	GOP_GetProfile,
 	GOP_SetProfile,
 	GOP_WriteToDo,
+	GOP_DeleteAllToDos,
 	GOP_WriteCalendarNote,
 	GOP_DeleteCalendarNote,
 	GOP_SetSpeedDial,
@@ -192,8 +193,11 @@ typedef enum {
 	GOP_EnterChar,
 	GOP_Subscribe,
 	GOP_GetWAPBookmark,
+	GOP_WriteWAPBookmark,
 	GOP_DeleteWAPBookmark,
 	GOP_GetWAPSetting,
+	GOP_ActivateWAPSetting,
+	GOP_WriteWAPSetting,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 
