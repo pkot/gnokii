@@ -20,11 +20,11 @@ Application (gnokii/xgnoki)
     |  GSM->Function() 
 Gsm-api
     |  P*_Functions()
-Phone specific code (eg phone-nk7110.c)
+Phone specific code (eg nk7110.c)
     |  SM_SendMessage(), SM_Wait(), SM_Loop()
 StateMachine
     |  SendMessage(), Loop()
-Link specific code  (eg fbus-generic.c, mbus.c etc to follow)
+Link specific code  (eg fbus.c)
     |
 Hardware code
 
@@ -39,10 +39,10 @@ Initialisation:
 The gnokii application (eg gnokii, xgnokii) decides on the phone type and
 required connection method from the config file.  It then calls the
 gsm-api init code which in turn calls the init code for the correct phone.  
-This code is located in a series of files phone-*.c.  This code creates a
+This code is located in a series of files phone/*.c.  This code creates a
 GSM_State structure (which contains a GSM_Link structure) and passes this
 to the common code for the specific link (eg FBUS_Initialise, contained in
-fbus-generic.c).  The link code fills in the GSM_Link part of state (but
+fbus.c).  The link code fills in the GSM_Link part of state (and
 also stores state to use later).  The phone code chooses the appropriate
 link and is free to perform any phone specific init.  It then initialises
 the StateMachine by passing it the state struct and a GSM_Phone struct.
@@ -50,7 +50,7 @@ the StateMachine by passing it the state struct and a GSM_Phone struct.
 
 The Link:
 
-The link serves to deal bits of the phone protocol which are common to
+The link serves to deal with bits of the phone protocol which are common to
 every exchange for that particular phone.
 
 The GSM_Link structure is used to contain any information about the link
@@ -77,10 +77,10 @@ the phone.  Any received correctly are passed up to the statemachine code.
 The Middle Layer
 
 All common/*.c files contain the code that is general and is used by all
-of the phones. The functions within should convert the gnokii internat
+of the phones. The functions within should convert the gnokii internal
 structures into the frames (without the header) that can be sent to the
 phone and understood by it. It's obvious that this layer should be phone
-independent. All the phone speficic stuff should be done in the phone layer.
+independent. All the phone specific stuff should be done in the phone layer.
 In the case when phone frames are similiar but not the same, the phone layer
 can export some help structures to let be the code shared in the middle
 layer. Using the middle layer is optional. Currently almost no code does use
@@ -90,16 +90,17 @@ to keep clean the phone drivers.
 
 The Phone:
 
-The phone-*.c code therefore basically contains code to package up and
+The phone/*.c code therefore basically contains code to package up and
 unpack information from the phone specific format to generic gnokii
 structures (eg GSM_Bitmap).  However, it is also at the top of the tree
 and contains functions called by the application.  Generally there are
 three types of exchanges that can occur.  Firstly the computer can send
-the phone a command and expect no answer (not including acks).  Secondly
-the computer may send a command and expect a response within a certain
-time - often containing useful information.  Lastly the phone may send the
-computer unrequested information (ring!).  Therefore the functions in the
-phone code need to process one of these three things:
+the phone a command and expect no answer (not including acks etc which 
+are dealt with by the phone code).  Secondly the computer may send a command
+and expect a response within a certain time - often containing useful 
+information.  Lastly the phone may send the computer unrequested 
+information (ring!).  Therefore the functions in the phone code need to 
+process one of these three things:
 
 1) Just sending out is easy - we simply call SM_SendMessage - which in
 turn calls the link sendmessage.
@@ -181,7 +182,7 @@ sized chunks!
 Other Notes
 -----------
 
-Within a phone-*.c or link file the functions should be made static.  It
+Within a phone/*.c or link file the functions should be made static.  It
 is therefore not necessary to use prefixes such as FB61_ but this may help
 code legibility to distiguish the major functions.
 
