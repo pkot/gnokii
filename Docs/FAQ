@@ -106,6 +106,9 @@ A. We don't have any formal documentation of the protocols in use.
      Nagy Balazs' pages:
        http://www.lsc.hu/dl/
 
+     The MBUS / FBUS pages 
+       http://www.flosys.com/tdma/
+
 -------------------------------------------------------------------------------
 Q. Does gnokii work under Sun's Solaris?
 
@@ -117,7 +120,8 @@ A. Generally yes, but in fact it depends on hardware -- your serial port
 Q. Could somebody tell me the key for on, off and select menu in
     gnokii --keysequence function?
 
-A. Menu is M, power is P. Usefull keys are "0123456789#*PGR+-UDMN".
+   M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
+   +: increase volume, -: decrease volume, 0123456789#* as is.
 
 -------------------------------------------------------------------------------
 Q. I get 'undefined symbol: GSM_ELogHandler' when runnig gnokii. What's
