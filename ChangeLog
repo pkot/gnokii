@@ -32,6 +32,7 @@
     o get rid of the global GSM_Data                   (Markus Plail)
     o fix deleting SMS messages                        (Markus Plail)
     o fix date when saving SMS messages to mailbox     (Markus Plail)
+    o use correct xgnokiidir in xgnokii    (Pawel Kot, Tor Petterson)
  * gnokii updates:
     o remove SMSFolder hack from getsms                (Markus Plail)
     o call status display added                      (BORBELY Zoltan)
