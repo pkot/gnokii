@@ -608,8 +608,9 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	dprintf("AT mode set\n");
 
 	/* Prepare the message and count the size */
-	memcpy(req2, data->RawSMS->MessageCenter, data->RawSMS->MessageCenter[0] + 1);
-	offset += data->RawSMS->MessageCenter[0];
+/*	memcpy(req2, data->RawSMS->MessageCenter, data->RawSMS->MessageCenter[0] + 1);
+	offset += data->RawSMS->MessageCenter[0];*/
+	req2[0] = 0;
 
 	req2[offset + 1] = 0x01 | 0x10; /* Validity period in relative format */
 	if (data->RawSMS->RejectDuplicates) req2[offset + 1] |= 0x04;
@@ -633,7 +634,7 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	length = data->RawSMS->UserDataLength + offset + 8;
 
 	/* Length in AT mode is the length of the full message minus SMSC field length */
-	sprintf(req, "AT+%s=%d\r", cmd, length - data->RawSMS->MessageCenter[0] - 1);
+	sprintf(req, "AT+%s=%d\r", cmd, length - 1);
 	dprintf("Sending initial sequence\n");
 	if (SM_SendMessage(state, strlen(req), GOPAT_Prompt, req) != GE_NONE) return GE_NOTREADY;
 	error = SM_BlockNoRetry(state, data, GOPAT_Prompt);
@@ -653,10 +654,8 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[16];
-	sprintf(req, "AT+CMGR=%d\r", data->SMS->Number);
+	sprintf(req, "AT+CMGR=%d\r", data->RawSMS->Number);
 	dprintf("%s", req);
-	data->RawSMS->Number = data->SMS->Number;
-	data->RawSMS->MemoryType = data->SMS->MemoryType;
 	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GE_NONE)
 		return GE_NOTREADY;
 	return SM_Block(state, data, GOP_GetSMS);
@@ -814,7 +813,7 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	AT_LineBuffer buf;
-	char *pos;
+	unsigned char *pos, *aux;
 
 	if (buffer[0] != GEAT_OK)
 		return GE_UNKNOWN; /* FIXME */
@@ -828,13 +827,18 @@ static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int l
 		if (strstr(buf.line2,"+CSCA")) {
 			pos = strchr(buf.line2 + 8, '\"');
 			if (pos) {
-				*pos = '\0';
+				*pos++ = '\0';
 				data->MessageCenter->No = 1;
 				strncpy(data->MessageCenter->SMSC.Number, buf.line2 + 8, MAX_BCD_STRING_LENGTH);
-		                data->MessageCenter->SMSC.Number[MAX_BCD_STRING_LENGTH - 1] = '\0';
-				if (data->MessageCenter->SMSC.Number[0] == '+')
+				data->MessageCenter->SMSC.Number[MAX_BCD_STRING_LENGTH - 1] = '\0';
+				/* Now we look for the number type */
+				data->MessageCenter->SMSC.Type = 0;
+				aux = strchr(pos, ',');
+				if (aux)
+					data->MessageCenter->SMSC.Type = atoi(++aux);
+				else if (data->MessageCenter->SMSC.Number[0] == '+')
 					data->MessageCenter->SMSC.Type = SMS_International;
-				else
+				if (!data->MessageCenter->SMSC.Type)
 					data->MessageCenter->SMSC.Type = SMS_Unknown;
 			} else {
 				data->MessageCenter->No = 0;
@@ -994,9 +998,9 @@ static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length
 	/* SendSMS or SaveSMS */
 	if (!strncmp("+CMGW:", buf.line2, 6) ||
 	    !strncmp("+CMGS:", buf.line2, 6))
-		data->SMS->Number = atoi(buf.line2 + 6);
+		data->RawSMS->Number = atoi(buf.line2 + 6);
 	else
-		data->SMS->Number = -1;
+		data->RawSMS->Number = -1;
 	dprintf("Message sent okay\n");
 	return GE_NONE;
 }
