@@ -270,7 +270,6 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 gn_error phonet_initialise(struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_FAILED;
-	bool connected;
 
 	/* Fill in the link functions */
 	state->link.loop = &phonet_loop;
