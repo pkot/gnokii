@@ -22,7 +22,7 @@ AC_PATH_PROG(LD, ld, no)
 AC_PATH_PROG(RM, rm, no)
 AC_PATH_PROG(MSGFMT, msgfmt, no)
 AC_PATH_PROG(XGETTEXT, xgettext, no)
-AC_PATH_PROG(MAKE, make, no)
+AC_CHECK_PROGS(MAKE, gmake make)
 AC_PATH_PROG(INSTALL, install, no)
 
 AC_ARG_ENABLE(debug, 

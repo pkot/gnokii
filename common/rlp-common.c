@@ -116,7 +116,7 @@ u8 RLP_T2=0;
 
 
 /* Send Ring Buffer */
-#define SendRingBufferSize 1024
+#define SendRingBufferSize 8192
 u16 SendHead;
 u16 SendTail;
 u8 *SendRingBuffer;
@@ -1209,7 +1209,7 @@ bool RLP_PrepareDataToTransmit(u8 *p)
     *p=j;
     return true;
   } else j=Incr(j);
-  if (VS==VD) return false;
+  if (S[VS].State==_idle) return false;
   j=VS;
   S[VS].State=_wait;
   VS=Incr(VS);
@@ -1247,6 +1247,7 @@ void RLP_SendSREJ(u8 x)
     RLP_SendF96Frame(RLPFT_SI_SREJ, true, false, x , k , S[k].Data, false); 
     R[x].State=_wait;
     RLP_SetTimer(&T_RCVS[x]);
+    RLP_SetTimer(&T);
     Ackn_State=false; /* Serge does not have these */
   }
   else {
@@ -1284,6 +1285,7 @@ void RLP_Send_XX_Cmd(RLP_FrameTypes type)
 #endif
     RLP_SendF96Frame(type+4, true, false, VR , k , S[k].Data, false); 
     Ackn_State=false;
+    RLP_SetTimer(&T);
   }
   else {
 #ifdef RLP_DEBUG
@@ -1645,6 +1647,8 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
       case RLPFT_S_RNR:
       case RLPFT_S_REJ:
       case RLPFT_S_SREJ:
+	/* This is not in the spec but we have to clear it sometime!! */
+	T=-1;
 	/* Should check here for unsolicited Fbit */
 	if (header->Nr < RLP_M) RLP_S_Handler(frame,header);  /* Check as Serge, the spec is more thorough */
 	break;
@@ -1652,6 +1656,8 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
       case RLPFT_SI_RNR:
       case RLPFT_SI_REJ:
       case RLPFT_SI_SREJ:
+	/* This is not in the spec but we have to clear it sometime!! */
+	T=-1;
 	/* Should check here for unsolicited Fbit */
 	if (header->Nr < RLP_M) /* Check as Serge, spec more thorough */
 	  if (!RLP_I_Handler(frame,header)) RLP_S_Handler(frame,header);
