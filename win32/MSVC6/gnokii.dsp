@@ -197,10 +197,6 @@ SOURCE=nokia.c
 # End Source File
 # Begin Source File
 
-SOURCE=utils.c
-# End Source File
-# Begin Source File
-
 SOURCE=winserial.c
 # End Source File
 # End Group
@@ -270,10 +266,6 @@ SOURCE=phones\nk7110.h
 # Begin Source File
 
 SOURCE=phones\nokia.h
-# End Source File
-# Begin Source File
-
-SOURCE=links\utils.h
 # End Source File
 # Begin Source File
 

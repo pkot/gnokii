@@ -30,7 +30,6 @@
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
 #include "device.h"
-#include "links/utils.h"
 
 #include "links/cbus.h"
 

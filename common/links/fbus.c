@@ -32,7 +32,6 @@
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
 #include "gsm-statemachine.h"
-#include "links/utils.h"
 #include "device.h"
 
 #include "links/fbus.h"
