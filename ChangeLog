@@ -2,6 +2,7 @@
 =====
  * Misc cleanups
     o move mkinstalldirs to config/                      (Pawel Kot)
+    o update README                                      (Pawel Kot)
 
 0.5.0pre4
 =========
@@ -23,7 +24,7 @@
  * gnokii updates
     o add --getnetworkinfo                          (Bertrik Sikken)
  * build system fixes
-    o correctly set CFLAGS w0th --enable-debug           (Pawel Kot)
+    o correctly set CFLAGS with --enable-debug           (Pawel Kot)
  * nk6510 driver updates:
     o don't segfault with uninitialized data->alarm      (Pawel Kot)
     o don't segfault with uninitialized data->sms_status (Pawel Kot)

@@ -6,8 +6,8 @@
 e.g.
 
    cd /usr/src
-   tar xvfz /tmp/gnokii-0.4.X.tar.gz
-   cd gnokii-0.4.X
+   tar xvfz /tmp/gnokii-0.5.X.tar.gz
+   cd gnokii-0.5.X
    ./configure --enable-nls --with-x
    make
    groupadd gnokii
@@ -67,7 +67,7 @@ connect 'chat -v TIMEOUT 60 ABORT BUSY ABORT ERROR ABORT "NO CARRIER" "" AT OK A
 
    on the computer called you can use the ttyI* device, for more info read
    the following mail:
-   http://mail.freesoftware.fsf.org/pipermail/gnokii-users/2002-June/001259.html
+   http://mail.nongnu.org/pipermail/gnokii-users/2002-June/001259.html
 
 --------------- /etc/ppp/pap-secrets ---------------------------
 XXXX.demon.co.uk	demon-gnokii	<yourpassword>

@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2002 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2002 Pawe³ Kot
-                  Last update 23 Jul 2002    Version 0.4.3
+                  Last update 23 Jul 2002    Version 0.5.0pre
 
 - Contents - 			   
 
@@ -24,7 +24,7 @@
 			   
 - 1.0 Introduction -
 
-This is version 0.4.1 of gnokii, a Linux/Unix tool suite and modem
+This is version 0.5.0pre of gnokii, a Linux/Unix tool suite and modem
 driver for Nokia mobile phones, released under the GPL.  Please
 see COPYING for more details on license/copying issues, the lack of
 warranty and where to send a postcard if you like gnokii :).
@@ -40,7 +40,7 @@ negotiations stalled over the issue of binary versus open source
 releases and the project has proceeded without official or unofficial
 assistance.
 
-We have a web site at http://gnokii.org/ which amongst other things
+We have a web site at http://www.gnokii.org/ which amongst other things
 gives information on how to join the gnokii mailing list, retrieving
 bleeding edge releases through CVS and more!
 
@@ -132,7 +132,7 @@ it in the conventional manner for the package type in question.
 For example if you downloaded a .rpm file you can install it by
 running the following as root.
 
-rpm -i gnokii-0.4.1-i386.rpm
+rpm -i gnokii-0.4.3-i386.rpm
 
 If you are using a Debian based system, you can use dpackage
 to do the installation. On Slackware you use installpkg or pkgtool.
@@ -167,16 +167,22 @@ A simple test to confirm that your cable/IR link is working
 is to run gnokii with the --monitor flag e.g.
 
   foobar$ gnokii --monitor
-  
+
 This will attempt to connect to your phone and display
 information such as signal strength, battery level  etc.
-      
+
 If you get an error along the lines of
 	
   Hmmm... GSM_LinkOK never went true. Quitting.
 	    
 this indicates that gnokii could not communicate with your phone
 for some reason and you will need to do some troubleshooting.
+
+As the other test you may try:
+
+  foobar$ gnokii --identify
+
+which should show you the base information on your phone.
 		                        
 
 - 7.0 Known Bugs -
@@ -250,10 +256,12 @@ Just install the cvs package for your distribution and follow these steps:
 
 If you prefer, there is a WWW interface to the CVS server at
 
-http://savannah.gnu.org/cgi-bin/viewcvs/gnokii/
+http://savannah.nongnu.org/cgi-bin/viewcvs/gnokii/
 
 Once you have the sources, you will need to run the following commands
 
+	gettextize
+	aclocal
 	autoheader
 	autoconf
 	./configure
@@ -273,7 +281,7 @@ on the list first to avoid duplicated effort.
 
 If you would like to receive email when updates are made to the CVS
 repository, subscribe to gnokii-commit mailing list at
-http://mail.freesoftware.fsf.org/mailman/listinfo/gnokii-commit.
+http://mail.nongnu.org/mailman/listinfo/gnokii-commit.
 
 Our thanks go to the Czech Linux Users Group for hosting the original
 CVS repository at cvs.linux.cz and then to the Samba Team who kept hosting
@@ -287,25 +295,24 @@ You'll find the detailed protocol description in Docs/protocol/ directory.
 
 The web site for this project is at;
 
-	http://gnokii.org/
+	<http://www.gnokii.org/>
 
 Project page on savannah is at
 
-	http://savannah.gnu.org/projects/gnokii/
+	<http://savannah.nongnu.org/projects/gnokii/>
 
 The mailing list devoted to the gnokii project is
 
-	<gnokii-users@mail.freesoftware.fsf.org>
+	<gnokii-users@mail.nongnu.org>
 
 You can subscribe at
 
-	http://mail.freesoftware.fsf.org/mailman/listinfo/gnokii-users
+	<http://mail.nongnu.org/mailman/listinfo/gnokii-users>
 
 The serial programming how-to was valuable in cobbling together
-serial code for both monitoring and the tools themselves.  This
-is the Australian mirror, there will be one nearby to you too :)
+serial code for both monitoring and the tools themselves.
 
-<http://www.monash.edu.au/mirror/ldp/HOWTO/Serial-Programming-HOWTO.html>
+	<http://www.tldp.org/HOWTO/Serial-Programming-HOWTO/index.html>
 
 
 - 13.0 Handsets tested -
@@ -346,10 +353,10 @@ Nokia 2110 Series
  + 6080
 
 Nokia 6160 Series
- - depreciated
+ - deprecated
 
 Nokia 640 Series
- - depreciated
+ - deprecated
 
 AT series
  - Nokia 6210/7110/8210/6310/6510
@@ -363,6 +370,12 @@ to recognise those who have helped so far!
 
 
 - 15.0 Release Notes -
+200301?? Version 0.5.0
+The external API was rewritten. Now it should be easier to write any
+external application using libgnokii. Many bugfixes and code cleanups.
+Improved build system. Better portability to *BSD, MacOSX and Windows. Allow
+to use multiple phones.
+
 20020805 Version 0.4.3
 Many functional updates. They touch mainly nk6510 and nk6110 drivers
 functionality, also updates in nk7110 driver. Add new functionality to
