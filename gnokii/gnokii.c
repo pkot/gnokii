@@ -742,6 +742,8 @@ static int sendsms(int argc, char *argv[])
 		if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
 			strcpy(sms.smsc.number, data.message_center->smsc.number);
 			sms.smsc.type = data.message_center->smsc.type;
+		} else {
+			fprintf(stderr, _("Cannot read the SMSC number from your phone. If the sms send will fail, please use --smsc option explicitely giving the number.\n"));
 		}
 		free(data.message_center);
 	}
