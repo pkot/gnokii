@@ -74,6 +74,7 @@ static GSM_Error InitModelInf (void)
   GSM_Error error;
   char model[64], rev[64], manufacturer[64];
 
+  GSM_DataClear(&data);
   data.Manufacturer = manufacturer;
   data.Model = model;
   data.Revision = rev;
@@ -189,6 +190,7 @@ static void RefreshSMS (const gint number)
   phoneMonitor.sms.number = 0;
   pthread_mutex_unlock (&smsMutex);
 
+  GSM_DataClear(&data);
   data.SMSFolderList = &folderlist;
   folder.FolderID = 0;
   data.SMSFolder = &folder;
@@ -207,7 +209,6 @@ static void RefreshSMS (const gint number)
       pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
       phoneMonitor.sms.number++;
-      pthread_mutex_unlock (&smsMutex);
       
       if (phoneMonitor.sms.number == number)
       {
@@ -215,12 +216,13 @@ static void RefreshSMS (const gint number)
         pthread_mutex_unlock (&smsMutex);
         return;
       }
+
+      pthread_mutex_unlock (&smsMutex);
     }
     else if (error == GE_INVALIDSMSLOCATION)   /* All positions are readed */
     {
       g_free (msg);
       pthread_cond_signal (&smsCond);
-      pthread_mutex_unlock (&smsMutex);
       break;
     }
     else
@@ -241,6 +243,7 @@ static gint A_SendSMSMessage (gpointer data)
   if (d)
   {
     pthread_mutex_lock (&sendSMSMutex);
+    GSM_DataClear(&dt);
     dt.SMSMessage = d->sms;
     error = d->status = SendSMS ( &dt, &sm);
     pthread_cond_signal (&sendSMSCond);
@@ -259,6 +262,7 @@ static gint A_DeleteSMSMessage (gpointer data)
   GSM_Data dt;
   GSM_Error error = GE_UNKNOWN;
 
+  GSM_DataClear(&dt);
   dt.SMSMessage = (GSM_SMSMessage *) data;
   if (dt.SMSMessage)
   {
@@ -292,6 +296,7 @@ void *Connect (void *a)
   PhoneEvent *event;
   GSM_Error error;
 
+  GSM_DataClear(&data);
   data.SMSStatus = &SMSStatus;
   
 # ifdef XDEBUG

@@ -1,3 +1,7 @@
+* Wed Mar 20 2002 BORBELY Zoltan <bozo@andrews.hu>
+- GSM_Data structures initialised correctly
+- Minor locking fixes
+
 * Thu Feb 14 2002 Jan Derfinak <ja@mail.upjs.sk>
 - Rewrited PostgreSQL plugin.
 - Added retrying when sending sms's.
