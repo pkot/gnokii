@@ -221,7 +221,7 @@ struct {
 	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE },
 	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE },
 	{ "RPM-1",	"-4.23",	NK6100_CAP_NBS_UPLOAD },
-	{ "NSE-8",	NULL,		NK6100_CAP_OLD_KEY_API },
+	{ "NSE-8",	NULL,		NK6100_CAP_OLD_KEY_API | NK6100_CAP_NO_PSTATUS | NK6100_CAP_NO_CB },
 	{ "NSE-9",	NULL,		NK6100_CAP_OLD_KEY_API },
 	{ NULL,		NULL,		0 }
 };
@@ -602,6 +602,9 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 static gn_error GetPhoneStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
+
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NO_PSTATUS)
+		return GN_ERR_NOTSUPPORTED;
 
 	dprintf("Getting phone status...\n");
 	if (sm_message_send(4, 0x04, req, state)) return GN_ERR_NOTREADY;
@@ -1255,6 +1258,9 @@ static gn_error SetCellBroadcast(gn_data *data, struct gn_statemachine *state)
 	unsigned char req_ena[] = {FBUS_FRAME_HEADER, 0x20, 0x01, 0x01, 0x00, 0x00, 0x01, 0x01};
 	unsigned char req_dis[] = {FBUS_FRAME_HEADER, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	unsigned char *req;
+
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NO_CB)
+		return GN_ERR_NOTSUPPORTED;
 
 	req = data->on_cell_broadcast ? req_ena : req_dis;
 	DRVINSTANCE(state)->on_cell_broadcast = data->on_cell_broadcast;

@@ -16,6 +16,7 @@
     o ringtone handling unified                    (BORBELY Zoltan)
     o datacall cleanup                             (BORBELY Zoltan)
     o DeleteRingtone support added                 (BORBELY Zoltan)
+    o CB and PhoneStatus disabled on NSE-8 (3210)  (BORBELY Zoltan)
  * 7110 series updates
     o ringtone handling unified                    (BORBELY Zoltan)
  * gnokiid updates
