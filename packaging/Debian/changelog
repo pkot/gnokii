@@ -1,0 +1,25 @@
+gnokii (0.3.3_pre24) unstable; urgency=low
+
+  * other itsy-bitsy changes in order to get gnokii to pass lintian
+  * moving gnokii group deletion from postinst to gnokii.postrm
+  * splitting-out examples and man pages listings to gnokii.examples
+    and gnokii.manpages
+    
+ -- Erik Rossen (Linux consultant) <rossen@freesurf.ch>  Mon, 18 Jun 2001 21:16:56 +0200
+
+gnokii (0.3.2) stable; urgency=low
+
+  * No changes for debian package in source 
+  * This file generate gnokii's build system (sorry deb's guru..)
+    
+ -- Karel Zak <zakkr@zf.jcu.cz>  Wed, 17 May 2000 13:56:28 +0100
+
+gnokii (0.3.2_pre1) unstable; urgency=low
+
+  * No changes for debian package in source 
+    
+ -- Karel Zak <zakkr@zf.jcu.cz>  Tue, 11 Jan 2000 16:57:00 +0100
+
+Local variables:
+mode: debian-changelog
+End:

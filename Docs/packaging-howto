@@ -55,16 +55,27 @@ you must first 'cd' to the top gnokii directory and type:
 
 4) In the top gnokii directory type:
 
-	debian/rules binary
+	fakeroot debian/rules binary
 
 5) And then clean up:
 
-	debian/rules clean
+	fakeroot debian/rules clean
 
 	rm debian
 
 The .deb packages will appear in the directory ABOVE the top gnokii
 directory.
+
+Alternatively, if you want to build everything including sources (.tar.gz,
+.dsc, and .changes files), go to the top gnokii directory and type:
+
+	dpkg-buildpackage -rfakeroot
+
+instead of invoking "debian/rules binary" directly.  Note that you will
+need the fakeroot package installed, but are there any Debian developers
+that don't have that one installed?  Nope.  If you want to sign the
+packages with your own PGP key, you will need to make a new first entry
+in the Debian changelog.
 
 
 RedHat:
@@ -109,7 +120,13 @@ Win32:
 
 DOCUMENT HISTORY
 
-2001-04-20 
+2001-06-18
+
+Erik Rossen <rossen@freesurf.ch>
+
+* fixing Debian notes to mention 'fakeroot' and 'dpkg-buildpackage'
+
+2001-04-20
 
 Erik Rossen <rossen@freesurf.ch>
 

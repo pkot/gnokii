@@ -340,12 +340,14 @@ else
          x_support="yes"   
 
          XGNOKIIDIR='${prefix}/share'
+         XGNOKIIPATH=${prefix}/share
          AC_ARG_WITH(xgnokiidir,
             [  --with-xgnokiidir=DIR   specifies the base for xgnokii],
             [ if test x$withval = xyes; then 
                  AC_MSG_WARN(Usage is: --with-xgnokiilib=DIR)
               else
                  XGNOKIIDIR="$withval"
+                 XGNOKIIPATH="$withval"
               fi
             ]
          )
@@ -456,6 +458,7 @@ AC_SUBST(VERSION)
 AC_SUBST(XVERSION)
 AC_SUBST(XPACKAGE)
 AC_SUBST(XGNOKIIDIR)
+AC_SUBST(XGNOKIIPATH)
 AC_SUBST(exec_prefix)
 AC_SUBST(USE_NLS)
 AC_SUBST(GTK_CFLAGS)
@@ -472,7 +475,6 @@ AC_OUTPUT(
    include/config.h.in
    Makefile.global
    po/Makefile.in
-   packaging/Debian/changelog
    packaging/RedHat/gnokii.spec
    packaging/Slackware/SlackBuild,
    [sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile]

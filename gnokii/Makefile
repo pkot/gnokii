@@ -39,9 +39,30 @@ $(TOPDIR)/getopt/libgetopt.a:
 clean:
 	$(RM) $(OBJS) *~ depend gnokii *.exe core *.bak
 
-install:
+install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) gnokii $(bindir)
+
+install-strip: all
+	$(INSTALL) -d $(bindir)
+	$(INSTALL) -s gnokii $(bindir)
+	@echo "done"
+
+install-suid: all
+	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
+		/usr/sbin/groupadd gnokii; \
+	fi
+	$(INSTALL) -d $(bindir)
+	$(INSTALL) -o root -g gnokii -m 0750 gnokii $(bindir)
+	@echo
+
+install-ss: all
+	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
+		/usr/sbin/groupadd gnokii; \
+	fi
+	$(INSTALL) -d $(bindir)
+	$(INSTALL) -o root -g gnokii -m 0750 -s gnokii $(bindir)
+	@echo
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

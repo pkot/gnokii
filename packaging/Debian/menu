@@ -1,1 +1,1 @@
-?package(gnokii):needs=text section="Apps/Comm" title="XGnokii" command="/usr/bin/xgnokii"
+?package(gnokii):needs="X11" section="Apps/Net" title="XGnokii" command="/usr/bin/xgnokii"

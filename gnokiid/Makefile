@@ -27,9 +27,30 @@ $(TOPDIR)/common/data/DATA.o:
 clean:
 	$(RM) $(OBJS) *~ depend gnokiid *.exe core *.bak
 
-install:
+install: all
 	$(INSTALL) -d $(sbindir)
 	$(INSTALL) gnokiid $(sbindir)
+
+install-strip: all
+	$(INSTALL) -d $(sbindir)
+	$(INSTALL) -s gnokiid $(sbindir)
+	@echo "done"
+
+install-suid: all
+	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
+		/usr/sbin/groupadd gnokii; \
+	fi
+	$(INSTALL) -d $(sbindir)
+	$(INSTALL) -o root -g gnokii -m 4750 gnokiid $(sbindir)
+	@echo "done"
+
+install-ss: all
+	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
+		/usr/sbin/groupadd gnokii; \
+	fi
+	$(INSTALL) -d $(sbindir)
+	$(INSTALL) -o root -g gnokii -m 4750 -s gnokiid $(sbindir)
+	@echo "done"
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

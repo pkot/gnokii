@@ -15,13 +15,18 @@ TOPDIR=.
 #
 include ${TOPDIR}/Makefile.global
 
+BIN_DIRS = gnokii
+
+ifndef WIN32
+BIN_DIRS += gnokiid
+endif
 
 DIRS =  common/phones \
 	common/links \
 	common/devices \
 	common/data \
         common \
-	gnokii
+	$(BIN_DIRS)
 
 #
 # For now gnokiid and utils only make sense on Unix like systems.
@@ -29,8 +34,7 @@ DIRS =  common/phones \
 #
 
 ifndef WIN32
-DIRS +=	gnokiid \
-         utils
+DIRS +=	utils
 endif
 
 GTK_DIRS =  xgnokii \
@@ -94,7 +98,6 @@ distclean:	clean
 		include/config.h.in \
 		packaging/RedHat/gnokii.spec \
 		packaging/Slackware/SlackBuild \
-		packaging/Debian/changelog \
 		po/Makefile.in \
 		debian
 
@@ -135,6 +138,53 @@ install: all
 
 install-docs:
 	$(MAKE) -C $(DOCS_DIR) install
+	@echo "done"
+
+install-strip:
+	@for dir in $(BIN_DIRS); do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install-strip; \
+		fi; \
+	done
+
+	@if [ "$(GTK_LIBS)" ]; then \
+		@for dir in $(GTK_DIRS); do \
+			if [ -e $$dir/Makefile ]; then \
+				$(MAKE) -C $$dir install-strip; \
+			fi; \
+		done \
+	fi
+	@echo "done"
+
+install-suid:
+	@for dir in $(BIN_DIRS); do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install-suid; \
+		fi; \
+	done
+	@if [ "$(GTK_LIBS)" ]; then \
+		@for dir in $(GTK_DIRS); do \
+			if [ -e $$dir/Makefile ]; then \
+				$(MAKE) -C $$dir install-suid; \
+			fi; \
+		done \
+	fi
+	@echo "done"
+
+install-ss:
+	@for dir in $(BIN_DIRS); do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install-ss; \
+		fi; \
+	done
+
+	@if [ "$(GTK_LIBS)" ]; then \
+		for dir in $(GTK_DIRS); do \
+			if [ -e $$dir/Makefile ]; then \
+				$(MAKE) -C $$dir install-ss; \
+			fi; \
+		done \
+	fi
 	@echo "done"
 
 .PHONY: all install clean distclean dep depend install-docs

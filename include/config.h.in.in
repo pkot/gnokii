@@ -11,7 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.1  2001-01-02 09:09:09  pkot
+  Revision 1.2  2001-06-20 22:34:45  pkot
+  Updated Debian packaging system (Erik Rossen)
+  Updated Makefiles to let packaging process be easier (Pawel Kot)
+
+  Revision 1.1  2001/01/02 09:09:09  pkot
   Misc fixes and updates.
 
 
@@ -24,7 +28,7 @@
 
 #define VERSION    "@VERSION@"
 #define XVERSION   "@XVERSION@"
-#define XGNOKIIDIR "@XGNOKIIDIR@/@XPACKAGE@"
+#define XGNOKIIDIR "@XGNOKIIPATH@/@XPACKAGE@"
 
 /* Define if you have timersub() */
 #undef HAVE_TIMEOPS

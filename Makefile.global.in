@@ -72,5 +72,5 @@ endif
 
 
 CFLAGS += -I$(GNOKII_INCLUDE)
-LDFLAGS = -s $(LIBS)
+LDFLAGS = $(LIBS)
 

@@ -1,17 +1,24 @@
 #!/usr/bin/make -f
 
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
+export DH_COMPAT=3
+
+export build_dir=$(shell pwd)/debian/gnokii
 
 build:	build-stamp
 build-stamp:
 	dh_testdir
 	./configure --prefix=/usr --with-x
+#	./configure --prefix=/usr --with-x --enable-debug --enable-xdebug --enable-rlpdebug
 	make
+	touch build
+	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
-	make clean
+	rm -f build build-stamp
+	#make clean
 	dh_clean
 
 # Build architecture-independent files here.
@@ -26,27 +33,27 @@ binary-arch:	build
 	dh_testdir
 	dh_testroot
 	dh_installdirs
-	make install prefix=`pwd`/debian/tmp/usr
-	mkdir -p `pwd`/debian/tmp/etc/
-	sed 's#/usr/local/sbin/#/usr/sbin/#' < Docs/sample/gnokiirc > `pwd`/debian/tmp/etc/gnokiirc
+	make install prefix=$(build_dir)/usr
+	mkdir -p $(build_dir)/etc
+	sed 's#/usr/local/sbin/#/usr/sbin/#' < Docs/sample/gnokiirc > $(build_dir)/etc/gnokiirc
+	sed 's#"COPYING"#"file:/usr/share/doc/gnokii/copyright"#' < xgnokii/docs/help/en_US/faq.html > $(build_dir)/usr/share/xgnokii/help/en_US/faq.html
+	rm $(build_dir)/usr/share/xgnokii/help/en_US/COPYING
 #	dh_installdebconf	
-#	dh_installexamples
+	dh_installexamples
 	dh_installdocs
 	dh_installmenu
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installinit
 #	dh_installcron
-#	dh_installmanpages
-	dh_installinfo
+	dh_installman
+#	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs
 	dh_link
 	dh_strip
 	dh_compress
-	dh_fixperms
-	# You may want to make some executables suid here.
-	dh_suidregister
+	dh_fixperms -Xmgnokiidev
 #	dh_makeshlibs
 	dh_installdeb
 #	dh_perl
