@@ -22,6 +22,8 @@
     o getsms support                               (BORBELY Zoltan)
     o sms status request support                   (BORBELY Zoltan)
     o minor phonebook reading/writing cleanup      (BORBELY Zoltan)
+    o sendsms support                              (BORBELY Zoltan)
+    o getsmscenter support                         (BORBELY Zoltan)
  * gnokii updates
     o --showsmsfolderstatus added                  (BORBELY Zoltan)
     o folder id display fix in --deletesmsfolder   (BORBELY Zoltan)
