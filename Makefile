@@ -26,13 +26,13 @@ CC = gcc
 # Model of the mobile phone
 #
 
-# MODEL=-DMODEL="\"3810\""
+MODEL=-DMODEL="\"3810\""
 
 #
 # For Nokia 6110/5110 uncomment the next line
 #
 
-MODEL=-DMODEL="\"6110\""
+# MODEL=-DMODEL="\"6110\""
 
 #
 # Serial port for communication
