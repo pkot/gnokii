@@ -1,5 +1,11 @@
-/* This is bus for dancall phones.
-*/
+/* -*- linux-c -*-
+
+  Copyright (C) 2001 Pavel Machek <pavel@ucw.cz>
+  Copyright (C) 2001 Michl Ladislav <xmichl03@stud.fee.vutbr.cz>
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+ 
+ */
 
 /* System header files */
 
@@ -53,7 +59,7 @@ bool CBUS_OpenSerial()
 
 /* -------------------------------------------------------------------- */
 
-int xread(unsigned char *d, int len)
+static int xread(unsigned char *d, int len)
 {
 	int res;
 	while (len) {
@@ -72,7 +78,7 @@ int xread(unsigned char *d, int len)
 	return 0;
 }
 
-int xwrite(unsigned char *d, int len)
+static int xwrite(unsigned char *d, int len)
 {
 	int res;
 	while (len) {
@@ -91,7 +97,7 @@ int xwrite(unsigned char *d, int len)
 	return 0;
 }
 
-void
+static void
 say(unsigned char *c, int len)
 {
 	unsigned char d[10240];
@@ -107,7 +113,7 @@ say(unsigned char *c, int len)
 	}			
 }
 
-int
+static int
 waitack(void)
 {
 	unsigned char c;
@@ -121,7 +127,7 @@ waitack(void)
 	return 0;
 }
 
-void
+static void
 sendpacket(unsigned char *msg, int len, unsigned short cmd)
 {
 	unsigned char p[10240], csum = 0;
