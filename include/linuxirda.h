@@ -28,7 +28,10 @@
  * GNOKII modifications:
  *
  * $Log$
- * Revision 1.2  2001-07-03 00:03:37  pkot
+ * Revision 1.3  2001-07-05 10:54:53  pkot
+ * Solaris 2.7 fixes - should be harmless for other OSes (Michael Wiedmann)
+ *
+ * Revision 1.2  2001/07/03 00:03:37  pkot
  * Small fixes to let gnokii compile and work under solaris (thanks to Artur Kubiak)
  *
  */
@@ -37,7 +40,7 @@
 #define IRDA_H
 
 #include <sys/types.h>
-#include <stdint.h>
+#include <inttypes.h>
 
 /* Hint bit positions for first hint byte */
 #define HINT_PNP         0x01

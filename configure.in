@@ -354,6 +354,9 @@ else
    fi
 fi
 
+dnl ======================== Check for libsocket
+AC_CHECK_LIB(socket, socket)
+
 dnl ======================== Additional switches
 
 AC_ARG_ENABLE(security, 
