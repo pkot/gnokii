@@ -27,6 +27,7 @@
  * nk6100 driver updates
     o PressKey and ReleaseKey support for 3210      (BORBELY Zoltan)
     o support for Nokia 5100(?)                          (Pawel Kot)
+    o get rid of the warning on missing parethensis      (Pawel Kot)
  * statemachine changes
     o don't wait for an ack in case no message was sent
                                                      (Osma Suominen)
