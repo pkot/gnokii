@@ -941,6 +941,8 @@ static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 	error = ValidateSMS(data, state);
 	if (error != GE_NONE) return error;
 
+	data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
+
 	if ((data->RawSMS->MemoryType == GMT_IN) || (data->RawSMS->MemoryType == GMT_OU)) {
 		if (data->RawSMS->Number > 1024) {
 			data->RawSMS->Number -= 1024;
