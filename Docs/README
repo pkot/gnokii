@@ -272,6 +272,7 @@ is the Australian mirror, there will be one nearby to you too :)
 6150/Beeline (Vympelkom) (Moscow, Russia)
 6150/MTS (Moscow, Russia)
 6150/NWGSM (St. Petersburg, Russia)
+6130/IDEA Centertel (Poland)
 6110/Paegas (Czech Republic)
 6110/Panafon (Greece)
 5110/Omnitel (Italy)
@@ -288,6 +289,8 @@ Thank you to, in no particular order...
 
 *  Pavel Janík ml. for the majority of work on gnokii 6110 series
    support, spelling corrections and miscellaneous code cleanups.
+
+*  Serge Odinokov for Nokia authentication protocol. Many thanks...
 
 *  Francois Dessart, Brendan O'Dea, Tony Lindstrom, Steffan Henke
    and Cobus Van Eeden for dumps (and in some cases interpretation!)
