@@ -2049,6 +2049,7 @@ int monitormode(void)
   GSM_BatteryUnits batt_units = GBU_Arbitrary;
 
   GSM_NetworkInfo NetworkInfo;
+  GSM_CBMessage CBMessage;
 
   GSM_MemoryStatus SIMMemoryStatus = {GMT_SM, 0, 0};
   GSM_MemoryStatus PhoneMemoryStatus = {GMT_ME, 0, 0};
@@ -2075,6 +2076,9 @@ int monitormode(void)
   /* Initialise the code for the GSM interface. */     
 
   fbusinit(NULL);
+
+  sleep(1);
+  GSM->EnableCellBroadcast();
 
   /* Loop here indefinitely - allows you to see messages from GSM code in
      response to unknown messages etc. The loops ends after pressing the
@@ -2124,6 +2128,9 @@ int monitormode(void)
 
     if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE)
       fprintf(stdout, _("Network: %s (%s), LAC: %s, CellID: %s\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC, NetworkInfo.CellID);
+
+    if (GSM->ReadCellBroadcast(&CBMessage) == GE_NONE)
+      fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), CBMessage.Channel, CBMessage.Message);
 	    
     sleep(1);
   }

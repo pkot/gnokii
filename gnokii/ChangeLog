@@ -67,3 +67,6 @@
 
 * Thu Jun 29 00:38:33 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
 - new option for --writephonebook and some null poiner checking added
+
+* Tue Jul 04 10:57:33 AEST 2000 Mark Looi <m.looi@qut.edu.au>
+- added cell broadcast to monitormode
