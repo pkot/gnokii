@@ -140,7 +140,7 @@ API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info)
 	case GN_BMP_StartupLogo:
 		bitmap->width = info->startup_logo_width;
 		bitmap->height = info->startup_logo_height;
-		if ((!strncmp(info->models, "6510", 4)) || (!strncmp(info->models, "7110", 4)))
+		if (info->models && ((!strncmp(info->models, "6510", 4)) || (!strncmp(info->models, "7110", 4))))
 			bitmap->size = ceiling_to_octet(bitmap->height) * bitmap->width;
 		else 
 			bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
