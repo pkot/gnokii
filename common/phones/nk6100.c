@@ -945,7 +945,7 @@ static gn_error PhoneInfo(gn_data *data, struct gn_statemachine *state)
 	dprintf("Getting phone info (new way)...\n");
 
 	if (sm_message_send(4, 0x64, req, state)) return GN_ERR_NOTREADY;
-	return sm_block(0x03, data, state);
+	return sm_block(0x64, data, state);
 }
 
 static gn_error Authentication(struct gn_statemachine *state, char *imei)
@@ -1842,7 +1842,7 @@ static gn_error SetProfileFeature(gn_data *data, struct gn_statemachine *state, 
 	dprintf("Setting profile %d feature %d to %d\n", req[5], req[6], req[7]);
 
 	if (sm_message_send(9, 0x05, req, state)) return GN_ERR_NOTREADY;
-	return sm_block(0x05i, data, state);
+	return sm_block(0x05, data, state);
 }
 
 static gn_error GetProfile(gn_data *data, struct gn_statemachine *state)
