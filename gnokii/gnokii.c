@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.118  2001-02-01 15:17:33  pkot
+  Revision 1.119  2001-02-05 12:29:37  pkot
+  Changes needed to let unicode work
+
+  Revision 1.118  2001/02/01 15:17:33  pkot
   Fixed --identify and added Manfred's manufacturer patch
 
   Revision 1.117  2001/01/31 23:45:27  pkot
@@ -534,6 +537,7 @@ int main(int argc, char *argv[])
 
 #ifdef USE_NLS
   textdomain("gnokii");
+  setlocale(LC_ALL, "");
 #endif
 
   /* Read config file */
