@@ -5,3 +5,8 @@ Xgnokii is capable to save contatcs in vcard format (Thanks to Pavel Machek
 export dialog write file name with .vcard or .gcrd extension.
 
 				Jan Derfinak <ja@mail.upjs.sk>
+
+If you want to know more about vcard format, read rfc2426. You can use
+gnomecard utility to process .gcrd files.
+
+				Pavel Machek <pavel@ucw.cz>
