@@ -24,7 +24,6 @@ OBJS =	cfgreader.o \
 	fbus-6110-ringtones.o \
 	fbus-6110.o \
 	gsm-api.o \
-	gsm-filetypes.o \
 	gsm-networks.o \
 	mbus-2110.o \
 	mbus-640.o \
@@ -45,6 +44,9 @@ all: COMMON.o
 
 COMMON.o: $(OBJS)
 	$(LD) $(LDREL) $(LDOUT) COMMON.o $(OBJS)
+
+gsm-filetypes.o:
+	$(CC) $(CFLAGS) -c gsm-filetypes.c
 
 clean:
 	$(RM) $(OBJS) *~ depend COMMON.o

@@ -12,3 +12,6 @@
 
 * Thu Mar 16 16:41:59 CET 2000 Jan Derfinak <ja@mail.upjs.sk>
 - added --enable-xdebug in configure.in
+
+* Fri Mar 17 19:07:23 CET 2000 Chris Kemp <ck231@cam.ac.uk>
+- Xpm library linking fixed

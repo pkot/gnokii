@@ -21,10 +21,13 @@ OBJS =	gnokii.o
 
 all: gnokii
 
-gnokii: $(OBJS) $(TOPDIR)/common/COMMON.o
+gnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/gsm-filetypes.o
 
 $(TOPDIR)/common/COMMON.o: 
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
+
+$(TOPDIR)/common/gsm-filetypes.o: 
+	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
 
 clean:
 	$(RM) $(OBJS) *~ depend gnokii *.exe core *.bak
