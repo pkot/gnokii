@@ -3012,7 +3012,7 @@ static int netmonitor(char *Mode)
 
 static int identify(void)
 {
-	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
+	/* Hopefully 64 is enough */
 	char imei[64], model[64], rev[64], manufacturer[64];
 
 	manufacturer[0] = model[0] = rev[0] = imei[0] = 0;
