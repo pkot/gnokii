@@ -70,6 +70,8 @@ static GSM_Data gdat;
 GSM_Statemachine statemachine;
 /* FIXME - don't really know what should own the statemachine in */
 /* the xgnokii scheme of things - Chris */
+int isSMSactivated = 0;
+
 
 
 inline void GUI_InsertEvent(PhoneEvent * event)
@@ -296,6 +298,7 @@ static gint compare_number(const GSM_SMSMessage * a, const GSM_SMSMessage * b)
 		return 1;
 }
 
+
 static void RefreshSMS(const gint number)
 {
 	GSM_Error error;
@@ -305,6 +308,7 @@ static void RefreshSMS(const gint number)
 	GSM_RawData *raw;
 	GSList *tmp_list;
 	gint i, j, dummy;
+	GSM_MemoryType memtypes;
 
 #ifdef XDEBUG
 	g_print("RefreshSMS is running...\n");
@@ -356,11 +360,9 @@ static void RefreshSMS(const gint number)
 					gdat.RawData = raw;
 
 					gdat.SMSMessage->Number = gdat.MessagesList[j][i]->Location;
-					dummy = (i * 8) + 8;
-					if (dummy > 32)
-						dummy++;
-					gdat.SMSMessage->MemoryType = dummy;
-					if ((error = GetSMS(&gdat, &statemachine)) == GE_NONE) {
+					gdat.SMSMessage->MemoryType =(GSM_MemoryType) i + 12 ;
+					dprintf("#: %i, mt: %i\n", gdat.SMSMessage->Number, gdat.SMSMessage->MemoryType);
+					if ((error = GetSMSnoValidate(&gdat, &statemachine)) == GE_NONE) {
 						dprintf("Found valid SMS ...\n %s\n",
 							msg->UserData[0].u.Text);
 						pthread_mutex_lock(&smsMutex);
@@ -1153,7 +1155,7 @@ void *GUI_Connect(void *a)
 			g_free(event);
 		}
 		newtime = time(&newtime);
-		if (newtime < oldtime + 2) continue;
+		if ((newtime < oldtime + 2) || !isSMSactivated)  continue;
 		oldtime = newtime;
 
 		if ((GetFolderChanges(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS)))

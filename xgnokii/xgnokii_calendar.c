@@ -91,6 +91,14 @@ typedef struct {
 	GtkWidget *text;
 } AddDialogData2;
 
+typedef struct {
+	GtkWidget *dialog;
+	DateTime date;
+	DateTime alarm;
+	GtkWidget *alarmCheck;
+	GtkWidget *text;
+	GtkWidget *phone;
+} AddDialogData3;
 
 typedef struct {
 	GtkWidget *dialog;
@@ -109,7 +117,7 @@ static ErrorDialog errorDialog = { NULL, NULL };
 static CalendarWidget cal = { NULL, NULL };
 static QuestMark questMark;
 static AddDialogData addReminderDialogData;
-static AddDialogData2 addCallDialogData;
+static AddDialogData3 addCallDialogData;
 static AddDialogData2 addMeetingDialogData;
 static AddDialogData addBirthdayDialogData;
 static CalendarDialog calendarDialog = { NULL, NULL };
@@ -499,26 +507,28 @@ static void OkAddCallDialog(GtkWidget * widget, gpointer data)
 
 	note.Type = GCN_CALL;
 	note.Location = 0;
-	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData2 *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData2 *) data)->date.date.year;
-	note.Time.Month = ((AddDialogData2 *) data)->date.date.month;
-	note.Time.Day = ((AddDialogData2 *) data)->date.date.day;
-	note.Time.Hour = ((AddDialogData2 *) data)->date.hours;
-	note.Time.Minute = ((AddDialogData2 *) data)->date.minutes;
+	strncpy(note.Phone, gtk_entry_get_text(GTK_ENTRY(((AddDialogData3 *) data)->phone)), 20);
+	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData3 *) data)->text)), 20);
+	note.Time.Year = ((AddDialogData3 *) data)->date.date.year;
+	note.Time.Month = ((AddDialogData3 *) data)->date.date.month;
+	note.Time.Day = ((AddDialogData3 *) data)->date.date.day;
+	note.Time.Hour = ((AddDialogData3 *) data)->date.hours;
+	note.Time.Minute = ((AddDialogData3 *) data)->date.minutes;
 	note.Time.Second = note.Time.Timezone = 0;
-	if (GTK_TOGGLE_BUTTON(((AddDialogData2 *) data)->alarmCheck)->active) {
-		note.Alarm.Year = ((AddDialogData2 *) data)->alarm.date.year;
-		note.Alarm.Month = ((AddDialogData2 *) data)->alarm.date.month;
-		note.Alarm.Day = ((AddDialogData2 *) data)->alarm.date.day;
-		note.Alarm.Hour = ((AddDialogData2 *) data)->alarm.hours;
-		note.Alarm.Minute = ((AddDialogData2 *) data)->alarm.minutes;
+	if (GTK_TOGGLE_BUTTON(((AddDialogData3 *) data)->alarmCheck)->active) {
+		note.Alarm.Year = ((AddDialogData3 *) data)->alarm.date.year;
+		note.Alarm.Month = ((AddDialogData3 *) data)->alarm.date.month;
+		note.Alarm.Day = ((AddDialogData3 *) data)->alarm.date.day;
+		note.Alarm.Hour = ((AddDialogData3 *) data)->alarm.hours;
+		note.Alarm.Minute = ((AddDialogData3 *) data)->alarm.minutes;
 		note.Alarm.Second = note.Alarm.Timezone = 0;
 	} else {
 		note.Alarm.Year = 0;
 	}
 	AddCalendarNote(&note);
-	gtk_entry_set_text(GTK_ENTRY(((AddDialogData2 *) data)->text), "");
-	gtk_widget_hide(((AddDialogData2 *) data)->dialog);
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData3 *) data)->text), "");
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData3 *) data)->phone), "");
+	gtk_widget_hide(((AddDialogData3 *) data)->dialog);
 }
 
 static void OkAddMeetingDialog(GtkWidget * widget, gpointer data)
@@ -935,12 +945,25 @@ static void AddCall(void)
 				   GTK_SIGNAL_FUNC(ShowCalTime),
 				   (gpointer) & (addCallDialogData.date));
 		gtk_widget_show(button);
-
+		/* Phone */
 		hbox = gtk_hbox_new(FALSE, 0);
 		gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		gtk_widget_show(hbox);
 
 		label = gtk_label_new(_("Number:"));
+		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+		gtk_widget_show(label);
+
+		addCallDialogData.phone = gtk_entry_new_with_max_length(30);
+		gtk_box_pack_end(GTK_BOX(hbox), addCallDialogData.phone, FALSE, FALSE, 2);
+		gtk_widget_show(addCallDialogData.phone);
+
+		/* Text */
+		hbox = gtk_hbox_new(FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(vbox), hbox);
+		gtk_widget_show(hbox);
+
+		label = gtk_label_new(_("Text:"));
 		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 		gtk_widget_show(label);
 

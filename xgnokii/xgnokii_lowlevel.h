@@ -209,4 +209,5 @@ extern void GUI_InitPhoneMonitor(void);
 extern void *GUI_Connect(void *a);
 extern void GUI_InsertEvent(PhoneEvent * event);
 extern GSM_Error GUI_InitSMSFolders(void);
+extern int isSMSactivated;
 #endif

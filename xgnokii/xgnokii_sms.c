@@ -1372,6 +1372,13 @@ static void ReplySMS(void)
 	gtk_widget_show(sendSMS.SMSSendWindow);
 }
 
+static void ActivateSMS(void)
+{
+	if (isSMSactivated)
+		isSMSactivated = 0;
+	else
+		isSMSactivated = 1;
+}
 
 static void NewBC(void)
 {
@@ -1453,6 +1460,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>W", CloseSMS, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
+	{NULL, "<control>A", ActivateSMS, 0, NULL},
 	{NULL, "<control>N", NewSMS, 0, NULL},
 	{NULL, "<control>F", ForwardSMS, 0, NULL},
 	{NULL, "<control>R", ReplySMS, 0, NULL},
@@ -1475,6 +1483,7 @@ static void InitMainMenu(void)
 	menu_items[i++].path = g_strdup(_("/File/Sep1"));
 	menu_items[i++].path = g_strdup(_("/File/_Close"));
 	menu_items[i++].path = g_strdup(_("/_Messages"));
+	menu_items[i++].path = g_strdup(_("/_Messages/(De)_Activate SMS reading"));
 	menu_items[i++].path = g_strdup(_("/_Messages/_New"));
 	menu_items[i++].path = g_strdup(_("/_Messages/_Forward"));
 	menu_items[i++].path = g_strdup(_("/_Messages/_Reply"));
@@ -1590,7 +1599,7 @@ void GUI_CreateSMSWindow(void)
 	gtk_tree_item_set_subtree(GTK_TREE_ITEM(treeSMSItem), subTree);
 
 	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
-	gtk_widget_set_usize(scrolledWindow, 75, 80);
+	gtk_widget_set_usize(scrolledWindow, 175, 180);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
@@ -1624,7 +1633,7 @@ void GUI_CreateSMSWindow(void)
 	gtk_clist_set_auto_sort(GTK_CLIST(SMS.smsClist), FALSE);
 	gtk_clist_set_selection_mode(GTK_CLIST(SMS.smsClist), GTK_SELECTION_EXTENDED);
 
-	gtk_clist_set_column_width(GTK_CLIST(SMS.smsClist), 0, 40);
+	gtk_clist_set_column_width(GTK_CLIST(SMS.smsClist), 0, 70);
 	gtk_clist_set_column_width(GTK_CLIST(SMS.smsClist), 1, 142);
 	gtk_clist_set_column_width(GTK_CLIST(SMS.smsClist), 2, 135);
 	//gtk_clist_set_column_justification (GTK_CLIST (SMS.smsClist), 2, GTK_JUSTIFY_CENTER);
