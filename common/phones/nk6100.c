@@ -715,8 +715,7 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 	*pos++ = pe->Location;
 	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_PB_UNICODE) {
 		*pos++ = (2 * namelen);
-		char_encode_unicode(pos, pe->Name, namelen);
-		namelen *= 2;
+		namelen = char_encode_unicode(pos, pe->Name, namelen);
 	} else {
 		*pos++ = namelen;
 		PNOK_EncodeString(pos, namelen, pe->Name);
@@ -802,7 +801,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			   set message[4] to 0. Newer ones set is to the location
 			   number. It can be the distinction when to read the name */
 			if (message[4] != 0)
-				char_decode_unicode(pe->Name, pos, n / 2);
+				char_decode_unicode(pe->Name, pos, n);
 			else
 				PNOK_DecodeString(pe->Name, sizeof(pe->Name), pos, n);
 			pos += n;
@@ -2565,7 +2564,7 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 			drawmsg.Command = GSM_Draw_DisplayText;
 			drawmsg.Data.DisplayText.x = x;
 			drawmsg.Data.DisplayText.y = y;
-			char_decode_unicode(drawmsg.Data.DisplayText.text, pos, n);
+			char_decode_unicode(drawmsg.Data.DisplayText.text, pos, n << 1);
 			disp->OutputFn(&drawmsg);
 
 			dprintf("(x,y): %d,%d, len: %d, data: %s\n", x, y, n, drawmsg.Data.DisplayText.text);

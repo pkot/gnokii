@@ -802,7 +802,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 			i = 10 + (j * 40);
 			data->SMSFolderList->FolderID[j] = message[i - 2];
 			dprintf("Folder(%i) name: ", message[i - 2]);
-			len = message[i - 1];
+			len = message[i - 1] << 1;
 			char_decode_unicode(data->SMSFolderList->Folder[j].Name, message + i, len);
 			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
 		}
@@ -1274,7 +1274,7 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 			case 0x81: /* SMSC name */
 				char_decode_unicode(data->MessageCenter->Name,
 					      message + offset + 4,
-					      message[offset + 2]);
+					      message[offset + 2] << 1);
 				break;
 			default:
 				dprintf("Unknown subtype %02x. Ignoring\n", message[offset]);
@@ -1970,9 +1970,9 @@ long P6510_GetNoteAlarmDiff(GSM_DateTime *time, GSM_DateTime *alarm)
 	dprintf("\tDate: %02i-%02i-%04i %02i:%02i:%02i\n",
 		time->Day, time->Month, time->Year,
 		time->Hour, time->Minute, time->Second);
-	dprintf("Difference in alarm time is %f\n", difftime(t_time, t_alarm) + 3600);
+	dprintf("Difference in alarm time is %f\n", difftime(t_time, t_alarm));
 
-	return difftime(t_time, t_alarm) + 3600;
+	return difftime(t_time, t_alarm);
 }
 
 static GSM_Error P6510_FirstCalendarFreePos(GSM_Data *data, GSM_Statemachine *state)
@@ -2223,7 +2223,7 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 					break;
 				}
 				operatorname = malloc(blockstart[5] + 1);
-				char_decode_unicode(operatorname, blockstart + 6, blockstart[5]);
+				char_decode_unicode(operatorname, blockstart + 6, blockstart[5] << 1);
 				dprintf("Operator Name: %s\n", operatorname);
 				break;
 			case 0x09:  /* Operator details */
@@ -2651,7 +2651,7 @@ static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, 
 				data->Profile->CallerGroups = blockstart[7];
 				break;
 			case 0x0c:
-				char_decode_unicode(data->Profile->Name, blockstart + 7, blockstart[6]);
+				char_decode_unicode(data->Profile->Name, blockstart + 7, blockstart[6] << 1);
 				dprintf("Profile Name: %s\n", data->Profile->Name);
 				break;
 			default:
@@ -3085,7 +3085,7 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		char_decode_unicode(dummy, message + 7, message[6]);
+		char_decode_unicode(dummy, message + 7, message[6] << 1);
 		dprintf("Number: %s\n", dummy);
 		break;		
 	case 0x04:
@@ -3099,7 +3099,7 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		char_decode_unicode(dummy, message + 7, message[6]);
+		char_decode_unicode(dummy, message + 7, message[6] << 1);
 		dprintf("From: %s\n", dummy);
 		break;
 	case 0x07:
@@ -3128,7 +3128,7 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		char_decode_unicode(dummy, message + 7, message[6]);
+		char_decode_unicode(dummy, message + 7, message[6] << 1);
 		dprintf("To: %s\n", dummy);
 		break;
 	default:
@@ -3167,7 +3167,7 @@ static GSM_Error P6510_MakeCall(GSM_Data *data, GSM_Statemachine *state)
 		return GE_ENTRYTOOLONG;
 	}
 	req[pos++] = len;
-	char_encode_unicode(req + pos, data->CallInfo->Number, len * 2);
+	char_encode_unicode(req + pos, data->CallInfo->Number, len);
 	pos += len << 1;
 	req[pos++] = 0x01; /* one block */
 	req[pos++] = 0x01; /* type */
@@ -3222,15 +3222,15 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 	case 0x07:
 		if (!data->WAPBookmark) return GE_INTERNALERROR;
 		dprintf("WAP bookmark received\n");
-		string_length = (message[6] << 8 | message[7]);
+		string_length = (message[6] << 8 | message[7]) << 1;
 
 		char_decode_unicode(data->WAPBookmark->Name, message + 8, string_length);
 		dprintf("Name: %s\n", data->WAPBookmark->Name);
-		pos = (string_length << 1) + 8;
+		pos = string_length + 8;
 
 		string_length = message[pos++] << 8;
 		string_length |= message[pos++];
-		char_decode_unicode(data->WAPBookmark->URL, message + pos, string_length);
+		char_decode_unicode(data->WAPBookmark->URL, message + pos, string_length << 1);
 		dprintf("URL: %s\n", data->WAPBookmark->URL);
 		break;
 	case 0x0a:
@@ -3246,17 +3246,17 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		if (!data->WAPSetting) return GE_INTERNALERROR;
 		dprintf("WAP setting received\n");
 
-		string_length = (message[4] << 8 | message[5]);
+		string_length = (message[4] << 8 | message[5]) << 1;
 		char_decode_unicode(data->WAPSetting->Name, message + 6, string_length);
 		dprintf("Name: %s\n", data->WAPSetting->Name);
-		pos = (string_length << 1) + 6;
+		pos = string_length + 6;
 		if (!(string_length % 2)) pad = 1;
 
 		string_length = message[pos++] << 8; 
-		string_length |= message[pos++];
+		string_length = (string_length | message[pos++]) << 1;
 		char_decode_unicode(data->WAPSetting->Home, message + pos, string_length);
 		dprintf("Home: %s\n", data->WAPSetting->Home);
-		pos += string_length << 1;
+		pos += string_length;
 
 		if (!((string_length + pad) % 2)) 
 			pad = 2; 
@@ -3281,28 +3281,28 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 
 		dprintf("GSM data:\n");
 
-		string_length = message[pos++];
+		string_length = message[pos++] << 1;
 		char_decode_unicode(data->WAPSetting->GSMdataIP, message + pos, string_length);
 		dprintf("   IP: %s\n", data->WAPSetting->GSMdataIP);
-		pos += string_length << 1;
+		pos += string_length;
 
   		string_length = message[pos++] << 8; 
-		string_length |= message[pos++];
+		string_length = (string_length | message[pos++]) << 1;
 		char_decode_unicode(data->WAPSetting->Number, message + pos, string_length);
 		dprintf("   Number: %s\n", data->WAPSetting->Number);
-		pos += string_length << 1;
+		pos += string_length;
 
   		string_length = message[pos++] << 8; 
-		string_length |= message[pos++];
+		string_length = (string_length | message[pos++]) << 1;
 		char_decode_unicode(data->WAPSetting->GSMdataUsername, message + pos, string_length);
 		dprintf("   Username: %s\n", data->WAPSetting->GSMdataUsername);
-		pos += string_length << 1;
+		pos += string_length;
 
   		string_length = message[pos++] << 8; 
-		string_length |= message[pos++];
+		string_length = (string_length | message[pos++]) << 1;
 		char_decode_unicode(data->WAPSetting->GSMdataPassword, message + pos, string_length);
 		dprintf("   Password: %s\n", data->WAPSetting->GSMdataPassword);
-		pos += string_length << 1;
+		pos += string_length;
 
 		while (message[pos] != 0x03) pos++;
 		pos += 4;
@@ -3313,29 +3313,29 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		data->WAPSetting->GPRSConnection = message[pos++];
 		data->WAPSetting->GPRSLogin = message[pos++];
 
-		string_length = message[pos++];
+		string_length = message[pos++] << 1;
 		char_decode_unicode(data->WAPSetting->AccessPoint, message + pos, string_length);
 		dprintf("   Access point: %s\n", data->WAPSetting->AccessPoint);
-		pos += string_length << 1;
+		pos += string_length;
 
   		string_length = message[pos++] << 8; 
-		string_length |= message[pos++];
+		string_length = (string_length | message[pos++]) << 1;
 		char_decode_unicode(data->WAPSetting->GPRSIP, message + pos, string_length);
 		dprintf("   IP: %s\n", data->WAPSetting->GPRSIP);
-		pos += string_length << 1;
+		pos += string_length;
 
   		string_length = message[pos++] << 8; 
-		string_length |= message[pos++];
+		string_length = (string_length | message[pos++]) << 1;
 		char_decode_unicode(data->WAPSetting->GPRSUsername, message + pos, string_length);
 		dprintf("   Username: %s\n", data->WAPSetting->GPRSUsername);
-		pos += string_length << 1;
+		pos += string_length;
 
 		if (message[pos] != 0x80) {
 			string_length = message[pos++] << 8; 
 			string_length |= message[pos++];
 			char_decode_unicode(data->WAPSetting->GPRSPassword, message + pos, string_length);
 			dprintf("   Password: %s\n", data->WAPSetting->GPRSPassword);
-			pos += string_length << 1;
+			pos += string_length;
 		} else
 			pos += 2;
 
