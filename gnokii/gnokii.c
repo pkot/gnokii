@@ -2142,6 +2142,9 @@ int getprofile(int argc, char *argv[])
   int start, stop, i;
   GSM_Profile profile;
   GSM_Error error;
+  
+  /* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
+  char model[64];
 
   /* Initialise the code for the GSM interface. */     
 
@@ -2152,11 +2155,16 @@ int getprofile(int argc, char *argv[])
 
   if (error == GE_NONE)
   {
+  
+    while (GSM->GetModel(model)  != GE_NONE)
+      sleep(1);
+
     max_profiles=7; /* This is correct for 6110 (at least my). How do we get
                        the number of profiles? */
 
-    /* FIXME: what does this mean? Why 0x30 ie 48? */
-    if (profile.Ringtone==48)
+    /*For N5110*/
+    /*FIX ME: It should be set to 3 for N5130 and 3210 too*/
+    if (!strcmp(model,"NSE-1"))
       max_profiles=3;
 
     if (argc>0)
@@ -2167,14 +2175,14 @@ int getprofile(int argc, char *argv[])
 
       if (profile.Number < 0)
       {
-         fprintf(stderr, _("Profile number must be value from 1 to %i!\n"), max_profiles);
+         fprintf(stderr, _("Profile number must be value from 1 to %d!\n"), max_profiles);
          GSM->Terminate();
          return -1;
       }
 
       if (profile.Number >= max_profiles)
       {
-         fprintf(stderr, _("This phone supports only %i profiles!\n"), max_profiles);
+         fprintf(stderr, _("This phone supports only %d profiles!\n"), max_profiles);
          GSM->Terminate();
          return -1;
       }
@@ -2191,20 +2199,30 @@ int getprofile(int argc, char *argv[])
       if (profile.Number!=0)
         GSM->GetProfile(&profile);
 
-      printf("%i. \"%s\"\n", (profile.Number+1), profile.Name);
+      printf("%d. \"%s\"\n", (profile.Number+1), profile.Name);
       if (profile.DefaultName==-1) printf(" (name defined)\n");
 
+#ifdef DEBUG
+     printf("Incoming call alert: %d\n", profile.CallAlert);
+     printf("Ringing volume: %d\n", profile.Volume);
+     printf("Message alert tone: %d\n", profile.MessageTone);
+     printf("Keypad tones: %d\n", profile.KeypadTone);
+     printf("Warning and game tones: %d\n", profile.WarningTone);
+     printf("Lights: %d\n", profile.Lights);
+     printf("Vibration: %d\n", profile.Vibration);
+     printf("Caller groups: 0x%02x\n", profile.CallerGroups);
+     printf("Automatic answer: %d\n", profile.AutomaticAnswer);
+     printf("\n");
+#endif
+      
       printf("Incoming call alert: %s\n", GetProfileCallAlertString(profile.CallAlert));
 
-      //      if (profile.Ringtone!=48)
-      //      {
-        /* For different phones different ringtones names */
+      /* For different phones different ringtones names */
 
-        if (!strcmp(model,"6110"))
-          printf("Ringing tone: %s (%d)\n", RingingTones[profile.Ringtone], profile.Ringtone);
-        else
-          printf("Ringtone number: %i\n", profile.Ringtone);
-	//      }
+      if (!strcmp(model,"NSE-3"))
+         printf("Ringing tone: %s (%d)\n", RingingTones[profile.Ringtone], profile.Ringtone);
+      else
+         printf("Ringtone number: %d\n", profile.Ringtone);
 
       printf("Ringing volume: %s\n", GetProfileVolumeString(profile.Volume));
 
@@ -2215,12 +2233,12 @@ int getprofile(int argc, char *argv[])
       printf("Warning and game tones: %s\n", GetProfileWarningToneString(profile.WarningTone));
 
       /* FIXME: Light settings is only used for Car */
-      if (profile.Number==(max_profiles-2)) printf("Lights: %s\n", profile.Lights ? "on" : "off");
+      if (profile.Number==(max_profiles-2)) printf("Lights: %s\n", profile.Lights ? "On" : "Automatic");
 
       printf("Vibration: %s\n", GetProfileVibrationString(profile.Vibration));
 
       /* FIXME: it will be nice to add here reading caller group name. */
-      if (profile.Ringtone!=48) printf("Caller groups: 0x%02x\n", profile.CallerGroups);
+      if (max_profiles!=3) printf("Caller groups: 0x%02x\n", profile.CallerGroups);
 
       /* FIXME: Automatic answer is only used for Car and Headset. */
       if (profile.Number>=(max_profiles-2)) printf("Automatic answer: %s\n", profile.AutomaticAnswer ? "On" : "Off");

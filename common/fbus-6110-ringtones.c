@@ -206,6 +206,20 @@ int GetScale(int number) {
   int scale=0;
 
   switch (number) {
+
+    /* Some files on the net seem to use 1-3 */
+    /* But Scale1 is not complete on my 6130 so start at Scale2 */
+    /* Perhaps we need some intelligence here? */
+
+  case 0:
+    scale=Scale1; break;
+  case 1:
+    scale=Scale2; break;
+  case 2:
+    scale=Scale3; break;
+  case 3:
+    scale=Scale4; break;
+
   case 5:
     scale=Scale1; break;
   case 6:
@@ -379,6 +393,7 @@ int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName)
 
     if (*ptr=='.')
       Notes[NrNotes].DurationSpecifier=DottedNote;
+    else Notes[NrNotes].DurationSpecifier=NoSpecialDuration;
 
     NrNotes++;
     ptr=strtok(NULL, ", ");

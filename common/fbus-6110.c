@@ -471,6 +471,9 @@ GSM_Error FB61_GetProfile(GSM_Profile *Profile)
 {
 
   int i, timeout=20;
+  
+  /* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
+  char model[64];
 
   unsigned char name_req[] = { FB61_FRAME_HEADER, 0x1a, 0x00};
   unsigned char feat_req[] = { FB61_FRAME_HEADER, 0x13, 0x01, 0x00, 0x00};
@@ -510,7 +513,12 @@ GSM_Error FB61_GetProfile(GSM_Profile *Profile)
 
   if (Profile->DefaultName > -1)
   {
-    if (Profile->Ringtone==48)
+    while (FB61_GetModel(model)  != GE_NONE)
+      sleep(1);
+
+    /*For N5110*/
+    /*FIX ME: It should be set for N5130 and 3210 too*/
+    if (!strcmp(model,"NSE-1"))
     {
       switch (Profile->DefaultName) {
         case 0x00: sprintf(Profile->Name, "Personal");break;

@@ -1,7 +1,6 @@
 0.3.2 THINGS:
 
 - gnokiid segfaults
-- AT vs at in gnokiid. It should be case insensitive.
 - FreeBSD build and work
 - international catalogs
 - Debian GNU/Linux package
@@ -41,3 +40,4 @@
 - how can we read the name of the uploaded tune? Can we do that?
 - SMS errors (Gary reported them on Fri, 25 Feb 2000 15:55:58 -0500 (EST))
 - storing of SMS messages into INBOX
+- --setringtone (see --foogle)
