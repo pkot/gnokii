@@ -30,7 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "gsm-common.h"
+#include "compat.h"
+#include "gnokii/common.h"
 
 API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *addon)
 {

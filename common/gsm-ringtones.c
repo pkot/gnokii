@@ -30,9 +30,9 @@
 
 */
 
-#include "gsm-sms.h"
-#include "gsm-common.h"
-#include "gsm-ringtones.h"
+#include "gnokii/sms.h"
+#include "gnokii/common.h"
+#include "gnokii/ringtones.h"
 #include "misc.h"
 
 /* Beats-per-Minute Encoding */

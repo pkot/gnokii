@@ -37,11 +37,11 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "gsm-error.h"
-#include "gsm-statemachine.h"
-#include "gsm-data.h"
-#include "gsm-encoding.h"
-#include "gsm-common.h"
+#include "gnokii/error.h"
+#include "gnokii/statemachine.h"
+#include "gnokii/data.h"
+#include "gnokii/encoding.h"
+#include "gnokii/common.h"
 #include "nokia-decoding.h"
 #include "phones/nk7110.h"
 #include "phones/generic.h"
@@ -51,7 +51,7 @@
 #include "links/m2bus.h"
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #define SEND_MESSAGE_BLOCK(type, length) \
 do { \

@@ -27,11 +27,11 @@
 */
 
 #include "misc.h"
-#include "gsm-common.h"
-#include "gsm-statemachine.h"
+#include "gnokii/common.h"
+#include "gnokii/statemachine.h"
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 gn_error sm_initialise(struct gn_statemachine *state)
 {

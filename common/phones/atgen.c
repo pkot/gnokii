@@ -35,7 +35,7 @@
 #include <ctype.h>
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 #include "phones/generic.h"
 #include "phones/atgen.h"
 #include "phones/atbosch.h"

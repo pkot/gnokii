@@ -35,8 +35,8 @@
 #ifndef _gnokii_phones_generic_h
 #define _gnokii_phones_generic_h
 
-#include "gsm-error.h"
-#include "gsm-statemachine.h"
+#include "gnokii/error.h"
+#include "gnokii/statemachine.h"
 
 /* Generic Functions */
 gn_error pgen_incoming_default(int messagetype, unsigned char *buffer, int length, struct gn_statemachine *state);

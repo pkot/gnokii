@@ -40,7 +40,7 @@
 #include "config.h"
 #include "compat.h"
 
-#include "gsm-data.h"
+#include "gnokii/data.h"
 
 #ifdef WIN32
 #  include <sys/types.h>

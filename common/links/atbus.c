@@ -39,7 +39,7 @@
 #include "links/utils.h"
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #include "device.h"
 

@@ -31,7 +31,7 @@
 #ifndef _gnokii_gsm_call_h
 #define _gnokii_gsm_call_h
 
-#include "gsm-error.h"
+#include <gnokii/error.h>
 
 typedef enum {
 	GN_CALL_Voice,		/* Voice call */

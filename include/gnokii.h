@@ -33,13 +33,13 @@
 #ifndef _gnokii_gsm_api_h
 #define _gnokii_gsm_api_h
 
-#include "gsm-sms.h"
-#include "gsm-call.h"
-#include "gsm-common.h"
-#include "gsm-data.h"
-#include "gsm-networks.h"
-#include "gsm-statemachine.h"
-#include "data/virtmodem.h"
+#include "gnokii/sms.h"
+#include "gnokii/call.h"
+#include "gnokii/common.h"
+#include "gnokii/data.h"
+#include "gnokii/networks.h"
+#include "gnokii/statemachine.h"
+#include "gnokii/virtmodem.h"
 
 API struct gn_cfg_header *gn_cfg_info;
 

@@ -32,17 +32,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "gsm-data.h"
-#include "gsm-encoding.h"
-#include "gsm-statemachine.h"
+#include "gnokii/data.h"
+#include "gnokii/encoding.h"
+#include "gnokii/statemachine.h"
 
-#include "gsm-ringtones.h"
-#include "gsm-bitmaps.h"
+#include "gnokii/ringtones.h"
+#include "gnokii/bitmaps.h"
 
 #include "sms-nokia.h"
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #undef ERROR
 #define ERROR() do { if (error != GN_ERR_NONE) return error; } while (0)

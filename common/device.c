@@ -27,7 +27,7 @@
 */
 
 #include "misc.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 #include "device.h"
 #include "devices/unixirda.h"
 #include "devices/unixbluetooth.h"

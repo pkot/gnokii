@@ -50,7 +50,7 @@
 #include "links/m2bus.h"
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #define	DRVINSTANCE(s) ((nk6100_driver_instance *)((s)->driver.driver_instance))
 #define	FREE(p) do { free(p); (p) = NULL; } while (0)

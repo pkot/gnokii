@@ -38,9 +38,9 @@
 #include <sys/stat.h>
 
 #include "misc.h"
-#include "gsm-common.h"
-#include "gsm-bitmaps.h"
-#include "gsm-api.h"
+#include "gnokii/common.h"
+#include "gnokii/bitmaps.h"
+#include "gnokii.h"
 
 /* A few useful functions for bitmaps */
 

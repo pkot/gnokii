@@ -31,8 +31,8 @@
 #ifndef _gnokii_data_datapump_h
 #define _gnokii_data_datapump_h
 
-#include "gsm-statemachine.h"
-#include "gsm-call.h"
+#include "gnokii/statemachine.h"
+#include "gnokii/call.h"
 
 /* Prototypes */
 bool	dp_Initialise(int read_fd, int write_fd);

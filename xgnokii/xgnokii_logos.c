@@ -36,7 +36,7 @@
 #include <gtk/gtk.h>
 
 #include "misc.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #include "xgnokii_logos.h"
 #include "xgnokii_common.h"

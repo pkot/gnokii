@@ -42,11 +42,11 @@
 
 #include "config.h"
 #include "misc.h"
-#include "gsm-api.h"
+#include "gnokii/statemachine.h"
 #include "device.h"
 #include "links/fbus.h"
-
 #include "gnokii-internal.h"
+#include "gnokii.h"
 
 static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);

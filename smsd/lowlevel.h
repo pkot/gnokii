@@ -32,7 +32,7 @@
 
 #include <pthread.h>
 #include <glib.h>
-#include "gsm-api.h"
+#include "gnokii.h"
 
 typedef enum {
   Event_SendSMSMessage,

@@ -27,7 +27,8 @@
 */
 
 #include <string.h>
-#include "gsm-data.h"
+#include "compat.h"
+#include "gnokii/data.h"
 
 gn_error unimplemented(void)
 {

@@ -48,12 +48,12 @@
 
 #include "config.h"
 #include "misc.h"
-#include "gsm-data.h"
-#include "gsm-api.h"
-#include "gsm-sms.h"
-#include "gsm-call.h"
+#include "gnokii/data.h"
+#include "gnokii.h"
+#include "gnokii/sms.h"
+#include "gnokii/call.h"
 #include "data/at-emulator.h"
-#include "data/virtmodem.h"
+#include "gnokii/virtmodem.h"
 #include "data/datapump.h"
 
 #define MAX_LINE_LENGTH 256

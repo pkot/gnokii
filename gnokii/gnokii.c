@@ -71,9 +71,8 @@
 #  include <locale.h>
 #endif
 
+#include "gnokii-app.h"
 #include "gnokii.h"
-
-#include "gsm-api.h"
 
 #define MAX_INPUT_LINE_LEN 512
 

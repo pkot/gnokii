@@ -33,8 +33,8 @@
 #include <memory.h>
 
 #include "misc.h"
-#include "gsm-api.h"
-#include "gsm-error.h"
+#include "gnokii.h"
+#include "gnokii/error.h"
 
 #define USECOMM      /* yes, we need the COMM API */
 

@@ -41,11 +41,11 @@
 #include <stdlib.h>
 
 #include "misc.h"
-#include "gsm-common.h"
+#include "gnokii/common.h"
 #include "cfgreader.h"
-#include "gsm-api.h"
-#include "data/rlp-common.h"
-#include "gsm-statemachine.h"
+#include "gnokii.h"
+#include "gnokii/rlp-common.h"
+#include "gnokii/statemachine.h"
 #include "phones/nk6510.h"
 #include "phones/nk7110.h"
 #include "phones/nk6100.h"

@@ -29,11 +29,11 @@
 #ifndef _gnokii_gsm_data_h
 #define _gnokii_gsm_data_h
 
-#include "gsm-common.h"
-#include "gsm-sms.h"
-#include "gsm-call.h"
-#include "gsm-error.h"
-#include "data/rlp-common.h"
+#include <gnokii/common.h>
+#include <gnokii/sms.h>
+#include <gnokii/call.h>
+#include <gnokii/error.h>
+#include <gnokii/rlp-common.h>
 
 #ifdef HAVE_BLUETOOTH
 #  include <bluetooth/bluetooth.h>
@@ -113,7 +113,7 @@ typedef struct {
 	gn_error (*loop)(struct timeval *timeout, struct gn_statemachine *state);
 	/* A pointer to the function used to send out a message. This is used
 	 * by the phone specific code to send a message over the link */
-	gn_error (*send_message)(u16 messagesize, u8 messagetype, unsigned char *message,
+	gn_error (*send_message)(unsigned int messagesize, unsigned char messagetype, unsigned char *message,
 				 struct gn_statemachine *state);
 	void *link_instance;
 } gn_link;

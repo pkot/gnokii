@@ -56,7 +56,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #include "xgnokii.h"
 #include "xgnokii_common.h"

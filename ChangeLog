@@ -1,4 +1,6 @@
 0.5.0pre (not released yet)
+ * general updates
+    o move include files into their final(?) destination (Pawel Kot)
  * Docs updates
     o add duncall.txt                               (Ladislav Michl)
  * SMSD updates

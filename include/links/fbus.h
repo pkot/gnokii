@@ -44,8 +44,8 @@
 #include "compat.h"
 
 #include "fbus-common.h"
-#include "gsm-statemachine.h"
-#include "gsm-data.h"
+#include "gnokii/statemachine.h"
+#include "gnokii/data.h"
 
 #define FBUS_FRAME_MAX_LENGTH    256
 #define FBUS_MESSAGE_MAX_TYPES   256

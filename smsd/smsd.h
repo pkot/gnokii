@@ -31,8 +31,7 @@
 #define SMSD_H
 
 #include <glib.h>
-#include "gsm-api.h"
-
+#include "gnokii.h"
 
 typedef enum {
   SMSD_READ_REPORTS = 1

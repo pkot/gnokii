@@ -27,7 +27,7 @@
 */
 
 #include "misc.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #include <stdio.h>
 #include <fcntl.h>

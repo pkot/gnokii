@@ -33,7 +33,7 @@
 #include "sms-nokia.h"
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 /**
  * PackSmartMessagePart - Adds Smart Message header to the certain part of the message

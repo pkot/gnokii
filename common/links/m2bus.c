@@ -43,10 +43,10 @@
 
 #include "config.h"
 #include "misc.h"
-#include "gsm-common.h"
-#include "gsm-ringtones.h"
-#include "gsm-networks.h"
-#include "gsm-statemachine.h"
+#include "gnokii/common.h"
+#include "gnokii/ringtones.h"
+#include "gnokii/networks.h"
+#include "gnokii/statemachine.h"
 #include "device.h"
 #include "links/m2bus.h"
 

@@ -29,7 +29,7 @@
 */
 
 #include "config.h"
-#include "gsm-error.h"
+#include "gnokii/error.h"
 #include "misc.h"
 
 API char *gn_error_print(gn_error e)

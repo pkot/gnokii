@@ -44,7 +44,7 @@
 #endif
 
 #include "misc.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 int irda_open(struct gn_statemachine *state);
 int irda_close(int fd, struct gn_statemachine *state);

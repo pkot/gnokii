@@ -35,7 +35,7 @@
 #ifndef _gnokii_phones_nk7110_h
 #define _gnokii_phones_nk7110_h
 
-#include "gsm-data.h"
+#include "gnokii/data.h"
 
 typedef enum {
 	GN_OP_NK7110_GetSMSFolders = GN_OP_Max,

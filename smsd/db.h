@@ -32,7 +32,7 @@
 
 #include <glib.h>
 #include "smsd.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 extern void (*DB_Bye) (void);
 extern gint (*DB_ConnectInbox) (const DBConfig);

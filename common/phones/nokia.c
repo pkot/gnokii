@@ -36,7 +36,7 @@
 #include <string.h>
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 #include "links/fbus.h"
 #include "phones/nokia.h"
 

@@ -49,13 +49,14 @@
 
 #undef DEBUG
 #include "misc.h"
-#include "gsm-common.h"
+#include "gnokii/common.h"
 #include "device.h"
-#include "gsm-api.h"
-#include "gsm-statemachine.h"
+#include "gnokii/statemachine.h"
 #include "phones/generic.h"
 #include "phones/nk2110.h"
 #include "phones/nokia.h"
+
+#include "gnokii.h"
 
 #define MYID 0x78
 #define ddprintf(x...)

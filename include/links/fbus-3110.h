@@ -34,9 +34,9 @@
 #ifndef _gnokii_links_fbus_3110_h
 #define _gnokii_links_fbus_3110_h
 
-#include "gsm-statemachine.h"
 #include "config.h"
 #include "compat.h"
+#include "gnokii/statemachine.h"
 
 #ifdef WIN32
 #  include <sys/types.h>

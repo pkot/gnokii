@@ -26,7 +26,7 @@
  */
 
 #include "misc.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #include <stdio.h>
 #ifdef HAVE_FCNTL_H

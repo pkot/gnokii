@@ -40,14 +40,14 @@
 #endif
 
 #include "misc.h"
-#include "gsm-common.h"
+#include "gnokii/common.h"
 #include "phones/generic.h"
 #include "phones/nk3110.h"
 #include "links/fbus-3110.h"
 #include "phones/nokia.h"
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 
 #define DRVINSTANCE(s) ((nk3110_driver_instance *)((s)->driver.driver_instance))

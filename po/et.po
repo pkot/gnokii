@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gnokii\n"
-"POT-Creation-Date: 2003-02-15 00:41+0100\n"
+"POT-Creation-Date: 2003-02-25 23:31+0100\n"
 "PO-Revision-Date: 2003-01-04 18:03:00+0200\n"
 "Last-Translator: Hans Mõtshärg <hans.motsharg@mail.ee>\n"
 "Language-Team: gnokii\n"
@@ -15,32 +15,32 @@ msgstr ""
 "Files: fbus-3810.h fbus-6110.h gsm-api.h gsm-common.h misc.h fbus-3810.c "
 "fbus-6110.c gnokii.c gsm-api.c\n"
 
-#: common/cfgreader.c:311 common/cfgreader.c:322 common/cfgreader.c:330
-#: common/cfgreader.c:337 common/cfgreader.c:356 common/cfgreader.c:365
+#: common/cfgreader.c:315 common/cfgreader.c:326 common/cfgreader.c:334
+#: common/cfgreader.c:341 common/cfgreader.c:360 common/cfgreader.c:369
 #, c-format
 msgid "Unsupported [%s] %s value \"%s\"\n"
 msgstr "Toetamata [%s] %s väärtus \"%s\"\n"
 
-#: common/cfgreader.c:348
+#: common/cfgreader.c:352
 #, c-format
 msgid "Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value\n"
 msgstr "Tundmatu [%s] määrang  \"%s\", kasuta \"%s\" või \"%s\" väärtust\n"
 
-#: common/cfgreader.c:413
+#: common/cfgreader.c:417
 #, c-format
 msgid "Couldn't open %s or gnokiirc. Exiting now...\n"
 msgstr "Ei suuda %s avada ega ka gnokiirc. Lõpetan....\n"
 
-#: common/cfgreader.c:423
+#: common/cfgreader.c:427
 #, c-format
 msgid "Couldn't open %s or /etc/gnokiirc. Exiting now...\n"
 msgstr "Ei suuda %s avada ega ka /etc/gnokiirc. Lõpetan....\n"
 
-#: common/cfgreader.c:471
+#: common/cfgreader.c:486
 msgid "Config error - no model specified.\n"
 msgstr "Konfiguratsiooni viga - mudel defineerimata.\n"
 
-#: common/cfgreader.c:475
+#: common/cfgreader.c:490
 msgid "Config error - no port specified.\n"
 msgstr "Konfiguratsiooni viga - port defineerimata.\n"
 
@@ -148,7 +148,7 @@ msgstr "Faili %s kirjutamine ebaõnnestus!\n"
 msgid "Couldn't open CBUS device"
 msgstr "Ei suuda avada CBUS seadet"
 
-#: common/links/fbus.c:72 common/links/fbus.c:92 common/links/fbus.c:131
+#: common/links/fbus.c:69 common/links/fbus.c:89 common/links/fbus.c:130
 msgid "Couldn't open FBUS device"
 msgstr "Ei suuda avada FBUS seadet"
 
@@ -156,50 +156,50 @@ msgstr "Ei suuda avada FBUS seadet"
 msgid "Couldn't open PHONET device"
 msgstr "Ei suuda avada PHONET seadet"
 
-#: common/misc.c:175
+#: common/misc.c:176
 msgid "Out of memory error while locking device\n"
 msgstr ""
 
-#: common/misc.c:203
+#: common/misc.c:204
 #, c-format
 msgid "Lockfile %s is stale. Overriding it..\n"
 msgstr ""
 
-#: common/misc.c:206
+#: common/misc.c:207
 msgid "Overriding failed, please check the permissions\n"
 msgstr ""
 
-#: common/misc.c:207 common/misc.c:222
+#: common/misc.c:208 common/misc.c:223
 msgid "Cannot lock device\n"
 msgstr "Ei suuda seadet lukustada\n"
 
-#: common/misc.c:211
+#: common/misc.c:212
 msgid "Device already locked.\n"
 msgstr "Seade on juba lukus!\n"
 
-#: common/misc.c:220
+#: common/misc.c:221
 #, c-format
 msgid "Unable to read lockfile %s.\n"
 msgstr "Ei suuda lugeda lukufaili %s.\n"
 
-#: common/misc.c:221
+#: common/misc.c:222
 msgid "Please check for reason and remove the lockfile by hand.\n"
 msgstr "Palun uuri põhjusi ja eemalda lukufail käsitsi.\n"
 
-#: common/misc.c:231
+#: common/misc.c:232
 msgid "Device seems to be locked by unknown process\n"
 msgstr "Seade tundub olevt lukustatud tundmatu protsessi poolt\n"
 
-#: common/misc.c:233
+#: common/misc.c:234
 msgid "Please check permission on lock directory\n"
 msgstr ""
 
-#: common/misc.c:235
+#: common/misc.c:236
 #, c-format
 msgid "Cannot create lockfile %s. Please check for existence of path"
 msgstr ""
 
-#: common/misc.c:257
+#: common/misc.c:258
 msgid "Cannot unlock device\n"
 msgstr "Ei suuda lukku vabastada\n"
 
@@ -298,7 +298,7 @@ msgid ""
 "          --debug           uses stdin/stdout for virtual modem comms\n"
 msgstr ""
 
-#: gnokiid/gnokiid.c:136 gnokii/gnokii.c:371 smsd/lowlevel.c:148
+#: gnokiid/gnokiid.c:136 gnokii/gnokii.c:371 smsd/lowlevel.c:153
 #: xgnokii/xgnokii_lowlevel.c:230
 msgid "Lock file error. Exiting\n"
 msgstr "Lukufaili faili viga. Väljun\n"
@@ -479,12 +479,12 @@ msgstr ""
 msgid "Empty message. Quitting.\n"
 msgstr "Tühi teade. Lõpetan.\n"
 
-#: gnokii/gnokii.c:655 gnokii/gnokii.c:1697 gnokii/gnokii.c:3800
-#: gnokii/gnokii.c:3953
+#: gnokii/gnokii.c:655 gnokii/gnokii.c:1697 gnokii/gnokii.c:3804
+#: gnokii/gnokii.c:3957
 msgid "Send succeeded!\n"
 msgstr "Saatmine õnnestus!\n"
 
-#: gnokii/gnokii.c:657 gnokii/gnokii.c:1698 gnokii/gnokii.c:3802
+#: gnokii/gnokii.c:657 gnokii/gnokii.c:1698 gnokii/gnokii.c:3806
 #, c-format
 msgid "SMS Send failed (%s)\n"
 msgstr "SMS saatmine ebaõnnestus (%s)\n"
@@ -506,7 +506,7 @@ msgstr "Määratud asukohas eksisteerib teade. "
 #: gnokii/gnokii.c:2772 gnokii/gnokii.c:2826 gnokii/gnokii.c:3071
 #: gnokii/gnokii.c:3275 gnokii/gnokii.c:3305 gnokii/gnokii.c:3331
 #: gnokii/gnokii.c:3516 gnokii/gnokii.c:3585 gnokii/gnokii.c:3611
-#: gnokii/gnokii.c:4147 gnokii/gnokii.c:4235 gnokii/gnokii.c:4237
+#: gnokii/gnokii.c:4151 gnokii/gnokii.c:4239 gnokii/gnokii.c:4241
 #, c-format
 msgid "Error: %s\n"
 msgstr "Viga: %s\n"
@@ -1383,7 +1383,7 @@ msgstr "SMS varamu on täis: %-3s\n"
 msgid "Entered display monitoring mode...\n"
 msgstr "Siirdun monitooringu olekusse...\n"
 
-#: gnokii/gnokii.c:2762 gnokii/gnokii.c:4228
+#: gnokii/gnokii.c:2762 gnokii/gnokii.c:4232
 msgid "Shutting down\n"
 msgstr "Lülitan välja\n"
 
@@ -1812,199 +1812,199 @@ msgid "GSM/FBUS init failed! (Unknown model?). Quitting.\n"
 msgstr ""
 "GSM/FBUS initsialiseerimine ebaõnnestus! (Tundmatu mudel?). Lõpetan....)\n"
 
-#: gnokii/gnokii.c:3787 gnokii/gnokii.c:3933 gnokii/gnokii.c:3945
+#: gnokii/gnokii.c:3787 gnokii/gnokii.c:3937 gnokii/gnokii.c:3949
 msgid "Failed to load ringtone.\n"
 msgstr "Helina laadimine ebaõnnestus.\n"
 
-#: gnokii/gnokii.c:3856
+#: gnokii/gnokii.c:3860
 #, c-format
 msgid "Getting ringtone %d failed: %s\n"
 msgstr "Helina %d saamine ebaõnnestus: %s\n"
 
-#: gnokii/gnokii.c:3859
+#: gnokii/gnokii.c:3863
 #, c-format
 msgid "Getting ringtone %d (\"%s\") succeeded!\n"
 msgstr "Helina saamine %d (\"%s\") õnnestus!\n"
 
-#: gnokii/gnokii.c:3865
+#: gnokii/gnokii.c:3869
 msgid "Failed to save ringtone.\n"
 msgstr "Helina salvestamine ebaõnnestus!\n"
 
-#: gnokii/gnokii.c:3872
+#: gnokii/gnokii.c:3876
 #, c-format
 msgid "Failed to save ringtone: %s\n"
 msgstr "Helina %s salvestamine ebaõnnestus!\n"
 
-#: gnokii/gnokii.c:3955
+#: gnokii/gnokii.c:3959
 #, c-format
 msgid "Send failed: %s\n"
 msgstr "Saatmine ebaõnnestus: %s\n"
 
-#: gnokii/gnokii.c:3966
+#: gnokii/gnokii.c:3970
 #, c-format
 msgid "Failed to press key: %s\n"
 msgstr "%s Klahvivajutus ebaõnnestus\n"
 
-#: gnokii/gnokii.c:4021
+#: gnokii/gnokii.c:4025
 #, c-format
 msgid "Error entering char: %s\n"
 msgstr "Viga tähemärgi %s sisestamiselisel\n"
 
-#: gnokii/gnokii.c:4124
+#: gnokii/gnokii.c:4128
 msgid "Divert type: "
 msgstr "Suunamise tüüp: "
 
-#: gnokii/gnokii.c:4126 gnokii/gnokii.c:4135
+#: gnokii/gnokii.c:4130 gnokii/gnokii.c:4139
 msgid "all\n"
 msgstr "Kõik\n"
 
-#: gnokii/gnokii.c:4127
+#: gnokii/gnokii.c:4131
 msgid "busy\n"
 msgstr "hõivatud\n"
 
-#: gnokii/gnokii.c:4128
+#: gnokii/gnokii.c:4132
 msgid "noans\n"
 msgstr "ei vasta\n"
 
-#: gnokii/gnokii.c:4129
+#: gnokii/gnokii.c:4133
 msgid "outofreach\n"
 msgstr "ei ulatu\n"
 
-#: gnokii/gnokii.c:4130
+#: gnokii/gnokii.c:4134
 msgid "notavail\n"
 msgstr "ei saa kätte\n"
 
-#: gnokii/gnokii.c:4131 gnokii/gnokii.c:4139
+#: gnokii/gnokii.c:4135 gnokii/gnokii.c:4143
 #, c-format
 msgid "unknown(0x%02x)\n"
 msgstr "Tundmatu(0x%02x)\n"
 
-#: gnokii/gnokii.c:4133
+#: gnokii/gnokii.c:4137
 msgid "Call type: "
 msgstr "Kõne tüüp: "
 
-#: gnokii/gnokii.c:4136
+#: gnokii/gnokii.c:4140
 msgid "voice\n"
 msgstr "Kõne\n"
 
-#: gnokii/gnokii.c:4137
+#: gnokii/gnokii.c:4141
 msgid "fax\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4138
+#: gnokii/gnokii.c:4142
 msgid "data\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4142
+#: gnokii/gnokii.c:4146
 #, c-format
 msgid "Number: %s\n"
 msgstr "Number: %s\n"
 
-#: gnokii/gnokii.c:4143
+#: gnokii/gnokii.c:4147
 #, c-format
 msgid "Timeout: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4145
+#: gnokii/gnokii.c:4149
 msgid "Divert isn't active.\n"
 msgstr "Suunamine pole aktiivne.\n"
 
-#: gnokii/gnokii.c:4168
+#: gnokii/gnokii.c:4172
 #, c-format
 msgid "SMS received from number: %s\n"
 msgstr "Saabus SMS numbrilt: %s\n"
 
-#: gnokii/gnokii.c:4177
+#: gnokii/gnokii.c:4181
 #, c-format
 msgid "Got message %d: %s\n"
 msgstr "Sain teate %d: %s\n"
 
-#: gnokii/gnokii.c:4184
+#: gnokii/gnokii.c:4188
 msgid "### Exists?!\n"
 msgstr "### On olemas?!\n"
 
-#: gnokii/gnokii.c:4189
+#: gnokii/gnokii.c:4193
 #, fuzzy, c-format
 msgid "### Cannot create file %s\n"
 msgstr "Ei suuda seada profiili %s\n"
 
-#: gnokii/gnokii.c:4220
+#: gnokii/gnokii.c:4224
 msgid "Entered sms reader mode...\n"
 msgstr "Siirdun SMS lugemise olekusse...\n"
 
-#: gnokii/gnokii.c:4230
+#: gnokii/gnokii.c:4234
 msgid "Exiting sms reader mode...\n"
 msgstr "Lahkun SMS lugemise olekust...\n"
 
-#: gnokii/gnokii.c:4251
+#: gnokii/gnokii.c:4255
 msgid "Getting security code... \n"
 msgstr "Võtan turvakoodi... \n"
 
-#: gnokii/gnokii.c:4253
+#: gnokii/gnokii.c:4257
 #, c-format
 msgid "Security code is: %s\n"
 msgstr "Turvakood on: %s\n"
 
-#: gnokii/gnokii.c:4288
+#: gnokii/gnokii.c:4292
 #, fuzzy, c-format
 msgid "Network      : %s (%s)\n"
 msgstr "Võrgu nimi   : %s %s\n"
 
-#: gnokii/gnokii.c:4291
+#: gnokii/gnokii.c:4295
 #, c-format
 msgid "Network code : %s\n"
 msgstr "Võrgu kood   : %s\n"
 
-#: gnokii/gnokii.c:4292
+#: gnokii/gnokii.c:4296
 #, fuzzy, c-format
 msgid "LAC          : %04x\n"
 msgstr "IMEI         : %s\n"
 
-#: gnokii/gnokii.c:4293
+#: gnokii/gnokii.c:4297
 #, fuzzy, c-format
 msgid "Cell id      : %04x\n"
 msgstr "Kärje id     : %d\n"
 
-#: gnokii/gnokii.c:4313
+#: gnokii/gnokii.c:4317
 #, c-format
 msgid "%7s : %10s, %7s, %6s, counter %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4355
+#: gnokii/gnokii.c:4359
 msgid "HOME variable missing\n"
 msgstr "\"HOME\" muutuja puudub\n"
 
-#: gnokii/gnokii.c:4628
+#: gnokii/gnokii.c:4632
 msgid "WARNING: cannot open logfile, logs will be directed to stderr\n"
 msgstr "HOIATUS: Ei suuda avada logifaili, logid saadetakse stderr\n"
 
-#: gnokii/gnokii.c:4657
+#: gnokii/gnokii.c:4661
 #, c-format
 msgid "Use '%s --help' for usage information.\n"
 msgstr "Kasuta '%s --help' kasutusvihjete saamiseks.\n"
 
-#: gnokii/gnokii.c:4876
+#: gnokii/gnokii.c:4880
 #, c-format
 msgid "Unknown option: %d\n"
 msgstr "Tundmatu valik: %d\n"
 
-#: gnokii/gnokii.c:4883
+#: gnokii/gnokii.c:4887
 msgid "Wrong number of arguments\n"
 msgstr "Vale argumentide kogus\n"
 
-#: smsd/lowlevel.c:103 smsd/lowlevel.c:178 smsd/lowlevel.c:180
+#: smsd/lowlevel.c:103 smsd/lowlevel.c:184 smsd/lowlevel.c:186
 #: xgnokii/xgnokii_lowlevel.c:164 xgnokii/xgnokii_lowlevel.c:254
 #: xgnokii/xgnokii_lowlevel.c:256 xgnokii/xgnokii_lowlevel.c:257
 #: xgnokii/xgnokii_sms.c:273 xgnokii/xgnokii_sms.c:353
 msgid "unknown"
 msgstr "tundmatu"
 
-#: smsd/lowlevel.c:162
+#: smsd/lowlevel.c:168
 msgid "GSM/FBUS init failed! (Unknown model ?). Quitting.\n"
 msgstr ""
 "GSM/FBUS initsialiseerimine ebaõnnestus! (Tundmatu mudel?). Lõpetan....)\n"
 
-#: smsd/lowlevel.c:421 xgnokii/xgnokii_lowlevel.c:1228
+#: smsd/lowlevel.c:427 xgnokii/xgnokii_lowlevel.c:1228
 #, c-format
 msgid "Event %d failed with return code %d!\n"
 msgstr "Tegevus %d ebaõnnestus, veakood %d!\n"

@@ -33,10 +33,7 @@
 #define _gnokii_gsm_common_h
 
 #include <stdlib.h>
-
-#include "config.h"
-#include "misc.h"
-#include "data/rlp-common.h"
+#include <gnokii/rlp-common.h>
 
 /* Type of connection. Now we support serial connection with FBUS cable and
    IR (only with 61x0 models) */
@@ -433,12 +430,12 @@ typedef struct {
 	gn_datetime_support alarm_support;
 	int maximum_alarms_number;
 	
-	u8 startup_logo_height;   /* Logo widths and heights - if supported */
-	u8 startup_logo_width;
-	u8 operator_logo_height;
-	u8 operator_logo_width;
-	u8 caller_logo_height;
-	u8 caller_logo_width;
+	unsigned int startup_logo_height;   /* Logo widths and heights - if supported */
+	unsigned int startup_logo_width;
+	unsigned int operator_logo_height;
+	unsigned int operator_logo_width;
+	unsigned int caller_logo_height;
+	unsigned int caller_logo_width;
 } gn_phone;
 
 /* Structure to hold profile entries. */

@@ -34,8 +34,8 @@
 #ifndef _gnokii_links_utils_h
 #define _gnokii_links_utils_h
 
-#include "gsm-error.h"
-#include "gsm-statemachine.h"
+#include "gnokii/error.h"
+#include "gnokii/statemachine.h"
 
 gn_error link_terminate(struct gn_statemachine *state);
 void at_dprintf(char *prefix, char *buf, int len);

@@ -27,7 +27,7 @@
 */
 
 #include "misc.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 #include "gnokii-internal.h"
 
 /* Do not compile this file under Win32 systems. */

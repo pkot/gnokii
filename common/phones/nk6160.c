@@ -44,7 +44,7 @@
 #include "links/m2bus.h"
 
 #include "gnokii-internal.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 
 #define SEND_MESSAGE_BLOCK(type, length) \
 do { \

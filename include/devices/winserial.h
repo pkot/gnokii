@@ -30,7 +30,7 @@
 #define __devices_winserial_h_
 
 #include "misc.h"
-#include "gsm-error.h"
+#include "gnokii/error.h"
 
 int serial_open(const char *file, int oflag);
 int serial_close(int fd, struct gn_statemachine *state);

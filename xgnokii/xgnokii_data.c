@@ -34,7 +34,6 @@
 #include "xgnokii.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii_data.h"
-//#include "data/virtmodem.h"
 
 static GtkWidget *GUI_DataWindow;
 bool GTerminateThread = false;

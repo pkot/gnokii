@@ -32,7 +32,7 @@
 #include "compat.h"
 #include "misc.h"
 #include <string.h>
-#include "gsm-networks.h"
+#include "gnokii/networks.h"
 
 static gn_country countries[] = {
 	{ "202", "Greece" },

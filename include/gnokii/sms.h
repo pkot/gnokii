@@ -31,12 +31,11 @@
 #ifndef _gnokii_gsm_sms_h
 #define _gnokii_gsm_sms_h
 
-#include "misc.h"
-#include "gsm-error.h"
-#include "gsm-common.h"
-#include "gsm-bitmaps.h"
-#include "gsm-ringtones.h"
-#include "gsm-encoding.h"
+#include <gnokii/error.h>
+#include <gnokii/common.h>
+#include <gnokii/bitmaps.h>
+#include <gnokii/ringtones.h>
+#include <gnokii/encoding.h>
 
 /* Maximum length of SMS center name */
 #define GN_SMS_CENTER_NAME_MAX_LENGTH  20

@@ -32,8 +32,8 @@
 #define _gnokii_device_h
 
 #include "misc.h"
-#include "gsm-common.h"
-#include "gsm-error.h"
+#include "gnokii/common.h"
+#include "gnokii/error.h"
 
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>

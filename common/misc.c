@@ -35,11 +35,14 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include "compat.h"
+
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
 
-#include "gsm-data.h"
+#include "misc.h"
+#include "gnokii/data.h"
 
 API void (*gn_elog_handler)(const char *fmt, va_list ap) = NULL;
 

@@ -33,8 +33,8 @@
 #include <string.h>
 
 #include "misc.h"
-#include "gsm-common.h"
-#include "gsm-encoding.h"
+#include "gnokii/common.h"
+#include "gnokii/encoding.h"
 
 #define GN_CHAR_ALPHABET_SIZE 128
 

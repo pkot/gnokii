@@ -50,7 +50,7 @@
 
 #include "misc.h"
 
-#include "gsm-api.h"
+#include "gnokii.h"
 #include "smsd.h"
 #include "lowlevel.h"
 #include "db.h"

@@ -34,7 +34,7 @@
 /* Various header file */
 #include "config.h"
 #include "misc.h"
-#include "gsm-statemachine.h"
+#include "gnokii/statemachine.h"
 #include "links/utils.h"
 #include "device.h"
 

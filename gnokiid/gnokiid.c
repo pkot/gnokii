@@ -40,8 +40,7 @@
 #include <string.h>
 
 #include "misc.h"
-#include "gsm-api.h"
-#include "data/virtmodem.h"
+#include "gnokii.h"
 
 /* Global variables */
 bool DebugMode;		/* When true, run in debug mode */

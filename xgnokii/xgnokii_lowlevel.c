@@ -32,7 +32,7 @@
 #include <string.h>
 #include <glib.h>
 #include "misc.h"
-#include "gsm-api.h"
+#include "gnokii.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii.h"
 
