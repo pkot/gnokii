@@ -31,19 +31,13 @@
 #ifndef _gnokii_cfgreader_h
 #define _gnokii_cfgreader_h
 
-#include "config.h"
-
 /* Structure definitions */
-
-/*
- * Exported things
- */
 
 /* A linked list of key/value pairs */
 struct gn_cfg_entry {
 	struct gn_cfg_entry *next, *prev;
 	char *key;
-char *value;
+	char *value;
 };
 
 struct gn_cfg_header {
@@ -51,22 +45,5 @@ struct gn_cfg_header {
 	struct gn_cfg_entry *entries;
 	char *section;
 };
-
-/* Global variables */
-extern API struct gn_cfg_header *gn_cfg_info;
-
-/* Functions */
-API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
-API int gn_cfg_readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
-
-/*
- * Exported things
- */
-
-struct gn_cfg_header *cfg_read_file(const char *filename);
-typedef void (*cfg_get_foreach_func)(const char *section, const char *key, const char *value);
-void cfg_get_foreach(struct gn_cfg_header *cfg, const char *section, cfg_get_foreach_func func);
-char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key, const char *value);
-int cfg_write_file(struct gn_cfg_header *cfg, const char *filename);
 
 #endif /* _gnokii_cfgreader_h */
