@@ -13,3 +13,9 @@ are writing their own firmware with arkanoid, for example.
 * Works with gnokii, use model AT as hardware type and add
 serial_baudrate = 9600 option to make it work.
 
+AT+CREG=2 should give cellid and operator notifications.
+AT+CPAS=1 gives "phone activity status" (what's that?)
+AT+CFUN=0 turns phone off
+AT+CIND=? gives some status, but I can't set indicators.
+AT+CMEE=2 gives string errors, might be usefull for debugging?
+AT+CCLK="02/04/26,22:20:10" works for setting time
