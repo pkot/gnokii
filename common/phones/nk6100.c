@@ -99,6 +99,12 @@ static GSM_Error GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetWelcomeMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetOperatorLogo(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetDateTime(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetDateTime(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetAlarm(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetAlarm(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetProfile(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -107,6 +113,7 @@ static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, in
 static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error Incoming0x17(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -115,6 +122,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x0a, IncomingNetworkInfo },
 	{ 0x03, IncomingPhonebook },
 	{ 0x05, IncomingProfile },
+	{ 0x11, IncomingPhoneClockAndAlarm },
 
 	{ 0x64, IncomingPhoneInfo },
 	{ 0xd2, IncomingModelInfo },
@@ -180,6 +188,18 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetNetworkInfo(data, state);
 	case GOP_GetSMS:
 		return GetSMSMessage(data, state);
+	case GOP_GetDateTime:
+		return GetDateTime(data, state);
+	case GOP_SetDateTime:
+		return SetDateTime(data, state);
+	case GOP_GetAlarm:
+		return GetAlarm(data, state);
+	case GOP_SetAlarm:
+		return SetAlarm(data, state);
+	case GOP_GetProfile:
+		return GetProfile(data, state);
+	case GOP_SetProfile:
+		return SetProfile(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -527,8 +547,13 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		}
 		break;
 	case 0x12:
-		dprintf("Invalid GetCallerGroupData reply: 0x%02x\n", message[4]);
-		return GE_UNKNOWN;
+		switch (message[4]) {
+		case 0x7d:
+			return GE_INVALIDPHBOOKLOCATION;
+		default:
+			dprintf("Invalid GetCallerGroupData reply: 0x%02x\n", message[4]);
+			return GE_UNKNOWN;
+		}
 	case 0x14:
 		break;
 	case 0x15:
@@ -946,14 +971,226 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	}
 }
 
+static GSM_Error GetProfileFeature(GSM_Data *data, GSM_Statemachine *state, int id)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x13, 0x01, 0x00, 0x00};
+
+	req[5] = data->Profile->Number;
+	req[6] = (unsigned char)id;
+
+	if (SM_SendMessage(state, 7, 0x05, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x05);
+}
+
+static GSM_Error SetProfileFeature(GSM_Data *data, GSM_Statemachine *state, int id, int value)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x01, 0x00, 0x00, 0x00, 0x01};
+
+	req[5] = data->Profile->Number;
+	req[6] = (unsigned char)id;
+	req[7] = (unsigned char)value;
+	dprintf("Setting profile %d feature %d to %d\n", req[5], req[6], req[7]);
+
+	if (SM_SendMessage(state, 9, 0x05, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x05);
+}
+
+static GSM_Error GetProfile(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x1a, 0x00};
+	GSM_Profile *prof;
+	GSM_Error error;
+	GSM_Data d;
+	char model[GSM_MAX_MODEL_LENGTH];
+	int i;
+
+	if (!data->Profile)
+		return GE_UNKNOWN;
+	prof = data->Profile;
+	req[4] = prof->Number;
+
+	if (SM_SendMessage(state, 5, 0x05, req) != GE_NONE) return GE_NOTREADY;
+	if ((error = SM_Block(state, data, 0x05)) != GE_NONE)
+		return error;
+
+	for (i = 0; i <= 0x09; i++) {
+		if ((error = GetProfileFeature(data, state, i)) != GE_NONE)
+			return error;
+	}
+
+	if (prof->DefaultName > -1) {
+		/*
+		 * FIXME: isn't it should be better if we store the manufacturer
+		 *	 and the model in GSM_Phone?
+		 */
+		GSM_DataClear(&d);
+		d.Model = model;
+		if ((error = GetModelName(&d, state)) != GE_NONE) {
+			return error;
+		}
+
+		/* For N5110 */
+		/* FIXME: It should be set for N5130 and 3210 too */
+		if (!strcmp(model, "NSE-1")) {
+			switch (prof->DefaultName) {
+			case 0x00:
+				snprintf(prof->Name, sizeof(prof->Name), _("Personal"));
+				break;
+			case 0x01:
+				snprintf(prof->Name, sizeof(prof->Name), _("Car"));
+				break;
+			case 0x02:
+				snprintf(prof->Name, sizeof(prof->Name), _("Headset"));
+				break;
+			default:
+				snprintf(prof->Name, sizeof(prof->Name), _("Unknown (%d)"), prof->DefaultName);
+				break;
+			}
+		} else {
+			switch (prof->DefaultName) {
+			case 0x00:
+				snprintf(prof->Name, sizeof(prof->Name), _("General"));
+				break;
+			case 0x01:
+				snprintf(prof->Name, sizeof(prof->Name), _("Silent"));
+				break;
+			case 0x02:
+				snprintf(prof->Name, sizeof(prof->Name), _("Meeting"));
+				break;
+			case 0x03:
+				snprintf(prof->Name, sizeof(prof->Name), _("Outdoor"));
+				break;
+			case 0x04:
+				snprintf(prof->Name, sizeof(prof->Name), _("Pager"));
+				break;
+			case 0x05:
+				snprintf(prof->Name, sizeof(prof->Name), _("Car"));
+				break;
+			case 0x06:
+				snprintf(prof->Name, sizeof(prof->Name), _("Headset"));
+				break;
+			default:
+				snprintf(prof->Name, sizeof(prof->Name), _("Unknown (%d)"), prof->DefaultName);
+				break;
+			}
+		}
+	}
+
+	return GE_NONE;
+}
+
+static GSM_Error SetProfile(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[64] = {FBUS_FRAME_HEADER, 0x1c, 0x01, 0x03};
+	GSM_Profile *prof;
+	GSM_Error error;
+
+	if (!data->Profile)
+		return GE_UNKNOWN;
+	prof = data->Profile;
+	dprintf("Setting profile %d (%s)\n", prof->Number, prof->Name);
+
+	if (prof->Number == 0) {
+		/* We cannot rename the General profile! - bozo */
+
+		/*
+		 * FIXME: We must to do something. We cannot ask the name
+		 * of the General profile, because it's language dependent.
+		 * But without SetProfileName we aren't able to set features.
+		 */
+		dprintf("You cannot rename General profile\n"); 
+		return GE_NOTSUPPORTED;
+	} else if (prof->DefaultName > -1) {
+		prof->Name[0] = 0;
+	}
+
+	req[7] = prof->Number;
+	req[8] = PNOK_EncodeString(req+9, 39, prof->Name);
+	req[6] = req[8] + 2;
+
+	if (SM_SendMessage(state, req[8]+9, 0x05, req) != GE_NONE) return GE_NOTREADY;
+	if ((error = SM_Block(state, data, 0x05)) != GE_NONE)
+		return error;
+
+	error  = SetProfileFeature(data, state, 0x00, prof->KeypadTone);
+	error |= SetProfileFeature(data, state, 0x01, prof->Lights);
+	error |= SetProfileFeature(data, state, 0x02, prof->CallAlert);
+	error |= SetProfileFeature(data, state, 0x03, prof->Ringtone);
+	error |= SetProfileFeature(data, state, 0x04, prof->Volume);
+	error |= SetProfileFeature(data, state, 0x05, prof->MessageTone);
+	error |= SetProfileFeature(data, state, 0x06, prof->Vibration);
+	error |= SetProfileFeature(data, state, 0x07, prof->WarningTone);
+	error |= SetProfileFeature(data, state, 0x08, prof->CallerGroups);
+	error |= SetProfileFeature(data, state, 0x09, prof->AutomaticAnswer);
+
+	return (error == GE_NONE) ? GE_NONE : GE_UNKNOWN;
+}
+
 static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Bitmap *bmp;
+	GSM_Profile *prof;
 	unsigned char *pos;
 	int i;
 	bool found;
 
 	switch (message[3]) {
+	/* Set profile feat. OK */
+	case 0x11:
+		switch (message[4]) {
+		case 0x01:
+			break;
+		case 0x7d:
+			dprintf(_("Cannot set profile feature\n"));
+			return GE_UNKNOWN;
+		default:
+			dprintf(_("Invalid SetProfileFeature reply: 0x%02x\n"), message[4]);
+			return GE_UNKNOWN;
+		}
+		break;
+		
+	/* Get profile feature */
+	case 0x14:
+		if (data->Profile) {
+			prof = data->Profile;
+			switch (message[6]) {
+			case 0x00:
+				prof->KeypadTone = message[8];
+				break;
+			case 0x01:
+				prof->Lights = message[8];
+				break;
+			case 0x02:
+				prof->CallAlert = message[8];
+				break;
+			case 0x03:
+				prof->Ringtone = message[8];
+				break;
+			case 0x04:
+				prof->Volume = message[8];
+				break;
+			case 0x05:
+				prof->MessageTone = message[8];
+				break;
+			case 0x06:
+				prof->Vibration = message[8];
+				break;
+			case 0x07:
+				prof->WarningTone = message[8];
+				break;
+			case 0x08:
+				prof->CallerGroups = message[8];
+				break;
+			case 0x09:
+				prof->AutomaticAnswer = message[8];
+				break;
+			default:
+				dprintf("Error\n");
+				break;
+			}
+		}
+		break;
+
 	/* Get Welcome Message */
 	case 0x17:
 		if (data->Bitmap) {
@@ -994,6 +1231,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 					pos += *pos + 1;
 					break;
 				default:
+					dprintf("Error\n");
 					break;
 				}
 				found = true;
@@ -1001,10 +1239,43 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 			if (!found) return GE_NOTSUPPORTED;
 		}
 		break;
+	
+	/* Set welcome ok */
 	case 0x19:
 		break;
+	
+	/* Get profile name */
+	case 0x1b:
+		if (data->Profile) {
+			if (message[9] == 0x00) {
+				data->Profile->DefaultName = message[8];
+				data->Profile->Name[0] = 0;
+			} else {
+				data->Profile->DefaultName = -1;
+				PNOK_DecodeString(data->Profile->Name, sizeof(data->Profile->Name), message+10, message[9]);
+			}
+			break;
+		} else {
+			return GE_UNKNOWN;
+		}
+		break;
+	
+	/* Set profile name OK */
+	case 0x1d:
+		switch (message[4]) {
+		case 0x01:
+			break;
+		default:
+			dprintf("Invalid SetProfile reply: 0x%02x\n", message[4]);
+			return GE_UNKNOWN;
+		}
+		break;
+	
+	/* Set oplogo ok */
 	case 0x31:
 		break;
+	
+	/* Set oplogo error */
 	case 0x32:
 		switch (message[4]) {
 		case 0x7d:
@@ -1013,6 +1284,8 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 			dprintf("Invalid SetOperatorLogo reply: 0x%02x\n", message[4]);
 			return GE_UNKNOWN;
 		}
+	
+	/* Get oplogo */
 	case 0x34:
 		if (data->Bitmap) {
 			bmp = data->Bitmap;
@@ -1040,11 +1313,141 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 			memcpy(bmp->bitmap, pos, bmp->size);
 		}
 		break;
+	
+	/* Get oplogo error */
 	case 0x35:
 		dprintf("Invalid GetOperatorLogo reply: 0x%02x\n", message[4]);
 		return GE_UNKNOWN;
+	
 	default:
 		dprintf("Unknown subtype of type 0x05 (%d)\n", message[3]);
+		return GE_UNKNOWN;
+	}
+
+	return GE_NONE;
+}
+
+
+static GSM_Error GetDateTime(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x62};
+      
+	if (SM_SendMessage(state, 4, 0x11, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x11);
+}
+
+static GSM_Error SetDateTime(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x60, 0x01, 0x01, 0x07,
+			       0x00, 0x00,	/* year - H/L */
+			       0x00, 0x00,	/* month, day */
+			       0x00, 0x00,	/* yours, minutes */
+			       0x00};		/* Unknown, but not seconds - try 59 and wait 1 sec. */
+      
+	req[7] = data->DateTime->Year >> 8;
+	req[8] = data->DateTime->Year & 0xff;
+	req[9] = data->DateTime->Month;
+	req[10] = data->DateTime->Day;
+	req[11] = data->DateTime->Hour;
+	req[12] = data->DateTime->Minute;
+
+	if (SM_SendMessage(state, 14, 0x11, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x11);
+}
+
+static GSM_Error GetAlarm(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x6d};
+      
+	if (SM_SendMessage(state, 4, 0x11, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x11);
+}
+
+static GSM_Error SetAlarm(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x6b, 0x01, 0x20, 0x03,
+			       0x02,		/* should be alarm on/off, but it doesn't works */
+			       0x00, 0x00,	/* hours, minutes */
+			       0x00};		/* Unknown, but not seconds - try 59 and wait 1 sec. */
+      
+	if (data->DateTime->AlarmEnabled) {
+		req[8] = data->DateTime->Hour;
+		req[9] = data->DateTime->Minute;
+	} else {
+		dprintf("Clearing the alarm clock isn't supported\n");
+		return GE_NOTSUPPORTED;
+	}
+
+	if (SM_SendMessage(state, 11, 0x11, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x11);
+}
+
+static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	GSM_DateTime *date;
+	unsigned char *pos;
+
+
+	switch (message[3]) {
+	/* Date and time set */
+	case 0x61:
+		switch (message[4]) {
+		case 0x01:
+			break;
+		default:
+			dprintf("Invalid SetDateTime reply: 0x%02x\n", message[4]);
+			return GE_UNKNOWN;
+		}
+		break;
+
+	/* Date and time received */
+	case 0x63:
+		if (data->DateTime) {
+			date = data->DateTime;
+			pos = message+8;
+			date->Year = (pos[0] << 8) | pos[1];
+			pos += 2;
+			date->Month = *pos++;
+			date->Day = *pos++;
+			date->Hour = *pos++;
+			date->Minute = *pos++;
+			date->Second = *pos++;
+
+			dprintf("Message: Date and time\n");
+			dprintf("   Time: %02d:%02d:%02d\n", date->Hour, date->Minute, date->Second);
+			dprintf("   Date: %4d/%02d/%02d\n", date->Year, date->Month, date->Day);
+		}
+		break;
+	
+	/* Alarm set */
+	case 0x6c:
+		switch (message[4]) {
+		case 0x01:
+			break;
+		default:
+			dprintf("Invalid SetAlarm reply: 0x%02x\n", message[4]);
+			return GE_UNKNOWN;
+		}
+		break;
+
+	/* Alarm received */
+	case 0x6e:
+		if (data->DateTime) {
+			date = data->DateTime;
+			pos = message + 8;
+			date->AlarmEnabled = (*pos++ == 2);
+			date->Hour = *pos++;
+			date->Minute = *pos++;
+			date->Second = 0;
+
+			dprintf("Message: Alarm\n");
+			dprintf("   Alarm: %02d:%02d\n", date->Hour, date->Minute);
+			dprintf("   Alarm is %s\n", date->AlarmEnabled ? _("on") : _("off"));
+		}
+		break;
+
+	default:
+		dprintf("Unknown subtype of type 0x11 (%d)\n", message[3]);
 		return GE_UNKNOWN;
 	}
 

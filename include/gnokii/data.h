@@ -108,6 +108,10 @@ typedef enum {
 	GOP_CallDivert,
 	GOP_OnSMS,
 	GOP_PollSMS,
+	GOP_SetAlarm,
+	GOP_SetDateTime,
+	GOP_GetProfile,
+	GOP_SetProfile,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

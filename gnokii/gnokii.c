@@ -221,7 +221,7 @@ static int usage(void)
 			  "          gnokii --getsmsc message_center_number\n"
 			  "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
 			  "          gnokii --getdatetime\n"
-			  "          gnokii --setalarm HH MM\n"
+			  "          gnokii --setalarm [HH MM]\n"
 			  "          gnokii --getalarm\n"
 			  "          gnokii --dialvoice number\n"
 			  "          gnokii --getcalendarnote start [end] [-v]\n"
@@ -1691,6 +1691,7 @@ static int setdatetime(int argc, char *argv[])
 	struct tm *now;
 	time_t nowh;
 	GSM_DateTime Date;
+	GSM_Error error;
 
 	nowh = time(NULL);
 	now = localtime(&nowh);
@@ -1722,12 +1723,13 @@ static int setdatetime(int argc, char *argv[])
 			Date.Year = Date.Year + 2000;
 	}
 
-	/* FIXME: Error checking should be here. */
-	if (GSM && GSM->SetDateTime) GSM->SetDateTime(&Date);
+	GSM_DataClear(&data);
+	data.DateTime = &Date;
+	error = SM_Functions(GOP_SetDateTime, &data, &State);
 
 	if (GSM && GSM->Terminate) GSM->Terminate();
 
-	return 0;
+	return error;
 }
 
 /* In this mode we receive the date and time from mobile phone. */
@@ -1764,14 +1766,27 @@ static int getdatetime(void)
 }
 
 /* Setting the alarm. */
-static int setalarm(char *argv[])
+static int setalarm(int argc, char *argv[])
 {
 	GSM_DateTime Date;
+	GSM_Error error;
 
-	Date.Hour = atoi(argv[0]);
-	Date.Minute = atoi(argv[1]);
+	if (argc == 2) {
+		Date.Hour = atoi(argv[0]);
+		Date.Minute = atoi(argv[1]);
+		Date.Second = 0;
+		Date.AlarmEnabled = true;
+	} else {
+		Date.Hour = 0;
+		Date.Minute = 0;
+		Date.Second = 0;
+		Date.AlarmEnabled = false;
+	}
 
-	if (GSM && GSM->SetAlarm) GSM->SetAlarm(1, &Date);
+	GSM_DataClear(&data);
+	data.DateTime = &Date;
+
+	error = SM_Functions(GOP_SetAlarm, &data, &State);
 
 	if (GSM && GSM->Terminate) GSM->Terminate();
 
@@ -2021,16 +2036,21 @@ static int getprofile(int argc, char *argv[])
 	int start, stop, i;
 	GSM_Profile profile;
 	GSM_Error error = GE_NOTSUPPORTED;
+	GSM_Data data;
 
 	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
-	char model[64];
+	char model[GSM_MAX_MODEL_LENGTH];
 
 	profile.Number = 0;
-	if (GSM && GSM->GetProfile) error = GSM->GetProfile(&profile);
+	GSM_DataClear(&data);
+	data.Profile = &profile;
+	error = SM_Functions(GOP_GetProfile, &data, &State);
 
 	if (error == GE_NONE) {
 
-		while (GSM && GSM->GetModel && GSM->GetModel(model) != GE_NONE)
+		GSM_DataClear(&data);
+		data.Model = model;
+		while (SM_Functions(GOP_GetModel, &data, &State) != GE_NONE)
 			sleep(1);
 
 		max_profiles = 7; /* This is correct for 6110 (at least my). How do we get
@@ -2062,12 +2082,15 @@ static int getprofile(int argc, char *argv[])
 			stop = max_profiles;
 		}
 
+		GSM_DataClear(&data);
+		data.Profile = &profile;
+
 		i = start;
 		while (i < stop) {
 			profile.Number = i;
 
 			if (profile.Number != 0)
-				if (GSM && GSM->GetProfile) GSM->GetProfile(&profile);
+				SM_Functions(GOP_GetProfile, &data, &State);
 
 			fprintf(stdout, "%d. \"%s\"\n", profile.Number + 1, profile.Name);
 			if (profile.DefaultName == -1) fprintf(stdout, _(" (name defined)\n"));
@@ -2781,6 +2804,7 @@ static int smsreader(void)
 	return 0;
 }
 
+
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 #ifndef WIN32
@@ -2829,7 +2853,7 @@ int main(int argc, char *argv[])
 		{ "getdatetime",        no_argument,       NULL, OPT_GETDATETIME },
 
 		// Set alarm
-		{ "setalarm",           required_argument, NULL, OPT_SETALARM },
+		{ "setalarm",           optional_argument, NULL, OPT_SETALARM },
 
 		// Get alarm
 		{ "getalarm",           no_argument,       NULL, OPT_GETALARM },
@@ -2940,7 +2964,7 @@ int main(int argc, char *argv[])
 #endif
 
 		{ OPT_SETDATETIME,       0, 5, 0 },
-		{ OPT_SETALARM,          2, 2, 0 },
+		{ OPT_SETALARM,          0, 2, 0 },
 		{ OPT_DIALVOICE,         1, 1, 0 },
 		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
 		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
@@ -3060,7 +3084,7 @@ int main(int argc, char *argv[])
 			rc = setdatetime(nargc, nargv);
 			break;
 		case OPT_SETALARM:
-			rc = setalarm(nargv);
+			rc = setalarm(nargc, nargv);
 			break;
 		case OPT_DIALVOICE:
 			rc = dialvoice(optarg);
