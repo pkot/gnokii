@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2001 Pavel Machek <pavel@ucw.cz>
-  Copyright (C) 2001, 2002 Ladislav Michl <ladis@linux-mips.org>
+  Copyright (C) 2001-2003 Ladislav Michl <ladis@linux-mips.org>
 
  */
 
@@ -63,15 +63,9 @@ static gn_error bus_write(unsigned char *d, int len, struct gn_statemachine *sta
 	return GN_ERR_NONE;
 }
 
-/*
- * FIXME: we need much more clever way for device reading. as stated in
- * Serial-Programming-HOWTO reading single character leads to lossing
- * bytes although no error is reported. i used this way because it's
- * simplicity. when fixing this keep in mind that cbus need very precise
- * timing...
- */
-static gn_error bus_read(unsigned char *rx_byte, unsigned int timeout, struct gn_statemachine *state)
+static gn_error bus_read(unsigned int timeout, struct gn_statemachine *state)
 {
+	cbus_instance *bi = CBUSINST(state);
 	int res;
 	struct timeval tv;
 	
@@ -79,20 +73,22 @@ static gn_error bus_read(unsigned char *rx_byte, unsigned int timeout, struct gn
 	tv.tv_usec = 1000 * timeout;
 	res = device_select(&tv, state);
 	if (res > 0)
-		res = device_read(rx_byte, 1, state);
+		res = device_read(bi->rx_buffer, CBUS_MAX_FRAME_LENGTH, state);
 	else
 		return GN_ERR_TIMEOUT;
 
 	/* This traps errors from device_read */
-	if (res > 0)
+	if (res > 0) {
+		bi->rx_buffer_pos = 0;
+		bi->rx_buffer_count = res;
 		return GN_ERR_NONE;
-	else
+	} else
 		return GN_ERR_INTERNALERROR;
 }
 
 static gn_error send_packet(unsigned char *msg, int len, unsigned short cmd, bool init, struct gn_statemachine *state)
 {
-	unsigned char p[1024], csum = 0;
+	unsigned char p[CBUS_MAX_FRAME_LENGTH], csum = 0;
 	int i, pos;
 
 	p[0] = (init) ? 0x38 : 0x34;
@@ -107,6 +103,7 @@ static gn_error send_packet(unsigned char *msg, int len, unsigned short cmd, boo
 	for (i = 0; i < pos; i++)
 		csum ^= p[i];
 	p[pos++] = csum;
+#if 0
 	if (cmd == 0x3c) {
 		at_dprintf("CBUS -> ", msg, len);
 	} else {
@@ -115,6 +112,7 @@ static gn_error send_packet(unsigned char *msg, int len, unsigned short cmd, boo
 			dprintf("%02x ", p[i]);
 		dprintf("\n");
 	}
+#endif
 	return bus_write(p, pos, state);
 }
 
@@ -123,8 +121,8 @@ static void dump_packet(cbus_instance *bi)
 	int i;
 
 	dprintf("CBUS %s ", (bi->frame_header1 == 0x19) ? "<-" : "->");
-	dprintf("hdr: (%02x,%02x), ", bi->frame_header1, bi->frame_header2);
-	dprintf("cmd: (%02x,%02x), ", bi->frame_type1, bi->frame_type2);
+	dprintf("hdr: (%02x,%02x) ", bi->frame_header1, bi->frame_header2);
+	dprintf("cmd: (%02x,%02x) ", bi->frame_type1, bi->frame_type2);
 	dprintf("len: %d\n", bi->message_len);
 	if (bi->message_len == 0)
 		return;
@@ -142,8 +140,10 @@ static void dump_packet(cbus_instance *bi)
  * State machine for receive handling. Called once for each character
  * received from the phone.
  */
-static bool state_machine(unsigned char rx_byte, cbus_instance *bi, struct gn_statemachine *state)
+static bool state_machine(unsigned char rx_byte, struct gn_statemachine *state)
 {
+	cbus_instance *bi = CBUSINST(state);
+	
 	/* checksum is XOR of all bytes in the frame */
 	if (bi->state != CBUS_RX_GetCSum) bi->checksum ^= rx_byte;
 
@@ -151,20 +151,18 @@ static bool state_machine(unsigned char rx_byte, cbus_instance *bi, struct gn_st
 
 	case CBUS_RX_Header:
 		switch (rx_byte) {
-			case 0x38:
-			case 0x34:
-				if (bi->prev_rx_byte == 0x19) {
-					bi->state = CBUS_RX_FrameType1;
-				}
-				break;
-			case 0x19:
-				if ((bi->prev_rx_byte == 0x38) || (bi->prev_rx_byte == 0x34)) {
-					bi->state = CBUS_RX_FrameType1;
-				}
-				break;
-			default:
-				dprintf("CBUS: discarding (%02x)\n", rx_byte);
-				break;
+		case 0x38:
+		case 0x34:
+			if (bi->prev_rx_byte == 0x19)
+				bi->state = CBUS_RX_FrameType1;
+			break;
+		case 0x19:
+			if ((bi->prev_rx_byte == 0x38) || (bi->prev_rx_byte == 0x34))
+				bi->state = CBUS_RX_FrameType1;
+			break;
+		default:
+			dprintf("CBUS: discarding (%02x)\n", rx_byte);
+			break;
 		}
 		if (bi->state != CBUS_RX_Header) {
 			bi->frame_header1 = bi->prev_rx_byte;
@@ -218,19 +216,19 @@ static bool state_machine(unsigned char rx_byte, cbus_instance *bi, struct gn_st
 
 	/* get checksum */
 	case CBUS_RX_GetCSum:
+		bi->state = CBUS_RX_Header;
 		/* compare against calculated checksum. */
 		if (bi->checksum == rx_byte) {
 			dump_packet(bi);
 			if (bi->frame_header1 == 0x19) {
 				dprintf("CBUS: sending ack\n");
 				bus_write("\xa5", 1, state);
+				return true;
 			}
 			bi->state = CBUS_RX_GetAck;
-		} else {
+		} else
 			dprintf("CBUS: Checksum error %02x/%02x\n",
 				bi->checksum, rx_byte);
-			bi->state = CBUS_RX_Header;
-		}
 		break;
 
 	/* get ack */
@@ -251,58 +249,68 @@ static bool state_machine(unsigned char rx_byte, cbus_instance *bi, struct gn_st
 	return false;
 }
 
-static gn_error get_packet(cbus_instance *bi, struct gn_statemachine *state)
+static gn_error get_packet(struct gn_statemachine *state)
 {
-	gn_error error;
-	unsigned char rx_byte;
+	cbus_instance *bi = CBUSINST(state);
+	gn_error error = GN_ERR_NONE;
 	bool done = false;
-	int retry = 10;
+	int retry = 3;
 
+	bi->state = CBUS_RX_Header;
 	do {
-		error = bus_read(&rx_byte, 5, state);
+		if (bi->rx_buffer_pos == bi->rx_buffer_count)
+			error = bus_read(5, state);
 		if (!error) {
-			retry = 10;
-			done = state_machine(rx_byte, bi, state);
- 		}
+			retry = 3;
+			done = state_machine(bi->rx_buffer[bi->rx_buffer_pos++], state);
+		}
 	} while (!done && --retry);
 	
-	return (done) ? GN_ERR_NONE : GN_ERR_INTERNALERROR;
+	return done ? GN_ERR_NONE : GN_ERR_TIMEOUT;
 }
 
 /* 
  * send packet and wait for 'ack'. 
  */
-static gn_error send_packet_ack(unsigned char *msg, int len, unsigned short cmd, bool init,
-				cbus_instance *bi, struct gn_statemachine *state)
+static gn_error send_packet_ack(unsigned char *msg, int len, unsigned short cmd,
+				bool init, struct gn_statemachine *state)
 {
-	gn_error error = GN_ERR_FAILED;
+	cbus_instance *bi = CBUSINST(state);
+	gn_error error;
 	int retry = 3;
 
-	while (retry-- && error) {
-		error = send_packet(msg, len, cmd, init, state);
-		if (error)
-			continue;
-again:
-		error = get_packet(bi, state);
+	bi->rx_buffer_pos = 0;
+	bi->rx_buffer_count = 0;
+	device_flush(state);
+	
+	error = send_packet(msg, len, cmd, init, state);
+	if (error)
+		return error;
+	
+	while (retry--) {
+		error = get_packet(state);
 		if (error)
 			continue;
 		if (bi->frame_type1 != cmd) {
 			dprintf("CBUS: get_packet is not the right packet\n");
-			goto again;
+			continue;
 		}
+		if (!error)
+			return GN_ERR_NONE;
 	}
-	
-	return error;
+	dprintf("CBUS: get_packet failed\n");
+	return GN_ERR_FAILED;
 }
 
-static gn_error bus_reset(cbus_instance *bi, struct gn_statemachine *state)
+static gn_error bus_reset(struct gn_statemachine *state)
 {
+	cbus_instance *bi = CBUSINST(state);
 	gn_error error;
 
 	bus_write("\0\0\0\0\0\0\0", 7, state);
-	send_packet_ack("", 0, 0xa6, true, bi, state);
-	send_packet_ack("D", 1, 0x90, true, bi, state);
-	error = get_packet(bi, state);
+	send_packet_ack("", 0, 0xa6, true, state);
+	send_packet_ack("\x1f", 1, 0x90, true, state);
+	error = get_packet(state);
 	if (error)
 		return error;
 	if (bi->frame_type1 != 0x91) {
@@ -313,27 +321,29 @@ static gn_error bus_reset(cbus_instance *bi, struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
-static gn_error get_cmd_confirmation(cbus_instance *bi, struct gn_statemachine *state)
+static gn_error get_cmd_confirmation(struct gn_statemachine *state)
 {
+	cbus_instance *bi = CBUSINST(state);
 	gn_error error;
 	
-	error = get_packet(bi, state);
+	error = get_packet(state);
 	if (error)
 		return error;
 	if (bi->frame_type1 != 0x3d) {
 		dprintf("CBUS: command confirmation expected %02x/%02x\n",
 			bi->frame_type1, bi->frame_type2);
-		return GN_ERR_INTERNALERROR;
+		return GN_ERR_FAILED;
 	}
 	dprintf("CBUS: command confirmed\n");
 	return GN_ERR_NONE;
 }
 
-static gn_error get_cmd_reply(cbus_instance *bi, struct gn_statemachine *state)
+static gn_error get_cmd_reply(struct gn_statemachine *state)
 {
+	cbus_instance *bi = CBUSINST(state);
 	gn_error error;
 
-	error = get_packet(bi, state);
+	error = get_packet(state);
 	if (error)
 		return error;
 	if (bi->frame_type1 != 0x3e) {
@@ -351,26 +361,25 @@ static gn_error get_cmd_reply(cbus_instance *bi, struct gn_statemachine *state)
 	if (bi->at_reply[0] == GN_AT_NONE) {
 		strcpy(bi->at_reply + 1, bi->buffer);
 		bi->at_reply[bi->message_len] = 0;
-		error = send_packet_ack("\x3e\x68", 2, 0x3f, false, bi, state);
+		error = send_packet_ack("\x3e\x68", 2, 0x3f, false, state);
 		if (error)
 			return error;
-		error = get_cmd_reply(bi, state);
+		error = get_cmd_reply(state);
 		if (error)
 			return error;
 	}
-	return send_packet_ack("\x3e\x68", 2, 0x3f, false, bi, state);
+	return send_packet_ack("\x3e\x68", 2, 0x3f, false, state);
 }
 
 static gn_error at_send_message(u16 message_length, u8 message_type,
 				unsigned char *buffer, struct gn_statemachine *state)
 {
 	gn_error error;
-	cbus_instance *bi = CBUSINST(state);
-	
-	error = send_packet_ack(buffer, message_length, 0x3c, false, bi, state);
+
+	error = send_packet_ack(buffer, message_length, 0x3c, false, state);
 	if (error)
 		return error;
-	return get_cmd_confirmation(bi, state);
+	return get_cmd_confirmation(state);
 }
 
 static bool cbus_open_serial(char *device, struct gn_statemachine *state)
@@ -394,7 +403,7 @@ static gn_error cbus_loop(struct timeval *timeout, struct gn_statemachine *sm)
 	gn_error error;
 	cbus_instance *bi = CBUSINST(sm);
 
-	error = get_cmd_reply(bi, sm);
+	error = get_cmd_reply(sm);
 	if (error)
 		return error;
 	sm_incoming_function(sm->last_msg_type, bi->at_reply, strlen(bi->at_reply), sm);
@@ -428,7 +437,7 @@ gn_error cbus_initialise(struct gn_statemachine *state)
 		free(CBUSINST(state));
 		CBUSINST(state) = NULL;
 	} else {
-		error = bus_reset(businst, state);
+		error = bus_reset(state);
 	}
 	return error;
 }

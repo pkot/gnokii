@@ -31,7 +31,6 @@
 #define _cbus_h
 
 #define CBUS_MAX_FRAME_LENGTH 256
-#define CBUS_MAX_TRANSMIT_LENGTH 256
 #define CBUS_MAX_MSG_LENGTH 256
 
 typedef enum {
@@ -53,6 +52,8 @@ typedef enum {
 
 typedef struct{
 	int checksum;
+	int rx_buffer_pos;
+	int rx_buffer_count;
 	int buffer_count;
 	cbus_rx_state state;
 	int frame_header1;
@@ -60,6 +61,7 @@ typedef struct{
 	int frame_type1;
 	int frame_type2;
 	int message_len;
+	unsigned char rx_buffer[CBUS_MAX_FRAME_LENGTH];
 	unsigned char buffer[CBUS_MAX_FRAME_LENGTH];
 	unsigned char prev_rx_byte;
 	unsigned char at_reply[CBUS_MAX_MSG_LENGTH];
