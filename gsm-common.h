@@ -28,8 +28,14 @@
    code */
 
 typedef enum {
-  GMT_INTERNAL, /* Internal memory of the mobile equipment */
-  GMT_SIM       /* SIM card memory */
+  GMT_INTERNAL,   /* Internal memory of the mobile equipment */
+  GMT_SIM,        /* SIM card memory */
+  GMT_FIXED,      /* Fixed dial numbers */
+  GMT_OWN,        /* Own numbers */
+  GMT_EN_UNKNOWN, /* Emergency numbers */
+  GMT_DIALED,     /* Dialled numbers */
+  GMT_RECEIVED,   /* Received numbers */
+  GMT_MISSED,     /* Missed numbers */
 } GSM_MemoryType;
 
 /* Power source types */
@@ -266,6 +272,8 @@ typedef struct {
   GSM_Error (*SetAlarm)( int alarm_number, GSM_DateTime *date_time );
 
   GSM_Error (*DialVoice)( char *Number);
+
+  GSM_Error (*DialData)( char *Number);
 
   GSM_Error (*GetIncomingCallNr)( char *Number );
 } GSM_Functions;

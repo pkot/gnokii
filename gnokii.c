@@ -46,6 +46,7 @@ void getdatetime(void);
 void setalarm(char *argv[]);
 void getalarm(void);
 void dialvoice(char *argv[]);
+void dialdata(char *argv[]);
 
 void version(void)
 {
@@ -73,6 +74,7 @@ void usage(void)
           gnokii [--setalarm] [HH] [MM]
           gnokii [--getalarm]
           gnokii [--dialvoice] [number]
+          gnokii [--dialdata] [number]
 
           --help            display usage information.
 
@@ -114,6 +116,8 @@ void usage(void)
           --getalarm        shows current alarm.
 
           --dialvoice       initiate voice call.
+
+          --dialdata        initiate data call.
 
    [memory type] is one of the following:
           A ... SIM card memory
@@ -210,6 +214,11 @@ int main(int argc, char *argv[])
   /* Voice call mode. */
   if (strcmp(argv[1], "--dialvoice") == 0) {
     dialvoice(argv);
+  }
+
+  /* Data call mode. */
+  if (strcmp(argv[1], "--dialdata") == 0) {
+    dialdata(argv);
   }
 
   /* Get phonebook command. */
@@ -456,6 +465,22 @@ void dialvoice(char *argv[])
 
   if (argv[2])
     GSM->DialVoice(argv[2]);
+
+  GSM->Terminate();
+  exit(0);
+}
+
+void dialdata(char *argv[])
+{
+
+  fbusinit(false);
+
+  sleep(10);
+
+  if (argv[2])
+    GSM->DialData(argv[2]);
+
+  sleep(10);
 
   GSM->Terminate();
   exit(0);
