@@ -120,7 +120,7 @@ static gn_error at_send_message(unsigned int message_length, unsigned char messa
 
 char *findcrlfbw(unsigned char *str, int len)
 {
-	while ((*str != '\n') && (*str-1 != '\r') && len--)
+	while (len-- && (*str != '\n') && (*str-1 != '\r'))
 		str--;
 	return len > 0 ? str+1 : NULL;
 }
