@@ -200,9 +200,12 @@ GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char mess
 }
 
 
-/* This function is for convinience only */
-/* It is called after SM_SendMessage and blocks until a response is received */
-GSM_Error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t)
+/* This function is for convinience only
+   It is called after SM_SendMessage and blocks until a response is received
+
+   t is in tenths of second
+*/
+static GSM_Error __SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t, int noretry)
 {
 	int retry, timeout;
 	GSM_State s;
@@ -222,45 +225,32 @@ GSM_Error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, 
 
 		dprintf("SM_Block Retry - %d\n", retry);
 		SM_Reset(state);
-		if (retry < 2) SM_SendMessage(state, state->LastMsgSize, state->LastMsgType, state->LastMsg);
+		if ((retry < 2) && (!noretry)) 
+			SM_SendMessage(state, state->LastMsgSize, state->LastMsgType, state->LastMsg);
 	}
 
 	return GE_TIMEOUT;
 }
 
+GSM_Error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t)
+{
+	return __SM_BlockTimeout(state, data, waitfor, t, 0);
+}
+
 GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 {
-	return SM_BlockTimeout(state, data, waitfor, 30);
+	return __SM_BlockTimeout(state, data, waitfor, 30, 0);
 }
 
 /* This function is equal to SM_Block except it does not retry the message */
 GSM_Error SM_BlockNoRetryTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t)
 {
-	int retry, timeout;
-	GSM_State s;
-	GSM_Error err;
-
-	for (retry = 0; retry < 3; retry++) {
-		timeout = t;
-		err = SM_WaitFor(state, data, waitfor);
-		if (err != GE_NONE) return err;
-
-		do {            /* ~3secs timeout */
-			s = SM_Loop(state, 1);  /* Timeout=100ms */
-			timeout--;
-		} while ((timeout > 0) && (s == WaitingForResponse));
-
-		if (s == ResponseReceived) return SM_GetError(state, waitfor);
-
-		SM_Reset(state);
-	}
-
-	return GE_TIMEOUT;
+	return __SM_BlockTimeout(state, data, waitfor, t, 1);
 }
 
 GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 {
-	return SM_BlockNoRetryTimeout(state, data, waitfor, 50);
+	return __SM_BlockTimeout(state, data, waitfor, 100, 1);
 }
 
 /* Just to do things neatly */
