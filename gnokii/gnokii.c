@@ -152,6 +152,7 @@ typedef enum {
 	OPT_DELETESMSFOLDER,
 	OPT_CREATESMSFOLDER,
 	OPT_LISTNETWORKS,
+	OPT_GETNETWORKINFO
 } opt_index;
 
 static char *bindir;     /* Binaries directory from .gnokiirc file - not used here yet */
@@ -316,6 +317,7 @@ static int usage(FILE *f, int retval)
 		     "                 [{--timeout|-m} time_in_seconds]\n"
 		     "                 [{--number|-n} number]\n"
 		     "          gnokii --listnetworks\n"
+		     "          gnokii --getnetworkinfo\n"
 		));
 #ifdef SECURITY
 	fprintf(f, _("          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
@@ -1866,7 +1868,7 @@ static int setlogo(int argc, char *argv[])
 			
 		memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
 		if (argc < 3)
-			if (gn_sm_functions(GN_OP_GetNetworkInfo, &data, &state) == GN_ERR_NONE) 
+			if (gn_sm_functions(GN_OP_GetNetworkInfo, &data, &state) == GN_ERR_NONE)
 				strncpy(bitmap.netcode, networkinfo.network_code, sizeof(bitmap.netcode) - 1);
 
 		if (!strncmp(state.driver.phone.models, "6510", 4))
@@ -4226,7 +4228,7 @@ static int getsecuritycode()
 	gn_data data;
 	gn_error error;
 	gn_security_code sc;
-	
+
 	memset(&sc, 0, sizeof(sc));
 	sc.type = GN_SCT_SecurityCode;
 	data.security_code = &sc;
@@ -4240,11 +4242,39 @@ static void list_gsm_networks(void)
 {
 	extern gn_network networks[];
 	int i;
-				    
+
 	printf("Network  Name\n");
 	printf("-----------------------------------------\n");
 	for (i = 0; strcmp(networks[i].name, "unknown"); i++)
 		printf("%-7s  %s\n", networks[i].code, networks[i].name);
+}
+
+static int getnetworkinfo(void)
+{
+	gn_network_info networkinfo;
+	gn_data data;
+	int cid, lac;
+	char country[4] = {0, 0, 0, 0};
+
+	gn_data_clear(&data);
+	data.network_info = &networkinfo;
+
+	if (gn_sm_functions(GN_OP_GetNetworkInfo, &data, &state) != GN_ERR_NONE) {
+		return -1;
+	}
+
+	cid = (networkinfo.cell_id[0] << 8) + networkinfo.cell_id[1];
+	lac = (networkinfo.LAC[0] << 8) + networkinfo.LAC[1];
+	memcpy(country, networkinfo.network_code, 3);
+
+	fprintf(stdout, _("Network      : %s %s\n"),
+			gn_network_name_get((char *)networkinfo.network_code),
+			gn_country_name_get((char *)country));
+	fprintf(stdout, _("Network code : %s\n"), networkinfo.network_code);
+	fprintf(stdout, _("LAC          : %d\n"), lac);
+	fprintf(stdout, _("Cell id      : %d\n"), cid);
+
+	return 0;
 }
 
 /* This is a "convenience" function to allow quick test of new API stuff which
@@ -4490,6 +4520,9 @@ int main(int argc, char *argv[])
 
 		/* List GSM networks */
 		{ "listnetworks",       no_argument,       NULL, OPT_LISTNETWORKS },
+
+		/* Get network info */
+		{ "getnetworkinfo",     no_argument,       NULL, OPT_GETNETWORKINFO },
 
 		{ 0, 0, 0, 0},
 	};
@@ -4781,6 +4814,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_LISTNETWORKS:
 			list_gsm_networks();
+			break;
+		case OPT_GETNETWORKINFO:
+			rc = getnetworkinfo();
 			break;
 #ifndef WIN32
 		case OPT_FOOGLE:
