@@ -175,7 +175,7 @@ AC_CHECK_HEADER(getopt.h, ,
       [CFLAGS="$CFLAGS -I../getopt"])
 
 AC_ARG_WITH(gnugetopt,
-   [  --with-gnugetopt=DIR       specifies the getopt library location directory],
+   [  --with-gnugetopt=DIR    specifies the getopt library location directory],
    [ if test x$withval=yes; then
         AC_MSG_WARN(Usage is: --with-gnugetopt=DIR) 
      else
@@ -199,7 +199,7 @@ AC_CHECK_HEADER(linux/irda.h,
 dnl ======================== Checks for Linux Bluetooth support
 bluetooth="no"
 AC_ARG_WITH(bluetooth,
-	[  --with-bluetooth=DIR   specifies the base libbluetooth],
+	[  --with-bluetooth=DIR    specifies the base libbluetooth],
 	[ if test x$withval = xyes; then
 		AC_MSG_WARN(Usage is: --with-bluetooth=DIR)
 	  else
