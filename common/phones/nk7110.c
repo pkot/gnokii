@@ -130,7 +130,7 @@ GSM_Phone phone_nokia_7110 = {
 	PGEN_IncomingDefault,
 	/* Mobile phone information */
 	{
-		"7110|6210|6250",      /* Supported models */
+		"7110|6210|6250|7190",      /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GRF_Percentage,        /* RF level units */

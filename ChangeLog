@@ -40,6 +40,7 @@
     o return NULL if no SMSC name is found             (Markus Plail)
     o change default group to 'No Group'(5) when reading contacts
                                                        (Markus Plail)
+    o add 7190 to the supported models list          (Terry Moreland)
  * gnokii fixes:
     o change deletesms() to reflect changes in API     (Markus Plail)
     o indentation changes                                 (Pawel Kot)
