@@ -14,6 +14,8 @@
 	   These functions are only ever called through the GSM_Functions
 	   structure defined in gsm-common.h and set up in gsm-api.c */
 
+#ifndef WIN32
+
 #define		__mbus_2110_c	/* "Turn on" prototypes in mbus-2110.h */
 
 #include	<termios.h>
@@ -357,3 +359,4 @@ void	MB21_ThreadLoop(void)
 
 }
 
+#endif

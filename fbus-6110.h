@@ -210,4 +210,6 @@ enum FB61_RX_States {
   FB61_RX_GetMessage
 };
 
+GSM_Error FB61_TX_SendStatusRequest(void);
+
 #endif /* __fbus_6110_h */

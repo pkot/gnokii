@@ -17,6 +17,8 @@
        These functions are only ever called through the GSM_Functions
        structure defined in gsm-common.h and set up in gsm-api.c */
 
+#ifndef WIN32
+
 #define     __fbus_3810_c   /* "Turn on" prototypes in fbus-3810.h */
 
 #include    <termios.h>
@@ -2347,3 +2349,5 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 #endif
 
 }
+
+#endif

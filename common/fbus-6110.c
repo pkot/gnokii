@@ -25,7 +25,9 @@
 /* System header files */
 
 #include <stdio.h>
-
+#include <string.h>
+#include <stdlib.h>
+ 
 #ifdef WIN32
 
   #include <windows.h>
@@ -42,7 +44,6 @@
 #else
 
   #define WRITEPHONE write
-  #include <stdlib.h>
   #include <unistd.h>
   #include <termios.h>
   #include <fcntl.h>
@@ -51,7 +52,6 @@
   #include <sys/ioctl.h>
   #include <sys/types.h>
   #include <sys/time.h>
-  #include <string.h>
   #include <pthread.h>
   #include <errno.h>
 
