@@ -11,7 +11,14 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.11  2001-08-20 23:27:37  pkot
+  Revision 1.12  2001-10-21 22:23:56  machek
+  Use symbolic constants instead of numbers
+
+  At least detect when we get other message than we asked for
+
+  Provide option to passively wait for sms-es
+
+  Revision 1.11  2001/08/20 23:27:37  pkot
   Add hardware shakehand to the link layer (Manfred Jonsson)
 
   Revision 1.10  2001/07/17 22:46:27  pkot
@@ -85,10 +92,12 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "phones/generic.h"
+#include "phones/nk2110.h"
 
 #define MYID 0x78
-#define ddprintf dprintf
+#define ddprintf(x...)
 #define eprintf(x...) fprintf(stderr, x)
+#undef DEBUG
 
 static GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
@@ -131,13 +140,13 @@ GSM_Phone phone_nokia_2110 = {
 static volatile bool RequestTerminate;
 static u8 TXPacketNumber = 0x01;
 #define MAX_MODEL_LENGTH 16
-static volatile unsigned char PacketData[256];
+static volatile unsigned char PacketData[10240];
 static volatile bool
 	ACKOK    = false,
 	PacketOK = false;
 
 static volatile int SMSpos = 0;
-static volatile unsigned char SMSData[256];
+static volatile unsigned char SMSData[10240];
 
 static long long LastChar = 0;
 
@@ -245,7 +254,7 @@ static int xwrite(unsigned char *d, int len)
 static GSM_Error
 SendFrame( u8 *buffer, u8 command, u8 length )
 {
-	u8  pkt[256], pkt2[256];
+	u8  pkt[10240], pkt2[10240];
 	int current = 0;
 
 	pkt[current++] = 0x00;               /* Construct the header.      */
@@ -341,40 +350,35 @@ SMS(GSM_SMSMessage *message, int command)
 	u8 pkt[] = { 0x10, 0x02, 0, 0 };
 
 	SMSpos = 0;
-	memset((void *) &SMSData[0], 0, 160);
+	memset((void *) &SMSData[0], 0, 255);
 	PacketOK = false;
 	pkt[1] = command;
 	pkt[2] = 1; /* == LM_SMS_MEM_TYPE_DEFAULT or LM_SMS_MEM_TYPE_SIM or LM_SMS_MEM_TYPE_ME */
 	pkt[3] = message->Location;
 	message->MessageNumber = message->Location;
 
-	SendCommand(pkt, 0x38 /* LN_SMS_COMMAND */, sizeof(pkt));
+	SendCommand(pkt, LM_SMS_COMMAND, sizeof(pkt));
+	msleep_poll(300);	/* We have to keep acknowledning phone's data */
 	waitfor(PacketOK, 1000);
 	if (!PacketOK) {
-		dprintf("No reply came within second!\n");
+		eprintf("SMS: No reply came within second!\n");
 	}
-		
-	if (PacketData[3] != 0x37 /* LN_SMS_EVENT */) {
+	if (PacketData[3] != LM_SMS_EVENT) {
 		eprintf("Something is very wrong with SMS\n");
 		return GE_BUSY; /* FIXME */
+	}
+	if ((SMSData[2]) && (SMSData[2] != message->Location)) {
+		eprintf("Wanted message @%d, got message at @%d!\n", message->Location, SMSData[2]);
+		return GE_BUSY;
 	}
 	return (GE_NONE);
 }
 
+
 static GSM_Error
-GetSMSMessage(GSM_SMSMessage *m)
+DecodeIncomingSMS(GSM_SMSMessage *m)
 {
 	int i, len;
-	if (SMS(m, 2) != GE_NONE)
-		return GE_BUSY; /* FIXME */
-	ddprintf("Have message?\n");
-	if (m->Location > 10)
-		return GE_INVALIDSMSLOCATION;
-
-	if (SMSData[0] != 0x0b) {
-		ddprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
-		return GE_EMPTYSMSLOCATION;
-	}
 	ddprintf("Status: " );
 	switch (SMSData[3]) {
 	case 7: m->Type = GST_MO; m->Status = GSS_NOTSENTREAD; ddprintf("not sent\n"); break;
@@ -421,7 +425,28 @@ GetSMSMessage(GSM_SMSMessage *m)
 	m->MessageCenter.No = 0;
 	strcpy(m->MessageCenter.Name, "(unknown)");
 	m->UDHType = GSM_NoUDH;
-	msleep_poll(300);		/* If phone lost our ack, it might retransmit data */
+	return GE_NONE;
+}
+
+static GSM_Error
+GetSMSMessage(GSM_SMSMessage *m)
+{
+	int i, len;
+	if (m->Location > 10)
+		return GE_INVALIDSMSLOCATION;
+
+	if (SMS(m, LM_SMS_READ_STORED_DATA) != GE_NONE)
+		return GE_BUSY; /* FIXME */
+	ddprintf("Have message?\n");
+	
+	if (DecodeIncomingSMS(m) != GE_NONE)
+		return GE_BUSY;
+
+	if (SMSData[0] != LM_SMS_FORWARD_STORED_DATA) {
+		ddprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
+		return GE_EMPTYSMSLOCATION;
+	}
+	msleep_poll(1000);		/* If phone lost our ack, it might retransmit data */
 	return (GE_NONE);
 }
 
@@ -592,8 +617,9 @@ static GSM_Error (*OutputFn)(char *text, char *ctrl);
 static int
 HandlePacket(void)
 {
+	eprintf("[%x]", PacketData[3]);
 	switch(PacketData[3]) {
-	case 0x12: {
+	case 0x12: {			/* Text from display */
 		char buf[10240], *s = buf, *t;
 		t = (char *)&PacketData[8];
 #define COPY(x) strncpy(s, t, x); t+=x; s+=x; *s++ = '\n'
@@ -602,7 +628,7 @@ HandlePacket(void)
 			(*OutputFn)(buf, NULL);
 		return 1;
 	}
-	case 0x2f: {
+	case 0x2f: {			/* Display lights */
 		char buf[10240], *s = buf;
 #undef COPY
 #define COPY(x, y, z) s = Display(PacketData[x], y, z, s)
@@ -618,7 +644,7 @@ HandlePacket(void)
 		return 1;
 #undef COPY
 	}
-	case 0x37:
+	case LM_SMS_EVENT:		/* SMS Data */
 		/* copy bytes 5+ to smsbuf */
 		ddprintf("SMSdata:");
 		{
@@ -632,7 +658,8 @@ HandlePacket(void)
 		return ((PacketData[4] & 0xf) != 0);
 		/* Make all but last fragment "secret" */
 
-	default: return 0;
+	default: dprintf("Unknown response %lx\n", PacketData[3]); 
+	         return 0;
 	}	
 }
 
@@ -967,6 +994,60 @@ EnableDisplayOutput(GSM_Statemachine *sm)
 	return GE_NONE;
 }
 
+static GSM_Error SMS_Reserve(GSM_Statemachine *sm)
+{
+	u8 pkt[] = { 0x10, LM_SMS_RESERVE_PP, LN_SMS_NORMAL_RESERVE };
+	PacketOK = false;
+	SendCommand(pkt, LM_SMS_COMMAND, sizeof(pkt));
+	PacketOK = 0;
+	waitfor(PacketOK, 100);
+	if (!PacketOK)
+		eprintf("No reply trying to reserve SMS-es\n");
+	if (PacketData[3] != LM_SMS_EVENT)
+		eprintf("Bad reply trying to reserve SMS-es\n");
+	if (SMSData[0] != LM_SMS_PP_RESERVE_COMPLETE)
+		eprintf("Not okay trying to reserve SMS-es (%d)\n", SMSData[0]);
+
+}
+
+static GSM_Error SMS_Slave(GSM_Statemachine *sm)
+{
+	SMS_Reserve(sm);
+	eprintf("Reserved okay\n");
+	while (1) {
+		PacketOK = 0;
+		SMSpos = 0;
+		memset((void *) &SMSData[0], 0, 255);
+		waitfor(PacketOK, 1000000);
+		if (PacketData[3] != LM_SMS_EVENT)
+			eprintf("Wrong packet came!\n");
+		switch (SMSData[0]) {
+		case LM_SMS_RECEIVED_PP_DATA:
+			eprintf("Data came!\n");
+			break;
+		case LM_SMS_ALIVE_TEST:
+			eprintf("Am I alive?\n");
+			break;
+ 		case LM_SMS_NEW_MESSAGE_INDICATION:
+			{
+				GSM_SMSMessage m;
+				eprintf("New message indicated @%d\n", SMSData[2]);
+				msleep_poll(200);
+				memset(&m, 0, sizeof(m));
+				m.Location = SMSData[2];
+				m.MemoryType = GMT_ME;
+				if (GetSMSMessage(&m) != GE_NONE)
+					eprintf("Could not find promissed message?\n");
+				else
+					slave_process(&m, SMSData[2]);
+			}
+			break;
+		default:
+			eprintf("Unexpected packet came: %x\n", SMSData[0]);
+		}
+	}
+}
+
 /* This is the main loop for the MB21 functions.  When N2110_Initialise
 	   is called a thread is created to run this loop.  This loop is
 	   exited when the application calls the N2110_Terminate function. */
@@ -1028,7 +1109,7 @@ GetPhonebookLocation(GSM_PhonebookEntry *entry)
 	pkt[2] = entry->Location;
 	
 	PacketOK = false;
-	SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3);
+	SendCommand(pkt, LN_LOC_COMMAND, 3);
 	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xc9) ||
 	    (PacketData[4] != 0x1a)) {
@@ -1069,7 +1150,7 @@ WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	strcpy(&pkt[3+strlen(entry->Name)+1], entry->Number);
 	
 	PacketOK = false;
-	SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3+strlen(entry->Number)+strlen(entry->Name)+2);
+	SendCommand(pkt, LN_LOC_COMMAND, 3+strlen(entry->Number)+strlen(entry->Name)+2);
 	waitfor(PacketOK, 0);
 	printf("okay?\n");
 	if ((PacketData[3] != 0xc9) ||
@@ -1097,56 +1178,56 @@ GSM_Functions N2110_Functions = {
 	Terminate,
 	GetPhonebookLocation,
 	WritePhonebookLocation,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
+	NULL,
+	NULL,
 	GetMemoryStatus,
 	GetSMSStatus,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
+	NULL,
+	NULL,
 	GetSMSMessage,
 	DeleteSMSMessage,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
+	NULL,
+	NULL,
 	GetRFLevel,
 	GetBatteryLevel,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 	PNOK_GetManufacturer,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 	SendRLPFrame,
-	UNIMPLEMENTED,
+	NULL,
 	EnableDisplayOutput,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
-	UNIMPLEMENTED,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 	SetKey,
 	HandleString,
-	UNIMPLEMENTED
+	NULL
 };
 
 #endif
@@ -1169,9 +1250,10 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 	case GOP_Identify:
 	case GOP_GetModel:
 	case GOP_GetRevision:
-		if(!Model) err = GetVersionInfo();
-		if(err == GE_NONE) strncpy(data->Model, Model, 64);
-		if(err == GE_NONE) strncpy(data->Revision, Revision, 64);
+		if (!Model) err = GetVersionInfo();
+		if (err) break;
+		if (data->Model) strncpy(data->Model, Model, 64);
+		if (data->Revision) strncpy(data->Revision, Revision, 64);
 		break;
 	case GOP_GetBatteryLevel:
 		err = GetBatteryLevel(data->BatteryUnits, data->BatteryLevel);
@@ -1191,11 +1273,23 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		err = EnableDisplayOutput(state);
 		break;
 	case GOP_GetSMS:
+#if 0
+		SMS_Slave(state);	/* FIXME!!! */
+#endif
 		msleep(100);
 		err = GetSMSMessage(data->SMSMessage);
 		break;
 	case GOP_DeleteSMS:
 		err = SMS(data->SMSMessage, 3);
+		break;
+	case GOP_ReadPhonebook:
+	  	err = GetPhonebookLocation(data->PhonebookEntry);
+		break;
+	case GOP_WritePhonebook:
+	  	err = WritePhonebookLocation(data->PhonebookEntry);
+		break;
+	case GOP_GetAlarm:
+		err = SMS_Slave(state);		/* Dirty hack, Fallthrough */
 		break;
 	default:
 		err = GE_NOTIMPLEMENTED;
