@@ -2,6 +2,8 @@
 ========================
  * build system updates
     o wrong permissions for gnapplet.sis             (Ville Skyttä)
+ * AT driver updates
+    o add more workarounds for SonyEricssons            (Hugo Haas)
 
 0.6.3
 =====

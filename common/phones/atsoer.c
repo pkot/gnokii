@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright 2004 Hugo Hass <hugo@larve.net>
+  Copyright 2004 Hugo Haas <hugo@larve.net>
   Copyright 2004 Pawel Kot <pkot@bezsensu.pl>
 
   This file provides functions specific to at commands on ericsson
@@ -127,6 +127,24 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 	return GN_ERR_NONE;
 }
 
+static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	char req[32];
+	gn_error ret;
+
+	ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
+	if (ret)
+		return ret;
+	ret = se_at_memory_type_set(data->phonebook_entry->memory_type, state);
+	if (ret)
+		return ret;
+	sprintf(req, "AT+CPBR=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
+	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_ReadPhonebook, data, state);
+}
+
 static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -161,8 +179,32 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_WritePhonebook, data, state);
 }
 
+static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	int len;
+	char req[64];
+	gn_error ret;
+
+	if (!data->phonebook_entry)
+		return GN_ERR_INTERNALERROR;
+
+	ret = se_at_memory_type_set(data->phonebook_entry->memory_type, state);
+	if (ret)
+		return ret;
+
+	len = sprintf(req, "AT+CPBW=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
+
+	if (sm_message_send(len, GN_OP_DeletePhonebook, req, state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_DeletePhonebook, data, state);
+}
+
+
 void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
+	at_insert_send_function(GN_OP_ReadPhonebook, AT_ReadPhonebook, state);
 	at_insert_recv_function(GN_OP_ReadPhonebook, ReplyReadPhonebook, state);
 	at_insert_send_function(GN_OP_WritePhonebook, AT_WritePhonebook, state);
+	at_insert_send_function(GN_OP_DeletePhonebook, AT_DeletePhonebook, state);
 }
