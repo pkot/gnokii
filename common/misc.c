@@ -238,6 +238,7 @@ static gn_phone_model models[] = {
 	{"7600",  "NMM-3", 0 },
 	{"7650",  "NHL-2NA", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_EXTPBK | PM_SMS | PM_FOLDERS },
 	{"8110",  "0423" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-6BX */
+	{"8110",  "2501", PM_SMS | PM_DTMF | PM_DATA },
 	{"8110",  "NHE-6", PM_SMS | PM_DTMF | PM_DATA },
 	{"8110",  "NHE-6BX", PM_SMS | PM_DTMF | PM_DATA },
 	{"8110i", "0423",  PM_SMS | PM_DTMF | PM_DATA }, /* Guess for NHE-6 */

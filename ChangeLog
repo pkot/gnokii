@@ -89,6 +89,8 @@
     o caller id support added to AT emulator        (Daniele Forsi)
  * 7110 driver updates
     o empty phonebook was reported as an error     (BORBELY Zoltan)
+ * 3110 driver updates
+    o model number 2501 added                      (BORBELY Zoltan)
 
 0.6.3
 =====
