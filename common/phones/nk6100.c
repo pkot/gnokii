@@ -78,6 +78,7 @@ static gn_error GetBitmap(gn_data *data, struct gn_statemachine *state);
 static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state);
 static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error DeletePhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error GetPowersource(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSMSStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
@@ -263,6 +264,8 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return ReadPhonebook(data, state);
 	case GN_OP_WritePhonebook:
 		return WritePhonebook(data, state);
+	case GN_OP_DeletePhonebook:
+		return DeletePhonebook(data, state);
 	case GN_OP_GetPowersource:
 		return GetPowersource(data, state);
 	case GN_OP_GetSMSStatus:
@@ -776,6 +779,24 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	*pos++ = (pe->caller_group == 5) ? 0xff : pe->caller_group;
 	if (sm_message_send(pos-req, 0x03, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x03, data, state);
+}
+
+static gn_error DeletePhonebook(gn_data *data, struct gn_statemachine *state)
+{
+	gn_data d;
+	gn_phonebook_entry entry;
+
+	if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
+
+	gn_data_clear(&d);
+	memset(&entry, 0, sizeof(entry));
+	d.phonebook_entry = &entry;
+
+	entry.location = data->phonebook_entry->location;
+	entry.memory_type = data->phonebook_entry->memory_type;
+	entry.caller_group = 5;
+
+	return WritePhonebook(&d, state);
 }
 
 static gn_error GetCallerGroupData(gn_data *data, struct gn_statemachine *state)
