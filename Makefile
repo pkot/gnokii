@@ -59,7 +59,7 @@ $(DIRS): dummy
 	$(MAKE) -C $@
 
 clean:
-	$(RM) *~
+	$(RM) *~ *.orig *.rej include/*~ include/*.orig include/*.rej
 	@for dir in $(DIRS); do \
 	    if [ -e $$dir/Makefile ]; then \
 		$(MAKE) -C $$dir clean; \

@@ -55,7 +55,7 @@ vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) *~ depend COMMON.o gsm-filetypes.o DATA.o vcal.c
+	$(RM) $(OBJS) *~ depend COMMON.o gsm-filetypes.o vcal.c phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 install:
 	@echo
