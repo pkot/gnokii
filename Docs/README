@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janík ml.
-                         (C) 2001 - 2003 Pawe³ Kot
-               Last update  1 February 2004   Version 0.5.10
+                         (C) 2001 - 2004 Pawe³ Kot
+                Last update 22 February 2004  Version 0.6.0
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.5.10 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.0 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -122,7 +122,7 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.5.10-i386.rpm
+rpm -i gnokii-0.6.0-i386.rpm
 
 If you are using a Debian based system, you can use dpackage to do the
 installation. On Slackware you use installpkg or pkgtool.
@@ -379,6 +379,13 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20040222 Version 0.6.0
+Bugfixes in phonebook handling (import and export should work now correctly,
+gnokii and xgnokii share the formats), calendar handling, sending unicode
+short messages (chinese texts should be sent correctly), msvc6 build. Set
+correctly Nokia 8310 information (logo sizes, signal indicator). Updates to
+documentation.
+
 20040201 Version 0.5.10
 Few bugfixes: ucs2 encoding and decoding, phonebook subentries, at driver
 responses handling. New features: answer/cancel call for AT driver, delete

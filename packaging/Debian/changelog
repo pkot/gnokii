@@ -1,3 +1,9 @@
+gnokii (0.6.0) unstable; urgency=low
+
+  * let Debian users build new gnokii version
+
+ -- Pawel Kot <pkot@linuxnews.pl>  Sun, 22 Feb 2004 23:30:32 +0100
+
 gnokii (0.5.10pre) unstable; urgency=low
 
   * sync with Debian mainstream package
