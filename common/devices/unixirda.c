@@ -33,7 +33,7 @@
 #include "devices/unixirda.h"
 
 #ifndef AF_IRDA
-#define AF_IRDA 23
+#  define AF_IRDA 23
 #endif
 
 #define INFO_LEN		22
