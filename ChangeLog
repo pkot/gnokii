@@ -14,22 +14,29 @@
     o add GetSMSnoValidate                             (Markus Plail)
     o minor battery fix                                (Markus Plail)
     o add (dummy) GetUnreadMessages                    (Markus Plail)
+    o add DeleteSMS                                    (Markus Plail)
  * 7110 series updates
     o move GetUnreadMessages from gsm-sms.c            (Markus Plail)
     o change GOP7110_* to GOP_*                        (Markus Plail)
     o do not read date/time and numbers when reading messages
       of type SMS_Submit                               (Markus Plail)
+    o change behaviour of DeleteSMS to be consistant with GetSMS
+                                                       (Markus Plail)
+ * gnokii fixes:
+    o change deletesms() to reflect changes in API     (Markus Plail)
  * xgnokii fixes:
     o fix SMS reading                                  (Markus Plail)
     o fix date/time display for SMS messages           (Markus Plail)
     o fix RF/battery level display for 6110 series     (Markus Plail)
     o make SMS stuff work again                        (Markus Plail)
+    o rename DeleteSMS to not conflict with new API    (Markus Plail)
  * libsms fixes
     o fix GSM_ReadSMSnoValidate                        (Markus Plail)
     o remove GetUnreadMessages and friends             (Markus Plail)
+    o add DeleteSMS                                    (Markus Plail)
  * replace GOP_FindUnreadSMS with GOP_GetUnreadMessages
 	                                               (Markus Plail)
-	
+
 0.4.1
 =====
  * gnokii fixes
