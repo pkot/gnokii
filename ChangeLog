@@ -2,6 +2,8 @@
 ========================
  * 6110 series updates
     o missing German characters added              (BORBELY Zoltan)
+ * portability fixes
+    o libgnokii.dsp (Visual Studio) updated        (BORBELY Zoltan)
 
 0.5.6
 =====

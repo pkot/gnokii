@@ -280,6 +280,10 @@ SOURCE=..\..\common\ldif.c
 
 SOURCE=..\..\common\devices\winserial.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\common\readmidi.c
+# End Source File
 # End Group
 # End Target
 # End Project
