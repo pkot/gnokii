@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2003 Marcus Godehard
+  Copyright (C) 2003 Marcus Godehardt
 
   This is the config.h file for GNOKII for MSVC6 compilers, you can
   edit this manually. This is not auto generated.
