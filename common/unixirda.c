@@ -1,11 +1,12 @@
 /*
  * $Id$
  *
- * irda.c - IrDA socket routines
  *
+ * G N O K I I
  *
- * GNU Input/Output library (GIO)
+ * A Linux/Unix toolset and driver for Nokia mobile phones.
  *
+ * Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
  * Copyright (C) 2000-2001  Marcel Holtmann <marcel@holtmann.org>
  *
  * This library is free software; you can redistribute it and/or
@@ -23,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2001-02-03 23:56:17  chris
+ * Revision 1.2  2001-02-06 21:15:35  chris
+ * Preliminary irda support for 7110 etc.  Not well tested!
+ *
+ * Revision 1.1  2001/02/03 23:56:17  chris
  * Start of work on irda support (now we just need fbus-irda.c!)
  * Proper unicode support in 7110 code (from pkot)
  *
@@ -50,110 +54,111 @@
 
 
 
-static int irda_discover_device(int fd) {
+static int irda_discover_device(int fd)
+{
 
-  struct irda_device_list *list;
-  unsigned char *buf;
-  int len, i;
+	struct irda_device_list *list;
+	unsigned char *buf;
+	int len, i;
 
-  len = sizeof(struct irda_device_list) +
-        sizeof(struct irda_device_info) * 10;  // 10 = max devices in discover
+	len = sizeof(struct irda_device_list) +
+	    sizeof(struct irda_device_info) * 10;	// 10 = max devices in discover
 
-  buf = malloc(len);
-  list = (struct irda_device_list *) buf;
+	buf = malloc(len);
+	list = (struct irda_device_list *) buf;
 
-  if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &len)) {
-    perror("getsockopt");
-    return -1;
-  }
+	if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &len)) {
+		perror("getsockopt");
+		return -1;
+	}
 
-  if (len > 0) {
-    for (i = 0; i < list->len; i++) {
-    }
+	if (len > 0) {
+		for (i = 0; i < list->len; i++) {
+		}
 
-    i = 0;
-    return (list->dev[i].daddr);
-  }
+		i = 0;
+		return (list->dev[i].daddr);
+	}
 
-  return -1;
-
-}
-
-
-int irda_open(void) {
-
-  struct sockaddr_irda peer;
-  /* struct irda_ias_set ias_query; */
-  int fd, daddr;
-
-
-  /* Create socket */
-
-  fd = socket(AF_IRDA, SOCK_STREAM, 0);
-
-  if (fd < 0)
-    perror("socket");
-
-
-  /* discover the devices */
-
-  daddr = irda_discover_device(fd);
-
-
-  /* Connect to service "Nokia:PhoNet" */
-
-  peer.sir_family = AF_IRDA;
-  peer.sir_lsap_sel = LSAP_ANY;
-  peer.sir_addr = DEV_ADDR_ANY;
-  strcpy(peer.sir_name, "Nokia:PhoNet"); 
-
-  if (connect(fd, (struct sockaddr *) &peer, sizeof(struct sockaddr_irda))) { 
-    perror("connect");
-    return -1;
-  }
-
-
-  /* call recv first to make select work correctly */
-
-  recv(fd, NULL, 0, 0);
-
-
-  return fd;
+	return -1;
 
 }
 
 
-int irda_close(int fd) {
+int irda_open(void)
+{
 
-  shutdown(fd, 0);
-  return close(fd);
+	struct sockaddr_irda peer;
+	/* struct irda_ias_set ias_query; */
+	int fd, daddr;
+
+
+	/* Create socket */
+
+	fd = socket(AF_IRDA, SOCK_STREAM, 0);
+
+	if (fd < 0) perror("socket");
+
+
+	/* discover the devices */
+
+	daddr = irda_discover_device(fd);
+
+
+	/* Connect to service "Nokia:PhoNet" */
+
+	peer.sir_family = AF_IRDA;
+	peer.sir_lsap_sel = LSAP_ANY;
+	peer.sir_addr = DEV_ADDR_ANY;
+	strcpy(peer.sir_name, "Nokia:PhoNet");
+
+	if (connect(fd, (struct sockaddr *)&peer, sizeof(struct sockaddr_irda))) {
+		perror("connect");
+		return -1;
+	}
+
+	/* call recv first to make select work correctly */
+
+	recv(fd, NULL, 0, 0);
+
+	return fd;
 
 }
 
 
-int irda_write(int __fd, __const __ptr_t __bytes, int __size) {
+int irda_close(int fd)
+{
 
-  return (send(__fd, __bytes, __size, 0));
-
-}
-
-
-int irda_read(int __fd, __const __ptr_t __bytes, int __size) {
-
-  return (recv(__fd, __bytes, __size, 0));
+	shutdown(fd, 0);
+	return close(fd);
 
 }
 
 
-int irda_select(int fd, struct timeval *timeout) {
+int irda_write(int __fd, __const __ptr_t __bytes, int __size)
+{
 
-  fd_set readfds;
-
-  FD_ZERO(&readfds);
-  FD_SET(fd, &readfds);
-
-  return (select(fd + 1, &readfds, NULL, NULL, timeout));
+	return (send(__fd, __bytes, __size, 0));
 
 }
 
 
+int irda_read(int __fd, __ptr_t __bytes, int __size)
+{
+
+	return (recv(__fd, __bytes, __size, 0));
+
+}
+
+
+int irda_select(int fd, struct timeval *timeout)
+{
+
+	fd_set readfds;
+
+	FD_ZERO(&readfds);
+	FD_SET(fd, &readfds);
+
+	return (select(fd + 1, &readfds, NULL, NULL, timeout));
+
+}

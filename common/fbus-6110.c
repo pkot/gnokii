@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.126  2001-02-06 14:35:55  pkot
+  Revision 1.127  2001-02-06 21:15:34  chris
+  Preliminary irda support for 7110 etc.  Not well tested!
+
+  Revision 1.126  2001/02/06 14:35:55  pkot
   Few more cleanups on authentication
 
   Revision 1.125  2001/02/03 23:56:12  chris
@@ -3590,7 +3593,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void)
 			break;
 		}
 		break;
-
+	
 		/* Mobile phone identification */
 
 	case 0x64:

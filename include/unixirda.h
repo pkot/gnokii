@@ -1,11 +1,11 @@
 /*
  * $Id$
  *
- * irda.h - IrDA socket routines
+ * G N O K I I
  *
+ * A Linux/Unix toolset and driver for Nokia mobile phones.
  *
- * GNU Input/Output library (GIO)
- *
+ * Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
  * Copyright (C) 2000-2001  Marcel Holtmann <marcel@holtmann.org>
  *
  * This library is free software; you can redistribute it and/or
@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2001-02-06 15:15:25  pkot
+ * Revision 1.3  2001-02-06 21:15:37  chris
+ * Preliminary irda support for 7110 etc.  Not well tested!
+ *
+ * Revision 1.2  2001/02/06 15:15:25  pkot
  * FreeBSD unixirda.h fix (Panagiotis Astithas)
  *
  * Revision 1.1  2001/02/03 23:56:18  chris
@@ -49,7 +52,5 @@
 int irda_open(void);
 int irda_close(int fd);
 int irda_write(int __fd, __const __ptr_t __bytes, int __size);
-int irda_read(int __fd, __const __ptr_t __bytes, int __size);
+int irda_read(int __fd, __ptr_t __bytes, int __size);
 int irda_select(int fd, struct timeval *timeout);
-
-

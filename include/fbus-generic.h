@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.2  2001-01-17 02:54:55  chris
+  Revision 1.3  2001-02-06 21:15:36  chris
+  Preliminary irda support for 7110 etc.  Not well tested!
+
+  Revision 1.2  2001/01/17 02:54:55  chris
   More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
   I can now edit my phonebook in xgnokii but it is 'work in progress'.
 
@@ -112,7 +115,7 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Phone *newphone);
 #ifdef __fbus_generic_c  /* Prototype functions for fbus-generic.c only */
 
 bool FBUS_OpenSerial();
-void FBUS_RX_StateMachine(char rx_byte);
+void FBUS_RX_StateMachine(unsigned char rx_byte);
 int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
 GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message);
 int FBUS_TX_SendAck(u8 message_type, u8 message_seq);

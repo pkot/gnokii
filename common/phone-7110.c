@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.6  2001-02-03 23:56:15  chris
+  Revision 1.7  2001-02-06 21:15:35  chris
+  Preliminary irda support for 7110 etc.  Not well tested!
+
+  Revision 1.6  2001/02/03 23:56:15  chris
   Start of work on irda support (now we just need fbus-irda.c!)
   Proper unicode support in 7110 code (from pkot)
 
@@ -51,6 +54,7 @@
 #include "phone-generic.h"
 #include "phone-7110.h"
 #include "fbus-generic.h"
+#include "fbus-phonet.h"
 #include "phone-nokia.h"
 
 
@@ -174,8 +178,20 @@ GSM_Error P7110_Initialise(char *port_device, char *initlength,
 	strncpy(link.PortDevice, port_device, 20);
 	link.InitLength = atoi(initlength);
 	link.ConnectionType = connection;
-	FBUS_Initialise(&link, &phone);
-  
+
+	switch (connection) {
+	case GCT_Serial:
+		FBUS_Initialise(&link, &phone);
+		break;
+	case GCT_Irda:
+		PHONET_Initialise(&link, &phone);
+		break;
+	case GCT_Infrared:
+	default:
+		return GE_NOTSUPPORTED;
+		break;
+	}
+
 	/* Now do any phone specific init */
   
   	return GE_NONE;
