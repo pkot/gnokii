@@ -1649,7 +1649,6 @@ static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
 static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x62, 0x00};
-	gn_error err;
 	int i;
 	
   	if (!data->file) return GN_ERR_INTERNALERROR;
@@ -1661,45 +1660,45 @@ static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state)
 }
 
 
-static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state) {
+static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
 	int i;
-	char string[300];
 	gn_file *file;
+	gn_error error = GN_ERR_NONE;
 
-       switch ( message[3] ) {
+	switch (message[3]) {
 	case 0x59:
-		// Sent a block of file ok
+		/* Sent a block of file ok */
 		if (data->file) {
 			data->file->togo -= data->file->just_sent;
-			return GN_ERR_NONE;
 		}
 		break;
 	case 0x5f:
-		// Recv a block of file
+		/* Recv a block of file */
 		if (data->file) {
-			i= (message[8]<<8) + message[9];
+			i = (message[8] << 8) + message[9];
 			memcpy(data->file->file + data->file->file_length - data->file->togo, message+10, i);
 			data->file->togo -= i;
-			return GN_ERR_NONE;
    		}
 		break;
 	case 0x63:
-		// Deleted ok
-		if (message[4]==0x06) {
+		/* Deleted ok */
+		if (message[4] == 0x06) {
 			dprintf("Invalid path\n");
-			return GN_ERR_INVALIDLOCATION;
+			error = GN_ERR_INVALIDLOCATION;
+			goto out;
 		}
-		return GN_ERR_NONE;
 		break;
 	case 0x6d:
 	case 0x69:
-		if (message[04]==0x06) {
+		if (message[4] == 0x06) {
 			dprintf("Invalid path\n");
-			return GN_ERR_INVALIDLOCATION;
+			error =  GN_ERR_INVALIDLOCATION;
+			goto out;
 		}
-		if (message[04]==0x0e) {
+		if (message[4] == 0x0e) {
 			dprintf("Empty directory\n");
-			return GN_ERR_NONE; 
+			goto out;
 		}
 		if (data->file) { 
 			file = data->file;
@@ -1707,13 +1706,16 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			data->file_list->files[data->file_list->file_count] = malloc(sizeof(gn_file));
 			file = data->file_list->files[data->file_list->file_count];
 			data->file_list->file_count++;
-			i = message[31]*2;
-			char_unicode_decode(file->name, message+32, i);
+			i = message[31] * 2;
+			char_unicode_decode(file->name, message + 32, i);
 		}
-		if (!file) return GN_ERR_INTERNALERROR;
+		if (!file) {
+			error = GN_ERR_INTERNALERROR;
+			goto out;
+		}
 		dprintf("Filename: %s\n", file->name);
 		dprintf("   Status bytes: %02x %02x %02x\n", message[8], message[9], message[29]);
-		file->file_length = (message[11]<<16) + (message[12]<<8) + message[13];
+		file->file_length = (message[11] << 16) + (message[12] << 8) + message[13];
 		dprintf("   Filesize: %d\n", file->file_length);
 		file->year = (message[14]<<8) + message[15];
 		file->month = message[16];
@@ -1723,20 +1725,20 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		file->second = message[20];
 		dprintf("   Date: %04u.%02u.%02u\n", file->year, file->month, file->day);
 		dprintf("   Time: %02u:%02u:%02u\n", file->hour, file->minute, file->second);
-		if (message[4]==0x0d) return GN_ERR_WAITING;
+		if (message[4] == 0x0d)
+			error = GN_ERR_WAITING;
 		break;
 	case 0x73:
 		if (data->file) {
-			if (message[4]==0x0c) {
+			if (message[4] == 0x0c) {
 				data->file->togo = -1;
-			} else if (message[4]==0x00) {
+			} else if (message[4] == 0x00) {
 				data->file->togo = data->file->file_length;
 			}
 		}
 		break;
 	case 0x75:
-		// file transfer complete ok
-		return GN_ERR_NONE;
+		/* file transfer complete ok */
 		break;
 	case 0x83:
 		if (data->file) {
@@ -1744,9 +1746,11 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		}
 		break;
 	default:
+		error =  GN_ERR_UNKNOWN;
 		break;
 	}
-	return GN_ERR_NONE;
+out:
+	return error;
 }
 
 
