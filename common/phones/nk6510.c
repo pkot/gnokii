@@ -235,8 +235,10 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_GetSMSCenter(data, state);
 	case GOP_GetDateTime:
 		return P6510_GetClock(P6510_SUBCLO_GET_DATE, data, state);
+		/*
 	case GOP_GetAlarm:
 		return P6510_GetClock(P6510_SUBCLO_GET_ALARM, data, state);
+		*/
 	case GOP_GetCalendarNote:
 		return P6510_GetCalendarNote(data, state);
 	case GOP_WriteCalendarNote:
@@ -1136,13 +1138,20 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	memcpy(req + 46, data->RawSMS->UserData, data->RawSMS->UserDataLength);
 	pos = 46 + data->RawSMS->UserDataLength;
 
+	/* padding */
+	if (req[43] % 8 != 0) {
+		memcpy(req + pos, "\x55\x55\x55\x55\x55\x55\x55\x55", 8 - req[43] % 8);
+		pos += 8 - req[43] % 8;
+		req[43] += 8 - req[43] % 8;
+	}
+
 	/* Block 4. Validity Period */
 	req[pos++] = 0x08; /* type: validity */
 	req[pos++] = 0x04;
 	req[pos++] = 0x01; /* data length */
 	req[pos++] = data->RawSMS->Validity[0];
 
-	dprintf("Sending SMS...(%d)\n", 46 + data->RawSMS->UserDataLength);
+	dprintf("Sending SMS...(%d)\n", pos);
 	if (SM_SendMessage(state, pos, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
 	do {
 		error = SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, state->Link.SMSTimeout);
@@ -1180,7 +1189,7 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 	case 0x08:  /* Read Memory response */
 		if (data->PhonebookEntry) {
 			data->PhonebookEntry->Empty = true;
-			data->PhonebookEntry->Group = 0;
+			data->PhonebookEntry->Group = 5; /* no group */
 			data->PhonebookEntry->Name[0] = '\0';
 			data->PhonebookEntry->Number[0] = '\0';
 			data->PhonebookEntry->SubEntriesCount = 0;
@@ -1574,8 +1583,6 @@ request: 0x19 / 0x0004
 reply: 0x19 / 0x0012
 01 23 00 1c 06 01 ff ff ff ff 00 00 49 4c 01 3e |  #    ÿÿÿÿ  IL >
 01 56
-
-01 23 00 0B 01 02 01 0C 01 03 07 D2 07 0F 08 2E 37 00 04 04 01 00
 	*/
 
 	dprintf("Incoming clock!\n");
@@ -1593,7 +1600,16 @@ reply: 0x19 / 0x0012
 		break;
 	case P6510_SUBCLO_ALARM_RCVD:
 		/*
-		*/
+01 23 00 1c 06 01 ff ff ff ff 00 00 3d 44 01 1d 1f 32 
+01 23 00 1c 06 01 ff ff ff ff 00 00 4c e4 01 3e b4 28
+01 23 00 1c 06 01 ff ff ff ff 00 00 4b 2c 01 1e 8d 56
+01 23 00 1c 06 01 ff ff ff ff 80 27 46 54 01 1d ad 56
+01 23 00 1c 06 01 ff ff ff ff 80 27 52 34 01 18 ee aa
+01 23 00 1c 06 01 ff ff ff ff 00 00 32 7c 01 1d b6 86
+01 23 00 1c 06 01 ff ff ff ff 80 27 46 54 01 1d ad 56
+01 23 00 1c 06 01 ff ff ff ff 00 00 3d 44 01 1d 1f 32
+01 23 00 1c 06 01 ff ff ff ff 80 27 46 54 01 1d ad 56
+		 */
 		switch(message[8]) {
 		case P6510_ALARM_ENABLED:
 			data->DateTime->AlarmEnabled = 1;
@@ -2181,6 +2197,7 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		*/
 		break;
 	case 0x24:
+		if (length == 18) return GE_EMPTYLOCATION;
 		if (data->Bitmap) {
 			int x;
 			data->Bitmap->netcode[0] = '0' + (message[12] & 0x0f);
@@ -2190,16 +2207,17 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 			data->Bitmap->netcode[4] = '0' + (message[14] & 0x0f);
 			data->Bitmap->netcode[5] = '0' + (message[14] >> 4);
 			data->Bitmap->netcode[6] = 0;
-			dprintf("Operator %s ",data->Bitmap->netcode);
+			dprintf("Operator %s \n",data->Bitmap->netcode);
 			data->Bitmap->type = GSM_NewOperatorLogo;
 			data->Bitmap->height = message[21];
 			data->Bitmap->width = message[20];
 			x = message[20] * message[21];
 			data->Bitmap->size = (x / 8) + (x % 8 > 0);
 			dprintf("size: %i\n", data->Bitmap->size);
-			memcpy(data->Bitmap->bitmap, message + 26, data->Bitmap->size);
-			dprintf("Logo (%dx%d) ", data->Bitmap->height, data->Bitmap->width);
-		}
+			memcpy(data->Bitmap->bitmap, message + 26, length - 26);
+			dprintf("Logo (%dx%d) \n", data->Bitmap->height, data->Bitmap->width);
+		} else 
+			return GE_INTERNALERROR;
 		break;
 	case 0xa4:
 		dprintf("Op Logo Set OK\n");
@@ -2967,6 +2985,47 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 	}
 	return GE_NONE;
 }
+
+/*****************/
+/****** WAP ******/
+/*****************/
+
+static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	int tmp;
+
+	dprintf("WAP bookmark received\n");
+	switch (message[3]) {
+	case 0x07:
+		tmp = (message[6] << 8) | message[7] * 2;
+		/*
+		memcpy(Data->WAPBookmark->Title,message+8,tmp);
+		Data->WAPBookmark->Title[tmp]	= 0;
+		Data->WAPBookmark->Title[tmp+1]	= 0;
+		tmp = tmp + 8;
+		dprintf("Title   : \"%s\"\n",DecodeUnicode(Data->WAPBookmark->Title));
+		memcpy(Data->WAPBookmark->Address,message+tmp+2,(message[tmp+1]+message[tmp]*256)*2);
+		Data->WAPBookmark->Address[(message[tmp+1]+message[tmp]*256)*2]	= 0;
+		Data->WAPBookmark->Address[(message[tmp+1]+message[tmp]*256)*2+1]	= 0;
+		dprintf("Address : \"%s\"\n",DecodeUnicodeString(Data->WAPBookmark->Address));
+		*/
+	case 0x08:
+		switch (message[4]) {
+		case 0x01:
+			dprintf("Security error. Inside WAP bookmarks menu\n");
+			return GE_UNKNOWN;
+		case 0x02:
+			dprintf("Invalid or empty\n");
+			return GE_INVALIDLOCATION;
+		default:
+			dprintf("ERROR: unknown %i\n",message[4]);
+			return GE_UNHANDLEDFRAME;
+		}
+		break;
+	}
+	return GE_NONE;
+}
+
 
 /********************************/
 /* NOT FRAME SPECIFIC FUNCTIONS */
