@@ -29,12 +29,12 @@
 #include <string.h>
 #include "gsm-data.h"
 
-gn_error Unimplemented(void)
+gn_error unimplemented(void)
 {
 	return GN_ERR_NOTIMPLEMENTED;
 }
 
-API gn_memory_type StrToMemoryType(const char *s)
+API gn_memory_type gn_str_to_memory_type(const char *s)
 {
 #define X(a) if (!strcmp(s, #a)) return GN_MT_##a;
 	X(ME);
@@ -75,9 +75,11 @@ API gn_memory_type StrToMemoryType(const char *s)
 #undef X
 }
 
-/* This very small function is just to make it */
-/* easier to clear the data struct every time one is created */
-API void GSM_DataClear(gn_data *data)
+/* 
+ * This very small function is just to make it easier to clear
+ * the data struct every time one is created 
+ */
+API void gn_data_clear(gn_data *data)
 {
 	memset(data, 0, sizeof(gn_data));
 }

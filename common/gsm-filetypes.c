@@ -262,7 +262,7 @@ gn_error file_load_rttl(FILE *file, gn_ringtone *ringtone)
 
 /* Save the ringtone file - this will overwrite the file */
 /* Confirming must be done before this is called */
-gn_error file_ringtone_save(char *filename, gn_ringtone *ringtone)
+gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone)
 {
 	FILE *file;
 	gn_error error;
@@ -1003,7 +1003,7 @@ gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info)
  * mode == 1 -> ask
  * mode == 2 -> append
  */
-int gn_file_save_text(char *filename, char *text, int mode)
+int gn_file_text_save(char *filename, char *text, int mode)
 {
 	FILE *file;
 	int confirm = -1;

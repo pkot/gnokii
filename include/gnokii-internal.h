@@ -89,8 +89,8 @@ int gn_calnote_fill(gn_calnote *note, char *type, char *text, char *desc,
 int gn_todo_fill(gn_todo *note, char *text, char *todo_priority);
 
 /* Ringtone Files */
-gn_error gn_file_read_ringtone(char *filename, gn_ringtone *ringtone);
-gn_error gn_file_save_ringtone(char *filename, gn_ringtone *ringtone);
+gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone);
+gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone);
 
 gn_error file_save_rttl(FILE *file, gn_ringtone *ringtone);
 gn_error file_save_ott(FILE *file, gn_ringtone *ringtone);
@@ -99,10 +99,10 @@ gn_error file_load_rttl(FILE *file, gn_ringtone *ringtone);
 gn_error file_load_ott(FILE *file, gn_ringtone *ringtone);
 
 /* Bitmap Files */
-gn_error gn_file_read_bitmap(char *filename, gn_bmp *bitmap, gn_phone *info);
-gn_error gn_file_save_bitmap(char *filename, gn_bmp *bitmap, gn_phone *info);
-int gn_file_save_text(char *filename, char *text, int mode);
-gn_error gn_file_show_bitmap(char *filename);
+gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info);
+gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info);
+int gn_file_text_save(char *filename, char *text, int mode);
+gn_error gn_file_bitmap_show(char *filename);
 
 void file_save_nol(FILE *file, gn_bmp *bitmap, gn_phone *info);
 void file_save_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info);

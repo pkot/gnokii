@@ -392,7 +392,7 @@ gn_error pnok_netmonitor(gn_data *data, struct gn_statemachine *state)
 	return sm_block(state, data, 0x40);
 }
 
-gn_error pnok_securty_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+gn_error pnok_security_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch (message[2]) {
 	/* Enable extended commands */

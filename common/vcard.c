@@ -32,7 +32,7 @@
 
 #include "gsm-common.h"
 
-API int phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *addon)
+API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *addon)
 {
 	char buf2[1024];
 	int i;
@@ -103,7 +103,7 @@ API int phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *addon)
 
 #define ERROR(a) fprintf(stderr, "%s\n", a)
 
-API int vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
+API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 {
 	char buf[10240];
 

@@ -33,7 +33,7 @@
 #include "gnokii-internal.h"
 #include "gsm-api.h"
 
-gn_error SM_Initialise(struct gn_statemachine *state)
+gn_error sm_initialise(struct gn_statemachine *state)
 {
 	state->current_state = GN_SM_Initialised;
 	state->waiting_for_number = 0;
@@ -42,7 +42,7 @@ gn_error SM_Initialise(struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
-gn_error SM_SendMessage(struct gn_statemachine *state, u16 messagesize, u8 messagetype, void *message)
+gn_error sm_message_send(struct gn_statemachine *state, u16 messagesize, u8 messagetype, void *message)
 {
 	if (state->current_state != GN_SM_Startup) {
 #ifdef	DEBUG
@@ -60,7 +60,7 @@ gn_error SM_SendMessage(struct gn_statemachine *state, u16 messagesize, u8 messa
 	else return GN_ERR_NOTREADY;
 }
 
-API gn_state SM_Loop(struct gn_statemachine *state, int timeout)
+API gn_state gn_sm_loop(struct gn_statemachine *state, int timeout)
 {
 	struct timeval loop_timeout;
 	int i;
@@ -84,7 +84,7 @@ API gn_state SM_Loop(struct gn_statemachine *state, int timeout)
 	return state->current_state;
 }
 
-void SM_Reset(struct gn_statemachine *state)
+void sm_reset(struct gn_statemachine *state)
 {
 	/* Don't reset to initialised if we aren't! */
 	if (state->current_state != GN_SM_Startup) {
@@ -94,7 +94,7 @@ void SM_Reset(struct gn_statemachine *state)
 	}
 }
 
-void SM_IncomingFunction(struct gn_statemachine *state, u8 messagetype, void *message, u16 messagesize)
+void sm_incoming_function(struct gn_statemachine *state, u8 messagetype, void *message, u16 messagesize)
 {
 	int c;
 	int temp = 1;
@@ -113,9 +113,7 @@ void SM_IncomingFunction(struct gn_statemachine *state, u8 messagetype, void *me
 	if (state->current_state == GN_SM_WaitingForResponse)
 		for (c = 0; c < state->waiting_for_number; c++)
 			if (state->waiting_for[c] == messagetype) {
-				/* FIXME What's wrong with that? 
 				data = state->data[c];
-				*/
 				waitingfor = c;
 			}
 
@@ -159,7 +157,7 @@ void SM_IncomingFunction(struct gn_statemachine *state, u8 messagetype, void *me
 }
 
 /* This returns the error recorded from the phone function and indicates collection */
-gn_error SM_GetError(struct gn_statemachine *state, unsigned char messagetype)
+gn_error sm_error_get(struct gn_statemachine *state, unsigned char messagetype)
 {
 	int c, d;
 	gn_error error = GN_ERR_NOTREADY;
@@ -190,7 +188,7 @@ gn_error SM_GetError(struct gn_statemachine *state, unsigned char messagetype)
 
 /* Indicate that the phone code is waiting for an response */
 /* This does not actually wait! */
-gn_error SM_WaitFor(struct gn_statemachine *state, gn_data *data, unsigned char messagetype)
+gn_error sm_wait_for(struct gn_statemachine *state, gn_data *data, unsigned char messagetype)
 {
 	/* If we've received a response, we have to call SM_GetError first */
 	if ((state->current_state == GN_SM_Startup) || (state->current_state == GN_SM_ResponseReceived))
@@ -198,9 +196,7 @@ gn_error SM_WaitFor(struct gn_statemachine *state, gn_data *data, unsigned char 
 
 	if (state->waiting_for_number == GN_SM_WAITINGFOR_MAX_NUMBER) return GN_ERR_NOTREADY;
 	state->waiting_for[state->waiting_for_number] = messagetype;
-	/* FIXME What's wrong with that? 
 	state->data[state->waiting_for_number] = data;
-	*/
 	state->ResponseError[state->waiting_for_number] = GN_ERR_BUSY;
 	state->waiting_for_number++;
 	state->current_state = GN_SM_WaitingForResponse;
@@ -214,7 +210,7 @@ gn_error SM_WaitFor(struct gn_statemachine *state, gn_data *data, unsigned char 
 
    t is in tenths of second
 */
-static gn_error __SM_BlockTimeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t, int noretry)
+static gn_error __sm_block_timeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t, int noretry)
 {
 	int retry, timeout;
 	gn_state s;
@@ -222,48 +218,48 @@ static gn_error __SM_BlockTimeout(struct gn_statemachine *state, gn_data *data, 
 
 	for (retry = 0; retry < 3; retry++) {
 		timeout = t;
-		err = SM_WaitFor(state, data, waitfor);
+		err = sm_wait_for(state, data, waitfor);
 		if (err != GN_ERR_NONE) return err;
 
 		do {            /* ~3secs timeout */
-			s = SM_Loop(state, 1);  /* Timeout=100ms */
+			s = gn_sm_loop(state, 1);  /* Timeout=100ms */
 			timeout--;
 		} while ((timeout > 0) && (s == GN_SM_WaitingForResponse));
 
-		if (s == GN_SM_ResponseReceived) return SM_GetError(state, waitfor);
+		if (s == GN_SM_ResponseReceived) return sm_error_get(state, waitfor);
 
 		dprintf("SM_Block Retry - %d\n", retry);
-		SM_Reset(state);
+		sm_reset(state);
 		if ((retry < 2) && (!noretry)) 
-			SM_SendMessage(state, state->last_msg_size, state->last_msg_type, state->last_msg);
+			sm_message_send(state, state->last_msg_size, state->last_msg_type, state->last_msg);
 	}
 
 	return GN_ERR_TIMEOUT;
 }
 
-gn_error SM_BlockTimeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t)
+gn_error sm_block_timeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t)
 {
-	return __SM_BlockTimeout(state, data, waitfor, t, 0);
+	return __sm_block_timeout(state, data, waitfor, t, 0);
 }
 
-gn_error SM_Block(struct gn_statemachine *state, gn_data *data, int waitfor)
+gn_error sm_block(struct gn_statemachine *state, gn_data *data, int waitfor)
 {
-	return __SM_BlockTimeout(state, data, waitfor, 30, 0);
+	return __sm_block_timeout(state, data, waitfor, 30, 0);
 }
 
 /* This function is equal to SM_Block except it does not retry the message */
-gn_error SM_BlockNoRetryTimeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t)
+gn_error sm_block_no_retry_timeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t)
 {
-	return __SM_BlockTimeout(state, data, waitfor, t, 1);
+	return __sm_block_timeout(state, data, waitfor, t, 1);
 }
 
-gn_error SM_BlockNoRetry(struct gn_statemachine *state, gn_data *data, int waitfor)
+gn_error sm_block_no_retry(struct gn_statemachine *state, gn_data *data, int waitfor)
 {
-	return __SM_BlockTimeout(state, data, waitfor, 100, 1);
+	return __sm_block_timeout(state, data, waitfor, 100, 1);
 }
 
 /* Just to do things neatly */
-API gn_error SM_Functions(gn_operation op, gn_data *data, struct gn_statemachine *sm)
+API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemachine *sm)
 {
 	if (!sm->driver.functions) {
 		dprintf("Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!\n");

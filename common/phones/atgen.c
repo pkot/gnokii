@@ -125,7 +125,7 @@ static at_function_init_type at_function_init[] = {
 #define REPLY_SIMPLETEXT(l1, l2, c, t) \
 	if ((strcmp(l1, c) == 0) && (t != NULL)) strcpy(t, l2)
 
-static gn_driver phone_at = {
+gn_driver driver_at = {
 	NULL,
 	pgen_incoming_default,
 	{
@@ -1175,7 +1175,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	dprintf("Initializing AT capable mobile phone ...\n");
 	
 	/* Copy in the phone info */
-	memcpy(&(state->driver), &phone_at, sizeof(gn_driver));
+	memcpy(&(state->driver), &driver_at, sizeof(gn_driver));
 
 	if (!(drvinst = malloc(sizeof(at_driver_instance))))
 		return GN_ERR_MEMORYFULL;
