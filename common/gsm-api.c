@@ -21,7 +21,10 @@
   functions themselves are defined in a structure in gsm-common.h.
 
   $Log$
-  Revision 1.29  2001-07-27 00:02:20  pkot
+  Revision 1.30  2001-08-09 11:51:38  pkot
+  Generic AT support updates and cleanup (Manfred Jonsson)
+
+  Revision 1.29  2001/07/27 00:02:20  pkot
   Generic AT support for the new structure (Manfred Jonsson)
 
   Revision 1.28  2001/06/06 09:05:56  machek
@@ -82,10 +85,19 @@ GSM_Information		*GSM_Info;
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
 
-static GSM_Error register_phone(GSM_Phone *phone, char *model, GSM_Statemachine *sm)
+static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel, GSM_Statemachine *sm)
 {
+	GSM_Data data;
+	GSM_Data *p_data;
+	if (setupmodel) {
+		GSM_DataClear(&data);
+		data.Model = setupmodel;
+		p_data = &data;
+	} else {
+		p_data = NULL;
+	}
        if (strstr(phone->Info.Models, model) != NULL)
-               return phone->Functions(GOP_Init, NULL, sm);
+               return phone->Functions(GOP_Init, p_data, sm);
        return GE_UNKNOWNMODEL;
 }
 
@@ -101,9 +113,9 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, GSM_Statemachine 
 	} \
 }
 
-#define REGISTER_PHONE(x) { \
+#define REGISTER_PHONE(x, y) { \
         extern GSM_Phone phone_##x; \
-        if ((ret = register_phone(&phone_##x, model, sm)) != GE_UNKNOWNMODEL) \
+        if ((ret = register_phone(&phone_##x, model, y, sm)) != GE_UNKNOWNMODEL) \
                 return ret; \
  } 
 
@@ -116,7 +128,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
 #ifndef WIN32  /* MB21 not supported in win32 */
         MODULE(MB61);
         MODULE(MB640);
-        MODULE(D2711);
+        /* MODULE(D2711); */
 	if (strstr("2110", model)) {
 		extern GSM_Phone phone_nokia_2110;
 		memcpy(&(sm->Phone), &phone_nokia_2110, sizeof(GSM_Phone));
@@ -129,8 +141,8 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
         sm->Link.InitLength=atoi(initlength);
         strcpy(sm->Link.PortDevice,device);
  
-        REGISTER_PHONE(nokia_7110);
-        REGISTER_PHONE(at);
+        REGISTER_PHONE(nokia_7110, NULL);
+        REGISTER_PHONE(at, model);
 
 #endif /* WIN32 */ 
         return (GE_UNKNOWNMODEL);

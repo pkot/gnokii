@@ -38,7 +38,7 @@ typedef struct{
   CBUS_IncomingFrame i;
 } CBUS_Link;
 
-GSM_Error CBUS_Initialise(GSM_Link *newlink, GSM_Phone *newphone);
+GSM_Error CBUS_Initialise(GSM_Statemachine *state);
 
 void sendat(char *msg);
 

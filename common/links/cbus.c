@@ -382,14 +382,14 @@ int CBUS_TX_SendAck(u8 message_type, u8 message_seq)
 
 /* Initialise variables and start the link */
 
-GSM_Error CBUS_Initialise(GSM_Link * newlink, GSM_Phone * newphone)
+GSM_Error CBUS_Initialise(GSM_Statemachine *state)
 {
         setvbuf(stdout, NULL, _IONBF, 0);
         setvbuf(stderr, NULL, _IONBF, 0);
 
 	/* 'Copy in' the global structures */
-	glink = newlink;
-	gphone = newphone;
+	glink = &(state->Link);
+	gphone = &(state->Phone);
 
 	/* Fill in the link functions */
 	glink->Loop = &CBUS_Loop;

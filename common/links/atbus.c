@@ -11,10 +11,12 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.1  2001-07-27 00:02:21  pkot
+  Revision 1.2  2001-08-09 11:51:39  pkot
+  Generic AT support updates and cleanup (Manfred Jonsson)
+
+  Revision 1.1  2001/07/27 00:02:21  pkot
   Generic AT support for the new structure (Manfred Jonsson)
 
-                
 */
 
 /* System header files */
@@ -76,7 +78,7 @@ static GSM_Error
 AT_SendMessage(u16 message_length, u8 message_type, void *msg)
 {
 	usleep(10000);
-        xwrite((char*)msg, message_length);
+	xwrite((char*)msg, message_length);
 	return GE_NONE;
 }
 
@@ -90,21 +92,21 @@ void ATBUS_RX_StateMachine(unsigned char rx_char)
 	reply_buf[reply_buf_pos] = '\0';
 
 	if (reply_buf_pos >= binlength) {
-		if (reply_buf_pos > 3) {
-			if (0 == strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4)) {
-				SM_IncomingFunction(statemachine, 1, reply_buf, reply_buf_pos);
-				reply_buf_pos = 0;
-				binlength = 0;
-				return;
+		if (((reply_buf_pos > 3) && (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4)))
+		|| ((reply_buf_pos > 6) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))) {
+			SM_IncomingFunction(statemachine, 1, reply_buf, reply_buf_pos);
+			reply_buf_pos = 0;
+			binlength = 0;
+			return;
+		}
+/* needed for binary date etc
+   todo: correct reading of variable length integers
+		if (reply_buf_pos == 12) {
+			if (!strncmp(reply_buf + 3, "ABC", 3) {
+				binlength = atoi(reply_buf + 8);
 			}
 		}
-// needed for pdu etc
-// todo: correct reading of variable length integers
-//		if (reply_buf_pos == 12) {
-//			if (strncmp(reply_buf + 3, "ABC", 3) {
-//				binlength = atoi(reply_buf + 8);
-//			}
-//		}
+*/
 	}
 }
 
@@ -152,8 +154,8 @@ bool ATBUS_OpenSerial()
 
 GSM_Error ATBUS_Initialise(GSM_Statemachine *state)
 {
-        setvbuf(stdout, NULL, _IONBF, 0);
-        setvbuf(stderr, NULL, _IONBF, 0);
+	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stderr, NULL, _IONBF, 0);
 
 	/* 'Copy in' the global structures */
 	glink = &(state->Link);

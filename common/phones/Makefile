@@ -23,8 +23,8 @@ OBJS =	generic.o \
 	nokia.o \
 	nk7110.o \
 	nk2110.o \
-	atgen.o \
-	dc2711.o
+	atgen.o
+#	dc2711.o
 
 all: PHONES.o
 
