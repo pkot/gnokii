@@ -6,6 +6,7 @@
     o Estonian translation updated                   (Hans Motshärg)
  * 3110 series updates
     o Phonebook support added                        (Osma Suominen)
+    o Prevent race condition in getsms code          (Osma Suominen)
 
 0.5.1
 =====

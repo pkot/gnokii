@@ -330,6 +330,7 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 	int memory_type;
 	unsigned char request[2];
 	gn_error error = GN_ERR_INTERNALERROR;
+	struct timeval now, next, timeout;
 
 	dprintf("Getting SMS message...\n");
 
@@ -353,12 +354,28 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 	error = sm_block(0x2c, data, state);
 	if (error != GN_ERR_NONE) return error;
 
-	/* Block for subsequent content frames... */
-	do {
-		dprintf("Waiting for content frames...\n");
-		error = sm_block_no_retry(0x27, data, state);
-		if (error != GN_ERR_NONE) return error;
-	} while (DRVINSTANCE(state)->user_data_count < data->raw_sms->length);
+	/* Wait for subsequent content frames. The received data is first
+	 * stored in DRVINSTANCE(state)->user_data, because trying to catch
+	 * all the user data frames using sm_block() would create a race
+	 * condition. */
+	   
+	timeout.tv_sec = 10;
+	timeout.tv_usec = 0;
+	gettimeofday(&now, NULL);
+	timeradd(&now, &timeout, &next);
+	dprintf("Waiting for content frames...\n");
+	while (DRVINSTANCE(state)->user_data_count < data->raw_sms->length
+	       && timercmp(&next, &now, >)) {
+		gn_sm_loop(1, state);
+		gettimeofday(&now, NULL);
+	}
+
+	if (DRVINSTANCE(state)->user_data_count < data->raw_sms->length)
+		return GN_ERR_TIMEOUT;
+	
+	/* the data has been received, copy it to the right place */
+	memcpy(data->raw_sms->user_data, DRVINSTANCE(state)->user_data,
+	       data->raw_sms->length);
 
 	return GN_ERR_NONE;
 }
@@ -655,28 +672,19 @@ static gn_error P3110_IncomingInitFrame(int messagetype, unsigned char *message,
 
 static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	int count;
-
 	/* First see if it was an acknowledgement to one of our messages,
 	   if so then nothing to do */
 	if (length == 0x02) return GN_ERR_NONE;
 
-	if (!data->raw_sms) {
-		dprintf("Unrequested SMS data frame received, ignoring.\n");
-		return GN_ERR_INTERNALERROR;
-	}
-
 	/* This function may be called several times; it accumulates the
-	 * SMS content in data->raw_sms->user_data.
+	 * SMS content in DRVINSTANCE(state)->user_data
 	 * DRVINSTANCE(state)->user_data_count is used as a counter. */
 
 	/* If this is the first block, reset accumulated message length. */
 	if (message[2] == 1)
 		DRVINSTANCE(state)->user_data_count = 0;
 
-	count = DRVINSTANCE(state)->user_data_count + length - 3;
-
-	memcpy(data->raw_sms->user_data + DRVINSTANCE(state)->user_data_count, message + 3, length - 3);
+	memcpy(DRVINSTANCE(state)->user_data + DRVINSTANCE(state)->user_data_count, message + 3, length - 3);
 
 	DRVINSTANCE(state)->user_data_count += length - 3;
 

@@ -45,6 +45,7 @@
 
 typedef struct {
 	bool sim_available;
+	unsigned char user_data[GN_SMS_MAX_LENGTH];
 	int user_data_count;
 } nk3110_driver_instance;
 
