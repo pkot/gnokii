@@ -19,6 +19,9 @@
     o add --getnetworkinfo                          (Bertrik Sikken)
  * build system fixes
     o correctly set CFLAGS w0th --enable-debug           (Pawel Kot)
+ * nk6510 driver updates:
+    o don't segfault with uninitialized data->alarm      (Pawel Kot)
+    o don't segfault with uninitialized data->sms_status (Pawel Kot)
 
 0.5.0pre3
 =========
