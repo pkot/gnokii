@@ -24,6 +24,7 @@
       distclean'                                        (Pawel Kot)
  * gnokii updates
     o accept range in --deletephonebook            (BORBELY Zoltan)
+    o deletephonebook initialisation fix           (BORBELY Zoltan)
  * documentation updates
     o update TODO to reflect real issues                (Pawel Kot)
     o mention default caller groups in the manpage   (Reiner Steib)
@@ -31,7 +32,7 @@
     o contacts won't save a trailing semicolon     (BORBELY Zoltan)
  * gnapplet series updates
     o gnapplet support added                       (BORBELY Zoltan)
-    o minimal phonebook reading support            (BORBELY Zoltan)
+    o minimal phonebook management support         (BORBELY Zoltan)
 
 0.6.0
 =====

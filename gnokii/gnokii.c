@@ -3481,6 +3481,7 @@ static int deletephonebook(int argc, char *argv[])
 	for (i = start_number; i <= end_number; i++) {
 		entry.location = i;
 		entry.empty = true;
+		data.phonebook_entry = &entry;
 		error = gn_sm_functions(GN_OP_DeletePhonebook, &data, &state);
 		switch (error) {
 		case GN_ERR_NONE:
