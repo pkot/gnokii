@@ -448,4 +448,31 @@ typedef struct {
 	char Screen[50];
 } GSM_NetMonitor;
 
+/* Data structure for make, answer and cancel a call */
+typedef enum {
+	GSM_CT_VoiceCall,		/* Voice call */
+	GSM_CT_NonDigitalDataCall,	/* Data call on non digital line */
+	GSM_CT_DigitalDataCall		/* Data call on digital line */
+} GSM_CallType;
+
+typedef enum {
+	GSM_CSN_Never,			/* Never send my number */
+	GSM_CSN_Always,			/* Always send my number */
+	GSM_CSN_Default			/* Use the network default settings */
+} GSM_CallSendNumber;
+
+typedef enum {
+	GSM_CS_IncomingCall,		/* Incoming call */
+	GSM_CS_LocalHangup,		/* Local end terminated the call */
+	GSM_CS_RemoteHangup		/* Remote end terminated the call */
+} GSM_CallStatus;
+
+typedef struct {
+	GSM_CallType Type;
+	char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1];
+	char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];
+	GSM_CallSendNumber SendNumber;
+	int CallID;
+} GSM_CallInfo;
+
 #endif	/* __gsm_common_h */

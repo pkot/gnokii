@@ -87,7 +87,8 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 		if (CommandMode == false) ATEM_ModemResult(MR_NOCARRIER);
 		connected = false;
 		/* Set the call passup back to the at emulator */
-/*		GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
+		data.CallNotification = ATEM_CallPassup;
+		SM_Functions(GOP_SetCallNotification, &data, sm);
 		CommandMode = true;
 		break;
 	case Reset_Ind:
@@ -104,7 +105,8 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 			if (ufds.revents != POLLIN) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
-/*				GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
+				data.CallNotification = ATEM_CallPassup;
+				SM_Functions(GOP_SetCallNotification, &data, sm);
 				return 0;
 			}
 
@@ -131,7 +133,8 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 			if (pluscount == 3) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
-/*				GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
+				data.CallNotification = ATEM_CallPassup;
+				SM_Functions(GOP_SetCallNotification, &data, sm);
 				ATEM_ModemResult(MR_OK);
 				break;
 			}
@@ -145,18 +148,20 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 	return 0;
 }
 
-void DP_CallPassup(char c)
+void DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
 {
-	switch (c) {
-	case 'D':
+	switch (CallStatus) {
+	case GSM_CS_IncomingCall:
 		if (CommandMode == false) ATEM_ModemResult(MR_CARRIER);
 		RLP_SetUserRequest(Conn_Req, true);
 		connected = true;
 		break;
-	case ' ':
+	case GSM_CS_LocalHangup:
+	case GSM_CS_RemoteHangup:
 		CommandMode = true;
 		/* Set the call passup back to the at emulator */
-/*		GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
+		data.CallNotification = ATEM_CallPassup;
+		SM_Functions(GOP_SetCallNotification, &data, sm);
 		ATEM_ModemResult(MR_NOCARRIER);
 		RLP_SetUserRequest(Disc_Req, true);
 		connected = false;

@@ -81,6 +81,8 @@ typedef enum {
 	OPT_SETALARM,
 	OPT_GETALARM,
 	OPT_DIALVOICE,
+	OPT_ANSWERCALL,
+	OPT_HANGUP,
 	OPT_GETCALENDARNOTE,
 	OPT_WRITECALENDARNOTE,
 	OPT_DELCALENDARNOTE,
@@ -235,6 +237,8 @@ static int usage(void)
 			  "          gnokii --setalarm [HH MM]\n"
 			  "          gnokii --getalarm\n"
 			  "          gnokii --dialvoice number\n"
+			  "          gnokii --answercall callid\n"
+			  "          gnokii --hangup callid\n"
 			  "          gnokii --getcalendarnote start [end] [-v]\n"
 			  "          gnokii --writecalendarnote vcardfile number\n"
 			  "          gnokii --deletecalendarnote start [end]\n"
@@ -1193,12 +1197,70 @@ static int getsecuritycodestatus(void)
 
 #endif
 
+static void callnotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
+{
+	switch (CallStatus) {
+	case GSM_CS_IncomingCall:
+		fprintf(stdout, "INCOMING CALL: ID: %d, Number: %s, Name: \"%s\"\n", CallInfo->CallID, CallInfo->Number, CallInfo->Name);
+		break;
+	case GSM_CS_LocalHangup:
+		fprintf(stdout, "CALL %d TERMINATED (LOCAL)\n", CallInfo->CallID);
+		break;
+	case GSM_CS_RemoteHangup:
+		fprintf(stdout, "CALL %d TERMINATED (REMOTE)\n", CallInfo->CallID);
+		break;
+	default:
+	}
+}
+
 /* Voice dialing mode. */
 static int dialvoice(char *Number)
 {
-/*	if (GSM && GSM->DialVoice) GSM->DialVoice(Number);*/
+    	GSM_CallInfo CallInfo;
+	GSM_Error error;
+
+	memset(&CallInfo, 0, sizeof(CallInfo));
+	snprintf(CallInfo.Number, sizeof(CallInfo.Number), "%s", Number);
+	CallInfo.Type = GSM_CT_VoiceCall;
+	CallInfo.SendNumber = GSM_CSN_Default;
+
+	GSM_DataClear(&data);
+	data.CallInfo = &CallInfo;
+
+	if ((error = SM_Functions(GOP_MakeCall, &data, &State)) != GE_NONE)
+	    	return error;
+
+	fprintf(stdout, _("Dialled call, id: %d\n"), CallInfo.CallID);
 
 	return 0;
+}
+
+/* Answering incoming call */
+static int answercall(char *CallID)
+{
+    	GSM_CallInfo CallInfo;
+
+	memset(&CallInfo, 0, sizeof(CallInfo));
+	CallInfo.CallID = atoi(CallID);
+
+	GSM_DataClear(&data);
+	data.CallInfo = &CallInfo;
+
+	return SM_Functions(GOP_AnswerCall, &data, &State);
+}
+
+/* Hangup the call */
+static int hangup(char *CallID)
+{
+    	GSM_CallInfo CallInfo;
+
+	memset(&CallInfo, 0, sizeof(CallInfo));
+	CallInfo.CallID = atoi(CallID);
+
+	GSM_DataClear(&data);
+	data.CallInfo = &CallInfo;
+
+	return SM_Functions(GOP_CancelCall, &data, &State);
 }
 
 /* FIXME: Integrate with sendsms */
@@ -2019,6 +2081,9 @@ static int monitormode(void)
 	data.SMSStatus = &SMSStatus;
 	data.NetworkInfo = &NetworkInfo;
 	data.OnCellBroadcast = StoreCBMessage;
+	data.CallNotification = callnotifier;
+
+	SM_Functions(GOP_SetCallNotification, &data, &State);
 
 	memset(CBQueue, 0, sizeof(CBQueue));
 	cb_ridx = 0;
@@ -3161,6 +3226,12 @@ int main(int argc, char *argv[])
 		/* Voice call mode */
 		{ "dialvoice",          required_argument, NULL, OPT_DIALVOICE },
 
+		/* Answer the incoming call */
+		{ "answercall",         required_argument, NULL, OPT_ANSWERCALL },
+
+		/* Hangup call */
+		{ "hangup",             required_argument, NULL, OPT_HANGUP },
+
 		/* Get calendar note mode */
 		{ "getcalendarnote",    required_argument, NULL, OPT_GETCALENDARNOTE },
 
@@ -3272,6 +3343,8 @@ int main(int argc, char *argv[])
 		{ OPT_SETDATETIME,       0, 5, 0 },
 		{ OPT_SETALARM,          0, 2, 0 },
 		{ OPT_DIALVOICE,         1, 1, 0 },
+		{ OPT_ANSWERCALL,        1, 1, 0 },
+		{ OPT_HANGUP,            1, 1, 0 },
 		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
 		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
@@ -3398,6 +3471,12 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_DIALVOICE:
 			rc = dialvoice(optarg);
+			break;
+		case OPT_ANSWERCALL:
+			rc = answercall(optarg);
+			break;
+		case OPT_HANGUP:
+			rc = hangup(optarg);
 			break;
 		case OPT_GETCALENDARNOTE:
 			rc = getcalendarnote(nargc, nargv);

@@ -51,10 +51,11 @@ bool ATEM_Initialised = false;	/* Set to true once initialised */
 extern bool CommandMode;
 extern int ConnectCount;
 
-static GSM_Statemachine *sm;
+GSM_Statemachine *sm;
+GSM_Data data;
 
-static GSM_Data data;
 static GSM_SMSMessage sms;
+static GSM_CallInfo callinfo;
 static 	char imei[64], model[64], revision[64], manufacturer[64];
 
 /* Local variables */
@@ -85,8 +86,10 @@ bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
 
 	GSM_DataClear(&data);
 	memset(&sms, 0, sizeof(GSM_SMSMessage));
+	memset(&callinfo, 0, sizeof(callinfo));
 
 	data.SMSMessage = &sms;
+	data.CallInfo = &callinfo;
 	data.Manufacturer = manufacturer;
 	data.Model = model;
 	data.Revision = revision;
@@ -115,7 +118,8 @@ bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
 	MessageFormat = PDU_MODE;
 
 	/* Set the call passup so that we get notified of incoming calls */
-	/*GSM->DialData(NULL,-1,&ATEM_CallPassup);*/
+	data.CallNotification = ATEM_CallPassup;
+	SM_Functions(GOP_SetCallNotification, &data, sm);
 
 	/* We're ready to roll... */
 	ATEM_Initialised = true;
@@ -141,11 +145,11 @@ void	ATEM_InitRegisters(void)
 
 
 /* This gets called to indicate an incoming call */
-void ATEM_CallPassup(char c)
+void ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
 {
-	if ((c >= 0) && (c < 9)) {
+	if (CallStatus == GSM_CS_IncomingCall) {
 		ATEM_ModemResult(MR_RING);
-		IncomingCallNo = c;
+		IncomingCallNo = CallInfo->CallID;
 	}
 }
 
@@ -203,7 +207,6 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 void	ATEM_ParseAT(char *cmd_buffer)
 {
 	char *buf;
-	char number[30];
 
 	if (strncasecmp (cmd_buffer, "AT", 2) != 0) {
 		ATEM_ModemResult(MR_ERROR);
@@ -220,8 +223,10 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			buf++;
 			/* For now we'll also initialise the datapump + rlp code again */
 			DP_Initialise(PtyRDFD, PtyWRFD);
-/*			GSM->DialData(NULL, -1, &DP_CallPassup);
-			GSM->AnswerCall(IncomingCallNo);*/
+			data.CallNotification = DP_CallPassup;
+			SM_Functions(GOP_SetCallNotification, &data, sm);
+			data.CallInfo->CallID = IncomingCallNo;
+			SM_Functions(GOP_AnswerCall, &data, sm);
 			CommandMode = false;
 			return;
 			break;
@@ -233,9 +238,15 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			buf++;
 			if (toupper(*buf) == 'T') buf++;
 			if (*buf == ' ') buf++;
-			strncpy(number, buf, 30);
-/*			if (ModemRegisters[S35] == 0) GSM->DialData(number, 1, &DP_CallPassup);
-			else GSM->DialData(number, 0, &DP_CallPassup);*/
+			data.CallNotification = DP_CallPassup;
+			SM_Functions(GOP_SetCallNotification, &data, sm);
+			snprintf(data.CallInfo->Number, sizeof(data.CallInfo->Number), "%s", buf);
+			if (ModemRegisters[S35] == 0)
+				data.CallInfo->Type = GSM_CT_DigitalDataCall;
+			else
+				data.CallInfo->Type = GSM_CT_NonDigitalDataCall;
+			data.CallInfo->SendNumber = GSM_CSN_Default;
+			SM_Functions(GOP_MakeCall, &data, sm);
 			ATEM_StringOut("\n\r");
 			CommandMode = false;
 			return;
@@ -244,7 +255,8 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			/* Hang Up */
 			buf++;
 			RLP_SetUserRequest(Disc_Req, true);
-/*			GSM->CancelCall();*/
+			data.CallInfo->CallID = IncomingCallNo;
+			SM_Functions(GOP_CancelCall, &data, sm);
 			break;
 		case 'S':
 			/* Change registers - only no. 35 for now */

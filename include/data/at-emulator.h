@@ -27,12 +27,14 @@ void	ATEM_ParseSMS(char *cmd_buffer);
 void	ATEM_ParseDIR(char *cmd_buffer);
 bool	ATEM_CommandPlusC(char **buf);
 bool	ATEM_CommandPlusG(char **buf);
-int		ATEM_GetNum(char **p);
+int	ATEM_GetNum(char **p);
 void	ATEM_ModemResult(int code);
-void    ATEM_CallPassup(char c);
+void    ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
 
 	/* Global variables */
 bool	ATEM_Initialised;
+extern GSM_Statemachine	*sm;
+extern GSM_Data		data;
 
 	/* Definition of modem result codes - these are returned to "terminal"
        numerically or as a string depending on the setting of S12 */

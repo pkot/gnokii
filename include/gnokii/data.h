@@ -53,6 +53,8 @@ typedef struct {
 	int *DisplayStatus;
 	void (*OnCellBroadcast)(GSM_CBMessage *Message);
 	GSM_NetMonitor *NetMonitor;
+	GSM_CallInfo *CallInfo;
+	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
 } GSM_Data;
 
 /* Global structures intended to be independant of phone etc */
@@ -126,6 +128,10 @@ typedef enum {
 	GOP_SaveSMS,
 	GOP_SetCellBroadcast,
 	GOP_NetMonitor,
+	GOP_MakeCall,
+	GOP_AnswerCall,
+	GOP_CancelCall,
+	GOP_SetCallNotification,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

@@ -85,6 +85,7 @@ static SMSMessage_PhoneLayout nk6100_layout;
 static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 /* FIXME: we should get rid on it */
 static void (*OnCellBroadcast)(GSM_CBMessage *Message) = NULL;
+static void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo) = NULL;
 
 /* static functions prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
@@ -125,6 +126,10 @@ static GSM_Error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error NetMonitor(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -136,6 +141,7 @@ static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *mess
 static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -151,6 +157,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x14, IncomingSMS },
 	{ 0x64, IncomingPhoneInfo },
 	{ 0x40, IncomingSecurity },
+	{ 0x01, IncomingCallInfo },
 	{ 0, NULL}
 };
 
@@ -252,6 +259,14 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return SetCellBroadcast(data, state);
 	case GOP_NetMonitor:
 		return NetMonitor(data, state);
+	case GOP_MakeCall:
+		return MakeCall(data, state);
+	case GOP_AnswerCall:
+		return AnswerCall(data, state);
+	case GOP_CancelCall:
+		return CancelCall(data, state);
+	case GOP_SetCallNotification:
+		return SetCallNotification(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -2111,6 +2126,148 @@ static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int l
 	case 0x7e:
 		if (message[3] != 0x00 && data->NetMonitor)
 			snprintf(data->NetMonitor->Screen, sizeof(data->NetMonitor->Screen), "%s", message + 4);
+		break;
+
+	default:
+		return GE_UNHANDLEDFRAME;
+	}
+
+	return GE_NONE;
+}
+
+
+static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01};
+	unsigned char voice_end[] = {0x01, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01};
+	unsigned char *pos;
+	int n;
+
+	n = strlen(data->CallInfo->Number);
+	if (n > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+		dprintf("number too long\n");
+		return GE_PHBOOKNUMBERTOOLONG;
+	}
+
+	pos = req + 4;
+	*pos++ = (unsigned char)n;
+	memcpy(pos, data->CallInfo->Number, n);
+	pos += n;
+
+	switch (data->CallInfo->Type) {
+	case GSM_CT_VoiceCall:
+		*pos++ = 0x05;
+		switch (data->CallInfo->SendNumber) {
+		case GSM_CSN_Never:
+			voice_end[4] = 0x02;
+			break;
+		case GSM_CSN_Always:
+			voice_end[4] = 0x03;
+			break;
+		case GSM_CSN_Default:
+			voice_end[4] = 0x01;
+			break;
+		default:
+			return GE_INTERNALERROR;
+		}
+		memcpy(pos, voice_end, 9);
+		pos += 9;
+		break;
+	default:
+		dprintf("Invalid call type %d\n", 1);
+		return GE_INTERNALERROR;
+	}
+
+	if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x01);
+}
+
+static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req1[] = {FBUS_FRAME_HEADER, 0x42, 0x05, 0x01, 0x07,
+				0xa2, 0x88, 0x81, 0x21, 0x15, 0x63, 0xa8, 0x00, 0x00,
+				0x07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80};
+	unsigned char req2[] = {FBUS_FRAME_HEADER, 0x06, 0x00, 0x00};
+	GSM_Error error;
+
+	if (SM_SendMessage(state, sizeof(req1), 0x01, req1) != GE_NONE) return GE_NOTREADY;
+	if ((error = SM_Block(state, data, 0x01)) != GE_NONE) return error;
+
+	req2[4] = data->CallInfo->CallID;
+
+	if (SM_SendMessage(state, sizeof(req2), 0x01, req2) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x01);
+}
+
+static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x08, 0x00, 0x85};
+
+	req[4] = data->CallInfo->CallID;
+
+	if (SM_SendMessage(state, 6, 0x01, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x01);
+}
+
+static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state)
+{
+	CallNotification = data->CallNotification;
+
+	return GE_NONE;
+}
+
+static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	GSM_CallInfo cinfo;
+	unsigned char *pos;
+
+	switch (message[3]) {
+	/* Call going msg */
+	case 0x02:
+		if (data->CallInfo)
+			data->CallInfo->CallID = message[4];
+		break;
+
+	/* Remote end hang up */
+	case 0x04:
+		memset(&cinfo, 0, sizeof(cinfo));
+		cinfo.CallID = message[4];
+		if (CallNotification)
+			CallNotification(GSM_CS_RemoteHangup, &cinfo);
+		return GE_UNSOLICITED;
+
+	/* incoming call alert */
+	case 0x05:
+		memset(&cinfo, 0, sizeof(cinfo));
+		pos = message + 4;
+		cinfo.CallID = *pos++;
+		pos++;
+		if (*pos >= sizeof(cinfo.Number))
+			return GE_UNHANDLEDFRAME;
+		memcpy(cinfo.Number, pos + 1, *pos);
+		pos += *pos + 1;
+		if (*pos >= sizeof(cinfo.Name))
+			return GE_UNHANDLEDFRAME;
+		memcpy(cinfo.Name, pos + 1, *pos);
+		pos += *pos + 1;
+		if (CallNotification)
+			CallNotification(GSM_CS_IncomingCall, &cinfo);
+		return GE_UNSOLICITED;
+	
+	/* terminated call */
+	case 0x09:
+		memset(&cinfo, 0, sizeof(cinfo));
+		cinfo.CallID = message[4];
+		if (CallNotification)
+			CallNotification(GSM_CS_LocalHangup, &cinfo);
+		return GE_UNSOLICITED;
+	
+	/* message after "terminated call" */
+	case 0x0a:
+		return GE_UNSOLICITED;
+
+	/* Send DTMF/voice call reply */
+	case 0x40:
 		break;
 
 	default:
