@@ -1,16 +1,27 @@
 0.4.0pre17 (not released yet)
 ==========
- * mark sending of ringtone as broken, cleanups        (Pavel Machek)
- * 2110: smsreader updates			       (Pavel Machek)
- * Yet another test of CVS commit mailer              (Hugh Blemings)
- * Updates to address GNU GPL requirements                (Pawel Kot)
- * Change from .gif to .png for documentation         (Hugh Blemings)
- * Fixed small typo in include/devices/linuxirda.h    (Hugh Blemings)
- * Updates to make cygwin compile
- (./configure --enable-win32 --disable-shared --disable-nls)
-                                                          (Pawel Kot)
  * We moved to savannah.gnu.org                           (Pawel Kot)
- * More accurate INSTALL file                  (Robert Steinhaeusser)
+ * 2110 series updates
+    o smsreader updates                                (Pavel Machek)
+ * 6110 series updates
+    o MakeCall() / IncomingCallInfo() restructured   (BORBELY Zoltan)
+ * 6510 series updates
+    o added GetMemoryStatus (thanks to Michael Moosbauer for
+      the info)                                        (Markus Plail)
+ * 7110 series updates
+    o added GetSMSnoValidate to 7110 code, to be able to read SMS
+      faster if you know their location                (Markus Plail)
+    o fixed folder handling in 7110 code -> all function expect
+      GMT_?? as MemoryType                             (Markus Plail)
+ * win32 updates:
+    o Updates to make cygwin compile
+      (./configure --enable-win32 --disable-shared --disable-nls)
+                                                          (Pawel Kot)
+    o misc fixes                                      (Marcin Wiacek)
+    o Cygwin compilation error fixed                 (BORBELY Zoltan)
+    o VC++ compability and minor fixes                (Feico de Boer)
+ * Docs updates
+    o More accurate INSTALL file               (Robert Steinhaeusser)
  * libsms updates
     o start documenting libsms. The source code is documented in
       the linux kernel manner, so you can use its tools   (Pawel Kot)
@@ -18,39 +29,31 @@
     o prepare to be able to compile libsms without bitmaps or
       ringtones support                                   (Pawel Kot)
     o Fix overflows when storing SMSC/remote number       (Pawel Kot)
- * win32 fixes                                        (Marcin Wiacek)
- * asprintf, vasprintf and C99 compliant snprintf and vsnprintf
-   functions provided if not present                 (BORBELY Zoltan)
- * portability cleanup in various functions          (BORBELY Zoltan)
- * Replaces ugly ifs from gsm-bitmaps.c::GSM_IsPointBitmap()
- with a switch                                            (Pawel Kot)
- * Fix using bitmap types from different places (gsm-sms.h and
- gsm-bitmap.h                                          (Markus Plail)
- * extend GetBCDNumber by a parameter (maxlen) to avoid memory
- corruption                                            (Markus Plail)
- * added GetSMSnoValidate to 7110 code, to be able to read SMS
- faster if you know their location                     (Markus Plail)
- * fixed folder handling in 7110 code -> all function expect
- GMT_?? as MemoryType                                  (Markus Plail)
+    o Fix using bitmap types from different places (gsm-sms.h and
+      gsm-bitmap.h                                     (Markus Plail)
+ * Compability updates:
+    o asprintf, vasprintf and C99 compliant snprintf and vsnprintf
+      functions provided if not present              (BORBELY Zoltan)
+    o portability cleanup in various functions       (BORBELY Zoltan)
+    o strsep function provided if not present          (Markus Plail)
  * xgnokii updates
-    o extended AddCall to accept text and phone number
-    o added (De)Activate SMS reading in SMS window menu
+    o extended AddCall to accept text and phone number (Markus Plail)
+    o added (De)Activate SMS reading in SMS window menu (Markus Plail)
     o changed the default size of SMS windows          (Markus Plail)
- * Cygwin compilation error fixed                    (BORBELY Zoltan)
- * xgnokii updates
     o speeded up reading contacts (skip locations after all
-      contacts are read (according to memory status))
+      contacts are read (according to memory status))  (Markus Plail)
     o hopefully fixed a bug when reading contacts from SIM
-      failed (as reported by Michal Kochanowicz)
+      failed (as reported by Michal Kochanowicz)       (Markus Plail)
     o decreased the time the splash screen is visible  (Markus Plail)
- * 6510 series update
-    o added GetMemoryStatus (thanks to Michael Moosbauer for
-      the info)                                        (Markus Plail)
- * strsep function provided if not present             (Markus Plail)
- * changed gnokii.c to use strsep instead of strtok    (Markus Plail)
+ * Cleanups
+    o changed gnokii.c to use strsep instead of strtok (Markus Plail)
+    o mark sending of ringtone as broken               (Pavel Machek)
+    o Change from .gif to .png for documentation      (Hugh Blemings)
+    o Fixed small typo in include/devices/linuxirda.h (Hugh Blemings)
+    o Updates to address GNU GPL requirements             (Pawel Kot)
+    o Replaces ugly ifs from gsm-bitmaps.c::GSM_IsPointBitmap()
+      with a switch                                       (Pawel Kot)
  * SM_BlockNoRetryTimeout fixed                      (BORBELY Zoltan)
- * 6110 updates
-    o MakeCall() / IncomingCallInfo() restructured   (BORBELY Zoltan)
 	
 0.4.0pre16
 ==========
