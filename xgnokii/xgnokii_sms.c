@@ -1425,7 +1425,7 @@ static void NewBC(void)
 	if (!sendSMS.SMSSendWindow)
 		CreateSMSSendWindow();
 
-	gtk_window_set_title(GTK_WINDOW(sendSMS.SMSSendWindow), _("Bussiness Card"));
+	gtk_window_set_title(GTK_WINDOW(sendSMS.SMSSendWindow), _("Business Card"));
 
 	gtk_tooltips_disable(sendSMS.addrTip);
 
@@ -1529,7 +1529,7 @@ static void InitMainMenu(void)
 	menu_items[i++].path = g_strdup(_("/_Messages/_Reply"));
 	menu_items[i++].path = g_strdup(_("/_Messages/_Delete"));
 	menu_items[i++].path = g_strdup(_("/Messages/Sep3"));
-	menu_items[i++].path = g_strdup(_("/_Messages/_Bussiness card"));
+	menu_items[i++].path = g_strdup(_("/_Messages/_Business card"));
 	menu_items[i++].path = g_strdup(_("/_Help"));
 	menu_items[i++].path = g_strdup(_("/Help/_Help"));
 	menu_items[i++].path = g_strdup(_("/Help/_About"));
@@ -1599,7 +1599,7 @@ void GUI_CreateSMSWindow(void)
 					  &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
 				(GtkSignalFunc) ReplySMS, NULL);
 
-	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Bussiness Card"), NULL,
+	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Business Card"), NULL,
 				NewPixmap(BCard_xpm, GUI_SMSWindow->window,
 					  &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
 				(GtkSignalFunc) NewBC, NULL);
