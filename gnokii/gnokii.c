@@ -485,7 +485,7 @@ static int sendsms(int argc, char *argv[])
 			input_len = GSM_MAX_8BIT_SMS_LENGTH;
 			break;
 		default:
-			sendsms_usage(); /* Would be better to have an sendsms_usage() here. */
+			sendsms_usage();
 		}
 	}
 
@@ -3714,7 +3714,7 @@ int main(int argc, char *argv[])
 	/* First, error conditions */
 	case '?':
 	case ':':
-		fprintf(stderr, _("Use '%s --help' for usage informations.\n"), argv[0]);
+		fprintf(stderr, _("Use '%s --help' for usage information.\n"), argv[0]);
 		exit(0);
 	/* Then, options with no arguments */
 	case OPT_HELP:
