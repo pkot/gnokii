@@ -35,8 +35,8 @@ ALL_LINGUAS="cs de et fi nl sk pl it sl fr"
 AC_CHECK_HEADERS(libintl.h)
 AM_GNU_GETTEXT([use-libtool])
 AC_CHECK_FUNCS(locale_charset)
-if test x$ac_cv_have_langinfo_codeset != xyes -a x$ac_cv_have_locale_charset != xyes ; then
-	AC_DEFINE(NEED_LOCALE_CHARSET,[],[Define if you need locale_charset])
+if test x$am_cv_langinfo_codeset != xyes -a x$ac_cv_func_locale_charset != xyes ; then
+	NEED_LOCALE_CHARSET=1
 fi
 
 dnl ======================== Check for include/config.h.in

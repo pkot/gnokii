@@ -9,14 +9,16 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-OBJS = mgnokiidev.o
+OBJS = mgnokiidev.lo
 
 all: mgnokiidev
 
 mgnokiidev: $(OBJS)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 clean:
-	$(RM) $(OBJS) *~ depend mgnokiidev *.exe core *.bak
+	$(LIBTOOL) --mode=clean $(RM) mgnokiidev $(OBJS)
+	$(RM) *~ depend *.exe core *.bak
 
 install-generic:
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
@@ -26,16 +28,16 @@ install-generic:
 	$(INSTALL) -m 755 ppm2nokia $(DESTDIR)$(bindir)
 
 install: install-generic
-	$(INSTALL) mgnokiidev $(DESTDIR)$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) mgnokiidev $(DESTDIR)$(sbindir)
 
 install-strip: install-generic
-	$(INSTALL) -s mgnokiidev $(DESTDIR)$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -s mgnokiidev $(DESTDIR)$(sbindir)
 
 install-suid: install-generic
-	$(INSTALL) -o root -g gnokii -m 4750 mgnokiidev $(DESTDIR)$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 4750 mgnokiidev $(DESTDIR)$(sbindir)
 
 install-ss: install-generic
-	$(INSTALL) -o root -g gnokii -m 4750 -s mgnokiidev $(DESTDIR)$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 4750 -s mgnokiidev $(DESTDIR)$(sbindir)
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend
