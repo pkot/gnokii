@@ -101,6 +101,7 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 	unsigned char req[10240];
 	int length, i;
 
+	EncodeByLayout(data, &at_submit, 0);
 	if (!data->RawData) return GE_INTERNALERROR;
 
 	length = data->RawData->Length;

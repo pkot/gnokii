@@ -23,10 +23,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2001-2002 Pawe³ Kot <pkot@linuxnews.pl>
+  Copyright (C) 2001-2002 Pavel Machek <pavel@ucw.cz>
 
   Library for parsing and creating Short Messages (SMS).
 
 */
+
+#define DEBUG
 
 #include <stdlib.h>
 #include <string.h>
@@ -958,10 +961,251 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 	return GE_NONE;
 }
 
-/* Fake functions. To let gnokii compile */
+/***
+ *** ENCODING SMS
+ ***/
+
+/**
+ * EncodeData - encodes the date from the SMS structure to the phone frame
+ *
+ * @SMS: SMS structure to be encoded
+ * @dcs: Data Coding Scheme field in the frame to be set
+ * @message: phone frame to be filled in
+ * @multipart: do we send one message or more?
+ * @clen: coded data length
+ *
+ * This function does the phone frame encoding basing on the given SMS
+ * structure. This function is capable to create only one frame at a time.
+ */
+GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
+{
+	SMS_AlphabetType al;
+	unsigned int i, length, size = 0, offset = 0;
+	int text_index = -1, bitmap_index = -1, ringtone_index = -1;
+	char *message = rawsms->UserData;
+	int *clen = &rawsms->UserDataLength;
+
+	/* Version: Smart Messaging Specification 3.0.0 */
+	message[0] = 0x30;
+	for (i = 0; i < 3; i++) {
+		switch (sms->UserData[i].Type) {
+		case SMS_PlainText:
+			text_index     = i; break;
+		case SMS_BitmapData:
+			bitmap_index   = i; break;
+		case SMS_RingtoneData:
+			ringtone_index = i; break;
+		default:
+			break;
+		}
+	}
+
+	length = strlen(sms->UserData[0].u.Text);
+
+	/* Additional Headers */
+	switch (sms->DCS.Type) {
+	case SMS_GeneralDataCoding:
+		switch (sms->DCS.u.General.Class) {
+		case 1: rawsms->DCS |= 0xf0; break; /* Class 0 */
+		case 2: rawsms->DCS |= 0xf1; break; /* Class 1 */
+		case 3: rawsms->DCS |= 0xf2; break; /* Class 2 */
+		case 4: rawsms->DCS |= 0xf3; break; /* Class 3 */
+		default: break;
+		}
+		if (sms->DCS.u.General.Compressed) {
+			/* Compression not supported yet */
+			/* dcs[0] |= 0x20; */
+		}
+		al = sms->DCS.u.General.Alphabet;
+		break;
+	case SMS_MessageWaiting:
+		al = sms->DCS.u.MessageWaiting.Alphabet;
+		if (sms->DCS.u.MessageWaiting.Discard) rawsms->DCS |= 0xc0;
+		else if (sms->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) rawsms->DCS |= 0xe0;
+		else rawsms->DCS |= 0xd0;
+
+		if (sms->DCS.u.MessageWaiting.Active) rawsms->DCS |= 0x08;
+		rawsms->DCS |= (sms->DCS.u.MessageWaiting.Type & 0x03);
+
+		break;
+	default:
+		return GE_SMSWRONGFORMAT;
+	}
+
+	if ((al == SMS_8bit) && multipart) al = SMS_DefaultAlphabet;
+	rawsms->Length = *clen = 0;
+
+	/* Text Coding */
+	if (text_index != -1) {
+		switch (al) {
+		case SMS_DefaultAlphabet:
+			if (multipart) {
+				offset = 4;
+				memcpy(message + 1, "\x00\x00\x00", 3);
+				rawsms->DCS |= 0xf4;
+			}
+#define UDH_Length 0
+			size = Pack7BitCharacters((7 - (UDH_Length % 7)) % 7, sms->UserData[text_index].u.Text, message + offset);
+			// sms->Length = 8 * 0 + (7 - (0 % 7)) % 7 + length + offset;
+			rawsms->Length = strlen(sms->UserData[text_index].u.Text);
+			*clen = size + offset;
+			if (multipart) {
+				message[2] = (size & 0xff00) >> 8;
+				message[3] = (size & 0x00ff);
+			}
+			break;
+		case SMS_8bit:
+			rawsms->DCS |= 0xf4;
+			memcpy(message, sms->UserData[text_index].u.Text + 1, sms->UserData[text_index].u.Text[0]);
+			*clen = rawsms->Length = sms->UserData[text_index].u.Text[0];
+			break;
+		case SMS_UCS2:
+			if (multipart) {
+				offset = 4;
+				memcpy(message + 1, "\x02\x00\x00", 3);
+			}
+			rawsms->DCS |= 0x08;
+			EncodeUnicode(message + offset, sms->UserData[text_index].u.Text, length);
+			length *= 2;
+			*clen = rawsms->Length = length + offset;
+			if (multipart) {
+				message[2] = (length & 0xff00) >> 8;
+				message[3] = (length & 0x00ff);
+			}
+			break;
+		default:
+			return GE_SMSWRONGFORMAT;
+		}
+	}
+
+	/* Bitmap coding */
+	if (bitmap_index != -1) {
+#ifdef BITMAP_SUPPORT
+		size = GSM_EncodeSMSBitmap(&(sms->UserData[bitmap_index].u.Bitmap), message + rawsms->Length);
+		rawsms->Length += size;
+		*clen += size;
+#else
+		return GE_NOTSUPPORTED;
+#endif
+	}
+
+	/* Ringtone coding */
+	if (ringtone_index != -1) {
+#ifdef RINGTONE_SUPPORT
+		size = GSM_EncodeSMSRingtone(message + rawsms->Length, &sms->UserData[ringtone_index].u.Ringtone);
+		rawsms->Length += size;
+		*clen += size;
+#else
+		return GE_NOTSUPPORTED;
+#endif
+	}
+	return GE_NONE;
+}
+
+/**
+ * EncodeUDH - encodes User Data Header
+ * @UDHi: User Data Header information
+ * @SMS: SMS structure with the data source
+ * @UDH: phone frame where to save User Data Header
+ *
+ * This function encodes the UserDataHeader as described in:
+ *  o GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
+ *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
+ *  o Smart Messaging Specification, Revision 3.0.0
+ */
+static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, GSM_SMSMessage *SMS, char *UDH)
+{
+	unsigned char pos;
+
+	pos = UDH[0];
+	switch (UDHi.Type) {
+	case SMS_NoUDH:
+		break;
+	case SMS_VoiceMessage:
+	case SMS_FaxMessage:
+	case SMS_EmailMessage:
+		UDH[pos+4] = UDHi.u.SpecialSMSMessageIndication.MessageCount;
+		if (UDHi.u.SpecialSMSMessageIndication.Store) UDH[pos+3] |= 0x80;
+	case SMS_ConcatenatedMessages:
+		printf("Adding ConcatMsg header\n");
+	case SMS_OpLogo:
+		printf("Adding OpLogo header\n");
+	case SMS_CallerIDLogo:
+	case SMS_Ringtone:
+	case SMS_MultipartMessage:
+		UDH[0] += headers[UDHi.Type].length;
+		memcpy(UDH+pos+1, headers[UDHi.Type].header, headers[UDHi.Type].length);
+		break;
+	default:
+		dprintf("Not supported User Data Header type\n");
+		break;
+	}
+	return GE_NONE;
+}
+
+GSM_Error PrepareSMS(GSM_Data *data, int i)
+{
+	GSM_API_SMS *SMS = data->SMS;
+	GSM_SMSMessage *rawsms = data->RawSMS;
+
+	switch (rawsms->Type = SMS->Type) {
+	case SMS_Submit:
+	case SMS_Deliver:
+		break;
+	case SMS_Picture:
+	case SMS_Delivery_Report:
+	default:
+		dprintf("Not supported message type: %d\n", rawsms->Type);
+		return GE_NOTSUPPORTED;
+	}
+
+	EncodeData(SMS, rawsms, 0);
+
+	return GE_NONE;
+}
+
+/**
+ * SendSMS - The main function for the SMS sending
+ * @data:
+ * @state:
+ */
 API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NOTIMPLEMENTED;
+	GSM_Error error = GE_NONE;
+	GSM_RawData rawdata;
+	int i, count;
+
+	count = 1;
+#if 0
+	/* AT does not need smsc */
+	if (data->SMS->MessageCenter.No) {
+		data->MessageCenter = &data->SMS->MessageCenter;
+		error = SM_Functions(GOP_GetSMSCenter, data, state);
+		if (error != GE_NONE) return error;
+	}
+#endif
+
+	if (count < 1) return GE_SMSWRONGFORMAT;
+
+	memset(&rawdata, 0, sizeof(rawdata));
+	data->RawData = &rawdata;
+	data->RawSMS = malloc(sizeof(*data->RawSMS));
+	memset(data->RawSMS, 0, sizeof(*data->RawSMS));
+
+	for (i = 0; i < count; i++) {
+		data->RawData->Data = calloc(256, 1);
+
+		error = PrepareSMS(data, i);
+		if (error != GE_NONE) break;
+
+		error = SM_Functions(GOP_SendSMS, data, state);
+
+		// dprintf("%d\n", data->RawSMS->Length);
+		free(data->RawData->Data);
+		if (error != GE_NONE) break;
+	}
+	data->RawData = NULL;
+	return error;
 }
 
 API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
