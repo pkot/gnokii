@@ -707,65 +707,18 @@ GSM_Error RequestSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 API GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
+	GSM_SMSMessage rawsms;
 
+	if (!data->SMS) return GE_INTERNALERROR;
+	memset(&rawsms, 0, sizeof(GSM_SMSMessage));
+	rawsms.Number = data->SMS->Number;
+	rawsms.MemoryType = data->SMS->MemoryType;
+	data->RawSMS = &rawsms;
 	error = RequestSMSnoValidate(data, state);
 	ERROR();
+	data->SMS->Status = rawsms.Status;
 	return ParseSMS(data);
 }
-
-/* Find the fist unread message in given folder statting from the *last position
- * As a help we have the array of the sorted read locations in 'location' with
- * no_loc entries. We can easily skip these locations.
- */
-static GSM_Error FindUnreadSMS(GSM_Data *data, GSM_Statemachine *state, int *last, const unsigned int *locations, unsigned int no_loc)
-{
-	GSM_Error error;
-	int i, index = 0;
-
-	dprintf("Starting at %d\n", *last);
-	for (i = *last;; i++) {
-		/* Skip all read messages */
-		while (index < no_loc && locations[index] < i) index++;
-		if (locations[index] == i) continue;
-
-		dprintf("Reading: %d\n", i);
-		memset(data->RawSMS, 0, sizeof(GSM_SMSMessage));
-		data->RawSMS->Number = i;
-		data->RawSMS->MemoryType = GMT_IN;
-		error = SM_Functions(GOP_GetSMS, data, state);
-		if (error == GE_EMPTYLOCATION) continue;
-		ERROR();
-		if (data->RawSMS->Status == SMS_Unread) {
-			dprintf("Got unread %d\n", i);
-			*last = i + 1;
-			return GE_NONE;
-		}
-	}
-	return GE_NONE;
-}
-
-static void sort(unsigned int *table, unsigned int number)
-{
-	int i, j;
-
-	for (i = 0; i < number; i++) {
-		int min = table[i], no = i;
-		for (j = i; j < number; j++) {
-			if (table[j] < min) {
-				min = table[j];
-				no = j;
-			}
-		}
-		if (no > i) {
-			int aux;
-
-			aux = table[i];
-			table[i] = table[no];
-			table[no] = aux;
-		}
-	}
-}
-
 
 static GSM_Error FreeDeletedMessages(GSM_Data *data, int folder)
 {
@@ -808,48 +761,6 @@ GSM_Error GetReadMessages(GSM_Data *data, SMS_Folder folder)
 			data->FolderStats[folder.FolderID]->Changed++;
 			data->SMSStatus->Changed++;
 		}
-	}
-	return GE_NONE;
-}
-
-GSM_Error GetUnreadMessages(GSM_Data *data, GSM_Statemachine *state, SMS_Folder folder)
-{
-	GSM_Error error;
-	GSM_SMSMessage rawsms;
-	int dummy, i, last = 1, current_folder, previous_unread = 0;
-
-	data->RawSMS = &rawsms;
-
-	current_folder = 0;
-
-	dprintf("GetUnreadMessages: Looking for unread (%d)\n", data->SMSStatus->Unread);
-
-	for (i = 0; i < data->FolderStats[current_folder]->Used; i++) {		/* cycle through all saved position */
-		if ((data->MessagesList[i][current_folder]->Type == SMS_NotRead) ||
-		    (data->MessagesList[i][current_folder]->Type == SMS_NotReadHandled)) {	/* add already found new SMS to SMSFolder */
-			folder.Locations[folder.Number] = data->MessagesList[i][current_folder]->Location;
-			folder.Number++;
-			previous_unread++;
-		}
-	}
-	dummy = data->SMSStatus->Unread - previous_unread;
-
-	if (dummy < 1) {
-		return GE_NONE;
-	}
-	dprintf("GetUnreadMessages: sorting... previous unread: %i\n", previous_unread);
-	sort((int *)folder.Locations, folder.Number);
-
-	dprintf("GetUnreadMessages: sorting finished! Trying to get %i unread mails\n",dummy);
-	for (i = 0; i < dummy; i++) {
-		error = FindUnreadSMS(data, state, &last, folder.Locations, folder.Number);
-		ERROR();
-		dprintf("Found new (unread) message!\n");
-		data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Location = data->RawSMS->Number;
-		data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Type = SMS_NotRead;
-		data->FolderStats[current_folder]->Used++;
-		data->FolderStats[current_folder]->Changed++;
-		data->SMSStatus->Changed++;
 	}
 	return GE_NONE;
 }
@@ -940,15 +851,16 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 		dprintf("GetFolderChanges: Getting folder status for folder #%i\n", data->SMSFolder->FolderID);
 		error = SM_Functions(GOP_GetSMSFolderStatus, data, state);
 		ERROR();
-		memcpy(&tmp_folder, data->SMSFolder, sizeof(SMS_Folder));	/* We need it because data->SMSFolder can get garbled */
-		tmp_folder.FolderID = i;	/* so we don't need to do a modulo 8 each time */
 
 		if (i == 0) {
 			dprintf("GetFolderChanges: Reading unread messages for folder #%i\n", i); /* Only for INBOX */
-			error = GetUnreadMessages(data, state, tmp_folder);
+			error = SM_Functions(GOP_GetUnreadMessages, data, state);
 			ERROR();
 		}
+		memcpy(&tmp_folder, data->SMSFolder, sizeof(SMS_Folder));	/* We need it because data->SMSFolder can get garbled */
 
+		tmp_folder.FolderID = i;	/* so we don't need to do a modulo 8 each time */
+			
 		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->SMSFolder->Number, i);
 		error = GetReadMessages(data, tmp_folder);
 		ERROR();
