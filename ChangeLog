@@ -19,6 +19,8 @@
     o rename 'class' field from one of the sms structs to avoid
       conflicts with C++ name space; now it is 'm_class' (as of
       message class)                                     (Pawel Kot)
+    o GN_ERR_INVALIDLOCATION is invalid and not empty location
+                                                     (Osma Suominen)
  * statemachine changes
     o allow sm_block and friends to be used not only directly after
       sm_message_send but also with sm_reset in between, which sets

@@ -51,7 +51,7 @@ API char *gn_error_print(gn_error e)
 	case GN_ERR_WAITING:               return "Waiting for the next part of the message.";
 	case GN_ERR_NOTREADY:              return "Device not ready.";
 	case GN_ERR_BUSY:                  return "Command is still being executed.";
-	case GN_ERR_INVALIDLOCATION:       return "The given memory location is empty.";
+	case GN_ERR_INVALIDLOCATION:       return "The given memory location is invalid.";
 	case GN_ERR_INVALIDMEMORYTYPE:     return "Invalid type of memory.";
 	case GN_ERR_EMPTYLOCATION:         return "The given location is empty.";
 	case GN_ERR_ENTRYTOOLONG:          return "The given entry is too long";
