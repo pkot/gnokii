@@ -157,7 +157,7 @@ void DB_Look (void)
   {
     GSM_API_SMS sms;
     
-    gn_sms_defaultsubmit (&sms);
+    gn_sms_default_submit (&sms);
     memset (&sms.Remote.Number, 0, sizeof (sms.Remote.Number));
     sms.DeliveryReport = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
