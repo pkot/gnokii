@@ -9,6 +9,8 @@
     o fix logos                                        (Markus Plail)
  * 6510 series updates:
     o add bitmap writing                               (Markus Plail)
+ * 6110 series updated:
+    o Nokia 3410 is known to work                         (Pawel Kot)
  * bitmap support
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)

@@ -73,6 +73,7 @@ static PhoneModel models[] = {
 	{"3310",  "NHM-5", PM_SMS | PM_DTMF },
 	{"3330",  "NHM-6", PM_SMS | PM_DTMF },
 	{"3360",  "NPW-6", PM_SMS | PM_DTMF },
+	{"3410",  "NHM-2", PM_SMS | PM_DTMF },
 	{"3810",  "0305" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-9 */
 	{"5110",  "NSE-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"5120",  "NSC-1", PM_KEYBOARD  },
