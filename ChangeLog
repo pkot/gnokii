@@ -1,5 +1,7 @@
 0.5.0pre2
 =========
+ * Last minute updates to autogen.sh. They are usefull with newer
+   gettextize versions                                    (Pawel Kot)
  * Compability changes:
     o sys/filio.h included for FIONREAD              (BORBELY Zoltan)
     o replaced AM_GNU_GETTEXT with AM_GNU_GETTEXT([external]) in
