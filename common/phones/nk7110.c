@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.19  2001-11-15 12:12:34  pkot
+  Revision 1.20  2001-11-15 12:15:04  pkot
+  smslib updates. begin work on sms in 6100 series
+
+  Revision 1.19  2001/11/15 12:12:34  pkot
   7110 and 6110 series phones introduce as Nokia
 
   Revision 1.18  2001/11/15 12:04:06  pkot
@@ -720,7 +723,33 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
                                 dprintf("[%02x ]", message[i]);
                 dprintf("\n");
 
-		DecodePDUSMS(message, data->SMSMessage, length);
+		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
+
+		/* These offsets are 6210/7110 series specific */
+		/* Short Message status */
+		data->SMSMessage->Status = message[4];
+		dprintf("\tStatus: ");
+		switch (data->SMSMessage->Status) {
+		case SMS_Read:
+			dprintf("READ\n");
+			break;
+		case SMS_Unread:
+			dprintf("UNREAD\n");
+			break;
+		case SMS_Sent:
+			dprintf("SENT\n");
+			break;
+		case SMS_Unsent:
+			dprintf("UNSENT\n");
+			break;
+		default:
+			dprintf("UNKNOWN\n");
+			break;
+		}
+		/* MessageType/FolderID */
+		data->SMSMessage->MemoryType = message[5];
+
+		DecodePDUSMS(message + 6, data->SMSMessage, length);
 
                 break;
     

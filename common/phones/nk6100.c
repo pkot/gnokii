@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.5  2001-11-15 12:12:34  pkot
+  Revision 1.6  2001-11-15 12:15:04  pkot
+  smslib updates. begin work on sms in 6100 series
+
+  Revision 1.5  2001/11/15 12:12:34  pkot
   7110 and 6110 series phones introduce as Nokia
 
   Revision 1.4  2001/11/15 12:04:06  pkot
@@ -88,31 +91,24 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	switch (op) {
 	case GOP_Init:
 		return Initialise(state);
-		break;
 	case GOP_GetModel:
 		return GetModelName(data, state);
-		break;
 	case GOP_GetRevision:
 		return GetRevision(data, state);
-		break;
 	case GOP_GetImei:
 		return GetIMEI(data, state);
-		break;
 	case GOP_Identify:
 		return Identify(data, state);
-		break;
 	case GOP_GetBatteryLevel:
 		return GetBatteryLevel(data, state);
-		break;
 	case GOP_GetRFLevel:
 		return GetRFLevel(data, state);
-		break;
 	case GOP_GetMemoryStatus:
 		return GetMemoryStatus(data, state);
-		break;
+	case GOP_GetSMS:
+		return GetSMSMessage(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
-		break;
 	}
 }
 
@@ -400,4 +396,14 @@ static int GetMemoryType(GSM_MemoryType memory_type)
 		break;
 	}
 	return (result);
+}
+
+static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x07, 0x02 /* Unknown */, 0x00 /* Location */, 0x01, 0x64};
+
+	req[5] = data->SMSMessage->Number;
+
+	if (SM_SendMessage(state, 8, 0x02, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x14);
 }

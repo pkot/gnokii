@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.1  2001-07-09 23:55:36  pkot
+  Revision 1.2  2001-11-15 12:15:04  pkot
+  smslib updates. begin work on sms in 6100 series
+
+  Revision 1.1  2001/07/09 23:55:36  pkot
   Initial support for 6100 series in the new structure (me)
 
 */
@@ -51,6 +54,7 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error Incoming0x03(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
