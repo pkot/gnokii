@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.5  2001-06-06 09:05:56  machek
+  Revision 1.6  2001-06-10 11:28:00  machek
+  Convert GetSMS/DeleteSMS to new structure.
+
+  Revision 1.5  2001/06/06 09:05:56  machek
   Convert Grab/Release display to new structure.
 
   Revision 1.4  2001/05/09 20:18:46  machek
@@ -549,54 +552,50 @@ SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 	return (false);
 }
 
-static void
-Display(u8 b, int shift, char *s)
+static char *
+Display(u8 b, int shift, char *s, char *buf)
 {
 	b >>= shift;
 	b &= 0x03;
 	switch (b) {
-	case 0: return;
-	case 1: case 2: printf( "!!!" );
-	case 3: printf("%s ", s);
+	case 0: break;
+	case 1: case 2: *buf++ = '!';
+	case 3: strcpy(buf, s); buf += strlen(s); *buf++ = ' ';
 	}
+	return buf;
 }
+
+static GSM_Error (*OutputFn)(char *text, char *ctrl);
 
 static int
 HandlePacket(void)
 {
 	switch(PacketData[3]) {
-	case 0x12: 
-		printf("Display text at (%d,%d: %s)\n", PacketData[6], PacketData[7], &PacketData[8]);
+	case 0x12: {
+		char buf[10240], *s = buf, *t;
+		t = &PacketData[8];
+#define COPY(x) strncpy(s, t, x); t+=x; s+=x; *s++ = '\n'
+		COPY(10); COPY(10); COPY(10); COPY(3); COPY(12); *s++ = 0;
+		if (OutputFn)
+			(*OutputFn)(buf, NULL);
 		return 1;
-	case 0x2f:
-		printf("Display indicators: ");	/* Valid for 2110 */
-		Display(PacketData[4], 0, "d");
-		Display(PacketData[4], 2, "b");
-		Display(PacketData[4], 4, "a");
-		Display(PacketData[4], 6, "lights");
-
-		Display(PacketData[5], 0, "service");
-		Display(PacketData[5], 2, "scroll_up");
-		Display(PacketData[5], 4, "scroll_down");
-		Display(PacketData[5], 6, "ABC");
-
-		Display(PacketData[6], 0, "2.>");
-		Display(PacketData[6], 2, "1.>");
-		Display(PacketData[6], 4, "roam");
-		Display(PacketData[6], 6, "handset");
-
-		Display(PacketData[7], 0, "vmail");
-		Display(PacketData[7], 2, "envelope");
-		Display(PacketData[7], 4, "battbar");
-		Display(PacketData[7], 6, "3.>");
-
-		Display(PacketData[8], 0, "?1");
-		Display(PacketData[8], 2, "?2");
-		Display(PacketData[8], 4, "fieldbar");
-		Display(PacketData[8], 6, "ring");
-		printf("\n");
+	}
+	case 0x2f: {
+		char buf[10240], *s = buf;
+#undef COPY
+#define COPY(x, y, z) s = Display(PacketData[x], y, z, s)
+		/* Valid for 2110 */
+		COPY(4, 0, "d"); COPY(4, 2, "b"); COPY(4, 4, "a"); COPY(4, 6, "lights");
+		COPY(5, 0, "service"); COPY(5, 2, "scroll_up"); COPY(5, 4, "scroll_down"); COPY(5, 6, "ABC");
+		COPY(6, 0, "2.>"); COPY(6, 2, "1.>"); COPY(6, 4, "roam"); COPY(6, 6, "handset");
+		COPY(7, 0, "vmail"); COPY(7, 2, "envelope"); COPY(7, 4, "battbar"); COPY(7, 6, "3.>");
+		COPY(8, 0, "?1"); COPY(8, 2, "?2"); COPY(8, 4, "fieldbar"); COPY(8, 6, "ring");
+		*s++ = 0;
+		if (OutputFn)
+			(*OutputFn)(NULL, buf);
 		return 1;
-
+#undef COPY
+	}
 	case 0x37:
 		/* copy bytes 5+ to smsbuf */
 		dprintf("SMSdata:");
@@ -920,18 +919,18 @@ Register(void)
 	SendFrame( reg, 0xe9, 5 );
 }
 
-/* Fixme: implement grabdisplay properly */
 static GSM_Error
-EnableDisplayOutput(void)
+EnableDisplayOutput(GSM_Statemachine *sm)
 {
 	/* LN_UC_SHARE, LN_UC_SHARE, LN_UC_RELEASE, LN_UC_RELEASE, LN_UC_KEEP */
 	u8  pkt[] = {3, 3, 0, 0, 1};
 
+	msleep_poll(500);
 	fprintf(stderr, "\nShould display output\n");
-#if 0
-	return GE_NOTIMPLEMENTED;	/* We can do grab display, but we do not know how to ungrab it and with
-					   display grabbed, we can't even initialize connection. */
-#endif
+	if (!OutputFn) {
+		pkt[0] = 0;
+		pkt[1] = 0;
+	}
 	PacketOK = false;
 	SendCommand(pkt, 0x19, 5);
 	fprintf(stderr, "\nGrabbing display");
@@ -940,18 +939,9 @@ EnableDisplayOutput(void)
 	    (PacketData[2] != 1) || 
 	    (PacketData[4] != 1 /* LN_UC_REQUEST_OK */))
 		fprintf(stderr, "Something is very wrong with GrabDisplay\n");
-	fprintf(stderr, "Display grabbed okay\n");
-	return GE_NONE;
-}
-
-static GSM_Error
-DisableDisplayOutput(void)
-{
-	u8  pkt[] = {0, 0, 0, 0, 1};
-	PacketOK = false;
-	SendCommand(pkt, 0x19, 5);
-	waitfor(PacketOK, 0);
-	fprintf(stderr, "\nGrabbing display");
+	fprintf(stderr, "Display grabbed okay (waiting)\n");
+	msleep_poll(500);
+	fprintf(stderr, "Okay\n");
 	return GE_NONE;
 }
 
@@ -1160,27 +1150,32 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		if(!Model) err = GetVersionInfo();
 		if(err == GE_NONE) strncpy(data->Model, Model, 64);
 		if(err == GE_NONE) strncpy(data->Revision, Revision, 64);
-		return err;
+		break;
 	case GOP_GetBatteryLevel:
-		return GetBatteryLevel(data->BatteryUnits, data->BatteryLevel);
+		err = GetBatteryLevel(data->BatteryUnits, data->BatteryLevel);
 		break;
 	case GOP_GetRFLevel:
-		return GetRFLevel(data->RFUnits, data->RFLevel);
+		err = GetRFLevel(data->RFUnits, data->RFLevel);
 		break;
 #if 0
 	case GOP_GetMemoryStatus:
-		return N2110_GetMemoryStatus(data, state);
+		err = N2110_GetMemoryStatus(data, state);
 		break;
 #endif
 	case GOP_DisplayOutput:
-		if (data->OutputFn)
-			return EnableDisplayOutput();
-		else
-			return DisableDisplayOutput();
-
-	default:
-		return GE_NOTIMPLEMENTED;
+		printf("DisplayOutput(%lx)\n", data->OutputFn);
+		OutputFn = data->OutputFn;
+		printf("Enable\n");
+		err = EnableDisplayOutput(state);
 		break;
+	case GOP_GetSMS:
+		err = GetSMSMessage(data->SMSMessage);
+		break;
+	case GOP_DeleteSMS:
+		err = SMS(data->SMSMessage, 3);
+		break;
+	default:
+		err = GE_NOTIMPLEMENTED;
 	}
-	return GE_NOTIMPLEMENTED;
+	return err;
 }

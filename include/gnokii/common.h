@@ -678,7 +678,9 @@ typedef enum {
 	GOP_GetAlarm,
 	GOP_GetSMSStatus,
 	GOP_GetIncomingCallNr,
-	GOP_GetNetworkInfo
+	GOP_GetNetworkInfo,
+	GOP_GetSMS,
+	GOP_DeleteSMS,
 } GSM_Operation;
 
 /* This structure contains the 'callups' needed by the statemachine */
