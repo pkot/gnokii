@@ -909,6 +909,10 @@ static int savesms(int argc, char *argv[])
 			sms.smsc_time.minute	= atoi(tmp);
 			strncpy(tmp, optarg+10, 2);
 			sms.smsc_time.second	= atoi(tmp);
+			if (!gn_timestamp_isvalid(sms.smsc_time)) {
+				fprintf(stderr, _("Invalid datetime: %s.\n"), optarg);
+				return -1;
+			}
 			break;
 		default:
 			usage(stderr, -1);

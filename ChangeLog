@@ -25,6 +25,8 @@
  * documentation updates
     o added new FAQ entry regrading win32 setup and the relvant
       sample in Docs/sample/gnokiirc                    (Pawel Kot)
+ * libgnokii updates
+    o add the function to validate the given date       (Pawel Kot)
 
 0.6.4
 =====

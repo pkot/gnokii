@@ -57,10 +57,10 @@ typedef unsigned char uint8_t;
 #  endif
 #endif
 
-#define LIBGNOKII_VERSION_STRING "2.1.0"
+#define LIBGNOKII_VERSION_STRING "2.0.2"
 #define LIBGNOKII_VERSION_MAJOR 2
-#define LIBGNOKII_VERSION_MINOR 1
-#define LIBGNOKII_VERSION_RELEASE 0
+#define LIBGNOKII_VERSION_MINOR 0
+#define LIBGNOKII_VERSION_RELEASE 2
 #define LIBGNOKII_MAKE_VERSION( a,b,c ) (((a) << 16) | ((b) << 8) | (c))
 
 #define LIBGNOKII_VERSION \
@@ -97,6 +97,7 @@ extern API gn_phone *gn_gsm_info;
 extern API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
 			 struct gn_statemachine *state);
 API gn_error gn_gsm_initialise(struct gn_statemachine *sm);
+API int gn_timestamp_isvalid(gn_timestamp dt);
 
 /* Config file */
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
