@@ -3,6 +3,11 @@
  * win32 port updates
     o bump the version number                           (Pawel Kot)
     o fix compilation warnings                          (Pawel Kot)
+ * libgnokii fixes
+    o fix the argument order in base64_encode() caller  (Pawel Kot)
+ * gnokii fixes
+    o fix deletesmsfolder(): incorrect struct field was examined
+                                                        (Pawel Kot)
 
 0.5.3
 =====
