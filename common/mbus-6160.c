@@ -108,6 +108,19 @@ bool					MB61_LinkOK;
 char                    PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
 u8						RequestSequenceNumber; /* 2-63 */
 int						PortFD;
+bool					GotInitResponse;
+
+enum MB61_RX_States     RX_State;
+int                     MessageLength;
+u8                      MessageDestination;
+u8                      MessageSource;
+u8                      MessageCommand;
+u8                      MessageBuffer[MB61_MAX_RECEIVE_LENGTH];
+u8						MessageCSum;
+u8						MessageSequenceNumber;
+int                     BufferCount;
+u8                      CalculatedCSum;
+int						ChecksumFails;
 
 
 	/* The following functions are made visible to gsm-api.c and friends. */
@@ -378,8 +391,9 @@ void	MB61_ThreadLoop(void)
 	char foogle[] = {0x0d};
 
         /* Initialise RX state machine. */
-    //BufferCount = 0;
-    //RX_State = MB61_RX_Sync;
+    BufferCount = 0;
+    RX_State = MB61_RX_Sync;
+    idle_timer = 0;
 
         /* Try to open serial port, if we fail we sit here and don't proceed
            to the main loop. */
@@ -411,7 +425,7 @@ void	MB61_ThreadLoop(void)
     RequestSequenceNumber = 0x02;
 
         /* Send Initialisation message to phone. */
-	MB61_TX_SendMessage(0x00, 0x1d, 0xd0, RequestSequenceNumber, 1, init_char);
+	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0xd0, RequestSequenceNumber, 1, init_char);
 
         /* We've now finished initialising things so sit in the loop
            until told to do otherwise.  Loop doesn't do much other
@@ -419,20 +433,24 @@ void	MB61_ThreadLoop(void)
            loop will become more involved once we start doing 
            fax/data calls. */
 
-    idle_timer = 0;
+	fprintf(stdout, "Waiting for first response...\n");
+	fflush(stdout);
+	while(GotInitResponse == false) {
+		usleep(100000);
+	}
+	GotInitResponse = false;
 
-	usleep(500000);
     RequestSequenceNumber ++;
-	MB61_TX_SendMessage(0x00, 0x1d, 0xd0, RequestSequenceNumber, 1, init_char);
+	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0xd0, RequestSequenceNumber, 1, init_char);
 
 
-	usleep(900000);
-	fprintf(stdout, "Wait...\n");
+	fprintf(stdout, "Waiting for second response...\n");
 	fflush(stdout);
+	while(GotInitResponse == false) {
+		usleep(100000);
+	}
+	GotInitResponse = false;
 
-	usleep(900000);
-	fprintf(stdout, "Wait...\n");
-	fflush(stdout);
 
 	MB61_TX_SendPhoneIDRequest();
 
@@ -452,12 +470,82 @@ void	MB61_ThreadLoop(void)
     device_setdtrrts(0, 0);
 }
 
+    /* MB61_RX_DispatchMessage
+       Once we've received a message from the phone, the command/message
+       type byte is used to call an appropriate handler routine or
+       simply acknowledge the message as required. */
+enum    MB61_RX_States MB61_RX_DispatchMessage(void)
+{
+    /* Uncomment this if you want all messages in raw form. */
+    MB61_RX_DisplayMessage(); 
+
+	if (MessageSource == MSG_ADDR_PC) {
+		fprintf(stdout, "Ignored...\n");
+	}
+	else {
+		fprintf(stdout, "\n");
+	}	
+
+        /* Switch on the basis of the message type byte */
+    switch (MessageCommand) {
+
+			/* 0xd0 messages are the response to initialisation requests. */
+        case 0xd0:  GotInitResponse = true;
+					break;
+
+            /* 0x0b messages are sent by phone when an incoming call occurs,
+               this message must be acknowledged. */
+        case 0x0b: /* FB38_RX_Handle0x0b_IncomingCall();*/
+                    break;
+
+            /* We send 0x0c message to answer to incoming call so don't ack */
+        case 0x0c:  break;
+
+        case 0x0d: /* FB38_RX_Handle0x0d_IncomingCallAnswered();*/
+                    break;
+
+        case 0x7f:/*  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
+                    CurrentPhonebookError = GE_INVALIDPHBOOKLOCATION;*/
+                    break;
+
+            /* Here we  attempt to acknowledge and display messages we don't
+               understand fully... The phone will send the same message
+               several (5-6) times before giving up if no ack is received.
+               Phone also appears to refuse to send any of that message type
+               again until an init sequence is done again. */
+        default:   /* if (FB38_TX_SendStandardAcknowledge(MessageBuffer[0]) != true) {
+                        fprintf(stderr, _("Standard Ack write failed!"));
+                    }*/
+                        /* Now display unknown message to user. */
+                    /*FB38_RX_DisplayMessage();*/
+                    break;
+    }
+
+    return MB61_RX_Sync;
+}
+
+void    MB61_RX_DisplayMessage(void)
+{
+	int		i;
+
+	fprintf(stdout, "DE:%02x SR:%02x CM:%02x LE:%d SQ:%02x CS:%02x Data:", 
+			MessageDestination, MessageSource, MessageCommand, MessageLength,
+			MessageSequenceNumber, MessageCSum);
+
+	for (i = 0; i < MessageLength; i++) {
+		fprintf(stdout, "%02x ", MessageBuffer[i]);
+	}
+	//fprintf(stdout, "\n");
+
+}
+
+
 void		MB61_TX_SendPhoneIDRequest(void)
 {
 	u8		message[5] = {0x00, 0x01, 0x00, 0x03, 0x00};
 	
 	MB61_UpdateSequenceNumber();
-	MB61_TX_SendMessage(0x00, 0x1d, 0xd0, RequestSequenceNumber, 5, message);
+	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0xd1, RequestSequenceNumber, 5, message);
 
 }
 
@@ -469,7 +557,105 @@ void		MB61_UpdateSequenceNumber(void)
 	}
 }
 		
-	
+	    /* RX_State machine for receive handling.  Called once for each
+       character received from the phone/phone. */
+void    MB61_RX_StateMachine(char rx_byte)
+{
+
+    switch (RX_State) {
+    
+                    /* Messages on the MBUS start with 0x1f.  We use
+					   this to "synchronise" with the incoming data
+                       stream. */       
+        case MB61_RX_Sync:
+                if (rx_byte == 0x1f) {
+
+                    BufferCount = 0;
+                    CalculatedCSum = rx_byte;
+                    RX_State = MB61_RX_GetDestination;
+                }
+                break;
+        
+                    /* Next byte is the destination of the message. */
+        case MB61_RX_GetDestination:
+                MessageDestination = rx_byte;
+                CalculatedCSum ^= rx_byte;
+                RX_State = MB61_RX_GetSource;
+                break;
+
+                    /* Next byte is the source of the message. */
+        case MB61_RX_GetSource:
+                MessageSource = rx_byte;
+                CalculatedCSum ^= rx_byte;
+                RX_State = MB61_RX_GetCommand;
+                break;
+
+                    /* Next byte is the command type. */
+        case MB61_RX_GetCommand:
+                MessageCommand = rx_byte;
+                CalculatedCSum ^= rx_byte;
+                RX_State = MB61_RX_GetLengthMSB;
+                break;
+
+                    /* Next is the most significant byte of message length. */
+        case MB61_RX_GetLengthMSB:
+                MessageLength = rx_byte * 256;
+                CalculatedCSum ^= rx_byte;
+                RX_State = MB61_RX_GetLengthLSB;
+                break;
+
+                    /* Next is the most significant byte of message length. */
+        case MB61_RX_GetLengthLSB:
+                MessageLength += rx_byte;
+                CalculatedCSum ^= rx_byte;
+                RX_State = MB61_RX_GetMessage;
+                break;
+
+                    /* Get each byte of the message.  We deliberately
+                       get one too many bytes so we get the sequence
+                       byte here as well. */
+        case MB61_RX_GetMessage:
+                CalculatedCSum ^= rx_byte;
+                MessageBuffer[BufferCount] = rx_byte;
+                BufferCount ++;
+
+                if (BufferCount >= MB61_MAX_RECEIVE_LENGTH) {
+                    RX_State = MB61_RX_Sync;        /* Should be PANIC */
+                }
+                    /* If this is the last byte, it's the checksum */
+                if (BufferCount > MessageLength) {
+					MessageSequenceNumber = rx_byte;
+					RX_State = MB61_RX_GetCSum;
+				}
+				break;
+
+					/* Get checksum and if valid hand over to 
+					   dispatch message function */	
+		case MB61_RX_GetCSum:
+
+                MessageCSum = rx_byte;
+
+                    /* Compare against calculated checksum. */
+                if (MessageCSum == CalculatedCSum) {
+                    /* Got checksum, matches calculated one so 
+                       now pass to appropriate dispatch handler. */
+                    RX_State = MB61_RX_DispatchMessage();
+                }
+                    /* Checksum didn't match so ignore. */
+                else {
+                    ChecksumFails ++;
+                    fprintf(stderr, _("CS Fail %02x != %02x"), MessageCSum, CalculatedCSum);
+                    MB61_RX_DisplayMessage();
+                    fflush(stderr);
+                    RX_State = MB61_RX_Sync;
+                }
+                    
+                CalculatedCSum ^= rx_byte;
+                break;
+
+        default:
+    }
+}
 
     /* Called by initialisation code to open comm port in
        asynchronous mode. */
@@ -507,14 +693,13 @@ void    MB61_SigHandler(int status)
     res = device_read(buffer, 255);
 
     for (count = 0; count < res ; count ++) {
-		fprintf(stdout, "{%02x}", buffer[count]);
-       // MB61_RX_StateMachine(buffer[count]);
+	//	fprintf(stdout, "{%02x}", buffer[count]);
+        MB61_RX_StateMachine(buffer[count]);
     }
-	fprintf(stdout, "\n");
-	fflush(stdout);
+	//fprintf(stdout, "\n");
+	//fflush(stdout);
 }
 
-#define MB61_MAX_TRANSMIT_LENGTH		(200) /* Arbitrary */
 
 	/* Prepares the message header and sends it, prepends the
        message start byte (0x01) and other values according

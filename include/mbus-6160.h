@@ -98,6 +98,24 @@ bool  		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 	   defined. */
 #ifdef	__mbus_6160_c
 
+#define		MB61_MAX_RECEIVE_LENGTH		(160)
+
+#define 	MB61_MAX_TRANSMIT_LENGTH		(200) /* Arbitrary */
+#define		MSG_ADDR_PC						(0x1d)
+#define		MSG_ADDR_PHONE					(0x00)
+#define		MSG_ADDR_SERVICE				(0x10)
+#define		MSG_ADDR_UNKNOWN				(0xf8)
+#define		MSG_ADDR_GLOBAL					(0xff)
+
+    /* States for receive code. */
+enum    MB61_RX_States {MB61_RX_Sync,
+                        MB61_RX_GetDestination,
+                        MB61_RX_GetSource,
+                        MB61_RX_GetCommand,
+                        MB61_RX_GetLengthMSB,
+                        MB61_RX_GetLengthLSB,
+                        MB61_RX_GetMessage,
+                        MB61_RX_GetCSum};
 
 	/* Prototypes for internal functions. */
 void	MB61_ThreadLoop(void);
@@ -108,6 +126,9 @@ void	MB61_UpdateSequenceNumber(void);
 int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_byte, int message_length, u8 *buffer);
 void	MB61_TX_SendPhoneIDRequest(void);
 
+void    MB61_RX_StateMachine(char rx_byte);
+enum    MB61_RX_States MB61_RX_DispatchMessage(void);
+void    MB61_RX_DisplayMessage(void);
 
 #endif	/* __mbus_6160_c */
 
