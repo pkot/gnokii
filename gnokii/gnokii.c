@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.146  2001-11-17 20:18:33  pkot
+  Revision 1.147  2001-11-18 00:54:32  pkot
+  Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
+
+  Revision 1.146  2001/11/17 20:18:33  pkot
   Added dau9p connection type for 6210/7110
 
   Revision 1.145  2001/11/14 10:46:12  pkot
@@ -955,8 +958,8 @@ int savesms(int argc, char *argv[])
 			while (confirm < 0) {
 				fprintf(stderr, _("Overwrite? (yes/no) "));
 				GetLine(stdin, ans, 7);
-				if (!strcmp(ans, "yes")) confirm = 1;
-				else if (!strcmp(ans, "no")) confirm = 0;
+				if (!strcmp(ans, _("yes"))) confirm = 1;
+				else if (!strcmp(ans, _("no"))) confirm = 0;
 			}  
 			if (!confirm) { GSM->Terminate(); return 0; }
 			else break;
@@ -1241,15 +1244,15 @@ int getsms(int argc, char *argv[])
 							fprintf(stdout, _("File %s exists.\n"), filename);
 							fprintf(stderr, _("Overwrite? (yes/no) "));
 							GetLine(stdin, ans, 4);
-							if (!strcmp(ans, "yes")) {
+							if (!strcmp(ans, _("yes"))) {
 								error = GSM_SaveBitmapFile(filename, &bitmap);
 							}
 						} else error = GSM_SaveBitmapFile(filename, &bitmap);	       
-						if (error!=GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
+						if (error != GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
 					}
 					break;
 				case SMS_Ringtone:
-					fprintf(stdout, ("Ringtone\n"));
+					fprintf(stdout, _("Ringtone\n"));
 					break;
 				case SMS_ConcatenatedMessages:
 					fprintf(stdout, _("Linked (%d/%d):\n"),
@@ -1262,6 +1265,9 @@ int getsms(int argc, char *argv[])
 						sprintf(buf, "%s%d", filename, count);
 						mode = GSM_SaveTextFile(buf, message.MessageText, mode);
 					}
+					break;
+				case SMS_BusinessCard:
+					fprintf(stdout, _("Business Card:\n%s"), message.MessageText);
 					break;
 				default:
 					fprintf(stderr, _("Unknown\n"));

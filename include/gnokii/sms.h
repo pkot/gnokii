@@ -13,7 +13,10 @@
   Include file for SMS library.
 
   $Log$
-  Revision 1.2  2001-11-13 16:12:21  pkot
+  Revision 1.3  2001-11-18 00:54:32  pkot
+  Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
+
+  Revision 1.2  2001/11/13 16:12:21  pkot
   Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
 
   Revision 1.1  2001/11/08 16:23:20  pkot
@@ -82,7 +85,8 @@ typedef enum {
 	SMS_FaxMessage           = 0x06,
 	SMS_EmailMessage         = 0x07,
 	SMS_OtherMessage         = 0x08,
-	SMS_UnknownUDH           = 0x09
+	SMS_BusinessCard         = 0x09,
+	SMS_UnknownUDH           = 0x0a
 } SMS_UDHType;
 
 typedef struct {
@@ -312,6 +316,7 @@ typedef struct {
 	SMS_MessageValidity Validity;                  /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
   
 	unsigned short UDH_No;                         /* Number of presend UDHs */
+	unsigned int UDH_Length;                       /* Length of the whole UDH */
 	SMS_UDHInfo UDH[SMS_MAX_UDH_HEADER_NUMBER];    /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
 
 	SMS_DateTime SMSCTime;                         /* Service Centre Time Stamp (9.2.3.11) */

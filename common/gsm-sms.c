@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.8  2001-11-17 20:19:29  pkot
+  Revision 1.9  2001-11-18 00:54:32  pkot
+  Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
+
+  Revision 1.8  2001/11/17 20:19:29  pkot
   smslib cleanups, fixes and debugging
 
   Revision 1.7  2001/11/15 12:15:04  pkot
@@ -67,11 +70,12 @@ static struct udh_data headers[] = {
 	{ 0x00, "" },
 	{ 0x05, "\x00\x03\x01\x00\x00" }, /* Concatenated messages */
 	{ 0x06, "\x05\x04\x15\x82\x00\x00" }, /* Operator logos */
-	{ 0x06, "\x05\x04\x15\x82\x00\x00" }, /* Caller logos */
+	{ 0x06, "\x05\x04\x15\x83\x00\x00" }, /* Caller logos */
 	{ 0x06, "\x05\x04\x15\x81\x00\x00" }, /* Ringtones */
 	{ 0x04, "\x03\x01\x00\x00" }, /* Voice Messages */
 	{ 0x04, "\x03\x01\x01\x00" }, /* Fax Messages */
 	{ 0x04, "\x03\x01\x02\x00" }, /* Email Messages */
+	{ 0x06, "\x05\x04\x23\xf4\x00\x00" }, /* Business Card */
 	{ 0x00, "" }
 };
 
@@ -338,16 +342,16 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 		strcpy(SMS->MessageText, _("Delivered"));
 		switch (status) {
 		case 0x00:
-			dprintf(_("SM received by the SME"));
+			dprintf("SM received by the SME");
 			break;
 		case 0x01:
-			dprintf(_("SM forwarded by the SC to the SME but the SC is unable to confirm delivery"));
+			dprintf("SM forwarded by the SC to the SME but the SC is unable to confirm delivery");
 			break;
 		case 0x02:
-			dprintf(_("SM replaced by the SC"));
+			dprintf("SM replaced by the SC");
 			break;
 		}
-		SMS->Length = 10;
+		SMS->Length = strlen(_("Delivered"));
 	} else if (status & 0x40) {
 
 		strcpy(SMS->MessageText, _("Failed"));
@@ -355,105 +359,105 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 		/* more detailed reason only for debug */
 
 		if (status & 0x20) {
-			dprintf(_("Temporary error, SC is not making any more transfer attempts\n"));
+			dprintf("Temporary error, SC is not making any more transfer attempts\n");
 
 			switch (status) {
 			case 0x60:
-				dprintf(_("Congestion"));
+				dprintf("Congestion");
 				break;
 			case 0x61:
-				dprintf(_("SME busy"));
+				dprintf("SME busy");
 				break;
 			case 0x62:
-				dprintf(_("No response from SME"));
+				dprintf("No response from SME");
 				break;
 			case 0x63:
-				dprintf(_("Service rejected"));
+				dprintf("Service rejected");
 				break;
 			case 0x64:
-				dprintf(_("Quality of service not aviable"));
+				dprintf("Quality of service not aviable");
 				break;
 			case 0x65:
-				dprintf(_("Error in SME"));
+				dprintf("Error in SME");
 				break;
 			default:
-				dprintf(_("Reserved/Specific to SC: %x"), status);
+				dprintf("Reserved/Specific to SC: %x", status);
 				break;
 			}
 		} else {
-			dprintf(_("Permanent error, SC is not making any more transfer attempts\n"));
+			dprintf("Permanent error, SC is not making any more transfer attempts\n");
 			switch (status) {
 			case 0x40:
-				dprintf(_("Remote procedure error"));
+				dprintf("Remote procedure error");
 				break;
 			case 0x41:
-				dprintf(_("Incompatibile destination"));
+				dprintf("Incompatibile destination");
 				break;
 			case 0x42:
-				dprintf(_("Connection rejected by SME"));
+				dprintf("Connection rejected by SME");
 				break;
 			case 0x43:
-				dprintf(_("Not obtainable"));
+				dprintf("Not obtainable");
 				break;
 			case 0x44:
-				dprintf(_("Quality of service not aviable"));
+				dprintf("Quality of service not aviable");
 				break;
 			case 0x45:
-				dprintf(_("No internetworking available"));
+				dprintf("No internetworking available");
 				break;
 			case 0x46:
-				dprintf(_("SM Validity Period Expired"));
+				dprintf("SM Validity Period Expired");
 				break;
 			case 0x47:
-				dprintf(_("SM deleted by originating SME"));
+				dprintf("SM deleted by originating SME");
 				break;
 			case 0x48:
-				dprintf(_("SM Deleted by SC Administration"));
+				dprintf("SM Deleted by SC Administration");
 				break;
 			case 0x49:
-				dprintf(_("SM does not exist"));
+				dprintf("SM does not exist");
 				break;
 			default:
-				dprintf(_("Reserved/Specific to SC: %x"), status);
+				dprintf("Reserved/Specific to SC: %x", status);
 				break;
 			}
 		}
-		SMS->Length = 6;
+		SMS->Length = strlen(_("Failed"));
 	} else if (status & 0x20) {
 		strcpy(SMS->MessageText, _("Pending"));
 
 		/* more detailed reason only for debug */
-		dprintf(_("Temporary error, SC still trying to transfer SM\n"));
+		dprintf("Temporary error, SC still trying to transfer SM\n");
 		switch (status) {
 		case 0x20:
-			dprintf(_("Congestion"));
+			dprintf("Congestion");
 			break;
 		case 0x21:
-			dprintf(_("SME busy"));
+			dprintf("SME busy");
 			break;
 		case 0x22:
-			dprintf(_("No response from SME"));
+			dprintf("No response from SME");
 			break;
 		case 0x23:
-			dprintf(_("Service rejected"));
+			dprintf("Service rejected");
 			break;
 		case 0x24:
-			dprintf(_("Quality of service not aviable"));
+			dprintf("Quality of service not aviable");
 			break;
 		case 0x25:
-			dprintf(_("Error in SME"));
+			dprintf("Error in SME");
 			break;
 		default:
-			dprintf(_("Reserved/Specific to SC: %x"), status);
+			dprintf("Reserved/Specific to SC: %x", status);
 			break;
 		}
-		SMS->Length = 7;
+		SMS->Length = strlen(_("Pending"));
 	} else {
 		strcpy(SMS->MessageText, _("Unknown"));
 
 		/* more detailed reason only for debug */
-		dprintf(_("Reserved/Specific to SC: %x"), status);
-		SMS->Length = 8;
+		dprintf("Reserved/Specific to SC: %x", status);
+		SMS->Length = strlen(_("Unknown"));
 	}
 	dprintf("\n");
 	return GE_NONE;
@@ -469,22 +473,12 @@ static GSM_Error DecodeData(char *message, char *output, int length, int size, i
 	} else {
 		/* 8bit SMS */
 		if ((dcs.Type & 0xf4) == 0xf4) {
-			int i;
 			dprintf("8bit message\n");
-			for (i = 0; i < size; i++) {
-				dprintf("%02x ", message[i]);
-			}
 			memcpy(output, message, length);
 		/* 7bit SMS */
 		} else {
-			int i;
 			dprintf("Default Alphabet\n");
-			for (i = 0; i < size; i++) {
-				dprintf("%02x ", message[i]);
-			}
-			dprintf("\n");
 			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
-			dprintf("%d %d\n", size, length);
 			Unpack7BitCharacters((7-udhlen)%7, size, length, message, output);
 			DecodeAscii(output, output, length);
 		}
@@ -497,46 +491,72 @@ static GSM_Error DecodeData(char *message, char *output, int length, int size, i
    - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
    - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
 */
-static GSM_Error DecodeUDH(char *SMSMessage, SMS_UDHInfo **UDHi, GSM_SMSMessage *SMS)
+static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 {
 	unsigned char length, pos, nr;
 
-	length = SMSMessage[0];
+	SMS->UDH_Length = length = message[0] + 1;
 	pos = 1;
 	nr = 0;
-	while (length > 0) {
+	while (length > 1) {
 		unsigned char udh_length;
 
-		udh_length = SMSMessage[pos+1];
-		switch (SMSMessage[pos]) {
+		udh_length = message[pos+1];
+		switch (message[pos]) {
 		case 0x00: // Concatenated short messages
-			dprintf("Concat UDH length: %d\n", udh_length);
-			UDHi[nr]->Type = SMS_ConcatenatedMessages;
-			UDHi[nr]->u.ConcatenatedShortMessage.ReferenceNumber = SMSMessage[pos + 3];
-			UDHi[nr]->u.ConcatenatedShortMessage.MaximumNumber   = SMSMessage[pos + 4];
-			UDHi[nr]->u.ConcatenatedShortMessage.CurrentNumber   = SMSMessage[pos + 5];
+			dprintf("Concatenated messages\n");
+			SMS->UDH[nr].Type = SMS_ConcatenatedMessages;
+			SMS->UDH[nr].u.ConcatenatedShortMessage.ReferenceNumber = message[pos + 2];
+			SMS->UDH[nr].u.ConcatenatedShortMessage.MaximumNumber   = message[pos + 3];
+			SMS->UDH[nr].u.ConcatenatedShortMessage.CurrentNumber   = message[pos + 4];
 			break;
 		case 0x01: // Special SMS Message Indication
-			switch (SMSMessage[pos + 3] & 0x03) {
+			switch (message[pos + 2] & 0x03) {
 			case 0x00:
-				UDHi[nr]->Type = SMS_VoiceMessage;
+				dprintf("Voice Message\n");
+				SMS->UDH[nr].Type = SMS_VoiceMessage;
 				break;
 			case 0x01:
-				UDHi[nr]->Type = SMS_FaxMessage;
+				dprintf("Fax Message\n");
+				SMS->UDH[nr].Type = SMS_FaxMessage;
 				break;
 			case 0x02:
-				UDHi[nr]->Type = SMS_EmailMessage;
+				dprintf("Email Message\n");
+				SMS->UDH[nr].Type = SMS_EmailMessage;
 				break;
 			default:
-				UDHi[nr]->Type = SMS_UnknownUDH;
+				dprintf("Unknown\n");
+				SMS->UDH[nr].Type = SMS_UnknownUDH;
 				break;
 			}
-			UDHi[nr]->u.SpecialSMSMessageIndication.Store = (SMSMessage[pos + 3] & 0x80) >> 7;
-			UDHi[nr]->u.SpecialSMSMessageIndication.MessageCount = SMSMessage[pos + 4];
+			SMS->UDH[nr].u.SpecialSMSMessageIndication.Store = (message[pos + 2] & 0x80) >> 7;
+			SMS->UDH[nr].u.SpecialSMSMessageIndication.MessageCount = message[pos + 3];
 			break;
 		case 0x04: // Application port addression scheme, 8 bit address
 			break;
 		case 0x05: // Application port addression scheme, 16 bit address
+			switch (((0x00ff & message[pos + 2]) << 8) | (0x00ff & message[pos + 3])) {
+			case 0x1581:
+				dprintf("Ringtone\n");
+				SMS->UDH[nr].Type = SMS_Ringtone;
+				break;
+			case 0x1582:
+				dprintf("Operator Logo\n");
+				SMS->UDH[nr].Type = SMS_OpLogo;
+				break;
+			case 0x1583:
+				dprintf("Caller Icon\n");
+				SMS->UDH[nr].Type = SMS_CallerIDLogo;
+				break;
+			case 0x23f4:
+				dprintf("Business Card\n");
+				SMS->UDH[nr].Type = SMS_BusinessCard;
+				break;
+			default:
+				dprintf("Unknown\n");
+				SMS->UDH[nr].Type = SMS_UnknownUDH;
+				break;
+			}
 			break;
 		case 0x06: // SMSC Control Parameters
 			break;
@@ -551,16 +571,6 @@ static GSM_Error DecodeUDH(char *SMSMessage, SMS_UDHInfo **UDHi, GSM_SMSMessage 
 	}
 	SMS->UDH_No = nr;
 
-	return GE_NONE;
-}
-
-static GSM_Error DecodeSMSSubmit()
-{
-	return GE_NONE;
-}
-
-static GSM_Error DecodeSMSDeliver()
-{
 	return GE_NONE;
 }
 
@@ -580,7 +590,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		dprintf("Mobile Originated message:\n");
 		break;
 	default:
-		dprintf("Not supported message:\n");
+		dprintf("Not supported message type:\n");
 		break;
 	}
 
@@ -616,8 +626,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	/* User Data Header */
         if (message[15] & 0x40) { /* UDH header available */
 		dprintf("UDH found\n");
-		SMS->UDH_No = 1; /* Temporary workaround */
-		//                DecodeUDH(message + 31 + DataOffset[SMS->Type], (SMS_UDHInfo **)SMS->UDH, SMS);
+		DecodeUDH(message + 34 + DataOffset[SMS->Type], SMS);
 	} else {                    /* No UDH */
 		dprintf("No UDH\n");
 		SMS->UDH_No = 0;
@@ -631,28 +640,21 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 */
 GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength)
 {
-	int i, udhlen = 0;
-
 	DecodeSMSHeader(message, SMS);
-	for (i = 0; i < SMS->UDH_No; i++) {
-		udhlen += headers[SMS->UDH[i].Type].length;
-	}
-	if (SMS->UDH_No) udhlen = message[34 + DataOffset[SMS->Type]] + 1;
-	else udhlen = 0;
 	if (SMS->Type == SMS_Delivery_Report) {
 		SMSStatus(message[17], SMS);
 	} else {
 		int size = MessageLength -
 			   34 -                    /* Header Length */
 			   DataOffset[SMS->Type] - /* offset */
-			   udhlen -                /* UDH Length */
+			   SMS->UDH_Length -       /* UDH Length */
 			   5;                      /* checksum */
-		DecodeData(message + 34 + DataOffset[SMS->Type] + udhlen,
+		dprintf("UDH Len : %d\n", SMS->UDH_Length);
+		DecodeData(message + 34 + DataOffset[SMS->Type] + SMS->UDH_Length,
 			   (unsigned char *)&(SMS->MessageText),
-			   SMS->Length, size, udhlen, SMS->DCS);
+			   SMS->Length, size, SMS->UDH_Length, SMS->DCS);
 		/* Just in case */
 		SMS->MessageText[SMS->Length] = 0;
-		dprintf("Length: %d\n", SMS->Length);
 	}
 	
 	return GE_NONE;
