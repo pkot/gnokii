@@ -58,6 +58,9 @@
     o distinct between currency and euro symbols based on locale
       set                                                 (Pawel Kot)
     o add DeleteSMSnoValidate                          (Markus Plail)
+ * SMSD updates
+    o support fo the phones with the SMS folders       (Markus Plail,
+                                                        Jan Derfinak)
  * build system updates:
     o respect CFLAGS from the environment, idea from PLD spec
                                                           (Pawel Kot)
