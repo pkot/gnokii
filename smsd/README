@@ -5,7 +5,7 @@ This code is a part of one project on which I worked and I provide it for
 free use under GPL. I provide the program AS IS without any warranty.
 
 The program is designed to use modules (plugins) to work with an SQL server.
-Curently are supported PostgreSQL, MySQL and a special module 'file' which is
+Currently are supported PostgreSQL, MySQL and a special module 'file' which is
 designed to work without an SQL database (see below for special instructions
 for the file module). See option --module. SMSD uses an SQL server as a
 repository for SMS's. You must create a database (default name is 'sms') with
@@ -93,7 +93,7 @@ Options:
  
 -m, --module db_module
 	Specify which module to use for connection to DB server.
-	Curently supported are pq for PostgreSQL and mysql for MySQL.
+	Currently supported are pq for PostgreSQL and mysql for MySQL.
 
 -l, --libdir path_to_db_module
 	Specify path to DB modules. If you specify pq module, smsd searches
