@@ -137,14 +137,14 @@ char *GetProfileVibrationString(int code)
 	}
 }
 
-int short_version(void)
+void short_version(void)
 {
 	fprintf(stderr, _("GNOKII Version %s\n"), VERSION);
 }
 
 /* This function shows the copyright and some informations usefull for
    debugging. */
-int version(void)
+void version(void)
 {
 	fprintf(stderr, _("Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
@@ -153,8 +153,7 @@ int version(void)
 			  "gnokii is free software, covered by the GNU General Public License, and you are\n"
 			  "welcome to change it and/or distribute copies of it under certain conditions.\n"
 			  "There is absolutely no warranty for gnokii.  See GPL for details.\n"
-			  "Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, model, Port);
-	return 0;
+			  "Built %s %s for %s on %s \n"), __TIME__, __DATE__, model, Port);
 }
 
 /* The function usage is only informative - it prints this program's usage and
@@ -225,7 +224,7 @@ void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 
 	GSM_DataClear(&data);
 
-	if (!strcasecmp(Connection, "dau9p"))    connection = GCT_DAU9P;
+	if (!strcasecmp(Connection, "dau9p"))    connection = GCT_DAU9P; /* Use only with 6210/7110 for faster connection with such cable */
 	if (!strcasecmp(Connection, "infrared")) connection = GCT_Infrared;
 	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
 
@@ -292,18 +291,18 @@ int main(int argc, char *argv[])
 	static struct option long_options[] =
 	{
 		/* FIXME: these comments are nice, but they would be more usefull as docs for the user */
-		// Display usage.
+		/* Display usage. */
 		{ "help",               no_argument,       NULL, OPT_HELP },
 
-		// Display version and build information.
+		/* Display version and build information. */
 		{ "version",            no_argument,       NULL, OPT_VERSION },
 
-		// Monitor mode
+		/* Monitor mode */
 		{ "monitor",            no_argument,       NULL, OPT_MONITOR },
 
 #ifdef SECURITY
 
-		// Enter Security Code mode
+		/* Enter Security Code mode */
 		{ "entersecuritycode",  required_argument, NULL, OPT_ENTERSECURITYCODE },
 
 		// Get Security Code status
@@ -484,7 +483,8 @@ int main(int argc, char *argv[])
 	case OPT_HELP:
 		usage();
 	case OPT_VERSION:
-		return version();
+		version();
+		exit(0);
 	}
 	
 	/* We have to build an array of the arguments which will be passed to the
@@ -677,6 +677,7 @@ int sendsms(int argc, char *argv[])
 	SMS.Validity.VPF = SMS_RelativeFormat;
 	SMS.Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
 	SMS.UDH_No = 0;
+	SMS.Report = false;
 
 	strcpy(SMS.RemoteNumber.number, argv[0]);
 	if (SMS.RemoteNumber.number[0] == '+') SMS.RemoteNumber.type = SMS_International;
@@ -709,7 +710,7 @@ int sendsms(int argc, char *argv[])
 			}
 			break;
 		case 'r': /* request for delivery report */
-			SMS.Type = SMS_Delivery_Report;
+			SMS.Report = true;
 			break;
 		case 'C': /* class Message */
 			switch (*optarg) {

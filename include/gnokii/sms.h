@@ -207,11 +207,22 @@ typedef enum {
 
 /*** MESSAGE CENTER ***/
 
+typedef enum {
+	SMS_FText   = 0x00, /* Plain text message. */
+	SMS_FFax    = 0x22, /* Fax message. */
+	SMS_FVoice  = 0x24, /* Voice mail message. */
+	SMS_FERMES  = 0x25, /* ERMES message. */
+	SMS_FPaging = 0x26, /* Paging. */
+	SMS_FUCI    = 0x2d, /* Email message in 8110i. */
+	SMS_FEmail  = 0x32, /* Email message. */
+	SMS_FX400   = 0x31  /* X.400 message. */
+} SMS_MessageFormat;
+
 typedef struct {
 	int			No;					/* Number of the SMSC in the phone memory. */
 	SMS_NumberType          Type;
 	char			Name[GSM_MAX_SMS_CENTER_NAME_LENGTH];	/* Name of the SMSC. */
-	SMS_IndicationType	Format;					/* SMS is sent as text/fax/paging/email. */
+	SMS_MessageFormat	Format;					/* SMS is sent as text/fax/paging/email. */
 	SMS_ValidityPeriod	Validity;				/* Validity of SMS Message. */
 	char			Number[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the SMSC. */
 	char			Recipient[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the default recipient. */

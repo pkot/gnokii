@@ -266,7 +266,7 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 
 	/* Status (Delivery) Report Request */
 	if (llayout.Report > -1) {
-		if (SMS->ReportStatus) frame[llayout.Report] |= 0x20;
+		if (SMS->Report) frame[llayout.Report] |= 0x20;
 	}
 
 	/* Validity Period Format: mask - 0x00, 0x10, 0x08, 0x18 */
@@ -369,8 +369,11 @@ int EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 		llayout = layout.Deliver;
 		dprintf("Saving SMS to Inbox\n");
 		break;
-	case SMS_Delivery_Report:
 	case SMS_Picture:
+		llayout = layout.Picture;
+		dprintf("Sending Picture Message\n");
+		break;
+	case SMS_Delivery_Report:
 	default:
 		dprintf("Not supported message type: %d\n", SMS->Type);
 		return GE_NOTSUPPORTED;
