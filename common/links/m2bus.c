@@ -68,11 +68,6 @@ static bool m2bus_serial_open(struct gn_statemachine *state)
 	}
 	device_changespeed(9600, state);
 
-	/*
-	 * Need to "toggle" the dtr/rts lines in the right sequence it seems
-	 * for the interface to work. Base time value is units of 50ms it
-	 * seems.
-	 */
 	device_setdtrrts(0, 1, state);
 
 	return true;
