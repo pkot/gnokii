@@ -9,7 +9,7 @@ Release: %{release}
 Copyright: GPL
 Packager: Pavel Janik ml. <Pavel.Janik@linux.cz>, Jan Derfinak <ja@mail.upjs.sk>
 Group: Applications/Communications
-Source: ftp://multivac.fatburen.org/pub/gnokii/%{name}-%{version}.tar.gz
+Source: ftp://ftp.gnokii.org/pub/gnokii/%{name}-%{version}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{version}-root
 
 %description
@@ -55,8 +55,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc Docs/CREDITS Docs/DataCalls-QuickStart Docs/FAQ Docs/README
 %doc Docs/README-3810 Docs/README-6110 Docs/README-2110 Docs/README-WIN32
 %doc Docs/gettext-howto Docs/gnokii.nol Docs/gnokii-ir-howto Docs/packaging-howto
+%doc Docs/README-dancall Docs/logos.txt Docs/gnokii.xpm Docs/Bugs
 %doc Docs/sample/gnokiirc Docs/sample/options Docs/sample/pap-secrets
 %doc Docs/sample/ppp-gnokii Docs/sample/ppp-on
+%doc Docs/protocol/nk2110.txt Docs/protocol/nk3110.txt Docs/protocol/nk6110.txt Docs/protocol/nk6160.txt
+%doc Docs/protocol/nk6185.txt Docs/protocol/nk640.txt Docs/protocol/nk7110.txt Docs/protocol/nokia.txt
 %attr(0750, root, gnokii) /usr/bin/gnokii
 %attr(0750, root, gnokii) /usr/sbin/gnokiid
 %attr(4750, root, gnokii) /usr/sbin/mgnokiidev
@@ -64,13 +67,19 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files xgnokii
 %defattr(-,root,root)
-/usr/bin/xgnokii
+/usr/X11R6/bin/xgnokii
 /usr/bin/todologo
 /usr/share/xgnokii
 
 %changelog
 
-* Sun Oct  2 2001 Pawel Kot <pkot@linuxnews.pl>
+* Fri Sep 28 2001 Pawel Kot <pkot@linuxnews.pl>
+- last minute fixes.
+
+* Thu Sep 27 2001 Pawel Kot <pkot@linuxnews.pl>
+- updates to 0.3.3 version - new docs, new ftp server
+
+* Sun Sep  2 2001 Pawel Kot <pkot@linuxnews.pl>
 - removes xlogos
 
 * Thu Jan 11 2001 Pawel Kot <pkot@linuxnews.pl>
