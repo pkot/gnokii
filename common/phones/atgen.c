@@ -365,17 +365,16 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_NONE;
 	/* no UCS2 charset found or error occured */
 	if (drvinst->defaultcharset == AT_CHAR_GSM) {
-		if (!(drvinst->availcharsets & AT_CHAR_HEXGSM)) {
-			/* if phone lacks HEX charset support, be happy with GSM */
-			drvinst->charset = AT_CHAR_GSM;
-			return GN_ERR_NONE;
-		}
 		/* try to set HEX charset */
 		error = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"HEX\"\r", state);
 		if (error)
 			return error;
 		error = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
-		if (!error)
+		if (error) {
+			/* no support for HEXGSM, be happy with GSM */ 
+			drvinst->charset = AT_CHAR_GSM;
+			error = GN_ERR_NONE;
+		} else
 			drvinst->charset = AT_CHAR_HEXGSM;
 	} else {
 		drvinst->charset = drvinst->defaultcharset;
@@ -613,7 +612,7 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 		dprintf("PDU mode not supported\n");
 		return error;
 	}
-	dprintf("AT mode set\n");
+	dprintf("PDU mode set\n");
 
 	/* Prepare the message and count the size */
 	memcpy(req2, data->raw_sms->message_center,
