@@ -9,6 +9,7 @@
  * gnokii fixes
     o fix deletesmsfolder(): incorrect struct field was examined
                                                         (Pawel Kot)
+    o comment out useless code                          (Pawel Kot)
 
 0.5.3
 =====
