@@ -22,6 +22,7 @@ exec_prefix    = @exec_prefix@
 
 bindir         = @bindir@
 sbindir        = @sbindir@
+xbindir        = ${prefix}/X11R6/bin/
 libdir         = @libdir@/${PACKAGE}
 xgnokii_libdir = @XGNOKIIDIR@/@XPACKAGE@
 man1dir        = @mandir@/man1/

@@ -58,8 +58,8 @@ clean:
 	$(RM) $(OBJS) *~ xpm/*~ depend xgnokii
 
 install: all
-	$(INSTALL) -d $(bindir)
-	$(INSTALL) xgnokii $(bindir)
+	$(INSTALL) -d $(xbindir)
+	$(INSTALL) xgnokii $(xbindir)
 	$(INSTALL) -d $(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -86,8 +86,8 @@ install: all
 	$(INSTALL) -m 0444 xpm/Preview_7110.xpm $(xgnokii_libdir)/xpm
 
 install-strip: all
-	$(INSTALL) -d $(bindir)
-	$(INSTALL) -s xgnokii $(bindir)
+	$(INSTALL) -d $(xbindir)
+	$(INSTALL) -s xgnokii $(xbindir)
 	$(INSTALL) -d $(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -118,8 +118,8 @@ install-suid: all
 	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
 		/usr/sbin/groupadd gnokii; \
 	fi
-	$(INSTALL) -d $(bindir)
-	$(INSTALL) -o root -g gnokii -m 0750 xgnokii $(bindir)
+	$(INSTALL) -d $(xbindir)
+	$(INSTALL) -o root -g gnokii -m 0750 xgnokii $(xbindir)
 	$(INSTALL) -o root -g gnokii -d -m 0750 $(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -150,8 +150,8 @@ install-ss: all
 	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
 		/usr/sbin/groupadd gnokii; \
 	fi
-	$(INSTALL) -o root -g gnokii -d $(bindir)
-	$(INSTALL) -o root -g gnokii -m 0750 -s xgnokii $(bindir)
+	$(INSTALL) -o root -g gnokii -d $(xbindir)
+	$(INSTALL) -o root -g gnokii -m 0750 -s xgnokii $(xbindir)
 	$(INSTALL) -o root -g gnokii -d -m 0750 $(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
