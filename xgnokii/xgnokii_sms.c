@@ -448,7 +448,8 @@ static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 			e->data = message;
 			GUI_InsertEvent(e);
 
-/*      error = GSM->DeleteSMSMessage(&message);
+			/*
+      error = DeleteSMS();
 
       if (error != GE_NONE)
       {
@@ -473,7 +474,7 @@ static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 }
 
 
-static void DeleteSMS(void)
+static void DelSMS(void)
 {
 	static GtkWidget *dialog = NULL;
 	GtkWidget *button, *hbox, *label, *pixmap;
@@ -1462,7 +1463,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, "<control>N", NewSMS, 0, NULL},
 	{NULL, "<control>F", ForwardSMS, 0, NULL},
 	{NULL, "<control>R", ReplySMS, 0, NULL},
-	{NULL, "<control>D", DeleteSMS, 0, NULL},
+	{NULL, "<control>D", DelSMS, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>B", NewBC, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
@@ -1565,7 +1566,7 @@ void GUI_CreateSMSWindow(void)
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Delete message"), NULL,
 				NewPixmap(Delete_xpm, GUI_SMSWindow->window,
 					  &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
-				(GtkSignalFunc) DeleteSMS, NULL);
+				(GtkSignalFunc) DelSMS, NULL);
 
 	gtk_box_pack_start(GTK_BOX(main_vbox), toolbar, FALSE, FALSE, 0);
 	gtk_widget_show(toolbar);
