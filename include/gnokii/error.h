@@ -57,7 +57,7 @@ typedef enum {
 	 GN_ERR_BUSY,                  /* Command is still being executed. */
 	
 	/* Locations */
-	 GN_ERR_INVALIDLOCATION,       /* The given memory location is empty. */
+	 GN_ERR_INVALIDLOCATION,       /* The given memory location has not valid location. */
 	 GN_ERR_INVALIDMEMORYTYPE,     /* Invalid type of memory. */
 	 GN_ERR_EMPTYLOCATION,         /* The given location is empty. */
 
