@@ -128,7 +128,7 @@ bool ATBUS_OpenSerial(int hw_handshake, char *device)
 		/* make 7110 happy */
 		sleep(1);
 	} else {
-		device_setdtrrts(0, 0);
+		device_setdtrrts(1, 1);
 	}
 	return (true);
 }
@@ -154,6 +154,8 @@ GSM_Error ATBUS_Loop(struct timeval *timeout)
 
 
 /* Initialise variables and start the link */
+/* Fixme we allow serial and irda for connection to reduce */
+/* bug reports. this is pretty silly for /dev/ttyS?. */
 GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
@@ -166,7 +168,8 @@ GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
 	state->Link.Loop = &ATBUS_Loop;
 	state->Link.SendMessage = &AT_SendMessage;
 
-	if (state->Link.ConnectionType == GCT_Serial) {
+	if ((state->Link.ConnectionType == GCT_Serial)
+	|| (state->Link.ConnectionType == GCT_Irda)) {
 		if (!ATBUS_OpenSerial(hw_handshake, state->Link.PortDevice))
 			return GE_DEVICEOPENFAILED;
 	} else {
