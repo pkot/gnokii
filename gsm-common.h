@@ -251,7 +251,11 @@ typedef struct {
 
   GSM_Error (*EnterPin)( char *pin );
 
-  GSM_Error (*GetIMEIAndCode)( char *imei, char *code );
+  GSM_Error (*GetIMEI)( char *imei );
+
+  GSM_Error (*GetRevision)( char *revision );
+
+  GSM_Error (*GetModel)( char *model );
 
   GSM_Error (*GetDateTime)( GSM_DateTime *date_time);
 

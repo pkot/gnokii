@@ -60,6 +60,7 @@ bool			RequestTerminate;
 	   of ptys for interface. */
 bool	VM_Initialise(bool debug_mode)
 {
+	int		rtn;
 
 	CommandMode = true;
 
@@ -86,6 +87,13 @@ bool	VM_Initialise(bool debug_mode)
 		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n\r"));
 		return (false);
 	}
+
+		/* Create and start thread, */
+	rtn = pthread_create(&Thread, NULL, (void *) VM_ThreadLoop, (void *)NULL);
+
+    if (rtn == EAGAIN || rtn == EINVAL) {
+        return (false);
+    }
 
 	return (true);
 }
@@ -132,6 +140,21 @@ void	VM_ThreadLoop(void)
 
 }
 
+	/* Application should call VM_Terminate to shut down
+	   the virtual modem thread */
+void		VM_Terminate(void)
+{
+		/* Request termination of thread */
+	RequestTerminate = true;
+
+		/* Now wait for thread to terminate. */
+	pthread_join(Thread, NULL);
+
+	if (!UseSTDIO) {
+		close (PtyRDFD);
+		close (PtyWRFD);
+	}
+}
 
 	/* Open pseudo tty interface and (in due course create a symlink
 	   to be /dev/gnokii etc. ) */
@@ -139,8 +162,6 @@ void	VM_ThreadLoop(void)
 int		VM_PtySetup(void)
 {
 	int						err;
-    struct termios          new_termios;
-    struct sigaction        sig_io;
 	char					*slave_name;
 
 	if (UseSTDIO) {

@@ -65,7 +65,9 @@ GSM_Functions FB61_Functions = {
   FB61_GetBatteryLevel,
   FB61_GetPowerSource,
   FB61_EnterPin,
-  FB61_GetIMEIAndCode,
+  FB61_GetIMEI,
+  FB61_GetRevision,
+  FB61_GetModel,
   FB61_GetDateTime,
   FB61_SetDateTime,
   FB61_GetAlarm,
@@ -655,9 +657,19 @@ GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
   return (GE_NONE);
 }
 
-GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code)
+GSM_Error FB61_GetIMEI(char *imei)
 {
-	return (GE_NOTIMPLEMENTED);
+  return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error FB61_GetRevision(char *revision)
+{
+  return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error FB61_GetModel(char *model)
+{
+  return (GE_NOTIMPLEMENTED);
 }
 
 GSM_Error FB61_SetDateTime(GSM_DateTime *date_time)

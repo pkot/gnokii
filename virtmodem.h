@@ -16,11 +16,12 @@
 #define __virtmodem_h
 
 	/* Prototypes */
-bool	VM_Initialise(bool debug_mode);
-int		VM_PtySetup(void);
-void	VM_ThreadLoop(void);
-void    VM_CharHandler(void);
-int		VM_GetMasterPty(char **name);
+bool		VM_Initialise(bool debug_mode);
+int			VM_PtySetup(void);
+void		VM_ThreadLoop(void);
+void    	VM_CharHandler(void);
+int			VM_GetMasterPty(char **name);
+void		VM_Terminate(void);
 GSM_Error 	VM_GSMInitialise(void);
 
 	/* All defines and prototypes from here down are specific to 

@@ -81,7 +81,7 @@ void	ATEM_InitRegisters(void)
 	ModemRegisters[REG_LF] = 13;
 	ModemRegisters[REG_BS] = 8;
 
-	ModemRegisters[REG_ECHO] = 0x00;
+	ModemRegisters[REG_ECHO] = BIT_ECHO;
 
 }
 
@@ -141,8 +141,9 @@ void	ATEM_ParseAT(char *cmd_buffer)
 
 	for (buf = &cmd_buffer[2]; *buf;) {
 		switch (*buf) {
-			case 'E':
+
 				/* E - Turn Echo on/off */
+			case 'E':
 				buf++;
 				switch (ATEM_GetNum(&buf)) {
 					case 0:
@@ -159,14 +160,22 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				}
 				break;
 
-			case '+':
 				/* + is the precursor to another set of commands +CSQ, +FCLASS etc. */
+			case '+':
 				buf++;
 				switch (*buf) {
 					case 'C':
 						buf++;
 							/* Returns true if error occured */
 						if (ATEM_CommandPlusC(&buf) == true) {
+							return;	
+						}
+						break;
+
+					case 'G':
+						buf++;
+							/* Returns true if error occured */
+						if (ATEM_CommandPlusG(&buf) == true) {
 							return;	
 						}
 						break;
@@ -192,14 +201,15 @@ void	ATEM_ParseAT(char *cmd_buffer)
 bool	ATEM_CommandPlusC(char **buf)
 {
 	float		rflevel;
-	char		buffer[20];
+	char		buffer[80];
+	char		buffer2[80];
 
 	if (strncmp(*buf, "SQ", 2) == 0) {
 		buf[0] ++;
 		buf[0] ++;
 
     	if (GSM->GetRFLevel(&rflevel) == GE_NONE) {
-			sprintf(buffer, "%f, 99", rflevel);
+			sprintf(buffer, "\n\r+CSQ: %0.0f, 99", rflevel);
 			ATEM_StringOut(buffer);
 			return (false);
 		}
@@ -208,10 +218,95 @@ bool	ATEM_CommandPlusC(char **buf)
 		}
 			
 	}
+		/* AT+CGMI is Manufacturer information for the ME (phone) so
+		   it should be Nokia rather than gnokii... */
+	if (strncmp(*buf, "GMI", 3) == 0) {
+		buf[0]+=3;
+
+		ATEM_StringOut("\n\rNokia Mobile Phones");
+		return (false);
+	}
+
+		/* AT+CGSN is IMEI */
+	if (strncmp(*buf, "GSN", 3) == 0) {
+		buf[0]+=3;
+		if (GSM->GetIMEI(buffer2) == GE_NONE) {
+			sprintf(buffer, "\n\r+CGSN: %s", buffer2);
+			ATEM_StringOut(buffer);
+			return (false);
+		}
+		else {
+			return (true);
+		}
+
+	}
+
+		/* AT+CGMR is Revision (hardware) */
+	if (strncmp(*buf, "GMR", 3) == 0) {
+		buf[0]+=3;
+		if (GSM->GetRevision(buffer2) == GE_NONE) {
+			sprintf(buffer, "\n\r+CGMR: %s", buffer2);
+			ATEM_StringOut(buffer);
+			return (false);
+		}
+		else {
+			return (true);
+		}
+
+	}
+
+		/* AT+CGMM is Model code  */
+	if (strncmp(*buf, "GMM", 3) == 0) {
+		buf[0]+=3;
+		if (GSM->GetModel(buffer2) == GE_NONE) {
+			sprintf(buffer, "\n\r+CGMM: %s", buffer2);
+			ATEM_StringOut(buffer);
+			return (false);
+		}
+		else {
+			return (true);
+		}
+
+	}
+
 	return (true);
-	
 
+}
 
+	/* AT+G commands.  Some of these responses are a bit tongue in cheek... */
+bool	ATEM_CommandPlusG(char **buf)
+{
+	char		buffer[80];
+
+		/* AT+GMI is Manufacturer information for the TA (Terminal Adaptor) */
+	if (strncmp(*buf, "MI", 3) == 0) {
+		buf[0]+=2;
+
+		ATEM_StringOut("\n\rHugh Blemings, Pavel Janík ml. and others...");
+		return (false);
+	}
+
+		/* AT+GMR is Revision information for the TA (Terminal Adaptor) */
+	if (strncmp(*buf, "MR", 3) == 0) {
+		buf[0]+=2;
+		sprintf(buffer, "\n\r%s %s %s", VERSION, __TIME__, __DATE__);
+
+		ATEM_StringOut(buffer);
+		return (false);
+	}
+
+//Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, MODEL, PORT);
+
+		/* AT+GMM is Model information for the TA (Terminal Adaptor) */
+	if (strncmp(*buf, "MM", 3) == 0) {
+		buf[0]+=2;
+
+		sprintf(buffer, "\n\rgnokii built for %s on %s", MODEL, PORT);
+		ATEM_StringOut(buffer);
+		return (false);
+	}
+
+	return (true);
 }
 
 	/* Send a result string back.  There is much work to do here, see

@@ -53,7 +53,9 @@ GSM_Functions			FB38_Functions = {
 		FB38_GetBatteryLevel,
 		FB38_GetPowerSource,
 		FB38_EnterPin,
-		FB38_GetIMEIAndCode,
+		FB38_GetIMEI,
+		FB38_GetRevision,
+		FB38_GetModel,
 		FB38_GetDateTime,
 		FB38_SetDateTime,
 		FB38_GetAlarm,
@@ -93,6 +95,15 @@ bool					DisableKeepalive;
 float					CurrentRFLevel;
 float					CurrentBatteryLevel;
 
+	/* These three are the information returned by AT+CGSN, AT+CGMR and
+	   AT+CGMM commands respectively. */
+char					IMEI[FB38_MAX_IMEI_LENGTH];
+bool					IMEIValid;
+char					Revision[FB38_MAX_REVISION_LENGTH];
+bool					RevisionValid;
+char					Model[FB38_MAX_MODEL_LENGTH];
+bool					ModelValid;
+
 	/* We have differing lengths for internal memory vs SIM memory.
 	   internal memory is index 0, SIM index 1. */
 int						MaxPhonebookNumberLength[2];
@@ -127,6 +138,9 @@ GSM_Error	FB38_Initialise(char *port_device, bool enable_monitoring)
 	DisableKeepalive = false;
 	CurrentRFLevel = -1;
 	CurrentBatteryLevel = -1;
+	IMEIValid = false;
+	RevisionValid = false;
+	ModelValid = false;
 
 	strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -516,6 +530,39 @@ GSM_Error	FB38_GetBatteryLevel(float *level)
 	}
 }
 
+GSM_Error	FB38_GetIMEI(char *imei)
+{
+	if (IMEIValid) {
+		strncpy (imei, IMEI, FB38_MAX_IMEI_LENGTH);
+		return (GE_NONE);
+	}
+	else {
+		return (GE_INTERNALERROR);
+	}
+}
+
+GSM_Error	FB38_GetRevision(char *revision)
+{
+	if (RevisionValid) {
+		strncpy (revision, Revision, FB38_MAX_REVISION_LENGTH);
+		return (GE_NONE);
+	}
+	else {
+		return (GE_INTERNALERROR);
+	}
+}
+
+GSM_Error	FB38_GetModel(char *model)
+{
+	if (ModelValid) {
+		strncpy (model, Model, FB38_MAX_MODEL_LENGTH);
+		return (GE_NONE);
+	}
+	else {
+		return (GE_INTERNALERROR);
+	}
+}
+
 	/* Our "Not implemented" functions */
 GSM_Error	FB38_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
@@ -538,10 +585,6 @@ GSM_Error	FB38_EnterPin(char *pin)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	FB38_GetIMEIAndCode(char *imei, char *code)
-{
-	return (GE_NOTIMPLEMENTED);
-}
 
 GSM_Error	FB38_GetDateTime(GSM_DateTime *date_time)
 {
@@ -630,6 +673,8 @@ void	FB38_ThreadLoop(void)
 		   loop will become more involved once we start doing 
 		   fax/data calls. */
 
+		/* Send IMEI/Revision/Model request */
+
 	idle_timer = 0;
 
 	while (!RequestTerminate) {
@@ -637,6 +682,8 @@ void	FB38_ThreadLoop(void)
 				/* Dont send keepalive packets when doing other transactions. */
 			if (!DisableKeepalive) {
 				FB38_TX_Send0x4aMessage();
+					/* FIXME - Don't need to do this over and over... */
+				FB38_TX_Send0x4c_RequestIMEIRevisionModelData();
 			}
 			idle_timer = 20;
 		}
@@ -1018,6 +1065,12 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 					}
 
 					return FB38_RX_Off;
+			/* We send 0x4c to request IMEI, Revision and Model info. */
+		case 0x4c:	break;
+
+			/* 0x4d Message provides IMEI, Revision and Model information. */
+		case 0x4d:	FB38_RX_Handle0x4d_IMEIRevisionModelData();
+					break;
 
 			/* Here we  attempt to acknowledge and display messages we don't
 			   understand fully... The phone will send the same message
@@ -1188,6 +1241,19 @@ void 	FB38_TX_Send0x43_RequestMemoryLocation(u8 memory_area, u8 location)
 	}
 
 }
+
+	/* 0x4c Messages are sent to request IMEI, Revision and Model 
+	   information. */
+
+void    FB38_TX_Send0x4c_RequestIMEIRevisionModelData(void)
+{
+	FB38_TX_UpdateSequenceNumber();
+
+	if (FB38_TX_SendMessage(0, 0x4c, RequestSequenceNumber, NULL) != true) {
+		fprintf(stderr, _("Request IMEI/Revision/Model Write failed!"));	
+	}
+}
+
 
 void	FB38_TX_Send0x23_SendSMSHeader(char *message_centre, char *destination, u8 total_length)
 {
@@ -1447,6 +1513,10 @@ void	FB38_RX_Handle0x27_SMSMessageText(void)
 	/* 0x4b is a general status message. */
 void	FB38_RX_Handle0x4b_Status(void)
 {
+		/* Map from values returned in status packet to the
+		   the values returned by the AT+CSQ command */
+	float	csq_map[5] = {0, 8, 16, 24, 31};
+
 		/* First, send acknowledge. */
 	if (FB38_TX_SendStandardAcknowledge(0x4b) != true) {
 		fprintf(stderr, _("0x4b Write failed!"));	
@@ -1459,7 +1529,13 @@ void	FB38_RX_Handle0x4b_Status(void)
 		   when incoming or outgoing calls occur...*/	
 	FB38_LinkOK = true;
 
-	CurrentRFLevel = MessageBuffer[3];
+	if (MessageBuffer[3] <= 4) {
+		CurrentRFLevel = csq_map[MessageBuffer[3]];
+	}
+	else {
+		CurrentRFLevel = 99;
+	}
+
 	CurrentBatteryLevel = MessageBuffer[4];
 
 	if (EnableMonitoringOutput == false) {
@@ -1471,6 +1547,7 @@ void	FB38_RX_Handle0x4b_Status(void)
 	fprintf(stdout, _("Status: Connection Status %02x.\n"), MessageBuffer[2]);
 
 }
+
 
 void	FB38_RX_Handle0x10_EndOfOutgoingCall(void)
 {
@@ -1742,6 +1819,33 @@ void	FB38_RX_Handle0x46_MemoryLocationData(void)
 	CurrentPhonebookError = GE_NONE;
 
 }
+
+	/* Handle 0x4d message which is sent by phone in response to 
+	   0x4c request.  Provides IMEI, Revision and Model information. */
+void	FB38_RX_Handle0x4d_IMEIRevisionModelData(void)
+{
+	int		imei_length;
+	int		rev_length;
+
+		/* As usual, acknowledge first. */
+	if (!FB38_TX_SendStandardAcknowledge(0x41)) {
+		fprintf(stderr, _("Write failed!"));
+	}
+
+	imei_length = strlen(MessageBuffer + 2);
+	rev_length = strlen(MessageBuffer + 3 + imei_length);
+
+	strncpy(IMEI, MessageBuffer + 2, FB38_MAX_IMEI_LENGTH);
+	IMEIValid = true;
+
+	strncpy(Revision, MessageBuffer + 3 + imei_length, FB38_MAX_REVISION_LENGTH);
+	RevisionValid = true;
+
+	strncpy(Model, MessageBuffer + 4 + imei_length + rev_length, FB38_MAX_MODEL_LENGTH);
+	ModelValid = true;
+
+}
+
 
 	/* Handle 0x41 message which is sent by phone in response to an
 	   0x3f request.  Contains data about the Message Centre in use,

@@ -98,8 +98,7 @@ int main(int argc, char *argv[])
 		exit (-1);
 	}
 	while (1) {
-		VM_ThreadLoop();
-		/*sleep (1);*/
+		sleep (1);
 	}
 	exit (0);
 }

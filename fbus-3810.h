@@ -47,7 +47,9 @@ GSM_Error	FB38_GetRFLevel(float *level);
 GSM_Error	FB38_GetBatteryLevel(float *level);
 GSM_Error	FB38_GetPowerSource(GSM_PowerSource *source);
 GSM_Error	FB38_EnterPin(char *pin);
-GSM_Error	FB38_GetIMEIAndCode(char *imei, char *code);
+GSM_Error	FB38_GetIMEI(char *imei);
+GSM_Error	FB38_GetRevision(char *revision);
+GSM_Error	FB38_GetModel(char *model);
 GSM_Error	FB38_GetDateTime(GSM_DateTime *date_time);
 GSM_Error	FB38_SetDateTime(GSM_DateTime *date_time);
 GSM_Error	FB38_GetAlarm(int alarm_number, GSM_DateTime *date_time);
@@ -75,11 +77,15 @@ GSM_Error	FB38_GetIncomingCallNr(char *Number);
 	/* Number of times to try resending SMS (empirical) */
 #define		FB38_SMS_SEND_RETRY_COUNT					(4)
 
-
 	/* Miscellaneous values. */
 #define		FB38_MAX_RECEIVE_LENGTH 			(512)
 #define		FB38_MAX_TRANSMIT_LENGTH			(256)
 #define 	FB38_BAUDRATE 						(B115200)
+
+	/* Limits for IMEI, Revision and Model string storage. */
+#define		FB38_MAX_IMEI_LENGTH			(20)
+#define		FB38_MAX_REVISION_LENGTH		(10)
+#define		FB38_MAX_MODEL_LENGTH			(8)
 
 	/* Limits for sizing of array in FB38_PhonebookEntry */
 #define		FB38_MAX_PHONEBOOK_NAME_LENGTH				(30)
@@ -116,6 +122,7 @@ void    FB38_RX_Handle0x0e_OutgoingCallAnswered(void);
 void	FB38_RX_Handle0x2c_SMSHeader(void);
 void	FB38_RX_Handle0x41_SMSMessageCentreData(void);
 void    FB38_RX_Handle0x46_MemoryLocationData(void);
+void	FB38_RX_Handle0x4d_IMEIRevisionModelData(void);
 
 void    FB38_TX_UpdateSequenceNumber(void);
 int     FB38_TX_SendStandardAcknowledge(u8 message_type);
@@ -130,6 +137,7 @@ void 	FB38_TX_Send0x3fMessage(void);
 void 	FB38_TX_Send0x4aMessage(void);
 int		FB38_TX_Send0x42_WriteMemoryLocation(u8 memory_area, u8 location, char *label, char *number);
 void    FB38_TX_Send0x43_RequestMemoryLocation(u8 memory_area, u8 location);
+void    FB38_TX_Send0x4c_RequestIMEIRevisionModelData(void);
 void    FB38_TX_Send0x15Message(u8 sequence_number);
 
 

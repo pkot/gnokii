@@ -22,6 +22,7 @@ void	ATEM_InitRegisters(void);
 void	ATEM_StringOut(char *buffer);
 void	ATEM_ParseAT(char *cmd_buffer);
 bool	ATEM_CommandPlusC(char **buf);
+bool	ATEM_CommandPlusG(char **buf);
 int		ATEM_GetNum(char **p);
 void	ATEM_ModemResult(int code);
 
