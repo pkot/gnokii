@@ -32,6 +32,8 @@
     o indexes with messages list were switched         (Ulrich Hopp)
     o fix problems with choosing names from the addressbook on
       sms sending                                      (Ulrich Hopp)
+    o compare folder and number not just number for the
+      incoming/deleted messages                        (Ulrich Hopp)
  * documentation updates
     o new Estonian translation                       (Hans Motshärg)
  * gnokii updates

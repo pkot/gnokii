@@ -301,6 +301,19 @@ static gint compare_number(const gn_sms * a, const gn_sms * b)
 		return 1;
 }
 
+static gint compare_folder_and_number(const gn_sms *a, const gn_sms *b)
+{
+	dprintf("memory type a: %i memory type b: %i\n", a->memory_type, b->memory_type);
+	dprintf("message number a: %i message number b: %i\n", a->number, b->number);
+	if (a->memory_type == b->memory_type)
+		if (a->number == b->number)
+			return 0;
+		else
+			return 1;
+	else
+		return 1;
+}
+
 
 static void RefreshSMS(const gint number)
 {
@@ -341,10 +354,13 @@ static void RefreshSMS(const gint number)
 					dprintf("We got a deleted message here to handle!\n");
 					pthread_mutex_lock(&smsMutex);
 					msg = g_malloc0(sizeof(gn_sms));
+
+/* 0 + 12 = GN_MT_IN, 1 + 12 = GN_MT_OU ... => gsm-common.h definition of gn_memory_type */ 
+					msg->memory_type = i + 12;
 					msg->number = MessagesList[j][i].location;
 					tmp_list =
 					    g_slist_find_custom(phoneMonitor.sms.messages, msg,
-								(GCompareFunc) compare_number);
+								(GCompareFunc) compare_folder_and_number);
 					tmp_msg = (gn_sms *) tmp_list->data;
 					phoneMonitor.sms.messages =
 					    g_slist_remove(phoneMonitor.sms.messages, tmp_msg);
