@@ -182,6 +182,7 @@ GSM_Network GSM_Networks[] =
   { "232 01", "A1" },
   { "232 03", "max.mobil." },
   { "232 05", "ONE" },
+  { "232 07", "tele.ring" },
   { "234 10", "Cellnet" },
   { "234 15", "Vodafone" },
   { "234 30", "One 2 One" },
