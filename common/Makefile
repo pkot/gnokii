@@ -30,7 +30,7 @@ OBJS =	cfgreader.o \
 	gsm-encoding.o \
 	gsm-statemachine.o
 
-all: libgnokii.o gsm-filetypes.o
+all: libgnokii.so gsm-filetypes.o
 
 phones/PHONES.o:
 	$(MAKE) -C phones PHONES.o
@@ -41,7 +41,7 @@ links/LINKS.o:
 devices/DEVICES.o:
 	$(MAKE) -C devices DEVICES.o
 
-libgnokii.o: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+libgnokii.so: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	$(CC) -shared -o libgnokii.so $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 gsm-filetypes.o: gsm-filetypes.c

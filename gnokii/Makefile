@@ -19,12 +19,11 @@ ifdef OWN_GETOPT
     OBJS += $(TOPDIR)/getopt/libgetopt.a
 endif
 
+LDFLAGS += -L$(TOPDIR)/common -lgnokii
+
 all: gnokii
 
-gnokii: $(OBJS) $(TOPDIR)/common/libgnokii.so $(TOPDIR)/common/gsm-filetypes.o
-
-$(TOPDIR)/common/libgnokii.so:
-	$(MAKE) -C $(TOPDIR)/common libgnokii.so
+gnokii: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o
 
 $(TOPDIR)/common/gsm-filetypes.o:
 	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
