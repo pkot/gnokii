@@ -684,8 +684,6 @@ static int savesms(int argc, char *argv[])
 	int interactive = 0;
 	char ans[8];
 #endif
-	unsigned char memory_type[20];
-
 	struct option options[] = {
 		{ "smsc",     required_argument, NULL, '0'},
 		{ "smscno",   required_argument, NULL, '1'},
@@ -698,8 +696,24 @@ static int savesms(int argc, char *argv[])
 		{ NULL,       0,                 NULL, 0}
 	};
 
-	dprintf("first argument: %s\n", argv[0]);
+	unsigned char memory_type[20];
+	struct tm		*now;
+	time_t			nowh;
+
+	nowh = time(NULL);
+	now  = localtime(&nowh);
+
 	gn_sms_default_submit(&sms);
+
+	sms.SMSCTime.Year	= now->tm_year;
+	sms.SMSCTime.Month	= now->tm_mon+1;
+	sms.SMSCTime.Day	= now->tm_mday;
+	sms.SMSCTime.Hour	= now->tm_hour;
+	sms.SMSCTime.Minute	= now->tm_min;
+	sms.SMSCTime.Second	= now->tm_sec;
+	sms.SMSCTime.Timezone	= 0;
+
+	sms.SMSCTime.Year += 1900;
 
 	/* the nokia 7110 will choke if no number is present when we */
 	/* try to store a SMS on the phone. maybe others do too */
@@ -744,11 +758,9 @@ static int savesms(int argc, char *argv[])
 			else
 				sms.Remote.Type = SMS_Unknown;
 			snprintf(sms.Remote.Number, MAX_NUMBER_LEN, "%s", optarg);
-			dprintf("Remote number: %s\n", sms.Remote.Number);
 			break;
 		case '3': /* location to write to */
 			sms.Number = atoi(optarg);
-			dprintf("Location: %i\n", sms.Number);
 			break;
 		case 's': /* mark the message as sent */
 		case 'r': /* mark the message as read */
@@ -836,7 +848,6 @@ static int savesms(int argc, char *argv[])
 	}
 	if (memory_type[0] != '\0')
 		sms.MemoryType = StrToMemoryType(memory_type);
-	dprintf("\nmt: %s\n", memory_type);
 
 	sms.UserData[0].Type = SMS_PlainText;
 	strncpy(sms.UserData[0].u.Text, message_buffer, chars_read);

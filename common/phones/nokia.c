@@ -228,7 +228,7 @@ int PNOK_FBUS_EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *
 	if (data->RawSMS->Type != SMS_Deliver)
 		memcpy(req + pos, data->RawSMS->Validity, 7);
 	else
-		memcpy(req + pos, "\x20\x80\x50\x80\x73\x54\x00", 7);  /* FIXME: Real date instead of hardcoded */
+		memcpy(req + pos, data->RawSMS->SMSCTime, 7);  /* FIXME: Real date instead of hardcoded */
 	pos += 7;
 
 	memcpy(req + pos, data->RawSMS->UserData, data->RawSMS->UserDataLength);
