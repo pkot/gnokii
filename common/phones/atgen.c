@@ -86,7 +86,7 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 
 
 #define REPLY_SIMPLETEXT(l1, l2, c, t) \
-	if ((0 == strcmp(l1, c)) && (NULL != t)) strcpy(t, l2)
+	if ((strcmp(l1, c) == 0) && (t != NULL)) strcpy(t, l2)
 
 
 GSM_Phone phone_at = {
@@ -110,6 +110,29 @@ GSM_Phone phone_at = {
 	Functions
 };
 
+static const SMSMessage_Layout at_deliver = {
+	true,						/* Is the SMS type supported */
+	 1, true, false,					/* SMSC */
+	 2,  2, -1,  2, -1, -1,  4, -1, 13,  5, -1,  2,
+	 3, true, false,					/* Remote Number */
+	 6, -1,						/* Time */
+	-1, -1,						/* Nonstandard fields */
+	14, true					/* User Data */
+};
+
+static const SMSMessage_Layout at_submit = {
+	true,						/* Is the SMS type supported */
+	 0, true, false,					/* SMSC */
+	-1,  1,  1,  1, -1,  2,  4, -1,  7,  5,  6,  1,
+	 3, true, false,					/* Remote Number */
+	-1, -1,						/* Time */
+	-1, -1,						/* Nonstandard fields */
+	 8, true					/* User Data */
+};
+
+static const SMSMessage_Layout at_not_supported = { false };
+
+static SMSMessage_PhoneLayout at_layout;
 
 static GSM_MemoryType memorytype = GMT_XX;
 static int atcharset = 0;
@@ -396,7 +419,12 @@ static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NONE;
+	char req[16];
+	sprintf(req, "AT+CMGR=%d\r\n", data->SMSMessage->Number);
+	dprintf("%s", req);
+	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_GetSMS);
 }
 
 
@@ -424,7 +452,7 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 		return GE_INVALIDPHBOOKLOCATION;
 
 	if (strncmp(buffer, "AT+CPBR", 7)) {
-		return GE_NONE; /*FIXME*/
+		return GE_NONE; /* FIXME */
  	}
 
 	if (!strncmp(buf.line2, "OK", 2)) {
@@ -473,6 +501,7 @@ static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int l
 
 	buf.line1 = buffer;
 	buf.length= length;
+	
 	splitlines(&buf);
 	if (buf.line1 == NULL)
 		return GE_INVALIDMEMORYTYPE;
@@ -561,7 +590,7 @@ static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int lengt
 	AT_LineBuffer buf;
 
 	buf.line1 = buffer;
-	buf.length= length;
+	buf.length = length;
 	splitlines(&buf);
 	if (buf.line1 == NULL)
 		return GE_NONE;		/* Fixme */
@@ -591,6 +620,21 @@ static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length
 
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
+	AT_LineBuffer buf;
+
+	buf.line1 = buffer;
+	buf.length= length;
+	
+	splitlines(&buf);
+	if (buf.line1 == NULL)
+		return GE_INTERNALERROR;
+
+	if (!data->RawData) data->RawData = calloc(sizeof(GSM_RawData), 1);
+	data->RawData->Length = strlen(buf.line3) / 2 + 1;
+	data->RawData->Data = calloc(data->RawData->Length, 1);
+	dprintf("%s\n", buf.line3);
+	data->RawData->Data[0] = SMS_Deliver;
+	hex2bin(data->RawData->Data + 1, buf.line3, data->RawData->Length - 1);
 	return GE_NONE;
 }
 
@@ -622,6 +666,16 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_at, sizeof(GSM_Phone));
+
+	/* SMS Layout */
+	at_layout.Type = 0; /* Locate the Type of the mesage field. */
+	at_layout.SendHeader = 0;
+	at_layout.ReadHeader = 0;
+	at_layout.Deliver = at_deliver;
+	at_layout.Submit = at_submit;
+	at_layout.DeliveryReport = at_not_supported;
+	at_layout.Picture = at_not_supported;
+	layout = at_layout;
 
 	for (i = 0; i < GOP_Max; i++) {
 		AT_Functions[i] = NULL;
@@ -675,7 +729,7 @@ void splitlines(AT_LineBuffer *buf)
 {
 	char *pos;
 
-	if ((buf->length > 7) && (!strncmp(buf->line1+buf->length-7, "ERROR", 5))) {
+	if ((buf->length > 7) && (!strncmp(buf->line1 + buf->length - 7, "ERROR", 5))) {
 		buf->line1 = NULL;
 		return;
 	}
@@ -693,6 +747,13 @@ void splitlines(AT_LineBuffer *buf)
 	} else {
 		buf->line3 = buf->line2;
 	}
+	pos = findcrlf(buf->line3, 1, buf->length);
+	if (pos) {
+		*pos = 0;
+		buf->line4 = skipcrlf(++pos);
+	} else {
+		buf->line4 = buf->line3;
+	}
 }
 
 
@@ -701,11 +762,11 @@ void splitlines(AT_LineBuffer *buf)
  * <cr> or <lf> is found. returns the new position.
  */
  
-char *skipcrlf(char *str)
+char *skipcrlf(unsigned char *str)
 {
         if (str == NULL)
                 return str;
-        while ((*str == '\n') || (*str == '\r'))
+        while ((*str == '\n') || (*str == '\r') || (*str > 127))
                 str++;
         return str;
 }

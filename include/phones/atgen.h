@@ -14,7 +14,10 @@
   phones. See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.1  2001-11-19 13:03:18  pkot
+  Revision 1.2  2002-01-10 10:14:09  pkot
+  Reading SMS in AT mode
+
+  Revision 1.1  2001/11/19 13:03:18  pkot
   nk3110.c cleanup
 
 
@@ -27,6 +30,7 @@ typedef struct {
         char *line1;
         char *line2;
         char *line3;
+        char *line4; /* When reading SMS there are 4 ouput lines. Maybe create a table here? */
         int length;
 } AT_LineBuffer;
 
@@ -37,6 +41,6 @@ GSM_Error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state);
 
 void splitlines(AT_LineBuffer *buf);
 
-char *skipcrlf(char *str);
+char *skipcrlf(unsigned char *str);
 char *findcrlf(char *str, int test, int maxlength);
 

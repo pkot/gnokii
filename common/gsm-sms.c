@@ -55,6 +55,34 @@ static struct udh_data headers[] = {
  *** Util functions
  ***/
 
+void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len)
+{
+	int i;
+
+	if (!dest) return;
+
+	for (i = 0; i < len; i++) {
+		unsigned aux;
+
+		if (src[2 * i] >= '0' && src[2 * i] <= '9') aux = src[2 * i] - '0';
+		else if (src[2 * i] >= 'a' && src[2 * i] <= 'f') aux = src[2 * i] - 'a' + 10;
+		else if (src[2 * i] >= 'A' && src[2 * i] <= 'F') aux = src[2 * i] - 'A' + 10;
+		else {
+			dest[0] = 0;
+			return;
+		}
+		dest[i] = aux << 4;
+		if (src[2 * i + 1] >= '0' && src[2 * i + 1] <= '9') aux = src[2 * i + 1] - '0';
+		else if (src[2 * i + 1] >= 'a' && src[2 * i + 1] <= 'f') aux = src[2 * i + 1] - 'a' + 10;
+		else if (src[2 * i + 1] >= 'A' && src[2 * i + 1] <= 'F') aux = src[2 * i + 1] - 'A' + 10;
+		else {
+			dest[0] = 0;
+			return;
+		}
+		dest[i] |= aux;
+	}
+}
+
 /* This function implements packing of numbers (SMS Center number and
    destination number) for SMS sending function. */
 int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
@@ -878,6 +906,55 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 	return GE_NONE;
 }
 
+/* Returns a new offset of the field */
+static short change_offset(short base, short orig, short offset)
+{
+	if (orig <= base) return orig;
+	else return (orig + offset);
+}
+static void change_offsets2(unsigned char *message, short pos, short offset)
+{
+	if (pos < 0) return;
+	llayout.MessageCenter = change_offset(pos, llayout.MessageCenter, offset);
+	llayout.MoreMessages = change_offset(pos, llayout.MoreMessages, offset);
+	llayout.ReplyViaSameSMSC = change_offset(pos, llayout.ReplyViaSameSMSC, offset);
+	llayout.RejectDuplicates = change_offset(pos, llayout.RejectDuplicates, offset);
+	llayout.Report = change_offset(pos, llayout.Report, offset);
+	llayout.Number = change_offset(pos, llayout.Number, offset);
+	llayout.Reference = change_offset(pos, llayout.Reference, offset);
+	llayout.PID = change_offset(pos, llayout.PID, offset);
+	llayout.ReportStatus = change_offset(pos, llayout.ReportStatus, offset);
+	llayout.Length = change_offset(pos, llayout.Length, offset);
+	llayout.DataCodingScheme = change_offset(pos, llayout.DataCodingScheme, offset);
+	llayout.Validity = change_offset(pos, llayout.Validity, offset);
+	llayout.UserDataHeader = change_offset(pos, llayout.UserDataHeader, offset);
+	llayout.RemoteNumber = change_offset(pos, llayout.RemoteNumber , offset);
+	llayout.SMSCTime = change_offset(pos, llayout.SMSCTime, offset);
+	llayout.Time = change_offset(pos, llayout.Time, offset);
+	llayout.MemoryType = change_offset(pos, llayout.MemoryType, offset);
+	llayout.Status = change_offset(pos, llayout.Status, offset);
+	llayout.UserData = change_offset(pos, llayout.UserData, offset);
+}
+
+/* These 2 functions are mainly for the AT mode, where MessageCenter and
+ * RemoteNumber have variable length */
+static void change_offsets(unsigned char *message)
+{
+	if (llayout.MessageCenter < llayout.RemoteNumber) {
+		if (!llayout.HasMessageCenterFixedLen && llayout.MessageCenter > -1)
+			change_offsets2(message, llayout.MessageCenter, message[llayout.MessageCenter]);
+		if (!llayout.HasRemoteNumberFixedLen && llayout.RemoteNumber > -1)
+			change_offsets2(message, llayout.RemoteNumber,
+					(message[llayout.RemoteNumber] + message[llayout.RemoteNumber] % 2) / 2 + 1);
+	} else {
+		if (!llayout.HasRemoteNumberFixedLen && llayout.RemoteNumber > -1)
+			change_offsets2(message, llayout.RemoteNumber,
+					(message[llayout.RemoteNumber] + message[llayout.RemoteNumber] % 2) / 2 + 1);
+		if (!llayout.HasMessageCenterFixedLen && llayout.MessageCenter > -1)
+			change_offsets2(message, llayout.MessageCenter, message[llayout.MessageCenter]);
+	}
+}
+
 static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 {
 	/* Short Message Type */
@@ -903,6 +980,8 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		dprintf("Not supported message type: %d\n", SMS->Type);
 		return GE_NOTSUPPORTED;
 	}
+
+	change_offsets(message);
 
 	if (!llayout.IsSupported) return GE_NOTSUPPORTED;
 
@@ -1027,13 +1106,10 @@ GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
 
-	dprintf("Reading\n");
 	header_offset = layout.ReadHeader;
 	error = SM_Functions(GOP_GetSMS, data, state);
-	dprintf("Actual decoding\n");
 	if (error != GE_NONE) return error;
 	if (!data->RawData || !data->SMSMessage) return GE_INTERNALERROR;
 	error = DecodePDUSMS(data->RawData->Data, data->SMSMessage, data->RawData->Length);
-	dprintf("Finished\n");
 	return error;
 }

@@ -430,6 +430,7 @@ typedef struct {
 } GSM_CBMessage;
 
 /* Utils */
+extern void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len);
 extern char *GetBCDNumber(u8 *Number);
 extern int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type);
 extern SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt);
