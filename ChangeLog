@@ -44,6 +44,7 @@
                                                      (David Vrabel)
     o add the ability to search the network code and country of
       origin                                            (Pawel Kot)
+    o fix SMS year > 2004 printing in the debug mode    (Pawel Kot)
  * 6100 driver updates
     o add Nokia 8850 support                       (Denis Pitzalis)
  * build system updates

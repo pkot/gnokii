@@ -146,7 +146,7 @@ static char *sms_timestamp_print(u8 *number)
 
 	/* Ugly hack, but according to the GSM specs, the year is stored
          * as the 2 digit number. */
-	if (number[0] < 70) sprintf(buffer, "20");
+	if ((10*(number[0] & 0x0f) + number[0] >> 4) < 70) sprintf(buffer, "20");
 	else sprintf(buffer, "19");
 
 	sprintf(buffer, "%s%d%d-", buffer, number[0] & 0x0f, number[0] >> 4);
