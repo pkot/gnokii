@@ -66,6 +66,8 @@ static GSM_Error P7110_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_PollSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
@@ -220,6 +222,10 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_GetClock(P7110_SUBCLO_GET_ALARM, data, state);
 	case GOP_GetCalendarNote:
 		return P7110_GetCalendarNote(data, state);
+	case GOP_WriteCalendarNote:
+		return P7110_WriteCalendarNote(data, state);
+	case GOP_DeleteCalendarNote:
+		return P7110_DeleteCalendarNote(data, state);
 	case GOP_GetSMS:
 		return P7110_GetSMS(data, state);
 	case GOP_OnSMS:
@@ -747,7 +753,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 		/* See if message# is given back by phone. If not and status is unread */
 		/* we want it, if status is not unread it's a "random" message given back */
-		/* by the phone because we want a message of which the # doesn't exist */
+		/* by the phone because we want a message of which the # doesn't exist
 		if (data->SMSFolder) {
 			found = false;
 			for (i = 0; i < data->SMSFolder->number; i++) {
@@ -761,7 +767,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 					return GE_EMPTYSMSLOCATION;
 			}
 		}
-
+		*/
 		if (!data->RawData) return GE_INTERNALERROR;
 		memset(data->RawData, 0, sizeof(GSM_RawData));
 
@@ -884,13 +890,28 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	return GE_NONE;
 }
 
+static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07,
+				0x08, /* FolderID */
+				0x00,
+				0x01, /* Location */
+				0x01, 0x65, 0x01};
+
+	dprintf("Getting SMS (without validating)...\n");
+	data->SMSFolder = NULL;
+	req[4] = data->SMSMessage->MemoryType;
+	req[5] = (data->SMSMessage->Number & 0xff00) >> 8;
+	req[6] = data->SMSMessage->Number & 0x00ff;
+	if (SM_SendMessage(state, 10, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x14);
+}
+
+
+
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req_folders[] = {FBUS_FRAME_HEADER, 0x7a, 0x00, 0x00};
-	unsigned char req_status[] = {FBUS_FRAME_HEADER, 0x6b,
-				0x08, /* Folder ID */
-				0x0f, 0x01};
-	unsigned char req_sms[] = {FBUS_FRAME_HEADER, 0x07,
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07,
 				0x08, /* FolderID */
 				0x00,
 				0x01, /* Location */
@@ -900,25 +921,28 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
 	if ((data->SMSFolder) && (data->SMSMessage->MemoryType != data->SMSFolder->FolderID)) {
-		dprintf("Getting list of SMS folders...\n");
-		if (SM_SendMessage(state, 6, 0x14, req_folders) != GE_NONE) return GE_NOTREADY;
-		error = SM_Block(state, data, 0x14);
-
+		if ((error = P7110_GetSMSFolders(data, state)) != GE_NONE) return error;
 		if (data->SMSMessage->MemoryType > data->SMSFolderList->FolderID[data->SMSFolderList->number-1])
 			return GE_INVALIDMEMORYTYPE;
-		data->SMSFolder->FolderID = data->SMSMessage->MemoryType;
-		req_status[4] = data->SMSMessage->MemoryType;
 
-		dprintf("Getting entries for SMS folder %i...\n", data->SMSMessage->MemoryType);
-		if (SM_SendMessage(state, 7, 0x14, req_status) != GE_NONE) return GE_NOTREADY;
-		error = SM_Block(state, data, 0x14);
+		data->SMSFolder->FolderID = data->SMSMessage->MemoryType;
+		if ((error = P7110_GetSMSFolderStatus(data, state)) != GE_NONE) return error;
+
+		if (data->SMSFolder->number + 2 < data->SMSMessage->Number) {
+			if (data->SMSMessage->Number > MAX_SMS_MESSAGES)
+				return GE_INVALIDSMSLOCATION;
+			else
+				return GE_EMPTYSMSLOCATION;
+		} else {
+			data->SMSMessage->Number = data->SMSFolder->locations[data->SMSMessage->Number - 1];
+		}
 	}
 
 	dprintf("Getting SMS...\n");
-	req_sms[4] = data->SMSMessage->MemoryType;
-	req_sms[5] = (data->SMSMessage->Number & 0xff00) >> 8;
-	req_sms[6] = data->SMSMessage->Number & 0x00ff;
-	if (SM_SendMessage(state, 10, 0x14, req_sms) != GE_NONE) return GE_NOTREADY;
+	req[4] = data->SMSMessage->MemoryType;
+	req[5] = (data->SMSMessage->Number & 0xff00) >> 8;
+	req[6] = data->SMSMessage->Number & 0x00ff;
+	if (SM_SendMessage(state, 10, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
 
@@ -1180,7 +1204,7 @@ static GSM_Error P7110_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 
 	c->Time.Hour = block[0];
 	c->Time.Minute = block[1];
-	c->Recurance = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
+	c->Recurence = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
 	alarmdiff = (((unsigned int)block[2]) << 8) + block[3];
 
 	if (alarmdiff != 0xffff) {
@@ -1201,13 +1225,13 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 
 	if (!data || !data->CalendarNote) return GE_INTERNALERROR;
 
-	year = 	data->CalendarNote->Time.Year;
+	year = data->CalendarNote->Time.Year;
 	dprintf("Year: %i\n", data->CalendarNote->Time.Year);
 	switch (message[3]) {
 	case P7110_SUBCAL_NOTE_RCVD:
 		block = message + 12;
 
-		data->CalendarNote->Location = (((unsigned int)message[4]) << 8) + message[5];
+		/*		data->CalendarNote->Location = (((unsigned int)message[4]) << 8) + message[5];*/
 		data->CalendarNote->Time.Year = (((unsigned int)message[8]) << 8) + message[9];
 		data->CalendarNote->Time.Month = message[10];
 		data->CalendarNote->Time.Day = message[11];
@@ -1229,7 +1253,7 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 			break;
 		case P7110_NOTE_REMINDER:
 			data->CalendarNote->Type = GCN_REMINDER;
-			data->CalendarNote->Recurance = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
+			data->CalendarNote->Recurence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
 			DecodeUnicode(data->CalendarNote->Text, (block + 4), block[2]);
 			break;
 		case P7110_NOTE_BIRTHDAY:
@@ -1270,6 +1294,7 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 
 		break;
 	case P7110_SUBCAL_INFO_RCVD:
+		if (!data->CalendarNotesList) return GE_INTERNALERROR;
 		dprintf("Calendar Notes Info received! %i\n", (message[4] << 8) | message[5]);
 		data->CalendarNotesList->Number = (message[4] << 8) + message[5];
 		dprintf("Location of Notes: ");
@@ -1279,21 +1304,325 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 		}
 		dprintf("\n");
 		break;
+	case P7110_SUBCAL_FREEPOS_RCVD:
+		dprintf("First free position received: %i!\n", (message[4] << 8) | message[5]);
+		data->CalendarNote->Location = (((unsigned int)message[4]) << 8) + message[5];
+		break;
+	case P7110_SUBCAL_DEL_NOTE_RESP:
+		dprintf("Succesfully deleted calendar note: %i!\n", (message[4] << 8) | message[5]);
+		break;
 
 	case P7110_SUBCAL_ADD_MEETING_RESP:
 	case P7110_SUBCAL_ADD_CALL_RESP:
 	case P7110_SUBCAL_ADD_BIRTHDAY_RESP:
 	case P7110_SUBCAL_ADD_REMINDER_RESP:
-	case P7110_SUBCAL_DEL_NOTE_RESP:
-	case P7110_SUBCAL_FREEPOS_RCVD:
-		dprintf("Subtype 0x%02x of type 0x%02x (calendar handling) not implemented\n", message[3], P7110_MSG_CALENDAR);
-		return GE_NOTIMPLEMENTED;
+		dprintf("Succesfully written calendar note: %i!\n", (message[4] << 8) | message[5]);
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", P7110_MSG_CALENDAR, message[3]);
 		return GE_UNHANDLEDFRAME;
 	}
 	return e;
 }
+
+long P7110_GetNoteAlarmDiff(GSM_DateTime *time, GSM_DateTime *alarm)
+{
+	time_t     t_alarm;
+	time_t     t_time;
+	struct tm  tm_alarm;
+	struct tm  tm_time;
+
+	tzset();
+
+	tm_alarm.tm_year=alarm->Year-1900;
+	tm_alarm.tm_mon=alarm->Month-1;
+	tm_alarm.tm_mday=alarm->Day;
+	tm_alarm.tm_hour=alarm->Hour;
+	tm_alarm.tm_min=alarm->Minute;
+	tm_alarm.tm_sec=alarm->Second;
+	tm_alarm.tm_isdst=0;
+	t_alarm = mktime(&tm_alarm);
+
+	tm_time.tm_year=time->Year-1900;
+	tm_time.tm_mon=time->Month-1;
+	tm_time.tm_mday=time->Day;
+	tm_time.tm_hour=time->Hour;
+	tm_time.tm_min=time->Minute;
+	tm_time.tm_sec=time->Second;
+	tm_time.tm_isdst=0;
+	t_time = mktime(&tm_time);
+
+	dprintf("   Alarm: %02i-%02i-%04i %02i:%02i:%02i\n",
+		alarm->Day,alarm->Month,alarm->Year,
+		alarm->Hour,alarm->Minute,alarm->Second);
+	dprintf("   Date: %02i-%02i-%04i %02i:%02i:%02i\n",
+		time->Day,time->Month,time->Year,
+		time->Hour,time->Minute,time->Second);
+	dprintf("Difference in alarm time is %f\n", difftime( t_time, t_alarm )+3600);
+
+	return difftime(t_time, t_alarm) + 3600;
+}
+
+static GSM_Error P7110_FirstCalendarFreePos(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x31 };
+	GSM_Error error;
+
+ 	if (SM_SendMessage(state, 4, P7110_MSG_CALENDAR, req) != GE_NONE) return GE_NOTREADY;
+	return SM_WaitFor(state, data, P7110_MSG_CALENDAR);
+}
+
+
+static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[200] = { FBUS_FRAME_HEADER,
+				   0x01,       /* note type ... */
+				   0x00, 0x00, /* location */
+				   0x00,       /* entry type */
+				   0x00,       //fixed
+				   0x00, 0x00, 0x00, 0x00, /* Year(2bytes), Month, Day */
+				   /* here starts block */
+				   0x00, 0x00, 0x00, 0x00,0x00, 0x00}; /* ... depends on note type ... */
+
+	GSM_CalendarNote *CalendarNote;
+	int count=0;
+	long seconds, minutes;
+	GSM_Error error;
+
+	CalendarNote = data->CalendarNote;
+
+	/* 6210/7110 needs to seek the first free pos to inhabit with next note */
+	error = P7110_FirstCalendarFreePos(data, state);
+	if (error != GE_NONE) return error;
+
+
+	/* Location */
+	req[4] = CalendarNote->Location >> 8;
+	req[5] = CalendarNote->Location & 0xff;
+
+	switch( CalendarNote->Type ) {
+	case GCN_MEETING: 
+		req[6]=0x01; 
+		req[3]=0x01; 
+		break;
+	case GCN_CALL:
+		req[6]=0x02; 
+		req[3]=0x03; 
+		break;
+	case GCN_BIRTHDAY: 
+		req[6]=0x04; 
+		req[3]=0x05;
+		break;
+	case GCN_REMINDER:
+		req[6]=0x08;
+		req[3]=0x07;
+		break;
+	}
+
+	req[8]=CalendarNote->Time.Year >> 8;
+	req[9]=CalendarNote->Time.Year & 0xff;
+	req[10]=CalendarNote->Time.Month;
+	req[11]=CalendarNote->Time.Day;
+
+	/* From here starts BLOCK */
+	count=12;
+	switch( CalendarNote->Type ) {
+
+	case GCN_MEETING:
+		req[count++] = CalendarNote->Time.Hour;   // 12
+		req[count++] = CalendarNote->Time.Minute; // 13
+		/* Alarm .. */
+		req[count++] = 0xff; // 14
+		req[count++] = 0xff; // 15
+		if( CalendarNote->Alarm.Year ) {
+			seconds = P7110_GetNoteAlarmDiff(&CalendarNote->Time, 
+							&CalendarNote->Alarm);
+			if( seconds >= 0L ) { /* Otherwise it's an error condition.... */
+				minutes = seconds / 60L;
+				count -= 2;
+				req[count++] = minutes>>8;
+				req[count++] = minutes&0xff;
+			}
+		}
+		/* Recurence */
+		if( CalendarNote->Recurence >= 8760 )
+			CalendarNote->Recurence = 0xffff; /* setting  1 Year repeat */
+		req[count++] = CalendarNote->Recurence >> 8;   // 16
+		req[count++] = CalendarNote->Recurence & 0xff; // 17
+		/* len of text */
+		req[count++] = strlen(CalendarNote->Text);    // 18
+		/* fixed 0x00 */
+		req[count++] = 0x00; // 19
+		/* Text */
+
+		dprintf("Count before encode = %d\n", count );
+		dprintf("Meeting Text is = \"%s\"\n", CalendarNote->Text );
+
+
+		EncodeUnicode(req+count,CalendarNote->Text, strlen(CalendarNote->Text)); // 20->N
+		count = count + 2 * strlen(CalendarNote->Text);
+		break;
+
+	case GCN_CALL:
+		req[count++] = CalendarNote->Time.Hour;   // 12
+		req[count++] = CalendarNote->Time.Minute; // 13
+		/* Alarm .. */
+		req[count++] = 0xff; // 14
+		req[count++] = 0xff; // 15
+		if( CalendarNote->Alarm.Year ) {
+			seconds = P7110_GetNoteAlarmDiff(&CalendarNote->Time, 
+							&CalendarNote->Alarm);
+			if( seconds >= 0L ) { /* Otherwise it's an error condition.... */
+				minutes = seconds / 60L;
+				count -= 2;
+				req[count++] = minutes >> 8;
+				req[count++] = minutes & 0xff;
+			}
+		}
+		/* Recurence */
+		if( CalendarNote->Recurence >= 8760 )
+			CalendarNote->Recurence = 0xffff; /* setting  1 Year repeat */
+		req[count++] = CalendarNote->Recurence >> 8;   // 16
+		req[count++] = CalendarNote->Recurence & 0xff; // 17
+		/* len of text */
+		req[count++] = strlen(CalendarNote->Text);    // 18
+		/* fixed 0x00 */
+		req[count++] = strlen(CalendarNote->Phone);   // 19
+		/* Text */
+		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text));// 20->N
+		count += 2 * strlen(CalendarNote->Text);
+		EncodeUnicode(req + count, CalendarNote->Phone, strlen(CalendarNote->Phone));// (N+1)->n
+		count += 2 * strlen(CalendarNote->Phone);
+		break;
+
+	case GCN_BIRTHDAY:
+		req[count++] = 0x00; // 12 Fixed
+		req[count++] = 0x00; // 13 Fixed
+
+		/* Alarm .. */
+		req[count++] = 0x00; 
+		req[count++] = 0x00; // 14, 15
+		req[count++] = 0xff; // 16
+		req[count++] = 0xff; // 17
+		if( CalendarNote->Alarm.Year ) {
+			/* I first try Time.Year = Alarm.Year. If negative, I increase year by one,
+			   but only once! This is because I may have alarm period across
+			   the year border, eg. birthday on 2001-01-10 and alarm on 2000-12-27 */
+
+			CalendarNote->Time.Year = CalendarNote->Alarm.Year;
+			if( (seconds= P7110_GetNoteAlarmDiff(&CalendarNote->Time, 
+							     &CalendarNote->Alarm)) < 0L ) {
+				CalendarNote->Time.Year++;
+				seconds= P7110_GetNoteAlarmDiff(&CalendarNote->Time,
+								&CalendarNote->Alarm);
+			}
+			if( seconds >= 0L ) { /* Otherwise it's an error condition.... */
+				count -= 4;
+				req[count++] = seconds>>24;              // 14
+				req[count++] = (seconds>>16) & 0xff;     // 15
+				req[count++] = (seconds>>8) & 0xff;      // 16
+				req[count++] = seconds&0xff;             // 17
+			}
+		}	
+
+		req[count++] = 0x00; /* FIXME: CalendarNote->AlarmType; 0x00 tone, 0x01 silent 18 */
+
+		/* len of text */
+		req[count++] = strlen(CalendarNote->Text); // 19
+
+		/* Text */
+		dprintf("Count before encode = %d\n", count );
+		/*		dprintf("Meeting Text is = \"%s\" Altype is 0x%02x \n", CalendarNote->Text , CalendarNote->AlarmType );*/
+
+		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text));// 22->N
+		count = count + 2 * strlen(CalendarNote->Text);
+		break;
+
+	case GCN_REMINDER:
+		/* Recurence */
+		if( CalendarNote->Recurence >= 8760 )
+			CalendarNote->Recurence = 0xffff; /* setting  1 Year repeat */
+		req[count++]=CalendarNote->Recurence >> 8;   // 12
+		req[count++]=CalendarNote->Recurence & 0xff; // 13
+		/* len of text */
+		req[count++]=strlen(CalendarNote->Text);    // 14
+		/* fixed 0x00 */
+		req[count++]=0x00; // 15
+		/* Text */
+		EncodeUnicode(req+count, CalendarNote->Text, strlen(CalendarNote->Text));// 16->N
+		count = count + 2 * strlen(CalendarNote->Text);
+		break;
+	}
+
+	/* padding */
+	req[count] = 0x00;
+
+	dprintf("Count after padding = %d\n", count);
+  
+	if (SM_SendMessage(state, count, P7110_MSG_CALENDAR, req) != GE_NONE) return GE_NOTREADY;
+	return SM_WaitFor(state, data, P7110_MSG_CALENDAR);
+}
+
+static GSM_Error P7110_GetCalendarNotesInfo(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_INFO, 0xFF, 0xFE};
+
+	if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P7110_MSG_CALENDAR);
+}
+
+static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Error	error = GE_NOTREADY;
+	unsigned char	req[] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_NOTE, 0x00, 0x00};
+	unsigned char	date[] = {FBUS_FRAME_HEADER, P7110_SUBCLO_GET_DATE};
+	GSM_Data	tmpdata;
+	GSM_DateTime	tmptime;
+	GSM_CalendarNotesList list;
+
+	data->CalendarNotesList = &list;
+	tmpdata.DateTime = &tmptime;
+	if ((error = P7110_GetCalendarNotesInfo(data, state)) == GE_NONE) {
+		if (data->CalendarNote->Location < data->CalendarNotesList->Number + 1 &&
+		    data->CalendarNote->Location > 0 ) {
+			if (SM_SendMessage(state, 4, P7110_MSG_CLOCK, date) == GE_NONE) {
+				SM_Block(state, &tmpdata, P7110_MSG_CLOCK);
+				req[4] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] >> 8;
+				req[5] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] & 0xff;
+				data->CalendarNote->Time.Year = tmptime.Year;
+				} else return GE_UNKNOWN; /* FIXME */
+		} else return GE_INVALIDCALNOTELOCATION;
+	} else return error;
+
+	if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P7110_MSG_CALENDAR);
+}
+
+static GSM_Error P7110_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER,
+				0x0b,      /* delete calendar note */
+				0x00, 0x00 //location
+	};
+	GSM_CalendarNotesList list;
+	GSM_Error error;
+
+	data->CalendarNotesList = &list;
+	if (P7110_GetCalendarNotesInfo(data, state) == GE_NONE) {
+		if (data->CalendarNote->Location < data->CalendarNotesList->Number + 1 &&
+		    data->CalendarNote->Location > 0 ) {
+			req[4] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] << 8;
+			req[5] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] & 0xff;
+		} else {
+			return GE_INVALIDCALNOTELOCATION;
+		}
+	}
+ 
+	if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) != GE_NONE) return GE_NOTREADY;
+	return SM_WaitFor(state, data, P7110_MSG_CALENDAR);
+	return error;
+}
+
 
 static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 {
@@ -1672,7 +2001,6 @@ static GSM_Error P7110_DeletePhonebookLocation(GSM_Data *data, GSM_Statemachine 
 	/* Two octets for the memory location */
 	req[12] = (entry->Location >> 8);
 	req[13] = entry->Location & 0xff;
-	/* Two octets for the memory type */
 	req[14] = GetMemoryType(entry->MemoryType);
 
 	if (SM_SendMessage(state, 18, 0x03, req) != GE_NONE) return GE_NOTREADY;
@@ -1803,41 +2131,6 @@ static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 	return SM_Block(state, data, P7110_MSG_CLOCK);
 }
 
-static GSM_Error P7110_GetCalendarNotesInfo(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_INFO, 0xFF, 0xFE};
-
-	if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, P7110_MSG_CALENDAR);
-}
-
-static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
-{
-	GSM_Error	error = GE_NOTREADY;
-	unsigned char	req[] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_NOTE, 0x00, 0x00};
-	unsigned char	date[] = {FBUS_FRAME_HEADER, P7110_SUBCLO_GET_DATE};
-	GSM_Data	tmpdata;
-	GSM_DateTime	tmptime;
-
-	tmpdata.DateTime = &tmptime;
-	if (P7110_GetCalendarNotesInfo(data, state) == GE_NONE) {
-		if (data->CalendarNote->Location < data->CalendarNotesList->Number + 1 &&
-		    data->CalendarNote->Location > 0 ) {
-			if (SM_SendMessage(state, 4, P7110_MSG_CLOCK, date) == GE_NONE) {
-				SM_Block(state, &tmpdata, P7110_MSG_CLOCK);
-				req[4] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] >> 8;
-				req[5] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] & 0xff;
-				data->CalendarNote->Time.Year = tmptime.Year;
-
-				if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) == GE_NONE) {
-					error = SM_Block(state, data, P7110_MSG_CALENDAR);
-				}
-			}
-		}
-	}
-
-	return error;
-}
 
 static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
 {
