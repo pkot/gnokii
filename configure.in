@@ -89,8 +89,9 @@ if test "$USE_NLS" = "yes"; then
 
   AC_CHECK_FUNC(gettext,
                 AC_DEFINE(HAVE_LIBINTL),
-                AC_CHECK_LIB(intl, gettext, NLS_LIBS="$NLS_LIBS -lintl",
-                             AC_DEFINE(HAVE_LIBINTL),
+                AC_CHECK_LIB(intl, gettext,
+                             [ NLS_LIBS="$NLS_LIBS -lintl"
+                               AC_DEFINE(HAVE_LIBINTL) ],
                              AC_MSG_ERROR(not found library: intl !!!)))
 
   AC_SUBST(HAVE_LIBINTL_H)  
@@ -316,13 +317,11 @@ else
       AC_MSG_WARN(Cannot find library libX11.)
       AC_MSG_WARN(Disabling xgnokii.)
    else
-      AC_CHECK_LIB(Xpm, XpmWriteFileFromPixmap, [
-            XPM_CFLAGS="-I$x_includes"
-            XPM_LIBS="-L$x_libraries -lX11 -lXpm"
-            AC_DEFINE(XPM)
-         ],
-         [ AC_MSG_WARN(Cannot found library libXpm.) ],
-         [ -L$x_libraries -lX11 ]
+      AC_CHECK_LIB(Xpm, XpmWriteFileFromXpmImage,
+            [ XPM_CFLAGS="-I$x_includes" XPM_LIBS="-L$x_libraries -lX11 -lXpm"
+              AC_DEFINE(XPM) ],
+            AC_MSG_WARN(Cannot found library libXpm - disabling XPM support.),
+            [ -L$x_libraries -lX11 ]
       ) 
 
       AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
