@@ -39,7 +39,7 @@ make prefix=${RPM_BUILD_ROOT}/usr install
 
 mkdir -p ${RPM_BUILD_ROOT}/etc/
 
-sed 's#/usr/local/sbin/#/usr/sbin/#' <Docs/sample.gnokiirc >${RPM_BUILD_ROOT}/etc/gnokiirc
+sed 's#/usr/local/sbin/#/usr/sbin/#' <Docs/sample/gnokiirc >${RPM_BUILD_ROOT}/etc/gnokiirc
 
 %pre
 /usr/sbin/groupadd -r -f gnokii >/dev/null 2>&1
@@ -52,9 +52,11 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc Docs/CREDITS Docs/DataCalls-QuickStart Docs/README
-%doc Docs/README-3810 Docs/README-6110 Docs/README-WIN32 Docs/sample.gnokiirc
+%doc Docs/CREDITS Docs/DataCalls-QuickStart Docs/FAQ Docs/README
+%doc Docs/README-3810 Docs/README-6110 Docs/README-2110 Docs/README-WIN32
 %doc Docs/gettext-howto Docs/gnokii.nol Docs/gnokii-ir-howto Docs/packaging-howto
+%doc Docs/sample/gnokiirc Docs/sample/options Docs/sample/pap-secrets
+%doc Docs/sample/ppp-gnokii Docs/sample/ppp-on
 %attr(0750, root, gnokii) /usr/bin/gnokii
 %attr(0750, root, gnokii) /usr/sbin/gnokiid
 %attr(4750, root, gnokii) /usr/sbin/mgnokiidev
@@ -68,6 +70,10 @@ rm -rf ${RPM_BUILD_ROOT}
 /usr/lib/xgnokii
 
 %changelog
+
+* Thu Jan 11 2001 Pawel Kot <pkot@linuxnews.pl>
+- misc updates
+
 * Fri Oct 27 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - todologo added to the package
 

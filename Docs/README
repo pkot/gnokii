@@ -110,8 +110,8 @@ in the next release of gnokii.
 - 3.0  Notes for specific model phones -
   
 Please see the README-3810 file for notes specific to the
-3810/8110 series and README-6110 for notes on the 5110/6110
-series.
+3810/8110 series, README-6110 for notes on the 5110/6110
+series and README-2110 for notes on 2110 series.
 
 
 - 4.0 Installation from source -
@@ -147,13 +147,13 @@ running the following as root.
 rpm -i gnokii-0.3.2-i386.rpm
 
 If you are using a Debian based system, you can use dpackage
-to do the installation.
+to do the installation. On Slackware you use installpkg or pkgtool.
 
 
 - 6.0 Configuration -
 
 Once you have installed the binaries, you should copy the
-sample.gnokiirc file from the Docs directory to your home
+sample/gnokiirc file from the Docs directory to your home
 directory and name it .gnokiirc  Using your favorite editor
 ensure that the settings are correct for your system, the sample
 file has details of the various options available.
@@ -217,9 +217,9 @@ The homepage of this module is http://www.agouros.de/gnokii
 There are a number of ways you can help out.
 
 Code specific to each model is contained within fbus-3810.[ch] and
-fbus-6110.[ch]  Both command handlers will dump information to stderr
-when they encounter a message they don't understand.  If this
-happens to you, try and work out what is going on.
+fbus-6110.[ch] and other [fm]bus-*.[ch] files. All command handlers
+will dump information to stderr when they encounter a message they don't
+understand.  If this happens to you, try and work out what is going on.
 
 Suggestions on changes to the code are welcome, the preference is that
 they be aired on the mailing list so that a consensus can be reached

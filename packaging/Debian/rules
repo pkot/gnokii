@@ -28,7 +28,7 @@ binary-arch:	build
 	dh_installdirs
 	make install prefix=`pwd`/debian/tmp/usr
 	mkdir -p `pwd`/debian/tmp/etc/
-	sed 's#/usr/local/sbin/#/usr/sbin/#' < Docs/sample/sample.gnokiirc > `pwd`/debian/tmp/etc/gnokiirc
+	sed 's#/usr/local/sbin/#/usr/sbin/#' < Docs/sample/gnokiirc > `pwd`/debian/tmp/etc/gnokiirc
 #	dh_installdebconf	
 #	dh_installexamples
 	dh_installdocs

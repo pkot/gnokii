@@ -11,7 +11,7 @@ A. Gnokii program cannot connect to the phone. Possible reasons are:
     - you are using the wrong cable,
     - you are using not supported phone model; currently supported phone models
       are:
-         + 6110|6130|6150|6190|5110|5130|5190
+         + 6110|6130|6150|6190|5110|5130|5190|3210
          + 3110|3810|8110|8110i
          + 2110|2140|6080
          + 640

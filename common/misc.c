@@ -38,7 +38,7 @@ int GetLine(FILE *File, char *Line, int count)
 static PhoneModel models[] = {
 	{NULL,    "", 0 },
 	{"1611",  "NHE-5", 0 },
-	{"2110i", "NHE-4", 0 },
+	{"2110i", "NHE-4", PM_SMS },
 	{"2148i", "NHK-4", 0 },
 	{"8810",  "NSE-6", PM_SMS | PM_DTMF | PM_DATA },
 	{"8110i", "NHE-6", PM_SMS | PM_DTMF | PM_DATA },

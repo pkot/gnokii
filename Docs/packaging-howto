@@ -52,9 +52,15 @@
 
  RedHat:
 
+        Just type:
+	   # rpm -ta gnokii-$VERSION.tar.gz
+	where $VERSION is version of gnokii distribution you have.
 
 
 
-
+ Slackware:
+ 
+ 
+ 
  Win32:
 	
