@@ -299,11 +299,11 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
 		     "                 [-m|--memory-type|--memory] [-n|--memory-location|--memory]\n"
 		     "                 [[-v|--vcard]|[-l|--ldif]]\n"
-		     "          gnokii --deletephonebook memory_type start_number [end_number]\n"
+		     "          gnokii --deletephonebook memory_type start_number [end_number|end]\n"
 		     "Calendar options:\n"
 		     "          gnokii --getcalendarnote start_number [end_number|end] [-v]\n"
 		     "          gnokii --writecalendarnote vcalendarfile number\n"
-		     "          gnokii --deletecalendarnote start [end]\n"
+		     "          gnokii --deletecalendarnote start [end_number|end]\n"
 		     "ToDo options:\n"
 		     "          gnokii --gettodo start_number [end_number|end] [-v]\n"
 		     "          gnokii --writetodo vcalendarfile number\n"
@@ -2159,8 +2159,13 @@ static int gettodo(int argc, char *argv[])
 
 	first_location = last_location = atoi(argv[0]);
 	if ((argc > 1) && (argv[1][0] != '-')) {
-		last_location = atoi(argv[1]);
+		if (!strcasecmp(argv[1], "end"))
+			last_location = INT_MAX;
+		else
+			last_location = atoi(argv[1]);
 	}
+	if (last_location < first_location)
+		last_location = first_location;
 
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {
@@ -2206,6 +2211,8 @@ static int gettodo(int argc, char *argv[])
 			break;
 		default:
 			fprintf(stderr, _("The ToDo note could not be read: %s\n"), gn_error_print(error));
+			if (last_location == INT_MAX)
+				last_location = 0;
 			break;
 		}
 	}
@@ -2473,7 +2480,14 @@ static int deletecalendarnote(int argc, char *argv[])
 	data.calnote_list = &clist;
 
 	first_location = last_location = atoi(argv[0]);
-	if (argc > 1) last_location = atoi(argv[1]);
+	if ((argc > 1) && (argv[1][0] != '-')) {
+		if (!strcasecmp(argv[1], "end"))
+			last_location = INT_MAX;
+		else
+			last_location = atoi(argv[1]);
+	}
+	if (last_location < first_location)
+		last_location = first_location;
 
 	for (i = first_location; i <= last_location; i++) {
 
@@ -2482,8 +2496,11 @@ static int deletecalendarnote(int argc, char *argv[])
 		error = gn_sm_functions(GN_OP_DeleteCalendarNote, &data, &state);
 		if (error == GN_ERR_NONE)
 			fprintf(stderr, _("Calendar note deleted.\n"));
-		else
+		else {
 			fprintf(stderr, _("The calendar note cannot be deleted: %s\n"), gn_error_print(error));
+			if (last_location == INT_MAX)
+				last_location = 0;
+		}
 	}
 
 	return error;
@@ -3529,7 +3546,7 @@ static int deletephonebook(int argc, char *argv[])
 	gn_phonebook_entry entry;
 	gn_error error;
 	char *memory_type_string;
-	int i, start_number, end_number;
+	int i, first_location, last_location;
 
 	if (argc < 2) {
 		usage(stderr, -1);
@@ -3543,10 +3560,17 @@ static int deletephonebook(int argc, char *argv[])
 		return -1;
 	}
 
-	start_number = atoi(argv[1]);
-	end_number = (argc < 3) ? start_number : atoi(argv[2]);
+	first_location = last_location = atoi(argv[1]);
+	if ((argc > 2) && (argv[2][0] != '-')) {
+		if (!strcasecmp(argv[2], "end"))
+			last_location = INT_MAX;
+		else
+			last_location = atoi(argv[1]);
+	}
+	if (last_location < first_location)
+		last_location = first_location;
 
-	for (i = start_number; i <= end_number; i++) {
+	for (i = last_location; i <= last_location; i++) {
 		entry.location = i;
 		entry.empty = true;
 		data.phonebook_entry = &entry;
@@ -3559,6 +3583,8 @@ static int deletephonebook(int argc, char *argv[])
 		default:
 			fprintf (stderr, _("Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"), 
 				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location);
+			if (last_location == INT_MAX)
+				last_location = 0;
 			break;
 		}
 	}

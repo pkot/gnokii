@@ -31,6 +31,8 @@
     o --writephonebook does not wait infinitely for answer in the
       interactive mode; it assumes no with the incorrect answer
                                                      (Reiner Steib)
+    o implement end keyword for --gettodo, --getcalendarnote,
+      --deletecalendarnote and --deletephonebook        (Pawel Kot)
  * libgnokii updates
     o fbus echo cancellation and statemachine fix  (BORBELY Zoltan)
     o todo vcalendar import/export functions was mixed
