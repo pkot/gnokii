@@ -71,7 +71,7 @@ static DBConfig connection;
 void (*DB_Bye) (void) = NULL;;
 gint (*DB_ConnectInbox) (const DBConfig) = NULL;
 gint (*DB_ConnectOutbox) (const DBConfig) = NULL;
-gint (*DB_InsertSMS) (const GSM_API_SMS * const) = NULL;
+gint (*DB_InsertSMS) (const gn_sms * const) = NULL;
 void (*DB_Look) (void) = NULL;
 
 static pthread_t db_monitor_th;
@@ -299,7 +299,7 @@ static void *SendSMS (void *a)
 }
 
 
-gint WriteSMS (GSM_API_SMS *sms)
+gint WriteSMS (gn_sms *sms)
 {
   gn_error error;
   PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
@@ -315,8 +315,8 @@ gint WriteSMS (GSM_API_SMS *sms)
 
 #ifdef XDEBUG
   g_print ("Address: %s\nText: %s\n",
-  sms->Remote.Number,
-  sms->UserData[0].u.Text);
+  sms->remote.number,
+  sms->user_data[0].u.text);
 #endif
 
   error = m->status;
@@ -328,12 +328,12 @@ gint WriteSMS (GSM_API_SMS *sms)
 
 static void ReadSMS (gpointer d, gpointer userData)
 {
-  GSM_API_SMS *data = (GSM_API_SMS *) d;
+  gn_sms *data = (gn_sms *) d;
   PhoneEvent *e;
   
-  if (data->Type == SMS_Deliver || data->Type == SMS_Delivery_Report)
+  if (data->type == GN_SMS_MT_Deliver || data->type == GN_SMS_MT_DeliveryReport)
   {
-    if (data->Type == SMS_Delivery_Report)
+    if (data->type == GN_SMS_MT_DeliveryReport)
     {
       if (smsdConfig.smsSets & SMSD_READ_REPORTS)
         (*DB_InsertSMS) (data);
@@ -341,11 +341,11 @@ static void ReadSMS (gpointer d, gpointer userData)
     else
     { 
 #ifdef XDEBUG 
-      g_print ("%d. %s   ", data->Number, data->Remote.Number);
-      g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->SMSCTime.Year,
-                data->SMSCTime.Month, data->SMSCTime.Day, data->SMSCTime.Hour,
-                data->SMSCTime.Minute, data->SMSCTime.Second, data->SMSCTime.Timezone,
-                data->UserData[0].u.Text);
+      g_print ("%d. %s   ", data->number, data->remote.number);
+      g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
+                data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
+                data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
+                data->user_data[0].u.text);
 #endif
       (*DB_InsertSMS) (data);
     }

@@ -33,6 +33,7 @@
 #include <glib.h>
 #include <libpq-fe.h>
 #include "smsd.h"
+#include "gsm-api.h"
 #include "gsm-sms.h"
 #include "gsm-encoding.h"
 
@@ -93,21 +94,21 @@ gint DB_ConnectOutbox (DBConfig connect)
 }
 
 
-gint DB_InsertSMS (const GSM_API_SMS * const data)
+gint DB_InsertSMS (const gn_sms * const data)
 {
   GString *buf;
   gchar *text;
   PGresult *res;
     
-  text = strEscape (data->UserData[0].u.Text);
+  text = strEscape (data->user_data[0].u.text);
   
   buf = g_string_sized_new (256);
   g_string_sprintf (buf, "INSERT INTO inbox (\"number\", \"smsdate\", \"insertdate\",\
                     \"text\", \"processed\") VALUES ('%s', \
                     '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', 'f')",
-                    data->Remote.Number, data->SMSCTime.Year, data->SMSCTime.Month,
-                    data->SMSCTime.Day, data->SMSCTime.Hour, data->SMSCTime.Minute,
-                    data->SMSCTime.Second, text);
+                    data->remote.number, data->smsc_time.year, data->smsc_time.month,
+                    data->smsc_time.day, data->smsc_time.hour, data->smsc_time.minute,
+                    data->smsc_time.second, text);
   g_free (text);
   
   res = PQexec(connIn, buf->str);
@@ -155,29 +156,29 @@ void DB_Look (void)
 
   for (i = 0; i < PQntuples (res1); i++)
   {
-    GSM_API_SMS sms;
+    gn_sms sms;
     
     gn_sms_default_submit (&sms);
-    memset (&sms.Remote.Number, 0, sizeof (sms.Remote.Number));
-    sms.DeliveryReport = (smsdConfig.smsSets & SMSD_READ_REPORTS);
+    memset (&sms.remote.number, 0, sizeof (sms.remote.number));
+    sms.delivery_report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
-    strncpy (sms.Remote.Number, PQgetvalue (res1, i, 1), sizeof (sms.Remote.Number) - 1);
-    sms.Remote.Number[sizeof(sms.Remote.Number) - 1] = '\0';
-    if (sms.Remote.Number[0] == '+')
-      sms.Remote.Type = SMS_International;
+    strncpy (sms.remote.number, PQgetvalue (res1, i, 1), sizeof (sms.remote.number) - 1);
+    sms.remote.number[sizeof(sms.remote.number) - 1] = '\0';
+    if (sms.remote.number[0] == '+')
+      sms.remote.type = GN_GSM_NUMBER_International;
     else
-      sms.Remote.Type = SMS_Unknown;
+      sms.remote.type = GN_GSM_NUMBER_Unknown;
     
-    strncpy (sms.UserData[0].u.Text, PQgetvalue (res1, i, 2), GSM_MAX_SMS_LENGTH + 1);
-    sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
-    sms.UserData[0].Length = strlen (sms.UserData[0].u.Text);
-    sms.UserData[0].Type = SMS_PlainText;
-    sms.UserData[1].Type = SMS_NoData;
-    if (!gn_char_def_alphabet (sms.UserData[0].u.Text))
-       sms.DCS.u.General.Alphabet = SMS_UCS2;
+    strncpy (sms.user_data[0].u.text, PQgetvalue (res1, i, 2), GN_SMS_MAX_LENGTH + 1);
+    sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';
+    sms.user_data[0].length = strlen (sms.user_data[0].u.text);
+    sms.user_data[0].type = GN_SMS_DATA_Text;
+    sms.user_data[1].type = GN_SMS_DATA_None;
+    if (!gn_char_def_alphabet (sms.user_data[0].u.text))
+       sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2;
 
 #ifdef XDEBUG
-    g_print ("Sending SMS: %s, %s\n", sms.Remote.Number, sms.UserData[0].u.Text);
+    g_print ("Sending SMS: %s, %s\n", sms.remote.number, sms.user_data[0].u.text);
 #endif
     
     numError = 0;

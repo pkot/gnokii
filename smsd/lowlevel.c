@@ -51,7 +51,7 @@ pthread_mutex_t sendSMSMutex;
 pthread_cond_t  sendSMSCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
-static GSM_Statemachine sm;
+static struct gn_statemachine sm;
 static char *lockfile = NULL;
 
 
@@ -87,16 +87,16 @@ inline static PhoneEvent *RemoveEvent (void)
 
 static gn_error InitModelInf (void)
 {
-  GSM_Data *data;
+  gn_data *data;
   gn_error error;
   char model[64], rev[64], manufacturer[64];
 
-  data = calloc (1,sizeof(GSM_Data));
-  data->Manufacturer = manufacturer;
-  data->Model = model;
-  data->Revision = rev;
+  data = calloc (1,sizeof(gn_data));
+  data->manufacturer = manufacturer;
+  data->model = model;
+  data->revision = rev;
                           
-  error = SM_Functions (GOP_GetModel, data, &sm);
+  error = gn_sm_functions (GN_OP_GetModel, data, &sm);
   if (error != GN_ERR_NONE)
   {
     free (data);
@@ -105,11 +105,11 @@ static gn_error InitModelInf (void)
     
   g_free (phoneMonitor.phone.model);
   phoneMonitor.phone.version = g_strdup (model);
-  phoneMonitor.phone.model = GetPhoneModel (model)->model;
+  phoneMonitor.phone.model = gn_get_phone_model (model)->model;
   if (phoneMonitor.phone.model == NULL)
     phoneMonitor.phone.model = g_strdup (_("unknown"));
 
-  phoneMonitor.supported = GetPhoneModel (model)->flags;
+  phoneMonitor.supported = gn_get_phone_model (model)->flags;
 
   g_free (phoneMonitor.phone.revision);
   phoneMonitor.phone.revision = g_strdup (rev);
@@ -127,8 +127,8 @@ static gn_error InitModelInf (void)
 
 static void busterminate(void)
 {
-	SM_Functions(GOP_Terminate, NULL, &sm);
-	if (lockfile) unlock_device(lockfile);
+	gn_sm_functions(GN_OP_Terminate, NULL, &sm);
+	if (lockfile) gn_unlock_device(lockfile);
 }
 
 
@@ -148,7 +148,7 @@ static gn_error fbusinit (bool enable_monitoring)
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = lock_device(smsdConfig.port);
+		lockfile = gn_lock_device(smsdConfig.port);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);
@@ -198,7 +198,7 @@ void InitPhoneMonitor (void)
 
 static inline void FreeElement (gpointer data, gpointer userData)
 {
-  g_free ((GSM_SMSMessage *) data);
+  g_free ((gn_sms *) data);
 }
 
 
@@ -215,11 +215,11 @@ static inline void FreeArray (GSList **array)
 
 static void RefreshSMS (const gint number)
 {
-  static GSM_Data data;
+  static gn_data data;
   gn_error error;
-  GSM_API_SMS *msg;
-  static SMS_Folder folder;
-  static SMS_FolderList folderlist;
+  gn_sms *msg;
+  static gn_sms_folder folder;
+  static gn_sms_folder_list folderlist;
   register gint i;
   
 
@@ -232,22 +232,22 @@ static void RefreshSMS (const gint number)
   phoneMonitor.sms.number = 0;
   pthread_mutex_unlock (&smsMutex);
 
-  GSM_DataClear(&data);
-  data.SMSFolderList = &folderlist;
-  folder.FolderID = 0;
-  data.SMSFolder = &folder;
+  gn_data_clear(&data);
+  data.sms_folder_list = &folderlist;
+  folder.folder_id = 0;
+  data.sms_folder = &folder;
   
   i = 0;
   while (1)
   {
-    msg = g_malloc (sizeof (GSM_API_SMS));
-    memset (msg, 0, sizeof (GSM_API_SMS));
+    msg = g_malloc (sizeof (gn_sms));
+    memset (msg, 0, sizeof (gn_sms));
     if (phoneMonitor.supported & PM_FOLDERS)
-      msg->MemoryType = GMT_IN;
+      msg->memory_type = GN_MT_IN;
     else
-      msg->MemoryType = GMT_SM;
-    msg->Number = ++i;
-    data.SMS = msg;
+      msg->memory_type = GN_MT_SM;
+    msg->number = ++i;
+    data.sms = msg;
     
     if ((error = gn_sms_get (&data, &sm)) == GN_ERR_NONE)
     {
@@ -282,30 +282,30 @@ static gint A_SendSMSMessage (gpointer data)
 {
   D_SMSMessage *d = (D_SMSMessage *) data;
   gn_error error;
-  GSM_Data *dt;
+  gn_data *dt;
 
   error = d->status = GN_ERR_UNKNOWN;
   if (d)
   {
     pthread_mutex_lock (&sendSMSMutex);
-    dt = calloc (1, sizeof (GSM_Data));
-    if (!d->sms->SMSC.Number[0])
+    dt = calloc (1, sizeof (gn_data));
+    if (!d->sms->smsc.number[0])
     {
-      dt->MessageCenter = calloc (1, sizeof (SMS_MessageCenter));
-      dt->MessageCenter->No = 1;
-      if (SM_Functions (GOP_GetSMSCenter, dt, &sm) == GN_ERR_NONE)
+      dt->message_center = calloc (1, sizeof (gn_sms_message_center));
+      dt->message_center->id = 1;
+      if (gn_sm_functions (GN_OP_GetSMSCenter, dt, &sm) == GN_ERR_NONE)
       {
-        strcpy (d->sms->SMSC.Number, dt->MessageCenter->SMSC.Number);
-        d->sms->SMSC.Type = dt->MessageCenter->SMSC.Type;
+        strcpy (d->sms->smsc.number, dt->message_center->smsc.number);
+        d->sms->smsc.type = dt->message_center->smsc.type;
       }
-      free (dt->MessageCenter);
+      free (dt->message_center);
     }
     
-    if (!d->sms->SMSC.Type)
-      d->sms->SMSC.Type = SMS_Unknown;
+    if (!d->sms->smsc.type)
+      d->sms->smsc.type = GN_GSM_NUMBER_Unknown;
       
-    GSM_DataClear (dt);
-    dt->SMS = d->sms;
+    gn_data_clear (dt);
+    dt->sms = d->sms;
     error = d->status = gn_sms_send (dt, &sm);
     free (dt);
     pthread_cond_signal (&sendSMSCond);
@@ -321,17 +321,17 @@ static gint A_SendSMSMessage (gpointer data)
 
 static gint A_DeleteSMSMessage (gpointer data)
 {
-  GSM_Data *dt;
+  gn_data *dt;
   gn_error error = GN_ERR_UNKNOWN;
-  SMS_Folder SMSFolder;
-  SMS_FolderList SMSFolderList;
+  gn_sms_folder SMSFolder;
+  gn_sms_folder_list SMSFolderList;
 
-  dt = calloc (1, sizeof (GSM_Data));
-  dt->SMS = (GSM_API_SMS *) data;
-  SMSFolder.FolderID = 0;
-  dt->SMSFolder = &SMSFolder;
-  dt->SMSFolderList = &SMSFolderList;
-  if (dt->SMS)
+  dt = calloc (1, sizeof (gn_data));
+  dt->sms = (gn_sms *) data;
+  SMSFolder.folder_id = 0;
+  dt->sms_folder = &SMSFolder;
+  dt->sms_folder_list = &SMSFolderList;
+  if (dt->sms)
   {
     error = gn_sms_delete (dt, &sm);
 //    I don't use copy, I don't need free message.
@@ -359,13 +359,13 @@ gint (*DoAction[])(gpointer) = {
 
 void *Connect (void *a)
 {
-  GSM_Data *data;
-  SMS_Status SMSStatus = {0, 0, 0, 0};
-  SMS_Folder SMSFolder;
+  gn_data *data;
+  gn_sms_status SMSStatus = {0, 0, 0, 0};
+  gn_sms_folder SMSFolder;
   PhoneEvent *event;
   gn_error error;
 
-  data = calloc (1, sizeof (GSM_Data));
+  data = calloc (1, sizeof (gn_data));
   
 # ifdef XDEBUG
   g_print ("Initializing connection...\n");
@@ -387,14 +387,14 @@ void *Connect (void *a)
 
     if (phoneMonitor.supported & PM_FOLDERS)
     {
-      data->SMSFolder = &SMSFolder;
-      SMSFolder.FolderID = GMT_IN;
-      if ((error = SM_Functions (GOP_GetSMSFolderStatus, data, &sm)) == GN_ERR_NONE)
+      data->sms_folder = &SMSFolder;
+      SMSFolder.folder_id = GN_MT_IN;
+      if ((error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, &sm)) == GN_ERR_NONE)
       {
-        if (phoneMonitor.sms.number != SMSFolder.Number)
+        if (phoneMonitor.sms.number != SMSFolder.number)
         {
           phoneMonitor.working = TRUE;
-          RefreshSMS (SMSFolder.Number);
+          RefreshSMS (SMSFolder.number);
           phoneMonitor.working = FALSE;
         }
         phoneMonitor.sms.unRead = 0;
@@ -402,17 +402,17 @@ void *Connect (void *a)
     }
     else
     {
-      data->SMSStatus = &SMSStatus;
-      if ((error = SM_Functions (GOP_GetSMSStatus, data, &sm)) == GN_ERR_NONE)
+      data->sms_status = &SMSStatus;
+      if ((error = gn_sm_functions (GN_OP_GetSMSStatus, data, &sm)) == GN_ERR_NONE)
       {
-        if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
-            phoneMonitor.sms.number != SMSStatus.Number)
+        if (phoneMonitor.sms.unRead != SMSStatus.unread ||
+            phoneMonitor.sms.number != SMSStatus.number)
         {
           phoneMonitor.working = TRUE;
-          RefreshSMS (SMSStatus.Number);
+          RefreshSMS (SMSStatus.number);
           phoneMonitor.working = FALSE;
         }
-        phoneMonitor.sms.unRead = SMSStatus.Unread;
+        phoneMonitor.sms.unRead = SMSStatus.unread;
       }
     }
 

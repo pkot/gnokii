@@ -27,6 +27,7 @@
     o reorganization in the common files: -data, -common,
       -statemachine                                      (Pawel Kot)
     o cleanup of the xgnokii; adapt to the new api    (P. Christeas)
+    o adapt smsd to the new api                     (BORBELY Zoltan)
  * 6110 series updates:
     o M2BUS support added                           (BORBELY Zoltan)
  * libgnokii changes:

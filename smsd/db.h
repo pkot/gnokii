@@ -37,7 +37,7 @@
 extern void (*DB_Bye) (void);
 extern gint (*DB_ConnectInbox) (const DBConfig);
 extern gint (*DB_ConnectOutbox) (const DBConfig);
-extern gint (*DB_InsertSMS) (const GSM_API_SMS * const);
+extern gint (*DB_InsertSMS) (const gn_sms * const);
 extern void (*DB_Look) (void);
 
 #endif
