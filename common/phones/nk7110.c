@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.12  2001-08-09 12:34:34  pkot
+  Revision 1.13  2001-08-16 23:59:32  pkot
+  Fixed (hopefully) timezone mismash (Sheldon Hearn)
+
+  Revision 1.12  2001/08/09 12:34:34  pkot
   3330 and 6250 support - I have no idea if it does work (mygnokii)
 
   Revision 1.11  2001/07/05 10:54:53  pkot
@@ -784,7 +787,6 @@ GSM_Error P7110_GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *al
 	time_t				t_alarm;
 	struct tm			tm_time;
 	struct tm			*tm_alarm;
-	extern volatile long int	timezone;
 	GSM_Error			e = GE_NONE;
 	
 	if (!time || !alarm) return GE_INTERNALERROR;
@@ -796,6 +798,7 @@ GSM_Error P7110_GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *al
 	tm_time.tm_hour = time->Hour;
 	tm_time.tm_min = time->Minute;
 
+	tzset();
 	t_alarm = mktime(&tm_time);
 	t_alarm -= alarmdiff;
 	t_alarm += timezone;
