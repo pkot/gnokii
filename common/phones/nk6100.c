@@ -881,7 +881,7 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 		case 0x6f:
 			return GN_ERR_TIMEOUT;
 		case 0x7d:
-			return GN_ERR_INTERNALERROR;
+			return GN_ERR_INVALIDMEMORYTYPE;
 		case 0x8d:
 			return GN_ERR_INVALIDSECURITYCODE;
 		default:

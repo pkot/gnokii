@@ -23,6 +23,8 @@
     o --playringtone implemented       (Tomi Ollila, BORBELY Zoltan)
  * 6110 series updates
     o PlayTone implemented                          (BORBELY Zoltan)
+    o GetMemoryStatus returns invalid memory type instead of
+      internal error if type isn't supported        (BORBELY Zoltan)
  * xgnokii fixes
     o do not free message previously added to GSList  (Josef Zlomek)
 
