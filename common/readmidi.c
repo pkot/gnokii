@@ -197,6 +197,7 @@ void midifile(struct MF *mf);
  */
 
 #include "config.h"
+#include "misc.h"
 #include "gnokii.h"
 #include <stdio.h>
 #include <stdlib.h>

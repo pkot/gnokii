@@ -37,6 +37,10 @@ ifdef XPM_LIBS
 	LDLIBS += $(XPM_LIBS)
 endif
 
+ifdef ICONV_LIBS
+	LDLIBS += $(ICONV_LIBS)
+endif
+
 all: $(PRGNAME)
 
 gnokii: $(OBJS) $(TOPDIR)/common/$(GNOKII_LIB)

@@ -15,6 +15,10 @@ ifdef XPM_LIBS
 	LDLIBS += $(XPM_LIBS)
 endif
 
+ifdef ICONV_LIBS
+	LDLIBS += $(ICONV_LIBS)
+endif
+
 OBJS = gnokiid.o
 
 ifdef NO_SHARED
