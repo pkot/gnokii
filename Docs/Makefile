@@ -55,7 +55,7 @@ INSTALL_DOCS = 	README \
 		sample/ppp/ppp-gnokii \
 		sample/ppp/ppp-on
 
-GNOKII1_MAN=man/gnokii.1 man/todologo.1
+GNOKII1_MAN=man/gnokii.1 man/todologo.1 man/sendsms.1 man/ppm2nokia.1
 GNOKII8_MAN=man/gnokiid.8 man/mgnokiidev.8
 XGNOKII_MAN=man/xgnokii.1x
 

@@ -1,5 +1,10 @@
+* Fri Aug 29 2003 Pawel Kot <pkot@linuxnews.pl>
+- Add the manual page
+
+
 * Tue Jun 03 2003 Ville Skyttä <ville.skytta@iki.fi>
 - Make SMSD install FHS compliant.
+
 
 * Tue Apr 08 2003 Bernhard Minks <bm@fachschaft.informatik.fh-muenchen.de>
 - compat.h added to file.c, mysql.c and pq.c.
