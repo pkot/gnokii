@@ -25,8 +25,8 @@ display usage information.
 .BR "\-\-version"
 displays version and copyright information.
 .TP 
-.BR "\-\-monitor"
-continually updates phone status to stderr.
+.BR "\-\-monitor \fI[delay]\fR"
+continually updates phone status to stderr. Optional \fIdelay\fR parameter sets the refresh interval to \fIdelay\fR seconds. Default is 1.
 
 .SS DIALING
 .TP 
@@ -53,6 +53,15 @@ show texts displayed in phone's screen.
 .BR "\-\-getprofile [\fInumber\fP]"
 show settings for selected(all) profile(s).
 .TP 
+.BR "\-\-setprofile"
+sets settings for selected(all) profile(s).
+.TP 
+.BR "\-\-getactiveprofile"
+reads the activer profile.
+.TP 
+.BR "\-\-setactiveprofile \fIprofile_no\fR"
+sets active profile to the profile number \fIprofile_no\fR.
+.TP 
 .BR "\-\-netmonitor {\fIreset\fP|\fIoff\fP|\fIfield\fP|\fIdevel\fP|\fInext\fP|\fInr\fP}"
 setting/querying netmonitor mode.
 .TP 
@@ -61,12 +70,12 @@ resets the phone.
 
 .SS TODO
 .TP 
-.BR "\-\-gettodo \fIstart\fP [\fIsend\fP] [\-v]"
+.BR "\-\-gettodo \fIstart\fP [\fIend\fP] [\-v]"
 get the notes with numbers from \fIstart\fR to \fIend\fR from calendar.
 .PP 
-[\-v] \- output in vCalendar 1.0 format
+\-v \- output in vCalendar 1.0 format
 .TP 
-.BR "\-\-writetodo \fIvCalendarfile \fInumber"
+.BR "\-\-writetodo \fIvCalendarfile\fR \fInumber\fR"
 write the notes to ToDo list.
 .PP 
 number \- location of the note in the vCalendar file
@@ -76,71 +85,82 @@ delete all notes from the ToDo list.
 
 .SS CALENDAR
 .TP 
-.BR "\-\-getcalendarnote \fIstart\fP [\fIsend\fP] [\-v]"
-get the note with numbers from \fIstart\fR to \fIend\fR from calendar.
+.BR "\-\-getcalendarnote \fIstart\fP [\fIend\fP] [\-v]"
+get the note with numbers from \fIstart\fR to \fIend\fR from calendar. \fIend\fR can be either a number or a keyword end that denotes 'everything till the end'.
 .PP 
-[\-v] \- output in vCalendar 1.0 format
+\-v \- output in vCalendar 1.0 format
 .TP 
-.BR "\-\-writecalendarnote"
-write the note to calendar.
+.BR "\-\-writecalendarnote \fIvcalfile\fR \fInumber\fR"
+write the note number \fInumber\fR from a vCal file \fIvcalfile\fR to a phone calendar. Just one note a time can be saved.
 .TP 
 .BR "\-\-deletecalendarnote \fIstart\fP [\fIend\fP]"
-delete the note with numbers from \fIstart\fR to \fIend\fR from calendar.
+delete the note with numbers from \fIstart\fR to \fIend\fR from calendar. \fIend\fR can be either a number or a keyword end that denotes 'everything till the end'.
 
 .SS SMS
 .TP 
-.BR "\-\-getsms \fImemory_type\fR \fIstart\fP [\fIend\fP] [\-f \fIfile\fP] [\-d]"
-gets SMS messages from specified \fImemory type\fR starting at entry [\fIstart\fR] and ending at [\fIend\fR].
+.BR "\-\-getsms \fImemory_type\fR \fIstart\fP [\fIend\fP] [\-f \fIfile\fP] [\-F \fIfile\fR] [\-d]"
+gets SMS messages from specified \fImemory type\fR starting at entry \fIstart\fR and ending at \fIend\fR.
 For the \fImemory types\fR you usually use SM for the SIM card and ME for the phone memory. The exception are the phones supported by nk7110 (Nokia 7110/6210/6250) and nk6510 (Nokia 6310/6510/8310) drivers. For these you should use IN for the Inbox, OU for the Outbox, AR for the Archive, TE for the Templates and F1, F2, ... for your own folders.
-If [\fIend\fR] is not specified only one location \- [\fIstart\fR] is read.
-If [\-f \fIfile\fR] is used entries are saved in \fIfile\fR.
-Otherwise they are dumped to stdout.
-If [\-d] switch is used, a message is deleted after reading.
+If \fIend\fR is not specified only one location \- \fIstart\fR is read.
+If \-f \fIfile\fR is used entries are saved in \fIfile\fR. If the file already existis, user is prompted whether to overwrite the file. \-F option forces gnokii to overwrite the file without asking. If none of these switches is used entries are dumped to stdout.
+If \-d switch is used, a message is deleted after reading.
 .TP 
 .BR "\-\-deletesms \fImemory_type\fP \fIstart\fP [\fIend\fP]"
-deletes SMS messages from specified \fImemory type\fR starting at entry [\fIstart\fR] and ending at [\fIend\fR].
-If [\fIend\fI] is not specified only one location \- [\fIstart\fR] is read.
+deletes SMS messages from specified \fImemory type\fR starting at entry \fIstart\fR and ending at \fIend\fR.
+If \fIend\fI is not specified only one location \- \fIstart\fR is read.
 .TP 
-.BR "\-\-sendsms \fIdestination\fP [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-r] [\-C \fIn\fP] [\-v \fIn\fP] [\-\-long \fIn\fP]"
+.BR "\-\-sendsms \fIdestination\fP [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-r] [\-C \fIn\fP] [\-v \fIn\fP] [\-\-long \fIn\fP] [\-i]"
 sends an SMS message to \fIdestination\fR via \fImessage_center_number\fR or SMSC number taken from phone memory from address \fImessage_center_index\fR.
 If this argument is ommited SMSC number is taken from phone memory from location 1.
 Message text is taken from STDIN.
-This function has had limited testing and may not work at all on your network.
 Meaning of other optional parameters:
 .PP 
-[\-r] \- request for delivery report
+\-r \- request for delivery report
 .PP 
-[\-C \fIn\fR] \- Class Message \fIn\fR, where \fIn\fR can be 0..3
+\-C \fIn\fR \- Class Message \fIn\fR, where \fIn\fR can be 0..3
 .PP 
-[\-v \fIn\fR] \- validity in minutes
+\-v \fIn\fR \- validity in minutes
 .PP 
-[\-\-long \fIn\fR] \- send no more then \fIn\fR characters, default is 160
+\-\-long \fIn\fR \- send no more then \fIn\fR characters, default is 160
+.PP 
+\-i \- send iMelody within SMS
+.TP 
+Sample usage:
+echo "This is a test message" | gnokii \-\-sendsms +48501123456 \-r
+
 .TP 
 .BR "\-\-savesms [\-\-sender \fIfrom\fP] [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-\-folder \fIfolder_id\fP] [\-\-location \fInumber\fP] [\-\-sent | \-\-read] [\-\-deliver]"
 saves SMS messages to phone. Messages are read from STDIN. You can specify the following optional arguments:
 .PP 
-[\-\-sender] \- set the sender number (only \fI\-\-deliver\fP)
+\-\-sender \- set the sender number (only \fI\-\-deliver\fP)
 .PP 
-[\-\-smsc \fImessage_center_number\fR] \- set the SMSC number (only \fI\-\-deliver\fP)
+\-\-smsc \fImessage_center_number\fR \- set the SMSC number (only \fI\-\-deliver\fP)
 .PP 
-[\-\-smscno \fImessage_center_index\fR] \- SMSC number taken from phone memory from address \fImessage_center_index\fR (only \fI\-\-deliver\fP)
+\-\-smscno \fImessage_center_index\fR \- SMSC number taken from phone memory from address \fImessage_center_index\fR (only \fI\-\-deliver\fP)
 .PP 
-[\-\-folder \fIfolder_id\fR] \- folder ID where to save the SMS to (only valid for newer phones, i.e. 6210/6510 series). For legal values see \fI\-\-getsms\fR.
+\-\-folder \fIfolder_id\fR \- folder ID where to save the SMS to (only valid for newer phones, i.e. 6210/6510 series). For legal values see \fI\-\-getsms\fR.
 .PP 
-[\-\-location \fInumber\fR] \- save the message to laction \fInumber\fR
+\-\-location \fInumber\fR \- save the message to laction \fInumber\fR
 .PP 
-[\-\-sent | \-\-read] \- mark the message saved/read depending on \fI\-\-deliver\fP
+\-\-sent | \-\-read \- mark the message saved/read depending on \fI\-\-deliver\fP
 .PP 
-[\-\-deliver] \- set the message type to SMS_Deliver
+\-\-deliver \- set the message type to SMS_Deliver
+
 .TP 
 .BR "\-\-getsmsc \fInumber\fP"
 show the SMSC number from location \fInumber\fR.
+
 .TP 
 .BR "\-\-createsmsfolder \fIname\fP"
 create SMS folder with name \fIname\fR.
+
 .TP 
 .BR "\-\-createsmsfolder \fInumber\fP"
 delete folder # \fInumber\fR of 'My Folders'.
+
+.TP 
+.BR "\-\-smsreader"
+keeps readning incoming SMS and saves them into the mailbox.
 
 .SS LOGOS
 .TP 
