@@ -31,78 +31,20 @@
 #ifndef _gnokii_gsm_filetypes_h
 #define _gnokii_gsm_filetypes_h
 
-#include "gsm-error.h"
-#include "gsm-common.h"
-#include "gsm-bitmaps.h"
-#include "gsm-ringtones.h"
-
-int GSM_ReadVCalendarFileEvent(char *FileName, GSM_CalendarNote *cnote, int number);
-int GSM_ReadVCalendarFileTodo(char *FileName, GSM_ToDo *cnote, int number);
-
-int GetvCalTime(GSM_DateTime *dt, char *time);
-int FillCalendarNote(GSM_CalendarNote *note, char *type,
-		     char *text, char *desc, char *time, char *alarm);
-int FillToDo(GSM_ToDo *note, char *text, char *todo_priority);
-
-
-/* Ringtone Files */
-
-gn_error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
-gn_error GSM_SaveRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
-
-int GetScale (char *num);
-int GetDuration (char *num);
-
 /* Defines the character that separates fields in rtttl files. */
 #define RTTTL_SEP ":"
 
-gn_error saverttl(FILE *file, GSM_Ringtone *ringtone);
-gn_error saveott(FILE *file, GSM_Ringtone *ringtone);
-
-gn_error loadrttl(FILE *file, GSM_Ringtone *ringtone);
-gn_error loadott(FILE *file, GSM_Ringtone *ringtone);
-
-
-/* Bitmap Files */
-
-gn_error GSM_ReadBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info);
-gn_error GSM_SaveBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info);
-int GSM_SaveTextFile(char *FileName, char *text, int mode);
-gn_error GSM_ShowBitmapFile(char *FileName);
-
-void savenol(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-void savengg(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-void savensl(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-void savenlm(FILE *file, gn_bmp *bitmap);
-void saveota(FILE *file, gn_bmp *bitmap);
-void savebmp(FILE *file, gn_bmp *bitmap);
-
-#ifdef XPM
-void savexpm(char *filename, gn_bmp *bitmap);
-#endif
-
-gn_error loadngg(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-gn_error loadnol(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-gn_error loadnsl(FILE *file, gn_bmp *bitmap);
-gn_error loadnlm(FILE *file, gn_bmp *bitmap);
-gn_error loadota(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-gn_error loadbmp(FILE *file, gn_bmp *bitmap);
-
-#ifdef XPM
-gn_error loadxpm(char *filename, gn_bmp *bitmap);
-#endif
-
 typedef enum {
-	None = 0,
-	NOL,
-	NGG,
-	NSL,
-	NLM,
-	BMP,
-	OTA,
-	XPMF,
-	RTTL,
-	OTT
-} GSM_Filetypes;
+	GN_FT_None = 0,
+	GN_FT_NOL,
+	GN_FT_NGG,
+	GN_FT_NSL,
+	GN_FT_NLM,
+	GN_FT_BMP,
+	GN_FT_OTA,
+	GN_FT_XPMF,
+	GN_FT_RTTL,
+	GN_FT_OTT
+} gn_filetypes;
 
 #endif /* _gnokii_gsm_filetypes_h */
