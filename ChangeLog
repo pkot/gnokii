@@ -23,6 +23,7 @@
     o add WAP handling                                 (Markus Plail)
     o fix SMS status                                   (Robert Ivanc)
     o add DeleteSMSnoValidate                          (Markus Plail)
+    o add date/time, alarm writing      (Marcin Wiacek, Markus Plail)
  * 6110 series updates:
     o Nokia 3410 is known to work                         (Pawel Kot)
     o use 0x64 frames only when PM_AUTHENTICATION is set for the

@@ -83,7 +83,10 @@ static GSM_Error P6510_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P6510_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 
-static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_GetDateTime(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_GetAlarm(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_SetDateTime(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_SetAlarm(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
@@ -110,7 +113,7 @@ static GSM_Error P6510_DeleteSMSnoValidate(GSM_Data *data, GSM_Statemachine *sta
 /*
 static GSM_Error P6510_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 */
-static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_GetRingtoneList(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_SetProfile(GSM_Data *data, GSM_Statemachine *state);
 
@@ -248,11 +251,13 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	case GOP_GetSMSCenter:
 		return P6510_GetSMSCenter(data, state);
 	case GOP_GetDateTime:
-		return P6510_GetClock(P6510_SUBCLO_GET_DATE, data, state);
-		/*
+		return P6510_GetDateTime(data, state);
 	case GOP_GetAlarm:
-		return P6510_GetClock(P6510_SUBCLO_GET_ALARM, data, state);
-		*/
+		return P6510_GetAlarm(data, state);
+	case GOP_SetDateTime:
+		return P6510_SetDateTime(data, state);
+	case GOP_SetAlarm:
+		return P6510_SetAlarm(data, state);
 	case GOP_GetToDo:
 		return P6510_GetToDo(data, state);
 	case GOP_WriteToDo:
@@ -1254,6 +1259,9 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	return error;
 }
 
+
+
+
 /**********************/
 /* PHONEBOOK HANDLING */
 /**********************/
@@ -1630,6 +1638,12 @@ reply: 0x19 / 0x0012
 	dprintf("Incoming clock!\n");
 	if (!data || !data->DateTime) return GE_INTERNALERROR;
 	switch (message[3]) {
+	case P6510_SUBCLO_SET_DATE_RCVD:
+		dprintf("Date/Time succesfully set!\n");
+		break;
+	case P6510_SUBCLO_SET_ALARM_RCVD:
+		dprintf("Alarm succesfully set!\n");
+		break;
 	case P6510_SUBCLO_DATE_RCVD:
 		dprintf("Date/Time received!\n");
 		data->DateTime->Year = (((unsigned int)message[10]) << 8) + message[11];
@@ -1642,16 +1656,6 @@ reply: 0x19 / 0x0012
 		break;
 	case P6510_SUBCLO_ALARM_RCVD:
 		/*
-01 23 00 1c 06 01 ff ff ff ff 00 00 3d 44 01 1d 1f 32 
-01 23 00 1c 06 01 ff ff ff ff 00 00 4c e4 01 3e b4 28
-01 23 00 1c 06 01 ff ff ff ff 00 00 4b 2c 01 1e 8d 56
-01 23 00 1c 06 01 ff ff ff ff 80 27 46 54 01 1d ad 56
-01 23 00 1c 06 01 ff ff ff ff 80 27 52 34 01 18 ee aa
-01 23 00 1c 06 01 ff ff ff ff 00 00 32 7c 01 1d b6 86
-01 23 00 1c 06 01 ff ff ff ff 80 27 46 54 01 1d ad 56
-01 23 00 1c 06 01 ff ff ff ff 00 00 3d 44 01 1d 1f 32
-01 23 00 1c 06 01 ff ff ff ff 80 27 46 54 01 1d ad 56
-		 */
 		switch(message[8]) {
 		case P6510_ALARM_ENABLED:
 			data->DateTime->AlarmEnabled = 1;
@@ -1665,9 +1669,9 @@ reply: 0x19 / 0x0012
 			error = GE_UNKNOWN;
 			break;
 		}
-
-		data->DateTime->Hour = message[9];
-		data->DateTime->Minute = message[10];
+		*/
+		data->DateTime->Hour = message[14];
+		data->DateTime->Minute = message[15];
 
 		break;
 	default:
@@ -1678,12 +1682,58 @@ reply: 0x19 / 0x0012
 	return error;
 }
 
-static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error P6510_GetDateTime(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, req_type, 0x00, 0x00};
+	unsigned char req[] = {FBUS_FRAME_HEADER, P6510_SUBCLO_GET_DATE, 0x00, 0x00};
 
 	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 6);
 }
+
+static GSM_Error P6510_SetDateTime(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x00, 0x01, 
+			       0x01, 0x0c, 0x01, 0x03,
+			       0x07, 0xd2,	/* Year */
+			       0x08, 0x01,     /* Month & Day */
+			       0x15, 0x1f,	/* Hours & Minutes */
+			       0x00,		/* Seconds */
+			       0x00};
+
+	
+	req[10] = data->DateTime->Year / 256;
+	req[11] = data->DateTime->Year % 256;
+	req[12] = data->DateTime->Month;
+	req[13] = data->DateTime->Day;
+	req[14] = data->DateTime->Hour;
+	req[15] = data->DateTime->Minute;
+	req[16] = data->DateTime->Second;
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 18);
+}
+
+static GSM_Error P6510_GetAlarm(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x19, 0x00, 0x02};
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 6);
+}
+
+static GSM_Error P6510_SetAlarm(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x11, 0x00, 0x01, 
+			       0x01, 0x0c, 0x02, 0x01, 0x00, 0x00, 0x00, 0x00,
+			       0x00, 0x00,		/* Hours, Minutes */
+			       0x00, 0x00, 0x00 };
+
+	dprintf("Setting alarm\n");
+	if (data->DateTime->AlarmEnabled != 1) return GE_NOTSUPPORTED;
+
+	req[14] = data->DateTime->Hour;
+	req[15] = data->DateTime->Minute;
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 19);
+}
+
 
 /*********************/
 /* CALENDAR HANDLING */
@@ -2275,7 +2325,7 @@ static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message,
 	return GE_NONE;
 }
 
-static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error P6510_GetRingtoneList(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x00, 0x00, 0xFE, 0x00, 0x7D};
 
@@ -2283,6 +2333,16 @@ static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state)
 	if (SM_SendMessage(state, 9, P6510_MSG_RINGTONE, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_RINGTONE);
 }
+
+static GSM_Error P6510_GetRingtone(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x00, 0x00, 0xFE, 0x00, 0x7D};
+
+	dprintf("Getting list of ringtones...\n");
+	if (SM_SendMessage(state, 9, P6510_MSG_RINGTONE, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_RINGTONE);
+}
+
 
 /*************/
 /* START UP  */
@@ -2582,7 +2642,7 @@ static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state)
 	req[length] = 0x04;
 
 	dprintf("Getting profile #%i...\n", data->Profile->Number);
-	P6510_GetRingtones(data, state);
+	P6510_GetRingtoneList(data, state);
 	SEND_MESSAGE_BLOCK(P6510_MSG_PROFILE, length + 1);
 }
 

@@ -89,11 +89,13 @@ extern bool P6510_LinkOK;
 
 /* Clock handling message subtypes (send) */
 #define P6510_SUBCLO_GET_DATE	0x0a	/* Get date & time */
-#define P6510_SUBCLO_GET_ALARM	0x1b	/* Get alarm */
+#define P6510_SUBCLO_GET_ALARM	0x02	/* Get alarm */
 /* Clock handling message subtypes (recv) */
-#define P6510_SUBCLO_DATE_RCVD	0x0b	/* Received date & time */
+#define P6510_SUBCLO_DATE_RCVD		0x0b	/* Received date & time */
+#define P6510_SUBCLO_SET_DATE_RCVD	0x02	/* Received date & time set OK */
+#define P6510_SUBCLO_SET_ALARM_RCVD	0x12	/* Received alarm set OK */
 #define P6510_SUBCLO_DATE_UPD_RCVD	0x0e	/* Received update on date & time */
-#define P6510_SUBCLO_ALARM_RCVD	0xff	/* Received alarm */
+#define P6510_SUBCLO_ALARM_RCVD		0x1a	/* Received alarm */
 /* Alarm on/off */
 #define P6510_ALARM_ENABLED	0x02	/* Alarm enabled */
 #define P6510_ALARM_DISABLED	0x01	/* Alarm disabled */
