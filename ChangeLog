@@ -19,6 +19,7 @@
     o getcalendarnote support                      (BORBELY Zoltan)
     o writecalendarnote support                    (BORBELY Zoltan)
     o deletecalendarnote support                   (BORBELY Zoltan)
+    o various minor calendar handling fixes        (BORBELY Zoltan)
  * gnokii updates
     o initialize error variables                             (SuSE)
 

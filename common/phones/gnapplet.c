@@ -1280,7 +1280,7 @@ static gn_error gnapplet_calendar_note_write(gn_data *data, struct gn_statemachi
 	pkt_put_uint32(&pkt, data->calnote->location);
 	pkt_put_uint8(&pkt, data->calnote->type);
 	pkt_put_timestamp(&pkt, &data->calnote->time);
-	if (data->calnote->alarm.enabled)
+	if (data->calnote->alarm.enabled && data->calnote->alarm.timestamp.year != 0)
 		pkt_put_timestamp(&pkt, &data->calnote->alarm.timestamp);
 	else {
 		gn_timestamp null_ts;
@@ -1288,7 +1288,10 @@ static gn_error gnapplet_calendar_note_write(gn_data *data, struct gn_statemachi
 		pkt_put_timestamp(&pkt, &null_ts);
 	}
 	pkt_put_string(&pkt, data->calnote->text);
-	pkt_put_string(&pkt, data->calnote->phone_number);
+	if (data->calnote->type == GN_CALNOTE_CALL)
+		pkt_put_string(&pkt, data->calnote->phone_number);
+	else
+		pkt_put_string(&pkt, "");
 	pkt_put_uint16(&pkt, data->calnote->recurrence);
 
 	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CALENDAR);
@@ -1322,8 +1325,8 @@ static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *messa
 		cal->location = pkt_get_uint32(&pkt);
 		cal->type = pkt_get_uint8(&pkt);
 		pkt_get_timestamp(&cal->time, &pkt);
-		cal->alarm.enabled = pkt_get_bool(&pkt);
 		pkt_get_timestamp(&cal->alarm.timestamp, &pkt);
+		cal->alarm.enabled = (cal->alarm.timestamp.year != 0);
 		pkt_get_string(cal->text, sizeof(cal->text), &pkt);
 		pkt_get_string(cal->phone_number, sizeof(cal->phone_number), &pkt);
 		cal->recurrence = pkt_get_uint16(&pkt);
