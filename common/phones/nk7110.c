@@ -243,23 +243,28 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 	GSM_Data data;
 	char model[10];
 	GSM_Error err;
-	int try = 0, connected = 0;
+	bool connected = false;
+	unsigned int try = 0;
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_7110, sizeof(GSM_Phone));
 
 	dprintf("Connecting\n");
 	while (!connected) {
+		if (try > 2) break;
 		switch (state->Link.ConnectionType) {
 		case GCT_DAU9P:
-			if (try == 0) try = 1;
+			try++;
+		case GCT_DLR3P:
+			if (try > 1) {
+				try = 3;
+				break;
+			}
 		case GCT_Serial:
-			if (try > 1) return GE_NOTSUPPORTED;
-			err = FBUS_Initialise(&(state->Link), state, 1 - try);
+			err = FBUS_Initialise(&(state->Link), state, try++);
 			break;
 		case GCT_Infrared:
 		case GCT_Irda:
-			if (try > 0) return GE_NOTSUPPORTED;
 			err = PHONET_Initialise(&(state->Link), state);
 			break;
 		default:
@@ -268,7 +273,6 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 
 		if (err != GE_NONE) {
 			dprintf("Error in link initialisation: %d\n", err);
-			try++;
 			continue;
 		}
 
@@ -277,9 +281,10 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 		/* Now test the link and get the model */
 		GSM_DataClear(&data);
 		data.Model = model;
-		if (state->Phone.Functions(GOP_GetModel, &data, state) != GE_NONE) try++;
-		else connected = 1;
+		if (state->Phone.Functions(GOP_GetModel, &data, state) == GE_NONE)
+			connected = true;
 	}
+	if (!connected) return err;
 	/* Check for 7110 and alter the startup logo size */
 	if (strcmp(model, "NSE-5") == 0) {
 		state->Phone.Info.StartupLogoH = 65;

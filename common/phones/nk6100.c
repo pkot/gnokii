@@ -418,7 +418,9 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
+		state->Link.ConnectionType = GCT_DAU9P;
 	case GCT_Infrared:
+	case GCT_DAU9P:
 		err = FBUS_Initialise(&(state->Link), state, 0);
 		break;
 	case GCT_Irda:

@@ -50,7 +50,6 @@
 
 #include "links/fbus.h"
 
-static bool FBUS_OpenSerial(bool dlr3);
 static void FBUS_RX_StateMachine(unsigned char rx_byte);
 static GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
 static int FBUS_TX_SendAck(u8 message_type, u8 message_seq);
@@ -83,6 +82,44 @@ static bool FBUS_OpenSerial(bool dlr3)
 	return (true);
 }
 
+static bool AT2FBUS_OpenSerial()
+{
+        unsigned char init_char = 0x55;
+        unsigned char end_init_char = 0xc1;
+        int count, res;
+        unsigned char buffer[255];
+ 
+        /* Open device. */
+        if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
+                perror(_("Couldn't open FBUS device"));
+                return false;
+        }
+ 
+        device_setdtrrts(0, 0);
+        sleep(1);
+        device_setdtrrts(1, 1);
+        device_changespeed(19200);
+        sleep(1);
+        device_write("AT\r", 3);
+        sleep(1);
+	res = device_read(buffer, 255);
+        device_write("AT&F\r", 5);
+        usleep(100000);
+	res = device_read(buffer, 255);
+        device_write("AT*NOKIAFBUS\r", 13);
+        usleep(100000);
+	res = device_read(buffer, 255);
+ 
+        device_changespeed(115200);
+ 
+        for (count = 0; count < 32; count++) {
+                device_write(&init_char, 1);
+        }
+        device_write(&end_init_char, 1);
+        usleep(1000000);
+ 
+        return (true);
+}
 
 static bool FBUS_OpenIR(void)
 {
@@ -490,12 +527,12 @@ static int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
 /* newlink is actually part of state - but the link code should not anything about state */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type)
+GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
 {
 	unsigned char init_char = 0x55;
 	int count;
+	bool err;
 
-	if (type > 2) return GE_FAILED;
 	/* 'Copy in' the global structures */
 	glink = newlink;
 	statemachine = state;
@@ -511,14 +548,44 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type)
 	/* Start up the link */
 	flink.RequestSequenceNumber = 0;
 
-	if (glink->ConnectionType == GCT_Infrared) {
+	switch (glink->ConnectionType) {
+	case GCT_Infrared:
 		if (!FBUS_OpenIR())
 			return GE_FAILED;
-	} else {		/* ConnectionType == GCT_Serial */
-		/* FBUS_OpenSerial(0) - try dau-9p
-		 * FBUS_OpenSerial(n != 0) - try dlr-3p */
-		if (!FBUS_OpenSerial(type))
+		break;
+	case GCT_Serial:
+		switch (try) {
+		case 0:
+		case 1:
+			err = FBUS_OpenSerial(1 - try);
+			break;
+		case 2:
+			err = AT2FBUS_OpenSerial();
+			break;
+		default:
 			return GE_FAILED;
+		}
+		if (!err) return GE_FAILED;
+		break;
+	case GCT_DAU9P:
+		if (!FBUS_OpenSerial(0))
+			return GE_FAILED;
+		break;
+	case GCT_DLR3P:
+		switch (try) {
+		case 0:
+			err = AT2FBUS_OpenSerial();
+			break;
+		case 1:
+			err = FBUS_OpenSerial(1);
+			break;
+		default:
+			return GE_FAILED;
+		}
+		if (!err) return GE_FAILED;
+		break;
+	default:
+		return GE_FAILED;
 	}
 
 	/* Send init string to phone, this is a bunch of 0x55 characters. Timing is

@@ -96,7 +96,7 @@ typedef struct{
 	u8 RequestSequenceNumber;
 } FBUS_Link;
 
-GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type);
+GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try);
 
 int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
 

@@ -337,6 +337,7 @@ static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 	GSM_DataClear(&data);
 
 	if (!strcasecmp(Connection, "dau9p"))    connection = GCT_DAU9P; /* Use only with 6210/7110 for faster connection with such cable */
+	if (!strcasecmp(Connection, "dlr3p"))    connection = GCT_DLR3P;
 	if (!strcasecmp(Connection, "infrared")) connection = GCT_Infrared;
 	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
 	if (!strcasecmp(Connection, "tcp"))      connection = GCT_TCP;
