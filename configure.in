@@ -230,14 +230,11 @@ AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_so
 		[struct sockaddr_rc rc;],
 		ac_cv_have_sockaddr_rc=yes,
 		ac_cv_have_sockaddr_rc=no)])
+USE_BLUETOOTH="no"
 if test $ac_cv_have_sockaddr_rc = yes; then
 	AC_DEFINE(HAVE_BLUETOOTH)
 	USE_BLUETOOTH="yes"
-	HAVE_BLUETOOTH_EXP="1"
 	LIBS="$LIBS -lbluetooth"
-else
-	HAVE_BLUETOOTH_EXP="0"
-	USE_BLUETOOTH="no"
 fi
 
 dnl ======================== Checks for X base support 
@@ -519,8 +516,6 @@ AC_SUBST(XPM_LIBS)
 AC_SUBST(HAVE_XGNOKII)
 AC_SUBST(WIN32)
 
-AC_SUBST(HAVE_BLUETOOTH_EXP)
-
 AC_OUTPUT(
    Makefile.global
    po/Makefile.in
@@ -528,7 +523,6 @@ AC_OUTPUT(
    packaging/RedHat/gnokii.spec
    packaging/Slackware/SlackBuild
    common/gnokii.pc
-   include/gnokii/data.h
    )
 
 
