@@ -16,7 +16,7 @@ AC_PREFIX_DEFAULT("/usr/local")
 
 dnl ======================== Default setting
 CFLAGS="-O2 -Wall"
-ALL_LINGUAS="cs de et fi nl sk pl"
+ALL_LINGUAS="cs de et fi nl sk pl it"
 
 dnl ======================== Checks for programs.
 AC_PROG_CC
