@@ -130,6 +130,21 @@ void pkt_put_timestamp(pkt_buffer *buf, const gn_timestamp *x)
 	pkt_put_uint8(buf, x->second);
 }
 
+void pkt_put_bool(pkt_buffer *buf, int x)
+{
+	pkt_put_uint8(buf, x ? 1 : 0);
+}
+
+void pkt_put_bytes(pkt_buffer *buf, const uint8_t *x, uint16_t n)
+{
+	uint8_t *b;
+
+	pkt_put_uint16(buf, n);
+
+	b = buffer_expand(buf, n);
+	memcpy(b, x, n);
+}
+
 int8_t pkt_get_int8(pkt_buffer *buf)
 {
 	uint8_t *b = buffer_expand(buf, 1);
@@ -197,4 +212,22 @@ gn_timestamp *pkt_get_timestamp(gn_timestamp *t, pkt_buffer *buf)
 	t->timezone = 0;
 
 	return t;
+}
+
+int pkt_get_bool(pkt_buffer *buf)
+{
+	return pkt_get_uint8(buf) ? (1 == 1) : 0;
+}
+
+uint16_t pkt_get_bytes(uint8_t *s, int len, pkt_buffer *buf)
+{
+	uint16_t l;
+	uint8_t *b;
+
+	l = pkt_get_uint16(buf);
+	assert(l <= len);
+	b = buffer_expand(buf, l);
+	memcpy(s, b, l);
+
+	return l;
 }

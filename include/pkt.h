@@ -47,6 +47,8 @@ void pkt_put_uint16(pkt_buffer *buf, uint16_t x);
 void pkt_put_uint32(pkt_buffer *buf, uint32_t x);
 void pkt_put_string(pkt_buffer *buf, const char *x);
 void pkt_put_timestamp(pkt_buffer *buf, const gn_timestamp *x);
+void pkt_put_bool(pkt_buffer *buf, int x);
+void pkt_put_bytes(pkt_buffer *buf, const uint8_t *x, uint16_t n);
 
 int8_t pkt_get_int8(pkt_buffer *buf);
 int16_t pkt_get_int16(pkt_buffer *buf);
@@ -56,5 +58,7 @@ uint16_t pkt_get_uint16(pkt_buffer *buf);
 uint32_t pkt_get_uint32(pkt_buffer *buf);
 char *pkt_get_string(char *s, int slen, pkt_buffer *buf);
 gn_timestamp *pkt_get_timestamp(gn_timestamp *t, pkt_buffer *buf);
+int pkt_get_bool(pkt_buffer *buf);
+uint16_t pkt_get_bytes(uint8_t *s, int len, pkt_buffer *buf);
 
 #endif

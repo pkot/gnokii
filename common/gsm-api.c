@@ -134,6 +134,7 @@ API gn_error gn_gsm_initialise(struct gn_statemachine *sm)
 	dprintf("smsc_timeout: %d\n", sm->config.smsc_timeout);
 	dprintf("connect_script: %s\n", sm->config.connect_script);
 	dprintf("disconnect_script: %s\n", sm->config.disconnect_script);
+	dprintf("rfcomm_cn: %d\n", (int)sm->config.rfcomm_cn);
 
 	if (sm->config.model[0] == '\0') return GN_ERR_UNKNOWNMODEL;
 	if (sm->config.port_device[0] == '\0') return GN_ERR_FAILED;

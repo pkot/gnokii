@@ -13,6 +13,7 @@
  * gnapplet series updates
     o folder management support (list, status, create,
       delete) support added                        (BORBELY Zoltan)
+    o getsms support                               (BORBELY Zoltan)
  * gnokii updates
     o --showsmsfolderstatus added                  (BORBELY Zoltan)
     o folder id display fix in --deletesmsfolder   (BORBELY Zoltan)
@@ -27,6 +28,8 @@
       seems to be the problem when using gnocky         (Pawel Kot)
     o clear strings before using them in phonebook reading
                                                    (Dmitry Astapov)
+    o display rfcomm_channel parameter at startup  (BORBELY Zoltan)
+    o fix sms timestamp export/import              (BORBELY Zoltan)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

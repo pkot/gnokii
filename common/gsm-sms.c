@@ -181,7 +181,7 @@ static char *sms_timestamp_print(u8 *number)
  * The function fills int gnokii datetime structure basing on the given datetime
  * in the binary format. It is Y2K compliant.
  */
-static gn_timestamp *sms_timestamp_unpack(u8 *number, gn_timestamp *dt)
+gn_timestamp *sms_timestamp_unpack(unsigned char *number, gn_timestamp *dt)
 {
 	if (!dt) return NULL;
 	memset(dt, 0, sizeof(gn_timestamp));
@@ -218,10 +218,10 @@ static gn_timestamp *sms_timestamp_unpack(u8 *number, gn_timestamp *dt)
  * @dt: datetime structure to be read
  *
  */
-static u8 *sms_timestamp_pack(gn_timestamp *dt, u8 *number)
+unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
 {
 	if (!number) return NULL;
-	memset(number, 0, sizeof(unsigned char));
+	memset(number, 0, GN_SMS_DATETIME_MAX_LENGTH);
 	if (!dt) return number;
 
 	/* Ugly hack, but according to the GSM specs, the year is stored

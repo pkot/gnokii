@@ -88,6 +88,7 @@ static gn_error gnapplet_sms_folder_list(gn_data *data, struct gn_statemachine *
 static gn_error gnapplet_sms_folder_status(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_folder_create(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_folder_delete(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_message_read(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -130,6 +131,31 @@ gn_driver driver_gnapplet = {
 };
 
 
+static void gnapplet_get_sms_number(char *buf, pkt_buffer *pkt, int smsc)
+{
+	char num[GN_PHONEBOOK_NUMBER_MAX_LENGTH];
+	int type;
+
+	pkt_get_string(num, sizeof(num), pkt);
+
+	type = (num[0] == '+') ? GN_GSM_NUMBER_International : GN_GSM_NUMBER_Unknown;
+	buf[0] = char_semi_octet_pack(num, buf + 1, type);
+	if (smsc) {
+		if (buf[0] % 2) buf[0]++;
+		if (buf[0]) buf[0] = buf[0] / 2 + 1;
+	}
+}
+
+
+static void gnapplet_get_time(char *buf, pkt_buffer *pkt)
+{
+	gn_timestamp dt;
+
+	pkt_get_timestamp(&dt, pkt);
+	sms_timestamp_pack(&dt, buf);
+}
+
+
 static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	if (!DRVINSTANCE(state) && op != GN_OP_Init) return GN_ERR_INTERNALERROR;
@@ -170,6 +196,8 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_sms_folder_create(data, state);
 	case GN_OP_DeleteSMSFolder:
 		return gnapplet_sms_folder_delete(data, state);
+	case GN_OP_GetSMS:
+		return gnapplet_sms_message_read(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -625,10 +653,50 @@ static gn_error gnapplet_sms_folder_delete(gn_data *data, struct gn_statemachine
 }
 
 
+static gn_error gnapplet_sms_validate(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+
+	if (!data->sms_folder) return GN_ERR_INTERNALERROR;
+
+	if (data->sms_folder->folder_id != data->raw_sms->memory_type) {
+		data->sms_folder->folder_id = data->raw_sms->memory_type;
+		if ((error = gnapplet_sms_folder_status(data, state)) != GN_ERR_NONE)
+			return error;
+	}
+
+	if (data->raw_sms->number < 1) return GN_ERR_INVALIDLOCATION;
+	if (data->raw_sms->number > data->sms_folder->number)
+		return GN_ERR_EMPTYLOCATION;
+
+	return GN_ERR_NONE;
+}
+
+
+static gn_error gnapplet_sms_message_read(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	gn_error error;
+	REQUEST_DEF;
+
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+
+	if ((error = gnapplet_sms_validate(data, state)) != GN_ERR_NONE) return error;
+	data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_MESSAGE_READ_REQ);
+	pkt_put_uint16(&pkt, data->raw_sms->memory_type);
+	pkt_put_uint32(&pkt, data->raw_sms->number);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
 static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_folder_list *folders;
 	gn_sms_folder *folder;
+	gn_sms_raw *rawsms;
 	int i;
 	REPLY_DEF;
 
@@ -671,6 +739,33 @@ static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, i
 		if (error != GN_ERR_NONE) return error;
 		memset(folder, 0, sizeof(gn_sms_folder));
 		folder->folder_id = pkt_get_uint16(&pkt);
+		break;
+
+	case GNAPPLET_MSG_SMS_MESSAGE_READ_RESP:
+		if (!(rawsms = data->raw_sms)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		memset(rawsms, 0, sizeof(rawsms));
+		rawsms->type = pkt_get_uint8(&pkt);
+		rawsms->more_messages = pkt_get_bool(&pkt);
+		rawsms->reply_via_same_smsc = pkt_get_bool(&pkt);
+		rawsms->reject_duplicates = pkt_get_bool(&pkt);
+		rawsms->report = pkt_get_bool(&pkt);
+		rawsms->number = pkt_get_uint8(&pkt);
+		rawsms->reference = pkt_get_uint8(&pkt);
+		rawsms->pid = pkt_get_uint8(&pkt);
+		rawsms->report_status = pkt_get_uint8(&pkt);
+		gnapplet_get_time(rawsms->smsc_time, &pkt);
+		gnapplet_get_time(rawsms->time, &pkt);
+		gnapplet_get_sms_number(rawsms->message_center, &pkt, 1);
+		gnapplet_get_sms_number(rawsms->remote_number, &pkt, 0);
+		rawsms->dcs = pkt_get_uint8(&pkt);
+		rawsms->udh_indicator = pkt_get_bool(&pkt) ? 0x40 : 0x00;
+		rawsms->length = pkt_get_bytes(rawsms->user_data, sizeof(rawsms->user_data), &pkt);
+		rawsms->user_data_length = rawsms->length;
+		rawsms->validity_indicator = pkt_get_uint8(&pkt);
+		pkt_get_bytes(rawsms->validity, sizeof(rawsms->validity), &pkt);
+		rawsms->memory_type = pkt_get_uint16(&pkt);
+		rawsms->status = pkt_get_uint8(&pkt);
 		break;
 
 	default:
