@@ -64,6 +64,8 @@
  * build system updates
     o reflecting smsd libtoolization in packages   (BORBELY Zoltan)
     o configure enables debugging support          (BORBELY Zoltan)
+    o disable nls support when neither xgettext nor msgfmt is
+      found, we're not able to build po/ then           (Pawel Kot)
 
 0.5.10
 ======

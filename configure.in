@@ -38,6 +38,10 @@ AC_CHECK_FUNCS(locale_charset)
 if test x$am_cv_langinfo_codeset != xyes -a x$ac_cv_func_locale_charset != xyes ; then
 	NEED_LOCALE_CHARSET=1
 fi
+# if msgfmt or xgettext is not present on the system, disable nls build
+if test "$MSGFMT" = ":" -o "$XGETTEXT" = ":"; then
+	USE_NLS="no"
+fi
 
 dnl ======================== Check for include/config.h.in
 AC_MSG_CHECKING([for include/config.h.in])
