@@ -22,6 +22,23 @@ Quickstart
     $ $EDITOR ~/.gnokiirc
 
 
+Requirements
+============
+
+Additional libraries and header files needed for the various gnokii parts:
+
+xgnokii: libX11, libXpm, glib-1.2, gtk+-1.2
+bitmap support: libXpm for xpm files support, gnokii can deal without this
+irda support: linux kernel includes
+bluetooth support: bluez
+
+Sources:
+http://www.xfree86.org/		libX11, libXpm
+http://www.gtk.org/		glib, gtk
+http://www.kernel.org/		linux kernel includes
+http://bluez.sf.net/		bluez (Linux Bluetooth)
+
+
 Verbose instructions
 ====================
 

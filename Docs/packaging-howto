@@ -13,16 +13,16 @@ GENERAL POLICY
 
 For more install/compilation information see the INSTALL file.
 
-Makefiles support 'make install prefix=<your_directory>' for package
+Makefiles support 'make DESTDIR=<your_directory> install' for package
 building.  For example, in .spec:
 
 	./configure --prefix=/usr
 
-	make install prefix=$RPM_BUILD_ROOT/usr
+	make DESTDIR=$RPM_BUILD_ROOT/usr install
 
 (You do not need to create any directories - just 'make && make install'.)
 
-For installation procedures use 'make install' or 'make install prefix=',
+For installation procedures use 'make install' or 'make DESTDIR=<dir> install',
 and verify that all outputs from the procedure are correct.
 
 Please, DO NOT make any corrections using your package-specific build
@@ -119,6 +119,12 @@ Win32:
 
 
 DOCUMENT HISTORY
+
+2002-09-28
+
+Pawel Kot <pkot@linuxnews.pl>
+
+* use 'make DESTDIR=<dir> install' instead of 'make install prefix=<dir>'
 
 2001-06-18
 

@@ -1,7 +1,3 @@
-2002-09-17  gettextize  <bug-gnu-gettext@gnu.org>
-
-	* configure.in (AC_OUTPUT): Add po/Makefile.in.
-
 0.5.0 (Not released yet)
 =====
  * Change the external API (provided by libgnokii to the user
@@ -104,6 +100,10 @@
       to winserial.c                                    (Mark Lakata)
     o don't use alloca(3)                                 (Pawel Kot)
  * proper unicode support in gsm-encoding     (Hu Gang, Markus Plail)
+ * docs updates:
+    o mention 'make DESTDIR=<dir> install' in the packaging howto
+                                                          (Pawel Kot)
+    o mention external libraries needed for gnokii        (Pawel Kot)
 
 0.4.3
 =====
@@ -621,7 +621,8 @@
     o strsep function provided if not present          (Markus Plail)
  * xgnokii updates
     o extended AddCall to accept text and phone number (Markus Plail)
-    o added (De)Activate SMS reading in SMS window menu (Markus Plail)
+    o added (De)Activate SMS reading in SMS window menu
+                                                       (Markus Plail)
     o changed the default size of SMS windows          (Markus Plail)
     o speeded up reading contacts (skip locations after all
       contacts are read (according to memory status))  (Markus Plail)
