@@ -19,6 +19,7 @@
     o fix the order of the incoming functions             (Pawel Kot)
     o fix phonebook names saving in 3310/3330/3410 phones;
       names are in unicode                                (Pawel Kot)
+    o Nokia 8250 is know to work with the driver           (Roger So)
  * 6510 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
