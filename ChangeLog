@@ -20,6 +20,7 @@
     o fix FreeBSD build  (Alexander V. Ribchansky, Peter Kolmisoppi)
  * libsms fixes
     o fix sms_free_deleted()                           (Ulrich Hopp)
+    o fix segfault on reading sms in nk7110 driver       (Pawel Kot)
  * xgnokii fixes
     o indexes with messages list were switched         (Ulrich Hopp)
     o fix problems with choosing names from the addressbook on
