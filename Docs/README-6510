@@ -33,23 +33,23 @@ The current code is able to:
  * send basic text messages
  * read/write calendar entries
  * read the memory status
- * read bitmaps (group, operator logos)
+ * read/write bitmaps (group, operator logos)
  * read network info
  * read RF/battery level
  * read date/time
  * read list of ringtones
  * read/write profiles
+ * read WAP bookmarks/settings
+ * read/write/delete ToDo entries
 
 Hint: For all these phones you can also use AT driver, as they all have a
-builtin hardware modem, which may give you more functionality for the
-moment.
+builtin hardware modem.
 
 * Bugs *
 
  * when using dlr3p connection type after the several sequent connection the
    phone got puzzled and you need to reset it to be able to connect it again
    (or also enable IrDA)
- * problems writing phonebook entries (numbers may be attached to number entries)
 
 * TODO *
 

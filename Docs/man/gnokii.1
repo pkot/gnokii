@@ -70,6 +70,9 @@ get the notes with numbers from \fIstart\fR to \fIend\fR from calendar.
 write the notes to ToDo list.
 .PP
 number \- location of the note in the vCalendar file
+.TP 
+.BR "\-\-deletealltodos"
+delete all notes from the ToDo list.
 
 .SS CALENDAR
 .TP 
@@ -164,6 +167,28 @@ use it then with \fI--writephonebook\fR. Normally you got verbose output.
 reads data from stdin and writes to phonebook
 When \-i option is used, refuses to overwrite existing entries.
 Uses the same format as provided by the output of the getphonebook command.
+
+.SS WAP
+.TP
+.BR "\-\-getwapbookmark \fInumber\fP"
+reads the specified WAP bookmark from phone
+.TP
+.BR "\-\-writewapbookmark \fIname\fP \fIURL\fP"
+write WAP bookmark to phone
+.TP
+.BR "\-\-deletewapbookmark \fInumber\fP"
+delete WAP bookmark from phone
+.TP
+.BR "\-\-getwapsetting \fInumber\fP [\fI-r\fP]"
+read WAP setting from phone
+.TP
+.BR "\-\-writewapsetting"
+reads data from stdin and writes it to phone
+Hint: see syntax from \fI--writephone\fP \fI-r\fP option
+.TP
+.BR "\-\-activatewapsetting \fInumber\fP"
+activate WAP setting \fInumber\fP
+
 
 .SS DATE, TIME AND ALARM
 .TP 
