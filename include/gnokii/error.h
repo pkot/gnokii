@@ -13,7 +13,10 @@
   Error codes.
 
   $Log$
-  Revision 1.3  2002-01-10 14:23:38  pkot
+  Revision 1.4  2002-01-16 12:39:21  pkot
+  Dump unhandled frames
+
+  Revision 1.3  2002/01/10 14:23:38  pkot
   Allow to read all phonebook entries easily (Simon Huggins)
 
   Revision 1.2  2001/11/08 16:34:20  pkot
@@ -77,7 +80,11 @@ typedef enum {
 	/* The following are here in anticipation of data call requirements. */
 
 	GE_LINEBUSY,              /* 41. Outgoing call requested reported line busy */
-	GE_NOCARRIER              /* 42. No Carrier error during data call setup ? */
+	GE_NOCARRIER,             /* 42. No Carrier error during data call setup ? */
+
+	/* The following value signals the current frame is unhandled */
+
+	GE_UNHANDLEDFRAME,        /* 43. The current frame isn't handled by the incoming function */
 } GSM_Error;
 
 extern char *print_error(GSM_Error e);

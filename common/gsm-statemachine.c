@@ -98,6 +98,8 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 		}
 		c++;
 	}
+	if (res == GE_UNHANDLEDFRAME)
+		SM_DumpUnhandledFrame(state, messagetype, message, messagesize);
 	if (temp != 0) {
 		dprintf("Unknown Frame Type %02x\n", messagetype);
 		state->Phone.DefaultFunction(messagetype, message, messagesize);
@@ -228,4 +230,30 @@ GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm)
 		return GE_INTERNALERROR;
 	}
 	return sm->Phone.Functions(op, data, sm);
+}
+
+/* Prints a warning message about unhandled frames */
+void SM_DumpUnhandledFrame(GSM_Statemachine *state, int messagetype, unsigned char *message, int messagesize)
+{
+	int i;
+
+	dprintf("UNHANDLED FRAME RECEIVED\n"
+		"request: 0x%02x / 0x%04x", state->LastMsgType, state->LastMsgSize);
+	for (i = 0; i < state->LastMsgSize; i++) {
+		if (i % 16 == 0)
+			dprintf("\n    ");
+		dprintf("%02x ", ((unsigned char *)state->LastMsg)[i]);
+	}
+	dprintf("\n");
+
+	dprintf("reply: 0x%02x / 0x%04x", messagetype, messagesize);
+	for (i = 0; i < messagesize; i++) {
+		if (i % 16 == 0)
+			dprintf("\n    ");
+		}
+		dprintf("%02x ", message[i]);
+	}
+	dprintf("\n");
+
+	dprintf("Please read the Docs/* and send a bug report!\n");
 }
