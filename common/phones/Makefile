@@ -29,9 +29,9 @@ OBJS =	generic.o \
 	atnok.o \
 	atsie.o \
 	dc2711.o \
-	fake.o
+	fake.o \
+	nk3110.o 
 
-#	nk3110.o \
 #	nk2110.o \
 
 all: PHONES.o

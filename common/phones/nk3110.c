@@ -46,64 +46,50 @@
 #include "links/fbus-3110.h"
 #include "phones/nokia.h"
 
+#include "gnokii-internal.h"
+#include "gsm-api.h"
+
 /* Prototypes */
-static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_Initialise(GSM_Statemachine *state);
-static gn_error P3110_GetSMSInfo(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_GetPhoneInfo(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_GetStatusInfo(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_Identify(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingCallAnswered(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingCallEstablished(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingRestart(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSSendError(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSError(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingPINEntered(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-void P3110_KeepAliveLoop(GSM_Statemachine *state);
-void P3110_DecodeTime(unsigned char *b, GSM_DateTime *dt);
-int P3110_bcd2int(u8 x);
+static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_Initialise(struct gn_statemachine *state);
+static gn_error P3110_GetSMSInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_GetPhoneInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_GetStatusInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_Identify(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *state, bool save_sms);
+static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingCall(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingCallAnswered(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingCallEstablished(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingRestart(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSSendError(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSSave(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSSaveError(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSError(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingPINEntered(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 
-/* Some globals */
+static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req, int ulength, bool save_sms);
 
-static SMSMessage_Layout nk3110_deliver = {
-	true, /* IsSupported */
-	16, false, false, /* MessageCenter */
-	-1, -1, -1, -1,  3, -1, -1, -1, 15,  7,  5,
-	-1, -1, -1, /* Validity */
-	17, false, false, /* RemoteNumber */
-	 8, /* SMSC Time */
-	-1, /* Time */
-	 2, /* Memory Type */
-	 4, /* Status */
-	18, false /* User Data */
-};
-
-static SMSMessage_PhoneLayout nk3110_layout;
-
-
-static GSM_IncomingFunctionType IncomingFunctions[] = {
+static gn_incoming_function_type incoming_functions[] = {
 	{ 0x0a, P3110_IncomingNothing },
 	{ 0x0b, P3110_IncomingCall },
 	{ 0x0c, P3110_IncomingNothing },
@@ -127,6 +113,8 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x27, P3110_IncomingSMSUserData },
 	{ 0x28, P3110_IncomingSMSSend },
 	{ 0x29, P3110_IncomingSMSSendError },
+	{ 0x2a, P3110_IncomingSMSSave },
+	{ 0x2b, P3110_IncomingSMSSaveError },
 	/* ... */
 	{ 0x2c, P3110_IncomingSMSHeader },
 	{ 0x2d, P3110_IncomingSMSError },
@@ -145,65 +133,67 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0, NULL}
 };
 
-GSM_Phone phone_nokia_3110 = {
-	IncomingFunctions,
-	PGEN_IncomingDefault,
+gn_driver driver_nokia_3110 = {
+	incoming_functions,
+	pgen_incoming_default,
 	/* Mobile phone information */
 	{
 		"3110|3810|8110|8110i",	/* Models */
 		4,			/* Max RF Level */
 		0,			/* Min RF Level */
-		GRF_Arbitrary,		/* RF level units */
+		GN_RF_Arbitrary,	/* RF level units */
 		4,			/* Max Battery Level */
 		0,			/* Min Battery Level */
-		GBU_Arbitrary,		/* Battery level units */
-		GDT_None,		/* No date/time support */
-		GDT_None,		/* No alarm support */
+		GN_BU_Arbitrary,	/* Battery level units */
+		GN_DT_None,		/* No date/time support */
+		GN_DT_None,		/* No alarm support */
 		0,			/* Max alarms = 0 */
 		0, 0,                   /* Startup logo size */
 		0, 0,                   /* Op logo size */
 		0, 0                    /* Caller logo size */
 	},
-	Functions,
+	functions,
 	NULL
 };
 
-static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
+static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	switch (op) {
-	case GOP_Init:
+	case GN_OP_Init:
 		return P3110_Initialise(state);
-	case GOP_Terminate:
-		return PGEN_Terminate(data, state);
-	case GOP_GetModel:
-	case GOP_GetRevision:
-	case GOP_GetImei:
+	case GN_OP_Terminate:
+		return pgen_terminate(data, state);
+	case GN_OP_GetModel:
+	case GN_OP_GetRevision:
+	case GN_OP_GetImei:
 		return P3110_GetPhoneInfo(data, state);
-	case GOP_Identify:
+	case GN_OP_Identify:
 		return P3110_Identify(data, state);
-	case GOP_GetBatteryLevel:
-	case GOP_GetRFLevel:
+	case GN_OP_GetBatteryLevel:
+	case GN_OP_GetRFLevel:
 		return P3110_GetStatusInfo(data, state);
-	case GOP_GetMemoryStatus:
+	case GN_OP_GetMemoryStatus:
 		return P3110_GetMemoryStatus(data, state);
-	case GOP_ReadPhonebook:
-	case GOP_WritePhonebook:
-	case GOP_GetPowersource:
-	case GOP_GetAlarm:
-	case GOP_GetSMSStatus:
-	case GOP_GetIncomingCallNr:
-	case GOP_GetNetworkInfo:
+	case GN_OP_ReadPhonebook:
+	case GN_OP_WritePhonebook:
+	case GN_OP_GetPowersource:
+	case GN_OP_GetAlarm:
+	case GN_OP_GetSMSStatus:
+	case GN_OP_GetIncomingCallNr:
+	case GN_OP_GetNetworkInfo:
 		return GN_ERR_NOTIMPLEMENTED;
-	case GOP_GetSMS:
+	case GN_OP_GetSMS:
 		return P3110_GetSMSMessage(data, state);
-	case GOP_DeleteSMS:
+	case GN_OP_DeleteSMS:
 		return P3110_DeleteSMSMessage(data, state);
-	case GOP_SendSMS:
-		return P3110_SendSMSMessage(data, state);
-	case GOP_GetSMSCenter:
+	case GN_OP_SendSMS:
+		return P3110_SendSMSMessage(data, state, false);
+	case GN_OP_SaveSMS:
+		return P3110_SendSMSMessage(data, state, true);
+	case GN_OP_GetSMSCenter:
 		return P3110_GetSMSInfo(data, state);
-	case GOP_GetSpeedDial:
-	case GOP_GetDateTime:
+	case GN_OP_GetSpeedDial:
+	case GN_OP_GetDateTime:
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -218,46 +208,36 @@ static bool DisableKeepAlive;
 static int KeepAliveTimer;
 
 /* Initialise is the only function allowed to 'use' state */
-static gn_error P3110_Initialise(GSM_Statemachine *state)
+static gn_error P3110_Initialise(struct gn_statemachine *state)
 {
-	GSM_Data data;
+	gn_data data;
 	u8 init_sequence[20] = {0x02, 0x01, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x55, 0x63, 0xa8, 0x00, 0x00, 0x07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80};
 
 	/* Copy in the phone info */
-	memcpy(&(state->Phone), &phone_nokia_3110, sizeof(GSM_Phone));
-
-	/* SMS Layout */
-	nk3110_layout.Type = 0;
-	nk3110_layout.SendHeader = 0;
-	nk3110_layout.ReadHeader = 0;
-	nk3110_layout.Deliver = nk3110_deliver;
-	nk3110_layout.Submit = nk3110_deliver;
-	nk3110_layout.DeliveryReport = nk3110_deliver;
-	nk3110_layout.Picture = nk3110_deliver;
-	layout = nk3110_layout;
+	memcpy(&(state->driver), &driver_nokia_3110, sizeof(gn_driver));
 
 	/* Only serial connection is supported */
-	if (state->Link.ConnectionType != GCT_Serial) return GN_ERR_NOTSUPPORTED;
+	if (state->config.connection_type != GN_CT_Serial) return GN_ERR_NOTSUPPORTED;
 
 	/* Initialise FBUS link */
-	if (FB3110_Initialise(&(state->Link), state) != GN_ERR_NONE) {
+	if (fb3110_initialise(state) != GN_ERR_NONE) {
 		dprintf("Error in link initialisation\n");
 		return GN_ERR_NOTREADY;
 	}
 
 	/* Initialise state machine */
-	SM_Initialise(state);
+	sm_initialise(state);
 
 	/* 0x15 messages are sent by the PC during the initialisation phase.
 	   Anyway, the contents of the message are not understood so we
 	   simply send the same sequence observed between the W95 PC and
 	   the phone.  The init sequence may still be a bit flaky and is not
 	   fully understood. */
-	if (SM_SendMessage(state, 20, 0x15, init_sequence) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(20, 0x15, init_sequence, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
 	/* Wait for response to 0x15 sequence */
-	GSM_DataClear(&data);
-	if (SM_Block(state, &data, 0x16) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	gn_data_clear(&data);
+	if (sm_block(0x16, &data, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
 	/* Start sending keepalive messages in separate thread */
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
@@ -267,39 +247,40 @@ static gn_error P3110_Initialise(GSM_Statemachine *state)
 }
 
 
-static gn_error P3110_GetSMSInfo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_GetSMSInfo(gn_data *data, struct gn_statemachine *state)
 {
+	dprintf("Getting SMS info...\n");
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
-	if (SM_SendMessage(state, 0, 0x3f, NULL) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x41);
+	if (sm_message_send(0, 0x3f, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(0x41, data, state);
 }
 
-static gn_error P3110_GetPhoneInfo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_GetPhoneInfo(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting phone info...\n");
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
-	if (SM_SendMessage(state, 0, 0x4c, NULL) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x4d);
+	if (sm_message_send(0, 0x4c, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(0x4d, data, state);
 }
 
-static gn_error P3110_GetStatusInfo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_GetStatusInfo(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting phone status...\n");
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
-	if (SM_SendMessage(state, 0, 0x4a, NULL) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x4b);
+	if (sm_message_send(0, 0x4a, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(0x4b, data, state);
 }
 
-static gn_error P3110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting memory status...\n");
 
 	/* Check if this type of memory is available */
-	switch (data->MemoryStatus->MemoryType) {
-	case GMT_SM:
+	switch (data->memory_status->memory_type) {
+	case GN_MT_SM:
 		if (!SimAvailable) return GN_ERR_NOTREADY;
 		return P3110_GetSMSInfo(data, state);
-	case GMT_ME:
+	case GN_MT_ME:
 		if (P3110_MEMORY_SIZE_ME == 0) return GN_ERR_NOTREADY;
 		return P3110_GetSMSInfo(data, state);
 	default:
@@ -309,20 +290,21 @@ static gn_error P3110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 }
 
 
-static gn_error P3110_Identify(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_Identify(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Identifying...\n");
+	pnok_manufacturer_get(data->manufacturer);
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
-	if (SM_SendMessage(state, 0, 0x4c, NULL) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	SM_Block(state, data, 0x4d);
+	if (sm_message_send(0, 0x4c, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	sm_block(0x4d, data, state);
 
 	/* Check that we are back at state Initialised */
-	if (SM_Loop(state, 0) != Initialised) return GN_ERR_UNKNOWN;
+	if (gn_sm_loop(0, state) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
 	return GN_ERR_NONE;
 }
 
 
-static gn_error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
 	int timeout, c;
 	u8 response = 0, request[2];
@@ -332,22 +314,22 @@ static gn_error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 
-	if (!data->SMSMessage) return GN_ERR_INTERNALERROR;
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
-	switch(data->SMSMessage->MemoryType) {
-	case GMT_ME:
-		data->SMSMessage->MemoryType = 1; /* 3 in 8110, 1 is GMT_CB */
+	switch(data->raw_sms->memory_type) {
+	case GN_MT_ME:
+		data->raw_sms->memory_type = 1; /* 3 in 8110, 1 is GMT_CB */
 		break;
-	case GMT_SM:
-		data->SMSMessage->MemoryType = 2;
+	case GN_MT_SM:
+		data->raw_sms->memory_type = 2;
 		break;
 	default:
-		return  GN_ERR_INVALIDMEMORYTYPE);
+		return  GN_ERR_INVALIDMEMORYTYPE;
 	}
 
 	/* Set memory type and location in the request */
-	request[0] = data->SMSMessage->MemoryType;
-	request[1] = data->SMSMessage->Number;
+	request[0] = data->raw_sms->memory_type;
+	request[1] = data->raw_sms->number;
 
 	/* 0x25 messages requests the contents of an SMS message
 	   from the phone.  The first byte has only ever been
@@ -355,33 +337,33 @@ static gn_error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	   external memory.  Specifying memory 0x00 may request the
 	   first location?  Phone replies with 0x2c and 0x27 messages
 	   for valid locations, 0x2d for empty ones. */
-	if (SM_SendMessage(state, 2, 0x25, request) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
-	SM_WaitFor(state, data, 0x2d);
-	SM_WaitFor(state, data, 0x2c);
+	if (sm_message_send(2, 0x25, request, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	sm_wait_for(0x2d, data, state);	
+	sm_wait_for(0x2c, data, state);	
 
 	timeout = 30; /* ~3secs timeout */
 
 	do {
-		SM_Loop(state, 1);
+		gn_sm_loop(1, state);
 		timeout--;
-	} while ((timeout > 0) && state->NumReceived == 0);
+	} while ((timeout > 0) && state->received_number == 0);
 
 	/* timeout */
-	if (state->NumReceived == 0) return GN_ERR_TIMEOUT;
+	if (state->received_number == 0) return GN_ERR_TIMEOUT;
 
 	/* find response in state machine */
-	for (c = 0; c < state->NumWaitingFor; c++) {
+	for (c = 0; c < state->waiting_for_number; c++) {
 		if (state->ResponseError[c] != GN_ERR_BUSY) {
-			response = state->WaitingFor[c];
+			response = state->waiting_for[c];
 			error = state->ResponseError[c];
 		}
 	}
 
-	if (!data->RawData) return GN_ERR_INTERNALERROR;
+	/* if (!data->raw_data) return GN_ERR_INTERNALERROR; */
 
 	/* reset state machine */
-	SM_Reset(state);
+	sm_reset(state);
 
 	/* process response */
 	switch (response) {
@@ -390,8 +372,9 @@ static gn_error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 
 		/* Block for subsequent content frames... */
 		do {
-			SM_Block(state, data, 0x27);
-		} while (!data->RawData->Full);
+			dprintf("Waiting for content frames...\n");
+			sm_block(0x27, data, state);
+		} while (user_data_count < data->raw_sms->length);
 
 		return GN_ERR_NONE;
 	case 0x2d:
@@ -402,7 +385,7 @@ static gn_error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 }
 
 
-static gn_error P3110_DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
 	int timeout, c;
 	u8 response = 0, request[2];
@@ -412,20 +395,20 @@ static gn_error P3110_DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 
-	switch(data->SMSMessage->MemoryType) {
-	case GMT_ME:
-		data->SMSMessage->MemoryType = 1; /* 3 in 8110, 1 is GMT_CB */
+	switch(data->raw_sms->memory_type) {
+	case GN_MT_ME:
+		data->raw_sms->memory_type = 1; /* 3 in 8110, 1 is GMT_CB */
 		break;
-	case GMT_SM:
-		data->SMSMessage->MemoryType = 2;
+	case GN_MT_SM:
+		data->raw_sms->memory_type = 2;
 		break;
 	default:
-		return  GN_ERR_INVALIDMEMORYTYPE);
+		return  GN_ERR_INVALIDMEMORYTYPE;
 	}
 
 	/* Set memory type and location in the request */
-	request[0] = data->SMSMessage->MemoryType;
-	request[1] = data->SMSMessage->Number;
+	request[0] = data->raw_sms->memory_type;
+	request[1] = data->raw_sms->number;
 
 	/* 0x26 message deletes an SMS message from the phone.
 	   The first byte has only ever been observed to be 0x02
@@ -433,31 +416,31 @@ static gn_error P3110_DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	   external memory.  Phone replies with 0x2e for valid locations,
 	   0x2f for invalid ones.  If a location is empty but otherwise
 	   valid 0x2e is still returned. */
-	if (SM_SendMessage(state, 2, 0x26, request) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(2, 0x26, request, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
-	SM_WaitFor(state, data, 0x2e);
-	SM_WaitFor(state, data, 0x2f);
+	sm_wait_for(0x2e, data, state);
+	sm_wait_for(0x2f, data, state);
 
 	timeout = 30; /* ~3secs timeout */
 
 	do {
-		SM_Loop(state, 1);
+		gn_sm_loop(1, state);
 		timeout--;
-	} while ((timeout > 0) && state->NumReceived == 0);
+	} while ((timeout > 0) && state->received_number == 0);
 
 	/* timeout */
-	if (state->NumReceived == 0) return GN_ERR_TIMEOUT;
+	if (state->received_number == 0) return GN_ERR_TIMEOUT;
 
 	/* find response in state machine */
-	for (c = 0; c < state->NumWaitingFor; c++) {
+	for (c = 0; c < state->waiting_for_number; c++) {
 		if (state->ResponseError[c] != GN_ERR_BUSY) {
-			response = state->WaitingFor[c];
+			response = state->waiting_for[c];
 			error = state->ResponseError[c];
 		}
 	}
 
 	/* reset state machine */
-	SM_Reset(state);
+	sm_reset(state);
 
 	/* process response */
 	switch (response) {
@@ -470,145 +453,111 @@ static gn_error P3110_DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 }
 
 
-static gn_error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *state, bool save_sms)
 {
-	int timeout, c, retry_count, block_count, block_length;
-	u8 userdata[GSM_MAX_SMS_LENGTH];
-	int userdata_length = 0, userdata_offset, userdata_remaining;
-	u8 response = 0, request[GSM_MAX_SMS_LENGTH];
+	unsigned char msgtype, hreq[256], req[256], udata[256];
+		/* FIXME hardcoded buffer sizes are ugly */
+	int c, response, hsize, retry_count, timeout;
+	int block_count, uoffset, uremain, ulength, blength;
 	gn_error error = GN_ERR_NONE;
-	SMS_MessageCenter smsc;
-	int i;
 
-	/* Get default SMSC from phone if not set in SMS */
-	if (!data->SMSMessage->MessageCenter.Number[0]) {
-		data->MessageCenter = &smsc;
-		error = P3110_GetSMSInfo(data, state);
-		if (error != GN_ERR_NONE) return error;
-		data->SMSMessage->MessageCenter = smsc;
-	}
+	msgtype = save_sms ? 0x24 : 0x23;
 
-	dprintf("Sending SMS to %s via message center %s\n", data->SMSMessage->RemoteNumber.number, data->SMSMessage->MessageCenter.Number);
+	/* FIXME Dirty hacks ahead:
+	 * The message data can either be unpacked from the raw_sms
+	 * structure - which is stupid - or it can be read directly from
+	 * the data->sms structure - which is ugly and breaks the code
+	 * structure. But the latter seems to work a bit better with
+	 * special characters, not sure why, but anyway this is not the
+	 * way things should be done, but it should be fixed elsewhere. */
 
-/*
-	Moved to gsm-sms.c
-	if (data->SMSMessage->UDH[0].Type) {
-		userdata_offset = 1 + data->SMSMessage->udhlen;
-		memcpy(userdata, data->SMSMessage->UserData[0].u.Text, userdata_offset);
-		fo |= FO_UDHI;
-	} else {
-		userdata_offset = 0;
-	}
-*/
+#if 0
+	/* The phone expects ASCII data instead of 7bit packed data, which
+	 * is the format used in raw_sms. So the data has to be unpacked
+	 * again. */
+	
+	ulength = char_7bit_unpack(0, data->raw_sms->user_data_length, 
+					sizeof(udata),
+					data->raw_sms->user_data, udata);
+#else
+	ulength = strlen(data->sms->user_data[0].u.text);
+	memcpy(udata, data->sms->user_data[0].u.text, ulength);
+#endif
 
-/*
-	Moved to gsm-sms.c
-	if (data->SMSMessage->EightBit) {
-		memcpy(userdata + userdata_offset, data->SMSMessage->UserData[0].u.Text, data->SMSMessage->Length);
-		userdata_length = data->SMSMessage->Length + userdata_offset;
-		max_userdata_length = GSM_MAX_SMS_8_BIT_LENGTH;
-		dcs = DCS_DATA | DCS_CLASS1;
-	} else {
-		userdata_length = strlen(data->SMSMessage->UserData[0].u.Text);
-		memcpy(userdata + userdata_offset, data->SMSMessage->UserData[0].u.Text, userdata_length);
-		userdata_length += userdata_offset;
-		max_userdata_length = GSM_MAX_SMS_LENGTH;
-	}
-*/
-
-/*
-	Moved to gsm-sms.c
-	request[0] = fo;
-	request[1] = PID_DEFAULT;
-	request[2] = dcs;
-	request[3] = GSMV_Max_Time;
-	request[4] = 0x00;
-	request[5] = 0x00;
-	request[6] = 0x00;
-	request[7] = 0x00;
-	request[8] = 0x00;
-	request[9] = 0x00;
-	request[10] = userdata_length;
-	request[11] = smsc_length;
-	memcpy(request+12, data->SMSMessage->MessageCenter.Number, smsc_length);
-	request[12+smsc_length] = dest_length;
-	memcpy(request+13+smsc_length, data->SMSMessage->Destination, dest_length);
-*/
-
-	/* error = EncodePDUSMS(data->SMSMessage, request); */
-	if (error) return error;
+	hsize = sms_header_encode(data, state, hreq, ulength, save_sms);
 
 	/* We have a loop here as if the response from the phone is
 	   0x65 0x26 the rule appears to be just to try sending the
-	   message again.  We do this a maximum of FB38_SMS_SEND_RETRY_COUNT
+	   message again.  We do this a maximum of P3110_SMS_SEND_RETRY_COUNT
 	   times before giving up.  This value is empirical only! */
+
 	retry_count = P3110_SMS_SEND_RETRY_COUNT;
 
 	while (retry_count > 0) {
-
 		KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 
-		dprintf("Transferring FBUS SMS header [");
-		for (i = 0; i < data->SMSMessage->Length; i++) dprintf(" %02hhX", request[i]);
-		dprintf(" ]\n");
+		if (sm_message_send(hsize, msgtype, hreq, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
-		if (SM_SendMessage(state, data->SMSMessage->Length, 0x23, request) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-
-		error = SM_Block(state, data, 0x23);
+		error = sm_block(msgtype, data, state);
 		if (error != GN_ERR_NONE) return error;
 
 		/* Now send as many blocks of maximum 55 characters as required
 		   to send complete message. */
-		block_count = 1;
-		userdata_offset = 0;
-		userdata_remaining = userdata_length;
+		block_count = 0;
+		uoffset = 0;
+		uremain = ulength;
 
-		while (userdata_remaining > 0) {
-			block_length = userdata_remaining;
+		while (uremain > 0) {
+			++block_count;
+			blength = uremain;
 
 			/* Limit block length */
-			if (block_length > 55) block_length = 55;
+			if (blength > 55)	blength = 55;
 
 			/* Create block */
-			request[0] = block_count;
-			memcpy(request+1, userdata + userdata_offset, block_length);
+			req[0] = block_count;
+			memcpy(req+1, udata + uoffset, blength);
 
 			/* Send block */
-			if (SM_SendMessage(state, block_length+1, 0x27, request) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-			error = SM_Block(state, data, 0x27);
+			if (sm_message_send(blength+1, 0x27, req, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+			error = sm_block(0x27, data, state);
 			if (error != GN_ERR_NONE) return error;
 
 			/* update remaining and offset values for next block */
-			userdata_remaining -= block_length;
-			userdata_offset += block_length;
-			block_count ++;
+			uremain -= blength;
+			uoffset += blength;
 		}
 
 		/* Now wait for response from network which will see
 		   CurrentSMSMessageError change from busy. */
-		SM_WaitFor(state, data, 0x28);
-		SM_WaitFor(state, data, 0x29);
+		if(save_sms) {
+			sm_wait_for(0x2a, data, state);
+			sm_wait_for(0x2b, data, state);
+		} else {
+			sm_wait_for(0x28, data, state);
+			sm_wait_for(0x29, data, state);
+		}
 
 		timeout = 1200; /* 120secs timeout */
 
 		do {
-			SM_Loop(state, 1);
+			gn_sm_loop(1, state);
 			timeout--;
-		} while ((timeout > 0) && state->NumReceived == 0);
+		} while ((timeout > 0) && state->received_number == 0);
 
 		/* timeout */
-		if (state->NumReceived == 0) return GN_ERR_TIMEOUT;
+		if (state->received_number == 0) return GN_ERR_TIMEOUT;
 
 		/* find response in state machine */
-		for (c = 0; c < state->NumWaitingFor; c++) {
+		for (c = 0; c < state->waiting_for_number; c++) {
 			if (state->ResponseError[c] != GN_ERR_BUSY) {
-				response = state->WaitingFor[c];
+				response = state->waiting_for[c];
 				error = state->ResponseError[c];
 			}
 		}
 
 		/* reset state machine */
-		SM_Reset(state);
+		sm_reset(state);
 
 		/* process response */
 		switch (response) {
@@ -621,23 +570,31 @@ static gn_error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 			/* After an empirically determined pause... */
 			usleep(500000); /* 0.5 seconds. */
 			break;
+		case 0x2a:
+			return error;
+		case 0x2b:
+			dprintf("SMS save attempt failed.\n");
+			return GN_ERR_FAILED;
 		default:
 			return GN_ERR_INTERNALERROR;
 		}
+
 	}
+
 	/* Retries must have failed. */
-	return GN_ERR_SMSSENDFAILED;
+	return GN_ERR_FAILED;
 }
 
 
-static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+
+static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	return GN_ERR_NONE;
 }
 
 /* 0x0b messages are sent by phone when an incoming call occurs,
    this message must be acknowledged. */
-static gn_error P3110_IncomingCall(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingCall(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int     count;
 	char    buffer[256];
@@ -658,7 +615,7 @@ static gn_error P3110_IncomingCall(int messagetype, unsigned char *message, int 
 	return GN_ERR_NONE;
 }
 
-static gn_error P3110_IncomingCallAnswered(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingCallAnswered(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Incoming call answered from phone.\n");
 
@@ -667,7 +624,7 @@ static gn_error P3110_IncomingCallAnswered(int messagetype, unsigned char *messa
 
 /* Fairly self explanatory these two, though the outgoing
    call message has three (unexplained) data bytes. */
-static gn_error P3110_IncomingCallEstablished(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingCallEstablished(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("%s call established - status bytes %02x %02x.\n",
 		(message[2] == 0x05 ? "voice":"data(?)"), message[3], message[4]);
@@ -677,7 +634,7 @@ static gn_error P3110_IncomingCallEstablished(int messagetype, unsigned char *me
 
 /* 0x10 messages are sent by the phone when an outgoing
    call terminates. */
-static gn_error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Call terminated from phone (0x10 message).\n");
 	/* FIXME: Tell datapump code that the call has terminated. */
@@ -691,7 +648,7 @@ static gn_error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *
 /* 0x11 messages are sent by the phone when an incoming call
    terminates.  There is some other data in the message,
    purpose as yet undertermined. */
-static gn_error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Call terminated from opposite end of line (or from network).\n");
 
@@ -707,7 +664,7 @@ static gn_error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *
    end of an outgoing call.  Significance of two messages
    versus the one at the end of an incoming call  is as
    yet undertermined. */
-static gn_error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Call terminated from phone (0x12 message).\n");
 
@@ -723,7 +680,7 @@ static gn_error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char 
 /* 0x13 messages are sent after the phone restarts.
    Re-initialise */
 
-static gn_error P3110_IncomingRestart(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingRestart(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	/* FIXME: send 0x15 message somehow */
 	return GN_ERR_NONE;
@@ -733,7 +690,7 @@ static gn_error P3110_IncomingRestart(int messagetype, unsigned char *message, i
 /* 0x15 messages are sent by the phone in response to the
    init sequence sent so we don't acknowledge them! */
 
-static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	return GN_ERR_NONE;
 }
@@ -747,7 +704,7 @@ static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *mes
    and 0x01 when not (e.g. when SIM card isn't inserted to phone or when
    it is waiting for PIN) */
 
-static gn_error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	SimAvailable = (message[2] == 0x02);
 	dprintf("SIM available: %s.\n", (SimAvailable ? "Yes" : "No"));
@@ -755,7 +712,7 @@ static gn_error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *mes
 }
 
 
-static gn_error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("0x17 Registration Response: Failure!\n");
 	return GN_ERR_NONE;
@@ -767,7 +724,7 @@ static gn_error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *mes
    to the phone with message text in it or they could
    contain message text for a message we requested. */
 
-static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int count;
 
@@ -775,23 +732,18 @@ static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *messag
 	   if so then nothing to do */
 	if (length == 0x02) return GN_ERR_NONE;
 
-	/* Copy into current SMS message as long as it's non-NULL */
-	if (!data->RawData) return GN_ERR_INTERNALERROR;
+	/* This function may be called several times; it accumulates the
+	 * SMS content in data->raw_sms->user_data. The static global
+	 * user_data_count is used as a counter. */
 
 	/* If this is the first block, reset accumulated message length. */
 	if (message[2] == 1) user_data_count = 0;
 
-	count = data->RawData->Length + length - 3;
+	count = user_data_count + length - 3;
 
-	/* Copy message text after the stored header */
-	data->RawData->Data = realloc(data->RawData->Data, count);
-	memcpy(data->RawData->Data + data->RawData->Length, message + 3, length - 3);
-	data->RawData->Length = count;
+	memcpy(data->raw_sms->user_data + user_data_count, message + 3, length - 3);
 
-	/* Check whether this is the last user data frame */
 	user_data_count += length - 3;
-	if (user_data_count >= data->RawData->Data[15])
-		data->RawData->Full = 1;
 
 	return GN_ERR_NONE;
 }
@@ -805,10 +757,10 @@ static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *messag
    TP-MR is send from phone within 0x32 message. TP-MR is increased
    by phone after each sent SMS */
 
-static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("SMS send OK (0x%02hhx)\n", message[2]);
-	data->SMSMessage->Number = (int) message[2];
+	data->raw_sms->number = (int) message[2];
 	return GN_ERR_NONE;
 }
 
@@ -819,10 +771,30 @@ static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *message, i
    the particular phone.  0x65 0x26 was observed too, whereupon
    the message was retried. */
 
-static gn_error P3110_IncomingSMSSendError(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSSendError(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("SMS send failed (0x%02hhx 0x%02hhx)\n", message[2], message[3]);
-	return GN_ERR_SMSSENDFAILED;
+	return GN_ERR_FAILED;
+}
+
+/* 0x2a messages are sent by the phone to acknowledge succesful
+   saving of an SMS message. */
+
+static gn_error P3110_IncomingSMSSave(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	dprintf("SMS save OK (0x%02hhx)\n", message[2]);
+	data->raw_sms->number = (int) message[2];
+	return GN_ERR_NONE;
+}
+
+
+/* 0x2b messages are sent by the phone to indicate an error in
+   saving an SMS message. */
+
+static gn_error P3110_IncomingSMSSaveError(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	dprintf("SMS send failed (0x%02hhx)\n", message[2]);
+	return GN_ERR_FAILED;
 }
 
 
@@ -831,119 +803,75 @@ static gn_error P3110_IncomingSMSSendError(int messagetype, unsigned char *messa
    as the 0x30 notification but with one extra.  Immediately after
    the 0x2c nessage, the phone sends 0x27 message(s) */
 
-static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	if (!data->SMSMessage) return GN_ERR_INTERNALERROR;
+	int smsc_length, remote_length, l;
+	gn_gsm_number_type smsc_number_type, remote_number_type;
+	unsigned char smsc[256], remote[256];	/* should be enough for anyone */
 
-	/* Set standard code of the message type */
-	switch (message[5]) {
-	case 0x24:
-		message[0] = SMS_Deliver;
-		break;
-	case 0x01:
-		message[0] = SMS_Submit;
-		break;
-	default:
-		return GN_ERR_INTERNALERROR;
+	data->raw_sms->status = message[4];
+
+	/* Check UDHI */
+	if (message[5] & 0x40)	/* FO_UDHI */
+		data->raw_sms->udh_indicator = 1;
+	else
+		data->raw_sms->udh_indicator = 0;
+
+
+	data->raw_sms->dcs = message[7];
+	/* FIXME the DCS is set to indicate an 8-bit message in order
+	 * to avoid the conversion from 7bit in gsm-sms.c
+	 * This really should be done some other way... */
+	data->raw_sms->dcs = 0xf4;
+
+	/* Set message length */
+	data->raw_sms->length = message[15];
+
+	/* Only received messages have meaningful timestamps and numbers,
+	 * saved messages only seem to have garbage in these fields.  So
+	 * they are not read if the message is a saved one.  It seems that
+	 * 0x01 indicates a saved message, however both 0x04 and 0x24 have
+	 * been seen in received messages.  What their difference is is
+	 * unknown (at least it's not just read/unread status - the value
+	 * seems not to change for a given message). */
+
+	if(message[5] != 0x01) {
+		memcpy(data->raw_sms->smsc_time, message + 8, 7);
+
+		/* Now get remote and message center length & type */
+		smsc_length = message[16];
+		remote_length = message[17 + smsc_length];
+		remote_number_type = message[17 + smsc_length + 1 + remote_length];
+
+		/* Need to do some stupid tricks with SMSC number and remote
+		 * number, because the gn_sms_raw data structure stores them
+		 * in BCD format whereas the phone uses non-zero-terminated
+		 * strings with a length byte. So first the data is copied to
+		 * a temp string, zero termination is added and the result is
+		 * fed to a BCD conversion function. */
+	
+		strncpy(smsc, message + 17, smsc_length);
+		smsc[smsc_length] = '\0';
+		smsc_number_type = (smsc[0] == '+') ? GN_GSM_NUMBER_International : GN_GSM_NUMBER_Unknown;
+		l = char_semi_octet_pack(smsc, data->raw_sms->message_center + 1, smsc_number_type);
+
+		/* and here's the magic for SMSC number length... */
+		data->raw_sms->message_center[0] = (l + 1) / 2 + 1;
+
+		strncpy(remote, message + 17 + smsc_length + 1, remote_length);
+		remote[remote_length] = '\0';
+		l = char_semi_octet_pack(remote, data->raw_sms->remote_number + 1, remote_number_type);
+		data->raw_sms->remote_number[0] = l;
 	}
-
-	if (!data->RawData) return GN_ERR_INTERNALERROR;
-
-	data->RawData->Length = length;
-	data->RawData->Data = calloc(length, 1);
-	memcpy(data->RawData->Data, message, length);
-
-	/* All these moved to gsm-sms.c
-	Set memory type
-	switch(message[2]) {
-	case 1:
-		data->SMSMessage->MemoryType = GMT_ME;
-		break;
-	case 2:
-		data->SMSMessage->MemoryType = GMT_SM;
-		break;
-	default:
-		data->SMSMessage->MemoryType = GMT_XX;
-		break;
-	}
-
-	Set location in memory
-	data->SMSMessage->Location = message[3];
-	data->SMSMessage->MessageNumber = message[3];
-
-	  3810 series has limited support for different SMS "mailboxes"
-	   to the extent that the only know differentiation is between
-	   received messages 0x01, 0x04 and written messages 0x07 0x01.
-	   No flag has been found (yet) that indicates whether the
-	   message has been sent or not.
-
-	Default to unknown message type
-	data->SMSMessage->Type = GST_UN;
-
-	Consider received messages "Inbox" (Mobile Terminated)
-	if (message[4] == 0x01 && message[5] == 0x04)
-		data->SMSMessage->Type = GST_MT;
-
-	Consider written messages "Outbox" (Mobile Originated)
-	if (message[4] == 0x07 && message[5] == 0x01)
-		data->SMSMessage->Type = GST_MO;
-
-	We don't know about read/unread or sent/unsent status.
-	   so assume has been sent or read
-	data->SMSMessage->Status = GSS_SENTREAD;
-
-	Based on experiences with a 3110 it seems, that
-	   0x03 means a received unread message,
-	   0x07 means a stored unsent message
-	if (message[4] == 0x03 || message[4] == 0x07)
-		data->SMSMessage->Status = GSS_NOTSENTREAD;
-	else
-		data->SMSMessage->Status = GSS_SENTREAD;
-
-	Check UDHI
-	if (message[5] & FO_UDHI)
-		data->SMSMessage->UDHType = GSM_RingtoneUDH; FIXME
-	else
-		data->SMSMessage->UDHType = GSM_NoUDH;
-
-	Check Data Coding Scheme and set text/binary flag
-	if (message[7] == 0xf5)
-		data->SMSMessage->EightBit = true;
-	else
-		data->SMSMessage->EightBit = false;
-
-	Extract date and time information which is packed in to
-	   nibbles of each byte in reverse order.  Thus day 28 would be
-	   encoded as 0x82
-	P3110_DecodeTime(message+8, &(data->SMSMessage->Time));
-
-	Set message length
-	data->SMSMessage->Length = message[15];
-
-	Now get sender and message center length
-	smsc_length = message[16];
-	sender_length = message[17 + smsc_length];
-
-	Copy SMSC number
-	l = smsc_length < GSM_MAX_SMS_CENTER_LENGTH ? smsc_length : GSM_MAX_SMS_CENTER_LENGTH;
-	strncpy(data->SMSMessage->MessageCenter.Number, message + 17, l);
-	data->SMSMessage->MessageCenter.Number[l] = 0;
-
-	Copy sender number
-	l = sender_length < GSM_MAX_SENDER_LENGTH ? sender_length : GSM_MAX_SENDER_LENGTH;
-	strncpy(data->SMSMessage->Sender, message + 18 + smsc_length, l);
-	data->SMSMessage->Sender[l] = 0;
 
 	dprintf("PID:%02x DCS:%02x Timezone:%02x Stat1:%02x Stat2:%02x\n",
 		message[6], message[7], message[14], message[4], message[5]);
 
 	dprintf("Message Read:\n");
-	dprintf("  Location: %d. Type: %d Status: %d\n", data->SMSMessage->Number, data->SMSMessage->Type, data->SMSMessage->Status);
-	dprintf("  Sender: %s\n", data->SMSMessage->RemoteNumber.number);
-	dprintf("  Message Center: %s\n", data->SMSMessage->MessageCenter.Number);
-	dprintf("  Time: %02d.%02d.%02d %02d:%02d:%02d\n",
-		data->SMSMessage->Time.Day, data->SMSMessage->Time.Month, data->SMSMessage->Time.Year, data->SMSMessage->Time.Hour, data->SMSMessage->Time.Minute, data->SMSMessage->Time.Second);
-	*/
+	dprintf("  Location: %d. Type: %d Status: %d\n", data->raw_sms->number, data->raw_sms->type, data->raw_sms->status);
+	dprintf("  Sender: %s\n", remote);
+	dprintf("  Message Center: %s\n", smsc);
+
 	return GN_ERR_NONE;
 }
 
@@ -951,19 +879,19 @@ static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message,
 /* 0x2d messages are generated when an SMS message is requested
    that does not exist or is empty. */
 
-static gn_error P3110_IncomingSMSError(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSError(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	if (message[2] == 0x74)
-		return GN_ERR_INVALIDSMSLOCATION;
+		return GN_ERR_INVALIDLOCATION;
 	else
-		return GN_ERR_EMPTYSMSLOCATION;
+		return GN_ERR_EMPTYLOCATION;
 }
 
 
 /* 0x2e messages are generated when an SMS message is deleted
    successfully. */
 
-static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	return GN_ERR_NONE;
 }
@@ -973,42 +901,42 @@ static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *message,
    that does not exist.  Unlike responses to a getsms message
    no error is returned when the entry is already empty */
 
-static gn_error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	/* Note 0x74 is the only value that has been seen! */
 	if (message[2] == 0x74)
-		return GN_ERR_INVALIDSMSLOCATION;
+		return GN_ERR_INVALIDLOCATION;
 	else
-		return GN_ERR_EMPTYSMSLOCATION;
+		return GN_ERR_EMPTYLOCATION;
 }
 
 
 /* 0x32 messages are generated when delivery notification arrives
    to phone from network */
 
-static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	static GSM_SMSMessage sms;
+	static gn_sms_raw sms;
 /*	u8 dest_length, smsc_length, l;*/
 	u8 U0, U1, U2;
 
-	data->SMSMessage = &sms;
+	data->raw_sms = &sms;
 
-	if (!data->SMSMessage) return GN_ERR_INTERNALERROR;
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
 	U0 = message[1];
 	U1 = message[2];
 	U2 = message[17];
 
-	/* DecodePDUSMS(message, data->SMSMessage, length); */
+	/* DecodePDUSMS(message, data->raw_sms, length); */
 
 	/* All these are moved fo gsm-sms.c
-	P3110_DecodeTime(message+3, &(data->SMSMessage->Time));
-	P3110_DecodeTime(message+10, &(data->SMSMessage->SMSCTime));
+	P3110_DecodeTime(message+3, &(data->raw_sms->Time));
+	P3110_DecodeTime(message+10, &(data->raw_sms->SMSCTime));
 
 
 	Get message id
-	data->SMSMessage->MessageNumber = (int) message[18];
+	data->raw_sms->MessageNumber = (int) message[18];
 
 	Get sender and message center length
 	dest_length = message[19];
@@ -1016,22 +944,22 @@ static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *messa
 
 	Copy destination number
 	l = dest_length < GSM_MAX_DESTINATION_LENGTH ? dest_length : GSM_MAX_DESTINATION_LENGTH;
-	strncpy(data->SMSMessage->Destination, message + 20, l);
-	data->SMSMessage->Destination[l] = 0;
+	strncpy(data->raw_sms->Destination, message + 20, l);
+	data->raw_sms->Destination[l] = 0;
 
 	Copy SMSC number
 	l = smsc_length < GSM_MAX_SMS_CENTER_LENGTH ? smsc_length : GSM_MAX_SMS_CENTER_LENGTH;
-	strncpy(data->SMSMessage->MessageCenter.Number, message + 21 + dest_length, l);
-	data->SMSMessage->MessageCenter.Number[l] = 0;
+	strncpy(data->raw_sms->MessageCenter.Number, message + 21 + dest_length, l);
+	data->raw_sms->MessageCenter.Number[l] = 0;
 
-	dprintf("Message [0x%02x] Delivered!\n", data->SMSMessage->Number);
-	dprintf("   Destination: %s\n", data->SMSMessage->RemoteNumber.number);
-	dprintf("   Message Center: %s\n", data->SMSMessage->MessageCenter.Number);
+	dprintf("Message [0x%02x] Delivered!\n", data->raw_sms->Number);
+	dprintf("   Destination: %s\n", data->raw_sms->RemoteNumber.number);
+	dprintf("   Message Center: %s\n", data->raw_sms->MessageCenter.Number);
 	dprintf("   Unknowns: 0x%02x 0x%02x 0x%02x\n", U0, U1, U2);
 	dprintf("   Discharge Time: %02d.%02d.%02d %02d:%02d:%02d\n",
-		data->SMSMessage->Time.Day, data->SMSMessage->Time.Month, data->SMSMessage->Time.Year, data->SMSMessage->Time.Hour, data->SMSMessage->Time.Minute, data->SMSMessage->Time.Second);
+		data->raw_sms->Time.Day, data->raw_sms->Time.Month, data->raw_sms->Time.Year, data->raw_sms->Time.Hour, data->raw_sms->Time.Minute, data->raw_sms->Time.Second);
 	dprintf("   SMSC Time Stamp:  %02d.%02d.%02d %02d:%02d:%02d\n",
-		data->SMSMessage->SMSCTime.Day, data->SMSMessage->SMSCTime.Month, data->SMSMessage->SMSCTime.Year, data->SMSMessage->SMSCTime.Hour, data->SMSMessage->SMSCTime.Minute, data->SMSMessage->SMSCTime.Second);
+		data->raw_sms->SMSCTime.Day, data->raw_sms->SMSCTime.Month, data->raw_sms->SMSCTime.Year, data->raw_sms->SMSCTime.Hour, data->raw_sms->SMSCTime.Minute, data->raw_sms->SMSCTime.Second);
 	*/
 	return GN_ERR_NONE;
 }
@@ -1040,7 +968,7 @@ static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *messa
 /* 0x40 Messages are sent to response to an 0x3f request.
    e.g. when phone is waiting for PIN */
 
-static gn_error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("SMS Message Center Data not reachable.\n");
 	return GN_ERR_NOTREADY;
@@ -1050,7 +978,7 @@ static gn_error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *message,
 /* Handle 0x41 message which is sent by phone in response to an
    0x3f request.  Contains data about the Message Center in use */
 
-static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	u8 center_number_length;
 	u8 option_number_length;
@@ -1086,41 +1014,45 @@ static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, i
 	dprintf("\n");
 
 	/* Get message center related info if upper layer wants to know */
-	if (data->MessageCenter) {
-		data->MessageCenter->Format = message[7];
-		data->MessageCenter->Validity = message[9];
+	if (data->message_center) {
+		data->message_center->format = message[7];
+		data->message_center->validity = message[9];
 
 		if (center_number_length == 0) {
-			data->MessageCenter->Number[0] = 0x00; /* Null terminate */
+			data->message_center->smsc.number[0] = 0x00; /* Null terminate */
 		} else {
-			memcpy(data->MessageCenter->Number,
+			memcpy(data->message_center->smsc.number,
 			       message + 14 + option_number_length,
 			       center_number_length);
-			data->MessageCenter->Number[center_number_length] = '\0';
+			data->message_center->smsc.number[center_number_length] = '\0';
+			data->message_center->smsc.type = 
+				(data->message_center->smsc.number[0] == '+') ? 
+					GN_GSM_NUMBER_International :
+					GN_GSM_NUMBER_Unknown;
 		}
 
 		/* 3810 series doesn't support Name or multiple center numbers
 		   so put in null data for them . */
-		data->MessageCenter->Name[0] = 0x00;
-		data->MessageCenter->No = 0;
+		data->message_center->name[0] = 0x00;
+		data->message_center->id = 0;
 	}
 
 	/* Get SMS related info if upper layer wants to know */
-	if (data->SMSStatus) {
-		data->SMSStatus->Unread = message[4] + message[6];
-		data->SMSStatus->Number = message[3] + message[5];
+	if (data->sms_status) {
+		data->sms_status->unread = message[4] + message[6];
+		data->sms_status->number = message[3] + message[5];
 	}
 
 	/* Get memory info if upper layer wants to know */
-	if (data->MemoryStatus) {
-		switch (data->MemoryStatus->MemoryType) {
-		case GMT_SM:
-			data->MemoryStatus->Used = message[5];
-			data->MemoryStatus->Free = P3110_MEMORY_SIZE_SM - message[5];
+	if (data->memory_status) {
+		switch (data->memory_status->memory_type) {
+		case GN_MT_SM:
+			data->memory_status->used = message[5];
+			data->memory_status->free = P3110_MEMORY_SIZE_SM - message[5];
 			break;
-		case GMT_ME:
-			data->MemoryStatus->Used = message[3];
-			data->MemoryStatus->Free = P3110_MEMORY_SIZE_ME - message[3];
+		case GN_MT_ME:
+			data->memory_status->used = message[3];
+			data->memory_status->free = P3110_MEMORY_SIZE_ME - message[3];
 			break;
 		default:
 			break;
@@ -1135,7 +1067,7 @@ static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, i
    message is received and the PIN (if any) has been entered
    correctly. */
 
-static gn_error P3110_IncomingPINEntered(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingPINEntered(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	SimAvailable = true;
 	dprintf("PIN [possibly] entered.\n");
@@ -1147,7 +1079,7 @@ static gn_error P3110_IncomingPINEntered(int messagetype, unsigned char *message
    alive packet.  We must acknowledge these it seems by sending a
    response with the "sequence number" byte loaded appropriately. */
 
-static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	/* Strings for the status byte received from phone. */
 	char *StatusStr[] = {
@@ -1166,16 +1098,16 @@ static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *message
 
 	/* Note: GetRFLevel function in fbus-3810.c does conversion
 	   into required units. */
-	if (data->RFLevel) {
-		*(data->RFUnits) = GRF_Arbitrary;
-		*(data->RFLevel) = message[3];
+	if (data->rf_level) {
+		*(data->rf_unit) = GN_RF_Arbitrary;
+		*(data->rf_level) = message[3];
 	}
 
 	/* Note: GetBatteryLevel function in fbus-3810.c does conversion
 	   into required units. */
-	if (data->BatteryLevel) {
-		*(data->BatteryUnits) = GBU_Arbitrary;
-		*(data->BatteryLevel) = message[4];
+	if (data->battery_level) {
+		*(data->battery_unit) = GN_BU_Arbitrary;
+		*(data->battery_level) = message[4];
 	}
 
 	/* Only output connection status byte now as the RF and Battery
@@ -1187,7 +1119,7 @@ static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *message
 
 /* 0x4d Message provides IMEI, Revision and Model information. */
 
-static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	size_t imei_length, rev_length, model_length;
 
@@ -1195,14 +1127,14 @@ static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message,
 	rev_length = strlen(message + 3 + imei_length);
 	model_length = strlen(message + 4 + imei_length + rev_length);
 
-	if (data->Imei)
-		strcpy(data->Imei, message + 2);
+	if (data->imei)
+		strcpy(data->imei, message + 2);
 
-	if (data->Revision)
-		strcpy(data->Revision, message + 3 + imei_length);
+	if (data->revision)
+		strcpy(data->revision, message + 3 + imei_length);
 
-	if (data->Model)
-		strcpy(data->Model, message + 4 + imei_length + rev_length);
+	if (data->model)
+		strcpy(data->model, message + 4 + imei_length + rev_length);
 
 	dprintf("Mobile Phone Identification:\n");
 	dprintf("   IMEI: %s\n", message + 2);
@@ -1212,42 +1144,75 @@ static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message,
 	return GN_ERR_NONE;
 }
 
+/* This function creates a header for sending or saving a SMS message.
+ * If save_sms is true, a header for saving is created; if false, a
+ * header for sending will be created instead. */
 
-void P3110_KeepAliveLoop(GSM_Statemachine *state)
+static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req, int ulength, bool save_sms)
 {
-	GSM_Data data;
-	GSM_DataClear(&data);
+	int pos = 0;
+	unsigned char fo;	/* some magic flags */
+	unsigned char smsc[256], remote[256];
 
-	while (!RequestTerminate) {
+	/* why the heck is this necessary? gsm-sms.c does this too  -Osma Suominen */
+	data->raw_sms->remote_number[0] = (data->raw_sms->remote_number[0] + 1) / 2 + 1;
 
-		if (KeepAliveTimer == 0) {
-			KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
-			/* Dont send keepalive packets when statemachine
-			   is doing other transactions. */
-			if (state->CurrentState == Initialised) {
-				dprintf("Sending keepalive message.\n");
-				P3110_GetStatusInfo(&data, state);
-			}
-		} else {
-			KeepAliveTimer--;
-		}
-		usleep(100000); /* Avoid becoming a "busy" loop. */
+	/* SMSC and remote number are in BCD format, but the phone wants them
+	 * in plain ASCII, so we have to convert. */
+	 
+	snprintf(smsc, sizeof(smsc), "%s", char_bcd_number_get(data->raw_sms->message_center));
+	snprintf(remote, sizeof(remote), "%s", char_bcd_number_get(data->raw_sms->remote_number));
+
+	dprintf("smsc:'%s' remote:'%s'", smsc, remote);
+	
+	if(save_sms) { /* make header for saving SMS */
+/*		req[pos++] = data->raw_sms->memory_type; */
+		req[pos++] = 0x02;	/* FIXME MT always SIM for now */
+		req[pos++] = data->raw_sms->status;
+		req[pos++] = 0x01;	/* status byte for "saved SMS" */
+	} else { /* make header for sending SMS */
+		/* the magic "first octet" or FO */
+		fo = 0x31;	/* FO_SUBMIT | FO_VPF_REL | FO_SRR */
+		if(data->raw_sms->udh_indicator)	fo |= 0x40;
+		req[pos++] = fo;
 	}
-}
 
-void P3110_DecodeTime(unsigned char *b, GSM_DateTime *dt)
-{
-	dt->Year = P3110_bcd2int(b[0]);
-	dt->Month = P3110_bcd2int(b[1]);
-	dt->Day = P3110_bcd2int(b[2]);
-	dt->Hour = P3110_bcd2int(b[3]);
-	dt->Minute = P3110_bcd2int(b[4]);
-	dt->Second = P3110_bcd2int(b[5]);
-	dt->Timezone = P3110_bcd2int(b[6]);
-	return;
-}
+	req[pos++] = data->raw_sms->pid;
+ 	req[pos++] = data->raw_sms->dcs;
 
-int P3110_bcd2int(u8 x)
-{
-	return (int)(10 * ((x & 0x0f)) + (x >> 4));
+	/* The following 7 bytes define validity for SMSs to be sent.
+	 * When saving they are apparently ignored - or somehow incorporated
+	 * into the garbage you get in the date bytes when you read a saved
+	 * SMS. So we'll just put validity in here now. */ 
+
+	req[pos++] = 0xff;	/* FIXME Max validity - hardcoded! */
+	req[pos++] = 0x00;
+	req[pos++] = 0x00;
+	req[pos++] = 0x00;
+	req[pos++] = 0x00;
+	req[pos++] = 0x00;
+	req[pos++] = 0x00;
+
+	req[pos++] = ulength;	/* user data length */
+
+	/* The SMSC and remote number are not particularly relevant for
+	 * saving SMSs, but there's a place for them in the request, so
+	 * we'll put them there. The phone ignores them or at least doesn't
+	 * return them when reading the message. */
+
+	req[pos++] = strlen(smsc);
+	memcpy(req + pos, smsc, strlen(smsc));
+	pos += strlen(smsc);	
+	req[pos++] = strlen(remote);
+	memcpy(req + pos, remote, strlen(remote));
+	pos += strlen(remote);
+
+	/* For some reason, the header for saving SMSs has a byte for the
+	 * remote number type, according to Docs/protocol/nk3110.txt
+	 * Sent SMS messages don't. */
+
+	if(save_sms)
+		req[pos++] = data->raw_sms->remote_number[1]; /* number type */
+
+	return pos;	/* length of encoded header is returned */
 }

@@ -142,8 +142,8 @@ API gn_error gn_gsm_initialise(struct gn_statemachine *sm)
 	REGISTER_DRIVER(nokia_7110, NULL);
 	REGISTER_DRIVER(nokia_6510, NULL);
 	REGISTER_DRIVER(nokia_6100, NULL);
-#if 0
 	REGISTER_DRIVER(nokia_3110, NULL);
+#if 0
 #ifndef WIN32
 	REGISTER_DRIVER(nokia_2110, NULL);
 #endif

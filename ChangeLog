@@ -15,6 +15,8 @@
                                                          (Pawel Kot)
     o avoid segfault on attempt to write the phonebook entry
       with xgnokii and Nokia phones                      (Pawel Kot)
+ * nk3110 driver updates
+    o bring the driver back to life in new API       (Osma Suominen)
  * docs updates
     o note that /dev/ttySX is the Linux notation         (Pawel Kot)
 
