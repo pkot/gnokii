@@ -2,6 +2,7 @@
 ==========
  * Code cleanups
     o remove compilation warnigns                         (Pawel Kot)
+    o portability fixes                              (BORBELY Zoltan)
  * 2110 series updates
     o fix segfault on getsms, but break smsreader.     (Pavel Machek)
       (this is actually step in right direction)
