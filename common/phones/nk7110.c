@@ -1951,36 +1951,42 @@ static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (!data || !data->NetMonitor) return GE_INTERNALERROR;
-	switch (message[3]) {
+	switch(message[2]) {
+	case P7110_SUBSEC_ENABLE_EXTENDED_CMDS:
+		dprintf("Extended commands enabled\n");
+		break;
 	case P7110_SUBSEC_NETMONITOR:
-		switch(message[4]) {
+		switch(message[3]) {
 		case 0x00:
 			dprintf("Message: Netmonitor correctly set.\n");
 			break;
 		default:
-			dprintf("Message: Netmonitor menu %d received:\n", message[4]);
+			dprintf("Message: Netmonitor menu %d received:\n", message[3]);
 			dprintf("%s\n", message + 5);
-			strcpy(data->NetMonitor->Screen, message + 5);
+			snprintf(data->NetMonitor->Screen, sizeof(data->NetMonitor->Screen), "%s", message + 5);
 			break;
 		}
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x%02x (Security): 0x%02x\n", P7110_MSG_SECURITY, message[3]);
-		return GE_UNHANDLEDFRAME;
+		dprintf("Unknown security command\n");
+		break;
 	}
 	return GE_NONE;
 }
 
 static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req0[] = {FBUS_FRAME_HEADER,
+	unsigned char req0[] = {0x00, 0x01,
 				P7110_SUBSEC_ENABLE_EXTENDED_CMDS, 0x01};
-	unsigned char req[] = {FBUS_FRAME_HEADER, P7110_SUBSEC_NETMONITOR};
+	unsigned char req[] = {0x00, 0x01, 
+				P7110_SUBSEC_NETMONITOR, 0x01};
+	GSM_Error error = GE_NONE;
 
-	req[4] = data->NetMonitor->Field;
+	req[3] = data->NetMonitor->Field;
 
-	if (SM_SendMessage(state, 5, P7110_MSG_SECURITY, req0) != GE_NONE) return GE_NOTREADY;
-	SEND_MESSAGE_BLOCK(P7110_MSG_SECURITY, 5);
+	if (SM_SendMessage(state, 4, P7110_MSG_SECURITY, req0) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, P7110_MSG_SECURITY);
+	SEND_MESSAGE_BLOCK(P7110_MSG_SECURITY, 4);
 }
 
 /*****************/
