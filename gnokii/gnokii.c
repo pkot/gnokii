@@ -2777,7 +2777,7 @@ static int displayoutput(void)
 				*/
 				memset(buf, 0, 102);
 			}
-			gn_sm_loop(&state, 1);
+			gn_sm_loop(1, &state);
 			gn_sm_functions(GN_OP_PollDisplay, &data, &state);
 		}
 		fprintf (stderr, _("Shutting down\n"));
@@ -4246,7 +4246,7 @@ static int smsreader(void)
 		fprintf(stderr, _("Entered sms reader mode...\n"));
 
 		while (!bshutdown) {
-			gn_sm_loop(&state, 1);
+			gn_sm_loop(1, &state);
 			/* Some phones may not be able to notify us, thus we give
 			   lowlevel chance to poll them */
 			error = gn_sm_functions(GN_OP_PollSMS, &data, &state);

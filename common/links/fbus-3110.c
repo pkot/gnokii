@@ -152,7 +152,7 @@ static void fb3110_rx_state_machine(unsigned char rx_byte)
 					dprintf("%02hhx:", i->buffer[count]);
 				dprintf("\n");
 				/* Transfer message to state machine */
-				sm_incoming_function(statemachine, i->buffer[0], i->buffer, i->frame_len);
+				sm_incoming_function(i->buffer[0], i->buffer, i->frame_len, statemachine);
 
 				/* Send an ack */
 				fb3110_tx_ack_send(i->buffer, i->frame_len);

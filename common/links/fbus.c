@@ -308,8 +308,8 @@ static void fbus_rx_statemachine(unsigned char rx_byte)
 						i->message_buffer[0], (unsigned char) i->message_buffer[1]);
 
 				} else if (i->message_type == 0xf1) {
-					sm_incoming_function(statemachine, i->message_type,
-							     i->message_buffer, i->frame_length - 2);
+					sm_incoming_function(i->message_type, i->message_buffer,
+							     i->frame_length - 2, statemachine);
 				} else {	/* Normal message type */
 
 					/* Add data to the relevant Message buffer */
@@ -359,7 +359,8 @@ static void fbus_rx_statemachine(unsigned char rx_byte)
 					/* Finally dispatch if ready */
 
 					if (m->frames_to_go == 0) {
-						sm_incoming_function(statemachine, i->message_type, m->message_buffer, m->message_length);
+						sm_incoming_function(i->message_type, m->message_buffer,
+								     m->message_length, statemachine);
 						free(m->message_buffer);
 						m->message_buffer = NULL;
 						m->malloced = 0;

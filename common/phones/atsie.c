@@ -60,7 +60,7 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	return (*writephonebook)(data, state);
 }
 
-void at_siemens_init(struct gn_statemachine *state, char *foundmodel, char *setupmodel)
+void at_siemens_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
 	/* names for s35 etc must be escaped */
 	if (foundmodel && !strncasecmp("35", foundmodel + 1, 2))

@@ -34,6 +34,6 @@
 
 #include "gsm-data.h"
 
-void at_siemens_init(struct gn_statemachine *state, char* foundmodel, char* setupmodel);
+void at_siemens_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state);
 
 #endif

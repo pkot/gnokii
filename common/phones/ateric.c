@@ -49,9 +49,9 @@ static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	ret = at_memory_type_set(data->memory_status->memory_type, state);
 	if (ret)
 		return ret;
-	if (sm_message_send(state, 11, GN_OP_GetMemoryStatus, "AT+CPBR=?\r\n"))
+	if (sm_message_send(11, GN_OP_GetMemoryStatus, "AT+CPBR=?\r\n", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_GetMemoryStatus);
+	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 }
 
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
@@ -78,7 +78,7 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 	return GN_ERR_NONE;
 }
 
-void at_ericsson_init(struct gn_statemachine *state, char *foundmodel, char *setupmodel)
+void at_ericsson_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
 	at_insert_recv_function(GN_OP_GetMemoryStatus, ReplyMemoryStatus, state);
 	at_insert_send_function(GN_OP_GetMemoryStatus, GetMemoryStatus, state);

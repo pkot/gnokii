@@ -53,7 +53,7 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	return (*writephonebook)(data, state);
 }
 
-void at_nokia_init(struct gn_statemachine *state, char *foundmodel, char *setupmodel)
+void at_nokia_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
 	/* block writing of phone memory on nokia phones other than */
 	/* 8210. if you write to the phonebook of a eg 7110 all extended */

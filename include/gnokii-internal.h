@@ -37,24 +37,24 @@
 #include "gsm-statemachine.h"
 
 /* SMS */
-gn_error sms_parse(gn_data *data, int offset);
+gn_error sms_parse(int offset, gn_data *data);
 gn_error sms_request(gn_data *data, struct gn_statemachine *state);
 gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms);
 gn_timestamp *gn_misc_unpack_timestamp(u8 *Number, gn_timestamp *dt);
 
 /* Statemachine */
 gn_error sm_initialise(struct gn_statemachine *state);
-gn_error sm_message_send(struct gn_statemachine *state, u16 messagesize, u8 messagetype, void *message);
-gn_error sm_wait_for(struct gn_statemachine *state, gn_data *data, unsigned char messagetype);
-void sm_incoming_function(struct gn_statemachine *state, u8 messagetype, void *message, u16 messagesize);
+gn_error sm_message_send(u16 messagesize, u8 messagetype, void *message, struct gn_statemachine *state);
+gn_error sm_wait_for(unsigned char messagetype, gn_data *data, struct gn_statemachine *state);
+void sm_incoming_function(u8 messagetype, void *message, u16 messagesize, struct gn_statemachine *state);
 void sm_reset(struct gn_statemachine *state);
-gn_error sm_error_get(struct gn_statemachine *state, unsigned char messagetype);
-gn_error sm_block_timeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t);
-gn_error sm_block(struct gn_statemachine *state, gn_data *data, int waitfor);
-gn_error sm_block_no_retry_timeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t);
-gn_error sm_block_no_retry(struct gn_statemachine *state, gn_data *data, int waitfor);
+gn_error sm_error_get(unsigned char messagetype, struct gn_statemachine *state);
+gn_error sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state);
+gn_error sm_block(int waitfor, gn_data *data, struct gn_statemachine *state);
+gn_error sm_block_no_retry_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state);
+gn_error sm_block_no_retry(int waitfor, gn_data *data, struct gn_statemachine *state);
 void sm_message_dump(int messagetype, unsigned char *message, int length);
-void sm_unhandled_frame_dump(struct gn_statemachine *state, int messagetype, unsigned char *message, int length);
+void sm_unhandled_frame_dump(int messagetype, unsigned char *message, int length, struct gn_statemachine *state);
 
 extern void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len);
 extern void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len);

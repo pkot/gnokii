@@ -49,6 +49,12 @@
 #include "gnokii-internal.h"
 #include "gsm-api.h"
 
+#define SEND_MESSAGE_BLOCK(type, length) \
+do { \
+	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
+	return sm_block(type, data, state); \
+} while (0)
+
 /* Some globals */
 
 /* FIXME: we should get rid on it */
@@ -176,8 +182,7 @@ static gn_error phonebook_read(gn_data *data, struct gn_statemachine *state)
 	dprintf("Reading phonebook location (%d)\n", data->phonebook_entry->location);
 
 	req[6] = data->phonebook_entry->location;
-	if (sm_message_send(state, 7, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x40);
+	SEND_MESSAGE_BLOCK(7, 0x40);
 }
 
 static gn_error phonebook_write(gn_data *data, struct gn_statemachine *state)
@@ -217,8 +222,7 @@ static gn_error phonebook_write(gn_data *data, struct gn_statemachine *state)
 	strcpy(pos, pe->name);
 	pos += namelen + 1;
 
-	if (sm_message_send(state, pos-req, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x40);
+	SEND_MESSAGE_BLOCK(pos - req, 0x40);
 }
 
 static gn_error phonebook_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
@@ -271,12 +275,9 @@ static gn_error phonebook_incoming(int messagetype, unsigned char *message, int 
 static gn_error phone_info(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x00, 0x03, 0x00};
-	gn_error error;
 
 	dprintf("Getting phone info...\n");
-	if (sm_message_send(state, 5, 0xd1, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, 0xd2);
-	return error;
+	SEND_MESSAGE_BLOCK(5, 0xd1);
 }
 
 static gn_error identify(gn_data *data, struct gn_statemachine *state)
@@ -289,7 +290,7 @@ static gn_error identify(gn_data *data, struct gn_statemachine *state)
 	if ((error = phone_info(data, state)) != GN_ERR_NONE) return error;
 
 	/* Check that we are back at state Initialised */
-	if (gn_sm_loop(state, 0) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
+	if (gn_sm_loop(0, state) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
 	return GN_ERR_NONE;
 }
 
@@ -315,9 +316,7 @@ static gn_error get_bitmap_startup_slice(gn_data *data, struct gn_statemachine *
 
 	logoslice = s;
 	req[5] = (unsigned char)s + 1;
-
-	if (sm_message_send(state, 6, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0xdd);
+	SEND_MESSAGE_BLOCK(6, 0x40);
 }
 
 static gn_error bitmap_get(gn_data *data, struct gn_statemachine *state)

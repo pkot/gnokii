@@ -42,7 +42,7 @@ gn_error sm_initialise(struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
-gn_error sm_message_send(struct gn_statemachine *state, u16 messagesize, u8 messagetype, void *message)
+gn_error sm_message_send(u16 messagesize, u8 messagetype, void *message, struct gn_statemachine *state)
 {
 	if (state->current_state != GN_SM_Startup) {
 #ifdef	DEBUG
@@ -60,7 +60,7 @@ gn_error sm_message_send(struct gn_statemachine *state, u16 messagesize, u8 mess
 	else return GN_ERR_NOTREADY;
 }
 
-API gn_state gn_sm_loop(struct gn_statemachine *state, int timeout)
+API gn_state gn_sm_loop(int timeout, struct gn_statemachine *state)
 {
 	struct timeval loop_timeout;
 	int i;
@@ -94,7 +94,7 @@ void sm_reset(struct gn_statemachine *state)
 	}
 }
 
-void sm_incoming_function(struct gn_statemachine *state, u8 messagetype, void *message, u16 messagesize)
+void sm_incoming_function(u8 messagetype, void *message, u16 messagesize, struct gn_statemachine *state)
 {
 	int c;
 	int temp = 1;
@@ -133,7 +133,7 @@ void sm_incoming_function(struct gn_statemachine *state, u8 messagetype, void *m
 		free(edata);
 		return;
 	} else if (res == GN_ERR_UNHANDLEDFRAME)
-		sm_unhandled_frame_dump(state, messagetype, message, messagesize);
+		sm_unhandled_frame_dump(messagetype, message, messagesize, state);
 	if (temp != 0) {
 		dprintf("Unknown Frame Type %02x\n", messagetype);
 		state->driver.default_function(messagetype, message, messagesize, state);
@@ -157,7 +157,7 @@ void sm_incoming_function(struct gn_statemachine *state, u8 messagetype, void *m
 }
 
 /* This returns the error recorded from the phone function and indicates collection */
-gn_error sm_error_get(struct gn_statemachine *state, unsigned char messagetype)
+gn_error sm_error_get(unsigned char messagetype, struct gn_statemachine *state)
 {
 	int c, d;
 	gn_error error = GN_ERR_NOTREADY;
@@ -188,7 +188,7 @@ gn_error sm_error_get(struct gn_statemachine *state, unsigned char messagetype)
 
 /* Indicate that the phone code is waiting for an response */
 /* This does not actually wait! */
-gn_error sm_wait_for(struct gn_statemachine *state, gn_data *data, unsigned char messagetype)
+gn_error sm_wait_for(unsigned char messagetype, gn_data *data, struct gn_statemachine *state)
 {
 	/* If we've received a response, we have to call SM_GetError first */
 	if ((state->current_state == GN_SM_Startup) || (state->current_state == GN_SM_ResponseReceived))
@@ -210,7 +210,7 @@ gn_error sm_wait_for(struct gn_statemachine *state, gn_data *data, unsigned char
 
    t is in tenths of second
 */
-static gn_error __sm_block_timeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t, int noretry)
+static gn_error __sm_block_timeout(int waitfor, int t, int noretry, gn_data *data, struct gn_statemachine *state)
 {
 	int retry, timeout;
 	gn_state s;
@@ -218,44 +218,44 @@ static gn_error __sm_block_timeout(struct gn_statemachine *state, gn_data *data,
 
 	for (retry = 0; retry < 3; retry++) {
 		timeout = t;
-		err = sm_wait_for(state, data, waitfor);
+		err = sm_wait_for(waitfor, data, state);
 		if (err != GN_ERR_NONE) return err;
 
 		do {            /* ~3secs timeout */
-			s = gn_sm_loop(state, 1);  /* Timeout=100ms */
+			s = gn_sm_loop(1, state);  /* Timeout=100ms */
 			timeout--;
 		} while ((timeout > 0) && (s == GN_SM_WaitingForResponse));
 
-		if (s == GN_SM_ResponseReceived) return sm_error_get(state, waitfor);
+		if (s == GN_SM_ResponseReceived) return sm_error_get(waitfor, state);
 
 		dprintf("SM_Block Retry - %d\n", retry);
 		sm_reset(state);
 		if ((retry < 2) && (!noretry)) 
-			sm_message_send(state, state->last_msg_size, state->last_msg_type, state->last_msg);
+			sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
 	}
 
 	return GN_ERR_TIMEOUT;
 }
 
-gn_error sm_block_timeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t)
+gn_error sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state)
 {
-	return __sm_block_timeout(state, data, waitfor, t, 0);
+	return __sm_block_timeout(waitfor, t, 0, data, state);
 }
 
-gn_error sm_block(struct gn_statemachine *state, gn_data *data, int waitfor)
+gn_error sm_block(int waitfor, gn_data *data, struct gn_statemachine *state)
 {
-	return __sm_block_timeout(state, data, waitfor, 30, 0);
+	return __sm_block_timeout(waitfor, 30, 0, data, state);
 }
 
 /* This function is equal to SM_Block except it does not retry the message */
-gn_error sm_block_no_retry_timeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t)
+gn_error sm_block_no_retry_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state)
 {
-	return __sm_block_timeout(state, data, waitfor, t, 1);
+	return __sm_block_timeout(waitfor, t, 1, data, state);
 }
 
-gn_error sm_block_no_retry(struct gn_statemachine *state, gn_data *data, int waitfor)
+gn_error sm_block_no_retry(int waitfor, gn_data *data, struct gn_statemachine *state)
 {
-	return __sm_block_timeout(state, data, waitfor, 100, 1);
+	return __sm_block_timeout(waitfor, 100, 1, data, state);
 }
 
 /* Just to do things neatly */
@@ -293,7 +293,7 @@ void sm_message_dump(int messagetype, unsigned char *message, int messagesize)
 }
 
 /* Prints a warning message about unhandled frames */
-void sm_unhandled_frame_dump(struct gn_statemachine *state, int messagetype, unsigned char *message, int messagesize)
+void sm_unhandled_frame_dump(int messagetype, unsigned char *message, int messagesize, struct gn_statemachine *state)
 {
 	dump(_("UNHANDLED FRAME RECEIVED\nrequest: "));
 	sm_message_dump(state->last_msg_type, state->last_msg, state->last_msg_size);

@@ -54,14 +54,14 @@
 
 #define SEND_MESSAGE_BLOCK(type, length) \
 do { \
-	if (sm_message_send(state, length, type, req) != GN_ERR_NONE) return GN_ERR_NOTREADY; \
-	return sm_block(state, data, type); \
+	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
+	return sm_block(type, data, state); \
 } while (0)
 
 #define SEND_MESSAGE_WAITFOR(type, length) \
 do { \
-	if (sm_message_send(state, length, type, req) != GN_ERR_NONE) return GN_ERR_NOTREADY; \
-	return sm_wait_for(state, data, type); \
+	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
+	return sm_wait_for(type, data, state); \
 } while (0)
 
 /* Functions prototypes */
@@ -385,14 +385,14 @@ static gn_error NK7110_Identify(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Identifying...\n");
 	pnok_manufacturer_get(data->manufacturer);
-	if (sm_message_send(state, 4, NK7110_MSG_IDENTITY, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	if (sm_message_send(state, 6, NK7110_MSG_IDENTITY, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	sm_wait_for(state, data, NK7110_MSG_IDENTITY);
-	sm_block(state, data, NK7110_MSG_IDENTITY); /* waits for all requests - returns req2 error */
-	sm_error_get(state, NK7110_MSG_IDENTITY);
+	if (sm_message_send(4, NK7110_MSG_IDENTITY, req, state)) return GN_ERR_NOTREADY;
+	if (sm_message_send(6, NK7110_MSG_IDENTITY, req2, state)) return GN_ERR_NOTREADY;
+	sm_wait_for(NK7110_MSG_IDENTITY, data, state);
+	sm_block(NK7110_MSG_IDENTITY, data, state); /* waits for all requests - returns req2 error */
+	sm_error_get(NK7110_MSG_IDENTITY, state);
 
 	/* Check that we are back at state Initialised */
-	if (gn_sm_loop(state, 0) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
+	if (gn_sm_loop(0, state) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
 	return GN_ERR_NONE;
 }
 
@@ -1213,12 +1213,12 @@ static gn_error NK7110_GetSMSStatus(gn_data *data, struct gn_statemachine *state
 	data->sms_folder->folder_id = GN_MT_TE;
 
 	error = NK7110_GetSMSFolderStatus(data, state);
-	if (error != GN_ERR_NONE) goto out;
+	if (error) goto out;
 
-	error = sm_message_send(state, 6, NK7110_MSG_FOLDER, req);
-	if (error != GN_ERR_NONE) goto out;
+	error = sm_message_send(6, NK7110_MSG_FOLDER, req, state);
+	if (error) goto out;
 
-	error = sm_block(state, data, NK7110_MSG_FOLDER);
+	error = sm_block(NK7110_MSG_FOLDER, data, state);
  out:
 	data->sms_folder = old_fld;
 	return error;
@@ -1241,15 +1241,15 @@ static gn_error NK7110_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 
 		dprintf("Special case INBOX in GetSMSFolderStatus!\n");
 
-		if (sm_message_send(state, 7, NK7110_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = sm_block(state, data, NK7110_MSG_FOLDER);
-		if (error != 0) return error;
+		if (sm_message_send(7, NK7110_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
+		error = sm_block(NK7110_MSG_FOLDER, data, state);
+		if (error) return error;
 
 		memcpy(&read, data->sms_folder, sizeof(gn_sms_folder));
 
 		req[4] = 0xf8; /* unread messages from INBOX */
-		if (sm_message_send(state, 7, NK7110_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = sm_block(state, data, NK7110_MSG_FOLDER);
+		if (sm_message_send(7, NK7110_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
+		error = sm_block(NK7110_MSG_FOLDER, data, state);
 
 		for (i = 0; i < read.number; i++) {
 			data->sms_folder->locations[data->sms_folder->number] = read.locations[i];
@@ -1303,7 +1303,7 @@ static gn_error NK7110_SaveSMS(gn_data *data, struct gn_statemachine *state)
 
 	if (req[5] == NK7110_MEMORY_TE) return GN_ERR_INVALIDLOCATION;
 
-	len = pnok_fbus_sms_encode(data, state, req + 9);
+	len = pnok_fbus_sms_encode(req + 9, data, state);
 	len += 9;
 
 	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, len);
@@ -1414,12 +1414,12 @@ static gn_error NK7110_SendSMS(gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 	int len;
 
-	len = pnok_fbus_sms_encode(data, state, req + 6);
+	len = pnok_fbus_sms_encode(req + 6, data, state);
 	len += 6;
 
-	if (sm_message_send(state, len, PNOK_MSG_ID_SMS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(len, PNOK_MSG_ID_SMS, req, state)) return GN_ERR_NOTREADY;
 	do {
-		error = sm_block_no_retry_timeout(state, data, PNOK_MSG_ID_SMS, state->link.sms_timeout);
+		error = sm_block_no_retry_timeout(PNOK_MSG_ID_SMS, state->link.sms_timeout, data, state);
 	} while (!state->link.sms_timeout && error == GN_ERR_TIMEOUT);
 
 	return error;
@@ -1781,8 +1781,8 @@ static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 	if ((error = NK7110_GetCalendarNotesInfo(data, state)) == GN_ERR_NONE) {
 		if (data->calnote->location < data->calnote_list->number + 1 &&
 		    data->calnote->location > 0) {
-			if (sm_message_send(state, 4, NK7110_MSG_CLOCK, date) == GN_ERR_NONE) {
-				sm_block(state, &tmpdata, NK7110_MSG_CLOCK);
+			if (sm_message_send(4, NK7110_MSG_CLOCK, date, state) == GN_ERR_NONE) {
+				sm_block(NK7110_MSG_CLOCK, &tmpdata, state);
 				req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
 				req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
 				data->calnote->time.year = tmptime.year;
@@ -2178,15 +2178,15 @@ static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *st
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		SendWAPFrame(data, state, 0x03);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
 	/* First we need to get WAP setting from the location we want to write to
 	   because we need wap_setting->successors */
 	req2[4] = data->wap_setting->location;
 	data->wap_setting->read_before_write = true;
-	if (sm_message_send(state, 5, NK7110_MSG_WAP, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK7110_MSG_WAP);
+	if (sm_message_send(5, NK7110_MSG_WAP, req2, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK7110_MSG_WAP, data, state);
 	if (error != GN_ERR_NONE) return error;
 
 	/* Name */
@@ -2203,9 +2203,9 @@ static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *st
 	memcpy(req + pos, "\x00\x80\x00\x00\x00\x00\x00\x00\x00", 9);
 	pos += 9;
 
-	if (sm_message_send(state, pos, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK7110_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(pos, NK7110_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK7110_MSG_WAP, data, state);
+	if (error) return error;
 
 	for (i = 0; i < 4; i++) {
 		pos = 4;
@@ -2238,9 +2238,9 @@ static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *st
 		memcpy(req1 + pos, "\x80\x00\x00\x00\x00\x00\x00\x00", 8);
 		pos += 8;
 
-		if (sm_message_send(state, pos, NK7110_MSG_WAP, req1) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = sm_block(state, data, NK7110_MSG_WAP);
-		if (error != GN_ERR_NONE) return error;
+		if (sm_message_send(pos, NK7110_MSG_WAP, req1, state)) return GN_ERR_NOTREADY;
+		error = sm_block(NK7110_MSG_WAP, data, state);
+		if (error) return error;
 	}
 
 	return FinishWAP(data, state);
@@ -2257,12 +2257,12 @@ static gn_error NK7110_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
-	if (sm_message_send(state, 6, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK7110_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(6, NK7110_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK7110_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -2278,12 +2278,12 @@ static gn_error NK7110_GetWAPBookmark(gn_data *data, struct gn_statemachine *sta
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
-	if (sm_message_send(state, 6, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK7110_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(6, NK7110_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK7110_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -2299,15 +2299,15 @@ static gn_error NK7110_WriteWAPBookmark(gn_data *data, struct gn_statemachine *s
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
 	pos += PackWAPString(req + pos, data->wap_bookmark->name, 1);
 	pos += PackWAPString(req + pos, data->wap_bookmark->URL, 1);
 
-	if (sm_message_send(state, pos, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK7110_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(pos, NK7110_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK7110_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -2330,18 +2330,18 @@ static gn_error NK7110_GetWAPSetting(gn_data *data, struct gn_statemachine *stat
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
-	if (sm_message_send(state, 5, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK7110_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(5, NK7110_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK7110_MSG_WAP, data, state);
+	if (error) return error;
 
 	for (i = 0; i < 4; i++) {
 		req2[4] = data->wap_setting->successors[i];
-		if (sm_message_send(state, 5, NK7110_MSG_WAP, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = sm_block(state, data, NK7110_MSG_WAP);
-		if (error != GN_ERR_NONE) return error;
+		if (sm_message_send(5, NK7110_MSG_WAP, req2, state)) return GN_ERR_NOTREADY;
+		error = sm_block(NK7110_MSG_WAP, data, state);
+		if (error) return error;
 	}
 	
 	return FinishWAP(data, state);
@@ -2358,12 +2358,12 @@ static gn_error NK7110_ActivateWAPSetting(gn_data *data, struct gn_statemachine 
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
-	if (sm_message_send(state, 5, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK7110_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(5, NK7110_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK7110_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -2394,8 +2394,8 @@ static gn_error NK7110_PressKey(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Pressing key...\n");
 	req[5] = data->key_code;
-	if (sm_message_send(state, 6, NK7110_MSG_KEYPRESS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK7110_MSG_KEYPRESS_RESP);
+	if (sm_message_send(6, NK7110_MSG_KEYPRESS, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(NK7110_MSG_KEYPRESS_RESP, data, state);
 }
 
 static gn_error NK7110_ReleaseKey(gn_data *data, struct gn_statemachine *state)
@@ -2403,8 +2403,8 @@ static gn_error NK7110_ReleaseKey(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {0x00, 0x01, 0x47, 0x00, 0x01, 0x0c};
 
 	dprintf("Releasing key...\n");
-	if (sm_message_send(state, 6, NK7110_MSG_KEYPRESS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK7110_MSG_KEYPRESS_RESP);
+	if (sm_message_send(6, NK7110_MSG_KEYPRESS, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(NK7110_MSG_KEYPRESS_RESP, data, state);
 }
 
 static gn_error NK7110_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press)

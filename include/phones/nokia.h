@@ -47,10 +47,10 @@ size_t pnok_string_encode(unsigned char *dest, size_t max, const unsigned char *
 /* Call divert: nk6100, nk7110 */
 gn_error pnok_call_divert(gn_data *data, struct gn_statemachine *state);
 gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
-int pnok_fbus_sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
+int pnok_fbus_sms_encode(unsigned char *req, gn_data *data, struct gn_statemachine *state);
 
 /* Security functions: nk6100, nk7100 */
-gn_error pnok_extended_cmds_enable(gn_data *data, struct gn_statemachine *state, unsigned char type);
+gn_error pnok_extended_cmds_enable(unsigned char type, gn_data *data, struct gn_statemachine *state);
 gn_error pnok_call_make(gn_data *data, struct gn_statemachine *state);
 gn_error pnok_call_answer(gn_data *data, struct gn_statemachine *state);
 gn_error pnok_call_cancel(gn_data *data, struct gn_statemachine *state);

@@ -51,14 +51,14 @@
 
 #define SEND_MESSAGE_BLOCK(type, length) \
 do { \
-	if (sm_message_send(state, length, type, req) != GN_ERR_NONE) return GN_ERR_NOTREADY; \
-	return sm_block(state, data, type); \
+	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
+	return sm_block(type, data, state); \
 } while (0)
 
 #define SEND_MESSAGE_WAITFOR(type, length) \
 do { \
-	if (sm_message_send(state, length, type, req) != GN_ERR_NONE) return GN_ERR_NOTREADY; \
-	return sm_wait_for(state, data, type); \
+	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
+	return sm_wait_for(type, data, state); \
 } while (0)
 
 /* Functions prototypes */
@@ -462,14 +462,14 @@ static gn_error NK6510_Identify(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Identifying...\n");
 	pnok_manufacturer_get(data->manufacturer);
-	if (sm_message_send(state, 5, 0x1b, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	if (sm_message_send(state, 6, 0x1b, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	sm_wait_for(state, data, 0x1b);
-	sm_block(state, data, 0x1b); /* waits for all requests - returns req2 error */
-	sm_error_get(state, 0x1b);
+	if (sm_message_send(5, 0x1b, req, state)) return GN_ERR_NOTREADY;
+	if (sm_message_send(6, 0x1b, req2, state)) return GN_ERR_NOTREADY;
+	sm_wait_for(0x1b, data, state);
+	sm_block(0x1b, data, state); /* waits for all requests - returns req2 error */
+	sm_error_get(0x1b, state);
 
 	/* Check that we are back at state Initialised */
-	if (gn_sm_loop(state, 0) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
+	if (gn_sm_loop(0i, state) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
 	return GN_ERR_NONE;
 }
 
@@ -478,8 +478,7 @@ static gn_error NK6510_GetIMEI(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x00, 0x41};
 
 	dprintf("Getting imei...\n");
-	if (sm_message_send(state, 5, 0x1b, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x1b);
+	SEND_MESSAGE_BLOCK(5, 0x1b);
 }
 
 static gn_error NK6510_GetModel(gn_data *data, struct gn_statemachine *state)
@@ -487,8 +486,7 @@ static gn_error NK6510_GetModel(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x00};
 
 	dprintf("Getting model...\n");
-	if (sm_message_send(state, 6, 0x1b, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x1b);
+	SEND_MESSAGE_BLOCK(6, 0x1b);
 }
 
 static gn_error NK6510_GetRevision(gn_data *data, struct gn_statemachine *state)
@@ -496,8 +494,7 @@ static gn_error NK6510_GetRevision(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x00};
 
 	dprintf("Getting revision...\n");
-	if (sm_message_send(state, 6, 0x1b, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x1b);
+	SEND_MESSAGE_BLOCK(6, 0x1b);
 }
 
 /*******************************/
@@ -506,20 +503,20 @@ static gn_error NK6510_GetRevision(gn_data *data, struct gn_statemachine *state)
 static void ResetLayout(unsigned char *message, gn_data *data)
 {
 	/* reset everything */
-	data->raw_sms->more_messages     = 0;
+	data->raw_sms->more_messages = 0;
 	data->raw_sms->reply_via_same_smsc = 0;
 	data->raw_sms->reject_duplicates = 0;
-	data->raw_sms->report           = 0;
-	data->raw_sms->reference        = 0;
-	data->raw_sms->pid              = 0;
-	data->raw_sms->report_status     = 0;
+	data->raw_sms->report = 0;
+	data->raw_sms->reference = 0;
+	data->raw_sms->pid = 0;
+	data->raw_sms->report_status  = 0;
 	memcpy(data->raw_sms->smsc_time, message, 0);
 	memcpy(data->raw_sms->time, message, 0);
 	memcpy(data->raw_sms->remote_number, message, 0);
 	memcpy(data->raw_sms->message_center, message, 0);
-	data->raw_sms->udh_indicator     = 0;
-	data->raw_sms->dcs              = 0;
-	data->raw_sms->length           = 0;
+	data->raw_sms->udh_indicator  = 0;
+	data->raw_sms->dcs = 0;
+	data->raw_sms->length = 0;
 	memcpy(data->raw_sms->user_data, message, 0);
 	data->raw_sms->validity_indicator = 0;
 	memcpy(data->raw_sms->validity, message, 0);
@@ -871,12 +868,12 @@ static gn_error NK6510_GetSMSStatus(gn_data *data, struct gn_statemachine *state
 	data->sms_folder->folder_id = GN_MT_TE;
 
 	error = NK6510_GetSMSFolderStatus(data, state);
-	if (error != GN_ERR_NONE) goto out;
+	if (error) goto out;
 
-	error = sm_message_send(state, 7, NK6510_MSG_FOLDER, req);
-	if (error != GN_ERR_NONE) goto out;
+	error = sm_message_send(7, NK6510_MSG_FOLDER, req, state);
+	if (error) goto out;
 
-	error = sm_block(state, data, NK6510_MSG_FOLDER);
+	error = sm_block(NK6510_MSG_FOLDER, data, state);
  out:
 	data->sms_folder = old_fld;
 	return error;
@@ -887,8 +884,7 @@ static gn_error NK6510_GetSMSFolders(gn_data *data, struct gn_statemachine *stat
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x12, 0x00, 0x00};
 
 	dprintf("Getting SMS Folders...\n");
-	if (sm_message_send(state, 6, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(6, NK6510_MSG_FOLDER);
 }
 
 static gn_error NK6510_DeleteSMSFolder(gn_data *data, struct gn_statemachine *state)
@@ -900,9 +896,7 @@ static gn_error NK6510_DeleteSMSFolder(gn_data *data, struct gn_statemachine *st
 	dprintf("Deleting SMS Folder...\n");
 	req[4] = data->sms_folder->folder_id + 5;
 	if (req[4] < 6) return GN_ERR_INVALIDMEMORYTYPE;
-
-	if (sm_message_send(state, 6, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(6, NK6510_MSG_FOLDER);
 }
 
 static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *state)
@@ -916,9 +910,7 @@ static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *st
 	
 	char_encode_unicode(req + 10, data->sms_folder->name, strlen(data->sms_folder->name));
 	req[7] = strlen(data->sms_folder->name) * 2 + 6;
-
-	if (sm_message_send(state, req[7] + 6, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(req[7] + 6, NK6510_MSG_FOLDER);
 }
 
 static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
@@ -939,15 +931,15 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
        	if ((req[5] == NK6510_MEMORY_IN) || (req[5] == NK6510_MEMORY_OU)) { /* special case IN/OUTBOX */
 		dprintf("Special case IN/OUTBOX in GetSMSFolderStatus!\n");
 
-		if (sm_message_send(state, 10, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = sm_block(state, data, NK6510_MSG_FOLDER);
-		if (error != 0) return error;
+		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
+		error = sm_block(NK6510_MSG_FOLDER, data, state);
+		if (error) return error;
 
 		memcpy(&phone, data->sms_folder, sizeof(gn_sms_folder));
 
 		req[4] = 0x01;
-		if (sm_message_send(state, 10, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = sm_block(state, data, NK6510_MSG_FOLDER);
+		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
+		error = sm_block(NK6510_MSG_FOLDER, data, state);
 
 		for (i = 0; i < phone.number; i++) {
 			data->sms_folder->locations[data->sms_folder->number] = phone.locations[i] + 1024;
@@ -955,9 +947,7 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 		}
 		return GN_ERR_NONE;
 	} 
-
-	if (sm_message_send(state, 10, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(10, NK6510_MSG_FOLDER);
 }
 
 static gn_error NK6510_GetSMSMessageStatus(gn_data *data, struct gn_statemachine *state)
@@ -981,9 +971,7 @@ static gn_error NK6510_GetSMSMessageStatus(gn_data *data, struct gn_statemachine
 	dprintf("Getting SMS message (%i in folder %i) status...\n", req[7], data->raw_sms->memory_type);
 
        	req[5] = get_memory_type(data->raw_sms->memory_type);
-
-	if (sm_message_send(state, 10, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(10, NK6510_MSG_FOLDER);
 }
 
 static gn_error NK6510_GetSMSnoValidate(gn_data *data, struct gn_statemachine *state)
@@ -1010,9 +998,7 @@ static gn_error NK6510_GetSMSnoValidate(gn_data *data, struct gn_statemachine *s
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
 	req[7] = data->raw_sms->number;
-
-	if (sm_message_send(state, 10, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(10, NK6510_MSG_FOLDER);
 }
 
 static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
@@ -1073,9 +1059,7 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
 	req[7] = data->sms_folder->locations[data->raw_sms->number - 1];
-
-	if (sm_message_send(state, 10, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(10, NK6510_MSG_FOLDER);
 }
 
 static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine *state)
@@ -1099,9 +1083,7 @@ static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
 	req[7] = data->raw_sms->number;
-
-	if (sm_message_send(state, 10, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(10, NK6510_MSG_FOLDER);
 }
 
 static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
@@ -1133,9 +1115,7 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
 	req[7] = data->raw_sms->number;
-
-	if (sm_message_send(state, 10, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_FOLDER);
+	SEND_MESSAGE_BLOCK(10, NK6510_MSG_FOLDER);
 }
 
 static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
@@ -1190,8 +1170,8 @@ static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
 	gn_get_line(stdin, ans, 4);
 	if (strcmp(ans, "yes")) return GN_ERR_USERCANCELED;
 
-	if (sm_message_send(state, len, NK6510_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK6510_MSG_FOLDER);
+	if (sm_message_send(len, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_FOLDER, data, state);
 #if 0
 	if (error == GN_ERR_NONE) {
 		req2[5] = get_memory_type(data->raw_sms->memory_type);
@@ -1205,8 +1185,8 @@ static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
 
 		req2[len++] = 0;
 		req2[len++] = 0;
-		if (sm_message_send(state, len, NK6510_MSG_FOLDER, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		return sm_block(state, data, NK6510_MSG_FOLDER);
+		if (sm_message_send(len, NK6510_MSG_FOLDER, req2, state)) return GN_ERR_NOTREADY;
+		return sm_block(NK6510_MSG_FOLDER, data, state);
 	}
 #endif
 	return error;
@@ -1348,8 +1328,7 @@ static gn_error NK6510_GetSMSCenter(gn_data *data, struct gn_statemachine *state
 	unsigned char req[] = {FBUS_FRAME_HEADER, NK6510_SUBSMS_GET_SMSC, 0x01, 0x00};
 
 	req[4] = data->message_center->id;
-	if (sm_message_send(state, 6, NK6510_MSG_SMS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_SMS);
+	SEND_MESSAGE_BLOCK(6, NK6510_MSG_SMS);
 }
 
 /**
@@ -1374,9 +1353,9 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 	pos = sms_encode(data, state, req + 9);
 
 	dprintf("Sending SMS...(%d)\n", pos + 9);
-	if (sm_message_send(state, pos + 9, NK6510_MSG_SMS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(pos + 9, NK6510_MSG_SMS, req, state)) return GN_ERR_NOTREADY;
 	do {
-		error = sm_block_no_retry_timeout(state, data, NK6510_MSG_SMS, state->link.sms_timeout);
+		error = sm_block_no_retry_timeout(NK6510_MSG_SMS, state->link.sms_timeout, data, state);
 	} while (!state->link.sms_timeout && error == GN_ERR_TIMEOUT);
 	return error;
 }
@@ -1466,8 +1445,7 @@ static gn_error NK6510_GetMemoryStatus(gn_data *data, struct gn_statemachine *st
 	dprintf("Getting memory status...\n");
 
 	req[5] = get_memory_type(data->memory_status->memory_type);
-	if (sm_message_send(state, 10, NK6510_MSG_PHONEBOOK, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_PHONEBOOK);
+	SEND_MESSAGE_BLOCK(10, NK6510_MSG_PHONEBOOK);
 }
 
 static gn_error NK6510_ReadPhonebookLocation(gn_data *data, struct gn_statemachine *state, int memtype, int location)
@@ -1483,9 +1461,7 @@ static gn_error NK6510_ReadPhonebookLocation(gn_data *data, struct gn_statemachi
 	req[9] = memtype;
 	req[14] = location >> 8;
 	req[15] = location & 0xff;
-
-	if (sm_message_send(state, 18, NK6510_MSG_PHONEBOOK, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_PHONEBOOK);
+	SEND_MESSAGE_BLOCK(18, NK6510_MSG_PHONEBOOK);
 }
 
 static gn_error NK6510_GetSpeedDial(gn_data *data, struct gn_statemachine *state)
@@ -1530,9 +1506,7 @@ static gn_error NK6510_SetSpeedDial(gn_data *data, struct gn_statemachine *state
 	memcpy(string + 8, "\x0B\x02", 2);
 
 	PackBlock(0x1a, 10, 1, string, req + 22, 40 - 22);
-
-	if (sm_message_send(state, 38, NK6510_MSG_PHONEBOOK, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_PHONEBOOK);
+	SEND_MESSAGE_BLOCK(38, NK6510_MSG_PHONEBOOK);
 }
 
 static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
@@ -1606,16 +1580,12 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 #endif
 
 	req[21] = block;
-	if (sm_message_send(state, count, NK6510_MSG_PHONEBOOK, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_PHONEBOOK);
+	SEND_MESSAGE_BLOCK(count, NK6510_MSG_PHONEBOOK);
 }
 
 static gn_error NK6510_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
-	int memtype;
-
-	memtype = get_memory_type(data->phonebook_entry->memory_type);
-
+	int memtype = get_memory_type(data->phonebook_entry->memory_type);
 	return NK6510_ReadPhonebookLocation(data, state, memtype, data->phonebook_entry->location);
 }
 
@@ -1634,9 +1604,7 @@ static gn_error GetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	req[15] = GNOKII_MIN(data->bitmap->number + 1, GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER);
 	req[15] = data->bitmap->number + 1;
 	dprintf("Getting caller(%d) logo...\n", req[15]);
-
-	if (sm_message_send(state, 18, NK6510_MSG_PHONEBOOK, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_PHONEBOOK);
+	SEND_MESSAGE_BLOCK(18, NK6510_MSG_PHONEBOOK);
 }
 
 static gn_error NK6510_DeletePhonebookLocation(gn_data *data, struct gn_statemachine *state)
@@ -1920,9 +1888,9 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, NK6510_SUBCAL_GET_INFO, 0xff, 0xfe};
+	
 	dprintf("Getting calendar notes info...\n");
-	if (sm_message_send(state, 6, NK6510_MSG_CALENDAR, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_CALENDAR);
+	SEND_MESSAGE_BLOCK(6, NK6510_MSG_CALENDAR);
 }
 
 static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
@@ -1938,14 +1906,14 @@ static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 	if (NK6510_GetCalendarNotesInfo(data, state) == GN_ERR_NONE) {
 		if (data->calnote->location < data->calnote_list->number + 1 &&
 		    data->calnote->location > 0 ) {
-			if (sm_message_send(state, 4, NK6510_MSG_CLOCK, date) == GN_ERR_NONE) {
-				sm_block(state, &tmpdata, NK6510_MSG_CLOCK);
+			if (sm_message_send(4, NK6510_MSG_CLOCK, date, state) == GN_ERR_NONE) {
+				sm_block(NK6510_MSG_CLOCK, &tmpdata, state);
 				req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
 				req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
 				data->calnote->time.year = tmptime.year;
 
-				if (sm_message_send(state, 6, NK6510_MSG_CALENDAR, req) == GN_ERR_NONE) {
-					error = sm_block(state, data, NK6510_MSG_CALENDAR);
+				if (sm_message_send(6, NK6510_MSG_CALENDAR, req, state) == GN_ERR_NONE) {
+					error = sm_block(NK6510_MSG_CALENDAR, data, state);
 				}
 			}
 		}
@@ -1995,9 +1963,7 @@ long NK6510_GetNoteAlarmDiff(gn_timestamp *time, gn_timestamp *alarm)
 static gn_error NK6510_FirstCalendarFreePos(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x31 };
-
-	if (sm_message_send(state, 4, NK6510_MSG_CALENDAR, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_CALENDAR);
+	SEND_MESSAGE_BLOCK(4, NK6510_MSG_CALENDAR);
 }
 
 
@@ -2337,8 +2303,7 @@ static gn_error NK6510_GetNetworkInfo(gn_data *data, struct gn_statemachine *sta
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x00, 0x00};
 
 	dprintf("Getting network info ...\n");
-	if (sm_message_send(state, 5, NK6510_MSG_NETSTATUS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_NETSTATUS);
+	SEND_MESSAGE_BLOCK(5, NK6510_MSG_NETSTATUS);
 }
 
 static gn_error NK6510_GetRFLevel(gn_data *data, struct gn_statemachine *state)
@@ -2346,8 +2311,7 @@ static gn_error NK6510_GetRFLevel(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x02, 0x00, 0x00, 0x00};
 
 	dprintf("Getting network info ...\n");
-	if (sm_message_send(state, 9, NK6510_MSG_NETSTATUS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_NETSTATUS);
+	SEND_MESSAGE_BLOCK(9, NK6510_MSG_NETSTATUS);
 }
 
 static gn_error GetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
@@ -2355,8 +2319,7 @@ static gn_error GetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x23, 0x00, 0x00, 0x55, 0x55, 0x55};
 
 	dprintf("Getting op logo...\n");
-	if (sm_message_send(state, 9, NK6510_MSG_NETSTATUS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_NETSTATUS);
+	SEND_MESSAGE_BLOCK(9, NK6510_MSG_NETSTATUS);
 }
 
 static gn_error SetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
@@ -2393,9 +2356,7 @@ static gn_error SetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 		memcpy(req + 26, data->bitmap->bitmap, data->bitmap->size);
 	}
 	dprintf("Setting op logo...\n");
-
-	if (sm_message_send(state, req[19] + req[11] + 10, NK6510_MSG_NETSTATUS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_NETSTATUS);
+	SEND_MESSAGE_BLOCK(req[19] + req[11] + 10, NK6510_MSG_NETSTATUS);
 }
 
 /*********************/
@@ -2423,8 +2384,7 @@ static gn_error NK6510_GetBatteryLevel(gn_data *data, struct gn_statemachine *st
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0A, 0x02, 0x00};
 
 	dprintf("Getting battery level...\n");
-	if (sm_message_send(state, 6, NK6510_MSG_BATTERY, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_BATTERY);
+	SEND_MESSAGE_BLOCK(6, NK6510_MSG_BATTERY);
 }
 
 
@@ -2464,8 +2424,7 @@ static gn_error NK6510_GetRingtoneList(gn_data *data, struct gn_statemachine *st
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x00, 0x00, 0xFE, 0x00, 0x7D};
 
 	dprintf("Getting list of ringtones...\n");
-	if (sm_message_send(state, 9, NK6510_MSG_RINGTONE, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_RINGTONE);
+	SEND_MESSAGE_BLOCK(9, NK6510_MSG_RINGTONE);
 }
 
 static gn_error NK6510_GetRingtone(gn_data *data, struct gn_statemachine *state)
@@ -2473,8 +2432,7 @@ static gn_error NK6510_GetRingtone(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x00, 0x00, 0xFE, 0x00, 0x7D};
 
 	dprintf("Getting list of ringtones...\n");
-	if (sm_message_send(state, 9, NK6510_MSG_RINGTONE, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_RINGTONE);
+	SEND_MESSAGE_BLOCK(9, NK6510_MSG_RINGTONE);
 }
 
 
@@ -2890,9 +2848,7 @@ static gn_error NK6510_SetProfile(gn_data *data, struct gn_statemachine *state)
 
 	req[5] = blocks;
 	dprintf("length: %i\n", length);
-
-	if (sm_message_send(state, length + 1, NK6510_MSG_PROFILE, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_PROFILE);
+	SEND_MESSAGE_BLOCK(length + 1, NK6510_MSG_PROFILE);
 }
 
 
@@ -3069,16 +3025,14 @@ static gn_error NK6510_IncomingSubscribe(int messagetype, unsigned char *message
 
 static gn_error NK6510_Subscribe(gn_data *data, struct gn_statemachine *state)
 {
+	int i;
 	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x10,
 			       0x34, /* number of groups */
 			       0x01, 0x0a, 0x02, 0x14, 0x15};
-	int i;
 
 	dprintf("Subscribing to various channels!\n");
 	for (i = 1; i < 35; i++) req[4 + i] = i;
-
-	if (sm_message_send(state, 39, NK6510_MSG_SUBSCRIBE, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_SUBSCRIBE);
+	SEND_MESSAGE_BLOCK(39, NK6510_MSG_SUBSCRIBE);
 }
 
 
@@ -3192,9 +3146,7 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 	req[pos++] = 0x00; /* CUG index */
 	req[pos++] = 0x00; /* CUG index */
 	req[pos++] = 0x01; /* CUG_OA true */
-
-	if (sm_message_send(state, pos, NK6510_MSG_COMMSTATUS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, NK6510_MSG_COMMSTATUS);
+	SEND_MESSAGE_BLOCK(pos, NK6510_MSG_COMMSTATUS);
 }
 
 /*****************/
@@ -3508,9 +3460,9 @@ static gn_error NK6510_WriteWAPSetting(gn_data *data, struct gn_statemachine *st
 	memcpy(req + pos, "\x00\x0c\x07\x6B\x0C\x1E\x00\x00\x00\x55", 10);
 	pos += 10;
 
-	if (sm_message_send(state, pos, NK6510_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK6510_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(pos, NK6510_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -3526,12 +3478,12 @@ static gn_error NK6510_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
-	if (sm_message_send(state, 6, NK6510_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK6510_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(6, NK6510_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -3547,12 +3499,12 @@ static gn_error NK6510_GetWAPBookmark(gn_data *data, struct gn_statemachine *sta
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
-	if (sm_message_send(state, 6, NK6510_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK6510_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(6, NK6510_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -3568,15 +3520,15 @@ static gn_error NK6510_WriteWAPBookmark(gn_data *data, struct gn_statemachine *s
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
 	pos += PackWAPString(req + pos, data->wap_bookmark->name, 2);
 	pos += PackWAPString(req + pos, data->wap_bookmark->URL, 2);
 
-	if (sm_message_send(state, pos, NK6510_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK6510_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(pos, NK6510_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -3592,13 +3544,13 @@ static gn_error NK6510_GetWAPSetting(gn_data *data, struct gn_statemachine *stat
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
 
-	if (sm_message_send(state, 5, NK6510_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK6510_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(5, NK6510_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }
@@ -3614,12 +3566,12 @@ static gn_error NK6510_ActivateWAPSetting(gn_data *data, struct gn_statemachine 
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
-		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
+		if ((error = PrepareWAP(data, state))) return error;
 	}
 
-	if (sm_message_send(state, 5, NK6510_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = sm_block(state, data, NK6510_MSG_WAP);
-	if (error != GN_ERR_NONE) return error;
+	if (sm_message_send(5, NK6510_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_WAP, data, state);
+	if (error) return error;
 
 	return FinishWAP(data, state);
 }

@@ -145,7 +145,7 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 		bi->rbuf[0] = GN_AT_PROMPT;
 	if (bi->rbuf[0] != GN_AT_NONE) {
 		at_printf("read : ", bi->rbuf + 1, bi->rbuf_pos - 1);
-		sm_incoming_function(sm, sm->last_msg_type, bi->rbuf, bi->rbuf_pos - 1);
+		sm_incoming_function(sm->last_msg_type, bi->rbuf, bi->rbuf_pos - 1, sm);
 		bi->rbuf_pos = 1;
 		bi->binlen = 1;
 		return;
@@ -184,7 +184,7 @@ static gn_error atbus_loop(struct timeval *timeout, struct gn_statemachine *sm)
 /* Initialise variables and start the link */
 /* Fixme we allow serial and irda for connection to reduce */
 /* bug reports. this is pretty silly for /dev/ttyS?. */
-gn_error atbus_initialise(struct gn_statemachine *state, int mode)
+gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	atbus_instance *businst;

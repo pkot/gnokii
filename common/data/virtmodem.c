@@ -197,7 +197,7 @@ void vm_loop(void)
 				queue.n++;
 			}
 		}
-		if (FD_ISSET(devfd, &rfds)) gn_sm_loop(sm, 1);
+		if (FD_ISSET(devfd, &rfds)) gn_sm_loop(1, sm);
 	}
 }
 

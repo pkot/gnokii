@@ -107,7 +107,7 @@ static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
 	return (*replygetsms)(type, buffer, length + 2, data, state);
 }
 
-void at_bosch_init(struct gn_statemachine *state, char* foundmodel, char* setupmodel)
+void at_bosch_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
 	at_insert_send_function(GN_OP_AT_GetCharset, GetCharset, state);
 	at_insert_send_function(GN_OP_AT_SetCharset, SetCharset, state);

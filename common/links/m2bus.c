@@ -244,7 +244,7 @@ static void m2bus_rx_statemachine(unsigned char rx_byte)
 
 					/* Finally dispatch if ready */
 
-					sm_incoming_function(statemachine, i->message_type, i->message_buffer, i->message_length);
+					sm_incoming_function(i->message_type, i->message_buffer, i->message_length, statemachine);
 				}
 			} else {
 				dprintf("M2BUS: Bad checksum!\n");

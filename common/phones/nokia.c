@@ -191,8 +191,8 @@ gn_error pnok_call_divert(gn_data *data, struct gn_statemachine *state)
 	    (data->call_divert->ctype == GN_CDV_AllCalls))
 		req[6] = 0x02;
 
-	if (sm_message_send(state, length, 0x06, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block_timeout(state, data, 0x06, 100);
+	if (sm_message_send(length, 0x06, req, state)) return GN_ERR_NOTREADY;
+	return sm_block_timeout(0x06, 100, data, state);
 }
 
 gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
@@ -253,7 +253,7 @@ gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int 
 	return GN_ERR_NONE;
 }
 
-int pnok_fbus_sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req)
+int pnok_fbus_sms_encode(unsigned char *req, gn_data *data, struct gn_statemachine *state)
 {
 	int pos = 0;
 
@@ -297,7 +297,7 @@ int pnok_fbus_sms_encode(gn_data *data, struct gn_statemachine *state, unsigned 
 
 /* security commands */
 
-gn_error pnok_extended_cmds_enable(gn_data *data, struct gn_statemachine *state, unsigned char type)
+gn_error pnok_extended_cmds_enable(unsigned char type, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x64, 0x00};
 
@@ -308,8 +308,8 @@ gn_error pnok_extended_cmds_enable(gn_data *data, struct gn_statemachine *state,
 
 	req[3] = type;
 
-	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x40);
+	if (sm_message_send(4, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
 }
 
 gn_error pnok_call_make(gn_data *data, struct gn_statemachine *state)
@@ -340,13 +340,13 @@ gn_error pnok_call_make(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_ENTRYTOOLONG;
 	}
 
-	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(0x01, data, state)))
 		return err;
 
 	strcpy(req + 4, data->call_info->number);
 
-	if (sm_message_send(state, 5 + n, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x40);
+	if (sm_message_send(5 + n, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
 }
 
 gn_error pnok_call_answer(gn_data *data, struct gn_statemachine *state)
@@ -356,11 +356,11 @@ gn_error pnok_call_answer(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->call_info) return GN_ERR_INTERNALERROR;
 
-	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(0x01, data, state)))
 		return err;
 
-	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x40);
+	if (sm_message_send(4, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
 }
 
 gn_error pnok_call_cancel(gn_data *data, struct gn_statemachine *state)
@@ -370,11 +370,11 @@ gn_error pnok_call_cancel(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->call_info) return GN_ERR_INTERNALERROR;
 
-	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(0x01, data, state)))
 		return err;
 
-	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x40);
+	if (sm_message_send(4, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
 }
 
 gn_error pnok_netmonitor(gn_data *data, struct gn_statemachine *state)
@@ -386,10 +386,10 @@ gn_error pnok_netmonitor(gn_data *data, struct gn_statemachine *state)
 
 	req[3] = data->netmonitor->field;
 
-	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE) return err;
+	if ((err = pnok_extended_cmds_enable(0x01, data, state))) return err;
 
-	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return sm_block(state, data, 0x40);
+	if (sm_message_send(4, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
 }
 
 gn_error pnok_security_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)

@@ -61,7 +61,7 @@ API gn_error gn_call_answer(int call_id);
 API gn_error gn_call_cancel(int call_id);
 
 /* Statemachine */
-API gn_state gn_sm_loop(struct gn_statemachine *state, int timeout);
+API gn_state gn_sm_loop(int timeout, struct gn_statemachine *state);
 API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemachine *sm);
 
 /* Define these as externs so that app code can pick them up. */

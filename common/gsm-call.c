@@ -40,7 +40,7 @@
 
 static gn_call calltable[GN_CALL_MAX_PARALLEL];
 
-static gn_call *search_call(struct gn_statemachine *state, int call_id)
+static gn_call *search_call(int call_id, struct gn_statemachine *state)
 {
 	int i;
 

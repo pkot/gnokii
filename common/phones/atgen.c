@@ -216,14 +216,14 @@ at_send_function_type at_insert_send_function(int type, at_send_function_type fu
 
 static gn_error SoftReset(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 4, GN_OP_Init, "ATZ\r")) return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_Init);
+	if (sm_message_send(4, GN_OP_Init, "ATZ\r", state)) return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_Init, data, state);
 }
 
 static gn_error SetEcho(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 5, GN_OP_Init, "ATE1\r")) return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_Init);
+	if (sm_message_send(5, GN_OP_Init, "ATE1\r", state)) return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_Init, data, state);
 }
 
 /* StoreDefaultCharset
@@ -271,11 +271,11 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
 
 	if (mt != drvinst->memorytype) {
 		sprintf(req, "AT+CPBS=\"%s\"\r", memorynames[mt]);
-		ret = sm_message_send(state, 13, GN_OP_Init, req);
+		ret = sm_message_send(13, GN_OP_Init, req, state);
 		if (ret)
 			return GN_ERR_NOTREADY;
 		gn_data_clear(&data);
-		ret = sm_block_no_retry(state, &data, GN_OP_Init);
+		ret = sm_block_no_retry(GN_OP_Init, &data, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->memorytype = mt;
 	}
@@ -291,11 +291,11 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 
 	if (mt != drvinst->smsmemorytype) {
 		sprintf(req, "AT+CPMS=\"%s\"\r", memorynames[mt]);
-		ret = sm_message_send(state, 13, GN_OP_Init, req);
+		ret = sm_message_send(13, GN_OP_Init, req, state);
 		if (ret != GN_ERR_NONE)
 			return GN_ERR_NOTREADY;
 		gn_data_clear(&data);
-		ret = sm_block_no_retry(state, &data, GN_OP_Init);
+		ret = sm_block_no_retry(GN_OP_Init, &data, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->smsmemorytype = mt;
 	}
@@ -344,23 +344,23 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 	if (drvinst->charset != AT_CHAR_NONE)
 		return GN_ERR_NONE;
 	/* check if ucs2 is available */
-	ret = sm_message_send(state, 10, GN_OP_AT_GetCharset, "AT+CSCS=?\r");
+	ret = sm_message_send(10, GN_OP_AT_GetCharset, "AT+CSCS=?\r", state);
 	if (ret)
 		return GN_ERR_NOTREADY;
 	gn_data_clear(&tmpdata);
 	*charsets = '\0';
 	tmpdata.model = charsets;
-	ret = sm_block_no_retry(state, &tmpdata, GN_OP_AT_GetCharset);
+	ret = sm_block_no_retry(GN_OP_AT_GetCharset, &tmpdata, state);
 	if (ret) {
 		*charsets = '\0';
 	}
 	else if (strstr(charsets, "UCS2")) {
 		/* ucs2 charset found. try to set it */
-		ret = sm_message_send(state, 15, GN_OP_Init, "AT+CSCS=\"UCS2\"\r");
+		ret = sm_message_send(15, GN_OP_Init, "AT+CSCS=\"UCS2\"\r", state);
 		if (ret)
 			return GN_ERR_NOTREADY;
 		gn_data_clear(&tmpdata);
-		ret = sm_block_no_retry(state, &tmpdata, GN_OP_Init);
+		ret = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->charset = AT_CHAR_UCS2;
 	}
@@ -374,19 +374,19 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 			return GN_ERR_NONE;
 		}
 		/* try to set hex charset */
-		ret = sm_message_send(state, 14, GN_OP_Init, "AT+CSCS=\"HEX\"\r");
+		ret = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"HEX\"\r", state);
 		if (ret)
 			return GN_ERR_NOTREADY;
 		gn_data_clear(&tmpdata);
-		ret = sm_block_no_retry(state, &tmpdata, GN_OP_Init);
+		ret = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->charset = AT_CHAR_HEXGSM;
 	} else {
-		ret = sm_message_send(state, 14, GN_OP_Init, "AT+CSCS=\"GSM\"\r");
+		ret = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"GSM\"\r", state);
 		if (ret)
 			return GN_ERR_NOTREADY;
 		gn_data_clear(&tmpdata);
-		ret = sm_block_no_retry(state, &tmpdata, GN_OP_Init);
+		ret = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->charset = AT_CHAR_GSM;
 	}
@@ -406,10 +406,10 @@ static gn_error AT_GetCharset(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error ret;
 
-	ret = sm_message_send(state, 9, GN_OP_AT_GetCharset, "AT+CSCS?\r");
+	ret = sm_message_send(9, GN_OP_AT_GetCharset, "AT+CSCS?\r", state);
 	if (ret)
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_AT_GetCharset);
+	return sm_block_no_retry(GN_OP_AT_GetCharset, data, state);
 }
 
 static gn_error AT_Identify(gn_data *data, struct gn_statemachine *state)
@@ -427,45 +427,45 @@ static gn_error AT_Identify(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 8, GN_OP_Identify, "AT+CGMM\r"))
+	if (sm_message_send(8, GN_OP_Identify, "AT+CGMM\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_Identify);
+	return sm_block_no_retry(GN_OP_Identify, data, state);
 }
 
 static gn_error AT_GetManufacturer(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 8, GN_OP_Identify, "AT+CGMI\r"))
+	if (sm_message_send(8, GN_OP_Identify, "AT+CGMI\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_Identify);
+	return sm_block_no_retry(GN_OP_Identify, data, state);
 }
 
 static gn_error AT_GetRevision(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 8, GN_OP_Identify, "AT+CGMR\r"))
+	if (sm_message_send(8, GN_OP_Identify, "AT+CGMR\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_Identify);
+	return sm_block_no_retry(GN_OP_Identify, data, state);
 }
 
 static gn_error AT_GetIMEI(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 8, GN_OP_Identify, "AT+CGSN\r"))
+	if (sm_message_send(8, GN_OP_Identify, "AT+CGSN\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_Identify);
+	return sm_block_no_retry(GN_OP_Identify, data, state);
 }
 
 /* gets battery level and power source */
 static gn_error AT_GetBattery(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 7, GN_OP_GetBatteryLevel, "AT+CBC\r"))
+	if (sm_message_send(7, GN_OP_GetBatteryLevel, "AT+CBC\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_GetBatteryLevel);
+	return sm_block_no_retry(GN_OP_GetBatteryLevel, data, state);
 }
 
 static gn_error AT_GetRFLevel(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 7, GN_OP_GetRFLevel, "AT+CSQ\r"))
+	if (sm_message_send(7, GN_OP_GetRFLevel, "AT+CSQ\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_GetRFLevel);
+	return sm_block_no_retry(GN_OP_GetRFLevel, data, state);
 }
 
 static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
@@ -475,14 +475,14 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	ret = at_memory_type_set(data->memory_status->memory_type,  state);
 	if (ret)
 		return ret;
-	if (sm_message_send(state, 9, GN_OP_GetMemoryStatus, "AT+CPBS?\r"))
+	if (sm_message_send(9, GN_OP_GetMemoryStatus, "AT+CPBS?\r", state))
 		return GN_ERR_NOTREADY;
-	ret = sm_block_no_retry(state, data, GN_OP_GetMemoryStatus);
+	ret = sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 	if (ret != GN_ERR_UNKNOWN)
 		return ret;
-	if (sm_message_send(state, 10, GN_OP_GetMemoryStatus, "AT+CPBR=?\r"))
+	if (sm_message_send(10, GN_OP_GetMemoryStatus, "AT+CPBR=?\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_GetMemoryStatus);
+	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 }
 
 static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
@@ -497,9 +497,9 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	if (ret)
 		return ret;
 	sprintf(req, "AT+CPBR=%d\r", data->phonebook_entry->location);
-	if (sm_message_send(state, strlen(req), GN_OP_ReadPhonebook, req))
+	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_ReadPhonebook);
+	return sm_block_no_retry(GN_OP_ReadPhonebook, data, state);
 }
 
 static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
@@ -543,9 +543,9 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 		tmp[len++] = '"'; tmp[len++] = '\r';
 		len += ofs;
 	} 
-	if (sm_message_send(state, len, GN_OP_WritePhonebook, req))
+	if (sm_message_send(len, GN_OP_WritePhonebook, req, state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_WritePhonebook);
+	return sm_block_no_retry(GN_OP_WritePhonebook, data, state);
 }
 
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
@@ -585,16 +585,16 @@ static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 	strcat(req, "\r");
 
 	dprintf("%s", req);
-	if (sm_message_send(state, strlen(req), GN_OP_CallDivert, req))
+	if (sm_message_send(strlen(req), GN_OP_CallDivert, req, state))
 		return GN_ERR_NOTREADY;
-	return sm_wait_for(state, data, GN_OP_CallDivert);
+	return sm_wait_for(GN_OP_CallDivert, data, state);
 }
 
 static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(state, 10, GN_OP_AT_SetPDUMode, "AT+CMGF=0\r"))
+	if (sm_message_send(10, GN_OP_AT_SetPDUMode, "AT+CMGF=0\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_AT_SetPDUMode);
+	return sm_block_no_retry(GN_OP_AT_SetPDUMode, data, state);
 }
 
 static gn_error AT_SendSMS(gn_data *data, struct gn_statemachine *state)
@@ -659,9 +659,9 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	 * SMSC field length */
 	sprintf(req, "AT+%s=%d\r", cmd, length - 1);
 	dprintf("Sending initial sequence\n");
-	if (sm_message_send(state, strlen(req), GN_OP_AT_Prompt, req))
+	if (sm_message_send(strlen(req), GN_OP_AT_Prompt, req, state))
 		return GN_ERR_NOTREADY;
-	error = sm_block_no_retry(state, data, GN_OP_AT_Prompt);
+	error = sm_block_no_retry(GN_OP_AT_Prompt, data, state);
 	dprintf("Got response %d\n", error);
 	if (error)
 		return error;
@@ -670,11 +670,10 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	req[length * 2] = 0x1a;
 	req[length * 2 + 1] = 0;
 	dprintf("Sending frame: %s\n", req);
-	if (sm_message_send(state, strlen(req), GN_OP_SendSMS, req))
+	if (sm_message_send(strlen(req), GN_OP_SendSMS, req, state))
 		return GN_ERR_NOTREADY;
 	do {
-		error = sm_block_no_retry_timeout(state, data, GN_OP_SendSMS,
-					       state->link.sms_timeout);
+		error = sm_block_no_retry_timeout(GN_OP_SendSMS, state->link.sms_timeout, data, state);
 	} while (!state->link.sms_timeout && error == GN_ERR_TIMEOUT);
 	return error;
 }
@@ -687,9 +686,9 @@ static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 		return err;
 	sprintf(req, "AT+CMGR=%d\r", data->raw_sms->number);
 	dprintf("%s", req);
-	if (sm_message_send(state, strlen(req), GN_OP_GetSMS, req))
+	if (sm_message_send(strlen(req), GN_OP_GetSMS, req, state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_GetSMS);
+	return sm_block_no_retry(GN_OP_GetSMS, data, state);
 }
 
 static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
@@ -701,9 +700,9 @@ static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 	sprintf(req, "AT+CMGD=%d\r", data->sms->number);
 	dprintf("%s", req);
 
-	if (sm_message_send(state, strlen(req), GN_OP_DeleteSMS, req))
+	if (sm_message_send(strlen(req), GN_OP_DeleteSMS, req, state))
  		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_DeleteSMS);
+	return sm_block_no_retry(GN_OP_DeleteSMS, data, state);
 }
 
 /* 
@@ -715,16 +714,16 @@ static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
  */
 static gn_error AT_GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
- 	if (sm_message_send(state, 9, GN_OP_GetSMSCenter, "AT+CSCA?\r"))
+ 	if (sm_message_send(9, GN_OP_GetSMSCenter, "AT+CSCA?\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_GetSMSCenter);
+	return sm_block_no_retry(GN_OP_GetSMSCenter, data, state);
 }
 
 static gn_error AT_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state)
 {
- 	if (sm_message_send(state, 9, GN_OP_GetSecurityCodeStatus, "AT+CPIN?\r"))
+ 	if (sm_message_send(9, GN_OP_GetSecurityCodeStatus, "AT+CPIN?\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_GetSecurityCodeStatus);
+	return sm_block_no_retry(GN_OP_GetSecurityCodeStatus, data, state);
 }
 
 static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *state)
@@ -735,9 +734,9 @@ static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *stat
 		return GN_ERR_NOTIMPLEMENTED;
 
 	sprintf(req, "AT+CPIN=\"%s\"\r", data->security_code->code);
- 	if (sm_message_send(state, strlen(req), GN_OP_EnterSecurityCode, req))
+ 	if (sm_message_send(strlen(req), GN_OP_EnterSecurityCode, req, state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(state, data, GN_OP_EnterSecurityCode);
+	return sm_block_no_retry(GN_OP_EnterSecurityCode, data, state);
 }
 
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
@@ -1206,9 +1205,9 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 		if (!strcmp(setupdata->model, "dancall"))
 			ret = cbus_initialise(state);
 		else if (!strcmp(setupdata->model, "AT-HW"))
-			ret = atbus_initialise(state, true);
+			ret = atbus_initialise(true, state);
 		else
-			ret = atbus_initialise(state, false);
+			ret = atbus_initialise(false, state);
 		break;
 	default:
 		ret = GN_ERR_NOTSUPPORTED;
@@ -1243,13 +1242,13 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 		goto out;
 
 	if (!strncasecmp(manufacturer, "bosch", 5))
-		at_bosch_init(state, model, setupdata->model);
+		at_bosch_init(model, setupdata->model, state);
 	else if (!strncasecmp(manufacturer, "ericsson", 8))
-		at_ericsson_init(state, model, setupdata->model);
+		at_ericsson_init(model, setupdata->model, state);
 	else if (!strncasecmp(manufacturer, "nokia", 5))
-		at_nokia_init(state, model, setupdata->model);
+		at_nokia_init(model, setupdata->model, state);
 	else if (!strncasecmp(manufacturer, "siemens", 7))
-		at_siemens_init(state, model, setupdata->model);
+		at_siemens_init(model, setupdata->model, state);
 	
 	StoreDefaultCharset(state);
 
