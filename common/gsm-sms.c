@@ -526,8 +526,6 @@ static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_U
 	dprintf("\tDate: %s\n", PrintDateTime(rawsms->SMSCTime));
 
 	/* Remote number */
-	/* FIXME Is this an ugly hack or correct? */
-	/* at least it works with 6210, 6510 and 6110 with the message I tested */
 	rawsms->RemoteNumber[0] = (rawsms->RemoteNumber[0] + 1) / 2 + 1;
 	snprintf(sms->Remote.Number, sizeof(sms->Remote.Number), "%s", GetBCDNumber(rawsms->RemoteNumber));
 	dprintf("\tRemote number (recipient or sender): %s\n", sms->Remote.Number);
@@ -580,12 +578,15 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 		/* This is incredible. Nokia violates it's own format in 6210 */
 		/* Indicate that it is Multipart Message. Remove it if not needed */
 		sms->UDH.Number = 1;
+		sms->UDH.UDH[0].Type = SMS_MultipartMessage;
 		if ((rawsms->UserData[0] == 0x48) && (rawsms->UserData[1] == 0x1c)) {
+
 			dprintf("First picture then text!\n");
-			sms->UDH.UDH[0].Type = SMS_MultipartMessage;
+
 			/* First part is a Picture */
 			sms->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(GSM_PictureMessage, rawsms->UserData, NULL, &sms->UserData[0].u.Bitmap);
+			GSM_ReadSMSBitmap(GSM_PictureMessage, rawsms->UserData,
+					  NULL, &sms->UserData[0].u.Bitmap);
 			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap);
 
 			size = rawsms->UserDataLength - 4 - sms->UserData[0].u.Bitmap.size;
@@ -596,20 +597,20 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 				   rawsms->Length - sms->UserData[0].u.Bitmap.size - 4,
 				   size, 0, sms->DCS);
 		} else {
+
 			dprintf("First text then picture!\n");
+
 			/* First part is a text */
 			sms->UserData[1].Type = SMS_PlainText;
-
-			dprintf("SMS text length: %i\n", rawsms->UserData[1]);
 			DecodeData(rawsms->UserData + 3,
 				   (unsigned char *)&(sms->UserData[1].u.Text),
 				   rawsms->UserData[1], rawsms->UserData[0], 0, sms->DCS);
-			//			sms->UserData[1].u.Text[rawsms->UserData[1]] = 0;
 
-			sms->UserData[0].Type = SMS_MultipartMessage;
 			/* Second part is a Picture */
 			sms->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(GSM_PictureMessage, rawsms->UserData + rawsms->UserData[0] + 7, NULL, &sms->UserData[0].u.Bitmap);
+			GSM_ReadSMSBitmap(GSM_PictureMessage,
+					  rawsms->UserData + rawsms->UserData[0] + 7,
+					  NULL, &sms->UserData[0].u.Bitmap);
 			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap);
 		}
 		break;
@@ -676,10 +677,8 @@ API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	rawsms.Number = data->SMS->Number;
 	rawsms.MemoryType = data->SMS->MemoryType;
 	data->RawSMS = &rawsms;
-	dprintf("Requesting\n");
 	error = RequestSMS(data, state);
 	if (error != GE_NONE) return error;
-	dprintf("Parsing\n");
 	return ParseSMS(data);
 }
 
