@@ -100,6 +100,7 @@ static GSM_Error P6510_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_SetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetStartupGreeting(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
@@ -251,6 +252,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_GetSMSFolders(data, state);
 	case GOP_GetProfile:
 		return P6510_GetProfile(data, state);
+	case GOP_SetProfile:
+		return P6510_SetProfile(data, state);
 	case GOP_PressPhoneKey:
 		return P6510_PressOrReleaseKey(data, state, true);
 	case GOP_ReleasePhoneKey:
@@ -582,7 +585,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		break;
 
 	/* error? the error codes are taken from 6100 sources */
-	case 0x09:
+	case 0x90:
 		dprintf("SMS reading failed:\n");
 		switch (message[4]) {
 		case 0x02:
@@ -613,14 +616,11 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		}
 
 	/* sms status */
-	case 0x37:
+	case 0x09:
 		dprintf("SMS Status received\n");
-		/* FIXME: Don't count messages in fixed locations together with other */
-		data->SMSStatus->Number = ((message[10] << 8) | message[11]) +
-					  ((message[14] << 8) | message[15]) +
-					  (data->SMSFolder->Number);
-		data->SMSStatus->Unread = ((message[12] << 8) | message[13]) +
-					  ((message[16] << 8) | message[17]);
+
+		data->SMSStatus->Number = ((message[12] << 8) | message[13]) + data->SMSFolder->Number;
+		data->SMSStatus->Unread = ((message[14] << 8) | message[15]);
 		break;
 
 	/* getfolderstatus */
@@ -697,23 +697,21 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 {
 	SMS_Folder fld;
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x36, 0x64};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x08, 0x00, 0x00, 0x01};
 
 	dprintf("Getting SMS Status...\n");
 
-	/* Nokia 6210 and family does not show not "fixed" messages from the
+	/* Nokia 6510 and family does not show not "fixed" messages from the
 	 * Templates folder, ie. when you save a message to the Templates folder,
 	 * SMSStatus does not change! Workaround: get Templates folder status, which
 	 * does show these messages.
 	 */
-	/*
+
 	fld.FolderID = GMT_TE;
 	data->SMSFolder = &fld;
-
 	if (P6510_GetSMSFolderStatus(data, state) != GE_NONE) return GE_NOTREADY;
-	*/
 
-	if (SM_SendMessage(state, 5, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 7, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
@@ -1254,7 +1252,7 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 
 static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x02, 0x00, 0x55, 0x55, 0x55, 0x00};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x00, 0x55, 0x55, 0x55, 0x00};
 
 	dprintf("Getting memory status...\n");
 
@@ -1471,18 +1469,21 @@ request: 0x19 / 0x0004
 reply: 0x19 / 0x0012
 01 23 00 1c 06 01 ff ff ff ff 00 00 49 4c 01 3e |  #    ÿÿÿÿ  IL >
 01 56
+
+01 23 00 0B 01 02 01 0C 01 03 07 D2 07 0F 08 2E 37 00 04 04 01 00
 	*/
 
 	dprintf("Incoming clock!\n");
 	if (!data || !data->DateTime) return GE_INTERNALERROR;
 	switch (message[3]) {
 	case P6510_SUBCLO_DATE_RCVD:
-		data->DateTime->Year = (((unsigned int)message[8]) << 8) + message[9];
-		data->DateTime->Month = message[10];
-		data->DateTime->Day = message[11];
-		data->DateTime->Hour = message[12];
-		data->DateTime->Minute = message[13];
-		data->DateTime->Second = message[14];
+		dprintf("Date/Time received!\n");
+		data->DateTime->Year = (((unsigned int)message[10]) << 8) + message[11];
+		data->DateTime->Month = message[12];
+		data->DateTime->Day = message[13];
+		data->DateTime->Hour = message[14];
+		data->DateTime->Minute = message[15];
+		data->DateTime->Second = message[16];
 
 		break;
 	case P6510_SUBCLO_ALARM_RCVD:
@@ -1516,20 +1517,9 @@ reply: 0x19 / 0x0012
 
 static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, req_type};
-	int i;
+	unsigned char req[] = {FBUS_FRAME_HEADER, req_type, 0x00, 0x00};
 
-	/*	
-	for (i=0x22; i < 0xff; i++) {
-		req[3] = i;
-	if (SM_SendMessage(state, 4, P6510_MSG_CLOCK, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetryTimeout(state, data, P6510_MSG_CLOCK, 5);
-	}
-	return GE_UNKNOWN;
-	*/
-
-	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 4);
-
+	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 6);
 }
 
 /*********************/
@@ -1997,7 +1987,7 @@ static GSM_Error P6510_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *stat
 
 static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	unsigned char *blockstart;
+	unsigned char *blockstart, *operatorname;
 	int i;
 
 	switch (message[3]) {
@@ -2006,13 +1996,29 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		for (i = 0; i < message[5]; i++) {
 			dprintf("Blockstart: %i\n", blockstart[0]);
 			switch (blockstart[0]) {
+			case 0x00:
+				switch (blockstart[2]) {
+				case 0x00:
+					dprintf("Logged into home network.\n");
+					break;
+				case 0x01:
+					dprintf("Logged into a roaming network.\n");
+					break;
+				case 0x04:
+				case 0x09:
+					dprintf("Not logged in any network!");
+					break;
+				default:
+					dprintf("Unknown network status!\n");
+					break;
+				}
+				operatorname = malloc(blockstart[5] + 1);
+				DecodeUnicode(operatorname, blockstart + 6, blockstart[5]);
+				dprintf("Operator Name: %s\n", operatorname);
+				break;
 			case 0x09:  /* Operator details */
 				/* Network code is stored as 0xBA 0xXC 0xED ("ABC DE"). */
 				if (data->NetworkInfo) {
-					/* Is this correct? */
-					/* 01 56 00 01 00 02 || 00 0C 00 02 00 02 00 44 00 32 00 00 || 
-					   09 14 02 05 00 00 50 53 62 F2 20 00 00 01 02 01 00 00 00 00
-					   FIXME: What is the first block about? */
 					data->NetworkInfo->CellID[0]=blockstart[6];
 					data->NetworkInfo->CellID[1]=blockstart[7];
 					data->NetworkInfo->LAC[0]=blockstart[2];
@@ -2098,9 +2104,7 @@ static GSM_Error P6510_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x02, 0x00, 0x00, 0x00};
-	/* 00 01 00 0B 00 01 00 00 00 00 
-	   00 01 00 02 01 00 00 04 01 00
-	*/
+
 	dprintf("Getting network info ...\n");
 	if (SM_SendMessage(state, 9, P6510_MSG_NETSTATUS, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_NETSTATUS);
@@ -2109,7 +2113,7 @@ static GSM_Error P6510_GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error GetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x23, 0x00, 0x00, 0x55, 0x55, 0x55};
-	/*  00 01 00 23 00 00 55 55 55 */
+
 	dprintf("Getting op logo...\n");
 	if (SM_SendMessage(state, 9, P6510_MSG_NETSTATUS, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_NETSTATUS);
@@ -2241,7 +2245,7 @@ reply: 0x7a / 0x0036
 
 static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[1000] = {FBUS_FRAME_HEADER, 0xec, 0x15, 0x00, 0x00, 0x00, 0x04, 0xc0, 0x02, 0x00,
+	unsigned char req[1000] = {FBUS_FRAME_HEADER, 0x04, 0x0f, 0x00, 0x00, 0x00, 0x04, 0xc0, 0x02, 0x00,
 				   0x00,           /* Height */
 				   0xc0, 0x03, 0x00,
 				   0x00,           /* Width */
@@ -2304,42 +2308,34 @@ static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, 
 	unsigned char *blockstart;
 	int i;
 
-	/*
-01 47 00 02 00 0c 02 
-09 00 01 01 00 00 01 00 02
-09 01 01 01 00 00 01 00 02 
-09 02 01 01 00 00 01 00 02 
-09 03 01 01 00 00 01 bd 02 
-09 04 01 01 00 00 01 03 02 
-09 05 01 01 00 00 01 01 02 
-09 06 01 01 00 00 01 01 02 
-09 07 01 01 00 00 01 01 02 
-09 08 01 01 00 00 01 ff 02 
-09 09 01 01 00 00 01 00 02 
-1c 0c 01 01 00 00 14 00 41 00 6c 00 6c 00 67 00 65 00 6d 00 65 00 69 00 6e 00 00 02 
-09 ff 05 01 00 00 01 00
-	*/
-	switch (message[5]) {
-	case 0x0c:
+	switch (message[3]) {
+	case 0x02:
 		blockstart = message + 7;
 		for (i = 0; i < 11; i++) {
 			switch (blockstart[1]) {
 			case 0x00:
 				dprintf("type: %02x, keypad tone level: %i\n", blockstart[1], blockstart[7]);
-				data->Profile->KeypadTone = blockstart[7];
-				break;
-			case 0x01:
-				dprintf("type: %02x, info: %i\n", blockstart[1], blockstart[7]);
+				switch (blockstart[7]) {
+				case 0x00:
+					data->Profile->KeypadTone = 0xff;
+					break;
+				case 0x01:
+					data->Profile->KeypadTone = 0x00;
+					break;
+				case 0x02:
+					data->Profile->KeypadTone = 0x01;
+					break;
+				case 0x03:
+					data->Profile->KeypadTone = 0x02;
+					break;
+				default:
+					dprintf("Unknown keypad tone volume!\n");
+					break;
+				}
 				break;
 			case 0x02:
 				dprintf("type: %02x, call alert: %i\n", blockstart[1], blockstart[7]);
 				data->Profile->CallAlert = blockstart[7];
-
-				/*
-				  0x00 off
-				  0x03 beep once
-				  0x05 ringing
-				*/
 				break;
 			case 0x03:
 				dprintf("type: %02x, ringtone: %i\n", blockstart[1], blockstart[7]);
@@ -2347,7 +2343,7 @@ static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, 
 				break;
 			case 0x04:
 				dprintf("type: %02x, ringtone volume: %i\n", blockstart[1], blockstart[7]);
-				data->Profile->Volume = blockstart[7];
+				data->Profile->Volume = blockstart[7] + 6;
 				break;
 			case 0x05:
 				dprintf("type: %02x, message tone: %i\n", blockstart[1], blockstart[7]);
@@ -2365,9 +2361,6 @@ static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, 
 				dprintf("type: %02x, caller groups: %i\n", blockstart[1], blockstart[7]);
 				data->Profile->CallerGroups = blockstart[7];
 				break;
-			case 0x09:
-				dprintf("type: %02x, info: %i\n", blockstart[1], blockstart[7]);
-				break;
 			case 0x0c:
 				DecodeUnicode(data->Profile->Name, blockstart + 7, blockstart[6]);
 				dprintf("Profile Name: %s\n", data->Profile->Name);
@@ -2380,6 +2373,74 @@ static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, 
 		}
 		return GE_NONE;
 		break;
+	case 0x04:
+		dprintf("Response to profile writing received!\n");
+
+		blockstart = message + 6;
+		for (i = 0; i < message[5]; i++) {
+			switch (blockstart[2]) {
+			case 0x00:
+				if (message[4] == 0x00) 
+					dprintf("keypad tone level successfully set!\n");
+				else
+					dprintf("failed to set keypad tone level! error: %i\n", message[4]);
+				break;
+			case 0x02:
+				if (message[4] == 0x00) 
+					dprintf("call alert successfully set!\n");
+				else
+					dprintf("failed to set call alert! error: %i\n", message[4]);
+				break;
+			case 0x03:
+				if (message[4] == 0x00) 
+					dprintf("ringtone successfully set!\n");
+				else
+					dprintf("failed to set ringtone! error: %i\n", message[4]);
+				break;
+			case 0x04:
+				if (message[4] == 0x00) 
+					dprintf("ringtone volume successfully set!\n");
+				else
+					dprintf("failed to set ringtone volume! error: %i\n", message[4]);
+				break;
+			case 0x05:
+				if (message[4] == 0x00) 
+					dprintf("message tone successfully set!\n");
+				else
+					dprintf("failed to set message tone! error: %i\n", message[4]);
+				break;
+			case 0x06:
+				if (message[4] == 0x00) 
+					dprintf("vibration successfully set!\n");
+				else
+					dprintf("failed to set vibration! error: %i\n", message[4]);
+				break;
+			case 0x07:
+				if (message[4] == 0x00) 
+					dprintf("warning tone level successfully set!\n");
+				else
+					dprintf("failed to set warning tone level! error: %i\n", message[4]);
+				break;
+			case 0x08:
+				if (message[4] == 0x00) 
+					dprintf("caller groups successfully set!\n");
+				else
+					dprintf("failed to set caller groups! error: %i\n", message[4]);
+				break;
+			case 0x0c:
+				if (message[4] == 0x00) 
+					dprintf("name successfully set!\n");
+				else
+					dprintf("failed to set name! error: %i\n", message[4]);
+				break;
+			default:
+				dprintf("Unknown profile subblock type %02x!\n", blockstart[1]);
+				break;
+			}
+			blockstart = blockstart + blockstart[1];
+		}
+		return GE_NONE;
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x39 (%d)\n", message[3]);
 		return GE_UNHANDLEDFRAME;
@@ -2389,7 +2450,7 @@ static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, 
 
 static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01, 0x01, 0x0C, 0x01};
+	unsigned char req[150] = {FBUS_FRAME_HEADER, 0x01, 0x01, 0x0C, 0x01};
 	int i, length = 7;
 
 	for (i = 0; i < 0x0a; i++) {
@@ -2411,6 +2472,121 @@ static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("Getting profile #%i...\n", data->Profile->Number);
 	P6510_GetRingtones(data, state);
 	SEND_MESSAGE_BLOCK(P6510_MSG_PROFILE, length + 1);
+}
+
+static GSM_Error P6510_SetProfile(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[150] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x06, 0x03};
+	int i, j, blocks = 0, length = 7;
+
+	for (i = 0; i < 0x07; i++) {
+		switch (i) {
+		case 0x00:
+			req[length] = 0x09;
+			req[length + 1] = i;
+			req[length + 2] = data->Profile->Number;
+			memcpy(req + length + 4, "\x00\x00\x01", 3);
+			req[length + 8] = 0x03;
+			switch (data->Profile->KeypadTone) {
+			case 0xff:
+				req[length + 3] = req[length + 7] = 0x00;
+				break;
+			case 0x00:
+				req[length + 3] = req[length + 7] = 0x01;
+				break;
+			case 0x01:
+				req[length + 3] = req[length + 7] = 0x02;
+				break;
+			case 0x02:
+				req[length + 3] = req[length + 7] = 0x03;
+				break;
+			default:
+				dprintf("Unknown keypad tone volume!\n");
+				break;
+			}
+			blocks++;
+			length += 9;
+			break;
+		case 0x02:
+			req[length] = 0x09;
+			req[length + 1] = i;
+			req[length + 2] = data->Profile->Number;
+			memcpy(req + length + 4, "\x00\x00\x01", 3);
+			req[length + 8] = 0x03;
+			req[length + 3] = req[length + 7] = data->Profile->CallAlert;
+			blocks++;
+			length += 9;
+			break;
+		case 0x03:
+			req[length] = 0x09;
+			req[length + 1] = i;
+			req[length + 2] = data->Profile->Number;
+			memcpy(req + length + 4, "\x00\x00\x01", 3);
+			req[length + 8] = 0x03;
+			req[length + 3] = req[length + 7] = data->Profile->Ringtone;
+			blocks++;
+			length += 9;
+			break;
+		case 0x04:
+			req[length] = 0x09;
+			req[length + 1] = i;
+			req[length + 2] = data->Profile->Number;
+			memcpy(req + length + 4, "\x00\x00\x01", 3);
+			req[length + 8] = 0x03;
+			req[length + 3] = req[length + 7] = data->Profile->Volume - 6;
+			blocks++;
+			length += 9;
+			break;
+		case 0x05:
+			req[length] = 0x09;
+			req[length + 1] = i;
+			req[length + 2] = data->Profile->Number;
+			memcpy(req + length + 4, "\x00\x00\x01", 3);
+			req[length + 8] = 0x03;
+			req[length + 3] = req[length + 7] = data->Profile->MessageTone;
+			blocks++;
+			length += 9;
+			break;
+		case 0x06:
+			req[length] = 0x09;
+			req[length + 1] = i;
+			req[length + 2] = data->Profile->Number;
+			memcpy(req + length + 4, "\x00\x00\x01", 3);
+			req[length + 8] = 0x03;
+			req[length + 3] = req[length + 7] = data->Profile->Vibration;
+			blocks++;
+			length += 9;
+			break;
+		}
+	}
+
+	req[length + 1] = 0x0c;
+	req[length + 2] = data->Profile->Number;
+	memcpy(req + length + 3, "\xcc\xad\xff", 3);
+	/* Name */
+	j = strlen(data->Profile->Name);
+	EncodeUnicode((req + length + 7), data->Profile->Name, j);
+	/* Terminating 0 */
+	req[j * 2 + 1] = 0;
+	/* Length of the string + length field + terminating 0 */
+	req[length + 6] = (j + 1) * 2;
+	req[length] = (j + 1) * 2 + 8;
+	length += (j + 1) * 2 + 8;
+	blocks++;
+
+	req[length] = 0x09;
+	req[length + 1] = 0x07;
+	req[length + 2] = data->Profile->Number;
+	memcpy(req + length + 4, "\x00\x00\x01", 3);
+	req[length + 3] = req[length + 7] = data->Profile->WarningTone;
+	length += 8;
+	blocks++;
+
+	req[5] = blocks;
+	dprintf("length: %i\n", length);
+
+	if (SM_SendMessage(state, length + 1, P6510_MSG_PROFILE, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_PROFILE);
 }
 
 
@@ -2462,13 +2638,12 @@ static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state
 			       0x00, 0x00, 
 			       0x00, 
 			       0x01, 0x01, 0x43, 0x12, 0x53};
-
 	/*
-1E 00 0C 0C 00 0C 00 01 00 11 00 01 00 00 00 01 01
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x00, 0x01};
+	  req[5] = data->KeyCode;
 
-	req[5] = data->KeyCode;
-			       */
+	  not functional yet
+
+	*/
 	req[5] = press ? 0x01 : 0x02;
 
 	SEND_MESSAGE_BLOCK(P6510_MSG_KEYPRESS, 11);
