@@ -861,43 +861,55 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 		string[0] = entry->caller_group + 1;
 		string[1] = 0;
 		count += PackBlock(0x1e, 2, block++, string, req + count);
-		/* Default Number */
-		defaultn = 999;
-		for (i = 0; i < entry->subentries_count; i++)
-			if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number)
-				if (!strcmp(entry->number, entry->subentries[i].data.number))
-					defaultn = i;
-		if (defaultn < i) {
-			string[0] = entry->subentries[defaultn].number_type;
+		/* We don't require the application to feel in any subentry.
+		 * if it is not filled in, let's take just one number we have.
+		 */
+		if (!entry->subentries_count) {
+			string[0] = GN_PHONEBOOK_ENTRY_Number;
 			string[1] = string[2] = string[3] = 0;
-			j = strlen(entry->subentries[defaultn].data.number);
-			char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
+			j = strlen(entry->number);
+			char_unicode_encode((string + 5), entry->number, j);
 			string[j * 2 + 1] = 0;
 			string[4] = j * 2;
 			count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
-		}
-		/* Rest of the numbers */
-		for (i = 0; i < entry->subentries_count; i++)
-			if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number) {
-				if (i != defaultn) {
-					string[0] = entry->subentries[i].number_type;
-					string[1] = string[2] = string[3] = 0;
-					j = strlen(entry->subentries[i].data.number);
-					char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
-					string[j * 2 + 1] = 0;
-					string[4] = j * 2;
-					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
-				}
-			} else {
-				j = strlen(entry->subentries[i].data.number);
-				string[0] = j * 2;
-				char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
+		} else {
+			/* Default Number */
+			defaultn = 999;
+			for (i = 0; i < entry->subentries_count; i++)
+				if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number)
+					if (!strcmp(entry->number, entry->subentries[i].data.number))
+						defaultn = i;
+			if (defaultn < i) {
+				string[0] = entry->subentries[defaultn].number_type;
+				string[1] = string[2] = string[3] = 0;
+				j = strlen(entry->subentries[defaultn].data.number);
+				char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
 				string[j * 2 + 1] = 0;
-				count += PackBlock(entry->subentries[i].entry_type, j * 2 + 2, block++, string, req + count);
+				string[4] = j * 2;
+				count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
 			}
-
+			/* Rest of the numbers */
+			for (i = 0; i < entry->subentries_count; i++)
+				if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number) {
+					if (i != defaultn) {
+						string[0] = entry->subentries[i].number_type;
+						string[1] = string[2] = string[3] = 0;
+						j = strlen(entry->subentries[i].data.number);
+						char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
+						string[j * 2 + 1] = 0;
+						string[4] = j * 2;
+						count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
+					}
+				} else {
+					j = strlen(entry->subentries[i].data.number);
+					string[0] = j * 2;
+					char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
+					string[j * 2 + 1] = 0;
+					count += PackBlock(entry->subentries[i].entry_type, j * 2 + 2, block++, string, req + count);
+				}
+		}
 		req[17] = block - 1;
-		dprintf("Writing phonebook entry %s...\n",entry->name);
+		dprintf("Writing phonebook entry %s...\n", entry->name);
 	} else {
 		return NK7110_DeletePhonebookLocation(data, state);
 	}

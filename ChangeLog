@@ -27,6 +27,12 @@
     o manufacturer for +CGMI request can be quoted    (Ron Yorston)
     o name string with phonebook entry may not be quoted
                                                       (Ron Yorston)
+ * 6510 series updates
+    o don't require to have any subentries filled in when writing
+      phonebook entry                                   (Pawel Kot)
+ * 7110 series updates
+    o don't require to have any subentries filled in when writing
+      phonebook entry                                   (Pawel Kot)
  * smsd updates
     o libtoolization finished                      (BORBELY Zoltan)
  * 3110 series updates
