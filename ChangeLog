@@ -46,6 +46,8 @@
  * 6510 series updates
     o handle writephonebook error when incorrect characters
       are attempted to be saved in the number            (Pawel Kot)
+ * Documentation updates
+    o add missing manual pages for executables           (Pawel Kot)
 
 0.5.2
 =====

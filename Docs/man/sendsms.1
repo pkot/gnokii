@@ -1,0 +1,58 @@
+.TH "sendsms" "1" "August 29, 2003" "" "Gnokii"
+.SH "NAME"
+sendsms \- command line tool to send SMSes using gnokii
+.SH "SYNOPSIS"
+.B sendsms \fI[OPTIONS]\fR
+
+.SH "DESCRIPTION"
+.PP 
+.B sendsms
+allows you to send a SMS using gnokii not knowing the syntax of gnokii
+command. It is written using dialog and allows to send a text SMS choosing
+recipients from the phone address book or entering it manually.
+
+.SS "OPTIONS"
+.PP 
+Available options:
+.TP
+.BR [\-\-debug|\-D]
+May bother with more debugging messages. For debugging purpose.
+.TP
+.BR --simul[ate],\ -S
+Simulation mode. Doesn't really send SMS by phone. Only simulates. For debugging purpose.
+.TP
+.BR --forcememread,\ -F
+Forces
+.B sendsms
+to read phonebook from SIM card, and to parse the generated file in order to update
+the numbers' list (useful only if required to pickup number from the phone's memory).
+.TP
+.BR --skipgnokiicheck,\ -K
+Skip the test of the presence of binary 'gnokii'. (It must be somewhere in your \$PATH).
+It allows you to try this script program, even if you don't have 'gnokii' already. ;)
+.TP
+.BR --smsset,\ --setsms
+Allows you to preset a SMS message from STDIN. (pipe or input redirection).
+This message will be proposed on the 'SMS message' field during the program input cycle.
+.TP
+.BR --help,\ -h,\ /h
+display this help and exit
+.TP
+.BR --version,\ -V
+output version information and exit"
+
+.SH "BUGS"
+.PP 
+None reported.
+
+
+.SH "AUTHOR"
+Sendsms was written by Gabriele Zappi - Rimini <gzappi@inwind.it>.
+
+This manual page was written by Pawel Kot.
+
+.SH "COPYING"
+This program is distributed under the GNU Public License.
+
+.SH "SEE ALSO"
+gnokii

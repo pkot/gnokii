@@ -1,0 +1,186 @@
+.TH "smsd" "8" "August 29, 2002" "" "Gnokii"
+.SH "NAME"
+smsd \- daemon for handling incoming and outgoing SMSes using libgnokii
+.SH "SYNOPSIS"
+.B smsd \fI[OPTIONS]\fR
+
+.SH "DESCRIPTION"
+.PP 
+The
+.B SMSD
+(SMS daemon) program is intended for receiving and sending SMSes.
+
+.PP
+The program is designed to use modules (plugins) to work with an SQL server.
+Currently are supported PostgreSQL, MySQL and a special module 'file' which is
+designed to work without an SQL database (see below for special instructions
+for the file module). See option \fI--module\fR. \fBSMSD\fR uses an SQL server as a
+repository for SMSes. You must create a database (default name is 'sms') with
+tables defined in sms.tables.{module}.sql files. Table 'inbox' is for
+received SMSes:
+.RS
+.TP
+.B number
+phone number from which is sms received
+.TP
+.B smsdate
+date set by SMS center
+.TP
+.B insertdate
+date SMS was inserted into table
+.TP
+.B text
+SMS text
+.TP
+.B processed
+smsd sets this always to FALSE. You can use it for another program which will parse SMSes.
+.RE
+
+.PP
+When the phone receives an SMS, \fBSMSD\fR moves it into 'inbox' table and
+removes the SMS from the phone.
+
+.PP
+Table 'outbox' is for outgoing SMSes. \fBSMSD\fR periodicaly looks into this table
+and searches for lines with attribute 'processed' set to FALSE. If it find
+such SMS, it will send SMS to 'number':
+
+.RS
+.TP
+.B number
+recipient's phone number
+
+.TP
+.B processed_date
+date of processing SMS.
+
+.TP
+.B insertdate
+date of inserting SMS in table
+
+.TP
+.B text
+SMS text
+
+.TP
+.B processed
+new SMS must have this attribut set to FALSE. \fBSMSD\fR will send this SMS and will update 'processed' to TRUE.
+
+.TP
+.B error
+This attribute contains return value of gn_sms_send() function. For explanation of numeric values see <gnokii/error.h> in gnokii source.
+
+.TP
+.B dreport
+request for delivery report per message. Possible values are 0 for no delivery report, 1 for delivery report.
+.RE
+
+.PP
+\fBSMSD\fR is multi threaded program. If you list processes you will see more then
+one instance of smsd.
+
+.SS
+THE FILE MODULE
+.PP
+This module doesn't need an SQL server to work. For incoming messages it
+work in a way that it calls a program giving phone number, date as parameter
+and the message text on stdin. In the smsd directory there is as example file
+action. It shows sms data to stdout. If you want something usefull you must
+write your own action.
+.BR
+For outgoing messages you can set spool directory where smsd looks
+regularly.
+
+.PP
+Incoming sms are passed in format
+.RS
+.PD 0
+.TP
+.BR action\ number\ date\ <\ sms
+.PD
+.RE
+
+.PP
+Outgoing sms must be in format:
+.RS
+.PD 0
+.TP
+.B number
+.TP
+.B text
+.PD
+.RE
+
+.PP
+The name of file is unimportant but smsd ignores all files with prefix
+"ERR.". If smsd succesfuly sends sms, it removes file from spool directory.
+If smsd cannot sends sms prepend file with "ERR." prefix and ignores it.
+If you use \fI-m file\fR, \fI-u\fR (\fI--user\fR) and \fI-c\fR (\fI--host\fR) will have other meaning.
+\fI-u\fR is for action (action must be executable)
+\fI-c\fR is for spool directory where smsd looks for smses. Smsd must have read
+and write permissions to this directory.
+
+.PP
+\fI-p\fR, \fI-d\fR parameters have no meaning when \fI-m file\fR is used.
+
+.PP
+If you don't specify \fI-u\fR, default action is to print sms to stdin.
+If you don't specify \fI-c\fR, sms sending will be disabled.
+
+.SS OPTIONS
+.PP
+Available options:
+.TP
+.BR -u,\ --user\ db_username
+Specify user name.
+
+.TP
+.BR -p,\ --password\ db_password
+Specify user password.
+
+.TP
+.BR -d,\ --db\ db_name
+Specify database name.
+
+.TP
+.BR -c,\ --host\ db_hostname
+Specify database server host name.
+
+.TP
+.BR -m,\ --module\ db_module
+Specify which module to use for connection to DB server. Currently supported are pq for PostgreSQL and mysql for MySQL.
+
+.TP
+.BR -l,\ --libdir\ path_to_db_module
+Specify path to DB modules. If you specify pq module, smsd searches in libdir for file libpq.so (for mysql - libmysql.so).
+Do not interchange this plugins with default SQL libraries from database distribution!
+
+.TP
+.BR -f,\ --logfile\ file
+If used, smsd will monitor sms traffic to file "file". File is
+reopened and closed for every message, you can simply rename or
+delete it if you want rotate logs.
+
+.TP
+.BR -v,\ --version
+Shows smsd version.
+
+.TP
+.BR -h,\ --help
+Shows short help.
+
+.SH "DIAGNOSTICS"
+Various error messages are printed to STDERR.
+.SH "BUGS"
+.PP 
+None reported.
+
+.SH "AUTHOR"
+\fBSMSD\fR was written by Jan Derfinak and contributed by other people.
+See also Docs/CREDITS from the Gnokii sources.
+
+.SH "COPYING"
+This program is distributed under the GNU Public License.
+
+.SH "SEE ALSO"
+gnokii
