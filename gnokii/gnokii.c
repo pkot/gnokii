@@ -4711,12 +4711,6 @@ int main(int argc, char *argv[])
 	/* Introduce yourself */
 	short_version();
 
-	/* Read config file */
-	if (gn_cfg_read(&bindir) < 0) {
-		exit(1);
-	}
-	if (!gn_cfg_phone_load("", &state)) exit(1);
-
 	/* Handle command line arguments. */
 	c = getopt_long(argc, argv, "", long_options, NULL);
 	if (c == -1) 		/* No argument given - we should display usage. */
@@ -4735,6 +4729,12 @@ int main(int argc, char *argv[])
 		version();
 		exit(0);
 	}
+
+	/* Read config file */
+	if (gn_cfg_read(&bindir) < 0) {
+		exit(1);
+	}
+	if (!gn_cfg_phone_load("", &state)) exit(1);
 
 	/* We have to build an array of the arguments which will be passed to the
 	   functions.  Please note that every text after the --command will be
