@@ -160,7 +160,7 @@ GSM_Network GSM_Networks[] = {
 	{ "202 10", "TELESTET" },
 	{ "204 04", "Vodafone" },
 	{ "204 08", "KPN Mobile" },
-	{ "204 12", "Telfort" },
+	{ "204 12", "O2" },
 	{ "204 16", "BEN" },
 	{ "204 20", "Dutchtone NV" },
 	{ "206 01", "PROXIMUS" },
