@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.5  2001-11-14 14:26:18  pkot
+  Revision 1.6  2001-11-14 18:21:19  pkot
+  Fixing some problems with UDH and Unicode, but still doesn't work yet :-(
+
+  Revision 1.5  2001/11/14 14:26:18  pkot
   Changed offset of DCS field to the right value in 6210/7110
 
   Revision 1.4  2001/11/14 11:26:18  pkot
@@ -487,6 +490,7 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 static GSM_Error DecodeData(char *message, char *output, int length, int size, int udhlen, SMS_DataCodingScheme dcs)
 {
 	char aux[160];
+	
 	/* Unicode */
 	if ((dcs.Type & 0x08) == 0x08) {
 		dprintf("Unicode message\n");
@@ -645,14 +649,14 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 
 	/* Data Coding Scheme */
 	if (SMS->Type != SMS_Delivery_Report)
-		SMS->DCS.Type = message[13 + DataOffset[SMS->Type]];
+		SMS->DCS.Type = message[19 + DataOffset[SMS->Type]];
 	else
 		SMS->DCS.Type = 0;
 
 	/* User Data Header */
-        if (message[19+DataOffset[SMS->Type]] & 0x40) { /* UDH header available */
+        if (message[21] & 0x40) { /* UDH header available */
 		dprintf("UDH found");
-                DecodeUDH(message + 31 + DataOffset[SMS->Type], (SMS_UDHInfo **)SMS->UDH, SMS);
+//                DecodeUDH(message + 31 + DataOffset[SMS->Type], (SMS_UDHInfo **)SMS->UDH, SMS);
 	} else {                    /* No UDH */
 		dprintf("No UDH\n");
 		SMS->UDH_No = 0;
