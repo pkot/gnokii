@@ -38,18 +38,10 @@
 #include "gsm-error.h"
 #include "gsm-statemachine.h"
 
-/* Generic Functions */
+#define GN_PHONEBOOK_ENTRY_MAX_LENGTH 1024
 
+/* Generic Functions */
 gn_error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
 gn_error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state);
 
-
 #endif
-
-
-
-
-
-
-
-

@@ -1493,8 +1493,9 @@ static gn_error P6510_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
 	return P6510_ReadPhonebookLocation(data, state, P6510_MEMORY_SPEEDDIALS, data->SpeedDial->Number);
 }
 
-static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
+static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block, unsigned int maxsize)
 {
+	if (size + 5 > maxsize) return 0;
 	*(block++) = id;
 	*(block++) = 0;
 	*(block++) = 0;
@@ -1528,7 +1529,7 @@ static gn_error P6510_SetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
 		string[7] = 0x05;
 	memcpy(string + 8, "\x0B\x02", 2);
 
-	PackBlock(0x1a, 10, 1, string, req + 22);
+	PackBlock(0x1a, 10, 1, string, req + 22, 40 - 22);
 
 	if (SM_SendMessage(state, 38, P6510_MSG_PHONEBOOK, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_PHONEBOOK);
@@ -1564,7 +1565,7 @@ static gn_error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	string[0] = data->Bitmap->number + 1;
 	string[1] = 0;
 	string[2] = 0x55;
-	count += PackBlock(0x1e, 3, block++, string, req + count);
+	count += PackBlock(0x1e, 3, block++, string, req + count, 200 - count);
 
 	/* Logo */
 	string[0] = data->Bitmap->width;
@@ -1572,7 +1573,7 @@ static gn_error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	string[2] = string[3] = 0x00;
 	string[4] = 0x7e;
 	memcpy(string + 5, data->Bitmap->bitmap, data->Bitmap->size);
-	count += PackBlock(0x1b, data->Bitmap->size + 5, block++, string, req + count);
+	count += PackBlock(0x1b, data->Bitmap->size + 5, block++, string, req + count, 200 - count);
 
 #if 0
 	/* Name */
@@ -1601,7 +1602,7 @@ static gn_error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 		string[0] = 0x00;
 		break;
 	}
-	if (string[0]) count += PackBlock(0x07, string[0], block++, string, req + count);
+	if (string[0]) count += PackBlock(0x07, string[0], block++, string, req + count, 200 - count);
 #endif
 
 	req[21] = block;
@@ -1661,11 +1662,12 @@ static gn_error P6510_DeletePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 
 static gn_error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x10,
-				  0x02, 0x00,  /* memory type */
-				  0x00, 0x00,  /* location */
-				  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /* blocks */
-	char string[500];
+	unsigned char req[GN_PHONEBOOK_ENTRY_MAX_LENGTH] = {
+		FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x10,
+		0x02, 0x00,  /* memory type */
+		0x00, 0x00,  /* location */
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /* blocks */
+	char string[GN_PHONEBOOK_ENTRY_MAX_LENGTH];
 	int block, i, j, defaultn;
 	unsigned int count = 22;
 	GSM_PhonebookEntry *entry;
@@ -1686,13 +1688,13 @@ static gn_error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *s
 		char_encode_unicode((string + 1), entry->Name, j);
 		/* Length ot the string + length field + terminating 0 */
 		string[0] = j * 2;
-		count += PackBlock(0x07, j * 2 + 1, block++, string, req + count);
+		count += PackBlock(0x07, j * 2 + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 
 		/* Group */
 		string[0] = entry->Group + 1;
 		string[1] = 0;
 		string[2] = 0x55;
-		count += PackBlock(0x1e, 3, block++, string, req + count);
+		count += PackBlock(0x1e, 3, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 
 		/* Default Number */
 		defaultn = 999;
@@ -1706,7 +1708,7 @@ static gn_error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *s
 			j = strlen(entry->SubEntries[defaultn].data.Number);
 			char_encode_unicode((string + 5), entry->SubEntries[defaultn].data.Number, j);
 			string[4] = j * 2;
-			count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count);
+			count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 		}
 
 		/* Rest of the numbers */
@@ -1718,13 +1720,13 @@ static gn_error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *s
 					j = strlen(entry->SubEntries[i].data.Number);
 					char_encode_unicode((string + 5), entry->SubEntries[i].data.Number, j);
 					string[4] = j * 2;
-					count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count);
+					count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 				}
 			} else {
 				j = strlen(entry->SubEntries[i].data.Number);
 				string[0] = j * 2;
 				char_encode_unicode((string + 1), entry->SubEntries[i].data.Number, j);
-				count += PackBlock(entry->SubEntries[i].EntryType, j * 2 + 1, block++, string, req + count);
+				count += PackBlock(entry->SubEntries[i].EntryType, j * 2 + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 			}
 
 		req[21] = block - 1;

@@ -29,6 +29,8 @@
     o add save SMS (may be dangerous)                  (Markus Plail)
     o add initial dialvoice support                    (Markus Plail)
     o add reading alarm state           (Marcin Wiacek, Markus Plail)
+    o be more carefull with the buffer overflow possibilities
+                                         (Jan de Cuveland, Pawel Kot)
  * 7110 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
