@@ -7,7 +7,7 @@ libgnokii API changes
 = means no change
 o change description
 
-v1.7 2004-??-??
+v1.7 2004-01-19
 
 	2004-01-16
 	o new fields in the struct; change the struct fields' types
