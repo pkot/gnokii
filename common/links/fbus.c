@@ -84,7 +84,6 @@ static bool at2fbus_serial_open(struct gn_statemachine *state)
 	int count, res;
 	unsigned char buffer[255];
 
-	dprintf("qq\n"); 
 	/* Open device. */
 	if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
 		perror(_("Couldn't open FBUS device"));
@@ -578,7 +577,6 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 		}
 		break;
 	case GN_CT_Bluetooth:
-		dprintf("aa\n");
 		connection = at2fbus_serial_open(state);
 		break;
 	default:
