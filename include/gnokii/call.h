@@ -65,6 +65,15 @@ typedef struct {
 	int call_id;
 } gn_call_info;
 
+typedef struct {
+	int call_id;
+	int channel;
+	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1];
+	char name[GN_PHONEBOOK_NAME_MAX_LENGTH + 1];
+	gn_call_status state;
+	gn_call_status prev_state;
+} gn_call_active;
+
 /* Call functions and structs */
 typedef struct {
 	struct gn_statemachine *state;

@@ -8,6 +8,7 @@
  * 6510 series updates
     o keyboard emulation isn't working, only up and down messages
       are known                                    (BORBELY Zoltan)
+    o call management functions implemented        (BORBELY Zoltan)
  * portability fixes
     o libgnokii.dsp (Visual Studio) updated        (BORBELY Zoltan)
     o VC debug and release flags differs                    (Ender)
@@ -23,6 +24,7 @@
     o too many lost reply caused phone lockups     (BORBELY Zoltan)
     o new operators in Finland                       (Timo Metsälä)
     o rfcomm_channel config option added           (BORBELY Zoltan)
+    o call management API updated                  (BORBELY Zoltan)
  * gnokii updates
     o phone keyboard emulation reports only errors (BORBELY Zoltan)
 

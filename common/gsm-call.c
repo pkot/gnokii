@@ -176,3 +176,73 @@ API gn_call *gn_call_get_active(int call_id)
 
 	return calltable + call_id;
 }
+
+API gn_error gn_call_check_active(struct gn_statemachine *state)
+{
+	gn_data data;
+	gn_call_active active[2];
+	gn_call *call;
+	gn_error err;
+	int i, j, got;
+
+	memset(active, 0, sizeof(*active));
+	gn_data_clear(&data);
+	data.call_active = active;
+
+	if ((err = gn_sm_functions(GN_OP_GetActiveCalls, &data, state)) != GN_ERR_NONE)
+		return err == GN_ERR_NOTIMPLEMENTED ? GN_ERR_NONE : err;
+
+	/* delete terminated calls */
+	for (j = 0; j < GN_CALL_MAX_PARALLEL; j++) {
+		if (calltable[i].state != state) continue;
+		got = 0;
+		for ( i = 0; i < 2; i++) {
+			if (calltable[j].call_id == active[i].call_id) {
+				got = 1;
+				break;
+			}
+		}
+		if (!got) {
+			memset(calltable + i, 0, sizeof(gn_call));
+			calltable[i].status = GN_CALL_Idle;
+		}
+	}
+
+	for (i = 0; i < 2; i++) {
+		if (active[i].state == GN_CALL_Idle) continue;
+
+		if (!(call = search_call(active[i].call_id, state))) {
+			/* incoming call */
+			if (active[i].state == GN_CALL_RemoteHangup || active[i].state == GN_CALL_LocalHangup)
+				continue;
+			if ((call = search_call(0, NULL)) == NULL) {
+				dprintf("Call table overflow!\n");
+				return GN_ERR_MEMORYFULL;
+			}
+
+			call->state = state;
+			call->call_id = active[i].call_id;
+			call->status = active[i].state;
+			call->type = GN_CALL_Voice;
+			strcpy(call->remote_number, active[i].number);
+			strcpy(call->remote_name, active[i].name);
+			gettimeofday(&call->start_time, NULL);
+			memset(&call->answer_time, 0, sizeof(call->answer_time));
+			call->local_originated = false;
+
+		} else {
+			/* already registered */
+			if (active[i].state == GN_CALL_RemoteHangup || active[i].state == GN_CALL_LocalHangup) {
+				memset(call, 0, sizeof(gn_call));
+				call->status = GN_CALL_Idle;
+			} else {
+				if (call->status != GN_CALL_Established && active[i].state == GN_CALL_Established) {
+					gettimeofday(&call->answer_time, NULL);
+				}
+				call->status = active[i].state;
+			}
+		}
+	}
+
+	return GN_ERR_NONE;
+}

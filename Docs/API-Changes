@@ -7,6 +7,29 @@ libgnokii API changes
 = means no change
 o change description
 
+	2003-11-30
+
+	o new function
+		+API gn_error gn_call_check_active(struct gn_statemachine *state);
+
+	o new type
+		+typedef struct {
+		+...
+		+} gn_call_active;
+
+	o new field in the struct
+		|typedef struct {
+		=...
+		+	gn_call_active *call_active;
+		=...
+
+	o new field in the struct
+		|typedef struct {
+		=...
+		+	GN_OP_GetActiveCalls
+		=...
+		|} gn_operation;
+
 v1.5 2003-10-24
 
 	o new type

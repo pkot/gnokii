@@ -21,62 +21,53 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
 
 
 0x01 COMMUNICATION
-     switch (message[3]) {
-        case  0x02:
-		dprintf("Call established, remote phone is ringing.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		break;
-	case 0x03:
-		dprintf("Call complete.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		dprintf("Call Mode: %i\n", message[5]);
-		dummy = malloc(message[6] + 1);
-		DecodeUnicode(dummy, message + 7, message[6]);
-		dprintf("Number: %s\n", dummy);
-		break;		
-	case 0x04:
-		dprintf("Hangup!\n");
-		dprintf("Call ID: %i\n", message[4]);
-		dprintf("Cause Type: %i\n", message[5]);
-		dprintf("Cause ID: %i\n", message[6]);
-		break;
-	case 0x05:
-		dprintf("Incoming call:\n");
-		dprintf("Call ID: %i\n", message[4]);
-		dprintf("Call Mode: %i\n", message[5]);
-		dummy = malloc(message[6] + 1);
-		DecodeUnicode(dummy, message + 7, message[6]);
-		dprintf("From: %s\n", dummy);
-		break;
-	case 0x07:
-		dprintf("Call answer initiated.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		break;
-	case 0x09:
-		dprintf("Call released.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		break;
-	case 0x0a:
-		dprintf("Call is being released.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		break;
-	case 0x0b:
-		/* No idea what this is about! */
-		break;
-	case 0x0c:
-		if (message[4] == 0x01)
-			dprintf("Audio enabled\n");
-		else
-			dprintf("Audio disabled\n");
-		break;
-	case 0x53:
-		dprintf("Outgoing call:\n");
-		dprintf("Call ID: %i\n", message[4]);
-		dprintf("Call Mode: %i\n", message[5]);
-		dummy = malloc(message[6] + 1);
-		DecodeUnicode(dummy, message + 7, message[6]);
-		dprintf("To: %s\n", dummy);
-		break;
+    s Make call             { 0x01, numlen, number (unicode), type, 0x01, 0x05,
+                              0x00, 0x02, send number, 0x00, 0x00 }
+                            where type is: 0x05 - voice call
+			          send number: 0x01 - don't send
+    s Answer call           { 0x06, seqnr }
+    s Hang up               { 0x08, seqnr }
+
+    s Get call status       { 0x20 }
+    r Get call status       { 0x21, num of calls, 0xff, callinfo }
+                            where callinfo: { 0x64, blklen (0xd4), seqnr (1-8),
+			        channel (1-2), state, prevstate, ?, ?, ?, ?,
+				namelen, numlen,
+				name (49 unicode chars + 0x00, 0x00),
+				number (49 unicode chars + 0x00, 0x00) }
+				where state is:
+				   0x00: incoming call
+				   0x02: dialing
+				   0x03: ringing (out)
+				   0x04: ringing (in)
+				   0x05: established
+				   0x06: call held
+				   0x07: remote hangup
+
+    s ?                     { 0x1e }
+    r ?                     { 0x1f }
+    s ?                     { 0x22 }
+    r ?                     { 0x23, 0x00, 0x00 }
+    s ?                     { 0x24 }
+    r ?                     { 0x25, 0x00, 0x00 }
+    s ?                     { 0x26 }
+    r ?                     { 0x27, 0x00, 0x00 }
+    s ?                     { 0x28 }
+    r ?                     { 0x29, 0xff, 0x00 }
+    s ?                     { 0x2a }
+    r ?                     { 0x2b, 0xff, 0x00 }
+    s ?                     { 0x2c }
+    r ?                     { 0x2d, 0x55, 0x00 }
+    s ?                     { 0x50 }
+    r ?                     { 0x51, ?, ? }
+    s ?                     { 0x5b }
+    s ?                     { 0x5c }
+    r ?                     { 0x5d, ?, ?, ? }
+    s ?                     { 0x61 }
+    r ?                     { 0x62, 0x00, 0x00 }
+    s ?                     { 0x63? }
+    s ?                     { 0x65 }
+    r ?                     { 0x66, 0x00 }
 
 0x02: SMS HANDLING
     s Send SMS              { 0x02, 0x00, 0x00, 0x00, 0x55, 0x55,

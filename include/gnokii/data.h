@@ -99,6 +99,7 @@ typedef struct {
 	gn_locks_info *locks_info;
 	gn_tone *tone;
 	gn_ringtone_list *ringtone_list;
+	gn_call_active *call_active;
 } gn_data;
 
 /* 
@@ -225,6 +226,7 @@ typedef enum {
 	GN_OP_PlayTone,
 	GN_OP_GetRingtoneList,
 	GN_OP_DeleteRingtone,
+	GN_OP_GetActiveCalls,
 	GN_OP_Max,	/* don't append anything after this entry */
 } gn_operation;
 

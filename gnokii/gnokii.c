@@ -2527,6 +2527,7 @@ static void displaycall(int call_id)
 	gettimeofday(&now, NULL);
 	switch (call->status) {
 	case GN_CALL_Ringing:
+	case GN_CALL_Incoming:
 		s = "RINGING";
 		timersub(&now, &call->start_time, &delta);
 		break;
@@ -2548,9 +2549,9 @@ static void displaycall(int call_id)
 		break;
 	}
 
-	fprintf(stderr, _("CALL%d: %s %s(%s) (duration: %d sec)\n"), call_id, s,
-		call->remote_number, call->remote_name,
-		(int)delta.tv_sec);
+	fprintf(stderr, _("CALL%d: %s %s(%s) (callid: %d, duration: %d sec)\n"),
+		call_id, s, call->remote_number, call->remote_name,
+		call->call_id, (int)delta.tv_sec);
 #endif
 }
 
@@ -2665,6 +2666,7 @@ static int monitormode(int argc, char *argv[])
 		if (gn_sm_functions(GN_OP_GetNetworkInfo, &data, &state) == GN_ERR_NONE)
 			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), gn_network_name_get(networkinfo.network_code), gn_country_name_get(networkinfo.network_code), networkinfo.LAC[0], networkinfo.LAC[1], networkinfo.cell_id[0], networkinfo.cell_id[1]);
 
+		gn_call_check_active(&state);
 		for (i = 0; i < GN_CALL_MAX_PARALLEL; i++)
 			displaycall(i);
 

@@ -130,7 +130,10 @@ static gn_error NK6510_SetProfile(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetAnykeyAnswer(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press);
 static gn_error NK6510_Subscribe(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetActiveCalls(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_CancelCall(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_AnswerCall(gn_data *data, struct gn_statemachine *state);
 
 #ifdef  SECURITY
 static gn_error NK6510_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
@@ -347,8 +350,14 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_PressOrReleaseKey(data, state, true);
 	case GN_OP_ReleasePhoneKey:
 		return NK6510_PressOrReleaseKey(data, state, false);
+	case GN_OP_GetActiveCalls:
+		return NK6510_GetActiveCalls(data, state);
 	case GN_OP_MakeCall:
 		return NK6510_MakeCall(data, state);
+	case GN_OP_CancelCall:
+		return NK6510_CancelCall(data, state);
+	case GN_OP_AnswerCall:
+		return NK6510_AnswerCall(data, state);
 #ifdef  SECURITY
 	case GN_OP_GetSecurityCodeStatus:
 		return NK6510_GetSecurityCodeStatus(data, state);
@@ -3272,64 +3281,62 @@ static gn_error NK6510_Subscribe(gn_data *data, struct gn_statemachine *state)
 
 static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char *dummy;
+	unsigned char *pos;
+	int i;
+	gn_call_active *ca;
 
 	switch (message[3]) {
-	case 0x02:
-		dprintf("Call established, remote phone is ringing.\n");
-		dprintf("Call ID: %i\n", message[4]);
+	/* get call status */
+	case 0x21:
+		if (!data->call_active) return GN_ERR_INTERNALERROR;
+		if (message[5] != 0xff) return GN_ERR_UNHANDLEDFRAME;
+		pos = message + 6;
+		ca = data->call_active;
+		memset(ca, 0x00, 2 * sizeof(gn_call_active));
+		for (i = 0; i < message[4]; i++) {
+			if (pos[0] != 0x64) return GN_ERR_UNHANDLEDFRAME;
+			ca[i].call_id = pos[2];
+			ca[i].channel = pos[3];
+			switch (pos[4]) {
+			case 0x00: ca[i].state = GN_CALL_Idle; break; /* missing number, wait a little */
+			case 0x02: ca[i].state = GN_CALL_Dialing; break;
+			case 0x03: ca[i].state = GN_CALL_Ringing; break;
+			case 0x04: ca[i].state = GN_CALL_Incoming; break;
+			case 0x05: ca[i].state = GN_CALL_Established; break;
+			case 0x06: ca[i].state = GN_CALL_Held; break;
+			case 0x07: ca[i].state = GN_CALL_RemoteHangup; break;
+			default: return GN_ERR_UNHANDLEDFRAME;
+			}
+			switch (pos[5]) {
+			case 0x00: ca[i].prev_state = GN_CALL_Idle; break; /* missing number, wait a little */
+			case 0x02: ca[i].prev_state = GN_CALL_Dialing; break;
+			case 0x03: ca[i].prev_state = GN_CALL_Ringing; break;
+			case 0x04: ca[i].prev_state = GN_CALL_Incoming; break;
+			case 0x05: ca[i].prev_state = GN_CALL_Established; break;
+			case 0x06: ca[i].prev_state = GN_CALL_Held; break;
+			case 0x07: ca[i].prev_state = GN_CALL_RemoteHangup; break;
+			default: return GN_ERR_UNHANDLEDFRAME;
+			}
+			char_unicode_decode(ca[i].name, pos + 12, 2 * pos[10]);
+			char_unicode_decode(ca[i].number, pos + 112, 2 * pos[11]);
+			pos += pos[1];
+		}
+		dprintf("Call status:\n");
+		for (i = 0; i < 2; i++) {
+			if (ca[i].state == GN_CALL_Idle) continue;
+			dprintf("ch#%d: id#%d st#%d pst#%d %s (%s)\n",
+				ca[i].channel, ca[i].call_id, ca[i].state, ca[i].prev_state, ca[i].number, ca[i].name);
+		}
 		break;
-	case 0x03:
-		dprintf("Call complete.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		dprintf("Call Mode: %i\n", message[5]);
-		dummy = malloc(message[6] + 1);
-		char_unicode_decode(dummy, message + 7, message[6] << 1);
-		dprintf("Number: %s\n", dummy);
-		break;		
+
+	/* hangup */
 	case 0x04:
 		dprintf("Hangup!\n");
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Cause Type: %i\n", message[5]);
 		dprintf("Cause ID: %i\n", message[6]);
-		break;
-	case 0x05:
-		dprintf("Incoming call:\n");
-		dprintf("Call ID: %i\n", message[4]);
-		dprintf("Call Mode: %i\n", message[5]);
-		dummy = malloc(message[6] + 1);
-		char_unicode_decode(dummy, message + 7, message[6] << 1);
-		dprintf("From: %s\n", dummy);
-		break;
-	case 0x07:
-		dprintf("Call answer initiated.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		break;
-	case 0x09:
-		dprintf("Call released.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		break;
-	case 0x0a:
-		dprintf("Call is being released.\n");
-		dprintf("Call ID: %i\n", message[4]);
-		break;
-	case 0x0b:
-		/* No idea what this is about! */
-		break;
-	case 0x0c:
-		if (message[4] == 0x01)
-			dprintf("Audio enabled\n");
-		else
-			dprintf("Audio disabled\n");
-		break;
-	case 0x53:
-		dprintf("Outgoing call:\n");
-		dprintf("Call ID: %i\n", message[4]);
-		dprintf("Call Mode: %i\n", message[5]);
-		dummy = malloc(message[6] + 1);
-		char_unicode_decode(dummy, message + 7, message[6] << 1);
-		dprintf("To: %s\n", dummy);
-		break;
+		return GN_ERR_UNKNOWN;
+
 	default:
 		dprintf("Unknown subtype of type 0x01 (%d)\n", message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
@@ -3338,13 +3345,24 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 	return GN_ERR_NONE;
 }
 
+static gn_error NK6510_GetActiveCalls(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x20};
+
+	if (!data->call_active) return GN_ERR_INTERNALERROR;
+
+	SEND_MESSAGE_BLOCK(NK6510_MSG_COMMSTATUS, 4);
+}
+
 static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01,
-				  0x0C }; /* number length in chars */
-
+	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01};
+	unsigned char voice_end[] = {0x05, 0x01, 0x05, 0x00, 0x02, 0x00, 0x00, 0x00};
 	int pos = 4, len;
+	gn_call_active active[2];
+	gn_data d;
 
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
 
 	switch (data->call_info->type) {
 	case GN_CALL_Voice:
@@ -3368,15 +3386,50 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 	req[pos++] = len;
 	char_unicode_encode(req + pos, data->call_info->number, len);
 	pos += len << 1;
-	req[pos++] = 0x01; /* one block */
-	req[pos++] = 0x01; /* type */
-	req[pos++] = 0x05; /* length */
-	req[pos++] = 0x00; /* adress type */
-	req[pos++] = 0x02; /* CLIR ON */
-	req[pos++] = 0x00; /* CUG index */
-	req[pos++] = 0x00; /* CUG index */
-	req[pos++] = 0x01; /* CUG_OA true */
-	SEND_MESSAGE_BLOCK(NK6510_MSG_COMMSTATUS, pos);
+
+	switch (data->call_info->send_number) {	
+	case GN_CALL_Never:   voice_end[5] = 0x01; break;
+	case GN_CALL_Always:  voice_end[5] = 0x00; break;
+	case GN_CALL_Default: voice_end[5] = 0x00; break;
+	default: return GN_ERR_INTERNALERROR;
+	}
+	memcpy(req + pos, voice_end, sizeof(voice_end));
+	pos += sizeof(voice_end);
+
+	if (sm_message_send(pos, NK6510_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	if (sm_block_ack(state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+
+	memset(active, 0, sizeof(*active));
+	gn_data_clear(&d);
+	d.call_active = active;
+	if (NK6510_GetActiveCalls(&d, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	data->call_info->call_id = active[0].call_id;
+
+	return GN_ERR_NONE;
+}
+
+static gn_error NK6510_CancelCall(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x08, 0x00};
+
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
+
+	req[4] = data->call_info->call_id;
+
+	if (sm_message_send(5, NK6510_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	return sm_block_ack(state);
+}
+
+static gn_error NK6510_AnswerCall(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x06, 0x00};
+
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
+
+	req[4] = data->call_info->call_id;
+
+	if (sm_message_send(5, NK6510_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	return sm_block_ack(state);
 }
 
 /*****************/

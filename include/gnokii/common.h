@@ -131,7 +131,7 @@ typedef struct {
 /* Limits for sizing of array in gn_phonebook_entry. Individual handsets may
    not support these lengths so they have their own limits set. */
 #define GN_PHONEBOOK_NAME_MAX_LENGTH            61   /* For 6510 */
-#define GN_PHONEBOOK_NUMBER_MAX_LENGTH          48   /* For 7110 */
+#define GN_PHONEBOOK_NUMBER_MAX_LENGTH          49   /* For 6510 */
 #define GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER      10   /* For 6510 */
 						     /* 7110 is able to have in one
 						      * entry 5 numbers and 4
