@@ -1875,11 +1875,15 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 	case NK6510_SUBCAL_ADD_CALL_RESP:
 	case NK6510_SUBCAL_ADD_BIRTHDAY_RESP:
 	case NK6510_SUBCAL_ADD_REMINDER_RESP:
-		dprintf("Succesfully written calendar note: %i!\n", (message[4] << 8) | message[5]);
+		if (message[6]) e = GN_ERR_FAILED;
+		dprintf("Attempt to write calendar note at %i. Status: %i\n",
+			(message[4] << 8) | message[5],
+			1 - message[6]);
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", NK6510_MSG_CALENDAR, message[3]);
-		return GN_ERR_UNHANDLEDFRAME;
+		e = GN_ERR_UNHANDLEDFRAME;
+		break;
 	}
 	return e;
 }
@@ -1982,6 +1986,8 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	int count = 0;
 	long seconds, minutes;
 	gn_error error;
+
+	if (!data->calnote) return GN_ERR_INTERNALERROR;
 
 	calnote = data->calnote;
 
@@ -2145,10 +2151,9 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 
 	/* padding */
 	req[count] = 0x00;
-	count++;
 	dprintf("Count after padding = %d\n", count);
 
-	SEND_MESSAGE_WAITFOR(NK6510_MSG_CALENDAR, count);
+	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, count);
 }
 
 static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
