@@ -702,9 +702,14 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00};
 
+	if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
+
 	dprintf("Reading phonebook location (%d/%d)\n", data->phonebook_entry->memory_type, data->phonebook_entry->location);
 	req[4] = get_memory_type(data->phonebook_entry->memory_type);
 	req[5] = data->phonebook_entry->location;
+
+	data->phonebook_entry->empty = true;
+
 	if (sm_message_send(7, 0x03, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x03, data, state);
 }
@@ -734,7 +739,8 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_UNKNOWN;
 	}
 	if ((pe->subentries_count == 1) && ((pe->subentries[0].entry_type != GN_PHONEBOOK_ENTRY_Number)
-		|| (pe->subentries[0].number_type != GN_PHONEBOOK_NUMBER_General) || (pe->subentries[0].id != 2)
+		|| ((pe->subentries[0].number_type != GN_PHONEBOOK_NUMBER_General)
+		 && (pe->subentries[0].number_type != 0)) || (pe->subentries[0].id != 2)
 		|| strcmp(pe->subentries[0].data.number, pe->number))) {
 		dprintf("61xx doesn't support subentries\n");
 		return GN_ERR_UNKNOWN;
@@ -823,7 +829,6 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 		if (data->phonebook_entry) {
 			pe = data->phonebook_entry;
 			pos = message + 5;
-			pe->empty = false;
 			n = *pos++;
 			/* It seems that older phones (at least Nokia 5110 and 6130)
 			   set message[4] to 0. Newer ones set is to the location
@@ -846,6 +851,7 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			pe->date.minute = *pos++;
 			pe->date.second = *pos++;
 			pe->subentries_count = 0;
+			pe->empty = (pe->name[0] == '\0');
 		}
 		break;
 	case 0x03:
