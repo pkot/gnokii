@@ -39,6 +39,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 #include <ctype.h>
 
@@ -107,6 +108,7 @@ static int	CurrentCmdBuffer;
 static int	CurrentCmdBufferIndex;
 static int	IncomingCallNo;
 static int     MessageFormat;          /* Message Format (text or pdu) */
+static int	CallerIDMode;
 
 	/* Current command parser */
 static void 	(*Parser)(char *); /* Current command parser */
@@ -181,6 +183,8 @@ void	gn_atem_registers_init(void)
 	ModemRegisters[REG_VERBOSE] |= BIT_VERBOSE;
 	ModemRegisters[REG_CTRLZ] = 26;
 	ModemRegisters[REG_ESCAPE] = 27;
+
+	CallerIDMode = 0;
 }
 
 
@@ -221,6 +225,7 @@ void gn_atem_call_passup(gn_call_status CallStatus, gn_call_info *CallInfo, stru
 		gn_atem_modem_result(MR_RING);
 		IncomingCallNo = CallInfo->call_id;
 		ModemRegisters[REG_RINGCNT]++;
+		gn_atem_cid_out(CallInfo);
 		if (ModemRegisters[REG_RINGATA] != 0) gn_atem_answer_phone();
 		break;
 	case GN_CALL_LocalHangup:
@@ -232,6 +237,41 @@ void gn_atem_call_passup(gn_call_status CallStatus, gn_call_info *CallInfo, stru
 	}
 }
 
+/* This gets called to output caller id info of incoming call */
+void gn_atem_cid_out(gn_call_info *CallInfo)
+{
+	struct tm *now;
+	time_t nowh;
+	char buf[14]; /* 7 for "DATE = " + 4 digits + \n + \r + \0 */
+	int i;
+
+	nowh = time(NULL);
+	now = localtime(&nowh);
+
+	switch (CallerIDMode) {
+	case 0:	/* no output */
+		break;
+	case 1: /* formatted CID */
+		snprintf(buf, sizeof(buf), "DATE = %02d%02d\n\r", now->tm_mon + 1, now->tm_mday);
+		gn_atem_string_out(buf);
+
+		snprintf(buf, sizeof(buf), "TIME = %02d%02d\n\r", now->tm_hour, now->tm_min);
+		gn_atem_string_out(buf);
+
+		/* TO DO: handle P and O numbers */
+		gn_atem_string_out("NMBR = ");
+		gn_atem_string_out(1 + CallInfo->number); /* skip leading "+" */
+		gn_atem_string_out("\n\rNAME = ");
+		gn_atem_string_out(CallInfo->name);
+		gn_atem_string_out("\n\r");
+
+		/* FIX ME: do a real emulation of rings after the first one (at a lower level than this) */
+		gn_atem_modem_result(MR_RING);
+
+		break;
+
+	}
+}
 
 /* Handler called when characters received from serial port.
    calls state machine code to process it. */
@@ -303,6 +343,8 @@ void	gn_atem_at_parse(char *cmd_buffer)
 	char *buf;
 	int regno, val;
 	char str[256];
+
+	if (!cmd_buffer[0]) return;
 
 	if (strncasecmp (cmd_buffer, "AT", 2) != 0) {
 		gn_atem_modem_result(MR_ERROR);
@@ -540,6 +582,15 @@ void	gn_atem_at_parse(char *cmd_buffer)
 
 			default:
 				gn_atem_modem_result(MR_ERROR);
+				return;
+			}
+			break;
+
+		/* # is the precursor to another set of commands */
+		case '#':
+			buf++;
+			/* Returns true if error occured */
+			if (gn_atem_command_diesis(&buf) == true) {
 				return;
 			}
 			break;
@@ -988,6 +1039,39 @@ bool	gn_atem_command_plusg(char **buf)
 		return (false);
 	}
 
+	return (true);
+}
+
+/* Handle AT# commands */
+bool	gn_atem_command_diesis(char **buf)
+{
+	int	number;
+	char	buffer[MAX_LINE_LENGTH];
+
+	if (strncasecmp(*buf, "CID", 3) == 0) {
+		buf[0] += 3;
+		switch (**buf) {
+		case '?':
+			buf[0]++;
+			gsprintf(buffer, MAX_LINE_LENGTH, "%d\n\r", CallerIDMode);
+			gn_atem_string_out(buffer);
+			return (false);
+		case '=':
+			buf[0]++;
+			if (**buf == '?') {
+				buf[0]++;
+				gn_atem_string_out("0,1\n\r");
+				return (false);
+			} else {
+				number = gn_atem_num_get(buf);
+				if ( number >= 0 && number <= 2 ) {
+					CallerIDMode = number;
+					return (false);
+				}
+			}
+		}
+	}
+	gn_atem_modem_result(MR_ERROR);
 	return (true);
 }
 
