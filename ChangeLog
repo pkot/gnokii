@@ -34,6 +34,8 @@
  * 6510 series updates
     o disable Nokia 6100 support: IT IS KNOWN TO BREAK PHONES
                                                         (Pawel Kot)
+ * gnokii updates
+    o playringtone won't play an endless note      (BORBELY Zoltan)
 
 0.5.8
 =====
