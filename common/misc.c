@@ -14,6 +14,13 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <signal.h>
+
 #include "misc.h"
 
 void (*GSM_ELogHandler)(const char *fmt, va_list ap) = NULL;
@@ -157,4 +164,94 @@ void GSM_WriteErrorLog(const char *fmt, ...)
 	}
 
 	va_end(ap);
+}
+
+#define max_buf_len 128
+#define lock_path "/var/lock/LCK.."
+
+/* Lock the device. Return allocated string with a lock name */
+char *lock_device(const char* port)
+{
+#ifndef WIN32
+	char *lock_file = NULL;
+	char buffer[max_buf_len];
+	char *aux = rindex(port, '/');
+	int fd, len = strlen(aux) + strlen(lock_path);
+
+	memset(buffer, 0, sizeof(buffer));
+	lock_file = calloc(len + 1, 1);
+	if (!lock_file) {
+		fprintf(stderr, _("Cannot lock device\n"));
+		return NULL;
+	}
+	/* I think we don't need to use strncpy, as we should have enough
+	 * buffer due to strlen results
+	 */
+	strcpy(lock_file, lock_path);
+	strcat(lock_file, aux);
+
+	/* Check for the stale lockfile.
+	 * The code taken from minicom by Miquel van Smoorenburg */
+	if ((fd = open(lock_file, O_RDONLY)) >= 0) {
+		char buf[max_buf_len];
+		int pid, n = 0;
+
+		n = read(fd, buf, sizeof(buf) - 1);
+		close(fd);
+		if (n > 0) {
+			pid = -1;
+			if (n == 4)
+				/* Kermit-style lockfile. */
+				pid = *(int *)buf;
+			else {
+				/* Ascii lockfile. */
+				buf[n] = 0;
+				sscanf(buf, "%d", &pid);
+			}
+			if (pid > 0 && kill((pid_t)pid, 0) < 0 && errno == ESRCH) {
+				fprintf(stderr, _("Lockfile is stale. Overriding it..\n"));
+				sleep(1);
+				unlink(lock_file);
+			} else
+				n = 0;
+		}
+		if (n == 0) {
+			free(lock_file);
+			fprintf(stderr, _("Device is already locked.\n"));
+			return NULL;
+		}
+	}
+
+	/* Try to create a new file, with 0644 mode */
+	fd = open(lock_file, O_CREAT | O_EXCL, 0644);
+	if (fd == -1) {
+		free(lock_file);
+		fprintf(stderr, _("Cannot lock device\n"));
+		return NULL;
+	}
+	sprintf(buffer, "%10ld gnokii\n", (long)getpid());
+	write(fd, buffer, strlen(buffer));
+	close(fd);
+	return lock_file;
+#else
+	return NULL;
+#endif /* WIN32 */
+}
+
+/* Removes lock and frees memory */
+bool unlock_device(char *lock_file)
+{
+#ifndef WIN32
+	int err;
+
+	if (!lock_file) {
+		fprintf(stderr, _("Cannot unlock device\n"));
+		return false;
+	}
+	err = unlink(lock_file);
+	free(lock_file);
+	return (err + 1);
+#else
+	return true;
+#endif /* WIN32 */
 }

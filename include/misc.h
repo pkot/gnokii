@@ -207,5 +207,8 @@ typedef struct {
 extern char *GetModel (const char *);
 extern PhoneModel *GetPhoneModel (const char *);
 
+extern char *lock_device(const char*);
+extern bool unlock_device(char *);
+
 #endif /* __misc_h */
 
