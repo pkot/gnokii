@@ -52,7 +52,6 @@
 #ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #endif
-#include <sys/poll.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -155,25 +154,31 @@ bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 
 static void VM_ThreadLoop(void)
 {
+	fd_set rfds, t_rfds;
+	struct timeval tv;
 	int res;
-	struct pollfd ufds[2];
+	int n, devfd;
 
 	/* Note we can't use signals here as they are already used
 	   in the FBUS code.  This may warrant changing the FBUS
 	   code around sometime to use select instead to free up
 	   the SIGIO handler for mainline code. */
 
-	ufds[0].fd = PtyRDFD;
-	ufds[0].events = POLLIN;
-	ufds[1].fd = device_getfd();
-	ufds[1].events = POLLIN;
+	devfd = device_getfd();
+	FD_ZERO(&rfds);
+	FD_SET(PtyRDFD, &rfds);
+	FD_SET(devfd, &rfds);
+	n = (PtyRDFD > devfd) ? PtyRDFD + 1 : devfd + 1;
 
 	while (!GTerminateThread) {
 		if (!CommandMode) {
 			sleep(1);
 		} else {  /* If we are in data mode, leave it to datapump to get the data */
 
-			res = poll(ufds, 2, 500);
+			tv.tv_sec = 0;
+			tv.tv_usec = 500000;
+			memcpy(&t_rfds, &rfds, sizeof(t_rfds));
+			res = select(n, &t_rfds, NULL, NULL, &tv);
 
 			switch (res) {
 			case 0: /* Timeout */
@@ -184,17 +189,9 @@ static void VM_ThreadLoop(void)
 				exit (-1);
 
 			default:
-				if (ufds[0].revents & (POLLHUP | POLLERR | POLLNVAL)) {
-					GTerminateThread = true;
-					return;
-				}
-				if (ufds[1].revents & (POLLHUP | POLLERR | POLLNVAL)) {
-					GTerminateThread = true;
-					return;
-				}
-				if (ufds[0].revents & POLLIN)
+				if (FD_ISSET(PtyRDFD, &t_rfds))
 					VM_CharHandler();
-				if (ufds[1].revents & POLLIN)
+				if (FD_ISSET(devfd, &t_rfds))
 					SM_Loop(sm, 1);
 				break;
 			}

@@ -43,7 +43,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/poll.h>
 #include <unistd.h>
 #include <pthread.h>
 
@@ -68,7 +67,8 @@ extern bool CommandMode;
 /* Local variables */
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
 int		PtyWRFD;	/* pty interface - only different in debug mode. */
-static struct pollfd ufds;
+static int	rfds_n;
+static fd_set	rfds;
 static pthread_t dp_thread = 0;
 u8 pluscount;
 bool connected;
@@ -77,8 +77,9 @@ bool DP_Initialise(int read_fd, int write_fd)
 {
 	PtyRDFD = read_fd;
 	PtyWRFD = write_fd;
-	ufds.fd = PtyRDFD;
-	ufds.events = POLLIN;
+	FD_ZERO(&rfds);
+	FD_SET(PtyRDFD, &rfds);
+	rfds_n = PtyRDFD + 1;
 	RLP_Initialise(DP_SendRLPFrame, DP_CallBack);
 	RLP_SetUserRequest(Attach_Req, true);
 	pluscount = 0;
@@ -99,6 +100,8 @@ bool DP_Initialise(int read_fd, int write_fd)
 static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 {
 	int temp;
+	struct timeval tv;
+	fd_set t_rfds;
 
 	switch(ind) {
 	case Data:
@@ -126,24 +129,29 @@ static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 		RLP_SetUserRequest(Reset_Resp, true);
 		break;
 	case GetData:
-		if (poll(&ufds, 1, 0)) {
+		memset(&tv, 0, sizeof(tv));
+		memcpy(&t_rfds, &rfds, sizeof(t_rfds));
+		if (select(rfds_n, &t_rfds, NULL, NULL, &tv) != 0) {
 
 			/* Check if the program has closed */
 			/* Return to command mode */
 			/* Note that the call will still be in progress, */
 			/* as with a normal modem (I think) */
 
-			if (ufds.revents != POLLIN) {
+			if (FD_ISSET(PtyRDFD, &t_rfds))
+				temp = read(PtyRDFD, buffer, length);
+			else
+				temp = 0;
+
+			if (temp == -1 && errno == EINTR) return 0;
+
+			if (temp <= 0) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
 				data.CallNotification = ATEM_CallPassup;
 				SM_Functions(GOP_SetCallNotification, &data, sm);
 				return 0;
 			}
-
-			temp = read(PtyRDFD, buffer, length);
-
-			if (temp < 0) return 0; /* FIXME - what do we do now? */
 
 			/* This will only check +++ and the beginning of a read */
 			/* But there should be a pause before it anyway */

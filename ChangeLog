@@ -32,6 +32,8 @@
     o NBS upload for operator logo                   (BORBELY Zoltan)
     o phone matching code improved                   (BORBELY Zoltan)
     o NBS upload for ringtone                        (BORBELY Zoltan)
+    o MakeCall1() calls GetNetworkInfo first (maybe eliminates
+      some datacall problem)                         (BORBELY Zoltan)
  * 7110 series updates:
     o use nokia-decoding                               (Markus Plail)
  * bitmap support
@@ -54,6 +56,7 @@
       can change this behaviour with --with-xgnokii-dir   (Pawel Kot)
  * vCalendar support
     o add ToDo support, fix/extend PHONE CALL          (Markus Plail)
+ * poll() converted to select() everywhere           (BORBELY Zoltan)
 
 0.4.2a
 ======
