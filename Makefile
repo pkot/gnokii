@@ -134,7 +134,7 @@ mgnokiidev: $(MGNOKIIDEV_OBJS)
 
 # Misc targets
 clean:
-	@rm -f core *~ *% *.bak bin/* \
+	@rm -f core *~ *% *.bak \
                $(COMMON_OBJS) \
                gnokii $(GNOKII_OBJS) \
                gnokiid $(GNOKIID_OBJS) \
@@ -142,7 +142,7 @@ clean:
                xkeyb $(XKEYB_OBJS) \
                mgnokiidev $(MGNOKIIDEV_OBJS) \
                gnokii-${VERSION}.tar.gz
-	@rmdir bin
+	@rm -rf bin
 	make -C xgnokii clean
 
 dist:	clean
