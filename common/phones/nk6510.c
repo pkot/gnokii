@@ -418,189 +418,113 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, 100);
 }
 
-static void DeliverLayout(unsigned char *message, GSM_Data *data)
+static void ResetLayout(unsigned char *message, GSM_Data *data)
 {
-	dprintf("Deliver layout\n");
+	/* reset everything */
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
 	data->RawSMS->RejectDuplicates = 0;
 	data->RawSMS->Report           = 0;
-
 	data->RawSMS->Reference        = 0;
 	data->RawSMS->PID              = 0;
 	data->RawSMS->ReportStatus     = 0;
-	
-	memcpy(data->RawSMS->SMSCTime,      message + 19, 7);
-	memcpy(data->RawSMS->Time,          message + 19, 7);
-	memcpy(data->RawSMS->MessageCenter, message + 46, 12);
-	memcpy(data->RawSMS->RemoteNumber,  message + 34, 12);
-	
-	data->RawSMS->DCS              = 0;
-	data->RawSMS->Length           = message[57];
+	memcpy(data->RawSMS->SMSCTime, message, 0);
+	memcpy(data->RawSMS->Time, message, 0);
+	memcpy(data->RawSMS->RemoteNumber, message, 0);
+	memcpy(data->RawSMS->MessageCenter, message, 0);
 	data->RawSMS->UDHIndicator     = 0;
-	memcpy(data->RawSMS->UserData, message + 58, data->RawSMS->Length);
-	
-	data->RawSMS->ValidityIndicator = 0;
-	memcpy(data->RawSMS->Validity, message, 0);
-}
-
-static void SubmitStoredLayout(unsigned char *message, GSM_Data *data)
-{
-	dprintf("Submit stored layout\n");
-	data->RawSMS->MoreMessages     = 0;
-	data->RawSMS->ReplyViaSameSMSC = 0;
-	data->RawSMS->RejectDuplicates = 0;
-	data->RawSMS->Report           = 0;
-
-	data->RawSMS->Reference        = 31;
-	data->RawSMS->PID              = 32;
-	data->RawSMS->ReportStatus     = 0;
-	
-	memcpy(data->RawSMS->SMSCTime,      message, 0);
-	memcpy(data->RawSMS->Time,          message, 0);
-	memcpy(data->RawSMS->MessageCenter, message, 0);
-	memcpy(data->RawSMS->RemoteNumber,  message, 0);
-	
-	data->RawSMS->DCS              = message[33];
-	data->RawSMS->Length           = message[41];
-	data->RawSMS->UDHIndicator     = message[30];
-	memcpy(data->RawSMS->UserData, message + 42, data->RawSMS->Length);
-	
-	data->RawSMS->ValidityIndicator = 0;
-	memcpy(data->RawSMS->Validity, message, 0);
-}
-
-static void SubmitSentLayout(unsigned char *message, GSM_Data *data)
-{
-	dprintf("Submit sent layout\n");
-	data->RawSMS->MoreMessages     = 0;
-	data->RawSMS->ReplyViaSameSMSC = 0;
-	data->RawSMS->RejectDuplicates = 0;
-	data->RawSMS->Report           = 0;
-
-	data->RawSMS->Reference        = 0;
-	data->RawSMS->PID              = 0;
-	data->RawSMS->ReportStatus     = 0;
-	
-	memcpy(data->RawSMS->SMSCTime,      message, 0);
-	memcpy(data->RawSMS->Time,          message + 19, 7);
-	memcpy(data->RawSMS->MessageCenter, message + 38,  12);
-	memcpy(data->RawSMS->RemoteNumber,  message + 26, 12);
-	
-	data->RawSMS->DCS              = message[33];
-	data->RawSMS->Length           = message[48];
-	data->RawSMS->UDHIndicator     = message[30];
-	memcpy(data->RawSMS->UserData, message + 50, data->RawSMS->Length);
-	
-	data->RawSMS->ValidityIndicator = 0;
-	memcpy(data->RawSMS->Validity, message, 0);
-}
-
-static void TextTemplateLayout(unsigned char *message, GSM_Data *data)
-{
-	dprintf("Text template layout\n");
-	data->RawSMS->MoreMessages     = 0;
-	data->RawSMS->ReplyViaSameSMSC = 0;
-	data->RawSMS->RejectDuplicates = 0;
-	data->RawSMS->Report           = 0;
-
-	data->RawSMS->Reference        = 0;
-	data->RawSMS->PID              = 0;
-	data->RawSMS->ReportStatus     = 0;
-	
-	memcpy(data->RawSMS->SMSCTime,      message, 0);
-	memcpy(data->RawSMS->Time,          message, 0);
-	memcpy(data->RawSMS->MessageCenter, message, 0);
-	memcpy(data->RawSMS->RemoteNumber,  message, 0);
-	
-	data->RawSMS->DCS              = message[21];
-	data->RawSMS->Length           = message[25];
-	data->RawSMS->UDHIndicator     = message[22];
-	memcpy(data->RawSMS->UserData, message + 26, data->RawSMS->Length);
-	
-	data->RawSMS->ValidityIndicator = 0;
-	memcpy(data->RawSMS->Validity, message, 0);
-}
-
-static void PictureTemplateLayout(unsigned char *message, GSM_Data *data)
-{
-	dprintf("Picture template layout\n");
-	data->RawSMS->MoreMessages     = 0;
-	data->RawSMS->ReplyViaSameSMSC = 0;
-	data->RawSMS->RejectDuplicates = 0;
-	data->RawSMS->Report           = 0;
-
-	data->RawSMS->Reference        = 0;
-	data->RawSMS->PID              = 0;
-	data->RawSMS->ReportStatus     = 0;
-	
-	memcpy(data->RawSMS->SMSCTime,      message, 0);
-	memcpy(data->RawSMS->Time,          message, 0);
-	memcpy(data->RawSMS->MessageCenter, message, 0);
-	memcpy(data->RawSMS->RemoteNumber,  message, 0);
-	
-	data->RawSMS->DCS              = message[21];
-	data->RawSMS->Length           = 256; // message[25];
-	data->RawSMS->UDHIndicator     = message[22];
-	memcpy(data->RawSMS->UserData, message + 26, data->RawSMS->Length);
-	
-	data->RawSMS->ValidityIndicator = 0;
-	memcpy(data->RawSMS->Validity, message, 0);
-}
-
-static void DeliveryReportLayout(unsigned char *message, GSM_Data *data)
-{
-	dprintf("Delivery report layout\n");
-	data->RawSMS->MoreMessages     = 0;
-	data->RawSMS->ReplyViaSameSMSC = 0;
-	data->RawSMS->RejectDuplicates = 0;
-	data->RawSMS->Report           = 0;
-
-	data->RawSMS->Reference        = 0;
-	data->RawSMS->PID              = 0;
-	data->RawSMS->ReportStatus     = 0;
-	
-	memcpy(data->RawSMS->SMSCTime,      message + 19, 7);
-	memcpy(data->RawSMS->Time,          message + 26, 7);
-	memcpy(data->RawSMS->MessageCenter, message + 50, 12);
-	memcpy(data->RawSMS->RemoteNumber,  message + 38, 12);
-	
 	data->RawSMS->DCS              = 0;
 	data->RawSMS->Length           = 0;
-	data->RawSMS->UDHIndicator     = 0;
 	memcpy(data->RawSMS->UserData, message, 0);
-	
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
 }
 
-static void PictureLayout(unsigned char *message, GSM_Data *data)
+static void ParseLayout(unsigned char *message, GSM_Data *data)
 {
-	dprintf("Picture layout\n");
-	data->RawSMS->MoreMessages     = 0;
-	data->RawSMS->ReplyViaSameSMSC = message[16];
-	data->RawSMS->RejectDuplicates = 0;
-	data->RawSMS->Report           = 0;
+	int i, subblocks;
+	unsigned char *block;
 
-	data->RawSMS->Reference        = 0;
-	data->RawSMS->PID              = 0;
-	data->RawSMS->ReportStatus     = 0;
-	
-	memcpy(data->RawSMS->SMSCTime,      message, 0);
-	memcpy(data->RawSMS->Time,          message + 19, 7);
-	memcpy(data->RawSMS->MessageCenter, message + 50,  12);
-	memcpy(data->RawSMS->RemoteNumber,  message + 38, 12);
-	
-	data->RawSMS->DCS              = message[55];
-	data->RawSMS->Length           = 256; //message[58];
-	data->RawSMS->UDHIndicator     = message[54];
-	memcpy(data->RawSMS->UserData, message + 63, data->RawSMS->Length);
-	
-	data->RawSMS->ValidityIndicator = 0;
-	memcpy(data->RawSMS->Validity, message, 0);
+	ResetLayout(message, data);
+
+	dprintf("Trying to parse message....\n");
+	dprintf("Blocks: %i\n", message[0]);
+	dprintf("Type: %i\n", message[1]);
+	dprintf("Length: %i\n", message[2]);
+
+	data->RawSMS->UDHIndicator = message[3];
+	data->RawSMS->DCS = message[5];
+
+	switch (message[1]) {
+	case 0x00: /* deliver */
+		block = message + 16;
+		memcpy(data->RawSMS->SMSCTime, message + 6, 7);
+		break;
+	case 0x01: /* delivery report */
+		block = message + 20; 
+		memcpy(data->RawSMS->SMSCTime, message + 6, 7);
+		memcpy(data->RawSMS->Time, message + 13, 7);
+		break;
+	case 0x02: /* submit, templates */
+		block = message + 8; 
+		break;
+	case 0xa0: /* pictures, still ugly */
+		if (message[2] == 0x01) {
+			data->RawSMS->Length = 256;
+			memcpy(data->RawSMS->UserData, message + 13, data->RawSMS->Length);
+			return;
+		} else if (message[2] == 0x02) {
+			block = message + 20;
+			memcpy(data->RawSMS->SMSCTime, message + 10, 7);
+			data->RawSMS->Length = 256; 
+			memcpy(data->RawSMS->UserData, message + 50, data->RawSMS->Length);
+		} else 
+			dprintf("Unknown picture message!\n");
+		break;
+	default:
+		dprintf("Type %02x not yet handled!\n", message[1]);
+		break;
+	}
+	subblocks = block[0];
+	dprintf("Subblocks: %i\n", subblocks);
+	block = block + 1;
+	for (i = 0; i < subblocks; i++) {
+		dprintf("  Type of subblock %i: %02x\n", i,  block[0]);
+		dprintf("  Length of subblock %i: %i\n", i, block[1]);
+		switch (block[0]) {
+		case 0x82: /* number */
+			switch (block[2]) {
+			case 0x01:
+				memcpy(data->RawSMS->RemoteNumber,  block + 4, block[3]);
+				dprintf("   Setting remote number: length: %i first: %02x\n", block[3], block[4]);
+				break;
+			case 0x02:
+				memcpy(data->RawSMS->MessageCenter,  block + 4, block[3]);
+				dprintf("   Setting MC number: length: %i first: %02x\n", block[3], block[4]);
+				break;
+			default:
+				dprintf("Error while parsing numbers!\n");
+				break;
+			}
+			break;
+		case 0x80: /* User Data */
+			if (message[1] != 0xa0) {  /* Ignore the found UserData block for pictures */
+				data->RawSMS->Length = block[3];
+				memcpy(data->RawSMS->UserData, block + 4, data->RawSMS->Length);
+			}
+			break;
+		case 0x08: /* Time blocks (mainly at the end of submit sent messages */
+			dprintf("   Setting time...\n");
+			memcpy(data->RawSMS->SMSCTime, block + 3, block[2]);
+			break;
+		default:
+			dprintf("Unknown block of type: %02x!\n", block[0]);
+			break;
+		}
+		dprintf("\n");
+		block = block + block[1];
+	}
 }
-
-
 
 /* handle messages of type 0x14 (SMS Handling, Folders, Logos.. */
 static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -615,6 +539,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		status = data->RawSMS->Status;
 		memset(data->RawSMS, 0, sizeof(GSM_SMSMessage));
 		data->RawSMS->Status = status;
+		ParseLayout(message + 13, data);
 
 		/* Number of SMS in folder */
 		data->RawSMS->Number = (message[8] << 8) | message[9];
@@ -626,18 +551,15 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		case 0x00: /* MT */
 			dprintf("Type: Deliver\n");
 			data->RawSMS->Type = SMS_Deliver;
-			DeliverLayout(message, data);
 			break;
 		case 0x01: /* DR */
 			dprintf("Type: Delivery Report\n");
 			data->RawSMS->Type = SMS_Delivery_Report;
-			DeliveryReportLayout(message, data);
 			break;
 		case 0x02: /* MO */
 			if (data->RawSMS->MemoryType == 5) {
 				dprintf("Type: TextTemplate\n");
 				data->RawSMS->Type = SMS_TextTemplate;
-				TextTemplateLayout(message, data);	/* text template */
 				break;
 			}
 
@@ -645,12 +567,10 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 			case SMS_Sent:
 				dprintf("Type: SubmitSent\n");
 				data->RawSMS->Type = SMS_SubmitSent;
-				SubmitSentLayout(message, data);
 				break;
 			case SMS_Unsent:
 				dprintf("Type: Submit\n");
 				data->RawSMS->Type = SMS_Submit;
-				SubmitStoredLayout(message, data);
 				break;
 			default:
 				return GE_INTERNALERROR;
@@ -660,17 +580,14 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		case 0x80: /* Picture */
 			dprintf("Type: Picture\n");
 			data->RawSMS->Type = SMS_Picture;
-			PictureLayout(message, data);
 			break;
 		case 0xa0: /* Pictures */
 			if (message[15] == 0x01) {
 				dprintf("Type: PictureTemplate\n");
 				data->RawSMS->Type = SMS_PictureTemplate;
-				PictureTemplateLayout(message, data);	/* picture template */
 			} else {
 				dprintf("Type: Picture\n");
 				data->RawSMS->Type = SMS_Picture;
-				PictureLayout(message, data);
 			}
 			break;
 		default:
@@ -814,7 +731,7 @@ static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 
 	req[5] = GetMemoryType(data->SMSFolder->FolderID);
 
-	if (req[5] == P6510_MEMORY_IN) req[4] = 0x01;
+	//	if (req[5] == P6510_MEMORY_IN) req[4] = 0x01;
 
 	dprintf("Getting SMS Folder (%i) status (%i)...\n", req[5], req[4]);
 
@@ -833,7 +750,7 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 
 	dprintf("Getting SMS message (%i) status (%i)...\n", data->RawSMS->Number, data->RawSMS->MemoryType);
 
-	req[5] = GetMemoryType(data->RawSMS->MemoryType);
+	//	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	if (req[5] == P6510_MEMORY_IN) req[4] = 0x01;
 	req[7] = data->RawSMS->Number;
 
@@ -881,7 +798,7 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 
-	if (req[5] == P6510_MEMORY_IN) req[4] = 0x01;
+	//	if (req[5] == P6510_MEMORY_IN) req[4] = 0x01;
 
 	req[7] = data->RawSMS->Number;
 
@@ -1137,6 +1054,7 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 				}
 				break;
 			case P6510_ENTRYTYPE_EMAIL:
+			case P6510_ENTRYTYPE_URL:
 			case P6510_ENTRYTYPE_POSTAL:
 			case P6510_ENTRYTYPE_NOTE:
 				if (data->PhonebookEntry) {
