@@ -52,6 +52,8 @@
       SEND_MESSAGE_WAITFOR arguments                     (Pawel Kot)
     o unify SEND_MESSAGE_BLOCK and SEND_MESSAGE_WAITFOR across
       the phone drivers                                  (Pawel Kot)
+    o fix a thinko done with the api change causing segfault on
+      sms reading                                        (Pawel Kot)
  * AT series updates:
     o fix smsc timestamp reading with getsms             (Pawel Kot)
  * libgnokii changes:

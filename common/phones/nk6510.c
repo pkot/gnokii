@@ -688,7 +688,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Trying to get message # %i in folder # %i\n", message[9], message[7]);
 		if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 		status = data->raw_sms->status;
-		memset(data->raw_sms, 0, sizeof(gn_sms));
+		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
 		data->raw_sms->status = status;
 		ParseLayout(message + 13, data);
 
