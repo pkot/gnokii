@@ -30,9 +30,9 @@ int device_getfd(void) {
   return device_portfd;
 }
 
-int device_open(__const char *__file, int __with_odd_parity) {
+int device_open(__const char *__file, int __with_odd_parity, int __with_async) {
 
-  device_portfd = serial_opendevice(__file, __with_odd_parity);
+  device_portfd = serial_opendevice(__file, __with_odd_parity, __with_async);
 
   return (device_portfd >= 0);
 }

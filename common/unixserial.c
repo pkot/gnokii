@@ -101,7 +101,7 @@ int serial_close(int __fd) {
 
 /* Open a device with standard options. */
 
-int serial_opendevice(__const char *__file, int __with_odd_parity) {
+int serial_opendevice(__const char *__file, int __with_odd_parity, int __with_async) {
 
   int fd;
   int retcode;
@@ -125,13 +125,15 @@ int serial_opendevice(__const char *__file, int __with_odd_parity) {
 
   /* Make filedescriptor asynchronous. */
 
-  retcode=fcntl(fd, F_SETFL, FASYNC);
-  if (retcode == -1){
-    perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
-    serial_close(fd);
-    return(-1);
+  if (__with_async) {
+    retcode=fcntl(fd, F_SETFL, FASYNC);
+    if (retcode == -1){
+      perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
+      serial_close(fd);
+      return(-1);
+    }
   }
-
+  
   /* Initialise the port settings */
 
   memcpy(&tp, &serial_termios, sizeof(struct termios));

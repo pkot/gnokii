@@ -235,8 +235,13 @@ typedef struct {
 /* Limits for sizing of array in GSM_PhonebookEntry. Individual handsets may
    not support these lengths so they have their own limits set. */
 
-#define GSM_MAX_PHONEBOOK_NAME_LENGTH   (40)
-#define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (40)
+#define GSM_MAX_PHONEBOOK_NAME_LENGTH   (50)   /* For 7110 */
+#define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (48)   /* For 7110 */
+#define GSM_MAX_PHONEBOOK_TEXT_LENGTH   (60)   /* For 7110 */
+#define GSM_MAX_PHONEBOOK_SUB_ENTRIES   (8)    /* For 7110 */
+                                               /* 7110 is able to in one
+						* entry 5 numbers and 2
+						* texts [email,notice,postal] */
 
 /* Here is a macro for models that do not support caller groups. */
 
@@ -258,19 +263,62 @@ typedef struct {
   int Number; /* The number of messages */
 } GSM_SMSStatus;
 
+
+
+/* Some phones (at the moment 6210/7110) supports extended phonebook
+   with additional data.  Here we have structures for them */
+
+typedef enum
+{
+  GSM_General = 0x0a,
+  GSM_Mobile  = 0x03,
+  GSM_Work    = 0x06,
+  GSM_Fax     = 0x04,
+  GSM_Home    = 0x02
+} GSM_Number_Type;
+
+typedef enum
+{
+  GSM_Number  = 0x0b,
+  GSM_Note    = 0x0a,
+  GSM_Postal  = 0x09,
+  GSM_Email   = 0x08,
+  GSM_Name    = 0x07,
+  GSM_Date    = 0x13   /* Date is used for DC,RC,etc (last calls) */
+} GSM_EntryType;
+
+typedef struct {
+  GSM_EntryType   EntryType;
+  GSM_Number_Type NumberType;
+  union {
+    char Number[GSM_MAX_PHONEBOOK_TEXT_LENGTH + 1]; /* Number */
+    GSM_DateTime Date;                         /* or the last calls list */
+  } data;
+  int             BlockNumber;
+} GSM_SubPhonebookEntry;
+
 /* Define datatype for phonebook entry, used for getting/writing phonebook
    entries. */
 
 typedef struct {
   bool Empty;                                       /* Is this entry empty? */
-  char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];     /* Plus 1 for null terminator. */
+  char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];     /* Plus 1 for
+						       nullterminator. */
   char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
   GSM_MemoryType MemoryType;                        /* Type of memory */
   int Group;                                        /* Group */
   int Location;                                     /* Location */
   GSM_DateTime Date;                                /* The record date and time
                                                        of the number. */
+  GSM_SubPhonebookEntry SubEntries[GSM_MAX_PHONEBOOK_SUB_ENTRIES];
+                                                    /* For phones with
+						     * additional phonebook
+						     * entries */
+  int SubEntriesCount;                              /* Should be 0, if extended
+                                                       phonebook is not used */
 } GSM_PhonebookEntry;
+
+
 
 /* This define speed dialing entries. */
 
@@ -306,7 +354,8 @@ typedef enum {
 typedef enum {
   GBU_Arbitrary,
   GBU_Volts,
-  GBU_Minutes
+  GBU_Minutes,
+  GBU_Percentage
 } GSM_BatteryUnits;
 
 /* Define enums for Calendar Note types */
@@ -531,6 +580,55 @@ typedef struct {
 #define DCS_CLASS1      0xf1
 #define DCS_CLASS2      0xf2
 #define DCS_CLASS3      0xf3
+
+
+
+/* Global structures intended to be independant of phone etc */
+/* Obviously currently rather Nokia biased but I think most things */
+/* (eg at commands) can be enumerated */
+
+
+/* A structure to hold information about the particular link */
+/* The link comes 'under' the phone */
+typedef struct {
+  char PortDevice[20];   /* The port device */
+  int InitLength;        /* Number of chars sent to sync the serial port */
+  GSM_ConnectionType ConnectionType;   /* Connection type, serial, ir etc */
+
+  /* A regularly called loop function */
+  /* timeout can be used to make the function block or not */
+  GSM_Error (*Loop)(struct timeval *timeout);
+
+  /* A pointer to the function used to send out a message */
+  /* This is used by the phone specific code to send a message over the link */
+  GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, void *message);
+
+  /* These provide support for command/response exchanges */
+  /* See phone-generic.c for useage */
+  void *CR_message;
+  int CR_messagelength;   /* Size allocated in CR_message */
+  int CR_waitfor;
+  int CR_error;
+} GSM_Link;
+
+
+/* Small structure used in GSM_Phone */
+/* Messagetype is passed to the function in case it is a 'generic' one */
+typedef struct {
+  u8 MessageType;
+  GSM_Error (*Functions)(int messagetype, char *buffer, int length);
+} GSM_IncomingFunctionType;
+
+
+/* This structure contains the 'callups' needed by the link */
+/* to deal with messages from the phone */
+
+typedef struct {
+  /* These make up a list of functions, one for each message type */
+  int IncomingFunctionNum;
+  GSM_IncomingFunctionType *IncomingFunctions;
+} GSM_Phone;
+
  
 /* Define the structure used to hold pointers to the various API functions.
    This is in effect the master list of functions provided by the gnokii API.

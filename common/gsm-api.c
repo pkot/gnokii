@@ -34,6 +34,7 @@
 #include "mbus-2110.h"
 #include "mbus-6160.h"
 #include "mbus-640.h"
+#include "phone-7110.h"
 
 /* GSM_LinkOK is set to true once normal communications with the phone have
    been established. */
@@ -71,6 +72,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
   MODULE(MB21)
   MODULE(MB61)
   MODULE(MB640)
+  MODULE(P7110)
 #endif /* WIN32 */ 
   return (GE_UNKNOWNMODEL);
 }

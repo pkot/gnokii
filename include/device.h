@@ -23,7 +23,7 @@
 
 int device_getfd(void);
 
-int device_open(__const char *__file, int __with_odd_parity);
+int device_open(__const char *__file, int __with_odd_parity, int __with_async);
 void device_close(void);
 void device_reset(void);
 

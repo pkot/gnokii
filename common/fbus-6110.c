@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.119  2001-01-10 16:32:16  pkot
+  Revision 1.120  2001-01-14 22:46:56  chris
+  Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
+
+  Revision 1.119  2001/01/10 16:32:16  pkot
   Documentation updates.
   FreeBSD fix for 3810 code.
   Added possibility for deleting SMS just after reading it in gnokii.
@@ -953,7 +956,7 @@ bool FB61_OpenIR(void)
 
   /* Open device. */
   
-  result = device_open(PortDevice, false);
+  result = device_open(PortDevice, false, true);
 
   if (!result) {
     perror(_("Couldn't open FB61 infrared device"));
@@ -2844,7 +2847,7 @@ bool FB61_OpenSerial(void)
 
   /* Open device. */
 
-  result = device_open(PortDevice, false);
+  result = device_open(PortDevice, false, true);
 
   if (!result) {
     perror(_("Couldn't open FB61 device"));
@@ -5541,3 +5544,5 @@ int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
   return FB61_TX_SendFrame(2, FB61_FRTYPE_ACK, request);
 }
+
+

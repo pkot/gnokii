@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.76  2001-01-12 14:09:12  pkot
+  Revision 1.77  2001-01-14 22:46:56  chris
+  Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
+
+  Revision 1.76  2001/01/12 14:09:12  pkot
   More cleanups. This time mainly in the code.
 
   Revision 1.75  2001/01/10 16:32:15  pkot
@@ -1271,7 +1274,7 @@ bool	FB38_OpenSerial(void)
 
 	/* Open device. */
 
-	result = device_open(PortDevice, false);
+	result = device_open(PortDevice, false, true);
 
 	if (!result) {
 		perror(_("Couldn't open FB38 device"));
