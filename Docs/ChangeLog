@@ -7,3 +7,6 @@
 
 * Mon May 15 19:29:55 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - proper access rights for gnokiid and mgnokiidev
+
+* Mon May 22 07:11:01 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- better gettext-howto (adding a new language) - Stano

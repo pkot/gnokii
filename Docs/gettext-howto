@@ -3,6 +3,8 @@
 - a reasonably recent version of GNU gettext (e.g. 0.10.35)
   Check the version using e.g. msgfmt -V
 
+- autoconf
+
 - gnokii distribution :-)
 
 - if you have the variable LINGUAS in the environment
@@ -36,6 +38,8 @@ steps to do:
 
   Caution: the language code may differ from the country
   code, e.g. czech language is cs, Czech Republic is cz 
+
+- run autoconf to recreate configure script
 
 - reconfigure the package (./configure)
 
