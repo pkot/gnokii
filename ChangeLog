@@ -46,12 +46,16 @@
  * 7110 series updates:
     o dropping duplicated frames during pb read     (BORBELY Zoltan)
     o fix calendar notes write support                   (Pawel Kot)
+    o fix calendar deletion support                      (Pawel Kot)
+    o fix calendar info reading                          (Pawel Kot)
     o fix reading caller icons                           (Pawel Kot)
     o fix reading speeddials                             (Pawel Kot)
  * 6510 series updates:
     o fix reading caller icons                           (Pawel Kot)
     o fix reading speeddials                             (Pawel Kot)
     o fix calendar notes write support                   (Pawel Kot)
+    o fix calendar deletion support                      (Pawel Kot)
+    o fix calendar info reading                          (Pawel Kot)
  * 6100 series updates:
     o better fix for busy (0xc9) frame              (BORBELY Zoltan)
     o Nokia CardPhone support updated                 (Georg Moritz)

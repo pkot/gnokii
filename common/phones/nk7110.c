@@ -1507,21 +1507,24 @@ static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message,
 		break;
 	case NK7110_SUBCAL_INFO_RCVD:
 		if (!data->calnote_list) return GN_ERR_INTERNALERROR;
-		dprintf("Calendar Notes Info received! %i\n", (message[4] << 8) | message[5]);
-		data->calnote_list->number = (message[4] << 8) + message[5];
+		dprintf("Calendar Notes Info received! %i\n", message[4] * 256 + message[5]);
+		data->calnote_list->number = message[4] * 256 + message[5];
 		dprintf("Location of Notes: ");
 		for (i = 0; i < data->calnote_list->number; i++) {
-			data->calnote_list->location[i] = (message[8 + 2 * i] << 8) | message[9 + 2 * i];
+			if (8 + 2 * i >= length) break;
+			data->calnote_list->location[i] = message[8 + 2 * i] * 256 + message[9 + 2 * i];
 			dprintf("%i ", data->calnote_list->location[i]);
 		}
 		dprintf("\n");
 		break;
 	case NK7110_SUBCAL_FREEPOS_RCVD:
-		dprintf("First free position received: %i!\n", (message[4] << 8) | message[5]);
+		dprintf("First free position received: %i!\n", message[4]  * 256 + message[5]);
 		data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
 		break;
 	case NK7110_SUBCAL_DEL_NOTE_RESP:
-		dprintf("Succesfully deleted calendar note: %i!\n", (message[4] << 8) | message[5]);
+		dprintf("Succesfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
+		for (i = 0; i < length; i++) dprintf("%02x ", message[i]);
+		dprintf("\n");
 		break;
 
 	case NK7110_SUBCAL_ADD_MEETING_RESP:
@@ -1583,7 +1586,7 @@ static gn_error NK7110_FirstCalendarFreePos(gn_data *data, struct gn_statemachin
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x31 };
 
-	SEND_MESSAGE_WAITFOR(NK7110_MSG_CALENDAR, 4);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 4);
 }
 
 
@@ -1829,14 +1832,14 @@ static gn_error NK7110_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 	if (NK7110_GetCalendarNotesInfo(data, state) == GN_ERR_NONE) {
 		if (data->calnote->location < data->calnote_list->number + 1 &&
 		    data->calnote->location > 0) {
-			req[4] = data->calnote_list->location[data->calnote->location - 1] << 8;
+			req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
 			req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
 		} else {
 			return GN_ERR_INVALIDLOCATION;
 		}
 	}
 
-	SEND_MESSAGE_WAITFOR(NK7110_MSG_CALENDAR, 6);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 6);
 }
 
 
