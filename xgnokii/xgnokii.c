@@ -2336,6 +2336,8 @@ int main(int argc, char *argv[])
 
 	gtk_init(&argc, &argv);
 
+	gn_elog_handler = NULL;
+
 /* Show the splash screen. */
 
 	SplashScreen();

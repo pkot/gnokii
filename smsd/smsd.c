@@ -421,6 +421,7 @@ int main (int argc, char *argv[])
   textdomain("gnokii");
 #endif
 
+  gn_elog_handler = NULL;
   ReadConfig (argc, argv);
   GTerminateThread = false;
   Run ();

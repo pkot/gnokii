@@ -4,6 +4,8 @@
     o updated Germany operator names                (Ruotger.Skupin)
     o using increasing instead of constant timeout values
       in message retransmission                     (BORBELY Zoltan)
+    o define gn_elog_handler as NULL in xgnokii, gnokiid and smsd
+                                                         (Pawel Kot)
  * SMSD updated
     o English grammar corrections in README            (Peter Nixon)
  * AT driver updates

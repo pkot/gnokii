@@ -126,6 +126,8 @@ int main(int argc, char *argv[])
 		atexit(busterminate);
 	}
 
+	gn_elog_handler = NULL;
+
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
