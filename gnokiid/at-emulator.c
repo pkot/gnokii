@@ -58,6 +58,7 @@ u8		ModemRegisters[MAX_MODEM_REGISTERS];
 char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
 int		CurrentCmdBuffer;
 int		CurrentCmdBufferIndex;
+bool	VerboseResponse; 	/* Switch betweek numeric (4) and text responses (ERROR) */
 
  	/* Current command parser */
 void 			(*Parser)(char *);
@@ -76,6 +77,9 @@ bool	ATEM_Initialise(int read_fd, int write_fd)
 		/* Initialise command buffer variables */
 	CurrentCmdBuffer = 0;
 	CurrentCmdBufferIndex = 0;
+	
+		/* Default to verbose reponses */
+	VerboseResponse = true;
 
 		/* Initialise registers */
 	ATEM_InitRegisters();
@@ -157,7 +161,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 	char number[30];
 
 	if (strncmp (cmd_buffer, "AT", 2) != 0) {
-		ATEM_ModemResult(4);
+		ATEM_ModemResult(MR_ERROR);
 		return;
 	}
 
@@ -209,7 +213,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 						break;
 
 					default:
-						ATEM_ModemResult(4);
+						ATEM_ModemResult(MR_ERROR);
 						return;
 				}
 				break;
@@ -218,12 +222,12 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			case '*':
 				buf++;
 				if (!strcmp(buf, "NOKIATEST")) {
-					ATEM_ModemResult(0); /* FIXME? */
+					ATEM_ModemResult(MR_OK); /* FIXME? */
 					return;
 				}
 			   	else {
 				   	if (!strcmp(buf, "C")) {
-						ATEM_ModemResult(0);
+						ATEM_ModemResult(MR_OK);
 						Parser= ATEM_ParseSMS;
 						return;
 					}
@@ -251,18 +255,18 @@ void	ATEM_ParseAT(char *cmd_buffer)
 						break;
 
 					default:
-						ATEM_ModemResult(4);
+						ATEM_ModemResult(MR_ERROR);
 						return;
 				}
 				break;
 
 			default: 
-				ATEM_ModemResult(4);
+				ATEM_ModemResult(MR_ERROR);
 				return;
 		}
 	}
 
-	ATEM_ModemResult(0);
+	ATEM_ModemResult(MR_OK);
 }
 
 void	ATEM_ReadSMS(int number, GSM_MemoryType type)
@@ -283,7 +287,7 @@ void	ATEM_ReadSMS(int number, GSM_MemoryType type)
 	}
    	else {
 	   	if (error != GE_NONE) {
-			ATEM_ModemResult(4);
+			ATEM_ModemResult(MR_ERROR);
 			return;
 		}
 	}
@@ -299,10 +303,10 @@ void	ATEM_EraseSMS(int number, GSM_MemoryType type)
 	message.MemoryType = type;
 	message.Location = number;
 	if (GSM->DeleteSMSMessage(&message) == GE_NONE) {
-		ATEM_ModemResult(0);
+		ATEM_ModemResult(MR_OK);
 	}
    	else {
-		ATEM_ModemResult(4);
+		ATEM_ModemResult(MR_ERROR);
 	}
 }
 
@@ -326,10 +330,10 @@ void	ATEM_ParseSMS(char *buff)
     }
     if (!strcmp(buff, "EXIT")) {
 		Parser= ATEM_ParseAT;
-		ATEM_ModemResult(0);
+		ATEM_ModemResult(MR_OK);
 		return;
     } 
-	ATEM_ModemResult(4);
+	ATEM_ModemResult(MR_ERROR);
 }
 
 	/* Parser for DIR sub mode of SMS interactive mode. */
@@ -349,10 +353,10 @@ void	ATEM_ParseDIR(char *buff)
 			return;
 		case 'Q':
 			Parser= ATEM_ParseSMS;
-			ATEM_ModemResult(0);
+			ATEM_ModemResult(MR_OK);
 			return;
 	}
-	ATEM_ModemResult(4);
+	ATEM_ModemResult(MR_ERROR);
 }
  
 	/* Handle AT+C commands, this is a quick hack together at this
@@ -480,15 +484,38 @@ bool	ATEM_CommandPlusG(char **buf)
 	   the code in the isdn driver for an idea of where it's heading... */
 void	ATEM_ModemResult(int code) 
 {
-	switch (code) {
-		case 0:		ATEM_StringOut("\n\rOK\n\r");
+	char	buffer[16];
+
+	if (VerboseResponse == false) {
+		sprintf(buffer, "\n\r%d\n\r", code);
+		ATEM_StringOut(buffer);
+	}
+	else {
+		switch (code) {
+			case MR_OK:	
+					ATEM_StringOut("\n\rOK\n\r");
 					break;
 
-		case 4:		ATEM_StringOut("\n\rERROR\n\r");
+			case MR_ERROR:
+					ATEM_StringOut("\n\rERROR\n\r");
 					break;
 
-		default:	ATEM_StringOut("\n\rUnknown Result Code!\n\r");
+			case MR_CARRIER:
+					ATEM_StringOut("\n\rCARRIER\n\r");
 					break;
+
+			case MR_CONNECT:
+					ATEM_StringOut("\n\rCONNECT\n\r");
+					break;
+
+			case MR_NOCARRIER:
+					ATEM_StringOut("\n\rNO CARRIER\n\r");
+					break;
+
+			default:
+					ATEM_StringOut("\n\rUnknown Result Code!\n\r");
+					break;
+		}
 	}
 
 }

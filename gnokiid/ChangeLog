@@ -3,4 +3,8 @@
 
 * Thr Mar 16 13:50:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
 - Improved error handling in RLP code.  Virtual-Modem is more flexible.
+  
+* Fri Mar 17 17:57:53 EST 2000 Hugh Blemings <hugh@linuxcare.com>
+- Changed datapump code to use ATEM_Result function.  Added some
+  #defines for Modem Result codes.
 

@@ -33,7 +33,7 @@
 /* We should force rlp_debug for now until it is more stable and then */
 /* it can become an option in configure */
 /* This way only interesting information (and not passwords) is recorded */
-#define RLP_DEBUG
+//#define RLP_DEBUG
 
 /* Our state machine which handles all of nine possible states of RLP
    machine. */

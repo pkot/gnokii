@@ -60,13 +60,10 @@ bool DP_Initialise(int read_fd, int write_fd)
 
 void DP_HandleIncomingData(u8 *buffer, int length)
 {
-  char ok[]="OK\n\r";
-  char carrierlost[]="NO CARRIER\n\r";
-
   /* If we're not connected yet I believe we should exit */
   /*if (!connected) {
     CommandMode=true;
-    write(PtyWRFD, carrierlost, strlen(carrierlost));
+	ATEM_ModemResult(MR_NOCARRIER);
     RLP_SetUserRequest(Disc_Req, true);
     GSM->CancelCall();
   }
@@ -78,7 +75,7 @@ void DP_HandleIncomingData(u8 *buffer, int length)
     else pluscount=0;
   if (pluscount==3) {
     CommandMode=true;
-    write(PtyWRFD, ok, strlen(ok));
+	ATEM_ModemResult(MR_OK);
     connected=false;
   }
   else RLP_Send(buffer, length);
@@ -88,26 +85,23 @@ void DP_HandleIncomingData(u8 *buffer, int length)
 
 void DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 {
-  char carrier[]="CARRIER\n\r";
-  char connect[]="CONNECT\n\r";
-  char carrierlost[]="NO CARRIER\n\r";
 
   switch(ind) {
   case Data:
     if (CommandMode==false) write(PtyWRFD, buffer, length);
     break;
   case Conn_Ind:
-    if (CommandMode==false) write(PtyWRFD, carrier, strlen(carrier));
+    if (CommandMode==false) ATEM_ModemResult(MR_CARRIER);
     RLP_SetUserRequest(Conn_Req,true);
     break;
   case StatusChange:
     if (buffer[0]==0) {
       connected=true;
-      if (CommandMode==false) write(PtyWRFD, connect, strlen(connect));
+      if (CommandMode==false) ATEM_ModemResult(MR_CONNECT);
     }
     break;
   case Disc_Ind:
-    if (CommandMode==false) write(PtyWRFD, carrier, strlen(carrierlost));
+    if (CommandMode==false) ATEM_ModemResult(MR_NOCARRIER);
     CommandMode=true;
     break;
   case Reset_Ind:
@@ -120,10 +114,8 @@ void DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 
 void DP_CallFinished(void)
 {
-  char carrierlost[]="NO CARRIER\n\r";
-
   CommandMode=true;
-  write(PtyWRFD, carrierlost, strlen(carrierlost));
+  ATEM_ModemResult(MR_NOCARRIER);
   RLP_SetUserRequest(Disc_Req, true);
   connected=false;
 }

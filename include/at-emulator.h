@@ -31,6 +31,17 @@ void	ATEM_ModemResult(int code);
 	/* Global variables */
 bool	ATEM_Initialised;
 
+	/* Definition of modem result codes - these are returned to "terminal"
+       numerically or as a string depending on the setting of S12 */
+
+	/* FIX ME - Numeric values for everything except OK and ERROR 
+	   are guesses as I've not got an AT reference handy.   HAB */
+
+#define 	MR_OK			(0)
+#define		MR_ERROR		(4)
+#define		MR_NOCARRIER	(5)
+#define		MR_CARRIER		(2)
+#define		MR_CONNECT		(3)
 
 	/* All defines and prototypes from here down are specific to 
 	   the at-emulator code and so are #ifdef out if __at_emulator_c isn't 
@@ -67,6 +78,7 @@ bool	ATEM_Initialised;
 #define BIT_DSR      64
 #define REG_CPPP     12
 #define BIT_CPPP    128
+
 
 #define	MAX_MODEM_REGISTERS	20
 

@@ -251,8 +251,8 @@ void    VM_CharHandler(void)
 	}
 
 
-        if (!CommandMode) {
-        	DP_HandleIncomingData((u8 *)&buffer, res);
+    if (!CommandMode) {
+        DP_HandleIncomingData((u8 *)&buffer, res);
 	}
 
 		/* If we're in command mode and the AT emulator is initialised,

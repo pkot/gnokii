@@ -30,3 +30,6 @@
 
 * Thr Mar 16 13:50:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
 - Improved error handling in RLP code.  Virtual-Modem is more flexible.
+  
+* Fri Mar 17 12:51:36 EST 2000 Hugh Blemings <hugh@linuxcare.com>
+- Added Harri's 3810/8110 functions.
