@@ -54,6 +54,10 @@
     o Please enter SMS text... message displays only when
       stdin is a terminal                           (BORBELY Zoltan)
     o --smsreader fixes                             (BORBELY Zoltan)
+    o introduce a consistency with gnokii return values -- be sure
+      at least to return non zero on the failure         (Pawel Kot)
+    o don't exit with multiple deletesms on a single failure
+                                                         (Pawel Kot)
  * smsd fixes
     o FreeBSD doesn't have libdl and smsd can be complied there
       without -ldl                                (Peter Kolmisoppi)
