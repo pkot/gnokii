@@ -126,6 +126,7 @@ static int get_memory_type(gn_memory_type memory_type);
 
 static bool sms_loop = false; /* Are we in infinite SMS reading loop? */
 static bool new_sms  = false; /* Do we have a new SMS? */
+static int ll_memtype, ll_location;
 
 static gn_incoming_function_type nk7110_incoming_functions[] = {
 	{ NK7110_MSG_FOLDER,	NK7110_IncomingFolder },
@@ -597,6 +598,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 	unsigned char *blockstart;
 	unsigned char blocks;
 	unsigned char subblockcount;
+	int memtype, location;
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */
@@ -612,6 +614,12 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		break;
 	case 0x08:  /* Read Memory response */
+		memtype = message[11];
+		location = (message[12] << 8) + message[13];
+		if (ll_memtype != memtype || ll_location != location) {
+			dprintf("skipping entry: ll_memtype: %d, memtype: %d, ll_location: %d, location: %d", ll_memtype, memtype, ll_location, location);
+			return GN_ERR_UNSOLICITED;
+		}
 		if (data->phonebook_entry) {
 			data->phonebook_entry->empty = true;
 			data->phonebook_entry->caller_group = 5; /* no group */
@@ -842,40 +850,36 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, count);
 }
 
-static gn_error NK7110_ReadPhonebookLL(gn_data *data, struct gn_statemachine *state, int memtype, int location)
+static gn_error NK7110_ReadPhonebookLL(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[2000] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
 				   0x00, 0x00, /* memory type; was: 0x02, 0x05 */
 				   0x00, 0x00, /* location */
 				   0x00, 0x00};
 
-	dprintf("Reading phonebook location (%d)\n", location);
+	dprintf("Reading phonebook location (%d)\n", ll_location);
 
-	req[9] = memtype;
-	req[10] = location >> 8;
-	req[11] = location & 0xff;
+	req[9] = ll_memtype;
+	req[10] = ll_location >> 8;
+	req[11] = ll_location & 0xff;
 
 	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 14);
 }
 
 static gn_error NK7110_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
-	int memtype, location;
+	ll_memtype = get_memory_type(data->phonebook_entry->memory_type);
+	ll_location = data->phonebook_entry->location;
 
-	memtype = get_memory_type(data->phonebook_entry->memory_type);
-	location = data->phonebook_entry->location;
-
-	return NK7110_ReadPhonebookLL(data, state, memtype, location);
+	return NK7110_ReadPhonebookLL(data, state);
 }
 
 static gn_error NK7110_GetSpeedDial(gn_data *data, struct gn_statemachine *state)
 {
-	int memtype, location;
+	ll_memtype = NK7110_MEMORY_SPEEDDIALS;
+	ll_location = data->speed_dial->number;
 
-	memtype = NK7110_MEMORY_SPEEDDIALS;
-	location = data->speed_dial->number;
-
-	return NK7110_ReadPhonebookLL(data, state, memtype, location);
+	return NK7110_ReadPhonebookLL(data, state);
 }
 
 /*****************************/
