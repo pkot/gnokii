@@ -1059,6 +1059,10 @@ bool		MB61_TX_SendStandardAcknowledge(u8 sequence_number)
         perror(_("TX_SendMessage - write:"));
         return (false);
     }
+
+#ifdef 	DEBUG
+	fprintf(stdout, "(Ack %02x) ", sequence_number);
+#endif
 	
     return (true);
 }	
@@ -1066,6 +1070,10 @@ bool		MB61_TX_SendStandardAcknowledge(u8 sequence_number)
        character received from the phone/phone. */
 void    MB61_RX_StateMachine(char rx_byte)
 {
+
+#ifdef 	DEBUG
+	fprintf(stdout, "(%d)", RX_State);
+#endif
 
     switch (RX_State) {
     
@@ -1092,8 +1100,17 @@ void    MB61_RX_StateMachine(char rx_byte)
         case MB61_RX_GetSource:
                 MessageSource = rx_byte;
                 CalculatedCSum ^= rx_byte;
-                RX_State = MB61_RX_GetCommand;
-                break;
+
+					/* Sanity check these.  We make sure that the Source
+                       and destination are either PC/PHONE or PHONE/PC */
+				if (((MessageSource == MSG_ADDR_PC) && (MessageDestination == MSG_ADDR_PHONE)) ||
+				   ((MessageSource == MSG_ADDR_PHONE) && (MessageDestination == MSG_ADDR_PC))) {
+                	RX_State = MB61_RX_GetCommand;
+				}
+				else {
+					RX_State = MB61_RX_Sync;
+				}
+				break;
 
                     /* Next byte is the command type. */
         case MB61_RX_GetCommand:
@@ -1207,11 +1224,19 @@ void    MB61_SigHandler(int status)
     res = device_read(buffer, 255);
 
     for (count = 0; count < res ; count ++) {
-		//fprintf(stdout, "<%02x>", buffer[count]);
         MB61_RX_StateMachine(buffer[count]);
+
+#ifdef		DEBUG
+		if (isprint(buffer[count])) {
+			fprintf(stdout, "<%02x%c>", buffer[count], buffer[count]);
+		}
+		else {
+			fprintf(stdout, "<%02x >", buffer[count]);
+		}
+#endif
+
     }
-	//fprintf(stdout, "\n");
-	//fflush(stdout);
+	fflush(stdout);
 }
 
 
@@ -1232,6 +1257,9 @@ int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_b
 
         return (false);
     }
+
+    //RX_State = MB61_RX_Sync;  Hack.
+
         /* Now construct the message header. */
     out_buffer[0] = 0x1f;   /* Start of message indicator */
     out_buffer[1] = destination;
