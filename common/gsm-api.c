@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -18,9 +20,14 @@
   Unless otherwise noted, all functions herein block until they complete.  The
   functions themselves are defined in a structure in gsm-common.h.
 
-  Last modification: Mon Mar 20 22:02:15 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.25  2001-03-26 23:39:21  pkot
+  Minor updates:
+   - Windows INLINE patch (Manfred Jonsson)
+   - patch to configure.in to compile under FreeBSD (Panagiotis Astithas)
+   - other cleanups (me)
 
+  
 */
 
 #include <stdio.h>

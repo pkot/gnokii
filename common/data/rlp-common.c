@@ -17,7 +17,13 @@
   downloadable from www.etsi.org (if you register with them)
 
   $Log$
-  Revision 1.4  2001-03-13 01:23:18  pkot
+  Revision 1.5  2001-03-26 23:39:36  pkot
+  Minor updates:
+   - Windows INLINE patch (Manfred Jonsson)
+   - patch to configure.in to compile under FreeBSD (Panagiotis Astithas)
+   - other cleanups (me)
+
+  Revision 1.4  2001/03/13 01:23:18  pkot
   Windows updates (Manfred Jonsson)
 
   Revision 1.3  2001/02/21 19:57:00  chris
@@ -38,6 +44,12 @@
 #include "data/rlp-crc24.h"
 #include "gsm-common.h" /* For GSM error and RLP send function. */
 #include "misc.h" /* For u8, u32 etc. */
+
+#ifdef WIN32
+#define INLINE __inline
+#else
+#define INLINE inline
+#endif
 
 /* Our state machine which handles all of nine possible states of RLP
    machine. */
@@ -244,7 +256,7 @@ void RLP_SetTimer(int *timer)
 
 
 /* Previous sequence number. */
-static inline u8 Decr(u8 x)
+static INLINE u8 Decr(u8 x)
 {
 	if (x==0)
 		return (RLP_M-1);
@@ -253,7 +265,7 @@ static inline u8 Decr(u8 x)
 }
 
 /* Next sequence number. */
-static inline u8 Incr(u8 x)
+static INLINE u8 Incr(u8 x)
 {
 	if (x==RLP_M-1)
 		return 0;
@@ -264,7 +276,7 @@ static inline u8 Incr(u8 x)
 /* Difference between sequence numbers. */
 
 /* FIXME: Not used now, so I have commented it out. PJ
- * static inline u8 Diff(u8 x, u8 y)
+ * static INLINE u8 Diff(u8 x, u8 y)
  * {
  *   int result = x-y;
  *   return (result >= 0) ? result : result + RLP_M;

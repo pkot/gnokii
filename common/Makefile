@@ -50,7 +50,7 @@ COMMON.o: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	$(LD) $(LDREL) $(LDOUT) COMMON.o $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 gsm-filetypes.o: gsm-filetypes.c
-	$(CC) $(CFLAGS) $(XPM_CFLAGS) -c gsm-filetypes.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(XPM_CFLAGS) -c gsm-filetypes.c
 
 vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx

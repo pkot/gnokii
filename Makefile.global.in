@@ -42,6 +42,7 @@ MSGFMT         = @MSGFMT@
 
 CC             = @CC@
 CFLAGS         = @CFLAGS@
+CPPFLAGS       = @CPPFLAGS@
 LIBS           = @LIBS@
 LEX            = @LEX@
 

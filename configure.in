@@ -92,7 +92,8 @@ if test "$USE_NLS" = "yes"; then
                 AC_CHECK_LIB(intl, gettext,
                              [ NLS_LIBS="$NLS_LIBS -lintl"
                                AC_DEFINE(HAVE_LIBINTL) ],
-                             AC_MSG_ERROR(not found library: intl !!!)))
+                             AC_MSG_ERROR(not found library: intl !!!),
+			     [ $NLS_FLAGS ]))
 
   AC_SUBST(HAVE_LIBINTL_H)  
   AC_SUBST(HAVE_LIBINTL)
