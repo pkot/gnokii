@@ -2631,7 +2631,7 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 		memcpy(pos, data_nondigital_end, ARRAY_LEN(data_nondigital_end));
 		pos += ARRAY_LEN(data_nondigital_end);
 		if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
-		usleep(500000);
+		usleep(10000);
 		dprintf("after nondigital1\n");
 		if (SM_SendMessage(state, ARRAY_LEN(data_nondigital_final), 0x01, data_nondigital_final) != GE_NONE) return GE_NOTREADY;
 		dprintf("after nondigital2\n");
@@ -2656,7 +2656,7 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 		return GE_INTERNALERROR;
 	}
 
-	return SM_BlockNoRetryTimeout(state, data, 0x01, 100);
+	return SM_BlockNoRetryTimeout(state, data, 0x01, 500);
 }
 
 static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
@@ -2724,6 +2724,10 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 
 	/* Call in progress */
 	case 0x03:
+		memset(&cinfo, 0, sizeof(cinfo));
+		cinfo.CallID = message[4];
+		if (CallNotification)
+			CallNotification(GSM_CS_Established, &cinfo);
 		return GE_UNSOLICITED;
 
 	/* Remote end hang up */

@@ -262,9 +262,10 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			else
 				data.CallInfo->Type = GSM_CT_NonDigitalDataCall;
 			data.CallInfo->SendNumber = GSM_CSN_Default;
-			SM_Functions(GOP_MakeCall, &data, sm);
-			ATEM_StringOut("\n\r");
-			CommandMode = false;
+			if (SM_Functions(GOP_MakeCall, &data, sm) != GE_NONE)
+				DP_CallPassup(GSM_CS_RemoteHangup, NULL);
+			else
+				CommandMode = false;
 			return;
 			break;
 		case 'H':

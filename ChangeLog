@@ -5,6 +5,7 @@
     o smsreader updates                                (Pavel Machek)
  * 6110 series updates
     o MakeCall() / IncomingCallInfo() restructured   (BORBELY Zoltan)
+    o more MakeCall() / IncomingCallInfo() fixes     (BORBELY Zoltan)
  * 6510 series updates
     o added GetMemoryStatus (thanks to Michael Moosbauer for
       the info)                                        (Markus Plail)
@@ -54,6 +55,11 @@
     o Replaces ugly ifs from gsm-bitmaps.c::GSM_IsPointBitmap()
       with a switch                                       (Pawel Kot)
  * SM_BlockNoRetryTimeout fixed                      (BORBELY Zoltan)
+ * gnokiid updates:
+    o datapump thread added                          (BORBELY Zoltan)
+    o dialing error handled                          (BORBELY Zoltan)
+    o polling fixes                                  (BORBELY Zoltan)
+    o RLP frame handling fixed in fbus.c             (BORBELY Zoltan)
 	
 0.4.0pre16
 ==========

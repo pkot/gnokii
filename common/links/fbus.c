@@ -265,6 +265,8 @@ static void FBUS_RX_StateMachine(unsigned char rx_byte)
 					dprintf("[Received Ack of type %02x, seq: %2x]\n",
 						i->MessageBuffer[0],(unsigned char) i->MessageBuffer[1]);
 
+				} else if (i->MessageType == 0xf1) {
+					SM_IncomingFunction(statemachine, i->MessageType, i->MessageBuffer, i->FrameLength - 2);
 				} else {	/* Normal message type */
 
 					/* Add data to the relevant Message buffer */
