@@ -33,6 +33,7 @@
  * documentation updates
     o update TODO to reflect real issues                (Pawel Kot)
     o mention default caller groups in the manpage   (Reiner Steib)
+    o update INSTALL file to match autogen.sh contents  (Pawel Kot)
  * xgnokii updates
     o contacts won't save a trailing semicolon     (BORBELY Zoltan)
  * gnapplet series updates
