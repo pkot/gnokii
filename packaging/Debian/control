@@ -1,7 +1,7 @@
 Source: gnokii
 Section: comm
 Priority: optional
-Build-Depends: debhelper, libc6-dev, xlibs-dev, xutils, libgtk1.2-dev
+Build-Depends: debhelper, libc6-dev, xlibs-dev, xutils, libglib1.2-dev, libgtk1.2-dev, libbluetooth1-dev, autotools-dev (>=20020621)
 Maintainer: Erik Rossen (Linux consultant) <rossen@freesurf.ch>
 Standards-Version: 3.1.0.0
 
