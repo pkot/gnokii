@@ -21,6 +21,8 @@
     o fix MSVC build                        (Phil Ashby, Pawel Kot)
     o document environmental variables for configure script
                                                         (Pawel Kot)
+    o let ./configure --with-included-gettext work correctly --
+      fix undeclared INSTALLPREFIX macro                (Pawel Kot)
  * gnapplet series updates
     o folder management support (list, status, create,
       delete) support added                        (BORBELY Zoltan)

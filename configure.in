@@ -28,6 +28,8 @@ define([AC_PROVIDE_AC_LIBTOOL_WIN32_DLL])
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
+AC_RELOCATABLE
+
 AM_ICONV
 
 dnl ======================== Default setting
