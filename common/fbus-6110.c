@@ -3242,6 +3242,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x11:   /* Profile feature change result */
 
+#ifdef DEBUG
+      fprintf(stdout, _("Message: Profile feature change result.\n"));
+#endif /* DEBUG */
+
       CurrentProfileError = GE_NONE;
       break;
 
@@ -3288,7 +3292,6 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       case 0x09:
         CurrentProfile->AutomaticAnswer = MessageBuffer[8];
         break;
-
 
       }
 

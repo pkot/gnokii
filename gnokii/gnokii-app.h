@@ -145,19 +145,88 @@ struct gnokii_arg_len {
 #define PROFILE_VOLUME_LEVEL4  0x09
 #define PROFILE_VOLUME_LEVEL5  0x0a
 
-#define RINGTONE_NOTSET       0x01
-#define RINGTONE_PRESET       0x10
-#define RINGTONE_UPLOAD       0x11
-#define RINGTONE_RINGRING     0x12
-#define RINGTONE_LOW          0x13
-#define RINGTONE_FLY          0x14
-#define RINGTONE_MOSQUITO     0x15
-#define RINGTONE_BEE          0x16
-#define RINGTONE_INTRO        0x17
-#define RINGTONE_ETUDE        0x18
-#define RINGTONE_HUNT         0x19
-#define RINGTONE_GOINGUP      0x1a
-#define RINGTONE_CITYBIRD     0x1b
-#define RINGTONE_GRANDEVALSE  0x2f
-#define RINGTONE_ATTRACTION   0x3a
-#define RINGTONE_SAMBA        0x44
+/* Nokia ringtones codes. */
+
+char *RingingTones[] = {
+/*  0 */ "Unknown",
+/*  1 */ "Unknown",                 /* FIXME: probably not set. */
+/*  2 */ "Unknown",
+/*  3 */ "Unknown",
+/*  4 */ "Unknown",
+/*  5 */ "Unknown",
+/*  6 */ "Unknown",
+/*  7 */ "Unknown",
+/*  8 */ "Unknown",
+/*  9 */ "Unknown",
+/* 10 */ "Unknown",                 /* FIXME: probably pre set. */
+/* 11 */ "Unknown",
+/* 12 */ "Unknown",
+/* 13 */ "Unknown",
+/* 14 */ "Unknown",
+/* 15 */ "Unknown",
+/* 16 */ "Unknown",
+/* 17 */ "Uploaded",
+/* 18 */ "Ring ring",
+/* 19 */ "Low",
+/* 20 */ "Fly",
+/* 21 */ "Mosquito",
+/* 22 */ "Bee",
+/* 23 */ "Intro",
+/* 24 */ "Etude",
+/* 25 */ "Hunt",
+/* 26 */ "Going up",
+/* 27 */ "City Bird",
+/* 28 */ "Unknown",
+/* 29 */ "Unknown",
+/* 30 */ "Chase",
+/* 31 */ "Unknown",
+/* 32 */ "Scifi",
+/* 33 */ "Unknown",
+/* 34 */ "Kick",
+/* 35 */ "Do-mi-so",
+/* 36 */ "Robo N1X",
+/* 37 */ "Dizzy",
+/* 38 */ "Unknown",
+/* 39 */ "Playground",
+/* 40 */ "Unknown",
+/* 41 */ "Unknown",
+/* 42 */ "Unknown",
+/* 43 */ "That's it!",
+/* 44 */ "Unknown",
+/* 45 */ "Unknown",
+/* 46 */ "Unknown",
+/* 47 */ "Grande valse",   /* FIXME: Knock knock (Knock again). */
+/* 48 */ "Helan",          /* FIXME: Grand valse on 5110. */
+/* 49 */ "Fuga",           /* FIXME: Helan on 5110. */
+/* 50 */ "Menuet",         /* FIXME: Fuga on 5110. */
+/* 51 */ "Ode to Joy",
+/* 52 */ "Elise",
+/* 53 */ "Mozart 40",
+/* 54 */ "Piano Concerto", /* FIXME: Mozart 40 on 5110. */
+/* 55 */ "William Tell",
+/* 56 */ "Badinerie",      /* FIXME: William Tell on 5110. */
+/* 57 */ "Polka",          /* FIXME: Badinerie on 5110. */
+/* 58 */ "Attraction",     /* FIXME: Polka on 5110. */
+/* 59 */ "Unknown",        /* FIXME: Attraction on 5110. */
+/* 60 */ "Polite",         /* FIXME: Down on 5110. */
+/* 61 */ "Persuasion",
+/* 62 */ "Unknown",        /* FIXME: Persuasion on 5110. */
+/* 63 */ "Unknown",
+/* 64 */ "Unknown",
+/* 65 */ "Unknown",
+/* 66 */ "Unknown",
+/* 67 */ "Tick tick",
+/* 68 */ "Samba",
+/* 69 */ "Unknown",        /* FIXME: Samba on 5110. */
+/* 70 */ "Orient",
+/* 71 */ "Charleston",     /* FIXME: Orient on 5110. */
+/* 72 */ "Unknown",        /* FIXME: Charleston on 5110. */
+/* 73 */ "Jumping",        /* FIXME: Songette on 5110. */
+/* 74 */ "Unknown",        /* FIXME: Jumping on 5110. */
+/* 75 */ "Unknown",        /* FIXME: Lamb (Marry) on 5110. */
+/* 76 */ "Unknown",
+/* 77 */ "Unknown",
+/* 78 */ "Unknown",
+/* 79 */ "Unknown",
+/* 80 */ "Unknown"         /* FIXME: Tango (Tangoed) on 5110. */
+};

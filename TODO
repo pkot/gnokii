@@ -13,7 +13,6 @@
 - Marcin's profile and dealer note patches.
 - update Docs/gettext-howto
 - test all gnokii options and xgnokii
-- fill in all ringing tone names in gnokii.h and gnokii.c
 
 
 0.4.0 THINGS:
@@ -40,3 +39,4 @@
   supported so xgnokii can disable some GUI stuff on phones which do not
   support this functions.
 - multiframed packets
+- how can we read the name of the uploaded tune? Can we do that?

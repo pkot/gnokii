@@ -159,49 +159,6 @@ char *GetProfileVibrationString(int code) {
   }
 }
 
-/* FIXME: correct only for N6110, fill in other strings and change it into
-   the array of structures for easy grepping through. */
-char *GetRingtoneName(int code) {
-
-  switch (code) {
-    case RINGTONE_NOTSET:
-      return "Not set";
-    case RINGTONE_PRESET:
-      return "Preset";
-    case RINGTONE_UPLOAD:
-      return "Uploaded tone";
-    case RINGTONE_RINGRING:
-      return "Ring ring";
-    case RINGTONE_LOW:
-      return "Low";
-    case RINGTONE_FLY:
-      return "Fly";
-    case RINGTONE_MOSQUITO:
-      return "Mosquito";
-    case RINGTONE_BEE:
-      return "Bee";
-    case RINGTONE_INTRO:
-      return "Intro";
-    case RINGTONE_ETUDE:
-      return "Etude";
-    case RINGTONE_HUNT:
-      return "Hunt";
-    case RINGTONE_GOINGUP:
-      return "Going up";
-    case RINGTONE_CITYBIRD:
-      return "City bird";
-    case RINGTONE_GRANDEVALSE:
-      return "Grande valse";
-    case RINGTONE_ATTRACTION:
-      return "Attraction";
-    case RINGTONE_SAMBA:
-      return "Samba";
-    default:
-      return "Unknown";
-  }
-}
-
-
 /* This function shows the copyright and some informations usefull for
    debugging. */
 
@@ -2239,15 +2196,15 @@ int getprofile(int argc, char *argv[])
 
       printf("Incoming call alert: %s\n", GetProfileCallAlertString(profile.CallAlert));
 
-      if (profile.Ringtone!=48)
-      {
+      //      if (profile.Ringtone!=48)
+      //      {
         /* For different phones different ringtones names */
 
         if (!strcmp(model,"6110"))
-          printf("Ringing tone: %s\n", GetRingtoneName(profile.Ringtone));
+          printf("Ringing tone: %s (%d)\n", RingingTones[profile.Ringtone], profile.Ringtone);
         else
           printf("Ringtone number: %i\n", profile.Ringtone);
-      }
+	//      }
 
       printf("Ringing volume: %s\n", GetProfileVolumeString(profile.Volume));
 

@@ -21,3 +21,6 @@
 
 * Sat May 13 18:43:57 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - typedef instead of #define in *BSD
+
+* Tue May 16 00:37:50 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- new ringtones list

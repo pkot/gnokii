@@ -52,3 +52,6 @@
 
 * Thu May 11 09:21:40 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - sendringtones corrected (Uff :-)
+
+* Tue May 16 00:20:33 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- ringtones filled in for 6110. Please test with 5110 and comment.

@@ -66,3 +66,6 @@
 
 * Sat May 13 20:33:48 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - do not double setting up speed, use cfsetspeed only
+
+* Mon May 15 22:49:39 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- debugging in profiles added
