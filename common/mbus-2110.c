@@ -12,7 +12,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.22  2000-12-20 09:11:19  pkot
+  Revision 1.23  2001-01-02 09:09:08  pkot
+  Misc fixes and updates.
+
+  Revision 1.22  2000/12/20 09:11:19  pkot
   Fixes to mbus-2110.c to let it compile (by Pavel Machek)
 
   Revision 1.21  2000/12/19 16:32:28  pkot
@@ -91,7 +94,7 @@ static volatile unsigned char SMSData[256];
 static u8
 GetChecksum( u8 * packet, int len )
 {
-	u8           checksum = 0;
+	u8 checksum = 0;
 	unsigned int i;
 
 	for( i = 0; i < len; i++ ) checksum ^= packet[i]; /* calculate checksum */
@@ -101,8 +104,8 @@ GetChecksum( u8 * packet, int len )
 static GSM_Error
 SendCommand( u8 *buffer, u8 command, u8 length )
 {
-	u8             pkt[256];
-	int            current = 0;
+	u8  pkt[256];
+	int current = 0;
 
 	pkt[current++] = 0x00;               /* Construct the header.      */
 	pkt[current++] = MYID;
@@ -116,12 +119,12 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 	{
 		int i;
 		u8  b;
-		fprintf( stdout, _("PC   : ") );
+		fprintf( stderr, _("PC   : ") );
 		for( i = 0; i < current; i++ ) {
 			b = pkt[i];
-			fprintf( stdout, "[%02X %c]", b, b > 0x20 ? b : '.' );
+			fprintf( stderr, "[%02X %c]", b, b > 0x20 ? b : '.' );
 		}
-		fprintf( stdout, "\n" );
+		fprintf( stderr, "\n" );
 	}
 #endif /* DEBUG */
 	/* Send it out... */
@@ -186,7 +189,7 @@ SMS(GSM_SMSMessage *message, int command)
 	int timeout = 2000000;
 
 	SMSpos = 0;
-	memset(&SMSData[0], 0, 160);
+	memset((void *) &SMSData[0], 0, 160);
 	ACKOK    = false;
 	PacketOK = false;
 	timeout  = 10;
@@ -204,12 +207,12 @@ SMS(GSM_SMSMessage *message, int command)
 		fprintf(stderr, ".");
 		usleep(100000);
 		if(0) {
-			fprintf(stderr, "Impossible timeout?\n");
+			fprintf(stderr, _("Impossible timeout?\n"));
 			return GE_BUSY;
 		}
 	}
 	if (PacketData[3] != 0x37 /* LN_SMS_EVENT */) {
-		fprintf(stderr, "Something is very wrong with GetValue\n");
+		fprintf(stderr, _("Something is very wrong with GetValue\n"));
 		return GE_BUSY; /* FIXME */
 	}
 	return (GE_NONE);
@@ -224,7 +227,7 @@ GetSMSMessage(GSM_SMSMessage *m)
 	dprintf("Have message?\n");
 
 	if (SMSData[0] != 0x0b) {
-		printf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
+		fprintf(stdout, "No sms there? (%x/%d)\n", SMSData[0], SMSpos);
 		return GE_BUSY;
 	}
 	dprintf("Status: " );
@@ -243,7 +246,7 @@ GetSMSMessage(GSM_SMSMessage *m)
 	if (len>160)
 		fprintf(stderr, "Magic not allowed\n");
 	memset(m->MessageText, 0, 161);
-	strncpy(m->MessageText, &SMSData[15], len);
+	strncpy(m->MessageText, (void *) &SMSData[15], len);
 	m->Length = len;
 	dprintf("Text is %s\n", m->MessageText);
 
@@ -283,7 +286,7 @@ GetValue(u8 index, u8 type)
 
 	PacketOK = false;
 	ACKOK    = false;
-	timeout        = 10;
+	timeout  = 10;
 	while(!PacketOK) {
 		fprintf(stderr, "\nRequesting value");
 		usleep(1000000);
@@ -331,21 +334,21 @@ static GSM_Error GetVersionInfo()
 	if (GetValue(0x11, 0x03) == -1)
 		return GE_TIMEOUT;
 
-	strncpy( s, &PacketData[6], sizeof(VersionInfo) );
+	strncpy( s, (void *) &PacketData[6], sizeof(VersionInfo) );
 
-	for( Revision     = s; *s != 0x0A; s++ ) if( !*s ) goto out;
+	for( Revision     = s; *s != 0x0A; s++ ) if( !*s ) return (GE_NONE);
 	*s++ = 0;
-	for( RevisionDate = s; *s != 0x0A; s++ ) if( !*s ) goto out;
+	for( RevisionDate = s; *s != 0x0A; s++ ) if( !*s ) return (GE_NONE);
 	*s++ = 0;
-	for( Model        = s; *s != 0x0A; s++ ) if( !*s ) goto out;
+	for( Model        = s; *s != 0x0A; s++ ) if( !*s ) return (GE_NONE);
 	*s++ = 0;
 	dprintf("Revision %s, Date %s, Model %s\n", Revision, RevisionDate, Model );
 	ModelValid = true;
-out:
 	return (GE_NONE);
 }
 
-static GSM_Error	GetRevision(char *revision)
+static GSM_Error
+GetRevision(char *revision)
 {
 	GSM_Error err = GE_NONE;
 
@@ -397,7 +400,8 @@ static GSM_Error	GetMemoryStatus(GSM_MemoryStatus *Status)
 		Status->Used = 0;
 		Status->Free = 0;
 		break;
-	default: return (GE_NOTIMPLEMENTED);
+	default:
+		return (GE_NOTIMPLEMENTED);
 	}
 	return (GE_NONE);
 }
@@ -527,6 +531,7 @@ static GSM_Error Unimplemented(void)
 {
 	return GE_NOTIMPLEMENTED;
 }
+#define UNIMPLEMENTED (void *) Unimplemented
 
 static void
 Display(u8 b, int shift, char *s)
@@ -654,7 +659,7 @@ SigHandler(int status)
 						} else {
 							/* Copy packet data  */
 							fprintf( stderr, "[data]" );
-							memcpy(PacketData,pkt,Length);
+							memcpy((void *) PacketData,pkt,Length);
 							/* send acknowledge packet to phone */
 							usleep(100000);
 							ack[0] = 0x00;                     /* Construct the header.   */
@@ -743,7 +748,8 @@ bool OpenSerial(void)
 	return (true);
 }
 
-static void SetKey(int c, int up)
+static GSM_Error
+ SetKey(int c, int up)
 {
 	u8 reg[] = { 0x7a /* RPC_UI_KEY_PRESS or RPC_UI_KEY_RELEASE */, 0, 1, 0 /* key code */ };
 	reg[0] += up;
@@ -757,21 +763,22 @@ static void SetKey(int c, int up)
 	}
 	while (!PacketOK)
 		usleep(20000);
+	return GE_NONE;
 }
 
-#define CTRL(a) (a&0x1f)
-#define POWER CTRL('o')
-#define SEND CTRL('t')
-#define END CTRL('s')
-#define CLR CTRL('h')
-#define MENU CTRL('d')
-#define ALPHA CTRL('a')
-#define PLUS CTRL('b')
-#define MINUS CTRL('e')
-#define PREV CTRL('p')
-#define NEXT CTRL('n')
-#define SOFTA CTRL('x')
-#define SOFTB CTRL('q')
+#define XCTRL(a) (a&0x1f)
+#define POWER XCTRL('o')
+#define SEND XCTRL('t')
+#define END XCTRL('s')
+#define CLR XCTRL('h')
+#define MENU XCTRL('d')
+#define ALPHA XCTRL('a')
+#define PLUS XCTRL('b')
+#define MINUS XCTRL('e')
+#define PREV XCTRL('p')
+#define NEXT XCTRL('n')
+#define SOFTA XCTRL('x')
+#define SOFTB XCTRL('q')
 
 static char lastkey;
 
@@ -841,6 +848,24 @@ HandleKey(char c)
 {
 	switch(c) {
 #define X(a, b) case a: PressString(b, 0); break;
+	X('-', "1");
+	X('?', "11");
+	X('!', "111");
+	X(',', "1111");
+	X('.', "11111");
+	X(':', "111111");
+	X('"', "1111111");
+	X('\'', "11111111");
+	X('&', "111111111");
+	X('$', "1111111111");
+/*	X('$', "11111111111"); libra, not in ascii */
+	X('(', "111111111111");
+	X(')', "1111111111111");
+	X('/', "11111111111111");
+	X('%', "111111111111111");
+	X('@', "1111111111111111");
+	X('_', "11111111111111111");
+	X('=', "111111111111111111");
 	X('a', "2");
 	X('b', "22");
 	X('c', "222");
@@ -867,6 +892,7 @@ HandleKey(char c)
 	X('x', "99");
 	X('y', "999");
 	X('z', "9999");
+#undef X
 #define X(a, b) case a: PressString(b, 1); break;
 	X('A', "2");
 	X('B', "22");
@@ -896,13 +922,14 @@ HandleKey(char c)
 	X('Z', "9999");
 #undef X
 	case ' ': PressKey('#', 0); break;
+	case '+': PressKey(ALPHA, 0); PressKey('*', 0); PressKey('*', 0);  PressKey(ALPHA, 0); break;
 	case '*': case '#':
 	case '0' ... '9': PressKey(ALPHA, 0); PressKey(c, 0); PressKey(ALPHA, 0); break;
 	default: PressKey(c, 0);
 	}
 }
 
-static void
+static GSM_Error
 HandleString(char *s)
 {
 	while (*s) {
@@ -911,6 +938,7 @@ HandleString(char *s)
 	}
 	fprintf(stderr,"***end of input");
 	PressKey(lastkey, 1);
+	return GE_NONE;
 }
 
 static void
@@ -920,8 +948,9 @@ Register(void)
 	SendCommand( reg, 0xe9, 5 );
 }
 
-static void
-GrabDisplay(void)
+/* Fixme: implement grabdisplay properly */
+static GSM_Error
+EnableDisplayOutput(void)
 {
 	/* LN_UC_SHARE, LN_UC_SHARE, LN_UC_RELEASE, LN_UC_RELEASE, LN_UC_KEEP */
 	u8  pkt[] = {3, 3, 0, 0, 1};
@@ -929,20 +958,21 @@ GrabDisplay(void)
 
 	PacketOK = false;
 	ACKOK    = false;
-	timeout        = 10;
+	timeout  = 10;
 	while(!PacketOK) {
 		fprintf(stderr, "\nGrabbing display");
 		usleep(1000000);
 		if(!ACKOK) SendCommand(pkt, 0x19, 5);
 		usleep(1000000);
 		if(!--timeout || RequestTerminate)
-			return;
+			return GE_BUSY;
 	}
 	if ((PacketData[3] != 0xcd) ||
 	    (PacketData[2] != 1) || 
 	    (PacketData[4] != 1 /* LN_UC_REQUEST_OK */))
 		fprintf(stderr, "Something is very wrong with GrabDisplay\n");
 	fprintf(stderr, "Display grabbed okay\n");
+	return GE_NONE;
 }
 
 
@@ -1039,7 +1069,7 @@ GSM_Functions MB21_Functions = {
 	GetSMSMessage,
 	DeleteSMSMessage,
 	SendSMSMessage,
-	Unimplemented,
+	UNIMPLEMENTED,
 	GetRFLevel,
 	GetBatteryLevel,
 	GetPowerSource,
@@ -1064,18 +1094,18 @@ GSM_Functions MB21_Functions = {
 	SendDTMF,
 	GetBitmap,
 	SetBitmap,
-	Unimplemented,
-	Unimplemented,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
 	Reset,
 	GetProfile,
 	SetProfile,
 	SendRLPFrame,
-        CancelCall,
-	Unimplemented,
-	Unimplemented,
-	Unimplemented,
-	Unimplemented,
-	Unimplemented,
+	CancelCall,
+	EnableDisplayOutput,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
 	SetKey,
 	HandleString
 };

@@ -24,7 +24,7 @@ INSTALL_DOCS = 	README \
 		packaging-howto \
 		sample.gnokiirc
 
-GNOKII_MAN = gnokii.1
+GNOKII_MAN = man/gnokii.1
 
 all: 
 	@echo

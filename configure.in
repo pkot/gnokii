@@ -242,9 +242,6 @@ AC_TRY_LINK([#include <termios.h>],
          have_termios="yes"
          AC_MSG_RESULT(yes)],
         AC_MSG_RESULT(no))
-#
-# FIXME: Test for these only if we do not have cfsetspeed
-#
 
 if test $have_termios = "no"; then
    AC_MSG_CHECKING(for cfsetispeed and cfsetospeed in termios.h)
@@ -360,8 +357,7 @@ AC_ARG_ENABLE(win32,
    [ win32=""]
 )
 
-AC_ARG_ENABLE(unix98ptys,
-   [  --enable-unix98ptys     enable support for unix98 style ptys ],
+AC_CHECK_FUNC(grantpt,
    [ AC_DEFINE(USE_UNIX98PTYS) ]
 )
 
@@ -424,7 +420,7 @@ AC_SUBST(OWN_GETOPT)
 AC_SUBST(USE_UNIX98PTYS)
 
 AC_OUTPUT(
-   include/config.h
+   include/config.h.in
    Makefile.global
    po/Makefile.in
    packaging/Debian/changelog

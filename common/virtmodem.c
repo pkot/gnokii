@@ -16,7 +16,10 @@
   from/to the GSM handset and the modem data/fax stream.
 
   $Log$
-  Revision 1.3  2000-12-27 10:54:14  pkot
+  Revision 1.4  2001-01-02 09:09:09  pkot
+  Misc fixes and updates.
+
+  Revision 1.3  2000/12/27 10:54:14  pkot
   Added Unix98 PTYs support (Michael Mráka).
 
   
@@ -40,6 +43,26 @@
 #include <pthread.h>
 #include <unistd.h>
 
+/* This is to avoid warnings for grantpt, unlockpt and ptsname.
+   On my Slackware with glibc 2.2, libc contains these functions,
+   but they are declared in stdlib.h within #ifdef __USE_XOPEN, which
+   is not ebabled by default. Disable it later if it was disabled
+   (just in case). */
+#ifdef USE_UNIX98PTYS
+# define __USE_XOPEN_DEF __USE_XOPEN
+# ifndef __USE_XOPEN
+#  define __USE_XOPEN 1
+# endif
+#endif
+
+#include <stdlib.h>
+
+#ifdef USE_UNIX98PTYS
+# ifndef __USE_XOPEN_DEF
+#  undef __USE_XOPEN
+# endif
+# undef __USE_XOPEN_DEF
+#endif
 
 #include "misc.h"
 #include "gsm-api.h"
@@ -84,7 +107,9 @@ bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 	}
 
 	if (GSMInit) {
-	  fprintf (stdout , "Initialising GSM\n");
+#ifdef DEBUG
+	  fprintf (stderr , "Initialising GSM\n");
+#endif /* DEBUG */
 	  if ((VM_GSMInitialise(model, port, initlength, connection) != GE_NONE)) {
 		fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
 		return (false);
@@ -208,7 +233,9 @@ int		VM_PtySetup(char *bindir)
 		return (0);
 	}
 
+#ifdef DEBUG
 	fprintf (stderr, _("Slave pty is %s, calling %s to create /dev/gnokii.\n"), slave_name, mgnokiidev);
+#endif /* DEBUG */
 
 		/* Create command line, something line ./mkgnokiidev ttyp0 */
 	sprintf(cmdline, "%s %s", mgnokiidev, slave_name);
@@ -301,7 +328,7 @@ int	VM_GetMasterPty(char **name) {
 			return(-1);
 		}
 	}
-#else
+#else /* USE_UNIX98PTYS */
    int i = 0 , j = 0;
    /* default to returning error */
    int master = -1;

@@ -15,21 +15,6 @@
 		--prefix=DIR
 			Install path prefix. Default /usr/local/
 
-		--with-model=MODEL
-			The mobil phone model (This is now only used as a
-			default if ~/.gnokiirc cannot be read.):
-
-				6110	- for Nokia 6110/5110 
-				3810	- for Nokia 3810 (default)	
-		
-		--with-port=PORT
-			Serial port for communication:
-
-				/dev/ttyS0	Linux "COM1" (default)
-				/dev/ttyS1	Linux "COM2"
-				/dev/ttyd0	FreeBSD
-				COM1		MS-Window COM1
-
 		--without-x
 			Compile without GTK (Xwin) programs
 		
@@ -40,7 +25,7 @@
 			Set if you want to enable all security features
 
 		--enable-debug
-			Set if you want debug code. in gnokii
+			Set if you want debug code in gnokii
 
 		--help		
 			show all options
@@ -49,9 +34,7 @@
 	Good default (example):
 
 		./configure --prefix=/usr \
-			    --enable-gettext \
-			    --with-port=/dev/ttyS1 \
-			    --with-model=6110 
+			    --enable-gettext
 
 2/
 	compilation:

@@ -123,7 +123,7 @@ send the \fIlogofile\fR to \fIdestination\fR as operator or CLI logo.
 .BR "--setlogo \fIdealer\fP [\fIdealer_startup_text\fP]"
 set caller, startup or operator logo.
 .TP
-.BR "--getlogo \fIlogofile\fI {\fIcaller\fP|\fIop\fP|\fIstartup\fP} [\fIcaller_group_number\fP]"
+.BR "--getlogo \fIlogofile\fP {\fIcaller\fP|\fIop\fP|\fIstartup\fP} [\fIcaller_group_number\fP]"
 get caller, startup or operator logo.
 
 .SS RINGTONES
@@ -175,15 +175,21 @@ show if a security code is needed.
 Various error messages are printed to standard error.  The exit code
 is 0 for correct functioning.  Errors which appear to be caused by
 invalid or abused command line parameters cause an exit code of 2, and
-other errors cause an exit code of 1. (?)
+other errors cause an exit code of 1.
 
 .SH BUGS
 .PP
 We write quality software here ;)
 
-.SH AUTHORS
-Hugh Blemings <hugh@linuxcare.com> and Pavel Janik ml. <Pavel.Janik@linux.cz>
+.SH AUTHOR
+Hugh Blemings <hugh@linuxcare.com> and Pavel Janik ml. <Pavel.Janik@suse.cz>
 
 Manual page written by Dag Wieers <dag@mind.be> and Pawel Kot <pkot@linuxnews.pl>
 
 See also Docs/CREDITS from Gnokii sources.
+
+.SH COPYING
+This program is distributed under the GNU Public License.
+
+.SH SEE ALSO
+gnokiid, xgnokii, xlogos

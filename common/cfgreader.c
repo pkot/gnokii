@@ -15,7 +15,10 @@
   Modified from code by Tim Potter.
 
   $Log$
-  Revision 1.10  2000-12-19 16:18:15  pkot
+  Revision 1.11  2001-01-02 09:09:07  pkot
+  Misc fixes and updates.
+
+  Revision 1.10  2000/12/19 16:18:15  pkot
   configure script updates and added shared function for configfile reading
 
 
@@ -114,7 +117,7 @@ struct CFG_Header *CFG_ReadFile(char *filename)
                         cfg_info = heading;
 
 #ifdef DEBUG
-                        printf("Added new section %s\n", heading->section);
+                        fprintf(stderr, "Added new section %s\n", heading->section);
 #endif
                         /* Go on to next line */
 
@@ -165,14 +168,14 @@ struct CFG_Header *CFG_ReadFile(char *filename)
                         cfg_info->entries = entry;
 
 #ifdef DEBUG
-                        printf("Adding key/value %s/%s\n", entry->key, entry->value);
+                        fprintf(stderr, "Adding key/value %s/%s\n", entry->key, entry->value);
 #endif
                         /* Go on to next line */
                         continue;
                 }
 
                         /* Line not part of any heading */
-                printf("Orphaned line: %s\n", line);
+                fprintf(stderr, "Orphaned line: %s\n", line);
         }
 
         /* Return pointer to configuration information */

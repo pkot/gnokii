@@ -2,10 +2,10 @@
 
 = Documentation:
   - update spec file for instalation of manual page
-  - write some docs about gnokiid.
+  - write some docs about gnokiid -- beeing written
 
 - --disable-debug should really disable debug :-)
-- FreeBSD build and work
+- FreeBSD build and work - is it done already?
 - 6160 support (is this useful: http://www.venia.net/tdma/? - yes it was -HAB)
   Please email Hugh before delving into x160 support.
 - 7110 support (fbus and/or plain AT commands)
@@ -16,7 +16,7 @@
 - getsecuritycode patch (I have it in ~/ so if there is anyone interested... We
   must include it in ---with-security).
 - international characters in SMS messages and phonebooks - see the mailing
-  list messages in archive
+  list messages in archive -- almost done for SMS
 - Business card sending via SMS (I do not know if it is already implemented or
   not)
 - if GNU getopt is not available in the system, use compile getopt from
@@ -30,17 +30,11 @@
 - how can we read the name of the uploaded tune? Can we do that?
 - SMS errors (Gary reported them on Fri, 25 Feb 2000 15:55:58 -0500 (EST))
 - storing of SMS messages into INBOX (Pavel already sent the dump of such
-  message)
-- write a function which periodically scans for new SMS messages (an
-  argument is the interval between checks in seconds)
+  message) -- done, not applied
 - Marcin's setprofile patch
-- write better interface for --writecalendarnote - it only send the note
-  "Big day" now.
 - --getdisplaystatus and Alarm sign? Is there any indication of it?
 - gnokii --setlogo logofile [caller group number] [group name] is not
   working correctly as is
-- gnokii --getlogo logofile {caller|op|startup} [caller group number] is not
-  working - it does not write the file...
 - --netmonitor field/devel should not report the menu (which contains
   useless data)... Try it.
 - integrate Marcin's patches

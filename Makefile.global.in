@@ -53,6 +53,8 @@ XPM_LIBS       = @XPM_LIBS@
 XPM_CFLAGS     = @XPM_CFLAGS@
 OWN_GETOPT     = @OWN_GETOPT@
 
+USE_NLS        = @USE_NLS@
+
 #
 # Global include directory 
 #	($TOPDIR is defined in Makefile)
