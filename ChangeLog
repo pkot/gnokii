@@ -3,6 +3,7 @@
  * code cleanups
     o change error paths in getactiveprofile/setactiveprofile
                                                          (Pawel Kot)
+    o FreeBSD 5.x compilation fix                   (BORBELY Zoltan)
  * statemachine changes
     o add function sm_block_ack(), needed by nk3110  (Osma Suominen)
     o remove hack that made it possible to call sm_block*

@@ -45,6 +45,13 @@
 #  define HAVE_MSGHDR_MSG_CONTROL 1
 #endif
 
+/* same for FreeBSD */
+#ifdef	__FreeBSD__
+#  include <sys/types.h>
+#  undef	__BSD_VISIBLE
+#  define	__BSD_VISIBLE	1
+#endif
+
 /* This is the correct way to include stdlib with _XOPEN_SOURCE = 500 defined.
  * Needed for clean unlockpt() declaration.
  * msghdr structure in Solaris depends on _XOPEN_SOURCE = 500 too. - bozo

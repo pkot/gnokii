@@ -39,6 +39,13 @@
 #endif
 
 /* See common/data/virtmodem.c for explanation */
+#ifdef	__FreeBSD__
+#  include <sys/types.h>
+#  undef	__BSD_VISIBLE
+#  define	__BSD_VISIBLE	1
+#endif
+
+/* See common/data/virtmodem.c for explanation */
 #define _XOPEN_SOURCE 500
 
 #include "misc.h"
