@@ -26,7 +26,9 @@ GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char mess
 void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message, u16 messagesize);
 void SM_Reset(GSM_Statemachine *state);
 GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype);
+GSM_Error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t);
 GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor);
+GSM_Error SM_BlockNoRetryTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t);
 GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor);
 GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm);
 void SM_DumpMessage(int messagetype, unsigned char *message, int length);

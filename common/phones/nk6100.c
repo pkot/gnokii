@@ -1037,7 +1037,7 @@ static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	memcpy(req + 6, data->RawData->Data + 4, length);
 
 	if (SM_SendMessage(state, 6 + length, 0x02, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetry(state, data, 0x02);
+	return SM_BlockNoRetryTimeout(state, data, 0x02, 100);
 }
 
 static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
@@ -3180,12 +3180,7 @@ static GSM_Error CallDivert(GSM_Data *data, GSM_Statemachine *state)
 //		req[6] = 0x02;
 
 	if (SM_SendMessage(state, length, 0x06, req) != GE_NONE) return GE_NOTREADY;
-	/*
-	 * FIXME: the timeout inside SM_Block() is too small for it. We should
-	 * try something better.
-	 */
-	sleep(5);
-	return SM_Block(state, data, 0x06);
+	return SM_BlockTimeout(state, data, 0x06, 100);
 }
 
 static GSM_Error IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data)

@@ -183,14 +183,14 @@ GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char mess
 
 /* This function is for convinience only */
 /* It is called after SM_SendMessage and blocks until a response is received */
-GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
+GSM_Error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t)
 {
 	int retry, timeout;
 	GSM_State s;
 	GSM_Error err;
 
 	for (retry = 0; retry < 3; retry++) {
-		timeout = 30;
+		timeout = t;
 		err = SM_WaitFor(state, data, waitfor);
 		if (err != GE_NONE) return err;
 
@@ -209,15 +209,20 @@ GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 	return GE_TIMEOUT;
 }
 
+GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
+{
+	return SM_BlockTimeout(state, data, waitfor, 30);
+}
+
 /* This function is equal to SM_Block except it does not retry the message */
-GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
+GSM_Error SM_BlockNoRetryTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t)
 {
 	int retry, timeout;
 	GSM_State s;
 	GSM_Error err;
 
 	for (retry = 0; retry < 3; retry++) {
-		timeout = 50;
+		timeout = t;
 		err = SM_WaitFor(state, data, waitfor);
 		if (err != GE_NONE) return err;
 
@@ -230,6 +235,11 @@ GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 	}
 
 	return GE_TIMEOUT;
+}
+
+GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
+{
+	return SM_BlockNoRetryTimeout(state, data, waitfor, 50);
 }
 
 /* Just to do things neatly */
