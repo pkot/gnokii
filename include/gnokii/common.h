@@ -58,7 +58,7 @@ typedef enum {
   GMT_MT, /* combined ME and SIM phonebook */
   GMT_TA, /* for compatibility only: TA=computer memory */
   GMT_CB, /* Currently selected memory */
-  GMT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions. */
+  GMT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions). */
 } GSM_MemoryType;
 
 /* Power source types */
@@ -788,5 +788,6 @@ extern unsigned char EncodeWithDefaultAlphabet(unsigned char);
 extern unsigned char DecodeWithDefaultAlphabet(unsigned char);
 extern wchar_t EncodeWithUnicodeAlphabet(unsigned char);
 extern unsigned char DecodeWithUnicodeAlphabet(wchar_t);
+extern GSM_MemoryType StrToMemoryType (const char *s);
 
 #endif	/* __gsm_common_h */

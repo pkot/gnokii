@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.2  2001-02-03 23:56:15  chris
+  Revision 1.3  2001-02-28 21:26:51  machek
+  Added StrToMemoryType utility function
+
+  Revision 1.2  2001/02/03 23:56:15  chris
   Start of work on irda support (now we just need fbus-irda.c!)
   Proper unicode support in 7110 code (from pkot)
 
@@ -132,4 +135,21 @@ void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len)
 GSM_Error Unimplemented(void)
 {
 	return GE_NOTIMPLEMENTED;
+}
+
+GSM_MemoryType StrToMemoryType(const char *s)
+{
+#define X(a) if (!strcmp(s, #a)) return GMT_##a;
+	X(ME);
+	X(SM);
+	X(FD);
+	X(ON);
+	X(EN);
+	X(DC);
+	X(RC);
+	X(MC);
+	X(LD);
+	X(MT);
+	return GMT_XX;
+#undef X
 }
