@@ -69,12 +69,20 @@ struct termios serial_termios;
 int serial_open(__const char *__file, int __oflag) {
 
   int __fd;
+  int retcode;
 
   __fd = open(__file, __oflag);
+  if (__fd == -1) {
+    perror("Gnokii serial_open: open");
+    return (-1);
+  }
 
-  if (__fd >= 0)
-    tcgetattr(__fd, &serial_termios);
-
+  retcode=tcgetattr(__fd, &serial_termios);
+  if(retcode==-1) {
+    perror("Gnokii serial_open:tcgetattr");
+    return(-1);
+  }
+  
   return __fd;
 }
 
@@ -93,22 +101,35 @@ int serial_close(int __fd) {
 int serial_opendevice(__const char *__file, int __with_odd_parity) {
 
   int fd;
+  int retcode;
   struct termios tp;
 
   /* Open device */
 
   fd = serial_open(__file, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
-  if (fd < 0)
+  if (fd < 0) 
     return fd;
 
   /* Allow process/thread to receive SIGIO */
 
-  fcntl(fd, F_SETOWN, getpid());
+  retcode=fcntl(fd, F_SETOWN, getpid());
+  if (retcode == -1){
+    perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
+    return(-1);
+  }
 
   /* Make filedescriptor asynchronous. */
 
-  fcntl(fd, F_SETFL, FASYNC);
+  retcode=fcntl(fd, F_SETFL, FASYNC);
+  if (retcode == -1){
+    perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
+    return(-1);
+  }
+
+  /* Initialise the port settings */
+
+  memcpy(&tp, &serial_termios, sizeof(struct termios));
 
   /* Set port settings for canonical input processing */
 
@@ -125,8 +146,17 @@ int serial_opendevice(__const char *__file, int __with_odd_parity) {
   tp.c_cc[VMIN] = 1;
   tp.c_cc[VTIME] = 0;
 
-  tcflush(fd, TCIFLUSH);
-  tcsetattr(fd, TCSANOW, &tp);
+  retcode=tcflush(fd, TCIFLUSH);
+  if (retcode == -1) {
+    perror("Gnokii serial_opendevice: tcflush");
+    return(-1);
+  }
+
+  retcode=tcsetattr(fd, TCSANOW, &tp);
+  if (retcode == -1){
+    perror("Gnokii serial_opendevice: tcsetattr");
+    return(-1);
+  }
 
   return fd;
 }
