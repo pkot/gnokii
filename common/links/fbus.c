@@ -306,9 +306,9 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 					}
 
 					memcpy(m->MessageBuffer + m->MessageLength, i->MessageBuffer,
-					       i->FrameLength - 2);/* - (i->FrameLength % 2)); */
+					       i->FrameLength - 2);
 
-					m->MessageLength += i->FrameLength - 2;/* - (i->FrameLength % 2); */
+					m->MessageLength += i->FrameLength - 2;
 
 					m->FramesToGo--;
 
