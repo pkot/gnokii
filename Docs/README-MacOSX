@@ -59,7 +59,7 @@ package (= the installer) nothing is needed.
 2. copy the contents of /sw/share/aclocal to /usr/share/aclocal. You need
 to be root to do this
 
-3. call Ôcd <gnokii_dir>Ô
+3. call 'cd <gnokii_dir>'
 
 4. call 'sh autogen.sh --disable-shared --disable-nls'
 
