@@ -228,7 +228,7 @@ GSM_Error EncodeByLayout(GSM_Data *data, SMSMessage_Layout *clayout, unsigned in
 	GSM_API_SMS *SMS = data->SMS;
 	GSM_SMSMessage *rawsms = data->RawSMS;
 	GSM_Error error = GE_NONE;
-	int i, clen = rawsms->UserDataLength, mm = 0;
+	int clen = rawsms->UserDataLength;
 	char *message = data->RawData->Data;
 
 	/* We actually scribble to our layout, and we do not want to propagate that uglyness elsewhere */

@@ -251,7 +251,7 @@ int GSM_GetScale(int number)
    Function returns number of packed notes and changes maxlength to
    number of used chars in "package" */
 
-API u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
+API u8 GSM_PackRingtone(GSM_Ringtone *ringtone, unsigned char *package, int *maxlength)
 {
 	int StartBit=0;
 	int i;
@@ -412,7 +412,7 @@ int OctetUnAlign(int CurrentBit)
 
 /* TODO: better checking, if contents of ringtone is OK */
 
-API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlength)
+API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, unsigned char *package, int maxlength)
 {
 	int StartBit = 0;
 	int spec, duration, scale;
@@ -578,7 +578,7 @@ GSM_Error GSM_ReadRingtoneFromSMS(GSM_API_SMS *message, GSM_Ringtone *ringtone)
 	} else return GE_SUBFORMATNOTSUPPORTED;
 }
 
-int GSM_EncodeSMSRingtone(char *message, GSM_Ringtone *ringtone)
+int GSM_EncodeSMSRingtone(unsigned char *message, GSM_Ringtone *ringtone)
 {
 	int j = GSM_MAX_8BIT_SMS_LENGTH;
 	GSM_PackRingtone(ringtone, message, &j);
@@ -586,16 +586,16 @@ int GSM_EncodeSMSRingtone(char *message, GSM_Ringtone *ringtone)
 }
 
 /* Returns message length */
-int GSM_EncodeSMSiMelody(char *imelody, char *message)
+int GSM_EncodeSMSiMelody(unsigned char *imelody, unsigned char *message)
 {
-	unsigned short size, current = 0;
+	unsigned int current = 0;
 
 	dprintf("EMS iMelody\n");
-	message[current++] = strlen(imelody)+3;
+	message[current++] = strlen(imelody) + 3;
 	message[current++] = 0x0c; 	/* iMelody code */
-	message[current++] = strlen(imelody)+1;
+	message[current++] = strlen(imelody) + 1;
 	message[current++] = 0;		      /* Position in text this melody is at */
-	strcpy(message+current, imelody);
+	strcpy(message + current, imelody);
 
 	return (current + strlen(imelody));
 }
