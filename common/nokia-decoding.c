@@ -46,17 +46,17 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 
 	for (i = 0; i < blocks; i++) {
 
+		dprintf("Blockstart: 0x%02x\n", blockstart[0]);  /* FIXME ? */
+
 		if (blockstart[0] != GN_PHONEBOOK_ENTRY_Logo &&
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_Ringtone &&
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_LogoSwitch &&
-		    blockstart[0] != GN_PHONEBOOK_ENTRY_Group) {
+		    blockstart[0] != GN_PHONEBOOK_ENTRY_Group &&
+		    blockstart[0] != GN_PHONEBOOK_ENTRY_Pointer) {
 			subentry = &data->phonebook_entry->subentries[subblock_count];
 			if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
-		} else {
-			if (!data->bitmap) return GN_ERR_INTERNALERROR;
 		}
  
-		dprintf("Blockstart: %i\n", blockstart[0]);  /* FIXME ? */
 
 		switch ((gn_phonebook_entry_type)blockstart[0]) {
 		case GN_PHONEBOOK_ENTRY_Pointer:  /* Pointer */

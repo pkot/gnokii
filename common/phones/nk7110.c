@@ -616,10 +616,6 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 	case 0x08:  /* Read Memory response */
 		memtype = message[11];
 		location = (message[12] << 8) + message[13];
-		if (ll_memtype != memtype || ll_location != location) {
-			dprintf("skipping entry: ll_memtype: %d, memtype: %d, ll_location: %d, location: %d", ll_memtype, memtype, ll_location, location);
-			return GN_ERR_UNSOLICITED;
-		}
 		if (data->phonebook_entry) {
 			data->phonebook_entry->empty = true;
 			data->phonebook_entry->caller_group = 5; /* no group */
@@ -647,6 +643,10 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 			default:
 				return GN_ERR_NOTIMPLEMENTED;
 			}
+		}
+		if (ll_memtype != memtype || ll_location != location) {
+			dprintf("skipping entry: ll_memtype: %d, memtype: %d, ll_location: %d, location: %d\n", ll_memtype, memtype, ll_location, location);
+			return GN_ERR_UNSOLICITED;
 		}
 		dprintf("Received phonebook info\n");
 		blocks     = message[17];
