@@ -32,6 +32,7 @@
  * 6510 series updates
     o don't require to have any subentries filled in when writing
       phonebook entry                                   (Pawel Kot)
+    o fix uncorrect call of PackBlock                (Reiner Steib)
  * 7110 series updates
     o don't require to have any subentries filled in when writing
       phonebook entry                                   (Pawel Kot)
