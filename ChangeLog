@@ -35,6 +35,7 @@
     o support for the new SMS subsystem                   (Pawel Kot)
  * 6510 series updates
     o update to work with new SMS subsystem            (Markus Plail)
+    o capitalization caused compilation problem      (BORBELY Zoltan)
  * Added MAINTAINERS file                                 (Pawel Kot)
  * Follow the convention: struct fields begin with the capital
    letter                                                 (Pawel Kot)

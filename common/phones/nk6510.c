@@ -817,13 +817,13 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 		if ((error = P6510_GetSMSFolderStatus(data, state)) != GE_NONE) return error;
 	}
 
-	if (data->SMSFolder->number + 2 < data->RawSMS->Number) {
+	if (data->SMSFolder->Number + 2 < data->RawSMS->Number) {
 		if (data->RawSMS->Number > MAX_SMS_MESSAGES)
 			return GE_INVALIDSMSLOCATION;
 		else
 			return GE_EMPTYSMSLOCATION;
 	} else {
-		data->RawSMS->Number = data->SMSFolder->locations[data->RawSMS->Number - 1];
+		data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
 	}
 
 	error = P6510_GetSMSMessageStatus(data, state);
