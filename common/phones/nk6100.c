@@ -52,6 +52,7 @@
 
 /* Some globals */
 
+/*
 static const SMSMessage_Layout nk6100_deliver = {
 	true,
 	 4, true, true,
@@ -95,8 +96,7 @@ static const SMSMessage_Layout nk6100_picture = {
 	-1, -1,
 	-1, true
 };
-
-static SMSMessage_PhoneLayout nk6100_layout;
+*/
 
 static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 /* FIXME: we should get rid on it */
@@ -104,7 +104,7 @@ static GSM_Statemachine *State = NULL;
 static void (*OnCellBroadcast)(GSM_CBMessage *Message) = NULL;
 static void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo) = NULL;
 static void (*RLP_RXCallback)(RLP_F96Frame *Frame) = NULL;
-static GSM_Error (*OnSMS)(GSM_SMSMessage *Message) = NULL;
+static GSM_Error (*OnSMS)(GSM_API_SMS *Message) = NULL;
 static bool sms_notification_in_progress = false;
 static bool sms_notification_lost = false;
 static NK6100_Keytable Keytable[256];
@@ -463,6 +463,7 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	memcpy(&(state->Phone), &phone_nokia_6100, sizeof(GSM_Phone));
 
 	/* SMS Layout */
+	/*
 	nk6100_layout.Type = 7;
 	nk6100_layout.SendHeader = 0;
 	nk6100_layout.ReadHeader = 4;
@@ -471,6 +472,7 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	nk6100_layout.DeliveryReport = nk6100_delivery_report;
 	nk6100_layout.Picture = nk6100_picture;
 	layout = nk6100_layout;
+	*/
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
@@ -678,7 +680,7 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		return GetCallerGroupData(data, state);
 
 	case GSM_None:
-	case GSM_PictureImage:
+	case GSM_PictureMessage:
 		return GE_NOTSUPPORTED;
 	default:
 		return GE_INTERNALERROR;
@@ -1136,7 +1138,7 @@ static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
 {
 	GSM_Data data;
-	GSM_SMSMessage sms;
+	GSM_API_SMS sms;
 	GSM_Error error;
 
 	if (!OnSMS) {
@@ -1157,7 +1159,7 @@ static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
 	sms.MemoryType = GMT_SM;
 	sms.Number = pos;
 	GSM_DataClear(&data);
-	data.SMSMessage = &sms;
+	data.SMS = &sms;
 
 	dprintf("trying to fetch sms#%hd\n", sms.Number);
 	if ((error = GetSMS(&data, state)) != GE_NONE) {
@@ -1370,9 +1372,9 @@ static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x07, 0x02 /* Unknown */, 0x00 /* Location */, 0x01, 0x64 };
 
-	if (!data->SMSMessage) return GE_INTERNALERROR;
+	if (!data->RawSMS) return GE_INTERNALERROR;
 
-	req[5] = data->SMSMessage->Number;
+	req[5] = data->RawSMS->Number;
 	if (SM_SendMessage(state, 8, 0x02, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
@@ -1388,9 +1390,9 @@ static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	length = data->RawData->Length - 4;
 	if (8 + length > sizeof(req)) return GE_SMSWRONGFORMAT;
 
-	if (data->SMSMessage->Status == SMS_Unsent)
+	if (data->RawSMS->Status == SMS_Unsent)
 		req[4] |= 0x02;
-	req[6] = data->SMSMessage->Number;
+	req[6] = data->RawSMS->Number;
 	memcpy(req + 8, data->RawData->Data + 4, length);
 
 	if (SM_SendMessage(state, 8 + length, 0x14, req) != GE_NONE) return GE_NOTREADY;
@@ -1401,8 +1403,8 @@ static GSM_Error DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x0a, 0x02, 0x00 /* Location */ };
 
-	if (!data->SMSMessage) return GE_INTERNALERROR;
-	req[5] = data->SMSMessage->Number;
+	if (!data->SMS) return GE_INTERNALERROR;
+	req[5] = data->SMS->Number;
 	if (SM_SendMessage(state, 6, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
@@ -1415,7 +1417,7 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 	/* save sms succeeded */
 	case 0x05:
 		dprintf("Message stored at %d\n", message[5]);
-		if (data->SMSMessage) data->SMSMessage->Number = message[5];
+		if (data->RawSMS) data->RawSMS->Number = message[5];
 		break;
 
 	/* save sms failed */
@@ -1439,20 +1441,43 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 			dprintf("[%02x(%d)]", message[i], i);
 		dprintf("\n");
 
-		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
+		if (!data->RawSMS) return GE_INTERNALERROR;
 
-		/* Short Message status */
-		data->SMSMessage->Status = message[4];
-		/* Short Message number */
-		data->SMSMessage->Number = message[6];
+		memset(data->RawSMS, 0, sizeof(GSM_SMSMessage));
 
-		/* Short Message status */
-		if (!data->RawData) return GE_INTERNALERROR;
+#define	getdata(d,dr)	(message[(data->RawSMS->Type == 0) ? (d) : (dr)])
+		switch (message[7]) {
+		case 0x00: data->RawSMS->Type	= 0; break;
+		case 0x01: data->RawSMS->Type	= 1; break;
+		case 0x02: data->RawSMS->Type	= 2; break;
+		default: return GE_UNHANDLEDFRAME;
+		}
+		data->RawSMS->Number		= message[6];
+		data->RawSMS->MemoryType	= GMT_SM;
+		data->RawSMS->Status		= message[4];
 
-		/* Skip the frame header */
-		data->RawData->Length = length - nk6100_layout.ReadHeader;
-		data->RawData->Data = calloc(data->RawData->Length, 1);
-		memcpy(data->RawData->Data, message + nk6100_layout.ReadHeader, data->RawData->Length);
+		data->RawSMS->MoreMessages	= 0;
+		if (data->RawSMS->Type == 0x01)
+			data->RawSMS->ReplyViaSameSMSC	= message[11];
+		data->RawSMS->RejectDuplicates	= 0;
+		data->RawSMS->Report		= 0;
+
+		data->RawSMS->Reference		= 0;
+		data->RawSMS->PID		= 0;
+		data->RawSMS->ReportStatus	= 0;
+
+		memcpy(data->RawSMS->SMSCTime, &getdata(36, 35), 7);
+		if (data->RawSMS->Type == 0x01)
+			memcpy(data->RawSMS->Time, message + 42, 7);
+		memcpy(data->RawSMS->MessageCenter, message + 8, 12);
+		memcpy(data->RawSMS->RemoteNumber, &getdata(24, 23), 12);
+
+		data->RawSMS->DCS		= getdata(22, 21);
+		data->RawSMS->Length		= getdata(23, 22);
+		data->RawSMS->UDHIndicator	= message[20];
+		memcpy(data->RawSMS->UserData, &getdata(43, 22), data->RawSMS->Length);
+
+		data->RawSMS->ValidityIndicator	= 0;
 
 		break;
 
@@ -1676,7 +1701,7 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		return SM_Block(state, data, 0x03);
 
 	case GSM_None:
-	case GSM_PictureImage:
+	case GSM_PictureMessage:
 		return GE_NOTSUPPORTED;
 	default:
 		return GE_INTERNALERROR;
