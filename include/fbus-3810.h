@@ -134,10 +134,9 @@ void    FB38_SigHandler(int status);
 void    FB38_ThreadLoop(void);
 
 void    FB38_RX_StateMachine(char rx_byte);
-enum FB38_RX_States FB38_RX_DispatchMessage(void);
-enum FB38_RX_States FB38_RX_HandleRLPMessage(void);
+enum    FB38_RX_States FB38_RX_DispatchMessage(void);
+enum    FB38_RX_States FB38_RX_HandleRLPMessage(void);
 void    FB38_RX_DisplayMessage(void);
-
 void    FB38_RX_Handle0x0b_IncomingCall(void);
 void    FB38_RX_Handle0x4b_Status(void);
 void    FB38_RX_Handle0x10_EndOfOutgoingCall(void);
@@ -145,8 +144,9 @@ void    FB38_RX_Handle0x11_EndOfIncomingCall(void);
 void    FB38_RX_Handle0x12_EndOfOutgoingCall(void);
 void    FB38_RX_Handle0x27_SMSMessageText(void);
 void    FB38_RX_Handle0x30_IncomingSMSNotification(void);
+void	FB38_RX_Handle0x32_SMSDelivered(void);
 void    FB38_RX_Handle0x0d_IncomingCallAnswered(void);
-void    FB38_RX_Handle0x0e_OutgoingCallAnswered(void);
+void    FB38_RX_Handle0x0e_CallEstablished(void);
 void    FB38_RX_Handle0x2c_SMSHeader(void);
 void    FB38_RX_Handle0x41_SMSMessageCenterData(void);
 void    FB38_RX_Handle0x46_MemoryLocationData(void);

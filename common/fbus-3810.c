@@ -124,6 +124,8 @@ GSM_Information         FB38_Information = {
         0                       /* Max alarms = 0 */
 };
 
+
+
     /* Local variables */
 enum FB38_RX_States     RX_State;
 int                     MessageLength;
@@ -202,6 +204,13 @@ bool                    SMSHeaderAckReceived;       /* Set when header ack'd */
 
 GSM_MessageCenter       *CurrentMessageCenter;
 GSM_Error               CurrentMessageCenterError;
+
+GSM_SMSStatus			*CurrentSMSStatus;
+GSM_Error				CurrentSMSStatusError;
+
+
+	/* Error variable for use when sending DTMF */
+GSM_Error				CurrentDTMFError;
 
     /* The following functions are made visible to gsm-api.c and friends. */
 
@@ -296,7 +305,7 @@ GSM_Error   FB38_GetMemoryLocation(GSM_PhonebookEntry *entry)
     CurrentPhonebookError = GE_BUSY;
 
     if (entry->MemoryType == GMT_ME) {
-        memory_area = 1;
+        memory_area = 1;	/* 3 in 8110, 1 is GMT_CB */
     }
     else {
         if (entry->MemoryType == GMT_SM) {
@@ -343,7 +352,7 @@ GSM_Error   FB38_WritePhonebookLocation(GSM_PhonebookEntry *entry)
         /* Make sure neither name or number is too long.  We assume (as
            has been reported that memory_area 1 is internal, 2 is the SIM */
     if (entry->MemoryType == GMT_ME) {
-        memory_area = 1;
+        memory_area = 1;	/* 3 in 8110, 1 is GMT_CB */
     }
     else {
         if (entry->MemoryType == GMT_SM) {
@@ -408,7 +417,7 @@ GSM_Error   FB38_GetSMSMessage(GSM_SMSMessage *message)
     int     memory_area;
 
     if (message->MemoryType == GMT_ME) {
-        memory_area = 1;
+        memory_area = 1;	/* 3 in 8110, 1 is GMT_CB */
     }
     else {
         if (message->MemoryType == GMT_SM) {
@@ -453,7 +462,7 @@ GSM_Error   FB38_DeleteSMSMessage(GSM_SMSMessage *message)
     int     memory_area;
 
     if (message->MemoryType == GMT_ME) {
-        memory_area = 1;
+        memory_area = 1;	/* 3 in 8110, 1 is GMT_CB */
     }
     else {
         if (message->MemoryType == GMT_SM) {
@@ -542,6 +551,7 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
         DisableKeepalive = true;
 
             /* Send header */
+			/* Use FB38_TX_Send0x24_StoreSMSHeader() if you want save message to phone */
         FB38_TX_Send0x23_SendSMSHeader(SMS->MessageCenter.Number, SMS->Destination, text_length);
 
         timeout = 20;   /* 2 seconds for command to complete */
@@ -802,8 +812,10 @@ GSM_Error   FB38_GetModel(char *model)
 
 GSM_Error   FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter)
 {
-    int timeout=10;
-
+    int 			timeout = 10;
+	GSM_SMSStatus 	tmp;
+ 
+	CurrentSMSStatus = &tmp;
     CurrentMessageCenter = MessageCenter;
     CurrentMessageCenterError = GE_BUSY;
 
@@ -839,18 +851,89 @@ bool		FB38_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 	return (FB38_TX_SendRLPFrame(frame, out_dtx));
 }
 
-    /* Our "Not implemented" functions */
 GSM_Error   FB38_SetSMSCenter(GSM_MessageCenter *MessageCenter)
 {
-    return (GE_NOTIMPLEMENTED);
-}
+	u8 msg[64];
+	int timeout;
+	int len = 0;
 
-GSM_Error   FB38_GetMemoryStatus(GSM_MemoryStatus *Status)
-{
-    return (GE_NOTIMPLEMENTED);
+	CurrentMessageCenter = MessageCenter;
+	CurrentMessageCenterError = GE_BUSY;
+
+	/* Mask defines which fields are set.
+	   Bit	Field
+	   7	??
+	   6	SRR	Status-Report-Request
+	   5	RP	Reply-Path
+	   4	SCA	Service-Centre-Address
+	   3	UA	Unknown-Address
+	   2	VP	Validity-Period
+	   1	U	Unknown
+	   0	PID	Protocol-Identifier
+	*/
+	msg[len++] = 0x7f;			/* Mask */
+	msg[len++] = MessageCenter->Format;	/* PID */
+	msg[len++] = 0x00;			/* U */
+	msg[len++] = MessageCenter->Validity;	/* VP */
+	msg[len++] = 0x01;			/* RP (1 = no, 2 = yes) */
+	msg[len++] = 0x02;			/* SRR (1 = no, 2 = yes) */
+
+	msg[len++] = 0x00;			/* Length of UA */
+	if (msg[len - 1] != 0) {		/* UA */
+		strcpy(msg + len, MessageCenter->Number);
+		len += msg[len - 1];
+	}
+
+	msg[len++] = strlen(MessageCenter->Number);	/* SCA */
+	if (msg[len - 1] != 0) {
+		strcpy(msg + len, MessageCenter->Number);
+		len += msg[len - 1];
+	}
+
+	/* Set address type of UnknownNumber to 0, so phone automatically
+	   changes it to correct value */
+	msg[len++] = 0x00;			/* TA */
+
+	FB38_TX_UpdateSequenceNumber();
+	if (FB38_TX_SendMessage(0x3c, len, RequestSequenceNumber, msg) != true) {
+		return (GE_INTERNALERROR);
+	}
+
+	timeout = 10;
+	while (timeout != 0 && CurrentMessageCenterError == GE_BUSY) {
+		timeout--;
+		if (timeout == 0)
+			return (GE_TIMEOUT);
+		usleep(100000);
+	}
+
+	return (CurrentMessageCenterError);
 }
 
 GSM_Error   FB38_GetSMSStatus(GSM_SMSStatus *Status)
+{
+	GSM_MessageCenter tmp;
+	int timeout = 10;
+
+	CurrentMessageCenter = &tmp;
+	CurrentMessageCenterError = GE_BUSY;
+	CurrentSMSStatus = Status;
+
+	FB38_TX_Send0x3fMessage();
+
+	/* Wait for timeout or other error. */
+	while (timeout != 0 && CurrentMessageCenterError == GE_BUSY ) {
+		if (--timeout == 0) {
+			return (GE_TIMEOUT);
+		}
+		usleep (100000);
+	}
+
+	return (CurrentMessageCenterError);
+}
+
+    /* Our "Not implemented" functions */
+GSM_Error   FB38_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
     return (GE_NOTIMPLEMENTED);
 }
@@ -932,7 +1015,29 @@ GSM_Error   FB38_Netmonitor (unsigned char mode, char *Screen)
 
 GSM_Error   FB38_SendDTMF (char *String)
 {
-    return (GE_NOTIMPLEMENTED);
+	u8 message[64];
+	int timeout;
+
+	message[0] = strlen(String);
+	strncpy(message + 1, String, message[0]);
+
+	FB38_TX_UpdateSequenceNumber();
+	if (FB38_TX_SendMessage(message[0] + 1, 0x20, RequestSequenceNumber, message) != true) {
+		return (GE_INTERNALERROR);
+	}
+
+	CurrentDTMFError = GE_BUSY;
+
+	timeout = 20;
+	/* This function have nothing to do with MessageCenter... */
+	while (timeout != 0 && CurrentDTMFError == GE_BUSY) {
+		timeout--;
+		if (timeout == 0)
+			return (GE_TIMEOUT);
+		usleep(100000);
+	}
+
+	return CurrentDTMFError;
 }
 
 GSM_Error   FB38_GetBitmap (GSM_Bitmap *Bitmap)
@@ -1273,7 +1378,7 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
         /* Switch on the basis of the message type byte */
     switch (MessageBuffer[0]) {
 
-                /* We send 0x0a messages to make a call so don't ack. */
+            /* We send 0x0a messages to make a call so don't ack. */
         case 0x0a:      break;
 
             /* 0x0b messages are sent by phone when an incoming call occurs,
@@ -1281,13 +1386,20 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
         case 0x0b:  FB38_RX_Handle0x0b_IncomingCall();
                     break;
 
-            /* Fairly self explanatory these two, though the outgoing 
-               call message has three (unexplained) data bytes. */
-        case 0x0e:  FB38_RX_Handle0x0e_OutgoingCallAnswered();
-                    break;
+            /* We send 0x0c message to answer to incoming call so don't ack */
+        case 0x0c:  break;
 
         case 0x0d:  FB38_RX_Handle0x0d_IncomingCallAnswered();
                     break;
+
+            /* We send 0x0f message to hang up so don't ack */
+        case 0x0f:  break;
+
+            /* Fairly self explanatory these two, though the outgoing 
+               call message has three (unexplained) data bytes. */
+        case 0x0e:  FB38_RX_Handle0x0e_CallEstablished();
+                    break;
+ 
 
             /* 0x10 messages are sent by the phone when an outgoing
                 call terminates. */
@@ -1324,24 +1436,47 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
                     break;
 
             /* 0x16 messages are sent by the phone during initialisation,
-               after the response to the 0x15 message.  Purpose is unclear, 
-               however the sequence bytes have been observed to change with 
+               to response to the 0x15 message.
+               Sequence bytes have been observed to change with 
                differing software versions.
                V06.61 (19/08/97) sends 0x10 0x02, V07.02 (17/03/98) sends 
-               0x30 0x02.  The actual data byte (0x02) is unchanged. 
-               Go figure :) */ 
+               0x30 0x02.
+               The actual data byte is 0x02 when SIM memory is available,
+               and 0x01 when not, e.g. when SIM card isn't inserted to phone or
+               when it is waiting for PIN */
         case 0x16:  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 
 #ifdef DEBUG
-                    fprintf(stdout, _("0x16 Registration Response 0x%02x 0x%02x\n"), MessageBuffer[1], MessageBuffer[2]);
+                    fprintf(stdout, _("0x16 Registration Response 0x%02x\n"), MessageBuffer[1]);
+                    fprintf(stdout, _("SIM access: %s.\n"), (MessageBuffer[2] == 0x02 ? "Yes" : "No") );
 #endif 
                     break;
+
+        case 0x17:  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
+
+#ifdef DEBUG
+                    fprintf(stderr, "0x17 Registration Response: Failure!\n");
+#endif
+                    break;
+
+            /* We send 0x20 message to phone to send DTFM, so don't ack */
+        case 0x20:      break;
+						
+			/* 0x21/0x20 are responses to DTMF commands. */
+        case 0x21:      CurrentDTMFError = GE_NONE;
+                        break;
+        case 0x22:      CurrentDTMFError = GE_UNKNOWN;
+                        break;
 
             /* We send 0x23 messages to phone as a header for outgoing SMS
                messages.  So we don't acknowledge it. */
         case 0x23:  SMSHeaderAckReceived = true;
                     break;
 
+            /* We send 0x24 messages to phone as a header for storing SMS
+               messages in memory. So we don't acknowledge it. :) */
+        case 0x24:  SMSHeaderAckReceived = true;
+                    break;
 
             /* We send 0x25 messages to phone to request an SMS message
                be dumped.  Thus we don't acknowledge it. */
@@ -1362,7 +1497,10 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
             /* 0x28 messages are sent by the phone to acknowledge succesfull
                sending of an SMS message.  The byte returned is a receipt
                number of some form, not sure if it's from the network, sending
-               phone or receiving phone. */
+               sending of an SMS message.  The byte returned is the TP-MR
+               (TP-Message-Reference) from sending phone (Also sent to network).
+               TP-MR is send from phone within 0x32 message. TP-MR is increased
+               by phone after each sent SMS */
         case 0x28:  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
                     CurrentSMSSendResponse[0] = MessageBuffer[2];
                     CurrentSMSSendResponse[1] = 0;
@@ -1378,6 +1516,28 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
                     CurrentSMSSendResponse[0] = MessageBuffer[2];
                     CurrentSMSSendResponse[1] = MessageBuffer[3];
                     CurrentSMSMessageError = GE_SMSSENDFAILED;
+                    break;
+
+            /* Responses to StoreSMSMessage */
+        case 0x2a:  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
+                    CurrentSMSSendResponse[0] = MessageBuffer[2];
+                    CurrentSMSSendResponse[1] = 0x00;
+                    CurrentSMSMessageError = GE_SMSSENDOK;
+#ifdef DEBUG
+                    fprintf(stdout, _("SMS Stored into location 0x%02x\n"),
+                            CurrentSMSSendResponse[0]);
+                    fflush(stdout);
+#endif
+                    break;
+
+        case 0x2b:  CurrentSMSSendResponse[0] = MessageBuffer[2];
+                    CurrentSMSSendResponse[1] = 0x00;
+                    CurrentSMSMessageError = GE_SMSSENDFAILED;
+#ifdef DEBUG
+                    fprintf(stdout, _("SMS Store failed: 0x%02x\n"),
+                            CurrentSMSSendResponse[0]);
+                    fflush(stdout);
+#endif
                     break;
 
             /* 0x2c messages are generated by the phone when we request
@@ -1426,12 +1586,33 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
         case 0x30:  FB38_RX_Handle0x30_IncomingSMSNotification();
                     break;
 
+            /* Delivery report from network */
+        case 0x32:  FB38_RX_Handle0x32_SMSDelivered();
+                    break;
+
+
+            /* We send 0x3c to write message center data, so don't ack */
+        case 0x3c:  break;
+
+            /* Response to 0x3c: OK */
+        case 0x3d:  CurrentMessageCenterError = GE_NONE;
+                    break;
+
+            /* Response to 0x3c: Error */
+        case 0x3e:  CurrentMessageCenterError = GE_INTERNALERROR;
+                    break;
+
             /* We send an 0x3f message to the phone to request a different
                type of status dump - this one seemingly concerned with 
                SMS message center details.  Phone responds with an ack to
                our 0x3f request then sends an 0x41 message that has the
                actual data in it. */
         case 0x3f:  break;  /* Don't send ack. */
+
+            /* 0x40 Messages are sent to response to an 0x3f request.
+               e.g. when phone is waiting for PIN */
+        case 0x40:  CurrentMessageCenterError = GE_UNKNOWN;
+                    break;
 
             /* 0x41 Messages are sent in response to an 0x3f request. */
         case 0x41:  FB38_RX_Handle0x41_SMSMessageCenterData();
@@ -1617,18 +1798,21 @@ GSM_Error   FB38_TX_SendDialCommand(u8 call_type, char *Number)
         message[3 + i] = Number[i];
     }
         /* Dunno what these are but may be initial setup values for RLP
-           timers, sequence numbers or such ? */
-    message[3 + number_length] = 0x07;
-    message[4 + number_length] = 0xa2;
-    message[5 + number_length] = 0x88;
-    message[6 + number_length] = 0x81;
-    message[7 + number_length] = 0x21;
-    message[8 + number_length] = 0x15;
-    message[9 + number_length] = 0x63;
-    message[10 + number_length] = 0xa8;
-    message[11 + number_length] = 0x00;
-    message[12 + number_length] = 0x00;
+           timers, sequence numbers or such ?
+     	   InitField1 is much like as in FB38_TX_Send0x15...
+	       InitField1 isn't needed for voice calls */
+    message[3 + number_length] = 0x07;	/* Length of "InitField1" */
+    message[4 + number_length] = 0xa2;  /* InitField1 */
+    message[5 + number_length] = 0x88;	/* . */
+    message[6 + number_length] = 0x81;	/* . */
+    message[7 + number_length] = 0x21;	/* . */
+    message[8 + number_length] = 0x15;	/* . */
+    message[9 + number_length] = 0x63;	/* . */
+    message[10 + number_length] = 0xa8;	/* . */
 
+    message[11 + number_length] = 0x00;	/* Length of "InitField2" */
+    message[12 + number_length] = 0x00;	/* Length of "InitField3" */
+ 
         /* Update sequence number and send to phone. */
     FB38_TX_UpdateSequenceNumber();
     if (FB38_TX_SendMessage(21, 0x0a, RequestSequenceNumber, message) != true) {
@@ -1808,20 +1992,19 @@ void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, 
     message_center_length = strlen (message_center);
     destination_length = strlen (destination);
 
-        /* Build and send message.  No idea what first 10 bytes are at this
-           this stage so just duplicate what has been observed. */
+        /* Build and send message. */
 
-    message[0] = 0x11;
-    message[1] = 0x00;
-    message[2] = 0x00;
-    message[3] = 0xff;
-    message[4] = 0x00;
-    message[5] = 0x00;
-    message[6] = 0x00;
-    message[7] = 0x00;
-    message[8] = 0x00;
-    message[9] = 0x00;
-
+    message[0] = FO_DEFAULT;	/* TP-FO */
+    message[1] = PID_DEFAULT;	/* TP-PID */
+    message[2] = DCS_DEFAULT;	/* TP-DCS */
+    message[3] = GSMV_Max_Time;	/* VP (Only this octet used when VPF == Relative */
+    message[4] = 0x00;		/* VP */
+    message[5] = 0x00;		/* VP */
+    message[6] = 0x00;		/* VP */
+    message[7] = 0x00;		/* VP */
+    message[8] = 0x00;		/* VP */
+    message[9] = 0x00;		/* VP */
+ 
         /* Add total length and message_center number length fields. */
     message[10] = total_length;
     message[11] = message_center_length;
@@ -1840,6 +2023,63 @@ void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, 
 
 }
 
+void    FB38_TX_Send0x24_StoreSMSHeader(char *message_center, char *destination, u8 total_length)
+{
+	u8			msg[255];
+	u8 		    smsc_len, dest_len;
+	struct tm   *s_tm;
+	time_t      t_t;
+
+        /* Update sequence number. */
+	FB38_TX_UpdateSequenceNumber();
+
+        /* Get length of message center and destination numbers. */
+	smsc_len = strlen (message_center);
+    dest_len = strlen (destination);
+
+	msg[0] = 0x01;	/* Store to GMT_CB (in 8110i) */
+ 
+	msg[1] = 0x03;	/* Set status to received+new */
+	msg[2] = 0x04;	/* These two are same as in requested sms's (Stat1 and Stat2) */
+ 
+	msg[3] = 0x00;	/* PID */
+	msg[4] = 0x00;	/* DCS */
+
+	/* Set SCTS to current time */
+	(void)time(&t_t);
+	s_tm = localtime(&t_t);
+#define swp(a) ( (((a) % 10) << 4) + ((a) / 10) )
+	msg[5] = swp(s_tm->tm_year % 100);
+	msg[6] = swp(s_tm->tm_mon + 1);
+	msg[7] = swp(s_tm->tm_mday);
+	msg[8] = swp(s_tm->tm_hour);
+	msg[9] = swp(s_tm->tm_min);
+	msg[10]= swp(s_tm->tm_sec);
+	msg[11]= swp(0x08);	/* timezone in Finland */
+#undef swp
+
+	msg[12] = total_length;	/* UDL */
+
+	msg[13] = smsc_len;	/* SCA */
+	if (smsc_len > 0) {
+		memcpy(msg + 14, message_center, smsc_len);
+	}
+
+	msg[14 + smsc_len] = dest_len;	/* DA, actually, destination is stored
+					   as originating address */
+	if (dest_len > 0) {
+		memcpy(msg + 15 + smsc_len, destination, dest_len);
+	}
+
+	msg[15 + smsc_len + dest_len] = 0x00;	/* Address type of originating address.
+						   When set to 0x00, phone changes it to
+						   correct value automatically */
+
+	if (FB38_TX_SendMessage(16 + smsc_len + dest_len, 0x24, RequestSequenceNumber, msg) != true) {
+		fprintf(stderr, _("Store SMS header failed!"));  
+	}
+}
+ 
 
 void    FB38_TX_Send0x27_SendSMSMessageText(u8 block_number, u8 block_length, char *text)
 {
@@ -1996,7 +2236,8 @@ void    FB38_RX_Handle0x0b_IncomingCall(void)
 
 #ifdef DEBUG
         /* Now display incoming call message. */
-    fprintf(stdout, _("Incoming call - status %02x %02x %02x, Number %s.\n"), MessageBuffer[2], MessageBuffer[3], MessageBuffer[4], buffer);
+    fprintf(stdout, _("Incoming call - Type: %s. %02x, Number %s.\n"),
+		(MessageBuffer[2] == 0x05 ? "Voice":"Data?"), MessageBuffer[3], buffer);
 
     fflush (stdout);
 #endif
@@ -2057,6 +2298,14 @@ void    FB38_RX_Handle0x27_SMSMessageText(void)
     /* 0x4b is a general status message. */
 void    FB38_RX_Handle0x4b_Status(void)
 {
+		/* Strings for the status byte received from phone. */
+	char *StatusStr[] = {
+		"Unknown",
+		"Ready",
+		"Interworking",
+		"Call in progress",
+		"No SIM access"
+	};
 
         /* First, send acknowledge. */
     if (FB38_TX_SendStandardAcknowledge(0x4b) != true) {
@@ -2079,7 +2328,8 @@ void    FB38_RX_Handle0x4b_Status(void)
 #ifdef DEBUG
         /* Only output connection status byte now as the RF and Battery
            levels are displayed by the main gnokii code. */
-    fprintf(stdout, _("Status: Connection Status %02x Batt %02x RF %02x.\n"), MessageBuffer[2], MessageBuffer[4], MessageBuffer[3]);
+    fprintf(stdout, _("Status: %s. Batt %02x RF %02x.\n"),
+		StatusStr[MessageBuffer[2]], MessageBuffer[4], MessageBuffer[3]);
 #endif
 
 }
@@ -2093,7 +2343,7 @@ void    FB38_RX_Handle0x10_EndOfOutgoingCall(void)
     }
 
 #ifdef DEBUG
-    fprintf(stdout, _("Outgoing call terminated (0x10 message).\n"));
+    fprintf(stdout, _("Call terminated from phone (0x10 message).\n"));
     fflush(stdout);
 #endif
 
@@ -2107,7 +2357,7 @@ void    FB38_RX_Handle0x11_EndOfIncomingCall(void)
     }
 
 #ifdef DEBUG
-    fprintf(stdout, _("Incoming call terminated.\n"));
+    fprintf(stdout, _("Call terminated from opposite end of line (or from network).\n"));
     fflush(stdout);
 #endif
 
@@ -2121,7 +2371,7 @@ void    FB38_RX_Handle0x12_EndOfOutgoingCall(void)
     }
 
 #ifdef DEBUG
-    fprintf(stdout, _("Outgoing call terminated (0x12 message).\n"));
+    fprintf(stdout, _("Call terminated from phone (0x12 message).\n"));
     fflush(stdout);
 #endif
 
@@ -2135,13 +2385,13 @@ void    FB38_RX_Handle0x0d_IncomingCallAnswered(void)
     }
 
 #ifdef DEBUG
-    fprintf(stdout, _("Incoming call answered.\n"));
+    fprintf(stdout, _("Incoming call answered from phone.\n"));
     fflush(stdout);
 #endif
 
 }
 
-void    FB38_RX_Handle0x0e_OutgoingCallAnswered(void)
+void    FB38_RX_Handle0x0e_CallEstablished(void)
 {
         /* As usual, acknowledge first. */
     if (FB38_TX_SendMessage(0, 0x0e, MessageBuffer[1] - 0x08, NULL) != true) {
@@ -2149,7 +2399,8 @@ void    FB38_RX_Handle0x0e_OutgoingCallAnswered(void)
     }
 
 #ifdef DEBUG
-    fprintf(stdout, _("Outgoing call answered - status bytes %02x %02x %02x.\n"), MessageBuffer[2], MessageBuffer[3], MessageBuffer[4]);
+    fprintf(stdout, _("%s call established - status bytes %02x %02x.\n"),
+		(MessageBuffer[2] == 0x05 ? "voice":"data(?)"), MessageBuffer[3], MessageBuffer[4]);
     fflush(stdout);
 #endif
 
@@ -2229,6 +2480,7 @@ void    FB38_RX_Handle0x2c_SMSHeader(void)
     CurrentSMSMessage->Time.Hour = (MessageBuffer[11] >> 4) + (10 * (MessageBuffer[11] & 0x0f)); 
     CurrentSMSMessage->Time.Minute = (MessageBuffer[12] >> 4) + (10 * (MessageBuffer[12] & 0x0f)); 
     CurrentSMSMessage->Time.Second = (MessageBuffer[13] >> 4) + (10 * (MessageBuffer[13] & 0x0f)); 
+    CurrentSMSMessage->Time.Timezone = MessageBuffer[14];
 
         /* Now get sender and message center information. */
     message_center_length = MessageBuffer[16];
@@ -2251,15 +2503,10 @@ void    FB38_RX_Handle0x2c_SMSHeader(void)
     strncpy(CurrentSMSMessage->Sender, MessageBuffer + 18 + message_center_length, sender_length);
     CurrentSMSMessage->Sender[sender_length] = 0;
 
-        /* Uncomment the following to print out unknown bytes.
-           please send any info on this to me (Hugh) */
-    /*
-    fprintf(stdout, _("Unknown bytes: %02x %02x %02x %02x \n"), 
-                    MessageBuffer[4], MessageBuffer[5],
-                    MessageBuffer[6], MessageBuffer[7]);
+    fprintf(stdout, _("PID:%02x DCS:%02x Timezone:%02x Stat1:%02x Stat2:%02x\n"), 
+                    MessageBuffer[6], MessageBuffer[7], MessageBuffer[14],
+                    MessageBuffer[4], MessageBuffer[5]);
     fflush(stdout);
-    
-    */
 }
 
 void    FB38_RX_Handle0x30_IncomingSMSNotification(void)
@@ -2276,23 +2523,21 @@ void    FB38_RX_Handle0x30_IncomingSMSNotification(void)
 
     u8      message_body_length;    /* Length of actual SMS message itself. */
 
-    u8      unk0, unk2, unk3, unk4; /* Unknown bytes at start of message */
-    u8      unk9;
+    u8      Mem, unk2, PID, DCS; /* Unknown bytes at start of message */
+    u8      tz;
 
-    u8      unk_end;                /* Unknown byte at end of message */
+    u8      TOA;                /* Type of Originating Address */
 
     if (FB38_TX_SendStandardAcknowledge(0x30) != true) {
         fprintf(stderr, _("Write failed!"));
     }
 
         /* Extract data from message. */
-    unk0 = MessageBuffer[2];
-    msg_number = MessageBuffer[3];
+    Mem = MessageBuffer[2];
+    msg_number = MessageBuffer[3];	/* location */
     unk2 = MessageBuffer[4];
-    unk3 = MessageBuffer[5];
-    unk4 = MessageBuffer[6];
-    unk9 = MessageBuffer[13];
-    message_body_length = MessageBuffer[14];
+    PID = MessageBuffer[5];
+    DCS = MessageBuffer[6];		/* DCS */
 
         /* Extract date and time information which is packed in to 
            nibbles of each byte in reverse order.  Thus day 28 would be
@@ -2305,6 +2550,9 @@ void    FB38_RX_Handle0x30_IncomingSMSNotification(void)
     minute = (MessageBuffer[11] >> 4) + (10 * (MessageBuffer[11] & 0x0f)); 
     second = (MessageBuffer[12] >> 4) + (10 * (MessageBuffer[12] & 0x0f)); 
 
+    tz = MessageBuffer[13];		/* timezone */
+    message_body_length = MessageBuffer[14];
+
         /* Now get sender and message center information. */
     sender_length = MessageBuffer[15];
     message_center_length = MessageBuffer[15 +  sender_length + 1];
@@ -2316,15 +2564,16 @@ void    FB38_RX_Handle0x30_IncomingSMSNotification(void)
     strncpy(message_center, MessageBuffer + 17 + sender_length, message_center_length);
     message_center[message_center_length] = 0;
 
-        /* Get last byte, purpose unknown. */
-    unk_end = MessageBuffer[17 + sender_length + message_center_length];
+        /* Get last byte, type of originating address (number). (0xa1 = international)*/
+    TOA = MessageBuffer[17 + sender_length + message_center_length];
 
+ 
         /* And output. */
 #ifdef DEBUG
-    fprintf(stdout, _("Incoming SMS %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n"),
-            year, month, day, hour, minute, second, sender, message_center);
-    fprintf(stdout, _("   Msg Length %d, Msg number %d,  Unknown bytes: %02x %02x %02x %02x %02x %02x\n"), 
-            message_body_length, msg_number, unk0, unk2, unk3, unk4, unk9, unk_end);
+    fprintf(stdout, _("Incoming SMS %d/%d/%d %d:%02d:%02d tz:0x%02x Sender: %s(Type %02x) Msg Center: %s\n"),
+            year, month, day, hour, minute, second, tz, sender, TOA, message_center);
+    fprintf(stdout, _("   Msg Length %d, Msg memory %d Msg number %d,  PID: %02x DCS: %02x Unknown: %02x\n"), 
+            message_body_length, Mem, msg_number, PID, DCS, unk2);
     fflush(stdout);
 #endif
 }
@@ -2427,17 +2676,14 @@ void    FB38_RX_Handle0x4d_IMEIRevisionModelData(void)
 
 
     /* Handle 0x41 message which is sent by phone in response to an
-       0x3f request.  Contains data about the Message Center in use,
-       the only bit understood at this time is the phone number portion
-       at the end of the message.  This number appears to be null terminated
-       unlike others but we don't rely on it at this stage! */
+       0x3f request.  Contains data about the Message Center in use */
 void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 {
     u8      center_number_length;
+    u8      option_number_length;
+    u8      opt_num[64];
 
-#ifdef DEBUG
     int     count;
-#endif
     
         /* As usual, acknowledge first. */
     if (!FB38_TX_SendStandardAcknowledge(0x41)) {
@@ -2452,33 +2698,68 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
         return;
     }
 
-        /* Get Message Center number length, which is byte 13 in message. */
-    center_number_length = MessageBuffer[13];
+    if (CurrentSMSStatus == NULL) {
+        CurrentMessageCenterError = GE_INTERNALERROR;
+        return;
+    }
 
-        /* Now put data into CurrentMessageCenter variable and set error
-           flag to none. */
-    if (center_number_length == 0) {
-        CurrentMessageCenter->Number[0] = 0x00; /* Null terminate */
-    }
-    else {
-        memcpy(CurrentMessageCenter->Number, MessageBuffer + 14, center_number_length);
-        CurrentMessageCenter->Number[center_number_length + 1] = 0x00;  /* Null terminate */
-    }
-    
+	CurrentMessageCenter->Format = MessageBuffer[7];
+	CurrentMessageCenter->Validity = MessageBuffer[9];
+
+	option_number_length = MessageBuffer[12];	// Don't know meaning of
+												// this number string
+	if (option_number_length != 0) {
+	        for (count = 0; count < option_number_length; count++) {
+				opt_num[count] = MessageBuffer[13 + count];
+			}
+	}
+
+	center_number_length = MessageBuffer[13 + option_number_length];
+
+	if (center_number_length == 0) {
+		CurrentMessageCenter->Number[0] = 0x00; /* Null terminate */
+	} else {
+		memcpy(CurrentMessageCenter->Number,
+			MessageBuffer + 14 + option_number_length,
+			center_number_length);
+		CurrentMessageCenter->Number[center_number_length] = '\0';
+	}
+ 
         /* 3810 series doesn't support Name or multiple center numbers
            so put in null data for them . */
     CurrentMessageCenter->Name[0] = 0x00;
     CurrentMessageCenter->No = 0;
+
+	CurrentSMSStatus->UnRead = MessageBuffer[4] + MessageBuffer[6];
+	CurrentSMSStatus->Number = MessageBuffer[3] + MessageBuffer[5];
+
     CurrentMessageCenterError = GE_NONE;
 
 
 #ifdef DEBUG
-        /* First 12 bytes are status values, purpose unknown.  For now
-           simply display for user to mull over if debugging is on... */
-    fprintf(stdout, _("SMS Message Center Data status bytes ="));
-    for (count = 0; count < 12; count ++) {
-        fprintf(stdout, "0x%02x ", MessageBuffer[2 + count]);
-    }
+
+	fprintf(stdout, _("SMS Message Center Data:\n"));
+	fprintf(stdout, _("Selected memory: 0x%02x\n"), MessageBuffer[2]);
+	fprintf(stdout, _("Messages in Phone: 0x%02x Unread: 0x%02x\n"),
+		MessageBuffer[3], MessageBuffer[4]);
+	fprintf(stdout, _("Messages in SIM: 0x%02x Unread: 0x%02x\n"),
+		MessageBuffer[5], MessageBuffer[6]);
+	fprintf(stdout, _("Reply via own centre: 0x%02x (%s)\n"),
+		MessageBuffer[10], (MessageBuffer[10] == 0x02 ? "Yes" : "No"));
+	fprintf(stdout, _("Delivery reports: 0x%02x (%s)\n"),
+		MessageBuffer[11], (MessageBuffer[11] == 0x02 ? "Yes" : "No"));
+	fprintf(stdout, _("Messages sent as: 0x%02x\n"), MessageBuffer[7]);
+	fprintf(stdout, _("Message validity: 0x%02x\n"), MessageBuffer[9]);
+	fprintf(stdout, _("Unknown: 0x%02x\n"), MessageBuffer[8]);
+
+	if (option_number_length == 0)
+		fprintf(stdout, _("UnknownNumber field empty."));
+	else {
+		fprintf(stdout, _("UnknownNumber: "));
+		for (count = 0; count < option_number_length; count ++)
+			fprintf(stdout, "%c", MessageBuffer[13 + count]);
+	}
+	fprintf(stdout, "\n");
 
     if (center_number_length == 0) {
         fprintf(stdout, _("Number field empty."));
@@ -2486,13 +2767,71 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
     else {
         fprintf(stdout, _("Number: "));
         for (count = 0; count < center_number_length; count ++) {
-            fprintf(stdout, "%c", MessageBuffer[14 + count]);
+            fprintf(stdout, "%c", MessageBuffer[14 + option_number_length + count]);
         }
     }
-
     fprintf(stdout, "\n");
+
     fflush(stdout);
 #endif
-
 }
 
+int sso2i(u8 x)
+{
+	return (int)(((x & 0x0f) << 4) + ((x & 0xf0) >> 4));
+}
+
+void FB38_RX_Handle0x32_SMSDelivered(void)
+{
+	GSM_DateTime DT, SCTS;
+	char smsc[30];
+	char dest[30];
+	int dest_len, smsc_len;
+	u8 MR, TA, U1, U2;
+
+	FB38_TX_SendStandardAcknowledge(0x32);
+
+	U1 = MessageBuffer[2];
+
+	DT.Year = 	sso2i(MessageBuffer[3]);
+	DT.Month = 	sso2i(MessageBuffer[4]);
+	DT.Day = 	sso2i(MessageBuffer[5]);
+	DT.Hour = 	sso2i(MessageBuffer[6]);
+	DT.Minute = 	sso2i(MessageBuffer[7]);
+	DT.Second = 	sso2i(MessageBuffer[8]);
+	DT.Timezone = 	sso2i(MessageBuffer[9]);
+
+	SCTS.Year = 	sso2i(MessageBuffer[10]);
+	SCTS.Month = 	sso2i(MessageBuffer[11]);
+	SCTS.Day = 	sso2i(MessageBuffer[12]);
+	SCTS.Hour = 	sso2i(MessageBuffer[13]);
+	SCTS.Minute = 	sso2i(MessageBuffer[14]);
+	SCTS.Second = 	sso2i(MessageBuffer[15]);
+	SCTS.Timezone = sso2i(MessageBuffer[16]);
+
+	U2 = MessageBuffer[17];
+
+	MR = MessageBuffer[18];
+
+	dest_len = (int)MessageBuffer[19];
+	strncpy(dest, MessageBuffer + 20, dest_len);
+	dest[dest_len] = '\0';
+	smsc_len = (int)MessageBuffer[20 + dest_len];
+	strncpy(smsc, MessageBuffer + 21 + dest_len, smsc_len);
+	smsc[smsc_len] = '\0';
+
+	TA = MessageBuffer[MessageLength - 1];
+
+#ifdef DEBUG
+	fprintf(stdout, "Message [%02x] Delivered!\n", MR);
+	fprintf(stdout, "Destination: %s (TypeOfAddress:%02x)\n", dest, TA);
+	fprintf(stdout, "Message Center: %s\n", smsc);
+	fprintf(stdout, "Unknowns: %02x %02x\n", U1, U2);	
+	fprintf(stdout, "Discharge Time: %02x.%02x.%02x %02x:%02x:%02x\n",
+		DT.Day, DT.Month, DT.Year, DT.Hour, DT.Minute, DT.Second);
+	fprintf(stdout, "SC Time Stamp:  %02x.%02x.%02x %02x:%02x:%02x\n",
+		SCTS.Day, SCTS.Month, SCTS.Year, SCTS.Hour, SCTS.Minute, SCTS.Second);
+	fflush(stdout);
+#endif
+}
+ 

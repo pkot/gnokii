@@ -54,6 +54,7 @@ typedef enum {
   GMT_LD, /* Last dialed */
   GMT_MT, /* combined ME and SIM phonebook */
   GMT_TA, /* for compatibility only: TA=computer memory */
+  GMT_CB, /* Currently selected memory */
   GMT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions. */
 } GSM_MemoryType;
 
@@ -114,8 +115,12 @@ typedef enum {
 typedef enum {
   GSMF_Text = 0x00,   /* Plain text message. */
   GSMF_Fax = 0x22,    /* Fax message. */
+  GSMF_Voice = 0x24,  /* Voice mail message */
+  GSMF_ERMES = 0x25,  /* ERMES message */
   GSMF_Paging = 0x26, /* Paging. */
-  GSMF_Email = 0x32   /* Email message. */
+  GSMF_UCI = 0x2d,    /* Email message in 8110i */
+  GSMF_Email = 0x32,  /* Email message. */
+  GSMF_X400 = 0x31    /* X.400 message. */
 } GSM_SMSMessageFormat;
 
 /* Validity of SMS Messages. */
@@ -431,6 +436,39 @@ typedef struct {
   int AutomaticAnswer; /* Does the phone auto-answer incoming call? */
 } GSM_Profile;
 
+
+#define FO_SUBMIT       0x01
+#define FO_RD           0x40
+#define FO_VPF_NONE     0x00
+#define FO_VPF_REL      0x10
+#define FO_VPF_ABS      0x18
+#define FO_VPF_ENH      0x08
+#define FO_SRR          0x20
+#define FO_UDHI         0x40
+#define FO_RP           0x80
+#define FO_DEFAULT      (FO_SUBMIT | FO_VPF_REL | FO_SRR)
+
+#define PID_DEFAULT     0x00
+#define PID_TYPE0       0x40
+#define PID_REPLACE1    0x41
+#define PID_REPLACE2    0x42
+#define PID_REPLACE3    0x43
+#define PID_REPLACE4    0x44
+#define PID_REPLACE5    0x45
+#define PID_REPLACE6    0x46
+#define PID_REPLACE7    0x47
+#define PID_RETURN_CALL 0x5f
+
+#define DCS_DEFAULT     0x00
+#define DCS_MSG_WAIT_VOICE_DISCARD      0xc8
+#define DCS_MSG_WAIT_VOICE_OFF          0xc0
+#define DCS_MSG_WAIT_VOICE_STORE        0xd8
+#define DCS_DATA        0xf4
+#define DCS_CLASS0      0xf0
+#define DCS_CLASS1      0xf1
+#define DCS_CLASS2      0xf2
+#define DCS_CLASS3      0xf3
+ 
 /* Define the structure used to hold pointers to the various API functions.
    This is in effect the master list of functions provided by the gnokii API.
    Modules containing the model specific code each contain one of these

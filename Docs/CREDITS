@@ -50,7 +50,7 @@ Thank you to, in no particular order...
 
 *  Konstantinos Agouros for gnokii-perl module.
 
-*  Czech Linux Users' group for it's CVS server which hosts our
+*  Czech Linux Users' group for it's CVS server which hosted our
    development repository.
 
 *  Goran Dokic, Samuli Sorvakko and anonymous for gettext files for
@@ -58,11 +58,13 @@ Thank you to, in no particular order...
    
 *  Marcel Holtmann for RLP FCS code and misc stuff.
 
-*  Chris Kemp for logo stuff and big part of RLP code.
+*  Chris Kemp for logo stuff and a big part of the RLP code.
   
 *  Andrew Kozin for the model 640 support (NMT 450 network).
  
 *  Karel Zak for his enthusiasm (and patches) for the autoconf stuff.
+  
+*  Harri Yli-Torkko for investigative work & code on the 3810/8110. 
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this.  Rachael for new parent induced insomnia...

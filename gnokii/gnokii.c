@@ -1042,7 +1042,16 @@ int getsmsc(char *MessageCenterNumber)
       break;
 
     case GSMF_Email:
+    case GSMF_UCI:
       fprintf(stdout, _("Email"));
+      break;
+
+    case GSMF_ERMES:
+      fprintf(stdout, _("ERMES"));
+      break;
+
+    case GSMF_X400:
+      fprintf(stdout, _("X.400"));
       break;
 
     default:
