@@ -289,7 +289,7 @@ GSM_Error	MB21_DialVoice(char *Number)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	MB21_DialData(char *Number)
+GSM_Error	MB21_DialData(char *Number, char type)
 {
 	return (GE_NOTIMPLEMENTED);
 }

@@ -17,23 +17,40 @@
        These functions are only ever called through the GSM_Functions
        structure defined in gsm-common.h and set up in gsm-api.c */
 
-#ifndef WIN32
-
 #define     __fbus_3810_c   /* "Turn on" prototypes in fbus-3810.h */
 
-#include    <termios.h>
 #include    <stdio.h>
 #include    <stdlib.h>
-#include    <unistd.h>
-#include    <fcntl.h>
-#include    <ctype.h>
-#include    <signal.h>
-#include    <sys/types.h>
-#include    <sys/time.h>
-#include    <sys/ioctl.h>
 #include    <string.h>
-#include    <pthread.h>
-#include    <errno.h>
+
+#ifdef WIN32
+
+  #include <windows.h>
+  #include "win32/winserial.h"
+
+  #undef IN
+  #undef OUT
+
+  #define WRITEPHONE(a, b, c) WriteCommBlock(b, c)
+  #define sleep(x) Sleep((x) * 1000)
+  #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+  extern HANDLE hPhone;
+
+#else
+
+  #define WRITEPHONE(a, b, c) device_write(b, c)
+  #include    <unistd.h>
+  #include    <fcntl.h>
+  #include    <ctype.h>
+  #include    <signal.h>
+  #include    <sys/types.h>
+  #include    <sys/time.h>
+  #include    <sys/ioctl.h>
+  #include    <pthread.h>
+  #include    <errno.h>
+  #include    "device.h"
+
+#endif /* WIN32 */
 
 #include    "misc.h"
 #include    "gsm-common.h"
@@ -44,6 +61,11 @@
        functions supported by this model of phone.  */
 bool                    FB38_LinkOK;
 
+#ifdef WIN32
+
+  void FB38_InitializeLink();
+
+#endif
 
 GSM_Functions           FB38_Functions = {
         FB38_Initialise,
@@ -112,9 +134,21 @@ unsigned char           CalculatedCSum;
 int                     PortFD;
 char                    PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
 u8                      RequestSequenceNumber;
+
+    /* Local variables */
+enum FB38_RX_States     RX_State;
+int                     MessageLength;
+u8                      MessageBuffer[FB38_MAX_RECEIVE_LENGTH];
+unsigned char           MessageCSum;
+int                     BufferCount;
+unsigned char           CalculatedCSum;
+int                     PortFD;
+char                    PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
+u8                      RequestSequenceNumber;
+#ifndef WIN32
 pthread_t               Thread;
+#endif /* WIN32 */
 bool                    RequestTerminate;
-struct termios          OldTermios; /* To restore termio on close. */
 bool                    DisableKeepalive;
 float                   CurrentRFLevel;
 float                   CurrentBatteryLevel;
@@ -125,6 +159,16 @@ long                    ChecksumFails;  /* For diagnostics */
     /* Pointer to callback function in user code to be called when
        RLP frames are received. */
 void                    (*RLP_RXCallback)(RLP_F96Frame *frame);
+
+#ifdef WIN32
+/* called repeatedly from a separate thread */
+void FB38_KeepAliveProc()
+{
+    if (!DisableKeepalive)
+  	FB38_TX_Send0x4aMessage();	/* send status request */
+    Sleep(2000);
+}
+#endif
 
     /* These three are the information returned by AT+CGSN, AT+CGMR and
        AT+CGMM commands respectively. */
@@ -192,9 +236,20 @@ GSM_Error   FB38_Initialise(char *port_device, char *initlength,
     }
 
         /* Create and start thread, */
-    rtn = pthread_create(&Thread, NULL, (void *) FB38_ThreadLoop, (void *)NULL);
 
-    if (rtn == EAGAIN || rtn == EINVAL) {
+#ifdef WIN32
+  DisableKeepalive = true;
+  rtn = ! OpenConnection(PortDevice, FB38_RX_StateMachine, FB38_KeepAliveProc);
+  if (rtn == 0) {
+      FB38_InitializeLink(); /* makes more sense to do this in 'this' thread */
+      DisableKeepalive = false;
+  }
+#else /* !WIN32 */
+    rtn = pthread_create(&Thread, NULL, (void *) FB38_ThreadLoop, (void *)NULL);
+#endif /* WIN32 */
+
+    if (rtn != 0)
+    {
         return (GE_INTERNALERROR);
     }
 
@@ -210,17 +265,21 @@ void        FB38_Terminate(void)
     RequestTerminate = true;
 
         /* Now wait for thread to terminate. */
+
+#ifndef WIN32
     pthread_join(Thread, NULL);
 
         /* Close serial port. */
-    tcsetattr(PortFD, TCSANOW, &OldTermios);
+    device_close();
 
         /* If in monitor mode, show number of checksum failures. */ 
 #ifdef DEBUG
     fprintf (stderr, "Checksum failures: %ld\n", ChecksumFails);
 #endif
-    
-    close (PortFD);
+
+#else /* WIN32 */
+    CloseConnection();
+#endif
 }
 
     /* Routine to get specifed phone book location.  Designed to 
@@ -901,6 +960,7 @@ GSM_Error   FB38_SetProfile(GSM_Profile *Profile)
     return (GE_NOTIMPLEMENTED);
 }
 
+#ifndef WIN32
     /* Everything from here down is internal to 3810 code. */
 
 
@@ -945,7 +1005,7 @@ void    FB38_ThreadLoop(void)
            characters.  Timing is empirical. */
     for (count = 0; count < InitLength; count ++) {
         usleep(1000);
-        write(PortFD, init_char, 1);
+        WRITEPHONE(PortFD, init_char, 1);
     }
 
         /* Now send the 0x15 message, the exact purpose is not understood
@@ -979,59 +1039,30 @@ void    FB38_ThreadLoop(void)
 
 }
 
+
     /* Called by initialisation code to open comm port in
        asynchronous mode. */
 bool        FB38_OpenSerial(void)
 {
-    struct termios          new_termios;
+    int                     result;
     struct sigaction        sig_io;
-    unsigned int            status;     /* For RTS/DTR line control. */
 
-        /* Open device. */
-    PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    /* Set up and install handler before enabling async IO on port. */
 
-    if (PortFD < 0) {
-        perror(_("Couldn't open FB38 device: "));
-        return (false);
-    }
-
-        /* Set up and install handler before enabling async IO on port. */
     sig_io.sa_handler = FB38_SigHandler;
     sig_io.sa_flags = 0;
     sigaction (SIGIO, &sig_io, NULL);
 
-        /* Allow process/thread to receive SIGIO */
-    fcntl(PortFD, F_SETOWN, getpid());
+        /* Open device. */
+    result = device_open(PortDevice);
 
-        /* Make filedescriptor asynchronous. */
-    fcntl(PortFD, F_SETFL, FASYNC);
-
-        /* Save current port attributes so they can be restored on exit. */
-    tcgetattr(PortFD, &OldTermios);
-
-        /* Set port settings for canonical input processing */
-    new_termios.c_cflag = FB38_BAUDRATE | CS8 | CLOCAL | CREAD;
-    new_termios.c_iflag = IGNPAR;
-    new_termios.c_oflag = 0;
-    new_termios.c_lflag = 0;
-    new_termios.c_cc[VMIN] = 1;
-    new_termios.c_cc[VTIME] = 0;
-
-    tcflush(PortFD, TCIFLUSH);
-    tcsetattr(PortFD, TCSANOW, &new_termios);
-
-        /* Get status of control lines on port. */  
-    if (ioctl(PortFD, TIOCMGET, &status) != 0) {
-        perror(_("Serial TIOCMGET failed: "));
-        return(false);
+    if (!result) {
+        perror(_("Couldn't open FB38 device: "));
+        return (false);
     }
-        /* Ensure RTS and DTR lines are true so interface cable gets power. */
-    status |= TIOCM_RTS;
-    status |= TIOCM_DTR;
-    if (ioctl(PortFD, TIOCMSET, &status) != 0) {
-        perror(_("Serial TIOCMSET failed: "));
-        return(false);
-    }
+
+    device_changespeed(115200);
+
     return (true);
 }
 
@@ -1042,12 +1073,64 @@ void    FB38_SigHandler(int status)
     unsigned char   buffer[255];
     int             count,res;
 
-    res = read(PortFD, buffer, 255);
+    res = device_read(buffer, 255);
 
     for (count = 0; count < res ; count ++) {
         FB38_RX_StateMachine(buffer[count]);
     }
 }
+
+#endif /* !WIN32 */
+
+#ifdef WIN32
+
+void FB38_InitializeLink()
+{
+    unsigned char       init_char[1] = {0x55};
+    int                 count, idle_timer;
+
+        /* Initialise RX state machine. */
+    BufferCount = 0;
+    RX_State = FB38_RX_Sync;
+
+    CurrentPhonebookEntry = NULL;
+
+        /* Set max lengths to default - eventually we'll work out
+           how to interrogate the phone for this information! */
+    MaxPhonebookNumberLength[0] = FB38_DEFAULT_INT_PHONEBOOK_NUMBER_LENGTH;
+    MaxPhonebookNameLength[0] = FB38_DEFAULT_INT_PHONEBOOK_NAME_LENGTH;
+
+    MaxPhonebookNumberLength[1] = FB38_DEFAULT_SIM_PHONEBOOK_NUMBER_LENGTH;
+    MaxPhonebookNameLength[1] = FB38_DEFAULT_SIM_PHONEBOOK_NAME_LENGTH;
+
+        /* Initialise sequence number used when sending messages
+           to phone. */
+    RequestSequenceNumber = 0x10;
+
+        /* Send init string to phone, this is a bunch of 0x55
+           characters.  Timing is empirical. */
+    for (count = 0; count < InitLength; count ++) {
+        usleep(1000);
+        WRITEPHONE(PortFD, init_char, 1);
+    }
+
+        /* Now send the 0x15 message, the exact purpose is not understood
+           but if not sent, link doesn't work. */
+    FB38_TX_Send0x15Message(0x11);
+
+        /* We've now finished initialising things so sit in the loop
+           until told to do otherwise.  Loop doesn't do much other
+           than send periodic keepalive messages to phone.  This
+           loop will become more involved once we start doing 
+           fax/data calls. */
+
+        /* Send IMEI/Revision/Model request */
+
+    idle_timer = 0;
+
+}
+
+#endif /* WIN32 */
 
     /* RX_State machine for receive handling.  Called once for each
        character received from the phone/phone. */
@@ -1852,7 +1935,7 @@ int     FB38_TX_SendMessage(u8 message_length, u8 message_type, u8 sequence_byte
     out_buffer[message_length + 4] = checksum;
 
         /* Send it out... */
-    if (write(PortFD, out_buffer, message_length + 5) != message_length + 5) {
+    if (WRITEPHONE(PortFD, out_buffer, message_length + 5) != message_length + 5) {
         perror(_("TX_SendMessage - write:"));
         return (false);
     }
@@ -2380,4 +2463,3 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 
 }
 
-#endif

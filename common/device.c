@@ -13,6 +13,8 @@
 
 */
 
+#ifndef WIN32
+
 #include "unixserial.h"
 #include "device.h"
 
@@ -62,3 +64,6 @@ size_t device_write(__const __ptr_t __buf, size_t __n) {
 
   return (serial_write(device_portfd, __buf, __n));
 }
+
+#endif /* WIN32 */
+

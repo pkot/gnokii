@@ -215,7 +215,6 @@ void    VM_CharHandler(void)
 {
     unsigned char   buffer[255];
     int             res;
-    int i;
 
     res = read(PtyRDFD, buffer, 255);
 

@@ -15,10 +15,16 @@ include ${TOPDIR}/Makefile.global
 
 
 DIRS =		common \
-		gnokii \
-		gnokiid \
-		utils \
-		win32 
+		gnokii
+#
+# For now gnokiid and utils only make sense on Unix like systems.
+# Some other stuff that makes only sense on Win32 platform.
+#
+
+ifndef WIN32
+DIRS +=		gnokiid \
+		utils
+endif
 
 GTK_DIRS =	xgnokii \
 		xgnokii/xpm \

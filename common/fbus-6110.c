@@ -75,7 +75,7 @@ bool FB61_LinkOK;
 
 #ifdef WIN32
 
-  void InitializeLink();
+  void FB61_InitializeLink();
 
 #endif
 
@@ -289,7 +289,7 @@ void               (*RLP_RXCallback)(RLP_F96Frame *frame);
 
 #ifdef WIN32
 /* called repeatedly from a separate thread */
-void KeepAliveProc()
+void FB61_KeepAliveProc()
 {
     if (!DisableKeepalive)
 	FB61_TX_SendStatusRequest();
@@ -324,9 +324,9 @@ GSM_Error FB61_Initialise(char *port_device, char *initlength,
 
 #ifdef WIN32
   DisableKeepalive = true;
-  rtn = ! OpenConnection(PortDevice, FB61_RX_StateMachine, KeepAliveProc);
+  rtn = ! OpenConnection(PortDevice, FB61_RX_StateMachine, FB61_KeepAliveProc);
   if (rtn == 0) {
-      InitializeLink(); /* makes more sense to do this in 'this' thread */
+      FB61_InitializeLink(); /* makes more sense to do this in 'this' thread */
       DisableKeepalive = false;
   }
 #else
@@ -964,7 +964,7 @@ void FB61_ThreadLoop(void)
 #endif /* WIN32 */
 
 #ifdef WIN32
-void InitializeLink()
+void FB61_InitializeLink()
 {
   int count, timeout=50;
   DCB        dcb;
