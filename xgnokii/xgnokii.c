@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   X G N O K I I
 
   A Linux/Unix GUI for Nokia mobile phones.
@@ -8,9 +10,11 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Mon May 01 2000
-  Modified by Jan Derfinak
+  $Log$
+  Revision 1.27  2000-12-19 16:18:21  pkot
+  configure script updates and added shared function for configfile reading
 
+  
 */
 
 #include <stdlib.h>  /* for getenv */
@@ -109,10 +113,6 @@ gint max_phonebook_sim_name_length;
 gint max_phonebook_sim_number_length;
 
 /* Local variables */
-static char *DefaultModel = MODEL; /* From Makefile */
-static char *DefaultPort = PORT;
-static char *DefaultBindir = "/usr/sbin/";
-static char *DefaultConnection = "serial";
 static char *DefaultXGnokiiDir = XGNOKIIDIR;
 static bool SMSSettingsInitialized = FALSE;
 static bool CallersGroupsInitialized = FALSE;
@@ -2346,64 +2346,19 @@ static gint RemoveSplash (GtkWidget *Win)
 
 static void ReadConfig (void)
 {
-  struct CFG_Header *cfg_info;
-  gchar *homedir;
-  gchar *rcfile;
-
 #ifdef WIN32
-/*  homedir = getenv("HOMEDRIVE"); */
-/*  g_strconcat(homedir, getenv("HOMEPATH"), NULL); */
-  homedir = g_get_home_dir ();
-  rcfile=g_strconcat(homedir, "\\_gnokiirc", NULL);
   xgnokiiConfig.locale = "";
 #else
-/*  if ((homedir = getenv ("HOME")) == NULL) */
-  if ((homedir = g_get_home_dir ()) == NULL)
-  {
-    g_print (_("WARNING: Can't find HOME enviroment variable!\n"));
-    exit (-1);
-  }
-  else if ((rcfile = g_strconcat (homedir, "/.gnokiirc", NULL)) == NULL)
-  {
-    g_print (_("WARNING: Can't allocate memory for config reading!\n"));
-    exit (-1);
-  }
-
   if ((xgnokiiConfig.locale = getenv ("LC_ALL")) == NULL)
     if ((xgnokiiConfig.locale = getenv ("LC_MESSAGES")) == NULL)
       if ((xgnokiiConfig.locale = getenv ("LANG")) == NULL)
         xgnokiiConfig.locale = "POSIX";
 #endif
-
-  /* Try opening .gnokirc from users home directory first */
-  if ((cfg_info = CFG_ReadFile (rcfile)) == NULL)
-    /* It failed so try for /etc/gnokiirc */
-    if ( (cfg_info = CFG_ReadFile ("/etc/gnokiirc")) == NULL )
-      /* That failed too so go with defaults... */
-      g_print (_("Couldn't open %s or /etc/gnokiirc, using default config!\n"), rcfile);
-
-  g_free (rcfile);
-
-  xgnokiiConfig.model = CFG_Get(cfg_info, "global", "model");
-  if (xgnokiiConfig.model == NULL)
-    xgnokiiConfig.model = DefaultModel;
-
-  xgnokiiConfig.port = CFG_Get(cfg_info, "global", "port");
-  if (xgnokiiConfig.port == NULL)
-    xgnokiiConfig.port = DefaultPort;
-
-  xgnokiiConfig.initlength = CFG_Get(cfg_info, "global", "initlength");
-  if (xgnokiiConfig.initlength == NULL) {
-       xgnokiiConfig.initlength = "default";
+  if (readconfig(&xgnokiiConfig.model, &xgnokiiConfig.port,
+           &xgnokiiConfig.initlength, &xgnokiiConfig.connection,
+           &xgnokiiConfig.bindir) < 0) {
+    exit(-1);
   }
-
-  xgnokiiConfig.connection = CFG_Get(cfg_info, "global", "connection");
-  if (xgnokiiConfig.connection == NULL)
-    xgnokiiConfig.connection = DefaultConnection;
-
-  xgnokiiConfig.bindir = CFG_Get(cfg_info, "global", "bindir");
-    if (xgnokiiConfig.bindir == NULL)
-        xgnokiiConfig.bindir = DefaultBindir;
 
   GUI_ReadXConfig();
   max_phonebook_name_length = atoi (xgnokiiConfig.maxPhoneLen);
@@ -2412,20 +2367,15 @@ static void ReadConfig (void)
 #ifndef WIN32
   xgnokiiConfig.xgnokiidir = DefaultXGnokiiDir;
 
-  if (strstr(FB38_Information.Models, xgnokiiConfig.model) != NULL)
-  {
+  if (strstr(FB38_Information.Models, xgnokiiConfig.model) != NULL) {
     max_phonebook_number_length = 30;
     max_phonebook_sim_number_length = 30;
-  }
-  else 
+  } else 
 #endif
-  if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL)
-  {
+  if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL) {
     max_phonebook_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
     max_phonebook_sim_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
-  }
-  else
-  {
+  } else {
     max_phonebook_number_length = max_phonebook_sim_number_length = GSM_MAX_PHONEBOOK_NUMBER_LENGTH;
   }
 

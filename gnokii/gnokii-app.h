@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,9 +12,11 @@
 
   Header file for test utility.
 
-  Last modification: Mon Mar 20 21:51:59 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.24  2000-12-19 16:18:19  pkot
+  configure script updates and added shared function for configfile reading
 
+  
 */
 
 /* Prototypes */
@@ -55,7 +59,6 @@ int setringtone(int argc, char *argv[]);
 int reset(char *type);
 int getprofile(int argc, char *argv[]);
 int displayoutput();
-void readconfig(void);
 
 typedef enum {
   OPT_HELP,

@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -11,9 +13,11 @@
   Mainline code for gnokiid daemon. Handles command line parsing and
   various daemon functions.
 
-  Last modification: Mon May 15
-  Modified by Chris Kemp <ck231@cam.ac.uk>	
+  $Log$
+  Revision 1.17  2000-12-19 16:18:18  pkot
+  configure script updates and added shared function for configfile reading
 
+  
 */
 
 #include <stdio.h>
@@ -33,29 +37,23 @@
 #include "virtmodem.h"
 
 
-	/* Prototypes. */
-void	read_config(void);
+/* Global variables */
+bool     DebugMode;       /* When true, run in debug mode */
+char     *Model;          /* Model from .gnokiirc file. */
+char     *Port;           /* Serial port from .gnokiirc file */
+char     *Initlength;     /* Init length from .gnokiirc file */
+char     *Connection;     /* Connection type from .gnokiirc file */
+char     *BinDir;         /* Directory of the mgnokiidev command */
+bool     TerminateThread;
 
-	/* Global variables */
-bool		DebugMode;	/* When true, run in debug mode */
-char		*Model;		/* Model from .gnokiirc file. */
-char		*Port;		/* Serial port from .gnokiirc file */
-char		*Initlength;	/* Init length from .gnokiirc file */
-char		*Connection;	/* Connection type from .gnokiirc file */
-char		*BinDir;	/* Directory of the mgnokiidev command */
-bool  TerminateThread;
-
-	/* Local variables */
-char		*DefaultModel = MODEL;	/* From Makefile */
-char		*DefaultPort = PORT;
-
-char		*DefaultConnection = "serial";
-char		*DefaultBinDir = "/usr/local/sbin";
+/* Local variables */
+char     *DefaultConnection = "serial";
+char     *DefaultBinDir = "/usr/local/sbin";
 
 void version(void)
 {
 
-  fprintf(stdout, _("gnokiid Version %s\n"
+        fprintf(stdout, _("gnokiid Version %s\n"
 "Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999\n"
 "Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999\n"
 "Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
@@ -67,7 +65,7 @@ void version(void)
 void usage(void)
 {
 
-  fprintf(stdout, _("   usage: gnokiid {--help|--version}\n"
+        fprintf(stdout, _("   usage: gnokiid {--help|--version}\n"
 "          --help            display usage information."
 "          --version         displays version and copyright information."
 "          --debug           uses stdin/stdout for virtual modem comms.\n"));
@@ -79,99 +77,55 @@ void usage(void)
 int main(int argc, char *argv[])
 {
 
-    GSM_ConnectionType connection = GCT_Serial;
+        GSM_ConnectionType connection = GCT_Serial;
 
-		/* For GNU gettext */
+        /* For GNU gettext */
 
-	#ifdef USE_NLS
-  		textdomain("gnokii");
-	#endif
+#ifdef USE_NLS
+        textdomain("gnokii");
+#endif
 
-	read_config();
+        if (readconfig(&Model, &Port, &Initlength, &Connection, &BinDir) < 0) {
+                exit(-1);
+        }
 
-  		/* Handle command line arguments. */
 
-	if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
-		usage();
-    	exit(0);
-  	}
+        /* Handle command line arguments. */
 
-		/* Display version, copyright and build information. */
+        if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
+                usage();
+                exit(0);
+        }
 
-	if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
-    	version();
-	    exit(0);
-	}
+        /* Display version, copyright and build information. */
 
-	if (argc >= 2 && strcmp(argv[1], "--debug") == 0) {
-		DebugMode = true;	
-	}
-	else {
-		DebugMode = false;	
-	}
+        if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
+                version();
+                exit(0);
+        }
 
-	if (!strcmp(Connection, "infrared")) {
-		connection=GCT_Infrared;
-	}
+        if (argc >= 2 && strcmp(argv[1], "--debug") == 0) {
+                DebugMode = true;
+        } else {
+                DebugMode = false;
+        }
 
-	TerminateThread=false;
+        if (!strcmp(Connection, "infrared")) {
+                connection=GCT_Infrared;
+        }
 
-	if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode, true) == false) 
-	  exit (-1);
+        TerminateThread=false;
 
-	while (1) {
-	  if (TerminateThread==true) {
-	    VM_Terminate();
-	    exit(1);
-	  }
-	  sleep (1);
-	}
-	exit (0);
-}
+        if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode, true) == false) {
+                exit (-1);
+        }
 
-void	read_config(void)
-{
-    struct CFG_Header 	*cfg_info;
-	char				*homedir;
-	char				rcfile[200];
-
-	homedir = getenv("HOME");
-
-	strncpy(rcfile, homedir, 200);
-	strncat(rcfile, "/.gnokiirc", 200);
-
-      /* Try opening .gnokirc from users home directory first */
-    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
-        /* It failed so try for /etc/gnokiirc */
-      if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL ) {
-	  /* That failed too so go with defaults... */
-        fprintf(stderr, _("Couldn't open %s or /etc/gnokiirc, using default config\n"), rcfile);
-      }
-    }
-
-    Model = CFG_Get(cfg_info, "global", "model");
-    if (Model == NULL) {
-		Model = DefaultModel;
-    }
-
-    Port = CFG_Get(cfg_info, "global", "port");
-    if (Port == NULL) {
-		Port = DefaultPort;
-    }
-
-    Initlength = CFG_Get(cfg_info, "global", "initlength");
-    if (Initlength == NULL) {
-		Initlength = "default";
-    }
-
-    Connection = CFG_Get(cfg_info, "global", "connection");
-    if (Connection == NULL) {
-		Connection = DefaultConnection;
-    }
-
-    BinDir = CFG_Get(cfg_info, "global", "bindir");
-    if (BinDir == NULL) {
-                BinDir = DefaultBinDir;
-    }
-
+        while (1) {
+                if (TerminateThread==true) {
+                        VM_Terminate();
+                        exit(1);
+                }
+                sleep (1);
+        }
+        exit (0);
 }

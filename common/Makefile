@@ -1,5 +1,7 @@
 
 #
+# $Id$
+#
 # Makefile for the GNOKII tool suite.
 #
 # Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
@@ -44,10 +46,6 @@ else
 	OBJS += unixserial.o
 endif
 
-ifdef XPM_CFLAGS
-    CFLAGS += $(XPM_CFLAGS)
-endif
-
 all: COMMON.o gsm-filetypes.o DATA.o
 
 COMMON.o: $(OBJS)
@@ -57,7 +55,7 @@ DATA.o: $(DATA_OBJS)
 	$(LD) $(LDREL) $(LDOUT) DATA.o $(DATA_OBJS)
 
 gsm-filetypes.o: gsm-filetypes.c 
-	$(CC) $(CFLAGS) -c gsm-filetypes.c
+	$(CC) $(CFLAGS) $(XPM_FLAGS) -c gsm-filetypes.c
 
 vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx

@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -11,9 +13,11 @@
   Config file (/etc/gnokiirc and ~/.gnokiirc) reader.
 
   Modified from code by Tim Potter.
-	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+  $Log$
+  Revision 1.10  2000-12-19 16:18:15  pkot
+  configure script updates and added shared function for configfile reading
+
 
 */
 
@@ -27,176 +31,152 @@
 #include <errno.h>
 
 #include "cfgreader.h"
+#include "misc.h"
 
 #ifdef WIN32
-
-  #define index strchr
-
+        #define index strchr
 #endif
 
-	/* Read configuration information from a ".INI" style file */
+/* Read configuration information from a ".INI" style file */
 struct CFG_Header *CFG_ReadFile(char *filename)
 {
-    FILE *handle;
-    char *line;
-    char *buf;
-    struct CFG_Header *cfg_info = NULL, *cfg_head = NULL;
+        FILE *handle;
+        char *line;
+        char *buf;
+        struct CFG_Header *cfg_info = NULL, *cfg_head = NULL;
 
-    /* Error check */
+        /* Error check */
+        if (filename == NULL) {
+                return NULL;
+        }
 
-    if (filename == NULL) {
-		return NULL;
-    }
-
-    /* Initialisation */
-
-    if ((buf = (char *)malloc(255)) == NULL) {
-		return NULL;
-    }
+        /* Initialisation */
+        if ((buf = (char *)malloc(255)) == NULL) {
+                return NULL;
+        }
     
-    /* Open file */
-
-    if ((handle = fopen(filename, "r")) == NULL) {
+        /* Open file */
+        if ((handle = fopen(filename, "r")) == NULL) {
 #ifdef DEBUG
-		fprintf( stderr, "CFG_ReadFile - open %s: %s\n", filename, strerror(errno));
+                fprintf( stderr, "CFG_ReadFile - open %s: %s\n", filename, strerror(errno));
 #endif /* DEBUG */
-		return NULL;
-    }
+                return NULL;
+        }
 #ifdef DEBUG
-    else
-		fprintf( stderr, "Opened configuration file %s\n", filename );
+        else
+                fprintf( stderr, "Opened configuration file %s\n", filename );
 #endif /* DEBUG */
 
-    /* Iterate over lines in the file */
+        /* Iterate over lines in the file */
+        while (fgets(buf, 255, handle) != NULL) {
 
-    while (fgets(buf, 255, handle) != NULL) {
+                line = buf;
 
-		line = buf;
-		/* Strip leading, trailing whitespace */
+                /* Strip leading, trailing whitespace */
+                while(isspace((int) *line))
+                        line++;
 
-		while(isspace((int) *line))
-		    	line++;
+                while((strlen(line) > 0) && isspace((int) line[strlen(line) - 1]))
+                        line[strlen(line) - 1] = '\0';
+        
+                /* Ignore blank lines and comments */
+                if ((*line == '\n') || (*line == '\0') || (*line == '#'))
+                        continue;
 
-		while((strlen(line) > 0) && isspace((int) line[strlen(line) - 1]))
-			line[strlen(line) - 1] = '\0';
-	
-		/* Ignore blank lines and comments */
-	
-		if ((*line == '\n') || (*line == '\0') || (*line == '#'))
-			continue;
+                /* Look for "headings" enclosed in square brackets */
+                if ((line[0] == '[') && (line[strlen(line) - 1] == ']')) {
+                        struct CFG_Header *heading;
 
-		/* Look for "headings" enclosed in square brackets */
+                        /* Allocate new heading entry */
+                        if ((heading = (struct CFG_Header *)malloc(sizeof(*heading))) == NULL) {
+                                return NULL;
+                        }
 
-		if ((line[0] == '[') && (line[strlen(line) - 1] == ']')) {
-	    	struct CFG_Header *heading;
+                        /* Fill in fields */
+                        memset(heading, '\0', sizeof(*heading));
+            
+                        line++;
+                        line[strlen(line) - 1] = '\0';
 
-	 	   		/* Allocate new heading entry */
+                        /* FIXME: strdup is not ANSI C compliant. */
+                        heading->section = strdup(line);
 
-	    	if ((heading = (struct CFG_Header *)
-		 		malloc(sizeof(*heading))) == NULL) {
+                        /* Add to tail of list  */
+                        heading->prev = cfg_info;
 
-				return NULL;
-	    	}
+                        if (cfg_info != NULL) {
+                                cfg_info->next = heading;
+                        } else {
+                                /* Store copy of head of list for return value */
+                                cfg_head = heading;
+                        }
 
-	    		/* Fill in fields */
-
-	    	memset(heading, '\0', sizeof(*heading));
-	    
-	    	line++;
-	    	line[strlen(line) - 1] = '\0';
-
-		/* FIXME: strdup is not ANSI C compliant. */
-	    	heading->section = strdup(line);
-
-	    		/* Add to tail of list  */
-
-	    	heading->prev = cfg_info;
-
-	    	if (cfg_info != NULL) {
-
-				cfg_info->next = heading;
-
-	    	}
-			else {
-
-				/* Store copy of head of list for return value */
-
-				cfg_head = heading;
-	    	}
-
-	    	cfg_info = heading;
+                        cfg_info = heading;
 
 #ifdef DEBUG
-	    printf("Added new section %s\n", heading->section);
+                        printf("Added new section %s\n", heading->section);
 #endif
-	    	/* Go on to next line */
+                        /* Go on to next line */
 
-	    	continue;
-		}
+                        continue;
+                }
 
-		/* Process key/value line */
+                /* Process key/value line */
 
-		/* FIXME: index is not ANSI C compliant. */
-		if ((index(line, '=') != NULL) && cfg_info != NULL) {
-	    	struct CFG_Entry *entry;
-	    	char *value;
+                /* FIXME: index is not ANSI C compliant. */
+                if ((index(line, '=') != NULL) && cfg_info != NULL) {
+                        struct CFG_Entry *entry;
+                        char *value;
 
-	  	  		/* Allocate new entry */
+                        /* Allocate new entry */
+                        if ((entry = (struct CFG_Entry *)malloc(sizeof(*entry))) == NULL) {
+                                return NULL;
+                        }
 
-	    	if ((entry = (struct CFG_Entry *)
-		 		malloc(sizeof(*entry))) == NULL) {
+                        /* Fill in fields */
+                        memset(entry, '\0', sizeof(*entry));
 
-				return NULL;
-	    	}
+                        /* FIXME: index is not ANSI C compliant. */
+                        value = index(line, '=');
+                        *value = '\0';                /* Split string */
+                        value++;
+            
+                        while(isspace((int) *value)) {      /* Remove leading white */
+                                value++;
+                        }
 
-	    		/* Fill in fields */
+                        entry->value = strdup(value);
 
-	    	memset(entry, '\0', sizeof(*entry));
+                        while((strlen(line) > 0) && isspace((int) line[strlen(line) - 1])) {
+                                line[strlen(line) - 1] = '\0';  /* Remove trailing white */
+                        }
 
-		/* FIXME: index is not ANSI C compliant. */
-	    	value = index(line, '=');
-		*value = '\0';                /* Split string */
-	    	value++;
-	    
-	    	while(isspace((int) *value)) {      /* Remove leading white */
-				value++;
-	    	}
+                        /* FIXME: strdup is not ANSI C compliant. */
+                        entry->key = strdup(line);
 
-	    	entry->value = strdup(value);
+                        /* Add to head of list */
 
-	    	while((strlen(line) > 0) && isspace((int) line[strlen(line) - 1])) {
-				line[strlen(line) - 1] = '\0';  /* Remove trailing white */
-	    	}
+                        entry->next = cfg_info->entries;
 
-		/* FIXME: strdup is not ANSI C compliant. */
-	    	entry->key = strdup(line);
+                        if (cfg_info->entries != NULL) {
+                                cfg_info->entries->prev = entry;
+                        }
 
-		/* Add to head of list */
-
-	    	entry->next = cfg_info->entries;
-
-	    	if (cfg_info->entries != NULL) {
-				cfg_info->entries->prev = entry;
-	    	}
-
-	    	cfg_info->entries = entry;
+                        cfg_info->entries = entry;
 
 #ifdef DEBUG
-	    printf("Adding key/value %s/%s\n", entry->key, entry->value);
+                        printf("Adding key/value %s/%s\n", entry->key, entry->value);
 #endif
-	    	/* Go on to next line */
+                        /* Go on to next line */
+                        continue;
+                }
 
-	    	continue;
-		}
+                        /* Line not part of any heading */
+                printf("Orphaned line: %s\n", line);
+        }
 
-			/* Line not part of any heading */
-
-		printf("Orphaned line: %s\n", line);
-    }
-
-    /* Return pointer to configuration information */
-
-    return cfg_head;
+        /* Return pointer to configuration information */
+        return cfg_head;
 }
 
 /*  Write configuration information to a config file */
@@ -215,75 +195,113 @@ int CFG_WriteFile(struct CFG_Header *cfg, char *filename)
 
 char *CFG_Get(struct CFG_Header *cfg, char *section, char *key)
 {
-    struct CFG_Header *h;
-    struct CFG_Entry *e;
+        struct CFG_Header *h;
+        struct CFG_Entry *e;
 
-    if ((cfg == NULL) || (section == NULL) || (key == NULL)) {
-		return NULL;
-    }
+        if ((cfg == NULL) || (section == NULL) || (key == NULL)) {
+                return NULL;
+        }
 
-    /* Search for section name */
-
-    for (h = cfg; h != NULL; h = h->next) {
-		if (strcmp(section, h->section) == 0) {
-	    
-	    	/* Search for key within section */
-
-	    	for (e = h->entries; e != NULL; e = e->next) {
-				if (strcmp(key, e->key) == 0) {
-
-		    	/* Found! */
-
-		    		return e->value;
-				}
-	    	}
-		}
-    }
-
-    /* Key not found in section */
-
-    return NULL;
+        /* Search for section name */
+        for (h = cfg; h != NULL; h = h->next) {
+                if (strcmp(section, h->section) == 0) {
+                        /* Search for key within section */
+                        for (e = h->entries; e != NULL; e = e->next) {
+                                if (strcmp(key, e->key) == 0) {
+                                        /* Found! */
+                                        return e->value;
+                                }
+                        }
+                }
+        }
+        /* Key not found in section */
+        return NULL;
 }
 
 /*  Set the value of a key in a config file.  Return the new value if
     the section/key can be found, else return NULL.  */
 
 char *CFG_Set(struct CFG_Header *cfg, char *section, char *key, 
-		    char *value)
+                    char *value)
 {
-    struct CFG_Header *h;
-    struct CFG_Entry *e;
+        struct CFG_Header *h;
+        struct CFG_Entry *e;
 
-    if ((cfg == NULL) || (section == NULL) || (key == NULL) || 
-		(value == NULL)) {
+        if ((cfg == NULL) || (section == NULL) || (key == NULL) || 
+            (value == NULL)) {
+                return NULL;
+        }
 
-		return NULL;
-    }
-
-    /* Search for section name */
-
-    for (h = cfg; h != NULL; h = h->next) {
-		if (strcmp(section, h->section) == 0) {
-	    
-	    	/* Search for key within section */
-
-	    	for (e = h->entries; e != NULL; e = e->next) {
-				if ((e->key != NULL) && strcmp(key, e->key) == 0) {
-
-		    		/* Found - set value */
-
-		    		free(e->key);
-				/* FIXME: strdup is not ANSI C compliant. */
-		    		e->key = strdup(value);
-
-		    		return e->value;
-				}
-	    	}
-		}
-    }
-
-    /* Key not found in section */
-
-    return NULL;    
+        /* Search for section name */
+        for (h = cfg; h != NULL; h = h->next) {
+                if (strcmp(section, h->section) == 0) {
+                        /* Search for key within section */
+                        for (e = h->entries; e != NULL; e = e->next) {
+                                if ((e->key != NULL) && strcmp(key, e->key) == 0) {
+                                        /* Found - set value */
+                                        free(e->key);
+                                        /* FIXME: strdup is not ANSI C compliant. */
+                                        e->key = strdup(value);
+                                        return e->value;
+                                }
+                        }
+                }
+        }
+        /* Key not found in section */
+        return NULL;    
 }
 
+int readconfig(char **model, char **port, char **initlength,
+               char **connection, char **bindir)
+{
+        struct CFG_Header *cfg_info;
+        char *homedir;
+        char rcfile[200];
+        char *DefaultConnection = "serial";
+        char *DefaultBindir     = "/usr/local/sbin/";
+
+#ifdef WIN32
+        homedir = getenv("HOMEDRIVE");
+        strncpy(rcfile, homedir ? homedir : "", 200);
+        homedir = getenv("HOMEPATH");
+        strncat(rcfile, homedir ? homedir : "", 200);
+        strncat(rcfile, "\\_gnokiirc", 200);
+#else
+        homedir = getenv("HOME");
+        if (homedir) strncpy(rcfile, homedir, 200);
+        strncat(rcfile, "/.gnokiirc", 200);
+#endif
+
+        /* Try opening .gnokirc from users home directory first */
+        if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
+                /* It failed so try for /etc/gnokiirc */
+                if ((cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL) {
+                        /* That failed too so exit */
+                        fprintf(stderr, _("Couldn't open %s or /etc/gnokiirc. Exiting now...\n"), rcfile);
+                        return -1;
+                }
+        }
+
+        (char *)*model = CFG_Get(cfg_info, "global", "model");
+        if (!*model) {
+                fprintf(stderr, _("Config error - no model specified. Exiting now...\n"));
+                return -2;
+        }
+
+        (char *)*port = CFG_Get(cfg_info, "global", "port");
+        if (!*port) {
+                fprintf(stderr, _("Config error - no port specified. Exiting now...\n"));
+                return -3;
+        }
+
+        (char *)*initlength = CFG_Get(cfg_info, "global", "initlength");
+        if (!*initlength) (char *)*initlength = "default";
+
+        (char *)*connection = CFG_Get(cfg_info, "global", "connection");
+        if (!*connection) (char *)*connection = DefaultConnection;
+
+        (char *)*bindir = CFG_Get(cfg_info, "global", "bindir");
+        if (!*bindir) (char *)*bindir = DefaultBindir;
+
+        return 0;
+}

@@ -1,13 +1,21 @@
 /*
+ * $Id$
+ *
  * serial interface threads for gnokii on win32
  * Based on the MS sample program 'tty.c'
  *
  * Roger Willcocks  16 Sept 99
  *
  * compile with:
- * cl -Zi -DWIN32 -DVERSION=\"win32\" -DMODEL=\"6110\" -DPORT=\"COM1\" \
+ * cl -Zi -DVERSION=\"win32\" \
  * gnokii.c winserial.c fbus-6110.c getopt.c gsm-api.c fbus-6110-auth.c \
  * fbus-6110-ringtones.c gsm-networks.c cfgreader.c 
+ *
+ * $Log$
+ * Revision 1.6  2000-12-19 16:18:19  pkot
+ * configure script updates and added shared function for configfile reading
+ *
+ *
  */
 
 #ifdef WIN32

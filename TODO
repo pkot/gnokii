@@ -6,10 +6,6 @@
 
 - --disable-debug should really disable debug :-)
 - FreeBSD build and work
-- use config.h for autoconf stuff
-- remove default MODEL and PORT, use config files only and bug the user if
-  /etc/gnokiirc or ~/.gnokiirc is not found
-- move VERSION, DEBUG, SECURITY and USE_NLS to config.h
 - 6160 support (is this useful: http://www.venia.net/tdma/? - yes it was -HAB)
   Please email Hugh before delving into x160 support.
 - 7110 support (fbus and/or plain AT commands)
@@ -47,8 +43,7 @@
   working - it does not write the file...
 - --netmonitor field/devel should not report the menu (which contains
   useless data)... Try it.
-- test for cfset{i,o}speed in configure.in should not be done if cfsetspeed
-  is detected, just make it conditional.
+- integrate Marcin's patches
 
 Additional things
 =================

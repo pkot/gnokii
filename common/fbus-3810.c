@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,9 +12,11 @@
 
   This file contains the main code for 3810 support.
 	
-  Last modification: Fri May 19 15:31:26 EST 2000
-  Modified by Hugh Blemings <hugh@linuxcare.com>
+  $Log$
+  Revision 1.72  2000-12-19 16:18:15  pkot
+  configure script updates and added shared function for configfile reading
 
+  
 */
 
 #define     __fbus_3810_c   /* "Turn on" prototypes in fbus-3810.h */
@@ -2746,9 +2750,10 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 {
     u8      center_number_length;
     u8      option_number_length;
-    u8      opt_num[64];
+	 /*    u8      opt_num[64];
 
-    int     count;
+			 int     count; To aviod the compilation warnings.
+			 See the next FIXME */
     
         /* As usual, acknowledge first. */
     if (!FB38_TX_SendStandardAcknowledge(0x41)) {

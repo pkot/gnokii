@@ -1,6 +1,8 @@
 
 
 #
+# $Id$
+#
 # Makefile for the xGNOKII tool suite.
 #
 # Copyright (C) 1999 Hugh Blemings & Pavel Janík ml. & Jan Derfinak
@@ -10,9 +12,7 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-CFLAGS += -DXVERSION=\"$(XVERSION)\" \
-          -DXGNOKIIDIR=\"$(xgnokii_libdir)\" \
-	  $(PTHREAD_CFLAGS) \
+CFLAGS += $(PTHREAD_CFLAGS) \
 	  $(GTK_CFLAGS) 
 
 LDFLAGS += $(PTHREAD_LIBS) \

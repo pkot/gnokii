@@ -2,7 +2,9 @@ dnl
 dnl  Makefile for the GNOKII tool suite.
 dnl 
 dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
-dnl                2000 Karel Zak
+dnl                2000 Karel Zak, Pawe³ Kot
+dnl
+dnl  $Id$
 dnl
 
 AC_INIT(gnokii/gnokii.c)
@@ -10,17 +12,11 @@ AC_INIT(gnokii/gnokii.c)
 AC_CONFIG_AUX_DIR(config)
 
 AC_CANONICAL_SYSTEM
+AC_PREFIX_DEFAULT("/usr/local")
 
 dnl ======================== Default setting
 CFLAGS="-O2 -Wall"
 ALL_LINGUAS="cs de et fi nl sk pl"
-model="6110"
-case "$build_os" in
-  solaris*)	port="/dev/cua/a"
-	;;
-  *)		port="/dev/ttyS0"
-	;;
-esac
 
 dnl ======================== Checks for programs.
 AC_PROG_CC
@@ -32,60 +28,70 @@ AC_PATH_PROG(FIND, find, no)
 AC_CHECK_PROGS(MAKE, gmake make)
 AC_PROG_INSTALL
 
+dnl Let us have $prefix variable aviable here
+test x"$prefix" = xNONE && prefix="$ac_default_prefix"
 
 AC_ARG_ENABLE(debug, 
-	[  --enable-debug          compile with debug code],
-	[ CFLAGS="-g -Wall"
-	  AC_DEFINE(DEBUG)
-          debug="yes" ],
-        [ debug="no"  ]
+   [  --enable-debug          compile with debug code],
+   [ CFLAGS="-g -Wall"
+     AC_DEFINE(DEBUG)
+     debug="yes" ],
+   [ debug="no"  ]
 )
 
 AC_ARG_ENABLE(xdebug,
-	[  --enable-xdebug         compile with xdebug code],
-	[ AC_DEFINE(XDEBUG)
-          xdebug="yes" ],
-        [ xdebug="no"  ]
+   [  --enable-xdebug         compile with xdebug code],
+   [ AC_DEFINE(XDEBUG)
+     xdebug="yes" ],
+   [ xdebug="no"  ]
 )
 
 AC_ARG_ENABLE(rlpdebug, 
-	[  --enable-rlpdebug       compile with RLP debug code],
-	[ AC_DEFINE(RLP_DEBUG)
-          rlpdebug="yes" ],
-        [ rlpdebug="no"  ]
+   [  --enable-rlpdebug       compile with RLP debug code],
+   [ AC_DEFINE(RLP_DEBUG)
+     rlpdebug="yes" ],
+   [ rlpdebug="no"  ]
 )
 
 dnl ======================== NLS support
 
+NLS_LIBS=""
+NLS_FLAGS=""
+AC_ARG_WITH(libintl,
+   [  --with-libintl=DIR      specifies the base NLS],
+   [ if test x$withval = xyes
+     then
+       AC_MSG_WARN(Usage is --with-libintl=DIR)
+     else
+       NLS_LIBS="-L$withval/lib"
+       NLS_CFLAGS="-I$withval/lib"
+     fi
+   ]
+)
+
 AC_ARG_ENABLE(nls,
-	[  --disable-nls           do not use NLS],
-	[ USE_NLS=$enableval ], [ USE_NLS=yes ])
+   [  --disable-nls           do not use NLS],
+   [ USE_NLS=$enableval ], [ USE_NLS=yes ])
 
 if test "$USE_NLS" = "yes"; then
-  AC_REQUIRE([AC_PROG_MAKE_SET])
-  AC_CHECK_HEADERS(locale.h)
-  AC_CHECK_FUNCS(setlocale)
-  AC_SUBST(HAVE_LOCALE_H)  
+   AC_REQUIRE([AC_PROG_MAKE_SET])
+   AC_CHECK_HEADERS(locale.h)
+   AC_CHECK_FUNCS(setlocale)
+   AC_SUBST(HAVE_LOCALE_H)  
 
-  AC_TRY_CPP([#include <libintl.h>], [
-	AC_DEFINE(HAVE_LIBINTL_H)
-	AC_MSG_RESULT(
-	  [checking for libintl.h... yes])], [
-	  CPPFLAGS="$CPPFLAGS -I/usr/local/include"
-	  AC_TRY_CPP([#include <libintl.h>], [
-		  CFLAGS="$CFLAGS -I/usr/local/include"
-		AC_DEFINE(HAVE_LIBINTL_H)
-		  AC_MSG_RESULT(
-		  [checking for libintl.h... /usr/local/include/libintl.h])],
-		  AC_MSG_ERROR(not found header file: libintl.h !!!))
-	])
-  AC_CHECK_FUNC(gettext, AC_DEFINE(HAVE_LIBINTL), [
-	  LIBS="$LIBS -L/usr/local/lib"
-	AC_DEFINE(HAVE_LIBINTL)
-	  AC_CHECK_LIB(intl, gettext, LIBS="$LIBS -lintl",
-		AC_MSG_ERROR(not found library: intl !!!)
-          )
-  ])
+   CPPFLAGS="$CPPFLAGS $NLS_CFLAGS"
+   AC_TRY_CPP([#include <libintl.h>],
+              [ CFLAGS="$CFLAGS $NLS_CFLAGS"
+                AC_DEFINE(HAVE_LIBINTL_H)
+                AC_MSG_RESULT([checking for libintl.h... yes]) ],
+              [ AC_MSG_ERROR(not found header file: libintl.h !!!) ] )
+
+  AC_CHECK_FUNC(gettext,
+                AC_DEFINE(HAVE_LIBINTL),
+                [ LIBS="$LIBS $NLS_LIBS"
+                  AC_DEFINE(HAVE_LIBINTL)
+                  AC_CHECK_LIB(intl, gettext, LIBS="$LIBS -lintl",
+                               AC_MSG_ERROR(not found library: intl !!!)) ] )
 
   AC_SUBST(HAVE_LIBINTL_H)  
   AC_SUBST(HAVE_LIBINTL)
@@ -172,21 +178,21 @@ if test x"$MSGFMT" = x; then
 fi
 
 if test x"$USE_NLS" = xyes; then
-  CFLAGS="$CFLAGS -DUSE_NLS"
+  AC_DEFINE(USE_NLS)
 fi
 
 dnl ======================== Checks for libraries.
 
 AC_ARG_WITH(libpthread, 
-	[  --with-libpthread=DIR   specifies the base libpthread],
-	[ if test x$withval = xyes
-	  then 
-		AC_MSG_WARN(Usage is: --with-libpthread=DIR)
-	  else
-		PTHREAD_LIBS="-L$withval/lib/"
-		PTHREAD_CFLAGS="-I$withval/include/"
-	  fi
-	]
+   [  --with-libpthread=DIR   specifies the base libpthread],
+   [ if test x$withval = xyes
+     then 
+      AC_MSG_WARN(Usage is: --with-libpthread=DIR)
+     else
+      PTHREAD_LIBS="-L$withval/lib/"
+      PTHREAD_CFLAGS="-I$withval/include/"
+     fi
+   ]
 )
 
 dnl Check for libpthread
@@ -194,7 +200,7 @@ PTHREAD_LIBS_SAVE="$PTHREAD_LIBS"
 PTHREAD_LIBS=error
 AC_CHECK_LIB(pthread, pthread_attr_init, [
                       PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_REENTRANT"
-		      PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -lpthread" ])
+                      PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -lpthread" ])
 
 dnl FIXME: test this on *BSD and report results immediatelly to the ml please
 dnl If it is not found, try to check for c_r (on FreeBSD)
@@ -206,8 +212,8 @@ fi
 
 dnl FIXME: do we really test here if libc contains this function?
 if test "x$PTHREAD_LIBS" = xerror; then
-	AC_CHECK_FUNC(pthread_attr_init, PTHREAD_LIBS="",
-		AC_MSG_ERROR(not found library: pthread !!!))
+   AC_CHECK_FUNC(pthread_attr_init, PTHREAD_LIBS="",
+      AC_MSG_ERROR(not found library: pthread !!!))
 fi
 
 dnl The following is taken from inn sources
@@ -215,7 +221,7 @@ AC_MSG_CHECKING(for tm_gmtoff in struct tm)
 AC_TRY_LINK([#include <time.h>],
         [struct tm t; t.tm_gmtoff = 0],
         [AC_MSG_RESULT(yes)
-        AC_DEFINE(HAVE_TM_GMTON)],
+         AC_DEFINE(HAVE_TM_GMTON)],
         [AC_MSG_RESULT(no)])
 
 dnl The following is taken from inn sources
@@ -223,102 +229,123 @@ AC_MSG_CHECKING(for timersub)
 AC_TRY_LINK([#include <sys/time.h>],
         [timersub(NULL, NULL, NULL)],
         [AC_DEFINE(HAVE_TIMEOPS)
-        AC_DEFINE(HAVE_TIMEOPS)
-	 AC_MSG_RESULT(yes)],
+         AC_DEFINE(HAVE_TIMEOPS)
+         AC_MSG_RESULT(yes)],
         [AC_MSG_RESULT(no)])
 
+have_termios="no"
 dnl Checking for setspeed in termios.h
 AC_MSG_CHECKING(for cfsetspeed in termios.h)
 AC_TRY_LINK([#include <termios.h>],
         [struct termios t; cfsetspeed(&t, B9600);],
         [AC_DEFINE(HAVE_CFSETSPEED)
-	 AC_MSG_RESULT(yes)],
-         AC_MSG_RESULT(no))
+         have_termios="yes"
+         AC_MSG_RESULT(yes)],
+        AC_MSG_RESULT(no))
 #
 # FIXME: Test for these only if we do not have cfsetspeed
 #
-AC_MSG_CHECKING(for cfsetispeed and cfsetospeed in termios.h)
-AC_TRY_LINK([#include <termios.h>],
-        [struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);],
-	[AC_DEFINE(HAVE_CFSETISPEED)
-	 AC_DEFINE(HAVE_CFSETOSPEED)
-	 AC_MSG_RESULT(yes)],
-         AC_MSG_RESULT(no))
 
-AC_MSG_CHECKING(for c_ispeed and c_ospeed in struct termios)
-AC_TRY_LINK([#include <termios.h>],
-        [struct termios t; t.c_iflag = B9600; t.c_oflag = B9600;],
-	[AC_DEFINE(HAVE_TERMIOS_CSPEED)
-	 AC_MSG_RESULT(yes)],
-         AC_MSG_RESULT(no))
+if test $have_termios = "no"; then
+   AC_MSG_CHECKING(for cfsetispeed and cfsetospeed in termios.h)
+   AC_TRY_LINK([#include <termios.h>],
+               [struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);],
+               [AC_DEFINE(HAVE_CFSETISPEED)
+                AC_DEFINE(HAVE_CFSETOSPEED)
+                have_termios="yes"
+                AC_MSG_RESULT(yes)],
+               [AC_MSG_RESULT(no)])
+
+   if test $have_termios = "no"; then
+      AC_MSG_CHECKING(for c_ispeed and c_ospeed in struct termios)
+      AC_TRY_LINK([#include <termios.h>],
+                  [struct termios t; t.c_iflag = B9600; t.c_oflag = B9600;],
+                  [AC_DEFINE(HAVE_TERMIOS_CSPEED)
+                   AC_MSG_RESULT(yes)],
+                  [AC_MSG_RESULT(no)])
+   fi
+fi
 
 dnl ======================== Checks for getopt_long support 
 
 AC_CHECK_HEADER(getopt.h, ,
-		[CFLAGS="$CFLAGS -I../getopt"])
+      [CFLAGS="$CFLAGS -I../getopt"])
+
+AC_ARG_WITH(gnugetopt,
+   [  --with-getopt=DIR       specifies the getopt library location directory],
+   [ if test x$withval=yes; then
+        AC_MSG_WARN(Usage is: --with-getopt=DIR) 
+     else
+        GETOPT_LIBS="-L$withval"
+     fi
+   ]
+)
 
 OWN_GETOPT=""
 AC_CHECK_FUNC(getopt_long, , [
-        LIBS="$LIBS -L/usr/local/lib"
-	        AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt",
-				OWN_GETOPT="1")])
+        LIBS="$LIBS $GETOPT_LIBS"
+           AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt",
+            OWN_GETOPT="1")])
 
 dnl ======================== Checks for X base support 
 
 if test "$no_x" = yes -o "$with_x" = "no"
 then
-	x_support="no"
-	XPM_CFLAGS=""
-	XPM_LIBS=""
-	GTK_CFLAGS=""
-	GTK_LIBS=""
+   x_support="no"
+   XPM_CFLAGS=""
+   XPM_LIBS=""
+   GTK_CFLAGS=""
+   GTK_LIBS=""
 else
-	AC_PATH_X
+   AC_PATH_X
 
-	AC_CHECK_LIB(Xpm, XpmWriteFileFromPixmap, [
-			XPM_CFLAGS="-I$x_includes"
-			XPM_LIBS="-L$x_libraries -lX11 -lXpm"
-			AC_DEFINE(XPM)
-		],
-		[ AC_MSG_ERROR(not found library: libXpm !!!) ],
-		[ -L$x_libraries -lX11 ]
-	) 
+   AC_CHECK_LIB(Xpm, XpmWriteFileFromPixmap, [
+         XPM_CFLAGS="-I$x_includes"
+         XPM_LIBS="-L$x_libraries -lX11 -lXpm"
+         AC_DEFINE(XPM)
+      ],
+      [ AC_MSG_WARN(not found library: libXpm !!!) ],
+      [ -L$x_libraries -lX11 ]
+   ) 
 
-	AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
-	if test "$GTK_CONFIG" = no
-	then
-		AC_MSG_ERROR(Cannot find gtk-config.)
-	else
-		GTK_CFLAGS=`$GTK_CONFIG --cflags`
-		GTK_LIBS=`$GTK_CONFIG --libs`
-	fi	
-	x_support="yes"	
+   AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
+   if test "$GTK_CONFIG" = no
+   then
+      AC_MSG_ERROR(Cannot find gtk-config.)
+   else
+      GTK_CFLAGS=`$GTK_CONFIG --cflags`
+      GTK_LIBS=`$GTK_CONFIG --libs`
+   fi   
+   x_support="yes"   
+
+   XGNOKIIDIR="$prefix/share"
+   AC_ARG_WITH(xgnokiidir,
+      [  --with-xgnokiidir=DIR   specifies the base for xgnokii],
+      [ if test x$withval = xyes
+        then 
+         AC_MSG_WARN(Usage is: --with-xgnokiilib=DIR)
+        else
+         XGNOKIIDIR="$withval"
+        fi
+      ]
+   )
+
 fi
-
 
 dnl ======================== Additional switches
 
 AC_ARG_ENABLE(security, 
-	[  --enable-security       enable all security features ],
-	[ AC_DEFINE(SECURITY)
-	  security="yes" ],
-	[ security="no"  ]
+   [  --enable-security       enable all security features ],
+   [ AC_DEFINE(SECURITY)
+     security="yes" ],
+   [ security="no"  ]
 )
 
 AC_ARG_ENABLE(win32, 
-	[  --enable-win32          if you want win32 suport ],
-	[ win32="-DWIN32" ],
-	[ win32=""]
-)
-
-AC_ARG_WITH(model, 
-	[  --with-model=MODEL      model of the mobile phone ],
-	[ model="$withval" ]
-)
-
-AC_ARG_WITH(port, 
-	[  --with-port=PORT        serial port for communication ],
-	[ port="$withval" ]
+   [  --enable-win32          if you want win32 suport ],
+   [ AC_DEFINE(WIN32)
+     win32="-DWIN32" ],
+   [ win32=""]
 )
 
 
@@ -343,12 +370,13 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(mktime select strdup strstr strtol strtok strsep snprintf)
 
 PACKAGE=gnokii
+XPACKAGE=xgnokii
 VERSION=`cat VERSION`
 XVERSION=`cat xgnokii/VERSION`
 
 case "$INSTALL" in
   'config/install-sh -c') INSTALL=`pwd`/$INSTALL
-	;;
+   ;;
 esac
 
 SHELL=${CONFIG_SHELL-/bin/sh}
@@ -356,7 +384,7 @@ SHELL=${CONFIG_SHELL-/bin/sh}
 AC_SUBST(SHELL)
 case "$build_os" in
   solaris*) SHELL=/bin/ksh
-	;;
+   ;;
 esac
 
 AC_CONFIG_HEADER(include/config.h)
@@ -366,9 +394,9 @@ AC_SUBST(ARCH)
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(XVERSION)
-AC_SUBST(model)
-AC_SUBST(port)
-AC_SUBST(win32)
+AC_SUBST(XPACKAGE)
+AC_SUBST(XGNOKIIDIR)
+AC_SUBST(exec_prefix)
 AC_SUBST(USE_NLS)
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
@@ -376,19 +404,17 @@ AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LIBS)
 AC_SUBST(XPM_CFLAGS)
 AC_SUBST(XPM_LIBS)
-AC_SUBST(TM_CFLAGS)
-AC_SUBST(TERMIOS_CFLAGS)
 AC_SUBST(OWN_GETOPT)
 
 AC_OUTPUT(
-	include/config.h
-	Makefile.global
-	po/Makefile.in
-	packaging/Debian/changelog
-	packaging/RedHat/gnokii.spec
-	packaging/Slackware/SlackBuild,
-	[sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile]
-	)
+   include/config.h
+   Makefile.global
+   po/Makefile.in
+   packaging/Debian/changelog
+   packaging/RedHat/gnokii.spec
+   packaging/Slackware/SlackBuild,
+   [sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile]
+   )
 
 
 dnl ======================== Final report
@@ -408,11 +434,9 @@ echo "
  
   See file COPYING for more details.
 
-    Host system:	$host_os
+    Host system:        $host_os
     Gnokii version:     $VERSION
-    Xgnokii version:	$XVERSION
-    Phone model:        $model
-    Serial port:        $port
+    Xgnokii version:    $XVERSION
     X (GTK) support:    $x_support
     Debug:              $debug
     XDebug:             $xdebug

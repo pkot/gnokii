@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -15,9 +17,11 @@
   wait for GUI application. Well, our test tool is now really powerful and
   useful :-)
 
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.108  2000-12-19 16:18:16  pkot
+  configure script updates and added shared function for configfile reading
 
+  
 */
 
 #include <stdio.h>
@@ -62,12 +66,8 @@ char *model;      /* Model from .gnokiirc file. */
 char *Port;       /* Serial port from .gnokiirc file */
 char *Initlength; /* Init length from .gnokiirc file */
 char *Connection; /* Connection type from .gnokiirc file */
-
+char *BinDir;     /* Binaries directory from .gnokiirc file - not used here yet */
 /* Local variables */
-
-char *DefaultModel = MODEL; /* From Makefile */
-char *DefaultPort = PORT;
-char *DefaultConnection = "serial";
 
 char *GetProfileCallAlertString(int code) {
 
@@ -492,7 +492,9 @@ int main(int argc, char *argv[])
 #endif
 
   /* Read config file */
-  readconfig();
+  if (readconfig(&model, &Port, &Initlength, &Connection, &BinDir) < 0) {
+          exit(-1);
+  }
 
   /* Handle command line arguments. */
 
@@ -2982,53 +2984,6 @@ int setspeeddial(char *argv[]) {
   GSM->Terminate();
 
   return 0;
-}
-
-void readconfig(void)
-{
-
-  struct CFG_Header *cfg_info;
-  char *homedir;
-  char rcfile[200];
-
-#ifdef WIN32
-  homedir = getenv("HOMEDRIVE");
-  strncpy(rcfile, homedir ? homedir : "", 200);
-  homedir = getenv("HOMEPATH");
-  strncat(rcfile, homedir ? homedir : "", 200);
-  strncat(rcfile, "\\_gnokiirc", 200);
-#else
-  homedir = getenv("HOME");
-
-  if (homedir)
-    strncpy(rcfile, homedir, 200);
-  strncat(rcfile, "/.gnokiirc", 200);
-#endif
-  
-    /* Try opening .gnokirc from users home directory first */
-  if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
-      /* It failed so try for /etc/gnokiirc */
-    if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL ) {
-	/* That failed too so go with defaults... */
-      fprintf(stderr, _("Couldn't open %s or /etc/gnokiirc, using default config\n"), rcfile);
-    }
-  }
-
-  model = CFG_Get(cfg_info, "global", "model");
-  if (!model)
-    model = DefaultModel;
-
-  Port = CFG_Get(cfg_info, "global", "port");
-  if (!Port)
-    Port = DefaultPort;
-
-  Initlength = CFG_Get(cfg_info, "global", "initlength");
-  if (!Initlength)
-    Initlength = "default";
-
-  Connection = CFG_Get(cfg_info, "global", "connection");
-  if (!Connection)
-    Connection = DefaultConnection;
 }
 
 /* Getting the status of the display. */

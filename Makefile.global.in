@@ -1,5 +1,7 @@
 
 #
+# $Id$
+#
 # Global Makefiles configuration for the GNOKII.
 #
 # Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
@@ -8,56 +10,48 @@
 
 
 
-SHELL		= @SHELL@
+SHELL          = @SHELL@
 
-LD		= @LD@
-LDREL		= -r
-LDOUT		= -o
+LD             = @LD@
+LDREL          = -r
+LDOUT          = -o
 
-PACKAGE 	= gnokii
-XPACKAGE	= xgnokii
-VERSION 	= @VERSION@
-XVERSION	= @XVERSION@
+PACKAGE        = gnokii
 
-MODEL		= -DMODEL="\"@model@\""
-PORT		= -DPORT="\"@port@\""
-WIN32		= @win32@
-USE_NLS         = @USE_NLS@
+srcdir         = @srcdir@
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
 
-srcdir 		= @srcdir@
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
+bindir         = @bindir@
+sbindir        = @sbindir@
+libdir         = @libdir@/${PACKAGE}
+xgnokii_libdir = @libdir@/${XPACKAGE}
+mandir         = @mandir@/man1/
+docdir         = ${prefix}/doc/${PACKAGE}
+locdir         = @datadir@/locale
 
-bindir		= @bindir@
-sbindir		= @sbindir@
-libdir		= @libdir@/${PACKAGE}
-xgnokii_libdir	= @libdir@/${XPACKAGE}
-mandir		= @mandir@/man1/
-docdir		= ${prefix}/doc/${PACKAGE}
-locdir		= @datadir@/locale
+BIN_MODE       = 0755
+TEXT_MODE      = 0444
 
-BIN_MODE	= 0755
-TEXT_MODE	= 0444
+INSTALL        = @INSTALL@
+RM             = @RM@ -f
+FIND           = @FIND@
+MAKE           = @MAKE@
+XGETTEXT       = @XGETTEXT@
+MSGFMT         = @MSGFMT@
 
-INSTALL		= @INSTALL@
-RM		= @RM@ -f
-FIND		= @FIND@
-MAKE		= @MAKE@
-XGETTEXT	= @XGETTEXT@
-MSGFMT		= @MSGFMT@
+CC             = @CC@
+CFLAGS         = @CFLAGS@
+LIBS           = @LIBS@
+LEX            = @LEX@
 
-CC		= @CC@
-CFLAGS		= @CFLAGS@
-LIBS		= @LIBS@
-LEX		= @LEX@
-
-GTK_CFLAGS	= @GTK_CFLAGS@
-GTK_LIBS	= @GTK_LIBS@
-PTHREAD_CFLAGS	= @PTHREAD_CFLAGS@
-PTHREAD_LIBS	= @PTHREAD_LIBS@
-XPM_LIBS 	= @XPM_LIBS@
-XPM_CFLAGS	= @XPM_CFLAGS@
-OWN_GETOPT	= @OWN_GETOPT@
+GTK_CFLAGS     = @GTK_CFLAGS@
+GTK_LIBS       = @GTK_LIBS@
+PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+PTHREAD_LIBS   = @PTHREAD_LIBS@
+XPM_LIBS       = @XPM_LIBS@
+XPM_CFLAGS     = @XPM_CFLAGS@
+OWN_GETOPT     = @OWN_GETOPT@
 
 #
 # Global include directory 
@@ -73,8 +67,6 @@ ifdef WIN32
 endif
 
 
-# FIXME: move this away to config.h
-CFLAGS += $(MODEL) $(PORT) $(WIN32) $(TERMIOS_CFLAGS) $(TM_CFLAGS)
-CFLAGS += -I $(GNOKII_INCLUDE) -DVERSION=\"$(VERSION)\"
+CFLAGS += -I $(GNOKII_INCLUDE)
 LDFLAGS = -s $(LIBS)
 
