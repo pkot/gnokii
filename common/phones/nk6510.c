@@ -1886,18 +1886,16 @@ static gn_error NK6510_SetAlarm(gn_data *data, struct gn_statemachine *state)
 static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error			e = GN_ERR_NONE;
-	int				i, year;
+	int				i;
 
 	if (!data || !data->calnote) return GN_ERR_INTERNALERROR;
 
-	year = 	data->calnote->time.year;
-	dprintf("Year: %i\n", data->calnote->time.year);
 	switch (message[3]) {
 	case NK6510_SUBCAL_NOTE_RCVD:
 		return calnote_decode(message, length, data);
 		break;
 	case NK6510_SUBCAL_INFO_RCVD:
-		dprintf("Calendar Notes Info received! %i\n", message[4] * 256 + message[5]);
+		dprintf("Calendar Notes Info received!\n Total count: %i\n", message[4] * 256 + message[5]);
 		data->calnote_list->number = message[4] * 256 + message[5];
 		dprintf("Location of Notes: ");
 		for (i = 0; i < data->calnote_list->number; i++) {

@@ -212,8 +212,8 @@ static gn_error calnote_get_times(unsigned char *block, gn_calnote *c)
 
 	c->time.hour = block[0];
 	c->time.minute = block[1];
-	c->recurrence = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
-	alarmdiff = (((unsigned int)block[2]) << 8) + block[3];
+	c->recurrence = (block[4] * 256 + block[5]) * 60;
+	alarmdiff = block[2] * 256 + block[3];
 
 	if (alarmdiff != 0xffff) {
 		e = calnote_get_alarm(alarmdiff * 60, &(c->time), &(c->alarm.timestamp));
@@ -235,13 +235,11 @@ gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 
 	block = message + 12;
 
-	data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
-	data->calnote->time.year = (((unsigned int)message[8]) << 8) + message[9];
+	data->calnote->location = message[4] * 256 + message[5];
+	data->calnote->time.year = message[8] * 256 + message[9];
 	data->calnote->time.month = message[10];
 	data->calnote->time.day = message[11];
 	data->calnote->time.second = 0;
-
-	dprintf("Year: %i\n", data->calnote->time.year);
 
 	switch (data->calnote->type = message[6]) {
 	case GN_CALNOTE_MEETING:
