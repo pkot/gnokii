@@ -85,7 +85,6 @@ distclean:	clean
 	fi
 	$(RM) Makefile.global config.cache config.log config.status \
 		include/config.h \
-		include/config.h.in \
 		packaging/RedHat/gnokii.spec \
 		packaging/Slackware/SlackBuild \
 		po/Makefile.in \

@@ -9,6 +9,7 @@ build:	build-stamp
 build-stamp:
 	dh_testdir
 #	if [ ! -f ./configure ] ; then autoconf ; fi
+#	if [ ! -f include/config.h.in ] ; then autoheader ; fi
 	./configure --prefix=/usr --with-x
 #	./configure --prefix=/usr --with-x --enable-debug --enable-xdebug --enable-rlpdebug
 	make

@@ -13,6 +13,7 @@
       patch for mygnokii)                            (BORBELY Zoltan)
     o configure.in updates for autoheader            (BORBELY Zoltan)
     o config.h.in.in removed                         (BORBELY Zoltan)
+    o autoheader specific cleanup in various files   (BORBELY Zoltan)
 
 0.4.0pre17
 ==========

@@ -1,3 +1,10 @@
+gnokii (0.4.0_pre17) unstable; urgency=low
+
+  * included a test in debian/rules to check for include/config.h.in or run
+    autoheader, but commented it out
+    
+ -- BORBELY Zoltan <bozo@andrews.hu>  Sat, 13 Apr 2002 21:30:34 +0200
+
 gnokii (0.3.3) unstable; urgency=low
 
   * Pawel has be notified that lintian does not like the "_" and he has
