@@ -289,8 +289,7 @@ AC_CHECK_FUNC(getopt_long, , [
 
 dnl ======================== Checks for X base support 
 
-if test "$no_x" = yes -o "$with_x" = "no"
-then
+if test "$no_x" = yes -o "$with_x" = "no"; then
    x_support="no"
    XPM_CFLAGS=""
    XPM_LIBS=""
@@ -299,37 +298,50 @@ then
 else
    AC_PATH_X
 
-   AC_CHECK_LIB(Xpm, XpmWriteFileFromPixmap, [
-         XPM_CFLAGS="-I$x_includes"
-         XPM_LIBS="-L$x_libraries -lX11 -lXpm"
-         AC_DEFINE(XPM)
-      ],
-      [ AC_MSG_WARN(not found library: libXpm !!!) ],
-      [ -L$x_libraries -lX11 ]
-   ) 
-
-   AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
-   if test "$GTK_CONFIG" = no
-   then
-      AC_MSG_ERROR(Cannot find gtk-config.)
+   if test "x$x_libraries" = "xNONE"; then
+      x_support="no"
+      XPM_CFLAGS=""
+      XPM_LIBS=""
+      GTK_CFLAGS=""
+      GTK_LIBS=""
+      AC_MSG_WARN(Cannot find library libX11.)
+      AC_MSG_WARN(Disabling xgnokii.)
    else
-      GTK_CFLAGS=`$GTK_CONFIG --cflags`
-      GTK_LIBS=`$GTK_CONFIG --libs`
-   fi   
-   x_support="yes"   
+      AC_CHECK_LIB(Xpm, XpmWriteFileFromPixmap, [
+            XPM_CFLAGS="-I$x_includes"
+            XPM_LIBS="-L$x_libraries -lX11 -lXpm"
+            AC_DEFINE(XPM)
+         ],
+         [ AC_MSG_WARN(Cannot found library libXpm.) ],
+         [ -L$x_libraries -lX11 ]
+      ) 
 
-   XGNOKIIDIR="$prefix/share"
-   AC_ARG_WITH(xgnokiidir,
-      [  --with-xgnokiidir=DIR   specifies the base for xgnokii],
-      [ if test x$withval = xyes
-        then 
-         AC_MSG_WARN(Usage is: --with-xgnokiilib=DIR)
-        else
-         XGNOKIIDIR="$withval"
-        fi
-      ]
-   )
+      AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
+      if test "$GTK_CONFIG" = no; then
+         x_support="no"
+         XPM_CFLAGS=""
+         XPM_LIBS=""
+         GTK_CFLAGS=""
+         GTK_LIBS=""
+         AC_MSG_WARN(Cannot find gtk-config.)
+         AC_MSG_WARN(Disabling xgnokii.)
+      else
+         GTK_CFLAGS=`$GTK_CONFIG --cflags`
+         GTK_LIBS=`$GTK_CONFIG --libs`
+         x_support="yes"   
 
+         XGNOKIIDIR="$prefix/share"
+         AC_ARG_WITH(xgnokiidir,
+            [  --with-xgnokiidir=DIR   specifies the base for xgnokii],
+            [ if test x$withval = xyes; then 
+                 AC_MSG_WARN(Usage is: --with-xgnokiilib=DIR)
+              else
+                 XGNOKIIDIR="$withval"
+              fi
+            ]
+         )
+      fi
+   fi
 fi
 
 dnl ======================== Additional switches
