@@ -61,16 +61,16 @@ resets the phone.
 
 .SS CALENDAR
 .TP 
-.BR "\-\-getcalendarnote \fIindex\fP [\-v]"
-get the note with number \fIindex\fR from calendar.
+.BR "\-\-getcalendarnote \fIstart\fP [\fIsend\fP] [\-v]"
+get the note with numbers from \fIstart\fR to \fIend\fR from calendar.
 .PP 
 [\-v] \- output in vCalendar 1.0 format
 .TP 
 .BR "\-\-writecalendarnote"
 write the note to calendar.
 .TP 
-.BR "\-\-deletecalendarnote \fIindex\fP"
-delete the note with number [\fIindex\fR] from calendar.
+.BR "\-\-deletecalendarnote \fIstart\fP [\fIend\fP]"
+delete the note with numbers from \fIstart\fR to \fIend\fR from calendar.
 
 .SS SMS
 .TP 
@@ -193,4 +193,4 @@ See also Docs/CREDITS from Gnokii sources.
 This program is distributed under the GNU Public License.
 
 .SH "SEE ALSO"
-gnokiid, xgnokii, xlogos
+gnokiid, xgnokii

@@ -65,11 +65,13 @@ rm -rf ${RPM_BUILD_ROOT}
 %files xgnokii
 %defattr(-,root,root)
 /usr/bin/xgnokii
-/usr/bin/xlogos
 /usr/bin/todologo
 /usr/share/xgnokii
 
 %changelog
+
+* Sun Oct  2 2001 Pawel Kot <pkot@linuxnews.pl>
+- removes xlogos
 
 * Thu Jan 11 2001 Pawel Kot <pkot@linuxnews.pl>
 - misc updates

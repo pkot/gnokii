@@ -37,8 +37,7 @@ ifndef WIN32
 DIRS +=	utils
 endif
 
-GTK_DIRS =  xgnokii \
-            xlogos
+GTK_DIRS =  xgnokii
 
 PO_DIR   = 	po
 DOCS_DIR = 	Docs
