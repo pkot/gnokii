@@ -38,6 +38,12 @@
  * Added MAINTAINERS file                                 (Pawel Kot)
  * Follow the convention: struct fields begin with the capital
    letter                                                 (Pawel Kot)
+ * Docs updates
+    o "call divert is active" documented             (BORBELY Zoltan)
+ * 6110 series updates
+    o SMS reading works with the new SMS subsystem   (BORBELY Zoltan)
+    o "call divert is active" frame marked as unsolicited in nokia.c
+                                                     (BORBELY Zoltan)
 
 0.4.0pre20
 ==========
