@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.12  2001-11-15 12:04:05  pkot
+  Revision 1.13  2001-11-17 20:14:15  pkot
+  Nasty bug with counting message length. Workaround applied. Needs fixing.
+
+  Revision 1.12  2001/11/15 12:04:05  pkot
   Faster initialization for 6100 series (don't check for dlr3 cable)
 
   Revision 1.11  2001/09/09 21:45:49  machek
@@ -157,9 +160,9 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 #if 0
 	if (isprint(rx_byte))
-		fprintf(stderr, "[%02x%c]", (unsigned char) rx_byte, rx_byte);
+		dprintf("[%02x%c]", (unsigned char) rx_byte, rx_byte);
 	else
-		fprintf(stderr, "[%02x ]", (unsigned char) rx_byte);
+		dprintf("[%02x ]", (unsigned char) rx_byte);
 #endif
 
 	/* XOR the byte with the current checksum */
@@ -310,11 +313,11 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 							m->Malloced = 0;
 							m->MessageBuffer = NULL;
 						}
-						m->Malloced = frm_num *m->MessageLength;
+						m->Malloced = frm_num * m->MessageLength;
 						m->MessageBuffer = (char *) malloc(m->Malloced);
 
 					} else if (m->FramesToGo != frm_num) {
-						fprintf(stdout, "Missed a frame in a multiframe message.\n");
+						dprintf("Missed a frame in a multiframe message.\n");
 						/* FIXME - we should make sure we don't ack the rest etc */
 					}
 
@@ -324,9 +327,9 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 					}
 
 					memcpy(m->MessageBuffer + m->MessageLength, i->MessageBuffer,
-					       i->FrameLength - 2 - (i->FrameLength % 2));
+					       i->FrameLength - 2);/* - (i->FrameLength % 2)); */
 
-					m->MessageLength += i->FrameLength - 2 - (i->FrameLength % 2);
+					m->MessageLength += i->FrameLength - 2;/* - (i->FrameLength % 2); */
 
 					m->FramesToGo--;
 
