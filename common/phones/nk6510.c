@@ -109,6 +109,12 @@ static GSM_Error P6510_GetStartupGreeting(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 
+#ifdef  SECURITY
+static GSM_Error P6510_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
+#endif
+
+
 static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -124,6 +130,10 @@ static GSM_Error P6510_IncomingCallDivert(int messagetype, unsigned char *messag
 static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data);
+
+#ifdef  SECURITY
+static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
+#endif
 
 
 static int GetMemoryType(GSM_MemoryType memory_type);
@@ -149,6 +159,9 @@ static GSM_IncomingFunctionType P6510_IncomingFunctions[] = {
 	{ P6510_MSG_PROFILE,    P6510_IncomingProfile },
 	{ P6510_MSG_RINGTONE,	P6510_IncomingRingtone },
 	{ P6510_MSG_KEYPRESS,	P6510_IncomingKeypress },
+#ifdef  SECURITY
+	{ P6510_MSG_SECURITY,	P6510_IncomingSecurity },
+#endif
 	{ 0, NULL }
 };
 
@@ -266,6 +279,12 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_PressOrReleaseKey(data, state, true);
 	case GOP_ReleasePhoneKey:
 		return P6510_PressOrReleaseKey(data, state, false);
+#ifdef  SECURITY
+	case GOP_GetSecurityCodeStatus:
+		return P6510_GetSecurityCodeStatus(data, state);
+	case GOP_EnterSecurityCode:
+		return P6510_EnterSecurityCode(data, state);
+#endif
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -1044,18 +1063,6 @@ static GSM_Error P6510_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
  * soon.
  * 10.07.2002: Almost all frames should be known know :-) (Markus)
  */
-
-/**
-00 01 00 02 00 00 00 55 55 01 02 2a 31 00 00 00 |        UU  *1   
-00 03 82 0c 01 08 02 81 fd 00 00 00 00 00 82 0c |         ý       
-02 08 07 91 94 71 22 72 00 00 80 09 05 05 76 b1 |      q"r      v±
-db ee 06
-
-00 01 00 02 01 00 01 55 55 01 02 30 31 00 00 00 
-00 04 82 0C 01 08 0C 91 94 71 94 40 56 87 82 0C 
-02 08 07 91 94 71 22 72 00 00 80 0C 05 05 76 B1 
-DB 2E 06 00 93 56 00 20 00 00 55
-*/
 
 static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
@@ -2725,6 +2732,104 @@ static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state
 	req[5] = press ? 0x01 : 0x02;
 
 	SEND_MESSAGE_BLOCK(P6510_MSG_KEYPRESS, 11);
+}
+
+/*****************/
+/*** SECURITY  ***/
+/*****************/
+
+static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	/*
+	  01 4e 00 12 05 12 02 00 00 00
+	  01 4e 00 09 06 00
+	 */
+	switch (message[3]) {
+	case 0x08:
+		dprintf("Security Code OK!\n");
+		break;
+	case 0x09:
+		switch (message[4]) {
+		case 0x06:
+			dprintf("PIN wrong!\n");
+			break;
+		case 0x09:
+			dprintf("PUK wrong!\n");
+			break;
+		default:
+			dprintf(" unknown security Code wrong!\n");
+			break;
+		}
+		break;
+	case 0x12:
+		dprintf("Security Code status received: ");
+		switch (message[4]) {
+		case 0x01:
+			dprintf("waiting for Security Code.\n");
+			data->SecurityCode->Type = GSCT_SecurityCode;
+			break;
+		case 0x07:
+		case 0x02:
+			dprintf("waiting for PIN.\n");
+			data->SecurityCode->Type = GSCT_Pin;
+			break;
+		case 0x03:
+			dprintf("waiting for PUK.\n");
+			data->SecurityCode->Type = GSCT_Puk;
+			break;
+		case 0x05:
+			dprintf("PIN ok, SIM ok\n");
+			data->SecurityCode->Type = GSCT_None;
+			break;
+		case 0x06:
+			dprintf("No input status\n");
+			data->SecurityCode->Type = GSCT_None;
+			break;
+		case 0x16:
+			dprintf("No SIM!\n");
+			data->SecurityCode->Type = GSCT_None;
+			break;
+		case 0x1A:
+			dprintf("SIM rejected!\n");
+			data->SecurityCode->Type = GSCT_None;
+			break;
+		default: 
+			dprintf(_("Unknown!\n")); 
+			return GE_UNHANDLEDFRAME;
+		}
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x08 (%d)\n", message[3]);
+		return GE_NONE;
+		break;
+	}
+	return GE_NONE;
+}
+
+static GSM_Error P6510_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x011, 0x00};
+
+	if (!data->SecurityCode) return GE_INTERNALERROR;
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_SECURITY, 5);
+}
+
+static GSM_Error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[35] = {FBUS_FRAME_HEADER, 0x07, 
+				 0x02 }; /* 0x02 PIN, 0x03 PUK */
+	int len ;
+	
+	/* Only PIN for the moment */
+
+	if (!data->SecurityCode) return GE_INTERNALERROR;
+
+	len = strlen(data->SecurityCode->Code);
+	memcpy(req + 5, data->SecurityCode->Code, len);
+	req[5 + len] = '\0';
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_SECURITY, 6 + len);
 }
 
 /********************************/
