@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.24  2001-11-19 15:53:16  pkot
+  Revision 1.25  2001-11-19 16:24:31  pkot
+  Grrrr... I should have check if I have fixed this typo
+
+  Revision 1.24  2001/11/19 15:53:16  pkot
   Typos
 
   Revision 1.23  2001/11/19 13:46:42  pkot
@@ -699,7 +702,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
         /* getfolders */
         case 0x7B:
                 i = 5;
-		memset(data->SMSFolderList, 0, sizeof(SMSFolderList));
+		memset(data->SMSFolderList, 0, sizeof(SMS_FolderList));
 		dprintf("Message: %d SMS Folders received:\n", message[4]);
 
 		strcpy(data->SMSFolderList->Folder[1].Name, "               ");
@@ -730,7 +733,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
         /* getfolderstatus */
         case 0x6C:
-		memset(data->SMSFolder, 0, sizeof(SMSFolder));
+		memset(data->SMSFolder, 0, sizeof(SMS_Folder));
                 dprintf("Message: SMS Folder status received: \n" );
 		data->SMSFolder->FolderID = data->SMSMessage->MemoryType;
                 data->SMSFolder->number = (message[5] * 256) + message[5];
