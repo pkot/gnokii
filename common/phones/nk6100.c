@@ -2139,7 +2139,27 @@ static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int l
 static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01};
-	unsigned char voice_end[] = {0x01, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01};
+	/* order: req, voice_end */
+	unsigned char voice_end[] = {0x05, 0x01, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00};
+	/* order: req, data_nondigital_end, data_nondigital_final */
+	unsigned char data_nondigital_end[]   = { 0x01,  /* make a data call = type 0x01 */
+						  0x02,0x01,0x05,0x81,0x01,0x00,0x00,0x01,0x02,0x0a,
+						  0x07,0xa2,0x88,0x81,0x21,0x15,0x63,0xa8,0x00,0x00 };
+	unsigned char data_nondigital_final[] = { FBUS_FRAME_HEADER, 0x42,0x05,0x01,
+						  0x07,0xa2,0xc8,0x81,0x21,0x15,0x63,0xa8,0x00,0x00,
+						  0x07,0xa3,0xb8,0x81,0x20,0x15,0x63,0x80,0x01,0x60 };
+	/* order: req, data_digital_pred1, data_digital_pred2, data_digital_end */
+	unsigned char data_digital_pred1[]    = { FBUS_FRAME_HEADER, 0x42,0x05,0x01,
+						  0x07,0xa2,0x88,0x81,0x21,0x15,0x63,0xa8,0x00,0x00,
+						  0x07,0xa3,0xb8,0x81,0x20,0x15,0x63,0x80 };
+	unsigned char data_digital_pred2[]    = { FBUS_FRAME_HEADER, 0x42,0x05,0x81,
+						  0x07,0xa1,0x88,0x89,0x21,0x15,0x63,0xa0,0x00,0x06,
+						  0x88,0x90,0x21,0x48,0x40,0xbb,0x07,0xa3,0xb8,0x81,
+						  0x20,0x15,0x63,0x80 };
+	unsigned char data_digital_end[]      = { 0x01,
+						  0x02,0x01,0x05,0x81,0x01,0x00,0x00,0x01,0x02,0x0a,
+						  0x07,0xa1,0x88,0x89,0x21,0x15,0x63,0xa0,0x00,0x06,
+						  0x88,0x90,0x21,0x48,0x40,0xbb };
 	unsigned char *pos;
 	int n;
 
@@ -2156,29 +2176,51 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 
 	switch (data->CallInfo->Type) {
 	case GSM_CT_VoiceCall:
-		*pos++ = 0x05;
 		switch (data->CallInfo->SendNumber) {
 		case GSM_CSN_Never:
-			voice_end[4] = 0x02;
+			voice_end[5] = 0x02;
 			break;
 		case GSM_CSN_Always:
-			voice_end[4] = 0x03;
+			voice_end[5] = 0x03;
 			break;
 		case GSM_CSN_Default:
-			voice_end[4] = 0x01;
+			voice_end[5] = 0x01;
 			break;
 		default:
 			return GE_INTERNALERROR;
 		}
-		memcpy(pos, voice_end, 9);
-		pos += 9;
+		/* here in the past: voice_end had 8 bytes, memcpied   9 bytes, sent 1+9 bytes
+		 * fbus-6110.c:      req_end   had 9 bytes, memcpied  10 bytes, sent   8 bytes
+		 * currently:        voice_end has 8 bytes, memcpying  8 bytes, sent   8 bytes
+		 */
+		memcpy(pos, voice_end, ARRAY_LEN(voice_end));
+		pos += ARRAY_LEN(voice_end);
+		if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
+		break;
+
+	case GSM_CT_NonDigitalDataCall:
+		memcpy(pos, data_nondigital_end, ARRAY_LEN(data_nondigital_end));
+		pos += ARRAY_LEN(data_nondigital_end);
+		if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
+/*		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY; */
+		if (SM_SendMessage(state, ARRAY_LEN(data_nondigital_final), 0x01, data_nondigital_final) != GE_NONE) return GE_NOTREADY;
+		return GE_NONE;
+		break;
+
+	case GSM_CT_DigitalDataCall:
+		if (SM_SendMessage(state, ARRAY_LEN(data_digital_pred1), 0x01, data_digital_pred1) != GE_NONE) return GE_NOTREADY;
+		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY;
+		if (SM_SendMessage(state, ARRAY_LEN(data_digital_pred2), 0x01, data_digital_pred2) != GE_NONE) return GE_NOTREADY;
+		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY;
+		memcpy(pos, data_digital_end, ARRAY_LEN(data_digital_end));
+		pos += ARRAY_LEN(data_digital_end);
+		if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
 		break;
 	default:
 		dprintf("Invalid call type %d\n", 1);
 		return GE_INTERNALERROR;
 	}
 
-	if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x01);
 }
 

@@ -111,7 +111,6 @@ gint max_phonebook_sim_name_length;
 gint max_phonebook_sim_number_length;
 char folders[MAX_SMS_FOLDERS][15];
 gint foldercount = 0, lastfoldercount = 0;
-static GSM_Statemachine state;
 
 /* Local variables */
 static char *DefaultXGnokiiDir = XGNOKIIDIR;

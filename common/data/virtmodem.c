@@ -57,7 +57,8 @@ static void VM_CharHandler(void);
 static GSM_Error VM_GSMInitialise(char *model,
 			   char *port,
 			   char *initlength,
-			   GSM_ConnectionType connection);
+			   GSM_ConnectionType connection,
+			   GSM_Statemachine *sm);
 
 /* Global variables */
 
@@ -73,17 +74,15 @@ bool UseSTDIO;	/* Use STDIO for debugging purposes instead of pty */
 bool CommandMode;
 
 pthread_t Thread;
-bool RequestTerminate;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
 bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode, bool GSMInit)
 {
 	int rtn;
-	GSM_Statemachine sm;
+	static GSM_Statemachine sm;
 
 	CommandMode = true;
-	RequestTerminate = false;
 
 	if (debug_mode == true) {
 		UseSTDIO = true;
@@ -93,7 +92,7 @@ bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 
 	if (GSMInit) {
 		dprintf("Initialising GSM\n");
-		if ((VM_GSMInitialise(model, port, initlength, connection) != GE_NONE)) {
+		if ((VM_GSMInitialise(model, port, initlength, connection, &sm) != GE_NONE)) {
 			fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
 			return (false);
 		}
@@ -137,7 +136,7 @@ static void VM_ThreadLoop(void)
 	ufds.fd = PtyRDFD;
 	ufds.events = POLLIN;
 
-	while (!RequestTerminate) {
+	while (!TerminateThread) {
 		if (!CommandMode) {
 			sleep(1);
 		} else {  /* If we are in data mode, leave it to datapump to get the data */
@@ -153,9 +152,14 @@ static void VM_ThreadLoop(void)
 				exit (-1);
 
 			default:
-				if (ufds.revents == POLLIN) {
+				if (ufds.revents & POLLIN)
 					VM_CharHandler();
-				} else usleep(500); /* Probably the file has been closed */
+				if ((ufds.revents & POLLHUP) && !(ufds.revents & POLLIN)) {
+					TerminateThread = true;
+					return;
+				}
+				if (!(ufds.revents & POLLIN)) /* Probably the file has been closed */
+					usleep(500);
 				break;
 			}
 		}
@@ -167,7 +171,7 @@ static void VM_ThreadLoop(void)
 void VM_Terminate(void)
 {
 	/* Request termination of thread */
-	RequestTerminate = true;
+	TerminateThread = true;
 
 	/* Now wait for thread to terminate. */
 	pthread_join(Thread, NULL);
@@ -308,7 +312,7 @@ static void VM_CharHandler(void)
 		res = read(PtyRDFD, buffer, 255);
 		/* A returned value of -1 means something serious has gone wrong - so quit!! */
 		/* Note that file closure etc. should have been dealt with in ThreadLoop */
-		if (res < 0) {
+		if (res <= 0) {
 			TerminateThread = true;
 			return;
 		}
@@ -318,13 +322,12 @@ static void VM_CharHandler(void)
 }
 
 /* Initialise GSM interface, returning GSM_Error as appropriate  */
-static GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection)
+static GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection, GSM_Statemachine *sm)
 {
 	GSM_Error error;
-	static GSM_Statemachine sm;
 
 	/* Initialise the code for the GSM interface. */
-	error = GSM_Initialise(model, port, initlength, connection, RLP_DisplayF96Frame, &sm);
+	error = GSM_Initialise(model, port, initlength, connection, RLP_DisplayF96Frame, sm);
 
 	if (error != GE_NONE)
 		fprintf(stderr, _("GSM/FBUS init failed!\n"));
