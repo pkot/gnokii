@@ -1072,9 +1072,9 @@ static GSM_Error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		case SMS_BitmapData:
 			switch (sms->UserData[0].u.Bitmap.type) {
 			case GN_BMP_PictureMessage:
-				size = GSM_EncodeNokiaBitmap(&(sms->UserData[i].u.Bitmap),
-							     rawsms->UserData + rawsms->UserDataLength,
-							     (i == 0));
+				size = sms_nokia_encode_bitmap(&(sms->UserData[i].u.Bitmap),
+							       rawsms->UserData + rawsms->UserDataLength,
+							       (i == 0));
 				break;
 			case GN_BMP_OperatorLogo:
 				if (!sms_encode_udh(rawsms, SMS_OpLogo)) return GE_NOTSUPPORTED;
@@ -1133,7 +1133,9 @@ static GSM_Error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		}
 
 		case SMS_NokiaText:
-			size = EncodeNokiaText(sms->UserData[i].u.Text, rawsms->UserData + rawsms->UserDataLength, (i == 0));
+			size = sms_nokia_encode_text(sms->UserData[i].u.Text,
+						     rawsms->UserData + rawsms->UserDataLength,
+						     (i == 0));
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			break;

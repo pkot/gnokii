@@ -42,8 +42,8 @@
  * This function adds the header as specified in the Nokia Smart Messaging
  * Specification v3.
  */
-int PackSmartMessagePart(unsigned char *msg, unsigned int size,
-			 unsigned int type, bool first)
+int sms_nokia_pack_smart_message_part(unsigned char *msg, unsigned int size,
+				      unsigned int type, bool first)
 {
 	unsigned char current = 0;
 
@@ -55,18 +55,18 @@ int PackSmartMessagePart(unsigned char *msg, unsigned int size,
 }
 
 /* Returns used length */
-int EncodeNokiaText(unsigned char *text, unsigned char *message, bool first)
+int sms_nokia_encode_text(unsigned char *text, unsigned char *message, bool first)
 {
 	int len, current = 0;
 	/* FIXME: unicode length is not as simple as strlen */
-	int type = SMS_MULTIPART_DEFAULT;
+	int type = GN_SMS_MULTIPART_DEFAULT;
 
 	len = strlen(text);
-	if (type == SMS_MULTIPART_UNICODE) len *= 2;
+	if (type == GN_SMS_MULTIPART_UNICODE) len *= 2;
 
-	current = PackSmartMessagePart(message, len, type, first);
+	current = sms_nokia_pack_smart_message_part(message, len, type, first);
 
-	if (type == SMS_MULTIPART_UNICODE)
+	if (type == GN_SMS_MULTIPART_UNICODE)
 		EncodeUnicode(message + current, text, strlen(text));
 	else
 		memcpy(message + current, text, strlen(text));
@@ -74,11 +74,11 @@ int EncodeNokiaText(unsigned char *text, unsigned char *message, bool first)
 	return current;
 }
 
-int GSM_EncodeNokiaBitmap(gn_bmp *bitmap, unsigned char *message, bool first)
+int sms_nokia_encode_bitmap(gn_bmp *bitmap, unsigned char *message, bool first)
 {
 	unsigned int current;
 
 	/* FIXME: allow for the different sizes */
-	current = PackSmartMessagePart(message, 256, SMS_MULTIPART_BITMAP, first);
+	current = sms_nokia_pack_smart_message_part(message, 256, GN_SMS_MULTIPART_BITMAP, first);
 	return gn_bmp_encode_sms(bitmap, message + current) + current;
 }

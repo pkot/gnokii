@@ -35,17 +35,17 @@
 
 /* There are type values for the different parts of the Nokia Multipart
  * Messages */
-#define SMS_MULTIPART_DEFAULT      0
-#define SMS_MULTIPART_UNICODE      1
-#define SMS_MULTIPART_BITMAP       2
-#define SMS_MULTIPART_RINGTONE     3
-#define SMS_MULTIPART_PROFILENAME  4 /* This is sick. Isn't it? */
-#define SMS_MULTIPART_RESERVED     5 /* I am really afraid what else can appear here... */
-#define SMS_MULTIPART_SCREENSAVER  6
+#define GN_SMS_MULTIPART_DEFAULT      0
+#define GN_SMS_MULTIPART_UNICODE      1
+#define GN_SMS_MULTIPART_BITMAP       2
+#define GN_SMS_MULTIPART_RINGTONE     3
+#define GN_SMS_MULTIPART_PROFILENAME  4 /* This is sick. Isn't it? */
+#define GN_SMS_MULTIPART_RESERVED     5 /* I am really afraid what else can appear here... */
+#define GN_SMS_MULTIPART_SCREENSAVER  6
 
-int PackSmartMessagePart(unsigned char *msg, unsigned int size,
-			 unsigned int type, bool first);
-int EncodeNokiaText(unsigned char *text, unsigned char *message, bool first);
-int GSM_EncodeNokiaBitmap(gn_bmp *bitmap, unsigned char *message, bool first);
+int sms_nokia_pack_smart_message_part(unsigned char *msg, unsigned int size,
+				      unsigned int type, bool first);
+int sms_nokia_encode_text(unsigned char *text, unsigned char *message, bool first);
+int sms_nokia_encode_bitmap(gn_bmp *bitmap, unsigned char *message, bool first);
 
 #endif /* _gnokii_sms_nokia_h */
