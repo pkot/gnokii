@@ -4671,7 +4671,7 @@ int main(int argc, char *argv[])
 	case '?':
 	case ':':
 		fprintf(stderr, _("Use '%s --help' for usage information.\n"), argv[0]);
-		exit(0);
+		exit(1);
 	/* Then, options with no arguments */
 	case OPT_HELP:
 		usage(stdout, -1);
