@@ -19,7 +19,7 @@
 #include "device.h"
 #include "links/utils.h"
 
-#define __links_cbus_
+#define __cbus_c
 #include "links/cbus.h"
 
 /* FIXME - pass device_* the link stuff?? */
@@ -204,8 +204,6 @@ sendat(char *msg)
 void
 internal_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 {
-	int c;
-
 	switch(type) {
 	case '=': CommandAck(type, buf, len);
 		break;
@@ -336,7 +334,7 @@ int CBUS_SendMessage(u16 message_length, u8 message_type, void * buffer)
 	return true;
 }
 
-int AT_SendMessage(u16 message_length, u8 message_type, void * buffer)
+GSM_Error AT_SendMessage(u16 message_length, u8 message_type, void * buffer)
 {
 	sendat(buffer);
 	return true;
@@ -379,8 +377,8 @@ int CBUS_TX_SendAck(u8 message_type, u8 message_seq)
 
 GSM_Error CBUS_Initialise(GSM_Link * newlink, GSM_Phone * newphone)
 {
-        setvbuf(stdout, _IONBF, NULL, 0);
-        setvbuf(stderr, _IONBF, NULL, 0);
+        setvbuf(stdout, NULL, _IONBF, 0);
+        setvbuf(stderr, NULL, _IONBF, 0);
 
 	/* 'Copy in' the global structures */
 	glink = newlink;

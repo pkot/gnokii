@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.3  2001-03-13 01:23:18  pkot
+  Revision 1.4  2001-03-13 01:24:02  pkot
+  Code cleanup - no warnings during compilation
+
+  Revision 1.3  2001/03/13 01:23:18  pkot
   Windows updates (Manfred Jonsson)
 
   Revision 1.2  2001/03/11 11:18:39  machek
@@ -59,6 +62,7 @@
 #include "gsm-common.h"
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
+#include "links/utils.h"
 
 #ifndef WIN32
   #include "device.h"
@@ -119,7 +123,7 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 	struct timeval time_diff;
 	FBUS_IncomingFrame *i = &flink.i;
-	int frm_num, seq_num, c;
+	int frm_num, seq_num;
 	FBUS_IncomingMessage *m;
 
 	//  if (isprint(rx_byte))

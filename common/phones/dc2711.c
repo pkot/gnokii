@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.1  2001-03-11 11:26:15  machek
+  Revision 1.2  2001-03-13 01:24:03  pkot
+  Code cleanup - no warnings during compilation
+
+  Revision 1.1  2001/03/11 11:26:15  machek
   Dancall support, now actually works enough to get sms messages.
 
 
@@ -27,8 +30,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "phones/generic.h"
-#include "links/fbus.h"
-#include "links/fbus-phonet.h"
+#include "links/cbus.h"
 
 /* Mobile phone information */
 
@@ -132,6 +134,7 @@ GSM_Error ATGSM_DeleteSMSMessage(GSM_SMSMessage * message)
 	sprintf(writecmd, "AT+CMGD=%d\r", message->Location);
 
 	Request(writecmd);
+	return GE_NONE;
 }
 
 
@@ -146,7 +149,7 @@ GSM_Error Initialise(char *port_device, char *initlength,
 			   GSM_ConnectionType connection,
 			   void (*rlp_callback)(RLP_F96Frame *frame))
 {
-	char model[10];
+	/* char model[10]; */
 
 	strncpy(link.PortDevice, port_device, 20);
 	link.InitLength = atoi(initlength);
