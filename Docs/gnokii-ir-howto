@@ -3,6 +3,7 @@
   Version: 1.04, 04 Aug 1999
 
   This document describes how to use the infrared-function of gnokii
+  with Nokia 6110, 6130 and 6150 models
   ______________________________________________________________________
 
   Table of Contents
@@ -98,7 +99,10 @@
   NOKIA (http://www.nokia.com ).
 
   This document is the guide to use gnokii over infrared.  It is not the
-  general gnokii-userguide and contains no part of protocol.
+  general gnokii-userguide and contains no part of protocol.  This document
+  covers only Nokia 6110, Nokia 6130 and Nokia 6150 models, as they have
+  own IrDA stack, that is incompatible with standard stacks on various
+  operating systems.
 
 
   3.  Installation
@@ -119,15 +123,16 @@
 
   3.1.  What Gnokii needs for communication over infrared
 
-  Since version **FIX_ME** gnokii contains everything that you need in
-  software for infrared-communication.
+  For a long time gnokii contains everything that you need in software
+  for infrared-communication.
 
   On the other side you need some hardware:
 
-  1. nokia mobile phone with infrared-port.  Some phones are: 6110, 6150
+  1. Nokia mobile phone with infrared-port.  The phone models are: 6110,
+     6130, 6150
 
-  2. infrared-port on your pc or notebook.  In moment only SIR works
-     with gnokii, because phones are limmited to 115200 bps.
+  2. Infrared-port on your pc or notebook.  In moment only SIR works
+     with gnokii, because phones are limited to 115200 bps.
 
 
   3.2.  Installing and Configuring the Software
@@ -166,6 +171,12 @@
 
   3. gnokiid
 
+  4. smsd
+
+  5. gnocky (which is not a part of gnokii distribution)
+
+  Also any other third party software using libgnokii can do it.
+
 
   4.  Mobiles and their software-version
 
@@ -179,26 +190,29 @@
 
   To get the software-version from your phone press in idle-mode:
 
-
        *#0000#
 
+  or
 
-
+       *#9999#
 
 
   4.2.  Tested phone-software-version
 
 
-  1. 6100
+  1. 6110
 
   o  V 4.73, 22-04-98, NSE-3
 
   o  V 5.24, 14-09-98, NSE-3
 
+  2. 6130
+
+  o  V 4.11, 10-06-98, NSK-3
 
   2. 6150
 
-  o  V 4.01, 23-09-98
+  o  V 4.01, 23-09-98, NSM-1
 
   o  V 4.12, 02-12-98, NSM-1
 
@@ -215,31 +229,37 @@
 
   o  Internal Adapters
 
-  o  Serial Adapters
+    +  Serial Adapters
 
-  o  SIR
+       -  SIR
 
-  o  FIR
+       -  FIR
 
-  o  Parallel Adapters
+    +  Parallel Adapters
 
-  o  SIR
+       -  SIR
 
-  o  FIR
+       -  FIR
 
   o  External Adapters
 
-  o  Serial Adapters
+    +  Serial Adapters (including USB adapters)
 
-  o  SIR
+       -  SIR
 
-  o  FIR
+       -  FIR
 
-  o  Parallel Adapters
+    +  USB Adapters
 
-  o  SIR
+       -  SIR
 
-  o  FIR
+       -  FIR
+
+    +  Parallel Adapters
+
+       -  SIR
+
+       -  FIR
 
   Mosts laptops have an internal infrared-port. Some motherboards - ASUS
   for example - have also a infrared-connector. On this boards you must
@@ -249,6 +269,8 @@
   reason this HowTo list all tested laptops and other hardware in each
   section.
 
+  Note that probably only internal adapters and serial adapters will work in
+  the described configurations in this HOWTO.
 
   5.1.  Laptops - who work with gnokii
 
@@ -568,7 +590,8 @@
   You can not use gnokii over infrared and linux-irda at the same time.
   If you want use gnokiis ir-communication you must put linux-irda off.
   If you want use linux-irda you must close all gnokii-applications what
-  use the infrared-port in moment.
+  use the infrared-port in moment. Note, that this applies only against
+  Nokia 6110, Nokia 6130 and Nokia 6150 mobile phones.
 
 
   7.  FAQ
@@ -582,13 +605,13 @@
   or ttyS0 up to ttyS3.
 
 
-  o  ttyS0: 3F8, IRQ: 4, COM1
+  o  ttyS0: 0x3F8, IRQ: 4, COM1
 
-  o  ttyS1: 2F8, IRQ: 3, COM2
+  o  ttyS1: 0x2F8, IRQ: 3, COM2
 
-  o  ttyS2: 3E8, IRQ: 4, COM3
+  o  ttyS2: 0x3E8, IRQ: 4, COM3
 
-  o  ttyS3: 2E8, IRQ: 3, COM4
+  o  ttyS3: 0x2E8, IRQ: 3, COM4
 
 
 

@@ -64,6 +64,8 @@
                                                 (Richard M Kreuter)
  * documentation updates
     o update gnokii.1 manpage                        (Reiner Steib)
+    o update gnokii-ir-howto: mention Nokia models it describes,
+      add note about USB adapters and fix some typos    (Pawel Kot)
 
 0.6.3
 =====
