@@ -2743,7 +2743,7 @@ static int writephonebook(int argc, char *args[])
 	int line_count = 0;
 	int subentry;
 
-	char *Line, OLine[256], BackLine[256];
+	char *Line, OLine[500], BackLine[500];
 	char *ptr;
 
 	/* Check argument */
@@ -2755,7 +2755,7 @@ static int writephonebook(int argc, char *args[])
 	memset(&entry, 0, sizeof(GSM_PhonebookEntry));
 
 	/* Go through data from stdin. */
-	while (GetLine(stdin, Line, 255)) {
+	while (GetLine(stdin, Line, 499)) {
 		strcpy(BackLine, Line);
 		line_count++;
 

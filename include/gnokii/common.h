@@ -135,7 +135,7 @@ typedef struct {
 /* Limits for sizing of array in GSM_PhonebookEntry. Individual handsets may
    not support these lengths so they have their own limits set. */
 
-#define GSM_MAX_PHONEBOOK_NAME_LENGTH   (50)	/* For 7110 */
+#define GSM_MAX_PHONEBOOK_NAME_LENGTH   (61)	/* For 6510 */
 #define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (48)	/* For 7110 */
 #define GSM_MAX_PHONEBOOK_SUB_ENTRIES   (10)	/* For 6510 */
 						/* 7110 is able to in one
