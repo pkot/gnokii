@@ -20,6 +20,9 @@
       sms sending                                      (Ulrich Hopp)
  * documentation updates
     o new Estonian translation                       (Hans Motshärg)
+ * gnokii updates
+    o --getnetworkinfo displays the LAC and cell id fields as
+      a zero padded four digit hex number           (BORBELY Zoltan)
 
 0.5.0pre4
 =========
