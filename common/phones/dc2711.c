@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.3  2001-03-23 13:40:23  chris
+  Revision 1.4  2001-04-25 12:53:07  machek
+  Added error handling to SMS receive function.
+
+  Revision 1.3  2001/03/23 13:40:23  chris
   Pavel's patch and a few fixes.
 
   Revision 1.2  2001/03/13 01:24:03  pkot
@@ -111,6 +114,11 @@ GSM_Error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
 	if (!s)
 		return GE_BUSY;
 	t = strchr(s, '\n')+1;
+	if (!strncmp(s, "+CMS ERROR: 321", 15))
+		return GE_EMPTYSMSLOCATION;
+	if (!strncmp(s, "+CMS ERROR: ", 11))
+		return GE_INTERNALERROR;
+		
 	printf("Got %s [%s] as reply for cmgr\n", s, t);
 	{
 		m->Time.Year=0;
@@ -162,7 +170,7 @@ GSM_Error Initialise(char *port_device, char *initlength,
 	link.InitLength = atoi(initlength);
 	link.ConnectionType = connection;
 
-	printf("Initializing dancall...\n");
+	fprintf(stderr, "Initializing dancall...\n");
 	switch (connection) {
 	case GCT_Serial:
 		CBUS_Initialise(&link, &phone);
