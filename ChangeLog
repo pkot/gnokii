@@ -31,6 +31,9 @@
       win32 gnokii.dll                             (BORBELY Zoltan)
     o utf8 handling without nl_langinfo(CODESET)   (BORBELY Zoltan)
     o subentry number field enlarged                 (Helge Deller)
+ * 6510 series updates
+    o disable Nokia 6100 support: IT IS KNOWN TO BREAK PHONES
+                                                        (Pawel Kot)
 
 0.5.8
 =====
