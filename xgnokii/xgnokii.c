@@ -2369,6 +2369,8 @@ static void ReadConfig(void)
 		if (pos)
 			xgnokiiConfig.help_locale = g_strndup(xgnokiiConfig.locale,
 							      pos - xgnokiiConfig.locale);
+		else
+			xgnokiiConfig.help_locale = NULL;
 		if (!LocaleHelpExists(xgnokiiConfig.help_locale)) {
 			g_free(xgnokiiConfig.help_locale);
 			xgnokiiConfig.help_locale = g_strdup("en_US");
