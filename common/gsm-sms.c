@@ -595,27 +595,22 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 				   (unsigned char *)&(sms->UserData[1].u.Text),
 				   rawsms->Length - sms->UserData[0].u.Bitmap.size - 4,
 				   size, 0, sms->DCS);
-#if 0
 		} else {
 			dprintf("First text then picture!\n");
 			/* First part is a text */
 			sms->UserData[1].Type = SMS_PlainText;
-			size = MessageLength - llayout.UserData - 4 - (72 * 28 / 8);
-			sms->Length = message[llayout.UserData];
-			dprintf("SMS length: %i, size: %i \n", SMS->Length, size);
-			if (size > sms->Length) {
-				DecodeData(message + llayout.UserData + 1,
-					   (unsigned char *)&(sms->UserData[1].u.Text),
-					   sms->Length, size, 0, sms->DCS);
-				sms->UserData[1].u.Text[sms->Length] = 0;
-			}
 
-			sms->UDH[0].Type = SMS_MultipartMessage;
+			dprintf("SMS text length: %i\n", rawsms->UserData[1]);
+			DecodeData(rawsms->UserData + 3,
+				   (unsigned char *)&(sms->UserData[1].u.Text),
+				   rawsms->UserData[1], rawsms->UserData[0], 0, sms->DCS);
+			//			sms->UserData[1].u.Text[rawsms->UserData[1]] = 0;
+
+			sms->UserData[0].Type = SMS_MultipartMessage;
 			/* Second part is a Picture */
 			sms->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(GSM_PictureImage, message + llayout.UserData + size, NULL, &sms->UserData[0].u.Bitmap);
+			GSM_ReadSMSBitmap(GSM_PictureMessage, rawsms->UserData + rawsms->UserData[0] + 7, NULL, &sms->UserData[0].u.Bitmap);
 			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap);
-#endif
 		}
 		break;
 	/* Plain text message */
