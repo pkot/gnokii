@@ -90,6 +90,17 @@ static char *Revision = NULL,
 	0, 0                            /* Caller logo size */ \
 }
 
+static const SMSMessage_Layout nk2110_deliver = {
+	true,						/* Is the SMS type supported */
+	/* Last ASCIIZ string */ -1, false, false,	/* SMSC */
+	-1, -1, -1, -1, -1, -1, -1, -1, 13, 5, -1,
+	-1, -1, -1,					/* Validity */
+	/* ASCIIZ second from the end */ -1, false, false,	/* Remote Number */
+	 6, -1,						/* Time */
+	 1,  3, 14, false				/* Nonstandart fields, User Data */
+};
+
+
 GSM_Information N2110_Information = INFO;
 
 GSM_Phone phone_nokia_2110 = {
@@ -347,6 +358,8 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 	error = GE_NONE;
 /*	Should be moved to gsm-sms.c */
 
+	/* SMSData[0] == Memory type */
+
 	ddprintf("Status: " );
 	switch (SMSData[3]) {
 	case 7: m->Type = SMS_Submit;  /* m->Status = GSS_NOTSENTREAD; */ ddprintf("not sent\n"); break;
@@ -390,8 +403,9 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 }
 
 static GSM_Error
-GetSMSMessage(GSM_SMSMessage *m)
+GetSMSMessage(GSM_Data *data)
 {
+	GSM_SMSMessage *m = data->SMSMessage;
 	if (m->Number > 10)
 		return GE_INVALIDSMSLOCATION;
 
@@ -399,13 +413,17 @@ GetSMSMessage(GSM_SMSMessage *m)
 		return GE_BUSY; /* FIXME */
 	ddprintf("Have message?\n");
 
-	if (DecodeIncomingSMS(m) != GE_NONE)
-		return GE_BUSY;
-
 	if (SMSData[0] != LM_SMS_FORWARD_STORED_DATA) {
 		ddprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
 		return GE_EMPTYSMSLOCATION;
 	}
+
+	data->RawData->Length = 180;
+	data->RawData->Data = calloc(data->RawData->Length, 1);
+	memcpy(data->RawData->Data, SMSData+1, 180);
+	if (ParseSMS(data, 0))
+		eprintf("Error in parsesms?\n");
+
 	msleep_poll(1000);		/* If phone lost our ack, it might retransmit data */
 	return (GE_NONE);
 }
@@ -584,9 +602,12 @@ CheckIncomingSMS(int at)
 	memset(&m, 0, sizeof(m));
 	m.Number = at;
 	m.MemoryType = GMT_ME;
+#if 0
 	if (GetSMSMessage(&m) != GE_NONE) {
 		return 0;
 	}
+#endif
+#warning Need to do something with data... somehow.
 	if (OnSMSFn)
 		OnSMSFn(&m);
 	DeleteSMSMessage(&m);
@@ -1087,6 +1108,10 @@ Initialise(GSM_Statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_2110, sizeof(GSM_Phone));
 
+	layout.Type = 8;
+	layout.SendHeader = 6;
+	layout.ReadHeader = 4;
+	layout.Deliver = nk2110_deliver;
 	RequestTerminate = false;
 	N2110_LinkOK     = false;
 	setvbuf(stdout, NULL, _IONBF, 0);
@@ -1228,7 +1253,7 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		break;
 	case GOP_GetSMS:
 		msleep(100);
-		err = GetSMSMessage(data->SMSMessage);
+		err = GetSMSMessage(data);
 		break;
 	case GOP_DeleteSMS:
 		err = SMS(data->SMSMessage, 3);

@@ -1,5 +1,8 @@
 0.4.0pre18 (not released yet)
 ==========
+ * 2110 series updates
+    o fix segfault on getsms, but break smsreader.     (Pavel Machek)
+      (this is actually step in right direction)
  * dancall updates
     o  make it at least compile [testers wanted]       (Pavel Machek) 
  * smsd updates
