@@ -44,6 +44,7 @@
 /* Limits of SMS messages. */
 #define GSM_MAX_SMS_LENGTH             160
 #define GSM_MAX_8BIT_SMS_LENGTH        140
+#define GSM_MAX_LONG_LENGTH	     10240
 
 #define SMS_MAX_PART_NUMBER              3
 
@@ -442,7 +443,7 @@ typedef struct {
 	unsigned int DCS;                              /* Data Coding Scheme (9.2.3.10) */
 	unsigned int Length;                           /* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
 	bool UDHIndicator;
-	unsigned char UserData[10240]; 		       /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
+	unsigned char UserData[GSM_MAX_LONG_LENGTH];   /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
 	int UserDataLength;                            /* Length of just previous field */
 
 	bool ValidityIndicator;

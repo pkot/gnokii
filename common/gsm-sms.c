@@ -36,20 +36,15 @@
 #include "gsm-encoding.h"
 #include "gsm-statemachine.h"
 
-#define BITMAP_SUPPORT 1
-#define RINGTONE_SUPPORT 1
-
-#ifdef BITMAP_SUPPORT
 #  include "gsm-ringtones.h"
-#endif
-#ifdef RINGTONE_SUPPORT
 #  include "gsm-bitmaps.h"
-#endif
 
 struct udh_data {
 	unsigned int length;
 	char *header;
 };
+
+#define MAX_SMS_PART 128
 
 /* User data headers */
 static struct udh_data headers[] = {
@@ -58,7 +53,7 @@ static struct udh_data headers[] = {
 	{ 0x06, "\x05\x04\x15\x81\x00\x00" }, /* Ringtones */
 	{ 0x06, "\x05\x04\x15\x82\x00\x00" }, /* Operator logos */
 	{ 0x06, "\x05\x04\x15\x83\x00\x00" }, /* Caller logos */
-	{ 0x0B, "\x05\x04\x15\x8a\x00\x00\x00\x03\xce\x03\x01" }, /* Multipart Message */
+	{ 0x06, "\x05\x04\x15\x8a\x00\x00" }, /* Multipart Message */
 	{ 0x06, "\x05\x04\x23\xf4\x00\x00" }, /* WAP vCard */
 	{ 0x06, "\x05\x04\x23\xf5\x00\x00" }, /* WAP vCalendar */
 	{ 0x06, "\x05\x04\x23\xf6\x00\x00" }, /* WAP vCardSecure */
@@ -575,6 +570,7 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 	case SMS_Picture:
 		/* This is incredible. Nokia violates it's own format in 6210 */
 		/* Indicate that it is Multipart Message. Remove it if not needed */
+		/* [I believe Nokia said in their manuals that any order is permitted --pavel] */
 		sms->UDH.Number = 1;
 		sms->UDH.UDH[0].Type = SMS_MultipartMessage;
 		if ((rawsms->UserData[0] == 0x48) && (rawsms->UserData[1] == 0x1c)) {
@@ -1084,13 +1080,12 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 		error = GE_NONE;
 		switch (sms->UserData[0].u.Bitmap.type) {
 		case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo, message); break;
+		case GSM_PictureMessage: 
 		case GSM_EMSPicture:
-		case GSM_PictureMessage:
 		case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
 		}
 		if (error != GE_NONE) return error;
 
-#ifdef BITMAP_SUPPORT
 		if (text_index != -1) {		/* This is quite a dirty hack */
 			if (sms->UserData[0].u.Bitmap.type != GSM_PictureMessage)
 				return GE_SMSWRONGFORMAT;
@@ -1103,9 +1098,6 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 		rawsms->UserDataLength += size;
 		rawsms->DCS = 0xf5;
 		rawsms->UDHIndicator = 1;
-#else
-		return GE_NOTSUPPORTED;
-#endif
 	}
 
 	/* Text Coding */
@@ -1165,30 +1157,33 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 	if (multi_index != -1) {
 		size = sms->UserData[0].Length;
 		error = EncodeUDH(rawsms, 0x05, message);
+		if (error != GE_NONE) return error;
+
+		message[0] += 5;
+		rawsms->Length += 5;
+		rawsms->UserDataLength += 5;
+		rawsms->UserData[ 7] = 0x00;
+		rawsms->UserData[ 8] = 0x03;
+		rawsms->UserData[ 9] = 0xce;
 		rawsms->UserData[10] = sms->UserData[multi_index].u.Multi.total;
 		rawsms->UserData[11] = sms->UserData[multi_index].u.Multi.this;
-		if (error != GE_NONE) return error;
-		memcpy(message + rawsms->UserDataLength, sms->UserData[multi_index].u.Multi.Binary, 128);
+
+		memcpy(message + rawsms->UserDataLength, sms->UserData[multi_index].u.Multi.Binary, MAX_SMS_PART);
 		rawsms->Length += size;
 		rawsms->UserDataLength += size;
 		rawsms->DCS = 0xf5;
 		rawsms->UDHIndicator = 1;		
 	}
 
-
 	/* Ringtone coding */
 	if (ringtone_index != -1) {
 		error = EncodeUDH(rawsms, SMS_Ringtone, message); 
 		if (error != GE_NONE) return error;
-#ifdef RINGTONE_SUPPORT
 		size = GSM_EncodeSMSRingtone(message + rawsms->Length, &sms->UserData[ringtone_index].u.Ringtone);
 		rawsms->Length += size;
 		rawsms->UserDataLength += size;
 		rawsms->DCS = 0xf5;
 		rawsms->UDHIndicator = 1;
-#else
-		return GE_NOTSUPPORTED;
-#endif
 	}
 	return GE_NONE;
 }
@@ -1238,16 +1233,15 @@ API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
 	LongSMS = *data->RawSMS;
 	sms = *data->SMS;
 
-	DumpRawSMS(rawsms);
-	count = (rawsms->UserDataLength + 127) / 128;
-	printf("Will need %d sms-es\n", count);
+	count = (rawsms->UserDataLength + MAX_SMS_PART -1) / MAX_SMS_PART;
+	dprintf("Will need %d sms-es\n", count);
 	for (i=0; i<count; i++) {
 		printf("Sending sms #%d\n", i);
 		sms.UserData[0].Type = SMS_MultiData;
-		sms.UserData[0].Length = 128;
+		sms.UserData[0].Length = MAX_SMS_PART;
 		if (i+1 == count)
-			sms.UserData[0].Length = rawsms->UserDataLength % 128;
-		memcpy(sms.UserData[0].u.Multi.Binary, rawsms->UserData + i*128, 128);
+			sms.UserData[0].Length = rawsms->UserDataLength % MAX_SMS_PART;
+		memcpy(sms.UserData[0].u.Multi.Binary, rawsms->UserData + i*MAX_SMS_PART, MAX_SMS_PART);
 		sms.UserData[0].u.Multi.this = i+1;
 		sms.UserData[0].u.Multi.total = count;
 		sms.UserData[1].Type = SMS_NoData;

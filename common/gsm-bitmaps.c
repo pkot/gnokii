@@ -237,7 +237,6 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 		message[current++]=0x02;     /* ID for bitmap, 0x06 is id for screensaver */
 #else
 		message[current++]=0x06;     /* ID for bitmap, 0x06 is id for screensaver */
-		strcpy(bitmap->text, "");
 #endif
 		message[current++]=0x01;     /* Length for picture part, hi */
 		message[current++]=0x00;     /* length lo */
@@ -250,23 +249,6 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 
 		memcpy(message+current,bitmap->bitmap,bitmap->size);
 		current=current+bitmap->size;
-
-		if (strlen(bitmap->text)!=0) {
-			/* FIXME: unicode length is not as simple as strlen */
-			int uni = 0, len;		     /* 0 .. ISO-8859-1, 1 .. Unicode */
-
-			message[current++]=uni;
-
-			/* Length for text part */
-			len = strlen(bitmap->text)*(uni + 1);
-			message[current++]=0x00;
-			message[current++]=len;
-			if (uni)
-				EncodeUnicode (message+current,bitmap->text,strlen(bitmap->text));
-			else
-				memcpy(message+current,bitmap->text,strlen(bitmap->text));
-			current += len;
-		}
 		return current;
 	case GSM_EMSPicture:
 		dprintf("EMS picture\n");
