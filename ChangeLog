@@ -4,6 +4,8 @@
     o remove keepalive stuff -- now obsoleted        (Osma Suominen)
     o don't use the global variables; move them to the driver
       instance                                       (Osma Suominen)
+    o sanity check for data->raw_sms in IncomingSMSHeader()
+                                                     (Osma Suominen)
  * win32 compability changes
     o removed exports for non gn_ functions, helper functions
       need to be linked statically if u use libarary
@@ -18,7 +20,6 @@
     o allow sm_block and friends to be used not only directly after
       sm_message_send but also with sm_reset in between, which sets
       the state to GN_SM_Initialised                 (Osma Suominen)
-
 
 0.5.0pre7
 =========

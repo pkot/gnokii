@@ -801,6 +801,11 @@ static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message,
 	gn_gsm_number_type smsc_number_type, remote_number_type;
 	unsigned char smsc[256], remote[256];	/* should be enough for anyone */
 
+	if (!data->raw_sms) {
+		dprintf("Unrequested SMS header received. Ignoring.\n");
+		return GN_ERR_INTERNALERROR;
+	}
+
 	data->raw_sms->status = message[4];
 
 	/* Check UDHI */
