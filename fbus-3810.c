@@ -1,4 +1,4 @@
-	/* G N O K I I
+/* G N O K I I
 	   A Linux/Unix toolset and driver for Nokia mobile phones.
 	   Copyright (C) Hugh Blemings, 1999  Released under the terms of 
        the GNU GPL, see file COPYING for more details.
@@ -28,6 +28,7 @@
 #include	<signal.h>
 #include	<sys/types.h>
 #include	<sys/time.h>
+#include	<sys/ioctl.h>
 #include	<string.h>
 #include	<pthread.h>
 #include	<errno.h>
@@ -878,6 +879,7 @@ bool		FB38_OpenSerial(void)
 {
 	struct termios			new_termios;
 	struct sigaction		sig_io;
+	unsigned int			status;		/* For RTS/DTR line control. */
 
 		/* Open device. */
 	PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -912,6 +914,18 @@ bool		FB38_OpenSerial(void)
 	tcflush(PortFD, TCIFLUSH);
 	tcsetattr(PortFD, TCSANOW, &new_termios);
 
+		/* Get status of control lines on port. */	
+	if (ioctl(PortFD, TIOCMGET, &status) != 0) {
+		perror(_("Serial TIOCMGET failed: "));
+		return(false);
+	}
+		/* Ensure RTS and DTR lines are true so interface cable gets power. */
+	status |= TIOCM_RTS;
+	status |= TIOCM_DTR;
+	if (ioctl(PortFD, TIOCMSET, &status) != 0) {
+		perror(_("Serial TIOCMSET failed: "));
+		return(false);
+	}
 	return (true);
 }
 
@@ -1600,6 +1614,7 @@ int		FB38_TX_SendMessage(u8 message_length, u8 message_type, u8 sequence_byte, u
 		/* Check message isn't too long, once the necessary
 		   header and trailer bytes are included. */
 	if ((message_length + 5) > FB38_MAX_TRANSMIT_LENGTH) {
+		fprintf(stderr, _("TX_SendMessage - message too long!\n"));
 
 		return (false);
 	}
@@ -1625,6 +1640,7 @@ int		FB38_TX_SendMessage(u8 message_length, u8 message_type, u8 sequence_byte, u
 
 		/* Send it out... */
 	if (write(PortFD, out_buffer, message_length + 5) != message_length + 5) {
+		perror(_("TX_SendMessage - write:"));
 		return (false);
 	}
 	return (true);
