@@ -104,6 +104,7 @@
     o mention 'make DESTDIR=<dir> install' in the packaging howto
                                                           (Pawel Kot)
     o mention external libraries needed for gnokii        (Pawel Kot)
+    o reflect API changes in gnokii-hackers howto         (Pawel Kot)
 
 0.4.3
 =====

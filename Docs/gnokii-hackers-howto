@@ -15,10 +15,10 @@ makes of phone.
 Overview:
 
 Application (gnokii/xgnoki)
-    |  DoSomething()
-(Middle-layer)
+    |  do_something()
+(Middle-layer aka gnokii API)
     |  GSM->Function() 
-Gsm-api
+gsm-api
     |  P*_Functions()
 Phone specific code (eg nk7110.c)
     |  SM_SendMessage(), SM_Wait(), SM_Loop()
@@ -92,7 +92,7 @@ The Phone:
 
 The phone/*.c code therefore basically contains code to package up and
 unpack information from the phone specific format to generic gnokii
-structures (eg GSM_Bitmap).  However, it is also at the top of the tree
+structures (eg gn_bmp).  However, it is also at the top of the tree
 and contains functions called by the application.  Generally there are
 three types of exchanges that can occur.  Firstly the computer can send
 the phone a command and expect no answer (not including acks etc which 
@@ -170,7 +170,7 @@ Note that this leaves the phone code very similar to the basic layout of
 eg fbus-6110.c but removes all the:
 
 static GSM_DateTime       *CurrentAlarm;
-static GSM_Error          CurrentAlarmError;
+static gn_error          CurrentAlarmError;
 
 ,makes everything well orderd and splits up DispatchMessage into byte
 sized chunks!
