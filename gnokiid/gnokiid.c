@@ -79,9 +79,9 @@ static void usage()
 {
 
 	fprintf(stderr, _("   usage: gnokiid {--help|--version}\n"
-"          --help            display usage information."
-"          --version         displays version and copyright information."
-"          --debug           uses stdin/stdout for virtual modem comms.\n"));
+"          --help            display usage information\n"
+"          --version         displays version and copyright information\n"
+"          --debug           uses stdin/stdout for virtual modem comms\n"));
 }
 
 /* cleanup function registered by atexit() and called at exit() */
