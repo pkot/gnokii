@@ -3265,7 +3265,7 @@ gchar *GUI_GetNumber(gchar * name)
 		if (pbEntry->status == E_Empty || pbEntry->status == E_Deleted)
 			continue;
 
-		if (strcmp(pbEntry->entry.name, name) == 0)
+		if (strcmp(g_strstrip(pbEntry->entry.name), g_strstrip(name)) == 0)
 			return pbEntry->entry.number;
 	}
 

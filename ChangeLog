@@ -16,6 +16,8 @@
     o fix sms_free_deleted()                           (Ulrich Hopp)
  * xgnokii fixes
     o indexes with messages list were switched         (Ulrich Hopp)
+    o fix problems with choosing names from the addressbook on
+      sms sending                                      (Ulrich Hopp)
 
 0.5.0pre4
 =========
