@@ -1,3 +1,7 @@
+* Thu Fri 27 2002 BORBELY Zoltan <bozo@andrews.hu>
+- Converted libfile.so to new libgnokii API
+
+
 * Thu Dec 26 2002 Pawel Kot <pkot@linuxnews.pl>
 - Converted to new libgnokii API
 
