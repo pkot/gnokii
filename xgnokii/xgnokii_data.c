@@ -98,6 +98,7 @@ void GUI_CreateDataWindow (void)
   GtkWidget *button, *hbox, *vbox;
   
   GUI_DataWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL); 
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_DataWindow), "DataWindow", "Xgnokii");
   gtk_window_set_title (GTK_WINDOW (GUI_DataWindow), _("Virtual Modem"));
   gtk_container_set_border_width (GTK_CONTAINER (GUI_DataWindow), 10);
   gtk_signal_connect (GTK_OBJECT (GUI_DataWindow), "delete_event",

@@ -1152,6 +1152,7 @@ static void CreateSMSSendWindow (void)
 
   InitSendMenu ();
   sendSMS.SMSSendWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW(sendSMS.SMSSendWindow), "SMSSendWindow", "Xgnokii");
 
   //gtk_widget_set_usize (GTK_WIDGET (sendSMS.SMSSendWindow), 436, 220);
   gtk_signal_connect (GTK_OBJECT (sendSMS.SMSSendWindow), "delete_event",
@@ -1541,6 +1542,7 @@ void GUI_CreateSMSWindow (void)
 
   InitMainMenu ();
   GUI_SMSWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_SMSWindow), "SMSWindow", "Xgnokii");
   gtk_window_set_title (GTK_WINDOW (GUI_SMSWindow), _("Short Message Service"));
   //gtk_widget_set_usize (GTK_WIDGET (GUI_SMSWindow), 436, 220);
   gtk_signal_connect (GTK_OBJECT (GUI_SMSWindow), "delete_event",

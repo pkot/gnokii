@@ -242,6 +242,7 @@ void GUI_CreateDTMFWindow ()
 
   InitMainMenu ();
   GUI_DTMFWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_DTMFWindow), "DTMFWindow", "Xgnokii");
   gtk_window_set_title (GTK_WINDOW (GUI_DTMFWindow), _("Dial Tone"));
   //gtk_widget_set_usize (GTK_WIDGET (GUI_DTMFWindow), 436, 220);
   gtk_signal_connect (GTK_OBJECT (GUI_DTMFWindow), "delete_event",

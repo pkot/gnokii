@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.37  2001-06-27 23:52:52  pkot
+  Revision 1.38  2001-09-14 13:14:03  pkot
+  Xgnokii WM fixes (Martin Lucina)
+
+  Revision 1.37  2001/06/27 23:52:52  pkot
   7110/6210 updates (Marian Jancar)
 
   Revision 1.36  2001/06/20 21:27:36  pkot
@@ -366,7 +369,7 @@ static inline void DrawText (GtkWidget *data, int at, char *text)
 {
   static GdkFont *Font;
 
-  Font = gdk_font_load ("-misc-fixed-medium-r-*-*-*-90-*-*-*-*-*-*");
+  Font = gdk_font_load ("-misc-fixed-medium-r-*-*-*-90-*-*-*-*-iso8859-*");
   gdk_draw_string (Pixmap,
 		   Font,
 		   GTK_WIDGET(data)->style->fg_gc[GTK_STATE_NORMAL],
@@ -2276,6 +2279,8 @@ static void TopLevelWindow (void)
   struct sigaction act;
 
   GUI_MainWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_MainWindow), "MainWindow", "Xgnokii");
+/*  gtk_window_set_decorated (GTK_WINDOW (GUI_MainWindow), GTK_FALSE); */
   gtk_widget_realize (GUI_MainWindow);
 
   BackgroundPixmap = gdk_pixmap_create_from_xpm_d (GUI_MainWindow->window, &mask, &GUI_MainWindow->style->white, (gchar **) XPM_background);

@@ -314,6 +314,7 @@ void GUI_CreateNetmonWindow ()
 
   InitMainMenu ();
   GUI_NetmonWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_NetmonWindow), "NetmonWindow", "Xgnokii");
   gtk_window_set_title (GTK_WINDOW (GUI_NetmonWindow), _("Net Monitor"));
   //gtk_widget_set_usize (GTK_WIDGET (GUI_NetmonWindow), 436, 220);
   gtk_signal_connect (GTK_OBJECT (GUI_NetmonWindow), "delete_event",

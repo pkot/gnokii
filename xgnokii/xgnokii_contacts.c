@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.29  2001-03-23 08:24:56  ja
+  Revision 1.30  2001-09-14 13:14:04  pkot
+  Xgnokii WM fixes (Martin Lucina)
+
+  Revision 1.29  2001/03/23 08:24:56  ja
   New preview for 6210 in xgnokii's logos module.
 
   Revision 1.28  2001/03/19 23:43:47  pkot
@@ -3294,6 +3297,7 @@ void GUI_CreateContactsWindow (void)
   InitMainMenu ();
   contactsMemoryInitialized = FALSE;
   GUI_ContactsWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_ContactsWindow), "ContactsWindow", "Xgnokii");
   gtk_window_set_title (GTK_WINDOW (GUI_ContactsWindow), _("Contacts"));
   gtk_widget_set_usize (GTK_WIDGET (GUI_ContactsWindow), 436, 220);
   //gtk_container_set_border_width (GTK_CONTAINER (GUI_ContactsWindow), 10);

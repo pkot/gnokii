@@ -257,6 +257,7 @@ void GUI_CreateXkeybWindow (void)
 
   InitMainMenu ();
   GUI_XkeybWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_XkeybWindow), "XkeybWindow", "Xgnokii");
   gtk_window_set_title (GTK_WINDOW (GUI_XkeybWindow), _("XGnokii Keyboard"));
   //gtk_widget_set_usize (GTK_WIDGET (GUI_XkeybWindow), 436, 220);
   gtk_signal_connect (GTK_OBJECT (GUI_XkeybWindow), "delete_event",

@@ -556,6 +556,7 @@ void GUI_CreateSpeedDialWindow (void)
 
   InitMainMenu ();
   GUI_SpeedDialWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_SpeedDialWindow), "SpeedDialWindow", "Xgnokii");
   gtk_window_set_title (GTK_WINDOW (GUI_SpeedDialWindow), _("Speed Dial"));
   gtk_widget_set_usize (GTK_WIDGET (GUI_SpeedDialWindow), 332, 220);
   //gtk_container_set_border_width (GTK_CONTAINER (GUI_SpeedDialWindow), 10);
