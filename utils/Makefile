@@ -26,6 +26,10 @@ install-generic:
 	$(INSTALL) -m 755 todologo $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 sendsms $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 ppm2nokia $(DESTDIR)$(bindir)
+	@if [ -f gnapplet.sis ]; then \
+		$(INSTALL) -d $(DESTDIR)$(docdir); \
+		$(INSTALL) -m 755 gnapplet.sis $(DESTDIR)$(docdir); \
+	fi
 
 install: install-generic
 	$(LIBTOOL) --mode=install $(INSTALL) mgnokiidev $(DESTDIR)$(sbindir)

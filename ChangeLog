@@ -23,6 +23,8 @@
       flex and then clean it with 'make distclean'; fix it keeping
       in mind that 'make -C common vcal.c' won't work after 'make
       distclean'                                        (Pawel Kot)
+    o get gnapplet.sis for the tarball and install it when present
+                                                        (Pawel Kot)
  * gnokii updates
     o accept range in --deletephonebook            (BORBELY Zoltan)
     o deletephonebook initialisation fix           (BORBELY Zoltan)

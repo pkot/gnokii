@@ -34,6 +34,8 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
    cp packaging/RedHat/gnokii.spec .
    # and Debian one
    cp -r packaging/Debian debian
+   # get recent version of gnapplet.sis
+   wget -q -O utils/gnapplet.sis http://users.szivarvanynet.hu/bozo/gnokii/gnapplet.sis
    make distclean
    mv common/vcal2.c common/vcal.c
    cd ..
