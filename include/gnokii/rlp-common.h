@@ -18,7 +18,11 @@
   Header file for RLP protocol.
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:11  chris
+  Revision 1.2  2001-06-10 11:29:49  machek
+  It is very bad idea to name enum "Data", because it is then impossible
+  to use variable called "Data".
+
+  Revision 1.1  2001/02/21 19:57:11  chris
   More fiddling with the directory layout
 
 
@@ -137,7 +141,7 @@ typedef enum {
   Conn_Conf,
   Disc_Ind,
   Reset_Ind,
-  Data,
+  Data,		/* FIXME: This should really be called RLP_Data, otherwise it hogs name "Data"! */
   StatusChange,
   GetData
 } RLP_UserInds;
