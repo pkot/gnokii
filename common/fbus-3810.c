@@ -13,7 +13,11 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.78  2001-01-15 17:00:44  pkot
+  Revision 1.79  2001-01-22 01:25:09  hugh
+  Tweaks for 3810 series, datacalls seem to be broken so need to do
+  some more debugging...
+
+  Revision 1.78  2001/01/15 17:00:44  pkot
   Initial keypress sequence support. Disable compilation warning
 
   Revision 1.77  2001/01/14 22:46:56  chris
@@ -203,17 +207,24 @@ int                     ExploreMessage; /* for debugging/investigation only */
 int                     InitLength;
 long                    ChecksumFails;  /* For diagnostics */
 
-    /* Pointer to callback function in user code to be called when
-       RLP frames are received. */
+	/* Pointer to callback function in user code to be called when
+	   RLP frames are received. */
 void                    (*RLP_RXCallback)(RLP_F96Frame *frame);
 
+	/* Pointer to a callback function used to return changes to a
+	   calls status.   This saves unreliable polling as there are
+	   situations where the 3810/8110 doesn't correctly return
+	   end of call status via the RLP messages  */
+void (*CallPassup)(char c);
+
+
 #ifdef WIN32
-/* called repeatedly from a separate thread */
+	/* called repeatedly from a separate thread */
 void FB38_KeepAliveProc()
 {
-    if (!DisableKeepalive)
-  	FB38_TX_Send0x4aMessage();	/* send status request */
-    Sleep(2000);
+	if (!DisableKeepalive)
+		FB38_TX_Send0x4aMessage();	/* send status request */
+	Sleep(2000);
 }
 #endif
 
@@ -266,20 +277,21 @@ GSM_Error   FB38_Initialise(char *port_device, char *initlength,
 {
 
     /* ConnectionType is ignored in 3810 code. */
+	
+	int     rtn;
 
-    int     rtn;
-
-    RequestTerminate = false;
-    FB38_LinkOK = false;
-    DisableKeepalive = false;
-    CurrentRFLevel = -1;
-    CurrentBatteryLevel = -1;
-    IMEIValid = false;
-    RevisionValid = false;
-    ModelValid = false;
-    ExploreMessage = -1;
-    ChecksumFails = 0;
-    RLP_RXCallback = rlp_callback;
+	RequestTerminate = false;
+	FB38_LinkOK = false;
+	DisableKeepalive = false;
+	CurrentRFLevel = -1;
+	CurrentBatteryLevel = -1;
+	IMEIValid = false;
+	RevisionValid = false;
+	ModelValid = false;
+	ExploreMessage = -1;
+	ChecksumFails = 0;
+	RLP_RXCallback = rlp_callback;
+	CallPassup = NULL;
     
     strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -879,7 +891,9 @@ GSM_Error   FB38_DialVoice(char *Number)
 
 GSM_Error   FB38_DialData(char *Number, char type, void (* callpassup)(char c))
 {
-    return(FB38_TX_SendDialCommand(0x01, Number));
+	CallPassup = callpassup;
+
+	return(FB38_TX_SendDialCommand(0x01, Number));
 }
 
 bool		FB38_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
@@ -887,7 +901,7 @@ bool		FB38_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 	return (FB38_TX_SendRLPFrame(frame, out_dtx));
 }
 
-GSM_Error   FB38_SetSMSCenter(GSM_MessageCenter *MessageCenter)
+GSM_Error	FB38_SetSMSCenter(GSM_MessageCenter *MessageCenter)
 {
 	u8 msg[64];
 	int timeout;
@@ -1209,9 +1223,7 @@ void    FB38_ThreadLoop(void)
 
         /* We've now finished initialising things so sit in the loop
            until told to do otherwise.  Loop doesn't do much other
-           than send periodic keepalive messages to phone.  This
-           loop will become more involved once we start doing 
-           fax/data calls. */
+           than send periodic keepalive messages to phone.  */
 
     idle_timer = 0;
 
@@ -1349,12 +1361,6 @@ void FB38_InitializeLink()
         /* Now send the 0x15 message, the exact purpose is not understood
            but if not sent, link doesn't work. */
     FB38_TX_Send0x15Message(0x11);
-
-        /* We've now finished initialising things so sit in the loop
-           until told to do otherwise.  Loop doesn't do much other
-           than send periodic keepalive messages to phone.  This
-           loop will become more involved once we start doing 
-           fax/data calls. */
 
         /* Send IMEI/Revision/Model request */
 
@@ -1546,10 +1552,10 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
 
             /* 0x13 messages are sent after the phone restarts. 
                Re-initialise */
-        case 0x13:  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
-					RequestSequenceNumber = 0x10;
-					FB38_TX_Send0x15Message(0x11);
-					break;
+        case 0x13:  	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
+			RequestSequenceNumber = 0x10;
+			FB38_TX_Send0x15Message(0x11);
+			break;
             
             /* 0x15 messages are sent by the phone in response to the
                init sequence sent so we don't acknowledge them! */
@@ -2439,7 +2445,7 @@ void    FB38_RX_Handle0x4b_Status(void)
 		"Ready",
 		"Interworking",
 		"Call in progress",
-		"No SIM access"
+		"No network access"  /* Was SIM but I don't think that was correct - HAB*/
 	};
 #endif
 
@@ -2474,43 +2480,54 @@ void    FB38_RX_Handle0x4b_Status(void)
 void    FB38_RX_Handle0x10_EndOfOutgoingCall(void)
 {
         /* As usual, acknowledge first. */
-    if (FB38_TX_SendMessage(0, 0x10, MessageBuffer[1] - 0x08, NULL) != true) {
-        fprintf(stderr, _("0x10 Write failed!"));
-    }
+	if (FB38_TX_SendMessage(0, 0x10, MessageBuffer[1] - 0x08, NULL) != true) {
+		fprintf(stderr, _("0x10 Write failed!"));
+	}
 
 #ifdef DEBUG
-    fprintf(stdout, _("Call terminated from phone (0x10 message).\n"));
-    fflush(stdout);
+	fprintf(stdout, _("Call terminated from phone (0x10 message).\n"));
+	fflush(stdout);
 #endif
-
+		/* Tell datapump code that the call has terminated. */
+	if (CallPassup) {
+		CallPassup(' ');
+	}
 }
 
 void    FB38_RX_Handle0x11_EndOfIncomingCall(void)
 {
         /* As usual, acknowledge first. */
-    if (FB38_TX_SendMessage(0, 0x11, MessageBuffer[1] - 0x08, NULL) != true) {
-        fprintf(stderr, _("Write failed!"));
-    }
+	if (FB38_TX_SendMessage(0, 0x11, MessageBuffer[1] - 0x08, NULL) != true) {
+		fprintf(stderr, _("Write failed!"));
+	}
 
 #ifdef DEBUG
-    fprintf(stdout, _("Call terminated from opposite end of line (or from network).\n"));
-    fflush(stdout);
+	fprintf(stdout, _("Call terminated from opposite end of line (or from network).\n"));
+	fflush(stdout);
 #endif
 
+		/* Tell datapump code that the call has terminated. */
+	if (CallPassup) {
+		CallPassup(' ');
+	}
 }
 
 void    FB38_RX_Handle0x12_EndOfOutgoingCall(void)
 {
         /* As usual, acknowledge first. */
-    if (FB38_TX_SendMessage(0, 0x12, MessageBuffer[1] - 0x08, NULL) != true) {
-        fprintf(stderr, _("Write failed!"));
-    }
+	if (FB38_TX_SendMessage(0, 0x12, MessageBuffer[1] - 0x08, NULL) != true) {
+		fprintf(stderr, _("Write failed!"));
+	}
 
 #ifdef DEBUG
-    fprintf(stdout, _("Call terminated from phone (0x12 message).\n"));
-    fflush(stdout);
+	fprintf(stdout, _("Call terminated from phone (0x12 message).\n"));
+	fflush(stdout);
 #endif
 
+		/* Tell datapump code that the call has terminated. */
+	if (CallPassup) {
+		CallPassup(' ');
+	}
 }
 
 void    FB38_RX_Handle0x0d_IncomingCallAnswered(void)

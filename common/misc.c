@@ -42,10 +42,11 @@ static PhoneModel models[] = {
 	{"2110i", "NHE-4", PM_SMS },
 	{"2148i", "NHK-4", 0 },
 	{"8810",  "NSE-6", PM_SMS | PM_DTMF | PM_DATA },
-	{"8110i", "NHE-6", PM_SMS | PM_DTMF | PM_DATA },
+	{"8110i", "0423",  PM_SMS | PM_DTMF | PM_DATA }, /* Guess for NHE-6 */
+	{"8110",  "0423" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-6BX */
 	{"3110",  "0310" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-8 */
 	{"3210",  "NSE-8", PM_SMS | PM_DTMF },
-	{"3810",  "NHE-9", PM_SMS | PM_DTMF | PM_DATA },
+	{"3810",  "0305" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-9 */
 	{"5110",  "NSE-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
 	{"5130",  "NSK-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
 	{"5160",  "NSW-1", PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
@@ -72,8 +73,13 @@ PhoneModel *GetPhoneModel (const char *num)
 	register int i = 0;
 
 	while (models[i].number != NULL) {
-		if (strcmp (num, models[i].number) == 0)
+		if (strcmp (num, models[i].number) == 0) {
+			fprintf(stdout, "Found model\n");
 			return (&models[i]);
+		}
+		else {
+			fprintf(stdout, "comparing %s and %s\n", num, models[i].number);
+		}
 		i++;
 	}
 
@@ -107,7 +113,11 @@ inline int KeyboardSupported (const char *num)
 
 inline int SMSSupported (const char *num)
 {
-	return (GetPhoneModel(num)->flags & PM_SMS ? 1 : 0);
+	int	i;
+	i = (GetPhoneModel(num)->flags & PM_SMS ? 1 : 0);
+	fprintf (stdout, "SMSSupport for %s returns %d\n\n", num, i);
+
+	return  i;
 }
 
 inline int DTMFSupported (const char *num)

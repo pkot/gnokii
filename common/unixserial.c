@@ -240,8 +240,8 @@ size_t serial_read(int __fd, __ptr_t __buf, size_t __nbytes) {
 /* Write to serial device. */
 
 size_t serial_write(int __fd, __const __ptr_t __buf, size_t __n) {
-
-  return (write(__fd, __buf, __n));
+	
+	return (write(__fd, __buf, __n));
 }
 
 #endif  /* WIN32 */
