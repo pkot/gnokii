@@ -364,6 +364,55 @@ typedef struct {
 	SMS_DateTime Time;               /* Delivery timestamp. Only for reading. */
 } GSM_API_SMS;
 
+/* Define the layout of the SMS message header */
+/* Misc notes:
+ *   - value -1 indicates in the location field means that the field is not
+ *     supported,
+ *   - when SMSC/Remote numbers have variable width all other fields should
+ *     contain values as its value was 1 ('0x00' as the length) -- if field X
+ *     follows SMSCNumber, X's locations would be SMSC's location + 1,
+ *   - see the examples in common/phones/7110.c, commmon/phones/6100.c,
+ *     common/phones/atgen.c.
+
+ *	DO NOT USE THIS. OBSOLETE INTERFACE TO BE KILLED.
+ */
+typedef struct {
+	bool IsSupported;		/* Indicates if SMS is supported */
+
+	short MessageCenter;		/* Location of the MessageCenter */
+	bool IsMessageCenterCoded;	/* Indicates if the MessageCenter address is BCD coded */
+	bool HasMessageCenterFixedLen;	/* Indicates if the MessageCenter field has always the fixed length */
+
+	short MoreMessages;		/* Location of the MoreMessages bit */
+	short ReplyViaSameSMSC;		/* Location of the ReplyPath bit */
+	short RejectDuplicates;		/* Location of the RejectDuplicates bit */
+	short Report;			/* Location of the Report bit */
+	short Number;			/* Location of the MessageReference number */
+	short Reference;		/* Location of the Reference bit */
+	short PID;			/* Location of the ProtocolIdentifier bit */
+	short ReportStatus;		/* Location of the ReportStatus bit */
+	short Length;			/* Location of the UserDataLength field */
+	short DataCodingScheme;		/* Location of the DataCodingScheme field */
+	short UserDataHeader;		/* Location of the UserDataHeader indicator bit */
+
+	short ValidityIndicator;	/* Location of the ValidityType Indicator field */
+	short Validity;			/* Location of the Validity field */
+	short ValidityLen;		/* Length ot the Validity field. -1 if the length is variable (as with GSM SPEC) */
+
+	short RemoteNumber;		/* Location of the RemoteNumber */
+	bool IsRemoteNumberCoded;	/* Indicates if the RemoteNumber address is BCD coded */
+	bool HasRemoteNumberFixedLen;	/* Indicates if the MessageCenter field has always the fixed length */
+
+	short SMSCTime;			/* Location of the SMSC Response time */
+	short Time;			/* Location of the Delivery time */
+
+	short MemoryType;		/* Location of the Memory Type field */
+	short Status;			/* Location of the Status field */
+	short UserData;			/* Location of the UserData field */
+	bool IsUserDataCoded;		/* Indicates if the UserData should be PDU coded */
+} SMSMessage_Layout;
+
+
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
 typedef struct {
 	unsigned int Type;                             /* Message Type Indicator - 2 bits (9.2.3.1) */
@@ -386,6 +435,7 @@ typedef struct {
 	unsigned int Length;                           /* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
 	bool UDHIndicator;
 	unsigned char UserData[SMS_USER_DATA_LEN];     /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
+	int UserDataLength;				/* Length of just previous field */
 
 	bool ValidityIndicator;
 	unsigned char Validity[MAX_VALIDITY_LENGTH];   /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
