@@ -138,6 +138,10 @@ SOURCE=..\..\common\phones\gnapplet.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\common\pkt.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\common\cfgreader.c
 # End Source File
 # Begin Source File
