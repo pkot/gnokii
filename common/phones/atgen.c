@@ -1043,6 +1043,11 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 	data->RawSMS->DCS              = tmp[offset + 2];
 	memcpy(data->RawSMS->SMSCTime, tmp + offset + 3, 7);
 	data->RawSMS->Length           = tmp[offset + 10] & 0x00ff;
+	if (sms_len - offset - 11 > 1000) {
+		fprintf(stderr, "Phone gave as poisonous (too short?) reply %s, either phone went crazy or communication went out of sync\n", buf.line3);
+		free(tmp);
+		return GE_INTERNALERROR;
+	}
 	memcpy(data->RawSMS->UserData, tmp + offset + 11, sms_len - offset - 11);
 	free(tmp);
 	return GE_NONE;
