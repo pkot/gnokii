@@ -114,18 +114,18 @@ API void gn_call_notifier(gn_call_status call_status, GSM_CallInfo *call_info, G
 	}
 }
 
-API GSM_Error gn_call_dial(int *call_id, GSM_Data *data, GSM_Statemachine *state)
+API gn_error gn_call_dial(int *call_id, GSM_Data *data, GSM_Statemachine *state)
 {
 	gn_call *call;
-	GSM_Error err;
+	gn_error err;
 
 	*call_id = -1;
 	if ((call = search_call(NULL, 0)) == NULL) {
 		dprintf("Call table overflow!\n");
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 	}
 
-	if ((err = SM_Functions(GOP_MakeCall, data, state)) != GE_NONE)
+	if ((err = SM_Functions(GOP_MakeCall, data, state)) != GN_ERR_NONE)
 		return err;
 
 	call->state = state;
@@ -140,15 +140,15 @@ API GSM_Error gn_call_dial(int *call_id, GSM_Data *data, GSM_Statemachine *state
 
 	*call_id = call - calltable;
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-API GSM_Error gn_call_answer(int call_id)
+API gn_error gn_call_answer(int call_id)
 {
 	GSM_Data data;
 	GSM_CallInfo call_info;
 
-	if (calltable[call_id].Status == GN_CALL_Idle) return GE_NONE;
+	if (calltable[call_id].Status == GN_CALL_Idle) return GN_ERR_NONE;
 
 	memset(&call_info, 0, sizeof(call_info));
 	call_info.CallID = calltable[call_id].CallID;
@@ -158,12 +158,12 @@ API GSM_Error gn_call_answer(int call_id)
 	return SM_Functions(GOP_AnswerCall, &data, calltable[call_id].state);
 }
 
-API GSM_Error gn_call_cancel(int call_id)
+API gn_error gn_call_cancel(int call_id)
 {
 	GSM_Data data;
 	GSM_CallInfo call_info;
 
-	if (calltable[call_id].Status == GN_CALL_Idle) return GE_NONE;
+	if (calltable[call_id].Status == GN_CALL_Idle) return GN_ERR_NONE;
 
 	memset(&call_info, 0, sizeof(call_info));
 	call_info.CallID = calltable[call_id].CallID;

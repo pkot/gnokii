@@ -84,7 +84,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 #endif	/* defined(WIN32) && defined(_USRDLL) */
 
 GSM_Statemachine GSM_SM;
-GSM_Error (*gn_gsm_f)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+gn_error (*gn_gsm_f)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
 
 /* Define pointer to the GSM_Information structure used by external code to
@@ -95,11 +95,11 @@ API GSM_Information *gn_gsm_info;
 /* Initialise interface to the phone. Model number should be a string such as
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
-static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel, GSM_Statemachine *sm)
+static gn_error register_phone(GSM_Phone *phone, char *model, char *setupmodel, GSM_Statemachine *sm)
 {
 	GSM_Data *data = NULL;
 	GSM_Data *p_data;
-	GSM_Error error = GE_UNKNOWNMODEL;
+	gn_error error = GN_ERR_UNKNOWNMODEL;
 
 	if (setupmodel) {
 		data = calloc(1, sizeof(GSM_Data));
@@ -117,16 +117,16 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 
 #define REGISTER_PHONE(x, y) { \
 	extern GSM_Phone phone_##x; \
-	if ((ret = register_phone(&phone_##x, model, y, sm)) != GE_UNKNOWNMODEL) \
+	if ((ret = register_phone(&phone_##x, model, y, sm)) != GN_ERR_UNKNOWNMODEL) \
 		return ret; \
 }
 
-API GSM_Error gn_gsm_initialise(char *model, char *device, char *initlength,
+API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
 				GSM_ConnectionType connection,
 				void (*rlp_callback)(RLP_F96Frame *frame),
 				GSM_Statemachine *sm)
 {
-	GSM_Error ret;
+	gn_error ret;
 	char *sms_timeout;
 
 	sm->Link.ConnectionType = connection;
@@ -151,5 +151,5 @@ API GSM_Error gn_gsm_initialise(char *model, char *device, char *initlength,
 	REGISTER_PHONE(at, model);
 	REGISTER_PHONE(nokia_6160, NULL);
 
-	return (GE_UNKNOWNMODEL);
+	return GN_ERR_UNKNOWNMODEL;
 }

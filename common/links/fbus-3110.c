@@ -52,8 +52,8 @@
 
 static bool FB3110_OpenSerial(void);
 static void FB3110_RX_StateMachine(unsigned char rx_byte);
-static GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
-static GSM_Error FB3110_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
+static gn_error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
+static gn_error FB3110_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
 static void FB3110_TX_SendAck(u8 *message, int length);
 static void FB3110_UpdateSequenceNumber(void);
 
@@ -79,7 +79,7 @@ static bool FB3110_OpenSerial(void)
 	}
 	device_changespeed(115200);
 
-	return (true);
+	return true;
 }
 
 
@@ -175,7 +175,7 @@ static void FB3110_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static GSM_Error FB3110_Loop(struct timeval *timeout)
+static gn_error FB3110_Loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -186,13 +186,13 @@ static GSM_Error FB3110_Loop(struct timeval *timeout)
 		for (count = 0; count < res; count++)
 			FB3110_RX_StateMachine(buffer[count]);
 	} else
-		return GE_TIMEOUT;
+		return GN_ERR_TIMEOUT;
 
 	/* This traps errors from device_read */
 	if (res > 0)
-		return GE_NONE;
+		return GN_ERR_NONE;
 	else
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 }
 
 
@@ -202,7 +202,7 @@ static GSM_Error FB3110_Loop(struct timeval *timeout)
    the value specified when called.  Calculates checksum
    and then sends the lot down the pipe... */
 
-static GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 * buffer)
+static gn_error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 * buffer)
 {
 
 	u8 out_buffer[FB3110_MAX_TRANSMIT_LENGTH];
@@ -213,7 +213,7 @@ static GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequ
 	   header and trailer bytes are included. */
 	if ((message_length + 5) > FB3110_MAX_TRANSMIT_LENGTH) {
 		fprintf(stderr, _("FB3110_TX_SendFrame - message too long!\n"));
-		return (GE_INTERNALERROR);
+		return GN_ERR_INTERNALERROR;
 	}
 
 	/* Now construct the message header. */
@@ -242,15 +242,15 @@ static GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequ
 
 	/* Send it out... */
 	if (device_write(out_buffer, current) != current)
-		return (GE_INTERNALERROR);
+		return GN_ERR_INTERNALERROR;
 
-	return (GE_NONE);
+	return GN_ERR_NONE;
 }
 
 
 /* Main function to send an fbus message */
 
-static GSM_Error FB3110_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
+static gn_error FB3110_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
 {
 	u8 seqnum;
 
@@ -316,7 +316,7 @@ static void FB3110_TX_SendAck(u8 *message, int length)
 		/* Standard acknowledge seems to be to return an empty message
 		   with the sequence number set to equal the sequence number
 		   sent minus 0x08. */
-		if (FB3110_TX_SendFrame(0, t, (message[1] & 0x1f) - 0x08, NULL) != GE_NONE)
+		if (FB3110_TX_SendFrame(0, t, (message[1] & 0x1f) - 0x08, NULL) != GN_ERR_NONE)
 			dprintf("Failed to acknowledge message type %02x.\n", t);
 		else
 			dprintf("Acknowledged message type %02x.\n", t);
@@ -328,14 +328,14 @@ static void FB3110_TX_SendAck(u8 *message, int length)
 /* newlink is actually part of state - but the link code should not anything about state */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-GSM_Error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
+gn_error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 {
 	unsigned char init_char = 0x55;
 	unsigned char count;
 	static int try = 0;
 
 	try++;
-	if (try > 2) return GE_FAILED;
+	if (try > 2) return GN_ERR_FAILED;
 	/* 'Copy in' the global structures */
 	glink = newlink;
 	statemachine = state;
@@ -352,7 +352,7 @@ GSM_Error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 
 	flink.RequestSequenceNumber = 0x10;
 
-	if (!FB3110_OpenSerial()) return GE_FAILED;
+	if (!FB3110_OpenSerial()) return GN_ERR_FAILED;
 
 	/* Send init string to phone, this is a bunch of 0x55 characters.
 	   Timing is empirical. I believe that we need/can do this for any
@@ -365,7 +365,7 @@ GSM_Error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	/* Init variables */
 	flink.i.State = FB3110_RX_Sync;
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 

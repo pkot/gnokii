@@ -54,7 +54,7 @@ size_t device_write(const __ptr_t buf, size_t n);
 
 int device_select(struct timeval *timeout);
 
-GSM_Error device_nreceived(int *n);
-GSM_Error device_flush(void);
+gn_error device_nreceived(int *n);
+gn_error device_flush(void);
 
 #endif  /* _gnokii_device_h */

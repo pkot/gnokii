@@ -39,14 +39,14 @@
 
 #define	PNOK_MSG_SMS 0x02
 
-GSM_Error PNOK_GetManufacturer(char *manufacturer);
+gn_error PNOK_GetManufacturer(char *manufacturer);
 void PNOK_DecodeString(unsigned char *dest, size_t max, const unsigned char *src, size_t len);
 size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *src);
 
 /* Common functions for misc Nokia drivers */
 /* Call divert: nk6100, nk7110 */
-GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state);
-GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+gn_error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state);
+gn_error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 int PNOK_FBUS_EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *req);
 
 #endif

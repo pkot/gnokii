@@ -32,44 +32,44 @@
 #include "gsm-error.h"
 #include "misc.h"
 
-API char *print_error(GSM_Error e)
+API char *gn_error_print(gn_error e)
 {
 	switch (e) {
-	case GE_NONE:                  return "No error.";
-	case GE_FAILED:                return "Command failed.";
-	case GE_UNKNOWNMODEL:          return "Model specified isn't known/supported.";
-	case GE_INVALIDSECURITYCODE:   return "Invalid Security code.";
-	case GE_INTERNALERROR:         return "Problem occured internal to model specific code.";
-	case GE_NOTIMPLEMENTED:        return "Command called isn't implemented in model.";
-	case GE_NOTSUPPORTED:          return "Function not supported by the phone";
-	case GE_USERCANCELED:          return "User aborted the action.";
-	case GE_UNKNOWN:               return "Unknown error - well better than nothing!!";
-	case GE_MEMORYFULL:            return "The specified memory is full.";
-	case GE_NOLINK:                return "Couldn't establish link with phone.";
-	case GE_TIMEOUT:               return "Command timed out.";
-	case GE_TRYAGAIN:              return "Try again.";
-	case GE_WAITING:               return "Waiting for the next part of the message.";
-	case GE_NOTREADY:              return "Device not ready.";
-	case GE_BUSY:                  return "Command is still being executed.";
-	case GE_INVALIDLOCATION:       return "The given memory location is empty.";
-	case GE_INVALIDMEMORYTYPE:     return "Invalid type of memory.";
-	case GE_EMPTYLOCATION:         return "The given location is empty.";
-	case GE_ENTRYTOOLONG:          return "The given entry is too long";
-	case GE_WRONGDATAFORMAT:       return "Data format is not valid";
-	case GE_INVALIDSIZE:           return "Wrong size of the object";
-	case GE_LINEBUSY:              return "Outgoing call requested reported line busy";
-	case GE_NOCARRIER:             return "No Carrier error during data call setup ?";
-	case GE_UNHANDLEDFRAME:        return "The current frame isn't handled by the incoming function";
-	case GE_UNSOLICITED:           return "Unsolicited message received.";
-	case GE_NONEWCBRECEIVED:       return "Attempt to read CB when no new CB received";
-	default:                       return "Unknown error.";
+	case GN_ERR_NONE:                  return "No error.";
+	case GN_ERR_FAILED:                return "Command failed.";
+	case GN_ERR_UNKNOWNMODEL:          return "Model specified isn't known/supported.";
+	case GN_ERR_INVALIDSECURITYCODE:   return "Invalid Security code.";
+	case GN_ERR_INTERNALERROR:         return "Problem occured internal to model specific code.";
+	case GN_ERR_NOTIMPLEMENTED:        return "Command called isn't implemented in model.";
+	case GN_ERR_NOTSUPPORTED:          return "Function not supported by the phone";
+	case GN_ERR_USERCANCELED:          return "User aborted the action.";
+	case GN_ERR_UNKNOWN:               return "Unknown error - well better than nothing!!";
+	case GN_ERR_MEMORYFULL:            return "The specified memory is full.";
+	case GN_ERR_NOLINK:                return "Couldn't establish link with phone.";
+	case GN_ERR_TIMEOUT:               return "Command timed out.";
+	case GN_ERR_TRYAGAIN:              return "Try again.";
+	case GN_ERR_WAITING:               return "Waiting for the next part of the message.";
+	case GN_ERR_NOTREADY:              return "Device not ready.";
+	case GN_ERR_BUSY:                  return "Command is still being executed.";
+	case GN_ERR_INVALIDLOCATION:       return "The given memory location is empty.";
+	case GN_ERR_INVALIDMEMORYTYPE:     return "Invalid type of memory.";
+	case GN_ERR_EMPTYLOCATION:         return "The given location is empty.";
+	case GN_ERR_ENTRYTOOLONG:          return "The given entry is too long";
+	case GN_ERR_WRONGDATAFORMAT:       return "Data format is not valid";
+	case GN_ERR_INVALIDSIZE:           return "Wrong size of the object";
+	case GN_ERR_LINEBUSY:              return "Outgoing call requested reported line busy";
+	case GN_ERR_NOCARRIER:             return "No Carrier error during data call setup ?";
+	case GN_ERR_UNHANDLEDFRAME:        return "The current frame isn't handled by the incoming function";
+	case GN_ERR_UNSOLICITED:           return "Unsolicited message received.";
+	case GN_ERR_NONEWCBRECEIVED:       return "Attempt to read CB when no new CB received";
+	default:                           return "Unknown error.";
 	}
 }
 
-API GSM_Error ISDNCauseToGSMError(char **src, char **msg, unsigned char loc, unsigned char cause)
+API gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause)
 {
 	char *s, *m;
-	GSM_Error err = GE_UNKNOWN;
+	gn_error err = GN_ERR_UNKNOWN;
 
 	if (src == NULL) src = &s;
 	if (msg == NULL) msg = &m;
@@ -123,7 +123,7 @@ API GSM_Error ISDNCauseToGSMError(char **src, char **msg, unsigned char loc, uns
 	case 0x4F: *msg = "Service or option not implemented, unspecified"; break;
 	case 0x51: *msg = "Invalid call reference value"; break;
 	case 0x52: *msg = "Identified channel does not exist"; break;
-	case 0x53: *msg = "A  suspended  call  exists,  but this call identity does not"; break;
+	case 0x53: *msg = "A suspended call exists, but this call identity does not"; break;
 	case 0x54: *msg = "Call identity in use"; break;
 	case 0x55: *msg = "No call suspended"; break;
 	case 0x56: *msg = "Call having the requested call identity"; break;
@@ -132,8 +132,8 @@ API GSM_Error ISDNCauseToGSMError(char **src, char **msg, unsigned char loc, uns
 	case 0x5F: *msg = "Invalid message, unspecified"; break;
 	case 0x60: *msg = "Mandatory information element is missing"; break;
 	case 0x61: *msg = "Message type non-existent or not implemented"; break;
-	case 0x62: *msg = "Message not compatible with call state  or  message or message type non existent or not implemented"; break;
-	case 0x63: *msg = "Information  element  non-existent  or  not  implemented"; break;
+	case 0x62: *msg = "Message not compatible with call state or message or message type non existent or not implemented"; break;
+	case 0x63: *msg = "Information element non-existent or not implemented"; break;
 	case 0x64: *msg = "Invalid information element content"; break;
 	case 0x65: *msg = "Message not compatible"; break;
 	case 0x66: *msg = "Recovery on timer expiry"; break;

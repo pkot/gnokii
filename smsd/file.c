@@ -221,9 +221,9 @@ void DB_Look (void)
       error = WriteSMS (&sms);
       sleep (1);
     }
-    while ((error == GE_TIMEOUT || error == GE_FAILED) && numError++ < 3);
+    while ((error == GN_ERR_TIMEOUT || error == GN_ERR_FAILED) && numError++ < 3);
 
-    if (error == GE_NONE)
+    if (error == GN_ERR_NONE)
     {
       if (unlink (buf->str))
         g_print (_("Cannot unlink %s."), buf->str);

@@ -225,7 +225,7 @@ int device_select(struct timeval *timeout)
 	return -1;
 }
 
-GSM_Error device_nreceived(int *n)
+gn_error device_nreceived(int *n)
 {
 	*n = -1;
 
@@ -234,17 +234,17 @@ GSM_Error device_nreceived(int *n)
 	case GCT_Infrared:
 		return serial_nreceived(device_portfd, n);
 	default:
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 	}
 }
 
-GSM_Error device_flush(void)
+gn_error device_flush(void)
 {
 	switch (devicetype) {
 	case GCT_Serial:
 	case GCT_Infrared:
 		return serial_flush(device_portfd);
 	default:
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 	}
 }

@@ -84,6 +84,6 @@ typedef struct{
 	u8 RequestSequenceNumber;
 } FB3110_Link;
 
-GSM_Error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
+gn_error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
 
 #endif   /* #ifndef __links_fbus_3110_h */

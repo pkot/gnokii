@@ -42,7 +42,7 @@
 /* This byte is at the beginning of all GSM Frames sent over PhoNet. */
 #define FBUS_PHONET_FRAME_ID 0x14
 
-GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
+gn_error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
 
 typedef struct {
 	int BufferCount;

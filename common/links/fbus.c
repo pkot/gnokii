@@ -51,7 +51,7 @@
 #include "links/fbus.h"
 
 static void FBUS_RX_StateMachine(unsigned char rx_byte);
-static GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
+static gn_error FBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
 static int FBUS_TX_SendAck(u8 message_type, u8 message_seq);
 
 /* FIXME - pass device_* the link stuff?? */
@@ -79,7 +79,7 @@ static bool FBUS_OpenSerial(bool dlr3)
 	/* clearing the RTS bit and setting the DTR bit */
 	device_setdtrrts((1-dlr3), 0);
 
-	return (true);
+	return true;
 }
 
 static bool AT2FBUS_OpenSerial()
@@ -118,7 +118,7 @@ static bool AT2FBUS_OpenSerial()
 	device_write(&end_init_char, 1);
 	usleep(1000000);
  
-	return (true);
+	return true;
 }
 
 static bool FBUS_OpenIR(void)
@@ -158,11 +158,11 @@ static bool FBUS_OpenIR(void)
 
 		if (device_select(&timeout)) {
 			dprintf("IR init succeeded\n");
-			return(true);
+			return true;
 		}
 	}
 
-	return (false);
+	return false;
 }
 
 
@@ -372,7 +372,7 @@ static void FBUS_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static GSM_Error FBUS_Loop(struct timeval *timeout)
+static gn_error FBUS_Loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -383,13 +383,13 @@ static GSM_Error FBUS_Loop(struct timeval *timeout)
 		for (count = 0; count < res; count++)
 			FBUS_RX_StateMachine(buffer[count]);
 	} else
-		return GE_TIMEOUT;
+		return GN_ERR_TIMEOUT;
 
 	/* This traps errors from device_read */
 	if (res > 0)
-		return GE_NONE;
+		return GN_ERR_NONE;
 	else
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 }
 
 
@@ -454,16 +454,16 @@ int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 * buffer)
 	/* Send it out... */
 
 	if (device_write(out_buffer, current) != current)
-		return (false);
+		return false;
 
-	return (true);
+	return true;
 }
 
 
 /* Main function to send an fbus message */
 /* Splits up the message into frames if necessary */
 
-static GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
+static gn_error FBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
 {
 	u8 seqnum, frame_buffer[FBUS_MAX_CONTENT_LENGTH + 2];
 	u8 nom, lml;		/* number of messages, last message len */
@@ -506,7 +506,7 @@ static GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char
 		FBUS_TX_SendFrame(messagesize + 2, messagetype,
 				  frame_buffer);
 	}
-	return (GE_NONE);
+	return GN_ERR_NONE;
 }
 
 
@@ -527,7 +527,7 @@ static int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
 /* newlink is actually part of state - but the link code should not anything about state */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
+gn_error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
 {
 	unsigned char init_char = 0x55;
 	int count;
@@ -551,7 +551,7 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
 	switch (glink->ConnectionType) {
 	case GCT_Infrared:
 		if (!FBUS_OpenIR())
-			return GE_FAILED;
+			return GN_ERR_FAILED;
 		break;
 	case GCT_Serial:
 		switch (try) {
@@ -563,13 +563,13 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
 			err = AT2FBUS_OpenSerial();
 			break;
 		default:
-			return GE_FAILED;
+			return GN_ERR_FAILED;
 		}
-		if (!err) return GE_FAILED;
+		if (!err) return GN_ERR_FAILED;
 		break;
 	case GCT_DAU9P:
 		if (!FBUS_OpenSerial(0))
-			return GE_FAILED;
+			return GN_ERR_FAILED;
 		break;
 	case GCT_DLR3P:
 		switch (try) {
@@ -580,12 +580,12 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
 			err = FBUS_OpenSerial(1);
 			break;
 		default:
-			return GE_FAILED;
+			return GN_ERR_FAILED;
 		}
-		if (!err) return GE_FAILED;
+		if (!err) return GN_ERR_FAILED;
 		break;
 	default:
-		return GE_FAILED;
+		return GN_ERR_FAILED;
 	}
 
 	/* Send init string to phone, this is a bunch of 0x55 characters. Timing is
@@ -607,5 +607,5 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
 		flink.messages[count].MessageBuffer = NULL;
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }

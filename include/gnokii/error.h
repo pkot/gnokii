@@ -28,58 +28,57 @@
 
 */
 
-#ifndef __gsm_error_h_
-#define __gsm_error_h_
+#ifndef _gnokii_gsm_error_h
+#define _gnokii_gsm_error_h
 
 #include "compat.h"
 
 /* Define standard GSM error/return code values. These codes are also used for
    some internal functions such as SIM read/write in the model specific code. */
-
 typedef enum {
 	/* General codes */
-	GE_NONE = 0,              /* No error. */
-	GE_FAILED,                /* Command failed. */
-	GE_UNKNOWNMODEL,          /* Model specified isn't known/supported. */
-	GE_INVALIDSECURITYCODE,   /* Invalid Security code. */
-	GE_INTERNALERROR,         /* Problem occured internal to model specific code. */
-	GE_NOTIMPLEMENTED,        /* Command called isn't implemented in model. */
-	GE_NOTSUPPORTED,          /* Function not supported by the phone */
-	GE_USERCANCELED,          /* User aborted the action. */
-	GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
-	GE_MEMORYFULL,            /* The specified memory is full. */
+	 GN_ERR_NONE = 0,              /* No error. */
+	 GN_ERR_FAILED,                /* Command failed. */
+	 GN_ERR_UNKNOWNMODEL,          /* Model specified isn't known/supported. */
+	 GN_ERR_INVALIDSECURITYCODE,   /* Invalid Security code. */
+	 GN_ERR_INTERNALERROR,         /* Problem occured internal to model specific code. */
+	 GN_ERR_NOTIMPLEMENTED,        /* Command called isn't implemented in model. */
+	 GN_ERR_NOTSUPPORTED,          /* Function not supported by the phone */
+	 GN_ERR_USERCANCELED,          /* User aborted the action. */
+	 GN_ERR_UNKNOWN,               /* Unknown error - well better than nothing!! */
+	 GN_ERR_MEMORYFULL,            /* The specified memory is full. */
 
 	/* Statemachine */
-	GE_NOLINK,                /* Couldn't establish link with phone. */
-	GE_TIMEOUT,               /* Command timed out. */
-	GE_TRYAGAIN,              /* Try again. */
-	GE_WAITING,               /* Waiting for the next part of the message. */
-	GE_NOTREADY,              /* Device not ready. */
-	GE_BUSY,                  /* Command is still being executed. */
+	 GN_ERR_NOLINK,                /* Couldn't establish link with phone. */
+	 GN_ERR_TIMEOUT,               /* Command timed out. */
+	 GN_ERR_TRYAGAIN,              /* Try again. */
+	 GN_ERR_WAITING,               /* Waiting for the next part of the message. */
+	 GN_ERR_NOTREADY,              /* Device not ready. */
+	 GN_ERR_BUSY,                  /* Command is still being executed. */
 	
 	/* Locations */
-	GE_INVALIDLOCATION,       /* The given memory location is empty. */
-	GE_INVALIDMEMORYTYPE,     /* Invalid type of memory. */
-	GE_EMPTYLOCATION,         /* The given location is empty. */
+	 GN_ERR_INVALIDLOCATION,       /* The given memory location is empty. */
+	 GN_ERR_INVALIDMEMORYTYPE,     /* Invalid type of memory. */
+	 GN_ERR_EMPTYLOCATION,         /* The given location is empty. */
 
 	/* Format */
-	GE_ENTRYTOOLONG,          /* The given entry is too long */
-	GE_WRONGDATAFORMAT,       /* Data format is not valid */
-	GE_INVALIDSIZE,           /* Wrong size of the object */
+	 GN_ERR_ENTRYTOOLONG,          /* The given entry is too long */
+	 GN_ERR_WRONGDATAFORMAT,       /* Data format is not valid */
+	 GN_ERR_INVALIDSIZE,           /* Wrong size of the object */
 
 	/* The following are here in anticipation of data call requirements. */
-	GE_LINEBUSY,              /* Outgoing call requested reported line busy */
-	GE_NOCARRIER,             /* No Carrier error during data call setup ? */
+	 GN_ERR_LINEBUSY,              /* Outgoing call requested reported line busy */
+	 GN_ERR_NOCARRIER,             /* No Carrier error during data call setup ? */
 
 	/* The following value signals the current frame is unhandled */
-	GE_UNHANDLEDFRAME,        /* The current frame isn't handled by the incoming function */
-	GE_UNSOLICITED,           /* Unsolicited message received. */
+	 GN_ERR_UNHANDLEDFRAME,        /* The current frame isn't handled by the incoming function */
+	 GN_ERR_UNSOLICITED,           /* Unsolicited message received. */
 
 	/* Other */
-	GE_NONEWCBRECEIVED        /* Attempt to read CB when no new CB received */
-} GSM_Error;
+	 GN_ERR_NONEWCBRECEIVED        /* Attempt to read CB when no new CB received */
+} gn_error;
 
-API char *print_error(GSM_Error e);
-API GSM_Error ISDNCauseToGSMError(char **src, char **msg, unsigned char loc, unsigned char cause);
+API char *gn_error_print(gn_error e);
+API gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause);
 
-#endif
+#endif /* _gn_gsm_error_h */

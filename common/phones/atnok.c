@@ -44,12 +44,12 @@
 
 static AT_SendFunctionType writephonebook;
 
-static GSM_Error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
+static gn_error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
 {
 	if (writephonebook == NULL)
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 	if (data->MemoryStatus->MemoryType == GMT_ME)
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 	return (*writephonebook)(data, state);
 }
 

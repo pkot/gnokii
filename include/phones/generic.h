@@ -40,8 +40,8 @@
 
 /* Generic Functions */
 
-GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
-GSM_Error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state);
+gn_error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
+gn_error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state);
 
 
 #endif

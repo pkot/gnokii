@@ -78,10 +78,10 @@ static void Terminate()
 
 /* ----------------------------------------------------------------------------------- */
 
-static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	printf("[ack]");
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 extern int seen_okay;
@@ -99,9 +99,9 @@ static char *Request(char *c)
 
 
 #if 0
-GSM_Error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
+gn_error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
 {
-	GSM_Error test = GE_NONE;
+	gn_error test = GN_ERR_NONE;
 	char writecmd[128];
 	char *s, *t;
 
@@ -111,12 +111,12 @@ GSM_Error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
 	sprintf(writecmd, "AT+CMGR=%d\r", m->Location);
 	s = Request(writecmd);
 	if (!s)
-		return GE_BUSY;
+		return GN_ERR_BUSY;
 	t = strchr(s, '\n')+1;
 	if (!strncmp(s, "+CMS ERROR: 321", 15))
-		return GE_EMPTYSMSLOCATION;
+		return GN_ERR_EMPTYSMSLOCATION;
 	if (!strncmp(s, "+CMS ERROR: ", 11))
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 
 	printf("Got %s [%s] as reply for cmgr\n", s, t);
 	{
@@ -140,26 +140,26 @@ GSM_Error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
 }
 
 
-GSM_Error ATGSM_DeleteSMSMessage(GSM_SMSMessage * message)
+gn_error ATGSM_DeleteSMSMessage(GSM_SMSMessage * message)
 {
 	char writecmd[128];
 
 	sprintf(writecmd, "AT+CMGD=%d\r", message->Location);
 
 	Request(writecmd);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
-GSM_Error ATGSM_SendSMSMessage(GSM_SMSMessage * SMS, int size)
+gn_error ATGSM_SendSMSMessage(GSM_SMSMessage * SMS, int size)
 {
-	return (GE_NOTIMPLEMENTED);
+	return  GN_ERR_NOTIMPLEMENTED);
 }
 #endif
 
 /* ----------------------------------------------------------------------------------- */
 
-static GSM_Error Initialise(GSM_Statemachine *state)
+static gn_error Initialise(GSM_Statemachine *state)
 {
 	/* char model[10]; */
 
@@ -171,7 +171,7 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 		CBUS_Initialise(state);
 		break;
 	default:
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 		break;
 	}
 	sendat("AT+CPMS=\"SM\",\"SM\"\r");
@@ -186,20 +186,20 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 		printf("Link UP\n");
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 #if 0
-static GSM_Error
+static gn_error
 GetSMSStatus(GSM_SMSStatus *Status)
 {
 	int i,j,k,l;
 	char *message = Request("AT+CPMS=\"SM\",\"SM\"\r");
 	if (sscanf(message, "+CPMS: \"SM\",%d,%d,\"SM\",%d,%d", &i, &j, &k, &l)!=4)
-		return GE_BUSY;
+		return GN_ERR_BUSY;
 	Status->UnRead = i;
 	Status->Number = k;
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 #endif
 

@@ -48,7 +48,7 @@ typedef struct {
 
 typedef struct {
   GSM_API_SMS *sms;
-  GSM_Error status;
+  gn_error status;
 } D_SMSMessage;
 
 typedef struct {

@@ -159,7 +159,7 @@ int serial_select(int fd, struct timeval *timeout)
 /* Change the speed of the serial device.
  * RETURNS: Success
  */
-GSM_Error serial_changespeed(int fd, int speed)
+gn_error serial_changespeed(int fd, int speed)
 {
     BOOL       fRetVal;
     DCB        dcb;
@@ -178,7 +178,7 @@ GSM_Error serial_changespeed(int fd, int speed)
 
     if (fRetVal == 0) fRetVal = GetLastError();
 
-    return GE_NONE;
+    return GN_ERR_NONE;
 }
 
 /* Read from serial device. */
@@ -300,12 +300,12 @@ size_t serial_write(int fd, __ptr_t buf, size_t n)
     return n;
 }
 
-GSM_Error serial_nreceived(int fd, int *n)
+gn_error serial_nreceived(int fd, int *n)
 {
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-GSM_Error serial_flush(int fd)
+gn_error serial_flush(int fd)
 {
-	return GE_NONE;
+	return GN_ERR_NONE;
 }

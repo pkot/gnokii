@@ -43,23 +43,23 @@
 #include "links/cbus.h"
 
 
-static GSM_Error GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
+static gn_error GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
 {
 	char req[128];
-	GSM_Error ret;
+	gn_error ret;
 
 	ret = AT_SetMemoryType(data->MemoryStatus->MemoryType,  state);
-	if (ret != GE_NONE)
+	if (ret != GN_ERR_NONE)
 		return ret;
 	sprintf(req, "AT+CPBR=?\r\n");
-	if (SM_SendMessage(state, 11, GOP_GetMemoryStatus, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 11, GOP_GetMemoryStatus, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	ret = SM_Block(state, data, GOP_GetMemoryStatus);
 	return ret;
 }
 
 
-static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
@@ -68,7 +68,7 @@ static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int l
 	buf.length = length;
 	splitlines(&buf);
 	if (buf.line1 == NULL)
-		return GE_INVALIDMEMORYTYPE;
+		return GN_ERR_INVALIDMEMORYTYPE;
 	if (data->MemoryStatus) {
 		if (strstr(buf.line2, "+CPBR")) {
 			pos = strchr(buf.line2, '-');
@@ -76,11 +76,11 @@ static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int l
 				data->MemoryStatus->Used = atoi(++pos);
 				data->MemoryStatus->Free = 0;
 			} else {
-				return GE_NOTSUPPORTED;
+				return GN_ERR_NOTSUPPORTED;
 			}
 		}
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 

@@ -301,7 +301,7 @@ static void *SendSMS (void *a)
 
 gint WriteSMS (GSM_API_SMS *sms)
 {
-  GSM_Error error;
+  gn_error error;
   PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
   D_SMSMessage *m = (D_SMSMessage *) g_malloc (sizeof (D_SMSMessage));
 

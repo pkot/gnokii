@@ -47,7 +47,7 @@
 
 #include "links/cbus.h"
 
-static GSM_Error CBUS_Loop(struct timeval *timeout);
+static gn_error CBUS_Loop(struct timeval *timeout);
 static bool CBUS_OpenSerial();
 static void CBUS_RX_StateMachine(unsigned char rx_byte);
 static int CBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
@@ -185,13 +185,13 @@ static void sendpacket(unsigned char *msg, int len, unsigned short cmd)
 /* -------------------------------------------------------------------- */
 
 
-static GSM_Error CommandAck(int messagetype, unsigned char *buffer, int length)
+static gn_error CommandAck(int messagetype, unsigned char *buffer, int length)
 {
 	dprintf("[ack]");
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error PhoneReply(int messagetype, unsigned char *buffer, int length)
+static gn_error PhoneReply(int messagetype, unsigned char *buffer, int length)
 {
 	if (!strncmp(buffer, "OK", 2)) {
 		seen_okay = 1;
@@ -207,7 +207,7 @@ static GSM_Error PhoneReply(int messagetype, unsigned char *buffer, int length)
 		CBUS_SendMessage(2, 0x3f, buf);
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 void sendat(unsigned char *msg)
@@ -361,7 +361,7 @@ static int CBUS_SendMessage(u16 message_length, u8 message_type, unsigned char *
 	return true;
 }
 
-static GSM_Error AT_SendMessage(u16 message_length, u8 message_type, unsigned char *buffer)
+static gn_error AT_SendMessage(u16 message_length, u8 message_type, unsigned char *buffer)
 {
 	sendat(buffer);
 	return true;
@@ -372,7 +372,7 @@ static GSM_Error AT_SendMessage(u16 message_length, u8 message_type, unsigned ch
 
 /* ladis: this function ought to be the same for all phones... */
 
-static GSM_Error CBUS_Loop(struct timeval *timeout)
+static gn_error CBUS_Loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -383,19 +383,19 @@ static GSM_Error CBUS_Loop(struct timeval *timeout)
 		for (count = 0; count < res; count++)
 			CBUS_RX_StateMachine(buffer[count]);
 	} else
-		return GE_TIMEOUT;
+		return GN_ERR_TIMEOUT;
 
 	/* This traps errors from device_read */
 	if (res > 0)
-		return GE_NONE;
+		return GN_ERR_NONE;
 	else
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 }
 
 
 /* Initialise variables and start the link */
 
-GSM_Error CBUS_Initialise(GSM_Statemachine *state)
+gn_error CBUS_Initialise(GSM_Statemachine *state)
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
@@ -410,10 +410,10 @@ GSM_Error CBUS_Initialise(GSM_Statemachine *state)
 
 	if (glink->ConnectionType == GCT_Serial) {
 		if (!CBUS_OpenSerial())
-			return GE_FAILED;
+			return GN_ERR_FAILED;
 	} else {
 		dprintf("Device not supported by CBUS");
-		return GE_FAILED;
+		return GN_ERR_FAILED;
 	}
 
 	dprintf("Saying hello...");
@@ -428,9 +428,9 @@ GSM_Error CBUS_Initialise(GSM_Statemachine *state)
 		char init1[] = { 0x38, 0x19, 0x90, 0x70, 0x01, 0x00, 0x1f, 0xdf };
 		say(init1, 8);
 		if (!waitack())
-			return GE_BUSY;
+			return GN_ERR_BUSY;
 	}
 	while (!init_okay)
 		CBUS_Loop(NULL);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }

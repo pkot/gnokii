@@ -974,7 +974,7 @@ gint DrawingAreaExposeEvent(GtkWidget * widget, GdkEventExpose * event)
 
 void GetNetworkInfoEvent(GtkWidget * widget)
 {
-	GSM_Error error;
+	gn_error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_NetworkInfo *data = (D_NetworkInfo *) g_malloc(sizeof(D_NetworkInfo));
 
@@ -992,7 +992,7 @@ void GetNetworkInfoEvent(GtkWidget * widget)
 	g_free(data);
 
 	/* watch for errors */
-	if (error != GE_NONE) {
+	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error getting network info\n(error=%d)"), error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
@@ -1006,7 +1006,7 @@ void GetNetworkInfoEvent(GtkWidget * widget)
 
 void GetLogoEvent(GtkWidget * widget)
 {
-	GSM_Error error;
+	gn_error error;
 	int i;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_Bitmap *data = (D_Bitmap *) g_malloc(sizeof(D_Bitmap));
@@ -1033,7 +1033,7 @@ void GetLogoEvent(GtkWidget * widget)
 	g_free(data);
 
 	/* watch for errors */
-	if (error != GE_NONE) {
+	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error getting bitmap\n(error=%d)"), error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
@@ -1046,7 +1046,7 @@ void GetLogoEvent(GtkWidget * widget)
 
 void SetLogoEvent(GtkWidget * widget)
 {
-	GSM_Error error;
+	gn_error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_Bitmap *data = (D_Bitmap *) g_malloc(sizeof(D_Bitmap));
 	char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
@@ -1081,7 +1081,7 @@ void SetLogoEvent(GtkWidget * widget)
 	g_free(data);
 
 	/* watch for errors */
-	if (error != GE_NONE) {
+	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error setting bitmap\n(error=%d)"), error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
@@ -1329,14 +1329,14 @@ inline void CloseLogosWindow(void)
 void ExportLogoFileMain(gchar * name)
 {
 	gn_bmp tbitmap;
-	GSM_Error error;
+	gn_error error;
 
 	tbitmap = bitmap;
 
 	strncpy(tbitmap.netcode, GSM_GetNetworkCode(networkInfo.NetworkCode), 7);
 
 	error = GSM_SaveBitmapFile(name, &tbitmap, &statemachine.Phone.Info);
-	if (error != GE_NONE) {
+	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error saving file\n(error=%d)"), error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
@@ -1377,7 +1377,7 @@ static void ExportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 {
 	gn_bmp tbitmap;
-	GSM_Error error = 0;
+	gn_error error = 0;
 
 	gchar *fileName;
 	FILE *f;
@@ -1395,7 +1395,7 @@ void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 		fclose(f);
 
 	error = GSM_ReadBitmapFile(fileName, &tbitmap, &statemachine.Phone.Info);
-	if (error != GE_NONE) {
+	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error reading file\n(error=%d)"), error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);

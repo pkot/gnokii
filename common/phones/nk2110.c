@@ -62,7 +62,7 @@
 #define eprintf(x...) fprintf(stderr, x)
 #undef DEBUG
 
-static GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+static gn_error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
 /* Global variables used by code in gsm-api.c to expose the
    functions supported by this model of phone.  */
@@ -226,7 +226,7 @@ static int xwrite(unsigned char *d, int len)
 
 /* --------------------------- */
 
-static GSM_Error
+static gn_error
 SendFrame( u8 *buffer, u8 command, u8 length )
 {
 	u8  pkt[10240], pkt2[10240];
@@ -260,19 +260,19 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	dprintf("writing...");
 	LastChar = GetTime();
 	if (xwrite(pkt, current) == -1)
-		return (GE_INTERNALERROR);
+		return  GN_ERR_INTERNALERROR);
 	if (xread(pkt2, current) == -1)
-		return (GE_INTERNALERROR);
+		return  GN_ERR_INTERNALERROR);
 	dprintf("echook");
 	if (memcmp(pkt, pkt2, current)) {
 		eprintf("Bad echo?!");
 		msleep(1000);
-		return (GE_TIMEOUT);
+		return  GN_ERR_TIMEOUT);
 	}
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
-static GSM_Error
+static gn_error
 SendCommand( u8 *buffer, u8 command, u8 length )
 {
 	int time, retries = 10;
@@ -299,7 +299,7 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 		now = GetTime();
 		while ((GetTime() - now) < time*1000) {
 			if (ACKOK)
-				return GE_NONE;
+				return GN_ERR_NONE;
 			yield();
 			POLLIT;
 		}
@@ -307,7 +307,7 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 		dprintf("[resend]");
 	}
 	eprintf("Command not okay after 10 retries!\n");
-	return GE_BUSY;
+	return GN_ERR_BUSY;
 }
 
 /* Applications should call Terminate to close the serial port. */
@@ -319,7 +319,7 @@ Terminate(void)
 	device_close();
 }
 
-static GSM_Error
+static gn_error
 SMS(GSM_SMSMessage *message, int command)
 {
 	u8 pkt[] = { 0x10, 0x02, 0, 0 };
@@ -339,24 +339,24 @@ SMS(GSM_SMSMessage *message, int command)
 	}
 	if (PacketData[3] != LM_SMS_EVENT) {
 		eprintf("Something is very wrong with SMS\n");
-		return GE_BUSY; /* FIXME */
+		return GN_ERR_BUSY; /* FIXME */
 	}
 	if ((SMSData[2]) && (SMSData[2] != message->Number)) {
 		eprintf("Wanted message @%d, got message at @%d!\n", message->Number, SMSData[2]);
-		return GE_BUSY;
+		return GN_ERR_BUSY;
 	}
 	SMSpos = 0;
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
 
-static GSM_Error
+static gn_error
 DecodeIncomingSMS(GSM_SMSMessage *m)
 {
-	GSM_Error error;
+	gn_error error;
 	int len, i;
 
-	error = GE_NONE;
+	error = GN_ERR_NONE;
 /*	Should be moved to gsm-sms.c */
 
 	/* SMSData[0] == Memory type */
@@ -403,20 +403,20 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 	return error;
 }
 
-static GSM_Error
+static gn_error
 GetSMSMessage(GSM_Data *data)
 {
 	GSM_SMSMessage *m = data->SMSMessage;
 	if (m->Number > 10)
-		return GE_INVALIDSMSLOCATION;
+		return GN_ERR_INVALIDSMSLOCATION;
 
-	if (SMS(m, LM_SMS_READ_STORED_DATA) != GE_NONE)
-		return GE_BUSY; /* FIXME */
+	if (SMS(m, LM_SMS_READ_STORED_DATA) != GN_ERR_NONE)
+		return GN_ERR_BUSY; /* FIXME */
 	ddprintf("Have message?\n");
 
 	if (SMSData[0] != LM_SMS_FORWARD_STORED_DATA) {
 		ddprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
-		return GE_EMPTYSMSLOCATION;
+		return GN_ERR_EMPTYSMSLOCATION;
 	}
 
 	data->RawData->Length = 180;
@@ -426,19 +426,19 @@ GetSMSMessage(GSM_Data *data)
 		eprintf("Error in parsesms?\n");
 
 	msleep_poll(1000);		/* If phone lost our ack, it might retransmit data */
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
 #if 0
-static GSM_Error
+static gn_error
 SendSMSMessage(GSM_SMSMessage *m)
 {
 	if (m->Number > 10)
-		return GE_INVALIDSMSLOCATION;
+		return GN_ERR_INVALIDSMSLOCATION;
 
 	if (SMSData[0] != 0x0b) {
 		ddprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
-		return GE_EMPTYSMSLOCATION;
+		return GN_ERR_EMPTYSMSLOCATION;
 	}
 	ddprintf("Status: " );
 	switch (SMSData[3]) {
@@ -447,11 +447,11 @@ SendSMSMessage(GSM_SMSMessage *m)
 	case 3: m->Type = GST_MT; m->Status = GSS_NOTSENTREAD; ddprintf("not read\n"); break;
 	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; ddprintf("read\n"); break;
 	}
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 #endif
 
-static GSM_Error DeleteSMSMessage(GSM_SMSMessage *message)
+static gn_error DeleteSMSMessage(GSM_SMSMessage *message)
 {
 	ddprintf("deleting...");
 	return SMS(message, 3);
@@ -482,7 +482,7 @@ GetValue(u8 index, u8 type)
 	return (val);
 }
 
-static GSM_Error
+static gn_error
 GetRFLevel(GSM_RFUnits *units, float *level)
 {
 	int val = GetValue(0x84, 2);
@@ -502,10 +502,10 @@ GetRFLevel(GSM_RFUnits *units, float *level)
 		*level = (100* (float) val) / 60.0;	/* This should be / 99.0 for some models other than nokia-2110 */
 		*units = GRF_Percentage;
 	}
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
-static GSM_Error
+static gn_error
 GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 {
 	int val = GetValue(0x85, 2);
@@ -523,30 +523,30 @@ GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 		*units = GBU_Percentage;
 	}
 
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
-static GSM_Error GetVersionInfo(void)
+static gn_error GetVersionInfo(void)
 {
 	char *s = VersionInfo;
 	ddprintf("Getting version info...\n");
 	if (GetValue(0x11, 0x03) == -1)
-		return GE_TIMEOUT;
+		return GN_ERR_TIMEOUT;
 
 	strncpy( s, (void *) &PacketData[6], sizeof(VersionInfo) );
 
-	for( Revision     = s; *s != 0x0A; s++ ) if( !*s ) return (GE_NONE);
+	for( Revision     = s; *s != 0x0A; s++ ) if( !*s ) return  GN_ERR_NONE);
 	*s++ = 0;
-	for( RevisionDate = s; *s != 0x0A; s++ ) if( !*s ) return (GE_NONE);
+	for( RevisionDate = s; *s != 0x0A; s++ ) if( !*s ) return  GN_ERR_NONE);
 	*s++ = 0;
-	for( Model        = s; *s != 0x0A; s++ ) if( !*s ) return (GE_NONE);
+	for( Model        = s; *s != 0x0A; s++ ) if( !*s ) return  GN_ERR_NONE);
 	*s++ = 0;
 	ddprintf("Revision %s, Date %s, Model %s\n", Revision, RevisionDate, Model );
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
 /* Our "Not implemented" functions */
-static GSM_Error
+static gn_error
 GetMemoryStatus(GSM_MemoryStatus *Status)
 {
 	switch(Status->MemoryType) {
@@ -567,9 +567,9 @@ GetMemoryStatus(GSM_MemoryStatus *Status)
 		Status->Free = 150;
 		break;
 	default:
-		return (GE_NOTIMPLEMENTED);
+		return  GN_ERR_NOTIMPLEMENTED);
 	}
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
 static bool
@@ -592,7 +592,7 @@ Display(u8 b, int shift, char *s, char *buf)
 }
 
 static void (*OutputFn)(GSM_DrawMessage *DrawMessage);
-static GSM_Error (*OnSMSFn)(GSM_SMSMessage *m);
+static gn_error (*OnSMSFn)(GSM_SMSMessage *m);
 int SMSReady = 0;
 
 static int
@@ -604,7 +604,7 @@ CheckIncomingSMS(int at)
 	m.Number = at;
 	m.MemoryType = GMT_ME;
 #if 0
-	if (GetSMSMessage(&m) != GE_NONE) {
+	if (GetSMSMessage(&m) != GN_ERR_NONE) {
 		return 0;
 	}
 #endif
@@ -826,7 +826,7 @@ bool OpenSerial(void)
 	return (true);
 }
 
-static GSM_Error
+static gn_error
 SetKey(int c, int up)
 {
 	u8 reg[] = { 0x7a /* RPC_UI_KEY_PRESS or RPC_UI_KEY_RELEASE */, 0, 1, 0 /* key code */ };
@@ -836,7 +836,7 @@ SetKey(int c, int up)
 	PacketOK = false;
 	SendCommand( reg, 0xe5, 4 );
 	waitfor(PacketOK, 0);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 #define XCTRL(a) (a&0x1f)
@@ -1004,7 +1004,7 @@ HandleKey(char c)
 	}
 }
 
-static GSM_Error
+static gn_error
 HandleString(char *s)
 {
 	while (*s) {
@@ -1013,7 +1013,7 @@ HandleString(char *s)
 	}
 	fprintf(stderr,"***end of input");
 	PressKey(lastkey, 1);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 static void
@@ -1023,7 +1023,7 @@ Register(void)
 	SendFrame( reg, 0xe9, 5 );
 }
 
-static GSM_Error
+static gn_error
 EnableDisplayOutput(GSM_Statemachine *sm)
 {
 	/* LN_UC_SHARE, LN_UC_SHARE, LN_UC_RELEASE, LN_UC_RELEASE, LN_UC_KEEP */
@@ -1046,10 +1046,10 @@ EnableDisplayOutput(GSM_Statemachine *sm)
 	fprintf(stderr, "Display grabbed okay (waiting)\n");
 	msleep_poll(500);
 	fprintf(stderr, "Okay\n");
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error SMS_Reserve(GSM_Statemachine *sm)
+static gn_error SMS_Reserve(GSM_Statemachine *sm)
 {
 	u8 pkt[] = { 0x10, LM_SMS_RESERVE_PP, LN_SMS_NORMAL_RESERVE };
 	PacketOK = false;
@@ -1064,17 +1064,17 @@ static GSM_Error SMS_Reserve(GSM_Statemachine *sm)
 	if (SMSData[0] != LM_SMS_PP_RESERVE_COMPLETE)
 		eprintf("Not okay trying to reserve SMS-es (%d)\n", SMSData[0]);
 	SMSpos = 0;
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error SMS_UnReserve(GSM_Statemachine *sm)
+static gn_error SMS_UnReserve(GSM_Statemachine *sm)
 {
 	u8 pkt[] = {0x10, LM_SMS_UNRESERVE_PP };
 	PacketOK = false;
 	msleep_poll(3000);
 	SendCommand(pkt, LM_SMS_COMMAND, sizeof(pkt));
 	SMSpos = 0;
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 /* This is the main loop for the MB21 functions.  When N2110_Initialise
@@ -1101,7 +1101,7 @@ RegisterMe(void)
 }
 
 /* Initialise variables and state machine. */
-static GSM_Error
+static gn_error
 Initialise(GSM_Statemachine *state)
 {
 	GSM_Data data;
@@ -1124,21 +1124,21 @@ Initialise(GSM_Statemachine *state)
 		RegisterMe();
 		break;
 	default:
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 		break;
 	}
 
 	SM_Initialise(state);
 	GSM_DataClear(&data);
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 /* Routine to get specifed phone book location.  Designed to be called by
    application.  Will block until location is retrieved or a timeout/error
    occurs. */
 
-static GSM_Error
+static gn_error
 GetPhonebookLocation(GSM_PhonebookEntry *entry)
 {
 	u8  pkt[] = {0x1a, 0 /* 1 == phone */, 0};
@@ -1153,7 +1153,7 @@ GetPhonebookLocation(GSM_PhonebookEntry *entry)
 	if ((PacketData[3] != 0xc9) ||
 	    (PacketData[4] != 0x1a)) {
 		fprintf(stderr, "Something is very wrong with GetPhonebookLocation\n");
-		return GE_BUSY;
+		return GN_ERR_BUSY;
 	}
 	ddprintf("type= %x\n", PacketData[5]);
 	ddprintf("location= %x\n", PacketData[6]);
@@ -1171,14 +1171,14 @@ GetPhonebookLocation(GSM_PhonebookEntry *entry)
 	entry->Empty = false;
 	entry->Group = 0;
 
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
 /* Routine to write phonebook location in phone. Designed to be called by
    application code. Will block until location is written or timeout
    occurs. */
 
-static GSM_Error
+static gn_error
 WritePhonebookLocation(GSM_PhonebookEntry *entry)
 {
 	u8  pkt[999] = {0x1b, 0 /* 1 == phone */, 0};
@@ -1195,33 +1195,33 @@ WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	if ((PacketData[3] != 0xc9) ||
 	    (PacketData[4] != 0x1b)) {
 		fprintf(stderr, "Something is very wrong with WritePhonebookLocation\n");
-		return GE_BUSY;
+		return GN_ERR_BUSY;
 	}
 	printf("type= %x\n", PacketData[5]);
 	printf("location= %x\n", PacketData[6]);
 	printf("status= %x\n", PacketData[7]);
-	return (GE_NONE);
+	return  GN_ERR_NONE);
 }
 
-static GSM_Error
+static gn_error
 GetSMSStatus(GSM_SMSMemoryStatus *Status)
 {
 	Status->Unread = 0;
 	Status->Number = 5;
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 #endif /* WIN32 */
 
-static GSM_Error link_Loop(struct timeval *tm)
+static gn_error link_Loop(struct timeval *tm)
 {
 	POLLIT;
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
+gn_error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error err = GE_NONE;
+	gn_error err = GN_ERR_NONE;
 
 //	printf("Asked for %d\n", op);
 	switch (op) {
@@ -1303,7 +1303,7 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 	case GOP_PollDisplay:
 		break;
 	default:
-		err = GE_NOTIMPLEMENTED;
+		err = GN_ERR_NOTIMPLEMENTED;
 	}
 	return err;
 }

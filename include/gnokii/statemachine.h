@@ -33,18 +33,18 @@
 
 #include "gsm-data.h"
 
-GSM_Error SM_Initialise(GSM_Statemachine *state);
+gn_error SM_Initialise(GSM_Statemachine *state);
 API GSM_State SM_Loop(GSM_Statemachine *state, int timeout);
-GSM_Error SM_SendMessage(GSM_Statemachine *state, u16 messagesize, u8 messagetype, void *message);
-GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char messagetype);
+gn_error SM_SendMessage(GSM_Statemachine *state, u16 messagesize, u8 messagetype, void *message);
+gn_error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char messagetype);
 void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message, u16 messagesize);
 void SM_Reset(GSM_Statemachine *state);
-GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype);
-GSM_Error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t);
-GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor);
-GSM_Error SM_BlockNoRetryTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t);
-GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor);
-API GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm);
+gn_error SM_GetError(GSM_Statemachine *state, unsigned char messagetype);
+gn_error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t);
+gn_error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor);
+gn_error SM_BlockNoRetryTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t);
+gn_error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor);
+API gn_error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm);
 void SM_DumpMessage(int messagetype, unsigned char *message, int length);
 void SM_DumpUnhandledFrame(GSM_Statemachine *state, int messagetype, unsigned char *message, int length);
 

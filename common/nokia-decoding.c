@@ -34,7 +34,7 @@
 #include "gsm-common.h"
 #include "nokia-decoding.h"
 
-GSM_Error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data, int blocks, int memtype, int speeddialpos)
+gn_error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data, int blocks, int memtype, int speeddialpos)
 {
 	int subblockcount = 0, i;
 	char *str;
@@ -163,17 +163,17 @@ GSM_Error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data,
 		}
 		blockstart += blockstart[3];
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *alarm)
+static gn_error GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *alarm)
 {
 	time_t				t_alarm;
 	struct tm			tm_time;
 	struct tm			*tm_alarm;
-	GSM_Error			e = GE_NONE;
+	gn_error			e = GN_ERR_NONE;
 
-	if (!time || !alarm) return GE_INTERNALERROR;
+	if (!time || !alarm) return GN_ERR_INTERNALERROR;
 
 	memset(&tm_time, 0, sizeof(tm_time));
 	tm_time.tm_year = time->Year - 1900;
@@ -200,12 +200,12 @@ static GSM_Error GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *a
 }
 
 
-static GSM_Error GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
+static gn_error GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 {
 	time_t		alarmdiff;
-	GSM_Error	e = GE_NONE;
+	gn_error	e = GN_ERR_NONE;
 
-	if (!c) return GE_INTERNALERROR;
+	if (!c) return GN_ERR_INTERNALERROR;
 
 	c->Time.Hour = block[0];
 	c->Time.Minute = block[1];
@@ -222,7 +222,7 @@ static GSM_Error GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 	return e;
 }
 
-GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
+gn_error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 {
 	unsigned char *block;
 	int alarm;
@@ -284,7 +284,7 @@ GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 		break;
 	default:
 		data->CalendarNote->Type = -1;
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }

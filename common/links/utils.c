@@ -39,9 +39,9 @@
 #include "device.h"
 
 
-GSM_Error LINK_Terminate(GSM_Statemachine *state)
+gn_error LINK_Terminate(GSM_Statemachine *state)
 {
 	/* device_close(&(state->Device)); */
 	device_close();
-	return GE_NONE; /* FIXME */
+	return GN_ERR_NONE; /* FIXME */
 }

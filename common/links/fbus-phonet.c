@@ -50,7 +50,7 @@
 #include "links/fbus-phonet.h"
 
 static void PHONET_RX_StateMachine(unsigned char rx_byte);
-static GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
+static gn_error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -170,9 +170,9 @@ static void PHONET_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static GSM_Error PHONET_Loop(struct timeval *timeout)
+static gn_error PHONET_Loop(struct timeval *timeout)
 {
-	GSM_Error	error = GE_INTERNALERROR;
+	gn_error	error = GN_ERR_INTERNALERROR;
 	unsigned char	buffer[255];
 	int		count, res;
 
@@ -184,10 +184,10 @@ static GSM_Error PHONET_Loop(struct timeval *timeout)
 			PHONET_RX_StateMachine(buffer[count]);
 		}
 		if (res > 0) {
-			error = GE_NONE;	/* This traps errors from device_read */
+			error = GN_ERR_NONE;	/* This traps errors from device_read */
 		}
 	} else if (!res) {
-		error = GE_TIMEOUT;
+		error = GN_ERR_TIMEOUT;
 	}
 
 	return error;
@@ -195,7 +195,7 @@ static GSM_Error PHONET_Loop(struct timeval *timeout)
 
 /* Main function to send an fbus message */
 
-static GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message) {
+static gn_error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message) {
 
 	u8 out_buffer[PHONET_MAX_TRANSMIT_LENGTH + 5];
 	int current = 0;
@@ -233,16 +233,16 @@ static GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned ch
 		else current += sent;
 	} while (current < total);
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
 
 /* Initialise variables and start the link */
 
-GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
+gn_error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 {
-	GSM_Error error = GE_FAILED;
+	gn_error error = GN_ERR_FAILED;
 
 	/* 'Copy in' the global structures */
 	glink = newlink;
@@ -254,7 +254,7 @@ GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 
 	if ((glink->ConnectionType == GCT_Infrared) || (glink->ConnectionType == GCT_Irda)) {
 		if (PHONET_Open() == true) {
-			error = GE_NONE;
+			error = GN_ERR_NONE;
 
 			/* Init variables */
 			imessage.state = FBUS_RX_Sync;

@@ -209,7 +209,7 @@ static void ReadSpeedDial(void)
 		pthread_mutex_lock(&speedDialMutex);
 		pthread_cond_wait(&speedDialCond, &speedDialMutex);
 		pthread_mutex_unlock(&speedDialMutex);
-		if (d->status != GE_NONE) {
+		if (d->status != GN_ERR_NONE) {
 			g_print("Cannot read speed dial key %d!\n", i);
 			*buf = i + '0';
 			row[0] = buf;
@@ -270,7 +270,7 @@ static void SaveSpeedDial(void)
 				pthread_cond_wait (&speedDialCond, &speedDialMutex);
 				pthread_mutex_unlock (&speedDialMutex);
 
-				if (d->status != GE_NONE) {
+				if (d->status != GN_ERR_NONE) {
 					g_print(_("Error writing speed dial for key %d!\n"), d->entry.Number);
 					/*
 					  gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);

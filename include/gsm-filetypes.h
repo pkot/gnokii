@@ -47,8 +47,8 @@ int FillToDo(GSM_ToDo *note, char *text, char *todo_priority);
 
 /* Ringtone Files */
 
-GSM_Error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
-GSM_Error GSM_SaveRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
+gn_error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
+gn_error GSM_SaveRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
 
 int GetScale (char *num);
 int GetDuration (char *num);
@@ -56,19 +56,19 @@ int GetDuration (char *num);
 /* Defines the character that separates fields in rtttl files. */
 #define RTTTL_SEP ":"
 
-GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone);
-GSM_Error saveott(FILE *file, GSM_Ringtone *ringtone);
+gn_error saverttl(FILE *file, GSM_Ringtone *ringtone);
+gn_error saveott(FILE *file, GSM_Ringtone *ringtone);
 
-GSM_Error loadrttl(FILE *file, GSM_Ringtone *ringtone);
-GSM_Error loadott(FILE *file, GSM_Ringtone *ringtone);
+gn_error loadrttl(FILE *file, GSM_Ringtone *ringtone);
+gn_error loadott(FILE *file, GSM_Ringtone *ringtone);
 
 
 /* Bitmap Files */
 
-GSM_Error GSM_ReadBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info);
-GSM_Error GSM_SaveBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info);
+gn_error GSM_ReadBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info);
+gn_error GSM_SaveBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info);
 int GSM_SaveTextFile(char *FileName, char *text, int mode);
-GSM_Error GSM_ShowBitmapFile(char *FileName);
+gn_error GSM_ShowBitmapFile(char *FileName);
 
 void savenol(FILE *file, gn_bmp *bitmap, GSM_Information *info);
 void savengg(FILE *file, gn_bmp *bitmap, GSM_Information *info);
@@ -81,15 +81,15 @@ void savebmp(FILE *file, gn_bmp *bitmap);
 void savexpm(char *filename, gn_bmp *bitmap);
 #endif
 
-GSM_Error loadngg(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-GSM_Error loadnol(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-GSM_Error loadnsl(FILE *file, gn_bmp *bitmap);
-GSM_Error loadnlm(FILE *file, gn_bmp *bitmap);
-GSM_Error loadota(FILE *file, gn_bmp *bitmap, GSM_Information *info);
-GSM_Error loadbmp(FILE *file, gn_bmp *bitmap);
+gn_error loadngg(FILE *file, gn_bmp *bitmap, GSM_Information *info);
+gn_error loadnol(FILE *file, gn_bmp *bitmap, GSM_Information *info);
+gn_error loadnsl(FILE *file, gn_bmp *bitmap);
+gn_error loadnlm(FILE *file, gn_bmp *bitmap);
+gn_error loadota(FILE *file, gn_bmp *bitmap, GSM_Information *info);
+gn_error loadbmp(FILE *file, gn_bmp *bitmap);
 
 #ifdef XPM
-GSM_Error loadxpm(char *filename, gn_bmp *bitmap);
+gn_error loadxpm(char *filename, gn_bmp *bitmap);
 #endif
 
 typedef enum {

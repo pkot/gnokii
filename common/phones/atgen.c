@@ -48,44 +48,44 @@
 #  include "links/cbus.h"
 #endif
 
-static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state);
-static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-/* static GSM_Error ReplyDeleteSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state); */
-static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error Initialise(GSM_Data *setupdata, GSM_Statemachine *state);
+static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+static gn_error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+/* static gn_error ReplyDeleteSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state); */
+static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 
 
-static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_GetRevision(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_GetManufacturer(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_GetBattery(GSM_Data *data,  GSM_Statemachine *state);
-static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state);
-static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state);
-static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
-static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *cmd);
-static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_GetModel(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_GetRevision(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_GetManufacturer(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_GetBattery(GSM_Data *data,  GSM_Statemachine *state);
+static gn_error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state);
+static gn_error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state);
+static gn_error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
+static gn_error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *cmd);
+static gn_error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
 
 typedef struct {
 	int gop;
@@ -211,22 +211,22 @@ AT_SendFunctionType AT_InsertSendFunction(int type, AT_SendFunctionType func)
 }
 
 
-static GSM_Error SoftReset(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SoftReset(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "ATZ\r");
-	if (SM_SendMessage(state, 4, GOP_Init, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 4, GOP_Init, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_Init);
 }
 
 
-static GSM_Error SetEcho(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetEcho(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "ATE1\r");
-	if (SM_SendMessage(state, 5, GOP_Init, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 5, GOP_Init, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_Init);
 }
 
@@ -254,33 +254,33 @@ static GSM_Error SetEcho(GSM_Data *data, GSM_Statemachine *state)
 static void StoreDefaultCharset(GSM_Statemachine *state)
 {
 	GSM_Data data;
-	GSM_Error ret = GE_NONE;
+	gn_error ret = GN_ERR_NONE;
 	char buf[256];
 
 	GSM_DataClear(&data);
 	data.Model = buf;
 	ret = state->Phone.Functions(GOPAT_GetCharset, &data, state);
-	if (ret != GE_NONE) return;
+	if (ret != GN_ERR_NONE) return;
 	if (!strncmp(buf, "GSM", 3)) atdefaultcharset = CHARGSM;
 	if (strstr(buf, "437")) atdefaultcharset = CHARCP437;
 	return;
 }
 
 
-GSM_Error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
+gn_error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
 {
 	char req[128];
-	GSM_Error ret = GE_NONE;
+	gn_error ret = GN_ERR_NONE;
 	GSM_Data data;
 
 	if (mt != memorytype) {
 		sprintf(req, "AT+CPBS=\"%s\"\r", memorynames[mt]);
 		ret = SM_SendMessage(state, 13, GOP_Init, req);
-		if (ret != GE_NONE)
-			return GE_NOTREADY;
+		if (ret != GN_ERR_NONE)
+			return GN_ERR_NOTREADY;
 		GSM_DataClear(&data);
 		ret = SM_BlockNoRetry(state, &data, GOP_Init);
-		if (ret == GE_NONE)
+		if (ret == GN_ERR_NONE)
 			memorytype = mt;
 	}
 	return ret;
@@ -319,35 +319,35 @@ GSM_Error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
  *
  * GSM_Data has no field for charset so i misuse Model.
  */
-static GSM_Error SetCharset(GSM_Statemachine *state)
+static gn_error SetCharset(GSM_Statemachine *state)
 {
 	char req[128];
 	char charsets[256];
-	GSM_Error ret = GE_NONE;
+	gn_error ret = GN_ERR_NONE;
 	GSM_Data data;
 
 	if (atcharset == CHARNONE) {
 		/* check if ucs2 is available */
 		sprintf(req, "AT+CSCS=?\r");
 		ret = SM_SendMessage(state, 10, GOPAT_GetCharset, req);
-		if (ret != GE_NONE)
-			return GE_NOTREADY;
+		if (ret != GN_ERR_NONE)
+			return GN_ERR_NOTREADY;
 		GSM_DataClear(&data);
 		*charsets = '\0';
 		data.Model = charsets;
 		ret = SM_BlockNoRetry(state, &data, GOPAT_GetCharset);
-		if (ret != GE_NONE) {
+		if (ret != GN_ERR_NONE) {
 			*charsets = '\0';
 		}
 		else if (strstr(charsets, "UCS2")) {
 			/* ucs2 charset found. try to set it */
 			sprintf(req, "AT+CSCS=\"UCS2\"\r");
 			ret = SM_SendMessage(state, 15, GOP_Init, req);
-			if (ret != GE_NONE)
-				return GE_NOTREADY;
+			if (ret != GN_ERR_NONE)
+				return GN_ERR_NOTREADY;
 			GSM_DataClear(&data);
 			ret = SM_BlockNoRetry(state, &data, GOP_Init);
-			if (ret == GE_NONE)
+			if (ret == GN_ERR_NONE)
 				atcharset = CHARUCS2;
 		}
 		if (atcharset == CHARNONE) {
@@ -356,25 +356,25 @@ static GSM_Error SetCharset(GSM_Statemachine *state)
 				atcharset = CHARGSM;
 				if (!strstr(charsets, "HEX")) {
 					/* no hex charset found! */
-					return GE_NONE;
+					return GN_ERR_NONE;
 				}
 				/* try to set hex charset */
 				sprintf(req, "AT+CSCS=\"HEX\"\r");
 				ret = SM_SendMessage(state, 14, GOP_Init, req);
-				if (ret != GE_NONE)
-					return GE_NOTREADY;
+				if (ret != GN_ERR_NONE)
+					return GN_ERR_NOTREADY;
 				GSM_DataClear(&data);
 				ret = SM_BlockNoRetry(state, &data, GOP_Init);
-				if (ret == GE_NONE)
+				if (ret == GN_ERR_NONE)
 					atcharset = CHARHEXGSM;
 			} else {
 				sprintf(req, "AT+CSCS=\"GSM\"\r");
 				ret = SM_SendMessage(state, 14, GOP_Init, req);
-				if (ret != GE_NONE)
-					return GE_NOTREADY;
+				if (ret != GN_ERR_NONE)
+					return GN_ERR_NOTREADY;
 				GSM_DataClear(&data);
 				ret = SM_BlockNoRetry(state, &data, GOP_Init);
-				if (ret == GE_NONE)
+				if (ret == GN_ERR_NONE)
 					atcharset = CHARGSM;
 			}
 		}
@@ -392,148 +392,148 @@ static GSM_Error SetCharset(GSM_Statemachine *state)
  * GSM_Data has no field for charset so you must misuse Model. the Model
  * string must be initialized with a length of 256 bytes.
  */
-static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
-	GSM_Error ret = GE_NONE;
+	gn_error ret = GN_ERR_NONE;
 
 	sprintf(req, "AT+CSCS?\r");
 	ret = SM_SendMessage(state, 9, GOPAT_GetCharset, req);
-	if (ret != GE_NONE)
-		return GE_NOTREADY;
+	if (ret != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOPAT_GetCharset);
 }
 
 
 
-static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_Identify(GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error ret;
+	gn_error ret;
 
-	if ((ret = Functions(GOP_GetModel, data, state)) != GE_NONE)
+	if ((ret = Functions(GOP_GetModel, data, state)) != GN_ERR_NONE)
 		return ret;
-	if ((ret = Functions(GOP_GetManufacturer, data, state)) != GE_NONE)
+	if ((ret = Functions(GOP_GetManufacturer, data, state)) != GN_ERR_NONE)
 		return ret;
-	if ((ret = Functions(GOP_GetRevision, data, state)) != GE_NONE)
+	if ((ret = Functions(GOP_GetRevision, data, state)) != GN_ERR_NONE)
 		return ret;
 	return Functions(GOP_GetImei, data, state);
 }
 
 
-static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetModel(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "AT+CGMM\r");
-	if (SM_SendMessage(state, 8, GOP_Identify, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 8, GOP_Identify, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_Identify);
 }
 
 
-static GSM_Error AT_GetManufacturer(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetManufacturer(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "AT+CGMI\r");
-	if (SM_SendMessage(state, 8, GOP_Identify, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 8, GOP_Identify, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_Identify);
 }
 
 
-static GSM_Error AT_GetRevision(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetRevision(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "AT+CGMR\r");
-	if (SM_SendMessage(state, 8, GOP_Identify, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 8, GOP_Identify, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_Identify);
 }
 
 
-static GSM_Error AT_GetIMEI(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetIMEI(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "AT+CGSN\r");
-	if (SM_SendMessage(state, 8, GOP_Identify, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 8, GOP_Identify, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_Identify);
 }
 
 
 /* gets battery level and power source */
 
-static GSM_Error AT_GetBattery(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetBattery(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "AT+CBC\r");
-	if (SM_SendMessage(state, 7, GOP_GetBatteryLevel, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 7, GOP_GetBatteryLevel, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_GetBatteryLevel);
 }
 
 
-static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state)
+static gn_error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "AT+CSQ\r");
-	if (SM_SendMessage(state, 7, GOP_GetRFLevel, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 7, GOP_GetRFLevel, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_GetRFLevel);
 }
 
 
-static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
+static gn_error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
 {
 	char req[128];
-	GSM_Error ret;
+	gn_error ret;
 
 	ret = AT_SetMemoryType(data->MemoryStatus->MemoryType,  state);
-	if (ret != GE_NONE)
+	if (ret != GN_ERR_NONE)
 		return ret;
 	sprintf(req, "AT+CPBS?\r");
-	if (SM_SendMessage(state, 9, GOP_GetMemoryStatus, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 9, GOP_GetMemoryStatus, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	ret = SM_BlockNoRetry(state, data, GOP_GetMemoryStatus);
-	if (ret != GE_UNKNOWN)
+	if (ret != GN_ERR_UNKNOWN)
 		return ret;
 	sprintf(req, "AT+CPBR=?\r");
-	if (SM_SendMessage(state, 10, GOP_GetMemoryStatus, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 10, GOP_GetMemoryStatus, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	ret = SM_BlockNoRetry(state, data, GOP_GetMemoryStatus);
 	return ret;
 }
 
 
-static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state)
+static gn_error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state)
 {
 	char req[128];
-	GSM_Error ret;
+	gn_error ret;
 
 	ret = SetCharset(state);
-	if (ret != GE_NONE)
+	if (ret != GN_ERR_NONE)
 		return ret;
 	ret = AT_SetMemoryType(data->PhonebookEntry->MemoryType,  state);
-	if (ret != GE_NONE)
+	if (ret != GN_ERR_NONE)
 		return ret;
 	sprintf(req, "AT+CPBR=%d\r", data->PhonebookEntry->Location);
-	if (SM_SendMessage(state, strlen(req), GOP_ReadPhonebook, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, strlen(req), GOP_ReadPhonebook, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	ret = SM_BlockNoRetry(state, data, GOP_ReadPhonebook);
 	return ret;
 }
 
 
-static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[64];
 
-	if (!data->CallDivert) return GE_UNKNOWN;
+	if (!data->CallDivert) return GN_ERR_UNKNOWN;
 
 	sprintf(req, "AT+CCFC=");
 
@@ -552,7 +552,7 @@ static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 		break;
 	default:
 		dprintf("3. %d\n", data->CallDivert->DType);
-		return GE_NOTIMPLEMENTED;
+		return GN_ERR_NOTIMPLEMENTED;
 	}
 	if (data->CallDivert->Operation == GSM_CDV_Register)
 		sprintf(req, "%s,%d,\"%s\",%d,,,%d", req,
@@ -566,43 +566,43 @@ static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 	strcat(req, "\r");
 
 	dprintf("%s", req);
-	if (SM_SendMessage(state, strlen(req), GOP_CallDivert, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, strlen(req), GOP_CallDivert, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_WaitFor(state, data, GOP_CallDivert);
 }
 
-static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[12];
 
 	sprintf(req, "AT+CMGF=0\r");
-	if (SM_SendMessage(state, 10, GOPAT_SetPDUMode, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 10, GOPAT_SetPDUMode, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOPAT_SetPDUMode);
 }
 
-static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	return AT_WriteSMS(data, state, "CMGS");
 }
 
-static GSM_Error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NOTSUPPORTED;
+	return GN_ERR_NOTSUPPORTED;
 	return AT_WriteSMS(data, state, "CMGW");
 }
 
-static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *cmd)
+static gn_error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *cmd)
 {
 	unsigned char req[10240], req2[5120];
-	GSM_Error error;
+	gn_error error;
 	unsigned int length, tmp, offset = 0;
 
-	if (!data->RawSMS) return GE_INTERNALERROR;
+	if (!data->RawSMS) return GN_ERR_INTERNALERROR;
 
 	/* Select PDU mode */
 	error = Functions(GOPAT_SetPDUMode, data, state);
-	if (error != GE_NONE) {
+	if (error != GN_ERR_NONE) {
 		dprintf("PDU mode not supported\n");
 		return error;
 	}
@@ -636,7 +636,7 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	/* Length in AT mode is the length of the full message minus SMSC field length */
 	sprintf(req, "AT+%s=%d\r", cmd, length - 1);
 	dprintf("Sending initial sequence\n");
-	if (SM_SendMessage(state, strlen(req), GOPAT_Prompt, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, strlen(req), GOPAT_Prompt, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	error = SM_BlockNoRetry(state, data, GOPAT_Prompt);
 	dprintf("Got response %d\n", error);
 
@@ -644,36 +644,36 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	req[length * 2] = 0x1a;
 	req[length * 2 + 1] = 0;
 	dprintf("Sending frame: %s\n", req);
-	if (SM_SendMessage(state, strlen(req), GOP_SendSMS, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, strlen(req), GOP_SendSMS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	do {
 		error = SM_BlockNoRetryTimeout(state, data, GOP_SendSMS, state->Link.SMSTimeout);
-	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
+	} while (!state->Link.SMSTimeout && error == GN_ERR_TIMEOUT);
 	return error;
 }
 
-static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[16];
 	sprintf(req, "AT+CMGR=%d\r", data->RawSMS->Number);
 	dprintf("%s", req);
-	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_GetSMS);
 }
 
 /* FIXME
  * This function doesn't set memory type. this need to be fixed when 
  * SMS for AT works */
-static GSM_Error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NOTSUPPORTED;
+	return GN_ERR_NOTSUPPORTED;
 /*
 	unsigned char req[16];
 	sprintf(req, "AT+CMGD=%d\r", data->SMS->Number);
 	dprintf("%s", req);
 
-	if (SM_SendMessage(state, strlen(req), GOP_DeleteSMS, req) != GE_NONE)
- 		return GE_NOTREADY;
+	if (SM_SendMessage(state, strlen(req), GOP_DeleteSMS, req) != GN_ERR_NONE)
+ 		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_DeleteSMS);
 */
 }
@@ -683,67 +683,67 @@ static GSM_Error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 /* command, nor can you change this number by AT commands. Worse, */
 /* an ATZ will clear a SMS Center Number set by AT commands. This */
 /* doesn't affect the number set by the phone menu */
-static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[16];
 	sprintf(req, "AT+CSCA?\r");
- 	if (SM_SendMessage(state, 9, GOP_GetSMSCenter, req) != GE_NONE)
-		return GE_NOTREADY;
+ 	if (SM_SendMessage(state, 9, GOP_GetSMSCenter, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_GetSMSCenter);
 }
 
 
-static GSM_Error AT_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[16];
 	sprintf(req, "AT+CPIN?\r");
- 	if (SM_SendMessage(state, 9, GOP_GetSecurityCodeStatus, req) != GE_NONE)
-		return GE_NOTREADY;
+ 	if (SM_SendMessage(state, 9, GOP_GetSecurityCodeStatus, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_GetSecurityCodeStatus);
 }
 
 
-static GSM_Error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state)
 {
 	/* fixme bufferoverflow */
 	unsigned char req[256];
 
 	if ((data->SecurityCode->Type != GSCT_Pin))
-		return (GE_NOTIMPLEMENTED);
+		return GN_ERR_NOTIMPLEMENTED;
 
 	sprintf(req, "AT+CPIN=\"%s\"\r", data->SecurityCode->Code);
- 	if (SM_SendMessage(state, strlen(req), GOP_EnterSecurityCode, req) != GE_NONE)
-		return GE_NOTREADY;
+ 	if (SM_SendMessage(state, strlen(req), GOP_EnterSecurityCode, req) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_EnterSecurityCode);
 }
 
 
-static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
+static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (op == GOP_Init)
 		return Initialise(data, state);
 	if ((op > GOP_Init) && (op < GOPAT_Max))
 		if (AT_Functions[op])
 			return (*AT_Functions[op])(data, state);
-	return GE_NOTIMPLEMENTED;
+	return GN_ERR_NOTIMPLEMENTED;
 }
 
 
-static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos, *endpos;
 	int l;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_INVALIDLOCATION;
+		return GN_ERR_INVALIDLOCATION;
 
 	buf.line1 = buffer + 1;
 	buf.length = length;
 	splitlines(&buf);
 
 	if (strncmp(buf.line1, "AT+CPBR", 7)) {
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 	}
 
 	if (!strncmp(buf.line2, "OK", 2)) {
@@ -754,7 +754,7 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 			data->PhonebookEntry->Group = 0;
 			data->PhonebookEntry->SubEntriesCount = 0;
 		}
-		return GE_NONE;
+		return GN_ERR_NONE;
 	}
 	if (data->PhonebookEntry) {
 		data->PhonebookEntry->Group = 0;
@@ -807,16 +807,16 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 			}
 		}
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	unsigned char *pos, *aux;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_UNKNOWN; /* FIXME */
+		return GN_ERR_UNKNOWN; /* FIXME */
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -851,16 +851,16 @@ static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int l
 			strcpy(data->MessageCenter->Recipient.Number, "") ;
 		}
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_INVALIDMEMORYTYPE;
+		return GN_ERR_INVALIDMEMORYTYPE;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -875,27 +875,27 @@ static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int l
 			} else {
 				data->MemoryStatus->Used = 100;
 				data->MemoryStatus->Free = 0;
-				return GE_UNKNOWN;
+				return GN_ERR_UNKNOWN;
 			}
 			pos = strchr(pos, ',');
 			if (pos) {
 				data->MemoryStatus->Free = atoi(++pos) - data->MemoryStatus->Used;
 			} else {
-				return GE_UNKNOWN;
+				return GN_ERR_UNKNOWN;
 			}
 		}
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
-static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -919,17 +919,17 @@ static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int len
 			if (*buf.line2 == '0') *(data->PowerSource) = GPS_BATTERY;
 		}
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
-static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos1, *pos2;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 		
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -946,16 +946,16 @@ static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int len
 			*(data->RFLevel) = 1;
 		}
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
-static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_UNKNOWN;		/* Fixme */
+		return GN_ERR_UNKNOWN;		/* Fixme */
 	buf.line1 = buffer + 1;
 	buf.length = length;
 	splitlines(&buf);
@@ -965,31 +965,31 @@ static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int lengt
 		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "MI", data->Manufacturer);
 		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "MR", data->Revision);
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int i;
 	for (i = 0; i < length; i++) {
 		dprintf("%02x ", buffer[i + 1]);
 	}
 	dprintf("\n");
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
-	if (buffer[0] == GEAT_PROMPT) return GE_NONE;
-	return GE_INTERNALERROR;
+	if (buffer[0] == GEAT_PROMPT) return GN_ERR_NONE;
+	return GN_ERR_INTERNALERROR;
 }
 
-static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_FAILED;
+		return GN_ERR_FAILED;
 
 	buf.line1 = buffer + 1;
 	buf.length = length;
@@ -1002,24 +1002,24 @@ static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length
 	else
 		data->RawSMS->Number = -1;
 	dprintf("Message sent okay\n");
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	unsigned int sms_len, l, offset = 0;
 	char *tmp = NULL;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 
 	buf.line1 = buffer + 1;
 	buf.length = length;
 
 	splitlines(&buf);
 
-	if (!data->RawSMS) return GE_INTERNALERROR;
+	if (!data->RawSMS) return GN_ERR_INTERNALERROR;
 	
 	sms_len = strlen(buf.line3) / 2;
 	tmp = calloc(sms_len, 1);
@@ -1046,11 +1046,11 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 	if (sms_len - offset - 11 > 1000) {
 		fprintf(stderr, "Phone gave as poisonous (too short?) reply %s, either phone went crazy or communication went out of sync\n", buf.line3);
 		free(tmp);
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 	}
 	memcpy(data->RawSMS->UserData, tmp + offset + 11, sms_len - offset - 11);
 	free(tmp);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
@@ -1063,13 +1063,13 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
  * GSM_Data has no field for charset so you must misuse Model. the Model
  * string must be initialized with a length of 256 bytes.
  */
-static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 		
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -1080,7 +1080,7 @@ static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int len
 		pos = strchr(buf.line2, '(');
 		if (pos) {
 			strncpy(data->Model, buf.line2, 255);
-			return GE_NONE;
+			return GN_ERR_NONE;
 		}
 		/* skip leading +CSCS: and quotation */
 		pos = strchr(buf.line2 + 8, '\"');
@@ -1088,17 +1088,17 @@ static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int len
 		strncpy(data->Model, buf.line2 + 8, 255);
 		(data->Model)[255] = '\0';
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
-static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	AT_LineBuffer buf;
 	char *pos;
 
 	if (buffer[0] != GEAT_OK)
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 		
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -1107,14 +1107,14 @@ static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buff
 	if ((!strncmp(buf.line1, "AT+CPIN", 7)) && (data->SecurityCode)) {
 		if (strncmp(buf.line2, "+CPIN: ", 7)) {
 			data->SecurityCode->Type = 0;
-			return GE_INTERNALERROR;
+			return GN_ERR_INTERNALERROR;
 		}
 
 		pos = 7 + buf.line2;
 
 		if (!strncmp(pos, "READY", 5)) {
 			data->SecurityCode->Type = GSCT_None;
-			return GE_NONE;
+			return GN_ERR_NONE;
 		}
 
 		if (!strncmp(pos, "SIM ", 4)) {
@@ -1133,26 +1133,26 @@ static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buff
 			}
 		}
 	}
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
 /* General reply function for phone responses. buffer[0] holds the compiled
  * success of the result (OK, ERROR, ... ). see links/atbus.h and links/atbus.c 
  * for reference */
-static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (buffer[0] != GEAT_OK)
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
-static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
+static gn_error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 {
 	GSM_Data data;
-	GSM_Error ret;
+	gn_error ret;
 	char model[20];
 	char manufacturer[20];
 	int i;
@@ -1185,10 +1185,10 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 			ret = ATBUS_Initialise(state, false);
 		break;
 	default:
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 		break;
 	}
-	if (ret != GE_NONE) return ret;
+	if (ret != GN_ERR_NONE) return ret;
 
 	SM_Initialise(state);
 
@@ -1202,11 +1202,11 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	GSM_DataClear(&data);
 	data.Model = model;
 	ret = state->Phone.Functions(GOP_GetModel, &data, state);
-	if (ret != GE_NONE) return ret;
+	if (ret != GN_ERR_NONE) return ret;
 	GSM_DataClear(&data);
 	data.Manufacturer = manufacturer;
 	ret = state->Phone.Functions(GOP_GetManufacturer, &data, state);
-	if (ret != GE_NONE) return ret;
+	if (ret != GN_ERR_NONE) return ret;
 
 	if (!strncasecmp(manufacturer, "ericsson", 8))
 		AT_InitEricsson(state, model, setupdata->Model);
@@ -1217,7 +1217,7 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 
 	dprintf("Initialisation completed\n");
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 

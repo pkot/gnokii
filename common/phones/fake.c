@@ -40,7 +40,7 @@
 
 /* Some globals */
 
-static GSM_Error Pfake_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+static gn_error Pfake_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
 GSM_Phone phone_fake = {
 	NULL,
@@ -67,7 +67,7 @@ GSM_Phone phone_fake = {
 
 
 /* Initialise is the only function allowed to 'use' state */
-static GSM_Error Pfake_Initialise(GSM_Statemachine *state)
+static gn_error Pfake_Initialise(GSM_Statemachine *state)
 {
 	GSM_Data data;
 	char model[10];
@@ -83,15 +83,15 @@ static GSM_Error Pfake_Initialise(GSM_Statemachine *state)
 	GSM_DataClear(&data);
 	data.Model = model;
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
+static gn_error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 {
 	unsigned char req[10240], req2[5120];
 	int length, tmp, offset = 0;
 
-	if (!data->RawSMS) return GE_INTERNALERROR;
+	if (!data->RawSMS) return GN_ERR_INTERNALERROR;
 
 	/* Do not fill message center so we don't have to emulate that */
 	offset += 0;
@@ -124,22 +124,22 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 	req[length * 2] = 0x1a;
 	req[length * 2 + 1] = 0;
 	fprintf(stdout, "%s\n", req);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error Pfake_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
+static gn_error Pfake_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (op) {
 	case GOP_Init:
 		return Pfake_Initialise(state);
 	case GOP_Terminate:
-		return GE_NONE;
+		return GN_ERR_NONE;
 	case GOP_SendSMS:
 		return AT_WriteSMS(data, state, "???");
 	case GOP_GetSMSCenter:
-		return GE_NONE;
+		return GN_ERR_NONE;
 	default:
-		return GE_NOTIMPLEMENTED;
+		return GN_ERR_NOTIMPLEMENTED;
 	}
-	return GE_INTERNALERROR;
+	return GN_ERR_INTERNALERROR;
 }

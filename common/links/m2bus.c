@@ -52,7 +52,7 @@
 #include "links/m2bus.h"
 
 static void M2BUS_RX_StateMachine(unsigned char rx_byte);
-static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
+static gn_error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
 static int M2BUS_TX_SendAck(u8 message_seq);
 
 /* FIXME - pass device_* the link stuff?? */
@@ -354,7 +354,7 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static GSM_Error M2BUS_Loop(struct timeval *timeout)
+static gn_error M2BUS_Loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -365,13 +365,13 @@ static GSM_Error M2BUS_Loop(struct timeval *timeout)
 		for (count = 0; count < res; count++)
 			M2BUS_RX_StateMachine(buffer[count]);
 	} else
-		return GE_TIMEOUT;
+		return GN_ERR_TIMEOUT;
 
 	/* This traps errors from device_read */
 	if (res > 0)
-		return GE_NONE;
+		return GN_ERR_NONE;
 	else
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 }
 
 
@@ -383,7 +383,7 @@ static void M2BUS_WaitforIdle(int timeout, bool reset)
 	do {
 		prev = n;
 		usleep(timeout);
-		if (device_nreceived(&n) != GE_NONE) break;
+		if (device_nreceived(&n) != GN_ERR_NONE) break;
 	} while (n != prev);
 
 	if (reset) {
@@ -399,7 +399,7 @@ static void M2BUS_WaitforIdle(int timeout, bool reset)
 	   (0x1f) and other values according the value specified when called.
 	   Calculates checksum and then sends the lot down the pipe... */
 
-static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
+static gn_error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
 {
 	u8 *out_buffer;
 	int count, i = 0;
@@ -407,12 +407,12 @@ static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 
 	if (messagesize > 0xffff) {
 		dprintf("M2BUS: message is too big to transmit, size: %d bytes\n", messagesize);
-		return GE_MEMORYFULL;
+		return GN_ERR_MEMORYFULL;
 	}
 
 	if ((out_buffer = malloc(messagesize + 8)) == NULL) {
 		dprintf("M2BUS: transmit buffer allocation failed, requested %d bytes.\n", messagesize + 8);
-		return GE_MEMORYFULL;
+		return GN_ERR_MEMORYFULL;
 	}
 
 	/*
@@ -482,13 +482,13 @@ static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 
 	if (device_write(out_buffer, i) != i) {
 		free(out_buffer);
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 	}
 
 	device_flush();
 
 	free(out_buffer);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
@@ -518,11 +518,11 @@ static int M2BUS_TX_SendAck(u8 message_seq)
 	M2BUS_WaitforIdle(2000, false);
 
 	if (device_write(out_buffer, 6) != 6)
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 
 	device_flush();
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
@@ -530,7 +530,7 @@ static int M2BUS_TX_SendAck(u8 message_seq)
 /* newlink is actually part of state - but the link code should not anything about state */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-GSM_Error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
+gn_error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 {
 	/* 'Copy in' the global structures */
 	glink = newlink;
@@ -546,11 +546,11 @@ GSM_Error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	flink.i.state = M2BUS_RX_Sync;
 
 	if (glink->ConnectionType == GCT_Infrared) {
-		return GE_FAILED;
+		return GN_ERR_FAILED;
 	} else {		/* ConnectionType == GCT_Serial */
 		if (!M2BUS_OpenSerial())
-			return GE_FAILED;
+			return GN_ERR_FAILED;
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }

@@ -101,13 +101,13 @@ int device_script(int fd, const char *section)
 	int status;
 
 	if (!scriptname)
-		return(0);
+		return 0;
 
 	errno = 0;
 	switch ((pid = fork())) {
 	case -1:
 		fprintf(stderr, _("device_script(\"%s\"): fork() failure: %s!\n"), scriptname, strerror(errno));
-		return(-1);
+		return -1;
 
 	case 0: /* child */
 		cfg_get_foreach(gn_cfg_info, section, device_script_cfgfunc);
@@ -125,12 +125,12 @@ int device_script(int fd, const char *section)
 
 	default:
 		if (pid == waitpid(pid, &status, 0 /* options */) && WIFEXITED(status) && !WEXITSTATUS(status))
-			return(0);
+			return 0;
 		fprintf(stderr, _("device_script(\"%s\"): child script failure: %s, exit code=%d\n"), scriptname,
 			(WIFEXITED(status) ? _("normal exit") : _("abnormal exit")),
 			(WIFEXITED(status) ? WEXITSTATUS(status) : -1));
 		errno = EIO;
-		return(-1);
+		return -1;
 
 	}
 	/* NOTREACHED */
@@ -149,7 +149,7 @@ int serial_open(const char *file, int oflag)
 	fd = open(file, oflag);
 	if (fd == -1) {
 		perror("Gnokii serial_open: open");
-		return (-1);
+		return -1;
 	}
 
 	retcode = tcgetattr(fd, &serial_termios);
@@ -157,7 +157,7 @@ int serial_open(const char *file, int oflag)
 		perror("Gnokii serial_open:tcgetattr");
 		/* Don't call serial_close since serial_termios is not valid */
 		close(fd);
-		return (-1);
+		return -1;
 	}
 
 	return fd;
@@ -181,7 +181,7 @@ int serial_close(int fd)
 		tcsetattr(fd, TCSANOW, &serial_termios);
 	}
 
-	return (close(fd));
+	return close(fd);
 }
 
 /* Open a device with standard options.
@@ -245,21 +245,21 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: tcflush");
 		serial_close(fd);
-		return (-1);
+		return -1;
 	}
 
 	retcode = tcsetattr(fd, TCSANOW, &tp);
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: tcsetattr");
 		serial_close(fd);
-		return (-1);
+		return -1;
 	}
 
 	/* Set speed */
 	s = gn_cfg_get(gn_cfg_info, "global", "serial_baudrate"); /* baud rate string */
 
 	if (s) baudrate = atoi(s);
-	if (baudrate && serial_changespeed(fd, baudrate) != GE_NONE)
+	if (baudrate && serial_changespeed(fd, baudrate) != GN_ERR_NONE)
 		baudrate = 0;
 	if (!baudrate)
 		serial_changespeed(fd, 19200 /* default value */ );
@@ -272,7 +272,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
 		serial_close(fd);
-		return(-1);
+		return -1;
 	}
 
 	/* handle config file connect_script:
@@ -280,7 +280,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	if (device_script(fd,"connect_script") == -1) {
 		fprintf(stderr,"Gnokii serial_opendevice: connect_script\n");
 		serial_close(fd);
-		return(-1);
+		return -1;
 	}
 
 	/* Allow process/thread to receive SIGIO */
@@ -290,7 +290,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
 		serial_close(fd);
-		return(-1);
+		return -1;
 	}
 #endif
 
@@ -303,7 +303,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
 		serial_close(fd);
-		return(-1);
+		return -1;
 	}
 
 	return fd;
@@ -337,16 +337,16 @@ int serial_select(int fd, struct timeval *timeout)
 	FD_ZERO(&readfds);
 	FD_SET(fd, &readfds);
 
-	return (select(fd + 1, &readfds, NULL, NULL, timeout));
+	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
 
 
 /* Change the speed of the serial device.
  * RETURNS: Success
  */
-GSM_Error serial_changespeed(int fd, int speed)
+gn_error serial_changespeed(int fd, int speed)
 {
-	GSM_Error retcode = GE_NONE;
+	gn_error retcode = GN_ERR_NONE;
 #ifndef SGTTY
 	struct termios t;
 #else
@@ -372,33 +372,33 @@ GSM_Error serial_changespeed(int fd, int speed)
 		break;
 	default:
 		fprintf(stderr, _("Serial port speed %d not supported!\n"), speed);
-		return(GE_NOTSUPPORTED);
+		return GN_ERR_NOTSUPPORTED;
 	}
 
 #ifndef SGTTY
-	if (tcgetattr(fd, &t)) retcode = GE_INTERNALERROR;
+	if (tcgetattr(fd, &t)) retcode = GN_ERR_INTERNALERROR;
 
 	if (cfsetspeed(&t, new_speed) == -1) {
 		dprintf("Serial port speed setting failed\n");
-		retcode = GE_INTERNALERROR;
+		retcode = GN_ERR_INTERNALERROR;
 	}
 
 	tcsetattr(fd, TCSADRAIN, &t);
 #else
-	if (ioctl(fd, TIOCGETP, &t)) retcode = GE_INTERNALERROR;
+	if (ioctl(fd, TIOCGETP, &t)) retcode = GN_ERR_INTERNALERROR;
 
 	t.sg_ispeed = new_speed;
 	t.sg_ospeed = new_speed;
 
-	if (ioctl(fd, TIOCSETN, &t)) retcode = GE_INTERNALERROR;
+	if (ioctl(fd, TIOCSETN, &t)) retcode = GN_ERR_INTERNALERROR;
 #endif
-	return(retcode);
+	return retcode;
 }
 
 /* Read from serial device. */
 size_t serial_read(int fd, __ptr_t buf, size_t nbytes)
 {
-	return (read(fd, buf, nbytes));
+	return read(fd, buf, nbytes);
 }
 
 #if !defined(TIOCMGET) && defined(TIOCMODG)
@@ -446,39 +446,39 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n)
 		check_dcd(fd);
 
 	if (serial_write_usleep < 0)
-		return(write(fd, buf, n));
+		return write(fd, buf, n);
 
 	while (n > 0) {
 		got = write(fd, buf, 1);
 		if (got <= 0)
-			return((!r ? -1 : r));
+			return (!r ? -1 : r);
 		buf++;
 		n--;
 		r++;
 		if (serial_write_usleep)
 			usleep(serial_write_usleep);
 	}
-	return(r);
+	return r;
 }
 
-GSM_Error serial_nreceived(int fd, int *n)
+gn_error serial_nreceived(int fd, int *n)
 {
 	if (ioctl(fd, FIONREAD, n)) {
 		dprintf("serial_nreceived: cannot get the received data size\n");
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-GSM_Error serial_flush(int fd)
+gn_error serial_flush(int fd)
 {
 	if (tcdrain(fd)) {
 		dprintf("serial_flush: cannot flush serial device\n");
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 #endif /* WIN32 */

@@ -73,7 +73,7 @@ typedef struct {
 	GSM_DateTime *DateTime;
 	GSM_RawData *RawData;
 	GSM_CallDivert *CallDivert;
-	GSM_Error (*OnSMS)(GSM_API_SMS *Message);
+	gn_error (*OnSMS)(GSM_API_SMS *Message);
 	int *DisplayStatus;
 	void (*OnCellBroadcast)(GSM_CBMessage *Message);
 	GSM_NetMonitor *NetMonitor;
@@ -105,18 +105,18 @@ typedef struct {
 
 	/* A regularly called loop function */
 	/* timeout can be used to make the function block or not */
-	GSM_Error (*Loop)(struct timeval *timeout);
+	gn_error (*Loop)(struct timeval *timeout);
 
 	/* A pointer to the function used to send out a message */
 	/* This is used by the phone specific code to send a message over the link */
-	GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, unsigned char *message);
+	gn_error (*SendMessage)(u16 messagesize, u8 messagetype, unsigned char *message);
 } GSM_Link;
 
 /* Small structure used in GSM_Phone */
 /* Messagetype is passed to the function in case it is a 'generic' one */
 typedef struct {
 	u8 MessageType;
-	GSM_Error (*Functions)(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
+	gn_error (*Functions)(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 } GSM_IncomingFunctionType;
 
 typedef enum {
@@ -210,9 +210,9 @@ typedef enum {
 typedef struct {
 	/* These make up a list of functions, one for each message type and NULL terminated */
 	GSM_IncomingFunctionType *IncomingFunctions;
-	GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
+	gn_error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
 	GSM_Information Info;
-	GSM_Error (*Functions)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+	gn_error (*Functions)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 	void *DriverInstance;
 } GSM_Phone;
 
@@ -246,13 +246,13 @@ struct _GSM_Statemachine {
 	unsigned char NumWaitingFor;
 	unsigned char NumReceived;
 	unsigned char WaitingFor[SM_MAXWAITINGFOR];
-	GSM_Error ResponseError[SM_MAXWAITINGFOR];
+	gn_error ResponseError[SM_MAXWAITINGFOR];
 	/* Data structure to be filled in with the response */
 	GSM_Data *Data[SM_MAXWAITINGFOR];
 };
 
 /* Undefined functions in fbus/mbus files */
-extern GSM_Error Unimplemented(void);
+extern gn_error Unimplemented(void);
 #define UNIMPLEMENTED (void *) Unimplemented
 
 API GSM_MemoryType StrToMemoryType (const char *s);

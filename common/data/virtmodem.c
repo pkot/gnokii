@@ -81,7 +81,7 @@
 static int  VM_PtySetup(char *bindir);
 static void VM_ThreadLoop(void);
 static void VM_CharHandler(void);
-static GSM_Error VM_GSMInitialise(char *model,
+static gn_error VM_GSMInitialise(char *model,
 			   char *port,
 			   char *initlength,
 			   GSM_ConnectionType connection,
@@ -121,7 +121,7 @@ bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 
 	if (GSMInit) {
 		dprintf("Initialising GSM\n");
-		if ((VM_GSMInitialise(model, port, initlength, connection, sm) != GE_NONE)) {
+		if ((VM_GSMInitialise(model, port, initlength, connection, sm) != GN_ERR_NONE)) {
 			fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
 			return (false);
 		}
@@ -369,15 +369,15 @@ static void VM_CharHandler(void)
 	}
 }
 
-/* Initialise GSM interface, returning GSM_Error as appropriate  */
-static GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection, GSM_Statemachine *sm)
+/* Initialise GSM interface, returning gn_error as appropriate  */
+static gn_error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection, GSM_Statemachine *sm)
 {
-	GSM_Error error;
+	gn_error error;
 
 	/* Initialise the code for the GSM interface. */
 	error = gn_gsm_initialise(model, port, initlength, connection, RLP_DisplayF96Frame, sm);
 
-	if (error != GE_NONE)
+	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("GSM/FBUS init failed!\n"));
 
 	return (error);

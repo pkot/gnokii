@@ -57,9 +57,9 @@ typedef struct {
 #define	GN_CALL_MAX_PARALLEL 2
 
 API void gn_call_notifier(gn_call_status call_status, GSM_CallInfo *call_info, GSM_Statemachine *state);
-API GSM_Error gn_call_dial(int *call_id, GSM_Data *data, GSM_Statemachine *state);
-API GSM_Error gn_call_answer(int call_id);
-API GSM_Error gn_call_cancel(int call_id);
+API gn_error gn_call_dial(int *call_id, GSM_Data *data, GSM_Statemachine *state);
+API gn_error gn_call_answer(int call_id);
+API gn_error gn_call_cancel(int call_id);
 API gn_call *gn_call_get_active(int call_id);
 
 #endif /* _gnokii_gsm_call_h */

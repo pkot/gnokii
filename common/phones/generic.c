@@ -43,15 +43,15 @@
 #include "links/utils.h"
 
 /* If we do not support a message type, print out some debugging info */
-GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state)
+gn_error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state)
 {
 	dprintf("Unknown Message received [type (%02x) length (%d): \n", messagetype, length);
 	SM_DumpMessage(messagetype, buffer, length);
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-GSM_Error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state)
+gn_error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state)
 {
 	return LINK_Terminate(state);
 }

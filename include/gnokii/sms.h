@@ -445,7 +445,7 @@ typedef struct {
 	int New;
 } GSM_CBMessage;
 
-GSM_Error sms_prepare(GSM_API_SMS *sms, GSM_SMSMessage *rawsms);
+gn_error sms_prepare(GSM_API_SMS *sms, GSM_SMSMessage *rawsms);
 
 /* Utils */
 SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt);

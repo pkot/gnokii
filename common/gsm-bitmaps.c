@@ -44,15 +44,15 @@
 
 /* A few useful functions for bitmaps */
 
-API GSM_Error gn_bmp_null(gn_bmp *bmp, GSM_Information *info)
+API gn_error gn_bmp_null(gn_bmp *bmp, GSM_Information *info)
 {
-	if (!bmp || !info) return GE_INTERNALERROR;
+	if (!bmp || !info) return GN_ERR_INTERNALERROR;
 	strcpy(bmp->netcode, "000 00");
 	bmp->width = info->OpLogoW;
 	bmp->height = info->OpLogoH;
 	bmp->size = ceiling_to_octet(bmp->width * bmp->height);
 	gn_bmp_clear(bmp);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 API void gn_bmp_set_point(gn_bmp *bmp, int x, int y)
@@ -206,7 +206,7 @@ API void gn_bmp_print(gn_bmp *bitmap, FILE *f)
 }
 
 
-API GSM_Error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap)
+API gn_error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap)
 {
 	int offset = 0;
 
@@ -216,7 +216,7 @@ API GSM_Error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *c
 		offset = 2;
 		break;
 	case GN_BMP_OperatorLogo:
-		if (!code) return GE_UNKNOWN;
+		if (!code) return GN_ERR_UNKNOWN;
 
 		bitmap->netcode[0] = '0' + (message[0] & 0x0f);
 		bitmap->netcode[1] = '0' + (message[0] >> 4);
@@ -230,7 +230,7 @@ API GSM_Error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *c
 	case GN_BMP_CallerLogo:
 		break;
 	default: /* error */
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 	}
 	bitmap->width = message[0];
 	bitmap->height = message[1];
@@ -240,7 +240,7 @@ API GSM_Error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *c
 
 	dprintf("Bitmap from SMS: width %i, height %i\n", bitmap->width, bitmap->height);
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
@@ -273,7 +273,7 @@ API int gn_bmp_encode_sms(gn_bmp *bitmap, unsigned char *message)
 		dprintf("EMS picture\n");
 		if (bitmap->width % 8) {
 			dprintf("EMS needs bitmap size 8, 16, 24, ... \n");
-			return GE_NOTSUPPORTED;
+			return GN_ERR_NOTSUPPORTED;
 		}
 		message[current++] = bitmap->width / 8 * bitmap->height + 5;
 		message[current++] = 0x12;              /* Picture code */
@@ -292,7 +292,7 @@ API int gn_bmp_encode_sms(gn_bmp *bitmap, unsigned char *message)
 		dprintf("(without header)\n");
 		if (bitmap->width != 16) {
 			dprintf("EMS animation needs bitmap 16x16 ... \n");
-			return GE_NOTSUPPORTED;
+			return GN_ERR_NOTSUPPORTED;
 		}
 		break;
 	default: /* error */

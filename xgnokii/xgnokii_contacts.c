@@ -2183,7 +2183,7 @@ static void SaveContacts(void)
 				pthread_cond_wait(&memoryCond, &memoryMutex);
 				pthread_mutex_unlock(&memoryMutex);
 
-				if (ml->status != GE_NONE) {
+				if (ml->status != GN_ERR_NONE) {
 					g_print(_
 						("%s: line: %d: Can't write ME memory entry number %d! Error: %d\n"),
 						__FILE__, __LINE__, i + 1, ml->status);
@@ -2222,7 +2222,7 @@ static void SaveContacts(void)
 				pthread_cond_wait(&memoryCond, &memoryMutex);
 				pthread_mutex_unlock(&memoryMutex);
 
-				if (ml->status != GE_NONE) {
+				if (ml->status != GN_ERR_NONE) {
 					g_print(_
 						("%s: line %d:Can't write SM memory entry number %d! Error: %d\n"),
 						__FILE__, __LINE__, i - memoryStatus.MaxME + 1,
@@ -2364,7 +2364,7 @@ static gint InsertPBEntryME(GSM_PhonebookEntry * entry)
 	gtk_progress_set_value(GTK_PROGRESS(progressDialog.pbarME), entry->Location);
 	GUI_Refresh();
 
-	return (GE_NONE);
+	return GN_ERR_NONE;
 }
 
 
@@ -2395,7 +2395,7 @@ static gint InsertPBEntrySM(GSM_PhonebookEntry * entry)
 	gtk_progress_set_value(GTK_PROGRESS(progressDialog.pbarSM), entry->Location);
 	GUI_Refresh();
 
-	return (GE_NONE);
+	return GN_ERR_NONE;
 }
 
 
@@ -2442,7 +2442,7 @@ static void ReadContactsMain(void)
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (ms->status != GE_NONE)
+	if (ms->status != GN_ERR_NONE)
 		/* Phone don't support ME (5110) */
 		memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME = 0;
 	else {
@@ -2460,7 +2460,7 @@ static void ReadContactsMain(void)
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (ms->status != GE_NONE) {
+	if (ms->status != GN_ERR_NONE) {
 		fbus3810 = TRUE;	/* I try to recognize memoryStatus.UsedSM while reading */
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Can't get SM memory status!\n\n\
 Setting max SIM entries to 100!\n"));
@@ -2506,7 +2506,7 @@ Setting max SIM entries to 100!\n"));
 		pthread_cond_wait(&memoryCond, &memoryMutex);
 		pthread_mutex_unlock(&memoryMutex);
 
-		if (mla->status != GE_NONE) {
+		if (mla->status != GN_ERR_NONE) {
 			g_free(mla);
 			gtk_widget_hide(progressDialog.dialog);
 			return;
@@ -2528,7 +2528,7 @@ Setting max SIM entries to 100!\n"));
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (mla->status != GE_NONE) {
+	if (mla->status != GN_ERR_NONE) {
 		g_free(mla);
 		gtk_widget_hide(progressDialog.dialog);
 		return;
@@ -2997,7 +2997,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (ms->status != GE_NONE)
+	if (ms->status != GN_ERR_NONE)
 		/* Phone don't support ME (5110) */
 		memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME = 0;
 	else {
@@ -3015,7 +3015,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (ms->status != GE_NONE) {
+	if (ms->status != GN_ERR_NONE) {
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Can't get SM memory status!\n\n\
 Setting max SIM entries set to 100!\n"));
 		memoryStatus.MaxSM = memoryStatus.FreeSM = 100;

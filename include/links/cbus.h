@@ -66,7 +66,7 @@ typedef struct{
 	CBUS_IncomingFrame i;
 } CBUS_Link;
 
-GSM_Error CBUS_Initialise(GSM_Statemachine *state);
+gn_error CBUS_Initialise(GSM_Statemachine *state);
 
 void sendat(unsigned char *msg);
 

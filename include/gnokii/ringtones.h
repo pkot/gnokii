@@ -165,7 +165,7 @@ typedef struct {
 int GSM_EncodeSMSRingtone(unsigned char *message, GSM_Ringtone *ringtone);
 int GSM_EncodeSMSiMelody(unsigned char *imelody, unsigned char *message);
 API u8 GSM_PackRingtone(GSM_Ringtone *ringtone, unsigned char *package, int *maxlength);
-API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, unsigned char *package, int maxlength);
+API gn_error GSM_UnPackRingtone(GSM_Ringtone *ringtone, unsigned char *package, int maxlength);
 
 API int GSM_GetNote(int number);
 

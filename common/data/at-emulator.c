@@ -261,7 +261,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			else
 				data.CallInfo->Type = GSM_CT_NonDigitalDataCall;
 			data.CallInfo->SendNumber = GSM_CSN_Default;
-			if (SM_Functions(GOP_MakeCall, &data, sm) != GE_NONE)
+			if (SM_Functions(GOP_MakeCall, &data, sm) != GN_ERR_NONE)
 				DP_CallPassup(GSM_CS_RemoteHangup, NULL, NULL);
 			else {
 				RLP_SetUserRequest(Conn_Req, true);
@@ -378,7 +378,7 @@ static void ATEM_PrintSMS(char *line, GSM_API_SMS *message, int mode)
 
 static void ATEM_HandleSMS()
 {
-	GSM_Error	error;
+	gn_error	error;
 	char		buffer[MAX_LINE_LENGTH];
 
 	data.SMS->MemoryType = SMSType;
@@ -386,7 +386,7 @@ static void ATEM_HandleSMS()
 	error = gn_sms_get(&data, sm);
 
 	switch (error) {
-	case GE_NONE:
+	case GN_ERR_NONE:
 		ATEM_PrintSMS(buffer, data.SMS, INTERACT_MODE);
 		ATEM_StringOut(buffer);
 		break;
@@ -438,7 +438,7 @@ void	ATEM_ParseDIR(char *buff)
 		case 'D':
 			data.SMS->MemoryType = SMSType;
 			data.SMS->Number = SMSNumber;
-			if (SM_Functions(GOP_DeleteSMS, &data, sm) == GE_NONE) {
+			if (SM_Functions(GOP_DeleteSMS, &data, sm) == GN_ERR_NONE) {
 				ATEM_ModemResult(MR_OK);
 			} else {
 				ATEM_ModemResult(MR_ERROR);
@@ -458,7 +458,7 @@ void	ATEM_ParseSMSText(char *buff)
 	static int index = 0;
 	int i, length;
 	char buffer[MAX_LINE_LENGTH];
-	GSM_Error error;
+	gn_error error;
 
 	length = strlen(buff);
 
@@ -477,7 +477,7 @@ void	ATEM_ParseSMSText(char *buff)
 			/* FIXME: set more SMS fields before sending */
 			error = gn_sms_send(&data, sm);
 
-			if (error == GE_NONE) {
+			if (error == GN_ERR_NONE) {
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMS->Number);
 				ATEM_StringOut(buffer);
 				ATEM_ModemResult(MR_OK);
@@ -512,14 +512,14 @@ bool	ATEM_CommandPlusC(char **buf)
 	GSM_RFUnits	rfunits = GRF_CSQ;
 	char		buffer[MAX_LINE_LENGTH], buffer2[MAX_LINE_LENGTH];
 	int		status, index;
-	GSM_Error	error;
+	gn_error	error;
 
 	if (strncasecmp(*buf, "SQ", 2) == 0) {
 		buf[0] += 2;
 
 		data.RFUnits = &rfunits;
 		data.RFLevel = &rflevel;
-		if (SM_Functions(GOP_GetRFLevel, &data, sm) == GE_NONE) {
+		if (SM_Functions(GOP_GetRFLevel, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CSQ: %0.0f, 99", *(data.RFLevel));
 			ATEM_StringOut(buffer);
 			return (false);
@@ -540,7 +540,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	if (strncasecmp(*buf, "GSN", 3) == 0) {
 		buf[0] += 3;
 		strcpy(data.Imei, "+CME ERROR: 0");
-		if (SM_Functions(GOP_GetImei, &data, sm) == GE_NONE) {
+		if (SM_Functions(GOP_GetImei, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Imei);
 			ATEM_StringOut(buffer);
 			return (false);
@@ -553,7 +553,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	if (strncasecmp(*buf, "GMR", 3) == 0) {
 		buf[0] += 3;
 		strcpy(data.Revision, "+CME ERROR: 0");
-		if (SM_Functions(GOP_GetRevision, &data, sm) == GE_NONE) {
+		if (SM_Functions(GOP_GetRevision, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Revision);
 			ATEM_StringOut(buffer);
 			return (false);
@@ -566,7 +566,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	if (strncasecmp(*buf, "GMM", 3) == 0) {
 		buf[0] += 3;
 		strcpy(data.Model, "+CME ERROR: 0");
-		if (SM_Functions(GOP_GetModel, &data, sm) == GE_NONE) {
+		if (SM_Functions(GOP_GetModel, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Model);
 			ATEM_StringOut(buffer);
 			return (false);
@@ -589,7 +589,7 @@ bool	ATEM_CommandPlusC(char **buf)
 			error = SM_Functions(GOP_DeleteSMS, &data, sm);
 
 			switch (error) {
-			case GE_NONE:
+			case GN_ERR_NONE:
 				break;
 			default:
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMS ERROR: %d\n\r", error);
@@ -647,7 +647,7 @@ bool	ATEM_CommandPlusC(char **buf)
 			error = gn_sms_get(&data, sm);
 
 			switch (error) {
-			case GE_NONE:
+			case GN_ERR_NONE:
 				ATEM_PrintSMS(buffer2, data.SMS, MessageFormat);
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGR: %s", buffer2);
 				ATEM_StringOut(buffer);
@@ -719,7 +719,7 @@ bool	ATEM_CommandPlusC(char **buf)
 				error = gn_sms_get(&data, sm);
 
 				switch (error) {
-				case GE_NONE:
+				case GN_ERR_NONE:
 					/* print messsage if it has the required status */
 					if (data.SMS->Status == status || status == 4 /* ALL */) {
 						ATEM_PrintSMS(buffer2, data.SMS, MessageFormat);
@@ -727,7 +727,7 @@ bool	ATEM_CommandPlusC(char **buf)
 						ATEM_StringOut(buffer);
 					}
 					break;
-				case GE_EMPTYLOCATION:
+				case GN_ERR_EMPTYLOCATION:
 					/* don't care if this storage is empty */
 					break;
 				default:

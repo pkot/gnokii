@@ -414,9 +414,9 @@ static void ClickEntry(GtkWidget * clist,
 inline void GUI_ShowSMS(void)
 {
 	gint i, j;
-	GSM_Error error;
+	gn_error error;
 
-	while ((error = GUI_InitSMSFolders()) != GE_NONE)
+	while ((error = GUI_InitSMSFolders()) != GN_ERR_NONE)
 		sleep(1);
 
 	for (i = 0; i < foldercount; i++) {
@@ -470,8 +470,8 @@ static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 			e->data = message;
 			GUI_InsertEvent(e);
 			/*
-			if (e->status != GE_NONE) {
-				if (e->status == GE_NOTIMPLEMENTED) {
+			if (e->status != GN_ERR_NONE) {
+				if (e->status == GN_ERR_NOTIMPLEMENTED) {
 					gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Function not implemented!"));  
 					gtk_widget_show(errorDialog.dialog);
 				}
@@ -904,7 +904,7 @@ static void ShowSelectContactsDialog(void)
 
 static gint SendSMSCore(GSM_API_SMS * sms)
 {
-	GSM_Error error;
+	gn_error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_SMSMessage *m = (D_SMSMessage *) g_malloc(sizeof(D_SMSMessage));
 	unsigned int i = 0;
@@ -934,7 +934,7 @@ static gint SendSMSCore(GSM_API_SMS * sms)
 	error = m->status;
 	g_free(m);
 
-	if (error != GE_NONE) {
+	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("SMS send to %s failed\n(error=%d)"),
 					     sms->Remote.Number, error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
@@ -1029,7 +1029,7 @@ static void DoSendSMS(void)
 					g_free(buf);
 					GUI_Refresh();
 
-					if (SendSMSCore(&sms) != GE_NONE) {
+					if (SendSMSCore(&sms) != GN_ERR_NONE) {
 						gtk_widget_hide(infoDialog.dialog);
 						GUI_Refresh();
 						break;
@@ -1061,7 +1061,7 @@ static void DoSendSMS(void)
 					g_free(buf);
 					GUI_Refresh();
 
-					if (SendSMSCore(&sms) != GE_NONE) {
+					if (SendSMSCore(&sms) != GN_ERR_NONE) {
 						gtk_widget_hide(infoDialog.dialog);
 						GUI_Refresh();
 						break;

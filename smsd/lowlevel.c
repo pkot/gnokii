@@ -85,10 +85,10 @@ inline static PhoneEvent *RemoveEvent (void)
 }
 
 
-static GSM_Error InitModelInf (void)
+static gn_error InitModelInf (void)
 {
   GSM_Data *data;
-  GSM_Error error;
+  gn_error error;
   char model[64], rev[64], manufacturer[64];
 
   data = calloc (1,sizeof(GSM_Data));
@@ -97,7 +97,7 @@ static GSM_Error InitModelInf (void)
   data->Revision = rev;
                           
   error = SM_Functions (GOP_GetModel, data, &sm);
-  if (error != GE_NONE)
+  if (error != GN_ERR_NONE)
   {
     free (data);
     return error;
@@ -121,7 +121,7 @@ static GSM_Error InitModelInf (void)
 #endif
 
   free (data);
-  return (GE_NONE);
+  return GN_ERR_NONE;
 }
 
 
@@ -132,9 +132,9 @@ static void busterminate(void)
 }
 
 
-static GSM_Error fbusinit (bool enable_monitoring)
+static gn_error fbusinit (bool enable_monitoring)
 {
-  GSM_Error error = GE_NOLINK;
+  gn_error error = GN_ERR_NOLINK;
   GSM_ConnectionType connection = GCT_Serial;
   char *aux;
   static bool atexit_registered = false;
@@ -180,7 +180,7 @@ static GSM_Error fbusinit (bool enable_monitoring)
   g_print ("fbusinit: error %d\n", error);
 #endif
 
-  if (error != GE_NONE) {
+  if (error != GN_ERR_NONE) {
     g_print (_("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
     return (error);
   }
@@ -232,7 +232,7 @@ static inline void FreeArray (GSList **array)
 static void RefreshSMS (const gint number)
 {
   static GSM_Data data;
-  GSM_Error error;
+  gn_error error;
   GSM_API_SMS *msg;
   static SMS_Folder folder;
   static SMS_FolderList folderlist;
@@ -265,7 +265,7 @@ static void RefreshSMS (const gint number)
     msg->Number = ++i;
     data.SMS = msg;
     
-    if ((error = gn_sms_get (&data, &sm)) == GE_NONE)
+    if ((error = gn_sms_get (&data, &sm)) == GN_ERR_NONE)
     {
       pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
@@ -280,7 +280,7 @@ static void RefreshSMS (const gint number)
 
       pthread_mutex_unlock (&smsMutex);
     }
-    else if (error == GE_INVALIDLOCATION)   /* All positions are readed */
+    else if (error == GN_ERR_INVALIDLOCATION)   /* All positions are readed */
     {
       g_free (msg);
       pthread_cond_signal (&smsCond);
@@ -297,10 +297,10 @@ static void RefreshSMS (const gint number)
 static gint A_SendSMSMessage (gpointer data)
 {
   D_SMSMessage *d = (D_SMSMessage *) data;
-  GSM_Error error;
+  gn_error error;
   GSM_Data *dt;
 
-  error = d->status = GE_UNKNOWN;
+  error = d->status = GN_ERR_UNKNOWN;
   if (d)
   {
     pthread_mutex_lock (&sendSMSMutex);
@@ -309,7 +309,7 @@ static gint A_SendSMSMessage (gpointer data)
     {
       dt->MessageCenter = calloc (1, sizeof (SMS_MessageCenter));
       dt->MessageCenter->No = 1;
-      if (SM_Functions (GOP_GetSMSCenter, dt, &sm) == GE_NONE)
+      if (SM_Functions (GOP_GetSMSCenter, dt, &sm) == GN_ERR_NONE)
       {
         strcpy (d->sms->SMSC.Number, dt->MessageCenter->SMSC.Number);
         d->sms->SMSC.Type = dt->MessageCenter->SMSC.Type;
@@ -328,8 +328,8 @@ static gint A_SendSMSMessage (gpointer data)
     pthread_mutex_unlock (&sendSMSMutex);
   }
 
-  if (d->status == GE_NONE)
-    return (GE_NONE);
+  if (d->status == GN_ERR_NONE)
+    return GN_ERR_NONE;
   else
     return (error);
 }
@@ -338,7 +338,7 @@ static gint A_SendSMSMessage (gpointer data)
 static gint A_DeleteSMSMessage (gpointer data)
 {
   GSM_Data *dt;
-  GSM_Error error = GE_UNKNOWN;
+  gn_error error = GN_ERR_UNKNOWN;
   SMS_Folder SMSFolder;
   SMS_FolderList SMSFolderList;
 
@@ -379,7 +379,7 @@ void *Connect (void *a)
   SMS_Status SMSStatus = {0, 0, 0, 0};
   SMS_Folder SMSFolder;
   PhoneEvent *event;
-  GSM_Error error;
+  gn_error error;
 
   data = calloc (1, sizeof (GSM_Data));
   
@@ -387,7 +387,7 @@ void *Connect (void *a)
   g_print ("Initializing connection...\n");
 # endif
 
-  if (fbusinit (true) != GE_NONE)
+  if (fbusinit (true) != GN_ERR_NONE)
   {
     free (data);
     exit (1);
@@ -405,7 +405,7 @@ void *Connect (void *a)
     {
       data->SMSFolder = &SMSFolder;
       SMSFolder.FolderID = GMT_IN;
-      if ((error = SM_Functions (GOP_GetSMSFolderStatus, data, &sm)) == GE_NONE)
+      if ((error = SM_Functions (GOP_GetSMSFolderStatus, data, &sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.number != SMSFolder.Number)
         {
@@ -419,7 +419,7 @@ void *Connect (void *a)
     else
     {
       data->SMSStatus = &SMSStatus;
-      if ((error = SM_Functions (GOP_GetSMSStatus, data, &sm)) == GE_NONE)
+      if ((error = SM_Functions (GOP_GetSMSStatus, data, &sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
             phoneMonitor.sms.number != SMSStatus.Number)
@@ -439,7 +439,7 @@ void *Connect (void *a)
 #     endif
       phoneMonitor.working = TRUE;
       if (event->event <= Event_Exit)
-        if ((error = DoAction[event->event] (event->data)) != GE_NONE)
+        if ((error = DoAction[event->event] (event->data)) != GN_ERR_NONE)
           g_print (_("Event %d failed with return code %d!\n"), event->event, error);
       g_free (event);
     }

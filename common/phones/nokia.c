@@ -45,10 +45,10 @@
  * the error reporting is also very simple
  * the strncpy and PNOK_MAX_MODEL_LENGTH is only here as a reminder
  */
-GSM_Error PNOK_GetManufacturer(char *manufacturer)
+gn_error PNOK_GetManufacturer(char *manufacturer)
 {
 	strcpy(manufacturer, "Nokia");
-	return (GE_NONE);
+	return GN_ERR_NONE;
 }
 
 
@@ -73,7 +73,7 @@ size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *s
 }
 
 /* Call Divert */
-GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
+gn_error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned short length = 0x09;
 	char req[55] = { FBUS_FRAME_HEADER, 0x01, 0x00, /* operation */
@@ -81,7 +81,7 @@ GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 						0x00, /* divert type */
 						0x00, /* call type */
 						0x00 };
-	if (!data->CallDivert) return GE_UNKNOWN;
+	if (!data->CallDivert) return GN_ERR_UNKNOWN;
 	switch (data->CallDivert->Operation) {
 	case GSM_CDV_Query:
 		req[4] = 0x05;
@@ -98,7 +98,7 @@ GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 		req[4] = 0x04;
 		break;
 	default:
-		return GE_NOTIMPLEMENTED;
+		return GN_ERR_NOTIMPLEMENTED;
 	}
 	switch (data->CallDivert->CType) {
 	case GSM_CDV_AllCalls:
@@ -113,7 +113,7 @@ GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 		req[7] = 0x19;
 		break;
 	default:
-		return GE_NOTIMPLEMENTED;
+		return GN_ERR_NOTIMPLEMENTED;
 	}
 	switch (data->CallDivert->DType) {
 	case GSM_CDV_AllTypes:
@@ -129,17 +129,17 @@ GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 		req[6] = 0x3e;
 		break;
 	default:
-		return GE_NOTIMPLEMENTED;
+		return GN_ERR_NOTIMPLEMENTED;
 	}
 	if ((data->CallDivert->DType == GSM_CDV_AllTypes) &&
 	    (data->CallDivert->CType == GSM_CDV_AllCalls))
 		req[6] = 0x02;
 
-	if (SM_SendMessage(state, length, 0x06, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, length, 0x06, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_BlockTimeout(state, data, 0x06, 100);
 }
 
-GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+gn_error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *pos;
 	GSM_CallDivert *cd;
@@ -149,27 +149,27 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 	case 0x02:
 		pos = message + 4;
 		cd = data->CallDivert;
-		if (*pos != 0x05 && *pos != 0x04) return GE_UNHANDLEDFRAME;
+		if (*pos != 0x05 && *pos != 0x04) return GN_ERR_UNHANDLEDFRAME;
 		pos++;
-		if (*pos++ != 0x00) return GE_UNHANDLEDFRAME;
+		if (*pos++ != 0x00) return GN_ERR_UNHANDLEDFRAME;
 		switch (*pos++) {
 		case 0x02:
 		case 0x15: cd->DType = GSM_CDV_AllTypes; break;
 		case 0x43: cd->DType = GSM_CDV_Busy; break;
 		case 0x3d: cd->DType = GSM_CDV_NoAnswer; break;
 		case 0x3e: cd->DType = GSM_CDV_OutOfReach; break;
-		default: return GE_UNHANDLEDFRAME;
+		default: return GN_ERR_UNHANDLEDFRAME;
 		}
-		if (*pos++ != 0x02) return GE_UNHANDLEDFRAME;
+		if (*pos++ != 0x02) return GN_ERR_UNHANDLEDFRAME;
 		switch (*pos++) {
 		case 0x00: cd->CType = GSM_CDV_AllCalls; break;
 		case 0x0b: cd->CType = GSM_CDV_VoiceCalls; break;
 		case 0x0d: cd->CType = GSM_CDV_FaxCalls; break;
 		case 0x19: cd->CType = GSM_CDV_DataCalls; break;
-		default: return GE_UNHANDLEDFRAME;
+		default: return GN_ERR_UNHANDLEDFRAME;
 		}
 		if (message[4] == 0x04 && pos[0] == 0x00) {
-			return GE_EMPTYLOCATION;
+			return GN_ERR_EMPTYLOCATION;
 		} else if (message[4] == 0x04 || (pos[0] == 0x01 && pos[1] == 0x00)) {
 			cd->Number.Type = SMS_Unknown;
 			memset(cd->Number.Number, 0, sizeof(cd->Number.Number));
@@ -184,17 +184,17 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 
 	/* FIXME: failed calldivert result code? */
 	case 0x03:
-		return GE_UNHANDLEDFRAME;
+		return GN_ERR_UNHANDLEDFRAME;
 	
 	/* FIXME: call divert is active */
 	case 0x06:
-		return GE_UNSOLICITED;
+		return GN_ERR_UNSOLICITED;
 
 	default:
-		return GE_UNHANDLEDFRAME;
+		return GN_ERR_UNHANDLEDFRAME;
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 int PNOK_FBUS_EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *req)

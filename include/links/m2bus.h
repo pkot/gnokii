@@ -89,6 +89,6 @@ typedef struct{
 } M2BUS_Link;
 
 
-GSM_Error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
+gn_error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
 
 #endif   /* #ifndef __links_m2bus_h */

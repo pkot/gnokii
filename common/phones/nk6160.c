@@ -54,19 +54,19 @@ static GSM_Statemachine *State = NULL;
 static int logoslice;
 
 /* static functions prototypes */
-static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error Initialise(GSM_Statemachine *state);
-static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state);
+static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+static gn_error Initialise(GSM_Statemachine *state);
+static gn_error Identify(GSM_Data *data, GSM_Statemachine *state);
+static gn_error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
+static gn_error WritePhonebook(GSM_Data *data, GSM_Statemachine *state);
+static gn_error GetBitmap(GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 #endif
 
-static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 #endif
@@ -105,7 +105,7 @@ GSM_Phone phone_nokia_6160 = {
 	NULL
 };
 
-static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
+static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (op) {
 	case GOP_Init:
@@ -128,14 +128,14 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 #endif
 	default:
 		dprintf("NK6160 unimplemented operation: %d\n", op);
-		return GE_NOTIMPLEMENTED;
+		return GN_ERR_NOTIMPLEMENTED;
 	}
 }
 
 /* Initialise is the only function allowed to 'use' state */
-static GSM_Error Initialise(GSM_Statemachine *state)
+static gn_error Initialise(GSM_Statemachine *state)
 {
-	GSM_Error err;
+	gn_error err;
 	char model[GSM_MAX_MODEL_LENGTH+1];
 	GSM_Data data;
 	PhoneModel *pm;
@@ -149,12 +149,12 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 		err = M2BUS_Initialise(&(state->Link), state);
 		break;
 	default:
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 	}
 
-	if (err != GE_NONE) {
+	if (err != GN_ERR_NONE) {
 		dprintf("Error in link initialisation\n");
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 	}
 
 	SM_Initialise(state);
@@ -165,32 +165,32 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	GSM_DataClear(&data);
 	data.Model = model;
 
-	if ((err = Identify(&data, state)) != GE_NONE) return err;
+	if ((err = Identify(&data, state)) != GN_ERR_NONE) return err;
 	dprintf("model: '%s'\n", model);
 	if ((pm = GetPhoneModel(model)) == NULL) {
 		dump(_("Unsupported phone model \"%s\"\n"), model);
 		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 	}
 
 	State = state;
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
-static GSM_Error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x1f, 0x01, 0x04, 0x86, 0x00};
 
 	dprintf("Reading phonebook location (%d)\n", data->PhonebookEntry->Location);
 
 	req[6] = data->PhonebookEntry->Location;
-	if (SM_SendMessage(state, 7, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 7, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_Block(state, data, 0x40);
 }
 
-static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
+static gn_error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[512] = {0x00, 0x01, 0x1f, 0x01, 0x04, 0x87, 0x00};
 	GSM_PhonebookEntry *pe;
@@ -204,21 +204,21 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("Writing phonebook location (%d): %s\n", pe->Location, pe->Name);
 	if (namelen > GSM_MAX_PHONEBOOK_NAME_LENGTH) {
 		dprintf("name too long\n");
-		return GE_ENTRYTOOLONG;
+		return GN_ERR_ENTRYTOOLONG;
 	}
 	if (numlen > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
 		dprintf("number too long\n");
-		return GE_ENTRYTOOLONG;
+		return GN_ERR_ENTRYTOOLONG;
 	}
 	if (pe->SubEntriesCount > 1) {
 		dprintf("6160 doesn't support subentries\n");
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 	}
 	if ((pe->SubEntriesCount == 1) && ((pe->SubEntries[0].EntryType != GSM_Number)
 		|| (pe->SubEntries[0].NumberType != GSM_General) || (pe->SubEntries[0].BlockNumber != 2)
 		|| strcmp(pe->SubEntries[0].data.Number, pe->Number))) {
 		dprintf("6160 doesn't support subentries\n");
-		return GE_UNKNOWN;
+		return GN_ERR_UNKNOWN;
 	}
 
 	*pos++ = pe->Location;
@@ -227,18 +227,18 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 	strcpy(pos, pe->Name);
 	pos += namelen + 1;
 
-	if (SM_SendMessage(state, pos-req, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, pos-req, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_Block(state, data, 0x40);
 }
 
-static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_PhonebookEntry *pe;
 	unsigned char *pos;
 	unsigned char respheader[] = {0x01, 0x00, 0xc9, 0x04, 0x01};
 
 	if (memcmp(message, respheader, sizeof(respheader)))
-		return GE_UNHANDLEDFRAME;
+		return GN_ERR_UNHANDLEDFRAME;
 
 	switch (message[5]) {
 	/* read phonebook reply */
@@ -250,8 +250,8 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 
 		switch (message[7]) {
 		case 0x01: break;
-		case 0x05: return GE_INVALIDLOCATION;
-		default: return GE_UNHANDLEDFRAME;
+		case 0x05: return GN_ERR_INVALIDLOCATION;
+		default: return GN_ERR_UNHANDLEDFRAME;
 		}
 		snprintf(pe->Number, sizeof(pe->Number), "%s", pos);
 		pos += strlen(pos) + 1;
@@ -266,44 +266,44 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 	case 0x87:
 		switch (message[7]) {
 		case 0x01: break;
-		case 0x05: return GE_INVALIDLOCATION;
-		default: return GE_UNHANDLEDFRAME;
+		case 0x05: return GN_ERR_INVALIDLOCATION;
+		default: return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
 
 	default:
-		return GE_UNHANDLEDFRAME;
+		return GN_ERR_UNHANDLEDFRAME;
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error PhoneInfo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error PhoneInfo(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x00, 0x03, 0x00};
-	GSM_Error error;
+	gn_error error;
 
 	dprintf("Getting phone info...\n");
-	if (SM_SendMessage(state, 5, 0xd1, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 5, 0xd1, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	error = SM_Block(state, data, 0xd2);
 	return error;
 }
 
-static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
+static gn_error Identify(GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error error;
+	gn_error error;
 
 	dprintf("Identifying...\n");
 	if (data->Manufacturer) PNOK_GetManufacturer(data->Manufacturer);
 
-	if ((error = PhoneInfo(data, state)) != GE_NONE) return error;
+	if ((error = PhoneInfo(data, state)) != GN_ERR_NONE) return error;
 
 	/* Check that we are back at state Initialised */
-	if (SM_Loop(state, 0) != Initialised) return GE_UNKNOWN;
-	return GE_NONE;
+	if (SM_Loop(state, 0) != Initialised) return GN_ERR_UNKNOWN;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char *pos;
 
@@ -315,27 +315,27 @@ static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int 
 		if ((pos = strchr(data->Revision, '\n')) != NULL) *pos = 0;
 	}
 	dprintf("Phone info:\n%s\n", message + 4);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
-static GSM_Error GetStartupSlice(GSM_Data *data, GSM_Statemachine *state, int s)
+static gn_error GetStartupSlice(GSM_Data *data, GSM_Statemachine *state, int s)
 {
 	unsigned char req[] = {0x00, 0x01, 0x07, 0x07, 0x08, 0x00};
 
 	logoslice = s;
 	req[5] = (unsigned char)s + 1;
 
-	if (SM_SendMessage(state, 6, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 6, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return SM_Block(state, data, 0xdd);
 }
 
-static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error error;
+	gn_error error;
 	int i;
 
-	if (!data->Bitmap) return GE_INTERNALERROR;
+	if (!data->Bitmap) return GN_ERR_INTERNALERROR;
 
 	switch (data->Bitmap->type) {
 	case GN_BMP_StartupLogo:
@@ -344,7 +344,7 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		data->Bitmap->size = ceiling_to_octet(data->Bitmap->height * data->Bitmap->width);
 		gn_bmp_clear(data->Bitmap);
 		for (i = 0; i < 6; i++)
-			if ((error = GetStartupSlice(data, state, i)) != GE_NONE)
+			if ((error = GetStartupSlice(data, state, i)) != GN_ERR_NONE)
 				return error;
 		break;
 	case GN_BMP_WelcomeNoteText:
@@ -353,32 +353,32 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	case GN_BMP_CallerLogo:
 	case GN_BMP_None:
 	case GN_BMP_PictureMessage:
-		return GE_NOTSUPPORTED;
+		return GN_ERR_NOTSUPPORTED;
 
 	default:
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
-static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingStartupLogo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	int x, i;
 	unsigned char b;
 
 	if (message[0] != 0x01 || message[1] != 0x00 || message[2] != 0x07 || message[3] != 0x08)
-		return GE_UNHANDLEDFRAME;
+		return GN_ERR_UNHANDLEDFRAME;
 
 	if (!data->Bitmap || data->Bitmap->type != GN_BMP_StartupLogo)
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 
 	for (x = 0; x < 84; x++)
 		for (b = message[5 + x], i = 0; b != 0; b >>= 1, i++)
 			if (b & 0x01)
 				gn_bmp_set_point(data->Bitmap, x, 8 * logoslice + i);
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 

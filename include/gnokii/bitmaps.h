@@ -70,7 +70,7 @@ typedef struct {
 	char ringtone;           /* Ringtone no sent with caller group */
 } gn_bmp;
 
-API GSM_Error gn_bmp_null(gn_bmp *bmp, GSM_Information *info);
+API gn_error gn_bmp_null(gn_bmp *bmp, GSM_Information *info);
 API void gn_bmp_set_point(gn_bmp *bmp, int x, int y);
 API void gn_bmp_clear_point(gn_bmp *bmp, int x, int y);
 API bool gn_bmp_is_point(gn_bmp *bmp, int x, int y);
@@ -80,6 +80,6 @@ API void gn_bmp_print(gn_bmp *bitmap, FILE *f);
 
 /* SMS bitmap functions */
 API int gn_bmp_encode_sms(gn_bmp *bitmap, unsigned char *message);
-API GSM_Error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap);
+API gn_error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap);
 
 #endif /* _gnokii_gsm_bitmaps_h */

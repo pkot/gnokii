@@ -43,7 +43,7 @@
 
 #include "links/atbus.h"
 
-static GSM_Error ATBUS_Loop(struct timeval *timeout);
+static gn_error ATBUS_Loop(struct timeval *timeout);
 static bool ATBUS_OpenSerial(int mode, char *device);
 static void ATBUS_RX_StateMachine(unsigned char rx_char);
 
@@ -88,11 +88,11 @@ static int xwrite(unsigned char *d, int len)
 }
 
 
-static GSM_Error AT_SendMessage(u16 message_length, u8 message_type, unsigned char *msg)
+static gn_error AT_SendMessage(u16 message_length, u8 message_type, unsigned char *msg)
 {
 	usleep(10000);
 	xwrite(msg, message_length);
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 
@@ -177,7 +177,7 @@ static bool ATBUS_OpenSerial(int mode, char *device)
 	return (true);
 }
 
-static GSM_Error ATBUS_Loop(struct timeval *timeout)
+static gn_error ATBUS_Loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -188,19 +188,19 @@ static GSM_Error ATBUS_Loop(struct timeval *timeout)
 		for (count = 0; count < res; count++)
 			ATBUS_RX_StateMachine(buffer[count]);
 	} else
-		return GE_TIMEOUT;
+		return GN_ERR_TIMEOUT;
 	/* This traps errors from device_read */
 	if (res > 0)
-		return GE_NONE;
+		return GN_ERR_NONE;
 	else
-		return GE_INTERNALERROR;
+		return GN_ERR_INTERNALERROR;
 }
 
 
 /* Initialise variables and start the link */
 /* Fixme we allow serial and irda for connection to reduce */
 /* bug reports. this is pretty silly for /dev/ttyS?. */
-GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int mode)
+gn_error ATBUS_Initialise(GSM_Statemachine *state, int mode)
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
@@ -219,13 +219,13 @@ GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int mode)
 	if (state->Link.ConnectionType == GCT_Serial) {
 #endif
 		if (!ATBUS_OpenSerial(mode, state->Link.PortDevice))
-			return GE_FAILED;
+			return GN_ERR_FAILED;
 	} else {
 		dprintf("Device not supported by ATBUS\n");
-		return GE_FAILED;
+		return GN_ERR_FAILED;
 	}
 
-	return GE_NONE;
+	return GN_ERR_NONE;
 }
 
 static void at_printf(char *prefix, char *buf, int len)

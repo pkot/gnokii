@@ -83,17 +83,17 @@ typedef struct {
 
 typedef struct {
 	GSM_SpeedDial entry;
-	GSM_Error status;
+	gn_error status;
 } D_SpeedDial;
 
 typedef struct {
 	GSM_API_SMS *sms;
-	GSM_Error status;
+	gn_error status;
 } D_SMSMessage;
 
 typedef struct {
 	SMS_MessageCenter *center;
-	GSM_Error status;
+	gn_error status;
 } D_SMSCenter;
 
 typedef struct {
@@ -139,12 +139,12 @@ typedef struct {
 } D_CalendarNoteAll;
 
 typedef struct {
-	GSM_Error status;
+	gn_error status;
 	gn_bmp *bitmap;
 } D_Bitmap;
 
 typedef struct {
-	GSM_Error status;
+	gn_error status;
 	GSM_NetworkInfo *info;
 } D_NetworkInfo;
 
@@ -209,7 +209,7 @@ extern GSM_Statemachine statemachine;
 extern void GUI_InitPhoneMonitor(void);
 extern void *GUI_Connect(void *a);
 extern void GUI_InsertEvent(PhoneEvent * event);
-extern GSM_Error GUI_InitSMSFolders(void);
+extern gn_error GUI_InitSMSFolders(void);
 extern int isSMSactivated;
 
 #endif

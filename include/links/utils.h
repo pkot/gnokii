@@ -34,6 +34,6 @@
 #ifndef LINKS_UTILS
 #define LINKS_UTILS
 
-GSM_Error LINK_Terminate(GSM_Statemachine *state);
+gn_error LINK_Terminate(GSM_Statemachine *state);
 
 #endif

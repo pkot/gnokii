@@ -29,9 +29,9 @@
 #include <string.h>
 #include "gsm-data.h"
 
-GSM_Error Unimplemented(void)
+gn_error Unimplemented(void)
 {
-	return GE_NOTIMPLEMENTED;
+	return GN_ERR_NOTIMPLEMENTED;
 }
 
 API GSM_MemoryType StrToMemoryType(const char *s)
