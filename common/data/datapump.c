@@ -15,7 +15,10 @@
   interface.
 
   $Log$
-  Revision 1.3  2001-02-21 19:57:00  chris
+  Revision 1.4  2001-11-17 16:41:35  pkot
+  Cleanup
+
+  Revision 1.3  2001/02/21 19:57:00  chris
   More fiddling with the directory layout
 
   Revision 1.2  2001/02/17 22:40:51  chris
@@ -63,12 +66,12 @@ bool DP_Initialise(int read_fd, int write_fd)
 {
 	PtyRDFD = read_fd;
 	PtyWRFD = write_fd;
-	ufds.fd=PtyRDFD;
-	ufds.events=POLLIN;
+	ufds.fd = PtyRDFD;
+	ufds.events = POLLIN;
 	RLP_Initialise(GSM->SendRLPFrame, DP_CallBack);
-	RLP_SetUserRequest(Attach_Req,true);
-	pluscount=0;
-	connected=false;
+	RLP_SetUserRequest(Attach_Req, true);
+	pluscount = 0;
+	connected = false;
 	return true;
 }
 
@@ -79,78 +82,76 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 
 	switch(ind) {
 	case Data:
-		if (CommandMode==false) write(PtyWRFD, buffer, length);
+		if (CommandMode == false) write(PtyWRFD, buffer, length);
 		break;
 	case Conn_Ind:
-		if (CommandMode==false) ATEM_ModemResult(MR_CARRIER);
-		RLP_SetUserRequest(Conn_Req,true);
+		if (CommandMode == false) ATEM_ModemResult(MR_CARRIER);
+		RLP_SetUserRequest(Conn_Req, true);
 		break;
 	case StatusChange:
-		if (buffer[0]==0) {
-			connected=true;
-			if (CommandMode==false) ATEM_ModemResult(MR_CONNECT);
+		if (buffer[0] == 0) {
+			connected = true;
+			if (CommandMode == false) ATEM_ModemResult(MR_CONNECT);
 		}
 		break;
 	case Disc_Ind:
-		if (CommandMode==false) ATEM_ModemResult(MR_NOCARRIER);
-		connected=false;
+		if (CommandMode == false) ATEM_ModemResult(MR_NOCARRIER);
+		connected = false;
 		/* Set the call passup back to the at emulator */
-		GSM->DialData(NULL,-1,&ATEM_CallPassup);
-		CommandMode=true;
+		GSM->DialData(NULL, -1, &ATEM_CallPassup);
+		CommandMode = true;
 		break;
 	case Reset_Ind:
-		RLP_SetUserRequest(Reset_Resp,true);
+		RLP_SetUserRequest(Reset_Resp, true);
 		break;
 	case GetData:
-		if (poll(&ufds,1,0)) {
+		if (poll(&ufds, 1, 0)) {
 
 			/* Check if the program has closed */
 			/* Return to command mode */
 			/* Note that the call will still be in progress, */
 			/* as with a normal modem (I think) */
 
-			if (ufds.revents!=POLLIN) { 
-				CommandMode=true;
+			if (ufds.revents != POLLIN) { 
+				CommandMode = true;
 				/* Set the call passup back to the at emulator */
-				GSM->DialData(NULL,-1,&ATEM_CallPassup);
+				GSM->DialData(NULL, -1, &ATEM_CallPassup);
 				return 0;
 			}
 
 			temp = read(PtyRDFD, buffer, length);
 
-			if (temp<0) return 0; /* FIXME - what do we do now? */
+			if (temp < 0) return 0; /* FIXME - what do we do now? */
 
 			/* This will only check +++ and the beginning of a read */
 			/* But there should be a pause before it anyway */
       
-			if (buffer[0]=='+') {
+			if (buffer[0] == '+') {
 				pluscount++;
-				if (temp>1) {
-					if (buffer[1]=='+') pluscount++;
-					else pluscount=0;
-					if (temp>2) {
-						if (buffer[2]=='+') pluscount++;
-						else pluscount=0;
-						if (temp>3) pluscount=0;
+				if (temp > 1) {
+					if (buffer[1] == '+') pluscount++;
+					else pluscount = 0;
+					if (temp > 2) {
+						if (buffer[2] == '+') pluscount++;
+						else pluscount = 0;
+						if (temp > 3) pluscount = 0;
 					}
 				}
-			} else pluscount=0;
+			} else pluscount = 0;
       
-			if (pluscount==3) {
-				CommandMode=true;
+			if (pluscount == 3) {
+				CommandMode = true;
 				/* Set the call passup back to the at emulator */
-				GSM->DialData(NULL,-1,&ATEM_CallPassup);
+				GSM->DialData(NULL, -1, &ATEM_CallPassup);
 				ATEM_ModemResult(MR_OK);
 				break;
 			}
       
 			return temp;
 		}
-		return 0;
 		break;
-
 	default:
-
+		break;
 	}
 	return 0;
 }
@@ -159,17 +160,17 @@ void DP_CallPassup(char c)
 {
 	switch (c) {
 	case 'D':
-		if (CommandMode==false) ATEM_ModemResult(MR_CARRIER);
-		RLP_SetUserRequest(Conn_Req,true);
-		connected=true;
+		if (CommandMode == false) ATEM_ModemResult(MR_CARRIER);
+		RLP_SetUserRequest(Conn_Req, true);
+		connected = true;
 		break;
 	case ' ':
-		CommandMode=true;
+		CommandMode = true;
 		/* Set the call passup back to the at emulator */
-		GSM->DialData(NULL,-1,&ATEM_CallPassup);
+		GSM->DialData(NULL, -1, &ATEM_CallPassup);
 		ATEM_ModemResult(MR_NOCARRIER);
 		RLP_SetUserRequest(Disc_Req, true);
-		connected=false;
+		connected = false;
 		break;
 	default:
 		break;

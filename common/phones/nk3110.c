@@ -15,7 +15,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.3  2001-11-09 14:25:04  pkot
+  Revision 1.4  2001-11-17 16:42:47  pkot
+  Cleanup
+
+  Revision 1.3  2001/11/09 14:25:04  pkot
   DEBUG cleanups
 
   Revision 1.2  2001/11/09 13:47:58  pkot
@@ -774,7 +777,7 @@ static GSM_Error P3110_IncomingSMSSendError(int messagetype, unsigned char *mess
 
 static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	u8 sender_length, smsc_length, l;
+	/* u8 sender_length, smsc_length, l; */
 
 	if (!data->SMSMessage) return GE_INTERNALERROR;
 
@@ -918,7 +921,7 @@ static GSM_Error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *me
 static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	static GSM_SMSMessage sms;
-	u8 dest_length, smsc_length, l;
+/*	u8 dest_length, smsc_length, l;*/
 	u8 U0, U1, U2;
 
 	data->SMSMessage = &sms;
