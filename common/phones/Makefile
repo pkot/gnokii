@@ -23,10 +23,10 @@ OBJS =	generic.o \
 	nk6510.o \
 	nk6100.o \
 	atgen.o \
+	atbosch.o \
 	ateric.o \
 	atnok.o \
 	atsie.o \
-	dc2711.o \
 	fake.o \
 	nk6160.o
 

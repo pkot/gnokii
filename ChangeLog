@@ -23,6 +23,8 @@
  * libgnokii changes:
     o fix incorrect encoding of extened alphabet characters
                                                           (Pawel Kot)
+ * AT series updates:
+    * Bosch support. Tested with Bosch 909           (Ladislav Michl)
 
 0.5.0pre1
 =========
