@@ -136,6 +136,12 @@ Correct format is FBUS version 2/Infrared/MBUS version 2
                             where code:
                                     0x3d - wrong entry type
                                     0x3e - too much entries
+    s Delete mem location   { 0x010f, 0x00, 0x01, 0x04, 0x00, 0x00, 0x0c, 0x01, 0xff, xH, xL,
+                                      y, 0x00, 0x00, 0x00}
+                                      where   x: location
+                                      y: memory type
+    r Delete mem location   { 0x0110, 0x00, 0x00 }
+
 0x06: Calling line restriction/Call forwarding etc
     s Set call divert       { 0x0001, 0x03, 0x00, divtype, calltype, 0x01, number(packed like in SMS), 0x00, 0x00...,timeout}
                             NOTE: msglen=0x37

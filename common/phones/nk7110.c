@@ -637,6 +637,9 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 			}
 		}
 		break;
+	case 0x10:
+		dprintf("Entry succesfully deleted!\n");
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
 		return GE_UNHANDLEDFRAME;
@@ -1644,12 +1647,33 @@ static GSM_Error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	}
 }
 
+static GSM_Error P7110_DeletePhonebookLocation(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0f, 0x00, 0x01, 0x04, 0x00, 0x00, 0x0c, 0x01, 0xff,
+				  0x00, 0x00,  /* location */
+				  0x00,  /* memory type */
+				  0x00, 0x00, 0x00};
+	GSM_PhonebookEntry *entry;
+
+	if (data->PhonebookEntry) entry = data->PhonebookEntry;
+	else return GE_TRYAGAIN;
+	/* Two octets for the memory location */
+	req[12] = (entry->Location >> 8);
+	req[13] = entry->Location & 0xff;
+	/* Two octets for the memory type */
+	req[14] = GetMemoryType(entry->MemoryType);
+
+	if (SM_SendMessage(state, 18, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
+}
+
 static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
 				  0x00, 0x00,  /* memory type */
 				  0x00, 0x00,  /* location */
-				  0x00, 0x00, 0x00};
+				  0x00, 0x00, 0x00, 0x00};
+
 	char string[500];
 	int block, i, j, defaultn;
 	unsigned int count = 18;
@@ -1663,7 +1687,7 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 	req[12] = (entry->Location >> 8);
 	req[13] = entry->Location & 0xff;
 	block = 1;
-	if (*(entry->Name)) {
+	if ((*(entry->Name)) && (*(entry->Number))) { 
 		/* Name */
 		i = strlen(entry->Name);
 		EncodeUnicode((string + 1), entry->Name, i);
@@ -1705,6 +1729,8 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 				}
 		req[17] = block - 1;
 		dprintf("Writing phonebook entry %s...\n",entry->Name);
+	} else {
+		return P7110_DeletePhonebookLocation(data, state);
 	}
 	if (SM_SendMessage(state, count, 0x03, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x03);
