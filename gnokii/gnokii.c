@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.128  2001-03-08 00:49:06  pkot
+  Revision 1.129  2001-03-13 01:21:39  pkot
+  *BSD updates (Bert Driehuis)
+
+  Revision 1.128  2001/03/08 00:49:06  pkot
   Fixed bug (introduced by me) in getmemory function. Now gnokii.c should compile
 
   Revision 1.127  2001/03/08 00:18:13  pkot
@@ -106,7 +109,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 #  include <strings.h>	/* for memset */
 #endif
 #include <time.h>

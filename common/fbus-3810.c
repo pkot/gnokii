@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.84  2001-02-21 19:56:55  chris
+  Revision 1.85  2001-03-13 01:21:38  pkot
+  *BSD updates (Bert Driehuis)
+
+  Revision 1.84  2001/02/21 19:56:55  chris
   More fiddling with the directory layout
 
   Revision 1.83  2001/02/17 22:40:48  chris
@@ -109,7 +112,7 @@
        functions supported by this model of phone.  */
 bool	FB38_LinkOK;
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 	/* fd opened in device.c */
 	extern int device_portfd;
 #endif
@@ -219,7 +222,7 @@ u8                      RequestSequenceNumber;
 #ifndef WIN32
 pthread_t               Thread;
 #endif /* WIN32 */
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 pthread_t		selThread;
 #endif
 bool                    RequestTerminate;
@@ -1268,7 +1271,7 @@ void    FB38_ThreadLoop(void)
 }
 
 /* FB38_SelectLoop copied from fbus-6110.c, lets not reinvent the wheel */
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 /* thread for handling incoming data */
 void FB38_SelectLoop() {
 	int err;
@@ -1299,7 +1302,7 @@ bool	FB38_OpenSerial(void)
 {
 	int result;
   
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 	int rtn;
 #else
 	struct sigaction sig_io;
@@ -1321,7 +1324,7 @@ bool	FB38_OpenSerial(void)
 		return false;
 	}
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 	/* create a thread to handle incoming data from mobile phone */
 	rtn = pthread_create(&selThread, NULL, (void*)FB38_SelectLoop, (void*)NULL);
 	if (rtn != 0)

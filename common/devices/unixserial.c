@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.3  2001-03-06 22:27:46  pkot
+  Revision 1.4  2001-03-13 01:21:38  pkot
+  *BSD updates (Bert Driehuis)
+
+  Revision 1.3  2001/03/06 22:27:46  pkot
   Misc docs and Makefiles updates and cleanups
 
   Revision 1.2  2001/02/21 19:57:05  chris
@@ -29,7 +32,7 @@
 #include <sys/ioctl.h>
 #include <string.h>
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 #  include <sys/file.h>
 #endif
 
@@ -123,12 +126,14 @@ int serial_opendevice(__const char *__file, int __with_odd_parity, int __with_as
 
   /* Allow process/thread to receive SIGIO */
 
+#if !defined(__bsdi__)
   retcode=fcntl(fd, F_SETOWN, getpid());
   if (retcode == -1){
     perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
     serial_close(fd);
     return(-1);
   }
+#endif
 
   /* Make filedescriptor asynchronous. */
 

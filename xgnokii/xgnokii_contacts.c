@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.26  2001-03-05 10:42:03  ja
+  Revision 1.27  2001-03-13 01:21:39  pkot
+  *BSD updates (Bert Driehuis)
+
+  Revision 1.26  2001/03/05 10:42:03  ja
   Pavel Machek's vcard and finegrained indicators patch.
 
   Revision 1.25  2001/02/12 15:13:46  chris
@@ -38,7 +41,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 # include <strings.h>
 #endif
 #include <gtk/gtk.h>

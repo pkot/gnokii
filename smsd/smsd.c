@@ -250,7 +250,7 @@ static void Run (void)
   sigaction (SIGTERM, &act, NULL);
   sigaction (SIGINT, &act, NULL);
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
   act.sa_handler = SIG_IGN;
   sigemptyset (&(act.sa_mask));
   sigaction (SIGALRM, &act, NULL);

@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.130  2001-02-28 21:30:52  machek
+  Revision 1.131  2001-03-13 01:21:38  pkot
+  *BSD updates (Bert Driehuis)
+
+  Revision 1.130  2001/02/28 21:30:52  machek
   Return data in GBF_Arbitrary if we can't handle units requested.
 
   Revision 1.129  2001/02/21 19:56:55  chris
@@ -131,7 +134,7 @@ extern HANDLE hPhone;
 
 bool FB61_LinkOK;
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 /* fd opened in device.c */
 extern int device_portfd;
 #endif
@@ -291,7 +294,7 @@ u8        CallSequenceNumber; /* Used to disconnect the call */
 #ifndef WIN32
 
 pthread_t Thread;
-# if defined(__svr4__) || defined(__FreeBSD__)
+# if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 pthread_t selThread;
 # endif
 
@@ -430,7 +433,7 @@ GSM_Error FB61_Initialise(char *port_device, char *initlength,
 	return (GE_NONE);
 }
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 /* thread for handling incoming data */
 void FB61_SelectLoop()
 {
@@ -813,7 +816,7 @@ bool FB61_OpenIR(void)
 	bool ret = false;
 	u8 i = 0;
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 	int rtn;
 #else
 	struct sigaction sig_io;  
@@ -834,7 +837,7 @@ bool FB61_OpenIR(void)
 		return false;
 	}
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 	/* create a thread to handle incoming data from mobile phone */
 	rtn = pthread_create(&selThread, NULL, (void*)FB61_SelectLoop, (void*)NULL);
 	if (rtn != 0) return false;
@@ -2167,7 +2170,7 @@ bool FB61_OpenSerial(void)
 {
 	int result;
   
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 	int rtn;
 #else
 	struct sigaction sig_io;
@@ -2188,7 +2191,7 @@ bool FB61_OpenSerial(void)
 		return false;
 	}
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 	/* create a thread to handle incoming data from mobile phone */
 	rtn = pthread_create(&selThread, NULL, (void*)FB61_SelectLoop, (void*)NULL);
 	if (rtn != 0) return false;

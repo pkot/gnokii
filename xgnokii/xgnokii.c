@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.31  2001-03-05 10:42:02  ja
+  Revision 1.32  2001-03-13 01:21:39  pkot
+  *BSD updates (Bert Driehuis)
+
+  Revision 1.31  2001/03/05 10:42:02  ja
   Pavel Machek's vcard and finegrained indicators patch.
 
   Revision 1.30  2001/01/29 15:22:20  machek
@@ -2314,7 +2317,7 @@ static void TopLevelWindow (void)
   act.sa_flags = SA_NOCLDSTOP;
   sigaction (SIGCHLD, &act, NULL);
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
   act.sa_handler = SIG_IGN;
   sigemptyset (&(act.sa_mask));
   sigaction (SIGALRM, &act, NULL);

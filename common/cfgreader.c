@@ -15,7 +15,10 @@
   Modified from code by Tim Potter.
 
   $Log$
-  Revision 1.12  2001-01-08 15:11:36  pkot
+  Revision 1.13  2001-03-13 01:21:38  pkot
+  *BSD updates (Bert Driehuis)
+
+  Revision 1.12  2001/01/08 15:11:36  pkot
   Documentation updates.
   Fixed some bugs and removed FIXMEs.
   We need to move some stuff from configure.in to aclocal.m4
@@ -32,7 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 #  include <strings.h>
 #endif
 #include <ctype.h>

@@ -30,7 +30,7 @@
 #include	<sys/time.h>
 #include	<sys/ioctl.h>
 
-#if defined(__svr4__) || defined(__FreeBSD__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
 #  include <sys/file.h>
 #endif
 
