@@ -1190,6 +1190,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 
 	switch (state->config.connection_type) {
 	case GN_CT_Serial:
+	case GN_CT_Bluetooth:
 #ifdef HAVE_IRDA
 	case GN_CT_Irda:
 #endif
