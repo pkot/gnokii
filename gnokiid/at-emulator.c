@@ -231,7 +231,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	if (strncmp(*buf, "GSN", 3) == 0) {
 		buf[0]+=3;
 		if (GSM->GetIMEI(buffer2) == GE_NONE) {
-			sprintf(buffer, "\n\r+CGSN: %s", buffer2);
+			sprintf(buffer, "\n\r%s", buffer2);
 			ATEM_StringOut(buffer);
 			return (false);
 		}
@@ -245,7 +245,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	if (strncmp(*buf, "GMR", 3) == 0) {
 		buf[0]+=3;
 		if (GSM->GetRevision(buffer2) == GE_NONE) {
-			sprintf(buffer, "\n\r+CGMR: %s", buffer2);
+			sprintf(buffer, "\n\r%s", buffer2);
 			ATEM_StringOut(buffer);
 			return (false);
 		}
@@ -259,7 +259,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	if (strncmp(*buf, "GMM", 3) == 0) {
 		buf[0]+=3;
 		if (GSM->GetModel(buffer2) == GE_NONE) {
-			sprintf(buffer, "\n\r+CGMM: %s", buffer2);
+			sprintf(buffer, "\n\r%s", buffer2);
 			ATEM_StringOut(buffer);
 			return (false);
 		}
@@ -295,13 +295,20 @@ bool	ATEM_CommandPlusG(char **buf)
 		return (false);
 	}
 
-//Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, MODEL, PORT);
-
 		/* AT+GMM is Model information for the TA (Terminal Adaptor) */
 	if (strncmp(*buf, "MM", 3) == 0) {
 		buf[0]+=2;
 
 		sprintf(buffer, "\n\rgnokii built for %s on %s", MODEL, PORT);
+		ATEM_StringOut(buffer);
+		return (false);
+	}
+
+		/* AT+GSN is Serial number for the TA (Terminal Adaptor) */
+	if (strncmp(*buf, "SN", 3) == 0) {
+		buf[0]+=2;
+
+		sprintf(buffer, "\n\rnone built in, choose your own");
 		ATEM_StringOut(buffer);
 		return (false);
 	}

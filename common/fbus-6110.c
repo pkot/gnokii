@@ -139,9 +139,6 @@ unsigned char MessageLength,
 unsigned char MagicBytes[4]= { 0x00, 0x00, 0x00, 0x00 };
 GSM_Error CurrentMagicError = GE_BUSY;
 
-/* IMEI from the phone. */
-unsigned char IMEI[20];
-
 enum FB61_RX_States RX_State;
 
 u8 RequestSequenceNumber=0x00;
@@ -183,6 +180,10 @@ GSM_Error          CurrentSetAlarmError;
 int                CurrentRFLevel,
                    CurrentBatteryLevel,
                    CurrentPowerSource;
+
+unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
+unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
+unsigned char      Model[FB61_MAX_MODEL_LENGTH];
 
 char               CurrentIncomingCall[20];
 
@@ -262,7 +263,7 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentMemoryStatusError == GE_BUSY ) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -361,7 +362,7 @@ void FB61_ThreadLoop(void)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentMagicError == GE_BUSY ) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return;
 
     usleep (100000);
@@ -499,7 +500,7 @@ GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentRFLevel == -1 ) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -549,7 +550,7 @@ GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentBatteryLevel == -1 ) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -584,7 +585,7 @@ GSM_Error FB61_GetPowerSource(GSM_PowerSource *source)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentPowerSource == -1 ) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -665,7 +666,7 @@ GSM_Error FB61_EnterPin(char *pin)
   /* Wait for timeout or other error. */
   while (timeout != 0 && PINError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -688,7 +689,7 @@ GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentDateTimeError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -711,7 +712,7 @@ GSM_Error FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentAlarmError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -751,7 +752,7 @@ GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentSMSStatusError == GE_BUSY ) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -762,17 +763,26 @@ GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
 
 GSM_Error FB61_GetIMEI(char *imei)
 {
-  return (GE_NOTIMPLEMENTED);
+
+  strncpy (imei, IMEI, FB61_MAX_IMEI_LENGTH);
+
+  return (GE_NONE);
 }
 
 GSM_Error FB61_GetRevision(char *revision)
 {
-  return (GE_NOTIMPLEMENTED);
+
+  strncpy (revision, Revision, FB61_MAX_REVISION_LENGTH);
+
+  return (GE_NONE);
 }
 
 GSM_Error FB61_GetModel(char *model)
 {
-  return (GE_NOTIMPLEMENTED);
+
+  strncpy (model, Model, FB61_MAX_MODEL_LENGTH);
+
+  return (GE_NONE);
 }
 
 GSM_Error FB61_SetDateTime(GSM_DateTime *date_time)
@@ -801,7 +811,7 @@ GSM_Error FB61_SetDateTime(GSM_DateTime *date_time)
 
   while (timeout != 0 && CurrentSetDateTimeError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -833,7 +843,7 @@ GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 
   while (timeout != 0 && CurrentSetAlarmError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -870,7 +880,7 @@ GSM_Error FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GS
 
   while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -926,7 +936,7 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 
   while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -940,7 +950,7 @@ GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x07, 0x00, 0x00, 0x01, 0x64, 0x01};
   int memory_area;
-  int timeout = 50; /* 5 seconds for command to complete */
+  int timeout = 60; /* 5 seconds for command to complete */
 
   /* State machine code writes data to these variables when it comes in. */
 
@@ -965,7 +975,7 @@ GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
   /* Wait for timeout or other error. */
   while (timeout != 0 && (CurrentSMSMessageError == GE_BUSY || CurrentSMSMessageError == GE_SMSWAITING)) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -1001,7 +1011,7 @@ GSM_Error FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -1080,7 +1090,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   };
 
   int size=PackSevenBitsToEight(SMS->MessageText, req+42);
-  int timeout=50;
+  int timeout=60;
 
   CurrentSMSMessageError=GE_BUSY;
 
@@ -1131,7 +1141,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
 
-    if (timeout-- == 0)
+    if (--timeout == 0)
       return (GE_TIMEOUT);
 
     usleep (100000);
@@ -1986,6 +1996,35 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
   case 0x14:
 
+    if (CurrentSMSMessageError == GE_SMSWAITING) {
+
+#ifdef DEBUG
+      printf(_("Message: the rest of the SMS message received.\n"));
+#endif DEBUG
+
+      tmp=UnpackEightBitsToSeven(MessageLength-2, MessageBuffer, output);
+
+      for (i=0; i<tmp;i++) {
+
+#ifdef DEBUG
+        printf("%c", GSM_Default_Alphabet[output[i]]);
+#endif DEBUG
+
+        CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=GSM_Default_Alphabet[output[i]];
+      }
+
+      CurrentSMSMessage->MessageText[CurrentSMSPointer+tmp]=0;
+
+      CurrentSMSMessageError = GE_NONE;
+
+#ifdef DEBUG
+      printf("\n");
+#endif DEBUG
+
+      break;
+      
+    }
+    
     switch (MessageBuffer[3]) {
 
     case 0x08:
@@ -2183,32 +2222,11 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       break;
 	  
     default:
+    
+      /* FIXME: Here should be some error handling */
+      
+      break;
 
-      if (CurrentSMSMessageError == GE_SMSWAITING) {
-
-#ifdef DEBUG
-         printf(_("Message: the rest of the SMS message received.\n"));
-#endif DEBUG
-
-         tmp=UnpackEightBitsToSeven(MessageLength-2, MessageBuffer, output);
-
-         for (i=0; i<tmp;i++) {
-
-#ifdef DEBUG
-	   printf("%c", GSM_Default_Alphabet[output[i]]);
-#endif DEBUG
-
-           CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=GSM_Default_Alphabet[output[i]];
-         }
-
-         CurrentSMSMessage->MessageText[CurrentSMSPointer+tmp]=0;
-
-         CurrentSMSMessageError = GE_NONE;
-
-#ifdef DEBUG
-         printf("\n");
-#endif DEBUG
-      }
     }
 
     break;
@@ -2217,13 +2235,17 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
   case 0x64:
 
+    /* We should skip the string `NOKIA' */
+
+    snprintf(IMEI, FB61_MAX_IMEI_LENGTH, "%s", MessageBuffer+4+5);
+    snprintf(Model, FB61_MAX_MODEL_LENGTH, "%s", MessageBuffer+25);
+    snprintf(Revision, FB61_MAX_REVISION_LENGTH, "SW%s: HW%s\n", MessageBuffer+44, MessageBuffer+39);
+
 #ifdef DEBUG
     printf(_("Message: Mobile phone identification received:\n"));
-    printf(_("   IMEI: %s\n"), MessageBuffer+4);
+    printf(_("   IMEI: %s\n"), IMEI);
 
-    /* FIXME: What is this? My phone reports: NSE-3 */
-
-    printf("   %s\n", MessageBuffer+25);
+    printf(_("   Model: %s\n"), Model);
 
     printf(_("   Production Code: %s\n"), MessageBuffer+31);
 
@@ -2241,10 +2263,6 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     MagicBytes[1]=MessageBuffer[51];
     MagicBytes[2]=MessageBuffer[52];
     MagicBytes[3]=MessageBuffer[53];
-
-    /* We should skip the string `NOKIA' */
-
-    sprintf(IMEI, MessageBuffer+4+5);
 
     CurrentMagicError=GE_NONE;
 
@@ -2293,84 +2311,116 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   return FB61_RX_Sync;
 }
 
-	/* RX_State machine for receive handling.  Called once for each
-	   character received from the phone/phone. */
-void	FB61_RX_StateMachine(char rx_byte)
-{
+/* RX_State machine for receive handling.  Called once for each character
+   received from the phone/phone. */
+void FB61_RX_StateMachine(char rx_byte) {
 
-	switch (RX_State) {
+  static int checksum[2];
+
+  /* XOR the byte with the current checksum */
+  checksum[BufferCount&1] ^= rx_byte;
+
+  switch (RX_State) {
 	
-					/* Messages from the phone start with an 0x1e.  We
-					   use this to "synchronise" with the incoming data
-					   stream. */		
-		case FB61_RX_Sync:
-				if (rx_byte == FB61_FRAME_ID) {
-					BufferCount = 0;
-					RX_State = FB61_RX_GetDestination;
-				}
-				break;
+    /* Messages from the phone start with an 0x1e.  We use this to
+       "synchronise" with the incoming data stream. */
 
-		case FB61_RX_GetDestination:
-		  MessageDestination=rx_byte;
-		  RX_State = FB61_RX_GetSource;
-		  break;
+  case FB61_RX_Sync:
 
-		case FB61_RX_GetSource:
-		  MessageSource=rx_byte;
-		  RX_State = FB61_RX_GetType;
-		  break;
+    if (rx_byte == FB61_FRAME_ID) {
+      BufferCount = 0;
+      RX_State = FB61_RX_GetDestination;
 
-		case FB61_RX_GetType:
-		  MessageType=rx_byte;
-		  RX_State = FB61_RX_GetUnknown;
-		  break;
+      /* Initialize checksums. */
+      checksum[0] = FB61_FRAME_ID;
+      checksum[1] = 0;
+    }
 
-		case FB61_RX_GetUnknown:
-		  MessageUnknown=rx_byte;
-		  RX_State = FB61_RX_GetLength;
-		  break;
-		
-		case FB61_RX_GetLength:
-				MessageLength = rx_byte;
-				RX_State = FB61_RX_GetMessage;
-				break;
+    break;
 
-		case FB61_RX_GetMessage:
-				MessageBuffer[BufferCount] = rx_byte;
-				BufferCount ++;
+  case FB61_RX_GetDestination:
 
-				/* If this is the last byte, it's the checksum */
+    MessageDestination=rx_byte;
+    RX_State = FB61_RX_GetSource;
 
-				if (BufferCount == MessageLength+(MessageLength%2)+2) {
+    break;
 
-				  if (MessageType != FB61_FRTYPE_ACK)
-					FB61_TX_SendAck(MessageType, MessageBuffer[MessageLength-1] & 0x0f);
+  case FB61_RX_GetSource:
 
-		  FB61_RX_DispatchMessage();
+    MessageSource=rx_byte;
+    RX_State = FB61_RX_GetType;
 
-		  RX_State = FB61_RX_Sync;
-		}
+    break;
 
-					
-				break;
+  case FB61_RX_GetType:
 
-		default:
-	}
+    MessageType=rx_byte;
+    RX_State = FB61_RX_GetUnknown;
+
+    break;
+
+  case FB61_RX_GetUnknown:
+
+    MessageUnknown=rx_byte;
+    RX_State = FB61_RX_GetLength;
+
+    break;
+    
+  case FB61_RX_GetLength:
+
+    MessageLength = rx_byte;
+    RX_State = FB61_RX_GetMessage;
+
+    break;
+    
+  case FB61_RX_GetMessage:
+
+    MessageBuffer[BufferCount] = rx_byte;
+    BufferCount ++;
+
+    /* If this is the last byte, it's the checksum. */
+
+    if (BufferCount == MessageLength+(MessageLength%2)+2) {
+
+      /* Is the checksum correct? */
+
+      if (checksum[0] == checksum[1]) {
+
+      /* We do not want to send ACK of ACKs. */
+
+	if (MessageType != FB61_FRTYPE_ACK)
+	  FB61_TX_SendAck(MessageType, MessageBuffer[MessageLength-1] & 0x0f);
+
+	FB61_RX_DispatchMessage();
+      }
+
+#ifdef DEBUG
+      else
+	printf("Bad checksum!\n");
+#endif DEBUG
+
+      RX_State = FB61_RX_Sync;
+    }
+
+    break;
+    
+  }
 }
 
 char *FB61_PrintDevice(int Device)
 {
-    switch (Device) {
 
-	case FB61_DEVICE_PHONE:
-	  return _("Phone");
+  switch (Device) {
 
-	case FB61_DEVICE_PC:
-	  return _("PC");
+  case FB61_DEVICE_PHONE:
+    return _("Phone");
 
-	default:
-	  return _("Unknown");
-	}
+  case FB61_DEVICE_PC:
+    return _("PC");
+
+  default:
+    return _("Unknown");
+  }
 }
 
 /* FB61_RX_DisplayMessage is called when a message we don't know about is

@@ -42,7 +42,12 @@
 #define FB61_MEMORY_EN_UNKNOWN  0x06
 #define FB61_MEMORY_DIALLED     0x07
 #define FB61_MEMORY_RECEIVED    0x08
-#define FB61_MEMORY_MiSSED      0x09
+#define FB61_MEMORY_MISSED      0x09
+
+/* Limits for IMEI, Revision and Model string storage. */
+#define FB61_MAX_IMEI_LENGTH     (20)
+#define FB61_MAX_REVISION_LENGTH (20)
+#define FB61_MAX_MODEL_LENGTH    (8)
             
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
    6110 phones */

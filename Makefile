@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.0-pre1
+VERSION = 0.3.0-pre2
 
 #
 # Compiler to use.
@@ -32,7 +32,7 @@ MODEL=-DMODEL="\"3810\""
 # For Nokia 6110/5110 uncomment the next line
 #
 
-#MODEL=-DMODEL="\"6110\""
+# MODEL=-DMODEL="\"6110\""
 
 #
 # Serial port for communication
@@ -53,6 +53,14 @@ PORT=-DPORT="\"/dev/ttyS0\""
 GETTEXT=-DGNOKII_GETTEXT
 
 #
+# GTK - you need this only for GUI support, if you do not need GUI, you can
+# comment this out
+#
+
+GTKCFLAGS=`gtk-config --cflags`
+GTKLDFLAGS=`gtk-config --libs`
+
+#
 # For more information about threads see the comp.programming.threads FAQ
 # http://www.serpentine.com/~bos/threads-faq/
 #
@@ -61,10 +69,14 @@ GETTEXT=-DGNOKII_GETTEXT
 # Set up compilation/linking flags for Linux.
 #
 
-COMMON=-Wall -g -O0 ${MODEL} ${PORT} ${GETTEXT} ${DEBUG} -DVERSION=\"${VERSION}\"
+COMMON=-Wall -g -O0 \
+       ${MODEL} ${PORT} \
+       ${GETTEXT} \
+       ${DEBUG} \
+       -DVERSION=\"${VERSION}\"
 
-CFLAGS = -D_REENTRANT ${COMMON} `gtk-config --cflags`
-LDFLAGS = -lpthread `gtk-config --libs`
+CFLAGS = -D_REENTRANT ${COMMON} ${GTKCFLAGS}
+LDFLAGS = -lpthread ${GTKLDFLAGS}
 
 #
 # For FreeBSD uncomment the following lines
