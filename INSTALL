@@ -103,7 +103,20 @@ Alternatively, instead of writing these three commands you can use:
 
     $ sh autogen.sh [<options>]
 
-where options are the same as with configure script.
+where options are the same as with configure script. Sometimes (it happens
+mainly with libintl and libiconv) some libraries may not be correctly
+recognized. You may want to set enviromental variables to let configure do
+the work. The sample usage would be:
+
+    $ CPPFLAGS="-I/usr/local/include -L/usr/local/lib" ./configure \
+	--prefix=/usr --enable-security
+
+or
+
+    $ CFLAGS="-I/usr/local/include -L/usr/local/lib" ./configure \
+	--prefix=/usr --enable-security
+
+and the euivalent with autogen.sh
 
 
 Compilation

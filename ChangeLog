@@ -19,6 +19,8 @@
     o try to correctly link with all needed libs (libintl and
       libiconv)                                         (Pawel Kot)
     o fix MSVC build                        (Phil Ashby, Pawel Kot)
+    o document environmental variables for configure script
+                                                        (Pawel Kot)
  * gnapplet series updates
     o folder management support (list, status, create,
       delete) support added                        (BORBELY Zoltan)
