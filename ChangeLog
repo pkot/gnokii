@@ -43,6 +43,7 @@
                                                        (Markus Plail)
  * libsms updates:
     o remove SMSFolder hacks in GetFolderChanges       (Markus Plail)
+    o add add gn_sms_pack_date_time                    (Markus Plail)
  * change strncpys to snprintfs in vcal.lx             (Markus Plail)
  * spec file fixes                                        (Pawel Kot)
 
