@@ -963,9 +963,10 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
  *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  *  o Smart Messaging Specification, Revision 3.0.0
  */
-static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type, char *UDH)
+static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type)
 {
 	unsigned char pos;
+	char *UDH = rawsms->UserData;
 
 	pos = UDH[0];
 
@@ -995,6 +996,17 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type, char *UDH)
 		dprintf("Not supported User Data Header type\n");
 		break;
 	}
+	return GE_NONE;
+}
+
+static GSM_Error EncodeConcatHeader(GSM_SMSMessage *rawsms, int this, int total)
+{
+	EncodeUDH(rawsms, SMS_ConcatenatedMessages);
+	rawsms->Length --;
+	rawsms->UserDataLength --;
+	rawsms->UserData[ 9] = 0xce;
+	rawsms->UserData[10] = total;
+	rawsms->UserData[11] = this;
 	return GE_NONE;
 }
 
@@ -1034,8 +1046,7 @@ int EncodeNokiaText(char *text, char *message)
 GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 {
 	SMS_AlphabetType al = SMS_DefaultAlphabet;
-	unsigned int i, size = 0, offset = 0;
-	char *message = rawsms->UserData;
+	unsigned int i, size = 0;
 	GSM_Error error;
 
 	/* Additional Headers */
@@ -1076,14 +1087,14 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		case SMS_BitmapData:
 			error = GE_NONE;
 			switch (sms->UserData[0].u.Bitmap.type) {
-			case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo, message); break;
+			case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo); break;
 			case GSM_PictureMessage: 
 			case GSM_EMSPicture:
 			case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
 			}
 			if (error != GE_NONE) return error;
 
-			size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Bitmap), message + rawsms->UserDataLength);
+			size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Bitmap), rawsms->UserData + rawsms->UserDataLength);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			rawsms->DCS = 0xf5;
@@ -1091,25 +1102,25 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			break;
 
 		case SMS_PlainText: {
-			unsigned int length;
+			unsigned int length, offset = 0;
 
 			length = strlen(sms->UserData[0].u.Text);
 			switch (al) {
 			case SMS_DefaultAlphabet:
 #define UDH_Length 0
-				size = Pack7BitCharacters((7 - (UDH_Length % 7)) % 7, sms->UserData[i].u.Text, message + offset);
+				size = Pack7BitCharacters((7 - (UDH_Length % 7)) % 7, sms->UserData[i].u.Text, rawsms->UserData + offset);
 				// sms->Length = 8 * 0 + (7 - (0 % 7)) % 7 + length + offset;
 				rawsms->Length = strlen(sms->UserData[i].u.Text);
 				rawsms->UserDataLength = size + offset;
 				break;
 			case SMS_8bit:
 				rawsms->DCS |= 0xf4;
-				memcpy(message, sms->UserData[i].u.Text + 1, sms->UserData[i].u.Text[0]);
-				rawsms->UserDataLength = rawsms->Length = sms->UserData[i].u.Text[0];
+				memcpy(rawsms->UserData + offset, sms->UserData[i].u.Text + 1, sms->UserData[i].u.Text[0]);
+				rawsms->UserDataLength = rawsms->Length = sms->UserData[i].u.Text[0] + offset;
 				break;
 			case SMS_UCS2:
 				rawsms->DCS |= 0x08;
-				EncodeUnicode(message + offset, sms->UserData[i].u.Text, length);
+				EncodeUnicode(rawsms->UserData + offset, sms->UserData[i].u.Text, length);
 				length *= 2;
 				rawsms->UserDataLength = rawsms->Length = length + offset;
 				break;
@@ -1120,13 +1131,13 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		}
 
 		case SMS_NokiaText:
-			size = EncodeNokiaText(sms->UserData[i].u.Text, message + rawsms->UserDataLength);
+			size = EncodeNokiaText(sms->UserData[i].u.Text, rawsms->UserData + rawsms->UserDataLength);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			break;
 
 		case SMS_iMelodyText:
-			size = GSM_EncodeSMSiMelody(sms->UserData[i].u.Text, message + rawsms->UserDataLength);
+			size = GSM_EncodeSMSiMelody(sms->UserData[i].u.Text, rawsms->UserData + rawsms->UserDataLength);
 			dprintf("Imelody, size %d\n", size);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
@@ -1136,19 +1147,12 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 
 		case SMS_MultiData:
 			size = sms->UserData[0].Length;
-			error = EncodeUDH(rawsms, 0x05, message);
+			error = EncodeUDH(rawsms, SMS_MultipartMessage);
+			if (error != GE_NONE) return error;
+			error = EncodeConcatHeader(rawsms, sms->UserData[i].u.Multi.this, sms->UserData[i].u.Multi.total);
 			if (error != GE_NONE) return error;
 
-			message[0] += 5;
-			rawsms->Length += 5;
-			rawsms->UserDataLength += 5;
-			rawsms->UserData[ 7] = 0x00;
-			rawsms->UserData[ 8] = 0x03;
-			rawsms->UserData[ 9] = 0xce;
-			rawsms->UserData[10] = sms->UserData[i].u.Multi.total;
-			rawsms->UserData[11] = sms->UserData[i].u.Multi.this;
-
-			memcpy(message + rawsms->UserDataLength, sms->UserData[i].u.Multi.Binary, MAX_SMS_PART);
+			memcpy(rawsms->UserData + rawsms->UserDataLength, sms->UserData[i].u.Multi.Binary, MAX_SMS_PART);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			rawsms->DCS = 0xf5;
@@ -1156,9 +1160,9 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			break;
 
 		case SMS_RingtoneData:
-			error = EncodeUDH(rawsms, SMS_Ringtone, message); 
+			error = EncodeUDH(rawsms, SMS_Ringtone); 
 			if (error != GE_NONE) return error;
-			size = GSM_EncodeSMSRingtone(message + rawsms->Length, &sms->UserData[i].u.Ringtone);
+			size = GSM_EncodeSMSRingtone(rawsms->UserData + rawsms->Length, &sms->UserData[i].u.Ringtone);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			rawsms->DCS = 0xf5;
