@@ -188,7 +188,7 @@ Just install the cvs package for your distribution and follow these steps:
 
 	cvs login
 
-	   Use cvs as your password.
+	   Use 'cvs' as your password.
 
 
 	3. If you are logged in you are ready to checkout the latest sources:
