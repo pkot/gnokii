@@ -14,7 +14,10 @@
   handset.
 
   $Log$
-  Revision 1.79  2001-07-27 00:02:22  pkot
+  Revision 1.80  2001-08-20 23:36:27  pkot
+  More cleanup in AT code (Manfred Jonsson)
+
+  Revision 1.79  2001/07/27 00:02:22  pkot
   Generic AT support for the new structure (Manfred Jonsson)
 
   Revision 1.78  2001/06/28 00:28:45  pkot
@@ -675,6 +678,7 @@ typedef enum {
 	GOP_GetModel,
 	GOP_GetRevision,
 	GOP_GetImei,
+	GOP_GetManufacturer,
 	GOP_Identify,
 	GOP_GetBitmap,
 	GOP_SetBitmap,
@@ -695,6 +699,7 @@ typedef enum {
 	GOP_GetSMSCenter,
 	GOP_GetDateTime,
 	GOP_GetCalendarNote,
+	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 
 /* This structure contains the 'callups' needed by the statemachine */
