@@ -69,6 +69,14 @@ typedef struct {
   GtkWidget *text;
 } AddDialogData;
 
+typedef struct {
+  GtkWidget *dialog;
+  DateTime   date;
+  DateTime   alarm;
+  GtkWidget *alarmCheck;
+  GtkWidget *text;
+} AddDialogData2;
+
 
 typedef struct {
   GtkWidget *dialog;
@@ -87,6 +95,9 @@ static ErrorDialog errorDialog = {NULL, NULL};
 static CalendarWidget cal = {NULL, NULL};
 static QuestMark questMark;
 static AddDialogData addReminderDialogData;
+static AddDialogData2 addCallDialogData;
+static AddDialogData2 addMeetingDialogData;
+static AddDialogData addBirthdayDialogData;
 static CalendarDialog calendarDialog = {NULL, NULL};
 static CalTimeDialog calTimeDialog = {NULL, NULL};
 
@@ -425,10 +436,147 @@ static gint ReverseSelection (gconstpointer a, gconstpointer b)
     return (0);
 }
 
-  
+
+static gint AddCalendarNote(GSM_CalendarNote *cnote)
+{
+	GSM_Error error;
+	PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
+	D_CalendarNote *dnote = (D_CalendarNote *)g_malloc(sizeof(D_CalendarNote));
+
+	dnote->entry = cnote;
+	e->event = Event_WriteCalendarNote;
+	e->data = dnote;
+	GUI_InsertEvent (e);
+	pthread_mutex_lock (&calendarMutex);
+	pthread_cond_wait (&calendarCond, &calendarMutex);
+	pthread_mutex_unlock (&calendarMutex);
+
+#ifdef XDEBUG
+	g_print ("Saving calendar note\n");
+#endif
+
+	error = dnote->status;
+	g_free (dnote);
+
+	if (error != GE_NONE)
+	{
+		gchar *buf = g_strdup_printf (_("Saving failed failed\n(error=%d)"), error);
+		gtk_label_set_text (GTK_LABEL(errorDialog.text), buf);
+		gtk_widget_show (errorDialog.dialog);
+		g_free (buf);
+	}
+	else
+		g_print ("Note saved\n");
+	
+	return (error);
+}
+
 static void OkAddReminderDialog (GtkWidget *widget, gpointer data)
 {
-  /*gtk_toggle_button_get_active (button)*/
+	GSM_CalendarNote note;
+
+	note.Type = GCN_REMINDER;
+	note.Location = 0;
+	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *)data)->text)), 20);
+	note.Time.Year = ((AddDialogData *)data)->date.year;
+	note.Time.Month = ((AddDialogData *)data)->date.month;
+	note.Time.Day = ((AddDialogData *)data)->date.day;
+	note.Time.Hour = note.Time.Minute = note.Time.Second = note.Time.Timezone = 0;
+	if (GTK_TOGGLE_BUTTON(((AddDialogData*) data)->alarmCheck)->active) {
+		note.Alarm.Year = ((AddDialogData *)data)->alarm.date.year;
+		note.Alarm.Month = ((AddDialogData *)data)->alarm.date.month;
+		note.Alarm.Day = ((AddDialogData *)data)->alarm.date.day;
+		note.Alarm.Hour = ((AddDialogData *)data)->alarm.hours;
+		note.Alarm.Minute = ((AddDialogData *)data)->alarm.minutes;
+		note.Alarm.Second = note.Alarm.Timezone = 0;
+	} else {
+		note.Alarm.Year = 0;
+	}
+	AddCalendarNote(&note);
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *)data)->text), "");
+	gtk_widget_hide (((AddDialogData *)data)->dialog);
+}
+
+static void OkAddCallDialog (GtkWidget *widget, gpointer data)
+{
+	GSM_CalendarNote note;
+
+	note.Type = GCN_CALL;
+	note.Location = 0;
+	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData2 *)data)->text)), 20);
+	note.Time.Year = ((AddDialogData2 *)data)->date.date.year;
+	note.Time.Month = ((AddDialogData2 *)data)->date.date.month;
+	note.Time.Day = ((AddDialogData2 *)data)->date.date.day;
+	note.Time.Hour = ((AddDialogData2 *)data)->date.hours;
+	note.Time.Minute = ((AddDialogData2 *)data)->date.minutes;
+	note.Time.Second = note.Time.Timezone = 0;
+	if (GTK_TOGGLE_BUTTON(((AddDialogData2 *) data)->alarmCheck)->active) {
+		note.Alarm.Year = ((AddDialogData2 *)data)->alarm.date.year;
+		note.Alarm.Month = ((AddDialogData2 *)data)->alarm.date.month;
+		note.Alarm.Day = ((AddDialogData2 *)data)->alarm.date.day;
+		note.Alarm.Hour = ((AddDialogData2 *)data)->alarm.hours;
+		note.Alarm.Minute = ((AddDialogData2 *)data)->alarm.minutes;
+		note.Alarm.Second = note.Alarm.Timezone = 0;
+	} else {
+		note.Alarm.Year = 0;
+	}
+	AddCalendarNote(&note);
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData2 *)data)->text), "");
+	gtk_widget_hide (((AddDialogData2 *)data)->dialog);
+}
+
+static void OkAddMeetingDialog (GtkWidget *widget, gpointer data)
+{
+	GSM_CalendarNote note;
+
+	note.Type = GCN_MEETING;
+	note.Location = 0;
+	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData2 *)data)->text)), 20);
+	note.Time.Year = ((AddDialogData2 *)data)->date.date.year;
+	note.Time.Month = ((AddDialogData2 *)data)->date.date.month;
+	note.Time.Day = ((AddDialogData2 *)data)->date.date.day;
+	note.Time.Hour = ((AddDialogData2 *)data)->date.hours;
+	note.Time.Minute = ((AddDialogData2 *)data)->date.minutes;
+	note.Time.Second = note.Time.Timezone = 0;
+	if (GTK_TOGGLE_BUTTON(((AddDialogData2 *) data)->alarmCheck)->active) {
+		note.Alarm.Year = ((AddDialogData2 *)data)->alarm.date.year;
+		note.Alarm.Month = ((AddDialogData2 *)data)->alarm.date.month;
+		note.Alarm.Day = ((AddDialogData2 *)data)->alarm.date.day;
+		note.Alarm.Hour = ((AddDialogData2 *)data)->alarm.hours;
+		note.Alarm.Minute = ((AddDialogData2 *)data)->alarm.minutes;
+		note.Alarm.Second = note.Alarm.Timezone = 0;
+	} else {
+		note.Alarm.Year = 0;
+	}
+	AddCalendarNote(&note);
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData2 *)data)->text), "");
+	gtk_widget_hide (((AddDialogData2 *)data)->dialog);
+}
+
+static void OkAddBdayDialog (GtkWidget *widget, gpointer data)
+{
+	GSM_CalendarNote note;
+
+	note.Type = GCN_BIRTHDAY;
+	note.Location = 0;
+	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *)data)->text)), 20);
+	note.Time.Year = ((AddDialogData *)data)->date.year;
+	note.Time.Month = ((AddDialogData *)data)->date.month;
+	note.Time.Day = ((AddDialogData *)data)->date.day;
+	note.Time.Hour = note.Time.Minute = note.Time.Second = note.Time.Timezone = 0;
+	if (GTK_TOGGLE_BUTTON(((AddDialogData*) data)->alarmCheck)->active) {
+		note.Alarm.Year = ((AddDialogData *)data)->alarm.date.year;
+		note.Alarm.Month = ((AddDialogData *)data)->alarm.date.month;
+		note.Alarm.Day = ((AddDialogData *)data)->alarm.date.day;
+		note.Alarm.Hour = ((AddDialogData *)data)->alarm.hours;
+		note.Alarm.Minute = ((AddDialogData *)data)->alarm.minutes;
+		note.Alarm.Second = note.Alarm.Timezone = 0;
+	} else {
+		note.Alarm.Year = 0;
+	}
+	AddCalendarNote(&note);
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *)data)->text), "");
+	gtk_widget_hide (((AddDialogData *)data)->dialog);
 }
 
 
@@ -572,7 +720,27 @@ static void ShowCalTime (GtkWidget *widget, DateTime *date)
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
     gtk_widget_show (label);
 
-    adj = (GtkAdjustment *) gtk_adjustment_new (addReminderDialogData.alarm.hours,
+    /* What a fuck...*/
+    adj = (GtkAdjustment *) gtk_adjustment_new (date->hours,
+                                                0.0, 23.0, 1.0, 4.0, 0.0);
+    date->hButton = gtk_spin_button_new (adj, 0, 0);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (date->hButton), TRUE);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (date->hButton), TRUE);
+    gtk_box_pack_start (GTK_BOX (hbox), date->hButton, FALSE, FALSE, 0);
+    gtk_widget_show (date->hButton);
+
+    label = gtk_label_new (":");
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    adj = (GtkAdjustment *) gtk_adjustment_new (date->minutes,
+                                                0.0, 59.0, 1.0, 10.0, 0.0);
+    date->mButton = gtk_spin_button_new (adj, 0, 0);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (date->mButton), TRUE);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (date->mButton), TRUE);
+    gtk_box_pack_start (GTK_BOX (hbox), date->mButton, FALSE, FALSE, 0);
+    gtk_widget_show (date->mButton);
+/*    adj = (GtkAdjustment *) gtk_adjustment_new (addReminderDialogData.alarm.hours,
                                                 0.0, 23.0, 1.0, 4.0, 0.0);
     addReminderDialogData.alarm.hButton = gtk_spin_button_new (adj, 0, 0);
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarm.hButton), TRUE);
@@ -590,7 +758,7 @@ static void ShowCalTime (GtkWidget *widget, DateTime *date)
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarm.mButton), TRUE);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarm.mButton), TRUE);
     gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarm.mButton, FALSE, FALSE, 0);
-    gtk_widget_show (addReminderDialogData.alarm.mButton);
+    gtk_widget_show (addReminderDialogData.alarm.mButton);*/
   }
 
   gtk_widget_show (calTimeDialog.dialog);  
@@ -617,7 +785,7 @@ static void AddReminder (void)
     gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addReminderDialogData.dialog)->action_area),
                         button, TRUE, TRUE, 10);
     gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                        GTK_SIGNAL_FUNC (OkAddReminderDialog), (gpointer) addReminderDialogData.dialog);
+                        GTK_SIGNAL_FUNC (OkAddReminderDialog), (gpointer) &addReminderDialogData);
     GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
     gtk_widget_grab_default (button);
     gtk_widget_show (button);
@@ -707,6 +875,344 @@ static void AddReminder (void)
   }
   
   gtk_widget_show (GTK_WIDGET (addReminderDialogData.dialog));
+}
+
+
+static void AddCall (void)
+{
+  GtkWidget *button, *hbox, *vbox, *label;
+  time_t t;
+  struct tm *tm;
+  
+  if (addCallDialogData.dialog == NULL)
+  {
+    addCallDialogData.dialog = gtk_dialog_new();
+    gtk_window_set_title (GTK_WINDOW (addCallDialogData.dialog), _("Add Call"));
+    gtk_window_position (GTK_WINDOW (addCallDialogData.dialog), GTK_WIN_POS_MOUSE);
+    gtk_window_set_modal(GTK_WINDOW (addCallDialogData.dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (addCallDialogData.dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (addCallDialogData.dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addCallDialogData.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkAddCallDialog), (gpointer) &addCallDialogData);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addCallDialogData.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) addCallDialogData.dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (addCallDialogData.dialog)->vbox), 5);
+
+    vbox = gtk_vbox_new (FALSE, 10);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (addCallDialogData.dialog)->vbox), vbox);
+    gtk_widget_show (vbox);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+
+    label = gtk_label_new (_("Date:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+    
+    t = time (NULL);
+    tm = localtime (&t);
+    
+    addCallDialogData.date.date.year = addCallDialogData.alarm.date.year =
+                                      tm->tm_year + 1900;
+    addCallDialogData.date.date.month = addCallDialogData.alarm.date.month =
+                                       tm->tm_mon + 1;
+    addCallDialogData.date.date.day = addCallDialogData.alarm.date.day = 
+                                     tm->tm_mday;
+    
+    addCallDialogData.date.hours = addCallDialogData.alarm.hours = tm->tm_hour;
+    addCallDialogData.date.minutes = addCallDialogData.alarm.minutes = tm->tm_min;
+    
+    button = gtk_button_new ();
+    
+    addCallDialogData.date.button = gtk_label_new ("");
+    
+    gtk_container_add (GTK_CONTAINER (button), addCallDialogData.date.button);
+    SetDateTimeButton (&(addCallDialogData.date));
+    
+    gtk_widget_show (addCallDialogData.date.button);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (ShowCalTime), (gpointer) &(addCallDialogData.date));
+    gtk_widget_show (button);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    label = gtk_label_new (_("Number:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    addCallDialogData.text = gtk_entry_new_with_max_length (30);
+    gtk_box_pack_end (GTK_BOX (hbox), addCallDialogData.text, FALSE, FALSE, 2);
+    gtk_widget_show (addCallDialogData.text);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    addCallDialogData.alarmCheck = gtk_check_button_new_with_label (_("Alarm"));
+    gtk_box_pack_start (GTK_BOX(hbox), addCallDialogData.alarmCheck, FALSE, FALSE, 2);
+
+    gtk_widget_show (addCallDialogData.alarmCheck);
+
+    button = gtk_button_new ();
+    
+    addCallDialogData.alarm.button = gtk_label_new ("");
+    
+    gtk_container_add (GTK_CONTAINER (button), addCallDialogData.alarm.button);
+    SetDateTimeButton (&(addCallDialogData.alarm));
+    
+    gtk_widget_show (addCallDialogData.alarm.button);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (ShowCalTime), (gpointer) &(addCallDialogData.alarm));
+    gtk_widget_show (button);
+  }
+  
+  gtk_widget_show (GTK_WIDGET (addCallDialogData.dialog));
+}
+
+
+static void AddMeeting (void)
+{
+  GtkWidget *button, *hbox, *vbox, *label;
+  time_t t;
+  struct tm *tm;
+  
+  if (addMeetingDialogData.dialog == NULL)
+  {
+    addMeetingDialogData.dialog = gtk_dialog_new();
+    gtk_window_set_title (GTK_WINDOW (addMeetingDialogData.dialog), _("Add meeting"));
+    gtk_window_position (GTK_WINDOW (addMeetingDialogData.dialog), GTK_WIN_POS_MOUSE);
+    gtk_window_set_modal(GTK_WINDOW (addMeetingDialogData.dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (addMeetingDialogData.dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (addMeetingDialogData.dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addMeetingDialogData.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkAddMeetingDialog), (gpointer) &addMeetingDialogData);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addMeetingDialogData.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) addMeetingDialogData.dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (addMeetingDialogData.dialog)->vbox), 5);
+
+    vbox = gtk_vbox_new (FALSE, 10);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (addMeetingDialogData.dialog)->vbox), vbox);
+    gtk_widget_show (vbox);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+
+    label = gtk_label_new (_("Date:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+    
+    t = time (NULL);
+    tm = localtime (&t);
+    
+    addMeetingDialogData.date.date.year = addMeetingDialogData.alarm.date.year =
+                                      tm->tm_year + 1900;
+    addMeetingDialogData.date.date.month = addMeetingDialogData.alarm.date.month =
+                                       tm->tm_mon + 1;
+    addMeetingDialogData.date.date.day = addMeetingDialogData.alarm.date.day = 
+                                     tm->tm_mday;
+    
+    addMeetingDialogData.date.hours = addMeetingDialogData.alarm.hours = tm->tm_hour;
+    addMeetingDialogData.date.minutes = addMeetingDialogData.alarm.minutes = tm->tm_min;
+    
+    button = gtk_button_new ();
+    
+    addMeetingDialogData.date.button = gtk_label_new ("");
+    
+    gtk_container_add (GTK_CONTAINER (button), addMeetingDialogData.date.button);
+    SetDateTimeButton (&(addMeetingDialogData.date));
+    
+    gtk_widget_show (addMeetingDialogData.date.button);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (ShowCalTime), (gpointer) &(addMeetingDialogData.date));
+    gtk_widget_show (button);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    label = gtk_label_new (_("Name:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    addMeetingDialogData.text = gtk_entry_new_with_max_length (30);
+    gtk_box_pack_end (GTK_BOX (hbox), addMeetingDialogData.text, FALSE, FALSE, 2);
+    gtk_widget_show (addMeetingDialogData.text);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    addMeetingDialogData.alarmCheck = gtk_check_button_new_with_label (_("Alarm"));
+    gtk_box_pack_start (GTK_BOX(hbox), addMeetingDialogData.alarmCheck, FALSE, FALSE, 2);
+//    gtk_signal_connect (GTK_OBJECT (addMeetingDialogData.alarmCheck), "toggled",
+//                        GTK_SIGNAL_FUNC (TogleAlarm), &addMeetingDialogData);
+    gtk_widget_show (addMeetingDialogData.alarmCheck);
+
+    button = gtk_button_new ();
+    
+    addMeetingDialogData.alarm.button = gtk_label_new ("");
+    
+    gtk_container_add (GTK_CONTAINER (button), addMeetingDialogData.alarm.button);
+    SetDateTimeButton (&(addMeetingDialogData.alarm));
+    
+    gtk_widget_show (addMeetingDialogData.alarm.button);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (ShowCalTime), (gpointer) &(addMeetingDialogData.alarm));
+    gtk_widget_show (button);
+  }
+  
+  gtk_widget_show (GTK_WIDGET (addMeetingDialogData.dialog));
+}
+
+
+static void AddBirthday (void)
+{
+  GtkWidget *button, *hbox, *vbox, *label;
+  time_t t;
+  struct tm *tm;
+  
+  if (addBirthdayDialogData.dialog == NULL)
+  {
+    addBirthdayDialogData.dialog = gtk_dialog_new();
+    gtk_window_set_title (GTK_WINDOW (addBirthdayDialogData.dialog), _("Add birthday"));
+    gtk_window_position (GTK_WINDOW (addBirthdayDialogData.dialog), GTK_WIN_POS_MOUSE);
+    gtk_window_set_modal(GTK_WINDOW (addBirthdayDialogData.dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (addBirthdayDialogData.dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (addBirthdayDialogData.dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addBirthdayDialogData.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkAddBdayDialog), (gpointer) &addBirthdayDialogData);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addBirthdayDialogData.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) addBirthdayDialogData.dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (addBirthdayDialogData.dialog)->vbox), 5);
+
+    vbox = gtk_vbox_new (FALSE, 10);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (addBirthdayDialogData.dialog)->vbox), vbox);
+    gtk_widget_show (vbox);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+
+    label = gtk_label_new (_("Date:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+    
+    t = time (NULL);
+    tm = localtime (&t);
+    
+    addBirthdayDialogData.date.year = addBirthdayDialogData.alarm.date.year =
+                                      tm->tm_year + 1900;
+    addBirthdayDialogData.date.month = addBirthdayDialogData.alarm.date.month =
+                                       tm->tm_mon + 1;
+    addBirthdayDialogData.date.day = addBirthdayDialogData.alarm.date.day = 
+                                     tm->tm_mday;
+    
+    addBirthdayDialogData.alarm.hours = tm->tm_hour;
+    addBirthdayDialogData.alarm.minutes = tm->tm_min;
+    
+    button = gtk_button_new ();
+    
+    addBirthdayDialogData.date.button = gtk_label_new ("");
+    
+    gtk_container_add (GTK_CONTAINER (button), addBirthdayDialogData.date.button);
+    SetDateButton (&(addBirthdayDialogData.date));
+    
+    gtk_widget_show (addBirthdayDialogData.date.button);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (ShowCalendar), (gpointer) &(addBirthdayDialogData.date));
+    gtk_widget_show (button);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    label = gtk_label_new (_("Name:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    addBirthdayDialogData.text = gtk_entry_new_with_max_length (30);
+    gtk_box_pack_end (GTK_BOX (hbox), addBirthdayDialogData.text, FALSE, FALSE, 2);
+    gtk_widget_show (addBirthdayDialogData.text);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    addBirthdayDialogData.alarmCheck = gtk_check_button_new_with_label (_("Alarm"));
+    gtk_box_pack_start (GTK_BOX(hbox), addBirthdayDialogData.alarmCheck, FALSE, FALSE, 2);
+//    gtk_signal_connect (GTK_OBJECT (addBirthdayDialogData.alarmCheck), "toggled",
+//                        GTK_SIGNAL_FUNC (TogleAlarm), &addBirthdayDialogData);
+    gtk_widget_show (addBirthdayDialogData.alarmCheck);
+
+    button = gtk_button_new ();
+    
+    addBirthdayDialogData.alarm.button = gtk_label_new ("");
+    
+    gtk_container_add (GTK_CONTAINER (button), addBirthdayDialogData.alarm.button);
+    SetDateTimeButton (&(addBirthdayDialogData.alarm));
+    
+    gtk_widget_show (addBirthdayDialogData.alarm.button);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (ShowCalTime), (gpointer) &(addBirthdayDialogData.alarm));
+    gtk_widget_show (button);
+  }
+  
+  gtk_widget_show (GTK_WIDGET (addBirthdayDialogData.dialog));
 }
 
 
@@ -864,6 +1370,7 @@ void GUI_CreateCalendarWindow ()
 
   InitMainMenu ();
   GUI_CalendarWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass (GTK_WINDOW (GUI_CalendarWindow), "CalendarWindow", "Xgnokii");
   gtk_window_set_title (GTK_WINDOW (GUI_CalendarWindow), _("Calendar"));
   //gtk_widget_set_usize (GTK_WIDGET (GUI_CalendarWindow), 436, 220);
   gtk_signal_connect (GTK_OBJECT (GUI_CalendarWindow), "delete_event",
@@ -933,15 +1440,15 @@ void GUI_CreateCalendarWindow ()
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Add call"), NULL,
                            NewPixmap(NewCall_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) AddCall, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Add meeting"), NULL,
                            NewPixmap(NewMeet_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) AddMeeting, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Add birthday"), NULL,
                            NewPixmap(NewBD_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) AddBirthday, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Delete note"), NULL,
                            NewPixmap(Delete_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),

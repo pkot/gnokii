@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.18  2001-06-20 21:27:36  pkot
+  Revision 1.19  2001-09-14 13:09:26  pkot
+  Xgnokii calendar updates
+
+  Revision 1.18  2001/06/20 21:27:36  pkot
   IrDA patch (Martin Jancar)
 
   Revision 1.17  2001/06/10 11:40:06  machek
@@ -554,6 +557,25 @@ static gint A_GetCalendarNoteAll (gpointer data)
 }
 
 
+static gint A_WriteCalendarNote (gpointer data)
+{
+  GSM_Error error;
+  D_CalendarNote *cn = (D_CalendarNote *) data;
+
+  error = cn->status = GE_UNKNOWN;
+
+  if (cn)
+  {
+    pthread_mutex_lock (&calendarMutex);
+    error = cn->status = GSM->WriteCalendarNote (cn->entry);
+    pthread_cond_signal (&calendarCond);
+    pthread_mutex_unlock (&calendarMutex);
+  }
+
+  return (error);
+}
+
+
 static gint A_DeleteCalendarNote (gpointer data)
 {
   GSM_CalendarNote *note = (GSM_CalendarNote *) data;
@@ -914,6 +936,7 @@ gint (*DoAction[])(gpointer) = {
   A_WriteMemoryLocationAll,
   A_GetCalendarNote,
   A_GetCalendarNoteAll,
+  A_WriteCalendarNote,
   A_DeleteCalendarNote,
   A_GetCallerGroup,
   A_SendCallerGroup,
