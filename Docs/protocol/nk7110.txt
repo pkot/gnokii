@@ -209,6 +209,26 @@ Correct format is FBUS version 2/Infrared/MBUS version 2
     r Get Picture Image     { 0x0008, 0x07, location, number[2 bytes], 0x07, ??[38],
                                      width, height, lenH, lenL, {bitmap}}
                               where location: 0x21 (always ?)
+    s Get SMS Status        { 0x0036, 0x64 }
+    r Get SMS Status        { 0x0037, 0x05/0x03, 0x01, 0x00, 0x00,
+                              a (2 octets), b (2 octets), c (2 octets),
+                              d (2 octets), e (2 octets), 0x00
+                              where:
+                              a - Number of locations in "fixed" memory. These are all
+                                Templates entries in my Nokias 6210 (NPE-3 (c) NMP V05.36
+                                14-11-01, NPE-3 (c) NMP V05.27 01-08-01).
+                                I can't remove any of Templates entries in my phone.
+                              b - Number of used messages in phone memory. These
+                                are messages manually moved from the other folders.
+                                Picture messages are saved here.
+                              c - Number of unread messages in phone memory. Probably
+                                only smart messsages.
+                              d - Number of used messages in SIM memory. These are
+                                either received messages or saved into Outbox/Inbox.
+                                Note that you *can't* save message into this memory
+                                using 'Move' option. Picture messages are not here.
+                              e - Number of unread messages in SIM memory
+
     s Set Picture Image     { 0x0050, 0x07, location, number[2 bytes], 0x07, ??[38], 
                                      width, height, lenH, lenL, {bitmap}}
                               std. size: 72x28
