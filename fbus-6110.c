@@ -2527,6 +2527,19 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
         printf(_("   Network name: %s (%s)\n"),
                      GSM_GetNetworkName(CurrentNetworkInfo->NetworkCode),
                      GSM_GetCountryName(CurrentNetworkInfo->NetworkCode));
+        printf(_("   Status: "));
+
+        switch (MessageBuffer[8]) {
+          case 0x01: printf (_("home network selected")); break;
+          case 0x02: printf (_("roaming network")); break;
+          case 0x03: printf (_("requesting network")); break;
+          case 0x04: printf (_("not registered in the network")); break;
+          default: printf(_("unknown"));
+        }
+
+        printf("\n");
+
+        printf(_("   Network selection: %s\n"), MessageBuffer[9]==1?_("manual"):_("automatic"));
 #endif DEBUG
       }
 

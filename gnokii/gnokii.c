@@ -1412,8 +1412,10 @@ void writephonebook(void)
 	memory_type_string = "sim";
 	entry.MemoryType = GMT_SM;
       }
-      else
+      else {
 	fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
+        break;
+      }
     }
 
     ptr=strtok(NULL, ";"); entry.Location=atoi(ptr);
