@@ -3,6 +3,11 @@
     o sys/filio.h included for FIONREAD              (BORBELY Zoltan)
  * gnokii changes
     o fix potential segfault in writephonebook()    (Jan de Cuveland)
+ * docs updates
+    o describe install, install-suid, install-strip and install-ss
+      targets                                             (Pawel Kot)
+    o update config file description -- # only at the line
+      beginning denotes the comment                       (Pawel Kot)
 
 0.5.0pre1
 =========

@@ -118,6 +118,22 @@ Install the binaries into the system with one of the four following lines:
     # make install-strip
     # make install-ss          # <-- suid AND strip
 
+'install' target is the usual installation process that you would need in
+most cases.
+'install-suid' target sets more restrictive permissions. Only gnokii group
+members will have access to gnokii files. Remember to create the gnokii
+group.
+'install-strip' target strips the prepared binaries on install.
+'install-ss' target does both strip and suid.
+When you need to use mgnokiidev and don't want to setup it manually,
+install-suid will be a good choice.
+We don't recommend to strip the binaries as the debug symbols may give us
+some valuable input in case of problems.
+For distribution packaging install-ss target will be probably wise choice.
+
+Note that you will need to adjust /dev/ttyS* or /dev/ircomm* and /var/lock
+permissions and ownership before starting using gnokii.
+
 If you wish to install gnokii stuff in some other directory root (eg. when
 creating a distribution package), you can take an advantage of the DESTDIR
 variable:
@@ -154,7 +170,12 @@ your home directory:
 
 It is a plain ASCII file which can be read in any editor. Make sure you do 
 not save it in a wordprocessor's binary-format. It has to remain plain 
-text. vi, mcedit, kedit are good examples.
+text. vi, mcedit, kedit, joe or even emacs are good examples.
 
 Change the settings to fit your system. Lines beginning with a `#' are 
-comments. The file should be self-explaining.
+comments. The file should be self-explaining. Note that `#' not at the line
+beginning is NOT treated as comments. In particular:
+
+    connection = serial # I have DLR-3P cable
+
+will cause problems.
