@@ -8,7 +8,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Wed Sep 08 1999
+  Last modification: Mon May 01 2000
   Modified by Jan Derfinak
 
 */
@@ -26,6 +26,7 @@
 #include "xgnokii.h"
 #include "xpm/quest.xpm"
 #include "xpm/stop.xpm"
+#include "xpm/info.xpm"
 
 static Model models[] = {
   {"1611",  "NHE-5"},
@@ -49,65 +50,33 @@ static Model models[] = {
   {"7110",  "NSE-5"},
   {"9000i", "RAE-4"},
   {"9110",  "RAE-2"},
-  {{0},    {0}}
+  {"550",   "THF-10"},
+  {"540",   "THF-11"},
+  {"650",   "THF-12"},
+  {"640",   "THF-13"},
+  {NULL,    NULL}
 };
+
 
 gchar *GetModel (const gchar *num)
 {
   register gint i = 0;
-  
+
   while (models[i].number != 0)
   {
     if (strcmp (num, models[i].number) == 0)
       return (models[i].model);
     i++;
   }
-  
+
   return NULL;
 }
+
 
 bool CallerGroupSupported (const gchar *num)
 {
   register gint i = 0;
-  
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 10 && i < 19)
-        return TRUE;
-      else
-        return FALSE;
-    }
-    i++;
-  }
-  
-  return FALSE;
-}
 
-bool NetmonitorSupported (const gchar *num)
-{
-  register gint i = 0;
-  
-  while (models[i].number != 0)
-  {
-    if (strcmp (num, models[i].number) == 0)
-    {
-      if (i > 7 && i < 19)
-        return TRUE;
-      else
-        return FALSE;
-    }
-    i++;
-  }
-  
-  return FALSE;
-}
-
-bool KeyboardSupported (const gchar *num)
-{
-  register gint i = 0;
-  
   while (models[i].number != 0)
   {
     if (strcmp (num, models[i].number) == 0)
@@ -119,24 +88,147 @@ bool KeyboardSupported (const gchar *num)
     }
     i++;
   }
-  
+
   return FALSE;
 }
+
+
+bool CalendarSupported (const gchar *num)
+{
+  register gint i = 0;
+
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 10 && i < 18)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+
+  return FALSE;
+}
+
+
+bool NetmonitorSupported (const gchar *num)
+{
+  register gint i = 0;
+
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 7 && i < 18)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+
+  return FALSE;
+}
+
+
+bool KeyboardSupported (const gchar *num)
+{
+  register gint i = 0;
+
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 10 && i < 18)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+
+  return FALSE;
+}
+
+
+bool SMSSupported (const gchar *num)
+{
+  register gint i = 0;
+
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 2 && i < 18)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+
+  return FALSE;
+}
+
+
+bool DTMFSupported (const gchar *num)
+{
+  register gint i = 0;
+
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 2 && i < 18)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+
+  return FALSE;
+}
+
+
+bool SpeedDialSupported (const gchar *num)
+{
+  register gint i = 0;
+
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 7 && i < 18)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+
+  return FALSE;
+}
+
 
 inline void DeleteEvent (const GtkWidget *widget, const GdkEvent *event, const gpointer data)
 {
   gtk_widget_hide (GTK_WIDGET (widget));
 }
 
+
 inline void CancelDialog (const GtkWidget *widget, const gpointer data)
 {
   gtk_widget_hide (GTK_WIDGET (data));
 }
 
+
 void CreateErrorDialog (ErrorDialog *errorDialog, GtkWidget *window)
 {
   GtkWidget *button, *hbox, *pixmap;
-  
+
   errorDialog->dialog = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (errorDialog->dialog), _("Error"));
   gtk_window_set_modal (GTK_WINDOW (errorDialog->dialog), TRUE);
@@ -144,20 +236,20 @@ void CreateErrorDialog (ErrorDialog *errorDialog, GtkWidget *window)
   gtk_container_set_border_width (GTK_CONTAINER (errorDialog->dialog), 5);
   gtk_signal_connect (GTK_OBJECT (errorDialog->dialog), "delete_event",
                       GTK_SIGNAL_FUNC (DeleteEvent), NULL);
-    
+
   button = gtk_button_new_with_label (_("Cancel"));
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (errorDialog->dialog)->action_area),
                       button, FALSE, FALSE, 0);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
                       GTK_SIGNAL_FUNC (CancelDialog), (gpointer) errorDialog->dialog);
-  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);                               
+  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
   gtk_widget_grab_default (button);
   gtk_widget_show (button);
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (GTK_DIALOG (errorDialog->dialog)->vbox), hbox);
   gtk_widget_show (hbox);
-  
+
   if (window)
   {
     pixmap = NewPixmap (stop_xpm, window->window,
@@ -165,25 +257,56 @@ void CreateErrorDialog (ErrorDialog *errorDialog, GtkWidget *window)
     gtk_box_pack_start (GTK_BOX(hbox), pixmap, FALSE, FALSE, 10);
     gtk_widget_show (pixmap);
   }
-  
+
   errorDialog->text = gtk_label_new ("");
   gtk_box_pack_start (GTK_BOX(hbox), errorDialog->text, FALSE, FALSE, 10);
   gtk_widget_show (errorDialog->text);
 }
 
+
+void CreateInfoDialog (InfoDialog *infoDialog, GtkWidget *window)
+{
+  GtkWidget *hbox, *pixmap;
+
+  infoDialog->dialog = gtk_dialog_new ();
+  gtk_window_set_title (GTK_WINDOW (infoDialog->dialog), _("Info"));
+  gtk_window_set_modal (GTK_WINDOW (infoDialog->dialog), TRUE);
+  gtk_window_position (GTK_WINDOW (infoDialog->dialog), GTK_WIN_POS_MOUSE);
+  gtk_container_set_border_width (GTK_CONTAINER (infoDialog->dialog), 5);
+  gtk_signal_connect (GTK_OBJECT (infoDialog->dialog), "delete_event",
+                      GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (GTK_DIALOG (infoDialog->dialog)->vbox), hbox);
+  gtk_widget_show_now (hbox);
+  
+  if (window)
+  {
+    pixmap = NewPixmap (info_xpm, window->window,
+                        &window->style->bg[GTK_STATE_NORMAL]);
+    gtk_box_pack_start (GTK_BOX(hbox), pixmap, FALSE, FALSE, 10);
+    gtk_widget_show_now (pixmap);
+  }
+
+  infoDialog->text = gtk_label_new ("");
+  gtk_box_pack_start (GTK_BOX(hbox), infoDialog->text, FALSE, FALSE, 10);
+  gtk_widget_show_now (infoDialog->text);
+}
+
+
 void CreateYesNoDialog (YesNoDialog *yesNoDialog, const GtkSignalFunc yesFunc,
                         const GtkSignalFunc noFunc, GtkWidget *window)
 {
   GtkWidget *button, *hbox, *pixmap;
-  
+
   yesNoDialog->dialog = gtk_dialog_new ();
   gtk_window_position (GTK_WINDOW (yesNoDialog->dialog), GTK_WIN_POS_MOUSE);
   gtk_window_set_modal (GTK_WINDOW (yesNoDialog->dialog), TRUE);
   gtk_container_set_border_width (GTK_CONTAINER (yesNoDialog->dialog), 5);
   gtk_signal_connect (GTK_OBJECT (yesNoDialog->dialog), "delete_event",
                       GTK_SIGNAL_FUNC (DeleteEvent), NULL);
-    
-  
+
+
   button = gtk_button_new_with_label (_("Yes"));
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (yesNoDialog->dialog)->action_area),
                       button, FALSE, TRUE, 0);
@@ -218,30 +341,32 @@ void CreateYesNoDialog (YesNoDialog *yesNoDialog, const GtkSignalFunc yesFunc,
     gtk_box_pack_start (GTK_BOX (hbox), pixmap, FALSE, FALSE, 10);
     gtk_widget_show (pixmap);
   }
-  
+
   yesNoDialog->text = gtk_label_new ("");
   gtk_box_pack_start (GTK_BOX (hbox), yesNoDialog->text, FALSE, FALSE, 10);
   gtk_widget_show (yesNoDialog->text);
 }
+
 
 GtkWidget* NewPixmap (gchar **data, GdkWindow *window, GdkColor *background)
 {
   GtkWidget *wpixmap;
   GdkPixmap *pixmap;
   GdkBitmap *mask;
-                              
+
   pixmap = gdk_pixmap_create_from_xpm_d (window, &mask, background, data);
-  
+
   wpixmap = gtk_pixmap_new (pixmap, mask);
-  
+
   return wpixmap;
 }
+
 
 gint LaunchProcess (const gchar *p, const gchar *arg, const gint infile,
                     const gint outfile, const gint errfile)
 {
   pid_t pid;
-  
+
   if (p == 0)
     return (1);
   pid = fork ();
@@ -253,14 +378,14 @@ gint LaunchProcess (const gchar *p, const gchar *arg, const gint infile,
     setpgid (pid, pid);
     if (getuid () != geteuid ())
       seteuid (getuid ());
-      
+
     signal (SIGINT, SIG_DFL);
     signal (SIGQUIT, SIG_DFL);
     signal (SIGTSTP, SIG_DFL);
     signal (SIGTTIN, SIG_DFL);
     signal (SIGTTOU, SIG_DFL);
     signal (SIGCHLD, SIG_DFL);
-    
+
     if (infile != STDIN_FILENO)
     {
       dup2 (infile, STDIN_FILENO);
@@ -276,28 +401,30 @@ gint LaunchProcess (const gchar *p, const gchar *arg, const gint infile,
       dup2 (errfile, STDERR_FILENO);
       close (errfile);
     }
-    
+
     execlp (p, p, arg, NULL);
     g_print (_("Can't exec %s\n"), p);
     execlp ("/bin/false", p, NULL);
     return (-1);
   }
-  
+
   setpgid (pid, pid);
   return (0);
 }
 
+
 void RemoveZombie (const gint sign)
 {
   gint status;
-  
+
   wait (&status);
 }
+
 
 void Help (const GtkWidget *w, const gpointer data)
 {
   gchar buf[255] = "file:";
-  
+
   strncat (buf, xgnokiiConfig.xgnokiidir, 255 - strlen (buf));
   buf[254] = '\0';
   strncat (buf, (gchar *) data, 255 - strlen (buf));
@@ -305,16 +432,17 @@ void Help (const GtkWidget *w, const gpointer data)
   LaunchProcess (xgnokiiConfig.helpviewer, buf, STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
 }
 
+
 inline gint strrncmp (const gchar * const s1, const gchar * const s2, size_t n)
 {
   gint l1 = strlen (s1);
   gint l2 = strlen (s2);
-  
+
   if (l1 == 0 && l2 != 0)
     return (-1);
   else if (l1 != 0 && l2 == 0)
     return (1);
-    
+
   while (l1-- > 0 && l2-- > 0 && n-- > 0)
   {
     if (s1[l1] < s2[l2])
@@ -322,6 +450,13 @@ inline gint strrncmp (const gchar * const s1, const gchar * const s2, size_t n)
     else if (s1[l1] > s2[l2])
       return (1);
   }
-  
+
   return (0);
+}
+
+
+inline void GUI_Refresh (void)
+{
+  while (gtk_events_pending())
+    gtk_main_iteration();
 }

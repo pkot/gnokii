@@ -1,0 +1,166 @@
+/*
+
+  X G N O K I I
+
+  A Linux/Unix GUI for Nokia mobile phones.
+  Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
+  & Ján Derfiòák <ja@mail.upjs.sk>.
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+  Last modification: Sun Apr 30 2000
+  Modified by Jan Derfinak
+
+*/
+
+#ifndef XGNOKII_LOWLEVEL_H
+#define XGNOKII_LOWLEVEL_H
+
+#include <pthread.h>
+#include <glib.h>
+#include "gsm-common.h"
+
+#define INCALL_NUMBER_LENGTH	20
+#define NETMON_SCREEN_LENGTH	60
+
+typedef enum {
+  CS_Idle,
+  CS_Waiting,
+  CS_InProgress
+} CallState;
+
+typedef enum {
+  Event_GetMemoryStatus,
+  Event_GetMemoryLocation,
+  Event_GetMemoryLocationAll,
+  Event_WriteMemoryLocation,
+  Event_WriteMemoryLocationAll,
+  Event_GetCallerGroup,
+  Event_SendCallerGroup,
+  Event_GetSMSCenter,
+  Event_SetSMSCenter,
+  Event_SendSMSMessage,
+  Event_DeleteSMSMessage,
+  Event_GetSpeedDial,
+  Event_SendSpeedDial,
+  Event_SendDTMF,
+  Event_NetMonitorOnOff,
+  Event_NetMonitor,
+  Event_DialVoice,
+  Event_GetAlarm,
+  Event_SetAlarm,
+  Event_SendKeyStroke,
+  Event_Exit
+} PhoneAction;
+
+typedef struct {
+  PhoneAction event;
+  gpointer    data;
+} PhoneEvent;
+
+typedef struct {
+  GSM_SpeedDial entry;
+  GSM_Error status;
+} D_SpeedDial;
+
+typedef struct {
+  GSM_SMSMessage *sms;
+  GSM_Error status;
+} D_SMSMessage;
+
+typedef struct {
+  GSM_MessageCenter *center;
+  GSM_Error status;
+} D_SMSCenter;
+
+typedef struct {
+  guchar number;
+  gchar  text[256];
+  gint   status;
+} D_CallerGroup;
+
+typedef struct {
+  GSM_DateTime time;
+  gint status;
+} D_Alarm;
+
+typedef struct {
+  GSM_MemoryStatus memoryStatus;
+  gint status;
+} D_MemoryStatus;
+
+typedef struct {
+  GSM_PhonebookEntry *entry;
+  gint status;
+} D_MemoryLocation;
+
+typedef struct {
+  gint min;
+  gint max;
+  GSM_MemoryType type;
+  gint status;
+  gint (*InsertEntry)(GSM_PhonebookEntry *);
+  gint (*ReadFailed)(gint);
+} D_MemoryLocationAll;
+
+typedef struct {
+  gfloat rfLevel;
+  gfloat batteryLevel;
+  GSM_PowerSource powerSource;
+  bool working;
+  bool alarm;
+  struct {
+    gchar *model;
+    gchar *imei;
+    gchar *revision;
+    gchar *version;
+  } phone;
+  struct {
+    gint    unRead;
+    gint    number;
+    GSList *messages;
+  } sms;
+  struct {
+    CallState callInProgress;
+    gchar     callNum[INCALL_NUMBER_LENGTH];
+  } call;
+  struct {
+    gint  number;
+    gchar screen[NETMON_SCREEN_LENGTH];
+    gchar screen3[NETMON_SCREEN_LENGTH];
+    gchar screen4[NETMON_SCREEN_LENGTH];
+    gchar screen5[NETMON_SCREEN_LENGTH];
+  } netmonitor;
+  struct {
+    bool callerGroups:1;
+    bool sms:1;
+    bool netMonitor:1;
+    bool dtmf:1;
+    bool speedDial:1;
+    bool keyboard:1;
+    bool calendar:1;
+  } supported;
+} PhoneMonitor;
+
+extern pthread_t monitor_th;
+extern PhoneMonitor phoneMonitor;
+extern pthread_mutex_t memoryMutex;
+extern pthread_cond_t  memoryCond;
+extern pthread_mutex_t smsMutex;
+extern pthread_mutex_t sendSMSMutex;
+extern pthread_cond_t  sendSMSCond;
+extern pthread_mutex_t callMutex;
+extern pthread_mutex_t netMonMutex;
+extern pthread_mutex_t speedDialMutex;
+extern pthread_cond_t  speedDialCond;
+extern pthread_mutex_t callerGroupMutex;
+extern pthread_cond_t  callerGroupCond;
+extern pthread_mutex_t smsCenterMutex;
+extern pthread_cond_t  smsCenterCond;
+extern pthread_mutex_t alarmMutex;
+extern pthread_cond_t  alarmCond;
+extern void GUI_InitPhoneMonitor (void);
+extern void *GUI_Connect (void *a);
+extern void GUI_InsertEvent (PhoneEvent *event);
+
+#endif

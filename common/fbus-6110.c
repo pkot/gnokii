@@ -2563,7 +2563,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       */
 
     case 0x03:
-
+    
+/* JD: I think that this means "call in progress" (incomming or outgoing) */
 #ifdef DEBUG
       fprintf(stdout, _("Message: Call message, type 0x03:"));
       fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);

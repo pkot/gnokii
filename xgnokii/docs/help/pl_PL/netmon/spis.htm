@@ -1,0 +1,126 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<meta name="Author" content="Marcin Wiącek">
+<title>Strona Marcina - spis treci</title>
+<STYLE TYPE='text/css'><!--
+<!-- style z www.fkn.pl -->
+<!-- nieznacznie zmienione na potrzeby -->
+<!-- strony Marcina Wiącka (www.marcin-wiacek.topnet.pl) -->
+BODY {font-family: Arial, Helvetica; margin-left:0pt; margin-right:0pt; margin-top:0pt; margin-bottom:0pt; font-weight: normal; font-size:10pt; text-decoration: none; color:#2B2B69}
+P {font-family: Arial, Helvetica; font-weight: normal; font-size:10pt; text-decoration: none; color:#2B2B69}
+font.menu {font-family: Arial, Helvetica; font-weight: bold; font-size:8pt; text-decoration: none; color:#2B2B69}
+a.menu {font-family: Arial, Helvetica; font-weight: bold; font-size:8pt; text-decoration: none; color:#525FF5}
+a.menu:hover {font-family: Arial, Helvetica; font-weight: bold; font-size:8pt; text-decoration: underline; color:#1F409F}
+a.menu:active {font-family: Arial, Helvetica; font-weight: bold; font-size:8pt; text-decoration: underline; color:#2FA030}
+--></STYLE>
+<SCRIPT LANGUAGE=JavaScript>
+var ie=(document.all)?true:false;var nn=(document.layers)?true:false;
+function cache()
+{var wynik=0;if (top.frames.length==2 && top.frames[0].document.title=='Spis tresci - gora')
+{if (!top.frames[0].cache_spis) {wynik=1} else {wynik=2}}return wynik}
+function minit(ilosc) {for (i=0;i<ilosc;++i) this[i]=0;this.length=ilosc;return this}
+function mpos() {this.visibility='none'}
+function mclick(nr)
+{if (ie) {eval("var object=document.all('nr"+nr+"');");
+if (object.style.display=='none')
+{object.style.display=''; document.images[nr].src='dir1.gif'} else
+{object.style.display='none'; document.images[nr].src='dir0.gif'}
+if (cache()==2) {top.frames[0].cache_sp[nr].visibility=object.style.display}}}
+function zwin ()
+{if (ie){if (cache()==1){top.frames[0].cache_sp=new minit(document.images.length);
+for (i=0;i<document.images.length;++i) {top.frames[0].cache_sp[i]=new mpos()}top.frames[0].cache_spis=true}
+if (cache()==2) {for (i=0;i<document.images.length;++i) {if (document.images[i].src.indexOf('dir1.gif')!=-1 && top.frames[0].cache_sp[i].visibility=='none') mclick(i)}}
+else {for (i=0;i<document.images.length;++i) {if (document.images[i].src.indexOf('dir1.gif')!=-1) mclick(i)}}}}
+function ld(nr,n) {window.status=n} function lo() {window.status=''}</SCRIPT>
+<SCRIPT LANGUAGE=JavaScript1.2>
+if (nn) {document.onmousemove=mouseMove;document.captureEvents(Event.MOUSEMOVE)}
+function mouseMove(e)
+{if (nn) {obj.top=e.pageY+14}}
+function ld(nr,n)
+{if (nn) {var lyr=document.Popup.document;lyr.write("<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0><TR><TD BGCOLOR=#000000 COLSPAN=5 HEIGHT=1><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD></TR><TR><TD WIDTH=1 BGCOLOR=#000000><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD><TD WIDTH=2 BGCOLOR=#FFFFDF><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD><TD BGCOLOR=#FFFFDF>"+n+"</TD><TD WIDTH=2 BGCOLOR=#FFFFDF><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD><TD WIDTH=1 BGCOLOR=#000000><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD></TR><TR><TD HEIGHT=1 COLSPAN=5 BGCOLOR=#000000><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD></TR></TABLE>");lyr.close();obj.visibility="visible"}
+if (ie) {document.links[nr+1].title=n}
+window.status=n}
+function lo() {if (nn) obj.visibility='hidden';window.status=''}</SCRIPT>
+</head>
+<body bgcolor="#FFFFFF" text="#2B2B69" link="#525FF5" vlink="#525FF5" alink="#2FA030">
+<div id='Popup' style='position:absolute;visibility:hidden'></div>
+<SCRIPT LANGUAGE=JavaScript1.2>
+if (nn) var obj=document.layers['Popup'];</SCRIPT>
+<font name='Arial, Helvetica'><nobr>
+<SCRIPT LANGUAGE=JavaScript1.2>
+if (ie && cache()!=0)
+ {var tekst="Kliknij, aby zakotwiczyc menu";var tekst2='';
+  if (top.frames[1].location.href.indexOf('spis_d.htm')!=-1) {tekst="Kliknij, aby usunac menu"}
+  document.write("<a class=menu onmouseover='window.status=tekst;return true' onmouseout='window.status=tekst2;return true' href=javascript:top.frames[0].fl()>"+tekst+"</a><hr width=100%>")}
+</SCRIPT>
+<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(0,'Strona glowna');return true" onmouseout="lo();return true" class=menu target=main HREF=glowna.htm>Strona główna</A><BR>
+<img SRC="dir1.gif" height=16 width=16>&nbsp;<a onmouseover="window.status=''; return true" class=menu href=javascript:mclick(1)>NOKIA I GSM</a><br><font id=nr1>
+&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(2,'Identyfikacja i oprogramowanie telefonow Nokia (4 maja 2000)');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/firmware.htm>Identyfikacja i oprogramowanie telefonów Nokia (4 maja 2000)</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="dir1.gif" height=16 width=16>&nbsp;<a onmouseover="window.status=''; return true" class=menu href=javascript:mclick(3)>Kable (4 maja 2000)</a><br><font id=nr3>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(4,'Jakie sa rodzaje kabli do telefonow Nokia ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faqkable.htm#1>Jakie są rodzaje kabli do telefonów Nokia ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(5,'Czy sie roznia ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faqkable.htm#2>Czy się różnią ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(6,'Jak je rozpoznac ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faqkable.htm#3>Jak je rozpoznać ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(7,'Gdzie moge znalezc ich schematy ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faqkable.htm#4>Gdzie mogę znaleźć ich schematy ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(8,'Czy moge przerobic kabel FBUS na MBUS ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faqkable.htm#5>Czy mogę przerobić kabel FBUS na MBUS ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(9,'Gdzie i za ile moge kupic gotowy kabel ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faqkable.htm#6>Gdzie i za ile mogę kupić gotowy kabel ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(10,'Gdzie znajde protokoly transmisji ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faqkable.htm#7>Gdzie znajdę protokoły transmisji ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(11,'Podczas proby polaczenia z telefonem otrzymuje komunikaty &quot;Zla suma kontrolna&quot; (&quot;Bad checksum&quot;) albo podobne...');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faqkable.htm#8>Podczas próby połączenia z telefonem otrzymuję komunikaty &quot;Zła suma kontrolna&quot; (&quot;Bad checksum&quot;) albo podobne...</A><BR>
+</font>
+&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="dir1.gif" height=16 width=16>&nbsp;<a onmouseover="window.status=''; return true" class=menu href=javascript:mclick(12)>Loga operatora (4 maja 2000)</a><br><font id=nr12>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(13,'Co to jest ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#1>Co to jest ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(14,'Czy moj telefon moze je wyswietlac ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#2>Czy mój telefon może je wyświetlać ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(15,'Co potrzeba do stworzenia loga ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#3>Co potrzeba do stworzenia loga ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(16,'Gdzie w Internecie mozna znalezc gotowe loga ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#4>Gdzie w Internecie można znaleźć gotowe loga ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(17,'W jaki sposob mozna przeslac logo do telefonu ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#5>W jaki sposób można przesłać logo do telefonu ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(18,'Przeglad dostepnych programow do edycji/wysylania log');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#6>Przegląd dostępnych programów do edycji/wysyłania log</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(19,'Dlaczego nie moge zainstalowac programow Thomasa Kesslera (pokazuje sie Runtime error) ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#7>Dlaczego nie mogę zainstalować programów Thomasa Kesslera (pokazuje się 'Runtime error') ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(20,'Dlaczego nie moge zainstalowac programu Logo Express (blad rejestracji bibliotek) ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#8>Dlaczego nie mogę zainstalować programu Logo Express (błąd rejestracji bibliotek) ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(21,'Jak skonfigurowac programy ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#9>Jak skonfigurować programy ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(22,'Przesylanie log przy uzyciu konkretnych programow');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#10>Przesyłanie log przy użyciu konkretnych programów</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(23,'Dlaczego nie moge go po prostu przeslac kablem (we wszystkich modelach) ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#11>Dlaczego nie mogę go po prostu przesłać kablem (we wszystkich modelach) ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(24,'Czy moge je wyslac przez Internet albo modem ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#12>Czy mogę je wysłać przez Internet albo modem ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(25,'Dlaczego nie moge go przeslac uzywajac tego centrum wiadomosci SMS co zawsze ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#13>Dlaczego nie mogę go przesłać używając tego centrum wiadomości SMS co zawsze ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(26,'Jak zapisac logo w pamieci telefonu ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#14>Jak zapisać logo w pamięci telefonu ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(27,'Chce wykasowac moje logo !');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#15>Chcę wykasować moje logo !</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(28,'Czy moge skopiowac logo z pamieci telefonu do komputera ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#16>Czy mogę skopiować logo z pamięci telefonu do komputera ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(29,'Moj notebook ze zlaczem podczerwieni nie chce dzialac...');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#17>Mój notebook ze złączem podczerwieni nie chce działać...</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(30,'Jak przesylac loga do Nokii 3210 ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#18>Jak przesyłać loga do Nokii 3210 ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(31,'Czy wgranie loga operatora narusza warunki gwarancji ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#19>Czy wgranie loga operatora narusza warunki gwarancji ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(32,'Przy probie bezposredniego wgrania loga przez kabel (albo jego wykasowania) programem LogoManager nic sie nie dzieje...');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#20>Przy próbie bezpośredniego wgrania loga przez kabel (albo jego wykasowania) programem LogoManager nic się nie dzieje...</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(33,'Jak skopiowac logo z telefonu do telefonu ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#21>Jak skopiować logo z telefonu do telefonu ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(34,'Dodatkowe informacje');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_loga.htm#22>Dodatkowe informacje</A><BR>
+</font>
+&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="dir1.gif" height=16 width=16>&nbsp;<a onmouseover="window.status=''; return true" class=menu href=javascript:mclick(35)>Monitor sieci (4 maja 2000)</a><br><font id=nr35>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(36,'Co to jest ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#1>Co to jest ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(37,'Czy jest mi potrzebny ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#2>Czy jest mi potrzebny ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(38,'Czy po wlaczeniu monitora telefon pobiera wiecej energii ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#3>Czy po włączeniu monitora telefon pobiera więcej energii ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(39,'Jak go wlaczyc ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#4>Jak go włączyć ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(40,'Jaka wersje monitora moge wlaczyc w telefonie ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#5>Jaką wersję monitora mogę włączyć w telefonie ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(41,'Czy wlaczenie monitora powoduje utrate gwarancji ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#6>Czy włączenie monitora powoduje utratę gwarancji ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(42,'W moim telefonie menu monitora ma numer inny niz 10. Czy to normalne ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#7>W moim telefonie menu monitora ma numer inny niż 10. Czy to normalne ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(43,'W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#8>W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(44,'Jak sie nim poslugiwac ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#9>Jak się nim posługiwać ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(45,'Czy moge zepsuc sobie telefon ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#10>Czy mogę zepsuć sobie telefon ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(46,'Slowniczek');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net1.htm#11>Słowniczek</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(47,'Znaczenie poszczegolnych testow');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net2.htm#12>Znaczenie poszczególnych testów</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(48,'Mozna tez uzyc programu...');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#13>Można też użyć programu...</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(49,'Czy mozna korzystac z monitora sieci, gdy nie w telefonie karty SIM (nie zostal podany jej PIN) ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#14>Czy można korzystać z monitora sieci, gdy nie w telefonie karty SIM (nie został podany jej PIN) ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(50,'W jaki sposob moge wylaczyc monitor sieci ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#15>W jaki sposób mogę wyłączyć monitor sieci ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(51,'Czy powinienem wylaczyc monitor sieci przed oddaniem telefonu do serwisu ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#16>Czy powinienem wyłączyć monitor sieci przed oddaniem telefonu do serwisu ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(52,'Czy po wylaczeniu monitora sieci bede go mogl wlaczyc ponownie ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#17>Czy po wyłączeniu monitora sieci będę go mógł włączyć ponownie ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(53,'Czy monitor sieci jest dostepny takze w analogowych Nokiach ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#18>Czy monitor sieci jest dostępny także w analogowych Nokiach ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(54,'Czy monitor sieci pozwoli na uzywanie telefonu podobnie jak radiostacji ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#19>Czy monitor sieci pozwoli na używanie telefonu podobnie jak radiostacji ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(55,'Dlaczego w moim telefonie jest znacznie mniej testow niz zostalo tutaj opisane ? Czy moge zwiekszyc ich ilosc ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#20>Dlaczego w moim telefonie jest znacznie mniej testów niż zostało tutaj opisane ? Czy mogę zwiększyć ich ilość ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(56,'Czy moge stwierdzic z pomoca monitora sieci, gdzie znajduje sie moj rozmowca ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#21>Czy mogę stwierdzić z pomocą monitora sieci, gdzie znajduje się mój rozmówca ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(57,'Czy moge stwierdzic z pomoca monitora sieci, gdzie sie znajduje ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#22>Czy mogę stwierdzić z pomocą monitora sieci, gdzie się znajduję ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(58,'Co to sa kody monitora sieci ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#23>Co to są kody monitora sieci ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(59,'Czy jest prawda, ze monitor sieci w telefonie z dodatkowym urzadzeniem zmieniajacym jego pasmo dziala niepoprawnie ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#24>Czy jest prawdą, że monitor sieci w telefonie z dodatkowym urządzeniem zmieniającym jego pasmo działa niepoprawnie ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(60,'Gdzie znajde opis protokolu MBUS/FBUS i komendy zwiazane z monitorem sieci ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#25>Gdzie znajdę opis protokołu MBUS/FBUS i komendy związane z monitorem sieci ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(61,'Uzyte materialy');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#literatura>Użyte materiały</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(62,'Dodatkowe informacje');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#27>Dodatkowe informacje</A><BR>
+</font>
+</font>
+</font>
+<SCRIPT>zwin();</SCRIPT>
+</nobr></font></body></html>

@@ -32,5 +32,9 @@
 * Mon May  1 14:48:52 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - more FreeBSD-help stuff in the build process
 
+* Mon May  2 15:16:06 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>                  
+- added checking for cp command in configure.in and defined CP in               
+  Makefile.global.in
+
 * Thu May  4, 2000 12:35 PM Pavel Janík ml. <Pavel.Janik@linux.cz>
 - ${MAKE} in configure.in not make

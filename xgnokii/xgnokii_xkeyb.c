@@ -13,13 +13,13 @@
 
 */
 
-#include <stdio.h>
+#include <string.h>
 #include <gtk/gtk.h>
 #include "misc.h"
 #include "fbus-6110.h"
-#include "gsm-api.h"
 #include "xgnokii_common.h"
 #include "xgnokii.h"
+#include "xgnokii_lowlevel.h"
 #include "xgnokii_xkeyb.h"
 
 typedef struct {
@@ -62,8 +62,8 @@ static ButtonT button_6110[50] = {
 
 static ButtonT button_6150[50] = {
   {  99,  78, 114,  93, 0x0d }, /* Power */
-  {  20, 224,  49, 245, 0x19 }, /* Menu */
-  {  90, 245, 120, 223, 0x1a }, /* Names */
+  {  20, 223,  49, 245, 0x19 }, /* Menu */
+  {  90, 223, 120, 245, 0x1a }, /* Names */
   {  59, 230,  83, 247, 0x17 }, /* Up */
   {  56, 249,  84, 265, 0x18 }, /* Down */
   {  14, 254,  51, 273, 0x0e }, /* Green */
@@ -85,10 +85,14 @@ static ButtonT button_6150[50] = {
   {   0,   0,   0,   0, 0x00 }
 };
 
+
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  Help (w, _("/help/xkeyb.html"));
+  gchar *indx = g_strdup_printf ("/help/%s/xkeyb.html", xgnokiiConfig.locale);
+  Help (w, indx);
+  g_free (indx);
 }
+
 
 static GtkWidget *GetPixmap (void)
 {
@@ -96,25 +100,25 @@ static GtkWidget *GetPixmap (void)
   GdkPixmap *pixmap;
   GdkBitmap *mask;
   gchar *file;
-  
-  if (!strcmp (xgnokiiConfig.phoneModel, "6110") ||
-      !strcmp (xgnokiiConfig.phoneModel, "6120"))
+
+  if (!strcmp (phoneMonitor.phone.model, "6110") ||
+      !strcmp (phoneMonitor.phone.model, "6120"))
   {
     button = button_6110;
     file = g_strdup_printf ("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/6110.xpm");
   }
-  else if (!strcmp (xgnokiiConfig.phoneModel, "6130") ||
-      !strcmp (xgnokiiConfig.phoneModel, "6150") ||
-      !strcmp (xgnokiiConfig.phoneModel, "616x") ||
-      !strcmp (xgnokiiConfig.phoneModel, "6185") ||
-      !strcmp (xgnokiiConfig.phoneModel, "6190"))
+  else if (!strcmp (phoneMonitor.phone.model, "6130") ||
+      !strcmp (phoneMonitor.phone.model, "6150") ||
+      !strcmp (phoneMonitor.phone.model, "616x") ||
+      !strcmp (phoneMonitor.phone.model, "6185") ||
+      !strcmp (phoneMonitor.phone.model, "6190"))
   {
     button = button_6150;
     file = g_strdup_printf ("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/6150.xpm");
   }
   else
     return NULL;
-    
+
   pixmap = gdk_pixmap_create_from_xpm (pixArea->window, &mask,
                                        &pixArea->style->bg[GTK_STATE_NORMAL],
                                        file);
@@ -127,11 +131,13 @@ static GtkWidget *GetPixmap (void)
   
   return wpixmap;
 }
-  
+
+
 static inline void CloseXkeyb (GtkWidget *w, gpointer data)
 {
   gtk_widget_hide (GUI_XkeybWindow);
 }
+
 
 void GUI_ShowXkeyb (void)
 {
@@ -153,14 +159,15 @@ void GUI_ShowXkeyb (void)
   gtk_widget_show (GUI_XkeybWindow);
 }
 
+
 static gint ButtonEvent (GtkWidget *widget, GdkEventButton *event)
 {
   unsigned char req[] = {FB61_FRAME_HEADER, 0x42, 0x01, 0x00, 0x01};
   register gint i = 0;
-  
+
   if (button == NULL)
     return TRUE;
-  
+
   if (event->button != 1)
     return TRUE;
 
@@ -175,11 +182,14 @@ static gint ButtonEvent (GtkWidget *widget, GdkEventButton *event)
     if (button[i].top_left_x <= event->x &&
 	event->x <= button[i].bottom_right_x &&
 	button[i].top_left_y <= event->y &&
-	event->y <= button[i].bottom_right_y) {
-
+	event->y <= button[i].bottom_right_y)
+    {
+      PhoneEvent *e = g_malloc (sizeof (PhoneEvent));
+      
       req[5]=button[i].code;
-      FB61_TX_SendMessage(0x07, 0x0c, req);
-
+      e->event = Event_SendKeyStroke;
+      e->data = g_memdup (req, sizeof (req));
+      GUI_InsertEvent (e);
     }
 
     i++;
@@ -187,6 +197,7 @@ static gint ButtonEvent (GtkWidget *widget, GdkEventButton *event)
 
   return TRUE;
 }
+
 
 static GtkItemFactoryEntry menu_items[] = {
   {NULL,	NULL,		NULL, 0, "<Branch>"},
@@ -204,7 +215,8 @@ static void InitMainMenu (void)
   menu_items[3].path = g_strdup (_("/Help/_Help"));
   menu_items[4].path = g_strdup (_("/Help/_About"));
 }
-  
+
+
 void GUI_CreateXkeybWindow (void)
 {
   int nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
@@ -212,7 +224,7 @@ void GUI_CreateXkeybWindow (void)
   GtkAccelGroup *accel_group;
   GtkWidget *menubar;
   GtkWidget *main_vbox;
-  
+
   InitMainMenu ();
   GUI_XkeybWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (GUI_XkeybWindow), _("XGnokii Keyboard"));
@@ -220,26 +232,26 @@ void GUI_CreateXkeybWindow (void)
   gtk_signal_connect (GTK_OBJECT (GUI_XkeybWindow), "delete_event",
                       GTK_SIGNAL_FUNC (DeleteEvent), NULL);
   gtk_widget_realize (GUI_XkeybWindow);
-  
+
   accel_group = gtk_accel_group_new ();
   item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", 
                                        accel_group);
-                                       
+
   gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
-  
+
   gtk_accel_group_attach (accel_group, GTK_OBJECT (GUI_XkeybWindow));
-  
+
   /* Finally, return the actual menu bar created by the item factory. */ 
   menubar = gtk_item_factory_get_widget (item_factory, "<main>");
-    
+
   main_vbox = gtk_vbox_new (FALSE, 1);
   gtk_container_border_width (GTK_CONTAINER (main_vbox), 1);
   gtk_container_add (GTK_CONTAINER (GUI_XkeybWindow), main_vbox);
   gtk_widget_show (main_vbox);
-  
+
   gtk_box_pack_start (GTK_BOX (main_vbox), menubar, FALSE, FALSE, 0);
   gtk_widget_show (menubar);
-  
+
   pixArea = gtk_fixed_new ();
   gtk_signal_connect (GTK_OBJECT (pixArea), "button_press_event",
 		      (GtkSignalFunc) ButtonEvent, NULL);
@@ -254,6 +266,6 @@ void GUI_CreateXkeybWindow (void)
 
   gtk_box_pack_start (GTK_BOX (main_vbox), pixArea, FALSE, FALSE, 3);
   gtk_widget_show (pixArea);
-  
+
   CreateErrorDialog (&errorDialog, GUI_XkeybWindow);
 }

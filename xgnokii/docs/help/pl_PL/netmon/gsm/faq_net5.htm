@@ -1,0 +1,1994 @@
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+   <meta name="Author" content="Marcin Wiącek">
+   <meta name="Description" content="FAQ dotyczący monitora sieci w Nokiach (NOKIA NetMonitor description)">
+   <meta name="language" content="pl">
+   <meta name="revisit-after" content="15 days">
+   <meta name="Robots" content="all">
+   <meta name="KeyWords" content="3110, 9110, GSM, DCS, Nokia, 3210, 5110, 5130, 6110, 6130, 6150, 8810, FAQ, NetMonitor, monitor sieci, Marcin, Wiącek, Wiacek, Marcin Wiącek, Marcin Wiacek">
+   <title>FAQ - monitor sieci w Nokiach (część 6/7)</title>
+   <link rel="stylesheet" href="../styl.css" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" text="#2B2B69" link="#525FF5" vlink="#525FF5" alink="#2FA030">
+
+<font class="drukuj">
+<p align="RIGHT"><a class="autoremail" href="../glowna.htm">Strona główna</a></p>
+</font>
+<center><font color="#1F409F" size=+2 class="tytul">Monitor sieci w telefonach Nokia (6/7)</font>
+<font class="drukuj">
+<p><a href="faq_net0.htm">[Część 1]</a><a href="faq_net1.htm">[Część 2]</a><a href="faq_net2.htm">[Część 3]</a><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><b>[Część 6]</b><a href="faq_net6.htm">[Część 7]</a>
+</font>
+</center>
+
+<hr noshade width="60%" style="color: #004080" align=center>
+<a NAME="Top"></a>
+
+<font class="drukuj">
+<ol>
+<li><a href="faq_net0.htm#1"><b>Co to jest ?</b></a></li>
+<li><a href="faq_net0.htm#2"><b>Czy jest mi potrzebny ?</b></a></li>
+<li><a href="faq_net0.htm#3"><b>Czy po włączeniu monitora telefon pobiera więcej energii ?</b></a></li>
+<li><a href="faq_net0.htm#4"><b>Jak go włączyć ?</b></a></li>
+<li><a href="faq_net0.htm#5"><b>Jaką wersję monitora mogę włączyć w telefonie ?</b></a></li>
+<li><a href="faq_net0.htm#6"><b>Czy włączenie monitora powoduje utratę gwarancji ?</b></a></li>
+<li><a href="faq_net0.htm#7"><b>W moim telefonie menu monitora ma numer inny niż 10. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#8"><b>W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#9"><b>Jak się nim posługiwać ?</b></a></li>
+<li><a href="faq_net0.htm#10"><b>Czy mogę zepsuć sobie telefon ?</b></a></li>
+<li><a href="faq_net1.htm#11"><b>Słowniczek</b></a></li>
+<li><a href="faq_net2.htm#12"><b>Znaczenie poszczególnych testów</b></a></li>
+<li><a href="faq_net6.htm#13"><b>Można też użyć programu...</b></a></li>
+<li><a href="faq_net6.htm#14"><b>Czy można korzystać z monitora sieci, gdy nie ma w telefonie karty SIM, nie został podany jej PIN lub jest nieaktywna ?</b></a></li>
+<li><a href="faq_net6.htm#15"><b>W jaki sposób mogę wyłączyć monitor sieci ?</b></a></li>
+<li><a href="faq_net6.htm#16"><b>Czy powinienem wyłączyć monitor sieci przed oddaniem telefonu do serwisu ?</b></a></li>
+<li><a href="faq_net6.htm#17"><b>Czy po wyłączeniu monitora sieci będę go mógł włączyć ponownie ?</b></a></li>
+<li><a href="faq_net6.htm#18"><b>Czy monitor sieci jest dostępny także w analogowych Nokiach ?</b></a></li>
+<li><a href="faq_net6.htm#19"><b>Czy monitor sieci pozwoli na używanie telefonu podobnie jak radiostacji ?</b></a></li>
+<li><a href="faq_net6.htm#20"><b>Dlaczego w moim telefonie jest znacznie mniej testów niż zostało tutaj opisane ? Czy mogę zwiększyć ich ilość ?</b></a></li>
+<li><a href="faq_net6.htm#21"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie znajduje się mój rozmówca ?</b></a></li>
+<li><a href="faq_net6.htm#22"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie się znajduję ?</b></a></li>
+<li><a href="faq_net6.htm#23"><b>Co to są kody monitora sieci ?</b></a></li>
+<li><a href="faq_net6.htm#24"><b>Czy jest prawdą, że monitor sieci w telefonie z dodatkowym urządzeniem zmieniającym jego pasmo działa niepoprawnie ?</b></a></li>
+<li><a href="faq_net6.htm#25"><b>Gdzie znajdę opis protokołu MBUS/FBUS i komendy związane z monitorem sieci ?</b></a></li>
+<li><a href="faq_net6.htm#Literatura"><b>Użyte materiały</b></a></li>
+<li><a href="faq_net6.htm#27"><b>Dodatkowe informacje</b></a></li>
+</ol>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<p><a NAME="Menu58"></a><b>Menu 10-58</b>
+
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>384:02 &nbsp; &nbsp; &nbsp;<br>
+512:02<br>
+752:02<br>&nbsp;</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu59"></a><b>Menu 10-59</b>
+
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>
+0087<br>
+00 00 00 00&nbsp;<p>&nbsp;
+</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu60"></a><b>Menu 10-60</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;FIELD TEST&nbsp;<br>
+&nbsp; DISPLAY&nbsp;<br>
+&nbsp;COUNTERS&nbsp;<br>
+&nbsp;&nbsp; RESET</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Use menu to<br>
+reset field<br>
+test display<br>
+counters</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Przez bezpośrednie wejście do tego menu możesz wyzerować liczniki od
+<b><a href="#Menu41">Menu
+10-41</a></b> do <b><a href="#Menu43">Menu 10-43</a></b> i od <b><a href="#Menu61">Menu
+10-61</a></b> do <b><a href="#Menu66">Menu 10-66</a></b>.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Jeżeli wyzerujesz te liczniki na początku każdego miesiąca, to będziesz
+mógł(mogła) porównać ilość wysłanych <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a>
+(<b><a href="#Menu65">Menu 10-65</a></b>) i rozmów (<b><a href="#Menu63">Menu
+10-63</a></b>) z Twoim rachunkiem telefonicznym.
+Dodatkowo (w niektórych kartach prepaid - np. Tak-Tak) pobierana jest z góry
+opłata za wysłanie pewnej ilości <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a>
+- jeżeli wyzerujesz te liczniki na początku "cyklu", będzie wiedzieć, kiedy
+z Twojego konta zostaną odjęte kolejne pieniądze...
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu61"></a><b>Menu 10-61</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>NOPSW&nbsp; :aaaa<br>
+SYNCR&nbsp; :bbbb<br>
+RESELEC:cccc<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>PSWMesgCntr<br>
+SyncMeasCntr<br>
+CellReselCtr<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaa - licznik (szesnastkowy) zliczający komunikaty MDI_NO_PSW_FOUND
+z <a href="faq_net1.htm#DSP">DSP</a></li>
+
+<li>
+bbbb - licznik (dziesiętny) prób zmierzenia synchronizacji. Jeżeli przekroczy
+9999, pokazywane są cztery x.</li>
+
+<li>
+cccc - licznik (szesnastkowy) powtórnych wyborów komórki</li>
+</ul>
+
+<p>Wartości liczników są zapamiętywane przy wyłączaniu telefonu. Możesz je
+wyzerować używając <b><a href="#Menu60">Menu 10-60</a></b>. Są one zerowane,
+gdy osiągną wartości maksymalne.
+
+<p>W telefonach dualnych pojawi się takie <b>Menu 10-61</b>:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaaaa&nbsp; bbbbb<br>
+ccccc&nbsp; ddddd<br>
+eeeee&nbsp; fffff<br>
+ggggg&nbsp; hhhhh</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>NOPswGSM DCS<br>
+Sync GSM DCS<br>
+reselG>G D>D<br>
+reselG>D D>G</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaaa - dla GSM 900: licznik (dziesiętny) zliczający komunikaty MDI_NO_PSW_FOUND
+z <a href="faq_net1.htm#DSP">DSP</a></li>
+
+<li>
+bbbb - dla GSM 1800: licznik (dziesiętny) zliczający komunikaty MDI_NO_PSW_FOUND
+z <a href="faq_net1.htm#DSP">DSP</a></li>
+
+<li>
+ccccc - dla GSM 900: licznik (dziesiętny) prób zmierzenia synchronizacji.
+Jeżeli przekroczy 99999, pokazywane jest pięć x.</li>
+
+<li>
+ddddd - dla GSM 1800: licznik (dziesiętny) prób zmierzenia synchronizacji.
+Jeżeli przekroczy 99999, pokazywane jest pięć x.</li>
+
+<li>
+eeeee - licznik (dziesiątkowy) powtórnych wyborów komórki GSM 900 - GSM
+900</li>
+
+<li>
+fffff - licznik (dziesiątkowy) powtórnych wyborów komórki GSM 1800 - GSM
+1800</li>
+
+<li>
+ggggg - licznik (dziesiątkowy) powtórnych wyborów komórki GSM 900 - GSM
+1800</li>
+
+<li>
+hhhhh - licznik (dziesiątkowy) powtórnych wyborów komórki GSM 1800 - GSM
+900</li>
+</ul>
+
+<p>Wartości liczników są zapamiętywane przy wyłączaniu telefonu. Możesz je
+wyzerować używając <b><a href="#Menu60">Menu 10-60</a></b>. Są one zerowane,
+gdy osiągną wartości maksymalne.
+
+<p>W Nokii 6185/6188 jest on jeszcze inny:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+V<br>
+aaaaaaaaaaaa<br>
+bbbbbbbbbb<br>
+ccccccc
+</tt></td>
+</tr>
+</table>
+
+<ul>
+<li>aaaaaaaaaaaa - wersja oprogramowania telefonu</li>
+<li>bbbbbbbbbb - data oprogramowania telefonu</li>
+<li>ccccccc - oznaczenie kodowe telefonu (NSD-3AX)</li>
+</ul>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Ten telefon pokazuje te informacje również po użyciu kodu <b>*#837#</b>.
+Jeżeli chcesz się więcej dowiedzieć o wewnętrznym oprogramowaniu telefonów Nokia
+(różnice, wersje, itd.), kliknij <a href="firmware.htm">tutaj</a>.</td>
+</tr>
+</table>
+
+<p><a NAME="Menu62"></a><b>Menu 10-62</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;PSW&nbsp; :aaaa&nbsp;<br>
+&nbsp;SYNCR:bbbb<br>
+&nbsp;BCCH :cccc&nbsp;<br>
+&nbsp;BCCHE:dddd</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>NeghbrPSWCtr<br>
+SyncMeasCntr<br>
+BCCHMeasAtmp<br>
+BCCHExtMeAtm</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaa - ilość prób pomiarów PSW w sąsiednich komórkach</li>
+
+<li>
+bbbb - ilość prób zmierzenia synchronizacji w sąsiednich komórkach</li>
+
+<li>
+cccc - ilość prób pomiarów kanałów
+<a href="faq_net2.htm#BCCH">BCCH</a>
+(tzn. jakości transmisji z nimi) w sąsiednich komórkach (patrz opis <a href="faq_net1.htm#C1">C1</a>)</li>
+
+<li>
+dddd - ilość prób rozszerzonych pomiarów kanałów <a href="faq_net2.htm#BCCH">BCCH</a>
+(tzn. jakości transmisji z nimi) w sąsiednich komórkach (patrz opis <a href="faq_net1.htm#C1">C1</a>)</li>
+</ul>
+
+<p>Wartości liczników są zapamiętywane przy wyłączaniu telefonu. Możesz je
+wyzerować używając <b><a href="#Menu60">Menu 10-60</a></b>. Są one zerowane,
+gdy osiągną wartości maksymalne.
+
+<p>W Nokii 6185/6188 ten test wygląda inaczej:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>DSP ROM 2&nbsp; &nbsp;<br>
+VERS 430<br>
+BETA 0014<br>&nbsp;</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu63"></a><b>Menu 10-63</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp; aa&nbsp;&nbsp;&nbsp; bb<br>
+&nbsp; ccc&nbsp;&nbsp; ddd&nbsp;<br>
+&nbsp; eee&nbsp;&nbsp; fff<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>CalRel RelDi<br>
+MOCAtmp MOOK<br>
+AllMT&nbsp;&nbsp; MTOK<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aa - tutaj znajdziesz przyczynę zakończenia ostatniego połączenia (parametr
+ten jest również podawany w <b><a href="faq_net2.htm#Menu2">Menu 10-2</a></b>
+i <b><a href="faq_net4.htm#Menu39">Menu 10-39</a></b> (w tym ostatnim menu
+znajdziesz wyjaśnienia - patrz opis pierwszego parametru))</li>
+
+<li>
+bb - kolejna informacja o zakończeniu ostatniego połączenia:
+
+<p>
+<ul>
+<li>
+UN: nieznana (przykładowo: od włączenia Twojego telefonu nie były wykonywane
+żadne połączenia)</li>
+
+<li>
+IN: przyczyna wewnętrzna (przykładowo: włączyłeś(aś) w <b><a href="faq_net3.htm#Menu17">Menu
+10-17</a></b> test <a href="faq_net1.htm#BTS">BTSa</a>, telefon nie odnalazł
+sieci na podanym kanale, a Ty próbowałeś(aś) wykonać połączenie)</li>
+
+<li>
+MT: przerwanie przez sieć</li>
+
+<li>
+MO: nastąpiło rozłączenie (odłożenie słuchawki) z któregoś telefonu</li>
+</ul>
+<p>
+</li>
+
+<li>
+ccc - ilość wybieranych połączeń z Twojego telefonu</li>
+
+<li>
+ddd - ilość poprawnie zrealizowanych połączeń wychodzących z Twojego telefonu
+(tzn. ile razy dodzwoniłeś(aś) się do Twojego rozmówcy)</li>
+
+<li>
+eee - ilość wszystkich rozmów przychodzących</li>
+
+<li>
+fff - ilość odebranych rozmów przychodzących</li>
+</ul>
+
+<p>Po osiągnięciu wartości maksymalnej liczniki są zerowane (możesz to też
+zrobić w <b><a href="#Menu60">Menu 10-60</a></b>). Ich wartości (od licznika
+ccc włącznie) są zapamiętywane przy wyłączaniu telefonu.
+
+<p>W Nokii 6185/6188 ten test wygląda inaczej:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>
+C1M 00 &nbsp; &nbsp; &nbsp;<br> 
+C1L 00<br>
+C2M 00<br>
+C2L 03
+</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu64"></a><b>Menu 10-64</b>
+<br>Zawiera m.in. informacje, ile razy Twój telefon informował sieć o swoim
+położeniu (patrz również opis <b><a href="faq_net3.htm#Menu10">Menu 10-10</a></b>)
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aa bbb ccc&nbsp;<br>
+&nbsp;dd eee fff&nbsp;<p>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Nfai NL NLOK<br>
+PFai PL PLOK<br>
+&nbsp;Loc update<br>
+&nbsp; counters</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa - kod błędu (zerowany po włączeniu telefonu) przy ostatnim błędnym
+<a href="faq_net1.htm#LocationUpdate">Location
+Update</a> (tzn. zmienia się tylko wtedy, gdy gdy wystąpił błąd przy jego
+wykonywaniu). Znajdziesz go również w <b><a href="faq_net4.htm#Menu39">Menu
+10-39</a></b> - jest to wartość parametru MM (tam podane są również wartości
+kodów z wyjaśnieniami).</li>
+
+<li>
+bbb - ile razy próbowano wykonać <a href="faq_net1.htm#LocationUpdate">Location
+Update</a></li>
+
+<li>
+ccc - ilość prób wykonania <a href="faq_net1.htm#LocationUpdate">Location
+Update</a> zakończonych sukcesem</li>
+
+<li>
+ddd - błąd przy ostatnim <a href="faq_net1.htm#PLU">PLU</a> lub <a href="faq_net1.htm#IMSIattach">IMSI
+Attach</a></li>
+
+<li>
+eee - ile razy telefon próbował wykonać <a href="faq_net1.htm#PLU">PLU</a> lub
+<a href="faq_net1.htm#IMSIattach">IMSI Attach</a></li>
+
+<li>
+fff - ilość udanych prób wykonania <a href="faq_net1.htm#PLU">PLU</a> lub
+<a href="faq_net1.htm#IMSIattach">IMSI Attach</a></li>
+</ul>
+
+<p>Wartości tych liczników (z wyjątkiem kodów błędów) są zapamiętywane przy
+wyłączaniu telefonu. Możesz je wyzerować w <b><a href="#Menu60">Menu 10-60</a></b>
+(jest robione również, gdy osiągną wartości maksymalne).
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Jeżeli nie wyłączasz telefonu i jesteś cały czas w zasięgu swojej sieci,
+to z tego menu możesz się dowiedzieć (w przybliżeniu), jak długo jest włączony
+(musisz w
+<b><a href="faq_net3.htm#Menu10">Menu 10-10</a></b> sprawdzić,
+co ile jest zerowany licznik T3212 (parametr ccc) i pomnożyć tamten czas
+przez parametr eee z tego menu). Możesz użyć do tego celu również licznika
+z <b><a href="#Menu82">Menu 10-82</a></b> (jest dokładniejszy, ale wymaga
+włączenia któregoś testu) albo menu serwisowego (Nokia 6130 lub 3210).</td>
+</tr>
+</table>
+
+<p>W Nokii 6185/6188 ten test wygląda inaczej:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>
+C3M 00 &nbsp; &nbsp; &nbsp;<br> 
+C3L 00<br>
+C4M 00<br>
+C4L 03
+</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu65"></a><b>Menu 10-65</b>
+<br>Menu związane z wiadomościami <a href="http://www.fkn.pl/faqs/smsfaq.html">SMS</a>
+(raporty nie są uwzględniane)
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aa bbb ccc&nbsp;<br>
+&nbsp;dd eee fff<br>
+&nbsp;gggg<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>SFai MO MOOK<br>
+RFai MT MTOK<br>
+Sched Msgs<br>
+SMS counters</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa - numer błędu przy wysyłaniu ostatniego <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSa</a>
+(zerowany po włączeniu telefonu):
+
+<p>
+<ul>
+<li>
+<tt>&nbsp;&nbsp;1</tt>: 'Nie ma takiego numeru'</li>
+
+<li>
+<tt>&nbsp;21</tt>: 'Wysłanie nieudane tym razem' ('Message not sent this
+time'). Błąd pojawiający się przy próbie wysłania wiadomości z Tak-Taka
+(gdy nie można jeszcze było ich było z niego wysyłać - przed 28.04.2000),
+wysyłaniu pod błędny numer (dobre SMSC) albo przez SMSC zablokowane na
+Twoją sieć.</li>
+
+<li>
+<tt>&nbsp;28</tt>: 'Nie ma takiego numeru'</li>
+
+<li>
+<tt>&nbsp;38</tt>: 'Wysłanie nieudane tym razem' ('Message not sent this
+time'). Błąd przy wysyłaniu wiadomości przez SMSC zablokowane na Twoją
+sieć.</li>
+
+<li>
+<tt>&nbsp;42</tt>: prawdopodobnie błąd ten pojawia się, gdy użyte SMSC
+jest przeciążone (za dużo wysłanych na raz wiadomości przez użytkowników)
+i nie może wysłać Twojej wiadomości</li>
+
+<li>
+<tt>&nbsp;50</tt>: "Sprawdź usługi operatora" ("Check operator services").
+Błąd pojawiający się przy próbie wysłania wiadomości z Tak-Taka
+(gdy nie można jeszcze było ich było z niego wysyłać - przed 28.04.2000).
+</li>
+
+<li>
+<tt>111</tt>: 'Nieudane wysłanie wiadomości' ('Message sending failed').
+Przyczyną jest niewłaściwy numer, pod który wysyłałeś wiadomość (albo numer
+SMSC)</li>
+
+<li>
+<tt>166</tt>: 'Nieudane wysłanie wiadomości' ('Message sending failed').
+Pokazuje się przy błędnym numerze SMSC albo SMSC zablokowanym na Twoją
+sieć.</li>
+
+<li>
+<tt>178</tt>: 'Nieudane wysłanie wiadomości' ('Message sending failed').
+Błąd pojawiający się przy próbie wysłania wiadomości z Tak-Taka
+(gdy nie można tego jeszcze było z niego robić - przed 28.04.2000).</li>
+
+<li>
+<tt>252</tt>: 'Nieudane wysłanie wiadomości' ('Message sending failed').
+Pojawia się, gdy został wyłączony nadajnik telefonu w <b><a href="faq_net4.htm#Menu45">Menu
+10-45</a></b> albo telefon nie mógł znaleźć sieci (w teście <a href="faq_net1.htm#BTS">BTSa</a>
+z <b><a href="faq_net3.htm#Menu17">Menu 10-17</a></b> został ustawiony
+taki kanał).</li>
+
+<li>
+253: 'Nieudane wysłanie wiadomości' ('Message sending failed'). Pokazuje
+się przy błędnym numerze SMSC.</li>
+</ul>
+<p>
+</li>
+
+<li>
+bbb - ilość prób wysłania <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a></li>
+
+<li>
+ccc - ilość poprawnie wysłanych <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a>
+(tzn. takich, które zostały zaakceptowane przez użyte centrum SMS - tylko
+za nie zapłaciłeś(aś))</li>
+
+<li>
+ddd - numer błędu przy otrzymywaniu ostatniego <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSa</a>
+(zerowany po włączeniu telefonu):
+
+<p>
+<ul>
+<li>
+<tt>22</tt>: pełna pamięć przeznaczona na wiadomości (telefon próbował
+przyjąć <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSa</a> - zwiększyła
+się wartość licznika eee, nie zmieniła się wartość fff). Informuje o tym
+również mrugająca koperta na samym górze wyświetlacza, a telefon pokazał
+również oddzielny komunikat 'Brak miejsca na więcej wiadomości' ('No space
+for new messages'). Jeżeli zapisujesz wiadomości na karcie SIM, ich łączna
+ilość w 'Skrzynce nadawczej' ('Outbox') i 'Skrzynce odbiorczej' ('Inbox')
+zależy właśnie od niej (w różnych sieciach komórkowych oferowane są karty
+SIM z różną ilością możliwych do zapisania wiadomości <a href="http://www.fkn.pl/faqs/smsfaq.html">SMS</a>
+- dla kart <a href="http://www.plusgsm.pl/">Plusa</a> wynosi ona 10, <a href="http://www.eragsm.pl/">Ery</a>
+15, a <a href="http://www.idea.centertel.pl/">Idei</a> 30). Nie możesz
+więc dopisywać nowych wiadomości (komunikat 'Pełna pamięć wiadomości' ('Message
+memory full')). Jeżeli nie wykasujesz którejś z już zapisanych wiadomości,
+możesz utracić te przychodzące (jeżeli sieć nie dostarczy ich przez czas
+określony przez ich nadawcę, zostaną bezpowrotnie wykasowane).</li>
+</ul>
+<p>
+</li>
+
+<li>
+eee - ilość prób odebrania <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a></li>
+
+<li>
+fff - ilość poprawnie odebranych <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a></li>
+
+<li>
+gggg - ilość odebranych komunikatów nadawania komórkowego (czy obsługuje je aktualnie używany
+<a href="faq_net1.htm#BTS">BTS</a>, sprawdzisz w <a href="faq_net2.htm#Menu7">Menu 10-7</a>):
+ile razy Twój telefon odebrał komunikaty tzw. cell-info (włączasz jego odbiór w <b>Menu 4-2-2</b> w Nokii 5110)
+oraz cell-broadcast (<b>Menu 2-5</b> w Nokii 5110).</li>
+</ul>
+
+<p>Wartości tych liczników (z wyjątkiem kodów błędów) są zapamiętywane przy
+wyłączaniu telefonu. Możesz je wyzerować w <b><a href="#Menu60">Menu 10-60</a></b>
+(jest to robione również, gdy osiągną maksymalne wartości).
+
+<p>Jeżeli chcesz się dowiedzieć troszkę więcej o wysyłaniu <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a>
+(albo poznać numery SMSC operatorów), zajrzyj pod adres <a href="http://www.vdheyden.demon.nl/sms/index1.htm">www.vdheyden.demon.nl/sms/index1.htm</a>.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Spora część programów komputerowych nie sygnalizuje użytkownikowi, czy
+wiadomość została poprawnie wysłana - Ty będziesz mógł to natomiast sprawdzić
+dzięki temu testowi.</td>
+</tr>
+</table>
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu64">Menu 10-64</a></b>.
+
+<p>W Nokii 6185/6188 ten test wygląda inaczej:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>
+C5M 00 &nbsp; &nbsp; &nbsp;<br> 
+C5L 00<br>
+C6M 00<br>
+C6L 03
+</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu66"></a><b>Menu 10-66</b>
+<br>Liczniki przekroczenia czasu związane z <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSami</a>
+(jak wiadomo, przy wysyłaniu takiej wiadomości można ustalić czas, przez
+jaki czas sieć będzie próbowała ją dostarczyć do telefonu odbiorcy - przypuszczam,
+że te liczniki są w jakiś sposób z tym związane).
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aaa bbb cc&nbsp;<br>
+&nbsp;ddd eee ff<p>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>TR1 TR2 TRA&nbsp;<br>
+TC1 TC2 SCH&nbsp;<br>
+SMS timeout<br>
+&nbsp; counters</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>aaa - licznik przekroczenia czasu dla TR1M</li>
+<li>bbb - licznik przekroczenia czasu dla TR2M</li>
+<li>cc - licznik przekroczenia czasu dla TRAM</li>
+<li>ddd - licznik przekroczenia czasu dla TC1M</li>
+<li>eee - licznik przekroczenia czasu dla TC2M</li>
+<li>ff - licznik przekroczenia czasu dla nadawania komórkowego</li>
+</ul>
+
+<p>Wartości liczników za zapamiętywane przy wyłączaniu telefonu. Jeżeli osiągną
+wartości maksymalne, są zerowane. Możesz je również wyzerować w <b><a href="#Menu60">Menu
+10-60</a></b>.
+
+<p>W Nokii 6185/6188 ten test wygląda inaczej:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>
+CT1 82 &nbsp; &nbsp; &nbsp;<br>
+CT2 00<br>
+RF 23<br>&nbsp;
+</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu67"></a><b>Menu 10-67</b>
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>
+REC 00<br>
+SEND 00&nbsp; &nbsp; &nbsp;<br>
+CTR 4C<br>
+STA 68
+</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu68"></a><b>Menu 10-68</b>
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>
+CNT 00 &nbsp; &nbsp; &nbsp;<br>
+ACK 00<br>
+&nbsp;<br>
+M1M B3
+</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu70"></a><b>Menu 10-70</b>
+<br>Zawartość tymczasowych liczników <a href="faq_net1.htm#DSP">DSP</a> (szesnastkowe
+wartości komórek pamięci oznaczanych w opisach jako r_dsp2ftd+0, r_dsp2ftd+1,
+r_dsp2ftd+2, itd.)
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaaaa&nbsp; bbbbb<br>
+ccccc&nbsp; ddddd<br>
+eeeee&nbsp; fffff<br>
+ggggg&nbsp; hhhhh</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;Temporary<br>
+DSP counters<br>
+&nbsp;R DSP2FTD<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Ten test jest używany przez debuggery
+oprogramowania <a href="faq_net1.htm#DSP">DSP</a>. Mogą one wstawiać pewne
+użyteczne informacje do określonych komórek pamięci. Kiedy ten test jest wybrany,
+<a href="faq_net1.htm#MCU">MCU</a> pokazuje zawartość tych komórek pamięci
+na wyświetlaczu w podanym wyżej formacie.
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu80">Menu 10-80</a></b>.
+
+<p><a NAME="Menu71_72"></a><b>Menu 10-71, 10-72</b>
+<br>Oba menu pozwalają kontrolować ustawienia <a href="faq_net1.htm#DSP">DSP</a>
+
+<p>Jeżeli wejdziesz bezpośrednio do którego z nich, w obu zmieniają się
+cyferki pod AUDIO ENHANCEMENT - ich wartości zależą od włożonej karty SIM.
+W zależności od tego, które z nich teraz oglądałeś(aś) (używając strzałek),
+zmieni się dźwięk (mogą się np. pojawić okropne szumy i trzaski). Możesz
+mieć wpływ na te wartości (mogą mieć maksymalną wartość 65536) - wystarczy
+je zapisać odpowiednio w 31 i 32 pozycji książki telefonicznej na karcie
+SIM (jak to zrobić ? opis znajdziesz przy <b><a href="faq_net3.htm#Menu17">Menu
+10-17</a></b>). Parametr Conf z <b><a href="faq_net4.htm#Menu30">Menu 10-30</a></b>
+pokazuje natomiast wybraną tutaj wartość. Żeby wrócić do stanu wyjściowego,
+musisz wyłączyć i włączyć telefon. Na jakość dźwięku (tzn. czy przy pewnych
+ustawieniach pojawiają się zakłócenia) nie wpływa podłączenie zestawu słuchawkowego
+i samochodowego.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;&nbsp;&nbsp; AUDIO<br>
+&nbsp;ENHANCEMENT<br>
+&nbsp;&nbsp;&nbsp; aaaaa<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Use menu to<br>
+control DSP<br>
+&nbsp;&nbsp; audio<br>
+enhancements</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>W Nokii 3110 test 71 wygląda jak <b><a href="#Menu81">Menu 10-81</a></b>.
+
+<p><a NAME="Menu73"></a><b>Menu 10-73</b>
+<br>Ogólne informacje o ustawieniach <a href="faq_net1.htm#DSP">DSP</a>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aaa bb&nbsp; aaa<br>
+cccc bb cccc<br>
+cccc bb cccc<br>
+&nbsp;cccc cccc</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>DB1&nbsp; B1&nbsp; DB2<br>
+HEX1 B2 HEX2<br>
+HEX3 B3 HEX4<br>
+&nbsp; HEX5 HEX6</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa - główna głośność (poziom sygnału) w dB. Znak części ułamkowej i znak
+nie jest pokazywany (np. zamiast -10.5 zobaczysz 105)</li>
+
+<li>
+bb - główna wartość (podana szesnastkowo) bajtu (używana dla mieszanych
+znaczników).</li>
+
+<li>
+cccc - główna wartość szesnastkowa</li>
+</ul>
+
+<p>Angielskie opisy piszą o tym teście:
+<br>"Wartości liczników są pokazywane tylko w czasie rozmowy
+(gdy włączone są testy monitora). Jeżeli połączenie
+jest przerwane, zatrzymują się one na ostatnich wartościach. Ich wartości
+nie są zapamiętywane przy wyłączaniu telefonu."
+
+<p>...ale ja tego nie zauważyłem i u mnie zawsze były równe 0
+(czy trzeba jakoś dodatkowo włączyć ten test ?)
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu82">Menu 10-82</a></b>.
+
+<p><a NAME="Menu74"></a><b>Menu 10-74</b>
+<br>Informacje o głośności podczas rozmowy
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp; aaa&nbsp; bbb &nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ccc<br>
+&nbsp; dd&nbsp;&nbsp;&nbsp; ee<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>DSigL USigL<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NseLvl<br>
+&nbsp;DTbl&nbsp; UTbl<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa - głośność sygnału z telefonu naszego rozmówcy.</li>
+
+<li>
+bbb - głośność sygnału z Twojego telefonu.</li>
+
+<li>
+ccc - głośność tzw. "komfortowego szumu" (patrz opis <a href="faq_net1.htm#DTX">DTX</a>).</li>
+
+<li>
+dd - wartość DRC dla sygnału z telefonu naszego rozmówcy (dwucyfrowa liczba
+całkowita)</li>
+
+<li>
+ee - wartość DRC dla sygnału z Twojego telefonu (dwucyfrowa liczba całkowita)</li>
+</ul>
+
+<p>Pierwsze trzy parametry są podawane w dB i obliczane na podstawie DRC.
+Znak części ułamkowej i znak liczby nie są pokazywane (np. zamiast
+-10.5 zobaczysz 105).
+
+<p>Angielskie opisy piszą o tym teście:
+<br>"Wartości liczników są pokazywane tylko w czasie rozmowy
+(gdy włączone są testy monitora). Jeżeli połączenie
+jest przerwane, zatrzymują się one na ostatnich wartościach. Ich wartości
+nie są zapamiętywane przy wyłączaniu telefonu."
+
+<p>...ale ja tego nie zauważyłem i u mnie zawsze były równe 0
+(czy trzeba jakoś dodatkowo włączyć ten test ?)
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu71_72">Menu 10-72</a></b>.
+
+<p><a NAME="Menu75"></a><b>Menu 10-75</b>
+<br>Informacje o trybie pracy podłączonych akcesoriów dźwiękowych
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>Mod:aaaaaaa<br>
+AudReq: bbbb<br>
+AccMod: cccc<br>
+H2Path: dddd</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>ExtAudStatus<br>
+AudioRequest<br>
+AccAudMode<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaaa - rodzaj podłączonych do telefonu akcesoriów dźwiękowych
+(dla niektórych telefonów możliwe wartości to:
+HP, HF, HEADSET, EXT albo HP_OFFHO). W Nokii 7110 podawany w <a href="faq_net6.htm#Menu99">Menu 10-99</a>.
+
+<p>Jeśli chodzi o Nokię 5110, przyjmowane były następujące
+wartości:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER><td></td><td>wartość</td></tr>
+<tr ALIGN=CENTER><td>stan normalny (nie podłączono nic, jest kabel FBUS/M2BUS albo ładowarka)</td><td>HP</td></tr>
+
+<tr ALIGN=CENTER><td>zestaw słuchawkowy (telefon wyświetla Mikrozestaw (Headset))
+<br>Możesz go zasymulować
+<br>łącząc piny 1-2 złącza na dole telefonu
+<br>(patrząc od lewej strony, gdy telefon leży wyświetlaczem do góry).
+<br>W Nokii 9110 możesz do tego użyć również <b><a href="faq_net6.htm#Menu92">Menu
+10-92</a></b>.</td>
+<td>HD (skrót od <b>H</b>ea<b>D</b>set)</td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td>zestaw samochodowy (telefon wyświetla Samochód (Car))
+<br>Możesz go zasymulować
+<br>łącząc piny 2-3 złącza na dole telefonu
+<br>(patrząc od lewej strony, gdy telefon leży wyświetlaczem do góry)</td>
+<td>HFU 1 (skrót od <b>H</b>ands <b>F</b>ree <b>U</b>nit 1)</td>
+</tr>
+</table>
+
+<p>Powyższe metody symulacji zestawów są poprawne dla Nokii 5xxx, 6xxx
+i zapewne 9110 (używasz ich na WŁASNĄ odpowiedzialność).
+
+<p>Po podłączeniu (symulacji) obu zestawów w telefonie uaktywniała się funkcja
+"Odbiór samoczynny" ("Automatic answer") - <b>Menu 4-1-6</b> w Nokii 5110 - dzięki
+której telefon może automatycznie odbierać przychodzące połączenie. W Nokii 9110
+możesz ją uaktywnić również m.in. używając <a href="faq_net6.htm#Menu92"><b>Menu 10-92</b></a>.
+<p>
+</li>
+
+<li>
+bbbb - audio_request bitmap in hex</li>
+
+<li>
+cccc - tryb pracy akcesoriów dźwiękowych</li>
+
+<li>
+dd - ścieżka dla HFU-2 (<b>H</b>ands <b>F</b>ree <b>U</b>nit-2)</li>
+</ul>
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu73">Menu 10-73</a></b>.
+
+<p><a NAME="Menu76"></a><b>Menu 10-76</b>
+<br>Informacje o dźwięku, który Ty słyszysz w swoim telefonie
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;Vab&nbsp; Pccc<br>
+&nbsp;Cddd CAeee<br>
+PAfff<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>EVol PeakVal<br>
+CutOff COAve<br>
+PkAver<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+ab - głośność (poniższe informacje są na pewno poprawne dla Nokii 5110):
+
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr><td></td><td><b>a</b></td><td><b>b</b></td></tr>
+<tr ALIGN=CENTER><td>głośnik wyłączony</td><td>0</td><td>F</td></tr>
+
+<tr ALIGN=CENTER>
+<td>wydawany jest dźwięk po naciśnięciu klawisza (poziom głośności 1)</td>
+<td>0</td><td>8</td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td>wydawany jest dźwięk po naciśnięciu klawisza (poziom głośności 2)</td>
+<td>0</td><td>4</td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td>wydawany jest dźwięk po naciśnięciu klawisza (poziom głośności 3 albo
+włączone głośne dźwięki)</td>
+<td>0</td><td>0</td>
+</tr>
+
+</table>
+
+<p>W czasie połączenia parametr a przyjmuje wartość "A", natomiast parametr
+b pozwala obliczyć ustawioną głośność dźwięku (musisz przeliczyć go na
+wartość dziesiętną i odjąć od niego 11) - tę ostatnią możesz również sprawdzić
+w <b><a href="faq_net4.htm#Menu30">Menu 10-30</a></b>. Przy podłączonym
+zestawie słuchawkowym parametr a przyjmuje natomiast wartość "C" (wzór do obliczenia
+głośności rozmowy przyjmuje wtedy wartość 10 - b). Jeżeli do telefonu podłączony
+jest zestaw samochodowy, parametr a jest równy "2", a wzór na głośność podczas rozmowy
+przyjmuje wartość 10 - b.
+
+<p>Jeżeli ktoś do Ciebie dzwoni (nie odebrałeś(aś) jeszcze połączenia),
+telefon nie zawsze pokazuje głośność emitowanego dźwięku (zachowuje się
+tak jak przy wyłączonym głośniku) - nie wiem, czy jest to błąd w oprogramowaniu
+testującym (wersja 5.07), czy coś innego. Tylko bowiem przy pewnych kombinacjach
+ustawień rodzaju dzwonka (ciągły, wzrastający, itp.) i jego głośności jest
+ona pokazywana (podaję od razu wartości obu parametrów): poziom 1 - A7,
+poziom 2 - A6, poziom 4 - A4, poziom 5 - A0.
+</li>
+
+<li>
+<p>ccc - maksymalna głośność sygnału z telefonu Twojego rozmówcy w czasie
+ostatniej ramki (podawana w dB). Znak i znak części dziesiętnej nie są
+pokazywane (np. zamiast -10.5 zobaczysz 105).</li>
+
+<li>
+<p>ddd - licznik pokazujący ilość próbek sygnału akustycznego, w których nastąpiło
+przepełnienie (tak jak przesterowanie), w czasie ostatniej ramki.</li>
+
+<li>
+<p>eee - średnia licznika podawanego jako poprzedni parametr. Znak i znak
+części dziesiętnej nie są pokazywane (np. zamiast -10.5 zobaczysz 105).</li>
+
+<li>
+<p>fff - średnia głośność słyszanego przez Ciebie dźwięku</li>
+</ul>
+
+<p>Angielskie opisy piszą o tym teście:
+<br>"Wartości liczników są pokazywane tylko w czasie rozmowy
+(gdy włączone są testy monitora). Jeżeli połączenie
+jest przerwane, zatrzymują się one na ostatnich wartościach. Ich wartości
+nie są zapamiętywane przy wyłączaniu telefonu."
+
+<p>...ale ja tego nie zauważyłem i u mnie zawsze (bez pierwszego) były równe 0
+(czy trzeba jakoś dodatkowo włączyć ten test ?)
+
+<p><a NAME="Menu77"></a><b>Menu 10-77</b>
+<br>Informacje o dźwięku, który słyszy Twój rozmówca (tzn. parametry dźwięku
+wysyłanego przez Twój telefon)
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;Paaa&nbsp; Abbb&nbsp;<br>
+&nbsp;Cccc CAddd<p>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>MicPeak MAve<br>
+CutOff COAve<p>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa - maksymalna głośność wysyłanego dźwięku w czasie ostatniej ramki w
+dB. Znak części ułamkowej i znak liczby nie są pokazywane (np. zamiast
+-10.5 zobaczysz 105).</li>
+
+<li>
+bbb - przeciętna głośność wysyłanego dźwięku w dB. Znak części ułamkowej
+i znak liczby nie są pokazywane (np. zamiast -10.5 zobaczysz 105).</li>
+
+<li>
+ccc - licznik pokazujący ilość próbek sygnału akustycznego, w których nastąpiło
+przepełnienie (tak jak przesterowanie), w czasie ostatniej ramki.</li>
+
+<li>
+ddd - średnia licznika podawanego jako poprzedni parametr.</li>
+</ul>
+
+<p>Angielskie opisy piszą o tym teście:
+<br>"Wartości liczników są pokazywane tylko w czasie rozmowy
+(gdy włączone są testy monitora). Jeżeli połączenie
+jest przerwane, zatrzymują się one na ostatnich wartościach. Ich wartości
+nie są zapamiętywane przy wyłączaniu telefonu."
+
+<p>...ale ja tego nie zauważyłem i u mnie zawsze były równe 0
+(czy trzeba jakoś dodatkowo włączyć ten test ?)
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu75">Menu 10-75</a></b>.
+
+<p><a NAME="Menu78"></a><b>Menu 10-78</b>
+<br>Kolejne parametry <a href="faq_net1.htm#DSP">DSP</a>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaa bbb ccc&nbsp;<br>
+ddd eee fff<br>
+ggg h i jjj<br>
+&nbsp;kkkk llll</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>EAA Ada ERL&nbsp;<br>
+RxG TxG GLi<br>
+TxN Sta Mod<br>
+&nbsp;RVAD TVAD</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa - poziom cyfrowego tłumienia echa z punktu widzenia <a href="faq_net1.htm#DSP">DSP</a>
+:-) w dB. Znak liczby i części ułamkowej nie są pokazywane (np. -10.5 dB
+będzie wyświetlane jako "105", -0.5 dB zaś jako "&nbsp; 5"). 20*log10(
+Q15 )</li>
+
+<li>
+bbb - poziom adaptacyjnego tłumienia echa (znak części ułamkowej nie jest
+pokazywany). 20*log10( Q15 )</li>
+
+<li>
+ccc - poziom stłumienia sygnalu, który wraca po odbiciu (znak części ułamkowej
+nie jest pokazywany). 20*log10( Q15 )</li>
+
+<li>
+ddd - tłumienie tłumika sygnału odbieranego (akustyczne) w dB. Znak liczby
+i części ułamkowej nie są pokazywane. 20*log10( Q15 aec_rx_gain )</li>
+
+<li>
+eee - tłumienie tłumika sygnału nadawanego (akustyczne) w dB. Znak liczby
+i części ułamkowej nie są pokazywane. 20*log10( Q15 aec_tx_gain )</li>
+
+<li>
+fff - ograniczenie dla dwóch powyższych parametrów (ddd i eee) - znak liczby
+i części ułamkowej nie są pokazywane. 20*log10( Q15 aec_gain_limit )</li>
+
+<li>
+ggg - głośność nadawanego "komfortowego szumu" (patrz opis <a href="faq_net1.htm#DTX">DTX</a>)
+w dB. Znak części ułamkowej i znak liczny nie są pokazywane. 20*log10(
+Q15 aec_tx_noise)</li>
+
+<li>
+h - stan filtru adaptacyjnego. (Q0 aec_nlms_state) (bit UPDATE &lt;&lt;
+2) | (bit NLMS2 &lt;&lt; 1) | (bit NLMS1)</li>
+
+<li>
+i - informacja, o tym czy jest generowany tzw. "komfortowy szum" - patrz
+opis <a href="faq_net1.htm#DTX">DTX</a> (wartości 0 lub 1) (Q0 AEC_TX_COMF_GEN)</li>
+
+<li>
+jjj - tryb pracy układu tłumików i filtru adaptacyjnego (AEC) (byte Q0
+s_AEC_mode)</li>
+
+<li>
+kkkk - ostatnich 16 decyzji układu wykrywania głosu dla sygnału odbieranego
+(RX VAD) w formacie szesnastkowym. Hex( Q0 aec_rx_vadreg )</li>
+
+<li>
+llll - ostatnich 16 decyzji układu wykrywania głosu dla sygnału nadawanego
+(TX VAD) w formacie szesnastkowym. Hex( Q0 aec_tx_vadreg )</li>
+</ul>
+
+<p>U mnie wartości tych liczników zawsze były równe 0
+(czy trzeba jakoś dodatkowo włączyć ten test ?)
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu76">Menu 10-76</a></b>.
+
+<p><a NAME="Menu79"></a><b>Menu 10-79</b>
+<br>Wyświetlacz equalizera audio
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaaaa bbbbb<br>
+ccccc ddddd<br>
+-ee.e -ff.f&nbsp;<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>MiCutB MiCTA<br>
+EpCutB EPCTA<br>
+MiCLev EarLv<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaaa - próbki sygnału akustycznego, w których nastąpiło przepełnienie
+(tak jak przesterowanie), przed przejściem przez equalizer mikrofonowy
+w postaci 16-bitowej całkowitej (dziesiętnej) liczby.</li>
+
+<li>
+bbbbb - próbki sygnału akustycznego, w których nastąpiło przepełnienie
+(tak jak przesterowanie), po przejściu przez equalizer mikrofonowy w postaci
+16-bitowej całkowitej (dziesiętnej) liczby.</li>
+
+<li>
+ccccc - próbki sygnału akustycznego, w których nastąpiło przepełnienie
+(tak jak przesterowanie), przed przejściem przez equalizer głośnikowy w
+postaci 16-bitowej całkowitej (dziesiętnej) liczby.</li>
+
+<li>
+ddddd - próbki sygnału akustycznego, w których nastąpiło przepełnienie
+(tak jak przesterowanie), po przejściu przez equalizer głośnikowy w postaci
+16-bitowej całkowitej (dziesiętnej) liczby.</li>
+
+<li>
+-ee.e - głośność dźwięku wychwytywanego przez mikrofon w formacie dB. Wymaga
+funkcji matematycznej log10 w <a href="faq_net1.htm#MCU">MCU</a>.
+16 bitowa wartość w <a href="faq_net1.htm#DSP">DSP</a>,
+0 dB = 32768.</li>
+
+<li>
+-ff.f - głośność sygnału po przejściu przez equalizer głośnikowy w formacie
+dB. Wymaga funkcji matematycznej log10 w <a href="faq_net1.htm#MCU">MCU</a>.
+16 bitowa wartość w <a href="faq_net1.htm#DSP">DSP</a>,
+0 dB = 32768.</li>
+</ul>
+
+<p>Angielskie opisy piszą o tym teście:
+<br>"Wartości liczników są pokazywane tylko w czasie rozmowy. Jeżeli połączenie
+jest przerwane, zatrzymują się one na ostatnich wartościach.
+Ich wartości nie są zapamiętywane przy wyłączaniu telefonu. Wartości liczników
+aaaaa-ddddd są obliczane w <a href="faq_net1.htm#DSP">DSP</a> (i tylko
+nowe są wysyłane do <a href="faq_net1.htm#MCU">MCU</a>. Poziomy sygnału
+mikrofonowego i głośnikowego są obliczane w <a href="faq_net1.htm#DSP">DSP</a>,
+który wysyła liniowe wartości do <a href="faq_net1.htm#MCU">MCU</a>, który z kolei
+dokonuje liniowej transformacji dB (20*log10(x)) do wartości głośności".
+
+<p>...ale ja tego nie zauważyłem i u mnie zawsze były równe 0
+(czy trzeba jakoś dodatkowo włączyć ten test ?)
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu77">Menu 10-77</a></b>.
+
+<p><a NAME="Menu80"></a><b>Menu 10-80</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt>&nbsp;&nbsp; TIMERS&nbsp; &nbsp;<br>
+&nbsp;&nbsp; RESET&nbsp;<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp; Use menu<br>
+&nbsp; to reset<br>
+&nbsp;field test&nbsp;<br>
+&nbsp;&nbsp; timers</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Przez bezpośrednie wejście do tego menu możesz wyzerować liczniki z <b><a href="#Menu82">Menu
+10-82</a></b>. Telefon robi to automatycznie, gdy odłączasz od niego ładowarkę.
+Według opisów angielskich, dzieje się tak również, gdy akumulator jest
+naładowany (ja tego nie zaobserwowałem).
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu83">Menu 10-83</a></b>.
+
+<p><a NAME="Menu81"></a><b>Menu 10-81</b>
+
+<p>
+<center><table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt>&nbsp;&nbsp; TIMERS&nbsp; &nbsp;<br>
+&nbsp; aaaaaaaa<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Use menu to<br>
+control test<br>
+&nbsp; display<br>
+&nbsp; timers</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table></center>
+
+<p>Przez bezpośrednie wejście do tego menu możesz włączyć (aaaaaaaa=ENABLED) lub
+wyłączyć (aaaaaaaa=DISABLED) licznik z <b><a href="#Menu82">Menu 10-82</a></b>.
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu84_86">Menu 10-84</a></b>.
+
+<p><a NAME="Menu82"></a><b>Menu 10-82</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaaaa bbbbb&nbsp;<br>
+ccccc ddddd<br>
+&nbsp;TIMERS eee<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>PwrOn InServ<br>
+NSPS&nbsp; TxON<br>
+&nbsp;&nbsp; Timers<br>
+&nbsp;&nbsp; Status</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaaa - informacja, ile minut (dwie ostatnie cyfry) i godzin (trzy pierwsze)
+telefon był włączony</li>
+
+<li>
+bbbbb - informacja, ile minut (dwie ostatnie cyfry) i godzin (trzy pierwsze)
+telefon był zalogowany do sieci</li>
+
+<li>
+ccccc - informacja, ile minut (dwie ostatnie cyfry) i godzin (trzy pierwsze)
+telefon był w stanie <a href="faq_net2.htm#NSPS">NSPS</a></li>
+
+<li>
+ddddd - informacja, ile minut (dwie ostatnie cyfry) i godzin (trzy pierwsze)
+był włączony nadajnik telefonu</li>
+
+<li>
+eee - informacja, czy liczniki są włączone (ON) czy wyłączone (OFF) (zmienić
+to można w <b><a href="#Menu81">Menu 10-81</a></b>)</li>
+</ul>
+
+<p>Według angielskich opisów maksymalna wartość wynosi 99 h i 59 minut. Jeżeli
+pierwszy (aaaaa) licznik osiągnie tę wartość, wszystkie liczniki staną.
+
+<p>Niestety liczniki działają tylko wtedy, gdy włączysz jakiś test w monitorze
+sieci (tzn. gdy wyłączysz testy, nie będą odmierzać czasu pomimo wyświetlonej
+informacji, że są włączone). Oznacza to, że faktycznie możesz tutaj
+znaleźć informację o tym, ile korzystasz z monitora sieci (pierwszy parametr),
+ile czasu telefon był w tym czasie zalogowany do sieci (następny), itd.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Jeżeli nie możesz zrezygnować z odmierzania czasu, proponuję w <b><a href="#Menu83">Menu
+10-83</a></b> wybrać SHOW TASK MSG BUFS i włączyć
+<b><a href="#Menu87">Menu
+10-87</a></b> (wyświetlacz będzie pusty). Jedyną niedogodnością tego rozwiązania
+będzie to, że nie będziesz miał(a) identyfikacji osób dzwoniących do Ciebie.
+<p>W menu serwisowym Nokii 6130 (kod
+<b>*#WARRANTY#</b>) i 3210 (kod <b>*#WAR0ANTY#</b>)
+pod pozycją "Life Timer" znajdziesz informację, ile pełnych dni telefon
+pracował w sieci (pierwsze dwie cyfry przed dwukropkiem) oraz ile czasu
+rozmawiałeś(aś) - reszta cyfr (dwie ostatnie cyfry przed przecinkiem oznaczają
+godziny, cyfry po nim minuty). Przykładowo, 0701:35 to 7 dni (w przeciągu
+których telefon działał w sieci) i 1 h 35 minut czasu rozmowy.</td>
+</tr>
+</table>
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu84_86">Menu 10-85</a></b>.
+
+<p><a NAME="Menu83"></a><b>Menu 10-83</b>
+
+<p>
+<center><table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt>&nbsp;SHOW TASK&nbsp;<br>
+&nbsp;STACKS<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt>&nbsp;SHOW TASK&nbsp;<br>
+&nbsp;MSG BUFS<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt>&nbsp;SHOW TASK&nbsp;<br>
+&nbsp;FAST BUFS<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Use menu to<br>
+select shown<br>
+&nbsp;task info<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table></center>
+
+<p>Przez bezpośrednie wejście do tego menu można spowodować, że w <b>Menu
+10-84</b>, <b>Menu 10-85</b>, <b>Menu 10-86</b>, <b>Menu 10-87</b> są pokazywane
+wartości innych liczników:
+
+<p>
+<ul>
+<li>
+"STACKS" - pokazuje wolne miejsce w bloku pamięci w najgorszym razie</li>
+
+<li>
+"MSG BUFS" - pokazuje najwyższą ilość będących w takcie realizacji wiadomości.</li>
+
+<li>
+"FAST BUFS" - pokazuje najwyższą ilość bedących w trakcie realizacji szybkich
+wiadomości.</li>
+</ul>
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu84_86">Menu 10-86</a></b>.
+
+<p><a NAME="Menu84_86"></a><b>Menu 10-84, 10-85, 10-86</b>
+<br>Tak ogólnie wyglądają te menu:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aaaa bbbb &nbsp;<br>
+&nbsp;cccc dddd<br>
+&nbsp;eeee ffff<br>
+&nbsp;gggg hhhh</tt></td>
+</tr>
+</table>
+
+<p>A tak wygląda ich pomoc:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr ALIGN=CENTER>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>IDLE&nbsp; DEV_IO<br>
+LOCAL MDISND<br>
+MDIRCV&nbsp; UI<br>
+&nbsp;TONE&nbsp;&nbsp; PN</b></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;FBUS&nbsp;&nbsp; AUD<br>
+L1CTRL L1MEA<br>
+L1SYSP&nbsp; L2<br>
+&nbsp;CC&nbsp;&nbsp;&nbsp;&nbsp; MM</b></tt></td>
+</tr>
+</table>
+
+<p>albo (w Nokii 3210) tak:
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>IRDA&nbsp; FBUS<br>
+AUD&nbsp; L1CTRL<br>
+L1MEA L1SYSP<br>
+L2&nbsp;&nbsp;&nbsp; CC</b></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;RR&nbsp;&nbsp;&nbsp;&nbsp; RM<br>
+&nbsp;SMS&nbsp;&nbsp;&nbsp; EM<br>
+SIMUPL SIML2<br>
+&nbsp;DDI</b></tt></td>
+</tr>
+</table>
+
+<p>albo (w Nokii 3210) tak:
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>MM&nbsp;&nbsp;&nbsp; RR<br>
+RM&nbsp;&nbsp;&nbsp; SMS<br>
+EM&nbsp;&nbsp;&nbsp; SIMUPL<br>
+SIML2 DDI</b></tt></td>
+</tr>
+</table>
+
+<p>albo (w Nokii 9110) tak:
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;RR&nbsp;&nbsp;&nbsp;&nbsp; RM<br>
+SMS&nbsp;&nbsp;&nbsp;&nbsp; EM<br>
+SIMUPL SIML2<br>
+&nbsp;DGC&nbsp; DGNTB</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaa, bbbb,... - zadanie 0, 1, itd.</li>
+</ul>
+
+<p>Liczby określające, jak bardzo komórki pamięci związane ze stosami są puste
+w najgorszym wypadku (jeżeli pokazuje się 0, stos jest pełny). Wartości
+nie są zapisywane w pamięci przy wyłączaniu telefonu.
+
+<p>W Nokii 3110 test 86 wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>MCUSW&nbsp; aaaaa<br>
+DATE&nbsp;&nbsp; cccccc<br>
+CHKSUM dddd<br>
+DSP&nbsp;&nbsp;&nbsp; eee</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>MCUSWVersion<br>
+DateOfMCUSW<br>
+MCUSWChecksum<br>
+DSPSWVersion</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Znaczenie parametrów aaaaa,cccccc, dddd i eee znajdziesz w <b><a href="#Menu88">Menu
+10-88</a></b>.
+
+<p><a NAME="Menu87"></a><b>Menu 10-87</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aaaa&nbsp; bbbb&nbsp;<br>
+&nbsp;<p>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp; FIQ&nbsp; IRQ &nbsp;<br>
+&nbsp;<p>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaa - OS_SYSTEM_STACK</li>
+</ul>
+
+<p>W Nokii 9110 menu to wygląda natomiast tak:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;cccc&nbsp; dddd&nbsp;<br>
+&nbsp;aaaa&nbsp; bbbb&nbsp;<p>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;DGTB&nbsp; DGFAX<br>
+&nbsp;FIQ&nbsp;&nbsp; IRQ<p>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>W Nokii 7110 jest jeszcze trochę inne:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+1040010363800<br>
+&nbsp; 700 &nbsp;800<br>
+&nbsp; 220<br>
+&nbsp; &nbsp; 476 &nbsp; 480
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+DGN &nbsp;DGF &nbsp;SCKT<br>
+PCL &nbsp;PWB<br>
+PPC<br>
+FIQ &nbsp; &nbsp;IRQ
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Stan licznika nie jest zapisywany przy wyłączaniu telefonu.
+
+<p><a NAME="Menu88"></a><b>Menu 10-88</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaaaa bbbbbb<br>
+Date&nbsp; cccccc<br>
+ChkSum dddd<br>
+eeeeeeeeeeee</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>MCUSW&nbsp; PPM<br>
+MCUSW_Date<br>
+MCU_Checksum<br>
+DSP_Version</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaaa i cccccc - wersja i data oprogramowania <a href="faq_net1.htm#MCU">MCU</a>
+(kody do ich sprawdzenia i różnice między różnymi ich wersjami
+są szczegółowo opisane na <a href="firmware.htm">tej stronie</a>)</li>
+
+<li>
+bbbbbb - wersja wgranego do telefonu pakietu PPM (<b>P</b>ost-<b>p</b>rogramming <b>M</b>emory):
+firma <a href="http://www.nokia.com">Nokia</a> przygotowywuje różne wersje językowe
+oprogramowania do swoich telefonów. Są one zapisywane w "paczkach" - każda z nich
+zawiera komunikaty i obsługę kilku języków.
+Powód takiego postępowania jest prosty: komunikaty we wszystkich językach świata
+nie zmieściłyby się w pamięci telefonów.
+Tutaj zobaczysz właśnie wersję wgranego pakietu <b>PPM</b>: jest to liczba
+zgodna z wersją oprogramowania <a href="faq_net1.htm#MCU">MCU</a>, po której
+pojawia się litera (może to być "A", "B", itd. - język polski jest dostępny w pakiecie "B").
+I stąd zapewne jasne jest, że jeżeli Twój telefon został przywieziony z zagranicy
+i nie ma obsługi jakiegoś języka (polskiego ?), trzeba wgrać do niego inny pakiet <b>PPM</b>.
+
+<p>Dla ciekawych: jeżeli chodzi o starsze modele (np. Nokię 2110i) - tam nie było pakietów
+<b>PPM</b>, a zmiana wersji językowej wiązała się z wymianą CAŁEGO oprogramowania słuchawki.
+Czytałem również, iż sprzedawane telefony z "ogólnym" oprogramowaniem miały fabrycznie
+deaktywowaną obsługę niektórych języków (np. greckiego) - można było ją włączyć przy użyciu
+niektórych programów serwisowych (np. PC-Locals 0.6).
+<p>
+</li>
+
+<li>
+dddd - suma kontrolna pamięci <a href="faq_net1.htm#MCU">MCU</a>
+(gdy jest błędna, telefon wyświetla CONTACT SERVICE)</li>
+
+<li>
+eeeeeeeeeeee - wersja oprogramowania <a href="faq_net1.htm#DSP">DSP</a></li>
+</ul>
+
+<p>Informacje z tego menu są również podawane w różnych programach serwisowych (np.
+PC-Locals 1.3 albo WinTesli).
+
+<p><a NAME="Menu89"></a><b>Menu 10-89</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>HW: aaaa&nbsp;<br>
+TXT: Ubbbbbb<p>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>HW version<br>
+Text version<p>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaa - wersja sprzętowa telefonu (np. najnowsze mi znane Nokie 5110 pokazują
+tutaj 4220)</li>
+
+<li>
+bbbbbb - informacja, kiedy zostały opracowane teksty (prawdopodobnie nazwy operatorów)
+wyświetlane przez telefon</li>
+</ul>
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a><br>
+
+<center>
+<p><a href="faq_net0.htm">[Część 1]</a><a href="faq_net1.htm">[Część 2]</a><a href="faq_net2.htm">[Część 3]</a><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><b>[Część 6]</b><a href="faq_net6.htm">[Część 7]</a>
+</center>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<br><p align="RIGHT"><font class='autor' size='1'><a class="autoremail" href="mailto:Marcin Wiącek<Marcin-Wiacek@topnet.pl>">Marcin Wiącek</a> (<a class="autoremail" href="http://marcin-wiacek.topnet.pl">WWW</a>)
+<br>Ostatnia aktualizacja: 4 maja 2000</font>
+
+<script language=JavaScript src='../konw.js'></script>
+</body>
+</html>

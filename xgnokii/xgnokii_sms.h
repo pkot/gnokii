@@ -20,8 +20,6 @@ extern void GUI_CreateSMSWindow (void);
 
 extern void GUI_ShowSMS (void);
 
-extern void GUI_RefreshSMS (void);
-
 extern void GUI_RefreshMessageWindow (void);
 
 extern void GUI_RefreshSMSCenterMenu (void);

@@ -1,16 +1,16 @@
 /*
 
   X G N O K I I
-  
+
   A Linux/Unix GUI for Nokia mobile phones.
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
   & Ján Derfiòák <ja@mail.upjs.sk>.
-  
+
   Released under the terms of the GNU GPL, see file COPYING for more details.
-  
+
   Last modification: Mon Oct 10 1999
   Modified by Jan Derfinak
-              
+
 */
 
 #include <stdlib.h>
@@ -33,6 +33,7 @@ ConfigEntry config[] = {
  {"",          NULL}
 };
 
+
 static void GetDefaultValues ()
 {
   xgnokiiConfig.user.name = g_strdup ("");
@@ -45,6 +46,7 @@ static void GetDefaultValues ()
   xgnokiiConfig.helpviewer = g_strdup ("netscape");
 }
 
+
 void GUI_ReadXConfig ()
 {
   FILE *file;
@@ -54,9 +56,9 @@ void GUI_ReadXConfig ()
   gchar *current;
   register gint len;
   register gint i;
-  
+
   GetDefaultValues ();
-  
+
 #ifdef WIN32
 /*  homedir = getenv("HOMEDRIVE");
   g_strconcat(homedir, getenv("HOMEPATH"), NULL); */
@@ -69,46 +71,45 @@ void GUI_ReadXConfig ()
     g_print (_("WARNING: Can't find HOME enviroment variable!\n"));
     return;
   }
-  
+
   if ((rcfile = g_strconcat (homedir, "/.xgnokiirc", NULL)) == NULL)
   {
     g_print (_("WARNING: Can't allocate memory for config reading!\n"));
     return;
   }
 #endif
-    
+
   if ((file = fopen (rcfile, "r")) == NULL)
   {
     g_free (rcfile);
     return;
   }
-  
+
   g_free (rcfile);
-  
+
   if ((line = (char *) g_malloc (255)) == NULL)
   {
     g_print (_("WARNING: Can't allocate memory for config reading!\n"));
     fclose (file);
     return;
   }
-  
+
   while (fgets (line, 255, file) != NULL)
   {
     current = line;
-    
+
     /* Strip leading, trailing whitespace */
-    
     while (isspace (*current))
       current++;
-    
+
     while ((strlen (current) > 0) && isspace (current[strlen (current) - 1]))
       current[strlen (current) - 1] = '\0';
-      
+
     /* Ignore blank lines and comments */
-            
+
     if ((*current == '\n') || (*current == '\0') || (*current == '#'))
       continue;
-    
+
     i = 0;
     while (*config[i].key != '\0')
     {
@@ -132,14 +133,15 @@ void GUI_ReadXConfig ()
           else
             *config[i].value = g_strndup (current, MAX_BUSINESS_CARD_LENGTH);  
         }
-      }  
+      }
       i++;
     }
   }
-  
+
   fclose (file);
   g_free (line);
 }
+
 
 gint GUI_SaveXConfig ()
 {
@@ -148,28 +150,28 @@ gint GUI_SaveXConfig ()
   gchar *homedir;
   gchar *rcfile;
   register gint i;
-  
+
   if ((homedir = getenv ("HOME")) == NULL)
   {
     g_print (_("ERROR: Can't find HOME enviroment variable!\n"));
     return (1);
   }
-  
+
   if ((rcfile = g_strconcat (homedir, "/.xgnokiirc", NULL)) == NULL)
   {
     g_print (_("ERROR: Can't allocate memory for config writing!\n"));
     return (2);
   }
-    
+
   if ((file = fopen (rcfile, "w")) == NULL)
   {
     g_print (_("ERROR: Can't open file %s for writing!\n"), rcfile);
     g_free (rcfile);
     return (3);
   }
-  
+
   g_free (rcfile);
-  
+
   i = 0;
   while (*config[i].key != '\0')
   {
@@ -189,7 +191,7 @@ gint GUI_SaveXConfig ()
     g_free (line);
     i++;
   }
-  
+
   fclose (file);
   return (0);
 }

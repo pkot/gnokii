@@ -1,0 +1,1778 @@
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+   <meta name="Author" content="Marcin Wiącek">
+   <meta name="Description" content="FAQ dotyczący monitora sieci w Nokiach (NOKIA NetMonitor description)">
+   <meta name="language" content="pl">
+   <meta name="revisit-after" content="15 days">
+   <meta name="Robots" content="all">
+   <meta name="KeyWords" content="3110, 9110, GSM, DCS, Nokia, 3210, 5110, 5130, 6110, 6130, 6150, 8810, FAQ, NetMonitor, monitor sieci, Marcin, Wiącek, Wiacek, Marcin Wiącek, Marcin Wiacek">
+   <title>FAQ - monitor sieci w Nokiach (część 4/7)</title>
+   <link rel="stylesheet" href="../styl.css" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" text="#2B2B69" link="#525FF5" vlink="#525FF5" alink="#2FA030">
+
+<font class="drukuj">
+<p align="RIGHT"><a class="autoremail" href="../glowna.htm">Strona główna</a></p>
+</font>
+<center><font color="#1F409F" size=+2 class="tytul">Monitor sieci w telefonach Nokia (4/7)</font>
+<font class="drukuj">
+<p><a href="faq_net0.htm">[Część 1]</a><a href="faq_net1.htm">[Część 2]</a><a href="faq_net2.htm">[Część 3]</a><b>[Część 4]</b><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><a href="faq_net6.htm">[Część 7]</a>
+</font>
+</center>
+
+<hr noshade width="60%" style="color: #004080" align=center>
+<a NAME="Top"></a>
+
+<font class="drukuj">
+<ol>
+<li><a href="faq_net0.htm#1"><b>Co to jest ?</b></a></li>
+<li><a href="faq_net0.htm#2"><b>Czy jest mi potrzebny ?</b></a></li>
+<li><a href="faq_net0.htm#3"><b>Czy po włączeniu monitora telefon pobiera więcej energii ?</b></a></li>
+<li><a href="faq_net0.htm#4"><b>Jak go włączyć ?</b></a></li>
+<li><a href="faq_net0.htm#5"><b>Jaką wersję monitora mogę włączyć w telefonie ?</b></a></li>
+<li><a href="faq_net0.htm#6"><b>Czy włączenie monitora powoduje utratę gwarancji ?</b></a></li>
+<li><a href="faq_net0.htm#7"><b>W moim telefonie menu monitora ma numer inny niż 10. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#8"><b>W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#9"><b>Jak się nim posługiwać ?</b></a></li>
+<li><a href="faq_net0.htm#10"><b>Czy mogę zepsuć sobie telefon ?</b></a></li>
+<li><a href="faq_net1.htm#11"><b>Słowniczek</b></a></li>
+<li><a href="faq_net2.htm#12"><b>Znaczenie poszczególnych testów</b></a></li>
+<li><a href="faq_net6.htm#13"><b>Można też użyć programu...</b></a></li>
+<li><a href="faq_net6.htm#14"><b>Czy można korzystać z monitora sieci, gdy nie ma w telefonie karty SIM, nie został podany jej PIN lub jest nieaktywna ?</b></a></li>
+<li><a href="faq_net6.htm#15"><b>W jaki sposób mogę wyłączyć monitor sieci ?</b></a></li>
+<li><a href="faq_net6.htm#16"><b>Czy powinienem wyłączyć monitor sieci przed oddaniem telefonu do serwisu ?</b></a></li>
+<li><a href="faq_net6.htm#17"><b>Czy po wyłączeniu monitora sieci będę go mógł włączyć ponownie ?</b></a></li>
+<li><a href="faq_net6.htm#18"><b>Czy monitor sieci jest dostępny także w analogowych Nokiach ?</b></a></li>
+<li><a href="faq_net6.htm#19"><b>Czy monitor sieci pozwoli na używanie telefonu podobnie jak radiostacji ?</b></a></li>
+<li><a href="faq_net6.htm#20"><b>Dlaczego w moim telefonie jest znacznie mniej testów niż zostało tutaj opisane ? Czy mogę zwiększyć ich ilość ?</b></a></li>
+<li><a href="faq_net6.htm#21"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie znajduje się mój rozmówca ?</b></a></li>
+<li><a href="faq_net6.htm#22"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie się znajduję ?</b></a></li>
+<li><a href="faq_net6.htm#23"><b>Co to są kody monitora sieci ?</b></a></li>
+<li><a href="faq_net6.htm#24"><b>Czy jest prawdą, że monitor sieci w telefonie z dodatkowym urządzeniem zmieniającym jego pasmo działa niepoprawnie ?</b></a></li>
+<li><a href="faq_net6.htm#25"><b>Gdzie znajdę opis protokołu MBUS/FBUS i komendy związane z monitorem sieci ?</b></a></li>
+<li><a href="faq_net6.htm#Literatura"><b>Użyte materiały</b></a></li>
+<li><a href="faq_net6.htm#27"><b>Dodatkowe informacje</b></a></li>
+</ol>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<p><a NAME="Menu8"></a><b>Menu 10-8</b>
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 width=100%>
+<tr><td><a href="faq_net1.htm#CDMA">CDMA</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+TADD TDROP<br>
+TCOMP TTDROP<br>
+WW1 WW2 WW3<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+<td><a href="faq_net1.htm#AMPS">AMPS</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+1STBY_RX7244<br>
+XNRML_RX006C<br>
+X_N_RX_O004C<br>
+X_N_RX_F0020</i>
+</tt></td>
+</tr>
+</table>
+</td></tr>
+<tr><td colspan=2>
+&nbsp;<br><a href="faq_net1.htm#CDMA">CDMA</a><p>
+<ul>
+<li>TADD - threshold to add a new active PN (raw value ex: 28 = Ec/Io at -14 dB), [TDROP] : threshold to drop an active PN (raw value ex: 32 = Ec/Io at -16 dB)</li>
+<li>TCOMP - an other threshold to add an active PN when a candidate PN becomes stronger than an active PN</li>
+<li>TTROP - timer to drop a PN when power of this PN goes below TDROP</li>
+<li>WW1 - value of the seach window for the active PN</li>
+<li>WW2 - value of the seach window for the neighbour PN,[WW3]: value of the seach window for the remaining PN.</li>
+</ul>
+</td></tr></table>
+
+<br><a NAME="Menu9"></a><b>Menu 10-9</b>
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 width=100%>
+<tr><td><a href="faq_net1.htm#CDMA">CDMA</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+006 330 270<br>
+047 062 062<br>
+342 102 030<br>
+062 062 062</i>
+</tt></td>
+</tr>
+</table>
+</td>
+<td><a href="faq_net1.htm#AMPS">AMPS</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+1PT_1_OK724E<br>
+RPT_1_FA0042<br>
+TIME__2_0000<br>
+MER2HIGH0002</i>
+</tt></td>
+</tr>
+</table>
+</td></tr>
+<tr><td colspan=2>
+&nbsp;<br><a href="faq_net1.htm#CDMA">CDMA</a><p>
+Tracked PN Offsets (lines 1,3) and EC/SO (Energy per chip per noise).
+An EC/SO of 062 likely means not really usable? lower numbers are better
+strengths). See <a href="faq_net2.htm#Menu2">Menu 10-2</a> for PN offset information.
+</td></tr></table>
+
+<br><a NAME="Menu10"></a><b>Menu 10-10</b>
+<br>Informacje sieciowe (dotyczą aktualnie używanej albo ostatnio monitorowanej
+sieci)
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>TMSIaaaaaaaa<br>
+T321:bbb/ccc<br>
+PRP:d&nbsp; ee ff<br>
+&nbsp;ggggg&nbsp; hhh&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>TMSI(hex)<br>
+T3212ctr/tim<br>
+PaRP DSF AGC<br>
+&nbsp; AFC&nbsp;&nbsp; Ch</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaaaaaa - <a href="faq_net1.htm#TMSI">TMSI</a>:
+numer nadawany każdemu telefonowi działającemu w sieci (może to być wykonywane
+np. po włączeniu, rozmowie, wysłaniu (odebraniu) <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSa</a>,
+zgłoszeniu żądania, <a href="faq_net1.htm#PLU">PLU</a>). Wartość z karty
+SIM (po otrzymaniu nowego numeru z sieci jest on na niej zapisywany). Podawana
+szesnastkowo. Jeżeli przyznanie tego numeru nie powiedzie się (np. wyłączony
+został nadajnik w <b><a href="faq_net4.htm#Menu45">Menu 10-45</a></b> albo karta SIM
+w telefonie nie jest aktywna),
+pokazuje się tutaj 'xxxxxxxx', a telefon wyświetla 'Poza zasięgiem sieci'
+- 'No coverage network' (gdy próbujesz wykonać połączenie).</li>
+
+<li>
+bbb - wartość tzw. licznika T3212: telefon co jakiś czas informuje sieć,
+gdzie się znajduje (wykonuje tzw. <a href="faq_net1.htm#PLU">PLU</a>).
+Liczba bbb oznacza czas, jaki minął od ostatniej aktualizacji i przyjmuje
+zakres od 0 do wartości liczby ccc (gdzie 1 oznacza 6 minut, 2 - 2 * 6min
+= 12min, itd.). Licznik ten jest również zerowany po zakończeniu rozmowy,
+otrzymaniu (wysłaniu) <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSa</a>,
+zgłaszaniu żądania do sieci - np. dotyczącego przekierowywań rozmów (jednakże
+wtedy telefon nie zmienia wartości liczników z <b><a href="faq_net5.htm#Menu64">Menu
+10-64</a></b>). Wartość nie zmienia się (jest równa cały czas 0) przy nieaktywnej karcie
+SIM.</li>
+
+<li>
+ccc - maksymalna wartość tzw. licznika T3212: przedział czasu, co jaki
+telefon wysyła informację o swoim położeniu - wykonuje tzw. <a href="faq_net1.htm#PLU">PLU</a>
+(zakres od 1 do 240, gdzie 1 oznacza 6 min pomiędzy aktualizacjami, 240
+oznacza 24 godziny (240*6min)). Liczbę tę otrzymuje telefon z sieci (jeżeli
+jest równa 0, oznacza to, że sieć nie pobiera informacji o położeniu) -
+np. dla <a href="http://www.eragsm.pl/">Ery</a> i <a href="http://www.plusgsm.pl/">Plusa</a>
+jest równa 30 (3h), dla <a href="http://www.idea.centertel.pl/">Idei</a> 2h. Wyświetlana
+normalnie także, gdy karta SIM nie jest aktywna.</li>
+
+<li>
+d - Paging Repeat Period, czasami określany jako DRX
+(Dincontinuous Receive): odstęp czasu, z jakim telefon
+musi włączać odbiornik, żeby sprawdzić, czy ktoś do nas dzwoni (zakres
+od 2 do 9 - im większy, tym jest to robione rzadziej i telefon zużywa mniej
+energii: PRP=2 oznacza ok. 0.95 s, a PRP=9 okres 4.25 s.).
+Z tym parametrem wiąże się jedna ciekawostka: czasy czuwania
+i pracy baterii są najczęściej podawane przy wartości 9 tego parametru.
+</li>
+
+<li>
+ee - DSF (<b>D</b>ownlink <b>S</b>ignalling <b>F</b>ailure). Jeżeli jest
+ujemna, pokazywane jest 0. Maksymalna wartość to 45. Kiedy telefon używa
+kanału <a href="faq_net1.htm#TCH">TCH</a>, pokazywane jest xx.</li>
+
+<li>
+ff - AGC (<b>A</b>utomatic <b>G</b>ain <b>C</b>ontrol) - automatyczna regulacja
+wzmocnienia toru odbiornika telefonu. Im mocniejszy jest sygnał z <a href="faq_net1.htm#BTS">BTSa</a>,
+tym wartość ta maleje (pokazując jak odbiornik telefonu zmniejsza swoje
+wzmocnienie, by uniknąć przesterowania). Jest ona poprawnie podawana tylko
+w czasie używania kanału <a href="faq_net1.htm#TCH">TCH</a>/<a href="faq_net2.htm#SDCC">SDCCH</a>
+(np. rozmowy) i przyjmuje wartości z zakresu 0 - 93 (dB ?).</li>
+
+<li>
+ggggg - w angielskich opisach jest to "VCTCXO AFC DAC control" przyjmująca
+wartości z zakresu -1024 - 1023. W pomocy jest opisana jako AFC (<b>A</b>utomatic
+<b>F</b>requency
+<b>C</b>ontrol)
+- automatyczne dostrajanie odbiornika telefonu do częstotliwości nadawanego
+przez <a href="faq_net1.htm#BTS">BTS</a> sygnału. Im bardziej ta wartość
+odbiega od 0, tym więcej odbiornik telefonu musi korygować swoją częstotliwość
+(zależy ona od kanału używanego do komunikacji z <a href="faq_net1.htm#BTS">BTSem</a>
+- patrz <b><a href="faq_net2.htm#Menu1">Menu 10-1</a></b>), by "dopasować"
+się do <a href="faq_net1.htm#BTS">BTSa</a>.</li>
+
+<li>
+hhh - CH (<b>ch</b>annel): numer kanału używanego do komunikacji z komórką
+(podany dziesiętnie)</li>
+</ul>
+
+<p>W Nokii 3110 test ten wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>TMSI:aaaaaaaa<br>
+T3212:bbb/ccc<br>
+PRP:d&nbsp; ee ff<br>
+w gggg&nbsp; hhh z</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>TMSI(hex)<br>
+T3212 ctr/tim<br>
+PagRP DSF AGC<br>
+S AFC&nbsp;&nbsp; CH&nbsp; B</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Jeżeli po włączeniu telefon nie był zalogowany do żadnej sieci, pokazywane
+są tutaj pewne wartości domyślne (z wyjątkiem <b>TMSI</b>).
+<p>Dla ciekawych: niektóre z tutaj pokazywanych danych znajdziesz również
+w niektórych programach serwisowych (np. w WinTesli należy wybrać z menu
+głównego "Testing", a później "RF Information").
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Informację o tym, ile razy telefon wysyłał informację o swoim położeniu,
+znajdziesz w <b><a href="faq_net5.htm#Menu64">Menu 10-64</a></b>. Jeżeli
+np. wysyłałeś(aś) ostatnio <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSa</a>,
+możesz w przybliżeniu określić (z dokładnością do 6 min), kiedy to nastąpiło
+(o ile było to nie dłużej niż 3h (dla <a href="http://www.eragsm.pl/">Ery</a>
+i <a href="http://www.plusgsm.pl/">Plusa</a>)) - sprawdź wartość parametru
+bbb.</td>
+</tr>
+</table>
+
+<p>A tak wygląda ten test w Nokii 6185/6188:
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 width=100%>
+<tr><td><a href="faq_net1.htm#CDMA">CDMA</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+414 084 222<br>
+062 060 062<br>
+420 366 252<br>
+062 062 062
+</i>
+</tt></td>
+</tr>
+</table>
+</td>
+<td><a href="faq_net1.htm#AMPS">AMPS</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+1X_XSTBY000D<br>
+SYNC_LOS0031<br>
+DEC_SAME0000<br>
+VOTED_BT0000</i>
+</tt></td>
+</tr>
+</table>
+</td></tr>
+<tr><td colspan=2>
+&nbsp;<br><a href="faq_net1.htm#CDMA">CDMA</a><p>
+Tracked PN Offsets (lines 1,3) and signal strengths.
+</td></tr></table>
+
+<p><a NAME="Menu11"></a><b>Menu 10-11</b>
+<br>Identyfikacja aktualnie używanej (ostatnio monitorowanej) sieci
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>CC:aaa NCbbb<br>
+&nbsp; LAC:ccccc<br>
+&nbsp; CH : deee<br>
+&nbsp; CID:fffff</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;<b>MCC&nbsp;&nbsp;&nbsp; MNC<br>
+LocAreaCode&nbsp;<br>
+ServChannel<br>
+&nbsp;&nbsp; CellId</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa - MCC (<b>M</b>obile <b>C</b>ountry <b>C</b>ode): kod kraju, w którym
+działa sieć (260 dla Polski). Podawany dziesiątkowo.</li>
+
+<li>
+bbb - MNC (<b>M</b>obile <b>N</b>etwork <b>C</b>ode): kod sieci (w Polsce:
+01 dla <a href="http://www.plusgsm.pl/">Plusa</a>, 02 dla <a href="http://www.eragsm.pl/">Ery</a>,
+03 dla <a href="http://www.idea.centertel.pl/">Idei</a>). W telefonie w
+systemie PCS 1900 (np. Nokia 6190) numer ten może mieć trzy cyfry. Podawany
+dziesiątkowo.</li>
+
+<li>
+ccccc - LAC (<b>L</b>ocation <b>A</b>rea <b>C</b>ode): kod regionu (dziesiątkowy
+lub szesnastkowy), w którym działa komórka. Wielkość obszaru, na którym
+nie zmienia się LAC komórek, zależy od sieci. Po zmianie LAC telefon wykonuje
+<a href="faq_net1.htm#LocationUpdate">Location
+Update</a>.</li>
+
+<li>
+d - H, jeżeli włączone jest skakanie po częstotliwościach (w przeciwnym
+razie pole jest puste). Informację o tym telefon podaje również w <b><a href="faq_net2.htm#Menu1">Menu
+10-1</a></b> i <b><a href="faq_net3.htm#Menu12">Menu 10-12</a></b>.</li>
+
+<li>
+eee - CH (<b>ch</b>annel): numer kanału używanego do komunikacji z komórką
+(dziesiętny)</li>
+
+<li>
+fffff - CID (<b>C</b>ell <b>Id</b>entifier): numer używanej komórki (każda
+ma swój niepowtarzalny w danym regionie) podawany dziesiątkowo lub szesnastkowo
+</li>
+</ul>
+
+<p>Format LAC i CID (tzn. czy są podawane dziesiątkowo czy szesnastkowo) zależy
+od modelu Twojego telefonu i jego oprogramowania (przykładowo: Nokia 3210 podaje
+je dziesiętnie, Nokia 5110 z nowszym oprogramowaniem również, natomiast ta sama
+Nokia 5110 z oprogramowaniem 4.51 (i starszymi jego wersjami) oraz starsze modele
+(np. Nokia 3110) stosują już format szesnastkowy).
+
+<p>Telefony GSM identyfikują sieć na podstawie numerów MCC i MNC (ich spis
+jest np. pod adresem
+<a href="http://kbs.cs.tu-berlin.de/~jutta/gsm/gsm-list.html">http://kbs.cs.tu-berlin.de/~jutta/gsm/gsm-list.html</a>).
+Napisy '<a href="http://www.eragsm.pl/">ERA GSM</a>', '<a href="http://www.plusgsm.pl/">Plus
+GSM</a>' czy '<a href="http://www.idea.centertel.pl/">Idea</a>' pokazywane
+na wyświetlaczu są zapisane w pamięci telefonu (tzn. to jego producent decyduje,
+że będą takie, a nie inne - sieć komórkowa nie wysyła żadnej nazwy, tylko te dwa numery).
+W momencie, gdy zaczyna działać nowa sieć,
+uaktualniane jest jego oprogramowanie (dopiero po tym zabiegu może on wyświetlać
+jej nazwę literową). Starsze telefony w rodzaju Nokii 2110i
+(albo nowsze bez zaktualizowanego oprogramowania)
+wyświetlają natomiast napisy w stylu PL-03 (rozpoznają, że MCC=260 odpowiada Polsce,
+która z kolei ma oznaczenie międzynarodowe PL).
+Jedna nazwa literowa może być również zmieniona
+przy pomocy odpowiednich programów serwisowych (np. WinTesli -
+z menu głównego należy wybrać "Dealer" i "Operator Settings").
+
+<p>Przy <a href="faq_net1.htm#BTS">opisie BTSów</a> znajdziesz adresy stron
+zawierających np. ich listy z podanymi lokalizacjami, LAC i CID (dla polskich
+sieci oczywiście).
+
+<p>Jeżeli po włączeniu telefon nie był zalogowany do żadnej sieci, pokazywane
+są tutaj pewne wartości domyślne.
+
+<p>W Nokii 3110 menu to wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>CC:aaa NC:bbb<br>
+&nbsp; LAC:cccc<br>
+&nbsp; CH :deee<br>
+w CID:ffff&nbsp; z</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;MCC&nbsp;&nbsp;&nbsp;&nbsp; MNC<br>
+&nbsp;LocAreaCode<br>
+&nbsp;ServChannel<br>
+S CellId&nbsp;&nbsp;&nbsp; B</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>A takie jest w Nokii 6185/6188:
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 width=100%>
+<tr><td><a href="faq_net1.htm#CDMA">CDMA</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+162 054 &nbsp; &nbsp;<br>
+062 062<br>
+186 084<br>
+062 051
+</i>
+</tt></td>
+</tr>
+</table>
+</td>
+<td><a href="faq_net1.htm#AMPS">AMPS</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+11_BETTR0000<br>
+SYNC_SAM0000<br>
+MSG__BTR0000<br>
+SFLG_BTR0000</i>
+</tt></td>
+</tr>
+</table>
+</td></tr>
+<tr><td colspan=2>
+&nbsp;<br><a href="faq_net1.htm#CDMA">CDMA</a><p>
+Tracked PN Offsets (lines 1,3) and signal strengths (only, when phone is in CONV state)
+</td></tr></table>
+
+<p><a NAME="Menu12"></a><b>Menu 10-12</b>
+<br>Parametry aktualnie używanej (ostatnio monitorowanej) sieci
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>CIPHER :aaa&nbsp;<br>
+HOPPING:bbb<br>
+DTX&nbsp;&nbsp;&nbsp; :ccc<br>
+IMSI&nbsp;&nbsp; :ddd</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>CipherValue<br>
+HoppingValue<br>
+DTXValue<br>
+IMSIAttach</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa:
+
+<p>
+<ul>
+<li>
+OFF: telefon nie nadaje</li>
+
+<li>
+A51: telefon nadaje, dane są kodowane algorytmem A5/1 (odmiana trudniejsza
+do złamania i podsłuchania)</li>
+
+<li>
+A52: telefon nadaje, dane są kodowane algorytmem A5/2 (odmiana zaprojektowana
+pierwotnie dla "niepewnych" krajów (np. Iraku). Chodziło o to, aby kraje
+zachodnie (np. USA) mogły podsłuchiwać rozmowy prowadzone w sieciach ewentualnych
+(przyszłych) wrogów. O ile się jednak orientuję, nawet ta słabsza odmiana
+jest ciągle bezpieczna (niezłamana) - mogę się jednak mylić !</li>
+</ul>
+<p>
+</li>
+
+<li>
+bbb - czy jest używane (ON)/wyłączone (OFF) <a href="faq_net1.htm#Hopping">skakanie
+po częstotliwościach</a></li>
+
+<li>
+ccc - czy jest używane (ON) czy nie (OFF) <a href="faq_net1.htm#DTX">DTX</a> przez telefon</li>
+
+<li>
+ddd - czy jest dozwolone (ON) <a href="faq_net1.htm#IMSIattach">IMSI attach</a></li>
+</ul>
+
+<p>Wartości w tym menu są uaktualniane tylko, gdy telefon korzysta z kanału
+<a href="faq_net1.htm#TCH">TCH</a>.
+
+<p>Jeżeli po włączeniu telefon nie był zalogowany do żadnej sieci, pokazywane
+są tutaj pewne wartości domyślne.
+
+<p>Więcej o algorytmach A5/1 i A5/2 możesz poczytać np. na stronie <a href="http://www.scard.org/gsm/">www.scard.org/gsm/</a>.
+
+<p>W Nokii 3110 test ten wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>CIPHER :aaa<br>
+HOPPING:bbb<br>
+DTX&nbsp;&nbsp;&nbsp; :ccc<br>
+w IMSI :ddd z</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>CipheringValu<br>
+HoppingValue<br>
+DTXValue<br>
+S IMSIAttachB</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>W Nokii 6185/6188 w trybie <a href="faq_net1.htm#AMPS">AMPS</a> wygląda inaczej:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>1IN_FAIL0044<br>
+DYN_FAIL01C7<br>
+MIN2_FAI0045<br>
+DYN2_FAI01CB</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu13"></a><b>Menu 10-13</b>
+<br>Informacje o <a href="faq_net1.htm#DTX">DTX</a>
+w aktualnie używanej (ostatnio monitorowanej) sieci
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaaaaaaaaa&nbsp;<br>
+DTX(DEF):bbb<br>
+DTX(BS) :ccc<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>DTXMode<br>
+DefaulDTXSta<br>
+DTXValFromBS<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaaaaaaaaaa: informacja, czy telefon używa <a href="faq_net1.htm#DTX">DTX</a>:
+
+<p>
+<ul>
+<li>DTX:ON - tak, używa</li>
+<li>DTX:OFF - nie używa</li>
+<li>DTX:DEF - telefon używa albo nie (zależy od domyślnego ustawienia - parametru bbb)</li>
+<li>
+NOTALLOWED - telefon nie może "samodzielnie" decydować, czy ma używać <a href="faq_net1.htm#DTX">DTX</a>,
+czy nie (<a href="faq_net1.htm#BTS">BTS</a> na to nie pozwala)</li>
+</ul>
+<p>
+</li>
+
+<li>
+bbb - domyślne ustawienie <a href="faq_net1.htm#DTX">DTX</a>. Wartości
+ON albo OFF.</li>
+
+<li>
+ccc - wartość DTX z <a href="faq_net1.htm#BTS">BTS</a> (na uplinku - kanale
+służącym do komunikacji w kierunku telefon-<a href="faq_net1.htm#BTS">BTS</a>):
+
+<p>
+<ul>
+<li>
+MAY - <a href="faq_net1.htm#BTS">BTS</a> pozwala "decydować" telefonowi,
+czy ma korzystać z <a href="faq_net1.htm#DTX">DTX</a></li>
+
+<li>
+USE - <a href="faq_net1.htm#BTS">BTS</a> wymusza używanie <a href="faq_net1.htm#DTX">DTX</a></li>
+
+<li>
+NOT - <a href="faq_net1.htm#BTS">BTS</a> nie pozwala korzystać z <a href="faq_net1.htm#DTX">DTX</a></li>
+</ul>
+<p>
+</li>
+
+</ul>
+
+<p>Jeżeli po włączeniu telefon nie był zalogowany do żadnej sieci, pokazywane
+są tutaj pewne wartości domyślne.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Jeżeli <a href="faq_net1.htm#BTS">BTS</a> na to pozwala (tzn. jeżeli
+ostatni parametr w tym menu przyjmuje wartość MAY), to przez bezpośrednie
+wejście do tego menu możesz ustawiać, czy telefon ma korzystać (czy nie)
+z <a href="faq_net1.htm#DTX">DTX</a>.</td>
+</tr>
+</table>
+
+<p><a NAME="Menu14"></a><b>Menu 10-14</b>
+<br>Przez bezpośrednie wejście do tego menu, możesz zmienić wartość aa
+z 01 (wartości domyślnej) na 00 (albo odwrotnie).
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;SCREENING &nbsp;<br>
+&nbsp;INDICATOR<br>
+&nbsp;&nbsp; IS aa<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Use menu to&nbsp;<br>
+&nbsp; change<br>
+&nbsp;Screening<br>
+&nbsp;indicator</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu15"></a><b>Menu 10-15</b>
+<br>Ten test jest dostępny w Nokii 5190 (cyfrowym telefonie <a href="faq_net1.htm#GSM">GSM</a>,
+który po włożeniu odpowiedniej przystawki może działać również w analogowym systemie
+<a href="faq_net1.htm#AMPS">AMPS</a>).
+Niestety testowany telefon nie miał jej (jest wkładana pomiędzy "właściwą" słuchawkę
+i baterię) i stąd komunikat o niedostępności tego testu...
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+AMPS display<br>
+not<br>
+available<br>
+&nbsp;</i>
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+CH RxL TxPwr<br>
+MdSt SAT DCC<br>
+ST &nbsp;&nbsp;TxA RxA<br>
+&nbsp;&nbsp;CS STATE
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu17"></a><b>Menu 10-17</b>
+<br>Pozwala włączyć testowanie przez telefon jednego konkretnego kanału
+używanego do kontaktu z komórką (telefon nie szuka wtedy kanału o najsilniejszym
+sygnale, tylko korzysta z podanego przez Ciebie: dla GSM 900 poprawne są
+kanały 1-124, dla GSM 1800 512-885). Każda sieć GSM ma przyporządkowane
+dla siebie kanały z podanych zakresów (tzn. <a href="http://www.plusgsm.pl/">Plus</a>
+nie może korzystać z kanałów <a href="http://www.eragsm.pl/">Ery</a> i
+odwrotnie). Poniżej podaję podział dla różnych sieci:
+
+<p>
+<center>
+<table cellspacing=0 cellpadding=0>
+<tr><td></td><td><center>GSM 900</center></td><td><center>GSM 1800</center></td></tr>
+<tr><td nowrap><center><a href="http://www.tim.it/">TIM</a> (222-01)</center></td><td nowrap><center>8-64 (16 najważniejszych miast) albo 8-50 (poza nimi)</center></td><td nowrap><center>736-760</center></td></tr>
+<tr><td nowrap><center><a href="http://www.omnitel.it/">Omnitel</a> (222-10)</center></td><td nowrap><center>66-118 (16 najważniejszych miast) albo 77-118 (poza nimi)</center></td><td nowrap><center>861-885</center></td></tr>
+<tr><td nowrap><center><a href="http://www.wind.it/">Wind</a> (222-88)</center></td><td nowrap><center>52-75 (poza 16 najważniejszymi miastami)</center></td><td nowrap><center>761-810</center></td></tr>
+<tr><td nowrap><center><a href="http://www.blu.it/">Blu</a> (222-??)</center></td><td nowrap><center>-</center></td><td nowrap><center>811-860</center></td></tr>
+<tr><td nowrap><center><a href="http://www.plusgsm.pl/">Plus GSM</a> (260-01)</center></td><td nowrap><center>1-14 i 37-67 (37 i 67 do testów)</center></td><td nowrap><center>750 - 760, 852 - 884 ?</center></td></tr>
+<tr><td nowrap><center><a href="http://www.eragsm.pl/">Era GSM</a> (260-02)</center></td><td nowrap><center>15-36 i 68-90 (15 i 36 do testów)</center></td><td nowrap><center>736 - 748, 811 - 844 ?</center></td></tr>
+<tr><td nowrap><center><a href="http://www.idea.centertel.pl/">Idea</a> (260-03)</center></td><td nowrap><center>91 - 122 (docelowo)</center></td><td nowrap><center>763 - 810</center></td></tr>
+</table>
+</center>
+
+<p>Możesz tu podawać kanały dowolnej sieci (jeżeli masz do niej zabroniony
+dostęp, wyświetlane będą wprawdzie jej parametry, ale nie będzie możliwe
+wykonywanie połączeń (z wyjątkiem telefonów alarmowych), itp.) Po włączeniu
+testu nie będzie możliwe przeprowadzanie <a href="faq_net4.htm#Handover">handoverów</a>.
+
+<p>Aby włączyć test, należy (czasami ta procedura nie działa - pomaga np.
+wyłączenie i włączenie telefonu; nie wiem, dlaczego tak się dzieje):
+
+<p>
+<ul>
+<li>
+zapisać (zmienić) żądany kanał na pozycji 33 w książce telefonicznej na
+karcie SIM (<b><font color="#FF6666">nie w pamięci telefonu !</font></b>)
+- <b><font color="#FF6666">jeżeli wpiszesz tam 0, test nie będzie się włączał
+!</font></b>. Nie jest to jednak konieczne (o ile numer ten był tam wcześniej
+zapisany - sprawdzisz to np. kodem <b>33#</b>).</li>
+
+<li>
+przejść do <b>Menu 10-17</b></li>
+
+<li>
+jeszcze raz wejść bezpośrednio do <b>Menu 10-17</b></li>
+
+<li>
+wyłączyć i włączyć telefon</li>
+</ul>
+
+<p>Jeżeli chcesz wyłączyć test:
+
+<p>
+<ul>
+<li>
+wejdź bezpośrednio do <b>Menu 10-17</b></li>
+
+<li>
+wyłącz i włącz telefon (czasami nie jest to konieczne - telefon
+powinien wyłączyć test, gdy utraci sygnał na danym kanale; lepiej
+jednak jest to zrobić, aby uniknąć jakichkolwiek problemów)</li>
+</ul>
+
+<p>Ciekawe wyniki uzyskiwałem, gdy (zgadnij, dlaczego ?):
+
+<p>
+<ul>
+<li>
+telefon miał włączony test</li>
+
+<li>
+w <b><a href="#Menu19">Menu 10-19</a></b> zmieniałem ustawienie na REVERSE</li>
+
+<li>
+wyłączałem test, ale nie telefon (tzn. w celu wyłączenia testu tylko raz
+wchodziłem bezpośrednio do <b>Menu 10-17</b>)</li>
+</ul>
+
+<p>W takich wypadkach telefon potrafił "skakać" po kanałach i monitorować
+kanały różnych sieci (nie tylko mojej) - mogłem np. obejrzeć LAC, CID używanych
+komórek. Co więcej, nie potrafił się zalogować do mojej macierzystej sieci
+(chociaż wyświetlał dane jej kanału). Kilka razy udało mi się uzyskać komunikat
+"Insert SIM card" (albo "SIM card rejected" - "Karta SIM odrzucona") -
+ten efekt wynikał prawdopodobnie z błędu w oprogramowaniu. Po wyłączeniu
+i włączeniu telefonu wszystko wracało do normy.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Opisany przeze mnie efekt możesz wykorzystać do szybszego rozładowania
+akumulatora (jednakże wtedy Twój telefon nie będzie dostępny w sieci).
+
+<p>Jeżeli chcesz sprawdzać dane innej niż Twoja sieć, możesz też użyć innej
+metody:
+
+<ol>
+<li>przejdź do testu, który pozwoli Ci odczytać poszukiwane informacje
+dla interesującej Cię sieci</li>
+<li>przejdź do ręcznego wyboru sieci (np. <b>Menu 4-2-4-2</b> w Nokii 5110)</li>
+<li>wybierz sieć, której dane chcesz obejrzeć</li>
+<li>poczekaj kilka sekund (wymagany jest odpowiedni czas, aby telefon zaczął się
+logować do danej sieci) i naciśnij "Quit" (a NIE klawisz (c)) albo poczekaj,
+aż telefon wyświetli jakiś komunikat (np. że nie mógł się zalogować).</li>
+<li>naciśnij szybko klawisz (c), aby wyjść z menu telefonu</li>
+</ol>
+
+<p>Przez kilka sekund telefon będzie pokazywał dane interesującej Cię sieci...
+
+</td>
+</tr>
+</table>
+
+<p>Słyszałem o przypadkach, iż test ten włączał się samoistnie po zaniku
+sygnału sieci. Ja się z tym nie spotkałem. Jeżeli jednak zdarzyło (zdarza)
+się to Tobie, wpisz 0 na pozycji 33 w książce telefonicznej. I już...
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Ponieważ Nokie serii 51xx/61xx nie posiadają możliwości "wymuszenia"
+zapisywania numeru pod określoną pozycją w książce telefonicznej, poleciłbym:
+<ol>
+<li>
+sprawdzenie, czy mamy już zapisany jakiś numer pod tą pozycją (wpisujemy
+<b>33#</b>)</li>
+
+<li>
+jeżeli telefon wyświetlił 'Błędna pozycja' ('Invalid location'), wpisujemy
+tyle telefonów do książki, aż nie zobaczymy tego komunikatu (powtarzając
+oczywiście sprawdzanie z punktu 1)</li>
+
+<li>
+po wyświetleniu się numeru musimy dojść do tego, jaka jest nazwa, pod którą
+jest on zapisany w książce telefonicznej. Można to zrobić na dwa sposoby:
+
+<p>
+<ol>
+<li>
+po prostu przypomnieć sobie (albo przejrzeć całą książkę telefoniczną)</li>
+
+<li>
+wyłączyć nadajnik telefonu w <b><a href="faq_net4.htm#Menu45">Menu 10-45</a></b>
+i zadzwonić pod ten numer (telefon przy wybieraniu numeru wyświetli nazwę
+przypisaną do numeru - znajdziesz ją również na liście ostatnio wybieranych
+połączeń)</li>
+</ol>
+<p>
+</li>
+
+<li>
+edytujemy książkę telefoniczną (ten numer) - możemy np. zmienić nazwę albo
+numer (kanału)</li>
+
+<li>
+gdy telefon spyta się, czy zastąpić stary numer nowym czy zapisać pod inną
+pozycją, wybieramy to pierwsze</li>
+</ol>
+
+<p>Do zapisania numeru pod określoną pozycją można użyć również innych modeli
+Nokii (np. 2110), telefonów innych producentów albo odpowiedniego oprogramowania.
+Przykładowo: w programie <a href="http://www.fkn.pl/faqs/ncdsfaq.html">Nokia Cellular Data Suite</a>
+należy wyeksportować listę numerów do pliku, otworzyć go w dowolnym edytorze,
+zmienić i z powrotem wgrać do telefonu...
+</td>
+</tr>
+</table>
+
+<p>
+<center><table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt>&nbsp; BTS TEST &nbsp;<br>
+&nbsp;&nbsp;&nbsp; aaa<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Use menu to&nbsp;<br>
+toggle BTS<br>
+test ON/OFF<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table></center>
+
+<p>
+<ul>
+<li>
+aaa - przyjmuje wartości "ON" albo "OFF"</li>
+</ul>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Wbrew pozorom (wszak telefon automatycznie szuka najlepszego dla nas
+sygnału) włączenie tego testu może się przydać, gdy:
+
+<p>
+<ul>
+<li>
+chcesz wymusić korzystanie z konkretnej komórki (np. chcesz sprawdzić,
+czy możliwe jest skorzystanie z komórki znajdującej się 20 km od Ciebie)</li>
+
+<li>
+nie chcesz działać w roamingu (podwyższa to przecież opłaty) np. przy granicy
+kraju (telefon uznał, że sygnał sieci sąsiada jest mocniejszy i z niego
+korzysta) - przełączasz na kanał używany przez Twoją macierzystą sieć i
+już...</li>
+
+<li>
+druga dostępna sieć ma dość silny sygnał (np. -85 dBm), a Twoja macierzysta
+sieć z kolei bardzo słaby (np. -100 dBm) - bez użycia kanału Twojej sieci
+telefon może mieć duże kłopoty z zalogowaniem się do niej</li>
+
+<li>
+chcesz monitorować stan kanału, którego sygnał jest bardzo słaby - otrzymywałem
+informacje, że najniższa zmierzona w ten sposób wartość wynosiła -118 dBm.</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<p>W Nokii 3210 obsługa tego testu jest najprawdopodobniej niedopracowana - wielu
+użytkowników tego telefonu ma problemy z jego włączaniem i wyłączaniem.
+
+<p><a NAME="Menu18"></a><b>Menu 10-18</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>To menu pozwala włączyć na stałe podświetlanie wyświetlacza i klawiszy
+(LIGHTS ON). Jest to świetny sposób na szybsze rozładowywanie baterii.
+W ten sposób firma <a href="http://www.nokia.com">Nokia</a> ufundowała
+nam również lampkę - możesz z jej pomocą np. sprawdzić rozkład jazdy, położenie
+na mapie, być lepiej widoczny na drodze :-), itd. Jest tylko jeden warunek:
+musisz mieć włączony jakiś test w monitorze sieci.
+
+<p>Jeżeli je włączymy i wyłączymy, światełko wyłączy się na stałe (nie
+będzie reagować na klawisze) na kilka minut (dobre do gier - oszczędza
+akumulator)...
+
+<p>Światełko możesz też włączyć na stałe, jeżeli podłączysz zestaw samochowy
+(albo go zasymulujesz - patrz <b><a href="faq_net5.htm#Menu75">Menu 10-75</a></b>)
+i opcja "Lights" (<b>Menu 2-5</b> w Nokii 5110) będzie ustawiona na "All".
+I to BEZ włączonego monitora sieci (ani tym bardziej żadnego testu) !</td>
+</tr>
+</table>
+
+<p>Zmiana przez bezpośrednie wejście do tego menu.
+
+<p>
+<center><table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt>&nbsp;&nbsp; LIGHTS&nbsp; &nbsp;<br>
+&nbsp;&nbsp;&nbsp; aaa<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Use menu to&nbsp;<br>
+&nbsp; toggle<br>
+&nbsp; lights<br>
+&nbsp; ON/OFF</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table></center>
+
+<p>
+<ul>
+<li>
+aaa - przyjmuje wartości "ON" albo "OFF" (domyślnie)</li>
+</ul>
+<p>
+
+<a NAME="Menu19"></a><b>Menu 10-19</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Każdy operator przed oddaniem do normalnego użytku (po naprawie, wybudowaniu...)
+stacji bazowej (<a href="faq_net1.htm#BTS">BTS</a>) testuje wchodzące w
+jej komórki. Normalny telefon GSM odczytuje tę informację i nie próbuje
+z nich skorzystać. Korzystając z tego menu możesz jednak ustawić swój tak,
+że będzie to robił (należy ustawić na DISCARD) - możesz w ten sposób "powiększyć"
+zasięg swojej sieci (np. obecnie jest to jedyna metoda pozwalająca korzystać
+z budowanej (testowanej) <a href="http://www.idea.centertel.pl/">Idei</a>
+pracującej w paśmie 900 MHz).
+
+<p>Jeżeli chcesz, aby telefon próbował korzystać tylko z testowanych komórek,
+ustawiasz to menu na REVERSE (jezeli nie ma takich w okolicy, możesz spowodować,
+że nikt nie będzie mógł zadzwonić z Twojego telefonu ani dodzwonić się
+do Ciebie - dobre, jak chcesz zablokować telefon ?).
+
+<p>Przy ustawieniu na ACCEPTED telefon używa tylko oddanych do użytku komórek
+(zachowuje się jak każdy inny).</td>
+</tr>
+</table>
+
+<p>Informacja o statusie komórki nadawana jest w kanale <a href="faq_net2.htm#BCCH">BCCH</a>
+jako wartość parametru CELL_BARRED. Zmiana ustawienia przez bezpośrednie
+wejście do tego menu (jeżeli jednak wcześniej włączyłeś(aś) test w <b><a href="#Menu17">Menu
+10-17</a></b>, używana komórka może mieć inny status niż tutaj wybrany
+(np. tutaj wybrałeś(aś) tylko komórki testowane, a telefon korzysta z normalnej)).
+
+<p>Po zmianie ustawienia telefon je uwzględnia przy następnych pomiarach
+jakości sygnału (żeby mu pomóc, możesz spróbować wykonać połączenie, zmusić
+go do szukania sieci (ustawić jej ręczny wybór) albo po prostu przez dłuższy
+czas trzymać jego antenę (np. palcami)).
+
+<p>Czasami telefon może nie znajdować komórek o ustawionym tu statusie
+i wyświetlać dane komórek drugiej sieci o tym statusie (np. kiedyś ustawiłem
+to menu na REVERSE i telefon zaczął mi wyświetlać testowane komórki <a href="http://www.plusgsm.pl/">Plusa</a>
+(bo nie znalazł takowych w <a href="http://www.eragsm.pl/">Erze</a>)).
+Informacje o statusie komórek znajdziesz w <b><a href="faq_net2.htm#Menu1">Menu
+10-1</a></b> do <b><a href="faq_net2.htm#Menu5">Menu 10-5</a></b>.
+
+<p>
+<center><table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt><nobr>&nbsp; CELL BARR&nbsp;<br>
+&nbsp; ACCEPTED<br>
+&nbsp;</nobr></tt></td>
+</tr>
+</table>
+
+<p>Telefon zachowuje się jak każdy inny (domyślnie)</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt><nobr>&nbsp; CELL BARR&nbsp;<br>
+&nbsp; REVERSE<br>
+&nbsp;</nobr></tt></td>
+</tr>
+</table>
+
+<p>Używane są tylko testowane komórki</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<br><tt><nobr>&nbsp; CELL BARR&nbsp;<br>
+&nbsp; DISCARD<br>
+&nbsp;</nobr></tt></td>
+</tr>
+</table>
+
+<p>Korzystasz ze wszystkich możliwych komórek</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><nobr><tt><b>Use menu to&nbsp;<br>
+toggle cell<br>
+barr status<br>
+DIS/ACC/REV</b></tt></nobr></td>
+</tr>
+</table>
+</td>
+</tr>
+</table></center>
+
+<p><a NAME="Menu20"></a><b>Menu 10-20</b>
+<br>Informacje o baterii i trybie pracy ładowarki telefonu
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aaa&nbsp;&nbsp; bbbbb<br>
+Tccc&nbsp;&nbsp;&nbsp;&nbsp; ddd<br>
+Ceee&nbsp;&nbsp;&nbsp; Wfff<br>
+gggg&nbsp;&nbsp;&nbsp; hhhh</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>BatVol ChMod<br>
+BTemp ChTime<br>
+ChrgVol Pwm<br>
+&nbsp;BTyp&nbsp; BFDC</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaa - wartość napięcia baterii (V/100 - przykładowo 7.19V jest pokazywane
+jako 719). Zakres 0.00 - 9.99 V</li>
+
+<li>
+bbbbb - informacje o ładowaniu baterii:
+
+<p>
+<ul>
+<li><tt>xxxxx</tt> - nie podłączono ładowarki albo nie ma procesu ładowania</li>
+<li><tt>BatCk</tt> - sprawdzanie stopnia naładowania akumulatora (dzieje się tak np. po każdym użyciu kanału <a href="faq_net1.htm#TCH">TCH</a> (czyli np. rozmowie) w trakcie ładowania akumulatora NiMH)</li>
+<li><tt>BSIFa</tt> - ładowanie zostało przerwane (błąd sprawdzania BSI (<b>B</b>attery <b>S</b>ize <b>I</b>ndicator):
+jednego ze styków baterii podłączonego wraz z masą (BGND) do opornika wewnątrz akumulatora
+- dzięki pomiarowi jego oporu telefon może określić rodzaj podłączonej akumulatora))</li>
+<li><tt>CelBr</tt> - ładowanie zostało przerwane (któraś z cel akumulatora ma defekt)</li>
+<li><tt>ChaCk</tt> - EM sprawdza ładowarkę</li>
+<li><tt>Charg</tt> - ładowanie</li>
+<li><tt>ColdC</tt> - ładowanie zimnej baterii</li>
+<li><tt>ColdM</tt> - akumulator jest zimny, trwa ładowanie podtrzymujące</li>
+<li><tt>CurFa</tt> - ładowanie zostało przerwane (błąd sprawdzania natężenia prądu z ładowarki)</li>
+<li><tt>DisCh</tt> - rozładowywanie akumulatora</li>
+<li><tt>Faile</tt> - błąd</li>
+<li><tt>FastC</tt> - szybkie ładowanie</li>
+<li><tt>FullM</tt> - akumulator pełny, trwa ładowanie podtrzymujące</li>
+<li><tt>F_Che</tt> - sprawdzanie procesu szybkiego ładowania</li>
+<li><tt>HotM&nbsp;</tt> - akumulator jest gorący, trwa ładowanie podtrzymujące</li>
+<li><tt>I_Che</tt> - inicjacja sprawdzania parametrów ładowania (po niej pokazuje się komunikat 'Ładuje' ('Charging'))</li>
+<li><tt>InitC</tt> - proces ładowania jest inicjowany</li>
+<li><tt>L_Che</tt> - sprawdzanie procesu ładowania akumulatora LiION</li>
+<li><tt>LiAFu</tt> - poziom parametru fff (Pwm) jest ponad dopuszczalny limit dla naładowanego akumulatora</li>
+<li><tt>LiDCH</tt> - ładowanie DCH (prawdopodobnie podtrzymujące) akumulatora LiION</li>
+<li><tt>LiFul</tt> - parametr fff (Pwm) przekroczył dopuszczalny limit dla naładowanego akumulatora przez określony czas (określony dla naładowanego akumulatora)</li>
+<li><tt>LiHot</tt> - ładowanie gorącego (nagrzanego) akumulatora LiION</li>
+<li><tt>LithC</tt> - ładowanie akumulatora LiION</li>
+<li><tt>LiTxO</tt> - ładowanie akumulatora LiION, włączony nadajnik telefonu (rozmowa)</li>
+<li><tt>LNFTx</tt> - ładowanie akumulatora LiION (ale zużywane jest tyle energii, że faktycznie nie jest doładowywany), włączony nadajnik telefonu (rozmowa)</li>
+<li><tt>M_Che</tt> - sprawdzanie procesu ładowania podtrzymującego</li>
+<li><tt>MaBFD</tt> - ładowanie podtrzymujące (BFD)</li>
+<li><tt>Maint</tt> - ładowanie podtrzymujące</li>
+<li><tt>TmpFa</tt> - ładowanie zostało przerwane (telefon nie mógł odczytać natężenia opornika
+NTC w akumulatorze podłaczonego do złącza BTEMP i BGND akumulatora i w związku z tym nie mógł określić temperatury tegoż akumulatora)</li>
+<li><tt>TxNoF</tt> - ładowanie akumulatora NiMH (ale zużywane jest tyle energii, że faktycznie nie jest doładowywany), włączony nadajnik telefonu (rozmowa)</li>
+<li><tt>TxOnC</tt> - ładowanie baterii NiMH, włączony nadajnik telefonu (rozmowa)</li>
+<li><tt>VolFa</tt> - ładowanie zostało przerwane (błąd sprawdzania napięcia z ładowarki)</li>
+</ul>
+<p>
+</li>
+
+<li>
+ccc - temperatura akumulatora (np. T+27 oznacza +27 stopni C). Bardzo rzadko
+(czasami, jeżeli telefon jest włączony i przez dłuższy czas nieużywany
+(brak rozmów, itp. - niski pobór prądu z akumulatora)), temperatura tu
+podawana może być równa temperaturze otoczenia (w więc masz wtedy termometr).
+Gdybyś potrzebował(a) temperatury w stopniach Fahrenheita, do przeliczenia
+użyj wzoru F = 32 + 9C/5 (gdzie F i C to oczywiście odpowiednie temperatury).
+Temperatura akumulatora LiION jest również widoczna w <b><a href="#Menu23">Menu
+10-23</a></b>.</li>
+
+<li>
+ddd - czas ładowania w godzinach (pierwsza cyfra) i minutach (2 ostatnie
+cyfry). Zerowany po rozpoczęciu ładowania (nie zawsze: telefon nie robi
+tego, gdy:
+
+<p>
+<ul>
+<li>
+nie zostało zakończone poprzednie ładowanie akumulatora</li>
+
+<li>
+parametry prądu z sieci elektrycznej nie spełniają pewnych wymogów (jeżeli
+podłączałem ładowarkę w pewnych miejscach, nie było to wykonywne)).</li>
+</ul>
+
+<p>Zaobserwowałem to również w Nokii 6110 po zmianie baterii (np. z LiION
+na NiMH). Zaczyna odliczać czas po podłączeniu ładowarki. Jeżeli akumulator
+jest naładowany albo odłączysz ładowarkę, zatrzymuje się.
+</li>
+
+<li>
+eee - napięcie ładowania (V/100). Bateria nie jest ładowana prądem stałym,
+tylko pulsującym (wskaźnik się ciągle zmienia). Zakres 0.0 - 18.7 V. Po
+zakończeniu ładowania trwa tzw. ładowanie podtrzymujące (patrz opis niżej)</li>
+
+<li>
+fff - kontrola ładowania (Charge control output). Podawana dziesiętnie
+(zakres 000 - 255)</li>
+
+<li>
+ggg - pojemność akumulatora w mAh (według opisów angielskich i pomocy monitora
+w Nokii 3110 BSI pomnożone przez 4): w przypadku akumulatora LiION
+jest to podawana dokładnie taka wartość, jak na jej obudowie; w akumulatorach
+NiMH może się różnić nawet o 200 mAh i zmieniać w zależności od temperatury
+(czy jest związane z efektem pamięciowym ?)</li>
+
+<li>
+hhhh - licznik pozwalający ocenić czas do naładowania
+akumulatora: kiedy aktualne naładowanie jest mniejsze niż ustalony limit,
+wtedy rozpoczyna odliczanie. Jeżeli osiągnie 0, ładowanie zostanie (przynajmniej powinno
+być według angielskich opisów - ja obserwowałem to niezwykle rzadko) zakończone.</li>
+</ul>
+
+<p>W Nokii 3110 menu to wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp; aaa&nbsp; bbbbb<br>
+&nbsp;Tccc&nbsp;&nbsp; ddd<br>
+&nbsp;Ceee&nbsp; Wfff<br>
+w gggg hhhh z</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>BatVol ChMode<br>
+BTemp ChrTime<br>
+ChrgVol&nbsp; Pwm<br>
+S 4BSI BFDC B</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+bbbbb - w tym telefonie przyjmuje dodatkowo wartość NOTCH (brak ładowania)</li>
+</ul>
+
+<p>W Nokii 9110 przyjmuje zaś następujący wygląd:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaa&nbsp;&nbsp; bbbbbb<br>
+Tccc&nbsp;&nbsp;&nbsp; ddd<br>
+i Ceee&nbsp; Wfff<br>
+&nbsp;gggg&nbsp;&nbsp; hhhh</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>BatVol&nbsp; ChMod<br>
+BTemp&nbsp;&nbsp; ChTime<br>
+ChrgVol Pwm<br>
+BTyp&nbsp;&nbsp;&nbsp; BFDC</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+i - informacja o tym, czy do telefonu jest podłączona ładowarka podróżna (wartość
+"1") czy nie (wartość "0").</li>
+</ul>
+
+<p>Nazwa szybkie ładowanie (Fast Charging - FastC) oznacza ładowanie większym
+prądem i przy sprawnej ładowarce na pewno nie uszkodzi Twojego akumulatora.
+
+<p>Po zakończeniu ładowania akumulatora wykonywane jest tzw.
+ładowanie podtrzymujące (akumulator zaczyna się przecież od razu rozładowywać;
+jeżeli w tym czasie do telefonu jest ciągle podłączona
+ładowarka, przez doładowywanie niewielkim prądem może uzupełnić powstałe straty energii).
+
+<p>Problemy i informacje związane z akumulatorami (np. informacje o szybkim ładowaniu,
+ładowaniu podtrzymującym) zostały omówione i podane na bardzo dobrej stronie
+<a href="http://www.telefon.pl/jpzr/kck/technika/001/index.html">www.telefon.pl/jpzr/kck/technika/001/index.html</a>.
+
+<p>Dla ciekawych: niektóre z tutaj pokazywanych danych znajdziesz również
+w niektórych programach serwisowych (np. w WinTesli należy wybrać z menu
+głównego "Testing", a później "ADC Readings...").
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Ten test pozwala sprawdzić przede wszystkim ładowarkę. Możesz tutaj
+również zobaczyć rzeczywiste parametry akumulatora:
+<ul>
+<li>
+pojemność</li>
+
+<li>
+jego sprawność (np. nie radzę kupować akumulatorów z uszkodzona celą)</li>
+
+<li>
+napięcie (jeżeli jesteś np. na wycieczce, to tutaj możesz zobaczyć, czy
+napięcie z akumulatora będzie odpowiednie do zasilania latarki)</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu21"></a><b>Menu 10-21</b>
+<br>Parametry ładowania (zauważyłem, że pokazywane tu wartości są poprawne
+tylko po przeprowadzeniu rozmowy w jego trakcie - tylko wtedy się zmieniają
+(po jej zakończeniu wyświetlają ostatnie rejestrowane wartości))
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aaaa&nbsp; bbbb&nbsp;<br>
+&nbsp; ccc&nbsp;&nbsp; ddd<br>
+&nbsp; eee&nbsp;&nbsp; fff<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>MTDif MPDif<br>
+BUpV&nbsp; BDownV<br>
+AverV SumMF<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaa - różnica pomiędzy mierzonym napięciem i tym, które ma być osiągnięte
+docelowo w czasie ładowania</li>
+
+<li>
+bbbb - różnica pomiędzy mierzonym napięciem i wynikiem poprzedniego pomiaru,
+znak części ułamkowej nie jest pokazywany.</li>
+
+<li>
+ccc - najwyższe zmierzone napięcie z akumulatora (przy ładowaniu akumulatora
+i jednoczesnym korzystaniu z niego napięcie może się zmieniać)</li>
+
+<li>
+ddd - najniższe zmierzone napięcie z akumulatora</li>
+
+<li>
+eee - przeciętne napięcie</li>
+
+<li>
+fff - suma ustawień parametrów z <b><a href="#Menu22">Menu 10-22</a></b>
+(zakres 0.00 - 9.99, np. 1.53 pokazywane jest jako 153) - według
+moich obserwacji pod uwagę NIE JEST brany parametr DerivCount (Eaaa). Jeżeli
+osiągnie wartość 1.00 albo 0.99, wtedy pokazywany jest wskaźnik pełnego
+naładowania akumulatora (tzn. wtedy przestaje się poruszać wskaźnik po
+prawej stronie wyświetlacza i ładowanie zostaje zakończone).</li>
+</ul>
+
+<p><a NAME="Menu22"></a><b>Menu 10-22</b>
+<br>Wskaźniki pozwalające ocenić parametry ładowania
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;Eaaa&nbsp; Cbbb&nbsp;<br>
+&nbsp;Dccc&nbsp; Rddd&nbsp;<br>
+&nbsp;Ieee&nbsp; Afff&nbsp;<br>
+&nbsp;Tggg&nbsp; Vhhh</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>DeriC ChAm<br>
+&nbsp;VDif VDrop&nbsp;<br>
+&nbsp;VDTi AvDif<br>
+&nbsp;Temp Volt</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>aaa - DerivCount</li>
+<li>bbb - ChargeAmount</li>
+<li>ccc - VolDiffToMax</li>
+<li>ddd - VolDropCnt</li>
+<li>eee - VolDiffTime</li>
+<li>fff - AverDiff</li>
+<li>ggg - temperatura</li>
+<li>hhh - napięcie</li>
+</ul>
+
+<p>Tutaj zobaczysz wartości wskaźników parametrów ładowania. Wszystkie (oprócz
+DerivCount) przyjmują wartości od 0.00 do 1.00 (np. 0.23 jest pokazywane
+jako 023). Po odłączeniu ładowarki wartości tutaj mogą być bardzo różne.
+Litery E, C, D, R, I, A, T i V są wyświetlane, gdy liczba za nimi nie jest
+czterocyfrowa.
+
+<p><a NAME="Menu23"></a><b>Menu 10-23</b>
+<br>Informacje o baterii.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aaaa&nbsp; bbbb<br>
+&nbsp;cccc&nbsp; dddd<br>
+eee fff gggg<br>
+hhh iiiijjjj</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>TxOn&nbsp;&nbsp; TxOff<br>
+ChCur&nbsp; Stdby<br>
+Age CAP Curr<br>
+Tmp CmAhTarg</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+aaaa - napięcie z akumulatora, gdy pracuje nadajnik telefonu (a.aaa mV)</li>
+
+<li>
+bbbb - napięcie z akumulatora, gdy nadajnik
+telefonu jest wyłączony (b.bbb mV)</li>
+
+<li>
+cccc - prąd ładowania (c.ccc mA). Jeżeli ładowarka nie jest podłączona,
+pokazuje się tutaj 0. W Nokii 3210 ZAWSZE równy 0 (prawdopodobnie wynika
+to z błędu w oprogramowaniu tego telefonu).</li>
+
+<li>
+dddd - oczekiwane napięcie z akumulatora w trybie
+czuwania (d.ddd mV). To, czy karta SIM może zatrzymywać swój zegar w tym
+trybie, sprawdzisz w <b><a href="faq_net4.htm#Menu51">Menu 10-51</a></b>.</li>
+
+<li>
+eee - szacowany wiek akumulatora (0 - nowy, 100 -
+stary) dla akumulatora LiION (wartość licznika jest prawdopodobnie
+obliczana na podstawie pomiarów wykonywanych w czasie pracy/rozładowywania
+akumulatora i jego pojemności (odczytanej i dostępnej w <b><a href="#Menu20">Menu
+10-20</a></b>); stąd należy go traktować tylko orientacyjnie !) albo 33
+dla akumulatora NiMH.</li>
+
+<li>
+fff - poziom naładowania akumulatora (25 - 1 kreska, 50 - 2 kreski, 75
+- 3 i 100 - 4) - wartości takie, jak pokazuje wskaźnik po prawej stronie
+wyświetlacza. Wskaźnik ten (i parametr) jest bardzo niedokładny podczas
+ładowania (praktycznie od razu przyjmuje wartość 100) - wtedy lepiej użyj parametrów ii i jjj.</li>
+
+<li>
+gggg - chwilowe zużycie energii wskazywane przez PSM (według opisów angielskich
+w dziesiętnych częściach mA; natomiast poniższe oszacowania czasu
+działania telefonu opierają się na przekonaniu, że są tutaj podawane wartości
+w mA)</li>
+
+<li>
+hhh - temperatura akumulatora LiION (znajdziesz ją również w <b><a href="#Menu20">Menu
+10-20</a></b> - czasami jednak oba te wskaźniki różnią się trochę) albo
+0 (akumulator NiMH)</li>
+
+<li>
+iiii - ile mAh zostało naładowane do akumulatora do tej chwili. Jeżeli
+jest w przybliżeniu równa wartości parametru jjj, ta ostatnia podwyższa
+się (albo kończy się proces ładowania). Parametr ten jest zerowany po każdym
+użyciu kanału <a href="faq_net1.htm#TCH">TCH</a> (np. rozmowie) przeprowadzanej
+w trakcie ładowania (w przypadku akumulatora NiMH) - można w ten sposób
+przedłużać ładowanie praktycznie w nieskończoność. Zauważyłem to również
+w Nokii 6110 przy ładowaniu akumulatora LiION (przy wyłączaniu i włączaniu
+telefonu w trakcie tego procesu). Wartość wskaźnika zmienia się co 14 sekund
+(Nokia 5110 i standardowa ładowarka).</li>
+
+<li>
+jjjj - przy jakiej wartość pojemności akumulatora (w mAh) zostanie zakończony
+następny etap ładowania (patrz opis poprzedniego parametru). Zaobserwowałem
+jego zerowanie w trakcie ładowania akumulatora LiION (przy wyłączaniu i
+włączaniu telefonu w trakcie tego procesu) w Nokii 6110.</li>
+</ul>
+
+<p>Dla ciekawych: niektóre z tutaj pokazywanych danych znajdziesz również
+w niektórych programach serwisowych (np. w WinTesli należy wybrać z menu
+głównego "Testing", a później "ADC Readings...").
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Tutaj możesz sprawdzić np. rodzaj akumulatora (czy jest on LiION czy
+NiMH).</td>
+</tr>
+</table>
+
+<p>Poniżej podaję orientacyjny pobór prądu (może się zmieniać w zależności
+od różnych parametrów) przy korzystaniu z konkretnych kanałów (Nokie 5xxx
+i 6xxx):
+
+<p>
+<ul>
+<li>
+przy nadawaniu (wartość parametru TX - mocy nadawania telefonu - możesz
+sprawdzić w <b><a href="faq_net2.htm#Menu1">Menu 10-1</a></b>) - używaniu
+kanałów
+<a href="faq_net2.htm#SDCC">SDCC</a> i <a href="faq_net2.htm#TFR">TFR</a>
+(Nokia 6110):
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER><td>TX</td><td>pobór prądu (parametr gg)</td></tr>
+<tr ALIGN=CENTER><td>powyżej 19</td><td>92</td></tr>
+<tr ALIGN=CENTER><td>16-18</td><td>99</td></tr>
+<tr ALIGN=CENTER><td>14-15</td><td>105</td></tr>
+<tr ALIGN=CENTER><td>13</td><td>114</td></tr>
+<tr ALIGN=CENTER><td>12</td><td>123</td></tr>
+<tr ALIGN=CENTER><td>11</td><td>136</td></tr>
+<tr ALIGN=CENTER><td>10</td><td>151</td></tr>
+<tr ALIGN=CENTER><td>9</td><td>173</td></tr>
+<tr ALIGN=CENTER><td>8</td><td>198</td></tr>
+<tr ALIGN=CENTER><td>7</td><td>232</td></tr>
+<tr ALIGN=CENTER><td>6</td><td>269</td></tr>
+<tr ALIGN=CENTER><td>5</td><td>300</td></tr>
+</table>
+
+<p>Wniosek: czas pracy baterii może rzeczywiście bardzo zależeć od warunków
+panujących w sieci (a w większości materiałów reklamowych jest on podawany
+(mierzony), gdy telefon nadaje z najmniejszą mocą (najwyższe TX)).
+</li>
+
+<li>
+<a href="faq_net2.htm#AGCH">AGCH</a>: 310 mA w przypadku Nokii 5110 i 6110</li>
+
+<li>
+<a href="faq_net2.htm#CCCH">CCCH</a> i <a href="faq_net2.htm#CBCH">CBCH</a>:
+Nokie 6110 ze starszym oprogramowaniem (np. 4.73) podają odpowiednio 20
+i 34. Nie wiem jednak, czy jest błąd ich oprogramowania (najprawdopodobniej
+są to wartości w mA/10) czy też pobór prądu jest faktycznie tak duży
+(np. w Nokii 5130 wartość ta jest też równa 34). Sprawdziłem,
+że Nokie 5110 (i 6110 z oprogramowaniem 5.31) podają 3 mA, gdy
+używają kanału <a href="faq_net2.htm#CCCH">CCCH</a>. Przypuszczalnie może
+się "opłacić" (dłuższy czas czuwania, itd.) wyłączenie odbioru "nadawania
+komórkowego" w telefonie, o ile go nie obsługuje sieć (po szczególy odsyłam
+<a href="faq_net2.htm#Wylacz504">tutaj</a>).
+W przypadku, gdy telefon pobiera dane <a href="faq_net1.htm#BTS">BTSa</a>
+(który będzie teraz przez niego używany - ma mocniejszy sygnał niż poprzedni
+- szczegóły przy <a href="faq_net1.htm#C2">opisie <b>C2</b></a>), wartość
+ta zmienia się na 220 mA (trwa to dosłownie chwilę).</li>
+
+<li>
+<a href="faq_net2.htm#NSPS">NSPS</a>: 55 zarówno w Nokii 5110 jak i 6110
+(czy jest to wartość w mA, czy w mA/10 ?)</li>
+</ul>
+
+<p>Włączenie podświetlenia zabiera kolejne 90 mA, przy ładowaniu trzeba doliczyć
+kolejne 17 mA.
+
+<p>W Nokii 3210 z kolei te dane się różnią u różnych osób (czy zależy to od wersji oprogramowania, częstotliwości ?):
+<table border=1>
+<tr><td>czuwanie</td><td>pobieranie danych <a href="faq_net1.htm#BTS">BTSa</a></td><td>podświetlenie</td></tr>
+<tr><td>52 mA</td><td>90 mA</td><td>+155 mA</td></tr> <!-- 4.43 Era, Idea bez cellinfo -->
+<tr><td>8 lub 9 mA</td><td>?</td><td>+159 lub +160 mA</td></tr> <!-- Idea 1800 -->
+<tr><td>53, czasami (rzadko i przez chwilę) 8 mA</td><td>93 mA</td><td>+158 lub +159 mA</td></tr> <!-- +GSM 900 mHz -->
+<tr><td>8 mA</td><td>?</td><td>+154 mA</td></tr></table> <!-- Idea 1800 mHz, Plus 900 -->
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Na podstawie znajomości poboru prądu można wyliczyć przybliżony czas
+działania telefonu:
+<ul>
+<li>
+900 mAh / 225 mA = 4 godziny rozmowy (średnio)</li>
+
+<br>Należy pamiętać o początkowym poborze prądu przy użyciu kanału <a href="faq_net2.htm#SDCC">SDCC</a>
+oraz to, że na początku telefon używa pełnej mocy, ktorą potem obniża.
+<li>
+900 mAh / 5,45 mA = 165 godzin czuwania (średnio)</li>
+
+<br>Należy pamiętać, że w stanie czuwania telefon np. musi co jakiś wykonywać
+<a href="faq_net1.htm#PLU">PLU</a></ul>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu24"></a><b>Menu 10-24</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+3476&nbsp; &nbsp; 3481<br>
+BSI: &nbsp; &nbsp; 551<br>
+ET: &nbsp; &nbsp; &nbsp; &nbsp;9<br>
+&nbsp; 111 &nbsp; &nbsp; &nbsp;1</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>V_inst V_avg<br>
+BSI value<br>
+Elapsed time<br>
+RST_m &nbsp;RST_h</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu25"></a><b>Menu 10-25</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+&nbsp; &nbsp; 0&nbsp;  &nbsp; &nbsp; 1<br>
+10059<br>
+&nbsp;5664&nbsp;  &nbsp; 641<br>
+&nbsp; &nbsp; 1&nbsp;  &nbsp; &nbsp; 0
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+Chrgtp #Bars<br>
+alpha<br>
+zeta&nbsp; &nbsp; &nbsp;phi<br>
+noblw&nbsp; nobcr
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<font class="drukuj">
+<br><a class="shref" href="#Top"><small><em>Na początek</em></small></a><br>
+
+<center>
+<p><a href="faq_net0.htm">[Część 1]</a><a href="faq_net1.htm">[Część 2]</a><a href="faq_net2.htm">[Część 3]</a><b>[Część 4]</b><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><a href="faq_net6.htm">[Część 7]</a>
+</center>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<br><p align="RIGHT"><font class='autor' size='1'><a class="autoremail" href="mailto:Marcin Wiącek<Marcin-Wiacek@topnet.pl>">Marcin Wiącek</a> (<a class="autoremail" href="http://marcin-wiacek.topnet.pl">WWW</a>)
+<br>Ostatnia aktualizacja: 4 maja 2000</font>
+
+<script language=JavaScript src='../konw.js'></script>
+</body>
+</html>

@@ -1,0 +1,1618 @@
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+   <meta name="Author" content="Marcin Wiącek">
+   <meta name="Description" content="FAQ dotyczący monitora sieci w Nokiach (NOKIA NetMonitor description)">
+   <meta name="language" content="pl">
+   <meta name="revisit-after" content="15 days">
+   <meta name="Robots" content="all">
+   <meta name="KeyWords" content="3110, 9110, GSM, DCS, Nokia, 3210, 5110, 5130, 6110, 6130, 6150, 8810, FAQ, NetMonitor, monitor sieci, Marcin, Wiącek, Wiacek, Marcin Wiącek, Marcin Wiacek">
+   <title>FAQ - monitor sieci w Nokiach (część 7/7)</title>
+   <link rel="stylesheet" href="../styl.css" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" text="#2B2B69" link="#525FF5" vlink="#525FF5" alink="#2FA030">
+
+<font class="drukuj">
+<p align="RIGHT"><a class="autoremail" href="../glowna.htm">Strona główna</a></p>
+</font>
+<center><font color="#1F409F" size=+2 class="tytul">Monitor sieci w telefonach Nokia (7/7)</font>
+<font class="drukuj">
+<p><a href="faq_net0.htm">[Część 1]</a><a href="faq_net1.htm">[Część 2]</a><a href="faq_net2.htm">[Część 3]</a><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><b>[Część 7]</b>
+</font>
+</center>
+
+<hr noshade width="60%" style="color: #004080" align=center>
+<a NAME="Top"></a>
+
+<font class="drukuj">
+<ol>
+<li><a href="faq_net0.htm#1"><b>Co to jest ?</b></a></li>
+<li><a href="faq_net0.htm#2"><b>Czy jest mi potrzebny ?</b></a></li>
+<li><a href="faq_net0.htm#3"><b>Czy po włączeniu monitora telefon pobiera więcej energii ?</b></a></li>
+<li><a href="faq_net0.htm#4"><b>Jak go włączyć ?</b></a></li>
+<li><a href="faq_net0.htm#5"><b>Jaką wersję monitora mogę włączyć w telefonie ?</b></a></li>
+<li><a href="faq_net0.htm#6"><b>Czy włączenie monitora powoduje utratę gwarancji ?</b></a></li>
+<li><a href="faq_net0.htm#7"><b>W moim telefonie menu monitora ma numer inny niż 10. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#8"><b>W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#9"><b>Jak się nim posługiwać ?</b></a></li>
+<li><a href="faq_net0.htm#10"><b>Czy mogę zepsuć sobie telefon ?</b></a></li>
+<li><a href="faq_net1.htm#11"><b>Słowniczek</b></a></li>
+<li><a href="faq_net2.htm#12"><b>Znaczenie poszczególnych testów</b></a></li>
+<li><a href="#13"><b>Można też użyć programu...</b></a></li>
+<li><a href="#14"><b>Czy można korzystać z monitora sieci, gdy nie ma w telefonie karty SIM, nie został podany jej PIN lub jest nieaktywna ?</b></a></li>
+<li><a href="#15"><b>W jaki sposób mogę wyłączyć monitor sieci ?</b></a></li>
+<li><a href="#16"><b>Czy powinienem wyłączyć monitor sieci przed oddaniem telefonu do serwisu ?</b></a></li>
+<li><a href="#17"><b>Czy po wyłączeniu monitora sieci będę go mógł włączyć ponownie ?</b></a></li>
+<li><a href="#18"><b>Czy monitor sieci jest dostępny także w analogowych Nokiach ?</b></a></li>
+<li><a href="#19"><b>Czy monitor sieci pozwoli na używanie telefonu podobnie jak radiostacji ?</b></a></li>
+<li><a href="#20"><b>Dlaczego w moim telefonie jest znacznie mniej testów niż zostało tutaj opisane ? Czy mogę zwiększyć ich ilość ?</b></a></li>
+<li><a href="#21"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie znajduje się mój rozmówca ?</b></a></li>
+<li><a href="#22"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie się znajduję ?</b></a></li>
+<li><a href="#23"><b>Co to są kody monitora sieci ?</b></a></li>
+<li><a href="#24"><b>Czy jest prawdą, że monitor sieci w telefonie z dodatkowym urządzeniem zmieniającym jego pasmo działa niepoprawnie ?</b></a></li>
+<li><a href="#25"><b>Gdzie znajdę opis protokołu MBUS/FBUS i komendy związane z monitorem sieci ?</b></a></li>
+<li><a href="#Literatura"><b>Użyte materiały</b></a></li>
+<li><a href="#27"><b>Dodatkowe informacje</b></a></li>
+</ol>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<p><a NAME="Menu90"></a><b>Menu 10-90</b>
+
+<p>W Nokii 9110 to menu wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;Cover&nbsp; aaaa<br>
+&nbsp;CarKit bbbb<br>
+&nbsp;Heads&nbsp; cccc<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>CoverCnt<br>
+CarKitCnt<br>
+HeadsetCnt &nbsp;<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>aaaa - ilość otwarć pokrywy</li>
+<li>bbbb - ilość podłączeń zestawu samochodowego</li>
+<li>cccc - ilość podlączeń zestawu słuchawkowego</li>
+</ul>
+
+<p>Ponieważ Nokia 9110 jest w 100% sprzętowo
+zgodna z modelem 6110, zapewne będzie działać ta sama metoda "symulacji"
+zestawu słuchawkowego i samochodowego (patrz <b><a href="faq_net5.htm#Menu75">Menu
+10-75</a></b>). Ten pierwszy możesz również symulować przez użycie
+<b><a href="#Menu92">Menu 10-92</a></b> (przy czym jego użycie nie zwiększa wartości
+licznika z tego menu !). Polecam też zapoznanie się ze stroną
+<A HREF="http://www.fkn.pl/communicator/software/init.html">www.fkn.pl/communicator/software/init.html</A>,
+na której znajdziesz dokładniejsze informacje na temat symulacji obu zestawów.
+
+<p>takie jest w Nokii 5190:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>M:DCS:DO4100<br>
+D:HPA:NTM:NC<br>
+D:REA:OFS:RU<br>
+0000000:000</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+MODESERVSIM&nbsp;<br>
+DCS AMPSMOD<br>
+DPWRAPWRSMC<br>
+PRILIST
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>a tak wygląda w Nokii 7110:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+PS0 aaaa<br>
+EC0 bbbbbbbb<br>
+PS1 cccc<br>
+EC1 dddddddd</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+PS0 FFFE<br>
+EC0 00000003<br>
+PS1 FFF8<br>
+EC1 00000002</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+Page0 Status<br>
+EraseCounter<br>
+Page1 Status<br>
+EraseCounter
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>aaaa - taki sam jak parametr bbbb z <a href="#Menu92">Menu 10-92</a></li>
+<li>bbbbbbbb - taki sam jak parametr dddddddd z <a href="#Menu92">Menu 10-92</a></li>
+<li>cccc - taki sam jak parametr bbbb z <a href="#Menu93">Menu 10-93</a></li>
+<li>dddddddd - taki sam jak parametr dddddddd z <a href="#Menu93">Menu 10-93</a></li>
+</ul>
+
+<p><a NAME="Menu91"></a><b>Menu 10-91</b>
+
+<p>W Nokii 9110:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;&nbsp; RESET&nbsp;<br>
+&nbsp;&nbsp; MISC<br>
+&nbsp; COUNTERS &nbsp;<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp; Use menu &nbsp;<br>
+&nbsp; to reset<br>
+&nbsp;&nbsp;&nbsp; misc<br>
+&nbsp; counters</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Przez bezpośrednie wejście do tego menu możesz wykasować liczniki z <b><a href="#Menu90">Menu
+10-90</a></b>.
+
+<p>W Nokii 7110 to menu jest inne:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+FL&nbsp; 005FC998<br>
+E2&nbsp; &nbsp; 0&nbsp; &nbsp; 0<br>
+PR&nbsp; &nbsp;30 &nbsp; &nbsp;1<br>
+OM&nbsp; &nbsp; 0 0000<br>
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+NextEntry<br>
+Addr &nbsp;Length<br>
+Small&nbsp; &nbsp;Long<br>
+ErCnt&nbsp;ErMask<br>
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu92"></a><b>Menu 10-92</b>
+
+<p>W Nokii 9110 ten test jest następujący:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><br><tt>&nbsp; Headset&nbsp; &nbsp;<br>
+&nbsp;&nbsp;&nbsp; xxx<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;Use menu to<br>
+&nbsp;&nbsp; toggle<br>
+&nbsp;&nbsp; headset<br>
+&nbsp;&nbsp; ON/OFF</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Przez bezpośrednie wejście do tego menu możesz włączyć/wyłączyć profil
+"headset" dostępny po podłączeniu zestawu słuchawkowego (którego oczywiście
+nie musisz już mieć) - xxx może przyjmować wartości ON albo OFF. Po jego użyciu
+nie zwiększają się wartości licznika z <a href="#Menu90">Menu 10-90</a>.
+Polecam też zapoznanie się ze stroną
+<A HREF="http://www.fkn.pl/communicator/software/init.html">www.fkn.pl/communicator/software/init.html</A>,
+na której znajdziesz dokładniejsze informacje na temat dostępności tego profilu w tym telefonie.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Użyj tego menu, jeżeli potrzebujesz funkcji 'Automatic Answer' ('Odbiór
+samoczynny') polegającej na odebraniu połączenia przez telefon już po jednym
+dzwonku. Funkcja ta pokazuje się w menu nowszych modeli Nokii tylko przy
+podłączonym zestawie (w starszych telefonach - np. Nokii 2110i jest dostępna
+zawsze).</td>
+</tr>
+</table>
+
+<p>a w Nokii 7110 wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+EP aaaa bbbb<br>
+#0&nbsp; &nbsp; &nbsp; cccc<br>
+&nbsp; &nbsp; dddddddd<br>
+eeeeeeeeeeee
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+EP F0F0 FFFE<br>
+#0&nbsp; &nbsp; &nbsp; 0000<br>
+&nbsp; &nbsp; 00000003<br>
+FFFFFFFFFFFF</i>
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+EMark PgStat<br>
+PgType<br>
+EraseCount<br>
+PpInd PpECnt
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>bbbb - taki sam jak parametr aaaa z <a href="#Menu90">Menu 10-90</a></li>
+<li>dddddddd - taki sam jak parametr bbbbbbbb z <a href="#Menu90">Menu 10-90</a></li>
+</ul>
+
+<p><a NAME="Menu93"></a><b>Menu 10-93</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+EP aaaa bbbb<br>
+#1&nbsp; &nbsp; &nbsp; cccc<br>
+&nbsp; &nbsp; dddddddd<br>
+eeeeeeeeeeee
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+EP F0F0 FFF8<br>
+#1 &nbsp; &nbsp; &nbsp;0001<br>
+&nbsp; &nbsp; 00000002<br>
+000000000002</i>
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+EMark PgStat<br>
+PgType<br>
+EraseCount<br>
+PpInd PpECnt
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>bbbb - taki sam jak parametr cccc z <a href="#Menu90">Menu 10-90</a></li>
+<li>dddddddd - taki sam jak parametr dddddddd z <a href="#Menu90">Menu 10-90</a></li>
+</ul>
+
+<p><a NAME="Menu94"></a><b>Menu 10-94</b>
+
+<p>Test w Nokii 3210:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>Vo:&nbsp; aaa bbb<br>
+Pins:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c<br>
+Mode:&nbsp;&nbsp; dddd<br>
+State:&nbsp; eeee</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>V: Req ADC &nbsp;<br>
+Pin Status<br>
+Mode<br>
+Band Ch</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>dddd - jedna z przyjmowanych wartości to AUTO</li>
+<li>eeee - przyjmowane wartości to GS05, GS09</li>
+</ul>
+
+<p>i 7110:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+<i>
+IN E111 F000<br>
+ST &nbsp; &nbsp; &nbsp;0000<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 0000<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 0000
+</i>
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+InExc &nbsp;InRec<br>
+&nbsp; &nbsp; &nbsp; EmuErr<br>
+&nbsp; &nbsp; &nbsp; EnvErr<br>
+&nbsp; &nbsp; &nbsp; RecEr
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu95"></a><b>Menu 10-95</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>1:aaa 4:ddd&nbsp;<br>
+2:bbb 5:eee<br>
+3:ccc 6:fff<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>6 lowest<br>
+values at&nbsp; &nbsp;<br>
+shut down<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu96"></a><b>Menu 10-96</b>
+
+<p>W Nokii 3210:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>VCX0ADC: aaa<br>
+TEMP(C):&nbsp; bb<br>
+TEMP(K): ccc<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>ADC VALUE<br>
+RF TEMP(C)<br>
+RF TEMP(K) &nbsp;<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+ccc - temperatura licznika bb (tylko, że w stopniach Kelwina: K = C + 273)</li>
+</ul>
+
+<p>i 7110:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+Co: 49 A: 279<br>
+Tu: 49 K: 305<br>
+Of: &nbsp;0 &nbsp;C:+32<br>
+V5: &nbsp;2
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+Contrast ADC<br>
+Tuned Kelvin<br>
+Offset &nbsp; &nbsp; C<br>&nbsp;
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu98"></a><b>Menu 10-98</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+WR &nbsp;00000000<br>
+&nbsp; &nbsp; &nbsp; 0 0000<br>
+ER &nbsp;00000000<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 0000
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+WrErrCnt &nbsp; &nbsp;<br>
+WrRtry WrSta<br>
+ErErrCnt<br>
+ErSta<br>
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu99"></a><b>Menu 10-99</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+Ead:aaaa &nbsp; &nbsp;<br>
+Mod:bb<br>
+MODE: cccc<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+EAD value&nbsp; &nbsp;<br>
+Acc. status<br>
+FBUS mode<br>&nbsp;
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<ul>
+<li>bb - rodzaj podłączonych do telefonu akcesoriów dźwiękowych
+(przykładowe wartości:
+HP przy stanie normalnym, HD przy zestawie słuchawkowym - np. HDC-9P).
+W innych telefonach ta informacja jest podawana w
+<a href="faq_net5.htm#Menu75">Menu 10-75</a></li>
+<li>cccc - "FBUS" przy połączeniu kablem FBUS lub MBUS od starszych modeli
+Nokii (5xxx, 6xxx) albo poprzez Irdę</li>
+</ul>
+
+<p><a NAME="Menu100"></a><b>Menu 10-100</b>
+
+<p>Test z Nokii 9110:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>a&nbsp; b&nbsp;<br>
+c&nbsp; ddd&nbsp;&nbsp;&nbsp; e&nbsp;<p>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>UWS DWS<br>
+T1&nbsp;&nbsp; N1&nbsp;&nbsp; T2<p>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>i 7110:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+004D63&nbsp; &nbsp;5.0<br>
+0018D1&nbsp; &nbsp;1.6<br>
+05B1DD&nbsp; 94.0<br>&nbsp;
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+MemUseT %Use<br>
+MemRelT %Rel<br>
+MemUnuT %Unu<br>&nbsp;
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Informacje o wykorzystaniu pamięci telefonu.
+W tym momencie nie jestem pewien, o jaką dokładnie pamięć chodzi (po dodaniu
+wpisu do książki telefonicznej prawdopodobnie jest tutaj podawana pamięć książki)
+
+<p><a NAME="Menu101"></a><b>Menu 10-101</b>
+
+<p>Test z Nokii 9110:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp; aaaaaaaa<br>
+&nbsp; bbbbbbbb<br>
+&nbsp; cccccccc &nbsp;<br>
+&nbsp; dddddddd</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>TX Frame Cnt<br>
+RX Frame Cnt<br>
+TX Retx Cnt<br>
+RX Tetx Cnt</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Wszystkie wartości są podawane w cyfrach szesnastkowych.
+
+<p>i 7110:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+#0 &nbsp;0 &nbsp;#1 &nbsp;0<br>
+#2 &nbsp;0 &nbsp;#3 &nbsp;0<br>
+#4 &nbsp;0 &nbsp;#5 &nbsp;0<br>&nbsp;
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+Pn LoCPn LoC<br>
+Pn LoCPn LoC<br>
+Pn LoCPn LoC<br>&nbsp;
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu102"></a><b>Menu 10-102</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaaaaaaaaa<br>
+bbbbbbbbbbbb<br>
+ccccccccccc<br>
+&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Data call<br>
+flow control<br>
+info<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu103"></a><b>Menu 10-103</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+100 &nbsp; &nbsp;0 &nbsp;00<br>
+PoolS 01EA6E<br>
+RsrvS 031386<br>&nbsp;
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+%FW %BW FrCo<br>
+PoolSizeLeft<br>
+Reservations<br>&nbsp;
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu104"></a><b>Menu 10-104</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+LOG 00000000<br>
+COD 00000000<br>
+WrA 00000000<br>
+RdA 00000000
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+ErrorLogAddr<br>
+ErrorCode<br>
+WrErrorAddrs<br>
+RdErrorAddrs
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu105"></a><b>Menu 10-105</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+WrC 00000000<br>
+RdC 00000000<br>
+Group&nbsp; &nbsp; &nbsp;00<br>
+Index&nbsp; &nbsp;0000
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+DevWrErrorCo<br>
+DevRdErrorCo<br>
+CallingGroup<br>
+CallingIndex
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu106"></a><b>Menu 10-106</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+RtyDaRd 0000<br>
+RtyDaWr 0000<br>
+RtyHeRd 0000<br>
+RtyHeWr 0000
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+RtyDataRead<br>
+RtyDataWrite<br>
+RtyHeadRead<br>
+RtyHeadWrite
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu107"></a><b>Menu 10-107</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+&nbsp; 1 &nbsp;1 &nbsp;1 &nbsp;1<br>
+LLRS: 000000<br>
+DchsmEr:0000<br>&nbsp;
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+PB GB &nbsp;HB PB<br>
+LastLostSize<br>
+DtChsmErrCo<br>&nbsp;
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu108"></a><b>Menu 10-108</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+FF:FF FF:FF&nbsp;<br>
+FF:FF 00:00<br>
+FF:FF FF:FF<br>
+FF:FF FF:FF
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+Link&LID 0-1<br>
+Link&LID 2-3<br>
+Link&LID 4-5<br>
+Link&LID 6-7
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p><a NAME="Menu110_115"></a><b>Menu 10-110, 10-111, 10-112, 10-113, 10-114, 10-115</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+&nbsp;0 FFFE&nbsp; 0.0<br>
+000002&nbsp; &nbsp;0.0<br>
+000000 100.0<br>
+&nbsp;3 &nbsp;1 0 FFE0
+</i></tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+Pn &nbsp;Sta&nbsp;%Use<br>
+EraseCn %Rel<br>
+NextRec %Unu<br>
+Cu Cl Cc MmC
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Prawdopodobnie związane z przeglądarką i kolejnymi (jest ich 5)
+ustawieniami połączeń do WAP
+
+<p><a NAME="Menu130"></a><b>Menu 10-130</b>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+aaa&nbsp; &nbsp;bbbbbb<p>&nbsp;<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>
+Slide &nbsp;&nbsp;Open<p>&nbsp;<br>&nbsp;
+</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<ul>
+<li>bbbbbb - licznik otwarcia klapki telefonu</li>
+</ul>
+
+<p><a NAME="Menu240"></a><b>Menu 10-240</b>
+<br>Chociaż nie pokazuje żadnych informacji, jego użycie wywołuje:
+
+<p>
+<ul>
+<li>
+wyzerowanie liczników zerowanych przez bezpośrednie wejście do <b><a href="faq_net4.htm#Menu40">Menu
+10-40</a></b>, <b><a href="faq_net5.htm#Menu60">Menu 10-60</a></b> i <b><a href="faq_net5.htm#Menu82">Menu
+10-80</a></b></li>
+
+<li>
+włączenie licznika czasu z <b><a href="faq_net5.htm#Menu82">Menu 10-82</a></b>
+(to samo można uzyskać przez bezpośrednie wejście do <b><a href="faq_net5.htm#Menu81">Menu
+10-81</a></b>).</li>
+</ul>
+
+<p><a NAME="Menu241"></a><b>Menu 10-241</b>
+<br><b><font color="#FF6666">Wyłącza monitor sieci (tzn.
+wyłącznie usuwa z telefonu jego menu) ! Do jego ponownego włączenia
+będziesz musiał(a) użyć metod opisanych w punkcie <a href="faq_net0.htm#4"><i>Jak go włączyć ?</i></a>
+</font></b> Być może
+po jego użyciu potrzebne będzie wyłączenie i ponowne włączenie telefonu
+(żeby zaczęły działać strzałki góra/dół). Może się również okazać, iż
+wspomniane strzałki będą działać wyłącznie wtedy, gdy monitor
+zdeaktywujesz programem (z komputera)...
+
+<p><a NAME="Menu242"></a><b>Menu 10-242</b>
+<br><b><font color="#FF6666">Włącza okrojony monitor sieci
+(tylko testy od 1 do 19). Do włączenia <a href="faq_net0.htm#5">pełnej wersji monitora</a>
+będziesz musiał(a) użyć metod opisanych w punkcie
+<a href="faq_net0.htm#4"><i>Jak go włączyć ?</i></a>
+(telefon nie pozwoli użyć <a href="faq_net6.htm#Menu243">testu
+243</a>, który normalnie włącza pełną wersję monitora - będziesz go mógł(mogła)
+podać jedynie w programie w komputerze uaktywniającym monitor).
+</font></b>
+
+<p><a NAME="Menu243"></a><b>Menu 10-243</b>
+<br>Włącza pełen monitor sieci.
+
+<p><a NAME="Menu250"></a><b>Menu 10-250</b>
+<br>Według angielskich opisów czyści informacje z
+<b><a href="faq_net4.htm#Menu57">Menu 10-57</a></b> (ja tego nie zauważyłem).
+
+<p><a NAME="Menu497"></a><b>Menu 10-497</b>
+<br>Prosta arytmetyka pokazuje, że wywołanie tego menu ma takie same skutki
+jak użycie <b><a href="#Menu241">Menu 10-241</a></b> (<b><font color="#FF6666"><font size=+1>wyłącza
+monitor sieci</font></font></b>). Niektóre jednak strony
+(np.
+<a href="http://www.versamart.com/Nokia5110/nokia5110code.shtml">www.versamart.com/Nokia5110/nokia5110code.shtml</a>
+piszą, że:
+
+<p><i>The tips needs Net Monitor enabled.</i>
+<br><i>Be aware that the trick wil remove Netmonitor in some</i>
+<br><i>sw versions like v4.73 and v5.04.</i>
+
+<p>
+<ol>
+<li><i>Laungh the NetMonitor in your Nokia 51xx / 61xx</i></li>
+<li><i>Execute the test number 497</i></li>
+<li><i>Free calling for about 90 sec should now have been activated.</i></li>
+</ol>
+
+<p><i>The trick has not been comfirmed working yet.</i>
+
+<p>W wolnym tłumaczeniu może to oznaczać: wejdź bezpośrednio do tego testu,
+a przez (około) 90 sekund będziesz mógł(mogła) bezpłatnie dzwonić.
+
+<p>Myślę, że jednak jest to swego rodzaju żart...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="13"></a><font color="#1F409F" size=+2 class="dzial">13. Można też użyć programu...</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Są już programy, które pozwalają śledzić niektóre z tych parametrów
+na ekranie komputera (telefon musi być oczywiście z nim połączony kablem):
+
+<p>
+<ul>
+<li>
+program Andreasa Schmidta (<a href="http://www.aschmidt.de/">www.aschmidt.de/</a>):
+wyświetla on na ekranie komputera to, co pokazuje telefon w wybranym teście
+i pozwala śledzić <a href="faq_net1.htm#BTS">BTSy</a>
+(m.in. porównywać moc ich sygnału).</li>
+
+<li>
+gnokii: tak nazywa się projekt (oficjalna strona - <a href="http://multivac.fatburen.org/gnokii/">http://multivac.fatburen.org/gnokii/</a>)
+i oprogramowanie (najnowsze wersje - <a href="ftp://ftp.inet.cz/pub/People/Pavel.Janik/gnokii/">ftp://ftp.inet.cz/pub/People/Pavel.Janik/gnokii/</a>),
+które ma ambicję stać się <a href="http://www.fkn.pl/faqs/ncdsfaq.html">Nokia
+Cellular Data Suite</a> w Unixie i Linuxie. Już teraz wyświetla ono podobne
+informacje do tych podawanych przez program wymieniony wcześniej (LAC i
+CID komórek) oraz programu <a href="http://www.aschmidt.de/">Andreasa Schmidta</a>.</li>
+
+<li>Logo Manager (<a href="http://clicksave.eu.org/nlm/">http://clicksave.eu.org/nlm/</a>)
+w wersji zarejestrowanej pozwala wyświetlać wyglądy testów monitora.</li>
+
+<li>
+autorstwa N. Hüttischa (<a href="http://www.nobbi.com/">www.nobbi.com/</a>).
+Może działać też np. z Siemensem C10. Jeśli chodzi o Nokię, wymagany jest
+niestety <a href="http://www.fkn.pl/faqs/ncdsfaq.html">Nokia Cellular
+Data Suite</a>. Po rozpakowaniu musisz zmienić w pliku
+<b>monitor.ini</b>
+(jest w archiwum z pobranym programem) parametr <b>comport</b> (podajesz
+tam numer portu, pod którym masz w systemie modemy 'Nokia GSM Data'
+i 'Nokia GSM Voice'). I już... Myślę, iż nie będziesz miał teraz problemów
+z rozpoznaniem wyświetlanych parametrów...</li>
+
+<li>
+Logo Express (<a href="http://memsu1.iam.ntu.edu.tw/~jrywu/">http://memsu1.iam.ntu.edu.tw/~jrywu/</a>
+albo <a href="http://logoexpress.bizland.com/">http://logoexpress.bizland.com/</a>):
+również pokazuje LAC i CID komórek.</li>
+
+<li>
+dostępne pod adresem <a href="http://members.tripod.com/smssend/gsm_csq.htm">http://members.tripod.com/smssend/gsm_csq.htm</a>
+(wersje pod PSIONa, DOSa i Windows): rysują one wykres poziomu sygnału
+sieci (na podstawie sygnału z telefonu), działają chyba tylko z Nokiami
+6xxx.</li>
+
+<li>
+WinTesla: ten komercyjny program serwisowy podaje bardzo dużo różnych i
+szczegółowych danych (tak przynajmniej wynika z opisów na różnych stronach)</li>
+
+<li>
+PC-Locals w wersji 1.3: tutaj dostępne są dwie możliwości:
+
+<p>
+<ol>
+<li>
+w oknie, w którym normalnie aktywowany jest monitor sieci, wpisujesz po
+prostu numer testu - komputer pokazuje to, co wyświetliłby w teście o tym
+numerze telefon.</li>
+
+<li>uruchomienie monitora dostępnego w programie. Należy:
+
+<p>
+<ol>
+<li>wybrać menu 8 (Event Trace)</li>
+
+<li>wybrać menu 9 (Load TRC file)</li>
+
+<li>
+wpisać nazwę pliku TRC (z PC-Locals w wersji 1.3 rozpowszechnionej w Internecie
+jest dostępny plik nse3_433.trc dla Nokii 6110 z oprogramowaniem 4.33)
+odpowiednią dla modelu telefonu i jego oprogramowania (albo nacisnąć Enter
+i wybrać odpowiedni plik). Jeżeli wersja z pliku i wersja telefonu nie
+zgadza się, komputer upewni się, że chcemy załadować wybrany plik (nie
+spowoduje to żadnych skutków typu uszkodzenie telefonu; niemniej jednak
+parametry wyświetlane przez program mogą nie zgadzać się z parametrami
+dostępnymi w monitorze telefonu).</li>
+
+<li>
+wybrać menu 1 (MCU Events)</li>
+
+<li>
+zmienić status zdarzeń, które chcemy śledzić w oknie Trace - robi się to
+szarym klawiszem + po prawej stronie klawiatury (można wyłączyć śledzenie
+zdarzenia, włączyć normalne albo rozszerzone śledzenie). Jeżeli chcemy,
+aby był dostępny monitor wyświetlany po naciśnięciu klawisza F8, musimy
+włączyć śledzenie CONSTANT_WINDOW_TRA (zmienić na NORM albo EXT).</li>
+
+<li>
+wybrać menu 2 (Event Control) i zmienić na On.</li>
+
+</ol>
+</li>
+
+<p>W oknie "Trace" będą teraz wyświetlane monitorowane zdarzenia. Parametry
+sieci możesz też obserwować po naciśnięciu F8. Menu 6 (Break Trace Functions)
+przerywa monitorowanie zdarzeń.</ol>
+</li>
+</ul>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Jeżeli interesują Cię komendy używane przez wspomiane programy
+od odczytywania testów monitora sieci, <a href="faqkable.htm#7">tutaj</a> znajdziesz adresy
+strony WWW z ich opisami.</td>
+</tr>
+</table>
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="14"></a><font color="#1F409F" size=+2 class="dzial">14. Czy można korzystać z monitora sieci, gdy nie ma w telefonie karty SIM, nie został podany jej PIN lub jest nieaktywna ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Według założeń standardu GSM telefon komórkowy zawsze powinien pozwalać
+skorzystać z numeru alarmowego (z reguły 112) - nawet wtedy, gdy został
+zablokowany (tzn. gdy operator nie pozwala korzystać w swojej sieci telefonowi
+o takim <a href="faq_net1.htm#IMEI">IMEI</a>) albo nie ma w nim karty SIM
+(ewentualnie jest ona również zablokowana). Wymogi te powodują, że od momentu
+włączenia Twoja Nokia wyszukuje dostępne sieci komórkowe. Istnieją już
+programy (patrz w <i><a href="#13">Można też użyć programu...</a></i>),
+które wyświetlają na ekranie komputera to, co pokazałby w danym momencie
+telefon w podanym teście. Innymi słowy: jeżeli podłączysz Nokię do komputera
+kablem i użyjesz np. Pc-Locals 1.3 albo programu
+<a href="http://www.aschmidt.de/">Andreasa Schmidta</a>, możesz sobie
+oglądać różne dane podawane normalnie w menu "Net Monitor". W niektórych telefonach
+(sprawdzałem to np. w Nokii 5110) możesz uzyskać do tego menu (w ogóle, do
+menu telefonu) używając gnokii: należy wysłać do telefonu sekwencję
+dtmf (np. uruchmiając gnokii z parameterem "--senddtmf sekwencja", gdzie
+sekwencja składa się z dowolnych liczb).
+
+<p>Dopiero po wpisaniu PINu masz możliwość "normalnego" skorzystania z menu "Net monitor"
+z klawiatury telefonu (o ile oczywiście zostało wcześniej uaktywnione)
+i wszystkich dostępnych w nim ustawień oraz testów (przykładowo: dopiero
+wtedy w <b><a href="faq_net2.htm#Menu6">Menu 10-6</a></b> pokażą się sieci
+"preferowane" oraz "zabronione"). Ciągle też można wyświetlać testy używając
+wymienionych programów (co jest np. przydatne, gdy chcesz monitorować stan
+sieci i nie tracić identyfikacji dzwoniących do Ciebie osób albo sprawdzić
+rodzaj użytego kanału po wpisaniu PINu) - ich działanie jest niezależne
+od tego, czy w telefonie masz uaktywnione menu "Net monitor" i który test
+jest w nim wyświetlany.
+
+<p>Dane karty SIM możesz natomiast odczytać w <b><a href="faq_net4.htm#Menu51">Menu
+10-51</a></b> (o ile oczywiście test ten dostępny w Twojej Nokii) używając
+wspomnianych programów niezależnie od tego, czy został jej podany PIN czy
+nie. Jeżeli nie została ona włożona do telefonu, zobaczysz tam "ERROR1".
+
+<p>Przy użyciu zdeaktywowanej karty SIM masz oczywiście dostęp do testów
+z menu telefonu (o ile oczywiście menu monitora zostało uaktywnione).
+Sieć karty jest normalnie monitorowana. Telefon próbuje się z nią
+skomunikować tylko raz po włączeniu (monitor pokazuje, że używane są kolejno kanały
+<a href="faq_net2.htm#CCCH">CCCH</a>, <a href="faq_net2.htm#AGCH">AGCH</a>,
+<a href="faq_net2.htm#SDCC">SDCC</a> (odświeżane jest wtedy <a href="faq_net2.htm#TA">TA</a>),
+<a href="faq_net2.htm#BCCH">BCCH</a> i <a href="faq_net2.htm#CCCH">CCCH</a>
+- wszystko jak przy normalnej karcie SIM). Później jest to niemożliwe,
+cała operacja jest natomiast powtarzana po resecie telefonu. Z wiadomych względów
+na jego ekranie nie ma nazwy monitorowanej sieci ani jej cellinfo.
+Ciekawostką jest natomiast, że można normalnie np. używać
+<a href="faq_net3.htm#Menu17">test BTS</a>...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="15"></a><font color="#1F409F" size=+2 class="dzial">15. W jaki sposób mogę wyłączyć monitor sieci ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>telefony <a href="faq_net1.htm#GSM">GSM</a>/<a href="faq_net1.htm#DCS">DCS</a>/PCS: 
+
+<p>Należy wybrać w telefonie <a href="#Menu241">test 241</a> ewentualnie użyć któregoś z opisanych
+w punkcie <a href="faq_net0.htm#4"><i>Jak go włączyć ?</i></a> programów (podajesz tam numer 241, wybierasz
+opcję "OFF" czy coś podobnego...).
+
+<p>telefony TDMA 800/TDMA 1900: 
+
+<p>Wejdź do menu służącego do programowania NAM (kod <b>*3001#12345#</b>
+- niektóre źródła podają, że zamiast 12345 należy wpisywać
+kod zabezpieczający (security code) telefonu), ustaw "Field Test display" na "Off" i zresetuj telefon.
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="16"></a><font color="#1F409F" size=+2 class="dzial">16. Czy powinienem wyłączyć monitor sieci przed oddaniem telefonu do serwisu ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Standardowo (fabrycznie) telefony Nokia nie mają włączonego monitora. Jeżeli
+więc oddasz swoją słuchawkę do serwisu, ktoś może uznać, iż robiłeś(aś) z nią różne
+"dziwne" rzeczy (oczywiście tak nie musi być - zależy to od serwisu i osób,
+które będą naprawiać Twoją słuchawkę)... Myślę jednak, iż warto sobie
+oszczędzić (ewentualnych) kłopotów z tym związanych i po prostu zdeaktywować
+menu monitora przed jej oddaniem do niego (powtarzam: nie jest to konieczne,
+niemniej jednak po co mieć później jakieś problemy ?)...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="17"></a><font color="#1F409F" size=+2 class="dzial">17. Czy po wyłączeniu monitora sieci będę go mógł włączyć ponownie ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>TAK ! <a href="faq_net0.htm#4">Włączanie</a> (i <a href="#15">wyłączanie</a>)
+monitora sieci możesz powtarzać w nieskończoność (a nawet raz więcej ;-))
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="18"></a><font color="#1F409F" size=+2 class="dzial">18. Czy monitor sieci jest dostępny także w analogowych Nokiach ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Tak, jest on dostępny w większości Nokii (niezależnie od systemu, w którym
+działają). 
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="19"></a><font color="#1F409F" size=+2 class="dzial">19. Czy monitor sieci pozwoli na używanie telefonu podobnie jak radiostacji ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Nie - jeżeli chcesz sobie bezpłatnie rozmawiać z osobami znajdującymi się
+blisko Ciebie, musisz mieć np. radiostację albo telefon bezprzewodowy.
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="20"></a><font color="#1F409F" size=+2 class="dzial">20. Dlaczego w moim telefonie jest znacznie mniej testów niż zostało tutaj opisane ? Czy mogę zwiększyć ich ilość ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Ten FAQ dotyczy i wymienia testy z RÓŻNYCH modeli Nokii. Jeżeli chcesz powiększyć
+ich ilość, będziesz musiał(a) wymienić więc telefon na taki, który ma bogatszy monitor
+(np. Nokię 7110) albo zmienić w nim oprogramowanie na nowsze - czasami, jak np. w Nokii
+5110, uzyskasz AŻ 1 test (oprogramowanie 5.04 i nowsze mają
+dodatkowy <a href="faq_net5.htm#Menu89">test 89</a>).
+
+<p>Jeżeli natomiast masz TYLKO 19 pierwszych testów, masz uaktywniony TYLKO
+podstawową wersję monitora - włącz sobie pełną (<a href="faq_net0.htm#5">tutaj</a>
+jest więcej informacji na ten temat).
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="21"></a><font color="#1F409F" size=+2 class="dzial">21. Czy mogę stwierdzić z pomocą monitora sieci, gdzie znajduje się mój rozmówca ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>NIE. Dane takie znajdują się wprawdzie w rejestrach sieci, ale nie są
+przesyłane do Twojego telefonu. Monitor sieci pozwala natomiast (przynajmniej teoretycznie)
+na określenie parameterów dźwięku, jaki jest przesyłany z jego telefonu...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="22"></a><font color="#1F409F" size=+2 class="dzial">22. Czy mogę stwierdzić z pomocą monitora sieci, gdzie się znajduję ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Jest to możliwe tylko z pewną dokładnością. Dlaczego ?
+
+<p>Telefon może odczytać dane potrzebne do identyfikacji <a href="faq_net1.htm#BTS">BTSów</a>
+takie jak ich numery (patrz <a href="faq_net3.htm#Menu11">Menu 10-11</a>) czy
+<a href="faq_net2.htm#TA">TA</a> (patrz <a href="faq_net2.htm#Menu1">Menu 10-1</a>),
+ale odczyt <a href="faq_net2.htm#TA">TA</a> nie musi oznaczać odległości od
+<a href="faq_net1.htm#BTS">BTSa</a> w linii prostej (sygnał może się załamywać)
+i ciągle niemożliwe jest poznanie, w którą stronę (pod jakim kątem) są umieszczone
+<a href="faq_net1.htm#BTS">BTSy</a>, których sygnał odbiera Twój telefon. Jednym słowem,
+można określić jedynie obszar, w którym sie znajdujesz (w miastach, gdzie
+<a href="faq_net1.htm#BTS">BTSy</a> są ustawione gęściej, będzie to dokładniejsze).
+I może to być zrobione przez Ciebie lub przez Twojego operatora...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="23"></a><font color="#1F409F" size=+2 class="dzial">23. Co to są kody monitora sieci ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Czasami czytam ogłoszenia z prośbą o kody monitora sieci i nie wiem, o co chodzi.
+Po prostu: w Polsce używane są głównie telefony <a href="faq_net1.htm#GSM">GSM</a>/<a href="faq_net1.htm#DCS">DCS</a>,
+w których nie ma raczej jakichś "tajnych" kodów aktywujących monitor... Jeżeli chodzi
+o jego opis - jest zawarty w tym FAQ.
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="24"></a><font color="#1F409F" size=+2 class="dzial">24. Czy jest prawdą, że monitor sieci w telefonie z dodatkowym urządzeniem zmieniającym jego pasmo działa niepoprawnie ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>O ile wiem, nie ma takich urządzeń, a artykuł o nich w <a href="http://www.twoja-komorka.top.pl">Twojej Komórce</a> 4/2000 (strona 18)
+był jedynie żartem prima-aprilisowym...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="25"></a><font color="#1F409F" size=+2 class="dzial">25. Gdzie znajdę opis protokołu MBUS/FBUS i komendy związane z monitorem sieci ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Nie ma ten temat oficjalnych informacji, a wszystkie poniższe strony
+zostały stworzone przez różnych ludzi na podstawie obserwacji działania
+gotowego oprogramowania:
+
+<p>
+<ul>
+<li>strona <a href="http://multivac.fatburen.org/gnokii/">projektu gnokii</a>,
+w ramach którego jest tworzone darmowe oprogramowanie dostępne z pełnym kodem źródłowym
+(jego analiza pozwala bardzo dobrze zrozumieć protokół !)
+(pod adresem <a href="ftp://ftp.inet.cz/pub/People/Pavel.Janik/gnokii/">ftp://ftp.inet.cz/pub/People/Pavel.Janik/gnokii/</a>
+znajdziesz jego najnowsze testowe wersje), które obsługuje coraz więcej modeli telefonów
+(firma <a href="http://www.nokia.com">Nokia</a> przynajmniej 3 razy zmieniała już protokoły transmisji -
+<a href="http://www.fkn.pl/varia/typy.html">tutaj</a> znajdziesz szczegóły).
+Na <a href="http://www.roads.lut.ac.uk/lists/gnokii">liście dyskusyjnej tego projektu</a> możesz również znaleźć
+adresy do opracowań z listami poszukiwanych komend:
+
+<p>
+<ul>
+<li><a href="http://www.gadgets.co.uk/nokia21xx/index.html">www.gadgets.co.uk/nokia21xx/index.html</a> (Nokia 2110)</li>
+<li><a href="http://priv5.onet.pl/wa/junk/mbus/">http://priv5.onet.pl/wa/junk/mbus/</a> (Nokia 2110 i starsze telefony)</li>
+<li><a href="http://www.tec.puv.fi/~s98114/GSM/FBUS.html">www.tec.puv.fi/~s98114/GSM/FBUS.html</a> (modele NHx)</li>
+<li><a href="http://lsc.kva.hu/dl/README.MSGTYPES.txt">http://lsc.kva.hu/dl/README.MSGTYPES.txt</a> (modele NSx)</li>
+<li><a href="http://www.venia.net/tdma/">www.venia.net/tdma/</a> (telefony TDMA)<p></li>
+</ul>
+</li>
+
+<li>z pełnym kodem źródłowym jest udostępniany
+pod adresem <a href="http://atrey.karlin.mff.cuni.cz/~short/sw/">http://atrey.karlin.mff.cuni.cz/~short/sw/</a>
+program do wysyłania <a href="faq_loga.htm">log</a> do Nokii 9110</li>
+
+<li>pewne informacje na ten temat znajdziesz także na stronie
+<a href="http://www.gadgets.demon.co.uk/nokia61xx/">www.gadgets.demon.co.uk/nokia61xx/</a></li>
+
+</ul>
+
+<p>Na powyższych stronach znajdziesz na pewno informacje o tym, jakie komendy są
+związane z monitorem sieci, dla modeli NSx (jeżeli nie wiesz, jaki jest model Twojego
+telefonu, zajrzyj na <a href="firmware.htm">tę stronę</a>). Zawsze możesz też gotowej
+i bezpłatnej kontrolki ActiveX (<a href="http://www.gertjaap.com">http://www.gertjaap.com</a>)
+działającej z tymi modelami...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="Literatura"></a><font color="#1F409F" size=+2 class="dzial">26. Użyte materiały</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Przy opracowaniu tego FAQ skorzystałem z:
+
+<p>
+<ul>
+<li>
+opisów monitora sieci dostępnych w Internecie (np. ze strony
+"<a href="http://www.tele-servizi.com/nokiasecrets/nokia/nokia_main.html">The Nokia page</a>", strony N. Hüttischa
+(<a href="http://www.nobbi.com/">www.nobbi.com/</a>) oraz spod adresów
+<a href="http://www.arcx.com/sites/Nokia6188.htm">www.arcx.com/sites/Nokia6188.htm</a>,
+<a href="http://www.windows.to/wireless/nokia.htm">http://www.windows.to/wireless/nokia.htm</a>,
+<a href="http://www3.l0pht.com/~oblivion/blkcrwl/cell/nokia/">http://www3.l0pht.com/~oblivion/blkcrwl/cell/nokia/</a>
+i <a href="http://www.geckobeach.com/cellular/">www.geckobeach.com/cellular/</a>)
+</li>
+
+<li>
+informacji z GSM FAQ "PeSTKa" (<a href="http://193.193.73.3/gsm/">http://193.193.73.3/gsm/</a>)
+i <a href="http://www.fkn.pl/">Fan Klubu Nokii</a> (m.in. strony
+Andrzeja Górnego (<a href="http://www.fkn.pl/agorny/index.html">www.fkn.pl/agorny/index.html</a>)
+będącej pierwszą próbą opisu monitora po polsku - pozwoliłem sobie z niej
+wykorzystać obszerne fragmenty dotyczące <a href="#Handover">handoverów</a>
+i rodzajów kanałów).</li>
+
+<li>
+pomocy i wiedzy :-) ludzi z list dyskusyjnych <a href="news:pl.misc.telefonia.gsm">pl.misc.telefonia.gsm</a>
+oraz nokia-l (<a href="http://www.fkn.pl/nokia-l/index.html">www.fkn.pl/nokia-l/index.html</a>)</li>
+
+<li>
+pomocy wielu ludzi (wymienię tutaj niektórych: Maćka Oksieńciuka (<a href="http://angel.qdnet.pl">http://angel.qdnet.pl</a>),
+Jerzego Woźniakiewicza (<a href="http://student.wsp.krakow.pl/~jwozni">http://student.wsp.krakow.pl/~jwozni</a>),
+Juliusza Orlikowskiego, Sławomira Niemkiewicza, Andzeja
+Bobka, Wojtka, Piotra Główkę (<a href="http://www.gsm.alpha.pl">www.gsm.alpha.pl</a>),
+Michała Jerza (<a href="http://n9k.ats.pl">http://n9k.ats.pl</a>), Andrzeja Wilczyńskiego, Krzysztofa,
+Marcina Dembińskiego,
+Pawła Żerdzickiego (<a href="http://republika.pl/vosper/">http://republika.pl/vosper/</a>,
+Tomasza Rolewskiego, Dawida Lorenza (<a href="http://shit.prawda.pl">http://shit.prawda.pl</a>)...
+To oni pomogli mi zgromadzić mi część tych informacji...</li>
+</ul>
+
+<p>Jeżeli kogoś nie wymieniłem, powinien mi zwrócić na to uwagę :-) !
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="27"></a><font color="#1F409F" size=+2 class="dzial">27. Dodatkowe informacje</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>
+<ul>
+<li>same podstawy ;-) GSM znajdziesz pod adresami:
+
+<p>
+<ul>
+<li>po polsku:
+
+<p>
+<ul>
+<li>Transmisja cyfrowych danych w sieciach GSM  - <a href="http://www.fkn.pl/dane/technika/transmisja.html">www.fkn.pl/dane/technika/transmisja.html</a></li>
+<li>Telekomunikacja w Polsce i we Francji - <a href="http://venus.wmid.amu.edu.pl/telekomunikacja/index.html">http://venus.wmid.amu.edu.pl/telekomunikacja/index.html</a></li>
+</ul>
+<p>
+</li>
+
+<li>po angielsku:
+
+<p>
+<ul>
+<li>opis Javiera Gozálveza Sempere - <a href="http://www.comms.eee.strath.ac.uk/~gozalvez/gsm/gsm.html">www.comms.eee.strath.ac.uk/~gozalvez/gsm/gsm.html</a></li>
+<li>opis Johna Scouriasa (bardziej szczegółowo) - <a href="http://ccnga.uwaterloo.ca/~jscouria/GSM/">http://ccnga.uwaterloo.ca/~jscouria/GSM/</a></li>
+<li><a href="http://www.tns.lcs.mit.edu/~turletti/gsm-overview/">www.tns.lcs.mit.edu/~turletti/gsm-overview/</a></li>
+</ul>
+</li>
+</ul>
+<p>
+</li>
+
+<li>bardzo polecam również zapoznanie się z artykułami w KĄCYKO (<a href="http://www.telefon.pl">www.telefon.pl</a>), które w przystępny
+sposób wyjaśniają różne zagadnienia związane z GSM</li>
+
+<li>specyfikacje GSM są natomiast na stronie <a href="http://www.etsi.org">www.etsi.org</a></li>
+
+<li>
+spis części i zdjęcia Nokii 6190 (podobna do 6110, 6130 i 6150, tylko pracująca
+w systemie PCS 1900 MHz) - <a href="http://jeff.trilli.com/6190.html">http://jeff.trilli.com/6190.html</a></li>
+
+<li>
+strona projektu MobSim - A GSM Network Simulator (jego celem jest stworzenie
+oprogramowania do Unixa pozwalającego symulować sieć komórkową w pamięci
+komputera) - <a href="http://mordor.cs.hut.fi/tik-76.115/95-96/palautukset/Mobiili/lt/manual.html">http://mordor.cs.hut.fi/tik-76.115/95-96/palautukset/Mobiili/lt/manual.html</a></li>
+
+<li>być może jakieś ciekawe materiały znajdziesz w ringu GSM - <a href="http://www.flashback.net/~lesve/gsmring.html">www.flashback.net/~lesve/gsmring.html</a>.</li>
+
+<li>
+a jeżeli chcesz się odprężyć do taaakiej dawce techniki, obejrzyj sobie
+Galerię GSM - <a href="http://www.gsm-gallery.w.pl">www.gsm-gallery.w.pl</a>.</li>
+
+<li>z "tradycyjnej" literatury poleciłbym książkę "Cyfrowe systemy telefonii komórkowej
+GSM 900, GSM 1800, UMTS" Witolda Hołubowicza i Piotra Płóciennika</li>
+</ul>
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a><br>
+
+<center>
+<p><a href="faq_net0.htm">[Część 1]</a><a href="faq_net1.htm">[Część 2]</a><a href="faq_net2.htm">[Część 3]</a><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><b>[Część 7]</b>
+</center>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<br><p align="RIGHT"><font class='autor' size='1'><a class="autoremail" href="mailto:Marcin Wiącek<Marcin-Wiacek@topnet.pl>">Marcin Wiącek</a> (<a class="autoremail" href="http://marcin-wiacek.topnet.pl">WWW</a>)
+<br>Ostatnia aktualizacja: 4 maja 2000</font>
+
+<script language=JavaScript src='../konw.js'></script>
+</body>
+</html>

@@ -1,0 +1,2301 @@
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+   <meta name="Author" content="Marcin Wiącek">
+   <meta name="Description" content="FAQ dotyczący monitora sieci w Nokiach (NOKIA NetMonitor description)">
+   <meta name="language" content="pl">
+   <meta name="revisit-after" content="15 days">
+   <meta name="Robots" content="all">
+   <meta name="KeyWords" content="3110, 9110, GSM, DCS, Nokia, 3210, 5110, 5130, 6110, 6130, 6150, 8810, FAQ, NetMonitor, monitor sieci, Marcin, Wiącek, Wiacek, Marcin Wiącek, Marcin Wiacek">
+   <title>FAQ - monitor sieci w Nokiach (część 3/7)</title>
+   <link rel="stylesheet" href="../styl.css" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" text="#2B2B69" link="#525FF5" vlink="#525FF5" alink="#2FA030">
+
+<font class="drukuj">
+<p align="RIGHT"><a class="autoremail" href="../glowna.htm">Strona główna</a></p>
+</font>
+<center><font color="#1F409F" size=+2 class="tytul">Monitor sieci w telefonach Nokia (3/7)</font>
+<font class="drukuj">
+<p><a href="faq_net0.htm">[Część 1]</a><a href="faq_net1.htm">[Część 2]</a><b>[Część 3]</b><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><a href="faq_net6.htm">[Część 7]</a>
+</font>
+</center>
+
+<hr noshade width="60%" style="color: #004080" align=center>
+<a NAME="Top"></a>
+
+<font class="drukuj">
+<ol>
+<li><a href="faq_net0.htm#1"><b>Co to jest ?</b></a></li>
+<li><a href="faq_net0.htm#2"><b>Czy jest mi potrzebny ?</b></a></li>
+<li><a href="faq_net0.htm#3"><b>Czy po włączeniu monitora telefon pobiera więcej energii ?</b></a></li>
+<li><a href="faq_net0.htm#4"><b>Jak go włączyć ?</b></a></li>
+<li><a href="faq_net0.htm#5"><b>Jaką wersję monitora mogę włączyć w telefonie ?</b></a></li>
+<li><a href="faq_net0.htm#6"><b>Czy włączenie monitora powoduje utratę gwarancji ?</b></a></li>
+<li><a href="faq_net0.htm#7"><b>W moim telefonie menu monitora ma numer inny niż 10. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#8"><b>W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#9"><b>Jak się nim posługiwać ?</b></a></li>
+<li><a href="faq_net0.htm#10"><b>Czy mogę zepsuć sobie telefon ?</b></a></li>
+<li><a href="faq_net1.htm#11"><b>Słowniczek</b></a></li>
+<li><a href="#12"><b>Znaczenie poszczególnych testów</b></a></li>
+<li><a href="faq_net6.htm#13"><b>Można też użyć programu...</b></a></li>
+<li><a href="faq_net6.htm#14"><b>Czy można korzystać z monitora sieci, gdy nie ma w telefonie karty SIM, nie został podany jej PIN lub jest nieaktywna ?</b></a></li>
+<li><a href="faq_net6.htm#15"><b>W jaki sposób mogę wyłączyć monitor sieci ?</b></a></li>
+<li><a href="faq_net6.htm#16"><b>Czy powinienem wyłączyć monitor sieci przed oddaniem telefonu do serwisu ?</b></a></li>
+<li><a href="faq_net6.htm#17"><b>Czy po wyłączeniu monitora sieci będę go mógł włączyć ponownie ?</b></a></li>
+<li><a href="faq_net6.htm#18"><b>Czy monitor sieci jest dostępny także w analogowych Nokiach ?</b></a></li>
+<li><a href="faq_net6.htm#19"><b>Czy monitor sieci pozwoli na używanie telefonu podobnie jak radiostacji ?</b></a></li>
+<li><a href="faq_net6.htm#20"><b>Dlaczego w moim telefonie jest znacznie mniej testów niż zostało tutaj opisane ? Czy mogę zwiększyć ich ilość ?</b></a></li>
+<li><a href="faq_net6.htm#21"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie znajduje się mój rozmówca ?</b></a></li>
+<li><a href="faq_net6.htm#22"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie się znajduję ?</b></a></li>
+<li><a href="faq_net6.htm#23"><b>Co to są kody monitora sieci ?</b></a></li>
+<li><a href="faq_net6.htm#24"><b>Czy jest prawdą, że monitor sieci w telefonie z dodatkowym urządzeniem zmieniającym jego pasmo działa niepoprawnie ?</b></a></li>
+<li><a href="faq_net6.htm#25"><b>Gdzie znajdę opis protokołu MBUS/FBUS i komendy związane z monitorem sieci ?</b></a></li>
+<li><a href="faq_net6.htm#Literatura"><b>Użyte materiały</b></a></li>
+<li><a href="faq_net6.htm#27"><b>Dodatkowe informacje</b></a></li>
+</ol>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<p><a NAME="12"></a><font color="#1F409F" size=+2 class="dzial">12. Znaczenie poszczególnych testów</font><br>
+<hr size="3" align="left" noshade width="300" color="#60C0A0">
+
+<p><a NAME="jest"></a>To, czy któryś test występuje w Twoim telefonie,
+zależy:
+
+<p>
+<ul>
+<li>
+od jego modelu: generalnie, im nowszy i bardziej skomplikowany (więcej funkcji), tym
+bogatszy ma monitor sieci (przykładowe porównanie znajdziesz pod adresem
+<a href="http://www.fkn.pl/netmonitor/index.html">www.fkn.pl/netmonitor/index.html</a>).</li>
+
+<li>
+od wersji oprogramowania - najczęściej: im nowsze, tym więcej jest opcji
+(wymianę oprogramowania można zlecić serwisowi, jego wersję sprawdzisz
+przy pomocy kodów wymienionych na <a href="firmware.htm">tej stronie</a>)
+- przykładowo w Nokii 5110 w <b><a href="faq_net5.htm#Menu89">Menu 10-89</a></b>
+parametr bbbbbb pokazywany jest dopiero przy oprogramowaniu 5.07. Z wymiany
+oprogramowania masz jeszcze jedną korzyść: w nowszych jego wersjach poprawiane
+są różne błędy (również w monitorze sieci).</li>
+
+<li>
+od tego, kto wygrywał oprogramowanie do telefonu: jest ono pisane
+jest zazwyczaj w C (a później tłumaczone (kompilowane) na kod pracującego
+w nim mikroprocesora). Według mojej prywatnej teorii występowanie (i działanie)
+pewnych testów zależy również od tego, czy w jego kodzie źródłowym były
+ustawione pewne stałe (programiści :-) zapewne zrozumieją, co staram się
+napisać). Takim sztampowym przykładem może być <b><a href="faq_net4.htm#Menu38">Menu
+10-38</a></b>: według opisów angielskich nie ma go w sprzedawanych
+telefonach, ponieważ przed kompilacją oprogramowania nie została
+ustawiona stała DEV_FT_MEMORY_DUMP_IN_USE w pliku ftd_conf.h (jednym
+z plików z kodem źródłowym oprogramowania). Myślę, że podobnie jest z
+opisami pomocy (w jednych telefonach występują, w innych nie) - ich obecność
+nie zależy od wersji oprogramowania, tylko od tego, gdzie telefon został
+kupiony (skąd pochodzi - gdzie miał wgrywane oprogramowanie). Jak sobie
+poradzić z tym problemem ? Niestety, należy wgrać od nowa oprogramowanie (w którym przed
+kompilacją owe stałe były ustawione).
+
+<p>Aha, nie
+jestem pewien, czy również testy związane z <a href="faq_net1.htm#DSP">DSP</a>
+(<b><a href="faq_net5.htm#Menu70">Menu 10-70</a></b>, <b><a href="faq_net5.htm#Menu73">10-73</a></b>,
+<b><a href="faq_net5.htm#Menu74">10-74</a></b>,
+<b><a href="faq_net5.htm#Menu76">10-76</a></b>
+(z wyjątkiem parametru ab),
+<b><a href="faq_net5.htm#Menu77">10-77</a></b>,
+<b><a href="faq_net5.htm#Menu78">10-78</a></b>
+i <b><a href="faq_net5.htm#Menu79">10-79</a></b>) muszą być w ten sposób
+włączone (czy też ich działanie (albo niedziałanie) zależy od używanej
+sieci).</li>
+</ul>
+
+<p>Pomoce do opisywanych testów są zaznaczone <b>wytłuszczoną czcionką</b>,
+natomiast konkretne wartości testów <i>pochyłą</i> (umieściłem je tam, gdzie nie miałem
+dalszych szczegółów).
+
+<p>
+<ul>
+<li>przykładowe ekrany z Nokii 2110i, 5110, 6110 i 9110 są umieszczone pod adresami
+<a href="http://www.yaws.dk/communicator/faq/miscellanous/mbus/">www.yaws.dk/communicator/faq/miscellanous/mbus/</a>
+albo <a href="http://www.fan.net.au/~mrvfone/vfone/techtop/">www.fan.net.au/~mrvfone/vfone/techtop/</a>.
+Pierwszy z nich zawiera opis monitora po angielsku w Nokii 9110 podpisany
+moim i Michała Jerza (<a href="http://n9k.ats.pl">http://n9k.ats.pl</a>) nazwiskiem. Niestety, z różnych względów (brak porozumienia
+z autorem tej strony) zawiera on na razie różne błędy (bardziej więc polecam
+czytanie tego FAQ).</li>
+<li>ekraniki monitora z Nokii 3110 znajdziesz natomiast na stronie Piotra Główki (<a href="http://www.gsm.alpha.pl">www.gsm.alpha.pl</a>)</li>
+</ul>
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="Menu1"></a><b>Menu 10-1</b>
+<br>Informacje o trybie komunikacji z komórką
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>abbb ccc ddd<br>
+&nbsp;e ff g mmmm<br>
+&nbsp;nnn&nbsp;&nbsp;&nbsp;&nbsp; ppp<br>
+&nbsp;&nbsp;&nbsp; oooo</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>CH RxL TxPwr<br>
+TS TA RQ RLT<br>
+&nbsp;C1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C2<br>
+&nbsp;&nbsp;&nbsp; CHT</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>
+a - H, jeżeli włączone jest <a href="faq_net1.htm#Hopping">skakanie po
+częstotliwościach</a> (w przeciwnym razie pole jest puste). Informację
+o tym telefon podaje również w <b><a href="faq_net3.htm#Menu11">Menu 10-11</a></b>
+i <b><a href="faq_net3.htm#Menu12">Menu 10-12</a></b>.</li>
+
+<li>
+bbb - CH (<b>ch</b>annel): numer kanału używanego do komunikacji z komórką
+(dziesiętny). Jeśli jest włączone <a href="faq_net1.htm#Hopping">skakanie
+po częstotliwościach</a>, numer zmienia się, gdy wyświetlacz jest odświeżany.
+Zależą od niego częstotliwości używane do komunikacji telefonu z <a href="faq_net1.htm#BTS">BTS-em</a>:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td nowrap><center><b>częstotliwość nośna (środkowa)
+<br>kanału transmisji (MHz)</b></center></td>
+
+<td nowrap><center><b>GSM 900</b></center></td>
+<td nowrap><center><b>GSM 1800</b></center></td>
+</tr>
+
+<tr>
+<td nowrap><center>transmisja telefon-<a href="faq_net1.htm#BTS">BTS</a></center></td>
+<td nowrap><center>890 + CH * 0,2</center></td>
+<td nowrap><center>1710 + (CH - 511) * 0,2</center></td>
+</tr>
+
+<tr>
+<td nowrap><center>transmisja <a href="faq_net1.htm#BTS">BTS</a>-telefon</center></td>
+<td nowrap><center>935 + CH * 0,2</center></td>
+<td nowrap><center>1805 + (CH - 511) * 0,2</center></td>
+</tr>
+
+</table>
+
+<p>
+oraz to, czy telefon korzysta z komórki działającej w GSM 900 czy 1800 MHz
+(dokładniej o numerach kanałów piszę w <b><a href="faq_net3.htm#Menu17">Menu 10-17</a></b>).
+
+<p>
+</li>
+
+<li>
+<p><a NAME="RX"></a>ccc - <a href="faq_net1.htm#RX">RX</a>: minus nie jest
+pokazywany, gdy wartość &lt;=-100. Od tego parametru zależy kilka rzeczy:
+
+<p>
+<ul>
+<li>
+jeżeli wszystkie kanały mają sygnał niższy od -110 dBm, telefon nie monitoruje
+kanałów.</li>
+
+<li>
+jeżeli zaniknie sygnał Twojej macierzystej sieci (np. <a href="http://www.eragsm.pl/">Ery</a>),
+telefon próbuje monitorować następną dostępną (np. <a href="http://www.plusgsm.pl/">Plusa</a>)
+- pokazuje się wtedy znak obecności sieci i 0 kresek zasięgu (możesz oczywiście
+korzystać z połączeń alarmowych)</li>
+
+<li>
+w przypadku, gdy druga sieć ma dość silny sygnał (np. -85 dBm), a Twoja
+macierzysta sieć z kolei bardzo słaby (np. -100 dBm), telefon może mieć
+duże kłopoty z zalogowaniem się do niej (musisz wtedy skorzystać z <b><a href="faq_net3.htm#Menu17">Menu
+10-17</a></b> i wymusić używanie konkretnego kanału)</li>
+
+<li>
+wartość parametru RXLev:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER><td><b>RX (od)</b></td><td><b>RX (do)</b></td><td><b>RXLev</b></td></tr>
+<tr ALIGN=CENTER><td>mniej niż</td><td>-110 dBm</td><td>0</td></tr>
+<tr ALIGN=CENTER><td>-110 dBm</td><td>-109 dBm</td><td>1</td></tr>
+<tr ALIGN=CENTER><td>-109 dBm</td><td>-108 dBm</td><td>2</td></tr>
+<tr ALIGN=CENTER><td>...</td><td>...</td><td>...</td></tr>
+<tr ALIGN=CENTER><td>-49 dBm</td><td>-48 dBm</td><td>62</td></tr>
+<tr ALIGN=CENTER><td>-48 dBm</td><td>więcej</td><td>63</td></tr>
+</table>
+<p>
+</li>
+
+<li>
+wartość wskaźnika po lewej stronie wyświetlacza (podaję w przybliżeniu):
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER><td><b>RX (od - do)</b></td><td><b>ilość kresek</b></td></tr>
+<tr ALIGN=CENTER><td>od -105 do -100 dBm</td><td>0</td></tr>
+<tr ALIGN=CENTER><td>od -100 do -95 dBm</td><td>1</td></tr>
+<tr ALIGN=CENTER><td>od -95 do -90 dBm</td><td>2</td></tr>
+<tr ALIGN=CENTER><td>od -90 do -85 dBm</td><td>3</td></tr>
+<tr ALIGN=CENTER><td>więcej niż -85 dBm</td><td>4</td></tr>
+</table>
+<p>
+</ul>
+</li>
+</li>
+
+<li>
+<p><a name="TX"></a>ddd - TX: poziom nadawanego sygnału (tylko podczas połączenia). Jeżeli
+nadajnik telefonu działa, przed wartością jest dodawana * (gwiazdka). Im
+mniejszy, tym większa moc (również wypromieniowywana w kierunku głowy !
+- informacje o szkodliwości telefonii komórkowej znajdziesz w <a href="http://www.fkn.pl/">Fan
+Klubie Nokii</a> (<a href="http://www.fkn.pl/zdrowie/index.html">www.fkn.pl/zdrowie/index.html</a>)
+i na <a href="http://www.pdi.net/~markos/">stronie Wojciecha Markiewicza</a>)
+i zużycie baterii.
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER><td nowrap><b>TX (GSM 900)</b></td><td>16</td><td></td><td>15</td><td></td><td>14</td><td></td><td>13</td><td></td><td>12</td><td></td><td>11</td><td></td><td>10</td><td></td><td>9</td><td></td></tr>
+<tr ALIGN=CENTER><td nowrap><b>TX (GSM 1800)</b></td><td></td><td>9</td><td></td><td>8</td><td></td><td>7</td><td></td><td>6</td><td></td><td>5</td><td></td><td>4</td><td></td><td>3</td><td></td><td>2</td></tr>
+<tr ALIGN=CENTER><td><b>dBm</b></td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+<tr ALIGN=CENTER><td><b>Waty</b></td><td>0,012</td><td>0,016</td><td>0,02</td><td>0,025</td><td>0,032</td><td>0,04</td><td>0,05</td><td>0,063</td><td>0,079</td><td>0,1</td><td>0,125</td><td>0,158</td><td>0,2</td><td>0,251</td><td>0,316</td><td>0,398</td></tr>
+</table>
+
+<p>i ciąg dalszy...
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER><td nowrap><b>TX (GSM 900)</b></td><td>8</td><td></td><td>7</td><td></td><td>6</td><td></td><td>5</td><td></td><td>4</td><td></td><td>3</td><td></td><td>2-0</td><td></td><td></td><td></td><td></td></tr>
+<tr ALIGN=CENTER><td nowrap><b>TX (GSM 1800)</b></td><td></td><td>1</td><td></td><td>0</td><td></td><td>31</td><td></td><td>30</td><td></td><td>29</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr ALIGN=CENTER><td><b>dBm</b></td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td>32</td><td>33</td><td>34</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td><td>40</td><td>41</td><td>42</td><td>43</td></tr>
+<tr ALIGN=CENTER><td><b>Waty</b></td><td>0,501</td><td>0,631</td><td>0,794</td><td>1</td><td>1,26</td><td>1,58</td><td>2</td><td>2,51</td><td>3,16</td><td>3,98</td><td>5</td><td>6,31</td><td>8</td><td>10</td><td>12</td><td>15,8</td><td>20</td></tr>
+</table>
+
+<p>
+Watt = 10<sup>(dBm/10)</sup>*0,001
+<br>dBm = 10*log(Watt/0,001)
+<br><br>Kolejne klasy (określające maksymalną moc telefonów) są następujące:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr><td><center><b>GSM 900</b></center></td><td><center><b>GSM 1800</b></center></td></tr>
+
+<tr>
+<td>
+<center>20 W (nie realizowana)
+<br>8 W (telefon samochodowy/przenośny)&nbsp;
+<br>5 W (telefon samochodowy/przenośny)
+<br>2 W (telefon ręczny)
+<br>0,8 (telefon ręczny)</center>
+</td>
+
+<td>
+<center>1 W (telefon ręczny)
+<br>0,25 W (telefon ręczny)</center>
+</td>
+</tr>
+</table>
+
+<p>Minimalna moc telefonów w GSM 900 to 0,02 W, w GSM 1800 zaś 0,0025 W
+(4 dBm).
+
+<p>Klasy mocy <a href="faq_net1.htm#BTS">BTSów</a> podaję przy ich
+opisie.
+</li>
+
+<li>
+<p><a NAME="TS"></a>e - TS (<b>T</b>ime <b>S</b>lot): kanał radiowy używany
+do komunikacji pomiędzy telefonem i <a href="faq_net1.htm#BTS">BTSem</a>
+jest dzielony na 8 części (zwane TS - szczelinami czasowymi). Jeżeli we
+wszystkich <a href="faq_net1.htm#BTS">BTSach</a> (dostępnych dla Twojego
+telefonu) każda szczelina jest w danym momencie zajęta, nie będziesz mógł(mogła)
+z niego zadzwonić (a inni dodzwonić się do Ciebie) i otrzymasz komunikat
+'Network busy' - 'Sieć zajęta' (informacja o tej przyczynie niezrealizowania
+połączenia jest podawana m.in. w <b><a href="faq_net4.htm#Menu39">Menu
+10-39</a></b>). Niestety, każde połączenie ma ten sam priorytet w polskich
+sieciach (piorytetowanie połączeń zostało wprawdzie wprowadzone w fazie 2+ GSM,
+ale nie jest ona na razie obsługiwana w Polsce)
+- tak więc (przynajmniej na razie), jeżeli chcesz zadzwonić pod alarmowy numer 112
+i sieć jest zajęta, to żadne inne mniej "ważne" połączenie nie zostanie przerwane).
+Rozwiązaniem, które
+pozwoli uniknąć takich sytuacji, jest powiększenie ilości <a href="faq_net1.htm#BTS">BTSów</a>
+(np. stworzenie sieci GSM 900/1800 MHz) albo takie jej modyfikacje, aby
+możliwe było używanie w niej kanałów <a href="faq_net1.htm#HR">HR</a> (przy
+<a href="faq_net1.htm#FR">FR</a>
+albo <a href="faq_net1.htm#EFR">EFR</a> telefon wykorzystuje całą przydzieloną
+szczelinę, przy <a href="faq_net1.htm#HR">HR</a> (zdefiniowanych w fazie
+2 GSM) już tylko jej połowę). Maksymalna prędkość transmisji danych przy
+użyciu jednego TS wynosi 9.6 kbit/sek. (14.4 kbit/sek. przy pewnych dodatkowych
+warunkach). Projektowane i wprowadzane do użytku systemy pozwalające ją
+zwiększyć (np. GPRS (<b>G</b>eneric <b>P</b>acket <b>R</b>adio <b>S</b>ervices)
+(dokładniejsze informacje na stronie
+<a href="http://www.fkn.pl/dane/technika/gprs.html">www.fkn.pl/dane/technika/gprs.html</a>)
+albo HSCSD (<b>H</b>igh <b>S</b>peed <b>C</b>ircuit <b>S</b>witched <b>D</b>ata)
+(dokładniejszy opis pod adresem
+<a href="http://www.fkn.pl/dane/technika/hscsd.html">www.fkn.pl/dane/technika/hscsd.html</a>))
+bazują na przydzielaniu jednemu telefonowi kilku TS równocześnie (co oczywiście
+zmniejsza pojemność sieci). Wskaźnik tutaj pokazuje natomiast numer używanej
+szczeliny (0..7 dla <a href="faq_net1.htm#FR">FR</a> (<a href="faq_net1.htm#EFR">EFR</a>)
+albo 0..15 dla <a href="faq_net1.htm#HR">HR</a>).</li>
+
+<li>
+<p><a NAME="TA"></a>ff - TA (<b>T</b>iming <b>A</b>dvance): <a href="faq_net1.htm#BTS">BTS</a>
+informuje telefon, o ile wcześniej ma wysłać sygnał (aby ten dotarł na
+czas do <a href="faq_net1.htm#BTS">BTSa</a>). To jest właśnie ten wskaźnik.
+Pozwala on ocenić odległość telefonu od <a href="faq_net1.htm#BTS">BTSa</a>:
+jest ona z przedziału do TA*550 m do (TA+1)*550 m (tak naprawdę czasami trzeba uwzględnić,
+że sygnał ulega (wielokrotnemu) odbiciu i takie odczytywanie odległości może być mylące).
+Uaktualniany przy komunikacji z siecią (odbieranie (wysyłanie)
+<a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a>,
+rozmowa, zgłaszanie żądań) - korzystaniu np. z kanałów <a href="#SDCC">SDCC</a>
+i <a href="#TFR">TFR</a>. Przyjmuje wartości od 0 do 63 (do 35 km) przy
+korzystaniu z kanału <a href="faq_net1.htm#FR">FR</a> albo <a href="faq_net1.htm#EFR">EFR</a>.
+Przy użyciu kanału <a href="faq_net1.htm#HR">HR</a> teoretycznie (m.in.
+przy zestawie samochodowym (potrzebna większa moc przy nadawaniu) i płaskim
+terenie) maksymalna odległość od <a href="faq_net1.htm#BTS">BTSa</a> może
+wynosić dwa razy tyle (do 70 km), a TA być z zakresu od 0 do 128 (angielskie
+opisy monitora, z których korzystałem, nic o tym nie wspominały - jest więc np. możliwe,
+że przy wartość większych od 64 telefon (?) odejmuje to 64 od nich i pokazuje taką
+wartość w tym teście).</li>
+
+<li>
+<p>g - RXQUAL_SUB (stopa błędów w transmisji przy włączonym <a href="faq_net1.htm#DTX">DTX</a>&nbsp;
+(stan <a href="faq_net1.htm#DTX">DTX</a> można sprawdzić w <b><a href="faq_net3.htm#Menu12">Menu
+10-12</a></b>)): określa, jak dużo błędów w połączeniu telefon musi poprawiać,
+aby była możliwa rozmowa. Zakres 0 - 7 (0 - oznacza, że żadnych, powyżej
+5 jest duża szansa na przerwanie rozmowy). Im większa wartość, tym bardziej
+rozmowa jest urywana...
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER VALIGN=CENTER><td nowrap><b>Wartość RQ</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+<tr ALIGN=CENTER VALIGN=CENTER><td nowrap><b>Maksymalna ilość błędów</b></td><td>&lt;0,2%</td><td>&lt;0,4%</td><td>&lt;0,8%</td><td>&lt;1,6%</td><td>&lt;3,2%</td><td>&lt;6,4%</td><td>&lt;12,8%</td><td>&gt;12,8%</td></tr>
+</table>
+<p>
+</li>
+
+<li>
+<p>mmmm - RLT (<b>R</b>adio <b>L</b>ink <b>T</b>imeout): jeśli wartość jest
+ujemna, pokazywane jest 0. Parametr może przyjąć maksymalnie wartość 64.
+Jeżeli telefon używa innego kanału niż <a href="faq_net1.htm#TCH">TCH</a>
+albo <a href="#SDCC">SDCC</a>, pokazywane jest xx.</li>
+
+<li><p>nnn - parametr <a href="faq_net1.htm#C1">C1</a></li>
+
+<li>
+<p>ppp - parametr <a href="faq_net1.htm#C2">C2</a>. Jeżeli sieć obsługuje
+tylko fazę 1 GSM, pokazywana jest tutaj wartość <a href="faq_net1.htm#C1">C1</a>.</li>
+
+<li>
+<p>oooo - rodzaj kanału używanego przez telefon (pod adresem <a href="http://www.pins.co.uk/upages/stratfordc/">www.pins.co.uk/upages/stratfordc/</a>
+znajdziesz programy w C z algorytmami używanymi do kodowania różnych ich
+rodzajów). Przu używaniu kanałów <a href="faq_net1.htm#HR">HR</a> możesz nawet zobaczyć,
+czy wykorzystywana jest pierwsza czy druga część <a href="#TS">TS</a> (mówią o tym wartości podkanału: 0 albo 1):
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+
+<tr>
+<td>AGCH</td>
+<td><a NAME="AGCH"></a>(<b>A</b>ccess <b>G</b>rant <b>Ch</b>annel) - jest
+to kanał używany przez <a href="faq_net1.htm#BTS">BTSa</a> do poinformowania
+telefonu o tym, jakiego kanału powinien użyć (jest odpowiedzią <a href="faq_net1.htm#BTS">BTSa</a>
+na na <a href="faq_net2.htm#RACH">RACH</a>) - przyporządkowywujący telefon
+do <a href="#SDCC">SDCCH</a></td>
+</tr>
+
+<tr>
+<td>BCCH</td>
+<td><a NAME="BCCH"></a>(<b>B</b>roadcast <b>C</b>ontrol <b>Ch</b>annel)
+- kanał w kierunku
+<a href="faq_net1.htm#BTS">BTS</a>-telefon, który zawiera
+on dokładne informacje o sieci (potrzebne do identyfikacji i dostępu do
+niej) - np.
+<ul>
+<li>jak często telefon ma informować sieć, gdzie się znajduje (wartość licznika T3212 - dokładniejszy opis w <b><a href="faq_net3.htm#Menu10">Menu 10-10</a></b>)</li>
+<li>o tym, czy w sieci używane jest <a href="faq_net1.htm#Hopping">skakanie po częstotliwościach</a></li>
+<li>parametr CELL_RESELECT_HYSTERESIS (patrz opis parametru <a href="faq_net1.htm#C2">C2</a>)</li>
+<li>parametr CELL_BARRED (informujący, czy komórka jest testowana, czy oddana do normalnego użytku - telefon może go ignorować i używać również tych testowanych - patrz <b><a href="faq_net3.htm#Menu19">Menu 10-19</a></b>)</li>
+</ul>
+</td>
+</tr>
+
+<tr><td>THR0</td><td><a href="faq_net1.htm#HR">TCH HR</a> podkanał 0</td></tr>
+<tr><td>THR1</td><td><a href="faq_net1.htm#HR">TCH HR</a> podkanał 1</td></tr>
+<tr><td><a NAME="TFR"></a>TFR</td><td><a href="faq_net1.htm#FR">TCH FR</a></td></tr>
+<tr><td>TEFR</td><td><a href="faq_net1.htm#EFR">TCH EFR</a></td></tr>
+<tr><td>F144</td><td><a href="faq_net1.htm#FR">TCH FR</a> - transmisja danych komputerowych, prędkość 14.4 kbit/sek.</td></tr>
+<tr><td>F96</td><td><a href="faq_net1.htm#FR">TCH FR</a> - transmisja danych komputerowych, prędkość 9.6 kbit/sek.</td></tr>
+<tr><td>F72</td><td><a href="faq_net1.htm#FR">TCH FR</a> - transmisja danych komputerowych, prędkość 7.2 kbit/sek.</td></tr>
+<tr><td>F48</td><td><a href="faq_net1.htm#FR">TCH FR</a> - transmisja danych komputerowych, prędkość 4.8 kbit/sek.</td></tr>
+<tr><td>F24</td><td><a href="faq_net1.htm#FR">TCH FR</a> - transmisja danych komputerowych, prędkość 2.4 kbit/sek.</td></tr>
+<tr><td>H480</td><td><a href="faq_net1.htm#HR">TCH HR</a> - transmisja danych komputerowych, prędkość 4.8 kbit/sek., podkanał 0</td></tr>
+<tr><td>H481</td><td><a href="faq_net1.htm#HR">TCH HR</a> - transmisja danych komputerowych, prędkość 4.8 kbit/sek., podkanał 1</td></tr>
+<tr><td>H240</td><td><a href="faq_net1.htm#HR">TCH HR</a> - transmisja danych komputerowych, prędkość 2.4 kbit/sek., podkanał 0</td></tr>
+<tr><td>H241</td><td><a href="faq_net1.htm#HR">TCH HR</a> - transmisja danych komputerowych, prędkość 2.4 kbit/sek., podkanał 1</td></tr>
+
+<tr>
+<td>FA</td>
+<td><a href="faq_net1.htm#FR">TCH FR</a> - używany tylko do szybkiej sygnalizacji
+np. przy <a href="faq_net4.htm#Handover">handoverach</a>
+<br>(FACCH - <b>F</b>ast <b>A</b>ssociated <b>C</b>ontrol <b>Ch</b>annel)</td>
+</tr>
+
+<tr>
+<td>FAH0</td>
+<td><a href="faq_net1.htm#HR">TCH HR</a> - używany tylko do szybkiej sygnalizacji
+np. przy <a href="faq_net4.htm#Handover">handoverach</a>
+<br>(FACCH - <b>F</b>ast <b>A</b>ssociated <b>C</b>ontrol<b>Ch</b>annel), podkanał 0</td>
+</tr>
+
+<tr>
+<td>FAH1</td>
+<td><a href="faq_net1.htm#HR">TCH HR</a> - używany tylko do szybkiej sygnalizacji
+np. przy <a href="faq_net4.htm#Handover">handoverach</a>
+<br>(FACCH - <b>F</b>ast <b>A</b>ssociated <b>C</b>ontrol <b>Ch</b>annel), podkanał 1</td>
+</tr>
+
+<tr>
+<td>SDCC</td>
+<td><a NAME="SDCC"></a>SDCCH (<b>S</b>tand-alone <b>D</b>edicated <b>C</b>ontrol
+<b>Ch</b>annel)
+- używany do sygnalizacji systemowej:
+<ul>
+<li>ustanowienia połączenia</li>
+<li>weryfikacji użytkownika</li>
+<li>wykonywania <a href="faq_net1.htm#LocationUpdate">Location Update</a></li>
+<li>przyporządkowania do <a href="faq_net1.htm#TCH">TCH</a></li>
+<li>przesyłania <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSów</a></li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td>CCCH</td><td><a NAME="CCCH"></a>(<b>C</b>ommon <b>C</b>ontrol <b>Ch</b>annel ?) - używany, gdy telefon czuwa (nie nadaje ani nie odbiera danych)</td>
+</tr>
+
+<tr>
+<td>CBCH</td>
+<td><a NAME="CBCH"></a>(<b>C</b>ell <b>B</b>roadcast <b>Ch</b>annel) -
+kanał w kierunku <a href="faq_net1.htm#BTS">BTS</a>-telefon używany do
+nadawania komórkowego (jego odbiór np. w Nokii 5110 włączysz w <b>Menu
+2-5</b> i <b>Menu 4-2-2, </b>w Nokiii 6110 w <b>Menu 1-5</b> i <b>Menu
+4-4-2</b>; obsługuje go jak na razie <a href="http://www.plusgsm.pl/">Plus</a>
+i <a href="http://www.idea.centertel.pl/">Idea</a>)</td>
+</tr>
+
+<tr>
+<td>CCHR</td><td>połączenie kanałów <a href="#CCCH">CCCH</a> i <a href="#CBCH">CBCH</a></td>
+</tr>
+
+<tr>
+<td>SEAR</td>
+<td>telefon szuka sieci</td>
+</tr>
+
+<tr>
+<td>NSPS</td>
+<td><a NAME="NSPS"></a>(<b>N</b>o <b>S</b>erve <b>P</b>ower <b>S</b>ave)
+- telefon nie jest w zasięgu sieci, włączone oszczędzanie energii (informację
+o tym, czy karta SIM może zatrzymywać zegar w trybie oszczędzania energii,
+znajdziesz w <b><a href="faq_net4.htm#Menu51">Menu 10-51</a></b>)</td>
+</tr>
+</table>
+</li>
+</ul>
+
+<p>W Nokii 3110 test ten wygląda podobnie:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>abbb cccc ddd<br>
+&nbsp;e ff g qqrr<br>
+s Bttuu mmmm<br>
+w ppp oonnn z</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>&nbsp;CH RxL TxPwr<br>
+TS TA QPM RAR<br>
+Ro BsiCLK RLT<br>
+S C2 CHT C1 B</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>cccc - w tym telefonie minus jest pokazywany zawsze</li>
+<li>ooo - wartości szesnastkowe</li>
+<li>qq - tryb pagingu (patrz <b><a href="#Menu2">Menu 10-2</a></b>)</li>
+<li>rr - RAR (opis w <b><a href="#Menu2">Menu 10-2</a></b>)</li>
+<li>s - wskaźnik roamingu (opis w <b><a href="#Menu2">Menu 10-2</a></b>)</li>
+<li>tt - BSIC dla używanej komórki (opis w <b><a href="#Menu2">Menu 10-2</a></b>)</li>
+</ul>
+
+<p>Daje się zauważyć powiązanie pomiędzy poziomem sygnału odbieranego
+(<a href=faq_net1.htm#RX>RX</a>) i mocą nadawania telefonu
+(<a href=#TX>TX</a>): im słabszy jest ten pierwszy, tym mocniejsza
+jest ta druga (podaję przykładowe zmierzone dane dla Nokii 6110 przy korzystaniu
+z kanałów
+<a href="#SDCC">SDCC</a> i <a href="#TFR">TFR</a>):
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER><td><b>RX</b></td><td><b>TX</b></td></tr>
+<tr ALIGN=CENTER><td>od -38 do -49 dBm</td><td>19</td></tr>
+<tr ALIGN=CENTER><td>od -68 do -75 dBm</td><td>9-14 (0,032 - 0,316 Wata)</td></tr>
+<tr ALIGN=CENTER><td>od -79 do -85 dBm</td><td>7-9 (0,794 - 0,032 Wata)</td></tr>
+<tr ALIGN=CENTER><td>od -85 do -93 dBm</td><td>5-7 (2 - 0,794 Wata)</td></tr>
+</table>
+
+<p>Dla ciekawych: niektóre z tutaj pokazywanych danych znajdziesz również
+w niektórych programach serwisowych (np. w WinTesli należy wybrać z menu
+głównego "Testing", a później "RF Information").
+
+<p><table CELLSPACING=0 CELLPADDING=0 WIDTH="100%">
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td><a NAME="Wylacz504"></a>To, czy telefon używa kanału <a href="#CCCH">CCCH</a>
+czy <a href="#CBCH">CBCH</a> (w przypadku, gdy komórka nie obsługuje nadawania
+komórkowego - można to sprawdzić w <b><a href="faq_net2.htm#Menu7">Menu
+10-7</a></b>), zależy od jego wersji oprogramowania i od tego, czy włączony
+jest odbiór takiego nadawania. Przykładowo: Nokia 5110 z oprogramowaniem
+5.04 używa kanału <a href="#CBCH">CBCH</a>, gdy włączysz jego odbiór w
+<b>Menu 2-5</b> lub
+<b>Menu 4-2-2</b> (<a href="#CCCH">CCCH</a>, gdy je wyłączysz).
+Myślę więc, że opłaci się wyłączyć go, gdy nie obsługuje go sieć - przypuszczalnie
+możesz zaoszczędzić w ten sposób trochę energii. Zostało to poprawione
+(tzn. telefon korzysta wtedy z kanału <a href="#CCCH">CCCH</a> niezależnie
+od ustawienia opcji "Serwis informacyjny" ("Info service") oraz "Informacja
+o sieci" ("Cell info display")) przy oprogramowaniu 5.07.
+
+<p>W zależności od parametru ccc (<a href=faq_net1.htm#RX>RX</a>) możesz
+ustawić lepiej antenę (szczególnie
+kierunkową) niż opierając się na wskaźniku po lewej stronie wyświetlacza
+! Jeśli chodzi o zasięg sieci, to taka mała rada praktyczna: nie dotykaj
+anteny telefonu (możesz zresztą sprawdzić, o ile może zmniejszyć się poziom
+odbieranego sygnału po przytrzymaniu jej palcami) !
+
+<p>Parametr <a href="#TA">TA</a> możesz wykorzystać (oprócz sprawdzania
+odległości od <a href="faq_net1.htm#BTS">BTSa</a>) również do pomiaru prędkości
+(np. samochodu, którym jedziesz). Poważnie ! Musi być spełnione kilka warunków:
+
+<ul>
+<li>droga powinna być prosta (bez zakrętów)</li>
+<li>telefon w czasie pomiaru musi korzystać z 1 <a href="faq_net1.htm#BTS">BTSa</a></li>
+<li>sam <a href="faq_net1.htm#BTS">BTS</a> musi być dosyć blisko drogi</li>
+</ul>
+
+<p>A teraz trochę matematyki:<map name=mapa><area shape=rect coords="5,2,29,13" href=faq_net1.htm#BTS></map>
+<br><img SRC="net_mon1.gif" BORDER=0 usemap="#mapa" height=107 width=183>
+<br>Z twierdzenia Pitagorasa:
+
+<p>a<sup>2</sup> = c<sup>2</sup> + e<sup>2</sup>
+<br>b<sup>2</sup> = c<sup>2</sup> + f<sup>2</sup>
+
+<p>Stąd:
+<br>e =<img SRC="net_mon3.gif" height=27 width=63 align=CENTER>
+<br>f =<img SRC="net_mon2.gif" height=26 width=62 align=CENTER>
+
+<p>Teraz d = e - f =<img SRC="net_mon3.gif" height=27 width=63 align=CENTER>-<img SRC="net_mon2.gif" height=26 width=62 align=CENTER>
+
+<p>Skoro znasz:
+
+<p>
+<ol>
+<li>
+drogę, którą przebył samochód (na rysunku: długość odcinka d; możesz ją
+obliczyć na podstawie znajomości odcinków a, b (są to odpowiednie wielokrotności
+513
+m (można tak przyjąć dla uproszczenia) odczytane na podstawie <a href="#TA">TA</a>)
+i c (piszę o nim dalej))</li>
+
+<li>
+czas, w którym się zmieniał <a href="#TA">TA</a> (do pomiaru wystarczy
+zegarek ze stoperem)</li>
+</ol>
+
+<p>to możesz oblicz swoją prędkość.<br>Błąd takiego pomiaru zależy od:
+
+<p>
+<ul>
+<li>
+odległości <a href="faq_net1.htm#BTS">BTSa</a> od drogi (odcinek c)</li>
+
+<li>
+samej prędkości</li>
+
+<li>
+odległości samochodu od <a href="faq_net1.htm#BTS">BTSa</a> (im większa,
+tym błąd zależy mniej od długości odcinka c)</li>
+</ul>
+
+<p>A teraz konkretny przykład:
+<br><a href="#TA">TA</a> miał wpierw wartość 2, która po 15 sekundach zmieniła
+się na 1. Wyniki pomiaru były następujące:
+
+<p>
+<ul>
+<li>123,120 km/h (<a href="faq_net1.htm#BTS">BTS</a> 0 m od drogi)</li>
+<li>124,320 km/h (100 m od drogi)</li>
+<li>128,160 km/h (200 m)</li>
+<li>135,600 km/h (300 m)</li>
+</ul>
+
+<p>Możesz średnio przyjąć, że odcinek c jest równy 100 m (albo 0, gdy liczysz
+w pamięci - wtedy d = e - f), a prędkość jest liczona z błędem 5 km/h.</td>
+</tr>
+</table>
+
+<p>W Nokii 2120 test ten wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+Digital mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+rssi DVC d<br>
+chan &nbsp;l &nbsp;a<br>
+S &nbsp;&nbsp;BB &nbsp;TT</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+Analog mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi &nbsp;s &nbsp;d<br>
+chan &nbsp;l &nbsp;a<br>
+CS-state</tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>natomiast w Nokii 2160 jest jeszcze inny:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<a href="faq_net1.htm#DCCH">DCCH</a> mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi DVC S<br>
+chan &nbsp;Pw A<br>
+CS-state</tt></td>
+</tr>
+</table>
+<p>
+</td>
+
+<td>
+<a href="faq_net1.htm#DTCH">DTCH</a> mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi &nbsp;&nbsp;s d<br>
+chan &nbsp;&nbsp;l a<br>
+CS-state</tt></td>
+</tr>
+</table>
+<p>
+</td>
+</tr>
+
+<tr>
+<td>
+<a href="faq_net1.htm#ACCH">ACCH</a> mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi &nbsp;&nbsp;D d<br>
+chan &nbsp;Pw A<br>
+CS-state</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<a href="faq_net1.htm#AVCH">AVCH</a> mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi DVC S<br>
+chan &nbsp;&nbsp;l a<br>
+CS-state</tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>a w Nokii 6160 wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<a href="faq_net1.htm#DCCH">DCCH</a> mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi DVC S<br>
+Bchan Pw A<br>
+CS-state<br>&nbsp;</tt></td>
+</tr>
+</table>
+<p>
+</td>
+
+<td>
+<a href="faq_net1.htm#DTCH">DTCH</a> mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi DVC s<br>
+Bchan Be l<br>
+CS-state<br>&nbsp;</tt></td>
+</tr>
+</table>
+<p>
+</td>
+</tr>
+
+<tr>
+<td>
+<a href="faq_net1.htm#ACCH">ACCH</a> mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi D d<br>
+Bchan Pw A<br>
+CS-state<br>&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<a href="faq_net1.htm#AVCH">AVCH</a> mode
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>rssi s d<br>
+Bchan l a&nbsp;<br>
+CS-state<br>&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+
+<li>B = aktualnie używana sieć/częstotliwość<p>
+<ul>
+<li>a = a-side 800mhz cellular</li>
+<li>b = b-side 800mhz cellular</li>
+<li>A = A-block (30 mhz) 1900mhz PCS</li>
+<li>B = B-block (30 mhz) 1900mhz PCS</li>
+<li>C = C-block (30 mhz) 1900mhz PCS</li>
+<li>D = D-block (10 mhz) narrowband 1900mhz PCS</li>
+<li>E = E-block (10 mhz) narrowband 1900mhz PCS</li>
+<li>F = F-block (10 mhz) narrowband 1900mhz PCS</li>
+</ul>
+<p>
+</li>
+
+<li>Be = <b>B</b>it <b>E</b>rror rate (stopa błędów) w % (0-16)</li>
+<li>TT = ostatnia otrzymania wartość przyporządkowania czasu (0-31)</li>
+<li>rssi = moc odbieranego sygnału (dBm) (min= -113dBm, max= -51dBm, w krokach 2dB)</li>
+<li>DVC = <b>D</b>igital <b>V</b>erification <b>C</b>olor (1-255, - = nie zabezpieczony)</li>
+<li>D = DCC (<b>D</b>igital <b>C</b>olor <b>C</b>ode) na kanale <a href="faq_net1.htm#ACCH">ACCH</a> (0-3, - = nie zabezpieczony)</li>
+<li>s = kolor SAT (0-2, - = nie zabezpieczony)</li>
+
+<li>d = stan odbioru danych
+<p>
+<ol start=0>
+<li>brak synchronizacji/brak danych</li>
+<li>synchronizacja/brak możliwości odczytania</li>
+<li>czytanie poprawne</li>
+<li>czytanie niepoprawne</li>
+</ol>
+<p>
+</li>
+
+<li>S = slot (1-3)</li>
+<li>chan = numer kanału (0001-1023)</li>
+
+<li>Pw = maksymalna moc, z jaką sieć pozwala nadawać telefonowi
+<p>
+<ul>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: MS-ACC-PWR (0-10, - = nie zabezpieczony)</li>
+<li><a href="faq_net1.htm#ACCH">ACCH</a>: CMAC (0-7, - = nie zabezpieczony)</li>
+</ul>
+<p>
+</li>
+
+<li>l = poziom nadawanego sygnału (0-10, - = nadajnik wyłączony)</li>
+<li>a = informacja, czy włączony jest (1) czy wyłączony (0) układ dźwiękowy</li>
+
+<li>CS-state = Cellular State
+<p>
+<ul>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>SCAN-LOCK</tt> : szukanie i zajmowanie <a href="faq_net1.htm#DCCH">DCCH</a></li>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>DCCH-SEL&nbsp;</tt> : wybór <a href="faq_net1.htm#DCCH">DCCH</a></li>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>CAMPING &nbsp;</tt> : Camping</li>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>REGISTR &nbsp;</tt> : procedura rejestracji</li>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>WAIT-ORDER</tt>: Waiting for order</li>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>ORIGINAT&nbsp;</tt> : wysyłanie</li>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>RSELECT &nbsp;</tt> : powtórny wybór</li>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>ORIG-SMS&nbsp;</tt> : wysyłanie SMSa</li>
+<li><a href="faq_net1.htm#DCCH">DCCH</a>: <tt>TERM-SMS&nbsp;</tt> : odbieranie SMSa</li>
+<li><a href="faq_net1.htm#DTCH">DTCH</a>: <tt>TCH&nbsp;&nbsp; &nbsp; &nbsp;</tt> : potwierdzenie kanału do transmisji</li>
+<li><a href="faq_net1.htm#ATCH">ATCH</a> or <a href="faq_net1.htm#DTCH">DTCH</a>: <tt>CONVERSAT</tt> : rozmowa</li>
+<li><a href="faq_net1.htm#ACCH">ACCH</a>: <tt>OOR &nbsp; &nbsp; &nbsp;</tt> : poza zasięgiem</li>
+<li><a href="faq_net1.htm#ACCH">ACCH</a>: <tt>SCAN-PDCH</tt> : szukanie podstawowych dedykowanych kanałów kontrolnych</li>
+<li><a href="faq_net1.htm#ACCH">ACCH</a>: <tt>SCAN-SDCH</tt> : szukanie następnych dedykowanych kanałów kontrolnych</li>
+<li><a href="faq_net1.htm#ACCH">ACCH</a>: <tt>SCAN-PCH&nbsp;</tt> : skanowanie kanałów pagingowych</li>
+<li><a href="faq_net1.htm#ACCH">ACCH</a>: <tt>IDLE&nbsp &nbsp; &nbsp;</tt> : tryb czuwania</li>
+<li><a href="faq_net1.htm#ACCH">ACCH</a>: <tt>ACCESS&nbsp; &nbsp;</tt> : dostęp</li>
+<li><a href="faq_net1.htm#ACCH">ACCH</a>: <tt>VCH &nbsp; &nbsp; &nbsp;</tt>: potwierdzenie kanału do transmisji głosu</li>
+</ul>
+</li>
+</ul>
+
+<P>Test ten w Nokii 6185/6188 jest, oczywiście ;-), jeszcze inny:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+kontrola <a href="faq_net1.htm#CDMA">CDMA</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+CSST CHAN SP<br>
+PPN EC/SO XF<br>
+LOS XHO FR B<br>
+-Rxx-Txx FER
+</tt></td>
+</tr>
+</table>
+<p>
+</td>
+
+<td>
+transmisja <a href="faq_net1.htm#CDMA">CDMA</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+<i>CONV 0450 NP<br>
+8000 2<br>
+000 0D9 00 0<br>
+-093+006 000</i>
+</tt></td>
+</tr>
+</table>
+<p>
+</td>
+
+<td>
+kontrola <a href="faq_net1.htm#AMPS">AMPS</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+RSSI S D<br>
+CHAN P A<br>
+CSST SID E<br>
+XTBY MINMAX&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+transmisja <a href="faq_net1.htm#AMPS">AMPS</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+<i>
+-095 2 3<br>
+0273 0 0<br>
+CONV 16427 0<br>
+Y
+</i></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr>
+<td colspan=2><a href="faq_net1.htm#CDMA">CDMA</a></td>
+<td colspan=2><a href="faq_net1.htm#AMPS">AMPS</a></td>
+</tr>
+
+<tr>
+<td colspan=2>
+<ul>
+<li>CSST - Cellular State: IDLE, CONVE, PLIOS, TIME, SYNC, RELE, PAGE, TRFIN, W_OR</li>
+<li>Chan - kanał</li>
+<li>PPN - PseudoNoise offset</li>
+<li>EC/SO - Energy per chip per noise</li>
+<li>B - aktualna sieć/częstotliwość. a,b oznaczają pasmo A i B 800 MHz <a href="faq_net1.htm#AMPS">AMPS</a> (analogowe). A-F oznaczają użycie cyfrowych bloków.</li>
+<li>Rxx - moc odbioru w dB</li>
+<li>Txx - moc transmisji w dB</li>
+<li>FER - <b>F</b>rame <b>E</b>rror <b>R</b>ate</li>
+<li>W czasie transmisji <a href="faq_net1.htm#CDMA">CDMA</a> pokazywany jest aktualnie używany codec (jeden z poniższych):
+<p><ul>
+<li>8000 - 13 kbit/sek</li>
+<li>0001 - 8 kbit/sek</li>
+<li>0003 - EVRC</li>
+</ul>
+
+</td>
+<td colspan=2>
+<ul>
+<li>RSSI - moc odbieranego sygnału</li>
+<li>S - numer slotu (1-3)</li>
+<li>D - DCC (<b>D</b>igital <b>C</b>olour <b>C</b>ode) na kontrolnym kanale analogowym
+(0-3, - = nie zabezpieczony)</li>
+<li>CHAN - kanał</li>
+<li>CSST - Cellular State: IDLE, CONVE, PLIOS, TIME, SYNC, RELE, PAGE, TRFIN, W_OR</li>
+<li>SID - System ID (Cantel = odd number)</li>
+<li>MINMAX: minimalne i maksymalne RSSI w czasie ostatniego przedziału czasowego ?</li>
+</ul>
+</td></tr>
+</table>
+
+<p><a NAME="Menu2"></a><b>Menu 10-2</b>
+<br>Więcej informacji o używanej komórce
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>&nbsp;aa b c Bdd&nbsp;<br>
+&nbsp;ee f&nbsp;<br>
+&nbsp;ggg hh iii<br>
+&nbsp;H=j mm nn</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>PM RAR Ro BC<br>
+RelR QLF<br>
+CRO TO PenT<br>
+H MAIO HSN</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>aa - tryb pagingu:
+
+<p>
+<ul>
+<li>NO : normalny</li>
+<li>EX : rozszerzony</li>
+<li>RO lub SB : reorganizacja pagingu</li>
+</ul>
+<p>
+</li>
+
+<li>
+b - RAR (<b>R</b>andom <b>A</b>ccess <b>R</b>etransmission): maksymalna
+ilość transmisji z użyciem kanału&nbsp;<a NAME="RACH"></a>RACH (<b>R</b>andom
+<b>A</b>ccess <b>Ch</b>annel
+- kanał telefon-<a href="faq_net1.htm#BTS">BTS</a> używany do zgłaszania
+prośby o dostęp do sieci np. przy logowaniu)</li>
+
+<li>
+c - jeżeli telefon działa w roamingu, wyświetla się literka R (w przeciwnym
+razie pole jest puste). Informacja ta jest również podawana na wyświetlaczu
+na samej górze.</li>
+
+<li>
+dd - wartość <a href="faq_net1.htm#BSIC">BSIC</a> dla używanej komórki</li>
+
+<li>
+ee - tutaj znajdziesz przyczynę zakończenia ostatniego połączenia (parametr
+ten jest również podawany w <b><a href="faq_net5.htm#Menu63">Menu 10-63</a></b>
+i <b><a href="faq_net4.htm#Menu39">Menu 10-39</a></b> (w tym ostatnim menu
+znajdziesz wyjaśnienia - patrz opis pierwszego parametru))</li>
+
+<li>
+f - RXQUAL_FULL (stopa błędów w transmisji przy wyłączonym <a href="faq_net1.htm#DTX">DTX</a>
+(stan <a href="faq_net1.htm#DTX">DTX</a> można sprawdzić w <b><a href="faq_net3.htm#Menu12">Menu
+10-12</a></b>)): określa, jak dużo błędów w połączeniu telefon musi poprawiać,
+aby była możliwa rozmowa. Zakres 0 - 7 (0 - oznacza, że żadnych, powyżej
+5 jest duża szansa na przerwanie rozmowy).
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER VALIGN=CENTER><td nowrap><b>Wartość RQ</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+<tr ALIGN=CENTER VALIGN=CENTER><td nowrap><b>Maksymalna ilość błędów</b></td><td>&lt;0,2%</td><td>&lt;0,4%</td><td>&lt;0,8%</td><td>&lt;1,6%</td><td>&lt;3,2%</td><td>&lt;6,4%</td><td>&lt;12,8%</td><td>&gt;12,8%</td></tr>
+</table>
+<p>
+</li>
+
+<li>
+<p>ggg - <a NAME="CellReselect"></a>Cell reselect offset: zakres 0 -
+63 (wartości należy mnożyć przez 2 dB), 'xxx' przy nadawaniu. Potrzebny
+do obliczenia <a href="faq_net1.htm#C2">C2</a>.</li>
+
+<li>
+<p>hh - <a NAME="TemporaryOffset"></a>Temporary offset: zakres 0 - 7
+(wartości należy mnożyć przez 10 dB, 70 dB oznacza nieskończenie długi
+czas), 'xx' przy nadawaniu. Potrzebny do obliczenia <a href="faq_net1.htm#C2">C2</a>.</li>
+
+<li>
+<p>iii - <a NAME="PenaltyTime"></a>Penalty time: zakres 0 - 31 (wartość
+należy mnożyć przez 20 s), 'xxx' przy nadawaniu.&nbsp; Potrzebny do obliczenia
+<a href="faq_net1.htm#C2">C2</a>.</li>
+
+<li>
+<p>j - informacja, czy włączone jest <a href="faq_net1.htm#Hopping">skakanie
+po częstotliwościach</a>:
+
+<p>
+<ul>
+<li>0 - nie (używany jest pojedyńcza częstotliwość - tzw. RF (<b>R</b>adio <b>F</b>requency))</li>
+<li>1 - tak (używane są różne RF (<b>R</b>adio <b>F</b>requency))</li>
+</ul>
+<p>
+</li>
+
+<li>
+<p>mm - MAIO (<b>M</b>obile <b>A</b>llocation <b>I</b>ndex <b>O</b>ffset).
+Zakres od 0 do 63, 'xx' gdy j=0 (tzn. gdy nie ma <a href="faq_net1.htm#Hopping">skakania
+po częstotliwościach</a> - to ostatnie możesz też sprawdzić w <b><a href="faq_net3.htm#Menu12">Menu
+10-12</a></b>)</li>
+
+<li>
+<p>nn - HSN (<b>H</b>opping <b>S</b>equence <b>N</b>umber). Zakres od 0 do
+63, 'xx' gdy j=0 (tzn. gdy nie ma <a href="faq_net1.htm#Hopping">skakania
+po częstotliwościach</a> - to ostatnie możesz też sprawdzić w <b><a href="faq_net3.htm#Menu12">Menu
+10-12</a></b>)</li>
+</ul>
+
+<p>W Nokii 3110 test ten wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaabbbccccddd<br>
+aaabbbccccddd<br>
+aaabbbccccddd<br>
+w&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; z</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>S CH C1 rx C2<br>
+1 CH C1 rx C2<br>
+2 CH C1 rx C2<br>
+S&nbsp;&nbsp;&nbsp; 1N 2N&nbsp; B</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Opisu parametrów szukaj w <b><a href="#Menu3">Menu 10-3</a></b> (w tym
+modelu przed parametrami cccc jest zawsze minus).
+
+<p>W Nokii 2120 test ten wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>ENCR &nbsp;CIPH<br>
+DTX &nbsp;XSTBY<br>
+CS-state</tt></td>
+</tr>
+</table>
+</td>
+
+</tr>
+</table>
+
+<p>
+<ul>
+<li>ENCR = kiedy kodowanie wiadomości (SMS ?) jest włączone</li>
+<li>CIPH = kiedy kodowanie dźwięku jest włączone</li>
+<li>DTX  = kiedy <a href="faq_net1.htm#DTX">DTX</a> jest włączone</li>
+<li>XSTBY= kiedy rozszerzone czuwanie jest włączone</li>
+<li>CS-state = opis w poprzednim teście</li>
+</li>
+</ul>
+
+<p>natomiast w Nokii 2160 jest jeszcze inny:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+tryb <a href="faq_net1.htm#DCCH">DCCH</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>mode &nbsp; DTX<br>
+ENCR &nbsp;CIPH<br>
+d &nbsp; &nbsp;Be TA</tt></td>
+</tr>
+</table>
+<p>
+</td>
+
+<td>
+tryb <a href="faq_net1.htm#DTCH">DTCH</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+mode &nbsp; DTX<br>
+ENCR &nbsp;CIPH<br>
+d&nbsp; &nbsp; Be TA
+</tt></td>
+</tr>
+</table>
+<p>
+</td>
+</tr>
+
+<tr>
+<td>
+tryb <a href="faq_net1.htm#ACCH">ACCH</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+mode<br>
+XSTBY<br>
+&nbsp; &nbsp; &nbsp; &nbsp;SID
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+tryb <a href="faq_net1.htm#AVCH">AVCH</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>mode<br>&nbsp;<br>
+&nbsp; &nbsp; &nbsp; &nbsp;SAT
+</tt>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>a tak wygląda w Nokii 6160:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+tryb <a href="faq_net1.htm#DCCH">DCCH</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>mode M C<br>
+FB E SP pc<br>
+net SID..<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+<p>
+</td>
+
+<td>
+tryb <a href="faq_net1.htm#DTCH">DTCH</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>mode DTX<br>
+ENCR CIPR&nbsp;<br>
+d a TA S<br>
+CODEC...
+</tt></td>
+</tr>
+</table>
+<p>
+</td>
+</tr>
+
+<tr>
+<td>
+tryb <a href="faq_net1.htm#ACCH">ACCH</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>mode<br>
+XSTBY<br>
+&nbsp;SID &nbsp; &nbsp; &nbsp;<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+tryb <a href="faq_net1.htm#AVCH">AVCH</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>mode<br>&nbsp;<br>
+&nbsp;SAT &nbsp; &nbsp; &nbsp;<br>&nbsp;
+</tt>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>mode = <a href="faq_net1.htm#DCCH">DCCH</a>, <a href="faq_net1.htm#DTCH">DTCH</a>, <a href="faq_net1.htm#ACCH">ACCH</a>, <a href="faq_net1.htm#AVCH">AVCH</a></li>
+<li>SID = system ID [0-32767, - = nie zabezpieczony]</li>
+
+<li>tryb <a href="faq_net1.htm#DCCH">DCCH</a>
+<p>
+<ul>
+<li>M = maksymalna klasa ramki pagingowej (PFC) obsługiwana przez sieć (1-8)</li>
+<li>C = aktualna PFC (<b>P</b>aging <b>F</b>rame <b>C</b>lass) (1-8)</li>
+<li>FB = ilość slotów F-BCCH</li>
+<li>E = ilość slotów E-BCCH</li>
+<li>SP = ilość slotów SPACH</li>
+<li>pc = podkanał PCH</li>
+<li>net = obsługiwane typy sieci, mapa bitowa (1=obsługiwane, 0=nie, C=aktualnie używane):
+1 bit dla sieci publicznej, 2 dla prywatnej, 3 dla rezydenckiej</li>
+</ul>
+<p>
+</li>
+
+<li>tryb <a href="faq_net1.htm#DTCH">DTCH</a>
+<p>
+<ul>
+<li>DTX  = pokazywane kiedy <a href="faq_net1.htm#DTX">DTX</a> jest włączone</li>
+<li>ENCR = pokazywane kiedy kodowanie wiadomości (SMS ?) jest włączone</li>
+<li>CIPH albo CIPR = pokazywane kiedy kodowanie głosu jest włączone</li>
+<li>d = stan odbioru danych (0=brak synchronizacji, 1=synchronizacja)</li>
+<li>Be = <b>B</b>it <b>E</b>rror <b>r</b>ate (stopa błędów) w % (0-16)</li>
+<li>TA = aktualne przyporządkowanie czasu (0-30)</li>
+<li>a = informacja, czy generowany jest dźwięk (1) czy nie (0)</li>
+<li>CODEC... = aktualnie używany codec:<p>
+<ul>
+<li>-EFR- = IS-136A ACELP coder</li>
+</ul>
+</ul>
+<p>
+</li>
+
+<li>tryb <a href="faq_net1.htm#ACCH">ACCH</a>
+<p>
+<ul>
+<li>XSTBY = pokazywane kiedy rozszerzone czuwanie jest włączone</li>
+</ul>
+<p>
+</li>
+
+<li>tryb <a href="faq_net1.htm#AVCH">AVCH</a>
+<p>
+<ul>
+<li>SAT = ważność SAT mierzona przez <a href-"faq_net1.htm#DSP">DSP</a> (0-32767)</li>
+</ul>
+<p>
+</li>
+</ul>
+
+<p>i w Nokii 6185/6188:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+kontrola <a href="faq_net1.htm#CDMA">CDMA</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+PN1<br>
+ECK&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<p>&nbsp;
+</tt></td>
+</tr>
+</table>
+<p>
+</td>
+
+<td>
+transmisja <a href="faq_net1.htm#CDMA">CDMA</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+PN1 PN3 PN5&nbsp;<br>
+ECK ECK ECK<br>
+PN2 PN4 PN6<br>
+ECK ECK ECK 
+</tt></td>
+</tr>
+</table>
+<p>
+</td>
+
+<td>
+kontrola <a href="faq_net1.htm#AMPS">AMPS</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+X F S N N C<br>
+SLEEP EMC<br>
+SCC STC M<br>
+RSSCPLCC CAL
+</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+transmisja <a href="faq_net1.htm#AMPS">AMPS</a>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td>
+<tt>
+<i>2 2 1 0 4 1<br>
+00015F927B13<br>
+0029B 0A0 2<br>
+140 372 0000</i>
+</tt></td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr>
+<td colspan=4><a href="faq_net1.htm#CDMA">CDMA</a>
+<p>
+<ul>
+<li>PNx: <a href="faq_net1.htm#CDMA">CDMA</a> PN offsets handoff canidate listing. Shows only the current offset while idling.
+Shows 1 to 6 additional choices during traffic.</li>
+</ul>
+</td></tr>
+</table>
+
+<p><a NAME="Menu3"></a><b>Menu 10-3</b>
+<br>Informacje o aktualnie używanej i sąsiednich komórkach
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaabbbcccddd<br>
+aaabbbcccddd<br>
+aaabbbcccddd<br>
+&nbsp;&nbsp; ef gh</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>SCH C1 rx C2<br>
+1CH C1 rx C2<br>
+2CH C1 rx C2<br>
+&nbsp;&nbsp;&nbsp; 1N 2N</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Znaczenie poszczególnych linijek:
+
+<p>
+<ol>
+<li>informacje o aktualnej komórce</li>
+<li>1 sąsiednia komórka</li>
+<li>2 sąsiednia komórka</li>
+<li>e,f dotyczą 1 sąsiedniej komórki, g,h 2 sąsiedniej komórki</li>
+</ol>
+
+<p>
+<ul>
+<li>
+aaa - CH (<b>ch</b>annel): numer kanału używanego do komunikacji z komórką
+(dziesiętny)</li>
+
+<li>
+bbb - wartości <a href="faq_net1.htm#C1">C1</a> wyświetlane tylko w trybie
+czuwania. W trybie aktywnym (np. połączenie) wyświetlana literka B i wartości
+<a href="faq_net1.htm#BSIC">BSIC</a>
+dla danej komórki</li>
+
+<li>ccc - <a href="faq_net1.htm#RX">RX</a>: Minus nie jest pokazywany,
+gdy wartość &lt;=-100. Pozwala on obliczyć wartość parametru RXLev:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr ALIGN=CENTER><td><b>RX (od)</b></td><td><b>RX (do)</b></td><td><b>RXLev</b></td></tr>
+<tr ALIGN=CENTER><td>mniej niż</td><td>-110 dBm</td><td>0</td></tr>
+<tr ALIGN=CENTER><td>-110 dBm</td><td>-109 dBm</td><td>1</td></tr>
+<tr ALIGN=CENTER><td>-109 dBm</td><td>-108 dBm</td><td>2</td></tr>
+<tr ALIGN=CENTER><td>...</td><td>...</td><td>...</td</tr>
+<tr ALIGN=CENTER><td>-49 dBm</td><td>-48 dBm</td><td>62</td></tr>
+<tr ALIGN=CENTER><td>-48 dBm</td><td>więcej</td><td>63</td></tr>
+</table>
+<p>
+</li>
+
+<li>
+ddd - parametr <a href="faq_net1.htm#C2">C2</a></li>
+
+<li>
+e,g - pokazuje się F, jeżeli komórka jest na zabronionym obszarze (w przeciwnym
+razie pole jest puste)</li>
+
+<li>
+f,h:
+
+<p>
+<ul>
+<li>
+B oznacza komórkę testowaną (telefon może korzystać z testowanych komórek
+- trzeba to włączyć w<b> <a href="faq_net3.htm#Menu19">Menu 10-19</a></b>)</li>
+<li>N - oddaną do normalnego użytku</li>
+<li>L - oznacza niski poziom</li>
+<li>w innych wypadkach pole jest puste.</li>
+</ul>
+<p>
+</li>
+
+</ul>
+
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Jeżeli chcesz się dowiedzieć, czy aktualnie używana komórka jest testowa czy nie,
+zajrzyj do <a href="faq_net3.htm#Menu19">Menu 10-19</a> (zależy to bowiem od ustawienia
+tamtego testu)</td>
+</tr>
+</table>
+
+<p>Czasami telefon pokazuje, że równocześnie <a href="faq_net1.htm#C1">C1</a> i
+<a href="faq_net1.htm#C2">C2</a> dla danego kanału są równe -99
+- oznacza to prawdopodobnie, że nie mógłby się do niego zalogować...
+
+<p>W Nokii 3110 test ten wygląda jak <b><a href="#Menu4">Menu 10-4</a></b>.
+
+<p>W Nokii 2120 test ten wygląda jak <b><a href="#Menu4">test 4</a></b> w Nokii 2160.
+
+<p>W Nokii 2160 test ten wygląda inaczej i występuje tylko przy używaniu
+kanału <a href="faq_net1.htm#DCCH">DCCH</a>:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+RS SS SI b<br>
+NA ND<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+</tr></table>
+
+<p>a tak w Nokii 6160:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+RS SS SI b<br>
+NA ND<br>
+MA MD MO<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+</tr></table>
+
+<p>
+<ul>
+<li>RS = minimalny poziom sygnału niezbędny do dostępu do komórki (0-31, gdzie 0=-113 dBm i 31=-51 dBm)</li>
+<li>SS = minimum signal <b>S</b>trength <b>S</b>ufficient for candidate of reselection (0-31, gdzie 0=-113 dBm i 31=-51 dBm)</li>
+<li>SI = <b>S</b>can <b>I</b>nterval between consecutive strength measurements in hyperframes (1-16)</li>
+<li>b = access burst size (0=normal, 1=abbreviated RACH)</li>
+<li>NA = ilość sąsiednich analogowych komórek (0-24)</li>
+<li>ND = ilość sąsiednich komórek cyfrowych (0-24)</li>
+</ul>
+
+<p>i w Nokii 6185/6188:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+OWNNUMBER<br>
+ESN-00000000<br>
+ESN-HEX<br>
+SL P MD PC
+</tt></td>
+</tr>
+</table>
+
+<ul>
+<li>OWNNUMBER - numer telefonu</li>
+<li>ESN - <b>E</b>lectronic <b>S</b>erial <b>N</b>umber</li>
+<li>MD - [AD] zmienia się na [DI] w czasie używania <a href="faq_net1.htm#CDMA">CDMA</a> na 800 MHz</li>
+</ul>
+
+<p><a NAME="Menu4"></a><b>Menu 10-4</b>
+<br>Informacje o sąsiednich komórkach
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaabbbcccddd<br>
+aaabbbcccddd<br>
+aaabbbcccddd<br>
+&nbsp; ef gh ij</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>3CH C1 rx C2<br>
+4CH C1 rx C2<br>
+5CH C1 rx C2<br>
+&nbsp; 3N 4N 5N</b></tt></td>
+</tr>
+</table>
+</td>
+
+</tr>
+</table>
+
+<p>Znaczenie poszczególnych linijek:
+<ol>
+<li>3 sąsiednia komórka</li>
+<li>4 sąsiednia komórka</li>
+<li>5 sąsiednia komórka</li>
+<li>
+e,f dotyczą 3 sąsiedniej komórki, g,h 4 sąsiedniej komórki, i,j
+5 sąsiedniej komórki</li>
+</ol>
+
+<p>Znaczenie literek jest takie jak w <b><a href="#Menu3">Menu 10-3</a></b>
+(literka i oznacza to samo co e, zaś j to samo co f)
+
+<p>Czasami telefon pokazuje, że równocześnie <a href="faq_net1.htm#C1">C1</a> i
+<a href="faq_net1.htm#C2">C2</a> dla danego kanału są równe -99
+- oznacza to prawdopodobnie, że nie mógłby się do niego zalogować...
+
+<p>W Nokii 3110 ten test wygląda jak <b><a href="#Menu5">Menu 10-5</a></b>.
+
+<p>W Nokii 2160 ten test wygląda inaczej:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+bVo mod bs<br>
+Tbat1  Tb2<br>
+Wpwm FCmAh<br>
+</tt></td>
+</tr>
+</table>
+</td>
+
+</tr></table>
+
+<p>
+<ul>
+<li>bVo = napięcie akumulatora</li>
+<li>mod = tryb ładowania
+
+<p>
+<ul>
+<li>FAS = szybkie ładowanie</li>
+<li>COL = ładowanie zimnego akumulatora</li>
+<li>MAI = ładowanie podtrzymujące</li>
+<li>ERR = zła ładowarka albo problem z akumulatorem</li>
+<li>LIC = ładowanie akumulatora LiION</li>
+<li>TXO = ładowanie przy włączonym nadajniku (rozmowa ?)</li>
+<li>*** = ładowarka jest odłączona</li>
+</ul>
+<p>
+</li>
+
+<li>bs = bateria jest pełna albo przyczyna przerwania szybkiego ładowania
+
+<p>
+<ul>
+<li>TI = osiągnięto maksymalny czas ładowania</li>
+<li>DV = wykryto dV/watość peak (jest naładowany)</li>
+<li>BV = maksymalny poziom napięcia akumulatora</li>
+<li>BT = maksymalny poziom temperatury akumulatora (przegrzanie)</li>
+<li>** = akumulator nie jest naładowany</li>
+</ul>
+<p>
+</li>
+
+<li>Tbat1 = battery temp. a/d reading (subtracted from 1023)</li>
+<li>Tb2   = temperatura akumulatora w C (nie zaimplementowana)</li>
+<li>Wpwm  = kontrola ładowania (000-250)</li>
+<li>FCmAh = ilość mAh naładowanych do akumulatora</li>
+</ul>
+</li>
+
+<p>W Nokii 2120 ten test wygląda jak
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+ChargV:NNN<br>
+ST hex des<br>
+B:LLLL KKK</tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>natomiast nie został on zaimplementowany.
+
+<p>W Nokii 6160 wygląda następująco:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+SID #####<br>
+NN NT NR<br>
+Alphatag &nbsp;<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>SID = <b>S</b>ystem <b>I</b>dentification <b>N</b>umber (0-32767, nieparzysty
+dla nośnych 'A', parzysty dla nośnych 'B', - = niezabezpieczony)</li>
+<li>Alphatag.. = textual end-user display of current system</li>
+</ul>
+
+<p>i w Nokii 6185/6188:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+CSST CHAN<br>
+A B<br>
+SID<br>
+SD IT TM CAP
+</tt></td>
+</tr>
+</table>
+
+<ul>
+<li>CSST - Cellular state: IDLE, CONVE, PLIOS, TIME, SYNC, RELE, PAGE, TRFIN, W_OR</li>
+<li>CHAN - kanał</li>
+<li>B - pasmo częstotliwości (małe a,b = pasmo 800 MHz; wielkie A,B = pasmo 1900 MHz)</li>
+<li>SID - System ID:<p>
+<ul>
+<li>[17500] - Clearnet PCS</li>
+<li>[16422] - BC Tel Mobility</li>
+<li>[16xxx parzysty numer] - Cantel AT&T</li>
+</ul>
+<p></li>
+</ul>
+
+<p><a NAME="Menu5"></a><b>Menu 10-5</b>
+<br>Informacje o sąsiednich komórkach
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaabbbcccddd<br>
+aaabbbcccddd<br>
+aaabbbcccddd<br>
+&nbsp; ef gh ij</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>6CH C1 rx C2<br>
+7CH C1 rx C2<br>
+8CH C1 rx C2<br>
+&nbsp; 6N 7N 8N</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Znaczenie poszczególnych linijek:
+<ol>
+<li>6 sąsiednia komórka</li>
+<li>7 sąsiednia komórka</li>
+<li>8 sąsiednia komórka</li>
+<li>
+e,f dotyczą 6 sąsiedniej komórki, g,h 7 sąsiedniej komórki, i,j
+8 sąsiedniej komórki</li>
+</ol>
+
+<p>Znaczenie literek jest takie jak w <b><a href="#Menu3">Menu 10-3</a></b>
+(literka i oznacza to samo co e, zaś j to samo co f)
+
+<p>Czasami telefon pokazuje, że równocześnie <a href="faq_net1.htm#C1">C1</a> i
+<a href="faq_net1.htm#C2">C2</a> dla danego kanału są równe -99
+- oznacza to prawdopodobnie, że nie mógłby się do niego zalogować...
+
+<p>W Nokii 3110 ten test wygląda jak <b><a href="#Menu6">Menu 10-6</a></b>.
+
+<p>O ile się dobrze orientuję, dopiero Nokia 3210 potrafi "obserwować" 8 sąsiednich
+komórek (w starszych telefonach - np. Nokii 5110 - możliwe jest wyświetlanie
+parametrów maksymalnie 6 sąsiednich komórek).
+
+<p>W Nokii 2160 ten test przyjmuje następujący wygląd:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+ROM SW<br>
+EPROM SW<br>
+Prod type&nbsp;</tt></td>
+</tr>
+</table>
+</td>
+</tr></table>
+
+<p>
+<ul>
+<li>ROM SW = wersja oprogramowania ROM (np. V 65.08)</li>
+<li>EPROM SW = wersja oprogramowania w EEPROM, (np. V  1.45)</li>
+<li>Prod type = oznaczenie kodowe telefonu (np. NHC-4NE)</li>
+</ul>
+
+<p>a tak w Nokii 6160:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+S bandorde<br>
+NC NP IRC<br>
+RSCO RSLO<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+</tr></table>
+
+<p>
+<ul>
+<li>S = wskaźnik pokazujący status używanej sieci:<p>
+<ul>
+<li>H = hometype system</li>
+<li>P = partner roamingowy</li>
+<li>F = preferowany roaming</li>
+<li>N = normalny roaming</li>
+<li>X = brak zasięgu</li>
+<li>a, b, A, B, C, D, E, F = aktualna częstotliwość podczas szukania kanału kontrolnego
+(szczegóły przy opisie następnego parametetru)</li>
+</ul>
+<p></li>
+
+<li>bandorde = kolejność szukania sieci:<p>
+<ul>
+<li>a = a-side 800mhz cellular</li>
+<li>b = b-side 800mhz cellular</li>
+<li>A = A-block (30 mhz) 1900mhz PCS</li>
+<li>B = B-block (30 mhz) 1900mhz PCS</li>
+<li>C = C-block (30 mhz) 1900mhz PCS</li>
+<li>D = D-block (10 mhz) narrowband 1900mhz PCS</li>
+<li>E = E-block (10 mhz) narrowband 1900mhz PCS</li>
+<li>F = F-block (10 mhz) narrowband 1900mhz PCS</li>
+</ul>
+<p></li>
+
+<li>NC = <b>N</b>umber of <b>C</b>ellular = ilość możliwych bloków do przeszukania w pasmach częstotliwości używanych przez sieci komórkowe</li>
+<li>NP = <b>N</b>umber of <b>P</b>CS - ilość podbloków do przeszukania w pasmach częstotliwości PCS</li>
+<li>IRC = <b>IR C</b>ontrol:<p>
+<ul>
+<li>1 = tylko systemy z domowym SID albo SOC są akceptowane</li>
+<li>0 = każdy system nie zaznaczony jako zabroniony jest akceptowany</li>
+</ul><p></li>
+
+<li>RSCO = <b>R</b>e<b>s</b>can <b>Co</b>unt - czas potwórnego szukania w hyperramkach</li>
+<li>RSLO = <b>R</b>e<b>s</b>can <b>Lo</b>op - definiuje, kiedy wszystkie pasma częstotliwości
+wymienione w parametrze "bandorde" są przeszukiwane</li>
+
+</ul>
+
+<p>i w Nokii 6185/6188:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+1YNC_OK_097B<br>
+SYNC_FAI4CC1<br>
+FOCC_WOR587C<br>
+WORD_OK_3E65</i>
+</tt></td>
+</tr>
+</table>
+
+<p><a NAME="Menu6"></a><b>Menu 10-6</b>
+<br>Informacje o "preferowanych" i zabronionych sieciach włożonej do telefonu
+karty SIM.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>aaabb&nbsp; aaabb<br>
+aaabb&nbsp; aaabb<br>
+aaabb&nbsp; aaabb<br>
+aaabb&nbsp; aaabb</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>LReg&nbsp;&nbsp; 1_For<br>
+1_Pre&nbsp; 2_For<br>
+2_Pre&nbsp; 3_For<br>
+3_Pre&nbsp; 4_For</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>Znaczenie poszczególnych linijek:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr><td ALIGN=CENTER>sieć ostatnia używana</td><td>1 sieć, do której miała zabroniony dostęp</td></tr>
+<tr><td>1 "preferowana" sieć</td><td>2 sieć, do której miała zabroniony dostęp</td></tr>
+<tr><td>2 "preferowana" sieć</td><td>3 sieć, do której miała zabroniony dostęp</td></tr>
+<tr><td>3 "preferowana" sieć</td><td>4 sieć, do której miała zabroniony dostęp</td></tr>
+</table>
+
+<p>
+<ul>
+<li>
+sieć ostatnio używana - może to być sieć, operatorowi której płacisz rachunki
+(jeżeli tak, to po jej ręcznym wybraniu
+(w Nokii 5110 <b>Menu 4-2-4</b>) telefon sygnalizuje "Home network
+selected" ("Wybrano własną sieć"))</li>
+
+<li>
+"preferowana" sieć - sieć, do której karta SIM mogła się zalogować (będąc
+w jej zasięgu) - np. w roamingu.</li>
+
+<li>
+sieć, do której miała zabroniony dostęp - była w jej zasięgu, ale przez
+brak odpowiednich umów nie mogła z niej skorzystać...</li>
+</ul>
+
+<ul>
+<li>
+<p>aaa - <a NAME="MCC"></a>MCC (<b>M</b>obile <b>C</b>ountry <b>C</b>ode)
+- kod kraju, w którym działa sieć (260 dla Polski) w kodzie BCD</li>
+
+<li>
+<p>bb - <a NAME="MNC"></a>MNC (<b>M</b>obile <b>N</b>etwork <b>C</b>ode)
+- kod sieci (w Polsce: 01 dla <a href="http://www.plusgsm.pl/">Plusa</a>,
+02 dla <a href="http://www.eragsm.pl/">Ery</a>, 03 dla <a href="http://www.idea.centertel.pl/">Idei</a>)
+w kodzie BCD. W przypadku, gdy używasz telefonu w systemie PCS 1900 (np.
+Nokia 6190), numer ten może mieć trzy cyfry.</li>
+</ul>
+
+<p>Po co w ogóle są zapisywane takie listy na karcie SIM ? Dzięki nim:
+
+<p>
+<ol>
+<li>
+telefon nie traci energii na logowanie się do sieci, do których karta SIM
+ma zabroniony dostęp (wystarczy to raz sprawdzić, zapamiętać i nie powtarzać
+całej procedury sprawdzania od nowa)</li>
+
+<li>
+przy automatycznym wybieraniu sieci w pierwszej kolejności używa tych,
+w których wcześniej działał (czyli właśnie "preferowanych").</li>
+</ol>
+
+<p>Listę sieci "preferowanych" i "zabronionych"
+zapisuje telefon (Nokia umieszcza tam ostatnio wybrane sieci).
+Sieci "preferowane" mogą być edytowane np. w Motorolach i Alcatelach (ale nie w Nokii).
+Czasami robi to również operator (tzn. przed sprzedaniem karty zapisuje
+na niej zarówno sieci "preferowane" jak i zabronione (wiadome jest np.,
+że z kartą <a href="http://www.idea.centertel.pl/">Idei</a> nie zalogujesz
+do <a href="http://www.plusgsm.pl/">Plusa</a> - można to już zapisać w
+procesie programowania karty)). Obie te listy możesz zmienić korzystając
+z dostępnego w czeskiej wersji językowej programu SIMedit (<a href="http://www.compelson.cz/simedit.htm">www.compelson.cz/simedit.htm</a>)...
+
+<p>Pod adresem 
+<a href="http://kbs.cs.tu-berlin.de/~jutta/gsm/gsm-list.html">http://kbs.cs.tu-berlin.de/~jutta/gsm/gsm-list.html</a>
+możesz natomiast znaleźć spis parametrów MCC i MNC dla różnych sieci.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Na podstawie tego menu możesz więc sprawdzić (z dosyć dużym prawdopodobieństwem
+- NIE ZAWSZE !), gdzie była ostatnio używana karta SIM (w kraju, za granicą)
+albo gdzie jeździł jej posiadacz...</td>
+</tr>
+</table>
+
+<p>W Nokii 2160 ten test jest używany, gdy chcesz "wyłączyć" testy monitora.
+
+<p>Tak wygląda w Nokii 6160:
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+PSC PSD&nbsp; &nbsp;<br>
+FSC FSD<br>
+XSC XSD<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+</tr></table>
+
+<p>statystyki
+inteligentnej bazy roamingowej
+(IRDB = <b>I</b>ntelligent <b>R</b>oaming <b>D</b>ata<b>b</b>ase):
+
+<p>Tutaj możesz zobaczyć ilość SOC i SID w każdej kategorii.
+Baza ma pamięć o pojemności 82 wpisów, które mogą być podzielone
+pomiędzy następujące kategorie:
+
+<p>
+PSC = ilość partnerów SOC<br>
+PSD = ilość partnerów SID<br>
+FSC = ilość preferowanych SOC<br>
+FSD = ilość preferowanych SID<br>
+XSC = ilość zabronionych SOC<br>
+XSD = ilość zabronionych SID<br>
+
+<p>Partner SOC/SID = traktowany jak sieć macierzysta
+<br>Preferowany SOC/SID = jeżeli są dostępne neutralne (niezdefiniowane) systemy,
+preferowany bardziej niż one
+<br>Zabronione SOC/SID = odrzucane przez telefon
+
+<p>i w Nokii 6185/6188:
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 width=100%>
+<tr><td><a href="faq_net1.htm#CDMA">CDMA</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+SID NID<br>
+BASE ID<br>
+P_REV<br>
+MIN_P_REV&nbsp; &nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+<td><a href="faq_net1.htm#AMPS">AMPS</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+0ORD_COR0CE3<br>
+WORD_FAI0E76<br>
+CTRL_FIL787D<br>
+SAT_V_OK0004</i>
+</tt></td>
+</tr>
+</table>
+</td></tr>
+<tr><td colspan=2>
+&nbsp;<br><a href="faq_net1.htm#CDMA">CDMA</a><br>
+<ul>
+<li>SID - System ID:<p>
+<ul>
+<li>[17500] - Clearnet PCS</li>
+<li>[16422] - BCTel Mobility</li>
+<li>[16xxx parzysty numer] - Cantel AT&T</li>
+<li>[00000]: Second SID assignment</li>
+</ul>
+</ul>
+<p>Linie 3 i 4 dotyczą prawdopodobnie specyfikacji <a href="faq_net1.htm#CDMA">CDMA</a>: [ANSI] dla 1900 MHz, [TSB74] dla 800 MHz <a href="faq_net1.htm#CDMA">CDMA</a>
+</td></tr></table>
+
+<p><a NAME="Menu7"></a><b>Menu 10-7</b>
+<br>Informacje o aktualnie używanej (ostatnio monitorowanej) komórce
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>E A H C I BR<br>
+a b c d e fg<br>
+ECSC 2Ter MB<br>
+h&nbsp;&nbsp;&nbsp; i&nbsp;&nbsp;&nbsp; j</tt></td>
+</tr>
+</table>
+</td>
+
+<td>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><b>Serving Cell<br>
+system info<br>
+bits<br>
+&nbsp;</b></tt></td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+
+<p>
+<ul>
+<li>a - 1, gdy możliwe jest połączenie z telefonem alarmowym (chyba 112)</li>
+<li>b - 1, gdy możliwe jest <a href="faq_net1.htm#IMSIattach">IMSI attach</a> oraz <a href="faq_net1.htm#IMSIdetach">IMSI detach</a></li>
+<li>c - 1, gdy komórka może używać <a href="faq_net1.htm#HR">kanałów HR</a></li>
+<li>d - 1, gdy nadawane są wartości <a href="faq_net1.htm#C2">C2</a></li>
+<li>e - 1, gdy informacje systemowe 7 i 8 (system information 7 and 8) są nadawane</li>
+<li>f - 1, jeżeli komórka obsługuje nadawanie komórkowe (kanał <a href="#CBCH">CBCH</a>)</li>
+<li>g - 1, gdy możliwe jest powtórne nawiązywanie transmisji (cell re-establishment)</li>
+</ul>
+
+<p>Tylko w telefonach dualnych (GSM 900/1800 - np. Nokia 6150 czy 3210) pojawiają
+się dwie ostatnie linijki:
+
+<p>
+<ul>
+<li>
+h - w trybie czuwania pojawia się 1, gdy obsługiwane jest wysyłanie ECSC
+(Early Classmark). W czasie rozmowy pojawia się tutaj x.</li>
+
+<li>
+i - w trybie czuwania pojawia się 1, jeżeli obsługiwane są komunikaty 2-Ter.
+W czasie rozmowy pojawia się tutaj x.</li>
+
+<li>
+j - tutaj znajdziesz informację (jeżeli jest to obsługiwane), jakie komórki
+z obu częstotliwości (900 i 1800 MHz) są pokazywane (wartość parametru
+MULTIBAND_REPORTING). Opisy ze specyfikacji Phase2+ ETSI GSM 05.08 wersja 5.4.0,
+sekcja 8.4.3 "Additional cell reporting requirements for multi band MS":
+
+<p>
+<ul>
+<li>
+0 - pokazywane jest 6 najmocniejszych komórek (ze znanym i dozwolonym do
+użycia <a href="faq_net1.htm#NCC">NCC</a> z <a href="faq_net1.htm#BSIC">BSIC</a>) niezależnie
+od używanej przez nie pasma częstotliwości (900 albo 1800 MHz).</li>
+
+<li>
+1 - pokazywana jest najmocniejsza komórka (ze znanym i dozwolonym do użycia
+<a href="faq_net1.htm#NCC">NCC</a>
+z <a href="faq_net1.htm#BSIC">BSIC</a>) w każdym pasmie częstotliwości
+na liście BA, wyłączając pasmo częstotliwości używanej komórki. Pozostałe
+pozycje powinny być użyte do pokazywania komórek w pasmie używanej komórki.
+Jeżeli są nadal wolne pozycje, znajdą się tam następne najmocniejsze i
+rozpoznane komórki z innych pasm (niezależnie od użytego przez nie pasma).</li>
+
+<li>
+2 - podobnie jak przy 1, ale na początku są pokazywane dwie najmocniejsze
+komórki (ze znanym i dozwolonym do użycia <a href="faq_net1.htm#NCC">NCC</a> z <a href="faq_net1.htm#BSIC">BSIC</a>)
+w każdym pasmie...</li>
+
+<li>
+3 - początkowo pokazywane są trzy najmocniejsze komórki...</li>
+</ul>
+</li>
+
+</ul>
+
+<p>Jeżeli po włączeniu telefon nie był zalogowany do żadnej sieci, pokazywane
+są tutaj pewne wartości domyślne.
+
+<p>W Nokii 6160 ten test jest inny:
+
+<p>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+User<br>
+interface&nbsp;<br>
+display<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+
+<p>a taki jest w Nokii 6185/6188:
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 width=100%>
+<tr><td><a href="faq_net1.htm#CDMA">CDMA</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt>
+CSST&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br>
+DATE<br> 
+TIME<br>&nbsp;
+</tt></td>
+</tr>
+</table>
+</td>
+<td><a href="faq_net1.htm#AMPS">AMPS</a><br>
+<table BORDER CELLSPACING=0 CELLPADDING=0 >
+<tr>
+<td><tt><i>
+1AT_V_FA0000<br>
+FVC_S_FA0000<br>
+WFLG_INT7046<br>
+NORMALRXFE25</i>
+</tt></td>
+</tr>
+</table>
+</td></tr>
+<tr><td colspan=2>
+&nbsp;<br><a href="faq_net1.htm#CDMA">CDMA</a><p>
+<ul>
+<li>CSST - Cellular state: [IDLE], [CONVE], [PLIOS], [TIME], [SYNC], [RELE], [PAGE], [TRFIN], [W_OR]</li>
+<li>DATE - data sieci <a href="faq_net1.htm#CDMA">CDMA</a></li>
+<li>TIME - czas sieci <a href="faq_net1.htm#CDMA">CDMA</a></li>
+</ul>
+</td></tr></table>
+
+<font class="drukuj">
+<a class="shref" href="#Top"><small><em>Na początek</em></small></a><br>
+
+<center>
+<p><a href="faq_net0.htm">[Część 1]</a><a href="faq_net1.htm">[Część 2]</a><b>[Część 3]</b><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><a href="faq_net6.htm">[Część 7]</a>
+</center>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<br><p align="RIGHT"><font class='autor' size='1'><a class="autoremail" href="mailto:Marcin Wiącek<Marcin-Wiacek@topnet.pl>">Marcin Wiącek</a> (<a class="autoremail" href="http://marcin-wiacek.topnet.pl">WWW</a>)
+<br>Ostatnia aktualizacja: 4 maja 2000</font>
+
+<script language=JavaScript src='../konw.js'></script>
+</body>
+</html>

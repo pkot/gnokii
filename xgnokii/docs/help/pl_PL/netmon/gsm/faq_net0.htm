@@ -1,0 +1,709 @@
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+   <meta name="Author" content="Marcin Wiącek">
+   <meta name="Description" content="FAQ dotyczący monitora sieci w Nokiach (NOKIA NetMonitor description)">
+   <meta name="language" content="pl">
+   <meta name="revisit-after" content="15 days">
+   <meta name="Robots" content="all">
+   <meta name="KeyWords" content="3110, 9110, GSM, DCS, Nokia, 3210, 5110, 5130, 6110, 6130, 6150, 8810, FAQ, NetMonitor, monitor sieci, Marcin, Wiącek, Wiacek, Marcin Wiącek, Marcin Wiacek">
+   <title>FAQ - monitor sieci w Nokiach (część 1/7)</title>
+   <link rel="stylesheet" href="../styl.css" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" text="#2B2B69" link="#525FF5" vlink="#525FF5" alink="#2FA030">
+
+<font class="drukuj">
+<p align="RIGHT"><a class="autoremail" href="../glowna.htm">Strona główna</a></p>
+</font>
+<center><font color="#1F409F" size=+2 class="tytul">Monitor sieci w telefonach Nokia (1/7)</font>
+<font class="drukuj">
+<p><b>[Część 1]</b><a href="faq_net1.htm">[Część 2]</a><a href="faq_net2.htm">[Część 3]</a><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><a href="faq_net6.htm">[Część 7]</a>
+</font>
+</center>
+
+<hr noshade width="60%" style="color: #004080" align=center>
+
+<p>Chciałbym tu wyraźnie na początku napisać, że nie zajmuję się zawodowo
+telefonami ani sieciami komórkowymi, a opis monitora
+sieci opracowałem głównie na podstawie różnych materiałów i korzystając
+z pomocy wielu ludzi (patrz
+<i><a href="faq_net6.htm#Literatura">Użyte materiały</a></i>).
+Jest to raczej opis użytkownika. Mogłem w nim nie uwzględnić
+wszystkich możliwości, zapewne są tu błędy (mogły np. powstać w wyniku
+złego tłumaczenia albo wynikać z mojej niewiedzy) i naprawdę dziwne sformuowania.
+Nie znajdziesz odpowiedzi na wiele pytań. Co więcej, strona jest ciągle
+"under construction" (w trakcie budowy). Zachęcające, prawda ? Ale taka
+jest niestety prawda: firma <a href="http://www.nokia.com/">Nokia</a>
+oficjalnie nie udostępnia publicznie odpowiednich materiałów...
+I zapewniam Cię, że naprawdę dołożyłem wszelkich możliwych starań, żeby
+znalazł się tutaj możliwie najlepszy opis.
+
+<p>W tej chwili na mojej stronie dostępna jest również wersja angielska tego FAQ.
+W tworzeniu wersji polskiej czynny udział wzięli: mój brat Robert oraz Piotrek Zdunek.
+
+<p><b><font color="#FF6666">Będę bardzo wdzięczny, jeżeli pomożesz mi w
+jego tworzeniu - proszę o
+<a href="mailto:Marcin Wiącek<Marcin-Wiacek@TopNet.PL>"><b>przysyłanie</b></a>
+wszelkich informacji (adresów stron,
+na których je znajdę), sugestii i uwag. Mój FAQ dotyczy obecnie Nokii 2120, 2160, 3110,
+3210, 5110, 5130, 5190, 6110, 6130, 6150, 6160, 6185/6188, 7110 oraz 9110. Jeżeli masz włączony monitor sieci
+w innym modelu (np. 2110i, 8xxx, 9000), również proszę o
+<a href="mailto:Marcin Wiącek<Marcin-Wiacek@TopNet.PL>"><b>kontakt ze mną</b></a>
+(chciałbym opisać różnice, ewentualnie nowe testy).</font></b>
+
+<p><b><font color="#FF6666">Pamiętaj również, że ja ani osoby tu wymienione nie ponoszą żadnej odpowiedzialności
+za szkody wynikłe z użycia zawartych tu wiadomości (wykorzystujesz je na
+własną odpowiedzialność) !</font></b>
+
+<p><hr size="2" noshade width="60%" align="center" style="color: #004080">
+<a NAME="Top"></a>
+
+<font class="drukuj">
+<ol>
+<li><a href="#1"><b>Co to jest ?</b></a></li>
+<li><a href="#2"><b>Czy jest mi potrzebny ?</b></a></li>
+<li><a href="#3"><b>Czy po włączeniu monitora telefon pobiera więcej energii ?</b></a></li>
+<li><a href="#4"><b>Jak go włączyć ?</b></a></li>
+<li><a href="#5"><b>Jaką wersję monitora mogę włączyć w telefonie ?</b></a></li>
+<li><a href="#6"><b>Czy włączenie monitora powoduje utratę gwarancji ?</b></a></li>
+<li><a href="#7"><b>W moim telefonie menu monitora ma numer inny niż 10. Czy to normalne ?</b></a></li>
+<li><a href="#8"><b>W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?</b></a></li>
+<li><a href="#9"><b>Jak się nim posługiwać ?</b></a></li>
+<li><a href="#10"><b>Czy mogę zepsuć sobie telefon ?</b></a></li>
+<li><a href="faq_net1.htm#11"><b>Słowniczek</b></a></li>
+<li><a href="faq_net2.htm#12"><b>Znaczenie poszczególnych testów</b></a></li>
+<li><a href="faq_net6.htm#13"><b>Można też użyć programu...</b></a></li>
+<li><a href="faq_net6.htm#14"><b>Czy można korzystać z monitora sieci, gdy nie ma w telefonie karty SIM, nie został podany jej PIN lub jest nieaktywna ?</b></a></li>
+<li><a href="faq_net6.htm#15"><b>W jaki sposób mogę wyłączyć monitor sieci ?</b></a></li>
+<li><a href="faq_net6.htm#16"><b>Czy powinienem wyłączyć monitor sieci przed oddaniem telefonu do serwisu ?</b></a></li>
+<li><a href="faq_net6.htm#17"><b>Czy po wyłączeniu monitora sieci będę go mógł włączyć ponownie ?</b></a></li>
+<li><a href="faq_net6.htm#18"><b>Czy monitor sieci jest dostępny także w analogowych Nokiach ?</b></a></li>
+<li><a href="faq_net6.htm#19"><b>Czy monitor sieci pozwoli na używanie telefonu podobnie jak radiostacji ?</b></a></li>
+<li><a href="faq_net6.htm#20"><b>Dlaczego w moim telefonie jest znacznie mniej testów niż zostało tutaj opisane ? Czy mogę zwiększyć ich ilość ?</b></a></li>
+<li><a href="faq_net6.htm#21"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie znajduje się mój rozmówca ?</b></a></li>
+<li><a href="faq_net6.htm#22"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie się znajduję ?</b></a></li>
+<li><a href="faq_net6.htm#23"><b>Co to są kody monitora sieci ?</b></a></li>
+<li><a href="faq_net6.htm#24"><b>Czy jest prawdą, że monitor sieci w telefonie z dodatkowym urządzeniem zmieniającym jego pasmo działa niepoprawnie ?</b></a></li>
+<li><a href="faq_net6.htm#25"><b>Gdzie znajdę opis protokołu MBUS/FBUS i komendy związane z monitorem sieci ?</b></a></li>
+<li><a href="faq_net6.htm#Literatura"><b>Użyte materiały</b></a></li>
+<li><a href="faq_net6.htm#27"><b>Dodatkowe informacje</b></a></li>
+</ol>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<p><a NAME="1"></a><font color="#1F409F" size=+2 class="dzial">1. Co to jest ?</font><br>
+<hr size="3" align="left" noshade width="300" color="#60C0A0">
+
+<p>Monitor sieci (ang. Net Monitor) to po prostu specjalny tryb, po włączeniu
+którego telefon podaje różne informacje o sieci oraz pracy i stanie własnych
+podzespołów, karty SIM, itp. Po jego włączeniu zazwyczaj w telefonie pokazuje
+się dodatkowe menu, w którym można zobaczyć różne tajemnicze literki i
+cyferki, które ciągle się zmieniają. Nie ma tutaj żadnych standardów -
+w każdym telefonie podawane są różne dane, różnie się włącza taki tryb
+(mój opis dotyczy monitorów sieci w Nokiach - jeżeli masz jakiś inny, musisz
+niestety szukać gdzie indziej). Można natomiast zaryzykować stwierdzenie,
+że jakąś jego formę można znaleźć w praktycznie każdej współczesnej "komórce"
+(producentom nie opłaca się tworzyć dwóch wersji oprogramowania dla swojego
+produktu - jednej z nim, drugiej bez niego). A poniżej podaję niektóre
+adresy zawierające sposoby włączania albo wręcz całe opisy dla innych telefonów:
+
+<p>
+<ul>
+<li>po angielsku:
+
+<p>
+<ul>
+<li><a href="http://friko7.onet.pl/wa/supastar/otek.html">Alcatel One Touch Easy</a></li>
+<li><a href="http://www.tele-servizi.com/Janus/motpages.html">Motorola</a></li>
+<li><a href="http://www.liljeberg.nu/monitor/">Siemens S1, S3, S3+, S3 Com i S4</a></li>
+</ul>
+<p>
+</li>
+
+<li>po niemiecku:
+
+<p>
+<ul>
+<li><a href="http://www.ruhr.de/home/nutrimatic/aeg902e.htm">AEG Telecar D 902</a></li>
+<li><a href="http://www.ruhr.de/home/nutrimatic/aeg9070e.htm">AEG Teleport TP 9070 DTFX</a></li>
+<li><a href="http://www.ruhr.de/home/nutrimatic/aeg9082e.htm">AEG Teleport TP 9082</a></li>
+<li><a href="http://www.nobbi.com/moni1_s4.htm">Siemens S4</a></li>
+<li><a href="http://www.nobbi.com/moni1_s15.htm">Siemens S15, S16, Bosch DualCom 738, World 718, GSM-COM 607 i 908</a></li>
+</ul>
+<p>
+</li>
+
+<li>po polsku:
+
+<p>
+<ul>
+<li><a href="http://www.kki.net.pl/~boryspas/">Alcatel DB</a></li>
+<li><a href="http://www.wit.waw.pl/opisy/aote.html">Alcatel One Touch Easy</a></li>
+<li><a href="http://www.alcatelklub.triger.com.pl/kody_ote.html">Alcatel One Touch Easy</a></li>
+<li><a href="http://www.kki.net.pl/~rafald/kody.htm">Alcatel One Touch Max</a></li>
+<li><a href="http://friko5.onet.pl/lu/eurogsm/kody.htm">Audiovox 680, Dancall HP-2711, Motorola 6200, 7500, 8200 i 8400, Siemens S1/S3com/S4/Sony CM-DX 1000</a></li>
+<li><a href="http://vlo.waw.pdi.net/~jfiok/gsm.html">Bosch com 608, Philips Genie, Siemens S4 Power</a></li>
+<li><a href="http://www.wit.waw.pl/opisy/s15e.html">Bosch DualCom 738, Siemens S15E</a></li>
+<li><a href="http://www.wit.waw.pl/opisy/hp2711.html">Dancall HP-2711</a></li>
+<li><a href="http://193.193.73.3/gsm/dancall.htm">Dancall HP-2711 oraz HP-2731, OKI GT1, Audiovox 650 &amp; 680, Samsung SGH 100</a></li>
+<li><a href="http://www.telefon.pl/jpzr/kck/archiwum/kody/index.html">Dancall HP-2711, Motorole (m.in. 8400 i 8700), Siemens S1, S3, S3+, S3Com, S4, S4Power, Sony CM DX 1000</a></li>
+<li><a href="http://193.193.73.3/gsm/ericsson.htm">Ericsson GF/GH 388</a></li>
+<li><a href="http://www.ericsson.org.pl/monitor.htm">Ericsson GH 688, SH 888, S 868, T 18s</a></li>
+<li><a href="http://friko5.onet.pl/gd/felkner/C170.htm">Motorola C170</a></li>
+<li><a href="http://www.gsm.alpha.pl">Motorola C170</a></li>
+<li><a href="http://prioris.mini.pw.edu.pl/~nelis/cd920/">Motorola CD920</a></li>
+<li><a href="http://priv4.onet.pl/war/tomzag/">Motorola 3688</a></li>
+<li><a href="http://zeus.polsl.gliwice.pl/~bmw//motorola.html">Motorole</a></li>
+<li><a href="http://www.waw.pdi.net/~pawelk/nortel.html">Nortel 1822</a></li>
+<li><a href="http://www.gsm.alpha.pl">Nortel 1822</a></li>
+<li><a href="http://www.wit.waw.pl/opisy/s4.html">Siemens S4 i S4 Power</a></li>
+</ul>
+</li>
+
+</ul>
+
+<p>Co do innych modeli: spróbuj poszukać wśród odnośników dostępnych pod adresem
+<a href="http://www.mobilserver.com/Phone_info/">www.mobilserver.com/Phone_info/</a>
+albo zapoznaj się z ofertą np. firmy Datex (<a href="http://www.datex.pl/">www.datex.pl/</a>)
+prowadzącej działalność m.in. w Krakowie i Warszawie.
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="2"></a><font color="#1F409F" size=+2 class="dzial">2. Czy jest mi potrzebny ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>"Normalni" użytkownicy na pewno nie potrzebują żadnego monitora
+sieci. Po prostu, większość znajdujących się tam danych jest przydatnych
+tylko specjalistom (dzięki nim mogą się dowiedzieć praktycznie wszystko
+o działaniu sieci). Ty dzięki niemu możesz natomiast:
+
+<p>
+<ul>
+<li>poczuć się lepiej i móc się chwalić (moja słuchawka ma TYYYLLLLEEEEE opcji !)</li>
+<li>obserwować te różne parametry (w moim opisie staram się wyjaśnić ich znaczenie) i dowiedzieć się, jak działa sieć komórkowa</li>
+<li>wpłynąć na działanie swojego telefonu i czasami rzeczywiście ułatwić sobie życie (korzystając z nowych opcji) - gdzie mogłem, starałem się umieścić użyteczne zastosowania monitora</li>
+</ul>
+
+<p>Jeżeli po tym krótkim wyjaśnieniu ciągle uważasz, że jest on Ci niepotrzebny,
+polecam ci pozostanie przy lekturze innych stron Fan Klubu Nokii (<a href="http://www.fkn.pl/">www.fkn.pl</a>)
+Możesz też co najwyżej przeczytać:
+
+<p>
+<ul>
+<li>krótkie wprowadzenie do monitora sieci (<a href="http://www.fkn.pl/netmonitor/index.html">www.fkn.pl/netmonitor/index.html</a>)</li>
+<li>FAQ, w którym podane są pożyteczne zastosowania monitora dla "normalnych" użytkowników
+(<a href="http://www.fkn.pl/faqs/netmonitorfaq.html">www.fkn.pl/faqs/netmonitorfaq.html</a>)
+</li>
+</ul>
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="3"></a><font color="#1F409F" size="+2" class="dzial">3. Czy po włączeniu monitora telefon pobiera więcej energii ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Powiedziałbym, że nie: telefon sprawdza parametry sieci nawet wtedy,
+gdy nie masz włączonego monitora.
+
+<p>Czy wobec tego wielu użytkowników nie
+ma racji mówiąc, że po jego włączeniu muszą częściej ładować baterie ?
+Dosyć łatwo można to wyjaśnić: jeżeli często przechodzą oni od testu do
+testu (niektórzy pewnie nie mogą przestać ;-) i robią to nałogowo),
+telefon po każdym naciśnięciu klawisza (standardowo) włącza podświetlenie
+(co zużywa dużo prądu - patrz <b><a href="faq_net3.htm#Menu23">Menu
+10-23</a></b>). Pewnym antidotum może być tutaj użycie <b><a href="faq_net3.htm#Menu18">Menu
+10-18</a></b>. Dodatkowo, niektóre testy (np. <b><a href="faq_net3.htm#Menu17">Menu
+10-17</a></b> czy <b><a href="faq_net3.htm#Menu19">Menu
+10-19</a></b>) pozwalają wprowadzić telefon w stan, w którym ciągle szuka
+sieci (co też bardzo obciąża akumulator).
+
+<p>Innymi słowy, samo włączenie
+monitora (uaktywnienie menu w telefonie) nie wypływa na zużycie prądu.
+Zwiększa się ono dopiero wtedy, gdy użytkownik wykonuje pewne dosyć świadome
+działania...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="4"></a><font color="#1F409F" size="+2" class="dzial">4. Jak go włączyć ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Możesz tego dokonać na jeden z trzech sposobów:
+
+<p>
+<ol>
+<li>podłączając telefon do komputera przy pomocy <a href="faqkable.htm">kabla</a>
+(w modelu 3210 podłącza się go wewnątrz obudowy)
+i używając odpowiedniego oprogramowania <b><font color="#FF6666">(POLECAM !)</font></b>
+działającego w systemie:
+
+<p>
+<ul>
+<li>DOS:
+
+<p>
+<ul>
+<li>PC-Locals w wersji 1.3 - wymaga <a href="faqkable.htm">kabelka
+FBUS lub MBUS</a>.<p>
+</li>
+</ul>
+
+</li>
+
+<li>Unix:
+
+<p>
+<ul>
+<li>gnokii (strona główna projektu: <a href="http://multivac.fatburen.org/gnokii/">http://multivac.fatburen.org/gnokii/</a>;
+najnowsze wersje oprogramowania: <a href="ftp://ftp.inet.cz/pub/People/Pavel.Janik/gnokii/">ftp://ftp.inet.cz/pub/People/Pavel.Janik/gnokii/</a>,
+które działa z <a href="faqkable.htm">kablem FBUS</a> albo IrDĄ)<p>
+</li>
+</ul>
+
+</li>
+
+<li>Windows CE:
+
+<p>
+<ul>
+<li>Light Sabre IDE (działający przez złącze IrDA) z projektu Light Sabre
+(<a href="http://www.binet.lv/personal/nokia/ppc.htm">www.binet.lv/personal/nokia/ppc.htm</a>).<p>
+</li>
+</ul>
+
+</li>
+
+<li>Windows 95/98 i NT:
+
+<p>
+<ul>
+<li>Logo Express (<a href="http://memsu1.iam.ntu.edu.tw/~jrywu/">http://memsu1.iam.ntu.edu.tw/~jrywu/</a>
+albo <a href="http://logoexpress.bizland.com/">http://logoexpress.bizland.com/</a>)
+- działa z <a href="faqkable.htm">kablem FBUS</a> albo złączem IrDA.</li>
+
+<li>Logo Manager (<a href="http://clicksave.eu.org/nlm/">http://clicksave.eu.org/nlm/</a>)
+- wymaga <a href="faqkable.htm">kabla FBUS/MBUS</a> albo złącza IrDA.
+Jest on jako jedyny dostępny w polskiej wersji językowej (po zainstalowaniu
+odpowiedniego dodatku).</li>
+
+<li>gnokii</li>
+
+<li>program Andreasa Schmidta (<a href="http://www.aschmidt.de/">www.aschmidt.de/</a>) działający
+z <a href="faqkable.htm">kablem FBUS</a></li>
+
+<li>PC-Locals w wersji 1.3</li>
+
+<li>NetMonitor (wymaga <a href="faqkable.htm">kabelka MBUS</a>)</li>
+
+<li>Nokia Wrench (<a href="http://www.wildies.de/nokia/index.html">www.wildies.de/nokia/index.html</a>)
+- wymaga <a href="faqkable.htm">kabelka MBUS</a></li>
+
+<li>Nok Commander (<a href="http://netcity3.web.hinet.net/userdata/nokiacmd/eng/">http://netcity3.web.hinet.net/userdata/nokiacmd/eng/</a>)
+- wymaga <a href="faqkable.htm">kabla</a> albo złącza IrDA</li>
+
+</ul>
+</li>
+</ul>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Pierwsze cztery programy dla Windows 95/98 i NT
+są dostępne na serwerze <a href="ftp://ftp.fkn.pl/pub/nokia/">FTP Fan Klubu Nokii</a>.</td>
+</tr>
+</table>
+
+<p>Podane oprogramowanie działa w przypadku większości Nokii, które w swym oznaczeniu
+kodowym mają w środku literkę "S" - np. modeli 5110, 5130, 5190, 6110, 6130, 6150, 3210).
+Jeżeli bowiem chodzi o model 7110 (NSE-5), przez kabelek DAU-9P (działający
+z Nokiami 5xxx/6xxx) zadziałał jedynie Pc-Locals (problem dotyczy raczej kabla, ale kto wie)...
+W przypadku Nokii 9110 (RAE-2) monitor potrafiły uaktywnić tylko programy wykorzystujące protokół <a href="faqkable.htm">MBUS</a>:
+<a href="http://clicksave.eu.org/nlm/">Logo Manager</a>, Pc-Locals albo 
+<a href="http://www.wildies.de/nokia/index.html">Nokia Wrench</a>.
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Oznaczenie kodowe swojej Nokii sprawdzisz np. <a href="firmware.htm">tutaj</a> albo na stronie
+<a href="http://www.fkn.pl/varia/typy.html">www.fkn.pl/varia/typy.html</a></td>
+</tr>
+</table>
+<p>
+
+<li>bezpośrednio przeprogramowywując pamięć EEPROM (<b>E</b>lectrically
+<b>E</b>rasable and <b>P</b>rogrammable <b>R</b>ead-<b>O</b>nly <b>M</b>emory).
+Przy czym z góry mówię, iż wymaga to otwierania słuchawki
+i raczej na pewno pozostawi na niej widoczne wewnątrz ślady. Ja <b><font color="#FF6666">NIE
+POLECAM WIĘC UŻYWAĆ TEJ METODY !</font></b> Jeśli jednak chcesz:
+
+<p>
+<ul>
+<li><a href="http://www.eeprom.w.pl">www.eeprom.w.pl</a> - opis dla Nokii 5110, 6110 i 6130</li>
+<li><a href="http://www.utg-bi.de/netmonitor.htm">www.utg-bi.de/netmonitor.htm</a>
+- opis dla Nokii 5110, 5130, 6110, 6130 i 6150.</li>
+<li><a href="http://www.cs.unibo.it/~lanconel/">www.cs.unibo.it/~lanconel/</a> -
+opis programatora pamięci EEPROM.</li>
+</ul>
+<p>
+</li>
+
+<li>używając specjalnego menu pozwalącego programować NAM (dotyczy tylko
+niektórych telefonów analogowych - np. Nokii 2160, 2120, 6160, 6185 i 6188):
+
+<p>
+<ul>
+<li>użyj kodu <b>*3001#12345#</b> (czasami dodatkowo trzeba nacisnąć klawisz Menu;
+niektóre źródła podają również, że zamiast 12345 należy wpisać
+kod zabezpieczający (security code) telefonu)</li>
+<li>opcję "Field Test Mode" ustaw na "On"</li>
+<li>wyłącz i włącz telefon</li>
+</ul>
+</li>
+</ol>
+
+<p>Możesz też:
+
+<p>
+<ul>
+<li>
+zdać się na ludzi z list dyskusyjnych związanych z <a href="#GSM">GSM</a>
+- np. <a href="news:pl.misc.telefonia.gsm">pl.misc.telefonia.gsm</a>
+albo <a href="news:pl.misc.telefonia.gsm.gielda">pl.misc.telefonia.gsm.gielda</a>
+(zrobią to za darmo lub np. za piwo)</li>
+
+<li>
+czy też zlecić to jakiejś specjalizującej się w tym firmie (ja znalazłem
+w Internecie np. ofertę firmy <a href="http://www.datex.pl/">Datex</a>
+prowadzącej działalność m.in. w Krakowie i Warszawie)</li>
+</ul>
+
+<p>Nie znam natomiast dokładnych szczegółów uaktywniania monitora
+w innych modelach (np. 1610, 2110, 3110, 8110i, 8810, 9000) - konkretnie, nie potrafię podać, jakie są przy tym używane programy
+(jeżeli chodzi o starsze modele: czytałem, że być może pozwala na to PC-Locals w wersji 0.6) albo jak przeprogramować EEPROM.
+Jedyne, co mogę zrobić, to znów odesłać do firmy <a href="http://www.datex.pl/">Datex</a>
+albo na stronę <a href="http://discserver.snap.com/Indices/16654.html">http://discserver.snap.com/Indices/16654.html</a>
+(jeżeli masz wspomniane informacje,
+<a href="mailto:Marcin Wiącek<Marcin-Wiacek@TopNet.PL>"><b>napisz do mnie</b></a>
+w tej sprawie).
+
+<p>Słyszałem również, że niektóre egzemplarze Nokii 6110 i 5110
+pozwalają na uruchamianie monitora przez skrót (wciskasz klawisz Menu
+i wpisujesz 10 - to powinno działać nawet, gdy menu monitora nie jest widoczne).
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH="100%">
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td><b><font color="#FF6666">Jeżeli nie umiesz sam włączyć monitora, powierz
+to bardziej doświadczonej osobie (można uszkodzić telefon przy tej operacji)
+!</font></b></td>
+</tr>
+</table>
+
+<p>Chciałbym też zwrócić uwagę na jeden szczegół - w Nokiach monitor jest
+włączany, nie wgrywany (on się ciągle znajduje w Twoim telefonie - opisane
+wyżej działania z podanymi programy jedynie "wydobywają go" na światło
+dzienne: uaktywniają w nim dodatkowe menu).
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Jeżeli po tych wyjaśnieniach ciągle nie potrafisz uaktywnić sobie monitora,
+zajrzyj na stronę
+<a href="http://www.fkn.pl/netmonitor/aktywacja.html">www.fkn.pl/netmonitor/aktywacja.html</a>
+(być może tamten opis będzie dla Ciebie bardziej zrozumiały). Znajdziesz na niej
+np. opisy wyjaśniające krok po kroku korzystanie z niektórych z wymienionych wcześniej programów...</td>
+</tr>
+</table>
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="5"></a><font color="#1F409F" size="+2" class="dzial">5. Jaką wersję monitora mogę włączyć w telefonie ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Opisane w <a href="#4">poprzednim punkcie</a> programy pozwalają uaktywnić jedną z dwóch wersji monitora
+sieci:
+
+<p>
+<ol>
+<li>okrojoną, która zawiera testy od 1 do 19 (dotyczą one wyłącznie sieci komórkowej).
+W programach zazwyczaj nazywa się ona np. "Field Test" albo "Operator field tests" (ewentualnie wpisujesz w nich kod 242 w celu jej uaktywnienia)</li>
+
+<li>pełną, w której dostępne są również testy dotyczące samego telefonu
+(i czasami karty SIM). Nazywa się ona np. "Engineering" (albo "R&D field tests"), a kod
+do jej uaktywnienia to 243.</li>
+</ol>
+
+<p>
+<table CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<tr>
+<td><img SRC="tip.gif" height=36 width=27 align=LEFT></td>
+
+<td>Proponuję włączać od razu pełną wersję monitora sieci - zawsze możesz
+przejść od niej do wersji okrojonej (w telefonie wybierasz <a href="faq_net6.htm#Menu242">test 242</a>).
+W drugą stronę jest to niemożliwe (tzn. nie możesz tego zrobić z poziomu menu telefonu
+- nie akceptuje on <a href="faq_net6.htm#Menu243">testu 243</a>, gdy włączona jest okrojona wersja monitora; ciągle
+oczywiście działają metody z <a href="#4">poprzedniego punktu</a>).</td>
+</tr>
+</table>
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="6"></a><font color="#1F409F" size="+2" class="dzial">6. Czy włączenie monitora powoduje utratę gwarancji ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Sposób polegający na bezpośrednim przeprogramowaniu EEPROMU wymaga rozebrania
+słuchawki i ingerencji w jej wnętrzu (co faktycznie jest powodem utraty gwarancji
+i pozostawia na niej widoczne ślady - zarysowania, itp.).
+
+<p>Myślę natomiast, iż nie masz się czego obawiać, gdy użyłeś(aś) któregoś
+ze wspomnianych wyżej programów albo kodu (mogę się oczywiście mylić - na listach
+dyskusyjnych co jakiś czas można przeczytać, iż również ta metoda pozostawia
+na słuchawce swój ślad)...
+
+<p>Oczywiście, przed oddaniem telefonu do serwisu lepiej jest <a href="faq_net6.htm#15">zdeaktywować</a>
+monitor. Czasami, np. przy awarii zasilania, jest to niemożliwe - wtedy
+część serwisantów może uznać, że zostały naruszone warunki gwarancji
+(zależy to od konkretnego człowieka)...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="7"></a><font color="#1F409F" size="+2" class="dzial">7. W moim telefonie menu monitora ma numer inny niż 10. Czy to normalne ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p><img SRC="nm_5110.gif" ALT="Menu monitora w Nokii 5110" height=48 width=84 align=LEFT>
+<img SRC="nm_9110.gif" ALT="Menu monitora w Nokii 9110" height=48 width=84 align=LEFT>
+<img SRC="nm_3210.gif" ALT="Menu monitora w Nokii 3210" height=48 width=84 align=LEFT>
+Oczywiście. Numer menu monitora (oznaczonego jako "Net monitor" albo "Field test")
+jest różny (zależy od wersji oprogramowania i modelu) w różnych Nokiach.
+Może to być więc np. <b>Menu 7</b> (Nokia 3110 i 9110),
+<b>Menu 10 </b>(Nokia 5xxx, 6110, 6130; tak też przyjąłem w tym FAQ), <b>Menu
+11</b> (Nokia 5190 albo 3210) albo <b>Menu 12</b> (Nokie 8210 albo niektóre 6150). W Nokii 3210 zupełnie inna
+jest też ikonka tej pozycji menu. Innymi słowy, menu monitora sieci
+wygląda odmiennie w różnych modelach I JEST TO ZUPEŁNIE NORMALNE.
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="8"></a><font color="#1F409F" size="+2" class="dzial">8. W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>TAK - jest to normalne. Taka sytuacja zachodzi np. w Nokii 3210. "Brakujące" <b>Menu 10</b>
+zostało tam przewidziane dla usług karty SIM (SIM application toolkit)
+i pokaże się, gdy będziesz miał do nich dostęp.
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="9"></a><font color="#1F409F" size="+2" class="dzial">9. Jak się nim posługiwać ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>telefony <a href="faq_net1.htm#GSM">GSM</a>/<a href="faq_net1.htm#DCS">DCS</a>/PCS:
+
+<p>Po włączeniu monitora sieci masz dostęp do nowej pozycji (oznaczonej jako "Net monitor"
+albo "Field Test") w menu głównym telefonu. 
+
+<p><img SRC="nm2_5110.gif" height=48 width=84 align=LEFT ALT="Menu monitora w Nokii 5110">Po wejściu do tego
+menu możesz wpisać numer testu, który ma być wyświetlony (od 1 w 19 w okrojonej
+wersji monitora, wyższe numery także w pełnej - <b><font color="#FF6666">Uwaga
+! Wpisanie <a href="faq_net6.htm#Menu241">numeru 241</a>
+całkowicie wyłączy monitor sieci, <a href="faq_net6.htm#Menu242">242</a>
+włączy okrojoną jego wersję - w celu ponownej aktywacji
+niezbędnę będzie użycie metod z punktu <a href="#4"><i>Jak go włączyć ?</i></a> !
+</font></b>).
+
+<p>Po naciśnięciu OK pojawia się on bezpośrednio na wyświetlaczu (a jego
+numer na samej jego górze) zamiast nazwy/<a href="faq_loga.htm">loga</a>
+sieci komórkowej. Jeżeli wybrałeś(aś) niewłaściwy numer testu, pokaże się
+tekst NO TEST i telefon powróci do ostatniego poprawnie wyświetlanego testu.
+Jeżeli natomiast numer był większy od 256, 512 lub 768, zostanie od niego
+odjęta odpowiednia wielokrotność liczby 256 i dopiero test o tym numerze
+zostanie wyświetlony (np. numery 300 i 556 dadzą test 44). Jeżeli wyświetlisz
+w ten sposób część testów (tzn. wpiszesz tu numer i wejdziesz do razu do
+któregoś z nich), możesz zmienić w nich pewne ustawienia (szczegóły podaję
+dalej, nazywam to zaś bezpośrednim wejściem do testu - patrz np. <b><a href="faq_net3.htm#Menu18">Menu
+10-18</a></b>).
+
+<p>Możesz go teraz zmieniać strzałkami góra/dół (bez obawy - takie wejście przez
+przeglądanie nie zmienia ustawień w testach) - po ich użyciu zostanie pokazany
+poprzedni/następny dostępny test. W niektórych modelach (np. 5110) klawisze
+te służą do innych celów (np. wyświetlanie ostatnio wybieranych numerów,
+książki telefonicznej albo zmiana głośności) - jeżeli wyświetlany
+jest jakiś test, tracisz niestety wspomniane funkcje :-(. Natomiast ciekawostką
+jest fakt, że podczas połączenia można zmieniać głośność w Nokii 5xxx
+- wspomniane strzałki trzeba przytrzymać dłużej (około sekundy).
+
+<p>Nazwa/<a href="faq_loga.htm">logo</a> używanej sieci
+pojawi się ponownie na wyświetlaczu, gdy wpiszesz w tym menu 0.
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH="100%">
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Jeżeli wpiszesz jako numer testu 0, a później
+podasz numer nieistniejącego testu (np. 52), telefon będzie się zachowywał
+prawie tak samo, jakby monitor sieci był włączony (np. strzałki góra/dół
+będą zmieniać numer testu - możesz to sprawdzić w <b>Menu 10</b>). Niestety
+(z góry mówię), liczniki z <b><a href="faq_net5.htm#Menu82">Menu
+10-82</a></b> wtedy nie działają. Po włączeniu telefonu pokazuje się wybrany
+w ten sposób test. Do czego to może się przydać ?
+
+<ul>
+<li>chwilowego "uszkodzenia" telefonu (jak nabrać kolegę ?)</li>
+<li>zablokowania korzystania z książki telefonicznej (Nokia 5xxx i 6xxx)</li>
+<li>uniemożliwienia uzyskania listy ostatnich numerów
+przy wyświetlanej nazwie/<a href="faq_loga.htm">logo</a>
+sieci (Nokia 5xxx)</li>
+<li>utrudnienia przestawienia głośności podczas połączenia
+(Nokia 5xxx) - wpomniane strzałki trzeba nacisnąć i dłużej przytrzymać</li>
+<li>uniemożliwienia przestawienia głośności (Nokia 3110)</li>
+</ul>
+
+</td>
+</tr>
+</table>
+
+<p>Przy włączonym którymś z testów, telefon nie wyświetla niektórych komunikatów
+(np. "Dzwoni..."), nie masz też identyfikacji osoby dzwoniącej (jedyny
+chyba wyjątek przy wykonywaniu połączenia jest zrobiony w przypadku komunikatu:
+'Note: you have active diverts' ('Uwaga:
+włączone przekazy') pojawiającego się w przy włączonym przekazywaniu rozmów).
+Jeżeli wpisujesz numer telefonu, test może zniknąć
+(pojawi się ponownie, gdy uzyskasz połączenie albo wykasujesz go z wyświetlacza).
+
+<p>Informacja (opis) do oglądanego testu zostanie wyświetlona, gdy przez
+dłuższy czas przytrzymasz wciśnięty klawisz * (jego ponowne przytrzymanie
+spowoduje powrót do wartości liczbowych). Ta ostatnia możliwość jest dostępna
+tylko w niektórych egzemplarzach telefonów (moje <a href="faq_net2.htm#jest">wytłumaczenie
+tego faktu</a> jest dostępne w <i><a href="faq_net2.htm#12">Znaczenie
+poszczególnych testów</a></i>) - dlatego te krótkie opisy pomocy podaję
+<b>wytłuszczonym drukiem</b> w większości testów... Jeżeli są one wyświetlane,
+nie zmienisz ustawień przez bezpośrednie wejście do menu.
+
+<p>Przy użyciu informacji (opisów pomocy) można natrafić na pewien błąd
+(jak na razie, udało mi się potwierdzić jego istnienie dla Nokii 5110 z
+różnymi wersjami oprogramowania). Jeżeli chcesz go zobaczyć:
+
+<p>
+<ul>
+<li>Naciśnij i trzymaj *. W momencie, gdy * zniknie z ekranu
+(ale przed zmianą pomocy na wartości testu albo wartości na pomoc), puść klawisz *</li>
+<li>Odtąd wszystko musi to być robione tak szybko, żeby * nie pojawiała się
+na ekranie ani żeby nie zmienił sie napis nad NaviKey: od razu naciśnij i
+po chwili puść klawisz *. Krok ten możesz powtórzyć - 
+w zależności od ilości powtórzeń uzyskasz inne efekty. Dla przykładu:
+przy oprogramowaniu 5.07 (albo 5.11) i 0 powtórzeniach wchodzisz do 1 "ukrytego menu",
+przy 1 powtórzeniu telefon się zawiesza i wyłącza (proponuję zajrzeć do
+<a href="faq_net4.htm#Menu36">Menu 10-36</a> - wyniki mogą być zaskakujące),
+przy 2 powtórzeniach telefonach sam "zmienia" język ;-)), a przy 3 powtórzeniach
+mamy dostęp do 2 "ukrytego menu", a czasami (nie znalazłem reguły) pokazuje
+się "CONTACT SERVICE" (na szczęście po restarcie wszystko znów działa).
+Jeżeli chodzi o oprogramowanie 5.24: przy 0 powtórzeniach można wejść do 2
+"ukrytego menu", przy 1 albo 2 powtórzeniach znika oznaczenie NaviKey, przy
+3 oznaczenie NaviKey zmienia się na "Wyślij" ("Send").</li>
+<li>odczekaj dluższą chwilkę</li>
+<li>naciśnij na chwilę i puść jeden z klawiszy: *, 0 do 9 albo #</li>
+</ul>
+
+<p>
+Możliwy jest także restart telefonu (na pewno Nokii 5110 ze starszym
+oprogramowaniem niż 5.24 (w tej wersji to nie działa) - np. 5.11 czy 5.07):
+
+<p>
+<ul>
+<li>Naciśnij i trzymaj *. W momencie, gdy * zniknie z ekranu
+(ale przed zmianą pomocy na wartości testu albo wartości na pomoc), puść klawisz *</li>
+<li>Odtąd wszystko musi to być robione tak szybko, żeby * nie pojawiała się
+na ekranie ani żeby nie zmienił sie napis nad NaviKey: od razu naciśnij i
+po chwili puść klawisz *, od razu naciśnij klawisz * na co najmniej 2 sec.
+i puść, od razu naciśnij i po chwili puść klawisz *</li>
+</ul>
+
+<p>Przyczyną jest przepełnienie stosu (patrz <a href="faq_net4.htm#Menu35">Menu 10-35</a>
+i <a href="faq_net4.htm#Menu57">Menu 10-57</a>). Jeżeli u Ciebie to nie działa
+i masz Nokię 6110, możesz też spróbować takiej sztuczki resetującej telefon:
+
+<ol>
+<li>Wejdź do menu Calendar (<b>Menu-8</b>)</li>
+<li>Utwórz notatkę albo przypomnienie</li>
+<li>Wpisz jakiś tekst w polu edycji danych</li>
+<li>Trzymaj klawisz "Clear" do momentu, aż tekst zostanie wykasowany</li>
+<li>Naciśnij "Back"</li>
+<li>Naciśnij "0"</li>
+<li>Wpisz 4 cyfry (np. 1234)</li>
+<li>Użyj dolnej strzałki i przesuń kursor do lewej strony numerów i wolnej przestrzeni (naciśnij strzałkę 2 razy).</li>
+<li>Wpisz 6 cyfr i naciśnij zieloną słuchawkę</li>
+</ol>
+
+<p>telefony TDMA 800/TDMA 1900:
+
+<p>Po włączeniu monitora sieci masz dostęp do nowej pozycji (oznaczonej jako
+"Field Test") w menu głównym telefonu. 
+
+<p>Po wejściu do tego menu możesz wpisać numer testu, który ma być wyświetlony
+(od 1 do 7 w Nokii 6160) albo 0, aby testy zostały "chwilowo" wyłączone.
+
+<p>Możesz go teraz zmieniać strzałkami góra/dół. W czasie rozmowy (w zależności
+od tego, w jaki sposób wyświetliłeś(aś) testy), służą one do przełączania
+testów (nie możesz zmieniać głośności) albo właśnie zmiany głośności podczas
+rozmowy.
+
+<p>Jeżeli włączona jest blokada klawiatury i jakiś test jest wyświetlany,
+po naciśnięciu 0-9, * albo # zostanie on "wyłączony". Naciśnięcie czerwonej
+albo zelonej słuchawki, ewentualnie strzałek, z powrotem go przywróci.
+
+<p>W Nokii 2120 albo 2160 pomoc do testów jest wyświetlana po naciśnięciu
+klawisza "ABC".
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a>
+</font>
+
+<p><a NAME="10"></a><font color="#1F409F" size="+2" class="dzial">10. Czy mogę zepsuć sobie telefon ?</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Chyba tylko przy jego <a href="#4">włączaniu</a> (szczególnie w telefonach analogowych
+z menu służącym do programowania NAM). Nie
+spotkałem się z czymś takim (nie powiodły się również usilne :-) próby)
+przy jego użytkowaniu. Należy być jednak ostrożnym - monitor jest wszak "nieoficjalną" częścią
+oprogramowania telefonu.
+
+<p>Jeżeli coś nie działa jak trzeba, wyłącz i włącz telefon - wszystkie (z wyjątkiem
+<a href="faq_net3.htm#Menu17">Menu 10-17</a>) testy, które można ustawić,
+zostaną przywrócone do wartości domyślnych...
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a><p>
+
+<center>
+<p><b>[Część 1]</b><a href="faq_net1.htm">[Część 2]</a><a href="faq_net2.htm">[Część 3]</a><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><a href="faq_net6.htm">[Część 7]</a>
+</center>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<br><p align="RIGHT"><font class='autor' size='1'><a class="autoremail" href="mailto:Marcin Wiącek<Marcin-Wiacek@topnet.pl>">Marcin Wiącek</a> (<a class="autoremail" href="http://marcin-wiacek.topnet.pl">WWW</a>)
+<br>Ostatnia aktualizacja: 4 maja 2000</font>
+
+<script language=JavaScript src='../konw.js'></script>
+</body>
+</html>

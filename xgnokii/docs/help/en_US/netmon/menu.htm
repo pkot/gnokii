@@ -1,0 +1,91 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="Author" content="Marcin Wiacek">
+<title>Marcin's page - menu</title>
+<STYLE TYPE='text/css'><!--
+<!-- styles from www.fkn.pl -->
+<!-- changed to page of Marcin Wiacek (www.marcin-wiacek.topnet.pl) -->
+BODY {font-family: Arial, Helvetica; margin-left:0pt; margin-right:0pt; margin-top:0pt; margin-bottom:0pt; font-weight: normal; font-size:10pt; text-decoration: none; color:#2B2B69}
+P {font-family: Arial, Helvetica; font-weight: normal; font-size:10pt; text-decoration: none; color:#2B2B69}
+font.menu {font-family: Arial, Helvetica; font-weight: bold; font-size:8pt; text-decoration: none; color:#2B2B69}
+a.menu {font-family: Arial, Helvetica; font-weight: bold; font-size:8pt; text-decoration: none; color:#525FF5}
+a.menu:hover {font-family: Arial, Helvetica; font-weight: bold; font-size:8pt; text-decoration: underline; color:#1F409F}
+a.menu:active {font-family: Arial, Helvetica; font-weight: bold; font-size:8pt; text-decoration: underline; color:#2FA030}
+--></STYLE>
+<SCRIPT LANGUAGE=JavaScript>
+var ie=(document.all)?true:false;var nn=(document.layers)?true:false;
+function cache()
+{var wynik=0;if (top.frames.length==2 && top.frames[0].document.title=='Up menu')
+{if (!top.frames[0].cache_spis) {wynik=1} else {wynik=2}}return wynik}
+function minit(ilosc) {for (i=0;i<ilosc;++i) this[i]=0;this.length=ilosc;return this}
+function mpos() {this.visibility='none'}
+function mclick(nr)
+{if (ie) {eval("var object=document.all('nr"+nr+"');");
+if (object.style.display=='none')
+{object.style.display=''; document.images[nr].src='dir1.gif'} else
+{object.style.display='none'; document.images[nr].src='dir0.gif'}
+if (cache()==2) {top.frames[0].cache_sp[nr].visibility=object.style.display}}}
+function zwin ()
+{if (ie){if (cache()==1){top.frames[0].cache_sp=new minit(document.images.length);
+for (i=0;i<document.images.length;++i) {top.frames[0].cache_sp[i]=new mpos()}top.frames[0].cache_spis=true}
+if (cache()==2) {for (i=0;i<document.images.length;++i) {if (document.images[i].src.indexOf('dir1.gif')!=-1 && top.frames[0].cache_sp[i].visibility=='none') mclick(i)}}
+else {for (i=0;i<document.images.length;++i) {if (document.images[i].src.indexOf('dir1.gif')!=-1) mclick(i)}}}}
+function ld(nr,n) {window.status=n} function lo() {window.status=''}</SCRIPT>
+<SCRIPT LANGUAGE=JavaScript1.2>
+if (nn) {document.onmousemove=mouseMove;document.captureEvents(Event.MOUSEMOVE)}
+function mouseMove(e)
+{if (nn) {obj.top=e.pageY+14}}
+function ld(nr,n)
+{if (nn) {var lyr=document.Popup.document;lyr.write("<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0><TR><TD BGCOLOR=#000000 COLSPAN=5 HEIGHT=1><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD></TR><TR><TD WIDTH=1 BGCOLOR=#000000><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD><TD WIDTH=2 BGCOLOR=#FFFFDF><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD><TD BGCOLOR=#FFFFDF>"+n+"</TD><TD WIDTH=2 BGCOLOR=#FFFFDF><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD><TD WIDTH=1 BGCOLOR=#000000><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD></TR><TR><TD HEIGHT=1 COLSPAN=5 BGCOLOR=#000000><IMG SRC=dir0.gif WIDTH=1 HEIGHT=1></TD></TR></TABLE>");lyr.close();obj.visibility="visible"}
+if (ie) {document.links[nr+1].title=n}
+window.status=n}
+function lo() {if (nn) obj.visibility='hidden';window.status=''}</SCRIPT>
+</head>
+<body bgcolor="#FFFFFF" text="#2B2B69" link="#525FF5" vlink="#525FF5" alink="#2FA030">
+<div id='Popup' style='position:absolute;visibility:hidden'></div>
+<SCRIPT LANGUAGE=JavaScript1.2>
+if (nn) var obj=document.layers['Popup'];</SCRIPT>
+<font name='Arial, Helvetica'><nobr>
+<SCRIPT LANGUAGE=JavaScript1.2>
+if (ie && cache()!=0)
+ {var tekst="Click here to move this menu down";var tekst2='';
+  if (top.frames[1].location.href.indexOf('down.htm')!=-1) {tekst="Click here to move this menu up"}
+  document.write("<a class=menu onmouseover='window.status=tekst;return true' onmouseout='window.status=tekst2;return true' href=javascript:top.frames[0].fl()>"+tekst+"</a><hr width=100%>")}
+</SCRIPT>
+<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(0,'Main page');return true" onmouseout="lo();return true" class=menu target=main HREF=main.htm>Main page</A><BR>
+<img SRC="dir1.gif" height=16 width=16>&nbsp;<a onmouseover="window.status=''; return true" class=menu href=javascript:mclick(1)>GSM AND NOKIA</a><br><font id=nr1>
+&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(2,'Nokia identification &amp; firmware (4 May 2000)');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/firmware.htm>Nokia identification &amp; firmware (4 May 2000)</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="dir1.gif" height=16 width=16>&nbsp;<a onmouseover="window.status=''; return true" class=menu href=javascript:mclick(3)>NetMonitor (4 May 2000)</a><br><font id=nr3>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(4,'What is it ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#1>What is it ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(5,'Do I need it ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#2>Do I need it ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(6,'Does my phone use more power with NetMonitor enabled ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#3>Does my phone use more power with NetMonitor enabled ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(7,'How to activate it ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#4>How to activate it ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(8,'Which NetMonitor version can be activated in my phone ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#5>Which NetMonitor version can be activated in my phone ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(9,'Does NetMonitor activation void warranty ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#6>Does NetMonitor activation void warranty ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(10,'NetMonitor menu in my phone has different number than 10. Is it normal ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#7>NetMonitor menu in my phone has different number than 10. Is it normal ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(11,'NetMonitor menu in my phone has 11 number, hovewer previous position has 9 number. Is it normal ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#8>NetMonitor menu in my phone has 11 number, hovewer previous position has 9 number. Is it normal ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(12,'How to use it ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#9>How to use it ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(13,'Can I damage my phone ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net0.htm#10>Can I damage my phone ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(14,'Glossary');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net1.htm#11>Glossary</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(15,'Description of the individual tests');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net2.htm#12>Description of the individual tests</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(16,'You can also use a program...');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#13>You can also use a program...</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(17,'Can I use NetMonitor without SIM card inserted, without PIN number entered or when SIM card is not active ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#14>Can I use NetMonitor without SIM card inserted, without PIN number entered or when SIM card is not active ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(18,'How can I disable NetMonitor ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#15>How can I disable NetMonitor ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(19,'Do I need to disable NetMonitor before sending my phone to the service ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#16>Do I need to disable NetMonitor before sending my phone to the service ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(20,'Is it possible to re-activate NetMonitor after disabling it ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#17>Is it possible to re-activate NetMonitor after disabling it ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(21,'Is NetMonitor available in analog Nokia phones ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#18>Is NetMonitor available in analog Nokia phones ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(22,'Does NetMonitor allow to use phone like broadcast station ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#19>Does NetMonitor allow to use phone like broadcast station ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(23,'I dont have all described tests in my phone. Why ? Can I increase their number ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#20>I don't have all described tests in my phone. Why ? Can I increase their number ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(24,'Does NetMonitor allow to identify place, where is my interlocutor ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#21>Does NetMonitor allow to identify place, where is my interlocutor ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(25,'Does NetMonitor allow to identify place, where am I ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#22>Does NetMonitor allow to identify place, where am I ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(26,'What are NetMonitor codes ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#23>What are NetMonitor codes ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(27,'Is it the truth, that in phones with additional hardware changing frequency band NetMonitor doesnt work correct ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#24>Is it the truth, that in phones with additional hardware changing frequency band NetMonitor doesn't work correct ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(28,'Where can I find description of FBUS/MBUS protocol and commands connected with NetMonitor ?');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#25>Where can I find description of FBUS/MBUS protocol and commands connected with NetMonitor ?</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(29,'Information sources');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#literatura>Information sources</A><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img SRC="htm.gif" height=16 width=16>&nbsp;<A onmouseover="ld(30,'Additional information');return true" onmouseout="lo();return true" class=menu target=main HREF=gsm/faq_net6.htm#27>Additional information</A><BR>
+</font>
+</font>
+</font>
+<SCRIPT>zwin();</SCRIPT>
+</nobr></font></body></html>

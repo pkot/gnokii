@@ -1,0 +1,611 @@
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+   <meta name="Author" content="Marcin Wiącek">
+   <meta name="Description" content="FAQ dotyczący monitora sieci w Nokiach (NOKIA NetMonitor description)">
+   <meta name="language" content="pl">
+   <meta name="revisit-after" content="15 days">
+   <meta name="Robots" content="all">
+   <meta name="KeyWords" content="3110, 9110, GSM, DCS, Nokia, 3210, 5110, 5130, 6110, 6130, 6150, 8810, FAQ, NetMonitor, monitor sieci, Marcin, Wiącek, Wiacek, Marcin Wiącek, Marcin Wiacek">
+   <title>FAQ - monitor sieci w Nokiach (część 2/7)</title>
+   <link rel="stylesheet" href="../styl.css" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" text="#2B2B69" link="#525FF5" vlink="#525FF5" alink="#2FA030">
+
+<font class="drukuj">
+<p align="RIGHT"><a class="autoremail" href="../glowna.htm">Strona główna</a></p>
+</font>
+<center><font color="#1F409F" size=+2 class="tytul">Monitor sieci w telefonach Nokia (2/7)</font>
+<font class="drukuj">
+<p><a href="faq_net0.htm">[Część 1]</a><b>[Część 2]</b><a href="faq_net2.htm">[Część 3]</a><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><a href="faq_net6.htm">[Część 7]</a>
+</font>
+</center>
+
+<hr noshade width="60%" style="color: #004080" align=center>
+<a NAME="Top"></a>
+
+<font class="drukuj">
+<ol>
+<li><a href="faq_net0.htm#1"><b>Co to jest ?</b></a></li>
+<li><a href="faq_net0.htm#2"><b>Czy jest mi potrzebny ?</b></a></li>
+<li><a href="faq_net0.htm#3"><b>Czy po włączeniu monitora telefon pobiera więcej energii ?</b></a></li>
+<li><a href="faq_net0.htm#4"><b>Jak go włączyć ?</b></a></li>
+<li><a href="faq_net0.htm#5"><b>Jaką wersję monitora mogę włączyć w telefonie ?</b></a></li>
+<li><a href="faq_net0.htm#6"><b>Czy włączenie monitora powoduje utratę gwarancji ?</b></a></li>
+<li><a href="faq_net0.htm#7"><b>W moim telefonie menu monitora ma numer inny niż 10. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#8"><b>W moim telefonie menu monitora ma numer 11, natomiast poprzednia pozycja numer 9. Czy to normalne ?</b></a></li>
+<li><a href="faq_net0.htm#9"><b>Jak się nim posługiwać ?</b></a></li>
+<li><a href="faq_net0.htm#10"><b>Czy mogę zepsuć sobie telefon ?</b></a></li>
+<li><a href="#11"><b>Słowniczek</b></a></li>
+<li><a href="faq_net2.htm#12"><b>Znaczenie poszczególnych testów</b></a></li>
+<li><a href="faq_net6.htm#13"><b>Można też użyć programu...</b></a></li>
+<li><a href="faq_net6.htm#14"><b>Czy można korzystać z monitora sieci, gdy nie ma w telefonie karty SIM, nie został podany jej PIN lub jest nieaktywna ?</b></a></li>
+<li><a href="faq_net6.htm#15"><b>W jaki sposób mogę wyłączyć monitor sieci ?</b></a></li>
+<li><a href="faq_net6.htm#16"><b>Czy powinienem wyłączyć monitor sieci przed oddaniem telefonu do serwisu ?</b></a></li>
+<li><a href="faq_net6.htm#17"><b>Czy po wyłączeniu monitora sieci będę go mógł włączyć ponownie ?</b></a></li>
+<li><a href="faq_net6.htm#18"><b>Czy monitor sieci jest dostępny także w analogowych Nokiach ?</b></a></li>
+<li><a href="faq_net6.htm#19"><b>Czy monitor sieci pozwoli na używanie telefonu podobnie jak radiostacji ?</b></a></li>
+<li><a href="faq_net6.htm#20"><b>Dlaczego w moim telefonie jest znacznie mniej testów niż zostało tutaj opisane ? Czy mogę zwiększyć ich ilość ?</b></a></li>
+<li><a href="faq_net6.htm#21"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie znajduje się mój rozmówca ?</b></a></li>
+<li><a href="faq_net6.htm#22"><b>Czy mogę stwierdzić z pomocą monitora sieci, gdzie się znajduję ?</b></a></li>
+<li><a href="faq_net6.htm#23"><b>Co to są kody monitora sieci ?</b></a></li>
+<li><a href="faq_net6.htm#24"><b>Czy jest prawdą, że monitor sieci w telefonie z dodatkowym urządzeniem zmieniającym jego pasmo działa niepoprawnie ?</b></a></li>
+<li><a href="faq_net6.htm#25"><b>Gdzie znajdę opis protokołu MBUS/FBUS i komendy związane z monitorem sieci ?</b></a></li>
+<li><a href="faq_net6.htm#Literatura"><b>Użyte materiały</b></a></li>
+<li><a href="faq_net6.htm#27"><b>Dodatkowe informacje</b></a></li>
+</ol>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<p><a NAME="11"></a><font color="#1F409F" size="+2" class="dzial">11. Słowniczek</font><br>
+<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<p>Poniżej wyjaśniam niektóre pojęcia, które przewijają się w tym FAQ:
+
+<p><a NAME="ACCH"></a><b>ACCH</b> (<b>A</b>nalog <b>C</b>ontrol <b>Ch</b>annel)
+<font size=-2>(TDMA 800/TDMA 1900)</font>
+
+<p><A name="AMPS"></a><b>AMPS</b> (<b>A</b>dvanced <b>M</b>obile <b>P</b>hone <b>S</b>ervice)
+<br>System analogowej telefonii komórkowej działający w częstotliwości 800 Mhz.
+Używany m.in. w Ameryce Północnej.
+
+<p><a NAME="ASIC"></a><b>ASIC</b> (<b>A</b>pplication <b>S</b>pecific <b>I</b>ntegrated <b>C</b>ircuit)
+<br>Mianem tym określa się układ elektroniczny służący do konkretnych
+celów (w telefonie m.in. kontroluje komunikację między <a href="#MCU">MCU</a> i <a href="#DSP">DSP</a>).
+Układy takie projektują i produkują używające je firmy.
+
+<p><a NAME="AVCH"></a><b>AVCH</b> (<b>A</b>nalog <b>V</b>oice <b>Ch</b>annel)
+<font size=-2>(TDMA 800/TDMA 1900)</font>
+
+<p><a NAME="BCC"></a><b>BCC</b> (<b>B</b>ase-station <b>C</b>olor <b>C</b>ode)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>3 bitowy numer (zakres 0-7) używany do rozróżnienia sąsiadujących komórek
+tego samego operatora nadających z użyciem <a href="faq_net2.htm#BCCH">BCCH</a>
+w tym samym kanale <a href="#FDMA">FDMA</a>. Takie rozróżnienie
+nie jest potrzebne w przypadku komórek różnych operatorów (używają różnych
+kanałów, więc ich <a href="faq_net2.htm#BCCH">BCCH</a> są
+w różnych kanałach <a href="#FDMA">FDMA</a>). Jest podawany
+w <a href="#BSIC">BSIC</a> każdego <a href="#BTS">BTSa</a>
+(możesz go sprawdzić np. w <b><a href="faq_net2.htm#Menu2">Menu
+10-2</a></b>).
+
+<p><a NAME="BSC"></a><b>BSC</b> (<b>B</b>ase <b>S</b>tation <b>C</b>ontroller)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Kontroler stacji bazowych. Może sterować i sprawować nadzór nad jednym
+lub kilkoma <a href="#BTS">BTSami</a>.
+
+<p><a NAME="BSIC"></a><b>BSIC</b> (<b>B</b>ase <b>S</b>tation <b>I</b>dentity <b>C</b>ode
+albo <b>B</b>ase transceiver <b>S</b>tation <b>I</b>dentity <b>C</b>ode)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Numer identyfikujący danego <a href="#BTS">BTSa</a>.
+Jeżeli jego wartość zapiszemy binarnie (dwójkowo), to trzy pierwsze cyfry
+(oczywiście w zapisie dziesiątkowym) stanowić będą jego
+<a href="#BCC">BCC</a>,
+następne trzy <a href="#NCC">NCC</a>. Przyjmuje wartości
+z zakresu 0 - 63. Wartości <b>BSIC</b> są podawane m.in. w <b><a href="faq_net2.htm#Menu2">Menu
+10-2</a></b>.
+
+<p><a NAME="BTS"></a><b>BTS</b> (<b>B</b>ase <b>T</b>ransceiver <b>S</b>tation)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Stacja nadawczo - odbiorcza. Za jej pośrednictwem telefony komunikują
+się z siecią (parametry takie jak kanał używany do komunikacji, odległość
+i jakość sygnału możesz znaleźć np. w <b><a href="faq_net2.htm#Menu1">Menu
+10-1</a></b>).
+
+Klasy mocy <b>BTSów</b> są następujące:
+
+<p>
+<table cellspacing=0 cellpadding=0 border=1>
+<tr><td><center><b>GSM 900</b></center></td><td><b>GSM 1800</b></td></tr>
+<tr>
+<td>
+<center>320 W (55 dBm)<br>
+160 W (52 dBm)<br>
+80 W (49 dBm)<br>
+40 W (46 dBm)</center>
+</td><td>
+<center>-<br>
+-<br>
+-<br>
+-</center>
+</td></tr>
+<tr><td colspan=2>
+<center>20 W (43 dBm)<br>
+10 W (40 dBm)<br>
+5 W (37 dBm)<br>
+2,5 W (34 dBm)</center>
+</td></tr>
+</table>
+
+<p>Jeżeli chodzi o spisy <b>BTSów</b>, musisz pamiętać, że czasami w sieci
+zmieniane są LAC i CID komórek (i dane, które znajdziesz pod podanymi adresami,
+mogą być nieaktualne !).
+
+<p>
+<ul>
+<li><b>BTSom</b> w Toruniu poświęcona jest strona <a href="http://www.phys.uni.torun.pl/~wind/bts.html">www.phys.uni.torun.pl/~wind/bts.html</a>
+i (bliźniacza) <a href="http://www.phys.uni.torun.pl/~microbe/bts.html">www.phys.uni.torun.pl/~microbe/bts.html</a></li>
+<li><b>BTSy</b> w Radomiu są opisane na stronie <a href="http://mbx.zptr.com.pl/gsm/">http://mbx.zptr.com.pl/gsm/</a></li>
+<li>mapa <b>BTSów</b> dla sieci <a href="http://www.idea.centertel.pl/">Idea</a> 1800 MHz - <a href="http://www.ee.pw.edu.pl/~lwasilew/bts.htm">www.ee.pw.edu.pl/~lwasilew/bts.htm</a></li>
+<li>mapa <b>BTSów</b> z okolicy Warszawy (<a href="http://www.eragsm.pl/">Era</a>) - <a href="http://gsm-mapka.topnet.pl">http://gsm-mapka.topnet.pl</a></li>
+<li>mapa i spisy <b>BTSów</b> w Bydgoszczy i woj. Kujawsko-Pomorskim - <a href="http://www.republika.pl/btsy_w_bydgoszczy">www.republika.pl/btsy_w_bydgoszczy</a></li>
+<li>mapy <b>BTSów</b> w Trójmieście - <a href="http://diamond.itnet.com.pl/~cybere/bts_map.htm">http://diamond.itnet.com.pl/~cybere/bts_map.htm</a></li>
+<li>mapy i spis <b>BTSów</b> z województwa Kujawsko-Pomorskiego - <a href="http://www.byd.top.pl/~mzuraw/bts">www.byd.top.pl/~mzuraw/bts</a></li>
+</ul>
+
+<p>Odnośniki związane z <b>BTSami</b> (mapki, lokalizacje, zdjęcia, opisy) znajdziesz również:
+
+<p>
+<ul>
+<li>na stronie Bartłomieja Zielińskiego - <a href="http://zeus.polsl.gliwice.pl/~bmw/">http://zeus.polsl.gliwice.pl/~bmw/</a></li>
+<li>na stronie Dariusza Grzecy - <a href="http://priv4.onet.pl/by/dariog/">http://priv4.onet.pl/by/dariog/</a></li>
+<li>na stronie Dawida Lorenza - <a href="http://adl.pl/bts/">http://adl.pl/bts/</a></li>
+<li>na stronie Jakuba Krama - <a href="http://195.116.20.230/qba/">http://195.116.20.230/qba/</a> albo <a href="http://www.gamma.com.pl/qba/">www.gamma.com.pl/qba/</a></li>
+<li>na stronie Jurka Bosowskiego - <a href="http://www.radio.opole.pl/~jbos/gsm.htm">www.radio.opole.pl/~jbos/gsm.htm</a></li>
+<li>na stronie Macieja Pawlaka - <a href="http://195.116.20.230/private/maciej/poznan.htm">http://195.116.20.230/private/maciej/poznan.htm</a></li>
+<li>na stronie Marcina Ludwiniaka  - <a href="http://www.kki.net.pl/~duntek/">www.kki.net.pl/~duntek/</a></li>
+<li>na stronie Marka - <a href="http://friko.onet.pl/wa/marekba/gsm.htm">http://friko.onet.pl/wa/marekba/gsm.htm</a></li>
+<li>na stronie Pawła Bojahra - <a href="http://www.rudykot.pl/~pawelb">www.rudykot.pl/~pawelb</a></li>
+<li>na stronie Piotra Główki - <a href="http://www.gsm.alpha.pl/">www.gsm.alpha.pl/</a></li>
+<li>na stronie poświęconej <b>BTSom</b> - <a href="http://www.bts.nsr.net/">www.bts.nsr.net/</a></li>
+<li>na stronie Przemysława Rydla - <a href="http://gsm.mtl.pl/">http://gsm.mtl.pl/</a></li>
+<li>na stronie Roberta Błaszczaka - <a href="http://www.lubuskie.prv.pl">http://www.lubuskie.prv.pl</a></li>
+<li>w GSMKR - <a href="http://friko5.onet.pl/kr/gsmkr/">http://friko5.onet.pl/kr/gsmkr/</a></li>
+</ul>
+
+<p>Na specjalne wyróżnienie (moim zdaniem) zasługują natomiast:
+
+<p>
+<ul>
+<li>strona Wojciecha Markiewicza - <a href="http://www.pdi.net/~markos/">www.pdi.net/~markos/</a>
+(bardzo dużo informacji o GSM; jeśli chodzi o <b>BTSy</b>, zawiera spisy
+i mapy, dokładne dane techniczne, informacje o szkodliwości i aspekty prawne
+związane z ich budową)</li>
+<li>strony w <a href="http://www.fkn.pl/">Fan Klubie Nokii</a>:
+jedna pod adresem <a href="http://www.fkn.pl/btsy/index.html">www.fkn.pl/btsy/index.html</a>
+(dużo informacji o <b>BTSach</b>) i druga 
+<a href="http://www.fkn.pl/zdrowie/index.html">www.fkn.pl/zdrowie/index.html</a> (poświęcona (nie) szkodliwości telefonii komórkowej)</li>
+<li>strona <a href="http://www.geckobeach.com/cellular/cellpixs/cellid.htm">www.geckobeach.com/cellular/cellpixs/cellid.htm</a>
+o <b>BTSach</b> i sieciach w Ameryce Północnej</li>
+</ul>
+
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH="100%">
+<tr>
+<td><img SRC="tip.gif" height=36 width=27></td>
+
+<td>Wszelkie uwagi dotyczące <b>BTSów</b> w sieci <a href="http://www.eragsm.pl/">Era
+GSM</a> (np. informacje o nieprawidłowym działaniu, propozycje nowych lokalizacji,
+itp.) można natomiast zgłaszać do Jakuba Krama (<a href="mailto:602293483@eranet.pl">602293483@eranet.pl</a>)
+i Mirosława Kotlińskiego (<a href="mailto:602287746@eranet.pl">602287746@eranet.pl</a>).</td>
+</tr>
+</table>
+
+<p><a NAME="C1"></a><b>C1</b> (path loss-criterium)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Parametr (zakres od -99 do 99 dBm) obliczany przez telefon, który na
+jego podstawie decyduje, z których komórek ma korzystać (robi to tylko
+wtedy, jeżeli <b>C1</b> jest dodatni dla danej komórki). Pod uwagę są brane:
+
+<p>
+<ul>
+<li><a NAME="RX"></a><b>RX</b>
+<br>Moc, z jaką odbierane są dane na kanale <a href="faq_net2.htm#BCCH">BCCH</a>.
+Jeżeli jest ona równa bądź mniejsza niż <a href="#RxLevAm">RxLevAm</a>,
+telefon szuka następnego kanału <a href="faq_net2.htm#BCCH">BCCH</a>.
+Jest ona podawana w <b><a href="faq_net2.htm#Menu1">Menu
+10-1</a></b> (dla aktualnie używanego kanału) i w <b><a href="faq_net2.htm#Menu3">Menu
+10-3</a></b>, <b><a href="faq_net2.htm#Menu4">Menu 10-4</a></b>
+i <b><a href="faq_net2.htm#Menu4">Menu 10-5</a></b> (dla sąsiednich kanałów). Ilość prób pomiarów jakości transmisji
+z kanałami <a href="#BCCH">BCCH</a> w sąsiednich komórkach
+jest podawana w <b><a href="faq_net5.htm#Menu62">Menu 10-62</a></b></li>
+
+<li><a NAME="RxLevAm"></a><b>RxLevAm</b> (<b>Rx</b> <b>Lev</b>el <b>A</b>ccess
+<b>m</b>inimum)
+<br>Minimalny poziom odbieranego sygnału (zazwyczaj wynosi od -100 dBm
+do -110 dBm) wymagany do tego, aby telefon próbował korzystać z danej komórki.</li>
+
+<li><a NAME="MSTxPwr"></a><b>MSTxPwr</b>
+<br>Maksymalna moc, z jaką telefon może nadawać, aby uzyskać dostęp do
+kanału <a href="faq_net2.htm#RACH">RACH</a> (tzn. maksymalna
+moc dopuszczalna przez aktualną komórkę). Generalnie, jest ona mniejsza
+w miastach (komórki są ustawione gęściej), większa poza nimi.</li>
+
+<li><a NAME="MSMaxTxPwr"></a><b>MSMaxTxPwr</b>
+<br>Maksymalna dopuszczalna moc nadawania telefonu (określające ją klasy
+podaję przy <a href="faq_net2.htm#TX">opisie TX</a>) w ogóle.</li></ul>
+
+<p>a wzór do jego obliczania wygląda następująco: <nobr>C1 = (<a href="#RX">RX</a>
+- <a href="#RxLevAm">RxLevAm</a> - MAX ( ( <a href="#MSTxPwr">MSTxPwr</a>
+- <a href="#MSMaxTxPwr">MSMaxTxPwr</a> ), 0) ) )</nobr>,
+gdzie MAX(x,y) to oczywiście funkcja matematyczna zwracająca większą z
+podanych liczb. Telefon podaje wartości <b>C1</b> w <b><a href="faq_net2.htm#Menu1">Menu
+10-1</a></b> (dla używanego kanału) i w <b><a href="faq_net2.htm#Menu3">Menu
+10-3</a></b>, <b><a href="faq_net2.htm#Menu4">Menu 10-4</a></b>
+i <b><a href="faq_net2.htm#Menu5">Menu 10-5</a></b> (dla sąsiednich kanałów).
+
+<p><a NAME="C2"></a><b>C2</b> (cell-reselection criterion)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Parametr (wartości z zakresu od -99 do 99 dBm) obliczany na podstawie
+wzoru <nobr>C2 = C1 + <a href="faq_net2.htm#CellReselect">Cell reselect
+offset</a> - <a href="faq_net2.htm#TemporaryOffset">Temporary offset</a>
+* H (<a href="faq_net2.htm#PenaltyTime">Penalty time</a> - T)</nobr>.
+Jeżeli jego wartość dla jakiejś komórki (<b>C2</b> dla sąsiednich kanałów
+są w <b><a href="faq_net2.htm#Menu3">Menu 10-3</a></b>,
+<b><a href="faq_net2.htm#Menu4">Menu 10-4</a></b> i
+<b><a href="faq_net2.htm#Menu5">Menu 10-5</a></b>)
+jest wyższa niż wartość dla aktualnej komórki (telefon podaje ją w <b><a href="faq_net2.htm#Menu1">Menu
+10-1</a></b> i <b><a href="faq_net2.htm#Menu3">Menu 10-3</a></b>)
+dłużej niż 5 sekund, telefon ją zmienia. Są 2 wyjątki od tej reguły:
+
+<p>
+<ul>
+<li>jeżeli nowa komórka leży na innym Location Area (wartość tego parametru
+dla aktualnej komórki możesz sprawdzić w <b><a href="faq_net3.htm#Menu11">Menu
+10-11</a></b>), <b>C2</b> dla niej musi przez przynajmniej 5 sekund wartość
+większą niż <b>C2</b>+CELL_RESELECT_HYSTERESIS dla starej komórki (gdzie
+CELL_RESELECT_HYSTERESIS jest specjalnym parametrem wysyłanym w kanale
+<a href="faq_net2.htm#BCCH">BCCH</a>).</li>
+
+<li>jeżeli w przeciągu ostatnich 15 sekund telefon zmienił używaną komórkę,<b>C2</b>
+dla nowej komórki musi być wyższa co najmniej o 5 dBm od <b>C2</b> dla
+starej.</li>
+</ul>
+
+<p>Jeżeli chodzi o funkcję H(x), to dla nieużywanych aktualnie komórek przyjmuje
+ona wartość 0 (jeżeli x&lt;0) albo 1 (jeżeli x>=0). Dla aktualnie używanej
+komórki H(x) jest zawsze równa 0.
+<br>Jak widać, dzięki umiejętnemu operowaniu tym parametrem (przez CELL_RESELECT_HYSTERESIS)
+operator może kierowac połączenia do konkretnych komórek (odciążając w
+ten sposób sieć).
+
+<p><a name="CDMA"></a><b>CDMA</b> (<b>C</b>ode <b>D</b>ivision <b>M</b>ultiple <b>A</b>ccess; also known as IS-95)
+<br>One of the newer digital technologies in 800 or 1900 Mhz. Used in North America, Australia and some southeastern Asian countries
+(e.g. Hong Kong and South Korea). It doesn't divide the radio frequency
+spectrum into separate user channels by frequency slices or time slots, but
+separates users by assigning them digital codes within the same broad spectrum.
+
+<p><a NAME="DCCH"></a><b>DCCH</b> (<b>D</b>igital <b>C</b>ontrol <b>Ch</b>annel)
+<font size=-2>(TDMA 800/TDMA 1900)</font>
+
+<p><a NAME="DCS"></a><b>DCS</b> (<b>D</b>igital <b>C</b>ellular <b>S</b>ystem)
+<br>System telefonii komórkowej działający w paśmie 1800 Mhz (stąd nazywany
+jest obecnie raczej GSM 1800) - zmieniona wersja systemu
+<a href="#GSM">GSM</a>
+(900 Mhz). Wprowadzone modyfikacje pozwoliły zwiększyć pojemność sieci
+(stąd instaluje się go głównie w okolicach aglomeracji miejskich, gdzie
+jest większa ilość abonentów) kosztem gęstszego rozstawiania stacji bazowych
+(<a href="#BTS">BTSów</a>) oraz wprowadzić roaming w obrębie
+jednego kraju. Ze szczegółow technicznych: inne są numery kanałów (patrz
+<b><a href="faq_net3.htm#Menu17">Menu 10-17</a></b>), moce
+nadawcze telefonów (patrz <a href="faq_net2.htm#RX">opis
+RX</a>) i <a href="#BTS">BTSów</a> pracujących w obu systemach,
+jak również maksymalna prędkość użytkownika, przy której może wykorzystywać
+swój telefon (w GSM jest to 250 km/h, w DCS 130 km/h).
+
+<p><a NAME="DSP"></a><b>DSP</b> (<b>D</b>igital <b>S</b>ignal <b>P</b>rocessor)
+<br>Procesor sygnałowy (układ scalony zajmujący się cyfrową obróbką sygnałów
+- kontroluje interfejs radiowy i kodowanie/dekodowanie mowy).
+Wersja oprogramowania jest podawana w <b><a href="faq_net5.htm#Menu88">Menu
+10-88</a></b>.
+
+<p><a NAME="DTCH"></a><b>DTCH</b> (<b>D</b>igital <b>T</b>raffic <b>Ch</b>annel)
+<font size=-2>(TDMA 800/TDMA 1900)</font>
+
+<p><a NAME="DTX"></a><b>DTX</b> (<b>D</b>iscontinous <b>T</b>ransmission E<b>x</b>change)
+<br>W trosce o nasze akumulatory ;-), część sieci i telefonów
+pozwala na tzw. przerywaną transmisję (właśnie <b>DTX</b>).
+Po prostu, wykorzystane zostało to, że nie mówimy cały czas, tylko również
+słuchamy (i wtedy telefon może wyłączać swój nadajnik). Aby nasz rozmówca nie usłyszał
+ciszy (pomyśli, że połączenie zostało przerwane), jego telefon generuje
+pewien szum (nazywany potocznie komfortowym :-)) naśladujący odbierane w czasie mówienia
+szumy.
+
+<p><font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>:
+<br>Na korzystanie z <b>DTX</b> musi pozwalać telefon (Nokia oczywiście może
+- patrz <b><a href="faq_net5.htm#Menu78">Menu 10-78</a></b>)
+i <a href="#BTS">BTS</a> - sprawdzisz to (i ewentualnie
+ustawisz) w <b><a href="faq_net3.htm#Menu12">Menu 10-12</a></b>
+i <b><a href="faq_net3.htm#Menu13">Menu 10-13</a></b>.
+
+<p><a NAME="FDMA"></a><b>FDMA</b> (<b>F</b>requency <b>D</b>ivision <b>M</b>ultiple <b>A</b>ccess)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Pojęcie to oznacza wielodostęp w dziedzinie częstotliwości: w tym samym
+czasie (równocześnie) jest prowadzona transmisja na różnych częstotliwościach
+(jest to połączenie typu "pełen dupleks" - "full duplex"): "w dół" (down-link)
+- od <a href="#BTS">BTSa</a> do telefonu i "w górę" (up-link)
+- od telefonu do <a href="#BTS">BTS</a> (określenia "w dół"
+i "w górę" wzięły się stąd, że anteny <a href="#BTS">BTSów</a>
+są zazwyczaj wyżej niż anteny telefonów i sygnał od <a href="#BTS">BTSa</a>
+do telefonu musi rzeczywiście wędrować w dół (albo w odwrotną stronę w
+górę)).
+
+<p><a NAME="GSM"></a><b>GSM</b> (<b>G</b>lobal <b>S</b>ystem for <b>M</b>obile Communication)
+<br>System telefonii komórkowej działający w częstotliwości 900 Mhz. Później
+zaadoptowano go na częstotliwość 1800 Mhz (<a href="#DCS">DCS</a>)
+oraz 1900 Mhz (PCS).
+
+<p><a NAME="HLR"></a><b>HLR</b> (<b>H</b>ome <b>L</b>ocation <b>R</b>egister)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Rejestr sieci przechowujący informacje związane z abonentami swojej
+sieci (np. do jakich usług mają dostęp, jaki mają abonament, w zasięgu
+jakiej sieci się ostatnio znajdowali, itp.).
+
+<p><a NAME="IMEI"></a><b>IMEI</b> (<b>I</b>nternational <b>M</b>obile <b>E</b>quipment <b>I</b>dentification code)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Niepowtarzalny (15 cyfrowy) numer przyporządkowany każdemu telefonowi
+GSM na świecie. Można go sprawdzić kodem <b>*#06#</b> (nie tylko w Nokiach)
+albo w menu serwisowym (Nokia) - włączasz go kodem <b>*#WAR0ANTY# </b>albo
+<b>*#WARRANTY#</b> (Nokia 6130). W Nokii 3110 w menu serwisowym (<b>*#WAR0ANTY#</b>)
+musisz w tym celu podać natomiast kod <b>9268</b>. Na podstawie samego
+<b>IMEI</b> można m.in. określić producenta telefonu, miejsce jego wyprodukowania,
+numer seryjny (pod adresem
+<a href="http://www.tele-servizi.com/janus/texts/imei.txt">www.tele-servizi.com/janus/texts/imei.txt</a>
+możesz np. zobaczyć taką listę dla Motoroli). Operatorzy mogą nie zezwalać
+na dostęp do swoich sieci niektórym telefonom - np. kradzionym (są identyfikowane
+właśnie na podstawie <b>IMEI</b>). Mogą oni się również wymieniać ich listami.
+
+<p><a NAME="IMSI"></a><b>IMSI</b> (<b>I</b>nternational <b>M</b>obile <b>S</b>ubscriber <b>I</b>dentify)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Niepowtarzalny numer (maksymalnie 15 cyfr) nadawany telefonowi:
+
+<p>
+<ul>
+<li>pierwsze trzy cyfry to jego <a href="faq_net2.htm#MCC">MCC</a></li>
+<li>następne trzy to <a href="faq_net2.htm#MNC">MNC</a></li>
+<li>reszta to niepowtarzalny numer</li>
+</ul>
+
+<p><a NAME="IMSIattach"></a><b>IMSI attach</b>
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Czynność wykonywana po włączeniu telefonu. Polega ona na tym, że podaje
+on sieci informację, że jest już aktywny (można się z nim komunikować -
+wysłać zaległe <a href="http://www.fkn.pl/faqs/smsfaq.html">SMSy</a>,
+itp.) i dostaje numer <a href="#IMSI">IMSI</a>. Licznik
+związany z <b>IMSI attach</b> jest w <b><a href="faq_net5.htm#Menu64">Menu
+10-64</a></b>, to, czy pozwala na to komórka, sprawdzisz w <b><a href="faq_net2.htm#Menu7">Menu
+10-7</a></b>.
+
+<p><a NAME="IMSIdetach"></a><b>IMSI detach</b>
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Przy wyłączeniu telefon informuje z kolei sieć, że nie będzie możliwa
+komunikacja z nim (i jego <a href="#IMSI">IMSI</a> jest
+już nieaktualny). Licznik związany z <b>IMSI detach</b> jest w <b><a href="faq_net5.htm#Menu64">Menu
+10-64</a></b>, to, czy pozwala na to komórka, sprawdzisz w <b><a href="faq_net2.htm#Menu7">Menu
+10-7</a></b>.
+
+<p><a NAME="LocationUpdate"></a><b>Location Update</b>
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Telefon powinien informować sieć, gdzie go szukać. Jest to nazywane
+<b>Location Update</b> i wykonywane po zmianie Location Area (telefon robi
+to "inteligentnie" i np. w przypadku, gdy straci (a później odzyska sygnał
+sieci), wykonuje <b>Location Update</b> tylko wtedy, gdy używany aktualnie
+<a href="faq_net1.htm#BTS">BTS</a> ma inny LAC niż poprzedni
+- wykorzystywany przed stratą sygnału) lub <a href="#PLMN">PLMN</a>
+(przeniesieniu się w zasięg drugiej sieci lub próbie zalogowania się do
+niej). Wtedy wiadomość o <b>Location Update</b> jest przekazywana do nowego
+<a href="#MSC">MSC</a>/<a href="#VLR">VLR</a>,
+które przekazuje z kolei informację o położeniu do <a href="#HLR">HLR</a>.
+Kiedy telefon działa już w nowym <a href="#MSC">MSC</a>/<a href="#VLR">VLR</a>,
+<a href="#HLR">HLR</a> użytkownika nie identyfikuje go już
+przez numer przekazywany przez stary <a href="#MSC">MSC</a>/<a href="#VLR">VLR</a>.
+Pewną odmianą <b>Location Update</b> są tzw. <a href="#PLU">PLU</a>,
+<a href="#IMSIattach">IMSI attach</a> i <a href="#IMSIdetach">IMSI
+detach</a> (telefon je odróżnia w <b><a href="faq_net5.htm#Menu64">Menu
+10-64</a></b>). Aktualne Location Area możesz sprawdzić w <b><a href="faq_net3.htm#Menu11">Menu
+10-11</a></b>.
+
+<p><a NAME="MCU"></a><b>MCU</b> (<b>M</b>aster <b>C</b>ontrol <b>U</b>nit processor)
+<br>Główny procesor w telefonie.
+
+<p><a NAME="MSC"></a><b>MSC</b> (<b>M</b>obile <b>S</b>witching <b>C</b>enter)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Odpowiada za komunikację użytkowników z innymi (np. użytkownikami innych
+sieci).
+
+<p>
+<ul>
+<li>zdjęcia z <b>MSC</b> sieci <a href="http://www.plusgsm.pl">Plus GSM</a> w Łodzi - <a href="http://www.pdi.net/~markos/gsm_msc_plus.htm">www.pdi.net/~markos/gsm_msc_plus.htm</a>
+(<a href="http://www.pdi.net/~markos/">strona Wojciecha
+Markiewicza</a>)</li>
+</ul>
+
+<p><a NAME="NCC"></a><b>NCC</b> (<b>N</b>ational <b>C</b>olor <b>C</b>ode albo <b>N</b>etwork <b>C</b>olor <b>C</b>ode)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>3 bitowy numer (zakres 0-7) używany do rozróżnienia komórek operatorów
+z różnych krajów (np. przy granicy kraju, gdzie telefon znajduje się w
+zasięgu różnych sieci) nadających z użyciem
+<a href="faq_net2.htm#BCCH">BCCH</a>
+w tym samym kanale <a href="#FDMA">FDMA</a>.
+Numer ten nie zmienia się w obrębie <a href="#PLMN">PLMN</a>.
+Jest podawany w <a href="#BSIC">BSIC</a> każdego <a href="#BTS">BTSa</a>
+(możesz go sprawdzić np. w <b><a href="faq_net2.htm#Menu2">Menu
+10-2</a></b>).
+
+<p><a NAME="PLMN"></a><b>PLMN</b> (<b>P</b>ublic <b>L</b>and <b>M</b>obile <b>N</b>etwork)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Obszar obsługiwany przez jednego operatora (jedną sieć). Przy jego zmianie telefon wykonuje
+<a href="#LocationUpdate">Location Update</a>.
+
+<p>
+<ul>
+<li>Dużo odnośników do mapek zasięgu polskich sieci (czyli wielkość ich <b>PLMN</b>) znajdziesz przy opisie <a href="#BTS">BTSów</a>.</li>
+<li>Ciekawa strona (zawierająca w miarę aktualne mapki różnych operatorów na
+świecie) jest pod adresem <a href="http://www.subcam.freeserve.co.uk/mark/orange/ora.html">www.subcam.freeserve.co.uk/mark/orange/ora.html</a>.</li>
+</ul>
+
+<p><a NAME="PLU"></a><b>PLU </b>(<b>P</b>eriodic <b>L</b>ocation <b>U</b>pdate)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Informowanie sieci przez telefon o tym, w zasięgu jakich komórek (w
+jakim rejonie kraju) się znajduje. Czynność ta jest wykonywana co pewien
+ustalony (zależny od sieci - np. dla <a href="http://www.eragsm.pl/">Ery</a>
+i <a href="http://www.plusgsm.pl/">Plusa</a> są to 3 h, dla
+<a href="http://www.idea.centertel.pl/">Idei</a> 2 h)
+czas (można go sprawdzić w <b><a href="faq_net3.htm#Menu10">Menu
+10-10</a></b>). Jest on liczony od ostatniego "kontaktu" z siecią (licznik
+nie zatrzymuje się, gdy telefon utraci jej sygnał !) - rozmowy, wysłania
+(otrzymania)
+<a href="http://www.fkn.pl/faqs/smsfaq.html">SMSa</a>,
+zgłaszania żądań (np. włączania przekierowań rozmów) - również wtedy jest
+ona informowana o położeniu telefonu (jednakże nie jest to rejestrowane
+w <b><a href="faq_net5.htm#Menu64">Menu 10-64</a></b>).
+Licznik związany z <b>PLU</b> jest w <b><a href="faq_net5.htm#Menu64">Menu
+10-64</a></b>.
+
+<p><a NAME="Hopping"></a><b>Skakanie po częstotliwościach</b> (channel hopping)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Podczas połączenia Twój telefon może stale zmieniać używaną częstotliwość
+(a właściwie kanał) podczas komunikacji z komórką. Jest to stosowane, gdy
+jakiś kanał jest ciągle zakłócany - przy stałym jego używaniu przez telefon
+nawiązanie połączenia mogłoby być niemożliwe, przy <b>channel hopping</b>
+tracona jest co najwyżej część całej transmisji przeprowadzona na tej częstotliwości
+(daje to mnie zaników sygnału, nie zmienia natomiast jakości dźwięku - wszak sposób jego
+kodowania jest zawsze taki sam). To, czy telefon używa tego (podczas połączenia),
+sprawdzisz w <b><a href="faq_net2.htm#Menu1">Menu 10-1</a></b>,
+to, czy pozwala na to komórka, w <b><a href="faq_net3.htm#Menu12">Menu
+10-12</a></b> (wartości uaktualniane tylko podczas połączenia). Do używania
+<b>channel hopping </b>potrzebne jest tzw. Hopping Sequence Number (zmiana
+częstotliwości odbywa się według znanej telefonowi i sieci sekwencji) - patrz
+<b><a href="faq_net2.htm#Menu2">Menu 10-2</a></b>.
+
+<p><a NAME="TCH"></a><b>TCH</b> (<b>T</b>raffic <b>Ch</b>annels)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Dwukierunkowe, fizyczne kanały do transmisji danych użytkownika (komputerowych
+albo zakodowanego dźwięku). Istnieje kilka ich odmian:
+
+<ul>
+<li>
+<a NAME="HR"></a><b>HR</b> (<b>H</b>alf <b>R</b>ate Traffic): przekazywanie
+danych z maksymalną prędkością 6.5 kbit/sek (wprowadzone w fazie 2 GSM).
+Przy używaniu kanałów <b>HR</b>
+gorsza jest jakość dźwięku, ale również wolniejsze rozładowywania się akumulatora
+w telefonie (nawet do 30%). Jego zaletą jest również to, iż pozwala on
+zwiększyć dwukrotnie pojemność sieci (ilość osób mogących wykonywać jednocześnie
+połączenia - informacji o tym szukaj przy opisie <a href="faq_net2.htm#TS">parametru
+TS</a>) albo podwoić maksymalną odległość, z jakiej telefon wciąż może
+korzystać z danego <a href="#BTS">BTSa</a>. Na jego używanie
+musi pozwalać sieć (odpowiednią informację znajdziesz w <b><a href="faq_net2.htm#Menu7">Menu
+10-7</a></b>) i telefon. Można go włączyć kodem <b>*HRC0#</b>, wyłączyć
+<b>#HRC0#</b>. Niestety, nie wszystkie Nokie przyjmują te kody (telefon
+powinien się zrestartować po ich wprowadzeniu) - w starszych modelach nie są
+w ogóle przewidziane, w nowszych są deaktywowane, gdy telefon
+jest kierowany na rynek, na którym nie już sieci obsługujących ten kanał. 
+I jedna ciekawostka: w Nokii 6110 (oprogramowanie 5.24) możesz natomiast samodzielnie zdecydować
+o tym, czy telefon ma używać tego kanału czy nie - wystarczy zmienić w
+EEPROMIE wartości odpowiednich komórek pamięci:
+
+<table BORDER CELLSPACING=0 CELLPADDING=0>
+<tr>
+<td ALIGN=CENTER><b>włączanie</b></td>
+
+<td ALIGN=CENTER><b>wyłączanie</b></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER>komórka 0070 na 78
+<br>komórka 011F na 84</td>
+
+<td ALIGN=CENTER>komórka 0070 na 70
+<br>komórka 011F na 7C</td>
+</tr>
+</table>
+</li>
+
+<li>
+<a NAME="FR"></a><b>FR</b> (<b>F</b>ull <b>R</b>ate Traffic): przekaz z
+prędkością 13 kbit/sek, kodowanie algorytmem LPC-RPE (<b>L</b>inear <b>P</b>rediction
+<b>C</b>oding with <b>R</b>egular <b>P</b>ulse <b>E</b>xcitation)</li>
+
+<li>
+<a NAME="EFR"></a><b>EFR</b> (<b>E</b>nhanced <b>F</b>ull <b>R</b>ate):
+13 kbit/sek, mechanizm kodowania jest inny niż przy <a href="#FR">FR</a>
+(nazywa się ASELP - AlgebraicCode Excitation Linear Prediction i został
+stworzony przez firmę <a href="http://www.nokia.com">Nokia</a>
+i uniwersytet z Sherbrooke; uznano go za przemysłowy standard dla telefonii
+GSM). Kodowanie <b>EFR</b>daje lepszą jakość dźwięku przy tej samej prędkości
+przesyłania informacji (ale szybsze o ok. 5% wyczerpywanie się akumulatora
+w telefonie w porównaniu do <a href="#FR">FR</a>). Tryb
+ten włączysz kodem <b>*EFR0#</b> (po jego użyciu telefon próbuje korzystać
+z kanałów <b>TCH</b> w kolejności <b>EFR</b>, <b>FR</b>, (<b>HR</b>)), a
+wyłączysz <b>#EFR0#</b> (kolejność <b>FR</b>, (<b>HR</b>)). Wymienione kody
+mogą być nieobsługiwane przez niektóre modele (np. 6110 z pewnymi wersjami
+oprogramowania) - jeżeli Twój telefon je akceptuje, powinien się
+zresetować po ich użyciu (jeżeli się tak nie dzieje, nie włączysz/wyłączysz
+<b>EFR</b> z jego klawiatury). Starsze Nokie (np. 2110) w ogóle nie obsługiwały
+tego kanału. W Polsce można go użyć w <a href="http://www.idea.centertel.pl/">Idei</a>
+oraz (częściowo) w <a href="http://www.eragsm.pl/">Erze</a>.
+To, czy rzeczywiście jest używany, sprawdzisz tylko w czasie rozmowy (rodzaj
+używanego kanału).</li>
+</ul>
+
+<p>Jeżeli sieć nie obsługuje któregoś z kanałów, a Twój telefon przyjmuje kod
+do jego aktywacji, możesz zobaczyć komunikat "Nie gotowe" ("Not ready").
+
+<p>Rodzaj używanego przez telefon kanału możesz sprawdzić w <b><a href="faq_net2.htm#Menu1">Menu
+10-1</a></b>. Kolejność używania kanałów <b>TCH</b> możesz natomiast dowolnie
+ustawić w niektórych programach serwisowych (np. w WinTesli wybierasz z
+menu głównego "Software", a później "Product Profile" - może to być jedyna metoda
+włączenia obsługi kanału <b>HR</b> w słuchawce).
+
+<p><b>TDMA</b> (<b>T</b>ime <b>D</b>ivision <b>M</b>ultiple <b>A</b>ccess)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Pojęcie oznaczające wielodostęp w dziedzinie czasu: w tym "samym" czasie
+możliwa jest transmisja danych (zakodowana rozmowa albo dane komputerowe)
+na jednym kanale (jego numer sprawdzisz w <b><a href="faq_net2.htm#Menu1">Menu
+10-1</a></b>) przez KILKA telefonów (tak naprawdę, czas ten jest dzielony
+na bardzo małe części (patrz <a href="faq_net2.htm#TS">opis
+TS</a>), których nie zauważamy - stąd w uproszczeniu można napisać,
+że wszystko dzieje się równocześnie).
+
+<p><a name="TMSI"></a><b>TMSI</b> (<b>T</b>emporary <b>M</b>obile <b>S</b>ubscriber <b>I</b>dentity):
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>W trakcie procedur sygnalizacyjnych kodowanych w kanale radiowym (m.in.
+w czasie uaktualniania położenia) telefonowi jest przydzielany przez <a href="#MSC">MSC</a>
+ten numer. W momencie, gdy sieć chce skontaktowac się z danym telefonem, a
+transmisja po kanale radiowym nie jest jeszcze kodowana, jest on wysyłany zamiast
+<a href="#IMSI">IMSI</a> i pozwala telefonowi zorientować się, że przywołanie
+dotyczy właśnie jego. Numer ten ma znaczenie lokalne
+i jego struktura jest określana przez administratora sieci. Aktualne <b>TMSI</b>
+sprawdzisz w <a href="faq_net3.htm#Menu10">Menu 10-10</a>.
+
+<p><a NAME="VLR"></a><b>VLR</b> (<b>V</b>isitor <b>L</b>ocation <b>R</b>egister)
+<font size=-2>(<a href="#GSM">GSM</a>/<a href="#DCS">DCS</a>/PCS)</font>
+<br>Rejestr przechowujący te same informacje co <a href="#HLR">HLR</a>,
+ale dla abonentów działających w roamingu (są one pobrane z <a href="#HLR">HLR</a> ich
+macierzystych sieci)
+
+<font class="drukuj">
+<p><a class="shref" href="#Top"><small><em>Na początek</em></small></a><br>
+
+<center>
+<p><a href="faq_net0.htm">[Część 1]</a><b>[Część 2]</b><a href="faq_net2.htm">[Część 3]</a><a href="faq_net3.htm">[Część 4]</a><a href="faq_net4.htm">[Część 5]</a><a href="faq_net5.htm">[Część 6]</a><a href="faq_net6.htm">[Część 7]</a>
+</center>
+<hr size="2" noshade width="60%" align="center" style="color: #004080">
+</font>
+
+<br><p align="RIGHT"><font class='autor' size='1'><a class="autoremail" href="mailto:Marcin Wiącek<Marcin-Wiacek@topnet.pl>">Marcin Wiącek</a> (<a class="autoremail" href="http://marcin-wiacek.topnet.pl">WWW</a>)
+<br>Ostatnia aktualizacja: 4 maja 2000</font>
+
+<script language=JavaScript src='../konw.js'></script>
+</body>
+</html>

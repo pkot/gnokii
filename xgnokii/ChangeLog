@@ -1,3 +1,25 @@
+* Fri May 12 01:14:48 CEST 2000
+- Callers groups are readed only once.
+- Added info dialog when reading SMS centers.
+- New online help from Marcin Wiacek <Marcin-Wiacek@topnet.pl> in English
+  and Polish language. Language version depends on locale settings (LANG,
+  LC_MESSAGES or LC_ALL)
+
+* Mon May  1 21:16:35 CEST 2000
+- added new thread to xgnokii. This thread glue slow phone interface with
+  quick user interface (GUI).
+- new backgroung for xgnokii. "Business Cards" is replaced with "Calendar".
+  (Petr Vostrel <pisi@parscom.cz>)
+- Initial support for Calendar.
+- added online help for netmonitor from Marcin Wiacek
+  <Marcin-Wiacek@topnet.pl>.
+- added info dialog.
+- added support for showing outgoing call.
+- added support for translation menus into national languages.
+- corrected xkeyb map for 6150 (Jochen Schnapka <Jochen_Schnapka@genua.de>)
+- added detection for MNT phones (Andrew Kozin <stanson@chat.ru>)
+- more minor fixes.
+
 * Thu Mar 20 12:06:47 CET 2000 Jan Derfinak <ja@mail.upjs.sk>
 xgnokii-20000320
 - corrected if clause for support Callers groups and Netmonitor.
