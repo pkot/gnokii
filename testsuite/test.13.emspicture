@@ -1,5 +1,5 @@
 #
 # Send pacman to 0604343103
 # 
-#$GNOKII --sendlogo emspicture 0604343103 ../Docs/pacman.xpm
-$GNOKII --sendlogo emspicture 0604343103 ../Docs/gnokii.nol
+$GNOKII --sendlogo emspicture 0604343103 ../Docs/pacman.xpm
+
