@@ -373,6 +373,7 @@ static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 #endif
 #ifndef WIN32
 	if (!strcasecmp(Connection, "tcp"))      connection = GCT_TCP;
+	if (!strcasecmp(Connection, "tekram"))   connection = GCT_Tekram;
 #endif
 
 	/* register cleanup function */

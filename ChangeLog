@@ -109,6 +109,7 @@
       to winserial.c                                    (Mark Lakata)
     o don't use alloca(3)                                 (Pawel Kot)
  * proper unicode support in gsm-encoding     (Hu Gang, Markus Plail)
+ * tekram dongle support reimplemented               (BORBELY Zoltan)
  * docs updates:
     o mention 'make DESTDIR=<dir> install' in the packaging howto
                                                           (Pawel Kot)

@@ -502,6 +502,9 @@ static gn_error Initialise(GSM_Statemachine *state)
 		state->Link.ConnectionType = GCT_DAU9P;
 	case GCT_Infrared:
 	case GCT_DAU9P:
+#ifndef WIN32
+	case GCT_Tekram:
+#endif
 		err = FBUS_Initialise(&(state->Link), state, 0);
 		break;
 #ifdef HAVE_IRDA

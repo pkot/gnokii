@@ -133,6 +133,8 @@ int main(int argc, char *argv[])
 		connection = GCT_Infrared;
 	if (!strcmp(Connection, "tcp"))
 		connection = GCT_TCP;
+	if (!strcmp(Connection, "tekram"))
+		connection = GCT_Tekram;
 
 	/* register cleanup function */
 	if (!atexit_registered) {

@@ -230,6 +230,8 @@ static gn_error fbusinit(bool enable_monitoring)
 #ifndef WIN32
 	if (!strcmp(xgnokiiConfig.connection, "tcp"))
 		connection = GCT_TCP;
+	if (!strcmp(xgnokiiConfig.connection, "tekram"))
+		connection = GCT_Tekram;
 #endif
 	if (!strcmp(xgnokiiConfig.connection, "dau9p"))
 		connection = GCT_DAU9P;
