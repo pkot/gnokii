@@ -96,6 +96,7 @@ LDFLAGS = -lpthread ${GTKLDFLAGS}
 
 COMMON_OBJS = gsm-api.o \
               fbus-3810.o \
+			  mbus-2110.o \
               fbus-6110.o fbus-6110-auth.o fbus-6110-ringtones.o \
               gsm-networks.o cfgreader.o
 
@@ -164,8 +165,9 @@ xkeyb.o: xkeyb.c gsm-api.c gsm-api.h misc.h gsm-common.h
 virtmodem.o: virtmodem.c at-emulator.c gsm-api.c gsm-api.h misc.h gsm-common.h
 datapump.o: datapump.c gsm-api.c gsm-api.h misc.h gsm-common.h
 at-emulator.o: at-emulator.c gsm-api.c gsm-api.h misc.h gsm-common.h
-gsm-api.o: gsm-api.c fbus-3810.c fbus-3810.h misc.h gsm-common.h
+gsm-api.o: gsm-api.c fbus-3810.c fbus-3810.h mbus-2110.c mbus-2110.h fbus-6110.c fbus-6110.h misc.h gsm-common.h
 fbus-3810.o: fbus-3810.c fbus-3810.h misc.h gsm-common.h
+mbus-2110.o: mbus-2110.c mbus-2110.h misc.h gsm-common.h
 fbus-6110.o: fbus-6110.c fbus-6110.h misc.h gsm-common.h gsm-networks.h
 fbus-6110-auth.o: fbus-6110-auth.c fbus-6110-auth.h
 fbus-6110-ringtones.o: fbus-6110-ringtones.c fbus-6110-ringtones.h

@@ -29,6 +29,7 @@
 #include "gsm-common.h"
 #include "fbus-3810.h"
 #include "fbus-6110.h"
+#include "mbus-2110.h"
 
 /* GSM_LinkOK is set to true once normal communications with the phone have
    been established. */
@@ -81,6 +82,17 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
       GSM = &FB61_Functions;
       GSM_Info = &FB61_Information;
       GSM_LinkOK = &FB61_LinkOK;
+    }
+    else 
+	/* Scan through models supported by the MB21 code... */
+    if (strstr(MB21_Information.Models, model) != NULL) {
+      found_match = true;
+
+      /* Set pointers to relevant MB21 addresses */
+
+      GSM = &MB21_Functions;
+      GSM_Info = &MB21_Information;
+      GSM_LinkOK = &MB21_LinkOK;
     }
 
   /* If we didn't get a model match, return error code. */
