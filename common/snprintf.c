@@ -70,7 +70,7 @@
 #  include <ctype.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_STDARD_H
+#ifdef HAVE_STDARG_H
 #  include <stdarg.h>
 #endif
 #ifdef HAVE_STDLIB_H
