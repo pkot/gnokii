@@ -28,7 +28,6 @@ DIRS =  common/phones \
 	$(DATA_DIR) \
 	po \
 	common \
-	intl \
 	$(BIN_DIRS)
 
 GTK_DIRS =	xgnokii
@@ -42,7 +41,7 @@ INSTALL_SIMPLE =	po \
 
 DOCS_DIR = 	Docs
 
-all: $(DIRS)
+all: intl $(DIRS)
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
 		    if [ -e $$dir/Makefile ]; then \

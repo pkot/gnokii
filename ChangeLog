@@ -9,6 +9,7 @@
     o update spec file to install all libs              (Pawel Kot)
     o sync Debian build files with Debian mainstream package
                                                         (Pawel Kot)
+    o more improvements to make install variants        (Pawel Kot)
  * libgnokii updates
     o correctly use gn_ringtone->notes_count; this is unsigned char
       and therefore it will be always less then
