@@ -50,7 +50,11 @@
 
 int tekram_open(const char *file, struct gn_statemachine *state)
 {
+#if defined(O_NOCTTY) && defined(O_NONBLOCK)
 	return serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK);
+#else
+	return serial_open(file, O_RDWR);
+#endif
 }
 
 void tekram_close(int fd, struct gn_statemachine *state)
