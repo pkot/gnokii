@@ -11,9 +11,12 @@
       locales in xgnokii                          (Malte Schünemann)
  * docs updates
     o more info on Nokia 3410 FBUS protocol oddities
-                                                    (Bertrik Sikken)
  * xgnokii updates
     o fix segfault when saving SMS to mailbox          (Jiri Masik?)
+ * nk6510 driver updates
+    o fix the problem with incorrectly set number of the messages
+      in the sms folder                                  (Pawel Kot)
+    o fix the --getdatetime problem                      (Pawel Kot)
 
 0.5.0pre6
 =========

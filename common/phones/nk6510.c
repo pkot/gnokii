@@ -744,7 +744,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		memset(data->sms_folder, 0, sizeof(gn_sms_folder));
 		data->sms_folder->folder_id = status;
 
-		data->sms_folder->number = (message[6] << 8) | message[7];
+		data->sms_folder->number = message[6] * 256 + message[7];
 		dprintf("Message: Number of Entries: %i\n" , data->sms_folder->number);
 		dprintf("Message: IDs of Entries : ");
 		for (i = 0; i < data->sms_folder->number; i++) {
@@ -930,12 +930,14 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
        	if ((req[5] == NK6510_MEMORY_IN) || (req[5] == NK6510_MEMORY_OU)) { /* special case IN/OUTBOX */
 		dprintf("Special case IN/OUTBOX in GetSMSFolderStatus!\n");
 
+		/* Get folder list */
 		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
 		error = sm_block(NK6510_MSG_FOLDER, data, state);
 		if (error) return error;
 
 		memcpy(&phone, data->sms_folder, sizeof(gn_sms_folder));
 
+		/* Get folder status */
 		req[4] = 0x01;
 		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
 		error = sm_block(NK6510_MSG_FOLDER, data, state);
@@ -1724,7 +1726,7 @@ reply: 0x19 / 0x0012
 	*/
 
 	dprintf("Incoming clock!\n");
-	if (!data || !data->datetime || !data->alarm) return GN_ERR_INTERNALERROR;
+	if (!data) return GN_ERR_INTERNALERROR;
 	switch (message[3]) {
 	case NK6510_SUBCLO_SET_DATE_RCVD:
 		dprintf("Date/Time succesfully set!\n");
@@ -1733,6 +1735,7 @@ reply: 0x19 / 0x0012
 		dprintf("Alarm succesfully set!\n");
 		break;
 	case NK6510_SUBCLO_DATE_RCVD:
+		if (!data->datetime) return GN_ERR_INTERNALERROR;
 		dprintf("Date/Time received!\n");
 		data->datetime->year = (((unsigned int)message[10]) << 8) + message[11];
 		data->datetime->month = message[12];
@@ -1743,10 +1746,12 @@ reply: 0x19 / 0x0012
 
 		break;
 	case NK6510_SUBCLO_ALARM_TIME_RCVD:
+		if (!data->alarm) return GN_ERR_INTERNALERROR;
 		data->alarm->timestamp.hour = message[14];
 		data->alarm->timestamp.minute = message[15];
 		break;
 	case NK6510_SUBCLO_ALARM_STATE_RCVD:
+		if (!data->alarm) return GN_ERR_INTERNALERROR;
 		switch(message[37]) {
 		case NK6510_ALARM_ENABLED:
 			data->alarm->enabled = true;
