@@ -120,7 +120,7 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOPAT_GetCharset, AT_GetCharset, ReplyGetCharset },
 	{ GOP_GetSMSCenter, AT_GetSMSCenter, ReplyGetSMSCenter },
 	{ GOP_GetSecurityCodeStatus, AT_GetSecurityCodeStatus, ReplyGetSecurityCodeStatus },
-	{ GOP_EnterSecurityCode, AT_EnterSecurityCode, Reply }
+	{ GOP_EnterSecurityCode, AT_EnterSecurityCode, Reply },
 };
 
 
@@ -151,6 +151,7 @@ GSM_Phone phone_at = {
 };
 
 static GSM_MemoryType memorytype = GMT_XX;
+static GSM_MemoryType smsmemorytype = GMT_XX;
 static GSMAT_Charset atdefaultcharset = CHARNONE;
 static GSMAT_Charset atcharset = CHARNONE;
 
@@ -282,6 +283,25 @@ gn_error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
 		ret = SM_BlockNoRetry(state, &data, GOP_Init);
 		if (ret == GN_ERR_NONE)
 			memorytype = mt;
+	}
+	return ret;
+}
+
+gn_error AT_SetSMSMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
+{
+	char req[128];
+	gn_error ret = GN_ERR_NONE;
+	GSM_Data data;
+
+	if (mt != smsmemorytype) {
+		sprintf(req, "AT+CPMS=\"%s\"\r", memorynames[mt]);
+		ret = SM_SendMessage(state, 13, GOP_Init, req);
+		if (ret != GN_ERR_NONE)
+			return GN_ERR_NOTREADY;
+		GSM_DataClear(&data);
+		ret = SM_BlockNoRetry(state, &data, GOP_Init);
+		if (ret == GN_ERR_NONE)
+			smsmemorytype = mt;
 	}
 	return ret;
 }
@@ -588,7 +608,9 @@ static gn_error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 static gn_error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GN_ERR_NOTSUPPORTED;
+	gn_error ret = AT_SetSMSMemoryType(data->RawSMS->MemoryType,  state);
+	if (ret != GN_ERR_NONE)
+		return ret;
 	return AT_WriteSMS(data, state, "CMGW");
 }
 
@@ -654,6 +676,9 @@ static gn_error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned ch
 static gn_error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[16];
+	gn_error ret = AT_SetSMSMemoryType(data->RawSMS->MemoryType,  state);
+	if (ret != GN_ERR_NONE)
+		return ret;
 	sprintf(req, "AT+CMGR=%d\r", data->RawSMS->Number);
 	dprintf("%s", req);
 	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GN_ERR_NONE)
@@ -661,21 +686,18 @@ static gn_error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_BlockNoRetry(state, data, GOP_GetSMS);
 }
 
-/* FIXME
- * This function doesn't set memory type. this need to be fixed when 
- * SMS for AT works */
 static gn_error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GN_ERR_NOTSUPPORTED;
-/*
 	unsigned char req[16];
+	gn_error ret = AT_SetSMSMemoryType(data->RawSMS->MemoryType,  state);
+	if (ret != GN_ERR_NONE)
+		return ret;
 	sprintf(req, "AT+CMGD=%d\r", data->SMS->Number);
 	dprintf("%s", req);
 
 	if (SM_SendMessage(state, strlen(req), GOP_DeleteSMS, req) != GN_ERR_NONE)
  		return GN_ERR_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_DeleteSMS);
-*/
 }
 
 /* Hey nokia users. don't expect this to return anything useful */
