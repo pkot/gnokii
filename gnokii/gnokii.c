@@ -33,6 +33,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 
 #ifdef WIN32
@@ -116,6 +117,7 @@ typedef enum {
 	OPT_SETPROFILE,
 	OPT_DISPLAYOUTPUT,
 	OPT_KEYPRESS,
+	OPT_ENTERCHAR,
 	OPT_DIVERT,
 	OPT_SMSREADER,
 	OPT_FOOGLE
@@ -266,6 +268,7 @@ static int usage(void)
 			  "          gnokii --setprofile\n"
 			  "          gnokii --displayoutput\n"
 			  "          gnokii --keysequence\n"
+			  "          gnokii --enterchar\n"
 			  "          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
 			  "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
 			  "                 {--call|-c} {all|voice|fax|data}\n"
@@ -3151,16 +3154,58 @@ static int setringtone(int argc, char *argv[])
 
 static int presskeysequence(void)
 {
-	char buf[105];
+	unsigned char *syms = "0123456789#*PGR+-UDMN";
+	GSM_KeyCode keys[] = {GSM_KEY_0, GSM_KEY_1, GSM_KEY_2, GSM_KEY_3,
+			      GSM_KEY_4, GSM_KEY_5, GSM_KEY_6, GSM_KEY_7,
+			      GSM_KEY_8, GSM_KEY_9, GSM_KEY_HASH,
+			      GSM_KEY_ASTERISK, GSM_KEY_POWER, GSM_KEY_GREEN,
+			      GSM_KEY_RED, GSM_KEY_INCREASEVOLUME,
+			      GSM_KEY_DECREASEVOLUME, GSM_KEY_UP, GSM_KEY_DOWN,
+			      GSM_KEY_MENU, GSM_KEY_NAMES};
+	unsigned char ch, *pos;
 
+	GSM_DataClear(&data);
 	console_raw();
 
-	memset(&buf[0], 0, 102);
-	while (read(0, buf, 100) > 0) {
-		fprintf(stderr, "handling keys (%d).\n", strlen(buf));
-/*		if (GSM && GSM->HandleString && GSM->HandleString(buf) != GE_NONE)
-			fprintf(stdout, _("Key press simulation failed.\n"));*/
-		memset(buf, 0, 102);
+	while (read(0, &ch, 1) > 0) {
+		if ((pos = strchr(syms, toupper(ch))) != NULL)
+			data.KeyCode = keys[pos - syms];
+		else
+			continue;
+		
+		SM_Functions(GOP_PressPhoneKey, &data, &State);
+		SM_Functions(GOP_ReleasePhoneKey, &data, &State);
+	}
+
+	return 0;
+}
+
+static int enterchar(void)
+{
+	unsigned char ch;
+
+	GSM_DataClear(&data);
+	console_raw();
+
+	while (read(0, &ch, 1) > 0) {
+		switch (ch) {
+		case '\r':
+			break;
+		case '\n':
+			data.KeyCode = GSM_KEY_MENU;
+			SM_Functions(GOP_PressPhoneKey, &data, &State);
+			SM_Functions(GOP_ReleasePhoneKey, &data, &State);
+			break;
+		case '\e':
+			data.KeyCode = GSM_KEY_NAMES;
+			SM_Functions(GOP_PressPhoneKey, &data, &State);
+			SM_Functions(GOP_ReleasePhoneKey, &data, &State);
+			break;
+		default:
+			data.Character = ch;
+			SM_Functions(GOP_EnterChar, &data, &State);
+			break;
+		}
 	}
 
 	return 0;
@@ -3532,6 +3577,9 @@ int main(int argc, char *argv[])
 		/* Simulate pressing the keys */
 		{ "keysequence",        no_argument,       NULL, OPT_KEYPRESS },
 
+		/* Simulate pressing the keys */
+		{ "enterchar",          no_argument,       NULL, OPT_ENTERCHAR },
+
 		/* Divert calls */
 		{ "divert",		required_argument, NULL, OPT_DIVERT },
 
@@ -3770,6 +3818,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_KEYPRESS:
 			rc = presskeysequence();
+			break;
+		case OPT_ENTERCHAR:
+			rc = enterchar();
 			break;
 		case OPT_SENDDTMF:
 			rc = senddtmf(optarg);

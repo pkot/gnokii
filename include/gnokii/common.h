@@ -479,4 +479,29 @@ typedef struct {
 	int CallID;
 } GSM_CallInfo;
 
+typedef enum {
+	GSM_KEY_NONE = 0x00,
+	GSM_KEY_1 = 0x01,
+	GSM_KEY_2,
+	GSM_KEY_3,
+	GSM_KEY_4,
+	GSM_KEY_5,
+	GSM_KEY_6,
+	GSM_KEY_7,
+	GSM_KEY_8,
+	GSM_KEY_9,
+	GSM_KEY_0,
+	GSM_KEY_HASH,
+	GSM_KEY_ASTERISK,
+	GSM_KEY_POWER,
+	GSM_KEY_GREEN,
+	GSM_KEY_RED,
+	GSM_KEY_INCREASEVOLUME,
+	GSM_KEY_DECREASEVOLUME,
+	GSM_KEY_UP = 0x17,
+	GSM_KEY_DOWN,
+	GSM_KEY_MENU,
+	GSM_KEY_NAMES
+} GSM_KeyCode;
+
 #endif	/* __gsm_common_h */

@@ -37,4 +37,9 @@
 
 #define	P6100_MAX_SMS_MESSAGES	12 /* maximum number of sms messages */
 
+typedef struct {
+	GSM_KeyCode Key;
+	int Repeat;
+} NK6100_Keytable;
+
 #endif  /* #ifndef __phones_nk6100_h */

@@ -90,11 +90,13 @@ static void (*OnCellBroadcast)(GSM_CBMessage *Message) = NULL;
 static void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo) = NULL;
 static void (*RLP_RXCallback)(RLP_F96Frame *Frame) = NULL;
 static GSM_Error (*OnSMS)(GSM_SMSMessage *Message) = NULL;
+static NK6100_Keytable Keytable[256];
 
 /* static functions prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Initialise(GSM_Statemachine *state);
 static GSM_Error Authentication(GSM_Statemachine *state);
+static GSM_Error BuildKeytable(GSM_Statemachine *state);
 static GSM_Error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state);
@@ -146,6 +148,8 @@ static GSM_Error Reset(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetRingtone(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
+static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -160,6 +164,7 @@ static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int l
 static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -178,6 +183,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x01, IncomingCallInfo },
 	{ 0xf1, IncomingRLPFrame },
 	{ 0x08, IncomingSecurityCode },
+	{ 0x0c, IncomingKey },
 	{ 0, NULL}
 };
 
@@ -316,6 +322,12 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetRawRingtone(data, state);
 	case GOP_SetRawRingtone:
 		return SetRawRingtone(data, state);
+	case GOP_PressPhoneKey:
+		return PressOrReleaseKey(data, state, true);
+	case GOP_ReleasePhoneKey:
+		return PressOrReleaseKey(data, state, false);
+	case GOP_EnterChar:
+		return EnterChar(data, state);
 	default:
 		dprintf("NK61xx unimplemented operation: %d\n", op);
 		return GE_NOTIMPLEMENTED;
@@ -360,6 +372,8 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	if (Authentication(state) != GE_NONE) return GE_NOTSUPPORTED;
 
 	State = state;
+
+	if (BuildKeytable(state) != GE_NONE) return GE_NOTSUPPORTED;
 
 	return GE_NONE;
 }
@@ -2843,6 +2857,152 @@ static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, i
 		if (message[4] != 0x88) return GE_UNHANDLEDFRAME;
 		dprintf("Message: Security code wrong.\n");
 		return GE_INVALIDSECURITYCODE;
+
+	default:
+		return GE_UNHANDLEDFRAME;
+	}
+
+	return GE_NONE;
+}
+
+
+static GSM_Error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x42, 0x00, 0x00, 0x01};
+
+	req[4] = press ? 0x01 : 0x02;
+	req[5] = data->KeyCode;
+
+	if (SM_SendMessage(state, 7, 0x0c, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x0c);
+}
+
+static int ParseKey(GSM_Statemachine *state, GSM_KeyCode key, unsigned char **ppos)
+{
+	unsigned char ch;
+	int n;
+
+	ch = **ppos;
+	(*ppos)++;
+
+	if (key == GSM_KEY_NONE) return ch ? -1 : 0;
+
+	for (n = 1; ch; n++) {
+		Keytable[ch].Key = key;
+		Keytable[ch].Repeat = n;
+		ch = **ppos;
+		(*ppos)++;
+	}
+
+	return 0;
+}
+
+static GSM_Error BuildKeytable(GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x40, 0x01};
+	GSM_Error error;
+	GSM_Data data;
+	int i;
+
+	for (i = 0; i < 256; i++) {
+		Keytable[i].Key = GSM_KEY_NONE;
+		Keytable[i].Repeat = 0;
+	}
+
+	GSM_DataClear(&data);
+
+	if (SM_SendMessage(state, 5, 0x0c, req) != GE_NONE) return GE_NOTREADY;
+	if ((error = SM_Block(state, &data, 0x0c)) != GE_NONE) return error;
+
+
+	return GE_NONE;
+}
+
+static GSM_Error PressKey(GSM_Statemachine *state, GSM_KeyCode key, int d)
+{
+	GSM_Data data;
+	GSM_Error error;
+
+	GSM_DataClear(&data);
+
+	data.KeyCode = key;
+
+	if ((error = PressOrReleaseKey(&data, state, true)) != GE_NONE) return error;
+	if (d) usleep(d*1000);
+	if ((error = PressOrReleaseKey(&data, state, false)) != GE_NONE) return error;
+
+	return GE_NONE;
+}
+
+static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_KeyCode key;
+	GSM_Error error;
+	int i, r;
+
+	if (isupper(data->Character)) {
+		i = tolower(data->Character);
+		if (Keytable[i].Key == GSM_KEY_NONE) return GE_UNKNOWN;
+	} else {
+		i = data->Character;
+		if (Keytable[i].Key == GSM_KEY_NONE) return GE_UNKNOWN;
+		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GE_NONE) return error;
+	}
+	if (Keytable[i].Key == GSM_KEY_ASTERISK) {
+		if ((error = PressKey(state, GSM_KEY_ASTERISK, 0)) != GE_NONE) return error;
+		key = GSM_KEY_DOWN;
+		r = 1;
+	}
+	else {
+		key = Keytable[i].Key;
+		r = 0;
+	}
+
+	for (; r < Keytable[i].Repeat; r++) {
+		if ((error = PressKey(state, key, 0)) != GE_NONE) return error;
+	}
+
+	if (islower(data->Character)) {
+		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GE_NONE) return error;
+	}
+	else if (key == GSM_KEY_DOWN) {
+		if ((error = PressKey(state, GSM_KEY_MENU, 0)) != GE_NONE) return error;
+	} else {
+		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GE_NONE) return error;
+		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GE_NONE) return error;
+	}
+
+	return GE_NONE;
+}
+
+static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	unsigned char *pos;
+
+	switch (message[3]) {
+	/* Press key ack */
+	case 0x43:
+		if (message[4] != 0x01 && message[4] != 0x02)
+			return GE_UNHANDLEDFRAME;
+		break;
+
+	/* Get key assignments */
+	case 0x41:
+		pos = message + 4;
+		if (ParseKey(State, GSM_KEY_1, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_2, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_3, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_4, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_5, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_6, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_7, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_8, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_9, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_0, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_NONE, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_NONE, &pos)) return GE_UNHANDLEDFRAME;
+		if (ParseKey(State, GSM_KEY_ASTERISK, &pos)) return GE_UNHANDLEDFRAME;
+		break;
 
 	default:
 		return GE_UNHANDLEDFRAME;

@@ -64,6 +64,8 @@ typedef struct {
 	GSM_SecurityCode *SecurityCode;
 	const char *DTMFString;
 	unsigned char ResetType;
+	GSM_KeyCode KeyCode;
+	unsigned char Character;
 } GSM_Data;
 
 /* Global structures intended to be independant of phone etc */
@@ -156,6 +158,9 @@ typedef enum {
 	GOP_SetRingtone,
 	GOP_GetRawRingtone,
 	GOP_SetRawRingtone,
+	GOP_PressPhoneKey,
+	GOP_ReleasePhoneKey,
+	GOP_EnterChar,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 
