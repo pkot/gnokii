@@ -53,6 +53,8 @@
     o add Nokia 6800 and family support            (Chris de Vidal)
     o fix incorrect set of operator_logo_width in Nokia 8310
                                                   (Giorgio Rusconi)
+    o add Nokia 6610i support                    
+                   (Julien LOLLIVIER, vee.lehtinen@dnainternet.net)
  * portability changes
     o NetBSD also fall into unices category     (Richard M Kreuter)
     o NetBSD needs the same tricks as OpenBSD and FreeBSD in
