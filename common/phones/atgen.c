@@ -62,6 +62,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_error AT_Identify(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state);
@@ -87,6 +88,7 @@ static gn_error AT_GetSMSCenter(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -123,6 +125,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetSecurityCodeStatus, AT_GetSecurityCodeStatus, ReplyGetSecurityCodeStatus },
 	{ GN_OP_EnterSecurityCode,     AT_EnterSecurityCode,     Reply },
 	{ GN_OP_MakeCall,              AT_DialVoice,             Reply },
+	{ GN_OP_GetNetworkInfo,        AT_GetNetworkInfo,        ReplyGetNetworkInfo },
 };
 
 #define REPLY_SIMPLETEXT(l1, l2, c, t) \
@@ -753,6 +756,29 @@ static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_MakeCall, data, state);
 }
 
+static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+
+	if (!data->network_info)
+		return GN_ERR_INTERNALERROR;
+
+	if (sm_message_send(10, GN_OP_GetNetworkInfo, "AT+CREG=2\r", state))
+		return GN_ERR_NOTREADY;
+
+	error = sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+
+	if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+CREG?\r", state))
+		return GN_ERR_NOTREADY;
+
+	error = sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+
+	if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+COPS?\r", state))
+		return GN_ERR_NOTREADY;
+
+	return sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+}
+
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -1187,6 +1213,93 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
 			}
 		}
 	}
+	return GN_ERR_NONE;
+}
+
+static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_line_buffer buf;
+	char *pos;
+	char **strings;
+
+	if (!data->network_info)
+		return GN_ERR_INTERNALERROR;
+
+	if (buffer[0] != GN_AT_OK)
+		return GN_ERR_UNKNOWN;
+
+	buf.line1 = buffer + 1;
+	buf.length= length;
+
+	splitlines(&buf);
+
+	if (!strncmp(buf.line1, "AT+CREG?", 8)) {
+		char tmp[3] = {0, 0, 0};
+
+		strings = gnokii_strsplit(buf.line2, ",", 4);
+
+		if (strings[2] && strlen(strings[2]) >= 6) {
+			pos = strings[2];
+			pos++;
+
+			tmp[0] = pos[0];
+			tmp[1] = pos[1];
+
+			data->network_info->LAC[0] = strtol(tmp, NULL, 16);
+
+			tmp[0] = pos[2];
+			tmp[1] = pos[3];
+
+			data->network_info->LAC[1] = strtol(tmp, NULL, 16);
+		}
+
+		if (strings[3] && strlen(strings[3]) >= 6) {
+
+			pos = strings[3];
+			pos++;
+
+			tmp[0] = pos[0];
+			tmp[1] = pos[1];
+
+			data->network_info->cell_id[0] = strtol(tmp, NULL, 16);
+
+			tmp[0] = pos[2];
+			tmp[1] = pos[3];
+
+			data->network_info->cell_id[1] = strtol(tmp, NULL, 16);
+		}
+
+		gnokii_strfreev(strings);
+
+	} else if (!strncmp(buf.line1, "AT+COPS?", 8)) {
+		int format;
+		strings = gnokii_strsplit(buf.line2, ",", 3);
+		format = atoi(strings[1]);
+		switch (format) {
+		case 0: /* network operator name given */
+			pos = strings[2];
+			pos++;
+			pos = strtok(pos, "\"");
+			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), gn_network_code_get(pos));
+			break;
+		case 2: /* network operator code given */
+			if (strlen(strings[2]) >= 6) { 
+				data->network_info->network_code[0] = strings[2][1];
+				data->network_info->network_code[1] = strings[2][2];
+				data->network_info->network_code[2] = strings[2][3];
+				data->network_info->network_code[3] = ' ';
+				data->network_info->network_code[4] = strings[2][4];
+				data->network_info->network_code[5] = strings[2][5];
+			} else { /* probably incorrect */
+				snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), strings[2]);
+			}
+			break;
+		default: /* FIXME: add error handling */
+			break;
+		}
+		gnokii_strfreev(strings);
+	}
+
 	return GN_ERR_NONE;
 }
 
