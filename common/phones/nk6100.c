@@ -74,6 +74,7 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetOnSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state);
@@ -231,7 +232,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	case GOP_GetNetworkInfo:
 		return GetNetworkInfo(data, state);
 	case GOP_SendSMS:
-		return PNOK_FBUS_SendSMS(data, state);
+		return SendSMSMessage(data, state);
 	case GOP_OnSMS:
 		return SetOnSMS(data, state);
 	case GOP_PollSMS:
@@ -1058,6 +1059,21 @@ static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state)
 
 	if (SM_SendMessage(state, 10, 0x02, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x02);
+}
+
+static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+{
+    GSM_Data dtemp;
+
+    /*
+     * FIXME:
+     * Ugly hack. The phone seems to drop the SendSMS message if the link
+     * had been idle too long. -- bozo
+     */
+    GSM_DataClear(&dtemp);
+    GetNetworkInfo(&dtemp, state);
+
+    return PNOK_FBUS_SendSMS(data, state);
 }
 
 static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)

@@ -71,6 +71,8 @@
     o answercall fix                                 (BORBELY Zoltan)
     o SMS sending works with the new SMS subsystem   (BORBELY Zoltan)
     o SMS saving works with the new SMS subsystem    (BORBELY Zoltan)
+    o calling GetNetworkInfo before sending an SMS (it will
+      reactivate the link)                           (BORBELY Zoltan)
  * 6160 series updates:
     o experimental driver added                      (BORBELY Zoltan)
     o Identify implemented                           (BORBELY Zoltan)
