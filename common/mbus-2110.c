@@ -1,4 +1,4 @@
-/*
+/* -*- linux-c -*-
 
   $Id$
 
@@ -6,13 +6,17 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2000 Pavel Machek <pavel@ucw.cz>
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.26  2001-01-23 15:32:38  chris
+  Revision 1.27  2001-01-23 18:58:51  machek
+  Implement collision protocol slightly better. It is still not
+  completely okay -- we should check if echo is exactly same characters
+  as we sent.
+
+  Revision 1.26  2001/01/23 15:32:38  chris
   Pavel's 'break' and 'static' corrections.
   Work on logos for 7110.
 
@@ -66,6 +70,15 @@
 #define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
 #endif
 
+#undef VELO
+#ifdef VELO
+#define usleep(x) do { usleep(x); SigHandler(0); } while (0)
+#endif
+
+#define msleep(x) do { usleep(x*1000); } while (0)
+
+#define THREAD
+
 /* Global variables used by code in gsm-api.c to expose the
    functions supported by this model of phone.  */
 bool MB21_LinkOK;
@@ -92,7 +105,9 @@ GSM_Information MB21_Information = {
 };
 
 /* Local variables */
+#ifdef THREAD
 static pthread_t Thread;
+#endif
 static volatile bool RequestTerminate;
 static int PortFD;
 static struct termios old_termios; /* old termios */
@@ -108,7 +123,23 @@ static volatile bool
 static volatile int SMSpos = 0;
 static volatile unsigned char SMSData[256];
 
-/* The following functions are made visible to gsm-api.c and friends. */
+static long long LastChar = 0;
+
+long long
+GetTime(void)
+{
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec * 1000000 + tv.tv_usec;
+}
+
+void
+Wait(long long from, int msec)
+{
+	while (GetTime() < from + ((long long) msec)*1000)
+		usleep(5000);
+}
 
 /* Checksum calculation */
 static u8
@@ -122,7 +153,7 @@ GetChecksum( u8 * packet, int len )
 }
 
 static GSM_Error
-SendCommand( u8 *buffer, u8 command, u8 length )
+SendFrame( u8 *buffer, u8 command, u8 length )
 {
 	u8  pkt[256];
 	int current = 0;
@@ -149,15 +180,42 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 #endif /* DEBUG */
 	/* Send it out... */
 	EchoOK = false;
-	if( write(PortFD, pkt, current) != current ) /* BUGGY! */ {
+	dprintf("(");
+	Wait(LastChar, 3);
+	/* I should put my messages at least 2msec apart... */
+	dprintf(")");
+	if (write(PortFD, pkt, current) != current) /* BUGGY, we should handle -EINTR and short writes! */ {
 		perror( _("Write error!\n") );
 		return (GE_INTERNALERROR);
 	}
 	/* wait for echo */
 	while( !EchoOK && current-- ) 
-		usleep(1000);
-	if( !EchoOK ) return (GE_TIMEOUT);
+		usleep(1300);
+	if( !EchoOK ) {
+		fprintf(stderr, "no echo?!");
+		return (GE_TIMEOUT);
+	}
 	return (GE_NONE);
+}
+
+static GSM_Error
+SendCommand( u8 *buffer, u8 command, u8 length )
+{
+	int time, retries = 10;
+
+	ACKOK = false;
+	while (retries--) {
+		SendFrame(buffer, command, length);
+		time = 20;
+		while (time--) {
+			if (ACKOK)
+				return GE_NONE;
+			msleep(10);
+		}
+		fprintf(stderr, "[resend]");
+	}
+	fprintf(stderr, "Command not okay after 10 retries!\n");
+	return GE_NONE;
 }
 
 /* Applications should call Terminate to close the serial port. */
@@ -166,8 +224,10 @@ Terminate(void)
 {
 	/* Request termination of thread */
 	RequestTerminate = true;
+#ifdef THREAD
 	/* Now wait for thread to terminate. */
 	pthread_join(Thread, NULL);
+#endif
 	/* Close serial port. */
 	if( PortFD >= 0 ) {
 		tcsetattr(PortFD, TCSANOW, &old_termios);
@@ -179,23 +239,16 @@ static GSM_Error
 SMS(GSM_SMSMessage *message, int command)
 {
 	u8 pkt[] = { 0x10, 0x02, 0, 0 };
-	int timeout = 2000000;
 
 	SMSpos = 0;
 	memset((void *) &SMSData[0], 0, 160);
-	ACKOK    = false;
 	PacketOK = false;
-	timeout  = 10;
 	pkt[1] = command;
 	pkt[2] = 1; /* == LM_SMS_MEM_TYPE_DEFAULT or LM_SMS_MEM_TYPE_SIM or LM_SMS_MEM_TYPE_ME */
 	pkt[3] = message->Location;
 	message->MessageNumber = message->Location;
 
-	while (!ACKOK) {
-		dprintf(":");
-		usleep(100000);
-		SendCommand(pkt, 0x38 /* LN_SMS_COMMAND */, sizeof(pkt));
-	}
+	SendCommand(pkt, 0x38 /* LN_SMS_COMMAND */, sizeof(pkt));
 	while(!PacketOK) {
 		dprintf(".");
 		usleep(100000);
@@ -232,6 +285,19 @@ GetSMSMessage(GSM_SMSMessage *m)
 	case 3: m->Type = GST_MT; m->Status = GSS_NOTSENTREAD; dprintf("not read\n"); break;
 	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; dprintf("read\n"); break;
 	}
+
+	/* Date is at SMSData[7]; this code is copied from fbus-6110.c*/
+	{
+		int offset = -32 + 7;
+		m->Time.Year=10*(SMSData[32+offset]&0x0f)+(SMSData[32+offset]>>4);
+		m->Time.Month=10*(SMSData[33+offset]&0x0f)+(SMSData[33+offset]>>4);
+		m->Time.Day=10*(SMSData[34+offset]&0x0f)+(SMSData[34+offset]>>4);
+		m->Time.Hour=10*(SMSData[35+offset]&0x0f)+(SMSData[35+offset]>>4);
+		m->Time.Minute=10*(SMSData[36+offset]&0x0f)+(SMSData[36+offset]>>4);
+		m->Time.Second=10*(SMSData[37+offset]&0x0f)+(SMSData[37+offset]>>4);
+		m->Time.Timezone=(10*(SMSData[38+offset]&0x07)+(SMSData[38+offset]>>4))/4;
+	}
+
 	len = SMSData[14];
 	dprintf("%d bytes: ", len );
 	for (i = 0; i<len; i++)
@@ -245,11 +311,44 @@ GetSMSMessage(GSM_SMSMessage *m)
 	m->Length = len;
 	dprintf("Text is %s\n", m->MessageText);
 
+	/* Originator address is at 15+i,
+	   followed by message center addres (?) */
+	{
+		char *s = (char *) &SMSData[15+i];	/* We discard volatile. Make compiler quiet. */
+		strcpy(m->Sender, s);
+		s+=strlen(s)+1;
+		strcpy(m->MessageCenter.Number, s);
+		dprintf("Sender = %s, MessageCenter = %s\n", m->Sender, m->MessageCenter.Name);
+	}
+
 	m->MessageCenter.No = 0;
 	strcpy(m->MessageCenter.Name, "(unknown)");
-	strcpy(m->MessageCenter.Number, "(unknown)");
 	m->UDHType = GSM_NoUDH;
 
+	fprintf(stderr, "(spurious?");
+	usleep(1000000);
+	fprintf(stderr, "(okay)");
+
+	return (GE_NONE);
+}
+
+static GSM_Error
+SendSMSMessage(GSM_SMSMessage *m)
+{
+	if (m->Location > 10)
+		return GE_INVALIDSMSLOCATION;
+
+	if (SMSData[0] != 0x0b) {
+		dprintf("No sms there? (%x/%d)\n", SMSData[0], SMSpos);
+		return GE_EMPTYSMSLOCATION;
+	}
+	dprintf("Status: " );
+	switch (SMSData[3]) {
+	case 7: m->Type = GST_MO; m->Status = GSS_NOTSENTREAD; dprintf("not sent\n"); break;
+	case 5: m->Type = GST_MO; m->Status = GSS_SENTREAD; dprintf("sent\n"); break;
+	case 3: m->Type = GST_MT; m->Status = GSS_NOTSENTREAD; dprintf("not read\n"); break;
+	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; dprintf("read\n"); break;
+	}
 	return (GE_NONE);
 }
 
@@ -265,20 +364,17 @@ static int
 GetValue(u8 index, u8 type)
 {
 	u8  pkt[] = {0x84, 2, 0};	/* Sending 4 at pkt[0] makes phone crash */
-	int timeout, val;
+	int val;
 	pkt[0] = index;
 	pkt[1] = type;
 
 	PacketOK = false;
-	ACKOK    = false;
-	timeout  = 10;
-	usleep(1000000);
+
+	dprintf("\nRequesting value(%d)", index);
+	SendCommand(pkt, 0xe5, 3);
+
 	while(!PacketOK) {
-		dprintf("\nRequesting value(%d)", index);
-		if(!ACKOK) { SendCommand(pkt, 0xe5, 3); continue; }
 		usleep(1000000);
-		if(!--timeout || RequestTerminate)
-			return(-1);
 	}
 	if ((PacketData[3] != 0xe6) ||
 	    (PacketData[4] != index) || 
@@ -451,10 +547,9 @@ HandlePacket(void)
 static void
 SigHandler(int status)
 {
-	unsigned char        buffer[256],ack[5],b;
-	int                  i,res;
-	static unsigned int  Index = 0,
-		Length = 5;
+	unsigned char        buffer[256], ack[5], b;
+	int                  i, res;
+	static unsigned int  Index = 0, Length = 5;
 	static unsigned char pkt[256];
 #ifdef DEBUG
 	int                  j;
@@ -567,8 +662,10 @@ bool OpenSerial(void)
 	sigaction (SIGIO, &sig_io, NULL);
 	/* Allow process/thread to receive SIGIO */
 	fcntl(PortFD, F_SETOWN, getpid());
+#ifndef VELO
 	/* Make filedescriptor asynchronous. */
 	fcntl(PortFD, F_SETFL, FASYNC);
+#endif
 	/* Save old termios */
 	tcgetattr(PortFD, &old_termios);
 	/* set speed , 8bit, odd parity */
@@ -602,12 +699,8 @@ SetKey(int c, int up)
 	reg[0] += up;
 	reg[3] = c;
 	fprintf(stderr, "\n Pressing %d\n", c );
-	ACKOK = false;
 	PacketOK = false;
-	while (!ACKOK) {
-		usleep(20000);
-		SendCommand( reg, 0xe5, 4 );
-	}
+	SendCommand( reg, 0xe5, 4 );
 	while (!PacketOK)
 		usleep(20000);
 	return GE_NONE;
@@ -687,6 +780,10 @@ PressString(char *s, int upcase)
 	}
 }
 
+/*
+ * This is able to press keys at 62letters/36seconds, tested on message
+ * "Tohle je testovaci zprava schvalne za jak dlouho ji to napise"
+ */
 static void
 HandleKey(char c)
 {
@@ -789,7 +886,7 @@ static void
 Register(void)
 {
 	u8 reg[] = { 1, 1, 0x0f, 1, 0x0f };
-	SendCommand( reg, 0xe9, 5 );
+	SendFrame( reg, 0xe9, 5 );
 }
 
 /* Fixme: implement grabdisplay properly */
@@ -798,18 +895,15 @@ EnableDisplayOutput(void)
 {
 	/* LN_UC_SHARE, LN_UC_SHARE, LN_UC_RELEASE, LN_UC_RELEASE, LN_UC_KEEP */
 	u8  pkt[] = {3, 3, 0, 0, 1};
-	int timeout;
 
+	return GE_NOTIMPLEMENTED;	/* We can do grab display, but we do not know how to ungrab it and with
+					   display grabbed, we can't even initialize connection. */
 	PacketOK = false;
-	ACKOK    = false;
-	timeout  = 10;
+
+	SendCommand(pkt, 0x19, 5);
 	while(!PacketOK) {
 		fprintf(stderr, "\nGrabbing display");
 		usleep(1000000);
-		if(!ACKOK) SendCommand(pkt, 0x19, 5);
-		usleep(1000000);
-		if(!--timeout || RequestTerminate)
-			return GE_BUSY;
 	}
 	if ((PacketData[3] != 0xcd) ||
 	    (PacketData[2] != 1) || 
@@ -828,11 +922,14 @@ ThreadLoop(void)
 {
 	fprintf(stderr, "Initializing... ");
 	/* Do initialisation stuff */
+	LastChar = GetTime();
 	if (OpenSerial() != true) {
 		MB21_LinkOK = false;
+#ifdef THREAD
 		while (!RequestTerminate) {
 			usleep (100000);
 		}
+#endif
 		return;
 	}
 
@@ -840,44 +937,16 @@ ThreadLoop(void)
 	while(!MB21_LinkOK) {
 		fprintf(stderr, "registration... ");
 		Register();
-		usleep(400000);
+		msleep(100);
+		msleep(100);
+		msleep(100);
+		msleep(100);
 	}
 	fprintf(stderr, "okay\n");
-/*
-	while(1) {
-		char c;
-		read(0, &c, 1);
-		HandleKey(c);
-	}
-*/
-/*
-	while(1) {
-		float a,b;
-		GetVersionInfo();
-		GetRFLevel(&a,&b);
-		GetBatteryLevel(&a,&b);
-		sleep(5);
-	}
-*/
-/*	GrabDisplay(); */
-/*
-	{
-		GSM_SMSMessage msg;
-
-		msg.Location = 1;
-		GetSMSMessage(&msg);
-		msg.Location = 2;
-		GetSMSMessage(&msg);
-		msg.Location = 3;
-		GetSMSMessage(&msg);
-		msg.Location = 4;
-		GetSMSMessage(&msg);
-		msg.Location = 5;
-		GetSMSMessage(&msg);
-
-	}*/
+#ifdef THREAD
 	while (!RequestTerminate)
-		usleep(100000);		/* Avoid becoming a "busy" loop. */
+		msleep(100);		/* Avoid becoming a "busy" loop. */
+#endif
 }
 
 /* Initialise variables and state machine. */
@@ -885,20 +954,22 @@ static GSM_Error   Initialise(char *port_device, char *initlength,
 		       GSM_ConnectionType connection,
 		       void (*rlp_callback)(RLP_F96Frame *frame))
 {
-	int rtn;
-
-	/* ConnectionType is ignored in 640 code. */
 	RequestTerminate = false;
 	MB21_LinkOK     = false;
 	memset(VersionInfo,0,sizeof(VersionInfo));
 	strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
-	rtn = pthread_create(&Thread, NULL, (void *) ThreadLoop, (void *)NULL);
-	if(rtn == EAGAIN || rtn == EINVAL) {
-		return (GE_INTERNALERROR);
+#ifdef THREAD
+	{
+		int rtn;
+		rtn = pthread_create(&Thread, NULL, (void *) ThreadLoop, (void *)NULL);
+		if(rtn == EAGAIN || rtn == EINVAL)
+			return (GE_INTERNALERROR);
 	}
+#else
+	ThreadLoop();
+#endif
 	return (GE_NONE);
 }
-
 
 /* Routine to get specifed phone book location.  Designed to be called by
    application.  Will block until location is retrieved or a timeout/error
@@ -907,23 +978,15 @@ static GSM_Error   Initialise(char *port_device, char *initlength,
 GSM_Error GetPhonebookLocation(GSM_PhonebookEntry *entry)
 {
 	u8  pkt[] = {0x1a, 0 /* 1 == phone */, 0};
-	int timeout;
 	int i;
 
 	pkt[1] = 3 + (entry->MemoryType != GMT_ME);
 	pkt[2] = entry->Location;
 	
 	PacketOK = false;
-	ACKOK    = false;
-	timeout  = 10;
-	usleep(1000000);
-	while(!PacketOK) {
-		dprintf("\Getting phonebook (%d)", entry->Location);
-		if(!ACKOK) { SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3); continue; }
-		usleep(1000000);
-		if(!--timeout || RequestTerminate)
-			return(-1);
-	}
+	SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3);
+	while (!PacketOK)
+		msleep(100);
 	if ((PacketData[3] != 0xc9) ||
 	    (PacketData[4] != 0x1a)) {
 		fprintf(stderr, "Something is very wrong with GetPhonebookLocation\n");
@@ -954,7 +1017,6 @@ GSM_Error GetPhonebookLocation(GSM_PhonebookEntry *entry)
 GSM_Error WritePhonebookLocation(GSM_PhonebookEntry *entry)
 {
 	u8  pkt[999] = {0x1b, 0 /* 1 == phone */, 0};
-	int timeout;
 
 	pkt[1] = 3 + (entry->MemoryType != GMT_ME);
 	pkt[2] = entry->Location;
@@ -962,15 +1024,9 @@ GSM_Error WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	strcpy(&pkt[3+strlen(entry->Name)+1], entry->Number);
 	
 	PacketOK = false;
-	ACKOK    = false;
-	timeout  = 10;
-	usleep(1000000);
+	SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3+strlen(entry->Number)+strlen(entry->Name)+2);
 	while(!PacketOK) {
-		dprintf("\Writing phonebook (%d)", entry->Location);
-		if(!ACKOK) { SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3+strlen(entry->Number)+strlen(entry->Name)+2); continue; }
 		usleep(1000000);
-		if(!--timeout || RequestTerminate)
-			return(-1);
 	}
 	printf("okay?\n");
 	if ((PacketData[3] != 0xc9) ||
