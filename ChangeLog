@@ -8,7 +8,10 @@
  * api changes
     o don't use UpperCase variable names in API but lower_case
                                                          (Pawel Kot)
-
+ * cleanups
+    o reorder exported headers: don't include unneccesary headers,
+      be sure to have all things defined (currently Linux and MSVC6)
+                                                         (Pawel Kot)
 0.5.0rc3
 ========
  * general updates

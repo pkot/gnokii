@@ -34,6 +34,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Some portability definitions first */
+#if defined(__linux__)
+#  include <stdint.h>
+#  include <sys/time.h>
+#elif defined(_MSC_VER) && defined(WIN32)
+#  include <Winsock2.h>
+#else
+typedef unsigned char uint8_t;
+#endif
 	
 #ifndef API
 #  define API

@@ -31,7 +31,6 @@
 #ifndef _gnokii_call_h
 #define _gnokii_call_h
 
-#include <sys/time.h>
 #include <gnokii/error.h>
 
 typedef enum {
