@@ -29,12 +29,11 @@
 
 */
 
-#ifndef _gnokii_gsm_bitmaps_h
-#define _gnokii_gsm_bitmaps_h
+#ifndef _gnokii_bitmaps_h
+#define _gnokii_bitmaps_h
 
-#include "misc.h"
-#include "gsm-error.h"
-#include "gsm-common.h"
+#include <gnokii/error.h>
+#include <gnokii/common.h>
 
 /* Bitmap types. These do *not* corespond to headers[] in gsm-sms.c. */
 
@@ -48,8 +47,8 @@ typedef enum {
 	GN_BMP_DealerNoteText,
 	GN_BMP_NewOperatorLogo,
 	GN_BMP_EMSPicture,
-	GN_BMP_EMSAnimation,		/* First bitmap in animation should have this type */
-	GN_BMP_EMSAnimation2,		/* ...second, third and fourth should have this type */
+	GN_BMP_EMSAnimation,	/* First bitmap in animation should have this type */
+	GN_BMP_EMSAnimation2,	/* ...second, third and fourth should have this type */
 } gn_bmp_types;
 
 #define GN_BMP_MAX_SIZE 1000
@@ -70,4 +69,4 @@ typedef struct {
 	char ringtone;           /* Ringtone no sent with caller group */
 } gn_bmp;
 
-#endif /* _gnokii_gsm_bitmaps_h */
+#endif /* _gnokii_bitmaps_h */

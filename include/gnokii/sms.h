@@ -28,8 +28,8 @@
 
 */
 
-#ifndef _gnokii_gsm_sms_h
-#define _gnokii_gsm_sms_h
+#ifndef _gnokii_sms_h
+#define _gnokii_sms_h
 
 #include <gnokii/error.h>
 #include <gnokii/common.h>
@@ -67,10 +67,14 @@ typedef struct {
 } gn_sms_memory_status;
 
 typedef struct {
-	unsigned int number;	/* Number of message we get from GetSMSStatus */
-	unsigned int unread;	/* Number of unread messages we get from GetSMSStatus */
-	unsigned int changed;	/* because when a message is moved between folders status wouldn't change */
-	unsigned int folders_count;	/* Number of Folders we get from GetFolders */
+	/* Number of message we get from GetSMSStatus */
+	unsigned int number;
+	/* Number of unread messages we get from GetSMSStatus */
+	unsigned int unread;
+	/* when a message is moved between folders status wouldn't change */
+	unsigned int changed;
+	/* Number of Folders we get from GetFolders */
+	unsigned int folders_count;
 } gn_sms_status;
 
 
@@ -127,11 +131,11 @@ typedef struct {
 typedef enum {
 	GN_SMS_MW_PID,  /* Set Protocol Identifier to `Return Call Message' */
 	GN_SMS_MW_DCS,  /* Set Data Coding Scheme "to indicate the type of
-			message waiting and whether there are some messages
-			or no messages" */
-	GN_SMS_MW_UDH   /* Use User Data Header - Special SMS Message Indication;
-			the maximium level of information, may not be supported
-			by all phones */
+			 * message waiting and whether there are some messages
+			 * or no messages" */
+	GN_SMS_MW_UDH   /* Use User Data Header - Special SMS Message
+			 * Indication; the maximium level of information,
+			 * may not be supported	by all phones */
 } gn_sms_message_waiting_type;
 
 /*** DATA CODING SCHEME ***/
@@ -158,12 +162,13 @@ typedef struct {
 	gn_sms_dcs_type type;
 	union {
 		struct {
-			unsigned short m_class; /* Message class:
-						    0 - no class
-						    1 - Class 0
-						    2 - Class 1
-						    3 - Class 2
-						    4 - Class 3 */
+			/* Message class: 
+			 * 0 - no class
+			 * 1 - Class 0
+			 * 2 - Class 1
+			 * 3 - Class 2
+			 * 4 - Class 3 */
+			unsigned short m_class;
 			bool compressed;
 			gn_sms_dcs_alphabet_type alphabet;
 		} general;
@@ -187,7 +192,7 @@ typedef enum {
 typedef enum {
 	GN_SMS_VPE_None              = 0x00,
 	GN_SMS_VPE_RelativeFormat    = 0x01,
-	GN_SMS_VPE_RelativeSeconds   = 0x02, /* Only one ocetet more is used */
+	GN_SMS_VPE_RelativeSeconds   = 0x02, /* Only one octet more is used */
 	GN_SMS_VPE_RelativeSemiOctet = 0x03  /* 3 octets contain relative time in hours, minutes and seconds in semi-octet representation */
 } gn_sms_vp_enhanced_type;
 
@@ -216,7 +221,7 @@ typedef struct {
 	gn_sms_vp_format vpf;
 	union {
 		gn_sms_vp_enhanced enhanced;
-		gn_sms_vp_time relative; /* 8 bit */
+		gn_sms_vp_time relative;	/* 8 bit */
 		gn_timestamp absolute;
 	} u;
 } gn_sms_vp;
@@ -236,13 +241,13 @@ typedef enum {
 } gn_sms_message_format;
 
 typedef struct {
-	int			id;					/* Number of the SMSC in the phone memory. */
-	char			name[GN_SMS_CENTER_NAME_MAX_LENGTH];	/* Name of the SMSC. */
-	int			default_name;				/* >= 1 if default name used, otherwise -1 */
-	gn_sms_message_format	format;					/* SMS is sent as text/fax/paging/email. */
-	gn_sms_vp_time		validity;				/* Validity of SMS Message. */
-	gn_gsm_number	       	smsc;			       		/* Number of the SMSC. */
-	gn_gsm_number		recipient;				/* Number of the default recipient. */
+	int id;				/* Number of the SMSC in the phone memory. */
+	char name[GN_SMS_CENTER_NAME_MAX_LENGTH];	/* Name of the SMSC. */
+	int default_name;		/* >= 1 if default name used, otherwise -1 */
+	gn_sms_message_format format;	/* SMS is sent as text/fax/paging/email. */
+	gn_sms_vp_time validity;	/* Validity of SMS Message. */
+	gn_gsm_number smsc;		/* Number of the SMSC. */
+	gn_gsm_number recipient;	/* Number of the default recipient. */
 } gn_sms_message_center;
 
 /*** SHORT MESSAGE CORE ***/
@@ -317,7 +322,7 @@ typedef enum {
 } gn_sms_location_status;
 
 typedef struct {
-	gn_sms_location_status status;		/* deleted, new, old, ToBeRemoved */
+	gn_sms_location_status status;	/* deleted, new, old, ToBeRemoved */
 	unsigned int location;
 	gn_sms_message_type message_type;
 } gn_sms_message_list;
@@ -377,55 +382,62 @@ typedef struct {
 
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
 typedef struct {
-	unsigned int type;                             /* Message Type Indicator - 2 bits (9.2.3.1) */
-	bool more_messages;                             /* More Messages to Send (9.2.3.2) */
-	bool reply_via_same_smsc;                         /* Reply Path (9.2.3.17) - `Reply via same centre' in the phone */
-	bool reject_duplicates;                         /* Reject Duplicates (9.2.3.25) */
-	bool report;                                   /* Status Report (9.2.3.4, 9.2.3.5 & 9.2.3.26) - `Delivery reports' in the phone */
+	unsigned int type;		/* Message Type Indicator - 2 bits (9.2.3.1) */
+	bool more_messages;		/* More Messages to Send (9.2.3.2) */
+	bool reply_via_same_smsc;	/* Reply Path (9.2.3.17) - `Reply via same centre' in the phone */
+	bool reject_duplicates;		/* Reject Duplicates (9.2.3.25) */
+	bool report;			/* Status Report (9.2.3.4, 9.2.3.5 & 9.2.3.26) - `Delivery reports' in the phone */
 
-	unsigned int number;                           /* Message Number - 8 bits (9.2.3.18) */
-	unsigned int reference;                        /* Message Reference - 8 bit (9.2.3.6) */
-	unsigned int pid;                              /* Protocol Identifier - 8 bit (9.2.3.9) */
-	unsigned int report_status;                     /* Status - 8 bit (9.2.3.15), Failure Cause (9.2.3.22) */
+	unsigned int number;		/* Message Number - 8 bits (9.2.3.18) */
+	unsigned int reference;		/* Message Reference - 8 bit (9.2.3.6) */
+	unsigned int pid;		/* Protocol Identifier - 8 bit (9.2.3.9) */
+	unsigned int report_status;	/* Status - 8 bit (9.2.3.15), Failure Cause (9.2.3.22) */
 
 	unsigned char smsc_time[GN_SMS_DATETIME_MAX_LENGTH];   /* Service Centre Time Stamp (9.2.3.11) */
 	unsigned char time[GN_SMS_DATETIME_MAX_LENGTH];       /* Discharge Time (9.2.3.13) */
 	unsigned char message_center[GN_SMS_SMSC_NUMBER_MAX_LENGTH];/* SMSC Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
 	unsigned char remote_number[GN_SMS_NUMBER_MAX_LENGTH];    /* Origination, destination, Recipient Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
 
-	unsigned int dcs;                              /* Data Coding Scheme (9.2.3.10) */
-	unsigned int length;                           /* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
+	unsigned int dcs;		/* Data Coding Scheme (9.2.3.10) */
+	unsigned int length;		/* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
 	bool udh_indicator;
-	unsigned char user_data[GN_SMS_LONG_MAX_LENGTH];   /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
-	int user_data_length;                            /* Length of just previous field */
+	unsigned char user_data[GN_SMS_LONG_MAX_LENGTH];	/* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
+	int user_data_length;		/* Length of just previous field */
 
 	gn_sms_vp_format validity_indicator;
 	unsigned char validity[GN_SMS_VP_MAX_LENGTH];   /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
 
-
 	/* Other fields */
-	unsigned int memory_type;                       /* MemoryType (for 6210/7110): folder indicator */
-	unsigned int status;                           /* Status of the message: sent/read or unsent/unread */
+	unsigned int memory_type;	/* MemoryType (for 6210/7110): folder indicator */
+	unsigned int status;		/* Status of the message: sent/read or unsent/unread */
 } gn_sms_raw;
 
 
 /*** FOLDERS ***/
 
-/* Datatype for SMS folders ins 6210/7110 */
-#define GN_SMS_FOLDER_NAME_MAX_LENGTH 16	/* Max name length is 15 characters and trailing \0 */
+/*** Datatype for SMS folders ins 6210/7110 ***/
+/* Max name length is 15 characters and trailing \0 */
+#define GN_SMS_FOLDER_NAME_MAX_LENGTH	16
 typedef struct {
-	char name[GN_SMS_FOLDER_NAME_MAX_LENGTH];          /* Name for SMS folder. */
-	bool sms_data;                                     /* if folder contains sender, SMSC number and sending date */
-	unsigned int locations[GN_SMS_MESSAGE_MAX_NUMBER]; /* locations of SMS messages in that folder (6210 specific) */
-	unsigned int number;                               /* number of SMS messages in that folder*/
-	unsigned int folder_id;                            /* ID od fthe current folder */
+	/* Name for SMS folder. */
+	char name[GN_SMS_FOLDER_NAME_MAX_LENGTH];
+	/* if folder contains sender, SMSC number and sending date */
+	bool sms_data;
+	/* locations of SMS messages in that folder (6210 specific) */
+	unsigned int locations[GN_SMS_MESSAGE_MAX_NUMBER];
+	/* number of SMS messages in that folder*/
+	unsigned int number;
+	/* ID od fthe current folder */
+	unsigned int folder_id;
 } gn_sms_folder;
 
 typedef struct {
 	gn_sms_folder folder[GN_SMS_FOLDER_MAX_NUMBER];
-	unsigned int folder_id[GN_SMS_FOLDER_MAX_NUMBER]; /* ID specific for this folder and phone.
-	                                         * Used in internal functions. Do not use it. */
-	unsigned int number;                    /* number of SMS folders */
+	/* ID specific for this folder and phone. Used in internal functions.
+	 * Do not use it. */
+	unsigned int folder_id[GN_SMS_FOLDER_MAX_NUMBER];
+	/* number of SMS folders */
+	unsigned int number;
 } gn_sms_folder_list;
 
 /*** CELL BROADCAST ***/
@@ -434,9 +446,9 @@ typedef struct {
 
 /* Define datatype for Cell Broadcast message */
 typedef struct {
-	int channel;                                      /* channel number */
+	int channel;
 	char message[GN_CM_MESSAGE_MAX_LENGTH + 1];
 	int is_new;
 } gn_cb_message;
 
-#endif /* _gnokii_gsm_sms_h */
+#endif /* _gnokii_sms_h */
