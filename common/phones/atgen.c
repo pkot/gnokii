@@ -608,9 +608,8 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	dprintf("AT mode set\n");
 
 	/* Prepare the message and count the size */
-/*	memcpy(req2, data->RawSMS->MessageCenter, data->RawSMS->MessageCenter[0] + 1);
-	offset += data->RawSMS->MessageCenter[0];*/
-	req2[0] = 0;
+	memcpy(req2, data->RawSMS->MessageCenter, data->RawSMS->MessageCenter[0] + 1);
+	offset += data->RawSMS->MessageCenter[0];
 
 	req2[offset + 1] = 0x01 | 0x10; /* Validity period in relative format */
 	if (data->RawSMS->RejectDuplicates) req2[offset + 1] |= 0x04;
