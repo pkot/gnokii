@@ -15,6 +15,8 @@
                                                         (Pawel Kot)
     o update Slackware build scripts; we have now 2 scripts to
       to build with and without X11 support             (Pawel Kot)
+    o add the information about possibility to have smaller
+      binaries with MSVC                               (Phil Ashby)
  * gnapplet series updates
     o folder management support (list, status, create,
       delete) support added                        (BORBELY Zoltan)

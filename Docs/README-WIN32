@@ -17,6 +17,9 @@ Below a description how to compile Gnokii with the Microsoft Visual C++ 6.0.
 2) Copy <path>\win32\MSVC6\config.h into <path>\include\
 3) Open <path>\win32\MSVC6\gnokii.dsw and compile :)
 
+You may want to change the compiler run-time library settings to singe
+threaded / debug single threaded to have much smaller binaries.
+
 Compile with Cygwin (B20)
 =========================
 
