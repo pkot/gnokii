@@ -1,4 +1,4 @@
- * This file is part of gnokii.
+/* This file is part of gnokii.
  *
  * Gnokii is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
