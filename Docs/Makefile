@@ -34,24 +34,24 @@ INSTALL_DOCS = 	README \
 		gnokii-hackers-howto \
 		ringtones.txt \
 		logos.txt \
-		sample/gnokiirc
-		sample/magic
+		sample/gnokiirc \
+		sample/magic \
 		sample/logo/pacman.xpm \
 		sample/logo/gnokii.xpm \
-		sample/logo/gnokiiop.xpm
-		sample/logo/horse.xpm
-		sample/logo/bronto.xpm
-		sample/logo/horse2.xpm
-		sample/ringtone/star.imelody
-		sample/ringtone/star.rtttl
-		sample/vCalendar/test.vcs
-		sample/ppp/cimd-connect
-		sample/ppp/ppp-FILES
-		sample/ppp/options
-		sample/ppp/pap-secrets
-		sample/ppp/ppp-hscsd
-		sample/ppp/ppp-6210-modem
-		sample/ppp/ppp-gnokii
+		sample/logo/gnokiiop.xpm \
+		sample/logo/horse.xpm \
+		sample/logo/bronto.xpm \
+		sample/logo/horse2.xpm \
+		sample/ringtone/star.imelody \
+		sample/ringtone/star.rtttl \
+		sample/vCalendar/test.vcs \
+		sample/ppp/cimd-connect \
+		sample/ppp/ppp-FILES \
+		sample/ppp/options \
+		sample/ppp/pap-secrets \
+		sample/ppp/ppp-hscsd \
+		sample/ppp/ppp-6210-modem \
+		sample/ppp/ppp-gnokii \
 		sample/ppp/ppp-on
 
 GNOKII1_MAN=man/gnokii.1 man/todologo.1
