@@ -260,29 +260,53 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		else { 
 		*/
 		gchar *row[4];
-		if (data->Type == SMS_Delivery_Report) {
-			if (data->Status == SMS_Read)
+		switch (data->Type) {
+		case SMS_Delivery_Report:
+			switch (data->Status) {
+			case SMS_Read:
 				row[0] = g_strdup(_("read report"));
-			else
+				break;
+			default:
 				row[0] = g_strdup(_("unread report"));
-		} else if ((data->Type == SMS_Picture) || (data->Type == SMS_PictureTemplate)) {
-				if (data->Status == SMS_Read)
-					row[0] = g_strdup(_("seen picture"));
-				if (data->Status == SMS_Unread)
-					row[0] = g_strdup(_("unseen picture"));
-				if (data->Status == SMS_Sent)
-					row[0] = g_strdup(_("sent picture"));
-				if (data->Status == SMS_Unsent)
-					row[0] = g_strdup(_("not sent picture"));
-		} else {
-			if (data->Status == SMS_Read)
+				break;
+			}
+		case SMS_Picture:
+		case SMS_PictureTemplate:
+			switch (data->Status) {
+			case SMS_Read:
+				row[0] = g_strdup(_("seen picture"));
+				break;
+			case SMS_Unread:
+				row[0] = g_strdup(_("unseen picture"));
+				break;
+			case SMS_Sent:
+				row[0] = g_strdup(_("sent picture"));
+				break;
+			case SMS_Unsent:
+				row[0] = g_strdup(_("not sent picture"));
+				break;
+			default:
+				row[0] = g_strdup(_("unknown picture"));
+				break;
+			}
+		default:
+			switch (data->Status) {
+			case SMS_Read:
 				row[0] = g_strdup(_("read"));
-			if (data->Status == SMS_Unread)
+				break;
+			case SMS_Unread:
 				row[0] = g_strdup(_("unread"));
-			if (data->Status == SMS_Sent)
+				break;
+			case SMS_Sent:
 				row[0] = g_strdup(_("sent"));
-			if (data->Status == SMS_Unsent)
+				break;
+			case SMS_Unsent:
 				row[0] = g_strdup(_("not sent"));
+				break;
+			default:
+				row[0] = g_strdup(_("unknown"));
+				break;
+			}
 		}
 
 		if (dt) {
