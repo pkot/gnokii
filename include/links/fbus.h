@@ -32,7 +32,7 @@
 #include "fbus-common.h"
 
 #define FBUS_MAX_FRAME_LENGTH 256
-#define FBUS_MAX_MESSAGE_TYPES 128
+#define FBUS_MAX_MESSAGE_TYPES 256
 #define FBUS_MAX_TRANSMIT_LENGTH 256
 #define FBUS_MAX_CONTENT_LENGTH 120
 
@@ -59,7 +59,7 @@ typedef struct{
 	int MessageDestination;
 	int MessageType;
 	int FrameLength;
-	char MessageBuffer[FBUS_MAX_FRAME_LENGTH];
+	u8 MessageBuffer[FBUS_MAX_FRAME_LENGTH];
 } FBUS_IncomingFrame;
 
 typedef struct{

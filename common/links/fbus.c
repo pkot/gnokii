@@ -230,14 +230,14 @@ static void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 	case FBUS_RX_GetMessage:
 
-		i->MessageBuffer[i->BufferCount] = rx_byte;
-		i->BufferCount++;
-
-		if (i->BufferCount > FBUS_MAX_FRAME_LENGTH) {
+		if (i->BufferCount >= FBUS_MAX_FRAME_LENGTH) {
 			dprintf("FBUS: Message buffer overun - resetting\n");
 			i->state = FBUS_RX_Sync;
 			break;
 		}
+
+		i->MessageBuffer[i->BufferCount] = rx_byte;
+		i->BufferCount++;
 
 		/* If this is the last byte, it's the checksum. */
 
@@ -477,7 +477,7 @@ static int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
 GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type)
 {
 	unsigned char init_char = 0x55;
-	unsigned char count;
+	int count;
 
 	if (type > 2) return GE_DEVICEOPENFAILED;
 	/* 'Copy in' the global structures */
@@ -521,6 +521,7 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type)
 		flink.messages[count].Malloced = 0;
 		flink.messages[count].FramesToGo = 0;
 		flink.messages[count].MessageLength = 0;
+		flink.messages[count].MessageBuffer = NULL;
 	}
 
 	return GE_NONE;
