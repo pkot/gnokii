@@ -45,10 +45,10 @@
 #include "links/atbus.h"
 
 /* Some globals */
-static GSM_Statemachine *statemachine;
+static struct gn_statemachine *statemachine;
 
 /* CBUS specific stuff, internal to this file */
-static CBUS_Link clink;
+static cbus_link clink;
 
 
 static gn_error bus_write(unsigned char *d, int len)
@@ -121,16 +121,16 @@ static void send_ack(void)
 	bus_write("\xa5", 1);
 }
 
-static void dump_packet(CBUS_IncomingFrame *frame)
+static void dump_packet(cbus_incoming_frame *frame)
 {
 	int i;
 	
-	fprintf(stderr, "Hdr: %02x %02x   ", frame->FrameHeader1, frame->FrameHeader2);
-	fprintf(stderr, (frame->FrameHeader1 == 0x19) ? "->\n" : "<-\n");
-	fprintf(stderr, "Cmd: %02x %02x\n", frame->FrameType1, frame->FrameType2);
-	fprintf(stderr, "Len: %d\n", frame->MessageLength);
+	fprintf(stderr, "Hdr: %02x %02x   ", frame->frame_header1, frame->frame_header2);
+	fprintf(stderr, (frame->frame_header1 == 0x19) ? "->\n" : "<-\n");
+	fprintf(stderr, "Cmd: %02x %02x\n", frame->frame_type1, frame->frame_type2);
+	fprintf(stderr, "Len: %d\n", frame->message_len);
 	fprintf(stderr, "Data: ");
-	for (i = 0; i < frame->BufferCount; i++)
+	for (i = 0; i < frame->buffer_count; i++)
 		fprintf(stderr, "%02x ", frame->buffer[i]);
 	fprintf(stderr, "\n");
 }
@@ -204,10 +204,10 @@ static void outgoing_frame(unsigned char cmd1, unsigned char cmd2)
 /* state machine for receive handling. Called once for each character
    received from the phone. */
 
-static CBUS_PKT_State state_machine(unsigned char rx_byte)
+static cbus_pkt_state state_machine(unsigned char rx_byte)
 {
-	CBUS_PKT_State state = CBUS_PKT_None;
-	CBUS_IncomingFrame *i = &clink.frame;
+	cbus_pkt_state state = CBUS_PKT_None;
+	cbus_incoming_frame *i = &clink.frame;
 
 	/* checksum is XOR of all bytes in the frame */
 	if (i->state != CBUS_RX_GetCSum) i->checksum ^= rx_byte;
@@ -232,34 +232,34 @@ static CBUS_PKT_State state_machine(unsigned char rx_byte)
 				break;
 		}
 		if (i->state != CBUS_RX_Header) {
-			i->FrameHeader1 = i->prev_rx_byte;
-			i->FrameHeader2 = rx_byte;
-			i->BufferCount = 0;
+			i->frame_header1 = i->prev_rx_byte;
+			i->frame_header2 = rx_byte;
+			i->buffer_count = 0;
 			i->checksum = i->prev_rx_byte ^ rx_byte;
 		}
 		break;
 
 	case CBUS_RX_FrameType1:
-		i->FrameType1 = rx_byte;
+		i->frame_type1 = rx_byte;
 		i->state = CBUS_RX_FrameType2;
 		break;
 
 	case CBUS_RX_FrameType2:
-		i->FrameType2 = rx_byte;
+		i->frame_type2 = rx_byte;
 		i->state = CBUS_RX_GetLengthLB;
 		break;
 
 	/* message length - low byte */
 	case CBUS_RX_GetLengthLB:
-		i->MessageLength = rx_byte;
+		i->message_len = rx_byte;
 		i->state = CBUS_RX_GetLengthHB;
 		break;
 
 	/* message length - high byte */
 	case CBUS_RX_GetLengthHB:
-		i->MessageLength = i->MessageLength | rx_byte << 8;
+		i->message_len = i->message_len | rx_byte << 8;
 		/* there are also empty messages */
-		if (i->MessageLength == 0)
+		if (i->message_len == 0)
 			i->state = CBUS_RX_GetCSum;
 		else
 			i->state = CBUS_RX_GetMessage;
@@ -267,14 +267,15 @@ static CBUS_PKT_State state_machine(unsigned char rx_byte)
 
 	/* get each byte of the message body */
 	case CBUS_RX_GetMessage:
-		i->buffer[i->BufferCount] = rx_byte;
-		/* avoid buffer overflow */		if (i->BufferCount > CBUS_MAX_MSG_LENGTH) {
-		dprintf("CBUS: Message buffer overun - resetting\n");
+		i->buffer[i->buffer_count] = rx_byte;
+		/* avoid buffer overflow */		
+		if (i->buffer_count > CBUS_MAX_MSG_LENGTH) {
+			dprintf("CBUS: Message buffer overun - resetting\n");
 			i->state = CBUS_RX_Header;
 			break;
 		}
 
-		if (i->BufferCount == i->MessageLength)
+		if (i->buffer_count == i->message_len)
 			i->state = CBUS_RX_GetCSum;
 		break;
 
@@ -288,7 +289,7 @@ static CBUS_PKT_State state_machine(unsigned char rx_byte)
 			dprintf("CBUS: Checksum error; expected: %02x, got: %02x\n", i->checksum, rx_byte);
 			state = CBUS_PKT_CSumErr;
 		}
-		i->buffer[i->MessageLength + 1] = 0;
+		i->buffer[i->message_len + 1] = 0;
 		i->state = CBUS_RX_Header;
 		break;
 	default:
@@ -302,10 +303,10 @@ static CBUS_PKT_State state_machine(unsigned char rx_byte)
 static gn_error get_packet(void)
 {
 	gn_error res;
-	CBUS_PKT_State state = CBUS_PKT_None;
+	cbus_pkt_state state = CBUS_PKT_None;
 	unsigned char rx_byte;
 	int retry = 20;
-	CBUS_IncomingFrame *i = &clink.frame;	
+	cbus_incoming_frame *i = &clink.frame;	
 
 	i->state = CBUS_RX_Header;
 	while (state == CBUS_PKT_None && --retry) {
@@ -359,7 +360,7 @@ static gn_error send_packet_ack(unsigned char *msg, int len, unsigned short cmd,
 {
 	gn_error res;
 	int retry = 3;
-	CBUS_IncomingFrame *i = &clink.frame;
+	cbus_incoming_frame *i = &clink.frame;
 
 	do {
 		retry--;
@@ -375,7 +376,7 @@ again:
 			dprintf("CBUS: get_packet failed\n");
 			continue;
 		}
-		if (i->FrameType1 != cmd) {
+		if (i->frame_type1 != cmd) {
 			dprintf("CBUS: get_packet is not the right packet\n");
 			goto again;
 		}
@@ -393,7 +394,7 @@ again:
 static gn_error bus_reset(void)
 {
 	gn_error res;
-	CBUS_IncomingFrame *i = &clink.frame;
+	cbus_incoming_frame *i = &clink.frame;
 
 /*	bus_write("\0\0\0\0\0", 5);*/
 	usleep(1000);
@@ -402,7 +403,7 @@ static gn_error bus_reset(void)
 	res = get_packet();
 	if (res)
 		return res;
-	if (i->FrameType1 != 0x91) {
+	if (i->frame_type1 != 0x91) {
 		dprintf("CBUS: Bus reset failed\n");
 		return GN_ERR_NOLINK;
 	}
@@ -429,13 +430,13 @@ static gn_error bus_reset(void)
 static gn_error wait_at_confirmation(void)
 {
 	gn_error res;
-	CBUS_IncomingFrame *i = &clink.frame;
+	cbus_incoming_frame *i = &clink.frame;
 	
 	res = get_packet();
 	if (res)
 		return res;
-	if (i->FrameType1 != 0x3d) {
-		dprintf("CBUS: AT command confirmation expected, but got %02x/%02x\n", i->FrameType1, i->FrameType2);
+	if (i->frame_type1 != 0x3d) {
+		dprintf("CBUS: AT command confirmation expected, but got %02x/%02x\n", i->frame_type1, i->frame_type2);
 		return GN_ERR_INTERNALERROR;
 	}
 	dprintf("CBUS: AT command confirmed\n");
@@ -445,13 +446,13 @@ static gn_error wait_at_confirmation(void)
 static gn_error get_at_reply(void)
 {
 	gn_error res;
-	CBUS_IncomingFrame *i = &clink.frame;
+	cbus_incoming_frame *i = &clink.frame;
 
 	res = get_packet();
 	if (res)
 		return res;
-	if (i->FrameType2 != 0x3e) {
-		dprintf("CBUS: AT command reply expected, but got %02x/%02x\n", i->FrameType1, i->FrameType2);
+	if (i->frame_type2 != 0x3e) {
+		dprintf("CBUS: AT command reply expected, but got %02x/%02x\n", i->frame_type1, i->frame_type2);
 		return GN_ERR_INTERNALERROR;
 	}
 	dprintf("CBUS: AT reply: %s", i->buffer);
@@ -459,7 +460,7 @@ static gn_error get_at_reply(void)
 	return send_packet_ack("\x3e\x68", 2, 0x3f, false);
 }
 
-static gn_error AT_SendMessage(u16 message_length, u8 message_type, unsigned char *buffer)
+static gn_error at_message_send(u16 message_length, u8 message_type, unsigned char *buffer)
 {
 	gn_error res;
 
@@ -475,9 +476,9 @@ static gn_error AT_SendMessage(u16 message_length, u8 message_type, unsigned cha
 	return get_at_reply();
 }
 
-static bool CBUS_OpenSerial(char *device)
+static bool cbus_open_serial(char *device)
 {
-	int result = device_open(device, false, false, false, GCT_Serial);
+	int result = device_open(device, false, false, false, GN_CT_Serial);
 	if (!result) {
 		perror(_("Couldn't open CBUS device"));
 		return false;
@@ -488,10 +489,11 @@ static bool CBUS_OpenSerial(char *device)
 }
 
 
-/* This is the main loop function which must be called regularly */
-/* timeout can be used to make it 'busy' or not */
-
-static gn_error CBUS_Loop(struct timeval *timeout)
+/* 
+ * This is the main loop function which must be called regularly
+ * timeout can be used to make it 'busy' or not 
+ */
+static gn_error cbus_loop(struct timeval *timeout)
 {
 /*	SM_IncomingFunction(statemachine, statemachine->LastMsgType, clink.AT_message, clink.AT_message_len);*/
 	return GN_ERR_NONE;
@@ -499,21 +501,17 @@ static gn_error CBUS_Loop(struct timeval *timeout)
 
 
 /* Initialise variables and start the link */
-
-gn_error CBUS_Initialise(GSM_Statemachine *state)
+gn_error cbus_initialise(struct gn_statemachine *state)
 {
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
-
 	/* 'Copy in' the global structures */
 	statemachine = state;
 		
 	/* Fill in the link functions */
-	state->Link.Loop = &CBUS_Loop;
-	state->Link.SendMessage = &AT_SendMessage;
+	state->link.loop = &cbus_loop;
+	state->link.send_message = &at_message_send;
 
-	if (state->Link.ConnectionType == GCT_Serial) {
-		if (!CBUS_OpenSerial(state->Link.PortDevice))
+	if (state->link.connection_type == GN_CT_Serial) {
+		if (!cbus_open_serial(state->link.port_device))
 			return GN_ERR_FAILED;
 	} else {
 		dprintf("Device not supported by CBUS\n");

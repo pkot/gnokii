@@ -26,21 +26,22 @@
 
 */
 
-#ifndef __atbus_h
-#define __atbus_h
+#ifndef _gnokii_atbus_h
+#define _gnokii_atbus_h
 
-gn_error ATBUS_Initialise(GSM_Statemachine *state, int mode);
+#include "gsm-statemachine.h"
+
+gn_error atbus_initialise(struct gn_statemachine *state, int mode);
 
 /* Define some result/error codes internal to the AT command functions.
    Also define a code for an unterminated message. */
-
 typedef enum {
-	GEAT_NONE,		/* NO or unknown result code */
-	GEAT_PROMPT,		/* SMS command waiting for input */
-	GEAT_OK,		/* Command succceded */
-	GEAT_ERROR,		/* Command failed */
-	GEAT_CMS,		/* SMS Command failed */
-	GEAT_CME,		/* Extended error code found */
-} GSMAT_Result;
+	GN_AT_NONE,		/* NO or unknown result code */
+	GN_AT_PROMPT,		/* SMS command waiting for input */
+	GN_AT_OK,		/* Command succceded */
+	GN_AT_ERROR,		/* Command failed */
+	GN_AT_CMS,		/* SMS Command failed */
+	GN_AT_CME,		/* Extended error code found */
+} at_result;
 
-#endif   /* #ifndef __atbus_h */
+#endif   /* #ifndef _gnokii_atbus_h */

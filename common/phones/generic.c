@@ -33,6 +33,7 @@
 */
 
 #include "gnokii-internal.h"
+#include "links/utils.h"
 
 /* If we do not support a message type, print out some debugging info */
 gn_error pgen_incoming_default(int messagetype, unsigned char *buffer, int length, struct gn_statemachine *state)

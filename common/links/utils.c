@@ -39,7 +39,7 @@
 #include "device.h"
 
 
-gn_error LINK_Terminate(GSM_Statemachine *state)
+gn_error link_terminate(struct gn_statemachine *state)
 {
 	/* device_close(&(state->Device)); */
 	device_close();

@@ -31,9 +31,12 @@
 
 */
 
-#ifndef LINKS_UTILS
-#define LINKS_UTILS
+#ifndef _gnokii_links_utils_h
+#define _gnokii_links_utils_h
 
-gn_error LINK_Terminate(GSM_Statemachine *state);
+#include "gsm-error.h"
+#include "gsm-statemachine.h"
+
+gn_error link_terminate(struct gn_statemachine *state);
 
 #endif

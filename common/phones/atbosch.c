@@ -69,7 +69,7 @@ static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
 	char *pos, *lenpos;
 	char tmp[8];
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_INVALIDLOCATION;
 
 	pos = buffer + 1;

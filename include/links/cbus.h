@@ -23,12 +23,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2001 Pavel Machek <pavel@ucw.cz>
-  Copyright (C) 2001 Michl Ladislav <xmichl03@stud.fee.vutbr.cz>
+  Copyright (C) 2001 Michl Ladislav <ladis@psi.cz>
 
  */
 
-#ifndef __cbus_h
-#define __cbus_h
+#ifndef _cbus_h
+#define _cbus_h
 
 #define CBUS_MAX_FRAME_LENGTH 256
 #define CBUS_MAX_TRANSMIT_LENGTH 256
@@ -43,36 +43,36 @@ typedef enum {
 	CBUS_RX_GetMessage,
 	CBUS_RX_GetCSum,
 	CBUS_RX_GetAck
-} CBUS_RX_State;
+} cbus_rx_state;
 
 typedef enum {
 	CBUS_PKT_None,
 	CBUS_PKT_Ready,
 	CBUS_PKT_CSumErr
-} CBUS_PKT_State;
+} cbus_pkt_state;
 
 typedef struct{
 	int checksum;
-	int BufferCount;
-	CBUS_RX_State state;
-	int FrameHeader1;
-	int FrameHeader2;
-	int FrameType1;
-	int FrameType2;
-	int MessageLength;
+	int buffer_count;
+	cbus_rx_state state;
+	int frame_header1;
+	int frame_header2;
+	int frame_type1;
+	int frame_type2;
+	int message_len;
 	unsigned char buffer[CBUS_MAX_FRAME_LENGTH];
 	u8 prev_rx_byte;
-} CBUS_IncomingFrame;
+} cbus_incoming_frame;
 
 typedef struct {
 	int message_length;
 	unsigned char buffer[CBUS_MAX_MSG_LENGTH];
-} CBUS_OutgoingMessage;
+} cbus_outgoing_message;
 
 typedef struct{
-	CBUS_IncomingFrame frame;
-} CBUS_Link;
+	cbus_incoming_frame frame;
+} cbus_link;
 
-gn_error CBUS_Initialise(GSM_Statemachine *state);
+gn_error cbus_initialise(struct gn_statemachine *state);
 
-#endif   /* #ifndef __cbus_h */
+#endif   /* #ifndef _cbus_h */

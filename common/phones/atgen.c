@@ -44,7 +44,7 @@
 #include "phones/atsie.h"
 #include "links/atbus.h"
 #ifndef WIN32
-//#  include "links/cbus.h"
+#  include "links/cbus.h"
 #endif
 
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state);
@@ -747,7 +747,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 	char *pos, *endpos;
 	int l;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_INVALIDLOCATION;
 
 	buf.line1 = buffer + 1;
@@ -827,7 +827,7 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 	at_line_buffer buf;
 	unsigned char *pos, *aux;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_UNKNOWN; /* FIXME */
 
 	buf.line1 = buffer + 1;
@@ -869,7 +869,7 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 	at_line_buffer buf;
 	char *pos;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_INVALIDMEMORYTYPE;
 
 	buf.line1 = buffer + 1;
@@ -901,7 +901,7 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 	at_line_buffer buf;
 	char *pos;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_UNKNOWN;
 
 	buf.line1 = buffer + 1;
@@ -934,7 +934,7 @@ static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int leng
 	at_line_buffer buf;
 	char *pos1, *pos2;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_UNKNOWN;
 		
 	buf.line1 = buffer + 1;
@@ -959,7 +959,7 @@ static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length
 {
 	at_line_buffer buf;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_UNKNOWN;		/* FIXME */
 	buf.line1 = buffer + 1;
 	buf.length = length;
@@ -985,14 +985,14 @@ static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int leng
 
 static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
-	return (buffer[0] == GEAT_PROMPT) ? GN_ERR_NONE : GN_ERR_INTERNALERROR;
+	return (buffer[0] == GN_AT_PROMPT) ? GN_ERR_NONE : GN_ERR_INTERNALERROR;
 }
 
 static gn_error ReplySendSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_line_buffer buf;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_FAILED;
 
 	buf.line1 = buffer + 1;
@@ -1016,7 +1016,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	unsigned int sms_len, l, offset = 0;
 	char *tmp;
 	
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_INTERNALERROR;
 
 	buf.line1 = buffer + 1;
@@ -1088,7 +1088,7 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 	at_line_buffer buf;
 	char *pos;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_UNKNOWN;
 		
 	buf.line1 = buffer + 1;
@@ -1116,7 +1116,7 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
 	at_line_buffer buf;
 	char *pos;
 
-	if (buffer[0] != GEAT_OK)
+	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_UNKNOWN;
 		
 	buf.line1 = buffer + 1;
@@ -1160,7 +1160,7 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
  * for reference */
 static gn_error Reply(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
-	return (buffer[0] != GEAT_OK) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
+	return (buffer[0] != GN_AT_OK) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
 }
 
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
@@ -1204,11 +1204,11 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	case GN_CT_Irda:
 #endif
 		if (!strcmp(setupdata->model, "dancall"))
-			ret = CBUS_Initialise(state);
+			ret = cbus_initialise(state);
 		else if (!strcmp(setupdata->model, "AT-HW"))
-			ret = ATBUS_Initialise(state, true);
+			ret = atbus_initialise(state, true);
 		else
-			ret = ATBUS_Initialise(state, false);
+			ret = atbus_initialise(state, false);
 		break;
 	default:
 		ret = GN_ERR_NOTSUPPORTED;

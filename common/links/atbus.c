@@ -40,12 +40,13 @@
 #include "gsm-networks.h"
 #include "device.h"
 #include "gsm-statemachine.h"
-
 #include "links/atbus.h"
 
-static gn_error ATBUS_Loop(struct timeval *timeout);
-static bool ATBUS_OpenSerial(int mode, char *device);
-static void ATBUS_RX_StateMachine(unsigned char rx_char);
+#include "gnokii-internal.h"
+
+static gn_error atbus_loop(struct timeval *timeout);
+static bool atbus_serial_open(int mode, char *device);
+static void atbus_rx_statemachine(unsigned char rx_char);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -57,7 +58,7 @@ static void at_printf(char *prefix, char *buf, int len);
 /*         the result is _one_ error message from the phone. */
 
 /* Some globals */
-static GSM_Statemachine *statemachine;
+static struct gn_statemachine *statemachine;
 
 /* The buffer for phone responses not only holds the data from
 the phone but also a byte which holds the compiled status of the
@@ -88,7 +89,7 @@ static int xwrite(unsigned char *d, int len)
 }
 
 
-static gn_error AT_SendMessage(u16 message_length, u8 message_type, unsigned char *msg)
+static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *msg)
 {
 	usleep(10000);
 	xwrite(msg, message_length);
@@ -98,33 +99,33 @@ static gn_error AT_SendMessage(u16 message_length, u8 message_type, unsigned cha
 
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
-static void ATBUS_RX_StateMachine(unsigned char rx_char)
+static void atbus_rx_statemachine(unsigned char rx_char)
 {
 	reply_buf[reply_buf_pos++] = rx_char;
 	reply_buf[reply_buf_pos] = '\0';
 
 	if (reply_buf_pos >= binlength) {
-		reply_buf[0] = GEAT_NONE;
+		reply_buf[0] = GN_AT_NONE;
 		/* first check if <cr><lf> is found at end of reply_buf.
 		 * attention: the needed length is greater 2 because we
 		 * dont need to enter if no result/error will be found. */
 		if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-2, "\r\n", 2))) {
 			/* no lenght check needed */
 			if (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4))
-				reply_buf[0] = GEAT_OK;
+				reply_buf[0] = GN_AT_OK;
 			else if ((reply_buf_pos > 7) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))
-				reply_buf[0] = GEAT_ERROR;
+				reply_buf[0] = GN_AT_ERROR;
 		}
 		/* check if SMS prompt is found */
 		if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-4, "\r\n> ", 4))) {
-			reply_buf[0] = GEAT_PROMPT;
+			reply_buf[0] = GN_AT_PROMPT;
 		}
-		if (reply_buf[0] != GEAT_NONE) {
+		if (reply_buf[0] != GN_AT_NONE) {
 
 
 			at_printf("read : ", reply_buf + 1, reply_buf_pos - 1);
 
-			SM_IncomingFunction(statemachine, statemachine->LastMsgType, reply_buf, reply_buf_pos - 1);
+			sm_incoming_function(statemachine, statemachine->last_msg_type, reply_buf, reply_buf_pos - 1);
 			reply_buf_pos = 1;
 			binlength = 1;
 			return;
@@ -141,10 +142,10 @@ static void ATBUS_RX_StateMachine(unsigned char rx_char)
 }
 
 
-static bool ATBUS_OpenSerial(int mode, char *device)
+static bool atbus_serial_open(int mode, char *device)
 {
 	int result;
-	result = device_open(device, false, false, mode, GCT_Serial);
+	result = device_open(device, false, false, mode, GN_CT_Serial);
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
 		return (false);
@@ -177,7 +178,7 @@ static bool ATBUS_OpenSerial(int mode, char *device)
 	return (true);
 }
 
-static gn_error ATBUS_Loop(struct timeval *timeout)
+static gn_error atbus_loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -186,7 +187,7 @@ static gn_error ATBUS_Loop(struct timeval *timeout)
 	if (res > 0) {
 		res = device_read(buffer, 255);
 		for (count = 0; count < res; count++)
-			ATBUS_RX_StateMachine(buffer[count]);
+			atbus_rx_statemachine(buffer[count]);
 	} else
 		return GN_ERR_TIMEOUT;
 	/* This traps errors from device_read */
@@ -200,25 +201,18 @@ static gn_error ATBUS_Loop(struct timeval *timeout)
 /* Initialise variables and start the link */
 /* Fixme we allow serial and irda for connection to reduce */
 /* bug reports. this is pretty silly for /dev/ttyS?. */
-gn_error ATBUS_Initialise(GSM_Statemachine *state, int mode)
+gn_error atbus_initialise(struct gn_statemachine *state, int mode)
 {
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
-
 	/* 'Copy in' the global structures */
 	statemachine = state;
 
 	/* Fill in the link functions */
-	state->Link.Loop = &ATBUS_Loop;
-	state->Link.SendMessage = &AT_SendMessage;
+	state->link.loop = &atbus_loop;
+	state->link.send_message = &at_send_message;
 
-#ifdef HAVE_IRDA
-	if ((state->Link.ConnectionType == GCT_Serial) ||
-	    (state->Link.ConnectionType == GCT_Irda)) {
-#else
-	if (state->Link.ConnectionType == GCT_Serial) {
-#endif
-		if (!ATBUS_OpenSerial(mode, state->Link.PortDevice))
+	if ((state->link.connection_type == GN_CT_Serial) ||
+	    (state->link.connection_type == GN_CT_Irda)) {
+		if (!atbus_serial_open(mode, state->link.port_device))
 			return GN_ERR_FAILED;
 	} else {
 		dprintf("Device not supported by ATBUS\n");
