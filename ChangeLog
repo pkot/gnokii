@@ -44,6 +44,8 @@
     o add --getlocksinfo along with 6100 driver     (Bertrik Sikken)
     o make --getlogo caller more convinient to use: switch 'caller
       group number' and 'logofile' arguments             (Pawel Kot)
+    o fix deletecalendarnote for nk7110 and nk6510 drivers
+                                                         (Pawel Kot)
  * 7110 series updates:
     o dropping duplicated frames during pb read     (BORBELY Zoltan)
     o fix calendar notes write support                   (Pawel Kot)
