@@ -54,12 +54,12 @@ API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_info, s
 {
 	gn_call *call;
 
-	call = search_call(state, call_info->call_id);
+	call = search_call(call_info->call_id, state);
 
 	switch (call_status) {
 	case GN_CALL_Incoming:
 		if (call != NULL) break;
-		if ((call = search_call(NULL, 0)) == NULL) {
+		if ((call = search_call(0, NULL)) == NULL) {
 			dprintf("Call table overflow!\n");
 			break;
 		}
@@ -83,7 +83,7 @@ API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_info, s
 
 	case GN_CALL_Established:
 		if (call == NULL) {
-			if ((call = search_call(NULL, 0)) == NULL) {
+			if ((call = search_call(0, NULL)) == NULL) {
 				dprintf("Call table overflow!\n");
 				break;
 			}
@@ -122,7 +122,7 @@ API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *s
 	gn_error err;
 
 	*call_id = -1;
-	if ((call = search_call(NULL, 0)) == NULL) {
+	if ((call = search_call(0, NULL)) == NULL) {
 		dprintf("Call table overflow!\n");
 		return GN_ERR_INTERNALERROR;
 	}
