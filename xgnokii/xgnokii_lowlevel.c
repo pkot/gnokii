@@ -200,9 +200,6 @@ static GSM_Error InitModelInf(void)
 	}
 
 #ifdef XDEBUG
-	dprintf("stats: %i, %i, %i, %i\n", gdat.FolderStats[2]->Number,
-		gdat.FolderStats[2]->Unread, gdat.FolderStats[2]->Changed,
-		gdat.MessagesList[2][2]->Location);
 	g_print("Version: %s\n", phoneMonitor.phone.version);
 	g_print("Model: %s\n", phoneMonitor.phone.model);
 	g_print("IMEI: %s\n", phoneMonitor.phone.imei);
