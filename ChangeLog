@@ -22,6 +22,8 @@
     o support for make call command                    (Igor Popik)
  * gnokii changes
     o handle argument correctness to getphonebook       (Pawel Kot)
+    o gnokii --help didn't show the real --writephonbook usage
+                                                        (Pawel Kot)
 
 0.5.7
 =====
