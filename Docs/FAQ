@@ -195,6 +195,13 @@ echo 115200 > /proc/sys/net/irda/max_baud_rate
    and see whether it helps.
 
 -------------------------------------------------------------------------------
+Q. I'm using the Win32 gnokii distribution and got the error "Couldn't open
+   FBUS device". What's wrong?
+
+A. Make sure that you put in the config file "port = com1:", not
+   "port = :com1".
+
+-------------------------------------------------------------------------------
 Q. My phone is not mentioned as supported by gnokii, but it seems that it is
    similar to the one of the mentioned in the supported phones list? What
    should I do to check this out?

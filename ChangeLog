@@ -3,6 +3,7 @@
  * translation updates
     o updated Estonian translation                  (Hans Motshärg)
     o xgnokii_xring.c was missing from POTFILES.in  (Hans Motshärg)
+    o Chinese translation added                        (Funda Wang)
  * gnokii updates
     o --monitor once will run only once            (BORBELY Zoltan)
     o add the ability to set datetime with gnokii --savesms
@@ -18,12 +19,13 @@
     o ringtone list will return fix entries too    (BORBELY Zoltan)
     o call status query function added             (BORBELY Zoltan)
     o call management functions has been rewritten (BORBELY Zoltan)
- * translation updates
-    o Chinese translation added                        (Funda Wang)
- * Link updates
+ * link layer updates
     o Support for the DKU2 cable added                 (Chris Kemp)
     o DKU2 kernel module patches for 2.4.22 and 2.6.9  (Chris Kemp)
-	
+ * documentation updates
+    o added new FAQ entry regrading win32 setup and the relvant
+      sample in Docs/sample/gnokiirc                    (Pawel Kot)
+
 0.6.4
 =====
  * build system updates

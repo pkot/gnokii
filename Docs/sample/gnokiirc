@@ -7,22 +7,27 @@
 # Set port to the physical serial port used to connect to your phone.
 # Linux version is:
 port = /dev/ttyS0
+#
 # For MacOSX you will need something like:
 # port = /dev/cu.USA28X1P1.1
 #
+# For Win32 you want to use:
+# port = com1:
+# or similiar.
+#
 # Use this setting also for the Bluetooth connection:
 # port = aa:bb:cc:dd:ee:ff
- 
+
 # Set model to the model number of your phone
 model = 6110
 
 # Initlength controls the number of characters sent to the
 # phone during initialisation.  You can either set it to
 # the word "default" or a positive integer.
-# 
+#
 # You can try setting this value if you want to connect
 # to the phone quicker.  If you've never noticed the
-# connection to be slow, it is suggested that you 
+# connection to be slow, it is suggested that you
 # leave this alone.  Read the initialisation code in fbus-xxxx
 # to understand what this changes if you're curious.
 initlength = default
