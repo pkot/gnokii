@@ -36,6 +36,21 @@
 #include "compat.h"
 #include "gnokii.h"
 
+
+/* a utility function to reuse code */
+static int ldif_entry_write(FILE *f, const char *parameter, const char *value, int convertToUTF8)
+{
+	char *buf = NULL;
+
+	if (string_base64(value)) {
+		base64_encode(value, convertToUTF8, buf);
+		fprintf(f, "%s:: %s\n", parameter, buf);
+	} else {
+		fprintf(f, "%s: %s\n", parameter, value);
+	}
+	return 1;
+}
+
 API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 {
 	char *aux;
@@ -50,46 +65,46 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 
 	aux = strrchr(entry->name, ' ');
 	if (aux) *aux = 0;
-	fprintf(f, "givenName: %s\n", entry->name);
-	fprintf(f, "sn: %s\n", aux+1);
+	ldif_entry_write(f, "givenName", entry->name, 1);
+	if (aux) ldif_entry_write(f, "sn", aux + 1, 1);
 	if (aux) *aux = ' ';
-	fprintf(f, "cn: %s\n", entry->name);
+	ldif_entry_write(f, "cn", entry->name, 1);
 
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {
 		switch (entry->subentries[i].entry_type) {
 		case GN_PHONEBOOK_ENTRY_Email:
-			fprintf(f, "mail: %s\n", entry->subentries[i].data.number);
+			ldif_entry_write(f, "mail", entry->subentries[i].data.number, 1);
 			break;
 		case GN_PHONEBOOK_ENTRY_Postal:
-			fprintf(f, "homePostalAddress: %s\n", entry->subentries[i].data.number);
+			ldif_entry_write(f, "homePostalAddress", entry->subentries[i].data.number, 1);
 			break;
 		case GN_PHONEBOOK_ENTRY_Note:
-			fprintf(f, "Description: %s\n", entry->subentries[i].data.number);
+			ldif_entry_write(f, "Description", entry->subentries[i].data.number, 1);
 			break;
 		case GN_PHONEBOOK_ENTRY_Number:
 			switch (entry->subentries[i].number_type) {
 			case GN_PHONEBOOK_NUMBER_Home:
-				fprintf(f, "homePhone: %s\n", entry->subentries[i].data.number);
+				ldif_entry_write(f, "homePhone", entry->subentries[i].data.number, 1);
 				break;
 			case GN_PHONEBOOK_NUMBER_Mobile:
-				fprintf(f, "mobile: %s\n", entry->subentries[i].data.number);
+				ldif_entry_write(f, "mobile", entry->subentries[i].data.number, 1);
 				break;
 			case GN_PHONEBOOK_NUMBER_Fax:
-				fprintf(f, "fax: %s\n", entry->subentries[i].data.number);
+				ldif_entry_write(f, "fax", entry->subentries[i].data.number, 1);
 				break;
 			case GN_PHONEBOOK_NUMBER_Work:
-				fprintf(f, "workPhone: %s\n", entry->subentries[i].data.number);
+				ldif_entry_write(f, "workPhone", entry->subentries[i].data.number, 1);
 				break;
 			case GN_PHONEBOOK_NUMBER_General:
-				fprintf(f, "telephoneNumber: %s\n", entry->subentries[i].data.number);
+				ldif_entry_write(f, "telephoneNumber", entry->subentries[i].data.number, 1);
 				break;
 			default:
 				break;
 			}
 			break;
 		case GN_PHONEBOOK_ENTRY_URL:
-			fprintf(f, "homeurl: %s\n", entry->subentries[i].data.number);
+			ldif_entry_write(f, "homeurl", entry->subentries[i].data.number, 1);
 			break;
 		default:
 			fprintf(f, "custom%d: %s\n", entry->subentries[i].entry_type, entry->subentries[i].data.number);
@@ -103,14 +118,21 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
 #define STORE2(a, b, c) if (BEGINS(a)) { c; strncpy(b, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
+#define STORE2_BASE64(a, b, c) if (BEGINS(a)) { c; base64_decode(b, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
 
 #define STORE(a, b) STORE2(a, b, (void) 0)
+#define STORE_BASE64(a, b) STORE2_BASE64(a, b, (void) 0)
 
 #define STORESUB(a, c) STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
 				entry->subentries[entry->subentries_count].entry_type = c);
+#define STORESUB_BASE64(a, c) STORE2_BASE64(a, entry->subentries[entry->subentries_count++].data.number, \
+				entry->subentries[entry->subentries_count].entry_type = c);
 #define STORENUM(a, c) STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
-				entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
-				entry->subentries[entry->subentries_count].number_type = c);
+					entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
+					entry->subentries[entry->subentries_count].number_type = c);
+#define STORENUM_BASE64(a, c) STORE2_BASE64(a, entry->subentries[entry->subentries_count++].data.number, \
+					entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
+					entry->subentries[entry->subentries_count].number_type = c);
 
 #undef ERROR
 #define ERROR(a) fprintf(stderr, "%s\n", a)
@@ -123,7 +145,7 @@ API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 	while (1) {
 		if (!fgets(buf, 1024, f))
 			return -1;
-		if (BEGINS("dn: "))
+		if (BEGINS("dn:"))
 			break;
 	}
 
@@ -133,18 +155,29 @@ API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 			return -1;
 		}
 		STORE("cn: ", entry->name);
+		STORE_BASE64("cn:: ", entry->name);
 		STORE("telephoneNumber: ", entry->number);
+		STORE_BASE64("telephoneNumber:: ", entry->number);
 
 		STORESUB("homeurl: ", GN_PHONEBOOK_ENTRY_URL);
+		STORESUB_BASE64("homeurl:: ", GN_PHONEBOOK_ENTRY_URL);
 		STORESUB("mail: ", GN_PHONEBOOK_ENTRY_Email);
+		STORESUB_BASE64("mail:: ", GN_PHONEBOOK_ENTRY_Email);
 		STORESUB("homePostalAddress: ", GN_PHONEBOOK_ENTRY_Postal);
+		STORESUB_BASE64("homePostalAddress:: ", GN_PHONEBOOK_ENTRY_Postal);
 		STORESUB("Description: ", GN_PHONEBOOK_ENTRY_Note);
+		STORESUB_BASE64("Description:: ", GN_PHONEBOOK_ENTRY_Note);
 
 		STORENUM("homePhone: ", GN_PHONEBOOK_NUMBER_Home);
+		STORENUM_BASE64("homePhone:: ", GN_PHONEBOOK_NUMBER_Home);
 		STORENUM("mobile: ", GN_PHONEBOOK_NUMBER_Mobile);
+		STORENUM_BASE64("mobile:: ", GN_PHONEBOOK_NUMBER_Mobile);
 		STORENUM("fax: ", GN_PHONEBOOK_NUMBER_Fax);
+		STORENUM_BASE64("fax:: ", GN_PHONEBOOK_NUMBER_Fax);
 		STORENUM("workPhone: ", GN_PHONEBOOK_NUMBER_Work);
+		STORENUM_BASE64("workPhone:: ", GN_PHONEBOOK_NUMBER_Work);
 		STORENUM("telephoneNumber: ", GN_PHONEBOOK_NUMBER_General);
+		STORENUM_BASE64("telephoneNumber:: ", GN_PHONEBOOK_NUMBER_General);
 
 		if (BEGINS("\n"))
 			break;

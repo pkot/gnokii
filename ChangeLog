@@ -76,6 +76,8 @@
       be used to remove white characters either from all number
       entries in the phonebook or in a single number     (Pawel Kot)
     o add base64 and utf8 support       (Pawel Kot, Martin Goldhahn)
+    o use base64 encoding for non ascii entries in ldif addressbook
+      (for Mozilla)                     (Pawel Kot, Martin Goldhahn)
 
 0.5.2
 =====
