@@ -1,12 +1,13 @@
 GNOKII FAQ
 Pawe³ Kot, pkot@linuxnews.pl
-v0.1, 8 January 2001
+
+$Id:
 
 -------------------------------------------------------------------------------
 Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
-   running gnokii. What's wrong?
+   running gnokii. What's wrong ?
 
-A. Gnokii program cannot connect to the phone. Possible reasons are:
+A. Gnokii cannot connect to the phone.  Possible reasons are:
     - wrong serial port is defined in gnokii config file,
     - you are using the wrong cable,
     - you are using not supported phone model; currently supported phone models
@@ -19,19 +20,36 @@ A. Gnokii program cannot connect to the phone. Possible reasons are:
     - you don't have permission to write to /dev/ttySX device.
 
 -------------------------------------------------------------------------------
-Q. `make install' sets mgnokiidev suid root. Is it correct?
+Q. `make install' sets mgnokiidev suid root.  Is this correct ?
 
-A. Yes, it is correct. gnokiid requires to have a new created device in /dev
-   directory. mgnokiidev is the code which does it and nothing else. mgnokiidev
-   is executable only for gnokii group members (and root). You don't have to
-   worry.
-
--------------------------------------------------------------------------------
-Q. Does gnokii support Nokia 3210 phone?
-
-A. Yes it does. But support is very limited yet.
+A. Yes.  gnokiid needs to create a symbolic link in the /dev
+   directory.  mgnokiidev is the program which does this and hence
+   it must be suid root so it can write to the directory.  mgnokiidev
+   is executable only for gnokii group members (and root).  You don't have
+   to worry.
 
 -------------------------------------------------------------------------------
-Q. Does gnokii support Nokia 6210/7110 phone?
+Q. Does gnokii support Nokia 3210 phone ?
 
-A. Not yet. But hopefully will be very soon.
+A. Yes it does, but support is presently limited.
+
+-------------------------------------------------------------------------------
+Q. Does gnokii support Nokia 6210/7110 phone ?
+
+A. There is limited support but it is improving every day now.
+
+-------------------------------------------------------------------------------
+Q. Can I get a copy of the protocol for the <insert phone model here> ?
+
+A. We don't have any formal documentation of the protocols in use.
+   If you take a look at the source code this should provide some
+   pointers, alternatively there are some web sites that have
+   collated some information;
+   
+     Nokia 3110/3810/8110
+       http://www.tec.puv.fi/~s98114/GSM/FBUS.html  
+   
+     Nokia 5110/6110
+       http://www.gadgets.demon.co.uk/nokia61xx/protocol.html
+
+
