@@ -19,6 +19,7 @@
     o cleanup: delete functions IncomingSecurity, netmonitor...
       as they won't work with this series.             (Markus Plail)
     o add profile reading                              (Markus Plail)
+    o add speed dials reading/writing                  (Markus Plail)
  * 7110 series
     o typo in P7110_WritePhonebookLocation             (Markus Plail)
  * New supported phones:
