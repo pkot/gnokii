@@ -18,47 +18,47 @@
 
 #ifdef __gnokii_c_
 
-int monitormode(void);
+static int monitormode(void);
 
 #ifdef SECURITY
-  int entersecuritycode(char *type);
-  int getsecuritycodestatus(void);
+  static int entersecuritycode(char *type);
+  static int getsecuritycodestatus(void);
 #endif
 
-int getmemory(int argc, char *argv[]);
-int writephonebook(int argc, char *argv[]);
-int getspeeddial(char *number);
-int setspeeddial(char *argv[]);
-int getsms(int argc, char *argv[]);
-int deletesms(int argc, char *argv[]);
-int sendsms(int argc, char *argv[]);
-int savesms(int argc, char *argv[]);
-int sendlogo(int argc, char *argv[]);
-int sendringtone(int argc, char *argv[]);
-int getsmsc(char *mcn);
-int setdatetime(int argc, char *argv[]);
-int getdatetime(void);
-int setalarm(char *argv[]);
-int getalarm(void);
-int dialvoice(char *number);
-int getcalendarnote(int argc, char *argv[]);
-int writecalendarnote(char *argv[]);
-int deletecalendarnote(int argc, char *argv[]);
-int getdisplaystatus();
-int netmonitor(char *_mode);
-int identify(void);
-int senddtmf(char *String);
-int foogle(char *argv[]);
-int pmon(void);
-int setlogo(int argc, char *argv[]);
-int getlogo(int argc, char *argv[]);
-int viewlogo(char *);
-int setringtone(int argc, char *argv[]);
-int reset(char *type);
-int getprofile(int argc, char *argv[]);
-int displayoutput();
-int presskeysequence();
-int divert(int argc, char *argv[]);
+static int getmemory(int argc, char *argv[]);
+static int writephonebook(int argc, char *argv[]);
+static int getspeeddial(char *number);
+static int setspeeddial(char *argv[]);
+static int getsms(int argc, char *argv[]);
+static int deletesms(int argc, char *argv[]);
+static int sendsms(int argc, char *argv[]);
+static int savesms(int argc, char *argv[]);
+static int sendlogo(int argc, char *argv[]);
+static int sendringtone(int argc, char *argv[]);
+static int getsmsc(char *mcn);
+static int setdatetime(int argc, char *argv[]);
+static int getdatetime(void);
+static int setalarm(char *argv[]);
+static int getalarm(void);
+static int dialvoice(char *number);
+static int getcalendarnote(int argc, char *argv[]);
+static int writecalendarnote(char *argv[]);
+static int deletecalendarnote(int argc, char *argv[]);
+static int getdisplaystatus();
+static int netmonitor(char *_mode);
+static int identify(void);
+static int senddtmf(char *String);
+static int foogle(char *argv[]);
+static int pmon(void);
+static int setlogo(int argc, char *argv[]);
+static int getlogo(int argc, char *argv[]);
+static int viewlogo(char *);
+static int setringtone(int argc, char *argv[]);
+static int reset(char *type);
+static int getprofile(int argc, char *argv[]);
+static int displayoutput();
+static int presskeysequence();
+static int divert(int argc, char *argv[]);
 
 #endif
 
