@@ -97,6 +97,7 @@
  * MS Windows compatibility
     o add serial_nreceived() and serial_flush() functions
       to winserial.c                                    (Mark Lakata)
+    o don't use alloca(3)                                 (Pawel Kot)
 
 0.4.3
 =====

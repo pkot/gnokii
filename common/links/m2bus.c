@@ -410,7 +410,7 @@ static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 		return GE_MEMORYFULL;
 	}
 
-	if ((out_buffer = alloca(messagesize + 8)) == NULL) {
+	if ((out_buffer = malloc(messagesize + 8)) == NULL) {
 		dprintf("M2BUS: transmit buffer allocation failed, requested %d bytes.\n", messagesize + 8);
 		return GE_MEMORYFULL;
 	}
@@ -480,11 +480,14 @@ static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 
 	M2BUS_WaitforIdle(5000, true);
 
-	if (device_write(out_buffer, i) != i)
+	if (device_write(out_buffer, i) != i) {
+		free(out_buffer);
 		return GE_INTERNALERROR;
+	}
 
 	device_flush();
 
+	free(out_buffer);
 	return GE_NONE;
 }
 
