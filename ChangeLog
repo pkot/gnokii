@@ -9,11 +9,12 @@
     o fix logos                                        (Markus Plail)
  * 6510 series updates:
     o add bitmap writing                               (Markus Plail)
- * 6110 series updated:
+ * 6110 series updates:
     o Nokia 3410 is known to work                         (Pawel Kot)
     o use 0x64 frames only when PM_AUTHENTICATION is set for the
       model                                               (Pawel Kot)
     o use unicode for the newer phones in the phonebook   (Pawel Kot)
+    o phone info frame (0xd2) parsed correctly       (BORBELY Zoltan)
  * bitmap support
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)

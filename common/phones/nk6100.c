@@ -929,13 +929,14 @@ static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int 
 
 static GSM_Error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
+	unsigned char *pos;
+
 	if (data->Model) {
 		snprintf(data->Model, 6, "%s", message + 21);
-		data->Model[5] = 0;
 	}
 	if (data->Revision) {
 		snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW: %s", message + 6);
-		data->Revision[GSM_MAX_REVISION_LENGTH-1] = 0;
+		if ((pos = strchr(data->Revision, '\n')) != NULL) *pos = 0;
 	}
 	dprintf("Phone info:\n%s\n", message + 4);
 	return GE_NONE;
