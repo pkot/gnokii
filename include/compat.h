@@ -22,7 +22,8 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2002, BORBELY Zoltan
+  Copyright (C) 2002-2004, BORBELY Zoltan
+  Copyright (C) 2002-2004, Pawel Kot
 
   Header file for various platform compatibility.
 
@@ -37,8 +38,9 @@
 
 #ifdef WIN32
 #  include <windows.h>
-#  include <string.h>
-#  include <direct.h>
+#  ifdef HAVE_DIRECT_H
+#    include <direct.h>
+#  endif
 #endif
 
 #ifdef HAVE_STDARG_H

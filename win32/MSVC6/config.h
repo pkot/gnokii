@@ -58,6 +58,7 @@
 #undef HAVE_UNISTD_H
 #define HAVE_CTYPE_H 1
 #define HAVE_STDLIB_H 1
+#define HAVE_DIRECT_H 1
 
 /* Define if your compiler supports long long */
 #undef HAVE_LONG_LONG
