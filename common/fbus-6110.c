@@ -1856,8 +1856,8 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   };
 
-  int size=PackSevenBitsToEight(SMS->MessageText, req+42);
-  int timeout=60;
+  int size;
+  int timeout=70;
 
   /* First of all we should get SMSC number */
   if (SMS->MessageCenter.No) {
@@ -1870,10 +1870,18 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   fprintf(stdout, _("Sending SMS to %s via message center %s\n"), SMS->Destination, SMS->MessageCenter.Number);
 #endif /* DEBUG */
 
+  if (SMS->UserDataHeaderIndicator) {
+    size = 14 + SMS->MessageText[11] * SMS->MessageText[12] / 8;
+    memcpy(req + 42, SMS->MessageText, size);
+    req[22] = size;
+  } else {
+    size = PackSevenBitsToEight(SMS->MessageText, req+42);
+    req[22]=strlen(SMS->MessageText);
+    if (strlen(SMS->MessageText) > GSM_MAX_SMS_LENGTH)
+      return(GE_SMSTOOLONG);
+  }
   CurrentSMSMessageError=GE_BUSY;
 
-  if (strlen(SMS->MessageText) > GSM_MAX_SMS_LENGTH)
-    return(GE_SMSTOOLONG);
 
   req[6]=SemiOctetPack(SMS->MessageCenter.Number, req+7);
   if (req[6] % 2) req[6]++;
@@ -1905,17 +1913,17 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   }
   
   /* Mask for 8 bit data */
-
-  /* FIXME: 8 bit data is currently not supported so the following line
-     is commented out */
+  /* FIXME: full support for 8 bit data */
   if (SMS->EightBit) req[21] = req[21] | 0xf4;
   
+  /* Mask for User Data Header Indicator */
+  if (SMS->UserDataHeaderIndicator) req[18] = req[18] | 0x40;
+
   /* Mask for compression */
-  /* FIXME: Compression is currently not supported so following line is commented out */
+  /* FIXME: support for compression */
   /* See GSM 03.42 */
 /*  if (SMS->Compression) req[21] = req[21] | 0x20; */
 
-  req[22]=strlen(SMS->MessageText);
 
   req[23]=SemiOctetPack(SMS->Destination, req+24);
 

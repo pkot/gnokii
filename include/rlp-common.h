@@ -51,6 +51,27 @@ typedef enum {
     RLPS_SREJ   = 0x03      /* Selective Reject */
 }   RLP_SFrameField;
 
+/* Used for CurrentFrameType. */
+typedef enum {
+    RLPFT_U_SABM = 0x00,
+    RLPFT_U_UA,
+    RLPFT_U_DISC,
+    RLPFT_U_DM,
+    RLPFT_U_NULL,
+    RLPFT_U_UI,
+    RLPFT_U_XID,
+    RLPFT_U_TEST,
+    RLPFT_U_REMAP,
+    RLPFT_S_RR,
+    RLPFT_S_REJ,
+    RLPFT_S_RNR,
+    RLPFT_S_SREJ,
+    RLPFT_SI_RR,
+    RLPFT_SI_REJ,
+    RLPFT_SI_RNR,
+    RLPFT_SI_SREJ,
+    RLPFT_BAD
+} RLP_FrameTypes;
 
     /* Frame definition for TCH/F9.6 Frame */
 typedef struct {
@@ -71,12 +92,23 @@ typedef struct {
 
 }   RLP_F96Header;
 
+/* RLP (main) states. See GSM specification 04.22 Annex A, Section A.1.1. */
 
-	/* Prototypes for functions */
-void    RLP_DisplayF96Frame(RLP_F96Frame *frame);
-void    RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header);
-void    RLP_DisplayXID(u8 *frame);
+typedef enum {
+  RLP_S0, /* ADM and Detached */
+  RLP_S1, /* ADM and Attached */
+  RLP_S2, /* Pending Connect Request */
+  RLP_S3, /* Pending Connect Indication */
+  RLP_S4, /* ABM and Connection Established */
+  RLP_S5, /* Disconnect Initiated */
+  RLP_S6, /* Pending Reset Request */
+  RLP_S7  /* Pending Reset Indication */
+} RLP_State;
 
+/* Prototypes for functions */
 
+void RLP_DisplayF96Frame(RLP_F96Frame *frame);
+void RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header);
+void RLP_DisplayXID(u8 *frame);
 
 #endif	/* __rlp_common_h */

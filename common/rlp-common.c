@@ -15,12 +15,71 @@
 #include    "rlp-crc24.h"
 #include    "misc.h"        /* For u8, u32 etc. */
 
+void MAIN_STATE_MACHINE(RLP_F96Frame *frame);
+
+/* This is the type we are just handling. */
+RLP_FrameTypes CurrentFrameType;
+
+/* Current state of RLP state machine. */
+RLP_State      CurrentState=RLP_S0; /* We start at ADM and Detached */
+
+/* Next state of RLP state machine. */
+RLP_State      NextState;
+
+
+/* State variables - see GSM 04.22, Annex A, section A.1.2 */
+
+u8 RLP_M = 62; /* Number of different sequence numbers (modulus) */
+
+u8 RLP_N2 = 15; /* Maximum number of retransmisions. GSM spec says 6 here, but
+                   Nokia will XID this. */
+
+/* Previous sequence number. */
+u8 Decr(x) {
+
+  if (x==0)
+    return (RLP_M-1);
+  else
+    return (x-1);
+}
+
+/* Next sequence number. */
+u8 Incr(x) {
+
+    return (x+1) % RLP_M;
+}
+
+/* This function is used for sending RLP frames to the phone. */
+
+void RLP_SendF96Frame(RLP_FrameTypes FrameType, u8 OuTCR, u8 OutPF,
+                      u8 OutNR, u8 OutNS,
+                      u8 *OutData)
+
+{
+
+  /* RLP_F96Frame frame; */
+
+  /* u8 req[64]; */
+
+  /* Store FCS in the frame. */
+
+  // RLP_CheckCRC24FCS((u8 *)frame, 30);
+
+}
+
+/* Check_input_PDU in Serge's code. */
 
 void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 {
 
   int           count;
   RLP_F96Header header;
+
+  /*
+    IncrementTimes();
+  */
+
+  CurrentFrameType=RLPFT_BAD;
 
   /* Check FCS. */
 
@@ -35,59 +94,110 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
     case RLPFT_U: /* Unnumbered frames. */
 
-      fprintf(stdout, _("Unnumbered Frame M=%02x "), header.M);
+#ifdef DEBUG
+      fprintf(stdout, "Unnumbered Frame M=%02x ", header.M);
+#endif
 
       switch (header.M) {
 
       case RLPU_SABM :
 
-	fprintf(stdout, _("Set Asynchronous Balanced Mode (SABM) "));
+#ifdef DEBUG
+	fprintf(stdout, "Set Asynchronous Balanced Mode (SABM) ");
+#endif
+
+	CurrentFrameType=RLPFT_U_SABM;
+
 	break;
 
       case RLPU_UA:
 
-	fprintf(stdout, _("Unnumbered Acknowledge (UA) "));
+#ifdef DEBUG
+	fprintf(stdout, "Unnumbered Acknowledge (UA) ");
+#endif
+
+	CurrentFrameType=RLPFT_U_UA;
+
 	break;
 
       case RLPU_DISC:
 
-	fprintf(stdout, _("Disconnect (DISC) "));
+#ifdef DEBUG
+	fprintf(stdout, "Disconnect (DISC) ");
+#endif
+
+	CurrentFrameType=RLPFT_U_DISC;
+
 	break;
 
       case RLPU_DM:
 
-	fprintf(stdout, _("Disconnected Mode (DM) "));
+#ifdef DEBUG
+	fprintf(stdout, "Disconnected Mode (DM) ");
+#endif
+	CurrentFrameType=RLPFT_U_DM;
+
 	break;
 
       case RLPU_UI:
 
-	fprintf(stdout, _("Unnumbered Information (UI) "));
+#ifdef DEBUG
+	fprintf(stdout, "Unnumbered Information (UI) ");
+#endif
+
+	CurrentFrameType=RLPFT_U_UI;
+
 	break;
 
       case RLPU_XID:
 
-	fprintf(stdout, _("Exchange Information (XID) \n"));
+#ifdef DEBUG
+	fprintf(stdout, "Exchange Information (XID) \n");
 	RLP_DisplayXID(frame->Data);
+#endif
+
+	CurrentFrameType=RLPFT_U_XID;
+
 	break;
 
       case RLPU_TEST:
 
-	fprintf(stdout, _("Test (TEST) "));
+#ifdef DEBUG
+	fprintf(stdout, "Test (TEST) ");
+#endif
+
+	CurrentFrameType=RLPFT_U_TEST;
+
 	break;
 
       case RLPU_NULL:
 
-	fprintf(stdout, _("Null information (NULL) "));
+#ifdef DEBUG
+	fprintf(stdout, "Null information (NULL) ");
+#endif
+
+	CurrentFrameType=RLPFT_U_NULL;
+
 	break;
 
       case RLPU_REMAP:
 
-	fprintf(stdout, _("Remap (REMAP) "));
+#ifdef DEBUG
+	fprintf(stdout, "Remap (REMAP) ");
+#endif
+
+	CurrentFrameType=RLPFT_U_REMAP;
+
 	break;
                     
       default :
 
+#ifdef DEBUG
 	fprintf(stdout, _("Unknown!!! "));
+#endif
+
+	CurrentFrameType=RLPFT_BAD;
+
 	break;
 
       }
@@ -95,38 +205,158 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
             
     case RLPFT_S: /* Supervisory frames. */
 
-      fprintf(stdout, _("Supervisory Frame S=%x N(R)=%02x"), header.S, header.Nr);
+#ifdef DEBUG
+      fprintf(stdout, "Supervisory Frame S=%x N(R)=%02x", header.S, header.Nr);
+#endif
+
+      switch (header.S) {
+
+      case RLPS_RR:
+
+#ifdef DEBUG
+      fprintf(stdout, "RR");
+#endif
+
+      CurrentFrameType=RLPFT_S_RR;
+
+	break;
+
+      case RLPS_REJ:
+
+#ifdef DEBUG
+      fprintf(stdout, "REJ");
+#endif
+
+      CurrentFrameType=RLPFT_S_REJ;
+
+	break;
+
+      case RLPS_RNR:
+
+#ifdef DEBUG
+      fprintf(stdout, "RNR");
+#endif
+
+      CurrentFrameType=RLPFT_S_RNR;
+
+	break;
+
+      case RLPS_SREJ:
+
+#ifdef DEBUG
+      fprintf(stdout, "SREJ");
+#endif
+
+      CurrentFrameType=RLPFT_S_SREJ;
+
+	break;
+
+      default:
+
+#ifdef DEBUG
+      fprintf(stdout, _("BAD"));
+#endif
+
+      CurrentFrameType=RLPFT_BAD;
+
+      }
+
       break;
             
     default:
 
-      fprintf(stdout, _("Info+Supervisory Frame S=%x N(S)=%02x N(R)=%02x"), header.S, header.Ns, header.Nr);
+#ifdef DEBUG
+      fprintf(stdout, "Info+Supervisory Frame S=%x N(S)=%02x N(R)=%02x ", header.S, header.Ns, header.Nr);
+#endif
+
+      switch (header.S) {
+
+      case RLPS_RR:
+
+#ifdef DEBUG
+      fprintf(stdout, "RR");
+#endif
+
+      CurrentFrameType=RLPFT_SI_RR;
+
+	break;
+
+      case RLPS_REJ:
+
+#ifdef DEBUG
+      fprintf(stdout, "REJ");
+#endif
+
+      CurrentFrameType=RLPFT_SI_REJ;
+
+	break;
+
+      case RLPS_RNR:
+
+#ifdef DEBUG
+      fprintf(stdout, "RRN");
+#endif
+
+      CurrentFrameType=RLPFT_SI_RNR;
+
+	break;
+
+      case RLPS_SREJ:
+
+#ifdef DEBUG
+      fprintf(stdout, "SREJ");
+#endif
+
+      CurrentFrameType=RLPFT_SI_SREJ;
+
+	break;
+
+      default:
+
+#ifdef DEBUG
+      fprintf(stdout, "BAD");
+#endif
+
+      CurrentFrameType=RLPFT_BAD;
+
+      }
+
       break;
     }   
 
+#ifdef DEBUG
+
     /* Command/Response and Poll/Final bits. */
 
-    fprintf(stdout, _(" C/R=%d P/F=%d \n"), header.CR, header.PF);
+    fprintf(stdout, " C/R=%d P/F=%d ", header.CR, header.PF);
 
     /* Information. */
     
-    for (count = 0; count < 25; count ++) {
+    if (CurrentFrameType!=RLPFT_U_NULL) {
 
-      if (isprint(frame->Data[count]))
-	fprintf(stdout, "[%02x%c]", frame->Data[count], frame->Data[count]);
-      else
-	fprintf(stdout, "[%02x ]", frame->Data[count]);
+      fprintf(stdout, "\n");
 
-      if (count == 15)
-	fprintf(stdout, "\n");
+      for (count = 0; count < 25; count ++) {
+
+	if (isprint(frame->Data[count]))
+	  fprintf(stdout, "[%02x%c]", frame->Data[count], frame->Data[count]);
+	else
+	  fprintf(stdout, "[%02x ]", frame->Data[count]);
+
+	if (count == 15)
+	  fprintf(stdout, "\n");
+      }
     }
 
     /* FCS. */
     
-    fprintf (stdout, _(" FCS: %02x %02x %02x"), frame->FCS[0], frame->FCS[1], frame->FCS[2]);
+    fprintf (stdout, " FCS: %02x %02x %02x\n\n", frame->FCS[0],
+                                                 frame->FCS[1],
+                                                 frame->FCS[2]);
 
-  fprintf(stdout, "\n\n");
-  fflush(stdout);
+    fflush(stdout);
+
+#endif
 
   }
   else {
@@ -137,7 +367,17 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
   }
 
+  MAIN_STATE_MACHINE(frame);
+
+  /*
+    Y:= outblock();
+  */
+
   return;
+}
+
+void MAIN_STATE_MACHINE(RLP_F96Frame *frame) {
+
 }
 
 /* Given a pointer to an RLP XID frame, display contents in human readable
@@ -152,7 +392,7 @@ void RLP_DisplayXID(u8 *frame)
   int count = 25;  /* Sanity check */
   u8  type, length;
     
-  fprintf(stdout, _("XID: "));
+  fprintf(stdout, "XID: ");
 
   while ((*frame !=0) && (count >= 0)) {
 
@@ -164,52 +404,52 @@ void RLP_DisplayXID(u8 *frame)
     case 0x01: /* RLP Version Number, probably 1 for Nokia. */
 
       frame += length;
-      fprintf(stdout, _("Ver %d "), *frame);
+      fprintf(stdout, "Ver %d ", *frame);
       break;
                 
     case 0x02: /* IWF to MS window size */
 
       frame += length;
-      fprintf(stdout, _("IWF-MS %d "), *frame);
+      fprintf(stdout, "IWF-MS %d ", *frame);
       break;
                 
     case 0x03: /* MS to IWF window size. */
 
       frame += length;
-      fprintf(stdout, _("MS-IWF %d "), *frame);
+      fprintf(stdout, "MS-IWF %d ", *frame);
       break;
 
     case 0x04: /* Acknowledgement Timer (T1). */
 
       frame += length;
-      fprintf(stdout, _("T1 %dms "), *frame * 10);
+      fprintf(stdout, "T1 %dms ", *frame * 10);
       break;
 
     case 0x05: /* Retransmission attempts (N2). */
 
       frame += length;
-      fprintf(stdout, _("N2 %d "), *frame);
+      fprintf(stdout, "N2 %d ", *frame);
       break;
 
     case 0x06: /* Reply delay (T2). */
 
       frame += length;
-      fprintf(stdout, _("T2 %dms "), *frame * 10);
+      fprintf(stdout, "T2 %dms ", *frame * 10);
       break;
 
     case 0x07: /* Compression. */
 
       frame ++;
-      fprintf(stdout, _("Comp [Pt=%d "), (*frame >> 4) );
-      fprintf(stdout, _("P0=%d "), (*frame & 0x03) );
+      fprintf(stdout, "Comp [Pt=%d ", (*frame >> 4) );
+      fprintf(stdout, "P0=%d ", (*frame & 0x03) );
 
       frame ++;
-      fprintf(stdout, _("P1l=%d "), *frame);
+      fprintf(stdout, "P1l=%d ", *frame);
       frame ++;
-      fprintf(stdout, _("P1h=%d "), *frame);
+      fprintf(stdout, "P1h=%d ", *frame);
 
       frame ++;
-      fprintf(stdout, _("P2=%d] "), *frame);
+      fprintf(stdout, "P2=%d] ", *frame);
       break;
             
     default:

@@ -179,8 +179,9 @@ typedef struct {
   GSM_SMSMessageType Type;                  /* Type of the SMS message */
   GSM_SMSMessageStatus Status;              /* Status of the SMS message */
   int Class;                                /* Class Message: 0, 1, 2, 3 or none; see GSM 03.38 */
-  bool EightBit;                            /* Indicates whether SMS contains 8 bit data or not */
-  bool Compression;                         /* Indicates whether SMS contains compressed data or not */
+  bool EightBit;                            /* Indicates whether SMS contains 8 bit data */
+  bool Compression;                         /* Indicates whether SMS contains compressed data */
+  bool UserDataHeaderIndicator;             /* Indicates whether SMS data is preceded by the user data header */
   int Location;                             /* Location in the memory. */
 } GSM_SMSMessage;
 

@@ -9,12 +9,13 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
   Mainline code for gnokii utility.  Handles command line parsing and
-  reading/writing phonebook entries.
+  reading/writing phonebook entries and other stuff.
 
   Warning: this code is only the test tool. It is not intented to real work -
-  wait for GUI application.
+  wait for GUI application. Well, our test tool is now really powerful and
+  useful :-)
 
-  Last modification: Sun May 16 21:04:03 CEST 1999
+  Last modification: Wed Dec  1 18:53:21 CET 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -92,6 +93,7 @@ int usage(void)
 "          gnokii --sendsms destination [--smsc message_center_number |\n"
 "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
 "          gnokii --getsmsc message_center_number\n"
+"          gnokii --sendoplogoviasms destionation logofile [network code]\n"
 "          gnokii --setdatetime [YYYY MM DD HH MM]\n"
 "          gnokii --getdatetime\n"
 "          gnokii --setalarm HH MM\n"
@@ -150,6 +152,9 @@ int usage(void)
 
 "          --getsmsc         show the SMSC number from location\n"
 "                            [message_center_number].\n\n"
+
+"          --sendoplogoviasms send the logofile to destination as operator\n"
+"                             logo\n\n"
 
 "          --setdatetime     set the date and the time of the phone.\n\n"
 
@@ -345,6 +350,9 @@ int main(int argc, char *argv[])
     // Send SMS message mode
     { "sendsms",            required_argument, NULL, OPT_SENDSMS },
 
+    // Send SMS message mode
+    { "sendoplogoviasms",   required_argument, NULL, OPT_SENDOPLOGOVIASMS },
+
     // Get SMS center number mode
     { "getsmsc",            required_argument, NULL, OPT_GETSMSC },
 
@@ -399,6 +407,7 @@ int main(int argc, char *argv[])
     { OPT_GETSMS,            3, 3, 0 },
     { OPT_DELETESMS,         3, 3, 0 },
     { OPT_SENDSMS,           1, 8, 0 },
+    { OPT_SENDOPLOGOVIASMS,  2, 3, GAL_XOR },
     { OPT_GETSMSC,           1, 1, 0 },
     { OPT_GETWELCOMENOTE,    1, 1, 0 },
     { OPT_SETWELCOMENOTE,    1, 1, 0 },
@@ -584,6 +593,11 @@ int main(int argc, char *argv[])
       rc = sendsms(nargc, nargv);
       break;
 
+    case OPT_SENDOPLOGOVIASMS:
+
+      rc = sendoplogoviasms(nargc, nargv);
+      break;
+
     case OPT_GETSMSC:
 
       rc = getsmsc(optarg);
@@ -681,6 +695,8 @@ int sendsms(int argc, char *argv[])
       - no compression
       - 7 bit data
       - SMSC no. 1
+      - message validity for 3 days
+      - unset user data header indicator
   */
 
   SMS.Type = GST_MO;
@@ -689,6 +705,7 @@ int sendsms(int argc, char *argv[])
   SMS.EightBit = false;
   SMS.MessageCenter.No = 1;
   SMS.Validity = 4320; /* 4320 minutes == 72 hours */
+  SMS.UserDataHeaderIndicator = false;
 
   strcpy(SMS.Destination,argv[0]);
 
@@ -980,7 +997,7 @@ int getsms(char *argv[])
               fprintf(stdout,_("%d"), message.Time.Timezone);
           }
 
-          fprintf(stdout, _("\n"));
+          fprintf(stdout, "\n");
 
           fprintf(stdout, _("Response date/time: %d/%d/%d %d:%02d:%02d GMT"), \
                   message.Time.Day, message.Time.Month, message.Time.Year, \
@@ -993,7 +1010,7 @@ int getsms(char *argv[])
               fprintf(stdout,_("%d"),message.Time.Timezone);
           }
 
-          fprintf(stdout, _("\n"));
+          fprintf(stdout, "\n");
 
           fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
           fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
@@ -1020,7 +1037,7 @@ int getsms(char *argv[])
               fprintf(stdout,_("%d"),message.Time.Timezone);
           }
 
-          fprintf(stdout, _("\n"));
+          fprintf(stdout, "\n");
 
           fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
           fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
@@ -1281,6 +1298,73 @@ int dialvoice(char *Number)
 
   GSM->Terminate();
 
+  return 0;
+}
+
+/* The following function allows to send the operator logos using SMS */
+int sendoplogoviasms(int argc, char *argv[])
+{
+  GSM_SMSMessage SMS;
+  GSM_Bitmap bitmap;
+  GSM_Error error;
+
+  char UserDataHeader[14] = {0x06, 0x05, 0x04,
+                 0x15, 0x82, 0x00, 0x00,
+                 0x00, 0x00, 0x00,
+                 0x00, 0x00, 0x00, 0x01};
+
+  /* Default settings:
+      - no delivery report
+      - Class Message 1
+      - no compression
+      - 8 bit data
+      - SMSC no. 1
+      - validity 3 days
+      - set UserDataHeaderIndicator
+  */
+
+  SMS.Type = GST_MO;
+  SMS.Class = 1;
+  SMS.Compression = false;
+  SMS.EightBit = true;
+  SMS.MessageCenter.No = 1;
+  SMS.Validity = 4320; /* 4320 minutes == 72 hours */
+  SMS.UserDataHeaderIndicator = true;
+
+  /* The first argument is the destionation, ie the phone number of recipient. */
+  strcpy(SMS.Destination,argv[0]);
+
+  /* The second argument is the bitmap file. */
+  GSM_ReadBitmapFile(argv[1], &bitmap);
+
+  /* The third argument, if present, is the Network code of the operator. */
+  if (argv[2])
+    strcpy(bitmap.netcode, argv[2]);
+
+  /* Set the logo size */
+  UserDataHeader[11] = bitmap.width;
+  UserDataHeader[12] = bitmap.height;
+
+  /* Set the network code */
+  UserDataHeader[7] = ((bitmap.netcode[1] & 0x0f) << 4) | (bitmap.netcode[0] & 0xf);
+  UserDataHeader[8] = 0xf0 | (bitmap.netcode[2] & 0x0f);
+  UserDataHeader[9] = ((bitmap.netcode[5] & 0x0f) << 4) | (bitmap.netcode[4] & 0xf);
+
+  memcpy(SMS.MessageText,UserDataHeader,14);
+  memcpy(SMS.MessageText+14,bitmap.bitmap,bitmap.size);
+
+  /* Initialise the GSM interface. */
+  fbusinit(NULL);
+  
+  /* Send the message. */
+  error = GSM->SendSMSMessage(&SMS);
+
+  if (error == GE_SMSSENDOK)
+    fprintf(stdout, _("Send succeeded!\n"));
+  else
+    fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+
+  GSM->Terminate();
   return 0;
 }
 
