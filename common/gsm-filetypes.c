@@ -1303,9 +1303,9 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 			if (pos2 == 7) buffer[pos] = 0;
 			if (GSM_IsPointBitmap(bitmap, x, y)) buffer[pos] |= (1 << pos2);
 			pos2--;
-			if (pos2 < 0) {pos2 = 7; pos++;} //going to new line
+			if (pos2 < 0) {pos2 = 7; pos++;} /* going to new line */
 		}
-		if (pos2 != 7) {pos2 = 7; pos++;} //for startup logos - new line with new byte
+		if (pos2 != 7) {pos2 = 7; pos++;} /* for startup logos - new line with new byte */
 	}
 
 	division = div(bitmap->width, 8);
