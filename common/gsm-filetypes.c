@@ -531,12 +531,13 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 	case BMP:
 		error = loadbmp(file, bitmap);
 		break;
-#ifdef XPM
 	case XPMF:
-		fclose(file);
+#ifdef XPM
 		error = loadxpm(FileName, bitmap);
-		file = NULL;
 		break;
+#else
+		fprintf(stderr, "Sorry, gnokii was not compiled with XPM support.\n");
+		/* FALLTHRU */
 #endif
 	default:
 		error = GE_INVALIDFILEFORMAT;
@@ -549,7 +550,6 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 
 
 #ifdef XPM
-
 GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 {
 	int error, x, y;
@@ -597,9 +597,7 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 
 	return GE_NONE;
 }
-
 #endif
-
 
 /* Based on the article from the Polish Magazine "Bajtek" 11/92 */
 /* Marcin-Wiacek@Topnet.PL */
@@ -1309,70 +1307,11 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 
 GSM_Error GSM_ShowBitmapFile(char *FileName)
 {
-	FILE *file;
-	unsigned char buffer[300];
-	int error;
-	GSM_Filetypes filetype = None;
 	int i, j;
 	GSM_Bitmap bitmap;
+	GSM_Error error;
 
-	file = fopen(FileName, "rb");
-
-	if (!file)
-		return (GE_CANTOPENFILE);
-
-	fread(buffer, 1, 9, file);
-
-	if (memcmp(buffer, "NOL", 3) == 0) {
-		filetype = NOL;
-	} else if (memcmp(buffer, "NGG", 3) == 0) {
-		filetype = NGG;
-	} else if (memcmp(buffer, "FORM", 4) == 0) {
-		filetype = NSL;
-	} else if (memcmp(buffer, "NLM", 3) == 0) {
-		filetype = NLM;
-	} else if (memcmp(buffer, "BM", 2) == 0) {
-		filetype = BMP;
-	} else if (memcmp(buffer, "XPM", 3) == 0) {
-		filetype = XPMF;
-	} else filetype = None;
-
-	if (strstr(FileName, ".otb")) filetype = OTA;
-
-	rewind(file);
-
-	switch (filetype) {
-	case NOL:
-		error = loadnol(file, &bitmap, NULL);
-		fclose(file);
-		break;
-	case NGG:
-		error = loadngg(file, &bitmap, NULL);
-		fclose(file);
-		break;
-	case NSL:
-		error = loadnsl(file, &bitmap);
-		fclose(file);
-		break;
-	case OTA:
-		error = loadota(file, &bitmap, NULL);
-		fclose(file);
-		break;
-	case BMP:
-		error = loadbmp(file, &bitmap);
-		fclose(file);
-		break;
-#ifdef XPM
-	case XPMF:
-		fclose(file);
-		error = loadxpm(FileName, &bitmap);
-		break;
-#endif
-	default:
-		error = GE_INVALIDFILEFORMAT;
-		break;
-	}
-
+	error = GSM_ReadBitmapFile(FileName, &bitmap, NULL);
 	if (error != GE_NONE)
 		return (error);
 
