@@ -90,9 +90,16 @@ AC_ARG_WITH(libpthread,
 dnl Check for libpthread
 PTHREAD_LIBS_SAVE="$PTHREAD_LIBS"
 PTHREAD_LIBS=error
-AC_CHECK_LIB(pthread, pthread_attr_init, [
-                      PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_REENTRANT"
-                      PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -lpthread" ])
+dnl we cannot use AC_CHECK_LIB, HP-UX requires the #include statement -- bozo
+AC_CACHE_CHECK(for pthread_attr_init in -lpthread, ac_cv_lib_pthread_pthread_attr_init,
+	[AC_TRY_LINK([#include <pthread.h>],
+		[pthread_attr_init(NULL);],
+		ac_cv_lib_pthread_pthread_attr_init=yes,
+		ac_cv_lib_pthread_pthread_attr_init=no)])
+if test $ac_cv_lib_pthread_pthread_attr_init = yes; then
+	PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_REENTRANT"
+	PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -lpthread"
+fi
 
 dnl FIXME: test this on *BSD and report results immediatelly to the ml please
 dnl If it is not found, try to check for c_r (on FreeBSD)
@@ -361,7 +368,7 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h)
 AC_CHECK_HEADERS(string.h strings.h ctype.h stdlib.h stdarg.h)
-AC_CHECK_HEADERS(stddef.h sys/socket.h)
+AC_CHECK_HEADERS(stddef.h sys/socket.h sys/modem.h)
 
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -392,7 +399,8 @@ AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(mktime gettimeofday select poll)
 AC_CHECK_FUNCS(strdup strstr strtol strtok strsep asprintf vasprintf)
-AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf,
+AC_CHECK_FUNCS(snprintf vsnprintf)
+AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf_c99,
 	[AC_TRY_RUN([
 #include <stdio.h>
 
@@ -402,12 +410,11 @@ int main()
 
 	snprintf(buf, 3, "ABC");
 	exit ((buf[2] != 0) || (snprintf(NULL, 0, "%d", 100) != 3));
-}],ac_cv_func_snprintf=yes,ac_cv_func_snprintf=no,ac_cv_func_snprintf=no)])
-if test $ac_cv_func_snprintf = yes; then
-	AC_DEFINE(HAVE_SNPRINTF)
+}],ac_cv_func_snprintf_c99=yes,ac_cv_func_snprintf_c99=no,ac_cv_func_snprintf_c99=no)])
+if test $ac_cv_func_snprintf_c99 = yes; then
 	AC_DEFINE(HAVE_C99_SNPRINTF)
 fi
-AC_CACHE_CHECK(for ISO C99 compliant vsnprintf,ac_cv_func_vsnprintf,
+AC_CACHE_CHECK(for ISO C99 compliant vsnprintf,ac_cv_func_vsnprintf_c99,
 	[AC_TRY_RUN([
 #include <stdio.h>
 #include <stdarg.h>
@@ -430,9 +437,8 @@ int main()
 
 	doit(buf, 3, "ABC");
 	exit ((buf[2] != 0) || (doit(NULL, 0, "%d", 100) != 3));
-}],ac_cv_func_vsnprintf=yes,ac_cv_func_vsnprintf=no,ac_cv_func_vsnprintf=no)])
-if test $ac_cv_func_vsnprintf = yes; then
-	AC_DEFINE(HAVE_VSNPRINTF)
+}],ac_cv_func_vsnprintf_c99=yes,ac_cv_func_vsnprintf_c99=no,ac_cv_func_vsnprintf_c99=no)])
+if test $ac_cv_func_vsnprintf_c99 = yes; then
 	AC_DEFINE(HAVE_C99_VSNPRINTF)
 fi
 

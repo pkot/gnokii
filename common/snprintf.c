@@ -61,6 +61,8 @@
 
 #include "compat.h"
 
+#define	snprintf __dummy_snprintf
+
 #if defined(WIN32) && !defined(CYGWIN)
 #  include <stddef.h>
 #endif
@@ -82,6 +84,8 @@
 #ifdef HAVE_STDLIB_H
 #  include <stdlib.h>
 #endif
+
+#undef snprintf
 
 #if defined(HAVE_SNPRINTF) && defined(HAVE_VSNPRINTF) && defined(HAVE_C99_VSNPRINTF)
 /* only include stdio.h if we are not re-defining snprintf or vsnprintf */

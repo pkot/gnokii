@@ -57,6 +57,10 @@
 #  include <sys/select.h>
 #endif
 
+#ifdef HAVE_SYS_MODEM_H
+#  include <sys/modem.h>
+#endif
+
 /* If the target operating system does not have cfsetspeed, we can emulate
    it. */
 
@@ -90,7 +94,13 @@ struct termios serial_termios;
 static void device_script_cfgfunc(const char *section, const char *key, const char *value)
 {
 #if !defined(__svr4__)
+#  if defined(HAVE_SETENV)
 	setenv(key, value, 1 /* overwrite */); /* errors ignored */
+#  else
+	char *str;
+	asprintf(&str, "%s=%s", key, value);
+	putenv(str);
+#  endif
 #endif
 }
 
@@ -231,10 +241,12 @@ int serial_opendevice(const char *file, int with_odd_parity,
 		tp.c_iflag = 0;
 	} else
 		tp.c_iflag = IGNPAR;
+#ifdef CRTSCTS
 	if (with_hw_handshake)
 		tp.c_cflag |= CRTSCTS;
 	else
 		tp.c_cflag &= ~CRTSCTS;
+#endif
 
 	tp.c_oflag = 0;
 	tp.c_lflag = 0;
@@ -299,7 +311,17 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	/* We need to supply FNONBLOCK (or O_NONBLOCK) again as it would get reset
 	 * by F_SETFL as a side-effect!
 	 */
+#ifdef FNONBLOCK
 	retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | FNONBLOCK);
+#else
+#  ifdef FASYNC
+	retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | O_NONBLOCK);
+#  else
+	retcode = fcntl(fd, F_SETFL, O_NONBLOCK);
+	if (retcode != -1)
+		retcode = ioctl(fd, FIOASYNC, &with_async);
+#  endif
+#endif
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
 		serial_close(fd);

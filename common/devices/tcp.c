@@ -166,7 +166,17 @@ int tcp_opendevice(const char *file, int with_async)
 	/* We need to supply FNONBLOCK (or O_NONBLOCK) again as it would get reset
 	 * by F_SETFL as a side-effect!
 	 */
+#ifdef FNONBLOCK
 	retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | FNONBLOCK);
+#else
+#  ifdef FASYNC
+	retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | O_NONBLOCK);
+#  else
+	retcode = fcntl(fd, F_SETFL, O_NONBLOCK);
+	if (retcode != -1)
+		retcode = ioctl(fd, FIOASYNC, &with_async);
+#  endif
+#endif
 	if (retcode == -1) {
 		perror("Gnokii tcp_opendevice: fnctl(F_SETFL)");
 		tcp_close(fd);
