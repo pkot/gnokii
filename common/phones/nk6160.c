@@ -39,12 +39,9 @@
 #endif
 
 #include "misc.h"
-#include "gsm-common.h"
 #include "phones/generic.h"
-#include "links/m2bus.h"
 #include "phones/nokia.h"
-#include "gsm-encoding.h"
-#include "gsm-api.h"
+#include "links/m2bus.h"
 
 #include "gnokii-internal.h"
 #include "gsm-api.h"

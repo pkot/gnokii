@@ -41,24 +41,18 @@
 #endif
 
 #include "misc.h"
-#include "gsm-common.h"
 #include "phones/generic.h"
+#include "phones/nokia.h"
 #include "phones/nk6100.h"
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
 #include "links/m2bus.h"
-#include "phones/nokia.h"
-#include "gsm-encoding.h"
-#include "gsm-api.h"
-#include "gsm-sms.h"
 
 #include "gnokii-internal.h"
 #include "gsm-api.h"
 
 #define	DRVINSTANCE(s) ((nk6100_driver_instance *)((s)->driver.driver_instance))
 #define	FREE(p) do { free(p); (p) = NULL; } while (0)
-
-/* Some globals */
 
 /* static functions prototypes */
 static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
@@ -185,18 +179,18 @@ gn_driver driver_nokia_6100 = {
 	/* Mobile phone information */
 	{
 		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|3360|3410|8210|8250|8290", /* Supported models */
-		4,                     /* Max RF Level */
-		0,                     /* Min RF Level */
-		GN_RF_Arbitrary,         /* RF level units */
-		4,                     /* Max Battery Level */
-		0,                     /* Min Battery Level */
-		GN_BU_Arbitrary,         /* Battery level units */
-		GN_DT_DateTime,          /* Have date/time support */
-		GN_DT_TimeOnly,	       /* Alarm supports time only */
-		1,                     /* Alarms available - FIXME */
-		48, 84,                /* Startup logo size */
-		14, 72,                /* Op logo size */
-		14, 72                 /* Caller logo size */
+		4,			/* Max RF Level */
+		0,			/* Min RF Level */
+		GN_RF_Arbitrary,	/* RF level units */
+		4,			/* Max Battery Level */
+		0,			/* Min Battery Level */
+		GN_BU_Arbitrary,	/* Battery level units */
+		GN_DT_DateTime,		/* Have date/time support */
+		GN_DT_TimeOnly,		/* Alarm supports time only */
+		1,			/* Alarms available - FIXME */
+		48, 84,			/* Startup logo size */
+		14, 72,			/* Op logo size */
+		14, 72			/* Caller logo size */
 	},
 	Functions,
 	NULL
