@@ -13,6 +13,8 @@
     o GetProfile implemented                       (BORBELY Zoltan)
  * 6510 series updates
     o Nokia 6100 support added                     (Tobias Gebhard)
+    o GetRawRingtone, SetRawRingtone added         (BORBELY Zoltan)
+    o GetRingtone, SetRingtone emulation added     (BORBELY Zoltan)
  * libgnokii changes
     o Tomi Ollila's readmidi.c added               (BORBELY Zoltan)
     o Nokia raw ringtone conversion functions      (BORBELY Zoltan)
@@ -22,6 +24,7 @@
       most of the built-in ringtones of the 6610   (BORBELY Zoltan)
  * Documentation updates
     o nk7110 profile reading messages updated      (BORBELY Zoltan)
+    o nk6510 raw ringtone get/set messages added   (BORBELY Zoltan)
  * gnokii changes
     o ringtoneconvert support added                (BORBELY Zoltan)
     o playringtone updates and fixes               (BORBELY Zoltan)

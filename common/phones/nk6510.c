@@ -118,6 +118,10 @@ static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine
 static gn_error NK6510_CallDivert(gn_data *data, struct gn_statemachine *state);
 */
 static gn_error NK6510_GetRingtoneList(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetRawRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_SetRawRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_SetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetProfile(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SetProfile(gn_data *data, struct gn_statemachine *state);
 
@@ -349,6 +353,14 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 #endif
 	case GN_OP_Subscribe:
 		return NK6510_Subscribe(data, state);
+	case GN_OP_GetRawRingtone:
+		return NK6510_GetRawRingtone(data, state);
+	case GN_OP_SetRawRingtone:
+		return NK6510_SetRawRingtone(data, state);
+	case GN_OP_GetRingtone:
+		return NK6510_GetRingtone(data, state);
+	case GN_OP_SetRingtone:
+		return NK6510_SetRingtone(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -2450,6 +2462,7 @@ static gn_error NK6510_GetBatteryLevel(gn_data *data, struct gn_statemachine *st
 static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int i, j, index;
+	unsigned char *pos;
 
 	switch (message[3]) {
 	case 0x08:
@@ -2467,9 +2480,40 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 			index += 3;
 		}		
 		break;
+
+	/* set raw ringtone result */
+	case 0x0f:
+		if (message[4] == 0x00 && message[5] == 0x00) {
+			break;
+		} else if (message[4] == 0x03 || message[5] == 0x00) {
+			/* FIXME: some kind of ringtone error */
+			return GN_ERR_UNKNOWN;
+		} else return GN_ERR_UNHANDLEDFRAME;
+		break;
+
+	/* get raw ringtone result */
+	case 0x13:
+		if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
+		pos = message + 8;
+		char_unicode_decode(data->ringtone->name, pos, 2 * message[7]);
+		pos += 2 * message[7];
+		i = (pos[0] << 8) + pos[1];
+		pos += 2;
+		if (data->raw_data->length < i) return GN_ERR_INVALIDSIZE;
+		data->raw_data->length = i;
+		memcpy(data->raw_data->data, pos, i);
+		pos += i;
+		if (pos + 2 - message != length || pos[0] != 0 || pos[1] != 0)
+			return GN_ERR_UNHANDLEDFRAME;
+		break;
+
+	/* get raw ringtone failed */
+	case 0x14:
+		return GN_ERR_INVALIDLOCATION;
+
 	default:
 		dprintf("Unknown subtype of type 0x1f (%d)\n", message[3]);
-		return GN_ERR_UNKNOWN;
+		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
 }
@@ -2482,12 +2526,83 @@ static gn_error NK6510_GetRingtoneList(gn_data *data, struct gn_statemachine *st
 	SEND_MESSAGE_BLOCK(NK6510_MSG_RINGTONE, 9);
 }
 
+static gn_error NK6510_GetRawRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x12, 0x00, 0x00};
+
+	if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
+
+	dprintf("Getting raw ringtone %d...\n", data->ringtone->location);
+	req[4] = data->ringtone->location / 256;
+	req[5] = data->ringtone->location % 256;
+
+	SEND_MESSAGE_BLOCK(NK6510_MSG_RINGTONE, 6);
+}
+
+static gn_error NK6510_SetRawRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[32768] = {FBUS_FRAME_HEADER, 0x0e, 0x7f, 0xff, 0xfe};
+	unsigned char *pos;
+
+	if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
+
+	dprintf("Setting raw ringtone %d...\n", data->ringtone->location);
+	pos = req + 7;
+	*pos = strlen(data->ringtone->name);
+	char_unicode_encode(pos + 1, data->ringtone->name, *pos);
+	pos += 1 + 2 * *pos;
+	*pos++ = data->raw_data->length / 256;
+	*pos++ = data->raw_data->length % 256;
+	if (pos - req + data->raw_data->length + 2 > sizeof(req)) return GN_ERR_INVALIDSIZE;
+	memcpy(pos, data->raw_data->data, data->raw_data->length);
+	pos += data->raw_data->length;
+	*pos++ = 0;
+	*pos++ = 0;
+
+	SEND_MESSAGE_BLOCK(NK6510_MSG_RINGTONE, pos - req);
+}
+
 static gn_error NK6510_GetRingtone(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x00, 0x00, 0xFE, 0x00, 0x7D};
+	gn_data d;
+	gn_error err;
+	gn_raw_data rawdata;
+	char buf[4096];
 
-	dprintf("Getting list of ringtones...\n");
-	SEND_MESSAGE_BLOCK(NK6510_MSG_RINGTONE, 9);
+	if (!data->ringtone) return GN_ERR_INTERNALERROR;
+
+	memset(&rawdata, 0, sizeof(gn_raw_data));
+	rawdata.data = buf;
+	rawdata.length = sizeof(buf);
+	gn_data_clear(&d);
+	d.ringtone = data->ringtone;
+	d.raw_data = &rawdata;
+
+	if ((err = NK6510_GetRawRingtone(&d, state)) != GN_ERR_NONE) return err;
+
+	return pnok_ringtone_from_raw(data->ringtone, rawdata.data, rawdata.length);
+}
+
+static gn_error NK6510_SetRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	gn_data d;
+	gn_error err;
+	gn_raw_data rawdata;
+	char buf[4096];
+
+	if (!data->ringtone) return GN_ERR_INTERNALERROR;
+
+	memset(&rawdata, 0, sizeof(gn_raw_data));
+	rawdata.data = buf;
+	rawdata.length = sizeof(buf);
+	gn_data_clear(&d);
+	d.ringtone = data->ringtone;
+	d.raw_data = &rawdata;
+
+	if ((err = pnok_ringtone_to_raw(rawdata.data, &rawdata.length, data->ringtone)) != GN_ERR_NONE)
+		return err;
+
+	return NK6510_SetRawRingtone(&d, state);
 }
 
 
