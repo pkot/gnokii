@@ -194,7 +194,7 @@ API gn_error gn_call_check_active(struct gn_statemachine *state)
 
 	/* delete terminated calls */
 	for (j = 0; j < GN_CALL_MAX_PARALLEL; j++) {
-		if (calltable[i].state != state) continue;
+		if (calltable[j].state != state) continue;
 		got = 0;
 		for ( i = 0; i < 2; i++) {
 			if (calltable[j].call_id == active[i].call_id) {
@@ -203,8 +203,8 @@ API gn_error gn_call_check_active(struct gn_statemachine *state)
 			}
 		}
 		if (!got) {
-			memset(calltable + i, 0, sizeof(gn_call));
-			calltable[i].status = GN_CALL_Idle;
+			memset(calltable + j, 0, sizeof(gn_call));
+			calltable[j].status = GN_CALL_Idle;
 		}
 	}
 

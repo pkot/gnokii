@@ -21,6 +21,8 @@
                          (Olivier Kaloudoff, Siegfried Schloissnig)
     o Bluetooth support on FreeBSD                 (BORBELY Zoltan)
     o Mac OSX bluetooth code fixes              (Olivier Kaloudoff)
+    o Minor bugs found during the 2003-09-16 -> latest
+      changeset review                             (BORBELY Zoltan)
  * translations updates
     o Estonian translation updated                  (Hans Motshärg)
     o French translation updated                (Olivier Kaloudoff)

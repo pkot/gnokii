@@ -1289,7 +1289,6 @@ API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 	sms_dump_raw(data->raw_sms);
 	if (data->raw_sms->user_data_length > MAX_SMS_PART) {
 		dprintf("SMS is too long? %d\n", data->raw_sms->user_data_length);
-		sleep(5);
 		error = sms_send_long(data, state);
 		goto cleanup;
 	}

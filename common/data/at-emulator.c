@@ -501,7 +501,6 @@ void	gn_atem_at_parse(char *cmd_buffer)
 				gn_atem_modem_result(MR_ERROR);
 				return;
 			}
-			ModemRegisters[S22] = (ModemRegisters[S22] & 0x8f) | val;
 			break;
 
 		  /* Handle AT* commands (Nokia proprietary I think) */
@@ -1052,7 +1051,7 @@ int gn_atem_num_get(char **p)
    command mode - data pump is used when connected.  */
 void	gn_atem_string_out(char *buffer)
 {
-	int		count = 0;
+	int	count = 0;
 	char	out_char;
 
 	while (count < strlen(buffer)) {

@@ -35,7 +35,7 @@ You can easily cross compile gnokii with MinGW, just follow these instructions:
 2) edit win32/mingw-cross/mingw-cross.sh according to your MinGW setup
 3) run make
 4) copy common/gnokii.dll and gnokii/gnokii.exe anywhere you want
-5) if you want to setupo a development environment you can copy
+5) if you want to setup a development environment you can copy
    common/gnokii.lib and include/gnokii.h and include/gnokii/ anywhere you
    want
 
