@@ -57,36 +57,35 @@ static GSM_Statemachine statemachine;
 /* the xgnokii scheme of things - Chris */
 
 
-inline void GUI_InsertEvent (PhoneEvent *event)
+inline void GUI_InsertEvent(PhoneEvent *event)
 {
-# ifdef XDEBUG
-  g_print ("Inserting Event: %d\n", event->event);
-# endif
-  pthread_mutex_lock (&eventsMutex);
-  ScheduledEvents = g_slist_prepend (ScheduledEvents, event);
-  pthread_mutex_unlock (&eventsMutex);
+#ifdef XDEBUG
+	g_print ("Inserting Event: %d\n", event->event);
+#endif
+	pthread_mutex_lock (&eventsMutex);
+	ScheduledEvents = g_slist_prepend(ScheduledEvents, event);
+	pthread_mutex_unlock(&eventsMutex);
 }
 
 
-inline static PhoneEvent *RemoveEvent (void)
+inline static PhoneEvent *RemoveEvent(void)
 {
-  GSList *list;
-  PhoneEvent *event = NULL;
+	GSList *list;
+	PhoneEvent *event = NULL;
 
-  pthread_mutex_lock (&eventsMutex);
-  list = g_slist_last (ScheduledEvents);
-  if (list)
-  {
-    event = (PhoneEvent *) list->data;
-    ScheduledEvents = g_slist_remove_link (ScheduledEvents, list);
-    g_slist_free_1 (list);
-  }
-  pthread_mutex_unlock (&eventsMutex);
+	pthread_mutex_lock(&eventsMutex);
+	list = g_slist_last(ScheduledEvents);
+	if (list) {
+		event = (PhoneEvent *)list->data;
+		ScheduledEvents = g_slist_remove_link(ScheduledEvents, list);
+		g_slist_free_1(list);
+	}
+	pthread_mutex_unlock(&eventsMutex);
 
-  return (event);
+	return (event);
 }
 
-void GUI_InitSMSFolders (void)
+void GUI_InitSMSFolders(void)
 {
 	GSM_Error error;
 	GSM_SMSMessage *msg;
@@ -98,10 +97,10 @@ void GUI_InitSMSFolders (void)
 
 	if (phoneMonitor.supported & PM_FOLDERS) {
 		GSM_DataClear(&gdat);
-  		msg = g_malloc (sizeof(GSM_SMSMessage));
-		fld = g_malloc (sizeof(SMS_Folder));
-		list = g_malloc (sizeof(SMS_FolderList));
-		raw = g_malloc (sizeof(GSM_RawData));
+  		msg = g_malloc(sizeof(GSM_SMSMessage));
+		fld = g_malloc(sizeof(SMS_Folder));
+		list = g_malloc(sizeof(SMS_FolderList));
+		raw = g_malloc(sizeof(GSM_RawData));
 
 		msg->MemoryType = 0x08;
 		msg->Number = 1;
@@ -125,90 +124,85 @@ void GUI_InitSMSFolders (void)
 
 static void InitModelInf (void)
 {
-  gchar buf[64];
-  GSM_Error error;
-  register gint i = 0;
-  GSM_Data data;
+	gchar buf[64];
+	GSM_Error error;
+	register gint i = 0;
+	GSM_Data data;
 
-  GSM_DataClear(&data);
-  data.Model = buf;
-  while ((error = SM_Functions(GOP_GetModel, &data, &statemachine)) != GE_NONE && i++ < 5)
-    sleep(1);
+	GSM_DataClear(&data);
+	data.Model = buf;
+	error = SM_Functions(GOP_GetModel, &data, &statemachine);
 
-  if (error == GE_NONE)
-  {
-    g_free (phoneMonitor.phone.model);
-    phoneMonitor.phone.version = g_strdup (buf);
-    phoneMonitor.phone.model = GetModel (buf);
-    if (phoneMonitor.phone.model == NULL)
-      phoneMonitor.phone.model = g_strdup (_("unknown"));
+	if (error == GE_NONE) {
+		g_free(phoneMonitor.phone.model);
+		phoneMonitor.phone.version = g_strdup(buf);
 
-    phoneMonitor.supported = GetPhoneModel(buf)->flags;
-  }
+		if (phoneMonitor.phone.model == NULL)
+			phoneMonitor.phone.model = g_strdup (_("unknown"));
 
-  i = 0;
-  data.Revision=buf;
-  while ((error = SM_Functions(GOP_GetRevision, &data, &statemachine)) != GE_NONE && i++ < 5)
-    sleep(1);
+		phoneMonitor.supported = GetPhoneModel(buf)->flags;
+	}
 
-  if (error == GE_NONE)
-  {
-    g_free (phoneMonitor.phone.revision);
-    phoneMonitor.phone.revision = g_strdup (buf);
-  }
+	i = 0;
+	data.Revision = buf;
+	error = SM_Functions(GOP_GetRevision, &data, &statemachine);
+
+	if (error == GE_NONE) {
+		g_free(phoneMonitor.phone.revision);
+		phoneMonitor.phone.revision = g_strdup (buf);
+	}
 
 /* FIXME: Uncomment it when it works in 6110 series
-  i = 0;
-  data.Imei=buf;
-  while ((error = SM_Functions(GOP_GetImei,&data,&statemachine)) != GE_NONE && i++ < 5)
-    sleep(1);
+	i = 0;
+	data.Imei = buf;
+	while ((error = SM_Functions(GOP_GetImei, &data, &statemachine)) != GE_NONE && i++ < 5)
+		sleep(1);
 */
-  if (error == GE_NONE)
-  {
-    g_free (phoneMonitor.phone.imei);
-    phoneMonitor.phone.imei = g_strdup (buf);
-  }
+	if (error == GE_NONE) {
+		g_free(phoneMonitor.phone.imei);
+		phoneMonitor.phone.imei = g_strdup(buf);
+	}
 
 
 #ifdef XDEBUG
-  g_print ("Version: %s\n", phoneMonitor.phone.version);
-  g_print ("Model: %s\n", phoneMonitor.phone.model);
-  g_print ("IMEI: %s\n", phoneMonitor.phone.imei);
-  g_print ("Revision: %s\n", phoneMonitor.phone.revision);
+	g_print("Version: %s\n", phoneMonitor.phone.version);
+	g_print("Model: %s\n", phoneMonitor.phone.model);
+	g_print("IMEI: %s\n", phoneMonitor.phone.imei);
+	g_print("Revision: %s\n", phoneMonitor.phone.revision);
 #endif
 }
 
 
 static GSM_Error fbusinit(bool enable_monitoring)
 {
-  static GSM_Error error=GE_NOLINK;
-  GSM_ConnectionType connection=GCT_Serial;
+	static GSM_Error error = GE_NOLINK;
+	GSM_ConnectionType connection = GCT_Serial;
 
-  if (!strcmp(xgnokiiConfig.connection, "infrared"))
-    connection = GCT_Infrared;
+	if (!strcmp(xgnokiiConfig.connection, "infrared"))
+		connection = GCT_Infrared;
 
-  if (!strcmp(xgnokiiConfig.connection, "irda"))
-    connection = GCT_Irda;
+	if (!strcmp(xgnokiiConfig.connection, "irda"))
+		connection = GCT_Irda;
 
-  /* Initialise the code for the GSM interface. */     
+	/* Initialise the code for the GSM interface. */     
 
-  if (error == GE_NOLINK)
-    error = GSM_Initialise (xgnokiiConfig.model, xgnokiiConfig.port,
-                            xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame, &statemachine);
+	if (error == GE_NOLINK)
+		error = GSM_Initialise(xgnokiiConfig.model, xgnokiiConfig.port,
+				       xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame, &statemachine);
 
 #ifdef XDEBUG
-  g_print ("fbusinit: error %d\n", error);
+	g_print("fbusinit: error %d\n", error);
 #endif
 
-  if (error != GE_NONE) {
-    g_print (_("GSM/FBUS init failed!\n"));
-    /* FIXME: should popup some message... */
-    return (error);
-  }
+	if (error != GE_NONE) {
+		g_print(_("GSM/FBUS init failed!\n"));
+		/* FIXME: should popup some message... */
+		return (error);
+	}
 
-  InitModelInf ();
+	InitModelInf();
 
-  return GE_NONE;
+	return GE_NONE;
 }
 
 
@@ -1027,8 +1021,8 @@ void *GUI_Connect (void *a)
 # endif
 
   phoneMonitor.working = _("Connecting...");
-  while (!fbusinit (true))
-    sleep (1);
+  while (fbusinit(true) != GE_NONE)
+    sleep(1);
 
 # ifdef XDEBUG
   g_print ("Phone connected. Starting monitoring...\n");
