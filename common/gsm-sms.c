@@ -1093,14 +1093,12 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 	for (i=0; i<SMS_MAX_PART_NUMBER; i++) {
 		switch (sms->UserData[i].Type) {
 		case SMS_BitmapData:
-			error = GE_NONE;
 			switch (sms->UserData[0].u.Bitmap.type) {
 			case GSM_OperatorLogo: if (!EncodeUDH(rawsms, SMS_OpLogo)) return GE_NOTSUPPORTED; break;
 			case GSM_PictureMessage: 
 			case GSM_EMSPicture:
 			case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
 			}
-			if (error != GE_NONE) return error;
 			size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Bitmap), rawsms->UserData + rawsms->UserDataLength);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
@@ -1124,7 +1122,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		case SMS_PlainText: {
 			unsigned int length, offset = rawsms->UserDataLength;
 
-			length = strlen(sms->UserData[0].u.Text);
+			length = strlen(sms->UserData[i].u.Text);
 			switch (al) {
 			case SMS_DefaultAlphabet:
 #define UDH_Length 0
@@ -1135,8 +1133,8 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 				break;
 			case SMS_8bit:
 				rawsms->DCS |= 0xf4;
-				memcpy(rawsms->UserData + offset, sms->UserData[i].u.Text + 1, sms->UserData[i].u.Text[0]);
-				rawsms->UserDataLength = rawsms->Length = sms->UserData[i].u.Text[0] + offset;
+				memcpy(rawsms->UserData + offset, sms->UserData[i].u.Text, sms->UserData[i].u.Text[0]);
+				rawsms->UserDataLength = rawsms->Length = length + offset;
 				break;
 			case SMS_UCS2:
 				rawsms->DCS |= 0x08;
