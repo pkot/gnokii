@@ -183,12 +183,12 @@ int usage(void)
 {
 
   fprintf(stdout, _("   usage: gnokii [--help|--monitor|--version]\n"
-"          gnokii --getmemory memory_type start end\n"
+"          gnokii --getmemory memory_type start [end]\n"
 "          gnokii --writephonebook [-i]\n"
 "          gnokii --getspeeddial number\n"
 "          gnokii --setspeeddial number memory_type location\n"
-"          gnokii --getsms memory_type start end\n"
-"          gnokii --deletesms memory_type start end\n"
+"          gnokii --getsms memory_type start [end] [-f file]\n"
+"          gnokii --deletesms memory_type start [end]\n"
 "          gnokii --sendsms destination [--smsc message_center_number |\n"
 "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
 "                 [--long n]\n"
