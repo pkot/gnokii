@@ -13,7 +13,7 @@
   The various routines are called FB61 (whatever) as a concatenation of FBUS
   and 6110.
 
-  Last modification: Thu May  6 00:51:48 CEST 1999
+  Last modification: Sat May 15 23:44:34 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -275,11 +275,6 @@ void	FB61_ThreadLoop(void)
 
 	usleep(100);
 
-	/* This function sends the Alarm request to the phone.  Values
-	   passed are ignored at present */
-
-	// FB61_GetAlarm(0, &date_time);
-
 	/* Get the primary SMS Center */
 
 	/* It's very strange that if I send this request again (with different
@@ -289,8 +284,6 @@ void	FB61_ThreadLoop(void)
 	//	FB61_GetSMSCenter(1);
 
 	// 	FB61_GetCalendarNote(1);
-
-	//	FB61_SetDateTime(NULL);
 
 	idle_timer=0;
 
@@ -325,6 +318,66 @@ void		FB61_Terminate(void)
 	tcsetattr(PortFD, TCSANOW, &OldTermios);
 	
 	close (PortFD);
+}
+
+#define ByteMask ((1<<NumOfBytes)-1)
+
+int UnpackEightBitsToSeven(int length, unsigned char *input, unsigned char *output)
+{
+
+  int NumOfBytes=7;
+  unsigned char Rest=0x00;
+
+  unsigned char *OUT=output, *IN=input;
+
+  while ((IN-input) < length) {
+
+    *OUT = ((*IN & ByteMask) << (7-NumOfBytes)) | Rest;
+
+    Rest = *IN >> NumOfBytes;
+
+    IN++;OUT++;
+
+    if (NumOfBytes==1) {
+      *OUT=Rest;
+      OUT++;
+      NumOfBytes=7;
+      Rest=0x00;
+    }
+    else
+      NumOfBytes--;
+  }
+
+  return OUT-output;
+}
+
+int PackSevenBitsToEight(unsigned char *String, unsigned char* Buffer)
+{
+
+  unsigned char *OUT=Buffer; /* Current pointer to the output buffer */
+  unsigned char *IN=String;  /* Current pointer to the input buffer */
+  int Bits=7;                /* Number of bits directly copied to output buffer */
+
+  while ((IN-String)<strlen(String)) {
+
+    unsigned char Byte=*IN & 0x7f;
+
+    *OUT=Byte>>(7-Bits);
+
+    if (Bits != 7)
+      *(OUT-1)|=(Byte & ( (1<<(7-Bits))-1))<<(Bits+1);
+
+    Bits--;
+
+    if (Bits==-1)
+      Bits=7;
+    else
+      OUT++;
+      
+    IN++;
+  }
+
+  return OUT-Buffer;
 }
 
 GSM_Error FB61_GetRFLevel(float *level)
@@ -793,9 +846,86 @@ GSM_Error	FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
 
 }
 
-GSM_Error	FB61_SendSMSMessage(char *message_centre, char *destination, char *text)
+/* This function implements packing of numbers (SMS Center number and
+   destination number) for SMS sending function. */
+
+int SemiOctetPack(char *Number, unsigned char *Output) {
+
+  unsigned char *IN=Number;  /* Pointer to the input number */
+  unsigned char *OUT=Output; /* Pointer to the output */
+
+  int count=0; /* This variable is used to notify us about count of already
+                  packed numbers. */
+
+  /* The first byte in the Semi-octet representation of the address field is
+     the Type-of-Address. This field is described in the official GSM
+     specification 03.40 version 5.3.0, section 9.1.2.5, page 33. We support
+     only international and unknown number. */
+  
+  if (*IN == '+') {
+    *OUT++=GNT_INTERNATIONAL; /* International number */
+    IN++;
+  }
+  else
+    *OUT++=GNT_UNKNOWN; /* Unknown number */
+
+  /* The next field is the number. It is in semi-octet representation - see
+     GSM scpecification 03.40 version 5.3.0, section 9.1.2.3, page 31. */
+
+  while (*IN) {
+
+    if (count & 0x01) {
+      *OUT=*OUT | ((*IN-'0')<<4);
+      OUT++;
+    }
+    else
+      *OUT=*IN-'0';
+
+    count++; IN++;
+
+  }
+
+  /* We should also fill in the most significant bits of the last byte with
+     0x0f (1111 binary) if the number is represented with odd number of
+     digits. */
+
+  if (count & 0x01) {
+    *OUT=*OUT | 0xf0;
+    OUT++;
+  }
+
+  return OUT-Output;
+}
+
+GSM_Error FB61_SendSMSMessage(char *message_centre, char *destination, char *text)
 {
-	return (GE_NOTIMPLEMENTED);
+
+  unsigned char req[256] = {
+    FB61_FRAME_HEADER,
+    0x01, 0x02, 0x00, /* SMS send request*/
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* SMS centre, the rest is unused */
+    0x11, 
+    0x00,
+    0x00,
+    0x00,
+    0x00, /* Message length */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* destination */
+    0xa9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /* Validity FIXME: add validity in the call */
+  };
+
+  int size=PackSevenBitsToEight(text, req+42);
+
+  req[6]=SemiOctetPack(message_centre, req+7);
+
+  req[22]=strlen(text);
+
+  req[23]=2*(SemiOctetPack(destination, req+24)-1);
+
+  req[42+size]=0x01;
+
+  FB61_TX_SendMessage(42+size+1, 0x02, req);
+
+  return (GE_NONE);
 }
 
 void FB61_DumpSerial()
@@ -877,7 +1007,6 @@ bool		FB61_OpenSerial(void)
 		/* Set up and install handler before enabling async IO on port. */
 	sig_io.sa_handler = FB61_SigHandler;
 	sig_io.sa_flags = 0;
-	sig_io.sa_restorer = NULL;
 	sigaction (SIGIO, &sig_io, NULL);
 
 		/* Allow process/thread to receive SIGIO */
@@ -958,8 +1087,6 @@ char *FB61_GetPackedDateTime(u8 *Number) {
 
 }
 
-#define ByteMask ((1<<NumOfBytes)-1)
-
 unsigned char GSM_Default_Alphabet[] = {
 
   /* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet */
@@ -985,36 +1112,7 @@ unsigned char GSM_Default_Alphabet[] = {
   'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
 
-int fromoctet(int length, unsigned char *input, unsigned char *output)
-{
-
-  int NumOfBytes=7;
-  unsigned char Rest=0x00;
-
-  unsigned char *OUT=output, *IN=input;
-
-  while ((IN-input) < length) {
-
-    *OUT = ((*IN & ByteMask) << (7-NumOfBytes)) | Rest;
-
-    Rest = *IN >> NumOfBytes;
-
-    IN++;OUT++;
-
-    if (NumOfBytes==1) {
-      *OUT=Rest;
-      OUT++;
-      NumOfBytes=7;
-      Rest=0x00;
-    }
-    else
-      NumOfBytes--;
-  }
-
-  return OUT-output;
-}
-
-enum FB61_RX_States		FB61_RX_DispatchMessage(void)
+enum FB61_RX_States FB61_RX_DispatchMessage(void)
 {
 
   int i, tmp, count;
@@ -1024,12 +1122,12 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
   FB61_RX_DisplayMessage();
 #endif DEBUG
 
-		/* Switch on the basis of the message type byte */
-	switch (MessageType) {
+  /* Switch on the basis of the message type byte */
+  switch (MessageType) {
 	  
-	  /* Call information */
+    /* Call information */
 
-	case 0x01:
+  case 0x01:
 	  
 	  switch (MessageBuffer[3]) {
 
@@ -1187,7 +1285,7 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
       		printf("   Date: %s\n", FB61_GetPackedDateTime(MessageBuffer+35));
 		printf("   SMS: ");
 
-		tmp=fromoctet(MessageLength-42-2, MessageBuffer+42, output);
+		tmp=UnpackEightBitsToSeven(MessageLength-42-2, MessageBuffer+42, output);
 
 		for (i=0; i<tmp;i++)
 		  printf("%c", GSM_Default_Alphabet[output[i]]);
@@ -1582,7 +1680,7 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 
 		strcpy(CurrentSMSMessage->MessageCentre, FB61_GetBCDNumber(MessageBuffer+8));
 
-		tmp=fromoctet(MessageLength-43-2, MessageBuffer+43, output);
+		tmp=UnpackEightBitsToSeven(MessageLength-43-2, MessageBuffer+43, output);
 
 		for (i=0; i<tmp;i++) {
 
@@ -1650,7 +1748,7 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	    printf("Message: the rest of the SMS message received.\n");
 #endif DEBUG
 
-	    tmp=fromoctet(MessageLength-2, MessageBuffer, output);
+	    tmp=UnpackEightBitsToSeven(MessageLength-2, MessageBuffer, output);
 
 		for (i=0; i<tmp;i++) {
 
@@ -1859,127 +1957,130 @@ void	FB61_RX_DisplayMessage(void)
 #endif DEBUG
 }
 
-	/* Prepares the message header and sends it, prepends the
-	   message start byte (0x1e) and other values according
-	   the value specified when called.  Calculates checksum
-	   and then sends the lot down the pipe... */
-int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
+/* Prepares the message header and sends it, prepends the message start byte
+	   (0x1e) and other values according the value specified when called.
+	   Calculates checksum and then sends the lot down the pipe... */
+
+int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 {
-	u8			out_buffer[FB61_MAX_TRANSMIT_LENGTH + 5];
-	int			count, current=0;
-	unsigned char			checksum;
+  u8 out_buffer[FB61_MAX_TRANSMIT_LENGTH + 5];
+  int count, current=0;
+  unsigned char	checksum;
 
-	/* FIXME - we should check for the message length ... */
+  /* FIXME - we should check for the message length ... */
 
-	/* Now construct the message header. */
-	out_buffer[current++] = FB61_FRAME_ID;	/* Start of message indicator */
+  /* Now construct the message header. */
 
-	out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
-	out_buffer[current++] = FB61_DEVICE_PC; /* Source */
+  out_buffer[current++] = FB61_FRAME_ID; /* Start of message indicator */
 
-	out_buffer[current++] = message_type; /* Type */
+  out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
+  out_buffer[current++] = FB61_DEVICE_PC;    /* Source */
 
-	out_buffer[current++] = 0; /* Unknown */
-	out_buffer[current++] = message_length+1; /* Length + 1 for seq. nr*/
+  out_buffer[current++] = message_type; /* Type */
 
-		/* Copy in data if any. */	
-	if (message_length != 0) {
-		memcpy(out_buffer + current, buffer, message_length);
-		current+=message_length;
-	}
+  out_buffer[current++] = 0; /* Unknown */
 
-	out_buffer[current++]=0x40+RequestSequenceNumber;
+  out_buffer[current++] = message_length+1; /* Length + 1 for seq. nr*/
 
-	RequestSequenceNumber=(RequestSequenceNumber+1) & 0x07;
+  /* Copy in data if any. */	
+	
+  if (message_length != 0) {
+    memcpy(out_buffer + current, buffer, message_length);
+    current+=message_length;
+  }
 
-	/* If the message length is odd we should add pad byte 0x00 */
-	if ( (message_length+1) % 2)
-	  out_buffer[current++]=0x00;
+  out_buffer[current++]=0x40+RequestSequenceNumber;
 
-		/* Now calculate checksums over entire message 
-		   and append to message. */
+  RequestSequenceNumber=(RequestSequenceNumber+1) & 0x07;
 
-	/* Odd bytes */
+  /* If the message length is odd we should add pad byte 0x00 */
+  if ( (message_length+1) % 2)
+    out_buffer[current++]=0x00;
 
-	checksum = 0;
-	for (count = 0; count < current; count+=2) {
-		checksum ^= out_buffer[count];
-	}
-	out_buffer[current++] = checksum;
+  /* Now calculate checksums over entire message and append to message. */
 
-	/* Even bytes */
+  /* Odd bytes */
 
-	checksum = 0;
-	for (count = 1; count < current; count+=2) {
-		checksum ^= out_buffer[count];
-	}
-	out_buffer[current++] = checksum;
+  checksum = 0;
+  for (count = 0; count < current; count+=2)
+    checksum ^= out_buffer[count];
+
+  out_buffer[current++] = checksum;
+
+  /* Even bytes */
+
+  checksum = 0;
+  for (count = 1; count < current; count+=2)
+    checksum ^= out_buffer[count];
+
+  out_buffer[current++] = checksum;
 
 #ifdef DEBUG
+  printf("PC: ");
 
-	printf("PC: ");
+  for (count = 0; count < current; count++)
+    printf("%02x:", out_buffer[count]);
 
-	for (count = 0; count < current; count++)
-	  printf("%02x:", out_buffer[count]);
-
-	printf("\n");
-
+  printf("\n");
 #endif DEBUG
 
-		/* Send it out... */
-	if (write(PortFD, out_buffer, current) != current) {
-		return (false);
-	}
-	return (true);
+  /* Send it out... */
+  
+  if (write(PortFD, out_buffer, current) != current)
+    return (false);
+
+  return (true);
 }
 
 int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
   unsigned char out_buffer[FB61_MAX_TRANSMIT_LENGTH + 5];
   int count, current=0;
-  unsigned char			checksum;
+  unsigned char checksum;
 
 #ifdef DEBUG
+
   printf("[Sending Ack of type %02x, seq: %x]\n", message_type, message_seq);
+
 #endif DEBUG
 
   /* Now construct the Ack header. */
-  out_buffer[current++] = FB61_FRAME_ID;	/* Start of message indicator */
 
-	out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
-	out_buffer[current++] = FB61_DEVICE_PC; /* Source */
+  out_buffer[current++] = FB61_FRAME_ID; /* Start of message indicator */
 
-	out_buffer[current++] = FB61_FRTYPE_ACK; /* Ack */
+  out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
+  out_buffer[current++] = FB61_DEVICE_PC;    /* Source */
 
-	out_buffer[current++] = 0; /* Unknown */
-	out_buffer[current++] = 2; /* Ack is always of 2 bytes */
+  out_buffer[current++] = FB61_FRTYPE_ACK; /* Ack */
 
-	out_buffer[current++] = message_type; /* Type */
-	out_buffer[current++] = message_seq; /* Sequence number */
+  out_buffer[current++] = 0; /* Unknown */
+  out_buffer[current++] = 2; /* Ack is always of 2 bytes */
 
-		/* Now calculate checksums over entire message 
-		   and append to message. */
+  out_buffer[current++] = message_type; /* Type */
+  out_buffer[current++] = message_seq;  /* Sequence number */
 
-	/* Odd bytes */
+  /* Now calculate checksums over entire message and append to message. */
 
-	checksum = 0;
-	for (count = 0; count < current; count+=2) {
-		checksum ^= out_buffer[count];
-	}
-	out_buffer[current++] = checksum;
+  /* Odd bytes */
 
-	/* Even bytes */
+  checksum = 0;
+  for (count = 0; count < current; count+=2)
+    checksum ^= out_buffer[count];
 
-	checksum = 0;
-	for (count = 1; count < current; count+=2) {
-		checksum ^= out_buffer[count];
-	}
-	out_buffer[current++] = checksum;
+  out_buffer[current++] = checksum;
 
-		/* Send it out... */
-	if (write(PortFD, out_buffer, current) != current) {
-		return (false);
-	}
+  /* Even bytes */
 
-return true;  
+  checksum = 0;
+  for (count = 1; count < current; count+=2)
+    checksum ^= out_buffer[count];
+
+  out_buffer[current++] = checksum;
+
+  /* Send it out... */
+
+  if (write(PortFD, out_buffer, current) != current)
+    return (false);
+
+  return true;  
 }

@@ -656,7 +656,6 @@ bool		FB38_OpenSerial(void)
 		/* Set up and install handler before enabling async IO on port. */
 	sig_io.sa_handler = FB38_SigHandler;
 	sig_io.sa_flags = 0;
-	sig_io.sa_restorer = NULL;
 	sigaction (SIGIO, &sig_io, NULL);
 
 		/* Allow process/thread to receive SIGIO */

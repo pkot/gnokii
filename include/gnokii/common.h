@@ -10,7 +10,7 @@
   Header file for the definitions, enums etc. that are used by all models of
   handset.
 
-  Last modification: Thu May  6 00:51:48 CEST 1999
+  Last modification: Sat May 15 23:44:34 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -38,6 +38,14 @@ typedef enum {
   GPS_ACDC=1,     /* AC/DC powered (charging) */
   GPS_BATTERY /* Internal battery */
 } GSM_PowerSource;
+
+/* This data-type is used to specify the type of the number. See the official
+   GSM specification 03.40, version 5.3.0, section 9.1.2.5, page 33. */
+
+typedef enum {
+  GNT_UNKNOWN=0x81,      /* Unknown number */
+  GNT_INTERNATIONAL=0x91 /* International number */
+} GSM_NumberType;
 
 /* Limits of SMS messages. */
 

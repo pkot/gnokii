@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.2.5-pre15
+VERSION = 0.2.5-pre16
 
 #
 # Compiler to use.
@@ -70,8 +70,8 @@ LDFLAGS = -lpthread
 # For FreeBSD uncomment the following lines
 #
 
-# CFLAGS= -D_THREAD_SAFE ${COMMON}
-# LDFLAGS= -pthread
+# CFLAGS= -D_THREAD_SAFE ${COMMON} -I/usr/local/include
+# LDFLAGS= -pthread -L/usr/local/lib -lintl
 
 ################## Nothing interesting after this line ##################
 
