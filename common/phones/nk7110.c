@@ -228,8 +228,11 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	case GOP_DeleteCalendarNote:
 		return P7110_DeleteCalendarNote(data, state);
 	case GOP_GetSMS:
+		dprintf("Getting SMS (validating)...\n");
 		return P7110_GetSMS(data, state);
 	case GOP_GetSMSnoValidate:
+		dprintf("Getting SMS (without validating)...\n");
+		data->SMSFolder = NULL;
 		return P7110_GetSMSnoValidate(data, state);
 	case GOP_OnSMS:
 		/* Register notify when running for the first time */
@@ -905,7 +908,6 @@ static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 				0x01, /* Location */
 				0x01, 0x65, 0x01};
 
-	dprintf("Getting SMS (without validating)...\n");
 	data->SMSFolder = NULL;
 	req[4] = GetMemoryType(data->SMSMessage->MemoryType);
 	req[5] = (data->SMSMessage->Number & 0xff00) >> 8;
@@ -914,15 +916,8 @@ static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x14);
 }
 
-
-
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07,
-				0x08, /* FolderID */
-				0x00,
-				0x01, /* Location */
-				0x01, 0x65, 0x01};
 	GSM_Error error;
 
 	/* Handle MemoryType = 0 explicitely, because SMSFolder->FolderID = 0 by default */
@@ -950,13 +945,7 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 		data->SMSMessage->Number = data->SMSFolder->locations[data->SMSMessage->Number - 1];
 	}
 
-
-	dprintf("Getting SMS (validating)...\n");
-	req[4] = GetMemoryType(data->SMSMessage->MemoryType);
-	req[5] = (data->SMSMessage->Number & 0xff00) >> 8;
-	req[6] = data->SMSMessage->Number & 0x00ff;
-	if (SM_SendMessage(state, 10, 0x14, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x14);
+	return P7110_GetSMSnoValidate(data, state);
 }
 
 
