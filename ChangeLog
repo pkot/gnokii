@@ -8,6 +8,7 @@
     o pkt.c was missing from the Windows build     (BORBELY Zoltan)
     o serial_opendevice sets handshake and speed in the
       win32 version too                            (BORBELY Zoltan)
+    o add irda support for Windows systems             (Phil Ashby)
  * build system updates
     o use libtool --tag=CXX to be able to build gnokii with distcc
       or ccache (and probably crosscompile with newer autotools)

@@ -35,6 +35,21 @@ You can easily cross compile gnokii with MinGW, just follow these instructions:
 2) edit win32/mingw-cross/mingw-cross.sh according to your MinGW setup
 3) run make DESTDIR=/tmp/foo to install
 
+IrDA support for Windows
+========================
+
+Gnokii does support IrDA connection on Windows system. Due to license issues
+we cannot distribute all needed files to build Windows support out of the
+box. Here are the steps you need to take to build IrDA support for Windows.
+1) Get a copy of af_irda.h header file. It is distributed with the Windows
+IrDA DDK. The contents of the file you can find at:
+http://www.cswl.com/whiteppr/white/arhead.html
+2) Copy it to <path>\include\devices\ in gnokii sources
+3) Enable IrDA support in config.h file (see above) by replacing a line:
+#undef HAVE_IRDA
+with
+#define HAVE_IRDA 1
+4) Build gnokii as described above
 
 Disclaimer
 ==========
