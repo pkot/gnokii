@@ -128,6 +128,7 @@ static gn_error get_hw(GSM_Data *data, GSM_Statemachine *state);
 static gn_error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 static gn_error GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
 static gn_error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state);
+static gn_error get_security_code(GSM_Data *data, GSM_Statemachine *state);
 #endif
 
 static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
@@ -325,6 +326,8 @@ static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		return GetSecurityCodeStatus(data, state);
 	case GOP_ChangeSecurityCode:
 		return ChangeSecurityCode(data, state);
+	case GOP_GetSecurityCode:
+		return get_security_code(data, state);
 #endif
 	case GOP_SendDTMF:
 		return SendDTMF(data, state);
@@ -2784,6 +2787,23 @@ static gn_error get_hw(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x40);
 }
 
+#ifdef  SECURITY
+static gn_error get_security_code(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x6e, 0x01};
+	gn_error err;
+
+	if (!data->SecurityCode) return GN_ERR_INTERNALERROR;
+	req[3] = data->SecurityCode->Type;
+
+	if ((err = EnableExtendedCmds(data, state, 0x01)) != GN_ERR_NONE)
+		return err;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+#endif
+
 static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	char *aux, *aux2;
@@ -2800,6 +2820,17 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
 		}
 		break;
+
+#ifdef	SECURITY
+	/* get security code */
+	case 0x6e:
+		if (message[4] != 0x01) return GN_ERR_UNKNOWN;
+		if (data->SecurityCode) {
+			data->SecurityCode->Type = message[3];
+			snprintf(data->SecurityCode->Code, sizeof(data->SecurityCode->Code), "%s", message + 4);
+		}
+		break;
+#endif
 
 	/* call management (old style) */
 	case 0x7c:

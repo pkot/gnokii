@@ -329,12 +329,12 @@ static int usage(FILE *f, int retval)
 		     "                 [{--timeout|-m} time_in_seconds]\n"
 		     "                 [{--number|-n} number]\n"
 		     "          gnokii --listnetworks\n"
-		     "          gnokii --getsecuritycode\n"
 		));
 #ifdef SECURITY
 	fprintf(f, _("          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 		     "          gnokii --getsecuritycodestatus\n"
 		     "          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
+		     "          gnokii --getsecuritycode\n"
 		));
 #endif
 	exit(retval);
@@ -4243,11 +4243,12 @@ static int getsecuritycode()
 	gn_error error;
 	GSM_SecurityCode sc;
 	
-	memset(&sc.Code, 0, 10 * sizeof(char));
+	memset(&sc, 0, sizeof(sc));
+	sc.Type = GSCT_SecurityCode;
 	data.SecurityCode = &sc;
 	fprintf(stderr, _("Getting security code... \n"));
 	error = SM_Functions(GOP_GetSecurityCode, &data, &State);
-	fprintf(stdout, _("Security code is: %s\n"), &sc.Code[0]);
+	fprintf(stdout, _("Security code is: %s\n"), sc.Code);
 	return error;
 }
 
