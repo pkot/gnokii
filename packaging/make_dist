@@ -20,8 +20,6 @@ rm -rf /tmp/gnokii-${VERSION}
 cp -r ../../gnokii /tmp/gnokii-${VERSION}
 
 # Some files and directories in CVS are useless
-rm -rf /tmp/gnokii-${VERSION}/xkeyb
-rm -rf /tmp/gnokii-${VERSION}/xlogo*
 rm -rf /tmp/gnokii-${VERSION}/common/obsolete
 rm -rf /tmp/gnokii-${VERSION}/include/obsolete
 
