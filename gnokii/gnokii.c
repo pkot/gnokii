@@ -2820,11 +2820,11 @@ static int smsreader(void)
 		signal(SIGINT, interrupted);    
 		fprintf(stderr, _("Entered sms reader mode...\n"));
 
-		/* Loop here indefinitely - allows you to read texts from phone's
-		   display. The loops ends after pressing the Ctrl+C. */
 		while (!bshutdown) {
 			SM_Loop(&State, 1);
-			usleep(1000);
+			/* Some phones may not be able to notify us, thus we give
+			   lowlevel chance to poll them */
+			error = SM_Functions(GOP_PollSMS, &data, &State);
 		}
 		fprintf(stderr, _("Shutting down\n"));
 
