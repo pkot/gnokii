@@ -35,6 +35,8 @@
     o add --getlocksinfo along with 6100 driver     (Bertrik Sikken)
  * 7110 series updates:
     o dropping duplicated frames during pb read     (BORBELY Zoltan)
+ * 6100 series updates:
+    o better fix for busy (0xc9) frame              (BORBELY Zoltan)
 
 0.5.0pre4
 =========

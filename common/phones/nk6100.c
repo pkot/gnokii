@@ -1106,16 +1106,12 @@ static int get_memory_type(gn_memory_type memory_type)
 
 static gn_error GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error;
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x33, 0x64, 0x00};
 
 	req[5] = data->message_center->id;
 
 	if (sm_message_send(6, 0x02, req, state)) return GN_ERR_NOTREADY;
-	do {
-		error = sm_block(0x02, data, state);
-	} while (error == GN_ERR_BUSY);
-	return error;
+	return sm_block(0x02, data, state);
 }
 
 static gn_error SetSMSCenter(gn_data *data, struct gn_statemachine *state)
@@ -1225,7 +1221,7 @@ static gn_error SendSMSMessage(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(len, PNOK_MSG_ID_SMS, req, state)) return GN_ERR_NOTREADY;
 	do {
 		error = sm_block_no_retry_timeout(PNOK_MSG_ID_SMS, state->config.smsc_timeout, data, state);
-	} while (!state->config.smsc_timeout && (error == GN_ERR_TIMEOUT || error == GN_ERR_BUSY));
+	} while (!state->config.smsc_timeout && error == GN_ERR_TIMEOUT);
 
 	return error;
 }
@@ -1456,7 +1452,7 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 
 	case 0xc9:
 		dprintf("Still waiting....\n");
-		return GN_ERR_BUSY;
+		return GN_ERR_UNSOLICITED;
 
 	default:
 		return GN_ERR_UNHANDLEDFRAME;
