@@ -330,7 +330,7 @@ else
       AC_MSG_WARN(Disabling xgnokii.)
    else
       AC_CHECK_LIB(Xpm, XpmWriteFileFromXpmImage,
-            [ XPM_CFLAGS="-I$x_includes" XPM_LIBS="-L$x_libraries -lX11 -lXpm"
+            [ XPM_CFLAGS="-I$x_includes" XPM_LIBS="-L$x_libraries -lXpm -lX11"
               AC_DEFINE(XPM) ],
             AC_MSG_WARN(Cannot found library libXpm - disabling XPM support.),
             [ -L$x_libraries -lX11 ]

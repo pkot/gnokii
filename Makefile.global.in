@@ -73,5 +73,6 @@ endif
 
 
 CFLAGS += -I$(GNOKII_INCLUDE)
-LDFLAGS = $(LIBS) -Wl,--rpath -Wl,$(libdir)
+LDFLAGS = -Wl,--rpath -Wl,$(libdir)
+LDLIBS = $(LIBS)
 
