@@ -17,7 +17,16 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.10  2001-08-20 23:27:37  pkot
+  Revision 1.11  2001-09-09 21:45:49  machek
+  Cleanups from Ladislav Michl <ladis@psi.cz>:
+
+  *) do *not* internationalize debug messages
+
+  *) some whitespace fixes, do not use //
+
+  *) break is unneccessary after return
+
+  Revision 1.10  2001/08/20 23:27:37  pkot
   Add hardware shakehand to the link layer (Manfred Jonsson)
 
   Revision 1.9  2001/05/28 09:25:16  pkot
@@ -143,10 +152,12 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 	int frm_num, seq_num;
 	FBUS_IncomingMessage *m;
 
-//      if (isprint(rx_byte))
-//	  fprintf(stderr, "[%02x%c]", (unsigned char) rx_byte, rx_byte);
-//	else
-//	  fprintf(stderr, "[%02x ]", (unsigned char) rx_byte);
+#if 0
+	if (isprint(rx_byte))
+		fprintf(stderr, "[%02x%c]", (unsigned char) rx_byte, rx_byte);
+	else
+		fprintf(stderr, "[%02x ]", (unsigned char) rx_byte);
+#endif
 
 	/* XOR the byte with the current checksum */
 	i->checksum[i->BufferCount & 1] ^= rx_byte;
@@ -535,7 +546,6 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 		glink->InitLength = 250;
 
 	/* Start up the link */
-
 	flink.RequestSequenceNumber = 0;
 
 	if (glink->ConnectionType == GCT_Infrared) {

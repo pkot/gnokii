@@ -11,7 +11,16 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.4  2001-07-27 00:02:20  pkot
+  Revision 1.5  2001-09-09 21:45:49  machek
+  Cleanups from Ladislav Michl <ladis@psi.cz>:
+
+  *) do *not* internationalize debug messages
+
+  *) some whitespace fixes, do not use //
+
+  *) break is unneccessary after return
+
+  Revision 1.4  2001/07/27 00:02:20  pkot
   Generic AT support for the new structure (Manfred Jonsson)
 
   Revision 1.3  2001/06/10 11:26:56  machek
@@ -53,20 +62,19 @@ GSM_Error SM_SendMessage(GSM_Statemachine *state, u16 messagesize, u8 messagetyp
 	else return GE_NOTREADY;
 }
 
-
 GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
 {
 	struct timeval loop_timeout;
 	int i;
 
-	loop_timeout.tv_sec=0;
+	loop_timeout.tv_sec = 0;
 	loop_timeout.tv_usec = 100000;
 
 	if (!state->Link.Loop) {
-		fprintf(stderr, "Statemachine does not have loop function\n");
+		fprintf(stderr, "No Loop function. Aborting.\n");
 		abort();
 	}
-	for (i=0; i<timeout; i++) {
+	for (i = 0; i < timeout; i++) {
 		state->Link.Loop(&loop_timeout);
 	}
 

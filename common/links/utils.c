@@ -17,7 +17,16 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.3  2001-03-23 13:40:23  chris
+  Revision 1.4  2001-09-09 21:45:49  machek
+  Cleanups from Ladislav Michl <ladis@psi.cz>:
+
+  *) do *not* internationalize debug messages
+
+  *) some whitespace fixes, do not use //
+
+  *) break is unneccessary after return
+
+  Revision 1.3  2001/03/23 13:40:23  chris
   Pavel's patch and a few fixes.
 
   Revision 1.2  2001/03/21 23:36:05  chris
@@ -27,18 +36,14 @@
   Revision 1.1  2001/03/06 10:40:32  machek
   Added file with functions usefull for different links.
 
-
-
 */
 
 /* System header files */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 /* Various header file */
-
 #include "config.h"
 #include "misc.h"
 #include "gsm-common.h"
@@ -47,7 +52,6 @@
 #include "device.h"
 
 #if 0
-
 void
 link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 {
@@ -63,5 +67,4 @@ link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 	dprintf("Unknown Frame Type %02x\n\r", type);
 	gphone->DefaultFunction(type, buf, len);
 }
-
 #endif

@@ -11,7 +11,16 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.3  2001-08-20 23:27:37  pkot
+  Revision 1.4  2001-09-09 21:45:49  machek
+  Cleanups from Ladislav Michl <ladis@psi.cz>:
+
+  *) do *not* internationalize debug messages
+
+  *) some whitespace fixes, do not use //
+
+  *) break is unneccessary after return
+
+  Revision 1.3  2001/08/20 23:27:37  pkot
   Add hardware shakehand to the link layer (Manfred Jonsson)
 
   Revision 1.2  2001/08/09 11:51:39  pkot
@@ -23,7 +32,6 @@
 */
 
 /* System header files */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -50,7 +58,6 @@
 
 
 /* Some globals */
-
 static GSM_Link *glink;
 static GSM_Statemachine *statemachine;
 static int binlength = 0;
@@ -88,7 +95,6 @@ AT_SendMessage(u16 message_length, u8 message_type, void *msg)
 
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
-
 void ATBUS_RX_StateMachine(unsigned char rx_char)
 {
 	reply_buf[reply_buf_pos++] = rx_char;
@@ -103,7 +109,7 @@ void ATBUS_RX_StateMachine(unsigned char rx_char)
 			return;
 		}
 /* needed for binary date etc
-   todo: correct reading of variable length integers
+   TODO: correct reading of variable length integers
 		if (reply_buf_pos == 12) {
 			if (!strncmp(reply_buf + 3, "ABC", 3) {
 				binlength = atoi(reply_buf + 8);
@@ -111,31 +117,6 @@ void ATBUS_RX_StateMachine(unsigned char rx_char)
 		}
 */
 	}
-}
-
-
-/* This is the main loop function which must be called regularly */
-/* timeout can be used to make it 'busy' or not */
-
-/* ladis: this function ought to be the same for all phones... */
-
-GSM_Error ATBUS_Loop(struct timeval *timeout)
-{
-	unsigned char buffer[255];
-	int count, res;
-
-	res = device_select(timeout);
-	if (res > 0) {
-		res = device_read(buffer, 255);
-		for (count = 0; count < res; count++)
-			ATBUS_RX_StateMachine(buffer[count]);
-	} else {
-		return GE_TIMEOUT;
-	}
-
-	/* This traps errors from device_read */
-	if (res > 0) return GE_NONE;
-	else return GE_INTERNALERROR;
 }
 
 
@@ -160,9 +141,27 @@ bool ATBUS_OpenSerial(int hw_handshake)
 	return (true);
 }
 
+GSM_Error ATBUS_Loop(struct timeval *timeout)
+{
+	unsigned char buffer[255];
+	int count, res;
+			        
+	res = device_select(timeout);
+	if (res > 0) {
+		res = device_read(buffer, 255);
+		for (count = 0; count < res; count++)
+			ATBUS_RX_StateMachine(buffer[count]);
+	} else
+		return GE_TIMEOUT;  
+	/* This traps errors from device_read */
+	if (res > 0)
+		return GE_NONE;
+	else
+		return GE_INTERNALERROR;
+}
+
 
 /* Initialise variables and start the link */
-
 GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
 {
 	setvbuf(stdout, NULL, _IONBF, 0);

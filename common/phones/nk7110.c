@@ -17,7 +17,16 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.13  2001-08-16 23:59:32  pkot
+  Revision 1.14  2001-09-09 21:45:49  machek
+  Cleanups from Ladislav Michl <ladis@psi.cz>:
+
+  *) do *not* internationalize debug messages
+
+  *) some whitespace fixes, do not use //
+
+  *) break is unneccessary after return
+
+  Revision 1.13  2001/08/16 23:59:32  pkot
   Fixed (hopefully) timezone mismash (Sheldon Hearn)
 
   Revision 1.12  2001/08/09 12:34:34  pkot
@@ -151,61 +160,42 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	switch (op) {
 	case GOP_Init:
 		return P7110_Initialise(state);
-		break;
 	case GOP_GetModel:
 		return P7110_GetModel(data, state);
-		break;
 	case GOP_GetRevision:
 		return P7110_GetRevision(data, state);
-		break;
 	case GOP_GetImei:
 		return P7110_GetIMEI(data, state);
-		break;
 	case GOP_Identify:
 		return P7110_Identify(data, state);
-		break;
 	case GOP_GetBatteryLevel:
 		return P7110_GetBatteryLevel(data, state);
-		break;
 	case GOP_GetRFLevel:
 		return P7110_GetRFLevel(data, state);
-		break;
 	case GOP_GetMemoryStatus:
 		return P7110_GetMemoryStatus(data, state);
-		break;
 	case GOP_GetBitmap:
 		return P7110_GetBitmap(data, state);
-		break;
 	case GOP_SetBitmap:
 		return P7110_SetBitmap(data, state);
-		break;
 	case GOP_ReadPhonebook:
 		return P7110_ReadPhonebook(data, state);
-		break;
 	case GOP_WritePhonebook:
 		return P7110_WritePhonebookLocation(data, state);
-		break;
 	case GOP_GetNetworkInfo:
 		return P7110_GetNetworkInfo(data, state);
-		break;
 	case GOP_GetSpeedDial:
 		return P7110_GetSpeedDial(data, state);
-		break;
 	case GOP_GetSMSCenter:
 		return P7110_GetSMSCenter(data, state);
-		break;
 	case GOP_GetDateTime:
 		return P7110_GetClock(P7110_SUBCLO_GET_DATE, data, state);
-		break;
 	case GOP_GetAlarm:
 		return P7110_GetClock(P7110_SUBCLO_GET_ALARM, data, state);
-		break;
 	case GOP_GetCalendarNote:
 		return P7110_GetCalendarNote(data, state);
-		break;
 	default:
 		return GE_NOTIMPLEMENTED;
-		break;
 	}
 }
 
@@ -384,7 +374,7 @@ static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *message, 
 				}
 				break;
 			default:
-				dprintf(_("Unknown operator block %d\n"), blockstart[0]);
+				dprintf("Unknown operator block %d\n", blockstart[0]);
 				break;
 			}
 			blockstart += blockstart[1];
@@ -436,7 +426,7 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 			if (message[5] != 0xff) {
 				data->MemoryStatus->Used = (message[16] << 8) + message[17];
 				data->MemoryStatus->Free = ((message[14] << 8) + message[15]) - data->MemoryStatus->Used;
-				dprintf(_("Memory status - location = %d\n"), (message[8] << 8) + message[9]);
+				dprintf("Memory status - location = %d\n", (message[8] << 8) + message[9]);
 				return GE_NONE;
 			} else {
 				dprintf("Unknown error getting mem status\n");
@@ -516,7 +506,7 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 				} else if (data->PhonebookEntry) {
 					DecodeUnicode(data->PhonebookEntry->Name, (blockstart + 6), blockstart[5] / 2);
 					data->PhonebookEntry->Empty = false;
-					dprintf(_("   Name: %s\n"), data->PhonebookEntry->Name);
+					dprintf("   Name: %s\n", data->PhonebookEntry->Name);
 				}
 				break;
 			case P7110_ENTRYTYPE_EMAIL:
@@ -527,8 +517,8 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 					subEntry->NumberType  = 0;
 					subEntry->BlockNumber = blockstart[4];
 					DecodeUnicode(subEntry->data.Number, (blockstart + 6), blockstart[5] / 2);
-					dprintf(_("   Type: %d (%02x)\n"), subEntry->EntryType, subEntry->EntryType);
-					dprintf(_("   Text: %s\n"), subEntry->data.Number);
+					dprintf("   Type: %d (%02x)\n", subEntry->EntryType, subEntry->EntryType);
+					dprintf("   Text: %s\n", subEntry->data.Number);
 					subblockcount++;
 					data->PhonebookEntry->SubEntriesCount++;
 				}
@@ -540,8 +530,8 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 					subEntry->BlockNumber = blockstart[4];
 					DecodeUnicode(subEntry->data.Number, (blockstart + 10), blockstart[9] / 2);
 					if (!subblockcount) strcpy(data->PhonebookEntry->Number, subEntry->data.Number);
-					dprintf(_("   Type: %d (%02x)\n"), subEntry->NumberType, subEntry->NumberType);
-					dprintf(_(" Number: %s\n"), subEntry->data.Number);					
+					dprintf("   Type: %d (%02x)\n", subEntry->NumberType, subEntry->NumberType);
+					dprintf(" Number: %s\n", subEntry->data.Number);					
 					subblockcount++;
 					data->PhonebookEntry->SubEntriesCount++;
 				}
@@ -563,9 +553,9 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 					subEntry->data.Date.Hour   = blockstart[10];
 					subEntry->data.Date.Minute = blockstart[11];
 					subEntry->data.Date.Second = blockstart[12];
-					dprintf(_("   Date: %02u.%02u.%04u\n"), subEntry->data.Date.Day,
+					dprintf("   Date: %02u.%02u.%04u\n", subEntry->data.Date.Day,
 						subEntry->data.Date.Month, subEntry->data.Date.Year);
-					dprintf(_("   Time: %02u:%02u:%02u\n"), subEntry->data.Date.Hour,
+					dprintf("   Time: %02u:%02u:%02u\n", subEntry->data.Date.Hour,
 						subEntry->data.Date.Minute, subEntry->data.Date.Second);
 					subblockcount++;
 				}
@@ -584,11 +574,11 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 			case P7110_ENTRYTYPE_GROUP:	/* Caller group number */
 				if (data->PhonebookEntry) {
 					data->PhonebookEntry->Group = blockstart[5] - 1;
-					dprintf(_("   Group: %d\n"), data->PhonebookEntry->Group);
+					dprintf("   Group: %d\n", data->PhonebookEntry->Group);
 				}
 				break;
 			default:
-				dprintf(_("Unknown phonebook block %02x\n"), blockstart[0]);
+				dprintf("Unknown phonebook block %02x\n", blockstart[0]);
 				break;
 			}
 			blockstart += blockstart[3];
