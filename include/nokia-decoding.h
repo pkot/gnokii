@@ -29,37 +29,9 @@
 
 */
 
-#ifndef __nokia_decoding_h
-#define __nokia_decoding_h
+#ifndef _gnokii_nokia_decoding_h
+#define _gnokii_nokia_decoding_h
 
-#include "gsm-error.h"
-#include "gsm-common.h"
-#include "gsm-data.h"
+#define GN_NOKIA_MEMORY_SPEEDDIALS   0x0e   /* Speed dials */
 
-#define PNOKIA_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
-
-/* Entry Types for the enhanced phonebook */
-#define PNOKIA_ENTRYTYPE_POINTER		0x1a	/* Pointer to other memory */
-#define PNOKIA_ENTRYTYPE_NAME		0x07	/* Name always the only one */
-#define PNOKIA_ENTRYTYPE_EMAIL		0x08	/* Email Adress (TEXT) */
-#define PNOKIA_ENTRYTYPE_POSTAL		0x09	/* Postal Address (Text) */
-#define PNOKIA_ENTRYTYPE_NOTE		0x0a	/* Note (Text) */
-#define PNOKIA_ENTRYTYPE_NUMBER		0x0b	/* Phonenumber */
-#define PNOKIA_ENTRYTYPE_RINGTONE	0x0c	/* Ringtone */
-#define PNOKIA_ENTRYTYPE_DATE		0x13	/* Date for a Called List */
-#define PNOKIA_ENTRYTYPE_LOGO		0x1b	/* Group logo */
-#define PNOKIA_ENTRYTYPE_LOGOSWITCH	0x1c	/* Group logo on/off */
-#define PNOKIA_ENTRYTYPE_GROUP		0x1e	/* Group number for phonebook entry */
-#define PNOKIA_ENTRYTYPE_URL		0x2c	/* Group number for phonebook entry */
-
-/* Calendar note types */
-#define PNOKIA_NOTE_MEETING		0x01	/* Metting */
-#define PNOKIA_NOTE_CALL		0x02	/* Call */
-#define PNOKIA_NOTE_BIRTHDAY		0x04	/* Birthday */
-#define PNOKIA_NOTE_REMINDER		0x08	/* Reminder */
-
-gn_error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data, int blocks, int memtype, int speeddialpos);
-gn_error DecodeCalendar(unsigned char *message, int length, GSM_Data *data);
-
-
-#endif /* __nokia_decoding_h */
+#endif /* _gnokii_nokia_decoding_h */
