@@ -185,6 +185,7 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 
 static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
 static int get_memory_type(gn_memory_type memory_type);
+static gn_memory_type get_gn_memory_type(int memory_type);
 
 /* Some globals */
 
@@ -882,9 +883,8 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 	case 0x0d:
 		dprintf("Message: SMS Folder status received\n" );
 		if (!data->sms_folder) return GN_ERR_INTERNALERROR;
-		status = data->sms_folder->folder_id;
-		memset(data->sms_folder, 0, sizeof(gn_sms_folder));
-		data->sms_folder->folder_id = status;
+		data->sms_folder->sms_data = 0;
+		memset(data->sms_folder->locations, 0, sizeof(data->sms_folder->locations));
 
 		data->sms_folder->number = message[6] * 256 + message[7];
 		dprintf("Message: Number of Entries: %i\n" , data->sms_folder->number);
@@ -943,7 +943,8 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			strcpy(data->sms_folder_list->folder[j].name, "               ");
 
 			if (message[i] != 0x01) return GN_ERR_UNHANDLEDFRAME;
-			data->sms_folder_list->folder_id[j] = message[i + 2];
+			data->sms_folder_list->folder_id[j] = get_gn_memory_type(message[i + 2]);
+			data->sms_folder_list->folder[j].folder_id = data->sms_folder_list->folder_id[j];
 			dprintf("Folder(%i) name: ", message[i + 2]);
 			len = message[i + 3] << 1;
 			char_unicode_decode(data->sms_folder_list->folder[j].name, message + i + 4, len);
@@ -4653,6 +4654,90 @@ static int get_memory_type(gn_memory_type memory_type)
 		break;
 	default:
 		result = NK6510_MEMORY_XX;
+		break;
+	}
+	return (result);
+}
+
+static gn_memory_type get_gn_memory_type(int memory_type)
+{
+	int result;
+
+	switch (memory_type) {
+	case NK6510_MEMORY_IN:
+		result = GN_MT_IN;
+		break;
+	case NK6510_MEMORY_OU:
+		result = GN_MT_OU;
+		break;
+	case NK6510_MEMORY_AR:
+		result = GN_MT_AR;
+		break;
+	case NK6510_MEMORY_TE:
+		result = GN_MT_TE;
+		break;
+	case NK6510_MEMORY_F1:
+		result = GN_MT_F1;
+		break;
+	case NK6510_MEMORY_F2:
+		result = GN_MT_F2;
+		break;
+	case NK6510_MEMORY_F3:
+		result = GN_MT_F3;
+		break;
+	case NK6510_MEMORY_F4:
+		result = GN_MT_F4;
+		break;
+	case NK6510_MEMORY_F5:
+		result = GN_MT_F5;
+		break;
+	case NK6510_MEMORY_F6:
+		result = GN_MT_F6;
+		break;
+	case NK6510_MEMORY_F7:
+		result = GN_MT_F7;
+		break;
+	case NK6510_MEMORY_F8:
+		result = GN_MT_F8;
+		break;
+	case NK6510_MEMORY_F9:
+		result = GN_MT_F9;
+		break;
+	case NK6510_MEMORY_F10:
+		result = GN_MT_F10;
+		break;
+	case NK6510_MEMORY_F11:
+		result = GN_MT_F11;
+		break;
+	case NK6510_MEMORY_F12:
+		result = GN_MT_F12;
+		break;
+	case NK6510_MEMORY_F13:
+		result = GN_MT_F13;
+		break;
+	case NK6510_MEMORY_F14:
+		result = GN_MT_F14;
+		break;
+	case NK6510_MEMORY_F15:
+		result = GN_MT_F15;
+		break;
+	case NK6510_MEMORY_F16:
+		result = GN_MT_F16;
+		break;
+	case NK6510_MEMORY_F17:
+		result = GN_MT_F17;
+		break;
+	case NK6510_MEMORY_F18:
+		result = GN_MT_F18;
+		break;
+	case NK6510_MEMORY_F19:
+		result = GN_MT_F19;
+		break;
+	case NK6510_MEMORY_F20:
+		result = GN_MT_F20;
+		break;
+	default:
+		result = GN_MT_XX;
 		break;
 	}
 	return (result);
