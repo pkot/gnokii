@@ -16,6 +16,8 @@
     o zero the gn_sms structures when mallocing        (Ulrich Hopp)
  * gnokii updates
     o add --getnetworkinfo                          (Bertrik Sikken)
+ * build system fixes
+    o correctly set CFLAGS w0th --enable-debug           (Pawel Kot)
 
 0.5.0pre3
 =========
