@@ -38,6 +38,9 @@
  * Translation updates
     o Estonian translation for the pre19 release      (Hans Motsharg)
     o Slovenian translation for the pre19 release    (Bostjan Muller)
+ * gnokii updates
+    o fix sendlogo to set SMS_NoData for the non-existent message
+      parts                                               (Pawel Kot)
 
 0.4.0pre19
 ==========

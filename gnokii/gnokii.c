@@ -1447,7 +1447,10 @@ static int sendlogo(int argc, char *argv[])
 	/* FIXME: read from the stdin */
 	if (SMS.UDH[0].Type == GSM_PictureImage) {
 		SMS.UserData[1].Type = SMS_PlainText;
+		SMS.UserData[2].Type = SMS_NoData;
 		strcpy(SMS.UserData[1].u.Text, "testtest");
+	} else {
+		SMS.UserData[1].Type = SMS_NoData;
 	}
 
 	/* Send the message. */
