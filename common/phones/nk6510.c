@@ -248,7 +248,7 @@ GSM_Phone phone_nokia_6510 = {
 	PGEN_IncomingDefault,
 	/* Mobile phone information */
 	{
-		"6510|6310",		     /* Supported models */
+		"6510|6310|8310",      /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GRF_Percentage,        /* RF level units */
