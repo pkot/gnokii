@@ -9,6 +9,8 @@
                                                          (Pawel Kot)
  * 6110 series updates
     o "calendar functions busy" messages handled    (BORBELY Zoltan)
+ * gnokii updates
+    o vCalendar export fixed                        (BORBELY Zoltan)
 
 0.5.0
 =====
