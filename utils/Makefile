@@ -21,8 +21,9 @@ clean:
 install-generic:
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) todologo $(DESTDIR)$(bindir)
-	$(INSTALL) ppm2nokia $(DESTDIR)$(bindir)
+	$(INSTALL) -m 755 todologo $(DESTDIR)$(bindir)
+	$(INSTALL) -m 755 sendsms $(DESTDIR)$(bindir)
+	$(INSTALL) -m 755 ppm2nokia $(DESTDIR)$(bindir)
 
 install: install-generic
 	$(INSTALL) mgnokiidev $(DESTDIR)$(sbindir)

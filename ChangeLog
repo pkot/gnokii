@@ -21,6 +21,7 @@
     o correct include of winserial.h in tekram driver        (Polik)
     o give the working config example in gnokii-IrDA-howto
                                                      (Simon Huggins)
+    o install sendsms on make install                    (Pawel Kot)
  * Build system fixes
     o fix a stupid bug in configure that made configure not detect
       many functions/types when user didn't explicitely give
