@@ -39,8 +39,14 @@
 #  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif
 
-#define __links_fbus_3110_c
 #include "links/fbus-3110.h"
+
+static bool FB3110_OpenSerial(void);
+static void FB3110_RX_StateMachine(unsigned char rx_byte);
+static GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
+static GSM_Error FB3110_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
+static void FB3110_TX_SendAck(u8 *message, int length);
+static void FB3110_UpdateSequenceNumber(void);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -55,7 +61,7 @@ static FB3110_Link flink;		/* FBUS specific stuff, internal to this file */
 
 /*--------------------------------------------*/
 
-bool FB3110_OpenSerial(void)
+static bool FB3110_OpenSerial(void)
 {
 	/* Open device. */
 	if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
@@ -71,7 +77,7 @@ bool FB3110_OpenSerial(void)
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
-void FB3110_RX_StateMachine(unsigned char rx_byte)
+static void FB3110_RX_StateMachine(unsigned char rx_byte)
 {
 	FB3110_IncomingFrame *i = &flink.i;
 	int count;
@@ -160,7 +166,7 @@ void FB3110_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-GSM_Error FB3110_Loop(struct timeval *timeout)
+static GSM_Error FB3110_Loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -187,7 +193,7 @@ GSM_Error FB3110_Loop(struct timeval *timeout)
    the value specified when called.  Calculates checksum
    and then sends the lot down the pipe... */
 
-GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 * buffer)
+static GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 * buffer)
 {
 
 	u8 out_buffer[FB3110_MAX_TRANSMIT_LENGTH];
@@ -235,7 +241,7 @@ GSM_Error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_by
 
 /* Main function to send an fbus message */
 
-GSM_Error FB3110_SendMessage(u16 messagesize, u8 messagetype, void *message)
+static GSM_Error FB3110_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
 {
 	u8 seqnum;
 
@@ -251,7 +257,7 @@ GSM_Error FB3110_SendMessage(u16 messagesize, u8 messagetype, void *message)
    a command sent to it.  The ack. algorithm isn't 100% understood
    at this time. */
 
-void FB3110_TX_SendAck(u8 *message, int length)
+static void FB3110_TX_SendAck(u8 *message, int length)
 {
 	u8 t = message[0];
 
@@ -360,7 +366,7 @@ GSM_Error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
    accurately, the numbers cycle 0,1,2,3..7 with bit 4 of the byte
    premanently set. */
 
-void FB3110_UpdateSequenceNumber(void)
+static void FB3110_UpdateSequenceNumber(void)
 {
 	flink.RequestSequenceNumber++;
 

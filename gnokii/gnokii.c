@@ -39,10 +39,8 @@
 #ifdef WIN32
 
 #  include <windows.h>
-#  define sleep(x) Sleep((x) * 1000)
-#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #  define stat _stat
-#  include "win32/getopt.h"
+#  include "getopt.h"
 
 #else
 
@@ -57,7 +55,6 @@
 #ifdef USE_NLS
 #  include <locale.h>
 #endif
-
 
 #include "gnokii.h"
 
@@ -308,10 +305,13 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
 
 	aux = CFG_Get(CFG_Info, "global", "use_locking");
-	/* Defaults to 'yes' */
-	if (!aux || !strcmp(aux, "yes")) {
+	/* Defaults to 'no' */
+	if (aux && !strcmp(aux, "yes")) {
 		lockfile = lock_device(Port);
-		if (lockfile == NULL) exit(-1);
+		if (lockfile == NULL) {
+			fprintf(stderr, _("Lock file error. Exiting\n"));
+			exit(-1);
+		}
 	}
 
 	/* Initialise the code for the GSM interface. */
@@ -1916,10 +1916,12 @@ static int writecalendarnote(char *argv[])
 	GSM_DataClear(&data);
 	data.CalendarNote = &CalendarNote;
 
+#ifndef WIN32
 	if (GSM_ReadVCalendarFile(argv[0], &CalendarNote, atoi(argv[1]))) {
 		fprintf(stdout, _("Failed to load vCalendar file.\n"));
 		return -1;
 	}
+#endif
 
 	/* Error 22 = Calendar full ;-) */
 	if (SM_Functions(GOP_WriteCalendarNote, &data, &State) == GE_NONE)

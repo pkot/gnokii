@@ -28,8 +28,11 @@
 #include "links/utils.h"
 #include "gsm-statemachine.h"
 
-#define __atbus_c
 #include "links/atbus.h"
+
+static GSM_Error ATBUS_Loop(struct timeval *timeout);
+static bool ATBUS_OpenSerial(int hw_handshake, char *device);
+static void ATBUS_RX_StateMachine(unsigned char rx_char);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -72,18 +75,17 @@ static int xwrite(unsigned char *d, int len)
 }
 
 
-static GSM_Error
-AT_SendMessage(u16 message_length, u8 message_type, void *msg)
+static GSM_Error AT_SendMessage(u16 message_length, u8 message_type, unsigned char *msg)
 {
 	usleep(10000);
-	xwrite((char*)msg, message_length);
+	xwrite(msg, message_length);
 	return GE_NONE;
 }
 
 
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
-void ATBUS_RX_StateMachine(unsigned char rx_char)
+static void ATBUS_RX_StateMachine(unsigned char rx_char)
 {
 	reply_buf[reply_buf_pos++] = rx_char;
 	reply_buf[reply_buf_pos] = '\0';
@@ -126,7 +128,7 @@ void ATBUS_RX_StateMachine(unsigned char rx_char)
 }
 
 
-bool ATBUS_OpenSerial(int hw_handshake, char *device)
+static bool ATBUS_OpenSerial(int hw_handshake, char *device)
 {
 	int result;
 	result = device_open(device, false, false, hw_handshake, GCT_Serial);
@@ -163,7 +165,7 @@ bool ATBUS_OpenSerial(int hw_handshake, char *device)
 	return (true);
 }
 
-GSM_Error ATBUS_Loop(struct timeval *timeout)
+static GSM_Error ATBUS_Loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;

@@ -1,6 +1,10 @@
 0.4.0pre16 (not released yet)
 ==========
  * Killed inlines in the code (except xgnokii and smsd)   (Pawel Kot)
+ * Fix incorrect LDFLAGS during configure run             (Pawel Kot)
+ * More win32 updates                                 (Marcin Wiacek)
+ * Cleanups with some header files, static functions and other
+   things in links/* files                                (Pawel Kot)
 
 0.4.0pre15
 ==========

@@ -137,6 +137,7 @@ void serial_setdtrrts(int fd, int dtr, int rts)
 
 int serial_select(int fd, struct timeval *timeout)
 {
+	usleep(timeout->tv_sec*60+timeout->tv_usec);
 	return 1;
 }
 

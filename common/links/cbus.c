@@ -32,8 +32,13 @@
 #include "device.h"
 #include "links/utils.h"
 
-#define __cbus_c
 #include "links/cbus.h"
+
+static GSM_Error CBUS_Loop(struct timeval *timeout);
+static bool CBUS_OpenSerial();
+static void CBUS_RX_StateMachine(unsigned char rx_byte);
+static int CBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
+static int CBUS_TX_SendAck(u8 message_type, u8 message_seq);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -51,7 +56,7 @@ char reply_buf[10240];
 
 /*--------------------------------------------------------------------------*/
 
-bool CBUS_OpenSerial()
+static bool CBUS_OpenSerial()
 {
 	int result;
 	result = device_open(glink->PortDevice, false, false, false, GCT_Serial);
@@ -193,7 +198,7 @@ static GSM_Error PhoneReply(int messagetype, unsigned char *buffer, int length)
 	return GE_NONE;
 }
 
-void sendat(char *msg)
+void sendat(unsigned char *msg)
 {
 	usleep(10000);
 	printf("AT command: %s\n", msg);
@@ -210,7 +215,7 @@ void sendat(char *msg)
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
-void internal_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
+static void internal_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 {
 	switch(type) {
 	case '=': CommandAck(type, buf, len);
@@ -222,7 +227,7 @@ void internal_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, in
 	}
 }
 
-void CBUS_RX_StateMachine(unsigned char rx_byte)
+static void CBUS_RX_StateMachine(unsigned char rx_byte)
 {
 	CBUS_IncomingFrame *i = &clink.i;
 
@@ -336,13 +341,13 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 	i->prev_rx_byte = rx_byte;
 }
 
-int CBUS_SendMessage(u16 message_length, u8 message_type, void * buffer)
+static int CBUS_SendMessage(u16 message_length, u8 message_type, unsigned char *buffer)
 {
 	sendpacket(buffer, message_length, message_type);
 	return true;
 }
 
-static GSM_Error AT_SendMessage(u16 message_length, u8 message_type, void * buffer)
+static GSM_Error AT_SendMessage(u16 message_length, u8 message_type, unsigned char *buffer)
 {
 	sendat(buffer);
 	return true;
@@ -353,7 +358,7 @@ static GSM_Error AT_SendMessage(u16 message_length, u8 message_type, void * buff
 
 /* ladis: this function ought to be the same for all phones... */
 
-GSM_Error CBUS_Loop(struct timeval *timeout)
+static GSM_Error CBUS_Loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -371,13 +376,6 @@ GSM_Error CBUS_Loop(struct timeval *timeout)
 		return GE_NONE;
 	else
 		return GE_INTERNALERROR;
-}
-
-
-int CBUS_TX_SendAck(u8 message_type, u8 message_seq)
-{
-	dprintf("[Sending Ack]\n");
-	return (0);
 }
 
 

@@ -17,7 +17,10 @@
 #ifndef __device_h_
 #define __device_h_
 
-#include <unistd.h>
+#ifndef WIN32
+#  include <unistd.h>
+#endif
+
 #include "misc.h"
 #include "gsm-common.h"
 

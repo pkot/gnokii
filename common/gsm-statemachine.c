@@ -14,6 +14,7 @@
 
 #include "gsm-common.h"
 #include "gsm-statemachine.h"
+#include "misc.h"
 
 GSM_Error SM_Initialise(GSM_Statemachine *state)
 {

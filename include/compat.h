@@ -17,7 +17,12 @@
 #ifndef	__gnokii_compat_h
 #define	__gnokii_compat_h
 
-#include <sys/time.h>
+#ifdef WIN32
+#  include <windows.h>
+#  include <string.h>
+#else
+#  include <sys/time.h>
+#endif
 
 #ifndef	HAVE_TIMEOPS
 
@@ -59,13 +64,13 @@ int gettimeofday(struct timeval *tv, struct timezone *tz);
 
 #ifdef WIN32
 /*
- * This is inspired by Marcin Wiacek <marcin.wiacek@obywatel.pl>, it should help
- * windows compilers
+ * This is inspired by Marcin Wiacek <marcin-wiacek@topnet.pl>, it should help
+ * windows compilers (MS VC 6)
  */
 #  define inline /* Not supported */
-#  define strcasecmp strcmp
-#  define __const /* Not supported */
 #  define snprintf _snprintf
+#  define strcasecmp strcmp
+#  define strncasecmp _strnicmp
 #  define sleep(x) Sleep((x) * 1000)
 #  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif

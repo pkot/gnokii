@@ -14,21 +14,22 @@
 
 */
 
-#include <sys/time.h>
+#ifdef WIN32
+#  include <windows.h>
+#  include <sys/timeb.h>
+#  include <time.h>
+#else
+#  include <sys/time.h>
+#endif
 
 #include "config.h"
 #include "compat.h"
-
-#ifdef WIN32
-#include <windows.h>
-#include <sys/timeb.h>
-#endif
 
 #ifndef	HAVE_GETTIMEOFDAY
 
 int gettimeofday(struct timeval *tv, struct timezone *tz)
 {
-	struct timeb t;
+	struct _timeb t;
 
 	_ftime(&t);
 

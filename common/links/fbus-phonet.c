@@ -33,9 +33,11 @@
 #include "gsm-networks.h"
 #include "device.h"
 
-#define __links_fbus_phonet_c
-#include "links/fbus.h"
+// #include "links/fbus.h"
 #include "links/fbus-phonet.h"
+
+static void PHONET_RX_StateMachine(unsigned char rx_byte);
+static GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -50,7 +52,7 @@ PHONET_IncomingMessage imessage;
 
 /*--------------------------------------------*/
 
-bool PHONET_Open()
+static bool PHONET_Open()
 {
 	int result;
 
@@ -68,7 +70,7 @@ bool PHONET_Open()
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
-void PHONET_RX_StateMachine(unsigned char rx_byte)
+static void PHONET_RX_StateMachine(unsigned char rx_byte)
 {
 	PHONET_IncomingMessage *i = &imessage;
 
@@ -155,7 +157,7 @@ void PHONET_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-GSM_Error PHONET_Loop(struct timeval *timeout)
+static GSM_Error PHONET_Loop(struct timeval *timeout)
 {
 	GSM_Error	error = GE_INTERNALERROR;
 	unsigned char	buffer[255];
@@ -180,7 +182,7 @@ GSM_Error PHONET_Loop(struct timeval *timeout)
 
 /* Main function to send an fbus message */
 
-GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message) {
+static GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message) {
 
 	u8 out_buffer[PHONET_MAX_TRANSMIT_LENGTH + 5];
 	int current = 0;

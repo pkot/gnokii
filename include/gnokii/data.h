@@ -85,7 +85,7 @@ typedef struct {
 
 	/* A pointer to the function used to send out a message */
 	/* This is used by the phone specific code to send a message over the link */
-	GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, void *message);
+	GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, unsigned char *message);
 } GSM_Link;
 
 /* Small structure used in GSM_Phone */

@@ -42,4 +42,6 @@ typedef struct {
 	int Repeat;
 } NK6100_Keytable;
 
+void PNOK_GetNokiaAuth(unsigned char *Imei, unsigned char *MagicBytes, unsigned char *MagicResponse);
+
 #endif  /* #ifndef __phones_nk6100_h */

@@ -25,7 +25,6 @@
 
 /* Generic Functions */
 
-GSM_Error PGEN_DebugMessage(int type, unsigned char *mes, int len);
 GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length);
 
 

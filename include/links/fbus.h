@@ -22,7 +22,6 @@
 #define __links_fbus_h
 
 #include <time.h>
-#include "gsm-statemachine.h"
 #include "config.h"
 #include "compat.h"
 
@@ -30,17 +29,12 @@
 #  include <sys/types.h>
 #endif
 
+#include "fbus-common.h"
+
 #define FBUS_MAX_FRAME_LENGTH 256
 #define FBUS_MAX_MESSAGE_TYPES 128
 #define FBUS_MAX_TRANSMIT_LENGTH 256
 #define FBUS_MAX_CONTENT_LENGTH 120
-
-/* Nokia mobile phone. */
-#define FBUS_DEVICE_PHONE 0x00
-
-/* Our PC. */
-#define FBUS_DEVICE_PC 0x0c
-
 
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
    phones.  This may have to become a phone dependant parameter... */
@@ -54,21 +48,6 @@
    sequence. */
 
 #define FBUS_FRAME_HEADER 0x00, 0x01, 0x00
-
-
-/* States for receive code. */
-
-enum FBUS_RX_States {
-	FBUS_RX_Sync,
-	FBUS_RX_Discarding,
-	FBUS_RX_GetDestination,
-	FBUS_RX_GetSource,
-	FBUS_RX_GetType,
-	FBUS_RX_GetLength1,
-	FBUS_RX_GetLength2,
-	FBUS_RX_GetMessage
-};
-
 
 typedef struct{
 	int checksum[2];
@@ -106,12 +85,5 @@ typedef struct{
 GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type);
 
 int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
-
-#ifdef __links_fbus_c  /* Prototype functions for fbus-generic.c only */
-bool FBUS_OpenSerial(bool dlr3);
-void FBUS_RX_StateMachine(unsigned char rx_byte);
-GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message);
-int FBUS_TX_SendAck(u8 message_type, u8 message_seq);
-#endif   /* #ifdef __links_fbus_c */
 
 #endif   /* #ifndef __links_fbus_h */
