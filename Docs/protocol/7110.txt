@@ -1,5 +1,5 @@
-7110.txt version 28.01.2001
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+7110.MSGTYPES version 28.01.2001
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Assembled by
 Balazs Nagy (js@lsc.hu) and
 Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)

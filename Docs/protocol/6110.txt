@@ -1,37 +1,34 @@
-6110.txt version Sat Nov 13 16:23:03 1999
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Assembled by Balazs Nagy <julian7@synergon.hu>
+README.MSGTYPES version 11.01.2001
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Assembled by Balazs Nagy (js@lsc.hu)
 
-Many thanks to:
+Help from
 	Alfred R. Nurnberger <arnu@flosys.com>
 	Hugh Blemings <Hugh.Blemings@vsb.com.au>
 	Mike Bradley <mike@trumpington.st>
 	Odinokov Serge <serge@takas.lt>
-	Pavel Janik <Pavel.Janik@inet.cz>
+	Pavel Janik <Pavel@Janik.cz>
 	Pawe³ Kot <pkot@linuxnews.pl>
-	... and to the members of gnokii mailing list.
+	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)
+	... and other members of gnokii mailing list.
 
-This document covers the FBUS 
+This document covers the FBUS/IRDA and MBUS
 
 NOTE: this information isn't (and can't be) complete.  If you know anything
-about 6110's non listed features or you noticed a bug in this list, please
-notify me via e-mail (julian7@synergon.hu).  Thank you.
+about features not listed here or you noticed a bug in this list, please
+notify us via e-mail.  Thank you.
 
- Message types for 6110 and derivatives:
- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Frame format:
+ Message types for NSE-x (6110 and derivatives):
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Frame format for FBUS/IRDA:
 
-    { FrameID, DestDEV, SrcDEV, MsgType, 0x00,
-      FrameLength, {block}, FramesToGo,
+    { FrameID, DestDEV, SrcDEV, MsgType, 0x00, FrameLength, {block}, FramesToGo,
       SeqNo, PaddingByte?, ChkSum1, ChkSum2 }
 
          where FrameID:         0x1c: IR / FBUS
                                 0x1e: Serial / FBUS
-                                0x1f: Serial / M2BUS
                DestDev, SrcDev: 0x00: mobile phone
                                 0x0c: TE (FBUS) [eg. PC]
-                                0x10: TE (M2BUS)
-                                0x1d: TE (M2BUS)
                MsgType:         see List
                FrameLength:     {block} + 2 (+ 1 if PaddingByte exists)
                FramesToGo:      0x01 means the last frame
@@ -41,8 +38,23 @@ notify me via e-mail (julian7@synergon.hu).  Thank you.
 			          Y: sequence number
                PaddingByte:     0x00 if FrameLength would be an odd number
                                 anyways it doesn't exists
-               ChkSum1:         XOR on frame's odd numbers (M2BUS: all numbers)
+               ChkSum1:         XOR on frame's odd numbers
                ChkSum2?:        XOR on frame's even numbers
+
+ Frame format for MBUS:
+ 
+    { FrameID, DestDEV, SrcDEV, MsgType, FrameLengthLO, FrameLengthHI, {block},
+      SeqNo, ChkSum }
+
+         where FrameID:         0x1f: Serial / M2BUS
+               DestDev, SrcDev: 0x00: mobile phone
+                                0x10: TE (M2BUS) ? (found in nokia511052x.zip)
+                                0x1d: TE (M2BUS)
+				0x10: TE (M2BUS) (LM, WinTesla)
+               MsgType:         see List
+               FrameLength:     {block}
+               SeqNo:           sequence number
+               ChkSum:          XOR on frame's all numbers
 
     Please note that M2BUS has only one checksum: XOR on frame[FrameID..SeqNo]
 
@@ -63,38 +75,76 @@ notify me via e-mail (julian7@synergon.hu).  Thank you.
 0x01: Call Information
     s voice call?           { 0x0001, "numbers", 5,1,1,5,81,1,0,0,1 }
     s data call?            { 0x0001, "numbers", 1,2,1,5,81,1,0,0,1,2,10,7,162,136,129,33,21,99,168,0,0 }
-    s ext. ring (7110)      {*0x0108, 0x0002, xx, 0x01 }
-    s ext. hang on (7110)   {*0x0108, 0x0003, 5,0,1,3,2,0x91,0,1 }
-    r missed call           { 0x0004, seqnr }
+    r Call going msg        { 0x0002}
+    r Call in progress      { 0x0003, seqnr }
+    r Remote end hang up    { 0x0004, seqnr, ?, error (like in netmon in 39) }
     r incoming call alert   { 0x0005, seqnr, numlen, "number", namelen, "name" }
     r answered call         { 0x0007, seqnr }
     r terminated call       { 0x0009, seqnr }
+    r call msg              { 0x000a, seqnr }
+    r Send DTMF/voice call  { 0x0040}
     s ???                   { 0x0042, 5,1,7,0xa2,0x88,0x81,0x21,0x15,0x63,0xa8,0,0,7,0xa3,0xb8,0x81,0x20,0x15,0x63,0x80 }
     s ??? sent after        { 0x0042,0x05,0x01,0x07,0xa2,0xc8,0x81,0x21,0x15,0x63,0xa8,0x00,0x00,0x07,0xa3,0xb8,0x81,
         issuing data call            0x20,0x15,0x63,0x80,0x01,0x60}
     s Send DTMF             { 0x0050, length, {ascii codes for DTMF}, 0x01 }
-    r line busy             { 0x0054, 5,17,0,0,0,1 }
-    r ext. hangup           { 0x0054, xx, 16,0,0,0,1 }
-0x02: SMS handling (works in 7110)
+0x02: SMS handling
     s Send SMS message      { 0x0001, 0x02, 0x00 (SEND REQUEST), ... }
     r Message sent          { 0x0002 }
-    r Send failed           { 0x0003 }
+    r Send failed           { 0x0003, ?, ?, error (like in netmon in 65)}    
     s Get SMS message       { 0x0007, 0x02, location, 0x01, 0x64 }
     s Initiate connection   { 0x000d, 0x00, 0x00, 0x02 }
     r Initiate ACK          { 0x000e, 0x01 }
     r SMS message received  { 0x0010, ...... } (whole message)
-    s ???                   { 0x0020, 0x02, 0x01 }
-    r ???                   { 0x0021, 0x01 }
-    s Set SMS center        { 0x0030, 0x64, priority, 0xe9?,0?,type,validity period, 12x?, number len, SMS center number (12 bytes), ....? }
+    s Set CellBroadcast     { 0x0020, 0x01, 0x01, 0x00, 0x00, 0x01, 0x01 }
+                                      for enable cell broadcast ?
+                                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+                                      for disable cell broadcast ?
+    r Set CellBroadcast OK  { 0x0021, 0x01 }
+    r Read CellBroadcast    { 0x0023, ?, ?, ?, channel, ?, message... } ?
+    s Set SMS center        { 0x0030, 0x64, priority, checksum? ,0?, format,
+                                      validity, {DefaultRecipient no.}[12], 
+                                      {SMScenter no.}[12], {SMSC name}, 0x00}
+                              where tel.no.[12]: {len, type, {number(BCD)}}
+                                    type: 0x81: normal
+                                          0x91: + (international)
+                                          0xd0: alphanumeric
+                                    format: 0x00: text
+                                            0x22: fax
+                                            0x24: voice
+                                            0x25: ERMES
+                                            0x26: paging
+                                            0x31: X.400
+                                            0x32: email
+                                    validity: 0x0b:  1 hour
+                                              0x47:  6 hours
+                                              0xa7: 24 hours
+                                              0xa9: 72 hours
+                                              0xad:  1 week
+                                              0xff: max.time
     r Set SMS center OK     { 0x0031 }
     r Set SMS center error  { 0x0032, reason }
     s Get SMS center        { 0x0033, 0x64, priority }
-    r SMS center received   { 0x0034, priority, 0xe9?, type, 0x00?, validity, 12x0x00?, SMScenter len, SMScenter no.(BCD) (12 bytes) }
-                            # 21-> smscenter number (BCD), 33-> smscenter name
+    r SMS center received   { 0x0034, priority, checksum?, format, 0x00?,
+                                      validity, {DefaultRecipient no.}[12],
+                                      {SMScenter no.}[12], {SMSC name}, 0x00}
+                                      tel.no[12]: {len, type, {number(BCD)}} 
+                              where priority, checksum, type, validity,
+                                    tel.no.[12]: see 0x02/0x0030
     r SMS center error recv { 0x0035, reason }
 0x03: Phonebook functions
     s Get mem location      { 0x0001, memtype, location, 0 }
-    r mem location recvd    { 0x0002, memtype,namelen,"name",numlen,"number",groupID }
+                            where memory:
+                                     0x01: telephone and SIM phonebook (in one)
+                                     0x02: telephone phonebook
+                                     0x03: SIM phonebook
+                                     0x04: SIM fixdialling-phonebook (?)
+                                     0x05: Own numbers
+                                     0x07: Dialled numbers
+                                     0x08: Missed calls
+                                     0x09: Received calls
+                                     0x0b: voice mailbox (location not important)
+    r mem location recvd    { 0x0002, 0x00,namelen,"name",numlen,"number",groupID, 0x01?, yearLO, yearHI, month, day, hour, minute, sec. }
+                            Note: in 3310 all entries have null name ("feature" of bug ?)
     r mem loc error recvd   { 0x0003, errtype }
                             where errtype: 0x7d: invalid memory type
     s Set mem location      { 0x0004, memtype,location,namelen,"Name",numlen,"number",groupID }
@@ -210,8 +260,8 @@ notify me via e-mail (julian7@synergon.hu).  Thank you.
                             where nr: see 0x05/0x0013
                                   len: text length 
                                   flen len + len(nr, len) = len + 2
-    s Set Profile name      { 0x001c, 1, 3, flen, nr, len, {text} }
-    r Set Profile name OK   { 0x001d }
+    s ???                   { 0x001c }
+    r ???                   { 0x001d, 0x93 }
     s Set oplogo            { 0x0030, location, MCC1, MCC2, MNC, lenhi=0x00, lenlo=0x82, OTABitmap }
     r Set oplogo OK         { 0x0031 }
     r Set oplogo error      { 0x0032, reason }
@@ -221,9 +271,20 @@ notify me via e-mail (julian7@synergon.hu).  Thank you.
     r Get oplogo            { 0x0034, location, MCC1, MCC2, MNC, lenhi=0x00, lenlo=0x82, OTABitmap }
     r Get oplogo error      { 0x0035, reason }
                             where reason: 0x7d invalid location
-    s Set ringtone          { 0x0036, lenhi, lenlo, {data} }
+    s Set ringtone          { 0x0036, location,0x00,0x78, ringtone packed according to SM2.0}
     r Set ringtone OK       { 0x0037 }
     r Set ringtone error    { 0x0038, reason }
+                            where reason=0x7d, when not supported location
+    s Get services settings { 0x0080, setting (2 bytes) }
+                            where: setting: 0x02,0x00=Nokia access number 1
+                                            0x02,0x01=Operator access number 1
+                                            0x01,0x00=Personal bookmark 1 settings (name only ?)
+                                            0x01,0x01=?
+                                            0x02,0x02=?
+    r Get services sett.OK  { 0x0081, .... }
+    r Get services sett.err { 0x0082, 0x7b }
+0x06:
+    r Get prepaid(?) info   { 0x0005, ?,?,?,length,message(packed like in 7bit SMS)}
 0x07:
     s ???                   { 0x0022, ? (1&2 sounds OK) }
     r ??? OK                { 0x0023, ?,?,? }
@@ -247,10 +308,9 @@ notify me via e-mail (julian7@synergon.hu).  Thank you.
 0x09: SIM login
     r login                 { 0x0080 }
     r logout                { 0x0081 }
-
 0x0a: Network status
     s Key duplication on/off{ 0x0044, on? 0x01: 0x02 }
-    s Get used network(7110){ 0x0070, 0x01 }
+    s get used network      { 0x0070 }
     r network registration  { 0x0071, ?,?,?,length,netstatus,netsel,cellIDH,cellIDL,lacH,lacL,netcode,netcode,netcode }
 0x0c: Keys
     s Get key assignments   { 0x0040, 0x01 }
@@ -298,9 +358,10 @@ notify me via e-mail (julian7@synergon.hu).  Thank you.
     r alarm set             { 0x006c }
     s get alarm             { 0x006d }
     r alarm received        { 0x006e,?,?,?,?,alrm(==2:on),hour,min }
-0x12: Connect to NBS port (6110 only)
-    s Send                  {+0x0c, 0x01, 0x06, 0x05, 0x04,destporth,destportl,srcporth,srcportl,...}
+0x12: Connect to NBS port (61xx only ?)
+    s Send                  {+0x0c, 0x01, UDH header, data}
                             (without 0,1 header  -- for oplogo, cli, ringtone etc upload)
+			    where: UDH header = 0x06, 0x05, 0x04,destporth,destportl,srcporth,srcportl
 0x13: Calendar notes
     s Write calendar note   { 0x0064, 0x01, 0x10, length, type, yearH, yearL, month, day, hour, timezone,
                               alarm?(alarm yearH, yearL, month, day, hour, timezone): (0,0,0,0,0,0),
@@ -319,7 +380,7 @@ notify me via e-mail (julian7@synergon.hu).  Thank you.
                             where err: 0x01: OK
                                        0x93: cannot delete
 0x14: SMS funcs
-    s Write SMS to outbox   { 0x0004, 
+    s Write SMS to SIM      { 0x0004, .... }
     r SMS message frame rcv { 0x0008,subtype,?,num,?,BCD(smscenter)...} 20->type, 22->status
                             where type: 0x06: delivery report 
                                   status: 0x00: delivered
@@ -333,34 +394,142 @@ notify me via e-mail (julian7@synergon.hu).  Thank you.
     s SMS status request    { 0x0036, 0x64 }
     r SMS status            { 0x0037,?,?,?,?,?,?,msgnumber,unread }
     r SMS status error      { 0x0038 }
-0x1b: Phone information (7110)
-    s Get IMEI              { 0x0001 }
-    s Phone ref+soft version{ 0x0003, 0x01, 0x32, 0x01 }
 0x40: Security commands
     s Enable extended cmds  { 0x0164, cmd }
                             where cmd: 0x00: off
                                        0x01: on
                                        0x03: reset (doesn't ask for PIN again)
                                        0x04: reset (PIN is requested)
-                                       0x06: CONTACT SERVICE (maybe new firmware upload?)
+                                             In 5110 makes reset without PIN
+                                       0x06: CONTACT SERVICE!!! Don't try it!
+    s Get IMEI              { 0x0166 }
+    r Get IMEI              { 0x0166, 0x01, IMEI, 0x00}
+    s Get Product Profile
+      Settings              { 0x016a}
+    r Get Product Profile
+      Settings              { 0x016a, 4bytes with Product Profile Settings }
+    s Set Product Profile
+      Settings              { 0x016b, 4bytes with Product Profile Settings }
+    r Set Product Profile
+      Settings OK ?         { 0x016b }
     s Get code              { 0x016e, code }
                             where code: see 0x08/0x0004 (only sec.code is allowed)
     r Get code              { 0x016e, code, allowed, allowed? (sec code (text)) }
                             where code: see 0x08/0x0004
                                   allowed: 0: no
                                            1: yes
+    s Reset Permanent
+      Counters (nm->test36) { 0x0174, 0x01, 0x01, 0x0e }
+    r Reset Permanent
+      Counters (nm->test36) { 0x0174 }
     s Netmonitor            { 0x017e, field }
                             where: field: 00: next
                                           F0: reset
                                           F1: off
                                           F2: field test menus
                                           F3: developer menus
+    s Get simlock info      { 0x018a, 0x00}
+    r Get simlock info      { 0x018a, 0x00, ... }
+                            warning! it's possible, that using it in some phones
+                            can close simlocks !
+    s Set downloaded OpName { 0x018b, 0x00, MCC1, MCC2, MNC, Name, 0x00 }
+    r SetdownloadedOpNameOK?{ 0x018b, 0x00, 0x01 }
+    s Get downloaded OpName { 0x018c, 0x00 }
+    r Get downloaded OpName { 0x018c, 0x00, 0x01, MCC1, MCC2, MNC, Name, 0x00,...}
     s Buzzer pitch          { 0x018f, volume, hzLO, hzHI }
                             if volume and hz is 0, it's off
+    r Buzzer pitch          { 0x018f}
+    s Get bin ringtone      { 0x019e, location }
+                            where: location=0,1,etc.
+    r Get bin ringtone      { 0x019e, location, error, contents... }
+                            where location=0,1,etc.
+                                  error=0x0a, ringtone NOT available
+                                        0x00, OK
+    s Set bin ringtone      { 0x01a0, location, 0x00, contenst... }
+                            where: location=0,1,etc.
+    r Set bin ringtone      { 0x019e, location, error }
+                              where location=0,1,etc.
+                                    error=0x0a, ringtone NOT set
+                                          0x00, ringtone set OK
+    s Get info about phone  { 0x01c8, 0x01 }
+    r Get info about phone  { 0x01c8, 0x01, 0x00, "V ", "firmware", 0x0a, "firmware date", 0x0a, "model", 0x0a, "(c) NMP.", 0x00 }
+    s Get MCU SW Checksum   { 0x01c8, 0x02 }
+    r Get MCU SW Checksum   { 0x01c8, 0x02, 0x00, checksum (4 bytes),0x00 }
+    s DPS External SW       { 0x01c7, 0x03 }
+    r DSP External SW       { 0x01c7, 0x03, 0x00, string,0x00 }
+    s Get HW                { 0x01c8, 0x05 }
+    r Get HW                { 0x01c8, 0x05, 0x00, HW version (4 bytes), 0x00 }
+    s Get "Made" Date       { 0x01c8, 0x05 }
+    r Get "Made" Date       { 0x01c8, 0x05, 0x00, date(4 bytes), 0x00 }
+    s Get DSP Internal SW   { 0x01c8, 0x09 }
+    r Get DSP Internal SW   { 0x01c8, 0x09, 0x00, version (1 bytes), 0x00 }
+    s Get PCI version       { 0x01c8, 0x0a }
+    r Get PCI version       { 0x01c8, 0x0a, 0x00, version, 0x00 }
+    s Get system ASIC       { 0x01c8, 0x0c }
+    r Get system ASIC       { 0x01c8, 0x0c, 0x00, string, 0x00 }
+    s Get COBBA             { 0x01c8, 0x0d }
+    r Get COBBA             { 0x01c8, 0x0d, 0x00, string, 0x00 }
+    s Get PLUSSA            { 0x01c8, 0x0e }
+    r Get PLUSSA            { 0x01c8, 0x0e, available, 0x00 }
+                            where available: 0x01: not available
+    s Get CCONT             { 0x01c8, 0x0f }
+    r Get CCONT             { 0x01c8, 0x0f, available, 0x00 }
+                            where available: 0x01: not available
+    s Get PPM version       { 0x01c8, 0x10 }
+    r Get PPM version       { 0x01c8, 0x10, 0x00, "V ", "firmware", 0x0a, "firmware date", 0x0a, "model", 0x0a, "(c) NMP.", 0x00 }
+    s Get PPM info          { 0x01c8, 0x12 }
+    r Get PPM info          { 0x01c8, 0x12, 0x00, PPM version ("B", "C", etc.), 0x00 }
+    s Set HW version        { 0x01c9, 0x05, version, 0x00 }
+    s Get Product Code      { 0x01ca, 0x01 }
+    r Get Product Code      { 0x01ca, 0x01, 0x00, number, 0x00 }
+    s Get Order Number      { 0x01ca, 0x02 }
+    r Get Order Number      { 0x01ca, 0x02, 0x00, string, 0x00 }
+    s Get Prod.Ser.Number   { 0x01ca, 0x03 }
+    r Get Prod.Ser.Number   { 0x01ca, 0x03, 0x00, number, 0x00 }
+    s Get Basic Prod.Code   { 0x01ca, 0x04 }
+    r Get Basic Prod.Code   { 0x01ca, 0x04, 0x00, number, 0x00 }
+    s Set Product Code      { 0x01cb, 0x01, product code, 0x00 }
+    s Set Order Number      { 0x01cb, 0x02, number, 0x00 }
+    s Set Prod.Ser.Number   { 0x01cb, 0x03, number, 0x00 }
+    s Get (original ?)IMEI  { 0x01cc, 0x01 }
+    r Get (original ?)IMEI  { 0x01cc, 0x01, IMEI, 0x00 }
+    s Get Manufacture Month { 0x01cc, 0x02 }
+    r Get Manufacture Month { 0x01cc, 0x02, 0x00, string, 0x00 }
+    s Get Purchare date     { 0x01cc, 0x04 }
+    r Get Purchare date     { 0x01cc, 0x04, 0x00, string, 0x00 }
+    s Set "Made" date       { 0x01cd, 0x02, string, 0x00 }
+    s Result of phone tests { 0x01cf }
+    r Result of phone tests { 0x01cf, 0xff, results of next tests }
+    s ???                   { 0x01d1 }
+    r ???(N5110)            { 0x01d1, 0x00, 0x1d, 0x00, 0x01, 0x08, 0x00 }
+    s LCD Test              { 0x01d3, value }
+                            where value: 0x03, 0x02 - 1'st test
+			                 0x03, 0x01 - 2'nd test
+                                         0x02, 0x03 - clears screen
+0x47:
+    s Get Picture Image     { 0x0001, location }
+    r Get Picture Image     when contains sender number
+                            { 0x0002, location, number(like in SMS), 0x00, len, text, 0x00, width, height, 0x01, bitmap }
+			    NOTE: Supports only 0x81 and 0x91 coding (NOT alphanumeric numbers!) in sender
+                            without sender number
+                            { 0x0002, location, 0x00, 0x00, 0x00, len, text, 0x00, width, height, 0x01, bitmap }
+    s Set Picture Image     { 0x0003, frame...}
+                            where frame: see 0x47/0x0002
+    r Get/Set PictureImageOK{ 0x0004 }
+    r Set Picture Image err { 0x0005, error? }
+                            where error=0x74 - wrong location ?
 0x64:
     s Phone ID request      { 0x0010 }
     r Phone ID recvd        { 0x0011, "NOKIA", "imei", 0, "model", 0, "prod.code", 0, "HW", 0, "firmware", magic bytes x 4 ... }
     s Accessory connection  { 0x0012, 16x0x00, 'NOKIA&NOKIA accessory', 3x0x00 } (45 bytes)
-0x7f: Acknowledge           {+type, seq }
-0xd0: Power on message seq 1 (receive only)
-0xf4: Power on message seq 2 (receive only)
+0x7f: Acknowledge(FBUS/IRDA){+type, seq }
+      Acknowledge(MBUS)...
+0xd0: 
+    s Power on message seq1 {+04 }
+    r Power on message seq1 {+05 }
+0xd1:
+    s Get HW&SW version     { 0x0003, 0x00 }
+0xd2:
+    r Get HW&SW version     { 0x0003 "V " "firmware\n" "firmware date\n"
+                              "model\n" "(c) NMP." }
+0xf4: Power on message seq 2
