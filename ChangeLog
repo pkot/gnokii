@@ -14,6 +14,8 @@
     o folder management support (list, status, create,
       delete) support added                        (BORBELY Zoltan)
     o getsms support                               (BORBELY Zoltan)
+    o sms status request support                   (BORBELY Zoltan)
+    o minor phonebook reading/writing cleanup      (BORBELY Zoltan)
  * gnokii updates
     o --showsmsfolderstatus added                  (BORBELY Zoltan)
     o folder id display fix in --deletesmsfolder   (BORBELY Zoltan)
@@ -32,6 +34,7 @@
     o fix sms timestamp export/import              (BORBELY Zoltan)
     o allow to open other config files than /etc/gnokiirc and
       $HOME/.gnokiirc                                   (Pawel Kot)
+    o the new cfgreader skipped /etc/gnokiirc      (BORBELY Zoltan)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

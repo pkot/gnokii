@@ -84,6 +84,7 @@ static gn_error gnapplet_memory_status(gn_data *data, struct gn_statemachine *st
 static gn_error gnapplet_get_network_info(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_get_rf_level(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_get_power_info(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_get_status(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_folder_list(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_folder_status(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_folder_create(gn_data *data, struct gn_statemachine *state);
@@ -188,6 +189,8 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 	case GN_OP_GetBatteryLevel:
 	case GN_OP_GetPowersource:
 		return gnapplet_get_power_info(data, state);
+	case GN_OP_GetSMSStatus:
+		return gnapplet_sms_get_status(data, state);
 	case GN_OP_GetSMSFolders:
 		return gnapplet_sms_folder_list(data, state);
 	case GN_OP_GetSMSFolderStatus:
@@ -329,31 +332,44 @@ static gn_error gnapplet_read_phonebook(gn_data *data, struct gn_statemachine *s
 static gn_error gnapplet_write_phonebook(gn_data *data, struct gn_statemachine *state)
 {
 	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
-	int i;
+	gn_phonebook_subentry *se;
+	int i, need_defnumber;
 	REQUEST_DEF;
 
 	if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
 	if (!data->phonebook_entry->name[0])
 		return gnapplet_delete_phonebook(data, state);
 
+	need_defnumber = 1;
+	for (i = 0; i < data->phonebook_entry->subentries_count; i++) {
+		se = data->phonebook_entry->subentries + i;
+		if (se->entry_type == GN_PHONEBOOK_ENTRY_Number && strcmp(se->data.number, data->phonebook_entry->number) == 0) {
+			need_defnumber = 0;
+			break;
+		}
+	}
+
 	pkt_put_uint16(&pkt, GNAPPLET_MSG_PHONEBOOK_WRITE_REQ);
 	pkt_put_uint16(&pkt, data->phonebook_entry->memory_type);
 	pkt_put_uint32(&pkt, data->phonebook_entry->location);
 
-	pkt_put_uint16(&pkt, data->phonebook_entry->subentries_count + 2);
+	pkt_put_uint16(&pkt, data->phonebook_entry->subentries_count + 1 + need_defnumber);
 
 	pkt_put_uint16(&pkt, GN_PHONEBOOK_ENTRY_Name);
 	pkt_put_uint16(&pkt, 0);
 	pkt_put_string(&pkt, data->phonebook_entry->name);
 
-	pkt_put_uint16(&pkt, GN_PHONEBOOK_ENTRY_Number);
-	pkt_put_uint16(&pkt, GN_PHONEBOOK_NUMBER_General);
-	pkt_put_string(&pkt, data->phonebook_entry->number);
+	if (need_defnumber) {
+		pkt_put_uint16(&pkt, GN_PHONEBOOK_ENTRY_Number);
+		pkt_put_uint16(&pkt, GN_PHONEBOOK_NUMBER_General);
+		pkt_put_string(&pkt, data->phonebook_entry->number);
+	}
 
 	for (i = 0; i < data->phonebook_entry->subentries_count; i++) {
-		pkt_put_uint16(&pkt, data->phonebook_entry->subentries[i].entry_type);
-		pkt_put_uint16(&pkt, data->phonebook_entry->subentries[i].number_type);
-		pkt_put_string(&pkt, data->phonebook_entry->subentries[i].data.number);
+		se = data->phonebook_entry->subentries + i;
+		pkt_put_uint16(&pkt, se->entry_type);
+		pkt_put_uint16(&pkt, se->number_type);
+		pkt_put_string(&pkt, se->data.number);
 	}
 
 	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_PHONEBOOK);
@@ -598,6 +614,19 @@ static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message,
 }
 
 
+static gn_error gnapplet_sms_get_status(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->sms_status) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_STATUS_REQ);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
 static gn_error gnapplet_sms_folder_list(gn_data *data, struct gn_statemachine *state)
 {
 	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
@@ -701,6 +730,15 @@ static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, i
 	REPLY_DEF;
 
 	switch (code) {
+
+	case GNAPPLET_MSG_SMS_STATUS_RESP:
+		if (!data->sms_status) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		data->sms_status->number = pkt_get_uint32(&pkt);
+		data->sms_status->unread = pkt_get_uint32(&pkt);
+		data->sms_status->changed = pkt_get_bool(&pkt);
+		data->sms_status->folders_count = pkt_get_uint16(&pkt);
+		break;
 
 	case GNAPPLET_MSG_SMS_FOLDER_LIST_RESP:
 		if (!(folders = data->sms_folder_list)) return GN_ERR_INTERNALERROR;

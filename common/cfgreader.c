@@ -434,7 +434,7 @@ API int gn_cfg_read_default(char **bindir)
 	/* Try opening .gnokirc from users home directory first */
 	if (gn_cfg_read(rcfile, bindir)) {
 		/* It failed so try for /etc/gnokiirc */
-		if (cfg_file_read(globalrc)) {
+		if (gn_cfg_read(globalrc, bindir)) {
 			/* That failed too so exit */
 			fprintf(stderr, _("Couldn't open %s or %s.\n"), rcfile, globalrc);
 			return -1;
