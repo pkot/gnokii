@@ -14,4 +14,6 @@
 * Tue May 16 02:00:00 BST 2000 Chris Kemp
 - Changed method gnokiid uses to get data and other reliablity changes. 
 
+* Sat Jul 15 13:10:12 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- moved at-emulator.c, datapump.c, virtmodem.c from gnokiid to common.
 	

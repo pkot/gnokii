@@ -28,6 +28,9 @@
 #undef HAVE_CFSETOSPEED
 #undef HAVE_TERMIOS_CSPEED
 
+/* Define if you have snprintf */
+#undef HAVE_SNPRINTF
+
 /* Define debug level */
 #undef DEBUG
 #undef XDEBUG

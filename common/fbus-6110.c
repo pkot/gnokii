@@ -62,6 +62,7 @@
 
 /* Various header file */
 
+#include "config.h"
 #include "misc.h"
 #include "gsm-common.h"
 #include "fbus-6110.h"
@@ -73,6 +74,11 @@
    supported by this model of phone. */
 
 bool FB61_LinkOK;
+
+#ifdef __svr4__
+  /* fd opened in device.c */
+  extern int device_portfd;
+#endif
 
 #ifdef WIN32
 
@@ -221,6 +227,9 @@ u8        CallSequenceNumber; /* Used to disconnect the call */
 #ifndef WIN32
 
   pthread_t Thread;
+# ifdef __svr4__
+  pthread_t selThread;
+# endif
 
 #endif
 
@@ -357,6 +366,32 @@ GSM_Error FB61_Initialise(char *port_device, char *initlength,
   return (GE_NONE);
 }
 
+#ifdef __svr4__
+/* thread for handling incoming data */
+void FB61_SelectLoop() {
+int err;
+  fd_set readfds;
+  struct timeval timeout;
+
+  FD_ZERO(&readfds);
+  FD_SET(device_portfd,&readfds);
+  /* set timeout to 15 seconds */
+  timeout.tv_sec=15;
+  timeout.tv_usec=0;
+  while (!RequestTerminate) {
+    err=select(device_portfd+1,&readfds,NULL,NULL,&timeout);
+    if ( err > 0 )
+      /* call singal handler to process incoming data */
+      FB61_SigHandler(0);
+    else {
+      if (err == -1)
+       perror("Error in SelectLoop");
+    }
+  }
+}
+#endif
+
+  
 /* This function send the status request to the phone. */
 
 GSM_Error FB61_TX_SendStatusRequest(void)
@@ -882,14 +917,19 @@ bool FB61_OpenIR(void)
 
   int result;
   bool ret = false;
-  struct sigaction sig_io;
   u8 i = 0;
-  
+
+#ifdef __svr4__
+  int rtn;
+#else
+  struct sigaction sig_io;  
+
   /* Set up and install handler before enabling async IO on port. */
   
   sig_io.sa_handler = FB61_SigHandler;
   sig_io.sa_flags = 0;
   sigaction (SIGIO, &sig_io, NULL);
+#endif
 
   /* Open device. */
   
@@ -899,6 +939,13 @@ bool FB61_OpenIR(void)
     perror(_("Couldn't open FB61 infrared device"));
     return false;
   }
+
+#ifdef __svr4__
+  /* create a thread to handle incoming data from mobile phone */
+  rtn=pthread_create(&selThread,NULL,(void*)FB61_SelectLoop,(void*)NULL);
+  if (rtn != 0)
+    return false;
+#endif
 
   device_changespeed(9600);
 
@@ -2658,6 +2705,10 @@ void FB61_SetFBUS()
 bool FB61_OpenSerial(void)
 {
   int result;
+  
+#ifdef __svr4__
+  int rtn;
+#else
   struct sigaction sig_io;
 
 
@@ -2666,7 +2717,7 @@ bool FB61_OpenSerial(void)
   sig_io.sa_handler = FB61_SigHandler;
   sig_io.sa_flags = 0;
   sigaction (SIGIO, &sig_io, NULL);
-
+#endif
 
   /* Open device. */
 
@@ -2676,6 +2727,13 @@ bool FB61_OpenSerial(void)
     perror(_("Couldn't open FB61 device"));
     return false;
   }
+
+#ifdef __svr4__
+  /* create a thread to handle incoming data from mobile phone */
+  rtn=pthread_create(&selThread,NULL,(void*)FB61_SelectLoop,(void*)NULL);
+  if (rtn != 0)
+    return false;
+#endif
 
   device_changespeed(115200);
 
@@ -4768,7 +4826,7 @@ stdout);
 
   case 0x64:
 
-#ifdef WIN32
+#if defined WIN32 || !defined HAVE_SNPRINTF
     sprintf(IMEI, "%s", MessageBuffer+9);
     sprintf(Model, "%s", MessageBuffer+25);
     sprintf(Revision, "SW%s, HW%s", MessageBuffer+44, MessageBuffer+39);

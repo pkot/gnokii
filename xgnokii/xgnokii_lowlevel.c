@@ -109,6 +109,7 @@ static void InitModelInf (void)
     phoneMonitor.supported.speedDial = SpeedDialSupported (buf);
     phoneMonitor.supported.keyboard = KeyboardSupported (buf);
     phoneMonitor.supported.calendar = CalendarSupported (buf);
+    phoneMonitor.supported.data = DataSupported (buf);
   }
 
   i = 0;
@@ -154,7 +155,7 @@ static GSM_Error fbusinit(bool enable_monitoring)
 
   if (error == GE_NOLINK)
     error = GSM_Initialise (xgnokiiConfig.model, xgnokiiConfig.port,
-                            xgnokiiConfig.initlength, connection, NULL);
+                            xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame);
 
 #ifdef XDEBUG
   g_print ("fbusinit: error %d\n", error);
@@ -192,6 +193,7 @@ void GUI_InitPhoneMonitor (void)
   phoneMonitor.supported.speedDial = FALSE;
   phoneMonitor.supported.keyboard = FALSE;
   phoneMonitor.supported.calendar = FALSE;
+  phoneMonitor.supported.data = FALSE;
   phoneMonitor.rfLevel = phoneMonitor.batteryLevel = -1;
   phoneMonitor.powerSource = GPS_BATTERY;
   phoneMonitor.working = FALSE;
@@ -487,6 +489,20 @@ static gint A_GetCalendarNoteAll (gpointer data)
     return (e);
 }
 
+
+static gint A_DeleteCalendarNote (gpointer data)
+{
+  GSM_CalendarNote *note = (GSM_CalendarNote *) data;
+  GSM_Error error = GE_UNKNOWN;
+
+  if (note)
+  {
+    error = GSM->DeleteCalendarNote (note);
+    g_free (note);
+  }
+
+  return (error);
+}
 
 static gint A_GetCallerGroup (gpointer data)
 {
@@ -815,6 +831,7 @@ gint (*DoAction[])(gpointer) = {
   A_WriteMemoryLocationAll,
   A_GetCalendarNote,
   A_GetCalendarNoteAll,
+  A_DeleteCalendarNote,
   A_GetCallerGroup,
   A_SendCallerGroup,
   A_GetSMSCenter,

@@ -30,12 +30,17 @@ ConfigEntry config[] = {
  {"email",     &(xgnokiiConfig.user.email)},
  {"address",   &(xgnokiiConfig.user.address)},
  {"viewer",    &(xgnokiiConfig.helpviewer)},
+ {"mailbox",   &(xgnokiiConfig.mailbox)},
+ {"simlen",    &(xgnokiiConfig.maxSIMLen)},
+ {"phonelen",  &(xgnokiiConfig.maxPhoneLen)},
  {"",          NULL}
 };
 
 
 static void GetDefaultValues ()
 {
+  gchar *homedir;
+  
   xgnokiiConfig.user.name = g_strdup ("");
   xgnokiiConfig.user.title = g_strdup ("");
   xgnokiiConfig.user.company = g_strdup ("");
@@ -44,6 +49,11 @@ static void GetDefaultValues ()
   xgnokiiConfig.user.email = g_strdup ("");
   xgnokiiConfig.user.address = g_strdup ("");
   xgnokiiConfig.helpviewer = g_strdup ("netscape");
+  if ((homedir = g_get_home_dir ()) == NULL)
+    homedir = "";
+  xgnokiiConfig.mailbox = g_strdup_printf ("%s/Mail/smsbox", homedir);
+  xgnokiiConfig.maxSIMLen = g_strdup ("14");
+  xgnokiiConfig.maxPhoneLen = g_strdup ("16");
 }
 
 
@@ -65,7 +75,6 @@ void GUI_ReadXConfig ()
   homedir = g_get_home_dir ();
   rcfile=g_strconcat(homedir, "\\_xgnokiirc", NULL);
 #else
-/*  if ((homedir = getenv ("HOME")) == NULL) */
   if ((homedir = g_get_home_dir ()) == NULL)
   {
     g_print (_("WARNING: Can't find HOME enviroment variable!\n"));
@@ -96,6 +105,7 @@ void GUI_ReadXConfig ()
 
   while (fgets (line, 255, file) != NULL)
   {
+    gint v;
     current = line;
 
     /* Strip leading, trailing whitespace */
@@ -125,13 +135,32 @@ void GUI_ReadXConfig ()
           while(isspace ((int) *current))
             current++;
           g_free (*config[i].value);
-          if (i == 3 || i == 4)
-            *config[i].value = g_strndup (current, max_phonebook_number_length);
-          else
-          if (i == 7)
-            *config[i].value = g_strndup (current, HTMLVIEWER_LENGTH);
-          else
-            *config[i].value = g_strndup (current, MAX_BUSINESS_CARD_LENGTH);  
+          switch (i)
+          {
+            case 3:
+            case 4: 
+              *config[i].value = g_strndup (current, max_phonebook_number_length);
+              break;
+
+            case 7:
+              *config[i].value = g_strndup (current, HTMLVIEWER_LENGTH);
+              break;
+
+            case 8:
+              *config[i].value = g_strndup (current, MAILBOX_LENGTH);
+              break;
+
+            case 9:
+            case 10:
+              v = atoi (current);
+              if ( v > 0 && v < 100 )
+                *config[i].value = g_strndup (current, 3);
+              break;
+
+            default:
+              *config[i].value = g_strndup (current, MAX_BUSINESS_CARD_LENGTH);
+              break;
+          }
         }
       }
       i++;

@@ -27,6 +27,11 @@
 #include "xpm/Edit.xpm"
 #include "xpm/Delete.xpm"
 #include "xpm/SendSMS.xpm"
+#include "xpm/NewBD.xpm"
+#include "xpm/NewCall.xpm"
+#include "xpm/NewMeet.xpm"
+#include "xpm/NewRem.xpm"
+#include "xpm/quest.xpm"
 
 typedef struct {
   GtkWidget *calendar;
@@ -35,9 +40,22 @@ typedef struct {
   GdkColor   colour;
 } CalendarWidget;
 
+typedef struct {
+  GtkWidget *dialog;
+  GtkWidget *date;
+  GtkWidget *text;
+  GtkWidget *alarm;
+  GtkWidget *alarmFrame;
+  GtkWidget *alarmCal;
+  GtkWidget *alarmHour;
+  GtkWidget *alarmMin;
+} AddDialogData;
+
 static GtkWidget *GUI_CalendarWindow;
 static ErrorDialog errorDialog = {NULL, NULL};
 static CalendarWidget cal = {NULL, NULL};
+static QuestMark questMark;
+static AddDialogData addReminderDialogData;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
@@ -53,7 +71,8 @@ static inline void CloseCalendar (GtkWidget *w, gpointer data)
 
 inline void GUI_ShowCalendar ()
 {
-  gtk_widget_show (GUI_CalendarWindow);
+  if (phoneMonitor.supported.calendar)
+    gtk_widget_show (GUI_CalendarWindow);
 }
 
 
@@ -350,6 +369,254 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
 }
 
 
+static gint ReverseSelection (gconstpointer a, gconstpointer b)
+{
+  gchar *buf1, *buf2;
+  gint index1, index2;
+  gint row1 = GPOINTER_TO_INT (a);
+  gint row2 = GPOINTER_TO_INT (b);
+  
+  gtk_clist_get_text (GTK_CLIST (cal.notesClist), row1, 0, &buf1);
+  gtk_clist_get_text (GTK_CLIST (cal.notesClist), row2, 0, &buf2);
+  
+  index1 = atoi (buf1);
+  index2 = atoi (buf2);
+  
+  if (index1 < index2)
+    return (1);
+  else if (index1 > index2)
+    return (-1);
+  else
+    return (0);
+}
+
+  
+static void OkAddReminderDialog (GtkWidget *widget, gpointer data)
+{
+}
+
+static void ShowAlarmVBox (GtkToggleButton *button, AddDialogData *data)
+{
+  if (gtk_toggle_button_get_active (button))
+  {
+    gtk_widget_show (data->alarmFrame);
+  }
+  else
+  {
+    gtk_widget_hide (data->alarmFrame);
+    gtk_widget_set_usize (GTK_WIDGET (GTK_DIALOG (data->dialog)->vbox), 0, 0);
+//    gtk_widget_map (data->dialog);
+  }
+}
+
+static void AddReminder (void)
+{
+  GtkWidget *button, *hbox, *vbox, *vbox2, *label;
+  GtkAdjustment *adj;
+  time_t t;
+  struct tm *tm;
+  
+  if (addReminderDialogData.dialog == NULL)
+  {
+    addReminderDialogData.dialog = gtk_dialog_new();
+    gtk_window_set_title (GTK_WINDOW (addReminderDialogData.dialog), _("Add reminder"));
+    gtk_window_position (GTK_WINDOW (addReminderDialogData.dialog), GTK_WIN_POS_MOUSE);
+    gtk_window_set_modal(GTK_WINDOW (addReminderDialogData.dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (addReminderDialogData.dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (addReminderDialogData.dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addReminderDialogData.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkAddReminderDialog), (gpointer) addReminderDialogData.dialog);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (addReminderDialogData.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) addReminderDialogData.dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (addReminderDialogData.dialog)->vbox), 5);
+
+    vbox = gtk_vbox_new (FALSE, 10);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (addReminderDialogData.dialog)->vbox), vbox);
+    gtk_widget_show (vbox);
+
+    label = gtk_label_new (_("Date:"));
+    gtk_container_add (GTK_CONTAINER (vbox), label);
+    gtk_widget_show (label);
+    
+    addReminderDialogData.date = gtk_calendar_new ();
+
+    t = time (NULL);
+    tm = localtime (&t);
+    gtk_calendar_select_month (GTK_CALENDAR (addReminderDialogData.date), tm->tm_mon, tm->tm_year + 1900);
+    gtk_calendar_select_day (GTK_CALENDAR (addReminderDialogData.date), tm->tm_mday);
+
+    gtk_container_add (GTK_CONTAINER (vbox), addReminderDialogData.date);
+    gtk_widget_show (addReminderDialogData.date);  
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    label = gtk_label_new (_("Subject:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    addReminderDialogData.text = gtk_entry_new_with_max_length (30);
+    gtk_box_pack_end (GTK_BOX (hbox), addReminderDialogData.text, FALSE, FALSE, 2);
+    gtk_widget_show (addReminderDialogData.text);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    addReminderDialogData.alarm = gtk_check_button_new_with_label (_("Alarm"));
+    gtk_box_pack_start (GTK_BOX(hbox), addReminderDialogData.alarm, FALSE, FALSE, 10);
+    gtk_signal_connect (GTK_OBJECT (addReminderDialogData.alarm), "toggled",
+                        GTK_SIGNAL_FUNC (ShowAlarmVBox), &addReminderDialogData);
+    gtk_widget_show (addReminderDialogData.alarm);
+
+    
+    addReminderDialogData.alarmFrame = gtk_frame_new (_("Alarm"));
+    gtk_container_add (GTK_CONTAINER (vbox), addReminderDialogData.alarmFrame);
+    
+    vbox2 = gtk_vbox_new (FALSE, 3);
+    gtk_container_add (GTK_CONTAINER (addReminderDialogData.alarmFrame), vbox2);
+    gtk_widget_show (vbox2);
+
+    label = gtk_label_new (_("Alarm date:"));
+    gtk_box_pack_start (GTK_BOX (vbox2), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    addReminderDialogData.alarmCal = gtk_calendar_new ();
+    gtk_container_add (GTK_CONTAINER (vbox2), addReminderDialogData.alarmCal);
+    gtk_widget_show (addReminderDialogData.alarmCal);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox2), hbox);
+    gtk_widget_show (hbox);
+    
+    label = gtk_label_new (_("Alarm time:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 0.0, 23.0, 1.0, 4.0, 0.0);
+    addReminderDialogData.alarmHour = gtk_spin_button_new (adj, 0, 0);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarmHour), TRUE);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarmHour), TRUE);
+    gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarmHour, FALSE, FALSE, 0);
+    gtk_widget_show (addReminderDialogData.alarmHour);
+
+    label = gtk_label_new (":");
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 0.0, 59.0, 1.0, 10.0, 0.0);
+    addReminderDialogData.alarmMin = gtk_spin_button_new (adj, 0, 0);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarmMin), TRUE);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarmMin), TRUE);
+    gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarmMin, FALSE, FALSE, 0);
+    gtk_widget_show (addReminderDialogData.alarmMin);
+
+  }
+  
+  gtk_widget_show (GTK_WIDGET (addReminderDialogData.dialog));
+}
+
+
+static void OkDeleteNoteDialog (GtkWidget *widget, gpointer data)
+{
+  GSM_CalendarNote *note;
+  PhoneEvent *e;
+  GList *sel;
+  gint row;
+  gchar *buf;
+
+
+  sel = GTK_CLIST (cal.notesClist)->selection;
+
+  gtk_clist_freeze (GTK_CLIST (cal.notesClist));
+
+  sel = g_list_sort (sel, ReverseSelection);
+  
+  while (sel != NULL)
+  {
+    row = GPOINTER_TO_INT (sel->data);
+    sel = sel->next;
+
+    note = (GSM_CalendarNote *) g_malloc (sizeof (GSM_CalendarNote));
+    gtk_clist_get_text (GTK_CLIST (cal.notesClist), row, 0, &buf);
+    note->Location = atoi (buf);
+
+    e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
+    e->event = Event_DeleteCalendarNote;
+    e->data = note;
+    GUI_InsertEvent (e);
+  }
+
+  gtk_widget_hide (GTK_WIDGET (data));
+
+  gtk_clist_thaw (GTK_CLIST (cal.notesClist));
+
+  ReadCalNotes ();
+}
+
+
+static void DeleteNote (void)
+{
+  static GtkWidget *dialog = NULL;
+  GtkWidget *button, *hbox, *label, *pixmap;
+
+  if (dialog == NULL)
+  {
+    dialog = gtk_dialog_new();
+    gtk_window_set_title (GTK_WINDOW (dialog), _("Delete calendar note"));
+    gtk_window_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
+    gtk_window_set_modal(GTK_WINDOW (dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkDeleteNoteDialog), (gpointer) dialog);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), 5);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), hbox);
+    gtk_widget_show (hbox);
+
+    pixmap = gtk_pixmap_new (questMark.pixmap, questMark.mask);
+    gtk_box_pack_start (GTK_BOX (hbox), pixmap, FALSE, FALSE, 10);
+    gtk_widget_show (pixmap);
+
+    label = gtk_label_new (_("Do you want to delete selected note(s)?"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 10);
+    gtk_widget_show (label);
+  }
+
+  gtk_widget_show (GTK_WIDGET (dialog));
+}
+
 static GtkItemFactoryEntry menu_items[] = {
   { NULL,		NULL,		NULL, 0, "<Branch>"},
   { NULL,		"<control>R",	ReadCalNotes, 0, NULL},
@@ -367,7 +634,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { NULL,		"<control>M",	NULL, 0, NULL},
   { NULL,		"<control>B",	NULL, 0, NULL},
   { NULL,		NULL,		NULL, 0, NULL},
-  { NULL,		"<control>D",	NULL, 0, NULL},
+  { NULL,		"<control>D",	DeleteNote, 0, NULL},
   { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>A",	NULL, 0, NULL},
   { NULL,		NULL,		NULL, 0, "<LastBranch>"},
@@ -481,25 +748,25 @@ void GUI_CreateCalendarWindow ()
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) NULL, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Add reminder"), NULL,
-                           NewPixmap(Delete_xpm, GUI_CalendarWindow->window,
+                           NewPixmap(NewRem_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) AddReminder, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Add call"), NULL,
-                           NewPixmap(Delete_xpm, GUI_CalendarWindow->window,
+                           NewPixmap(NewCall_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) NULL, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Add meeting"), NULL,
-                           NewPixmap(Delete_xpm, GUI_CalendarWindow->window,
+                           NewPixmap(NewMeet_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) NULL, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Add birthday"), NULL,
-                           NewPixmap(Delete_xpm, GUI_CalendarWindow->window,
+                           NewPixmap(NewBD_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) NULL, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Delete note"), NULL,
                            NewPixmap(Delete_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) DeleteNote, NULL);
 
   gtk_box_pack_start (GTK_BOX (main_vbox), toolbar, FALSE, FALSE, 0);
   gtk_widget_show (toolbar);
@@ -586,6 +853,11 @@ void GUI_CreateCalendarWindow ()
   cal.colour.blue = 0;
   if (!gdk_color_alloc (cmap, &(cal.colour)))
     g_error (_("couldn't allocate colour"));
+
+  questMark.pixmap = gdk_pixmap_create_from_xpm_d (GUI_CalendarWindow->window,
+                         &questMark.mask,
+                         &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL],
+                         quest_xpm);
 
   CreateErrorDialog (&errorDialog, GUI_CalendarWindow);
 }

@@ -30,8 +30,13 @@ OBJS =	cfgreader.o \
 	mbus-640.o \
 	rlp-common.o \
 	rlp-crc24.o \
-	misc.o \
-	vcal.o
+	vcal.o 
+# timersub is defined in misc.h
+#	misc.o 
+
+DATA_OBJS = virtmodem.o \
+	at-emulator.o \
+	datapump.o
 
 ifdef WIN32
 	OBJS += $(TOPDIR)/win32/winserial.o
@@ -43,10 +48,13 @@ ifdef XPM_CFLAGS
     CFLAGS += $(XPM_CFLAGS)
 endif
 
-all: COMMON.o gsm-filetypes.o
+all: COMMON.o gsm-filetypes.o DATA.o
 
 COMMON.o: $(OBJS)
 	$(LD) $(LDREL) $(LDOUT) COMMON.o $(OBJS)
+
+DATA.o: $(DATA_OBJS)
+	$(LD) $(LDREL) $(LDOUT) DATA.o $(DATA_OBJS)
 
 gsm-filetypes.o: gsm-filetypes.c 
 	$(CC) $(CFLAGS) -c gsm-filetypes.c
@@ -55,7 +63,7 @@ vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) *~ depend COMMON.o gsm-filetypes.o vcal.c
+	$(RM) $(OBJS) $(DATA_OBJS) *~ depend COMMON.o gsm-filetypes.o DATA.o vcal.c
 
 install:
 	@echo

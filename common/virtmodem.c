@@ -61,12 +61,11 @@ bool	CommandMode;
 
 pthread_t		Thread;
 bool			RequestTerminate;
-bool                    GSMInit=true;
 
 
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
-bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode)
+bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode, bool GSMInit)
 {
 	int		rtn;
 

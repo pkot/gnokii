@@ -25,7 +25,8 @@ bool VM_Initialise(char *model,
 		   char *initlength,
 		   GSM_ConnectionType connection,
 		   char *bindir,
-		   bool debug_mode);
+		   bool debug_mode,
+		   bool GSM_Init);
 int  VM_PtySetup(char *bindir);
 void VM_ThreadLoop(void);
 void VM_CharHandler(void);

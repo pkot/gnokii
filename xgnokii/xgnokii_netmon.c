@@ -17,7 +17,6 @@
 # include <unistd.h>
 #endif
 #include <pthread.h>
-#include <stdio.h>   /* for snprintf */
 #include <stdlib.h>  /* for atoi */
 #include <string.h>
 #include <gtk/gtk.h>
@@ -72,7 +71,7 @@ static inline void RefreshDisplay ()
   if (!GTK_WIDGET_VISIBLE(GUI_NetmonWindow))
     return;
 
-  snprintf (number, 3, "%.2d", displayData.curDisp);
+  g_snprintf (number, 3, "%.2d", displayData.curDisp);
   if (displayData.number)
     gtk_label_set_text (GTK_LABEL (displayData.number), number);
 

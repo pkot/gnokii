@@ -14,6 +14,7 @@
 */
 
 #include <stdlib.h>  /* for getenv */
+#include <locale.h>
 #include <string.h>
 #include <time.h>    /* for time   */
 #include <pthread.h>
@@ -52,6 +53,7 @@
 #include "xgnokii_calendar.h"
 #include "xgnokii_logos.h"
 #include "xgnokii_cfg.h"
+#include "xgnokii_data.h"
 
 #include "xpm/logo.xpm"
 #include "xpm/background.xpm"
@@ -94,7 +96,9 @@ static GtkWidget *speedDial_menu_item;
 static GtkWidget *xkeyb_menu_item;
 static GtkWidget *cg_names_option_frame;
 static GtkWidget *sms_option_frame;
+static GtkWidget *mail_option_frame;
 static GtkWidget *user_option_frame;
+static GtkWidget *data_menu_item;
 
 /* Hold main configuration data for xgnokii */
 XgnokiiConfig xgnokiiConfig;
@@ -139,6 +143,8 @@ typedef struct {
   GtkWidget *version;
   GtkWidget *revision;
   GtkWidget *imei;
+  GtkWidget *simNameLen;
+  GtkWidget *phoneNameLen;
 } PhoneWidgets;
 
 typedef struct {
@@ -170,6 +176,7 @@ static struct ConfigDialogData
   AlarmWidgets alarm;
   SMSWidgets sms;
   UserWidget user;
+  GtkWidget *mailbox;
   GtkWidget *help;
 } configDialogData;
 
@@ -695,6 +702,12 @@ void GUI_ShowOptions (void)
 
   gtk_entry_set_text (GTK_ENTRY (configDialogData.phone.imei), phoneMonitor.phone.imei);
 
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (configDialogData.phone.simNameLen),
+                             atof (xgnokiiConfig.maxSIMLen));
+
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON (configDialogData.phone.phoneNameLen),
+                             atof (xgnokiiConfig.maxPhoneLen));
+                             
   /* Alarm */
   alarm = (D_Alarm *) g_malloc (sizeof (D_Alarm));
   e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
@@ -771,6 +784,16 @@ void GUI_ShowOptions (void)
   else
     gtk_widget_hide (cg_names_option_frame);
 
+  /* Mail */
+  if (phoneMonitor.supported.sms)
+  {
+    gtk_widget_show (mail_option_frame);
+    gtk_entry_set_text (GTK_ENTRY (configDialogData.mailbox),
+                        xgnokiiConfig.mailbox);;
+  }
+  else
+    gtk_widget_hide (mail_option_frame);
+
   /* Help */
   gtk_entry_set_text (GTK_ENTRY (configDialogData.help),
                       xgnokiiConfig.helpviewer);
@@ -837,6 +860,11 @@ static void ShowMenu (GdkEventButton *event)
     gtk_widget_show (speedDial_menu_item);
   else
     gtk_widget_hide (speedDial_menu_item);
+  
+  if (phoneMonitor.supported.data)
+    gtk_widget_show (data_menu_item);
+  else
+    gtk_widget_hide (data_menu_item);
 
   gtk_menu_popup (GTK_MENU (Menu), NULL, NULL, NULL, NULL,
                           bevent->button, bevent->time);
@@ -891,11 +919,19 @@ static gint ButtonPressEvent (GtkWidget *widget, GdkEventButton *event)
 }
 
 
-static void optionsApplyCallback (GtkWidget *widget, gpointer data )
+static void OptionsApplyCallback (GtkWidget *widget, gpointer data )
 {
   PhoneEvent *e;
   D_Alarm *alarm;
   register gint i;
+
+  /* Phone */
+  max_phonebook_sim_name_length = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (configDialogData.phone.simNameLen));
+  max_phonebook_name_length = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (configDialogData.phone.phoneNameLen));
+  g_free (xgnokiiConfig.maxSIMLen);
+  g_free (xgnokiiConfig.maxPhoneLen);
+  xgnokiiConfig.maxSIMLen = g_strdup_printf ("%d", max_phonebook_sim_name_length);
+  xgnokiiConfig.maxPhoneLen = g_strdup_printf ("%d", max_phonebook_name_length);
 
   /* ALARM */
   /* From fbus-6110.c 
@@ -953,13 +989,20 @@ static void optionsApplyCallback (GtkWidget *widget, gpointer data )
     GUIEventSend (GUI_EVENT_CONTACTS_CHANGED);
   }
 
+  /* Mail */
+  if (phoneMonitor.supported.sms)         
+  {
+    g_free(xgnokiiConfig.mailbox);
+    xgnokiiConfig.mailbox = g_strdup (gtk_entry_get_text(GTK_ENTRY (configDialogData.mailbox)));
+  }
+  
   /* Help */
   g_free(xgnokiiConfig.helpviewer);
   xgnokiiConfig.helpviewer = g_strdup (gtk_entry_get_text(GTK_ENTRY (configDialogData.help)));
 }
 
 
-static void optionsSaveCallback (GtkWidget *widget, gpointer data )
+static void OptionsSaveCallback (GtkWidget *widget, gpointer data )
 {
   D_CallerGroup *cg;
   D_SMSCenter *c;
@@ -967,7 +1010,7 @@ static void optionsSaveCallback (GtkWidget *widget, gpointer data )
   register gint i;
 
   //gtk_widget_hide(GTK_WIDGET(data));
-  optionsApplyCallback (widget, data);
+  OptionsApplyCallback (widget, data);
   for (i = 0; i < xgnokiiConfig.smsSets; i++)
   {
     xgnokiiConfig.smsSetting[i].No = i + 1;
@@ -977,13 +1020,6 @@ static void optionsSaveCallback (GtkWidget *widget, gpointer data )
     e->event = Event_SetSMSCenter;
     e->data = c;
     GUI_InsertEvent (e);
-//    g_free (c);
-
-//    if (GSM->SetSMSCenter (&(xgnokiiConfig.smsSetting[i])) != GE_NONE)
-//    {
-//      gtk_label_set_text (GTK_LABEL(errorDialog.text), _("Error saving SMS centers!"));
-//      gtk_widget_show (errorDialog.dialog);
-//    }
   }
 
   if (phoneMonitor.supported.callerGroups)
@@ -1104,6 +1140,11 @@ static GtkWidget *CreateMenu (void)
   gtk_menu_append (GTK_MENU (menu), netmon_menu_item);
   gtk_signal_connect_object (GTK_OBJECT (netmon_menu_item), "activate",
                              GTK_SIGNAL_FUNC (GUI_ShowNetmon), NULL);
+
+  data_menu_item = gtk_menu_item_new_with_label (_("Data calls"));
+  gtk_menu_append (GTK_MENU (menu), data_menu_item);
+  gtk_signal_connect_object (GTK_OBJECT (data_menu_item), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowData), NULL);
 
   menu_items = gtk_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), menu_items);
@@ -1574,7 +1615,7 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
                       button, TRUE, TRUE, 10);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                      GTK_SIGNAL_FUNC (optionsApplyCallback), (gpointer)dialog);
+                      GTK_SIGNAL_FUNC (OptionsApplyCallback), (gpointer)dialog);
   GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
   gtk_widget_grab_default (button);
   gtk_widget_show (button);
@@ -1583,7 +1624,7 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
                       button, TRUE, TRUE, 10);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                      GTK_SIGNAL_FUNC (optionsSaveCallback), (gpointer)dialog);
+                      GTK_SIGNAL_FUNC (OptionsSaveCallback), (gpointer)dialog);
   gtk_widget_show (button);
 
   button = gtk_button_new_with_label (_("Close"));
@@ -1758,6 +1799,40 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.phone.imei, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.phone.imei);
 
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (vbox), hbox);
+  gtk_widget_show (hbox);
+
+  label = gtk_label_new ("Names length:");
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
+
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (vbox), hbox);
+  gtk_widget_show (hbox);
+
+  label = gtk_label_new ("SIM:");
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
+
+  adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 1.0, 100.0, 1.0, 10.0, 0.0);
+  configDialogData.phone.simNameLen = gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (configDialogData.phone.simNameLen), TRUE);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (configDialogData.phone.simNameLen), TRUE);
+  gtk_box_pack_start (GTK_BOX (hbox), configDialogData.phone.simNameLen, FALSE, FALSE, 2);
+  gtk_widget_show (configDialogData.phone.simNameLen);
+
+  adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 1.0, 100.0, 1.0, 10.0, 0.0);
+  configDialogData.phone.phoneNameLen = gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (configDialogData.phone.phoneNameLen), TRUE);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (configDialogData.phone.phoneNameLen), TRUE);
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.phone.phoneNameLen, FALSE, FALSE, 2);
+  gtk_widget_show (configDialogData.phone.phoneNameLen);
+
+  label = gtk_label_new ("Phone:");
+  gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
+
   /***  Alarm notebook  ***/
   xgnokiiConfig.alarmSupported = TRUE;
 
@@ -1776,8 +1851,8 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_widget_show (hbox);
 
   configDialogData.alarm.alarmSwitch = gtk_check_button_new_with_label (_("Alarm"));
-  gtk_box_pack_start(GTK_BOX(hbox), configDialogData.alarm.alarmSwitch, FALSE, FALSE, 10);
-  gtk_widget_show(configDialogData.alarm.alarmSwitch);
+  gtk_box_pack_start (GTK_BOX (hbox), configDialogData.alarm.alarmSwitch, FALSE, FALSE, 10);
+  gtk_widget_show (configDialogData.alarm.alarmSwitch);
 
   adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 0.0, 23.0, 1.0, 4.0, 0.0);
   configDialogData.alarm.alarmHour = gtk_spin_button_new (adj, 0, 0);
@@ -1798,7 +1873,6 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_widget_show (configDialogData.alarm.alarmMin);
 
   /***  SMS notebook     ***/
-
   sms_option_frame = gtk_frame_new (_("Short Message Service"));
 
   vbox = gtk_vbox_new (FALSE, 0);
@@ -2077,6 +2151,31 @@ static GtkWidget *CreateOptionsDialog (void)
     gtk_widget_show (configDialogData.groups[i]);
   }
 
+  /* Mail */
+  mail_option_frame = gtk_frame_new (_("Mailbox"));
+  gtk_widget_show (mail_option_frame);
+
+  vbox = gtk_vbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (mail_option_frame), vbox);
+  gtk_widget_show (vbox);
+
+  label = gtk_label_new (_("Mail"));
+  gtk_notebook_append_page( GTK_NOTEBOOK (notebook), mail_option_frame, label);
+
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
+  gtk_widget_show (hbox);
+
+  label = gtk_label_new (_("Path to mailbox:"));
+  gtk_box_pack_start(GTK_BOX (hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
+
+  configDialogData.mailbox = gtk_entry_new_with_max_length (MAILBOX_LENGTH - 1);
+  gtk_widget_set_usize (configDialogData.mailbox, 220, 22);
+
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.mailbox, FALSE, FALSE, 2);
+  gtk_widget_show (configDialogData.mailbox);
+
   /* Help */
   frame = gtk_frame_new (_("Help viewer"));
   gtk_widget_show (frame);
@@ -2093,7 +2192,7 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_widget_show (hbox);
 
   label = gtk_label_new (_("Viewer:"));
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  gtk_box_pack_start(GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
   configDialogData.help = gtk_entry_new_with_max_length (HTMLVIEWER_LENGTH - 1);
@@ -2171,6 +2270,7 @@ static void TopLevelWindow (void)
   GUI_CreateXkeybWindow ();
   GUI_CreateCalendarWindow ();
   GUI_CreateLogosWindow ();
+  GUI_CreateDataWindow();
   CreateErrorDialog (&errorDialog, GUI_MainWindow);
   CreateInfoDialog (&infoDialog, GUI_MainWindow);
   CreateInCallDialog ();
@@ -2179,6 +2279,12 @@ static void TopLevelWindow (void)
   sigemptyset (&(act.sa_mask));
   act.sa_flags = SA_NOCLDSTOP;
   sigaction (SIGCHLD, &act, NULL);
+
+#ifdef __svr4__
+  act.sa_handler = SIG_IGN;
+  sigemptyset (&(act.sa_mask));
+  sigaction (SIGALRM, &act, NULL);
+#endif
 
   gtk_widget_show_all (GUI_MainWindow);
   GUI_Refresh ();
@@ -2298,28 +2404,27 @@ static void ReadConfig (void)
     if (xgnokiiConfig.bindir == NULL)
         xgnokiiConfig.bindir = DefaultBindir;
 
+  GUI_ReadXConfig();
+  max_phonebook_name_length = atoi (xgnokiiConfig.maxPhoneLen);
+  max_phonebook_sim_name_length = atoi (xgnokiiConfig.maxSIMLen);
+  
 #ifndef WIN32
   xgnokiiConfig.xgnokiidir = DefaultXGnokiiDir;
 
   if (strstr(FB38_Information.Models, xgnokiiConfig.model) != NULL)
   {
-    max_phonebook_name_length = 20;
     max_phonebook_number_length = 30;
-    max_phonebook_sim_name_length = 14;
     max_phonebook_sim_number_length = 30;
   }
   else 
 #endif
   if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL)
   {
-    max_phonebook_name_length = FB61_MAX_PHONEBOOK_NAME_LENGTH;
     max_phonebook_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
-    max_phonebook_sim_name_length = 14;
     max_phonebook_sim_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
   }
   else
   {
-    max_phonebook_name_length = max_phonebook_sim_name_length = GSM_MAX_PHONEBOOK_NAME_LENGTH;
     max_phonebook_number_length = max_phonebook_sim_number_length = GSM_MAX_PHONEBOOK_NUMBER_LENGTH;
   }
 
@@ -2327,7 +2432,6 @@ static void ReadConfig (void)
   xgnokiiConfig.callerGroups[2] = xgnokiiConfig.callerGroups[3] =
   xgnokiiConfig.callerGroups[4] = xgnokiiConfig.callerGroups[5] = NULL;
   xgnokiiConfig.smsSets = 0;
-  GUI_ReadXConfig();
 }
 
 

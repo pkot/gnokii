@@ -830,7 +830,7 @@ static void CreateEditDialog( EditEntryData *editEntryData, gchar *title,
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
-  editEntryData->name = gtk_entry_new_with_max_length(max_phonebook_name_length);
+  editEntryData->name = gtk_entry_new_with_max_length (100);
 
   gtk_box_pack_end(GTK_BOX(hbox), editEntryData->name, FALSE, FALSE, 2);
   gtk_widget_show (editEntryData->name);
@@ -843,7 +843,7 @@ static void CreateEditDialog( EditEntryData *editEntryData, gchar *title,
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
-  editEntryData->number = gtk_entry_new_with_max_length(max_phonebook_number_length);
+  editEntryData->number = gtk_entry_new_with_max_length (max_phonebook_number_length);
   gtk_box_pack_end(GTK_BOX(hbox), editEntryData->number, FALSE, FALSE, 2);
   gtk_widget_show (editEntryData->number);
 

@@ -37,6 +37,7 @@ typedef enum {
   Event_WriteMemoryLocationAll,
   Event_GetCalendarNote,
   Event_GetCalendarNoteAll,
+  Event_DeleteCalendarNote,
   Event_GetCallerGroup,
   Event_SendCallerGroup,
   Event_GetSMSCenter,
@@ -165,6 +166,7 @@ typedef struct {
     bool speedDial:1;
     bool keyboard:1;
     bool calendar:1;
+    bool data:1;
   } supported;
 } PhoneMonitor;
 

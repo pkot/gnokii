@@ -24,6 +24,9 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#ifdef __svr4__
+#  include <strings.h>	/* for bzero */
+#endif
 #include <time.h>
 
 #ifdef WIN32
@@ -608,6 +611,11 @@ int main(int argc, char *argv[])
       usage();
       exit(-1);
     }
+
+#ifdef __svr4__
+    /* have to ignore SIGALARM */
+    sigignore(SIGALRM);
+#endif
 
     switch(c) {
 

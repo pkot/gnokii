@@ -6,7 +6,7 @@ common/mbus-640.c
 common/rlp-common.c
 gnokii/gnokii.c
 gnokiid/gnokiid.c
-gnokiid/virtmodem.c
+common/virtmodem.c
 xgnokii/xgnokii.c
 xgnokii/xgnokii_cfg.c
 xgnokii/xgnokii_common.c

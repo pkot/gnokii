@@ -1,3 +1,18 @@
+* Sat Jul 15 13:18:12 CEST 2000 Jan Derfinak Jan Derfinak <ja@mail.upjs.sk>
+- Patch from Christopher Kemp <ck231@cam.ac.uk> to enable data mode in
+  xgnokii.
+
+* Sun Jul 02 19:02:39 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- Deleting calendar notes work.
+- Initialization timeout shorted from 15 secs to 10 secs.
+
+* Sun Jun 18 03:18:27 CEST 2000 Jan Derfinak <ja@mail.upjs.sk
+- Saving SMS's to mailbox. Original idea from Petri Lahti <petri.lahti@iki.fi>
+- User configurable maximum length of names in contacts on SIM and phone.
+
+* Sat Jun 16 22:35:24 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- New pixmap in calendar window from Marcel Koeppen <jojo@jojosoft.de>
+
 * Tue Jun 13 01:58:56 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
 - Initialization timeout was extended from 5 secs to 15 secs.
 - Corrected algorithm for SMS reading. Now we can read all SMS on SIM card.

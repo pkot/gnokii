@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
 	TerminateThread=false;
 
-	if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode) == false) 
+	if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode, true) == false) 
 	  exit (-1);
 
 	while (1) {

@@ -17,6 +17,7 @@
 #define XGNOKII_H
 
 #include <gtk/gtk.h>
+#include "config.h"
 #include "misc.h"
 #include "gsm-common.h"
 
@@ -41,7 +42,10 @@ typedef struct {
   gchar *connection; /* Connection type from .gnokiirc file */
   gchar *bindir;
   gchar *xgnokiidir;
-  gchar *helpviewer;
+  gchar *helpviewer; /* Program to showing help files */
+  gchar *mailbox;    /* Mailbox, where we can save SMS's */
+  gchar *maxSIMLen;  /* Max length of names on SIM card */
+  gchar *maxPhoneLen;/* Max length of names in phone */
   gchar *locale;
   GSM_MessageCenter smsSetting[MAX_SMS_CENTER];
   UserInf user;

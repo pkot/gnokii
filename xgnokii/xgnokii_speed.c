@@ -57,7 +57,8 @@ static void CloseSpeedDial (GtkWidget *w, gpointer data)
 
 static inline void DestroyCListData (gpointer data)
 {
-  g_free ((D_SpeedDial *) data);
+  if (data)
+    g_free ((D_SpeedDial *) data);
 }
 
 
@@ -104,8 +105,6 @@ static void OkSelectContactDialog (GtkWidget *widget,
     d->entry.MemoryType = pbEntry->entry.MemoryType + 2;
     d->entry.Location = pbEntry->entry.Location;
 
-    g_free ((D_SpeedDial *) gtk_clist_get_row_data (GTK_CLIST (clist),
-            selectedKey));
     gtk_clist_set_row_data_full (GTK_CLIST (clist), selectedKey,
                                  (gpointer) d, DestroyCListData);
 

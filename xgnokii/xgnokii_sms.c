@@ -13,8 +13,11 @@
 
 */
 #include <unistd.h>
+#include <locale.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <time.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
@@ -112,8 +115,8 @@ static inline void CloseSMSSend (GtkWidget *w, gpointer data)
 
 static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer ptr2)
 {
-  char *text1 = NULL;
-  char *text2 = NULL;
+  gchar *text1 = NULL;
+  gchar *text2 = NULL;
 
   GtkCListRow *row1 = (GtkCListRow *) ptr1;
   GtkCListRow *row2 = (GtkCListRow *) ptr2;
@@ -156,7 +159,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     bdTime.tm_min  = atoi (text1 + 12);
     bdTime.tm_hour = atoi (text1 + 9);
     bdTime.tm_mday = atoi (text1);
-    bdTime.tm_mon  = atoi (text1 + 3);
+    bdTime.tm_mon  = atoi (text1 + 3) - 1;
     bdTime.tm_year = atoi (text1 + 6);
     if (bdTime.tm_year < 70)
       bdTime.tm_year += 100;
@@ -172,7 +175,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     bdTime.tm_min  = atoi (text2 + 12);
     bdTime.tm_hour = atoi (text2 + 9);
     bdTime.tm_mday = atoi (text2);
-    bdTime.tm_mon  = atoi (text2 + 3);
+    bdTime.tm_mon  = atoi (text2 + 3) - 1;
     bdTime.tm_year = atoi (text2 + 6);
     if (bdTime.tm_year < 70)
       bdTime.tm_year += 100;
@@ -412,11 +415,11 @@ static void OkDeleteSMSDialog (GtkWidget *widget, gpointer data)
 
   sel = GTK_CLIST (SMS.smsClist)->selection;
 
-  gtk_clist_freeze(GTK_CLIST (SMS.smsClist));
+  gtk_clist_freeze (GTK_CLIST (SMS.smsClist));
 
   while (sel != NULL)
   {
-    row = GPOINTER_TO_INT(sel->data);
+    row = GPOINTER_TO_INT (sel->data);
     sel = sel->next;
     for (count = 0; count < ((MessagePointers *) gtk_clist_get_row_data (GTK_CLIST (SMS.smsClist), row))->count; count++)
     {
@@ -453,13 +456,13 @@ static void OkDeleteSMSDialog (GtkWidget *widget, gpointer data)
     }
   }
 
-  gtk_widget_hide(GTK_WIDGET (data));
+  gtk_widget_hide (GTK_WIDGET (data));
 
-  gtk_clist_thaw(GTK_CLIST (SMS.smsClist));
+  gtk_clist_thaw (GTK_CLIST (SMS.smsClist));
 }
 
 
-void DeleteSMS(void)
+static void DeleteSMS (void)
 {
   static GtkWidget *dialog = NULL;
   GtkWidget *button, *hbox, *label, *pixmap;
@@ -496,15 +499,118 @@ void DeleteSMS(void)
     gtk_widget_show (hbox);
 
     pixmap = gtk_pixmap_new (questMark.pixmap, questMark.mask);
-    gtk_box_pack_start(GTK_BOX(hbox), pixmap, FALSE, FALSE, 10);
-    gtk_widget_show(pixmap);
+    gtk_box_pack_start (GTK_BOX (hbox), pixmap, FALSE, FALSE, 10);
+    gtk_widget_show (pixmap);
 
-    label = gtk_label_new(_("Do you want to delete selected SMS?"));
-    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 10);
-    gtk_widget_show(label);
+    label = gtk_label_new (_("Do you want to delete selected SMS?"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 10);
+    gtk_widget_show (label);
   }
 
-  gtk_widget_show(GTK_WIDGET (dialog));
+  gtk_widget_show (GTK_WIDGET (dialog));
+}
+
+
+static void SaveToMailbox (void)
+{
+  gchar buf[255];
+  FILE *f;
+  gint fd;
+  GList *sel;
+  struct tm t, *loctime;
+  struct flock lock;
+  time_t caltime;
+  gint row;
+  gchar *number, *text, *loc;
+
+
+  if ((f = fopen (xgnokiiConfig.mailbox, "a")) == NULL)
+  {
+    snprintf (buf, 255, _("Cannot open mailbox %s for appending!"), xgnokiiConfig.mailbox);
+    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+    gtk_widget_show (errorDialog.dialog);
+    return;
+  }
+
+  fd = fileno (f);
+  lock.l_type = F_WRLCK;
+  lock.l_whence = SEEK_SET;
+  lock.l_start = 0;
+  lock.l_len = 0;
+  
+  if (fcntl (fd, F_GETLK, &lock) != -1 && lock.l_type != F_UNLCK)
+  {
+    snprintf (buf, 255, _("Cannot save to mailbox %s.\n\
+%s is locked for process %d!"), xgnokiiConfig.mailbox, lock.l_pid);
+    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+    gtk_widget_show (errorDialog.dialog);
+    fclose (f);
+    return;
+  }
+  
+  lock.l_type = F_WRLCK;
+  lock.l_whence = SEEK_SET;
+  lock.l_start = 0;
+  lock.l_len = 0;
+  if (fcntl (fd, F_SETLK, &lock) == -1)
+  {
+    snprintf (buf, 255, _("Cannot lock mailbox %s!"), xgnokiiConfig.mailbox);
+    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+    gtk_widget_show (errorDialog.dialog);
+    fclose (f);
+    return;
+  }
+  
+  sel = GTK_CLIST (SMS.smsClist)->selection;
+
+  while (sel != NULL)
+  {
+    row = GPOINTER_TO_INT (sel->data);
+    sel = sel->next;
+    gtk_clist_get_text (GTK_CLIST (SMS.smsClist), row, 1, &text);
+    t.tm_sec  = atoi (text + 15);
+    t.tm_min  = atoi (text + 12);
+    t.tm_hour = atoi (text + 9);
+    t.tm_mday = atoi (text);
+    t.tm_mon  = atoi (text + 3) - 1;
+    t.tm_year = atoi (text + 6);
+    if (t.tm_year < 70)
+      t.tm_year += 100;
+#ifdef HAVE_TM_GMTON
+    if (text[17] != '\0')
+      t.tm_gmtoff = atoi (text + 18) * 3600;
+#endif
+
+    caltime = mktime (&t);
+    loctime = localtime (&caltime);
+
+    gtk_clist_get_text (GTK_CLIST (SMS.smsClist), row, 2, &number);
+    gtk_clist_get_text (GTK_CLIST (SMS.smsClist), row, 3, &text);
+
+    fprintf (f, "From %s@xgnokii %s", number, asctime (loctime));
+    loc = setlocale (LC_ALL, "C");
+    strftime (buf, 255, "Date: %a, %d %b %Y %H:%M:%S %z (%Z)\n", loctime);
+    setlocale (LC_ALL, loc);
+    fprintf (f, "%s", buf);
+    fprintf (f, "From: %s@xgnokii\n", number);
+    strncpy (buf, text, 20);
+    buf[20] = '\0'; 
+    fprintf (f, "Subject: %s\n\n", buf);
+    fprintf (f, "%s\n\n", text);
+  }
+
+  lock.l_type = F_UNLCK;
+  lock.l_whence = SEEK_SET;
+  lock.l_start = 0;
+  lock.l_len = 0;
+  if (fcntl (fd, F_SETLK, &lock) == -1)
+  {
+    snprintf (buf, 255, _("Cannot unlock mailbox %s!"), xgnokiiConfig.mailbox);
+    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+    gtk_widget_show (errorDialog.dialog);
+  }
+
+  fclose (f);
 }
 
 
@@ -1377,6 +1483,7 @@ static void NewBC (void)
 static GtkItemFactoryEntry menu_items[] = {
   { NULL,		NULL,		NULL,		0, "<Branch>"},
   { NULL,		"<control>S",	NULL,		0, NULL},
+  { NULL,		"<control>M",	SaveToMailbox,	0, NULL},
   { NULL,		NULL,		NULL,		0, "<Separator>"},
   { NULL,		"<control>W",	CloseSMS,	0, NULL},
   { NULL,		NULL,		NULL,		0, "<Branch>"},
@@ -1394,20 +1501,23 @@ static GtkItemFactoryEntry menu_items[] = {
 
 static void InitMainMenu (void)
 {
-  menu_items[0].path = g_strdup (_("/_File"));
-  menu_items[1].path = g_strdup (_("/File/_Save"));
-  menu_items[2].path = g_strdup (_("/File/Sep1"));
-  menu_items[3].path = g_strdup (_("/File/_Close"));
-  menu_items[4].path = g_strdup (_("/_Messages"));
-  menu_items[5].path = g_strdup (_("/_Messages/_New"));
-  menu_items[6].path = g_strdup (_("/_Messages/_Forward"));
-  menu_items[7].path = g_strdup (_("/_Messages/_Reply"));
-  menu_items[8].path = g_strdup (_("/_Messages/_Delete"));
-  menu_items[9].path = g_strdup (_("/Messages/Sep3"));
-  menu_items[10].path = g_strdup (_("/_Messages/_Bussiness card"));
-  menu_items[11].path = g_strdup (_("/_Help"));
-  menu_items[12].path = g_strdup (_("/Help/_Help"));
-  menu_items[13].path = g_strdup (_("/Help/_About"));
+  register gint i = 0;
+  
+  menu_items[i++].path = g_strdup (_("/_File"));
+  menu_items[i++].path = g_strdup (_("/File/_Save"));
+  menu_items[i++].path = g_strdup (_("/File/Save to mailbo_x"));
+  menu_items[i++].path = g_strdup (_("/File/Sep1"));
+  menu_items[i++].path = g_strdup (_("/File/_Close"));
+  menu_items[i++].path = g_strdup (_("/_Messages"));
+  menu_items[i++].path = g_strdup (_("/_Messages/_New"));
+  menu_items[i++].path = g_strdup (_("/_Messages/_Forward"));
+  menu_items[i++].path = g_strdup (_("/_Messages/_Reply"));
+  menu_items[i++].path = g_strdup (_("/_Messages/_Delete"));
+  menu_items[i++].path = g_strdup (_("/Messages/Sep3"));
+  menu_items[i++].path = g_strdup (_("/_Messages/_Bussiness card"));
+  menu_items[i++].path = g_strdup (_("/_Help"));
+  menu_items[i++].path = g_strdup (_("/Help/_Help"));
+  menu_items[i++].path = g_strdup (_("/Help/_About"));
 }
 
 

@@ -29,7 +29,8 @@ OBJS = 	xgnokii.o \
 	xgnokii_xkeyb.o \
 	xgnokii_calendar.o \
 	xgnokii_logos.o \
-	xgnokii_lowlevel.o
+	xgnokii_lowlevel.o \
+	xgnokii_data.o
 
 HELP_DIR = docs/help
 
@@ -37,10 +38,13 @@ HELP_DIR = docs/help
 all: xgnokii
 
 
-xgnokii: $(OBJS) $(TOPDIR)/common/COMMON.o
+xgnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/DATA.o
 
 $(TOPDIR)/common/COMMON.o: 
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
+
+$(TOPDIR)/common/DATA.o:
+	$(MAKE) -C $(TOPDIR)/common DATA.o
 
 clean:
 	$(RM) $(OBJS) *~ xpm/*~ depend xgnokii
@@ -50,9 +54,9 @@ install: all
 	$(INSTALL) -m 755 -s xgnokii $(bindir)
 	$(INSTALL) -d $(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
-	  find ./ -type d \! -path "*CVS*" \
+	  $(FIND) . -type d \! -path "*CVS*" \
 	       -exec $(INSTALL) -d $(xgnokii_libdir)/help/{} \; ; \
-	  find ./ -type f \! -path "*CVS*" \
+	  $(FIND) . -type f \! -path "*CVS*" \
 	       -exec $(INSTALL) -m 0444 {} $(xgnokii_libdir)/help/{} \; \
 	)
 	$(INSTALL) -m 0444 ../Docs/CREDITS $(xgnokii_libdir)/help/en_US

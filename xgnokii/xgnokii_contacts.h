@@ -124,11 +124,6 @@ typedef struct {
   GdkBitmap *mask;
 } MemoryPixmaps;
 
-typedef struct {
-  GdkPixmap *pixmap;
-  GdkBitmap *mask;
-} QuestMark;
-
 extern void GUI_CreateContactsWindow (void);
 
 extern void GUI_ShowContacts (void);

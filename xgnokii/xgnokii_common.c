@@ -88,7 +88,7 @@ bool CallerGroupSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 10 && i < 18)
+      if (i > 11 && i < 19)
         return TRUE;
       else
         return FALSE;
@@ -108,7 +108,7 @@ bool CalendarSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 10 && i < 18)
+      if (i > 11 && i < 19)
         return TRUE;
       else
         return FALSE;
@@ -128,7 +128,7 @@ bool NetmonitorSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 7 && i < 18)
+      if (i > 7 && i < 19)
         return TRUE;
       else
         return FALSE;
@@ -148,7 +148,7 @@ bool KeyboardSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 7 && i < 18)
+      if (i > 7 && i < 19)
         return TRUE;
       else
         return FALSE;
@@ -168,7 +168,7 @@ bool SMSSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 2 && i < 18)
+      if (i > 2 && i < 19)
         return TRUE;
       else
         return FALSE;
@@ -188,7 +188,27 @@ bool DTMFSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 2 && i < 18)
+      if (i > 2 && i < 19)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+
+  return FALSE;
+}
+
+
+bool DataSupported (const gchar *num)
+{
+  register gint i = 0;
+
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if ((i > 2 && i < 6) || (i > 6 && i < 20))
         return TRUE;
       else
         return FALSE;
@@ -208,7 +228,7 @@ bool SpeedDialSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 7 && i < 18)
+      if (i > 7 && i < 19)
         return TRUE;
       else
         return FALSE;

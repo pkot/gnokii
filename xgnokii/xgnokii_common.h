@@ -44,6 +44,11 @@ typedef struct {
   GtkWidget *text;
 } YesNoDialog;
 
+typedef struct {
+  GdkPixmap *pixmap;
+  GdkBitmap *mask;
+} QuestMark;
+
 typedef enum {
   GUI_EVENT_CONTACTS_CHANGED,
   GUI_EVENT_CALLERS_GROUPS_CHANGED,
@@ -71,6 +76,7 @@ extern bool KeyboardSupported (const gchar *);
 extern bool SMSSupported (const gchar *);
 extern bool CalendarSupported (const gchar *);
 extern bool DTMFSupported (const gchar *);
+extern bool DataSupported (const gchar *);
 extern bool SpeedDialSupported (const gchar *);
 extern void GUI_Refresh (void);
 extern void SetSortColumn (GtkWidget *, SortColumn *);

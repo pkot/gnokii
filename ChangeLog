@@ -86,3 +86,9 @@
 
 * Tue Jul  4 23:26:47 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
 - config.h support added
+
+* Sat Jul 15 13:10:12 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- Patch from William Sun <William.Sun@Aus.Sun.COM> for Solaris.
+- Many modification in source code and config stuff for Solaris.
+- Patch from Christopher Kemp <ck231@cam.ac.uk> to enable data mode in
+  xgnokii.

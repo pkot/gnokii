@@ -12,17 +12,17 @@ include $(TOPDIR)/Makefile.global
 CFLAGS	+= $(PTHREAD_CFLAGS)
 LDFLAGS += $(PTHREAD_LIBS)
 
-OBJS =	at-emulator.o \
-	datapump.o \
-	gnokiid.o \
-	virtmodem.o
+OBJS =	gnokiid.o
 
 all: gnokiid
 
-gnokiid: $(OBJS) $(TOPDIR)/common/COMMON.o
+gnokiid: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/DATA.o
 
 $(TOPDIR)/common/COMMON.o: 
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
+
+$(TOPDIR)/common/DATA.o:
+	$(MAKE) -C $(TOPDIR)/common DATA.o
 
 clean:
 	$(RM) $(OBJS) *~ depend gnokiid *.exe core *.bak

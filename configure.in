@@ -15,7 +15,12 @@ dnl ======================== Default setting
 CFLAGS="-O2 -Wall"
 ALL_LINGUAS="cs de fi nl sk"
 model="6110"
-port="/dev/ttyS0"
+case "$build_os" in
+  solaris*)	port="/dev/cua/a"
+	;;
+  *)		port="/dev/ttyS0"
+	;;
+esac
 
 dnl ======================== Checks for programs.
 AC_PROG_CC
@@ -23,8 +28,10 @@ AC_PROG_CPP
 AC_PROG_LEX
 AC_PATH_PROG(LD, ld, no)
 AC_PATH_PROG(RM, rm, no)
+AC_PATH_PROG(FIND, find, no)
 AC_CHECK_PROGS(MAKE, gmake make)
 AC_PROG_INSTALL
+
 
 AC_ARG_ENABLE(debug, 
 	[  --enable-debug          compile with debug code],
@@ -333,11 +340,16 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS(mktime select strdup strstr strtol)
+AC_CHECK_FUNCS(mktime select strdup strstr strtol snprintf)
 
 PACKAGE=gnokii
 VERSION=`cat VERSION`
 XVERSION=`cat xgnokii/VERSION`
+
+case "$INSTALL" in
+  'config/install-sh -c') INSTALL=`pwd`/$INSTALL
+	;;
+esac
 
 SHELL=${CONFIG_SHELL-/bin/sh}
 

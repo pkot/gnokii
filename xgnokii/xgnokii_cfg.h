@@ -20,6 +20,7 @@
 #include "xgnokii.h"
 
 #define		HTMLVIEWER_LENGTH	200
+#define		MAILBOX_LENGTH		200
 
 typedef struct {
   gchar key[10];

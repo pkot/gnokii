@@ -84,9 +84,19 @@
 
 #ifndef HAVE_TIMEOPS
 #include <sys/time.h>
-#include <unistd.h>
 
-// extern int timersub(struct timeval *t1, struct timeval *t2, struct timeval *t3);
+#ifndef timersub
+#define timersub(a, b, result)                                                \
+  do {                                                                        \
+    (result)->tv_sec = (a)->tv_sec - (b)->tv_sec;                             \
+    (result)->tv_usec = (a)->tv_usec - (b)->tv_usec;                          \
+    if ((result)->tv_usec < 0) {                                              \
+      --(result)->tv_sec;                                                     \
+      (result)->tv_usec += 1000000;                                           \
+    }                                                                         \
+  } while (0)
+#endif
+
 #endif /* HAVE_TIMEOPS */
 
 #endif /* __misc_h */
