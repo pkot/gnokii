@@ -184,7 +184,7 @@ typedef struct {
 static struct ConfigDialogData {
 	ConnectionWidgets connection;
 	PhoneWidgets phone;
-	GtkWidget *groups[6];
+	GtkWidget *groups[GSM_MAX_CALLER_GROUPS];
 	AlarmWidgets alarm;
 	SMSWidgets sms;
 	UserWidget user;
@@ -770,7 +770,7 @@ void GUI_ShowOptions(void)
 	if (phoneMonitor.supported & PM_CALLERGROUP) {
 		gtk_widget_show(cg_names_option_frame);
 		GUI_InitCallerGroupsInf();
-		for (i = 0; i < 6; i++)
+		for (i = 0; i < GSM_MAX_CALLER_GROUPS; i++)
 			gtk_entry_set_text(GTK_ENTRY(configDialogData.groups[i]),
 					   xgnokiiConfig.callerGroups[i]);
 	} else
@@ -966,7 +966,7 @@ static void OptionsApplyCallback(GtkWidget * widget, gpointer data)
 
 	/* GROUPS */
 	if (phoneMonitor.supported & PM_CALLERGROUP) {
-		for (i = 0; i < 6; i++) {
+		for (i = 0; i < GSM_MAX_CALLER_GROUPS; i++) {
 			strncpy(xgnokiiConfig.callerGroups[i],
 				gtk_entry_get_text(GTK_ENTRY(configDialogData.groups[i])),
 				MAX_CALLER_GROUP_LENGTH);
@@ -1011,7 +1011,7 @@ static void OptionsSaveCallback(GtkWidget * widget, gpointer data)
 	if (phoneMonitor.supported & PM_CALLERGROUP) {
 		cg = (D_CallerGroup *) g_malloc(sizeof(D_CallerGroup));
 		cg->number = 0;
-		if (strcmp(xgnokiiConfig.callerGroups[0], _("Familly")) == 0)
+		if (strcmp(xgnokiiConfig.callerGroups[0], _("Family")) == 0)
 			*cg->text = '\0';
 		else
 			strncpy(cg->text, xgnokiiConfig.callerGroups[0], 256);
@@ -2076,7 +2076,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	label = gtk_label_new(_("Groups"));
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cg_names_option_frame, label);
 
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < GSM_MAX_CALLER_GROUPS; i++) {
 		hbox = gtk_hbox_new(FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 3);
 		gtk_widget_show(hbox);

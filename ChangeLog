@@ -8,6 +8,7 @@
  * xgnokii updates:
     o fix speeddial writing                            (Markus Plail)
     o fix logos                                        (Markus Plail)
+    o don't user hardcoded values                       (Paul Vriens)
  * 6510 series updates:
     o add bitmap writing                               (Markus Plail)
     o add ToDo reading                                 (Markus Plail)
