@@ -673,6 +673,7 @@ static int EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num)
 GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
+	GSM_RawData rawdata;
 	unsigned short i, count;
 
 	header_offset = layout.SendHeader;
@@ -684,11 +685,13 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	if (count < 1) return GE_SMSWRONGFORMAT;
+
+	data->RawData = &rawdata;
 	for (i = 0; i < count; i++) {
-		if (!data->RawData) data->RawData = calloc(sizeof(GSM_RawData), 1);
-		if (!data->RawData->Data) data->RawData->Data = calloc(200, 1);
+		if (!data->RawData->Data) data->RawData->Data = calloc(256, 1);
 		data->RawData->Length = EncodePDUSMS(data->SMSMessage, data->RawData->Data, i);
 		error = SM_Functions(GOP_SendSMS, data, state);
+		free(data->RawData->Data);
 	}
 	return error;
 }
