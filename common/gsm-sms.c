@@ -361,7 +361,7 @@ static GSM_Error DecodeData(unsigned char *message, unsigned char *output, unsig
 		/* 8bit SMS */
 		if ((dcs.Type & 0xf4) == 0xf4) {
 			dprintf("8bit message\n");
-			memcpy(output, message, length);
+			memcpy(output, message + udhlen, length);
 		/* 7bit SMS */
 		} else {
 			dprintf("Default Alphabet\n");
