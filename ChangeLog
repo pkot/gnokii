@@ -2,6 +2,9 @@
 ==========
  * xgnokii fixes:
     o lockup during the phonebook reading fixed      (BORBELY Zoltan)
+ * gnokii updates:
+    o let gnokii display usage instruction to stdout when it's
+    called with --help or -h and to stderr otherwise      (Pawel Kot)
 
 0.4.0pre20
 ==========

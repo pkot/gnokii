@@ -244,66 +244,65 @@ static void version(void)
 
 /* The function usage is only informative - it prints this program's usage and
    command-line options. */
-static int usage(void)
+static int usage(FILE *f)
 {
-	fprintf(stderr, _("   usage: gnokii [--help|--monitor|--version]\n"
-			  "          gnokii --getmemory memory_type start_number [end_number|end]\n"
-			  "          gnokii --writephonebook [-i]\n"
-			  "          gnokii --getspeeddial number\n"
-			  "          gnokii --setspeeddial number memory_type location\n"
-			  "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
-			  "          gnokii --deletesms memory_type start [end]\n"
-			  "          gnokii --sendsms destination [--smsc message_center_number |\n"
-			  "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
-			  "                 [--long n]\n"
-			  "          gnokii --savesms [-m] [-l n] [-i]\n"
-			  "          gnokii --smsreader\n"
-			  "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
-			  "          gnokii --setsmsc\n"
-			  "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
-			  "          gnokii --getdatetime\n"
-			  "          gnokii --setalarm [HH MM]\n"
-			  "          gnokii --getalarm\n"
-			  "          gnokii --dialvoice number\n"
-			  "          gnokii --answercall callid\n"
-			  "          gnokii --hangup callid\n"
-			  "          gnokii --getcalendarnote start [end] [-v]\n"
-			  "          gnokii --writecalendarnote vcardfile number\n"
-			  "          gnokii --deletecalendarnote start [end]\n"
-			  "          gnokii --getdisplaystatus\n"
-			  "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
-			  "          gnokii --identify\n"
-			  "          gnokii --senddtmf string\n"
-			  "          gnokii --sendlogo {caller|op|picture} destination logofile [network code]\n"
-			  "          gnokii --sendringtone rtttlfile destination\n"
-			  "          gnokii --setlogo op [logofile] [network code]\n"
-			  "          gnokii --setlogo startup [logofile]\n"
-			  "          gnokii --setlogo caller [logofile] [caller group number] [group name]\n"
-			  "          gnokii --setlogo {dealer|text} [text]\n"
-			  "          gnokii --getlogo op [logofile] [network code]\n"
-			  "          gnokii --getlogo startup [logofile] [network code]\n"
-			  "          gnokii --getlogo caller [logofile][caller group number][network code]\n"
-			  "          gnokii --getlogo {dealer|text}\n"
-			  "          gnokii --viewlogo logofile\n"
-			  "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
-			  "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"
-			  "          gnokii --reset [soft|hard]\n"
-			  "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
-			  "          gnokii --setprofile\n"
-			  "          gnokii --displayoutput\n"
-			  "          gnokii --keysequence\n"
-			  "          gnokii --enterchar\n"
-			  "          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
-			  "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
-			  "                 {--call|-c} {all|voice|fax|data}\n"
-			  "                 [{--timeout|-m} time_in_seconds]\n"
-			  "                 [{--number|-n} number]\n"
+	fprintf(f, _("   usage: gnokii [--help|--monitor|--version]\n"
+		     "          gnokii --getmemory memory_type start_number [end_number|end]\n"
+		     "          gnokii --writephonebook [-i]\n"
+		     "          gnokii --getspeeddial number\n"
+		     "          gnokii --setspeeddial number memory_type location\n"
+		     "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
+		     "          gnokii --deletesms memory_type start [end]\n"
+		     "          gnokii --sendsms destination [--smsc message_center_number |\n"
+		     "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
+		     "                 [--long n]\n"
+		     "          gnokii --savesms [-m] [-l n] [-i]\n"
+		     "          gnokii --smsreader\n"
+		     "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
+		     "          gnokii --setsmsc\n"
+		     "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
+		     "          gnokii --getdatetime\n"
+		     "          gnokii --setalarm [HH MM]\n"
+		     "          gnokii --getalarm\n"
+		     "          gnokii --dialvoice number\n"
+		     "          gnokii --answercall callid\n"
+		     "          gnokii --hangup callid\n"
+		     "          gnokii --getcalendarnote start [end] [-v]\n"
+		     "          gnokii --writecalendarnote vcardfile number\n"
+		     "          gnokii --deletecalendarnote start [end]\n"
+		     "          gnokii --getdisplaystatus\n"
+		     "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
+		     "          gnokii --identify\n"
+		     "          gnokii --senddtmf string\n"
+		     "          gnokii --sendlogo {caller|op|picture} destination logofile [network code]\n"
+		     "          gnokii --sendringtone rtttlfile destination\n"
+		     "          gnokii --setlogo op [logofile] [network code]\n"
+		     "          gnokii --setlogo startup [logofile]\n"
+		     "          gnokii --setlogo caller [logofile] [caller group number] [group name]\n"
+		     "          gnokii --setlogo {dealer|text} [text]\n"
+		     "          gnokii --getlogo op [logofile] [network code]\n"
+		     "          gnokii --getlogo startup [logofile] [network code]\n"
+		     "          gnokii --getlogo caller [logofile][caller group number][network code]\n"
+		     "          gnokii --getlogo {dealer|text}\n"
+		     "          gnokii --viewlogo logofile\n"
+		     "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
+		     "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"
+		     "          gnokii --reset [soft|hard]\n"
+		     "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
+		     "          gnokii --setprofile\n"
+		     "          gnokii --displayoutput\n"
+		     "          gnokii --keysequence\n"
+		     "          gnokii --enterchar\n"
+		     "          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
+		     "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
+		     "                 {--call|-c} {all|voice|fax|data}\n"
+		     "                 [{--timeout|-m} time_in_seconds]\n"
+		     "                 [{--number|-n} number]\n"
 		));
 #ifdef SECURITY
-	fprintf(stderr, _(
-		"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
-		"          gnokii --getsecuritycodestatus\n"
-		"          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
+	fprintf(f, _("          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
+		     "          gnokii --getsecuritycodestatus\n"
+		     "          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 		));
 #endif
 	if (lockfile) unlock_device(lockfile);
@@ -574,7 +573,7 @@ static int savesms(int argc, char *argv[])
 		case 'c': /* Specify the smsc location */
 			break;
 		default:
-			usage();
+			usage(stderr);
 			return -1;
 		}
 	}
@@ -668,7 +667,7 @@ static int getsmsc(int argc, char *argv[])
 			raw = true;
 			break;
 		default:
-			usage(); /* FIXME */
+			usage(stderr); /* FIXME */
 			return -1;
 		}
 	}
@@ -882,10 +881,10 @@ static int getsms(int argc, char *argv[])
 					strncpy(filename, optarg, sizeof(filename) - 1);
 					if (strlen(optarg) > sizeof(filename) - 1)
 						fprintf(stderr, _("Filename too long - will be truncated to 63 characters.\n"));
-				} else  usage();
+				} else usage(stderr);
 				break;
 			default:
-				usage();
+				usage(stderr);
 			}
 		}
 	}
@@ -1170,7 +1169,7 @@ static int entersecuritycode(char *type)
 		SecurityCode.Type = GSCT_SecurityCode;
 	*/
 	else
-		usage();
+		usage(stderr);
 
 	memset(&SecurityCode.Code, 0, sizeof(SecurityCode.Code));
 	get_password(_("Enter your code: "), SecurityCode.Code, sizeof(SecurityCode.Code));
@@ -1251,7 +1250,7 @@ static int changesecuritycode(char *type)
 		SecurityCode.Type = GSCT_SecurityCode;
 	*/
 	else
-		usage();
+		usage(stderr);
 
 	get_password(_("Enter your code: "), SecurityCode.Code, sizeof(SecurityCode.Code));
 	get_password(_("Enter new code: "), SecurityCode.NewCode, sizeof(SecurityCode.NewCode));
@@ -1816,7 +1815,7 @@ static int getcalendarnote(int argc, char *argv[])
 			vCal = true;
 			break;
 		default:
-			usage(); /* Would be better to have an calendar_usage() here. */
+			usage(stderr); /* Would be better to have an calendar_usage() here. */
 			return -1;
 		}
 	}
@@ -2423,7 +2422,7 @@ static int getprofile(int argc, char *argv[])
 			raw = true;
 			break;
 		default:
-			usage(); /* FIXME */
+			usage(stderr); /* FIXME */
 			return -1;
 		}
 	}
@@ -2666,7 +2665,7 @@ static int writephonebook(int argc, char *args[])
 
 	/* Check argument */
 	if (argc && (strcmp("-i", args[0])))
-		usage();
+		usage(stderr);
 
 	Line = OLine;
 
@@ -3041,7 +3040,7 @@ static int getringtone(int argc, char *argv[])
 			raw = true;
 			break;
 		default:
-			usage(); /* FIXME */
+			usage(stderr); /* FIXME */
 			return -1;
 		}
 	}
@@ -3054,7 +3053,7 @@ static int getringtone(int argc, char *argv[])
 	data.RawData = &rawdata;
 
 	if (argc <= optind) {
-		usage();
+		usage(stderr);
 		return -1;
 	}
 
@@ -3119,7 +3118,7 @@ static int setringtone(int argc, char *argv[])
 			snprintf(name, sizeof(name), "%s", optarg);
 			break;
 		default:
-			usage(); /* FIXME */
+			usage(stderr); /* FIXME */
 			return -1;
 		}
 	}
@@ -3132,7 +3131,7 @@ static int setringtone(int argc, char *argv[])
 	data.RawData = &rawdata;
 
 	if (argc <= optind) {
-		usage();
+		usage(stderr);
 		return -1;
 	}
 
@@ -3280,7 +3279,7 @@ static int divert(int argc, char **argv)
 			} else if (!strcmp("query", optarg)) {
 				cd.Operation = GSM_CDV_Query;
 			} else {
-				usage();
+				usage(stderr);
 				return -1;
 			}
 			break;
@@ -3296,7 +3295,7 @@ static int divert(int argc, char **argv)
 			} else if (!strcmp("notavail", optarg)) {
 				cd.DType = GSM_CDV_NotAvailable;
 			} else {
-				usage();
+				usage(stderr);
 				return -1;
 			}
 			break;
@@ -3310,7 +3309,7 @@ static int divert(int argc, char **argv)
 			} else if (!strcmp("data", optarg)) {
 				cd.CType = GSM_CDV_DataCalls;
 			} else {
-				usage();
+				usage(stderr);
 				return -1;
 			}
 			break;
@@ -3323,7 +3322,7 @@ static int divert(int argc, char **argv)
 			else cd.Number.type = SMS_Unknown;
 			break;
 		default:
-			usage();
+			usage(stderr);
 			return -1;
 		}
 	}
@@ -3721,7 +3720,7 @@ int main(int argc, char *argv[])
 	/* Handle command line arguments. */
 	c = getopt_long(argc, argv, "", long_options, NULL);
 	if (c == -1) 		/* No argument given - we should display usage. */
-		usage();
+		usage(stderr);
 
 	switch(c) {
 	/* First, error conditions */
@@ -3731,7 +3730,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	/* Then, options with no arguments */
 	case OPT_HELP:
-		usage();
+		usage(stdout);
 	case OPT_VERSION:
 		version();
 		exit(0);
@@ -3748,7 +3747,7 @@ int main(int argc, char *argv[])
 
 		if (checkargs(c, gals, nargc)) {
 			free(nargv); /* Wrong number of arguments - we should display usage. */
-			usage();
+			usage(stderr);
 		}
 
 #ifdef __svr4__
