@@ -676,6 +676,7 @@ API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	rawsms.MemoryType = data->SMS->MemoryType;
 	data->RawSMS = &rawsms;
 	error = RequestSMS(data, state);
+	data->SMS->Status = rawsms.Status;
 	if (error != GE_NONE) return error;
 	return ParseSMS(data);
 }
