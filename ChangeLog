@@ -59,6 +59,7 @@
     o unsolicited network info (+CREG) dropped     (BORBELY Zoltan)
     o extra spaces skipped in the identify replies (BORBELY Zoltan)
     o network code can be specified without quotes (BORBELY Zoltan)
+    o GetSecurityCodeStatus fixed                  (BORBELY Zoltan)
 
 0.6.1
 =====
