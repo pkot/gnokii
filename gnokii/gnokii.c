@@ -105,12 +105,11 @@ void usage(void)
                             the getphonebook command.
 
           --getsms          gets SMS messages from specified memory type
-                            ('A' or 'B') starting at entry [start] and
-                            ending at [end].  Entries are dumped to stdout.
+                            starting at entry [start] and ending at [end].
+                            Entries are dumped to stdout.
 
           --deletesms       deletes SMS messages from specified memory type
-                            ('A' or 'B') starting at entry [start] and
-                            ending at [end].
+                            starting at entry [start] and ending at [end].
 
           --sendsms         sends an SMS message to [destination] via
                             [message centre].  Message text is taken from
@@ -300,12 +299,10 @@ void sendsms(char *argv[])
 
   error = GSM->SendSMSMessage(&SMS);
 
-  if (error == GE_SMSSENDOK) {
+  if (error == GE_SMSSENDOK)
     fprintf(stdout, _("Send succeeded!\n"));
-  }
-  else {
+  else
     fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
-  }
 
   GSM->Terminate();
   exit(-1);
@@ -316,28 +313,69 @@ void getsms(char *argv[])
 {
 
   GSM_SMSMessage message;
-  GSM_MemoryType memory_type;
   char *memory_type_string;
   int start_message, end_message, count;
   GSM_Error error;
 
   /* Handle command line args that set type, start and end locations. */
 
-  /* FIXME: do not specify memory type, use fixed value - Pawel... */
+  /* FIXME: This is done more than once in gnokii, should be in some function
+     or should not be here at all if we can not store SMS in different types
+     of memory */
 
-  if (strcmp(argv[2], "B") == 0) {
-    memory_type = GMT_ME;
-    memory_type_string = "B";
+  if (strcmp(argv[2], "ME") == 0) {
+    message.MemoryType = GMT_ME;
+    memory_type_string = "ME";
   }
   else
-    if (strcmp(argv[2], "A") == 0) {
-      memory_type = GMT_SM;
-      memory_type_string = "A";
+    if (strcmp(argv[2], "SM") == 0) {
+      message.MemoryType = GMT_SM;
+      memory_type_string = "SM";
     }
-    else {
-      fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
-      exit (-1);
+  else
+    if (strcmp(argv[2], "FD") == 0) {
+      message.MemoryType = GMT_FD;
+      memory_type_string = "FD";
     }
+  else
+    if (strcmp(argv[2], "ON") == 0) {
+      message.MemoryType = GMT_ON;
+      memory_type_string = "ON";
+    }
+  else
+    if (strcmp(argv[2], "EN") == 0) {
+      message.MemoryType = GMT_EN;
+      memory_type_string = "EN";
+    }
+  else
+    if (strcmp(argv[2], "DC") == 0) {
+      message.MemoryType = GMT_DC;
+      memory_type_string = "DC";
+    }
+  else
+    if (strcmp(argv[2], "RC") == 0) {
+      message.MemoryType = GMT_RC;
+      memory_type_string = "RC";
+     }
+  else
+    if (strcmp(argv[2], "MC") == 0) {
+      message.MemoryType = GMT_MC;
+      memory_type_string = "MC";
+    }
+  else
+    if (strcmp(argv[2], "LD") == 0) {
+      message.MemoryType = GMT_LD;
+      memory_type_string = "LD";
+    }
+  else
+    if (strcmp(argv[2], "MT") == 0) {
+      message.MemoryType = GMT_MT;
+      memory_type_string = "MT";
+    }
+  else {
+    fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
+    exit (-1);
+  }
 
   start_message = atoi(argv[3]);
   end_message = atoi(argv[4]);
@@ -350,7 +388,7 @@ void getsms(char *argv[])
 
   for (count = start_message; count <= end_message; count ++) {
 	
-    error = GSM->GetSMSMessage(memory_type, count, &message);
+    error = GSM->GetSMSMessage(count, &message);
 
     switch (error) {
 
@@ -395,26 +433,65 @@ void deletesms(char *argv[])
 {
 
   GSM_SMSMessage message;
-  GSM_MemoryType memory_type;
   char *memory_type_string;
   int start_message, end_message, count;
   GSM_Error error;
 
   /* Handle command line args that set type, start and end locations. */
 
-  if (strcmp(argv[2], "B") == 0) {
-    memory_type = GMT_ME;
-    memory_type_string = "B";
+  if (strcmp(argv[2], "ME") == 0) {
+    message.MemoryType = GMT_ME;
+    memory_type_string = "ME";
   }
   else
-    if (strcmp(argv[2], "A") == 0) {
-      memory_type = GMT_SM;
-      memory_type_string = "A";
+    if (strcmp(argv[2], "SM") == 0) {
+      message.MemoryType = GMT_SM;
+      memory_type_string = "SM";
     }
-    else {
-      fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
-      exit (-1);
+  else
+    if (strcmp(argv[2], "FD") == 0) {
+      message.MemoryType = GMT_FD;
+      memory_type_string = "FD";
     }
+  else
+    if (strcmp(argv[2], "ON") == 0) {
+      message.MemoryType = GMT_ON;
+      memory_type_string = "ON";
+    }
+  else
+    if (strcmp(argv[2], "EN") == 0) {
+      message.MemoryType = GMT_EN;
+      memory_type_string = "EN";
+    }
+  else
+    if (strcmp(argv[2], "DC") == 0) {
+      message.MemoryType = GMT_DC;
+      memory_type_string = "DC";
+    }
+  else
+    if (strcmp(argv[2], "RC") == 0) {
+      message.MemoryType = GMT_RC;
+      memory_type_string = "RC";
+     }
+  else
+    if (strcmp(argv[2], "MC") == 0) {
+      message.MemoryType = GMT_MC;
+      memory_type_string = "MC";
+    }
+  else
+    if (strcmp(argv[2], "LD") == 0) {
+      message.MemoryType = GMT_LD;
+      memory_type_string = "LD";
+    }
+  else
+    if (strcmp(argv[2], "MT") == 0) {
+      message.MemoryType = GMT_MT;
+      memory_type_string = "MT";
+    }
+  else {
+    fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
+    exit (-1);
+  }
 
   start_message = atoi (argv[3]);
   end_message = atoi (argv[4]);
@@ -427,7 +504,7 @@ void deletesms(char *argv[])
 
   for (count = start_message; count <= end_message; count ++) {
 
-    error = GSM->DeleteSMSMessage(memory_type, count, &message);
+    error = GSM->DeleteSMSMessage(count, &message);
 
     if (error == GE_NONE)
       fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);

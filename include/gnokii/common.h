@@ -260,11 +260,9 @@ typedef struct {
 
   GSM_Error (*GetSMSStatus)( GSM_SMSStatus *Status);
 
-  GSM_Error (*GetSMSMessage)( GSM_MemoryType memory_type, int location,
-			      GSM_SMSMessage *message );
+  GSM_Error (*GetSMSMessage)( int location, GSM_SMSMessage *message );
 
-  GSM_Error (*DeleteSMSMessage)( GSM_MemoryType memory_type,
-				int location, GSM_SMSMessage *message );
+  GSM_Error (*DeleteSMSMessage)( int location, GSM_SMSMessage *message );
 
   GSM_Error (*SendSMSMessage)( GSM_SMSMessage *SMS );
 

@@ -287,16 +287,16 @@ GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 	return (CurrentPhonebookError);
 }
 
-GSM_Error	FB38_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
+GSM_Error	FB38_GetSMSMessage(int location, GSM_SMSMessage *message)
 {
 	int		timeout;
 	int		memory_area;
 
-	if (memory_type == GMT_ME) {
+	if (message->MemoryType == GMT_ME) {
 		memory_area = 1;
 	}
 	else {
-		if (memory_type == GMT_SM) {
+		if (message->MemoryType == GMT_SM) {
 			memory_area = 2;
 		}
 		else {
@@ -332,16 +332,16 @@ GSM_Error	FB38_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
 	return(CurrentSMSMessageError);
 }
 
-GSM_Error	FB38_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
+GSM_Error	FB38_DeleteSMSMessage(int location, GSM_SMSMessage *message)
 {
 	int		timeout;
 	int		memory_area;
 
-	if (memory_type == GMT_ME) {
+	if (message->MemoryType == GMT_ME) {
 		memory_area = 1;
 	}
 	else {
-		if (memory_type == GMT_SM) {
+		if (message->MemoryType == GMT_SM) {
 			memory_area = 2;
 		}
 		else {

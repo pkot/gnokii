@@ -26,9 +26,17 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/usr/bin
+mkdir -p $RPM_BUILD_ROOT/usr/bin $RPM_BUILD_ROOT/usr/sbin $RPM_BUILD_ROOT/etc
 
 cp gnokii gnokiid xgnokii $RPM_BUILD_ROOT/usr/bin
+cp mgnokiidev $RPM_BUILD_ROOT/usr/sbin
+cp sample.gnokiirc $RPM_BUILD_ROOT/etc/gnokiirc
+
+%pre
+/usr/sbin/groupadd -r -f gnokii >/dev/null 2>&1
+
+%postun
+/usr/sbin/groupdel gnokii >/dev/null 2>&1
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -37,8 +45,14 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc BUGS COPYING MANIFEST README TODO-6110 TODO-gnokiid sample.gnokiirc gettext-howto
 /usr/bin/*
+%attr(4754, root, gnokii) /usr/sbin/*
+%config /etc/gnokiirc
 
 %changelog
+* Sun Jul 18 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- mgnokiidev added to RPM package
+- config file in /etc (it is not used now...)
+
 * Sat Jul 10 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - use of ~/.gnokiirc so not magic model stuff
 - new doc files

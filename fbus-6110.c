@@ -241,9 +241,9 @@ GSM_Error FB61_TX_SendStatusRequest(void)
   /* The status request is of the type 0x04. It's subtype is 0x01. If you have
      another subtypes and it's meaning - just inform Pavel, please. */
 
-  unsigned char request[] = {FB61_FRAME_HEADER, 0x01, 0x01};
+  unsigned char request[] = {FB61_FRAME_HEADER, 0x01};
 
-  FB61_TX_SendMessage(0x05, 0x04, request);
+  FB61_TX_SendMessage(4, 0x04, request);
 
   return (GE_NONE);
 }
@@ -308,8 +308,8 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
 
   unsigned char req[] = { FB61_FRAME_HEADER,
                           0x07, /* MemoryStatus request */
-                          0x00, /* MemoryType */
-                          0x01};
+                          0x00 /* MemoryType */
+                        };
   int timeout=20;
 
   CurrentMemoryStatus = Status;
@@ -317,7 +317,7 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
 
   req[4] = FB61_GetMemoryType(Status->MemoryType);
 
-  FB61_TX_SendMessage(0x06, 0x03, req);
+  FB61_TX_SendMessage(5, 0x03, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentMemoryStatusError == GE_BUSY ) {
@@ -334,11 +334,11 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
 GSM_Error FB61_GetCalendarNote(int location)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x66, 0x00, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x66, 0x00};
 
   req[4]=location;
 
-  FB61_TX_SendMessage(0x06, 0x13, req);
+  FB61_TX_SendMessage(5, 0x13, req);
 
   return (GE_NONE);
 }
@@ -358,7 +358,7 @@ void FB61_InitIR(void)
 
 bool FB61_InitIR115200(void)
 {
-  u8 connect_seq[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02, 0x01};
+  u8 connect_seq[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
 
   bool ret         = true;
   u8 nr_read       = 0;
@@ -370,7 +370,7 @@ bool FB61_InitIR115200(void)
   int done         = 0;
 
   /* send the connection sequence to phone */
-  FB61_TX_SendMessage(8, 0x02, connect_seq);
+  FB61_TX_SendMessage(7, 0x02, connect_seq);
 
   /* Wait for 1 sec. */
   timeout.tv_sec  = 1;
@@ -498,10 +498,10 @@ void FB61_ThreadLoop(void)
 {
 
   unsigned char init_char = 0x55;
-  unsigned char connect1[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02, 0x01};
-  unsigned char connect2[] = {FB61_FRAME_HEADER, 0x20, 0x02, 0x01};
-  unsigned char connect3[] = {FB61_FRAME_HEADER, 0x0d, 0x01, 0x00, 0x02, 0x01};
-  unsigned char connect4[] = {FB61_FRAME_HEADER, 0x10, 0x01};
+  unsigned char connect1[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
+  unsigned char connect2[] = {FB61_FRAME_HEADER, 0x20, 0x02};
+  unsigned char connect3[] = {FB61_FRAME_HEADER, 0x0d, 0x01, 0x00, 0x02};
+  unsigned char connect4[] = {FB61_FRAME_HEADER, 0x10};
 
   unsigned char magic_connect[] = {FB61_FRAME_HEADER,
   0x12,
@@ -517,7 +517,7 @@ void FB61_ThreadLoop(void)
   0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x26, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x20,
   0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x79,
   
-  0x00, 0x00, 0x00, 0x00, 0x01};
+  0x00, 0x00, 0x00, 0x00};
 
   int count, idle_timer, timeout=50;
 
@@ -567,19 +567,19 @@ void FB61_ThreadLoop(void)
 
   usleep(100);
 
-  FB61_TX_SendMessage(8, 0x02, connect1);
+  FB61_TX_SendMessage(7, 0x02, connect1);
 
   usleep(100);
 
-  FB61_TX_SendMessage(6, 0x02, connect2);
+  FB61_TX_SendMessage(5, 0x02, connect2);
 
   usleep(100);
 
-  FB61_TX_SendMessage(8, 0x02, connect3);
+  FB61_TX_SendMessage(7, 0x02, connect3);
 
   usleep(100);
 
-  FB61_TX_SendMessage(5, 0x64, connect4);
+  FB61_TX_SendMessage(4, 0x64, connect4);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentMagicError == GE_BUSY ) {
@@ -592,7 +592,7 @@ void FB61_ThreadLoop(void)
 
   FB61_GetNokiaAuth(IMEI, MagicBytes, magic_connect+4);
 
-  FB61_TX_SendMessage(46, 0x64, magic_connect);
+  FB61_TX_SendMessage(45, 0x64, magic_connect);
   
   /* Get the primary SMS Center */
 
@@ -825,7 +825,7 @@ GSM_Error FB61_GetPowerSource(GSM_PowerSource *source)
 GSM_Error FB61_DialVoice(char *Number) {
 
   unsigned char req[64]={FB61_FRAME_HEADER, 0x01};
-  unsigned char req_end[]={0x05, 0x01, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01, 0x01};
+  unsigned char req_end[]={0x05, 0x01, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01};
   int i=0;
 
   req[4]=strlen(Number);
@@ -835,7 +835,7 @@ GSM_Error FB61_DialVoice(char *Number) {
 
   memcpy(req+5+strlen(Number), req_end, 10);
 
-  FB61_TX_SendMessage(14+strlen(Number), 0x01, req);
+  FB61_TX_SendMessage(13+strlen(Number), 0x01, req);
 
   return(GE_NONE);
 }
@@ -843,7 +843,7 @@ GSM_Error FB61_DialVoice(char *Number) {
 GSM_Error FB61_DialData(char *Number) {
 
   unsigned char req[100]={FB61_FRAME_HEADER, 0x01};
-  unsigned char req_end[]={0x01, 0x02, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01, 0x02, 0x0a, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x15, 0x63, 0xa8, 0x00, 0x00, 0x01};
+  unsigned char req_end[]={0x01, 0x02, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01, 0x02, 0x0a, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x15, 0x63, 0xa8, 0x00, 0x00};
   int i=0;
 
   req[4]=strlen(Number);
@@ -853,7 +853,7 @@ GSM_Error FB61_DialData(char *Number) {
 
   memcpy(req+5+strlen(Number), req_end, 23);
 
-  FB61_TX_SendMessage(27+strlen(Number), 0x01, req);
+  FB61_TX_SendMessage(26+strlen(Number), 0x01, req);
 
   return(GE_NONE);
 }
@@ -871,18 +871,17 @@ GSM_Error FB61_GetIncomingCallNr(char *Number) {
 GSM_Error FB61_EnterPin(char *pin)
 {
 
-  unsigned char pin_req[15] = {FB61_FRAME_HEADER, 0x0a, 0x02};
+  unsigned char req[15] = {FB61_FRAME_HEADER, 0x0a, 0x02};
   int i=0, timeout=20;
 
   PINError=GE_BUSY;
 
   for (i=0; i<strlen(pin);i++)
-    pin_req[5+i]=pin[i];
+    req[5+i]=pin[i];
 
-  pin_req[5+strlen(pin)]=0x00;
-  pin_req[6+strlen(pin)]=0x01;
+  req[5+strlen(pin)]=0x00;
 
-  FB61_TX_SendMessage(7+strlen(pin), 0x08, pin_req);
+  FB61_TX_SendMessage(6+strlen(pin), 0x08, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && PINError == GE_BUSY) {
@@ -899,13 +898,13 @@ GSM_Error FB61_EnterPin(char *pin)
 GSM_Error FB61_GetDateTime(GSM_DateTime *date_time)
 {
 
-  unsigned char clock_req[] = {FB61_FRAME_HEADER, 0x62, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x62};
   int timeout=5;
 
   CurrentDateTime=date_time;
   CurrentDateTimeError=GE_BUSY;
 
-  FB61_TX_SendMessage(0x05, 0x11, clock_req);
+  FB61_TX_SendMessage(4, 0x11, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentDateTimeError == GE_BUSY) {
@@ -922,13 +921,13 @@ GSM_Error FB61_GetDateTime(GSM_DateTime *date_time)
 GSM_Error FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x6d, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x6d};
   int timeout=5;
 
   CurrentAlarm=date_time;
   CurrentAlarmError=GE_BUSY;
 
-  FB61_TX_SendMessage(0x05, 0x11, req);
+  FB61_TX_SendMessage(4, 0x11, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentAlarmError == GE_BUSY) {
@@ -948,13 +947,23 @@ GSM_Error FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
 GSM_Error FB61_GetSMSCenter(u8 priority)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x33, 0x64, 0x01, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x33, 0x64, 0x01};
+  int timeout=10;
 
   req[5]=priority;
 
-  /* FIXME: error checking, waiting for the response. */
+  CurrentSMSStatusError = GE_BUSY;
 
-  FB61_TX_SendMessage(0x07, 0x02, req);
+  FB61_TX_SendMessage(6, 0x02, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentSMSStatusError == GE_BUSY ) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
 
   return (GE_NONE);
 }
@@ -962,13 +971,13 @@ GSM_Error FB61_GetSMSCenter(u8 priority)
 GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x36, 0x64, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x36, 0x64};
   int timeout=10;
 
   CurrentSMSStatus = Status;
   CurrentSMSStatusError = GE_BUSY;
 
-  FB61_TX_SendMessage(0x06, 0x14, req);
+  FB61_TX_SendMessage(5, 0x14, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentSMSStatusError == GE_BUSY ) {
@@ -1009,14 +1018,14 @@ GSM_Error FB61_GetModel(char *model)
 GSM_Error FB61_SetDateTime(GSM_DateTime *date_time)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER,
-			 0x60, /* set-time subtype */
-			 0x01, 0x01, 0x07, /* unknown */
-			 0x00, 0x00, /* Year (0x07cf = 1999) */
-			 0x00, 0x00, /* Month Day */
-			 0x00, 0x00, /* Hours Minutes */
-			 0x00, /* Unknown, but not seconds - try 59 and wait 1 sec. */
-			 0x01 };
+  unsigned char req[] = { FB61_FRAME_HEADER,
+			  0x60, /* set-time subtype */
+			  0x01, 0x01, 0x07, /* unknown */
+			  0x00, 0x00, /* Year (0x07cf = 1999) */
+			  0x00, 0x00, /* Month Day */
+			  0x00, 0x00, /* Hours Minutes */
+			  0x00 /* Unknown, but not seconds - try 59 and wait 1 sec. */
+			};
   int timeout=20;
 
   req[7] = date_time->Year / 256;
@@ -1028,7 +1037,7 @@ GSM_Error FB61_SetDateTime(GSM_DateTime *date_time)
 
   CurrentSetDateTimeError=GE_BUSY;
 
-  FB61_TX_SendMessage(0x0f, 0x11, req);
+  FB61_TX_SendMessage(14, 0x11, req);
 
   while (timeout != 0 && CurrentSetDateTimeError == GE_BUSY) {
 
@@ -1046,13 +1055,13 @@ GSM_Error FB61_SetDateTime(GSM_DateTime *date_time)
 GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER,
-			 0x6b, /* set-alarm subtype */
-			 0x01, 0x20, 0x03, /* unknown */
-			 0x02,       /* should be alarm on/off, but it don't works */
-			 0x00, 0x00, /* Hours Minutes */
-			 0x00, /* Unknown, but not seconds - try 59 and wait 1 sec. */
-			 0x01 };
+  unsigned char req[] = { FB61_FRAME_HEADER,
+			  0x6b, /* set-alarm subtype */
+			  0x01, 0x20, 0x03, /* unknown */
+			  0x02,       /* should be alarm on/off, but it don't works */
+			  0x00, 0x00, /* Hours Minutes */
+			  0x00 /* Unknown, but not seconds - try 59 and wait 1 sec. */
+			};
   int timeout=20;
 
   req[8] = date_time->Hour;
@@ -1060,7 +1069,7 @@ GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 
   CurrentSetAlarmError=GE_BUSY;
 
-  FB61_TX_SendMessage(0x0c, 0x11, req);
+  FB61_TX_SendMessage(11, 0x11, req);
 
   while (timeout != 0 && CurrentSetAlarmError == GE_BUSY) {
 
@@ -1079,7 +1088,7 @@ GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 
 GSM_Error FB61_GetMemoryLocation(int location, GSM_PhonebookEntry *entry) {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00};
   int timeout=20; /* 2 seconds for command to complete */
 
   CurrentPhonebookEntry = entry;
@@ -1088,7 +1097,7 @@ GSM_Error FB61_GetMemoryLocation(int location, GSM_PhonebookEntry *entry) {
   req[4] = FB61_GetMemoryType(entry->MemoryType);
   req[5] = location;
 
-  FB61_TX_SendMessage(0x08, 0x03, req);
+  FB61_TX_SendMessage(7, 0x03, req);
 
   while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
 
@@ -1134,7 +1143,6 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
   current+=strlen(entry->Number);
 
   req[current++]=0xff;
-  req[current++]=0x01;
 
   FB61_TX_SendMessage(current, 3, req);
 
@@ -1149,23 +1157,27 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
   return (CurrentPhonebookError);
 }
 
-GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
+GSM_Error FB61_GetSMSMessage(int location, GSM_SMSMessage *message)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x07, 0x00, 0x00, 0x01, 0x64, 0x01};
-  int timeout = 60; /* 5 seconds for command to complete */
+  unsigned char req[] = { FB61_FRAME_HEADER,
+                          0x07,
+                          0x02, /* Unknown */
+                          0x00, /* Location */
+                          0x01, 0x64};
+
+  int timeout = 60; /* 6 seconds for command to complete */
 
   /* State machine code writes data to these variables when it comes in. */
 
   CurrentSMSMessage = message;
   CurrentSMSMessageError = GE_BUSY;
 
-  req[4] = FB61_GetMemoryType(memory_type);
   req[5] = location;
 
   /* Send request */
 
-  FB61_TX_SendMessage(0x09, 0x02, req);
+  FB61_TX_SendMessage(8, 0x02, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && (CurrentSMSMessageError == GE_BUSY || CurrentSMSMessageError == GE_SMSWAITING)) {
@@ -1179,18 +1191,17 @@ GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
   return (CurrentSMSMessageError);
 }
 
-GSM_Error FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
+GSM_Error FB61_DeleteSMSMessage(int location, GSM_SMSMessage *message)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x0a, 0x02, 0x00};
   int timeout = 50; /* 5 seconds for command to complete */
 
   CurrentSMSMessageError = GE_BUSY;
 
-  req[4] = FB61_GetMemoryType(memory_type);
   req[5] = location;
 
-  FB61_TX_SendMessage(0x07, 0x14, req);
+  FB61_TX_SendMessage(6, 0x14, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
@@ -1318,9 +1329,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   else if ((SMS->Validity > 43200) && (SMS->Validity <= 635040))
     req[35] = (unsigned char) (SMS->Validity/10080)+192;
 
-  req[42+size]=0x01;
-
-  FB61_TX_SendMessage(42+size+1, 0x02, req);
+  FB61_TX_SendMessage(42+size, 0x02, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
@@ -1725,9 +1734,13 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x34:
 
+#ifdef DEBUG
       printf(_("Message: SMS Center received:\n"));
       printf(_("   %d. SMS Center name is %s\n"), MessageBuffer[4], MessageBuffer+33);
       printf(_("   %d. SMS Center number is %s\n"), MessageBuffer[4], FB61_GetBCDNumber(MessageBuffer+21));
+#endif DEBUG
+
+      CurrentSMSStatusError=GE_NONE;
 
       break;
 
@@ -2691,7 +2704,7 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 
   out_buffer[current++] = 0; /* Unknown */
 
-  out_buffer[current++] = message_length+1; /* Length + 1 for seq. nr*/
+  out_buffer[current++] = message_length+2; /* Length + 2 for seq. nr */
 
   /* Copy in data if any. */	
 	
@@ -2700,12 +2713,14 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
     current+=message_length;
   }
 
+  out_buffer[current++]=0x01;
+
   out_buffer[current++]=0x40+RequestSequenceNumber;
 
   RequestSequenceNumber=(RequestSequenceNumber+1) & 0x07;
 
   /* If the message length is odd we should add pad byte 0x00 */
-  if ( (message_length+1) % 2)
+  if (message_length % 2)
     out_buffer[current++]=0x00;
 
   /* Now calculate checksums over entire message and append to message. */
@@ -2745,7 +2760,7 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 
 int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
-  unsigned char out_buffer[FB61_MAX_TRANSMIT_LENGTH + 5];
+  unsigned char out_buffer[10]; /* Acks are always 10 char */
   int count, current=0;
   unsigned char checksum;
 

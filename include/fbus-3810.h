@@ -36,10 +36,9 @@ GSM_Error	FB38_GetMemoryStatus(GSM_MemoryStatus *Status);
 
 GSM_Error	FB38_GetSMSStatus(GSM_SMSStatus *Status);
 
-GSM_Error	FB38_GetSMSMessage(GSM_MemoryType memory_type, int location,
-				 GSM_SMSMessage *message);
+GSM_Error	FB38_GetSMSMessage(int location, GSM_SMSMessage *message);
 
-GSM_Error	FB38_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message);
+GSM_Error	FB38_DeleteSMSMessage(int location, GSM_SMSMessage *message);
 
 GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS);
 
