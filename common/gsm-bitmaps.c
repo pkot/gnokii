@@ -40,6 +40,17 @@
 
 /* A few useful functions for bitmaps */
 
+GSM_Error GSM_NullBitmap(GSM_Bitmap *bmp, GSM_Information *info)
+{
+	if (!bmp || !info) return GE_INTERNALERROR;
+	strcpy(bmp->netcode, "000 00");
+	bmp->width = info->OpLogoW;
+	bmp->height = info->OpLogoH;
+	bmp->size = bmp->width * bmp->height / 8;
+	GSM_ClearBitmap(bmp);
+	return GE_NONE;
+}
+
 void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8);

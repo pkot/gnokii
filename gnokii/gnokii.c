@@ -1635,6 +1635,7 @@ GSM_Error ReadBitmapFileDialog(char *FileName, GSM_Bitmap *bitmap, GSM_Informati
 	return error;
 }
 
+
 static int setlogo(int argc, char *argv[])
 {
 	GSM_Bitmap bitmap, oldbit;
@@ -1658,17 +1659,8 @@ static int setlogo(int argc, char *argv[])
 		if (argc > 1) strncpy(bitmap.text, argv[1], sizeof(bitmap.text) - 1);
 		break;
 	case GSM_OperatorLogo:
-		if ((argc > 1) && (ReadBitmapFileDialog(argv[1], &bitmap, info) != GE_NONE)) return -1;
-		else /* Set the NULL bitmap. FIXME: make it a function */ {
-			bitmap.type = GSM_OperatorLogo;
-			strcpy(bitmap.netcode, "000 00");
-			/* FIXME: is info (from State) already set? */
-			bitmap.width = info->OpLogoW;
-			bitmap.height = info->OpLogoH;
-			bitmap.size = bitmap.width * bitmap.height / 8;
-			GSM_ClearBitmap(&bitmap);
-			fprintf(stdout, _("Removing Logo.\n"));
-		}
+		error = (argc < 2) ? GSM_NullBitmap(&bitmap, info) : ReadBitmapFileDialog(argv[1], &bitmap, info);
+		if (error != GE_NONE) return -1;
 			
 		memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
 		if (bitmap.type != GSM_OperatorLogo || argc < 3)

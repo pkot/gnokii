@@ -64,6 +64,7 @@ typedef struct {
 	char ringtone;           /* Ringtone no sent with caller group */
 } GSM_Bitmap;
 
+GSM_Error GSM_NullBitmap(GSM_Bitmap *bmp, GSM_Information *info);
 void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y);
 void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y);
 bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y);
