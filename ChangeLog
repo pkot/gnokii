@@ -12,6 +12,8 @@
       unconditionally                                    (Pawel Kot)
  * xgnokii fixes
     o fix coredump when reading clock                  (Ulrich Hopp)
+    o fix compilation warning with asprintf              (Pawel Kot)
+    o zero the gn_sms structures when mallocing        (Ulrich Hopp)
 
 0.5.0pre3
 =========
