@@ -31,6 +31,8 @@
 #ifndef __gsm_error_h_
 #define __gsm_error_h_
 
+#include "compat.h"
+
 /* Define standard GSM error/return code values. These codes are also used for
    some internal functions such as SIM read/write in the model specific code. */
 
@@ -88,6 +90,6 @@ typedef enum {
 	GE_UNSOLICITED            /* 44. Unsolicited message received. */
 } GSM_Error;
 
-extern char *print_error(GSM_Error e);
+API char *print_error(GSM_Error e);
 
 #endif

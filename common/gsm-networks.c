@@ -28,6 +28,8 @@
 
 */
 
+#include "config.h"
+
 #include <string.h>
 #include "gsm-networks.h"
 
@@ -156,8 +158,8 @@ GSM_Network GSM_Networks[] = {
 	{ "202 01", "Cosmote" },
 	{ "202 05", "PANAFON" },
 	{ "202 10", "TELESTET" },
-	{ "204 04", "LIBERTEL" },
-	{ "204 08", "KPN Telecom" },
+	{ "204 04", "Vodafone" },
+	{ "204 08", "KPN Mobile" },
 	{ "204 12", "Telfort" },
 	{ "204 16", "BEN" },
 	{ "204 20", "Dutchtone NV" },
@@ -401,7 +403,7 @@ GSM_Network GSM_Networks[] = {
 	{ "undefined", "unknown" }
 };
 
-char *GSM_GetNetworkName(char *NetworkCode)
+API char *GSM_GetNetworkName(char *NetworkCode)
 {
 	int index = 0;
 
@@ -411,7 +413,7 @@ char *GSM_GetNetworkName(char *NetworkCode)
 	return GSM_Networks[index].Name;
 }
 
-char *GSM_GetNetworkCode(char *NetworkName)
+API char *GSM_GetNetworkCode(char *NetworkName)
 {
 	int index = 0;
 
@@ -421,7 +423,7 @@ char *GSM_GetNetworkCode(char *NetworkName)
 	return GSM_Networks[index].Code;
 }
 
-char *GSM_GetCountryName(char *CountryCode)
+API char *GSM_GetCountryName(char *CountryCode)
 {
 	int index = 0;
 
@@ -431,7 +433,7 @@ char *GSM_GetCountryName(char *CountryCode)
 	return GSM_Countries[index].Name;
 }
 
-char *GSM_GetCountryCode(char *CountryName)
+API char *GSM_GetCountryCode(char *CountryName)
 {
 	int index = 0;
 

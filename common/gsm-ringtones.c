@@ -189,7 +189,7 @@ int GSM_GetDuration(int number, unsigned char *spec)
 }
 
 
-int GSM_GetNote(int number)
+API int GSM_GetNote(int number)
 {
 	int note = 0;
 
@@ -249,7 +249,7 @@ int GSM_GetScale(int number)
    Function returns number of packed notes and changes maxlength to
    number of used chars in "package" */
 
-u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
+API u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength)
 {
 	int StartBit=0;
 	int i;
@@ -410,7 +410,7 @@ int OctetUnAlign(int CurrentBit)
 
 /* TODO: better checking, if contents of ringtone is OK */
 
-GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlength)
+API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlength)
 {
 	int StartBit = 0;
 	int spec, duration, scale;

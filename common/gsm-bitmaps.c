@@ -52,7 +52,7 @@ GSM_Error GSM_NullBitmap(GSM_Bitmap *bmp, GSM_Information *info)
 	return GE_NONE;
 }
 
-void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
+API void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8);
 	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8));
@@ -61,7 +61,7 @@ void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8));
 }
 
-void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
+API void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] &= 255 - (1 << (y%8));
 	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo)
@@ -71,7 +71,7 @@ void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] &= 255 - (1 << (7-(x%8)));
 }
 
-bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
+API bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	int i = 0;
 
@@ -93,13 +93,13 @@ bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	return ((i == 0) ? false : true);
 }
 
-void GSM_ClearBitmap(GSM_Bitmap *bmp)
+API void GSM_ClearBitmap(GSM_Bitmap *bmp)
 {
 	memset(bmp->bitmap, 0, bmp->size);
 }
 
 
-void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Information *info)
+API void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Information *info)
 {
 	GSM_Bitmap backup;
 	int x, y, copywidth, copyheight;
@@ -150,7 +150,7 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Informati
 	}
 }
 
-void GSM_PrintBitmap(GSM_Bitmap *bitmap)
+API void GSM_PrintBitmap(GSM_Bitmap *bitmap)
 {
 	int x, y;
 
@@ -167,7 +167,7 @@ void GSM_PrintBitmap(GSM_Bitmap *bitmap)
 }
 
 
-GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bitmap)
+API GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bitmap)
 {
 	int offset = 0;
 

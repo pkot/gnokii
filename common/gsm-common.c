@@ -34,7 +34,7 @@ GSM_Error Unimplemented(void)
 	return GE_NOTIMPLEMENTED;
 }
 
-GSM_MemoryType StrToMemoryType(const char *s)
+API GSM_MemoryType StrToMemoryType(const char *s)
 {
 #define X(a) if (!strcmp(s, #a)) return GMT_##a;
 	X(ME);
@@ -77,7 +77,7 @@ GSM_MemoryType StrToMemoryType(const char *s)
 
 /* This very small function is just to make it */
 /* easier to clear the data struct every time one is created */
-void GSM_DataClear(GSM_Data *data)
+API void GSM_DataClear(GSM_Data *data)
 {
 	memset(data, 0, sizeof(GSM_Data));
 }

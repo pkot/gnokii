@@ -231,8 +231,8 @@ struct _GSM_Statemachine {
 extern GSM_Error Unimplemented(void);
 #define UNIMPLEMENTED (void *) Unimplemented
 
-extern GSM_MemoryType StrToMemoryType (const char *s);
+API GSM_MemoryType StrToMemoryType (const char *s);
 
-void GSM_DataClear(GSM_Data *data);
+API void GSM_DataClear(GSM_Data *data);
 
 #endif	/* __gsm_data_h */

@@ -31,6 +31,8 @@
 #ifndef __gsm_networks_h
 #define __gsm_networks_h
 
+#include "compat.h"
+
 /* This type is used to hold information about various GSM networks. */
 
 typedef struct {
@@ -46,10 +48,10 @@ typedef struct {
 } GSM_Country;
 
 /* These functions are used to search the structure defined above.*/
-char *GSM_GetNetworkName(char *NetworkCode);
-char *GSM_GetNetworkCode(char *NetworkName);
+API char *GSM_GetNetworkName(char *NetworkCode);
+API char *GSM_GetNetworkCode(char *NetworkName);
 
-char *GSM_GetCountryName(char *CountryCode);
-char *GSM_GetCountryCode(char *CountryName);
+API char *GSM_GetCountryName(char *CountryCode);
+API char *GSM_GetCountryCode(char *CountryName);
 
 #endif	/* __gsm_networks_h */

@@ -41,9 +41,33 @@
 #endif
 
 #ifdef HAVE_STDARG_H
-#include <stdarg.h>
+#  include <stdarg.h>
 #endif
 
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
+#endif
+
+/*
+ * The following ifdef block is the standard way of creating macros which make
+ * exporting from a DLL simpler. All files within this DLL are compiled with 
+ * the GNOKIIDLL_EXPORTS symbol defined on the command line. this symbol should
+ * not be defined on any project that uses this DLL. This way any other project
+ * whose source files include this file see API functions as being imported 
+ * from a DLL, wheras this DLL sees symbols defined with this macro as being 
+ * exported.
+ *
+ */
+
+#if defined(WIN32) && defined(_USRDLL)
+#  ifdef GNOKIIDLL_EXPORTS
+#    define API __declspec(dllexport)
+#  else
+#    define API __declspec(dllimport)
+#  endif
+#else /* !WIN32 */
+#  define API
+#endif /* WIN32 */
 
 #ifndef	HAVE_TIMEOPS
 
@@ -90,7 +114,7 @@ int gettimeofday(struct timeval *tv, void *tz);
 #endif
 
 #ifndef	HAVE_STRSEP
-char *strsep(char **stringp, const char *delim);
+API char *strsep(char **stringp, const char *delim);
 #endif
 
 #if !defined(HAVE_SNPRINTF) && !defined(HAVE_C99_SNPRINTF)

@@ -42,9 +42,9 @@
 #include "misc.h"
 
 
-void (*GSM_ELogHandler)(const char *fmt, va_list ap) = NULL;
+API void (*GSM_ELogHandler)(const char *fmt, va_list ap) = NULL;
 
-int GetLine(FILE *File, char *Line, int count)
+API int GetLine(FILE *File, char *Line, int count)
 {
 	char *ptr;
 

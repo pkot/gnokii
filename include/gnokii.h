@@ -38,23 +38,23 @@
 
 /* Define these as externs so that app code can pick them up. */
 
-extern GSM_Information *GSM_Info;
+API GSM_Information *GSM_Info;
 extern GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
 /* Prototype for the functions actually provided by gsm-api.c. */
 
-GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_handler)(RLP_F96Frame *frame), GSM_Statemachine *sm);
+API GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_handler)(RLP_F96Frame *frame), GSM_Statemachine *sm);
 
 /* SMS Functions */
 /* Sending */
-GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state);
-GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state);
+API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state);
+API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state);
 /* Reading */
-GSM_Error ParseSMS(GSM_Data *data, int offset);
-GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state);
-GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state);
-GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
-GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_folders);
+API GSM_Error ParseSMS(GSM_Data *data, int offset);
+API GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state);
+API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state);
+API GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
+API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_folders);
 /* Default values */
 void DefaultSMS(GSM_SMSMessage *SMS);
 void DefaultSubmitSMS(GSM_SMSMessage *SMS);

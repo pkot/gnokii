@@ -163,9 +163,9 @@ typedef struct {
 #define GSM_MAX_RINGTONE_NOTES 130
 
 int GSM_EncodeSMSRingtone(char *message, GSM_Ringtone *ringtone);
-u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength);
-GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlength);
+API u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength);
+API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlength);
 
-int GSM_GetNote(int number);
+API int GSM_GetNote(int number);
 
 #endif	/* __gsm_ringtones_h */

@@ -1,7 +1,6 @@
 0.4.0pre20 (Not released yet)
 ==========
  * Added support for AT-9600,needed for ericsson a1018 (Pavel Machek)
- * Added short docs about ericsson phones              (Pavel Machek)
  * Added testsuite				       (Pavel Machek)
  * 6110 series updates
     o PollSMS race condition eliminated              (BORBELY Zoltan)
@@ -38,12 +37,18 @@
  * Docs updates
     o reflect changes in email and web addresses     (BORBELY Zoltan)
     o protocol updates for 6110                    (Harri Yli-Torkko)
+    o added short docs about ericsson phones           (Pavel Machek)
  * Translation updates
     o Estonian translation for the pre19 release      (Hans Motsharg)
     o Slovenian translation for the pre19 release    (Bostjan Muller)
  * gnokii updates
     o fix sendlogo to set SMS_NoData for the non-existent message
       parts                                               (Pawel Kot)
+ * win32 updates
+    o builds regular (LIB) and shared (DLL) version for Win32 with
+      Visual Studio 6                                 (Feico de Boer)
+    o builds Cygwin Win32 with --enable-win32 --disable-shared
+                                                      (Feico de Boer)
 
 0.4.0pre19
 ==========

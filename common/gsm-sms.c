@@ -697,7 +697,7 @@ static GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned int n
  * @data:
  * @state:
  */
-GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 	GSM_RawData rawdata;
@@ -712,6 +712,7 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 		if (error != GE_NONE) return error;
 	}
 
+	dprintf("COUNT: %d\n", count);
 	if (count < 1) return GE_SMSWRONGFORMAT;
 
 	dprintf("Strlen: %d\n", strlen(data->SMSMessage->UserData[0].u.Text));
@@ -729,7 +730,7 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	return error;
 }
 
-GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 	GSM_RawData rawdata;
@@ -1211,19 +1212,19 @@ static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int M
 	return GE_NONE;
 }
 
-GSM_Error ParseSMS(GSM_Data *data, int offset)
+API GSM_Error ParseSMS(GSM_Data *data, int offset)
 {
 	header_offset = offset;
 	if (!data->RawData || !data->SMSMessage) return GE_INTERNALERROR;
 	return DecodePDUSMS(data->RawData->Data, data->SMSMessage, data->RawData->Length);
 }
 
-GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	return SM_Functions(GOP_GetSMS, data, state);
 }
 
-GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
 	GSM_RawData rawdata;
@@ -1243,7 +1244,7 @@ GSM_Error RequestSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Functions(GOP_GetSMSnoValidate, data, state);
 }
 
-GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
 	GSM_RawData rawdata;
@@ -1449,7 +1450,7 @@ GSM_Error VerifyMessagesStatus(GSM_Data *data, SMS_Folder folder)
 }
 
 
-GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_folders)
+API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_folders)
 {
 	GSM_Error error;
 	SMS_Folder tmp_folder, SMSFolder;
@@ -1536,7 +1537,7 @@ void DefaultSMS(GSM_SMSMessage *SMS)
 	SMS->Status = SMS_Unsent;
 }
 
-void DefaultSubmitSMS(GSM_SMSMessage *SMS)
+API void DefaultSubmitSMS(GSM_SMSMessage *SMS)
 {
 	DefaultSMS(SMS);
 	SMS->Type = SMS_Submit;

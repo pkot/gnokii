@@ -117,7 +117,7 @@ static char sccsid[] = "@(#)strsep.c	8.1 (Berkeley) 6/4/93";
  * If *stringp is NULL, strsep returns NULL.
  */
 
-char *strsep(char **stringp, const char *delim)
+API char *strsep(char **stringp, const char *delim)
 {
 	register char *s;
 	register const char *spanp;

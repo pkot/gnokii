@@ -28,9 +28,10 @@
 
 */
 
+#include "config.h"
 #include "gsm-error.h"
 
-char *print_error(GSM_Error e)
+API char *print_error(GSM_Error e)
 {
 	switch (e) {
 	case GE_NONE:                     return "No error.";

@@ -51,16 +51,16 @@ struct CFG_Header {
 
 /* Global variables */
 
-extern struct CFG_Header *CFG_Info;
+API struct CFG_Header *CFG_Info;
 
 /* Function prototypes */
 
 struct CFG_Header *CFG_ReadFile(const char *filename);
-char *CFG_Get(struct CFG_Header *cfg, const char *section, const char *key);
+API char *CFG_Get(struct CFG_Header *cfg, const char *section, const char *key);
 typedef void (*CFG_GetForeach_func)(const char *section, const char *key, const char *value);
 void CFG_GetForeach(struct CFG_Header *cfg, const char *section, CFG_GetForeach_func func);
 char *CFG_Set(struct CFG_Header *cfg, const char *section, const char *key, const char *value);
 int CFG_WriteFile(struct CFG_Header *cfg, const char *filename);
-int readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
+API int readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
 
 #endif /* _CFGREADER_H */

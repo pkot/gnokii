@@ -49,6 +49,39 @@
 #include "phones/nk3110.h"
 #include "phones/nk2110.h"
 
+
+#if defined(WIN32) && defined(_USRDLL)
+
+/*	GnokiiDll.cpp : Defines the entry point for the DLL application.
+ *	
+ *	We don't do anything special here (yet) but the code is needed
+ *	in order to create a DLL.
+ *
+ */
+
+BOOL APIENTRY DllMain( HANDLE hModule, 
+                       DWORD  ul_reason_for_call, 
+                       LPVOID lpReserved
+					 )
+{
+	/*	For now this is enough to satisfy the compiler
+	 *	and linker. Currently no extra code is needed
+	 *	for initializing or deinitializing of the DLL.
+	 */
+
+    switch (ul_reason_for_call)
+	{
+		case DLL_PROCESS_ATTACH:
+		case DLL_THREAD_ATTACH:
+		case DLL_THREAD_DETACH:
+		case DLL_PROCESS_DETACH:
+			break;
+    }
+    return TRUE;
+}
+
+#endif	/* defined(WIN32) && defined(_USRDLL) */
+
 GSM_Statemachine GSM_SM;
 GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
@@ -57,7 +90,7 @@ GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
    obtain information that varies from model to model. This structure is also
    defined in gsm-common.h */
 
-GSM_Information		*GSM_Info;
+API GSM_Information		*GSM_Info;
 
 /* Initialise interface to the phone. Model number should be a string such as
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
@@ -85,7 +118,7 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 		return ret; \
 }
 
-GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
+API GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
 {
 	GSM_Error ret;
 
@@ -100,8 +133,8 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
 	REGISTER_PHONE(nokia_3110, NULL);
 #ifndef WIN32
 	REGISTER_PHONE(nokia_2110, NULL);
-#endif
 	REGISTER_PHONE(dancall_2711, NULL);
+#endif
 	REGISTER_PHONE(fake, NULL);
 	REGISTER_PHONE(at, model);
 

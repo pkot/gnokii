@@ -57,7 +57,7 @@ GSM_Error SM_SendMessage(GSM_Statemachine *state, u16 messagesize, u8 messagetyp
 	else return GE_NOTREADY;
 }
 
-GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
+API GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
 {
 	struct timeval loop_timeout;
 	int i;
@@ -264,7 +264,7 @@ GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 }
 
 /* Just to do things neatly */
-GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm)
+API GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm)
 {
 	if (!sm->Phone.Functions) {
 		dprintf("Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!\n");

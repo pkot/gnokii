@@ -698,10 +698,12 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 			if (pos < 0) pos = 7; /* going to the new byte */
 		}
 		pos = 7; /* going to the new byte */
-		while (i != 5) { /* each line is written in multiples of 4 bytes */
-			fread(buffer, 1, 1, file);
-			sizeimage++;
-			i++;
+		if (i != 1) {
+			while (i != 5) { /* each line is written in multiples of 4 bytes */
+				fread(buffer, 1, 1, file);
+				sizeimage++;
+				i++;
+			}
 		}
 	}
 	dprintf("Data size in BMP file: %i\n", sizeimage);

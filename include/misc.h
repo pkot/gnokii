@@ -92,7 +92,7 @@
 #  endif /* DEBUG */
 #endif /* __GNUC__ */
 
-extern void (*GSM_ELogHandler)(const char *fmt, va_list ap);
+API void (*GSM_ELogHandler)(const char *fmt, va_list ap);
 extern void GSM_WriteErrorLog(const char *fmt, ...);
 
 /* Use gsprintf instead of sprintf and sprintf */
@@ -153,7 +153,7 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 	typedef void * __ptr_t;
 #endif /* __ptr_t */
 
-extern int GetLine(FILE *File, char *Line, int count);
+API int GetLine(FILE *File, char *Line, int count);
 
 /* This is for the bitmaps mostly, but may be useful also for the other
  * things. Counts how many octets we need to cover the given ammount of
@@ -183,7 +183,7 @@ typedef struct {
 extern char *GetModel (const char *);
 extern PhoneModel *GetPhoneModel (const char *);
 
-extern char *lock_device(const char*);
-extern bool unlock_device(char *);
+API char *lock_device(const char*);
+API bool unlock_device(char *);
 
 #endif /* __misc_h */
