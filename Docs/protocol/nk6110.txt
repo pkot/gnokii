@@ -446,7 +446,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     s Key duplication on/off{ 0x0044, on? 0x01: 0x02 }
     s get used network      { 0x0070 }
     r network registration  { 0x0071, ?,?,?,length,netstatus,netsel,cellIDH,cellIDL,lacH,lacL,netcode,netcode,netcode }
-0x0c: Keys
+0x0c: Keys (Nokia 3310 seems to not respond to these frames)
     s Get key assignments   { 0x0040, 0x01 }
     r Get key assignments   { 0x0041, {key '1'}, 0x00, {key '2'} ... {key '0'}, 0,0,0, {symbols}, 0 }
                             where {key '0'} => ' ', '0'
@@ -745,7 +745,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r Get/Set PictureImageOK{ 0x0004 }
     r Set Picture Image err { 0x0005, error? }
                             where error=0x74 - wrong location ?
-0x64:
+0x64: (Nokia 3310 seems to not respond to this frame)
     s Phone ID request      { 0x0010 }
     r Phone ID recvd        { 0x0011, "NOKIA", "imei", 0, "model", 0, "prod.code", 0, "HW", 0, "firmware", magic bytes x 4 ... }
     s Accessory connection  { 0x0012, 16x0x00, 'NOKIA&NOKIA accessory', 3x0x00 } (45 bytes)
