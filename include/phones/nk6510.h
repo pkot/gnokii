@@ -51,6 +51,7 @@ extern bool P6510_LinkOK;
 #define P6510_MSG_PHONEBOOK	0x03	/* Phonebook functions */
 #define P6510_MSG_DIVERT	0x06	/* Call Divert */
 #define P6510_MSG_NETSTATUS	0x0a	/* Network status */
+#define P6510_MSG_KEYPRESS	0x0c	/* keypress emulation? */
 #define P6510_MSG_CALENDAR	0x13	/* Calendar notes */
 #define P6510_MSG_FOLDER	0x14	/* Folders handling */
 #define P6510_MSG_BATTERY	0x17	/* Battery info */
@@ -58,6 +59,9 @@ extern bool P6510_LinkOK;
 #define P6510_MSG_IDENTITY	0x1b	/* Brief product info */
 #define P6510_MSG_RINGTONE	0x1f	/* Ringtone handling */
 #define P6510_MSG_PROFILE	0x39	/* Profiles */
+#define P6510_MSG_NOTKNOWN	0x3E	/*          */
+#define P6510_MSG_WAP		0x3E	/* WAP */
+#define P6510_MSG_RADIO    	0x43	/* Radio (6510/8310) */
 #define P6510_MSG_STLOGO	0x7a	/* Startup logo */
 #define P6510_MSG_VERREQ	0xd1	/* HW&SW version request */
 #define P6510_MSG_VERRESP	0xd2	/* HW&SW version response */
@@ -160,7 +164,7 @@ extern bool P6510_LinkOK;
 #define P6510_MEMORY_XX 0xff
 
 /* Entry Types for the enhanced phonebook */
-#define P6510_ENTRYTYPE_POINTER		0x04	/* Pointer to other memory */
+#define P6510_ENTRYTYPE_POINTER		0x1a	/* Pointer to other memory */
 #define P6510_ENTRYTYPE_NAME		0x07	/* Name always the only one */
 #define P6510_ENTRYTYPE_EMAIL		0x08	/* Email Adress (TEXT) */
 #define P6510_ENTRYTYPE_POSTAL		0x09	/* Postal Address (Text) */
