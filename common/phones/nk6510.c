@@ -123,6 +123,7 @@ static GSM_Error P6510_SetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 static GSM_Error P6510_Subscribe(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_MakeCall(GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 static GSM_Error P6510_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
@@ -336,6 +337,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_PressOrReleaseKey(data, state, true);
 	case GOP_ReleasePhoneKey:
 		return P6510_PressOrReleaseKey(data, state, false);
+	case GOP_MakeCall:
+		return P6510_MakeCall(data, state);
 #ifdef  SECURITY
 	case GOP_GetSecurityCodeStatus:
 		return P6510_GetSecurityCodeStatus(data, state);
@@ -3134,6 +3137,49 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 	return GE_NONE;
 }
 
+static GSM_Error P6510_MakeCall(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01,
+				  0x0C }; /* number length in chars */
+
+	int pos = 4, len;
+
+
+	switch (data->CallInfo->Type) {
+	case GSM_CT_VoiceCall:
+		break;
+
+	case GSM_CT_NonDigitalDataCall:
+	case GSM_CT_DigitalDataCall:
+		dprintf("Unsupported call type %d\n", data->CallInfo->Type);
+		return GE_NOTSUPPORTED;
+
+	default:
+		dprintf("Invalid call type %d\n", data->CallInfo->Type);
+		return GE_INTERNALERROR;
+	}
+
+	len = strlen(data->CallInfo->Number);
+	if (len > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+		dprintf("number too long\n");
+		return GE_ENTRYTOOLONG;
+	}
+	req[pos++] = len;
+	EncodeUnicode(req + pos, data->CallInfo->Number, len * 2);
+	pos += len << 1;
+	req[pos++] = 0x01; /* one block */
+	req[pos++] = 0x01; /* type */
+	req[pos++] = 0x05; /* length */
+	req[pos++] = 0x00; /* adress type */
+	req[pos++] = 0x02; /* CLIR ON */
+	req[pos++] = 0x00; /* CUG index */
+	req[pos++] = 0x00; /* CUG index */
+	req[pos++] = 0x01; /* CUG_OA true */
+
+	if (SM_SendMessage(state, pos, P6510_MSG_COMMSTATUS, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_COMMSTATUS);
+}
+
 /*****************/
 /****** WAP ******/
 /*****************/
@@ -3441,7 +3487,7 @@ static GSM_Error P6510_WriteWAPSetting(GSM_Data *data, GSM_Statemachine *state)
 	memcpy(req + pos, "\x80\x00", 2);
 	pos += 2;
 
-	/* no idea what this is about, seems to be some kind of 'end of message */
+	/* no idea what this is about, seems to be some kind of 'end of message' */
 	memcpy(req + pos, "\x00\x0c\x07\x6B\x0C\x1E\x00\x00\x00\x55", 10);
 	pos += 10;
 
