@@ -1,4 +1,5 @@
-0.5.0pre (not released yet)
+0.5.0pre10
+==========
  * general updates
     o move include files into their final(?) destination (Pawel Kot)
     o disable dancall support in 0.5 release        (Ladislav Michl)
