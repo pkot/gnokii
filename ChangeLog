@@ -7,6 +7,8 @@
       under win32                                       (Pawel Kot)
     o use $(CC) detected by configure instead of hardcoded gcc
       in smsd Makefile; taken from FreeBSD port       (Guido Falsi)
+    o do make install only in the dirs where there's something
+      to install; inspired by FreeBSD port patches      (Pawel Kot)
  * 6510 series updates
     o added Nokia 3510i to the supported phones list
                                                     (Rafal Czlonka)
