@@ -37,6 +37,13 @@
 #include "misc.h"
 #include "gnokii.h"
 
+#ifdef HAVE_ICONV
+#  include <iconv.h>
+#  include <langinfo.h>
+#endif
+
+static const char *base64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
 #define GN_CHAR_ALPHABET_SIZE 128
 
 #define GN_CHAR_ESCAPE 0x1b
@@ -338,7 +345,6 @@ int char_uni_alphabet_decode(wchar_t value, unsigned char *dest)
 
 	switch (length = wctomb(dest, value)) {
 	case -1:
-		dprintf("Error calling wctomb!\n");
 		*dest = '?';
 		length = 1;
 	default:
@@ -541,4 +547,189 @@ char *char_bcd_number_get(u8 *number)
 		break;
 	}
 	return buffer;
+}
+
+/* BASE64 functions */
+int string_base64(const char *instring)
+{
+	for (; *instring; instring++)
+		if (*instring & 0x80)
+			return 1;
+	return 0;
+}
+
+int utf82ascii(char *outstring, char *instring, int inlen)
+{
+	int outlen = inlen;
+#ifdef HAVE_ICONV
+	iconv_t cd;
+
+	cd = iconv_open(nl_langinfo(CODESET), "UTF-8");
+	outlen = iconv(cd, &instring, (size_t *)&inlen, &outstring, (size_t *)&outlen);
+	iconv_close(cd);
+	outstring[outlen] = 0;
+#endif
+	return outlen;
+}
+
+int ascii2utf8(char *outstring, unsigned char *instring, int inlen)
+{
+	int aux = inlen;
+	int retval, outlen = inlen * 2;
+#ifdef HAVE_ICONV
+	iconv_t cd;
+
+	cd = iconv_open("UTF-8", nl_langinfo(CODESET));
+	retval = iconv(cd, &instring, &inlen, &outstring, &outlen);
+	iconv_close(cd);
+#endif
+	return 2 * aux - outlen;
+}
+
+/*
+   encodes a null-terminated input string with base64 encoding.
+   convertToUTF8 is necessary for Mozilla, but might not be appropriate for
+   other programs that use the LDIF format, base64 encoding is compliant with the LDIF format
+   the buffer outstring needs to be at least 1.333 times bigger than the input string length
+   *outlen contains the actual length of the converted string
+*/
+int base64_encode(char *outstring, char *instring, int convertToUTF8)
+{
+	char *in1, *pin, *pout;
+	int inleft, inlen, outleft, inprocessed, outlen;
+	unsigned int i1, i2, i3, i4;
+
+	/* convert to UTF-8 if necessary */
+	if (convertToUTF8) {
+		char *outtemp = NULL;
+
+		inlen = strlen(instring);
+		outtemp = malloc(inlen);
+		outlen = ascii2utf8(outtemp, instring, inlen);
+		instring = outtemp;
+		inlen = outlen;
+	} else {
+		inlen = strlen(instring);
+	}
+
+	/* copy the input string, need multiple of 3 chars */
+	in1 = malloc(inlen + 3);
+	memset(in1, 0, inlen + 3);
+	memcpy(in1, instring, inlen);
+
+	pout = outstring;
+	inleft = inlen;
+	outleft = outlen;
+	outleft = 1000;
+	inprocessed = 0;
+	pin = in1;
+
+	for (; (outleft > 3) && (inprocessed < inlen); ) {
+		if (!(*pin))
+			break;
+
+		/* calculate the indexes */
+		i1 = (pin[0] & 0xFC) >> 2;
+		i2 = ((pin[0] & 0x03) << 4) | ((pin[1] & 0xF0) >> 4);
+		i3 = ((pin[1] & 0x0F) << 2) | ((pin[2] & 0xC0) >> 6);
+		i4 = pin[2] & 0x3F;
+		pin += 3;
+
+		/* assign the characters or the padding char, if necessary */
+		*(pout++) = base64_alphabet[i1];
+		*(pout++) = base64_alphabet[i2];
+		inleft--;
+		if (!inleft) {
+			*(pout++) = '=';
+		} else {
+			*(pout++) = base64_alphabet[i3];
+			inleft--;
+		}
+
+		if (!inleft)
+			*(pout++) = '=';
+		else {
+			*(pout++) = base64_alphabet[i4];
+			inleft--;
+		}
+
+		/* update the counters */
+		inprocessed += 3;
+		outlen += 4;
+		outleft -= 4;
+	}
+
+	if (convertToUTF8)
+		free(instring);
+
+	free(in1);
+
+	return 1;
+}
+
+int base64_decode(char *dest, char *source, int length)
+{
+	int dtable[256];
+	int i, c, retval;
+	int dpos = 0;
+	int spos = 0;
+	char *aux;
+
+	aux = calloc(length, sizeof(char));
+	for (i = 0; i < 255; i++) {
+		dtable[i] = 0x80;
+	}
+	for (i = 'A'; i <= 'Z'; i++) {
+		dtable[i] = 0 + (i - 'A');
+	}
+	for (i = 'a'; i <= 'z'; i++) {
+		dtable[i] = 26 + (i - 'a');
+	}
+	for (i = '0'; i <= '9'; i++) {
+		dtable[i] = 52 + (i - '0');
+	}
+	dtable['+'] = 62;
+	dtable['/'] = 63;
+	dtable['='] = 0;
+
+	/* CONSTANT CONDITION */
+	while (1) {
+		int a[4], b[4], o[3];
+
+		for (i = 0; i < 4; i++) {
+			if (spos >= length) {
+				goto endloop;
+			}
+			c = source[spos++];
+
+			if (c == 0) {
+				if (i > 0) {
+					goto endloop;
+				}
+				goto endloop;
+			}
+			if (dtable[c] & 0x80) {
+				/* Ignoring errors: discard invalid character. */
+				i--;
+				continue;
+			}
+			a[i] = (int) c;
+			b[i] = (int) dtable[c];
+		}
+		o[0] = (b[0] << 2) | (b[1] >> 4);
+		o[1] = (b[1] << 4) | (b[2] >> 2);
+		o[2] = (b[2] << 6) | b[3];
+        	i = a[2] == '=' ? 1 : (a[3] == '=' ? 2 : 3);
+		if (i >= 1) aux[dpos++] = o[0];
+		if (i >= 2) aux[dpos++] = o[1];
+		if (i >= 3) aux[dpos++] = o[2];
+		aux[dpos] = 0;
+		if (i < 3) {
+			goto endloop;
+		}
+	}
+endloop:
+	retval = utf82ascii(dest, aux, dpos);
+	free(aux);
+	return retval;
 }

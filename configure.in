@@ -26,6 +26,8 @@ AC_CHECK_PROGS(AR, ar)
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
+AM_ICONV
+
 dnl ======================== Default setting
 ALL_LINGUAS="cs de et fi nl sk pl it sl fr"
 AC_CHECK_HEADERS(libintl.h)

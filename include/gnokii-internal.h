@@ -143,4 +143,7 @@ int cfg_file_write(struct gn_cfg_header *cfg, const char *filename);
 
 gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause);
 
+int base64_decode(char *dest, char *src, int length);
+int base64_encode(char *dest, char *src, int convertToUTF8);
+
 #endif /* _gnokii_internal_h */
