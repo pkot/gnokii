@@ -183,9 +183,6 @@ if test x"$USE_NLS" = xyes; then
   AC_DEFINE(USE_NLS)
 fi
 
-CFLAGS="$CFLAGS $NLS_FLAGS"
-LIBS="$LIBS $NLS_LIBS"
-
 dnl ======================== Checks for libraries.
 
 AC_ARG_WITH(libpthread, 
@@ -397,6 +394,9 @@ AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(mktime select strdup strstr strtol strtok strsep snprintf)
+
+CFLAGS="$CFLAGS $NLS_FLAGS"
+LIBS="$LIBS $NLS_LIBS"
 
 PACKAGE=gnokii
 XPACKAGE=xgnokii
