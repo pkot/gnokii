@@ -18,6 +18,8 @@
     o Nokia raw ringtone conversion functions      (BORBELY Zoltan)
     o initial midi writing support                 (BORBELY Zoltan)
     o various ringtone fixes                       (BORBELY Zoltan)
+    o nokia raw ringtone handling improved a lot, it can parse
+      most of the built-in ringtones of the 6610   (BORBELY Zoltan)
  * Documentation updates
     o nk7110 profile reading messages updated      (BORBELY Zoltan)
  * gnokii changes

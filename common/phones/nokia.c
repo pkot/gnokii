@@ -502,14 +502,15 @@ gn_error pnok_security_incoming(int messagetype, unsigned char *message, int len
 
 gn_error pnok_ringtone_from_raw(gn_ringtone *ringtone, const unsigned char *raw, int rawlen)
 {
-	int i, c, p;
+	int i, c, p, current;
 	int rcount, rstart;
-	int lead = 0;
 	int lastc, lastp;
 	gn_ringtone_note *note;
 	int notes[] = {0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12};
 
-	ringtone->tempo = 100;
+	ringtone->tempo = 120;
+
+recode:
 	ringtone->notes_count = 0;
 
 	rstart = -1;
@@ -517,52 +518,76 @@ gn_error pnok_ringtone_from_raw(gn_ringtone *ringtone, const unsigned char *raw,
 	lastc = -1;
 	lastp = 0;
 	for(i = 0; i < rawlen; ) {
+		current = i;
 		c = raw[i++];
 
 		if (c == 0x00) {
-			/* unknown */
+			/* start? */
 			continue;
 
 		} else if (c == 0x06) {
 			/* repeat end */
-			if (rstart <= 1) continue;
-			if (ringtone->notes_count + rcount * (ringtone->notes_count - rstart) >= GN_RINGTONE_MAX_NOTES)
-				return GN_ERR_MEMORYFULL;
+			if (rstart < 0) continue; /* FIXME: why not corrupted */
+
+			p = ringtone->notes_count - rstart;
+			if (ringtone->notes_count + rcount * p >= GN_RINGTONE_MAX_NOTES)
+				return GN_ERR_INVALIDSIZE;
+			while (rcount-- > 0) {
+				memcpy(ringtone->notes + ringtone->notes_count, ringtone->notes + rstart, p * sizeof(gn_ringtone_note));
+				ringtone->notes_count += p;
+			}
 			rstart = -1;
+			rcount = 0;
 			continue;
 
+		} else if (c == 0x07) {
+			/* unknown */
+			continue;
 		} else if (c == 0x09) {
+			/* unknown */
+			continue;
+		} else if (c == 0x0b) {
+			/* stop */
+			break;
+		} else if (c == 0x0c) {
+			/* unknown */
+			continue;
+		} else if (c == 0x0e) {
 			/* unknown */
 			continue;
 		}
 
-		if (i >= rawlen) return GN_ERR_WRONGDATAFORMAT;
+		if (i >= rawlen) goto corrupted;
 		p = raw[i++];
 
-		if (c == 0x05) {
+		if (c == 0x04) {
+			/* unknown */
+
+		} else if (c == 0x05) {
 			/* begin repeat */
-			if (rstart >= 0) return GN_ERR_WRONGDATAFORMAT;
+			if (rstart >= 0) goto corrupted;
 			rstart = ringtone->notes_count;
 			rcount = p - 1;
 
-		} else if (c == 0x07) {
-			if (p == 0x0b) break;
-
 		} else if (c == 0x0a) {
-			if (p == 0x0a) lead = 1;
-			if (p == 0xfe && lead) break;
-			if (p != 0x01 && p != 0x0a && p != 0xfe) return GN_ERR_WRONGDATAFORMAT;
+			/* vibra? */
 
 		} else if (c == 0x40) {
 			/* pause */
-			lastc = -1;
 			if (p == 0x01) {
 				/* skip normal inter note pause */
+				lastc = -1;
 				continue;
 			}
-
-			if (ringtone->notes_count >= GN_RINGTONE_MAX_NOTES) return GN_ERR_MEMORYFULL;
-			note = ringtone->notes + ringtone->notes_count++;
+			if (c == lastc) {
+				lastp += p;
+				p = lastp;
+			} else {
+				if (ringtone->notes_count >= GN_RINGTONE_MAX_NOTES) return GN_ERR_INVALIDSIZE;
+				note = ringtone->notes + ringtone->notes_count++;
+				lastc = c;
+				lastp = p;
+			}
 
 			note->note = 255;
 			gn_ringtone_set_duration(ringtone, note - ringtone->notes, 8000 * p);
@@ -573,7 +598,7 @@ gn_error pnok_ringtone_from_raw(gn_ringtone *ringtone, const unsigned char *raw,
 				lastp += p;
 				p = lastp;
 			} else {
-				if (ringtone->notes_count >= GN_RINGTONE_MAX_NOTES) return GN_ERR_MEMORYFULL;
+				if (ringtone->notes_count >= GN_RINGTONE_MAX_NOTES) return GN_ERR_INVALIDSIZE;
 				note = ringtone->notes + ringtone->notes_count++;
 				lastc = c;
 				lastp = p;
@@ -582,13 +607,64 @@ gn_error pnok_ringtone_from_raw(gn_ringtone *ringtone, const unsigned char *raw,
 			note->note = 14 * ((c - 114) / 12) + notes[(c - 114) % 12];
 			gn_ringtone_set_duration(ringtone, note - ringtone->notes, 8000 * p);
 
+		} else if (66 <= c && c <= 113) {
+			/*
+			 * FIXME:
+			 * octave(s) below limit! we should be more
+			 * intelligent in the future -- bozo
+			 */
+
+			if (c == lastc) {
+				lastp += p;
+				p = lastp;
+			} else {
+				if (ringtone->notes_count >= GN_RINGTONE_MAX_NOTES) return GN_ERR_INVALIDSIZE;
+				note = ringtone->notes + ringtone->notes_count++;
+				lastc = c;
+				lastp = p;
+			}
+
+			note->note = notes[(c - 66) % 12];
+			gn_ringtone_set_duration(ringtone, note - ringtone->notes, 8000 * p);
+
 		} else {
 			/* unknown messages */
-			return GN_ERR_WRONGDATAFORMAT;
+			goto corrupted;
 		}
 	}
 
+	/* check wheter the tempo selected correctly */
+	c = 0;
+	for (i = 0; i < ringtone->notes_count; i++)
+		if (ringtone->notes[i].note != 255 && ringtone->notes[i].duration > c)
+			c = ringtone->notes[i].duration;
+	if (ringtone->tempo < 250 && c < 32) {
+		/* there was no 1/8 */
+		ringtone->tempo = 250;
+		goto recode;
+	}
+
+	while (ringtone->notes_count > 0 && ringtone->notes[ringtone->notes_count - 1].note == 255)
+		ringtone->notes_count--;
+
 	return GN_ERR_NONE;
+
+corrupted:
+	dump(_("NOKIA RAW RINGTONE DECODING FAILED\nringtone:\n"));
+
+	for (i = 0; i < rawlen; i++) {
+		if (i % 16 == 0) {
+			if (i != 0) dump("\n");
+			dump("%04x", i);
+		}
+		dump(" %02x", raw[i]);
+	}
+	if (i % 16 != 0) dump("\n");
+
+	dump(_("offset: %04x\n"), current);
+	dump(_("Please read Docs/Bugs and send a bug report!\n"));
+
+	return GN_ERR_WRONGDATAFORMAT;
 }
 
 gn_error pnok_ringtone_to_raw(char *raw, int *rawlen, const gn_ringtone *ringtone)
@@ -596,8 +672,8 @@ gn_error pnok_ringtone_to_raw(char *raw, int *rawlen, const gn_ringtone *rington
 	int i, c, p, l, freq;
 	int rleft, vtime, vstat;
 	const gn_ringtone_note *note;
-	char header[] = {0x0a, 0x01};
-	char tailer[] = {0x0a, 0x0a, 0x0a, 0xfe, 0x07, 0x0b, 0xff, 0xff, 0xff, 0xff};
+	char header[] = {0x00, 0x0a, 0x01};
+	char tailer[] = {0x0a, 0x0a, 0x0a, 0xfe, 0x40, 0x20, 0x07, 0x0b, 0xff, 0xff, 0xff, 0xff};
 	char vibr_on[] = {0x0a, 0x01};
 	char vibr_off[] = {0x0a, 0xfe};
 	int notes[] = {0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10, 11, 11};
