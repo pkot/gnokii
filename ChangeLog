@@ -59,6 +59,10 @@
       key and colon                                      (Pawel Kot)
     o add experimental and simple LDIF support; we will be able
       to import/export eg. Mozilla Addressbook           (Pawel Kot)
+    o add new function gn_memory_type2str()              (Pawel Kot)
+    o don't clear gn_phonebook_entry when reading vCard or
+      LDIF file -- caller may have already prepared something
+      (defaults)                                         (Pawel Kot)
 
 0.5.2
 =====
