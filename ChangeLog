@@ -51,6 +51,8 @@
     o fix off-by-one potential bug in findcrlfbw()           (Jens)
     o fix phonebook vcard writing which appended a newline
       character at the end of each entry                (Pawel Kot)
+    o escape '\n', '\r', ';', ',' and '\' in the phonebook entries
+      for raw and vcard types (ldif is todo)            (Pawel Kot)
  * 6100 driver updates
     o add Nokia 8850 support                       (Denis Pitzalis)
     o handle new frames when SIM card is not inserted   (Pawel Kot)

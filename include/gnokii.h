@@ -86,8 +86,6 @@ extern API struct gn_cfg_header *gn_cfg_info;
 
 /* Files */
 API int gn_file_text_save(char *filename, char *text, int mode);
-/* reads internal gnokii raw phonebook format */
-API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *buffer);
 
 /* Misc */
 API gn_memory_type gn_str2memory_type(const char *s);
@@ -112,6 +110,10 @@ API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
 
 API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry);
 API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry);
+
+/* reads internal gnokii raw phonebook format */
+API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *buffer);
+API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, char *memory_type_string);
 
 /* DEPRECATED */
 API int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number);

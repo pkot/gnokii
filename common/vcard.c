@@ -37,10 +37,12 @@
 API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 {
 	int i;
+	char name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
 
 	fprintf(f, "BEGIN:VCARD\n");
 	fprintf(f, "VERSION:3.0\n");
-	fprintf(f, "FN:%s\n", entry->name);
+	add_slashes(name, entry->name, sizeof(name), strlen(entry->name));
+	fprintf(f, "FN:%s\n", name);
 	fprintf(f, "TEL;VOICE:%s\n", entry->number);
 	fprintf(f, "X_GSM_STORE_AT:%s\n", location);
 	fprintf(f, "X_GSM_CALLERGROUP:%d\n", entry->caller_group);
@@ -49,13 +51,16 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 	for (i = 0; i < entry->subentries_count; i++) {
 		switch (entry->subentries[i].entry_type) {
 		case GN_PHONEBOOK_ENTRY_Email:
-			fprintf(f, "EMAIL;INTERNET:%s\n", entry->subentries[i].data.number);
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			fprintf(f, "EMAIL;INTERNET:%s\n", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Postal:
-			fprintf(f, "ADR;HOME:%s\n", entry->subentries[i].data.number);
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			fprintf(f, "ADR;HOME:%s\n", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Note:
-			fprintf(f, "NOTE:%s\n", entry->subentries[i].data.number);
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			fprintf(f, "NOTE:%s\n", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Number:
 			switch (entry->subentries[i].number_type) {
@@ -80,10 +85,12 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 			}
 			break;
 		case GN_PHONEBOOK_ENTRY_URL:
-			fprintf(f, "URL:%s\n", entry->subentries[i].data.number);
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			fprintf(f, "URL:%s\n", name);
 			break;
 		default:
-			fprintf(f, "X_GNOKII_%d: %s\n", entry->subentries[i].entry_type, entry->subentries[i].data.number);
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			fprintf(f, "X_GNOKII_%d: %s\n", entry->subentries[i].entry_type, name);
 			break;
 		}
 	}
@@ -93,8 +100,8 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 }
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
-#define STORE3(a, b) if (BEGINS(a)) { strncpy(b, buf+strlen(a), line_len - strlen(a)); }
-#define STORE2(a, b, c) if (BEGINS(a)) { c; strncpy(b, buf+strlen(a), line_len - strlen(a)); continue; }
+#define STORE3(a, b) if (BEGINS(a)) { strip_slashes(b, buf+strlen(a), line_len - strlen(a), line_len - strlen(a)); }
+#define STORE2(a, b, c) if (BEGINS(a)) { c; strip_slashes(b, buf+strlen(a), line_len - strlen(a), line_len - strlen(a)); continue; }
 #define STORE(a, b) STORE2(a, b, (void) 0)
 #define STOREINT(a, b) if (BEGINS(a)) { b = atoi(buf+strlen(a)); continue; }
 
@@ -110,9 +117,8 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 /* We assume gn_phonebook_entry is ready for writing in, ie. no rubbish inside */
 API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 {
-	char buf[10240];
+	char buf[1024];
 	char memloc[10];
-	int line_len;
 
 	memset(memloc, 0, 10);
 	while (1) {
@@ -124,15 +130,24 @@ API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 
 	while (1) {
 		char *cr, *lf;
+		int line_len;
 		if (!fgets(buf, 1024, f)) {
 			ERROR("Vcard began but not ended?");
 			return -1;
 		}
 		/* There's either "\n" or "\r\n' sequence at the
 		 * end of the line */
-		cr = strchr(buf, '\r');
-		lf = strchr(buf, '\n');
-		line_len = cr ? cr - buf : (lf ? lf - buf : strlen(buf));
+		line_len = strlen(buf);
+		if (buf[line_len - 1] == '\n') {
+			buf[--line_len] = 0;
+		}
+		if (!line_len)
+			continue;
+		if (buf[line_len - 1] == '\r') {
+			buf[--line_len] = 0;
+		}
+		if (!line_len)
+			continue; 
 
 		STORE("FN:", entry->name);
 		STORE("TEL;VOICE:", entry->number);

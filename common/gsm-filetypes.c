@@ -1386,63 +1386,37 @@ gn_error gn_file_bitmap_show(char *filename)
 	return GN_ERR_NONE;
 }
 
-static inline int SIGN(int X)
+/* returns number of the characters before the next delimiter, including it */
+static int get_next_token(char *src, int delim)
 {
-	if (X < 0) return -1;
-	else if (X == 0) return 0;
-	else return 1;
-}
+	int i, len = strlen(src);
+	int slash_state = 0;
 
-/* Copies the first token from src to dest. The token is delimited by
- * delim char. If the delim char is preceeded by '\', it is not counted
- * as delimiter. maxlen is the maximum number of characters that can be
- * copied to dest. Return characters eaten from src including trailing ';'.
- */
-static int get_token(char *dest, char *src, int delim, int maxlen)
-{
-	char *next;
-	unsigned int offset;
-
-	if (!src || !dest) {
-		return 0;
-	}
-	next = strchr(src, delim);
-	if (next) {
-		offset = next - src;
-	} else {
-		strncpy(dest, src, maxlen);
-		return strlen(src) + 1;
-	}
-	switch (offset) {
-	case 0:
-		return 1;
-	case 1:
-		if (src[0] == '\\') {
-			dest[0] = delim;
-			return 2 + get_token(dest + 1, src + 2, delim, maxlen - 1);
-		}
-		break;
-	default:
-		if (src[offset - 1] == '\\' &&
-		    src[offset - 2] != '\\') {
-		    	switch (SIGN(offset - maxlen)) {
-			case -1:
-				strncpy(dest, src, offset - 1);
-				dest[offset - 1] = delim;
-				return offset + 1 + get_token(dest + offset,
-							      src + offset + 1,
-							      delim, maxlen - offset);
-		    	case 0:
-				src[offset - 1] = delim;
-				break;
-			case 1:
-				break;
+	for (i = 0; i < len; i++) {
+		switch (src[i]) {
+		case '\\':
+			if (slash_state) {
+				printf("enter\n");
+				slash_state = 0;
+			} else {
+				printf("exit\n");
+				slash_state = 1;
 			}
+			break;
+		case ';':
+			printf("semicolon\n");
+			if (slash_state)
+				slash_state = 0;
+			else
+				return i + 1;
+			break;
+		default:
+			if (slash_state)
+				slash_state = 0;
+			break;
 		}
-		break;
 	}
-	strncpy(dest, src, GNOKII_MIN(maxlen, offset));
-	return offset + 1;
+	return i;
 }
 
 #define BUG(x) \
@@ -1454,13 +1428,18 @@ static int get_token(char *dest, char *src, int delim, int maxlen)
 
 #define MAX_INPUT_LINE_LEN 512
 
+#define GET_NEXT_TOKEN()	o = get_next_token(line + offset, ';')
+#define STORE_TOKEN(a)		strip_slashes(a, line + offset, sizeof(a) - 1, o - 1)
+
 API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 {
 	char backline[MAX_INPUT_LINE_LEN];
 	char memory_type_char[3];
-	char number[10];
+	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH];
+	char stripped_line[MAX_INPUT_LINE_LEN];
 	int length, o, offset = 0;
 	gn_error error = GN_ERR_NONE;
+	char *next, *last = line;
 
 	memset(entry, 0, sizeof(gn_phonebook_entry));
 
@@ -1469,9 +1448,11 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	entry->empty = true;
 	memory_type_char[2] = 0;
 
-	o = get_token(entry->name, line, ';', sizeof(entry->name) - 1);
+	printf("%s\n", line + offset);
+	GET_NEXT_TOKEN();
 	switch (o) {
 	case 0:
+		dprintf("dupa1\n");
 		return GN_ERR_WRONGDATAFORMAT;
 	case 1:
 		/* empty name: this is a request to delete the entry */
@@ -1479,28 +1460,35 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	default:
 		break;
 	}
+	STORE_TOKEN(entry->name);
 	offset += o;
 
 	BUG(offset >= length);
 
-	o = get_token(entry->number, line+offset, ';', sizeof(entry->number) - 1);
+	printf("%s\n", line + offset);
+	GET_NEXT_TOKEN();
 	switch (o) {
 	case 0:
+		dprintf("dupa2\n");
 		return GN_ERR_WRONGDATAFORMAT;
 	default:
 		break;
 	}
+	STORE_TOKEN(entry->number);
 	offset += o;
 
 	BUG(offset >= length);
 
-	o = get_token(memory_type_char, line+offset, ';', 3);
+	printf("%s\n", line + offset);
+	GET_NEXT_TOKEN();
 	switch (o) {
 	case 3:
 		break;
 	default:
+		dprintf("dupa3: %d\n", o);
 		return GN_ERR_WRONGDATAFORMAT;
 	}
+	STORE_TOKEN(memory_type_char);
 	offset += o;
 
 	BUG(offset >= length);
@@ -1516,9 +1504,11 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	BUG(offset >= length);
 
 	memset(number, 0, sizeof(number));
-	o = get_token(number, line+offset, ';', 9);
+	GET_NEXT_TOKEN();
+	STORE_TOKEN(number);
 	switch (o) {
 	case 0:
+		dprintf("dupa4\n");
 		return GN_ERR_WRONGDATAFORMAT;
 	case 1:
 		entry->location = 0;
@@ -1532,9 +1522,11 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	BUG(offset >= length);
 
 	memset(number, 0, sizeof(number));
-	o = get_token(number, line+offset, ';', 9);
+	GET_NEXT_TOKEN();
+	STORE_TOKEN(number);
 	switch (o) {
 	case 0:
+		dprintf("dupa5\n");
 		return GN_ERR_WRONGDATAFORMAT;
 	case 1:
 		entry->caller_group = 0;
@@ -1549,7 +1541,8 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 
 	for (entry->subentries_count = 0; offset < length; entry->subentries_count++) {
 		memset(number, 0, sizeof(number));
-		o = get_token(number, line+offset, ';', 9);
+		GET_NEXT_TOKEN();
+		STORE_TOKEN(number);
 		switch (o) {
 		case 0:
 			fprintf(stderr, "Formatting error: unknown error while reading subentry type\n");
@@ -1571,7 +1564,8 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		}
 
 		memset(number, 0, sizeof(number));
-		o = get_token(number, line+offset, ';', 9);
+		GET_NEXT_TOKEN();
+		STORE_TOKEN(number);
 		switch (o) {
 		case 0:
 			fprintf(stderr, "Formatting error: unknown error while reading subentry number type\n");
@@ -1598,7 +1592,8 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		}
 
 		memset(number, 0, sizeof(number));
-		o = get_token(number, line+offset, ';', 9);
+		GET_NEXT_TOKEN();
+		STORE_TOKEN(number);
 		switch (o) {
 		case 0:
 			fprintf(stderr, "Formatting error: unknown error while reading subentry id\n");
@@ -1619,7 +1614,8 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 			break;
 		}
 
-		o = get_token(entry->subentries[entry->subentries_count].data.number, line+offset, ';', sizeof(entry->subentries[entry->subentries_count].data.number) - 1);
+		GET_NEXT_TOKEN();
+		STORE_TOKEN(entry->subentries[entry->subentries_count].data.number);
 		switch (o) {
 		case 0:
 			fprintf(stderr, "Formatting error: unknown error while reading subentry contents\n");
@@ -1654,3 +1650,34 @@ endloop:
 endfunc:
 	return error;
 }
+
+API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, char *memory_type_string)
+{
+	char escaped_name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
+	int i;
+
+	add_slashes(escaped_name, entry->name, sizeof(escaped_name), strlen(entry->name));
+	fprintf(f, "%s;%s;%s;%d;%d", escaped_name,
+		entry->number, memory_type_string,
+		entry->location, entry->caller_group);
+	for (i = 0; i < entry->subentries_count; i++) {
+		switch (entry->subentries[i].entry_type) {
+		case GN_PHONEBOOK_ENTRY_Date:
+			break;
+		default:
+			add_slashes(escaped_name, entry->subentries[i].data.number, sizeof(escaped_name), strlen(entry->subentries[i].data.number));
+			fprintf(f, ";%d;%d;%d;%s",
+				entry->subentries[i].entry_type,
+				entry->subentries[i].number_type,
+				entry->subentries[i].id,
+				escaped_name);
+			break;
+		}
+	}
+	if (entry->memory_type == GN_MT_MC || entry->memory_type == GN_MT_DC || entry->memory_type == GN_MT_RC)
+		fprintf(f, "%d;0;0;%02u.%02u.%04u %02u:%02u:%02u", GN_PHONEBOOK_ENTRY_Date,
+			entry->date.day, entry->date.month, entry->date.year, entry->date.hour, entry->date.minute, entry->date.second);
+	fprintf(f, "\n");
+	return GN_ERR_NONE;
+}
+

@@ -3233,21 +3233,6 @@ static int setactiveprofile(int argc, char *argv[])
 	return error;
 }
 
-static char *escape_semicolon(char *src)
-{
-	int i, j, len = strlen(src);
-	char *dest;
-
-	dest = calloc(2 * len, sizeof(char));
-	for (i = 0, j = 0; i < len; i++, j++) {
-		if (src[i] == ';')
-			dest[j++] = '\\';
-		dest[j] = src[i];
-	}
-	dest[j] = 0;
-	return dest;
-}
-
 /* Get requested range of memory storage entries and output to stdout in
    easy-to-parse format */
 static int getphonebook(int argc, char *argv[])
@@ -3320,33 +3305,7 @@ static int getphonebook(int argc, char *argv[])
 			num_entries--;
 			switch (type) {
 			case 1:
-				do {
-					char *escaped_name = escape_semicolon(entry.name);
-					fprintf(stdout, "%s;%s;%s;%d;%d", escaped_name,
-						entry.number, memory_type_string,
-						entry.location, entry.caller_group);
-					free(escaped_name);
-				} while (0);
-				for (i = 0; i < entry.subentries_count; i++) {
-					char *escaped_number = NULL;
-					switch (entry.subentries[i].entry_type) {
-					case GN_PHONEBOOK_ENTRY_Date:
-						break;
-					default:
-						escaped_number = escape_semicolon(entry.subentries[i].data.number);
-						fprintf(stdout, ";%d;%d;%d;%s",
-							entry.subentries[i].entry_type,
-							entry.subentries[i].number_type,
-							entry.subentries[i].id,
-							escaped_number);
-						free(escaped_number);
-						break;
-					}
-				}
-				if (entry.memory_type == GN_MT_MC || entry.memory_type == GN_MT_DC || entry.memory_type == GN_MT_RC)
-					fprintf(stdout, "%d;0;0;%02u.%02u.%04u %02u:%02u:%02u", GN_PHONEBOOK_ENTRY_Date,
-						entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);
-				fprintf(stdout, "\n");
+				gn_file_phonebook_raw_write(stdout, &entry, memory_type_string);
 				break;
 			case 2:
 				sprintf(location, "%s%d", memory_type_string, entry.location);
