@@ -1,4 +1,33 @@
 0.4.0 THINGS:
 
- - stable libsms
- - working xgnokii
+ * stable libsms
+ * working xgnokii
+
+
+AFTER 0.4.0 THINGS:
+
+ * multiple phone support:
+    o config subsystem cleanup
+    o adding state to incoming functions
+    o moving static variables into state
+
+ * international support:
+    o convert phonebook, calendar, ... functions to unicode
+
+ * better logging/debugging subsystem
+
+ * better gnokiid:
+    o eliminate threads
+    o gnokiid mustn't quit if the client disconnects
+
+ * better gnokii:
+    o separating into smaller parts
+    o readline support
+
+ * 6110 series:
+    o get good things from mygnokii
+    o decoding raw ringtones
+
+ * GNOME/KDE support
+
+ * Full Smart Messaging Specification 3.0, EMS, etc.
