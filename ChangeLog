@@ -58,5 +58,10 @@
 * Wed May 17 13:56:28 CEST 2000 Karel Zak <zakkr@zf.jcu.cz>
 - Changes in debian package build system
 
-* Thu May 18 15:11:26 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz
+* Thu May 18 15:11:26 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
 - -pthread changed to -lpthread
+
+* Mon May 22 07:16:04 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
+- sk language added
+- checking for older libc on Linux
+- better checking for cf*speed
