@@ -3286,98 +3286,6 @@ static int getphonebook(int argc, char *argv[])
 	return error;
 }
 
-static int decodephonebook(gn_phonebook_entry *entry, char *oline)
-{
-	char *line = oline;
-	char *ptr;
-	char backline[MAX_INPUT_LINE_LEN];
-
-	strcpy(backline, line);
-
-	ptr = strsep(&line, ";");
-	if (ptr) strncpy(entry->name, ptr, sizeof(entry->name) - 1);
-
-	ptr = strsep(&line, ";");
-	if (ptr) strncpy(entry->number, ptr, sizeof(entry->number) - 1);
-
-	ptr = strsep(&line, ";");
-
-	if (!ptr) {
-		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-		line = oline;
-		return 0;
-	}
-
-	if (!strncmp(ptr, "ME", 2)) {
-		entry->memory_type = GN_MT_ME;
-	} else {
-		if (!strncmp(ptr, "SM", 2)) {
-			entry->memory_type = GN_MT_SM;
-		} else {
-			fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-			return 0;
-		}
-	}
-
-	ptr = strsep(&line, ";");
-	if (ptr) entry->location = atoi(ptr);
-	else entry->location = 0;
-
-	ptr = strsep(&line, ";");
-	if (ptr) entry->caller_group = atoi(ptr);
-	else entry->caller_group = 0;
-
-	if (!ptr) {
-		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-		return 0;
-	}
-
-	for (entry->subentries_count = 0; ; entry->subentries_count++) {
-		ptr = strsep(&line, ";");
-
-		if (ptr && *ptr != 0)
-			entry->subentries[entry->subentries_count].entry_type = atoi(ptr);
-		else
-			break;
-
-		ptr = strsep(&line, ";");
-		if (ptr) entry->subentries[entry->subentries_count].number_type = atoi(ptr);
-
-		/* Phone Numbers need to have a number type. */
-		if (!ptr && entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Number) {
-			fprintf(stderr, _("Missing phone number type on line %d"
-					  " entry [%s]\n"), entry->subentries_count, backline);
-			entry->subentries_count--;
-			break;
-		}
-
-		ptr = strsep(&line, ";");
-		if (ptr) entry->subentries[entry->subentries_count].id = atoi(ptr);
-
-		ptr = strsep(&line, ";");
-
-		/* 0x13 Date Type; it is only for Dailed Numbers, etc.
-		   we don't store to this memories so it's an error to use it. */
-		if (!ptr || entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Date) {
-			fprintf(stderr, _("There is no phone number on line [%s] entry %d\n"),
-				backline, entry->subentries_count);
-			entry->subentries_count--;
-			break;
-		} else
-			strncpy(entry->subentries[entry->subentries_count].data.number, ptr, sizeof(entry->subentries[entry->subentries_count].data.number) - 1);
-	}
-
-	/* This is to send other exports (like from 6110) to 7110 */
-	if (!entry->subentries_count) {
-		entry->subentries[entry->subentries_count].entry_type   = GN_PHONEBOOK_ENTRY_Number;
-		entry->subentries[entry->subentries_count].number_type  = GN_PHONEBOOK_NUMBER_General;
-		entry->subentries[entry->subentries_count].id = 2;
-		strcpy(entry->subentries[entry->subentries_count].data.number, entry->number);
-		entry->subentries_count = 1;
-	}
-	return 1;
-}
-
 
 /* Read data from stdin, parse and write to phone.  The parsing is relatively
    crude and doesn't allow for much variation from the stipulated format. */
@@ -3459,8 +3367,8 @@ static int writephonebook(int argc, char *args[])
 		default:
 			if (!gn_line_get(stdin, line, MAX_INPUT_LINE_LEN))
 				return 0; /* it means we read an empty line, but that's not an error */
-			else if (decodephonebook(&entry, oline) == 0)
-				error = GN_ERR_WRONGDATAFORMAT;
+			else
+				error = gn_file_phonebook_raw(&entry, oline);
 			break;
 		}
 

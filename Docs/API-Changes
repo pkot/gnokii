@@ -9,6 +9,18 @@ o change description
 
 v1.8 2004-??-??
 
+	2004-02-17
+	o new function
+		+API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *buffer);
+
+	2004-02-16
+	o new element in the enum
+		|typedef enum {
+		=...
+		+	GN_CALNOTE_MONTHLY = 65534,
+		=...
+		|} gn_calnote_recurrence;
+
 	2004-01-25
 	o new element in the enum
 		|typedef enum {
