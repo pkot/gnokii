@@ -820,7 +820,7 @@ static GSM_Error PhoneInfo(GSM_Data *data, GSM_Statemachine *state)
 	if (SM_SendMessage(state, 5, 0xd1, req) != GE_NONE) return GE_NOTREADY;
 	if ((error = SM_Block(state, data, 0xd2)) != GE_NONE) return error;
 
-	if ((data->Phone = GetPhoneModel(data->Model)) == NULL) {
+	if (data->Model && ((data->Phone = GetPhoneModel(data->Model)) == NULL)) {
 		dump(_("Unsupported phone model \"%s\"\n"), data->Model);
 		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
 		return GE_INTERNALERROR;
