@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.116  2000-12-19 16:27:16  pkot
+  Revision 1.117  2000-12-21 15:13:46  pkot
+  Fixed functions converting ascii to and from PDU
+
+  Revision 1.116  2000/12/19 16:27:16  pkot
   Added 'static' word to variable declarations in common/fbus-6110.c and Makefile fix. (thanks to Pavel Machek)
 
   
@@ -1220,91 +1223,95 @@ void FB61_Terminate(void)
 #endif
 }
 
-#define ByteMask ((1<<NumOfBytes)-1)
+#define ByteMask ((1 << Bits) - 1)
 
-int UnpackEightBitsToSeven(int fillbits, int in_length, int out_length, unsigned char *input, unsigned char *output)
+int UnpackEightBitsToSeven(int offset, int in_length, int out_length,
+                           unsigned char *input, unsigned char *output)
 {
-  int NumOfBytes=7;
-  unsigned char Rest=0x00;
+        unsigned char *OUT = output; /* Current pointer to the output buffer */
+        unsigned char *IN  = input;  /* Current pointer to the input buffer */
+        unsigned char Rest = 0x00;
+        int Bits;
 
-  unsigned char *OUT=output; /* Current pointer to the output buffer */
-  unsigned char *IN=input;   /* Current pointer to the input buffer */
+        Bits = offset ? offset : 7;
 
-  while ((IN-input) < in_length) {
+        while ((IN - input) < in_length) {
 
-    *OUT = ((*IN & ByteMask) << (7-NumOfBytes)) | Rest;
+                *OUT = ((*IN & ByteMask) << (7 - Bits)) | Rest;
+                Rest = *IN >> Bits;
 
-    if (IN == input && fillbits != 0) {
-      *OUT = *OUT>>fillbits;
-      NumOfBytes = 1;
-      OUT--;
-    }
-    
-    Rest = *IN >> NumOfBytes;
+                /* If we don't start from 0th bit, we shouldn't go to the
+                   next char. Under *OUT we have now 0 and under Rest -
+                   _first_ part of the char. */
+                if ((IN != input) || (Bits == 7)) OUT++;
+                IN++;
 
-    IN++;OUT++;
+                if ((OUT - output) >= out_length) break;
 
-    if ((OUT-output) >= out_length) break;
+                /* After reading 7 octets we have read 7 full characters but
+                   we have 7 bits as well. This is the next character */
+                if (Bits == 1) {
+                        *OUT = Rest;
+                        OUT++;
+                        Bits = 7;
+                        Rest = 0x00;
+                } else {
+                        Bits--;
+                }
+        }
 
-    if (NumOfBytes==1) {
-      *OUT=Rest;
-      OUT++;
-      NumOfBytes=7;
-      Rest=0x00;
-    }
-    else
-      NumOfBytes--;
-  }
-
-  return OUT-output;
+        return OUT - output;
 }
 
 unsigned char GetAlphabetValue(unsigned char value)
 {
-
-  unsigned char i;
+        unsigned char i;
   
-  if (value == '?') return  0x3f;
+        if (value == '?') return 0x3f;
   
-  for (i = 0 ; i < 128 ; i++)
-    if (GSM_Default_Alphabet[i] == value)
-      return i;
+        for (i = 0 ; i < 128 ; i++)
+                if (GSM_Default_Alphabet[i] == value)
+                        return i;
 
-  return 0x3f; /* '?' */
+        return 0x3f; /* '?' */
 }
 
-int PackSevenBitsToEight(int fillbits, unsigned char *String, unsigned char* Buffer)
+int PackSevenBitsToEight(int offset, unsigned char *input, unsigned char *output)
 {
 
-  unsigned char *OUT=Buffer; /* Current pointer to the output buffer */
-  unsigned char *IN=String;  /* Current pointer to the input buffer */
-  int Bits=7;                /* Number of bits directly copied to output buffer */
+        unsigned char *OUT = output; /* Current pointer to the output buffer */
+        unsigned char *IN  = input;  /* Current pointer to the input buffer */
+        int Bits;                    /* Number of bits directly copied to
+                                        the output buffer */
 
-  while ((IN-String)<strlen(String)) {
+        Bits = (7 + offset) % 8;
 
-    unsigned char Byte=GetAlphabetValue(*IN);
+        /* If we don't begin with 0th bit, we will write only a part of the
+           first octet */
+        if (offset) {
+                *OUT = 0x00;
+                OUT++;
+        }
 
-    *OUT=Byte>>(7-Bits);
+        while ((IN - input) < strlen(input)) {
 
-    if (Bits != 7)
-      *(OUT-1)|=(Byte & ( (1<<(7-Bits))-1))<<(Bits+1);
+                unsigned char Byte = GetAlphabetValue(*IN);
 
-    Bits--;
+                *OUT = Byte >> (7 - Bits);
+                /* If we don't write at 0th bit of the octet, we should write
+                   a second part of the previous octet */
+                if (Bits != 7)
+                        *(OUT-1) |= (Byte & ((1 << (7-Bits)) - 1)) << (Bits+1);
 
-    if (OUT == Buffer && fillbits != 0) {
-    	*OUT = *OUT<<fillbits;
-    	Bits = 7;
-    }
+                Bits--;
 
-    if (Bits==-1)
-      Bits=7;
-    else
-      OUT++;
-      
-    IN++;
-  }
+                if (Bits == -1) Bits = 7;
+                else OUT++;
 
-  return OUT-Buffer;
+                IN++;
+        }
+
+        return (OUT - output);
 }
 
 GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level)
