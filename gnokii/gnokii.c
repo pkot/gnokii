@@ -144,7 +144,8 @@ typedef enum {
 	OPT_ENTERCHAR,
 	OPT_DIVERT,
 	OPT_SMSREADER,
-	OPT_FOOGLE
+	OPT_FOOGLE,
+	OPT_GETSECURITYCODE,
 } opt_index;
 
 static char *model;      /* Model from .gnokiirc file. */
@@ -298,6 +299,7 @@ static int usage(FILE *f)
 		     "                 {--call|-c} {all|voice|fax|data}\n"
 		     "                 [{--timeout|-m} time_in_seconds]\n"
 		     "                 [{--number|-n} number]\n"
+		     "          gnokii --getsecuritycode\n"
 		));
 #ifdef SECURITY
 	fprintf(f, _("          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
@@ -3548,6 +3550,20 @@ static int smsreader(void)
 	return 0;
 }
 
+static int getsecuritycode()
+{
+	GSM_Data data;
+	GSM_Error error;
+	GSM_SecurityCode sc;
+	
+	memset(&sc.Code, 0, 10 * sizeof(char));
+	data.SecurityCode = &sc;
+	printf("Getting security code... \n");
+	error = SM_Functions(GOP_GetSecurityCode, &data, &State);
+	printf("Security code is: %s \n", &sc.Code[0]);
+	return error;
+}
+
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 #ifndef WIN32
@@ -3753,6 +3769,9 @@ int main(int argc, char *argv[])
 		/* For development purposes: insert you function calls here */
 		{ "foogle",             no_argument,       NULL, OPT_FOOGLE },
 
+		/* Get Security Code */
+		{ "getsecuritycode",  no_argument,   	   NULL, OPT_GETSECURITYCODE },
+
 		{ 0, 0, 0, 0},
 	};
 
@@ -3877,6 +3896,9 @@ int main(int argc, char *argv[])
 			rc = changesecuritycode(optarg);
 			break;
 #endif
+		case OPT_GETSECURITYCODE:
+			rc = getsecuritycode();
+			break;
 		case OPT_GETDATETIME:
 			rc = getdatetime();
 			break;
