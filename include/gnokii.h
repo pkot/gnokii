@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-  Copyright (C) 2001-2003 Pawe³ Kot
+  Copyright (C) 2001, 2002, 2003 Pawe³ Kot
   
   Main header file for gnokii. Include just this file in your app.
 */
@@ -31,6 +31,10 @@
 #ifndef _gnokii_h
 #define _gnokii_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 #ifndef API
 #  define API
 #endif
@@ -98,5 +102,9 @@ API gn_error gn_sms_delete_no_validate(gn_data *data, struct gn_statemachine *st
 
 /* Call service */
 API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* _gnokii_h */
