@@ -201,6 +201,25 @@ You can use also \fI\-r\fR or \fI\-\-raw\fR switch to get the raw output. You ca
 reads data from stdin and writes to phonebook
 When \-i option is used, refuses to overwrite existing entries.
 Uses the same format as provided by the output of the getphonebook command.
+.PP
+The format is very simple.  Each line represents one entry.  Fields are
+separated by semicolons.  Semicolons aren't allowed inside a field.  The
+fields have to be in this order (the subentries are optional):
+.IP "" .5i
+name
+.IP "" .5i
+number
+.IP "" .5i
+memory_type
+.IP "" .5i
+entry_location
+.IP "" .5i
+caller_group
+.IP "" .5i
+subenty_no
+.IP "" .5i
+subentry_text
+.PP
 
 .SS WAP
 .TP 

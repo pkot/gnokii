@@ -18,6 +18,9 @@
     o GNOKIIDLL_IMPORTS required on win32 platform (BORBELY Zoltan)
     o set default values of memory type and location to the sane
       values when using --writephonebook                (Pawel Kot)
+ * documentation updates
+    o add short description of --getphonebook raw format to the
+      gnokii manual page                             (Reiner Steib)
 
 0.5.10
 ======
