@@ -112,7 +112,7 @@ static void sms_default(gn_sms *sms)
 	sms->dcs.type = GN_SMS_DCS_GeneralDataCoding;
 	sms->dcs.u.general.compressed = false;
 	sms->dcs.u.general.alphabet = GN_SMS_DCS_DefaultAlphabet;
-	sms->dcs.u.general.class = 0;
+	sms->dcs.u.general.m_class = 0;
 }
 
 API void gn_sms_default_submit(gn_sms *sms)
@@ -1048,7 +1048,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 	/* Additional Headers */
 	switch (sms->dcs.type) {
 	case GN_SMS_DCS_GeneralDataCoding:
-		switch (sms->dcs.u.general.class) {
+		switch (sms->dcs.u.general.m_class) {
 		case 0: break;
 		case 1: rawsms->dcs |= 0xf0; break; /* Class 0 */
 		case 2: rawsms->dcs |= 0xf1; break; /* Class 1 */

@@ -16,6 +16,9 @@
       (currently the only driver that will support bluetooth); note
       the [bluetooth] section in .gnokiirc; it DOES NOT work yet
                                                          (Pawel Kot)
+    o rename 'class' field from one of the sms structs to avoid
+      conflicts with C++ name space; now it is 'm_class' (as of
+      message class)                                     (Pawel Kot)
  * statemachine changes
     o allow sm_block and friends to be used not only directly after
       sm_message_send but also with sm_reset in between, which sets

@@ -159,11 +159,12 @@ typedef struct {
 	gn_sms_dcs_type type;
 	union {
 		struct {
-			unsigned short class; /* 0 - no class
-						 1 - Class 0
-						 2 - Class 1
-						 3 - Class 2
-						 4 - Class 3 */
+			unsigned short m_class; /* Message class:
+						    0 - no class
+						    1 - Class 0
+						    2 - Class 1
+						    3 - Class 2
+						    4 - Class 3 */
 			bool compressed;
 			gn_sms_dcs_alphabet_type alphabet;
 		} general;

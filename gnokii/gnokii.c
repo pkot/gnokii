@@ -588,10 +588,10 @@ static int sendsms(int argc, char *argv[])
 
 		case 'C': /* class Message */
 			switch (*optarg) {
-			case '0': sms.dcs.u.general.class = 1; break;
-			case '1': sms.dcs.u.general.class = 2; break;
-			case '2': sms.dcs.u.general.class = 3; break;
-			case '3': sms.dcs.u.general.class = 4; break;
+			case '0': sms.dcs.u.general.m_class = 1; break;
+			case '1': sms.dcs.u.general.m_class = 2; break;
+			case '2': sms.dcs.u.general.m_class = 3; break;
+			case '3': sms.dcs.u.general.m_class = 4; break;
 			default: sendsms_usage();
 			}
 			break;
