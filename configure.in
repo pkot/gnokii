@@ -16,7 +16,7 @@ AC_CANONICAL_SYSTEM
 AC_PREFIX_DEFAULT("/usr/local")
 
 dnl ======================== Default setting
-CFLAGS="-O2 -Wall"
+CFLAGS="$CFLAGS -O2 -Wall"
 ALL_LINGUAS="cs de et fi nl sk pl it sl"
 
 dnl ======================== Check for include/config.h.in
@@ -47,7 +47,7 @@ test x"$prefix" = xNONE && prefix="$ac_default_prefix"
 AC_ARG_ENABLE(debug, 
 	[  --enable-debug          compile with debug code],
 	[ if test "x$GCC" = "xyes"; then
-		CFLAGS="-ggdb3 -Wall"
+		CFLAGS="$CFLAGS -ggdb3 -Wall"
 	  fi
 	  AC_DEFINE(DEBUG)
 	  debug="yes" ],

@@ -58,6 +58,9 @@
     o distinct between currency and euro symbols based on locale
       set                                                 (Pawel Kot)
     o add DeleteSMSnoValidate                          (Markus Plail)
+ * build system updates:
+    o respect CFLAGS from the environment, idea from PLD spec
+                                                          (Pawel Kot)
  * create nokia-decoding.c for decoding functions generic to newer
    NOKIA phones (phonebook, calendar for now)          (Markus Plail)
  * statemachine pointer added to the incoming functions of the
