@@ -173,7 +173,7 @@ void DB_Look (void)
     sms.UserData[0].Length = strlen (sms.UserData[0].u.Text);
     sms.UserData[0].Type = SMS_PlainText;
     sms.UserData[1].Type = SMS_NoData;
-    if (!gn_char_def_alphabet(sms.UserData[0].u.Text))
+    if (!gn_char_def_alphabet (sms.UserData[0].u.Text))
        sms.DCS.u.General.Alphabet = SMS_UCS2;
 
 #ifdef XDEBUG
