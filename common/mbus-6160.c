@@ -387,8 +387,7 @@ bool		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 void	MB61_ThreadLoop(void)
 {
     unsigned char       init_char[1] = {0x04};
-    int                 count, idle_timer;
-	char foogle[] = {0x0d};
+    int                 idle_timer;
 
         /* Initialise RX state machine. */
     BufferCount = 0;

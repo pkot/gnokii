@@ -19,3 +19,5 @@
 * Tue May  9 21:13:08 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - dealernote support added (Marcin)
 
+* Sat May 13 18:43:57 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- typedef instead of #define in *BSD

@@ -1,4 +1,4 @@
-%define name gnokii
+%define name @PACKAGE@
 %define version @VERSION@
 %define release 1
 
@@ -29,7 +29,7 @@ computer and more other features.
 %setup -q
 
 %build
-./configure --prefix=/usr --enable-gettext #--enable-debug --enable-rlpdebug
+./configure --prefix=/usr --enable-nls --with-x #--enable-debug --enable-rlpdebug
 make
 
 %install
@@ -52,9 +52,9 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc COPYING ChangeLog INSTALL TODO Docs/CREDITS Docs/README Docs/README-3810
-%doc Docs/README-6110 Docs/README-WIN32 Docs/sample/sample.gnokiirc
-%doc Docs/gettext-howto gnokii.nol Docs/gnokii-ir-howto
+%doc COPYING INSTALL TODO Docs/CREDITS Docs/DataCalls-QuickStart Docs/README
+%doc Docs/README-3810 Docs/README-6110 Docs/README-WIN32 Docs/sample/sample.gnokiirc
+%doc Docs/gettext-howto gnokii.nol Docs/gnokii-ir-howto Docs/packaging-howto
 /usr/bin/gnokii
 %attr(0754, root, gnokii) /usr/sbin/gnokiid
 %attr(4754, root, gnokii) /usr/sbin/mgnokiidev
@@ -67,6 +67,9 @@ rm -rf ${RPM_BUILD_ROOT}
 /usr/lib/xgnokii
 
 %changelog
+* Sat May 13 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- new doc files added
+
 * Tue Mar 21 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - permission on /usr/sbin fixed
 - correct /etc/gnokiirc file

@@ -1,0 +1,66 @@
+
+           QUICK-START GUIDE TO RLP DATA CALLS USING GNOKII
+
+(1) Compile and install gnokii as per instructions in the INSTALL file.
+
+e.g.
+
+   cd /usr/src
+   tar xvfz /tmp/gnokii-0.3.2.tar.gz
+   cd gnokii-0.3.2
+   ./configure --enable-nls --with-x --with-model=6110 --with-port=/dev/ttyS2
+   make
+   make install
+
+   groupadd gnokii
+   chown root:gnokii /usr/local/sbin/mgnokiidev
+   chmod 4754 /usr/local/sbin/mgnokiidev
+
+(2) Create /etc/gnokiirc
+
+   cp Docs/sample/sample.gnokiirc /etc/gnokiirc
+
+   Edit to suit; in my case:
+
+   [global]
+   port = /dev/ttyS2
+   model = 6150
+   initlength = default
+   connection = serial
+   bindir = /usr/local/sbin/
+
+(3) Connect your phone to your PC and then run gnokiid:
+
+   # gnokiid
+
+   If successful, you should see a message saying that mgnokiidev has been
+   run to create /dev/gnokii, and your phone will probably bleep for
+   "accessory connected"
+
+   [I run gnokiid as root; it will probably work for another user who is
+    in group gnokii, as long as the serial port is accessible to that
+    user as well]
+
+(4) Use /dev/gnokii as a modem:
+
+e.g. ppp session
+--------------- /etc/ppp/peers/demon-gnokii ---------------------
+/dev/gnokii 115200
+modem crtscts defaultroute
+connect 'chat -v ABORT BUSY ABORT ERROR ABORT "NO CARRIER" "" AT OK-AT-OK ATD02083389666 CONNECT'
+user XXXX.demon.co.uk
+noauth
+mtu 296
+debug
+----------------------------------------------------------------
+--------------- /etc/ppp/pap-secrets ---------------------------
+XXXX.demon.co.uk	demon-gnokii	<yourpassword>
+----------------------------------------------------------------
+
+    Then "pppd call demon-gnokii" should connect
+    ('tail -f /var/log/messages' to see what is happening)
+
+(5) If a call terminates you should get 'NO CARRIER' and gnokiid should
+    continue to work, but this is early code and you may find you have to
+    Ctrl-C and restart gnokiid (especially if the phone says the terminal
+    connection has been lost)

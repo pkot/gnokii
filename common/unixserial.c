@@ -8,10 +8,12 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Wed Apr 12 18:29:55 PDT 2000
-  Modified by Hugh Blemings <hugh@linuxcare.com>
+  Last modification: Sat May 13 20:33:48 CEST 2000
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
+
+/* Do not compile this file under Win32 systems. */
 
 #ifndef WIN32
 
@@ -22,45 +24,42 @@
 #include "unixserial.h"
 
 #ifdef HAVE_SYS_IOCTL_COMPAT_H
-#include <sys/ioctl_compat.h>
+  #include <sys/ioctl_compat.h>
 #endif
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 
+/* If the target operating system does not have cfsetspeed, we can emulate
+   it. */
+
 #ifndef HAVE_CFSETSPEED
-#if defined(HAVE_CFSETISPEED) && defined(HAVE_CFSETOSPEED)
-#define cfsetspeed(t, speed) \
-  (cfsetispeed(t, speed) || (cfsetospeed(t, speed))
-#else
-static int cfsetspeed(struct termios *t, int speed) {
-#ifdef HAVE_TERMIOS_CSPEED
-  t->c_ispeed = speed;
-  t->c_ospeed = speed;
-#else
-  t->c_cflag |= speed;
-#endif
-  return 0;
-}
-#endif
+  #if defined(HAVE_CFSETISPEED) && defined(HAVE_CFSETOSPEED)
+     #define cfsetspeed(t, speed) \
+     (cfsetispeed(t, speed) || (cfsetospeed(t, speed))
+  #else
+    static int cfsetspeed(struct termios *t, int speed) {
+    #ifdef HAVE_TERMIOS_CSPEED
+      t->c_ispeed = speed;
+      t->c_ospeed = speed;
+    #else
+      t->c_cflag |= speed;
+    #endif
+      return 0;
+    }
+  #endif
 #endif
 
 #ifndef O_NONBLOCK
-#define O_NONBLOCK  0
+  #define O_NONBLOCK  0
 #endif
 
-/*
- * Structure to backup the setting of the terminal.
- *
- */
+/* Structure to backup the setting of the terminal. */
 
 struct termios serial_termios;
 
-/*
- * Open the serial port and store the settings.
- *
- */
+/* Open the serial port and store the settings. */
 
 int serial_open(__const char *__file, int __oflag) {
 
@@ -74,10 +73,7 @@ int serial_open(__const char *__file, int __oflag) {
   return __fd;
 }
 
-/*
- * Close the serial port and restore old settings.
- *
- */
+/* Close the serial port and restore old settings. */
 
 int serial_close(int __fd) {
 
@@ -87,10 +83,7 @@ int serial_close(int __fd) {
   return (close(__fd));
 }
 
-/*
- * Open a device with standard options.
- *
- */
+/* Open a device with standard options. */
 
 int serial_opendevice(__const char *__file, int __with_odd_parity) {
 
@@ -119,9 +112,9 @@ int serial_opendevice(__const char *__file, int __with_odd_parity) {
     tp.c_cflag |= (PARENB | PARODD);
     tp.c_iflag = 0;
   }
-  else {
+  else
     tp.c_iflag = IGNPAR;
-  }
+
   tp.c_oflag = 0;
   tp.c_lflag = 0;
   tp.c_cc[VMIN] = 1;
@@ -133,10 +126,7 @@ int serial_opendevice(__const char *__file, int __with_odd_parity) {
   return fd;
 }
 
-/*
- * Set the DTR and RTS bit of the serial device.
- *
- */
+/* Set the DTR and RTS bit of the serial device. */
 
 void serial_setdtrrts(int __fd, int __dtr, int __rts) {
 
@@ -157,10 +147,7 @@ void serial_setdtrrts(int __fd, int __dtr, int __rts) {
     ioctl(__fd, TIOCMBIC, &flags);
 }
 
-/*
- * Change the speed of the serial device.
- *
- */
+/* Change the speed of the serial device. */
 
 void serial_changespeed(int __fd, int __speed) {
 
@@ -183,8 +170,9 @@ void serial_changespeed(int __fd, int __speed) {
 #ifndef SGTTY
   tcgetattr(__fd, &t);
 
-  t.c_cflag &= ~CBAUD;
-  t.c_cflag |= speed;
+  // This is not needed! We set up the speed via cfsetspeed
+  //  t.c_cflag &= ~CBAUD;
+  //  t.c_cflag |= speed;
   cfsetspeed(&t, speed);
 
   tcsetattr(__fd, TCSADRAIN, &t);
@@ -198,20 +186,14 @@ void serial_changespeed(int __fd, int __speed) {
 #endif
 }
 
-/*
- * Read from serial device.
- *
- */
+/* Read from serial device. */
 
 size_t serial_read(int __fd, __ptr_t __buf, size_t __nbytes) {
 
   return (read(__fd, __buf, __nbytes));
 }
 
-/*
- * Write to serial device.
- *
- */
+/* Write to serial device. */
 
 size_t serial_write(int __fd, __const __ptr_t __buf, size_t __n) {
 

@@ -2194,22 +2194,20 @@ GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
     req[count++]=0x01; /* Only one block */
     
     if (Bitmap->size==0x00) {
-      textlen=strlen(Bitmap->dealertext);
-      if (textlen==0)
+      if (!Bitmap->dealerset)
       {
         req[count++]=0x02; /* Welcome text */
-       textlen=strlen(Bitmap->text);
-       req[count++]=textlen;
+        textlen=strlen(Bitmap->text);
+        req[count++]=textlen;
         memcpy(req+count,Bitmap->text,textlen);
-        count+=textlen;
       } else
       {
         req[count++]=0x03; /* Dealer Welcome Note */
         textlen=strlen(Bitmap->dealertext);
         req[count++]=textlen;
         memcpy(req+count,Bitmap->dealertext,textlen);
-        count+=textlen;
       }
+      count+=textlen;
     }
     else
       {
@@ -3238,7 +3236,6 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   
     /* Startup Logo, Operator Logo and Profiles. */
 
-
   case 0x05:
 
     switch (MessageBuffer[3]) {
@@ -3300,10 +3297,11 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x17:   /* Startup Logo */
 
-     if (GetBitmap!=NULL) {
 #ifdef DEBUG
-	fprintf(stdout, _("Message: Startup Logo received.\n"));
+    fprintf(stdout, _("Message: Startup Logo, welcome note and dealer welcome note received.\n"));
 #endif
+
+     if (GetBitmap!=NULL) {
        
        GetBitmap->height=0; //in some phones (5110, 5130) we don't have 01 block
        GetBitmap->width=0; //and it's better to set bitmap to 'default'
@@ -3322,13 +3320,28 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	   GetBitmap->size=GetBitmap->height*GetBitmap->width/8;
 	   memcpy(GetBitmap->bitmap,MessageBuffer+count,GetBitmap->size);
 	   count+=GetBitmap->size;
+#ifdef DEBUG
+	   fprintf(stdout, _("Startup logo supported - "));
+	   if (GetBitmap->size!=0)
+	   {
+	     fprintf(stdout, _("currently set\n"));
+	   } else {
+	     fprintf(stdout, _("currently empty\n"));
+	   }
+#endif
 	   break;
 	 case 0x02:
 	   memcpy(GetBitmap->text,MessageBuffer+count+1,MessageBuffer[count]);
 	   GetBitmap->text[MessageBuffer[count]]=0;
 	   count+=MessageBuffer[count]+1;
 #ifdef DEBUG
-	   fprintf(stdout, _("Startup Text: %s\n"),GetBitmap->text);
+	   fprintf(stdout, _("Startup Text supported - "));
+	   if (GetBitmap->text[0]!=0)
+	   {
+	     fprintf(stdout, _("currently set to \"%s\"\n"), GetBitmap->text);
+	   } else {
+             fprintf(stdout, _("currently empty\n"));
+	   }
 #endif
 	   break;
 	 case 0x03:
@@ -3336,7 +3349,13 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	   GetBitmap->dealertext[MessageBuffer[count]]=0;
 	   count+=MessageBuffer[count]+1;
 #ifdef DEBUG
-	   fprintf(stdout, _("Dealer welcome note: %s\n"),GetBitmap->dealertext);
+	   fprintf(stdout, _("Dealer welcome note supported - "));
+	   if (GetBitmap->dealertext[0]!=0)
+	   {
+	     fprintf(stdout, _("currently set to \"%s\"\n"), GetBitmap->dealertext);
+	   } else {
+             fprintf(stdout, _("currently empty\n"));
+	   }
 #endif
            break;
 	 }
@@ -3354,7 +3373,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     
       SetBitmapError=GE_NONE;    
 #ifdef DEBUG
-	fprintf(stdout, _("Message: Startup logo correctly set.\n"));
+      fprintf(stdout, _("Message: Startup logo, welcome note or dealer welcome note correctly set.\n"));
 #endif  
       break;      
 

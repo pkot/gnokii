@@ -1,3 +1,11 @@
+* Sun May 14 21:17:06 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- Hey, we really won the World Championship in ice hockey again!
+- Fixed some minor language stuff.
+
+* Sat May 13 20:46:26 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- slovak debug messages removed :-)
+- Hey, we will beat you tomorrow in ice hockey!
+
 * Fri May 12 01:14:48 CEST 2000
 - Callers groups are readed only once.
 - Added info dialog when reading SMS centers.

@@ -73,7 +73,7 @@
 /* This one is for FreeBSD and similar systems without __ptr_t_ */
 
 #ifndef __ptr_t
-  #define __ptr_t void *
+  typedef void * __ptr_t;
 #endif /* __ptr_t */
 
 #endif /* __misc_h */

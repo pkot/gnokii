@@ -490,7 +490,7 @@ void DeleteSMS(void)
     gtk_box_pack_start(GTK_BOX(hbox), pixmap, FALSE, FALSE, 10);
     gtk_widget_show(pixmap);
 
-    label = gtk_label_new(_("Do you want delete selected SMS?"));
+    label = gtk_label_new(_("Do you want to delete selected SMS?"));
     gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 10);
     gtk_widget_show(label);
   }

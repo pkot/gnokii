@@ -52,7 +52,7 @@ int pmon(void);
 int setlogo(char *argv[]);
 int getlogo(char *argv[]);
 int reset(char *type);
-int showprofile(int argc, char *argv[]);
+int getprofile(int argc, char *argv[]);
 void readconfig(void);
 
 typedef enum {
@@ -90,7 +90,7 @@ typedef enum {
   OPT_RESET,
   OPT_SETLOGO,
   OPT_GETLOGO,
-  OPT_SHOWPROFILE,
+  OPT_GETPROFILE,
   OPT_FOOGLE
 } opt_index;
 
@@ -159,4 +159,5 @@ struct gnokii_arg_len {
 #define RINGTONE_GOINGUP      0x1a
 #define RINGTONE_CITYBIRD     0x1b
 #define RINGTONE_GRANDEVALSE  0x2f
+#define RINGTONE_ATTRACTION   0x3a
 #define RINGTONE_SAMBA        0x44

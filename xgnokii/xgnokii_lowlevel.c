@@ -167,14 +167,8 @@ static GSM_Error fbusinit(bool enable_monitoring)
     return (error);
   }
 
-#ifdef XDEBUG
-  g_print("Pred usleep.\n");
-#endif
   while (count++ < 40 && *GSM_LinkOK == false)
     usleep(50000);
-#ifdef XDEBUG
-  g_print("Za usleep. GSM_LinkOK: %d\n", *GSM_LinkOK);
-#endif
 
   if (*GSM_LinkOK == true)
     InitModelInf ();
