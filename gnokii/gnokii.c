@@ -2740,7 +2740,7 @@ static int getdisplaystatus(void)
 static int netmonitor(char *Mode)
 {
 	unsigned char mode = atoi(Mode);
-	char Screen[50];
+	GSM_NetMonitor nm;
 
 	if (!strcmp(Mode, "reset"))
 		mode = 0xf0;
@@ -2753,10 +2753,13 @@ static int netmonitor(char *Mode)
 	else if (!strcmp(Mode, "next"))
 		mode = 0x00;
 
-	memset(&Screen, 0, sizeof(Screen));
-//	if (GSM && GSM->NetMonitor) GSM->NetMonitor(mode, Screen);
+	nm.Field = mode;
+	memset(&nm.Screen, 0, 50);
+	data.NetMonitor = &nm;
 
-	if (Screen) fprintf(stdout, "%s\n", Screen);
+	SM_Functions(GOP_NetMonitor, &data, &State);
+
+	if (nm.Screen) fprintf(stdout, "%s\n", nm.Screen);
 
 	return 0;
 }

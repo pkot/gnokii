@@ -434,5 +434,9 @@ typedef struct {
 	struct timeval Last;
 } GSM_DisplayOutput;
 
+typedef struct {
+	int Field;
+	char Screen[50];
+} GSM_NetMonitor;
 
 #endif	/* __gsm_common_h */

@@ -66,6 +66,7 @@ static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -77,6 +78,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *buffer, in
 static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -142,6 +144,7 @@ static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ P7110_MSG_IDENTITY,	P7110_Incoming0x1b },
 	{ P7110_MSG_STLOGO,	P7110_IncomingStartup },
 	{ P7110_MSG_DIVERT,	P7110_IncomingCallDivert },
+	{ P7110_MSG_SECURITY,	P7110_IncomingSecurity },
 	{ 0, NULL }
 };
 
@@ -228,6 +231,8 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_GetSMSStatus(data, state);
 	case GOP_CallDivert:
 		return P7110_CallDivert(data, state);
+	case GOP_NetMonitor:
+		return P7110_NetMonitor(data, state);
 	case GOP7110_GetSMSFolders:
 		return P7110_GetSMSFolders(data, state);
 	case GOP7110_GetSMSFolderStatus:
@@ -1928,4 +1933,47 @@ static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	return error;
+}
+
+static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req1[2000] = {FBUS_FRAME_HEADER,
+					P7110_SUBSEC_ENABLE_EXTENDED_CMDS, 0x01};
+	unsigned char req2[2000] = {FBUS_FRAME_HEADER, P7110_SUBSEC_NETMONITOR};
+
+	req2[4] = data->NetMonitor->Field;
+
+	if (SM_SendMessage(state, 5, P7110_MSG_SECURITY, req1) != GE_NONE)
+		return GE_NOTREADY;
+	if (SM_SendMessage(state, 5, P7110_MSG_SECURITY, req2) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, P7110_MSG_SECURITY);
+}
+
+static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	int i;
+
+	for (i = 0; i < length; i++) dprintf("0x%02x ", message[i]);
+	dprintf("\n");
+
+	if (!data || !data->NetMonitor) return GE_INTERNALERROR;
+	switch (message[3]) {
+	case P7110_SUBSEC_NETMONITOR:
+		switch(message[4]) {
+		case 0x00:
+			dprintf("Message: Netmonitor correctly set.\n");
+			break;
+		default:
+			dprintf("Message: Netmonitor menu %d received:\n", message[4]);
+			dprintf("%s\n", message + 5);
+			strcpy(data->NetMonitor->Screen, message + 5);
+			break;
+		}
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x%02x (Security): 0x%02x\n", P7110_MSG_SECURITY, message[3]);
+		return GE_UNHANDLEDFRAME;
+	}
+	return GE_NONE;
 }

@@ -136,4 +136,8 @@ extern bool P7110_LinkOK;
 #define P7110_ENTRYTYPE_LOGOSWITCH	0x1c	/* Group logo on/off */
 #define P7110_ENTRYTYPE_GROUP		0x1e	/* Group number for phonebook entry */
 
-#endif  /* #ifndef __phones_nk7110_h */
+/* Entry types for the security commands */
+#define P7110_SUBSEC_ENABLE_EXTENDED_CMDS 0x64  /* Enable extended commands */
+#define P7110_SUBSEC_NETMONITOR         0x7e    /* Netmonitor */
+
+#endif  /* __phones_nk7110_h */
