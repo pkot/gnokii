@@ -28,6 +28,7 @@
       --without-x and X headers were not found by configure
       (CPPFLAGS became to have value '-I')               (Pawel Kot)
     o fix FreeBSD build  (Alexander V. Ribchansky, Peter Kolmisoppi)
+    o fix the order of the library linking               (Pawel Kot)
  * libsms fixes
     o fix sms_free_deleted()                           (Ulrich Hopp)
     o fix segfault on reading sms in nk7110 driver       (Pawel Kot)

@@ -9,10 +9,6 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-ifdef XPM_LIBS
-	LDLIBS += $(XPM_LIBS)
-endif
-
 OBJS =	gnokii.o
 
 ifdef OWN_GETOPT
@@ -26,6 +22,10 @@ else
 endif
 
 LDLIBS += -L$(TOPDIR)/common -lgnokii
+
+ifdef XPM_LIBS
+	LDLIBS += $(XPM_LIBS)
+endif
 
 all: gnokii
 
