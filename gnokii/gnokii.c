@@ -1388,6 +1388,8 @@ static GSM_Bitmap_Types set_bitmap_type(char *s)
 	if (!strcmp(s, "startup")) return GSM_StartupLogo;
 	if (!strcmp(s, "caller")) return GSM_CallerLogo;
 	if (!strcmp(s, "picture")) return GSM_PictureImage;
+	if (!strcmp(s, "emspicture")) return GSM_EMSPicture;
+	if (!strcmp(s, "emsanimation")) return GSM_EMSAnimation;
 	return GSM_None;
 }
 
@@ -1403,18 +1405,12 @@ static int sendlogo(int argc, char *argv[])
 
 	/* The first argument is the type of the logo. */
 	switch (sms.UserData[0].u.Bitmap.type = set_bitmap_type(argv[0])) {
-	case GSM_OperatorLogo:
-		fprintf(stderr, _("Sending operator logo.\n"));
-		break;
-	case GSM_CallerLogo:
-		fprintf(stderr, _("Sending caller line identification logo.\n"));
-		break;
-	case GSM_PictureImage:
-		fprintf(stderr, _("Sending Multipart Message: Picture Message.\n"));
-		break;
-	default:
-		fprintf(stderr, _("You should specify what kind of logo to send!\n"));
-		return (-1);
+	case GSM_OperatorLogo: fprintf(stderr, _("Sending operator logo.\n")); break;
+	case GSM_CallerLogo:   fprintf(stderr, _("Sending caller line identification logo.\n")); break;
+	case GSM_PictureImage: fprintf(stderr, _("Sending Multipart Message: Picture Message.\n")); break;
+	case GSM_EMSPicture:   fprintf(stderr, _("Sending EMS-compliant Picture Message.\n")); break;
+	case GSM_EMSAnimation: fprintf(stderr, _("Sending EMS-compliant Animation.\n")); break;
+	default: 	       fprintf(stderr, _("You should specify what kind of logo to send!\n")); return (-1);
 	}
 
 	sms.UserData[0].Type = SMS_BitmapData;
@@ -1781,7 +1777,11 @@ static int setlogo(int argc, char *argv[])
 
 static int viewlogo(char *filename)
 {
-	return GSM_ShowBitmapFile(filename);
+	GSM_Error error;
+	error = GSM_ShowBitmapFile(filename);
+	if (error != GE_NONE)
+		fprintf(stdout, _("Could not load bitmap: %d (%m)\n"), error);
+	return error;
 }
 
 /* Calendar notes receiving. */
