@@ -184,7 +184,7 @@ void DB_Look (void)
       continue;
     }
     
-    DefaultSubmitSMS (&sms);
+    gn_sms_default_submit (&sms);
     memset (&sms.Remote.Number, 0, sizeof (sms.Remote.Number));
 
     fgets (sms.Remote.Number, sizeof (sms.Remote.Number), smsFile);

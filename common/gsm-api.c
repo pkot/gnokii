@@ -38,6 +38,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -59,7 +60,6 @@
  *	in order to create a DLL.
  *
  */
-
 BOOL APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
                        LPVOID lpReserved
@@ -84,19 +84,17 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 #endif	/* defined(WIN32) && defined(_USRDLL) */
 
 GSM_Statemachine GSM_SM;
-GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+GSM_Error (*gn_gsm_f)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
 
 /* Define pointer to the GSM_Information structure used by external code to
    obtain information that varies from model to model. This structure is also
    defined in gsm-common.h */
-
-API GSM_Information		*GSM_Info;
+API GSM_Information *gn_gsm_info;
 
 /* Initialise interface to the phone. Model number should be a string such as
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
-
 static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel, GSM_Statemachine *sm)
 {
 	GSM_Data data;
@@ -119,7 +117,10 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 		return ret; \
 }
 
-API GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
+API GSM_Error gn_gsm_initialise(char *model, char *device, char *initlength,
+				GSM_ConnectionType connection,
+				void (*rlp_callback)(RLP_F96Frame *frame),
+				GSM_Statemachine *sm)
 {
 	GSM_Error ret;
 	char *sms_timeout;

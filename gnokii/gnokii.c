@@ -383,7 +383,7 @@ static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 	}
 
 	/* Initialise the code for the GSM interface. */
-	error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler, &State);
+	error = gn_gsm_initialise(model, Port, Initlength, connection, rlp_handler, &State);
 	if (error != GE_NONE) {
 		fprintf(stderr, _("Telephone interface init failed: %s Quitting.\n"), print_error(error));
 		exit(2);
@@ -509,7 +509,7 @@ static int sendsms(int argc, char *argv[])
 	input_len = GSM_MAX_SMS_LENGTH;
 
 	/* The memory is zeroed here */
-	DefaultSubmitSMS(&sms);
+	gn_sms_default_submit(&sms);
 
 	memset(&sms.Remote.Number, 0, sizeof(sms.Remote.Number));
 	strncpy(sms.Remote.Number, argv[0], sizeof(sms.Remote.Number) - 1);
@@ -655,7 +655,7 @@ static int sendsms(int argc, char *argv[])
 	data.SMS = &sms;
 
 	/* Send the message. */
-	error = SendSMS(&data, &State);
+	error = gn_sms_send(&data, &State);
 
 	if (error == GE_NONE) {
 		fprintf(stderr, _("Send succeeded!\n"));
@@ -695,7 +695,7 @@ static int savesms(int argc, char *argv[])
 	};
 
 
-	DefaultSubmitSMS(&sms);
+	gn_sms_default_submit(&sms);
 
 	/* the nokia 7110 will choke if no number is present when we */
 	/* try to store a SMS on the phone. maybe others do too */
@@ -837,7 +837,7 @@ static int savesms(int argc, char *argv[])
 		sms.DCS.u.General.Alphabet = SMS_UCS2;
 
 	data.SMS = &sms;
-	error = SaveSMS(&data, &State);
+	error = gn_sms_save(&data, &State);
 
 	if (error == GE_NONE)
 		fprintf(stderr, _("Saved to %d!\n"), sms.Number);
@@ -1102,7 +1102,7 @@ static int getsms(int argc, char *argv[])
 		message.Number = count;
 		data.SMS = &message;
 
-		error = GetSMS(&data, &State);
+		error = gn_sms_get(&data, &State);
 		switch (error) {
 		case GE_NONE:
 			switch (message.Type) {
@@ -1270,7 +1270,7 @@ static int getsms(int argc, char *argv[])
 			}
 			if (del) {
 				data.SMS = &message;
-				if (GE_NONE != DeleteSMS(&data, &State))
+				if (GE_NONE != gn_sms_delete(&data, &State))
 					fprintf(stderr, _("(delete failed)\n"));
 				else
 					fprintf(stderr, _("(message deleted)\n"));
@@ -1314,7 +1314,7 @@ static int deletesms(int argc, char *argv[])
 		data.SMS = &message;
 		data.SMSFolder = &folder;
 		data.SMSFolderList = &folderlist;
-		error = DeleteSMS(&data, &State);
+		error = gn_sms_delete(&data, &State);
 
 		if (error == GE_NONE)
 			fprintf(stderr, _("Deleted SMS %s %d\n"), memory_type_string, count);
@@ -1584,7 +1584,7 @@ static int sendlogo(int argc, char *argv[])
 	GSM_Error error;
 	int type;
 
-	DefaultSubmitSMS(&sms);
+	gn_sms_default_submit(&sms);
 
 	/* The first argument is the type of the logo. */
 	switch (type = set_bitmap_type(argv[0])) {
@@ -1637,7 +1637,7 @@ static int sendlogo(int argc, char *argv[])
 
 	/* Send the message. */
 	data.SMS = &sms;
-	error = SendSMS(&data, &State);
+	error = gn_sms_send(&data, &State);
 
 	if (error == GE_NONE) fprintf(stderr, _("Send succeeded!\n"));
 	else fprintf(stderr, _("SMS Send failed (%s)\n"), print_error(error));
@@ -3681,7 +3681,7 @@ static int pmon(void)
 	GSM_ConnectionType connection = GCT_Serial;
 
 	/* Initialise the code for the GSM interface. */
-	error = GSM_Initialise(model, Port, Initlength, connection, NULL, &State);
+	error = gn_gsm_initialise(model, Port, Initlength, connection, NULL, &State);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
@@ -3700,7 +3700,7 @@ static int sendringtone(int argc, char *argv[])
 	GSM_API_SMS sms;
 	GSM_Error error = GE_NOTSUPPORTED;
 
-	DefaultSubmitSMS(&sms);
+	gn_sms_default_submit(&sms);
 	sms.UserData[0].Type = SMS_RingtoneData;
 	sms.UserData[1].Type = SMS_NoData;
 
@@ -3715,7 +3715,7 @@ static int sendringtone(int argc, char *argv[])
 
 	/* Send the message. */
 	data.SMS = &sms;
-	error = SendSMS(&data, &State);
+	error = gn_sms_send(&data, &State);
 
 	if (error == GE_NONE)
 		fprintf(stderr, _("Send succeeded!\n"));

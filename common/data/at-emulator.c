@@ -32,7 +32,6 @@
 
 #define		__data_at_emulator_c
 
-
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -384,7 +383,7 @@ static void ATEM_HandleSMS()
 
 	data.SMS->MemoryType = SMSType;
 	data.SMS->Number = SMSNumber;
-	error = GetSMS(&data, sm);
+	error = gn_sms_get(&data, sm);
 
 	switch (error) {
 	case GE_NONE:
@@ -476,7 +475,7 @@ void	ATEM_ParseSMSText(char *buff)
 			dprintf("Sending SMS to %s (text: %s)\n", data.SMS->Remote.Number, data.SMS->UserData[0].u.Text);
 
 			/* FIXME: set more SMS fields before sending */
-			error = SendSMS(&data, sm);
+			error = gn_sms_send(&data, sm);
 
 			if (error == GE_NONE) {
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMS->Number);
@@ -645,7 +644,7 @@ bool	ATEM_CommandPlusC(char **buf)
 
 			data.SMS->MemoryType = SMSType;
 			data.SMS->Number = index;
-			error = GetSMS(&data, sm);
+			error = gn_sms_get(&data, sm);
 
 			switch (error) {
 			case GE_NONE:
@@ -717,7 +716,7 @@ bool	ATEM_CommandPlusC(char **buf)
 
 				data.SMS->MemoryType = SMSType;
 				data.SMS->Number = index;
-				error = GetSMS(&data, sm);
+				error = gn_sms_get(&data, sm);
 
 				switch (error) {
 				case GE_NONE:

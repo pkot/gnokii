@@ -273,7 +273,7 @@ static void ReadConfig (gint argc, gchar *argv[])
 }
 
 
-static void *SendSMS2 (void *a)
+static void *SendSMS (void *a)
 {
   if ((*DB_ConnectOutbox) (connection))
   {
@@ -358,7 +358,7 @@ static void ReadSMS (gpointer d, gpointer userData)
 }
 
 
-static void GetSMS2 (void)
+static void GetSMS (void)
 {
   while (1)
   {
@@ -418,8 +418,8 @@ static void Run (void)
   pthread_create (&monitor_th, NULL, Connect, NULL);
   db_monitor = TRUE;
   pthread_mutex_init (&db_monitorMutex, NULL);
-  pthread_create (&db_monitor_th, NULL, SendSMS2, NULL);
-  GetSMS2 ();
+  pthread_create (&db_monitor_th, NULL, SendSMS, NULL);
+  GetSMS ();
 }
 
 

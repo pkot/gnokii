@@ -445,9 +445,9 @@ typedef struct {
 	int New;
 } GSM_CBMessage;
 
-GSM_Error PrepareSMS(GSM_API_SMS *sms, GSM_SMSMessage *rawsms);
+GSM_Error sms_prepare(GSM_API_SMS *sms, GSM_SMSMessage *rawsms);
 
 /* Utils */
-extern SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt);
+SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt);
 
 #endif /* __gnokii_sms_h_ */

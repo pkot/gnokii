@@ -988,7 +988,7 @@ static void DoSendSMS(void)
 		} else
 			number = addresses[i];
 
-		DefaultSubmitSMS(&sms);
+		gn_sms_default_submit(&sms);
 		strcpy(sms.SMSC.Number, xgnokiiConfig.smsSetting[sendSMS.center].SMSC.Number);
 		sms.SMSC.Type = xgnokiiConfig.smsSetting[sendSMS.center].SMSC.Type;
 

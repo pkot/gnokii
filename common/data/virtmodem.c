@@ -375,7 +375,7 @@ static GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM
 	GSM_Error error;
 
 	/* Initialise the code for the GSM interface. */
-	error = GSM_Initialise(model, port, initlength, connection, RLP_DisplayF96Frame, sm);
+	error = gn_gsm_initialise(model, port, initlength, connection, RLP_DisplayF96Frame, sm);
 
 	if (error != GE_NONE)
 		fprintf(stderr, _("GSM/FBUS init failed!\n"));

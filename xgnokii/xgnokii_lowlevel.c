@@ -251,9 +251,9 @@ static GSM_Error fbusinit(bool enable_monitoring)
 	/* Initialise the code for the GSM interface. */
 
 	if (error == GE_NOLINK)
-		error = GSM_Initialise(xgnokiiConfig.model, xgnokiiConfig.port,
-				       xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame,
-				       &statemachine);
+		error = gn_gsm_initialise(xgnokiiConfig.model, xgnokiiConfig.port,
+					  xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame,
+					  &statemachine);
 
 #ifdef XDEBUG
 	g_print("fbusinit: error %d\n", error);
@@ -387,7 +387,7 @@ static void RefreshSMS(const gint number)
 					gdat.SMS->Number = MessagesList[j][i].Location;
 					gdat.SMS->MemoryType =(GSM_MemoryType) i + 12 ;
 					dprintf("#: %i, mt: %i\n", gdat.SMS->Number, gdat.SMS->MemoryType);
-					if ((error = GetSMSnoValidate(&gdat, &statemachine)) == GE_NONE) {
+					if ((error = gn_sms_get_no_validate(&gdat, &statemachine)) == GE_NONE) {
 						dprintf("Found valid SMS ...\n %s\n",
 							msg->UserData[0].u.Text);
 						pthread_mutex_lock(&smsMutex);
@@ -426,7 +426,7 @@ static void RefreshSMS(const gint number)
 			msg->Number = i;
 
 			gdat.SMS = msg;
-			if ((error = GetSMS(&gdat, &statemachine)) == GE_NONE) {
+			if ((error = gn_sms_get(&gdat, &statemachine)) == GE_NONE) {
 				dprintf("Found valid SMS ...\n");
 				pthread_mutex_lock(&smsMutex);
 				phoneMonitor.sms.messages =
@@ -804,7 +804,7 @@ static gint A_SendSMSMessage(gpointer data)
 	if (d) {
 		gdat.SMS = d->sms;
 		pthread_mutex_lock(&sendSMSMutex);
-		error = d->status = SendSMS(&gdat, &statemachine);
+		error = d->status = gn_sms_send(&gdat, &statemachine);
 		pthread_cond_signal(&sendSMSCond);
 		pthread_mutex_unlock(&sendSMSMutex);
 	}
@@ -823,9 +823,9 @@ static gint A_DeleteSMSMessage(gpointer data)
 	if (sms) {
 		gdat.SMS = sms;
 		if (phoneMonitor.supported & PM_FOLDERS)
-			error = DeleteSMSnoValidate(&gdat, &statemachine);
+			error = gn_sms_delete_no_validate(&gdat, &statemachine);
 		else
-			error = DeleteSMS(&gdat, &statemachine);
+			error = gn_sms_delete(&gdat, &statemachine);
 		g_free(sms);
 	}
 	return (error);
@@ -1263,8 +1263,7 @@ void *GUI_Connect(void *a)
 				gdat.MessagesList[i][j] = &MessagesList[i][j];
 		}
 
-		if ((GetFolderChanges(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS)))
-		    == GE_NONE) {
+		if ((gn_sms_get_folder_changes(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS))) == GE_NONE) {
 			dprintf("old UR: %i, new UR: %i, old total: %i, new total: %i\n",
 				phoneMonitor.sms.unRead, gdat.SMSStatus->Unread,
 				phoneMonitor.sms.number, gdat.SMSStatus->Number);

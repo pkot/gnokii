@@ -1231,7 +1231,7 @@ static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
 	data.SMS = &sms;
 
 	dprintf("trying to fetch sms#%hd\n", sms.Number);
-	if ((error = GetSMS(&data, state)) != GE_NONE) {
+	if ((error = gn_sms_get(&data, state)) != GE_NONE) {
 		DRVINSTANCE(state)->sms_notification_in_progress = false;
 		return false;
 	}
@@ -3466,7 +3466,7 @@ static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType
 	GSM_Error err;
 	int n;
 
-	DefaultSubmitSMS(&sms);
+	gn_sms_default_submit(&sms);
 	sms.UserData[0].Type = type;
 	sms.UserData[1].Type = SMS_NoData;
 
@@ -3483,7 +3483,7 @@ static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType
 
 	memset(&rawsms, 0, sizeof(rawsms));
 
-	if ((err = PrepareSMS(&sms, &rawsms)) != GE_NONE) return err;
+	if ((err = sms_prepare(&sms, &rawsms)) != GE_NONE) return err;
 
 	n = 2 + rawsms.UserDataLength;
 	if (n > sizeof(req)) return GE_INTERNALERROR;

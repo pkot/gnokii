@@ -43,7 +43,7 @@
 
 #define ERROR() do { if (error != GE_NONE) return error; } while (0)
 
-struct udh_data {
+struct sms_udh_data {
 	unsigned int length;
 	char *header;
 };
@@ -51,21 +51,21 @@ struct udh_data {
 #define MAX_SMS_PART 128
 
 /* These are positions in the following (headers[]) table. */
-#define UDH_CONCATENATED_MESSAGES  1
-#define UDH_RINGTONES              2
-#define UDH_OPERATOR_LOGOS         3
-#define UDH_CALLER_LOGOS           4
-#define UDH_MULTIPART_MESSAGES     5
-#define UDH_WAP_VCARD              6
-#define UDH_WAP_CALENDAR           7
-#define UDH_WAP_VCARDSECURE        8
-#define UDH_WAP_VCALENDARSECURE    9
-#define UDH_VOICE_MESSAGES        10
-#define UDH_FAX_MESSAGES          11
-#define UDH_EMAIL_MESSAGES        12
+#define SMS_UDH_CONCATENATED_MESSAGES  1
+#define SMS_UDH_RINGTONES              2
+#define SMS_UDH_OPERATOR_LOGOS         3
+#define SMS_UDH_CALLER_LOGOS           4
+#define SMS_UDH_MULTIPART_MESSAGES     5
+#define SMS_UDH_WAP_VCARD              6
+#define SMS_UDH_WAP_CALENDAR           7
+#define SMS_UDH_WAP_VCARDSECURE        8
+#define SMS_UDH_WAP_VCALENDARSECURE    9
+#define SMS_UDH_VOICE_MESSAGES        10
+#define SMS_UDH_FAX_MESSAGES          11
+#define SMS_UDH_EMAIL_MESSAGES        12
 
 /* User data headers */
-static struct udh_data headers[] = {
+static struct sms_udh_data headers[] = {
 	{ 0x00, "" },
 	{ 0x05, "\x00\x03\x01\x00\x00" },     /* Concatenated messages */
 	{ 0x06, "\x05\x04\x15\x81\x00\x00" }, /* Ringtones */
@@ -84,8 +84,8 @@ static struct udh_data headers[] = {
 
 
 /**
- * DefaultSMS - fills in SMS structure with the default values
- * @SMS: pointer to a structure we need to fill in
+ * sms_default - fills in SMS structure with the default values
+ * @sms: pointer to a structure we need to fill in
  *
  * Default settings:
  *  - no delivery report
@@ -95,7 +95,7 @@ static struct udh_data headers[] = {
  *  - message validity for 3 days
  *  - unsent status
  */
-static void DefaultSMS(GSM_API_SMS *sms)
+static void sms_default(GSM_API_SMS *sms)
 {
 	memset(sms, 0, sizeof(GSM_API_SMS));
 
@@ -109,16 +109,16 @@ static void DefaultSMS(GSM_API_SMS *sms)
 	sms->DCS.u.General.Class = 0;
 }
 
-API void DefaultSubmitSMS(GSM_API_SMS *sms)
+API void gn_sms_default_submit(GSM_API_SMS *sms)
 {
-	DefaultSMS(sms);
+	sms_default(sms);
 	sms->Type = SMS_Submit;
 	sms->MemoryType = GMT_SM;
 }
 
-API void DefaultDeliverSMS(GSM_API_SMS *sms)
+API void gn_sms_default_deliver(GSM_API_SMS *sms)
 {
-	DefaultSMS(sms);
+	sms_default(sms);
 	sms->Type = SMS_Deliver;
 	sms->MemoryType = GMT_ME;
 }
@@ -129,13 +129,13 @@ API void DefaultDeliverSMS(GSM_API_SMS *sms)
  ***/
 
 /**
- * PrintDateTime - formats date and time in the human readable manner
+ * sms_print_date_time - formats date and time in the human readable manner
  * @number: binary coded date and time
  *
  * The function converts binary date time into a easily readable form.
  * It is Y2K compliant.
  */
-static char *PrintDateTime(u8 *number)
+static char *sms_print_date_time(u8 *number)
 {
 #ifdef DEBUG
 #define LOCAL_DATETIME_MAX_LENGTH 23
@@ -175,14 +175,14 @@ static char *PrintDateTime(u8 *number)
 }
 
 /**
- * UnpackDateTime - converts binary datetime to the gnokii's datetime struct
+ * gn_sms_unpack_date_time - converts binary datetime to the gnokii's datetime struct
  * @number: binary coded date and time
  * @dt: datetime structure to be filled
  *
  * The function fills int gnokii datetime structure basing on the given datetime
  * in the binary format. It is Y2K compliant.
  */
-SMS_DateTime *UnpackDateTime(u8 *number, SMS_DateTime *dt)
+SMS_DateTime *gn_sms_unpack_date_time(u8 *number, SMS_DateTime *dt)
 {
 	if (!dt) return NULL;
 	memset(dt, 0, sizeof(SMS_DateTime));
@@ -218,7 +218,7 @@ SMS_DateTime *UnpackDateTime(u8 *number, SMS_DateTime *dt)
  ***/
 
 /**
- * SMSStatus - decodes the error code contained in the delivery report.
+ * sms_status - decodes the error code contained in the delivery report.
  * @status: error code to decode
  * @sms: SMS struct to store the result
  *
@@ -229,7 +229,7 @@ SMS_DateTime *UnpackDateTime(u8 *number, SMS_DateTime *dt)
  * contain only one part, so it is assumed all other part except 0th are
  * NULL.
  */
-static GSM_Error SMSStatus(unsigned char status, GSM_API_SMS *sms)
+static GSM_Error sms_status(unsigned char status, GSM_API_SMS *sms)
 {
 	sms->UserData[0].Type = SMS_PlainText;
 	sms->UserData[1].Type = SMS_NoData;
@@ -352,7 +352,7 @@ static GSM_Error SMSStatus(unsigned char status, GSM_API_SMS *sms)
 }
 
 /**
- * DecodeData - decodes encoded text from the SMS.
+ * sms_decode_data - decodes encoded text from the SMS.
  * @message: encoded text
  * @output: room for the encoded text
  * @length: decoded text length
@@ -363,8 +363,8 @@ static GSM_Error SMSStatus(unsigned char status, GSM_API_SMS *sms)
  * This function decodes either 7bit or 8bit os Unicode text to the
  * readable text format according to the locale set.
  */
-static GSM_Error DecodeData(unsigned char *message, unsigned char *output, unsigned int length,
-			    unsigned int size, unsigned int udhlen, SMS_DataCodingScheme dcs)
+static GSM_Error sms_decode_data(unsigned char *message, unsigned char *output, unsigned int length,
+				 unsigned int size, unsigned int udhlen, SMS_DataCodingScheme dcs)
 {
 	/* Unicode */
 	if ((dcs.Type & 0x08) == 0x08) {
@@ -388,7 +388,7 @@ static GSM_Error DecodeData(unsigned char *message, unsigned char *output, unsig
 }
 
 /**
- * DecodeUDH - interprete the User Data Header contents
+ * sms_decode_udh - interprete the User Data Header contents
  * @message: received UDH
  * @sms: SMS structure to fill in
  *
@@ -397,7 +397,7 @@ static GSM_Error DecodeData(unsigned char *message, unsigned char *output, unsig
  *   - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
  *   - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  */
-static GSM_Error DecodeUDH(unsigned char *message, SMS_UserDataHeader *udh)
+static GSM_Error sms_decode_udh(unsigned char *message, SMS_UserDataHeader *udh)
 {
 	unsigned char length, pos, nr;
 
@@ -496,7 +496,7 @@ static GSM_Error DecodeUDH(unsigned char *message, SMS_UserDataHeader *udh)
 }
 
 /**
- * DecodeSMSHeader - Doecodes PDU SMS header
+ * sms_decode_header - Doecodes PDU SMS header
  * @rawsms:
  * @sms:
  * @udh:
@@ -505,7 +505,7 @@ static GSM_Error DecodeUDH(unsigned char *message, SMS_UserDataHeader *udh)
  * them in hihger level SMS struct. It also checks for the UDH and when
  * it's found calls the function to extract the UDH.
  */
-static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_UserDataHeader *udh)
+static GSM_Error sms_decode_header(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_UserDataHeader *udh)
 {
 	switch (sms->Type = rawsms->Type) {
 	case SMS_Deliver:
@@ -535,8 +535,8 @@ static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_U
 	}
 
 	/* Sending date */
-	UnpackDateTime(rawsms->SMSCTime, &(sms->SMSCTime));
-	dprintf("\tDate: %s\n", PrintDateTime(rawsms->SMSCTime));
+	gn_sms_unpack_date_time(rawsms->SMSCTime, &(sms->SMSCTime));
+	dprintf("\tDate: %s\n", sms_print_date_time(rawsms->SMSCTime));
 
 	/* Remote number */
 	rawsms->RemoteNumber[0] = (rawsms->RemoteNumber[0] + 1) / 2 + 1;
@@ -549,8 +549,8 @@ static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_U
 
 	/* Delivery time */
 	if (sms->Type == SMS_Delivery_Report) {
-		UnpackDateTime(rawsms->Time, &(sms->Time));
-		dprintf("\tDelivery date: %s\n", PrintDateTime(rawsms->Time));
+		gn_sms_unpack_date_time(rawsms->Time, &(sms->Time));
+		dprintf("\tDelivery date: %s\n", sms_print_date_time(rawsms->Time));
 	}
 
 	/* Data Coding Scheme */
@@ -559,30 +559,30 @@ static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_U
 	/* User Data Header */
 	if (rawsms->UDHIndicator & 0x40) { /* UDH header available */
 		dprintf("UDH found\n");
-		DecodeUDH(rawsms->UserData, udh);
+		sms_decode_udh(rawsms->UserData, udh);
 	}
 
 	return GE_NONE;
 }
 
 /**
- * DecodePDUSMS - This function decodes the PDU SMS
+ * sms_decode_pdu - This function decodes the PDU SMS
  * @rawsms - SMS read by the phone driver
  * @sms - place to store the decoded message
  *
  * This function decodes SMS as described in GSM 03.40 version 6.1.0
  * Release 1997, section 9
  */
-static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
+static GSM_Error sms_decode_pdu(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 {
 	unsigned int size = 0;
 	GSM_Error error;
 
-	error = DecodeSMSHeader(rawsms, sms, &sms->UDH);
+	error = sms_decode_header(rawsms, sms, &sms->UDH);
 	ERROR();
 	switch (sms->Type) {
 	case SMS_Delivery_Report:
-		SMSStatus(rawsms->ReportStatus, sms);
+		sms_status(rawsms->ReportStatus, sms);
 		break;
 	case SMS_PictureTemplate:
 	case SMS_Picture:
@@ -604,19 +604,19 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 			size = rawsms->UserDataLength - 4 - sms->UserData[0].u.Bitmap.size;
 			/* Second part is a text */
 			sms->UserData[1].Type = SMS_NokiaText;
-			DecodeData(rawsms->UserData + 5 + sms->UserData[0].u.Bitmap.size,
-				   (unsigned char *)&(sms->UserData[1].u.Text),
-				   rawsms->Length - sms->UserData[0].u.Bitmap.size - 4,
-				   size, 0, sms->DCS);
+			sms_decode_data(rawsms->UserData + 5 + sms->UserData[0].u.Bitmap.size,
+					(unsigned char *)&(sms->UserData[1].u.Text),
+					rawsms->Length - sms->UserData[0].u.Bitmap.size - 4,
+					size, 0, sms->DCS);
 		} else {
 
 			dprintf("First text then picture!\n");
 
 			/* First part is a text */
 			sms->UserData[1].Type = SMS_NokiaText;
-			DecodeData(rawsms->UserData + 3,
-				   (unsigned char *)&(sms->UserData[1].u.Text),
-				   rawsms->UserData[1], rawsms->UserData[0], 0, sms->DCS);
+			sms_decode_data(rawsms->UserData + 3,
+					(unsigned char *)&(sms->UserData[1].u.Text),
+					rawsms->UserData[1], rawsms->UserData[0], 0, sms->DCS);
 
 			/* Second part is a Picture */
 			sms->UserData[0].Type = SMS_BitmapData;
@@ -629,12 +629,12 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 	/* Plain text message */
 	default:
 		size = rawsms->Length - sms->UDH.Length;
-		DecodeData(rawsms->UserData + sms->UDH.Length,        /* Skip the UDH */
-			   (unsigned char *)&sms->UserData[0].u.Text, /* With a plain text message we have only 1 part */
-			   rawsms->Length,                            /* Length of the decoded text */
-			   size,                                      /* Length of the encoded text (in full octets) without UDH */
-			   sms->UDH.Length,                          /* To skip the certain number of bits when unpacking 7bit message */
-			   sms->DCS);
+		sms_decode_data(rawsms->UserData + sms->UDH.Length,        /* Skip the UDH */
+				(unsigned char *)&sms->UserData[0].u.Text, /* With a plain text message we have only 1 part */
+				rawsms->Length,                            /* Length of the decoded text */
+				size,                                      /* Length of the encoded text (in full octets) without UDH */
+				sms->UDH.Length,                          /* To skip the certain number of bits when unpacking 7bit message */
+				sms->DCS);
 		break;
 	}
 
@@ -642,22 +642,22 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 }
 
 /**
- * ParseSMS - High-level function for the SMS parsing
+ * gn_sms_parse - High-level function for the SMS parsing
  * @data: GSM data from the phone driver
  *
  * This function parses the SMS message from the lowlevel RawSMS to
  * the highlevel SMS. In data->RawSMS there's SMS read by the phone
  * driver, data->SMS is the place for the parsed SMS.
  */
-API GSM_Error ParseSMS(GSM_Data *data)
+API GSM_Error gn_sms_parse(GSM_Data *data)
 {
 	if (!data->RawSMS || !data->SMS) return GE_INTERNALERROR;
 	/* Let's assume at the moment that all messages are PDU coded */
-	return DecodePDUSMS(data->RawSMS, data->SMS);
+	return sms_decode_pdu(data->RawSMS, data->SMS);
 }
 
 /**
- * RequestSMS - High-level function for the expicit SMS reading from the phone
+ * gn_sms_request - High-level function for the expicit SMS reading from the phone
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
@@ -665,21 +665,21 @@ API GSM_Error ParseSMS(GSM_Data *data)
  * phone driver. Not that RawSMS field in the GSM_Data structure must
  * be initialized
  */
-API GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error gn_sms_request(GSM_Data *data, GSM_Statemachine *state)
 {
 	if (!data->RawSMS) return GE_INTERNALERROR;
 	return SM_Functions(GOP_GetSMS, data, state);
 }
 
 /**
- * GetSMS - High-level function for reading SMS
+ * gn_sms _get- High-level function for reading SMS
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
  * This function is the frotnend for reading SMS. Note that SMS field
  * in the GSM_Data structure must be initialized.
  */
-API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error gn_sms_get(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
 	GSM_SMSMessage rawsms;
@@ -689,21 +689,21 @@ API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	rawsms.Number = data->SMS->Number;
 	rawsms.MemoryType = data->SMS->MemoryType;
 	data->RawSMS = &rawsms;
-	error = RequestSMS(data, state);
+	error = gn_sms_request(data, state);
 	ERROR();
 	data->SMS->Status = rawsms.Status;
-	return ParseSMS(data);
+	return gn_sms_parse(data);
 }
 
 /**
- * DeleteSMS - High-level function for delting SMS
+ * gn_sms_delete - High-level function for delting SMS
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
  * This function is the frontend for deleting SMS. Note that SMS field
  * in the GSM_Data structure must be initialized.
  */
-API GSM_Error DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error gn_sms_delete(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_SMSMessage rawsms;
 
@@ -719,12 +719,12 @@ API GSM_Error DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
  *** OTHER FUNCTIONS
  ***/
 
-GSM_Error RequestSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error sms_request_no_validate(GSM_Data *data, GSM_Statemachine *state)
 {
 	return SM_Functions(GOP_GetSMSnoValidate, data, state);
 }
 
-API GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error gn_sms_get_no_validate(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
 	GSM_SMSMessage rawsms;
@@ -734,13 +734,13 @@ API GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 	rawsms.Number = data->SMS->Number;
 	rawsms.MemoryType = data->SMS->MemoryType;
 	data->RawSMS = &rawsms;
-	error = RequestSMSnoValidate(data, state);
+	error = sms_request_no_validate(data, state);
 	ERROR();
 	data->SMS->Status = rawsms.Status;
-	return ParseSMS(data);
+	return gn_sms_parse(data);
 }
 
-API GSM_Error DeleteSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error gn_sms_delete_no_validate(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_SMSMessage rawsms;
 
@@ -752,7 +752,7 @@ API GSM_Error DeleteSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Functions(GOP_DeleteSMSnoValidate, data, state);
 }
 
-static GSM_Error FreeDeletedMessages(GSM_Data *data, int folder)
+static GSM_Error sms_free_deleted(GSM_Data *data, int folder)
 {
 	int i, j;
 
@@ -773,7 +773,7 @@ static GSM_Error FreeDeletedMessages(GSM_Data *data, int folder)
 	return GE_NONE;
 }
 
-GSM_Error GetReadMessages(GSM_Data *data)
+static GSM_Error sms_get_read(GSM_Data *data)
 {
 	int i, j, found;
 
@@ -798,7 +798,7 @@ GSM_Error GetReadMessages(GSM_Data *data)
 	return GE_NONE;
 }
 
-GSM_Error GetDeletedMessages(GSM_Data *data)
+static GSM_Error sms_get_deleted(GSM_Data *data)
 {
 	int i, j, found = 0;
 
@@ -820,7 +820,7 @@ GSM_Error GetDeletedMessages(GSM_Data *data)
 	return GE_NONE;
 }
 
-GSM_Error VerifyMessagesStatus(GSM_Data *data)
+static GSM_Error sms_verify_status(GSM_Data *data)
 {
 	int i, j, found = 0;
 
@@ -844,7 +844,7 @@ GSM_Error VerifyMessagesStatus(GSM_Data *data)
 }
 
 
-API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_folders)
+API GSM_Error gn_sms_get_folder_changes(GSM_Data *data, GSM_Statemachine *state, int has_folders)
 {
 	GSM_Error error;
 	SMS_Folder  SMSFolder;
@@ -875,7 +875,7 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 
 	for (i = 0; i < data->SMSStatus->NumberOfFolders; i++) {
 		dprintf("GetFolderChanges: Freeing deleted messages for folder #%i\n", i);
-		error = FreeDeletedMessages(data, i);
+		error = sms_free_deleted(data, i);
 		ERROR();
 
 		data->SMSFolder = &SMSFolder;
@@ -887,15 +887,15 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 		data->SMSFolder->FolderID = i;	/* so we don't need to do a modulo 8 each time */
 			
 		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->SMSFolder->Number, i);
-		error = GetReadMessages(data);
+		error = sms_get_read(data);
 		ERROR();
 
 		dprintf("GetFolderChanges: Getting deleted messages for folder #%i\n", i);
-		error = GetDeletedMessages(data);
+		error = sms_get_deleted(data);
 		ERROR();
 
 		dprintf("GetFolderChanges: Verifying messages for folder #%i\n", i);
-		error = VerifyMessagesStatus(data);
+		error = sms_verify_status(data);
 		ERROR();
 	}
 	return GE_NONE;
@@ -907,10 +907,9 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 
 
 /**
- * EncodeUDH - encodes User Data Header
- * @UDHi: User Data Header information
- * @SMS: SMS structure with the data source
- * @UDH: phone frame where to save User Data Header
+ * sms_encode_udh - encodes User Data Header
+ * @sms: SMS structure with the data source
+ * @type:
  *
  * returns pointer to data it added;
  *
@@ -919,7 +918,7 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
  *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  *  o Smart Messaging Specification, Revision 3.0.0
  */
-static char *EncodeUDH(GSM_SMSMessage *rawsms, int type)
+static char *sms_encode_udh(GSM_SMSMessage *rawsms, int type)
 {
 	unsigned char pos;
 	char *UDH = rawsms->UserData;
@@ -963,7 +962,7 @@ static char *EncodeUDH(GSM_SMSMessage *rawsms, int type)
 }
 
 /**
- * EncodeConcatHeader - Adds concatenated messages header
+ * encode_concat_header - Adds concatenated messages header
  * @rawsms: processed SMS
  * @this: current part number
  * @total: total parts number
@@ -971,9 +970,9 @@ static char *EncodeUDH(GSM_SMSMessage *rawsms, int type)
  * This function adds sequent part of the concatenated messages header. Note
  * that this header should be the first of all headers.
  */
-static GSM_Error EncodeConcatHeader(GSM_SMSMessage *rawsms, int this, int total)
+static GSM_Error sms_encode_concat_header(GSM_SMSMessage *rawsms, int this, int total)
 {
-	char *header = EncodeUDH(rawsms, SMS_ConcatenatedMessages);
+	char *header = sms_encode_udh(rawsms, SMS_ConcatenatedMessages);
 	if (!header) return GE_NOTSUPPORTED;
 	header[2] = 0xce;		/* Message serial number. Is 0xce value somehow special? -- pkot */
 	header[3] = total;
@@ -982,7 +981,7 @@ static GSM_Error EncodeConcatHeader(GSM_SMSMessage *rawsms, int this, int total)
 }
 
 /**
- * EncodeData - encodes the date from the SMS structure to the phone frame
+ * encode_data - encodes the date from the SMS structure to the phone frame
  *
  * @SMS: SMS structure to be encoded
  * @dcs: Data Coding Scheme field in the frame to be set
@@ -993,7 +992,7 @@ static GSM_Error EncodeConcatHeader(GSM_SMSMessage *rawsms, int this, int total)
  * This function does the phone frame encoding basing on the given SMS
  * structure. This function is capable to create only one frame at a time.
  */
-GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
+static GSM_Error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 {
 	SMS_AlphabetType al = SMS_DefaultAlphabet;
 	unsigned int i, size = 0;
@@ -1042,7 +1041,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 							     (i == 0));
 				break;
 			case GSM_OperatorLogo:
-				if (!EncodeUDH(rawsms, SMS_OpLogo)) return GE_NOTSUPPORTED;
+				if (!sms_encode_udh(rawsms, SMS_OpLogo)) return GE_NOTSUPPORTED;
 			default:
 				size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Bitmap),
 							   rawsms->UserData + rawsms->UserDataLength);
@@ -1114,8 +1113,8 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 
 		case SMS_MultiData:
 			size = sms->UserData[0].Length;
-			if (!EncodeUDH(rawsms, SMS_MultipartMessage)) return GE_NOTSUPPORTED;
-			error = EncodeConcatHeader(rawsms, sms->UserData[i].u.Multi.this, sms->UserData[i].u.Multi.total);
+			if (!sms_encode_udh(rawsms, SMS_MultipartMessage)) return GE_NOTSUPPORTED;
+			error = sms_encode_concat_header(rawsms, sms->UserData[i].u.Multi.this, sms->UserData[i].u.Multi.total);
 			ERROR();
 
 			memcpy(rawsms->UserData + rawsms->UserDataLength, sms->UserData[i].u.Multi.Binary, MAX_SMS_PART);
@@ -1125,7 +1124,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			break;
 
 		case SMS_RingtoneData:
-			if (!EncodeUDH(rawsms, SMS_Ringtone)) return GE_NOTSUPPORTED;
+			if (!sms_encode_udh(rawsms, SMS_Ringtone)) return GE_NOTSUPPORTED;
 			size = GSM_EncodeSMSRingtone(rawsms->UserData + rawsms->Length, &sms->UserData[i].u.Ringtone);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
@@ -1136,7 +1135,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			dprintf("Encoding concat header\n");
 			al = SMS_8bit;
 			rawsms->DCS = 0xf5;
-			EncodeConcatHeader(rawsms, sms->UserData[i].u.Concat.this, sms->UserData[i].u.Concat.total);
+			sms_encode_concat_header(rawsms, sms->UserData[i].u.Concat.this, sms->UserData[i].u.Concat.total);
 			break;
 
 		case SMS_NoData:
@@ -1150,7 +1149,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 	return GE_NONE;
 }
 
-GSM_Error PrepareSMS(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
+GSM_Error sms_prepare(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 {
 	switch (rawsms->Type = sms->Type) {
 	case SMS_Submit:
@@ -1168,12 +1167,12 @@ GSM_Error PrepareSMS(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 	rawsms->ValidityIndicator = SMS_RelativeFormat;
 	rawsms->Validity[0] = 0xa9;
 
-	EncodeData(sms, rawsms);
+	sms_encode_data(sms, rawsms);
 
 	return GE_NONE;
 }
 
-static void DumpRawSMS(GSM_SMSMessage *rawsms)
+static void sms_dump_raw(GSM_SMSMessage *rawsms)
 {
 	char buf[10240];
 
@@ -1187,10 +1186,10 @@ static void DumpRawSMS(GSM_SMSMessage *rawsms)
 	dprintf("UserData: %s\n", buf);
 }
 
-GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error sms_send_long(GSM_Data *data, GSM_Statemachine *state);
 
 /**
- * SendSMS - The main function for the SMS sending
+ * gn_sms_send - The main function for the SMS sending
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
@@ -1199,7 +1198,7 @@ GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state);
  * and then phone driver takes the fields it needs and sends it in the
  * phone specific way to the phone.
  */
-API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error gn_sms_send(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 
@@ -1212,12 +1211,12 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	if (data->RawSMS->MessageCenter[0] % 2) data->RawSMS->MessageCenter[0]++;
 	data->RawSMS->MessageCenter[0] = data->RawSMS->MessageCenter[0] / 2 + 1;
 
-	error = PrepareSMS(data->SMS, data->RawSMS);
+	error = sms_prepare(data->SMS, data->RawSMS);
 	ERROR();
 
 	if (data->RawSMS->Length > GSM_MAX_SMS_LENGTH) {
 		dprintf("SMS is too long? %d\n", data->RawSMS->Length);
-		error = SendLongSMS(data, state);
+		error = sms_send_long(data, state);
 		goto cleanup;
 	}
 
@@ -1228,7 +1227,7 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	return error;
 }
 
-API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error sms_send_long(GSM_Data *data, GSM_Statemachine *state)
 {
 	int i, count;
 	GSM_SMSMessage LongSMS, *rawsms = &LongSMS;	/* We need local copy for our dirty tricks */
@@ -1251,13 +1250,13 @@ API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
 		sms.UserData[0].u.Multi.total = count;
 		sms.UserData[1].Type = SMS_NoData;
 		data->SMS = &sms;
-		error = SendSMS(data, state);
+		error = gn_sms_send(data, state);
 		ERROR();
 	}
 	return GE_NONE;
 }
 
-API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error gn_sms_save(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 	GSM_SMSMessage rawsms;
@@ -1275,7 +1274,7 @@ API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 		if (data->RawSMS->MessageCenter[0] % 2) data->RawSMS->MessageCenter[0]++;
 		data->RawSMS->MessageCenter[0] = data->RawSMS->MessageCenter[0] / 2 + 1;
 	}
-	error = PrepareSMS(data->SMS, data->RawSMS);
+	error = sms_prepare(data->SMS, data->RawSMS);
 	ERROR();
 
 	if (data->RawSMS->Length > GSM_MAX_SMS_LENGTH) {
@@ -1284,7 +1283,7 @@ API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	error = SM_Functions(GOP_SaveSMS, data, state);
- cleanup:
+cleanup:
 	data->RawSMS = NULL;
 	return error;
 }

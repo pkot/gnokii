@@ -166,8 +166,8 @@ static GSM_Error fbusinit (bool enable_monitoring)
 
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise (smsdConfig.model, smsdConfig.port,
-                          smsdConfig.initlength, connection, NULL, &sm);
+  error = gn_gsm_initialise (smsdConfig.model, smsdConfig.port,
+			     smsdConfig.initlength, connection, NULL, &sm);
 
 #ifdef XDEBUG
   g_print ("fbusinit: error %d\n", error);
@@ -258,7 +258,7 @@ static void RefreshSMS (const gint number)
     msg->Number = ++i;
     data.SMS = msg;
     
-    if ((error = GetSMS (&data, &sm)) == GE_NONE)
+    if ((error = gn_sms_get (&data, &sm)) == GE_NONE)
     {
       pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
@@ -315,7 +315,7 @@ static gint A_SendSMSMessage (gpointer data)
       
     GSM_DataClear (&dt);
     dt.SMS = d->sms;
-    error = d->status = SendSMS (&dt, &sm);
+    error = d->status = gn_sms_send (&dt, &sm);
     pthread_cond_signal (&sendSMSCond);
     pthread_mutex_unlock (&sendSMSMutex);
   }
@@ -341,7 +341,7 @@ static gint A_DeleteSMSMessage (gpointer data)
   dt.SMSFolderList = &SMSFolderList;
   if (dt.SMS)
   {
-    error = DeleteSMS (&dt, &sm);
+    error = gn_sms_delete (&dt, &sm);
 //    I don't use copy, I don't need free message.
 //    g_free (sms);
   }
