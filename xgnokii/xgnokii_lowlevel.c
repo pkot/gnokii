@@ -308,7 +308,6 @@ static void RefreshSMS(const gint number)
 	GSM_RawData *raw;
 	GSList *tmp_list;
 	gint i, j, dummy;
-	GSM_MemoryType memtypes;
 
 #ifdef XDEBUG
 	g_print("RefreshSMS is running...\n");
@@ -563,7 +562,6 @@ static gint A_WriteMemoryLocationAll(gpointer data)
 {
 	GSM_Error error;
 	D_MemoryLocationAll *mla = (D_MemoryLocationAll *) data;
-	GSM_Data gdat;
 
 	error = mla->status = GE_UNKNOWN;
 

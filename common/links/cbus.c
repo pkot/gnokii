@@ -51,7 +51,6 @@ static GSM_Error CBUS_Loop(struct timeval *timeout);
 static bool CBUS_OpenSerial();
 static void CBUS_RX_StateMachine(unsigned char rx_byte);
 static int CBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
-static int CBUS_TX_SendAck(u8 message_type, u8 message_seq);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */

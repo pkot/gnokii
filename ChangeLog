@@ -1,5 +1,7 @@
 0.4.0pre18 (not released yet)
 ==========
+ * Code cleanups
+    o remove compilation warnigns                         (Pawel Kot)
  * 2110 series updates
     o fix segfault on getsms, but break smsreader.     (Pavel Machek)
       (this is actually step in right direction)
@@ -15,6 +17,7 @@
  * xgnokii fixes
     o some strange problem with xgnokii linking (reported
       by few people)                                      (Pawel Kot)
+    o Netmonitor fixed                                 (Markus Plail)
  * build system updates:
     o autoheader support added (based on Jan Kratochvil's autoheader
       patch for mygnokii)                            (BORBELY Zoltan)
@@ -34,8 +37,6 @@
     o keepalive packet won't be reported as an unhadled frame
                                                      (BORBELY Zoltan)
     o CancelCall, AnswerCall fixed                   (BORBELY Zoltan)
- * xgnokii updates
-    o Netmonitor fixed                                 (Markus Plail)
 
 0.4.0pre17
 ==========

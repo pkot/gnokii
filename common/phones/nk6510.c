@@ -1059,7 +1059,6 @@ static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
 					0x00, 0x00, 0x00, 0x00, 
 				         0x00, 0x01, /*location */
 				         0x00, 0x00};
-	GSM_Error error;
 
 	/*       00 01 00 07 01 01 00 01 
 		FE 10 

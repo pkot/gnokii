@@ -39,7 +39,7 @@ cd $PN-$PV
 # Configure and make package
 ./configure --prefix=/usr --with-xgnokiidir=/usr/X11R6 i386-slackware-linux
 make
-make prefix=$PKG/usr xgnokii_libdir=$PKG/usr/X11R6 install
+make DESTDIR=$PKG install
 
 # Copy the docs
 mkdir -p $PKG/usr/doc/$PN-$PV
