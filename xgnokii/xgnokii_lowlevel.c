@@ -937,18 +937,18 @@ static gint A_SetAlarm(gpointer data)
 }
 
 
-static gint A_SendKeyStroke(gpointer data)
+static gint A_PressKey(gpointer data)
 {
-	/*  gchar *buf = (gchar *) data; */
+	gdat.KeyCode = GPOINTER_TO_INT(data);
 
-	/* This is wrong. FIX IT */
-	/*  if (buf) 
-	   {
-	   FB61_TX_SendMessage(0x07, 0x0c, buf);
-	   g_free (buf);
-	   } */
+	return SM_Functions(GOP_PressPhoneKey, &gdat, &statemachine);
+}
 
-	return (0);
+static gint A_ReleaseKey(gpointer data)
+{
+	gdat.KeyCode = GPOINTER_TO_INT(data);
+
+	return SM_Functions(GOP_ReleasePhoneKey, &gdat, &statemachine);
 }
 
 static gint A_GetBitmap(gpointer data)
@@ -1019,7 +1019,7 @@ static gint A_Exit(gpointer data)
 
 
 gint(*DoAction[])(gpointer) = {
-A_GetMemoryStatus,
+	    A_GetMemoryStatus,
 	    A_GetMemoryLocation,
 	    A_GetMemoryLocationAll,
 	    A_WriteMemoryLocation,
@@ -1041,7 +1041,13 @@ A_GetMemoryStatus,
 	    A_NetMonitor,
 	    A_DialVoice,
 	    A_GetAlarm,
-	    A_SetAlarm, A_SendKeyStroke, A_GetBitmap, A_SetBitmap, A_GetNetworkInfo, A_Exit};
+	    A_SetAlarm,
+	    A_PressKey,
+	    A_ReleaseKey,
+	    A_GetBitmap,
+	    A_SetBitmap,
+	    A_GetNetworkInfo,
+	    A_Exit};
 
 
 void *GUI_Connect(void *a)

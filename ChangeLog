@@ -40,6 +40,7 @@
  * xgnokii updates
     o fix folder name max length                          (Pawel Kot)
     o reindented code                                     (Pawel Kot)
+    o keyboard handling fixed                        (BORBELY Zoltan)
  * libsms updates
     o fix folder name max length                          (Pawel Kot)
     o added DefaultSMS() function for initializing SMS struct

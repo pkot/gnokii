@@ -35,73 +35,73 @@ static ErrorDialog errorDialog = { NULL, NULL };
 static ButtonT *button = NULL;
 
 static ButtonT button_6110[30] = {
-	{103, 91, 114, 107, 0x0d},	/* Power */
-	{28, 240, 54, 263, 0x19},	/* Menu */
-	{84, 240, 110, 263, 0x1a},	/* Names */
-	{58, 245, 82, 258, 0x17},	/* Up */
-	{55, 263, 85, 276, 0x18},	/* Down */
-	{22, 271, 50, 289, 0x0e},	/* Green */
-	{91, 271, 115, 289, 0x0f},	/* Red */
-	{18, 294, 44, 310, 0x01},	/* 1 */
-	{56, 294, 85, 310, 0x02},	/* 2 */
-	{98, 294, 121, 310, 0x03},	/* 3 */
-	{18, 317, 44, 333, 0x04},	/* 4 */
-	{56, 317, 85, 333, 0x05},	/* 5 */
-	{98, 317, 121, 333, 0x06},	/* 6 */
-	{18, 342, 44, 356, 0x07},	/* 7 */
-	{56, 342, 85, 356, 0x08},	/* 8 */
-	{98, 342, 121, 356, 0x09},	/* 9 */
-	{18, 365, 44, 380, 0x0c},	/* * */
-	{56, 365, 85, 380, 0x0a},	/* 0 */
-	{98, 365, 121, 380, 0x0b},	/* # */
-	{1, 138, 10, 150, 0x10},	/* Volume + */
-	{1, 165, 10, 176, 0x11},	/* Volume - */
+	{103, 91, 114, 107, GSM_KEY_POWER},		/* Power */
+	{28, 240, 54, 263, GSM_KEY_MENU},		/* Menu */
+	{84, 240, 110, 263, GSM_KEY_NAMES},		/* Names */
+	{58, 245, 82, 258, GSM_KEY_UP},			/* Up */
+	{55, 263, 85, 276, GSM_KEY_DOWN},		/* Down */
+	{22, 271, 50, 289, GSM_KEY_GREEN},		/* Green */
+	{91, 271, 115, 289, GSM_KEY_RED},		/* Red */
+	{18, 294, 44, 310, GSM_KEY_1},			/* 1 */
+	{56, 294, 85, 310, GSM_KEY_2},			/* 2 */
+	{98, 294, 121, 310, GSM_KEY_3},			/* 3 */
+	{18, 317, 44, 333, GSM_KEY_4},			/* 4 */
+	{56, 317, 85, 333, GSM_KEY_5},			/* 5 */
+	{98, 317, 121, 333, GSM_KEY_6},			/* 6 */
+	{18, 342, 44, 356, GSM_KEY_7},			/* 7 */
+	{56, 342, 85, 356, GSM_KEY_8},			/* 8 */
+	{98, 342, 121, 356, GSM_KEY_9},			/* 9 */
+	{18, 365, 44, 380, GSM_KEY_ASTERISK},		/* * */
+	{56, 365, 85, 380, GSM_KEY_0},			/* 0 */
+	{98, 365, 121, 380, GSM_KEY_HASH},		/* # */
+	{1, 138, 10, 150, GSM_KEY_INCREASEVOLUME},	/* Volume + */
+	{1, 165, 10, 176, GSM_KEY_DECREASEVOLUME},	/* Volume - */
 	{0, 0, 0, 0, 0x00}
 };
 
 static ButtonT button_6150[30] = {
-	{99, 78, 114, 93, 0x0d},	/* Power */
-	{20, 223, 49, 245, 0x19},	/* Menu */
-	{90, 223, 120, 245, 0x1a},	/* Names */
-	{59, 230, 83, 247, 0x17},	/* Up */
-	{56, 249, 84, 265, 0x18},	/* Down */
-	{14, 254, 51, 273, 0x0e},	/* Green */
-	{90, 255, 126, 273, 0x0f},	/* Red */
-	{18, 281, 53, 299, 0x01},	/* 1 */
-	{55, 280, 86, 299, 0x02},	/* 2 */
-	{90, 281, 122, 299, 0x03},	/* 3 */
-	{18, 303, 53, 323, 0x04},	/* 4 */
-	{55, 303, 87, 323, 0x05},	/* 5 */
-	{90, 303, 122, 323, 0x06},	/* 6 */
-	{18, 327, 53, 346, 0x07},	/* 7 */
-	{53, 327, 87, 346, 0x08},	/* 8 */
-	{90, 327, 122, 346, 0x09},	/* 9 */
-	{18, 349, 53, 370, 0x0c},	/* * */
-	{56, 349, 87, 370, 0x0a},	/* 0 */
-	{98, 349, 122, 370, 0x0b},	/* # */
-	{2, 131, 10, 147, 0x10},	/* Volume + */
-	{2, 155, 10, 173, 0x11},	/* Volume - */
+	{99, 78, 114, 93, GSM_KEY_POWER},		/* Power */
+	{20, 223, 49, 245, GSM_KEY_MENU},		/* Menu */
+	{90, 223, 120, 245, GSM_KEY_NAMES},		/* Names */
+	{59, 230, 83, 247, GSM_KEY_UP},			/* Up */
+	{56, 249, 84, 265, GSM_KEY_DOWN},		/* Down */
+	{14, 254, 51, 273, GSM_KEY_GREEN},		/* Green */
+	{90, 255, 126, 273, GSM_KEY_RED},		/* Red */
+	{18, 281, 53, 299, GSM_KEY_1},			/* 1 */
+	{55, 280, 86, 299, GSM_KEY_2},			/* 2 */
+	{90, 281, 122, 299, GSM_KEY_3},			/* 3 */
+	{18, 303, 53, 323, GSM_KEY_4},			/* 4 */
+	{55, 303, 87, 323, GSM_KEY_5},			/* 5 */
+	{90, 303, 122, 323, GSM_KEY_6},			/* 6 */
+	{18, 327, 53, 346, GSM_KEY_7},			/* 7 */
+	{53, 327, 87, 346, GSM_KEY_8},			/* 8 */
+	{90, 327, 122, 346, GSM_KEY_9},			/* 9 */
+	{18, 349, 53, 370, GSM_KEY_ASTERISK},		/* * */
+	{56, 349, 87, 370, GSM_KEY_0},			/* 0 */
+	{98, 349, 122, 370, GSM_KEY_HASH},		/* # */
+	{2, 131, 10, 147, GSM_KEY_INCREASEVOLUME},	/* Volume + */
+	{2, 155, 10, 173, GSM_KEY_DECREASEVOLUME},	/* Volume - */
 	{0, 0, 0, 0, 0x00}
 };
 
 static ButtonT button_5110[30] = {
-	{100, 85, 114, 99, 0x0d},	/* Power */
-	{50, 240, 85, 265, 0x19},	/* Menu */
-	{20, 240, 45, 260, 0x1a},	/* Names */
-	{100, 240, 117, 258, 0x17},	/* Up */
-	{93, 267, 112, 287, 0x18},	/* Down */
-	{14, 294, 44, 312, 0x01},	/* 1 */
-	{54, 294, 83, 312, 0x02},	/* 2 */
-	{94, 294, 122, 312, 0x03},	/* 3 */
-	{14, 320, 44, 338, 0x04},	/* 4 */
-	{54, 320, 83, 338, 0x05},	/* 5 */
-	{94, 320, 122, 338, 0x06},	/* 6 */
-	{14, 345, 44, 363, 0x07},	/* 7 */
-	{54, 345, 83, 363, 0x08},	/* 8 */
-	{94, 345, 122, 363, 0x09},	/* 9 */
-	{18, 374, 49, 389, 0x0c},	/* * */
-	{53, 371, 82, 387, 0x0a},	/* 0 */
-	{96, 374, 119, 389, 0x0b},	/* # */
+	{100, 85, 114, 99, GSM_KEY_POWER},	/* Power */
+	{50, 240, 85, 265, GSM_KEY_MENU},	/* Menu */
+	{20, 240, 45, 260, GSM_KEY_NAMES},	/* Names */
+	{100, 240, 117, 258, GSM_KEY_UP},	/* Up */
+	{93, 267, 112, 287, GSM_KEY_DOWN},	/* Down */
+	{14, 294, 44, 312, GSM_KEY_1},		/* 1 */
+	{54, 294, 83, 312, GSM_KEY_2},		/* 2 */
+	{94, 294, 122, 312, GSM_KEY_3},		/* 3 */
+	{14, 320, 44, 338, GSM_KEY_4},		/* 4 */
+	{54, 320, 83, 338, GSM_KEY_5},		/* 5 */
+	{94, 320, 122, 338, GSM_KEY_6},		/* 6 */
+	{14, 345, 44, 363, GSM_KEY_7},		/* 7 */
+	{54, 345, 83, 363, GSM_KEY_8},		/* 8 */
+	{94, 345, 122, 363, GSM_KEY_9},		/* 9 */
+	{18, 374, 49, 389, GSM_KEY_ASTERISK},	/* * */
+	{53, 371, 82, 387, GSM_KEY_0},		/* 0 */
+	{96, 374, 119, 389, GSM_KEY_HASH},	/* # */
 	{0, 0, 0, 0, 0x00}
 };
 
@@ -177,8 +177,8 @@ void GUI_ShowXkeyb(void)
 
 static gint ButtonEvent(GtkWidget * widget, GdkEventButton * event)
 {
-	unsigned char req[] = { FBUS_FRAME_HEADER, 0x42, 0x01, 0x00, 0x01 };
 	register gint i = 0;
+	int action;
 
 	if (button == NULL)
 		return TRUE;
@@ -187,9 +187,9 @@ static gint ButtonEvent(GtkWidget * widget, GdkEventButton * event)
 		return TRUE;
 
 	if (event->type == GDK_BUTTON_PRESS)
-		req[4] = 0x01;
+		action = Event_PressKey;
 	else if (event->type == GDK_BUTTON_RELEASE)
-		req[4] = 0x02;
+		action = Event_ReleaseKey;
 	else
 		return TRUE;
 
@@ -201,9 +201,8 @@ static gint ButtonEvent(GtkWidget * widget, GdkEventButton * event)
 		    button[i].top_left_y <= event->y && event->y <= button[i].bottom_right_y) {
 			PhoneEvent *e = g_malloc(sizeof(PhoneEvent));
 
-			req[5] = button[i].code;
-			e->event = Event_SendKeyStroke;
-			e->data = g_memdup(req, sizeof(req));
+			e->event = action;
+			e->data = GINT_TO_POINTER(button[i].code);
 			GUI_InsertEvent(e);
 		}
 
