@@ -61,6 +61,8 @@
     o clean up irda code: headers usage, etc            (Pawel Kot)
     o add support for writing calendar and todo entries in vCal
       format even if there's no libical in the system   (Pawel Kot)
+    o use af_irda header as the system one, not gnokii specific
+                                                        (Pawel Kot)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

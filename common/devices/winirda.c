@@ -37,7 +37,7 @@
 #include "devices/irda.h"
 /* 'cause af_irda needs it.. */
 #define _WIN32_WINDOWS
-#include "devices/af_irda.h"
+#include <af_irda.h>
 
 #define INFO_LEN		22
 #define DISCOVERY_TIMEOUT	60000

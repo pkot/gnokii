@@ -278,6 +278,10 @@ SOURCE=..\..\common\devices\osxbluetooth.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\common\devices\irda.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\common\devices\winirda.c
 # End Source File
 # Begin Source File

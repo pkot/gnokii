@@ -47,7 +47,7 @@ box. Here are the steps you need to take to build IrDA support for Windows.
 1) Get a copy of af_irda.h header file. It is distributed with the Windows
 IrDA DDK. The contents of the file you can find at:
 http://www.cswl.com/whiteppr/white/arhead.html
-2) Copy it to <path>\include\devices\ in gnokii sources
+2) Copy it to some system path
 3) Enable IrDA support in config.h file (see above) by replacing a line:
 #undef HAVE_IRDA
 with
