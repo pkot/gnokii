@@ -20,9 +20,15 @@ Nokia's mobile phones, released under the GPL.
 Summary: Graphical Linux/Unix tool suite for Nokia mobile phones.
 Group: X11/Applications
 %description xgnokii
-Xgnokii is graphical Linux/Unix tool suite for Nokia's mobile phones. It
-allows you to edit your contacts book, send/read SMS's from/in
-computer and more other features.
+Xgnokii is a graphical Linux/Unix tool suite for Nokia's mobile phones. It
+allows you to edit your contacts book, send/read SMS's from/in your
+computer and more.
+
+%package devel
+Summary: Headers for gnokii application development
+Group: Development/Communication
+%description devel
+Header files needed for developing applications using gnokii.
 
 %prep
 
@@ -35,11 +41,20 @@ make
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-make prefix=${RPM_BUILD_ROOT}/usr install
+make DESTDIR=${RPM_BUILD_ROOT} install
 
-mkdir -p ${RPM_BUILD_ROOT}/etc/
+mkdir -p ${RPM_BUILD_ROOT}%{_sysconfdir}
 
-sed 's#/usr/local/sbin/#/usr/sbin/#' <Docs/sample/gnokiirc >${RPM_BUILD_ROOT}/etc/gnokiirc
+sed 's#/usr/local/sbin/#%{_sbindir}#' <Docs/sample/gnokiirc >${RPM_BUILD_ROOT}%{_sysconfdir}/gnokiirc
+
+# I know of no proper rpm macro to pickup manpages, they're expected
+# to be part of make install - So until that happens this hack is needed
+mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man1
+mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man8
+mkdir -p ${RPM_BUILD_ROOT}%{_prefix}/X11R6/man/man1
+cp Docs/man/*.1 ${RPM_BUILD_ROOT}%{_mandir}/man1
+cp Docs/man/*.8 ${RPM_BUILD_ROOT}%{_mandir}/man8
+cp Docs/man/*.1x ${RPM_BUILD_ROOT}%{_prefix}/X11R6/man/man1
 
 %pre
 /usr/sbin/groupadd -r -f gnokii >/dev/null 2>&1
@@ -54,11 +69,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %doc Docs/CREDITS Docs/DataCalls-QuickStart Docs/FAQ Docs/README
 %doc Docs/README-3810 Docs/README-6110 Docs/README-2110 Docs/README-6510 Docs/README-7110
-%doc Docs/README-WIN32 Docs/README-MaxOSX
+%doc Docs/README-WIN32 Docs/README-MacOSX
 %doc Docs/README-dancall Docs/README-siemens Docs/README-ericsson
 %doc Docs/gettext-howto Docs/gnokii-IrDA-Linux Docs/gnokii-ir-howto Docs/packaging-howto
 %doc Docs/gnokii-hackers-howto Docs/gnokii.nol Docs/logos.txt Docs/ringtones.txt Docs/Bugs
-%doc Docs/sample/logos/gnokii.xpm Docs/sample/ringtones/star.imelody Docs/sample/ringtones/star.rtttl
+%doc Docs/sample/logo/gnokii.xpm Docs/sample/ringtone/star.imelody Docs/sample/ringtone/star.rtttl
 %doc Docs/sample/gnokiirc
 %doc Docs/sample/ppp/options Docs/sample/ppp/pap-secrets
 %doc Docs/sample/ppp/ppp-gnokii Docs/sample/ppp/ppp-on
@@ -68,21 +83,37 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc Docs/protocol/nk6185.txt Docs/protocol/nk640.txt Docs/protocol/nk7110.txt Docs/protocol/nk6510.txt
 %doc Docs/protocol/nokia.txt
 
-%attr(0750, root, gnokii) /usr/bin/gnokii
-%attr(0750, root, gnokii) /usr/sbin/gnokiid
-%attr(4750, root, gnokii) /usr/sbin/mgnokiidev
-%attr(0750, root, gnokii) /usr/lib/libgnokii.so
-%config /etc/gnokiirc
+%attr(0750, root, gnokii) %{_bindir}/gnokii
+%attr(0750, root, gnokii) %{_sbindir}/gnokiid
+%attr(4750, root, gnokii) %{_sbindir}/mgnokiidev
+%attr(0750, root, gnokii) %{_libdir}/libgnokii.so
+%{_bindir}/ppm2nokia
+%{_bindir}/sendsms
+%{_datadir}/locale/*
+%config %{_sysconfdir}/gnokiirc
+%{_mandir}/*/*
+%{_prefix}/X11R6/man/*/*
 
 %files xgnokii
 %defattr(-,root,root)
-/usr/X11R6/bin/xgnokii
-/usr/bin/todologo
-/usr/X11R6/share/xgnokii
+%{_prefix}/X11R6/bin/xgnokii
+%{_bindir}/todologo
+%{_prefix}/X11R6/share/xgnokii
+
+%files devel
+%defattr(-,root,root)
+%{_includedir}/*
 
 %changelog
 
-* Sat Jan  4 2002 Pawel Kot <pkot#linuxnews.pl>
+* Wed Apr  2 2003 Tom G. Christensen <tom.christensen@get2net.dk>
+- add a -devel package
+- add manpages to package 
+- use proper %{_*dir} macros when referring to paths
+- use make DESTDIR for install
+- made sure that no files are left unpackaged
+
+* Sat Jan  4 2003 Pawel Kot <pkot#linuxnews.pl>
 - reflect changes in the file layout
 
 * Thu Aug 15 2002 Pawel Kot <pkot#linuxnews.pl>
