@@ -13,7 +13,10 @@
   Include file for SMS library.
 
   $Log$
-  Revision 1.1  2001-07-09 23:06:26  pkot
+  Revision 1.1  2001-11-08 16:23:20  pkot
+  New version of libsms. Not functional yet, but it reasonably stable API.
+
+  Revision 1.1  2001/07/09 23:06:26  pkot
   Moved sms.* files from my hard disk to CVS
 
 
@@ -25,8 +28,33 @@
 #include "misc.h"
 #include "gsm-error.h"
 
-#define SMS_MAX_SMS_LENGTH         160
-#define SMS_MAX_ADDRESS_LENGTH      40
+/* Maximum length of SMS center name */
+
+#define GSM_MAX_SMS_CENTER_NAME_LENGTH	(20)
+
+/* Limits of SMS messages. */
+
+#define GSM_MAX_SMS_CENTER_LENGTH  (40)
+#define GSM_MAX_SENDER_LENGTH      (40)
+#define GSM_MAX_DESTINATION_LENGTH (40)
+
+#define GSM_MAX_SMS_LENGTH         (160)
+#define GSM_MAX_8BIT_SMS_LENGTH    (140)
+
+#define SMS_MAX_ADDRESS_LENGTH      (40)
+
+/* FIXME: what value should be here? (Pawel Kot) */
+//#define GSM_MAX_USER_DATA_HEADER_LENGTH (10)
+#define SMS_MAX_UDH_HEADER_NUMBER 10
+
+/*** MEMORY INFO ***/
+
+typedef struct {
+	int Unread; /* Number of unread messages */
+	int Number; /* Number of all messages */
+} GSM_SMSMemoryStatus;
+
+/*** DATE AND TIME ***/
 
 typedef struct {
 	int Year;          /* The complete year specification - e.g. 1999. Y2K :-) */
@@ -37,6 +65,8 @@ typedef struct {
 	int Second;
 	int Timezone;      /* The difference between local time and GMT */
 } SMS_DateTime;
+
+/*** USER DATA HEADER ***/
 
 /* types of User Data Header */
 typedef enum {
@@ -80,6 +110,8 @@ typedef enum {
 	SMS_UDH  /* Use User Data Header - Special SMS Message Indication; the maximium level of information, may not be supported by all phones */
 } SMS_MessageWaitingType;
 
+/*** DATA CODING SCHEME ***/
+
 typedef enum {
 	SMS_GeneralDataCoding,
 	SMS_MessageWaiting
@@ -95,7 +127,8 @@ typedef enum {
 	SMS_VoiceMail = 0x00,
 	SMS_Fax       = 0x01,
 	SMS_Email     = 0x02,
-	SMS_Other     = 0x03
+	SMS_Text      = 0x03,
+	SMS_Other     = 0x04
 } SMS_IndicationType;
 
 typedef struct {
@@ -118,6 +151,8 @@ typedef struct {
 		} MessageWaiting;
 	} u;
 } SMS_DataCodingScheme;
+
+/*** VALIDITY PERIOD ***/
 
 typedef enum {
 	SMS_NoValidityPeriod = 0x00,
@@ -144,14 +179,40 @@ typedef struct {
 	} period;
 } SMS_EnhancedValidityPeriod;
 
+/* Validity of SMS Messages. */
+
+typedef enum {
+        SMS_V1H   = 0x0b,
+        SMS_V6H   = 0x47,
+        SMS_V24H  = 0xa7,
+        SMS_V72H  = 0xa9,
+        SMS_V1W   = 0xad,
+        SMS_VMax  = 0xff
+} SMS_ValidityPeriod;
+
 typedef struct {
 	SMS_ValidityPeriodFormat VPF;
 	union {
 		SMS_EnhancedValidityPeriod Enhanced;
-		unsigned short Relative; /* 8 bit */
+		SMS_ValidityPeriod Relative; /* 8 bit */
 		SMS_DateTime Absolute;
 	} u;
-} SMS_ValidityPeriod;
+} SMS_MessageValidity;
+
+
+/*** MESSAGE CENTER ***/
+
+typedef struct {
+	int			No;					/* Number of the SMSC in the phone memory. */
+	char			Name[GSM_MAX_SMS_CENTER_NAME_LENGTH];	/* Name of the SMSC. */
+	SMS_IndicationType	Format;					/* SMS is sent as text/fax/paging/email. */
+	SMS_ValidityPeriod	Validity;				/* Validity of SMS Message. */
+	char			Number[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the SMSC. */
+	char			Recipient[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the default recipient. */
+} SMS_MessageCenter;
+
+
+/*** SHORT MESSAGE CORE ***/
 
 /* This data-type is used to specify the type of the number. See the official
    GSM specification 03.40, version 6.1.0, section 9.1.2.5, page 35-37. */
@@ -170,20 +231,13 @@ typedef struct {
 	char number[SMS_MAX_ADDRESS_LENGTH];
 } SMS_Number;
 
-/* Define datatype for SMS Message Type */
-//typedef enum {
-//  SMS_MobileOriginated, /* Mobile Originated (MO) message - Outbox message */
-//  SMS_MobileTerminated, /* Mobile Terminated (MT) message - Inbox message */
-//  SMS_DeliveryReport /* Delivery Report */
-//} SMS_MessageType;
-
 typedef enum {                     /* Bits meaning */
-	SMS_Deliver        = 0x00, /* 00 0 First 2 digits are taken from */
-	SMS_Deliver_Report = 0x01, /* 00 1 GSM 03.40 version 6.1.0 Release 1997 */
-	SMS_Status_Report  = 0x05, /* 10 1 Section 9.2.3.1; 3rd digit is to */
-	SMS_Command        = 0x04, /* 10 0 mark a report */
-	SMS_Submit         = 0x02, /* 01 0 */
-	SMS_Submit_Report  = 0x03  /* 01 1 */
+	SMS_Deliver         = 0x00, /* 00 0 First 2 digits are taken from */
+	SMS_Delivery_Report = 0x01, /* 00 1 GSM 03.40 version 6.1.0 Release 1997 */
+	SMS_Submit          = 0x02, /* 01 0 */
+	SMS_Submit_Report   = 0x03, /* 01 1 */
+	SMS_Command         = 0x04, /* 10 0 mark a report */
+	SMS_Status_Report   = 0x05, /* 10 1 Section 9.2.3.1; 3rd digit is to */
 } SMS_MessageType;
 
 typedef enum {
@@ -198,17 +252,18 @@ typedef struct {
 } SMS_MessageCommand;
 
 /* Datatype for SMS status */
-/* FIXME - This needs to be made clearer and or turned into a 
-   bitfield to allow compound values (read | sent etc.) */
 typedef enum {
-	SMS_SENT   = 0x01,
-	SMS_UNSENT = 0x00,
-	SMS_READ   = 0x02,
-	SMS_UNREAD = 0x03
+	SMS_Read   = 0x01,
+	SMS_Unread = 0x03,
+	SMS_Sent   = 0x05,
+	SMS_Unsent = 0x07
 } SMS_MessageStatus;
 
-/* Define datatype for SMS messages, used for getting SMS messages from the
-   phones memory. */
+typedef enum {
+	SMS_XXX = 0x01
+} SMS_MemoryType;
+        
+/* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
 typedef struct {
 	/* Specification fields */
 	SMS_MessageType Type;                          /* Message Type Indicator - 2 bits (9.2.3.1) */
@@ -216,31 +271,68 @@ typedef struct {
 	bool ReplyViaSameSMSC;                         /* Reply Path (9.2.3.17) - `Reply via same centre' in the phone */
 	bool RejectDuplicates;                         /* Reject Duplicates (9.2.3.25) */
 	bool Report;                                   /* Status Report (9.2.3.4, 9.2.3.5 & 9.2.3.26) - `Delivery reports' in the phone */
+
 	unsigned short Number;                         /* Message Number - 8 bits (9.2.3.18) */
 	unsigned short Reference;                      /* Message Reference - 8 bit (9.2.3.6) */
 	unsigned short PID;                            /* Protocol Identifier - 8 bit (9.2.3.9) */
 	unsigned short ReportStatus;                   /* Status - 8 bit (9.2.3.15), Failure Cause (9.2.3.22) */
 	unsigned short Length;                         /* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
-	SMS_Number SMSC;                               /* SMSC Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
-	SMS_Number Address;                            /* Origination, destination, Recipient Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
-	unsigned char Data[SMS_MAX_SMS_LENGTH];        /* User Data (9.2.3.24), Command Data (9.2.3.21) */
-//	unsigned char Parameter[???];                  /* Parameter Indicator (9.2.3.27); FIXME: how to use it??? */
+
+	SMS_MessageCenter MessageCenter;               /* SMSC Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
+	SMS_Number RemoteNumber;                       /* Origination, destination, Recipient Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
+	unsigned char MessageText[GSM_MAX_SMS_LENGTH]; /* User Data (9.2.3.24), Command Data (9.2.3.21) */
 	SMS_DataCodingScheme DCS;                      /* Data Coding Scheme (9.2.3.10) */
-	SMS_ValidityPeriod Validity;                   /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
-	SMS_UDHInfo UDH;                               /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
-//	SMS_CommandType Command;                       /* Command Type - 8 bits (9.2.3.19); FIXME: use it!!!! */
+	SMS_MessageValidity Validity;                  /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
+  
+	unsigned short UDH_No;                         /* Number of presend UDHs */
+	SMS_UDHInfo UDH[SMS_MAX_UDH_HEADER_NUMBER];    /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
+
 	SMS_DateTime SMSCTime;                         /* Service Centre Time Stamp (9.2.3.11) */
-	SMS_DateTime DischargeTime;                    /* Discharge Time (9.2.3.13) */
+	SMS_DateTime Time;                             /* Discharge Time (9.2.3.13) */
 
 	/* Other fields */
+        SMS_MemoryType MemoryType;                     /* memoryType (for 6210/7110: folder indicator */
 	SMS_MessageStatus Status;                      /* Status of the message: sent/read or unsent/unread */
-	unsigned short Location;                       /* Location of the message in the SIM/Phone memory */
+
+//	SMS_CommandType Command;                       /* Command Type - 8 bits (9.2.3.19); FIXME: use it!!!! */
+//	unsigned char Parameter[???];                  /* Parameter Indicator (9.2.3.27); FIXME: how to use it??? */
 } GSM_SMSMessage;
 
-GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *frame);
-GSM_Error DecodePDUSMS();
+extern GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *frame);
+extern GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength);
+extern GSM_Error EncodeTextSMS();
+extern GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS);
 
-GSM_Error EncodeTextSMS();
-GSM_Error DecodeTextSMS();
+/*** FOLDERS ***/
+
+/* Maximal number of SMS folders */
+#define MAX_SMS_FOLDERS 24
+
+/* Datatype for SMS folders ins 6210/7110 */
+typedef struct {
+	char Name[15];     /* Name for SMS folder */
+	bool SMSData;      /* if folder contains sender, SMSC number and sending date */
+	u8 locations[160]; /* locations of SMS messages in that folder (6210 specific) */
+	u8 number;         /* number of SMS messages in that folder*/
+	u8 FolderID;       /* ID od fthe current folder */
+} SMS_Folder;
+
+typedef struct {
+	SMS_Folder Folder[MAX_SMS_FOLDERS];
+	u8 FoldersID[MAX_SMS_FOLDERS]; /* ID specific for this folder and phone. */
+	                               /* Used in internal functions. Do not use it. */
+	u8 number;                     /* number of SMS folders */
+} SMS_FolderList;
+
+/*** CELL BROADCAST ***/
+
+#define GSM_MAX_CB_MESSAGE         (160)
+
+/* Define datatype for Cell Broadcast message */
+typedef struct {
+	int Channel;                                      /* channel number */
+	char Message[GSM_MAX_CB_MESSAGE + 1];
+	int New;
+} GSM_CBMessage;
 
 #endif /* __gnokii_sms_h_ */
