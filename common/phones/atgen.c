@@ -865,20 +865,11 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 		/* store name */
 		pos = NULL;
 		if (endpos)
-			pos = strchr(++endpos, '\"');
+			pos = strchr(endpos+2, ',');
 		endpos = NULL;
 		if (pos) {
-			pos++;
-			/* parse the string form behind for quotation.
-			 * this will allways succede because quotation
-			 * was found at pos.
-			 */
-			endpos = buf.line1 + length - 1;
-			for (;;) {
-				if (*endpos == '\"') break;
-				endpos--;
-			}
-			l = endpos - pos;
+			pos = strip_quotes(pos+1);
+			l = strlen(pos);
 			switch (drvinst->charset) {
 			case AT_CHAR_GSM:
 				char_ascii_decode(data->phonebook_entry->name, pos, l);
