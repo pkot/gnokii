@@ -678,7 +678,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		}
 		dprintf("\n");
 		break;
-	/* get message status ? */
+	/* get message status */
 	case 0x0f:
 		dprintf("Message: SMS message(%i in folder %i) status received!\n", 
 			(message[10] << 8) | message[11],  message[12]);
@@ -753,7 +753,6 @@ static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
-
 static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x12, 0x00, 0x00};
@@ -773,13 +772,14 @@ static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 	int i;
 	SMS_Folder phone;
 
-	dprintf("Getting SMS Folder (%i) status (%i)...\n", req[5], req[4]);
 
 	req[5] = GetMemoryType(data->SMSFolder->FolderID);
 
-       	if (req[5] == P6510_MEMORY_IN) { /* special case INBOX */
-		dprintf("Special case INBOX in GetSMSFolderStatus!\n");
-		req[4] = 0x02;
+	dprintf("Getting SMS Folder (%i) status (%i)...\n", req[5], req[4]);
+
+       	if ((req[5] == P6510_MEMORY_IN) || (req[5] == P6510_MEMORY_OU)) { /* special case IN/OUTBOX */
+		dprintf("Special case IN/OUTBOX in GetSMSFolderStatus!\n");
+
 		if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 		error = SM_Block(state, data, P6510_MSG_FOLDER);
 		if (error != 0) return error;
@@ -790,21 +790,18 @@ static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 		if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 		error = SM_Block(state, data, P6510_MSG_FOLDER);
 
-		data->nk6510_SIM_Inbox_Number = 1000;
-
 		for (i = 0; i < phone.Number; i++) {
-			data->SMSFolder->Locations[data->SMSFolder->Number] = phone.Locations[i];
-			data->nk6510_SIM_Inbox_Number = GNOKII_MIN(data->nk6510_SIM_Inbox_Number, phone.Locations[i]);
+			data->SMSFolder->Locations[data->SMSFolder->Number] = phone.Locations[i] + 1024;
 			data->SMSFolder->Number++;
 		}
 		return GE_NONE;
-	} else {
-		if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
-		return SM_Block(state, data, P6510_MSG_FOLDER);
-	}
+	} 
+
+	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
-static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *state, int mem)
+static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0E, 
 			       0x02, /* 0x01 SIM, 0x02 phone*/
@@ -813,11 +810,18 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 			       0x00, /* Location */
 			       0x55, 0x55};
 
-	dprintf("Getting SMS message (%i) status (%i)...\n", data->RawSMS->Number, data->RawSMS->MemoryType);
+	if ((data->RawSMS->MemoryType == GMT_IN) || (data->RawSMS->MemoryType == GMT_OU)) {
+		if (data->RawSMS->Number > 1024) {
+			req[7] = data->RawSMS->Number - 0xc8;
+		} else {
+			req[4] = 0x01;
+			req[7] = data->RawSMS->Number;
+		}
+	}
 
-	req[4] = mem;
+	dprintf("Getting SMS message (%i in folder %i) status...\n", req[7], data->RawSMS->MemoryType);
+
        	req[5] = GetMemoryType(data->RawSMS->MemoryType);
-	req[7] = data->RawSMS->Number;
 
 	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_FOLDER);
@@ -835,13 +839,17 @@ static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Getting SMS (no validate) ...\n");
 
-	if (data->RawSMS->MemoryType == GMT_IN) 
-		if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number) req[4] = 0x01;
+	error = P6510_GetSMSMessageStatus(data, state);
 
-	error = P6510_GetSMSMessageStatus(data, state, req[4]);
+	if ((data->RawSMS->MemoryType == GMT_IN) || (data->RawSMS->MemoryType == GMT_OU)) {
+		if (data->RawSMS->Number > 1024) {
+			data->RawSMS->Number -= 1024;
+		} else {
+			req[4] = 0x01;
+		}
+	}
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
-	req[7] = data->RawSMS->Number;
 
 	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_FOLDER);
@@ -893,12 +901,16 @@ static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 	error = ValidateSMS(data, state);
 	if (error != GE_NONE) return error;
 
-	data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
-	if (data->RawSMS->MemoryType == GMT_IN) 
-		if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number) req[4] = 0x01;
+	if ((data->RawSMS->MemoryType == GMT_IN) || (data->RawSMS->MemoryType == GMT_OU)) {
+		if (data->RawSMS->Number > 1024) {
+			data->RawSMS->Number -= 1024;
+		} else {
+			req[4] = 0x01;
+		}
+	}
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
-	req[7] = data->RawSMS->Number;
+	req[7] = data->SMSFolder->Locations[data->RawSMS->Number - 1];
 
 	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_FOLDER);
@@ -920,11 +932,16 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	if (error != GE_NONE) return error;
 
 	data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
-	dprintf("raw: %i, %i\n", data->RawSMS->Number, data->nk6510_SIM_Inbox_Number);
-	if (data->RawSMS->MemoryType == GMT_IN) 
-		if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number) req[4] = 0x01;
 
-	error = P6510_GetSMSMessageStatus(data, state, req[4]);
+	error = P6510_GetSMSMessageStatus(data, state);
+
+	if ((data->RawSMS->MemoryType == GMT_IN) || (data->RawSMS->MemoryType == GMT_OU)) {
+		if (data->RawSMS->Number > 1024) {
+			data->RawSMS->Number -= 1024;
+		} else {
+			req[4] = 0x01;
+		}
+	}
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	req[7] = data->RawSMS->Number;
@@ -1153,7 +1170,7 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	/* Block 4. Validity Period */
 	req[pos++] = 0x08; /* type: validity */
-	req[pos++] = 0x04;
+	req[pos++] = 0x04; /* block length */
 	req[pos++] = 0x01; /* data length */
 	req[pos++] = data->RawSMS->Validity[0];
 
