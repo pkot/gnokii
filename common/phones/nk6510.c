@@ -102,6 +102,7 @@ static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetStartupGreeting(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 
 static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -2435,6 +2436,7 @@ static GSM_Error P6510_IncomingRadio(int messagetype, unsigned char *message, in
 00 01 00 05 00 00 00 2C 00 02 00 00 00 01 00 00
 
 	 */
+	return GE_NOTIMPLEMENTED;
 }
 
 /*****************/
