@@ -1,0 +1,173 @@
+diff -urN serial_orig/Kconfig serial/Kconfig
+--- serial_orig/Kconfig	2004-10-18 22:54:40.000000000 +0100
++++ serial/Kconfig	2004-12-16 15:15:02.000000000 +0000
+@@ -388,6 +388,17 @@
+ 	  To compile this driver as a module, choose M here: the
+ 	  module will be called omninet.
+ 
++config USB_SERIAL_NOKIA
++	tristate "USB Nokia / DKU2 Driver (EXPERIMENTAL)"
++	depends on USB_SERIAL && USB_SERIAL_GENERIC && EXPERIMENTAL
++	help
++	  Say Y here if you want to use a Nokia mobile with DKU2 USB lead.
++
++	  This driver is intended for use with the gnokii userland software.  See www.gnokii.org for more information.
++
++	  To compile this driver as a module, choose M here: the
++	  module will be called nokia_dku2.
++
+ config USB_EZUSB
+ 	bool
+ 	depends on USB_SERIAL_KEYSPAN_PDA || USB_SERIAL_XIRCOM || USB_SERIAL_KEYSPAN || USB_SERIAL_WHITEHEAT
+diff -urN serial_orig/Makefile serial/Makefile
+--- serial_orig/Makefile	2004-10-18 22:53:22.000000000 +0100
++++ serial/Makefile	2004-12-16 14:37:52.000000000 +0000
+@@ -11,6 +11,7 @@
+ 
+ usbserial-objs	:= usb-serial.o generic.o bus.o $(usbserial-obj-y)
+ 
++obj-$(CONFIG_USB_SERIAL_NOKIA)			+= nokia_dku2.o
+ obj-$(CONFIG_USB_SERIAL_BELKIN)			+= belkin_sa.o
+ obj-$(CONFIG_USB_SERIAL_CYBERJACK)		+= cyberjack.o
+ obj-$(CONFIG_USB_SERIAL_DIGI_ACCELEPORT)	+= digi_acceleport.o
+diff -urN serial_orig/nokia_dku2.c serial/nokia_dku2.c
+--- serial_orig/nokia_dku2.c	1970-01-01 01:00:00.000000000 +0100
++++ serial/nokia_dku2.c	2004-12-20 12:09:23.976137300 +0000
+@@ -0,0 +1,137 @@
++/*
++ *  Nokia DKU2 USB driver
++ *
++ *  Copyright (C) 2004
++ *  Author: C Kemp
++ *
++ *  This program is largely derived from work by the linux-usb group
++ *  and associated source files.  Please see the usb/serial files for
++ *  individual credits and copyrights.
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ */
++
++
++#include <linux/config.h>
++#include <linux/kernel.h>
++#include <linux/errno.h>
++#include <linux/init.h>
++#include <linux/slab.h>
++#include <linux/tty.h>
++#include <linux/tty_driver.h>
++#include <linux/tty_flip.h>
++#include <linux/module.h>
++#include <linux/usb.h>
++
++#ifdef CONFIG_USB_SERIAL_DEBUG
++	static int debug = 1;
++#else
++	static int debug;
++#endif
++
++#include "usb-serial.h"
++
++/*
++ * Version Information
++ */
++#define DRIVER_VERSION "v0.2"
++#define DRIVER_AUTHOR "C Kemp"
++#define DRIVER_DESC "Nokia DKU2 Driver"
++
++
++#define NOKIA_VENDOR_ID	0x0421
++#define NOKIA7600_PRODUCT_ID 0x0400
++
++/* Function prototypes */
++static int nokia_probe (struct usb_serial *serial, const struct usb_device_id *id);
++
++static struct usb_device_id id_table [] = {
++	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7600_PRODUCT_ID) },
++	{ }			/* Terminating entry */
++};
++
++MODULE_DEVICE_TABLE (usb, id_table);
++
++static struct usb_driver nokia_driver = {
++	.owner =	THIS_MODULE,
++	.name =		"Nokia DKU2",
++	.probe =	usb_serial_probe,
++	.disconnect =	usb_serial_disconnect,
++	.id_table =	id_table,
++};
++
++static struct usb_serial_device_type nokia_device = {
++	.owner =		THIS_MODULE,
++	.name =			"Nokia 7600/DKU2 driver",
++	.id_table =		id_table,
++	.num_interrupt_in =	1,
++	.num_bulk_in =		1,
++	.num_bulk_out =		1,
++	.num_ports =		1,
++	.probe =		nokia_probe
++};
++
++/* The only thing which makes this device different from a generic device is that */
++/* we have to set an alternative configuration to make the relevant endpoints available */
++/* In 2.6 this is really easy... */
++
++static int nokia_probe (struct usb_serial *serial, const struct usb_device_id *id)
++{
++	dbg("%s", __FUNCTION__);
++
++	if (serial->interface->altsetting[0].endpoint[0].desc.bEndpointAddress == 0x82) {
++
++	  // the AT port
++	  printk("Nokia AT Port:\n");
++
++	  return 0;
++
++	} else if (serial->interface->num_altsetting == 2 && serial->interface->altsetting[1].endpoint[0].desc.bEndpointAddress == 0x86) {
++
++	  // the FBUS port
++	  printk("Nokia FBUS Port:\n");
++	
++	  usb_set_interface(serial->dev,10,1);
++
++	  return 0;
++	}
++
++	return(-1);
++}
++
++
++static int __init nokia_init (void)
++{
++        int retval;
++
++	if( (retval = usb_serial_register(&nokia_device)) ) return retval;
++
++	if( (retval = usb_register(&nokia_driver)) ) {
++	        usb_serial_deregister(&nokia_device);
++		return retval;
++	}
++
++	info(DRIVER_VERSION " " DRIVER_AUTHOR);
++	info(DRIVER_DESC);
++
++	return 0;
++}
++
++static void __exit nokia_exit (void)
++{
++	usb_serial_deregister (&nokia_device);
++}
++
++module_init(nokia_init);
++module_exit(nokia_exit);
++
++MODULE_AUTHOR( DRIVER_AUTHOR );
++MODULE_DESCRIPTION( DRIVER_DESC );
++MODULE_LICENSE("GPL");
++
++MODULE_PARM(debug, "i");
++MODULE_PARM_DESC(debug, "Debug enabled or not");

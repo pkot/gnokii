@@ -6,7 +6,7 @@
 
 The DKU2 cable, supplied for example with the nokia 7600, is a straight-through lead which connects the phone to a USB port.  By default, the usb device exposes two endpoints which provide AT-like modem emulation.  This kernel module sets an alternative configuration to enable two further endpoints which enable Fbus communication.
 
-Patches are in gnokii/patches.  So far only for 2.4.22 - I expect it'll work with most 2.4 kernels.
+Patches are in gnokii/patches.  There is one for 2.4.22 - I expect it'll work with most 2.4 kernels, and one for 2.6.9.
 
 The driver connects two ttys - after connecting the phone dmesg gives:
   Nokia AT Port:

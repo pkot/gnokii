@@ -16,7 +16,10 @@
     o call management functions has been rewritten (BORBELY Zoltan)
  * translation updates
     o Chinese translation added                        (Funda Wang)
-
+ * Link updates
+    o Support for the DKU2 cable added                 (Chris Kemp)
+    o DKU2 kernel module patches for 2.4.22 and 2.6.9  (Chris Kemp)
+	
 0.6.4
 =====
  * build system updates
