@@ -182,6 +182,7 @@ typedef enum {
 	GOP_PressPhoneKey,
 	GOP_ReleasePhoneKey,
 	GOP_EnterChar,
+	GOP_Subscribe,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 
