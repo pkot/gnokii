@@ -52,7 +52,8 @@ void    RLP_DisplayF96Frame(RLP_F96Frame *frame)
                     break;
 
                 case RLPU_XID:
-                    fprintf(stdout, _("Exchange Information "));
+                    fprintf(stdout, _("Exchange Information\n"));
+                    RLP_DisplayXID(frame->Data);
                     break;
 
                 case RLPU_TEST:
@@ -79,7 +80,7 @@ void    RLP_DisplayF96Frame(RLP_F96Frame *frame)
     }   
 
     fprintf(stdout, _(" P/F=%d C/R=%d \n"), header.PF, header.CR);
-
+    
     for (count = 0; count < 25; count ++) {
         if (isprint(frame->Data[count])) {
             fprintf(stdout, "[%02x%c]", frame->Data[count], frame->Data[count]);
@@ -94,8 +95,86 @@ void    RLP_DisplayF96Frame(RLP_F96Frame *frame)
     
     fprintf (stdout, _(" FCS: %02x %02x %02x"), frame->FCS[0], frame->FCS[1], frame->FCS[2]);
 
+        /* Check FCS */
+    if (RLP_CheckCRC24FCS(frame, 30) == true) {
+        fprintf (stdout, _(" (OK)"));
+    }
+    else {
+        fprintf (stdout, _(" (Failed!)"));
+    }
+
     fprintf(stdout, "\n\n");
     fflush(stdout);
+}
+
+    /* Given a pointer to an RLP XID frame, display contents in human
+       readable form.  Note for now only Version 0 and 1 are supported.
+       Fields can appear in any order and are delimited by a zero type
+       field. */
+void    RLP_DisplayXID(u8 *frame) 
+{
+    int     count = 25;  /* Sanity check */
+    u8      type, length;
+    
+    fprintf(stdout, _("XID: "));
+
+    while ((*frame !=0) && (count >= 0)) {
+        type = *frame >> 4;
+        length = *frame & 0x0f;
+
+        switch (type) {
+            case 0x01:      /* RLP Version Number */
+                frame += length;
+                fprintf(stdout, _("Ver %d "), *frame);
+                break;
+                
+            case 0x02:      /* IWF to MS window size */
+                frame += length;
+                fprintf(stdout, _("IWF-MS %d "), *frame);
+                break;
+                
+            case 0x03:      /* MS to IWF window size */
+                frame += length;
+                fprintf(stdout, _("MS-IWF %d "), *frame);
+                break;
+
+            case 0x04:      /* Acknowledgement Timer (T1) */
+                frame += length;
+                fprintf(stdout, _("T1 %dms "), *frame * 10);
+                break;
+
+            case 0x05:      /* Retransmission attempts (N2) */
+                frame += length;
+                fprintf(stdout, _("N2 %d "), *frame);
+                break;
+
+            case 0x06:      /* Reply Delay (T2) */
+                frame += length;
+                fprintf(stdout, _("T2 %dms "), *frame * 10);
+                break;
+
+            case 0x07:      /* Compression */
+                frame ++;
+                fprintf(stdout, _("Comp [Pt=%d "), (*frame >> 4) );
+                fprintf(stdout, _("P0=%d "), (*frame & 0x03) );
+
+                frame ++;
+                fprintf(stdout, _("P1l=%d "), *frame);
+                frame ++;
+                fprintf(stdout, _("P1h=%d "), *frame);
+
+                frame ++;
+                fprintf(stdout, _("P2=%d] "), *frame);
+                break;
+            
+            default:
+                frame += length;
+                fprintf(stdout, "Unknown! type=%02x, length=%02x", type, length);
+                break;
+        }
+        count --;
+        frame ++;
+    } 
 }
 
 
