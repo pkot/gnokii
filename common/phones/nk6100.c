@@ -120,6 +120,7 @@ static GSM_Error CancelCall2(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType type);
+static GSM_Error get_imei(GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 static GSM_Error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
@@ -152,26 +153,26 @@ static int GetMemoryType(GSM_MemoryType memory_type);
 static void FlushLostSMSNotifications(GSM_Statemachine *state);
 
 static GSM_IncomingFunctionType IncomingFunctions[] = {
-	{ 0x04, IncomingPhoneStatus },
-	{ 0x0a, IncomingNetworkInfo },
-	{ 0x03, IncomingPhonebook },
-	{ 0x05, IncomingProfile },
-	{ 0x11, IncomingPhoneClockAndAlarm },
-	{ 0x13, IncomingCalendar },
-	{ 0x0d, IncomingDisplay },
-	{ 0x02, IncomingSMS1 },
-	{ 0x14, IncomingSMS },
-	{ 0x64, IncomingPhoneInfo },
-	{ 0xd2, IncomingPhoneInfo2 },
-	{ 0x40, IncomingSecurity },
 	{ 0x01, IncomingCallInfo },
-	{ 0xf1, IncomingRLPFrame },
-	{ 0x0c, IncomingKey },
+	{ 0x02, IncomingSMS1 },
+	{ 0x03, IncomingPhonebook },
+	{ 0x04, IncomingPhoneStatus },
+	{ 0x05, IncomingProfile },
 	{ 0x06, PNOK_IncomingCallDivert },
-	{ 0xda, IncomingMisc },
 #ifdef	SECURITY
 	{ 0x08, IncomingSecurityCode },
 #endif
+	{ 0x0a, IncomingNetworkInfo },
+	{ 0x0c, IncomingKey },
+	{ 0x0d, IncomingDisplay },
+	{ 0x11, IncomingPhoneClockAndAlarm },
+	{ 0x13, IncomingCalendar },
+	{ 0x14, IncomingSMS },
+	{ 0x40, IncomingSecurity },
+	{ 0x64, IncomingPhoneInfo },
+	{ 0xd2, IncomingPhoneInfo2 },
+	{ 0xda, IncomingMisc },
+	{ 0xf1, IncomingRLPFrame },
 	{ 0, NULL}
 };
 
@@ -438,7 +439,7 @@ static GSM_Error IdentifyPhone(GSM_Statemachine *state)
 	data.Imei = drvinst->IMEI;
 	data.Revision = revision;
 
-	if ((err = PhoneInfo2(&data, state)) != GE_NONE) {
+	if ((err = GetPhoneID(&data, state)) != GE_NONE) {
 		return err;
 	}
 
@@ -451,8 +452,6 @@ static GSM_Error IdentifyPhone(GSM_Statemachine *state)
 	if (drvinst->PM->flags & PM_AUTHENTICATION) {
 		/* Now test the link and authenticate ourself */
 		if ((err = PhoneInfo(&data, state)) != GE_NONE) return err;
-	} else {
-		GetPhoneID(&data, state);
 	}
 
 	sscanf(revision, "SW %9[^ 	,], HW %9s", drvinst->SWVersion, drvinst->HWVersion);
@@ -636,6 +635,10 @@ static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, in
 			sscanf(message + 40, " %9s", sw);
 			snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW %s, HW %s", sw, hw);
 			dprintf("Received revision %s\n", data->Revision);
+		}
+		if (data->Model) {
+			snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 21);
+			dprintf("Received model %s\n", data->Model);
 		}
 		break;
 
@@ -2723,6 +2726,30 @@ static GSM_Error CancelCall2(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x40);
 }
 
+static GSM_Error get_imei(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x66};
+	GSM_Error err;
+
+	if ((err = EnableExtendedCmds(data, state, 0x01)) != GE_NONE)
+		return err;
+
+	if (SM_SendMessage(state, 3, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+static GSM_Error get_phone_info(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0xc8, 0x01};
+	GSM_Error err;
+
+	if ((err = EnableExtendedCmds(data, state, 0x01)) != GE_NONE)
+		return err;
+
+	if (SM_SendMessage(state, 3, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
 static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[2]) {
@@ -2766,13 +2793,20 @@ static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int l
 		if (message[3] != 0x02) return GE_UNHANDLEDFRAME;
 		break;
 
+	/* IMEI */
+	case 0x66:
+		if (data->Imei) {
+			dprintf("IMEI: %s\n", message + 4);
+			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
+		}
+		break;
+
 	default:
 		return GE_UNHANDLEDFRAME;
 	}
 
 	return GE_NONE;
 }
-
 
 static GSM_Error MakeCall1(GSM_Data *data, GSM_Statemachine *state)
 {

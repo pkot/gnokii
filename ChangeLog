@@ -12,6 +12,10 @@
     o Nokia 8290 is known to work with the driver             (Roger)
     o fix default number reading with the smsc info       (Pawel Kot)
     o remove translatable strings from some dprintfs   (Markus Plail)
+    o make initialization on some phones (not supporting 0xd2 frame)
+                                                          (Pawel Kot)
+    o implement more protocol frames (security commands)  (Pawel Kot)
+    o fix the order of the incoming functions             (Pawel Kot)
  * 6510 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
