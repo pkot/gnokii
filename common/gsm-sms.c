@@ -213,6 +213,42 @@ SMS_DateTime *gn_sms_unpack_date_time(u8 *number, SMS_DateTime *dt)
 	return dt;
 }
 
+/**
+ * gn_sms_pack_date_time - converts gnokii's datetime struct to the binary datetime
+ * @number: binary variable to be filled
+ * @dt: datetime structure to be read
+ *
+ */
+u8 *gn_sms_pack_date_time(SMS_DateTime *dt, u8 *number)
+{
+	if (!number) return NULL;
+	memset(number, 0, sizeof(unsigned char));
+	if (!dt) return number;
+
+	/* Ugly hack, but according to the GSM specs, the year is stored
+         * as the 2 digit number. */
+	if (dt->Year < 2000) dt->Year -= 1900;
+	else dt->Year -= 2000;
+
+	number[0]    = (dt->Year   / 10) | ((dt->Year   % 10) << 4);
+	number[1]    = (dt->Month  / 10) | ((dt->Month  % 10) << 4);
+	number[2]    = (dt->Day    / 10) | ((dt->Day    % 10) << 4);
+	number[3]    = (dt->Hour   / 10) | ((dt->Hour   % 10) << 4);
+	number[4]    = (dt->Minute / 10) | ((dt->Minute % 10) << 4);
+	number[5]    = (dt->Second / 10) | ((dt->Second % 10) << 4);
+
+	/* The timezone is given in quarters. The base is GMT */
+	number[6]    = (dt->Timezone / 10) | ((dt->Second % 10) << 4) * 4;
+	/* The GSM spec is not clear what is the sign of the timezone when the
+	 * 6th bit is set. Some SMSCs are compatible with our interpretation,
+	 * some are not. If your operator does use incompatible SMSC and wrong
+	 * sign disturbs you, change the sign here.
+	 */
+	if (dt->Timezone < 0) number[6] |= 0x08;
+
+	return number;
+}
+
 /***
  *** DECODING SMS
  ***/
@@ -1207,6 +1243,8 @@ API GSM_Error gn_sms_send(GSM_Data *data, GSM_Statemachine *state)
 	data->RawSMS = malloc(sizeof(*data->RawSMS));
 	memset(data->RawSMS, 0, sizeof(*data->RawSMS));
 
+	data->RawSMS->Status = SMS_Sent;
+
 	data->RawSMS->MessageCenter[0] = SemiOctetPack(data->SMS->SMSC.Number, data->RawSMS->MessageCenter + 1, data->SMS->SMSC.Type);
 	if (data->RawSMS->MessageCenter[0] % 2) data->RawSMS->MessageCenter[0]++;
 	data->RawSMS->MessageCenter[0] = data->RawSMS->MessageCenter[0] / 2 + 1;
@@ -1267,6 +1305,9 @@ API GSM_Error gn_sms_save(GSM_Data *data, GSM_Statemachine *state)
 	data->RawSMS->Number = data->SMS->Number;
 	data->RawSMS->Status = data->SMS->Status;
 	data->RawSMS->MemoryType = data->SMS->MemoryType;
+
+	gn_sms_pack_date_time(&data->SMS->SMSCTime, data->RawSMS->SMSCTime);
+	dprintf("\tDate: %s\n", sms_print_date_time(data->RawSMS->SMSCTime));
 
 	if (data->SMS->SMSC.Number[0] != '\0') {
 		data->RawSMS->MessageCenter[0] = 
