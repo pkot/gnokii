@@ -802,6 +802,20 @@ API char *gn_network_code_get(char *network_name)
 	return networks[index].code ? networks[index].code : _("undefined");
 }
 
+API char *gn_network_code_find(char *network_name, char *country_name)
+{
+	int index = 0;
+	char country_code[4];
+	
+	snprintf(country_code, 3, " %2s", gn_country_code_get(country_name));
+	country_code[3] = 0;
+	while (networks[index].name &&
+	       (!strstr(networks[index].code, country_code) ||
+	        strcasecmp(networks[index].name, network_name))) index++;
+
+	return networks[index].code ? networks[index].code : _("undefined");
+}
+
 API char *gn_country_name_get(char *country_code)
 {
 	int index = 0;
