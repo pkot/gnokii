@@ -13,7 +13,11 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.81  2001-02-01 15:17:27  pkot
+  Revision 1.82  2001-02-03 23:56:12  chris
+  Start of work on irda support (now we just need fbus-irda.c!)
+  Proper unicode support in 7110 code (from pkot)
+
+  Revision 1.81  2001/02/01 15:17:27  pkot
   Fixed --identify and added Manfred's manufacturer patch
 
   Revision 1.80  2001/01/23 15:32:35  chris
@@ -1303,7 +1307,7 @@ bool	FB38_OpenSerial(void)
 
 	/* Open device. */
 
-	result = device_open(PortDevice, false, true);
+	result = device_open(PortDevice, false, true, GCT_Serial);
 
 	if (!result) {
 		perror(_("Couldn't open FB38 device"));

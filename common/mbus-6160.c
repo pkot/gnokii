@@ -1018,7 +1018,7 @@ bool        MB61_OpenSerial(void)
     sigaction (SIGIO, &sig_io, NULL);
 
         /* Open device MBUS uses 9600,O,1  */
-    result = device_open(PortDevice, true, true);
+    result = device_open(PortDevice, true, true, GCT_Serial);
 
     if (!result) {
         perror(_("Couldn't open MB61 device: "));

@@ -38,4 +38,6 @@ void serial_changespeed(int __fd, int __speed);
 size_t serial_read(int __fd, __ptr_t __buf, size_t __nbytes);
 size_t serial_write(int __fd, __const __ptr_t __buf, size_t __n);
 
+int serial_select(int fd, struct timeval *timeout);
+
 #endif  /* __unixserial_h */

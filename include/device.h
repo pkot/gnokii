@@ -20,10 +20,11 @@
 
 #include <unistd.h>
 #include "misc.h"
+#include "gsm-common.h"
 
 int device_getfd(void);
 
-int device_open(__const char *__file, int __with_odd_parity, int __with_async);
+int device_open(__const char *__file, int __with_odd_parity, int __with_async, GSM_ConnectionType device_type);
 void device_close(void);
 void device_reset(void);
 
@@ -32,5 +33,7 @@ void device_changespeed(int __speed);
 
 size_t device_read(__ptr_t __buf, size_t __nbytes);
 size_t device_write(__const __ptr_t __buf, size_t __n);
+
+int device_select(struct timeval *timeout);
 
 #endif  /* __device_h */

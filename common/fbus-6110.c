@@ -17,7 +17,11 @@
   and 6110.
 
   $Log$
-  Revision 1.124  2001-02-01 15:17:27  pkot
+  Revision 1.125  2001-02-03 23:56:12  chris
+  Start of work on irda support (now we just need fbus-irda.c!)
+  Proper unicode support in 7110 code (from pkot)
+
+  Revision 1.124  2001/02/01 15:17:27  pkot
   Fixed --identify and added Manfred's manufacturer patch
 
   Revision 1.123  2001/01/31 12:49:00  pkot
@@ -794,7 +798,7 @@ bool FB61_OpenIR(void)
 
 	/* Open device. */
   
-	result = device_open(PortDevice, false, true);
+	result = device_open(PortDevice, false, true, GCT_Infrared);
 
 	if (!result) {
 		perror(_("Couldn't open FB61 infrared device"));
@@ -2145,7 +2149,7 @@ bool FB61_OpenSerial(void)
 
 	/* Open device. */
 
-	result = device_open(PortDevice, false, true);
+	result = device_open(PortDevice, false, true, GCT_Serial);
 
 	if (!result) {
 		perror(_("Couldn't open FB61 device"));

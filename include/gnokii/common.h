@@ -19,16 +19,18 @@
 #ifndef __gsm_common_h
 #define __gsm_common_h
 
-#ifndef __rlp_common_h
-    #include "rlp-common.h"
-#endif
+#include <stdlib.h>
+
+#include "rlp-common.h"
+
 
 /* Type of connection. Now we support serial connection with FBUS cable and
    IR (only with 61x0 models) */
 
 typedef enum {
-  GCT_Serial,  /* Serial connection. */
-  GCT_Infrared /* Infrared connection. */
+  GCT_Serial,   /* Serial connection. */
+  GCT_Infrared, /* Infrared connection. */
+  GCT_Irda
 } GSM_ConnectionType;
 
 /* Maximum length of device name for serial port */
@@ -769,5 +771,16 @@ typedef struct {
 /* Undefined functions in fbus/mbus files */
 extern GSM_Error Unimplemented(void);
 #define UNIMPLEMENTED (void *) Unimplemented
+
+/* Coding functions */
+extern void EncodeAscii (unsigned char* dest, const unsigned char* src, int len);
+extern void DecodeAscii (unsigned char* dest, const unsigned char* src, int len);
+extern void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len);
+extern void DecodeUnicode (unsigned char* dest, const unsigned char* src, int len);
+
+extern unsigned char EncodeWithDefaultAlphabet(unsigned char);
+extern unsigned char DecodeWithDefaultAlphabet(unsigned char);
+extern wchar_t EncodeWithUnicodeAlphabet(unsigned char);
+extern unsigned char DecodeWithUnicodeAlphabet(wchar_t);
 
 #endif	/* __gsm_common_h */

@@ -17,7 +17,11 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.1  2001-01-14 22:46:59  chris
+  Revision 1.2  2001-02-03 23:56:14  chris
+  Start of work on irda support (now we just need fbus-irda.c!)
+  Proper unicode support in 7110 code (from pkot)
+
+  Revision 1.1  2001/01/14 22:46:59  chris
   Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
 
@@ -52,6 +56,7 @@ GSM_Link *glink;
 GSM_Phone *gphone;
 FBUS_Link flink;  /* FBUS specific stuff, internal to this file */
 
+
 /*--------------------------------------------*/
 
 bool FBUS_OpenSerial()
@@ -60,7 +65,7 @@ bool FBUS_OpenSerial()
 
   /* Open device. */
 
-  result = device_open(glink->PortDevice, false, false);
+  result = device_open(glink->PortDevice, false, false, GCT_Serial);
 
   if (!result) {
     perror(_("Couldn't open FBUS device"));
@@ -317,14 +322,10 @@ void FBUS_RX_StateMachine(char rx_byte) {
 
 GSM_Error FBUS_Loop(struct timeval *timeout)
 {
-  fd_set readfds;
   unsigned char buffer[255];
   int count, res;
 
-  FD_ZERO(&readfds);
-  FD_SET(device_getfd(),&readfds);
-
-  res=select(device_getfd()+1,&readfds,NULL,NULL,timeout);
+  res=device_select(timeout);
   if ( res > 0 ) { 
     res=device_read(buffer,255);
     for (count=0; count<res; count++)

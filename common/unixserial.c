@@ -191,6 +191,19 @@ void serial_setdtrrts(int __fd, int __dtr, int __rts) {
     ioctl(__fd, TIOCMBIC, &flags);
 }
 
+
+int serial_select(int fd, struct timeval *timeout) {
+
+  fd_set readfds;
+
+  FD_ZERO(&readfds);
+  FD_SET(fd, &readfds);
+
+  return (select(fd + 1, &readfds, NULL, NULL, timeout));
+
+}
+
+
 /* Change the speed of the serial device. */
 
 void serial_changespeed(int __fd, int __speed) {
