@@ -29,13 +29,14 @@
   This file provides useful functions for all phones
   See README for more details on supported mobile phones.
 
-  The various routines are called PNOK_(whatever).
+  The various routines are called pnok_(whatever).
 
 */
 
 #include <string.h>
 
-#include "gsm-data.h"
+#include "gnokii-internal.h"
+#include "gsm-api.h"
 #include "links/fbus.h"
 #include "phones/nokia.h"
 
@@ -43,16 +44,16 @@
  * because it is only used by the fbus/mbus protocol phones and only
  * nokia is using those protocols, the result is clear.
  * the error reporting is also very simple
- * the strncpy and PNOK_MAX_MODEL_LENGTH is only here as a reminder
+ * the strncpy and pnok_MAX_MODEL_LENGTH is only here as a reminder
  */
-gn_error PNOK_GetManufacturer(char *manufacturer)
+gn_error pnok_manufacturer_get(char *manufacturer)
 {
 	strcpy(manufacturer, "Nokia");
 	return GN_ERR_NONE;
 }
 
 
-static wchar_t PNOK_nokia_to_uni(unsigned char ch)
+static wchar_t pnok_nokia_to_uni(unsigned char ch)
 {
 	switch (ch) {
 	case 0x82: return 0x00e1; /* LATIN SMALL LETTER A WITH ACUTE */
@@ -77,7 +78,7 @@ static wchar_t PNOK_nokia_to_uni(unsigned char ch)
 	}
 }
 
-static unsigned char PNOK_uni_to_nokia(wchar_t wch)
+static unsigned char pnok_uni_to_nokia(wchar_t wch)
 {
 	switch (wch) {
 	case 0x00e1: return 0x82; /* LATIN SMALL LETTER A WITH ACUTE */
@@ -102,33 +103,33 @@ static unsigned char PNOK_uni_to_nokia(wchar_t wch)
 	}
 }
 
-void PNOK_DecodeString(unsigned char *dest, size_t max, const unsigned char *src, size_t len)
+void pnok_string_decode(unsigned char *dest, size_t max, const unsigned char *src, size_t len)
 {
 	size_t i, j, n;
 	unsigned char buf[16];
 
 	for (i = 0, j = 0; j < len; i += n, j++) {
-		n = char_decode_uni_alphabet(PNOK_nokia_to_uni(src[j]), buf);
+		n = char_decode_uni_alphabet(pnok_nokia_to_uni(src[j]), buf);
 		if (i + n >= max) break;
 		memcpy(dest + i, buf, n);
 	}
 	dest[i] = 0;
 }
 
-size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *src)
+size_t pnok_string_encode(unsigned char *dest, size_t max, const unsigned char *src)
 {
 	size_t i, j, n;
 	wchar_t wch;
 
 	for (i = 0, j = 0; i < max && src[j]; i++, j += n) {
 		n = char_encode_uni_alphabet(src + j, &wch);
-		dest[i] = PNOK_uni_to_nokia(wch);
+		dest[i] = pnok_uni_to_nokia(wch);
 	}
 	return i;
 }
 
 /* Call Divert */
-gn_error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
+gn_error pnok_call_divert(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned short length = 0x09;
 	char req[55] = { FBUS_FRAME_HEADER, 0x01, 0x00, /* operation */
@@ -136,111 +137,111 @@ gn_error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 						0x00, /* divert type */
 						0x00, /* call type */
 						0x00 };
-	if (!data->CallDivert) return GN_ERR_UNKNOWN;
-	switch (data->CallDivert->Operation) {
-	case GSM_CDV_Query:
+	if (!data->call_divert) return GN_ERR_UNKNOWN;
+	switch (data->call_divert->operation) {
+	case GN_CDV_Query:
 		req[4] = 0x05;
 		break;
-	case GSM_CDV_Register:
+	case GN_CDV_Register:
 		req[4] = 0x03;
 		length = 0x37;
 		req[8] = 0x01;
-		req[9] = char_semi_octet_pack(data->CallDivert->Number.Number,
-					      req + 10, data->CallDivert->Number.Type);
-		req[54] = data->CallDivert->Timeout;
+		req[9] = char_semi_octet_pack(data->call_divert->number.number,
+					      req + 10, data->call_divert->number.type);
+		req[54] = data->call_divert->timeout;
 		break;
-	case GSM_CDV_Erasure:
+	case GN_CDV_Erasure:
 		req[4] = 0x04;
 		break;
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
-	switch (data->CallDivert->CType) {
-	case GSM_CDV_AllCalls:
+	switch (data->call_divert->ctype) {
+	case GN_CDV_AllCalls:
 		break;
-	case GSM_CDV_VoiceCalls:
+	case GN_CDV_VoiceCalls:
 		req[7] = 0x0b;
 		break;
-	case GSM_CDV_FaxCalls:
+	case GN_CDV_FaxCalls:
 		req[7] = 0x0d;
 		break;
-	case GSM_CDV_DataCalls:
+	case GN_CDV_DataCalls:
 		req[7] = 0x19;
 		break;
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
-	switch (data->CallDivert->DType) {
-	case GSM_CDV_AllTypes:
+	switch (data->call_divert->type) {
+	case GN_CDV_AllTypes:
 		req[6] = 0x15;
 		break;
-	case GSM_CDV_Busy:
+	case GN_CDV_Busy:
 		req[6] = 0x43;
 		break;
-	case GSM_CDV_NoAnswer:
+	case GN_CDV_NoAnswer:
 		req[6] = 0x3d;
 		break;
-	case GSM_CDV_OutOfReach:
+	case GN_CDV_OutOfReach:
 		req[6] = 0x3e;
 		break;
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
-	if ((data->CallDivert->DType == GSM_CDV_AllTypes) &&
-	    (data->CallDivert->CType == GSM_CDV_AllCalls))
+	if ((data->call_divert->type == GN_CDV_AllTypes) &&
+	    (data->call_divert->ctype == GN_CDV_AllCalls))
 		req[6] = 0x02;
 
-	if (SM_SendMessage(state, length, 0x06, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_BlockTimeout(state, data, 0x06, 100);
+	if (sm_message_send(state, length, 0x06, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block_timeout(state, data, 0x06, 100);
 }
 
-gn_error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char *pos;
-	GSM_CallDivert *cd;
+	gn_call_divert *cd;
 
 	switch (message[3]) {
 	/* Get call diverts ok */
 	case 0x02:
 		pos = message + 4;
-		cd = data->CallDivert;
+		cd = data->call_divert;
 		if (*pos != 0x05 && *pos != 0x04) return GN_ERR_UNHANDLEDFRAME;
 		pos++;
 		if (*pos++ != 0x00) return GN_ERR_UNHANDLEDFRAME;
 		switch (*pos++) {
 		case 0x02:
-		case 0x15: cd->DType = GSM_CDV_AllTypes; break;
-		case 0x43: cd->DType = GSM_CDV_Busy; break;
-		case 0x3d: cd->DType = GSM_CDV_NoAnswer; break;
-		case 0x3e: cd->DType = GSM_CDV_OutOfReach; break;
+		case 0x15: cd->type = GN_CDV_AllTypes; break;
+		case 0x43: cd->type = GN_CDV_Busy; break;
+		case 0x3d: cd->type = GN_CDV_NoAnswer; break;
+		case 0x3e: cd->type = GN_CDV_OutOfReach; break;
 		default: return GN_ERR_UNHANDLEDFRAME;
 		}
 		if (*pos++ != 0x02) return GN_ERR_UNHANDLEDFRAME;
 		switch (*pos++) {
-		case 0x00: cd->CType = GSM_CDV_AllCalls; break;
-		case 0x0b: cd->CType = GSM_CDV_VoiceCalls; break;
-		case 0x0d: cd->CType = GSM_CDV_FaxCalls; break;
-		case 0x19: cd->CType = GSM_CDV_DataCalls; break;
+		case 0x00: cd->ctype = GN_CDV_AllCalls; break;
+		case 0x0b: cd->ctype = GN_CDV_VoiceCalls; break;
+		case 0x0d: cd->ctype = GN_CDV_FaxCalls; break;
+		case 0x19: cd->ctype = GN_CDV_DataCalls; break;
 		default: return GN_ERR_UNHANDLEDFRAME;
 		}
 		if (message[4] == 0x04 && pos[0] == 0x00) {
 			return GN_ERR_EMPTYLOCATION;
 		} else if (message[4] == 0x04 || (pos[0] == 0x01 && pos[1] == 0x00)) {
-			cd->Number.Type = SMS_Unknown;
-			memset(cd->Number.Number, 0, sizeof(cd->Number.Number));
+			cd->number.type = GN_GSM_NUMBER_Unknown;
+			memset(cd->number.number, 0, sizeof(cd->number.number));
 		} else if (pos[0] == 0x02 && pos[1] == 0x01) {
 			pos += 2;
-			snprintf(cd->Number.Number, sizeof(cd->Number.Number),
+			snprintf(cd->number.number, sizeof(cd->number.number),
 				 "%-*.*s", *pos+1, *pos+1, char_get_bcd_number(pos+1));
 			pos += 12 + 22;
-			cd->Timeout = *pos++;
+			cd->timeout = *pos++;
 		}
 		break;
 
 	/* FIXME: failed calldivert result code? */
 	case 0x03:
 		return GN_ERR_UNHANDLEDFRAME;
-	
+
 	/* FIXME: call divert is active */
 	case 0x06:
 		return GN_ERR_UNSOLICITED;
@@ -252,51 +253,51 @@ gn_error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int le
 	return GN_ERR_NONE;
 }
 
-int PNOK_FBUS_EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *req)
+int pnok_fbus_sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req)
 {
 	int pos = 0;
 
-	if (data->RawSMS->MessageCenter[0] != '\0') 
-		memcpy(req, data->RawSMS->MessageCenter, 12);
+	if (data->raw_sms->message_center[0] != '\0')
+		memcpy(req, data->raw_sms->message_center, 12);
 	pos += 12;
 
-	if (data->RawSMS->Type != SMS_Deliver)
+	if (data->raw_sms->type != GN_SMS_MT_Deliver)
 		req[pos] = 0x01; /* SMS Submit */
 	else
 		req[pos] = 0x00; /* SMS Deliver */
 
-	if (data->RawSMS->ReplyViaSameSMSC)  req[pos] |= 0x80;
-	if (data->RawSMS->RejectDuplicates)  req[pos] |= 0x04;
-	if (data->RawSMS->Report)            req[pos] |= 0x20;
-	if (data->RawSMS->UDHIndicator)      req[pos] |= 0x40;
-	if (data->RawSMS->Type != SMS_Deliver) {
-		if (data->RawSMS->ValidityIndicator) req[pos] |= 0x10;
+	if (data->raw_sms->reply_via_same_smsc)  req[pos] |= 0x80;
+	if (data->raw_sms->reject_duplicates)    req[pos] |= 0x04;
+	if (data->raw_sms->report)               req[pos] |= 0x20;
+	if (data->raw_sms->udh_indicator)        req[pos] |= 0x40;
+	if (data->raw_sms->type != GN_SMS_MT_Deliver) {
+		if (data->raw_sms->validity_indicator) req[pos] |= 0x10;
 		pos++;
-		req[pos++] = data->RawSMS->Reference;
+		req[pos++] = data->raw_sms->reference;
 	} else
 		pos++;
 
-	req[pos++] = data->RawSMS->PID;
-	req[pos++] = data->RawSMS->DCS;
-	req[pos++] = data->RawSMS->Length;
-	memcpy(req + pos, data->RawSMS->RemoteNumber, 12);
+	req[pos++] = data->raw_sms->pid;
+	req[pos++] = data->raw_sms->dcs;
+	req[pos++] = data->raw_sms->length;
+	memcpy(req + pos, data->raw_sms->remote_number, 12);
 	pos += 12;
 
-	if (data->RawSMS->Type != SMS_Deliver)
-		memcpy(req + pos, data->RawSMS->Validity, 7);
+	if (data->raw_sms->type != GN_SMS_MT_Deliver)
+		memcpy(req + pos, data->raw_sms->validity, 7);
 	else
-		memcpy(req + pos, data->RawSMS->SMSCTime, 7);  /* FIXME: Real date instead of hardcoded */
+		memcpy(req + pos, data->raw_sms->smsc_time, 7);  /* FIXME: Real date instead of hardcoded */
 	pos += 7;
 
-	memcpy(req + pos, data->RawSMS->UserData, data->RawSMS->UserDataLength);
-	pos += data->RawSMS->UserDataLength;
+	memcpy(req + pos, data->raw_sms->user_data, data->raw_sms->user_data_length);
+	pos += data->raw_sms->user_data_length;
 
 	return pos;
 }
 
 /* security commands */
 
-gn_error PNOK_enable_extended_cmds(GSM_Data *data, GSM_Statemachine *state, unsigned char type)
+gn_error pnok_extended_cmds_enable(gn_data *data, struct gn_statemachine *state, unsigned char type)
 {
 	unsigned char req[] = {0x00, 0x01, 0x64, 0x00};
 
@@ -307,91 +308,91 @@ gn_error PNOK_enable_extended_cmds(GSM_Data *data, GSM_Statemachine *state, unsi
 
 	req[3] = type;
 
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-gn_error PNOK_make_call(GSM_Data *data, GSM_Statemachine *state)
+gn_error pnok_call_make(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[5 + GSM_MAX_PHONEBOOK_NUMBER_LENGTH] = {0x00, 0x01, 0x7c, 0x01};
+	unsigned char req[5 + GN_PHONEBOOK_NUMBER_MAX_LENGTH] = {0x00, 0x01, 0x7c, 0x01};
 	int n;
 	gn_error err;
 
-	if (!data->CallInfo) return GN_ERR_INTERNALERROR;
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
 
-	switch (data->CallInfo->Type) {
-	case GSM_CT_VoiceCall:
+	switch (data->call_info->type) {
+	case GN_CALL_Voice:
 		break;
 
-	case GSM_CT_NonDigitalDataCall:
-	case GSM_CT_DigitalDataCall:
-		dprintf("Unsupported call type %d\n", data->CallInfo->Type);
+	case GN_CALL_NonDigitalData:
+	case GN_CALL_DigitalData:
+		dprintf("Unsupported call type %d\n", data->call_info->type);
 		return GN_ERR_NOTSUPPORTED;
 
 	default:
-		dprintf("Invalid call type %d\n", data->CallInfo->Type);
+		dprintf("Invalid call type %d\n", data->call_info->type);
 		return GN_ERR_INTERNALERROR;
 	}
 
-	n = strlen(data->CallInfo->Number);
-	if (n > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+	n = strlen(data->call_info->number);
+	if (n > GN_PHONEBOOK_NUMBER_MAX_LENGTH) {
 		dprintf("number too long\n");
 		return GN_ERR_ENTRYTOOLONG;
 	}
 
-	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
-	strcpy(req + 4, data->CallInfo->Number);
+	strcpy(req + 4, data->call_info->number);
 
-	if (SM_SendMessage(state, 5 + n, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 5 + n, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-gn_error PNOK_answer_call(GSM_Data *data, GSM_Statemachine *state)
+gn_error pnok_call_answer(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[4] = {0x00, 0x01, 0x7c, 0x02};
 	gn_error err;
 
-	if (!data->CallInfo) return GN_ERR_INTERNALERROR;
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
 
-	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-gn_error PNOK_cancel_call(GSM_Data *data, GSM_Statemachine *state)
+gn_error pnok_call_cancel(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[4] = {0x00, 0x01, 0x7c, 0x03};
 	gn_error err;
 
-	if (!data->CallInfo) return GN_ERR_INTERNALERROR;
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
 
-	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-gn_error PNOK_netmonitor(GSM_Data *data, GSM_Statemachine *state)
+gn_error pnok_netmonitor(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x7e, 0x00};
 	gn_error err;
 
-	if (!data->NetMonitor) return GN_ERR_INTERNALERROR;
+	if (!data->netmonitor) return GN_ERR_INTERNALERROR;
 
-	req[3] = data->NetMonitor->Field;
+	req[3] = data->netmonitor->field;
 
-	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE) return err;
+	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE) return err;
 
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-gn_error PNOK_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+gn_error pnok_securty_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch (message[2]) {
 	/* Enable extended commands */
@@ -418,8 +419,8 @@ gn_error PNOK_IncomingSecurity(int messagetype, unsigned char *message, int leng
 		default:
 			dprintf("Message: Netmonitor menu %d received:\n", message[3]);
 			dprintf("%s\n", message + 4);
-			if (data->NetMonitor)
-				snprintf(data->NetMonitor->Screen, sizeof(data->NetMonitor->Screen), "%s", message + 4);
+			if (data->netmonitor)
+				snprintf(data->netmonitor->screen, sizeof(data->netmonitor->screen), "%s", message + 4);
 			break;
 		}
 		break;

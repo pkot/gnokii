@@ -32,29 +32,29 @@
 
 */
 
-#ifndef __phones_nokia_h
-#define __phones_nokia_h
+#ifndef _gnokii_phones_nokia_h
+#define _gnokii_phones_nokia_h
 
 #include "gsm-error.h"
 
 #define	PNOK_MSG_SMS 0x02
 
-gn_error PNOK_GetManufacturer(char *manufacturer);
-void PNOK_DecodeString(unsigned char *dest, size_t max, const unsigned char *src, size_t len);
-size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *src);
+gn_error pnok_manufacturer_get(char *manufacturer);
+void pnok_string_decode(unsigned char *dest, size_t max, const unsigned char *src, size_t len);
+size_t pnok_string_encode(unsigned char *dest, size_t max, const unsigned char *src);
 
 /* Common functions for misc Nokia drivers */
 /* Call divert: nk6100, nk7110 */
-gn_error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state);
-gn_error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-int PNOK_FBUS_EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *req);
+gn_error pnok_call_divert(gn_data *data, struct gn_statemachine *state);
+gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+int pnok_fbus_sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
 
 /* Security functions: nk6100, nk7100 */
-gn_error PNOK_enable_extended_cmds(GSM_Data *data, GSM_Statemachine *state, unsigned char type);
-gn_error PNOK_make_call(GSM_Data *data, GSM_Statemachine *state);
-gn_error PNOK_answer_call(GSM_Data *data, GSM_Statemachine *state);
-gn_error PNOK_cancel_call(GSM_Data *data, GSM_Statemachine *state);
-gn_error PNOK_netmonitor(GSM_Data *data, GSM_Statemachine *state);
-gn_error PNOK_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+gn_error pnok_extended_cmds_enable(gn_data *data, struct gn_statemachine *state, unsigned char type);
+gn_error pnok_call_make(gn_data *data, struct gn_statemachine *state);
+gn_error pnok_call_answer(gn_data *data, struct gn_statemachine *state);
+gn_error pnok_call_cancel(gn_data *data, struct gn_statemachine *state);
+gn_error pnok_netmonitor(gn_data *data, struct gn_statemachine *state);
+gn_error pnok_security_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 #endif
