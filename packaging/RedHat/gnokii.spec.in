@@ -63,6 +63,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %attr(0750, root, gnokii) /usr/bin/gnokii
 %attr(0750, root, gnokii) /usr/sbin/gnokiid
 %attr(4750, root, gnokii) /usr/sbin/mgnokiidev
+%attr(0750, root, gnokii) /usr/lib/libgnokii.so
 %config /etc/gnokiirc
 
 %files xgnokii

@@ -2,6 +2,7 @@
 =====
  * Moved logos, ringtones and vCards from Docs/ to more appropriate
    place                                                  (Pawel Kot)
+ * Update spec file to reflect libgnokii.so in there  (Tibor Pittich)
  * 6510 series updates
     o fix date/time reading                            (Markus Plail)
     o add profile writing                              (Markus Plail)
