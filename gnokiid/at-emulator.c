@@ -42,8 +42,8 @@ bool	ATEM_Initialised = false;	/* Set to true once initialised */
 extern char *Model;
 extern char *Port;	/* Hmm, this is a bit iffy ? */
 
-	/* Local variables */
 
+	/* Local variables */
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
 int		PtyWRFD;	/* pty interface - only different in debug mode. */ 
 
@@ -52,6 +52,12 @@ char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
 int		CurrentCmdBuffer;
 int		CurrentCmdBufferIndex;
 
+ 	/* Current command parser */
+void 			(*Parser)(char *);
+//void 			(*Parser)(char *) = ATEM_ParseAT; /* Current command parser */
+
+GSM_MemoryType 	SMSType;
+int 			SMSNumber;
 
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
@@ -66,6 +72,13 @@ bool	ATEM_Initialise(int read_fd, int write_fd)
 
 		/* Initialise registers */
 	ATEM_InitRegisters();
+	
+		/* Initial parser is AT routine */
+	Parser = ATEM_ParseAT;
+	
+		/* Setup defaults for AT*C interpreter. */
+	SMSNumber = 1;
+	SMSType = GMT_ME;
 
 		/* We're ready to roll... */
 	ATEM_Initialised = true;
@@ -105,13 +118,13 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 			ATEM_StringOut(out_buf);
 		}
 
-			/* If it's a command terminator character, go to next
-			   buffer. */
+			/* If it's a command terminator character, parse what
+			   we have so far then go to next buffer. */
 		if (buffer[count] == ModemRegisters[REG_CR] ||
 		    buffer[count] == ModemRegisters[REG_LF]) {
 
 			CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = 0x00;
-			ATEM_ParseAT(CmdBuffer[CurrentCmdBuffer]);
+			Parser(CmdBuffer[CurrentCmdBuffer]);
 
 			CurrentCmdBuffer ++;
 			if (CurrentCmdBuffer >= MAX_CMD_BUFFERS) {
@@ -130,7 +143,7 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 }     
 
 
-	/* Parse commands in buffer, cmd_buffer must be null terminated. */
+	/* Parser for standard AT commands.  cmd_buffer must be null terminated. */
 void	ATEM_ParseAT(char *cmd_buffer)
 {
 	char *buf;
@@ -158,6 +171,22 @@ void	ATEM_ParseAT(char *cmd_buffer)
 					default:
 						ATEM_ModemResult(4);
 						return;
+				}
+				break;
+
+				/* Handle AT* commands (Nokia proprietary I think) */
+			case '*':
+				buf++;
+				if (!strcmp(buf, "NOKIATEST")) {
+					ATEM_ModemResult(0); /* FIXME? */
+					return;
+				}
+			   	else {
+				   	if (!strcmp(buf, "C")) {
+						ATEM_ModemResult(0);
+						Parser= ATEM_ParseSMS;
+						return;
+					}
 				}
 				break;
 
@@ -196,7 +225,94 @@ void	ATEM_ParseAT(char *cmd_buffer)
 	ATEM_ModemResult(0);
 }
 
+void	ATEM_ReadSMS(int number, GSM_MemoryType type)
+{
+	GSM_SMSMessage message;
+	GSM_Error error;
+	char line[250];
 
+	message.MemoryType = type;
+	error = GSM->GetSMSMessage(number, &message);
+
+	if (error == GE_EMPTYSMSLOCATION) {
+		snprintf(line, sizeof(line), "\n\rNo message number %d\n\r", SMSNumber);
+		ATEM_StringOut(line);
+//		SMSnumber = 1;
+		return;
+	}
+   	else {
+	   	if (error != GE_NONE) {
+			ATEM_ModemResult(4);
+			return;
+		}
+	}
+	snprintf(line, 250, "\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n\r", message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCentre);
+	ATEM_StringOut(line);
+	snprintf(line, 250, "Text: %s\n\r", message.MessageText);
+	ATEM_StringOut(line);
+}
+
+void	ATEM_EraseSMS(int number, GSM_MemoryType type)
+{
+	GSM_SMSMessage message;
+	message.MemoryType = type;
+	if (GSM->DeleteSMSMessage(number, &message) == GE_NONE) {
+		ATEM_ModemResult(0);
+	}
+   	else {
+		ATEM_ModemResult(4);
+	}
+}
+
+	/* Parser for SMS interactive mode */
+void	ATEM_ParseSMS(char *buff)
+{
+
+	if (!strcmp(buff, "HELP")) {
+		ATEM_StringOut("\n\rThe following commands work...\n\r");
+		ATEM_StringOut("DIR\n\r");
+		ATEM_StringOut("EXIT\n\r");
+		ATEM_StringOut("HELP\n\r");
+		return;
+    }
+
+	if (!strcmp(buff, "DIR")) {
+		SMSNumber = 1;
+		ATEM_ReadSMS(SMSNumber, SMSType);
+		Parser= ATEM_ParseDIR;
+		return;
+    }
+    if (!strcmp(buff, "EXIT")) {
+		Parser= ATEM_ParseAT;
+		ATEM_ModemResult(0);
+		return;
+    } 
+	ATEM_ModemResult(4);
+}
+
+	/* Parser for DIR sub mode of SMS interactive mode. */
+void	ATEM_ParseDIR(char *buff)
+{
+	switch (*buff) {
+		case 'P':
+			SMSNumber--;
+			ATEM_ReadSMS(SMSNumber, SMSType);
+			return;
+		case 'N':
+			SMSNumber++;
+			ATEM_ReadSMS(SMSNumber, SMSType);
+			return;
+		case 'D':
+			ATEM_EraseSMS(SMSNumber, SMSType);
+			return;
+		case 'Q':
+			Parser= ATEM_ParseSMS;
+			ATEM_ModemResult(0);
+			return;
+	}
+	ATEM_ModemResult(4);
+}
+ 
 	/* Handle AT+C commands, this is a quick hack together at this
 	   stage. */
 bool	ATEM_CommandPlusC(char **buf)

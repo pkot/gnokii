@@ -21,6 +21,7 @@
 
 #include	<termios.h>
 #include	<stdio.h>
+#include	<stdlib.h>
 #include	<unistd.h>
 #include	<fcntl.h>
 #include	<ctype.h>
@@ -98,6 +99,7 @@ bool					DisableKeepalive;
 float					CurrentRFLevel;
 float					CurrentBatteryLevel;
 int						ExploreMessage; /* FIXME - for debugging/investigation only */
+int						InitLength;
 
 	/* These three are the information returned by AT+CGSN, AT+CGMR and
 	   AT+CGMM commands respectively. */
@@ -132,7 +134,7 @@ bool					SMSHeaderAckReceived;		/* Set when header ack'd */
 	/* The following functions are made visible to gsm-api.c and friends. */
 
 	/* Initialise variables and state machine. */
-GSM_Error	FB38_Initialise(char *port_device, GSM_ConnectionType connection, bool enable_monitoring)
+GSM_Error	FB38_Initialise(char *port_device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring)
 {
 
 	/* ConnectionType is ignored in 3810 code. */
@@ -151,6 +153,12 @@ GSM_Error	FB38_Initialise(char *port_device, GSM_ConnectionType connection, bool
 	ExploreMessage = -1;
 
 	strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
+
+	InitLength = atoi(initlength);
+
+	if ((strcmp(initlength, "default") == 0) || (InitLength == 0)) {
+		InitLength = 100;	/* This is the usual value, lower may work. */
+	}
 
 		/* Create and start thread, */
 	rtn = pthread_create(&Thread, NULL, (void *) FB38_ThreadLoop, (void *)NULL);
@@ -785,7 +793,7 @@ void	FB38_ThreadLoop(void)
 
 		/* Send init string to phone, this is a bunch of 0x55
 		   characters.  Timing is empirical. */
-	for (count = 0; count < 100; count ++) {
+	for (count = 0; count < InitLength; count ++) {
 		usleep(1000);
 		write(PortFD, init_char, 1);
 	}

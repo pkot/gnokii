@@ -25,6 +25,7 @@
 /* System header files */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <termios.h>
 #include <fcntl.h>
@@ -165,6 +166,8 @@ u8 RequestSequenceNumber=0x00;
 pthread_t Thread;
 bool RequestTerminate;
 bool DisableKeepalive=false;
+int	InitLength;
+
 struct termios OldTermios; /* To restore termio on close. */
 
 /* Local variables used by get/set phonebook entry code. Buffer is used as a
@@ -216,7 +219,7 @@ char               CurrentIncomingCall[20];
 
 /* Initialise variables and state machine. */
 
-GSM_Error FB61_Initialise(char *port_device, GSM_ConnectionType connection, bool enable_monitoring)
+GSM_Error FB61_Initialise(char *port_device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring)
 {
 
   int rtn;
@@ -225,6 +228,12 @@ GSM_Error FB61_Initialise(char *port_device, GSM_ConnectionType connection, bool
   FB61_LinkOK = false;
 
   strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
+
+  InitLength = atoi(initlength);
+
+  if ((strcmp(initlength, "default") == 0) || (InitLength == 0)) {
+    InitLength = 250;	/* This is the usual value, lower may work. */
+  }
 
   CurrentConnectionType = connection;
 
@@ -588,7 +597,7 @@ void FB61_ThreadLoop(void)
   /* Send init string to phone, this is a bunch of 0x55 characters. Timing is
      empirical. */
 
-  for (count = 0; count < 250; count ++) {
+  for (count = 0; count < InitLength; count ++) {
     usleep(100);
     write(PortFD, &init_char, 1);
   }

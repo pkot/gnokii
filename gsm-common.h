@@ -255,8 +255,8 @@ typedef struct {
 
   /* FIXME: comment this. */
 
-  GSM_Error (*Initialise)( char *port_device, GSM_ConnectionType connection,
-                           bool enable_monitoring );
+  GSM_Error (*Initialise)( char *port_device, char *initlength, 
+		  				   GSM_ConnectionType connection, bool enable_monitoring );
 
   void (*Terminate)(void);	
 

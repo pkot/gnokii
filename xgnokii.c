@@ -45,6 +45,7 @@ static GdkPixmap *AlarmPixmap = NULL;
 
 char *Model;      /* Model from .gnokiirc file. */
 char *Port;       /* Serial port from .gnokiirc file */
+char *Initlength;	/* Init length from .gnokiirc file */
 char *Connection; /* Connection type from .gnokiirc file */
 
 /* Local variables */
@@ -65,13 +66,14 @@ GSM_Error fbusinit(bool enable_monitoring)
   static GSM_Error error=GE_NOLINK;
   GSM_ConnectionType connection=GCT_Serial;
 
-  if (!strcmp(Connection, "infrared"))
+  if (!strcmp(Connection, "infrared")) {
     connection=GCT_Infrared;
+  }
     
   /* Initialise the code for the GSM interface. */     
 
   if (error==GE_NOLINK)
-    error = GSM_Initialise(Model, Port, connection, enable_monitoring);
+    error = GSM_Initialise(Model, Port, Initlength, connection, enable_monitoring);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -382,6 +384,11 @@ void GUI_ReadConfig(void)
   Port = CFG_Get(cfg_info, "global", "port");
   if (Port == NULL)
     Port = DefaultPort;
+
+  Initlength = CFG_Get(cfg_info, "global", "initlength");
+  if (Initlength == NULL) {
+	Initlength = "default";
+  }
 
   Connection = CFG_Get(cfg_info, "global", "connection");
   if (Connection == NULL)

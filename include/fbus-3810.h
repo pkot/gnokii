@@ -22,7 +22,8 @@ extern GSM_Information		FB38_Information;
 
 
 	/* Prototypes for the functions designed to be used externally. */
-GSM_Error	FB38_Initialise(char *port_device, GSM_ConnectionType connection, bool enable_monitoring);
+GSM_Error	FB38_Initialise(char *port_device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring);
+
 bool		FB38_OpenSerial(void);
 void		FB38_Terminate(void);
 

@@ -1,15 +1,14 @@
 /*
-  G N O K I I
+	G N O K I I
 
-  A Linux/Unix toolset and driver for Nokia mobile phones.
+	A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) Hugh Blemings, 1999.
+	Copyright (C) Hugh Blemings, 1999.
 
-  Released under the terms of the GNU GPL, see file COPYING for more details.
-	
-  Mainline code for gnokiid daemon.  Handles command line parsing and
-  various daemon functions.
+	Released under the terms of the GNU GPL, see file COPYING for more details.
 
+	Mainline code for gnokiid daemon.  Handles command line parsing and
+	various daemon functions.
 
 */
 
@@ -37,6 +36,7 @@ void	read_config(void);
 bool		DebugMode;	/* When true, run in debug mode */
 char		*Model;		/* Model from .gnokiirc file. */
 char		*Port;		/* Serial port from .gnokiirc file */
+char		*Initlength;	/* Init length from .gnokiirc file */
 char		*Connection;	/* Connection type from .gnokiirc file */
 
 	/* Local variables */
@@ -107,10 +107,11 @@ int main(int argc, char *argv[])
 		DebugMode = false;	
 	}
 
-	if (!strcmp(Connection, "infrared"))
+	if (!strcmp(Connection, "infrared")) {
 		connection=GCT_Infrared;
+	}
 
-	if (VM_Initialise(Model, Port, connection, DebugMode) == false) {
+	if (VM_Initialise(Model, Port, Initlength, connection, DebugMode) == false) {
 		exit (-1);
 	}
 	while (1) {
@@ -143,6 +144,11 @@ void	read_config(void)
     Port = CFG_Get(cfg_info, "global", "port");
     if (Port == NULL) {
 		Port = DefaultPort;
+    }
+
+    Initlength = CFG_Get(cfg_info, "global", "initlength");
+    if (Initlength == NULL) {
+		Initlength = "default";
     }
 
     Connection = CFG_Get(cfg_info, "global", "connection");

@@ -52,7 +52,7 @@ GSM_Information		*GSM_Info;
    enable_monitoring is true and the model specific code supports it,
    additional information will be output when communicating with the phone. */
 
-GSM_Error GSM_Initialise(char *model, char *device, GSM_ConnectionType connection, bool enable_monitoring)
+GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring)
 {
   bool found_match=false;
 
@@ -90,5 +90,5 @@ GSM_Error GSM_Initialise(char *model, char *device, GSM_ConnectionType connectio
 
   /* Now call model specific initialisation code. */
 
-  return (GSM->Initialise(device, connection, enable_monitoring));
+  return (GSM->Initialise(device, initlength, connection, enable_monitoring));
 }
