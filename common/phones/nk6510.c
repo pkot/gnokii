@@ -72,10 +72,10 @@ static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 static GSM_Error P6510_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 /*
 static GSM_Error P6510_PollSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetPicture(GSM_Data *data, GSM_Statemachine *state);
 */
+static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
@@ -211,8 +211,6 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		break;
 	case GOP6510_GetPicture:
 		return P6510_GetPicture(data, state);
-	case GOP_SendSMS:
-		return P6510_SendSMS(data, state);
 	case GOP_DeleteSMS:
 		return P6510_DeleteSMS(data, state);
 	case GOP_GetSMSStatus:
@@ -220,6 +218,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	case GOP_CallDivert:
 		return P6510_CallDivert(data, state);
 		*/
+	case GOP_SendSMS:
+		return P6510_SendSMS(data, state);
 	case GOP_NetMonitor:
 		return P6510_NetMonitor(data, state);
 	case GOP_GetSMSFolderStatus:
@@ -376,7 +376,49 @@ static GSM_Error P6510_GetRevision(GSM_Data *data, GSM_Statemachine *state)
 /*******************************/
 /* SMS/PICTURE/FOLDER HANDLING */
 /*******************************/
-static void DeliverLayout (unsigned char *message, GSM_Data *data)
+/**
+ * P6510_SendSMS - low level SMS sending function for 6310/6510 phones
+ * @data: gsm data
+ * @state: statemachine
+ *
+ * Nokia changed the format of the SMS frame completly. Currently there are
+ * here some magic numbers (well, many) but hopefully we'll get their meaning
+ * soon.
+ */
+static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02, 0x00, 0x00, 0x00,
+				  0x55, 0x55, 0x01, 0x02};
+	int padding;
+
+	memset(req + 11, 0, 244);
+	req[11] = 0x2c; /* What's this? */
+	req[12] = 0x01; /* SMS Submit */
+	if (data->RawSMS->ReplyViaSameSMSC)  req[12] |= 0x80;
+	if (data->RawSMS->RejectDuplicates)  req[12] |= 0x04;
+	if (data->RawSMS->Report)            req[12] |= 0x20;
+	if (data->RawSMS->UDHIndicator)      req[12] |= 0x40;
+	if (data->RawSMS->ValidityIndicator) req[12] |= 0x10;
+	req[13] = data->RawSMS->Reference;
+	req[14] = data->RawSMS->PID;
+	req[15] = data->RawSMS->DCS;
+	memcpy(req + 16, "\x00\x04\x82\x0c\x01\x07", 6); /* What's this? */
+	dprintf("%02x\n", data->RawSMS->RemoteNumber[0]);
+	memcpy(req + 22, data->RawSMS->RemoteNumber, 12);
+	memcpy(req + 30, "\x82\x0c\x02\x08", 4);
+	memcpy(req + 34, data->RawSMS->MessageCenter, 8);
+	req[42] = 0x80;
+	req[43] = 0x08;
+	req[44] = req[45] = data->RawSMS->Length; /* These octets seems to be equal */
+	memcpy(req + 46, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+	padding = data->RawSMS->UserDataLength % 4; /* We fill UserData with 0's to match 4 octets boundary */
+	memcpy(req + 46 + data->RawSMS->UserDataLength + padding, "\x08\x04\x01\xa7", 4); /* What's this? */
+	dprintf("Sending SMS...(%d)\n", 46 + data->RawSMS->UserDataLength + 4 + padding);
+	if (SM_SendMessage(state, 46 + data->RawSMS->UserDataLength + 4 + padding, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
+	return SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, 100);
+}
+
+static void DeliverLayout(unsigned char *message, GSM_Data *data)
 {
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = message[16];
@@ -400,7 +442,8 @@ static void DeliverLayout (unsigned char *message, GSM_Data *data)
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
 }
-static void SubmitStoredLayout (unsigned char *message, GSM_Data *data)
+
+static void SubmitStoredLayout(unsigned char *message, GSM_Data *data)
 {
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
@@ -424,7 +467,8 @@ static void SubmitStoredLayout (unsigned char *message, GSM_Data *data)
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
 }
-static void SubmitSentLayout (unsigned char *message, GSM_Data *data)
+
+static void SubmitSentLayout(unsigned char *message, GSM_Data *data)
 {
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
@@ -448,7 +492,8 @@ static void SubmitSentLayout (unsigned char *message, GSM_Data *data)
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
 }
-static void TextTemplateLayout (unsigned char *message, GSM_Data *data)
+
+static void TextTemplateLayout(unsigned char *message, GSM_Data *data)
 {
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
@@ -472,7 +517,8 @@ static void TextTemplateLayout (unsigned char *message, GSM_Data *data)
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
 }
-static void PictureTemplateLayout (unsigned char *message, GSM_Data *data)
+
+static void PictureTemplateLayout(unsigned char *message, GSM_Data *data)
 {
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 0;
@@ -496,7 +542,8 @@ static void PictureTemplateLayout (unsigned char *message, GSM_Data *data)
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
 }
-static void DeliveryReportLayout (unsigned char *message, GSM_Data *data)
+
+static void DeliveryReportLayout(unsigned char *message, GSM_Data *data)
 {
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = 16;
@@ -520,7 +567,8 @@ static void DeliveryReportLayout (unsigned char *message, GSM_Data *data)
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
 }
-static void PictureLayout (unsigned char *message, GSM_Data *data)
+
+static void PictureLayout(unsigned char *message, GSM_Data *data)
 {
 	data->RawSMS->MoreMessages     = 0;
 	data->RawSMS->ReplyViaSameSMSC = message[16];
@@ -892,8 +940,13 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 		break;
 
 	case P6510_SUBSMS_SEND_FAIL: /* 0x03 */
-		dprintf("SMS sending failed\n");
-		e = GE_SMSSENDFAILED;
+		/* That's not exactly correct. I receive:
+		 * 01 58 00 03 00 01 0c 08 00 00 25 55 55 00
+		 * on the succeeded sending. Let's try to say we
+		 * succeeded.
+		 */
+		dprintf("SMS sent?\n");
+		e = GE_NONE;
 		break;
 
 	case 0x0e:
@@ -904,10 +957,6 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 		dprintf("SMS received\n");
 		/* We got here the whole SMS */
 		NewSMS = true;
-		//		data->RawData->Length = length - nk6510_layout.ReadHeader;
-		data->RawData->Data = calloc(data->RawData->Length, 1);
-		//		ParseSMS(data, nk6510_layout.ReadHeader);
-		free(data->RawData->Data);
 		break;
 
 	case P6510_SUBSMS_SMS_RCVD: /* 0x10 */

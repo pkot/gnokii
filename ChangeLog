@@ -28,7 +28,7 @@
  * More verbose reporting when detecting the model
                                                (Friedrich Lobenstock)
  * Added MAINTAINERS file                                 (Pawel Kot)
- * Docs updates
+ * Docs updates:
     o "call divert is active" documented             (BORBELY Zoltan)
  * Allow GSM_PrintBitmap to output to any stream          (Pawel Kot)
  * Build system updates:
@@ -45,18 +45,19 @@
     o fixes for getsms() to not output the text twice and correctly
       use SMSCTime and Time fields                        (Pawel Kot)
     o fixes for getsms() to correctly get SMSC number     (Pawel Kot)
- * gnokiid updates
+ * gnokiid updates:
     o ATH can terminate initiated calls              (BORBELY Zoltan)
     o incoming calls can be answered                 (BORBELY Zoltan)
- * 7110 series updates
+ * 7110 series updates:
     o Cleanups in the 7110 driver                         (Pawel Kot)
     o added writing of non GSM_Number subentries       (Markus Plail)
     o cleanups in the driver - recommended to toher driver to follow
       this code                                           (Pawel Kot)
     o support for the new SMS subsystem                   (Pawel Kot)
- * 6510 series updates
+ * 6510 series updates:
     o update to work with new SMS subsystem            (Markus Plail)
     o capitalization caused compilation problem      (BORBELY Zoltan)
+    o make SMS sending work                               (Pawel Kot)
  * 6110 series updates:
     o SMS reading works with the new SMS subsystem   (BORBELY Zoltan)
     o "call divert is active" frame marked as unsolicited in nokia.c
