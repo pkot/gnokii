@@ -1462,7 +1462,6 @@ static int sendlogo(int argc, char *argv[])
 		sms.UserData[1].Type = SMS_NokiaText;
 		readtext(&sms.UserData[1], 120);
 		sms.UserData[2].Type = SMS_NoData;
-		//		strcpy(sms.UserData[1].u.Text, "Ahoj, tohle je mala zprava na testovani telefonu");
 	}
 
 	/* Send the message. */
