@@ -156,36 +156,9 @@ also provide information about what functionality is
 available for each model.
 
 In order to make use of the AT emulator provided by gnokiid
-through /dev/gnokii, you must do the following.  We've given
-a summary of what is required for each step, if anything
-is unclear either ask a Unix-savvy friend or ask for help
-on the gnokii mailing list.
+through /dev/gnokii, you must read the documentation file
+DataCalls-QuickStart.
 
-* Create a group called gnokii 
-
-Either use groupadd if your system provides it or manually
-edit /etc/group.  You'll need to be root to do this.
-
-* Ensure you are in the gnokii group.
- 
-As root, edit /etc/group and add your name to the end of the
-line for the gnokii group.  Look at other entries in the file
-to see how entries are laid out.
-
-* Ensure that the mgnokiidev executable has permissions 4754
-  and that it is owned by root and in group gnokii.
-
-As root run
-
-chmod 4754 <path>gnokii 
-
-then
-
-chown root.gnokii <path> gnokii
-
-where <path> is the location of gnokii.  Typically this is
-/usr/bin
- 
 
 - 7.0 Known Bugs -
 
@@ -357,7 +330,7 @@ to recognise those who have helped so far!
 
 
 - 15.0 Release Notes -
-200004xx Version 0.3.2
+200005xx Version 0.3.2
 We have data calls and autoconf.  Nuff said :)
 
 19991222 Version 0.3.1

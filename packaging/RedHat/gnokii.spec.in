@@ -55,9 +55,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc COPYING INSTALL TODO Docs/CREDITS Docs/DataCalls-QuickStart Docs/README
 %doc Docs/README-3810 Docs/README-6110 Docs/README-WIN32 Docs/sample/sample.gnokiirc
 %doc Docs/gettext-howto gnokii.nol Docs/gnokii-ir-howto Docs/packaging-howto
-/usr/bin/gnokii
-%attr(0754, root, gnokii) /usr/sbin/gnokiid
-%attr(4754, root, gnokii) /usr/sbin/mgnokiidev
+%attr(0750, root, gnokii) /usr/bin/gnokii
+%attr(0750, root, gnokii) /usr/sbin/gnokiid
+%attr(4750, root, gnokii) /usr/sbin/mgnokiidev
 %config /etc/gnokiirc
 
 %files xgnokii
@@ -67,6 +67,9 @@ rm -rf ${RPM_BUILD_ROOT}
 /usr/lib/xgnokii
 
 %changelog
+* Mon May 15 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- proper access rights for gnokiid, gnokii and mgnokiidev
+
 * Sat May 13 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - new doc files added
 

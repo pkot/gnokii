@@ -14,7 +14,7 @@ e.g.
 
    groupadd gnokii
    chown root:gnokii /usr/local/sbin/mgnokiidev
-   chmod 4754 /usr/local/sbin/mgnokiidev
+   chmod 4750 /usr/local/sbin/mgnokiidev
 
 (2) Create /etc/gnokiirc
 
