@@ -303,7 +303,8 @@ Thank you to, in no particular order...
 
 *  Jiri Meloun for voice calling.
 
-*  Emilio Brambilla for SMS notification fixes.
+*  Emilio Brambilla for SMS notification fixes, setdatetime implementation
+   and typing GSM_Default_Alphabet.
 
 *  Czech Linux Users' group for it's CVS server which hosts our
    development repository.

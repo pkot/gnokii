@@ -65,6 +65,22 @@ typedef struct {
 #define GSM_MAX_PHONEBOOK_NAME_LENGTH (40)
 #define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (40)
 
+/* This data type is used to report the number of used and free positions in
+   memory (sim or internal). */
+
+typedef struct {
+  GSM_MemoryType MemoryType; /* Type of the memory */
+  int Used;                  /* Number of used positions */
+  int Free;                  /* Number of free positions */
+} GSM_MemoryStatus;
+
+/* This data type is used to hold the current SMS status. */
+
+typedef struct {
+  int UnRead; /* The number of unread messages */
+  int Number; /* The number of messages */
+} GSM_SMSStatus;
+
 /* Define datatype for phonebook entry, used for getting/writing phonebook
    entries. */
 
@@ -200,6 +216,10 @@ typedef struct {
 
   GSM_Error (*WritePhonebookLocation)( GSM_MemoryType memory_type,
 				       int location, GSM_PhonebookEntry *entry );
+
+  GSM_Error (*GetMemoryStatus)( GSM_MemoryStatus *Status);
+
+  GSM_Error (*GetSMSStatus)( GSM_SMSStatus *Status);
 
   GSM_Error (*GetSMSMessage)( GSM_MemoryType memory_type, int location,
 			      GSM_SMSMessage *message );

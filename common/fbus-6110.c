@@ -53,6 +53,8 @@ GSM_Functions FB61_Functions = {
   FB61_Terminate,
   FB61_GetPhonebookLocation,
   FB61_WritePhonebookLocation,
+  FB61_GetMemoryStatus,
+  FB61_GetSMSStatus,
   FB61_GetSMSMessage,
   FB61_DeleteSMSMessage,
   FB61_SendSMSMessage,
@@ -107,6 +109,12 @@ GSM_SMSMessage     *CurrentSMSMessage;
 GSM_Error          CurrentSMSMessageError;
 int                CurrentSMSPointer;
 
+GSM_MemoryStatus   *CurrentMemoryStatus;
+GSM_Error          CurrentMemoryStatusError;
+
+GSM_SMSStatus      *CurrentSMSStatus;
+GSM_Error          CurrentSMSStatusError;
+
 GSM_Error          PINError;
 
 GSM_DateTime       *CurrentDateTime;
@@ -115,9 +123,9 @@ GSM_Error          CurrentDateTimeError;
 GSM_DateTime       *CurrentAlarm;
 GSM_Error          CurrentAlarmError;
 
-int                CurrentRFLevel=-1,
-                   CurrentBatteryLevel=-1,
-                   CurrentPowerSource=-1;
+int                CurrentRFLevel,
+                   CurrentBatteryLevel,
+                   CurrentPowerSource;
 
 #define FB61_FRAME_HEADER 0x00, 0x01, 0x00
 
@@ -129,6 +137,7 @@ GSM_Error FB61_Initialise(char *port_device, bool enable_monitoring)
   int rtn;
 
   RequestTerminate = false;
+  FB61_LinkOK = false;
   EnableMonitoringOutput = enable_monitoring;
 
   strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
@@ -158,14 +167,37 @@ GSM_Error FB61_TX_SendStatusRequest()
   return (GE_NONE);
 }
 
-GSM_Error	FB61_GetStorageStatus(GSM_MemoryType memory_type)
+/* This function is used to get storage status from the phone. It currently
+   supports two different memory areas - internal and SIM. */
+
+GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x07, 0x00, 0x01};
+  int timeout=10;
 
-  req[4]= (memory_type==GMT_INTERNAL)?FB61_MEMORY_PHONE:FB61_MEMORY_SIM;
+  CurrentMemoryStatus = Status;
+  CurrentMemoryStatusError = GE_BUSY;
+
+  if (Status->MemoryType == GMT_INTERNAL)
+    req[4] = FB61_MEMORY_PHONE;
+  else
+    if (Status->MemoryType == GMT_SIM)
+      req[4] = FB61_MEMORY_SIM;
+    else
+      return (GE_INVALIDMEMORYTYPE);
 
   FB61_TX_SendMessage(0x06, 0x03, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentMemoryStatusError == GE_BUSY ) {
+
+    if (timeout-- == 0) {
+      return (GE_TIMEOUT);
+    }    
+
+    usleep (100000);
+  }
 
   return (GE_NONE);
 }
@@ -263,12 +295,8 @@ void	FB61_ThreadLoop(void)
 
 		  if (idle_timer == 0) {
 			/* Dont send keepalive and status packets when doing other transactions. */
-			if (!DisableKeepalive) {
+			if (!DisableKeepalive)
 			  FB61_TX_SendStatusRequest();
-			  FB61_GetSMSStatus();
-			  FB61_GetStorageStatus(GMT_INTERNAL);
-			  FB61_GetStorageStatus(GMT_SIM);
-			}
 
 			idle_timer = 20;
 		  }
@@ -297,6 +325,21 @@ void		FB61_Terminate(void)
 
 GSM_Error FB61_GetRFLevel(float *level)
 {
+  int timeout=10;
+
+  CurrentRFLevel=-1;
+
+  FB61_TX_SendStatusRequest();
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentRFLevel == -1 ) {
+
+    if (timeout-- == 0) {
+      return (GE_TIMEOUT);
+    }    
+
+    usleep (100000);
+  }
 
   if (CurrentRFLevel != -1) {
     *level=CurrentRFLevel;
@@ -308,6 +351,21 @@ GSM_Error FB61_GetRFLevel(float *level)
 
 GSM_Error FB61_GetBatteryLevel(float *level)
 {
+  int timeout=10;
+
+  CurrentBatteryLevel=-1;
+
+  FB61_TX_SendStatusRequest();
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentBatteryLevel == -1 ) {
+
+    if (timeout-- == 0) {
+      return (GE_TIMEOUT);
+    }    
+
+    usleep (100000);
+  }
 
   if (CurrentBatteryLevel != -1) {
     *level=CurrentBatteryLevel;
@@ -319,6 +377,22 @@ GSM_Error FB61_GetBatteryLevel(float *level)
 
 GSM_Error FB61_GetPowerSource(GSM_PowerSource *source)
 {
+
+  int timeout=10;
+
+  CurrentPowerSource=-1;
+
+  FB61_TX_SendStatusRequest();
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentPowerSource == -1 ) {
+
+    if (timeout-- == 0) {
+      return (GE_TIMEOUT);
+    }    
+
+    usleep (100000);
+  }
 
   if (CurrentPowerSource != -1) {
     *source=CurrentPowerSource;
@@ -449,14 +523,30 @@ GSM_Error	FB61_GetSMSCenter(u8 priority)
 	return (GE_NONE);
 }
 
-GSM_Error	FB61_GetSMSStatus()
+GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
 {
-	unsigned char smsstatus_req[] = {FB61_FRAME_HEADER, 0x36, 0x64, 0x01};
 
-	FB61_TX_SendMessage(0x06, 0x14, smsstatus_req);
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x36, 0x64, 0x01};
+  int timeout=10;
 
-	return (GE_NONE);
+  CurrentSMSStatus = Status;
+  CurrentSMSStatusError = GE_BUSY;
+
+  FB61_TX_SendMessage(0x06, 0x14, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentSMSStatusError == GE_BUSY ) {
+
+    if (timeout-- == 0) {
+      return (GE_TIMEOUT);
+    }    
+
+    usleep (100000);
+  }
+
+  return (GE_NONE);
 }
+
 
 GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code)
 {
@@ -474,6 +564,13 @@ GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time)
 			       0x00, /* Unknown, but not seconds - try 59 and wait 1 sec. */
 			       0x01 };
 
+        req[7] = date_time->Year / 256;
+        req[8] = date_time->Year % 256;
+        req[9] = date_time->Month;
+        req[10] = date_time->Day;
+        req[11] = date_time->Hour;
+        req[12] = date_time->Minute;
+
 	FB61_TX_SendMessage(0x0f, 0x11, req);
 	return (GE_NONE);
 }
@@ -489,51 +586,44 @@ GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 GSM_Error	FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry) {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00, 0x01};
-  int memory_area;
   int timeout;
 
-		/* State machine code writes data to these variables when
-		   it comes in. */
-	CurrentPhonebookEntry = entry;
-	CurrentPhonebookError = GE_BUSY;
+  CurrentPhonebookEntry = entry;
+  CurrentPhonebookError = GE_BUSY;
 
-	if (memory_type == GMT_INTERNAL) {
-		memory_area = FB61_MEMORY_PHONE;
-	}
-	else {
-		if (memory_type == GMT_SIM) {
-			memory_area = FB61_MEMORY_SIM;
-		}
-		else {
-			return (GE_INVALIDMEMORYTYPE);
-		}
-	}
+  if (memory_type == GMT_INTERNAL)
+    req[4] = FB61_MEMORY_PHONE;
+  else
+    if (memory_type == GMT_SIM)
+      req[4] = FB61_MEMORY_SIM;
+    else
+      return (GE_INVALIDMEMORYTYPE);
 
-	req[4] = memory_area;
-	req[5] = location;
+  req[5] = location;
 
-	timeout = 20; 	/* 2 seconds for command to complete */
+  timeout = 20; /* 2 seconds for command to complete */
 
-		/* Return if no link has been established. */
-	if (!FB61_LinkOK) {
-	  printf("returning no link :-(\n");
-	  return GE_NOLINK;
-	}
+  /* Return if no link has been established. */
 
-		/* Send request */
-	FB61_TX_SendMessage(0x08, 0x03, req);
+  if (!FB61_LinkOK) {
+    printf("returning no link :-(\n");
+    return GE_NOLINK;
+  }
 
-		/* Wait for timeout or other error. */
-	while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
+  /* Send request */
 
-		timeout --;
-		if (timeout == 0) {
-			return (GE_TIMEOUT);
-		}
-		usleep (100000);
-	}
+  FB61_TX_SendMessage(0x08, 0x03, req);
 
-	return (CurrentPhonebookError);
+  /* Wait for timeout or other error. */
+
+  while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
+    timeout --;
+    if (timeout == 0)
+      return (GE_TIMEOUT);
+    usleep (100000);
+  }
+
+  return (CurrentPhonebookError);
 }
 
 	/* Routine to write phonebook location in phone. Designed to 
@@ -835,8 +925,27 @@ char *FB61_GetPackedDateTime(u8 *Number) {
 
 unsigned char GSM_Default_Alphabet[] = {
 
-  /* FIXME: see ETSI GSM 03.38, 6.2.1 Default alphabet */
+  /* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet */
+  /* char in hex position 10, [12 to 1a] and 24 are not present
+     on latin1 charset, so we cannot reproduce on the screen, 
+     however they are greek symbol not present even on my Nokia */
 
+  '@',  0xa3, '$',  0xa5, 0xe8, 0xe9, 0xf9, 0xec, 
+  0xf2, 0xc7, '\n', 0xd8, 0xf8, '\r', 0xc5, 0xe5,
+  '?',  '_',  '?',  '?',  '?',  '?',  '?',  '?',
+  '?',  '?',  '?',  ' ',  0xc6, 0xe6, 0xdf, 0xc9,
+  ' ',  '!',  '\"', '#',  '?',  '%',  '&',  '\'',
+  '(',  ')',  '*',  '+',  ',',  '-',  '.',  '/',
+  '0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',
+  '8',  '9',  ':',  ';',  '<',  '=',  '>',  '?',
+  0xa1, 'A',  'B',  'C',  'D',  'E',  'F',  'G',
+  'H',  'I',  'J',  'K',  'L',  'M',  'N',  'O',
+  'P',  'Q',  'R',  'S',  'T',  'U',  'V',  'W',
+  'X',  'Y',  'Z',  0xc4, 0xd6, 0xd1, 0xdc, 0xa7,
+  0xbf, 'a',  'b',  'c',  'd',  'e',  'f',  'g',
+  'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',
+  'p',  'q',  'r',  's',  't',  'u',  'v',  'w',
+  'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
 
 int fromoctet(int length, unsigned char *input, unsigned char *output)
@@ -1002,19 +1111,22 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 
 	  case 0x10:
 	  
+#ifdef DEBUG
+
 	  	printf(_("Message: SMS Message Received\n"));
     	  	printf("   SMS center number: %s\n", FB61_GetBCDNumber(MessageBuffer+7));
-		MessageBuffer[23] = MessageBuffer[23]/2+1;
+		MessageBuffer[23] = (MessageBuffer[23]+1)/2+1;
 		printf("   Remote number: %s\n", FB61_GetBCDNumber(MessageBuffer+23));
       		printf("   Date: %s\n", FB61_GetPackedDateTime(MessageBuffer+35));
 		printf("   SMS: ");
 
-		tmp=fromoctet(MessageBuffer[0x16], MessageBuffer+42, output);
+		tmp=fromoctet(MessageLength-42-2, MessageBuffer+42, output);
 
 		for (i=0; i<tmp;i++)
-		  printf("%c", (output[i]==0x00)?'@':output[i]);
+		  printf("%c", GSM_Default_Alphabet[output[i]]);
 
 		printf("\n");
+#endif DEBUG
 
 		break;
 
@@ -1106,6 +1218,10 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	    printf("   Used: %d\n", MessageBuffer[6]);
 	    printf("   Free: %d\n", MessageBuffer[5]);
 #endif DEBUG
+
+	    CurrentMemoryStatus->Used = MessageBuffer[6];
+	    CurrentMemoryStatus->Free = MessageBuffer[5];
+	    CurrentMemoryStatusError = GE_NONE;
 
 	    break;
 
@@ -1356,7 +1472,7 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 
 	  case 0x08:
 
-		MessageBuffer[24] = MessageBuffer[24]/2+1;
+                MessageBuffer[24] = (MessageBuffer[24]+1)/2+1;
 
 #ifdef DEBUG
 		printf("Message: SMS Received.\n");
@@ -1388,11 +1504,10 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 		for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-		  printf("%c", (output[i]==0x00)?'@':output[i]);
+		  printf("%c", GSM_Default_Alphabet[output[i]]);
 #endif DEBUG
 
-		  /* FIXME: GSM Alphabet should be here... */
-		  CurrentSMSMessage->MessageText[i]=(output[i]==0x00)?'@':output[i];
+		  CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
 		}
 
 		CurrentSMSMessage->MessageText[tmp]=0;
@@ -1432,6 +1547,10 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 		printf("   Unread messages: %d\n", MessageBuffer[11]);
 #endif DEBUG
 
+	    CurrentSMSStatus->UnRead = MessageBuffer[11];
+	    CurrentSMSStatus->Number = MessageBuffer[10];
+	    CurrentSMSStatusError = GE_NONE;
+
 	  break;
 
           case 0x38:
@@ -1453,10 +1572,10 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 		for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-		  printf("%c", (output[i]==0x00)?'@':output[i]);
+		  printf("%c", GSM_Default_Alphabet[output[i]]);
 #endif DEBUG
 
-		  CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=(output[i]==0x00)?'@':output[i];
+		  CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=GSM_Default_Alphabet[output[i]];
 		}
 
 		CurrentSMSMessage->MessageText[CurrentSMSPointer+tmp]=0;
@@ -1483,12 +1602,9 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	  printf("   %s\n", MessageBuffer+25);
 
 	  /* What is this? My phone reports: 0501505 */
-	  printf("   %s\n", MessageBuffer+31);
+	  printf("   Production Code: %s\n", MessageBuffer+31);
 
-	  /* What is this? My phone reports: 4200. John Kougoulos reported
-	     4300... */
-
-	  printf("   %s\n", MessageBuffer+39);
+	  printf("   HW: %s\n", MessageBuffer+39);
 
 	  printf("   Firmware: %s\n", MessageBuffer+44);
 

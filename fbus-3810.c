@@ -44,6 +44,8 @@ GSM_Functions			FB38_Functions = {
 		FB38_Terminate,
 		FB38_GetPhonebookLocation,
 		FB38_WritePhonebookLocation,
+		FB38_GetMemoryStatus,
+		FB38_GetSMSStatus,
 		FB38_GetSMSMessage,
 		FB38_DeleteSMSMessage,
 		FB38_SendSMSMessage,
@@ -469,6 +471,16 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 }
 
 	/* Our "Not implemented" functions */
+GSM_Error	FB38_GetMemoryStatus(GSM_MemoryStatus *Status)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_GetSMSStatus(GSM_SMSStatus *Status)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
 GSM_Error	FB38_GetRFLevel(float *level)
 {
 	return (GE_NOTIMPLEMENTED);

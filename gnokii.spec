@@ -26,10 +26,9 @@ make
 cp gnokii gnokii3810
 
 cat <<EOM |patch -p1
-diff -u gnokii-0.2.4-orig/Makefile gnokii-0.2.4/Makefile
---- gnokii-0.2.4-orig/Makefile	Sun Mar 28 12:17:00 1999
-+++ gnokii-0.2.4/Makefile	Sun Mar 28 12:18:06 1999
-@@ -16,7 +16,7 @@
+--- Makefile.orig	Sun May  9 21:15:17 1999
++++ Makefile	Sun May  9 21:15:25 1999
+@@ -32,7 +32,7 @@
  # For Nokia 6110/5110 uncomment the next line
  #
  
@@ -61,6 +60,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/*
 
 %changelog
+* Sun May  9 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- included 6110-patch updated to my prepatches
+
 * Thu May  6 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - TODO-6110 file added to documentation files
 

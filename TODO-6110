@@ -10,8 +10,6 @@ This is a to-do list for 6110 series.
 
 - delete all FIXME from the sources
 
-- implement correct settime function - it should be very easy
-
 - implement calendar notes infrastructure and --getcalendarnote
 
 - --writecalendarnote
@@ -23,3 +21,12 @@ This is a to-do list for 6110 series.
 
 - X interface :-)
 
+- carefully check incoming packets so we can not crash if the mouse is
+  repeating our bytes on the serial interface (i.e. checksums and
+  source/destination fields)
+
+- second part of SMS notification is not handled now...
+
+- support for Nokia CDS's phonebook files
+
+- MemoryType should be in GSM_PhonebookEntry

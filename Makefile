@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.2.5-pre13
+VERSION = 0.2.5-pre14
 
 #
 # Compiler to use.
@@ -99,7 +99,7 @@ rpm:	dist
 	@make clean
 
 # Dependencies - simplified for now
-gnokii.o: gnokii.c gsm-api.c gsm-api.h  misc.h gsm-common.h
+gnokii.o: gnokii.c gsm-api.c gsm-api.h misc.h gsm-common.h
 gsm-api.o: gsm-api.c fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-3810.o: fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-6110.o: fbus-6110.c fbus-6110.h misc.h gsm-common.h gsm-networks.h

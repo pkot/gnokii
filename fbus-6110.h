@@ -70,6 +70,10 @@ GSM_Error	FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location,
 GSM_Error	FB61_WritePhonebookLocation(GSM_MemoryType memory_type, 
 				int location, GSM_PhonebookEntry *entry);
 
+GSM_Error	FB61_GetMemoryStatus(GSM_MemoryStatus *Status);
+
+GSM_Error	FB61_GetSMSStatus(GSM_SMSStatus *Status);
+
 GSM_Error	FB61_GetSMSMessage(GSM_MemoryType memory_type, int location,
 				 GSM_SMSMessage *message);
 
@@ -112,7 +116,6 @@ bool		FB61_OpenSerial(void);
 void		FB61_SigHandler(int status);
 void		FB61_RX_StateMachine(char rx_byte);
 void		FB61_RX_DisplayMessage(void);
-GSM_Error	FB61_GetSMSStatus() ;
 
 	/* Insert code here as required ? */
 

@@ -41,6 +41,7 @@ void writephonebook(void);
 void getsms(char *argv[]);
 void deletesms(char *argv[]);
 void sendsms(char *argv[]);
+void setdatetime(char *argv[]);
 void getdatetime(void);
 void getalarm(void);
 void dialvoice(char *argv[]);
@@ -66,6 +67,7 @@ void usage(void)
           gnokii [--getsms] [memory type] [start] [end]
           gnokii [--deletesms] [memory type] [start] [end]
           gnokii [--sendsms] [destination] [message centre]
+          gnokii [--setdatetime] [YYYY] [MM] [DD] [HH] [MM]
           gnokii [--getdatetime]
           gnokii [--getalarm]
           gnokii [--dialvoice] [number]
@@ -101,6 +103,8 @@ void usage(void)
                             stdin.  This function has had limited testing
                             and may not work at all on your network.
 
+          --setdatetime     set the date and the time of the phone.
+
           --getdatetime     shows current date and time in the phone.
 
           --getalarm        shows current alarm.
@@ -131,7 +135,7 @@ void fbusinit(bool enable_monitoring)
   while (count++ < 200 && *GSM_LinkOK == false)
     usleep(50000);
 
-  if (GSM_LinkOK == false) {
+  if (*GSM_LinkOK == false) {
     fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting. \n"));
     exit(-1);
   }
@@ -188,6 +192,11 @@ int main(int argc, char *argv[])
   /* Voice call mode. */
   if (strcmp(argv[1], "--dialvoice") == 0) {
     dialvoice(argv);
+  }
+
+  /* Set Date and Time. */
+  if (strcmp(argv[1], "--setdatetime") == 0 && argc==7) {
+    setdatetime(argv);
   }
 
 		/* Get phonebook command. */
@@ -416,6 +425,24 @@ void dialvoice(char *argv[])
   exit(0);
 }
 
+void setdatetime(char *argv[])
+{
+  GSM_DateTime Date;
+
+  fbusinit(false);
+
+  Date.Year = atoi (argv[2]);
+  Date.Month = atoi (argv[3]);
+  Date.Day = atoi (argv[4]);
+  Date.Hour = atoi (argv[5]);
+  Date.Minute = atoi (argv[6]);
+
+  GSM->SetDateTime(&Date);
+
+  GSM->Terminate();
+  exit(0);
+}
+
 	/* In this mode we receive the date and time from mobile phone */
 
 void	getdatetime(void) {
@@ -455,6 +482,11 @@ void monitormode(void)
   float rflevel=-1, batterylevel=-1;
   GSM_PowerSource powersource=-1;
 
+  GSM_MemoryStatus SIMMemoryStatus = {GMT_SIM, 0, 0};
+  GSM_MemoryStatus PhoneMemoryStatus = {GMT_INTERNAL, 0, 0};
+
+  GSM_SMSStatus SMSStatus = {0, 0};
+    
   /* We do not want to monitor serial line forever - press Ctrl+C to stop the
      monitoring mode. */
 
@@ -473,7 +505,7 @@ void monitormode(void)
 
   while (!shutdown) {
 
-    if (GSM->GetRFLevel(&rflevel)==GE_NONE)
+    if (GSM->GetRFLevel(&rflevel) == GE_NONE)
       fprintf(stdout, "RFLevel: %d\n", (int)rflevel);
 
     if (GSM->GetBatteryLevel(&batterylevel) == GE_NONE)
@@ -481,6 +513,15 @@ void monitormode(void)
 
     if (GSM->GetPowerSource(&powersource) == GE_NONE)
       fprintf(stdout, "Power Source: %s\n", (powersource==GPS_ACDC)?"AC/DC":"battery");
+
+    if (GSM->GetMemoryStatus(&SIMMemoryStatus) == GE_NONE)
+      fprintf(stdout, "SIM: Used %d, Free %d\n", SIMMemoryStatus.Used, SIMMemoryStatus.Free);
+
+    if (GSM->GetMemoryStatus(&PhoneMemoryStatus) == GE_NONE)
+      fprintf(stdout, "Phone: Used %d, Free %d\n", PhoneMemoryStatus.Used, PhoneMemoryStatus.Free);
+
+    if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE)
+      fprintf(stdout, "SMS Messages: UnRead %d, Number %d\n", SMSStatus.UnRead, SMSStatus.Number);
 
     sleep(1);
   }
