@@ -21,6 +21,8 @@
     o fix the case when NOL bitmap is not in the size dividable
       by 8                                                (Pawel Kot)
     o cleanups using ceiling function     (BORBELY Zoltan, Pawel Kot)
+    o GSM_ShowBitmapFile cleanup, startup logo is displayed
+      correctly                                      (BORBELY Zoltan)
  * Updated TODO                           (BORBELY Zoltan, Pawel Kot)
  * code cleanups
     o minor portability fixes        (Jan Kratochvil, BORBELY Zoltan)
