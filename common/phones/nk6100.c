@@ -105,6 +105,8 @@ static void (*OnCellBroadcast)(GSM_CBMessage *Message) = NULL;
 static void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo) = NULL;
 static void (*RLP_RXCallback)(RLP_F96Frame *Frame) = NULL;
 static GSM_Error (*OnSMS)(GSM_SMSMessage *Message) = NULL;
+static bool sms_notification_in_progress = false;
+static bool sms_notification_lost = false;
 static NK6100_Keytable Keytable[256];
 
 /* static functions prototypes */
@@ -190,6 +192,7 @@ static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, i
 #endif
 
 static int GetMemoryType(GSM_MemoryType memory_type);
+static void FlushLostSMSNotifications(GSM_Statemachine *state);
 
 static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x04, IncomingPhoneStatus },
@@ -1138,6 +1141,16 @@ static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
 		return false;
 	}
 
+	/*
+	 * libgnokii isn't reentrant anyway, so this simple trick should be
+	 * enough - bozo
+	 */
+	if (sms_notification_in_progress) {
+		sms_notification_lost = true;
+		return false;
+	}
+	sms_notification_in_progress = true;
+
 	memset(&sms, 0, sizeof(sms));
 	sms.MemoryType = GMT_SM;
 	sms.Number = pos;
@@ -1145,24 +1158,38 @@ static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
 	data.SMSMessage = &sms;
 
 	dprintf("trying to fetch sms#%hd\n", sms.Number);
-	if ((error = GetSMS(&data, state)) != GE_NONE) return false;
+	if ((error = GetSMS(&data, state)) != GE_NONE) {
+		sms_notification_in_progress = false;
+		return false;
+	}
 
 	OnSMS(&sms);
 
 	dprintf("deleting sms#%hd\n", sms.Number);
 	DeleteSMSMessage(&data, state);
 
+	sms_notification_in_progress = false;
+
 	return true;
+}
+
+static void FlushLostSMSNotifications(GSM_Statemachine *state)
+{
+	int i;
+
+	while (!sms_notification_in_progress && sms_notification_lost) {
+		sms_notification_lost = false;
+		for (i = 1; i <= P6100_MAX_SMS_MESSAGES; i++)
+			CheckIncomingSMS(state, i);
+	}
 }
 
 static GSM_Error SetOnSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	int	i;
-
 	if (data->OnSMS) {
 		OnSMS = data->OnSMS;
-		for (i = 1; i <= P6100_MAX_SMS_MESSAGES; i++)
-			CheckIncomingSMS(state, i);
+		sms_notification_lost = true;
+		FlushLostSMSNotifications(state);
 	} else {
 		OnSMS = NULL;
 	}
@@ -1197,6 +1224,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 	case 0x10:
 		dprintf("SMS received, location: %d\n", message[5]);
 		CheckIncomingSMS(State, message[5]);
+		FlushLostSMSNotifications(State);
 		return GE_UNSOLICITED;
 
 	/* FIXME: unhandled frame, request: Get HW&SW version !!! */

@@ -1,3 +1,8 @@
+0.4.0pre20 (Not released yet)
+==========
+ * 6110 series updates
+    o PollSMS race condition eliminated              (BORBELY Zoltan)
+
 0.4.0pre19
 ==========
  * include tcp.h                                       (Pavel Machek)
