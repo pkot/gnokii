@@ -55,6 +55,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplySendSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 /* static gn_error ReplyDeleteSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state); */
@@ -74,6 +75,7 @@ static gn_error AT_ReadPhonebook(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_WritePhonebook(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SendSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SaveSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state, unsigned char *cmd);
@@ -109,6 +111,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_CallDivert,            AT_CallDivert,            ReplyCallDivert },
 	{ GN_OP_AT_SetPDUMode,         AT_SetPDUMode,            Reply },
 	{ GN_OP_AT_Prompt,             NULL,                     ReplyGetPrompt },
+	{ GN_OP_GetSMSStatus,          AT_GetSMSStatus,          ReplyGetSMSStatus },
 	{ GN_OP_SendSMS,               AT_SendSMS,               ReplySendSMS },
 	{ GN_OP_SaveSMS,               AT_SaveSMS,               ReplySendSMS },
 	{ GN_OP_GetSMS,                AT_GetSMS,                ReplyGetSMS },
@@ -582,6 +585,18 @@ static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_AT_SetPDUMode, data, state);
 }
 
+static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error ret;
+
+	if (!data->sms_status) return GN_ERR_INTERNALERROR;
+
+	ret = sm_message_send(13, GN_OP_GetSMSStatus, "AT+CPMS=\"SM\"\r", state);
+	if (ret != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_GetSMSStatus, data, state);
+}
+
 static gn_error AT_SendSMS(gn_data *data, struct gn_statemachine *state)
 {
 	return AT_WriteSMS(data, state, "CMGS");
@@ -967,6 +982,26 @@ static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int leng
 static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	return (buffer[0] == GN_AT_PROMPT) ? GN_ERR_NONE : GN_ERR_INTERNALERROR;
+}
+
+static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_line_buffer buf;
+
+	if (buffer[0] != GN_AT_OK) return GN_ERR_FAILED;
+
+	buf.line1 = buffer + 1;
+	buf.length = length;
+	splitlines(&buf);
+
+	if (sscanf(buf.line2, "+CPMS: %d", &data->sms_status->number) != 1)
+		return GN_ERR_FAILED;
+
+	data->sms_status->unread = 0;
+	data->sms_status->changed = 0;
+	data->sms_status->folders_count = 0;
+
+	return GN_ERR_NONE;
 }
 
 static gn_error ReplySendSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)

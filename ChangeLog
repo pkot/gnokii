@@ -11,6 +11,8 @@
     o keyboard emulation isn't working, only up and down messages
       are known                                    (BORBELY Zoltan)
     o call management functions implemented        (BORBELY Zoltan)
+ * AT series updates
+    o GetSMSStatus implemented                     (BORBELY Zoltan)
  * portability fixes
     o libgnokii.dsp (Visual Studio) updated        (BORBELY Zoltan)
     o VC debug and release flags differs                    (Ender)
