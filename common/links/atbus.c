@@ -149,7 +149,6 @@ static bool ATBUS_OpenSerial(int mode, char *device)
 		perror(_("Couldn't open ATBUS device"));
 		return (false);
 	}
-	device_changespeed(mode == 2 ? 9600 : 19200);
 	if (mode) {
 		/* make 7110 with dlr-3 happy. the nokia dlr-3 cable     */
 		/* provides hardware handshake lines but is, at least at */

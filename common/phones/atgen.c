@@ -122,7 +122,7 @@ GSM_Phone phone_at = {
 	IncomingFunctions,
 	PGEN_IncomingDefault,
 	{
-		"AT|AT-HW|dancall|AT-9600",	/* Supported models */
+		"AT|AT-HW|dancall",	/* Supported models */
 		99,			/* Max RF Level */
 		0,			/* Min RF Level */
 		GRF_CSQ,		/* RF level units */
@@ -1053,8 +1053,6 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 			ret = CBUS_Initialise(state);
 		else if (!strcmp(setupdata->Model, "AT-HW"))
 			ret = ATBUS_Initialise(state, true);
-		else if (!strcmp(setupdata->Model, "AT-9600"))
-			ret = ATBUS_Initialise(state, 2);
 		else
 			ret = ATBUS_Initialise(state, false);
 		break;

@@ -10,5 +10,6 @@ are writing their own firmware with arkanoid, for example.
 
 * Its quite easy to flash firmware there.
 
-* Works with gnokii, use AT-9600 as hardware type.
+* Works with gnokii, use model AT as hardware type and add
+serial_baudrate = 9600 option to make it work.
 
