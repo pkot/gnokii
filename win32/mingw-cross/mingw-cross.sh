@@ -8,7 +8,7 @@ HOST=i386-pc-mingw32
 OLDPATH=$PATH
 PATH=$MINGW_PATH/bin:$OLDPATH
 export PATH
-./configure --host=$HOST --prefix=/ --enable-security --disable-nls --enable-win32
+./configure --host=$HOST --prefix=/ --enable-security --disable-nls --enable-win32 --without-x
 
 HOST_CC="PATH=$OLDPATH cc"
 export HOST_CC

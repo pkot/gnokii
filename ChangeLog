@@ -8,6 +8,7 @@
     o use pq_config instead of hardcoding paths in smsd Makefile
                         (Ville Skyttä, Bradley Marshall, Pawel Kot)
     o fix MSCS debug build                  (Phil Ashby, Pawel Kot)
+    o mingw-cross.sh explicitly disables X support (BORBELY Zoltan)
  * AT driver updates
     o add more workarounds for SonyEricssons            (Hugo Haas)
  * gnapplet driver updates
