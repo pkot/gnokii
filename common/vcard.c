@@ -129,7 +129,6 @@ API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	}
 
 	while (1) {
-		char *cr, *lf;
 		int line_len;
 		if (!fgets(buf, 1024, f)) {
 			ERROR("Vcard began but not ended?");

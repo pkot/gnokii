@@ -4911,7 +4911,6 @@ static int getfileid(char *filename)
 {
     	gn_file fi;
 	gn_error error;
-	int i;
 
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", filename);
@@ -4932,7 +4931,6 @@ static int deletefile(char *filename)
 {
     	gn_file fi;
 	gn_error error;
-	int i;
 
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", filename);
@@ -4953,7 +4951,6 @@ static int getfile(int nargc, char *nargv[])
 {
     	gn_file fi;
 	gn_error error;
-	int i;
 	FILE *f;
 	char filename2[512];
 
@@ -5035,7 +5032,6 @@ static int putfile(int nargc, char *nargv[])
 {
     	gn_file fi;
 	gn_error error;
-	int i;
 	FILE *f;
 
 	if (nargc != 2) usage(stderr, -1);

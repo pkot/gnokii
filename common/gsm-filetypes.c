@@ -1436,10 +1436,8 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	char backline[MAX_INPUT_LINE_LEN];
 	char memory_type_char[3];
 	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH];
-	char stripped_line[MAX_INPUT_LINE_LEN];
 	int length, o, offset = 0;
 	gn_error error = GN_ERR_NONE;
-	char *next, *last = line;
 
 	memset(entry, 0, sizeof(gn_phonebook_entry));
 
