@@ -29,8 +29,8 @@
 
 */
 
-#ifndef __gsm_ringtones_h
-#define __gsm_ringtones_h
+#ifndef _gnokii_gsm_ringtones_h
+#define _gnokii_gsm_ringtones_h
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,129 +44,111 @@
 /* ie. c#=1 and 5 and 13 are invalid */
 /* note=255 means a pause */
 
-#define MAX_RINGTONE_NOTES 256
+#define GN_RINGTONE_MAX_NOTES 256
 
 /* Structure to hold note of ringtone. */
 
 typedef struct {
 	u8 duration;
 	u8 note;
-} GSM_RingtoneNote;
+} gn_ringtone_note;
 
 /* Structure to hold ringtones. */
-
 typedef struct {
-	int Location;
+	int location;
 	char name[20];
 	u8 tempo;
-	u8 NrNotes;
-	GSM_RingtoneNote notes[MAX_RINGTONE_NOTES];
-} GSM_Ringtone;
+	u8 notes_count;
+	gn_ringtone_note notes[GN_RINGTONE_MAX_NOTES];
+} gn_ringtone;
 
-#define GetBit(Stream,BitNr) Stream[(BitNr)/8] & 1<<(7-((BitNr)%8))
-#define SetBit(Stream,BitNr) Stream[(BitNr)/8] |= 1<<(7-((BitNr)%8))
-#define ClearBit(Stream,BitNr) Stream[(BitNr)/8] &= 255 - (1 << (7-((BitNr)%8)))
+#define gn_ringtone_get_bit(stream, bitno) stream[(bitno) / 8]   &  1   << (7 - ((bitno) % 8))
+#define gn_ringtone_set_bit(stream, bitno) stream[(bitno) / 8]   |= 1   << (7 - ((bitno) % 8))
+#define gn_ringtone_clear_bit(stream, bitno) stream[(bitno) / 8] &= 255 -  (1 << (7 - ((bitno) % 8)))
 
 /* These values are from Smart Messaging Specification Revision 2.0.0 pages
    3-23, ..., 3-29 */
 
 /* Command-Part Encoding */
-
-#define CancelCommand          (0x05<<1) /* binary 0000 101 */
-#define RingingToneProgramming (0x25<<1) /* binary 0100 101 */
-#define Sound                  (0x1d<<1) /* binary 0011 101 */
-#define Unicode                (0x22<<1) /* binary 0100 010 */
+#define GN_RINGTONE_CancelCommand          (0x05 << 1) /* binary 0000 101 */
+#define GN_RINGTONE_Programming            (0x25 << 1) /* binary 0100 101 */
+#define GN_RINGTONE_Sound                  (0x1d << 1) /* binary 0011 101 */
+#define GN_RINGTONE_Unicode                (0x22 << 1) /* binary 0100 010 */
 
 /* Song-Type Encoding */
-
-#define BasicSongType     (0x01<<5) /* binary 001 */
-#define TemporarySongType (0x02<<5) /* binary 010 */
-#define MidiSongType      (0x03<<5) /* binary 011 */
-#define DigitizedSongType (0x04<<5) /* binary 100 */
+#define GN_RINGTONE_BasicSongType     (0x01 << 5) /* binary 001 */
+#define GN_RINGTONE_TemporarySongType (0x02 << 5) /* binary 010 */
+#define GN_RINGTONE_MidiSongType      (0x03 << 5) /* binary 011 */
+#define GN_RINGTONE_DigitizedSongType (0x04 << 5) /* binary 100 */
 
 /* Instruction ID Encoding */
-
-#define PatternHeaderId      (0x00<<5) /* binary 000 */
-#define NoteInstructionId    (0x01<<5) /* binary 001 */
-#define ScaleInstructionId   (0x02<<5) /* binary 010 */
-#define StyleInstructionId   (0x03<<5) /* binary 011 */
-#define TempoInstructionId   (0x04<<5) /* binary 100 */
-#define VolumeInstructionId (0x05<<5) /* binary 101 */
+#define GN_RINGTONE_PatternHeaderId      (0x00 << 5) /* binary 000 */
+#define GN_RINGTONE_NoteInstructionId    (0x01 << 5) /* binary 001 */
+#define GN_RINGTONE_ScaleInstructionId   (0x02 << 5) /* binary 010 */
+#define GN_RINGTONE_StyleInstructionId   (0x03 << 5) /* binary 011 */
+#define GN_RINGTONE_TempoInstructionId   (0x04 << 5) /* binary 100 */
+#define GN_RINGTONE_VolumeInstructionId  (0x05 << 5) /* binary 101 */
 
 /* Style-Value Encoding*/
-
-#define NaturalStyle    (0x00<<6) /* binary 00 */
-#define ContinuousStyle (0x01<<6) /* binary 01 */
-#define StaccatoStyle   (0x02<<6) /* binary 11 */
+#define GN_RINGTONE_NaturalStyle    (0x00 << 6) /* binary 00 */
+#define GN_RINGTONE_ContinuousStyle (0x01 << 6) /* binary 01 */
+#define GN_RINGTONE_StaccatoStyle   (0x02 << 6) /* binary 11 */
 
 /* Note-Scale Encoding  */
-
-#define Scale1 (0x00<<6) /* binary 00 */
-#define Scale2 (0x01<<6) /* binary 01 */
-#define Scale3 (0x02<<6) /* binary 10 */
-#define Scale4 (0x03<<6) /* binary 11 */
+#define GN_RINGTONE_Scale1 (0x00 << 6) /* binary 00 */
+#define GN_RINGTONE_Scale2 (0x01 << 6) /* binary 01 */
+#define GN_RINGTONE_Scale3 (0x02 << 6) /* binary 10 */
+#define GN_RINGTONE_Scale4 (0x03 << 6) /* binary 11 */
 
 /* Note-Value Encoding */
-
-#define Note_Pause (0x00<<4) /* binary 0000 */
-#define Note_C     (0x01<<4) /* binary 0001 */
-#define Note_Cis   (0x02<<4) /* binary 0010 */
-#define Note_D     (0x03<<4) /* binary 0011 */
-#define Note_Dis   (0x04<<4) /* binary 0100 */
-#define Note_E     (0x05<<4) /* binary 0101 */
-#define Note_F     (0x06<<4) /* binary 0110 */
-#define Note_Fis   (0x07<<4) /* binary 0111 */
-#define Note_G     (0x08<<4) /* binary 1000 */
-#define Note_Gis   (0x09<<4) /* binary 1001 */
-#define Note_A     (0x0a<<4) /* binary 1010 */
-#define Note_Ais   (0x0b<<4) /* binary 1011 */
-#define Note_H     (0x0c<<4) /* binary 1100 */
+#define GN_RINGTONE_Note_Pause (0x00 << 4) /* binary 0000 */
+#define GN_RINGTONE_Note_C     (0x01 << 4) /* binary 0001 */
+#define GN_RINGTONE_Note_Cis   (0x02 << 4) /* binary 0010 */
+#define GN_RINGTONE_Note_D     (0x03 << 4) /* binary 0011 */
+#define GN_RINGTONE_Note_Dis   (0x04 << 4) /* binary 0100 */
+#define GN_RINGTONE_Note_E     (0x05 << 4) /* binary 0101 */
+#define GN_RINGTONE_Note_F     (0x06 << 4) /* binary 0110 */
+#define GN_RINGTONE_Note_Fis   (0x07 << 4) /* binary 0111 */
+#define GN_RINGTONE_Note_G     (0x08 << 4) /* binary 1000 */
+#define GN_RINGTONE_Note_Gis   (0x09 << 4) /* binary 1001 */
+#define GN_RINGTONE_Note_A     (0x0a << 4) /* binary 1010 */
+#define GN_RINGTONE_Note_Ais   (0x0b << 4) /* binary 1011 */
+#define GN_RINGTONE_Note_H     (0x0c << 4) /* binary 1100 */
 
 /* Note-Duration Encoding */
-
-#define Duration_Full (0x00<<5) /* binary 000 */
-#define Duration_1_2  (0x01<<5) /* binary 001 */
-#define Duration_1_4  (0x02<<5) /* binary 010 */
-#define Duration_1_8  (0x03<<5) /* binary 011 */
-#define Duration_1_16 (0x04<<5) /* binary 100 */
-#define Duration_1_32 (0x05<<5) /* binary 101 */
+#define GN_RINGTONE_Duration_Full (0x00 << 5) /* binary 000 */
+#define GN_RINGTONE_Duration_1_2  (0x01 << 5) /* binary 001 */
+#define GN_RINGTONE_Duration_1_4  (0x02 << 5) /* binary 010 */
+#define GN_RINGTONE_Duration_1_8  (0x03 << 5) /* binary 011 */
+#define GN_RINGTONE_Duration_1_16 (0x04 << 5) /* binary 100 */
+#define GN_RINGTONE_Duration_1_32 (0x05 << 5) /* binary 101 */
 
 /* Note-Duration-Specifier Encoding */
-
-#define NoSpecialDuration (0x00<<6) /* binary 00 */
-#define DottedNote        (0x01<<6) /* binary 01 */
-#define DoubleDottedNote  (0x02<<6) /* binary 10 */
-#define Length_2_3        (0x03<<6) /* binary 11 */
+#define GN_RINGTONE_NoSpecialDuration (0x00 << 6) /* binary 00 */
+#define GN_RINGTONE_DottedNote        (0x01 << 6) /* binary 01 */
+#define GN_RINGTONE_DoubleDottedNote  (0x02 << 6) /* binary 10 */
+#define GN_RINGTONE_Length_2_3        (0x03 << 6) /* binary 11 */
 
 /* Pattern ID Encoding */
-#define A_part (0x00<<6) /* binary 00 */
-#define B_part (0x01<<6) /* binary 01 */
-#define C_part (0x02<<6) /* binary 10 */
-#define D_part (0x03<<6) /* binary 11 */
+#define GN_RINGTONE_A_part (0x00 << 6) /* binary 00 */
+#define GN_RINGTONE_B_part (0x01 << 6) /* binary 01 */
+#define GN_RINGTONE_C_part (0x02 << 6) /* binary 10 */
+#define GN_RINGTONE_D_part (0x03 << 6) /* binary 11 */
 
 /* Command-End */
-
-#define CommandEnd (0x00) /* binary 00000000 */
+#define GN_RINGTONE_CommandEnd (0x00) /* binary 00000000 */
 
 /* Definition of the Note type */
-
 typedef struct {
-	int Scale;
-	int NoteID;
-	int Duration;
-	int DurationSpecifier;
-} Note;
+	int scale;
+	int note_id;
+	int duration;
+	int duration_specifier;
+} gn_note;
 
-#define GSM_MAX_RINGTONE_PACKAGE_LENGTH 200
+#define GN_RINGTONE_PACKAGE_MAX_LENGTH 200
 
 /* From PC Composer help */
-#define GSM_MAX_RINGTONE_NOTES 130
+#define GN_RINGTONE_NOTES_MAX_NUMBER 130
 
-int GSM_EncodeSMSRingtone(unsigned char *message, GSM_Ringtone *ringtone);
-int GSM_EncodeSMSiMelody(unsigned char *imelody, unsigned char *message);
-API u8 GSM_PackRingtone(GSM_Ringtone *ringtone, unsigned char *package, int *maxlength);
-API gn_error GSM_UnPackRingtone(GSM_Ringtone *ringtone, unsigned char *package, int maxlength);
-
-API int GSM_GetNote(int number);
-
-#endif	/* __gsm_ringtones_h */
+#endif	/* _gnokii_gsm_ringtones_h */
