@@ -1420,7 +1420,7 @@ static int sendlogo(int argc, char *argv[])
 		 * Network code is in this format: "xxx yy".
 		 */
 		if (argc > 3) {
-			memcpy(SMS.UserData[0].u.Bitmap.netcode, 0, sizeof(SMS.UserData[0].u.Bitmap.netcode));
+			memset(SMS.UserData[0].u.Bitmap.netcode, 0, sizeof(SMS.UserData[0].u.Bitmap.netcode));
 			strncpy(SMS.UserData[0].u.Bitmap.netcode, argv[3], sizeof(SMS.UserData[0].u.Bitmap.netcode) - 1);
 			dprintf("Operator code: %s\n", argv[3]);
 		}
