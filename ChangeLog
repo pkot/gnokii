@@ -30,6 +30,9 @@
     o adapt smsd to the new api                     (BORBELY Zoltan)
     o use just 1 include (gsm-api.h) in gnokii.c         (Pawel Kot)
     o use just 1 include (gsm-api.h) in smsd             (Pawel Kot)
+    o use just 1 include (gsm-api.h) in xgnokii          (Pawel Kot)
+    o use just 1 include (gsm-api.h) in gnokiid          (Pawel Kot)
+    o make data/virtual.h part of the external API       (Pawel Kot)
  * 6110 series updates:
     o M2BUS support added                           (BORBELY Zoltan)
  * 7110 series updates:

@@ -40,11 +40,8 @@
 #include <string.h>
 
 #include "misc.h"
-#include "cfgreader.h"
-#include "gsm-common.h"
 #include "gsm-api.h"
 #include "data/virtmodem.h"
-
 
 /* Global variables */
 bool DebugMode;		/* When true, run in debug mode */
@@ -87,7 +84,7 @@ static void usage()
 /* cleanup function registered by atexit() and called at exit() */
 static void busterminate(void)
 {
-	vm_terminate();
+	gn_vm_terminate();
 	if (lockfile) gn_unlock_device(lockfile);
 }
 
@@ -145,13 +142,13 @@ int main(int argc, char *argv[])
 	}
 
 	while (1) {
-		if (vm_initialise(Model, Port, Initlength, Connection, BinDir, DebugMode, true) == false) {
+		if (gn_vm_initialise(Model, Port, Initlength, Connection, BinDir, DebugMode, true) == false) {
 			exit (-1);
 		}
 
 		GTerminateThread = false;
 
-		vm_loop();
+		gn_vm_loop();
 	}
 
 	exit (0);
