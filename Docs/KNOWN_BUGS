@@ -1,0 +1,22 @@
+1. IDA connection for nk7110 driver (Nokia 6210 and Nokia 7110) is slooow.
+Configurations known to be affected:
+	model = 6210
+	connection = irda
+and
+	model = 7110
+	connection = irda
+
+2. Nokia 6100 with old firmware (04.07 reported) breaks when used with
+nk6510 driver. Newer firmare (04.17 reported) is known to work.
+Configurations known to be affected:
+	model = 6100
+	connection = irda
+
+3. Nokia 6310(i) doesn't work well over the DRL3P cable. After few
+successfull connections it stops working. When you power the phone off and
+on, it works again. Configuration knowns to be affected:
+	model = 6310
+	connection = serial
+and
+	model = 6310
+	connection = dlr3p
