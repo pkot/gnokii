@@ -3108,30 +3108,35 @@ static gn_error NK6510_IncomingRadio(int messagetype, unsigned char *message, in
 
 static gn_error NK6510_IncomingKeypress(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	switch (message[4]) {
+	switch (message[3]) {
+	case 0x12:
+		if (length != 6 || message[5] != 0x00) return GN_ERR_UNHANDLEDFRAME;
+		if (message[4] == 0x00) break;
+		if (message[4] == 0x01) return GN_ERR_UNKNOWN;
+		return GN_ERR_UNHANDLEDFRAME;
+		break;
+
 	default:
 		dprintf("Unknown subtype of type 0x3c (%d)\n", message[4]);
-		return GN_ERR_NONE;
+		return GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
+
+	return GN_ERR_NONE;
 }
 
 static gn_error NK6510_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x11, 
-			       0x00, 0x01, 
-			       0x00, 0x00, 
-			       0x00, 
-			       0x01, 0x01, 0x43, 0x12, 0x53};
-	/*
-	  req[5] = data->KeyCode;
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x11, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
 
-	  not functional yet
-	*/
+	req[6] = press ? 0x00 : 0x01;
+	switch (data->key_code) {
+	case GN_KEY_UP:   req[8] = 0x01; break;
+	case GN_KEY_DOWN: req[8] = 0x02; break;
+	default: return GN_ERR_NOTSUPPORTED;
+	}
 
-	req[5] = press ? 0x01 : 0x02;
-
-	SEND_MESSAGE_BLOCK(NK6510_MSG_KEYPRESS, 11);
+	SEND_MESSAGE_BLOCK(NK6510_MSG_KEYPRESS, 10);
 }
 
 /*****************/

@@ -4349,7 +4349,8 @@ static int presskey(void)
 	error = gn_sm_functions(GN_OP_PressPhoneKey, &data, &state);
 	if (error == GN_ERR_NONE)
 		error = gn_sm_functions(GN_OP_ReleasePhoneKey, &data, &state);
-	fprintf(stderr, _("Failed to press key: %s\n"), gn_error_print(error));
+	if (error != GN_ERR_NONE)
+		fprintf(stderr, _("Failed to press key: %s\n"), gn_error_print(error));
 	return error;
 }
 
