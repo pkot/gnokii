@@ -57,6 +57,7 @@
     o handle writephonebook error when incorrect characters
       are attempted to be saved in the number            (Pawel Kot)
     o handle another writephonebook error (empty block)  (Pawel Kot)
+    o fix stupid bug in deletesms()                      (Pawel Kot)
  * Documentation updates
     o add missing manual pages for executables           (Pawel Kot)
  * libgnokii changes
