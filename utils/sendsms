@@ -133,7 +133,7 @@ sure_to_quit() {
 
 SMS_phoneread() {
 dialog --backtitle "$BACKTITLE" --infobox "Reading phonebook by phone's SIM\n         Please wait" 4 40 
-$GNOKII --getmemory SM 1 130 > $SMSDIR/.SMlist.temp
+$GNOKII --getphonebook SM 1 end --raw > $SMSDIR/.SMlist.temp
 }
 
 SMS_choicefrommem() {

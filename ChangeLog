@@ -7,6 +7,9 @@
  * 3110 series updates
     o Phonebook support added                        (Osma Suominen)
     o Prevent race condition in getsms code          (Osma Suominen)
+ * utils updates
+    o use --getphonebook and not --getmemory in sendsms utility
+                                                      (Ville Skyttä)
 
 0.5.1
 =====
