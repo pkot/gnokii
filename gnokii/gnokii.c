@@ -17,7 +17,11 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.123  2001-02-20 21:55:11  pkot
+  Revision 1.124  2001-02-28 21:42:00  machek
+  Possibility to force overwrite in --getsms (-F). Possibility to get
+  multiple files (use --getsms -f xyzzy%d), cleanup.
+
+  Revision 1.123  2001/02/20 21:55:11  pkot
   Small #include updates
 
   Revision 1.122  2001/02/16 14:29:53  chris
@@ -256,7 +260,7 @@ int usage(void)
 "          gnokii --writephonebook [-i]\n"
 "          gnokii --getspeeddial number\n"
 "          gnokii --setspeeddial number memory_type location\n"
-"          gnokii --getsms memory_type start [end] [-f file] [-d]\n"
+"          gnokii --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
 "          gnokii --deletesms memory_type start [end]\n"
 "          gnokii --sendsms destination [--smsc message_center_number |\n"
 "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
@@ -1225,295 +1229,246 @@ int getsmsc(char *MessageCenterNumber)
 /* Get SMS messages. */
 int getsms(int argc, char *argv[])
 {
-  int del = 0;
-  GSM_SMSMessage message;
-  char *memory_type_string;
-  int start_message, end_message, count, mode = 1;
-  char filename[64];
-  GSM_Error error;
-  GSM_Bitmap bitmap;
-  char ans[5];
-  struct stat buf;
+	int del = 0;
+	GSM_SMSMessage message;
+	char *memory_type_string;
+	int start_message, end_message, count, mode = 1;
+	char filename[64];
+	GSM_Error error;
+	GSM_Bitmap bitmap;
+	char ans[5];
+	struct stat buf;
 
-  /* Handle command line args that set type, start and end locations. */
+	/* Handle command line args that set type, start and end locations. */
 
+	memory_type_string = argv[2];
+	message.MemoryType = StrToMemoryType(memory_type_string);
+	if (message.MemoryType == GMT_XX) {
+		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[2]);
+		return (-1);
+	}
 
-  if (strcmp(argv[2], "ME") == 0) {
-    message.MemoryType = GMT_ME;
-    memory_type_string = "ME";
-  }
-  else
-    if (strcmp(argv[2], "SM") == 0) {
-      message.MemoryType = GMT_SM;
-      memory_type_string = "SM";
-    }
-  else
-    if (strcmp(argv[2], "FD") == 0) {
-      message.MemoryType = GMT_FD;
-      memory_type_string = "FD";
-    }
-  else
-    if (strcmp(argv[2], "ON") == 0) {
-      message.MemoryType = GMT_ON;
-      memory_type_string = "ON";
-    }
-  else
-    if (strcmp(argv[2], "EN") == 0) {
-      message.MemoryType = GMT_EN;
-      memory_type_string = "EN";
-    }
-  else
-    if (strcmp(argv[2], "DC") == 0) {
-      message.MemoryType = GMT_DC;
-      memory_type_string = "DC";
-    }
-  else
-    if (strcmp(argv[2], "RC") == 0) {
-      message.MemoryType = GMT_RC;
-      memory_type_string = "RC";
-     }
-  else
-    if (strcmp(argv[2], "MC") == 0) {
-      message.MemoryType = GMT_MC;
-      memory_type_string = "MC";
-    }
-  else
-    if (strcmp(argv[2], "LD") == 0) {
-      message.MemoryType = GMT_LD;
-      memory_type_string = "LD";
-    }
-  else
-    if (strcmp(argv[2], "MT") == 0) {
-      message.MemoryType = GMT_MT;
-      memory_type_string = "MT";
-    }
-  else {
-    fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
-    return (-1);
-  }
+	memset(&filename, 0, 64);
 
-  memset(&filename, 0, 64);
+	start_message = atoi(argv[3]);
+	if (argc > 4) {
+		int i;
 
-  start_message = atoi(argv[3]);
-  if (argc > 4) {
-	 int i;
-
-
-	 /* [end] can be only argv[4] */
-	 if (argv[4][0] == '-') {
-      end_message = start_message;
-	 } else {
-      end_message = atoi(argv[4]);
-    }
-
-	 /* parse all options (beginning with '-' */
-	 while ((i = getopt(argc, argv, "f:d")) != -1) {
-		switch (i) {
-		case 'd':
-		  del = 1;
-		  break;
-		case 'f':
-		  if (optarg) {
-#ifdef DEBUG
-          fprintf(stderr, _("Saving into %s\n"), optarg);
-#endif /* DEBUG */
-			 strncpy(filename, optarg, 64);
-          if (strlen(optarg) > 63) {
-            fprintf(stderr, _("Filename too long - will be truncated to 63 charactera.\n"));
-            filename[63] = 0;
-          } else {
-            filename[strlen(optarg)] = 0;
-          }
-		  } else {
-			 usage();
-			 exit(1);
-		  }
-		  break;
-		default:
-		  usage();
-		  exit(1);
+		/* [end] can be only argv[4] */
+		if (argv[4][0] == '-') {
+			end_message = start_message;
+		} else {
+			end_message = atoi(argv[4]);
 		}
-    }
-  } else {
-	 end_message = start_message;
-  }
 
-  /* Initialise the code for the GSM interface. */     
+		/* parse all options (beginning with '-' */
+		while ((i = getopt(argc, argv, "f:F:da")) != -1) {
+			switch (i) {
+			case 'd':
+				del = 1;
+				break;
+			case 'F':
+				mode = 0;
+			case 'f':
+				if (optarg) {
+					dprintf(_("Saving into %s\n"), optarg);
+					strncpy(filename, optarg, 64);
+					if (strlen(optarg) > 63) {
+						fprintf(stderr, _("Filename too long - will be truncated to 63 charactera.\n"));
+						filename[63] = 0;
+					} else {
+						filename[strlen(optarg)] = 0;
+					}
+				} else {
+					usage();
+					exit(1);
+				}
+				break;
+			default:
+				usage();
+				exit(1);
+			}
+		}
+	} else {
+		end_message = start_message;
+	}
 
-  fbusinit(NULL);
+	/* Initialise the code for the GSM interface. */     
 
-  /* Now retrieve the requested entries. */
+	fbusinit(NULL);
 
-  for (count = start_message; count <= end_message; count ++) {
+	/* Now retrieve the requested entries. */
 
-    message.Location = count;
+	for (count = start_message; count <= end_message; count ++) {
+
+		message.Location = count;
 	
-    error = GSM->GetSMSMessage(&message);
+		error = GSM->GetSMSMessage(&message);
 
-    switch (error) {
+		switch (error) {
 
-    case GE_NONE:
-      switch (message.Type) {
+		case GE_NONE:
+			switch (message.Type) {
 
-        case GST_MO:
+			case GST_MO:
 
-          fprintf(stdout, _("%d. Outbox Message "), message.MessageNumber);
+				fprintf(stdout, _("%d. Outbox Message "), message.MessageNumber);
 
-          if (message.Status)
-            fprintf(stdout, _("(sent)\n"));
-          else
-            fprintf(stdout, _("(not sent)\n"));
+				if (message.Status)
+					fprintf(stdout, _("(sent)\n"));
+				else
+					fprintf(stdout, _("(not sent)\n"));
 
-          fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
+				fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
 
-          break;
+				break;
 
-        case GST_DR:
+			case GST_DR:
 
-          fprintf(stdout, _("%d. Delivery Report "), message.MessageNumber);
-          if (message.Status)
-            fprintf(stdout, _("(read)\n"));
-          else
-            fprintf(stdout, _("(not read)\n"));
+				fprintf(stdout, _("%d. Delivery Report "), message.MessageNumber);
+				if (message.Status)
+					fprintf(stdout, _("(read)\n"));
+				else
+					fprintf(stdout, _("(not read)\n"));
 
-          fprintf(stdout, _("Sending date/time: %d/%d/%d %d:%02d:%02d "), \
-                  message.Time.Day, message.Time.Month, message.Time.Year, \
-                  message.Time.Hour, message.Time.Minute, message.Time.Second);
+				fprintf(stdout, _("Sending date/time: %d/%d/%d %d:%02d:%02d "), \
+					message.Time.Day, message.Time.Month, message.Time.Year, \
+					message.Time.Hour, message.Time.Minute, message.Time.Second);
 
-          if (message.Time.Timezone) {
-            if (message.Time.Timezone > 0)
-              fprintf(stdout,_("+%02d00"), message.Time.Timezone);
-            else
-              fprintf(stdout,_("%02d00"), message.Time.Timezone);
-          }
+				if (message.Time.Timezone) {
+					if (message.Time.Timezone > 0)
+						fprintf(stdout,_("+%02d00"), message.Time.Timezone);
+					else
+						fprintf(stdout,_("%02d00"), message.Time.Timezone);
+				}
 
-          fprintf(stdout, "\n");
+				fprintf(stdout, "\n");
 
-          fprintf(stdout, _("Response date/time: %d/%d/%d %d:%02d:%02d "), \
-                  message.SMSCTime.Day, message.SMSCTime.Month, message.SMSCTime.Year, \
-                  message.SMSCTime.Hour, message.SMSCTime.Minute, message.SMSCTime.Second);
+				fprintf(stdout, _("Response date/time: %d/%d/%d %d:%02d:%02d "), \
+					message.SMSCTime.Day, message.SMSCTime.Month, message.SMSCTime.Year, \
+					message.SMSCTime.Hour, message.SMSCTime.Minute, message.SMSCTime.Second);
 
-          if (message.SMSCTime.Timezone) {
-            if (message.SMSCTime.Timezone > 0)
-              fprintf(stdout,_("+%02d00"),message.SMSCTime.Timezone);
-            else
-              fprintf(stdout,_("%02d00"),message.SMSCTime.Timezone);
-          }
+				if (message.SMSCTime.Timezone) {
+					if (message.SMSCTime.Timezone > 0)
+						fprintf(stdout,_("+%02d00"),message.SMSCTime.Timezone);
+					else
+						fprintf(stdout,_("%02d00"),message.SMSCTime.Timezone);
+				}
 
-          fprintf(stdout, "\n");
+				fprintf(stdout, "\n");
 
-          fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
-          fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
+				fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
+				fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
 
-          break;
+				break;
 
-        default:
+			default:
 
-          fprintf(stdout, _("%d. Inbox Message "), message.MessageNumber);
+				fprintf(stdout, _("%d. Inbox Message "), message.MessageNumber);
 
-          if (message.Status)
-            fprintf(stdout, _("(read)\n"));
-          else
-            fprintf(stdout, _("(not read)\n"));
+				if (message.Status)
+					fprintf(stdout, _("(read)\n"));
+				else
+					fprintf(stdout, _("(not read)\n"));
 
-          fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d "), \
-                  message.Time.Day, message.Time.Month, message.Time.Year, \
-                  message.Time.Hour, message.Time.Minute, message.Time.Second);
+				fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d "), \
+					message.Time.Day, message.Time.Month, message.Time.Year, \
+					message.Time.Hour, message.Time.Minute, message.Time.Second);
 
-          if (message.Time.Timezone) {
-            if (message.Time.Timezone > 0)
-              fprintf(stdout,_("+%02d00"),message.Time.Timezone);
-            else
-              fprintf(stdout,_("%02d00"),message.Time.Timezone);
-          }
+				if (message.Time.Timezone) {
+					if (message.Time.Timezone > 0)
+						fprintf(stdout,_("+%02d00"),message.Time.Timezone);
+					else
+						fprintf(stdout,_("%02d00"),message.Time.Timezone);
+				}
 
-          fprintf(stdout, "\n");
-          fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
+				fprintf(stdout, "\n");
+				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
 
-          switch (message.UDHType) {
+				switch (message.UDHType) {
 
-          case GSM_OpLogo:
+				case GSM_OpLogo:
+					fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
+					if (!strcmp(message.Sender, "+998000005") && !strcmp(message.MessageCenter.Number, "+886935074443")) dprintf(_("Saved by Logo Express\n"));
+					if (!strcmp(message.Sender, "+998000002") || !strcmp(message.Sender, "+998000003")) dprintf(_("Saved by Operator Logo Uploader by Thomas Kessler\n"));
 
-            fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
-#ifdef DEBUG
-            if (!strcmp(message.Sender, "+998000005") && !strcmp(message.MessageCenter.Number, "+886935074443")) fprintf(stdout, _("Saved by Logo Express\n"));
-            if (!strcmp(message.Sender, "+998000002") || !strcmp(message.Sender, "+998000003")) fprintf(stdout, _("Saved by Operator Logo Uploader by Thomas Kessler\n"));
-#endif
+				case GSM_CallerIDLogo:
 
-          case GSM_CallerIDLogo:
+					fprintf(stdout, ("Logo:\n"));
 
-            fprintf(stdout, ("Logo:\n"));
+					/* put bitmap into bitmap structure */
+					GSM_ReadSMSBitmap(&message, &bitmap);
 
-            /* put bitmap into bitmap structure */
-            GSM_ReadSMSBitmap(&message, &bitmap);
+					GSM_PrintBitmap(&bitmap);
 
-            GSM_PrintBitmap(&bitmap);
+					if (*filename) {
+						error = GE_NONE;
+						if ((stat(filename, &buf) == 0)) {
+							fprintf(stdout, _("File %s exists.\n"), filename);
+							fprintf(stderr, _("Overwrite? (yes/no) "));
+							GetLine(stdin, ans, 4);
+							if (!strcmp(ans, "yes")) {
+								error = GSM_SaveBitmapFile(filename, &bitmap);
+							}
+						} else error = GSM_SaveBitmapFile(filename, &bitmap);	       
+						if (error!=GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
+					}
 
-            if (*filename) {
-	        error = GE_NONE;
-	        if ((stat(filename, &buf) == 0)) {
-		  fprintf(stdout, _("File %s exists.\n"), filename);
-		  fprintf(stderr, _("Overwrite? (yes/no) "));
-		  GetLine(stdin, ans, 4);
-		  if (!strcmp(ans, "yes")) {
-		    error = GSM_SaveBitmapFile(filename, &bitmap);
-		  }
-		} else error = GSM_SaveBitmapFile(filename, &bitmap);	       
-		if (error!=GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
-	    }
+					break;
+				case GSM_RingtoneUDH:
+					fprintf(stdout, ("Ringtone\n"));
+					break;
+				case GSM_ConcatenatedMessages:
+					fprintf(stdout, _("Linked (%d/%d):\n"),message.UDH[5],message.UDH[4]);
+				case GSM_NoUDH:
+					fprintf(stdout, _("Text:\n%s\n\n"), message.MessageText);
+					if ((mode != -1) && *filename) {
+						char buf[1024];
+						sprintf(buf, filename, count );
+						mode = GSM_SaveTextFile(buf, message.MessageText, mode);
+					}
+					break;
+				default:
+					fprintf(stderr, _("Unknown\n"));
+				}
 
-            break;
-          case GSM_RingtoneUDH:
-            fprintf(stdout, ("Ringtone\n"));
-            break;
-          case GSM_ConcatenatedMessages:
-            fprintf(stdout, _("Linked (%d/%d):\n"),message.UDH[5],message.UDH[4]);
-          case GSM_NoUDH:
-            fprintf(stdout, _("Text:\n%s\n\n"), message.MessageText);
-            if (count == start_message) mode = 1; /* ask */
-            if ((mode != -1) && *filename) mode = GSM_SaveTextFile(filename, message.MessageText, mode);
-            break;
-          default:
-            fprintf(stderr, _("Unknown\n"));
-          }
+				break;
+			}
+			if (del) {
+				if (GE_NONE != GSM->DeleteSMSMessage(&message))
+					fprintf(stdout, _("(delete failed)\n"));
+				else
+					fprintf(stdout, _("(message deleted)\n"));
+			}
+			break;
 
-          break;
-      }
-      if (del) {
-	if (GE_NONE != GSM->DeleteSMSMessage(&message))
-	  fprintf(stdout, _("(delete failed)\n"));
-        else
-	  fprintf(stdout, _("(message deleted)\n"));
-      }
-      break;
+		case GE_NOTIMPLEMENTED:
 
-    case GE_NOTIMPLEMENTED:
+			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
+			GSM->Terminate();
+			return -1;	
 
-      fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-      GSM->Terminate();
-      return -1;	
+		case GE_INVALIDSMSLOCATION:
 
-    case GE_INVALIDSMSLOCATION:
+			fprintf(stderr, _("Invalid location: %s %d\n"), memory_type_string, count);
 
-      fprintf(stderr, _("Invalid location: %s %d\n"), memory_type_string, count);
+			break;
 
-      break;
+		case GE_EMPTYSMSLOCATION:
 
-    case GE_EMPTYSMSLOCATION:
+			fprintf(stderr, _("SMS location %s %d empty.\n"), memory_type_string, count);
 
-      fprintf(stderr, _("SMS location %s %d empty.\n"), memory_type_string, count);
+			break;
 
-      break;
+		default:
 
-    default:
+			fprintf(stdout, _("GetSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
+		}
+	}
 
-      fprintf(stdout, _("GetSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
-    }
-  }
+	GSM->Terminate();
 
-  GSM->Terminate();
-
-  return 0;
+	return 0;
 }
 
 /* Delete SMS messages. */
@@ -1527,58 +1482,12 @@ int deletesms(int argc, char *argv[])
 
   /* Handle command line args that set type, start and end locations. */
 
-  if (strcmp(argv[0], "ME") == 0) {
-    message.MemoryType = GMT_ME;
-    memory_type_string = "ME";
-  }
-  else
-    if (strcmp(argv[0], "SM") == 0) {
-      message.MemoryType = GMT_SM;
-      memory_type_string = "SM";
-    }
-  else
-    if (strcmp(argv[0], "FD") == 0) {
-      message.MemoryType = GMT_FD;
-      memory_type_string = "FD";
-    }
-  else
-    if (strcmp(argv[0], "ON") == 0) {
-      message.MemoryType = GMT_ON;
-      memory_type_string = "ON";
-    }
-  else
-    if (strcmp(argv[0], "EN") == 0) {
-      message.MemoryType = GMT_EN;
-      memory_type_string = "EN";
-    }
-  else
-    if (strcmp(argv[0], "DC") == 0) {
-      message.MemoryType = GMT_DC;
-      memory_type_string = "DC";
-    }
-  else
-    if (strcmp(argv[0], "RC") == 0) {
-      message.MemoryType = GMT_RC;
-      memory_type_string = "RC";
-    }
-  else
-    if (strcmp(argv[0], "MC") == 0) {
-      message.MemoryType = GMT_MC;
-      memory_type_string = "MC";
-    }
-  else
-    if (strcmp(argv[0], "LD") == 0) {
-      message.MemoryType = GMT_LD;
-      memory_type_string = "LD";
-    }
-  else
-    if (strcmp(argv[0], "MT") == 0) {
-      message.MemoryType = GMT_MT;
-      memory_type_string = "MT";
-    }
-  else {
-    fprintf(stderr, _("Unknown memory type %s (use ME,SM,....)!\n"), argv[0]);
-    return -1;
+
+  memory_type_string = argv[2];
+  message.MemoryType = StrToMemoryType(memory_type_string);
+  if (message.MemoryType == GMT_XX) {
+    fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[2]);
+    return (-1);
   }
 
   start_message = atoi (argv[1]);
