@@ -91,6 +91,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %attr(0750, root, gnokii) %{_sbindir}/gnokiid
 %attr(4750, root, gnokii) %{_sbindir}/mgnokiidev
 %attr(0750, root, gnokii) %{_libdir}/libgnokii.so.*
+%attr(0750, root, gnokii) %{_libdir}/libgnokii.a
+%attr(0750, root, gnokii) %{_libdir}/libgnokii.la
 %{_bindir}/ppm2nokia
 %{_bindir}/sendsms
 %{_datadir}/locale/*
@@ -108,9 +110,14 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %{_includedir}/*
 %{_libdir}/*.so
+%{_libdir}/*.a
+%{_libdir}/*.la
 %{_libdir}/pkgconfig/*
 
 %changelog
+
+* Tue Jan 20 2003 Pawel Kot <pkot@linuxnews.pl>
+- install *.a and *.la into -devel package
 
 * Wed Apr  2 2003 Tom G. Christensen <tom.christensen@get2net.dk>
 - add a -devel package
