@@ -1225,7 +1225,7 @@ static gn_error SendSMSMessage(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(len, PNOK_MSG_ID_SMS, req, state)) return GN_ERR_NOTREADY;
 	do {
 		error = sm_block_no_retry_timeout(PNOK_MSG_ID_SMS, state->config.smsc_timeout, data, state);
-	} while (!state->config.smsc_timeout && error == GN_ERR_TIMEOUT);
+	} while (!state->config.smsc_timeout && (error == GN_ERR_TIMEOUT || error == GN_ERR_BUSY));
 
 	return error;
 }
