@@ -587,7 +587,6 @@ AC_OUTPUT(
    Makefile.global
    intl/Makefile 
    po/Makefile.in
-   po/Makefile
    packaging/RedHat/gnokii.spec
    packaging/Slackware/SlackBuild
    common/gnokii.pc
