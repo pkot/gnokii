@@ -78,7 +78,4 @@ typedef enum {
 	 GN_ERR_NONEWCBRECEIVED        /* Attempt to read CB when no new CB received */
 } gn_error;
 
-API char *gn_error_print(gn_error e);
-API gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause);
-
-#endif /* _gn_gsm_error_h */
+#endif /* _gnokii_gsm_error_h */
