@@ -21,7 +21,10 @@
   functions themselves are defined in a structure in gsm-common.h.
 
   $Log$
-  Revision 1.32  2001-11-14 11:26:18  pkot
+  Revision 1.33  2001-12-28 16:00:30  pkot
+  Misc cleanup. Some usefull functions
+
+  Revision 1.32  2001/11/14 11:26:18  pkot
   Getting SMS in 6210/7110 does finally work in some cases :)
 
   Revision 1.31  2001/11/08 16:45:58  pkot
@@ -100,9 +103,9 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 	} else {
 		p_data = NULL;
 	}
-       if (strstr(phone->Info.Models, model) != NULL)
-               return phone->Functions(GOP_Init, p_data, sm);
-       return GE_UNKNOWNMODEL;
+	if (strstr(phone->Info.Models, model) != NULL)
+		return phone->Functions(GOP_Init, p_data, sm);
+	return GE_UNKNOWNMODEL;
 }
 
 #define MODULE(x) { \

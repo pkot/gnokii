@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.20  2001-11-26 18:06:08  pkot
+  Revision 1.21  2001-12-28 16:00:31  pkot
+  Misc cleanup. Some usefull functions
+
+  Revision 1.20  2001/11/26 18:06:08  pkot
   Checking for *printf functions, N_(x) for localization, generic ARRAY_LEN, SAFE_STRNCPY, G_GNUC_PRINTF (Jan Kratochvil)
 
   Revision 1.19  2001/11/22 17:56:53  pkot
@@ -92,6 +95,7 @@ static PhoneModel models[] = {
 	{"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_EXTPBK | PM_SMS},
 	{"6250",  "NHM-3", PM_CALLERGROUP | PM_CALENDAR | PM_EXTPBK },
 	{"7110",  "NSE-5", PM_CALLERGROUP | PM_SPEEDDIAL | PM_EXTPBK },
+	{"8210",  "NSM-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"8810",  "NSE-6", PM_SMS | PM_DTMF | PM_DATA },
 	{"8110i", "0423",  PM_SMS | PM_DTMF | PM_DATA }, /* Guess for NHE-6 */
 	{"8110",  "0423" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-6BX */

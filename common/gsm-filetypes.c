@@ -12,11 +12,6 @@
 	
   Functions to read and write common file types.
 
-  $Log$
-  Revision 1.18  2001-09-20 21:46:20  pkot
-  Locale cleanups (Pawel Kot)
- 
-
 */
 
 #include <stdio.h>
@@ -101,7 +96,7 @@ GSM_Error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 	filetype = RTTL;
 	if (strstr(FileName, ".ott")) filetype = OTT; /* OTT files saved by NCDS3 */
   
-	error=GE_NONE;
+	error = GE_NONE;
 
 	rewind(file);  /* Not necessary for now but safer */
 
@@ -159,7 +154,7 @@ GSM_Error loadrttl(FILE *file, GSM_Ringtone *ringtone)
 
 	ptr = strtok(def, ", ");
         /* Parsing the <defaults> section. */
-	ringtone->tempo=63;
+	ringtone->tempo = 63;
 
 	while (ptr) {
 
@@ -473,7 +468,6 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 
 GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 {
-
 	FILE *file;
 	unsigned char buffer[300];
 	int error;
@@ -488,54 +482,48 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 
 	/* Attempt to identify filetype */
 
-	if (memcmp(buffer, "NOL", 3) == 0) {  /* NOL files have 'NOL' at the start */
+	if (memcmp(buffer, "NOL", 3) == 0) {               /* NOL files have 'NOL' at the start */
 		filetype = NOL;
-	} else if (memcmp(buffer, "NGG", 3) == 0) {  /* NGG files have 'NGG' at the start */
+	} else if (memcmp(buffer, "NGG", 3) == 0) {        /* NGG files have 'NGG' at the start */
 		filetype = NGG;
-	} else if (memcmp(buffer, "FORM", 4) == 0) {  /* NSL files have 'FORM' at the start */
+	} else if (memcmp(buffer, "FORM", 4) == 0) {       /* NSL files have 'FORM' at the start */
 		filetype = NSL;
-	} else if (memcmp(buffer, "NLM", 3) == 0) {  /* NLM files have 'NLM' at the start */
+	} else if (memcmp(buffer, "NLM", 3) == 0) {        /* NLM files have 'NLM' at the start */
 		filetype = NLM;
-	} else if (memcmp(buffer, "BM", 2) == 0) {  /* BMP, I61 and GGP files have 'BM' at the start */
+	} else if (memcmp(buffer, "BM", 2) == 0) {         /* BMP, I61 and GGP files have 'BM' at the start */
 		filetype = BMP;
 	} else if (memcmp(buffer, "/* XPM */", 9) == 0) {  /* XPM files have 'XPM' at the start */  
 		filetype = XPMF;
-	} else filetype = None;
+	}
 
-	if (strstr(FileName, ".otb")) filetype = OTA; /* OTA files saved by NCDS3 */
+	if ((filetype == None) && strstr(FileName, ".otb")) filetype = OTA; /* OTA files saved by NCDS3 */
   
 	rewind(file);
 
 	switch (filetype) {
-
 	case NOL:
 		error = loadnol(file, bitmap);
-		fclose(file);
 		break;
 	case NGG:
 		error = loadngg(file, bitmap);
-		fclose(file);
 		break;
 	case NSL:
 		error = loadnsl(file, bitmap);
-		fclose(file);
 		break;
 	case NLM:
 		error = loadnlm(file, bitmap);
-		fclose(file);
 		break;
 	case OTA:
 		error = loadota(file, bitmap);
-		fclose(file);
 		break;
 	case BMP:
 		error = loadbmp(file, bitmap);
-		fclose(file);
 		break;
 #ifdef XPM
 	case XPMF:
 		fclose(file);
 		error = loadxpm(FileName, bitmap);
+		file = NULL;
 		break;
 #endif
 	default:
@@ -543,6 +531,7 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 		break;
 	}
 
+	if (file) fclose(file);
 	return(error);
 }
 
@@ -558,12 +547,17 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 	error = XpmReadFileToXpmImage(filename, &image, &info);
 
 	switch (error) {
-	case XpmColorError:  return GE_WRONGCOLORS; break;
-	case XpmColorFailed: return GE_WRONGCOLORS; break;
-	case XpmOpenFailed:  return GE_CANTOPENFILE; break;
-	case XpmFileInvalid: return GE_INVALIDFILEFORMAT; break;
-	case XpmSuccess: break;
-	default: break;
+	case XpmColorError:
+		return GE_WRONGCOLORS;
+	case XpmColorFailed:
+		return GE_WRONGCOLORS;
+	case XpmOpenFailed:
+		return GE_CANTOPENFILE;
+	case XpmFileInvalid:
+		return GE_INVALIDFILEFORMAT;
+	case XpmSuccess:
+	default:
+		break;
 	}
 
 	if (image.ncolors != 2) return GE_WRONGNUMBEROFCOLORS; 
@@ -583,8 +577,8 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 
 	GSM_ClearBitmap(bitmap);
   
-	for(y = 0; y < image.height; y++) {
-		for(x = 0; x < image.width; x++) {
+	for (y = 0; y < image.height; y++) {
+		for (x = 0; x < image.width; x++) {
 			if (image.data[y * image.width + x] == 0) GSM_SetPointBitmap(bitmap, x, y);
 		}
 	}
@@ -599,7 +593,6 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 /* Marcin-Wiacek@Topnet.PL */
 
 /* This loads the image as a startup logo - but is resized as necessary later */
-
 GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 {
 	unsigned char buffer[34];
@@ -613,51 +606,59 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 
 	GSM_ClearBitmap(bitmap);
   
-	fread(buffer, 1, 34, file); //required part of header
+	fread(buffer, 1, 34, file); /* required part of header */
 
-	h = buffer[22] + 256 * buffer[21]; //height of image in the file
-	w = buffer[18] + 256 * buffer[17]; //width of image in the file
+	h = buffer[22] + 256 * buffer[21]; /* height of image in the file */
+	w = buffer[18] + 256 * buffer[17]; /* width of image in the file */
 	dprintf("Image Size in BMP file: %dx%d\n", w, h);
 
 	dprintf("Number of colors in BMP file: ");
 	switch (buffer[28]) {
-	case 1:  dprintf("2 (supported by gnokii)\n"); break;
-	case 4:  dprintf("16 (not supported by gnokii)\n"); break;
-	case 8:  dprintf("256 (not supported by gnokii)\n"); break;
-	case 24: dprintf("True Color (not supported by gnokii)\n"); break;
-	default: dprintf("unknown\n"); break;
-	}
-
-	if (buffer[28] != 1) {
-		fprintf(stdout, "Wrong number of colors\n"); //we support only 2 colors images !
+	case 1:
+		dprintf("2 (supported by gnokii)\n");
+		break;
+	case 4:
+		dprintf("16 (not supported by gnokii)\n");
+		return GE_WRONGNUMBEROFCOLORS;
+	case 8:
+		dprintf("256 (not supported by gnokii)\n");
+		return GE_WRONGNUMBEROFCOLORS;
+	case 24:
+		dprintf("True Color (not supported by gnokii)\n");
+		return GE_WRONGNUMBEROFCOLORS;
+	default:
+		dprintf("unknown color type (not supported by gnokii)\n");
 		return GE_WRONGNUMBEROFCOLORS;
 	}
 
 	dprintf("Compression in BMP file: ");
 	switch (buffer[30]) {
-	case 0:  dprintf("no compression (supported by gnokii)\n"); break;
-	case 1:  dprintf("RLE8 (not supported by gnokii)\n"); break;
-	case 2:  dprintf("RLE4 (not supported by gnokii)\n"); break;
-	default: dprintf("unknown\n"); break;
+	case 0:
+		dprintf("no compression (supported by gnokii)\n");
+		break;
+	case 1:
+		dprintf("RLE8 (not supported by gnokii)\n");
+		return GE_SUBFORMATNOTSUPPORTED;
+	case 2:
+		dprintf("RLE4 (not supported by gnokii)\n");
+		return GE_SUBFORMATNOTSUPPORTED;
+	default:
+		dprintf("unknown compression type (not supported by gnokii)\n");
+		return GE_SUBFORMATNOTSUPPORTED;
 	}
 
-	if (buffer[30] != 0) {
-		dprintf("Subformat not supported\n"); //we don't support RLE compression
-		return GE_SUBFORMATNOTSUPPORTED;
-	}  
-  
 	pos = buffer[10] - 34;
-	fread(buffer, 1, pos, file); //rest of header (if exists) and color palette
+	fread(buffer, 1, pos, file); /* the rest of the header (if exists) and the color palette */
   
 	dprintf("First color in BMP file: %i %i %i ", buffer[pos-8], buffer[pos-7], buffer[pos-6]);
-	if (buffer[pos-8] == 0 && buffer[pos-7] == 0 && buffer[pos-6] == 0) dprintf("(white)");
-	if (buffer[pos-8] == 0xFF && buffer[pos-7] == 0xFF && buffer[pos-6] == 0xFF) dprintf("(black)");
-	if (buffer[pos-8] == 102 && buffer[pos-7] == 204 && buffer[pos-6] == 102) dprintf("(green)");
+	if (buffer[pos-8] == 0x00 && buffer[pos-7] == 0x00 && buffer[pos-6] == 0x00) dprintf("(white)");
+	if (buffer[pos-8] == 0xff && buffer[pos-7] == 0xff && buffer[pos-6] == 0xff) dprintf("(black)");
+	if (buffer[pos-8] == 0x66 && buffer[pos-7] == 0xbb && buffer[pos-6] == 0x66) dprintf("(green)");
 	dprintf("\n");
 
-	dprintf("Second color in BMP file: %i %i %i ",buffer[pos-4], buffer[pos-3], buffer[pos-2]);
-	if (buffer[pos-4] == 0 && buffer[pos-3] == 0 && buffer[pos-2] == 0) dprintf("(white)");
-	if (buffer[pos-4] == 0xFF && buffer[pos-3] == 0xFF && buffer[pos-2] == 0xFF) dprintf("(black)");
+	dprintf("Second color in BMP file: %i %i %i ", buffer[pos-4], buffer[pos-3], buffer[pos-2]);
+	if (buffer[pos-4] == 0x00 && buffer[pos-3] == 0x00 && buffer[pos-2] == 0x00) dprintf("(white)");
+	if (buffer[pos-4] == 0xff && buffer[pos-3] == 0xff && buffer[pos-2] == 0xff) dprintf("(black)");
 	dprintf("\n");  
 
 	first_white = true;
@@ -665,16 +666,16 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
  
 	sizeimage = 0;
 	pos = 7;
-	for (y = h-1; y >= 0; y--) { //lines are written from the last to the first
+	for (y = h-1; y >= 0; y--) { /* the lines are written from the last one to the first one */
 		i = 1;
 		for (x = 0; x < w; x++) {
-			if (pos == 7) { //new byte !
+			if (pos == 7) { /* new byte ! */
 				fread(buffer, 1, 1, file);
 				sizeimage++;
 				i++;
-				if (i == 5) i = 1; //each line is written in multiply of 4 bytes
+				if (i == 5) i = 1; /* each line is written in multiply of 4 bytes */
 			}
-			if (x <= bitmap->width && y <= bitmap->height) { //we have top left corner !
+			if (x <= bitmap->width && y <= bitmap->height) { /* we have top left corner ! */
 				if (!first_white) {
 					if ((buffer[0] & (1 << pos)) <= 0) GSM_SetPointBitmap(bitmap, x, y);
 				} else {
@@ -682,10 +683,10 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 				}
 			}
 			pos--;
-			if (pos < 0) pos = 7; //going to new byte
+			if (pos < 0) pos = 7; /* going to the new byte */
 		}
-		pos = 7; //going to new byte
-		while (i != 5) { //each line is written in multiples of 4 bytes
+		pos = 7; /* going to the new byte */
+		while (i != 5) { /* each line is written in multiples of 4 bytes */
 			fread(buffer, 1, 1, file);
 			sizeimage++;
 			i++;
@@ -702,21 +703,17 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap)
 
 	bitmap->type = GSM_OperatorLogo;
 
-	fread(buffer, 1, 6, file);
-	fread(buffer, 1, 4, file);
-	sprintf(bitmap->netcode, "%d %02d", buffer[0] + 256 * buffer[1], buffer[2]);
+	fread(buffer, 1, 20, file);
+	sprintf(bitmap->netcode, "%d %02d", buffer[6] + 256 * buffer[7], buffer[8]);
 
-	fread(buffer, 1, 4, file); /* Width and height of the icon. */
-	bitmap->width = buffer[0];
-	bitmap->height = buffer[2];
+	bitmap->width = buffer[10];
+	bitmap->height = buffer[12];
 	bitmap->size = bitmap->height * bitmap->width / 8;
 
 	if ((bitmap->height != 14) || (bitmap->width != 72)) {
 		dprintf("Invalid Image Size (%dx%d).\n",bitmap->width,bitmap->height);
 		return GE_INVALIDIMAGESIZE;
 	}
-
-	fread(buffer, 1, 6, file); /* Unknown bytes. */
 
 	for (i = 0; i < bitmap->size; i++) {
 		if (fread(buffer, 1, 8, file) == 8) {
@@ -747,18 +744,15 @@ GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap)
 
 	bitmap->type = GSM_CallerLogo;
 
-	fread(buffer, 1, 6, file);
-	fread(buffer, 1, 4, file); /* Width and height of the icon. */
-	bitmap->width = buffer[0];
-	bitmap->height = buffer[2];
+	fread(buffer, 1, 16, file);
+	bitmap->width = buffer[6];
+	bitmap->height = buffer[8];
 	bitmap->size = bitmap->height * bitmap->width / 8;
 
 	if ((bitmap->height != 14) || (bitmap->width != 72)) {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
 		return GE_INVALIDIMAGESIZE;
 	}
-
-	fread(buffer, 1, 6, file); /* Unknown bytes. */
 
 	for (i = 0; i < bitmap->size; i++) {
 		if (fread(buffer, 1, 8, file) == 8){
@@ -785,7 +779,7 @@ GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap)
 GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 {
 	unsigned char block[6], buffer[505];
-	int block_size;
+	int block_size, count;
 
 	bitmap->size = 0;
   
@@ -799,8 +793,8 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 
 			if (block_size != 0) {
 
-				fread(buffer, 1, block_size, file);
-				buffer[block_size] = 0; //if it's string, we end it with \0
+				count = fread(buffer, 1, block_size, file);
+				buffer[count] = 0;
 
 				if (!strncmp(block, "VERS", 4)) dprintf("  File saved by: %s\n", buffer);
 				if (!strncmp(block, "MODL", 4)) dprintf("  Logo saved from: %s\n", buffer);

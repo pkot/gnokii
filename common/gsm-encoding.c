@@ -13,7 +13,10 @@
   Functions for encoding SMS, calendar and other things.
 
   $Log$
-  Revision 1.4  2001-11-22 17:56:53  pkot
+  Revision 1.5  2001-12-28 16:00:30  pkot
+  Misc cleanup. Some usefull functions
+
+  Revision 1.4  2001/11/22 17:56:53  pkot
   smslib update. sms sending
 
   Revision 1.3  2001/11/17 20:15:31  pkot
@@ -207,7 +210,7 @@ void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len)
 
 	for (i = 0; i < len; i++) {
 		wc = EncodeWithUnicodeAlphabet(src[i]);
-		dest[i*2] = (wc >> 8) &0xff;
+		dest[i*2] = (wc >> 8) & 0xff;
 		dest[(i*2)+1] = wc & 0xff;
 	}
 	return;

@@ -16,40 +16,6 @@
 
   The various routines are called PHONET_(whatever).
 
-  $Log$
-  Revision 1.8  2001-08-20 23:27:37  pkot
-  Add hardware shakehand to the link layer (Manfred Jonsson)
-
-  Revision 1.7  2001/06/27 23:52:49  pkot
-  7110/6210 updates (Marian Jancar)
-
-  Revision 1.6  2001/06/20 21:27:36  pkot
-  IrDA patch (Marian Jancar)
-
-  Revision 1.5  2001/05/07 16:24:03  pkot
-  DLR-3P temporary fix. How should I do it better?
-
-  Revision 1.4  2001/03/23 13:40:23  chris
-  Pavel's patch and a few fixes.
-
-  Revision 1.3  2001/03/21 23:36:05  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.2  2001/02/21 19:57:06  chris
-  More fiddling with the directory layout
-
-  Revision 1.1  2001/02/16 14:29:52  chris
-  Restructure of common/.  Fixed a problem in fbus-phonet.c
-  Lots of dprintfs for Marcin
-  Any size xpm can now be loaded (eg for 7110 startup logos)
-  nk7110 code detects 7110/6210 and alters startup logo size to suit
-  Moved Marcin's extended phonebook code into gnokii.c
-
-  Revision 1.1  2001/02/06 21:15:35  chris
-  Preliminary irda support for 7110 etc.  Not well tested!
-
-
 */
 
 /* System header files */
@@ -89,7 +55,6 @@ bool PHONET_Open()
 	int result;
 
 	/* Open device. */
-
 	result = device_open(glink->PortDevice, false, false, false, GCT_Irda);
 
 	if (!result) {
@@ -100,70 +65,69 @@ bool PHONET_Open()
 	return (true);
 }
 
-
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
-void PHONET_RX_StateMachine(unsigned char rx_byte) {
-  
-	PHONET_IncomingMessage *i=&imessage;
+void PHONET_RX_StateMachine(unsigned char rx_byte)
+{
+	PHONET_IncomingMessage *i = &imessage;
 
-	//  if (isprint(rx_byte))
-	//  fprintf(stderr, "[%02x%c]", (unsigned char) rx_byte, rx_byte);
-	//else
-	//  fprintf(stderr, "[%02x ]", (unsigned char) rx_byte);
+	if (isprint(rx_byte))
+		fprintf(stderr, "[%02x%c]", (unsigned char) rx_byte, rx_byte);
+	else
+		fprintf(stderr, "[%02x ]", (unsigned char) rx_byte);
 
 
 	switch (i->state) {
 	
 	case FBUS_RX_Sync:
 		if (rx_byte == FBUS_PHONET_FRAME_ID) {
-			i->state=FBUS_RX_GetDestination;
+			i->state = FBUS_RX_GetDestination;
 		} 
 		break;
 
 	case FBUS_RX_GetDestination:
 
-		i->MessageDestination=rx_byte;
+		i->MessageDestination = rx_byte;
 		i->state = FBUS_RX_GetSource;
     
-		if (rx_byte!=0x0c) {
-			i->state=FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x0c, got %2x\n",rx_byte);
+		if (rx_byte != 0x0c) {
+			i->state = FBUS_RX_Sync;
+			dprintf("The fbus stream is out of sync - expected 0x0c, got %2x\n", rx_byte);
 		}
 		break;
 
 	case FBUS_RX_GetSource:
 
-		i->MessageSource=rx_byte;
+		i->MessageSource = rx_byte;
 		i->state = FBUS_RX_GetType;
 
 		/* Source should be 0x00 */
     
 		if (rx_byte!=0x00)  {
-			i->state=FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x00, got %2x\n",rx_byte);
+			i->state = FBUS_RX_Sync;
+			dprintf("The fbus stream is out of sync - expected 0x00, got %2x\n", rx_byte);
 		}
 
 		break;
  
 	case FBUS_RX_GetType:
 
-		i->MessageType=rx_byte;
+		i->MessageType = rx_byte;
 		i->state = FBUS_RX_GetLength1;
 
 		break;
 
 	case FBUS_RX_GetLength1:
 
-		i->MessageLength=rx_byte<<8;
+		i->MessageLength = rx_byte << 8;
 		i->state = FBUS_RX_GetLength2;
 
 		break;
     
 	case FBUS_RX_GetLength2:
 
-		i->MessageLength=i->MessageLength + rx_byte;
+		i->MessageLength = i->MessageLength + rx_byte;
 		i->state = FBUS_RX_GetMessage;
 		i->BufferCount=0;
 
@@ -174,7 +138,7 @@ void PHONET_RX_StateMachine(unsigned char rx_byte) {
 		i->MessageBuffer[i->BufferCount] = rx_byte;
 		i->BufferCount++;
     
-		if (i->BufferCount>PHONET_MAX_FRAME_LENGTH) {
+		if (i->BufferCount > PHONET_MAX_FRAME_LENGTH) {
 			dprintf("PHONET: Message buffer overun - resetting\n");
 			i->state = FBUS_RX_Sync;
 			break;
@@ -248,29 +212,27 @@ GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message) {
 		current += messagesize;
 	}
 
-#ifdef DEBUG
 	{
 		int count;
-		fprintf(stderr, _("PC: "));
+		dprintf("PC: ");
 
 		for (count = 0; count < current; count++)
-			fprintf(stderr, "%02x:", out_buffer[count]);
+			dprintf("%02x:", out_buffer[count]);
 
-		fprintf(stderr, "\n");
+		dprintf("\n");
 	}
-#endif /* DEBUG */
 
 	/* Send it out... */
 
-	total=current;
-	current=0;
-	sent=0;
+	total = current;
+	current = 0;
+	sent = 0;
 	
 	do {
-		sent=device_write(out_buffer+current, total-current);
-		if (sent<0) return (false);
-		else current+=sent;
-	} while (current<total);
+		sent = device_write(out_buffer + current, total - current);
+		if (sent < 0) return (false);
+		else current += sent;
+	} while (current < total);
 
 	return GE_NONE;
 }
@@ -306,4 +268,4 @@ GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	}
 	
 	return error;
-} 
+}

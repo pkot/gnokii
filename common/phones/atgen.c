@@ -41,6 +41,7 @@ static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int len
 static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state);
@@ -52,6 +53,7 @@ static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 
 typedef struct {
 	int gop;
@@ -75,7 +77,8 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_GetRFLevel, AT_GetRFLevel, ReplyGetRFLevel },
 	{ GOP_GetMemoryStatus, AT_GetMemoryStatus, ReplyMemoryStatus },
 	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
-	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert }
+	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert },
+	{ GOP_SendSMS, AT_SendSMS, ReplyReadPhonebook }
 };
 
 
@@ -278,7 +281,7 @@ static GSM_Error AT_GetIMEI(GSM_Data *data, GSM_Statemachine *state)
 
 /* gets battery level and power source */
 
-static GSM_Error AT_GetBattery(GSM_Data *data,  GSM_Statemachine *state)
+static GSM_Error AT_GetBattery(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
@@ -382,6 +385,12 @@ static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 		return GE_NOTREADY;
 	return SM_WaitFor(state, data, GOP_CallDivert);
 }
+
+static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	return GE_NONE;
+}
+
 
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
@@ -567,6 +576,12 @@ static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int len
 	return GE_NONE;
 }
 
+static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	return GE_NONE;
+}
+
+
 static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	AT_LineBuffer buf;
@@ -595,18 +610,19 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_at, sizeof(GSM_Phone));
 
-	for (i=0; i<GOP_Max; i++) {
+	for (i = 0; i < GOP_Max; i++) {
 		AT_Functions[i] = NULL;
 		IncomingFunctions[i].MessageType = 0;
 		IncomingFunctions[i].Functions = NULL;
 	}
-	for (i=0; i<ARRAY_LEN(AT_FunctionInit); i++) {
+	for (i = 0; i < ARRAY_LEN(AT_FunctionInit); i++) {
 		AT_InsertSendFunction(AT_FunctionInit[i].gop, AT_FunctionInit[i].sfunc);
 		AT_InsertRecvFunction(AT_FunctionInit[i].gop, AT_FunctionInit[i].rfunc);
 	}
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
+	case GCT_Irda:
 		if (!strcmp(setupdata->Model, "dancall"))
 			CBUS_Initialise(state);
 		else if (!strcmp(setupdata->Model, "AT-HW"))

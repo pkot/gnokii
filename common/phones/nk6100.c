@@ -86,7 +86,7 @@ GSM_Phone phone_nokia_6100 = {
 	PGEN_IncomingDefault,
         /* Mobile phone information */
 	{
-		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330", /* Supported models */
+		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|8210", /* Supported models */
 		4,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GRF_Arbitrary,         /* RF level units */
@@ -154,6 +154,7 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 		err = FBUS_Initialise(&(state->Link), state, 0);
 		break;
 	case GCT_Infrared:
+	case GCT_Irda:
 		err = PHONET_Initialise(&(state->Link), state);
 		break;
 	default:

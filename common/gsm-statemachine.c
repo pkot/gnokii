@@ -68,8 +68,6 @@ void SM_Reset(GSM_Statemachine *state)
 	}
 }
 
-
-
 void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message, u16 messagesize)
 {
 	int c;
@@ -124,7 +122,6 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 
 
 /* This returns the error recorded from the phone function and indicates collection */
-
 GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 {
 	int c, d;
@@ -156,7 +153,6 @@ GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 
 /* Indicate that the phone code is waiting for an response */
 /* This does not actually wait! */
-
 GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char messagetype)
 {
 
@@ -177,11 +173,9 @@ GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char mess
 
 /* This function is for convinience only */
 /* It is called after SM_SendMessage and blocks until a response is received */
-
 GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor) 
 {
-	int retry;
-	int timeout;
+	int retry, timeout;
 	GSM_State s;
 	GSM_Error err;
 
@@ -205,9 +199,30 @@ GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 	return GE_TIMEOUT;
 }
 
+/* This function is equal to SM_Block except it does not retry the message */
+GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
+{
+	int retry, timeout;
+	GSM_State s;
+	GSM_Error err;
+
+	for (retry = 0; retry < 3; retry++) {
+		timeout = 30;
+		err = SM_WaitFor(state, data, waitfor);
+		if (err != GE_NONE) return err; 
+
+		do {            /* ~3secs timeout */
+			s = SM_Loop(state, 1);  /* Timeout=100ms */
+			timeout--;
+		} while ((timeout > 0) && (s == WaitingForResponse));
+		
+		if (s == ResponseReceived) return SM_GetError(state, waitfor);
+	}
+
+	return GE_TIMEOUT;
+}
 
 /* Just to do things neatly */
-
 GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm)
 {
 	if (!sm->Phone.Functions) {
