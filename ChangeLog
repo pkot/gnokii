@@ -13,6 +13,8 @@
       confusion                                         (Pawel Kot)
  * gnokii updates
     o accept range in --deletephonebook            (BORBELY Zoltan)
+ * documentation updates
+    o update TODO to reflect real issues                (Pawel Kot)
 
 0.6.0
 =====

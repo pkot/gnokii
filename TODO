@@ -1,24 +1,23 @@
- * international support:
-    o convert phonebook, calendar, ... functions to unicode
-
- * better logging/debugging subsystem
-
- * better gnokii:
+ * gnokii changes:
     o separating into smaller parts
     o readline support
+    o improve command line args parsing
 
- * 6110 series:
-    o get good things from mygnokii
+ * libgnokii changes
+    o make modules dynamically loadable (phone drivers, connection drivers)
+    o improve interfaces
+       + encoding/decoding functions require output length
+       + move information hardcoded in the drivers into gn_phone_model
+         structure
+
+ * driver changes
+    o obex support
+    o syncml support
+    o support new phones with filesystems, cameras and other bell'n'whistles
+    o Nokia 9210 and family
+    o irda and bluetooth support for win32
 
  * GNOME/KDE support
+    o external apps
 
  * Full Smart Messaging Specification 3.0, EMS, etc.
-
-
-CONTRIB THINGS (do it when you are bored, but you can't live without your
-computer ;-)
-
- * vccd - vCard/vCalendar daemon listening to the IrDA device and receiving
-any transmission from the phone (mainly vCards and vCalendars)
-
- * ...
