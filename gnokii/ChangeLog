@@ -57,4 +57,10 @@
 - ringtones filled in for 6110. Please test with 5110 and comment.
 
 * Wed May 24 09:27:48 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
-- --diadata removed
+- --dialdata removed.
+
+* Sat Jun 10 14:15:23 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- --setringtone implemented.
+
+* Sat Jun 10 19:57:21 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- translation of VCARD keywords is not good(tm)! (Stano)

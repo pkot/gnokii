@@ -66,5 +66,12 @@
 - checking for older libc on Linux
 - better checking for cf*speed
 
-* Wed Jun  7 13:54:01 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz
-- configure removed from CVS and other changes
+* Wed Jun  7 13:54:01 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
+- configure removed from CVS and other changes.
+
+* Sat Jun 10 14:55:21 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
+- --setringtone for 6110 implemented.
+
+* Sun Jun 11 01:45:11 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
+- spelling fix: destionation to destination (Marcin)
+

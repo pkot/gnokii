@@ -291,9 +291,9 @@ int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 
   FILE *file;
 
+#ifdef XPM
   /* Does the filename contain  .xpm ? */
 
-#ifdef XPM
   if (strstr(FileName,".xpm")) savexpm(FileName, bitmap);
   else {
 #endif    
@@ -429,6 +429,40 @@ void savensl(FILE *file, GSM_Bitmap *bitmap)
   /* This filetype is not self evident and these files are unlikely to work in
      another app. */
 
+  fwrite(header,1,sizeof(header),file);
+
+  fwrite(bitmap->bitmap,1,bitmap->size,file);
+}
+
+void savenlm(FILE *file, GSM_Bitmap *bitmap)
+{
+
+  char header[]={'N','L','M', /* Nokia Logo Manager file ID. */
+                 0x20,
+                 0x01,
+                 0x00,        /* 0x00 (OP), 0x01 (CLI), 0x02 (Startup)*/
+                 0x00,
+                 0x00,        /* Width. */
+                 0x00,        /* Height. */
+                 0x01};
+
+  switch (bitmap->type) {
+  case GSM_OperatorLogo:
+    header[5]=0x00;
+    break;
+  case GSM_CallerLogo:
+    header[5]=0x01;
+    break;
+  case GSM_StartupLogo:
+    header[5]=0x02;
+    break;
+  case GSM_None:
+    break;
+  }
+  
+  header[7]=bitmap->width;
+  header[8]=bitmap->height;
+  
   fwrite(header,1,sizeof(header),file);
 
   fwrite(bitmap->bitmap,1,bitmap->size,file);

@@ -30,3 +30,6 @@
 
 * Mon May 22 07:11:01 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - cleaning of unixserial.h from Pawel
+
+* Sat Jun 10 14:15:23 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- setringtone implemented.

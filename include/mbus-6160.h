@@ -88,6 +88,7 @@ GSM_Error	MB61_Netmonitor(unsigned char mode, char *Screen);
 GSM_Error	MB61_SendDTMF(char *String);
 GSM_Error	MB61_GetBitmap(GSM_Bitmap *Bitmap);
 GSM_Error	MB61_SetBitmap(GSM_Bitmap *Bitmap);
+GSM_Error	MB61_SetRingTone(char *Filename);
 GSM_Error	MB61_Reset(unsigned char type);
 GSM_Error	MB61_GetProfile(GSM_Profile *Profile);
 GSM_Error	MB61_SetProfile(GSM_Profile *Profile);

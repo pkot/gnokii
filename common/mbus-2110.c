@@ -79,6 +79,7 @@ GSM_Functions			MB21_Functions = {
 		MB21_SendDTMF,
 		MB21_GetBitmap,
 		MB21_SetBitmap,
+		MB21_SetRingTone,
 		MB21_Reset,
 		MB21_GetProfile,
 		MB21_SetProfile,
@@ -337,6 +338,11 @@ GSM_Error	MB21_GetBitmap(GSM_Bitmap *Bitmap)
 }
 
 GSM_Error	MB21_SetBitmap(GSM_Bitmap *Bitmap)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_SetRingTone(char *Filename)
 {
     return (GE_NOTIMPLEMENTED);
 }

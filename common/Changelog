@@ -41,7 +41,7 @@
 
 * Thu Apr  6 01:29:15 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - each Note in the Tune can be of different Scale.
-- FB61_SendRingtoneRTTL will send specified filename in RTTL format to the
+- FB61_SendRingtoneRTTTL will send specified filename in RTTTL format to the
   phone (6110) only, via SMS soon.
 
 * Sat Apr 15 13:18:39 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
@@ -84,3 +84,10 @@
 
 * Tue May 30 12:07:20 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - new operator in Czech republic - Oskar
+
+* Sun Jun 11 02:15:12 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- operator logo can be saved with Network Code (Marcin)
+
+* Sun Jun 11 02:29:47 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- savenlm implemented by Marcin
+

@@ -21,6 +21,7 @@ int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap);
 void savenol(FILE *file, GSM_Bitmap *bitmap);
 void savengg(FILE *file, GSM_Bitmap *bitmap);
 void savensl(FILE *file, GSM_Bitmap *bitmap);
+void savenlm(FILE *file, GSM_Bitmap *bitmap);
 void savexpm(char *filename, GSM_Bitmap *bitmap);
 
 int loadngg(FILE *file, GSM_Bitmap *bitmap);

@@ -119,6 +119,7 @@ GSM_Functions FB61_Functions = {
   FB61_SendDTMF,
   FB61_GetBitmap,
   FB61_SetBitmap,
+  FB61_SetRingTone,
   FB61_Reset,
   FB61_GetProfile,
   FB61_SetProfile,
@@ -976,7 +977,7 @@ void FB61_ThreadLoop(void)
   /* FIXME: we should implement better support for ringtones and the utility
      to set ringtones. */
 
-  // FB61_SendRingtoneRTTL("/tmp/barbie.txt");
+  // FB61_SendRingtoneRTTTL("/tmp/barbie.txt");
 
   idle_timer=0;
 
@@ -1436,8 +1437,6 @@ GSM_Error FB61_CancelCall(void)
   return GE_NONE;
 }  
   
-
-
 GSM_Error FB61_EnterSecurityCode(GSM_SecurityCode SecurityCode)
 {
 
@@ -2355,6 +2354,18 @@ GSM_Error FB61_GetBitmap(GSM_Bitmap *Bitmap) {
   GetBitmap=NULL;
 
   return (GetBitmapError);
+}
+
+GSM_Error FB61_SetRingTone(char *Filename) {
+
+  unsigned char req[255];
+  int size=FB61_PackRingtoneRTTTL(req, Filename);
+
+  /* FIXME: should check for long messages or something. */
+  if (size!=0)
+    return FB61_TX_SendMessage(size, 0x12, req);
+  else
+    return GE_UNKNOWN;
 }
 
 GSM_Error FB61_Reset(unsigned char type)
@@ -3452,8 +3463,19 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
 	fprintf(stdout, _("Message: Operator Logo received.\n"));
 #endif  
-	count=8;  /* Location and netcode ignored */
-	
+
+	count=5;  /* Location ignored. */
+
+        /* Network code is stored as 0xBA 0xXC 0xED ("ABC DE"). */
+
+	GetBitmap->netcode[0]='0' + (MessageBuffer[count] & 0x0f);
+	GetBitmap->netcode[1]='0' + (MessageBuffer[count++] >> 4);
+	GetBitmap->netcode[2]='0' + (MessageBuffer[count++] & 0x0f);
+	GetBitmap->netcode[3]=' ';
+	GetBitmap->netcode[4]='0' + (MessageBuffer[count] & 0x0f);
+	GetBitmap->netcode[5]='0' + (MessageBuffer[count++] >> 4);
+	GetBitmap->netcode[6]=0;
+
 	GetBitmap->size=MessageBuffer[count++]<<8;
 	GetBitmap->size+=MessageBuffer[count++];
 	count++;

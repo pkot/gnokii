@@ -84,6 +84,7 @@ GSM_Functions			MB640_Functions = {
 		MB640_SendDTMF,
 		MB640_GetBitmap,
 		MB640_SetBitmap,
+		MB640_SetRingTone,
 		MB640_Reset,
 		MB640_GetProfile,
 		MB640_SetProfile,
@@ -708,6 +709,12 @@ GSM_Error	MB640_SetBitmap(GSM_Bitmap *Bitmap)
   }
   return (GE_NONE);
 }
+
+GSM_Error	MB640_SetRingTone(char *Filename)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
 
 GSM_Error	MB640_Reset(unsigned char type)
 {u8        pkt[] = { 0x43, 0x00, 0x00 };

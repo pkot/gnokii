@@ -202,13 +202,14 @@ int usage(void)
 "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
 "          gnokii --identify\n"
 "          gnokii --senddtmf string\n"
-"          gnokii --sendlogo {caller|op} destionation logofile [network code]\n"
+"          gnokii --sendlogo {caller|op} destination logofile [network code]\n"
 "          gnokii --setlogo logofile [network code]\n"
 "          gnokii --setlogo logofile [caller group number] [group name]\n"
 "          gnokii --setlogo text [startup text]\n"
 "          gnokii --setlogo dealer [dealer startup text]\n"
 "          gnokii --getlogo logofile {caller|op|startup} [caller group number]\n"
-"          gnokii --sendringtone destionation rtttlfile\n"
+"          gnokii --sendringtone destination rtttlfile\n"
+"          gnokii --setringtone rtttlfile\n"
 "          gnokii --reset [soft|hard]\n"
 "          gnokii --getprofile [number]\n"
   ));
@@ -296,6 +297,8 @@ int usage(void)
 "          --getlogo         get caller, startup or operator logo\n\n"
 
 "          --sendringtone    send the rtttlfile to destination as ringtone\n\n"
+
+"          --setringtone     set the rtttlfile as ringtone (on 6110)\n\n"
 
 "          --reset [soft|hard] resets the phone.\n\n"
 
@@ -475,6 +478,9 @@ int main(int argc, char *argv[])
     // Send ringtone as SMS message
     { "sendringtone",       required_argument, NULL, OPT_SENDRINGTONE },
 
+    // Set ringtone
+    { "setringtone",        required_argument, NULL, OPT_SETRINGTONE },
+
     // Get SMS center number mode
     { "getsmsc",            required_argument, NULL, OPT_GETSMSC },
 
@@ -540,6 +546,7 @@ int main(int argc, char *argv[])
     { OPT_SENDDTMF,          1, 1, 0 },
     { OPT_SETLOGO,           1, 3, 0 },
     { OPT_GETLOGO,           2, 3, 0 },
+    { OPT_SETRINGTONE,       1, 1, 0 },
     { OPT_RESET,             0, 1, 0 },
     { OPT_GETPROFILE,        0, 1, 0 },
 
@@ -717,6 +724,11 @@ int main(int argc, char *argv[])
     case OPT_SENDLOGO:
 
       rc = sendlogo(nargc, nargv);
+      break;
+
+    case OPT_SETRINGTONE:
+
+      rc = setringtone(optarg);
       break;
 
     case OPT_SENDRINGTONE:
@@ -1567,7 +1579,7 @@ int sendlogo(int argc, char *argv[])
     return (-1);
   }
 
-  /* The second argument is the destionation, ie the phone number of recipient. */
+  /* The second argument is the destination, ie the phone number of recipient. */
   strcpy(SMS.Destination,argv[1]);
 
   /* The third argument is the bitmap file. */
@@ -1715,8 +1727,6 @@ int setlogo(char *argv[])
   return 0;
 }
 
-
-
 /* Calendar notes receiving. */
 
 int getcalendarnote(int argc, char *argv[])
@@ -1750,38 +1760,38 @@ int getcalendarnote(int argc, char *argv[])
   if (GSM->GetCalendarNote(&CalendarNote) == GE_NONE) {
 
     if (vCal) {
-        fprintf(stdout, _("BEGIN:VCALENDAR\n"));
-        fprintf(stdout, _("VERSION:1.0\n"));
-        fprintf(stdout, _("BEGIN:VEVENT\n"));
-        fprintf(stdout, _("CATEGORIES:"));
+        fprintf(stdout, "BEGIN:VCALENDAR\n");
+        fprintf(stdout, "VERSION:1.0\n");
+        fprintf(stdout, "BEGIN:VEVENT\n");
+        fprintf(stdout, "CATEGORIES:");
         switch (CalendarNote.Type) {
          case GCN_REMINDER:
-           fprintf(stdout, _("MISCELLANEOUS\n"));
+           fprintf(stdout, "MISCELLANEOUS\n");
            break;
          case GCN_CALL:
-           fprintf(stdout, _("PHONE CALL\n"));
+           fprintf(stdout, "PHONE CALL\n");
            break;
          case GCN_MEETING:
-           fprintf(stdout, _("MEETING\n"));
+           fprintf(stdout, "MEETING\n");
            break;
          case GCN_BIRTHDAY:
-           fprintf(stdout, _("SPECIAL OCCASION\n"));
+           fprintf(stdout, "SPECIAL OCCASION\n");
            break;
          default:
-           fprintf(stdout, _("UNKNOWN\n"));
+           fprintf(stdout, "UNKNOWN\n");
            break;
         }
-        fprintf(stdout, _("SUMMARY:%s\n"),CalendarNote.Text);
-        fprintf(stdout, _("DTSTART:%04d%02d%02dT%02d%02d%02d\n"), CalendarNote.Time.Year,
+        fprintf(stdout, "SUMMARY:%s\n",CalendarNote.Text);
+        fprintf(stdout, "DTSTART:%04d%02d%02dT%02d%02d%02d\n", CalendarNote.Time.Year,
            CalendarNote.Time.Month, CalendarNote.Time.Day, CalendarNote.Time.Hour,
            CalendarNote.Time.Minute, CalendarNote.Time.Second);
         if (CalendarNote.Alarm.Year!=0) {
-           fprintf(stdout, _("DALARM:%04d%02d%02dT%02d%02d%02d\n"), CalendarNote.Alarm.Year,
+           fprintf(stdout, "DALARM:%04d%02d%02dT%02d%02d%02d\n", CalendarNote.Alarm.Year,
               CalendarNote.Alarm.Month, CalendarNote.Alarm.Day, CalendarNote.Alarm.Hour,
               CalendarNote.Alarm.Minute, CalendarNote.Alarm.Second);
         }
-        fprintf(stdout, _("END:VEVENT\n"));
-        fprintf(stdout, _("END:VCALENDAR\n"));
+        fprintf(stdout, "END:VEVENT\n");
+        fprintf(stdout, "END:VCALENDAR\n");
 
     } else {  /* not vCal */
 	fprintf(stdout, _("   Type of the note: "));
@@ -2663,6 +2673,20 @@ int reset( char *type)
   return 0;
 }
 
+/* Set ringtone mode. */
+
+int setringtone(char *Filename)
+{
+
+  fbusinit(NULL);
+
+  GSM->SetRingTone(Filename);
+
+  GSM->Terminate();
+
+  return 0;
+}
+
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 
@@ -2674,8 +2698,7 @@ int foogle(char *argv[])
 
   fbusinit(NULL);
 
-//  Uncomment this for testing RTTTLsending... rename it to rTTTl...
-//  FB61_SendRingtoneRTTL("/tmp/q.txt");
+  // Fill in what you would like to test here...
 
   sleep(5);
 
@@ -2713,7 +2736,7 @@ int pmon()
 }
 
 /* FIXME: this can not be here... */
-int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName);
+int FB61_PackRingtoneRTTTL(unsigned char *req, char *FileName);
 
 int sendringtone(int argc, char *argv[])
 {
@@ -2742,11 +2765,11 @@ int sendringtone(int argc, char *argv[])
 
   SMS.UDHType = GSM_Ringtone;
 
-  /* The first argument is the destionation, ie the phone number of recipient. */
+  /* The first argument is the destination, ie the phone number of recipient. */
   strcpy(SMS.Destination,argv[0]);
 
   /* The second argument is the RTTTL file. */
-  size=FB61_PackRingtoneRTTL(req, argv[1]);
+  size=FB61_PackRingtoneRTTTL(req, argv[1]);
 
   memcpy(SMS.UDH,req+2,7);
   memcpy(SMS.MessageText,req+9,size-9);

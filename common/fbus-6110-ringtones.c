@@ -233,7 +233,7 @@ int GetScale(int number) {
   return scale;
 }
 
-int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName)
+int FB61_PackRingtoneRTTTL(unsigned char *req, char *FileName)
 {
 
   int size;
@@ -401,13 +401,4 @@ int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName)
 
   size=FB61_PackRingtone(req, Name, DefBeats, NrNotes, Notes);
   return size;
-}
-
-void FB61_SendRingtoneRTTL(char *FileName) {
-
-  unsigned char req[255];
-  int size=FB61_PackRingtoneRTTL(req, FileName);
-
-  if (size!=0)
-    FB61_TX_SendMessage(size, 0x12, req);
 }

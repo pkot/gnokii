@@ -103,10 +103,11 @@ GSM_Functions           FB38_Functions = {
         FB38_SendDTMF,
         FB38_GetBitmap,
         FB38_SetBitmap,
+        FB38_SetRingTone,
         FB38_Reset,
         FB38_GetProfile,
         FB38_SetProfile,
-		FB38_SendRLPFrame,
+        FB38_SendRLPFrame,
         FB38_CancelCall
 };
 
@@ -1055,6 +1056,11 @@ GSM_Error   FB38_GetBitmap (GSM_Bitmap *Bitmap)
 }
 
 GSM_Error   FB38_SetBitmap (GSM_Bitmap *Bitmap)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_SetRingTone (char *Filename)
 {
     return (GE_NOTIMPLEMENTED);
 }

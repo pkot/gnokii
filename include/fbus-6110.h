@@ -184,7 +184,6 @@ GSM_Error FB61_GetIncomingCallNr(char *Number);
 
 GSM_Error FB61_SendBitmap(char *NetworkCode, int width, int height,
                           unsigned char *bitmap);
-
 GSM_Error FB61_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 
 GSM_Error FB61_GetCalendarNote(GSM_CalendarNote *CalendarNote);
@@ -195,6 +194,8 @@ GSM_Error FB61_NetMonitor(unsigned char mode, char *Screen);
 
 GSM_Error FB61_SetBitmap( GSM_Bitmap *Bitmap );
 GSM_Error FB61_GetBitmap( GSM_Bitmap *Bitmap );
+
+GSM_Error FB61_SetRingTone( char *Filename );
 
 GSM_Error FB61_SendDTMF(char *String);
 

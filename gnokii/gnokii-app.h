@@ -50,6 +50,7 @@ int foogle(char *argv[]);
 int pmon(void);
 int setlogo(char *argv[]);
 int getlogo(char *argv[]);
+int setringtone(char *filename);
 int reset(char *type);
 int getprofile(int argc, char *argv[]);
 void readconfig(void);
@@ -88,6 +89,7 @@ typedef enum {
   OPT_RESET,
   OPT_SETLOGO,
   OPT_GETLOGO,
+  OPT_SETRINGTONE,
   OPT_GETPROFILE,
   OPT_FOOGLE
 } opt_index;

@@ -106,21 +106,21 @@ typedef enum {
    bitfield to allow compound values (read | sent etc.) */
 
 typedef enum {
-  GSS_SENTREAD = true,    /* Sent or read message */
+  GSS_SENTREAD    = true, /* Sent or read message */
   GSS_NOTSENTREAD = false /* Not sent or not read message */
 } GSM_SMSMessageStatus;
 
 /* SMS Messages sent as... */
 
 typedef enum {
-  GSMF_Text = 0x00,   /* Plain text message. */
-  GSMF_Fax = 0x22,    /* Fax message. */
-  GSMF_Voice = 0x24,  /* Voice mail message */
-  GSMF_ERMES = 0x25,  /* ERMES message */
+  GSMF_Text   = 0x00, /* Plain text message. */
+  GSMF_Fax    = 0x22, /* Fax message. */
+  GSMF_Voice  = 0x24, /* Voice mail message. */
+  GSMF_ERMES  = 0x25, /* ERMES message. */
   GSMF_Paging = 0x26, /* Paging. */
-  GSMF_UCI = 0x2d,    /* Email message in 8110i */
-  GSMF_Email = 0x32,  /* Email message. */
-  GSMF_X400 = 0x31    /* X.400 message. */
+  GSMF_UCI    = 0x2d, /* Email message in 8110i. */
+  GSMF_Email  = 0x32, /* Email message. */
+  GSMF_X400   = 0x31  /* X.400 message. */
 } GSM_SMSMessageFormat;
 
 /* Validity of SMS Messages. */
@@ -137,11 +137,11 @@ typedef enum {
 /* Define datatype for SMS Message Center */
 
 typedef struct {
-  int No;        /* Number of the SMSC in the phone memory */
-  char Name[GSM_MAX_SMS_CENTER_NAME_LENGTH]; /* Name of the SMSC */
+  int No;        /* Number of the SMSC in the phone memory. */
+  char Name[GSM_MAX_SMS_CENTER_NAME_LENGTH]; /* Name of the SMSC. */
   GSM_SMSMessageFormat Format; /* SMS is sent as text/fax/paging/email. */
-  GSM_SMSMessageValidity Validity; /* Validity of SMS Message. */
-  char Number[GSM_MAX_SMS_CENTER_LENGTH]; /* Number of the SMSC */
+  GSM_SMSMessageValidity Validity;           /* Validity of SMS Message. */
+  char Number[GSM_MAX_SMS_CENTER_LENGTH];    /* Number of the SMSC. */
 } GSM_MessageCenter;
 
 /* Definition of security codes. */
@@ -569,6 +569,8 @@ typedef struct {
   GSM_Error (*GetBitmap) ( GSM_Bitmap *Bitmap );
   
   GSM_Error (*SetBitmap) ( GSM_Bitmap *Bitmap );
+
+  GSM_Error (*SetRingTone) ( char *FileName );
 
   GSM_Error (*Reset) ( unsigned char type );
 

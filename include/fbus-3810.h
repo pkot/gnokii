@@ -90,6 +90,7 @@ GSM_Error   FB38_Netmonitor(unsigned char mode, char *Screen);
 GSM_Error   FB38_SendDTMF(char *String);
 GSM_Error   FB38_GetBitmap(GSM_Bitmap *Bitmap);
 GSM_Error   FB38_SetBitmap(GSM_Bitmap *Bitmap);
+GSM_Error   FB38_SetRingTone(char *Filename);
 GSM_Error   FB38_Reset(unsigned char type);
 GSM_Error   FB38_GetProfile(GSM_Profile *Profile);
 GSM_Error   FB38_SetProfile(GSM_Profile *Profile);
