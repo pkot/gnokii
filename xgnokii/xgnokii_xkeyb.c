@@ -8,7 +8,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Mon Mar 20 2000
+  Last modification: Sun May 14 2000
   Modified by Jan Derfinak
 
 */
@@ -35,7 +35,7 @@ static GtkWidget *phonePixmap = NULL;
 static ErrorDialog errorDialog = {NULL, NULL};
 static ButtonT *button = NULL;
 
-static ButtonT button_6110[50] = {
+static ButtonT button_6110[30] = {
   { 103,  91, 114, 107, 0x0d }, /* Power */
   {  28, 240,  54, 263, 0x19 }, /* Menu */
   {  84, 240, 110, 263, 0x1a }, /* Names */
@@ -60,7 +60,7 @@ static ButtonT button_6110[50] = {
   {   0,   0,   0,   0, 0x00 }
 };
 
-static ButtonT button_6150[50] = {
+static ButtonT button_6150[30] = {
   {  99,  78, 114,  93, 0x0d }, /* Power */
   {  20, 223,  49, 245, 0x19 }, /* Menu */
   {  90, 223, 120, 245, 0x1a }, /* Names */
@@ -85,6 +85,26 @@ static ButtonT button_6150[50] = {
   {   0,   0,   0,   0, 0x00 }
 };
 
+static ButtonT button_5110[30] = {
+  { 100,  85, 114,  99, 0x0d }, /* Power */
+  {  50, 240,  85, 265, 0x19 }, /* Menu */
+  {  20, 240,  45, 260, 0x1a }, /* Names */
+  { 100, 240, 117, 258, 0x17 }, /* Up */
+  {  93, 267, 112, 287, 0x18 }, /* Down */
+  {  14, 294,  44, 312, 0x01 }, /* 1 */
+  {  54, 294,  83, 312, 0x02 }, /* 2 */
+  {  94, 294, 122, 312, 0x03 }, /* 3 */
+  {  14, 320,  44, 338, 0x04 }, /* 4 */
+  {  54, 320,  83, 338, 0x05 }, /* 5 */
+  {  94, 320, 122, 338, 0x06 }, /* 6 */
+  {  14, 345,  44, 363, 0x07 }, /* 7 */
+  {  54, 345,  83, 363, 0x08 }, /* 8 */
+  {  94, 345, 122, 363, 0x09 }, /* 9 */
+  {  18, 374,  49, 389, 0x0c }, /* * */
+  {  53, 371,  82, 387, 0x0a }, /* 0 */
+  {  96, 374, 119, 389, 0x0b }, /* # */
+  {   0,   0,   0,   0, 0x00 }
+};
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
@@ -108,13 +128,20 @@ static GtkWidget *GetPixmap (void)
     file = g_strdup_printf ("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/6110.xpm");
   }
   else if (!strcmp (phoneMonitor.phone.model, "6130") ||
-      !strcmp (phoneMonitor.phone.model, "6150") ||
-      !strcmp (phoneMonitor.phone.model, "616x") ||
-      !strcmp (phoneMonitor.phone.model, "6185") ||
-      !strcmp (phoneMonitor.phone.model, "6190"))
+           !strcmp (phoneMonitor.phone.model, "6150") ||
+           !strcmp (phoneMonitor.phone.model, "616x") ||
+           !strcmp (phoneMonitor.phone.model, "6185") ||
+           !strcmp (phoneMonitor.phone.model, "6190"))
   {
     button = button_6150;
     file = g_strdup_printf ("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/6150.xpm");
+  }
+  else if (!strcmp (phoneMonitor.phone.model, "5110") ||
+           !strcmp (phoneMonitor.phone.model, "5130") ||
+           !strcmp (phoneMonitor.phone.model, "5190"))
+  {
+    button = button_5110;
+    file = g_strdup_printf ("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/5110.xpm");
   }
   else
     return NULL;
@@ -177,6 +204,8 @@ static gint ButtonEvent (GtkWidget *widget, GdkEventButton *event)
     req[4] = 0x02;
   else
     return TRUE;
+
+//  g_print ("%f %f\n", event->x, event->y);
 
   while (button[i].top_left_x != 0) {
     if (button[i].top_left_x <= event->x &&

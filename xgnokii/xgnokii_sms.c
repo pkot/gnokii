@@ -1446,7 +1446,6 @@ void GUI_CreateSMSWindow (void)
   gtk_widget_show (menubar);
 
   /* Create the toolbar */
-
   toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
   gtk_toolbar_set_button_relief (GTK_TOOLBAR (toolbar), GTK_RELIEF_NORMAL);
 
@@ -1454,7 +1453,7 @@ void GUI_CreateSMSWindow (void)
                            NewPixmap(Edit_xpm, GUI_SMSWindow->window,
                            &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) NewSMS, NULL);
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Forward Message"), NULL,
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Forward message"), NULL,
                            NewPixmap(Forward_xpm, GUI_SMSWindow->window,
                            &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
                            (GtkSignalFunc) ForwardSMS, NULL);

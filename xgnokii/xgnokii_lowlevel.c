@@ -86,20 +86,9 @@ static void InitModelInf (void)
   while ((error = GSM->GetModel(buf)) != GE_NONE && i++ < 5)
     sleep(1);
 
-  if (error != GE_NONE)
+  if (error == GE_NONE)
   {
-    phoneMonitor.phone.model = g_strdup (_("unknown"));
-    phoneMonitor.phone.version = phoneMonitor.phone.model;
-    phoneMonitor.supported.callerGroups = FALSE;
-    phoneMonitor.supported.netMonitor = FALSE;
-    phoneMonitor.supported.sms = FALSE;
-    phoneMonitor.supported.dtmf = FALSE;
-    phoneMonitor.supported.speedDial = FALSE;
-    phoneMonitor.supported.keyboard = FALSE;
-    phoneMonitor.supported.calendar = FALSE;
-  }
-  else
-  {
+    g_free (phoneMonitor.phone.model);
     phoneMonitor.phone.version = g_strdup (buf);
     phoneMonitor.phone.model = GetModel (buf);
     if (phoneMonitor.phone.model == NULL)
@@ -118,19 +107,21 @@ static void InitModelInf (void)
   while ((error = GSM->GetRevision (buf)) != GE_NONE && i++ < 5)
     sleep(1);
 
-  if (error != GE_NONE)
-    phoneMonitor.phone.revision = g_strdup (_("unknown"));
-  else
+  if (error == GE_NONE)
+  {
+    g_free (phoneMonitor.phone.revision);
     phoneMonitor.phone.revision = g_strdup (buf);
+  }
 
   i = 0;
   while ((error = GSM->GetIMEI (buf)) != GE_NONE && i++ < 5)
     sleep(1);
 
-  if (error != GE_NONE)
-    phoneMonitor.phone.imei = g_strdup (_("unknown"));
-  else
+  if (error == GE_NONE)
+  {
+    g_free (phoneMonitor.phone.imei);
     phoneMonitor.phone.imei = g_strdup (buf);
+  }
 
 
 #ifdef XDEBUG
@@ -169,6 +160,9 @@ static GSM_Error fbusinit(bool enable_monitoring)
 
   while (count++ < 40 && *GSM_LinkOK == false)
     usleep(50000);
+#ifdef XDEBUG
+  g_print("After usleep. GSM_LinkOK: %d\n", *GSM_LinkOK);
+#endif
 
   if (*GSM_LinkOK == true)
     InitModelInf ();
@@ -179,6 +173,17 @@ static GSM_Error fbusinit(bool enable_monitoring)
 
 void GUI_InitPhoneMonitor (void)
 {
+  phoneMonitor.phone.model = g_strdup (_("unknown"));
+  phoneMonitor.phone.version = phoneMonitor.phone.model;
+  phoneMonitor.phone.revision = g_strdup (_("unknown"));
+  phoneMonitor.phone.imei = g_strdup (_("unknown"));
+  phoneMonitor.supported.callerGroups = FALSE;
+  phoneMonitor.supported.netMonitor = FALSE;
+  phoneMonitor.supported.sms = FALSE;
+  phoneMonitor.supported.dtmf = FALSE;
+  phoneMonitor.supported.speedDial = FALSE;
+  phoneMonitor.supported.keyboard = FALSE;
+  phoneMonitor.supported.calendar = FALSE;
   phoneMonitor.rfLevel = phoneMonitor.batteryLevel = -1;
   phoneMonitor.powerSource = GPS_BATTERY;
   phoneMonitor.working = FALSE;
@@ -684,6 +689,7 @@ static gint A_SendKeyStroke (gpointer data)
 static gint A_Exit (gpointer data)
 {
   pthread_exit (0);
+  return (0); /* just to be proper */
 }
 
 

@@ -1698,7 +1698,7 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
-  configDialogData.phone.model = gtk_entry_new_with_max_length (5);
+  configDialogData.phone.model = gtk_entry_new_with_max_length (7);
   gtk_widget_set_usize (configDialogData.phone.model, 220, 22);
   gtk_entry_set_editable (GTK_ENTRY (configDialogData.phone.model),
                           FALSE);
@@ -1713,7 +1713,7 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
-  configDialogData.phone.version = gtk_entry_new_with_max_length (6);
+  configDialogData.phone.version = gtk_entry_new_with_max_length (7);
   gtk_widget_set_usize (configDialogData.phone.version, 220, 22);
   gtk_entry_set_editable (GTK_ENTRY (configDialogData.phone.version),
                           FALSE);

@@ -1,3 +1,11 @@
+* Tue May 16 11:24:08 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- Okay, okay you are better in ice hockey.
+- Why did you removed slovak messages? You cannot translate them? :)
+- New skin for 5110 in keyboard window (Marcin Wiacek
+  <Marcin-Wiacek@topnet.pl>)
+- Corrected initialization of some static variables.
+- Progress in Calendar window design.
+
 * Mon May 15 19:15:04 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - removed references to malloc.h, it is deprecated.  We now use stdlib.h.
 
@@ -9,14 +17,14 @@
 - slovak debug messages removed :-)
 - Hey, we will beat you tomorrow in ice hockey!
 
-* Fri May 12 01:14:48 CEST 2000
+* Fri May 12 01:14:48 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
 - Callers groups are readed only once.
 - Added info dialog when reading SMS centers.
 - New online help from Marcin Wiacek <Marcin-Wiacek@topnet.pl> in English
   and Polish language. Language version depends on locale settings (LANG,
   LC_MESSAGES or LC_ALL)
 
-* Mon May  1 21:16:35 CEST 2000
+* Mon May  1 21:16:35 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
 - added new thread to xgnokii. This thread glue slow phone interface with
   quick user interface (GUI).
 - new backgroung for xgnokii. "Business Cards" is replaced with "Calendar".

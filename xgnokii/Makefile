@@ -53,6 +53,7 @@ install: all
 	$(INSTALL) -d $(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6110.xpm $(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6150.xpm $(xgnokii_libdir)/xpm
+	$(INSTALL) -m 0444 xpm/5110.xpm $(xgnokii_libdir)/xpm
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend
