@@ -77,14 +77,15 @@ GSM_Error	FB38_GetIMEIAndCode(char *imei, char *code);
 	/* States for receive code. */
 enum	FB38_RX_States {FB38_RX_Sync,
 						FB38_RX_GetLength,
-						FB38_RX_GetMessage};
+						FB38_RX_GetMessage,
+						FB38_RX_Off};
 
 	/* Prototypes for internal functions. */
 void	FB38_SigHandler(int status);
 void	FB38_ThreadLoop(void);
 
 void	FB38_RX_StateMachine(char rx_byte);
-void	FB38_RX_DispatchMessage(void);
+enum FB38_RX_States	FB38_RX_DispatchMessage(void);
 void	FB38_RX_DisplayMessage(void);
 
 void    FB38_RX_Handle0x0b_IncomingCall(void);

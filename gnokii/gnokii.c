@@ -14,7 +14,7 @@
 #include	<stdlib.h>
 #include	<unistd.h>
 #include	<fcntl.h>
-#include	<sys/signal.h>
+#include	<signal.h>
 #include	<sys/types.h>
 #include	<sys/time.h>
 #include	<string.h>
@@ -35,7 +35,7 @@ void	sendsms(char *argv[]);
 
 	/**** Change these to suit your setup! ****/
 #define		MODEL	"3810"
-#define		PORT	"/dev/ttyS0"	
+#define		PORT	"/dev/ttyS0"
 
 	/* Main function - handles command line args then passes to 
 	   separate function accordingly. */
@@ -199,10 +199,20 @@ void	getsms(char *argv[])
 }
 
 
+static volatile bool shutdown = false;
+static void interrupted(int sig)
+{
+    signal(sig, SIG_IGN);
+    fprintf(stdout, "Interrupted\n");
+    shutdown = true;
+}
+
 	/* In monitor mode we don't do much, just initialise the fbus code
 	   with monitoring enabled. */
 void	monitormode(void)
 {
+	signal(SIGINT, interrupted);
+
 	fprintf (stdout, "Monitor mode...\n");
 	fprintf (stdout, "Initialising GSM interface...\n");
 
@@ -211,7 +221,7 @@ void	monitormode(void)
 
 		/* loop here indefinitely - allows you to see messages from GSM
 		   code in response to unknown messages etc. */
-	while (1) {
+	while (!shutdown) {
 		sleep(1);
 	}
 

@@ -24,7 +24,7 @@
 #include	<unistd.h>
 #include	<fcntl.h>
 #include	<ctype.h>
-#include	<sys/signal.h>
+#include	<signal.h>
 #include	<sys/types.h>
 #include	<sys/time.h>
 #include	<string.h>
@@ -82,11 +82,6 @@ GSM_Error	FB61_Initialise(char *port_device, bool enable_monitoring)
 
 	strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
-
-		/* REMOVE THIS BEFORE TESTING YOUR CODE !!!!!!! */
-	return (GE_NOTIMPLEMENTED);
-
-
 		/* Create and start thread, */
 	rtn = pthread_create(&Thread, NULL, (void *) FB61_ThreadLoop, (void *)NULL);
 
@@ -104,10 +99,18 @@ GSM_Error	FB61_Initialise(char *port_device, bool enable_monitoring)
 void	FB61_ThreadLoop(void)
 {
 		/* Initialise things... */
+	unsigned char 		init_string[4] = {0x55, 0x55, 0x55, 0x55};
+	unsigned char 		connect1[9] = {0x00, 0x01, 0x00, 0x0d, 0x00, 0x00, 0x02, 0x01, 0x40};
+	unsigned char 		connect2[7] = {0x00, 0x01, 0x00, 0x20, 0x02, 0x01, 0x40};
 
+	unsigned char 		connect3[9] = {0x00, 0x01, 0x00, 0x0d, 0x01, 0x00, 0x02, 0x01, 0x41};
+	unsigned char 		connect4[6] = {0x00, 0x01, 0x00, 0x10, 0x01, 0x62};
 
+	unsigned char 		connect5[0x1a] = {0x00, 0x01, 0x00, 0x42, 0x05, 0x01, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x55, 0x63, 0xa8, 0x00, 0x00, 07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80, 0x01, 0x63};
 
+	unsigned char       connect6[0x2f] = {0x00, 0x01, 0x00, 0x12, 0x65, 0x40, 0x36, 0x76, 0x10, 0x66, 0x50, 0x14, 0xba, 0xff, 0x66, 0x62, 0x40, 0xf9, 0xde, 0xdf, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x26, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x20, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x79, 0x00, 0x00, 0x00, 0x00, 0x01, 0x44};
 
+	int					count;
 
 		/* Try to open serial port, if we fail we sit here and don't proceed
 		   to the main loop. */
@@ -122,14 +125,40 @@ void	FB61_ThreadLoop(void)
 	}
 
 		/* Initialise link with phone or what have you */
+		/* Send init string to phone, this is a bunch of 0x55
+		   characters.  Timing is empirical. */
+	for (count = 0; count < 100; count ++) {
+		usleep(1000);
+		write(PortFD, init_string, 1);
+	}
 
+	FB61_TX_SendMessage(9, 0x02, connect1);
 
+		usleep(10000);
+
+	FB61_TX_SendMessage(7, 0x02, connect2);
+
+		usleep(10000);
+
+	FB61_TX_SendMessage(9, 0x02, connect3);
+
+		usleep(10000);
+
+	FB61_TX_SendMessage(6, 0x64, connect4);
+
+		usleep(1000);
+
+	FB61_TX_SendMessage(0x1a, 0x01, connect5);
+
+		usleep(1000);
+
+	FB61_TX_SendMessage(0x2f, 0x64, connect6);
 
 		/* Now enter main loop */
 	while (!RequestTerminate) {
 
 			/* Do things... */
-		
+
 
 		usleep(100000);		/* Avoid becoming a "busy" loop. */
 	}
@@ -244,6 +273,28 @@ bool		FB61_OpenSerial(void)
 	return (true);
 }
 
+void 	  FB61_HandleReceived(unsigned char *buffer, int count){
+
+  int current;
+
+  if (buffer[count+3] != FB61_FRTYPE_ACK) {
+
+	printf("Phone: ");
+
+	for (current=0; current<buffer[count+5]+8; current++)
+	  printf("[%2x]", buffer[count+current]);
+
+	printf("\n");
+
+	FB61_TX_SendAck(buffer[count+3]);
+
+  }
+  else {
+	printf("Received Ack of type %2x, seq %2x\n", buffer[count+6], buffer[count+7]);
+  }
+
+}
+
 	/* Handler called when characters received from serial port. 
 	   calls state machine code to process it. */
 void	FB61_SigHandler(int status)
@@ -252,12 +303,141 @@ void	FB61_SigHandler(int status)
 	int				count,res;
 
 	res = read(PortFD, buffer, 255);
+	count=0;
 
-	for (count = 0; count < res ; count ++) {
-		/* For the 3810 code, the RX state machine is called once
-		   for each character received.  By no means the only approach
-		   but seems to work OK in the 3810 case at least! */
-		/*FB61_RX_StateMachine(buffer[count]);*/
+	while (res) {
+
+	  int length=8+buffer[count+5]+(buffer[count+5] % 2);
+
+	  FB61_HandleReceived(buffer, count);
+	  count=count+length;
+	  res=res-length;
 	}
+
 }
 
+	/* Prepares the message header and sends it, prepends the
+	   message start byte (0x1e) and other values according
+	   the value specified when called.  Calculates checksum
+	   and then sends the lot down the pipe... */
+int		FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
+{
+	u8			out_buffer[FB61_MAX_TRANSMIT_LENGTH + 5];
+	int			count, current=0;
+	unsigned char			checksum;
+
+		/* Check message isn't too long, once the necessary
+		   header and trailer bytes are included. */
+	/* FIXME */
+	if ((message_length + 5) > FB61_MAX_TRANSMIT_LENGTH) {
+
+		return (false);
+	}
+		/* Now construct the message header. */
+	out_buffer[current++] = FB61_FRAME_ID;	/* Start of message indicator */
+
+	out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
+	out_buffer[current++] = FB61_DEVICE_PC; /* Source */
+
+	out_buffer[current++] = message_type; /* Type */
+
+	out_buffer[current++] = 0; /* Unknown */
+	out_buffer[current++] = message_length; /* Length */
+
+		/* Copy in data if any. */	
+	if (message_length != 0) {
+		memcpy(out_buffer + current, buffer, message_length);
+		current+=message_length;
+	}
+
+	/* If the message length is odd we should add pad byte 0x00 */
+	if (message_length % 2)
+	  out_buffer[current++]=0x00;
+
+		/* Now calculate checksums over entire message 
+		   and append to message. */
+
+	/* Odd bytes */
+
+	checksum = 0;
+	for (count = 0; count < current; count+=2) {
+		checksum ^= out_buffer[count];
+	}
+	out_buffer[current++] = checksum;
+
+	/* Even bytes */
+
+	checksum = 0;
+	for (count = 1; count < current; count+=2) {
+		checksum ^= out_buffer[count];
+	}
+	out_buffer[current++] = checksum;
+
+	printf("PC: ");
+
+	for (count = 0; count < current; count++) {
+		printf("%2x:", out_buffer[count]);
+	}
+
+	printf("\n");
+
+		/* Send it out... */
+	if (write(PortFD, out_buffer, current) != current) {
+		return (false);
+	}
+	return (true);
+}
+
+int		FB61_TX_SendAck(u8 message_type) {
+
+  static sequence=0;
+	u8			out_buffer[FB61_MAX_TRANSMIT_LENGTH + 5];
+  int count, current=0;
+	unsigned char			checksum;
+
+	printf("Sending Ack of type %2x\n", message_type);
+
+  /* Now construct the Ack header. */
+    out_buffer[current++] = FB61_FRAME_ID;	/* Start of message indicator */
+
+	out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
+	out_buffer[current++] = FB61_DEVICE_PC; /* Source */
+
+	out_buffer[current++] = FB61_FRTYPE_ACK; /* Ack */
+
+	out_buffer[current++] = 0; /* Unknown */
+	out_buffer[current++] = 2; /* Ack is always of 2 bytes */
+
+	out_buffer[current++] = sequence++; /* Sequence number */
+
+	printf("sequence: %x\n", sequence);
+
+	if (sequence == 7)
+	  sequence=0;
+
+		/* Now calculate checksums over entire message 
+		   and append to message. */
+
+	/* Odd bytes */
+
+	checksum = 0;
+	for (count = 0; count < current; count+=2) {
+		checksum ^= out_buffer[count];
+	}
+	out_buffer[current++] = checksum;
+
+	/* Even bytes */
+
+	checksum = 0;
+	for (count = 1; count < current; count+=2) {
+		checksum ^= out_buffer[count];
+	}
+	out_buffer[current++] = checksum;
+
+		/* Send it out... */
+	if (write(PortFD, out_buffer, current) != current) {
+		return (false);
+	}
+
+return true;  
+}

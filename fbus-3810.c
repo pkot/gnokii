@@ -24,7 +24,7 @@
 #include	<unistd.h>
 #include	<fcntl.h>
 #include	<ctype.h>
-#include	<sys/signal.h>
+#include	<signal.h>
 #include	<sys/types.h>
 #include	<sys/time.h>
 #include	<string.h>
@@ -451,7 +451,7 @@ GSM_Error	FB38_GetIMEIAndCode(char *imei, char *code)
 	   exited when the application calls the FB38_Terminate function. */
 void	FB38_ThreadLoop(void)
 {
-	unsigned char 		init_string[4] = {0x55, 0x55, 0x55, 0x55};
+	unsigned char 		init_char[1] = {0x55};
 	int					count, idle_timer;
 
 		/* Initialise RX state machine. */
@@ -487,7 +487,7 @@ void	FB38_ThreadLoop(void)
 		   characters.  Timing is empirical. */
 	for (count = 0; count < 100; count ++) {
 		usleep(1000);
-		write(PortFD, init_string, 1);
+		write(PortFD, init_char, 1);
 	}
 
 		/* Now send the 0x15 message, the exact purpose is not understood
@@ -584,6 +584,21 @@ void	FB38_RX_StateMachine(char rx_byte)
 
 	switch (RX_State) {
 	
+					/* Phone is currently off.  Wait for 0x55 before
+					   restarting */
+		case FB38_RX_Off:
+				if (rx_byte != 0x55)
+					break;
+
+				/* Seen 0x55, restart at 0x04 */
+				if (EnableMonitoringOutput == true) {
+					fprintf(stdout, "restarting.\n");
+				}
+
+				RX_State = FB38_RX_Sync;
+
+				/*FALLTHROUGH*/
+
 					/* Messages from the phone start with an 0x04.  We
 					   use this to "synchronise" with the incoming data
 					   stream. */		
@@ -621,8 +636,7 @@ void	FB38_RX_StateMachine(char rx_byte)
 					if (MessageCSum == CalculatedCSum) {
 						/* Got checksum, matches calculated one so 
 						   now pass to dispatch handler. */
-						FB38_RX_DispatchMessage();
-						RX_State = FB38_RX_Sync;
+						RX_State = FB38_RX_DispatchMessage();
 					}
 						/* Checksum didn't match so ignore. */
 					else {
@@ -647,7 +661,7 @@ void	FB38_RX_StateMachine(char rx_byte)
 	   names given to the handler routines reflect that the names
 	   of the purpose of the handler are best guesses only hence both
 	   the byte (0x0b) and the purpose (IncomingCall) are given. */
-void	FB38_RX_DispatchMessage(void)
+enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 {
 	/* Uncomment this if you want all messages in raw form. */
 	/*FB38_RX_DisplayMessage();*/
@@ -697,11 +711,19 @@ void	FB38_RX_DispatchMessage(void)
 		case 0x12: 	FB38_RX_Handle0x12_EndOfOutgoingCall();
 					break;
 
+			/* 0x13 messages are sent after the phone restarts. 
+			   Re-initialise */
+		case 0x13:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
+				RequestSequenceNumber = 0x10;
+				FB38_TX_Send0x15Message(0x11);
+				break;
+			
 			/* 0x15 messages are sent by the phone in response to the
 			   init sequence sent so we don't acknowledge them! */
 		case 0x15:	if (EnableMonitoringOutput == true) {
 						fprintf(stdout, "0x15 Registration Response 0x%02x\n", MessageBuffer[1]);
 					}
+					DisableKeepalive = false;
 					break;
 
 			/* 0x16 messages are sent by the phone during initialisation,
@@ -711,7 +733,7 @@ void	FB38_RX_DispatchMessage(void)
 			   V06.61 (19/08/97) sends 0x10 0x02, V07.02 (17/03/98) sends 
 			   0x30 0x02.  The actual data byte (0x02) is unchanged. 
 			   Go figure :) */ 
-		case 0x16:	FB38_TX_SendStandardAcknowledge(0x16);
+		case 0x16:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					if (EnableMonitoringOutput == true) {
 						fprintf(stdout, "0x16 Registration Response 0x%02x 0x%02x\n", MessageBuffer[1], MessageBuffer[2]);
 					}
@@ -738,7 +760,7 @@ void	FB38_RX_DispatchMessage(void)
 			   sending of an SMS message.  The byte returned is a receipt
 			   number of some form, not sure if it's from the network, sending
 			   phone or receiving phone. */
-		case 0x28:	FB38_TX_SendStandardAcknowledge(0x28);
+		case 0x28:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					CurrentSMSSendResponse[0] = MessageBuffer[2];
 					CurrentSMSSendResponse[1] = 0;
 					CurrentSMSMessageError = GE_SMSSENDOK;
@@ -749,7 +771,7 @@ void	FB38_RX_DispatchMessage(void)
 			   the phone originated SMS was disabled by the network for
 			   the particular phone.  0x65 0x26 was observed too, whereupon
 			   the message was retried. */
-		case 0x29:	FB38_TX_SendStandardAcknowledge(0x29);
+		case 0x29:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					CurrentSMSSendResponse[0] = MessageBuffer[2];
 					CurrentSMSSendResponse[1] = MessageBuffer[3];
 					CurrentSMSMessageError = GE_SMSSENDFAILED;
@@ -764,7 +786,7 @@ void	FB38_RX_DispatchMessage(void)
 
 			/* 0x2d messages are generated when an SMS message is requested
 			   that does not exist or is empty. */
-		case 0x2d:	FB38_TX_SendStandardAcknowledge(0x2d);
+		case 0x2d:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					if (MessageBuffer[2] == 0x74) {
 						CurrentSMSMessageError = GE_INVALIDSMSLOCATION;
 					}
@@ -802,13 +824,13 @@ void	FB38_RX_DispatchMessage(void)
 
 			/* 0x44 is sent by phone to acknowledge that phonebook location	
 			   was written correctly. */
-		case 0x44:	FB38_TX_SendStandardAcknowledge(0x44);
+		case 0x44:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					CurrentPhonebookError = GE_NONE;
 					break;
 
 			/* 0x45 is sent by phone if a write to a phonebook location
 			   failed. */
-		case 0x45:	FB38_TX_SendStandardAcknowledge(0x45);
+		case 0x45:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					CurrentPhonebookError = GE_INVALIDPHBOOKLOCATION;
 					break;
 	
@@ -819,9 +841,29 @@ void	FB38_RX_DispatchMessage(void)
 			/* 0x47 is sent if the location requested in an 0x43 message is
 			   invalid or unavailable (such as immediately after the phone
 			   is switched on. */
-		case 0x47:	FB38_TX_SendStandardAcknowledge(0x47);
+		case 0x47:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					CurrentPhonebookError = GE_INVALIDPHBOOKLOCATION;
 					break;
+
+			/* 0x48 is sent during power-on of the phone, after the 0x13
+			   message is received and the PIN (if any) has been entered
+			   correctly. */
+		case 0x48:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
+					if (EnableMonitoringOutput == true) {
+						fprintf(stdout, "PIN [possibly] entered.\n");
+					}
+					break;
+
+			/* 0x49 is sent when the phone is switched off.  Disable
+			   keepalives and wait for 0x55 from the phone.  */
+		case 0x49:	DisableKeepalive = true;
+					FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
+					if (EnableMonitoringOutput == true) {
+						fprintf(stdout, "Phone powering off...");
+						fflush(stdout);
+					}
+
+					return FB38_RX_Off;
 
 			/* Here we  attempt to acknowledge and display messages we don't
 			   understand fully... The phone will send the same message
@@ -836,7 +878,7 @@ void	FB38_RX_DispatchMessage(void)
 					break;
 	}
 
-
+	return FB38_RX_Sync;
 }
 
 	/* FB38_RX_DisplayMessage

@@ -6,10 +6,22 @@
 # Compiler to use.
 CC = gcc
 
-# Set up compilation/linking flags.
-CFLAGS = -D_REENTRANT -Wall -g -O0 -pthread 
+#
+# For more information about threads see the comp.programming.threads FAQ
+# http://www.serpentine.com/~bos/threads-faq/
+#
 
+# Set up compilation/linking flags for Linux.
+
+CFLAGS = -D_REENTRANT -Wall -g -O0
 LDFLAGS = -lpthread
+
+#
+# For FreeBSD uncomment the following lines
+#
+
+# CFLAGS= -D_THREAD_SAFE -Wall -g -O2
+# LDFLAGS= -pthread
 
 GNOKII_OBJS = gnokii.o gsm-api.o fbus-3810.o fbus-6110.o
 
