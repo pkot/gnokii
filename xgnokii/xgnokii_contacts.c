@@ -221,6 +221,10 @@ static inline void SetType8(GtkWidget * item, gpointer data)
 {
 	((EditEntryData *) data)->newType = 8;
 }
+static inline void SetType9(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 9;
+}
 
 PhonebookEntry *FindFreeEntry(GSM_MemoryType type)
 {
@@ -942,6 +946,16 @@ void CreateTypeMenu(EditEntryData * data)
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
+	if  ((g_strncasecmp(xgnokiiConfig.model, "6210", 4) != 0) &&
+	     (g_strncasecmp(xgnokiiConfig.model, "7110", 4) != 0) &&
+	     (g_strncasecmp(xgnokiiConfig.model, "6250", 4) != 0)) {
+		item = gtk_menu_item_new_with_label("URL");
+		gtk_signal_connect(GTK_OBJECT(item), "activate",
+				   GTK_SIGNAL_FUNC(SetType9), (gpointer) data);
+		gtk_widget_show(item);
+		gtk_menu_append(GTK_MENU(data->groupMenu), item);
+	}
+
 	gtk_option_menu_set_menu(GTK_OPTION_MENU(data->group), data->groupMenu);
 }
 
@@ -987,6 +1001,9 @@ void inttotype(gint int_type, gchar *type)
 		return;
 	case 8:
 		strcpy(type, "Name");
+		return;
+	case 9:
+		strcpy(type, "URL");
 		return;
 	default:
 		return;
@@ -1111,6 +1128,7 @@ gint typetoint(gchar *type)
 	if (g_strncasecmp(type, "Postal", 3) == 0) return (6);
 	if (g_strncasecmp(type, "E-Mail", 3) == 0) return (7);
 	if (g_strncasecmp(type, "Name", 3) == 0) return (8);
+	if (g_strncasecmp(type, "URL", 3) == 0) return (9);
 	return(-1);
 }
 
@@ -1151,6 +1169,7 @@ gint typetohex(gchar *type)
 	if (g_strcasecmp(type, "Postal") == 0) return (0x09);
 	if (g_strcasecmp(type, "E-Mail") == 0) return (0x08);
 	if (g_strcasecmp(type, "Name") == 0) return (0x07);
+	if (g_strcasecmp(type, "URL") == 0) return (0x2c);
 	return(-1);
 }
 
@@ -1204,6 +1223,7 @@ static void OkEditNumbersDialog(GtkWidget * c_list, EditEntryData * editEntryDat
 		case 0x07:
 		case 0x08:
 		case 0x09:
+		case 0x2c:
 			editEntryData->pbEntry->entry.SubEntries
 				[editEntryData->pbEntry->entry.SubEntriesCount].EntryType = type; 
 			editEntryData->pbEntry->entry.SubEntries
@@ -1378,7 +1398,9 @@ static void EditNumbers(GtkWidget * widget, EditEntryData *editEntryData)
 		case GSM_Name:
 			row[2] = "Name";
 			break;
-
+		case GSM_URL:
+			row[2] = "URL";
+			break;
 		default:
 			row[2] = "Unknown";
 			break;
