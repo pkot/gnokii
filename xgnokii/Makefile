@@ -70,7 +70,9 @@ install: all
 	$(INSTALL) -m 0444 ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
 	$(INSTALL) -m 0444 ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	(cd $(DESTDIR)$(xgnokii_libdir)/help; ln -sf en_US C; ln -sf en_US POSIX)
+	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
+	 rm -f C ; ln -sf en_US C; \
+	 rm -f POSIX ; ln -sf en_US POSIX)
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
@@ -98,7 +100,9 @@ install-strip: all
 	$(INSTALL) -m 0444 ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
 	$(INSTALL) -m 0444 ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	(cd $(DESTDIR)$(xgnokii_libdir)/help; ln -sf en_US C; ln -sf en_US POSIX)
+	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
+	 rm -f C ; ln -sf en_US C; \
+	 rm -f POSIX; ln -sf en_US POSIX)
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
@@ -130,7 +134,9 @@ install-suid: all
 	$(INSTALL) -o root -g gnokii -m 0440 ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
 	$(INSTALL) -o root -g gnokii -d -m 0750 $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
 	$(INSTALL) -o root -g gnokii -m 0440 ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	(cd $(DESTDIR)$(xgnokii_libdir)/help; ln -sf en_US C; ln -sf en_US POSIX)
+	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
+	 rm -f C ; ln -sf en_US C; \
+	 rm -f POSIX; ln -sf en_US POSIX)
 	$(INSTALL) -o root -g gnokii -d -m 0750 $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL) -o root -g gnokii -m 0440 xpm/6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL) -o root -g gnokii -m 0440 xpm/6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
@@ -162,7 +168,9 @@ install-ss: all
 	$(INSTALL) -o root -g gnokii -m 0440 ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
 	$(INSTALL) -o root -g gnokii -d -m 0750 $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
 	$(INSTALL) -o root -g gnokii -m 0440 ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	(cd $(DESTDIR)$(xgnokii_libdir)/help; ln -sf en_US C; ln -sf en_US POSIX)
+	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
+	 rm -f C ; ln -sf en_US C; \
+	 rm -f POSIX; ln -sf en_US POSIX)
 	$(INSTALL) -o root -g gnokii -d -m 0750 $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL) -o root -g gnokii -m 0440 xpm/6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL) -o root -g gnokii -m 0440 xpm/6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm

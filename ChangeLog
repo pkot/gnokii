@@ -4,6 +4,9 @@
     o using strchr() for better portability         (BORBELY Zoltan)
     o enable tekram device on win32 platform        (BORBELY Zoltan)
     o ease a bit compilation procedure on MacOS X   (Ruotger Skupin)
+ * build system updated
+    o avoid problems with recursive loop when installing
+      locales in xgnokii                          (Malte Schünemann)
 
 0.5.0pre6
 =========
