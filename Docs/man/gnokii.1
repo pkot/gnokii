@@ -138,13 +138,15 @@ set the \fIrtttlfile\fR as ringtone (on 6110).
 
 .SS PHONEBOOK
 .TP 
-.BR "\-\-getphonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP]"
+.BR "\-\-getphonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP] [\fI-r|--raw\fP]"
 reads specificed memory location from phone.
 If [\fIend_number\fR] is not specified only one location \- [\fIstart\fR] is
 read.
 If instead of [\fIend_number\fR] the text \fIend\fR is specified then gnokii
 will read from \fIstart_number\fR until it encounters a non-existant location.
 Valid \fImemory types\fR are: ME, SM, FD, ON, EN, DC, RC, MC, LD.
+You can use also \rI-r\fR or \rI--raw\fR switch to get the raw output. You can
+use it then with \fI--writephonebook\fR. Normally you got verbose output.
 .TP 
 .BR "\-\-writephonebook [\-i]"
 reads data from stdin and writes to phonebook

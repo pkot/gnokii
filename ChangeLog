@@ -5,6 +5,8 @@
       catched by Markus Plail                             (Pawel Kot)
     o raise writephonebook buffer from 99 to 254       (Markus Plail)
     o use print_error() when reporting the error          (Pawel Kot)
+    o print phonebook in the more userfiendly manner; for the
+      old behaviour use -r or --raw                       (Pawel Kot)
  * 6510 series updates
     o major SMS layout rewrite, the messages are now parsed, rather
       than using hardcoded numbers                     (Markus Plail)

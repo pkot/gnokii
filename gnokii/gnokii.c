@@ -248,7 +248,8 @@ static void version(void)
 static int usage(FILE *f)
 {
 	fprintf(f, _("   usage: gnokii [--help|--monitor|--version]\n"
-		     "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
+		     "          gnokii --getphonebook memory_type start_number [end_number|end]"
+		     "                 [-r|--raw]\n"
 		     "          gnokii --writephonebook [-i]\n"
 		     "          gnokii --getspeeddial number\n"
 		     "          gnokii --setspeeddial number memory_type location\n"
@@ -2616,7 +2617,7 @@ static int getphonebook(int argc, char *argv[])
 	int count, start_entry, end_entry = 0;
 	GSM_Error error;
 	char *memory_type_string;
-	bool all = false;
+	bool all = false, raw = false;
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
@@ -2626,13 +2627,22 @@ static int getphonebook(int argc, char *argv[])
 		return (-1);
 	}
 
-	start_entry = atoi(argv[1]);
-	if (argc > 2) {
-		if (argv[2] && (strlen(argv[2]) == 3) && !strcmp(argv[2], "end")) {
-			all = true;
-		} else end_entry = atoi(argv[2]);
+	start_entry = end_entry = atoi(argv[1]);
+	switch (argc) {
+	case 2: /* Nothing to do */
+		break;
+	case 4:
+		if (!strcmp(argv[3], "-r") || !strcmp(argv[3], "--raw")) raw = true;
+		else usage(stderr);
+	case 3:
+		if (!strcmp(argv[2], "end")) all = true;
+		else if (!strcmp(argv[2], "-r") || !strcmp(argv[2], "--raw")) raw = true;
+		else end_entry = atoi(argv[2]);
+		break;
+	default:
+		usage(stderr);
+		break;
 	}
-	else end_entry = start_entry;
 
 	/* Now retrieve the requested entries. */
 	count = start_entry;
@@ -2645,17 +2655,68 @@ static int getphonebook(int argc, char *argv[])
 		switch (error) {
 			int i;
 		case GE_NONE:
-			fprintf(stdout, "%s;%s;%s;%d;%d", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
-			for (i = 0; i < entry.SubEntriesCount; i++) {
-				fprintf(stdout, ";%d;%d;%d;%s", entry.SubEntries[i].EntryType, entry.SubEntries[i].NumberType,
-								entry.SubEntries[i].BlockNumber, entry.SubEntries[i].data.Number);
+			if (raw) {
+				fprintf(stdout, "%s;%s;%s;%d;%d", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
+				for (i = 0; i < entry.SubEntriesCount; i++) {
+					fprintf(stdout, ";%d;%d;%d;%s", entry.SubEntries[i].EntryType, entry.SubEntries[i].NumberType,
+						entry.SubEntries[i].BlockNumber, entry.SubEntries[i].data.Number);
+				}
+				fprintf(stdout, "\n");
+				if (entry.MemoryType == GMT_MC || entry.MemoryType == GMT_DC || entry.MemoryType == GMT_RC)
+					fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.Date.Day, entry.Date.Month, entry.Date.Year, entry.Date.Hour, entry.Date.Minute, entry.Date.Second);
+			} else {
+				fprintf(stdout, _("%d. Name: %s\nNumber: %s\nGroup id: %d\n"), entry.Location, entry.Name, entry.Number, entry.Location);
+				for (i = 0; i < entry.SubEntriesCount; i++) {
+					switch (entry.SubEntries[i].EntryType) {
+					case 0x08:
+						fprintf(stdout, _("Email address: "));
+						break;
+					case 0x09:
+						fprintf(stdout, _("Address: "));
+						break;
+					case 0x0a:
+						fprintf(stdout, _("Notes: "));
+						break;
+					case 0x0b:
+						switch (entry.SubEntries[i].NumberType) {
+						case 0x02:
+							fprintf(stdout, _("Home number: "));
+							break;
+						case 0x03:
+							fprintf(stdout, _("Cellular number: "));
+							break;
+						case 0x04:
+							fprintf(stdout, _("Fax number: "));
+							break;
+						case 0x06:
+							fprintf(stdout, _("Business number: "));
+							break;
+						case 0x0a:
+							fprintf(stdout, _("Preferred number: "));
+							break;
+						default:
+							fprintf(stdout, _("Unknown (%d): "), entry.SubEntries[i].NumberType);
+							break;
+						}
+						break;
+					case 0x2c:
+						fprintf(stdout, _("WWW address: "));
+						break;
+					default:
+						fprintf(stdout, _("Unknown (%d): "), entry.SubEntries[i].EntryType);
+						break;
+					}
+					fprintf(stdout, "%s\n", entry.SubEntries[i].data.Number);
+				}
+				if (entry.MemoryType == GMT_MC || entry.MemoryType == GMT_DC || entry.MemoryType == GMT_RC)
+					fprintf(stdout, _("Date: %02u.%02u.%04u %02u:%02u:%02u\n"), entry.Date.Day, entry.Date.Month, entry.Date.Year, entry.Date.Hour, entry.Date.Minute, entry.Date.Second);
 			}
-			fprintf(stdout, "\n");
-			if (entry.MemoryType == GMT_MC || entry.MemoryType == GMT_DC || entry.MemoryType == GMT_RC)
-				fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.Date.Day, entry.Date.Month, entry.Date.Year, entry.Date.Hour, entry.Date.Minute, entry.Date.Second);
+			break;
+		case GE_EMPTYLOCATION:
+			fprintf(stderr, _("Empty memory location. Skipping.\n"));
 			break;
 		case GE_INVALIDLOCATION:
-			fprintf(stderr, _("Error saving at location %d in memory %s\n"), count, memory_type_string);
+			fprintf(stderr, _("Error reading from the location %d in memory %s\n"), count, memory_type_string);
 			if (all) {
 				/* Ensure that we quit the loop */
 				all = false;
@@ -2664,7 +2725,7 @@ static int getphonebook(int argc, char *argv[])
 			}
 			break;
 		default:
-			fprintf(stderr, "Error: %s\n", print_error(error));
+			fprintf(stderr, _("Error: %s\n"), print_error(error));
 			return -1;
 		}
 		count++;
@@ -3716,7 +3777,7 @@ int main(int argc, char *argv[])
 		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
 		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
-		{ OPT_GETPHONEBOOK,      2, 3, 0 },
+		{ OPT_GETPHONEBOOK,      2, 4, 0 },
 		{ OPT_GETSPEEDDIAL,      1, 1, 0 },
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
 		{ OPT_GETSMS,            2, 5, 0 },

@@ -1067,7 +1067,6 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 			case 0x30:
 				return GE_INVALIDMEMORYTYPE;
 			case 0x33:
-
 				return GE_EMPTYLOCATION;
 			case 0x34:
 				return GE_INVALIDLOCATION;
@@ -1149,7 +1148,7 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 					DecodeUnicode(subEntry->data.Number, (blockstart + 10), blockstart[9] / 2);
 					if (!subblockcount) strcpy(data->PhonebookEntry->Number, subEntry->data.Number);
 					dprintf("   Type: %d (%02x)\n", subEntry->NumberType, subEntry->NumberType);
-					dprintf(" Number: %s\n", subEntry->data.Number);
+					dprintf("   Number: %s\n", subEntry->data.Number);
 					subblockcount++;
 					data->PhonebookEntry->SubEntriesCount++;
 				}
