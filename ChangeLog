@@ -19,6 +19,9 @@
     o fix the --getdatetime problem                      (Pawel Kot)
  * AT driver updates
     o fix sms sending                                    (Pawel Kot)
+ * MS VC6 compability fixes
+    o include tekram.h alsow with WIN32 enabled     (Ladislav Michl,
+                                                   Marcus Godehardt)
 
 0.5.0pre6
 =========

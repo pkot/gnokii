@@ -34,11 +34,11 @@
 #endif
 #ifndef WIN32
 #  include "devices/unixserial.h"
-#  include "devices/tekram.h"
 #  include "devices/tcp.h"
 #else
 #  include "devices/winserial.h"
 #endif
+#include "devices/tekram.h"
 
 
 int device_getfd(struct gn_statemachine *state)
