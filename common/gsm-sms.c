@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.3  2001-11-13 16:12:20  pkot
+  Revision 1.4  2001-11-14 11:26:18  pkot
+  Getting SMS in 6210/7110 does finally work in some cases :)
+
+  Revision 1.3  2001/11/13 16:12:20  pkot
   Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
 
   Revision 1.2  2001/11/09 14:25:04  pkot
@@ -474,11 +477,13 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 		dprintf(_("Reserved/Specific to SC: %x"), status);
 		SMS->Length = 8;
 	}
+	dprintf("\n");
 	return GE_NONE;
 }
 
-static GSM_Error DecodeData(char *message, char *output, int length, SMS_DataCodingScheme dcs, int udhlen, int size)
+static GSM_Error DecodeData(char *message, char *output, int length, int size, int udhlen, SMS_DataCodingScheme dcs)
 {
+	char aux[160];
 	/* Unicode */
 	if ((dcs.Type & 0x08) == 0x08) {
 		dprintf("Unicode message\n");
@@ -493,9 +498,9 @@ static GSM_Error DecodeData(char *message, char *output, int length, SMS_DataCod
 		} else {
 			dprintf("Default Alphabet\n");
 			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
-			Unpack7BitCharacters((7-udhlen)%7, size, length, message, output);
+			Unpack7BitCharacters((7-udhlen)%7, size, length, message, aux);
 		}
-		DecodeAscii(output, output, length);
+		DecodeAscii(output, aux, length);
 	}
 	dprintf("%s\n", output);
 	return GE_NONE;
@@ -575,7 +580,7 @@ static GSM_Error DecodeSMSDeliver()
 static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 {
 	/* Short Message Type */
-        switch (SMS->Type = message[7]) {
+        switch (SMS->Type = message[8]) {
 	case SMS_Deliver:
 		dprintf("Mobile Terminated message:\n");
 		break;
@@ -613,11 +618,11 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	}
 
 	/* Short Message location in memory */
-	SMS->Number = message[6];
+	SMS->Number = message[7];
 	dprintf("\tLocation: %d\n", SMS->Number);
 
 	/* Short Message Center */
-        strcpy(SMS->MessageCenter.Number, GetBCDNumber(message));
+        strcpy(SMS->MessageCenter.Number, GetBCDNumber(message + 9));
         dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
         SMS->ReplyViaSameSMSC = false;
         if (SMS->RemoteNumber.number[0] == 0 && (message[12] & 0x80)) {
@@ -625,12 +630,15 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	}
 
         /* Remote number */
-        message[20+DataOffset[SMS->Type]] = ((message[20+DataOffset[SMS->Type]])+1)/2+1;
-        dprintf("\tRemote number (recipient or sender): %s\n", GetBCDNumber(message + 20 + DataOffset[SMS->Type]));
-        strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + 20 + DataOffset[SMS->Type]));
+        message[21+DataOffset[SMS->Type]] = ((message[21+DataOffset[SMS->Type]])+1)/2+1;
+        dprintf("\tRemote number (recipient or sender): %s\n", GetBCDNumber(message + 21 + DataOffset[SMS->Type]));
+        strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + 21 + DataOffset[SMS->Type]));
 
-	UnpackDateTime(message + 24 + DataOffset[SMS->Type], &(SMS->Time));
-        dprintf("\tDate: %s\n", PrintDateTime(message + 24 + DataOffset[SMS->Type]));
+	UnpackDateTime(message + 33 + DataOffset[SMS->Type], &(SMS->Time));
+        dprintf("\tDate: %s\n", PrintDateTime(message + 33 + DataOffset[SMS->Type]));
+
+	/* Message length */
+	SMS->Length = message[20+DataOffset[SMS->Type]];
 
 	/* Data Coding Scheme */
 	if (SMS->Type != SMS_Delivery_Report)
@@ -639,10 +647,13 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		SMS->DCS.Type = 0;
 
 	/* User Data Header */
-        if (message[20] & 0x40) /* UDH header available */
+        if (message[19+DataOffset[SMS->Type]] & 0x40) { /* UDH header available */
+		dprintf("UDH found");
                 DecodeUDH(message + 31 + DataOffset[SMS->Type], (SMS_UDHInfo **)SMS->UDH, SMS);
-	else                    /* No UDH */
+	} else {                    /* No UDH */
+		dprintf("No UDH\n");
 		SMS->UDH_No = 0;
+	}
 
 	return GE_NONE;
 }
@@ -659,17 +670,16 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 		udhlen += headers[SMS->UDH[i].Type].length;
 	}
 	if (SMS->Type == SMS_Delivery_Report) {
-		SMSStatus(message[22], SMS);
+		SMSStatus(message[23], SMS);
 	} else {
 		int size = MessageLength -
-			   39 -                    /* Header Length */
+			   40 -                    /* Header Length */
 			   DataOffset[SMS->Type] - /* offset */
 			   udhlen -                /* UDH Length */
 			   2;                      /* checksum */
-		DecodeData(message + 39 + DataOffset[SMS->Type] + udhlen,
+		DecodeData(message + 40 + DataOffset[SMS->Type] + udhlen,
 			   (unsigned char *)&(SMS->MessageText),
-			   SMS->Length, SMS->DCS,
-			   udhlen, size);
+			   SMS->Length, size, udhlen, SMS->DCS);
 	}
 	
 	return GE_NONE;

@@ -21,7 +21,10 @@
   functions themselves are defined in a structure in gsm-common.h.
 
   $Log$
-  Revision 1.31  2001-11-08 16:45:58  pkot
+  Revision 1.32  2001-11-14 11:26:18  pkot
+  Getting SMS in 6210/7110 does finally work in some cases :)
+
+  Revision 1.31  2001/11/08 16:45:58  pkot
   Obsolete old structure, kill treads where possible and make shared library
 
   Revision 1.30  2001/08/09 11:51:38  pkot
@@ -138,8 +141,9 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
         strcpy(sm->Link.PortDevice,device);
  
         REGISTER_PHONE(nokia_7110, NULL);
-        REGISTER_PHONE(at, model);
+	REGISTER_PHONE(nokia_6100, NULL);
 	REGISTER_PHONE(nokia_3110, NULL);
+	REGISTER_PHONE(at, model);
 
 #endif /* WIN32 */ 
         return (GE_UNKNOWNMODEL);
