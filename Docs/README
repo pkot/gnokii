@@ -225,31 +225,40 @@ large changes and/or submitting big patches.
 - 10.0 gnokii by CVS -
 
 The source of gnokii aplications is in the CVS server.  The server's
-address is subversions.gnu.org.  If you are already familiar with CVS,
+address is savannah.nongnu.org.  If you are already familiar with CVS,
 set the CVSROOT to 
 
-	:pserver:anoncvs@subversions.gnu.org:/cvsroot/gnokii
+	:ext:anoncvs@subversions.gnu.org:/cvsroot/gnokii
 
-and use the empty password for checking out the repository with the name
-gnokii.
+and CVS_RSH to ssh, and using ssh protocol v2, check out the repository with
+the name gnokii.
 
 If you are not familiar with cvs, don't worry. It's very simple.
 Just install the cvs package for your distribution and follow these steps:
 
-	1. set your environmental variable CVSROOT. If you have bash (Bourne
-           Again Shell):
+	1. Set up your ssh client to connect to savannah servers using ssh
+           v2 protocol. Put:
 
-	export CVSROOT=:pserver:anoncvs@subversions.gnu.org:/cvsroot/gnokii
+	Host savannah.nongnu.org
+		Protocol 2
+
+	   into your ssh configuration (~/.ssh/config)
+
+	2. Set your environmental variable CVS_RSH (remote shell command).
+	   If you have bash (Bourne Again Shell):
+
+	export CVS_RSH=ssh
 
 	   If you have different shell, use different command (e.g. setenv).
 
-	2. Log in to the CVS server as anonymous reader by typing
+	3. Set your environmental variable CVSROOT. If you have bash (Bourne
+           Again Shell):
 
-	cvs login
+	export CVSROOT=:ext:anoncvs@savannah.nongnu.org:/cvsroot/gnokii
 
-	   Use the empty password.
+	   If you have different shell, use different command (e.g. setenv).
 
-	3. If you are logged in you are ready to checkout the latest sources:
+	4. You are ready to checkout the latest sources:
 
 	cvs co gnokii
 
@@ -372,7 +381,7 @@ AT series
  + Bosch 908/909
  + Motorola Timeport P7389i (L series)
  + Nokia 6210/7110/8210/6310/6510
- + Siemens S25/SL45i
+ + Siemens S25/SL45i/C55/M55
  + Sony Ericsson T68i
 
 

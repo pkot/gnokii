@@ -11,6 +11,7 @@
     o rttl is rtttl (ringing tone text transfer language
                                                    (Torsten Kunkel,
                                                          Pawel Kot)
+    o reflect the changes on savannah, our host site    (Pawel Kot)
  * libgnokii changes
     o rttl is rtttl (ringing tone text transfer language (changes
       internal API                                 (Torsten Kunkel,
