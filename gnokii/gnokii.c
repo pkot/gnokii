@@ -1058,7 +1058,7 @@ static int getsms(int argc, char *argv[])
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Remote.Number, message.SMSC.Number);
 				fprintf(stdout, _("Bitmap:\n"));
-				GSM_PrintBitmap(&message.UserData[0].u.Bitmap);
+				GSM_PrintBitmap(&message.UserData[0].u.Bitmap, stdout);
 				fprintf(stdout, _("Text:\n"));
 				fprintf(stdout, "%s\n", message.UserData[1].u.Text);
 				break;
@@ -1107,7 +1107,7 @@ static int getsms(int argc, char *argv[])
 					fprintf(stdout, ("Logo:\n"));
 					/* put bitmap into bitmap structure */
 					GSM_ReadSMSBitmap(GSM_OperatorLogo, message.UserData[0].u.Text + 2 + offset, message.UserData[0].u.Text, &bitmap);
-					GSM_PrintBitmap(&bitmap);
+					GSM_PrintBitmap(&bitmap, stdout);
 					if (*filename) {
 						error = GE_NONE;
 						if ((stat(filename, &buf) == 0)) {
@@ -1589,7 +1589,7 @@ static int getlogo(int argc, char *argv[])
 		error = SM_Functions(GOP_GetBitmap, &data, &State);
 
 		dprintf("\n");
-		GSM_PrintBitmap(&bitmap);
+		GSM_PrintBitmap(&bitmap, stdout);
 		switch (error) {
 		case GE_NONE:
 			switch (bitmap.type) {

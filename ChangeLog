@@ -22,6 +22,7 @@
  * Added MAINTAINERS file                                 (Pawel Kot)
  * Docs updates
     o "call divert is active" documented             (BORBELY Zoltan)
+ * Allow GSM_PrintBitmap to output to any stream          (Pawel Kot)
  * Build system updates:
     o fixed Makefile to install libgnokii.so for all install*
       targets                                             (Pawel Kot)

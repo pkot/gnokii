@@ -31,8 +31,6 @@
 
 */
 
-//#define DEBUG
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -172,19 +170,19 @@ API void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Infor
 	}
 }
 
-API void GSM_PrintBitmap(GSM_Bitmap *bitmap)
+API void GSM_PrintBitmap(GSM_Bitmap *bitmap, FILE *f)
 {
 	int x, y;
 
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
 			if (GSM_IsPointBitmap(bitmap, x, y)) {
-				fprintf(stdout, "#");
+				fprintf(f, "#");
 			} else {
-				fprintf(stdout, " ");
+				fprintf(f, " ");
 			}
 		}
-		fprintf(stdout, "\n");
+		fprintf(f, "\n");
 	}
 }
 
