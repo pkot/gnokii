@@ -32,7 +32,7 @@
 #ifndef _gnokii_links_fbus_common_h
 #define _gnokii_links_fbus_common_h
 
-#include "gnokii/statemachine.h"
+#include "gnokii.h"
 
 /* Nokia mobile phone. */
 #define FBUS_DEVICE_PHONE 0x00

@@ -29,7 +29,7 @@
 #ifndef _gnokii_atbus_h
 #define _gnokii_atbus_h
 
-#include "gnokii/statemachine.h"
+#include "gnokii.h"
 
 gn_error atbus_initialise(int mode, struct gn_statemachine *state);
 
