@@ -15,6 +15,7 @@
                                                      (BORBELY Zoltan)
     o "SetCellBroadcast error" frame documented      (BORBELY Zoltan)
     o GetSecurityCode implemented                    (BORBELY Zoltan)
+    o recognize Delivery Report type                      (Pawel Kot)
  * typos in et.po                                       (Ulrich Hopp)
  * gnokiid updates:
     o threads eliminated from gnokiid                (BORBELY Zoltan)
