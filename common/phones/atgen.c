@@ -130,8 +130,29 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetNetworkInfo,        AT_GetNetworkInfo,        ReplyGetNetworkInfo },
 };
 
-#define REPLY_SIMPLETEXT(l1, l2, c, t) \
-	if ((strcmp(l1, c) == 0) && (t != NULL)) strcpy(t, l2)
+static char *strip_quotes(char *s)
+{
+	char *t ;
+
+	if (*s == '"') {
+		if ((t = strrchr(++s, '"'))) {
+			*t = '\0';
+		}
+	}
+
+	return s;
+}
+
+static void reply_simpletext(char *l1, char *l2, char *c, char *t)
+{
+	if ((strncmp(l1, c, 5) == 0) && (t != NULL)) {
+		if (strncmp(l2, c, 7) == 0)  {
+			strcpy(t, strip_quotes(l2+7));
+		} else {
+			strcpy(t, l2);
+		}
+	}
+}
 
 gn_driver driver_at = {
 	NULL,
@@ -1021,10 +1042,10 @@ static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length
 	buf.length = length;
 	splitlines(&buf);
 	if (!strncmp(buf.line1, "AT+CG", 5)) {
-		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "SN", data->imei);
-		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "MM", data->model);
-		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "MI", data->manufacturer);
-		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "MR", data->revision);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGSN:", data->imei);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGMM:", data->model);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGMI:", data->manufacturer);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGMR:", data->revision);
 	}
 	return GN_ERR_NONE;
 }

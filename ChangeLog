@@ -19,6 +19,7 @@
                                                          Pawel Kot)
  * AT series updates
     o getnetworkinfo always terminates the result  (BORBELY Zoltan)
+    o manufacturer for +CGMI request can be quoted    (Ron Yorston)
  * smsd updates
     o libtoolization finished                      (BORBELY Zoltan)
 
