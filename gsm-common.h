@@ -49,6 +49,7 @@ typedef enum {
   GMT_LD, /* Last dialed */
   GMT_MT, /* combined ME and SIM phonebook */
   GMT_TA, /* for compatibility only: TA=computer memory */
+  GMT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions. */
 } GSM_MemoryType;
 
 /* Power source types */

@@ -312,7 +312,7 @@ int FB61_GetMemoryType(GSM_MemoryType memory_type)
         break;
 
      default:
-        result=FB61_MEMORY_UNKNOWN;
+        result=FB61_MEMORY_XX;
    }
 
    return (result);

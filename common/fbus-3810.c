@@ -524,7 +524,7 @@ GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS)
 
 			/* Indicate attempt failed and show attempt number and number
 			   of attempts remaining. */
-		fprintf(stderr, _("SMS Send attempt failed, trying again (%d of %d)\n"), 			(retry_count - FB38_SMS_SEND_RETRY_COUNT + 1), FB38_SMS_SEND_RETRY_COUNT);
+		fprintf(stderr, _("SMS Send attempt failed, trying again (%d of %d)\n"), 			((FB38_SMS_SEND_RETRY_COUNT - retry_count) + 1), FB38_SMS_SEND_RETRY_COUNT);
 			/* Got a retry response so try again! */
 		retry_count --;
 
@@ -1843,7 +1843,22 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 	}
 
 		/* Extract data from message into CurrentSMSMessage. */
-	CurrentSMSMessage->MemoryType = MessageBuffer[2];
+		
+		/* Starting with memory type. */
+	if (MessageBuffer[2] == 1) {
+		CurrentSMSMessage->MemoryType = GMT_ME;
+	}
+	else {
+		if (MessageBuffer[2] == 2) {
+			CurrentSMSMessage->MemoryType = GMT_SM;
+		}
+		else {
+				/* Unknown memory type. */
+			CurrentSMSMessage->MemoryType = GMT_XX;
+		}
+	}
+
+		/* Now do message number and length */
 	CurrentSMSMessage->MessageNumber = MessageBuffer[3];
 	CurrentSMSMessage->Length = MessageBuffer[15];
 
@@ -1879,6 +1894,15 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 	strncpy(CurrentSMSMessage->Sender, MessageBuffer + 18 + message_center_length, sender_length);
 	CurrentSMSMessage->Sender[sender_length] = 0;
 
+		/* Uncomment the following to print out unknown bytes.
+		   please send any info on this to me (Hugh) */
+	/*
+	fprintf(stdout, _("Unknown bytes: %02x %02x %02x %02x \n"), 
+					MessageBuffer[4], MessageBuffer[5],
+    				MessageBuffer[6], MessageBuffer[7]);
+	fflush(stdout);
+	
+	*/
 }
 
 void	FB38_RX_Handle0x30_IncomingSMSNotification(void)

@@ -54,7 +54,7 @@
 
 /* This is used when the memory type is unknown. */
 
-#define FB61_MEMORY_UNKNOWN 0xff
+#define FB61_MEMORY_XX 0xff
 
 /* Limits for IMEI, Revision and Model string storage. */
 
