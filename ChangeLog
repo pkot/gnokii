@@ -10,6 +10,7 @@
       the acknowledge frame                         (BORBELY Zoltan)
     o implement access to network and country names
                                                     (Ladislav Michl)
+    o new operator in Singapore                      (Fabrice MARIE)
  * build system updated
     o avoid problems with recursive loop when installing
       locales in xgnokii                          (Malte Schünemann)
