@@ -1,14 +1,14 @@
-0.5.0pre (not released yet)
-========
+0.5.0pre9
+=========
  * libgnokii updates
     o don't send the initial sequence with FBUS over Bluetooth
                                                    (Marcel Holtmann)
     o remove ugly #ifdefs as they are not needed in fact (Pawel Kot)
     o move null terminating of the decoded strings to
       gsm-encoding.c                        (James Clark, Pawel Kot)
-    o fix compilation issues caused by bluetooth stuuf   (Pawel Kot)
+    o fix compilation issues caused by bluetooth stuff   (Pawel Kot)
  * translation updates
-    o sync po files wuth current sources                 (Pawel Kot)
+    o sync po files with current sources                 (Pawel Kot)
 
 0.5.0pre8
 =========
