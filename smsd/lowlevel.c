@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.3  2001-03-29 08:42:59  ja
+  Revision 1.4  2001-05-30 14:36:47  pkot
+  Fix smsd to use StateMachine and let it compile.
+
+  Revision 1.3  2001/03/29 08:42:59  ja
   Enabling compilation of smsd.
 
   Revision 1.2  2001/02/02 08:09:57  ja
@@ -127,6 +130,7 @@ static GSM_Error fbusinit(bool enable_monitoring)
   int count=0;
   static GSM_Error error=GE_NOLINK;
   GSM_ConnectionType connection=GCT_Serial;
+  static GSM_Statemachine sm;
 
   if (!strcmp(smsdConfig.connection, "infrared"))
     connection = GCT_Infrared;
@@ -135,7 +139,7 @@ static GSM_Error fbusinit(bool enable_monitoring)
 
   if (error == GE_NOLINK)
     error = GSM_Initialise (smsdConfig.model, smsdConfig.port,
-                            smsdConfig.initlength, connection, NULL);
+                            smsdConfig.initlength, connection, NULL, &sm);
 
 #ifdef XDEBUG
   g_print ("fbusinit: error %d\n", error);
