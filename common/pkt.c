@@ -34,6 +34,8 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include "config.h"
+#include "compat.h"
 #include "gnokii.h"
 #include "pkt.h"
 

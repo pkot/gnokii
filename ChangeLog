@@ -8,6 +8,7 @@
                                         (BORBELY Zoltan, Pawel Kot)
     o gn_file_phonebook_read marks entry non-empty (BORBELY Zoltan)
     o log settings will be printed                 (BORBELY Zoltan)
+    o build problem without struct timeval fixed        (Pawel Kot)
  * build system updates
     o require flex at rpm build time            (Olivier Kaloudoff)
     o it appears that we had backward compatibility problem since
