@@ -49,7 +49,7 @@
 #include "data/virtmodem.h"
 #include "data/rlp-common.h"
 
-	/* Global variables */
+/* Global variables */
 
 extern bool TerminateThread;
 int ConnectCount;
@@ -66,14 +66,14 @@ pthread_t		Thread;
 bool			RequestTerminate;
 
 
-	/* If initialised in debug mode, stdin/out is used instead
-	   of ptys for interface. */
+/* If initialised in debug mode, stdin/out is used instead
+   of ptys for interface. */
 bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode, bool GSMInit)
 {
-	int		rtn;
+	int rtn;
+	GSM_Statemachine sm;
 
 	CommandMode = true;
-
 	RequestTerminate = false;
 
 	if (debug_mode == true) {
@@ -84,9 +84,7 @@ bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 	}
 
 	if (GSMInit) {
-#ifdef DEBUG
-	  fprintf (stderr , "Initialising GSM\n");
-#endif /* DEBUG */
+	  dprintf("Initialising GSM\n");
 	  if ((VM_GSMInitialise(model, port, initlength, connection) != GE_NONE)) {
 		fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
 		return (false);
@@ -99,7 +97,7 @@ bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 		return (false);
 	}
     
-	if (ATEM_Initialise(PtyRDFD, PtyWRFD, model, port) != true) {
+	if (ATEM_Initialise(PtyRDFD, PtyWRFD, &sm) != true) {
 		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n"));
 		return (false);
 	}
@@ -123,23 +121,23 @@ void	VM_ThreadLoop(void)
 	int res;
 	struct pollfd ufds;
 
-		/* Note we can't use signals here as they are already used
-		   in the FBUS code.  This may warrant changing the FBUS
-		   code around sometime to use select instead to free up
-		   the SIGIO handler for mainline code. */
+	/* Note we can't use signals here as they are already used
+	   in the FBUS code.  This may warrant changing the FBUS
+	   code around sometime to use select instead to free up
+	   the SIGIO handler for mainline code. */
 
-	ufds.fd=PtyRDFD;
-	ufds.events=POLLIN;
+	ufds.fd = PtyRDFD;
+	ufds.events = POLLIN;
 
 	while (!RequestTerminate) {
-	  if (!CommandMode) {
-	    sleep(1);
-	  } else {  /* If we are in data mode, leave it to datapump to get the data */
+		if (!CommandMode) {
+			sleep(1);
+		} else {  /* If we are in data mode, leave it to datapump to get the data */
 
-		res=poll(&ufds,1,500);
+			res = poll(&ufds, 1, 500);
 
-		switch (res) {
-		        case 0: /* Timeout */
+			switch (res) {
+			case 0: /* Timeout */
 				break;
 
 			case -1:
@@ -147,18 +145,17 @@ void	VM_ThreadLoop(void)
 				exit (-1);
 
 			default:
-			  if (ufds.revents==POLLIN) {
-			    VM_CharHandler();
-			  } else usleep(500); /* Probably the file has been closed */
-			  break;
+				if (ufds.revents == POLLIN) {
+					VM_CharHandler();
+				} else usleep(500); /* Probably the file has been closed */
+				break;
+			}
 		}
-	  }
 	}
-	
 }
 
-	/* Application should call VM_Terminate to shut down
-	   the virtual modem thread */
+/* Application should call VM_Terminate to shut down
+   the virtual modem thread */
 void		VM_Terminate(void)
 {
      
@@ -174,9 +171,8 @@ void		VM_Terminate(void)
 	}
 }
 
-	/* Open pseudo tty interface and (in due course create a symlink
-	   to be /dev/gnokii etc. ) */
-
+/* Open pseudo tty interface and (in due course create a symlink
+   to be /dev/gnokii etc. ) */
 int		VM_PtySetup(char *bindir)
 {
 	int			err;
@@ -203,74 +199,70 @@ int		VM_PtySetup(char *bindir)
 	}
 	PtyWRFD = PtyRDFD;
 
-		/* Check we haven't been installed setuid root for some reason
-		   if so, don't create /dev/gnokii */
+	/* Check we haven't been installed setuid root for some reason
+	   if so, don't create /dev/gnokii */
 	if (getuid() != geteuid()) {
 		fprintf(stderr, _("gnokiid should not be installed setuid root!\n"));
 		return (0);
 	}
 
-#ifdef DEBUG
-	fprintf (stderr, _("Slave pty is %s, calling %s to create /dev/gnokii.\n"), slave_name, mgnokiidev);
-#endif /* DEBUG */
+	dprintf("Slave pty is %s, calling %s to create /dev/gnokii.\n", slave_name, mgnokiidev);
 
-		/* Create command line, something line ./mkgnokiidev ttyp0 */
+	/* Create command line, something line ./mkgnokiidev ttyp0 */
 	sprintf(cmdline, "%s %s", mgnokiidev, slave_name);
 
-		/* And use system to call it. */	
+	/* And use system to call it. */	
 	err = system (cmdline);
 	
 	return (err);
-
 }
 
-    /* Handler called when characters received from serial port.
-       calls state machine code to process it. */
+/* Handler called when characters received from serial port.
+   calls state machine code to process it. */
 void    VM_CharHandler(void)
 {
-    unsigned char   buffer[255];
-    int             res;
+	unsigned char   buffer[255];
+	int             res;
 
+	/* If we are in command mode, get the character, otherwise leave it */
 
-    /* If we are in command mode, get the character, otherwise leave it */
+	if (CommandMode && ATEM_Initialised) {
+      
+		res = read(PtyRDFD, buffer, 255);
+      
+		/* A returned value of -1 means something serious has gone wrong - so quit!! */
+		/* Note that file closure etc. should have been dealt with in ThreadLoop */
+      
+		if (res < 0) {	
+			TerminateThread = true;
+			return;
+		}
 
-    if (CommandMode && ATEM_Initialised) {
-      
-      res = read(PtyRDFD, buffer, 255);
-      
-      /* A returned value of -1 means something serious has gone wrong - so quit!! */
-      /* Note that file closure etc. should have been dealt with in ThreadLoop */
-      
-      if (res < 0) {	
-	    TerminateThread=true;
-	    return;
-      }
-	
-      ATEM_HandleIncomingData(buffer, res);
-    }	
+		ATEM_HandleIncomingData(buffer, res);
+	}	
 }     
 
-	/* Initialise GSM interface, returning GSM_Error as appropriate  */
+/* Initialise GSM interface, returning GSM_Error as appropriate  */
 GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection)
 {
-	int 		count=0;
+	int 		count = 0;
 	GSM_Error 	error;
 	static GSM_Statemachine sm;
 
-		/* Initialise the code for the GSM interface. */     
+	/* Initialise the code for the GSM interface. */     
 
-	error = GSM_Initialise(model,port, initlength, connection, RLP_DisplayF96Frame, &sm);
+	error = GSM_Initialise(model, port, initlength, connection, RLP_DisplayF96Frame, &sm);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
-    	return (error);
+    		return (error);
 	}
 
 		/* First (and important!) wait for GSM link to be active. We allow 10
 		   seconds... */
 
 	while (count++ < 200 && *GSM_LinkOK == false) {
-    	usleep(50000);
+    		usleep(50000);
 	}
 
 	if (*GSM_LinkOK == false) {
@@ -290,9 +282,8 @@ GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Conne
    you are responsible to free *name.  Code is from Developling Linux
    Applications by Troan and Johnson */
 
-
-int	VM_GetMasterPty(char **name) { 
-
+int	VM_GetMasterPty(char **name)
+{ 
 #ifdef USE_UNIX98PTYS
 	int master, err;
 
@@ -307,41 +298,40 @@ int	VM_GetMasterPty(char **name) {
 		}
 	}
 #else /* USE_UNIX98PTYS */
-   int i = 0 , j = 0;
-   /* default to returning error */
-   int master = -1;
+	int i = 0 , j = 0;
+	/* default to returning error */
+	int master = -1;
 
-   /* create a dummy name to fill in */
-   *name = strdup("/dev/ptyXX");
+	/* create a dummy name to fill in */
+	*name = strdup("/dev/ptyXX");
 
-   /* search for an unused pty */
-   for (i=0; i<16 && master <= 0; i++) {
-      for (j=0; j<16 && master <= 0; j++) {
-         (*name)[8] = "pqrstuvwxyzPQRST"[i];
-         (*name)[9] = "0123456789abcdef"[j];
-         /* open the master pty */
-         if ((master = open(*name, O_RDWR | O_NOCTTY | O_NONBLOCK )) < 0) {
-            if (errno == ENOENT) {
-               /* we are out of pty devices */
-               free (*name);
-               return (master);
-            }
-         }
-      }
-   }
-   if ((master < 0) && (i == 16) && (j == 16)) {
-      /* must have tried every pty unsuccessfully */
-      free (*name);
-      return (master);
-   }
+	/* search for an unused pty */
+	for (i = 0; i < 16 && master <= 0; i++) {
+		for (j = 0; j < 16 && master <= 0; j++) {
+			(*name)[8] = "pqrstuvwxyzPQRST"[i];
+			(*name)[9] = "0123456789abcdef"[j];
+			/* open the master pty */
+			if ((master = open(*name, O_RDWR | O_NOCTTY | O_NONBLOCK )) < 0) {
+				if (errno == ENOENT) {
+					/* we are out of pty devices */
+					free(*name);
+					return (master);
+				}
+			}
+		}
+	}
+	if ((master < 0) && (i == 16) && (j == 16)) {
+		/* must have tried every pty unsuccessfully */
+		free(*name);
+		return (master);
+	}
 
-   /* By substituting a letter, we change the master pty
-    * name into the slave pty name.
-    */
-   (*name)[5] = 't';
+	/* By substituting a letter, we change the master pty
+	 * name into the slave pty name.
+	 */
+	(*name)[5] = 't';
 
 #endif /* USE_UNIX98PTYS */
 
-   return (master);
+	return (master);
 }
-

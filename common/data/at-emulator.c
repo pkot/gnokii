@@ -39,13 +39,14 @@
 #include "misc.h"
 #include "gsm-data.h"
 #include "gsm-api.h"
+#include "gsm-sms.h"
 #include "data/at-emulator.h"
 #include "data/virtmodem.h"
 #include "data/datapump.h"
 
 #define MAX_LINE_LENGTH 256
 
-	/* Global variables */
+/* Global variables */
 bool ATEM_Initialised = false;	/* Set to true once initialised */
 extern bool CommandMode;
 extern int ConnectCount;
@@ -56,8 +57,7 @@ static GSM_Data data;
 static GSM_SMSMessage sms;
 static 	char imei[64], model[64], revision[64], manufacturer[64];
 
-
-	/* Local variables */
+/* Local variables */
 int	PtyRDFD;	/* File descriptor for reading and writing to/from */
 int	PtyWRFD;	/* pty interface - only different in debug mode. */ 
 
@@ -70,14 +70,14 @@ char    IncomingCallNo;
 int     MessageFormat;          /* Message Format (text or pdu) */
 
 	/* Current command parser */
-void 	(*Parser)(char *);
-//void 	(*Parser)(char *) = ATEM_ParseAT; /* Current command parser */
+void 	(*Parser)(char *); /* Current command parser */
+/* void 	(*Parser)(char *) = ATEM_ParseAT; */
 
 GSM_MemoryType 	SMSType;
 int 	SMSNumber;
 
-	/* If initialised in debug mode, stdin/out is used instead
-	   of ptys for interface. */
+/* If initialised in debug mode, stdin/out is used instead
+   of ptys for interface. */
 bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
 {
 	PtyRDFD = read_fd;
@@ -122,7 +122,8 @@ bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
 	return (true);
 }
 
-	/* Initialise the "registers" used by the virtual modem. */
+
+/* Initialise the "registers" used by the virtual modem. */
 void	ATEM_InitRegisters(void) 
 {
 
@@ -140,7 +141,6 @@ void	ATEM_InitRegisters(void)
 
 
 /* This gets called to indicate an incoming call */
-
 void ATEM_CallPassup(char c)
 {
 	if ((c >= 0) && (c < 9)) {
@@ -150,9 +150,8 @@ void ATEM_CallPassup(char c)
 }
 
 
-    /* Handler called when characters received from serial port.
-       calls state machine code to process it. */
-
+/* Handler called when characters received from serial port.
+   calls state machine code to process it. */
 void	ATEM_HandleIncomingData(char *buffer, int length)
 {
 	int count;
@@ -200,7 +199,7 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 }     
 
 
-	/* Parser for standard AT commands.  cmd_buffer must be null terminated. */
+/* Parser for standard AT commands.  cmd_buffer must be null terminated. */
 void	ATEM_ParseAT(char *cmd_buffer)
 {
 	char *buf;
@@ -368,7 +367,7 @@ static void ATEM_HandleSMS()
 	return;
 }
 
-	/* Parser for SMS interactive mode */
+/* Parser for SMS interactive mode */
 void	ATEM_ParseSMS(char *buff)
 {
 	if (!strcasecmp(buff, "HELP")) {
@@ -393,7 +392,7 @@ void	ATEM_ParseSMS(char *buff)
 	ATEM_ModemResult(MR_ERROR);
 }
 
-	/* Parser for DIR sub mode of SMS interactive mode. */
+/* Parser for DIR sub mode of SMS interactive mode. */
 void	ATEM_ParseDIR(char *buff)
 {
 	switch (toupper(*buff)) {
@@ -422,7 +421,7 @@ void	ATEM_ParseDIR(char *buff)
 	ATEM_ModemResult(MR_ERROR);
 }
 
-	/* Parser for entering message content (+CMGS) */
+/* Parser for entering message content (+CMGS) */
 void	ATEM_ParseSMSText(char *buff)
 {
 	static int index = 0;
@@ -432,21 +431,23 @@ void	ATEM_ParseSMSText(char *buff)
 
 	length = strlen(buff);
 
-	for (i=0; i < length; i++) {
+	sms.UserData[0].Type = SMS_PlainText;
+
+	for (i = 0; i < length; i++) {
 
 		if (buff[i] == ModemRegisters[REG_CTRLZ]) {
 			/* Exit SMS text mode with sending */
-			sms.MessageText[index] = 0;
+			sms.UserData[0].u.Text[index] = 0;
+			sms.UserData[0].Length = index;
 			index = 0;
 			Parser = ATEM_ParseAT;
-#ifdef DEBUG
-			dprintf("Sending SMS to %s (text: %s)\n", data.SMSMessage->Destination, data.SMSMessage->MessageText);
-#endif
+			dprintf("Sending SMS to %s (text: %s)\n", data.SMSMessage->RemoteNumber.number, data.SMSMessage->UserData[0].u.Text);
+
 			/* FIXME: set more SMS fields before sending */
 			error = SendSMS(&data, sm);
 
 			if (error == GE_NONE || error == GE_SMSSENDOK) {
-				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMSMessage->MessageNumber);
+				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMSMessage->Number);
 				ATEM_StringOut(buffer);
 				ATEM_ModemResult(MR_OK);
 			} else {
@@ -455,24 +456,25 @@ void	ATEM_ParseSMSText(char *buff)
 			return;
 		} else if (buff[i] == ModemRegisters[REG_ESCAPE]) {
 			/* Exit SMS text mode without sending */
-			sms.MessageText[index] = 0;
+			sms.UserData[0].u.Text[index] = 0;
+			sms.UserData[0].Length = index;
 			index = 0;
 			Parser = ATEM_ParseAT;
 			ATEM_ModemResult(MR_OK);
 			return;
 		} else {
 			/* Appent next char to message text */
-			sms.MessageText[index++] = buff[i];
+			sms.UserData[0].u.Text[index++] = buff[i];
 		}
 	}
 
 	/* reached the end of line so insert \n and wait for more */
-	sms.MessageText[index++] = '\n';
+	sms.UserData[0].u.Text[index++] = '\n';
 	ATEM_StringOut("\n\r> ");
 }
 
-	/* Handle AT+C commands, this is a quick hack together at this
-	   stage. */
+/* Handle AT+C commands, this is a quick hack together at this
+   stage. */
 bool	ATEM_CommandPlusC(char **buf)
 {
 	float		rflevel = -1;
@@ -494,15 +496,16 @@ bool	ATEM_CommandPlusC(char **buf)
 			return (true);
 		}
 	}
-		/* AT+CGMI is Manufacturer information for the ME (phone) so
-		   it should be Nokia rather than gnokii... */
+
+	/* AT+CGMI is Manufacturer information for the ME (phone) so
+	   it should be Nokia rather than gnokii... */
 	if (strncasecmp(*buf, "GMI", 3) == 0) {
 		buf[0] += 3;
 		ATEM_StringOut(_("\n\rNokia Mobile Phones"));
 		return (false);
 	}
 
-		/* AT+CGSN is IMEI */
+	/* AT+CGSN is IMEI */
 	if (strncasecmp(*buf, "GSN", 3) == 0) {
 		buf[0] += 3;
 		strcpy(data.Imei, "+CME ERROR: 0");
@@ -515,7 +518,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		}
 	}
 
-		/* AT+CGMR is Revision (hardware) */
+	/* AT+CGMR is Revision (hardware) */
 	if (strncasecmp(*buf, "GMR", 3) == 0) {
 		buf[0] += 3;
 		strcpy(data.Revision, "+CME ERROR: 0");
@@ -528,7 +531,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		}
 	}
 
-		/* AT+CGMM is Model code  */
+	/* AT+CGMM is Model code  */
 	if (strncasecmp(*buf, "GMM", 3) == 0) {
 		buf[0] += 3;
 		strcpy(data.Model, "+CME ERROR: 0");
@@ -541,7 +544,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		}
 	}
 
-		/* AT+CMGD is deleting a message */
+	/* AT+CMGD is deleting a message */
 	if (strncasecmp(*buf, "MGD", 3) == 0) {
 		buf[0] += 3;
 		switch (**buf) {
@@ -569,7 +572,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		return (false);
 	}
 
-		/* AT+CMGF is mode selection for message format  */
+	/* AT+CMGF is mode selection for message format  */
 	if (strncasecmp(*buf, "MGF", 3) == 0) {
 		buf[0] += 3;
 		switch (**buf) {
@@ -599,7 +602,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		return (false);
 	}
 
-		/* AT+CMGR is reading a message */
+	/* AT+CMGR is reading a message */
 	if (strncasecmp(*buf, "MGR", 3) == 0) {
 		buf[0] += 3;
 		switch (**buf) {
@@ -630,13 +633,13 @@ bool	ATEM_CommandPlusC(char **buf)
 		return (false);
 	}
 
-		/* AT+CMGS is sending a message */
+	/* AT+CMGS is sending a message */
 	if (strncasecmp(*buf, "MGS", 3) == 0) {
 		buf[0] += 3;
 		switch (**buf) {
 		case '=':
 			buf[0]++;
-			if (sscanf(*buf, "\"%[+0-9a-zA-Z ]\"", sms.Destination)) {
+			if (sscanf(*buf, "\"%[+0-9a-zA-Z ]\"", sms.RemoteNumber.number)) {
 				Parser = ATEM_ParseSMSText;
 				buf[0] += strlen(*buf);
 				ATEM_StringOut("\n\r> ");
@@ -648,9 +651,9 @@ bool	ATEM_CommandPlusC(char **buf)
 		return (false);
 	}
 
-		/* AT+CMGL is listing messages */
+	/* AT+CMGL is listing messages */
 	if (strncasecmp(*buf, "MGL", 3) == 0) {
-		buf[0]+=3;
+		buf[0] += 3;
 		status = -1;
 
 		switch (**buf) {
@@ -713,12 +716,12 @@ bool	ATEM_CommandPlusC(char **buf)
 	return (true);
 }
 
-	/* AT+G commands.  Some of these responses are a bit tongue in cheek... */
+/* AT+G commands.  Some of these responses are a bit tongue in cheek... */
 bool	ATEM_CommandPlusG(char **buf)
 {
 	char		buffer[MAX_LINE_LENGTH];
 
-		/* AT+GMI is Manufacturer information for the TA (Terminal Adaptor) */
+	/* AT+GMI is Manufacturer information for the TA (Terminal Adaptor) */
 	if (strncasecmp(*buf, "MI", 3) == 0) {
 		buf[0] += 2;
 
@@ -726,7 +729,7 @@ bool	ATEM_CommandPlusG(char **buf)
 		return (false);
 	}
 
-		/* AT+GMR is Revision information for the TA (Terminal Adaptor) */
+	/* AT+GMR is Revision information for the TA (Terminal Adaptor) */
 	if (strncasecmp(*buf, "MR", 3) == 0) {
 		buf[0] += 2;
 		gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s %s %s", VERSION, __TIME__, __DATE__);
@@ -735,7 +738,7 @@ bool	ATEM_CommandPlusG(char **buf)
 		return (false);
 	}
 
-		/* AT+GMM is Model information for the TA (Terminal Adaptor) */
+	/* AT+GMM is Model information for the TA (Terminal Adaptor) */
 	if (strncasecmp(*buf, "MM", 3) == 0) {
 		buf[0] += 2;
 
@@ -744,7 +747,7 @@ bool	ATEM_CommandPlusG(char **buf)
 		return (false);
 	}
 
-		/* AT+GSN is Serial number for the TA (Terminal Adaptor) */
+	/* AT+GSN is Serial number for the TA (Terminal Adaptor) */
 	if (strncasecmp(*buf, "SN", 3) == 0) {
 		buf[0] += 2;
 
@@ -756,8 +759,8 @@ bool	ATEM_CommandPlusG(char **buf)
 	return (true);
 }
 
-	/* Send a result string back.  There is much work to do here, see
-	   the code in the isdn driver for an idea of where it's heading... */
+/* Send a result string back.  There is much work to do here, see
+   the code in the isdn driver for an idea of where it's heading... */
 void	ATEM_ModemResult(int code) 
 {
 	char	buffer[16];
@@ -798,8 +801,8 @@ void	ATEM_ModemResult(int code)
 }
 
 
-	/* Get integer from char-pointer, set pointer to end of number
-	   stolen basically verbatim from ISDN code.  */
+/* Get integer from char-pointer, set pointer to end of number
+   stolen basically verbatim from ISDN code.  */
 int ATEM_GetNum(char **p)
 {
 	int v = -1;
@@ -811,9 +814,9 @@ int ATEM_GetNum(char **p)
 	return v;
 }
 
-	/* Write string to virtual modem port, either pty or
-	   STDOUT as appropriate.  This function is only used during
-	   command mode - data pump is used when connected.  */
+/* Write string to virtual modem port, either pty or
+   STDOUT as appropriate.  This function is only used during
+   command mode - data pump is used when connected.  */
 void	ATEM_StringOut(char *buffer)
 {
 	int		count = 0;
@@ -821,7 +824,7 @@ void	ATEM_StringOut(char *buffer)
 
 	while (count < strlen(buffer)) {
 
-			/* Translate CR/LF/BS as appropriate */
+		/* Translate CR/LF/BS as appropriate */
 		switch (buffer[count]) {
 			case '\r':
 				out_char = ModemRegisters[REG_CR];
@@ -838,7 +841,6 @@ void	ATEM_StringOut(char *buffer)
 		}
 
 		write(PtyWRFD, &out_char, 1);
-		count ++;
+		count++;
 	}
-
 }
