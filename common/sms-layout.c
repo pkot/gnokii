@@ -31,8 +31,6 @@
 
 */
 
-#define DEBUG
-
 #include <stdlib.h>
 #include <string.h>
 
