@@ -1,3 +1,8 @@
+0.6.4 (not released yet)
+========================
+ * build system updates
+    o wrong permissions for gnapplet.sis             (Ville Skyttä)
+
 0.6.3
 =====
  * portability fixes

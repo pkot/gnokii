@@ -28,7 +28,7 @@ install-generic:
 	$(INSTALL) -m 755 ppm2nokia $(DESTDIR)$(bindir)
 	@if [ -f gnapplet.sis ]; then \
 		$(INSTALL) -d $(DESTDIR)$(docdir); \
-		$(INSTALL) -m 755 gnapplet.sis $(DESTDIR)$(docdir); \
+		$(INSTALL_DATA) gnapplet.sis $(DESTDIR)$(docdir); \
 	fi
 
 install: install-generic
