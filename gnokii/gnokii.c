@@ -3397,7 +3397,7 @@ static int writephonebook(int argc, char *args[])
 			type = 2;
 			break;
 		case 'f':
-			find_free = 0;
+			find_free = 1;
 			break;
 		case 'm':
 			default_mt = gn_str2memory_type(optarg);
