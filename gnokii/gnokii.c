@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.142  2001-09-14 13:02:03  pkot
+  Revision 1.143  2001-09-14 13:30:07  pkot
+  Fixed bugs introduced during 0.3.3 merge
+
+  Revision 1.142  2001/09/14 13:02:03  pkot
   Gnokii calendar changes from 0.3.3
 
   Revision 1.141  2001/09/14 12:53:00  pkot
@@ -1910,8 +1913,8 @@ int getcalendarnote(int argc, char *argv[])
 {
 	GSM_CalendarNote	CalendarNote;
 	GSM_Data		data;
-	GSM_Error		error;
-	int			i;
+	GSM_Error		error = GE_NONE;
+	int			i, first_location, last_location;
 	bool			vCal = false;
 	
 	struct option options[] = {
@@ -1933,14 +1936,24 @@ int getcalendarnote(int argc, char *argv[])
 			vCal=true;
 			break;
 		default:
-			usage(); // Would be better to have an calendar_usage() here.
+			usage(); /* Would be better to have an calendar_usage() here. */
 			return -1;
 		}
 	}
 
+                                                                                                        
 	for (i = first_location; i <= last_location; i++) {
 		CalendarNote.Location = i;
-		switch (error = GSM->GetCalendarNote(&CalendarNote)) {
+	 	if (GSM && GSM->GetCalendarNote && GSM->Terminate) {
+			error = GSM->GetCalendarNote(&CalendarNote);
+			GSM->Terminate();
+		} else {
+			GSM_DataClear(&data);
+			data.CalendarNote = &CalendarNote;
+
+			error = SM_Functions(GOP_GetCalendarNote, &data, &State);
+		}
+		switch (error) {
 		case GE_NONE:
 			if (vCal) {
 				fprintf(stdout, "BEGIN:VCALENDAR\n");

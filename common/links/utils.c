@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.5  2001-09-14 12:15:28  pkot
+  Revision 1.6  2001-09-14 13:30:07  pkot
+  Fixed bugs introduced during 0.3.3 merge
+
+  Revision 1.5  2001/09/14 12:15:28  pkot
   Cleanups from 0.3.3 (part1)
 
   Revision 1.4  2001/09/09 21:45:49  machek
@@ -54,6 +57,7 @@
 #include "gsm-networks.h"
 #include "device.h"
 
+#if 0
 void
 link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 {
@@ -69,3 +73,4 @@ link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 	dprintf("Unknown Frame Type %02x\n", type);
 	gphone->DefaultFunction(type, buf, len);
 }
+#endif

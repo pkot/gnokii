@@ -720,7 +720,6 @@ static void ShowCalTime (GtkWidget *widget, DateTime *date)
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
     gtk_widget_show (label);
 
-    /* What a fuck...*/
     adj = (GtkAdjustment *) gtk_adjustment_new (date->hours,
                                                 0.0, 23.0, 1.0, 4.0, 0.0);
     date->hButton = gtk_spin_button_new (adj, 0, 0);
@@ -740,25 +739,6 @@ static void ShowCalTime (GtkWidget *widget, DateTime *date)
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (date->mButton), TRUE);
     gtk_box_pack_start (GTK_BOX (hbox), date->mButton, FALSE, FALSE, 0);
     gtk_widget_show (date->mButton);
-/*    adj = (GtkAdjustment *) gtk_adjustment_new (addReminderDialogData.alarm.hours,
-                                                0.0, 23.0, 1.0, 4.0, 0.0);
-    addReminderDialogData.alarm.hButton = gtk_spin_button_new (adj, 0, 0);
-    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarm.hButton), TRUE);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarm.hButton), TRUE);
-    gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarm.hButton, FALSE, FALSE, 0);
-    gtk_widget_show (addReminderDialogData.alarm.hButton);
-
-    label = gtk_label_new (":");
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-    gtk_widget_show (label);
-
-    adj = (GtkAdjustment *) gtk_adjustment_new (addReminderDialogData.alarm.minutes,
-                                                0.0, 59.0, 1.0, 10.0, 0.0);
-    addReminderDialogData.alarm.mButton = gtk_spin_button_new (adj, 0, 0);
-    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarm.mButton), TRUE);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarm.mButton), TRUE);
-    gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarm.mButton, FALSE, FALSE, 0);
-    gtk_widget_show (addReminderDialogData.alarm.mButton);*/
   }
 
   gtk_widget_show (calTimeDialog.dialog);  
