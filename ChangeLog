@@ -18,7 +18,7 @@
  * 7110 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
-    o implement WAP (all but writing settings)         (Markus Plail)
+    o implement WAP                                    (Markus Plail)
  * Call management subsystem updates:
     o state pointer added to CallNotification        (BORBELY Zoltan)
     o call management API added to the repository    (BORBELY Zoltan)
@@ -26,6 +26,7 @@
     o remove unnecessary GSM_Data declarations         (Markus Plail)
     o DialVoice converted to the new api             (BORBELY Zoltan)
     o SendDTMF implemented again                     (BORBELY Zoltan)
+    o get rid of the global GSM_Data                   (Markus Plail)
  * gnokii updates:
     o remove SMSFolder hack from getsms                (Markus Plail)
     o call status display added                      (BORBELY Zoltan)

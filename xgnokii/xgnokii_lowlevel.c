@@ -68,8 +68,12 @@ pthread_cond_t getNetworkInfoCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
 
-static GSM_Data gdat;
 static char *lockfile = NULL;
+
+SMS_Status SMSStatus = {0,0,0,0};
+SMS_FolderStats FolderStats[MAX_SMS_FOLDERS];
+SMS_MessagesList MessagesList[MAX_SMS_MESSAGES][MAX_SMS_FOLDERS];
+
 GSM_Statemachine statemachine;
 /* FIXME - don't really know what should own the statemachine in */
 /* the xgnokii scheme of things - Chris */
@@ -107,10 +111,12 @@ inline static PhoneEvent *RemoveEvent(void)
 
 GSM_Error GUI_InitSMSFolders(void)
 {
+	GSM_Data gdat;
 	GSM_Error error;
 	SMS_FolderList list;
 	gint i;
 
+	GSM_DataClear(&gdat);
 	if (phoneMonitor.supported & PM_FOLDERS) {
 
 		gdat.SMSFolderList = &list;
@@ -145,12 +151,10 @@ static inline void FreeArray(GSList ** array)
 
 static GSM_Error InitModelInf(void)
 {
+	GSM_Data gdat;
+	GSM_Error error;
 	gchar buf[64];
 	gint i, j;
-	GSM_Error error;
-	SMS_Status *SMSStatus;
-	SMS_FolderStats *FolderStats[MAX_SMS_FOLDERS];
-	SMS_MessagesList *MessagesList[MAX_SMS_MESSAGES][MAX_SMS_FOLDERS];
 
 	GSM_DataClear(&gdat);
 
@@ -181,26 +185,15 @@ static GSM_Error InitModelInf(void)
 	phoneMonitor.phone.imei = g_malloc(sizeof(gdat.Imei));
 	phoneMonitor.phone.imei = g_strdup(gdat.Imei);
 
-	SMSStatus = g_malloc(sizeof(SMS_Status));
-	memset(SMSStatus, 0, sizeof(SMS_Status));
-	gdat.SMSStatus = SMSStatus;
-
 	for (i = 0; i < MAX_SMS_FOLDERS; i++) {
-		FolderStats[i] = g_malloc(sizeof(SMS_FolderStats));
-		memset(FolderStats[i], 0, sizeof(SMS_FolderStats));
-		gdat.FolderStats[i] = FolderStats[i];
-
-		gdat.FolderStats[i]->Number = 0;
-		gdat.FolderStats[i]->Changed = 0;
-		gdat.FolderStats[i]->Unread = 0;
-		gdat.FolderStats[i]->Changed = 0;
+		FolderStats[i].Number = 0;
+		FolderStats[i].Changed = 0;
+		FolderStats[i].Unread = 0;
+		FolderStats[i].Changed = 0;
 		for (j = 0; j < MAX_SMS_MESSAGES; j++) {
-			MessagesList[j][i] = g_malloc(sizeof(SMS_MessagesList));
-			gdat.MessagesList[j][i] = MessagesList[j][i];
-
-			gdat.MessagesList[j][i]->Type = SMS_Old;
-			gdat.MessagesList[j][i]->Location = 0;
-			gdat.MessagesList[j][i]->MessageType = SMS_Deliver;
+			MessagesList[j][i].Type = SMS_Old;
+			MessagesList[j][i].Location = 0;
+			MessagesList[j][i].MessageType = SMS_Deliver;
 		}
 	}
 
@@ -236,6 +229,8 @@ static GSM_Error fbusinit(bool enable_monitoring)
 		connection = GCT_TCP;
 	if (!strcmp(xgnokiiConfig.connection, "dau9p"))
 		connection = GCT_DAU9P;
+	if (!strcmp(xgnokiiConfig.connection, "dlr3p"))
+		connection = GCT_DLR3P;
 
 	/* register cleanup function */
 	if (!atexit_registered) {
@@ -329,6 +324,7 @@ static gint compare_number(const GSM_SMSMessage * a, const GSM_SMSMessage * b)
 
 static void RefreshSMS(const gint number)
 {
+	GSM_Data gdat;
 	GSM_Error error;
 	GSM_API_SMS *msg, *tmp_msg;
 	SMS_Folder *fld;
@@ -341,29 +337,31 @@ static void RefreshSMS(const gint number)
 	g_print("RefreshSMS is running...\n");
 #endif
 
-	dprintf("RefreshSMS: changed: %i\n", gdat.SMSStatus->Changed);
-	dprintf("RefreshSMS: unread: %i, total: %i\n", gdat.SMSStatus->Unread,
-		gdat.SMSStatus->Number);
-	for (i = 0; i < gdat.SMSStatus->NumberOfFolders; i++) {
+	GSM_DataClear(&gdat);
+
+	dprintf("RefreshSMS: changed: %i\n", SMSStatus.Changed);
+	dprintf("RefreshSMS: unread: %i, total: %i\n", SMSStatus.Unread,
+		SMSStatus.Number);
+	for (i = 0; i < SMSStatus.NumberOfFolders; i++) {
 		dummy = 0;
-		for (j = 0; j < gdat.FolderStats[i]->Used; j++) {
-			if ((gdat.MessagesList[j][i]->Type == SMS_Changed) ||
-			    (gdat.MessagesList[j][i]->Type == SMS_NotRead) ||
-			    (gdat.MessagesList[j][i]->Type == SMS_New))
+		for (j = 0; j < FolderStats[i].Used; j++) {
+			if ((MessagesList[j][i].Type == SMS_Changed) ||
+			    (MessagesList[j][i].Type == SMS_NotRead) ||
+			    (MessagesList[j][i].Type == SMS_New))
 				dprintf("RefreshSMS: change #%i in folder %i at location %i!\n",
-					++dummy, i, gdat.MessagesList[j][i]->Location);
+					++dummy, i, MessagesList[j][i].Location);
 		}
 	}
 	if (phoneMonitor.supported & PM_FOLDERS) {
 
-		for (i = 0; i < gdat.SMSStatus->NumberOfFolders; i++) {
-			for (j = 0; j < gdat.FolderStats[i]->Used; j++) {
-				if (gdat.MessagesList[j][i]->Type == SMS_Deleted ||
-				    gdat.MessagesList[j][i]->Type == SMS_Changed) {
+		for (i = 0; i < SMSStatus.NumberOfFolders; i++) {
+			for (j = 0; j < FolderStats[i].Used; j++) {
+				if (MessagesList[j][i].Type == SMS_Deleted ||
+				    MessagesList[j][i].Type == SMS_Changed) {
 					dprintf("We got a deleted message here to handle!\n");
 					pthread_mutex_lock(&smsMutex);
 					msg = g_malloc(sizeof(GSM_API_SMS));
-					msg->Number = gdat.MessagesList[j][i]->Location;
+					msg->Number = MessagesList[j][i].Location;
 					tmp_list =
 					    g_slist_find_custom(phoneMonitor.sms.messages, msg,
 								(GCompareFunc) compare_number);
@@ -372,12 +370,12 @@ static void RefreshSMS(const gint number)
 					    g_slist_remove(phoneMonitor.sms.messages, tmp_msg);
 					g_free(tmp_msg);
 					pthread_mutex_unlock(&smsMutex);
-					if (gdat.MessagesList[j][i]->Type == SMS_Deleted)
-						gdat.MessagesList[j][i]->Type = SMS_ToBeRemoved;	/* FreeDeletedMessages has to find it */
+					if (MessagesList[j][i].Type == SMS_Deleted)
+						MessagesList[j][i].Type = SMS_ToBeRemoved;	/* FreeDeletedMessages has to find it */
 				}
-				if (gdat.MessagesList[j][i]->Type == SMS_New ||
-				    gdat.MessagesList[j][i]->Type == SMS_NotRead ||
-				    gdat.MessagesList[j][i]->Type == SMS_Changed) {
+				if (MessagesList[j][i].Type == SMS_New ||
+				    MessagesList[j][i].Type == SMS_NotRead ||
+				    MessagesList[j][i].Type == SMS_Changed) {
 					msg = g_malloc(sizeof(GSM_API_SMS));
 					list = g_malloc(sizeof(SMS_FolderList));
 					raw = g_malloc(sizeof(GSM_RawData));
@@ -386,7 +384,7 @@ static void RefreshSMS(const gint number)
 					gdat.SMSFolderList = list;
 					gdat.RawData = raw;
 
-					gdat.SMS->Number = gdat.MessagesList[j][i]->Location;
+					gdat.SMS->Number = MessagesList[j][i].Location;
 					gdat.SMS->MemoryType =(GSM_MemoryType) i + 12 ;
 					dprintf("#: %i, mt: %i\n", gdat.SMS->Number, gdat.SMS->MemoryType);
 					if ((error = GetSMSnoValidate(&gdat, &statemachine)) == GE_NONE) {
@@ -397,16 +395,16 @@ static void RefreshSMS(const gint number)
 						    g_slist_append(phoneMonitor.sms.messages, msg);
 						pthread_mutex_unlock(&smsMutex);
 					}
-					if (gdat.MessagesList[j][i]->Type == SMS_New ||
-					    gdat.MessagesList[j][i]->Type == SMS_Changed)
-						gdat.MessagesList[j][i]->Type = SMS_Old;
-					if (gdat.MessagesList[j][i]->Type == SMS_NotRead)
-						gdat.MessagesList[j][i]->Type = SMS_NotReadHandled;
+					if (MessagesList[j][i].Type == SMS_New ||
+					    MessagesList[j][i].Type == SMS_Changed)
+						MessagesList[j][i].Type = SMS_Old;
+					if (MessagesList[j][i].Type == SMS_NotRead)
+						MessagesList[j][i].Type = SMS_NotReadHandled;
 				}
 			}
-			gdat.FolderStats[i]->Changed = 0;	/* now we handled the changes and can reset */
+			FolderStats[i].Changed = 0;	/* now we handled the changes and can reset */
 		}
-		gdat.SMSStatus->Changed = 0;	/* now we handled the changes and can reset */
+		SMSStatus.Changed = 0;	/* now we handled the changes and can reset */
 
 	} else {
 		pthread_mutex_lock(&smsMutex);
@@ -458,6 +456,9 @@ static gint A_GetMemoryStatus(gpointer data)
 {
 	GSM_Error error;
 	D_MemoryStatus *ms = (D_MemoryStatus *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = ms->status = GE_UNKNOWN;
 	if (ms) {
@@ -475,6 +476,9 @@ static gint A_GetMemoryLocation(gpointer data)
 {
 	GSM_Error error;
 	D_MemoryLocation *ml = (D_MemoryLocation *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = ml->status = GE_UNKNOWN;
 
@@ -496,6 +500,9 @@ static gint A_GetMemoryLocationAll(gpointer data)
 	GSM_Error error;
 	D_MemoryLocationAll *mla = (D_MemoryLocationAll *)data;
 	register gint i, j, read = 0;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = mla->status = GE_NONE;
 	entry.MemoryType = mla->type;
@@ -571,6 +578,9 @@ static gint A_WriteMemoryLocation(gpointer data)
 {
 	GSM_Error error;
 	D_MemoryLocation *ml = (D_MemoryLocation *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = ml->status = GE_UNKNOWN;
 
@@ -590,6 +600,9 @@ static gint A_WriteMemoryLocationAll(gpointer data)
 {
 	GSM_Error error;
 	D_MemoryLocationAll *mla = (D_MemoryLocationAll *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = mla->status = GE_UNKNOWN;
 
@@ -600,6 +613,9 @@ static gint A_GetCalendarNote(gpointer data)
 {
 	GSM_Error error;
 	D_CalendarNote *cn = (D_CalendarNote *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = cn->status = GE_UNKNOWN;
 
@@ -621,8 +637,10 @@ static gint A_GetCalendarNoteAll(gpointer data)
 	GSM_CalendarNote entry;
 	D_CalendarNoteAll *cna = (D_CalendarNoteAll *) data;
 	GSM_Error error;
-	GSM_Data gdat;
 	register gint i = 1;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	pthread_mutex_lock(&calendarMutex);
 	while (1) {
@@ -650,6 +668,9 @@ static gint A_WriteCalendarNote(gpointer data)
 {
 	GSM_Error error;
 	D_CalendarNote *cn = (D_CalendarNote *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = cn->status = GE_UNKNOWN;
 
@@ -669,6 +690,9 @@ static gint A_DeleteCalendarNote(gpointer data)
 {
 	GSM_CalendarNote *note = (GSM_CalendarNote *) data;
 	GSM_Error error = GE_UNKNOWN;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	if (note) {
 		gdat.CalendarNote = note;
@@ -684,6 +708,9 @@ static gint A_GetCallerGroup(gpointer data)
 	GSM_Bitmap bitmap;
 	GSM_Error error;
 	D_CallerGroup *cg = (D_CallerGroup *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = cg->status = GE_UNKNOWN;
 
@@ -707,6 +734,9 @@ static gint A_SendCallerGroup(gpointer data)
 	GSM_Bitmap bitmap;
 	D_CallerGroup *cg = (D_CallerGroup *) data;
 	GSM_Error error;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	if (!cg)
 		return (GE_UNKNOWN);
@@ -729,6 +759,9 @@ static gint A_GetSMSCenter(gpointer data)
 {
 	D_SMSCenter *c = (D_SMSCenter *) data;
 	GSM_Error error;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = c->status = GE_UNKNOWN;
 	if (c) {
@@ -746,6 +779,9 @@ static gint A_SetSMSCenter(gpointer data)
 {
 	D_SMSCenter *smsc = (D_SMSCenter *) data;
 	GSM_Error error;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = smsc->status = GE_UNKNOWN;
 	if (smsc) {
@@ -764,6 +800,9 @@ static gint A_SendSMSMessage(gpointer data)
 {
 	D_SMSMessage *d = (D_SMSMessage *) data;
 	GSM_Error error;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = d->status = GE_UNKNOWN;
 	if (d) {
@@ -781,6 +820,9 @@ static gint A_DeleteSMSMessage(gpointer data)
 {
 	GSM_API_SMS *sms = (GSM_API_SMS *) data;
 	GSM_Error error = GE_UNKNOWN;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	if (sms) {
 		gdat.SMS = sms;
@@ -798,6 +840,9 @@ static gint A_GetSpeedDial(gpointer data)
 {
 	D_SpeedDial *d = (D_SpeedDial *) data;
 	GSM_Error error;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = d->status = GE_UNKNOWN;
 
@@ -817,6 +862,9 @@ static gint A_SendSpeedDial(gpointer data)
 {
 	D_SpeedDial *d = (D_SpeedDial *) data;
 	GSM_Error error;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = d->status = GE_UNKNOWN;
 
@@ -836,6 +884,9 @@ static gint A_SendDTMF(gpointer data)
 {
 	gchar *buf = (gchar *) data;
 	GSM_Error error = GE_UNKNOWN;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	if (buf) {
 		gdat.DTMFString = buf;
@@ -852,6 +903,9 @@ static gint A_NetMonOnOff(gpointer data)
 {
 	gint mode = GPOINTER_TO_INT(data);
 	GSM_NetMonitor nm;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	gdat.NetMonitor = &nm;
 	if (mode)
@@ -881,6 +935,9 @@ static gint A_DialVoice(gpointer data)
 	GSM_Error error;
 	GSM_CallInfo CallInfo;
 	int CallId;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	if (!number) return GE_UNKNOWN;
 
@@ -902,6 +959,9 @@ static gint A_GetAlarm(gpointer data)
 {
 	D_Alarm *a = (D_Alarm *) data;
 	GSM_Error error;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = GE_UNKNOWN;
 
@@ -922,6 +982,9 @@ static gint A_SetAlarm(gpointer data)
 {
 	D_Alarm *a = (D_Alarm *) data;
 	GSM_Error error;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	error = a->status = GE_UNKNOWN;
 
@@ -936,6 +999,9 @@ static gint A_SetAlarm(gpointer data)
 
 static gint A_PressKey(gpointer data)
 {
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 	gdat.KeyCode = GPOINTER_TO_INT(data);
 
 	return SM_Functions(GOP_PressPhoneKey, &gdat, &statemachine);
@@ -943,6 +1009,9 @@ static gint A_PressKey(gpointer data)
 
 static gint A_ReleaseKey(gpointer data)
 {
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 	gdat.KeyCode = GPOINTER_TO_INT(data);
 
 	return SM_Functions(GOP_ReleasePhoneKey, &gdat, &statemachine);
@@ -952,6 +1021,9 @@ static gint A_GetBitmap(gpointer data)
 {
 	GSM_Error error;
 	D_Bitmap *d = (D_Bitmap *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	pthread_mutex_lock(&getBitmapMutex);
 	gdat.Bitmap = d->bitmap;
@@ -966,6 +1038,9 @@ static gint A_SetBitmap(gpointer data)
 	GSM_Error error;
 	D_Bitmap *d = (D_Bitmap *) data;
 	GSM_Bitmap bitmap;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	pthread_mutex_lock(&setBitmapMutex);
 	if (d->bitmap->type == GSM_CallerLogo) {
@@ -992,6 +1067,9 @@ static gint A_GetNetworkInfo(gpointer data)
 {
 	GSM_Error error;
 	D_NetworkInfo *d = (D_NetworkInfo *) data;
+	GSM_Data gdat;
+
+	GSM_DataClear(&gdat);
 
 	pthread_mutex_lock(&getNetworkInfoMutex);
 	gdat.NetworkInfo = d->info;
@@ -1046,7 +1124,8 @@ void *GUI_Connect(void *a)
 	GSM_BatteryUnits batt_units = GBU_Percentage;
 	GSM_DateTime Alarm;
 	GSM_NetMonitor netmonitor;
-	gint displaystatus;
+	GSM_Data gdat;
+	gint displaystatus, i, j;
 	time_t newtime, oldtime;
 
 	GN_API_Call *call;
@@ -1066,6 +1145,8 @@ void *GUI_Connect(void *a)
 #endif
 
 	sleep(1);
+
+	GSM_DataClear(&gdat);
 
 	gdat.RFLevel = &phoneMonitor.rfLevel;
 	gdat.RFUnits = &rf_units;
@@ -1178,6 +1259,13 @@ void *GUI_Connect(void *a)
 
 		/* only do SMS monitoring when activated */
 		if (!isSMSactivated) continue;
+		gdat.SMSStatus = &SMSStatus;
+		/* FIXME: This can surely be done easier */
+		for (i = 0; i < MAX_SMS_FOLDERS; i++) {
+			gdat.FolderStats[i] = &FolderStats[i];
+			for (j = 0; j < MAX_SMS_MESSAGES; j++)
+				gdat.MessagesList[i][j] = &MessagesList[i][j];
+		}
 
 		if ((GetFolderChanges(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS)))
 		    == GE_NONE) {
