@@ -266,6 +266,14 @@ typedef enum {
 	GCN_BIRTHDAY    /* Birthday */
 } GSM_CalendarNoteType;
 
+typedef enum {
+	GCN_NEVER   = 0,
+	GCN_DAILY   = 24,
+	GCN_WEEKLY  = 168,
+	GCN_2WEEKLY = 336,
+	GCN_YEARLY  = 65535
+} GSM_CalendarRecurrences;
+
 /* Calendar note type */
 
 typedef struct {
@@ -275,7 +283,7 @@ typedef struct {
 	GSM_DateTime Alarm;		/* The alarm of the note */
 	char Text[20];		/* The text of the note */
 	char Phone[20];		/* For Call only: the phone number */
-	int Recurrence;		/* Recurance of the note */
+	GSM_CalendarRecurrences Recurrence;	/* Recurrence of the note */
 } GSM_CalendarNote;
 
 /* List of Calendar Notes in phone */
