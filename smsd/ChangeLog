@@ -1,3 +1,7 @@
+* Tue Jan 25 2005 David Vrabel
+- Make configurable where to look for the new messages.
+
+
 * Sun Oct 17 2004 Pawel Kot <pkot@bezsensu.pl>
 - Correctly exit when the device is locked.
 

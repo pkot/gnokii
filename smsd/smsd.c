@@ -226,6 +226,7 @@ static void ReadConfig (gint argc, gchar *argv[])
   smsdConfig.refreshInt = 1;     // Phone querying interval in seconds
   smsdConfig.maxSMS = 10;        // Smsd uses it if GetSMSStatus isn't implemented
   smsdConfig.smsSets = 0;
+  smsdConfig.memoryType = GN_MT_XX;
 
   while (1)
   {
@@ -244,11 +245,12 @@ static void ReadConfig (gint argc, gchar *argv[])
       {"version", 0, 0, 'v'},
       {"interval", 1, 0, 'i'},
       {"maxsms", 1, 0, 's'},
+      {"inbox", 1, 0, 'b'},
       {"help", 0, 0, 'h'},
       {0, 0, 0, 0}
     };
     
-    c = getopt_long (argc, argv, "u:p:d:c:m:l:f:t:vi:s:h", longOptions, &optionIndex);
+    c = getopt_long (argc, argv, "u:p:d:c:m:l:f:t:vi:s:b:h", longOptions, &optionIndex);
     if (c == EOF)
       break;
     switch (c)
@@ -305,6 +307,10 @@ static void ReadConfig (gint argc, gchar *argv[])
 
       case 's':
         smsdConfig.maxSMS = atoi (optarg);
+        break;
+
+      case 'b':
+        smsdConfig.memoryType = gn_str2memory_type (optarg);
         break;
 
       case 'v':

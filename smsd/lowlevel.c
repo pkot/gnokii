@@ -237,10 +237,7 @@ static void RefreshSMS (const gint number)
   {
     msg = g_malloc (sizeof (gn_sms));
     memset (msg, 0, sizeof (gn_sms));
-    if (phoneMonitor.supported & PM_FOLDERS)
-      msg->memory_type = GN_MT_IN;
-    else
-      msg->memory_type = GN_MT_SM;
+    msg->memory_type = smsdConfig.memoryType;
     msg->number = ++i;
     data.sms = msg;
     
@@ -371,6 +368,13 @@ void *Connect (void *phone)
     exit (1);
   }
 
+  if (smsdConfig.memoryType == GN_MT_XX) {
+    if (phoneMonitor.supported & PM_FOLDERS)
+      smsdConfig.memoryType = GN_MT_IN;
+    else
+      smsdConfig.memoryType = GN_MT_SM;
+  }
+
   gn_log_xdebug ("Phone connected. Starting monitoring...\n");
 
   while (1)
@@ -380,7 +384,7 @@ void *Connect (void *phone)
     if (phoneMonitor.supported & PM_FOLDERS)
     {
       data->sms_folder = &SMSFolder;
-      SMSFolder.folder_id = GN_MT_IN;
+      SMSFolder.folder_id = smsdConfig.memoryType;
       if (status && (error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, &sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.number != SMSFolder.number)
@@ -405,7 +409,11 @@ void *Connect (void *phone)
     }
     else
     {
+      gn_memory_status dummy;
+      dummy.memory_type = smsdConfig.memoryType;
+
       data->sms_status = &SMSStatus;
+      data->memory_status = &dummy;
       if (status && (error = gn_sm_functions (GN_OP_GetSMSStatus, data, &sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.unRead != SMSStatus.unread ||
