@@ -25,26 +25,26 @@ A. You can pronounce gnokii as "gnooki" or "gnocki" at your option :-)
 Q. What models are supported?
 
 A. Currently supported phone models are (if not marked, it's a Nokia phone):
-         + 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330|8210
-         + 7110|6210|6250
-         + 6310|6510|8310
+         + 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330|3360|3410|8210|8290
+         + 5160|6160|6185
+         + 7110|6210|6250|7190
          + 6210|7110|6250
+         + 6310|6310i|6510|8310
          + AT mode compatible phones (namely Nokia 62X0, Nokia 7110,
            Nokia 8210, Nokia 6310, Nokia 6510, Ericsson T39, Sony-Ericsson
            T68i, Siemens S25 are known to work)
    Support for these models is obsoleted. If noone is interested in
    development for them, the support will be dropped:
          + 640
-         + 5160|6160|6185
          + 3110|3810|8110|8110i
          + 2110|2140|6080
-         + Dancall 2711
+         + Dancall 2711 and 2713
 
 -------------------------------------------------------------------------------
 Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
    running gnokii. What's wrong?
 
-A. Gnokii cannot connect to the phone.  Possible reasons are:
+A. Gnokii cannot connect to the phone. Possible reasons are:
     - wrong serial port is defined in gnokii config file,
     - you are using the wrong cable,
     - you are using not supported phone model,
@@ -53,11 +53,14 @@ A. Gnokii cannot connect to the phone.  Possible reasons are:
 -------------------------------------------------------------------------------
 Q. Does mgnokiidev need to be suid root?
 
-A. Yes.  gnokiid needs to create a symbolic link in the /dev directory.
+A. Yes. gnokiid needs to create a symbolic link in the /dev directory.
    mgnokiidev is the program which does this and hence it must be suid
-   root so it can write to the directory.  mgnokiidev is executable only
+   root so it can write to the directory. mgnokiidev is executable only
    for gnokii group members (and root) so it presents minimal security
-   problems.
+   problems. Be sure that you use not older then 0.3.5 gnokii version if
+   you want to install mkgnokiidev suid root and give the access for
+   execution for not trusted people. The former versions had security
+   problems and allowed people to write to an arbitrary file.
 
 -------------------------------------------------------------------------------
 Q. Should any other gnokii binary be installed suid root?
@@ -113,7 +116,7 @@ A. Generally yes, but in fact it depends on hardware -- your serial port
 Q. Could somebody tell me the key for on, off and select menu in
     gnokii --keysequence function?
 
-   M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
+A. M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
    +: increase volume, -: decrease volume, 0123456789#* as is.
 
 -------------------------------------------------------------------------------
@@ -168,3 +171,49 @@ Q. I can't compile gnokii. It failes with po directory building.
 A. You need to run gettextize. See autogen.sh and INSTALL files. If you don't
    have it on your system, grab the -current tarball which should have all
    needed files already generated.
+
+-------------------------------------------------------------------------------
+Q. My phone is not mentioned as supported by gnokii, but it seems that it is
+   similiar to the one of the mentioned in the supported phones list? What
+   should I do to check this out?
+
+A. It is quite simple. If you use AT compatible phone you can just use
+   'model = AT' in the config file. If you have Nokia and you would like to
+   enable FBUS mode (it has more facilities then AT mode), there are few
+   things you should do. Let's say, you want to check the support for Nokia
+   6211, which should be compatible with Nokia 6210. First, let's find the
+   correct driver. The drivers are located in the common/phones/ directory
+   within the gnokii sources:
+
+pkot@bzzzt:~/gnokii/common/phones$ grep -n 6210 *
+nk7110.c:148:           "7110|6210|6250|7190",      /* Supported models */
+nk7110.c:958:           /* This is ugly hack. But the picture message format in 6210
+nk7110.c:1197:  /* Nokia 6210 and family does not show not "fixed" messages from the
+nk7110.c:1610:  /* 6210/7110 needs to seek the first free pos to inhabit with next note */
+
+   Interesting is the line 148. We define GSM_Phone structure there. Just
+   add new model there, so the line will contain:
+
+7110|6210|6250|7190|6211
+
+   Once this is done, look into the common/misc.c file. We have there large
+   phone capabilities table. Find the one for the phone that is similiar to
+   your. In our case this is 6210:
+
+{"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS }
+
+   We will replace two first fields as for our phone. The second fiels is
+   the phone model identifier. In most of the phones to get this type on
+   your phone keyboard the following sequence: *#0000#. If it doesn't work
+   search the Internet for the information. Let's say in our example that
+   the string is NPL-3. Our line will contain:
+
+{"6211",  "NPL-3", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS }
+
+   This is almost everything. If you have Linux and need to enable the IrDA
+   connection, edit the common/devices/unixserial.c file. Find there the
+   phone[] table. It contains the numerous Nokia models mentioned. Add your
+   phone name there. In our case: "Nokia 6211". Recompile the sources and
+   add "model = 6211" (according to your Nokia model) to the config and try
+   if it works. In any case let us know (to the gnokii mailing list) about
+   the result.

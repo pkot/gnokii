@@ -1,3 +1,11 @@
+0.5.0pre (not relased yet)
+========
+ * Docs updates:
+    o FAQ updates:
+       + update status of the supported phones           (Pawel Kot)
+       + fix typos                                       (Pawel Kot)
+       + new entry on how to test the new model          (Pawel Kot)
+
 0.5.0pre2
 =========
  * Last minute updates to autogen.sh. They are usefull with newer
