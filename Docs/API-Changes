@@ -7,6 +7,16 @@ libgnokii API changes
 = means no change
 o change description
 
+v1.7 2004-??-??
+
+	2004-01-16
+	o new fields in the struct; change the struct fields' types
+		= typedef struct {
+		| 	unsigned int number;
+		|	unsigned int location[GN_CALNOTE_MAX_NUMBER];
+		+	unsigned int last;
+		= } gn_calnote_list;
+
 v1.6 2003-12-16
 
 	2003-11-30
