@@ -24,6 +24,12 @@
     o country and operator codes and names updated from
       www.gsmworld.com                         (Krzysztof Koziarek,
                                                          Pawel Kot)
+    o operator and country name search should be case insensitive
+                                                       (Igor Popik,
+                                                         Pawel Kot)
+    o return international strings when no matching
+      operator/country name was found for the given code
+                                                        (Pawel Kot)
  * AT series updates
     o support for make call command                    (Igor Popik)
     o set data->phonebook_entry->empty when the phonebook location

@@ -786,10 +786,10 @@ API char *gn_network_name_get(char *network_code)
 	int index = 0;
 
 	while (networks[index].code &&
-	       strcmp(networks[index].code, network_code)) index++;
+	       strncmp(networks[index].code, network_code, 6)) index++;
 
 	/* for now be compacrapatible ;) */
-	return networks[index].name ? networks[index].name : "unknown";
+	return networks[index].name ? networks[index].name : _("unknown");
 }
 
 API char *gn_network_code_get(char *network_name)
@@ -797,9 +797,9 @@ API char *gn_network_code_get(char *network_name)
 	int index = 0;
 
 	while (networks[index].name &&
-	       strcmp(networks[index].name, network_name)) index++;
+	       strcasecmp(networks[index].name, network_name)) index++;
 
-	return networks[index].code ? networks[index].code : "undefined";
+	return networks[index].code ? networks[index].code : _("undefined");
 }
 
 API char *gn_country_name_get(char *country_code)
@@ -809,7 +809,7 @@ API char *gn_country_name_get(char *country_code)
 	while (countries[index].code &&
 	       strncmp(countries[index].code, country_code, 3)) index++;
 
-	return countries[index].name ? countries[index].name : "unknown";
+	return countries[index].name ? countries[index].name : _("unknown");
 }
 
 API char *gn_country_code_get(char *country_name)
@@ -817,9 +817,9 @@ API char *gn_country_code_get(char *country_name)
 	int index = 0;
 
 	while (countries[index].name &&
-	       strcmp(countries[index].name, country_name)) index++;
+	       strcasecmp(countries[index].name, country_name)) index++;
 
-	return countries[index].code ? countries[index].code : "undefined";
+	return countries[index].code ? countries[index].code : _("undefined");
 }
 
 API bool gn_network_get(gn_network *network, int index)
