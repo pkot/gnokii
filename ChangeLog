@@ -16,6 +16,8 @@
     o call management API added to the repository    (BORBELY Zoltan)
  * xgnokii updates:
     o remove unnecessary GSM_Data declarations         (Markus Plail)
+    o DialVoice converted to the new api             (BORBELY Zoltan)
+    o SendDTMF implemented again                     (BORBELY Zoltan)
  * gnokii updates:
     o remove SMSFolder hack from getsms                (Markus Plail)
     o call status display added                      (BORBELY Zoltan)

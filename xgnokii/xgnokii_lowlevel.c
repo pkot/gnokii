@@ -35,6 +35,7 @@
 #include "gsm-common.h"
 #include "gsm-api.h"
 #include "gsm-sms.h"
+#include "gsm-call.h"
 #include "cfgreader.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii.h"
@@ -833,7 +834,9 @@ static gint A_SendDTMF(gpointer data)
 	GSM_Error error = GE_UNKNOWN;
 
 	if (buf) {
-//    error = GSM->SendDTMF (buf);
+		gdat.DTMFString = buf;
+		error = SM_Functions(GOP_SendDTMF, &gdat, &statemachine);
+		gdat.DTMFString = NULL;
 		g_free(buf);
 	}
 
@@ -871,12 +874,21 @@ static gint A_NetMonitor(gpointer data)
 static gint A_DialVoice(gpointer data)
 {
 	gchar *number = (gchar *) data;
-	GSM_Error error = GE_UNKNOWN;
+	GSM_Error error;
+	GSM_CallInfo CallInfo;
+	int CallId;
 
-	if (number) {
-//    error = GSM->DialVoice (number);
-		g_free(number);
-	}
+	if (!number) return GE_UNKNOWN;
+
+	memset(&CallInfo, 0, sizeof(CallInfo));
+	snprintf(CallInfo.Number, sizeof(CallInfo.Number), "%s", number);
+	CallInfo.Type = GSM_CT_VoiceCall;
+	CallInfo.SendNumber = GSM_CSN_Default;
+	g_free(number);
+
+	gdat.CallInfo = &CallInfo;
+	error = GN_CallDial(&CallId, &gdat, &statemachine);
+	gdat.CallInfo = NULL;
 
 	return (error);
 }
@@ -1033,7 +1045,7 @@ void *GUI_Connect(void *a)
 	gint displaystatus;
 	time_t newtime, oldtime;
 
-	gchar number[INCALL_NUMBER_LENGTH];
+	GN_API_Call *call;
 	PhoneEvent *event;
 	GSM_Error error;
 
@@ -1057,7 +1069,6 @@ void *GUI_Connect(void *a)
 	gdat.BatteryUnits = &batt_units;
 	gdat.BatteryLevel = &phoneMonitor.batteryLevel;
 	gdat.DateTime = &Alarm;
-	gdat.IncomingCallNr = number;
 	oldtime = time(&oldtime);
 	oldtime += 2;
 
@@ -1067,7 +1078,7 @@ void *GUI_Connect(void *a)
 /* FIXME - this loop goes mad on my 7110 - so I've put in a usleep */
 		usleep(50000);
 
-		if (SM_Functions(GOP_GetIncomingCallNr, &gdat, &statemachine) == GE_NONE) {
+		if ((call = GN_CallGetActive(0)) != NULL) {
 #ifdef XDEBUG
 			g_print("Call in progress: %s\n", phoneMonitor.call.callNum);
 #endif
@@ -1080,7 +1091,7 @@ void *GUI_Connect(void *a)
 			} else {
 				pthread_mutex_lock (&callMutex);
 				phoneMonitor.call.callInProgress = CS_Waiting;
-				strncpy (phoneMonitor.call.callNum, number, INCALL_NUMBER_LENGTH);
+				strncpy (phoneMonitor.call.callNum, call->RemoteNumber, INCALL_NUMBER_LENGTH);
 				pthread_mutex_unlock (&callMutex);
 			}
 		} else {
