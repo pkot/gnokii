@@ -345,8 +345,8 @@ typedef struct {
 
 /* Limits for IMEI, Revision and Model string storage. */
 #define GSM_MAX_IMEI_LENGTH     (20)
-#define GSM_MAX_REVISION_LENGTH (6)
-#define GSM_MAX_MODEL_LENGTH    (6)
+#define GSM_MAX_REVISION_LENGTH (20)
+#define GSM_MAX_MODEL_LENGTH    (20)
 
 /* Data structures for the call divert */
 typedef enum {

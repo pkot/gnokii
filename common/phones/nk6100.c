@@ -91,9 +91,6 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 static GSM_Error Initialise(GSM_Statemachine *state);
 static GSM_Error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error GetModelName(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error GetRevision(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
@@ -127,14 +124,12 @@ static GSM_Error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error Incoming0x17(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -151,10 +146,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x0d, IncomingDisplay },
 	{ 0x02, IncomingSMS1 },
 	{ 0x14, IncomingSMS },
-
 	{ 0x64, IncomingPhoneInfo },
-	{ 0xd2, IncomingModelInfo },
-	{ 0x17, Incoming0x17 },
 	{ 0, NULL}
 };
 
@@ -190,11 +182,9 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	case GOP_SetSpeedDial:
 		return SetSpeedDial(data, state);
 	case GOP_GetModel:
-		return GetModelName(data, state);
 	case GOP_GetRevision:
-		return GetRevision(data, state);
 	case GOP_GetImei:
-		return GetIMEI(data, state);
+	case GOP_GetManufacturer:
 	case GOP_Identify:
 		return Identify(data, state);
 	case GOP_GetBitmap:
@@ -305,36 +295,6 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	return GE_NONE;
 }
 
-static GSM_Error GetPhoneInfo(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x00};
-
-	dprintf("Getting phone info...\n");
-	if (SM_SendMessage(state, 5, 0xd1, req) != GE_NONE) return GE_NOTREADY;
-	return (SM_Block(state, data, 0xd2));
-}
-
-static GSM_Error GetModelName(GSM_Data *data, GSM_Statemachine *state)
-{
-	dprintf("Getting model...\n");
-	return GetPhoneInfo(data, state);
-}
-
-static GSM_Error GetRevision(GSM_Data *data, GSM_Statemachine *state)
-{
-	dprintf("Getting revision...\n");
-	return GetPhoneInfo(data, state);
-}
-
-static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
-
-	dprintf("Getting imei...\n");
-	if (SM_SendMessage(state, 4, 0x1b, req)!=GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x1b);
-}
-
 
 static GSM_Error GetPhoneStatus(GSM_Data *data, GSM_Statemachine *state)
 {
@@ -365,48 +325,42 @@ static GSM_Error GetPowersource(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
+	float   csq_map[5] = {0, 8, 16, 24, 31};
+
 	switch (message[3]) {
 	/* Phone status */
 	case 0x02:
 		dprintf("\tRFLevel: %d\n", message[5]);
-		if (data->RFLevel) {
-			*(data->RFUnits) = GRF_Arbitrary;
-			*(data->RFLevel) = message[5];
-		}
 		dprintf("\tPowerSource: %d\n", message[7]);
-		if (data->PowerSource) {
-			*(data->PowerSource) = message[7];
-		}
 		dprintf("\tBatteryLevel: %d\n", message[8]);
-		if (data->BatteryLevel) {
-			*(data->BatteryUnits) = GBU_Arbitrary;
-			*(data->BatteryLevel) = message[8];
+		if (message[5] > 4) return GE_UNHANDLEDFRAME;
+		if (message[7] != 1 && message[7] != 2) return GE_UNHANDLEDFRAME;
+		if (data->RFLevel && data->RFUnits) {
+			switch (*data->RFUnits) {
+			case GRF_CSQ:
+				*data->RFLevel = csq_map[message[5]];
+				break;
+			case GRF_Arbitrary:
+			default:
+				*data->RFUnits = GRF_Arbitrary;
+				*data->RFLevel = message[5];
+				break;
+			}
+		}
+		if (data->PowerSource) {
+			*data->PowerSource = message[7];
+		}
+		if (data->BatteryLevel && data->BatteryUnits) {
+			*data->BatteryUnits = GBU_Arbitrary;
+			*data->BatteryLevel = message[8];
 		}
 		break;
+
 	default:
 		return GE_UNHANDLEDFRAME;
 	}
 
 	return GE_NONE;
-}
-
-
-static GSM_Error Incoming0x17(int messagetype, unsigned char *message, int length, GSM_Data *data)
-{
-	switch (message[3]) {
-	case 0x03:
-		if (data->BatteryLevel) {
-			*(data->BatteryUnits) = GBU_Percentage;
-			*(data->BatteryLevel) = message[5];
-			dprintf("Battery level %f\n", *(data->BatteryLevel));
-		}
-		return GE_NONE;
-		break;
-	default:
-		dprintf("Unknown subtype of type 0x17 (%d)\n", message[3]);
-		return GE_UNKNOWN;
-		break;
-	}
 }
 
 
@@ -673,16 +627,17 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 	return GE_NONE;
 }
 
+
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = { FBUS_FRAME_HEADER, 0x10 };
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10};
+	GSM_Error error;
 
 	dprintf("Identifying...\n");
-	PNOK_GetManufacturer(data->Manufacturer);
+	if (data->Manufacturer) PNOK_GetManufacturer(data->Manufacturer);
+
 	if (SM_SendMessage(state, 4, 0x64, req) != GE_NONE) return GE_NOTREADY;
-	SM_WaitFor(state, data, 0x64);
-	SM_Block(state, data, 0x64); /* waits for all requests */
-	SM_GetError(state, 0x64);
+	if ((error = SM_Block(state, data, 0x64)) != GE_NONE) return error;
 
 	/* Check that we are back at state Initialised */
 	if (SM_Loop(state, 0) != Initialised) return GE_UNKNOWN;
@@ -691,54 +646,44 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	if (data->Imei) {
-		snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
-		dprintf("Received imei %s\n", data->Imei);
-	}
-	if (data->Model) {
-		snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 22);
-		dprintf("Received model %s\n", data->Model);
-	}
-	if (data->Revision) {
-		snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "%s", message + 7);
-		dprintf("Received revision %s\n", data->Revision);
-	}
+	switch (message[3]) {
+	/* Phone ID recvd */
+	case 0x11:
+		if (data->Imei) {
+			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 9);
+			dprintf("Received imei %s\n", data->Imei);
+		}
+		if (data->Model) {
+			snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 25);
+			dprintf("Received model %s\n", data->Model);
+		}
+		if (data->Revision) {
+			snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW%s, HW%s", message + 44, message + 39);
+			dprintf("Received revision %s\n", data->Revision);
+		}
 
-	dprintf("Message: Mobile phone identification received:\n");
-	dprintf("\tIMEI: %s\n", data->Imei);
-	dprintf("\tModel: %s\n", data->Model);
-	dprintf("\tProduction Code: %s\n", message + 31);
-	dprintf("\tHW: %s\n", message + 39);
-	dprintf("\tFirmware: %s\n", message + 44);
+		dprintf("Message: Mobile phone identification received:\n");
+		dprintf("\tIMEI: %s\n", message + 9);
+		dprintf("\tModel: %s\n", message + 25);
+		dprintf("\tProduction Code: %s\n", message + 31);
+		dprintf("\tHW: %s\n", message + 39);
+		dprintf("\tFirmware: %s\n", message + 44);
 
-	/* These bytes are probably the source of the "Accessory not connected"
-	   messages on the phone when trying to emulate NCDS... I hope....
-	   UPDATE: of course, now we have the authentication algorithm. */
-	dprintf("\tMagic bytes: %02x %02x %02x %02x\n", message[50], message[51], message[52], message[53]);
+		/* These bytes are probably the source of the "Accessory not connected"
+		   messages on the phone when trying to emulate NCDS... I hope....
+		   UPDATE: of course, now we have the authentication algorithm. */
+		dprintf("\tMagic bytes: %02x %02x %02x %02x\n", message[50], message[51], message[52], message[53]);
 
-	MagicBytes[0] = message[50];
-	MagicBytes[1] = message[51];
-	MagicBytes[2] = message[52];
-	MagicBytes[3] = message[53];
+		memcpy(MagicBytes, message + 50, 4);
+		break;
+
+	default:
+		return GE_UNHANDLEDFRAME;
+	}
 
 	return GE_NONE;
 }
 
-static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
-{
-	dprintf("%p %p %p\n", data, data->Model, data->Revision);
-	if (data->Model) {
-		snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 21);
-		data->Model[GSM_MAX_MODEL_LENGTH - 1] = 0;
-	}
-	if (data->Revision) {
-		snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW%s", message + 5);
-		data->Revision[GSM_MAX_REVISION_LENGTH - 1] = 0;
-	}
-	dprintf("Phone info:\n%s\n", message + 4);
-
-	return GE_NONE;
-}
 
 static int GetMemoryType(GSM_MemoryType memory_type)
 {
@@ -1408,7 +1353,7 @@ static GSM_Error GetProfile(GSM_Data *data, GSM_Statemachine *state)
 		 */
 		GSM_DataClear(&d);
 		d.Model = model;
-		if ((error = GetModelName(&d, state)) != GE_NONE) {
+		if ((error = Identify(&d, state)) != GE_NONE) {
 			return error;
 		}
 
