@@ -143,6 +143,9 @@ static GSM_Error GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SendDTMF(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Reset(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetRingtone(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -305,6 +308,14 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return SendDTMF(data, state);
 	case GOP_Reset:
 		return Reset(data, state);
+	case GOP_GetRingtone:
+		return GE_NOTSUPPORTED;
+	case GOP_SetRingtone:
+		return SetRingtone(data, state);
+	case GOP_GetRawRingtone:
+		return GetRawRingtone(data, state);
+	case GOP_SetRawRingtone:
+		return SetRawRingtone(data, state);
 	default:
 		dprintf("NK61xx unimplemented operation: %d\n", op);
 		return GE_NOTIMPLEMENTED;
@@ -1642,6 +1653,21 @@ static GSM_Error SetProfile(GSM_Data *data, GSM_Statemachine *state)
 	return (error == GE_NONE) ? GE_NONE : GE_UNKNOWN;
 }
 
+static GSM_Error SetRingtone(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[7+GSM_MAX_RINGTONE_PACKAGE_LENGTH] = {FBUS_FRAME_HEADER, 0x36, 0x00, 0x00, 0x78};
+	int size;
+
+	if (!data || !data->Ringtone) return GE_INTERNALERROR;
+
+	size = GSM_MAX_RINGTONE_PACKAGE_LENGTH;
+	GSM_PackRingtone(data->Ringtone, req + 7, &size);
+	req[4] = data->Ringtone->Location;
+
+	if (SM_SendMessage(state, 7 + size, 0x05, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x05);
+}
+
 static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Bitmap *bmp;
@@ -1825,6 +1851,20 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 
 	/* Get oplogo error */
 	case 0x35:
+		switch (message[4]) {
+			case 0x7d:
+				return GE_UNKNOWN;
+			default:
+				return GE_UNHANDLEDFRAME;
+		}
+		break;
+	
+	/* Set ringtone OK */
+	case 0x37:
+		return GE_NONE;
+
+	/* Set ringtone error */
+	case 0x38:
 		switch (message[4]) {
 			case 0x7d:
 				return GE_UNKNOWN;
@@ -2296,6 +2336,43 @@ static GSM_Error Reset(GSM_Data *data, GSM_Statemachine *state)
 	return EnableExtendedCmds(data, state, data->ResetType);
 }
 
+static GSM_Error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x9e, 0x00};
+	GSM_Error error;
+
+	if (!data || !data->Ringtone || !data->RawData) return GE_INTERNALERROR;
+
+	req[3] = data->Ringtone->Location;
+
+	if ((error = EnableExtendedCmds(data, state, 0x01)) != GE_NONE) return error;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+static GSM_Error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[512] = {0x00, 0x01, 0xa0, 0x00, 0x00,
+				  0x0c, 0x2c, 0x01,
+				  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				  0x02, 0xfc, 0x09};
+	GSM_Error error;
+
+	if (!data || !data->Ringtone || !data->RawData || !data->RawData->Data)
+		return GE_INTERNALERROR;
+
+	req[3] = data->Ringtone->Location;
+	snprintf(req + 8, 13, "%s", data->Ringtone->name);
+	memcpy(req + 24, data->RawData->Data, data->RawData->Length);
+
+	if ((error = EnableExtendedCmds(data, state, 0x01)) != GE_NONE) return error;
+
+	if (SM_SendMessage(state, 24 + data->RawData->Length, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
 static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	switch (message[2]) {
@@ -2307,6 +2384,30 @@ static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int l
 	case 0x7e:
 		if (message[3] != 0x00 && data->NetMonitor)
 			snprintf(data->NetMonitor->Screen, sizeof(data->NetMonitor->Screen), "%s", message + 4);
+		break;
+
+	/* Get bin ringtone */
+	case 0x9e:
+		switch (message[4]) {
+		case 0x00:
+			break;
+		case 0x0a:
+			return GE_UNKNOWN;
+		default:
+			return GE_UNHANDLEDFRAME;
+		}
+		if (!data->Ringtone) return GE_INTERNALERROR;
+		data->Ringtone->Location = message[3];
+		snprintf(data->Ringtone->name, sizeof(data->Ringtone->name), "%s", message + 8);
+		if (data->RawData && data->RawData->Data) {
+			memcpy(data->RawData->Data, message + 24, length - 24);
+			data->RawData->Length = length - 24;
+		}
+		break;
+	
+	/* Set bin ringtone result */
+	case 0xa0:
+		if (message[3] != 0x02) return GE_UNHANDLEDFRAME;
 		break;
 
 	default:

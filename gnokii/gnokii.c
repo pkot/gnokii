@@ -110,6 +110,7 @@ typedef enum {
 	OPT_SETLOGO,
 	OPT_GETLOGO,
 	OPT_VIEWLOGO,
+	OPT_GETRINGTONE,
 	OPT_SETRINGTONE,
 	OPT_GETPROFILE,
 	OPT_SETPROFILE,
@@ -258,7 +259,8 @@ static int usage(void)
 			  "          gnokii --getlogo caller [logofile][caller group number][network code]\n"
 			  "          gnokii --getlogo {dealer|text}\n"
 			  "          gnokii --viewlogo logofile\n"
-			  "          gnokii --setringtone rtttlfile\n"
+			  "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
+			  "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"
 			  "          gnokii --reset [soft|hard]\n"
 			  "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
 			  "          gnokii --setprofile\n"
@@ -2994,18 +2996,150 @@ static int sendringtone(int argc, char *argv[])
 	return 0;
 }
 
+static int getringtone(int argc, char *argv[])
+{
+	GSM_Ringtone ringtone;
+	GSM_RawData rawdata;
+	GSM_Error error;
+	unsigned char buff[512];
+	int i;
+
+	bool raw = false;
+	struct option options[] = {
+		{ "raw",    no_argument, NULL, 'r'},
+		{ NULL,     0,           NULL, 0}
+	};
+
+	optarg = NULL;
+	optind = 0;
+	argv++;
+	argc--;
+
+	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
+		switch (i) {
+		case 'r':
+			raw = true;
+			break;
+		default:
+			usage(); /* FIXME */
+			return -1;
+		}
+	}
+
+	memset(&ringtone, 0, sizeof(ringtone));
+	rawdata.Data = buff;
+	rawdata.Length = sizeof(buff);
+	GSM_DataClear(&data);
+	data.Ringtone = &ringtone;
+	data.RawData = &rawdata;
+
+	if (argc <= optind) {
+		usage();
+		return -1;
+	}
+
+	ringtone.Location = (argc > optind + 1) ? atoi(argv[optind + 1]) : 0;
+
+	if (raw)
+		error = SM_Functions(GOP_GetRawRingtone, &data, &State);
+	else
+		error = SM_Functions(GOP_GetRingtone, &data, &State);
+	if (error != GE_NONE) {
+		fprintf(stdout, _("Getting ringtone %d failed\n"), ringtone.Location);
+		return error;
+	}
+	fprintf(stdout, _("Getting ringtone %d (\"%s\") succeeded!\n"), ringtone.Location, ringtone.name);
+
+	if (raw) {
+		FILE *f;
+
+		if ((f = fopen(argv[optind], "wb")) == NULL) {
+			fprintf(stdout, _("Failed to save ringtone.\n"));
+			return(-1);
+		}
+		fwrite(rawdata.Data, 1, rawdata.Length, f);
+		fclose(f);
+	} else {
+		if (GSM_SaveRingtoneFile(argv[optind], &ringtone)) {
+			fprintf(stdout, _("Failed to save ringtone.\n"));
+			return(-1);
+		}
+	}
+
+	return 0;
+}
 
 static int setringtone(int argc, char *argv[])
 {
 	GSM_Ringtone ringtone;
-	GSM_Error error = GE_NOTSUPPORTED;
+	GSM_RawData rawdata;
+	GSM_Error error;
+	unsigned char buff[512];
+	int i;
 
-	if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
-		fprintf(stdout, _("Failed to load ringtone.\n"));
-		return(-1);
+	bool raw = false;
+	char name[16] = "";
+	struct option options[] = {
+		{ "raw",    no_argument,       NULL, 'r'},
+		{ "name",   required_argument, NULL, 'n'},
+		{ NULL,     0,                 NULL, 0}
+	};
+
+	optarg = NULL;
+	optind = 0;
+	argv++;
+	argc--;
+
+	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
+		switch (i) {
+		case 'r':
+			raw = true;
+			break;
+		case 'n':
+			snprintf(name, sizeof(name), "%s", optarg);
+			break;
+		default:
+			usage(); /* FIXME */
+			return -1;
+		}
 	}
 
-/*	if (GSM && GSM->SetRingtone) error = GSM->SetRingtone(&ringtone);*/
+	memset(&ringtone, 0, sizeof(ringtone));
+	rawdata.Data = buff;
+	rawdata.Length = sizeof(buff);
+	GSM_DataClear(&data);
+	data.Ringtone = &ringtone;
+	data.RawData = &rawdata;
+
+	if (argc <= optind) {
+		usage();
+		return -1;
+	}
+
+	ringtone.Location = (argc > optind + 1) ? atoi(argv[optind + 1]) : 0;
+
+	if (raw) {
+		FILE *f;
+
+		if ((f = fopen(argv[optind], "rb")) == NULL) {
+			fprintf(stdout, _("Failed to load ringtone.\n"));
+			return(-1);
+		}
+		rawdata.Length = fread(rawdata.Data, 1, rawdata.Length, f);
+		fclose(f);
+		if (*name)
+			snprintf(ringtone.name, sizeof(ringtone.name), "%s", name);
+		else
+			snprintf(ringtone.name, sizeof(ringtone.name), "GNOKII");
+		error = SM_Functions(GOP_SetRawRingtone, &data, &State);
+	} else {
+		if (GSM_ReadRingtoneFile(argv[optind], &ringtone)) {
+			fprintf(stdout, _("Failed to load ringtone.\n"));
+			return(-1);
+		}
+		if (*name) snprintf(ringtone.name, sizeof(ringtone.name), "%s", name);
+		error = SM_Functions(GOP_SetRingtone, &data, &State);
+	}
 
 	if (error == GE_NONE)
 		fprintf(stdout, _("Send succeeded!\n"));
@@ -3350,6 +3484,9 @@ int main(int argc, char *argv[])
 		/* Send ringtone as SMS message */
 		{ "sendringtone",       required_argument, NULL, OPT_SENDRINGTONE },
 
+		/* Get ringtone */
+		{ "getringtone",        required_argument, NULL, OPT_GETRINGTONE },
+
 		/* Set ringtone */
 		{ "setringtone",        required_argument, NULL, OPT_SETRINGTONE },
 
@@ -3442,7 +3579,8 @@ int main(int argc, char *argv[])
 		{ OPT_SETLOGO,           1, 4, 0 },
 		{ OPT_GETLOGO,           1, 4, 0 },
 		{ OPT_VIEWLOGO,          1, 1, 0 },
-		{ OPT_SETRINGTONE,       1, 1, 0 },
+		{ OPT_GETRINGTONE,       1, 3, 0 },
+		{ OPT_SETRINGTONE,       1, 5, 0 },
 		{ OPT_RESET,             0, 1, 0 },
 		{ OPT_GETPROFILE,        0, 3, 0 },
 		{ OPT_WRITEPHONEBOOK,    0, 1, 0 },
@@ -3612,8 +3750,11 @@ int main(int argc, char *argv[])
 		case OPT_VIEWLOGO:
 			rc = viewlogo(optarg);
 			break;
+		case OPT_GETRINGTONE:
+			rc = getringtone(argc, argv);
+			break;
 		case OPT_SETRINGTONE:
-			rc = setringtone(nargc, nargv);
+			rc = setringtone(argc, argv);
 			break;
 		case OPT_SENDRINGTONE:
 			rc = sendringtone(nargc, nargv);

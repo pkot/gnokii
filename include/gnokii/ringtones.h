@@ -42,6 +42,7 @@ typedef struct {
 /* Structure to hold ringtones. */
 
 typedef struct {
+	int Location;
 	char name[20];
 	u8 tempo;
 	u8 NrNotes;

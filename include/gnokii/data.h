@@ -152,6 +152,10 @@ typedef enum {
 	GOP_ChangeSecurityCode,
 	GOP_SendDTMF,
 	GOP_Reset,
+	GOP_GetRingtone,
+	GOP_SetRingtone,
+	GOP_GetRawRingtone,
+	GOP_SetRawRingtone,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 
