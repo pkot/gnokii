@@ -1,7 +1,7 @@
 Source: gnokii
 Section: comm
 Priority: optional
-Maintainer: Karel Zak - Zakkr <zakkr@zf.jcu.cz>
+Maintainer: Karel Zak <zakkr@zf.jcu.cz>
 Standards-Version: 2.4.0.0
 
 Package: gnokii

@@ -54,3 +54,6 @@
 
 * Wed May 17 22:22:44 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
 - gnokii.nol moved to Docs directory
+
+* Wed May 17 13:56:28 CEST 2000 Karel Zak <zakkr@zf.jcu.cz>
+- Changes in debian package build system

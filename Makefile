@@ -16,6 +16,7 @@ include ${TOPDIR}/Makefile.global
 
 DIRS =		common \
 		gnokii
+
 #
 # For now gnokiid and utils only make sense on Unix like systems.
 # Some other stuff that makes only sense on Win32 platform.
@@ -76,7 +77,9 @@ distclean:	clean
 		$(MAKE) -C $(PO_DIR) distclean; \
 	fi
 	$(RM) Makefile.global config.cache config.log config.status \
-        packaging/RedHat/gnokii.spec
+		packaging/RedHat/gnokii.spec \
+		packaging/Debian/changelog \
+		debian
 
 dep: 
 	@for dir in $(DIRS); do \

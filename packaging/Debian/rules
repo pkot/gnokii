@@ -5,7 +5,7 @@
 build:	build-stamp
 build-stamp:
 	dh_testdir
-	./configure --prefix=/usr --enable-gettext
+	./configure --prefix=/usr --with-x
 	make
 
 clean:
@@ -25,7 +25,10 @@ binary-arch:	build
 #	dh_testversion
 	dh_testdir
 	dh_testroot
+	dh_installdirs
 	make install prefix=`pwd`/debian/tmp/usr
+	mkdir -p `pwd`/debian/tmp/etc/
+	sed 's#/usr/local/sbin/#/usr/sbin/#' < Docs/sample/sample.gnokiirc > `pwd`/debian/tmp/etc/gnokiirc
 #	dh_installdebconf	
 #	dh_installexamples
 	dh_installdocs

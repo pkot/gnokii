@@ -1,8 +1,0 @@
-gnokii (0.3.2_pre1) unstable; urgency=low
-  * - Not changes for debian package in source 
-    
- -- Karel Zak <zakkr@zf.jcu.cz>  Tue, 11 Jan 2000 16:57:00 +0100
-
-Local variables:
-mode: debian-changelog
-End:

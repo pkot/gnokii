@@ -315,8 +315,9 @@ AC_SUBST(XPM_LIBS)
 AC_OUTPUT(
 	Makefile.global
 	po/Makefile.in
+	packaging/Debian/changelog
 	packaging/RedHat/gnokii.spec,
-        [sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile]
+	[sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile]
 	)
 
 
