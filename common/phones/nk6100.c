@@ -105,7 +105,9 @@ static GSM_Error GetAlarm(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetAlarm(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetProfile(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -203,8 +205,12 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetProfile(data, state);
 	case GOP_SetProfile:
 		return SetProfile(data, state);
+	case GOP_GetCalendarNote:
+		return GetCalendarNote(data, state);
 	case GOP_WriteCalendarNote:
 		return WriteCalendarNote(data, state);
+	case GOP_DeleteCalendarNote:
+		return DeleteCalendarNote(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -334,8 +340,7 @@ static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, in
 		}
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x02 (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 
 	return GE_NONE;
@@ -448,10 +453,13 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		return GetOperatorLogo(data, state);
 	case GSM_CallerLogo:
 		return GetCallerGroupData(data, state);
-	default:
+
+	case GSM_None:
+	case GSM_PictureImage:
 		return GE_NOTSUPPORTED;
+	default:
+		return GE_INTERNALERROR;
 	}
-	return GE_INTERNALERROR;
 }
 
 static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -489,8 +497,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		if ((message[4] == 0x7d) || (message[4] == 0x74)) {
 			return GE_INVALIDPHBOOKLOCATION;
 		}
-		dprintf("Invalid GetMemoryLocation reply: 0x%02x\n", message[4]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	case 0x05:
 		break;
 	case 0x06:
@@ -501,8 +508,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		case 0x74:
 			return GE_INVALIDPHBOOKLOCATION;
 		default:
-			dprintf("Invalid GetMemoryLocation reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 	case 0x08:
 		dprintf("\tMemory location: %d\n", data->MemoryStatus->MemoryType);
@@ -523,8 +529,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		case 0x8d:
 			return GE_INVALIDSECURITYCODE;
 		default:
-			dprintf("Invalid GetMemoryStatus reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 	case 0x11:
 		if (data->Bitmap) {
@@ -544,10 +549,8 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			pos++;
 			n = bmp->height * bmp->width / 8;
 			if (bmp->size > n) bmp->size = n;
-			if (bmp->size > sizeof(bmp->bitmap)) {
-				dprintf("bitmap is too long\n");
+			if (bmp->size > sizeof(bmp->bitmap))
 				return GE_INTERNALERROR;
-			}
 			memcpy(bmp->bitmap, pos, bmp->size);
 		}
 		break;
@@ -556,8 +559,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		case 0x7d:
 			return GE_INVALIDPHBOOKLOCATION;
 		default:
-			dprintf("Invalid GetCallerGroupData reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 	case 0x14:
 		break;
@@ -566,12 +568,10 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		case 0x7d:
 			return GE_INVALIDPHBOOKLOCATION;
 		default:
-			dprintf("Invalid SetCallerGroupData reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 	default:
-		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 
 	return GE_NONE;
@@ -833,8 +833,7 @@ static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, in
 		}
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 
 	return GE_NONE;
@@ -1149,8 +1148,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 			dprintf("Cannot set profile feature\n");
 			return GE_UNKNOWN;
 		default:
-			dprintf("Invalid SetProfileFeature reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 		break;
 		
@@ -1190,8 +1188,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 				prof->AutomaticAnswer = message[8];
 				break;
 			default:
-				dprintf("Error\n");
-				break;
+				return GE_UNHANDLEDFRAME;
 			}
 		}
 		break;
@@ -1213,7 +1210,6 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 					bmp->width = *pos++;
 					bmp->size = bmp->height * bmp->width / 8;
 					if (bmp->size > sizeof(bmp->bitmap)) {
-						dprintf("bitmap is too long\n");
 						return GE_INTERNALERROR;
 					}
 					memcpy(bmp->bitmap, pos, bmp->size);
@@ -1236,8 +1232,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 					pos += *pos + 1;
 					break;
 				default:
-					dprintf("Error\n");
-					break;
+					return GE_UNHANDLEDFRAME;
 				}
 				found = true;
 			}
@@ -1271,8 +1266,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 		case 0x01:
 			break;
 		default:
-			dprintf("Invalid SetProfile reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 		break;
 	
@@ -1286,8 +1280,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 		case 0x7d:
 			return GE_INVALIDPHBOOKLOCATION;
 		default:
-			dprintf("Invalid SetOperatorLogo reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 	
 	/* Get oplogo */
@@ -1312,7 +1305,6 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 			i = bmp->height * bmp->width / 8;
 			if (bmp->size > i) bmp->size = i;
 			if (bmp->size > sizeof(bmp->bitmap)) {
-				dprintf("bitmap is too long\n");
 				return GE_INTERNALERROR;
 			}
 			memcpy(bmp->bitmap, pos, bmp->size);
@@ -1321,12 +1313,16 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 	
 	/* Get oplogo error */
 	case 0x35:
-		dprintf("Invalid GetOperatorLogo reply: 0x%02x\n", message[4]);
-		return GE_UNKNOWN;
+		switch (message[4]) {
+			case 0x7d:
+				return GE_UNKNOWN;
+			default:
+				return GE_UNHANDLEDFRAME;
+		}
+		break;
 	
 	default:
-		dprintf("Unknown subtype of type 0x05 (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 
 	return GE_NONE;
@@ -1399,8 +1395,7 @@ static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *mess
 		case 0x01:
 			break;
 		default:
-			dprintf("Invalid SetDateTime reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 		break;
 
@@ -1429,8 +1424,7 @@ static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *mess
 		case 0x01:
 			break;
 		default:
-			dprintf("Invalid SetAlarm reply: 0x%02x\n", message[4]);
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 		break;
 
@@ -1451,13 +1445,22 @@ static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *mess
 		break;
 
 	default:
-		dprintf("Unknown subtype of type 0x11 (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 
 	return GE_NONE;
 }
 
+
+static GSM_Error GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x66, 0x00};
+
+	req[4] = data->CalendarNote->Location;
+
+	if (SM_SendMessage(state, 5, 0x13, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x13);
+}
 
 static GSM_Error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 {
@@ -1504,18 +1507,34 @@ static GSM_Error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 	*pos = PNOK_EncodeString(pos+1, 255, note->Text);
 	pos += *pos+1;
 
-	*pos++ = numlen;
-	memcpy(pos, note->Phone, numlen);
-	pos += numlen;
-
-/*	req[6] = pos-req-7; */
+	if (note->Type == GCN_CALL) {
+		*pos++ = numlen;
+		memcpy(pos, note->Phone, numlen);
+		pos += numlen;
+	} else {
+		*pos++ = 0;
+	}
 
 	if (SM_SendMessage(state, pos-req, 0x13, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x13);
 }
 
+static GSM_Error DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x68, 0x00};
+
+	req[4] = data->CalendarNote->Location;
+
+	if (SM_SendMessage(state, 5, 0x13, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x13);
+}
+
 static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
+	GSM_CalendarNote *note;
+	unsigned char *pos;
+	int n;
+
 	switch (message[3]) {
 	/* Write cal.note report */
 	case 0x65:
@@ -1526,13 +1545,71 @@ static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int l
 			case 0x7d:
 				return GE_UNKNOWN;
 			default:
-			    dprintf("Invalid WriteCalendarNote reply: 0x%02x\n", message[4]);
-			    return GE_UNKNOWN;
+				return GE_UNHANDLEDFRAME;
 		}
+		break;
+	
+	/* Calendar note recvd */
+	case 0x67:
+		switch (message[4]) {
+		case 0x01:
+			break;
+		case 0x93:
+			return GE_EMPTYMEMORYLOCATION;
+		default:
+			return GE_UNHANDLEDFRAME;
+		}
+		if (data->CalendarNote) {
+			note = data->CalendarNote;
+			pos = message + 8;
+
+			/* FIXME: this supposed to be replaced by general date unpacking function :-) */
+			note->Type = *pos++;
+			note->Time.Year = (pos[0] << 8) + pos[1];
+			pos += 2;
+			note->Time.Month = *pos++;
+			note->Time.Day = *pos++;
+			note->Time.Hour = *pos++;
+			note->Time.Minute = *pos++;
+			note->Time.Second = *pos++;
+
+			note->Alarm.Year = (pos[0] << 8) + pos[1];
+			pos += 2;
+			note->Alarm.Month = *pos++;
+			note->Alarm.Day = *pos++;
+			note->Alarm.Hour = *pos++;
+			note->Alarm.Minute = *pos++;
+			note->Alarm.Second = *pos++;
+			note->Alarm.AlarmEnabled = (note->Alarm.Year != 0);
+			n = *pos++;
+			PNOK_DecodeString(note->Text, sizeof(note->Text), pos, n);
+			pos += n;
+
+			if (note->Type == GCN_CALL) {
+				/* This will be replaced later :-) */
+				n = *pos++;
+				PNOK_DecodeString(note->Phone, sizeof(note->Phone), pos, n);
+				pos += n;
+			} else {
+				note->Phone[0] = 0;
+			}
+		}
+		break;
+	
+	/* Del. cal.note report */
+	case 0x69:
+		switch (message[4]) {
+		case 0x01:
+			break;
+		case 0x93:
+			return GE_EMPTYMEMORYLOCATION;
+		default:
+			return GE_UNHANDLEDFRAME;
+		}
+		break;
 
 	default:
-		dprintf("Unknown subtype of type 0x13 (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 
 	return GE_NONE;

@@ -1537,15 +1537,11 @@ static int getcalendarnote(int argc, char *argv[])
 
 	for (i = first_location; i <= last_location; i++) {
 		CalendarNote.Location = i;
-	 	if (GSM && GSM->GetCalendarNote && GSM->Terminate) {
-			error = GSM->GetCalendarNote(&CalendarNote);
-			GSM->Terminate();
-		} else {
-			GSM_DataClear(&data);
-			data.CalendarNote = &CalendarNote;
 
-			error = SM_Functions(GOP_GetCalendarNote, &data, &State);
-		}
+		GSM_DataClear(&data);
+		data.CalendarNote = &CalendarNote;
+
+		error = SM_Functions(GOP_GetCalendarNote, &data, &State);
 		switch (error) {
 		case GE_NONE:
 			if (vCal) {
@@ -1636,7 +1632,6 @@ static int getcalendarnote(int argc, char *argv[])
 		}
 	}
 	
-	if (GSM && GSM->Terminate) GSM->Terminate();
 	return error;
 }
 
@@ -1670,6 +1665,10 @@ static int deletecalendarnote(int argc, char *argv[])
 {
 	GSM_CalendarNote CalendarNote;
 	int i, first_location, last_location;
+	GSM_Data data;
+
+	GSM_DataClear(&data);
+	data.CalendarNote = &CalendarNote;
 
 	first_location = last_location = atoi(argv[0]);
 	if (argc > 1) last_location = atoi(argv[1]);
@@ -1678,15 +1677,13 @@ static int deletecalendarnote(int argc, char *argv[])
 
 		CalendarNote.Location = i;
 
-		if (GSM && GSM->DeleteCalendarNote && GSM->DeleteCalendarNote(&CalendarNote) == GE_NONE) {
+		if (SM_Functions(GOP_DeleteCalendarNote, &data, &State) == GE_NONE) {
 			fprintf(stdout, _("   Calendar note deleted.\n"));
 		} else {
 			fprintf(stderr, _("The calendar note can not be deleted\n"));
 		}
 
 	}
-
-	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
