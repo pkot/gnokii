@@ -1,6 +1,7 @@
 0.4.0pre17 (not released yet)
 ==========
  * Updates to address GNU GPL requirements                (Pawel Kot)
+ * Change from .gif to .png for documentation         (Hugh Blemings)
 
 0.4.0pre16
 ==========
