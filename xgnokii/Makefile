@@ -13,17 +13,17 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 ifdef XPM_LIBS
-    LDFLAGS += $(XPM_LIBS)
-    CFLAGS  += $(XPM_CFLAGS)
+	LDLIBS += $(XPM_LIBS)
+	CFLAGS += $(XPM_CFLAGS)
 endif
 
 CFLAGS += $(PTHREAD_CFLAGS) \
 	  $(GTK_CFLAGS)
 
-LDFLAGS += $(PTHREAD_LIBS) \
-	   $(GTK_LIBS)
+LDLIBS += $(PTHREAD_LIBS) \
+	  $(GTK_LIBS)
 
-LDFLAGS += -L$(TOPDIR)/common -lgnokii
+LDLIBS += -L$(TOPDIR)/common -lgnokii
 
 OBJS = 	xgnokii.o \
 	xgnokii_common.o \
@@ -45,13 +45,8 @@ HELP_DIR = docs/help
 all: xgnokii
 
 
-xgnokii: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o
-
-$(TOPDIR)/common/data/DATA.o:
-	$(MAKE) -C $(TOPDIR)/common/data DATA.o
-
-$(TOPDIR)/common/gsm-filetypes.o:
-	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
+xgnokii: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/libgnokii.so
+	$(CC) $(LDFLAGS) $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o $(LDLIBS) -o $@
 
 clean:
 	$(RM) $(OBJS) *~ xpm/*~ depend xgnokii

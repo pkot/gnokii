@@ -10,7 +10,7 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 ifdef XPM_LIBS
-	LDFLAGS +=$(XPM_LIBS)
+	LDLIBS += $(XPM_LIBS)
 endif
 
 OBJS =	gnokii.o
@@ -19,14 +19,12 @@ ifdef OWN_GETOPT
 	OBJS += $(TOPDIR)/getopt/libgetopt.a
 endif
 
-LDFLAGS += -L$(TOPDIR)/common -lgnokii
+LDLIBS += -L$(TOPDIR)/common -lgnokii
 
 all: gnokii
 
-gnokii: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o
-
-$(TOPDIR)/common/gsm-filetypes.o:
-	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
+gnokii: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/libgnokii.so
+	$(CC) $(LDFLAGS) $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(LDLIBS) -o $@
 
 $(TOPDIR)/getopt/libgetopt.a:
 	$(MAKE) -C $(TOPDIR)/getopt
