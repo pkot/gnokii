@@ -13,7 +13,10 @@
   Functions for encoding SMS, calendar and other things.
 
   $Log$
-  Revision 1.1  2001-10-24 22:37:25  pkot
+  Revision 1.2  2001-11-08 16:34:19  pkot
+  Updates to work with new libsms
+
+  Revision 1.1  2001/10/24 22:37:25  pkot
   Moved encoding functions to a separate file
 
 
@@ -48,7 +51,7 @@ static unsigned char GSM_DefaultAlphabet[NUMBER_OF_7_BIT_ALPHABET_ELEMENTS] = {
 	'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
 
-unsigned char EncodeWithDefaultAlphabet(unsigned char value)
+static unsigned char EncodeWithDefaultAlphabet(unsigned char value)
 {
 	unsigned char i;
 	
@@ -61,7 +64,7 @@ unsigned char EncodeWithDefaultAlphabet(unsigned char value)
 	return '?';
 }
 
-wchar_t EncodeWithUnicodeAlphabet(unsigned char value)
+static wchar_t EncodeWithUnicodeAlphabet(unsigned char value)
 {
 	wchar_t retval;
 
@@ -69,12 +72,12 @@ wchar_t EncodeWithUnicodeAlphabet(unsigned char value)
 	else return retval;
 }
 
-unsigned char DecodeWithDefaultAlphabet(unsigned char value)
+static unsigned char DecodeWithDefaultAlphabet(unsigned char value)
 {
 	return GSM_DefaultAlphabet[value];
 }
 
-unsigned char DecodeWithUnicodeAlphabet(wchar_t value)
+static unsigned char DecodeWithUnicodeAlphabet(wchar_t value)
 {
 	unsigned char retval;
 
@@ -159,4 +162,48 @@ int Pack7BitCharacters(int offset, unsigned char *input, unsigned char *output)
         }
 
         return (OUT - output);
+}
+
+void DecodeAscii (unsigned char* dest, const unsigned char* src, int len)
+{
+	int i;
+
+	for (i = 0; i < len; i++)
+		dest[i] = DecodeWithDefaultAlphabet(src[i]);
+	return;
+}
+
+void EncodeAscii (unsigned char* dest, const unsigned char* src, int len)
+{
+	int i;
+
+	for (i = 0; i < len; i++)
+		dest[i] = EncodeWithDefaultAlphabet(src[i]);
+	return;
+}
+
+void DecodeUnicode (unsigned char* dest, const unsigned char* src, int len)
+{
+	int i;
+	wchar_t wc;
+
+	for (i = 0; i < len; i++) {
+		wc = src[(2*i)+1] | (src[2*i] << 8);
+		dest[i] = DecodeWithUnicodeAlphabet(wc);
+	}
+	dest[len]=0;
+	return;
+}
+
+void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len)
+{
+	int i;
+	wchar_t wc;
+
+	for (i = 0; i < len; i++) {
+		wc = EncodeWithUnicodeAlphabet(src[i]);
+		dest[i*2] = (wc >> 8) &0xff;
+		dest[(i*2)+1] = wc & 0xff;
+	}
+	return;
 }

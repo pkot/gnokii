@@ -14,7 +14,10 @@
   handset.
 
   $Log$
-  Revision 1.80  2001-08-20 23:36:27  pkot
+  Revision 1.81  2001-11-08 16:34:20  pkot
+  Updates to work with new libsms
+
+  Revision 1.80  2001/08/20 23:36:27  pkot
   More cleanup in AT code (Manfred Jonsson)
 
   Revision 1.79  2001/07/27 00:02:22  pkot
@@ -32,15 +35,16 @@
 #include <stdlib.h>
 
 #include "data/rlp-common.h"
+#include "gsm-sms.h"
 
 /* Type of connection. Now we support serial connection with FBUS cable and
    IR (only with 61x0 models) */
 
 typedef enum {
-  GCT_Serial,   /* Serial connection. */
-  GCT_Infrared, /* Infrared connection. */
-  GCT_Tekram,   /* Tekram Ir-Dongle */
-  GCT_Irda
+	GCT_Serial,   /* Serial connection. */
+	GCT_Infrared, /* Infrared connection. */
+	GCT_Tekram,   /* Tekram Ir-Dongle */
+	GCT_Irda
 } GSM_ConnectionType;
 
 /* Maximum length of device name for serial port */
@@ -55,194 +59,52 @@ typedef enum {
 */
 
 typedef enum {
-  GMT_ME, /* Internal memory of the mobile equipment */
-  GMT_SM, /* SIM card memory */
-  GMT_FD, /* Fixed dial numbers */
-  GMT_ON, /* Own numbers */
-  GMT_EN, /* Emergency numbers */
-  GMT_DC, /* Dialled numbers */
-  GMT_RC, /* Received numbers */
-  GMT_MC, /* Missed numbers */
-  GMT_LD, /* Last dialed */
-  GMT_MT, /* combined ME and SIM phonebook */
-  GMT_TA, /* for compatibility only: TA=computer memory */
-  GMT_CB, /* Currently selected memory */
-  GMT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions). */
+	GMT_ME, /* Internal memory of the mobile equipment */
+	GMT_SM, /* SIM card memory */
+	GMT_FD, /* Fixed dial numbers */
+	GMT_ON, /* Own numbers */
+	GMT_EN, /* Emergency numbers */
+	GMT_DC, /* Dialled numbers */
+	GMT_RC, /* Received numbers */
+	GMT_MC, /* Missed numbers */
+	GMT_LD, /* Last dialed */
+	GMT_MT, /* combined ME and SIM phonebook */
+	GMT_TA, /* for compatibility only: TA=computer memory */
+	GMT_CB, /* Currently selected memory */
+	GMT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions). */
 } GSM_MemoryType;
 
 /* Power source types */
 
 typedef enum {
-  GPS_ACDC=1, /* AC/DC powered (charging) */
-  GPS_BATTERY /* Internal battery */
+	GPS_ACDC=1, /* AC/DC powered (charging) */
+	GPS_BATTERY /* Internal battery */
 } GSM_PowerSource;
-
-/* This data-type is used to specify the type of the number. See the official
-   GSM specification 03.40, version 5.3.0, section 9.1.2.5, page 33. */
-
-typedef enum {
-  GNT_UNKNOWN=0x81,      /* Unknown number */
-  GNT_INTERNATIONAL=0x91 /* International number */
-} GSM_NumberType;
-
-
-/* Maximum length of SMS center name */
-
-#define GSM_MAX_SMS_CENTER_NAME_LENGTH	(20)
-
-/* Limits of SMS messages. */
-
-#define GSM_MAX_SMS_CENTER_LENGTH  (40)
-#define GSM_MAX_SENDER_LENGTH      (40)
-#define GSM_MAX_DESTINATION_LENGTH (40)
-#define GSM_MAX_SMS_LENGTH         (160)
-
-#define GSM_MAX_CB_MESSAGE         (160)
-
-/* The maximum length of an uncompressed concatenated short message is
-   255 * 153 = 39015 default alphabet characters */
-#define GSM_MAX_CONCATENATED_SMS_LENGTH	(39015)
-
-/* FIXME: what value should be here? (Marcin Wiacek) */
-#define GSM_MAX_SMS_8_BIT_LENGTH (132)
-
-/* FIXME: what value should be here? (Pawel Kot) */
-#define GSM_MAX_USER_DATA_HEADER_LENGTH (10)
-
-/* Define datatype for SMS Message Type */
-
-typedef enum {
-  GST_MO, /* Mobile Originated (MO) message - Outbox message */
-  GST_MT, /* Mobile Terminated (MT) message - Inbox message */
-  GST_DR, /* Delivery Report */
-  GST_UN  /* Unknown */
-} GSM_SMSMessageType;
-
-/* Datatype for SMS status */
-/* FIXME - This needs to be made clearer and or turned into a 
-   bitfield to allow compound values (read | sent etc.) */
-
-typedef enum {
-  GSS_SENTREAD    = true, /* Sent or read message */
-  GSS_NOTSENTREAD = false /* Not sent or not read message */
-} GSM_SMSMessageStatus;
-
-/* SMS Messages sent as... */
-
-typedef enum {
-  GSMF_Text   = 0x00, /* Plain text message. */
-  GSMF_Fax    = 0x22, /* Fax message. */
-  GSMF_Voice  = 0x24, /* Voice mail message. */
-  GSMF_ERMES  = 0x25, /* ERMES message. */
-  GSMF_Paging = 0x26, /* Paging. */
-  GSMF_UCI    = 0x2d, /* Email message in 8110i. */
-  GSMF_Email  = 0x32, /* Email message. */
-  GSMF_X400   = 0x31  /* X.400 message. */
-} GSM_SMSMessageFormat;
-
-/* Validity of SMS Messages. */
-
-typedef enum {
-  GSMV_1_Hour   = 0x0b,
-  GSMV_6_Hours  = 0x47,
-  GSMV_24_Hours = 0xa7,
-  GSMV_72_Hours = 0xa9,
-  GSMV_1_Week   = 0xad,
-  GSMV_Max_Time = 0xff
-} GSM_SMSMessageValidity;
-
-/* Define datatype for SMS Message Center */
-
-typedef struct {
-	int			No;					/* Number of the SMSC in the phone memory. */
-	char			Name[GSM_MAX_SMS_CENTER_NAME_LENGTH];	/* Name of the SMSC. */
-	GSM_SMSMessageFormat	Format;					/* SMS is sent as text/fax/paging/email. */
-	GSM_SMSMessageValidity	Validity;				/* Validity of SMS Message. */
-	char			Number[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the SMSC. */
-	char			Recipient[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the default recipient. */
-} GSM_MessageCenter;
-
-/* Define datatype for Cell Broadcast message */
-typedef struct {
-  int Channel;                                      /* channel number */
-  char Message[GSM_MAX_CB_MESSAGE + 1];
-  int New;
-} GSM_CBMessage;
-
-
 
 /* Definition of security codes. */
 
 typedef enum {
-  GSCT_SecurityCode = 0x01, /* Security code. */
-  GSCT_Pin,                 /* PIN. */
-  GSCT_Pin2,                /* PIN 2. */
-  GSCT_Puk,                 /* PUK. */
-  GSCT_Puk2,                /* PUK 2. */
-  GSCT_None                 /* Code not needed. */
+	GSCT_SecurityCode = 0x01, /* Security code. */
+	GSCT_Pin,                 /* PIN. */
+	GSCT_Pin2,                /* PIN 2. */
+	GSCT_Puk,                 /* PUK. */
+	GSCT_Puk2,                /* PUK 2. */
+	GSCT_None                 /* Code not needed. */
 } GSM_SecurityCodeType;
 
 /* Security code definition. */
 
 typedef struct {
-  GSM_SecurityCodeType Type; /* Type of the code. */
-  char Code[10];             /* Actual code. */
+	GSM_SecurityCodeType Type; /* Type of the code. */
+	char Code[10];             /* Actual code. */
 } GSM_SecurityCode;
-
-/* Structure used for passing dates/times to date/time functions such as
-   GSM_GetTime and GSM_GetAlarm etc. */
-
-typedef struct {
-  bool AlarmEnabled; /* Is the alarm set? */
-  int Year;          /* The complete year specification - e.g. 1999. Y2K :-) */
-  int Month;	     /* January = 1 */
-  int Day;
-  int Hour;
-  int Minute;
-  int Second;
-  int Timezone;      /* The difference between local time and GMT */
-} GSM_DateTime;
-
-/* types of User Data Header */
-typedef enum {
-  GSM_NoUDH,
-  GSM_ConcatenatedMessages,
-  GSM_OpLogo,
-  GSM_CallerIDLogo,
-  GSM_RingtoneUDH
-} GSM_UDH;
-
-/* Define datatype for SMS messages, used for getting SMS messages from the
-   phones memory. */
-
-typedef struct {
-  GSM_DateTime Time;	                    /* Date of reception/response of messages. */
-  GSM_DateTime SMSCTime;	            /* Date of SMSC response if DeliveryReport messages. */
-  int Length;                               /* Length of the SMS message. */
-  int Validity;                             /* Validity Period of the SMS message. */
-  GSM_UDH UDHType;                          /* If UDH is present - type of UDH */
-  char UDH[GSM_MAX_USER_DATA_HEADER_LENGTH]; /* If UDH is present - content of UDH */
-  char MessageText[GSM_MAX_SMS_LENGTH + 1]; /* Room for null term. */
-  GSM_MessageCenter MessageCenter;          /* SMS Center. */
-  char Sender[GSM_MAX_SENDER_LENGTH + 1];   /* Sender of the SMS message. */
-  char Destination[GSM_MAX_DESTINATION_LENGTH + 1]; /* Destination of the message. */
-  int MessageNumber;                        /* Location in the memory. */
-  GSM_MemoryType MemoryType;                /* Type of memory message is stored in. */
-  GSM_SMSMessageType Type;                  /* Type of the SMS message */
-  GSM_SMSMessageStatus Status;              /* Status of the SMS message */
-  int Class;                                /* Class Message: 0, 1, 2, 3 or none; see GSM 03.38 */
-  bool EightBit;                            /* Indicates whether SMS contains 8 bit data */
-  bool Compression;                         /* Indicates whether SMS contains compressed data */
-  int Location;                             /* Location in the memory. */
-  bool ReplyViaSameSMSC;                    /* Indicates whether "Reply via same center" is set */
-} GSM_SMSMessage;
 
 /* This structure is used to get the current network status */
 
 typedef struct {
-  char NetworkCode[10]; /* GSM network code */
-  char CellID[10];      /* CellID */
-  char LAC[10];         /* LAC */
+	char NetworkCode[10]; /* GSM network code */
+	char CellID[10];      /* CellID */
+	char LAC[10];         /* LAC */
 } GSM_NetworkInfo;
 
 /* Limits for sizing of array in GSM_PhonebookEntry. Individual handsets may
@@ -264,133 +126,131 @@ typedef struct {
    memory (sim or internal). */
 
 typedef struct {
-  GSM_MemoryType MemoryType; /* Type of the memory */
-  int Used;                  /* Number of used positions */
-  int Free;                  /* Number of free positions */
+	GSM_MemoryType MemoryType; /* Type of the memory */
+	int Used;                  /* Number of used positions */
+	int Free;                  /* Number of free positions */
 } GSM_MemoryStatus;
-
-/* This data type is used to hold the current SMS status. */
-
-typedef struct {
-  int UnRead; /* The number of unread messages */
-  int Number; /* The number of messages */
-} GSM_SMSStatus;
-
-
 
 /* Some phones (at the moment 6210/7110) supports extended phonebook
    with additional data.  Here we have structures for them */
 
-typedef enum
-{
-  GSM_General = 0x0a,
-  GSM_Mobile  = 0x03,
-  GSM_Work    = 0x06,
-  GSM_Fax     = 0x04,
-  GSM_Home    = 0x02
+typedef enum {
+	GSM_General = 0x0a,
+	GSM_Mobile  = 0x03,
+	GSM_Work    = 0x06,
+	GSM_Fax     = 0x04,
+	GSM_Home    = 0x02
 } GSM_Number_Type;
 
-typedef enum
-{
-  GSM_Number  = 0x0b,
-  GSM_Note    = 0x0a,
-  GSM_Postal  = 0x09,
-  GSM_Email   = 0x08,
-  GSM_Name    = 0x07,
-  GSM_Date    = 0x13   /* Date is used for DC,RC,etc (last calls) */
+typedef enum {
+	GSM_Number  = 0x0b,
+	GSM_Note    = 0x0a,
+	GSM_Postal  = 0x09,
+	GSM_Email   = 0x08,
+	GSM_Name    = 0x07,
+	GSM_Date    = 0x13   /* Date is used for DC,RC,etc (last calls) */
 } GSM_EntryType;
 
 typedef struct {
-  GSM_EntryType   EntryType;
-  GSM_Number_Type NumberType;
-  union {
-    char Number[GSM_MAX_PHONEBOOK_TEXT_LENGTH + 1]; /* Number */
-    GSM_DateTime Date;                         /* or the last calls list */
-  } data;
-  int             BlockNumber;
+	bool AlarmEnabled; /* Is alarm set ? */
+	int Year;          /* The complete year specification - e.g. 1999. Y2K :-) */
+	int Month;	   /* January = 1 */
+	int Day;
+	int Hour;
+	int Minute;
+	int Second;
+	int Timezone;      /* The difference between local time and GMT */
+} GSM_DateTime;
+
+typedef struct {
+	GSM_EntryType   EntryType;
+	GSM_Number_Type NumberType;
+	union {
+		char Number[GSM_MAX_PHONEBOOK_TEXT_LENGTH + 1]; /* Number */
+		GSM_DateTime Date;                         /* or the last calls list */
+	} data;
+	int             BlockNumber;
 } GSM_SubPhonebookEntry;
 
 /* Define datatype for phonebook entry, used for getting/writing phonebook
    entries. */
 
 typedef struct {
-  bool Empty;                                       /* Is this entry empty? */
-  char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];     /* Plus 1 for
-						       nullterminator. */
-  char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
-  GSM_MemoryType MemoryType;                        /* Type of memory */
-  int Group;                                        /* Group */
-  int Location;                                     /* Location */
-  GSM_DateTime Date;                                /* The record date and time
-                                                       of the number. */
-  GSM_SubPhonebookEntry SubEntries[GSM_MAX_PHONEBOOK_SUB_ENTRIES];
-                                                    /* For phones with
-						     * additional phonebook
-						     * entries */
-  int SubEntriesCount;                              /* Should be 0, if extended
-                                                       phonebook is not used */
+	bool Empty;                                       /* Is this entry empty? */
+	char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];     /* Plus 1 for
+							     nullterminator. */
+	char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
+	GSM_MemoryType MemoryType;                        /* Type of memory */
+	int Group;                                        /* Group */
+	int Location;                                     /* Location */
+	GSM_DateTime Date;                                /* The record date and time
+							     of the number. */
+	GSM_SubPhonebookEntry SubEntries[GSM_MAX_PHONEBOOK_SUB_ENTRIES];
+	/* For phones with
+	 * additional phonebook
+	 * entries */
+	int SubEntriesCount;                              /* Should be 0, if extended
+							     phonebook is not used */
 } GSM_PhonebookEntry;
-
-
 
 /* This define speed dialing entries. */
 
 typedef struct {
-  int Number;                /* Which number is used to dialing? */
-  GSM_MemoryType MemoryType; /* Memory type of the number. */
-  int Location;              /* Location of the number in MemoryType. */
+	int Number;                /* Which number is used to dialing? */
+	GSM_MemoryType MemoryType; /* Memory type of the number. */
+	int Location;              /* Location of the number in MemoryType. */
 } GSM_SpeedDial;
 
 /* Define enum used to describe what sort of date/time support is
    available. */
 
 typedef enum {
-  GDT_None,     /* The mobile phone doesn't support time and date. */
-  GDT_TimeOnly, /* The mobile phone supports only time. */
-  GDT_DateOnly, /* The mobile phone supports only date. */
-  GDT_DateTime  /* Wonderful phone - it supports date and time. */
+	GDT_None,     /* The mobile phone doesn't support time and date. */
+	GDT_TimeOnly, /* The mobile phone supports only time. */
+	GDT_DateOnly, /* The mobile phone supports only date. */
+	GDT_DateTime  /* Wonderful phone - it supports date and time. */
 } GSM_DateTimeSupport;
 
 /* Define enums for RF units.  GRF_CSQ asks for units in form used
    in AT+CSQ command as defined by GSM 07.07 */
 
 typedef enum {
-  GRF_Arbitrary,
-  GRF_dBm,
-  GRF_mV,
-  GRF_uV,
-  GRF_CSQ,
-  GRF_Percentage
+	GRF_Arbitrary,
+	GRF_dBm,
+	GRF_mV,
+	GRF_uV,
+	GRF_CSQ,
+	GRF_Percentage
 } GSM_RFUnits;
 
 /* Define enums for Battery units. */
 
 typedef enum {
-  GBU_Arbitrary,
-  GBU_Volts,
-  GBU_Minutes,
-  GBU_Percentage
+	GBU_Arbitrary,
+	GBU_Volts,
+	GBU_Minutes,
+	GBU_Percentage
 } GSM_BatteryUnits;
 
 /* Define enums for Calendar Note types */
 
 typedef enum {
-  GCN_REMINDER=1, /* Reminder */
-  GCN_CALL,       /* Call */
-  GCN_MEETING,    /* Meeting */
-  GCN_BIRTHDAY    /* Birthday */
+	GCN_REMINDER=1, /* Reminder */
+	GCN_CALL,       /* Call */
+	GCN_MEETING,    /* Meeting */
+	GCN_BIRTHDAY    /* Birthday */
 } GSM_CalendarNoteType;
 
 /* Calendar note type */
 
 typedef struct {
-  int Location;			/* The number of the note in the phone memory */
-  GSM_CalendarNoteType Type;	/* The type of the note */
-  GSM_DateTime Time;		/* The time of the note */
-  GSM_DateTime Alarm;		/* The alarm of the note */
-  char Text[20];		/* The text of the note */
-  char Phone[20];		/* For Call only: the phone number */
-  double Recurance;		/* Recurance of the note */
+	int Location;			/* The number of the note in the phone memory */
+	GSM_CalendarNoteType Type;	/* The type of the note */
+	GSM_DateTime Time;		/* The time of the note */
+	GSM_DateTime Alarm;		/* The alarm of the note */
+	char Text[20];		/* The text of the note */
+	char Phone[20];		/* For Call only: the phone number */
+	double Recurance;		/* Recurance of the note */
 } GSM_CalendarNote;
 
 /* This structure is provided to allow common information about the particular
@@ -401,116 +261,65 @@ typedef struct {
 
 typedef struct {
 	 	
-  char *Models; /* Models covered by this type, pipe '|' delimited. */
+	char *Models; /* Models covered by this type, pipe '|' delimited. */
 
 /* Minimum and maximum levels for RF signal strength. Units are as per the
    setting of RFLevelUnits.  The setting of RFLevelUnits indicates the 
    default or "native" units used.  In the case of the 3110 and 6110 series
    these are arbitrary, ranging from 0 to 4. */
 
-  float MaxRFLevel;
-  float MinRFLevel;
-  GSM_RFUnits RFLevelUnits;
+	float MaxRFLevel;
+	float MinRFLevel;
+	GSM_RFUnits RFLevelUnits;
 
 /* Minimum and maximum levels for battery level. Again, units are as per the
    setting of GSM_BatteryLevelUnits.  The value that BatteryLevelUnits is set
    to indicates the "native" or default value that the phone supports.  In the
    case of the 3110 and 6110 series these are arbitrary, ranging from 0 to 4. */
 
-  float MaxBatteryLevel;
-  float MinBatteryLevel;
-  GSM_BatteryUnits BatteryLevelUnits;
+	float MaxBatteryLevel;
+	float MinBatteryLevel;
+	GSM_BatteryUnits BatteryLevelUnits;
 
 /* FIXME: some very similar code is in common/misc.c */
 
 /* Information about date, time and alarm support. In case of alarm
    information we provide value for the number of alarms supported. */
 
-  GSM_DateTimeSupport DateTimeSupport;
-  GSM_DateTimeSupport AlarmSupport;
-  int MaximumAlarms;
-  u8 StartupLogoH;   /* Logo Widths and Heights - if supported */
-  u8 StartupLogoW;
-  u8 OpLogoH;
-  u8 OpLogoW;
-  u8 CallerLogoH;
-  u8 CallerLogoW;
+	GSM_DateTimeSupport DateTimeSupport;
+	GSM_DateTimeSupport AlarmSupport;
+	int MaximumAlarms;
+	u8 StartupLogoH;   /* Logo Widths and Heights - if supported */
+	u8 StartupLogoW;
+	u8 OpLogoH;
+	u8 OpLogoW;
+	u8 CallerLogoH;
+	u8 CallerLogoW;
 } GSM_Information;
-
-/* Define standard GSM error/return code values. These codes are also used for
-   some internal functions such as SIM read/write in the model specific code. */
-
-typedef enum {
-  GE_NONE = 0,              /* No error. */
-  GE_DEVICEOPENFAILED,	    /* Couldn't open specified serial device. */
-  GE_UNKNOWNMODEL,          /* Model specified isn't known/supported. */
-  GE_NOLINK,                /* Couldn't establish link with phone. */
-  GE_TIMEOUT,               /* Command timed out. */
-  GE_TRYAGAIN,              /* Try again. */
-  GE_INVALIDSECURITYCODE,   /* Invalid Security code. */
-  GE_NOTIMPLEMENTED,        /* Command called isn't implemented in model. */
-  GE_INVALIDSMSLOCATION,    /* Invalid SMS location. */
-  GE_INVALIDPHBOOKLOCATION, /* Invalid phonebook location. */
-  GE_INVALIDMEMORYTYPE,     /* Invalid type of memory. */
-  GE_INVALIDSPEEDDIALLOCATION, /* Invalid speed dial location. */
-  GE_INVALIDCALNOTELOCATION,/* Invalid calendar note location. */
-  GE_INVALIDDATETIME,       /* Invalid date, time or alarm specification. */
-  GE_EMPTYSMSLOCATION,      /* SMS location is empty. */
-  GE_PHBOOKNAMETOOLONG,     /* Phonebook name is too long. */
-  GE_PHBOOKNUMBERTOOLONG,   /* Phonebook number is too long. */
-  GE_PHBOOKWRITEFAILED,     /* Phonebook write failed. */
-  GE_SMSSENDOK,             /* SMS was send correctly. */
-  GE_SMSSENDFAILED,         /* SMS send fail. */
-  GE_SMSWAITING,            /* Waiting for the next part of SMS. */
-  GE_SMSTOOLONG,            /* SMS message too long. */
-  GE_NONEWCBRECEIVED,       /* Attempt to read CB when no new CB received */
-  GE_INTERNALERROR,         /* Problem occured internal to model specific code. */
-  GE_CANTOPENFILE,          /* Can't open file with bitmap/ringtone */
-  GE_WRONGNUMBEROFCOLORS,   /* Wrong number of colors in specified bitmap file */
-  GE_WRONGCOLORS,           /* Wrong colors in bitmap file */
-  GE_INVALIDFILEFORMAT,     /* Invalid format of file */
-  GE_SUBFORMATNOTSUPPORTED, /* Subformat of file not supported */
-  GE_FILETOOSHORT,          /* Too short file to read */
-  GE_FILETOOLONG,           /* Too long file to read */
-  GE_INVALIDIMAGESIZE,      /* Invalid size of bitmap (in file, sms etc.) */
-  GE_NOTSUPPORTED,          /* Function not supported by the phone */
-  GE_BUSY,                  /* Command is still being executed. */
-  GE_USERCANCELED,
-  GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
-  GE_MEMORYFULL,
-  GE_NOTWAITING,            /* Not waiting for a response from the phone */
-  GE_NOTREADY,
-
-  /* The following are here in anticipation of data call requirements. */
-
-  GE_LINEBUSY,              /* Outgoing call requested reported line busy */
-  GE_NOCARRIER              /* No Carrier error during data call setup ? */
-} GSM_Error;
-
 
 /* This enum is used for display status. */
 
 typedef enum {
-  DS_Call_In_Progress, /* Call in progress. */
-  DS_Unknown,          /* The meaning is unknown now :-( */
-  DS_Unread_SMS,       /* There is Unread SMS. */
-  DS_Voice_Call,       /* Voice call active. */
-  DS_Fax_Call,         /* Fax call active. */
-  DS_Data_Call,        /* Data call active. */
-  DS_Keyboard_Lock,    /* Keyboard lock status. */
-  DS_SMS_Storage_Full  /* Full SMS Memory. */
+	DS_Call_In_Progress, /* Call in progress. */
+	DS_Unknown,          /* The meaning is unknown now :-( */
+	DS_Unread_SMS,       /* There is Unread SMS. */
+	DS_Voice_Call,       /* Voice call active. */
+	DS_Fax_Call,         /* Fax call active. */
+	DS_Data_Call,        /* Data call active. */
+	DS_Keyboard_Lock,    /* Keyboard lock status. */
+	DS_SMS_Storage_Full  /* Full SMS Memory. */
 } DisplayStatusEntity;
 
 /* Bitmap types. */
 
 typedef enum {
-  GSM_None=0,
-  GSM_StartupLogo,
-  GSM_OperatorLogo,
-  GSM_CallerLogo,
-  GSM_PictureImage,
-  GSM_WelcomeNoteText,
-  GSM_DealerNoteText
+	GSM_None=0,
+	GSM_StartupLogo,
+	GSM_OperatorLogo,
+	GSM_CallerLogo,
+	GSM_PictureImage,
+	GSM_WelcomeNoteText,
+	GSM_DealerNoteText
 } GSM_Bitmap_Types;
 
 #define GSM_MAX_BITMAP_SIZE 864
@@ -518,17 +327,17 @@ typedef enum {
 /* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
 
 typedef struct {
-  u8 height;               /* Bitmap height (pixels) */
-  u8 width;                /* Bitmap width (pixels) */
-  u16 size;                /* Bitmap size (bytes) */
-  GSM_Bitmap_Types type;   /* Bitmap type */
-  char netcode[7];         /* Network operator code */
-  char text[256];          /* Text used for welcome-note or callergroup name */
-  char dealertext[256];    /* Text used for dealer welcome-note */
-  bool dealerset;          /* Is dealer welcome-note set now ? */
-  unsigned char bitmap[GSM_MAX_BITMAP_SIZE]; /* Actual Bitmap */ 
-  char number;             /* Caller group number */
-  char ringtone;           /* Ringtone no sent with caller group */
+	u8 height;               /* Bitmap height (pixels) */
+	u8 width;                /* Bitmap width (pixels) */
+	u16 size;                /* Bitmap size (bytes) */
+	GSM_Bitmap_Types type;   /* Bitmap type */
+	char netcode[7];         /* Network operator code */
+	char text[256];          /* Text used for welcome-note or callergroup name */
+	char dealertext[256];    /* Text used for dealer welcome-note */
+	bool dealerset;          /* Is dealer welcome-note set now ? */
+	unsigned char bitmap[GSM_MAX_BITMAP_SIZE]; /* Actual Bitmap */ 
+	char number;             /* Caller group number */
+	char ringtone;           /* Ringtone no sent with caller group */
 } GSM_Bitmap;
 
 
@@ -542,35 +351,35 @@ typedef struct {
 /* Structure to hold note of ringtone. */
 
 typedef struct {
-  u8 duration;
-  u8 note;
+	u8 duration;
+	u8 note;
 } GSM_RingtoneNote;
 
 /* Structure to hold ringtones. */
 
 typedef struct {
-  char name[20];
-  u8 tempo;
-  u8 NrNotes;
-  GSM_RingtoneNote notes[MAX_RINGTONE_NOTES];
+	char name[20];
+	u8 tempo;
+	u8 NrNotes;
+	GSM_RingtoneNote notes[MAX_RINGTONE_NOTES];
 } GSM_Ringtone;
   
 /* Structure to hold profile entries. */
 
 typedef struct {
-  int Number;          /* The number of the profile. */
-  char Name[40];       /* The name of the profile. */
-  int DefaultName;     /* 0-6, when default name is used, -1, when not. */
-  int KeypadTone;      /* Volume level for keypad tones. */
-  int Lights;          /* Lights on/off. */
-  int CallAlert;       /* Incoming call alert. */
-  int Ringtone;        /* Ringtone for incoming call alert. */
-  int Volume;          /* Volume of the ringing. */
-  int MessageTone;     /* The tone for message indication. */
-  int WarningTone;     /* The tone for warning messages. */
-  int Vibration;       /* Vibration? */
-  int CallerGroups;    /* CallerGroups. */
-  int AutomaticAnswer; /* Does the phone auto-answer incoming call? */
+	int Number;          /* The number of the profile. */
+	char Name[40];       /* The name of the profile. */
+	int DefaultName;     /* 0-6, when default name is used, -1, when not. */
+	int KeypadTone;      /* Volume level for keypad tones. */
+	int Lights;          /* Lights on/off. */
+	int CallAlert;       /* Incoming call alert. */
+	int Ringtone;        /* Ringtone for incoming call alert. */
+	int Volume;          /* Volume of the ringing. */
+	int MessageTone;     /* The tone for message indication. */
+	int WarningTone;     /* The tone for warning messages. */
+	int Vibration;       /* Vibration? */
+	int CallerGroups;    /* CallerGroups. */
+	int AutomaticAnswer; /* Does the phone auto-answer incoming call? */
 } GSM_Profile;
 
 
@@ -621,8 +430,8 @@ typedef struct {
 	GSM_PhonebookEntry *PhonebookEntry;
 	GSM_SpeedDial *SpeedDial;
 	GSM_MemoryStatus *MemoryStatus;
-	GSM_SMSStatus *SMSStatus;
-	GSM_MessageCenter *MessageCenter;
+	GSM_SMSMemoryStatus *SMSStatus;
+	SMS_MessageCenter *MessageCenter;
 	char *Imei;
 	char *Revision;
 	char *Model;
@@ -651,17 +460,17 @@ typedef struct {
 /* A structure to hold information about the particular link */
 /* The link comes 'under' the phone */
 typedef struct {
-  char PortDevice[20];   /* The port device */
-  int InitLength;        /* Number of chars sent to sync the serial port */
-  GSM_ConnectionType ConnectionType;   /* Connection type, serial, ir etc */
+	char PortDevice[20];   /* The port device */
+	int InitLength;        /* Number of chars sent to sync the serial port */
+	GSM_ConnectionType ConnectionType;   /* Connection type, serial, ir etc */
 
-  /* A regularly called loop function */
-  /* timeout can be used to make the function block or not */
-  GSM_Error (*Loop)(struct timeval *timeout);
+	/* A regularly called loop function */
+	/* timeout can be used to make the function block or not */
+	GSM_Error (*Loop)(struct timeval *timeout);
 
-  /* A pointer to the function used to send out a message */
-  /* This is used by the phone specific code to send a message over the link */
-  GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, void *message);
+	/* A pointer to the function used to send out a message */
+	/* This is used by the phone specific code to send a message over the link */
+	GSM_Error (*SendMessage)(u16 messagesize, u8 messagetype, void *message);
 
 } GSM_Link;
 
@@ -669,8 +478,8 @@ typedef struct {
 /* Small structure used in GSM_Phone */
 /* Messagetype is passed to the function in case it is a 'generic' one */
 typedef struct {
-  u8 MessageType;
-  GSM_Error (*Functions)(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+	u8 MessageType;
+	GSM_Error (*Functions)(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 } GSM_IncomingFunctionType;
 
 typedef enum {
@@ -695,6 +504,7 @@ typedef enum {
 	GOP_GetNetworkInfo,
 	GOP_GetSMS,
 	GOP_DeleteSMS,
+	GOP_SendSMS,
 	GOP_GetSpeedDial,
 	GOP_GetSMSCenter,
 	GOP_GetDateTime,
@@ -708,11 +518,11 @@ typedef enum {
 typedef struct _GSM_Statemachine GSM_Statemachine; 
 
 typedef struct {
-  /* These make up a list of functions, one for each message type and NULL terminated */
-  GSM_IncomingFunctionType *IncomingFunctions;
-  GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length);
-  GSM_Information Info;
-  GSM_Error (*Functions)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+	/* These make up a list of functions, one for each message type and NULL terminated */
+	GSM_IncomingFunctionType *IncomingFunctions;
+	GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length);
+	GSM_Information Info;
+	GSM_Error (*Functions)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 } GSM_Phone;
 
 
@@ -763,123 +573,123 @@ struct _GSM_Statemachine{
 
 typedef struct {
 
-  /* FIXME: comment this. */
+	/* FIXME: comment this. */
 
-  GSM_Error (*Initialise)( char *port_device, char *initlength,
-                           GSM_ConnectionType connection,
-                           void (*rlp_callback)(RLP_F96Frame *frame));
+	GSM_Error (*Initialise)( char *port_device, char *initlength,
+				 GSM_ConnectionType connection,
+				 void (*rlp_callback)(RLP_F96Frame *frame));
 
-  void (*Terminate)(void);	
+	void (*Terminate)(void);	
 
-  GSM_Error (*GetMemoryLocation)( GSM_PhonebookEntry *entry );
+	GSM_Error (*GetMemoryLocation)( GSM_PhonebookEntry *entry );
 
-  GSM_Error (*WritePhonebookLocation)( GSM_PhonebookEntry *entry );
+	GSM_Error (*WritePhonebookLocation)( GSM_PhonebookEntry *entry );
 
-  GSM_Error (*GetSpeedDial)( GSM_SpeedDial *entry);
+	GSM_Error (*GetSpeedDial)( GSM_SpeedDial *entry);
 
-  GSM_Error (*SetSpeedDial)( GSM_SpeedDial *entry);
+	GSM_Error (*SetSpeedDial)( GSM_SpeedDial *entry);
 
-  GSM_Error (*GetMemoryStatus)( GSM_MemoryStatus *Status);
+	GSM_Error (*GetMemoryStatus)( GSM_MemoryStatus *Status);
 
-  GSM_Error (*GetSMSStatus)( GSM_SMSStatus *Status);
+	GSM_Error (*GetSMSStatus)( GSM_SMSMemoryStatus *Status);
 
-  GSM_Error (*GetSMSCenter)( GSM_MessageCenter *MessageCenter );
+	GSM_Error (*GetSMSCenter)( SMS_MessageCenter *MessageCenter );
 
-  GSM_Error (*SetSMSCenter)( GSM_MessageCenter *MessageCenter );
+	GSM_Error (*SetSMSCenter)( SMS_MessageCenter *MessageCenter );
 
-  GSM_Error (*GetSMSMessage)( GSM_SMSMessage *Message );
+	GSM_Error (*GetSMSMessage)( GSM_SMSMessage *Message );
 
-  GSM_Error (*DeleteSMSMessage)( GSM_SMSMessage *Message );
+	GSM_Error (*DeleteSMSMessage)( GSM_SMSMessage *Message );
 
-  GSM_Error (*SendSMSMessage)( GSM_SMSMessage *Message, int size );
+	GSM_Error (*SendSMSMessage)( GSM_SMSMessage *Message, int size );
 
-  GSM_Error (*SaveSMSMessage)( GSM_SMSMessage *Message );
+	GSM_Error (*SaveSMSMessage)( GSM_SMSMessage *Message );
 
-    /* If units is set to a valid GSM_RFUnits value, the code
-       will return level in these units if it is able.  Otherwise
-       value will be returned as GRF_Arbitary.  If phone doesn't
-       support GetRFLevel, function returns GE_NOTSUPPORTED */
-  GSM_Error (*GetRFLevel)( GSM_RFUnits *units, float *level );
+	/* If units is set to a valid GSM_RFUnits value, the code
+	   will return level in these units if it is able.  Otherwise
+	   value will be returned as GRF_Arbitary.  If phone doesn't
+	   support GetRFLevel, function returns GE_NOTSUPPORTED */
+	GSM_Error (*GetRFLevel)( GSM_RFUnits *units, float *level );
 
-    /* Works the same as GetRFLevel, except returns battery
-       level if known. */
-  GSM_Error (*GetBatteryLevel)( GSM_BatteryUnits *units, float *level );
+	/* Works the same as GetRFLevel, except returns battery
+	   level if known. */
+	GSM_Error (*GetBatteryLevel)( GSM_BatteryUnits *units, float *level );
 
-  GSM_Error (*GetPowerSource)( GSM_PowerSource *source);
+	GSM_Error (*GetPowerSource)( GSM_PowerSource *source);
 
-  GSM_Error (*GetDisplayStatus)( int *Status);
+	GSM_Error (*GetDisplayStatus)( int *Status);
 
-  GSM_Error (*EnterSecurityCode)( GSM_SecurityCode Code);
+	GSM_Error (*EnterSecurityCode)( GSM_SecurityCode Code);
 
-  GSM_Error (*GetSecurityCodeStatus)( int *Status );
+	GSM_Error (*GetSecurityCodeStatus)( int *Status );
 
-  GSM_Error (*GetIMEI)( char *imei );
+	GSM_Error (*GetIMEI)( char *imei );
 
-  GSM_Error (*GetRevision)( char *revision );
+	GSM_Error (*GetRevision)( char *revision );
 
-  GSM_Error (*GetModel)( char *model );
+	GSM_Error (*GetModel)( char *model );
 
-  GSM_Error (*GetManufacturer)( char *manufacturer );
+	GSM_Error (*GetManufacturer)( char *manufacturer );
 
-  GSM_Error (*GetDateTime)( GSM_DateTime *date_time);
+	GSM_Error (*GetDateTime)( GSM_DateTime *date_time);
 
-  GSM_Error (*SetDateTime)( GSM_DateTime *date_time);
+	GSM_Error (*SetDateTime)( GSM_DateTime *date_time);
 
-  GSM_Error (*GetAlarm)( int alarm_number, GSM_DateTime *date_time );
+	GSM_Error (*GetAlarm)( int alarm_number, GSM_DateTime *date_time );
 
-  GSM_Error (*SetAlarm)( int alarm_number, GSM_DateTime *date_time );
+	GSM_Error (*SetAlarm)( int alarm_number, GSM_DateTime *date_time );
 
-  GSM_Error (*DialVoice)( char *Number);
+	GSM_Error (*DialVoice)( char *Number);
 
-  GSM_Error (*DialData)( char *Number, char type, void (* callpassup)(char c));
+	GSM_Error (*DialData)( char *Number, char type, void (* callpassup)(char c));
 
-  GSM_Error (*GetIncomingCallNr)( char *Number );
+	GSM_Error (*GetIncomingCallNr)( char *Number );
 
-  GSM_Error (*GetNetworkInfo) ( GSM_NetworkInfo *NetworkInfo );
+	GSM_Error (*GetNetworkInfo) ( GSM_NetworkInfo *NetworkInfo );
 
-  GSM_Error (*GetCalendarNote) ( GSM_CalendarNote *CalendarNote);
+	GSM_Error (*GetCalendarNote) ( GSM_CalendarNote *CalendarNote);
 
-  GSM_Error (*WriteCalendarNote) ( GSM_CalendarNote *CalendarNote);
+	GSM_Error (*WriteCalendarNote) ( GSM_CalendarNote *CalendarNote);
 
-  GSM_Error (*DeleteCalendarNote) ( GSM_CalendarNote *CalendarNote);
+	GSM_Error (*DeleteCalendarNote) ( GSM_CalendarNote *CalendarNote);
 
-  GSM_Error (*NetMonitor) ( unsigned char mode, char *Screen );
+	GSM_Error (*NetMonitor) ( unsigned char mode, char *Screen );
 
-  GSM_Error (*SendDTMF) ( char *String );
+	GSM_Error (*SendDTMF) ( char *String );
 
-  GSM_Error (*GetBitmap) ( GSM_Bitmap *Bitmap );
+	GSM_Error (*GetBitmap) ( GSM_Bitmap *Bitmap );
   
-  GSM_Error (*SetBitmap) ( GSM_Bitmap *Bitmap );
+	GSM_Error (*SetBitmap) ( GSM_Bitmap *Bitmap );
 
-  GSM_Error (*SetRingtone) ( GSM_Ringtone *ringtone );
+	GSM_Error (*SetRingtone) ( GSM_Ringtone *ringtone );
 
-  GSM_Error (*SendRingtone) ( GSM_Ringtone *ringtone, char *dest );
+	GSM_Error (*SendRingtone) ( GSM_Ringtone *ringtone, char *dest );
 
-  GSM_Error (*Reset) ( unsigned char type );
+	GSM_Error (*Reset) ( unsigned char type );
 
-  GSM_Error (*GetProfile) ( GSM_Profile *Profile );
+	GSM_Error (*GetProfile) ( GSM_Profile *Profile );
 
-  GSM_Error (*SetProfile) ( GSM_Profile *Profile );
+	GSM_Error (*SetProfile) ( GSM_Profile *Profile );
   
-  bool      (*SendRLPFrame) ( RLP_F96Frame *frame, bool out_dtx );
+	bool      (*SendRLPFrame) ( RLP_F96Frame *frame, bool out_dtx );
 
-  GSM_Error (*CancelCall) ();
+	GSM_Error (*CancelCall) ();
   
-  GSM_Error (*EnableDisplayOutput) ();
+	GSM_Error (*EnableDisplayOutput) ();
   
-  GSM_Error (*DisableDisplayOutput) ();
+	GSM_Error (*DisableDisplayOutput) ();
  
-  GSM_Error (*EnableCellBroadcast) ();
+	GSM_Error (*EnableCellBroadcast) ();
 
-  GSM_Error (*DisableCellBroadcast) ();
+	GSM_Error (*DisableCellBroadcast) ();
 
-  GSM_Error (*ReadCellBroadcast) ( GSM_CBMessage *Message );
+	GSM_Error (*ReadCellBroadcast) ( GSM_CBMessage *Message );
   
-  GSM_Error (*SetKey) (int c, int up);
+	GSM_Error (*SetKey) (int c, int up);
   
-  GSM_Error (*HandleString) (char *s);
+	GSM_Error (*HandleString) (char *s);
 	
-  GSM_Error (*AnswerCall) (char s);
+	GSM_Error (*AnswerCall) (char s);
 
 } GSM_Functions;
 
@@ -887,16 +697,6 @@ typedef struct {
 extern GSM_Error Unimplemented(void);
 #define UNIMPLEMENTED (void *) Unimplemented
 
-/* Coding functions */
-extern void EncodeAscii (unsigned char* dest, const unsigned char* src, int len);
-extern void DecodeAscii (unsigned char* dest, const unsigned char* src, int len);
-extern void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len);
-extern void DecodeUnicode (unsigned char* dest, const unsigned char* src, int len);
-
-extern unsigned char EncodeWithDefaultAlphabet(unsigned char);
-extern unsigned char DecodeWithDefaultAlphabet(unsigned char);
-extern wchar_t EncodeWithUnicodeAlphabet(unsigned char);
-extern unsigned char DecodeWithUnicodeAlphabet(wchar_t);
 extern GSM_MemoryType StrToMemoryType (const char *s);
 
 inline void GSM_DataClear(GSM_Data *data);

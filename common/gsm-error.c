@@ -13,7 +13,10 @@
   Error codes.
 
   $Log$
-  Revision 1.1  2001-10-24 22:33:01  pkot
+  Revision 1.2  2001-11-08 16:34:19  pkot
+  Updates to work with new libsms
+
+  Revision 1.1  2001/10/24 22:33:01  pkot
   Moved error codes to a separate files
 
 
@@ -46,6 +49,7 @@ char *print_error(GSM_Error e)
 	case GE_SMSSENDFAILED:            return "SMS send fail.";
 	case GE_SMSWAITING:               return "Waiting for the next part of SMS.";
 	case GE_SMSTOOLONG:               return "SMS message too long.";
+	case GE_SMSWRONGFORMAT:           return "Wrong format of the SMS message.";
 	case GE_NONEWCBRECEIVED:          return "Attempt to read CB when no new CB received";
 	case GE_INTERNALERROR:            return "Problem occured internal to model specific code.";
 	case GE_CANTOPENFILE:             return "Can't open file with bitmap/ringtone";

@@ -13,7 +13,10 @@
   Error codes.
 
   $Log$
-  Revision 1.1  2001-10-24 22:33:00  pkot
+  Revision 1.2  2001-11-08 16:34:20  pkot
+  Updates to work with new libsms
+
+  Revision 1.1  2001/10/24 22:33:00  pkot
   Moved error codes to a separate files
 
 
@@ -48,28 +51,29 @@ typedef enum {
 	GE_SMSSENDFAILED,         /* 19. SMS send fail. */
 	GE_SMSWAITING,            /* 20. Waiting for the next part of SMS. */
 	GE_SMSTOOLONG,            /* 21. SMS message too long. */
-	GE_NONEWCBRECEIVED,       /* 22. Attempt to read CB when no new CB received */
-	GE_INTERNALERROR,         /* 23. Problem occured internal to model specific code. */
-	GE_CANTOPENFILE,          /* 24. Can't open file with bitmap/ringtone */
-	GE_WRONGNUMBEROFCOLORS,   /* 25. Wrong number of colors in specified bitmap file */
-	GE_WRONGCOLORS,           /* 26. Wrong colors in bitmap file */
-	GE_INVALIDFILEFORMAT,     /* 27. Invalid format of file */
-	GE_SUBFORMATNOTSUPPORTED, /* 28. Subformat of file not supported */
-	GE_FILETOOSHORT,          /* 29. Too short file to read */
-	GE_FILETOOLONG,           /* 30. Too long file to read */
-	GE_INVALIDIMAGESIZE,      /* 31. Invalid size of bitmap (in file, sms etc.) */
-	GE_NOTSUPPORTED,          /* 32. Function not supported by the phone */
-	GE_BUSY,                  /* 33. Command is still being executed. */
-	GE_USERCANCELED,          /* 34. */
-	GE_UNKNOWN,               /* 35. Unknown error - well better than nothing!! */
-	GE_MEMORYFULL,            /* 36. */
-	GE_NOTWAITING,            /* 37. Not waiting for a response from the phone */
-	GE_NOTREADY,              /* 38. */
+	GE_SMSWRONGFORMAT,        /* 22. Wrong format of the SMS */
+	GE_NONEWCBRECEIVED,       /* 23. Attempt to read CB when no new CB received */
+	GE_INTERNALERROR,         /* 24. Problem occured internal to model specific code. */
+	GE_CANTOPENFILE,          /* 25. Can't open file with bitmap/ringtone */
+	GE_WRONGNUMBEROFCOLORS,   /* 26. Wrong number of colors in specified bitmap file */
+	GE_WRONGCOLORS,           /* 27. Wrong colors in bitmap file */
+	GE_INVALIDFILEFORMAT,     /* 28. Invalid format of file */
+	GE_SUBFORMATNOTSUPPORTED, /* 29. Subformat of file not supported */
+	GE_FILETOOSHORT,          /* 30. Too short file to read */
+	GE_FILETOOLONG,           /* 31. Too long file to read */
+	GE_INVALIDIMAGESIZE,      /* 32. Invalid size of bitmap (in file, sms etc.) */
+	GE_NOTSUPPORTED,          /* 33. Function not supported by the phone */
+	GE_BUSY,                  /* 34. Command is still being executed. */
+	GE_USERCANCELED,          /* 35. */
+	GE_UNKNOWN,               /* 36. Unknown error - well better than nothing!! */
+	GE_MEMORYFULL,            /* 37. */
+	GE_NOTWAITING,            /* 38. Not waiting for a response from the phone */
+	GE_NOTREADY,              /* 39. */
 
 	/* The following are here in anticipation of data call requirements. */
 
-	GE_LINEBUSY,              /* 39. Outgoing call requested reported line busy */
-	GE_NOCARRIER              /* 40. No Carrier error during data call setup ? */
+	GE_LINEBUSY,              /* 40. Outgoing call requested reported line busy */
+	GE_NOCARRIER              /* 41. No Carrier error during data call setup ? */
 } GSM_Error;
 
 extern char *print_error(GSM_Error e);

@@ -13,7 +13,10 @@
   This file provides support for ringtones.
 
   $Log$
-  Revision 1.2  2001-09-20 21:46:21  pkot
+  Revision 1.3  2001-11-08 16:34:19  pkot
+  Updates to work with new libsms
+
+  Revision 1.2  2001/09/20 21:46:21  pkot
   Locale cleanups (Pawel Kot)
 
 
@@ -402,111 +405,111 @@ int OctetUnAlign(int CurrentBit)
 
 GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlength)
 {
-	int StartBit=0;
-	int spec,duration,scale;
+	int StartBit = 0;
+	int spec, duration, scale;
 	int HowMany;
-	int l,q,i;
+	int l, q, i;
 
-	StartBit=BitUnPackInt(package,StartBit,&l,8);
-	if (l!=0x02) {
+	StartBit = BitUnPackInt(package, StartBit, &l, 8);
+	if (l != 0x02) {
 		dprintf("Not header\n");
 		return GE_SUBFORMATNOTSUPPORTED;
 	}
 
-	StartBit=BitUnPackInt(package,StartBit,&l,7);    
-	if (l!=RingingToneProgramming) {
+	StartBit = BitUnPackInt(package, StartBit, &l, 7);
+	if (l != RingingToneProgramming) {
 		dprintf("Not RingingToneProgramming\n");
 		return GE_SUBFORMATNOTSUPPORTED;
 	}
     
 /* The page 3-23 of the specs says that <command-part> is always
    octet-aligned. */
-	StartBit=OctetUnAlign(StartBit);
+	StartBit = OctetUnAlign(StartBit);
 
-	StartBit=BitUnPackInt(package,StartBit,&l,7);    
-	if (l!=Sound) {
+	StartBit = BitUnPackInt(package, StartBit, &l, 7);
+	if (l != Sound) {
 		dprintf("Not Sound\n");
 		return GE_SUBFORMATNOTSUPPORTED;
 	}
 
-	StartBit=BitUnPackInt(package,StartBit,&l,3);    
-	if (l!=BasicSongType) {
+	StartBit = BitUnPackInt(package, StartBit, &l, 3);
+	if (l != BasicSongType) {
 		dprintf("Not BasicSongType\n");
 		return GE_SUBFORMATNOTSUPPORTED;
 	}
 
 /* Getting length of the tune name */
-	StartBit=BitUnPackInt(package,StartBit,&l,4);
-	l=l>>4;
+	StartBit = BitUnPackInt(package, StartBit, &l, 4);
+	l = l >> 4;
 
 /* Unpacking the name of the tune. */
-	StartBit=BitUnPack(package, StartBit, ringtone->name, 8*l);
-	ringtone->name[l]=0;
+	StartBit = BitUnPack(package, StartBit, ringtone->name, 8*l);
+	ringtone->name[l] = 0;
 
-	StartBit=BitUnPackInt(package,StartBit,&l,8);    
-	if (l!=1) return GE_SUBFORMATNOTSUPPORTED; //we support only one song pattern
+	StartBit = BitUnPackInt(package, StartBit, &l, 8);    
+	if (l != 1) return GE_SUBFORMATNOTSUPPORTED; //we support only one song pattern
 
-	StartBit=BitUnPackInt(package,StartBit,&l,3);          
-	if (l!=PatternHeaderId) {
+	StartBit = BitUnPackInt(package, StartBit, &l, 3);          
+	if (l != PatternHeaderId) {
 		dprintf("Not PatternHeaderId\n");
 		return GE_SUBFORMATNOTSUPPORTED;
 	}
 
-	StartBit+=2; //Pattern ID - we ignore it
+	StartBit += 2; //Pattern ID - we ignore it
 
-	StartBit=BitUnPackInt(package,StartBit,&l,4);          
+	StartBit = BitUnPackInt(package, StartBit, &l, 4);          
     
-	HowMany=0;
-	StartBit=BitUnPackInt(package, StartBit, &HowMany, 8);
+	HowMany = 0;
+	StartBit = BitUnPackInt(package, StartBit, &HowMany, 8);
 
-	scale=0;
-	ringtone->NrNotes=0;
+	scale = 0;
+	ringtone->NrNotes = 0;
     
-	for (i=0;i<HowMany;i++) {
+	for (i = 0; i < HowMany; i++) {
 
-		StartBit=BitUnPackInt(package,StartBit,&q,3);              
+		StartBit = BitUnPackInt(package, StartBit, &q, 3);
 		switch (q) {
 		case VolumeInstructionId:
-			StartBit+=4;
+			StartBit += 4;
 			break;
 		case StyleInstructionId:
-			StartBit=BitUnPackInt(package,StartBit,&l,2);              
-			l=l>>3;
+			StartBit = BitUnPackInt(package,StartBit,&l,2);
+			l = l >> 3;
 			break;
 		case TempoInstructionId:
-			StartBit=BitUnPackInt(package,StartBit,&l,5);
-			l=l>>3;
-			ringtone->tempo=BeatsPerMinute[l];
+			StartBit = BitUnPackInt(package, StartBit, &l, 5);
+			l = l >> 3;
+			ringtone->tempo = BeatsPerMinute[l];
 			break;
 		case ScaleInstructionId:
-			StartBit=BitUnPackInt(package,StartBit,&scale,2);
-			scale=scale>>6;
+			StartBit = BitUnPackInt(package, StartBit, &scale, 2);
+			scale = scale >> 6;
 			break;
 		case NoteInstructionId:
-			StartBit=BitUnPackInt(package,StartBit,&l,4);    
+			StartBit = BitUnPackInt(package, StartBit, &l, 4);
 
 			switch (l) {
-			case Note_C  :ringtone->notes[ringtone->NrNotes].note=0;break;
-			case Note_Cis:ringtone->notes[ringtone->NrNotes].note=1;break;
-			case Note_D  :ringtone->notes[ringtone->NrNotes].note=2;break;
-			case Note_Dis:ringtone->notes[ringtone->NrNotes].note=3;break;
-			case Note_E  :ringtone->notes[ringtone->NrNotes].note=4;break;
-			case Note_F  :ringtone->notes[ringtone->NrNotes].note=6;break;
-			case Note_Fis:ringtone->notes[ringtone->NrNotes].note=7;break;
-			case Note_G  :ringtone->notes[ringtone->NrNotes].note=8;break;
-			case Note_Gis:ringtone->notes[ringtone->NrNotes].note=9;break;
-			case Note_A  :ringtone->notes[ringtone->NrNotes].note=10;break;
-			case Note_Ais:ringtone->notes[ringtone->NrNotes].note=11;break;
-			case Note_H  :ringtone->notes[ringtone->NrNotes].note=12;break;
-			default      :ringtone->notes[ringtone->NrNotes].note=255;break; //Pause ?
+			case Note_C   :ringtone->notes[ringtone->NrNotes].note = 0;   break;
+			case Note_Cis :ringtone->notes[ringtone->NrNotes].note = 1;   break;
+			case Note_D   :ringtone->notes[ringtone->NrNotes].note = 2;   break;
+			case Note_Dis :ringtone->notes[ringtone->NrNotes].note = 3;   break;
+			case Note_E   :ringtone->notes[ringtone->NrNotes].note = 4;   break;
+			case Note_F   :ringtone->notes[ringtone->NrNotes].note = 6;   break;
+			case Note_Fis :ringtone->notes[ringtone->NrNotes].note = 7;   break;
+			case Note_G   :ringtone->notes[ringtone->NrNotes].note = 8;   break;
+			case Note_Gis :ringtone->notes[ringtone->NrNotes].note = 9;   break;
+			case Note_A   :ringtone->notes[ringtone->NrNotes].note = 10;  break;
+			case Note_Ais :ringtone->notes[ringtone->NrNotes].note = 11;  break;
+			case Note_H   :ringtone->notes[ringtone->NrNotes].note = 12;  break;
+			default       :ringtone->notes[ringtone->NrNotes].note = 255; break; //Pause ?
 			}
       
-			if (ringtone->notes[ringtone->NrNotes].note!=255)
-				ringtone->notes[ringtone->NrNotes].note=ringtone->notes[ringtone->NrNotes].note+scale*14;
+			if (ringtone->notes[ringtone->NrNotes].note != 255)
+				ringtone->notes[ringtone->NrNotes].note = ringtone->notes[ringtone->NrNotes].note + scale*14;
 
-			StartBit=BitUnPackInt(package,StartBit,&duration,3);    
+			StartBit = BitUnPackInt(package, StartBit, &duration, 3);
 
-			StartBit=BitUnPackInt(package,StartBit,&spec,2);    
+			StartBit = BitUnPackInt(package, StartBit, &spec, 2);    
 
 			if (duration==Duration_Full && spec==DottedNote)
 				ringtone->notes[ringtone->NrNotes].duration=128*3/2;
@@ -561,7 +564,7 @@ GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlengt
 
 GSM_Error GSM_ReadRingtoneFromSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
 {
-	if (message->UDHType==GSM_RingtoneUDH) {
+	if (message->UDH[0].Type==SMS_Ringtone) {
 		return GSM_UnPackRingtone(ringtone, message->MessageText, message->Length);
 	} else return GE_SUBFORMATNOTSUPPORTED;
 }
@@ -569,7 +572,7 @@ GSM_Error GSM_ReadRingtoneFromSMS(GSM_SMSMessage *message, GSM_Ringtone *rington
 
 int GSM_SaveRingtoneToSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
 {  
-	int i, j=GSM_MAX_SMS_8_BIT_LENGTH;
+	int i, j = GSM_MAX_8BIT_SMS_LENGTH;
   
 	char UserDataHeader[7]= { 0x06,  /* User Data Header Length */
 				  0x05,  /* IEI: application port addressing scheme, 16 bit address */
@@ -589,21 +592,26 @@ int GSM_SaveRingtoneToSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
 	   - set UserDataHeaderIndicator
 	*/
 
-	message->Type = GST_MO;
-	message->Class = 1;
-	message->Compression = false;
-	message->EightBit = true;
+	message->Type = SMS_Sent;
+
+	/* Data Coding Scheme */
+	message->DCS.Type = SMS_GeneralDataCoding;
+	message->DCS.u.General.Class = 2;
+	message->DCS.u.General.Compressed = false;
+	message->DCS.u.General.Alphabet = SMS_8bit;
+
 	message->MessageCenter.No = 1;
-	message->Validity = 4320; /* 4320 minutes == 72 hours */
+	message->Validity.VPF = SMS_RelativeFormat;
+	message->Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
 	message->ReplyViaSameSMSC = false;
 
-	message->UDHType = GSM_RingtoneUDH;
+	message->UDH_No = 1;
+	message->UDH[0].Type = SMS_Ringtone;
   
-	i=GSM_PackRingtone(ringtone, message->MessageText, &j);
-
-	message->Length=j;
+	message->Length = j;
   
-	memcpy(message->UDH,UserDataHeader,7);
+	memcpy(message->MessageText, UserDataHeader, 7);
+	i = GSM_PackRingtone(ringtone, message->MessageText + 7, &j);
   
 	return i;
 }

@@ -15,7 +15,10 @@
   kernel AT Emulator IDSN code by Fritz Elfert and others.
   
   $Log$
-  Revision 1.4  2001-07-03 15:27:03  pkot
+  Revision 1.5  2001-11-08 16:34:19  pkot
+  Updates to work with new libsms
+
+  Revision 1.4  2001/07/03 15:27:03  pkot
   AT commands for SMS handling support (Tamas Bondar)
   Small at-emulator code cleanup (me)
 
@@ -316,7 +319,7 @@ static GSM_Error ATEM_ReadSMS(int number, GSM_MemoryType type, GSM_SMSMessage *m
 	GSM_Error error;
 
 	message->MemoryType = type;
-	message->Location = number;
+	message->Number = number;
 	error = GSM->GetSMSMessage(message);
 
 	return error;
@@ -326,13 +329,14 @@ static void ATEM_PrintSMS(char *line, GSM_SMSMessage *message, int mode)
 {
 	switch (mode) {
 	case INTERACT_MODE:
-		gsprintf(line, MAX_LINE_LENGTH, _("\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\rText: %s\n\r"), message->Time.Day, message->Time.Month, message->Time.Year, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Sender, message->MessageCenter.Number, message->MessageText);
+		gsprintf(line, MAX_LINE_LENGTH, _("\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\rText: %s\n\r"), message->Time.Day, message->Time.Month, message->Time.Year, message->Time.Hour, message->Time.Minute, message->Time.Second, message->RemoteNumber.number, message->MessageCenter.Number, message->MessageText);
 		break;
 	case TEXT_MODE:
-		if (message->EightBit)
-			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->Sender, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, _("<Not implemented>"));
+		if ((message->DCS.Type == SMS_GeneralDataCoding) &&
+		    (message->DCS.u.General.Alphabet == SMS_8bit))
+			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->RemoteNumber.number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, _("<Not implemented>"));
 		else
-			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->Sender, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, message->MessageText);
+			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->RemoteNumber.number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, message->MessageText);
 		break;
 	case PDU_MODE:
 		gsprintf(line, MAX_LINE_LENGTH, _("<Not implemented>"));
@@ -347,7 +351,7 @@ static void ATEM_EraseSMS(int number, GSM_MemoryType type)
 {
 	GSM_SMSMessage message;
 	message.MemoryType = type;
-	message.Location = number;
+	message.Number = number;
 	if (GSM->DeleteSMSMessage(&message) == GE_NONE) {
 		ATEM_ModemResult(MR_OK);
 	} else {
@@ -563,12 +567,12 @@ bool	ATEM_CommandPlusC(char **buf)
 				strcasecmp(*buf, "3") == 0 ||
 				strcasecmp(*buf, "\"REC READ\"") == 0 ||
 				strcasecmp(*buf, "\"STO SENT\"") == 0) {
-				status = GSS_SENTREAD;
+				status = SMS_Sent;
 			} else if (strcasecmp(*buf, "0") == 0 ||
 				strcasecmp(*buf, "2") == 0 ||
 				strcasecmp(*buf, "\"REC UNREAD\"") == 0 ||
 				strcasecmp(*buf, "\"STO UNSENT\"") == 0) {
-				status = GSS_NOTSENTREAD;
+				status = SMS_Unsent;
 			} else if (strcasecmp(*buf, "4") == 0 ||
 				strcasecmp(*buf, "\"ALL\"") == 0) {
 				status = 4; /* ALL */

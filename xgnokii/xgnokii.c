@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.38  2001-09-14 13:14:03  pkot
+  Revision 1.39  2001-11-08 16:34:20  pkot
+  Updates to work with new libsms
+
+  Revision 1.38  2001/09/14 13:14:03  pkot
   Xgnokii WM fixes (Martin Lucina)
 
   Revision 1.37  2001/06/27 23:52:52  pkot
@@ -77,9 +80,11 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
-#include "fbus-6110.h"
-#include "fbus-3810.h"
 #include "cfgreader.h"
+#include "phones/nk7110.h"
+#include "phones/nk6110.h"
+#include "phones/nk3110.h"
+#include "phones/nk2110.h"
 #include "xgnokii.h"
 #include "xgnokii_common.h"
 #include "xgnokii_lowlevel.h"
