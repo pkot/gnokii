@@ -517,7 +517,7 @@ static int sendsms(int argc, char *argv[])
 	/* Send the message. */
 	error = SendSMS(&data, &State);
 
-	if (error == GE_SMSSENDOK) {
+	if (error == GE_NONE) {
 		fprintf(stderr, _("Send succeeded!\n"));
 	} else {
 		fprintf(stderr, _("SMS Send failed (%s)\n"), print_error(error));
@@ -1437,7 +1437,7 @@ static int sendlogo(int argc, char *argv[])
 
 	SendSMS(&data, &State);
 
-	if (error == GE_SMSSENDOK)
+	if (error == GE_NONE)
 		fprintf(stdout, _("Send succeeded!\n"));
 	else
 		fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);

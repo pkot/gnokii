@@ -1080,7 +1080,7 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 
 	case P7110_SUBSMS_SMS_SENT: /* 0x02 */
 		dprintf("SMS sent\n");
-		e = GE_SMSSENDOK;
+		e = GE_NONE;
 		break;
 
 	case P7110_SUBSMS_SEND_FAIL: /* 0x03 */

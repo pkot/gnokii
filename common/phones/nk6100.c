@@ -1180,7 +1180,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 	switch (message[3]) {
 	/* Message sent */
 	case 0x02:
-		return GE_SMSSENDOK;
+		return GE_NONE;
 
 	/* Send failed */
 	case 0x03:

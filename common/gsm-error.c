@@ -51,7 +51,6 @@ char *print_error(GSM_Error e)
 	case GE_PHBOOKNAMETOOLONG:        return "Phonebook name is too long.";
 	case GE_PHBOOKNUMBERTOOLONG:      return "Phonebook number is too long.";
 	case GE_PHBOOKWRITEFAILED:        return "Phonebook write failed.";
-	case GE_SMSSENDOK:                return "SMS was send correctly.";
 	case GE_SMSSENDFAILED:            return "SMS send fail.";
 	case GE_SMSWAITING:               return "Waiting for the next part of SMS.";
 	case GE_SMSTOOLONG:               return "SMS message too long.";

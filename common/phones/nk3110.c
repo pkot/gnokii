@@ -806,7 +806,7 @@ static GSM_Error P3110_IncomingSMSSend(int messagetype, unsigned char *message, 
 {
 	dprintf("SMS send OK (0x%02hhx)\n", message[2]);
 	data->SMSMessage->Number = (int) message[2];
-	return GE_SMSSENDOK;
+	return GE_NONE;
 }
 
 

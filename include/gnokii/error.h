@@ -53,7 +53,7 @@ typedef enum {
 	GE_PHBOOKNAMETOOLONG,     /* 15. Phonebook name is too long. */
 	GE_PHBOOKNUMBERTOOLONG,   /* 16. Phonebook number is too long. */
 	GE_PHBOOKWRITEFAILED,     /* 17. Phonebook write failed. */
-	GE_SMSSENDOK,             /* 18. SMS was send correctly. */
+	GE_RESERVED_1,            /* 18. SMS was send correctly. */
 	GE_SMSSENDFAILED,         /* 19. SMS send fail. */
 	GE_SMSWAITING,            /* 20. Waiting for the next part of SMS. */
 	GE_SMSTOOLONG,            /* 21. SMS message too long. */

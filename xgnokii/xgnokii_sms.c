@@ -905,7 +905,7 @@ static gint SendSMSCore(GSM_SMSMessage * sms)
 	error = m->status;
 	g_free(m);
 
-	if (error != GE_SMSSENDOK) {
+	if (error != GE_NONE) {
 		gchar *buf = g_strdup_printf(_("SMS send to %s failed\n(error=%d)"),
 					     sms->RemoteNumber.number, error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
@@ -996,7 +996,7 @@ static void DoSendSMS(void)
 					g_free(buf);
 					GUI_Refresh();
 
-					if (SendSMSCore(&sms) != GE_SMSSENDOK) {
+					if (SendSMSCore(&sms) != GE_NONE) {
 						gtk_widget_hide(infoDialog.dialog);
 						GUI_Refresh();
 						break;
@@ -1027,7 +1027,7 @@ static void DoSendSMS(void)
 					g_free(buf);
 					GUI_Refresh();
 
-					if (SendSMSCore(&sms) != GE_SMSSENDOK) {
+					if (SendSMSCore(&sms) != GE_NONE) {
 						gtk_widget_hide(infoDialog.dialog);
 						GUI_Refresh();
 						break;
