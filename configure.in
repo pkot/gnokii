@@ -93,7 +93,7 @@ if test "$USE_NLS" = "yes"; then
                              [ NLS_LIBS="$NLS_LIBS -lintl"
                                AC_DEFINE(HAVE_LIBINTL) ],
                              AC_MSG_ERROR(not found library: intl !!!),
-			     [ $NLS_FLAGS ]))
+			     [ $NLS_LIBS]))
 
   AC_SUBST(HAVE_LIBINTL_H)  
   AC_SUBST(HAVE_LIBINTL)
@@ -393,7 +393,7 @@ AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(mktime select strdup strstr strtol strtok strsep snprintf)
 
-CFLAGS="$CFLAGS $NLS_FLAGS"
+CFLAGS="$CFLAGS $NLS_CFLAGS"
 LIBS="$LIBS $NLS_LIBS"
 
 PACKAGE=gnokii
