@@ -915,7 +915,7 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	if (data->RawSMS->RejectDuplicates)  req[12] |= 0x04;
 	if (data->RawSMS->Report)            req[12] |= 0x20;
 	if (data->RawSMS->UDHIndicator)      req[12] |= 0x40;
-	if (data->RawSMS->ValidityIndicator) req[12] |= 0x00;
+	if (data->RawSMS->ValidityIndicator) req[12] |= 0x10;
 
 	req[13] = data->RawSMS->Reference;
 	req[14] = data->RawSMS->PID;
