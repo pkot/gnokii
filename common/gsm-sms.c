@@ -708,7 +708,8 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	if (data->SMSMessage->MessageCenter.No) {
 		data->MessageCenter = &data->SMSMessage->MessageCenter;
-		SM_Functions(GOP_GetSMSCenter, data, state);
+		error = SM_Functions(GOP_GetSMSCenter, data, state);
+		if (error != GE_NONE) return error;
 	}
 
 	if (count < 1) return GE_SMSWRONGFORMAT;

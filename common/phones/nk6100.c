@@ -1214,6 +1214,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 		/* I belive this is GE_SMSSENDFAILED in all cases -- pkot */
 		switch (message[6]) {
 		case 0x02:
+		case 0x6f: /* maybe bad sms center number */
 			return GE_SMSSENDFAILED;
 		default:
 			return GE_UNHANDLEDFRAME;
