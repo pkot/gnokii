@@ -3050,6 +3050,7 @@ static int getphonebook(int argc, char *argv[])
 	int count, start_entry, end_entry = 0;
 	gn_error error;
 	char *memory_type_string;
+	char location[32];
 	int type = 0; /* Output type:
 				0 - not formatted
 				1 - CSV
@@ -3110,11 +3111,9 @@ static int getphonebook(int argc, char *argv[])
 					fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);
 				break;
 			case 2:
-			{
-				char location[32];
 				sprintf(location, "%s%d", memory_type_string, entry.location);
 				gn_phonebook2vcard(stdout, &entry, location);
-			}
+				break;
 			case 3:
 				gn_phonebook2ldif(stdout, &entry);
 				break;

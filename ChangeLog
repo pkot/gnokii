@@ -28,6 +28,7 @@
     o getprofile shows the real ringtone name      (BORBELY Zoltan)
     o deleteringtone command added                 (BORBELY Zoltan)
     o sendlogo won't load different logo type      (BORBELY Zoltan)
+    o missing break between vcard and ldap part (Vincent Glotzbach)
  * libgnokii updates
     o Nokia 6250 has irda                               (Pawel Kot)
     o utf8, base64 and LDIF export fix            (Martin Goldhahn)
