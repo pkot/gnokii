@@ -3,6 +3,7 @@
  * build system updates
     o don't exit configure when no pthread library is present
       in the system                                      (Pawel Kot)
+    o check for stdint.h include                         (Pawel Kot)
 
 0.5.0pre11
 ==========
