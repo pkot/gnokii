@@ -74,8 +74,17 @@ Basic options are:
 	Set if you want to enable all security features supported by your 
         mobile (PIN change, etc.).
 
-    --enable-debug
-	Set if you want debug code compiled in.
+    --disable-debug
+	Set if you don't want debug code compiled in.
+
+    --disable-rlpdebug
+	Set if you don't want RLP code compiled in.
+
+    --disable-xdebug
+	Set if you don't want X code compiled in.
+
+    --enable-fulldebug
+	Set if you want to produce binaries with debug symbols (cc -g)
 
     --help		
 	Shows all options.

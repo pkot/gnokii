@@ -52,7 +52,7 @@
 #ifndef RLP_DEBUG
 #  define rlpprintf(a...) do { } while (0)
 #else
-#  define rlpprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0)
+#  define rlpprintf(a...) do { gn_log_rlpdebug(a); } while (0)
 #endif
 
 /* Our state machine which handles all of nine possible states of RLP

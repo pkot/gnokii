@@ -3,9 +3,11 @@ When you report some problems with gnokii please attach the following informatio
  - connection type (irda/cable with its type)
  - gnokii version (gnokii --version) along with source for it: cvs,
 tarball, binary package
- - if you can, compile gnokii with --enable-debug option for configure and
-attach gzipped output to the email:
-(x)gnokii(d) [parameters] 2>errfile
+ - edit you gnokiirc and enable debugging, e.g.:
+    [logging]
+    debug = on
+   and attach gzipped output to the email:
+    (x)gnokii(d) [parameters] 2>errfile
 
 It would be good if you name the problem in the subject if possible and
 name if it meets gnokii, xgnokii or gnokiid binaries or gnokii as a whole.

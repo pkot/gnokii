@@ -661,4 +661,9 @@ typedef struct {
 	gn_ringtone_info ringtone[GN_RINGTONE_MAX_COUNT];
 } gn_ringtone_list;
 
+typedef enum {
+	GN_LOG_T_NONE = 0,
+	GN_LOG_T_STDERR = 1
+} gn_log_target;
+
 #endif	/* _gnokii_common_h */

@@ -50,9 +50,7 @@ static char *lockfile = NULL;
 
 inline void InsertEvent (PhoneEvent *event)
 {
-# ifdef XDEBUG
-  g_print ("Inserting Event: %d\n", event->event);
-# endif
+  gn_log_xdebug ("Inserting Event: %d\n", event->event);
   pthread_mutex_lock (&eventsMutex);
   ScheduledEvents = g_slist_prepend (ScheduledEvents, event);
   pthread_mutex_unlock (&eventsMutex);
@@ -107,11 +105,9 @@ static gn_error InitModelInf (void)
   g_free (phoneMonitor.phone.revision);
   phoneMonitor.phone.revision = g_strdup (rev);
 
-#ifdef XDEBUG
-  g_print ("Version: %s\n", phoneMonitor.phone.version);
-  g_print ("Model: %s\n", phoneMonitor.phone.model);
-  g_print ("Revision: %s\n", phoneMonitor.phone.revision);
-#endif
+  gn_log_xdebug ("Version: %s\n", phoneMonitor.phone.version);
+  gn_log_xdebug ("Model: %s\n", phoneMonitor.phone.model);
+  gn_log_xdebug ("Revision: %s\n", phoneMonitor.phone.revision);
 
   free (data);
   return GN_ERR_NONE;
@@ -162,9 +158,7 @@ static gn_error fbusinit (const char * const iname)
 
   error = gn_gsm_initialise (&sm);
 
-#ifdef XDEBUG
-  g_print ("fbusinit: error %d\n", error);
-#endif
+  gn_log_xdebug ("fbusinit: error %d\n", error);
 
   if (error != GN_ERR_NONE)
   {
@@ -226,9 +220,7 @@ static void RefreshSMS (const gint number)
   register gint i;
   
 
-# ifdef XDEBUG
-  g_print ("RefreshSMS is running...\n");
-# endif
+  gn_log_xdebug ("RefreshSMS is running...\n");
 
   pthread_mutex_lock (&smsMutex);
   FreeArray (&(phoneMonitor.sms.messages));
@@ -370,9 +362,7 @@ void *Connect (void *phone)
 
   data = calloc (1, sizeof (gn_data));
   
-# ifdef XDEBUG
-  g_print ("Initializing connection...\n");
-# endif
+  gn_log_xdebug ("Initializing connection...\n");
 
   if (fbusinit ((gchar *)phone) != GN_ERR_NONE)
   {
@@ -380,9 +370,7 @@ void *Connect (void *phone)
     exit (1);
   }
 
-# ifdef XDEBUG
-  g_print ("Phone connected. Starting monitoring...\n");
-# endif
+  gn_log_xdebug ("Phone connected. Starting monitoring...\n");
 
   while (1)
   {
@@ -425,9 +413,7 @@ void *Connect (void *phone)
 
     while ((event = RemoveEvent ()) != NULL)
     {
-#     ifdef XDEBUG      
-      g_print ("Processing Event: %d\n", event->event);
-#     endif
+      gn_log_xdebug ("Processing Event: %d\n", event->event);
       phoneMonitor.working = TRUE;
       if (event->event <= Event_Exit)
         if ((error = DoAction[event->event] (event->data)) != GN_ERR_NONE)

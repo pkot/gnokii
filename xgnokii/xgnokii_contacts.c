@@ -2162,11 +2162,9 @@ static void SaveContacts(void)
 		/* Save Phone memory */
 		for (i = 0; i < memoryStatus.MaxME; i++) {
 			pbEntry = g_ptr_array_index(contactsMemory, i);
-#ifdef XDEBUG
-			g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
+			gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
 				pbEntry->entry.number, (int) pbEntry->entry.memory_type,
 				pbEntry->entry.caller_group, (int) pbEntry->status);
-#endif
 			if (pbEntry->status == E_Changed || pbEntry->status == E_Deleted) {
 				if (pbEntry->status == E_Deleted) {
 					pbEntry->entry.name[0] = '\0';
@@ -2200,11 +2198,9 @@ static void SaveContacts(void)
 		for (i = memoryStatus.MaxME; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++) {
 			pbEntry = g_ptr_array_index(contactsMemory, i);
 
-#ifdef XDEBUG
-			g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
+			gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
 				pbEntry->entry.number, (int) pbEntry->entry.memory_type,
 				pbEntry->entry.caller_group, (int) pbEntry->status);
-#endif
 
 			if (pbEntry->status == E_Changed || pbEntry->status == E_Deleted) {
 				if (pbEntry->status == E_Deleted) {
@@ -2332,11 +2328,9 @@ void GUI_RefreshContacts(void)
 
 			gtk_clist_set_row_data(GTK_CLIST(clist), row_i++, (gpointer) pbEntry);
 		}
-#ifdef XDEBUG
-		g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
+		gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
 			pbEntry->entry.number, (int) pbEntry->entry.memory_type,
 			pbEntry->entry.caller_group, (int) pbEntry->status);
-#endif
 	}
 
 	gtk_clist_sort(GTK_CLIST(clist));

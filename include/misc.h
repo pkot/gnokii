@@ -82,17 +82,17 @@
 #  ifndef DEBUG
 #    define dprintf(a...) do { } while (0)
 #  else
-#    define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0)
+#    define dprintf(a...) do { gn_log_debug(a); } while (0)
 #  endif /* DEBUG */
 #  /* Use it for error reporting */
-#  define dump(a...) do { dprintf(a); gn_elog_write(a); } while (0)
+#  define dump(a...) do { gn_elog_write(a); } while (0)
 #else
 #  ifndef DEBUG
 #    define dump while (0)
 #    define dprintf while (0)
 #  else
-#    define dump printf
-#    define dprintf printf
+#    define dump gn_elog_write
+#    define dprintf gn_log_debug
 #  endif /* DEBUG */
 #endif /* __GNUC__ */
 

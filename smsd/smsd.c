@@ -106,9 +106,7 @@ gint LoadDB (void)
   
   g_string_sprintf (buf, "%s/lib%s.so", smsdConfig.libDir, smsdConfig.dbMod);
 
-#ifdef XDEBUG
-  g_print ("Trying to load module %s\n", buf->str);
-#endif
+  gn_log_xdebug ("Trying to load module %s\n", buf->str);
     
   handle = dlopen (buf->str, RTLD_LAZY);
   if (!handle)
@@ -368,11 +366,9 @@ gint WriteSMS (gn_sms *sms)
   pthread_cond_wait (&sendSMSCond, &sendSMSMutex);
   pthread_mutex_unlock (&sendSMSMutex);
 
-#ifdef XDEBUG
-  g_print ("Address: %s\nText: %s\n",
+  gn_log_xdebug ("Address: %s\nText: %s\n",
   sms->remote.number,
   sms->user_data[0].u.text);
-#endif
 
   error = m->status;
   g_free (m);
@@ -404,13 +400,11 @@ static void ReadSMS (gpointer d, gpointer userData)
     }
     else */
     {  
-#ifdef XDEBUG 
-      g_print ("%d. %s   ", data->number, data->remote.number);
-      g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
+      gn_log_xdebug ("%d. %s   ", data->number, data->remote.number);
+      gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
                 data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
                 data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
                 data->user_data[0].u.text);
-#endif
       error = (*DB_InsertSMS) (data, smsdConfig.phone);
     }
     

@@ -269,8 +269,8 @@ static void MarkSMSasRead(gpointer d, gpointer userData)
 			dprint_status1 = g_strdup(_("unknown"));
 			break;
 		}
-		dprintf("In MarkSMSasRead : data->status : %s \n", dprint_status1);
-		dprintf("In MarkSMSasRead : data->number : %i row : %i\n", data->number, row);
+		gn_log_xdebug("In MarkSMSasRead : data->status : %s \n", dprint_status1);
+		gn_log_xdebug("In MarkSMSasRead : data->number : %i row : %i\n", data->number, row);
 #endif
 		if (data->number == row) data->status = GN_SMS_Read;
 	};
@@ -1066,11 +1066,9 @@ static gint Sendsmscore(gn_sms * sms)
 	pthread_cond_wait(&sendSMSCond, &sendSMSMutex);
 	pthread_mutex_unlock(&sendSMSMutex);
 
-#ifdef XDEBUG
-	g_print("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
+	gn_log_xdebug("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
 		sms->remote.number, sms->user_data[0].u.text,
 		GTK_TOGGLE_BUTTON(sendSMS.report)->active, sendSMS.center);
-#endif
 
 	error = m->status;
 	g_free(m);

@@ -36,7 +36,7 @@ Header files needed for developing applications using gnokii.
 %setup -q
 
 %build
-./configure --prefix=/usr --with-xgnokiidir=/usr/X11R6 --enable-security #--enable-debug --enable-rlpdebug
+./configure --prefix=/usr --with-xgnokiidir=/usr/X11R6 --enable-security
 make
 
 %install

@@ -9,6 +9,30 @@ o change description
 
 v1.8 2004-??-??
 
+	2004-02-19
+	o new type
+		+typedef enum {
+		+...
+		+} gn_log_target;
+
+	o new variable
+		+extern API gn_log_target gn_log_debug_mask;
+
+	o new variable
+		+extern API gn_log_target gn_log_rlpdebug_mask;
+
+	o new variable
+		+extern API gn_log_target gn_log_xdebug_mask;
+
+	o new function
+		+API void gn_log_debug(const char *fmt, ...);
+
+	o new function
+		+API void gn_log_rlpdebug(const char *fmt, ...);
+
+	o new function
+		+API void gn_log_xdebug(const char *fmt, ...);
+
 	2004-02-17
 	o new function
 		+API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *buffer);

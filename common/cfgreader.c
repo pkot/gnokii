@@ -391,6 +391,25 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 	return true;
 }
 
+static bool cfg_get_log_target(gn_log_target *t, const char *opt)
+{
+	char *val;
+
+	if (!(val = gn_cfg_get(gn_cfg_info, "logging", opt)))
+		val = "off";
+
+	if (!strcasecmp(val, "off"))
+		*t = GN_LOG_T_NONE;
+	else if (!strcasecmp(val, "on"))
+		*t = GN_LOG_T_STDERR;
+	else {
+		fprintf(stderr, _("Unrecognized [logging] option \"%s\", use \"off\" or \"on\" value\n"), opt);
+		return false;
+	}
+
+	return true;
+}
+
 API int gn_cfg_read(char **bindir)
 {
 	char *homedir;
@@ -464,6 +483,10 @@ API int gn_cfg_read(char **bindir)
 
 	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
 	if (!*bindir) (char *)*bindir = default_bindir;
+
+	if (!cfg_get_log_target(&gn_log_debug_mask, "debug")) return -2;
+	if (!cfg_get_log_target(&gn_log_rlpdebug_mask, "rlpdebug")) return -2;
+	if (!cfg_get_log_target(&gn_log_xdebug_mask, "xdebug")) return -2;
 
 	return 0;
 }

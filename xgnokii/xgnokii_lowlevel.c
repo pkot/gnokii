@@ -81,9 +81,7 @@ int isSMSactivated = 0;
 
 inline void GUI_InsertEvent(PhoneEvent * event)
 {
-#ifdef XDEBUG
-	g_print("Inserting Event: %d\n", event->event);
-#endif
+	gn_log_xdebug("Inserting Event: %d\n", event->event);
 	pthread_mutex_lock(&eventsMutex);
 	ScheduledEvents = g_slist_prepend(ScheduledEvents, event);
 	pthread_mutex_unlock(&eventsMutex);
@@ -195,12 +193,10 @@ static gn_error InitModelInf(void)
 		}
 	}
 
-#ifdef XDEBUG
-	g_print("Version: %s\n", phoneMonitor.phone.version);
-	g_print("Model: %s\n", phoneMonitor.phone.model);
-	g_print("IMEI: %s\n", phoneMonitor.phone.imei);
-	g_print("Revision: %s\n", phoneMonitor.phone.revision);
-#endif
+	gn_log_xdebug("Version: %s\n", phoneMonitor.phone.version);
+	gn_log_xdebug("Model: %s\n", phoneMonitor.phone.model);
+	gn_log_xdebug("IMEI: %s\n", phoneMonitor.phone.imei);
+	gn_log_xdebug("Revision: %s\n", phoneMonitor.phone.revision);
 	return GN_ERR_NONE;
 }
 
@@ -237,9 +233,7 @@ static gn_error fbusinit(bool enable_monitoring)
 	/* Initialise the code for the GSM interface. */
 	error = gn_gsm_initialise(&statemachine);
 
-#ifdef XDEBUG
-	g_print("fbusinit: error %d\n", error);
-#endif
+	gn_log_xdebug("fbusinit: error %d\n", error);
 
 	if (error != GN_ERR_NONE) {
 		g_print(_("GSM/FBUS init failed!\n"));
@@ -321,9 +315,7 @@ static void RefreshSMS(const gint number)
 	GSList *tmp_list;
 	gint i, j, dummy;
 
-#ifdef XDEBUG
-	g_print("RefreshSMS is running...\n");
-#endif
+	gn_log_xdebug("RefreshSMS is running...\n");
 
 	gn_data_clear(&gdat);
 
@@ -1242,21 +1234,15 @@ void *GUI_Connect(void *a)
 	PhoneEvent *event;
 	gn_error error;
 
-#ifdef XDEBUG
-	g_print("Initializing connection...\n");
-#endif
+	gn_log_xdebug("Initializing connection...\n");
 
 	phoneMonitor.working = _("Connecting...");
 	if (fbusinit(true) != GN_ERR_NONE) {
-#ifdef XDEBUG
-		g_print("Initialization failed...\n");
-#endif
+		gn_log_xdebug("Initialization failed...\n");
 		MainExit();
 	}
 
-#ifdef XDEBUG
-	g_print("Phone connected. Starting monitoring...\n");
-#endif
+	gn_log_xdebug("Phone connected. Starting monitoring...\n");
 
 	sleep(1);
 
@@ -1279,9 +1265,7 @@ void *GUI_Connect(void *a)
 		usleep(50000);
 
 		if ((call = gn_call_get_active(0)) != NULL) {
-#ifdef XDEBUG
-			g_print("Call in progress: %s\n", phoneMonitor.call.callNum);
-#endif
+			gn_log_xdebug("Call in progress: %s\n", phoneMonitor.call.callNum);
 			gdat.display_status = &displaystatus;
 			gn_sm_functions(GN_OP_GetDisplayStatus, &gdat, &statemachine);
 			if (displaystatus & (1<<GN_DISP_Call_In_Progress)) {
@@ -1334,9 +1318,7 @@ void *GUI_Connect(void *a)
 		pthread_mutex_unlock(&netMonMutex);
 
 		while ((event = RemoveEvent()) != NULL) {
-#ifdef XDEBUG
-			g_print("Processing Event: %d\n", event->event);
-#endif
+			gn_log_xdebug("Processing Event: %d\n", event->event);
 			phoneMonitor.working = _("Working...");
 			if (event->event <= Event_Exit)
 				if ((error = DoAction[event->event] (event->data)) != GN_ERR_NONE)

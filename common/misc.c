@@ -44,6 +44,9 @@
 #include "misc.h"
 #include "gnokii.h"
 
+API gn_log_target gn_log_debug_mask = GN_LOG_T_NONE;
+API gn_log_target gn_log_rlpdebug_mask = GN_LOG_T_NONE;
+API gn_log_target gn_log_xdebug_mask = GN_LOG_T_NONE;
 API void (*gn_elog_handler)(const char *fmt, va_list ap) = NULL;
 
 API int gn_line_get(FILE *file, char *line, int count)
@@ -146,18 +149,67 @@ API char *gn_model_get(const char *num)
 	return (gn_phone_model_get(num)->model);
 }
 
+static void log_printf(gn_log_target mask, const char *fmt, va_list ap)
+{
+	if (mask & GN_LOG_T_STDERR) {
+		vfprintf(stderr, fmt, ap);
+		fflush(stderr);
+	}
+}
+
+API void gn_log_debug(const char *fmt, ...)
+{
+#ifdef DEBUG
+	va_list ap;
+
+	va_start(ap, fmt);
+
+	log_printf(gn_log_debug_mask, fmt, ap);
+
+	va_end(ap);
+#endif
+}
+
+API void gn_log_rlpdebug(const char *fmt, ...)
+{
+#ifdef RLP_DEBUG
+	va_list ap;
+
+	va_start(ap, fmt);
+
+	log_printf(gn_log_rlpdebug_mask, fmt, ap);
+
+	va_end(ap);
+#endif
+}
+
+API void gn_log_xdebug(const char *fmt, ...)
+{
+#ifdef XDEBUG
+	va_list ap;
+
+	va_start(ap, fmt);
+
+	log_printf(gn_log_xdebug_mask, fmt, ap);
+
+	va_end(ap);
+#endif
+}
+
 API void gn_elog_write(const char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
 
+	log_printf(gn_log_debug_mask, fmt, ap);
+
 	if (gn_elog_handler) {
 		gn_elog_handler(fmt, ap);
 	} else {
 #ifndef	DEBUG
-		vfprintf(stderr, fmt, ap);
-		fflush(stderr);
+		if (!(gn_log_debug_mask & GN_LOG_T_STDERR))
+			log_printf(GN_LOG_T_STDERR, fmt, ap);
 #endif
 	}
 

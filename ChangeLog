@@ -13,6 +13,7 @@
     o correctle read bitmap names from the phone        (Pawel Kot)
     o extract decodephonebook from gnokii and export it from
       libgnokii as gn_file_phonebook_raw()              (Pawel Kot)
+    o better debugging support                     (BORBELY Zoltan)
  * AT series updates
     o try to handle correctly sms empty location        (Pawel Kot)
     o use actual encoding when reading network information
@@ -53,6 +54,7 @@
                                                         (Pawel Kot)
  * build system updates
     o reflecting smsd libtoolization in packages   (BORBELY Zoltan)
+    o configure enables debugging support          (BORBELY Zoltan)
 
 0.5.10
 ======

@@ -98,3 +98,20 @@ smsc_timeout = 10
 [connect_script]
 TELEPHONE = 12345678
 [disconnect_script]
+
+
+# The following parameters control how libgnokii handle the debugging messages.
+# Currently there are three categories: "debug" controls the libgnokii
+# normal debug output, "rlpdebug" controls the debug output of the RLP
+# subsystem, and "xdebug" is used by the xgnokii or smsd.
+
+[logging]
+
+# where to log the debug output (on: stderr)
+debug = off
+
+# where to log the rlp debug output (on: stderr)
+rlpdebug = off
+
+# where to log X debug output (on: stderr)
+xdebug = off

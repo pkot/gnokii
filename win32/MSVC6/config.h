@@ -97,9 +97,9 @@
 #undef HAVE_STRSEP
 
 /* Define debug level */
-#undef DEBUG
-#undef XDEBUG
-#undef RLP_DEBUG
+#define DEBUG 1
+#define XDEBUG 1
+#define RLP_DEBUG 1
 
 /* Define debug level */
 #ifdef _DEBUG

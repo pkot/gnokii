@@ -513,9 +513,7 @@ static gint AddCalendarNote(gn_calnote * cnote)
 	pthread_cond_wait(&calendarCond, &calendarMutex);
 	pthread_mutex_unlock(&calendarMutex);
 
-#ifdef XDEBUG
-	g_print("Saving calendar note\n");
-#endif
+	gn_log_xdebug("Saving calendar note\n");
 
 	error = dnote->status;
 	g_free(dnote);
@@ -525,10 +523,8 @@ static gint AddCalendarNote(gn_calnote * cnote)
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
-#ifdef XDEBUG
 	} else {
-		g_print("Note saved\n");
-#endif
+		gn_log_xdebug("Note saved\n");
 	}
 
 	return (error);

@@ -211,9 +211,7 @@ void DB_Look (const gchar * const phone)
        sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2;
 
 
-#ifdef XDEBUG
-    g_print ("Sending SMS: %s, %s\n", sms.remote.number, sms.user_data[0].u.text);
-#endif
+    gn_log_xdebug ("Sending SMS: %s, %s\n", sms.remote.number, sms.user_data[0].u.text);
     
     numError = 0;
     do
