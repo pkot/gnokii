@@ -1640,8 +1640,11 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     /* Load any data from the Send ringbuffer into the send slots */
     if (SendHead!=SendTail) RLP_AddRingBufferDataToSlots();
 
-    printf("SendHead=%d, SendTail=%d, VD=%d, VA=%d\n",SendHead,SendTail,VD,VA);
-    
+#ifdef DEBUG
+    fprintf(stdout, "SendHead=%d, SendTail=%d, VD=%d, VA=%d\n",SendHead,SendTail,VD,VA);
+#endif    
+
+
     if (RLP_GetUserRequest(Disc_Req)) {
       T=0;
       T_RCVR=0;

@@ -513,7 +513,7 @@ void	ATEM_StringOut(char *buffer)
 	int		count = 0;
 	char	out_char;
 
-	while (count <= strlen(buffer)) {
+	while (count < strlen(buffer)) {
 
 			/* Translate CR/LF/BS as appropriate */
 		switch (buffer[count]) {
