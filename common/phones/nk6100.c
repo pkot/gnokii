@@ -118,8 +118,11 @@ static GSM_Error DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetDisplayStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error DisplayOutput(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error PollDisplay(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -140,6 +143,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x11, IncomingPhoneClockAndAlarm },
 	{ 0x13, IncomingCalendar },
 	{ 0x0d, IncomingDisplay },
+	{ 0x02, IncomingSMS1 },
 
 	{ 0x64, IncomingPhoneInfo },
 	{ 0xd2, IncomingModelInfo },
@@ -233,6 +237,10 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return DisplayOutput(data, state);
 	case GOP_PollDisplay:
 		return PollDisplay(data, state);
+	case GOP_GetSMSCenter:
+		return GetSMSCenter(data, state);
+	case GOP_SetSMSCenter:
+		return SetSMSCenter(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -756,6 +764,204 @@ static int GetMemoryType(GSM_MemoryType memory_type)
 	}
 	return (result);
 }
+
+
+static GSM_Error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x33, 0x64, 0x00};
+
+	req[5] = data->MessageCenter->No;
+
+	if (SM_SendMessage(state, 6, 0x02, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x02);
+}
+
+static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[64] = {FBUS_FRAME_HEADER, 0x30, 0x64};
+	SMS_MessageCenter *smsc;
+	unsigned char *pos;
+
+	smsc = data->MessageCenter;
+	pos = req+5;
+	*pos++ = smsc->No;
+	pos++;
+	switch (smsc->Format) {
+		case SMS_FText:
+			*pos++ = 0x00;
+			break;
+		case SMS_FFax:
+			*pos++ = 0x22;
+			break;
+		case SMS_FVoice:
+			*pos++ = 0x24;
+			break;
+		case SMS_FERMES:
+			*pos++ = 0x25;
+			break;
+		case SMS_FPaging:
+			*pos++ = 0x26;
+			break;
+		case SMS_FX400:
+			*pos++ = 0x31;
+			break;
+		case SMS_FEmail:
+			*pos++ = 0x32;
+			break;
+		default:
+			return GE_NOTSUPPORTED;
+	}
+	pos++;
+	switch (smsc->Validity) {
+		case SMS_V1H:
+			*pos++ = 0x0b;
+			break;
+		case SMS_V6H:
+			*pos++ = 0x47;
+			break;
+		case SMS_V24H:
+			*pos++ = 0xa7;
+			break;
+		case SMS_V72H:
+			*pos++ = 0xa9;
+			break;
+		case SMS_V1W:
+			*pos++ = 0xad;
+			break;
+		case SMS_VMax:
+			*pos++ = 0xff;
+			break;
+		default:
+			return GE_NOTSUPPORTED;
+	}
+	*pos = (SemiOctetPack(smsc->Recipient, pos+1, SMS_Unknown) + 1) / 2 + 1;
+	pos += 12;
+	*pos = (SemiOctetPack(smsc->Number, pos+1, smsc->Type) + 1) / 2 + 1;
+	pos += 12;
+	if (smsc->DefaultName < 1) {
+		snprintf(pos, 13, "%s", smsc->Name);
+		pos += strlen(pos)+1;
+	} else
+		*pos++ = 0;
+
+	if (SM_SendMessage(state, pos-req, 0x02, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x02);
+}
+
+static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	SMS_MessageCenter *smsc;
+	unsigned char *pos;
+
+	switch (message[3]) {
+	/* FIXME: unhandled frame, request: Get HW&SW version !!! */
+	case 0x0e:
+		if (length == 4) return GE_NONE;
+		return GE_UNHANDLEDFRAME;
+
+	/* Set SMS center OK */
+	case 0x31:
+		break;
+
+	/* Set SMS center error */
+	case 0x32:
+		switch (message[4]) {
+		case 0x02:
+			return GE_EMPTYMEMORYLOCATION;
+		default:
+			return GE_UNHANDLEDFRAME;
+		}
+		return GE_UNHANDLEDFRAME;
+
+	/* SMS center received */
+	case 0x34:
+		if (data->MessageCenter) {
+			smsc = data->MessageCenter;
+			pos = message+4;
+			smsc->No = *pos++;
+			pos++;
+			switch (*pos++) {
+			case 0x00:	/* text */
+				smsc->Format = SMS_FText;
+				break;
+			case 0x22:	/* fax */
+				smsc->Format = SMS_FFax;
+				break;
+			case 0x24:	/* voice */
+				smsc->Format = SMS_FVoice;
+				break;
+			case 0x25:	/* ERMES */
+				smsc->Format = SMS_FERMES;
+				break;
+			case 0x26:	/* paging */
+				smsc->Format = SMS_FPaging;
+				break;
+			case 0x31:	/* X.400 */
+				smsc->Format = SMS_FX400;
+				break;
+			case 0x32:	/* email */
+				smsc->Format = SMS_FEmail;
+				break;
+			default:
+				return GE_UNHANDLEDFRAME;
+			}
+			pos++;
+			switch (*pos++) {
+			case 0x0b:	/*  1 hour */
+				smsc->Validity = SMS_V1H;
+				break;
+			case 0x47:	/*  6 hours */
+				smsc->Validity = SMS_V6H;
+				break;
+			case 0x00:	/* Not set, treat as 24h - bozo */
+			case 0xa7:	/* 24 hours */
+				smsc->Validity = SMS_V24H;
+				break;
+			case 0xa9:	/* 72 hours */
+				smsc->Validity = SMS_V72H;
+				break;
+			case 0xad:	/*  1 week */
+				smsc->Validity = SMS_V1W;
+				break;
+			case 0xff:	/* max.time */
+				smsc->Validity = SMS_VMax;
+				break;
+			default:
+				return GE_UNHANDLEDFRAME;
+			}
+			snprintf(smsc->Recipient, sizeof(smsc->Recipient), "%s", GetBCDNumber(pos));
+			pos += 12;
+			snprintf(smsc->Number, sizeof(smsc->Number), "%s", GetBCDNumber(pos));
+			smsc->Type = pos[1];
+			pos += 12;
+			//!!!FIXME: codepage must be investigated - bozo
+			if (pos[0] == 0x00) {
+				snprintf(smsc->Name, sizeof(smsc->Name), _("Set %d"), smsc->No);
+				smsc->DefaultName = smsc->No;
+			} else {
+				snprintf(smsc->Name, sizeof(smsc->Name), "%s", pos);
+				smsc->DefaultName = -1;
+			}
+		}
+		break;
+
+	/* SMS center error recv */
+	case 0x35:
+		switch (message[4]) {
+		case 0x01:
+			return GE_EMPTYMEMORYLOCATION;
+		default:
+			return GE_UNHANDLEDFRAME;
+		}
+		break;
+
+	default:
+		return GE_UNHANDLEDFRAME;
+	}
+
+	return GE_NONE;
+}
+
 
 static GSM_Error GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 {

@@ -105,6 +105,7 @@ typedef enum {
 	GOP_SendSMS,
 	GOP_GetSpeedDial,
 	GOP_GetSMSCenter,
+	GOP_SetSMSCenter,
 	GOP_GetDateTime,
 	GOP_GetCalendarNote,
 	GOP_CallDivert,

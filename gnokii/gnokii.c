@@ -9,6 +9,7 @@
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001       Pavel Machek
   Copyright (C) 2001-2002  Pawe³ Kot
+  Copyright (C) 2002       BORBELY Zoltan
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -95,6 +96,7 @@ typedef enum {
 	OPT_SENDLOGO,
 	OPT_SENDRINGTONE,
 	OPT_GETSMSC,
+	OPT_SETSMSC,
 	OPT_GETWELCOMENOTE,
 	OPT_SETWELCOMENOTE,
 	OPT_PMON,
@@ -203,6 +205,7 @@ static void version(void)
 			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 			  "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
 			  "Copyright (C) Pawe³ Kot <pkot@linuxnews.pl>, 2001-2002\n"
+			  "Copyright (C) BORBELY Zoltan <bozo@andrews.hu>, 2002\n"
 			  "gnokii is free software, covered by the GNU General Public License, and you are\n"
 			  "welcome to change it and/or distribute copies of it under certain conditions.\n"
 			  "There is absolutely no warranty for gnokii.  See GPL for details.\n"
@@ -225,7 +228,8 @@ static int usage(void)
 			  "                 [--long n]\n"
 			  "          gnokii --savesms [-m] [-l n] [-i]\n"
 			  "          gnokii --smsreader\n"
-			  "          gnokii --getsmsc message_center_number\n"
+			  "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
+			  "          gnokii --setsmsc\n"
 			  "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
 			  "          gnokii --getdatetime\n"
 			  "          gnokii --setalarm [HH MM]\n"
@@ -595,89 +599,191 @@ static int savesms(int argc, char *argv[])
 }
 
 /* Get SMSC number */
-static int getsmsc(char *MessageCenterNumber)
+static int getsmsc(int argc, char *argv[])
 {
-	SMS_MessageCenter	MessageCenter;
-	GSM_Data		data;
-	GSM_Error		error;
+	SMS_MessageCenter MessageCenter;
+	GSM_Data data;
+	GSM_Error error;
+	int start, stop, i;
+	bool raw = false;
+	struct option options[] = {
+		{ "raw",    no_argument, NULL, 'r'},
+		{ NULL,     0,           NULL, 0}
+	};
 
-	memset(&MessageCenter, 0, sizeof(MessageCenter));
-	MessageCenter.No = atoi(MessageCenterNumber);
+	optarg = NULL;
+	optind = 0;
+	argv++;
+	argc--;
+
+	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
+		switch (i) {
+		case 'r':
+			raw = true;
+			break;
+		default:
+			usage(); /* FIXME */
+			return -1;
+		}
+	}
+
+	if (argc > optind) {
+		start = atoi(argv[optind]);
+		stop = (argc > optind+1) ? atoi(argv[optind+1]) : start;
+
+		if (start > stop) {
+			fprintf(stderr, _("Starting SMS center number is greater than stop\n"));
+			return -1;
+		}
+
+		if (start < 1) {
+			fprintf(stderr, _("SMS center number must be greater than 1\n"));
+			return -1;
+		}
+	} else {
+		start = 1;
+		stop = 5;	/* FIXME: determine it */
+	}
 
 	GSM_DataClear(&data);
 	data.MessageCenter = &MessageCenter;
-	error = SM_Functions(GOP_GetSMSCenter, &data, &State);
 
-	switch (error) {
-	case GE_NONE:
-		fprintf(stdout, _("%d. SMS center (%s) number is %s\n"), MessageCenter.No, MessageCenter.Name, MessageCenter.Number);
-		fprintf(stdout, _("Default recipient number is %s\n"), MessageCenter.Recipient);
-		fprintf(stdout, _("Messages sent as "));
+	for (i = start; i <= stop; i++) {
+		memset(&MessageCenter, 0, sizeof(MessageCenter));
+		MessageCenter.No = i;
 
-		switch (MessageCenter.Format) {
-		case SMS_FText:
-			fprintf(stdout, _("Text"));
+		error = SM_Functions(GOP_GetSMSCenter, &data, &State);
+		switch (error) {
+		case GE_NONE:
 			break;
-		case SMS_FVoice:
-			fprintf(stdout, _("VoiceMail"));
-			break;
-		case SMS_FFax:
-			fprintf(stdout, _("Fax"));
-			break;
-		case SMS_FEmail:
-		case SMS_FUCI:
-			fprintf(stdout, _("Email"));
-			break;
-		case SMS_FERMES:
-			fprintf(stdout, _("ERMES"));
-			break;
-		case SMS_FX400:
-			fprintf(stdout, _("X.400"));
-			break;
+		case GE_NOTIMPLEMENTED:
+			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
+			return GE_NOTIMPLEMENTED;
 		default:
-			fprintf(stdout, _("Unknown"));
-			break;
+			fprintf(stderr, _("SMS center %d can not be found\n"), i);
+			return error;
 		}
 
-		printf("\n");
-		fprintf(stdout, _("Message validity is "));
+		if (raw) {
+			fprintf(stdout, "%d;%s;%d;%d;%d;%d;%s;%s\n",
+				MessageCenter.No, MessageCenter.Name,
+				MessageCenter.DefaultName, MessageCenter.Type,
+				MessageCenter.Format, MessageCenter.Validity,
+				MessageCenter.Number, MessageCenter.Recipient);
+		} else {
+			if (i != 1) fprintf(stdout, "\n");
 
-		switch (MessageCenter.Validity) {
-		case SMS_V1H:
-			fprintf(stdout, _("1 hour"));
-			break;
-		case SMS_V6H:
-			fprintf(stdout, _("6 hours"));
-			break;
-		case SMS_V24H:
-			fprintf(stdout, _("24 hours"));
-			break;
-		case SMS_V72H:
-			fprintf(stdout, _("72 hours"));
-			break;
-		case SMS_V1W:
-			fprintf(stdout, _("1 week"));
-			break;
-		case SMS_VMax:
-			fprintf(stdout, _("Maximum time"));
-			break;
-		default:
-			fprintf(stdout, _("Unknown"));
-			break;
+			if (MessageCenter.DefaultName == -1)
+				fprintf(stdout, _("No. %d: \"%s\" (defined name)\n"), MessageCenter.No, MessageCenter.Name);
+			else
+				fprintf(stdout, _("No. %d: \"%s\" (default name)\n"), MessageCenter.No, MessageCenter.Name);
+			fprintf(stdout, _("SMS center number is %s\n"), MessageCenter.Number);
+			fprintf(stdout, _("Default recipient number is %s\n"), MessageCenter.Recipient);
+			fprintf(stdout, _("Messages sent as "));
+
+			switch (MessageCenter.Format) {
+			case SMS_FText:
+				fprintf(stdout, _("Text"));
+				break;
+			case SMS_FVoice:
+				fprintf(stdout, _("VoiceMail"));
+				break;
+			case SMS_FFax:
+				fprintf(stdout, _("Fax"));
+				break;
+			case SMS_FEmail:
+			case SMS_FUCI:
+				fprintf(stdout, _("Email"));
+				break;
+			case SMS_FERMES:
+				fprintf(stdout, _("ERMES"));
+				break;
+			case SMS_FX400:
+				fprintf(stdout, _("X.400"));
+				break;
+			default:
+				fprintf(stdout, _("Unknown"));
+				break;
+			}
+
+			printf("\n");
+			fprintf(stdout, _("Message validity is "));
+
+			switch (MessageCenter.Validity) {
+			case SMS_V1H:
+				fprintf(stdout, _("1 hour"));
+				break;
+			case SMS_V6H:
+				fprintf(stdout, _("6 hours"));
+				break;
+			case SMS_V24H:
+				fprintf(stdout, _("24 hours"));
+				break;
+			case SMS_V72H:
+				fprintf(stdout, _("72 hours"));
+				break;
+			case SMS_V1W:
+				fprintf(stdout, _("1 week"));
+				break;
+			case SMS_VMax:
+				fprintf(stdout, _("Maximum time"));
+				break;
+			default:
+				fprintf(stdout, _("Unknown"));
+				break;
+			}
+
+			fprintf(stdout, "\n");
 		}
-
-		fprintf(stdout, "\n");
-
-		break;
-	case GE_NOTIMPLEMENTED:
-		fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-		break;
-	default:
-		fprintf(stdout, _("SMS center can not be found :-(\n"));
-		break;
 	}
 
-	return error;
+	return GE_NONE;
+}
+
+/* Set SMSC number */
+static int setsmsc()
+{
+	SMS_MessageCenter MessageCenter;
+	GSM_Data data;
+	GSM_Error error;
+	char line[256], ch;
+	int n;
+
+	GSM_DataClear(&data);
+	data.MessageCenter = &MessageCenter;
+
+	while (fgets(line, sizeof(line), stdin)) {
+		n = strlen(line);
+		if (n > 0 && line[n-1] == '\n') {
+			line[--n] = 0;
+		}
+
+		memset(&MessageCenter, 0, sizeof(MessageCenter));
+		n = sscanf(line, "%d;%19[^;];%d;%d;%d;%d;%39[^;];%39[^;\n]%c",
+				&MessageCenter.No, MessageCenter.Name,
+				&MessageCenter.DefaultName, (int *)&MessageCenter.Type,
+				(int *)&MessageCenter.Format, (int *)&MessageCenter.Validity,
+				MessageCenter.Number, MessageCenter.Recipient, &ch);
+		switch (n) {
+		case 6:
+			MessageCenter.Number[0] = 0;
+		case 7:
+			MessageCenter.Recipient[0] = 0;
+		case 8:
+			break;
+		default:
+			fprintf(stderr, _("Input line format isn't valid\n"));
+			return GE_UNKNOWN;
+		}
+
+		error = SM_Functions(GOP_SetSMSCenter, &data, &State);
+		if (error != GE_NONE) {
+			fprintf(stderr, _("Cannot set SMS center %d\n"), MessageCenter.No);
+			return error;
+		}
+	}
+
+	return GE_NONE;
 }
 
 /* Get SMS messages. */
@@ -3046,7 +3152,10 @@ int main(int argc, char *argv[])
 		{ "setringtone",        required_argument, NULL, OPT_SETRINGTONE },
 
 		/* Get SMS center number mode */
-		{ "getsmsc",            required_argument, NULL, OPT_GETSMSC },
+		{ "getsmsc",            optional_argument, NULL, OPT_GETSMSC },
+
+		/* Set SMS center number mode */
+		{ "setsmsc",            no_argument,       NULL, OPT_SETSMSC },
 
 		/* For development purposes: run in passive monitoring mode */
 		{ "pmon",               no_argument,       NULL, OPT_PMON },
@@ -3120,7 +3229,8 @@ int main(int argc, char *argv[])
 		{ OPT_SAVESMS,           0, 6, 0 },
 		{ OPT_SENDLOGO,          3, 4, GAL_XOR },
 		{ OPT_SENDRINGTONE,      2, 2, 0 },
-		{ OPT_GETSMSC,           1, 1, 0 },
+		{ OPT_GETSMSC,           0, 3, 0 },
+		{ OPT_SETSMSC,           0, 0, 0 },
 		{ OPT_GETWELCOMENOTE,    1, 1, 0 },
 		{ OPT_SETWELCOMENOTE,    1, 1, 0 },
 		{ OPT_NETMONITOR,        1, 1, 0 },
@@ -3270,7 +3380,10 @@ int main(int argc, char *argv[])
 			rc = sendlogo(nargc, nargv);
 			break;
 		case OPT_GETSMSC:
-			rc = getsmsc(optarg);
+			rc = getsmsc(argc, argv);
+			break;
+		case OPT_SETSMSC:
+			rc = setsmsc();
 			break;
 		case OPT_NETMONITOR:
 			rc = netmonitor(optarg);
