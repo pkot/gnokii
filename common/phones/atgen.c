@@ -47,6 +47,7 @@
 #include "links/cbus.h"
 
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state);
+static gn_error Terminate(gn_data *data, struct gn_statemachine *state);
 static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 static gn_error Reply(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -95,7 +96,7 @@ typedef struct {
 /* Mobile phone information */
 static at_function_init_type at_function_init[] = {
 	{ GN_OP_Init,                  NULL,                     Reply },
-	{ GN_OP_Terminate,             pgen_terminate,           Reply },
+	{ GN_OP_Terminate,             Terminate,                Reply },
 	{ GN_OP_GetModel,              AT_GetModel,              ReplyIdentify },
 	{ GN_OP_GetRevision,           AT_GetRevision,           ReplyIdentify },
 	{ GN_OP_GetImei,               AT_GetIMEI,               ReplyIdentify },
@@ -167,6 +168,10 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	if (op == GN_OP_Init)
 		return Initialise(data, state);
+	if (!drvinst && op == GN_OP_Terminate)
+		return Terminate(data, state);
+	if (!drvinst)
+		return GN_ERR_INTERNALERROR;
 	if ((op > GN_OP_Init) && (op < GN_OP_AT_Max))
 		if (drvinst->functions[op])
 			return (*(drvinst->functions[op]))(data, state);
@@ -1253,6 +1258,14 @@ out:
 	return ret;
 }
 
+static gn_error Terminate(gn_data *data, struct gn_statemachine *state)
+{
+	if (AT_DRVINST(state)) {
+		free(AT_DRVINST(state));
+		AT_DRVINST(state) = NULL;
+	}
+	return pgen_terminate(data, state);
+}
 
 void splitlines(at_line_buffer *buf)
 {
