@@ -32,16 +32,19 @@ all:
 	@echo
 
 install:
-	$(INSTALL) -d $(docdir)
+	$(INSTALL) -d $(DESTDIR)/$(docdir)
 	@for xxx in $(INSTALL_DOCS); do \
 	    if [ -e $$xxx ]; then \
-		$(INSTALL) -m 0444 $$xxx $(docdir)/$$xxx; \
+		$(INSTALL) -m 0444 $$xxx $(DESTDIR)/$(docdir)/$$xxx; \
 	    fi; \
 	done
-	$(INSTALL) $(GNOKII1_MAN) $(man1dir)
-	$(INSTALL) $(GNOKII8_MAN) $(man8dir)
+	$(INSTALL) -d $(DESTDIR)/$(man1dir)
+	$(INSTALL) -d $(DESTDIR)/$(man8dir)
+	$(INSTALL) $(GNOKII1_MAN) $(DESTDIR)/$(man1dir)
+	$(INSTALL) $(GNOKII8_MAN) $(DESTDIR)/$(man8dir)
 	if [ "x$(HAVE_XGNOKII)" = "xyes" ]; then \
-		$(INSTALL) $(XGNOKII_MAN) $(xmandir); \
+		$(INSTALL) -d $(DESTDIR)/$(xmandir); \
+		$(INSTALL) $(XGNOKII_MAN) $(DESTDIR)/$(xmandir); \
 	fi
 	@echo "done"
 

@@ -60,6 +60,8 @@ USE_NLS        = @USE_NLS@
 HAVE_XGNOKII   = @HAVE_XGNOKII@
 WIN32          = @WIN32@
 
+DESTDIR        =
+
 #
 # Global include directory
 #	($TOPDIR is defined in Makefile)

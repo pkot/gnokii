@@ -84,7 +84,7 @@ distclean:	clean
 		$(MAKE) -C $(PO_DIR) distclean; \
 	fi
 	$(RM) Makefile.global config.cache config.log config.status \
-		include/config.h include/config.h.in \
+		include/config.h \
 		packaging/RedHat/gnokii.spec \
 		packaging/Slackware/SlackBuild \
 		po/Makefile.in \

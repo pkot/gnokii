@@ -57,10 +57,10 @@ clean:
 	$(RM) $(OBJS) *~ depend smsd libpq.so libmysql.so core*
 
 install: all
-	$(INSTALL) -d $(bindir)
-	$(INSTALL) -m 755 -s smsd $(bindir)
-	$(INSTALL) -d ${prefix}/share/smsd
-	$(INSTALL) lib*.so ${prefix}/share/smsd
+	$(INSTALL) -d $(DESTDIR)/$(bindir)
+	$(INSTALL) -m 755 -s smsd $(DESTDIR)/$(bindir)
+	$(INSTALL) -d $(DESTDIR)/${prefix}/share/smsd
+	$(INSTALL) lib*.so $(DESTDIR)/${prefix}/share/smsd
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

@@ -90,6 +90,11 @@ Install the binaries into the system with one of the four following lines:
     # make install-strip
     # make install-ss          # <-- suid AND strip
 
+If you wish to install gnokii stuff in some other directory root (eg. when
+creating a distribution package), you can take an advantage of the DESTDIR
+variable:
+
+    $ make DESTDIR=/somewhere install
 
 To install the documentation type
 

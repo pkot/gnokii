@@ -71,8 +71,8 @@ clean:
 	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so gsm-filetypes.o vcal.c phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 install:
-	$(INSTALL) -d $(libdir)
-	$(INSTALL) libgnokii.so $(libdir)
+	$(INSTALL) -d $(DESTDIR)/$(libdir)
+	$(INSTALL) libgnokii.so $(DESTDIR)/$(libdir)
 	@echo
 
 install-strip: install

@@ -31,28 +31,28 @@ clean:
 	$(RM) $(OBJS) *~ depend gnokiid *.exe core *.bak
 
 install: all
-	$(INSTALL) -d $(sbindir)
-	$(INSTALL) gnokiid $(sbindir)
+	$(INSTALL) -d $(DESTDIR)/$(sbindir)
+	$(INSTALL) gnokiid $(DESTDIR)/$(sbindir)
 
 install-strip: all
-	$(INSTALL) -d $(sbindir)
-	$(INSTALL) -s gnokiid $(sbindir)
+	$(INSTALL) -d $(DESTDIR)/$(sbindir)
+	$(INSTALL) -s gnokiid $(DESTDIR)/$(sbindir)
 	@echo "done"
 
 install-suid: all
 	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
 		/usr/sbin/groupadd gnokii; \
 	fi
-	$(INSTALL) -d $(sbindir)
-	$(INSTALL) -o root -g gnokii -m 4750 gnokiid $(sbindir)
+	$(INSTALL) -d $(DESTDIR)/$(sbindir)
+	$(INSTALL) -o root -g gnokii -m 4750 gnokiid $(DESTDIR)/$(sbindir)
 	@echo "done"
 
 install-ss: all
 	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
 		/usr/sbin/groupadd gnokii; \
 	fi
-	$(INSTALL) -d $(sbindir)
-	$(INSTALL) -o root -g gnokii -m 4750 -s gnokiid $(sbindir)
+	$(INSTALL) -d $(DESTDIR)/$(sbindir)
+	$(INSTALL) -o root -g gnokii -m 4750 -s gnokiid $(DESTDIR)/$(sbindir)
 	@echo "done"
 
 depend dep:

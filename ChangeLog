@@ -15,9 +15,10 @@
     o config.h.in.in removed                         (BORBELY Zoltan)
     o autoheader specific cleanup in various files   (BORBELY Zoltan)
     o configure.in fixes and cleanup                 (BORBELY Zoltan)
-    o remove config.h.in in make distclean                (Pawel Kot)
     o fix HAVE_LONG_DOUBLE problem with autoheader >= 2.50
                                                           (Pawel Kot)
+    o make use of DESTDIR variable to be able to change directory
+      root                                                (Pawel Kot)
  * libsms updates:
     o fixed memset typo in DefaultSMS()                        (Ueli)
     o fix the problem with decoding BCD international numbers
