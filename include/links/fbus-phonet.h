@@ -42,6 +42,16 @@
 /* This byte is at the beginning of all GSM Frames sent over PhoNet. */
 #define FBUS_PHONET_FRAME_ID 0x14
 
+/* This byte is at the beginning of all GSM Frames sent over Bluetooth to Nokia 6310
+   family phones. */
+#define FBUS_PHONET_BLUETOOTH_FRAME_ID  0x19
+
+/* Nokia mobile phone in the Nokia 6310 family over Bluetooth. */
+#define FBUS_PHONET_BLUETOOTH_DEVICE_PHONE 0x10
+
+/* Our PC in the Nokia 6310 family over Bluetooth. */
+#define FBUS_PHONET_BLUETOOTH_DEVICE_PC 0x00
+
 gn_error phonet_initialise(struct gn_statemachine *state);
 
 typedef struct {

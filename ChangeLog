@@ -12,6 +12,9 @@
     o reorder exported headers: don't include unneccesary headers,
       be sure to have all things defined (currently Linux and MSVC6)
                                                          (Pawel Kot)
+ * general updates
+    o Bluetooth support for FBUS mode in nk6510 series   (Pawel Kot,
+                                                    Marcel Holtmann)
 0.5.0rc3
 ========
  * general updates
