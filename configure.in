@@ -226,6 +226,7 @@ if test $ac_cv_have_sockaddr_rc = yes; then
 	LIBS="$LIBS -lbluetooth"
 else
 	HAVE_BLUETOOTH_EXP="0"
+	USE_BLUETOOTH="no"
 fi
 
 dnl ======================== Checks for X base support 

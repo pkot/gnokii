@@ -14,6 +14,8 @@
       #if @HAVE_BLUETOOTH_EXP@                           (Pawel Kot)
     o information about ldconfig, /etc/ld.so.conf and such
       after issuing 'make install'                       (Pawel Kot)
+    o report "Bluetooth: no" in the configure summary when
+      bluetooth libraries are not found                  (Pawel Kot)
  * cbus update                                      (Ladislav Michl)
  * nk7110 driver updates
     o get rid of global variables                   (Ladislav Michl)
