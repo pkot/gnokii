@@ -13,7 +13,7 @@ AC_CANONICAL_SYSTEM
 
 dnl ======================== Default setting
 CFLAGS="-O2 -Wall"
-ALL_LINGUAS="cs de fi nl sk"
+ALL_LINGUAS="cs de fi nl sk pl"
 model="6110"
 case "$build_os" in
   solaris*)	port="/dev/cua/a"

@@ -598,7 +598,7 @@ msgstr ""
 
 #: common/fbus-6110.c:2970
 msgid "Message: Memory status error, waiting for security code.\n"
-msgstr "Wiadomo¶æ: B³±d stanu pamiêci, czekam na kod zabezpieczaj±cy"
+msgstr "Wiadomo¶æ: B³±d stanu pamiêci, czekam na kod zabezpieczaj±cy.\n"
 
 #: common/fbus-6110.c:2977
 #, c-format
@@ -992,7 +992,7 @@ msgstr "Wiadomo¶æ: B³±d przy usuwaniu wpisu kalendarza\n"
 
 #: common/fbus-6110.c:3847
 msgid "Message: Calendar Alarm active\n"
-msgstr "Wiadomo¶æ: Alarm kalendarza aktywny"
+msgstr "Wiadomo¶æ: Alarm kalendarza aktywny\n"
 
 #: common/fbus-6110.c:3848
 #, c-format
