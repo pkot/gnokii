@@ -1324,8 +1324,10 @@ static int dialvoice(char *Number)
 	GSM_DataClear(&data);
 	data.CallInfo = &CallInfo;
 
-	if ((error = SM_Functions(GOP_MakeCall, &data, &State)) != GE_NONE)
+	if ((error = SM_Functions(GOP_MakeCall, &data, &State)) != GE_NONE) {
+		fprintf(stdout, _("Dialing failed: %s\n"), print_error(error));
 	    	return error;
+	}
 
 	fprintf(stdout, _("Dialled call, id: %d\n"), CallInfo.CallID);
 

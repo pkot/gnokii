@@ -47,6 +47,9 @@
       the info)                                        (Markus Plail)
  * strsep function provided if not present             (Markus Plail)
  * changed gnokii.c to use strsep instead of strtok    (Markus Plail)
+ * SM_BlockNoRetryTimeout fixed                      (BORBELY Zoltan)
+ * 6110 updates
+    o MakeCall() / IncomingCallInfo() restructured   (BORBELY Zoltan)
 	
 0.4.0pre16
 ==========

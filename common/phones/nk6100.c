@@ -2632,27 +2632,31 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 		pos += ARRAY_LEN(data_nondigital_end);
 		if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
 		usleep(500000);
-		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY;
+		dprintf("after nondigital1\n");
 		if (SM_SendMessage(state, ARRAY_LEN(data_nondigital_final), 0x01, data_nondigital_final) != GE_NONE) return GE_NOTREADY;
-		usleep(500000);
+		dprintf("after nondigital2\n");
 		break;
 
 	case GSM_CT_DigitalDataCall:
 		dprintf("Digital Data Call\n");
 		if (SM_SendMessage(state, ARRAY_LEN(data_digital_pred1), 0x01, data_digital_pred1) != GE_NONE) return GE_NOTREADY;
-		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY;
+		usleep(500000);
+		dprintf("after digital1\n");
 		if (SM_SendMessage(state, ARRAY_LEN(data_digital_pred2), 0x01, data_digital_pred2) != GE_NONE) return GE_NOTREADY;
-		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY;
+		usleep(500000);
+		dprintf("after digital2\n");
 		memcpy(pos, data_digital_end, ARRAY_LEN(data_digital_end));
 		pos += ARRAY_LEN(data_digital_end);
 		if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
+		dprintf("after digital3\n");
 		break;
+
 	default:
 		dprintf("Invalid call type %d\n", data->CallInfo->Type);
 		return GE_INTERNALERROR;
 	}
 
-	return SM_Block(state, data, 0x01);
+	return SM_BlockNoRetryTimeout(state, data, 0x01, 100);
 }
 
 static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
@@ -2679,7 +2683,7 @@ static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state)
 	req[4] = data->CallInfo->CallID;
 
 	if (SM_SendMessage(state, 6, 0x01, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x01);
+	return SM_BlockNoRetry(state, data, 0x01);
 }
 
 static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state)
@@ -2724,6 +2728,10 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 
 	/* Remote end hang up */
 	case 0x04:
+		if (data->CallInfo) {
+			data->CallInfo->CallID = message[4];
+			return GE_UNKNOWN;
+		}
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.CallID = message[4];
 		if (CallNotification)
@@ -2784,20 +2792,20 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 			CallNotification(GSM_CS_CallResumed, &cinfo);
 		return GE_UNSOLICITED;
 
-	/* voice call reply */
 	case 0x40:
-		break;
+		return GE_UNSOLICITED;
 
 	/* FIXME: response from "Sent after issuing data call (non digital lines)"
 	 * that's what we call data_nondigital_final in MakeCall()
 	 */
 	case 0x43:
 		if (message[4] != 0x02) return GE_UNHANDLEDFRAME;
-		break;
+		return GE_UNSOLICITED;
   	
 	/* FIXME: response from answer1? - bozo */
 	case 0x44:
-		break;
+		if (message[4] != 0x68) return GE_UNHANDLEDFRAME;
+		return GE_UNSOLICITED;
 	
 	/* DTMF sent */
 	case 0x51:

@@ -251,6 +251,8 @@ GSM_Error SM_BlockNoRetryTimeout(GSM_Statemachine *state, GSM_Data *data, int wa
 		} while ((timeout > 0) && (s == WaitingForResponse));
 
 		if (s == ResponseReceived) return SM_GetError(state, waitfor);
+
+		SM_Reset(state);
 	}
 
 	return GE_TIMEOUT;
