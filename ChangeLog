@@ -1,4 +1,5 @@
-0.5.0pre
+0.5.0pre2
+=========
  * Compability changes:
     o sys/filio.h included for FIONREAD              (BORBELY Zoltan)
     o replaced AM_GNU_GETTEXT with AM_GNU_GETTEXT([external]) in
