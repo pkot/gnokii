@@ -1,3 +1,8 @@
+0.5.0pre11
+==========
+ * let configure check for <sys/file.h>                  (Pawel Kot)
+ * more header cleanups: use #include <gnokii.h> instead of
+   #include <gnokii/*.h>                                 (Pawel Kot)
 0.5.0pre10
 ==========
  * general updates

@@ -33,7 +33,8 @@
 #ifndef _gnokii_phones_nk3110_h
 #define _gnokii_phones_nk3110_h
 
-#include "gnokii/data.h"
+#include "misc.h"
+#include "gnokii.h"
 
 /* Phone Memory Sizes */
 #define P3110_MEMORY_SIZE_SM 20

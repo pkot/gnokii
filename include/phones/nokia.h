@@ -35,7 +35,7 @@
 #ifndef _gnokii_phones_nokia_h
 #define _gnokii_phones_nokia_h
 
-#include "gnokii/error.h"
+#include "gnokii.h"
 
 #define	PNOK_MSG_ID_SMS 0x02
 

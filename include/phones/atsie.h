@@ -32,7 +32,7 @@
 #ifndef _gnokii_atsie_h_
 #define _gnokii_atsie_h_
 
-#include "gnokii/data.h"
+#include "gnokii.h"
 
 void at_siemens_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state);
 

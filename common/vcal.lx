@@ -32,7 +32,7 @@
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
+#include "gnokii.h"
 #include "gsm-filetypes.h"
 
 #define YY_DECL int yylex(char *type, char *text, char *desc, char *time, char *alarm, char *todo_priority, int lexnumber)

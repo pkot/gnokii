@@ -33,7 +33,7 @@
 #ifndef _gnokii_phones_nk6100_h
 #define _gnokii_phones_nk6100_h
 
-#include "gnokii/data.h"
+#include "gnokii.h"
 
 /* Phone Memory types */
 
