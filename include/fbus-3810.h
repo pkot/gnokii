@@ -167,6 +167,7 @@ GSM_Error   FB38_TX_SendDialCommand(u8 call_type, char *Number);
 bool 	FB38_TX_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 
 int     FB38_TX_SendMessage(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
+void	FB38_TX_Send0x0f_HangupMessage(void);
 void    FB38_TX_Send0x25_RequestSMSMemoryLocation(u8 memory_type, u8 location); 
 void    FB38_TX_Send0x26_DeleteSMSMemoryLocation(u8 memory_type, u8 location);
 

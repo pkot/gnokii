@@ -400,15 +400,6 @@ GSM_Error   FB38_WritePhonebookLocation(GSM_PhonebookEntry *entry)
     return (CurrentPhonebookError);
 }
 
-GSM_Error   FB38_GetSpeedDial(GSM_SpeedDial *entry)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SetSpeedDial(GSM_SpeedDial *entry)
-{
-    return (GE_NOTIMPLEMENTED);
-}
 
 GSM_Error   FB38_GetSMSMessage(GSM_SMSMessage *message)
 {
@@ -931,7 +922,53 @@ GSM_Error   FB38_GetSMSStatus(GSM_SMSStatus *Status)
 	return (CurrentMessageCenterError);
 }
 
+GSM_Error   FB38_SendDTMF (char *String)
+{
+	u8 message[64];
+	int timeout;
+
+	message[0] = strlen(String);
+	strncpy(message + 1, String, message[0]);
+
+	FB38_TX_UpdateSequenceNumber();
+	if (FB38_TX_SendMessage(message[0] + 1, 0x20, RequestSequenceNumber, message) != true) {
+		return (GE_INTERNALERROR);
+	}
+
+	CurrentDTMFError = GE_BUSY;
+
+	timeout = 20;
+	/* This function have nothing to do with MessageCenter... */
+	while (timeout != 0 && CurrentDTMFError == GE_BUSY) {
+		timeout--;
+		if (timeout == 0)
+			return (GE_TIMEOUT);
+		usleep(100000);
+	}
+
+	return CurrentDTMFError;
+}
+
+GSM_Error   FB38_CancelCall(void)
+{
+    FB38_TX_Send0x0f_HangupMessage();
+    return (GE_NONE);
+}
+
+
+
     /* Our "Not implemented" functions */
+
+GSM_Error   FB38_GetSpeedDial(GSM_SpeedDial *entry)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_SetSpeedDial(GSM_SpeedDial *entry)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
 GSM_Error   FB38_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
     return (GE_NOTIMPLEMENTED);
@@ -982,11 +1019,6 @@ GSM_Error   FB38_GetIncomingCallNr(char *Number)
     return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error   FB38_CancelCall(void)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
 GSM_Error   FB38_SendBitmap (char *NetworkCode, int width, int height, unsigned char *bitmap)
 {
     return (GE_NOTIMPLEMENTED);
@@ -1015,33 +1047,6 @@ GSM_Error   FB38_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
 GSM_Error   FB38_Netmonitor (unsigned char mode, char *Screen)
 {
     return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SendDTMF (char *String)
-{
-	u8 message[64];
-	int timeout;
-
-	message[0] = strlen(String);
-	strncpy(message + 1, String, message[0]);
-
-	FB38_TX_UpdateSequenceNumber();
-	if (FB38_TX_SendMessage(message[0] + 1, 0x20, RequestSequenceNumber, message) != true) {
-		return (GE_INTERNALERROR);
-	}
-
-	CurrentDTMFError = GE_BUSY;
-
-	timeout = 20;
-	/* This function have nothing to do with MessageCenter... */
-	while (timeout != 0 && CurrentDTMFError == GE_BUSY) {
-		timeout--;
-		if (timeout == 0)
-			return (GE_TIMEOUT);
-		usleep(100000);
-	}
-
-	return CurrentDTMFError;
 }
 
 GSM_Error   FB38_GetBitmap (GSM_Bitmap *Bitmap)
@@ -1869,6 +1874,15 @@ bool 	FB38_TX_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
     return (true);
 }
 
+
+void	FB38_TX_Send0x0f_HangupMessage(void)
+{
+    FB38_TX_UpdateSequenceNumber();
+
+    if (FB38_TX_SendMessage(0, 0x0f, RequestSequenceNumber, NULL) != true) {
+        fprintf(stderr, _("Request HangupMessage Write failed!"));    
+    }
+}
 
     /* 0x4a messages appear to be a keepalive message and cause the phone
        to send an 0x4a acknowledge and then an 0x4b message which has

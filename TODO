@@ -6,8 +6,8 @@
 - Debian GNU/Linux package
 - Red Hat Linux package
 - fill in all co-authors names in CREDITS, if you have something in gnokii,
-  do not hesitate to send me the patch with your name :-) If you do not have
-  nothing, you should do something or your name will not be there :-))
+  do not hesitate to send Hugh or Pavel the patch with your name :-)
+  If you do nothing your name will not be there :-))
 - test RLP setup as per RLP-guide in Docs.
 - Marcin's setprofile patch
 - test all gnokii options and xgnokii
@@ -17,9 +17,9 @@
 
 - use config.h for autoconf stuff
 - remove default MODEL and PORT, use config files only and bug the user if
-  /etc/gnokiirc or ~/.gnokiirs is not found
+  /etc/gnokiirc or ~/.gnokiirc is not found
 - move VERSION, DEBUG, SECURITY and USE_NLS to config.h
-- 6160 support (is this useful: http://www.venia.net/tdma/ - yes it was - HAB?)
+- 6160 support (is this useful: http://www.venia.net/tdma/? - yes it was - HAB)
   Please email Hugh before delving into x160 support.
 - 7110 support (plain AT commands)
 - integrate xlogos into xgnokii
@@ -36,7 +36,8 @@
 - write some docs about gnokiid.
 - we should report back to xgnokii what functions are and which are not
   supported so xgnokii can disable some GUI stuff on phones which do not
-  support this functions.
+  support this functions.  (Should be an extension to existing GSM_Information
+  structure - HAB)
 - multiframed packets
 - how can we read the name of the uploaded tune? Can we do that?
 - SMS errors (Gary reported them on Fri, 25 Feb 2000 15:55:58 -0500 (EST))
