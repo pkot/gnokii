@@ -55,6 +55,7 @@ API GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state);
 API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state);
 API GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
 API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_folders);
+API GSM_Error DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
 /* Default values */
 API void DefaultSubmitSMS(GSM_API_SMS *SMS);
 API void DefaultDeliverSMS(GSM_API_SMS *SMS);
