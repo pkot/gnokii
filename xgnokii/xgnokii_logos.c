@@ -1091,9 +1091,9 @@ void SetLogoEvent(GtkWidget * widget)
 
 static void ClearLogoEvent(GtkWidget * widget)
 {
-
-	//  bitmap.size=bitmap.width*bitmap.height/8;
-
+	/*
+	bitmap.size=bitmap.width*bitmap.height/8;
+	*/
 	GSM_ClearBitmap(&bitmap);
 
 	UpdatePoints(widget);
@@ -1293,11 +1293,15 @@ gint LogoTypeEvent(GtkWidget * widget)
 	}
 
 	/* is new type operatorLogo? */
-	if (GTK_TOGGLE_BUTTON(buttonOperator)->active && bitmap.type != GSM_OperatorLogo) {
+	if ((GTK_TOGGLE_BUTTON(buttonOperator)->active && bitmap.type != GSM_OperatorLogo) ||
+	    (GTK_TOGGLE_BUTTON(buttonOperator)->active && bitmap.type != GSM_NewOperatorLogo)) {
 		/* previous startup? clear and draw batteries, signal, ... */
 		/* Clear anyway for 7110..CK */
 		clear = 1;
-		GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, &statemachine.Phone.Info);
+		if (!strncmp(statemachine.Phone.Info.Models, "6510", 4))
+			GSM_ResizeBitmap(&bitmap, GSM_NewOperatorLogo, &statemachine.Phone.Info);
+		else
+			GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, &statemachine.Phone.Info);
 	}
 
 	/* must clear? */
@@ -1405,7 +1409,7 @@ void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonOperator), false);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonCaller), false);
 
-	if (tbitmap.type == GSM_OperatorLogo)
+	if (tbitmap.type == GSM_OperatorLogo || tbitmap.type == GSM_OperatorLogo)
 		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonOperator), true);
 	if (tbitmap.type == GSM_StartupLogo)
 		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonStartup), true);
