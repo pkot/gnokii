@@ -16,6 +16,9 @@
       binaries with MSVC                               (Phil Ashby)
     o add buildin irda for WIN32 in the Makefile       (Phil Ashby)
     o add direct.h detection                            (Pawel Kot)
+    o try to correctly link with all needed libs (libintl and
+      libiconv)                                         (Pawel Kot)
+    o fix MSVC build                        (Phil Ashby, Pawel Kot)
  * gnapplet series updates
     o folder management support (list, status, create,
       delete) support added                        (BORBELY Zoltan)
