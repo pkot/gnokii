@@ -4,6 +4,8 @@
     o bump the version number                      (BORBELY Zoltan)
  * build system updates
     o require flex at rpm build time            (Olivier Kaloudoff)
+ * gnokii updates
+    o accept range in --deletephonebook            (BORBELY Zoltan)
 
 0.6.0
 =====

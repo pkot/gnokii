@@ -285,7 +285,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
 		     "                 [-m|--memory-type|--memory] [-n|--memory-location|--memory]\n"
 		     "                 [[-v|--vcard]|[-l|--ldif]]\n"
-		     "          gnokii --deletephonebook memory_type location\n"
+		     "          gnokii --deletephonebook memory_type start_number [end_number]\n"
 		     "Calendar options:\n"
 		     "          gnokii --getcalendarnote start_number [end_number|end] [-v]\n"
 		     "          gnokii --writecalendarnote vcardfile number\n"
@@ -3461,6 +3461,7 @@ static int deletephonebook(int argc, char *argv[])
 	gn_phonebook_entry entry;
 	gn_error error;
 	char *memory_type_string;
+	int i, start_number, end_number;
 
 	if (argc < 2) {
 		usage(stderr, -1);
@@ -3474,20 +3475,25 @@ static int deletephonebook(int argc, char *argv[])
 		return -1;
 	}
 
-	entry.location = atoi(argv[1]);
-	entry.empty = true;
-	error = gn_sm_functions(GN_OP_DeletePhonebook, &data, &state);
-	switch (error) {
-	case GN_ERR_NONE:
-		fprintf (stderr, _("Phonebook entry removed: memory type: %s, loc: %d\n"), 
-			 gn_memory_type2str(entry.memory_type), entry.location);
-		break;
-	default:
-		fprintf (stderr, _("Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"), 
-			 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location);
-		break;
+	start_number = atoi(argv[1]);
+	end_number = (argc < 3) ? start_number : atoi(argv[2]);
+
+	for (i = start_number; i <= end_number; i++) {
+		entry.location = i;
+		entry.empty = true;
+		error = gn_sm_functions(GN_OP_DeletePhonebook, &data, &state);
+		switch (error) {
+		case GN_ERR_NONE:
+			fprintf (stderr, _("Phonebook entry removed: memory type: %s, loc: %d\n"), 
+				 gn_memory_type2str(entry.memory_type), entry.location);
+			break;
+		default:
+			fprintf (stderr, _("Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"), 
+				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location);
+			break;
+		}
 	}
-	return error;
+	return GN_ERR_NONE;
 }
 
 /* Getting WAP bookmarks. */
@@ -5047,7 +5053,7 @@ int main(int argc, char *argv[])
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
 		{ OPT_GETPHONEBOOK,      2, 4, 0 },
 		{ OPT_WRITEPHONEBOOK,    0, 10, 0 },
-		{ OPT_DELETEPHONEBOOK,   2, 2, 0 },
+		{ OPT_DELETEPHONEBOOK,   2, 3, 0 },
 		{ OPT_GETSPEEDDIAL,      1, 1, 0 },
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
 		{ OPT_CREATESMSFOLDER,   1, 1, 0 },
