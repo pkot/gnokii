@@ -1055,10 +1055,10 @@ static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length
 	buf.length = length;
 	splitlines(&buf);
 	if (!strncmp(buf.line1, "AT+CG", 5)) {
-		reply_simpletext(buf.line1+2, buf.line2, "+CGSN:", data->imei);
-		reply_simpletext(buf.line1+2, buf.line2, "+CGMM:", data->model);
-		reply_simpletext(buf.line1+2, buf.line2, "+CGMI:", data->manufacturer);
-		reply_simpletext(buf.line1+2, buf.line2, "+CGMR:", data->revision);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGSN: ", data->imei);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGMM: ", data->model);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGMI: ", data->manufacturer);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGMR: ", data->revision);
 	}
 	return GN_ERR_NONE;
 }
