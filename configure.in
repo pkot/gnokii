@@ -227,8 +227,8 @@ AC_MSG_CHECKING(for cfsetispeed and cfsetospeed in termios.h)
 AC_TRY_LINK([#include <termios.h>],
         [struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);],
 	[AC_DEFINE(HAVE_CFSETISPEED)
-	 AC_DEFINE(HAVE_CFSET0SPEED)
-	 TERMIOS_CFLAGS="$TERMIOS_CFLAGS -DHAVE_CFSETISPEED -DHAVE_CFSET0SPEED"
+	 AC_DEFINE(HAVE_CFSETOSPEED)
+	 TERMIOS_CFLAGS="$TERMIOS_CFLAGS -DHAVE_CFSETISPEED -DHAVE_CFSETOSPEED"
 	 AC_MSG_RESULT(yes)],
          AC_MSG_RESULT(no))
 

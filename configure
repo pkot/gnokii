@@ -1876,10 +1876,10 @@ if { (eval echo configure:1873: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && t
 EOF
 
 	 cat >> confdefs.h <<\EOF
-#define HAVE_CFSET0SPEED 1
+#define HAVE_CFSETOSPEED 1
 EOF
 
-	 TERMIOS_CFLAGS="$TERMIOS_CFLAGS -DHAVE_CFSETISPEED -DHAVE_CFSET0SPEED"
+	 TERMIOS_CFLAGS="$TERMIOS_CFLAGS -DHAVE_CFSETISPEED -DHAVE_CFSETOSPEED"
 	 echo "$ac_t""yes" 1>&6
 else
   echo "configure: failed program was:" >&5
