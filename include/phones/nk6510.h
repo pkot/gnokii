@@ -50,6 +50,7 @@ extern bool P6510_LinkOK;
 #define P6510_MSG_SMS		0x02	/* SMS handling */
 #define P6510_MSG_PHONEBOOK	0x03	/* Phonebook functions */
 #define P6510_MSG_DIVERT	0x06	/* Call Divert */
+#define P6510_MSG_SECURITY	0x08	/* PIN and stuff */
 #define P6510_MSG_NETSTATUS	0x0a	/* Network status */
 #define P6510_MSG_KEYPRESS	0x0c	/* keypress emulation? */
 #define P6510_MSG_CALENDAR	0x13	/* Calendar notes */
