@@ -2,7 +2,7 @@
 ==========
  * Rewrite of the SMS subsystem
     o reading of SMS splitted into 2 stages               (Pawel Kot)
-    o first tries at EMS picture SMSes                 (Pavel Machek)
+    o support for EMS picture/animation SMSes          (Pavel Machek)
     o support for sending nokia ringtones              (Pavel Machek)
     o support for sending iMelody                      (Pavel Machek)
     o reactivate support for text before picture messages

@@ -1096,10 +1096,20 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
 			}
 			if (error != GE_NONE) return error;
-
 			size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Bitmap), rawsms->UserData + rawsms->UserDataLength);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
+			rawsms->DCS = 0xf5;
+			rawsms->UDHIndicator = 1;
+			break;
+
+		case SMS_AnimationData:
+			error = GE_NONE;
+			for (i=0; i<4; i++) {
+				size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Animation[i]), rawsms->UserData + rawsms->UserDataLength);
+				rawsms->Length += size;
+				rawsms->UserDataLength += size;
+			}
 			rawsms->DCS = 0xf5;
 			rawsms->UDHIndicator = 1;
 			break;

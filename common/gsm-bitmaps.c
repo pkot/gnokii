@@ -263,6 +263,17 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 		message[current++] = bitmap->width/8; /* Horizontal size / 8 */
 		message[current++] = bitmap->height;
 		break;
+	case GSM_EMSAnimation:
+		dprintf("EMS animation\n");
+		if (bitmap->width != 16) {
+			fprintf(stderr, "EMS animation needs bitmap 16x16 ... \n");
+			return GE_NOTSUPPORTED;
+		}
+		message[current++] = bitmap->width/8*bitmap->height+3;
+		message[current++] = 0x0e; 	/* Animation code */
+		message[current++] = bitmap->width/8*bitmap->height+1; /* Picture size */;
+		break;
+	case GSM_EMSAnimation2:
 	default: /* error */
 		dprintf("gulp?\n");
 		break;
@@ -270,6 +281,8 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 
 	switch (bitmap->type) {
 	case GSM_EMSPicture:
+	case GSM_EMSAnimation:
+	case GSM_EMSAnimation2:
 		break;
 	default:			/* Add common nokia headers */
 		/* Info field */
