@@ -13,6 +13,8 @@
       availale                                           (Pawel Kot)
     o fix phonebook reading when UCS2 encoding is not available
                                                          (Pawel Kot)
+    o avoid segfault on attempt to write the phonebook entry
+      with xgnokii and Nokia phones                      (Pawel Kot)
  * docs updates
     o note that /dev/ttySX is the Linux notation         (Pawel Kot)
 
