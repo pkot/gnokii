@@ -249,11 +249,9 @@ static GSM_Error fbusinit(bool enable_monitoring)
 	}
 
 	/* Initialise the code for the GSM interface. */
-
-	if (error == GE_NOLINK)
-		error = gn_gsm_initialise(xgnokiiConfig.model, xgnokiiConfig.port,
-					  xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame,
-					  &statemachine);
+	error = gn_gsm_initialise(xgnokiiConfig.model, xgnokiiConfig.port,
+				  xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame,
+				  &statemachine);
 
 #ifdef XDEBUG
 	g_print("fbusinit: error %d\n", error);
@@ -1134,8 +1132,13 @@ void *GUI_Connect(void *a)
 #endif
 
 	phoneMonitor.working = _("Connecting...");
-	while (fbusinit(true) != GE_NONE)
-		sleep(1);
+	if (fbusinit(true) != GE_NONE) {
+#ifdef XDEBUG
+		g_printf("Initialization failed...\n");
+#endif
+		/* FIXME: Add some popup */
+		exit(1);
+	}
 
 #ifdef XDEBUG
 	g_print("Phone connected. Starting monitoring...\n");
