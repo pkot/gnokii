@@ -371,6 +371,7 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 		FREE(DRVINSTANCE(state));
 		return err;
 	}
+
 	/* Check for 7110 and alter the startup logo size */
 	if (strcmp(model, "NSE-5") == 0) {
 		state->driver.phone.startup_logo_height = 65;
