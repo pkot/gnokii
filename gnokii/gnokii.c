@@ -495,7 +495,7 @@ static int sendsms(int argc, char *argv[])
 	optarg = NULL;
 	optind = 0;
 
-	while ((i = getopt_long(argc, argv, "r8co:C:v:i", options, NULL)) != -1) {
+	while ((i = getopt_long(argc, argv, "r8co:C:v:ip:", options, NULL)) != -1) {
 		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
 			strncpy(sms.SMSC.Number, optarg, sizeof(sms.SMSC.Number) - 1);
@@ -524,6 +524,7 @@ static int sendsms(int argc, char *argv[])
 			}
 			break;
 
+		case 'p':
 		case '4': /* we send multipart message - picture message; FIXME: This seems not yet implemented */
 			sms.UDH.Number = 1;
 			break;
@@ -1119,7 +1120,7 @@ static int getsms(int argc, char *argv[])
 					if (!strcmp(message.Remote.Number, "+998000002") || !strcmp(message.Remote.Number, "+998000003")) fprintf(stdout, _("Saved by Operator Logo Uploader by Thomas Kessler\n"));
 					offset = 3;
 				case SMS_CallerIDLogo:
-					fprintf(stdout, ("Logo:\n"));
+					fprintf(stdout, _("Logo:\n"));
 					/* put bitmap into bitmap structure */
 					GSM_ReadSMSBitmap(GSM_OperatorLogo, message.UserData[0].u.Text + 2 + offset, message.UserData[0].u.Text, &bitmap);
 					GSM_PrintBitmap(&bitmap, stdout);
@@ -1382,22 +1383,22 @@ static void callnotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
 {
 	switch (CallStatus) {
 	case GSM_CS_IncomingCall:
-		fprintf(stdout, "INCOMING CALL: ID: %d, Number: %s, Name: \"%s\"\n", CallInfo->CallID, CallInfo->Number, CallInfo->Name);
+		fprintf(stdout, _("INCOMING CALL: ID: %d, Number: %s, Name: \"%s\"\n"), CallInfo->CallID, CallInfo->Number, CallInfo->Name);
 		break;
 	case GSM_CS_LocalHangup:
-		fprintf(stdout, "CALL %d TERMINATED (LOCAL)\n", CallInfo->CallID);
+		fprintf(stdout, _("CALL %d TERMINATED (LOCAL)\n"), CallInfo->CallID);
 		break;
 	case GSM_CS_RemoteHangup:
-		fprintf(stdout, "CALL %d TERMINATED (REMOTE)\n", CallInfo->CallID);
+		fprintf(stdout, _("CALL %d TERMINATED (REMOTE)\n"), CallInfo->CallID);
 		break;
 	case GSM_CS_Established:
-		fprintf(stdout, "CALL %d ACCEPTED BY THE REMOTE SIDE\n", CallInfo->CallID);
+		fprintf(stdout, _("CALL %d ACCEPTED BY THE REMOTE SIDE\n"), CallInfo->CallID);
 		break;
 	case GSM_CS_CallHeld:
-		fprintf(stdout, "CALL %d PLACED ON HOLD\n", CallInfo->CallID);
+		fprintf(stdout, _("CALL %d PLACED ON HOLD\n"), CallInfo->CallID);
 		break;
 	case GSM_CS_CallResumed:
-		fprintf(stdout, "CALL %d RETRIEVED FROM HOLD\n", CallInfo->CallID);
+		fprintf(stdout, _("CALL %d RETRIEVED FROM HOLD\n"), CallInfo->CallID);
 		break;
 	default:
 		break;
@@ -2412,7 +2413,7 @@ static int displayoutput(void)
 			char buf[105];
 			memset(&buf[0], 0, 102);
 			while (read(0, buf, 100) > 0) {
-//				fprintf(stderr, "handling keys (%d).\n", strlen(buf));
+//				fprintf(stderr, _("handling keys (%d).\n"), strlen(buf));
 //				if (GSM && GSM->HandleString && GSM->HandleString(buf) != GE_NONE)
 //					fprintf(stdout, _("Key press simulation failed.\n"));
 				memset(buf, 0, 102);
@@ -2420,7 +2421,7 @@ static int displayoutput(void)
 			SM_Loop(&State, 1);
 			SM_Functions(GOP_PollDisplay, &data, &State);
 		}
-		fprintf (stderr, "Shutting down\n");
+		fprintf (stderr, _("Shutting down\n"));
 
 		fprintf (stderr, _("Leaving display monitor mode...\n"));
 
@@ -3418,7 +3419,6 @@ static int divert(int argc, char **argv)
 	error = SM_Functions(GOP_CallDivert, &data, &State);
 
 	if (error == GE_NONE) {
-		fprintf(stderr, "Divert succeeded.\n");
 		fprintf(stdout, _("Divert type: "));
 		switch (cd.DType) {
 		case GSM_CDV_AllTypes: fprintf(stdout, _("all\n")); break;
@@ -3803,7 +3803,7 @@ int main(int argc, char *argv[])
 	};
 
 	if (install_log_handler()) {
-		fprintf(stderr, "WARNING: cannot open logfile, logs will be directed to stderr\n");
+		fprintf(stderr, _("WARNING: cannot open logfile, logs will be directed to stderr\n"));
 	}
 
 	opterr = 0;
