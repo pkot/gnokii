@@ -2036,18 +2036,27 @@ static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 	gn_timestamp	tmptime;
 
 	dprintf("Getting calendar note...\n");
-	tmpdata.datetime = &tmptime;
-	if (NK6510_GetCalendarNotesInfo(data, state) == GN_ERR_NONE) {
-		if (data->calnote->location < data->calnote_list->number + 1 &&
-		    data->calnote->location > 0 ) {
-			if (sm_message_send(4, NK6510_MSG_CLOCK, date, state) == GN_ERR_NONE) {
-				sm_block(NK6510_MSG_CLOCK, &tmpdata, state);
-				req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
-				req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
-				data->calnote->time.year = tmptime.year;
+	if (data->calnote->location < 1) {
+		error = GN_ERR_INVALIDLOCATION;
+	} else {
+		tmpdata.datetime = &tmptime;
+		error = NK6510_GetCalendarNotesInfo(data, state);
+		if (error == GN_ERR_NONE) {
+			if (!data->calnote_list->number ||
+			    data->calnote->location > data->calnote_list->number) {
+				error = GN_ERR_EMPTYLOCATION;
+			} else {
+				error = sm_message_send(4, NK6510_MSG_CLOCK, date, state);
+				if (error == GN_ERR_NONE) {
+					sm_block(NK6510_MSG_CLOCK, &tmpdata, state);
+					req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+					req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+					data->calnote->time.year = tmptime.year;
 
-				if (sm_message_send(6, NK6510_MSG_CALENDAR, req, state) == GN_ERR_NONE) {
-					error = sm_block(NK6510_MSG_CALENDAR, data, state);
+					error = sm_message_send(6, NK6510_MSG_CALENDAR, req, state);
+					if (error == GN_ERR_NONE) {
+						error = sm_block(NK6510_MSG_CALENDAR, data, state);
+					}
 				}
 			}
 		}
@@ -3920,18 +3929,51 @@ static gn_error NK6510_ActivateWAPSetting(gn_data *data, struct gn_statemachine 
 /***** ToDo *********/
 /********************/
 
+static gn_error NK6510_GetToDo_Internal(gn_data *data, struct gn_statemachine *state, int location)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER,0x03, 
+			       0x00, 0x00, 0x80, 0x00,
+			       0x00, 0x01};		/* Location */
+
+	req[8] = location / 256;
+	req[9] = location % 256;
+	dprintf("Getting ToDo\n");
+	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10);
+}
+
 static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int i;
+	gn_error error = GN_ERR_NONE;
 
 	switch (message[3]) {
 	case 0x02:
-		dprintf("ToDo set!\n");
+		if (!data->todo) {
+			error = GN_ERR_INTERNALERROR;
+			break;
+		}
+		switch (message[4]) {
+		case 0x00:
+			dprintf("ToDo set!\n");
+			data->todo->location = message[8] * 256 + message[9];
+			break;
+		case 0x04:
+			dprintf("Invalid priority?\n");
+		default:
+			dprintf("ToDo setting failed\n");
+			error = GN_ERR_FAILED;
+		}
 		break;
 	case 0x04:
 		dprintf("ToDo received!\n");
-		if (!data->todo) return GN_ERR_INTERNALERROR;
-		if (message[5] == 0x08) return GN_ERR_INVALIDLOCATION;
+		if (!data->todo) {
+			error = GN_ERR_INTERNALERROR;
+			break;
+		}
+		if (message[5] == 0x08) {
+			error = GN_ERR_INVALIDLOCATION;
+			break;
+		}
 		if ((message[4] > 0) && (message[4] < 4)) {
 			data->todo->priority = message[4];
 		}
@@ -3941,7 +3983,10 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 		break;
 	case 0x10:
 		dprintf("Next free ToDo location received!\n");
-		if (!data->todo) return GN_ERR_INTERNALERROR;
+		if (!data->todo) {
+			error = GN_ERR_INTERNALERROR;
+			break;
+		}
 		data->todo->location = message[8] * 256 + message[9];
 		dprintf("   location: %i\n", data->todo->location);
 		break;
@@ -3950,7 +3995,10 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 		break;
 	case 0x16:
 		dprintf("ToDo locations received!\n");
-		if (!data->todo) return GN_ERR_INTERNALERROR;
+		if (!data->todo) {
+			error = GN_ERR_INTERNALERROR;
+			break;
+		}
 		data->todo_list->number = message[6] * 256 + message[7];
 		dprintf("Number of Entries: %i\n", data->todo_list->number);
 
@@ -3963,10 +4011,10 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x01 (%d)\n", message[3]);
-		return GN_ERR_UNHANDLEDFRAME;
+		error = GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
-	return GN_ERR_NONE;
+	return error;
 }
 
 
@@ -4000,15 +4048,18 @@ static gn_error NK6510_GetToDo(gn_data *data, struct gn_statemachine *state)
 			       0x00, 0x01};		/* Location */
 	gn_error error;
 
-
-	error = NK6510_GetToDoLocations(data, state);
-	if (error != GN_ERR_NONE) return error;
-
-	req[8] = data->todo_list->location[data->todo->location - 1] / 256;
-	req[9] = data->todo_list->location[data->todo->location - 1] % 256;
-
-	dprintf("Getting ToDo\n");
-	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10);
+	if (data->todo->location < 1) {
+		error = GN_ERR_INVALIDLOCATION;
+	} else {
+		error = NK6510_GetToDoLocations(data, state);
+		if (!data->todo_list->number ||
+		    data->todo->location > data->todo_list->number) {
+			error = GN_ERR_EMPTYLOCATION;
+		} else {
+			return NK6510_GetToDo_Internal(data, state, data->todo_list->location[data->todo->location - 1]);
+		}
+	}
+	return error;
 }
 
 static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state)
@@ -4031,7 +4082,12 @@ static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state)
 	memcpy(req + 10, text, length);
 
 	dprintf("Setting ToDo\n");
-	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10 + strlen(data->todo->text) * 2);
+	if (sm_message_send(length, NK6510_MSG_TODO, req, state)) return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_TODO, data, state);
+	if (error == GN_ERR_NONE) {
+		error = NK6510_GetToDo_Internal(data, state, data->todo->location);
+	}
+	return error;
 }
 
 /********************/

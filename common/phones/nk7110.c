@@ -1892,27 +1892,34 @@ static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 	gn_timestamp	tmptime;
 	gn_calnote_list list;
 
-	data->calnote_list = &list;
-	tmpdata.datetime = &tmptime;
-	if ((error = NK7110_GetCalendarNotesInfo(data, state)) == GN_ERR_NONE) {
-		if (data->calnote->location < data->calnote_list->number + 1 &&
-		    data->calnote->location > 0) {
-			if (sm_message_send(4, NK7110_MSG_CLOCK, date, state) == GN_ERR_NONE) {
-				sm_block(NK7110_MSG_CLOCK, &tmpdata, state);
-				if (data->calnote_list->location[data->calnote->location - 1] > 0) {
+	dprintf("Getting calendar note...\n");
+	if (data->calnote->location < 1) {
+		error = GN_ERR_INVALIDLOCATION;
+	} else {
+		data->calnote_list = &list;
+		tmpdata.datetime = &tmptime;
+		error = NK7110_GetCalendarNotesInfo(data, state);
+		if (error == GN_ERR_NONE) {
+			if (!data->calnote_list->number ||
+			    data->calnote->location > data->calnote_list->number) {
+				error = GN_ERR_EMPTYLOCATION;
+			} else {
+				error = sm_message_send(4, NK7110_MSG_CLOCK, date, state);
+				if (error == GN_ERR_NONE) {
+					sm_block(NK7110_MSG_CLOCK, &tmpdata, state);
 					req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
 					req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+					data->calnote->time.year = tmptime.year;
+					
+					error = sm_message_send(6, NK7110_MSG_CALENDAR, req, state);
+					if (error == GN_ERR_NONE) {
+						error = sm_block(NK7110_MSG_CALENDAR, data, state);
+					}
 				}
-				data->calnote->time.year = tmptime.year;
-			} else
-				return GN_ERR_UNKNOWN; /* FIXME */
-		} else
-
-			return GN_ERR_INVALIDLOCATION;
-	} else
-		return error;
-
-	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 6);
+			}
+		}
+	}
+	return error;
 }
 
 static gn_error NK7110_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)

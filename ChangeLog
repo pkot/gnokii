@@ -75,6 +75,8 @@
     o extended error handling (CME and CMS erros)  (BORBELY Zoltan)
     o SetPDUMode was missing from GetSMS           (BORBELY Zoltan)
     o GetNetworkInfo won't crash if there's no net (BORBELY Zoltan)
+ * nk7110 series updates
+    o handle empty calentar entries not as an error     (Pawel Kot)
 
 0.6.1
 =====
