@@ -43,12 +43,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc BUGS COPYING MANIFEST README TODO-6110 TODO-gnokiid sample.gnokiirc gettext-howto
+%doc BUGS COPYING MANIFEST README TODO-6110 TODO-gnokiid sample.gnokiirc gettext-howto gnokii.nol
 /usr/bin/*
 %attr(4754, root, gnokii) /usr/sbin/*
 %config /etc/gnokiirc
 
 %changelog
+* Thu Jul 22 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- gnokii.nol added - nice example for logo uploading
+
 * Sun Jul 18 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - mgnokiidev added to RPM package
 - config file in /etc (it is not used now...)

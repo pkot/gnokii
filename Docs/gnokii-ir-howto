@@ -1,0 +1,528 @@
+  Gnokii-Infrared-HowTo
+  Thomas Schneider, ts-ml@dev-thomynet.de
+  Version: 1.03, 21 July 1999
+
+  This document describes how to use the infrared-function of gnokii
+  ______________________________________________________________________
+
+  Table of Contents
+
+
+  1. Preamble
+
+     1.1 Copyright
+     1.2 Credits
+     1.3 Comments
+     1.4 Latest version of this document
+
+  2. Introduction
+
+  3. Installation
+
+     3.1 What Gnokii needs for communication over infrared
+     3.2 Installing and Configuring the Software
+
+  4. Mobiles and their software-version
+
+     4.1 Get software-version of your phone
+     4.2 Tested phone-software-version
+
+  5. PC-Hardware and Configuration
+
+     5.1 Laptops - who work with gnokii
+        5.1.1 DELL Inspiron 7000 A366LT
+        5.1.2 DELL Latitude LM 166
+        5.1.3 IBM Thinkpad 390
+        5.1.4 IBM Thinkpad 600
+     5.2 Laptops - who don't work
+     5.3 Mainboards - who work with gnokii
+        5.3.1 ASUS ????
+     5.4 Mainboards - who don't work with gnokii
+     5.5 External Adapters - who work with gnokii
+     5.6 External Adapters - who don't work with gnokii
+        5.6.1 Tekram IR210B
+
+  6. Gnokii over infrared versus LINUX-IRDA
+
+  7. FAQ
+
+  8. Appendix A: COM-Port-Table
+
+
+
+  ______________________________________________________________________
+
+  1.  Preamble
+
+  1.1.  Copyright
+
+  Copyright Thomas Schneider 1999
+
+  You may redistribute and/or modify this document as long as you comply
+  with the terms of the GNU General Public Licence, version 2 or later.
+
+
+
+
+  1.2.  Credits
+
+  Special thanks go to Hugh Blemings and Pavel Janik, they are the
+  maintainer of gnokii, for the good work. Also to Colin Paton for his
+  mail with description connection establishment over infrared.
+
+
+  1.3.  Comments
+
+  Do not hesitate to tell me any thing you think will help make this
+  document better. I will examine your critics thoroughly.  Do not
+  hesitate as well to ask me any questions related to topics discussed
+  here. I will be more than happy to answer them, as they may help me
+  further improve this document. (-- Translator note: If the English is
+  ugly, well then that goes to me!--)
+
+  Note:If you have any big problems or other questions to gnokii -
+  please mail to gnokii-mailinglist and not to me! For more details:
+  http://multivac.fatburen.org/gnokii/
+
+
+  1.4.  Latest version of this document
+
+  You can find the latest version of this document in the gnokii-
+  distribution under: http://multivac.fatburen.org/gnokii/ or in the web
+  on http://www.dev-thomynet.de/nokworld/gnokii-infrared-howto/ .
+
+
+  2.  Introduction
+
+  Gnokii is a suite of programs what deal with some mobilephones from
+  NOKIA (http://www.nokia.com ).
+
+  This document is the guide to use gnokii over infrared.  It is not the
+  general gnokii-userguide and contains no part of protocol.
+
+
+  3.  Installation
+
+  You can get gnokii from gnokiis-homepage:
+
+  o  http://multivac.fatburen.org/gnokii/
+
+  Gnokii-package is available in some different formats: rpm and tgz.
+  To install the tgz unpack the package with
+
+  tar xvzf filename
+
+
+  The first address after unpack is file README in dir gnokii - all
+  important parts you can read in it.
+
+
+  3.1.  What Gnokii needs for communication over infrared
+
+  Since version **FIX_ME** gnokii contains everything that you need in
+  software for infrared-communication.
+
+  On the other side you need some hardware:
+
+  1. nokia mobile phone with infrared-port.  Some phones are: 6110, 6150
+
+  2. infrared-port on your pc or notebook.  In moment only SIR works
+     with gnokii, because phones are limmited to 115200 bps.
+
+
+  3.2.  Installing and Configuring the Software
+
+  All steps needed to install and configure gnokii are described in
+  README.  Here is the short way for configure infrared with gnokii:
+
+
+  1. Copy the file sample.gnokiirc as .gnokiirc in your homedir.
+
+
+       cp sample.gnokiirc ~/.gnokiirc
+
+
+
+
+  2. Edit the ~/.gnokiirc file:
+
+
+       port       = /dev/ttyS1 # Set this to the port where you infrared-equipment is connected.
+       model      = 6150       # Set up to your model.
+       connection = infrared   # If you want connection over cable set this to serial.
+
+
+
+
+  3. Make the complete gnokii-software with make in gnokii-dir.
+
+  Thats all! If you use infrared in ~/.gnokiirc all parts of the gnokii-
+  distribution use communication over infrared! This parts are in
+  moment:
+
+  1. gnokii
+
+  2. xgnokii
+
+  3. gnokiid
+
+
+  4.  Mobiles and their software-version
+
+  In all tested situations the software from your phone is not the
+  problem if you can't connect it over infrared. The problem in such
+  situations was the pc-equipment or the pc-configuration. If you have
+  problems please look first in ``pc-section''.
+
+
+  4.1.  Get software-version of your phone
+
+  To get the software-version from your phone press in idle-mode:
+
+
+       *#0000#
+
+
+
+
+
+  4.2.  Tested phone-software-version
+
+
+  1. 6100
+
+  o  V 4.73, 22-04-98, NSE-3
+
+  o  V 5.24, 14-09-98, NSE-3
+
+
+  2. 6150
+
+  o  V 4.12, 02-12-98, NSM-1
+
+  o  V 5.02, 02-02-99, NSM-1
+
+
+  5.  PC-Hardware and Configuration
+
+  This is the most cause for some problems. In moment gnokii works only
+  with SIR- equipment and not with FIR-eqipment. One reason for this is,
+  what phone-speed is limited to 115200 bps.  If you have any problems
+  with your equipment read the following parts. Adapters can be the
+  following:
+
+  o  Internal Adapters
+
+  o  Serial Adapters
+
+  o  SIR
+
+  o  FIR
+
+  o  Parallel Adapters
+
+  o  SIR
+
+  o  FIR
+
+  o  External Adapters
+
+  o  Serial Adapters
+
+  o  SIR
+
+  o  FIR
+
+  o  Parallel Adapters
+
+  o  SIR
+
+  o  FIR
+
+  Mosts laptops have an internal infrared-port. Some motherboards - ASUS
+  for example - have also a infrared-connector. On this boards you must
+  buy a little infrared-transmitter to use infrared-connections.
+
+  It is very difficult to describe all parts of configuration. On this
+  reason this HowTo list all tested laptops and other hardware in each
+  section.
+
+
+  5.1.  Laptops - who work with gnokii
+
+  Short list:
+
+  o  ``DELL Inspiron 7000 A366LT''
+
+  o  ``DELL Latitude LM 166''
+
+  o  ``IBM Thinkpad 390''
+
+  o  ``IBM Thinkpad 600''
+
+
+
+  5.1.1.  DELL Inspiron 7000 A366LT
+
+
+  o  BIOS-Version  : Phoenix BIOS 4.0, Release: 6.0
+
+  o  CPU           : Mobile Pentium II, MMX, 366MHz, BIOS Rev A10 (037A)
+
+  o  Memory        : 256 MByte
+
+  o  Kernel        : 2.2.5
+
+  o  Distibution   : SuSE 6.1 (german version)
+
+  o  reported from : Thomas Schneider < ts-ml@dev-thomynet.de >
+
+  o  BIOS-Menu     : System Devices: Infrared Port: Customized: SIR,
+     2F8, IRQ3
+
+  o  Configuration : In BIOS you can configure many thinks for the
+     internal-infrared-port.  First you have some choices: SIR or FIR or
+     AUTO. All kinds are tested and works - also FIR!  For the COM-Port
+     you must set address in hex and irq. For FIR and AUTO you must also
+     DMA.  If you have problems with address/irq look in ``COM-PORT-
+     Table''.  Tested with all possibillity com-port from 1 to 4 and
+     their default irqs - no problems. DMA was set in all test to: 3.
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
+
+
+  5.1.2.  DELL Latitude LM 166
+
+
+  o  BIOS-Version  : Phoenix NoteBIOS 4.0
+
+  o  CPU           : Mobile Pentium, MMX, 166MHz
+
+  o  Memory        : 40 MByte
+
+  o  Kernel        : 2.2.5
+
+  o  Distibution   : SuSE 6.1 (german version)
+
+  o  reported from : Thomas Schneider < ts-ml@dev-thomynet.de >
+
+  o  BIOS-Menu     : Peripherals: Integrated Peripherals: Infrared: COM2
+
+  o  Configuration : You must enable in BIOS the internal-infrared-port
+     and must setup the COM-Port on which the internal ir-adapter should
+     work. If you want what infrared use COM2 you must set it here for
+     example.
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
+
+
+  5.1.3.  IBM Thinkpad 390
+
+
+  o  BIOS-Version  : ????
+
+  o  CPU           : ????
+
+
+  o  Memory        : ????
+
+  o  Kernel        : ????
+
+  o  Distibution   : ????
+
+  o  reported from : Mario Viljac on 21. July to gnokii-ml
+
+  o  BIOS-Menu     : ????
+
+  o  Configuration : IR-port must be enabled, set also COM-Address and
+     IRQ. If you have problems with address/irq look in ``COM-PORT-
+     Table''.
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
+
+
+  5.1.4.  IBM Thinkpad 600
+
+
+  o  BIOS-Version  : ????
+
+  o  CPU           : ????
+
+  o  Memory        : ????
+
+  o  Kernel        : ????
+
+  o  Distibution   : ????
+
+  o  reported from : Tuomas Mttnen on 06. July to gnokii-ml
+
+  o  BIOS-Menu     : ????
+
+  o  Configuration : ????
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
+
+
+
+  5.2.  Laptops - who don't work
+
+  No mails for this part in moment.
+
+
+  5.3.  Mainboards - who work with gnokii
+
+  Short list:
+
+  o  ``ASUS ????''
+
+
+  5.3.1.  ASUS ????
+
+
+  o  BIOS-Version  : ????
+
+  o  CPU           : ????
+
+  o  Memory        : ????
+
+
+  o  Kernel        : ????
+
+  o  Distibution   : ????
+
+  o  reported from : mail from Victor L. Belov on 06. July to gnokii-ml
+
+  o  BIOS-Menu     : ????
+
+  o  Configuration : ????
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
+
+
+  5.4.  Mainboards - who don't work with gnokii
+
+  No mails for this part in moment.
+
+
+  5.5.  External Adapters - who work with gnokii
+
+  No mails for this part in moment.
+
+
+  5.6.  External Adapters - who don't work with gnokii
+
+  Short list:
+
+  o  ``Tekram IR210B''
+
+
+  5.6.1.  Tekram IR210B
+
+
+  o  BIOS-Version  : ????
+
+  o  CPU           : ????
+
+  o  Memory        : ????
+
+  o  Kernel        : ????
+
+  o  Distibution   : ????
+
+  o  reported from : Any mails from some peopel.
+
+  o  BIOS-Menu     : ????
+
+  o  Configuration : ????
+
+  o  Known Problems: don't work
+
+  o  Note          : selfpowered over com-port Must be tested - mail to
+     gnokii-ml.
+
+
+  6.  Gnokii over infrared versus LINUX-IRDA
+
+  You can not use gnokii over infrared and linux-irda at the same time.
+  If you want use gnokiis ir-communication you must put linux-irda off.
+  If you want use linux-irda you must close all gnokii-applications what
+  use the infrared-port in moment.
+
+
+
+  7.  FAQ
+
+  No FAQ is available in moment.
+
+
+  8.  Appendix A: COM-Port-Table
+
+  Here you find the default addresses and irq's from com1 up to com4 -
+  or ttyS0 up to ttyS3.
+
+
+  o  ttyS0: 3F8, IRQ: 4, COM1
+
+  o  ttyS1: 2F8, IRQ: 3, COM2
+
+  o  ttyS2: 3E8, IRQ: 4, COM3
+
+  o  ttyS3: 2E8, IRQ: 3, COM4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
