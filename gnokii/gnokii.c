@@ -319,32 +319,35 @@ void getsms(char *argv[])
 	
     error = GSM->GetSMSMessage(memory_type, count, &message);
 
-    if (error == GE_NONE) {
+    switch (error) {
+
+    case GE_NONE:
 
       fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"), message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCentre);
 
       fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
 
-    }
-    else {
-      if (error == GE_NOTIMPLEMENTED) {
-	fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
-	GSM->Terminate();
-	exit(-1);	
-      }
-      else {
-	if (error == GE_INVALIDMEMORYTYPE) {
-	  fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
-	  GSM->Terminate();
-	  exit(-1);	
-	}
-	else
-	  if (error == GE_EMPTYSMSLOCATION) {
-	    fprintf(stderr, _("Empty location: %s %d!\n"), memory_type_string, count);
-	    GSM->Terminate();
-	    exit(-1);	
-	  }
-      }
+      break;
+
+    case GE_NOTIMPLEMENTED:
+
+      fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
+      GSM->Terminate();
+      exit(-1);	
+
+    case GE_INVALIDMEMORYTYPE:     
+
+      fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
+      GSM->Terminate();
+      exit(-1);	
+
+     case GE_EMPTYSMSLOCATION:
+
+       fprintf(stderr, _("SMS location %s %d empty.\n"), memory_type_string, count);
+
+       break;
+
+    default:
 
       fprintf(stdout, _("GetSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
     }

@@ -273,6 +273,7 @@ is the Australian mirror, there will be one nearby to you too :)
 5110/Paegas (Czech Republic)
 6150/Omnitel (Italy)
 5110/Omnitel (Italy)
+5190/???????
 
 - Credits -
 
@@ -312,6 +313,8 @@ Thank you to, in no particular order...
 
 *  Emilio Brambilla for SMS notification fixes, setdatetime implementation
    and typing GSM_Default_Alphabet.
+
+*  Pawe³ Kot for EnterPIN on 6110 Series changes and other things.
 
 *  Czech Linux Users' group for it's CVS server which hosts our
    development repository.

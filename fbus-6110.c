@@ -552,9 +552,10 @@ GSM_Error FB61_EnterPin(char *pin)
   for (i=0; i<strlen(pin);i++)
     pin_req[5+i]=pin[i];
 
-  pin_req[5+strlen(pin)]=0x01;
+  pin_req[5+strlen(pin)]=0x00;
+  pin_req[6+strlen(pin)]=0x01;
 
-  FB61_TX_SendMessage(6+strlen(pin), 0x08, pin_req);
+  FB61_TX_SendMessage(7+strlen(pin), 0x08, pin_req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && PINError == GE_BUSY) {
@@ -591,16 +592,16 @@ GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time)
   return (CurrentDateTimeError);
 }
 
-GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
+GSM_Error FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
 {
 
-  unsigned char alarm_req[] = {FB61_FRAME_HEADER, 0x6d, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x6d, 0x01};
   int timeout=5;
 
   CurrentAlarm=date_time;
   CurrentAlarmError=GE_BUSY;
 
-  FB61_TX_SendMessage(0x05, 0x11, alarm_req);
+  FB61_TX_SendMessage(0x05, 0x11, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentAlarmError == GE_BUSY) {
@@ -1489,9 +1490,35 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x09:
 
+	switch (MessageBuffer[4]) {
+
+	  case 0x6f:
 #ifdef DEBUG
-      printf(_("Message: Memory status error, probably not authorized by PIN\n"));
+	        printf(_("Message: Memory status error, phone is probably powered off.\n"));
 #endif DEBUG
+		CurrentMemoryStatusError = GE_TIMEOUT;
+		break;
+
+	  case 0x7d:
+#ifdef DEBUG
+	        printf(_("Message: Memory status error, memory type not supported by phone model.\n"));
+#endif DEBUG
+		CurrentMemoryStatusError = GE_INTERNALERROR;
+		break;
+
+	  case 0x8d:
+#ifdef DEBUG
+	        printf(_("Message: Memory status error, waiting for pin.\n"));
+#endif DEBUG
+		CurrentMemoryStatusError = GE_INVALIDPIN;
+		break;
+
+	  default:
+#ifdef DEBUG
+	        printf(_("Message: Unknown Memory status error, subtype (MessageBuffer[4]) = %02x\n"),MessageBuffer[4]);
+#endif DEBUG
+		break;
+	  }
 
       break;
 
