@@ -26,6 +26,7 @@
     o Nokia 6250 has irda                               (Pawel Kot)
     o utf8, base64 and LDIF export fix            (Martin Goldhahn)
     o RLP fixes (SABM retransmission, Conn_Req)    (BORBELY Zoltan)
+    o AT emulator improved                         (BORBELY Zoltan)
 
 0.5.5
 =====

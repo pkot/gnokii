@@ -1768,6 +1768,9 @@ void rlp_xid_display(u8 *frame)
 		count--;
 		frame++;
 	}
+
+	fprintf(stdout, "\n");
+
 	return;
 }
 

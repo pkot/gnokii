@@ -65,29 +65,20 @@
 #define REG_CR        3
 #define REG_LF        4
 #define REG_BS        5
-#define S35           6
-#define REG_CTRLZ     7
-#define REG_ESCAPE    8
+#define	S22          22
+#define S35          35
+#define REG_CTRLZ   100
+#define REG_ESCAPE  101
 
-#define REG_RESP     12
-#define BIT_RESP      1
-#define REG_RESPNUM  12
-#define BIT_RESPNUM   2
-#define REG_ECHO     12
-#define BIT_ECHO      4
-#define REG_DCD      12
-#define BIT_DCD       8
-#define REG_CTS      12
-#define BIT_CTS      16
-#define REG_DTRR     12
-#define BIT_DTRR     32
-#define REG_DSR      12
-#define BIT_DSR      64
-#define REG_CPPP     12
-#define BIT_CPPP    128
+#define REG_QUIET    14
+#define BIT_QUIET     4
+#define REG_VERBOSE  14
+#define BIT_VERBOSE   8
+#define REG_ECHO     14
+#define BIT_ECHO      2
 
 
-#define	MAX_MODEM_REGISTERS	20
+#define	MAX_MODEM_REGISTERS	102
 
 /* Message format definitions */
 #define PDU_MODE      0
@@ -114,8 +105,7 @@ static u8	ModemRegisters[MAX_MODEM_REGISTERS];
 static char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
 static int	CurrentCmdBuffer;
 static int	CurrentCmdBufferIndex;
-static bool	VerboseResponse; 	/* Switch betweek numeric (4) and text responses (ERROR) */
-static char    IncomingCallNo;
+static int	IncomingCallNo;
 static int     MessageFormat;          /* Message Format (text or pdu) */
 
 	/* Current command parser */
@@ -149,9 +139,6 @@ bool gn_atem_initialise(int read_fd, int write_fd, struct gn_statemachine *vmsm)
 	CurrentCmdBuffer = 0;
 	CurrentCmdBufferIndex = 0;
 
-	/* Default to verbose reponses */
-	VerboseResponse = true;
-
 	/* Initialise registers */
 	gn_atem_registers_init();
 
@@ -169,6 +156,9 @@ bool gn_atem_initialise(int read_fd, int write_fd, struct gn_statemachine *vmsm)
 	data.call_notification = gn_atem_call_passup;
 	gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 
+	/* query model, revision and imei */
+	if (gn_sm_functions(GN_OP_Identify, &data, sm) != GN_ERR_NONE) return false;
+
 	/* We're ready to roll... */
 	gn_atem_initialised = true;
 	return (true);
@@ -178,17 +168,46 @@ bool gn_atem_initialise(int read_fd, int write_fd, struct gn_statemachine *vmsm)
 /* Initialise the "registers" used by the virtual modem. */
 void	gn_atem_registers_init(void)
 {
+	memset(ModemRegisters, 0, sizeof(ModemRegisters));
 
 	ModemRegisters[REG_RINGATA] = 0;
-	ModemRegisters[REG_RINGCNT] = 2;
+	ModemRegisters[REG_RINGCNT] = 0;
 	ModemRegisters[REG_ESC] = '+';
 	ModemRegisters[REG_CR] = 10;
 	ModemRegisters[REG_LF] = 13;
 	ModemRegisters[REG_BS] = 8;
 	ModemRegisters[S35]=7;
-	ModemRegisters[REG_ECHO] = BIT_ECHO;
+	ModemRegisters[REG_ECHO] |= BIT_ECHO;
+	ModemRegisters[REG_VERBOSE] |= BIT_VERBOSE;
 	ModemRegisters[REG_CTRLZ] = 26;
 	ModemRegisters[REG_ESCAPE] = 27;
+}
+
+
+static void  gn_atem_hangup_phone(void)
+{
+	if (IncomingCallNo > 0) {
+		rlp_user_request_set(Disc_Req, true);
+		gn_sm_loop(10, sm);
+	}
+	if (IncomingCallNo > 0) {
+		data.call_info->call_id = IncomingCallNo;
+		gn_sm_functions(GN_OP_CancelCall, &data, sm);
+		IncomingCallNo = -1;
+	}
+	dp_Initialise(PtyRDFD, PtyWRFD);
+}
+
+
+static void  gn_atem_answer_phone(void)
+{
+	/* For now we'll also initialise the datapump + rlp code again */
+	dp_Initialise(PtyRDFD, PtyWRFD);
+	data.call_notification = dp_CallPassup;
+	gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
+	data.call_info->call_id = IncomingCallNo;
+	gn_sm_functions(GN_OP_AnswerCall, &data, sm);
+	CommandMode = false;
 }
 
 
@@ -197,9 +216,19 @@ void gn_atem_call_passup(gn_call_status CallStatus, gn_call_info *CallInfo, stru
 {
 	dprintf("gn_atem_call_passup called with %d\n", CallStatus);
 
-	if (CallStatus == GN_CALL_Incoming) {
+	switch (CallStatus) {
+	case GN_CALL_Incoming:
 		gn_atem_modem_result(MR_RING);
 		IncomingCallNo = CallInfo->call_id;
+		ModemRegisters[REG_RINGCNT]++;
+		if (ModemRegisters[REG_RINGATA] != 0) gn_atem_answer_phone();
+		break;
+	case GN_CALL_LocalHangup:
+	case GN_CALL_RemoteHangup:
+		IncomingCallNo = -1;
+		break;
+	default:
+		break;
 	}
 }
 
@@ -220,6 +249,12 @@ void	gn_atem_incoming_data_handle(char *buffer, int length)
 		    buffer[count] == ModemRegisters[REG_CTRLZ] ||
 		    buffer[count] == ModemRegisters[REG_ESCAPE]) {
 
+			/* Echo character if appropriate. */
+			if (buffer[count] == ModemRegisters[REG_LF] &&
+				(ModemRegisters[REG_ECHO] & BIT_ECHO)) {
+				gn_atem_string_out("\r\n");
+			}
+
 			/* Save CTRL-Z and ESCAPE for the parser */
 			if (buffer[count] == ModemRegisters[REG_CTRLZ] ||
 			    buffer[count] == ModemRegisters[REG_ESCAPE])
@@ -235,6 +270,15 @@ void	gn_atem_incoming_data_handle(char *buffer, int length)
 			}
 			CurrentCmdBufferIndex = 0;
 
+		} else if (buffer[count] == ModemRegisters[REG_BS]) {
+			if (CurrentCmdBufferIndex > 0) {
+				/* Echo character if appropriate. */
+				if (ModemRegisters[REG_ECHO] & BIT_ECHO) {
+					gn_atem_string_out("\b \b");
+				}
+
+				CurrentCmdBufferIndex--;
+			}
 		} else {
 			/* Echo character if appropriate. */
 			if (ModemRegisters[REG_ECHO] & BIT_ECHO) {
@@ -257,6 +301,8 @@ void	gn_atem_incoming_data_handle(char *buffer, int length)
 void	gn_atem_at_parse(char *cmd_buffer)
 {
 	char *buf;
+	int regno, val;
+	char str[256];
 
 	if (strncasecmp (cmd_buffer, "AT", 2) != 0) {
 		gn_atem_modem_result(MR_ERROR);
@@ -267,27 +313,36 @@ void	gn_atem_at_parse(char *cmd_buffer)
 		switch (toupper(*buf)) {
 
 		case 'Z':
+			/* Reset modem */
 			buf++;
+			switch (gn_atem_num_get(&buf)) {
+			case -1:
+			case 0:	/* reset and load stored profile 0 */
+			case 1:	/* reset and load stored profile 1 */
+				gn_atem_hangup_phone();
+				gn_atem_registers_init();
+				break;
+			default:
+				gn_atem_modem_result(MR_ERROR);
+				return;
+			}
 			break;
+
 		case 'A':
+		        /* Answer call */
 			buf++;
-			/* For now we'll also initialise the datapump + rlp code again */
-			dp_Initialise(PtyRDFD, PtyWRFD);
-			data.call_notification = dp_CallPassup;
-			gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
-			data.call_info->call_id = IncomingCallNo;
-			gn_sm_functions(GN_OP_AnswerCall, &data, sm);
-			CommandMode = false;
+			gn_atem_answer_phone();
 			return;
 			break;
+
 		case 'D':
 			/* Dial Data :-) */
 			/* FIXME - should parse this better */
 			/* For now we'll also initialise the datapump + rlp code again */
 			dp_Initialise(PtyRDFD, PtyWRFD);
 			buf++;
-			if (toupper(*buf) == 'T') buf++;
-			if (*buf == ' ') buf++;
+			if (toupper(*buf) == 'T' || toupper(*buf) == 'P') buf++;
+			while (*buf == ' ') buf++;
 			data.call_notification = dp_CallPassup;
 			gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 			snprintf(data.call_info->number, sizeof(data.call_info->number), "%s", buf);
@@ -302,29 +357,58 @@ void	gn_atem_at_parse(char *cmd_buffer)
 				dp_CallPassup(GN_CALL_RemoteHangup, NULL, NULL);
 			} else {
 				IncomingCallNo = data.call_info->call_id;
+				gn_sm_loop(10, sm);
 			}
 			return;
 			break;
+
 		case 'H':
 			/* Hang Up */
 			buf++;
-			rlp_user_request_set(Disc_Req, true);
-			data.call_info->call_id = IncomingCallNo;
-			gn_sm_functions(GN_OP_CancelCall, &data, sm);
-			break;
-		case 'S':
-			/* Change registers - only no. 35 for now */
-			buf++;
-			if (memcmp(buf, "35=", 3) == 0) {
-				buf += 3;
-				ModemRegisters[S35] = *buf - '0';
-				buf++;
+			switch (gn_atem_num_get(&buf)) {
+			case -1:
+			case 0:	/* hook off the phone */
+				gn_atem_hangup_phone();
+				break;
+			case 1:	/* hook on the phone */
+				break;
+			default:
+				gn_atem_modem_result(MR_ERROR);
+				return;
 			}
 			break;
-		  /* E - Turn Echo on/off */
+
+		case 'S':
+			/* Change registers */
+			buf++;
+			regno = gn_atem_num_get(&buf);
+			if (regno < 0 || regno >= MAX_MODEM_REGISTERS) {
+				gn_atem_modem_result(MR_ERROR);
+				return;
+			}
+			if (*buf == '=') {
+				buf++;
+				val = gn_atem_num_get(&buf);
+				if (val < 0 || val > 255) {
+					gn_atem_modem_result(MR_ERROR);
+					return;
+				}
+				ModemRegisters[regno] = val;
+			} else if (*buf == '?') {
+				buf++;
+				snprintf(str, sizeof(str), "%d\r\n", ModemRegisters[regno]);
+				gn_atem_string_out(str);
+			} else {
+				gn_atem_modem_result(MR_ERROR);
+				return;
+			}
+			break;
+
 		case 'E':
+		        /* E - Turn Echo on/off */
 			buf++;
 			switch (gn_atem_num_get(&buf)) {
+			case -1:
 			case 0:
 				ModemRegisters[REG_ECHO] &= ~BIT_ECHO;
 				break;
@@ -335,6 +419,89 @@ void	gn_atem_at_parse(char *cmd_buffer)
 				gn_atem_modem_result(MR_ERROR);
 				return;
 			}
+			break;
+
+		case 'Q':
+		        /* Q - Turn Quiet on/off */
+			buf++;
+			switch (gn_atem_num_get(&buf)) {
+			case -1:
+			case 0:
+				ModemRegisters[REG_QUIET] &= ~BIT_QUIET;
+				break;
+			case 1:
+				ModemRegisters[REG_QUIET] |= BIT_QUIET;
+				break;
+			default:
+				gn_atem_modem_result(MR_ERROR);
+				return;
+			}
+			break;
+
+		case 'V':
+		        /* V - Turn Verbose on/off */
+			buf++;
+			switch (gn_atem_num_get(&buf)) {
+			case -1:
+			case 0:
+				ModemRegisters[REG_VERBOSE] &= ~BIT_VERBOSE;
+				break;
+			case 1:
+				ModemRegisters[REG_VERBOSE] |= BIT_VERBOSE;
+				break;
+			default:
+				gn_atem_modem_result(MR_ERROR);
+				return;
+			}
+			break;
+
+		case 'X':
+		        /* X - Set verbosity of the result messages */
+			buf++;
+			switch (gn_atem_num_get(&buf)) {
+			case -1:
+			case 0: val = 0x00; break;
+			case 1: val = 0x40; break;
+			case 2: val = 0x50; break;
+			case 3: val = 0x60; break;
+			case 4: val = 0x70; break;
+			case 5: val = 0x10; break;
+			default:
+				gn_atem_modem_result(MR_ERROR);
+				return;
+			}
+			ModemRegisters[S22] = (ModemRegisters[S22] & 0x8f) | val;
+			break;
+
+		case 'I':
+		        /* I - info */
+			buf++;
+			switch (gn_atem_num_get(&buf)) {
+			case -1:
+			case 0:	/* terminal id */
+				snprintf(str, sizeof(str), "%d\r\n", ModemRegisters[39]);
+				gn_atem_string_out(str);
+				break;
+			case 1:	/* serial number (IMEI) */
+				snprintf(str, sizeof(str), "%s\r\n", imei);
+				gn_atem_string_out(str);
+				break;
+			case 2: /* phone revision */
+				snprintf(str, sizeof(str), "%s\r\n", revision);
+				gn_atem_string_out(str);
+				break;
+			case 3: /* modem revision */
+				gn_atem_string_out("gnokiid " VERSION "\r\n");
+				break;
+			case 4: /* OEM string */
+				snprintf(str, sizeof(str), "%s %s\r\n", manufacturer, model);
+				gn_atem_string_out(str);
+				break;
+			default:
+				gn_atem_modem_result(MR_ERROR);
+				return;
+			}
+			ModemRegisters[S22] = (ModemRegisters[S22] & 0x8f) | val;
 			break;
 
 		  /* Handle AT* commands (Nokia proprietary I think) */
@@ -831,29 +998,29 @@ void	gn_atem_modem_result(int code)
 {
 	char	buffer[16];
 
-	if (VerboseResponse == false) {
-		sprintf(buffer, "\n\r%d\n\r", code);
+	if (!(ModemRegisters[REG_VERBOSE] & BIT_VERBOSE)) {
+		sprintf(buffer, "%d\n\r", code);
 		gn_atem_string_out(buffer);
 	} else {
 		switch (code) {
 			case MR_OK:
-					gn_atem_string_out("\n\rOK\n\r");
+					gn_atem_string_out("OK\n\r");
 					break;
 
 			case MR_ERROR:
-					gn_atem_string_out("\n\rERROR\n\r");
+					gn_atem_string_out("ERROR\n\r");
 					break;
 
 			case MR_CARRIER:
-					gn_atem_string_out("\n\rCARRIER\n\r");
+					gn_atem_string_out("CARRIER\n\r");
 					break;
 
 			case MR_CONNECT:
-					gn_atem_string_out("\n\rCONNECT\n\r");
+					gn_atem_string_out("CONNECT\n\r");
 					break;
 
 			case MR_NOCARRIER:
-					gn_atem_string_out("\n\rNO CARRIER\n\r");
+					gn_atem_string_out("NO CARRIER\n\r");
 					break;
 		        case MR_RING:
 					gn_atem_string_out("RING\n\r");

@@ -165,16 +165,17 @@ void gn_vm_loop(void)
 	int res;
 	int nfd, devfd;
 	int i, n;
-	char buf[256];
+	char buf[256], *d;
 
 	devfd = device_getfd(sm);
 	nfd = (PtyRDFD > devfd) ? PtyRDFD + 1 : devfd + 1;
 
 	while (!GTerminateThread) {
-		if (CommandMode && gn_atem_initialised && queue.n != 0) {
-			gn_atem_incoming_data_handle(queue.buf + queue.head, 1);
+		if (CommandMode && gn_atem_initialised && queue.n > 0) {
+			d = queue.buf + queue.head;
 			queue.head = (queue.head + 1) % sizeof(queue.buf);
 			queue.n--;
+			gn_atem_incoming_data_handle(d, 1);
 			continue;
 		}
 
