@@ -2050,6 +2050,14 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 					string[4] = j * 2;
 					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
 				}
+			} else {
+				j = strlen(entry->SubEntries[i].data.Number);
+				string[0] = j * 2;
+				EncodeUnicode((string + 1), entry->SubEntries[i].data.Number, j);
+				string[j * 2 + 1] = 0;
+				count += PackBlock(entry->SubEntries[i].EntryType, j * 2 + 2, block++, string, req + count);
+			}
+
 		req[17] = block - 1;
 		dprintf("Writing phonebook entry %s...\n",entry->Name);
 	} else {
