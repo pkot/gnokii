@@ -59,6 +59,7 @@ GSM_Functions           FB38_Functions = {
         FB38_GetRFLevel,
         FB38_GetBatteryLevel,
         FB38_GetPowerSource,
+        FB38_GetDisplayStatus,
         FB38_EnterPin,
         FB38_GetIMEI,
         FB38_GetRevision,
@@ -786,6 +787,11 @@ GSM_Error   FB38_GetSMSStatus(GSM_SMSStatus *Status)
 }
 
 GSM_Error   FB38_GetPowerSource(GSM_PowerSource *source)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_GetDisplayStatus(int *Status)
 {
     return (GE_NOTIMPLEMENTED);
 }

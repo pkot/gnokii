@@ -54,6 +54,7 @@ GSM_Functions			MB21_Functions = {
 		MB21_GetRFLevel,
 		MB21_GetBatteryLevel,
 		MB21_GetPowerSource,
+		MB21_GetDisplayStatus,
 		MB21_EnterPin,
 		MB21_GetIMEI,
 		MB21_GetRevision,
@@ -229,6 +230,11 @@ GSM_Error	MB21_GetSMSStatus(GSM_SMSStatus *Status)
 }
 
 GSM_Error	MB21_GetPowerSource(GSM_PowerSource *source)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_GetDisplayStatus(int *Status)
 {
 	return (GE_NOTIMPLEMENTED);
 }

@@ -151,6 +151,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *Message);
 GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level);
 GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 GSM_Error FB61_GetPowerSource(GSM_PowerSource *source);
+GSM_Error FB61_GetDisplayStatus(int *Status);
 
 GSM_Error FB61_EnterPin(char *pin);
 

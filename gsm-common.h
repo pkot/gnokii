@@ -312,6 +312,20 @@ typedef enum {
   GE_NOCARRIER,             /* No Carrier error during data call setup ? */
 } GSM_Error;
 
+
+/* This enum is used for display status. */
+
+typedef enum {
+  DS_Call_In_Progress, /* Call in progress. */
+  DS_Unknown,          /* The meaning is unknown now :-( */
+  DS_Unread_SMS,       /* There is Unread SMS. */
+  DS_Voice_Call,       /* Voice call active. */
+  DS_Fax_Call,         /* Fax call active. */
+  DS_Data_Call,        /* Data call active. */
+  DS_Keyboard_Lock,    /* Keyboard lock status. */
+  DS_SMS_Storage_Full  /* Full SMS Memory. */
+} DisplayStatusEntity;
+
 /* Define the structure used to hold pointers to the various API functions.
    This is in effect the master list of functions provided by the gnokii API.
    Modules containing the model specific code each contain one of these
@@ -362,6 +376,8 @@ typedef struct {
   GSM_Error (*GetBatteryLevel)( GSM_BatteryUnits *units, float *level );
 
   GSM_Error (*GetPowerSource)( GSM_PowerSource *source);
+
+  GSM_Error (*GetDisplayStatus)( int *Status);
 
   GSM_Error (*EnterPin)( char *pin );
 

@@ -70,6 +70,7 @@ GSM_Functions FB61_Functions = {
   FB61_GetRFLevel,
   FB61_GetBatteryLevel,
   FB61_GetPowerSource,
+  FB61_GetDisplayStatus,
   FB61_EnterPin,
   FB61_GetIMEI,
   FB61_GetRevision,
@@ -220,6 +221,9 @@ GSM_Error          CurrentSetAlarmError;
 int                CurrentRFLevel,
                    CurrentBatteryLevel,
                    CurrentPowerSource;
+
+int                DisplayStatus;
+GSM_Error          DisplayStatusError;
 
 unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
 unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
@@ -991,6 +995,29 @@ GSM_Error FB61_GetPowerSource(GSM_PowerSource *source)
   }
   else
     return (GE_NOLINK);
+}
+
+GSM_Error FB61_GetDisplayStatus(int *Status) {
+
+  unsigned char req[64]={ FB61_FRAME_HEADER, 0x51 };
+  int timeout=10;
+
+  DisplayStatusError=GE_BUSY;
+
+  FB61_TX_SendMessage(4, 0x0d, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && DisplayStatusError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  *Status=DisplayStatus;
+
+  return (DisplayStatusError);
 }
 
 GSM_Error FB61_DialVoice(char *Number) {
@@ -2515,19 +2542,41 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
   break;
 
-    /* Keyboard lock */
-
-    /* FIXME: there are at least two types of 0x0d messages (length 09
-       and 0b(?)). The exact meaning of all bytes except keyboard
-       locked/unlocked is not known yet. */
+    /* Display status. */
 
   case 0x0d:
 
+    switch(MessageBuffer[3]) {
+
+    case 0x52:
+
+      for (i=0; i<MessageBuffer[4];i++)
+        if (MessageBuffer[2*i+6]==2)
+          DisplayStatus|=1<<(MessageBuffer[2*i+5]-1);
+        else
+          DisplayStatus&= (0xff - (1<<(MessageBuffer[2*i+5]-1)));
+
 #ifdef DEBUG
-    printf(_("Message: Keyboard lock\n"));
-    printf(_("   Keyboard is %s\n"), (MessageBuffer[6]==2)?_("locked"):_("unlocked"));
+      printf("Call in progress: %s\n", DisplayStatus & (1<<DS_Call_In_Progress)?"on":"off");
+      printf("Unknown: %s\n",          DisplayStatus & (1<<DS_Unknown)?"on":"off");
+      printf("Unread SMS: %s\n",       DisplayStatus & (1<<DS_Unread_SMS)?"on":"off");
+      printf("Voice call: %s\n",       DisplayStatus & (1<<DS_Voice_Call)?"on":"off");
+      printf("Fax call active: %s\n",  DisplayStatus & (1<<DS_Fax_Call)?"on":"off");
+      printf("Data call active: %s\n", DisplayStatus & (1<<DS_Data_Call)?"on":"off");
+      printf("Keyboard lock: %s\n",    DisplayStatus & (1<<DS_Keyboard_Lock)?"on":"off");
+      printf("SMS storage full: %s\n", DisplayStatus & (1<<DS_SMS_Storage_Full)?"on":"off");
 #endif DEBUG
 
+      DisplayStatusError=GE_NONE;
+
+      break;
+      
+      default:
+
+        printf("Unknown message of type 0x0d.\n");
+      
+      }
+      
     break;
 
     /* Phone Clock and Alarm */

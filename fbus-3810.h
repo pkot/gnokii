@@ -58,6 +58,7 @@ GSM_Error   FB38_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 
     /* These aren't presently implemented. */
 GSM_Error   FB38_GetPowerSource(GSM_PowerSource *source);
+GSM_Error   FB38_GetDisplayStatus(int *Status);
 GSM_Error   FB38_EnterPin(char *pin);
 GSM_Error   FB38_GetIMEI(char *imei);
 GSM_Error   FB38_GetRevision(char *revision);

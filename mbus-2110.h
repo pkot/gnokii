@@ -64,6 +64,7 @@ GSM_Error	MB21_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 
 	/* These aren't presently implemented. */
 GSM_Error	MB21_GetPowerSource(GSM_PowerSource *source);
+GSM_Error	MB21_GetDisplayStatus(int *Status);
 GSM_Error	MB21_EnterPin(char *pin);
 GSM_Error	MB21_GetIMEI(char *imei);
 GSM_Error	MB21_GetRevision(char *revision);

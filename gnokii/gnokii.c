@@ -59,6 +59,7 @@ void sendclicon(char *argv[]);
 void getcalendarnote(char *argv[]);
 void writecalendarnote(char *argv[]);
 void deletecalendarnote(char *argv[]);
+void getdisplaystatus();
 void foogle(char *argv[]);
 void pmon(char *argv[]);
 void readconfig(void);
@@ -110,6 +111,7 @@ void usage(void)
           gnokii [--getcalendarnote] [index]
           gnokii [--writecalendarnote]
           gnokii [--deletecalendarnote] [index]
+          gnokii [--getdisplaystatus]
 
           --help            display usage information.
 
@@ -119,7 +121,7 @@ void usage(void)
 
           --enterpin        sends the entered PIN to the mobile phone.
 
-          --getmemory       reads specificed memory location from phone.
+          --getemory       reads specificed memory location from phone.
                             Valid memory types are:
                             ME, SM, FD, ON, EN, DC, RC, MC, LD
 
@@ -175,6 +177,8 @@ void usage(void)
 
           --deletecalendarnote  delete the note with number [index]
                                 from calendar.
+
+          --getdisplaystatus shows what icons are displayed.
 "));  /*"*/
 }
 
@@ -337,6 +341,10 @@ int main(int argc, char *argv[])
   /* Delete calendar note mode. */
   if (argc == 3 && strcmp(argv[1], "--deletecalendarnote") == 0)
     deletecalendarnote(argv);
+
+  /* Get display status. */
+  if (strcmp(argv[1], "--getdisplaystatus") == 0)
+    getdisplaystatus();
 
   /* Get memory command. */
   if (argc == 5 && strcmp(argv[1], "--getmemory") == 0)
@@ -1512,6 +1520,31 @@ void	readconfig(void)
     if (Connection == NULL) {
 		Connection = DefaultConnection;
     }
+}
+
+void getdisplaystatus()
+{ 
+
+  int Status;
+
+  /* Initialise the code for the GSM interface. */     
+
+  fbusinit(true, NULL);
+
+  GSM->GetDisplayStatus(&Status);
+
+  printf("Call in progress: %s\n", Status & (1<<DS_Call_In_Progress)?"on":"off");
+  printf("Unknown: %s\n",          Status & (1<<DS_Unknown)?"on":"off");
+  printf("Unread SMS: %s\n",       Status & (1<<DS_Unread_SMS)?"on":"off");
+  printf("Voice call: %s\n",       Status & (1<<DS_Voice_Call)?"on":"off");
+  printf("Fax call active: %s\n",  Status & (1<<DS_Fax_Call)?"on":"off");
+  printf("Data call active: %s\n", Status & (1<<DS_Data_Call)?"on":"off");
+  printf("Keyboard lock: %s\n",    Status & (1<<DS_Keyboard_Lock)?"on":"off");
+  printf("SMS storage full: %s\n", Status & (1<<DS_SMS_Storage_Full)?"on":"off");
+
+  GSM->Terminate();
+
+  exit(0);
 }
 
 /* This is a "convenience" function to allow quick test of new
