@@ -218,6 +218,6 @@ extern GSM_Error Unimplemented(void);
 
 extern GSM_MemoryType StrToMemoryType (const char *s);
 
-inline void GSM_DataClear(GSM_Data *data);
+void GSM_DataClear(GSM_Data *data);
 
 #endif	/* __gsm_data_h */

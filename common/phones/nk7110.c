@@ -1453,7 +1453,7 @@ static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x03);
 }
 
-static inline unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
+static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
 {
 	*(block++) = id;
 	*(block++) = 0;

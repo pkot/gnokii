@@ -101,7 +101,7 @@ PhoneModel *GetPhoneModel (const char *num)
 	return (&models[0]);
 }
 
-inline char *GetModel (const char *num)
+char *GetModel (const char *num)
 {
 	return (GetPhoneModel(num)->model);
 }
