@@ -62,6 +62,8 @@ API void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	switch (bmp->type) {
 	case GSM_StartupLogo:  bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8); break;
 	case GSM_EMSPicture:
+	case GSM_EMSAnimation:
+	case GSM_EMSAnimation2:
 	case GSM_OperatorLogo:
 	case GSM_CallerLogo:   bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8)); break;
 		               /* Testing only! */	
@@ -74,6 +76,8 @@ API void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	switch (bmp->type) {
 	case GSM_StartupLogo:  bmp->bitmap[((y/8)*bmp->width)+x] &= ~(1 << (y%8)); break;
 	case GSM_EMSPicture:
+	case GSM_EMSAnimation:
+	case GSM_EMSAnimation2:
 	case GSM_OperatorLogo:
 	case GSM_CallerLogo:   bmp->bitmap[(y*bmp->width+x)/8] &= ~(1 << (7-((y*bmp->width+x)%8))); break;
 		               /* Testing only! */	
@@ -265,15 +269,17 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 		break;
 	case GSM_EMSAnimation:
 		dprintf("EMS animation\n");
+		message[current++] = 128+3;
+		message[current++] = 0x0e; 	/* Animation code */
+		message[current++] = 128+1; /* Picture size */;
+		message[current++] = 0x00; 	/* Position where to display */
+	case GSM_EMSAnimation2:
+		dprintf("(without header)\n");
 		if (bitmap->width != 16) {
 			fprintf(stderr, "EMS animation needs bitmap 16x16 ... \n");
 			return GE_NOTSUPPORTED;
 		}
-		message[current++] = bitmap->width/8*bitmap->height+3;
-		message[current++] = 0x0e; 	/* Animation code */
-		message[current++] = bitmap->width/8*bitmap->height+1; /* Picture size */;
 		break;
-	case GSM_EMSAnimation2:
 	default: /* error */
 		dprintf("gulp?\n");
 		break;

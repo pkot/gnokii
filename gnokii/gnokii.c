@@ -457,6 +457,7 @@ static int sendsms(int argc, char *argv[])
 		{ "picture", required_argument, NULL, '4'},
 		{ "8bit",    0,                 NULL, '8'},
 		{ "imelody", 0,                 NULL, 'i'},
+		{ "animation",required_argument,NULL, 'a'},
 		{ NULL,      0,                 NULL, 0}
 	};
 
@@ -500,9 +501,35 @@ static int sendsms(int argc, char *argv[])
 			}
 			break;
 
-		case '4': /* we send multipart message - picture message */
+		case '4': /* we send multipart message - picture message; FIXME: This seems not yet implemented */
 			sms.UDH.Number = 1;
 			break;
+
+		case 'a': /* Animation */ {
+			char buf[10240];
+			char *s = buf, *t;
+			strcpy(buf, optarg);
+			sms.UserData[0].Type = SMS_AnimationData;
+			for (i=0; i<4; i++) {
+				error = GSM_NullBitmap(&sms.UserData[0].u.Animation[i], &State.Phone.Info);
+				sms.UserData[0].u.Animation[i].type = i ? GSM_EMSAnimation2 : GSM_EMSAnimation;
+				if (error != GE_NONE) {
+					fprintf(stdout, _("Could not null bitmap: %d (%m)\n"), error);
+					return -1;
+				}
+				t = strchr(s, ';');
+				if (t)
+					*t++ = 0;
+				printf("Loading from %s\n", s);
+				error = GSM_ReadBitmapFile(s, &sms.UserData[0].u.Animation[i], &State.Phone.Info);
+				if (error != GE_NONE) {
+					fprintf(stdout, _("Could not load bitmap: %d (%m)\n"), error);
+					return -1;
+				}
+				s = t;
+			}
+			break;
+		}
 
 		case 'r': /* request for delivery report */
 			sms.DeliveryReport = true;
