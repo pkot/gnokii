@@ -108,6 +108,10 @@ static gn_error gnapplet_sms_center_write(gn_data *data, struct gn_statemachine 
 static gn_error gnapplet_calendar_note_read(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_calendar_note_write(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_calendar_note_delete(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_calendar_todo_read(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_calendar_todo_write(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_calendar_todo_delete(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_calendar_todo_delete_all(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -470,6 +474,12 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_calendar_note_write(data, state);
 	case GN_OP_DeleteCalendarNote:
 		return gnapplet_calendar_note_delete(data, state);
+	case GN_OP_GetToDo:
+		return gnapplet_calendar_todo_read(data, state);
+	case GN_OP_WriteToDo:
+		return gnapplet_calendar_todo_write(data, state);
+	case GN_OP_DeleteAllToDos:
+		return gnapplet_calendar_todo_delete_all(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -1312,9 +1322,75 @@ static gn_error gnapplet_calendar_note_delete(gn_data *data, struct gn_statemach
 }
 
 
+static gn_error gnapplet_calendar_todo_read(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->todo) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CALENDAR_TODO_READ_REQ);
+	pkt_put_uint32(&pkt, data->todo->location);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CALENDAR);
+}
+
+
+static gn_error gnapplet_calendar_todo_write(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->todo) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CALENDAR_TODO_WRITE_REQ);
+	pkt_put_uint32(&pkt, data->todo->location);
+	pkt_put_string(&pkt, data->todo->text);
+	pkt_put_uint8(&pkt, data->todo->priority);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CALENDAR);
+}
+
+
+static gn_error gnapplet_calendar_todo_delete(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->todo) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CALENDAR_TODO_DELETE_REQ);
+	pkt_put_uint32(&pkt, data->todo->location);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CALENDAR);
+}
+
+
+static gn_error gnapplet_calendar_todo_delete_all(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+	gn_todo todo;
+	gn_todo *todo_save;
+
+	todo_save = data->todo;
+	memset(&todo, 0, sizeof(todo));
+	data->todo = &todo;
+
+	do {
+		data->todo->location = 1;
+		error = gnapplet_calendar_todo_delete(data, state);
+	} while (error == GN_ERR_NONE);
+
+	data->todo = todo_save;
+
+	return GN_ERR_NONE;
+}
+
+
 static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_calnote *cal;
+	gn_todo *todo;
 	REPLY_DEF;
 
 	switch (code) {
@@ -1342,6 +1418,26 @@ static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *messa
 		if (!(cal = data->calnote)) return GN_ERR_INTERNALERROR;
 		if (error != GN_ERR_NONE) return error;
 		cal->location = pkt_get_uint32(&pkt);
+		break;
+
+	case GNAPPLET_MSG_CALENDAR_TODO_READ_RESP:
+		if (!(todo = data->todo)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		todo->location = pkt_get_uint32(&pkt);
+		pkt_get_string(todo->text, sizeof(todo->text), &pkt);
+		todo->priority = pkt_get_uint8(&pkt);
+		break;
+
+	case GNAPPLET_MSG_CALENDAR_TODO_WRITE_RESP:
+		if (!(todo = data->todo)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		todo->location = pkt_get_uint32(&pkt);
+		break;
+
+	case GNAPPLET_MSG_CALENDAR_TODO_DELETE_RESP:
+		if (!(todo = data->todo)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		todo->location = pkt_get_uint32(&pkt);
 		break;
 
 	default:

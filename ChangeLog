@@ -22,10 +22,15 @@
     o writecalendarnote support                    (BORBELY Zoltan)
     o deletecalendarnote support                   (BORBELY Zoltan)
     o various minor calendar handling fixes        (BORBELY Zoltan)
+    o gettodo support                              (BORBELY Zoltan)
+    o writetodo support                            (BORBELY Zoltan)
+    o deletealltodos support                       (BORBELY Zoltan)
  * gnokii updates
     o initialize error variables                             (SuSE)
  * libgnokii updates
     o fbus echo cancellation and statemachine fix  (BORBELY Zoltan)
+    o todo vcalendar import/export functions was mixed
+      when libical support is missing              (BORBELY Zoltan)
  * xgnokii updates
     o xgnokii tried to open the HTML file according to locale set,
       be smart and try to match the best one is the default is not
