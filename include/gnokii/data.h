@@ -130,7 +130,7 @@ typedef struct {
 	int smsc_timeout;				/* How many seconds should we wait for the SMSC response, defaults to 10 seconds */
 	char connect_script[256];			/* Script to run when device connection established */
 	char disconnect_script[256];			/* Script to run when device connection closed */
-#if @HAVE_BLUETOOTH_EXT@
+#if @HAVE_BLUETOOTH_EXP@
 	uint8_t rfcomm_cn;				/* RFCOMM channel number to connect */
 	bdaddr_t bt_address;				/* Bluetooth device address */
 #endif
