@@ -33,6 +33,7 @@
 #define _gnokii_gsm_common_h
 
 #include <stdlib.h>
+#include <sys/time.h>
 #include <gnokii/rlp-common.h>
 
 /* Type of connection. Now we support serial connection with FBUS cable and
