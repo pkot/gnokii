@@ -34,37 +34,41 @@
 #include "gsm-common.h"
 #include "nokia-decoding.h"
 
-gn_error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data, int blocks, int memtype, int speeddialpos)
+gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
+			  int blocks, int memtype, int speeddial_pos)
 {
-	int subblockcount = 0, i;
-	char *str;
-	GSM_SubPhonebookEntry* subEntry = NULL;
+	int subblock_count = 0, i;
+	gn_phonebook_subentry* subentry = NULL;
+
+	if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
 
 	for (i = 0; i < blocks; i++) {
-		if (data->PhonebookEntry)
-			subEntry = &data->PhonebookEntry->SubEntries[subblockcount];
-		dprintf("Blockstart: %i\n", blockstart[0]);
-		switch(blockstart[0]) {
-		case PNOKIA_ENTRYTYPE_POINTER:	/* Pointer */
+		subentry = &data->phonebook_entry->subentries[subblock_count];
+
+		dprintf("Blockstart: %i\n", blockstart[0]);  /* FIXME ? */
+
+		switch ((gn_phonebook_entry_type)blockstart[0]) {
+		case GN_PHONEBOOK_ENTRY_Pointer:  /* Pointer */
 			switch (memtype) {	/* Memory type */
-			case PNOKIA_MEMORY_SPEEDDIALS:	/* Speed dial numbers */
-				if ((data != NULL) && (data->SpeedDial != NULL)) {
-					data->SpeedDial->Location = (((unsigned int)blockstart[6]) << 8) + blockstart[7];
-					switch(blockstart[speeddialpos]) {
+			case GN_NOKIA_MEMORY_SPEEDDIALS:  /* Speed dial numbers */
+				if (data && data->speed_dial) {
+					unsigned char *str;
+					data->speed_dial->location = (((unsigned int)blockstart[6]) << 8) + blockstart[7];
+					switch(blockstart[speeddial_pos]) {
 					case 0x05:
-						data->SpeedDial->MemoryType = GMT_ME;
+						data->speed_dial->memory_type = GN_MT_ME;
 						str = "phone";
 						break;
 					case 0x06:
 						str = "SIM";
-						data->SpeedDial->MemoryType = GMT_SM;
+						data->speed_dial->memory_type = GN_MT_SM;
 						break;
 					default:
 						str = "unknown";
-						data->SpeedDial->MemoryType = GMT_XX;
+						data->speed_dial->memory_type = GN_MT_XX;
 						break;
 					}
-					dprintf("Speed dial pointer: %i in %s\n", data->SpeedDial->Location, str);
+					dprintf("Speed dial pointer: %i in %s\n", data->speed_dial->location, str);
 				} else {
 					dprintf("NULL entry?\n");
 				}
@@ -74,87 +78,78 @@ gn_error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data, 
 				dprintf("Wrong memory type(?)\n");
 				break;
 			}
-
 			break;
-		case PNOKIA_ENTRYTYPE_NAME:	/* Name */
-			if (data->Bitmap) {
-				char_decode_unicode(data->Bitmap->text, (blockstart + 6), blockstart[5]);
-				dprintf("Bitmap Name: %s\n", data->Bitmap->text);
+		case GN_PHONEBOOK_ENTRY_Name:	/* Name */
+			if (data->bitmap) {
+				char_decode_unicode(data->bitmap->text, (blockstart + 6), blockstart[5]);
+				dprintf("Bitmap Name: %s\n", data->bitmap->text);
 			}
-			if (data->PhonebookEntry) {
-				char_decode_unicode(data->PhonebookEntry->Name, (blockstart + 6), blockstart[5]);
-				data->PhonebookEntry->Empty = false;
-				dprintf("   Name: %s\n", data->PhonebookEntry->Name);
-			}
+			char_decode_unicode(data->phonebook_entry->name, (blockstart + 6), blockstart[5]);
+			data->phonebook_entry->empty = false;
+			dprintf("   Name: %s\n", data->phonebook_entry->name);
 			break;
-		case PNOKIA_ENTRYTYPE_EMAIL:
-		case PNOKIA_ENTRYTYPE_URL:
-		case PNOKIA_ENTRYTYPE_POSTAL:
-		case PNOKIA_ENTRYTYPE_NOTE:
-			if (data->PhonebookEntry) {
-				subEntry->EntryType   = blockstart[0];
-				subEntry->NumberType  = 0;
-				subEntry->BlockNumber = blockstart[4];
-				char_decode_unicode(subEntry->data.Number, (blockstart + 6), blockstart[5]);
-				dprintf("   Type: %d (%02x)\n", subEntry->EntryType, subEntry->EntryType);
-				dprintf("   Text: %s\n", subEntry->data.Number);
-				subblockcount++;
-				data->PhonebookEntry->SubEntriesCount++;
-			}
+		case GN_PHONEBOOK_ENTRY_Email:
+		case GN_PHONEBOOK_ENTRY_URL:
+		case GN_PHONEBOOK_ENTRY_Postal:
+		case GN_PHONEBOOK_ENTRY_Note:
+			subentry->entry_type  = blockstart[0];
+			subentry->number_type = 0;
+			subentry->id          = blockstart[4];
+			char_decode_unicode(subentry->data.number, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: %d (%02x)\n", subentry->entry_type, subentry->entry_type);
+			dprintf("   Text: %s\n", subentry->data.number);
+			subblock_count++;
+			data->phonebook_entry->subentries_count++;
 			break;
-		case PNOKIA_ENTRYTYPE_NUMBER:
-			if (data->PhonebookEntry) {
-				subEntry->EntryType   = blockstart[0];
-				subEntry->NumberType  = blockstart[5];
-				subEntry->BlockNumber = blockstart[4];
-				char_decode_unicode(subEntry->data.Number, (blockstart + 10), blockstart[9]);
-				if (!subblockcount) strcpy(data->PhonebookEntry->Number, subEntry->data.Number);
-				dprintf("   Type: %d (%02x)\n", subEntry->NumberType, subEntry->NumberType);
-				dprintf("   Number: %s\n", subEntry->data.Number);
-				subblockcount++;
-				data->PhonebookEntry->SubEntriesCount++;
-			}
+		case GN_PHONEBOOK_ENTRY_Number:
+			subentry->entry_type  = blockstart[0];
+			subentry->number_type = blockstart[5];
+			subentry->id          = blockstart[4];
+			char_decode_unicode(subentry->data.number, (blockstart + 10), blockstart[9]);
+			if (!subblock_count) strcpy(data->phonebook_entry->number, subentry->data.number);
+			dprintf("   Type: %d (%02x)\n", subentry->number_type, subentry->number_type);
+			dprintf("   Number: %s\n", subentry->data.number);
+			subblock_count++;
+			data->phonebook_entry->subentries_count++;
 			break;
-		case PNOKIA_ENTRYTYPE_RINGTONE:	/* Ringtone */
-			if (data->Bitmap) {
-				data->Bitmap->ringtone = blockstart[5];
-				dprintf("Ringtone no. %d\n", data->Bitmap->ringtone);
+		case GN_PHONEBOOK_ENTRY_Ringtone:  /* Ringtone */
+			if (data->bitmap) {
+				data->bitmap->ringtone = blockstart[5];
+				dprintf("Ringtone no. %d\n", data->bitmap->ringtone);
 			}
 			break;
-		case PNOKIA_ENTRYTYPE_DATE:
-			if (data->PhonebookEntry) {
-				subEntry->EntryType=blockstart[0];
-				subEntry->NumberType=blockstart[5];
-				subEntry->BlockNumber=blockstart[4];
-				subEntry->data.Date.Year=(blockstart[6] << 8) + blockstart[7];
-				subEntry->data.Date.Month  = blockstart[8];
-				subEntry->data.Date.Day    = blockstart[9];
-				subEntry->data.Date.Hour   = blockstart[10];
-				subEntry->data.Date.Minute = blockstart[11];
-				subEntry->data.Date.Second = blockstart[12];
-				dprintf("   Date: %02u.%02u.%04u\n", subEntry->data.Date.Day,
-					subEntry->data.Date.Month, subEntry->data.Date.Year);
-				dprintf("   Time: %02u:%02u:%02u\n", subEntry->data.Date.Hour,
-					subEntry->data.Date.Minute, subEntry->data.Date.Second);
-				subblockcount++;
-			}
+		case GN_PHONEBOOK_ENTRY_Date:
+			subentry->entry_type       = blockstart[0];
+			subentry->number_type      = blockstart[5];
+			subentry->id		   = blockstart[4];
+			subentry->data.date.year   = (blockstart[6] << 8) + blockstart[7];
+			subentry->data.date.month  = blockstart[8];
+			subentry->data.date.day    = blockstart[9];
+			subentry->data.date.hour   = blockstart[10];
+			subentry->data.date.minute = blockstart[11];
+			subentry->data.date.second = blockstart[12];
+			dprintf("   Date: %04u.%02u.%04u\n", subentry->data.date.year,
+				subentry->data.date.month, subentry->data.date.day);
+			dprintf("   Time: %02u:%02u:%02u\n", subentry->data.date.hour,
+				subentry->data.date.minute, subentry->data.date.second);
+			subblock_count++;
 			break;
-		case PNOKIA_ENTRYTYPE_LOGO:	 /* Caller group logo */
-			if (data->Bitmap) {
+		case GN_PHONEBOOK_ENTRY_Logo:   /* Caller group logo */
+			if (data->bitmap) {
 				dprintf("Caller logo received (h: %i, w: %i)!\n", blockstart[5], blockstart[6]);
-				data->Bitmap->width = blockstart[5];
-				data->Bitmap->height = blockstart[6];
-				data->Bitmap->size = (data->Bitmap->width * data->Bitmap->height) / 8;
-				memcpy(data->Bitmap->bitmap, blockstart + 10, data->Bitmap->size);
+				data->bitmap->width = blockstart[5];
+				data->bitmap->height = blockstart[6];
+				data->bitmap->size = (data->bitmap->width * data->bitmap->height) / 8;
+				memcpy(data->bitmap->bitmap, blockstart + 10, data->bitmap->size);
 				dprintf("Bitmap: width: %i, height: %i\n", blockstart[5], blockstart[6]);
 			}
 			break;
-		case PNOKIA_ENTRYTYPE_LOGOSWITCH:/* Logo on/off */
+		case GN_PHONEBOOK_ENTRY_LogoSwitch:   /* Logo on/off */
 			break;
-		case PNOKIA_ENTRYTYPE_GROUP:	/* Caller group number */
-			if (data->PhonebookEntry) {
-				data->PhonebookEntry->Group = blockstart[5] - 1;
-				dprintf("   Group: %d\n", data->PhonebookEntry->Group);
+		case GN_PHONEBOOK_ENTRY_Group:   /* Caller group number */
+			if (data->phonebook_entry) {
+				data->phonebook_entry->caller_group = blockstart[5] - 1;
+				dprintf("   Group: %d\n", data->phonebook_entry->caller_group);
 			}
 			break;
 		default:
@@ -166,21 +161,19 @@ gn_error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data, 
 	return GN_ERR_NONE;
 }
 
-static gn_error GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *alarm)
+static gn_error calnote_get_alarm(int alarmdiff, gn_timestamp *time, gn_timestamp *alarm)
 {
-	time_t				t_alarm;
-	struct tm			tm_time;
-	struct tm			*tm_alarm;
-	gn_error			e = GN_ERR_NONE;
+	time_t t_alarm;
+	struct tm tm_time, *tm_alarm;
 
 	if (!time || !alarm) return GN_ERR_INTERNALERROR;
 
 	memset(&tm_time, 0, sizeof(tm_time));
-	tm_time.tm_year = time->Year - 1900;
-	tm_time.tm_mon = time->Month - 1;
-	tm_time.tm_mday = time->Day;
-	tm_time.tm_hour = time->Hour;
-	tm_time.tm_min = time->Minute;
+	tm_time.tm_year = time->year - 1900;
+	tm_time.tm_mon = time->month - 1;
+	tm_time.tm_mday = time->day;
+	tm_time.tm_hour = time->hour;
+	tm_time.tm_min = time->minute;
 
 	tzset();
 	t_alarm = mktime(&tm_time);
@@ -189,76 +182,76 @@ static gn_error GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *al
 
 	tm_alarm = localtime(&t_alarm);
 
-	alarm->Year = tm_alarm->tm_year + 1900;
-	alarm->Month = tm_alarm->tm_mon + 1;
-	alarm->Day = tm_alarm->tm_mday;
-	alarm->Hour = tm_alarm->tm_hour;
-	alarm->Minute = tm_alarm->tm_min;
-	alarm->Second = tm_alarm->tm_sec;
+	alarm->year = tm_alarm->tm_year + 1900;
+	alarm->month = tm_alarm->tm_mon + 1;
+	alarm->day = tm_alarm->tm_mday;
+	alarm->hour = tm_alarm->tm_hour;
+	alarm->minute = tm_alarm->tm_min;
+	alarm->second = tm_alarm->tm_sec;
 
-	return e;
+	return GN_ERR_NONE;
 }
 
-
-static gn_error GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
+static gn_error calnote_get_times(unsigned char *block, gn_calnote *c)
 {
-	time_t		alarmdiff;
-	gn_error	e = GN_ERR_NONE;
+	time_t alarmdiff;
+	gn_error e = GN_ERR_NONE;
 
 	if (!c) return GN_ERR_INTERNALERROR;
 
-	c->Time.Hour = block[0];
-	c->Time.Minute = block[1];
-	c->Recurrence = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
+	c->time.hour = block[0];
+	c->time.minute = block[1];
+	c->recurrence = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
 	alarmdiff = (((unsigned int)block[2]) << 8) + block[3];
 
 	if (alarmdiff != 0xffff) {
-		e = GetNoteAlarm(alarmdiff * 60, &(c->Time), &(c->Alarm));
-		c->Alarm.AlarmEnabled = 1;
+		e = calnote_get_alarm(alarmdiff * 60, &(c->time), &(c->alarm.timestamp));
+		c->alarm.enabled = true;
 	} else {
-		c->Alarm.AlarmEnabled = 0;
+		c->alarm.enabled = false;
 	}
 
 	return e;
 }
 
-gn_error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
+gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 {
 	unsigned char *block;
 	int alarm;
+	gn_error e = GN_ERR_NONE;
+
+	if (!data->calnote) return GN_ERR_INTERNALERROR;
 
 	block = message + 12;
 
-	data->CalendarNote->Location = (((unsigned int)message[4]) << 8) + message[5];
-	data->CalendarNote->Time.Year = (((unsigned int)message[8]) << 8) + message[9];
-	data->CalendarNote->Time.Month = message[10];
-	data->CalendarNote->Time.Day = message[11];
-	data->CalendarNote->Time.Second = 0;
+	data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
+	data->calnote->time.year = (((unsigned int)message[8]) << 8) + message[9];
+	data->calnote->time.month = message[10];
+	data->calnote->time.day = message[11];
+	data->calnote->time.second = 0;
 
-	dprintf("Year: %i\n", data->CalendarNote->Time.Year);
+	dprintf("Year: %i\n", data->calnote->time.year);
 
-	switch (message[6]) {
-	case PNOKIA_NOTE_MEETING:
-		data->CalendarNote->Type = GCN_MEETING;
-		GetNoteTimes(block, data->CalendarNote);
-		char_decode_unicode(data->CalendarNote->Text, (block + 8), block[6] << 1);
+	switch (data->calnote->type = message[6]) {
+	case GN_CALNOTE_MEETING:
+		e = calnote_get_times(block, data->calnote);
+		if (e != GN_ERR_NONE) return e;
+		char_decode_unicode(data->calnote->text, (block + 8), block[6] << 1);
 		break;
-	case PNOKIA_NOTE_CALL:
-		data->CalendarNote->Type = GCN_CALL;
-		GetNoteTimes(block, data->CalendarNote);
-		char_decode_unicode(data->CalendarNote->Text, (block + 8), block[6] << 1);
-		char_decode_unicode(data->CalendarNote->Phone, (block + 8 + block[6] * 2), block[7] << 1);
+	case GN_CALNOTE_CALL:
+		e = calnote_get_times(block, data->calnote);
+		if (e != GN_ERR_NONE) return e;
+		char_decode_unicode(data->calnote->text, (block + 8), block[6] << 1);
+		char_decode_unicode(data->calnote->phone_number, (block + 8 + block[6] * 2), block[7] << 1);
 		break;
-	case PNOKIA_NOTE_REMINDER:
-		data->CalendarNote->Type = GCN_REMINDER;
-		data->CalendarNote->Recurrence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
-		char_decode_unicode(data->CalendarNote->Text, (block + 4), block[2] << 1);
+	case GN_CALNOTE_REMINDER:
+		data->calnote->recurrence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
+		char_decode_unicode(data->calnote->text, (block + 4), block[2] << 1);
 		break;
-	case PNOKIA_NOTE_BIRTHDAY:
-		data->CalendarNote->Type = GCN_BIRTHDAY;
-		data->CalendarNote->Time.Hour = 23;
-		data->CalendarNote->Time.Minute = 59;
-		data->CalendarNote->Time.Second = 58;
+	case GN_CALNOTE_BIRTHDAY:
+		data->calnote->time.hour = 23;
+		data->calnote->time.minute = 59;
+		data->calnote->time.second = 58;
 
 		alarm = ((unsigned int)block[2]) << 24;
 		alarm += ((unsigned int)block[3]) << 16;
@@ -268,22 +261,22 @@ gn_error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 		dprintf("alarm: %i\n", alarm);
 
 		if (alarm == 0xffff) {
-			data->CalendarNote->Alarm.AlarmEnabled = 0;
+			data->calnote->alarm.enabled = false;
 		} else {
-			data->CalendarNote->Alarm.AlarmEnabled = 1;
+			data->calnote->alarm.enabled = true;
 		}
 
-		GetNoteAlarm(alarm, &(data->CalendarNote->Time), &(data->CalendarNote->Alarm));
+		e = calnote_get_alarm(alarm, &(data->calnote->time), &(data->calnote->alarm.timestamp));
+		if (e != GN_ERR_NONE) return e;
 
-		data->CalendarNote->Time.Hour = 0;
-		data->CalendarNote->Time.Minute = 0;
-		data->CalendarNote->Time.Second = 0;
-		data->CalendarNote->Time.Year = (((unsigned int)block[6]) << 8) + block[7];
+		data->calnote->time.hour = 0;
+		data->calnote->time.minute = 0;
+		data->calnote->time.second = 0;
+		data->calnote->time.year = (((unsigned int)block[6]) << 8) + block[7];
 
-		char_decode_unicode(data->CalendarNote->Text, (block + 10), block[9] << 1);
+		char_decode_unicode(data->calnote->text, (block + 10), block[9] << 1);
 		break;
 	default:
-		data->CalendarNote->Type = -1;
 		return GN_ERR_UNKNOWN;
 	}
 	return GN_ERR_NONE;
