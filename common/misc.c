@@ -34,6 +34,7 @@ int GetLine(FILE *File, char *Line, int count)
 
 /* jano: Functions for detecting phone capabiltes. For explanation how  */
 /* to use these functions look into xgnokii_lowlevel.c                  */
+/* These function can only return 1 (TRUE) or 0 (FALSE)!		*/
 
 static PhoneModel models[] = {
 	{NULL,    "", 0 },
@@ -79,47 +80,47 @@ PhoneModel *GetPhoneModel (const char *num)
 	return (&models[0]);
 }
 
-char *GetModel (const char *num)
+inline char *GetModel (const char *num)
 {
-	return GetPhoneModel(num)->model;
+	return (GetPhoneModel(num)->model);
 }
 
-int CallerGroupSupported (const char *num)
+inline int CallerGroupSupported (const char *num)
 {
-	return GetPhoneModel(num)->flags & PM_CALLERGROUP;
+	return (GetPhoneModel(num)->flags & PM_CALLERGROUP ? 1 : 0);
 }
 
-int CalendarSupported (const char *num)
+inline int CalendarSupported (const char *num)
 {
-	return GetPhoneModel(num)->flags & PM_CALENDAR;
+	return (GetPhoneModel(num)->flags & PM_CALENDAR ? 1 : 0);
 }
 
-int NetmonitorSupported (const char *num)
+inline int NetmonitorSupported (const char *num)
 {
-	return GetPhoneModel(num)->flags & PM_NETMONITOR;
+	return (GetPhoneModel(num)->flags & PM_NETMONITOR ? 1 : 0);
 }
 
-int KeyboardSupported (const char *num)
+inline int KeyboardSupported (const char *num)
 {
-	return GetPhoneModel(num)->flags & PM_KEYBOARD;
+	return (GetPhoneModel(num)->flags & PM_KEYBOARD ? 1 : 0);
 }
 
-int SMSSupported (const char *num)
+inline int SMSSupported (const char *num)
 {
-	return GetPhoneModel(num)->flags & PM_SMS;
+	return (GetPhoneModel(num)->flags & PM_SMS ? 1 : 0);
 }
 
-int DTMFSupported (const char *num)
+inline int DTMFSupported (const char *num)
 {
-	return GetPhoneModel(num)->flags & PM_DTMF;
+	return (GetPhoneModel(num)->flags & PM_DTMF ? 1 : 0);
 }
 
-int DataSupported (const char *num)
+inline int DataSupported (const char *num)
 {
-	return GetPhoneModel(num)->flags & PM_DATA;
+	return (GetPhoneModel(num)->flags & PM_DATA ? 1 : 0);
 }
 
-int SpeedDialSupported (const char *num)
+inline int SpeedDialSupported (const char *num)
 {
-	return GetPhoneModel(num)->flags & PM_SPEEDDIAL;
+	return (GetPhoneModel(num)->flags & PM_SPEEDDIAL ? 1 : 0);
 }

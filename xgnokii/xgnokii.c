@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.28  2000-12-20 11:49:25  ja
+  Revision 1.29  2001-01-15 21:10:20  ja
+  Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
+
+  Revision 1.28  2000/12/20 11:49:25  ja
   Bringing back to life smsd. It was broken after last Pawel update.
 
   Revision 1.27  2000/12/19 16:18:21  pkot
@@ -323,7 +326,7 @@ static inline void DrawAlarm (GtkWidget *data)
 }
 
 
-static inline void DrawSMSReceived (GtkWidget *data)
+static inline void DrawText (GtkWidget *data, int at, char *text)
 {
   static GdkFont *Font;
 
@@ -331,19 +334,19 @@ static inline void DrawSMSReceived (GtkWidget *data)
   gdk_draw_string (Pixmap,
 		   Font,
 		   GTK_WIDGET(data)->style->fg_gc[GTK_STATE_NORMAL],
-		   33, 25, _("Short Message received"));
+                   33, at, text);
+}
+
+
+static inline void DrawSMSReceived (GtkWidget *data)
+{
+  DrawText (data, 25, _("Short Message received"));
 }
 
 
 static inline void DrawWorking (GtkWidget *data)
 {
-  static GdkFont *Font;
-
-  Font = gdk_font_load ("-misc-fixed-medium-r-*-*-*-90-*-*-*-*-*-*");
-  gdk_draw_string (Pixmap,
-		   Font,
-		   GTK_WIDGET(data)->style->fg_gc[GTK_STATE_NORMAL],
-		   33, 40, _("Working ..."));
+  DrawText(data, 40, _("Working ..."));
 }
 
 
@@ -413,9 +416,9 @@ static gint Update (gpointer data)
 
   if (phoneMonitor.alarm)
     DrawAlarm (data);
-
+    
   if (phoneMonitor.working)
-    DrawWorking (data);
+    DrawText (data, 25, phoneMonitor.working);
 
   pthread_mutex_lock (&smsMutex);
   if (phoneMonitor.sms.unRead > 0)
@@ -895,17 +898,21 @@ static gint ButtonPressEvent (GtkWidget *widget, GdkEventButton *event)
     {
       GUI_ShowContacts ();
     }
-    else if (phoneMonitor.supported.sms &&
-             event->x >= 190 && event->x <= 210 &&
+    else if (event->x >= 190 && event->x <= 210 &&
              event->y >=  70 && event->y <= 85)
     {
-      GUI_ShowSMS ();
+      if (!phoneMonitor.supported.sms)
+        phoneMonitor.working = _("SMS not supported!");
+      else
+        GUI_ShowSMS ();
     }
-    else if (phoneMonitor.supported.calendar &&
-             event->x >= 235 && event->x <= 248 &&
+    else if (event->x >= 235 && event->x <= 248 &&
              event->y >=  27 && event->y <= 75) 
     {
-      GUI_ShowCalendar ();
+      if (!phoneMonitor.supported.calendar)
+        phoneMonitor.working = _("Calendar not supported!");
+      else
+        GUI_ShowCalendar ();
     }
     else if (event->x >= 245 && event->x <= 258 &&
              event->y >=  83 && event->y <= 93)
@@ -1184,7 +1191,7 @@ static GtkWidget *CreateAboutDialog (void)
 {
   GtkWidget *dialog;
   GtkWidget *button, *hbox, *label;
-  gchar buf[200];
+  gchar buf[2000];
 
   dialog = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (dialog), _("About"));
@@ -1204,8 +1211,12 @@ static GtkWidget *CreateAboutDialog (void)
   gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), hbox);
   gtk_widget_show (hbox);
 
-  g_snprintf (buf, 200, _("xgnokii version: %s\ngnokii version: %s\n\n\
-Copyright (C) 1999 Pavel Janík ml.,\nHugh Blemings & Jan Derfinak\n"), XVERSION, VERSION);
+  g_snprintf (buf, 2000, _("xgnokii version: %s\ngnokii version: %s\n\n\
+Copyright (C) 1999,2000 Pavel Janík ml.,\nHugh Blemings, Jan Derfinak and others\n\
+xgnokii is free software, covered by the GNU General Public License, and you are\n\
+welcome to change it and/or distribute copies of it under certain conditions.\n\
+There is absolutely no waranty for xgnokii. See GPL for details.\n"),
+              XVERSION, VERSION);
   label = gtk_label_new ((gchar *) buf);
   gtk_box_pack_start (GTK_BOX(hbox), label, FALSE, FALSE, 0);
   gtk_widget_show (label);
@@ -1807,7 +1818,7 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_container_add (GTK_CONTAINER (vbox), hbox);
   gtk_widget_show (hbox);
 
-  label = gtk_label_new ("Names length:");
+  label = gtk_label_new (_("Names length:"));
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
@@ -1815,7 +1826,7 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_container_add (GTK_CONTAINER (vbox), hbox);
   gtk_widget_show (hbox);
 
-  label = gtk_label_new ("SIM:");
+  label = gtk_label_new (_("SIM:"));
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
@@ -1833,7 +1844,7 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.phone.phoneNameLen, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.phone.phoneNameLen);
 
-  label = gtk_label_new ("Phone:");
+  label = gtk_label_new (_("Phone:"));
   gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 

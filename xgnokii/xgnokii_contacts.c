@@ -59,6 +59,7 @@ typedef struct {
   GtkWidget *entry;
 } DialVoiceDialog;
 
+
 static GtkWidget *GUI_ContactsWindow;
 static bool fbus3810;
 static bool contactsMemoryInitialized;

@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   X G N O K I I
 
   A Linux/Unix GUI for Nokia mobile phones.
@@ -8,9 +10,11 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sun Apr 30 2000
-  Modified by Jan Derfinak
+  $Log$
+  Revision 1.9  2001-01-15 21:10:20  ja
+  Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
 
+  
 */
 
 #include <unistd.h>
@@ -196,7 +200,7 @@ void GUI_InitPhoneMonitor (void)
   phoneMonitor.supported.data = FALSE;
   phoneMonitor.rfLevel = phoneMonitor.batteryLevel = -1;
   phoneMonitor.powerSource = GPS_BATTERY;
-  phoneMonitor.working = FALSE;
+  phoneMonitor.working = NULL;
   phoneMonitor.alarm = FALSE;
   phoneMonitor.sms.unRead = phoneMonitor.sms.number = 0;
   phoneMonitor.sms.messages = NULL;
@@ -872,6 +876,7 @@ void *GUI_Connect (void *a)
   g_print ("Initializing connection...\n");
 # endif
 
+  phoneMonitor.working = _("Connecting...");
   while (!fbusinit (true))
     sleep (1);
 
@@ -881,7 +886,7 @@ void *GUI_Connect (void *a)
 
   while (1)
   {
-    phoneMonitor.working = FALSE;
+    phoneMonitor.working = NULL;
 
     if (GSM->GetRFLevel (&rf_units, &phoneMonitor.rfLevel) != GE_NONE)
       phoneMonitor.rfLevel = -1;
@@ -902,9 +907,9 @@ void *GUI_Connect (void *a)
       if (phoneMonitor.sms.unRead != SMSStatus.UnRead ||
           phoneMonitor.sms.number != SMSStatus.Number)
       {
-        phoneMonitor.working = TRUE;
+        phoneMonitor.working = _("Refreshing SMSes...");
         RefreshSMS (SMSStatus.Number);
-        phoneMonitor.working = FALSE;
+        phoneMonitor.working = NULL;
       }
 
       phoneMonitor.sms.unRead = SMSStatus.UnRead;
@@ -960,7 +965,7 @@ void *GUI_Connect (void *a)
 #     ifdef XDEBUG      
       g_print ("Processing Event: %d\n", event->event);
 #     endif
-      phoneMonitor.working = TRUE;
+      phoneMonitor.working = _("Working...");
       if (event->event <= Event_Exit)
         if ((error = DoAction[event->event] (event->data)) != GE_NONE)
           g_print (_("Event %d failed with return code %d!\n"), event->event, error);

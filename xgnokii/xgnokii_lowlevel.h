@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   X G N O K I I
 
   A Linux/Unix GUI for Nokia mobile phones.
@@ -8,9 +10,11 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sun Apr 30 2000
-  Modified by Jan Derfinak
+  $Log$
+  Revision 1.5  2001-01-15 21:10:20  ja
+  Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
 
+  
 */
 
 #ifndef XGNOKII_LOWLEVEL_H
@@ -134,7 +138,7 @@ typedef struct {
   gfloat rfLevel;
   gfloat batteryLevel;
   GSM_PowerSource powerSource;
-  bool working;
+  gchar *working;
   bool alarm;
   struct {
     gchar *model;

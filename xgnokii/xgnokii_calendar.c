@@ -34,6 +34,7 @@
 #include "xpm/NewRem.xpm"
 #include "xpm/quest.xpm"
 
+
 typedef struct {
   GtkWidget *calendar;
   GtkWidget *notesClist;
@@ -41,22 +42,53 @@ typedef struct {
   GdkColor   colour;
 } CalendarWidget;
 
+
+typedef struct {
+  guint year;
+  guint month;
+  guint day;
+  GtkWidget *button;
+} Date;
+
+
+typedef struct {
+  Date date;
+  guchar hours;
+  guchar minutes;
+  GtkWidget *button;
+  GtkWidget *hButton;
+  GtkWidget *mButton;
+} DateTime;
+
+
 typedef struct {
   GtkWidget *dialog;
-  GtkWidget *date;
+  Date       date;
+  DateTime   alarm;
+  GtkWidget *alarmCheck;
   GtkWidget *text;
-  GtkWidget *alarm;
-  GtkWidget *alarmFrame;
-  GtkWidget *alarmCal;
-  GtkWidget *alarmHour;
-  GtkWidget *alarmMin;
 } AddDialogData;
 
+
+typedef struct {
+  GtkWidget *dialog;
+  GtkWidget *cal;
+} CalendarDialog;
+
+
+typedef struct {
+  GtkWidget *dialog;
+  GtkWidget *cal;
+} CalTimeDialog;
+
+  
 static GtkWidget *GUI_CalendarWindow;
 static ErrorDialog errorDialog = {NULL, NULL};
 static CalendarWidget cal = {NULL, NULL};
 static QuestMark questMark;
 static AddDialogData addReminderDialogData;
+static CalendarDialog calendarDialog = {NULL, NULL};
+static CalTimeDialog calTimeDialog = {NULL, NULL};
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
@@ -65,10 +97,12 @@ static inline void Help1 (GtkWidget *w, gpointer data)
   g_free (indx);
 }
 
+
 static inline void CloseCalendar (GtkWidget *w, gpointer data)
 {
   gtk_widget_hide (GUI_CalendarWindow);
 }
+
 
 inline void GUI_ShowCalendar ()
 {
@@ -394,26 +428,178 @@ static gint ReverseSelection (gconstpointer a, gconstpointer b)
   
 static void OkAddReminderDialog (GtkWidget *widget, gpointer data)
 {
+  /*gtk_toggle_button_get_active (button)*/
 }
 
-static void ShowAlarmVBox (GtkToggleButton *button, AddDialogData *data)
+
+static inline void SetDateButton (Date *date)
 {
-  if (gtk_toggle_button_get_active (button))
-  {
-    gtk_widget_show (data->alarmFrame);
-  }
-  else
-  {
-    gtk_widget_hide (data->alarmFrame);
-    gtk_widget_set_usize (GTK_WIDGET (GTK_DIALOG (data->dialog)->vbox), 0, 0);
-//    gtk_widget_map (data->dialog);
-  }
+    gchar *buf = g_strdup_printf ("%d-%02d-%02d", date->year,
+                                   date->month, date->day);
+    gtk_label_set_text (GTK_LABEL (date->button), buf);
+    g_free (buf);
 }
+
+
+static inline void SetDateTimeButton (DateTime *date)
+{
+    gchar *buf = g_strdup_printf ("%d-%02d-%02d  %02d:%02d", date->date.year,
+                                   date->date.month, date->date.day,
+                                   date->hours, date->minutes);
+    gtk_label_set_text (GTK_LABEL (date->button), buf);
+    g_free (buf);
+}
+
+
+static void OkCalendarDialog (GtkWidget *widget, Date *date)
+{
+  gtk_calendar_get_date (GTK_CALENDAR (calendarDialog.cal), &(date->year),
+                         &(date->month), &(date->day));
+  date->month += 1;
+
+  SetDateButton (date);
+    
+  gtk_widget_hide (calendarDialog.dialog);
+}
+
+
+static void OkCalTimeDialog (GtkWidget *widget, DateTime *date)
+{
+  gtk_calendar_get_date (GTK_CALENDAR (calTimeDialog.cal), &(date->date.year),
+                         &(date->date.month), &(date->date.day));
+  date->date.month += 1;
+
+  date->hours = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (date->hButton));
+  date->minutes = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (date->mButton));
+ 
+  SetDateTimeButton (date);
+
+  gtk_widget_hide (calTimeDialog.dialog);
+}
+
+
+static void ShowCalendar (GtkWidget *widget, Date *date)
+{
+  GtkWidget *button;
+
+  if (calendarDialog.dialog == NULL)
+  {
+    calendarDialog.dialog = gtk_dialog_new ();
+    gtk_window_set_title (GTK_WINDOW (calendarDialog.dialog), _("Choose date"));
+    gtk_window_position (GTK_WINDOW (calendarDialog.dialog), GTK_WIN_POS_MOUSE);
+    gtk_window_set_modal(GTK_WINDOW (calendarDialog.dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (calendarDialog.dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (calendarDialog.dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (calendarDialog.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkCalendarDialog), (gpointer) date);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (calendarDialog.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) calendarDialog.dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (calendarDialog.dialog)->vbox), 5);
+
+    calendarDialog.cal = gtk_calendar_new ();
+
+    gtk_calendar_select_month (GTK_CALENDAR (calendarDialog.cal), date->month - 1, date->year);
+    gtk_calendar_select_day (GTK_CALENDAR (calendarDialog.cal), date->day);
+
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (calendarDialog.dialog)->vbox), calendarDialog.cal);
+    gtk_widget_show (calendarDialog.cal);  
+  }
+
+  gtk_widget_show (calendarDialog.dialog);  
+}
+
+
+static void ShowCalTime (GtkWidget *widget, DateTime *date)
+{
+  GtkWidget *button, *hbox, *label;
+  GtkAdjustment *adj;
+
+  if (calTimeDialog.dialog == NULL)
+  {
+    calTimeDialog.dialog = gtk_dialog_new ();
+    gtk_window_set_title (GTK_WINDOW (calTimeDialog.dialog), _("Choose date"));
+    gtk_window_position (GTK_WINDOW (calTimeDialog.dialog), GTK_WIN_POS_MOUSE);
+    gtk_window_set_modal(GTK_WINDOW (calTimeDialog.dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (calTimeDialog.dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (calTimeDialog.dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (calTimeDialog.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkCalTimeDialog), (gpointer) date);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (calTimeDialog.dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) calTimeDialog.dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (calTimeDialog.dialog)->vbox), 5);
+
+    calTimeDialog.cal = gtk_calendar_new ();
+
+    gtk_calendar_select_month (GTK_CALENDAR (calTimeDialog.cal), date->date.month - 1, date->date.year);
+    gtk_calendar_select_day (GTK_CALENDAR (calTimeDialog.cal), date->date.day);
+
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (calTimeDialog.dialog)->vbox), calTimeDialog.cal);
+    gtk_widget_show (calTimeDialog.cal);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (calTimeDialog.dialog)->vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    label = gtk_label_new (_("Alarm time:"));
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    adj = (GtkAdjustment *) gtk_adjustment_new (addReminderDialogData.alarm.hours,
+                                                0.0, 23.0, 1.0, 4.0, 0.0);
+    addReminderDialogData.alarm.hButton = gtk_spin_button_new (adj, 0, 0);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarm.hButton), TRUE);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarm.hButton), TRUE);
+    gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarm.hButton, FALSE, FALSE, 0);
+    gtk_widget_show (addReminderDialogData.alarm.hButton);
+
+    label = gtk_label_new (":");
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+
+    adj = (GtkAdjustment *) gtk_adjustment_new (addReminderDialogData.alarm.minutes,
+                                                0.0, 59.0, 1.0, 10.0, 0.0);
+    addReminderDialogData.alarm.mButton = gtk_spin_button_new (adj, 0, 0);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarm.mButton), TRUE);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarm.mButton), TRUE);
+    gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarm.mButton, FALSE, FALSE, 0);
+    gtk_widget_show (addReminderDialogData.alarm.mButton);
+  }
+
+  gtk_widget_show (calTimeDialog.dialog);  
+}
+
 
 static void AddReminder (void)
 {
-  GtkWidget *button, *hbox, *vbox, *vbox2, *label;
-  GtkAdjustment *adj;
+  GtkWidget *button, *hbox, *vbox, *label;
   time_t t;
   struct tm *tm;
   
@@ -448,19 +634,40 @@ static void AddReminder (void)
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG (addReminderDialogData.dialog)->vbox), vbox);
     gtk_widget_show (vbox);
 
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (vbox), hbox);
+    gtk_widget_show (hbox);
+
     label = gtk_label_new (_("Date:"));
-    gtk_container_add (GTK_CONTAINER (vbox), label);
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
     gtk_widget_show (label);
     
-    addReminderDialogData.date = gtk_calendar_new ();
-
     t = time (NULL);
     tm = localtime (&t);
-    gtk_calendar_select_month (GTK_CALENDAR (addReminderDialogData.date), tm->tm_mon, tm->tm_year + 1900);
-    gtk_calendar_select_day (GTK_CALENDAR (addReminderDialogData.date), tm->tm_mday);
-
-    gtk_container_add (GTK_CONTAINER (vbox), addReminderDialogData.date);
-    gtk_widget_show (addReminderDialogData.date);  
+    
+    addReminderDialogData.date.year = addReminderDialogData.alarm.date.year =
+                                      tm->tm_year + 1900;
+    addReminderDialogData.date.month = addReminderDialogData.alarm.date.month =
+                                       tm->tm_mon + 1;
+    addReminderDialogData.date.day = addReminderDialogData.alarm.date.day = 
+                                     tm->tm_mday;
+    
+    addReminderDialogData.alarm.hours = tm->tm_hour;
+    addReminderDialogData.alarm.minutes = tm->tm_min;
+    
+    button = gtk_button_new ();
+    
+    addReminderDialogData.date.button = gtk_label_new ("");
+    
+    gtk_container_add (GTK_CONTAINER (button), addReminderDialogData.date.button);
+    SetDateButton (&(addReminderDialogData.date));
+    
+    gtk_widget_show (addReminderDialogData.date.button);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (ShowCalendar), (gpointer) &(addReminderDialogData.date));
+    gtk_widget_show (button);
 
     hbox = gtk_hbox_new (FALSE, 0);
     gtk_container_add (GTK_CONTAINER (vbox), hbox);
@@ -478,54 +685,25 @@ static void AddReminder (void)
     gtk_container_add (GTK_CONTAINER (vbox), hbox);
     gtk_widget_show (hbox);
     
-    addReminderDialogData.alarm = gtk_check_button_new_with_label (_("Alarm"));
-    gtk_box_pack_start (GTK_BOX(hbox), addReminderDialogData.alarm, FALSE, FALSE, 10);
-    gtk_signal_connect (GTK_OBJECT (addReminderDialogData.alarm), "toggled",
-                        GTK_SIGNAL_FUNC (ShowAlarmVBox), &addReminderDialogData);
-    gtk_widget_show (addReminderDialogData.alarm);
+    addReminderDialogData.alarmCheck = gtk_check_button_new_with_label (_("Alarm"));
+    gtk_box_pack_start (GTK_BOX(hbox), addReminderDialogData.alarmCheck, FALSE, FALSE, 2);
+//    gtk_signal_connect (GTK_OBJECT (addReminderDialogData.alarmCheck), "toggled",
+//                        GTK_SIGNAL_FUNC (TogleAlarm), &addReminderDialogData);
+    gtk_widget_show (addReminderDialogData.alarmCheck);
 
+    button = gtk_button_new ();
     
-    addReminderDialogData.alarmFrame = gtk_frame_new (_("Alarm"));
-    gtk_container_add (GTK_CONTAINER (vbox), addReminderDialogData.alarmFrame);
+    addReminderDialogData.alarm.button = gtk_label_new ("");
     
-    vbox2 = gtk_vbox_new (FALSE, 3);
-    gtk_container_add (GTK_CONTAINER (addReminderDialogData.alarmFrame), vbox2);
-    gtk_widget_show (vbox2);
-
-    label = gtk_label_new (_("Alarm date:"));
-    gtk_box_pack_start (GTK_BOX (vbox2), label, FALSE, FALSE, 2);
-    gtk_widget_show (label);
-
-    addReminderDialogData.alarmCal = gtk_calendar_new ();
-    gtk_container_add (GTK_CONTAINER (vbox2), addReminderDialogData.alarmCal);
-    gtk_widget_show (addReminderDialogData.alarmCal);
-
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_container_add (GTK_CONTAINER (vbox2), hbox);
-    gtk_widget_show (hbox);
+    gtk_container_add (GTK_CONTAINER (button), addReminderDialogData.alarm.button);
+    SetDateTimeButton (&(addReminderDialogData.alarm));
     
-    label = gtk_label_new (_("Alarm time:"));
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-    gtk_widget_show (label);
-
-    adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 0.0, 23.0, 1.0, 4.0, 0.0);
-    addReminderDialogData.alarmHour = gtk_spin_button_new (adj, 0, 0);
-    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarmHour), TRUE);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarmHour), TRUE);
-    gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarmHour, FALSE, FALSE, 0);
-    gtk_widget_show (addReminderDialogData.alarmHour);
-
-    label = gtk_label_new (":");
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-    gtk_widget_show (label);
-
-    adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 0.0, 59.0, 1.0, 10.0, 0.0);
-    addReminderDialogData.alarmMin = gtk_spin_button_new (adj, 0, 0);
-    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (addReminderDialogData.alarmMin), TRUE);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (addReminderDialogData.alarmMin), TRUE);
-    gtk_box_pack_start (GTK_BOX (hbox), addReminderDialogData.alarmMin, FALSE, FALSE, 0);
-    gtk_widget_show (addReminderDialogData.alarmMin);
-
+    gtk_widget_show (addReminderDialogData.alarm.button);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 2);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (ShowCalTime), (gpointer) &(addReminderDialogData.alarm));
+    gtk_widget_show (button);
   }
   
   gtk_widget_show (GTK_WIDGET (addReminderDialogData.dialog));
