@@ -338,21 +338,21 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	if (!data->Bitmap) return GE_INTERNALERROR;
 
 	switch (data->Bitmap->type) {
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		data->Bitmap->height = phone_nokia_6160.Info.StartupLogoH;
 		data->Bitmap->width = phone_nokia_6160.Info.StartupLogoW;
 		data->Bitmap->size = ceiling_to_octet(data->Bitmap->height * data->Bitmap->width);
-		GSM_ClearBitmap(data->Bitmap);
+		gn_bmp_clear(data->Bitmap);
 		for (i = 0; i < 6; i++)
 			if ((error = GetStartupSlice(data, state, i)) != GE_NONE)
 				return error;
 		break;
-	case GSM_WelcomeNoteText:
-	case GSM_DealerNoteText:
-	case GSM_OperatorLogo:
-	case GSM_CallerLogo:
-	case GSM_None:
-	case GSM_PictureMessage:
+	case GN_BMP_WelcomeNoteText:
+	case GN_BMP_DealerNoteText:
+	case GN_BMP_OperatorLogo:
+	case GN_BMP_CallerLogo:
+	case GN_BMP_None:
+	case GN_BMP_PictureMessage:
 		return GE_NOTSUPPORTED;
 
 	default:
@@ -370,13 +370,13 @@ static GSM_Error IncomingStartupLogo(int messagetype, unsigned char *message, in
 	if (message[0] != 0x01 || message[1] != 0x00 || message[2] != 0x07 || message[3] != 0x08)
 		return GE_UNHANDLEDFRAME;
 
-	if (!data->Bitmap || data->Bitmap->type != GSM_StartupLogo)
+	if (!data->Bitmap || data->Bitmap->type != GN_BMP_StartupLogo)
 		return GE_INTERNALERROR;
 
 	for (x = 0; x < 84; x++)
 		for (b = message[5 + x], i = 0; b != 0; b >>= 1, i++)
-			if ( b & 0x01 )
-				GSM_SetPointBitmap(data->Bitmap, x, 8 * logoslice + i);
+			if (b & 0x01)
+				gn_bmp_set_point(data->Bitmap, x, 8 * logoslice + i);
 
 	return GE_NONE;
 }

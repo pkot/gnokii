@@ -724,19 +724,19 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("Reading bitmap...\n");
 	switch (data->Bitmap->type) {
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		return GetWelcomeMessage(data, state);
-	case GSM_WelcomeNoteText:
+	case GN_BMP_WelcomeNoteText:
 		return GetWelcomeMessage(data, state);
-	case GSM_DealerNoteText:
+	case GN_BMP_DealerNoteText:
 		return GetWelcomeMessage(data, state);
-	case GSM_OperatorLogo:
+	case GN_BMP_OperatorLogo:
 		return GetOperatorLogo(data, state);
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		return GetCallerGroupData(data, state);
 
-	case GSM_None:
-	case GSM_PictureMessage:
+	case GN_BMP_None:
+	case GN_BMP_PictureMessage:
 		return GE_NOTSUPPORTED;
 	default:
 		return GE_INTERNALERROR;
@@ -768,7 +768,7 @@ static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_PhonebookEntry *pe;
-	GSM_Bitmap *bmp;
+	gn_bmp *bmp;
 	unsigned char *pos;
 	int n;
 
@@ -1675,8 +1675,8 @@ static GSM_Error GetOperatorLogo(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[512+GSM_MAX_BITMAP_SIZE] = {FBUS_FRAME_HEADER};
-	GSM_Bitmap *bmp;
+	unsigned char req[512 + GN_BMP_MAX_SIZE] = {FBUS_FRAME_HEADER};
+	gn_bmp *bmp;
 	unsigned char *pos;
 	int len;
 
@@ -1684,7 +1684,7 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	pos = req+3;
 
 	switch (bmp->type) {
-	case GSM_WelcomeNoteText:
+	case GN_BMP_WelcomeNoteText:
 		len = strlen(bmp->text);
 		if (len > 255) {
 			dprintf("WelcomeNoteText is too long\n");
@@ -1698,7 +1698,7 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		if (SM_SendMessage(state, pos-req, 0x05, req) != GE_NONE) return GE_NOTREADY;
 		return SM_Block(state, data, 0x05);
 
-	case GSM_DealerNoteText:
+	case GN_BMP_DealerNoteText:
 		len = strlen(bmp->text);
 		if (len > 255) {
 			dprintf("DealerNoteText is too long\n");
@@ -1712,8 +1712,8 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		if (SM_SendMessage(state, pos-req, 0x05, req) != GE_NONE) return GE_NOTREADY;
 		return SM_Block(state, data, 0x05);
 
-	case GSM_StartupLogo:
-		if (bmp->size > GSM_MAX_BITMAP_SIZE) {
+	case GN_BMP_StartupLogo:
+		if (bmp->size > GN_BMP_MAX_SIZE) {
 			dprintf("StartupLogo is too long\n");
 			return GE_INTERNALERROR;
 		}
@@ -1727,8 +1727,8 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		if (SM_SendMessage(state, pos-req, 0x05, req) != GE_NONE) return GE_NOTREADY;
 		return SM_Block(state, data, 0x05);
 
-	case GSM_OperatorLogo:
-		if (bmp->size > GSM_MAX_BITMAP_SIZE) {
+	case GN_BMP_OperatorLogo:
+		if (bmp->size > GN_BMP_MAX_SIZE) {
 			dprintf("OperatorLogo is too long\n");
 			return GE_INTERNALERROR;
 		}
@@ -1750,13 +1750,13 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		if (SM_SendMessage(state, pos-req, 0x05, req) != GE_NONE) return GE_NOTREADY;
 		return SM_Block(state, data, 0x05);
 
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		len = strlen(bmp->text);
 		if (len > 255) {
 			dprintf("Callergroup name is too long\n");
 			return GE_INTERNALERROR;
 		}
-		if (bmp->size > GSM_MAX_BITMAP_SIZE) {
+		if (bmp->size > GN_BMP_MAX_SIZE) {
 			dprintf("CallerLogo is too long\n");
 			return GE_INTERNALERROR;
 		}
@@ -1785,8 +1785,8 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		if (SM_SendMessage(state, pos-req, 0x03, req) != GE_NONE) return GE_NOTREADY;
 		return SM_Block(state, data, 0x03);
 
-	case GSM_None:
-	case GSM_PictureMessage:
+	case GN_BMP_None:
+	case GN_BMP_PictureMessage:
 		return GE_NOTSUPPORTED;
 	default:
 		return GE_INTERNALERROR;
@@ -1956,7 +1956,7 @@ static GSM_Error SetRingtone(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Bitmap *bmp;
+	gn_bmp *bmp;
 	GSM_Profile *prof;
 	unsigned char *pos;
 	int i;
@@ -2026,7 +2026,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 			for (i = 0; i < message[4] && !found; i++) {
 				switch (*pos++) {
 				case 0x01:
-					if (bmp->type != GSM_StartupLogo) {
+					if (bmp->type != GN_BMP_StartupLogo) {
 						pos += pos[0] * pos[1] / 8 + 2;
 						continue;
 					}
@@ -2040,7 +2040,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 					pos += bmp->size;
 					break;
 				case 0x02:
-					if (bmp->type != GSM_WelcomeNoteText) {
+					if (bmp->type != GN_BMP_WelcomeNoteText) {
 						pos += *pos + 1;
 						continue;
 					}
@@ -2048,7 +2048,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 					pos += *pos + 1;
 					break;
 				case 0x03:
-					if (bmp->type != GSM_DealerNoteText) {
+					if (bmp->type != GN_BMP_DealerNoteText) {
 						pos += *pos + 1;
 						continue;
 					}
@@ -3472,7 +3472,7 @@ static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType
 
 	switch (type) {
 	case SMS_BitmapData:
-		memcpy(&sms.UserData[0].u.Bitmap, data->Bitmap, sizeof(GSM_Bitmap));
+		memcpy(&sms.UserData[0].u.Bitmap, data->Bitmap, sizeof(gn_bmp));
 		break;
 	case SMS_RingtoneData:
 		memcpy(&sms.UserData[0].u.Ringtone, data->Ringtone, sizeof(GSM_Ringtone));

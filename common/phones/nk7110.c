@@ -476,7 +476,7 @@ static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *message, 
 			case 0x04: /* Logo */
 				if (data->Bitmap) {
 					dprintf("Op logo received ok\n");
-					data->Bitmap->type = GSM_OperatorLogo;
+					data->Bitmap->type = GN_BMP_OperatorLogo;
 					data->Bitmap->size = blockstart[5]; /* Probably + [4]<<8 */
 					data->Bitmap->height = blockstart[3];
 					data->Bitmap->width = blockstart[2];
@@ -1878,7 +1878,7 @@ static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *message, 
 	case 0x15:
 		if (data->Bitmap) {
 			/* I'm sure there are blocks here but never mind! */
-			data->Bitmap->type = GSM_StartupLogo;
+			data->Bitmap->type = GN_BMP_StartupLogo;
 			data->Bitmap->height = message[13];
 			data->Bitmap->width = message[17];
 			data->Bitmap->size = ((data->Bitmap->height / 8) + (data->Bitmap->height % 8 > 0)) * data->Bitmap->width; /* Can't see this coded anywhere */
@@ -2407,11 +2407,11 @@ static GSM_Error P7110_ActivateWAPSetting(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	switch(data->Bitmap->type) {
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		return GetCallerBitmap(data, state);
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		return GetStartupBitmap(data, state);
-	case GSM_OperatorLogo:
+	case GN_BMP_OperatorLogo:
 		return GetOperatorBitmap(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
@@ -2421,11 +2421,11 @@ static GSM_Error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	switch(data->Bitmap->type) {
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		return SetCallerBitmap(data, state);
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		return SetStartupBitmap(data, state);
-	case GSM_OperatorLogo:
+	case GN_BMP_OperatorLogo:
 		return SetOperatorBitmap(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;

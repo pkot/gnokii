@@ -140,7 +140,7 @@ typedef struct {
 
 typedef struct {
 	GSM_Error status;
-	GSM_Bitmap *bitmap;
+	gn_bmp *bitmap;
 } D_Bitmap;
 
 typedef struct {

@@ -44,69 +44,75 @@
 
 /* A few useful functions for bitmaps */
 
-GSM_Error GSM_NullBitmap(GSM_Bitmap *bmp, GSM_Information *info)
+API GSM_Error gn_bmp_null(gn_bmp *bmp, GSM_Information *info)
 {
 	if (!bmp || !info) return GE_INTERNALERROR;
 	strcpy(bmp->netcode, "000 00");
 	bmp->width = info->OpLogoW;
 	bmp->height = info->OpLogoH;
 	bmp->size = ceiling_to_octet(bmp->width * bmp->height);
-	GSM_ClearBitmap(bmp);
+	gn_bmp_clear(bmp);
 	return GE_NONE;
 }
 
-API void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
+API void gn_bmp_set_point(gn_bmp *bmp, int x, int y)
 {
 	switch (bmp->type) {
-	case GSM_NewOperatorLogo:
-	case GSM_StartupLogo:
-		bmp->bitmap[((y / 8) * bmp->width) + x] |= 1 << (y % 8); break;
+	case GN_BMP_NewOperatorLogo:
+	case GN_BMP_StartupLogo:
+		bmp->bitmap[((y / 8) * bmp->width) + x] |= 1 << (y % 8);
+		break;
 	/* Testing only! */	
-	case GSM_PictureMessage:
-		bmp->bitmap[9 * y + (x / 8)] |= 1 << (7 - (x % 8)); break;
-	case GSM_EMSPicture:
-	case GSM_EMSAnimation:
-	case GSM_EMSAnimation2:
-	case GSM_OperatorLogo:
-	case GSM_CallerLogo:
+	case GN_BMP_PictureMessage:
+		bmp->bitmap[9 * y + (x / 8)] |= 1 << (7 - (x % 8));
+		break;
+	case GN_BMP_EMSPicture:
+	case GN_BMP_EMSAnimation:
+	case GN_BMP_EMSAnimation2:
+	case GN_BMP_OperatorLogo:
+	case GN_BMP_CallerLogo:
 	default:
-		bmp->bitmap[(y * bmp->width + x) / 8] |= 1 << (7 - ((y * bmp->width + x) % 8)); break;
+		bmp->bitmap[(y * bmp->width + x) / 8] |= 1 << (7 - ((y * bmp->width + x) % 8));
+		break;
 	}
 }
 
-API void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
+API void gn_bmp_clear_point(gn_bmp *bmp, int x, int y)
 {
 	switch (bmp->type) {
-	case GSM_StartupLogo:
-	case GSM_NewOperatorLogo:
-		bmp->bitmap[((y / 8) * bmp->width) + x] &= ~(1 << (y % 8)); break;
+	case GN_BMP_StartupLogo:
+	case GN_BMP_NewOperatorLogo:
+		bmp->bitmap[((y / 8) * bmp->width) + x] &= ~(1 << (y % 8));
+		break;
 	/* Testing only! */	
-	case GSM_PictureMessage:
-		bmp->bitmap[9 * y + (x / 8)] &= ~(1 << (7 - (x % 8))); break;
-	case GSM_EMSPicture:
-	case GSM_EMSAnimation:
-	case GSM_EMSAnimation2:
-	case GSM_OperatorLogo:
-	case GSM_CallerLogo:
+	case GN_BMP_PictureMessage:
+		bmp->bitmap[9 * y + (x / 8)] &= ~(1 << (7 - (x % 8)));
+		break;
+	case GN_BMP_EMSPicture:
+	case GN_BMP_EMSAnimation:
+	case GN_BMP_EMSAnimation2:
+	case GN_BMP_OperatorLogo:
+	case GN_BMP_CallerLogo:
 	default:
-		bmp->bitmap[(y*bmp->width+x)/8] &= ~(1 << (7-((y*bmp->width+x)%8))); break;
+		bmp->bitmap[(y*bmp->width+x)/8] &= ~(1 << (7-((y*bmp->width+x)%8)));
+		break;
 	}
 }
 
-API bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
+API bool gn_bmp_is_point(gn_bmp *bmp, int x, int y)
 {
 	int i = 0;
 
 	switch (bmp->type) {
-	case GSM_OperatorLogo:
-	case GSM_CallerLogo:
+	case GN_BMP_OperatorLogo:
+	case GN_BMP_CallerLogo:
 		i = (bmp->bitmap[(y * bmp->width + x) / 8] & 1 << (7-((y * bmp->width + x) % 8)));
 		break;
-	case GSM_PictureMessage:
+	case GN_BMP_PictureMessage:
 		i = (bmp->bitmap[9 * y + (x / 8)] & 1 << (7 - (x % 8)));
 		break;
-	case GSM_StartupLogo:
-	case GSM_NewOperatorLogo:
+	case GN_BMP_StartupLogo:
+	case GN_BMP_NewOperatorLogo:
 		i = (bmp->bitmap[((y / 8) * bmp->width) + x] & 1 << (y % 8));
 		break;
 	default:
@@ -115,21 +121,21 @@ API bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	return ((i == 0) ? false : true);
 }
 
-API void GSM_ClearBitmap(GSM_Bitmap *bmp)
+API void gn_bmp_clear(gn_bmp *bmp)
 {
 	memset(bmp->bitmap, 0, bmp->size);
 }
 
-API void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Information *info)
+API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, GSM_Information *info)
 {
-	GSM_Bitmap backup;
+	gn_bmp backup;
 	int x, y, copywidth, copyheight;
 
 	/* Copy into the backup */
-	memcpy(&backup, bitmap, sizeof(GSM_Bitmap));
+	memcpy(&backup, bitmap, sizeof(gn_bmp));
 
 	switch (target) {
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		bitmap->width = info->StartupLogoW;
 		bitmap->height = info->StartupLogoH;
 		if ((!strncmp(info->Models, "6510", 4)) || (!strncmp(info->Models, "7110", 4)))
@@ -137,22 +143,22 @@ API void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Infor
 		else 
 			bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
-	case GSM_NewOperatorLogo:
+	case GN_BMP_NewOperatorLogo:
 		bitmap->width = info->OpLogoW;
 		bitmap->height = info->OpLogoH;
 		bitmap->size = ceiling_to_octet(bitmap->height) * bitmap->width;
 		break;
-	case GSM_OperatorLogo:
+	case GN_BMP_OperatorLogo:
 		bitmap->width = info->OpLogoW;
 		bitmap->height = info->OpLogoH;
 		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		bitmap->width = info->CallerLogoW;
 		bitmap->height = info->CallerLogoH;
 		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
-	case GSM_PictureMessage:
+	case GN_BMP_PictureMessage:
 		bitmap->width = 72;
 		bitmap->height = 48;
 		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
@@ -175,21 +181,21 @@ API void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Infor
 		dprintf("We lost some part of image - it's cut (height from %i to %i) !\n", backup.height, bitmap->height);
 	} else copyheight = backup.height;
 
-	GSM_ClearBitmap(bitmap);
+	gn_bmp_clear(bitmap);
 
 	for (y = 0; y < copyheight; y++) {
 		for (x = 0; x < copywidth; x++)
-			if (GSM_IsPointBitmap(&backup, x, y)) GSM_SetPointBitmap(bitmap, x, y);
+			if (gn_bmp_is_point(&backup, x, y)) gn_bmp_set_point(bitmap, x, y);
 	}
 }
 
-API void GSM_PrintBitmap(GSM_Bitmap *bitmap, FILE *f)
+API void gn_bmp_print(gn_bmp *bitmap, FILE *f)
 {
 	int x, y;
 
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
-			if (GSM_IsPointBitmap(bitmap, x, y)) {
+			if (gn_bmp_is_point(bitmap, x, y)) {
 				fprintf(f, "#");
 			} else {
 				fprintf(f, " ");
@@ -200,16 +206,16 @@ API void GSM_PrintBitmap(GSM_Bitmap *bitmap, FILE *f)
 }
 
 
-API GSM_Error GSM_ReadSMSBitmap(int type, unsigned char *message, unsigned char *code, GSM_Bitmap *bitmap)
+API GSM_Error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap)
 {
 	int offset = 0;
 
 	bitmap->type = type;
 	switch (type) {
-	case GSM_PictureMessage:
+	case GN_BMP_PictureMessage:
 		offset = 2;
 		break;
-	case GSM_OperatorLogo:
+	case GN_BMP_OperatorLogo:
 		if (!code) return GE_UNKNOWN;
 
 		bitmap->netcode[0] = '0' + (message[0] & 0x0f);
@@ -221,7 +227,7 @@ API GSM_Error GSM_ReadSMSBitmap(int type, unsigned char *message, unsigned char 
 		bitmap->netcode[6] = 0;
 
 		break;
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		break;
 	default: /* error */
 		return GE_UNKNOWN;
@@ -239,19 +245,19 @@ API GSM_Error GSM_ReadSMSBitmap(int type, unsigned char *message, unsigned char 
 
 
 /* Returns message length */
-int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, unsigned char *message)
+API int gn_bmp_encode_sms(gn_bmp *bitmap, unsigned char *message)
 {
 	unsigned int current = 0;
 
 	switch (bitmap->type) {
-	case GSM_OperatorLogo:
+	case GN_BMP_OperatorLogo:
 		/* Set the network code */
 		dprintf("Operator Logo\n");
 		message[current++] = ((bitmap->netcode[1] & 0x0f) << 4) | (bitmap->netcode[0] & 0xf);
 		message[current++] = 0xf0 | (bitmap->netcode[2] & 0x0f);
 		message[current++] = ((bitmap->netcode[5] & 0x0f) << 4) | (bitmap->netcode[4] & 0xf);
 		break;
-	case GSM_PictureMessage:
+	case GN_BMP_PictureMessage:
 		dprintf("Picture Image\n");
 
 		/* Set the logo size */
@@ -263,7 +269,7 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, unsigned char *message)
 		memcpy(message + current, bitmap->bitmap, bitmap->size);
 		current = current + bitmap->size;
 		return current;
-	case GSM_EMSPicture:
+	case GN_BMP_EMSPicture:
 		dprintf("EMS picture\n");
 		if (bitmap->width % 8) {
 			dprintf("EMS needs bitmap size 8, 16, 24, ... \n");
@@ -276,13 +282,13 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, unsigned char *message)
 		message[current++] = bitmap->width / 8; /* Horizontal size / 8 */
 		message[current++] = bitmap->height;
 		break;
-	case GSM_EMSAnimation:
+	case GN_BMP_EMSAnimation:
 		dprintf("EMS animation\n");
 		message[current++] = 128 + 3;
 		message[current++] = 0x0e; 	/* Animation code */
 		message[current++] = 128 + 1;   /* Picture size */;
 		message[current++] = 0x00; 	/* Position where to display */
-	case GSM_EMSAnimation2:
+	case GN_BMP_EMSAnimation2:
 		dprintf("(without header)\n");
 		if (bitmap->width != 16) {
 			dprintf("EMS animation needs bitmap 16x16 ... \n");
@@ -295,9 +301,9 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, unsigned char *message)
 	}
 
 	switch (bitmap->type) {
-	case GSM_EMSPicture:
-	case GSM_EMSAnimation:
-	case GSM_EMSAnimation2:
+	case GN_BMP_EMSPicture:
+	case GN_BMP_EMSAnimation:
+	case GN_BMP_EMSAnimation2:
 		break;
 	default:			/* Add common nokia headers */
 		/* Info field */

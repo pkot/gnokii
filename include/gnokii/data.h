@@ -60,7 +60,7 @@ typedef struct {
 	GSM_ToDo *ToDo;
 	GSM_CalendarNotesList *CalendarNotesList;
 	GSM_CalendarNote *CalendarNote;
-	GSM_Bitmap *Bitmap;
+	gn_bmp *Bitmap;
 	GSM_Ringtone *Ringtone;
 	GSM_Profile *Profile;
 	GSM_BatteryUnits *BatteryUnits;

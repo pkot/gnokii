@@ -350,9 +350,9 @@ typedef struct {
 	union {
 		unsigned char Text[GSM_MAX_SMS_LENGTH];
 		GSM_Multi Multi;
-		GSM_Bitmap Bitmap;
+		gn_bmp Bitmap;
 		GSM_Ringtone Ringtone;
-		GSM_Bitmap Animation[4];
+		gn_bmp Animation[4];
 		GSM_Concat Concat;
 	} u;
 } SMS_UserData;

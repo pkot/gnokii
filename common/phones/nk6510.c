@@ -2187,7 +2187,7 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 			data->Bitmap->netcode[5] = '0' + (message[14] >> 4);
 			data->Bitmap->netcode[6] = 0;
 			dprintf("Operator %s \n",data->Bitmap->netcode);
-			data->Bitmap->type = GSM_NewOperatorLogo;
+			data->Bitmap->type = GN_BMP_NewOperatorLogo;
 			data->Bitmap->height = message[21];
 			data->Bitmap->width = message[20];
 			data->Bitmap->size = message[25];
@@ -2392,7 +2392,7 @@ reply: 0x7a / 0x0036
 				   c0 03 00 60   width
 				   c0 04 03 60   size
 				*/
-			data->Bitmap->type = GSM_StartupLogo;
+			data->Bitmap->type = GN_BMP_StartupLogo;
 			data->Bitmap->height = message[13];
 			data->Bitmap->width = message[17];
 			data->Bitmap->size = (message[20] << 8) | message[21];
@@ -3582,14 +3582,14 @@ static GSM_Error P6510_WriteToDo(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	switch(data->Bitmap->type) {
-	case GSM_WelcomeNoteText:
+	case GN_BMP_WelcomeNoteText:
 		return GetWelcomeNoteText(data, state);
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		return GetCallerBitmap(data, state);
-	case GSM_NewOperatorLogo:
-	case GSM_OperatorLogo:
+	case GN_BMP_NewOperatorLogo:
+	case GN_BMP_OperatorLogo:
 		return GetOperatorBitmap(data, state);
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		return GetStartupBitmap(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
@@ -3599,12 +3599,12 @@ static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	switch(data->Bitmap->type) {
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		return SetStartupBitmap(data, state);
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		return SetCallerBitmap(data, state);
-	case GSM_OperatorLogo:
-	case GSM_NewOperatorLogo:
+	case GN_BMP_OperatorLogo:
+	case GN_BMP_NewOperatorLogo:
 		return SetOperatorBitmap(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;

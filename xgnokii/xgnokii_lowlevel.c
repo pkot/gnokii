@@ -701,7 +701,7 @@ static gint A_DeleteCalendarNote(gpointer data)
 
 static gint A_GetCallerGroup(gpointer data)
 {
-	GSM_Bitmap bitmap;
+	gn_bmp bitmap;
 	GSM_Error error;
 	D_CallerGroup *cg = (D_CallerGroup *) data;
 	GSM_Data gdat;
@@ -711,7 +711,7 @@ static gint A_GetCallerGroup(gpointer data)
 	error = cg->status = GE_UNKNOWN;
 
 	if (cg) {
-		bitmap.type = GSM_CallerLogo;
+		bitmap.type = GN_BMP_CallerLogo;
 		bitmap.number = cg->number;
 
 		pthread_mutex_lock(&callerGroupMutex);
@@ -727,7 +727,7 @@ static gint A_GetCallerGroup(gpointer data)
 
 static gint A_SendCallerGroup(gpointer data)
 {
-	GSM_Bitmap bitmap;
+	gn_bmp bitmap;
 	D_CallerGroup *cg = (D_CallerGroup *) data;
 	GSM_Error error;
 	GSM_Data gdat;
@@ -737,7 +737,7 @@ static gint A_SendCallerGroup(gpointer data)
 	if (!cg)
 		return (GE_UNKNOWN);
 
-	bitmap.type = GSM_CallerLogo;
+	bitmap.type = GN_BMP_CallerLogo;
 	bitmap.number = cg->number;
 	gdat.Bitmap = &bitmap;
 	if ((error = SM_Functions(GOP_GetBitmap, &gdat, &statemachine)) != GE_NONE) {
@@ -1033,13 +1033,13 @@ static gint A_SetBitmap(gpointer data)
 {
 	GSM_Error error;
 	D_Bitmap *d = (D_Bitmap *) data;
-	GSM_Bitmap bitmap;
+	gn_bmp bitmap;
 	GSM_Data gdat;
 
 	GSM_DataClear(&gdat);
 
 	pthread_mutex_lock(&setBitmapMutex);
-	if (d->bitmap->type == GSM_CallerLogo) {
+	if (d->bitmap->type == GN_BMP_CallerLogo) {
 		bitmap.type = d->bitmap->type;
 		bitmap.number = d->bitmap->number;
 		gdat.Bitmap = &bitmap;

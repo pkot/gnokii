@@ -468,11 +468,11 @@ static GSM_Error readtext(SMS_UserData *udata, int input_len)
 	return GE_NONE;
 }
 
-static GSM_Error loadbitmap(GSM_Bitmap *bitmap, char *s, int type)
+static GSM_Error loadbitmap(gn_bmp *bitmap, char *s, int type)
 {
 	GSM_Error error;
 	bitmap->type = type;
-	error = GSM_NullBitmap(bitmap, &State.Phone.Info);	
+	error = gn_bmp_null(bitmap, &State.Phone.Info);	
 	if (error != GE_NONE) {
 		fprintf(stderr, _("Could not null bitmap: %s\n"), print_error(error));
 		return error;
@@ -567,7 +567,7 @@ static int sendsms(int argc, char *argv[])
 				t = strchr(s, ';');
 				if (t)
 					*t++ = 0;
-				loadbitmap(&sms.UserData[curpos].u.Animation[i], s, i ? GSM_EMSAnimation2 : GSM_EMSAnimation);
+				loadbitmap(&sms.UserData[curpos].u.Animation[i], s, i ? GN_BMP_EMSAnimation2 : GN_BMP_EMSAnimation);
 				s = t;
 			}
 			sms.UserData[++curpos].Type = SMS_NoData;
@@ -1044,7 +1044,7 @@ static int getsms(int argc, char *argv[])
 	int start_message, end_message, count, mode = 1;
 	char filename[64];
 	GSM_Error error;
-	GSM_Bitmap bitmap;
+	gn_bmp bitmap;
 	GSM_Information *info = &State.Phone.Info;
 	char ans[5];
 	struct stat buf;
@@ -1170,7 +1170,7 @@ static int getsms(int argc, char *argv[])
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Remote.Number, message.SMSC.Number);
 				fprintf(stdout, _("Bitmap:\n"));
-				GSM_PrintBitmap(&message.UserData[0].u.Bitmap, stdout);
+				gn_bmp_print(&message.UserData[0].u.Bitmap, stdout);
 				fprintf(stdout, _("Text:\n"));
 				fprintf(stdout, "%s\n", message.UserData[1].u.Text);
 				break;
@@ -1218,8 +1218,8 @@ static int getsms(int argc, char *argv[])
 				case SMS_CallerIDLogo:
 					fprintf(stdout, _("Logo:\n"));
 					/* put bitmap into bitmap structure */
-					GSM_ReadSMSBitmap(GSM_OperatorLogo, message.UserData[0].u.Text + 2 + offset, message.UserData[0].u.Text, &bitmap);
-					GSM_PrintBitmap(&bitmap, stdout);
+					gn_bmp_read_sms(GN_BMP_OperatorLogo, message.UserData[0].u.Text + 2 + offset, message.UserData[0].u.Text, &bitmap);
+					gn_bmp_print(&bitmap, stdout);
 					if (*filename) {
 						error = GE_NONE;
 						if ((stat(filename, &buf) == 0)) {
@@ -1563,17 +1563,17 @@ static int hangup(char *CallID)
 }
 
 
-static GSM_Bitmap_Types set_bitmap_type(char *s)
+static gn_bmp_types set_bitmap_type(char *s)
 {
-	if (!strcmp(s, "text")) return GSM_WelcomeNoteText;
-	if (!strcmp(s, "dealer")) return GSM_DealerNoteText;
-	if (!strcmp(s, "op")) return GSM_OperatorLogo;
-	if (!strcmp(s, "startup")) return GSM_StartupLogo;
-	if (!strcmp(s, "caller")) return GSM_CallerLogo;
-	if (!strcmp(s, "picture")) return GSM_PictureMessage;
-	if (!strcmp(s, "emspicture")) return GSM_EMSPicture;
-	if (!strcmp(s, "emsanimation")) return GSM_EMSAnimation;
-	return GSM_None;
+	if (!strcmp(s, "text"))         return GN_BMP_WelcomeNoteText;
+	if (!strcmp(s, "dealer"))       return GN_BMP_DealerNoteText;
+	if (!strcmp(s, "op"))           return GN_BMP_OperatorLogo;
+	if (!strcmp(s, "startup"))      return GN_BMP_StartupLogo;
+	if (!strcmp(s, "caller"))       return GN_BMP_CallerLogo;
+	if (!strcmp(s, "picture"))      return GN_BMP_PictureMessage;
+	if (!strcmp(s, "emspicture"))   return GN_BMP_EMSPicture;
+	if (!strcmp(s, "emsanimation")) return GN_BMP_EMSAnimation;
+	return GN_BMP_None;
 }
 
 /* FIXME: Integrate with sendsms */
@@ -1588,12 +1588,12 @@ static int sendlogo(int argc, char *argv[])
 
 	/* The first argument is the type of the logo. */
 	switch (type = set_bitmap_type(argv[0])) {
-	case GSM_OperatorLogo:   fprintf(stderr, _("Sending operator logo.\n")); break;
-	case GSM_CallerLogo:     fprintf(stderr, _("Sending caller line identification logo.\n")); break;
-	case GSM_PictureMessage: fprintf(stderr,_("Sending Multipart Message: Picture Message.\n")); break;
-	case GSM_EMSPicture:     fprintf(stderr, _("Sending EMS-compliant Picture Message.\n")); break;
-	case GSM_EMSAnimation:   fprintf(stderr, _("Sending EMS-compliant Animation.\n")); break;
-	default: 	         fprintf(stderr, _("You should specify what kind of logo to send!\n")); return (-1);
+	case GN_BMP_OperatorLogo:   fprintf(stderr, _("Sending operator logo.\n")); break;
+	case GN_BMP_CallerLogo:     fprintf(stderr, _("Sending caller line identification logo.\n")); break;
+	case GN_BMP_PictureMessage: fprintf(stderr,_("Sending Multipart Message: Picture Message.\n")); break;
+	case GN_BMP_EMSPicture:     fprintf(stderr, _("Sending EMS-compliant Picture Message.\n")); break;
+	case GN_BMP_EMSAnimation:   fprintf(stderr, _("Sending EMS-compliant Animation.\n")); break;
+	default: 	            fprintf(stderr, _("You should specify what kind of logo to send!\n")); return (-1);
 	}
 
 	sms.UserData[0].Type = SMS_BitmapData;
@@ -1608,7 +1608,7 @@ static int sendlogo(int argc, char *argv[])
 		return -1;
 
 	/* If we are sending op logo we can rewrite network code. */
-	if ((sms.UserData[0].u.Bitmap.type == GSM_OperatorLogo) && (argc > 3)) {
+	if ((sms.UserData[0].u.Bitmap.type == GN_BMP_OperatorLogo) && (argc > 3)) {
 		/*
 		 * The fourth argument, if present, is the Network code of the operator.
 		 * Network code is in this format: "xxx yy".
@@ -1619,7 +1619,7 @@ static int sendlogo(int argc, char *argv[])
 	}
 
 	sms.UserData[1].Type = SMS_NoData;
-	if (sms.UserData[0].u.Bitmap.type == GSM_PictureMessage) {
+	if (sms.UserData[0].u.Bitmap.type == GN_BMP_PictureMessage) {
 		sms.UserData[1].Type = SMS_NokiaText;
 		readtext(&sms.UserData[1], 120);
 		sms.UserData[2].Type = SMS_NoData;
@@ -1646,7 +1646,7 @@ static int sendlogo(int argc, char *argv[])
 }
 
 /* Getting logos. */
-static GSM_Error SaveBitmapFileDialog(char *FileName, GSM_Bitmap *bitmap, GSM_Information *info)
+static GSM_Error SaveBitmapFileDialog(char *FileName, gn_bmp *bitmap, GSM_Information *info)
 {
 	int confirm;
 	char ans[4];
@@ -1686,39 +1686,39 @@ static GSM_Error SaveBitmapFileDialog(char *FileName, GSM_Bitmap *bitmap, GSM_In
 
 static int getlogo(int argc, char *argv[])
 {
-	GSM_Bitmap bitmap;
+	gn_bmp bitmap;
 	GSM_Error error;
 	GSM_Information *info = &State.Phone.Info;
 
-	memset(&bitmap, 0, sizeof(GSM_Bitmap));
+	memset(&bitmap, 0, sizeof(gn_bmp));
 	bitmap.type = set_bitmap_type(argv[0]);
 
 	/* There is caller group number missing in argument list. */
-	if ((bitmap.type == GSM_CallerLogo) && (argc == 3)) {
+	if ((bitmap.type == GN_BMP_CallerLogo) && (argc == 3)) {
 		bitmap.number = (argv[2][0] < '0') ? 0 : argv[2][0] - '0';
 		if (bitmap.number > 9) bitmap.number = 0;
 	}
 
-	if (bitmap.type != GSM_None) {
+	if (bitmap.type != GN_BMP_None) {
 		data.Bitmap = &bitmap;
 		error = SM_Functions(GOP_GetBitmap, &data, &State);
 
-		GSM_PrintBitmap(&bitmap, stderr);
+		gn_bmp_print(&bitmap, stderr);
 		switch (error) {
 		case GE_NONE:
 			switch (bitmap.type) {
-			case GSM_DealerNoteText:
+			case GN_BMP_DealerNoteText:
 				fprintf(stdout, _("Dealer welcome note "));
 				if (bitmap.text[0]) fprintf(stdout, _("currently set to \"%s\"\n"), bitmap.text);
 				else fprintf(stdout, _("currently empty\n"));
 				break;
-			case GSM_WelcomeNoteText:
+			case GN_BMP_WelcomeNoteText:
 				fprintf(stdout, _("Welcome note "));
 				if (bitmap.text[0]) fprintf(stdout, _("currently set to \"%s\"\n"), bitmap.text);
 				else fprintf(stdout, _("currently empty\n"));
 				break;
-			case GSM_OperatorLogo:
-			case GSM_NewOperatorLogo:
+			case GN_BMP_OperatorLogo:
+			case GN_BMP_NewOperatorLogo:
 				if (!bitmap.width) goto empty_bitmap;
 				fprintf(stdout, _("Operator logo for %s (%s) network got succesfully\n"),
 					bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
@@ -1730,7 +1730,7 @@ static int getlogo(int argc, char *argv[])
 					}
 				}
 				break;
-			case GSM_StartupLogo:
+			case GN_BMP_StartupLogo:
 				if (!bitmap.width) goto empty_bitmap;
 				fprintf(stdout, _("Startup logo got successfully\n"));
 				if (argc == 3) {
@@ -1741,7 +1741,7 @@ static int getlogo(int argc, char *argv[])
 					}
 				}
 				break;
-			case GSM_CallerLogo:
+			case GN_BMP_CallerLogo:
 				if (!bitmap.width) goto empty_bitmap;
 				fprintf(stdout, _("Caller logo got successfully\n"));
 				if (argc == 4) {
@@ -1775,7 +1775,7 @@ static int getlogo(int argc, char *argv[])
 
 
 /* Sending logos. */
-GSM_Error ReadBitmapFileDialog(char *FileName, GSM_Bitmap *bitmap, GSM_Information *info)
+GSM_Error ReadBitmapFileDialog(char *FileName, gn_bmp *bitmap, GSM_Information *info)
 {
 	GSM_Error error;
 
@@ -1793,7 +1793,7 @@ GSM_Error ReadBitmapFileDialog(char *FileName, GSM_Bitmap *bitmap, GSM_Informati
 
 static int setlogo(int argc, char *argv[])
 {
-	GSM_Bitmap bitmap, oldbit;
+	gn_bmp bitmap, oldbit;
 	GSM_NetworkInfo NetworkInfo;
 	GSM_Error error = GE_NOTSUPPORTED;
 	GSM_Information *info = &State.Phone.Info;
@@ -1809,12 +1809,12 @@ static int setlogo(int argc, char *argv[])
 
 	bitmap.type = set_bitmap_type(argv[0]);
 	switch (bitmap.type) {
-	case GSM_WelcomeNoteText:
-	case GSM_DealerNoteText:
+	case GN_BMP_WelcomeNoteText:
+	case GN_BMP_DealerNoteText:
 		if (argc > 1) strncpy(bitmap.text, argv[1], sizeof(bitmap.text) - 1);
 		break;
-	case GSM_OperatorLogo:
-		error = (argc < 2) ? GSM_NullBitmap(&bitmap, info) : ReadBitmapFileDialog(argv[1], &bitmap, info);
+	case GN_BMP_OperatorLogo:
+		error = (argc < 2) ? gn_bmp_null(&bitmap, info) : ReadBitmapFileDialog(argv[1], &bitmap, info);
 		if (error != GE_NONE) return -1;
 			
 		memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
@@ -1823,9 +1823,9 @@ static int setlogo(int argc, char *argv[])
 				strncpy(bitmap.netcode, NetworkInfo.NetworkCode, sizeof(bitmap.netcode) - 1);
 
 		if (!strncmp(State.Phone.Info.Models, "6510", 4))
-			GSM_ResizeBitmap(&bitmap, GSM_NewOperatorLogo, info);
+			gn_bmp_resize(&bitmap, GN_BMP_NewOperatorLogo, info);
 		else
-			GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, info);
+			gn_bmp_resize(&bitmap, GN_BMP_OperatorLogo, info);
 
 		if (argc == 3) {
 			strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
@@ -1835,18 +1835,18 @@ static int setlogo(int argc, char *argv[])
 			}
 		}
 		break;
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		if ((argc > 1) && (ReadBitmapFileDialog(argv[1], &bitmap, info) != GE_NONE)) return -1;
-		GSM_ResizeBitmap(&bitmap, GSM_StartupLogo, info);
+		gn_bmp_resize(&bitmap, GN_BMP_StartupLogo, info);
 		break;
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		if ((argc > 1) && (ReadBitmapFileDialog(argv[1], &bitmap, info) != GE_NONE)) return -1;
-		GSM_ResizeBitmap(&bitmap, GSM_CallerLogo, info);
+		gn_bmp_resize(&bitmap, GN_BMP_CallerLogo, info);
 		if (argc > 2) {
 			bitmap.number = argv[2][0] - '0';
 			dprintf("%i \n", bitmap.number);
 			if ((bitmap.number < 0) || (bitmap.number > 9)) bitmap.number = 0;
-			oldbit.type = GSM_CallerLogo;
+			oldbit.type = GN_BMP_CallerLogo;
 			oldbit.number = bitmap.number;
 			data.Bitmap = &oldbit;
 			if (SM_Functions(GOP_GetBitmap, &data, &State) == GE_NONE) {
@@ -1872,11 +1872,11 @@ static int setlogo(int argc, char *argv[])
 		data.Bitmap = &oldbit;
 		if (SM_Functions(GOP_GetBitmap, &data, &State) == GE_NONE) {
 			switch (bitmap.type) {
-			case GSM_WelcomeNoteText:
-			case GSM_DealerNoteText:
+			case GN_BMP_WelcomeNoteText:
+			case GN_BMP_DealerNoteText:
 				if (strcmp(bitmap.text, oldbit.text)) {
 					fprintf(stderr, _("Error setting"));
-					if (bitmap.type == GSM_DealerNoteText) fprintf(stderr, _(" dealer"));
+					if (bitmap.type == GN_BMP_DealerNoteText) fprintf(stderr, _(" dealer"));
 					fprintf(stderr, _(" welcome note - "));
 
 					/* I know, it looks horrible, but...
@@ -1908,7 +1908,7 @@ static int setlogo(int argc, char *argv[])
 					ok = false;
 				}
 				break;
-			case GSM_StartupLogo:
+			case GN_BMP_StartupLogo:
 				for (i = 0; i < oldbit.size; i++) {
 					if (oldbit.bitmap[i] != bitmap.bitmap[i]) {
 						fprintf(stderr, _("Error setting startup logo - SIM card and PIN is required\n"));

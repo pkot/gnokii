@@ -478,7 +478,7 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 /* Bitmap file functions */
 /* ##################### */
 
-GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information *info)
+GSM_Error GSM_ReadBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info)
 {
 	FILE *file;
 	unsigned char buffer[300];
@@ -550,7 +550,7 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 
 
 #ifdef XPM
-GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
+GSM_Error loadxpm(char *filename, gn_bmp *bitmap)
 {
 	int error, x, y;
 	XpmImage image;
@@ -578,16 +578,16 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 	bitmap->width = image.width;
 	bitmap->size = ((bitmap->width + 7) / 8) * bitmap->height;
 
-	if (bitmap->size > GSM_MAX_BITMAP_SIZE) {
+	if (bitmap->size > GN_BMP_MAX_SIZE) {
 		fprintf(stdout, "Bitmap too large\n");
 		return GE_INVALIDSIZE;
 	}
 
-	GSM_ClearBitmap(bitmap);
+	gn_bmp_clear(bitmap);
 
 	for (y = 0; y < image.height; y++) {
 		for (x = 0; x < image.width; x++) {
-			if (image.data[y * image.width + x] == 0) GSM_SetPointBitmap(bitmap, x, y);
+			if (image.data[y * image.width + x] == 0) gn_bmp_set_point(bitmap, x, y);
 		}
 	}
 
@@ -599,18 +599,18 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 /* Marcin-Wiacek@Topnet.PL */
 
 /* This loads the image as a startup logo - but is resized as necessary later */
-GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
+GSM_Error loadbmp(FILE *file, gn_bmp *bitmap)
 {
 	unsigned char buffer[34];
 	bool first_white;
 	int w, h, pos, y, x, i, sizeimage;
 
-	bitmap->type = GSM_StartupLogo;
+	bitmap->type = GN_BMP_StartupLogo;
 	bitmap->width = 84;
 	bitmap->height = 48;
 	bitmap->size = bitmap->width * bitmap->height / 8;
 
-	GSM_ClearBitmap(bitmap);
+	gn_bmp_clear(bitmap);
 
 	fread(buffer, 1, 34, file); /* required part of header */
 
@@ -683,9 +683,9 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 			}
 			if (x <= bitmap->width && y <= bitmap->height) { /* we have top left corner ! */
 				if (!first_white) {
-					if ((buffer[0] & (1 << pos)) <= 0) GSM_SetPointBitmap(bitmap, x, y);
+					if ((buffer[0] & (1 << pos)) <= 0) gn_bmp_set_point(bitmap, x, y);
 				} else {
-					if ((buffer[0] & (1 << pos)) > 0) GSM_SetPointBitmap(bitmap, x, y);
+					if ((buffer[0] & (1 << pos)) > 0) gn_bmp_set_point(bitmap, x, y);
 				}
 			}
 			pos--;
@@ -704,9 +704,9 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 	return(GE_NONE);
 }
 
-GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
+GSM_Error loadnol(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 {
-	unsigned char buffer[GSM_MAX_BITMAP_SIZE + 20];
+	unsigned char buffer[GN_BMP_MAX_SIZE + 20];
 	int i, j;
 
 
@@ -715,7 +715,7 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 
 	bitmap->width = buffer[10];
 	bitmap->height = buffer[12];
-	bitmap->type = GSM_OperatorLogo;
+	bitmap->type = GN_BMP_OperatorLogo;
 	bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 
 	if (((bitmap->height != 14) || (bitmap->width != 72)) && /* standard size */
@@ -748,12 +748,12 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	return(GE_NONE);
 }
 
-GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
+GSM_Error loadngg(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 {
 	unsigned char buffer[2000];
 	int i, j;
 
-	bitmap->type = GSM_CallerLogo;
+	bitmap->type = GN_BMP_CallerLogo;
 
 	fread(buffer, 1, 16, file);
 	bitmap->width = buffer[6];
@@ -789,7 +789,7 @@ GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	return(GE_NONE);
 }
 
-GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
+GSM_Error loadnsl(FILE *file, gn_bmp *bitmap)
 {
 	unsigned char block[6], buffer[870];
 	int block_size, count;
@@ -832,7 +832,7 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 						dprintf("Unknown startup logo!\n");
 						return GE_WRONGDATAFORMAT;
 					}
-					bitmap->type = GSM_StartupLogo;
+					bitmap->type = GN_BMP_StartupLogo;
 					memcpy(bitmap->bitmap, buffer, bitmap->size);
 					dprintf("  Startup logo (size %i)\n", block_size);
 				}
@@ -843,7 +843,7 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 	return(GE_NONE);
 }
 
-GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
+GSM_Error loadnlm (FILE *file, gn_bmp *bitmap)
 {
 	unsigned char buffer[84*48];
 	int pos, pos2, x, y;
@@ -854,16 +854,16 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 
 	switch (buffer[0]) {
 	case 0x00:
-		bitmap->type = GSM_OperatorLogo;
+		bitmap->type = GN_BMP_OperatorLogo;
 		break;
 	case 0x01:
-		bitmap->type = GSM_CallerLogo;
+		bitmap->type = GN_BMP_CallerLogo;
 		break;
 	case 0x02:
-		bitmap->type = GSM_StartupLogo;
+		bitmap->type = GN_BMP_StartupLogo;
 		break;
 	case 0x03:
-		bitmap->type = GSM_PictureMessage;
+		bitmap->type = GN_BMP_PictureMessage;
 		break;
 	default:
 		return GE_WRONGDATAFORMAT;
@@ -880,12 +880,12 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 	if (fread(buffer, 1, (division.quot * bitmap->height), file) != (division.quot * bitmap->height))
 		return GE_INVALIDSIZE;
 
-	GSM_ClearBitmap(bitmap);
+	gn_bmp_clear(bitmap);
 
 	pos = 0; pos2 = 7;
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
-			if ((buffer[pos] & (1 << pos2)) > 0) GSM_SetPointBitmap(bitmap, x, y);
+			if ((buffer[pos] & (1 << pos2)) > 0) gn_bmp_set_point(bitmap, x, y);
 			pos2--;
 			if (pos2 < 0) {pos2 = 7; pos++;} //going to new byte
 		}
@@ -894,7 +894,7 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 	return (GE_NONE);
 }
 
-GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
+GSM_Error loadota(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 {
 	char buffer[4];
 
@@ -908,10 +908,10 @@ GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	if (((bitmap->height == 48) && (bitmap->width == 84)) || /* standard size */
 	    ((bitmap->height == 60) && (bitmap->width == 96)) || /* standard size */
 	    (info && ((bitmap->height == info->StartupLogoH) && (bitmap->width == info->StartupLogoW)))) {
-		bitmap->type = GSM_StartupLogo;
+		bitmap->type = GN_BMP_StartupLogo;
 	} else if (((bitmap->height == 14) && (bitmap->width == 72)) || /* standard size */
 		   (info && ((bitmap->height == info->CallerLogoH) && (bitmap->width == info->CallerLogoW)))) {
-		bitmap->type = GSM_CallerLogo;
+		bitmap->type = GN_BMP_CallerLogo;
 	} else {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
 		return GE_INVALIDSIZE;
@@ -922,7 +922,7 @@ GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 }
 
 /* This overwrites an existing file - so this must be checked before calling */
-GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information *info)
+GSM_Error GSM_SaveBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info)
 {
 	FILE *file;
 	bool done = false;
@@ -968,22 +968,22 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 
 		if (!done) {
 			switch (bitmap->type) {
-			case GSM_CallerLogo:
+			case GN_BMP_CallerLogo:
 				savengg(file, bitmap, info);
 				break;
-			case GSM_OperatorLogo:
-			case GSM_NewOperatorLogo:
+			case GN_BMP_OperatorLogo:
+			case GN_BMP_NewOperatorLogo:
 				savenol(file, bitmap, info);
 				break;
-			case GSM_StartupLogo:
+			case GN_BMP_StartupLogo:
 				savensl(file, bitmap, info);
 				break;
-			case GSM_PictureMessage:
+			case GN_BMP_PictureMessage:
 				savenlm(file, bitmap);
 				break;
-			case GSM_WelcomeNoteText:
-			case GSM_DealerNoteText:
-			case GSM_None:
+			case GN_BMP_WelcomeNoteText:
+			case GN_BMP_DealerNoteText:
+			case GN_BMP_None:
 			default:
 				break;
 			}
@@ -1034,7 +1034,7 @@ int GSM_SaveTextFile(char *FileName, char *text, int mode)
 
 
 #ifdef XPM
-void savexpm(char *filename, GSM_Bitmap *bitmap)
+void savexpm(char *filename, gn_bmp *bitmap)
 {
 	XpmColor colors[2] = {{".","c","#000000","#000000","#000000","#000000"},
 			      {"#","c","#ffffff","#ffffff","#ffffff","#ffffff"}};
@@ -1051,7 +1051,7 @@ void savexpm(char *filename, GSM_Bitmap *bitmap)
 
 	for (y = 0; y < image.height; y++) {
 		for (x = 0; x < image.width; x++)
-			if (GSM_IsPointBitmap(bitmap, x, y))
+			if (gn_bmp_is_point(bitmap, x, y))
 				data[y * image.width + x] = 0;
 			else
 				data[y * image.width + x] = 1;
@@ -1063,7 +1063,7 @@ void savexpm(char *filename, GSM_Bitmap *bitmap)
 
 /* Based on the article from the Polish Magazine "Bajtek" 11/92 */
 /* Marcin-Wiacek@Topnet.PL */
-void savebmp(FILE *file, GSM_Bitmap *bitmap)
+void savebmp(FILE *file, gn_bmp *bitmap)
 {
 	int x, y, pos, i, sizeimage;
 	unsigned char buffer[1];
@@ -1141,7 +1141,7 @@ void savebmp(FILE *file, GSM_Bitmap *bitmap)
 				if(i == 5) i = 1; //each line is written in multiply of 4 bytes
 				buffer[0] = 0;
 			}
-			if (GSM_IsPointBitmap(bitmap, x, y)) buffer[0] |= (1 << pos);
+			if (gn_bmp_is_point(bitmap, x, y)) buffer[0] |= (1 << pos);
 			pos--;
 			if (pos < 0) pos = 7; //going to new byte
 		}
@@ -1155,7 +1155,7 @@ void savebmp(FILE *file, GSM_Bitmap *bitmap)
 	}
 }
 
-void savengg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
+void savengg(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 {
 
 	char header[] = {'N', 'G', 'G', 0x00, 0x01, 0x00,
@@ -1169,7 +1169,7 @@ void savengg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	char buffer[8];
 	int i, j;
 
-	GSM_ResizeBitmap(bitmap, GSM_CallerLogo, info);
+	gn_bmp_resize(bitmap, GN_BMP_CallerLogo, info);
 
 	header[6] = bitmap->width;
 	header[8] = bitmap->height;
@@ -1187,7 +1187,7 @@ void savengg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	}
 }
 
-void savenol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
+void savenol(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 {
 
 	char header[] = {'N','O','L',0x00,0x01,0x00,
@@ -1202,7 +1202,7 @@ void savenol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	char buffer[8];
 	int i, j, country, net;
 
-	GSM_ResizeBitmap(bitmap, GSM_OperatorLogo, info);
+	gn_bmp_resize(bitmap, GN_BMP_OperatorLogo, info);
 
 	sscanf(bitmap->netcode, "%d %d", &country, &net);
 
@@ -1226,13 +1226,13 @@ void savenol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	}
 }
 
-void savensl(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
+void savensl(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 {
 
 	u8 header[] = {'F','O','R','M', 0x01,0xFE,  /* File ID block,      size 1*256+0xFE=510*/
 		       'N','S','L','D', 0x01,0xF8}; /* Startup Logo block, size 1*256+0xF8=504*/
 
-	GSM_ResizeBitmap(bitmap, GSM_StartupLogo, info);
+	gn_bmp_resize(bitmap, GN_BMP_StartupLogo, info);
 
         header[4] = (bitmap->size + 6) / 256;
         header[5] = (bitmap->size + 6) % 256;
@@ -1243,7 +1243,7 @@ void savensl(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
 }
 
-void saveota(FILE *file, GSM_Bitmap *bitmap)
+void saveota(FILE *file, gn_bmp *bitmap)
 {
 	char header[] = {0x01,
 		         0x00, /* Width */
@@ -1258,7 +1258,7 @@ void saveota(FILE *file, GSM_Bitmap *bitmap)
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
 }
 
-void savenlm(FILE *file, GSM_Bitmap *bitmap)
+void savenlm(FILE *file, gn_bmp *bitmap)
 {
 	char header[] = {'N','L','M', /* Nokia Logo Manager file ID. */
 		         0x20,
@@ -1274,22 +1274,22 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 	div_t division;
 
 	switch (bitmap->type) {
-	case GSM_OperatorLogo:
-	case GSM_NewOperatorLogo:
+	case GN_BMP_OperatorLogo:
+	case GN_BMP_NewOperatorLogo:
 		header[5] = 0x00;
 		break;
-	case GSM_CallerLogo:
+	case GN_BMP_CallerLogo:
 		header[5] = 0x01;
 		break;
-	case GSM_StartupLogo:
+	case GN_BMP_StartupLogo:
 		header[5] = 0x02;
 		break;
-	case GSM_PictureMessage:
+	case GN_BMP_PictureMessage:
 		header[5] = 0x03;
 		break;
-	case GSM_WelcomeNoteText:
-	case GSM_DealerNoteText:
-	case GSM_None:
+	case GN_BMP_WelcomeNoteText:
+	case GN_BMP_DealerNoteText:
+	case GN_BMP_None:
 	default:
 		break;
 	}
@@ -1301,7 +1301,7 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
 			if (pos2 == 7) buffer[pos] = 0;
-			if (GSM_IsPointBitmap(bitmap, x, y)) buffer[pos] |= (1 << pos2);
+			if (gn_bmp_is_point(bitmap, x, y)) buffer[pos] |= (1 << pos2);
 			pos2--;
 			if (pos2 < 0) {pos2 = 7; pos++;} /* going to new line */
 		}
@@ -1318,7 +1318,7 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 GSM_Error GSM_ShowBitmapFile(char *FileName)
 {
 	int i, j;
-	GSM_Bitmap bitmap;
+	gn_bmp bitmap;
 	GSM_Error error;
 
 	error = GSM_ReadBitmapFile(FileName, &bitmap, NULL);
@@ -1327,7 +1327,7 @@ GSM_Error GSM_ShowBitmapFile(char *FileName)
 
 	for (i = 0; i < bitmap.height; i++) {
 		for (j = 0; j < bitmap.width; j++)
-			printf("%c", GSM_IsPointBitmap(&bitmap, j, i) ? '#' : ' ');
+			printf("%c", gn_bmp_is_point(&bitmap, j, i) ? '#' : ' ');
 		printf("\n");
 	}
 

@@ -597,9 +597,9 @@ static GSM_Error sms_decode_pdu(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 
 			/* First part is a Picture */
 			sms->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(GSM_PictureMessage, rawsms->UserData,
-					  NULL, &sms->UserData[0].u.Bitmap);
-			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap, stderr);
+			gn_bmp_read_sms(GN_BMP_PictureMessage, rawsms->UserData,
+					NULL, &sms->UserData[0].u.Bitmap);
+			gn_bmp_print(&sms->UserData[0].u.Bitmap, stderr);
 
 			size = rawsms->UserDataLength - 4 - sms->UserData[0].u.Bitmap.size;
 			/* Second part is a text */
@@ -620,10 +620,10 @@ static GSM_Error sms_decode_pdu(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 
 			/* Second part is a Picture */
 			sms->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(GSM_PictureMessage,
-					  rawsms->UserData + rawsms->UserData[0] + 7,
-					  NULL, &sms->UserData[0].u.Bitmap);
-			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap, stderr);
+			gn_bmp_read_sms(GN_BMP_PictureMessage,
+					rawsms->UserData + rawsms->UserData[0] + 7,
+					NULL, &sms->UserData[0].u.Bitmap);
+			gn_bmp_print(&sms->UserData[0].u.Bitmap, stderr);
 		}
 		break;
 	/* Plain text message */
@@ -1035,16 +1035,16 @@ static GSM_Error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		switch (sms->UserData[i].Type) {
 		case SMS_BitmapData:
 			switch (sms->UserData[0].u.Bitmap.type) {
-			case GSM_PictureMessage:
+			case GN_BMP_PictureMessage:
 				size = GSM_EncodeNokiaBitmap(&(sms->UserData[i].u.Bitmap),
 							     rawsms->UserData + rawsms->UserDataLength,
 							     (i == 0));
 				break;
-			case GSM_OperatorLogo:
+			case GN_BMP_OperatorLogo:
 				if (!sms_encode_udh(rawsms, SMS_OpLogo)) return GE_NOTSUPPORTED;
 			default:
-				size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Bitmap),
-							   rawsms->UserData + rawsms->UserDataLength);
+				size = gn_bmp_encode_sms(&(sms->UserData[i].u.Bitmap),
+							 rawsms->UserData + rawsms->UserDataLength);
 				break;
 			}
 			rawsms->Length += size;
@@ -1056,7 +1056,7 @@ static GSM_Error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		case SMS_AnimationData: {
 			int j;
 			for (j = 0; j < 4; j++) {
-				size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Animation[j]), rawsms->UserData + rawsms->UserDataLength);
+				size = gn_bmp_encode_sms(&(sms->UserData[i].u.Animation[j]), rawsms->UserData + rawsms->UserDataLength);
 				rawsms->Length += size;
 				rawsms->UserDataLength += size;
 			}
