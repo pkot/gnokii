@@ -3658,9 +3658,12 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       CurrentCalendarNote->Alarm.Second=MessageBuffer[22];
 
       memcpy(CurrentCalendarNote->Text,MessageBuffer+24,MessageBuffer[23]);
+      CurrentCalendarNote->Text[MessageBuffer[23]]=0;
 
-      if (CurrentCalendarNote->Type == GCN_CALL)
+      if (CurrentCalendarNote->Type == GCN_CALL) {
         memcpy(CurrentCalendarNote->Phone,MessageBuffer+24+MessageBuffer[23]+1,MessageBuffer[24+MessageBuffer[23]]);
+        CurrentCalendarNote->Phone[MessageBuffer[24+MessageBuffer[23]]]=0;
+      }
 
 #ifdef DEBUG
       fprintf(stdout, _("Message: Calendar note received.\n"));
