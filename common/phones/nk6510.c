@@ -782,8 +782,9 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-	SMS_Folder fld;
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x08, 0x00, 0x00, 0x01};
+	SMS_Folder status_fld, *old_fld;
+	GSM_Error error;
 
 	dprintf("Getting SMS Status...\n");
 
@@ -793,12 +794,21 @@ static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 	 * does show these messages.
 	 */
 
-	fld.FolderID = GMT_TE;
-	data->SMSFolder = &fld;
-	if (P6510_GetSMSFolderStatus(data, state) != GE_NONE) return GE_NOTREADY;
+	old_fld = data->SMSFolder;
 
-	if (SM_SendMessage(state, 7, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, P6510_MSG_FOLDER);
+	data->SMSFolder = &status_fld;
+	data->SMSFolder->FolderID = GMT_TE;
+
+	error = P6510_GetSMSFolderStatus(data, state);
+	if (error != GE_NONE) goto out;
+
+	error = SM_SendMessage(state, 7, P6510_MSG_FOLDER, req);
+	if (error != GE_NONE) goto out;
+
+	error = SM_Block(state, data, P6510_MSG_FOLDER);
+ out:
+	data->SMSFolder = old_fld;
+	return error;
 }
 
 static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
