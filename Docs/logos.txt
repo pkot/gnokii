@@ -1,0 +1,54 @@
+$Id$
+
+------------------------[ Tutorial about logos files ]-------------------------
+nol (operator logo) and ngg (caller logo) files include the header as few
+first bytes of their content. That is 16 or 20 bytes structure. Header
+contains type of the file, netcode, width and height of icon. But width and
+height of icon is very important. Why? Because in NOKIA 7110, width = 72 bytes
+and height = 28 lines, and in other NOKIA phones witdh = 72 bytes, but height
+is only 14 lines ( thx for that info to Gabriele Zappi ).
+
+[1] NOL header
+
+            1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+            N O L 0 1 0 x 0 1  0  x  0  x  0  1  0  1  0  x  0
+
+    so :
+	first 3 bytes that's type of file
+	next 3 bytes (4,5,6) - nothing important
+        next 4 (7,8,9,10) - network code :
+	       sprintf(netcode, "%d %02d", header[7] + 256 * header[8], header[9]);
+               <<<<<<<<<<< this line is from common/gsm-common.h >>>>>>>>>>>
+        
+        next 3 (11,12,13) - very important bytes :
+			    width of icon = header[11]
+			    height of icon = header[13]
+        another 7 bytes (14,15,..,20) - I think that's nothing special
+    
+[2] NGG header
+
+	       1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+	       N G G 0 1 0 x 0 x  0  1  0  1  0  x  0
+
+	so :
+	   first 3 bytes that's type of file 
+	   next 3 bytes (4,5,6) - nothing important
+           next 3 (7,8,9) - very important
+			    width of icon = header[7]
+			    height of icon = header[9]
+           another 7 bytes (10,11,..,16) - nothing special 
+
+[3] icon's bytes
+
+To show icon on terminal you can read (height) times 72 bytes line and print
+these lines in the terminal:
+
+             ...
+             for (i = 0; i < heigth; i++) {
+                 read(buffer, 1, width, fd);
+                 printf("%s\n", buffer);
+             }
+	     ...	 
+
+------------------[ 2001 crayola <--> szuflandia corporation ]-----------------
+		   crayola@polbox.com klepacz@juni.gliwice.pl
