@@ -356,7 +356,7 @@ msgstr ""
 #: gnokii/gnokii.c:227
 #, c-format
 msgid "GNOKII Version %s\n"
-msgstr "GNOKII Versioon %s"
+msgstr "GNOKII Versioon %s\n"
 
 #: gnokii/gnokii.c:234
 #, c-format
