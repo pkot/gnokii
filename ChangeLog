@@ -1,5 +1,5 @@
-0.5.5 (not released yet)
-========================
+0.5.5
+=====
  * translation updates
     o gettext 0.12.x requires MSGID_BUGS_ADDRESS variable in
       po/Makevars                                       (Pawel Kot)
