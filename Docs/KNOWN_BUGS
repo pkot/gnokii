@@ -10,6 +10,9 @@ and
 nk6510 driver. Configurations known to be affected:
 	model = 6100
 	connection = irda
+Hadley Rich reports the same bad behaviour with Nokia 7250i. It is not
+supported explicitely but hacking the sources to support it (the usual way)
+leads to the damage.
 
 3. Nokia 6310(i) doesn't work well over the DRL3P cable. After few
 successfull connections it stops working. When you power the phone off and

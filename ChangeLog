@@ -39,6 +39,8 @@
       gnokii manual page                  (Pawel Kot, Reiner Steib)
     o add different memory types description to the gnokii manual
       page                                           (Reiner Steib)
+    o Nokia 7250i seems to have the same bug(?) as 6100
+                                                      (Hadley Rich)
  * nk6510 series updates
     o handle correctly the case with more then 50 calendar entries
       in the phone; previous fix missed some chunks     (Pawel Kot)
