@@ -305,6 +305,7 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 			}
 		case GN_CT_Serial:
 		case GN_CT_Bluetooth:
+			attempt = 2;
 			err = fbus_initialise(attempt++, state);
 			break;
 		case GN_CT_Infrared:

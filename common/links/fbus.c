@@ -600,9 +600,11 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 	   empirical. */
 	/* I believe that we need/can do this for any phone to get the UART synced */
 
-	for (count = 0; count < state->config.init_length; count++) {
-		usleep(100);
-		device_write(&init_char, 1, state);
+	if (state->config.connection_type != GN_CT_Bluetooth) {
+		for (count = 0; count < state->config.init_length; count++) {
+			usleep(100);
+			device_write(&init_char, 1, state);
+		}
 	}
 
 	/* Init variables */
