@@ -332,9 +332,12 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
 0x1f: RINGTONE
 
     s Get Ringtones         { 0x07, 0x00, 0x00, 0xFE, 0x00, 0x7D }
-    r Get Ringtones         { 0x08, 0x00, 0x23, 0x00, # ringtones, 0x00, 
-                              ringtone number, 0x01, 0x01, 0x00, name length (chars), name (unicode)... }
-			      raw ringtone format is the same as in nk6110
+    r Get Ringtones         { 0x08, numberHI, numberLO, blocks... }
+			    where block is: { blenHI, blenLO, idHI, idLO,
+			                      0x01, type, 0x00,
+					      name length (chars),
+					      name (unicode)...  }
+			    where type: 0x01 - built-in, 0x02 - user defined
 
     s Set raw ringtone      { 0x0e, 0x7f, 0xff, 0xfe, name length (chars), name (unicode),
                               datalenHI, datalenLO, data (MIDI file or raw ringtone), 0x00, 0x00 }

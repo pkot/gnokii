@@ -158,7 +158,8 @@ typedef enum {
 	OPT_CREATESMSFOLDER,
 	OPT_LISTNETWORKS,
 	OPT_GETNETWORKINFO,
-	OPT_GETLOCKSINFO
+	OPT_GETLOCKSINFO,
+	OPT_GETRINGTONELIST
 } opt_index;
 
 static char *bindir;     /* Binaries directory from .gnokiirc file - not used here yet */
@@ -313,6 +314,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"
 		     "          gnokii --playringtone rtttlfile [--volume vol]\n"
 		     "          gnokii --ringtoneconvert source destination\n"
+		     "          gnokii --getringtonelist\n"
 		     "          gnokii --reset [soft|hard]\n"
 		     "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
 		     "          gnokii --setprofile\n"
@@ -4233,6 +4235,34 @@ static int ringtoneconvert(int argc, char *argv[])
 	return GN_ERR_NONE;
 }
 
+static int getringtonelist(void)
+{
+	gn_error error;
+	gn_ringtone_list rlist;
+	int i;
+
+	memset(&rlist, 0, sizeof(rlist));
+	gn_data_clear(&data);
+	data.ringtone_list = &rlist;
+
+	if ((error = gn_sm_functions(GN_OP_GetRingtoneList, &data, &state)) != GN_ERR_NONE) {
+		fprintf(stderr, _("Failed to get the list of ringtones: %s\n"), gn_error_print(error));
+		return error;
+	}
+
+	printf("First user defined ringtone location: %3d\n", rlist.userdef_location);
+	printf("Number of user defined ringtones: %d\n\n", rlist.userdef_count);
+	printf("loc   rwu   name\n");
+	printf("===============================\n");
+	for (i = 0; i < rlist.count; i++) {
+		printf("%3d   %d%d%d   %-20s\n", rlist.ringtone[i].location,
+			rlist.ringtone[i].readable, rlist.ringtone[i].writable, rlist.ringtone[i].user_defined,
+			rlist.ringtone[i].name);
+	}
+
+	return GN_ERR_NONE;
+}
+
 static int presskey(void)
 {
 	gn_error error;
@@ -4772,6 +4802,9 @@ int main(int argc, char *argv[])
 		/* Convert ringtone */
 		{ "ringtoneconvert",    required_argument, NULL, OPT_RINGTONECONVERT },
 
+		/* Get list of the ringtones */
+		{ "getringtonelist",    no_argument,       NULL, OPT_GETRINGTONELIST },
+
 		/* Get SMS center number mode */
 		{ "getsmsc",            optional_argument, NULL, OPT_GETSMSC },
 
@@ -5112,6 +5145,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_PLAYRINGTONE:
 			rc = playringtone(argc, argv);
+			break;
+		case OPT_GETRINGTONELIST:
+			rc = getringtonelist();
 			break;
 		case OPT_RINGTONECONVERT:
 			rc = ringtoneconvert(nargc, nargv);

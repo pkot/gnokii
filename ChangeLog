@@ -3,15 +3,18 @@
  * 6510 series updates
     o GetRawRingtone reply differs on 6310         (BORBELY Zoltan)
     o GetSMSFolders hardcoded blocklen fixed  (Michael H. Warfield)
+    o GetRingtoneList command added                (BORBELY Zoltan)
  * 6110 series updates
     o phonebook reading fixes                      (BORBELY Zoltan)
     o add nokia 3390 to supported models           (BORBELY Zoltan)
+    o GetRingtoneList for 61xx models added        (BORBELY Zoltan)
  * gnokiid updates
     o double free bug eliminated from mgnokiidev   (BORBELY Zoltan)
     o traditional pty support fixed                (BORBELY Zoltan)
     o easily locateable and unique error messages  (BORBELY Zoltan)
  * gnokii updates
     o writephonebook fixes                         (BORBELY Zoltan)
+    o getringtonelist command added                (BORBELY Zoltan)
  * libgnokii updates
     o Nokia 6250 has irda                               (Pawel Kot)
 

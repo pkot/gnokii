@@ -361,6 +361,8 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_GetRingtone(data, state);
 	case GN_OP_SetRingtone:
 		return NK6510_SetRingtone(data, state);
+	case GN_OP_GetRingtoneList:
+		return NK6510_GetRingtoneList(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -2463,23 +2465,31 @@ static gn_error NK6510_GetBatteryLevel(gn_data *data, struct gn_statemachine *st
 
 static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	int i, j, index;
+	int i, j, n;
 	unsigned char *pos;
+	gn_ringtone_list *rl;
 
 	switch (message[3]) {
 	case 0x08:
 		dprintf("List of ringtones received!\n");
-		index = 13;
-		for (j = 0; j < message[7]; j++) {
+		if (!(rl = data->ringtone_list)) return GN_ERR_INTERNALERROR;
+		rl->count = 256 * message[4] + message[5];
+		rl->userdef_location = 0; //FIXME
+		rl->userdef_count = 10;
+		if (rl->count > GN_RINGTONE_MAX_COUNT) rl->count = GN_RINGTONE_MAX_COUNT;
+		i = 6;
+		for (j = 0; j < rl->count; j++) {
+			if (message[i + 4] != 0x01 || message[i + 6] != 0x00) return GN_ERR_UNHANDLEDFRAME;
+			rl->ringtone[j].location = 256 * message[i + 2] + message[i + 3];
+			rl->ringtone[j].user_defined = (message[i + 5] == 0x02);
+			rl->ringtone[j].readable = 1;
+			rl->ringtone[j].writable = rl->ringtone[j].user_defined;
+			n = message[i + 7];
+			if (n >= sizeof(rl->ringtone[0].name)) n = sizeof(rl->ringtone[0].name) - 1;
+			char_unicode_decode(rl->ringtone[j].name, message + i + 8, 2 * n);
+			i += 256 * message[i] + message[i + 1];
 
-			dprintf("Ringtone (#%03i) name: ", message[index - 4]);
-			for (i = 0; i < message[index]; i++) {
-				dprintf("%c", message[index + (2 * (i + 1))]);
-			}
-			dprintf("\n");
-			index += message[index] * 2;
-			while (message[index] != 0x01 || message[index + 1] != 0x01) index++;
-			index += 3;
+			dprintf("Ringtone (#%03i) name: %s\n", rl->ringtone[j].location, rl->ringtone[j].name);
 		}		
 		break;
 

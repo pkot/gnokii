@@ -123,6 +123,7 @@ static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_d
 static gn_error get_imei(gn_data *data, struct gn_statemachine *state);
 static gn_error get_phone_info(gn_data *data, struct gn_statemachine *state);
 static gn_error get_hw(gn_data *data, struct gn_statemachine *state);
+static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state);
 
 #ifdef SECURITY
 static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
@@ -360,6 +361,8 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return EnterChar(data, state);
 	case GN_OP_CallDivert:
 		return pnok_call_divert(data, state);
+	case GN_OP_GetRingtoneList:
+		return get_ringtone_list(data, state);
 	default:
 		dprintf("nk61xx unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -3679,4 +3682,84 @@ static gn_error IncomingMisc(int messagetype, unsigned char *message, int length
 	}
 
 	return GN_ERR_UNHANDLEDFRAME;
+}
+
+
+static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
+{
+	gn_ringtone_list *rl;
+	gn_ringtone ringtone;
+	gn_data d;
+
+#define ADDRINGTONE(id, str) \
+	rl->ringtone[rl->count].location = (id); \
+	strcpy(rl->ringtone[rl->count].name, (str)); \
+	rl->ringtone[rl->count].user_defined = 0; \
+	rl->ringtone[rl->count].readable = 0; \
+	rl->ringtone[rl->count].writable = 0; \
+	rl->count++;
+
+	if (!(rl = data->ringtone_list)) return GN_ERR_INTERNALERROR;
+	rl->count = 0;
+	rl->userdef_location = 0;
+	rl->userdef_count = 0;
+
+	if (!memcmp(state->config.model, "61", 2)) {
+		rl->userdef_location = 0;
+		rl->userdef_count = 1;
+		ADDRINGTONE(18, "Ring ring");
+		ADDRINGTONE(19, "Low");
+		ADDRINGTONE(20, "Fly");
+		ADDRINGTONE(21, "Mosquito");
+		ADDRINGTONE(22, "Bee");
+		ADDRINGTONE(23, "Intro");
+		ADDRINGTONE(24, "Etude");
+		ADDRINGTONE(25, "Hunt");
+		ADDRINGTONE(26, "Going up");
+		ADDRINGTONE(27, "City Bird");
+		ADDRINGTONE(30, "Chase");
+		ADDRINGTONE(32, "Scifi");
+		ADDRINGTONE(34, "Kick");
+		ADDRINGTONE(35, "Do-mi-so");
+		ADDRINGTONE(36, "Robo N1X");
+		ADDRINGTONE(37, "Dizzy");
+		ADDRINGTONE(39, "Playground");
+		ADDRINGTONE(43, "That's it!");
+		ADDRINGTONE(47, "Grande valse");
+		ADDRINGTONE(48, "Helan");
+		ADDRINGTONE(49, "Fuga");
+		ADDRINGTONE(50, "Menuet");
+		ADDRINGTONE(51, "Ode to Joy");
+		ADDRINGTONE(52, "Elise");
+		ADDRINGTONE(53, "Mozart 40");
+		ADDRINGTONE(54, "Piano Concerto");
+		ADDRINGTONE(55, "William Tell");
+		ADDRINGTONE(56, "Badinerie");
+		ADDRINGTONE(57, "Polka");
+		ADDRINGTONE(58, "Attraction");
+		ADDRINGTONE(60, "Polite");
+		ADDRINGTONE(61, "Persuasion");
+		ADDRINGTONE(67, "Tick tick");
+		ADDRINGTONE(68, "Samba");
+		ADDRINGTONE(70, "Orient");
+		ADDRINGTONE(71, "Charleston");
+		ADDRINGTONE(73, "Jumping");
+
+		memset(&ringtone, 0, sizeof(ringtone));
+		gn_data_clear(&d);
+		d.ringtone = &ringtone;
+		ringtone.location = 0;
+		if (GetRingtone(&d, state) == GN_ERR_NONE) {
+			rl->ringtone[rl->count].location = ringtone.location;
+			strcpy(rl->ringtone[rl->count].name, ringtone.name);
+			rl->ringtone[rl->count].user_defined = 1;
+			rl->ringtone[rl->count].readable = 1;
+			rl->ringtone[rl->count].writable = 1;
+			rl->count++;
+		}
+	} else return GN_ERR_NOTIMPLEMENTED;
+
+#undef ADDRINGTONE
+
+	return GN_ERR_NONE;
 }
