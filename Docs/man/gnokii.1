@@ -116,12 +116,22 @@ Meaning of other optional parameters:
 .PP 
 [\-\-long \fIn\fR] \- send no more then \fIn\fR characters, default is 160
 .TP 
-.BR "\-\-savesms [\-m] [\-l \fIn\fP] [\-i]"
-saves SMS messages to the Outbox. Messages are read from STDIN. You can specify the following optional arguments:
+.BR "\-\-savesms [--sender \fIfrom\fP] [--smsc \fImessage_center_number\fP | --smscno \fImessage_center_index\fP] [--folder \fIfolder_id\fP] [--location \fInumber\fP] [--sent | --read] [--deliver]"
+saves SMS messages to phone. Messages are read from STDIN. You can specify the following optional arguments:
 .PP 
-[\-m] \- mark the message as sent
-[\-l \fIn\fR] \- save the message at location \fIn\fR on the SIM card
-[\-i] \- ask before overwriting specified location
+[\-\-sender] \- set the sender number (only \fI\-\-deliver\fP)
+.PP 
+[\-\-smsc \fImessage_center_number\fR] \- set the SMSC number (only \fI\-\-deliver\fP)
+.PP 
+[\-\-smscno \fImessage_center_index\fR] \- SMSC number taken from phone memory from address \fImessage_center_index\fR (only \fI\-\-deliver\fP)
+.PP 
+[\-\-folder \fIfolder_id\fR] \- folder ID where to save the SMS to (only valid for newer phones, i.e. 6210/6510 series). For legal values see \fI\-\-getsms\fR.
+.PP 
+[\-\-location \fInumber\fR] \- save the message to laction \fInumber\fR
+.PP 
+[\-\-sent | \-\-read] \- mark the message saved/read depending on \fI\-\-deliver\fP
+.PP 
+[\-\-deliver] \- set the message type to SMS_Deliver
 .TP 
 .BR "\-\-getsmsc \fInumber\fP"
 show the SMSC number from location \fInumber\fR.

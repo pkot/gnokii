@@ -8,6 +8,7 @@
     o don't use hardcoded values               (Len Trigg, Pawel Kot)
     o add --writetodo                                  (Markus Plail)
     o add WAP handling                                 (Markus Plail)
+    o extend SaveSMS functionality                     (Markus Plail)
  * xgnokii updates:
     o fix speeddial writing                            (Markus Plail)
     o fix logos                                        (Markus Plail)
@@ -42,12 +43,14 @@
     o MakeCall1() calls GetNetworkInfo first (maybe eliminates
       some datacall problem)                         (BORBELY Zoltan)
     o use PNOK_FBUS_EncodeSMS                          (Markus Plail)
+    o extend SaveSMS functionality                     (Markus Plail)
  * 7110 series updates:
     o use nokia-decoding                               (Markus Plail)
     o fix Inbox status reading          (Marcin Wiacek, Markus Plail)
     o remove GetUnreadMessages and friends             (Markus Plail)
     o add DeleteSMSnoValidate                          (Markus Plail)
     o use PNOK_FBUS_EncodeSMS                          (Markus Plail)
+    o add SaveSMS functionality                        (Markus Plail)
  * bitmap support
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
@@ -58,6 +61,7 @@
     o distinct between currency and euro symbols based on locale
       set                                                 (Pawel Kot)
     o add DeleteSMSnoValidate                          (Markus Plail)
+    o extend SaveSMS functionality                     (Markus Plail)
  * SMSD updates
     o support fo the phones with the SMS folders       (Markus Plail,
                                                         Jan Derfinak)
