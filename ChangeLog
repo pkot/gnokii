@@ -1,3 +1,9 @@
+0.5.0rc (not released yet)
+=======
+ * general updates
+    o fix stupid typo in fbus.c causing Bluetooth not work
+                                                   (Marcel Holtmann)
+
 0.5.0rc1
 ========
  * build system updates

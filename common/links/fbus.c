@@ -579,7 +579,7 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 		}
 		break;
 	case GN_CT_Bluetooth:
-#ifdef BLUETOOTH
+#ifdef HAVE_BLUETOOTH
 		/* If there's no valid configuration in the .gnokiirc, try
 		 * to connect over tty interface */
 		if (!bacmp(BDADDR_ANY, &state->config.bt_address))
