@@ -265,7 +265,7 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 				row[0] = g_strdup(_("read report"));
 			else
 				row[0] = g_strdup(_("unread report"));
-		} else if ((data->Type == SMS_PictureTemplate) || (data->Type == SMS_PictureTemplate)) {
+		} else if ((data->Type == SMS_Picture) || (data->Type == SMS_PictureTemplate)) {
 				if (data->Status == SMS_Read)
 					row[0] = g_strdup(_("seen picture"));
 				if (data->Status == SMS_Unread)
@@ -305,8 +305,8 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		row[2] = GUI_GetName(data->Remote.Number);
 		if (row[2] == NULL)
 			row[2] = data->Remote.Number;
-		if ((data->Type == SMS_PictureTemplate) || (data->Type == SMS_PictureTemplate))
-			row[3] = g_strdup(_("Picture Message"));
+		if ((data->Type == SMS_Picture) || (data->Type == SMS_PictureTemplate))
+			row[3] = g_strdup_printf("Picture Message: %s", data->UserData[1].u.Text);
 		else
 			row[3] = data->UserData[0].u.Text;
 		gtk_clist_append(GTK_CLIST(SMS.smsClist), row);
