@@ -1,3 +1,9 @@
+* Thu Feb 14 2002 Jan Derfinak <ja@mail.upjs.sk>
+- Rewrited PostgreSQL plugin.
+- Added retrying when sending sms's.
+- Removed GSMLinkOK test.
+- Code and documentation cleanup.
+
 * Sun Feb 03 2002 Jan Derfinak <ja@mail.upjs.sk>
 - MySQL support is now really working.
 

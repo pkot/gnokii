@@ -9,13 +9,13 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-CFLAGS += -DXDEBUG -g $(PTHREAD_CFLAGS) \
+CFLAGS += -DMODULES_DIR=\"${prefix}/share/smsd\" $(PTHREAD_CFLAGS) \
 	  `glib-config --cflags`
 
 LDFLAGS += $(PTHREAD_LIBS) \
 	   `glib-config --libs`
 
-LDFLAGS += -g -rdynamic -L$(TOPDIR)/common -lgnokii -ldl
+LDFLAGS += -s -rdynamic -L$(TOPDIR)/common -lgnokii -ldl
 
 ifdef XPM_LIBS
 	LDFLAGS +=$(XPM_LIBS)
@@ -59,6 +59,8 @@ clean:
 install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -m 755 -s smsd $(bindir)
+	$(INSTALL) -d ${prefix}/share/smsd
+	$(INSTALL) lib*.so ${prefix}/share/smsd
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

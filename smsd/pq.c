@@ -35,60 +35,44 @@ void DB_Bye (void)
 
 gint DB_ConnectInbox (DBConfig connect)
 {
-  GString *buf = g_string_sized_new (64);
-
-  g_string_sprintf (buf, "dbname=%s", connect.db);
-
-  if (connect.user[0] != '\0')
-    g_string_sprintfa (buf, " user=%s", connect.user);
-
-  if (connect.password[0] != '\0')
-    g_string_sprintfa (buf, " password=%s", connect.password);
-
-  if (connect.host[0] != '\0')
-    g_string_sprintfa (buf, " host=%s", connect.host);
- 
-  connIn = PQconnectdb (buf->str);
+  connIn = PQsetdbLogin (connect.host[0] != '\0' ? connect.host : NULL,
+                         NULL,
+                         NULL,
+                         NULL,
+                         connect.db,
+                         connect.user[0] != '\0' ? connect.user : NULL,
+                         connect.password[0] != '\0' ? connect.password : NULL);
   
   if (PQstatus (connIn) == CONNECTION_BAD)
   {
-     g_print ("Connection to database '%s' failed.\n", buf->str);
-     g_print ("%s", PQerrorMessage(connIn));
-     g_string_free (buf, true);
-     return (1);
+    g_print (_("Connection to database '%s' on host '%s' failed.\n"),
+             connect.db, connect.host);
+    g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+    return (1);
   }
 
-  g_string_free (buf, true);
   return (0);
 }
 
 
 gint DB_ConnectOutbox (DBConfig connect)
 {
-  GString *buf = g_string_sized_new (64);
+  connOut = PQsetdbLogin (connect.host[0] != '\0' ? connect.host : NULL,
+                          NULL,
+                          NULL,
+                          NULL,
+                          connect.db,
+                          connect.user[0] != '\0' ? connect.user : NULL,
+                          connect.password[0] != '\0' ? connect.password : NULL);
 
-  g_string_sprintf (buf, "dbname=%s", connect.db);
-
-  if (connect.user[0] != '\0')
-    g_string_sprintfa (buf, " user=%s", connect.user);
-
-  if (connect.password[0] != '\0')
-    g_string_sprintfa (buf, " password=%s", connect.password);
-
-  if (connect.host[0] != '\0')
-    g_string_sprintfa (buf, " host=%s", connect.host);
-
-  connOut = PQconnectdb (buf->str);
-  
   if (PQstatus (connOut) == CONNECTION_BAD)
   {
-     g_print ("Connection to database '%s' failed.\n", buf->str);
-     g_print ("%s", PQerrorMessage(connOut));
-     g_string_free (buf, true);
-     return (1);
+    g_print (_("Connection to database '%s' on host '%s' failed.\n"),
+             connect.db, connect.host);
+    g_print (_("Error: %s\n"), PQerrorMessage (connOut));
+    return (1);
   }
 
-  g_string_free (buf, true);
   return (0);
 }
 
@@ -114,6 +98,8 @@ gint DB_InsertSMS (const GSM_SMSMessage * const data)
   g_string_free(buf, TRUE);
   if (!res || PQresultStatus(res) != PGRES_COMMAND_OK)
   {
+    g_print (_("%d: INSERT INTO inbox failed.\n"), __LINE__);
+    g_print (_("Error: %s\n"), PQerrorMessage (connIn));
     PQclear (res);
     return (1);
   }
@@ -129,6 +115,7 @@ void DB_Look (void)
   GString *buf;
   PGresult *res1, *res2;
   register int i;
+  gint numError, error;
 
   buf = g_string_sized_new (128);
 
@@ -141,9 +128,9 @@ void DB_Look (void)
   res1 = PQexec (connOut, buf->str);
   if (!res1 || PQresultStatus (res1) != PGRES_TUPLES_OK)
   {
-    g_print ("%s\n", PQcmdStatus (res1));
+    g_print (_("%d: SELECT FROM outbox command failed.\n"), __LINE__);
+    g_print (_("Error: %s\n"), PQerrorMessage (connOut));
     PQclear (res1);
-    g_print ("%d: SELECT FROM command failed\n", __LINE__);
     res1 = PQexec (connOut, "ROLLBACK TRANSACTION");
     PQclear (res1);
     g_string_free (buf, TRUE);
@@ -163,7 +150,7 @@ void DB_Look (void)
     sms.Validity.VPF = SMS_RelativeFormat;
     sms.Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
     sms.UDH_No = 0;
-    sms.Report = (smsdConfig.smsSets = SMSD_READ_REPORTS);
+    sms.Report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
     strncpy (sms.RemoteNumber.number, PQgetvalue (res1, i, 1), GSM_MAX_DESTINATION_LENGTH + 1);
     sms.RemoteNumber.number[GSM_MAX_DESTINATION_LENGTH] = '\0';
@@ -179,18 +166,26 @@ void DB_Look (void)
     g_print ("%s, %s\n", sms.RemoteNumber.number, sms.UserData[0].u.Text);
 #endif
     
-    if (WriteSMS (&sms) != 0)
+    numError = 0;
+    do
     {
-      g_string_sprintf (buf, "UPDATE outbox SET processed='t' WHERE id='%s'",
-                        PQgetvalue (res1, i, 0));
-      res2 = PQexec(connOut, buf->str);
-      if (!res2 || PQresultStatus (res2) != PGRES_COMMAND_OK)
-      {
-        g_print ("%s\n", PQcmdStatus (res2));
-        g_print ("%d: UPDATE command failed\n", __LINE__);
-      }
-      PQclear (res2);
+      error = WriteSMS (&sms);
+      sleep (2);
     }
+    while ((error == GE_TIMEOUT || error == GE_SMSSENDFAILED) && numError++ < 3);
+
+    g_string_sprintf (buf, "UPDATE outbox SET processed='t', error='%d', \
+                            processed_date='now' WHERE id='%s'",
+                      error, PQgetvalue (res1, i, 0));
+
+    res2 = PQexec (connOut, buf->str);
+    if (!res2 || PQresultStatus (res2) != PGRES_COMMAND_OK)
+    {
+      g_print (_("%d: UPDATE command failed.\n"), __LINE__);   
+      g_print (_("Error: %s\n"), PQerrorMessage (connOut));
+    }
+
+    PQclear (res2);
   }
 
   PQclear (res1);

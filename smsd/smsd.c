@@ -44,12 +44,7 @@
 #include "lowlevel.h"
 #include "db.h"
 
-#define DB	"sms"
-#define USER	""
-#define PASSWORD ""
-#define HOST	""
 
- 
 /* Hold main configuration data for smsd */
 SmsdConfig smsdConfig;
 
@@ -76,7 +71,6 @@ gchar *strEscape (const gchar *const s)
   register gint i = 0;
   gchar *ret;
   
-  g_print ("%s\n", str->str);
   while (str->str[i] != '\0')
   {
     if (str->str[i] == '\\' || str->str[i] == '\'')
@@ -84,7 +78,6 @@ gchar *strEscape (const gchar *const s)
     i++;
   }
   
-  g_print ("%s\n", str->str);
   ret = str->str;
   g_string_free (str, FALSE);
   
@@ -161,14 +154,14 @@ static void Usage (gchar *p)
 
 static void ReadConfig (gint argc, gchar *argv[])
 {
-  connect.user = g_strdup (USER);
-  connect.password = g_strdup (PASSWORD);
-  connect.db = g_strdup (DB);
-  connect.host = g_strdup (HOST);
+  connect.user = g_strdup ("");
+  connect.password = g_strdup ("");
+  connect.db = g_strdup ("sms");
+  connect.host = g_strdup ("");
   smsdConfig.dbMod = g_strdup ("pq");
-  smsdConfig.libDir = g_strdup (".");
-  
+  smsdConfig.libDir = g_strdup (MODULES_DIR);
   smsdConfig.smsSets = 0;
+
   while (1)
   {
     gint optionIndex = 0;
@@ -320,18 +313,8 @@ static void ReadSMS (gpointer d, gpointer userData)
   {
     if (data->Type == SMS_Delivery_Report)
     {
-#ifdef XDEBUG
-      g_print ("Report\n");
-#endif
-      g_print ("%d %d\n", smsdConfig.smsSets, SMSD_READ_REPORTS);
       if (smsdConfig.smsSets & SMSD_READ_REPORTS)
         (*DB_InsertSMS) (data);
-      
-      
-      e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-      e->event = Event_DeleteSMSMessage;
-      e->data = data;
-      InsertEvent (e);
     }
     else
     { 
@@ -343,12 +326,12 @@ static void ReadSMS (gpointer d, gpointer userData)
                data->UserData[0].u.Text);
 #endif
       (*DB_InsertSMS) (data);
-      
-      e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-      e->event = Event_DeleteSMSMessage;
-      e->data = data;
-      InsertEvent (e);
     }
+    
+    e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
+    e->event = Event_DeleteSMSMessage;
+    e->data = data;
+    InsertEvent (e);
   }
 }
 

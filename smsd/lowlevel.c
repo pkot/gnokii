@@ -66,7 +66,7 @@ inline static PhoneEvent *RemoveEvent (void)
 }
 
 
-static void InitModelInf (void)
+static GSM_Error InitModelInf (void)
 {
   GSM_Data data;
   gchar buf[64];
@@ -77,19 +77,17 @@ static void InitModelInf (void)
   data.Model = model;
   data.Revision = rev;
                           
+  error = SM_Functions (GOP_GetModel, &data, &sm);
+  if (error != GE_NONE)
+    return error;
+    
+  g_free (phoneMonitor.phone.model);
+  phoneMonitor.phone.version = g_strdup (model);
+  phoneMonitor.phone.model = GetPhoneModel (model)->model;
+  if (phoneMonitor.phone.model == NULL)
+    phoneMonitor.phone.model = g_strdup (_("unknown"));
 
-  error = SM_Functions(GOP_GetModel, &data, &sm);
-  
-  if (error == GE_NONE)
-  {
-    g_free (phoneMonitor.phone.model);
-    phoneMonitor.phone.version = g_strdup (model);
-    phoneMonitor.phone.model = GetPhoneModel (model)->model;
-    if (phoneMonitor.phone.model == NULL)
-      phoneMonitor.phone.model = g_strdup (_("unknown"));
-
-    phoneMonitor.supported = GetPhoneModel (buf)->flags;
-  }
+  phoneMonitor.supported = GetPhoneModel (buf)->flags;
 
   g_free (phoneMonitor.phone.revision);
   phoneMonitor.phone.revision = g_strdup (rev);
@@ -99,12 +97,13 @@ static void InitModelInf (void)
   g_print ("Model: %s\n", phoneMonitor.phone.model);
   g_print ("Revision: %s\n", phoneMonitor.phone.revision);
 #endif
+
+  return (GE_NONE);
 }
 
 
 static GSM_Error fbusinit (bool enable_monitoring)
 {
-  int count = 0;
   GSM_Error error = GE_NOLINK;
   GSM_ConnectionType connection = GCT_Serial;
   
@@ -126,16 +125,13 @@ static GSM_Error fbusinit (bool enable_monitoring)
     return (error);
   }
 
-  while (count++ < 40 && *GSM_LinkOK == false)
-    usleep(50000);
-#ifdef XDEBUG
-  g_print("After usleep. GSM_LinkOK: %d\n", *GSM_LinkOK);
-#endif
-
-  if (*GSM_LinkOK == true)
-    InitModelInf ();
-
-  return *GSM_LinkOK;
+  /* Why GSM_Initialise returns before initialization is completed?
+     We must wait cca 2 seconds. If smsd segfaults during initialiazation
+     try to increase number of seconds.
+  */
+  sleep (2);
+  
+  return InitModelInf ();
 }
 
 
@@ -301,8 +297,8 @@ void *Connect (void *a)
   g_print ("Initializing connection...\n");
 # endif
 
-  while (!fbusinit (true))
-    sleep (1);
+  if (fbusinit (true) != GE_NONE)
+    exit (1);
 
 # ifdef XDEBUG
   g_print ("Phone connected. Starting monitoring...\n");
@@ -312,11 +308,8 @@ void *Connect (void *a)
   {
     phoneMonitor.working = FALSE;
 
-    g_print ("Pred: %d, %d\n", SMSStatus.Unread, SMSStatus.Number);
     if ((error = SM_Functions (GOP_GetSMSStatus, &data, &sm)) == GE_NONE)
     {
-      g_print ("Po: %d, %d\n", SMSStatus.Unread, SMSStatus.Number);
-      
       if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
           phoneMonitor.sms.number != SMSStatus.Number)
       {
@@ -328,8 +321,6 @@ void *Connect (void *a)
       phoneMonitor.sms.unRead = SMSStatus.Unread;
     }
 
-    g_print ("error: %d\n", error);
-    
     while ((event = RemoveEvent ()) != NULL)
     {
 #     ifdef XDEBUG      

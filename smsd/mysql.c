@@ -25,8 +25,8 @@ static MYSQL mysqlOut;
 
 void DB_Bye (void)
 {
-    mysql_close (&mysqlIn);
-    mysql_close (&mysqlOut);
+  mysql_close (&mysqlIn);
+  mysql_close (&mysqlOut);
 }
 
 
@@ -110,12 +110,11 @@ void DB_Look (void)
   MYSQL_RES *res1;
   MYSQL_ROW row;
   gint numError, error;
-  gint status;
 
   buf = g_string_sized_new (128);
 
-  g_string_sprintf (buf, "SELECT id, number, text, error FROM outbox \
-                          WHERE processed='0' AND error < '5'");
+  g_string_sprintf (buf, "SELECT id, number, text FROM outbox \
+                          WHERE processed='0'");
 
   if (mysql_real_query (&mysqlOut, buf->str, buf->len))
   {
@@ -146,8 +145,7 @@ void DB_Look (void)
     sms.Validity.VPF = SMS_RelativeFormat;
     sms.Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
     sms.UDH_No = 0;
-    sms.Report = (smsdConfig.smsSets = SMSD_READ_REPORTS);
-    numError = atoi (row[3]);
+    sms.Report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
     strncpy (sms.RemoteNumber.number, row[1], GSM_MAX_DESTINATION_LENGTH + 1);
     sms.RemoteNumber.number[GSM_MAX_DESTINATION_LENGTH] = '\0';
@@ -163,32 +161,22 @@ void DB_Look (void)
     g_print ("%s, %s\n", sms.RemoteNumber.number, sms.UserData[0].u.Text);
 #endif
     
-    status = '1';
-    error = WriteSMS (&sms);
-    if (error == 4 || error == 19)
+    numError = 0;
+    do
     {
-      if (numError > 0)  /* change this for retrying */
-        numError = error;
-      else
-      {
-        numError++;
-        status = '0';
-      }
+      error = WriteSMS (&sms);
+      sleep (2);
     }
-    else
-      numError = 0;
-      
-    if (error != 0)
-    {
-      g_string_sprintf (buf, "UPDATE outbox SET processed='%d', error='%i', \
-                             processed_date=NULL WHERE id='%s'",
-                        status, error, row[0]);
+    while ((error == GE_TIMEOUT || error == GE_SMSSENDFAILED) && numError++ < 3);
+
+    g_string_sprintf (buf, "UPDATE outbox SET processed='1', error='%d', \
+                            processed_date=NULL WHERE id='%s'",
+                      error, row[0]);
                         
-      if (mysql_real_query (&mysqlOut, buf->str, buf->len))
-      {
-        g_print (_("%d: UPDATE command failed.\n"), __LINE__);
-        g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
-      }
+    if (mysql_real_query (&mysqlOut, buf->str, buf->len))
+    {
+      g_print (_("%d: UPDATE command failed.\n"), __LINE__);
+      g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
     }
   }
 
