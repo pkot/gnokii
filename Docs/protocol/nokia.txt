@@ -123,6 +123,8 @@ notify us via e-mail.  Thank you.
                SeqNo:           Sequence number of command in case where direction is
                                 from ME to computer, the sequence number is 
                                 counting from 0x30 to 0x37 and resetting back to 0x30.
+				Also seqnos 0x00 to 0x07 have been spotted on some
+				3110s (but not all, maybe different firmware revs?).
                                 When direction is from computer to ME,
                                 sequence number counts from 0x08 to 0x0f and resets back to 0x08.
                                 It may not be required to be this way.
