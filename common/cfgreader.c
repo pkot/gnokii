@@ -15,8 +15,11 @@
   Modified from code by Tim Potter.
 
   $Log$
-  Revision 1.14  2001-03-19 23:43:45  pkot
-  Solaris/*BSD '#if defined' cleanup
+  Revision 1.15  2001-06-10 11:24:57  machek
+  Kill "slash star" inside comment.
+
+  Revision 1.14  2001/03/19 23:43:45  pkot
+  Solaris/ *BSD '#if defined' cleanup
 
   Revision 1.13  2001/03/13 01:21:38  pkot
   *BSD updates (Bert Driehuis)

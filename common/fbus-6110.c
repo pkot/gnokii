@@ -17,8 +17,11 @@
   and 6110.
 
   $Log$
-  Revision 1.133  2001-03-19 23:43:46  pkot
-  Solaris/*BSD '#if defined' cleanup
+  Revision 1.134  2001-06-10 11:24:57  machek
+  Kill "slash star" inside comment.
+
+  Revision 1.133  2001/03/19 23:43:46  pkot
+  Solaris/ *BSD '#if defined' cleanup
 
   Revision 1.132  2001/03/13 01:23:17  pkot
   Windows updates (Manfred Jonsson)

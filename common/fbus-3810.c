@@ -13,11 +13,14 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.88  2001-06-04 09:24:27  machek
+  Revision 1.89  2001-06-10 11:24:57  machek
+  Kill "slash star" inside comment.
+
+  Revision 1.88  2001/06/04 09:24:27  machek
   Killed unneccessary functions.
 
   Revision 1.87  2001/03/19 23:43:45  pkot
-  Solaris/*BSD '#if defined' cleanup
+  Solaris/ *BSD '#if defined' cleanup
 
   Revision 1.86  2001/03/13 01:23:17  pkot
   Windows updates (Manfred Jonsson)
