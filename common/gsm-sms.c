@@ -816,12 +816,16 @@ static gn_error sms_get_read(gn_data *data)
 {
 	int i, j, found;
 
-	if (!data->message_list || !data->folder_stats) return GN_ERR_INTERNALERROR;
+	if (!data->message_list || !data->folder_stats || !data->sms_folder) return GN_ERR_INTERNALERROR;
 
 	for (i = 0; i < data->sms_folder->number; i++) {		/* cycle through all messages in phone */
 		found = 0;
 		for (j = 0; j < data->folder_stats[data->sms_folder->folder_id]->used; j++) {		/* and compare them to those alread in list */
 			if (data->sms_folder->locations[i] == data->message_list[j][data->sms_folder->folder_id]->location) found = 1;
+		}
+		if (data->folder_stats[data->sms_folder->folder_id]->used >= GN_SMS_MESSAGE_MAX_NUMBER)
+			dprintf("Max messages number in folder exceeded (%d)\n", GN_SMS_MESSAGE_MAX_NUMBER);
+			return GN_ERR_MEMORYFULL;
 		}
 		if (!found) {
 			dprintf("Found new (read) message. Will store it at #%i!\n", data->folder_stats[data->sms_folder->folder_id]->used);
