@@ -16,8 +16,8 @@
 #ifndef XGNOKII_DTMF_H
 #define XGNOKII_DTMF_H
 
-extern void GUI_CreateDTMFWindow ();
+extern void GUI_CreateDTMFWindow();
 
-extern void GUI_ShowDTMF ();
+extern void GUI_ShowDTMF();
 
 #endif

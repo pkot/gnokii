@@ -23,8 +23,8 @@
 #define		MAILBOX_LENGTH		200
 
 typedef struct {
-  gchar key[10];
-  gchar **value;
+	gchar key[10];
+	gchar **value;
 } ConfigEntry;
 
 extern void GUI_ReadXConfig();

@@ -16,8 +16,8 @@
 #ifndef XGNOKII_XKEYB_H
 #define XGNOKII_XKEYB_H
 
-extern void GUI_CreateXkeybWindow ();
+extern void GUI_CreateXkeybWindow();
 
-extern void GUI_ShowXkeyb ();
+extern void GUI_ShowXkeyb();
 
 #endif

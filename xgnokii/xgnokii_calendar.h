@@ -16,8 +16,8 @@
 #ifndef XGNOKII_CALENDAR_H
 #define XGNOKII_CALENDAR_H
 
-extern void GUI_CreateCalendarWindow ();
+extern void GUI_CreateCalendarWindow();
 
-extern void GUI_ShowCalendar ();
+extern void GUI_ShowCalendar();
 
 #endif

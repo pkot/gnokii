@@ -39,6 +39,7 @@
  * allow to build static library                   (Marcus Pallinger)
  * xgnokii updates
     o fix folder name max length                          (Pawel Kot)
+    o reindented code                                     (Pawel Kot)
  * libsms updates
     o fix folder name max length                          (Pawel Kot)
     o added DefaultSMS() function for initializing SMS struct
@@ -50,6 +51,8 @@
                                                           (Pawel Kot)
  * 6510 series updates
     o initial revision                                 (Markus Plail)
+ * 7110 series updates
+    o potentially fix SendSMS problem                     (Pawel Kot)
 
 0.4.0pre14
 ==========

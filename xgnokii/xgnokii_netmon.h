@@ -19,15 +19,15 @@
 #include <gtk/gtk.h>
 
 typedef struct {
-  GtkWidget *number;
-  GtkWidget *label;
-  gint       curDisp;
+	GtkWidget *number;
+	GtkWidget *label;
+	gint curDisp;
 } DisplayData;
 
-extern void GUI_CreateNetmonWindow ();
+extern void GUI_CreateNetmonWindow();
 
-extern void GUI_ShowNetmon ();
+extern void GUI_ShowNetmon();
 
-extern void GUI_RefreshNetmon ();
+extern void GUI_RefreshNetmon();
 
 #endif

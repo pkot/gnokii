@@ -1005,7 +1005,7 @@ static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	memcpy(req + 6, data->RawData->Data + 5, data->RawData->Length);
 	dprintf("Sending SMS...(%d)\n", length);
 	if (SM_SendMessage(state, length, 0x02, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetry(state, data, 0x02);
+	return SM_BlockNoRetryTimeout(state, data, 0x02, 100);
 }
 
 /* handle messages of type 0x02 (SMS Handling) */
