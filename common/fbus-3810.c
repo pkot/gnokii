@@ -1822,7 +1822,7 @@ GSM_Error   FB38_TX_SendDialCommand(u8 call_type, char *Number)
  
         /* Update sequence number and send to phone. */
     FB38_TX_UpdateSequenceNumber();
-    if (FB38_TX_SendMessage(21, 0x0a, RequestSequenceNumber, message) != true) {
+    if (FB38_TX_SendMessage(13 + number_length, 0x0a, RequestSequenceNumber, message) != true) {
         fprintf(stderr, _("Set Mem Loc Write failed!"));    
         return (GE_INTERNALERROR);
     }
