@@ -43,8 +43,6 @@
  * build system updates
     o don't use --rpath option with shared library as it
       causes too much harm                               (Pawel Kot)
- * added including compat.h to gnokii.h and virtmodem.h
-						      (Jan Derfinak)
 
 0.5.0pre9
 =========

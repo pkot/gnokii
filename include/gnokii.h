@@ -33,7 +33,6 @@
 #ifndef _gnokii_gsm_api_h
 #define _gnokii_gsm_api_h
 
-#include "compat.h"
 #include "gnokii/sms.h"
 #include "gnokii/call.h"
 #include "gnokii/common.h"

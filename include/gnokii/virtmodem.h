@@ -31,8 +31,6 @@
 #ifndef _gnokii_data_virtmodem_h
 #define _gnokii_data_virtmodem_h
 
-#include "../compat.h"
-
 struct vm_queue {
 	int n;
 	int head;
