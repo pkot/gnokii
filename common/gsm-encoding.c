@@ -16,6 +16,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#include "misc.h"
 
 #define NUMBER_OF_7_BIT_ALPHABET_ELEMENTS 128
 
@@ -44,17 +47,25 @@ static unsigned char GSM_DefaultAlphabet[NUMBER_OF_7_BIT_ALPHABET_ELEMENTS] = {
 	'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
 
+static unsigned char GSM_ReverseDefaultAlphabet[256];
+static bool reversed = false;
+
+static void SetupReverse()
+{
+	int i;
+
+	if (reversed) return;
+	memset(GSM_ReverseDefaultAlphabet, 0x3f, 256);
+	for (i = NUMBER_OF_7_BIT_ALPHABET_ELEMENTS - 1; i >= 0; i--)
+		GSM_ReverseDefaultAlphabet[ GSM_DefaultAlphabet[i] ] = i;
+	GSM_ReverseDefaultAlphabet['?'] = 0x3f;
+	reversed = true;
+}
+
 static unsigned char EncodeWithDefaultAlphabet(unsigned char value)
 {
-	unsigned char i;
-	
-	if (value == '?') return  0x3f;
-	
-	for (i = 0; i < NUMBER_OF_7_BIT_ALPHABET_ELEMENTS; i++)
-		if (GSM_DefaultAlphabet[i] == value)
-			return i;
-	
-	return '?';
+	SetupReverse();
+	return GSM_ReverseDefaultAlphabet[value];
 }
 
 static wchar_t EncodeWithUnicodeAlphabet(unsigned char value)
@@ -67,7 +78,11 @@ static wchar_t EncodeWithUnicodeAlphabet(unsigned char value)
 
 static unsigned char DecodeWithDefaultAlphabet(unsigned char value)
 {
-	return GSM_DefaultAlphabet[value];
+	if (value < NUMBER_OF_7_BIT_ALPHABET_ELEMENTS) {
+		return GSM_DefaultAlphabet[value];
+	} else {
+		return '?';
+	}
 }
 
 static unsigned char DecodeWithUnicodeAlphabet(wchar_t value)
