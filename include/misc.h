@@ -103,4 +103,22 @@
 #include <stdio.h>
 extern int GetLine(FILE *File, char *Line, int count);
 
+/* jano: Functions for detecting phone capabiltes. For explanation how  */
+/* to use these functions look into xgnokii_lowlevel.c                  */
+
+/* For models table */
+typedef struct {
+  char *model;
+  char *number;
+} PhoneModel;
+
+extern char *GetModel (const char *);
+extern int CallerGroupSupported (const char *);
+extern int NetmonitorSupported (const char *);
+extern int KeyboardSupported (const char *);
+extern int SMSSupported (const char *);
+extern int CalendarSupported (const char *);
+extern int DTMFSupported (const char *);
+extern int DataSupported (const char *);
+extern int SpeedDialSupported (const char *);
 #endif /* __misc_h */

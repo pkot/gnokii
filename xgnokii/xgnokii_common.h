@@ -24,10 +24,11 @@ typedef struct {
   gint       column;
 } SortColumn;
 
-typedef struct {
+/* typedef struct {
   gchar *model;
   gchar *number;
 } Model;
+*/
 
 typedef struct {
   GtkWidget *dialog;
@@ -69,15 +70,6 @@ extern gint LaunchProcess (const gchar *, const gchar *, const gint,
 extern void RemoveZombie (const gint);
 extern void Help (const GtkWidget *, const gpointer);
 extern gint strrncmp (const gchar * const, const gchar * const, size_t);
-extern gchar *GetModel (const gchar *);
-extern bool CallerGroupSupported (const gchar *);
-extern bool NetmonitorSupported (const gchar *);
-extern bool KeyboardSupported (const gchar *);
-extern bool SMSSupported (const gchar *);
-extern bool CalendarSupported (const gchar *);
-extern bool DTMFSupported (const gchar *);
-extern bool DataSupported (const gchar *);
-extern bool SpeedDialSupported (const gchar *);
 extern void GUI_Refresh (void);
 extern void SetSortColumn (GtkWidget *, SortColumn *);
 extern void GUIEventAdd (GUIEventType, void (*)(void));

@@ -24,7 +24,7 @@
 #include "fbus-3810.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii.h"
-#include "xgnokii_common.h"
+//#include "xgnokii_common.h"
 
 pthread_t monitor_th;
 PhoneMonitor phoneMonitor;

@@ -1,0 +1,48 @@
+The SMSD (SMS daemon) program is intended for receiving and sending SMS's.
+This code is a part of one project on which I work and I provide it for free
+use under GPL. I provide the program AS IS without any warranty.
+
+The program is designed to work with Postgres SQL server but you can adapt
+it for other SQL engines by rewriting db.{hc} modules. SMSD uses SQL server
+as repository for SMS's. You must create a database (default name is 'sms')
+with tables defined in sms.tables.sql file. Table 'inbox' is for received
+SMS's:
+number - phone number from which is sms received
+smsdate - date setted by SMS center
+insertdate - date of inserting SMS in table
+text - SMS text
+processed - smsd sets this always to FALSE
+
+PRIMARY KEY from 'number' and 'smsdate' is important. You must create it.
+
+When phone receive SMS, SMSD move it into table 'inbox'. (SMSD remove SMS
+from phone.)
+
+Table 'outbox' is for outgoing SMS's. SMSD periodicaly looking in this table
+and searching for lines with attribut 'processed' setted to FALSE. If it find
+such SMS, it will send SMS to 'number':
+number - recipient's phone number
+insertdate - date of inserting SMS in table
+text - SMS text
+processed - new SMS must have this attribut setted to FALSE. SMSD will send
+            this SMS and will update 'processed' to TRUE
+
+
+By default SMSD connect to localhost DB server, to database sms, with user
+name of user which start SMSD, without password. You can change this with
+-d,--db command line option. As argument of this option you must write Postgres
+connect info string. For example:
+./smsd --db "dbname=smsgateway host=bigserver user=ja password=secure" &
+
+SMSD is multi threaded program. After running SMSD you can see 5 threads.
+The first thread is thread manager, the second is for lowlevel communication
+with phone, the third for high level phone monitoring, the fourth is for
+receiving SMS's and last fifth is for SMS's sending.
+
+SMSD is not compiled by default with main 'make' command. You must compile it
+manually by typing 'make' in smsd directory. But before SMSD compilation
+you must right configure gnokii (autoconf, configure). SMSD shares gnokii
+runtime configuration file.
+
+					Jan Derfinak <ja@mail.upjs.sk>
+					17 December 2000

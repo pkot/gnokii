@@ -127,4 +127,5 @@
 * Sun 26 Nov 2000 Chris Kemp <ck231@cam.ac.uk>
 - Calling serial_close with any errors from above patch
 
-
+* Sun 19 Dec 2000 Jan Derfinak <ja@mail.upjs.sk>
+- Functions for detecting phone's capabilites moved from xgnokii directory.

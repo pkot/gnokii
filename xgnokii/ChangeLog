@@ -1,3 +1,6 @@
+* Sun 19 Dec 2000 Jan Derfinak <ja@mail.upjs.sk>
+- Functions for detecting phone's capabilites moved to common directory.
+
 * Sat Jul 15 13:18:12 CEST 2000 Jan Derfinak Jan Derfinak <ja@mail.upjs.sk>
 - Patch from Christopher Kemp <ck231@cam.ac.uk> to enable data mode in
   xgnokii.
