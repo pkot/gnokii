@@ -91,6 +91,7 @@ static void ReadConfig (gint argc, gchar *argv[])
       case 'd':
         g_free (connect);
         connect = g_strdup (optarg);
+        memset (optarg, 'x', strlen (optarg));
         break;
 
         case 'h':
