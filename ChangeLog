@@ -4,6 +4,7 @@
       compilation on some systems (eg OpenBSD)           (Pawel Kot)
     o uint8_t will be defined only if there's no stdint.h
       and inttypes.h                                (BORBELY Zoltan)
+    o abort configure if libiconv.h cannot be found (BORBELY Zoltan)
 
 0.5.0rc3
 ========

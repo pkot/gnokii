@@ -62,6 +62,10 @@ WIN32          = @WIN32@
 
 DESTDIR        =
 
+ifeq (@USE_NLS@, yes)
+	LIBS += @INTLLIBS@
+endif
+
 #
 # Global include directory
 #	($TOPDIR is defined in Makefile)
