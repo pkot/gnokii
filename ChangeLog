@@ -6,6 +6,8 @@
     o let gnokii understand X_GSM_* fields in vCard file; these
       fields are gnokii internal thing and set memory type,
       location and caller group                         (Pawel Kot)
+    o fix spelling: OCASSION->OCCASION; it makes calendar import
+      to work ok                       (Pawel Kot, Costin Grigoras)
  * AT series updates
     o try to handle correctly sms empty location        (Pawel Kot)
     o use actual encoding when reading network information

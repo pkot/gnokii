@@ -201,7 +201,7 @@ int gn_calnote_fill(gn_calnote *note, char *type, char *text,
 		note->type = GN_CALNOTE_CALL;
 	} else if (!strcmp(type, "MEETING"))
 		note->type = GN_CALNOTE_MEETING;
-	else if (!strcmp(type, "SPECIAL OCASSION"))
+	else if (!strcmp(type, "SPECIAL OCCASION"))
 		note->type = GN_CALNOTE_BIRTHDAY;
 	else
 		note->type = GN_CALNOTE_REMINDER;
