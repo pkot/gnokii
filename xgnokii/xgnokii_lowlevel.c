@@ -1134,7 +1134,7 @@ void *GUI_Connect(void *a)
 	phoneMonitor.working = _("Connecting...");
 	if (fbusinit(true) != GE_NONE) {
 #ifdef XDEBUG
-		g_printf("Initialization failed...\n");
+		g_print("Initialization failed...\n");
 #endif
 		/* FIXME: Add some popup */
 		exit(1);
