@@ -72,6 +72,10 @@ serial_baudrate = 19200
 # when DCD line will drop.
 #require_dcd = 1
 
+# If you are using a bluetooth connection, you can specify the rfcomm
+# channel number here. Default value is 1.
+#rfcomm_channel = 1
+
 # Run the specified script(s) right after opening and initializing the device
 # and before any communucation (right before closing for disconnect_script).
 # You may find handy to use it to connect your modem to SMS Center

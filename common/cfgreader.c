@@ -378,6 +378,13 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 	else
 		snprintf(cfg->disconnect_script, sizeof(cfg->disconnect_script), "%s", val);
 
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "rfcomm_channel")))
+		cfg->rfcomm_cn = def->rfcomm_cn;
+	else if (sscanf(val, " %d %c", &cfg->rfcomm_cn, &ch) != 1) {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "rfcomm_channel", val);
+		return false;
+	}
+
 	return true;
 }
 
@@ -439,6 +446,7 @@ API int gn_cfg_read(char **bindir)
 	gn_config_default.smsc_timeout = -1;
 	strcpy(gn_config_default.connect_script, "");
 	strcpy(gn_config_default.disconnect_script, "");
+	gn_config_default.rfcomm_cn = 1;
 
 	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default))
 		return -2;
@@ -453,8 +461,6 @@ API int gn_cfg_read(char **bindir)
 
 	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
 	if (!*bindir) (char *)*bindir = default_bindir;
-
-	gn_config_global.rfcomm_cn = 1;
 
 	return 0;
 }

@@ -16,6 +16,7 @@
     o utf8 encoding/decoding fixed                 (BORBELY Zoltan)
     o too many lost reply caused phone lockups     (BORBELY Zoltan)
     o new operators in Finland                       (Timo Metsälä)
+    o rfcomm_channel config option added           (BORBELY Zoltan)
 
 0.5.6
 =====
