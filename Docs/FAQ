@@ -32,8 +32,10 @@ A. Currently the supported phones are (All Nokia models unless
          + Nokia 3110|3810|8110|8110i
          + Nokia 5160|6160|6185
          + AT mode compatible phones (namely Nokia 62X0, Nokia 7110,
-           Nokia 8210, Nokia 6310, Nokia 6510, Ericsson T39, Sony-Ericsson
-           T68i, Siemens S25 are known to work)
+           Nokia 8210, Nokia 6310(i), Nokia 6510 (you should expect all
+           newer Nokia phones to work), Ericsson T39, Sony-Ericsson T68i,
+           Siemens S25/SL45i/C55/M55/S55, Motorola Timeport P7389i (L series),
+           C350, Bosch 908/909 are known to work)
 
    The following models are no longer being actively supported by the
    core team and the underlying code may have undergone some bit rot:

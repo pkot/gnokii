@@ -41,6 +41,7 @@
       page                                           (Reiner Steib)
     o Nokia 7250i seems to have the same bug(?) as 6100
                                                       (Hadley Rich)
+    o update information on AT tested phones            (Pawel Kot)
  * nk6510 series updates
     o handle correctly the case with more then 50 calendar entries
       in the phone; previous fix missed some chunks     (Pawel Kot)
