@@ -17,7 +17,10 @@
   The various routines are called PHONET_(whatever).
 
   $Log$
-  Revision 1.4  2001-03-23 13:40:23  chris
+  Revision 1.5  2001-05-07 16:24:03  pkot
+  DLR-3P temporary fix. How should I do it better?
+
+  Revision 1.4  2001/03/23 13:40:23  chris
   Pavel's patch and a few fixes.
 
   Revision 1.3  2001/03/21 23:36:05  chris
@@ -279,7 +282,7 @@ GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	glink->SendMessage=&PHONET_SendMessage;
 
 
-	if ( glink->ConnectionType == GCT_Irda ) {
+	if ((glink->ConnectionType == GCT_Infrared) || (glink->ConnectionType == GCT_Irda)) {
 		if (PHONET_Open() != true) return GE_DEVICEOPENFAILED;
 	} else { /* ConnectionType == GCT_Serial etc */
 		return GE_DEVICEOPENFAILED;

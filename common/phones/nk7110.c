@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.6  2001-03-23 13:40:24  chris
+  Revision 1.7  2001-05-07 16:24:04  pkot
+  DLR-3P temporary fix. How should I do it better?
+
+  Revision 1.6  2001/03/23 13:40:24  chris
   Pavel's patch and a few fixes.
 
   Revision 1.5  2001/03/22 16:17:06  chris
@@ -166,39 +169,44 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 	GSM_Data data;
 	char model[10];
 	GSM_Error err;
+	int try = 0, connected = 0;
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_7110, sizeof(GSM_Phone));
 
-	switch (state->Link.ConnectionType) {
-	case GCT_Serial:
-		err=FBUS_Initialise(&(state->Link), state);
-		break;
-	case GCT_Irda:
-		err=PHONET_Initialise(&(state->Link), state);
-		break;
-	case GCT_Infrared:
-	default:
-		return GE_NOTSUPPORTED;
-		break;
+	while (!connected) {
+		switch (state->Link.ConnectionType) {
+		case GCT_Serial:
+			if (try > 1) return GE_NOTSUPPORTED;
+			err = FBUS_Initialise(&(state->Link), state);
+			break;
+		case GCT_Infrared:
+		case GCT_Irda:
+			if (try > 0) return GE_NOTSUPPORTED;
+			err = PHONET_Initialise(&(state->Link), state);
+			break;
+		default:
+			return GE_NOTSUPPORTED;
+			break;
+		}
+
+		if (err != GE_NONE) {
+			dprintf("Error in link initialisation\n");
+			try++;
+			continue;
+		}
+
+		SM_Initialise(state);
+
+		/* Now test the link and get the model */
+		GSM_DataClear(&data);
+		data.Model = model;
+		if (state->Phone.Functions(GOP_GetModel, &data, state) != GE_NONE) try++;
+		else connected = 1;
 	}
-
-	if (err!=GE_NONE) {
-		dprintf("Error in link initialisation\n");
-		return err;
-	}
-
-	SM_Initialise(state);
-
-	/* Now test the link and get the model */
-
-	GSM_DataClear(&data);
-	data.Model=model;
-	if (state->Phone.Functions(GOP_GetModel, &data, state)!=GE_NONE) return GE_NOTSUPPORTED ;
-
 	/* Check for 7110 and alter the startup logo size */
-	if (strcmp(model,"NSE-5")==0) {
-	        state->Phone.Info.StartupLogoH=65;
+	if (strcmp(model, "NSE-5") == 0) {
+	        state->Phone.Info.StartupLogoH = 65;
 		dprintf("7110 detected - startup logo height set to 65\n");
 	}
   	return GE_NONE;

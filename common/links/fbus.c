@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.7  2001-03-22 16:17:05  chris
+  Revision 1.8  2001-05-07 16:24:03  pkot
+  DLR-3P temporary fix. How should I do it better?
+
+  Revision 1.7  2001/03/22 16:17:05  chris
   Tidy-ups and fixed gnokii/Makefile and gnokii/ChangeLog which I somehow corrupted.
 
   Revision 1.6  2001/03/21 23:36:05  chris
@@ -512,7 +515,9 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 {
 	unsigned char init_char = 0x55;
 	unsigned char count;
+	static int try = 0;
 
+	try++;
 	/* 'Copy in' the global structures */
 	glink = newlink;
 	statemachine = state;
@@ -533,9 +538,8 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 		/* FIXME!! */
 		return GE_DEVICEOPENFAILED;
 	} else {		/* ConnectionType == GCT_Serial */
-		if (!FBUS_OpenSerial(false)) /* Try DAU-9P cable */
-			if (!FBUS_OpenSerial(true)) /* Try DLR-3 cable */
-				return GE_DEVICEOPENFAILED;
+		if (!FBUS_OpenSerial(try - 1))
+			return GE_DEVICEOPENFAILED;
 	}
 
 	/* Send init string to phone, this is a bunch of 0x55 characters. Timing is
