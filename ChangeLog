@@ -5,6 +5,8 @@
     o mygnokii apparently does not exist (it is called gammu now),
       and it seems that it may be not compatible with sendsms
                                                         (Pawel Kot)
+    o don't say that gnokii is Nokia only in the spec file
+                                                        (Pawel Kot)
  * build system updates
     o update spec file to install all libs              (Pawel Kot)
     o sync Debian build files with Debian mainstream package
