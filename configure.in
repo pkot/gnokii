@@ -301,7 +301,7 @@ AC_ARG_ENABLE(shared,
      shared="no"
      GLDFLAGS="" ],
    [ shared="yes"
-     GLDFLAGS="-Wl,--rpath -Wl,\$(libdir)"]
+     GLDFLAGS=""]
 )
 
 AC_ARG_ENABLE(win32, 

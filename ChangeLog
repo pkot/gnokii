@@ -38,6 +38,9 @@
  * device layer updates
     o handling write errors in unixserial           (BORBELY Zoltan)
     o fixing write error handling                   (BORBELY Zoltan)
+ * build system updates
+    o don't use --rpath option with shared library as it
+      causes too much harm                               (Pawel Kot)
 
 0.5.0pre9
 =========
