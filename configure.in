@@ -240,7 +240,7 @@ AC_TRY_LINK([#include <termios.h>],
 
 AC_MSG_CHECKING(for c_ispeed and c_ospeed in struct termios)
 AC_TRY_LINK([#include <termios.h>],
-        [struct termios t; t.c_ispeed = B9600; t->c_ospeed = B9600;],
+        [struct termios t; t.c_iflag = B9600; t.c_oflag = B9600;],
 	[AC_DEFINE(HAVE_TERMIOS_CSPEED)
 	 AC_MSG_RESULT(yes)],
          AC_MSG_RESULT(no))
