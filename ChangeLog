@@ -2,6 +2,8 @@
 =====
  * general updates
     o add pkg-config support                             (Pawel Kot)
+    o use major and minor versions and soname for libgnokii
+                                                         (Pawel Kot)
 
 0.5.0rc2
 ========

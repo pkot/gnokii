@@ -17,6 +17,9 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
+MAJOR_NUMBER = 1
+MINOR_NUMBER = 0
+
 OBJS =	gsm-api.o \
 	gsm-error.o \
 	gsm-statemachine.o \
@@ -41,7 +44,9 @@ OBJS =	gsm-api.o \
 ifdef NO_SHARED
 GNOKII_LIB=libgnokii.a
 else
-GNOKII_LIB=libgnokii.so
+GNOKII_LIB  =libgnokii.so
+GNOKII_LIBM =$(GNOKII_LIB).$(MAJOR_NUMBER)
+GNOKII_LIBMM=$(GNOKII_LIBM).$(MINOR_NUMBER)
 endif
 
 all: $(GNOKII_LIB)
@@ -59,7 +64,9 @@ gnokii-debug: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/
 	$(CC) -o gnokii-debug $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/gnokii.o
 
 libgnokii.so: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	$(CC) -shared -o libgnokii.so $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(CC) -shared -Wl,-soname,$(GNOKII_LIBM) -o $(GNOKII_LIBMM) $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	ln -sf $(GNOKII_LIBMM) $(GNOKII_LIBM)
+	ln -sf $(GNOKII_LIBM) $(GNOKII_LIB)
 
 libgnokii.a: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	rm -f libgnokii.a
@@ -70,14 +77,18 @@ vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so* phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 distclean:
 	$(RM) vcal.c
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(libdir)
-	$(INSTALL) libgnokii.so $(DESTDIR)$(libdir)
+	$(INSTALL) $(GNOKII_LIBMM) $(DESTDIR)$(libdir)
+	cd $(DESTDIR)$(libdir) && ln -sf $(GNOKII_LIBMM) $(GNOKII_LIBM)
+	cd $(DESTDIR)$(libdir) && ln -sf $(GNOKII_LIBM) $(GNOKII_LIB)
+	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig
+	$(INSTALL) gnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	@echo
 
 install-strip: install
