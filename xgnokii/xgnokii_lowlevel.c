@@ -805,7 +805,7 @@ static gint A_DeleteSMSMessage(gpointer data)
 	if (sms) {
 		GSM_DataClear(&tmp_gdat);
 		tmp_gdat.SMS = sms;
-		error = SM_Functions(GOP_DeleteSMS, &tmp_gdat, &statemachine);
+		error = DeleteSMS(&tmp_gdat, &statemachine);
 		g_free(sms);
 	}
 	return (error);
