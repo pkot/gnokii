@@ -50,6 +50,8 @@
  * 6510 series updates:
     o fix incorrect order for SEND_MESSAGE_BLOCK and
       SEND_MESSAGE_WAITFOR arguments                     (Pawel Kot)
+    o unify SEND_MESSAGE_BLOCK and SEND_MESSAGE_WAITFOR across
+      the phone drivers                                  (Pawel Kot)
  * AT series updates:
     o fix smsc timestamp reading with getsms             (Pawel Kot)
  * libgnokii changes:
