@@ -395,6 +395,7 @@ unsigned int char_decode_unicode(unsigned char* dest, const unsigned char* src, 
 		dest += length;
 		pos += length;
 	}
+	*dest = 0;
 	return pos;
 }
 
