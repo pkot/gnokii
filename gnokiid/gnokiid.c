@@ -38,12 +38,14 @@ char		*Model;		/* Model from .gnokiirc file. */
 char		*Port;		/* Serial port from .gnokiirc file */
 char		*Initlength;	/* Init length from .gnokiirc file */
 char		*Connection;	/* Connection type from .gnokiirc file */
+char		*BinDir;	/* Directory of the mgnokiidev command */
 
 	/* Local variables */
 char		*DefaultModel = MODEL;	/* From Makefile */
 char		*DefaultPort = PORT;
 
 char		*DefaultConnection = "serial";
+char		*DefaultBinDir = "/usr/local/sbin";
 
 void version(void)
 {
@@ -111,7 +113,7 @@ int main(int argc, char *argv[])
 		connection=GCT_Infrared;
 	}
 
-	if (VM_Initialise(Model, Port, Initlength, connection, DebugMode) == false) {
+	if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode) == false) {
 		exit (-1);
 	}
 	while (1) {
@@ -154,4 +156,10 @@ void	read_config(void)
     if (Connection == NULL) {
 		Connection = DefaultConnection;
     }
+
+    BinDir = CFG_Get(cfg_info, "global", "bindir");
+    if (BinDir == NULL) {
+                BinDir = DefaultBinDir;
+    }
+
 }

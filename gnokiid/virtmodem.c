@@ -58,7 +58,7 @@ bool			RequestTerminate;
 
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
-bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType connection, bool debug_mode)
+bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode)
 {
 	int		rtn;
 
@@ -78,7 +78,7 @@ bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType
 		return (false);
 	}
 
-	if (VM_PtySetup() < 0) {
+	if (VM_PtySetup(bindir) < 0) {
 		fprintf (stderr, _("VM_Initialise - VM_PtySetup failed!\n"));
 		return (false);
 	}
@@ -165,14 +165,19 @@ void		VM_Terminate(void)
 	/* Open pseudo tty interface and (in due course create a symlink
 	   to be /dev/gnokii etc. ) */
 
-int		VM_PtySetup(void)
+int		VM_PtySetup(char *bindir)
 {
 	int			err;
 	char		*slave_name;
-	//char		*mgnokiidev = "/home/hugh/work/gnokii/mgnokiidev";			
-	char		*mgnokiidev = "../utils/mgnokiidev";			
+	char		mgnokiidev[200];
 	char		cmdline[200];
 	int			pty_number;
+
+	if (bindir) {
+		strncpy(mgnokiidev, bindir, 200);
+		strcat(mgnokiidev, "/");
+	}
+	strncat(mgnokiidev, "mgnokiidev", 200 - strlen(bindir));
 
 	if (UseSTDIO) {
 		PtyRDFD = STDIN_FILENO;
