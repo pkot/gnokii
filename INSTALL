@@ -8,8 +8,9 @@ Quickstart
 ==========
 
     $ gettextize                # only for CVS copies
-    $ autoconf			# only for CVS copies
+    $ aclocal			# only for CVS copies
     $ autoheader		# only for CVS copies
+    $ autoconf			# only for CVS copies
     $ ./configure [<options>]
     [ If you use latest Red Hat with new (0.11) gettext version ]
     [ run autogen.sh with configure options instead of the      ]
@@ -48,8 +49,9 @@ Preparations
 If you retrieved this copy from CVS, then first call
 
     $ gettextize
-    $ autoconf
+    $ aclocal
     $ autoheader
+    $ autoconf
 
 Now you have to determine your system specific settings.
 

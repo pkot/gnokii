@@ -1,9 +1,10 @@
-0.5.2 (not released yet)
+0.5.2
 =====
  * build system updates
     o build also bz2 archive                             (Pawel Kot)
     o use INSTALL_DATA variable from the configure script
                                                       (Ville Skyttä)
+    o update INSTALL installation notes                  (Pawel Kot)
  * translations updates
     o Estonian translation updated                   (Hans Motshärg)
     o added French translation                   (Olivier Kaloudoff)
