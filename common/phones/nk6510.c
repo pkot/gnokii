@@ -46,6 +46,18 @@
 #include "gsm-encoding.h"
 #include "gsm-api.h"
 
+#define SEND_MESSAGE_BLOCK(type, length) \
+do { \
+	if (SM_SendMessage(state, length, type, req) != GE_NONE) return GE_NOTREADY; \
+	return SM_Block(state, data, type); \
+} while (0)
+
+#define SEND_MESSAGE_WAITFOR(type, length) \
+do { \
+	if (SM_SendMessage(state, length, type, req) != GE_NONE) return GE_NOTREADY; \
+	return SM_WaitFor(state, data, type); \
+} while (0)
+
 /* Functions prototypes */
 static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_Initialise(GSM_Statemachine *state);
@@ -60,9 +72,7 @@ static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
-/*
 static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state);
-*/
 static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
 /*
@@ -182,10 +192,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		*/
 	case GOP_ReadPhonebook:
 		return P6510_ReadPhonebook(data, state);
-		/*
 	case GOP_WritePhonebook:
 		return P6510_WritePhonebookLocation(data, state);
-		*/
 	case GOP_GetNetworkInfo:
 		return P6510_GetNetworkInfo(data, state);
 		/*
@@ -1217,10 +1225,10 @@ static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x04, 0x01, 0x00, 0x01,
-					0x02, 0x05, /* memory type */ //02,05
-					0x00, 0x00, 0x00, 0x00, 
-				         0x00, 0x01, /*location */
-				         0x00, 0x00};
+			       0x02, 0x05, /* memory type */ //02,05
+			       0x00, 0x00, 0x00, 0x00, 
+			       0x00, 0x01, /*location */
+			       0x00, 0x00};
 
 	/*       00 01 00 07 01 01 00 01 
 		FE 10 
@@ -1252,14 +1260,108 @@ static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 			       0x03,  /* location */
 			       0x00, 0x00};
 
-	/* You can only get logos which have been altered, the standard */
-	/* logos can't be read!! */
+	/* You can only get logos which have been altered, */
+	/* the standard logos can't be read!! */
 
 	req[15] = GNOKII_MIN(data->Bitmap->number + 1, GSM_MAX_CALLER_GROUPS);
 	dprintf("Getting caller(%d) logo...\n", req[15]);
 
 	if (SM_SendMessage(state, 18, P6510_MSG_PHONEBOOK, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_PHONEBOOK);
+}
+
+static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
+{
+	*(block++) = id;
+	*(block++) = 0;
+	*(block++) = 0;
+	*(block++) = size + 6;
+	*(block++) = no;
+	memcpy(block, buf, size);
+	block += size;
+	*(block++) = 0;
+	return (size + 6);
+}
+
+static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x10,
+				  0x02, 0x00,  /* memory type */
+				  0x00, 0x00,  /* location */
+				  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /* blocks */
+
+	char string[500];
+	int block, i, j, defaultn;
+	unsigned int count = 22;
+	GSM_PhonebookEntry *entry;
+
+	if (data->PhonebookEntry) entry = data->PhonebookEntry;
+	else return GE_TRYAGAIN;
+
+	req[11] = GetMemoryType(entry->MemoryType);
+	/* Two octets for the memory location */
+	req[12] = (entry->Location >> 8);
+	req[13] = entry->Location & 0xff;
+	block = 1;
+	if ((*(entry->Name)) && (*(entry->Number))) {
+		/* Name */
+		i = strlen(entry->Name);
+		EncodeUnicode((string + 1), entry->Name, i);
+		/* Terminating 0 */
+		string[i * 2 + 1] = 0;
+		/* Length ot the string + length field + terminating 0 */
+		string[0] = (i + 1) * 2;
+		count += PackBlock(0x07, (i + 1) * 2, block++, string, req + count);
+
+		/* Group */
+		string[0] = entry->Group + 1;
+		string[1] = 0;
+		count += PackBlock(0x0b, 2, block++, string, req + count);
+
+		/* Default Number */
+		defaultn = 999;
+		for (i = 0; i < entry->SubEntriesCount; i++)
+			if (entry->SubEntries[i].EntryType == GSM_Number)
+				if (!strcmp(entry->Number, entry->SubEntries[i].data.Number))
+					defaultn = i;
+		if (defaultn < i) {
+			string[0] = entry->SubEntries[defaultn].NumberType;
+			string[1] = string[2] = string[3] = 0;
+			j = strlen(entry->SubEntries[defaultn].data.Number) + 1;
+			EncodeUnicode((string + 5), entry->SubEntries[defaultn].data.Number, j);
+			string[j * 2 + 1] = 0;
+			string[4] = j * 2;
+			count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
+		}
+		/* Rest of the numbers */
+		for (i = 0; i < entry->SubEntriesCount; i++)
+			if (entry->SubEntries[i].EntryType == GSM_Number) {
+				if (i != defaultn) {
+					string[0] = entry->SubEntries[i].NumberType;
+					string[1] = string[2] = string[3] = 0;
+					j = strlen(entry->SubEntries[i].data.Number) + 1;
+					EncodeUnicode((string + 5), entry->SubEntries[i].data.Number, j);
+					string[j * 2 + 1] = 0;
+					string[4] = j * 2;
+					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
+				}
+			} else {
+				j = strlen(entry->SubEntries[i].data.Number);
+				string[0] = j * 2;
+				EncodeUnicode((string + 1), entry->SubEntries[i].data.Number, j);
+				string[j * 2 + 1] = 0;
+				count += PackBlock(entry->SubEntries[i].EntryType, j * 2 + 2, block++, string, req + count);
+			}
+
+		req[21] = block - 1;
+		dprintf("Writing phonebook entry %s...\n",entry->Name);
+	} else {
+		return GE_NOTIMPLEMENTED;
+		/*
+		return P6510_DeletePhonebookLocation(data, state);
+		*/
+	}
+	SEND_MESSAGE_BLOCK(P6510_MSG_PHONEBOOK, count);
 }
 
 
