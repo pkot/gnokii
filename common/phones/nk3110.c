@@ -304,7 +304,7 @@ static gn_error P3110_Identify(gn_data *data, struct gn_statemachine *state)
 	dprintf("Identifying...\n");
 	pnok_manufacturer_get(data->manufacturer);
 	if (sm_message_send(0, 0x4c, NULL, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	sm_block(0x4d, data, state);
+	if (sm_block(0x4d, data, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
 	/* Check that we are back at state Initialised */
 	if (gn_sm_loop(0, state) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
@@ -343,7 +343,8 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 	/* Block for subsequent content frames... */
 	do {
 		dprintf("Waiting for content frames...\n");
-		sm_block_no_retry(0x27, data, state);
+		error = sm_block_no_retry(0x27, data, state);
+		if (error != GN_ERR_NONE) return error;
 	} while (DRVINSTANCE(state)->user_data_count < data->raw_sms->length);
 
 	return GN_ERR_NONE;
