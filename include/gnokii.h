@@ -113,4 +113,7 @@ API int gn_get_note(int number);
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
 API int gn_cfg_readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
 
+API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *addon);
+API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
+
 #endif	/* _gnokii_gsm_api_h */
