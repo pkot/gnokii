@@ -52,52 +52,6 @@
 
 /* Some globals */
 
-/*
-static const SMSMessage_Layout nk6100_deliver = {
-	true,
-	 4, true, true,
-	-1,  7, -1, -1,  2, -1, -1, -1, 19, 18, 16,
-	-1, -1, -1,
-	20, true, true,
-	32, -1,
-	 1,  0,
-	39, true
-};
-
-static const SMSMessage_Layout nk6100_submit = {
-	true,
-	 4, true, true,
-	-1, 16, 16, 16,  2, 17, 18, -1, 20, 19, 16,
-	16, -1, -1,
-	21, true, true,
-	33, -1,
-	-1, -1,
-	40, true
-};
-
-static const SMSMessage_Layout nk6100_delivery_report = {
-	true,
-	 4, true, true,
-	-1, -1, -1, -1,  2, -1, -1, -1, 18, 17, 16,
-	-1, -1, -1,
-	19, true, true,
-	31, 38,
-	 1,  0,
-	18, true
-};
-
-static const SMSMessage_Layout nk6100_picture = {
-	false,
-	-1, true, true,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1,
-	-1, true, true,
-	-1, -1,
-	-1, -1,
-	-1, true
-};
-*/
-
 static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 /* FIXME: we should get rid on it */
 static GSM_Statemachine *State = NULL;
@@ -461,18 +415,6 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_6100, sizeof(GSM_Phone));
-
-	/* SMS Layout */
-	/*
-	nk6100_layout.Type = 7;
-	nk6100_layout.SendHeader = 0;
-	nk6100_layout.ReadHeader = 4;
-	nk6100_layout.Deliver = nk6100_deliver;
-	nk6100_layout.Submit = nk6100_submit;
-	nk6100_layout.DeliveryReport = nk6100_delivery_report;
-	nk6100_layout.Picture = nk6100_picture;
-	layout = nk6100_layout;
-	*/
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
@@ -1445,40 +1387,32 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 
 		memset(data->RawSMS, 0, sizeof(GSM_SMSMessage));
 
-#define	getdata(d,dr)	(message[(data->RawSMS->Type == 0) ? (d) : (dr)])
+#define	getdata(d,dr,s)	(message[(data->RawSMS->Type == SMS_Deliver) ? (d) : ((data->RawSMS->Type == SMS_Delivery_Report) ? (dr) : (s))])
 		switch (message[7]) {
-		case 0x00: data->RawSMS->Type	= 0; break;
-		case 0x01: data->RawSMS->Type	= 1; break;
-		case 0x02: data->RawSMS->Type	= 2; break;
+		case 0x00: data->RawSMS->Type	= SMS_Deliver; break;
+		case 0x01: data->RawSMS->Type	= SMS_Delivery_Report; break;
+		case 0x02: data->RawSMS->Type	= SMS_Submit; break;
 		default: return GE_UNHANDLEDFRAME;
 		}
 		data->RawSMS->Number		= message[6];
 		data->RawSMS->MemoryType	= GMT_SM;
 		data->RawSMS->Status		= message[4];
 
-		data->RawSMS->MoreMessages	= 0;
-		if (data->RawSMS->Type == 0x01)
-			data->RawSMS->ReplyViaSameSMSC	= message[11];
-		data->RawSMS->RejectDuplicates	= 0;
-		data->RawSMS->Report		= 0;
-
-		data->RawSMS->Reference		= 0;
-		data->RawSMS->PID		= 0;
-		data->RawSMS->ReportStatus	= 0;
-
-		memcpy(data->RawSMS->SMSCTime, &getdata(36, 35), 7);
-		if (data->RawSMS->Type == 0x01)
-			memcpy(data->RawSMS->Time, message + 42, 7);
-		memcpy(data->RawSMS->MessageCenter, message + 8, 12);
-		memcpy(data->RawSMS->RemoteNumber, &getdata(24, 23), 12);
-
-		data->RawSMS->DCS		= getdata(22, 21);
-		data->RawSMS->Length		= getdata(23, 22);
+		data->RawSMS->DCS		= getdata(22, 21, 23);
+		data->RawSMS->Length		= getdata(23, 22, 24);
 		data->RawSMS->UDHIndicator	= message[20];
-		memcpy(data->RawSMS->UserData, &getdata(43, 22), data->RawSMS->Length);
+		memcpy(data->RawSMS->UserData, &getdata(43, 22, 44), data->RawSMS->Length);
 
-		data->RawSMS->ValidityIndicator	= 0;
-
+		if (data->RawSMS->Type == SMS_Delivery_Report) {
+			data->RawSMS->ReplyViaSameSMSC = message[11];
+			memcpy(data->RawSMS->Time, message + 42, 7);
+		}
+		if (data->RawSMS->Type != SMS_Submit) {
+			memcpy(data->RawSMS->SMSCTime, &getdata(36, 35, 0), 7);
+			memcpy(data->RawSMS->MessageCenter, message + 8, 12);
+			memcpy(data->RawSMS->RemoteNumber, &getdata(24, 23, 0), 12);
+		}
+#undef	getdata
 		break;
 
 	/* read sms failed */
