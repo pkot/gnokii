@@ -52,7 +52,7 @@ void EncodeHex (unsigned char* dest, const unsigned char* src, int len);
 void DecodeUCS2 (unsigned char* dest, const unsigned char* src, int len);
 void EncodeUCS2 (unsigned char* dest, const unsigned char* src, int len);
 
-extern char *GetBCDNumber(u8 *Number);
+extern char *GetBCDNumber(u8 *Number, int maxlen);
 extern int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type);
 
 #endif

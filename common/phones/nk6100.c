@@ -1282,9 +1282,9 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 				smsc->Validity = SMS_V24H;
 				break;
 			}
-			snprintf(smsc->Recipient, sizeof(smsc->Recipient), "%s", GetBCDNumber(pos));
+			snprintf(smsc->Recipient, sizeof(smsc->Recipient), "%s", GetBCDNumber(pos, GSM_MAX_SMS_CENTER_LENGTH - 1));
 			pos += 12;
-			snprintf(smsc->Number, sizeof(smsc->Number), "%s", GetBCDNumber(pos));
+			snprintf(smsc->Number, sizeof(smsc->Number), "%s", GetBCDNumber(pos, GSM_MAX_SMS_CENTER_LENGTH - 1));
 			smsc->Type = pos[1];
 			pos += 12;
 			/* FIXME: codepage must be investigated - bozo */
@@ -2198,6 +2198,7 @@ static GSM_Error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 		memset(pos, 0x00, 7);
 		pos += 7;
 	}
+	
 
 	*pos = PNOK_EncodeString(pos+1, 255, note->Text);
 	pos += *pos+1;
@@ -3299,7 +3300,7 @@ static GSM_Error IncomingCallDivert(int messagetype, unsigned char *message, int
 			memset(cd->Number.number, 0, sizeof(cd->Number.number));
 		} else if (pos[0] == 0x02 && pos[1] == 0x01) {
 			pos += 2;
-			snprintf(cd->Number.number, sizeof(cd->Number.number), "%-*.*s", *pos+1, *pos+1, GetBCDNumber(pos+1));
+			snprintf(cd->Number.number, sizeof(cd->Number.number), "%-*.*s", *pos+1, *pos+1, GetBCDNumber(pos+1,GSM_MAX_SMS_CENTER_LENGTH -1 ));
 			pos += 12 + 22;
 			cd->Timeout = *pos++;
 		}
