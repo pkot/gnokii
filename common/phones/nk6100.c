@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.2  2001-08-09 12:34:34  pkot
+  Revision 1.3  2001-08-17 00:01:53  pkot
+  Fixed a typo in 6100.c (me)
+
+  Revision 1.2  2001/08/09 12:34:34  pkot
   3330 and 6250 support - I have no idea if it does work (mygnokii)
 
   Revision 1.1  2001/07/09 23:55:35  pkot
@@ -30,7 +33,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "phones/generic.h"
-#include "phones/nk6110.h"
+#include "phones/nk6100.h"
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
 #include "phones/nokia.h"
