@@ -3,19 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "Config"=.\Config.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "Gnokii"=.\Gnokii.dsp - Package Owner=<4>
+Project: "gnokii"=.\gnokii.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -24,13 +12,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name GnokiiLib
+    Project_Dep_Name libgnokii
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "GnokiiLib"=.\GnokiiLib.dsp - Package Owner=<4>
+Project: "libgnokii"=.\libgnokii.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -38,9 +26,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name Config
-    End Project Dependency
 }}}
 
 ###############################################################################
