@@ -25,6 +25,9 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
 (
    cd /tmp/gnokii-${VERSION}
    ./autogen.sh
+   for patch in `ls patches/`; do
+	cat $patch | patch -p0
+   done
    make -C common vcal.c
    # RedHat thing
    cp packaging/RedHat/gnokii.spec .

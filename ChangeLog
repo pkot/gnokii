@@ -14,6 +14,8 @@
       ldconfig used old libraries assuming that 1.X is newer then
       1.0.Y; we're bumping major version number to 2 to avoid the
       confusion                                         (Pawel Kot)
+    o when building the release tarball, apply all patches from
+      patches/ subdir                                   (Pawel Kot)
  * gnokii updates
     o accept range in --deletephonebook            (BORBELY Zoltan)
  * documentation updates
