@@ -155,3 +155,16 @@ Q. I get 'Sorry, phone has not yet been converted to new style.
 
 A. You use ancient version of gnokii! Upgrade! See our downloads page for the
    detailes (http://www.gnokii.org/downloads.shtml).
+
+-------------------------------------------------------------------------------
+Q. I get 'ERROR: Modem DCD is down and global/require_dcd parameter is set!'
+   What should I do?
+
+A. Either comment out require_dcd variable in the config file or set it to 0
+
+-------------------------------------------------------------------------------
+Q. I can't compile gnokii. It failes with po directory building.
+
+A. You need to run gettextize. See autogen.sh and INSTALL files. If you don't
+   have it on your system, grab the -current tarball which should have all
+   needed files already generated.
