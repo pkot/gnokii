@@ -10,6 +10,8 @@
  * fbus-6110-ringtones.c gsm-networks.c cfgreader.c 
  */
 
+#ifdef WIN32
+
 #define USECOMM      // yes, we need the COMM API
 
 #include <windows.h>
@@ -469,5 +471,5 @@ DWORD FAR PASCAL KeepAliveProc(LPSTR lpData)
     return 0;
 }
 
-
+#endif
 /* end */
