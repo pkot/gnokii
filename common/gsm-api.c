@@ -56,13 +56,17 @@ GSM_Information		*GSM_Info;
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
 
-#define MODULE(x) \
+#define MODULE(x) { \
+	extern GSM_Functions x##_Functions; \
+	extern GSM_Information x##_Information; \
+	extern bool x##_LinkOK; \
 	if (strstr(x##_Information.Models, model) != NULL) { \
 		GSM = & x##_Functions; \
 	        GSM_Info = & x##_Information; \
 		GSM_LinkOK = & x##_LinkOK; \
 		return (GSM->Initialise(device, initlength, connection, rlp_callback)); \
-	}
+	} \
+}
 
 GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame))
 {
@@ -73,6 +77,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
   MODULE(MB61)
   MODULE(MB640)
   MODULE(P7110)
+  MODULE(D2711)
 #endif /* WIN32 */ 
   return (GE_UNKNOWNMODEL);
 }
