@@ -33,6 +33,8 @@
     o sms status message can crash the driver       (BORBELY Zoltan)
  * xgnokii fixes
     o do not free message previously added to GSList  (Josef Zlomek)
+    o strip spaces from the number to be saved to the addressbook
+                                                         (Pawel Kot)
  * build system updates
     o avoid warnings on Linux when irda headers are detected
                                                          (Pawel Kot)
