@@ -108,6 +108,7 @@ static GSM_Error P6510_SetProfile(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetStartupGreeting(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
+static GSM_Error P6510_Subscribe(GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 static GSM_Error P6510_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
@@ -130,6 +131,8 @@ static GSM_Error P6510_IncomingCallDivert(int messagetype, unsigned char *messag
 static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingSubscribe(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 #ifdef  SECURITY
 static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -162,6 +165,8 @@ static GSM_IncomingFunctionType P6510_IncomingFunctions[] = {
 #ifdef  SECURITY
 	{ P6510_MSG_SECURITY,	P6510_IncomingSecurity },
 #endif
+	{ P6510_MSG_SUBSCRIBE,	P6510_IncomingSubscribe },
+	{ P6510_MSG_COMMSTATUS,	P6510_IncomingCommStatus },
 	{ 0, NULL }
 };
 
@@ -285,6 +290,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	case GOP_EnterSecurityCode:
 		return P6510_EnterSecurityCode(data, state);
 #endif
+	case GOP_Subscribe:
+		return P6510_Subscribe(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -2077,6 +2084,7 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 
 	switch (message[3]) {
 	case 0x01:
+	case 0x02:
 		blockstart = message + 6;
 		for (i = 0; i < message[5]; i++) {
 			dprintf("Blockstart: %i\n", blockstart[0]);
@@ -2124,6 +2132,12 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 			blockstart += blockstart[1];
 		}
 		break;
+	case 0x0b:
+		/*
+		  no idea what this is about
+		  00 01 00 0b 00 02 00 00 00
+		*/
+		break;
 	case 0x0c: /* RF Level */
 		if (data->RFLevel) {
 			*(data->RFUnits) = GRF_Percentage;
@@ -2142,9 +2156,16 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		*/
 		if (data->RFLevel) {
 			*(data->RFUnits) = GRF_Percentage;
-			*(data->RFLevel) = message[5];
+			*(data->RFLevel) = message[4];
 			dprintf("RF level %f\n", *(data->RFLevel));
 		}
+		break;
+	case 0x20:
+		/*
+		  no idea what this is about
+		  01 56 00 20 02 00 55
+		  01 56 00 20 01 00 55
+		*/
 		break;
 	case 0x24:
 		if (data->Bitmap) {
@@ -2830,6 +2851,107 @@ static GSM_Error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state
 	req[5 + len] = '\0';
 
 	SEND_MESSAGE_BLOCK(P6510_MSG_SECURITY, 6 + len);
+}
+
+/*****************/
+/*** SUBSCRIBE ***/
+/*****************/
+
+static GSM_Error P6510_IncomingSubscribe(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	case 0x1e:
+		dprintf("Subscribing succesful\n");
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x3c (%d)\n", message[3]);
+		return GE_UNHANDLEDFRAME;
+		break;
+	}
+}
+
+static GSM_Error P6510_Subscribe(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10,
+			       0x05, /* number of groups */
+			       0x01, 0x0a, 0x02, 0x14, 0x15};
+
+	dprintf("Subscribing to various channels!\n");
+	if (SM_SendMessage(state, 10, P6510_MSG_SUBSCRIBE, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_SUBSCRIBE);
+}
+
+
+/*****************/
+/*** COMMSTATUS ***/
+/*****************/
+
+static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	unsigned char *dummy;
+
+	switch (message[3]) {
+	case 0x02:
+		dprintf("Call established, remote phone is ringing.\n");
+		dprintf("Call ID: %i\n", message[4]);
+		break;
+	case 0x03:
+		dprintf("Call complete.\n");
+		dprintf("Call ID: %i\n", message[4]);
+		dprintf("Call Mode: %i\n", message[5]);
+		dummy = malloc(message[6] + 1);
+		DecodeUnicode(dummy, message + 7, message[6]);
+		dprintf("Number: %s\n", dummy);
+		break;		
+	case 0x04:
+		dprintf("Hangup!\n");
+		dprintf("Call ID: %i\n", message[4]);
+		dprintf("Cause Type: %i\n", message[5]);
+		dprintf("Cause ID: %i\n", message[6]);
+		break;
+	case 0x05:
+		dprintf("Incoming call:\n");
+		dprintf("Call ID: %i\n", message[4]);
+		dprintf("Call Mode: %i\n", message[5]);
+		dummy = malloc(message[6] + 1);
+		DecodeUnicode(dummy, message + 7, message[6]);
+		dprintf("From: %s\n", dummy);
+		break;
+	case 0x07:
+		dprintf("Call answer initiated.\n");
+		dprintf("Call ID: %i\n", message[4]);
+		break;
+	case 0x09:
+		dprintf("Call released.\n");
+		dprintf("Call ID: %i\n", message[4]);
+		break;
+	case 0x0a:
+		dprintf("Call is being released.\n");
+		dprintf("Call ID: %i\n", message[4]);
+		break;
+	case 0x0b:
+		/* No idea what this is about! */
+		break;
+	case 0x0c:
+		if (message[4] == 0x01)
+			dprintf("Audio enabled\n");
+		else
+			dprintf("Audio disabled\n");
+		break;
+	case 0x53:
+		dprintf("Outgoing call:\n");
+		dprintf("Call ID: %i\n", message[4]);
+		dprintf("Call Mode: %i\n", message[5]);
+		dummy = malloc(message[6] + 1);
+		DecodeUnicode(dummy, message + 7, message[6]);
+		dprintf("To: %s\n", dummy);
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x01 (%d)\n", message[3]);
+		return GE_UNHANDLEDFRAME;
+		break;
+	}
+	return GE_NONE;
 }
 
 /********************************/
