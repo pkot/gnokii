@@ -57,3 +57,7 @@
 
 * Wed May 10 10:46:15 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - new network code
+
+* Thu May 11 01:00:00 CET 2000 Chris Kemp
+- Minor changes to GetBitmap to avoid interrupted mulitframe packets.
+

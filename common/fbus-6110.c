@@ -2259,20 +2259,27 @@ GSM_Error FB61_GetBitmap(GSM_Bitmap *Bitmap) {
 
   unsigned char req[10] = { FB61_FRAME_HEADER };
   u8 count=3;
-  int timeout=50; /* 5 seconds for command to complete */
+  int timeout;
 
   GetBitmap=Bitmap;
 
   GetBitmapError = GE_BUSY;
-
-  DisableKeepalive = true;
  
   /* This is needed to avoid the packet being interrupted */
+  /* Remove when multipacket code is implemented fully */
+
+  DisableKeepalive = true;
+
+  timeout=10;
 
   while (timeout!=0 && MessagesSent!=AcksReceived) {
     usleep(100000);
     timeout--;
   }
+
+  /* We'll assume that nothing more will be received after 1 sec */
+
+  MessagesSent=AcksReceived;
 
   switch (GetBitmap->type) {
   case GSM_StartupLogo:
@@ -2293,6 +2300,10 @@ GSM_Error FB61_GetBitmap(GSM_Bitmap *Bitmap) {
     break;
   }
 
+  /* 5secs for the command to complete */
+  
+  timeout=50;
+  
   while (timeout != 0 && GetBitmapError == GE_BUSY) {
 
     if (--timeout == 0)
