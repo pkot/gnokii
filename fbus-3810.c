@@ -90,6 +90,8 @@ bool					RequestTerminate;
 struct termios			OldTermios;	/* To restore termio on close. */
 bool					EnableMonitoringOutput;
 bool					DisableKeepalive;
+float					CurrentRFLevel;
+float					CurrentBatteryLevel;
 
 	/* We have differing lengths for internal memory vs SIM memory.
 	   internal memory is index 0, SIM index 1. */
@@ -123,6 +125,8 @@ GSM_Error	FB38_Initialise(char *port_device, bool enable_monitoring)
 	FB38_LinkOK = false;
 	EnableMonitoringOutput = enable_monitoring;
 	DisableKeepalive = false;
+	CurrentRFLevel = -1;
+	CurrentBatteryLevel = -1;
 
 	strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -471,6 +475,36 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 	return(CurrentSMSMessageError);
 }
 
+	/* FB38_GetRFLevel
+	   FIXME (sort of...)
+	   For now, GetRFLevel and GetBatteryLevel both rely
+	   on data returned by the "keepalive" packets.  I suspect
+	   that we don't actually need the keepalive at all but
+	   will await the official doco before taking it out.  HAB19990511 */
+GSM_Error	FB38_GetRFLevel(float *level)
+{
+	if (CurrentRFLevel == -1) {
+		return (GE_INTERNALERROR);
+	}
+	else {
+		*level = CurrentRFLevel;
+		return (GE_NONE);
+	}
+}
+
+	/* FB38_GetBatteryLevel
+	   FIXME (see above...) */
+GSM_Error	FB38_GetBatteryLevel(float *level)
+{
+	if (CurrentBatteryLevel == -1) {
+		return (GE_INTERNALERROR);
+	}
+	else {
+		*level = CurrentBatteryLevel;
+		return (GE_NONE);
+	}
+}
+
 	/* Our "Not implemented" functions */
 GSM_Error	FB38_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
@@ -482,15 +516,6 @@ GSM_Error	FB38_GetSMSStatus(GSM_SMSStatus *Status)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	FB38_GetRFLevel(float *level)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	FB38_GetBatteryLevel(float *level)
-{
-	return (GE_NOTIMPLEMENTED);
-}
 
 GSM_Error	FB38_GetPowerSource(GSM_PowerSource *source)
 {
@@ -1423,6 +1448,9 @@ void	FB38_RX_Handle0x4b_Status(void)
 		   network, 0x04 when no network available.   Steps through 0x02, 0x03
 		   when incoming or outgoing calls occur...*/	
 	FB38_LinkOK = true;
+
+	CurrentRFLevel = MessageBuffer[3];
+	CurrentBatteryLevel = MessageBuffer[4];
 
 	if (EnableMonitoringOutput == false) {
 		return;
