@@ -185,6 +185,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 #ifdef  SECURITY
 static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -209,6 +210,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0xf1, IncomingRLPFrame },
 	{ 0x0c, IncomingKey },
 	{ 0x06, IncomingCallDivert },
+	{ 0xda, IncomingMisc },
 #ifdef	SECURITY
 	{ 0x08, IncomingSecurityCode },
 #endif
@@ -3328,4 +3330,16 @@ static GSM_Error IncomingCallDivert(int messagetype, unsigned char *message, int
 	}
 
 	return GE_NONE;
+}
+
+
+static GSM_Error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	if (messagetype == 0xda && message[0] == 0x00 && message[1] == 0x00)
+	{
+		/* seems like a keepalive */
+		return GE_UNSOLICITED;
+	}
+
+	return GE_UNHANDLEDFRAME;
 }

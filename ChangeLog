@@ -16,6 +16,9 @@
     o autoheader specific cleanup in various files   (BORBELY Zoltan)
     o configure.in fixes and cleanup                 (BORBELY Zoltan)
  * fixed memset typo in DefaultSMS()                           (Ueli)
+ * 6110 series updates
+    o keepalive packet won't be reported as an unhadled frame
+                                                     (BORBELY Zoltan)
 
 0.4.0pre17
 ==========
