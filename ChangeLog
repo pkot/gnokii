@@ -45,7 +45,9 @@
  * 6510 series update
     o added GetMemoryStatus (thanks to Michael Moosbauer for
       the info)                                        (Markus Plail)
-
+ * strsep function provided if not present             (Markus Plail)
+ * changed gnokii.c to use strsep instead of strtok    (Markus Plail)
+	
 0.4.0pre16
 ==========
  * Killed inlines in the code (except xgnokii and smsd)   (Pawel Kot)
