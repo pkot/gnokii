@@ -26,6 +26,8 @@
     o group the external API functions in gsm-api.h      (Pawel Kot)
     o reorganization in the common files: -data, -common,
       -statemachine                                      (Pawel Kot)
+ * 6110 series updates:
+    o M2BUS support added                           (BORBELY Zoltan)
 
 0.5.0pre2
 =========

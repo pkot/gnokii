@@ -133,6 +133,8 @@ API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
 		sm->link.connection_type = GN_CT_DLR3P;
 	else if (!strcasecmp(connection, "infrared"))
 		sm->link.connection_type = GN_CT_Infrared;
+	else if (!strcasecmp(connection, "m2bus"))
+		sm->link.connection_type = GN_CT_M2BUS;
 #ifdef HAVE_IRDA
 	else if (!strcasecmp(connection, "irda"))
 		sm->link.connection_type = GN_CT_Irda;
