@@ -31,11 +31,10 @@
 #ifndef _gnokii_internal_h
 #define _gnokii_internal_h
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/sms.h"
-#include "gnokii/common.h"
-#include "gnokii/data.h"
-#include "gnokii/statemachine.h"
+#include "gnokii.h"
 
 /* SMS */
 gn_error sms_parse(int offset, gn_data *data);

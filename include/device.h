@@ -31,9 +31,10 @@
 #ifndef _gnokii_device_h
 #define _gnokii_device_h
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
-#include "gnokii/error.h"
+#include "gnokii.h"
 
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>

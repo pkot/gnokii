@@ -31,8 +31,9 @@
 #ifndef _gnokii_data_at_emulator_h
 #define _gnokii_data_at_emulator_h
 
-#include "gnokii/statemachine.h"
-#include "gnokii/call.h"
+#include "config.h"
+#include "compat.h"
+#include "gnokii.h"
 
 	/* Prototypes */
 bool	gn_atem_initialise(int read_fd, int write_fd, struct gn_statemachine *sm);

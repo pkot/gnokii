@@ -29,8 +29,10 @@
 #ifndef __devices_winserial_h_
 #define __devices_winserial_h_
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/error.h"
+#include "gnokii.h"
 
 int serial_open(const char *file, int oflag);
 int serial_close(int fd, struct gn_statemachine *state);

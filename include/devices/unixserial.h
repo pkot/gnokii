@@ -29,6 +29,9 @@
 #ifndef __devices_unixserial_h
 #define __devices_unixserial_h
 
+#include "config.h"
+#include "compat.h"
+
 #ifdef WIN32
 #  include <stddef.h>
 #else
@@ -36,7 +39,7 @@
 #endif	/* WIN32 */
 
 #include "misc.h"
-#include "gnokii/error.h"
+#include "gnokii.h"
 
 int serial_open(const char *file, int oflag);
 int serial_close(int fd, struct gn_statemachine *state);
