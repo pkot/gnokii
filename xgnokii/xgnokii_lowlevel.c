@@ -1106,28 +1106,6 @@ void *GUI_Connect(void *a)
 /* FIXME - this loop goes mad on my 7110 - so I've put in a usleep */
 		usleep(50000);
 
-		if (SM_Functions(GOP_GetRFLevel, &gdat, &statemachine) != GE_NONE)
-			phoneMonitor.rfLevel = -1;
-
-		if (rf_units == GRF_Arbitrary)
-			phoneMonitor.rfLevel *= 25;
-
-		if (SM_Functions(GOP_GetPowersource, &gdat, &statemachine) == GE_NONE
-		    && phoneMonitor.powerSource == GPS_ACDC)
-			phoneMonitor.batteryLevel = ((gint) phoneMonitor.batteryLevel + 25) % 125;
-		else {
-			if (SM_Functions(GOP_GetBatteryLevel, &gdat, &statemachine) != GE_NONE)
-				phoneMonitor.batteryLevel = -1;
-			if (batt_units == GBU_Arbitrary)
-				phoneMonitor.batteryLevel *= 25;
-		}
-
-		if (SM_Functions(GOP_GetAlarm, &gdat, &statemachine) == GE_NONE &&
-		    Alarm.AlarmEnabled != 0)
-			phoneMonitor.alarm = TRUE;
-		else
-			phoneMonitor.alarm = FALSE;
-
 		if (SM_Functions(GOP_GetIncomingCallNr, &gdat, &statemachine) == GE_NONE) {
 #ifdef XDEBUG
 			g_print("Call in progress: %s\n", phoneMonitor.call.callNum);
@@ -1194,9 +1172,36 @@ void *GUI_Connect(void *a)
 						event->event, error);
 			g_free(event);
 		}
+
+		/* two seconds delay for SMS, RF/power level */
 		newtime = time(&newtime);
-		if ((newtime < oldtime + 2) || !isSMSactivated)  continue;
+		if (newtime < oldtime + 2)  continue;
 		oldtime = newtime;
+
+		if (SM_Functions(GOP_GetRFLevel, &gdat, &statemachine) != GE_NONE)
+			phoneMonitor.rfLevel = -1;
+
+		if (SM_Functions(GOP_GetPowersource, &gdat, &statemachine) == GE_NONE
+		    && phoneMonitor.powerSource == GPS_ACDC)
+			phoneMonitor.batteryLevel = ((gint) phoneMonitor.batteryLevel + 25) % 125;
+		else {
+			if (SM_Functions(GOP_GetBatteryLevel, &gdat, &statemachine) != GE_NONE)
+				phoneMonitor.batteryLevel = -1;
+			if (batt_units == GBU_Arbitrary)
+				phoneMonitor.batteryLevel *= 25;
+		}
+
+		if (rf_units == GRF_Arbitrary) 
+			phoneMonitor.rfLevel *= 25;
+
+		if (SM_Functions(GOP_GetAlarm, &gdat, &statemachine) == GE_NONE &&
+		    Alarm.AlarmEnabled != 0)
+			phoneMonitor.alarm = TRUE;
+		else
+			phoneMonitor.alarm = FALSE;
+
+		/* only do SMS monitoring when activated */
+		if (!isSMSactivated) continue;
 
 		if ((GetFolderChanges(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS)))
 		    == GE_NONE) {
