@@ -52,7 +52,7 @@
 
 
 /* Function to convert scale field in to correct number. */
-static int ringtone_get_duration (char *num)
+static int ringtone_get_duration(char *num)
 {
 	int duration = 0;
 
@@ -80,7 +80,7 @@ static int ringtone_get_duration (char *num)
 }
 
 
-static int ringtone_get_scale (char *num)
+static int ringtone_get_scale(char *num)
 {
 	/* This may well need improving. */
 	int scale=0;
@@ -1386,92 +1386,260 @@ gn_error gn_file_bitmap_show(char *filename)
 	return GN_ERR_NONE;
 }
 
-#define MAX_INPUT_LINE_LEN 512
-API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *oline)
+static inline int SIGN(int X)
 {
-	char *line = oline;
-	char *ptr;
-	char backline[MAX_INPUT_LINE_LEN];
+	if (X < 0) return -1;
+	else if (X == 0) return 0;
+	else return 1;
+}
 
+/* Copies the first token from src to dest. The token is delimited by
+ * delim char. If the delim char is preceeded by '\', it is not counted
+ * as delimiter. maxlen is the maximum number of characters that can be
+ * copied to dest. Return characters eaten from src including trailing ';'.
+ */
+static int get_token(char *dest, char *src, int delim, int maxlen)
+{
+	char *next;
+	unsigned int offset;
+
+	if (!src || !dest) {
+		return 0;
+	}
+	next = strchr(src, delim);
+	if (next) {
+		offset = next - src;
+	} else {
+		strncpy(dest, src, maxlen);
+		return strlen(src) + 1;
+	}
+	switch (offset) {
+	case 0:
+		return 1;
+	case 1:
+		if (src[0] == '\\') {
+			dest[0] = delim;
+			return 2 + get_token(dest + 1, src + 2, delim, maxlen - 1);
+		}
+		break;
+	default:
+		if (src[offset - 1] == '\\' &&
+		    src[offset - 2] != '\\') {
+		    	switch (SIGN(offset - maxlen)) {
+			case -1:
+				strncpy(dest, src, offset - 1);
+				dest[offset - 1] = delim;
+				return offset + 1 + get_token(dest + offset,
+							      src + offset + 1,
+							      delim, maxlen - offset);
+		    	case 0:
+				src[offset - 1] = delim;
+				break;
+			case 1:
+				break;
+			}
+		}
+		break;
+	}
+	strncpy(dest, src, GNOKII_MIN(maxlen, offset));
+	return offset + 1;
+}
+
+#define BUG(x) \
+	do { \
+		if (x) { \
+			return GN_ERR_WRONGDATAFORMAT; \
+		} \
+	} while (0)
+
+#define MAX_INPUT_LINE_LEN 512
+
+API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
+{
+	char backline[MAX_INPUT_LINE_LEN];
+	char memory_type_char[3];
+	char number[10];
+	int length, o, offset = 0;
+	gn_error error = GN_ERR_NONE;
+
+	length = strlen(line);
 	strcpy(backline, line);
 	entry->empty = true;
+	memory_type_char[2] = 0;
 
-	ptr = strsep(&line, ";");
-	if (ptr) strncpy(entry->name, ptr, sizeof(entry->name) - 1);
+	o = get_token(entry->name, line, ';', sizeof(entry->name) - 1);
+	switch (o) {
+	case 0:
+		return GN_ERR_WRONGDATAFORMAT;
+	case 1:
+		/* empty name: this is a request to delete the entry */
+		return GN_ERR_NONE;
+	default:
+		break;
+	}
+	offset += o;
 
-	ptr = strsep(&line, ";");
-	if (ptr) strncpy(entry->number, ptr, sizeof(entry->number) - 1);
+	BUG(offset >= length);
 
-	ptr = strsep(&line, ";");
+	o = get_token(entry->number, line+offset, ';', sizeof(entry->number) - 1);
+	switch (o) {
+	case 0:
+		return GN_ERR_WRONGDATAFORMAT;
+	default:
+		break;
+	}
+	offset += o;
 
-	if (!ptr) {
+	BUG(offset >= length);
+
+	o = get_token(memory_type_char, line+offset, ';', 3);
+	switch (o) {
+	case 3:
+		break;
+	default:
+		return GN_ERR_WRONGDATAFORMAT;
+	}
+	offset += o;
+
+	BUG(offset >= length);
+
+	entry->memory_type = gn_str2memory_type(memory_type_char);
+	/* We can store addressbook entries only in ME or SM */
+	if (entry->memory_type != GN_MT_ME &&
+	    entry->memory_type != GN_MT_SM) {
 		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-		line = oline;
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 
-	if (!strncmp(ptr, "ME", 2)) {
-		entry->memory_type = GN_MT_ME;
-	} else {
-		if (!strncmp(ptr, "SM", 2)) {
-			entry->memory_type = GN_MT_SM;
-		} else {
-			fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-			return GN_ERR_WRONGDATAFORMAT;
-		}
-	}
+	BUG(offset >= length);
 
-	ptr = strsep(&line, ";");
-	if (ptr) entry->location = atoi(ptr);
-	else entry->location = 0;
-
-	ptr = strsep(&line, ";");
-	if (ptr) entry->caller_group = atoi(ptr);
-	else entry->caller_group = 0;
-
-	if (!ptr) {
-		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
+	o = get_token(number, line+offset, ';', 9);
+	switch (o) {
+	case 0:
 		return GN_ERR_WRONGDATAFORMAT;
+	case 1:
+		entry->location = 0;
+		break;
+	default:
+		entry->location = atoi(number);
+		break;
 	}
+	offset += o;
 
+	BUG(offset >= length);
+
+	o = get_token(number, line+offset, ';', 9);
+	switch (o) {
+	case 0:
+		return GN_ERR_WRONGDATAFORMAT;
+	case 1:
+		entry->caller_group = 0;
+		break;
+	default:
+		entry->caller_group = atoi(number);
+		break;
+	}
+	offset += o;
+	
 	entry->empty = false;
 
-	for (entry->subentries_count = 0; ; entry->subentries_count++) {
-		ptr = strsep(&line, ";");
-
-		if (ptr && *ptr != 0)
-			entry->subentries[entry->subentries_count].entry_type = atoi(ptr);
-		else
+	for (entry->subentries_count = 0; offset < length; entry->subentries_count++) {
+		memset(number, 0, sizeof(number));
+		o = get_token(number, line+offset, ';', 9);
+		switch (o) {
+		case 0:
+			fprintf(stderr, "Formatting error: unknown error while reading subentry type\n");
+			error = GN_ERR_WRONGDATAFORMAT;
+			goto endloop;
+		case 1:
+			fprintf(stderr, "Formatting error: empty entry type\n");
+			entry->subentries[entry->subentries_count].entry_type = 0;
 			break;
+		default:
+			entry->subentries[entry->subentries_count].entry_type = atoi(number);
+			break;
+		}
+		offset += o;
 
-		ptr = strsep(&line, ";");
-		if (ptr) entry->subentries[entry->subentries_count].number_type = atoi(ptr);
-
-		/* Phone Numbers need to have a number type. */
-		if (!ptr && entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Number) {
-			fprintf(stderr, _("Missing phone number type on line %d"
-					  " entry [%s]\n"), entry->subentries_count, backline);
-			entry->subentries_count--;
+		if (offset > length) {
+			fprintf(stderr, "Formatting error: subentry has only entry type field\n");
 			break;
 		}
 
-		ptr = strsep(&line, ";");
-		if (ptr) entry->subentries[entry->subentries_count].id = atoi(ptr);
-
-		ptr = strsep(&line, ";");
-
-		/* 0x13 Date Type; it is only for Dailed Numbers, etc.
-		   we don't store to this memories so it's an error to use it. */
-		if (!ptr || entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Date) {
-			fprintf(stderr, _("There is no phone number on line [%s] entry %d\n"),
-				backline, entry->subentries_count);
-			entry->subentries_count--;
+		memset(number, 0, sizeof(number));
+		o = get_token(number, line+offset, ';', 9);
+		switch (o) {
+		case 0:
+			fprintf(stderr, "Formatting error: unknown error while reading subentry number type\n");
+			error = GN_ERR_WRONGDATAFORMAT;
+			goto endloop;
+		case 1:
+			fprintf(stderr, "Formatting error: empty number type\n");
+			entry->subentries[entry->subentries_count].number_type = 0;
+			/* Number type is required with Number entry type */
+			if (entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Number) {
+				error = GN_ERR_WRONGDATAFORMAT;
+				goto endloop;
+			}
 			break;
-		} else
-			strncpy(entry->subentries[entry->subentries_count].data.number, ptr, sizeof(entry->subentries[entry->subentries_count].data.number) - 1);
+		default:
+			entry->subentries[entry->subentries_count].number_type = atoi(number);
+			break;
+		}
+		offset += o;
+
+		if (offset > length) {
+			fprintf(stderr, "Formatting error: subentry has only entry and number type fields\n");
+			break;
+		}
+
+		memset(number, 0, sizeof(number));
+		o = get_token(number, line+offset, ';', 9);
+		switch (o) {
+		case 0:
+			fprintf(stderr, "Formatting error: unknown error while reading subentry id\n");
+			error = GN_ERR_WRONGDATAFORMAT;
+			goto endloop;
+		case 1:
+			fprintf(stderr, "Formatting error: empty id\n");
+			entry->subentries[entry->subentries_count].id = 0;
+			break;
+		default:
+			entry->subentries[entry->subentries_count].id = atoi(number);
+			break;
+		}
+		offset += o;
+
+		if (offset > length) {
+			fprintf(stderr, "Formatting error: subentry has only entry and number type fields\n");
+			break;
+		}
+
+		o = get_token(entry->subentries[entry->subentries_count].data.number, line+offset, ';', sizeof(entry->subentries[entry->subentries_count].data.number) - 1);
+		switch (o) {
+		case 0:
+			fprintf(stderr, "Formatting error: unknown error while reading subentry contents\n");
+			error = GN_ERR_WRONGDATAFORMAT;
+			goto endloop;
+		case 1:
+			fprintf(stderr, "Formatting error: empty subentry contents\n");
+			/* 0x13 Date Type; it is only for Dialed Numbers, etc.
+			   we don't store to this memories so it's an error to use it. */
+			if (entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Date) {
+				fprintf(stderr, "Cannot write to read-only memory (Dialed Numbers)\n");
+				error = GN_ERR_WRONGDATAFORMAT;
+				/* With this error do not write a fake subentry (see below) */
+				goto endfunc;
+			}
+			break;
+		default:
+			break;
+		}
+		offset += o;
 	}
 
-	/* This is to send other exports (like from 6110) to 7110 */
+endloop:
+	/* Fake subentry: this is to send other exports (like from 6110) to 7110 */
 	if (!entry->subentries_count) {
 		entry->subentries[entry->subentries_count].entry_type   = GN_PHONEBOOK_ENTRY_Number;
 		entry->subentries[entry->subentries_count].number_type  = GN_PHONEBOOK_NUMBER_General;
@@ -1479,6 +1647,6 @@ API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *oline)
 		strcpy(entry->subentries[entry->subentries_count].data.number, entry->number);
 		entry->subentries_count = 1;
 	}
-	return GN_ERR_NONE;
+endfunc:
+	return error;
 }
-

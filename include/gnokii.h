@@ -78,7 +78,7 @@ extern API struct gn_cfg_header *gn_cfg_info;
 /* Files */
 API int gn_file_text_save(char *filename, char *text, int mode);
 /* reads internal gnokii raw phonebook format */
-API gn_error gn_file_phonebook_raw(gn_phonebook_entry *entry, char *buffer);
+API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *buffer);
 
 /* Misc */
 API gn_memory_type gn_str2memory_type(const char *s);
