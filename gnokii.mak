@@ -1,11 +1,19 @@
 # Microsoft Developer Studio Generated NMAKE File, Based on gnokii.dsp
-
-
-
 !IF "$(CFG)" == ""
 CFG=gnokii - Win32 Debug
 !MESSAGE No configuration specified. Defaulting to gnokii - Win32 Debug.
 !ENDIF 
+
+
+
+# here are some configuration
+MODEL=\"6150\" 
+PORT=\"COM2\" 
+VERSION=\"0.3.1-pre19\"
+# uncomment next line  if you want gnokii debug messages
+DEBUG = /D "DEBUG"
+
+
 
 !IF "$(CFG)" != "gnokii - Win32 Release" && "$(CFG)" != "gnokii - Win32 Debug"
 !MESSAGE Invalid configuration "$(CFG)" specified.
@@ -44,21 +52,22 @@ CLEAN :
 	-@erase "$(INTDIR)\fbus-6110-auth.obj"
 	-@erase "$(INTDIR)\fbus-6110-ringtones.obj"
 	-@erase "$(INTDIR)\fbus-6110.obj"
-	-@erase "$(INTDIR)\win32\getopt.obj"
+	-@erase "$(INTDIR)\getopt.obj"
 	-@erase "$(INTDIR)\gnokii.obj"
 	-@erase "$(INTDIR)\gsm-api.obj"
+	-@erase "$(INTDIR)\gsm-filetypes.obj"
 	-@erase "$(INTDIR)\gsm-networks.obj"
 	-@erase "$(INTDIR)\rlp-common.obj"
 	-@erase "$(INTDIR)\rlp-crc24.obj"
 	-@erase "$(INTDIR)\vc60.idb"
-	-@erase "$(INTDIR)\win32\winserial.obj"
+	-@erase "$(INTDIR)\winserial.obj"
 	-@erase "$(OUTDIR)\gnokii.exe"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /D "DEBUG" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D MODEL=\"6150\" /D PORT=\"COM2\" /D VERSION=\"Win32\" /Fp"$(INTDIR)\gnokii.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D MODEL=$(MODEL) /D PORT=$(PORT) /D VERSION=$(VERSION) $(DEBUG) /Fp"$(INTDIR)\gnokii.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -102,13 +111,14 @@ LINK32_OBJS= \
 	"$(INTDIR)\fbus-6110-auth.obj" \
 	"$(INTDIR)\fbus-6110-ringtones.obj" \
 	"$(INTDIR)\fbus-6110.obj" \
-	"$(INTDIR)\win32\getopt.obj" \
+	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\gnokii.obj" \
 	"$(INTDIR)\gsm-api.obj" \
 	"$(INTDIR)\gsm-networks.obj" \
 	"$(INTDIR)\rlp-common.obj" \
 	"$(INTDIR)\rlp-crc24.obj" \
-	"$(INTDIR)\win32\winserial.obj"
+	"$(INTDIR)\winserial.obj" \
+	"$(INTDIR)\gsm-filetypes.obj"
 
 "$(OUTDIR)\gnokii.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -131,15 +141,16 @@ CLEAN :
 	-@erase "$(INTDIR)\fbus-6110-auth.obj"
 	-@erase "$(INTDIR)\fbus-6110-ringtones.obj"
 	-@erase "$(INTDIR)\fbus-6110.obj"
-	-@erase "$(INTDIR)\win32\getopt.obj"
+	-@erase "$(INTDIR)\getopt.obj"
 	-@erase "$(INTDIR)\gnokii.obj"
 	-@erase "$(INTDIR)\gsm-api.obj"
+	-@erase "$(INTDIR)\gsm-filetypes.obj"
 	-@erase "$(INTDIR)\gsm-networks.obj"
 	-@erase "$(INTDIR)\rlp-common.obj"
 	-@erase "$(INTDIR)\rlp-crc24.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(INTDIR)\vc60.pdb"
-	-@erase "$(INTDIR)\win32\winserial.obj"
+	-@erase "$(INTDIR)\winserial.obj"
 	-@erase "$(OUTDIR)\gnokii.exe"
 	-@erase "$(OUTDIR)\gnokii.ilk"
 	-@erase "$(OUTDIR)\gnokii.pdb"
@@ -148,7 +159,7 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D MODEL=\"6150\" /D PORT=\"COM2\" /D VERSION=\"Win32\" /Fp"$(INTDIR)\gnokii.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
+CPP_PROJ=/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D MODEL=$(MODEL) /D PORT=$(PORT) /D VERSION=$(VERSION) $(DEBUG) /Fp"$(INTDIR)\gnokii.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -192,13 +203,14 @@ LINK32_OBJS= \
 	"$(INTDIR)\fbus-6110-auth.obj" \
 	"$(INTDIR)\fbus-6110-ringtones.obj" \
 	"$(INTDIR)\fbus-6110.obj" \
-	"$(INTDIR)\win32\getopt.obj" \
+	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\gnokii.obj" \
 	"$(INTDIR)\gsm-api.obj" \
 	"$(INTDIR)\gsm-networks.obj" \
 	"$(INTDIR)\rlp-common.obj" \
 	"$(INTDIR)\rlp-crc24.obj" \
-	"$(INTDIR)\win32\winserial.obj"
+	"$(INTDIR)\winserial.obj" \
+	"$(INTDIR)\gsm-filetypes.obj"
 
 "$(OUTDIR)\gnokii.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -218,60 +230,79 @@ LINK32_OBJS= \
 
 
 !IF "$(CFG)" == "gnokii - Win32 Release" || "$(CFG)" == "gnokii - Win32 Debug"
-SOURCE=.\cfgreader.c
+SOURCE=..\gnokii\cfgreader.c
 
 "$(INTDIR)\cfgreader.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=".\fbus-6110-auth.c"
+SOURCE="..\gnokii\fbus-6110-auth.c"
 
 "$(INTDIR)\fbus-6110-auth.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=".\fbus-6110-ringtones.c"
+SOURCE="..\gnokii\fbus-6110-ringtones.c"
 
 "$(INTDIR)\fbus-6110-ringtones.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=".\fbus-6110.c"
+SOURCE="..\gnokii\fbus-6110.c"
 
 "$(INTDIR)\fbus-6110.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=.\win32\getopt.c
+SOURCE=..\gnokii\win32\getopt.c
 
-"$(INTDIR)\win32\getopt.obj" : $(SOURCE) "$(INTDIR)"
+"$(INTDIR)\getopt.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=.\gnokii.c
+SOURCE=..\gnokii\gnokii.c
 
 "$(INTDIR)\gnokii.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=".\gsm-api.c"
+SOURCE="..\gnokii\gsm-api.c"
 
 "$(INTDIR)\gsm-api.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=".\gsm-networks.c"
+SOURCE="..\gnokii\gsm-filetypes.c"
+
+"$(INTDIR)\gsm-filetypes.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE="..\gnokii\gsm-networks.c"
 
 "$(INTDIR)\gsm-networks.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=".\rlp-common.c"
+SOURCE="..\gnokii\rlp-common.c"
 
 "$(INTDIR)\rlp-common.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=".\rlp-crc24.c"
+SOURCE="..\gnokii\rlp-crc24.c"
 
 "$(INTDIR)\rlp-crc24.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=.\win32\winserial.c
+SOURCE=..\gnokii\win32\winserial.c
 
-"$(INTDIR)\win32\winserial.obj" : $(SOURCE) "$(INTDIR)"
+"$(INTDIR)\winserial.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
 
 !ENDIF 
+
+
