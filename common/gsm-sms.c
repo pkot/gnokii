@@ -389,7 +389,7 @@ static GSM_Error DecodeUDH(unsigned char *message, SMS_UserDataHeader *udh)
 	unsigned char length, pos, nr;
 
 	udh->Length = length = message[0];
-	pos = 0;
+	pos = 1;
 	nr = 0;
 	while (length > 1) {
 		unsigned char udh_length;
