@@ -5,6 +5,9 @@
  * gnokii updates:
     o let gnokii display usage instruction to stdout when it's
     called with --help or -h and to stderr otherwise      (Pawel Kot)
+ * Support Nokia Card Phone RPM-1              (Friedrich Lobenstock)
+ * More verbose reporting when detecting the model
+                                               (Friedrich Lobenstock)
 
 0.4.0pre20
 ==========
