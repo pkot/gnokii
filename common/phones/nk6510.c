@@ -993,11 +993,12 @@ static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *st
 				 0x01, 0x00, 0x01,
 				 0x00, /* length */
 				 0x00, 0x00 };
+	int len;
 
 	dprintf("Creating SMS Folder...\n");
 	
-	char_unicode_encode(req + 10, data->sms_folder->name, strlen(data->sms_folder->name));
-	req[7] = strlen(data->sms_folder->name) * 2 + 6;
+	len = char_unicode_encode(req + 10, data->sms_folder->name, strlen(data->sms_folder->name));
+	req[7] = len + 6;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, req[7] + 6);
 }
 
@@ -1750,11 +1751,9 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	block = 1;
 	if (!entry->empty) {
 		/* Name */
-		j = strlen(entry->name);
-		char_unicode_encode((string + 1), entry->name, j);
-		/* Length ot the string + length field + terminating 0 */
-		string[0] = j * 2;
-		count += PackBlock(0x07, j * 2 + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+		j = char_unicode_encode((string + 1), entry->name, strlen(entry->name));
+		string[0] = j;
+		count += PackBlock(0x07, j + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 
 		/* Group */
 		string[0] = entry->caller_group + 1;
@@ -1768,10 +1767,10 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 			string[0] = GN_PHONEBOOK_ENTRY_Number;
 			string[1] = string[2] = string[3] = 0;
 			j = strlen(entry->number);
-			char_unicode_encode((string + 5), entry->number, j);
-			string[j * 2 + 1] = 0;
-			string[4] = j * 2;
-			count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+			j = char_unicode_encode((string + 5), entry->number, j);
+			string[j + 1] = 0;
+			string[4] = j;
+			count += PackBlock(0x0b, j + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 		} else {
 			/* Default Number */
 			defaultn = 999;
@@ -1783,10 +1782,10 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 				string[0] = entry->subentries[defaultn].number_type;
 				string[1] = string[2] = string[3] = 0;
 				j = strlen(entry->subentries[defaultn].data.number);
-				char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
-				string[j * 2 + 1] = 0;
-				string[4] = j * 2;
-				count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+				j = char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
+				string[j + 1] = 0;
+				string[4] = j;
+				count += PackBlock(0x0b, j + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 			}
 			/* Rest of the numbers */
 			for (i = 0; i < entry->subentries_count; i++)
@@ -1795,17 +1794,17 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 						string[0] = entry->subentries[i].number_type;
 						string[1] = string[2] = string[3] = 0;
 						j = strlen(entry->subentries[i].data.number);
-						char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
-						string[j * 2 + 1] = 0;
-						string[4] = j * 2;
-						count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+						j = char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
+						string[j + 1] = 0;
+						string[4] = j;
+						count += PackBlock(0x0b, j + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 					}
 				} else {
 					j = strlen(entry->subentries[i].data.number);
-					string[0] = j * 2;
-					char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
-					string[j * 2 + 1] = 0;
-					count += PackBlock(entry->subentries[i].entry_type, j * 2 + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
+					string[j + 1] = 0;
+					string[0] = j;
+					count += PackBlock(entry->subentries[i].entry_type, j + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 				}
 		}
 		req[21] = block - 1;
@@ -2112,6 +2111,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 
 	gn_calnote *calnote;
 	int count = 0;
+	int len = 0;
 	long seconds, minutes;
 	gn_error error;
 
@@ -2185,8 +2185,8 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		dprintf("Count before encode = %d\n", count);
 		dprintf("Meeting Text is = \"%s\"\n", calnote->text);
 
-		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
-		count = count + 2 * strlen(calnote->text);
+		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		count += len;
 		break;
 
 	case GN_CALNOTE_CALL:
@@ -2215,10 +2215,10 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* fixed 0x00 */
 		req[count++] = strlen(calnote->phone_number);   /* Field 19 */
 		/* Text */
-		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
-		count += 2 * strlen(calnote->text);
-		char_unicode_encode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
-		count += 2 * strlen(calnote->phone_number);
+		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		count += len;
+		len = char_unicode_encode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
+		count += len;
 		break;
 	case GN_CALNOTE_BIRTHDAY:
 		req[count++] = 0x00; /* Field 12 Fixed */
@@ -2257,8 +2257,8 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* Text */
 		dprintf("Count before encode = %d\n", count);
 
-		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
-		count = count + 2 * strlen(calnote->text);
+		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
+		count += len;
 		break;
 
 	case GN_CALNOTE_REMINDER:
@@ -2272,8 +2272,8 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* fixed 0x00 */
 		req[count++] = 0x00; /* Field 15 */
 		/* Text */
-		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
-		count += 2 * strlen(calnote->text);
+		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
+		count += len;
 		break;
 	}
 
@@ -2634,6 +2634,7 @@ static gn_error NK6510_SetRawRingtone(gn_data *data, struct gn_statemachine *sta
 {
 	unsigned char req[32768] = {FBUS_FRAME_HEADER, 0x0e, 0x00, 0x00, 0xfe};
 	unsigned char *pos;
+	int len;
 
 	if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
 
@@ -2649,8 +2650,8 @@ static gn_error NK6510_SetRawRingtone(gn_data *data, struct gn_statemachine *sta
 	}
 	pos++;
 	*pos = strlen(data->ringtone->name);
-	char_unicode_encode(pos + 1, data->ringtone->name, *pos);
-	pos += 1 + 2 * *pos;
+	len = char_unicode_encode(pos + 1, data->ringtone->name, *pos);
+	pos += 1 + len;
 	*pos++ = data->raw_data->length / 256;
 	*pos++ = data->raw_data->length % 256;
 	if (pos - req + data->raw_data->length + 2 > sizeof(req)) return GN_ERR_INVALIDSIZE;
@@ -3116,13 +3117,13 @@ static gn_error NK6510_SetProfile(gn_data *data, struct gn_statemachine *state)
 	memcpy(req + length + 3, "\xcc\xad\xff", 3);
 	/* Name */
 	j = strlen(data->profile->name);
-	char_unicode_encode((req + length + 7), data->profile->name, j);
+	j = char_unicode_encode((req + length + 7), data->profile->name, j);
 	/* Terminating 0 */
-	req[j * 2 + 1] = 0;
+	req[j + 1] = 0;
 	/* Length of the string + length field + terminating 0 */
-	req[length + 6] = (j + 1) * 2;
-	req[length] = (j + 1) * 2 + 8;
-	length += (j + 1) * 2 + 8;
+	req[length + 6] = j + 1;
+	req[length] = j + 9;
+	length += j + 9;
 	blocks++;
 
 	req[length] = 0x09;
@@ -3436,9 +3437,9 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 		dprintf("number too long\n");
 		return GN_ERR_ENTRYTOOLONG;
 	}
+	len = char_unicode_encode(req + pos + 1, data->call_info->number, len);
 	req[pos++] = len;
-	char_unicode_encode(req + pos, data->call_info->number, len);
-	pos += len << 1;
+	pos += len;
 
 	switch (data->call_info->send_number) {	
 	case GN_CALL_Never:   voice_end[5] = 0x01; break;
@@ -3699,8 +3700,8 @@ static int PackWAPString(unsigned char *dest, unsigned char *string, int length_
 		dest[0] = length % 256;
 	}
 
-	char_unicode_encode(dest + length_size, string, length);
-	return ((length << 1) + length_size);
+	length = char_unicode_encode(dest + length_size, string, length);
+	return length + length_size;
 }
 
 static gn_error NK6510_WriteWAPSetting(gn_data *data, struct gn_statemachine *state)
@@ -4013,6 +4014,7 @@ static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state)
 				  0x02, /* prority */
 				  0x0D, 0x80, 0x00, 0x00, 0x01};	/* Location */
 	unsigned char text[257];
+	int length;
 	gn_error error;
 
 	error = GetNextFreeToDoLocation(data, state);
@@ -4022,8 +4024,8 @@ static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state)
 	req[8] = data->todo->location / 256;
 	req[9] = data->todo->location % 256;
 
-	char_unicode_encode(text, data->todo->text, strlen(data->todo->text));
-	memcpy(req + 10, text, strlen(data->todo->text) * 2);
+	length = char_unicode_encode(text, data->todo->text, strlen(data->todo->text));
+	memcpy(req + 10, text, length);
 
 	dprintf("Setting ToDo\n");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10 + strlen(data->todo->text) * 2);

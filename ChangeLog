@@ -37,6 +37,8 @@
     o allow to open other config files than /etc/gnokiirc and
       $HOME/.gnokiirc                                   (Pawel Kot)
     o the new cfgreader skipped /etc/gnokiirc      (BORBELY Zoltan)
+    o fix usage of char_unicode_encode() and pnok_string_encode():
+      check the return code                             (Pawel Kot)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

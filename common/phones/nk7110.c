@@ -783,9 +783,9 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	block = 1;
 	/* Name */
 	i = strlen(data->bitmap->text);
-	char_unicode_encode((string + 1), data->bitmap->text, i);
-	string[0] = i * 2;
-	count += PackBlock(0x07, i * 2 + 1, block++, string, req + count);
+	i = char_unicode_encode((string + 1), data->bitmap->text, i);
+	string[0] = i;
+	count += PackBlock(0x07, i + 1, block++, string, req + count);
 	/* Ringtone */
 	string[0] = data->bitmap->ringtone;
 	string[1] = 0;
@@ -852,12 +852,10 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	if (!entry->empty) {
 		/* Name */
 		i = strlen(entry->name);
-		char_unicode_encode((string + 1), entry->name, i);
-		/* Terminating 0 */
-		string[i * 2 + 1] = 0;
+		i = char_unicode_encode((string + 1), entry->name, i);
 		/* Length ot the string + length field + terminating 0 */
-		string[0] = (i + 1) * 2;
-		count += PackBlock(0x07, (i + 1) * 2, block++, string, req + count);
+		string[0] = i;
+		count += PackBlock(0x07, i + 1, block++, string, req + count);
 		/* Group */
 		string[0] = entry->caller_group + 1;
 		string[1] = 0;
@@ -869,10 +867,10 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 			string[0] = GN_PHONEBOOK_ENTRY_Number;
 			string[1] = string[2] = string[3] = 0;
 			j = strlen(entry->number);
-			char_unicode_encode((string + 5), entry->number, j);
-			string[j * 2 + 1] = 0;
-			string[4] = j * 2;
-			count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
+			j = char_unicode_encode((string + 5), entry->number, j);
+			string[j + 1] = 0;
+			string[4] = j;
+			count += PackBlock(0x0b, j + 6, block++, string, req + count);
 		} else {
 			/* Default Number */
 			defaultn = 999;
@@ -884,10 +882,10 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 				string[0] = entry->subentries[defaultn].number_type;
 				string[1] = string[2] = string[3] = 0;
 				j = strlen(entry->subentries[defaultn].data.number);
-				char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
-				string[j * 2 + 1] = 0;
-				string[4] = j * 2;
-				count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
+				j = char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
+				string[j + 1] = 0;
+				string[4] = j;
+				count += PackBlock(0x0b, j + 6, block++, string, req + count);
 			}
 			/* Rest of the numbers */
 			for (i = 0; i < entry->subentries_count; i++)
@@ -896,17 +894,17 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 						string[0] = entry->subentries[i].number_type;
 						string[1] = string[2] = string[3] = 0;
 						j = strlen(entry->subentries[i].data.number);
-						char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
-						string[j * 2 + 1] = 0;
-						string[4] = j * 2;
-						count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
+						j = char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
+						string[j + 1] = 0;
+						string[4] = j;
+						count += PackBlock(0x0b, j + 6, block++, string, req + count);
 					}
 				} else {
 					j = strlen(entry->subentries[i].data.number);
-					string[0] = j * 2;
-					char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
-					string[j * 2 + 1] = 0;
-					count += PackBlock(entry->subentries[i].entry_type, j * 2 + 2, block++, string, req + count);
+					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
+					string[j + 1] = 0;
+					string[0] = j;
+					count += PackBlock(entry->subentries[i].entry_type, j + 2, block++, string, req + count);
 				}
 		}
 		req[17] = block - 1;
@@ -1676,6 +1674,7 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	gn_calnote *calnote;
 	int count = 0;
 	long seconds, minutes;
+	int len = 0;
 	gn_error error;
 
 	if (!data->calnote) return GN_ERR_INTERNALERROR;
@@ -1753,8 +1752,8 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		dprintf("Count before encode = %d\n", count);
 		dprintf("Meeting Text is = \"%s\"\n", calnote->text);
 
-		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
-		count = count + 2 * strlen(calnote->text);
+		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		count += len;
 		break;
 
 	case GN_CALNOTE_CALL:
@@ -1783,10 +1782,10 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* fixed 0x00 */
 		req[count++] = strlen(calnote->phone_number);   /* Field 19 */
 		/* Text */
-		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
-		count += 2 * strlen(calnote->text);
-		char_unicode_encode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
-		count += 2 * strlen(calnote->phone_number);
+		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		count += len;
+		len = char_unicode_encode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
+		count += len;
 		break;
 
 	case GN_CALNOTE_BIRTHDAY:
@@ -1826,8 +1825,8 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* Text */
 		dprintf("Count before encode = %d\n", count);
 
-		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
-		count = count + 2 * strlen(calnote->text);
+		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
+		count += len;
 		break;
 
 	case GN_CALNOTE_REMINDER:
@@ -1843,8 +1842,8 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		dprintf("Count before encode = %d\n", count);
 		dprintf("Reminder Text is = \"%s\"\n", calnote->text);
 		/* Text */
-		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
-		count = count + 2 * strlen(calnote->text);
+		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
+		count += len;
 		break;
 	}
 
@@ -2273,8 +2272,8 @@ static int PackWAPString(unsigned char *dest, unsigned char *string, int length_
 		dest[0] = length % 256;
 	}
 
-	char_unicode_encode(dest + length_size, string, length);
-	return ((length << 1) + length_size);
+	length = char_unicode_encode(dest + length_size, string, length);
+	return length + length_size;
 }
 
 static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *state)

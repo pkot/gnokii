@@ -766,11 +766,11 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	*pos++ = get_memory_type(pe->memory_type);
 	*pos++ = pe->location;
 	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_PB_UNICODE) {
-		*pos++ = (2 * namelen);
-		namelen = char_unicode_encode(pos, pe->name, namelen);
-	} else {
+		namelen = char_unicode_encode(pos + 1, pe->name, namelen);
 		*pos++ = namelen;
-		pnok_string_encode(pos, namelen, pe->name);
+	} else {
+		namelen = pnok_string_encode(pos + 1, namelen, pe->name);
+		*pos++ = namelen;
 	}
 	pos += namelen;
 	*pos++ = numlen;

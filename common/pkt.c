@@ -117,6 +117,7 @@ void pkt_put_string(pkt_buffer *buf, const char *x)
 	pkt_put_uint16(buf, n);
 
 	b = buffer_expand(buf, 2 * n);
+	/* FIXME: check the return code (size of the written buffer) */
 	char_unicode_encode(b, x, n);
 }
 

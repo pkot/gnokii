@@ -65,12 +65,11 @@ int sms_nokia_text_encode(unsigned char *text, unsigned char *message, bool firs
 	int type = GN_SMS_MULTIPART_DEFAULT;
 
 	len = strlen(text);
-	if (type == GN_SMS_MULTIPART_UNICODE) len *= 2;
 
 	current = sms_nokia_smart_message_part_pack(message, len, type, first);
 
 	if (type == GN_SMS_MULTIPART_UNICODE)
-		char_unicode_encode(message + current, text, strlen(text));
+		len = char_unicode_encode(message + current, text, strlen(text));
 	else
 		memcpy(message + current, text, strlen(text));
 	current += len;

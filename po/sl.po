@@ -4,7 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gnokii\n"
-"POT-Creation-Date: 2003-12-28 19:18+0100\n"
+"Report-Msgid-Bugs-To: feedback@gnokii.org\n"
+"POT-Creation-Date: 2004-05-31 21:58+0200\n"
 "PO-Revision-Date: 2002-04-24 09:41+0100\n"
 "Last-Translator: Bo¹tjan Müller <neonatus@neonatus.net>\n"
 "Language-Team: Slovenian <translation-team-sl@lists.sourceforge.net>\n"
@@ -12,57 +13,69 @@ msgstr ""
 "Content-Type: text/plain; charset=iso-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: common/cfgreader.c:313 common/cfgreader.c:324 common/cfgreader.c:332
-#: common/cfgreader.c:339 common/cfgreader.c:358 common/cfgreader.c:367
-#: common/cfgreader.c:384
+#: common/cfgreader.c:316 common/cfgreader.c:327 common/cfgreader.c:335
+#: common/cfgreader.c:342 common/cfgreader.c:361 common/cfgreader.c:370
+#: common/cfgreader.c:387
 #, fuzzy, c-format
 msgid "Unsupported [%s] %s value \"%s\"\n"
 msgstr "Nepodprt model telefona \"%s\"\n"
 
-#: common/cfgreader.c:350
+#: common/cfgreader.c:353
 #, fuzzy, c-format
 msgid "Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value\n"
 msgstr ""
 "Neprepoznana [%s] opcija \"%s\", uporabi \"%s\" ali \"%s\" vrednost, "
 "ignoriram!"
 
-#: common/cfgreader.c:422
-#, c-format
-msgid "Couldn't open %s or gnokiirc. Exiting now...\n"
-msgstr "Datoteke %s ali gnokiirc ni bilo mogoèe odpreti. Prekinjam...\n"
+#: common/cfgreader.c:406
+#, fuzzy, c-format
+msgid "Unrecognized [logging] option \"%s\", use \"off\" or \"on\" value\n"
+msgstr ""
+"Neprepoznana [%s] opcija \"%s\", uporabi \"%s\" ali \"%s\" vrednost, "
+"ignoriram!"
 
-#: common/cfgreader.c:432
-#, c-format
-msgid "Couldn't open %s or /etc/gnokiirc. Exiting now...\n"
-msgstr "Datoteke %s ali /etc/gnokiirc ni bilo mogoèe odpreti. Prekinjam...\n"
+#: common/cfgreader.c:439
+#, fuzzy, c-format
+msgid "Couldn't open %s or %s.\n"
+msgstr "pty-ja ni bilo mogoèe odpreti!\n"
 
-#: common/cfgreader.c:481
-#, fuzzy
+#: common/cfgreader.c:461
+#, fuzzy, c-format
+msgid "Couldn't open %s config file,\n"
+msgstr "Datoteke z logotipom %s ni bilo mogoèe shraniti!\n"
+
+#: common/cfgreader.c:478
+#, c-format
+msgid "No global section in % config file.\n"
+msgstr ""
+
+#: common/cfgreader.c:516
+#, fuzzy, c-format
 msgid "Config error - no model specified.\n"
 msgstr "Napaka v nastavitvah - model ni bil podan. Prekinjam...\n"
 
-#: common/cfgreader.c:485
-#, fuzzy
+#: common/cfgreader.c:520
+#, fuzzy, c-format
 msgid "Config error - no port specified.\n"
 msgstr "Napaka v nastavitvah - port ni bil podan. Prekinjam...\n"
 
 #: common/data/virtmodem.c:137
-#, fuzzy
+#, fuzzy, c-format
 msgid "gn_vm_initialise - VM_GSMInitialise failed!\n"
 msgstr "VM_Initialise - VM_GSMInitialise neuspe¹en!\n"
 
 #: common/data/virtmodem.c:144
-#, fuzzy
+#, fuzzy, c-format
 msgid "gn_vm_initialise - VM_PtySetup failed!\n"
 msgstr "VM_Initialise - VM_PtySetup neuspe¹en!\n"
 
 #: common/data/virtmodem.c:149
-#, fuzzy
+#, fuzzy, c-format
 msgid "gn_vm_initialise - gn_atem_initialise failed!\n"
 msgstr "VM_Initialise - DP_Initialise neuspe¹en!\n"
 
 #: common/data/virtmodem.c:154
-#, fuzzy
+#, fuzzy, c-format
 msgid "gn_vm_Initialise - dp_Initialise failed!\n"
 msgstr "VM_Initialise - DP_Initialise neuspe¹en!\n"
 
@@ -72,11 +85,13 @@ msgid "Cannot access %s, check the bindir in your gnokiirc!\n"
 msgstr ""
 
 #: common/data/virtmodem.c:361
+#, c-format
 msgid "Couldn't open pty!\n"
 msgstr "pty-ja ni bilo mogoèe odpreti!\n"
 
 #
-#: common/data/virtmodem.c:378 xgnokii/xgnokii_lowlevel.c:245
+#: common/data/virtmodem.c:378 xgnokii/xgnokii_lowlevel.c:239
+#, c-format
 msgid "GSM/FBUS init failed!\n"
 msgstr "GSM/FBUS inicializacija ni uspela!\n"
 
@@ -109,6 +124,7 @@ msgid "abnormal exit"
 msgstr "nenormalen izhod"
 
 #: common/devices/unixserial.c:188
+#, c-format
 msgid "Gnokii serial_close: disconnect_script\n"
 msgstr ""
 
@@ -118,12 +134,14 @@ msgid "Serial port speed %d not supported!\n"
 msgstr "Hitrost serijskega porta %d ni podprta!\n"
 
 #: common/devices/unixserial.c:429
+#, c-format
 msgid "ERROR: Modem DCD is down and global/require_dcd parameter is set!\n"
 msgstr ""
 "NAPAKA: DCD modema ne deluje ter globalni/require_dcd parameter je "
 "nastavljen!\n"
 
 #: common/devices/unixserial.c:445
+#, c-format
 msgid ""
 "WARNING: global/require_dcd argument was set but it is not supported on this "
 "system!\n"
@@ -131,22 +149,23 @@ msgstr ""
 "POZOR: globalni/require_dcd argument je bil nastavljen, vendar ni podprt na "
 "tem sistemu!\n"
 
-#: common/gsm-filetypes.c:1064 gnokii/gnokii.c:1341
+#: common/gsm-filetypes.c:1064 gnokii/gnokii.c:1396
 #, c-format
 msgid "File %s exists.\n"
 msgstr "Datoteka %s obstaja.\n"
 
-#: common/gsm-filetypes.c:1066 gnokii/gnokii.c:852 gnokii/gnokii.c:1342
-#: gnokii/gnokii.c:3438
+#: common/gsm-filetypes.c:1066 gnokii/gnokii.c:876 gnokii/gnokii.c:1397
+#: gnokii/gnokii.c:3496
+#, c-format
 msgid "Overwrite? (yes/no) "
 msgstr "Prepi¹em? (yes/no) "
 
-#: common/gsm-filetypes.c:1068 gnokii/gnokii.c:854 gnokii/gnokii.c:1344
-#: gnokii/gnokii.c:3440
+#: common/gsm-filetypes.c:1068 gnokii/gnokii.c:878 gnokii/gnokii.c:1399
+#: gnokii/gnokii.c:3498
 msgid "yes"
 msgstr "da"
 
-#: common/gsm-filetypes.c:1069 gnokii/gnokii.c:855 gnokii/gnokii.c:3441
+#: common/gsm-filetypes.c:1069 gnokii/gnokii.c:879 gnokii/gnokii.c:3499
 msgid "no"
 msgstr "ne"
 
@@ -155,128 +174,166 @@ msgstr "ne"
 msgid "Failed to write file %s\n"
 msgstr "Pisanje v datoteko \"%s\" neuspe¹no\n"
 
+#: common/gsm-filetypes.c:1510
+#, fuzzy, c-format
+msgid "Format problem on line [%s]\n"
+msgstr "Problem v formatu vrstice %d [%s]\n"
+
 #
-#: common/links/cbus.c:284
+#: common/links/cbus.c:287
 msgid "Couldn't open CBUS device"
 msgstr "Naprave FB38 ni bilo mogoèe odpreti"
 
 #
-#: common/links/fbus.c:76 common/links/fbus.c:96 common/links/fbus.c:137
+#: common/links/fbus.c:79 common/links/fbus.c:102 common/links/fbus.c:146
 msgid "Couldn't open FBUS device"
 msgstr "Naprave FB38 ni bilo mogoèe odpreti"
 
 #
-#: common/links/fbus-phonet.c:83
+#: common/links/fbus-phonet.c:86
 msgid "Couldn't open PHONET device"
 msgstr "Naprave FB38 ni bilo mogoèe odpreti"
 
 #
-#: common/misc.c:184
-#, fuzzy
+#: common/misc.c:390
+#, fuzzy, c-format
 msgid "Cannot lock NULL device.\n"
 msgstr "Ne morem zakleniti naprave\n"
 
-#: common/misc.c:199
-#, fuzzy
+#: common/misc.c:405
+#, fuzzy, c-format
 msgid "Out of memory error while locking device.\n"
 msgstr "Pri zaklepanju naprave je zmanjkalo spomina\n"
 
-#: common/misc.c:227
+#: common/misc.c:433
 #, c-format
 msgid "Lockfile %s is stale. Overriding it..\n"
 msgstr "Datoteka za zaklepanje %s je zastarela. Razveljavljam jo..\n"
 
-#: common/misc.c:230
-#, fuzzy
+#: common/misc.c:436
+#, fuzzy, c-format
 msgid "Overriding failed, please check the permissions.\n"
 msgstr "Razveljavitev ni uspela, prosim preverite dovoljenja\n"
 
 #
-#: common/misc.c:231 common/misc.c:246
-#, fuzzy
+#: common/misc.c:437 common/misc.c:452
+#, fuzzy, c-format
 msgid "Cannot lock device.\n"
 msgstr "Ne morem zakleniti naprave\n"
 
-#: common/misc.c:235
+#: common/misc.c:441
+#, c-format
 msgid "Device already locked.\n"
 msgstr "Naprava je ¾e zaklenjena.\n"
 
-#: common/misc.c:244
+#: common/misc.c:450
 #, c-format
 msgid "Unable to read lockfile %s.\n"
 msgstr "Branje zaklepne datoteke %s ni uspelo.\n"
 
-#: common/misc.c:245
+#: common/misc.c:451
+#, c-format
 msgid "Please check for reason and remove the lockfile by hand.\n"
 msgstr "Prosim preverite razlog, ter roèno odstranite zaklepno datoteko.\n"
 
-#: common/misc.c:255
-#, fuzzy
+#: common/misc.c:461
+#, fuzzy, c-format
 msgid "Device seems to be locked by unknown process.\n"
 msgstr "Napravo je oèitno zaklenil neznan proces\n"
 
-#: common/misc.c:257
-#, fuzzy
+#: common/misc.c:463
+#, fuzzy, c-format
 msgid "Please check permission on lock directory.\n"
 msgstr "Prosim preverite dovoljenja lock direktorija\n"
 
-#: common/misc.c:259
+#: common/misc.c:465
 #, fuzzy, c-format
 msgid "Cannot create lockfile %s. Please check for existence of the path."
 msgstr "Ne morem ustvariti zaklepne daototeke %s. Prosim preverite obstoj poti"
 
 #
-#: common/misc.c:282
+#: common/misc.c:488
+#, c-format
 msgid "Cannot unlock device\n"
 msgstr "Ne morem odkleniti naprave\n"
 
-#: common/phones/nk6100.c:1510 xgnokii/xgnokii.c:524 xgnokii/xgnokii_sms.c:849
+#
+#: common/phones/nk6100.c:954 xgnokii/xgnokii.c:223 xgnokii/xgnokii.c:1020
+msgid "Family"
+msgstr "Dru¾ina"
+
+#: common/phones/nk6100.c:955 xgnokii/xgnokii.c:224 xgnokii/xgnokii.c:1032
+msgid "VIP"
+msgstr "VIP"
+
+#: common/phones/nk6100.c:956 xgnokii/xgnokii.c:225 xgnokii/xgnokii.c:1044
+msgid "Friends"
+msgstr "Prijatelji"
+
+#: common/phones/nk6100.c:957 xgnokii/xgnokii.c:226 xgnokii/xgnokii.c:1056
+msgid "Colleagues"
+msgstr "Kolegi"
+
+#: common/phones/nk6100.c:958 xgnokii/xgnokii.c:227 xgnokii/xgnokii.c:1068
+msgid "Other"
+msgstr "Ostali"
+
+#: common/phones/nk6100.c:1542 xgnokii/xgnokii.c:524 xgnokii/xgnokii_sms.c:849
 #, c-format
 msgid "Set %d"
 msgstr "Nastavljen %d"
 
 #
-#: common/phones/nk6100.c:1957
+#: common/phones/nk6100.c:1989
+#, c-format
 msgid "Personal"
 msgstr "Osebno"
 
-#: common/phones/nk6100.c:1960 common/phones/nk6100.c:1987
+#: common/phones/nk6100.c:1992 common/phones/nk6100.c:2019
+#, c-format
 msgid "Car"
 msgstr "Avto"
 
-#: common/phones/nk6100.c:1963 common/phones/nk6100.c:1990
+#: common/phones/nk6100.c:1995 common/phones/nk6100.c:2022
+#, c-format
 msgid "Headset"
 msgstr "Slu¹alke"
 
-#: common/phones/nk6100.c:1966 common/phones/nk6100.c:1993
+#: common/phones/nk6100.c:1998 common/phones/nk6100.c:2025
 #, c-format
 msgid "Unknown (%d)"
 msgstr "Neznana (%d)"
 
-#: common/phones/nk6100.c:1972
+#: common/phones/nk6100.c:2004
+#, c-format
 msgid "General"
 msgstr "Splo¹ni"
 
 #
-#: common/phones/nk6100.c:1975
+#: common/phones/nk6100.c:2007
+#, c-format
 msgid "Silent"
 msgstr "Tiho"
 
-#: common/phones/nk6100.c:1978 xgnokii/xgnokii_calendar.c:195
+#: common/phones/nk6100.c:2010 xgnokii/xgnokii_calendar.c:195
+#, c-format
 msgid "Meeting"
 msgstr "Sreèanje"
 
 #
-#: common/phones/nk6100.c:1981
+#: common/phones/nk6100.c:2013
+#, c-format
 msgid "Outdoor"
 msgstr "Na prostem"
 
 #
-#: common/phones/nk6100.c:1984
+#: common/phones/nk6100.c:2016
+#, c-format
 msgid "Pager"
 msgstr ""
 
 #: common/phones/nk2110.c:248 common/phones/nk2110.c:777
+#, c-format
 msgid "PC   : "
 msgstr "PC   : "
 
@@ -299,11 +356,13 @@ msgid "Setting MBUS communication with 2110...\n"
 msgstr "Nastavljanje MBUS komunikacije z 2110...\n"
 
 #: common/vcal.lx:231 common/vcal.lx:288
+#, c-format
 msgid "File cannot be opened!\n"
 msgstr "Datoteke ni bilo mogoèe odpreti\n"
 
 #
 #: common/vcal.lx:240 common/vcal.lx:297
+#, c-format
 msgid "Error parsing vCalendar file!\n"
 msgstr "Napaka pri razpoznavanju vCalendar datoteke!\n"
 
@@ -325,7 +384,7 @@ msgstr ""
 
 #
 #: gnokiid/gnokiid.c:70
-#, fuzzy
+#, fuzzy, c-format
 msgid ""
 "   usage: gnokiid {--help|--version}\n"
 "          --help            display usage information\n"
@@ -338,22 +397,23 @@ msgstr ""
 "pravicah.          --debug           uporablja stdin/stdout za virtualne "
 "modemske comm-e.\n"
 
-#: gnokiid/gnokiid.c:135 smsd/lowlevel.c:156 xgnokii/xgnokii_lowlevel.c:232
+#: gnokiid/gnokiid.c:135 smsd/lowlevel.c:152 xgnokii/xgnokii_lowlevel.c:228
+#, c-format
 msgid "Lock file error. Exiting\n"
 msgstr "Napaka z zaklepno datoteko. Prekinjam\n"
 
-#: gnokii/gnokii.c:240
+#: gnokii/gnokii.c:242
 #, c-format
 msgid "GNOKII Version %s\n"
 msgstr "GNOKII Verzija %s\n"
 
-#: gnokii/gnokii.c:247
+#: gnokii/gnokii.c:249
 #, fuzzy, c-format
 msgid ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 "Copyright (C) Pavel Janik ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
-"Copyright (C) Pawel Kot <pkot@linuxnews.pl>, 2001-2003\n"
+"Copyright (C) Pawel Kot <pkot@linuxnews.pl>, 2001-2004\n"
 "Copyright (C) BORBELY Zoltan <bozo@andrews.hu>, 2002\n"
 "gnokii is free software, covered by the GNU General Public License, and you "
 "are\n"
@@ -373,23 +433,15 @@ msgstr ""
 "Za gnokii ni nikakr¹ne garancije.  Za detajlen opis si oglejte GPL.\n"
 "Prevedeno %s %s za %s na %s \n"
 
-#: gnokii/gnokii.c:262
-#, fuzzy
+#: gnokii/gnokii.c:264
+#, c-format
 msgid ""
-"   usage: gnokii [--help|--monitor [delay]|--version]\n"
-"          gnokii --getphonebook memory_type start_number [end_number|end]\n"
-"                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
-"          gnokii --writephonebook [-f|--force][[-v|--vcard]|[-l|--ldif]]\n"
-"          gnokii --getwapbookmark number\n"
-"          gnokii --writewapbookmark name URL\n"
-"          gnokii --deletewapbookmark number\n"
-"          gnokii --getwapsetting number [-r]\n"
-"          gnokii --writewapsetting\n"
-"          gnokii --activatewapsetting number\n"
-"          gnokii --getspeeddial number\n"
-"          gnokii --setspeeddial number memory_type location\n"
-"          gnokii --createsmsfolder name\n"
-"          gnokii --deletesmsfolder number\n"
+"Usage:\n"
+"General options:\n"
+"          gnokii --help\n"
+"          gnokii --monitor [delay]\n"
+"          gnokii --version\n"
+"SMS options:\n"
 "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
 "          gnokii --deletesms memory_type start [end]\n"
 "          gnokii --sendsms destination [--smsc message_center_number |\n"
@@ -398,28 +450,63 @@ msgid ""
 "          gnokii --savesms [--sender from] [--smsc message_center_number |\n"
 "                 --smscno message_center_index] [--folder folder_id]\n"
 "                 [--location number] [--sent | --read] [--deliver] \n"
-"          gnokii --smsreader\n"
 "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
 "          gnokii --setsmsc\n"
+"          gnokii --createsmsfolder name\n"
+"          gnokii --deletesmsfolder number\n"
+"          gnokii --showsmsfolderstatus\n"
+"          gnokii --smsreader\n"
+"Phonebook options:\n"
+"          gnokii --getphonebook memory_type start_number [end_number|end]\n"
+"                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
+"          gnokii --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
+"                 [-m|--memory-type|--memory] [-n|--memory-location|--"
+"memory]\n"
+"                 [[-v|--vcard]|[-l|--ldif]]\n"
+"          gnokii --deletephonebook memory_type start_number [end_number]\n"
+"Calendar options:\n"
+"          gnokii --getcalendarnote start_number [end_number|end] [-v]\n"
+"          gnokii --writecalendarnote vcardfile number\n"
+"          gnokii --deletecalendarnote start [end]\n"
+"ToDo options:\n"
+"          gnokii --gettodo start [end] [-v]\n"
+"          gnokii --writetodo vcardfile number\n"
+"          gnokii --deletealltodos\n"
+"Dialling and call options:\n"
+"          gnokii --getspeeddial number\n"
+"          gnokii --setspeeddial number memory_type location\n"
+"          gnokii --dialvoice number\n"
+"          gnokii --senddtmf string\n"
+"          gnokii --answercall callid\n"
+"          gnokii --hangup callid\n"
+"          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
+"                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
+"                 {--call|-c} {all|voice|fax|data}\n"
+"                 [{--timeout|-m} time_in_seconds]\n"
+"                 [{--number|-n} number]\n"
+"Phone settings:\n"
+"          gnokii --getdisplaystatus\n"
+"          gnokii --displayoutput\n"
+"          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
+"          gnokii --setprofile\n"
+"          gnokii --getactiveprofile\n"
+"          gnokii --setactiveprofile profile_number\n"
+"          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
+"          gnokii --reset [soft|hard]\n"
 "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
 "          gnokii --getdatetime\n"
 "          gnokii --setalarm [HH MM]\n"
 "          gnokii --getalarm\n"
-"          gnokii --dialvoice number\n"
-"          gnokii --answercall callid\n"
-"          gnokii --hangup callid\n"
-"          gnokii --gettodo start [end] [-v]\n"
-"          gnokii --writetodo vcardfile number\n"
-"          gnokii --deletealltodos\n"
-"          gnokii --getcalendarnote start_number [end_number|end] [-v]\n"
-"          gnokii --writecalendarnote vcardfile number\n"
-"          gnokii --deletecalendarnote start [end]\n"
-"          gnokii --getdisplaystatus\n"
-"          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
-"          gnokii --identify\n"
-"          gnokii --senddtmf string\n"
-"          gnokii --sendlogo {caller|op|picture} destination logofile "
-"[network code]\n"
+"WAP options:\n"
+"          gnokii --getwapbookmark number\n"
+"          gnokii --writewapbookmark name URL\n"
+"          gnokii --deletewapbookmark number\n"
+"          gnokii --getwapsetting number [-r]\n"
+"          gnokii --writewapsetting\n"
+"          gnokii --activatewapsetting number\n"
+"Logo options:\n"
+"          gnokii --sendlogo {caller|op|picture} destination logofile\n"
+"                 [network code]\n"
 "          gnokii --sendringtone rtttlfile destination\n"
 "          gnokii --setlogo op [logofile] [network code]\n"
 "          gnokii --setlogo startup [logofile]\n"
@@ -428,10 +515,11 @@ msgid ""
 "          gnokii --setlogo {dealer|text} [text]\n"
 "          gnokii --getlogo op [logofile] [network code]\n"
 "          gnokii --getlogo startup [logofile] [network code]\n"
-"          gnokii --getlogo caller [caller group number] [logofile] [network "
-"code]\n"
+"          gnokii --getlogo caller [caller group number] [logofile]\n"
+"                 [network code]\n"
 "          gnokii --getlogo {dealer|text}\n"
 "          gnokii --viewlogo logofile\n"
+"Ringtone options:\n"
 "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
 "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name "
 "name]\n"
@@ -439,86 +527,14 @@ msgid ""
 "          gnokii --ringtoneconvert source destination\n"
 "          gnokii --getringtonelist\n"
 "          gnokii --deleteringtone start [end]\n"
-"          gnokii --reset [soft|hard]\n"
-"          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
-"          gnokii --setprofile\n"
-"          gnokii --getactiveprofile\n"
-"          gnokii --setactiveprofile profile_number\n"
-"          gnokii --displayoutput\n"
-"          gnokii --keysequence\n"
-"          gnokii --enterchar\n"
-"          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
-"                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
-"                 {--call|-c} {all|voice|fax|data}\n"
-"                 [{--timeout|-m} time_in_seconds]\n"
-"                 [{--number|-n} number]\n"
-"          gnokii --listnetworks\n"
-"          gnokii --getnetworkinfo\n"
+"Security options:\n"
+"          gnokii --identify\n"
 "          gnokii --getlocksinfo\n"
 msgstr ""
-"   uporaba: gnokii [--help|--monitor|--version]\n"
-"          gnokii --getmemory vrsta_spomina zaèetek [konec]\n"
-"          gnokii --writephonebook [-i]\n"
-"          gnokii --getspeeddial ¹tevilka\n"
-"          gnokii --setspeeddial ¹tevilka vrsta_spomina lokacija\n"
-"          gnokii --getsms vrsta_spomina start [konec] [-f datoteka] [-F "
-"datoteka] [-d]\n"
-"          gnokii --deletesms vrsta_spomina zaèetek [konec]\n"
-"          gnokii --sendsms cilj [--smsc ¹tevilka_centra_za_sporoèila |\n"
-"                 --smscno oznaka_centra_za_sporoèila] [-r] [-C n] [-v n]\n"
-"                 [--long n]\n"
-"          gnokii --savesms [-m] [-l n] [-i]\n"
-"          gnokii --smsreader\n"
-"          gnokii --getsmsc [zaèetna_¹tevilka [konèna_¹tevilka]] [-r|--raw]\n"
-"          gnokii --setsmsc\n"
-"          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
-"          gnokii --getdatetime\n"
-"          gnokii --setalarm HH MM\n"
-"          gnokii --getalarm\n"
-"          gnokii --dialvoice ¹tevilka\n"
-"          gnokii --answercall id_klicoèega\n"
-"          gnokii --hangup id_klicoèega\n"
-"          gnokii --getcalendarnote zaèetek [konec] [-v]\n"
-"          gnokii --writecalendarnote vcarddatoteka ¹tevilka\n"
-"          gnokii --deletecalendarnote zaèetek [konec]\n"
-"          gnokii --getdisplaystatus\n"
-"          gnokii --netmonitor {ponastavi|izkljuèen|polje|razvojno|naslednji|"
-"¹t.}\n"
-"          gnokii --identify\n"
-"          gnokii --senddtmf niz\n"
-"          gnokii --sendlogo {caller|op} cilj datoteka_z_logom [omre¾na "
-"koda]\n"
-"          gnokii --sendringtone rtttlfile cilj\n"
-"          gnokii --setlogo op [datoteka_z_logom] [omre¾na_koda]\n"
-"          gnokii --setlogo startup [datoteka_z_logom]\n"
-"          gnokii --setlogo caller [datoteka_z_logom] [¹tevilka skupine "
-"klicanih] [ime skupine]\n"
-"          gnokii --setlogo {dealer|tekst} [text]\n"
-"          gnokii --getlogo op [datoteka_z_logom] [omre¾na_koda]\n"
-"          gnokii --getlogo startup [datoteka_z_logom] [omre¾na_koda]\n"
-"          gnokii --getlogo caller [datoteka_z_logom][¹tevilka skupine "
-"klicanih][omre¾na_koda]\n"
-"          gnokii --getlogo {dealer|text}\n"
-"          gnokii --viewlogo datoteka_z_logom\n"
-"          gnokii --getringtone rtttldatoteka [lokacija] [-r|--raw]\n"
-"          gnokii --setringtone rtttldatoteka [lokacija] [-r|--raw] [--name "
-"ime]\n"
-"          gnokii --reset [soft|hard]\n"
-"          gnokii --getprofile [zaèetna_¹tevilka [konèna_¹tevilka]] [-r|--"
-"raw]\n"
-"          gnokii --setprofile\n"
-"          gnokii --displayoutput\n"
-"          gnokii --keysequence\n"
-"          gnokii --enterchar\n"
-"          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
-"                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
-"                 {--call|-c} {all|voice|fax|data}\n"
-"                 [{--timeout|-m} èas_v_sekundah]\n"
-"                 [{--number|-n} ¹tevilka]\n"
 
 #
-#: gnokii/gnokii.c:339
-#, fuzzy
+#: gnokii/gnokii.c:357
+#, fuzzy, c-format
 msgid ""
 "          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 "          gnokii --getsecuritycodestatus\n"
@@ -529,20 +545,34 @@ msgstr ""
 "          gnokii --getsecuritycodestatus\n"
 "          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 
-#: gnokii/gnokii.c:386
-#, fuzzy
+#
+#: gnokii/gnokii.c:363
+#, fuzzy, c-format
+msgid ""
+"Misc options:\n"
+"          gnokii --keysequence\n"
+"          gnokii --enterchar\n"
+"          gnokii --listnetworks\n"
+"          gnokii --getnetworkinfo\n"
+msgstr ""
+"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
+"          gnokii --getsecuritycodestatus\n"
+"          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
+
+#: gnokii/gnokii.c:410
+#, fuzzy, c-format
 msgid "Lock file error. Exiting.\n"
 msgstr "Napaka z zaklepno datoteko. Prekinjam\n"
 
-#: gnokii/gnokii.c:394
+#: gnokii/gnokii.c:418
 #, c-format
 msgid ""
 "Telephone interface init failed: %s\n"
 "Quitting.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:431
-#, fuzzy
+#: gnokii/gnokii.c:455
+#, fuzzy, c-format
 msgid ""
 " usage: gnokii --sendsms destination\n"
 "               [--smsc message_center_number | --smscno "
@@ -574,7 +604,8 @@ msgstr ""
 "   --long n    - beri n znakov z vhoda; privzeto je 160\n"
 "\n"
 
-#: gnokii/gnokii.c:450
+#: gnokii/gnokii.c:474
+#, c-format
 msgid ""
 "usage: gnokii --getcalendarnote start_number [end_number | end] [-v]\n"
 "       start_number - entry number in the phone calendar (numeric)\n"
@@ -586,394 +617,465 @@ msgid ""
 "  NOTE: if no end is given, only the start entry is written\n"
 msgstr ""
 
-#: gnokii/gnokii.c:468 gnokii/gnokii.c:882
+#: gnokii/gnokii.c:492 gnokii/gnokii.c:906
+#, c-format
 msgid "Please enter SMS text. End your input with <cr><control-D>:"
 msgstr "Prosim vnesite tekst SMS-a. Svoj vnos konèajte z <cr><control-D>:"
 
-#: gnokii/gnokii.c:474 gnokii/gnokii.c:889
+#: gnokii/gnokii.c:498 gnokii/gnokii.c:913
+#, c-format
 msgid "Couldn't read from stdin!\n"
 msgstr "Branje z stdin ni bilo mogoèe!\n"
 
-#: gnokii/gnokii.c:477
+#: gnokii/gnokii.c:501
 #, c-format
 msgid "Input too long! (%d, maximum is %d)\n"
 msgstr "Vhod predolg! (%d, maksimum je %d)\n"
 
-#: gnokii/gnokii.c:498
+#: gnokii/gnokii.c:522
 #, c-format
 msgid "Could not null bitmap: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:503
+#: gnokii/gnokii.c:527
 #, fuzzy, c-format
 msgid "Could not load bitmap from %s: %s\n"
 msgstr "Branje z stdin ni bilo mogoèe!\n"
 
 #
-#: gnokii/gnokii.c:608 gnokii/gnokii.c:892
+#: gnokii/gnokii.c:632 gnokii/gnokii.c:916
+#, c-format
 msgid "Input too long!\n"
 msgstr "Vhod predolg!\n"
 
-#: gnokii/gnokii.c:641
+#: gnokii/gnokii.c:665
+#, c-format
 msgid "Incorrect --concat option\n"
 msgstr ""
 
-#: gnokii/gnokii.c:677 gnokii/gnokii.c:703
+#: gnokii/gnokii.c:701 gnokii/gnokii.c:727
+#, c-format
 msgid "Empty message. Quitting.\n"
 msgstr "Prazno sporoèilo. Prekinjam.\n"
 
-#: gnokii/gnokii.c:718 gnokii/gnokii.c:1764 gnokii/gnokii.c:4034
-#: gnokii/gnokii.c:4194
+#: gnokii/gnokii.c:742 gnokii/gnokii.c:1819 gnokii/gnokii.c:4134
+#: gnokii/gnokii.c:4294
+#, c-format
 msgid "Send succeeded!\n"
 msgstr "Po¹iljanje uspelo!\n"
 
-#: gnokii/gnokii.c:720 gnokii/gnokii.c:1765 gnokii/gnokii.c:4036
+#: gnokii/gnokii.c:744 gnokii/gnokii.c:1820 gnokii/gnokii.c:4136
 #, c-format
 msgid "SMS Send failed (%s)\n"
 msgstr "Po¹iljanje SMS neuspe¹no (%s)\n"
 
-#: gnokii/gnokii.c:829 gnokii/gnokii.c:1170 gnokii/gnokii.c:1422
-#: gnokii/gnokii.c:3088
+#: gnokii/gnokii.c:853 gnokii/gnokii.c:1225 gnokii/gnokii.c:1477
+#: gnokii/gnokii.c:3213 gnokii/gnokii.c:3544
 #, c-format
 msgid "Unknown memory type %s (use ME, SM, ...)!\n"
 msgstr "Neznana vrsta spomina %s (uporabite ME, SM, ...)!\n"
 
-#: gnokii/gnokii.c:850
+#: gnokii/gnokii.c:874
+#, c-format
 msgid "Message at specified location exists. "
 msgstr "Sporoèilo na navedeni lokaciji obstaja. "
 
-#: gnokii/gnokii.c:864 gnokii/gnokii.c:981 gnokii/gnokii.c:1100
-#: gnokii/gnokii.c:1122 gnokii/gnokii.c:1145 gnokii/gnokii.c:1509
-#: gnokii/gnokii.c:1595 gnokii/gnokii.c:1890 gnokii/gnokii.c:2054
-#: gnokii/gnokii.c:2454 gnokii/gnokii.c:2504 gnokii/gnokii.c:2849
-#: gnokii/gnokii.c:2852 gnokii/gnokii.c:2906 gnokii/gnokii.c:3204
-#: gnokii/gnokii.c:3492 gnokii/gnokii.c:3522 gnokii/gnokii.c:3548
-#: gnokii/gnokii.c:3733 gnokii/gnokii.c:3802 gnokii/gnokii.c:3828
-#: gnokii/gnokii.c:4560 gnokii/gnokii.c:4648 gnokii/gnokii.c:4650
+#: gnokii/gnokii.c:888 gnokii/gnokii.c:1005 gnokii/gnokii.c:1124
+#: gnokii/gnokii.c:1146 gnokii/gnokii.c:1169 gnokii/gnokii.c:1564
+#: gnokii/gnokii.c:1650 gnokii/gnokii.c:1949 gnokii/gnokii.c:2113
+#: gnokii/gnokii.c:2560 gnokii/gnokii.c:2610 gnokii/gnokii.c:2955
+#: gnokii/gnokii.c:2958 gnokii/gnokii.c:3012 gnokii/gnokii.c:3351
+#: gnokii/gnokii.c:3592 gnokii/gnokii.c:3622 gnokii/gnokii.c:3648
+#: gnokii/gnokii.c:3833 gnokii/gnokii.c:3902 gnokii/gnokii.c:3928
+#: gnokii/gnokii.c:4663 gnokii/gnokii.c:4751 gnokii/gnokii.c:4753
 #, fuzzy, c-format
 msgid "Error: %s\n"
 msgstr "Napaka !\n"
 
-#: gnokii/gnokii.c:886
+#: gnokii/gnokii.c:910
+#, c-format
 msgid "storing sms"
 msgstr "shranjujem sms"
 
-#: gnokii/gnokii.c:898
+#: gnokii/gnokii.c:922
+#, c-format
 msgid "Empty message. Quitting"
 msgstr "Prazno sporoèilo. Prekinjam"
 
-#: gnokii/gnokii.c:915
+#: gnokii/gnokii.c:939
 #, c-format
 msgid "Saved to %d!\n"
 msgstr "Shranjeno v %d!\n"
 
-#: gnokii/gnokii.c:917
+#: gnokii/gnokii.c:941
 #, fuzzy, c-format
 msgid "Saving failed (%s)\n"
 msgstr "Shranjevanje neuspe¹no (napaka=%d)\n"
 
 #
-#: gnokii/gnokii.c:956
+#: gnokii/gnokii.c:980
+#, c-format
 msgid "Starting SMS center number is greater than stop\n"
 msgstr "Zaèetna ¹tevilka SMS Centra je veèja kot konèna\n"
 
 #
-#: gnokii/gnokii.c:961
+#: gnokii/gnokii.c:985
+#, c-format
 msgid "SMS center number must be greater than 1\n"
 msgstr "©tevilka centra za sporoèila mora biti veèja od 1\n"
 
-#: gnokii/gnokii.c:994
+#: gnokii/gnokii.c:1018
 #, c-format
 msgid "No. %d: \"%s\" (defined name)\n"
 msgstr "©t. %d: \"%s\" (definirano ime)\n"
 
-#: gnokii/gnokii.c:996
+#: gnokii/gnokii.c:1020
 #, c-format
 msgid "No. %d: \"%s\" (default name)\n"
 msgstr "©t. %d: \"%s\" (privzeto ime)\n"
 
-#: gnokii/gnokii.c:997
+#: gnokii/gnokii.c:1021
 #, c-format
 msgid "SMS center number is %s\n"
 msgstr "©tevilka SMS Centra je %s\n"
 
-#: gnokii/gnokii.c:998
+#: gnokii/gnokii.c:1022
 #, c-format
 msgid "Default recipient number is %s\n"
 msgstr "Privzeta ¹tevilka prejemnika je %s\n"
 
-#: gnokii/gnokii.c:999
+#: gnokii/gnokii.c:1023
+#, c-format
 msgid "Messages sent as "
 msgstr "Sporoèilo poslano kot "
 
-#: gnokii/gnokii.c:1003 xgnokii/xgnokii.c:532 xgnokii/xgnokii.c:561
-#: xgnokii/xgnokii.c:1411 xgnokii/xgnokii_calendar.c:1552
+#: gnokii/gnokii.c:1027 xgnokii/xgnokii.c:532 xgnokii/xgnokii.c:561
+#: xgnokii/xgnokii.c:1412 xgnokii/xgnokii_calendar.c:1548
+#, c-format
 msgid "Text"
 msgstr "Tekst"
 
 #
-#: gnokii/gnokii.c:1006
+#: gnokii/gnokii.c:1030
+#, c-format
 msgid "VoiceMail"
 msgstr "GlasovnaPo¹ta"
 
-#: gnokii/gnokii.c:1009 xgnokii/xgnokii.c:540 xgnokii/xgnokii.c:1417
+#: gnokii/gnokii.c:1033 xgnokii/xgnokii.c:540 xgnokii/xgnokii.c:1418
+#, c-format
 msgid "Fax"
 msgstr "Faks"
 
-#: gnokii/gnokii.c:1013
+#: gnokii/gnokii.c:1037
+#, c-format
 msgid "Email"
 msgstr "E-po¹ta"
 
-#: gnokii/gnokii.c:1016 xgnokii/xgnokii.c:549
+#: gnokii/gnokii.c:1040 xgnokii/xgnokii.c:549
+#, c-format
 msgid "ERMES"
 msgstr "ERMES"
 
-#: gnokii/gnokii.c:1019 xgnokii/xgnokii.c:553
+#: gnokii/gnokii.c:1043 xgnokii/xgnokii.c:553
+#, c-format
 msgid "X.400"
 msgstr "X.400"
 
-#: gnokii/gnokii.c:1022 gnokii/gnokii.c:1049 xgnokii/xgnokii_calendar.c:230
+#: gnokii/gnokii.c:1046 gnokii/gnokii.c:1073 xgnokii/xgnokii_calendar.c:230
+#, c-format
 msgid "Unknown"
 msgstr "Neznano"
 
-#: gnokii/gnokii.c:1027
+#: gnokii/gnokii.c:1051
+#, c-format
 msgid "Message validity is "
 msgstr "Veljavnost sporoèila je "
 
-#: gnokii/gnokii.c:1031
+#: gnokii/gnokii.c:1055
+#, c-format
 msgid "1 hour"
 msgstr "1 ura"
 
-#: gnokii/gnokii.c:1034
+#: gnokii/gnokii.c:1058
+#, c-format
 msgid "6 hours"
 msgstr "6 ur"
 
-#: gnokii/gnokii.c:1037
+#: gnokii/gnokii.c:1061
+#, c-format
 msgid "24 hours"
 msgstr "24 ur"
 
-#: gnokii/gnokii.c:1040
+#: gnokii/gnokii.c:1064
+#, c-format
 msgid "72 hours"
 msgstr "72 ur"
 
-#: gnokii/gnokii.c:1043 xgnokii/xgnokii.c:583 xgnokii/xgnokii.c:1481
+#: gnokii/gnokii.c:1067 xgnokii/xgnokii.c:583 xgnokii/xgnokii.c:1482
+#, c-format
 msgid "1 week"
 msgstr "1 teden"
 
-#: gnokii/gnokii.c:1046
+#: gnokii/gnokii.c:1070
+#, c-format
 msgid "Maximum time"
 msgstr "Najdalj¹i èas"
 
-#: gnokii/gnokii.c:1094 gnokii/gnokii.c:3011 gnokii/gnokii.c:3771
+#: gnokii/gnokii.c:1118 gnokii/gnokii.c:3117 gnokii/gnokii.c:3871
+#, c-format
 msgid "Input line format isn't valid\n"
 msgstr "Format vhodne vrstice je neveljaven\n"
 
-#: gnokii/gnokii.c:1124
+#: gnokii/gnokii.c:1148
 #, c-format
 msgid "Folder with name: %s successfully created!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1141
+#: gnokii/gnokii.c:1165
 #, c-format
 msgid "Error: Number must be between 1 and %i!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1147
+#: gnokii/gnokii.c:1171
 #, c-format
 msgid "Number %i of 'My Folders' successfully deleted!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1195
+#: gnokii/gnokii.c:1187
+#, fuzzy, c-format
+msgid "Cannot list available folders: %s\n"
+msgstr "Profila %s ni bilo mogoèe nastaviti\n"
+
+#: gnokii/gnokii.c:1191
+#, c-format
+msgid "No. Name                             Id #Msg\n"
+msgstr ""
+
+#: gnokii/gnokii.c:1192
+#, c-format
+msgid "============================================\n"
+msgstr ""
+
+#: gnokii/gnokii.c:1196
+#, fuzzy, c-format
+msgid "Cannot stat folder \"%s\": %s\n"
+msgstr "Profila %s ni bilo mogoèe nastaviti\n"
+
+#: gnokii/gnokii.c:1199
+#, c-format
+msgid "%3d %-32s %2u %4u\n"
+msgstr ""
+
+#: gnokii/gnokii.c:1250
 #, c-format
 msgid "Saving into %s\n"
 msgstr "Shranjujem v %s\n"
 
-#: gnokii/gnokii.c:1199
+#: gnokii/gnokii.c:1254
+#, c-format
 msgid "Filename too long - will be truncated to 63 characters.\n"
 msgstr "Ime datoteke predolgo - skraj¹ano bo na 63 znakov.\n"
 
-#: gnokii/gnokii.c:1225
+#: gnokii/gnokii.c:1280
 #, c-format
 msgid "%d. MO Message "
 msgstr "%d. M0 Sporoèilo "
 
-#: gnokii/gnokii.c:1228 gnokii/gnokii.c:1240 gnokii/gnokii.c:1248
-#: gnokii/gnokii.c:1296 gnokii/gnokii.c:1308
+#: gnokii/gnokii.c:1283 gnokii/gnokii.c:1295 gnokii/gnokii.c:1303
+#: gnokii/gnokii.c:1351 gnokii/gnokii.c:1363
+#, c-format
 msgid "(read)\n"
 msgstr "(prebrano)\n"
 
 #
-#: gnokii/gnokii.c:1231 gnokii/gnokii.c:1299
+#: gnokii/gnokii.c:1286 gnokii/gnokii.c:1354
+#, c-format
 msgid "(unread)\n"
 msgstr "(neprebrano)\n"
 
-#: gnokii/gnokii.c:1234 gnokii/gnokii.c:1302
+#: gnokii/gnokii.c:1289 gnokii/gnokii.c:1357
+#, c-format
 msgid "(sent)\n"
 msgstr "(poslano)\n"
 
 #
-#: gnokii/gnokii.c:1237 gnokii/gnokii.c:1305
+#: gnokii/gnokii.c:1292 gnokii/gnokii.c:1360
+#, c-format
 msgid "(unsent)\n"
 msgstr "(neposlano)\n"
 
-#: gnokii/gnokii.c:1243 gnokii/gnokii.c:1272
+#: gnokii/gnokii.c:1298 gnokii/gnokii.c:1327
 #, c-format
 msgid ""
 "Text: %s\n"
 "\n"
 msgstr "Tekst: %s\n"
 
-#: gnokii/gnokii.c:1246
+#: gnokii/gnokii.c:1301
 #, c-format
 msgid "%d. Delivery Report "
 msgstr "%d. Poroèilo o prejemu "
 
-#: gnokii/gnokii.c:1250
+#: gnokii/gnokii.c:1305
+#, c-format
 msgid "(not read)\n"
 msgstr "(neprebrano)\n"
 
-#: gnokii/gnokii.c:1251
+#: gnokii/gnokii.c:1306
 #, c-format
 msgid "Sending date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr "Po¹iljam datum/èas: %02d/%02d/%04d %02d:%02d:%02d "
 
-#: gnokii/gnokii.c:1256 gnokii/gnokii.c:1266 gnokii/gnokii.c:1281
-#: gnokii/gnokii.c:1316
+#: gnokii/gnokii.c:1311 gnokii/gnokii.c:1321 gnokii/gnokii.c:1336
+#: gnokii/gnokii.c:1371
 #, c-format
 msgid "+%02d00"
 msgstr "+%02d00"
 
-#: gnokii/gnokii.c:1258 gnokii/gnokii.c:1268 gnokii/gnokii.c:1283
-#: gnokii/gnokii.c:1318
+#: gnokii/gnokii.c:1313 gnokii/gnokii.c:1323 gnokii/gnokii.c:1338
+#: gnokii/gnokii.c:1373
 #, c-format
 msgid "%02d00"
 msgstr "%02d00"
 
-#: gnokii/gnokii.c:1261
+#: gnokii/gnokii.c:1316
 #, c-format
 msgid "Response date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr "Odgovor datum/èas: %02d/%02d/%04d %02d:%02d:%02d "
 
-#: gnokii/gnokii.c:1271
+#: gnokii/gnokii.c:1326
 #, c-format
 msgid "Receiver: %s Msg Center: %s\n"
 msgstr "Prejemnik: %s Msg Center: %s\n"
 
 #
-#: gnokii/gnokii.c:1275
+#: gnokii/gnokii.c:1330
+#, c-format
 msgid "Picture Message\n"
 msgstr "Slikovno Sporoèilo\n"
 
-#: gnokii/gnokii.c:1276 gnokii/gnokii.c:1311
+#: gnokii/gnokii.c:1331 gnokii/gnokii.c:1366
 #, c-format
 msgid "Date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr "Datum/èas: %02d/%02d/%04d %02d:%02d:%02d "
 
-#: gnokii/gnokii.c:1286
+#: gnokii/gnokii.c:1341
 #, fuzzy, c-format
 msgid "Sender: %s Msg center: %s\n"
 msgstr "Popiljatelj: %s Msg Center: %s\n"
 
-#: gnokii/gnokii.c:1287
+#: gnokii/gnokii.c:1342
+#, c-format
 msgid "Bitmap:\n"
 msgstr "Bitna slka:\n"
 
 #
-#: gnokii/gnokii.c:1289 gnokii/gnokii.c:1326
+#: gnokii/gnokii.c:1344 gnokii/gnokii.c:1381
+#, c-format
 msgid "Text:\n"
 msgstr "Tekst:\n"
 
-#: gnokii/gnokii.c:1293
+#: gnokii/gnokii.c:1348
 #, c-format
 msgid "%d. Inbox Message "
 msgstr "%d. Sporoèilo v Inbox-u "
 
-#: gnokii/gnokii.c:1321
+#: gnokii/gnokii.c:1376
 #, c-format
 msgid "Sender: %s Msg Center: %s\n"
 msgstr "Popiljatelj: %s Msg Center: %s\n"
 
-#: gnokii/gnokii.c:1329
+#: gnokii/gnokii.c:1384
 #, c-format
 msgid "GSM operator logo for %s (%s) network.\n"
 msgstr "Logotip GSM operaterja za %s (%s) omre¾je.\n"
 
-#: gnokii/gnokii.c:1330
+#: gnokii/gnokii.c:1385
+#, c-format
 msgid "Saved by Logo Express\n"
 msgstr "Shranjeno v Logo Express-u\n"
 
-#: gnokii/gnokii.c:1331
+#: gnokii/gnokii.c:1386
+#, c-format
 msgid "Saved by Operator Logo Uploader by Thomas Kessler\n"
 msgstr "Shranjeno z Thomas Kesslerjevim Operator Logo Updater-jem\n"
 
-#: gnokii/gnokii.c:1334
-#, fuzzy
+#: gnokii/gnokii.c:1389
+#, fuzzy, c-format
 msgid "Logo:\n"
 msgstr "Logotipi"
 
-#: gnokii/gnokii.c:1348
+#: gnokii/gnokii.c:1403
 #, c-format
 msgid "Couldn't save logofile %s!\n"
 msgstr "Datoteke z logotipom %s ni bilo mogoèe shraniti!\n"
 
 #
-#: gnokii/gnokii.c:1353
+#: gnokii/gnokii.c:1408
+#, c-format
 msgid "Ringtone\n"
 msgstr "Melodija\n"
 
-#: gnokii/gnokii.c:1357
+#: gnokii/gnokii.c:1412
 #, c-format
 msgid "Linked (%d/%d):\n"
 msgstr "Povezano (%d/%d):\n"
 
-#: gnokii/gnokii.c:1362
+#: gnokii/gnokii.c:1417
+#, c-format
 msgid "WAP vCard:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1365
-#, fuzzy
+#: gnokii/gnokii.c:1420
+#, fuzzy, c-format
 msgid "WAP vCalendar:\n"
 msgstr "Koledar"
 
-#: gnokii/gnokii.c:1368
+#: gnokii/gnokii.c:1423
+#, c-format
 msgid "WAP vCardSecure:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1371
+#: gnokii/gnokii.c:1426
+#, c-format
 msgid "WAP vCalendarSecure:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1374 gnokii/gnokii.c:2292
+#: gnokii/gnokii.c:1429 gnokii/gnokii.c:2375
+#, c-format
 msgid "Unknown\n"
 msgstr "Neznano\n"
 
-#: gnokii/gnokii.c:1389
+#: gnokii/gnokii.c:1444
+#, c-format
 msgid "(delete failed)\n"
 msgstr "(brisanje neuspe¹no)\n"
 
-#: gnokii/gnokii.c:1391
+#: gnokii/gnokii.c:1446
+#, c-format
 msgid "(message deleted)\n"
 msgstr "(sporoèilo izbrisano)\n"
 
-#: gnokii/gnokii.c:1395
+#: gnokii/gnokii.c:1450
 #, fuzzy, c-format
 msgid "GetSMS %s %d failed! (%s)\n"
 msgstr ""
 "GetSMS %s %d neuspe¹en(%s)\n"
 "\n"
 
-#: gnokii/gnokii.c:1397
+#: gnokii/gnokii.c:1452
+#, c-format
 msgid ""
 "See the gnokii manual page for the supported memory types with the phone\n"
 "you use.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1438
+#: gnokii/gnokii.c:1493
 #, c-format
 msgid "Deleted SMS %s %d\n"
 msgstr "Izbrisan SMS %s %d\n"
 
-#: gnokii/gnokii.c:1440
+#: gnokii/gnokii.c:1495
 #, fuzzy, c-format
 msgid ""
 "DeleteSMS %s %d failed!(%s)\n"
@@ -982,139 +1084,156 @@ msgstr ""
 "DeleSMS %s %d neuspe¹no!(%d)\n"
 "\n"
 
-#: gnokii/gnokii.c:1497 gnokii/gnokii.c:1578
+#: gnokii/gnokii.c:1552 gnokii/gnokii.c:1633
 msgid "Enter your code: "
 msgstr "Vpi¹ite svojo kodo: "
 
 #
-#: gnokii/gnokii.c:1506
+#: gnokii/gnokii.c:1561
+#, c-format
 msgid "Code ok.\n"
 msgstr "Koda je v redu.\n"
 
-#: gnokii/gnokii.c:1525
+#: gnokii/gnokii.c:1580
+#, c-format
 msgid "Security code status: "
 msgstr "Stanje varnostne kode: "
 
-#: gnokii/gnokii.c:1529
+#: gnokii/gnokii.c:1584
+#, c-format
 msgid "waiting for Security Code.\n"
 msgstr "èakam na Varnostno Kodo.\n"
 
-#: gnokii/gnokii.c:1532
+#: gnokii/gnokii.c:1587
+#, c-format
 msgid "waiting for PIN.\n"
 msgstr "èakam na PIN.\n"
 
-#: gnokii/gnokii.c:1535
+#: gnokii/gnokii.c:1590
+#, c-format
 msgid "waiting for PIN2.\n"
 msgstr "èakam na PIN2.\n"
 
-#: gnokii/gnokii.c:1538
+#: gnokii/gnokii.c:1593
+#, c-format
 msgid "waiting for PUK.\n"
 msgstr "èakam na PUK.\n"
 
-#: gnokii/gnokii.c:1541
+#: gnokii/gnokii.c:1596
+#, c-format
 msgid "waiting for PUK2.\n"
 msgstr "èakam na PUK2.\n"
 
 #
-#: gnokii/gnokii.c:1544
+#: gnokii/gnokii.c:1599
+#, c-format
 msgid "nothing to enter.\n"
 msgstr "niè za vnost.\n"
 
-#: gnokii/gnokii.c:1547
+#: gnokii/gnokii.c:1602
+#, c-format
 msgid "Unknown!\n"
 msgstr "Neznan!\n"
 
 #
-#: gnokii/gnokii.c:1579
+#: gnokii/gnokii.c:1634
 msgid "Enter new code: "
 msgstr "Vpi¹ite svojo kodo: "
 
-#: gnokii/gnokii.c:1580
+#: gnokii/gnokii.c:1635
 msgid "Retype new code: "
 msgstr "Ponovno vpi¹ite novo kodo: "
 
 #
-#: gnokii/gnokii.c:1582
+#: gnokii/gnokii.c:1637
+#, c-format
 msgid "Error: new code differ\n"
 msgstr "Napaka: novi kodi se razlikujeta\n"
 
 #
-#: gnokii/gnokii.c:1592
+#: gnokii/gnokii.c:1647
+#, c-format
 msgid "Code changed.\n"
 msgstr "Koda spremenjena.\n"
 
-#: gnokii/gnokii.c:1608
+#: gnokii/gnokii.c:1663
 #, c-format
 msgid "INCOMING CALL: ID: %d, Number: %s, Name: \"%s\"\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1611
+#: gnokii/gnokii.c:1666
 #, c-format
 msgid "CALL %d TERMINATED (LOCAL)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1614
+#: gnokii/gnokii.c:1669
 #, c-format
 msgid "CALL %d TERMINATED (REMOTE)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1617
+#: gnokii/gnokii.c:1672
 #, c-format
 msgid "CALL %d ACCEPTED BY THE REMOTE SIDE\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1620
+#: gnokii/gnokii.c:1675
 #, c-format
 msgid "CALL %d PLACED ON HOLD\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1623
+#: gnokii/gnokii.c:1678
 #, c-format
 msgid "CALL %d RETRIEVED FROM HOLD\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1648
+#: gnokii/gnokii.c:1703
 #, c-format
 msgid "Dialing failed: %s\n"
 msgstr "Klicanje neuspe¹no: %s\n"
 
-#: gnokii/gnokii.c:1650
+#: gnokii/gnokii.c:1705
 #, fuzzy, c-format
 msgid "Dialled call, id: %d (lowlevel id: %d)\n"
 msgstr "Klic, id: %d\n"
 
-#: gnokii/gnokii.c:1709
+#: gnokii/gnokii.c:1764
+#, c-format
 msgid "Sending operator logo.\n"
 msgstr "Po¹iljam logo operaterja.\n"
 
-#: gnokii/gnokii.c:1710
+#: gnokii/gnokii.c:1765
+#, c-format
 msgid "Sending caller line identification logo.\n"
 msgstr "Po¹iljam logotip linije klicatelja.\n"
 
 #
-#: gnokii/gnokii.c:1711
+#: gnokii/gnokii.c:1766
+#, c-format
 msgid "Sending Multipart Message: Picture Message.\n"
 msgstr "Po¹iljam veèdelno sporoèilo: Slikovno Sporoèilo.\n"
 
 #
-#: gnokii/gnokii.c:1712
-#, fuzzy
+#: gnokii/gnokii.c:1767
+#, fuzzy, c-format
 msgid "Sending EMS-compliant Picture Message.\n"
 msgstr "Po¹iljam veèdelno sporoèilo: Slikovno Sporoèilo.\n"
 
-#: gnokii/gnokii.c:1713
+#: gnokii/gnokii.c:1768
+#, c-format
 msgid "Sending EMS-compliant Animation.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1714
+#: gnokii/gnokii.c:1769
+#, c-format
 msgid "You should specify what kind of logo to send!\n"
 msgstr "Definirati morate tip logotipa, ki bi radi poslali\n"
 
-#: gnokii/gnokii.c:1728
+#: gnokii/gnokii.c:1783
+#, c-format
 msgid "Cannot send logo: specified and loaded bitmap type differ!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1782
+#: gnokii/gnokii.c:1837
 #, c-format
 msgid "Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "
 msgstr ""
@@ -1122,559 +1241,627 @@ msgstr ""
 "koèi ? "
 
 #
-#: gnokii/gnokii.c:1784
+#: gnokii/gnokii.c:1839
 msgid "O"
 msgstr "P"
 
 #
-#: gnokii/gnokii.c:1784
+#: gnokii/gnokii.c:1839
 msgid "o"
 msgstr "p"
 
 #
-#: gnokii/gnokii.c:1785
+#: gnokii/gnokii.c:1840
 msgid "N"
 msgstr "N"
 
 #
-#: gnokii/gnokii.c:1785
+#: gnokii/gnokii.c:1840
 msgid "n"
 msgstr "n"
 
-#: gnokii/gnokii.c:1786
+#: gnokii/gnokii.c:1841
 msgid "S"
 msgstr ""
 
-#: gnokii/gnokii.c:1786
+#: gnokii/gnokii.c:1841
 msgid "s"
 msgstr ""
 
-#: gnokii/gnokii.c:1790
+#: gnokii/gnokii.c:1845
+#, c-format
 msgid "Enter name of new file: "
 msgstr "Vpi¹ite ime nove datoteke: "
 
-#: gnokii/gnokii.c:1800
+#: gnokii/gnokii.c:1855
 #, c-format
 msgid "Failed to write file \"%s\"\n"
 msgstr "Pisanje v datoteko \"%s\" neuspe¹no\n"
 
-#: gnokii/gnokii.c:1836
+#: gnokii/gnokii.c:1891
+#, c-format
 msgid "Dealer welcome note "
 msgstr "Zastopnikova dobrodo¹lica "
 
-#: gnokii/gnokii.c:1837 gnokii/gnokii.c:1842
+#: gnokii/gnokii.c:1892 gnokii/gnokii.c:1897
 #, c-format
 msgid "currently set to \"%s\"\n"
 msgstr "trenutno natavljen na \"%s\"\n"
 
-#: gnokii/gnokii.c:1838 gnokii/gnokii.c:1843
+#: gnokii/gnokii.c:1893 gnokii/gnokii.c:1898
+#, c-format
 msgid "currently empty\n"
 msgstr "trenutno prazen\n"
 
-#: gnokii/gnokii.c:1841
+#: gnokii/gnokii.c:1896
+#, c-format
 msgid "Welcome note "
 msgstr "Dobrodo¹lica "
 
-#: gnokii/gnokii.c:1848
+#: gnokii/gnokii.c:1903
 #, c-format
 msgid "Operator logo for %s (%s) network got succesfully\n"
 msgstr "Logotip GSM operaterja za %s (%s) omre¾je uspe¹no prejet.\n"
 
-#: gnokii/gnokii.c:1853 gnokii/gnokii.c:1864 gnokii/gnokii.c:1875
-#: gnokii/gnokii.c:1958
+#: gnokii/gnokii.c:1908 gnokii/gnokii.c:1919 gnokii/gnokii.c:1934
+#: gnokii/gnokii.c:2017
 #, c-format
 msgid "Sorry, gnokii doesn't know %s network !\n"
 msgstr "Oprostite, gnokii ne pozna omre¾ja %s !\n"
 
-#: gnokii/gnokii.c:1860
+#: gnokii/gnokii.c:1915
+#, c-format
 msgid "Startup logo got successfully\n"
 msgstr "Zagonski logotip uspe¹no prejet\n"
 
-#
-#: gnokii/gnokii.c:1871
-msgid "Caller logo got successfully\n"
-msgstr "Logotip klicoèega uspe¹no prejet\n"
-
-#
-#: gnokii/gnokii.c:1881
-msgid "Unknown bitmap type.\n"
-msgstr "Neznan tip bitne slike.\n"
-
-#: gnokii/gnokii.c:1884
+#: gnokii/gnokii.c:1926 gnokii/gnokii.c:1943
+#, c-format
 msgid "Your phone doesn't have logo uploaded !\n"
 msgstr "Va¹ telefon nima vne¹enega logotipa !\n"
 
 #
-#: gnokii/gnokii.c:1894
+#: gnokii/gnokii.c:1928
+#, c-format
+msgid "Caller logo got successfully\n"
+msgstr "Logotip klicoèega uspe¹no prejet\n"
+
+#: gnokii/gnokii.c:1929
+#, fuzzy, c-format
+msgid "Caller group name: %s, ringing tone: %s (%d)\n"
+msgstr "Melodija: %s (%d)\n"
+
+#
+#: gnokii/gnokii.c:1940
+#, c-format
+msgid "Unknown bitmap type.\n"
+msgstr "Neznan tip bitne slike.\n"
+
+#
+#: gnokii/gnokii.c:1953
+#, c-format
 msgid "What kind of logo do you want to get ?\n"
 msgstr "Kak¹ne vrste logotip bi radi sprejeli ?\n"
 
-#: gnokii/gnokii.c:1912
+#: gnokii/gnokii.c:1971
 #, fuzzy, c-format
 msgid "Error while reading file \"%s\": %s\n"
 msgstr "Napaka pri branju datoteke!"
 
-#: gnokii/gnokii.c:1986
+#: gnokii/gnokii.c:2045
+#, c-format
 msgid "What kind of logo do you want to set ?\n"
 msgstr "Kak¹ne vrste logotip bi radi nastavili ?\n"
 
-#: gnokii/gnokii.c:2003
+#: gnokii/gnokii.c:2062
+#, c-format
 msgid "Error setting"
 msgstr "Napaka pri nastavitvi"
 
-#: gnokii/gnokii.c:2004
+#: gnokii/gnokii.c:2063
+#, c-format
 msgid " dealer"
 msgstr " zastopnik"
 
-#: gnokii/gnokii.c:2005
+#: gnokii/gnokii.c:2064
+#, c-format
 msgid " welcome note - "
 msgstr " dobrodo¹lica - "
 
-#: gnokii/gnokii.c:2025
+#: gnokii/gnokii.c:2084
+#, c-format
 msgid "SIM card and PIN is required\n"
 msgstr "SIM kartica ter PIN sta obvezni\n"
 
-#: gnokii/gnokii.c:2031
+#: gnokii/gnokii.c:2090
 #, c-format
 msgid "too long, truncated to \"%s\" (length %i)\n"
 msgstr "predolgo, skraj¹ano v \"%s\" (dol¾ina %i)\n"
 
-#: gnokii/gnokii.c:2039
+#: gnokii/gnokii.c:2098
+#, c-format
 msgid "Error setting startup logo - SIM card and PIN is required\n"
 msgstr ""
 "Napaka pri nastavljanju logotipa ob zagonu - potrebni sta SIM kartica ter "
 "PIN koda\n"
 
-#: gnokii/gnokii.c:2040
+#: gnokii/gnokii.c:2099
 #, c-format
 msgid "i: %i, %2x %2x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2051
+#: gnokii/gnokii.c:2110
+#, c-format
 msgid "Done.\n"
 msgstr "Opravljeno.\n"
 
-#: gnokii/gnokii.c:2066
+#: gnokii/gnokii.c:2125
 #, c-format
 msgid "Could not load bitmap: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2123
+#: gnokii/gnokii.c:2182
 #, fuzzy, c-format
 msgid "Todo: %s\n"
 msgstr "Tekst: %s\n"
 
-#: gnokii/gnokii.c:2124
-#, fuzzy
+#: gnokii/gnokii.c:2183
+#, fuzzy, c-format
 msgid "Priority: "
 msgstr "Port:"
 
-#: gnokii/gnokii.c:2127
+#: gnokii/gnokii.c:2186
+#, c-format
 msgid "low\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2130
+#: gnokii/gnokii.c:2189
+#, c-format
 msgid "medium\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2133
+#: gnokii/gnokii.c:2192
+#, c-format
 msgid "high\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2136 gnokii/gnokii.c:3604 gnokii/gnokii.c:3627
-#: gnokii/gnokii.c:3640 gnokii/gnokii.c:3652 gnokii/gnokii.c:3667
-#: gnokii/gnokii.c:3679 gnokii/gnokii.c:3696 gnokii/gnokii.c:3708
-#: gnokii/gnokii.c:3720
-#, fuzzy
+#: gnokii/gnokii.c:2195 gnokii/gnokii.c:3704 gnokii/gnokii.c:3727
+#: gnokii/gnokii.c:3740 gnokii/gnokii.c:3752 gnokii/gnokii.c:3767
+#: gnokii/gnokii.c:3779 gnokii/gnokii.c:3796 gnokii/gnokii.c:3808
+#: gnokii/gnokii.c:3820
+#, fuzzy, c-format
 msgid "unknown\n"
 msgstr "neznan"
 
-#: gnokii/gnokii.c:2142
+#: gnokii/gnokii.c:2201
 #, fuzzy, c-format
 msgid "The ToDo note could not be read: %s\n"
 msgstr "Opombe koledarja se ne da prebrati\n"
 
-#: gnokii/gnokii.c:2162 gnokii/gnokii.c:2347
+#: gnokii/gnokii.c:2221 gnokii/gnokii.c:2453
 #, fuzzy, c-format
 msgid "Failed to load vCalendar file: %s\n"
 msgstr "VCalendar datoteke ni bilo mogoèe nalo¾iti.\n"
 
-#: gnokii/gnokii.c:2169 gnokii/gnokii.c:2354 gnokii/gnokii.c:3863
+#: gnokii/gnokii.c:2228 gnokii/gnokii.c:2460 gnokii/gnokii.c:3963
+#, c-format
 msgid "Succesfully written!\n"
 msgstr "Uspe¹no zapisan!\n"
 
-#: gnokii/gnokii.c:2171 gnokii/gnokii.c:2187 gnokii/gnokii.c:2356
+#: gnokii/gnokii.c:2230 gnokii/gnokii.c:2246 gnokii/gnokii.c:2462
 #, fuzzy, c-format
 msgid "Failed to write calendar note: %s\n"
 msgstr "Opombe koledarja se ni dalo zapisati!\n"
 
-#: gnokii/gnokii.c:2185
+#: gnokii/gnokii.c:2244
+#, c-format
 msgid "Succesfully deleted all ToDo notes!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2276
+#: gnokii/gnokii.c:2359
+#, c-format
 msgid "   Type of the note: "
 msgstr "   Tip opombe: "
 
-#: gnokii/gnokii.c:2280
+#: gnokii/gnokii.c:2363
+#, c-format
 msgid "Reminder\n"
 msgstr "Opomin\n"
 
-#: gnokii/gnokii.c:2283
+#: gnokii/gnokii.c:2366
+#, c-format
 msgid "Call\n"
 msgstr "Klic\n"
 
-#: gnokii/gnokii.c:2286
+#: gnokii/gnokii.c:2369
+#, c-format
 msgid "Meeting\n"
 msgstr "Sreèanje\n"
 
-#: gnokii/gnokii.c:2289
+#: gnokii/gnokii.c:2372
+#, c-format
 msgid "Birthday\n"
 msgstr "Rojstni dan\n"
 
-#: gnokii/gnokii.c:2296
+#: gnokii/gnokii.c:2379
 #, c-format
 msgid "   Date: %d-%02d-%02d\n"
 msgstr "   Datum: %d-%02d-%02d\n"
 
-#: gnokii/gnokii.c:2300
+#: gnokii/gnokii.c:2383
 #, c-format
 msgid "   Time: %02d:%02d:%02d\n"
 msgstr "   Ura: %02d:%02d:%02d\n"
 
-#: gnokii/gnokii.c:2305
+#: gnokii/gnokii.c:2388
 #, c-format
 msgid "   Alarm date: %d-%02d-%02d\n"
 msgstr "   Datum alarma: %d-%02d-%02d\n"
 
-#: gnokii/gnokii.c:2310
+#: gnokii/gnokii.c:2393
 #, c-format
 msgid "   Alarm time: %02d:%02d:%02d\n"
 msgstr "   Èas alarma: %02d:%02d:%02d\n"
 
-#: gnokii/gnokii.c:2316
+#: gnokii/gnokii.c:2403
+#, c-format
+msgid "   Repeat: every day\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2406
+#, c-format
+msgid "   Repeat: every week\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2409
+#, c-format
+msgid "   Repeat: every 2 weeks\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2412
+#, c-format
+msgid "   Repeat: every month\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2415
+#, c-format
+msgid "   Repeat: every year\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2418
+#, fuzzy, c-format
+msgid "   Repeat: %d hours\n"
+msgstr "   Tekst: %s\n"
+
+#: gnokii/gnokii.c:2422
 #, c-format
 msgid "   Text: %s\n"
 msgstr "   Tekst: %s\n"
 
-#: gnokii/gnokii.c:2319
+#: gnokii/gnokii.c:2425
 #, c-format
 msgid "   Phone: %s\n"
 msgstr "   Telefon: %s\n"
 
-#: gnokii/gnokii.c:2323
+#: gnokii/gnokii.c:2429
 #, fuzzy, c-format
 msgid "The calendar note can not be read: %s\n"
 msgstr "Opombe koledarja se ne da prebrati\n"
 
-#: gnokii/gnokii.c:2383
-#, fuzzy
+#: gnokii/gnokii.c:2489
+#, fuzzy, c-format
 msgid "Calendar note deleted.\n"
 msgstr "  Opomba koledarja izbrisana.\n"
 
 #
-#: gnokii/gnokii.c:2385
+#: gnokii/gnokii.c:2491
 #, fuzzy, c-format
 msgid "The calendar note cannot be deleted: %s\n"
 msgstr "Opombe koledarja se ni dalo izbrisati\n"
 
-#: gnokii/gnokii.c:2450
+#: gnokii/gnokii.c:2556
 #, c-format
 msgid "Date: %4d/%02d/%02d\n"
 msgstr "Datum: %4d/%02d/%02d\n"
 
-#: gnokii/gnokii.c:2451
+#: gnokii/gnokii.c:2557
 #, c-format
 msgid "Time: %02d:%02d:%02d\n"
 msgstr "Èas: %02d:%02d:%02d\n"
 
-#: gnokii/gnokii.c:2500
+#: gnokii/gnokii.c:2606
 #, c-format
 msgid "Alarm: %s\n"
 msgstr "Alarm: %s\n"
 
-#: gnokii/gnokii.c:2501
+#: gnokii/gnokii.c:2607
 #, c-format
 msgid "Time: %02d:%02d\n"
 msgstr "Èas: %02d:%02d\n"
 
-#: gnokii/gnokii.c:2543
+#: gnokii/gnokii.c:2649
 #, c-format
 msgid "CALL%d: IDLE\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2572
+#: gnokii/gnokii.c:2678
 #, c-format
 msgid "CALL%d: %s %s(%s) (callid: %d, duration: %d sec)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2613
+#: gnokii/gnokii.c:2719
+#, c-format
 msgid "Entering monitor mode...\n"
 msgstr "Vstopam v nadzorni naèin...\n"
 
-#: gnokii/gnokii.c:2639
+#: gnokii/gnokii.c:2745
 #, c-format
 msgid "RFLevel: %d\n"
 msgstr "RFLevel: %d\n"
 
-#: gnokii/gnokii.c:2642
+#: gnokii/gnokii.c:2748
 #, c-format
 msgid "Battery: %d\n"
 msgstr "Baterija: %d\n"
 
-#: gnokii/gnokii.c:2645
+#: gnokii/gnokii.c:2751
 #, c-format
 msgid "Power Source: %s\n"
 msgstr "Vrsta napajanja: %s\n"
 
 #
-#: gnokii/gnokii.c:2645
+#: gnokii/gnokii.c:2751
 msgid "AC/DC"
 msgstr "AC/DC"
 
 #
-#: gnokii/gnokii.c:2645
+#: gnokii/gnokii.c:2751
 msgid "battery"
 msgstr "baterija"
 
-#: gnokii/gnokii.c:2649
+#: gnokii/gnokii.c:2755
 #, c-format
 msgid "SIM: Used %d, Free %d\n"
 msgstr "SIM: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2653
+#: gnokii/gnokii.c:2759
 #, c-format
 msgid "Phone: Used %d, Free %d\n"
 msgstr "Telefon: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2657
+#: gnokii/gnokii.c:2763
 #, c-format
 msgid "DC: Used %d, Free %d\n"
 msgstr "DC: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2661
+#: gnokii/gnokii.c:2767
 #, c-format
 msgid "EN: Used %d, Free %d\n"
 msgstr "EN: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2665
+#: gnokii/gnokii.c:2771
 #, c-format
 msgid "FD: Used %d, Free %d\n"
 msgstr "FD: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2669
+#: gnokii/gnokii.c:2775
 #, c-format
 msgid "LD: Used %d, Free %d\n"
 msgstr "LD: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2673
+#: gnokii/gnokii.c:2779
 #, c-format
 msgid "MC: Used %d, Free %d\n"
 msgstr "MC: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2677
+#: gnokii/gnokii.c:2783
 #, c-format
 msgid "ON: Used %d, Free %d\n"
 msgstr "ON: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2681
+#: gnokii/gnokii.c:2787
 #, c-format
 msgid "RC: Used %d, Free %d\n"
 msgstr "RC: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii.c:2684
+#: gnokii/gnokii.c:2790
 #, c-format
 msgid "SMS Messages: Unread %d, Number %d\n"
 msgstr "SMS Sporoèil: Neprebranih %d, ©tevilo %d \n"
 
-#: gnokii/gnokii.c:2687
+#: gnokii/gnokii.c:2793
 #, c-format
 msgid "Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2694
+#: gnokii/gnokii.c:2800
 #, c-format
 msgid "Cell broadcast received on channel %d: %s\n"
 msgstr "Oddaja celice sprejeta na kanalu %d: %s\n"
 
-#: gnokii/gnokii.c:2702
+#: gnokii/gnokii.c:2808
+#, c-format
 msgid "Leaving monitor mode...\n"
 msgstr "Zapu¹èam nadzorni naèin...\n"
 
-#: gnokii/gnokii.c:2709
+#: gnokii/gnokii.c:2815
 #, c-format
 msgid "Call in progress: %-3s\n"
 msgstr "Klic v poteku: %-3s\n"
 
-#: gnokii/gnokii.c:2710 gnokii/gnokii.c:2712 gnokii/gnokii.c:2714
-#: gnokii/gnokii.c:2716 gnokii/gnokii.c:2718 gnokii/gnokii.c:2720
-#: gnokii/gnokii.c:2722 gnokii/gnokii.c:2724
+#: gnokii/gnokii.c:2816 gnokii/gnokii.c:2818 gnokii/gnokii.c:2820
+#: gnokii/gnokii.c:2822 gnokii/gnokii.c:2824 gnokii/gnokii.c:2826
+#: gnokii/gnokii.c:2828 gnokii/gnokii.c:2830
 msgid "on"
 msgstr "vklopljen"
 
-#: gnokii/gnokii.c:2710 gnokii/gnokii.c:2712 gnokii/gnokii.c:2714
-#: gnokii/gnokii.c:2716 gnokii/gnokii.c:2718 gnokii/gnokii.c:2720
-#: gnokii/gnokii.c:2722 gnokii/gnokii.c:2724
+#: gnokii/gnokii.c:2816 gnokii/gnokii.c:2818 gnokii/gnokii.c:2820
+#: gnokii/gnokii.c:2822 gnokii/gnokii.c:2824 gnokii/gnokii.c:2826
+#: gnokii/gnokii.c:2828 gnokii/gnokii.c:2830
 msgid "off"
 msgstr "izklopljen"
 
-#: gnokii/gnokii.c:2711
+#: gnokii/gnokii.c:2817
 #, c-format
 msgid "Unknown: %-3s\n"
 msgstr "Neznan: %-3s\n"
 
-#: gnokii/gnokii.c:2713
+#: gnokii/gnokii.c:2819
 #, c-format
 msgid "Unread SMS: %-3s\n"
 msgstr "Neprebran SMS: %-3s\n"
 
-#: gnokii/gnokii.c:2715
+#: gnokii/gnokii.c:2821
 #, c-format
 msgid "Voice call: %-3s\n"
 msgstr "Glasovni klic: %-3s\n"
 
-#: gnokii/gnokii.c:2717
+#: gnokii/gnokii.c:2823
 #, c-format
 msgid "Fax call active: %-3s\n"
 msgstr "Fax klic aktiven: %-3s\n"
 
-#: gnokii/gnokii.c:2719
+#: gnokii/gnokii.c:2825
 #, c-format
 msgid "Data call active: %-3s\n"
 msgstr "Podatkovni klic aktiven: %-3s\n"
 
-#: gnokii/gnokii.c:2721
+#: gnokii/gnokii.c:2827
 #, c-format
 msgid "Keyboard lock: %-3s\n"
 msgstr "Zaklepanje tipkovnice: %-3s\n"
 
-#: gnokii/gnokii.c:2723
+#: gnokii/gnokii.c:2829
 #, c-format
 msgid "SMS storage full: %-3s\n"
 msgstr "SMS pomnilnik poln: %-3s\n"
 
 #
-#: gnokii/gnokii.c:2825
+#: gnokii/gnokii.c:2931
+#, c-format
 msgid "Entered display monitoring mode...\n"
 msgstr "Vstopil v nadzorni naèin zaslona...\n"
 
 #
-#: gnokii/gnokii.c:2842 gnokii/gnokii.c:4641
+#: gnokii/gnokii.c:2948 gnokii/gnokii.c:4744
+#, c-format
 msgid "Shutting down\n"
 msgstr "Izklapljam\n"
 
-#: gnokii/gnokii.c:2844
+#: gnokii/gnokii.c:2950
+#, c-format
 msgid "Leaving display monitor mode...\n"
 msgstr "Zapu¹èam nadzorni naèin zaslona...\n"
 
-#: gnokii/gnokii.c:2923
+#: gnokii/gnokii.c:3029
+#, c-format
 msgid "Starting profile number is greater than stop\n"
 msgstr "Zaèetna ¹tevilka profila je veèja kot konèna\n"
 
-#: gnokii/gnokii.c:2928
+#: gnokii/gnokii.c:3034
 #, c-format
 msgid "Profile number must be value from 0 to %d!\n"
 msgstr "©tevilka profila mora biti vrednost od 0 do %d!\n"
 
-#: gnokii/gnokii.c:2933
+#: gnokii/gnokii.c:3039
 #, c-format
 msgid "This phone supports only %d profiles!\n"
 msgstr "Ta telefon podpira samo %d profilov!\n"
 
-#: gnokii/gnokii.c:2950 gnokii/gnokii.c:3043
+#: gnokii/gnokii.c:3056 gnokii/gnokii.c:3149
 #, c-format
 msgid "Cannot get profile %d\n"
 msgstr "Nisem mogel dobiti profila %d\n"
 
-#: gnokii/gnokii.c:2963
+#: gnokii/gnokii.c:3069
+#, c-format
 msgid " (name defined)\n"
 msgstr " (ime definirano)\n"
 
-#: gnokii/gnokii.c:2964
+#: gnokii/gnokii.c:3070
 #, c-format
 msgid "Incoming call alert: %s\n"
 msgstr "Alarm za dohodni klic: %s\n"
 
-#: gnokii/gnokii.c:2965
+#: gnokii/gnokii.c:3071
 #, c-format
 msgid "Ringing tone: %s (%d)\n"
 msgstr "Melodija: %s (%d)\n"
 
-#: gnokii/gnokii.c:2966
+#: gnokii/gnokii.c:3072
 #, c-format
 msgid "Ringing volume: %s\n"
 msgstr "Glasnost zvonenja: %s\n"
 
-#: gnokii/gnokii.c:2967
+#: gnokii/gnokii.c:3073
 #, c-format
 msgid "Message alert tone: %s\n"
 msgstr "Zvok za alarm ob sporoèilu: %s\n"
 
-#: gnokii/gnokii.c:2968
+#: gnokii/gnokii.c:3074
 #, c-format
 msgid "Keypad tones: %s\n"
 msgstr "Zvoki tipk: %s\n"
 
-#: gnokii/gnokii.c:2969
+#: gnokii/gnokii.c:3075
 #, c-format
 msgid "Warning and game tones: %s\n"
 msgstr "Zvoki za opozorila in igre: %s\n"
 
-#: gnokii/gnokii.c:2972
+#: gnokii/gnokii.c:3078
 #, c-format
 msgid "Lights: %s\n"
 msgstr "Osvetlitev: %s\n"
 
 #
-#: gnokii/gnokii.c:2972 gnokii/gnokii.c:2979
+#: gnokii/gnokii.c:3078 gnokii/gnokii.c:3085
 msgid "On"
 msgstr "Vklopljen"
 
-#: gnokii/gnokii.c:2972
+#: gnokii/gnokii.c:3078
 msgid "Automatic"
 msgstr "Avtomatski"
 
-#: gnokii/gnokii.c:2973
+#: gnokii/gnokii.c:3079
 #, c-format
 msgid "Vibration: %s\n"
 msgstr "Vibracija: %s\n"
 
-#: gnokii/gnokii.c:2976
+#: gnokii/gnokii.c:3082
 #, c-format
 msgid "Caller groups: 0x%02x\n"
 msgstr "Skupine klicoèih: 0x%02x\n"
 
-#: gnokii/gnokii.c:2979
+#: gnokii/gnokii.c:3085
 #, c-format
 msgid "Automatic answer: %s\n"
 msgstr "Avtomatski odgovor: %s\n"
 
 #
-#: gnokii/gnokii.c:2979
+#: gnokii/gnokii.c:3085
 msgid "Off"
 msgstr "Izklop"
 
-#: gnokii/gnokii.c:3017
+#: gnokii/gnokii.c:3123
 #, fuzzy, c-format
 msgid "Cannot set profile: %s\n"
 msgstr "Profila %s ni bilo mogoèe nastaviti\n"
 
-#: gnokii/gnokii.c:3037
+#: gnokii/gnokii.c:3143
 #, fuzzy, c-format
 msgid "Cannot get active profile: %s\n"
 msgstr "Profila %s ni bilo mogoèe nastaviti\n"
 
-#: gnokii/gnokii.c:3045
+#: gnokii/gnokii.c:3151
 #, fuzzy, c-format
 msgid "Active profile: %d (%s)\n"
 msgstr "Profila %s ni bilo mogoèe nastaviti\n"
 
-#: gnokii/gnokii.c:3063
+#: gnokii/gnokii.c:3169
 #, fuzzy, c-format
 msgid "Cannot set active profile to %d: %s\n"
 msgstr "Profila %s ni bilo mogoèe nastaviti\n"
 
-#: gnokii/gnokii.c:3143
+#: gnokii/gnokii.c:3287
 #, c-format
 msgid ""
 "%d. Name: %s\n"
@@ -1682,598 +1869,628 @@ msgid ""
 "Group id: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3147
-#, fuzzy
+#: gnokii/gnokii.c:3291
+#, fuzzy, c-format
 msgid "Email address: "
 msgstr "Naslov:"
 
-#: gnokii/gnokii.c:3150
-#, fuzzy
+#: gnokii/gnokii.c:3294
+#, fuzzy, c-format
 msgid "Address: "
 msgstr "Naslov:"
 
-#: gnokii/gnokii.c:3153
-#, fuzzy
+#: gnokii/gnokii.c:3297
+#, fuzzy, c-format
 msgid "Notes: "
 msgstr "Datum: "
 
-#: gnokii/gnokii.c:3158
-#, fuzzy
+#: gnokii/gnokii.c:3302
+#, fuzzy, c-format
 msgid "Home number: "
 msgstr "©tevilka: "
 
-#: gnokii/gnokii.c:3161
-#, fuzzy
+#: gnokii/gnokii.c:3305
+#, fuzzy, c-format
 msgid "Cellular number: "
 msgstr "©tevilka centra"
 
-#: gnokii/gnokii.c:3164
-#, fuzzy
+#: gnokii/gnokii.c:3308
+#, fuzzy, c-format
 msgid "Fax number: "
 msgstr "©tevilka: "
 
-#: gnokii/gnokii.c:3167
-#, fuzzy
+#: gnokii/gnokii.c:3311
+#, fuzzy, c-format
 msgid "Business number: "
 msgstr "Vizitka"
 
-#: gnokii/gnokii.c:3170
-#, fuzzy
+#: gnokii/gnokii.c:3314
+#, fuzzy, c-format
 msgid "Preferred number: "
 msgstr "©tevilka centra"
 
-#: gnokii/gnokii.c:3173 gnokii/gnokii.c:3181
+#: gnokii/gnokii.c:3317 gnokii/gnokii.c:3327
 #, fuzzy, c-format
 msgid "Unknown (%d): "
 msgstr "Neznana (%d)"
 
-#: gnokii/gnokii.c:3178
-#, fuzzy
+#: gnokii/gnokii.c:3322
+#, fuzzy, c-format
 msgid "WWW address: "
 msgstr "Naslov:"
 
-#: gnokii/gnokii.c:3187
+#: gnokii/gnokii.c:3334
 #, fuzzy, c-format
 msgid "Date: %02u.%02u.%04u %02u:%02u:%02u\n"
 msgstr "Datum/èas: %02d/%02d/%04d %02d:%02d:%02d "
 
-#: gnokii/gnokii.c:3192
+#: gnokii/gnokii.c:3339
+#, c-format
 msgid "Empty memory location. Skipping.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3195
+#: gnokii/gnokii.c:3342
 #, c-format
 msgid "Error reading from the location %d in memory %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3229 gnokii/gnokii.c:3240 gnokii/gnokii.c:3254
-#, fuzzy, c-format
-msgid "Format problem on line [%s]\n"
-msgstr "Problem v formatu vrstice %d [%s]\n"
-
-#: gnokii/gnokii.c:3271
-#, fuzzy, c-format
-msgid "Missing phone number type on line %d entry [%s]\n"
-msgstr "Manjkajoèa ¹tevilka tipa v vrstici %d vnos %d [%s]\n"
-
-#: gnokii/gnokii.c:3285
-#, fuzzy, c-format
-msgid "There is no phone number on line [%s] entry %d\n"
-msgstr "Na vrstici %d vnosu %d [%s] ni telefonske ¹tevilke\n"
-
-#: gnokii/gnokii.c:3435
+#: gnokii/gnokii.c:3493
+#, c-format
 msgid "Location busy. "
 msgstr "Lokacija zaposlena. "
 
-#: gnokii/gnokii.c:3449
+#: gnokii/gnokii.c:3507
 #, fuzzy, c-format
 msgid "Error (%s)\n"
 msgstr "Napaka !\n"
 
-#: gnokii/gnokii.c:3461
+#: gnokii/gnokii.c:3519
 #, c-format
 msgid "Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"
 msgstr "Zapis uspe¹en: vrsta spomina: %s, loc: %d, ime: %s, ¹tevilka: %s\n"
 
-#: gnokii/gnokii.c:3464
+#: gnokii/gnokii.c:3522
 #, c-format
 msgid "Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"
 msgstr ""
 "Zapis NEUSPE©EN(%s): vrsta spomina: %s, loc: %d, ime: %s, ¹tevilka: %s\n"
 
-#: gnokii/gnokii.c:3486 gnokii/gnokii.c:3592
+#: gnokii/gnokii.c:3558
+#, c-format
+msgid "Phonebook entry removed: memory type: %s, loc: %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:3562
+#, fuzzy, c-format
+msgid "Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"
+msgstr ""
+"Zapis NEUSPE©EN(%s): vrsta spomina: %s, loc: %d, ime: %s, ¹tevilka: %s\n"
+
+#: gnokii/gnokii.c:3586 gnokii/gnokii.c:3692
 #, c-format
 msgid "WAP bookmark nr. %d:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3487 gnokii/gnokii.c:3593
+#: gnokii/gnokii.c:3587 gnokii/gnokii.c:3693
 #, fuzzy, c-format
 msgid "Name: %s\n"
 msgstr "©tevilka: %s\n"
 
-#: gnokii/gnokii.c:3488
+#: gnokii/gnokii.c:3588
 #, fuzzy, c-format
 msgid "URL: %s\n"
 msgstr "Osvetlitev: %s\n"
 
-#: gnokii/gnokii.c:3519
+#: gnokii/gnokii.c:3619
 #, fuzzy, c-format
 msgid "WAP bookmark nr. %d succesfully written!\n"
 msgstr "Uspe¹no zapisan!\n"
 
-#: gnokii/gnokii.c:3545
+#: gnokii/gnokii.c:3645
 #, c-format
 msgid "WAP bookmark nr. %d deleted!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3594
+#: gnokii/gnokii.c:3694
 #, fuzzy, c-format
 msgid "Home: %s\n"
 msgstr "©tevilka: %s\n"
 
-#: gnokii/gnokii.c:3595
+#: gnokii/gnokii.c:3695
+#, c-format
 msgid "Session mode: "
 msgstr ""
 
-#: gnokii/gnokii.c:3598
-#, fuzzy
+#: gnokii/gnokii.c:3698
+#, fuzzy, c-format
 msgid "temporary\n"
 msgstr "Spomin"
 
-#: gnokii/gnokii.c:3601
+#: gnokii/gnokii.c:3701
+#, c-format
 msgid "permanent\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3607
-#, fuzzy
+#: gnokii/gnokii.c:3707
+#, fuzzy, c-format
 msgid "Connection security: "
 msgstr "Povezava:"
 
-#: gnokii/gnokii.c:3609
-#, fuzzy
+#: gnokii/gnokii.c:3709
+#, fuzzy, c-format
 msgid "yes\n"
 msgstr "da"
 
-#: gnokii/gnokii.c:3611
-#, fuzzy
+#: gnokii/gnokii.c:3711
+#, fuzzy, c-format
 msgid "no\n"
 msgstr "ne"
 
-#: gnokii/gnokii.c:3612
-#, fuzzy
+#: gnokii/gnokii.c:3712
+#, fuzzy, c-format
 msgid "Data bearer: "
 msgstr "Datum: "
 
-#: gnokii/gnokii.c:3615 gnokii/gnokii.c:3630
-#, fuzzy
+#: gnokii/gnokii.c:3715 gnokii/gnokii.c:3730
+#, fuzzy, c-format
 msgid "GSM data\n"
 msgstr "podatki\n"
 
-#: gnokii/gnokii.c:3618 gnokii/gnokii.c:3686
+#: gnokii/gnokii.c:3718 gnokii/gnokii.c:3786
+#, c-format
 msgid "GPRS\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3621 gnokii/gnokii.c:3727
-#, fuzzy
+#: gnokii/gnokii.c:3721 gnokii/gnokii.c:3827
+#, fuzzy, c-format
 msgid "SMS\n"
 msgstr "SMS"
 
-#: gnokii/gnokii.c:3624
+#: gnokii/gnokii.c:3724
+#, c-format
 msgid "USSD\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3631 gnokii/gnokii.c:3699
+#: gnokii/gnokii.c:3731 gnokii/gnokii.c:3799
+#, c-format
 msgid "   Authentication type: "
 msgstr ""
 
-#: gnokii/gnokii.c:3634 gnokii/gnokii.c:3702
-#, fuzzy
+#: gnokii/gnokii.c:3734 gnokii/gnokii.c:3802
+#, fuzzy, c-format
 msgid "normal\n"
 msgstr "normalen izhod"
 
-#: gnokii/gnokii.c:3637 gnokii/gnokii.c:3705
-#, fuzzy
+#: gnokii/gnokii.c:3737 gnokii/gnokii.c:3805
+#, fuzzy, c-format
 msgid "secure\n"
 msgstr "poslana slika"
 
-#: gnokii/gnokii.c:3643
-#, fuzzy
+#: gnokii/gnokii.c:3743
+#, fuzzy, c-format
 msgid "   Data call type: "
 msgstr "Tip klica: "
 
-#: gnokii/gnokii.c:3646
+#: gnokii/gnokii.c:3746
+#, c-format
 msgid "analogue\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3649
+#: gnokii/gnokii.c:3749
+#, c-format
 msgid "ISDN\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3655
-#, fuzzy
+#: gnokii/gnokii.c:3755
+#, fuzzy, c-format
 msgid "   Data call speed: "
 msgstr "Podatkovni klici"
 
-#: gnokii/gnokii.c:3658 gnokii/gnokii.c:3676 gnokii/gnokii.c:3717
-#, fuzzy
+#: gnokii/gnokii.c:3758 gnokii/gnokii.c:3776 gnokii/gnokii.c:3817
+#, fuzzy, c-format
 msgid "automatic\n"
 msgstr "Avtomatski"
 
-#: gnokii/gnokii.c:3661
+#: gnokii/gnokii.c:3761
+#, c-format
 msgid "9600\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3664
+#: gnokii/gnokii.c:3764
+#, c-format
 msgid "14400\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3670 gnokii/gnokii.c:3711
+#: gnokii/gnokii.c:3770 gnokii/gnokii.c:3811
+#, c-format
 msgid "   Login type: "
 msgstr ""
 
-#: gnokii/gnokii.c:3673 gnokii/gnokii.c:3714
+#: gnokii/gnokii.c:3773 gnokii/gnokii.c:3814
+#, c-format
 msgid "manual\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3682 gnokii/gnokii.c:3724
+#: gnokii/gnokii.c:3782 gnokii/gnokii.c:3824
 #, fuzzy, c-format
 msgid "   IP: %s\n"
 msgstr "   Telefon: %s\n"
 
-#: gnokii/gnokii.c:3683
+#: gnokii/gnokii.c:3783
 #, fuzzy, c-format
 msgid "   Number: %s\n"
 msgstr "©tevilka: %s\n"
 
-#: gnokii/gnokii.c:3684 gnokii/gnokii.c:3725
+#: gnokii/gnokii.c:3784 gnokii/gnokii.c:3825
 #, fuzzy, c-format
 msgid "   Username: %s\n"
 msgstr "   Telefon: %s\n"
 
-#: gnokii/gnokii.c:3685 gnokii/gnokii.c:3726
+#: gnokii/gnokii.c:3785 gnokii/gnokii.c:3826
 #, fuzzy, c-format
 msgid "   Password: %s\n"
 msgstr "   Telefon: %s\n"
 
-#: gnokii/gnokii.c:3687
-#, fuzzy
+#: gnokii/gnokii.c:3787
+#, fuzzy, c-format
 msgid "   connection: "
 msgstr "Povezava:"
 
-#: gnokii/gnokii.c:3690
-#, fuzzy
+#: gnokii/gnokii.c:3790
+#, fuzzy, c-format
 msgid "when needed\n"
 msgstr "Po¹iljanje uspelo!\n"
 
-#: gnokii/gnokii.c:3693
+#: gnokii/gnokii.c:3793
+#, c-format
 msgid "always\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3723
+#: gnokii/gnokii.c:3823
 #, fuzzy, c-format
 msgid "   Access point: %s\n"
 msgstr "   Tekst: %s\n"
 
-#: gnokii/gnokii.c:3728
+#: gnokii/gnokii.c:3828
 #, fuzzy, c-format
 msgid "   Service number: %s\n"
 msgstr "SMS prejet s ¹tevilke: %s\n"
 
-#: gnokii/gnokii.c:3729
+#: gnokii/gnokii.c:3829
 #, fuzzy, c-format
 msgid "   Server number: %s\n"
 msgstr "SMS prejet s ¹tevilke: %s\n"
 
-#: gnokii/gnokii.c:3778
+#: gnokii/gnokii.c:3878
 #, c-format
 msgid "Cannot write WAP setting: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3799
+#: gnokii/gnokii.c:3899
 #, c-format
 msgid "WAP setting nr. %d activated!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3825
+#: gnokii/gnokii.c:3925
 #, c-format
 msgid "SpeedDial nr. %d: %d:%d\n"
 msgstr "HitroKlicanje ¹t. %d: %d:%d\n"
 
-#: gnokii/gnokii.c:3855
+#: gnokii/gnokii.c:3955
 #, c-format
 msgid "Unknown memory type %s!\n"
 msgstr "Neznana vrsta spomina %s!\n"
 
 #
-#: gnokii/gnokii.c:3928 gnokii/gnokii.c:3929 gnokii/gnokii.c:3930
-#: gnokii/gnokii.c:3931
+#: gnokii/gnokii.c:4028 gnokii/gnokii.c:4029 gnokii/gnokii.c:4030
+#: gnokii/gnokii.c:4031
 msgid "(unknown)"
 msgstr "neznan"
 
-#: gnokii/gnokii.c:3935
+#: gnokii/gnokii.c:4035
 #, c-format
 msgid "IMEI         : %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3936
+#: gnokii/gnokii.c:4036
 #, c-format
 msgid "Manufacturer : %s\n"
 msgstr "Proizvajalec : %s\n"
 
-#: gnokii/gnokii.c:3937
+#: gnokii/gnokii.c:4037
 #, c-format
 msgid "Model        : %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3938
+#: gnokii/gnokii.c:4038
 #, c-format
 msgid "Revision     : %s\n"
 msgstr "Revizija     : %s\n"
 
-#: gnokii/gnokii.c:3964
+#: gnokii/gnokii.c:4064
+#, c-format
 msgid "What kind of reset do you want??\n"
 msgstr "Kak¹ne vrste reset bi ¾eleli??\n"
 
-#: gnokii/gnokii.c:3983
-#, fuzzy
+#: gnokii/gnokii.c:4083
+#, fuzzy, c-format
 msgid "GSM/FBUS init failed! (Unknown model?). Quitting.\n"
 msgstr "GSM/FBUS init ni uspel! (Neznan model ?). Prekinjam.\n"
 
-#: gnokii/gnokii.c:4004 gnokii/gnokii.c:4172 gnokii/gnokii.c:4185
+#: gnokii/gnokii.c:4104 gnokii/gnokii.c:4272 gnokii/gnokii.c:4285
+#, c-format
 msgid "Failed to load ringtone.\n"
 msgstr "Nalaganje melodije ni uspelo.\n"
 
-#: gnokii/gnokii.c:4095
+#: gnokii/gnokii.c:4195
 #, fuzzy, c-format
 msgid "Getting ringtone %d failed: %s\n"
 msgstr "Melodija: %s (%d)\n"
 
-#: gnokii/gnokii.c:4098
+#: gnokii/gnokii.c:4198
 #, c-format
 msgid "Getting ringtone %d (\"%s\") succeeded!\n"
 msgstr ""
 
 #
-#: gnokii/gnokii.c:4104
+#: gnokii/gnokii.c:4204
+#, c-format
 msgid "Failed to save ringtone.\n"
 msgstr "Nalaganje melodije ni uspelo.\n"
 
 #
-#: gnokii/gnokii.c:4111 gnokii/gnokii.c:4297
+#: gnokii/gnokii.c:4211 gnokii/gnokii.c:4401
 #, fuzzy, c-format
 msgid "Failed to save ringtone: %s\n"
 msgstr "Nalaganje melodije ni uspelo.\n"
 
-#: gnokii/gnokii.c:4196
+#: gnokii/gnokii.c:4296
 #, fuzzy, c-format
 msgid "Send failed: %s\n"
 msgstr "Po¹iljane ni uspelo\n"
 
-#: gnokii/gnokii.c:4243 gnokii/gnokii.c:4293
+#: gnokii/gnokii.c:4343 gnokii/gnokii.c:4397
 #, fuzzy, c-format
 msgid "Failed to load ringtone: %s\n"
 msgstr "Nalaganje melodije ni uspelo.\n"
 
-#: gnokii/gnokii.c:4269
-#, fuzzy
+#: gnokii/gnokii.c:4375
+#, fuzzy, c-format
 msgid "Play succeeded!\n"
 msgstr "Po¹iljanje uspelo!\n"
 
-#: gnokii/gnokii.c:4271
+#: gnokii/gnokii.c:4377
 #, fuzzy, c-format
 msgid "Play failed: %s\n"
 msgstr "Po¹iljane ni uspelo\n"
 
-#: gnokii/gnokii.c:4301
+#: gnokii/gnokii.c:4405
 #, c-format
 msgid "%d note(s) converted.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4314
-#, fuzzy
+#: gnokii/gnokii.c:4417
+#, fuzzy, c-format
 msgid "Failed to get the list of ringtones\n"
 msgstr "Nalaganje melodije ni uspelo.\n"
 
 #
-#: gnokii/gnokii.c:4360
+#: gnokii/gnokii.c:4463
 #, fuzzy, c-format
 msgid "Ringtone %d deleted\n"
 msgstr "Melodija\n"
 
 #
-#: gnokii/gnokii.c:4362
+#: gnokii/gnokii.c:4465
 #, fuzzy, c-format
 msgid "Failed to delete ringtone %d: %s\n"
 msgstr "Nalaganje melodije ni uspelo.\n"
 
-#: gnokii/gnokii.c:4375
+#: gnokii/gnokii.c:4478
 #, fuzzy, c-format
 msgid "Failed to press key: %s\n"
 msgstr "Pisanje v datoteko \"%s\" neuspe¹no\n"
 
-#: gnokii/gnokii.c:4434
+#: gnokii/gnokii.c:4537
 #, fuzzy, c-format
 msgid "Error entering char: %s\n"
 msgstr "Napaka pri sprejemu logotipa !\n"
 
-#: gnokii/gnokii.c:4537
+#: gnokii/gnokii.c:4640
+#, c-format
 msgid "Divert type: "
 msgstr "Tip preusmeritve: "
 
 #
-#: gnokii/gnokii.c:4539 gnokii/gnokii.c:4548
+#: gnokii/gnokii.c:4642 gnokii/gnokii.c:4651
+#, c-format
 msgid "all\n"
 msgstr "vsi\n"
 
 #
-#: gnokii/gnokii.c:4540
+#: gnokii/gnokii.c:4643
+#, c-format
 msgid "busy\n"
 msgstr "zaseden\n"
 
-#: gnokii/gnokii.c:4541
+#: gnokii/gnokii.c:4644
+#, c-format
 msgid "noans\n"
 msgstr "brez odg.\n"
 
 #
-#: gnokii/gnokii.c:4542
+#: gnokii/gnokii.c:4645
+#, c-format
 msgid "outofreach\n"
 msgstr "nedosegljiv\n"
 
-#: gnokii/gnokii.c:4543
+#: gnokii/gnokii.c:4646
+#, c-format
 msgid "notavail\n"
 msgstr "nedostopen\n"
 
-#: gnokii/gnokii.c:4544 gnokii/gnokii.c:4552
+#: gnokii/gnokii.c:4647 gnokii/gnokii.c:4655
 #, c-format
 msgid "unknown(0x%02x)\n"
 msgstr "neznan(0x%02x)\n"
 
-#: gnokii/gnokii.c:4546
+#: gnokii/gnokii.c:4649
+#, c-format
 msgid "Call type: "
 msgstr "Tip klica: "
 
 #
-#: gnokii/gnokii.c:4549
+#: gnokii/gnokii.c:4652
+#, c-format
 msgid "voice\n"
 msgstr "glasovno\n"
 
-#: gnokii/gnokii.c:4550
+#: gnokii/gnokii.c:4653
+#, c-format
 msgid "fax\n"
 msgstr "faks\n"
 
-#: gnokii/gnokii.c:4551
+#: gnokii/gnokii.c:4654
+#, c-format
 msgid "data\n"
 msgstr "podatki\n"
 
-#: gnokii/gnokii.c:4555
+#: gnokii/gnokii.c:4658
 #, c-format
 msgid "Number: %s\n"
 msgstr "©tevilka: %s\n"
 
-#: gnokii/gnokii.c:4556
+#: gnokii/gnokii.c:4659
 #, c-format
 msgid "Timeout: %d\n"
 msgstr "Èas potekel: %d\n"
 
-#: gnokii/gnokii.c:4558
+#: gnokii/gnokii.c:4661
+#, c-format
 msgid "Divert isn't active.\n"
 msgstr "Preusmeritev ni aktivna.\n"
 
-#: gnokii/gnokii.c:4581
+#: gnokii/gnokii.c:4684
 #, c-format
 msgid "SMS received from number: %s\n"
 msgstr "SMS prejet s ¹tevilke: %s\n"
 
-#: gnokii/gnokii.c:4590
+#: gnokii/gnokii.c:4693
 #, c-format
 msgid "Got message %d: %s\n"
 msgstr "Prejel sporoèilo %d: %s\n"
 
-#: gnokii/gnokii.c:4597
+#: gnokii/gnokii.c:4700
+#, c-format
 msgid "### Exists?!\n"
 msgstr "### Obstaja?!\n"
 
-#: gnokii/gnokii.c:4602
+#: gnokii/gnokii.c:4705
 #, fuzzy, c-format
 msgid "### Cannot create file %s\n"
 msgstr "Profila %s ni bilo mogoèe nastaviti\n"
 
 #
-#: gnokii/gnokii.c:4633
+#: gnokii/gnokii.c:4736
+#, c-format
 msgid "Entered sms reader mode...\n"
 msgstr "Vstopam v naèin smsreader (bralca sms sporoèil)...\n"
 
 #
-#: gnokii/gnokii.c:4643
+#: gnokii/gnokii.c:4746
+#, c-format
 msgid "Exiting sms reader mode...\n"
 msgstr "Izstopam iz smsreader naèina...\n"
 
-#: gnokii/gnokii.c:4664
-#, fuzzy
+#: gnokii/gnokii.c:4767
+#, fuzzy, c-format
 msgid "Getting security code... \n"
 msgstr "èakam na Varnostno Kodo.\n"
 
-#: gnokii/gnokii.c:4666
+#: gnokii/gnokii.c:4769
 #, fuzzy, c-format
 msgid "Security code is: %s\n"
 msgstr "Stanje varnostne kode: "
 
-#: gnokii/gnokii.c:4701
+#: gnokii/gnokii.c:4804
 #, c-format
 msgid "Network      : %s (%s)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4704
+#: gnokii/gnokii.c:4807
 #, fuzzy, c-format
 msgid "Network code : %s\n"
 msgstr "Stanje varnostne kode: "
 
-#: gnokii/gnokii.c:4705
+#: gnokii/gnokii.c:4808
 #, c-format
 msgid "LAC          : %04x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4706
+#: gnokii/gnokii.c:4809
 #, c-format
 msgid "Cell id      : %04x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4726
+#: gnokii/gnokii.c:4829
 #, c-format
 msgid "%7s : %10s, %7s, %6s, counter %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4768
+#: gnokii/gnokii.c:4871
+#, c-format
 msgid "HOME variable missing\n"
 msgstr ""
 
-#: gnokii/gnokii.c:5064
+#: gnokii/gnokii.c:5174
+#, c-format
 msgid "WARNING: cannot open logfile, logs will be directed to stderr\n"
 msgstr ""
 
-#: gnokii/gnokii.c:5087
+#: gnokii/gnokii.c:5197
 #, fuzzy, c-format
 msgid "Use '%s --help' for usage information.\n"
 msgstr "Uporabite '%s --help' za informacije o uporabi.\n"
 
-#: gnokii/gnokii.c:5331
+#: gnokii/gnokii.c:5447
 #, c-format
 msgid "Unknown option: %d\n"
 msgstr "Neznana opcija: %d\n"
 
-#: gnokii/gnokii.c:5338
+#: gnokii/gnokii.c:5454
+#, c-format
 msgid "Wrong number of arguments\n"
 msgstr "Napaèno ¹tevilo argumentov\n"
 
-#: smsd/lowlevel.c:103 smsd/lowlevel.c:187 smsd/lowlevel.c:189
-#: xgnokii/xgnokii_lowlevel.c:166 xgnokii/xgnokii_lowlevel.c:256
-#: xgnokii/xgnokii_lowlevel.c:258 xgnokii/xgnokii_lowlevel.c:259
+#: smsd/lowlevel.c:101 smsd/lowlevel.c:181 smsd/lowlevel.c:183
+#: xgnokii/xgnokii_lowlevel.c:164 xgnokii/xgnokii_lowlevel.c:250
+#: xgnokii/xgnokii_lowlevel.c:252 xgnokii/xgnokii_lowlevel.c:253
 #: xgnokii/xgnokii_sms.c:269 xgnokii/xgnokii_sms.c:349
 msgid "unknown"
 msgstr "neznan"
 
-#: smsd/lowlevel.c:145
+#: smsd/lowlevel.c:141
 #, c-format
 msgid ""
 "Cannot load phone %s!\n"
 "Do you have proper section in gnokiirc?\n"
 msgstr ""
 
-#: smsd/lowlevel.c:171
+#: smsd/lowlevel.c:165
 msgid "GSM/FBUS init failed! (Unknown model ?). Quitting.\n"
 msgstr "GSM/FBUS init ni uspel! (Neznan model ?). Prekinjam.\n"
 
-#: smsd/lowlevel.c:406
+#: smsd/lowlevel.c:394
 #, c-format
 msgid "GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\n"
 msgstr ""
 
-#: smsd/lowlevel.c:423
+#: smsd/lowlevel.c:411
 #, c-format
 msgid "GN_OP_GetSMSStatus at line %d in file %s returns error %d\n"
 msgstr ""
 
-#: smsd/lowlevel.c:434 xgnokii/xgnokii_lowlevel.c:1353
+#: smsd/lowlevel.c:420 xgnokii/xgnokii_lowlevel.c:1325
 #, c-format
 msgid "Event %d failed with return code %d!\n"
 msgstr "Dogodek %d neuspel z povratno kodo %d!\n"
@@ -2281,27 +2498,6 @@ msgstr "Dogodek %d neuspel z povratno kodo %d!\n"
 #: xgnokii/xgnokii.c:219
 msgid "Reading caller groups names ..."
 msgstr "Berem imena skupin klicoèih ..."
-
-#
-#: xgnokii/xgnokii.c:223 xgnokii/xgnokii.c:1020
-msgid "Family"
-msgstr "Dru¾ina"
-
-#: xgnokii/xgnokii.c:224 xgnokii/xgnokii.c:1032
-msgid "VIP"
-msgstr "VIP"
-
-#: xgnokii/xgnokii.c:225 xgnokii/xgnokii.c:1044
-msgid "Friends"
-msgstr "Prijatelji"
-
-#: xgnokii/xgnokii.c:226 xgnokii/xgnokii.c:1056
-msgid "Colleagues"
-msgstr "Kolegi"
-
-#: xgnokii/xgnokii.c:227 xgnokii/xgnokii.c:1068
-msgid "Other"
-msgstr "Ostali"
 
 #: xgnokii/xgnokii.c:228
 msgid "No group"
@@ -2341,11 +2537,11 @@ msgstr ""
 "Dohodni klic od: %s\n"
 "Èas: %s"
 
-#: xgnokii/xgnokii.c:536 xgnokii/xgnokii.c:1423
+#: xgnokii/xgnokii.c:536 xgnokii/xgnokii.c:1424
 msgid "Paging"
 msgstr "Paging"
 
-#: xgnokii/xgnokii.c:545 xgnokii/xgnokii.c:1429
+#: xgnokii/xgnokii.c:545 xgnokii/xgnokii.c:1430
 msgid "E-Mail"
 msgstr "E-Mail"
 
@@ -2353,19 +2549,19 @@ msgstr "E-Mail"
 msgid "Voice"
 msgstr "Glasovno"
 
-#: xgnokii/xgnokii.c:567 xgnokii/xgnokii.c:1457
+#: xgnokii/xgnokii.c:567 xgnokii/xgnokii.c:1458
 msgid "1 h"
 msgstr "1 ura"
 
-#: xgnokii/xgnokii.c:571 xgnokii/xgnokii.c:1463
+#: xgnokii/xgnokii.c:571 xgnokii/xgnokii.c:1464
 msgid "6 h"
 msgstr "6 ur"
 
-#: xgnokii/xgnokii.c:575 xgnokii/xgnokii.c:591 xgnokii/xgnokii.c:1469
+#: xgnokii/xgnokii.c:575 xgnokii/xgnokii.c:591 xgnokii/xgnokii.c:1470
 msgid "24 h"
 msgstr "24 ur"
 
-#: xgnokii/xgnokii.c:579 xgnokii/xgnokii.c:1475
+#: xgnokii/xgnokii.c:579 xgnokii/xgnokii.c:1476
 msgid "72 h"
 msgstr "72 ur"
 
@@ -2389,15 +2585,15 @@ msgstr "Koledar ni podprt!"
 msgid "Error writing configuration file!"
 msgstr "Napaka pri pisanju v konfiguracijsko datoteko!"
 
-#: xgnokii/xgnokii.c:1093 xgnokii/xgnokii_contacts.c:3481
+#: xgnokii/xgnokii.c:1093 xgnokii/xgnokii_contacts.c:3332
 msgid "Contacts"
 msgstr "Kontakti"
 
-#: xgnokii/xgnokii.c:1099 xgnokii/xgnokii.c:1843
+#: xgnokii/xgnokii.c:1099 xgnokii/xgnokii.c:1844
 msgid "SMS"
 msgstr "SMS"
 
-#: xgnokii/xgnokii.c:1104 xgnokii/xgnokii_calendar.c:1559
+#: xgnokii/xgnokii.c:1104 xgnokii/xgnokii_calendar.c:1555
 msgid "Calendar"
 msgstr "Koledar"
 
@@ -2431,11 +2627,11 @@ msgstr "Melodija\n"
 msgid "Data calls"
 msgstr "Podatkovni klici"
 
-#: xgnokii/xgnokii.c:1149 xgnokii/xgnokii.c:1571
+#: xgnokii/xgnokii.c:1149 xgnokii/xgnokii.c:1572
 msgid "Options"
 msgstr "Mo¾nosti"
 
-#: xgnokii/xgnokii.c:1159 xgnokii/xgnokii.c:2140
+#: xgnokii/xgnokii.c:1159 xgnokii/xgnokii.c:2141
 msgid "Help"
 msgstr "Pomoè"
 
@@ -2443,14 +2639,14 @@ msgstr "Pomoè"
 msgid "About"
 msgstr "O programu"
 
-#: xgnokii/xgnokii.c:1184 xgnokii/xgnokii.c:1354
-#: xgnokii/xgnokii_calendar.c:709 xgnokii/xgnokii_calendar.c:755
-#: xgnokii/xgnokii_calendar.c:902 xgnokii/xgnokii_calendar.c:1022
-#: xgnokii/xgnokii_calendar.c:1162 xgnokii/xgnokii_calendar.c:1295
-#: xgnokii/xgnokii_calendar.c:1452 xgnokii/xgnokii_contacts.c:1088
-#: xgnokii/xgnokii_contacts.c:1332 xgnokii/xgnokii_contacts.c:1466
-#: xgnokii/xgnokii_contacts.c:1617 xgnokii/xgnokii_contacts.c:1995
-#: xgnokii/xgnokii_contacts.c:3302 xgnokii/xgnokii_sms.c:581
+#: xgnokii/xgnokii.c:1184 xgnokii/xgnokii.c:1355
+#: xgnokii/xgnokii_calendar.c:705 xgnokii/xgnokii_calendar.c:751
+#: xgnokii/xgnokii_calendar.c:898 xgnokii/xgnokii_calendar.c:1018
+#: xgnokii/xgnokii_calendar.c:1158 xgnokii/xgnokii_calendar.c:1291
+#: xgnokii/xgnokii_calendar.c:1448 xgnokii/xgnokii_contacts.c:1087
+#: xgnokii/xgnokii_contacts.c:1331 xgnokii/xgnokii_contacts.c:1465
+#: xgnokii/xgnokii_contacts.c:1616 xgnokii/xgnokii_contacts.c:1994
+#: xgnokii/xgnokii_contacts.c:3153 xgnokii/xgnokii_sms.c:581
 msgid "Ok"
 msgstr "V redu"
 
@@ -2460,13 +2656,12 @@ msgid ""
 "xgnokii version: %s\n"
 "gnokii version: %s\n"
 "\n"
-"Copyright (C) 1999,2000 Pavel Janik ml.,\n"
-"Hugh Blemings, Jan Derfinak and others\n"
-"xgnokii is free software, covered by the GNU General Public License, and you "
-"are\n"
-"welcome to change it and/or distribute copies of it under certain "
-"conditions.\n"
-"There is absolutely no waranty for xgnokii. See GPL for details.\n"
+"Copyright (C) 1999-2004 Pavel Janik ml.,\n"
+"Hugh Blemings, Jan Derfinak,\n"
+"Pawel Kot and others xgnokii is free software, covered by the GNU General\n"
+"Public License, and you are welcome to change it and/or distribute copies\n"
+"of it under certain conditions. There is absolutely no waranty for xgnokii.\n"
+"See GPL for details.\n"
 msgstr ""
 "xgnokii verzija: %s\n"
 "gnokii verzija: %s\n"
@@ -2478,236 +2673,236 @@ msgstr ""
 "kode in/ali distribucija kopij pod doloèenimi pogoji.\n"
 "Za xgnokii ni absolutno nikakr¹ne garancije. Za detajle si oglejte GPL.\n"
 
-#: xgnokii/xgnokii.c:1348
+#: xgnokii/xgnokii.c:1349
 msgid "Edit SMS Setting"
 msgstr "Uredi SMS Nastavitve"
 
-#: xgnokii/xgnokii.c:1362 xgnokii/xgnokii_calendar.c:718
-#: xgnokii/xgnokii_calendar.c:764 xgnokii/xgnokii_calendar.c:911
-#: xgnokii/xgnokii_calendar.c:1031 xgnokii/xgnokii_calendar.c:1171
-#: xgnokii/xgnokii_calendar.c:1304 xgnokii/xgnokii_calendar.c:1460
+#: xgnokii/xgnokii.c:1363 xgnokii/xgnokii_calendar.c:714
+#: xgnokii/xgnokii_calendar.c:760 xgnokii/xgnokii_calendar.c:907
+#: xgnokii/xgnokii_calendar.c:1027 xgnokii/xgnokii_calendar.c:1167
+#: xgnokii/xgnokii_calendar.c:1300 xgnokii/xgnokii_calendar.c:1456
 #: xgnokii/xgnokii_common.c:78 xgnokii/xgnokii_common.c:160
-#: xgnokii/xgnokii_contacts.c:1099 xgnokii/xgnokii_contacts.c:1474
-#: xgnokii/xgnokii_contacts.c:1625 xgnokii/xgnokii_contacts.c:1862
-#: xgnokii/xgnokii_contacts.c:1909 xgnokii/xgnokii_contacts.c:2005
-#: xgnokii/xgnokii_contacts.c:2273 xgnokii/xgnokii_contacts.c:3309
+#: xgnokii/xgnokii_contacts.c:1098 xgnokii/xgnokii_contacts.c:1473
+#: xgnokii/xgnokii_contacts.c:1624 xgnokii/xgnokii_contacts.c:1861
+#: xgnokii/xgnokii_contacts.c:1908 xgnokii/xgnokii_contacts.c:2004
+#: xgnokii/xgnokii_contacts.c:2268 xgnokii/xgnokii_contacts.c:3160
 #: xgnokii/xgnokii_sms.c:589
 msgid "Cancel"
 msgstr "Preklièi"
 
-#: xgnokii/xgnokii.c:1375
+#: xgnokii/xgnokii.c:1376
 msgid "Set's name:"
 msgstr "Nastavi ime:"
 
-#: xgnokii/xgnokii.c:1389
+#: xgnokii/xgnokii.c:1390
 msgid "Center:"
 msgstr "Center:"
 
-#: xgnokii/xgnokii.c:1403
+#: xgnokii/xgnokii.c:1404
 msgid "Sending Format:"
 msgstr "Format za Po¹iljanje:"
 
-#: xgnokii/xgnokii.c:1443
+#: xgnokii/xgnokii.c:1444
 msgid "Validity Period:"
 msgstr "Perioda Veljavnosti:"
 
-#: xgnokii/xgnokii.c:1451
+#: xgnokii/xgnokii.c:1452
 msgid "Max. Time"
 msgstr "Maks. Èas"
 
-#: xgnokii/xgnokii.c:1568
+#: xgnokii/xgnokii.c:1569
 msgid "Set's name"
 msgstr "Nastavi ime"
 
-#: xgnokii/xgnokii.c:1568
+#: xgnokii/xgnokii.c:1569
 msgid "Center number"
 msgstr "©tevilka centra"
 
-#: xgnokii/xgnokii.c:1568
+#: xgnokii/xgnokii.c:1569
 msgid "Format"
 msgstr "Format"
 
-#: xgnokii/xgnokii.c:1568
+#: xgnokii/xgnokii.c:1569
 msgid "Validity"
 msgstr "Veljavnost"
 
-#: xgnokii/xgnokii.c:1576
+#: xgnokii/xgnokii.c:1577
 msgid "Apply"
 msgstr "Uporabi"
 
-#: xgnokii/xgnokii.c:1584 xgnokii/xgnokii_contacts.c:2259
+#: xgnokii/xgnokii.c:1585 xgnokii/xgnokii_contacts.c:2254
 #: xgnokii/xgnokii_dtmf.c:181
 msgid "Save"
 msgstr "Shrani"
 
-#: xgnokii/xgnokii.c:1590
+#: xgnokii/xgnokii.c:1591
 msgid "Close"
 msgstr "Zapri"
 
-#: xgnokii/xgnokii.c:1604
+#: xgnokii/xgnokii.c:1605
 msgid "Phone and connection type"
 msgstr "Telefon in vrsta povezave"
 
-#: xgnokii/xgnokii.c:1611
+#: xgnokii/xgnokii.c:1612
 msgid "Connection"
 msgstr "Povezava"
 
-#: xgnokii/xgnokii.c:1618
+#: xgnokii/xgnokii.c:1619
 msgid "Port:"
 msgstr "Port:"
 
-#: xgnokii/xgnokii.c:1632 xgnokii/xgnokii.c:1711
+#: xgnokii/xgnokii.c:1633 xgnokii/xgnokii.c:1712
 msgid "Model:"
 msgstr "Model:"
 
 #
-#: xgnokii/xgnokii.c:1646
+#: xgnokii/xgnokii.c:1647
 msgid "Init length:"
 msgstr "Dol¾ina Inita:"
 
-#: xgnokii/xgnokii.c:1660
+#: xgnokii/xgnokii.c:1661
 msgid "Bindir:"
 msgstr "Direktorij z programi:"
 
-#: xgnokii/xgnokii.c:1674
+#: xgnokii/xgnokii.c:1675
 msgid "Connection:"
 msgstr "Povezava:"
 
-#: xgnokii/xgnokii.c:1678
+#: xgnokii/xgnokii.c:1679
 msgid "infrared"
 msgstr "infrardeèa"
 
-#: xgnokii/xgnokii.c:1685
+#: xgnokii/xgnokii.c:1686
 msgid "serial"
 msgstr "serijska"
 
-#: xgnokii/xgnokii.c:1692
+#: xgnokii/xgnokii.c:1693
 msgid "irda"
 msgstr "irda"
 
-#: xgnokii/xgnokii.c:1697
+#: xgnokii/xgnokii.c:1698
 msgid "Phone information"
 msgstr "Informacije o telefonu"
 
-#: xgnokii/xgnokii.c:1704
+#: xgnokii/xgnokii.c:1705
 msgid "Phone"
 msgstr "Telefon"
 
-#: xgnokii/xgnokii.c:1725
+#: xgnokii/xgnokii.c:1726
 msgid "Version:"
 msgstr "Verzija"
 
-#: xgnokii/xgnokii.c:1739
+#: xgnokii/xgnokii.c:1740
 msgid "Revision:"
 msgstr "Revizija:"
 
-#: xgnokii/xgnokii.c:1753
+#: xgnokii/xgnokii.c:1754
 msgid "IMEI:"
 msgstr "IMEI:"
 
-#: xgnokii/xgnokii.c:1767
+#: xgnokii/xgnokii.c:1768
 msgid "Names length:"
 msgstr "Dol¾ina imen:"
 
-#: xgnokii/xgnokii.c:1775
+#: xgnokii/xgnokii.c:1776
 msgid "SIM:"
 msgstr "SIM:"
 
-#: xgnokii/xgnokii.c:1793
+#: xgnokii/xgnokii.c:1794
 msgid "Phone:"
 msgstr "Telefon:"
 
-#: xgnokii/xgnokii.c:1800
+#: xgnokii/xgnokii.c:1801
 msgid "Alarm setting"
 msgstr "Nastavitve alarma"
 
-#: xgnokii/xgnokii.c:1807 xgnokii/xgnokii.c:1814
-#: xgnokii/xgnokii_calendar.c:978 xgnokii/xgnokii_calendar.c:1110
-#: xgnokii/xgnokii_calendar.c:1239 xgnokii/xgnokii_calendar.c:1371
-#: xgnokii/xgnokii_calendar.c:1553
+#: xgnokii/xgnokii.c:1808 xgnokii/xgnokii.c:1815
+#: xgnokii/xgnokii_calendar.c:974 xgnokii/xgnokii_calendar.c:1106
+#: xgnokii/xgnokii_calendar.c:1235 xgnokii/xgnokii_calendar.c:1367
+#: xgnokii/xgnokii_calendar.c:1549
 msgid "Alarm"
 msgstr "Alarm"
 
-#: xgnokii/xgnokii.c:1837 xgnokii/xgnokii_sms.c:1702
+#: xgnokii/xgnokii.c:1838 xgnokii/xgnokii_sms.c:1700
 msgid "Short Message Service"
 msgstr "Kratka sporoèila"
 
-#: xgnokii/xgnokii.c:1870
+#: xgnokii/xgnokii.c:1871
 msgid "Edit"
 msgstr "Uredi"
 
-#: xgnokii/xgnokii.c:1882 xgnokii/xgnokii_sms.c:1569
-#: xgnokii/xgnokii_sms.c:1745
+#: xgnokii/xgnokii.c:1883 xgnokii/xgnokii_sms.c:1567
+#: xgnokii/xgnokii_sms.c:1743
 msgid "Business Card"
 msgstr "Vizitka"
 
-#: xgnokii/xgnokii.c:1888
+#: xgnokii/xgnokii.c:1889
 msgid "User"
 msgstr "Uporabnik"
 
-#: xgnokii/xgnokii.c:1906 xgnokii/xgnokii_calendar.c:1227
-#: xgnokii/xgnokii_calendar.c:1359 xgnokii/xgnokii_contacts.c:1487
+#: xgnokii/xgnokii.c:1907 xgnokii/xgnokii_calendar.c:1223
+#: xgnokii/xgnokii_calendar.c:1355 xgnokii/xgnokii_contacts.c:1486
 msgid "Name:"
 msgstr "Ime:"
 
-#: xgnokii/xgnokii.c:1931
+#: xgnokii/xgnokii.c:1932
 msgid "Title:"
 msgstr "Naziv:"
 
-#: xgnokii/xgnokii.c:1956
+#: xgnokii/xgnokii.c:1957
 msgid "Company:"
 msgstr "Dru¾ba:"
 
-#: xgnokii/xgnokii.c:1981
+#: xgnokii/xgnokii.c:1982
 msgid "Telephone:"
 msgstr "Telefon:"
 
-#: xgnokii/xgnokii.c:2007
+#: xgnokii/xgnokii.c:2008
 msgid "Fax:"
 msgstr "Fax:"
 
-#: xgnokii/xgnokii.c:2032
+#: xgnokii/xgnokii.c:2033
 msgid "E-Mail:"
 msgstr "E-Mail:"
 
-#: xgnokii/xgnokii.c:2057
+#: xgnokii/xgnokii.c:2058
 msgid "Address:"
 msgstr "Naslov:"
 
-#: xgnokii/xgnokii.c:2080
+#: xgnokii/xgnokii.c:2081
 msgid "Caller groups names"
 msgstr "Imena skupine klicoèih"
 
-#: xgnokii/xgnokii.c:2087
+#: xgnokii/xgnokii.c:2088
 msgid "Groups"
 msgstr "Skupine"
 
-#: xgnokii/xgnokii.c:2095
+#: xgnokii/xgnokii.c:2096
 #, c-format
 msgid "Group %d:"
 msgstr "Skupina %d:"
 
 #
-#: xgnokii/xgnokii.c:2108
+#: xgnokii/xgnokii.c:2109
 msgid "Mailbox"
 msgstr "Mailbox"
 
-#: xgnokii/xgnokii.c:2115
+#: xgnokii/xgnokii.c:2116
 msgid "Mail"
 msgstr "Po¹ta"
 
 #
-#: xgnokii/xgnokii.c:2122
+#: xgnokii/xgnokii.c:2123
 msgid "Path to mailbox:"
 msgstr "Pot do mailbox-a:"
 
 #
-#: xgnokii/xgnokii.c:2133
+#: xgnokii/xgnokii.c:2134
 msgid "Help viewer"
 msgstr "Prikazovalec pomoèi"
 
 #
-#: xgnokii/xgnokii.c:2147
+#: xgnokii/xgnokii.c:2148
 msgid "Viewer:"
 msgstr "Prikazovalec:"
 
@@ -2775,7 +2970,7 @@ msgstr ""
 msgid "Text: "
 msgstr "Tekst: "
 
-#: xgnokii/xgnokii_calendar.c:524
+#: xgnokii/xgnokii_calendar.c:522
 #, c-format
 msgid ""
 "Saving failed failed\n"
@@ -2784,236 +2979,236 @@ msgstr ""
 "Shranjevanje neuspe¹no\n"
 "(napaka=%d)"
 
-#: xgnokii/xgnokii_calendar.c:702 xgnokii/xgnokii_calendar.c:748
+#: xgnokii/xgnokii_calendar.c:698 xgnokii/xgnokii_calendar.c:744
 msgid "Choose date"
 msgstr "Izberite datum"
 
-#: xgnokii/xgnokii_calendar.c:788
+#: xgnokii/xgnokii_calendar.c:784
 msgid "Alarm time:"
 msgstr "Èas alarma:"
 
 #
-#: xgnokii/xgnokii_calendar.c:895 xgnokii/xgnokii_calendar.c:1621
+#: xgnokii/xgnokii_calendar.c:891 xgnokii/xgnokii_calendar.c:1617
 msgid "Add reminder"
 msgstr "Dodaj opomin"
 
-#: xgnokii/xgnokii_calendar.c:931 xgnokii/xgnokii_calendar.c:1050
-#: xgnokii/xgnokii_calendar.c:1191 xgnokii/xgnokii_calendar.c:1324
+#: xgnokii/xgnokii_calendar.c:927 xgnokii/xgnokii_calendar.c:1046
+#: xgnokii/xgnokii_calendar.c:1187 xgnokii/xgnokii_calendar.c:1320
 msgid "Date:"
 msgstr "Datum:"
 
-#: xgnokii/xgnokii_calendar.c:966
+#: xgnokii/xgnokii_calendar.c:962
 msgid "Subject:"
 msgstr "Zadeva:"
 
 #
-#: xgnokii/xgnokii_calendar.c:1015
+#: xgnokii/xgnokii_calendar.c:1011
 msgid "Add Call"
 msgstr "Dodaj klic"
 
-#: xgnokii/xgnokii_calendar.c:1085 xgnokii/xgnokii_contacts.c:1500
-#: xgnokii/xgnokii_contacts.c:2016
+#: xgnokii/xgnokii_calendar.c:1081 xgnokii/xgnokii_contacts.c:1499
+#: xgnokii/xgnokii_contacts.c:2015
 msgid "Number:"
 msgstr "©tevilka:"
 
 #
-#: xgnokii/xgnokii_calendar.c:1098
+#: xgnokii/xgnokii_calendar.c:1094
 msgid "Text:"
 msgstr "Tekst:"
 
-#: xgnokii/xgnokii_calendar.c:1130 xgnokii/xgnokii_calendar.c:1262
+#: xgnokii/xgnokii_calendar.c:1126 xgnokii/xgnokii_calendar.c:1258
 msgid "Repeat:"
 msgstr ""
 
-#: xgnokii/xgnokii_calendar.c:1155 xgnokii/xgnokii_calendar.c:1629
+#: xgnokii/xgnokii_calendar.c:1151 xgnokii/xgnokii_calendar.c:1625
 msgid "Add meeting"
 msgstr "Dodaj sestanek"
 
-#: xgnokii/xgnokii_calendar.c:1288 xgnokii/xgnokii_calendar.c:1633
+#: xgnokii/xgnokii_calendar.c:1284 xgnokii/xgnokii_calendar.c:1629
 msgid "Add birthday"
 msgstr "Dodaj rojstni dan"
 
-#: xgnokii/xgnokii_calendar.c:1445
+#: xgnokii/xgnokii_calendar.c:1441
 msgid "Delete calendar note"
 msgstr "Izbri¹i opombo koledarja"
 
-#: xgnokii/xgnokii_calendar.c:1477
+#: xgnokii/xgnokii_calendar.c:1473
 msgid "Do you want to delete selected note(s)?"
 msgstr "®elite izbrisati izbrano/e opombo/e?"
 
-#: xgnokii/xgnokii_calendar.c:1514 xgnokii/xgnokii_contacts.c:3435
+#: xgnokii/xgnokii_calendar.c:1510 xgnokii/xgnokii_contacts.c:3286
 #: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1484
-#: xgnokii/xgnokii_netmon.c:264 xgnokii/xgnokii_sms.c:1258
-#: xgnokii/xgnokii_sms.c:1662 xgnokii/xgnokii_speed.c:523
+#: xgnokii/xgnokii_netmon.c:264 xgnokii/xgnokii_sms.c:1256
+#: xgnokii/xgnokii_sms.c:1660 xgnokii/xgnokii_speed.c:523
 #: xgnokii/xgnokii_xkeyb.c:241
 msgid "/_File"
 msgstr "/_Datoteka"
 
-#: xgnokii/xgnokii_calendar.c:1515 xgnokii/xgnokii_contacts.c:3436
+#: xgnokii/xgnokii_calendar.c:1511 xgnokii/xgnokii_contacts.c:3287
 #: xgnokii/xgnokii_speed.c:524
 msgid "/File/_Read from phone"
 msgstr "/Datoteka/_Beri z telefona"
 
-#: xgnokii/xgnokii_calendar.c:1516 xgnokii/xgnokii_contacts.c:3437
+#: xgnokii/xgnokii_calendar.c:1512 xgnokii/xgnokii_contacts.c:3288
 #: xgnokii/xgnokii_speed.c:525
 msgid "/File/_Save to phone"
 msgstr "/Datoteka/_Shrani v telefon"
 
-#: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3438
+#: xgnokii/xgnokii_calendar.c:1513 xgnokii/xgnokii_contacts.c:3289
 #: xgnokii/xgnokii_dtmf.c:223 xgnokii/xgnokii_logos.c:1488
-#: xgnokii/xgnokii_sms.c:1261 xgnokii/xgnokii_sms.c:1666
+#: xgnokii/xgnokii_sms.c:1259 xgnokii/xgnokii_sms.c:1664
 #: xgnokii/xgnokii_speed.c:526
 msgid "/File/Sep1"
 msgstr "/Datoteka/Sep1"
 
-#: xgnokii/xgnokii_calendar.c:1518
+#: xgnokii/xgnokii_calendar.c:1514
 msgid "/File/Send via S_MS"
 msgstr "/Datoteka/Po¹lji preko S_MS"
 
-#: xgnokii/xgnokii_calendar.c:1519 xgnokii/xgnokii_contacts.c:3441
-#: xgnokii/xgnokii_logos.c:1492 xgnokii/xgnokii_sms.c:1264
+#: xgnokii/xgnokii_calendar.c:1515 xgnokii/xgnokii_contacts.c:3292
+#: xgnokii/xgnokii_logos.c:1492 xgnokii/xgnokii_sms.c:1262
 #: xgnokii/xgnokii_speed.c:529
 msgid "/File/Sep2"
 msgstr "/Datoteka/Sep2"
 
-#: xgnokii/xgnokii_calendar.c:1520 xgnokii/xgnokii_contacts.c:3439
+#: xgnokii/xgnokii_calendar.c:1516 xgnokii/xgnokii_contacts.c:3290
 #: xgnokii/xgnokii_speed.c:527
 msgid "/File/_Import from file"
 msgstr "/Datoteka/_Uvozi z datoteke"
 
-#: xgnokii/xgnokii_calendar.c:1521 xgnokii/xgnokii_contacts.c:3440
+#: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3291
 #: xgnokii/xgnokii_speed.c:528
 msgid "/File/_Export to file"
 msgstr "/Datoteka/_Izvozi v datoteko"
 
-#: xgnokii/xgnokii_calendar.c:1522
+#: xgnokii/xgnokii_calendar.c:1518
 msgid "/File/Sep3"
 msgstr "/Datoteka/Sep3"
 
-#: xgnokii/xgnokii_calendar.c:1523 xgnokii/xgnokii_contacts.c:3442
+#: xgnokii/xgnokii_calendar.c:1519 xgnokii/xgnokii_contacts.c:3293
 #: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1493
-#: xgnokii/xgnokii_netmon.c:265 xgnokii/xgnokii_sms.c:1265
-#: xgnokii/xgnokii_sms.c:1667 xgnokii/xgnokii_speed.c:530
+#: xgnokii/xgnokii_netmon.c:265 xgnokii/xgnokii_sms.c:1263
+#: xgnokii/xgnokii_sms.c:1665 xgnokii/xgnokii_speed.c:530
 #: xgnokii/xgnokii_xkeyb.c:242
 msgid "/File/_Close"
 msgstr "/Datoteka/_Zapri"
 
-#: xgnokii/xgnokii_calendar.c:1524 xgnokii/xgnokii_contacts.c:3443
+#: xgnokii/xgnokii_calendar.c:1520 xgnokii/xgnokii_contacts.c:3294
 #: xgnokii/xgnokii_logos.c:1494 xgnokii/xgnokii_speed.c:531
 msgid "/_Edit"
 msgstr "/Ur_edi"
 
-#: xgnokii/xgnokii_calendar.c:1525
+#: xgnokii/xgnokii_calendar.c:1521
 msgid "/Edit/Add _reminder"
 msgstr "/Uredi/Dodaj opozo_rilo"
 
-#: xgnokii/xgnokii_calendar.c:1526
+#: xgnokii/xgnokii_calendar.c:1522
 msgid "/Edit/Add _call"
 msgstr "/Uredi/Dodaj kli_c"
 
-#: xgnokii/xgnokii_calendar.c:1527
+#: xgnokii/xgnokii_calendar.c:1523
 msgid "/Edit/Add _meeting"
 msgstr "/Uredi/Dodaj _sestanek"
 
-#: xgnokii/xgnokii_calendar.c:1528
+#: xgnokii/xgnokii_calendar.c:1524
 msgid "/Edit/Add _birthday"
 msgstr "/Uredi/Dodaj _rojstni dan"
 
-#: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3447
+#: xgnokii/xgnokii_calendar.c:1528 xgnokii/xgnokii_contacts.c:3298
 msgid "/Edit/_Delete"
 msgstr "/Uredi/_Izbri¹i"
 
-#: xgnokii/xgnokii_calendar.c:1533 xgnokii/xgnokii_contacts.c:3450
+#: xgnokii/xgnokii_calendar.c:1529 xgnokii/xgnokii_contacts.c:3301
 #: xgnokii/xgnokii_logos.c:1502
 msgid "/Edit/Sep4"
 msgstr "/Uredi/Sep4"
 
-#: xgnokii/xgnokii_calendar.c:1534 xgnokii/xgnokii_contacts.c:3454
+#: xgnokii/xgnokii_calendar.c:1530 xgnokii/xgnokii_contacts.c:3305
 msgid "/Edit/Select _all"
 msgstr "/Uredi/Izbreri _vse"
 
-#: xgnokii/xgnokii_calendar.c:1535 xgnokii/xgnokii_contacts.c:3457
+#: xgnokii/xgnokii_calendar.c:1531 xgnokii/xgnokii_contacts.c:3308
 #: xgnokii/xgnokii_dtmf.c:225 xgnokii/xgnokii_netmon.c:269
-#: xgnokii/xgnokii_sms.c:1266 xgnokii/xgnokii_sms.c:1676
+#: xgnokii/xgnokii_sms.c:1264 xgnokii/xgnokii_sms.c:1674
 #: xgnokii/xgnokii_speed.c:533 xgnokii/xgnokii_xkeyb.c:243
 msgid "/_Help"
 msgstr "/_Pomoè"
 
-#: xgnokii/xgnokii_calendar.c:1536 xgnokii/xgnokii_contacts.c:3458
+#: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3309
 #: xgnokii/xgnokii_dtmf.c:226 xgnokii/xgnokii_netmon.c:270
-#: xgnokii/xgnokii_sms.c:1267 xgnokii/xgnokii_sms.c:1677
+#: xgnokii/xgnokii_sms.c:1265 xgnokii/xgnokii_sms.c:1675
 #: xgnokii/xgnokii_speed.c:534 xgnokii/xgnokii_xkeyb.c:244
 msgid "/Help/_Help"
 msgstr "/Pomoè/_Pomoè"
 
-#: xgnokii/xgnokii_calendar.c:1537 xgnokii/xgnokii_contacts.c:3459
+#: xgnokii/xgnokii_calendar.c:1533 xgnokii/xgnokii_contacts.c:3310
 #: xgnokii/xgnokii_dtmf.c:227 xgnokii/xgnokii_netmon.c:271
-#: xgnokii/xgnokii_sms.c:1268 xgnokii/xgnokii_sms.c:1678
+#: xgnokii/xgnokii_sms.c:1266 xgnokii/xgnokii_sms.c:1676
 #: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:245
 msgid "/Help/_About"
 msgstr "/Pomoè/_O Programu"
 
-#: xgnokii/xgnokii_calendar.c:1552
+#: xgnokii/xgnokii_calendar.c:1548
 msgid "#"
 msgstr ""
 
-#: xgnokii/xgnokii_calendar.c:1552
+#: xgnokii/xgnokii_calendar.c:1548
 msgid "Type"
 msgstr "Tip"
 
-#: xgnokii/xgnokii_calendar.c:1552
+#: xgnokii/xgnokii_calendar.c:1548
 msgid "Date"
 msgstr "Datum"
 
-#: xgnokii/xgnokii_calendar.c:1553 xgnokii/xgnokii_contacts.c:1948
-#: xgnokii/xgnokii_contacts.c:3475 xgnokii/xgnokii_speed.c:550
+#: xgnokii/xgnokii_calendar.c:1549 xgnokii/xgnokii_contacts.c:1947
+#: xgnokii/xgnokii_contacts.c:3326 xgnokii/xgnokii_speed.c:550
 msgid "Number"
 msgstr "©tevilka"
 
-#: xgnokii/xgnokii_calendar.c:1553
+#: xgnokii/xgnokii_calendar.c:1549
 msgid "Recurrence"
 msgstr ""
 
-#: xgnokii/xgnokii_calendar.c:1587 xgnokii/xgnokii_contacts.c:3511
+#: xgnokii/xgnokii_calendar.c:1583 xgnokii/xgnokii_contacts.c:3362
 #: xgnokii/xgnokii_speed.c:586
 msgid "Read from phone"
 msgstr "Beri z telefona"
 
-#: xgnokii/xgnokii_calendar.c:1591 xgnokii/xgnokii_contacts.c:3515
+#: xgnokii/xgnokii_calendar.c:1587 xgnokii/xgnokii_contacts.c:3366
 #: xgnokii/xgnokii_speed.c:590
 msgid "Save to phone"
 msgstr "Shrani na telefon"
 
-#: xgnokii/xgnokii_calendar.c:1598
+#: xgnokii/xgnokii_calendar.c:1594
 msgid "Send via SMS"
 msgstr "Po¹lji preko SMS"
 
-#: xgnokii/xgnokii_calendar.c:1605 xgnokii/xgnokii_contacts.c:3522
+#: xgnokii/xgnokii_calendar.c:1601 xgnokii/xgnokii_contacts.c:3373
 #: xgnokii/xgnokii_logos.c:1582 xgnokii/xgnokii_speed.c:597
 msgid "Import from file"
 msgstr "Uvozi iz datoteke"
 
-#: xgnokii/xgnokii_calendar.c:1609 xgnokii/xgnokii_contacts.c:3526
+#: xgnokii/xgnokii_calendar.c:1605 xgnokii/xgnokii_contacts.c:3377
 #: xgnokii/xgnokii_logos.c:1586 xgnokii/xgnokii_speed.c:601
 msgid "Export to file"
 msgstr "Izvozi v datoteko"
 
-#: xgnokii/xgnokii_calendar.c:1625
+#: xgnokii/xgnokii_calendar.c:1621
 msgid "Add call"
 msgstr "Dodaj klic"
 
-#: xgnokii/xgnokii_calendar.c:1637
+#: xgnokii/xgnokii_calendar.c:1633
 msgid "Delete note"
 msgstr "Izbri¹i opombo"
 
-#: xgnokii/xgnokii_calendar.c:1700 xgnokii/xgnokii_contacts.c:3332
-#: xgnokii/xgnokii_contacts.c:3579 xgnokii/xgnokii_sms.c:1831
+#: xgnokii/xgnokii_calendar.c:1696 xgnokii/xgnokii_contacts.c:3183
+#: xgnokii/xgnokii_contacts.c:3430 xgnokii/xgnokii_sms.c:1829
 #: xgnokii/xgnokii_speed.c:631
 #, c-format
 msgid "Error: %s: line %d: Can't allocate memory!\n"
 msgstr "Napaka: %s: vrstica %d: Ni bilo mogoèe dodeliti spomina!\n"
 
-#: xgnokii/xgnokii_calendar.c:1729 xgnokii/xgnokii_sms.c:1865
+#: xgnokii/xgnokii_calendar.c:1725 xgnokii/xgnokii_sms.c:1863
 msgid "couldn't allocate colour"
 msgstr "ni bilo mogoèe dodeliti barve"
 
@@ -3067,13 +3262,13 @@ msgstr "Ne"
 msgid "Can't exec %s\n"
 msgstr "Ne morem izvr¹iti %s\n"
 
-#: xgnokii/xgnokii_contacts.c:308 xgnokii/xgnokii_contacts.c:348
+#: xgnokii/xgnokii_contacts.c:307 xgnokii/xgnokii_contacts.c:347
 #: xgnokii/xgnokii_contacts.c:540 xgnokii/xgnokii_contacts.c:566
-#: xgnokii/xgnokii_contacts.c:712 xgnokii/xgnokii_contacts.c:732
+#: xgnokii/xgnokii_contacts.c:711 xgnokii/xgnokii_contacts.c:731
 msgid "Can't change memory type!"
 msgstr "Ne morem zamenjati vrste spomina!"
 
-#: xgnokii/xgnokii_contacts.c:360 xgnokii/xgnokii_contacts.c:424
+#: xgnokii/xgnokii_contacts.c:359 xgnokii/xgnokii_contacts.c:421
 msgid ""
 "Sorry, phonebook name will be truncated,\n"
 "because you save it into SIM memory!"
@@ -3081,7 +3276,7 @@ msgstr ""
 "Oprostite, ime telefonskega imenika bo skraj¹ano,\n"
 "ker ste vnos shranili v spomin SIM kartice!"
 
-#: xgnokii/xgnokii_contacts.c:578 xgnokii/xgnokii_contacts.c:623
+#: xgnokii/xgnokii_contacts.c:578 xgnokii/xgnokii_contacts.c:622
 msgid ""
 "Sorry, phonebook name will be truncated\n"
 "because you save it into SIM memory!"
@@ -3089,80 +3284,80 @@ msgstr ""
 "Oprostite, ime telefonskega imenika bo skraj¹ano,\n"
 "ker ste vnos shranili v spomin SIM kartice!"
 
-#: xgnokii/xgnokii_contacts.c:824
+#: xgnokii/xgnokii_contacts.c:823
 msgid "Can't find pattern!"
 msgstr "Ne najdem vzorca!"
 
-#: xgnokii/xgnokii_contacts.c:1107
+#: xgnokii/xgnokii_contacts.c:1106
 #, fuzzy
 msgid "Delete"
 msgstr "Izbri¹i SMS"
 
-#: xgnokii/xgnokii_contacts.c:1126
+#: xgnokii/xgnokii_contacts.c:1125
 #, fuzzy
 msgid "Number/Text:"
 msgstr "©tevilka:"
 
-#: xgnokii/xgnokii_contacts.c:1138
+#: xgnokii/xgnokii_contacts.c:1137
 #, fuzzy
 msgid "Type:"
 msgstr "Tip: "
 
-#: xgnokii/xgnokii_contacts.c:1173 xgnokii/xgnokii_contacts.c:1567
-#: xgnokii/xgnokii_contacts.c:3541 xgnokii/xgnokii_speed.c:608
+#: xgnokii/xgnokii_contacts.c:1172 xgnokii/xgnokii_contacts.c:1566
+#: xgnokii/xgnokii_contacts.c:3392 xgnokii/xgnokii_speed.c:608
 msgid "Edit entry"
 msgstr "Uredi vnos"
 
-#: xgnokii/xgnokii_contacts.c:1324
+#: xgnokii/xgnokii_contacts.c:1323
 msgid "Numbers"
 msgstr "©tevilke"
 
-#: xgnokii/xgnokii_contacts.c:1344
+#: xgnokii/xgnokii_contacts.c:1343
 msgid "New"
 msgstr "Novo"
 
-#: xgnokii/xgnokii_contacts.c:1526
+#: xgnokii/xgnokii_contacts.c:1525
 msgid "Memory:"
 msgstr "Spomin:"
 
-#: xgnokii/xgnokii_contacts.c:1530
+#: xgnokii/xgnokii_contacts.c:1529
 msgid "phone"
 msgstr "telefon"
 
-#: xgnokii/xgnokii_contacts.c:1547
+#: xgnokii/xgnokii_contacts.c:1546
 msgid "Caller group:"
 msgstr "Skupina klicoèih:"
 
-#: xgnokii/xgnokii_contacts.c:1610
+#: xgnokii/xgnokii_contacts.c:1609
 msgid "Delete entries"
 msgstr "Izbri¹i vnose"
 
-#: xgnokii/xgnokii_contacts.c:1642
+#: xgnokii/xgnokii_contacts.c:1641
 msgid "Do you want to delete selected entries?"
 msgstr "Ali ¾elite izbrisati izbrane vnose?"
 
-#: xgnokii/xgnokii_contacts.c:1660 xgnokii/xgnokii_contacts.c:3533
+#: xgnokii/xgnokii_contacts.c:1659 xgnokii/xgnokii_contacts.c:3384
 msgid "New entry"
 msgstr "Novi vnos"
 
-#: xgnokii/xgnokii_contacts.c:1704 xgnokii/xgnokii_contacts.c:3537
+#: xgnokii/xgnokii_contacts.c:1703 xgnokii/xgnokii_contacts.c:3388
 msgid "Duplicate entry"
 msgstr "Podvojen vnos"
 
-#: xgnokii/xgnokii_contacts.c:1773 xgnokii/xgnokii_contacts.c:1781
-#: xgnokii/xgnokii_contacts.c:1809
+#: xgnokii/xgnokii_contacts.c:1772 xgnokii/xgnokii_contacts.c:1780
+#: xgnokii/xgnokii_contacts.c:1808
 msgid "Can't find free memory."
 msgstr "Ne najdem prostega spomina."
 
-#: xgnokii/xgnokii_contacts.c:1846
+#: xgnokii/xgnokii_contacts.c:1845
 msgid "Changing memory type"
 msgstr "Menjam vrsto spomina"
 
-#: xgnokii/xgnokii_contacts.c:1853
+#: xgnokii/xgnokii_contacts.c:1852
 msgid "Continue"
 msgstr "Nadaljuj"
 
-#: xgnokii/xgnokii_contacts.c:1875
+#: xgnokii/xgnokii_contacts.c:1874
 msgid ""
 "If you change from phone memory to SIM memory\n"
 "some entries may be truncated."
@@ -3170,56 +3365,56 @@ msgstr ""
 "Èe zamenjate vrsto spomina z SIM kartice v spomin telefona\n"
 "so nekateri vnosi lahko skraj¹ani."
 
-#: xgnokii/xgnokii_contacts.c:1893 xgnokii/xgnokii_contacts.c:1899
+#: xgnokii/xgnokii_contacts.c:1892 xgnokii/xgnokii_contacts.c:1898
 msgid "Find"
 msgstr "Najdi"
 
-#: xgnokii/xgnokii_contacts.c:1925
+#: xgnokii/xgnokii_contacts.c:1924
 msgid "Pattern:"
 msgstr "Vzorec:"
 
-#: xgnokii/xgnokii_contacts.c:1940 xgnokii/xgnokii_contacts.c:3475
+#: xgnokii/xgnokii_contacts.c:1939 xgnokii/xgnokii_contacts.c:3326
 #: xgnokii/xgnokii_speed.c:550
 msgid "Name"
 msgstr "Ime"
 
-#: xgnokii/xgnokii_contacts.c:1989 xgnokii/xgnokii_contacts.c:3552
+#: xgnokii/xgnokii_contacts.c:1988 xgnokii/xgnokii_contacts.c:3403
 msgid "Dial voice"
 msgstr "Glasovno klicanje"
 
-#: xgnokii/xgnokii_contacts.c:2121
+#: xgnokii/xgnokii_contacts.c:2120
 msgid "Phone memory..."
 msgstr "Spomin telefona..."
 
-#: xgnokii/xgnokii_contacts.c:2132
+#: xgnokii/xgnokii_contacts.c:2131
 msgid "SIM memory..."
 msgstr "Spomin SIM kartice..."
 
-#: xgnokii/xgnokii_contacts.c:2159
+#: xgnokii/xgnokii_contacts.c:2158
 msgid "Saving entries"
 msgstr "Shranjujem vnose"
 
-#: xgnokii/xgnokii_contacts.c:2190
+#: xgnokii/xgnokii_contacts.c:2187
 #, fuzzy, c-format
 msgid "%s: line: %d: Can't write ME memory entry number %d! Error: %d\n"
 msgstr ""
 "%s: vrstica: %d: Ne morem pisati v ME spomin vnos ¹tevilka %d! Napaka: %d\n"
 
-#: xgnokii/xgnokii_contacts.c:2229
+#: xgnokii/xgnokii_contacts.c:2224
 #, c-format
 msgid "%s: line %d:Can't write SM memory entry number %d! Error: %d\n"
 msgstr ""
 "%s: vrstica %d:Ne morem pisati v SM spomin vnos ¹tevilka %d! Napaka: %d\n"
 
-#: xgnokii/xgnokii_contacts.c:2253
+#: xgnokii/xgnokii_contacts.c:2248
 msgid "Save changes?"
 msgstr "Shrani spremembe?"
 
-#: xgnokii/xgnokii_contacts.c:2267
+#: xgnokii/xgnokii_contacts.c:2262
 msgid "Don't save"
 msgstr "Ne shrani"
 
-#: xgnokii/xgnokii_contacts.c:2289
+#: xgnokii/xgnokii_contacts.c:2284
 msgid ""
 "You have made changes in your\n"
 "contacts directory.\n"
@@ -3233,38 +3428,28 @@ msgstr ""
 "\n"
 "®elite te spremembe shraniti v telefon?\n"
 
-#: xgnokii/xgnokii_contacts.c:2352 xgnokii/xgnokii_contacts.c:2378
-#: xgnokii/xgnokii_contacts.c:3025 xgnokii/xgnokii_contacts.c:3047
+#: xgnokii/xgnokii_contacts.c:2345 xgnokii/xgnokii_contacts.c:2371
+#: xgnokii/xgnokii_contacts.c:2875 xgnokii/xgnokii_contacts.c:2897
 #, c-format
 msgid "%s: line %d: Can't allocate memory!\n"
 msgstr "%s: vrstica %d: Ne morem dodeliti spomina!\n"
 
-#: xgnokii/xgnokii_contacts.c:2467
-msgid ""
-"Can't get SM memory status!\n"
-"\n"
-"Setting max SIM entries to 100!\n"
-msgstr ""
-"Ne morem dobiti stanja SM spomina!\n"
-"\n"
-"Nastavljam maksimalno ¹tevilo SIM vnosov na 100\n"
-
-#: xgnokii/xgnokii_contacts.c:2489
+#: xgnokii/xgnokii_contacts.c:2475
 msgid "Getting entries"
 msgstr "Dobivam vnose"
 
-#: xgnokii/xgnokii_contacts.c:2711 xgnokii/xgnokii_dtmf.c:135
+#: xgnokii/xgnokii_contacts.c:2724 xgnokii/xgnokii_dtmf.c:135
 #: xgnokii/xgnokii_speed.c:423
 #, c-format
 msgid "Can't open file %s for writing!"
 msgstr "Ne morem odpreti datoeke %s za pisanje!"
 
-#: xgnokii/xgnokii_contacts.c:2745 xgnokii/xgnokii_dtmf.c:166
+#: xgnokii/xgnokii_contacts.c:2758 xgnokii/xgnokii_dtmf.c:166
 #: xgnokii/xgnokii_logos.c:1360 xgnokii/xgnokii_speed.c:463
 msgid "Overwrite file?"
 msgstr "Prepi¹em datoteko?"
 
-#: xgnokii/xgnokii_contacts.c:2746 xgnokii/xgnokii_dtmf.c:167
+#: xgnokii/xgnokii_contacts.c:2759 xgnokii/xgnokii_dtmf.c:167
 #: xgnokii/xgnokii_logos.c:1361 xgnokii/xgnokii_speed.c:464
 #, c-format
 msgid ""
@@ -3274,83 +3459,73 @@ msgstr ""
 "Datoteka %s ¾e obstaja.\n"
 "Prepi¹em?"
 
-#: xgnokii/xgnokii_contacts.c:2762 xgnokii/xgnokii_speed.c:480
+#: xgnokii/xgnokii_contacts.c:2775 xgnokii/xgnokii_speed.c:480
 msgid "Export"
 msgstr "Izvozi"
 
-#: xgnokii/xgnokii_contacts.c:2954 xgnokii/xgnokii_dtmf.c:99
+#: xgnokii/xgnokii_contacts.c:2806 xgnokii/xgnokii_dtmf.c:99
 #: xgnokii/xgnokii_speed.c:330
 #, c-format
 msgid "Can't open file %s for reading!"
 msgstr "Ne morem odpreti datoteke %s za branje!"
 
-#: xgnokii/xgnokii_contacts.c:3004
-msgid ""
-"Can't get SM memory status!\n"
-"\n"
-"Setting max SIM entries set to 100!\n"
-msgstr ""
-"Ne morem dobiti stanja SM spomina!\n"
-"\n"
-"Nastavljam maksimum SIM vnosov na 100!\n"
-
-#: xgnokii/xgnokii_contacts.c:3106 xgnokii/xgnokii_speed.c:401
+#: xgnokii/xgnokii_contacts.c:2957 xgnokii/xgnokii_speed.c:401
 msgid "Import"
 msgstr "Vnesi"
 
-#: xgnokii/xgnokii_contacts.c:3299 xgnokii/xgnokii_sms.c:1372
+#: xgnokii/xgnokii_contacts.c:3150 xgnokii/xgnokii_sms.c:1370
 msgid "Select contacts"
 msgstr "Izberi kontakte"
 
-#: xgnokii/xgnokii_contacts.c:3444
+#: xgnokii/xgnokii_contacts.c:3295
 msgid "/Edit/_New"
 msgstr "/Uredi/_Nov"
 
-#: xgnokii/xgnokii_contacts.c:3445
+#: xgnokii/xgnokii_contacts.c:3296
 msgid "/Edit/D_uplicate"
 msgstr "/Uredi/Podvo_ji"
 
-#: xgnokii/xgnokii_contacts.c:3446 xgnokii/xgnokii_speed.c:532
+#: xgnokii/xgnokii_contacts.c:3297 xgnokii/xgnokii_speed.c:532
 msgid "/Edit/_Edit"
 msgstr "/Uredi/Ur_edi"
 
-#: xgnokii/xgnokii_contacts.c:3448 xgnokii/xgnokii_logos.c:1497
+#: xgnokii/xgnokii_contacts.c:3299 xgnokii/xgnokii_logos.c:1497
 msgid "/Edit/Sep3"
 msgstr "/Uredi/Sep3"
 
-#: xgnokii/xgnokii_contacts.c:3449
+#: xgnokii/xgnokii_contacts.c:3300
 msgid "/Edit/_Change memory type"
 msgstr "/Uredi/_Spremeni vrsto spomina"
 
-#: xgnokii/xgnokii_contacts.c:3451
+#: xgnokii/xgnokii_contacts.c:3302
 msgid "/Edit/_Find"
 msgstr "/Uredi/_Najdi"
 
-#: xgnokii/xgnokii_contacts.c:3452
+#: xgnokii/xgnokii_contacts.c:3303
 msgid "/Edit/Find ne_xt"
 msgstr "/Uredi/Naj_di naslednjo"
 
-#: xgnokii/xgnokii_contacts.c:3453
+#: xgnokii/xgnokii_contacts.c:3304
 msgid "/Edit/Sep5"
 msgstr "/Uredi/Sep5"
 
-#: xgnokii/xgnokii_contacts.c:3455
+#: xgnokii/xgnokii_contacts.c:3306
 msgid "/_Dial"
 msgstr "/_Klièi"
 
-#: xgnokii/xgnokii_contacts.c:3456
+#: xgnokii/xgnokii_contacts.c:3307
 msgid "/Dial/Dial _voice"
 msgstr "/Klièi/Glasovno _klicanje"
 
-#: xgnokii/xgnokii_contacts.c:3475
+#: xgnokii/xgnokii_contacts.c:3326
 msgid "Memory"
 msgstr "Spomin"
 
-#: xgnokii/xgnokii_contacts.c:3475
+#: xgnokii/xgnokii_contacts.c:3326
 msgid "Group"
 msgstr "Skupina"
 
-#: xgnokii/xgnokii_contacts.c:3545
+#: xgnokii/xgnokii_contacts.c:3396
 msgid "Delete entry"
 msgstr "Izbri¹i vnos"
 
@@ -3395,7 +3570,7 @@ msgid "/File/_Open"
 msgstr "/Datoteka/_Odpri"
 
 #: xgnokii/xgnokii_dtmf.c:222 xgnokii/xgnokii_logos.c:1486
-#: xgnokii/xgnokii_sms.c:1260 xgnokii/xgnokii_sms.c:1663
+#: xgnokii/xgnokii_sms.c:1258 xgnokii/xgnokii_sms.c:1661
 msgid "/File/_Save"
 msgstr "/Datoteka/_Shrani"
 
@@ -3572,21 +3747,21 @@ msgstr "Obrni vertikalno"
 msgid "Load preview pixmap error, feature disabled."
 msgstr "Napaka pri nalaganju predogleda slike, fukcija onemogoèena."
 
-#: xgnokii/xgnokii_lowlevel.c:520
+#: xgnokii/xgnokii_lowlevel.c:503
 #, c-format
 msgid "%s: line %d: Can't get memory entry number %d from memory %d! %d\n"
 msgstr ""
 "%s: vrstica %d: Ne morem prebrati vnosa %d v spominu z spomina %d! %d\n"
 
-#: xgnokii/xgnokii_lowlevel.c:1258
+#: xgnokii/xgnokii_lowlevel.c:1239
 msgid "Connecting..."
 msgstr "Povezujem..."
 
-#: xgnokii/xgnokii_lowlevel.c:1350
+#: xgnokii/xgnokii_lowlevel.c:1322
 msgid "Working..."
 msgstr "Delam..."
 
-#: xgnokii/xgnokii_lowlevel.c:1401
+#: xgnokii/xgnokii_lowlevel.c:1373
 msgid "Refreshing SMSes..."
 msgstr "Osve¾ujem SMS-e..."
 
@@ -3895,11 +4070,11 @@ msgstr "Ne morem odkleniti mailbox-a %s!"
 msgid "Choose Mailbox File"
 msgstr "Izberite datum"
 
-#: xgnokii/xgnokii_sms.c:973 xgnokii/xgnokii_sms.c:1106
+#: xgnokii/xgnokii_sms.c:973 xgnokii/xgnokii_sms.c:1104
 msgid "Address line contains illegal address!"
 msgstr "Vrstica z naslovom vsebuje nedovoljen naslov!"
 
-#: xgnokii/xgnokii_sms.c:1079
+#: xgnokii/xgnokii_sms.c:1077
 #, c-format
 msgid ""
 "SMS send to %s failed\n"
@@ -3908,143 +4083,143 @@ msgstr ""
 "Po¹iljanje SMS-a %s ni uspelo\n"
 "(napaka?%d)"
 
-#: xgnokii/xgnokii_sms.c:1165 xgnokii/xgnokii_sms.c:1197
+#: xgnokii/xgnokii_sms.c:1163 xgnokii/xgnokii_sms.c:1195
 #, c-format
 msgid "Sending SMS to %s (%d/%d) ...\n"
 msgstr "Po¹iljanje SMS-a %s (%d/%d) ...\n"
 
-#: xgnokii/xgnokii_sms.c:1223
+#: xgnokii/xgnokii_sms.c:1221
 #, c-format
 msgid "Sending SMS to %s ...\n"
 msgstr "Po¹iljanje SMS-a %s ...\n"
 
-#: xgnokii/xgnokii_sms.c:1259
+#: xgnokii/xgnokii_sms.c:1257
 msgid "/File/Sen_d"
 msgstr "/Datoteka/Po_¹lji"
 
-#: xgnokii/xgnokii_sms.c:1262
+#: xgnokii/xgnokii_sms.c:1260
 msgid "/File/Check _Names"
 msgstr "/Datoteka/Preveri Ime_na"
 
-#: xgnokii/xgnokii_sms.c:1263
+#: xgnokii/xgnokii_sms.c:1261
 msgid "/File/C_ontacts"
 msgstr "/Datoteka/_Kontakti"
 
-#: xgnokii/xgnokii_sms.c:1324
+#: xgnokii/xgnokii_sms.c:1322
 msgid "Send message"
 msgstr "Po¹lji sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1328
+#: xgnokii/xgnokii_sms.c:1326
 msgid "Save message to outbox"
 msgstr "Shrani sporoèilo v outbox"
 
-#: xgnokii/xgnokii_sms.c:1335
+#: xgnokii/xgnokii_sms.c:1333
 msgid "Check names"
 msgstr "Preveri imena"
 
-#: xgnokii/xgnokii_sms.c:1348
+#: xgnokii/xgnokii_sms.c:1346
 msgid "To:"
 msgstr "Za:"
 
-#: xgnokii/xgnokii_sms.c:1419
+#: xgnokii/xgnokii_sms.c:1417
 msgid "Delivery report"
 msgstr "Poroèilo o dostavi"
 
-#: xgnokii/xgnokii_sms.c:1423
+#: xgnokii/xgnokii_sms.c:1421
 msgid "Send as Long SMS"
 msgstr "Po¹lji kot dolgi SMS"
 
-#: xgnokii/xgnokii_sms.c:1427
+#: xgnokii/xgnokii_sms.c:1425
 msgid "SMS Center:"
 msgstr "SMS Center:"
 
-#: xgnokii/xgnokii_sms.c:1446
+#: xgnokii/xgnokii_sms.c:1444
 msgid "New Message"
 msgstr "Novo Sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1474
+#: xgnokii/xgnokii_sms.c:1472
 msgid "Forward Message"
 msgstr "Posreduj Sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1520
+#: xgnokii/xgnokii_sms.c:1518
 msgid "Reply Message"
 msgstr "Odgovori na Sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1664
+#: xgnokii/xgnokii_sms.c:1662
 msgid "/File/Save to mailbo_x"
 msgstr "/Datoteka/Shrani v mailbo_x"
 
-#: xgnokii/xgnokii_sms.c:1665
+#: xgnokii/xgnokii_sms.c:1663
 #, fuzzy
 msgid "/File/Save to _file"
 msgstr "/Datoteka/Shrani v mailbo_x"
 
-#: xgnokii/xgnokii_sms.c:1668
+#: xgnokii/xgnokii_sms.c:1666
 msgid "/_Messages"
 msgstr "/_Sporoèila"
 
-#: xgnokii/xgnokii_sms.c:1669
+#: xgnokii/xgnokii_sms.c:1667
 msgid "/_Messages/(De)_Activate SMS reading"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:1670
+#: xgnokii/xgnokii_sms.c:1668
 msgid "/_Messages/_New"
 msgstr "/_Sporoèila/_Nova"
 
-#: xgnokii/xgnokii_sms.c:1671
+#: xgnokii/xgnokii_sms.c:1669
 msgid "/_Messages/_Forward"
 msgstr "/_Sporoèila/_Posreduj/"
 
-#: xgnokii/xgnokii_sms.c:1672
+#: xgnokii/xgnokii_sms.c:1670
 msgid "/_Messages/_Reply"
 msgstr "/_Sporoèila/_Odgovori"
 
-#: xgnokii/xgnokii_sms.c:1673
+#: xgnokii/xgnokii_sms.c:1671
 msgid "/_Messages/_Delete"
 msgstr "/_Sporoèila/_Izbri¹i"
 
-#: xgnokii/xgnokii_sms.c:1674
+#: xgnokii/xgnokii_sms.c:1672
 msgid "/Messages/Sep3"
 msgstr "/Sporoèila/Sep3"
 
-#: xgnokii/xgnokii_sms.c:1675
+#: xgnokii/xgnokii_sms.c:1673
 #, fuzzy
 msgid "/_Messages/_Business card"
 msgstr "/_Sporoèila/_Vizitka"
 
-#: xgnokii/xgnokii_sms.c:1696
+#: xgnokii/xgnokii_sms.c:1694
 msgid "Status"
 msgstr "Stanje"
 
-#: xgnokii/xgnokii_sms.c:1696
+#: xgnokii/xgnokii_sms.c:1694
 msgid "Date / Time"
 msgstr "Datum / Èas"
 
-#: xgnokii/xgnokii_sms.c:1696
+#: xgnokii/xgnokii_sms.c:1694
 msgid "Sender"
 msgstr "Po¹iljatelj"
 
-#: xgnokii/xgnokii_sms.c:1696
+#: xgnokii/xgnokii_sms.c:1694
 msgid "Message"
 msgstr "Sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1732
+#: xgnokii/xgnokii_sms.c:1730
 msgid "New message"
 msgstr "Novo sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1736
+#: xgnokii/xgnokii_sms.c:1734
 msgid "Forward message"
 msgstr "Posreduj sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1740
+#: xgnokii/xgnokii_sms.c:1738
 msgid "Reply message"
 msgstr "Odogovori na sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1752
+#: xgnokii/xgnokii_sms.c:1750
 msgid "Delete message"
 msgstr "Izbri¹i sporoèilo"
 
-#: xgnokii/xgnokii_sms.c:1777
+#: xgnokii/xgnokii_sms.c:1775
 msgid "SMS's"
 msgstr "SMS-i"
 
@@ -4081,6 +4256,187 @@ msgstr "Ne morem nalo¾iti slike za ozadje!"
 #: xgnokii/xgnokii_xkeyb.c:260
 msgid "XGnokii Keyboard"
 msgstr "XGnokii Tipkovnica"
+
+#~ msgid "Couldn't open %s or gnokiirc. Exiting now...\n"
+#~ msgstr "Datoteke %s ali gnokiirc ni bilo mogoèe odpreti. Prekinjam...\n"
+
+#~ msgid "Couldn't open %s or /etc/gnokiirc. Exiting now...\n"
+#~ msgstr ""
+#~ "Datoteke %s ali /etc/gnokiirc ni bilo mogoèe odpreti. Prekinjam...\n"
+
+#, fuzzy
+#~ msgid ""
+#~ "   usage: gnokii [--help|--monitor [delay]|--version]\n"
+#~ "          gnokii --getphonebook memory_type start_number [end_number|"
+#~ "end]\n"
+#~ "                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
+#~ "          gnokii --writephonebook [-f|--force][[-v|--vcard]|[-l|--ldif]]\n"
+#~ "          gnokii --getwapbookmark number\n"
+#~ "          gnokii --writewapbookmark name URL\n"
+#~ "          gnokii --deletewapbookmark number\n"
+#~ "          gnokii --getwapsetting number [-r]\n"
+#~ "          gnokii --writewapsetting\n"
+#~ "          gnokii --activatewapsetting number\n"
+#~ "          gnokii --getspeeddial number\n"
+#~ "          gnokii --setspeeddial number memory_type location\n"
+#~ "          gnokii --createsmsfolder name\n"
+#~ "          gnokii --deletesmsfolder number\n"
+#~ "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-"
+#~ "d]\n"
+#~ "          gnokii --deletesms memory_type start [end]\n"
+#~ "          gnokii --sendsms destination [--smsc message_center_number |\n"
+#~ "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
+#~ "                 [--long n] [-i]\n"
+#~ "          gnokii --savesms [--sender from] [--smsc message_center_number "
+#~ "|\n"
+#~ "                 --smscno message_center_index] [--folder folder_id]\n"
+#~ "                 [--location number] [--sent | --read] [--deliver] \n"
+#~ "          gnokii --smsreader\n"
+#~ "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
+#~ "          gnokii --setsmsc\n"
+#~ "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
+#~ "          gnokii --getdatetime\n"
+#~ "          gnokii --setalarm [HH MM]\n"
+#~ "          gnokii --getalarm\n"
+#~ "          gnokii --dialvoice number\n"
+#~ "          gnokii --answercall callid\n"
+#~ "          gnokii --hangup callid\n"
+#~ "          gnokii --gettodo start [end] [-v]\n"
+#~ "          gnokii --writetodo vcardfile number\n"
+#~ "          gnokii --deletealltodos\n"
+#~ "          gnokii --getcalendarnote start_number [end_number|end] [-v]\n"
+#~ "          gnokii --writecalendarnote vcardfile number\n"
+#~ "          gnokii --deletecalendarnote start [end]\n"
+#~ "          gnokii --getdisplaystatus\n"
+#~ "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
+#~ "          gnokii --identify\n"
+#~ "          gnokii --senddtmf string\n"
+#~ "          gnokii --sendlogo {caller|op|picture} destination logofile "
+#~ "[network code]\n"
+#~ "          gnokii --sendringtone rtttlfile destination\n"
+#~ "          gnokii --setlogo op [logofile] [network code]\n"
+#~ "          gnokii --setlogo startup [logofile]\n"
+#~ "          gnokii --setlogo caller [logofile] [caller group number] [group "
+#~ "name]\n"
+#~ "          gnokii --setlogo {dealer|text} [text]\n"
+#~ "          gnokii --getlogo op [logofile] [network code]\n"
+#~ "          gnokii --getlogo startup [logofile] [network code]\n"
+#~ "          gnokii --getlogo caller [caller group number] [logofile] "
+#~ "[network code]\n"
+#~ "          gnokii --getlogo {dealer|text}\n"
+#~ "          gnokii --viewlogo logofile\n"
+#~ "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
+#~ "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name "
+#~ "name]\n"
+#~ "          gnokii --playringtone rtttlfile [--volume vol]\n"
+#~ "          gnokii --ringtoneconvert source destination\n"
+#~ "          gnokii --getringtonelist\n"
+#~ "          gnokii --deleteringtone start [end]\n"
+#~ "          gnokii --reset [soft|hard]\n"
+#~ "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
+#~ "          gnokii --setprofile\n"
+#~ "          gnokii --getactiveprofile\n"
+#~ "          gnokii --setactiveprofile profile_number\n"
+#~ "          gnokii --displayoutput\n"
+#~ "          gnokii --keysequence\n"
+#~ "          gnokii --enterchar\n"
+#~ "          gnokii --divert {--op|-o} {register|enable|query|disable|"
+#~ "erasure}\n"
+#~ "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
+#~ "                 {--call|-c} {all|voice|fax|data}\n"
+#~ "                 [{--timeout|-m} time_in_seconds]\n"
+#~ "                 [{--number|-n} number]\n"
+#~ "          gnokii --listnetworks\n"
+#~ "          gnokii --getnetworkinfo\n"
+#~ "          gnokii --getlocksinfo\n"
+#~ msgstr ""
+#~ "   uporaba: gnokii [--help|--monitor|--version]\n"
+#~ "          gnokii --getmemory vrsta_spomina zaèetek [konec]\n"
+#~ "          gnokii --writephonebook [-i]\n"
+#~ "          gnokii --getspeeddial ¹tevilka\n"
+#~ "          gnokii --setspeeddial ¹tevilka vrsta_spomina lokacija\n"
+#~ "          gnokii --getsms vrsta_spomina start [konec] [-f datoteka] [-F "
+#~ "datoteka] [-d]\n"
+#~ "          gnokii --deletesms vrsta_spomina zaèetek [konec]\n"
+#~ "          gnokii --sendsms cilj [--smsc ¹tevilka_centra_za_sporoèila |\n"
+#~ "                 --smscno oznaka_centra_za_sporoèila] [-r] [-C n] [-v n]\n"
+#~ "                 [--long n]\n"
+#~ "          gnokii --savesms [-m] [-l n] [-i]\n"
+#~ "          gnokii --smsreader\n"
+#~ "          gnokii --getsmsc [zaèetna_¹tevilka [konèna_¹tevilka]] [-r|--"
+#~ "raw]\n"
+#~ "          gnokii --setsmsc\n"
+#~ "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
+#~ "          gnokii --getdatetime\n"
+#~ "          gnokii --setalarm HH MM\n"
+#~ "          gnokii --getalarm\n"
+#~ "          gnokii --dialvoice ¹tevilka\n"
+#~ "          gnokii --answercall id_klicoèega\n"
+#~ "          gnokii --hangup id_klicoèega\n"
+#~ "          gnokii --getcalendarnote zaèetek [konec] [-v]\n"
+#~ "          gnokii --writecalendarnote vcarddatoteka ¹tevilka\n"
+#~ "          gnokii --deletecalendarnote zaèetek [konec]\n"
+#~ "          gnokii --getdisplaystatus\n"
+#~ "          gnokii --netmonitor {ponastavi|izkljuèen|polje|razvojno|"
+#~ "naslednji|¹t.}\n"
+#~ "          gnokii --identify\n"
+#~ "          gnokii --senddtmf niz\n"
+#~ "          gnokii --sendlogo {caller|op} cilj datoteka_z_logom [omre¾na "
+#~ "koda]\n"
+#~ "          gnokii --sendringtone rtttlfile cilj\n"
+#~ "          gnokii --setlogo op [datoteka_z_logom] [omre¾na_koda]\n"
+#~ "          gnokii --setlogo startup [datoteka_z_logom]\n"
+#~ "          gnokii --setlogo caller [datoteka_z_logom] [¹tevilka skupine "
+#~ "klicanih] [ime skupine]\n"
+#~ "          gnokii --setlogo {dealer|tekst} [text]\n"
+#~ "          gnokii --getlogo op [datoteka_z_logom] [omre¾na_koda]\n"
+#~ "          gnokii --getlogo startup [datoteka_z_logom] [omre¾na_koda]\n"
+#~ "          gnokii --getlogo caller [datoteka_z_logom][¹tevilka skupine "
+#~ "klicanih][omre¾na_koda]\n"
+#~ "          gnokii --getlogo {dealer|text}\n"
+#~ "          gnokii --viewlogo datoteka_z_logom\n"
+#~ "          gnokii --getringtone rtttldatoteka [lokacija] [-r|--raw]\n"
+#~ "          gnokii --setringtone rtttldatoteka [lokacija] [-r|--raw] [--"
+#~ "name ime]\n"
+#~ "          gnokii --reset [soft|hard]\n"
+#~ "          gnokii --getprofile [zaèetna_¹tevilka [konèna_¹tevilka]] [-r|--"
+#~ "raw]\n"
+#~ "          gnokii --setprofile\n"
+#~ "          gnokii --displayoutput\n"
+#~ "          gnokii --keysequence\n"
+#~ "          gnokii --enterchar\n"
+#~ "          gnokii --divert {--op|-o} {register|enable|query|disable|"
+#~ "erasure}\n"
+#~ "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
+#~ "                 {--call|-c} {all|voice|fax|data}\n"
+#~ "                 [{--timeout|-m} èas_v_sekundah]\n"
+#~ "                 [{--number|-n} ¹tevilka]\n"
+
+#, fuzzy
+#~ msgid "Missing phone number type on line %d entry [%s]\n"
+#~ msgstr "Manjkajoèa ¹tevilka tipa v vrstici %d vnos %d [%s]\n"
+
+#, fuzzy
+#~ msgid "There is no phone number on line [%s] entry %d\n"
+#~ msgstr "Na vrstici %d vnosu %d [%s] ni telefonske ¹tevilke\n"
+
+#~ msgid ""
+#~ "Can't get SM memory status!\n"
+#~ "\n"
+#~ "Setting max SIM entries to 100!\n"
+#~ msgstr ""
+#~ "Ne morem dobiti stanja SM spomina!\n"
+#~ "\n"
+#~ "Nastavljam maksimalno ¹tevilo SIM vnosov na 100\n"
+
+#~ msgid ""
+#~ "Can't get SM memory status!\n"
+#~ "\n"
+#~ "Setting max SIM entries set to 100!\n"
+#~ msgstr ""
+#~ "Ne morem dobiti stanja SM spomina!\n"
+#~ "\n"
+#~ "Nastavljam maksimum SIM vnosov na 100!\n"
 
 #~ msgid "Ringtone number: %d\n"
 #~ msgstr "©tevilka melodije: %d\n"
