@@ -51,6 +51,10 @@
 #  include <strings.h>
 #endif
 
+#ifdef HAVE_STRING_H
+#  include <string.h>
+#endif
+
 #ifdef HAVE_STDINT_H
 #  include <stdint.h>
 #endif
