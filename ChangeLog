@@ -35,6 +35,8 @@
     o updated FAQ (also on the webpage)                   (Pawel Kot)
     o V110 protocol info added to DataCalls-QuickStart
                                                      (Aart Koelewijn)
+    o mention memory types for --getsms in the manual page
+	                                                  (Pawel Kot)
  * Allow GSM_PrintBitmap to output to any stream          (Pawel Kot)
  * Build system updates:
     o fixed Makefile to install libgnokii.so for all install*
