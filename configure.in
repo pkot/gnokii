@@ -185,7 +185,7 @@ PTHREAD_LIBS_SAVE="$PTHREAD_LIBS"
 PTHREAD_LIBS=error
 AC_CHECK_LIB(pthread, pthread_attr_init, [
                       PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_REENTRANT"
-		      PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -pthread" ])
+		      PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -lpthread" ])
 
 dnl FIXME: test this on *BSD and report results immediatelly to the ml please
 dnl If it is not found, try to check for c_r (on FreeBSD)

@@ -1697,7 +1697,7 @@ if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
   
                       PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_REENTRANT"
-		      PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -pthread" 
+		      PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -lpthread" 
 else
   echo "$ac_t""no" 1>&6
 fi
@@ -3159,6 +3159,7 @@ ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "Makefile.global
 	po/Makefile.in
+	packaging/Debian/changelog
 	packaging/RedHat/gnokii.spec" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
@@ -3283,6 +3284,7 @@ cat >> $CONFIG_STATUS <<EOF
 
 CONFIG_FILES=\${CONFIG_FILES-"Makefile.global
 	po/Makefile.in
+	packaging/Debian/changelog
 	packaging/RedHat/gnokii.spec"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
