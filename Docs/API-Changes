@@ -1,0 +1,131 @@
+libgnokii API changes
+=====================
+
++ means addition
+- means substraction
+| means change
+= means no change
+o change description
+
+v1.3 2003-09-21
+
+	2003-09-10
+
+	o new function
+		+API void gn_number_sanitize(char *, int);
+
+	o new function
+		+API void gn_phonebook_entry_sanitize(gn_phonebook_entry *);
+
+v1.2 2003-09-07
+
+	2003-09-07
+
+	o new type
+		+typedef enum {
+		+...
+		+} gn_profile_message_type;
+
+	o new type
+		+typedef enum {
+		+...
+		+} gn_profile_warning_type;
+
+	o new type
+		+typedef enum {
+		+...
+		+} gn_profile_vibration_type;
+
+	o new type
+		+typedef enum {
+		+...
+		+} gn_profile_callalert_type;
+
+	o new type
+		+typedef enum {
+		+...
+		+} gn_profile_keyvol_type;
+
+	o new type
+		+typedef enum {
+		+...
+		+} gn_profile_volume_type;
+
+	2003-09-05
+
+	o new function
+		+API char *gn_memory_type2str(gn_memory_type);
+
+	2003-09-03
+
+	o new function
+		+API int gn_phonebook2ldif(FILE *, gn_phonebook_entry *);
+
+	o new function
+		+API int gn_ldif2phonebook(FILE *, gn_phonebook_entry *);
+
+v1.1 2003-08-18
+
+	2003-08-18
+
+	o change of the struct field type
+		|typedef struct {
+		=...
+		-	unsigned char text[GN_SMS_MAX_LENGTH + 1];
+		+	unsigned char text[10 * GN_SMS_MAX_LENGTH + 1];
+		=...
+		|} gn_sms_user_data;
+
+	2003-06-18
+
+	o new function
+		+API void gn_ringtone_get_tone(const gn_ringtone *, int,
+						int *, int *);
+
+	o new type
+		+typedef struct {
+		+...
+		+} gn_tone;
+
+	o new field in the struct
+		|typedef struct {
+		=...
+		+	gn_tone *tone;
+		=...
+		|} gn_data;
+
+	o new field in the struct
+		|typedef struct {
+		=...
+		+	GN_OP_PlayTone,
+		=...
+		|} gn_operation;
+
+	2003-06-12
+
+	o new fields in the struct
+		|typedef struct {
+		=...
+		+	GN_OP_GetActiveProfile,
+		+	GN_OP_SetActiveProfile,
+		=...
+		|} gn_operation;
+ 
+	2003-04-28
+
+	o change the struct definition
+		| typedef struct
+		-#if HAVE_BLUETOOTH
+		|	uint8_t rfcomm_cn;
+		-	bdaddr_t bt_address;
+		-#endif
+		+} gn_config;
+
+	o change the struct field name
+		|struct gn_statemachine {
+		=...
+		-	gn_error ResponseError[GN_SM_WAITINGFOR_MAX_NUMBER];
+		+	gn_error response_error[GN_SM_WAITINGFOR_MAX_NUMBER];
+		|};
+
+v1.0 2003-04-07

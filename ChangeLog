@@ -61,6 +61,7 @@
     o fix stupid bug in deletesms()                      (Pawel Kot)
  * Documentation updates
     o add missing manual pages for executables           (Pawel Kot)
+    o add a file with a history of the API changes       (Pawel Kot)
  * libgnokii changes
     o fix vCal support; there can be multiple whitechars between
       key and colon                                      (Pawel Kot)
