@@ -854,8 +854,8 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 		i = strlen(entry->name);
 		i = char_unicode_encode((string + 1), entry->name, i);
 		/* Length ot the string + length field + terminating 0 */
-		string[0] = i;
-		count += PackBlock(0x07, i + 1, block++, string, req + count);
+		string[0] = i + 2;
+		count += PackBlock(0x07, i + 2, block++, string, req + count);
 		/* Group */
 		string[0] = entry->caller_group + 1;
 		string[1] = 0;
