@@ -99,7 +99,7 @@ Thank you to, in no particular order...
 
 *  Bo¹tjan Müller for Slovenian translation and other things.
 
-*  Hans Motshärg for Estonian translation.
+*  Hans Motshärg for Estonian translation and useful bugreports.
 
 *  Marcin P³awiñski for preview logos.
 
@@ -142,6 +142,16 @@ Thank you to, in no particular order...
    things).
 
 *  Ruotger Skupin for work on MacOS X port.
+
+*  Bertrik Sikken, Ulrich Hopp, P. Christeas for any help, smart ideas, bug
+   reports and bug fixes they provided.
+
+*  Ladislav Michl for his help and maintainship of CBUS, Duncall and Bosch
+   drivers. And other things, like nice irc chats, too :-)
+
+*  Paulius Bulotas for finding not portable parts of gnokii.
+
+*  Everyone chatting with us on IRC #gnokii at freenode.net
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this.  Rachael for new parent induced insomnia...
