@@ -694,11 +694,9 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	for (i = 0; i < count; i++) {
 		data->RawData->Data = calloc(256, 1);
 		error = EncodePDUSMS(data->SMSMessage, data->RawData->Data, i, &data->RawData->Length);
-		if (error == GE_NONE)
-			error = SM_Functions(GOP_SendSMS, data, state);
+		if (error == GE_NONE) error = SM_Functions(GOP_SendSMS, data, state);
 		free(data->RawData->Data);
-		if (error != GE_NONE)
-			break;
+		if (error != GE_NONE) break;
 	}
 	data->RawData = NULL;
 	return error;
@@ -722,11 +720,9 @@ GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 	for (i = 0; i < count; i++) {
 		data->RawData->Data = calloc(256, 1);
 		error = EncodePDUSMS(data->SMSMessage, data->RawData->Data, i, &data->RawData->Length);
-		if (error == GE_NONE)
-			error = SM_Functions(GOP_SaveSMS, data, state);
+		if (error == GE_NONE) error = SM_Functions(GOP_SaveSMS, data, state);
 		free(data->RawData->Data);
-		if (error != GE_NONE)
-			break;
+		if (error != GE_NONE) break;
 	}
 	data->RawData = NULL;
 	return error;
@@ -1159,7 +1155,7 @@ GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	GSM_Error error;
 	GSM_RawData rawdata;
 
-	memset(&rawdata, sizeof(GSM_RawData), 0);
+	memset(&rawdata, 0, sizeof(GSM_RawData));
 	data->RawData = &rawdata;
 	error = RequestSMS(data, state);
 	if (error != GE_NONE) goto cleanup;

@@ -990,7 +990,7 @@ static GSM_Error P7110_GetIncomingSMS(GSM_Data *data, GSM_Statemachine *state)
 	/* Mark reregistering */
 	SMSLoop = true;
 
-	memset(&rawdata, sizeof(GSM_RawData), 0);
+	memset(&rawdata, 0, sizeof(GSM_RawData));
 
 	/* Check overall SMS Status */
 	error = P7110_GetSMSStatus(data, state);

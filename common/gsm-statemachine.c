@@ -134,7 +134,7 @@ GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 		for (c = 0; c < state->NumReceived; c++)
 			if (state->WaitingFor[c] == messagetype) {
 				error = state->ResponseError[c];
-				for(d = c + 1 ;d < state->NumReceived; d++){
+				for (d = c + 1 ; d < state->NumReceived; d++) {
 					state->ResponseError[d-1] = state->ResponseError[d];
 					state->WaitingFor[d-1] = state->WaitingFor[d];
 					state->Data[d-1] = state->Data[d];
