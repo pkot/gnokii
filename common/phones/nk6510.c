@@ -1326,7 +1326,6 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 		dprintf("Received phonebook info\n");
 		blocks     = message[21];
 		return DecodePhonebook(message + 22, length - 21, data, blocks, message[11], 12);
-		break;
 	case 0x0c:
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
