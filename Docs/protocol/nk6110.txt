@@ -184,7 +184,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                   pwr: 1: AC/DC
                                        2: battery
     s Request Phone ID      { 0x0003 }
-    r RequestPhone ID       { 0x0004, 0x01, "imei", 0, "model", 0, "prod.code", 0, "HW", 0, "firmware", 0x00, 0x01 }
+    r RequestPhone ID       { 0x0004, 0x01,"NOKIA""imei", 0, "model", 0, "prod.code", 0, "HW", 0, "firmware", 0x00, 0x01 }
 0x05: Profile settings
     s Set profile feature   { 0x0010, 1, nr, feature, a, 1 }
                             where nr: see 0x05/0x0013

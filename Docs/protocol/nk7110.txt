@@ -220,11 +220,21 @@ Correct format is FBUS version 2/Infrared/MBUS version 2
 			         LM tries with 0x09, 0x11, 0x19, 0x21, 0x29, 0x31, 0x39, 0x41, 0x49
 				 Returned value with 0x21
     r List Picture Images   { 0x0097, number of pictures[2 bytes], number1[2 bytes], number2[2 bytes], ..., }
-    s Get SMS from folder   { 0x0107, folderID, location(2 bytes), 0x01, 0x65, 0x01}
+    s Get SMS from folder   { 0x0107, folderID, 0x00, location, 0x01, 0x65, 0x01}
                             where: folderID - see 0x14/0x017B
-    r Get SMS from folder   { 0x0108, 0x01/0x03/0x05/0x07, folderID, location(2 bytes),
-                              0x00/0x01/0x02 (0x00 SMS, 0x01 Delivery Report),sender number ?,...}
-                            where: folderID - see 0x14/0x017B
+    r Get SMS from folder   { 0x0108, status, folderID, 0x00, location, type, sender number,...}
+
+                            where: status=0x01 - reveived/read
+					  0x03 - received/unread
+					  0x05 - stored/sent
+					  0x07 - stored/not sent
+
+			    where: folderID - see 0x14/0x017B
+
+                            where: type=0x00 - received SMS
+					0x01 - delivery report
+					0x02 - stored SMS
+					0x07 - picture message
     s Get folder status     { 0x016b, folderID, 0x0F, 0x01}
                             where: folderID - see 0x14/0x017B
     r Get folder status     { 0x016c, number of entries (2 bytes), entry1number (2 bytes), entry2number(2 bytes), ....}
