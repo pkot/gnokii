@@ -521,9 +521,9 @@ static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_U
 		return GE_NOTSUPPORTED;
 	}
 
-	/* Delivery date */
+	/* Sending date */
 	UnpackDateTime(rawsms->SMSCTime, &(sms->SMSCTime));
-	dprintf("\tDelivery date: %s\n", PrintDateTime(rawsms->SMSCTime));
+	dprintf("\tDate: %s\n", PrintDateTime(rawsms->SMSCTime));
 
 	/* Remote number */
 	/* FIXME Is this an ugly hack or correct? */
@@ -536,10 +536,11 @@ static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_U
 	snprintf(sms->SMSC.Number, sizeof(sms->SMSC.Number), "%s", GetBCDNumber(rawsms->MessageCenter));
 	dprintf("\tSMS center number: %s\n", sms->SMSC.Number);
 
-
-	/* Sending time */
-	UnpackDateTime(rawsms->Time, &(sms->Time));
-	dprintf("\tDate: %s\n", PrintDateTime(rawsms->Time));
+	/* Delivery time */
+	if (sms->Type = SMS_DeliveryReport) {
+		UnpackDateTime(rawsms->Time, &(sms->Time));
+		dprintf("\tDelivery date: %s\n", PrintDateTime(rawsms->Time));
+	}
 
 	/* Data Coding Scheme */
 	sms->DCS.Type = rawsms->DCS;
