@@ -175,7 +175,7 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 #endif
 
 /* Get rid of long defines. Use #if __unices__ */
-#define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__)
+#define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__) || defined(__OpenBSD__)
 
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>

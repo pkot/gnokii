@@ -5,6 +5,7 @@
     o use major and minor versions and soname for libgnokii
                                                          (Pawel Kot)
     o portability fixes for OpenBSD                 (BORBELY Zoltan)
+    o F_SETOWN disabled for OpenBSD                      (Pawel Kot)
 
 0.5.0rc2
 ========
