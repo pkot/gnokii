@@ -17,8 +17,8 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-MAJOR_NUMBER = 1
-MINOR_NUMBER = 8
+MAJOR_NUMBER = 2
+MINOR_NUMBER = 0
 ifdef WIN32_CROSS
 LIBTOOL_UNDEF = -no-undefined
 LIBTOOL_VER = -version-info $(MAJOR_NUMBER):$(MINOR_NUMBER):0 -avoid-version

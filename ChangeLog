@@ -5,6 +5,12 @@
     o wctomb() second argument should be 0, not NULL    (Pawel Kot)
  * build system updates
     o require flex at rpm build time            (Olivier Kaloudoff)
+    o it appears that we had backward compatibility problem since
+      changing to use libtool -- if you overinstalled the sources
+      manually with the shared lib, not removing it before,
+      ldconfig used old libraries assuming that 1.X is newer then
+      1.0.Y; we're bumping major version number to 2 to avoid the
+      confusion                                         (Pawel Kot)
  * gnokii updates
     o accept range in --deletephonebook            (BORBELY Zoltan)
 
