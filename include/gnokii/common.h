@@ -346,7 +346,9 @@ typedef enum {
 
 typedef enum {
 	GWP_GSMDATA = 1,
-	GWP_GPRS = 3
+	GWP_GPRS = 3,
+	GWP_SMS = 7,
+	GWP_USSD = 9 /* FIXME real value? */
 } GSM_WAPBearer;
 
 typedef enum {
@@ -372,6 +374,7 @@ typedef enum {
 
 typedef struct {
 	int Location;
+	int Successors[4];
 	char Number[MAX_WAP_SETTING_NAME_LENGTH];
 	char GSMdataIP[MAX_WAP_SETTING_NAME_LENGTH];
 	char GPRSIP[MAX_WAP_SETTING_NAME_LENGTH];
@@ -382,6 +385,8 @@ typedef struct {
 	char GPRSUsername[MAX_WAP_SETTING_USERNAME_LENGTH];
 	char GPRSPassword[MAX_WAP_SETTING_NAME_LENGTH];
 	char AccessPoint[MAX_WAP_SETTING_ACCESS_LENGTH];
+	char SMSServiceNumber[50];
+	char SMSServerNumber[50];
 	GSM_WAPSession Session;
 	bool Security;
 	GSM_WAPBearer Bearer;
