@@ -116,6 +116,8 @@ API bool gn_bmp_point(gn_bmp *bmp, int x, int y)
 		i = (bmp->bitmap[((y / 8) * bmp->width) + x] & 1 << (y % 8));
 		break;
 	default:
+		/* Let's guess */
+		i = (bmp->bitmap[(y * bmp->width + x) / 8] & 1 << (7-((y * bmp->width + x) % 8)));
 		break;
 	}
 	return ((i == 0) ? false : true);
@@ -123,7 +125,7 @@ API bool gn_bmp_point(gn_bmp *bmp, int x, int y)
 
 API void gn_bmp_clear(gn_bmp *bmp)
 {
-	memset(bmp->bitmap, 0, bmp->size);
+	if (bmp) memset(bmp->bitmap, 0, (bmp->size > GN_BMP_MAX_SIZE) ? GN_BMP_MAX_SIZE : bmp->size);
 }
 
 API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info)

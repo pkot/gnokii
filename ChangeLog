@@ -9,6 +9,8 @@
     o fix u16/unsigned int mixing problems in the statemachine
       and link layer              (Troy Korjuslommi, BORBELY Zoltan)
     o switch black and white in bmp handling                 (Polik)
+    o read BMP with --viewlogo as operator logo and fix segfault
+      on --viewlogo with BMP                             (Pawel Kot)
 
 0.5.0rc1
 ========
