@@ -20,6 +20,11 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+
+#ifdef __svr4__
+#  include <sys/file.h>
+#endif
+
 #include <termios.h>
 #include "unixserial.h"
 

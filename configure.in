@@ -240,19 +240,16 @@ AC_TRY_LINK([#include <termios.h>],
 	 AC_MSG_RESULT(yes)],
          AC_MSG_RESULT(no))
 
-AC_TRY_CPP([#include <getopt.h>], AC_MSG_RESULT(
-	[checking for getopt.h... yes]), [
-	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
-	AC_TRY_CPP([#include <getopt.h>], [
-		CFLAGS="$CFLAGS -I/usr/local/include"
-		AC_MSG_RESULT(
-		[checking for getopt.h... /usr/local/include/getopt.h])],
-		AC_MSG_ERROR(not found header file: getopt.h !!!))
-	])
+dnl ======================== Checks for getopt_long support 
+
+AC_CHECK_HEADER(getopt.h, ,
+		[CFLAGS="$CFLAGS -I../getopt"])
+
+OWN_GETOPT=""
 AC_CHECK_FUNC(getopt_long, , [
         LIBS="$LIBS -L/usr/local/lib"
 	        AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt",
-		                AC_MSG_ERROR(not found library: gnugetopt !!!))])
+				OWN_GETOPT="1")])
 
 dnl ======================== Checks for X base support 
 
@@ -339,6 +336,10 @@ XVERSION=`cat xgnokii/VERSION`
 SHELL=${CONFIG_SHELL-/bin/sh}
 
 AC_SUBST(SHELL)
+case "$build_os" in
+  solaris*) SHELL=/bin/ksh
+	;;
+esac
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(XVERSION)
@@ -354,6 +355,7 @@ AC_SUBST(XPM_CFLAGS)
 AC_SUBST(XPM_LIBS)
 AC_SUBST(TM_CFLAGS)
 AC_SUBST(TERMIOS_CFLAGS)
+AC_SUBST(OWN_GETOPT)
 
 AC_OUTPUT(
 	Makefile.global

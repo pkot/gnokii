@@ -75,3 +75,8 @@
 * Sun Jun 11 01:45:11 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
 - spelling fix: destionation to destination (Marcin)
 
+* Mon Jun 12 15:59:33 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- Added getopt into source. Gnokii should compile on systems which haven't
+  getopt_long function.
+- Code modified to compile under Solaris 8. (But gnokii still don't work due
+  limitation in SUN serial port.

@@ -29,6 +29,11 @@
 #include	<sys/types.h>
 #include	<sys/time.h>
 #include	<sys/ioctl.h>
+
+#ifdef __svr4__
+#  include <sys/file.h>
+#endif
+
 #include	<string.h>
 #include	<pthread.h>
 #include	<errno.h>

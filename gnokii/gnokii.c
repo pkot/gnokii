@@ -2408,11 +2408,19 @@ int writephonebook(void)
 
     line_count++;
 
+#ifdef __svr4__
+    ptr=strtok(Line, ";"); strcpy(entry.Name, ptr);
+
+    ptr=strtok(NULL, ";"); strcpy(entry.Number, ptr);
+
+    ptr=strtok(NULL, ";");
+#else
     ptr=strsep(&Line, ";"); strcpy(entry.Name, ptr);
 
     ptr=strsep(&Line, ";"); strcpy(entry.Number, ptr);
 
     ptr=strsep(&Line, ";");
+#endif
 
     if (!strncmp(ptr,"ME", 2)) {
       memory_type_string = "int";
@@ -2429,9 +2437,16 @@ int writephonebook(void)
       }
     }
 
+#ifdef __svr4__
+    ptr=strtok(NULL, ";"); entry.Location=atoi(ptr);
+
+    ptr=strtok(NULL, ";"); entry.Group=atoi(ptr);
+#else
     ptr=strsep(&Line, ";"); entry.Location=atoi(ptr);
 
     ptr=strsep(&Line, ";"); entry.Group=atoi(ptr);
+#endif
+
     Line = OLine;
 
     /* Do write and report success/failure. */

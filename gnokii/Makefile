@@ -19,6 +19,10 @@ endif
 
 OBJS =	gnokii.o
 
+ifdef OWN_GETOPT
+    OBJS += $(TOPDIR)/getopt/libgetopt.a
+endif
+
 all: gnokii
 
 gnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/gsm-filetypes.o
@@ -28,6 +32,9 @@ $(TOPDIR)/common/COMMON.o:
 
 $(TOPDIR)/common/gsm-filetypes.o: 
 	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
+
+$(TOPDIR)/getopt/libgetopt.a:
+	$(MAKE) -C $(TOPDIR)/getopt
 
 clean:
 	$(RM) $(OBJS) *~ depend gnokii *.exe core *.bak

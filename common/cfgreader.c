@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __svr4__
+#  include <strings.h>
+#endif
 #include <ctype.h>
 #include <errno.h>
 
@@ -71,10 +74,10 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 		line = buf;
 		/* Strip leading, trailing whitespace */
 
-		while(isspace(*line))
+		while(isspace((int) *line))
 		    	line++;
 
-		while((strlen(line) > 0) && isspace(line[strlen(line) - 1]))
+		while((strlen(line) > 0) && isspace((int) line[strlen(line) - 1]))
 			line[strlen(line) - 1] = '\0';
 	
 		/* Ignore blank lines and comments */
@@ -152,13 +155,13 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 	  		*value = '\0';                /* Split string */
 	    	value++;
 	    
-	    	while(isspace(*value)) {      /* Remove leading white */
+	    	while(isspace((int) *value)) {      /* Remove leading white */
 				value++;
 	    	}
 
 	    	entry->value = strdup(value);
 
-	    	while((strlen(line) > 0) && isspace(line[strlen(line) - 1])) {
+	    	while((strlen(line) > 0) && isspace((int) line[strlen(line) - 1])) {
 				line[strlen(line) - 1] = '\0';  /* Remove trailing white */
 	    	}
 
