@@ -112,12 +112,20 @@ static gn_error at_send_message(u16 message_length, u8 message_type, unsigned ch
 	return xwrite(msg, message_length, sm) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
 }
 
+char *findcrlfbw(unsigned char *str, int len)
+{
+	while ((*str != '\n') && (*str-1 != '\r') && len--)
+		str--;
+	return len ? str+1 : NULL;
+}
+
 /* 
  * rx state machine for receive handling. called once for each character
  * received from the phone. 
  */
 static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine *sm)
 {
+	int error;
 	atbus_instance *bi = AT_BUSINST(sm);
 	
 	bi->rbuf[bi->rbuf_pos++] = rx_char;
@@ -128,13 +136,23 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 
 	bi->rbuf[0] = GN_AT_NONE;
 	/* first check if <cr><lf> is found at end of reply_buf.
-	 * attention: the needed length is greater 2 because we
-	 * don't need to enter if no result/error will be found. */
+	 * none: the needed length is greater 4 because we don't
+	 * need to enter if no result/error will be found. */
 	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 2, "\r\n", 2)) {
-		/* no lenght check needed */
-		if (!strncmp(bi->rbuf + bi->rbuf_pos - 4, "OK\r\n", 4))
+		/* try to find previous <cr><lf> */
+		char *start = findcrlfbw(bi->rbuf + bi->rbuf_pos - 2, bi->rbuf_pos - 1);
+		/* if not found, start at buffer beginning */
+		if (!start)
+			start = bi->rbuf+1;
+		/* there are certainly more that 2 chars in buffer */
+		if (!strncmp(start, "OK", 2))
 			bi->rbuf[0] = GN_AT_OK;
-		else if (bi->rbuf_pos > 7 && !strncmp(bi->rbuf + bi->rbuf_pos - 7, "ERROR\r\n", 7))
+		else if (bi->rbuf_pos > 7 && !strncmp(start, "ERROR", 5))
+			bi->rbuf[0] = GN_AT_ERROR;
+		/* FIXME: use error codes some useful way */
+		else if (sscanf(start, "+CMS ERROR: %d", &error) == 1)
+			bi->rbuf[0] = GN_AT_ERROR;
+		else if (sscanf(start, "+CME ERROR: %d", &error) == 1)
 			bi->rbuf[0] = GN_AT_ERROR;
 	}
 	/* check if SMS prompt is found */

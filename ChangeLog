@@ -21,6 +21,8 @@
     o fix the --getdatetime problem                      (Pawel Kot)
  * AT driver updates
     o fix sms sending                                    (Pawel Kot)
+    o fix answer missunderstading in                (Ladislav Michl)
+      atbus_rx_statemachine
  * MS VC6 compability fixes
     o include tekram.h alsow with WIN32 enabled     (Ladislav Michl,
                                                    Marcus Godehardt)
