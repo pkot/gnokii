@@ -140,7 +140,7 @@ typedef enum {
 	GOP_GetSMSFolders,
 	GOP_GetSMSFolderStatus,
 	GOP_GetIncomingSMS,
-	GOP_FindUnreadSMS,
+	GOP_GetUnreadMessages,
 	GOP_GetNextSMS,
 	GOP_DeleteSMS,
 	GOP_SendSMS,
