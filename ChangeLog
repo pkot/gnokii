@@ -39,6 +39,10 @@
     o GetMemoryStatus support added                (BORBELY Zoltan)
     o DC/MC/RC memory handling added               (BORBELY Zoltan)
     o Identify will cache the result               (BORBELY Zoltan)
+    o network info and rf level support added      (BORBELY Zoltan)
+    o power source and battery level support added (BORBELY Zoltan)
+ * link layer updates
+    o gnbus treats IrDA as serial                  (BORBELY Zoltan)
 
 0.6.0
 =====

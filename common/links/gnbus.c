@@ -271,6 +271,7 @@ static gn_error gnbus_send_message(unsigned int messagesize, unsigned char messa
 
 gn_error gnbus_initialise(struct gn_statemachine *state)
 {
+	int conn_type;
 	gn_error err;
 
 	/* Fill in the link functions */
@@ -284,7 +285,8 @@ gn_error gnbus_initialise(struct gn_statemachine *state)
 	GNBUSINST(state)->i.state = GNBUS_RX_Sync;
 	GNBUSINST(state)->i.checksum_idx = 0;
 
-	if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
+	conn_type = (state->config.connection_type == GN_CT_Irda) ? GN_CT_Serial : state->config.connection_type;
+	if (!device_open(state->config.port_device, false, false, false, conn_type, state)) {
 		perror(_("Couldn't open GNBUS device"));
 		free(GNBUSINST(state));
 		GNBUSINST(state) = NULL;

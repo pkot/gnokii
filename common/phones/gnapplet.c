@@ -81,13 +81,20 @@ static gn_error gnapplet_read_phonebook(gn_data *data, struct gn_statemachine *s
 static gn_error gnapplet_write_phonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_delete_phonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_memory_status(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_get_network_info(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_get_rf_level(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_get_power_info(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_incoming_netinfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_incoming_power(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_INFO,		gnapplet_incoming_info },
 	{ GNAPPLET_MSG_PHONEBOOK,	gnapplet_incoming_phonebook },
+	{ GNAPPLET_MSG_NETINFO,		gnapplet_incoming_netinfo },
+	{ GNAPPLET_MSG_POWER,		gnapplet_incoming_power },
 	{ 0,				NULL}
 };
 
@@ -97,8 +104,8 @@ gn_driver driver_gnapplet = {
 	/* Mobile phone information */
 	{
 		"gnapplet|series60",	/* Supported models */
-		7,			/* Max RF Level */
-		0,			/* Min RF Level */
+		0,			/* Max RF Level */
+		100,			/* Min RF Level */
 		GN_RF_Percentage,	/* RF level units */
 		7,			/* Max Battery Level */
 		0,			/* Min Battery Level */
@@ -140,6 +147,13 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_delete_phonebook(data, state);
 	case GN_OP_GetMemoryStatus:
 		return gnapplet_memory_status(data, state);
+	case GN_OP_GetNetworkInfo:
+		return gnapplet_get_network_info(data, state);
+	case GN_OP_GetRFLevel:
+		return gnapplet_get_rf_level(data, state);
+	case GN_OP_GetBatteryLevel:
+	case GN_OP_GetPowersource:
+		return gnapplet_get_power_info(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -158,10 +172,10 @@ static gn_error gnapplet_initialise(struct gn_statemachine *state)
 		return GN_ERR_MEMORYFULL;
 
 	switch (state->config.connection_type) {
+	case GN_CT_Irda:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 	case GN_CT_TCP:
-	case GN_CT_Irda:
 	case GN_CT_Bluetooth:
 		err = gnbus_initialise(state);
 		break;
@@ -401,6 +415,107 @@ static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *mess
 		data->memory_status->memory_type = pkt_get_uint16(&pkt);
 		data->memory_status->used = pkt_get_uint32(&pkt);
 		data->memory_status->free = pkt_get_uint32(&pkt);
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
+}
+
+
+static gn_error gnapplet_get_network_info(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->network_info) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_NETINFO_GETCURRENT_REQ);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_NETINFO);
+}
+
+
+static gn_error gnapplet_get_rf_level(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->rf_unit || !data->rf_level) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_NETINFO_GETRFLEVEL_REQ);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_NETINFO);
+}
+
+
+static gn_error gnapplet_incoming_netinfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	gn_network_info *netinfo;
+	uint16_t cellid, lac;
+	uint32_t strength;
+	REPLY_DEF;
+
+	switch (code) {
+
+	case GNAPPLET_MSG_NETINFO_GETCURRENT_RESP:
+		if (!(netinfo = data->network_info)) return GN_ERR_INTERNALERROR;
+		memset(netinfo, 0, sizeof(gn_network_info));
+		if (error != GN_ERR_NONE) return error;
+		cellid = pkt_get_uint16(&pkt);
+		netinfo->cell_id[0] = cellid / 256;
+		netinfo->cell_id[1] = cellid % 256;
+		lac = pkt_get_uint16(&pkt);
+		netinfo->LAC[0] = lac / 256;
+		netinfo->LAC[1] = lac % 256;
+		pkt_get_uint8(&pkt); /* registration status */
+		pkt_get_string(netinfo->network_code, sizeof(netinfo->network_code), &pkt);
+		break;
+
+	case GNAPPLET_MSG_NETINFO_GETRFLEVEL_RESP:
+		if (!data->rf_unit || !data->rf_level) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		*data->rf_unit = GN_RF_Percentage;
+		*data->rf_level = pkt_get_uint8(&pkt);
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
+}
+
+
+static gn_error gnapplet_get_power_info(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->battery_unit && !data->battery_level && !data->power_source) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_POWER_INFO_REQ);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_POWER);
+}
+
+
+static gn_error gnapplet_incoming_power(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	uint8_t percent, source;
+	REPLY_DEF;
+
+	switch (code) {
+
+	case GNAPPLET_MSG_POWER_INFO_RESP:
+		percent = pkt_get_uint8(&pkt);
+		source = pkt_get_uint8(&pkt);
+		if (error != GN_ERR_NONE) return error;
+		if (data->battery_unit) *data->battery_unit = GN_RF_Percentage;
+		if (data->battery_level) *data->battery_level = percent;
+		if (data->power_source) *data->power_source = source;
 		break;
 
 	default:
