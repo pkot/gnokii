@@ -40,7 +40,7 @@
 
 	
 #undef VERSION
-#define VERSION "0.5.0pre6"
+#define VERSION "0.5.0rc3"
 
 /* Define if you have the following headers */
 #undef HAVE_UNISTD_H
