@@ -34,12 +34,15 @@ e.g.
    # gnokiid
 
    If successful, you should see a message saying that mgnokiidev has been
-   run to create /dev/gnokii, and your phone will probably bleep for
-   "accessory connected"
+   run to create /dev/gnokii.  If you're using a 5110/6110 series phone
+   you should hear a beep and see an "accessory connected" message on
+   the phone.  If you're using a 3810 series phone you won't see anything
+   on the phones LCD.
 
    [I run gnokiid as root; it will probably work for another user who is
     in group gnokii, as long as the serial port is accessible to that
-    user as well]
+    user as well.  It's not recommended that you run gnokiid as root
+    permanently however!]
 
 (4) Use /dev/gnokii as a modem:
 

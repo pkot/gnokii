@@ -381,6 +381,43 @@ bool		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 	/* Everything from here down is internal to 6160 code. */
 
 
+	/* Bit of a hack in an attempt to get slightly better timing
+       this code doesn't work properly yet... */
+void	mydelay(int usecs)
+{
+	struct timeval	delay_time;
+	struct timeval	target_time;
+	struct timezone	foo; 
+	int				quit;
+	int				count;
+
+	gettimeofday(&delay_time, &foo);
+
+	target_time.tv_usec = delay_time.tv_usec + usecs;
+	if (target_time.tv_usec > 1000000) {
+		target_time.tv_sec = delay_time.tv_sec + 1;
+		target_time.tv_usec -= 1000000;
+	}
+	else {
+		target_time.tv_sec = delay_time.tv_sec;
+	}
+
+	quit = false;
+	count = 0;
+
+	while (!quit) {
+		gettimeofday(&delay_time, &foo);
+		if (delay_time.tv_sec >= target_time.tv_sec && 
+		    delay_time.tv_usec >= target_time.tv_usec) {
+			quit = true;
+		}
+		//usleep(1000);
+		count ++;
+	}
+	fprintf(stderr, "%d ", count);
+			
+}
+
 	/* This is the main loop for the MB61 functions.  When MB61_Initialise
 	   is called a thread is created to run this loop.  This loop is
 	   exited when the application calls the MB61_Terminate function. */
@@ -411,7 +448,7 @@ void	MB61_ThreadLoop(void)
            sequence it seems for the interface to work. 
 		   Base time value is units of 50ms it seems */
 
-#define	BASE_TIME		(60000)
+#define	BASE_TIME		(50000)
 
 		/* Default state */
     device_setdtrrts(0, 1);
@@ -435,31 +472,30 @@ void	MB61_ThreadLoop(void)
 
 		/* RTS low, DTR high for 50ms */
     device_setdtrrts(1, 0);
-	usleep(BASE_TIME);
+	mydelay(BASE_TIME);
 
 		/* RTS low, DTR low for 50ms */
     device_setdtrrts(0, 0);
-	usleep(BASE_TIME);
+	mydelay(BASE_TIME);
 
 		/* RTS low, DTR high for 50ms */
     device_setdtrrts(1, 0);
-	usleep(BASE_TIME);
+	mydelay(BASE_TIME);
 
 		/* RTS high, DTR high for 50ms */
     device_setdtrrts(1, 1);
-	usleep(BASE_TIME);
+	mydelay(BASE_TIME);
 
 		/* RTS low, DTR low for 50ms */
     device_setdtrrts(0, 0);
-	usleep(BASE_TIME);
+	mydelay(BASE_TIME);
 
-		/* leave RTS high, DTR low for duration of sesssion. */
+		/* leave RTS high, DTR low for duration of session. */
+	usleep(BASE_TIME);
     device_setdtrrts(0, 1);
+
 	sleep(1);
 
-
-
-	//WRITEPHONE(PortFD, foogle, 1);
 
         /* Initialise sequence number used when sending messages
            to phone. */
@@ -501,7 +537,8 @@ void	MB61_ThreadLoop(void)
         }
         else {
             idle_timer --;
-			fprintf(stdout, ".");fflush(stdout);
+			fprintf(stdout, ".");
+			fflush(stdout);
         }
 
         usleep(100000);     /* Avoid becoming a "busy" loop. */
