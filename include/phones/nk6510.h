@@ -72,13 +72,12 @@ extern bool P6510_LinkOK;
 #define P6510_SUBSMS_SMS_SEND_OK	0x00	/* SMS sent */
 #define P6510_SUBSMS_SMS_SEND_FAIL	0x01	/* SMS send failed */
 #define P6510_SUBSMS_SMS_RCVD	0x10	/* SMS received */
-#define P6510_SUBSMS_SMSC_RCVD	0x15	/* SMS center received */
+#define P6510_SUBSMS_SMSC_RCV	0x15	/* SMS center info received */
 #define P6510_SUBSMS_CELLBRD_OK	0x21	/* Set cell broadcast success*/
 #define P6510_SUBSMS_CELLBRD_FAIL	0x22	/* Set cell broadcast failure */
 #define P6510_SUBSMS_READ_CELLBRD	0x23	/* Read cell broadcast */
 #define P6510_SUBSMS_SMSC_OK	0x31	/* Set SMS center success*/
 #define P6510_SUBSMS_SMSC_FAIL	0x32	/* Set SMS center failure */
-#define P6510_SUBSMS_SMSC_RCVFAIL	0x35	/* SMS center receive failure */
 
 /* Clock handling message subtypes (send) */
 #define P6510_SUBCLO_GET_DATE	0x62	/* Get date & time */

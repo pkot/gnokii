@@ -907,9 +907,23 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 	if (!data) return GE_INTERNALERROR;
 
 	switch (message[3]) {
-	case P6510_SUBSMS_SMSC_RCVD: /* 0x15 */
-		dprintf("SMSC Received\n");
-		/* FIXME: Implement all these in gsm-sms.c */
+	case P6510_SUBSMS_SMSC_RCV: /* 0x15 */
+		switch (message[4]) {
+		case 0x00:
+			dprintf("SMSC Received\n");
+			break;
+		case 0x02:
+			dprintf("SMSC reception failed\n");
+			e = GE_EMPTYMEMORYLOCATION;
+			break;
+		default:
+			dprintf("Unknown response subtype: %02x\n", message[4]);
+			e = GE_UNHANDLEDFRAME;
+			break;
+		}
+
+		if (e != GE_NONE) break;
+
 		data->MessageCenter->No = message[8];
 		data->MessageCenter->Format = message[4];
 		data->MessageCenter->Validity = message[12];  /* due to changes in format */
@@ -999,7 +1013,6 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 	case P6510_SUBSMS_READ_CELLBRD: /* 0x23 */
 	case P6510_SUBSMS_SMSC_OK: /* 0x31 */
 	case P6510_SUBSMS_SMSC_FAIL: /* 0x32 */
-	case P6510_SUBSMS_SMSC_RCVFAIL: /* 0x35 */
 		dprintf("Subtype 0x%02x of type 0x%02x (SMS handling) not implemented\n", message[3], P6510_MSG_SMS);
 		return GE_NOTIMPLEMENTED;
 
