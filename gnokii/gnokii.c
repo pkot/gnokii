@@ -67,10 +67,10 @@ char *DefaultConnection = "serial";
 int version(void)
 {
 
-  fprintf(stdout, _("GNOKII Version %s
-Copyright (C) Hugh Blemings <hugh@vsb.com.au>, 1999
-Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999
-Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
+  fprintf(stdout, _("GNOKII Version %s\n"
+"Copyright (C) Hugh Blemings <hugh@vsb.com.au>, 1999\n"
+"Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999\n"
+"Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
 
   return 0;
 }
@@ -81,102 +81,102 @@ Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
 int usage(void)
 {
 
-  fprintf(stdout, _("   usage: gnokii [--help|--monitor|--version]
-          gnokii --getmemory memory_type start end
-          gnokii --writephonebook
-          gnokii --getspeeddial number
-          gnokii --setspeeddial number memory_type location
-          gnokii --getsms memory_type start end
-          gnokii --deletesms memory_type start end
-          gnokii --sendsms destination [--smsc message_center_number |
-                 --smscno message_center_index] [-r] [-C n] [-v n]
-          gnokii --getsmsc message_center_number
-          gnokii --setdatetime [YYYY MM DD HH MM]
-          gnokii --getdatetime
-          gnokii --setalarm HH MM
-          gnokii --getalarm
-          gnokii --dialvoice number
-          gnokii --dialdata number
-          gnokii --sendoplogo logofile [network code]
-          gnokii --sendclicon logofile
-          gnokii --getcalendarnote index
-          gnokii --writecalendarnote
-          gnokii --deletecalendarnote index
-          gnokii --getdisplaystatus
-          gnokii --netmonitor {reset|off|field|devel|next|nr}
-          gnokii --identify
+  fprintf(stdout, _("   usage: gnokii [--help|--monitor|--version]\n"
+"          gnokii --getmemory memory_type start end\n"
+"          gnokii --writephonebook\n"
+"          gnokii --getspeeddial number\n"
+"          gnokii --setspeeddial number memory_type location\n"
+"          gnokii --getsms memory_type start end\n"
+"          gnokii --deletesms memory_type start end\n"
+"          gnokii --sendsms destination [--smsc message_center_number |\n"
+"                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
+"          gnokii --getsmsc message_center_number\n"
+"          gnokii --setdatetime [YYYY MM DD HH MM]\n"
+"          gnokii --getdatetime\n"
+"          gnokii --setalarm HH MM\n"
+"          gnokii --getalarm\n"
+"          gnokii --dialvoice number\n"
+"          gnokii --dialdata number\n"
+"          gnokii --sendoplogo logofile [network code]\n"
+"          gnokii --sendclicon logofile\n"
+"          gnokii --getcalendarnote index\n"
+"          gnokii --writecalendarnote\n"
+"          gnokii --deletecalendarnote index\n"
+"          gnokii --getdisplaystatus\n"
+"          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
+"          gnokii --identify\n\n"
 
-          --help            display usage information.
+"          --help            display usage information.\n\n"
 
-          --monitor         continually updates phone status to stderr.
+"          --monitor         continually updates phone status to stderr.\n\n"
 
-          --version         displays version and copyright information.
+"          --version         displays version and copyright information.\n\n"
 
-          --enterpin        sends the entered PIN to the mobile phone.
+"          --enterpin        sends the entered PIN to the mobile phone.\n\n"
 
-          --getmemory       reads specificed memory location from phone.
-                            Valid memory types are:
-                            ME, SM, FD, ON, EN, DC, RC, MC, LD
+"          --getmemory       reads specificed memory location from phone.\n"
+"                            Valid memory types are:\n"
+"                            ME, SM, FD, ON, EN, DC, RC, MC, LD\n\n"
 
-          --writephonebook  reads data from stdin and writes to phonebook.
-                            Uses the same format as provided by the output of
-                            the getphonebook command.
+"          --writephonebook  reads data from stdin and writes to phonebook.\n"
+"                            Uses the same format as provided by the output of\n"
+"                            the getphonebook command.\n\n"
 
-          --getspeeddial    reads speed dial from the specified location.
+"          --getspeeddial    reads speed dial from the specified location.\n\n"
           
-          --setspeeddial    specify speed dial.
+"          --setspeeddial    specify speed dial.\n\n"
 
-          --getsms          gets SMS messages from specified memory type
-                            starting at entry [start] and ending at [end].
-                            Entries are dumped to stdout.
+"          --getsms          gets SMS messages from specified memory type\n"
+"                            starting at entry [start] and ending at [end].\n"
+"                            Entries are dumped to stdout.\n\n"
 
-          --deletesms       deletes SMS messages from specified memory type
-                            starting at entry [start] and ending at [end].
+"          --deletesms       deletes SMS messages from specified memory type\n"
+"                            starting at entry [start] and ending at [end].\n\n"
 
-          --sendsms         sends an SMS message to [destination] via
-                            [message_center_number] or SMSC number taken from
-                            phone memory from address [message_center_index].
-                            If this argument is ommited SMSC number is taken
-                            from phone memory from location 1. Message text
-                            is taken from stdin.  This function has had
-                            limited testing and may not work at all on your
-                            network. Meaning of other optional parameters:
-                             [-r] - request for delivery report
-                             [-C n] - Class Message n, where n can be 0..3
-                             [-v n] - validity in minutes
+"          --sendsms         sends an SMS message to [destination] via\n"
+"                            [message_center_number] or SMSC number taken from\n"
+"                            phone memory from address [message_center_index].\n"
+"                            If this argument is ommited SMSC number is taken\n"
+"                            from phone memory from location 1. Message text\n"
+"                            is taken from stdin.  This function has had\n"
+"                            limited testing and may not work at all on your\n"
+"                            network. Meaning of other optional parameters:\n"
+"                             [-r] - request for delivery report\n"
+"                             [-C n] - Class Message n, where n can be 0..3\n"
+"                             [-v n] - validity in minutes\n\n"
 
-          --getsmsc         show the SMSC number from location
-                            [message_center_number].
+"          --getsmsc         show the SMSC number from location\n"
+"                            [message_center_number].\n\n"
 
-          --setdatetime     set the date and the time of the phone.
+"          --setdatetime     set the date and the time of the phone.\n\n"
 
-          --getdatetime     shows current date and time in the phone.
+"          --getdatetime     shows current date and time in the phone.\n\n"
 
-          --setalarm        set the alarm of the phone.
+"          --setalarm        set the alarm of the phone.\n\n"
 
-          --getalarm        shows current alarm.
+"          --getalarm        shows current alarm.\n\n"
 
-          --dialvoice       initiate voice call.
+"          --dialvoice       initiate voice call.\n\n"
 
-          --dialdata        initiate data call.
+"          --dialdata        initiate data call.\n\n"
 
-          --sendoplogo      send operator logo.
+"          --sendoplogo      send operator logo.\n\n"
 
-          --sendclicon      send CL icon.
+"          --sendclicon      send CL icon.\n\n"
 
-          --getcalendarnote get the note with number [index] from calendar.
+"          --getcalendarnote get the note with number [index] from calendar.\n\n"
 
-          --writecalendarnote write the note to calendar.
+"          --writecalendarnote write the note to calendar.\n\n"
 
-          --deletecalendarnote  delete the note with number [index]
-                                from calendar.
+"          --deletecalendarnote  delete the note with number [index]\n"
+"                                from calendar.\n\n"
 
-          --getdisplaystatus shows what icons are displayed.
+"          --getdisplaystatus shows what icons are displayed.\n\n"
 
-          --netmonitor      setting/querying netmonitor mode.
+"          --netmonitor      setting/querying netmonitor mode.\n\n"
 
-          --identify        get IMEI, model and revision
-"));  /*"*/
+"          --identify        get IMEI, model and revision\n\n"
+));  /*"*/
 
   return 0;
 }
@@ -390,8 +390,10 @@ int main(int argc, char *argv[])
     // Identify
     { "identify",           no_argument,       NULL, OPT_IDENTIFY },
 
+#ifndef WIN32
     // For development purposes: insert you function calls here
     { "foogle",             optional_argument, NULL, OPT_FOOGLE },
+#endif
 
     { 0, 0, 0, 0},
   };
@@ -614,10 +616,12 @@ int main(int argc, char *argv[])
       rc = identify();
       break;
 
+#ifndef WIN32
     case OPT_FOOGLE:
 
       rc = foogle(nargv);
       break;
+#endif
       
     default:
 
@@ -1902,17 +1906,10 @@ int identify( void )
   return 0;
 }
 
-/* This is a "convenience" function to allow quick test of new
-   API stuff which doesn't warrant a "proper" command line
-   function. */
+/* This is a "convenience" function to allow quick test of new API stuff which
+   doesn't warrant a "proper" command line function. */
 
-#ifdef WIN32
-
-  void foogle(char *argv[]) {
-  }
-
-#else
-
+#ifndef WIN32
 int foogle(char *argv[])
 { 
   /* Initialise the code for the GSM interface. */     
@@ -1925,7 +1922,7 @@ int foogle(char *argv[])
   // GSM->DialData("62401000");
 
   /* Pavel's one */
-  // GSM->DialData("4670");
+  GSM->DialData("4670");
   
   sleep (60);
   GSM->Terminate();

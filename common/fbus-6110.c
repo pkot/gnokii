@@ -840,7 +840,7 @@ void FB61_ThreadLoop(void)
       /* Dont send keepalive and status packets when doing other transactions. */
       
       if (!DisableKeepalive)
-	FB61_TX_SendStatusRequest();
+      	FB61_TX_SendStatusRequest();
 
       idle_timer = 20;
     }
@@ -3702,7 +3702,6 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       printf(_("Message: Unknown message.\n"));
 #endif DEBUG
 
-    FB61_RX_DisplayMessage();
   }
 
   return FB61_RX_Sync;
@@ -3842,24 +3841,40 @@ void FB61_RX_StateMachine(char rx_byte) {
   }
 }
 
+/* This function is used for parsing the RLP frame into fields. */
+
 enum FB61_RX_States FB61_RX_HandleRLPMessage(void)
 {
 
-  RLP_F96Frame    frame;
-  int             count;
+  RLP_F96Frame frame;
+  int count;
+
+  /* We do not need RLP frame parsing to be done when we do not have callback
+     specified. */
     
   if (RLP_RXCallback == NULL)
     return (FB61_RX_Sync);
+
+  /* Nokia uses 240 bit frame size of RLP frames as per GSM 04.22
+     specification, so Header consists of 16 bits (2 bytes). See section 4.1
+     of the specification. */
     
   frame.Header[0] = MessageBuffer[2];
   frame.Header[1] = MessageBuffer[3];
-    
+
+  /* Next 200 bits (25 bytes) contain the Information. We store the
+     information in the Data array. */
+
   for (count = 0; count < 25; count ++)
     frame.Data[count] = MessageBuffer[4 + count];
+
+  /* The last 24 bits (3 bytes) contain FCS. */
 
   frame.FCS[0] = MessageBuffer[29];
   frame.FCS[1] = MessageBuffer[30];
   frame.FCS[2] = MessageBuffer[31];
+
+  /* Here we pass the frame down in the input stream. */
     
   RLP_RXCallback(&frame);
 
