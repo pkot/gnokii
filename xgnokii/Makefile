@@ -1,17 +1,12 @@
 XVERSION = 19991116
-BIN = ../bin
-LN = /bin/ln
 
 # DEBUG += -DXDEBUG 
-
-GTKCFLAGS=`gtk-config --cflags`
-GTKLDFLAGS=`gtk-config --libs`
 
 #
 # Set up compilation/linking flags for Linux.
 #
 
-COMMON=-Wall -g -O0 \
+COMMON=-Wall -O2 \
        ${MODEL} ${PORT} \
        ${GETTEXT} \
        ${SECURITY} \
@@ -20,7 +15,7 @@ COMMON=-Wall -g -O0 \
        -DXVERSION=\"${XVERSION}\"
 
 CFLAGS = -D_REENTRANT ${COMMON} ${GTKCFLAGS}
-LDFLAGS = -lpthread ${GTKLDFLAGS}
+LDFLAGS = -s -lpthread ${GTKLDFLAGS}
 
 #
 # For FreeBSD uncomment the following lines
@@ -52,15 +47,10 @@ XGNOKII_OBJS = xgnokii.o xgnokii_common.o xgnokii_contacts.o xgnokii_sms.o \
 all: xgnokii
 
 xgnokii: $(XGNOKII_OBJS) $(COMMON_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(XGNOKII_OBJS) $(COMMON_OBJS) $(LDFLAGS)
-	if [ ! -d $(BIN) ]; then mkdir $(BIN); fi 
-	if [ -f $(BIN)/xgnokii ]; then rm -f $(BIN)/xgnokii; fi
-	$(LN) xgnokii $(BIN)/xgnokii
 
 # Misc targets
 clean:
-	@rm -f core *~ *% *.bak \
-               xgnokii $(BIN)/xgnokii $(XGNOKII_OBJS)
+	@rm -f core *~ *% *.bak xgnokii $(XGNOKII_OBJS)
 
 # Dependencies - simplified for now
 xgnokii.o: xgnokii.c xgnokii.h xgnokii_common.h xgnokii_netmon.h xgnokii_cfg.h ../gsm-api.c ../gsm-api.h ../misc.h ../gsm-common.h

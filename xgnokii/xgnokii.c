@@ -14,9 +14,12 @@
 */
 
 #include <stdio.h>   /* for printf */
+#include <stdlib.h>  /* for getenv */
+#include <string.h>  /* for strtok */
 
 #ifndef WIN32
 # include <unistd.h>  /* for usleep */
+# include <signal.h>
 #else
 # include <windows.h>
 # include "../win32/winserial.h"
@@ -27,8 +30,6 @@
 # define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif
 
-#include <stdlib.h>  /* for malloc */
-#include <string.h>  /* for strtok */
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
@@ -270,18 +271,18 @@ gint GUI_Update(gpointer data) {
   g_print("Point 3.\n");
 #endif*/
 
-  if (GSM->GetAlarm(0, &Alarm) == GE_NONE && Alarm.AlarmEnabled!=0)
+  if (GSM->GetAlarm (0, &Alarm) == GE_NONE && Alarm.AlarmEnabled != 0)
     GUI_DrawAlarm(data);
 
 /*#ifdef XDEBUG
   g_print("Point 4.\n");
 #endif*/
 
-  if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE && SMSStatus.UnRead>0) {
+  if (GSM->GetSMSStatus (&SMSStatus) == GE_NONE && SMSStatus.UnRead > 0) {
     GUI_DrawSMS(data);
 
     if (SMSStatus.UnRead > smsold && smsold != -1)
-      smsreceived=10; /* The message "Short Message Received" is displayed for 10s */
+      smsreceived = 10; /* The message "Short Message Received" is displayed for 10s */
     smsold=SMSStatus.UnRead;
   }
 

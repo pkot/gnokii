@@ -278,4 +278,4 @@ SOURCE=.\xgnokii_sms.c
 
 
 
-!ENDIF 
+!ENDIF
