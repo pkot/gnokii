@@ -51,7 +51,7 @@ all: xgnokii
 
 
 xgnokii: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/$(GNOKII_LIB)
-	$(CC) $(LDFLAGS) $(GLDLIBS) $(OBJS) $(TOPDIR)/common/data/DATA.o $(LDLIBS) -o $@
+	$(CC) $(LDFLAGS) $(OBJS) $(GLDLIBS) $(TOPDIR)/common/data/DATA.o $(LDLIBS) -o $@
 
 clean:
 	$(RM) $(OBJS) *~ xpm/*~ depend xgnokii
