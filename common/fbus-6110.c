@@ -4888,14 +4888,28 @@ stdout);
 void FB61_RX_StateMachine(char rx_byte) {
 
   static int checksum[2];
+  static struct timeval time_now, time_last, time_diff;
 
   /* XOR the byte with the current checksum */
   checksum[BufferCount&1] ^= rx_byte;
 
   switch (RX_State) {
 	
-    /* Messages from the phone start with an 0x1e.  We use this to
-       "synchronise" with the incoming data stream. */
+    /* Messages from the phone start with an 0x1e (cable) or 0x1c (IR).
+       We use this to "synchronise" with the incoming data stream. However,
+       if we see something else, we assume we have lost sync and we require
+       a gap of at least 5ms before we start looking again. This is because
+       the data part of the frame could contain a byte which looks like the
+       sync byte */
+
+  case FB61_RX_Discarding:
+    gettimeofday(&time_now, NULL);
+    timersub(&time_now, &time_last, &time_diff);
+    if (time_diff.tv_sec == 0 && time_diff.tv_usec < 5000) {
+      time_last = time_now;  /* no gap seen, continue discarding */
+      break;
+    }
+    /* else fall through to... */
 
   case FB61_RX_Sync:
 
@@ -4911,6 +4925,10 @@ void FB61_RX_StateMachine(char rx_byte) {
 	/* Initialize checksums. */
 	checksum[0] = FB61_IR_FRAME_ID;
 	checksum[1] = 0;
+      } else {
+        /* Lost frame sync */
+        RX_State = FB61_RX_Discarding;
+        gettimeofday(&time_last, NULL);
       }
     } else { /* CurrentConnectionType == GCT_Serial */
       if (rx_byte == FB61_FRAME_ID) {
@@ -4924,6 +4942,10 @@ void FB61_RX_StateMachine(char rx_byte) {
 	/* Initialize checksums. */
 	checksum[0] = FB61_FRAME_ID;
 	checksum[1] = 0;
+      } else {
+        /* Lost frame sync */
+        RX_State = FB61_RX_Discarding;
+        gettimeofday(&time_last, NULL);
       }
     }
     
@@ -5060,12 +5082,22 @@ enum FB61_RX_States FB61_RX_HandleRLPMessage(void)
 
   RLP_F96Frame frame;
   int count;
+  int valid = true;
 
   /* We do not need RLP frame parsing to be done when we do not have callback
      specified. */
     
   if (RLP_RXCallback == NULL)
     return (FB61_RX_Sync);
+
+  /* Anybody know the official meaning of the first two bytes?
+     Nokia 6150 sends junk frames starting D9 01, and real frames starting
+     D9 00. We'd drop the junk frames anyway because the FCS is bad, but
+     it's tidier to do it here. We still need to call the callback function
+     to give it a chance to handle timeouts and/or transmit a frame */
+
+  if (MessageBuffer[0] == 0xd9 && MessageBuffer[1] == 0x01)
+    valid = false;
 
   /* Nokia uses 240 bit frame size of RLP frames as per GSM 04.22
      specification, so Header consists of 16 bits (2 bytes). See section 4.1
@@ -5088,7 +5120,7 @@ enum FB61_RX_States FB61_RX_HandleRLPMessage(void)
 
   /* Here we pass the frame down in the input stream. */
     
-  RLP_RXCallback(&frame);
+  RLP_RXCallback(valid ? &frame : NULL);
 
   return (FB61_RX_Sync);
 }

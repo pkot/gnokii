@@ -219,6 +219,7 @@ GSM_Error FB61_CancelCall(void);
 
 enum FB61_RX_States {
   FB61_RX_Sync,
+  FB61_RX_Discarding,
   FB61_RX_GetDestination,
   FB61_RX_GetSource,
   FB61_RX_GetType,
