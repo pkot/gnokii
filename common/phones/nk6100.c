@@ -99,10 +99,13 @@ static GSM_Error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error NetMonitor(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error MakeCall1(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AnswerCall1(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error CancelCall1(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SendRLPFrame(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetRLPRXCallback(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SendDTMF(GSM_Data *data, GSM_Statemachine *state);
@@ -110,6 +113,9 @@ static GSM_Error Reset(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetRingtone(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error MakeCall2(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AnswerCall2(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error CancelCall2(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state);
 
@@ -188,6 +194,18 @@ GSM_Phone phone_nokia_6100 = {
 	},
 	Functions,
 	NULL
+};
+
+struct {
+	char *Model;
+	int Capabilities;
+} static P6100_capabilities[] = {
+    	/*
+	 * Capability setup for phone models.
+	 * Example:
+	 * { "NSE-3",	P6100_CAP_OLD_CALL_API }
+	 */
+	{ NULL,		0 }
 };
 
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
@@ -439,6 +457,7 @@ static GSM_Error IdentifyPhone(GSM_Statemachine *state)
 static GSM_Error Initialise(GSM_Statemachine *state)
 {
 	GSM_Error err;
+	int i;
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_6100, sizeof(GSM_Phone));
@@ -476,6 +495,12 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 		FREE(DRVINSTANCE(state));
 		return err;
 	}
+
+	for (i = 0; P6100_capabilities[i].Model != NULL; i++)
+		if (!strcmp(P6100_capabilities[i].Model, DRVINSTANCE(state)->Model)) {
+			DRVINSTANCE(state)->Capabilities = P6100_capabilities[i].Capabilities;
+			break;
+		}
 
 	if (DRVINSTANCE(state)->PM->flags & PM_AUTHENTICATION) {
 		/* Now test the link and authenticate ourself */
@@ -2582,11 +2607,76 @@ static GSM_Error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x40);
 }
 
+static GSM_Error MakeCall2(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[5 + GSM_MAX_PHONEBOOK_NUMBER_LENGTH] = {0x00, 0x01, 0x7c, 0x01};
+	int n;
+	GSM_Error err;
+
+	switch (data->CallInfo->Type) {
+	case GSM_CT_VoiceCall:
+		break;
+
+	case GSM_CT_NonDigitalDataCall:
+	case GSM_CT_DigitalDataCall:
+		dprintf("Unsupported call type %d\n", data->CallInfo->Type);
+		return GE_NOTSUPPORTED;
+
+	default:
+		dprintf("Invalid call type %d\n", data->CallInfo->Type);
+		return GE_INTERNALERROR;
+	}
+
+	n = strlen(data->CallInfo->Number);
+	if (n > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+		dprintf("number too long\n");
+		return GE_ENTRYTOOLONG;
+	}
+
+	if ((err = EnableExtendedCmds(data, state, 0x01)) != GE_NONE)
+		return err;
+
+	strcpy(req + 4, data->CallInfo->Number);
+
+	if (SM_SendMessage(state, 5 + n, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+static GSM_Error AnswerCall2(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[4] = {0x00, 0x01, 0x7c, 0x02};
+	GSM_Error err;
+
+	if ((err = EnableExtendedCmds(data, state, 0x01)) != GE_NONE)
+		return err;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+static GSM_Error CancelCall2(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[4] = {0x00, 0x01, 0x7c, 0x03};
+	GSM_Error err;
+
+	if ((err = EnableExtendedCmds(data, state, 0x01)) != GE_NONE)
+		return err;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
 static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (message[2]) {
 	/* FIXME: maybe "Enable extended cmds" reply? - bozo */
 	case 0x64:
+		break;
+
+	/* call management (old style) */
+	case 0x7c:
+		if (message[3] < 0x01 || message[3] > 0x03)
+			return GE_UNHANDLEDFRAME;
 		break;
 
 	/* Netmonitor */
@@ -2627,7 +2717,7 @@ static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int l
 }
 
 
-static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error MakeCall1(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01};
 	/* order: req, voice_end */
@@ -2723,7 +2813,7 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 	return SM_BlockNoRetryTimeout(state, data, 0x01, 500);
 }
 
-static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error AnswerCall1(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req1[] = {FBUS_FRAME_HEADER, 0x42, 0x05, 0x01, 0x07,
 				0xa2, 0x88, 0x81, 0x21, 0x15, 0x63, 0xa8, 0x00, 0x00,
@@ -2738,7 +2828,7 @@ static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x01);
 }
 
-static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error CancelCall1(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x08, 0x00, 0x85};
 
@@ -2754,6 +2844,30 @@ static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state)
 	DRVINSTANCE(state)->CallNotification = data->CallNotification;
 
 	return GE_NONE;
+}
+
+static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
+{
+	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
+		return MakeCall2(data, state);
+	else
+		return MakeCall1(data, state);
+}
+
+static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
+{
+	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
+		return AnswerCall2(data, state);
+	else
+		return AnswerCall1(data, state);
+}
+
+static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state)
+{
+	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
+		return CancelCall2(data, state);
+	else
+		return CancelCall1(data, state);
 }
 
 static GSM_Error SendDTMF(GSM_Data *data, GSM_Statemachine *state)

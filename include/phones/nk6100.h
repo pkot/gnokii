@@ -52,6 +52,8 @@
 
 #define	P6100_MAX_SMS_MESSAGES	12 /* maximum number of sms messages */
 
+#define	P6100_CAP_OLD_CALL_API	1
+
 typedef struct {
 	GSM_KeyCode Key;
 	int Repeat;
@@ -68,6 +70,7 @@ typedef struct {
 	bool sms_notification_lost;
 	GSM_DisplayOutput *DisplayOutput;
 	NK6100_Keytable Keytable[256];
+	int Capabilities;
 
 	char Model[GSM_MAX_MODEL_LENGTH];
 	char IMEI[GSM_MAX_IMEI_LENGTH];
