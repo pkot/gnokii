@@ -2,6 +2,8 @@
  * general updates
     o include <sys/types.h> in compat.h -- should cleanup
       compilation on some systems (eg OpenBSD)           (Pawel Kot)
+    o uint8_t will be defined only if there's no stdint.h
+      and inttypes.h                                (BORBELY Zoltan)
 
 0.5.0rc3
 ========

@@ -59,6 +59,10 @@
 #  include <sys/types.h>
 #endif
 
+#ifndef HAVE_INTTYPES_H
+#  include <inttypes.h>
+#endif
+
 /*
  * The following ifdef block is the standard way of creating macros which make
  * exporting from a DLL simpler. All files within this DLL are compiled with 
@@ -214,7 +218,7 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 #endif
 
 /* for Linux Bluetooth compability */
-#ifndef HAVE_STDINT_H
+#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
 	typedef unsigned char uint8_t;
 #endif
 
