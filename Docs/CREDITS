@@ -113,13 +113,18 @@ Thank you to, in no particular order...
 
 *  Artur Kubiak for help with Solaris.
 
-*  Markus Plail for work on 7110 support.
+*  Markus Plail for work on 7110 support and interesting irc chats.
 
 *  Simon Huggins for help with 6210 and IrDA.
 
 *  Jan Kratochvil for various patches.
 
-*  BORBELY Zoltan for patches for 6100 series for the new structure.
+*  BORBELY Zoltan for patches for 6100 series for the new structure, many
+   usefull hints and discussions and real help in approaching 0.4.0 release
+
+*  Przemek ¦widerski for sample hscsd chat script.
+
+*  Balazs Nagy for help in assembling protocol documentation.
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this.  Rachael for new parent induced insomnia...
