@@ -1,0 +1,145 @@
+Document describing protocol used in Dancall phones.
+
+The data provided is for information purposes only. 
+Some of the frames might be hazardous to your phone. Be careful!!! 
+We do not take any responsibility or liability for damages, etc.
+
+Last update 24.02.2003
+~~~~~~~~~~~~~~~~~~~~~~
+Assembled by
+	Ladislav Michl <ladis@linux-mips.org>
+Thanx to
+	Vojta Bouberle
+
+NOTE: this information isn't (and can't be) complete.  If you know anything
+about features not listed here or you noticed a bug in this list, please
+notify us via e-mail.  Thank you.
+
+ Frame format for CBUS:
+
+  Request from Computer/Answer from Phone:
+   { SrcDEV, DestDEV, FrameLenLo, FrameLenHi, MsgType1, MsgType2, {blk}, CSum }
+
+      where SrcDEV, DestDEV:    0x19: phone
+                                0x38: PC (wakeup msg)
+                                0x34: PC (normal msg)
+            FrameLenLo:         length of data frame, low byte.
+            FrameLenHi:         length of data frame, high byte.
+            MsgType1, MsgType2: see List
+            {blk}:              main frame
+            CSum:               XOR on frame's all members
+
+  Packet ack from Phone:
+    { 0x19, DestDEV, FrameLenLo, FrameLenHi, MsgType1, MsgType2, {block}, CSum }
+
+      where DestDEV:            taken from original request packet
+            FrameLenLo:         length of data frame, low byte.
+            FrameLenHi:         length of data frame, high byte.
+            MsgType1:           taken from original request packet plus one
+            MsgType2:           taken from original request packet
+            {blk}:              MsgType1 and MsgType2 taken from original
+                                request packet
+            CSum:               XOR on frame's all members
+
+  Packet ack from Computer:
+    { SrcDEV, 0x19, FrameLenLo, FrameLenHi, MsgType1, MsgType2, {blk}, CSum }
+
+      where SrcDEV:             taken from response packet
+            FrameLenLo:         length of data frame, low byte.
+            FrameLenHi:         length of data frame, high byte.
+            MsgType1:           taken from response packet plus one
+            MsgType2:           taken from response packet
+            {blk}:              MsgType1 and MsgType2 taken from response packet
+            CSum:               XOR on frame's all members
+
+  Response from Phone:
+    { 0x19, DestDEV, FrameLenLo, FrameLenHi, MsgType1, MsgType2, {blk}, CSum }
+
+      where DestDEV:            taken from original request packet
+            FrameLenLo:         length of data frame, low byte.
+            FrameLenHi:         length of data frame, high byte.
+            MsgType1, MsgType2: see List
+            {blk}:              MsgType1 and MsgType2 taken from original
+                                request packet
+            CSum:               XOR on frame's all members
+
+   Port settings:
+     Speed 9600 bps, Bits 8, Parity None, Stop Bits 1, DTR 1, RTS 0
+
+   CBUS bus has only one wire for transmition and reception.
+
+   Because of this characteristics of the phone connector, every time that the
+   PC writes into the phone it is writing as well into its own Rx. So every
+   time the PC sends info into the phone it finds that same information in its
+   own Rx buffers, like a mirror copy. This should be discarded.
+   
+   The communications is made like an old cb radio, only one
+   talking at a time. Communication is made (basically) this way:
+
+     o computer sends request
+       -> phone got request (checksum matches)
+     o phone sends 0xa5
+       -> phone understood request
+     o phone sends ack packet
+       -> computer got response (checksum matches)
+     o computer sends 0xa5
+       -> phone got 0xa5
+     o phone sends response
+       -> computer got response (checksum matches)
+     o computer sends 0xa5
+       -> phone got 0xa5
+     o computer sends ack packet
+       -> phone got ack packet (checksum matches)
+     o phone sends 0xa5
+
+  If 0xa5 is not sent in 10ms (wild guess ;)) the last
+  packet is repeated at most three times.
+
+  Example 1 (setting SMS center number)
+    Computer: 34 19 3c 68 18 00 41 54  4.<h..AT
+              2b 43 53 43 41 3d 22 2b  +CSCA="+
+              34 32 30 36 30 32 39 39  42060299
+              39 39 39 32 22 0d 5f     9992"._
+    Phone:    a5                       %
+    Phone:    19 34 3d 68 02 00 3c 68  .4=h..<h
+              2e                       .
+    Computer: a5                       %
+    Phone:    19 34 3e 68 04 00 4f 4b  .4>h..OK
+              0d 0a 7c                 ..|
+    Computer: a5                       %
+    Computer: 34 19 3f 68 02 00 3e 68  4.?h..>h
+              2e                       .
+    Phone:    a5                       %
+
+  Example 2 (querying number of SMSes on SIM)
+    Computer: 34 19 3c 68 12 00 41 54  4.<h..AT
+              2b 43 50 4d 53 3d 22 53  +CPMS="S
+              4d 22 2c 22 53 4d 22 0d  M","SM".
+              44                       D
+    Phone:    a5                       %
+    Phone:    19 34 3d 68 02 00 3c 68  .4=h..<h
+              2e                       .
+    Computer: a5                       %
+    Phone:    19 34 3e 68 1c 00 2b 43  .4>h..+C
+              50 4d 53 3a 20 22 53 4d  PMS: "SM
+              22 2c 30 2c 31 30 2c 22  ",0,10,"
+              53 4d 22 2c 30 2c 31 30  SM",0,10
+              0d 0a 70                 ..p
+    Computer: a5                       %
+    Computer: 34 19 3f 68 02 00 3e 68  4.?h..>h
+              2e                       .
+    Phone:    a5                       %
+    Phone:    19 34 3e 68 04 00 4f 4b  .4>h..OK
+              0d 0a 7c                 ..|
+    Computer: a5                       %
+    Phone:    34 19 3f 68 02 00 3e 68  4.?h..>h
+              2e                       .
+    Computer: a5                       %
+
+
+  You have to implement collision protocol. ie, you should listen for
+  what you are transmitting, and if it does not come back, you have
+  collision.
+
+Note: Bosch bought Dancall in 1997. Question for curious reader: which protocol
+is used by Bosch phones?
