@@ -75,7 +75,7 @@ AC_ARG_ENABLE(nls,
    [ USE_NLS=$enableval ], [ USE_NLS=yes ])
 
 if test "$USE_NLS" = "yes"; then
-   AC_REQUIRE([AC_PROG_MAKE_SET])
+   AC_PROG_MAKE_SET
    AC_CHECK_HEADERS(locale.h)
    AC_CHECK_FUNCS(setlocale)
    AC_SUBST(HAVE_LOCALE_H)  
@@ -322,13 +322,11 @@ else
               AC_DEFINE(XPM) ],
             AC_MSG_WARN(Cannot found library libXpm - disabling XPM support.),
             [ -L$x_libraries -lX11 ]
-      ) 
+      )
 
       AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
       if test "$GTK_CONFIG" = no; then
          x_support="no"
-         XPM_CFLAGS=""
-         XPM_LIBS=""
          GTK_CFLAGS=""
          GTK_LIBS=""
          AC_MSG_WARN(Cannot find gtk-config.)
@@ -374,7 +372,7 @@ AC_ARG_ENABLE(win32,
 )
 
 AC_CHECK_FUNC(grantpt,
-   [ AC_TRY_RUN_NATIVE([
+   [ AC_TRY_RUN([
 #define  _XOPEN_SOURCE 500
 
 #include <features.h>
@@ -405,7 +403,9 @@ int main()
 	exit(0);
 }
                 ],
-                AC_DEFINE(USE_UNIX98PTYS))
+                AC_DEFINE(USE_UNIX98PTYS),
+                AC_MSG_WARN("No unix98ptys"),
+		AC_MSG_WARN("Ensure to disable unix98ptys when crosscompiling"))
    ]
 )
 
@@ -453,8 +453,6 @@ esac
 
 AC_CONFIG_HEADER(include/config.h)
 
-ARCH=$host_cpu
-AC_SUBST(ARCH)
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(XVERSION)
