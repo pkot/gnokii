@@ -3582,9 +3582,6 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
  /* [location],[netcode x 3],[lenhi],[lenlo],[bitmap] */
 
       if (GetBitmap!=NULL) {
-#ifdef DEBUG
-	fprintf(stdout, _("Message: Operator Logo received.\n"));
-#endif  
 
 	count=5;  /* Location ignored. */
 
@@ -3597,6 +3594,12 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	GetBitmap->netcode[4]='0' + (MessageBuffer[count] & 0x0f);
 	GetBitmap->netcode[5]='0' + (MessageBuffer[count++] >> 4);
 	GetBitmap->netcode[6]=0;
+
+#ifdef DEBUG
+	fprintf(stdout, _("Message: Operator Logo for %s (%s) network received.\n"),
+	                   GetBitmap->netcode,
+	                   GSM_GetNetworkName(GetBitmap->netcode));
+#endif  
 
 	GetBitmap->size=MessageBuffer[count++]<<8;
 	GetBitmap->size+=MessageBuffer[count++];

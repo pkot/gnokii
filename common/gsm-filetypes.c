@@ -472,7 +472,8 @@ int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 #ifdef XPM
   /* Does the filename contain  .xpm ? */
 
-  if (strstr(FileName,".xpm")) savexpm(FileName, bitmap);
+  if (strstr(FileName,".xpm"))
+    savexpm(FileName, bitmap);
   else {
 #endif    
 
@@ -543,7 +544,6 @@ void savexpm(char *filename, GSM_Bitmap *bitmap)
   XpmWriteFileFromXpmImage(filename,&image,NULL);
 
 }
-
 
 #endif
 

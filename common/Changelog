@@ -91,3 +91,5 @@
 * Sun Jun 11 02:29:47 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - savenlm implemented by Marcin
 
+* Sat Jun 17 16:36:00 BST 2000 Brian Candler <B.Candler@pobox.com>
+- fixes to RLP
