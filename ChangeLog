@@ -53,6 +53,16 @@
     o fixed Makefile to install libgnokii.so for all install*
       targets                                             (Pawel Kot)
  * initial version of the M2BUS link driver added    (BORBELY Zoltan)
+ * device driver updates:
+    o device_nreceived, device_flush added           (BORBELY Zoltan)
+    o serial_nreceived, serial_flush added           (BORBELY Zoltan)
+ * link driver updates:
+    o M2BUS DTR/RTS toggling disabled at link initialisation
+                                                     (BORBELY Zoltan)
+    o M2BUS called the SM_IncomingFunction with wrong message
+      length                                         (BORBELY Zoltan)
+    o M2BUS idle channel check and channel flushing added
+                                                     (BORBELY Zoltan)
 
 0.4.0pre20
 ==========

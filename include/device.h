@@ -33,6 +33,7 @@
 
 #include "misc.h"
 #include "gsm-common.h"
+#include "gsm-error.h"
 
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
@@ -51,6 +52,9 @@ size_t device_read(__ptr_t buf, size_t nbytes);
 size_t device_write(const __ptr_t buf, size_t n);
 
 int device_select(struct timeval *timeout);
+
+GSM_Error device_nreceived(int *n);
+GSM_Error device_flush(void);
 
 #ifndef WIN32
 #  include "devices/unixserial.h"

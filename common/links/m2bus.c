@@ -82,6 +82,7 @@ static bool M2BUS_OpenSerial(void)
 	 * seems.
 	 */
 
+#if 0
 	/* Default state */
 	device_setdtrrts(0, 1);
 	sleep(1);
@@ -124,8 +125,9 @@ static bool M2BUS_OpenSerial(void)
 
 	/* leave RTS high, DTR low for duration of session. */
 	device_setdtrrts(0, 1);
+#endif
 
-	sleep(1);
+	device_setdtrrts(0, 1);
 
 	return true;
 }
@@ -187,7 +189,7 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 	M2BUS_IncomingMessage *i = &flink.i;
 
 #if 0
-	dprintf("rx_byte: %02x\n", rx_byte);
+	dprintf("rx_byte: %02x, state: %d\n", rx_byte, i->state);
 #endif
 
 	/* XOR the byte with the current checksum */
@@ -335,7 +337,7 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 
 					/* Finally dispatch if ready */
 
-					SM_IncomingFunction(statemachine, i->MessageType, i->MessageBuffer, i->MessageLength - 2);
+					SM_IncomingFunction(statemachine, i->MessageType, i->MessageBuffer, i->MessageLength);
 				}
 			} else {
 				dprintf("M2BUS: Bad checksum!\n");
@@ -373,6 +375,25 @@ static GSM_Error M2BUS_Loop(struct timeval *timeout)
 }
 
 
+static void M2BUS_WaitforIdle(int timeout, bool reset)
+{
+	int n, prev;
+
+	device_nreceived(&n);
+	do {
+		prev = n;
+		usleep(timeout);
+		if (device_nreceived(&n) != GE_NONE) break;
+	} while (n != prev);
+
+	if (reset) {
+		device_setdtrrts(0, 0);
+		usleep(200000);
+		device_setdtrrts(0, 1);
+		usleep(100000);
+	}
+}
+
 
 /* Prepares the message header and sends it, prepends the message start byte
 	   (0x1f) and other values according the value specified when called.
@@ -394,8 +415,6 @@ static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 		return GE_MEMORYFULL;
 	}
 
-	/* Now construct the message header. */
-
 	/*
 	 * Checksum problem:
 	 * It seems  that some phones have problems with a checksum of 1F.
@@ -411,6 +430,8 @@ static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 	 */
 
 	do {
+		/* Now construct the message header. */
+
 		i = 0;
 		if (glink->ConnectionType == GCT_Infrared)
 			out_buffer[i++] = M2BUS_IR_FRAME_ID;	/* Start of the IR frame indicator */
@@ -457,8 +478,12 @@ static GSM_Error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 	dprintf("\n");
 #endif
 
+	M2BUS_WaitforIdle(5000, true);
+
 	if (device_write(out_buffer, i) != i)
 		return GE_INTERNALERROR;
+
+	device_flush();
 
 	return GE_NONE;
 }
@@ -487,8 +512,12 @@ static int M2BUS_TX_SendAck(u8 message_seq)
 
 	out_buffer[5] = out_buffer[0] ^ out_buffer[1] ^ out_buffer[2] ^ out_buffer[3] ^ out_buffer[4];
 
+	M2BUS_WaitforIdle(2000, false);
+
 	if (device_write(out_buffer, 6) != 6)
 		return GE_INTERNALERROR;
+
+	device_flush();
 
 	return GE_NONE;
 }
@@ -519,14 +548,6 @@ GSM_Error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 		if (!M2BUS_OpenSerial())
 			return GE_DEVICEOPENFAILED;
 	}
-
-	usleep(100000);
-//	M2BUS_SendMessage(1, 0xd0, "\x01");
-//	M2BUS_Loop(NULL);
-//	usleep(100000);
-	M2BUS_SendMessage(1, 0xd0, "\x04");
-	usleep(100000);
-	M2BUS_Loop(NULL);
 
 	return GE_NONE;
 }
