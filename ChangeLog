@@ -1,3 +1,9 @@
+0.5.3 (not released yet)
+=====
+ * code cleanups
+    o change error paths in getactiveprofile/setactiveprofile
+                                                         (Pawel Kot)
+
 0.5.2
 =====
  * build system updates

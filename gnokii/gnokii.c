@@ -2968,14 +2968,12 @@ static int getactiveprofile()
 	}
 
 	error = gn_sm_functions(GN_OP_GetProfile, &data, &state);
-	if (error != GN_ERR_NONE) {
+	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Cannot get profile %d\n"), p.number);
-		return error;
-	}
+	else
+		fprintf(stdout, _("Active profile: %d (%s)\n"), p.number, p.name);
 
-	fprintf(stdout, _("Active profile: %d (%s)\n"), p.number, p.name);
-
-	return GN_ERR_NONE;
+	return error;
 }
 
 /* Select the specified profile */
@@ -2990,10 +2988,9 @@ static int setactiveprofile(int argc, char *argv[])
 	p.number = atoi(argv[0]);
 
 	error = gn_sm_functions(GN_OP_SetActiveProfile, &data, &state);
-	if (error != GN_ERR_NONE) {
+	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Cannot set active profile to %d: %s\n"), p.number, gn_error_print(error));
-		return error;
-	}
+	return error;
 }
 
 /* Get requested range of memory storage entries and output to stdout in
