@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.4  2001-03-21 23:36:04  chris
+  Revision 1.5  2001-03-22 16:17:05  chris
+  Tidy-ups and fixed gnokii/Makefile and gnokii/ChangeLog which I somehow corrupted.
+
+  Revision 1.4  2001/03/21 23:36:04  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -29,6 +32,7 @@
 */
 
 #include <gsm-common.h>
+#include <string.h>
 
 /* Coding functions */
 #define NUMBER_OF_7_BIT_ALPHABET_ELEMENTS 128
@@ -158,11 +162,9 @@ GSM_MemoryType StrToMemoryType(const char *s)
 #undef X
 }
 
-
-/* FIXME - a better way?? */
-void GSM_DataClear(GSM_Data *data)
+/* This very small function is just to make it */
+/* easier to clear the data struct every time one is created */
+inline void GSM_DataClear(GSM_Data *data)
 {
-	int c;
-
-	for (c=0;c<sizeof(GSM_Data);c++) ((unsigned char *)data)[c]=0;
+	memset(data, 0, sizeof(GSM_Data));
 }

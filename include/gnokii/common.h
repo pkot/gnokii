@@ -864,6 +864,6 @@ extern wchar_t EncodeWithUnicodeAlphabet(unsigned char);
 extern unsigned char DecodeWithUnicodeAlphabet(wchar_t);
 extern GSM_MemoryType StrToMemoryType (const char *s);
 
-void GSM_DataClear(GSM_Data *data);
+inline void GSM_DataClear(GSM_Data *data);
 
 #endif	/* __gsm_common_h */

@@ -1,140 +1,53 @@
 
 #
-# $Id$
-#
 # Makefile for the GNOKII tool suite.
 #
 # Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 #               2000 Karel Zak
 #
 
-TOPDIR=.
-
-#
-# Makefile.global contains gnokii global settings
-#
-include ${TOPDIR}/Makefile.global
+TOPDIR=..
+include $(TOPDIR)/Makefile.global
 
 
-DIRS =  common/phones \
-	common/links \
-	common/devices \
-	common/data \
-        common \
-	gnokii
+CFLAGS	+= $(PTHREAD_CFLAGS)
+LDFLAGS += $(PTHREAD_LIBS)
 
-#
-# For now gnokiid and utils only make sense on Unix like systems.
-# Some other stuff that makes only sense on Win32 platform.
-#
-
-ifndef WIN32
-DIRS +=	gnokiid \
-         utils
+ifdef XPM_LIBS
+    LDFLAGS +=$(XPM_LIBS)
 endif
 
-GTK_DIRS =  xgnokii \
-            xlogos
-
-PO_DIR   = 	po
-DOCS_DIR = 	Docs
-
-all: $(DIRS)
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR); \
-	fi
-
-	@if [ "$(GTK_LIBS)" ]; then \
-		for dir in $(GTK_DIRS); do \
-		    if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir; \
-		    fi; \
-		done \
-	fi
-	@echo "done"
-
-dummy:
-
-$(DIRS): dummy
-	$(MAKE) -C $@
-
-clean:
-	$(RM) *~ *.orig *.rej include/*~ include/*.orig include/*.rej
-	@for dir in $(DIRS); do \
-	    if [ -e $$dir/Makefile ]; then \
-		$(MAKE) -C $$dir clean; \
-	    fi; \
-	done
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR) clean; \
-	fi
+OBJS =	gnokii.o
 
 ifdef OWN_GETOPT
-		$(MAKE) -C getopt clean
+    OBJS += $(TOPDIR)/getopt/libgetopt.a
 endif
 
-	@if [ "$(GTK_LIBS)" ]; then \
-		for dir in $(GTK_DIRS); do \
-		    if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir clean; \
-		    fi; \
-		done \
-	fi
+all: gnokii
 
-	$(MAKE) -C Docs clean
+gnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/gsm-filetypes.o
 
-	@echo "done"
+$(TOPDIR)/common/COMMON.o:
+	$(MAKE) -C $(TOPDIR)/common COMMON.o
 
-distclean:	clean
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR) distclean; \
-	fi
-	$(RM) Makefile.global config.cache config.log config.status \
-		include/config.h \
-		include/config.h.in \
-		packaging/RedHat/gnokii.spec \
-		packaging/Slackware/SlackBuild \
-		packaging/Debian/changelog \
-		po/Makefile.in \
-		debian
+$(TOPDIR)/common/gsm-filetypes.o:
+	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
 
-dep:
-	@for dir in $(DIRS); do \
-	    if [ -e $$dir/Makefile ]; then \
-		$(MAKE) -C $$dir dep; \
-	    fi; \
-	done
+$(TOPDIR)/getopt/libgetopt.a:
+	$(MAKE) -C $(TOPDIR)/getopt
 
-	@if [ "$(GTK_LIBS)" ]; then \
-		for dir in $(GTK_DIRS); do \
-		    if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir dep; \
-		    fi; \
-		done \
-	fi
-	@echo "done"
+clean:
+	$(RM) $(OBJS) *~ depend gnokii *.exe core *.bak
 
-install: all
-	@for dir in $(DIRS); do \
-	    if [ -e $$dir/Makefile ]; then \
-		$(MAKE) -C $$dir install; \
-	    fi; \
-	done
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR) install; \
-	fi
+install:
+	$(INSTALL) -d $(bindir)
+	$(INSTALL) gnokii $(bindir)
 
-	@if [ "$(GTK_LIBS)" ]; then \
-		for dir in $(GTK_DIRS); do \
-		    if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir install; \
-		    fi; \
-		done \
-	fi
-	@echo "done"
+depend dep:
+	$(CC) $(CFLAGS) -MM *.c >depend
 
-install-docs:
-	$(MAKE) -C $(DOCS_DIR) install
-	@echo "done"
+ifeq (depend,$(wildcard depend))
+include depend
+endif
 
-.PHONY: all install clean distclean dep depend install-docs
+.PHONY: all install clean dep depend

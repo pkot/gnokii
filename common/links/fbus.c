@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.6  2001-03-21 23:36:05  chris
+  Revision 1.7  2001-03-22 16:17:05  chris
+  Tidy-ups and fixed gnokii/Makefile and gnokii/ChangeLog which I somehow corrupted.
+
+  Revision 1.6  2001/03/21 23:36:05  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -291,7 +294,7 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 						m->MessageBuffer = (char *) malloc(m->Malloced);
 
 					} else if (m->FramesToGo != frm_num) {
-						fprintf(stdout, "Missed a frame in a multiframe message.\n\r");
+						fprintf(stdout, "Missed a frame in a multiframe message.\n");
 						/* FIXME - we should make sure we don't ack the rest etc */
 					}
 
