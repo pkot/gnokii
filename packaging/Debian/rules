@@ -8,6 +8,7 @@ export build_dir=$(shell pwd)/debian/gnokii
 build:	build-stamp
 build-stamp:
 	dh_testdir
+#	if [ ! -f ./configure ] ; then autoconf ; fi
 	./configure --prefix=/usr --with-x
 #	./configure --prefix=/usr --with-x --enable-debug --enable-xdebug --enable-rlpdebug
 	make
@@ -17,8 +18,9 @@ build-stamp:
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build build-stamp
-	#make clean
+	rm -f build build-stamp config.*
+	touch Makefile.global
+	make clean
 	dh_clean
 
 # Build architecture-independent files here.
@@ -33,11 +35,28 @@ binary-arch:	build
 	dh_testdir
 	dh_testroot
 	dh_installdirs
+# The following two lines are to prevent the install process from installing
+# mgnokiidev owned by the probably not-yet-existing group "gnokii".  mgnokiidev
+# gets SGID after dpkg runs preinst which creates the group "gnokii".
+	mv utils/Makefile utils/Makefile.ORIG
+	sed 's#-o root -g gnokii -m 4750 ##' < utils/Makefile.ORIG > utils/Makefile
+#	
 	make install prefix=$(build_dir)/usr
+#
+# just to leave the sources in a pristine state...
+	mv utils/Makefile.ORIG utils/Makefile
+#
 	mkdir -p $(build_dir)/etc
 	sed 's#/usr/local/sbin/#/usr/sbin/#' < Docs/sample/gnokiirc > $(build_dir)/etc/gnokiirc
-	sed 's#"COPYING"#"file:/usr/share/doc/gnokii/copyright"#' < xgnokii/docs/help/en_US/faq.html > $(build_dir)/usr/share/xgnokii/help/en_US/faq.html
-	rm $(build_dir)/usr/share/xgnokii/help/en_US/COPYING
+# lintian complains if there are multiple licence files in one package, hence
+# the next two commands
+	sed 's#"COPYING"#"file:/usr/share/doc/gnokii/copyright"#' < \
+		xgnokii/docs/help/en_US/faq.html > \
+		$(build_dir)/usr/share/xgnokii/help/en_US/faq.html
+	rm -f $(build_dir)/usr/share/xgnokii/help/en_US/COPYING
+# lintian complains if there is a binary that does not have a man page.
+# Pawel says that xlogos will soon be dumped anyways, so...
+	rm -f $(build_dir)/usr/bin/xlogos
 #	dh_installdebconf	
 	dh_installexamples
 	dh_installdocs
@@ -53,7 +72,7 @@ binary-arch:	build
 	dh_link
 	dh_strip
 	dh_compress
-	dh_fixperms -Xmgnokiidev
+	dh_fixperms
 #	dh_makeshlibs
 	dh_installdeb
 #	dh_perl

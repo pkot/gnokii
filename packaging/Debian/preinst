@@ -1,10 +1,10 @@
 #!/bin/sh -e
 
-if [ -z "`/bin/grep -e '^gnokii:' /etc/group`" ]
+if [ -z "`grep -e '^gnokii:' /etc/group`" ]
 then
 	/usr/sbin/groupadd gnokii
 else
-	echo 'Group "gnokii" already exists.'
+	echo 'notice: group "gnokii" already exists'
 	echo 'I assume that you have used a gnokii before, Mr. Bond.'
 fi
 

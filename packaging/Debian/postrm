@@ -1,4 +1,27 @@
 #!/bin/sh -e
 
-/usr/sbin/groupdel gnokii
+case "$1" in
+    remove|upgrade)
+        ;;
+
+    purge)
+	rm -f /etc/gnokii
+	if [ ! -z "`grep -e '^gnokii:' /etc/group`" ]
+	then
+		echo 'deleting group "gnokii"'
+		/usr/sbin/groupdel gnokii
+	else
+		echo 'group "gnokii" already deleted'
+	fi
+        ;;
+
+    failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
+
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
 #DEBHELPER#

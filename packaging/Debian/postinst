@@ -1,4 +1,8 @@
 #!/bin/sh -e
 
-#/usr/sbin/groupdel gnokii
+echo 'Setting /usr/sbin/mgnokiidev SUID root, executable only by the "gnokii" group.'
+echo 'Read /usr/share/doc/gnokii/FAQ and README concerning the security risk.'
+chown root.gnokii /usr/sbin/mgnokiidev
+chmod 4750 /usr/sbin/mgnokiidev
+
 #DEBHELPER#

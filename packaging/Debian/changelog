@@ -1,3 +1,19 @@
+gnokii (0.3.3) unstable; urgency=low
+
+  * Pawel has be notified that lintian does not like the "_" and he has
+    promised to change this in the future
+  * included a test in debian/rules to check for ./configure or run autoconf,
+    but commented it out since ./configure should usually be supplied
+  * deleting xlogos binary to stop lintian complaints about a missing manpage
+  * setting mgnokiidev root SUID in postinst script rather than "make install"
+  * rewrote postrm script to do all of its work on "purge"
+  * updated Build-Depends to include libc6-dev, xlibs-dev, xutils (for xmkmf), 
+    and libgtk1.2-dev.  Note that autoconf is recommended.
+  * added "touch Makefile.global" to debian/rules to allow "make clean" on
+    un"./configure"d builds
+    
+ -- Erik Rossen (Linux consultant) <rossen@freesurf.ch>  Sat,  1 Sep 2001 14:04:02 +0200
+
 gnokii (0.3.3_pre25) unstable; urgency=low
 
   * incorporation of IRDA patch

@@ -1,13 +1,13 @@
 Source: gnokii
 Section: comm
 Priority: optional
-Build-Depends: debhelper
+Build-Depends: debhelper, libc6-dev, xlibs-dev, xutils, libgtk1.2-dev
 Maintainer: Erik Rossen (Linux consultant) <rossen@freesurf.ch>
 Standards-Version: 3.1.0.0
 
 Package: gnokii
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: adduser, ${shlibs:Depends}
 Description: Linux/Unix tool suite for Nokia mobile phones
  Gnokii is a Linux/Unix tool suite and (eventually) modem/fax driver
  for Nokia mobile phones, released under the GPL.
