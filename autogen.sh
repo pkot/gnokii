@@ -13,7 +13,7 @@ if [ -f configure.in~ ]; then
 fi
 
 libtoolize -c -f
-aclocal
+aclocal -I m4
 autoheader
 autoconf
 ./configure "$@"

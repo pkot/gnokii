@@ -122,26 +122,9 @@ AC_ARG_WITH(libpthread,
    ]
 )
 
-dnl Check for libpthread
-PTHREAD_LIBS_SAVE="$PTHREAD_LIBS"
-PTHREAD_LIBS=error
-dnl we cannot use AC_CHECK_LIB, HP-UX requires the #include statement -- bozo
-AC_CACHE_CHECK(for pthread_attr_init in -lpthread, ac_cv_lib_pthread_pthread_attr_init,
-	[AC_TRY_LINK([#include <pthread.h>],
-		[pthread_attr_init(NULL);],
-		ac_cv_lib_pthread_pthread_attr_init=yes,
-		ac_cv_lib_pthread_pthread_attr_init=no)])
-if test $ac_cv_lib_pthread_pthread_attr_init = yes; then
-	PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_REENTRANT"
-	PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -lpthread"
-fi
-
-dnl FIXME: test this on *BSD and report results immediatelly to the ml please
-dnl If it is not found, try to check for c_r (on FreeBSD)
-if test "x$PTHREAD_LIBS" = xerror; then
-  AC_CHECK_LIB(c_r, pthread_attr_init, [
-                    PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_THREAD_SAFE"
-                    PTHREAD_LIBS="-pthread" ])
+ACX_PTHREAD
+if test "x$PTHREAD_CFLAGS" = "x-pthread"; then
+	PTHREAD_LIBS="$PTHREAD_LIBS -pthread"
 fi
 
 dnl FIXME: do we really test here if libc contains this function?

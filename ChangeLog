@@ -25,6 +25,8 @@
       fix undeclared INSTALLPREFIX macro (taken from libiconv)
                                                         (Pawel Kot)
     o correctly add linking libraries where needed      (Pawel Kot)
+    o add m4 macros to allow harmless CVS build on all(?) platforms
+                                                        (Pawel Kot)
  * gnapplet series updates
     o folder management support (list, status, create,
       delete) support added                        (BORBELY Zoltan)
