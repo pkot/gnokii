@@ -243,11 +243,12 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 	SMS_DateTime *dt = NULL;
 	gint valid;
 
+	dt = &data->SMSCTime;
+
 	if ((valid = IsValidSMSforFolder(d, userData))) {
 
-/*		if (data->Type == GST_MT && data->UDHType == GSM_ConcatenatedMessages) {
-//FIXME
-
+		/*
+		if (data->Type == GST_MT && data->UDHType == GSM_ConcatenatedMessages) {
 			msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
 			msgPtrs->count = data->UDH[4];
 			msgPtrs->number = data->UDH[5];
@@ -257,7 +258,8 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 			msgPtrs->msgPtr = (gint *) g_malloc (msgPtrs->count * sizeof (gint));
 			*(msgPtrs->msgPtr + msgPtrs->number - 1) = data->MessageNumber;
 		}
-		else { */
+		else { 
+		*/
 		gchar *row[4];
 		if (data->Type == SMS_Delivery_Report) {
 			if (data->Status == SMS_Read)
