@@ -145,6 +145,10 @@ gint GUI_Update(gpointer data) {
 
   static int initialized=0;
 
+  /* Define required unit types for RF and Battery level meters. */
+  GSM_RFUnits rf_units = GRF_Arbitrary;
+  GSM_BatteryUnits batt_units = GBU_Arbitrary;
+
   /* The number of SMS messages before second */
   static int smsold=0;
 
@@ -156,13 +160,13 @@ gint GUI_Update(gpointer data) {
 
   GUI_DrawBackground(data);
 
-  if (GSM->GetRFLevel(&rflevel) == GE_NONE)
+  if (GSM->GetRFLevel(&rf_units, &rflevel) == GE_NONE)
     GUI_DrawNetwork(data, rflevel);
 
   if (GSM->GetPowerSource(&powersource) == GE_NONE && powersource == GPS_ACDC) {
     batterylevel=((int) batterylevel+1)%5;
   }
-  else if (GSM->GetBatteryLevel(&batterylevel) != GE_NONE)
+  else if (GSM->GetBatteryLevel(&batt_units, &batterylevel) != GE_NONE)
     batterylevel=-1;
 
   GUI_DrawBattery(data, batterylevel);

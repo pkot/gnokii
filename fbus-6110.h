@@ -93,8 +93,8 @@ GSM_Error	FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
 
 GSM_Error	FB61_SendSMSMessage(GSM_SMSMessage *message);
 
-GSM_Error	FB61_GetRFLevel(float *level);
-GSM_Error	FB61_GetBatteryLevel(float *level);
+GSM_Error   FB61_GetRFLevel(GSM_RFUnits *units, float *level);
+GSM_Error   FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 GSM_Error	FB61_GetPowerSource(GSM_PowerSource *source);
 GSM_Error	FB61_EnterPin(char *pin);
 GSM_Error	FB61_GetSMSCenter(u8 priority);

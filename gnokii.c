@@ -561,6 +561,8 @@ void monitormode(void)
 
   float rflevel=-1, batterylevel=-1;
   GSM_PowerSource powersource=-1;
+  GSM_RFUnits rf_units = GRF_Arbitrary;
+  GSM_BatteryUnits batt_units = GBU_Arbitrary;
 
   GSM_MemoryStatus SIMMemoryStatus = {GMT_SIM, 0, 0};
   GSM_MemoryStatus PhoneMemoryStatus = {GMT_INTERNAL, 0, 0};
@@ -587,10 +589,10 @@ void monitormode(void)
 
   while (!shutdown) {
 
-    if (GSM->GetRFLevel(&rflevel) == GE_NONE)
+    if (GSM->GetRFLevel(&rf_units, &rflevel) == GE_NONE)
       fprintf(stdout, _("RFLevel: %d\n"), (int)rflevel);
 
-    if (GSM->GetBatteryLevel(&batterylevel) == GE_NONE)
+    if (GSM->GetBatteryLevel(&batt_units, &batterylevel) == GE_NONE)
       fprintf(stdout, _("Battery: %d\n"), (int)batterylevel);
 
     if (GSM->GetPowerSource(&powersource) == GE_NONE)

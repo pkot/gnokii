@@ -507,32 +507,88 @@ GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS)
 	   on data returned by the "keepalive" packets.  I suspect
 	   that we don't actually need the keepalive at all but
 	   will await the official doco before taking it out.  HAB19990511 */
-GSM_Error	FB38_GetRFLevel(float *level)
+GSM_Error	FB38_GetRFLevel(GSM_RFUnits *units, float *level)
 {
-	if (CurrentRFLevel == -1) {
+		/* Map from values returned in status packet to the
+		   the values returned by the AT+CSQ command */
+	float	csq_map[5] = {0, 8, 16, 24, 31};
+	int		rf_level;
+
+		/* Take a copy in case it changes midway through... */
+	rf_level = CurrentRFLevel;
+
+	if (rf_level == -1) {
 		return (GE_INTERNALERROR);
 	}
-	else {
-		*level = CurrentRFLevel;
+
+		/* Arbitrary units. */
+	if (*units == GRF_Arbitrary) {
+		*level = rf_level;
 		return (GE_NONE);
 	}
+
+		/* CSQ units. */
+	if (*units == GRF_CSQ) {
+		if (rf_level <=4) {
+			*level = csq_map[rf_level];
+		}
+		else {
+			*level = 99;	/* Unknown/undefined */
+		}
+		return (GE_NONE);
+	}
+
+		/* Unit type is one we don't handle so return error */
+	return (GE_INTERNALERROR);
 }
 
 	/* FB38_GetBatteryLevel
 	   FIXME (see above...) */
-GSM_Error	FB38_GetBatteryLevel(float *level)
+GSM_Error	FB38_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 {
-	if (CurrentBatteryLevel == -1) {
+	float	batt_level;	
+
+	batt_level = CurrentBatteryLevel;
+	
+	if (batt_level == -1) {
 		return (GE_INTERNALERROR);
 	}
-	else {
-		*level = CurrentBatteryLevel;
+
+		/* Only units we handle at present are GBU_Arbitrary */
+	if (*units == GBU_Arbitrary) {
+		*level = batt_level;
 		return (GE_NONE);
 	}
+
+	return (GE_INTERNALERROR);
 }
 
 GSM_Error	FB38_GetIMEI(char *imei)
 {
+	int		timeout;
+
+		/* Return if no link has been established. */
+	if (!FB38_LinkOK) {
+		return GE_NOLINK;
+	}
+
+		/* Send request if IMEI not valid */
+	if (IMEIValid != true) {
+		FB38_TX_Send0x4c_RequestIMEIRevisionModelData();
+	}
+
+	timeout = 50;	/* 5 seconds */
+
+		/* Wait for timeout or other error. */
+	while (timeout != 0 && IMEIValid != true) {
+
+		timeout --;
+		if (timeout == 0) {
+			return (GE_TIMEOUT);
+		}
+		usleep (100000);
+	}
+
 	if (IMEIValid) {
 		strncpy (imei, IMEI, FB38_MAX_IMEI_LENGTH);
 		return (GE_NONE);
@@ -544,6 +600,30 @@ GSM_Error	FB38_GetIMEI(char *imei)
 
 GSM_Error	FB38_GetRevision(char *revision)
 {
+	int		timeout;
+
+		/* Return if no link has been established. */
+	if (!FB38_LinkOK) {
+		return GE_NOLINK;
+	}
+
+		/* Send request if Revision not valid */
+	if (RevisionValid != true) {
+		FB38_TX_Send0x4c_RequestIMEIRevisionModelData();
+	}
+
+	timeout = 50;	/* 5 seconds */
+
+		/* Wait for timeout or other error. */
+	while (timeout != 0 && RevisionValid != true) {
+
+		timeout --;
+		if (timeout == 0) {
+			return (GE_TIMEOUT);
+		}
+		usleep (100000);
+	}
+
 	if (RevisionValid) {
 		strncpy (revision, Revision, FB38_MAX_REVISION_LENGTH);
 		return (GE_NONE);
@@ -555,6 +635,30 @@ GSM_Error	FB38_GetRevision(char *revision)
 
 GSM_Error	FB38_GetModel(char *model)
 {
+	int		timeout;
+
+		/* Return if no link has been established. */
+	if (!FB38_LinkOK) {
+		return GE_NOLINK;
+	}
+
+		/* Send request if Model not valid */
+	if (ModelValid != true) {
+		FB38_TX_Send0x4c_RequestIMEIRevisionModelData();
+	}
+
+	timeout = 50;	/* 5 seconds */
+
+		/* Wait for timeout or other error. */
+	while (timeout != 0 && ModelValid != true) {
+
+		timeout --;
+		if (timeout == 0) {
+			return (GE_TIMEOUT);
+		}
+		usleep (100000);
+	}
+
 	if (ModelValid) {
 		strncpy (model, Model, FB38_MAX_MODEL_LENGTH);
 		return (GE_NONE);
@@ -688,8 +792,6 @@ void	FB38_ThreadLoop(void)
 				/* Dont send keepalive packets when doing other transactions. */
 			if (!DisableKeepalive) {
 				FB38_TX_Send0x4aMessage();
-					/* FIXME - Don't need to do this over and over... */
-				FB38_TX_Send0x4c_RequestIMEIRevisionModelData();
 			}
 			idle_timer = 20;
 		}
@@ -846,7 +948,7 @@ void	FB38_RX_StateMachine(char rx_byte)
 enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 {
 	/* Uncomment this if you want all messages in raw form. */
-	/*FB38_RX_DisplayMessage();*/
+	/*FB38_RX_DisplayMessage(); */
 
 		/* Switch on the basis of the message type byte */
 	switch (MessageBuffer[0]) {
@@ -1519,9 +1621,6 @@ void	FB38_RX_Handle0x27_SMSMessageText(void)
 	/* 0x4b is a general status message. */
 void	FB38_RX_Handle0x4b_Status(void)
 {
-		/* Map from values returned in status packet to the
-		   the values returned by the AT+CSQ command */
-	float	csq_map[5] = {0, 8, 16, 24, 31};
 
 		/* First, send acknowledge. */
 	if (FB38_TX_SendStandardAcknowledge(0x4b) != true) {
@@ -1535,13 +1634,10 @@ void	FB38_RX_Handle0x4b_Status(void)
 		   when incoming or outgoing calls occur...*/	
 	FB38_LinkOK = true;
 
-	if (MessageBuffer[3] <= 4) {
-		CurrentRFLevel = csq_map[MessageBuffer[3]];
-	}
-	else {
-		CurrentRFLevel = 99;
-	}
+		/* GetRFLevel function does conversion into required units. */
+	CurrentRFLevel = MessageBuffer[3];
 
+		/* GetBatteryLevel does conversion into required units. */
 	CurrentBatteryLevel = MessageBuffer[4];
 
 	if (EnableMonitoringOutput == false) {

@@ -136,16 +136,18 @@ typedef struct {
   int Second;
 } GSM_DateTime;
 
-/* Define enums for RF units. */
+/* Define enums for RF units.  GRF_CSQ asks for units in form used
+   in AT+CSQ command as defined by GSM 07.07 */
 
 typedef enum {
   GRF_Arbitrary,
   GRF_dBm,
   GRF_mV,
-  GRF_uV
+  GRF_uV,
+  GRF_CSQ,
 } GSM_RFUnits;
 
-/* Define enums for RF units. */
+/* Define enums for Battery units. */
 
 typedef enum {
   GBU_Arbitrary,
@@ -164,14 +166,19 @@ typedef struct {
   char *Models; /* Models covered by this type, pipe '|' delimited. */
 
 /* Minimum and maximum levels for RF signal strength. Units are as per the
-   setting of RFLevelUnits. */
+   setting of RFLevelUnits.  The setting of RFLevelUnits indicates the 
+   default or "native" units used.  In the case of the 3110 and 6110 series
+   these are arbitrary, ranging from 0 to 4 */
 
   float MaxRFLevel;
   float MinRFLevel;
   GSM_RFUnits RFLevelUnits;
 
 /* Minimum anx maximum levels for battery level. Again, units are as per the
-   setting of GSM_BatteryLevelUnits. */
+   setting of GSM_BatteryLevelUnits.  The value that BatteryLevelUnits is
+   set to indicates the "native" or default value that the phone supports. 
+   In the case of the 3110 and 6110 series these are arbitrary,
+    ranging from 0 to 4*/
 
   float MaxBatteryLevel;
   float MinBatteryLevel;
@@ -249,9 +256,15 @@ typedef struct {
 
   GSM_Error (*SendSMSMessage)( GSM_SMSMessage *SMS );
 
-  GSM_Error (*GetRFLevel)( float *level );
+    /* If units is set to a valid GSM_RFUnits value, the code
+       will return level in these units if it is able.  Otherwise
+       value will be returned as GRF_Arbitary.  If phone doesn't
+       support GetRFLevel, function returns GE_NOTSUPPORTED */
+  GSM_Error (*GetRFLevel)( GSM_RFUnits *units, float *level );
 
-  GSM_Error (*GetBatteryLevel)( float *level );
+    /* Works the same as GetRFLevel, except returns battery
+       level if known. */
+  GSM_Error (*GetBatteryLevel)( GSM_BatteryUnits *units, float *level );
 
   GSM_Error (*GetPowerSource)( GSM_PowerSource *source);
 

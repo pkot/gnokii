@@ -482,10 +482,15 @@ int PackSevenBitsToEight(unsigned char *String, unsigned char* Buffer)
   return OUT-Buffer;
 }
 
-GSM_Error FB61_GetRFLevel(float *level)
+GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level)
 {
 
+		/* FIXME - these values are from 3810 code, may be incorrect.
+           Map from values returned in status packet to the
+		   the values returned by the AT+CSQ command */
+  float	csq_map[5] = {0, 8, 16, 24, 31};
   int timeout=10;
+  int rf_level;
 
   CurrentRFLevel=-1;
 
@@ -500,18 +505,42 @@ GSM_Error FB61_GetRFLevel(float *level)
     usleep (100000);
   }
 
-  if (CurrentRFLevel != -1) {
-    *level=CurrentRFLevel;
-    return (GE_NONE);
-  }
-  else
+  /* Make copy in case it changes. */
+  rf_level = CurrentRFLevel;
+
+  if (rf_level == -1) {
     return (GE_NOLINK);
+  }
+ 
+  /* Now convert between the different units we support. */
+
+  /* Arbitrary units. */
+  if (*units == GRF_Arbitrary) {
+	*level = rf_level;
+	return (GE_NONE);
+  }
+
+  /* CSQ units. */
+  if (*units == GRF_CSQ) {
+	if (rf_level <=4) {
+	 *level = csq_map[rf_level];
+	}
+	else {
+     *level = 99;	/* Unknown/undefined */
+    }
+   return (GE_NONE);
+  }
+
+  /* Unit type is one we don't handle so return error */
+  return (GE_INTERNALERROR);
+
 }
 
-GSM_Error FB61_GetBatteryLevel(float *level)
+GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 {
 
   int timeout=10;
+  int batt_level;
 
   CurrentBatteryLevel=-1;
 
@@ -526,9 +555,18 @@ GSM_Error FB61_GetBatteryLevel(float *level)
     usleep (100000);
   }
 
-  if (CurrentBatteryLevel != -1) {
-    *level=CurrentBatteryLevel;
-    return (GE_NONE);
+  /* Take copy in case it changes. */
+  batt_level = CurrentBatteryLevel;
+
+  if (batt_level != -1) {
+
+		/* Only units we handle at present are GBU_Arbitrary */
+	if (*units == GBU_Arbitrary) {
+		*level = batt_level;
+		return (GE_NONE);
+	}
+
+	return (GE_INTERNALERROR);
   }
   else
     return (GE_NOLINK);

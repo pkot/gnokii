@@ -132,7 +132,6 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 void	ATEM_ParseAT(char *cmd_buffer)
 {
 	char *buf;
-	char dial_string[40];
 
 	if (strncmp (cmd_buffer, "AT", 2) != 0) {
 		ATEM_ModemResult(4);
@@ -201,6 +200,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 bool	ATEM_CommandPlusC(char **buf)
 {
 	float		rflevel;
+	GSM_RFUnits	rfunits = GRF_CSQ;
 	char		buffer[80];
 	char		buffer2[80];
 
@@ -208,7 +208,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		buf[0] ++;
 		buf[0] ++;
 
-    	if (GSM->GetRFLevel(&rflevel) == GE_NONE) {
+    	if (GSM->GetRFLevel(&rfunits, &rflevel) == GE_NONE) {
 			sprintf(buffer, "\n\r+CSQ: %0.0f, 99", rflevel);
 			ATEM_StringOut(buffer);
 			return (false);
