@@ -1,5 +1,8 @@
 0.4.0pre21 (not released yet)
 ==========
+ * AT series
+     o added stub for SMS delete. needs to be revisited when
+       SMS works for AT mode                              (Petr Cech)
  * Rewrite of the SMS subsystem
     o reading of SMS splitted into 2 stages               (Pawel Kot)
     o support for EMS picture/animation SMSes          (Pavel Machek)

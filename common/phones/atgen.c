@@ -60,6 +60,7 @@ static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int len
 static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+/* static GSM_Error ReplyDeleteSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data); */
 static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -80,6 +81,7 @@ static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *cmd);
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
@@ -114,6 +116,7 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_SendSMS, AT_SendSMS, ReplySendSMS },
 	{ GOP_SaveSMS, AT_SaveSMS, ReplySendSMS },
 	{ GOP_GetSMS, AT_GetSMS, ReplyGetSMS },
+	{ GOP_DeleteSMS, AT_DeleteSMS, Reply },
 	{ GOPAT_GetCharset, AT_GetCharset, ReplyGetCharset },
 	{ GOP_GetSMSCenter, AT_GetSMSCenter, ReplyGetSMSCenter },
 	{ GOP_GetSecurityCodeStatus, AT_GetSecurityCodeStatus, ReplyGetSecurityCodeStatus },
@@ -656,6 +659,23 @@ static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, GOP_GetSMS);
 }
 
+/* FIXME
+ * This function doesn't set memory type. this need to be fixed when 
+ * SMS for AT works */
+static GSM_Error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	return GE_NOTSUPPORTED;
+/*
+	unsigned char req[16];
+	sprintf(req, "AT+CMGD=%d\r", data->SMS->Number);
+	dprintf("%s", req);
+
+	if (SM_SendMessage(state, strlen(req), GOP_DeleteSMS, req) != GE_NONE)
+ 		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_DeleteSMS);
+*/
+}
+
 /* Hey nokia users. don't expect this to return anything useful */
 /* You can't read the number set by the phone menu with this */
 /* command, nor can you change this number by AT commands. Worse, */
@@ -1106,8 +1126,8 @@ static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buff
 
 
 /* General reply function for phone responses. buffer[0] holds the compiled
- * success of the result (OK, ERROR, ... ). see atbus.h and atbus.c for 
- * reference */
+ * success of the result (OK, ERROR, ... ). see links/atbus.h and links/atbus.c 
+ * for reference */
 static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	if (buffer[0] != GEAT_OK)
