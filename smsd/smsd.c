@@ -109,10 +109,17 @@ gint LoadDB (void)
   buf = g_string_sized_new (64);
   
   g_string_sprintf (buf, "%s/lib%s.so", smsdConfig.libDir, smsdConfig.dbMod);
-  
+
+#ifdef XDEBUG
+  g_print ("Trying to load module %s\n", buf->str);
+#endif
+    
   handle = dlopen (buf->str, RTLD_LAZY);
   if (!handle)
+  {
+    g_print ("dlopen error: %s!\n", dlerror());
     return (1);
+  }
     
   DB_Bye = dlsym(handle, "DB_Bye");
   if ((error = dlerror ()) != NULL)
