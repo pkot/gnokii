@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.89  2001-06-10 11:24:57  machek
+  Revision 1.90  2001-06-28 00:40:56  pkot
+  8bit SMS handling in 3810 series - old structure yet (Tamas Bondar)
+
+  Revision 1.89  2001/06/10 11:24:57  machek
   Kill "slash star" inside comment.
 
   Revision 1.88  2001/06/04 09:24:27  machek
@@ -590,12 +593,15 @@ GSM_Error   FB38_DeleteSMSMessage(GSM_SMSMessage *message)
 GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 {
     int     timeout;
-    int     text_offset;
-    int     text_length;
-    int     text_remaining;
+    int     retry_count;
     u8      block_count;
     u8      block_length;
-    int     retry_count;
+    u8      fo = FO_DEFAULT;
+    u8      dcs = DCS_DEFAULT;
+    u8      size;
+    u8      max_size = GSM_MAX_SMS_LENGTH;
+    unsigned char ud[160];
+    int ud_offset, ud_remaining;
     GSM_Error error;
 
         /* Return if no link has been established. */
@@ -609,15 +615,36 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
         if (error != GE_NONE)
             return error;
     }
-    
+
     fprintf(stdout, _("Sending SMS to %s via message center %s\n"), SMS->Destination, SMS->MessageCenter.Number);
 
-        /* Get and check total length, */
-    text_length = strlen(SMS->MessageText);
-
-    if (text_length > 160) {
-        return GE_SMSTOOLONG;
+        /* Check if User Data Header is present */
+    if (SMS->UDHType) {
+          /* ud_offset - length of the User Data Header */
+      ud_offset = 1 + SMS->UDH[0];
+          /* copy the UDH and set the mask for the indicator */
+      memcpy(ud, SMS->UDH, ud_offset);
+      fo |= FO_UDHI;
+    } else {
+          /* set ud_offset to starting position */     
+      ud_offset = 0;
     }
+
+        /* Copy SMS content to user data */
+    if (SMS->EightBit) {
+      memcpy(ud + ud_offset, SMS->MessageText, data_size);
+      size = data_size + ud_offset;
+      max_size = 140;
+      dcs = DCS_DATA | DCS_CLASS1;
+    } else {
+      size = strlen(SMS->MessageText);
+      memcpy(ud + ud_offset, SMS->MessageText, size);
+      size += ud_offset;
+    }
+
+        /* Get and check total length */
+    if (size > max_size)
+      return(GE_SMSTOOLONG);
 
         /* We have a loop here as if the response from the phone is
            0x65 0x26 the rule appears to be just to try sending the
@@ -637,8 +664,8 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
         DisableKeepalive = true;
 
             /* Send header */
-			/* Use FB38_TX_Send0x24_StoreSMSHeader() if you want save message to phone */
-        FB38_TX_Send0x23_SendSMSHeader(SMS->MessageCenter.Number, SMS->Destination, text_length);
+	    /* Use FB38_TX_Send0x24_StoreSMSHeader() if you want save message to phone */
+        FB38_TX_Send0x23_SendSMSHeader(SMS->MessageCenter.Number, SMS->Destination, fo, dcs, size);
 
         timeout = 20;   /* 2 seconds for command to complete */
 
@@ -655,11 +682,11 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
             /* Now send as many blocks of maximum 55 characters as required
                to send complete message. */
         block_count = 1;
-        text_offset = 0;
-        text_remaining = text_length;
+        ud_offset = 0;
+        ud_remaining = size;
 
-        while (text_remaining > 0) {
-            block_length = text_remaining;
+        while (ud_remaining > 0) {
+            block_length = ud_remaining;
 
                 /* Limit length */
             if (block_length > 55) {
@@ -668,12 +695,7 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 
                 /* Clear acknowledge received flag and send message. */
             SMSBlockAckReceived = false;        
-            FB38_TX_Send0x27_SendSMSMessageText(block_count, block_length, SMS->MessageText + text_offset);
-
-                /* update remaining and offset values for next time. */
-            text_remaining -= block_length;
-            text_offset += block_length;
-            block_count ++;
+            FB38_TX_Send0x27_SendSMSMessageText(block_count, block_length, ud + ud_offset);
     
             timeout = 20;   /* 2 seconds. */
     
@@ -686,6 +708,11 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
                     }
                 usleep (100000);
             }
+
+                /* update remaining and offset values for next time. */
+            ud_remaining -= block_length;
+            ud_offset += block_length;
+            block_count ++;
         }
 
             /* Now wait for response from network which will see
@@ -726,6 +753,7 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
     DisableKeepalive = false;
     return(CurrentSMSMessageError);
 }
+
 
     /* FB38_GetRFLevel
        FIXME (sort of...)
@@ -2002,12 +2030,12 @@ void    FB38_TX_Send0x4c_RequestIMEIRevisionModelData(void)
     }
 }
 
-
-void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, u8 total_length)
+void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, u8 fo, u8 dcs, u8 total_length)
 {
     
     u8      message[255];
     u8      message_center_length, destination_length;
+    int i;
 
         /* Update sequence number. */
     FB38_TX_UpdateSequenceNumber();
@@ -2018,9 +2046,9 @@ void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, 
 
         /* Build and send message. */
 
-    message[0] = FO_DEFAULT;	/* TP-FO */
+    message[0] = fo;      	/* TP-FO */
     message[1] = PID_DEFAULT;	/* TP-PID */
-    message[2] = DCS_DEFAULT;	/* TP-DCS */
+    message[2] = dcs;   	/* TP-DCS */
     message[3] = GSMV_Max_Time;	/* VP (Only this octet used when VPF == Relative */
     message[4] = 0x00;		/* VP */
     message[5] = 0x00;		/* VP */
@@ -2028,7 +2056,7 @@ void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, 
     message[7] = 0x00;		/* VP */
     message[8] = 0x00;		/* VP */
     message[9] = 0x00;		/* VP */
- 
+
         /* Add total length and message_center number length fields. */
     message[10] = total_length;
     message[11] = message_center_length;
@@ -2040,11 +2068,13 @@ void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, 
     message[12 + message_center_length] = destination_length;
     memcpy (message + 13 + message_center_length, destination, destination_length);
 
+    dprintf("Transferring FBUS SMS header [");
+    for (i=0; i < 13 + message_center_length + destination_length; i++) dprintf(" %02hhX", message[i]);
+    dprintf(" ]\n");
+
     if (FB38_TX_SendMessage(13 + message_center_length + destination_length, 0x23, RequestSequenceNumber, message) != true) {
         fprintf(stderr, _("Send SMS header failed!"));  
     }
-
-
 }
 
 void    FB38_TX_Send0x24_StoreSMSHeader(char *message_center, char *destination, u8 total_length)

@@ -13,7 +13,10 @@
   Header file for 3810 code.
 
   $Log$
-  Revision 1.50  2001-06-28 00:28:45  pkot
+  Revision 1.51  2001-06-28 00:40:57  pkot
+  8bit SMS handling in 3810 series - old structure yet (Tamas Bondar)
+
+  Revision 1.50  2001/06/28 00:28:45  pkot
   Small docs updates (Pawel Kot)
 	
 
@@ -185,7 +188,7 @@ void	FB38_TX_Send0x0f_HangupMessage(void);
 void    FB38_TX_Send0x25_RequestSMSMemoryLocation(u8 memory_type, u8 location); 
 void    FB38_TX_Send0x26_DeleteSMSMemoryLocation(u8 memory_type, u8 location);
 
-void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, u8 total_length);
+void    FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, u8 fo, u8 dcs, u8 total_length);
 void    FB38_TX_Send0x27_SendSMSMessageText(u8 block_number, u8 block_length, char *text);
 void    FB38_TX_Send0x3fMessage(void); 
 void    FB38_TX_Send0x4aMessage(void);
