@@ -389,34 +389,36 @@ static GSM_Error P6510_Initialise(GSM_Statemachine *state)
 
 static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
+	int pos, string_length;
+
 	switch (message[3]) {
 	case 0x01:
 		if (data->Imei) {
-			int n;
-			unsigned char *s = strchr(message + 10, '\n');
-
-			if (s) n = s - message - 9;
-			else n = GSM_MAX_IMEI_LENGTH;
-			snprintf(data->Imei, GNOKII_MIN(n, GSM_MAX_IMEI_LENGTH), "%s", message + 10);
+			snprintf(data->Imei, GNOKII_MIN(message[9], GSM_MAX_IMEI_LENGTH), "%s", message + 10);
 			dprintf("Received imei %s\n", data->Imei);
 		}
 		break;
 	case 0x08:
-		if (data->Model) {
-			int n;
-			unsigned char *s = strchr(message + 27, '\n');
-
-			n = s ? s - message - 26 : GSM_MAX_MODEL_LENGTH;
-			snprintf(data->Model, GNOKII_MIN(n, GSM_MAX_MODEL_LENGTH), "%s", message + 27);
-			dprintf("Received model %s\n",data->Model);
-		}
 		if (data->Revision) {
-			int n;
-			unsigned char *s = strchr(message + 10, '\n');
-
-			n = s ? s - message - 9 : GSM_MAX_REVISION_LENGTH;
-			snprintf(data->Revision, GNOKII_MIN(n, GSM_MAX_REVISION_LENGTH), "%s", message + 10);
+			pos = 10;
+			string_length = 0;
+			while (message[pos + string_length] != 0x0a) string_length++;
+			snprintf(data->Revision, GNOKII_MIN(string_length + 1, GSM_MAX_REVISION_LENGTH), "%s", message + pos);
 			dprintf("Received revision %s\n",data->Revision);
+		}
+		if (data->Model) {
+			pos = 10;
+			string_length = 0;
+			while (message[pos++] != 0x0a) ;  /* skip revision */
+			pos++;
+			while (message[pos++] != 0x0a) ;  /* skip date */
+
+			string_length = 0;
+			while (message[pos + string_length] != 0x0a) string_length++;  /* find model length */
+			dprintf("model length: %i\n", string_length);
+
+			snprintf(data->Model, GNOKII_MIN(string_length + 1, GSM_MAX_MODEL_LENGTH), "%s", message + pos);
+			dprintf("Received model %s\n", data->Model);
 		}
 		break;
 	default:
