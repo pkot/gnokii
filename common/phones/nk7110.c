@@ -658,13 +658,13 @@ static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	switch (message[3]) {
-	case 02:
+	case 0x02:
 		if (data->Imei) { 
 			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
 			dprintf("Received imei %s\n",data->Imei);
 		}
 		break;
-	case 04:
+	case 0x04:
 		if (data->Model) { 
 			snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 22);
 			dprintf("Received model %s\n",data->Model);
@@ -844,9 +844,11 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/* Some errors */
 	case 0xc9:
+		dprintf("Unknown command???\n");
+		return GE_UNHANDLEDFRAME;
+
 	case 0xca:
 	default:
-
 		for (i = 0; i < length; i ++)
 			if (isprint(message[i]))
 				dprintf("[%02x%c]", message[i], message[i]);
@@ -899,6 +901,7 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	dprintf("Getting SMS...\n");
+	req_sms[4] = data->SMSMessage->MemoryType;
 	req_sms[5] = (data->SMSMessage->Number & 0xff00) >> 8;
 	req_sms[6] = data->SMSMessage->Number & 0x00ff;
 	if (SM_SendMessage(state, 10, 0x14, req_sms) != GE_NONE) return GE_NOTREADY;
