@@ -24,8 +24,8 @@
 
   Copyright (C) 2002 Ladislav Michl <ladis@linux-mips.org>
 
-  This file provides functions specific to at commands on ericsson
-  phones. See README for more details on supported mobile phones.
+  This file provides functions specific to AT commands on Bosch phones.
+  See README for more details on supported mobile phones.
 
 */
 

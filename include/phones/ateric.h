@@ -24,8 +24,8 @@
 
   Copyright 2001 Manfred Jonsson <manfred.jonsson@gmx.de>
 
-  This file provides functions specific to at commands on ericsson
-  phones. See README for more details on supported mobile phones.
+  This file provides functions specific to AT commands on Ericsson phones.
+  See README for more details on supported mobile phones.
 
 */
 
