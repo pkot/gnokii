@@ -39,6 +39,23 @@
 
 /* ----- bluetooth io thread ----- */
 
+static void thread_rfcommDataListener(IOBluetoothRFCOMMChannelRef rfcommChannel,
+                               void* data, UInt16 length, void* refCon)
+{
+	threadContext *pContext = (threadContext *)refCon;
+	void *pBuffer = malloc(length);
+	dataBlock *pDataBlock = (dataBlock *)malloc(sizeof(dataBlock));
+
+	memcpy(pBuffer, data, length);
+
+	pDataBlock->pData = pBuffer;
+	pDataBlock->nSize = length;
+
+	pthread_mutex_lock(&(pContext->mutexWait));
+	CFArrayAppendValue(pContext->arrDataReceived, pDataBlock);
+	pthread_mutex_unlock(&(pContext->mutexWait));
+}
+
 static void *thread_main(void *pArg)
 {
 	threadContext* pContext = (threadContext *)pArg;
@@ -62,23 +79,6 @@ static void *thread_main(void *pArg)
 
 	/* start the runloop */
 	CFRunLoopRun();
-}
-
-static void thread_rfcommDataListener(IOBluetoothRFCOMMChannelRef rfcommChannel,
-                               void* data, UInt16 length, void* refCon)
-{
-	threadContext *pContext = (threadContext *)refCon;
-	void *pBuffer = malloc(length);
-	dataBlock *pDataBlock = (dataBlock *)malloc(sizeof(dataBlock));
-
-	memcpy(pBuffer, data, length);
-
-	pDataBlock->pData = pBuffer;
-	pDataBlock->nSize = length;
-
-	pthread_mutex_lock(&(pContext->mutexWait));
-	CFArrayAppendValue(pContext->arrDataReceived, pDataBlock);
-	pthread_mutex_unlock(&(pContext->mutexWait));
 }
 
 /* ---- bluetooth io thread ---- */
