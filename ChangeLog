@@ -3,6 +3,9 @@
  * maintainance updates
     o update make_dist script to reflect tar.bz2 file build
                                                         (Pawel Kot)
+ * nk6510 driver
+    o added Nokia 3510i to the supported phones list
+                                                    (Rafal Czlonka)
 
 0.5.7
 =====
