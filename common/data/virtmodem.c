@@ -51,6 +51,15 @@
 #include "data/rlp-common.h"
 #include "device.h"
 
+/* Defines */
+
+#ifndef AF_LOCAL 
+#  ifdef AF_UNIX
+#    define AF_LOCAL AF_UNIX
+#  else
+#    error AF_LOCAL not defined
+#  endif
+#endif
 /* Prototypes */
 static int  VM_PtySetup(char *bindir);
 static void VM_ThreadLoop(void);
