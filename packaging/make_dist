@@ -28,9 +28,9 @@ rm -rf /tmp/gnokii-${VERSION}/xkeyb
    cp packaging/RedHat/gnokii.spec .
    make distclean
    chmod 755 mkinstalldirs
+   cd ..
+   tar cvfz /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION} --exclude CVS
 )
-
-tar cvfz /tmp/gnokii-${VERSION}.tar.gz /tmp/gnokii-${VERSION} --exclude CVS
 
 rm -rf /tmp/gnokii-${VERSION}
 

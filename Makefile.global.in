@@ -72,7 +72,8 @@ ifdef WIN32
 endif
 
 
-CFLAGS += $(MODEL) $(PORT) $(WIN32)
+# FIXME: move this away to config.h
+CFLAGS += $(MODEL) $(PORT) $(WIN32) $(TERMIOS_CFLAGS) $(TM_CFLAGS)
 CFLAGS += -I $(GNOKII_INCLUDE) -DVERSION=\"$(VERSION)\"
 LDFLAGS = -s $(LIBS)
 
