@@ -40,6 +40,8 @@
       some datacall problem)                         (BORBELY Zoltan)
  * 7110 series updates:
     o use nokia-decoding                               (Markus Plail)
+    o fix Inbox status reading                         (Markus Plail)
+    o remove GetUnreadMessages and friends             (Markus Plail)
  * bitmap support
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
@@ -63,7 +65,7 @@
  * poll() converted to select() everywhere           (BORBELY Zoltan)
  * make static variables declared with static keyword, make
    variables extern where needed                          (Pawel Kot)
- * add 6310i to unixirda.c                             (Robert Ivanc)
+ * add 6310i and 7650 to unixirda.c      (Robert Ivanc, Markus Plail)
 
 0.4.2a
 ======
