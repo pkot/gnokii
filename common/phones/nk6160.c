@@ -146,6 +146,18 @@ static gn_error initialise(struct gn_statemachine *state)
 	case GN_CT_Infrared:
 		error = m2bus_initialise(state);
 		break;
+	case GN_CT_DLR3P:
+		if ((error = fbus_initialise(0, state)) == GN_ERR_NONE) break;
+		/*FALLTHROUGH*/
+	case GN_CT_DAU9P:
+		error = fbus_initialise(1, state);
+		break;
+	case GN_CT_Bluetooth:
+		error = fbus_initialise(2, state);
+		break;
+	case GN_CT_Irda:
+		error = phonet_initialise(state);
+		break;
 	default:
 		error = GN_ERR_NOTSUPPORTED;
 	}
