@@ -12,15 +12,6 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-ifdef XPM_LIBS
-	LDLIBS += $(XPM_LIBS)
-	CFLAGS += $(XPM_CFLAGS)
-endif
-
-ifdef ICONV_LIBS
-	LDLIBS += $(ICONV_LIBS)
-endif
-
 CFLAGS += $(PTHREAD_CFLAGS) \
 	  $(GTK_CFLAGS)
 

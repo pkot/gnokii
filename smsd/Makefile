@@ -30,14 +30,6 @@ LDLIBS += -rdynamic $(TOPDIR)/common/libgnokii.la -ldl
 # Some systems, eg. FreeBSD don't have libdl. Use this:
 # LDLIBS += -s -rdynamic -L$(TOPDIR)/common -lgnokii
 
-ifdef XPM_LIBS
-	LDLIBS +=$(XPM_LIBS)
-endif
-
-ifdef ICONV_LIBS
-	LDLIBS += $(ICONV_LIBS)
-endif
-
 OBJS = 	smsd.lo \
 	lowlevel.lo
 

@@ -26,14 +26,6 @@ endif
 
 LDLIBS += $(TOPDIR)/common/libgnokii.la
 
-ifdef XPM_LIBS
-	LDLIBS += $(XPM_LIBS)
-endif
-
-ifdef ICONV_LIBS
-	LDLIBS += $(ICONV_LIBS)
-endif
-
 all: gnokii
 
 gnokii: $(OBJS) $(TOPDIR)/common/libgnokii.la

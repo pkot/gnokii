@@ -1,3 +1,6 @@
+* Sun Jun 27 2004 Pawel Kot <pkot@bezsensu.pl>
+- Move appending LDLIBS to ../Makefile.global (in case of common libraries)
+
 * Sun Jun 20 2004 Pawel Kot <pkot@bezsensu.pl>
 - Really finish libtolization: use *.lo objects instead of *.o. It avoids
   mixing fPIC (from libgnokii) and non-fPIC (from smsd) code.
