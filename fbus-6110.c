@@ -865,6 +865,9 @@ GSM_Error FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x01};
   int memory_area;
+  int timeout = 50; /* 5 seconds for command to complete */
+
+  CurrentSMSMessageError = GE_BUSY;
 
   if (memory_type == GMT_INTERNAL)
     memory_area = FB61_MEMORY_PHONE;
@@ -879,9 +882,16 @@ GSM_Error FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
 
   FB61_TX_SendMessage(0x07, 0x14, req);
 
-  /* Fixme: error checking, waiting for the response. */
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
 
-  return (GE_NONE);
+    if (timeout-- == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentSMSMessageError);
 }
 
 /* This function implements packing of numbers (SMS Center number and
@@ -952,6 +962,9 @@ GSM_Error FB61_SendSMSMessage(char *message_centre, char *destination, char *tex
   };
 
   int size=PackSevenBitsToEight(text, req+42);
+
+  if (strlen(text) > GSM_MAX_SMS_LENGTH)
+    return(GE_SMSTOOLONG);
 
   req[6]=SemiOctetPack(message_centre, req+7);
 
@@ -1852,6 +1865,16 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       break;
 
+    case 0x0b:	/* successful delete */
+
+#ifdef DEBUG
+      printf(_("Message: SMS deleted successfully.\n"));
+#endif DEBUG
+
+      CurrentSMSMessageError = GE_NONE;	
+
+      break;
+
     case 0x37:
 
 #ifdef DEBUG
@@ -1875,6 +1898,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       break;
 	  
     default:
+
+      /* FIXME: this is very bad! Should identify specific type for "rest of msg" */
 
 #ifdef DEBUG
       printf(_("Message: the rest of the SMS message received.\n"));
@@ -2056,14 +2081,14 @@ char *FB61_PrintDevice(int Device)
    received so that the user can see what is going back and forth, and perhaps
    shed some more light/explain another message type! */
 	
-void	FB61_RX_DisplayMessage(void)
+void FB61_RX_DisplayMessage(void)
 {
 
 #ifdef DEBUG
 
-  int		count;
+  int count;
 
-  fprintf(stdout, _("Msg Destination: %s\n"), FB61_PrintDevice(MessageDestination));
+  fprintf(stdout, _("Msg Dest: %s\n"), FB61_PrintDevice(MessageDestination));
   fprintf(stdout, _("Msg Source: %s\n"), FB61_PrintDevice(MessageSource));
 
   fprintf(stdout, _("Msg Type: %02x\n"), MessageType);
