@@ -206,7 +206,9 @@ dnl ======================== Checks for Linux IrDA support
 USE_IRDA="no"
 AC_CHECK_HEADER(linux/irda.h,
 	[AC_DEFINE(HAVE_IRDA)
-	 USE_IRDA="yes"])
+	 USE_IRDA="yes"],,
+	[#include <sys/socket.h>
+	 #include <sys/ioctl.h>])
 
 dnl ======================== Checks for Linux Bluetooth support
 bluetooth="no"

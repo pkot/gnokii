@@ -30,6 +30,9 @@
     o sms status message can crash the driver       (BORBELY Zoltan)
  * xgnokii fixes
     o do not free message previously added to GSList  (Josef Zlomek)
+ * build system updates
+    o avoid warnings on Linux when irda headers are detected
+                                                         (Pawel Kot)
 
 0.5.2
 =====
