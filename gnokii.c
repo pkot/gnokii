@@ -269,6 +269,13 @@ void sendsms(char *argv[])
 
   error = GSM->SendSMSMessage(argv[3], argv[2], message_buffer);
 
+  if (error == GE_SMSSENDOK) {
+    fprintf(stdout, _("Send succeeded!\n"));
+  }
+  else {
+    fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+  }
+
   GSM->Terminate();
   exit(-1);
 }

@@ -73,6 +73,10 @@ GSM_Error	FB38_GetIncomingCallNr(char *Number);
 #define		FB38_DEFAULT_INT_PHONEBOOK_NAME_LENGTH		(20)
 #define		FB38_DEFAULT_INT_PHONEBOOK_NUMBER_LENGTH	(30)
 
+	/* Number of times to try resending SMS (empirical) */
+#define		FB38_SMS_SEND_RETRY_COUNT					(4)
+
+
 	/* Miscellaneous values. */
 #define		FB38_MAX_RECEIVE_LENGTH 			(512)
 #define		FB38_MAX_TRANSMIT_LENGTH			(256)

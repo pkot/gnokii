@@ -381,9 +381,9 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 
 		/* We have a loop here as if the response from the phone is
 		   0x65 0x26 the rule appears to be just to try sending the
-		   message again.  We do this a maximum of four times before
-		   giving up.  This value is empirical only! */
-	retry_count = 4;
+		   message again.  We do this a maximum of FB38_SMS_SEND_RETRY_COUNT
+		   times before giving up.  This value is empirical only! */
+	retry_count = FB38_SMS_SEND_RETRY_COUNT;
 
 	while (retry_count > 0) {
 
@@ -462,7 +462,18 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 			usleep (100000);
 		}
 
-		fprintf(stderr, _("SMS Send attempt failed, trying again (%d)\n"), retry_count);
+			/* New code here - commenting it in this manner as it's a bit
+			   late and hence I may be missing something.  Think this
+		 	   bug crept in between 1.5 and 1.6 - even if SMS was sent
+			   OK would still retry! HAB 19990517 */
+		if (CurrentSMSMessageError == GE_SMSSENDOK) {
+			DisableKeepalive = false;
+			return(CurrentSMSMessageError);
+		}
+
+			/* Indicate attempt failed and show attempt number and number
+			   of attempts remaining. */
+		fprintf(stderr, _("SMS Send attempt failed, trying again (%d of %d)\n"), 			(retry_count - FB38_SMS_SEND_RETRY_COUNT + 1), FB38_SMS_SEND_RETRY_COUNT);
 			/* Got a retry response so try again! */
 		retry_count --;
 
@@ -1455,7 +1466,9 @@ void	FB38_RX_Handle0x4b_Status(void)
 		return;
 	}
 
-	fprintf(stdout, _("Status: RF %02x, Batt %02x, Connection Status %02x.\n"), MessageBuffer[3], MessageBuffer[4], MessageBuffer[2]);
+		/* Only output connection status byte now as the RF and Battery
+	 	   levels are displayed by the main gnokii code. */
+	fprintf(stdout, _("Status: Connection Status %02x.\n"), MessageBuffer[2]);
 
 }
 
