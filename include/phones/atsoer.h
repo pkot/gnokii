@@ -29,8 +29,8 @@
 
 */
 
-#ifndef _gnokii_ateric_h
-#define _gnokii_ateric_h
+#ifndef _gnokii_atsoer_h
+#define _gnokii_atsoer_h
 
 #include "gnokii-internal.h"
 

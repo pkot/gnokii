@@ -2,6 +2,9 @@
 =====
  * portability fixes
     o build atsoer.c under MSVC                        (Phil Ashby)
+ * libgnokii changes
+    o protect atsoer.h with _gnokii_atsoer_h, not _gnokii_ateric_h
+                                                       (Phil Ashby)
 
 0.6.2
 =====
