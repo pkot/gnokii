@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
 
   /* Send sms message mode. */
   if (argc == 4 && strcmp(argv[1], "--sendsms") == 0)
-    sendsms(argv);
+    sendsms(argc, argv);
 
   /* Get smsc number mode. */
   if (argc == 3 && strcmp(argv[1], "--getsmsc") == 0)

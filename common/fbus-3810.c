@@ -738,11 +738,6 @@ GSM_Error	FB38_GetSMSStatus(GSM_SMSStatus *Status)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
 GSM_Error	FB38_GetPowerSource(GSM_PowerSource *source)
 {
 	return (GE_NOTIMPLEMENTED);
