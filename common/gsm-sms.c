@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.7  2001-11-15 12:15:04  pkot
+  Revision 1.8  2001-11-17 20:19:29  pkot
+  smslib cleanups, fixes and debugging
+
+  Revision 1.7  2001/11/15 12:15:04  pkot
   smslib updates. begin work on sms in 6100 series
 
   Revision 1.6  2001/11/14 18:21:19  pkot
@@ -80,14 +83,10 @@ static struct udh_data headers[] = {
 static char *GetBCDNumber(u8 *Number)
 {
         static char Buffer[20] = "";
-
-	/* This is the length of BCD coded number */
-        int length=Number[0];
-        int count;
-        int Digit;
+        int length = Number[0]; /* This is the length of BCD coded number */
+        int count, Digit;
 
         switch (Number[1]) {
-
 	case 0xd0:
 		Unpack7BitCharacters(0, length, length, Number+2, Buffer);
 		Buffer[length] = 0;
@@ -108,46 +107,14 @@ static char *GetBCDNumber(u8 *Number)
         return Buffer;
 }
 
-#if 0
-char *GetBCDNumber(u8 *Number, int maxdigits, int maxbytes) 
-{
-	static char Buffer[22] = "";
-	int length = Number[0];	/* This is the length of BCD coded number */
-	int bytes = 0, digits = 0;
-	int Digit = 0;
-	
-	dprintf("%i\n", length);
-	
-	if (Number[1] == 0x91) {
-		sprintf(Buffer, "+");
-	} else {
-		Buffer[0] = '\0';
-	}
-	
-	while ((Digit < 10) && (bytes < length) && (digits < maxdigits)) {
-		Digit = Number[bytes + 2] & 0x0f;
-		if (Digit < 10) {
-			sprintf(Buffer, "%s%d", Buffer, Digit);
-			digits++;
-			Digit = Number[bytes + 2] >> 4;
-			if (Digit < 10) {
-				sprintf(Buffer, "%s%d", Buffer, Digit);
-				digits++;
-			}
-		}
-		bytes++;
-	} 
-	
-	return Buffer;
-}
-#endif
-
 static char *PrintDateTime(u8 *Number) 
 {
         static char Buffer[23] = "";
 
 	memset(Buffer, 0, 23);
-        sprintf(Buffer, "%d%d-", Number[0] & 0x0f, Number[0] >> 4);
+	if (Number[0] < 70) sprintf(Buffer, "20");
+	else sprintf(Buffer, "19");
+        sprintf(Buffer, "%s%d%d-", Buffer, Number[0] & 0x0f, Number[0] >> 4);
         sprintf(Buffer, "%s%d%d-", Buffer, Number[1] & 0x0f, Number[1] >> 4);
         sprintf(Buffer, "%s%d%d ", Buffer, Number[2] & 0x0f, Number[2] >> 4);
         sprintf(Buffer, "%s%d%d:", Buffer, Number[3] & 0x0f, Number[3] >> 4);
@@ -165,6 +132,8 @@ static char *PrintDateTime(u8 *Number)
 static SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
 {
         dt->Year     =  10 * (Number[0] & 0x0f) + (Number[0] >> 4);
+	if (dt->Year < 70) dt->Year += 2000;
+	else dt->Year += 1900;
         dt->Month    =  10 * (Number[1] & 0x0f) + (Number[1] >> 4);
         dt->Day      =  10 * (Number[2] & 0x0f) + (Number[2] >> 4);
         dt->Hour     =  10 * (Number[3] & 0x0f) + (Number[3] >> 4);
@@ -492,8 +461,6 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 
 static GSM_Error DecodeData(char *message, char *output, int length, int size, int udhlen, SMS_DataCodingScheme dcs)
 {
-	char aux[160];
-	
 	/* Unicode */
 	if ((dcs.Type & 0x08) == 0x08) {
 		dprintf("Unicode message\n");
@@ -502,15 +469,25 @@ static GSM_Error DecodeData(char *message, char *output, int length, int size, i
 	} else {
 		/* 8bit SMS */
 		if ((dcs.Type & 0xf4) == 0xf4) {
+			int i;
 			dprintf("8bit message\n");
+			for (i = 0; i < size; i++) {
+				dprintf("%02x ", message[i]);
+			}
 			memcpy(output, message, length);
 		/* 7bit SMS */
 		} else {
+			int i;
 			dprintf("Default Alphabet\n");
+			for (i = 0; i < size; i++) {
+				dprintf("%02x ", message[i]);
+			}
+			dprintf("\n");
 			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
-			Unpack7BitCharacters((7-udhlen)%7, size, length, message, aux);
+			dprintf("%d %d\n", size, length);
+			Unpack7BitCharacters((7-udhlen)%7, size, length, message, output);
+			DecodeAscii(output, output, length);
 		}
-		DecodeAscii(output, aux, length);
 	}
 	dprintf("%s\n", output);
 	return GE_NONE;
@@ -596,8 +573,8 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		break;
 	case SMS_Delivery_Report:
 		dprintf("Delivery Report:\n");
-		UnpackDateTime(message + 33 + DataOffset[SMS->Type], &(SMS->Time));
-		dprintf("\tDelivery date: %s\n", PrintDateTime(message + 39 + DataOffset[SMS->Type]));
+		UnpackDateTime(message + 34 + DataOffset[SMS->Type], &(SMS->SMSCTime));
+		dprintf("\tDelivery date: %s\n", PrintDateTime(message + 34 + DataOffset[SMS->Type]));
 		break;
 	case SMS_Submit:
 		dprintf("Mobile Originated message:\n");
@@ -638,7 +615,8 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 
 	/* User Data Header */
         if (message[15] & 0x40) { /* UDH header available */
-		dprintf("UDH found");
+		dprintf("UDH found\n");
+		SMS->UDH_No = 1; /* Temporary workaround */
 		//                DecodeUDH(message + 31 + DataOffset[SMS->Type], (SMS_UDHInfo **)SMS->UDH, SMS);
 	} else {                    /* No UDH */
 		dprintf("No UDH\n");
@@ -659,6 +637,8 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 	for (i = 0; i < SMS->UDH_No; i++) {
 		udhlen += headers[SMS->UDH[i].Type].length;
 	}
+	if (SMS->UDH_No) udhlen = message[34 + DataOffset[SMS->Type]] + 1;
+	else udhlen = 0;
 	if (SMS->Type == SMS_Delivery_Report) {
 		SMSStatus(message[17], SMS);
 	} else {
@@ -666,10 +646,12 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 			   34 -                    /* Header Length */
 			   DataOffset[SMS->Type] - /* offset */
 			   udhlen -                /* UDH Length */
-			   2;                      /* checksum */
+			   5;                      /* checksum */
 		DecodeData(message + 34 + DataOffset[SMS->Type] + udhlen,
 			   (unsigned char *)&(SMS->MessageText),
 			   SMS->Length, size, udhlen, SMS->DCS);
+		/* Just in case */
+		SMS->MessageText[SMS->Length] = 0;
 		dprintf("Length: %d\n", SMS->Length);
 	}
 	

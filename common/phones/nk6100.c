@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.7  2001-11-17 16:44:07  pkot
+  Revision 1.8  2001-11-17 20:19:29  pkot
+  smslib cleanups, fixes and debugging
+
+  Revision 1.7  2001/11/17 16:44:07  pkot
   Cleanup. Reading SMS for 6100 series. Not that it has some bugs more and does not support UDH yet
 
   Revision 1.6  2001/11/15 12:15:04  pkot
@@ -432,7 +435,7 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 		}
         /* read sms */
         case 0x08:
-                for (i = 0; i < length - 2; i ++)
+                for (i = 0; i < length; i ++)
                         if (isprint(message[i]))
                                 dprintf("[%02x%c]", message[i], message[i]);
                         else
