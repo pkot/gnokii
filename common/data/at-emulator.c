@@ -475,7 +475,7 @@ void	ATEM_ParseSMSText(char *buff)
 			/* FIXME: set more SMS fields before sending */
 			error = SendSMS(&data, sm);
 
-			if (error == GE_NONE || error == GE_SMSSENDOK) {
+			if (error == GE_NONE) {
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMSMessage->Number);
 				ATEM_StringOut(buffer);
 				ATEM_ModemResult(MR_OK);

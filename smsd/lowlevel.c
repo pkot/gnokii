@@ -267,7 +267,7 @@ static gint A_SendSMSMessage (gpointer data)
     pthread_mutex_unlock (&sendSMSMutex);
   }
 
-  if (d->status == GE_SMSSENDOK)
+  if (d->status == GE_NONE)
     return (GE_NONE);
   else
     return (error);

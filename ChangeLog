@@ -1,3 +1,11 @@
+0.4.0pre19 (not released yet)
+==========
+ * libsms updates
+    o kill GE_SMSSENDOK and replace with GE_NONE       (Pavel Machek,
+                                                           Pawel Kot)
+ * AT series updates
+    o enlarge the buffer to avoid potential overruns   (Pavel Machek)
+
 0.4.0pre18
 ==========
  * Add TCP connection        (Jan Kratochvil, hacked by Pavel Machek)

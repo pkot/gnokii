@@ -722,7 +722,7 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 		if (error == GE_NONE) error = SM_Functions(GOP_SendSMS, data, state);
 		dprintf("%d\n", data->SMSMessage->Length);
 		free(data->RawData->Data);
-		if (error != GE_SMSSENDOK) break;
+		if (error != GE_NONE) break;
 	}
 	data->RawData = NULL;
 	return error;
