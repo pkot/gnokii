@@ -143,7 +143,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 		row[2] = g_strdup_printf("%02d/%02d/%04d", note->Time.Day,
 					 note->Time.Month, note->Time.Year);
 		row[5] = "";
-		switch (note->Recurrence) {
+		switch (note->Recurrence / 60) {
 		case GCN_NEVER:
 			row[6] = _("never");
 			break;
@@ -160,7 +160,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d hours", note->Recurrence);
+			row[6] = g_strdup_printf("every %d minutes", note->Recurrence);
 		}
 		break;
 
@@ -170,7 +170,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 					 note->Time.Month, note->Time.Year,
 					 note->Time.Hour, note->Time.Minute);
 		row[5] = note->Phone;
-		switch (note->Recurrence) {
+		switch (note->Recurrence / 60) {
 		case GCN_NEVER:
 			row[6] = _("never");
 			break;
@@ -187,7 +187,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d hours", note->Recurrence);
+			row[6] = g_strdup_printf("every %d minutes", note->Recurrence);
 		}
 		break;
 
@@ -197,7 +197,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 					 note->Time.Month, note->Time.Year,
 					 note->Time.Hour, note->Time.Minute);
 		row[5] = "";
-		switch (note->Recurrence) {
+		switch (note->Recurrence / 60) {
 		case GCN_NEVER:
 			row[6] = _("never");
 			break;
@@ -214,7 +214,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d hours", note->Recurrence);
+			row[6] = g_strdup_printf("every %d minutes", note->Recurrence);
 		}
 		break;
 
@@ -695,44 +695,42 @@ static void ShowCalendar(GtkWidget * widget, Date * date)
 {
 	GtkWidget *button;
 
-	if (calendarDialog.dialog == NULL) {
-		calendarDialog.dialog = gtk_dialog_new();
-		gtk_window_set_title(GTK_WINDOW(calendarDialog.dialog), _("Choose date"));
-		gtk_window_position(GTK_WINDOW(calendarDialog.dialog), GTK_WIN_POS_MOUSE);
-		gtk_window_set_modal(GTK_WINDOW(calendarDialog.dialog), TRUE);
-		gtk_container_set_border_width(GTK_CONTAINER(calendarDialog.dialog), 10);
-		gtk_signal_connect(GTK_OBJECT(calendarDialog.dialog), "delete_event",
-				   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
+	calendarDialog.dialog = gtk_dialog_new();
+	gtk_window_set_title(GTK_WINDOW(calendarDialog.dialog), _("Choose date"));
+	gtk_window_position(GTK_WINDOW(calendarDialog.dialog), GTK_WIN_POS_MOUSE);
+	gtk_window_set_modal(GTK_WINDOW(calendarDialog.dialog), TRUE);
+	gtk_container_set_border_width(GTK_CONTAINER(calendarDialog.dialog), 10);
+	gtk_signal_connect(GTK_OBJECT(calendarDialog.dialog), "delete_event",
+			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 
-		button = gtk_button_new_with_label(_("Ok"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(calendarDialog.dialog)->action_area),
-				   button, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(OkCalendarDialog), (gpointer) date);
-		GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
-		gtk_widget_grab_default(button);
-		gtk_widget_show(button);
+	button = gtk_button_new_with_label(_("Ok"));
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(calendarDialog.dialog)->action_area),
+			   button, TRUE, TRUE, 10);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			   GTK_SIGNAL_FUNC(OkCalendarDialog), (gpointer) date);
+	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+	gtk_widget_grab_default(button);
+	gtk_widget_show(button);
 
-		button = gtk_button_new_with_label(_("Cancel"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(calendarDialog.dialog)->action_area),
-				   button, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(CancelDialog), (gpointer) calendarDialog.dialog);
-		gtk_widget_show(button);
+	button = gtk_button_new_with_label(_("Cancel"));
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(calendarDialog.dialog)->action_area),
+			   button, TRUE, TRUE, 10);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			   GTK_SIGNAL_FUNC(CancelDialog), (gpointer) calendarDialog.dialog);
+	gtk_widget_show(button);
 
-		gtk_container_set_border_width(GTK_CONTAINER
-					       (GTK_DIALOG(calendarDialog.dialog)->vbox), 5);
+	gtk_container_set_border_width(GTK_CONTAINER
+				       (GTK_DIALOG(calendarDialog.dialog)->vbox), 5);
 
-		calendarDialog.cal = gtk_calendar_new();
+	calendarDialog.cal = gtk_calendar_new();
 
-		gtk_calendar_select_month(GTK_CALENDAR(calendarDialog.cal), date->month - 1,
-					  date->year);
-		gtk_calendar_select_day(GTK_CALENDAR(calendarDialog.cal), date->day);
+	gtk_calendar_select_month(GTK_CALENDAR(calendarDialog.cal), date->month - 1,
+				  date->year);
+	gtk_calendar_select_day(GTK_CALENDAR(calendarDialog.cal), date->day);
 
-		gtk_container_add(GTK_CONTAINER(GTK_DIALOG(calendarDialog.dialog)->vbox),
-				  calendarDialog.cal);
-		gtk_widget_show(calendarDialog.cal);
-	}
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(calendarDialog.dialog)->vbox),
+			  calendarDialog.cal);
+	gtk_widget_show(calendarDialog.cal);
 
 	gtk_widget_show(calendarDialog.dialog);
 }
@@ -743,71 +741,69 @@ static void ShowCalTime(GtkWidget * widget, DateTime * date)
 	GtkWidget *button, *hbox, *label;
 	GtkAdjustment *adj;
 
-	if (calTimeDialog.dialog == NULL) {
-		calTimeDialog.dialog = gtk_dialog_new();
-		gtk_window_set_title(GTK_WINDOW(calTimeDialog.dialog), _("Choose date"));
-		gtk_window_position(GTK_WINDOW(calTimeDialog.dialog), GTK_WIN_POS_MOUSE);
-		gtk_window_set_modal(GTK_WINDOW(calTimeDialog.dialog), TRUE);
-		gtk_container_set_border_width(GTK_CONTAINER(calTimeDialog.dialog), 10);
-		gtk_signal_connect(GTK_OBJECT(calTimeDialog.dialog), "delete_event",
-				   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
+	calTimeDialog.dialog = gtk_dialog_new();
+	gtk_window_set_title(GTK_WINDOW(calTimeDialog.dialog), _("Choose date"));
+	gtk_window_position(GTK_WINDOW(calTimeDialog.dialog), GTK_WIN_POS_MOUSE);
+	gtk_window_set_modal(GTK_WINDOW(calTimeDialog.dialog), TRUE);
+	gtk_container_set_border_width(GTK_CONTAINER(calTimeDialog.dialog), 10);
+	gtk_signal_connect(GTK_OBJECT(calTimeDialog.dialog), "delete_event",
+			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 
-		button = gtk_button_new_with_label(_("Ok"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(calTimeDialog.dialog)->action_area),
-				   button, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(OkCalTimeDialog), (gpointer) date);
-		GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
-		gtk_widget_grab_default(button);
-		gtk_widget_show(button);
+	button = gtk_button_new_with_label(_("Ok"));
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(calTimeDialog.dialog)->action_area),
+			   button, TRUE, TRUE, 10);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			   GTK_SIGNAL_FUNC(OkCalTimeDialog), (gpointer) date);
+	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+	gtk_widget_grab_default(button);
+	gtk_widget_show(button);
 
-		button = gtk_button_new_with_label(_("Cancel"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(calTimeDialog.dialog)->action_area),
-				   button, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(CancelDialog), (gpointer) calTimeDialog.dialog);
-		gtk_widget_show(button);
+	button = gtk_button_new_with_label(_("Cancel"));
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(calTimeDialog.dialog)->action_area),
+			   button, TRUE, TRUE, 10);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			   GTK_SIGNAL_FUNC(CancelDialog), (gpointer) calTimeDialog.dialog);
+	gtk_widget_show(button);
 
-		gtk_container_set_border_width(GTK_CONTAINER
-					       (GTK_DIALOG(calTimeDialog.dialog)->vbox), 5);
+	gtk_container_set_border_width(GTK_CONTAINER
+				       (GTK_DIALOG(calTimeDialog.dialog)->vbox), 5);
 
-		calTimeDialog.cal = gtk_calendar_new();
+	calTimeDialog.cal = gtk_calendar_new();
 
-		gtk_calendar_select_month(GTK_CALENDAR(calTimeDialog.cal), date->date.month - 1,
-					  date->date.year);
-		gtk_calendar_select_day(GTK_CALENDAR(calTimeDialog.cal), date->date.day);
+	gtk_calendar_select_month(GTK_CALENDAR(calTimeDialog.cal), date->date.month - 1,
+				  date->date.year);
+	gtk_calendar_select_day(GTK_CALENDAR(calTimeDialog.cal), date->date.day);
 
-		gtk_container_add(GTK_CONTAINER(GTK_DIALOG(calTimeDialog.dialog)->vbox),
-				  calTimeDialog.cal);
-		gtk_widget_show(calTimeDialog.cal);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(calTimeDialog.dialog)->vbox),
+			  calTimeDialog.cal);
+	gtk_widget_show(calTimeDialog.cal);
 
-		hbox = gtk_hbox_new(FALSE, 0);
-		gtk_container_add(GTK_CONTAINER(GTK_DIALOG(calTimeDialog.dialog)->vbox), hbox);
-		gtk_widget_show(hbox);
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(calTimeDialog.dialog)->vbox), hbox);
+	gtk_widget_show(hbox);
 
-		label = gtk_label_new(_("Alarm time:"));
-		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-		gtk_widget_show(label);
+	label = gtk_label_new(_("Alarm time:"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_show(label);
 
-		adj = (GtkAdjustment *) gtk_adjustment_new(date->hours, 0.0, 23.0, 1.0, 4.0, 0.0);
-		date->hButton = gtk_spin_button_new(adj, 0, 0);
-		gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(date->hButton), TRUE);
-		gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(date->hButton), TRUE);
-		gtk_box_pack_start(GTK_BOX(hbox), date->hButton, FALSE, FALSE, 0);
-		gtk_widget_show(date->hButton);
+	adj = (GtkAdjustment *) gtk_adjustment_new(date->hours, 0.0, 23.0, 1.0, 4.0, 0.0);
+	date->hButton = gtk_spin_button_new(adj, 0, 0);
+	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(date->hButton), TRUE);
+	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(date->hButton), TRUE);
+	gtk_box_pack_start(GTK_BOX(hbox), date->hButton, FALSE, FALSE, 0);
+	gtk_widget_show(date->hButton);
 
-		label = gtk_label_new(":");
-		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-		gtk_widget_show(label);
+	label = gtk_label_new(":");
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_show(label);
 
-		adj = (GtkAdjustment *) gtk_adjustment_new(date->minutes,
-							   0.0, 59.0, 1.0, 10.0, 0.0);
-		date->mButton = gtk_spin_button_new(adj, 0, 0);
-		gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(date->mButton), TRUE);
-		gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(date->mButton), TRUE);
-		gtk_box_pack_start(GTK_BOX(hbox), date->mButton, FALSE, FALSE, 0);
-		gtk_widget_show(date->mButton);
-	}
+	adj = (GtkAdjustment *) gtk_adjustment_new(date->minutes,
+						   0.0, 59.0, 1.0, 10.0, 0.0);
+	date->mButton = gtk_spin_button_new(adj, 0, 0);
+	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(date->mButton), TRUE);
+	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(date->mButton), TRUE);
+	gtk_box_pack_start(GTK_BOX(hbox), date->mButton, FALSE, FALSE, 0);
+	gtk_widget_show(date->mButton);
 
 	gtk_widget_show(calTimeDialog.dialog);
 }

@@ -640,13 +640,14 @@ static gint A_GetCalendarNoteAll(gpointer data)
 
 	pthread_mutex_lock(&calendarMutex);
 	while (1) {
-		entry.Location = i++;
+		entry.Location = i;
 
 		gdat.CalendarNote = &entry;
 		gdat.CalendarNotesList = &list;
 		if ((error = SM_Functions(GOP_GetCalendarNote, &gdat, &statemachine)) != GE_NONE)
 			break;
-
+		/* This is necessary for phones with calendar notes index (7110/6510) */
+		entry.Location = i++; 
 		if (cna->InsertEntry(&entry) != GE_NONE)
 			break;
 	}
