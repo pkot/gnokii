@@ -31,25 +31,25 @@ dnl Let us have $prefix variable aviable here
 test x"$prefix" = xNONE && prefix="$ac_default_prefix"
 
 AC_ARG_ENABLE(debug, 
-   [  --enable-debug          compile with debug code],
-   [ CFLAGS="-g -Wall"
-     AC_DEFINE(DEBUG)
-     debug="yes" ],
-   [ debug="no"  ]
+	[  --enable-debug          compile with debug code],
+	[ CFLAGS="-g -Wall"
+	  AC_DEFINE(DEBUG)
+	  debug="yes" ],
+	[ debug="no"  ]
 )
 
 AC_ARG_ENABLE(xdebug,
-   [  --enable-xdebug         compile with xdebug code],
-   [ AC_DEFINE(XDEBUG)
-     xdebug="yes" ],
-   [ xdebug="no"  ]
+	[  --enable-xdebug         compile with xdebug code],
+	[ AC_DEFINE(XDEBUG)
+	  xdebug="yes" ],
+	[ xdebug="no"  ]
 )
 
 AC_ARG_ENABLE(rlpdebug, 
-   [  --enable-rlpdebug       compile with RLP debug code],
-   [ AC_DEFINE(RLP_DEBUG)
-     rlpdebug="yes" ],
-   [ rlpdebug="no"  ]
+	[  --enable-rlpdebug       compile with RLP debug code],
+	[ AC_DEFINE(RLP_DEBUG)
+	  rlpdebug="yes" ],
+	[ rlpdebug="no"  ]
 )
 
 dnl ======================== NLS support
@@ -59,127 +59,137 @@ NLS_LIBS=""
 NLS_CFLAGS=""
 
 AC_ARG_WITH(libintl,
-   [  --with-libintl=DIR      specifies the base NLS],
-   [ if test x$withval = xyes
-     then
-       AC_MSG_WARN(Usage is --with-libintl=DIR)
-     else
-       NLS_LIBS="-L$withval/lib"
-       NLS_CFLAGS="-I$withval/include"
-     fi
-   ]
+	[  --with-libintl=DIR      specifies the base NLS],
+	[ if test "x$withval" = "xyes"; then
+		AC_MSG_WARN(Usage is --with-libintl=DIR)
+	  else
+		NLS_LIBS="-L$withval/lib"
+		NLS_CFLAGS="-I$withval/include"
+	  fi
+	]
 )
 
 AC_ARG_ENABLE(nls,
-   [  --disable-nls           do not use NLS],
-   [ USE_NLS=$enableval ], [ USE_NLS=yes ])
+	[  --disable-nls           do not use NLS],
+	[ USE_NLS=$enableval ],
+	[ USE_NLS=yes ]
+)
 
 if test "$USE_NLS" = "yes"; then
-   AC_PROG_MAKE_SET
-   AC_CHECK_HEADERS(locale.h)
-   AC_CHECK_FUNCS(setlocale)
-   AC_SUBST(HAVE_LOCALE_H)  
+	AC_PROG_MAKE_SET
+	AC_CHECK_HEADERS(locale.h)
+	AC_CHECK_FUNCS(setlocale)
+	AC_SUBST(HAVE_LOCALE_H)  
 
-   CPPFLAGS="$CPPFLAGS $NLS_CFLAGS"
-   AC_TRY_CPP([#include <libintl.h>],
-              [ AC_DEFINE(HAVE_LIBINTL_H)
-                AC_MSG_RESULT([checking for libintl.h... yes]) ],
-              [ AC_MSG_ERROR(not found header file: libintl.h !!!) ] )
+	CPPFLAGS="$CPPFLAGS $NLS_CFLAGS"
+	AC_TRY_CPP([#include <libintl.h>],
+		   [ AC_DEFINE(HAVE_LIBINTL_H)
+		     AC_MSG_RESULT([checking for libintl.h... yes]) ],
+		   [ AC_MSG_WARN(not found header file: libintl.h !!!)
+		     USE_NLS=no ]
+	)
+fi
 
-  AC_CHECK_FUNC(gettext,
-                AC_DEFINE(HAVE_LIBINTL),
-                AC_CHECK_LIB(intl, gettext,
-                             [ NLS_LIBS="$NLS_LIBS -lintl"
-                               AC_DEFINE(HAVE_LIBINTL) ],
-                             AC_MSG_ERROR(not found library: intl !!!),
-                             [ $NLS_LIBS ] ))
+if test "$USE_NLS" = "yes"; then
+	AC_CHECK_FUNC(gettext,
+		      AC_DEFINE(HAVE_LIBINTL),
+		      AC_CHECK_LIB(intl, gettext,
+				   [ NLS_LIBS="$NLS_LIBS -lintl"
+				     AC_DEFINE(HAVE_LIBINTL) ],
+				   [ AC_MSG_WARN(not found library: intl !!!)
+				     USE_NLS=no ],
+				   $NLS_LIBS
+		      )
+	)
+fi
 
-  AC_SUBST(HAVE_LIBINTL_H)  
-  AC_SUBST(HAVE_LIBINTL)
+if test "$USE_NLS" = "yes"; then
 
-  dnl Handle localedir
-  LOCALEDIR='${prefix}/share/locale'
-  AC_ARG_WITH(locale-dir,
-  [  --with-locale-dir=DIR   Location of the locale file(s)
-                          [PREFIX/share/locale]],[
-    if test x$withval = xyes; then
-      AC_MSG_WARN(Usage is: --with-locale-dir=basedir)
-    else
-      if test x$withval = xno; then
-        AC_MSG_WARN(Usage is: --with-locale-dir=basedir)
-      else
-        LOCALEDIR=$withval
-      fi
-    fi
-  ])
-  AC_SUBST(LOCALEDIR)
+	AC_SUBST(HAVE_LIBINTL_H)
+	AC_SUBST(HAVE_LIBINTL)
 
-  AC_PATH_PROG(MSGFMT, msgfmt, $MSGFMT)
-  if test -n "$MSGFMT"; then
-    AC_CHECK_FUNCS(dcgettext)
-    AC_PATH_PROG(GMSGFMT, gmsgfmt, $MSGFMT)
-    AC_PATH_PROG(XGETTEXT, xgettext, $XGETTEXT)
-    AC_PATH_PROG(MSGMERGE, msgmerge, $MSGMERGE)
+	dnl Handle localedir
+	LOCALEDIR='${prefix}/share/locale'
+	AC_ARG_WITH(locale-dir,
+		    [  --with-locale-dir=DIR   Location of the locale file(s)
+			[PREFIX/share/locale]],
+		    [ if test x$withval = xyes; then
+			AC_MSG_WARN(Usage is: --with-locale-dir=basedir)
+		      else
+			if test x$withval = xno; then
+				AC_MSG_WARN(Usage is: --with-locale-dir=basedir)
+			else
+				LOCALEDIR=$withval
+			fi
+		      fi
+		    ]
+	)
+	AC_SUBST(LOCALEDIR)
 
-    dnl Test whether we really found GNU xgettext.
-    if test -n "$XGETTEXT"; then
-      if $XGETTEXT --omit-header /dev/null 2> /dev/null; then
-        : ;
-      else
-        AC_MSG_RESULT(
-          [found xgettext program is not GNU xgettext; ignore it])
-        XGETTEXT=""
-      fi
-    fi
+	AC_PATH_PROG(MSGFMT, msgfmt, $MSGFMT)
+	if test -n "$MSGFMT"; then
+		AC_CHECK_FUNCS(dcgettext)
+		AC_PATH_PROG(GMSGFMT, gmsgfmt, $MSGFMT)
+		AC_PATH_PROG(XGETTEXT, xgettext, $XGETTEXT)
+		AC_PATH_PROG(MSGMERGE, msgmerge, $MSGMERGE)
 
-    dnl We add another test for comparing GNU xgettext with openwin xgettext
-    if test -n "$XGETTEXT"; then
-      if $XGETTEXT --help > /dev/null 2> /dev/null; then
-        : ;
-      else
-        AC_MSG_RESULT(
-          [found xgettext program is not GNU xgettext; ignore it])
-        XGETTEXT=""
-      fi
-    fi
+		dnl Test whether we really found GNU xgettext.
+		if test -n "$XGETTEXT"; then
+			if $XGETTEXT --omit-header /dev/null 2> /dev/null; then
+				: ;
+			else
+				AC_MSG_RESULT([found xgettext program is not GNU xgettext; ignore it])
+				XGETTEXT=""
+			fi
+		fi
 
-    dnl Test whether we really found GNU msgfmt.
-    if test -n "$MSGFMT"; then
-      if $MSGFMT < /dev/null 2> /dev/null; then
-        AC_MSG_RESULT(
-          [found msgfmt program is not GNU msgfmt; NLS will not be installed])
-        MSGFMT=""
-      fi
-    fi
+		dnl We add another test for comparing GNU xgettext with openwin xgettext
+		if test -n "$XGETTEXT"; then
+			if $XGETTEXT --help > /dev/null 2> /dev/null; then
+				: ;
+			else
+				AC_MSG_RESULT([found xgettext program is not GNU xgettext; ignore it])
+				XGETTEXT=""
+			fi
+		fi
 
-    AC_TRY_LINK(,
-                [extern int _nl_msg_cat_cntr;
-                 return _nl_msg_cat_cntr],
-                [CATOBJEXT=.gmo
-                 DATADIRNAME=share],  
-                [CATOBJEXT=.mo
-                 DATADIRNAME=lib])
-    INSTOBJEXT=.mo
-  fi
+		dnl Test whether we really found GNU msgfmt.
+		if test -n "$MSGFMT"; then
+			if $MSGFMT < /dev/null 2> /dev/null; then
+				AC_MSG_RESULT([found msgfmt program is not GNU msgfmt; NLS will not be installed])
+				MSGFMT=""
+			fi
+		fi
 
-  if test -n "$ALL_LINGUAS"; then
-    for lang in $ALL_LINGUAS; do
-      CATALOGS="$CATALOGS $lang$CATOBJEXT"
-    done
-  fi
-  AC_SUBST(CATALOGS)
-  AC_SUBST(CATOBJEXT)
-  AC_SUBST(INSTOBJEXT)
-  AC_SUBST(DATADIRNAME)
+		AC_TRY_LINK(,
+			    [ extern int _nl_msg_cat_cntr;
+			      return _nl_msg_cat_cntr],
+			    [ CATOBJEXT=.gmo
+			      DATADIRNAME=share],  
+			    [ CATOBJEXT=.mo
+			      DATADIRNAME=lib]
+		)
+		INSTOBJEXT=.mo
+	fi
+
+	if test -n "$ALL_LINGUAS"; then
+		for lang in $ALL_LINGUAS; do
+			CATALOGS="$CATALOGS $lang$CATOBJEXT"
+		done
+	fi
+	AC_SUBST(CATALOGS)
+	AC_SUBST(CATOBJEXT)
+	AC_SUBST(INSTOBJEXT)
+	AC_SUBST(DATADIRNAME)
 fi
 
 dnl don't use NLS, when there is no gettext installed
 if test x"$MSGFMT" = x; then
-  USE_NLS=no
+	USE_NLS=no
 fi
 
 if test x"$USE_NLS" = xyes; then
-  AC_DEFINE(USE_NLS)
+	AC_DEFINE(USE_NLS)
 fi
 
 dnl ======================== Checks for libraries.
