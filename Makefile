@@ -20,7 +20,7 @@ CC = gcc
 # developers and testers.
 #
 
-DEBUG=-DDEBUG
+# DEBUG=-DDEBUG
 
 #
 # Model of the mobile phone
@@ -32,7 +32,7 @@ MODEL=-DMODEL="\"3810\""
 # For Nokia 6110/5110 uncomment the next line
 #
 
-MODEL=-DMODEL="\"6110\""
+# MODEL=-DMODEL="\"6110\""
 
 #
 # Serial port for communication
@@ -77,14 +77,18 @@ LDFLAGS = -lpthread
 
 GNOKII_OBJS = gnokii.o gsm-api.o fbus-3810.o fbus-6110.o gsm-networks.o
 
+GNOKIID_OBJS = gnokiid.o at-emulator.o gsm-api.o fbus-3810.o fbus-6110.o
+
 # Build executable
-all: gnokii
+all: gnokii gnokiid
 
 gnokii: $(GNOKII_OBJS)
 
+gnokiid: $(GNOKIID_OBJS)
+
 # Misc targets
 clean:
-	@rm -f core *~ *% *.bak gnokii $(GNOKII_OBJS) gnokii-${VERSION}.tar.gz
+	@rm -f core *~ *% *.bak gnokii $(GNOKII_OBJS) gnokiid $(GNOKIID_OBJS) gnokii-${VERSION}.tar.gz
 
 dist:	clean
 	@mkdir -p /tmp/gnokii-${VERSION}
@@ -100,6 +104,8 @@ rpm:	dist
 
 # Dependencies - simplified for now
 gnokii.o: gnokii.c gsm-api.c gsm-api.h misc.h gsm-common.h
+gnokiid.o: gnokiid.c gsm-api.c gsm-api.h misc.h gsm-common.h
+at-emulator.o: at-emulator.c gsm-api.c gsm-api.h misc.h gsm-common.h
 gsm-api.o: gsm-api.c fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-3810.o: fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-6110.o: fbus-6110.c fbus-6110.h misc.h gsm-common.h gsm-networks.h
