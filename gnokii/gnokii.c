@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.129  2001-03-13 01:21:39  pkot
+  Revision 1.130  2001-03-13 01:23:18  pkot
+  Windows updates (Manfred Jonsson)
+
+  Revision 1.129  2001/03/13 01:21:39  pkot
   *BSD updates (Bert Driehuis)
 
   Revision 1.128  2001/03/08 00:49:06  pkot
@@ -113,12 +116,15 @@
 #  include <strings.h>	/* for memset */
 #endif
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #ifdef WIN32
 
 #include <windows.h>
 #define sleep(x) Sleep((x) * 1000)
 #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#define stat _stat
 #include "win32/getopt.h"
 
 #else
@@ -126,10 +132,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <fcntl.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #include <getopt.h>
-#include <sys/stat.h>
 
 #endif
 
@@ -2893,6 +2896,7 @@ int setringtone(int argc, char *argv[])
 
 int presskeysequence(void)
 {
+#ifndef WIN32
 	struct termios it;
 	char buf[105];
 
@@ -2915,6 +2919,9 @@ int presskeysequence(void)
 	}
 
 	GSM->Terminate();
+#else
+	fprintf(stdout, _("Key press simulation failed.\n"));
+#endif
 	return 0;
 }
  

@@ -17,7 +17,10 @@
   downloadable from www.etsi.org (if you register with them)
 
   $Log$
-  Revision 1.3  2001-02-21 19:57:00  chris
+  Revision 1.4  2001-03-13 01:23:18  pkot
+  Windows updates (Manfred Jonsson)
+
+  Revision 1.3  2001/02/21 19:57:00  chris
   More fiddling with the directory layout
 
   Revision 1.2  2001/02/17 22:40:51  chris
@@ -223,6 +226,7 @@ bool RLP_GetUserRequest(RLP_UserRequests type) {
 		break;
 	default:
 		x=&result;
+		break;
 	}
 
 	result=*x;
@@ -797,6 +801,8 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
 				CurrentFrameType=RLPFT_BAD;
 
+				break;
+
 			}
 
 			break;
@@ -862,6 +868,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
 				CurrentFrameType=RLPFT_BAD;
 
+				break;
 			}
 
 			break;
@@ -1421,6 +1428,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 				NextState=RLP_S1;
 				UA_State=_idle;
 			}
+			break;
 		}
 
 		break;
@@ -1607,6 +1615,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 					DM_FBit=true;
 					NextState=RLP_S1;
 				}
+				break;
 			}
 		}
     

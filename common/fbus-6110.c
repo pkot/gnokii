@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.131  2001-03-13 01:21:38  pkot
+  Revision 1.132  2001-03-13 01:23:17  pkot
+  Windows updates (Manfred Jonsson)
+
+  Revision 1.131  2001/03/13 01:21:38  pkot
   *BSD updates (Bert Driehuis)
 
   Revision 1.130  2001/02/28 21:30:52  machek
@@ -3710,7 +3713,12 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void)
 void FB61_RX_StateMachine(char rx_byte)
 {
 	static int checksum[2];
+#ifdef WIN32
+	static struct _timeb time_now, time_last;
+	static struct timeval time_diff;
+#else
 	static struct timeval time_now, time_last, time_diff;
+#endif
 
 	/* XOR the byte with the current checksum */
 	checksum[BufferCount&1] ^= rx_byte;

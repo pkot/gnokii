@@ -12,7 +12,10 @@
  * fbus-6110-ringtones.c gsm-networks.c cfgreader.c 
  *
  * $Log$
- * Revision 1.6  2000-12-19 16:18:19  pkot
+ * Revision 1.7  2001-03-13 01:23:19  pkot
+ * Windows updates (Manfred Jonsson)
+ *
+ * Revision 1.6  2000/12/19 16:18:19  pkot
  * configure script updates and added shared function for configfile reading
  *
  *
@@ -486,6 +489,53 @@ DWORD FAR PASCAL KeepAliveProc(LPSTR lpData)
 	(*ka)();
     KAThreadID = 0;
     return 0;
+}
+
+//---------------------------------------------------------------------------
+//  void device_changespeed()
+//
+//  Description:
+//     This routines sets up the DCB based on settings in the
+//     TTY info structure and performs a SetCommState().
+//
+//  Parameters:
+//
+//---------------------------------------------------------------------------
+
+void device_changespeed(int speed)
+{
+    BOOL       fRetVal;
+    DCB        dcb;
+
+    dcb.DCBlength = sizeof(DCB);
+
+    GetCommState(hPhone, &dcb);
+
+    dcb.BaudRate = speed;
+    fRetVal = SetCommState(hPhone, &dcb);
+
+    if (fRetVal == 0)
+       fRetVal = GetLastError();
+
+    return;
+
+} // end of device_changespeed(int speed)
+
+//---------------------------------------------------------------------------
+//  void device_setdtrrts()
+//
+//  Description:
+//     This routines sets up the DCB based on settings in the
+//     TTY info structure and performs a SetCommState().
+//
+//  Parameters:
+//
+//---------------------------------------------------------------------------
+
+void device_setdtrrts(int dtr, int rts)
+{
+       /* FIXME Oops not implemented */
+       return;
 }
 
 #endif

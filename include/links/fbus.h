@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:12  chris
+  Revision 1.2  2001-03-13 01:23:19  pkot
+  Windows updates (Manfred Jonsson)
+
+  Revision 1.1  2001/02/21 19:57:12  chris
   More fiddling with the directory layout
 
   Revision 1.3  2001/02/06 21:15:36  chris
@@ -36,7 +39,12 @@
 #ifndef __links_fbus_h
 #define __links_fbus_h
 
-#include <sys/time.h>
+#include <time.h>
+
+#ifdef WIN32
+#include <sys/types.h>
+#include <sys/timeb.h>
+#endif
 
 #define FBUS_MAX_FRAME_LENGTH 256
 #define FBUS_MAX_MESSAGE_TYPES 128
@@ -67,48 +75,53 @@
 /* States for receive code. */
 
 enum FBUS_RX_States {
-  FBUS_RX_Sync,
-  FBUS_RX_Discarding,
-  FBUS_RX_GetDestination,
-  FBUS_RX_GetSource,
-  FBUS_RX_GetType,
-  FBUS_RX_GetLength1,
-  FBUS_RX_GetLength2,
-  FBUS_RX_GetMessage
+	FBUS_RX_Sync,
+	FBUS_RX_Discarding,
+	FBUS_RX_GetDestination,
+	FBUS_RX_GetSource,
+	FBUS_RX_GetType,
+	FBUS_RX_GetLength1,
+	FBUS_RX_GetLength2,
+	FBUS_RX_GetMessage
 };
 
 
 typedef struct{
-  int checksum[2];
-  int BufferCount;
-  struct timeval time_now;
-  struct timeval time_last;
-  enum FBUS_RX_States state;
-  int MessageSource;
-  int MessageDestination;
-  int MessageType;
-  int FrameLength;
-  char MessageBuffer[FBUS_MAX_FRAME_LENGTH];
+	int checksum[2];
+	int BufferCount;
+#ifndef WIN32
+	struct timeval time_now;
+	struct timeval time_last;
+#else
+	struct _timeb time_now;
+	struct _timeb time_last;
+#endif
+	enum FBUS_RX_States state;
+	int MessageSource;
+	int MessageDestination;
+	int MessageType;
+	int FrameLength;
+	char MessageBuffer[FBUS_MAX_FRAME_LENGTH];
 } FBUS_IncomingFrame;
 
 typedef struct{
-  int MessageLength;
-  unsigned char *MessageBuffer;
-  char FramesToGo;
-  int Malloced;
+	int MessageLength;
+	unsigned char *MessageBuffer;
+	char FramesToGo;
+	int Malloced;
 } FBUS_IncomingMessage;
 
 typedef struct {
-  u16 message_length;
-  u8 message_type;
-  u8 *buffer;
+	u16 message_length;
+	u8 message_type;
+	u8 *buffer;
 } FBUS_OutgoingMessage;
 
 
 typedef struct{
-  FBUS_IncomingFrame i;
-  FBUS_IncomingMessage messages[FBUS_MAX_MESSAGE_TYPES];
-  u8 RequestSequenceNumber;
+	FBUS_IncomingFrame i;
+	FBUS_IncomingMessage messages[FBUS_MAX_MESSAGE_TYPES];
+	u8 RequestSequenceNumber;
 } FBUS_Link;
 
 GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Phone *newphone);

@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.85  2001-03-13 01:21:38  pkot
+  Revision 1.86  2001-03-13 01:23:17  pkot
+  Windows updates (Manfred Jonsson)
+
+  Revision 1.85  2001/03/13 01:21:38  pkot
   *BSD updates (Bert Driehuis)
 
   Revision 1.84  2001/02/21 19:56:55  chris
@@ -71,11 +74,11 @@
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <string.h>
-#include    <unistd.h>
 
 #ifdef WIN32
 
   #include <windows.h>
+  #include <time.h>
   #include "win32/winserial.h"
 
   #undef IN

@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:07  chris
+  Revision 1.2  2001-03-13 01:23:18  pkot
+  Windows updates (Manfred Jonsson)
+
+  Revision 1.1  2001/02/21 19:57:07  chris
   More fiddling with the directory layout
 
   Revision 1.1  2001/02/16 14:29:53  chris
@@ -67,6 +70,9 @@
 #include "links/fbus-phonet.h"
 #include "phones/nokia.h"
 
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
 
 /* Some globals */
 /* Note that these could be created in initialise */

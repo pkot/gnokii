@@ -91,6 +91,22 @@
 /* Add here any timer operations which are not supported by libc5 */
 
 #ifndef HAVE_TIMEOPS
+#ifdef WIN32
+
+#include <windows.h>
+#include <sys/timeb.h>
+#define timersub(a, b, result)
+  do {
+    (result)->tv_sec = (a)->time - (b)->time;
+    (result)->tv_usec = ((a)->millitm - (b)->millitm) * 1000;
+    if ((result)->tv_usec < 0) {
+      --(result)->tv_sec;
+      (result)->tv_usec += 1000000;
+    }
+  } while (0)
+#define gettimeofday(a, b) _ftime(a)
+
+#else
 #include <sys/time.h>
 
 #ifndef timersub
@@ -105,6 +121,7 @@
   } while (0)
 #endif
 
+#endif /* WIN32 */
 #endif /* HAVE_TIMEOPS */
 
 

@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.2  2001-03-11 11:18:39  machek
+  Revision 1.3  2001-03-13 01:23:18  pkot
+  Windows updates (Manfred Jonsson)
+
+  Revision 1.2  2001/03/11 11:18:39  machek
   Made fbus link_dispatch (and fixed minor memory leak)
 
   Revision 1.1  2001/02/21 19:57:06  chris
@@ -56,7 +59,16 @@
 #include "gsm-common.h"
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
-#include "device.h"
+
+#ifndef WIN32
+  #include "device.h"
+#else
+  #include "win32/winserial.h"
+  #define device_write(a, b) WriteCommBlock(a, b)
+  #define device_read(a, b) ReadCommBlock(a, b)
+  #define sleep(x) Sleep((x) * 1000)
+  #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#endif
 
 #define __links_fbus_c
 #include "links/fbus.h"
@@ -80,7 +92,11 @@ bool FBUS_OpenSerial()
 
 	/* Open device. */
 
+#ifdef WIN32
+	result = ! OpenConnection(glink->PortDevice, FBUS_RX_StateMachine, NULL);
+#else
 	result = device_open(glink->PortDevice, false, false, GCT_Serial);
+#endif
 
 	if (!result) {
 		perror(_("Couldn't open FBUS device"));
@@ -308,6 +324,7 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 GSM_Error FBUS_Loop(struct timeval *timeout)
 {
+#ifndef WIN32
 	unsigned char buffer[255];
 	int count, res;
 
@@ -324,6 +341,9 @@ GSM_Error FBUS_Loop(struct timeval *timeout)
 		return GE_NONE;
 	else
 		return GE_INTERNALERROR;
+#else
+	return GE_NONE;
+#endif
 }
 
 
