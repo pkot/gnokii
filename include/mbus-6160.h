@@ -124,6 +124,8 @@ void    MB61_SigHandler(int status);
 void    MB61_ThreadLoop(void);
 void	MB61_UpdateSequenceNumber(void);
 
+bool	MB61_TX_SendStandardAcknowledge(u8 sequence_number);
+
 int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_byte, int message_length, u8 *buffer);
 void	MB61_TX_SendPhoneIDRequest(void);
 

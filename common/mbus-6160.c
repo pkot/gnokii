@@ -536,7 +536,6 @@ void	MB61_ThreadLoop(void)
 	}
 	GotInitResponse = false;
 
-
 	MB61_TX_SendPhoneIDRequest();
 
     while (!RequestTerminate) {
@@ -545,8 +544,8 @@ void	MB61_ThreadLoop(void)
         }
         else {
             idle_timer --;
-			fprintf(stdout, ".");
-			fflush(stdout);
+			/*fprintf(stdout, ".");
+			fflush(stdout);*/
         }
 
         usleep(100000);     /* Avoid becoming a "busy" loop. */
@@ -562,49 +561,34 @@ void	MB61_ThreadLoop(void)
        simply acknowledge the message as required. */
 enum    MB61_RX_States MB61_RX_DispatchMessage(void)
 {
-    /* Uncomment this if you want all messages in raw form. */
-    MB61_RX_DisplayMessage(); 
 
-	if (MessageSource == MSG_ADDR_PC) {
-		fprintf(stdout, "Ignored...\n");
-	}
-	else {
-		fprintf(stdout, "\n");
-	}	
+				/* If the message is from ADDR_PC ignore and don't process further. */
+			if (MessageSource == MSG_ADDR_PC) {
+    			return MB61_RX_Sync;
+			}
+    			/* Leave this uncommented if you want all messages in raw form. */
+			MB61_RX_DisplayMessage(); 
 
-        /* Switch on the basis of the message type byte */
-    switch (MessageCommand) {
+				/* Switch on the basis of the message type byte */
+			switch (MessageCommand) {
 
-			/* 0xd0 messages are the response to initialisation requests. */
-        case 0xd0:  GotInitResponse = true;
-					break;
+					/* 0xd0 messages are the response to initialisation requests. */
+				case 0xd0:  GotInitResponse = true;
+							break;
 
-            /* 0x0b messages are sent by phone when an incoming call occurs,
-               this message must be acknowledged. */
-        case 0x0b: /* FB38_RX_Handle0x0b_IncomingCall();*/
-                    break;
+					/* Incoming 0x7f's are acks for commands we've sent. */
+				case 0x7f:  break;
 
-            /* We send 0x0c message to answer to incoming call so don't ack */
-        case 0x0c:  break;
-
-        case 0x0d: /* FB38_RX_Handle0x0d_IncomingCallAnswered();*/
-                    break;
-
-        case 0x7f:/*  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
-                    CurrentPhonebookError = GE_INVALIDPHBOOKLOCATION;*/
-                    break;
-
-            /* Here we  attempt to acknowledge and display messages we don't
-               understand fully... The phone will send the same message
-               several (5-6) times before giving up if no ack is received.
-               Phone also appears to refuse to send any of that message type
-               again until an init sequence is done again. */
-        default:   /* if (FB38_TX_SendStandardAcknowledge(MessageBuffer[0]) != true) {
-                        fprintf(stderr, _("Standard Ack write failed!"));
-                    }*/
-                        /* Now display unknown message to user. */
-                    /*FB38_RX_DisplayMessage();*/
-                    break;
+					/* Here we  attempt to acknowledge and display messages we don't
+					   understand fully... The phone will send the same message
+					   several (5-6) times before giving up if no ack is received.
+					   Phone also appears to refuse to send any of that message type
+					   again until an init sequence is done again. */
+				default:	if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
+								fprintf(stderr, _("Standard Ack write failed!"));
+							}
+							fprintf(stdout, "Sent standard Ack for unknown %02x\n", MessageCommand);
+                    		break;
     }
 
     return MB61_RX_Sync;
@@ -614,14 +598,28 @@ void    MB61_RX_DisplayMessage(void)
 {
 	int		i;
 
-	fprintf(stdout, "DE:%02x SR:%02x CM:%02x LE:%d SQ:%02x CS:%02x Data:", 
+	fprintf(stdout, "Dest:%02x Src:%02x Cmd:%02x Len:%d Seq:%02x Csum:%02x\n", 
 			MessageDestination, MessageSource, MessageCommand, MessageLength,
 			MessageSequenceNumber, MessageCSum);
 
-	for (i = 0; i < MessageLength; i++) {
-		fprintf(stdout, "%02x ", MessageBuffer[i]);
+	if (MessageLength == 0) {
+		return;
 	}
-	//fprintf(stdout, "\n");
+	else {
+		fprintf(stdout, "Data: ");
+	}
+	for (i = 0; i < MessageLength; i++) {
+		if (isprint(MessageBuffer[i])) {
+			fprintf(stdout, "[%02x%c]", MessageBuffer[i], MessageBuffer[i]);
+		}
+		else {
+			fprintf(stdout, "[%02x ]", MessageBuffer[i]);
+		}
+		if (((i + 1) % 8) == 0) {
+			fprintf(stdout, "\n      ");
+		}
+	}
+	fprintf(stdout, "\n");
 
 }
 
@@ -642,7 +640,36 @@ void		MB61_UpdateSequenceNumber(void)
 		RequestSequenceNumber = 2;
 	}
 }
-		
+
+	/* Not totally happy with this but it works for now. - HAB 20000602 */
+bool		MB61_TX_SendStandardAcknowledge(u8 sequence_number)
+{
+	u8		out_buffer[6];
+	u8		checksum;
+	int		count;
+
+	out_buffer[0] = 0x1f;
+	out_buffer[1] = MSG_ADDR_PHONE;
+	out_buffer[2] = MSG_ADDR_PC;
+	out_buffer[3] = 0x7f;
+	out_buffer[4] = sequence_number;
+
+        /* Now calculate checksum over entire message 
+           and append to message. */
+    checksum = 0;
+    for (count = 0; count < 5; count ++) {
+        checksum ^= out_buffer[count];
+    }
+    out_buffer[5] = checksum;
+
+        /* Send it out... */
+    if (WRITEPHONE(PortFD, out_buffer, 6) != 6) {
+        perror(_("TX_SendMessage - write:"));
+        return (false);
+    }
+	
+    return (true);
+}	
 	    /* RX_State machine for receive handling.  Called once for each
        character received from the phone/phone. */
 void    MB61_RX_StateMachine(char rx_byte)
@@ -680,8 +707,17 @@ void    MB61_RX_StateMachine(char rx_byte)
         case MB61_RX_GetCommand:
                 MessageCommand = rx_byte;
                 CalculatedCSum ^= rx_byte;
-                RX_State = MB61_RX_GetLengthMSB;
-                break;
+					/* Command type 0x7f is an ack and is handled
+					   differently in that it's length is known a priori */
+				if (MessageCommand != 0x7f) {
+                	RX_State = MB61_RX_GetLengthMSB;
+                	break;
+				}
+				else {
+					MessageLength = 0;
+					RX_State = MB61_RX_GetMessage;
+					break;
+				}
 
                     /* Next is the most significant byte of message length. */
         case MB61_RX_GetLengthMSB:
@@ -779,7 +815,7 @@ void    MB61_SigHandler(int status)
     res = device_read(buffer, 255);
 
     for (count = 0; count < res ; count ++) {
-	//	fprintf(stdout, "{%02x}", buffer[count]);
+		//fprintf(stdout, "{%02x}", buffer[count]);
         MB61_RX_StateMachine(buffer[count]);
     }
 	//fprintf(stdout, "\n");
@@ -833,11 +869,6 @@ int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_b
         return (false);
     }
 	
-    for (count = 0; count < message_length + 8; count ++) {
-        fprintf(stdout, "[%02x]", out_buffer[count]);
-    }
-	fprintf(stdout, "\n");
-
     return (true);
 }
 
