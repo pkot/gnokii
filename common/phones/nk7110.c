@@ -89,6 +89,7 @@ static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -225,6 +226,8 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_GetSMSFolderStatus(data, state);
 	case GOP7110_GetPictureList:
 		return P7110_GetPictureList(data, state);
+	case GOP_GetSecurityCode:
+		return P7110_GetSecurityCode(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -1178,7 +1181,7 @@ static GSM_Error P7110_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 
 	c->Time.Hour = block[0];
 	c->Time.Minute = block[1];
-	c->Recurrence = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
+	c->Recurrence = ((((unsigned int)block[4]) << 8) + block[5]);
 	alarmdiff = (((unsigned int)block[2]) << 8) + block[3];
 
 	if (alarmdiff != 0xffff) {
@@ -1216,15 +1219,11 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 		switch (message[6]) {
 		case P7110_NOTE_MEETING:
 			data->CalendarNote->Type = GCN_MEETING;
-			data->CalendarNote->Recurrence = (((unsigned int)block[4]) << 8) + block[5];
-			dprintf("Recurrence: %04x\n", data->CalendarNote->Recurrence);
 			P7110_GetNoteTimes(block, data->CalendarNote);
 			DecodeUnicode(data->CalendarNote->Text, (block + 8), block[6]);
 			break;
 		case P7110_NOTE_CALL:
 			data->CalendarNote->Type = GCN_CALL;
-			data->CalendarNote->Recurrence = (((unsigned int)block[4]) << 8) + block[5];
-			dprintf("Recurrence: %04x\n", data->CalendarNote->Recurrence);
 			P7110_GetNoteTimes(block, data->CalendarNote);
 			DecodeUnicode(data->CalendarNote->Text, (block + 8), block[6]);
 			DecodeUnicode(data->CalendarNote->Phone, (block + 8 + block[6] * 2), block[7]);
@@ -1232,10 +1231,6 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 		case P7110_NOTE_REMINDER:
 			data->CalendarNote->Type = GCN_REMINDER;
 			data->CalendarNote->Recurrence = (((unsigned int)block[0]) << 8) + block[1];
-			dprintf("Recurrence: %04x\n", data->CalendarNote->Recurrence);
-			/*
-			data->CalendarNote->Recurrence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
-			*/
 			DecodeUnicode(data->CalendarNote->Text, (block + 4), block[2]);
 			break;
 		case P7110_NOTE_BIRTHDAY:
@@ -1565,9 +1560,12 @@ static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 				req[4] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] >> 8;
 				req[5] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] & 0xff;
 				data->CalendarNote->Time.Year = tmptime.Year;
-			} else return GE_UNKNOWN; /* FIXME */
-		} else return GE_INVALIDCALNOTELOCATION;
-	} else return error;
+			} else 
+				return GE_UNKNOWN; /* FIXME */
+		} else 
+			return GE_INVALIDCALNOTELOCATION;
+	} else 
+		return error;
 
 	SEND_MESSAGE_BLOCK(P7110_MSG_CALENDAR, 6);
 }
@@ -1820,12 +1818,17 @@ static GSM_Error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	switch (message[3]) {
-	case 0xeb:
+	/*
+	  01 13 00 ed 1c 00 39 35 32 37 32 00
+	  01 13 00 ed 15 00 00 00 00 04 c0 02 00 3c c0 03
+
+	*/
+	switch (message[4]) {
+	case 0x02:
 		dprintf("Startup logo set ok\n");
 		return GE_NONE;
 		break;
-	case 0xed:
+	case 0x15:
 		if (data->Bitmap) {
 			/* I'm sure there are blocks here but never mind! */
 			data->Bitmap->type = GSM_StartupLogo;
@@ -1836,6 +1839,11 @@ static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *message, 
 			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->Bitmap->height, data->Bitmap->width);
 		}
 		return GE_NONE;
+		break;
+	case 0x1c:
+		dprintf("Succesfully got security code: ");
+		memcpy(data->SecurityCode->Code, message + 6, 5);
+		dprintf("%s \n", data->SecurityCode->Code);
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x7a (%d)\n", message[3]);
@@ -2121,3 +2129,21 @@ static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message,
 	}
 	return GE_NONE;
 }
+
+static GSM_Error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER,
+			       0xEE,
+			       0x1c};			/* SecurityCode */
+
+	SEND_MESSAGE_BLOCK(P7110_MSG_STLOGO, 5);
+}
+
+/*
+GSM_Error N7110_GetSecurityCode(GSM_StateMachine *s, char *SecurityCode)
+{
+	s->Phone.Data.SecurityCode=SecurityCode;
+	dprintf("Getting security code\n");
+	return N7110_GetPhoneSetting(s, ID_GetSecurityCode, 0x1c);
+}
+*/
