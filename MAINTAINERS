@@ -1,0 +1,35 @@
+This file reflect the current gnokii maintainance status. If you have
+patches for gnokii it would be wise to discuss them with maintainer of the
+certain area on the gnokii-ml.
+
+gnokii part		maintainer
+=============================================================================
+gnokii			Pawel Kot
+gnokiid			BORBELY Zoltan
+xgnokii			Jan Derfinak, Markus Plail
+smsd			Jan Derfinak
+libgnokii		Pawel Kot
+statemachine		Chris Kemp, BORBELY Zoltan
+libsms			Pawel Kot, Pavel Machel
+bitmaps			Pavel Machek, Pawel Kot
+ringtones		Pavel Machek, Chris Kemp
+2110 driver		Pavel Machek
+3110 driver		?
+6110 driver		BORBELY Zoltan
+6210 driver		Pawel Kot, Markus Plail, BORBELY Zoltan
+6510 driver		Markus Plail
+AT driver		Manfred Jonsson, Pavel Machek, Pawel Kot
+link layer		Chris Kemp, BORBELY Zoltan
+device layer		Manfred Jonsson, Chris Kemp
+documentation		Pawel Kot
+autoconf		Pawel Kot, BORBELY Zoltan
+
+maintainer		e-mail address
+=============================================================================
+BORBELY Zoltan		bozo (at) andrews (dot) hu
+Chris Kemp		ck231 (at) cam (dot) ac (dot) uk
+Jan Derfinak		ja (at) mail (dot) upjs (dot) sk
+Manfred Jonsson		manfred.jonsson (at) gmx (dot) de
+Markus Plail		plail (at) web (dot) de
+Pavel Machek		pavel (at) suse (dot) cz
+Pawel Kot		pkot (at) linuxnews (dot) pl

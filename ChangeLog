@@ -33,6 +33,7 @@
     o support for the new SMS subsystem                   (Pawel Kot)
  * 6510 series updates
     o update to work with new SMS subsystem            (Markus Plail)
+ * Added MAINTAINERS file                                 (Pawel Kot)
 
 0.4.0pre20
 ==========
