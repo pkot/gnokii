@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2002 Markus Plail
-  Copyright (C) 2002 Pawel Kot
+  Copyright (C) 2002 Pawe³ Kot
 
   This file provides functions specific to the 6510 series.
   See README for more details on supported mobile phones.
@@ -1090,7 +1090,7 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
 				  0x00, 0x00, 0x00, 0x55, 0x55}; /* What's this? */
 	GSM_Error error;
-	int pos;
+	unsigned int pos, len;
 
 	memset(req + 9, 0, 244);
 	req[9] = 0x01; /* one big block */
@@ -1117,15 +1117,20 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	/* FIXME. Do it in the loop */
 
 	/* Block 1. Remote Number */
+	len = data->RawSMS->RemoteNumber[0] + 4;
+	if (len % 2) len++;
+	len /= 2;
 	req[18] = 0x82; /* type: number */
 	req[19] = 0x0c; /* offset to next block starting from start of block (req[18]) */
 	req[20] = 0x01; /* first number field => RemoteNumber */
-	req[21] = 0x08; /* actual data length in this block */
-	memcpy(req + 22, data->RawSMS->RemoteNumber, 8);
+	req[21] = len; /* actual data length in this block */
+	memcpy(req + 22, data->RawSMS->RemoteNumber, len);
 
 	/* Block 2. SMSC Number */
-	memcpy(req + 30, "\x82\x0c\x02\x08", 4); /* as above 0x02 => MessageCenterNumber */
-	memcpy(req + 34, data->RawSMS->MessageCenter, 8);
+	len = data->RawSMS->MessageCenter[0] + 1;
+	memcpy(req + 30, "\x82\x0c\x02", 3); /* as above 0x02 => MessageCenterNumber */
+	req[33] = len;
+	memcpy(req + 34, data->RawSMS->MessageCenter, len);
 
 	/* Block 3. User Data */
 	req[42] = 0x80; /* type: User Data */
