@@ -21,6 +21,8 @@
     o add IncomingSubscribe/Subscribe                  (Markus Plail)
     o add IncomingCommStatus                           (Markus Plail)
     o return NULL if no SMSC name is found             (Markus Plail)
+    o fix SMS reading (for INBOX mainly)               (Markus Plail)
+    o add validity to SMS sending                      (Markus Plail)
  * 7110 series updates
     o move GetUnreadMessages from gsm-sms.c            (Markus Plail)
     o change GOP7110_* to GOP_*                        (Markus Plail)
@@ -38,6 +40,7 @@
     o make SMS stuff work again                        (Markus Plail)
     o rename DeleteSMS to not conflict with new API    (Markus Plail)
     o make SMS sending work again                      (Markus Plail)
+    o fix display of picture messages                  (Markus Plail)
  * libsms fixes
     o fix GSM_ReadSMSnoValidate                        (Markus Plail)
     o remove GetUnreadMessages and friends             (Markus Plail)
