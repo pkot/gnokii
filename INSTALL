@@ -3,6 +3,9 @@
 
  For package building see the 'Docs/packaging-howto' file.
 
+0/	If you got an CVS version
+
+	autoconf
 
 1/
 	./configure [ option ]
