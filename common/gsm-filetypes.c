@@ -92,7 +92,7 @@ static int ringtone_get_scale (char *num)
 }
 
 
-/* Currently only reads rttl and ott files - can be later extended to midi etc. */
+/* Currently only reads rtttl and ott files - can be later extended to midi etc. */
 
 gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 {
@@ -108,7 +108,7 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 	/* FIXME: for now identify the filetype based on the extension */
 	/* I don't like this but I haven't got any .ott files to work out a better way */
 
-	filetype = GN_FT_RTTL;
+	filetype = GN_FT_RTTTL;
 	if (strstr(filename, ".ott")) filetype = GN_FT_OTT; /* OTT files saved by NCDS3 */
 	else if (strstr(filename, ".mid")) filetype = GN_FT_MIDI;
 	else if (strstr(filename, ".raw")) filetype = GN_FT_NOKRAW_TONE;
@@ -118,8 +118,8 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 	rewind(file);  /* Not necessary for now but safer */
 
 	switch (filetype) {
-	case GN_FT_RTTL:
-		error = file_rttl_load(file, ringtone);
+	case GN_FT_RTTTL:
+		error = file_rtttl_load(file, ringtone);
 		fclose(file);
 		break;
 	case GN_FT_OTT:
@@ -154,7 +154,7 @@ gn_error file_ott_load(FILE *file, gn_ringtone *ringtone)
 }
 
 
-gn_error file_rttl_load(FILE *file, gn_ringtone *ringtone)
+gn_error file_rtttl_load(FILE *file, gn_ringtone *ringtone)
 {
 	int nr_note = 0;
 
@@ -236,7 +236,7 @@ gn_error file_rttl_load(FILE *file, gn_ringtone *ringtone)
 			ptr++;
 		}
 
-		/* Check for dodgy rttl */
+		/* Check for dodgy rtttl */
 		/* [<special-duration>] */
 		if (*ptr == '.') {
 			ringtone->notes[nr_note].duration *= 1.5;
@@ -312,7 +312,7 @@ gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone)
 	} else if (strstr(filename, ".raw")) {
 		error = file_nokraw_save(file, ringtone, 1);
 	} else {
-		error = file_rttl_save(file, ringtone);
+		error = file_rtttl_save(file, ringtone);
 	}
 	fclose(file);
 	return error;
@@ -335,7 +335,7 @@ gn_error file_ott_save(FILE *file, gn_ringtone *ringtone)
 	}
 }
 
-gn_error file_rttl_save(FILE *file, gn_ringtone *ringtone)
+gn_error file_rtttl_save(FILE *file, gn_ringtone *ringtone)
 {
 	int default_duration, default_scale = 2, current_note;
 	int buffer[6];

@@ -43,7 +43,7 @@ typedef enum {
 	GN_FT_BMP,
 	GN_FT_OTA,
 	GN_FT_XPMF,
-	GN_FT_RTTL,
+	GN_FT_RTTTL,
 	GN_FT_OTT,
 	GN_FT_MIDI,
 	GN_FT_NOKRAW_TONE

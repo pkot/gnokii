@@ -2,7 +2,7 @@ To use ringtone support, create file containing ringtone:
 
 echo ':d=4,o=5,b=100:c.,c,8c,c.,d#,8d,d,8c,c,8c,2c.' > /tmp/delme
 
-[This is so-called RTTL, see http://overtonez.co.uk/info/rtttl.txt]
+[This is so-called RTTTL, see http://overtonez.co.uk/info/rtttl.txt]
 
 then set it on the phone
 

@@ -3,11 +3,18 @@
  * maintainance updates
     o update make_dist script to reflect tar.bz2 file build
                                                         (Pawel Kot)
- * nk6510 driver
+ * 6510 series updates
     o added Nokia 3510i to the supported phones list
                                                     (Rafal Czlonka)
  * documentation updates
     o FAQ update and synchronize with WWW version       (Pawel Kot)
+    o rttl is rtttl (ringing tone text transfer language
+                                                   (Torsten Kunkel,
+                                                        (Pawel Kot)
+ * libgnokii changes
+    o rttl is rtttl (ringing tone text transfer language (changes
+      internal API                                 (Torsten Kunkel,
+                                                        (Pawel Kot)
 
 0.5.7
 =====
