@@ -41,7 +41,6 @@ static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int len
 static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error ReplySetPDUMode(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -90,7 +89,7 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_GetMemoryStatus, AT_GetMemoryStatus, ReplyMemoryStatus },
 	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
 	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert },
-	{ GOPAT_SetPDUMode, AT_SetPDUMode, ReplySetPDUMode },
+	{ GOPAT_SetPDUMode, AT_SetPDUMode, Reply },
 	{ GOPAT_Prompt, NULL, ReplyGetPrompt },
 	{ GOP_SendSMS, AT_SendSMS, ReplySendSMS },
 	{ GOP_SaveSMS, AT_SaveSMS, ReplySendSMS },
@@ -665,17 +664,19 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 	char *pos, *endpos;
 	int l;
 
-	buf.line1 = buffer;
-	buf.length= length;
-	splitlines(&buf);
-	if (buf.line1 == NULL)
+	if (buffer[0] != GEAT_OK)
 		return GE_INVALIDPHBOOKLOCATION;
 
-	if (strncmp(buffer, "AT+CPBR", 7)) {
-		return GE_NONE; /* FIXME */
+	buf.line1 = buffer + 1;
+	buf.length = length;
+	splitlines(&buf);
+
+	if (strncmp(buf.line1, "AT+CPBR", 7)) {
+		return GE_UNKNOWN;
 	}
 
 	if (!strncmp(buf.line2, "OK", 2)) {
+		/* Empty phonebook location found */
 		if (data->PhonebookEntry) {
 			*(data->PhonebookEntry->Number) = '\0';
 			*(data->PhonebookEntry->Name) = '\0';
@@ -709,7 +710,7 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 			 * this will allways succede because quotation
 			 * was found at pos.
 			 */
-			endpos = buffer + length - 1;
+			endpos = buf.line1 + length - 1;
 			for (;;) {
 				if (*endpos == '\"') break;
 				endpos--;
@@ -743,12 +744,13 @@ static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int l
 	AT_LineBuffer buf;
 	char *pos;
 
-	buf.line1 = buffer;
+	if (buffer[0] != GEAT_OK)
+		return GE_UNKNOWN; /* FIXME */
+
+	buf.line1 = buffer + 1;
 	buf.length= length;
 
 	splitlines(&buf);
-	if (buf.line1 == NULL)
-		return GE_UNKNOWN; /* FIXME */
 	
 	if (data->MessageCenter) {
 		if (strstr(buf.line2,"+CSCA")) {
@@ -778,12 +780,13 @@ static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int l
 	AT_LineBuffer buf;
 	char *pos;
 
-	buf.line1 = buffer;
+	if (buffer[0] != GEAT_OK)
+		return GE_INVALIDMEMORYTYPE;
+
+	buf.line1 = buffer + 1;
 	buf.length= length;
 
 	splitlines(&buf);
-	if (buf.line1 == NULL)
-		return GE_INVALIDMEMORYTYPE;
 
 	if (data->MemoryStatus) {
 		if (strstr(buf.line2,"+CPBS")) {
@@ -812,13 +815,15 @@ static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int len
 	AT_LineBuffer buf;
 	char *pos;
 
-	buf.line1 = buffer;
-	buf.length= length;
-	splitlines(&buf);
-	if ((buf.line1 == NULL) || (buf.line2 == NULL))
-		return GE_NONE;
+	if (buffer[0] != GEAT_OK)
+		return GE_UNKNOWN;
 
-	if (!strncmp(buffer, "AT+CBC", 6)) {
+	buf.line1 = buffer + 1;
+	buf.length= length;
+	
+	splitlines(&buf);
+
+	if (!strncmp(buf.line1, "AT+CBC", 6)) { /* FIXME realy needed? */
 		if (data->BatteryLevel) {
 			*(data->BatteryUnits) = GBU_Percentage;
 			pos = strchr(buf.line2, ',');
@@ -844,13 +849,15 @@ static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int len
 	AT_LineBuffer buf;
 	char *pos1, *pos2;
 
-	buf.line1 = buffer;
+	if (buffer[0] != GEAT_OK)
+		return GE_UNKNOWN;
+		
+	buf.line1 = buffer + 1;
 	buf.length= length;
+	
 	splitlines(&buf);
-	if (buf.line1 == NULL)
-		return GE_NONE;
 
-	if ((!strncmp(buffer, "AT+CSQ", 6)) && (data->RFUnits)) {
+	if ((!strncmp(buf.line1, "AT+CSQ", 6)) && (data->RFUnits)) { /*FIXME realy needed? */
 		*(data->RFUnits) = GRF_CSQ;
 		pos1 = buf.line2 + 6;
 		pos2 = strchr(buf.line2, ',');
@@ -868,16 +875,16 @@ static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int lengt
 {
 	AT_LineBuffer buf;
 
-	buf.line1 = buffer;
+	if (buffer[0] != GEAT_OK)
+		return GE_UNKNOWN;		/* Fixme */
+	buf.line1 = buffer + 1;
 	buf.length = length;
 	splitlines(&buf);
-	if (buf.line1 == NULL)
-		return GE_NONE;		/* Fixme */
-	if (!strncmp(buffer, "AT+CG", 5)) {
-		REPLY_SIMPLETEXT(buffer+5, buf.line2, "SN", data->Imei);
-		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MM", data->Model);
-		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MI", data->Manufacturer);
-		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MR", data->Revision);
+	if (!strncmp(buf.line1, "AT+CG", 5)) {
+		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "SN", data->Imei);
+		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "MM", data->Model);
+		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "MI", data->Manufacturer);
+		REPLY_SIMPLETEXT(buf.line1+5, buf.line2, "MR", data->Revision);
 	}
 	return GE_NONE;
 }
@@ -886,22 +893,15 @@ static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int len
 {
 	int i;
 	for (i = 0; i < length; i++) {
-		dprintf("%02x ", buffer[i]);
+		dprintf("%02x ", buffer[i + 1]);
 	}
 	dprintf("\n");
 	return GE_NONE;
 }
 
-static GSM_Error ReplySetPDUMode(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
-{
-	if (length < 4) return GE_NOTSUPPORTED;
-	if (strncmp(buffer+length-4, "OK\r\n", 4)) return GE_NOTSUPPORTED;
-	return GE_NONE;
-}
-
 static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
-	if (!strncmp(buffer, "> \r\n", 4)) return GE_NONE;
+	if (buffer[0] == GEAT_PROMPT) return GE_NONE;
 	return GE_INTERNALERROR;
 }
 
@@ -909,37 +909,33 @@ static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length
 {
 	AT_LineBuffer buf;
 
-	buf.line1 = buffer;
+	if (buffer[0] != GEAT_OK)
+		return GE_SMSSENDFAILED;
+
+	buf.line1 = buffer + 1;
 	buf.length = length;
 	splitlines(&buf);
 
-	/*
-	 * Todo
-	 * i assume we are allways working in pdu mode, so no <cr> or <lf>
-	 * can show up in the SMS text. therefore the OK is found in line 3
-	 */
-	if ((buf.line3 && !strncmp("OK", buf.line3, 2))) {
-		/* SendSMS or SaveSMS */
-		if (!strncmp("+CMGW:", buf.line2, 6) ||
-		    !strncmp("+CMGS:", buf.line2, 6))
-			data->SMSMessage->Number = atoi(buf.line2 + 6);
-		else
-			data->SMSMessage->Number = -1;
-		return GE_SMSSENDOK;
-	}
-	return GE_SMSSENDFAILED;
+	/* SendSMS or SaveSMS */
+	if (!strncmp("+CMGW:", buf.line2, 6) ||
+	    !strncmp("+CMGS:", buf.line2, 6))
+		data->SMSMessage->Number = atoi(buf.line2 + 6);
+	else
+		data->SMSMessage->Number = -1;
+	return GE_SMSSENDOK;
 }
 
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	AT_LineBuffer buf;
 
-	buf.line1 = buffer;
+	if (buffer[0] != GEAT_OK)
+		return GE_INTERNALERROR;
+
+	buf.line1 = buffer + 1;
 	buf.length = length;
 
 	splitlines(&buf);
-	if (buf.line1 == NULL)
-		return GE_INTERNALERROR;
 
 	if (!data->RawData) return GE_INTERNALERROR;
 	data->RawData->Length = strlen(buf.line3) / 2 + 1;
@@ -964,15 +960,15 @@ static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int len
 {
 	AT_LineBuffer buf;
 	char *pos;
-	int error = 0;
 
-	buf.line1 = buffer;
+	if (buffer[0] != GEAT_OK)
+		return GE_UNKNOWN;
+		
+	buf.line1 = buffer + 1;
 	buf.length= length;
 	splitlines(&buf);
-	if (buf.line1 == NULL)
-		error = 1;
 
-	if ((!strncmp(buffer, "AT+CSCS", 7)) && (data->Model)) {
+	if ((!strncmp(buf.line1, "AT+CSCS", 7)) && (data->Model)) {
 		/* if a opening bracket is in the string don't skip anything */
 		pos = strchr(buf.line2, '(');
 		if (pos) {
@@ -989,16 +985,13 @@ static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int len
 }
 
 
+/* General reply function for phone responses. buffer[0] holds the compiled
+ * success of the result (OK, ERROR, ... ). see atbus.h and atbus.c for 
+ * reference */
 static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
-	AT_LineBuffer buf;
-	int error = 0;
-
-	buf.line1 = buffer;
-	buf.length= length;
-	splitlines(&buf);
-	if (buf.line1 == NULL)
-		error = 1;
+	if (buffer[0] != GEAT_OK)
+		return GE_UNKNOWN;
 
 	return GE_NONE;
 }
@@ -1088,10 +1081,6 @@ void splitlines(AT_LineBuffer *buf)
 {
 	char *pos;
 
-	if ((buf->length > 7) && (!strncmp(buf->line1 + buf->length - 7, "ERROR", 5))) {
-		buf->line1 = NULL;
-		return;
-	}
 	pos = findcrlf(buf->line1, 0, buf->length);
 	if (pos) {
 		*pos = 0;

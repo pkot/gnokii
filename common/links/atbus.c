@@ -45,9 +45,13 @@ static void at_printf(char *prefix, char *buf, int len);
 /*         a statemachine. */
 
 static GSM_Statemachine *statemachine;
-static int binlength = 0;
+
+/* The buffer for phone responses not only holds the data from
+the phone but also a byte which holds the compiled status of the
+response. it is placed at [0]. */
 static char reply_buf[1024];
-static int reply_buf_pos = 0;
+static int reply_buf_pos = 1;
+static int binlength = 1;
 
 static int xwrite(unsigned char *d, int len)
 {
@@ -88,16 +92,29 @@ void ATBUS_RX_StateMachine(unsigned char rx_char)
 	reply_buf[reply_buf_pos] = '\0';
 
 	if (reply_buf_pos >= binlength) {
-		if (((reply_buf_pos > 3) && (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4)))
-		|| ((reply_buf_pos > 6) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))
-		|| ((reply_buf_pos > 3) && (!strncmp(reply_buf+reply_buf_pos-4, "\r\n> ", 4)))) {
+		reply_buf[0] = GEAT_NONE;
+		/* first check if <cr><lf> is found at end of reply_buf.
+		 * attention: the needed length is greater 2 because we
+		 * dont need to enter if no result/error will be found. */
+		if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-2, "\r\n", 2))) {
+			/* no lenght check needed */
+			if (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4))
+				reply_buf[0] = GEAT_OK;
+			else if ((reply_buf_pos > 7) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))
+				reply_buf[0] = GEAT_ERROR;
+		}
+		/* check if SMS prompt is found */
+		if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-4, "\r\n> ", 4))) {
+			reply_buf[0] = GEAT_PROMPT;
+		}
+		if (reply_buf[0] != GEAT_NONE) {
 
 
-			at_printf("read : ", reply_buf, reply_buf_pos);
+			at_printf("read : ", reply_buf + 1, reply_buf_pos - 1);
 
-			SM_IncomingFunction(statemachine, statemachine->LastMsgType, reply_buf, reply_buf_pos);
-			reply_buf_pos = 0;
-			binlength = 0;
+			SM_IncomingFunction(statemachine, statemachine->LastMsgType, reply_buf, reply_buf_pos - 1);
+			reply_buf_pos = 1;
+			binlength = 1;
 			return;
 		}
 /* needed for binary date etc
