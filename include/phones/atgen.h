@@ -39,6 +39,7 @@ typedef enum {
 	GN_OP_AT_SetCharset,
 	GN_OP_AT_SetPDUMode,
 	GN_OP_AT_Prompt,
+	GN_OP_AT_GetMemoryRange,
 	GN_OP_AT_Max	/* don't append anything after this entry */
 } at_operation;
 
@@ -63,6 +64,8 @@ typedef struct {
 	int if_pos;
 
 	gn_memory_type memorytype;
+	int memoryoffset;
+	int memorysize;
 	gn_memory_type smsmemorytype;
 	at_charset availcharsets;
 	at_charset defaultcharset;

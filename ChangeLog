@@ -19,6 +19,8 @@
                                                        (Igor Popik)
     o remove leading spaces from the model information introduced
       by earlier changes                              (Ron Yorston)
+    o handle Motorola C350 way of memory status checking
+                                                      (Ron Yorston)
  * 6100 series updates
     o add support for DeletePhonebook              (BORBELY Zoltan)
  * gnokii updates

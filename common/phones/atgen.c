@@ -53,6 +53,7 @@ static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int leng
 static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -72,6 +73,7 @@ static gn_error AT_GetManufacturer(gn_data *data, struct gn_statemachine *state)
 static gn_error AT_GetBattery(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_GetRFLevel(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_GetMemoryStatus(gn_data *data,  struct gn_statemachine *state);
+static gn_error AT_GetMemoryRange(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_ReadPhonebook(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_WritePhonebook(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_DeletePhonebook(gn_data *data,  struct gn_statemachine *state);
@@ -112,6 +114,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetPowersource,        AT_GetBattery,            ReplyGetBattery },
 	{ GN_OP_GetRFLevel,            AT_GetRFLevel,            ReplyGetRFLevel },
 	{ GN_OP_GetMemoryStatus,       AT_GetMemoryStatus,       ReplyMemoryStatus },
+	{ GN_OP_AT_GetMemoryRange,     AT_GetMemoryRange,        ReplyMemoryRange },
 	{ GN_OP_ReadPhonebook,         AT_ReadPhonebook,         ReplyReadPhonebook },
 	{ GN_OP_WritePhonebook,        AT_WritePhonebook,        Reply },
 	{ GN_OP_DeletePhonebook,       AT_DeletePhonebook,       Reply },
@@ -136,10 +139,23 @@ static at_function_init_type at_function_init[] = {
 
 static char *strip_quotes(char *s)
 {
-	char *t ;
+	char *t;
 
 	if (*s == '"') {
 		if ((t = strrchr(++s, '"'))) {
+			*t = '\0';
+		}
+	}
+
+	return s;
+}
+
+static char *strip_brackets(char *s)
+{
+	char *t ;
+
+	if (*s == '(') {
+		if ((t = strrchr(++s, ')'))) {
 			*t = '\0';
 		}
 	}
@@ -320,6 +336,9 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
 		ret = sm_block_no_retry(GN_OP_Init, &data, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->memorytype = mt;
+
+		gn_data_clear(&data);
+		ret = state->driver.functions(GN_OP_AT_GetMemoryRange, &data, state);
 	}
 	return ret;
 }
@@ -505,8 +524,19 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 }
 
+static gn_error AT_GetMemoryRange(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error ret;
+
+	ret = sm_message_send(10, GN_OP_AT_GetMemoryRange, "AT+CPBR=?\r", state);
+	if (ret)
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_AT_GetMemoryRange, data, state);
+}
+
 static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
 	char req[32];
 	gn_error ret;
 
@@ -516,7 +546,7 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
-	sprintf(req, "AT+CPBR=%d\r", data->phonebook_entry->location);
+	sprintf(req, "AT+CPBR=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
 	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_ReadPhonebook, data, state);
@@ -539,7 +569,7 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 		if (ret)
 			return ret;
 		ofs = sprintf(req, "AT+CPBW=%d,\"%s\",%s,\"",
-			      data->phonebook_entry->location,
+			      data->phonebook_entry->location+drvinst->memoryoffset,
 			      data->phonebook_entry->number,
 			      data->phonebook_entry->number[0] == '+' ? "145" : "129");
 		len = strlen(data->phonebook_entry->name);
@@ -570,6 +600,7 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
 	int len;
 	char req[64];
 	gn_error ret;
@@ -581,7 +612,7 @@ static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	if (ret)
 		return ret;
 
-	len = sprintf(req, "AT+CPBW=%d\r", data->phonebook_entry->location);
+	len = sprintf(req, "AT+CPBW=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
 
 	if (sm_message_send(len, GN_OP_DeletePhonebook, req, state))
 		return GN_ERR_NOTREADY;
@@ -956,6 +987,7 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
 	char *pos;
 
@@ -972,7 +1004,7 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 		if (pos) {
 			data->memory_status->used = atoi(++pos);
 		} else {
-			data->memory_status->used = 100;
+			data->memory_status->used = drvinst->memorysize;
 			data->memory_status->free = 0;
 			return GN_ERR_UNKNOWN;
 		}
@@ -983,6 +1015,43 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 			return GN_ERR_UNKNOWN;
 		}
 	}
+	return GN_ERR_NONE;
+}
+
+static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	at_line_buffer buf;
+	char *pos, *s, *t;
+
+	drvinst->memoryoffset = 0;
+	drvinst->memorysize = 100;
+
+	if (buffer[0] != GN_AT_OK)
+		return GN_ERR_UNKNOWN;
+
+	buf.line1 = buffer + 1;
+	buf.length= length;
+
+	splitlines(&buf);
+
+	if (strncmp(buf.line2, "+CPBR: ", 7) == 0) {
+		s = buf.line2 + 7;
+		pos = strchr(s, ',');
+		if (pos) {
+			*pos = '\0';
+			s = strip_brackets(s);
+			t = strchr(s, '-');
+			if (t) {
+				int first, last;
+				first = atoi(s);
+				last = atoi(t+1);
+				drvinst->memoryoffset = first - 1;
+				drvinst->memorysize = last - first + 1;
+			}
+		}
+	}
+
 	return GN_ERR_NONE;
 }
 
@@ -1409,6 +1478,8 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	state->driver.incoming_functions = drvinst->incoming_functions;
 	AT_DRVINST(state) = drvinst;
 	drvinst->memorytype = GN_MT_XX;
+	drvinst->memoryoffset = 0;
+	drvinst->memorysize = 100;
 	drvinst->smsmemorytype = GN_MT_XX;
 	drvinst->defaultcharset = AT_CHAR_UNKNOWN;
 	drvinst->charset = AT_CHAR_UNKNOWN;
