@@ -148,6 +148,7 @@ typedef enum {
 	GOP_GetIncomingSMS,
 	GOP_GetUnreadMessages,
 	GOP_GetNextSMS,
+	GOP_DeleteSMSnoValidate,
 	GOP_DeleteSMS,
 	GOP_SendSMS,
 	GOP_GetSpeedDial,

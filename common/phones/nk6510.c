@@ -69,6 +69,7 @@ static GSM_Error P6510_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
+
 static GSM_Error P6510_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
 
@@ -105,6 +106,7 @@ static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_DeleteSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
 /*
 static GSM_Error P6510_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 */
@@ -291,6 +293,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		*/
 	case GOP_DeleteSMS:
 		return P6510_DeleteSMS(data, state);
+	case GOP_DeleteSMSnoValidate:
+		return P6510_DeleteSMSnoValidate(data, state);
 	case GOP_GetSMSStatus:
 		return P6510_GetSMSStatus(data, state);
 		/*
@@ -953,6 +957,32 @@ static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	req[7] = data->SMSFolder->Locations[data->RawSMS->Number - 1];
+
+	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_FOLDER);
+}
+
+static GSM_Error P6510_DeleteSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x04,
+				   0x02, /* 0x01 for SM, 0x02 for ME */
+				   0x00, /* FolderID */
+				   0x00,
+				   0x02, /* Location */
+				   0x0F, 0x55};
+
+	dprintf("Deleting SMS (noValidate)...\n");
+
+	if ((data->RawSMS->MemoryType == GMT_IN) || (data->RawSMS->MemoryType == GMT_OU)) {
+		if (data->RawSMS->Number > 1024) {
+			data->RawSMS->Number -= 1024;
+		} else {
+			req[4] = 0x01;
+		}
+	}
+
+	req[5] = GetMemoryType(data->RawSMS->MemoryType);
+	req[7] = data->RawSMS->Number;
 
 	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_FOLDER);

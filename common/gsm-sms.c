@@ -740,6 +740,18 @@ API GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 	return ParseSMS(data);
 }
 
+API GSM_Error DeleteSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_SMSMessage rawsms;
+
+	if (!data->SMS) return GE_INTERNALERROR;
+	memset(&rawsms, 0, sizeof(GSM_SMSMessage));
+	rawsms.Number = data->SMS->Number;
+	rawsms.MemoryType = data->SMS->MemoryType;
+	data->RawSMS = &rawsms;
+	return SM_Functions(GOP_DeleteSMSnoValidate, data, state);
+}
+
 static GSM_Error FreeDeletedMessages(GSM_Data *data, int folder)
 {
 	int i, j;
