@@ -61,6 +61,7 @@ static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
@@ -80,6 +81,8 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char *cmd)
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AT_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
 
 typedef struct {
 	int gop;
@@ -111,7 +114,9 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_SaveSMS, AT_SaveSMS, ReplySendSMS },
 	{ GOP_GetSMS, AT_GetSMS, ReplyGetSMS },
 	{ GOPAT_GetCharset, AT_GetCharset, ReplyGetCharset },
-	{ GOP_GetSMSCenter, AT_GetSMSCenter, ReplyGetSMSCenter }
+	{ GOP_GetSMSCenter, AT_GetSMSCenter, ReplyGetSMSCenter },
+	{ GOP_GetSecurityCodeStatus, AT_GetSecurityCodeStatus, ReplyGetSecurityCodeStatus },
+	{ GOP_EnterSecurityCode, AT_EnterSecurityCode, Reply }
 };
 
 
@@ -667,7 +672,33 @@ static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 		return GE_NOTREADY;
 	return SM_Block(state, data, GOP_GetSMSCenter);
 }
-			
+
+
+static GSM_Error AT_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[16];
+	sprintf(req, "AT+CPIN?\r");
+ 	if (SM_SendMessage(state, 9, GOP_GetSecurityCodeStatus, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_GetSecurityCodeStatus);
+}
+
+
+static GSM_Error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+{
+	/* fixme bufferoverflow */
+	unsigned char req[256];
+
+	if ((data->SecurityCode->Type != GSCT_Pin))
+		return (GE_NOTIMPLEMENTED);
+
+	sprintf(req, "AT+CPIN=\"%s\"\r", data->SecurityCode->Code);
+ 	if (SM_SendMessage(state, strlen(req), GOP_GetSMSCenter, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_EnterSecurityCode);
+}
+
+
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (op == GOP_Init)
@@ -1002,6 +1033,51 @@ static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int len
 		if (pos) *pos = '\0';
 		strncpy(data->Model, buf.line2 + 8, 255);
 		(data->Model)[255] = '\0';
+	}
+	return GE_NONE;
+}
+
+
+static GSM_Error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	AT_LineBuffer buf;
+	char *pos;
+
+	if (buffer[0] != GEAT_OK)
+		return GE_UNKNOWN;
+		
+	buf.line1 = buffer + 1;
+	buf.length= length;
+	splitlines(&buf);
+
+	if ((!strncmp(buf.line1, "AT+CPIN", 7)) && (data->SecurityCode)) {
+		if (strncmp(buf.line2, "+CPIN: ", 7)) {
+			data->SecurityCode->Type = 0;
+			return GE_INTERNALERROR;
+		}
+
+		pos = 7 + buf.line2;
+
+		if (!strncmp(pos, "READY", 5)) {
+			data->SecurityCode->Type = GSCT_None;
+			return GE_NONE;
+		}
+
+		if (!strncmp(pos, "SIM ", 4)) {
+			pos += 4;
+			if (!strncmp(pos, "PIN2", 4)) {
+				data->SecurityCode->Type = GSCT_Pin2;
+			}
+			if (!strncmp(pos, "PUK2", 4)) {
+				data->SecurityCode->Type = GSCT_Puk2;
+			}
+			if (!strncmp(pos, "PIN", 3)) {
+				data->SecurityCode->Type = GSCT_Pin;
+			}
+			if (!strncmp(pos, "PUK", 3)) {
+				data->SecurityCode->Type = GSCT_Puk;
+			}
+		}
 	}
 	return GE_NONE;
 }
