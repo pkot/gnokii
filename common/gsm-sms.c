@@ -66,6 +66,7 @@ struct sms_udh_data {
 #define SMS_UDH_VOICE_MESSAGES        10
 #define SMS_UDH_FAX_MESSAGES          11
 #define SMS_UDH_EMAIL_MESSAGES        12
+#define SMS_UDH_WAP_PUSH              13
 
 /* User data headers */
 static struct sms_udh_data headers[] = {
@@ -82,6 +83,7 @@ static struct sms_udh_data headers[] = {
 	{ 0x04, "\x01\x02\x00\x00" },         /* Voice Messages */
 	{ 0x04, "\x01\x02\x01\x00" },         /* Fax Messages */
 	{ 0x04, "\x01\x02\x02\x00" },         /* Email Messages */
+	{ 0x06, "\x05\x04\x0b\x84\x23\xf0" }, /* WAP PUSH */
 	{ 0x00, "" },
 };
 
@@ -986,6 +988,7 @@ static char *sms_udh_encode(gn_sms_raw *rawsms, int type)
 	case GN_SMS_UDH_CallerIDLogo:
 	case GN_SMS_UDH_Ringtone:
 	case GN_SMS_UDH_MultipartMessage:
+	case GN_SMS_UDH_WAPPush:
 		udh[0] += headers[type].length;
 		res = udh+pos+1;
 		memcpy(res, headers[type].header, headers[type].length);
@@ -1171,6 +1174,15 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 		case GN_SMS_DATA_Ringtone:
 			if (!sms_udh_encode(rawsms, GN_SMS_UDH_Ringtone)) return GN_ERR_NOTSUPPORTED;
 			size = ringtone_sms_encode(rawsms->user_data + rawsms->length, &sms->user_data[i].u.ringtone);
+			rawsms->length += size;
+			rawsms->user_data_length += size;
+			rawsms->dcs = 0xf5;
+			break;
+
+		case GN_SMS_DATA_WAPPush:
+			if (!sms_udh_encode(rawsms, GN_SMS_UDH_WAPPush)) return GN_ERR_NOTSUPPORTED;
+			size = sms->user_data[i].length;
+			memcpy(rawsms->user_data + rawsms->user_data_length, sms->user_data[i].u.text, size );
 			rawsms->length += size;
 			rawsms->user_data_length += size;
 			rawsms->dcs = 0xf5;

@@ -91,8 +91,9 @@ typedef enum {
 	GN_SMS_UDH_VoiceMessage         = 0x0a,
 	GN_SMS_UDH_FaxMessage           = 0x0b,
 	GN_SMS_UDH_EmailMessage         = 0x0c,
-	GN_SMS_UDH_OtherMessage         = 0x0d,
-	GN_SMS_UDH_Unknown              = 0x0e
+	GN_SMS_UDH_WAPPush              = 0x0d,
+	GN_SMS_UDH_OtherMessage         = 0x0e,
+	GN_SMS_UDH_Unknown              = 0x0f
 } gn_sms_udh_type;
 
 typedef struct {
@@ -299,7 +300,8 @@ typedef enum {
 	GN_SMS_DATA_NokiaText = 0x06,
 	GN_SMS_DATA_Animation = 0x07,
 	GN_SMS_DATA_Concat    = 0x08,
-	GN_SMS_DATA_Other     = 0x09
+	GN_SMS_DATA_WAPPush   = 0x09,
+	GN_SMS_DATA_Other     = 0x0a
 } gn_sms_data_type;
 
 /*** FOLDER INFO ***/
