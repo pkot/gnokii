@@ -470,6 +470,9 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 			data->PhonebookEntry->Date.Minute = 0;
 			data->PhonebookEntry->Date.Second = 0;
 		}
+		if (data->Bitmap) {
+			data->Bitmap->text[0] = '\0';
+		}
 		if (message[6] == 0x0f) { /* not found */
 			switch (message[10]) {
 			case 0x30:
