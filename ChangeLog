@@ -2,6 +2,8 @@
 =====
  * build system updates
     o build also bz2 archive                             (Pawel Kot)
+    o use INSTALL_DATA variable from the configure script
+                                                      (Ville Skyttä)
  * translations updates
     o Estonian translation updated                   (Hans Motshärg)
  * 3110 series updates

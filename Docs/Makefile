@@ -28,6 +28,7 @@ INSTALL_DOCS = 	README \
 		Bugs \
 		DataCalls-QuickStart \
 		gettext-howto \
+		gnokii.nol \
 		packaging-howto \
 		gnokii-ir-howto \
 		gnokii-IrDA-Linux \
@@ -70,16 +71,16 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(docdir)/sample/ppp
 	@for xxx in $(INSTALL_DOCS); do \
 	    if [ -e $$xxx ]; then \
-		$(INSTALL) -m 0444 $$xxx $(DESTDIR)$(docdir)/$$xxx; \
+		$(INSTALL_DATA) $$xxx $(DESTDIR)$(docdir)/$$xxx; \
 	    fi; \
 	done
 	$(INSTALL) -d $(DESTDIR)$(man1dir)
 	$(INSTALL) -d $(DESTDIR)$(man8dir)
-	$(INSTALL) $(GNOKII1_MAN) $(DESTDIR)$(man1dir)
-	$(INSTALL) $(GNOKII8_MAN) $(DESTDIR)$(man8dir)
+	$(INSTALL_DATA) $(GNOKII1_MAN) $(DESTDIR)$(man1dir)
+	$(INSTALL_DATA) $(GNOKII8_MAN) $(DESTDIR)$(man8dir)
 	if [ "x$(HAVE_XGNOKII)" = "xyes" ]; then \
 		$(INSTALL) -d $(DESTDIR)$(xmandir); \
-		$(INSTALL) $(XGNOKII_MAN) $(DESTDIR)$(xmandir); \
+		$(INSTALL_DATA) $(XGNOKII_MAN) $(DESTDIR)$(xmandir); \
 	fi
 	@echo "done"
 

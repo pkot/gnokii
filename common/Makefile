@@ -88,7 +88,7 @@ install:
 	cd $(DESTDIR)$(libdir) && ln -sf $(GNOKII_LIBMM) $(GNOKII_LIBM)
 	cd $(DESTDIR)$(libdir) && ln -sf $(GNOKII_LIBM) $(GNOKII_LIB)
 	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig
-	$(INSTALL) gnokii.pc $(DESTDIR)$(libdir)/pkgconfig
+	$(INSTALL_DATA) gnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	@echo
 
 install-strip: install
