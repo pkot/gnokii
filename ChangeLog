@@ -6,6 +6,8 @@
  * Updates to make cygwin compile
  (./configure --enable-win32 --disable-shared --disable-nls)
                                                           (Pawel Kot)
+ * We moved to savannah.gnu.org                           (Pawel Kot)
+ * More accurate INSTALL file                  (Robert Steinhaeusser)
 
 0.4.0pre16
 ==========
