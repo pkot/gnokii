@@ -1554,8 +1554,11 @@ int sendoplogoviasms(int argc, char *argv[])
   /* The second argument is the bitmap file. */
   GSM_ReadBitmapFile(argv[1], &bitmap);
 
-  /* The third argument, if present, is the Network code of the operator. */
-  if (argv[2])
+  /*
+   * The third argument, if present, is the Network code of the operator.
+   * Network code is in this format: "xxx yy".
+   */
+  if (argc > 2)
     strcpy(bitmap.netcode, argv[2]);
 
   /* Set the logo size */

@@ -1,3 +1,7 @@
 * Thu Jan 13 23:43:23 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - ChangeLog started, we should comment every change here.
 
+* Tue Feb 22 13:10:47 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- WIN32 changes to argument checking in sendoplogoviasms(). Thanks to Jason
+  Garrett
+
