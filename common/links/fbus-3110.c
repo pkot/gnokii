@@ -148,6 +148,7 @@ static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachin
 					dprintf("%02hhx:", i->buffer[count]);
 				dprintf("\n");
 				/* Transfer message to state machine */
+				sm_incoming_acknowledge(state);
 				sm_incoming_function(fb3110_message_type_fold(i->buffer[0]), i->buffer, i->frame_len, state);
 
 				/* Send an ack */
@@ -251,8 +252,6 @@ static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned ch
 
 	fb3110_sequence_number_update(state);
 	seqnum = FBUSINST(state)->request_sequence_number;
-
-	sm_incoming_acknowledge(state);
 
 	return fb3110_tx_frame_send(messagesize, messagetype, seqnum, message, state);
 }

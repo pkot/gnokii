@@ -32,6 +32,7 @@
       sent and the phone does not reply within 100ms (Osma Suominen)
     o moving the call of the sm_incoming_acknowledge into the send
       function in the atbus and fbus-3110 drivers   (BORBELY Zoltan)
+    o sm_incoming_acknowledge reverted in fbus-3110 (BORBELY Zoltan)
  * device layer updates
     o handling write errors in unixserial           (BORBELY Zoltan)
 
