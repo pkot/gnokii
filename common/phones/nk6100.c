@@ -246,7 +246,6 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	case GOP_SetSpeedDial:
 		return SetSpeedDial(data, state);
 	case GOP_GetImei:
-		return GetIMEI(data, state);
 	case GOP_GetModel:
 	case GOP_GetRevision:
 	case GOP_GetManufacturer:
