@@ -3,7 +3,7 @@
 	cd ..
 	make
 	cd common
-	make gnokii-debug
+	make gnokii-debug || ( echo "*** Compile FAILED"; sleep 10 )
 )
 export HOME=`pwd`
 GNOKII=../common/gnokii-debug
