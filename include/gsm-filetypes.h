@@ -15,6 +15,15 @@
 
 */
 
+int GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
+
+int GetScale (char *num);
+int GetDuration (char *num);
+
+/* Defines the character that separates fields in rtttl files. */
+#define RTTTL_SEP ":"
+
+
 int GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap);
 int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap);
 

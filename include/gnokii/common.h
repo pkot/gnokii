@@ -182,7 +182,7 @@ typedef enum {
   GSM_ConcatenatedMessages,
   GSM_OpLogo,
   GSM_CallerIDLogo,
-  GSM_Ringtone
+  GSM_RingtoneUDH
 } GSM_UDH;
 
 /* Define datatype for SMS messages, used for getting SMS messages from the
@@ -425,6 +425,28 @@ typedef struct {
   char ringtone;           /* Ringtone no sent with caller group */
 } GSM_Bitmap;
 
+
+/* NoteValue is encoded as octave(scale)*14 + note */
+/* where for note: c=0, d=2, e=4 .... */
+/* ie. c#=1 and 5 and 13 are invalid */
+/* note=255 means a pause */
+
+/* Structure to hold note of ringtone. */
+
+typedef struct {
+  u8 duration;
+  u8 note;
+} GSM_RingtoneNote;
+
+/* Structure to hold ringtones. */
+
+typedef struct {
+  char name[20];
+  u8 tempo;
+  u8 NrNotes;
+  GSM_RingtoneNote notes[256];
+} GSM_Ringtone;
+  
 /* Structure to hold profile entries. */
 
 typedef struct {
@@ -570,7 +592,9 @@ typedef struct {
   
   GSM_Error (*SetBitmap) ( GSM_Bitmap *Bitmap );
 
-  GSM_Error (*SetRingTone) ( char *FileName );
+  GSM_Error (*SetRingtone) ( GSM_Ringtone *ringtone );
+
+  GSM_Error (*SendRingtone) ( GSM_Ringtone *ringtone, char *dest );
 
   GSM_Error (*Reset) ( unsigned char type );
 
@@ -581,6 +605,10 @@ typedef struct {
   bool      (*SendRLPFrame) ( RLP_F96Frame *frame, bool out_dtx );
 
   GSM_Error (*CancelCall) ();
+  
+  GSM_Error (*EnableDisplayOutput) ();
+  
+  GSM_Error (*DisableDisplayOutput) ();
 
 } GSM_Functions;
 

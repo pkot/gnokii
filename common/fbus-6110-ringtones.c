@@ -101,304 +101,184 @@ int FB61_BitPackByte(unsigned char *Dest, int CurrentBit, unsigned char Command,
   return FB61_BitPack(Dest, CurrentBit, Byte, Bits);
 }
 
-/* This function is used to send the ringtone to the phone. The name of the
-   tune as displayed on the Nokia is Name, beats per minute (aka tempo in
-   NCDS) is stored in the variable Beats. Enjoy! */
 
-int FB61_PackRingtone(unsigned char *req, char *Name, int Beats, int NrNotes, Note *Notes)
-{
 
-  int StartBit=0, i=0;
-  unsigned char FBUSRingtuneHeader[] = { 0x0c, 0x01, /* FBUS RingTone header*/
+/* This is messy but saves using the math library! */
 
-					 /* Next bytes are from Smart Messaging
-					    Specification version 2.0.0 */
-
-					 0x06,       /* User Data Header Length */
-					 0x05,       /* IEI FIXME: What is this? */
-					 0x04,       /* IEDL FIXME: What is this? */
-					 0x15, 0x81, /* Destination port */
-					 0x15, 0x81  /* Originator port, only
-                                                        to fill in the two
-                                                        bytes :-) */
-  };
-
-  unsigned char CommandLength = 0x02;
-
-  StartBit=FB61_BitPack(req, StartBit, FBUSRingtuneHeader, 72);
-  StartBit=FB61_BitPackByte(req, StartBit, CommandLength, 8);
-  StartBit=FB61_BitPackByte(req, StartBit, RingingToneProgramming, 7);
-
-  /* The page 3-23 of the specs says that <command-part> is always
-     octet-aligned. */
-  StartBit=FB61_OctetAlign(req, StartBit);
-
-  StartBit=FB61_BitPackByte(req, StartBit, Sound, 7);
-  StartBit=FB61_BitPackByte(req, StartBit, BasicSongType, 3);
-
-  /* Packing the name of the tune. */
-  StartBit=FB61_BitPackByte(req, StartBit, strlen(Name)<<4, 4);
-  StartBit=FB61_BitPack(req, StartBit, Name, 8*strlen(Name));
-
-  /* FIXME: unknown */
-  StartBit=FB61_BitPackByte(req, StartBit, 0x01, 8);
-  StartBit=FB61_BitPackByte(req, StartBit, 0x00, 8);
-  StartBit=FB61_BitPackByte(req, StartBit, 0x00, 1);
-
-  /* Number of instructions in the tune. Each Note contains two instructions -
-     Scale and Note. Default Tempo and Style are instructions too.  */
-  StartBit=FB61_BitPackByte(req, StartBit, 2*NrNotes+2, 8);
-
-  /* Style */
-  StartBit=FB61_BitPackByte(req, StartBit, StyleInstructionId, 3);
-  StartBit=FB61_BitPackByte(req, StartBit, ContinuousStyle, 2);
-
-  /* Beats per minute/tempo of the tune */
-  StartBit=FB61_BitPackByte(req, StartBit, TempoInstructionId, 3);
-  StartBit=FB61_BitPackByte(req, StartBit, FB61_GetTempo(Beats), 5);
-
-  /* Notes packing */
-  for(i=0; i<NrNotes; i++) {
-    /* Scale */
-    StartBit=FB61_BitPackByte(req, StartBit, ScaleInstructionId, 3);
-    StartBit=FB61_BitPackByte(req, StartBit, Notes[i].Scale, 2);
-    /* Note */
-    StartBit=FB61_BitPackByte(req, StartBit, NoteInstructionId, 3);
-    StartBit=FB61_BitPackByte(req, StartBit, Notes[i].NoteID, 4);
-    StartBit=FB61_BitPackByte(req, StartBit, Notes[i].Duration, 3);
-    StartBit=FB61_BitPackByte(req, StartBit, Notes[i].DurationSpecifier, 2);
-  }
-
-  StartBit=FB61_OctetAlign(req, StartBit);
-
-  StartBit=FB61_BitPackByte(req, StartBit, CommandEnd, 8);
-
-  /* 0x01 because we have only one frame... */
-  StartBit=FB61_BitPackByte(req, StartBit, 1, 8);
-
-  return StartBit/8;
-}
-
-int GetDuration(int number) {
+int FB61_GetDuration(int number, unsigned char *spec) {
 
   int duration=0;
 
   switch (number) {
-  case 1:
-    duration=Duration_Full; break;
-  case 2:
-    duration=Duration_1_2; break;
-  case 4:
-    duration=Duration_1_4; break;
-  case 8:
-    duration=Duration_1_8; break;
-  case 16:
-    duration=Duration_1_16; break;
+
+  case 128*3/2:
+    duration=Duration_Full; *spec=DottedNote; break;  
+  case 128*2/3:
+    duration=Duration_Full; *spec=Length_2_3; break;  
+  case 128:
+    duration=Duration_Full; *spec=NoSpecialDuration; break;  
+  case 64*9/4:
+    duration=Duration_1_2; *spec=DoubleDottedNote; break;    
+  case 64*3/2:
+    duration=Duration_1_2; *spec=DottedNote; break;  
+  case 64*2/3:
+    duration=Duration_1_2; *spec=Length_2_3; break;  
+  case 64:
+    duration=Duration_1_2; *spec=NoSpecialDuration; break;  
+  case 32*9/4:
+    duration=Duration_1_4; *spec=DoubleDottedNote; break;    
+  case 32*3/2:
+    duration=Duration_1_4; *spec=DottedNote; break;  
+  case 32*2/3:
+    duration=Duration_1_4; *spec=Length_2_3; break;  
   case 32:
-    duration=Duration_1_32; break;
+    duration=Duration_1_4; *spec=NoSpecialDuration; break;  
+  case 16*9/4:
+    duration=Duration_1_8; *spec=DoubleDottedNote; break;    
+  case 16*3/2:
+    duration=Duration_1_8; *spec=DottedNote; break;  
+  case 16*2/3:
+    duration=Duration_1_8; *spec=Length_2_3; break;  
+  case 16:
+    duration=Duration_1_8; *spec=NoSpecialDuration; break;  
+  case 8*9/4:
+    duration=Duration_1_16; *spec=DoubleDottedNote; break;    
+  case 8*3/2:
+    duration=Duration_1_16; *spec=DottedNote; break;  
+  case 8*2/3:
+    duration=Duration_1_16; *spec=Length_2_3; break;  
+  case 8:
+    duration=Duration_1_16; *spec=NoSpecialDuration; break;  
+  case 4*9/4:
+    duration=Duration_1_32; *spec=DoubleDottedNote; break;    
+  case 4*3/2:
+    duration=Duration_1_32; *spec=DottedNote; break;  
+  case 4*2/3:
+    duration=Duration_1_32; *spec=Length_2_3; break;  
+  case 4:
+    duration=Duration_1_32; *spec=NoSpecialDuration; break;  
   }
 
   return duration;
 }
 
-int GetScale(int number) {
 
-  int scale=0;
+int FB61_GetNote(int number) {
+  
+  int note=0;
+ 
+  if (number!=255) {
+    note=number%14;
+    switch (note) {
 
-  switch (number) {
-
-    /* Some files on the net seem to use 1-3 */
-    /* But Scale1 is not complete on my 6130 so start at Scale2 */
-    /* Perhaps we need some intelligence here? */
-
-  case 0:
-    scale=Scale1; break;
-  case 1:
-    scale=Scale2; break;
-  case 2:
-    scale=Scale3; break;
-  case 3:
-    scale=Scale4; break;
-
-  case 5:
-    scale=Scale1; break;
-  case 6:
-    scale=Scale2; break;
-  case 7:
-    scale=Scale3; break;
-  case 8:
-    scale=Scale4; break;
+    case 0:
+      note=Note_C; break;
+    case 1:
+      note=Note_Cis; break;
+    case 2:
+      note=Note_D; break;
+    case 3:
+      note=Note_Dis; break;
+    case 4:
+      note=Note_E; break;
+    case 6:
+      note=Note_F; break;
+    case 7:
+      note=Note_Fis; break;
+    case 8:
+      note=Note_G; break;
+    case 9:
+      note=Note_Gis; break;
+    case 10:
+      note=Note_A; break;
+    case 11:
+      note=Note_Ais; break;
+    case 12:
+      note=Note_H; break;
+    }
   }
+  else note = Note_Pause;
 
+  return note;
+
+}
+
+int FB61_GetScale(int number) {
+
+  int scale=-1;
+
+  if (number!=255) {
+    scale=number/14;
+
+    /* Ensure the scale is valid */
+    scale%=4;
+
+    scale=scale<<6;
+  }
   return scale;
 }
 
-int FB61_PackRingtoneRTTTL(unsigned char *req, char *FileName)
+
+/* This function packs the ringtone from the structure, so it can be set
+   or sent via sms to another phone. */
+
+u8 FB61_PackRingtone(GSM_Ringtone *ringtone, char *package)
 {
+  int StartBit=0;
+  int i;
+  unsigned char CommandLength = 0x02;
+  unsigned char spec;
+  int oldscale=-1, newscale;
 
-  int size;
+  StartBit=FB61_BitPackByte(package, StartBit, CommandLength, 8);
+  StartBit=FB61_BitPackByte(package, StartBit, RingingToneProgramming, 7);
 
-  int NrNotes=0;
-  Note Notes[100];
+  /* The page 3-23 of the specs says that <command-part> is always
+     octet-aligned. */
+  StartBit=FB61_OctetAlign(package, StartBit);
 
-  char Name[10];
+  StartBit=FB61_BitPackByte(package, StartBit, Sound, 7);
+  StartBit=FB61_BitPackByte(package, StartBit, BasicSongType, 3);
 
-  int DefNoteDuration=Duration_1_4;
-  int DefNoteScale=Scale2;
-  int DefBeats=63;
+  /* Packing the name of the tune. */
+  StartBit=FB61_BitPackByte(package, StartBit, strlen(ringtone->name)<<4, 4);
+  StartBit=FB61_BitPack(package, StartBit, ringtone->name, 8*strlen(ringtone->name));
 
-  unsigned char buffer[2000];
-  unsigned char *def, *notes, *ptr;
-  FILE *fd;
+  /* FIXME: unknown */
+  StartBit=FB61_BitPackByte(package, StartBit, 0x01, 8);
+  StartBit=FB61_BitPackByte(package, StartBit, 0x00, 8);
+  StartBit=FB61_BitPackByte(package, StartBit, 0x00, 1);
 
-  fd=fopen(FileName, "r");
-  if (!fd) {
-    fprintf(stderr, _("File can not be opened!\n"));
-    return 0;
-  }
+  /* Number of instructions in the tune. Each Note contains two instructions -
+     Scale and Note. Default Tempo and Style are instructions too.  */
+  StartBit=FB61_BitPackByte(package, StartBit, 2*(ringtone->NrNotes)+2, 8);
 
-  fread(buffer, 2000, 1, fd);
+  /* Style */
+  StartBit=FB61_BitPackByte(package, StartBit, StyleInstructionId, 3);
+  StartBit=FB61_BitPackByte(package, StartBit, ContinuousStyle, 2);
 
-#define RTTTL_SEP ":"
+  /* Beats per minute/tempo of the tune */
+  StartBit=FB61_BitPackByte(package, StartBit, TempoInstructionId, 3);
+  StartBit=FB61_BitPackByte(package, StartBit, FB61_GetTempo(ringtone->tempo), 5);
 
-  /* This is for buggy RTTTL ringtones without name. */
-  if (buffer[0] != RTTTL_SEP[0]) {
-    strtok(buffer, RTTTL_SEP);
-    sprintf(Name, "%s", buffer);
-    def=strtok(NULL, RTTTL_SEP);
-    notes=strtok(NULL, RTTTL_SEP);
-  }
-  else {
-    sprintf(Name, "GNOKII");
-    def=strtok(buffer, RTTTL_SEP);
-    notes=strtok(NULL, RTTTL_SEP);
-  }
-
-  ptr=strtok(def, ", ");
-  /* Parsing the <defaults> section. */
-  while (ptr) {
-
-    switch(*ptr) {
-    case 'd':
-    case 'D':
-      DefNoteDuration=GetDuration(atoi(ptr+2));
-      break;
-    case 'o':
-    case 'O':
-      DefNoteScale=GetScale(atoi(ptr+2));
-      break;
-    case 'b':
-    case 'B':
-      DefBeats=atoi(ptr+2);
-      break;
+  /* Notes packing */
+  for(i=0; i<ringtone->NrNotes; i++) {
+    /* Scale */
+    if (oldscale!=(newscale=FB61_GetScale(ringtone->notes[i].note))) {
+      oldscale=newscale;
+      StartBit=FB61_BitPackByte(package, StartBit, ScaleInstructionId, 3);
+      StartBit=FB61_BitPackByte(package, StartBit, FB61_GetScale(ringtone->notes[i].note), 2);
     }
-
-    ptr=strtok(NULL,", ");
+    /* Note */
+    StartBit=FB61_BitPackByte(package, StartBit, NoteInstructionId, 3);
+    StartBit=FB61_BitPackByte(package, StartBit, FB61_GetNote(ringtone->notes[i].note), 4);
+    StartBit=FB61_BitPackByte(package, StartBit, FB61_GetDuration(ringtone->notes[i].duration,&spec), 3);
+    StartBit=FB61_BitPackByte(package, StartBit, spec, 2);
   }
 
-#ifdef DEBUG
-  printf("DefNoteDuration=%d\n", DefNoteDuration);
-  printf("DefNoteScale=%d\n", DefNoteScale);
-  printf("DefBeats=%d\n", DefBeats);
-#endif
+  StartBit=FB61_OctetAlign(package, StartBit);
 
-  /* Parsing the <note-command>+ section. */
-  ptr=strtok(notes, ", ");
-  while (ptr && NrNotes<100) {
+  StartBit=FB61_BitPackByte(package, StartBit, CommandEnd, 8);
 
-    /* [<duration>] */
-    Notes[NrNotes].Duration=GetDuration(atoi(ptr));
-    if (Notes[NrNotes].Duration==0)
-      Notes[NrNotes].Duration=DefNoteDuration;
-
-    /* Skip all numbers in duration specification. */
-    while(isdigit(*ptr))
-      ptr++;
-
-    /* <note> */
-
-    switch(*ptr) {
-    case 'p':
-    case 'P':
-      Notes[NrNotes].NoteID=Note_Pause;
-      break;
-    case 'c':
-    case 'C':
-      Notes[NrNotes].NoteID=Note_C;
-      if (*(ptr+1)=='#') {
-	Notes[NrNotes].NoteID=Note_Cis;
-	ptr++;
-      }
-      break;
-    case 'd':
-    case 'D':
-      Notes[NrNotes].NoteID=Note_D;
-      if (*(ptr+1)=='#') {
-	Notes[NrNotes].NoteID=Note_Dis;
-	ptr++;
-      }
-      break;
-    case 'e':
-    case 'E':
-      Notes[NrNotes].NoteID=Note_E;
-      break;
-    case 'f':
-    case 'F':
-      Notes[NrNotes].NoteID=Note_F;
-      if (*(ptr+1)=='#') {
-	Notes[NrNotes].NoteID=Note_Fis;
-	ptr++;
-      }
-      break;
-    case 'g':
-    case 'G':
-      Notes[NrNotes].NoteID=Note_G;
-      if (*(ptr+1)=='#') {
-	Notes[NrNotes].NoteID=Note_Gis;
-	ptr++;
-      }
-      break;
-    case 'a':
-    case 'A':
-      Notes[NrNotes].NoteID=Note_A;
-      if (*(ptr+1)=='#') {
-	Notes[NrNotes].NoteID=Note_Ais;
-	ptr++;
-      }
-      break;
-    case 'h':
-    case 'H':
-      /* FIXME: What is this? Non-conforming RTTTL? Is B really H? */
-    case 'b':
-    case 'B':
-      Notes[NrNotes].NoteID=Note_H;
-      break;
-    default:
-
-      Notes[NrNotes].NoteID=Note_Pause;
-    }
-    ptr++;
-
-    /* [<scale>] */
-
-    Notes[NrNotes].Scale=GetScale(atoi(ptr));
-    if (Notes[NrNotes].Scale==0)
-      Notes[NrNotes].Scale=DefNoteScale;
-
-    /* Skip the number in scale specification. */
-    if(isdigit(*ptr))
-      ptr++;
-
-    /* [<special-duration>] */
-
-    if (*ptr=='.')
-      Notes[NrNotes].DurationSpecifier=DottedNote;
-    else Notes[NrNotes].DurationSpecifier=NoSpecialDuration;
-
-    NrNotes++;
-    ptr=strtok(NULL, ", ");
-  }
-
-  size=FB61_PackRingtone(req, Name, DefBeats, NrNotes, Notes);
-  return size;
+  return(StartBit/8);
 }

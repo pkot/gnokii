@@ -18,12 +18,191 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "gsm-common.h"
 #include "gsm-filetypes.h"
 
 #ifdef XPM
   #include <X11/xpm.h>
 #endif
+
+
+/* Function to convert scale field in to correct number. */
+
+int GetDuration (char *num)
+{
+
+int duration=0;
+
+ switch (atoi(num)) {
+ 
+ case 1:
+   duration=128; break;
+ case 2:
+   duration=64; break;
+ case 4:
+   duration=32; break;
+ case 8:
+   duration=16; break;
+ case 16:
+   duration=8; break;
+ case 32:
+   duration=4; break;
+ }
+   
+ return (duration);
+
+}
+
+
+int GetScale (char *num)
+{
+
+  /* This may well need improving. */
+
+  int scale=0;
+
+  if ((atoi(num))<4) scale=(atoi(num));
+  if ((atoi(num))>4) scale=(atoi(num))-4;
+
+  return (scale);
+}
+
+/* Currently only reads rttl files - can be later extended to midi etc. */
+
+int GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
+{
+
+  int NrNote=0;
+
+  //  GSM_RingtoneNoteDuration DefNoteDuration=GSM_RingtoneNoteDuration_1_4;
+  int DefNoteScale=2;
+  int DefNoteDuration=4;
+  unsigned char buffer[2000];
+  unsigned char *def, *notes, *ptr;
+  FILE *file;
+
+  file=fopen(FileName, "r");
+  if (!file) {
+    fprintf(stderr, _("File cannot be opened!\n"));
+    return -1;
+  }
+
+  fread(buffer, 2000, 1, file);
+
+
+  /* This is for buggy RTTTL ringtones without name. */
+  if (buffer[0] != RTTTL_SEP[0]) {
+    strtok(buffer, RTTTL_SEP);
+    sprintf(ringtone->name, "%s", buffer);
+    def=strtok(NULL, RTTTL_SEP);
+    notes=strtok(NULL, RTTTL_SEP);
+  }
+  else {
+    sprintf(ringtone->name, "GNOKII");
+    def=strtok(buffer, RTTTL_SEP);
+    notes=strtok(NULL, RTTTL_SEP);
+  }
+
+  ptr=strtok(def, ", ");
+  /* Parsing the <defaults> section. */
+  ringtone->tempo=63;
+
+  while (ptr) {
+
+    switch(*ptr) {
+    case 'd':
+    case 'D':
+      DefNoteDuration=GetDuration(ptr+2);
+      break;
+    case 'o':
+    case 'O':
+      DefNoteScale=GetScale(ptr+2);
+      break;
+    case 'b':
+    case 'B':
+      ringtone->tempo=atoi(ptr+2);
+      break;
+    }
+
+    ptr=strtok(NULL,", ");
+  }
+
+#ifdef DEBUG
+  printf("DefNoteDuration=%d\n", DefNoteDuration);
+  printf("DefNoteScale=%d\n", DefNoteScale);
+  printf("DefBeats=%d\n", DefBeats);
+#endif
+
+  /* Parsing the <note-command>+ section. */
+  ptr=strtok(notes, ", ");
+  while (ptr && NrNote<100) {
+
+    /* [<duration>] */
+    ringtone->notes[NrNote].duration=GetDuration(ptr);
+    if (ringtone->notes[NrNote].duration==0)
+      ringtone->notes[NrNote].duration=DefNoteDuration;
+
+    /* Skip all numbers in duration specification. */
+    while(isdigit(*ptr))
+      ptr++;
+
+    /* <note> */
+
+    if ((*ptr>='a') && (*ptr<='g')) ringtone->notes[NrNote].note=((*ptr-'a')*2)+10;
+    else if ((*ptr>='A') && (*ptr<='G')) ringtone->notes[NrNote].note=((*ptr-'A')*2)+10;
+    else if ((*ptr=='H') || (*ptr=='h')) ringtone->notes[NrNote].note=12;
+    else ringtone->notes[NrNote].note=255;
+
+    if ((ringtone->notes[NrNote].note>13)&&(ringtone->notes[NrNote].note!=255))
+	ringtone->notes[NrNote].note-=14;
+
+
+    ptr++;
+    
+    if ((*ptr)=='#') {
+      ringtone->notes[NrNote].note++;
+      if ((ringtone->notes[NrNote].note==5) || (ringtone->notes[NrNote].note==13))
+	ringtone->notes[NrNote].note++;
+      ptr++;
+    }
+
+    /* Check for dodgy rttl */
+    /* [<special-duration>] */
+    if (*ptr=='.') {
+      ringtone->notes[NrNote].duration*=1.5;
+      ptr++;
+    }
+
+
+    /* [<scale>] */
+
+    if (ringtone->notes[NrNote].note!=255) {
+      if (isdigit(*ptr)) {
+	ringtone->notes[NrNote].note+=GetScale(ptr)*14;
+	ptr++;
+      }
+      else ringtone->notes[NrNote].note+=DefNoteScale*14;
+    }
+
+    /* [<special-duration>] */
+    if (*ptr=='.') {
+      ringtone->notes[NrNote].duration*=1.5;
+      ptr++;
+    }
+
+    NrNote++;
+    ptr=strtok(NULL, ", ");
+  }
+
+  ringtone->NrNotes=NrNote;
+
+  return (0);
+
+}
+
+
+
 
 int GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 {

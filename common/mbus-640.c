@@ -90,6 +90,7 @@ GSM_Functions			MB640_Functions = {
 		MB640_GetBitmap,
 		MB640_SetBitmap,
 		MB640_SetRingTone,
+		MB640_SendRingTone,
 		MB640_Reset,
 		MB640_GetProfile,
 		MB640_SetProfile,
@@ -594,7 +595,7 @@ GSM_Error	MB640_DialVoice(char *Number)
 
 GSM_Error	MB640_DialData(char *Number, char type, void (* callpassup)(char c))
 {
-	return (GE_NOTIMPLEMENTED);
+        return (GE_NOTIMPLEMENTED);
 }
 
 GSM_Error	MB640_GetIncomingCallNr(char *Number)
@@ -715,11 +716,15 @@ GSM_Error	MB640_SetBitmap(GSM_Bitmap *Bitmap)
   return (GE_NONE);
 }
 
-GSM_Error	MB640_SetRingTone(char *Filename)
+GSM_Error       MB640_SetRingTone(GSM_Ringtone *ringtone)
 {
-    return (GE_NOTIMPLEMENTED);
+        return (GE_NOTIMPLEMENTED);
 }
 
+GSM_Error       MB640_SendRingTone(GSM_Ringtone *ringtone, char *dest)
+{
+        return (GE_NOTIMPLEMENTED);
+}
 
 GSM_Error	MB640_Reset(unsigned char type)
 {u8        pkt[] = { 0x43, 0x00, 0x00 };

@@ -195,7 +195,11 @@ GSM_Error FB61_NetMonitor(unsigned char mode, char *Screen);
 GSM_Error FB61_SetBitmap( GSM_Bitmap *Bitmap );
 GSM_Error FB61_GetBitmap( GSM_Bitmap *Bitmap );
 
-GSM_Error FB61_SetRingTone( char *Filename );
+GSM_Error FB61_SetRingTone(GSM_Ringtone *ringtone);
+GSM_Error FB61_SendRingTone(GSM_Ringtone *ringtone, char *dest);
+
+GSM_Error FB61_EnableDisplayOutput();
+GSM_Error FB61_DisableDisplayOutput();
 
 GSM_Error FB61_SendDTMF(char *String);
 

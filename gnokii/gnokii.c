@@ -212,6 +212,8 @@ int usage(void)
 "          gnokii --setringtone rtttlfile\n"
 "          gnokii --reset [soft|hard]\n"
 "          gnokii --getprofile [number]\n"
+"          gnokii --displayoutput\n"
+
   ));
 #ifdef SECURITY
   fprintf(stdout, _(
@@ -303,6 +305,8 @@ int usage(void)
 "          --reset [soft|hard] resets the phone.\n\n"
 
 "          --getprofile [number] show settings for selected(all) profile(s)\n\n"
+
+"          --displayoutput   show texts displayed in phone's screen\n\n"
   ));
 #ifdef SECURITY
   fprintf(stdout, _(
@@ -506,7 +510,10 @@ int main(int argc, char *argv[])
     { "getlogo",            required_argument, NULL, OPT_GETLOGO },
 
     // Show profile
-    { "getprofile",        optional_argument, NULL, OPT_GETPROFILE },
+    { "getprofile",         optional_argument, NULL, OPT_GETPROFILE },
+
+    // Show texts from phone's display
+    { "displayoutput",      no_argument, NULL, OPT_DISPLAYOUTPUT },
 
 #ifndef WIN32
     // For development purposes: insert you function calls here
@@ -726,16 +733,6 @@ int main(int argc, char *argv[])
       rc = sendlogo(nargc, nargv);
       break;
 
-    case OPT_SETRINGTONE:
-
-      rc = setringtone(optarg);
-      break;
-
-    case OPT_SENDRINGTONE:
-
-      rc = sendringtone(nargc, nargv);
-      break;
-
     case OPT_GETSMSC:
 
       rc = getsmsc(optarg);
@@ -761,9 +758,24 @@ int main(int argc, char *argv[])
       rc = getlogo(nargv);
       break;
 
+    case OPT_SETRINGTONE:
+
+      rc = setringtone(nargc, nargv);
+      break;
+
+  case OPT_SENDRINGTONE:
+
+      rc = sendringtone(nargc, nargv);
+      break;
+
     case OPT_GETPROFILE:
 
       rc = getprofile(nargc, nargv);
+      break;
+
+    case OPT_DISPLAYOUTPUT:
+
+      rc = displayoutput();
       break;
 
 #ifndef WIN32
@@ -2120,6 +2132,45 @@ int monitormode(void)
   return 0;
 }
 
+/* Shows texts from phone's display */
+
+int displayoutput()
+{
+
+  GSM_Error error;
+  
+  fbusinit(NULL);
+
+  error=GSM->EnableDisplayOutput();
+
+  if (error == GE_NONE)
+  {
+
+    /* We do not want to see texts forever - press Ctrl+C to stop. */
+
+    signal(SIGINT, interrupted);    
+
+    fprintf (stderr, _("Entering display monitoring mode...\n"));
+
+    /* Loop here indefinitely - allows you to read texts from phone's
+       display. The loops ends after pressing the Ctrl+C. */
+
+    while (!bshutdown)
+      sleep(1);
+
+    fprintf (stderr, _("Leaving display monitor mode...\n"));
+
+    error=GSM->DisableDisplayOutput();
+    if (error!=GE_NONE)
+      fprintf (stderr, _("Error!\n"));
+  } else
+      fprintf (stderr, _("Error!\n"));
+
+  GSM->Terminate();
+
+  return 0;
+}
+
 /* Reads profile from phone and displays its' settings */
 
 int getprofile(int argc, char *argv[])
@@ -2688,20 +2739,6 @@ int reset( char *type)
   return 0;
 }
 
-/* Set ringtone mode. */
-
-int setringtone(char *Filename)
-{
-
-  fbusinit(NULL);
-
-  GSM->SetRingTone(Filename);
-
-  GSM->Terminate();
-
-  return 0;
-}
-
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 
@@ -2750,56 +2787,57 @@ int pmon()
   return 0;
 }
 
-/* FIXME: this can not be here... */
-int FB61_PackRingtoneRTTTL(unsigned char *req, char *FileName);
-
 int sendringtone(int argc, char *argv[])
 {
-  GSM_SMSMessage SMS;
+  GSM_Ringtone ringtone;
   GSM_Error error;
 
-  int size;
-  unsigned char req[255];
-
-  /* Default settings for SMS message:
-      - no delivery report
-      - Class Message 1
-      - no compression
-      - 8 bit data
-      - SMSC no. 1
-      - validity 3 days
-      - set UserDataHeaderIndicator
-  */
-
-  SMS.Type = GST_MO;
-  SMS.Class = 1;
-  SMS.Compression = false;
-  SMS.EightBit = true;
-  SMS.MessageCenter.No = 1;
-  SMS.Validity = 4320; /* 4320 minutes == 72 hours */
-
-  SMS.UDHType = GSM_Ringtone;
-
-  /* The first argument is the destination, ie the phone number of recipient. */
-  strcpy(SMS.Destination,argv[0]);
-
-  /* The second argument is the RTTTL file. */
-  size=FB61_PackRingtoneRTTTL(req, argv[1]);
-
-  memcpy(SMS.UDH,req+2,7);
-  memcpy(SMS.MessageText,req+9,size-9);
+  if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
+    fprintf(stdout, _("Failed to load ringtone.\n"));
+     return(-1);
+  }  
 
   /* Initialise the GSM interface. */
   fbusinit(NULL);
 
-  /* Send the message. */
-  error = GSM->SendSMSMessage(&SMS,size-9);
+  error=GSM->SendRingtone(&ringtone,argv[1]);
 
-  if (error == GE_SMSSENDOK)
+  if (error==GE_NONE) 
     fprintf(stdout, _("Send succeeded!\n"));
   else
     fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
 
   GSM->Terminate();
   return 0;
+
 }
+
+
+int setringtone(int argc, char *argv[])
+{
+  GSM_Ringtone ringtone;
+  GSM_Error error;
+
+  if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
+    fprintf(stdout, _("Failed to load ringtone.\n"));
+     return(-1);
+  }  
+
+
+ /* Initialise the GSM interface. */
+  fbusinit(NULL);
+
+  error=GSM->SetRingtone(&ringtone);
+
+  if (error==GE_NONE) 
+    fprintf(stdout, _("Send succeeded!\n"));
+  else
+    fprintf(stdout, _("Send failed\n"));
+
+  GSM->Terminate();
+  return 0;
+
+}
+
+
+

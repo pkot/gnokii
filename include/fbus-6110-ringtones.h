@@ -115,6 +115,11 @@ typedef struct {
   int DurationSpecifier;
 } Note;
 
-int FB61_PackRingtoneRTTTL(unsigned char *req, char *FileName);
+#define FB61_MAX_RINGTONE_PACKAGE_LENGTH 200
+
+u8 FB61_PackRingtone(GSM_Ringtone *ringtone, char *package);
+int FB61_GetDuration(int number, unsigned char *spec);
+int FB61_GetNote(int number);
+int FB61_GetScale(int number);
 
 #endif	/* __fbus_6110_ringtones_h */

@@ -120,11 +120,14 @@ GSM_Functions FB61_Functions = {
   FB61_GetBitmap,
   FB61_SetBitmap,
   FB61_SetRingTone,
+  FB61_SendRingTone,
   FB61_Reset,
   FB61_GetProfile,
   FB61_SetProfile,
   FB61_SendRLPFrame,
-  FB61_CancelCall
+  FB61_CancelCall,
+  FB61_EnableDisplayOutput,
+  FB61_DisableDisplayOutput
 };
 
 /* Mobile phone information */
@@ -276,6 +279,8 @@ GSM_Error          SetBitmapError;
 
 GSM_Profile        *CurrentProfile;
 GSM_Error          CurrentProfileError;
+
+GSM_Error          CurrentDisplayOutputError;
 
 unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
 unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
@@ -466,6 +471,52 @@ GSM_Error FB61_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo)
   }
 
   return (GE_NONE);
+}
+
+GSM_Error FB61_EnableDisplayOutput()
+{
+ 
+  unsigned char req[] = { FB61_FRAME_HEADER,
+                          0x53, 0x01};
+  int timeout=20;
+  
+  CurrentDisplayOutputError = GE_BUSY;
+
+  FB61_TX_SendMessage(5, 0x0d, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentDisplayOutputError == GE_BUSY ) {
+          
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+                    
+    usleep (100000);
+  }
+                          
+  return (CurrentDisplayOutputError);
+}
+ 
+GSM_Error FB61_DisableDisplayOutput()
+{
+
+  unsigned char req[] = { FB61_FRAME_HEADER,
+                          0x53, 0x02};
+  int timeout=20;
+  
+  CurrentDisplayOutputError = GE_BUSY;
+
+  FB61_TX_SendMessage(5, 0x0d, req);
+ 
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentDisplayOutputError == GE_BUSY ) {
+           
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+      
+    usleep (100000);
+  }
+
+  return (CurrentDisplayOutputError);
 }
 
 GSM_Error FB61_GetProfile(GSM_Profile *Profile)
@@ -2356,17 +2407,88 @@ GSM_Error FB61_GetBitmap(GSM_Bitmap *Bitmap) {
   return (GetBitmapError);
 }
 
-GSM_Error FB61_SetRingTone(char *Filename) {
 
-  unsigned char req[255];
-  int size=FB61_PackRingtoneRTTTL(req, Filename);
+GSM_Error FB61_SetRingTone(GSM_Ringtone *ringtone)
+{
+  
+  char package[FB61_MAX_RINGTONE_PACKAGE_LENGTH+10] =
+  { 0x0c, 0x01, /* FBUS RingTone header */
+    /* Next bytes are from Smart Messaging Specification version 2.0.0 */
+    0x06,       /* User Data Header Length */
+    0x05,       /* IEI FIXME: What is this? */
+    0x04,       /* IEDL FIXME: What is this? */
+    0x15, 0x81, /* Destination port */
+    0x15, 0x81  /* Originator port, only
+		   to fill in the two
+		   bytes :-) */
+  };
+  u8 size;
+  
+  size=FB61_PackRingtone(ringtone, package+9);
+  package[size+9]=0x01;
 
-  /* FIXME: should check for long messages or something. */
-  if (size!=0)
-    return FB61_TX_SendMessage(size, 0x12, req);
-  else
-    return GE_UNKNOWN;
+  FB61_TX_SendMessage((size+10), 0x12, package);
+
+  return(GE_NONE);
 }
+
+
+GSM_Error FB61_SendRingTone(GSM_Ringtone *ringtone, char *dest)
+{
+  GSM_SMSMessage SMS;
+  GSM_Error error;
+
+  int size=0;
+  char Package[FB61_MAX_RINGTONE_PACKAGE_LENGTH];
+  char udh[]= {
+    0x06,       /* User Data Header Length */
+    0x05,       /* IEI FIXME: What is this? */
+    0x04,       /* IEDL FIXME: What is this? */
+    0x15, 0x81, /* Destination port */
+    0x15, 0x81  /* Originator port, only
+		   to fill in the two
+		   bytes :-) */
+  };
+  
+
+  /* Default settings for SMS message:
+      - no delivery report
+      - Class Message 1
+      - no compression
+      - 8 bit data
+      - SMSC no. 1
+      - validity 3 days
+      - set UserDataHeaderIndicator
+  */
+
+  SMS.Type = GST_MO;
+  SMS.Class = 1;
+  SMS.Compression = false;
+  SMS.EightBit = true;
+  SMS.MessageCenter.No = 1;
+  SMS.Validity = 4320; /* 4320 minutes == 72 hours */
+
+  SMS.UDHType = GSM_RingtoneUDH;
+
+  strcpy(SMS.Destination,dest);
+
+  size=FB61_PackRingtone(ringtone, Package);
+
+  memcpy(SMS.UDH,udh,7);
+  memcpy(SMS.MessageText,Package,size);
+
+  /* Send the message. */
+  error = FB61_SendSMSMessage(&SMS,size);
+
+  if (error == GE_SMSSENDOK)
+    fprintf(stdout, _("Send succeeded!\n"));
+  else
+    fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+
+  return(GE_NONE);
+
+}
+
 
 GSM_Error FB61_Reset(unsigned char type)
 {
@@ -3644,6 +3766,19 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     switch(MessageBuffer[3]) {
 
+     case 0x50:
+
+#ifdef DEBUG
+      fprintf(stdout, "%i %i ",MessageBuffer[6],MessageBuffer[5]);
+#endif /* DEBUG */
+
+      for (i=0; i<MessageBuffer[7];i++)
+        fprintf(stdout, "%c",MessageBuffer[9+(i*2)]);
+
+      fprintf(stdout, "\n");
+      
+      break;
+ 
     case 0x52:
 
       for (i=0; i<MessageBuffer[4];i++)
@@ -3653,21 +3788,35 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
           DisplayStatus&= (0xff - (1<<(MessageBuffer[2*i+5]-1)));
 
 #ifdef DEBUG
-      fprintf(stdout, "Call in progress: %s\n", DisplayStatus & (1<<DS_Call_In_Progress)?"on":"off");
-      fprintf(stdout, "Unknown: %s\n",          DisplayStatus & (1<<DS_Unknown)?"on":"off");
-      fprintf(stdout, "Unread SMS: %s\n",       DisplayStatus & (1<<DS_Unread_SMS)?"on":"off");
-      fprintf(stdout, "Voice call: %s\n",       DisplayStatus & (1<<DS_Voice_Call)?"on":"off");
-      fprintf(stdout, "Fax call active: %s\n",  DisplayStatus & (1<<DS_Fax_Call)?"on":"off");
-      fprintf(stdout, "Data call active: %s\n", DisplayStatus & (1<<DS_Data_Call)?"on":"off");
-      fprintf(stdout, "Keyboard lock: %s\n",    DisplayStatus & (1<<DS_Keyboard_Lock)?"on":"off");
-      fprintf(stdout, "SMS storage full: %s\n", DisplayStatus & (1<<DS_SMS_Storage_Full)?"on":"off");
+      fprintf(stdout, _("Call in progress: %s\n"), DisplayStatus & (1<<DS_Call_In_Progress)?"on":"off");
+      fprintf(stdout, _("Unknown: %s\n"),          DisplayStatus & (1<<DS_Unknown)?"on":"off");
+      fprintf(stdout, _("Unread SMS: %s\n"),       DisplayStatus & (1<<DS_Unread_SMS)?"on":"off");
+      fprintf(stdout, _("Voice call: %s\n"),       DisplayStatus & (1<<DS_Voice_Call)?"on":"off");
+      fprintf(stdout, _("Fax call active: %s\n"),  DisplayStatus & (1<<DS_Fax_Call)?"on":"off");
+      fprintf(stdout, _("Data call active: %s\n"), DisplayStatus & (1<<DS_Data_Call)?"on":"off");
+      fprintf(stdout, _("Keyboard lock: %s\n"),    DisplayStatus & (1<<DS_Keyboard_Lock)?"on":"off");
+      fprintf(stdout, _("SMS storage full: %s\n"), DisplayStatus & (1<<DS_SMS_Storage_Full)?"on":"off");
 #endif /* DEBUG */
 
       DisplayStatusError=GE_NONE;
 
       break;
       
-      default:
+    case 0x54:
+      
+      if (MessageBuffer[5]==1)
+      {
+      
+#ifdef DEBUG
+        fprintf(stdout, _("Display output successfully disabled/enabled.\n"));
+#endif /* DEBUG */
+
+        CurrentDisplayOutputError=GE_NONE;
+      }
+       
+      break;
+      
+    default:
 
         fprintf(stdout, _("Unknown message of type 0x0d.\n"));
       
