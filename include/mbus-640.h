@@ -77,7 +77,7 @@ GSM_Error	MB640_SetDateTime(GSM_DateTime *date_time);
 GSM_Error	MB640_GetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	MB640_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	MB640_DialVoice(char *Number);
-GSM_Error	MB640_DialData(char *Number, char type);
+GSM_Error	MB640_DialData(char *Number, char type, void (* callpassup)(char c));
 GSM_Error	MB640_GetIncomingCallNr(char *Number);
 GSM_Error	MB640_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 GSM_Error	MB640_GetCalendarNote(GSM_CalendarNote *CalendarNote);

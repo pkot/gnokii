@@ -839,7 +839,7 @@ GSM_Error   FB38_DialVoice(char *Number)
     return(FB38_TX_SendDialCommand(0x05, Number));
 }
 
-GSM_Error   FB38_DialData(char *Number, char type)
+GSM_Error   FB38_DialData(char *Number, char type, void (* callpassup)(char c))
 {
     return(FB38_TX_SendDialCommand(0x01, Number));
 }

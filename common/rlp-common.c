@@ -13,8 +13,8 @@
 
   Actual implementation of RLP protocol.
 
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Mon May 13
+  Modified by Chris Kemp <ck231@cam.ac.uk>
 
 */
 
@@ -45,7 +45,7 @@ RLP_State      NextState;
 bool      (*RLPSendFunction)(RLP_F96Frame *frame, bool out_dtx);
 
 /* Pointer to Passup function which returns data/inds */
-void      (*RLP_Passup)(RLP_UserInds ind, u8 *buffer, int length);
+int      (*RLP_Passup)(RLP_UserInds ind, u8 *buffer, int length);
 
 
 /* State variables - see GSM 04.22, Annex A, section A.1.2 */
@@ -102,7 +102,7 @@ bool RRReady=false;
 bool LRReady=true;
 bool DISC_PBit=false;
 
-u8 LastStatus=0;   /* Last Status byte */
+u8 LastStatus=0xff;   /* Last Status byte */
 
 
 /* RLP Constants. */
@@ -115,12 +115,6 @@ u8 RLP_VersionNumber=0;
 u8 RLP_T2=0;
 
 
-/* Send Ring Buffer */
-#define SendRingBufferSize 8192
-u16 SendHead;
-u16 SendTail;
-u8 *SendRingBuffer;
-
 
 /****** Externally called functions ********/
 /*******************************************/
@@ -129,7 +123,7 @@ u8 *SendRingBuffer;
 /* Function to initialise RLP code.  Main purpose for now is
    to set the address of the RLP send function in the API code. */
 
-void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx), void (*rlp_passup)(RLP_UserInds ind, u8 *buffer, int length))
+void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx), int (*rlp_passup)(RLP_UserInds ind, u8 *buffer, int length))
 {
   int i;
 
@@ -140,16 +134,9 @@ void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx)
   UserRequests.Conn_Req_Neg=false;
   UserRequests.Reset_Resp=false;
   UserRequests.Disc_Req=false;
-  SendRingBuffer=(u8 *)malloc(SendRingBufferSize);
-  /* FIXME - return something if no memory */
-  if (SendRingBuffer==NULL) fprintf(stdout,"Not enough memory for the Send ring buffer!\n");
-  SendTail=0;
-  SendHead=0;
   T=-1;
   for (i=0;i<RLP_M_max;i++) T_RCVS[i]=-1;
 }
-
-
 
 /* Set a user event */
 /* Called by user program for now */
@@ -177,27 +164,6 @@ void RLP_SetUserRequest(RLP_UserRequests type, bool value) {
 }
 
 
-
-/* Add supplied data to the internal ring buffer */
-
-void RLP_Send(char *buffer, int length)
-{
-  int i;
-
-  /* FIXME - is there a better way to do this? */
-  /* FIXME - do something sensible if there is no room */
-
-  
-  for(i=0; i<length; i++){
-    *(SendRingBuffer+SendHead)=buffer[i];
-    SendHead=(SendHead+1)%SendRingBufferSize;
-    if (SendHead==SendTail) {
-    fprintf(stdout, "Out of room in the send-ring-buffer!!\n");
-    return;
-    }
-  }
-}
-  
 
 
 /***** Internal functions **********/
@@ -275,6 +241,7 @@ void RLP_Init_link_vars(void)
   VR=0;
   VS=0;
   VD=0;  
+  LastStatus=0xff;
 
   for(i=0;i<RLP_M;i++) {
     R[i].State=_idle;
@@ -286,23 +253,19 @@ void RLP_Init_link_vars(void)
 
 void RLP_AddRingBufferDataToSlots()
 {
+  u8 buffer[24];
   int size;
-  u8 i;
  
-  while ((SendHead!=SendTail) && (S[VD].State==_idle)) {
+  while (((size=RLP_Passup(GetData,buffer,24))!=0) 
+	 && (S[VD].State==_idle)) {
     memset(S[VD].Data,0xff,25);    /* FIXME - this isn't necessary - but makes debugging easier! */
-    if (SendHead>SendTail) size=SendHead-SendTail;
-    else size=SendRingBufferSize-SendTail+SendHead;
     if (size>23) {
       S[VD].Data[0]=0x1e;
       size=24;
     }
     else S[VD].Data[0]=size;
     
-    for(i=0;i<size;i++) {
-      S[VD].Data[i+1]=*(SendRingBuffer+SendTail);
-      SendTail=(SendTail+1)%SendRingBufferSize;
-    }
+    memcpy(&S[VD].Data[1],buffer,size);
     
     if (size!=24) S[VD].Data[size+1]=0x1f;
 
@@ -1704,11 +1667,11 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 
 
     /* Load any data from the Send ringbuffer into the send slots */
-    if (SendHead!=SendTail) RLP_AddRingBufferDataToSlots();
+    RLP_AddRingBufferDataToSlots();
 
 #ifdef RLP_DEBUG
     //    if (CurrentFrameType!=RLPFT_BAD) 
-      fprintf(stdout, "SendHead=%d, SendTail=%d, VD=%d, VA=%d, VS=%d, VR=%d\n",SendHead,SendTail,VD,VA,VS,VR);
+      fprintf(stdout, "VD=%d, VA=%d, VS=%d, VR=%d\n",VD,VA,VS,VR);
 #endif    
 
 

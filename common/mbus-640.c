@@ -580,7 +580,7 @@ GSM_Error	MB640_DialVoice(char *Number)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	MB640_DialData(char *Number, char type)
+GSM_Error	MB640_DialData(char *Number, char type, void (* callpassup)(char c))
 {
 	return (GE_NOTIMPLEMENTED);
 }

@@ -14,8 +14,8 @@
   (AT-emulator) and "online" mode where the data pump code translates data
   from/to the GSM handset and the modem data/fax stream.
 
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Mon May 15
+  Modified by Chris Kemp <ck231@cam.ac.uk>
 
 */
 
@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/poll.h>
 #include <pthread.h>
 #include <unistd.h>
 
@@ -62,9 +63,10 @@ pthread_t		Thread;
 bool			RequestTerminate;
 bool                    GSMInit=true;
 
+
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
-bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode)
+bool	VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode)
 {
 	int		rtn;
 
@@ -80,7 +82,7 @@ bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType
 	}
 
 	if (GSMInit) {
-	  fprintf (stdout, "Initialising GSM\n");
+	  fprintf (stdout , "Initialising GSM\n");
 	  if ((VM_GSMInitialise(model, port, initlength, connection) != GE_NONE)) {
 		fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
 		return (false);
@@ -88,14 +90,12 @@ bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType
 	}
 	GSMInit=false;
 
-
 	if (VM_PtySetup(bindir) < 0) {
 		fprintf (stderr, _("VM_Initialise - VM_PtySetup failed!\n"));
 		return (false);
 	}
-
     
-	if (ATEM_Initialise(PtyRDFD, PtyWRFD) != true) {
+	if (ATEM_Initialise(PtyRDFD, PtyWRFD, model, port) != true) {
 		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n"));
 		return (false);
 	}
@@ -111,46 +111,31 @@ bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType
     if (rtn == EAGAIN || rtn == EINVAL) {
         return (false);
     }
-
 	return (true);
 }
 
 void	VM_ThreadLoop(void)
 {
-	int				res;
-	fd_set			input_fds, test_fds;
-	struct timeval	timeout;	
-	char name[20];
+	int res;
+	struct pollfd ufds;
 
 		/* Note we can't use signals here as they are already used
 		   in the FBUS code.  This may warrant changing the FBUS
 		   code around sometime to use select instead to free up
 		   the SIGIO handler for mainline code. */
 
-
-		/* Clear then set file descriptor set to point to PtyRDFD */
-	FD_ZERO(&input_fds);
-	FD_SET(PtyRDFD, &input_fds);
+	ufds.fd=PtyRDFD;
+	ufds.events=POLLIN;
 
 	while (!RequestTerminate) {
-		test_fds = input_fds;
-		timeout.tv_usec =0;
-		timeout.tv_usec = 500000;	/* Timeout after 500mS */	
-	        if (!CommandMode) {
-		  ConnectCount++;
-		  if (ConnectCount>50) {
+	  if (!CommandMode) {
+	    sleep(1);
+	  } else {  /* If we are in data mode, leave it to datapump to get the data */
 
-		    /* If we are in data mode check if the call is still going! */
-		    if ((!CommandMode) && (GSM->GetIncomingCallNr(name)==GE_BUSY))
-		      DP_CallFinished();
-		    ConnectCount=10;
-		  }
-		}
-
-		res = select(FD_SETSIZE, &test_fds, (fd_set *)0, (fd_set *)0, &timeout);
+		res=poll(&ufds,1,500);
 
 		switch (res) {
-			case 0:
+		        case 0: /* Timeout */
 				break;
 
 			case -1:
@@ -158,13 +143,14 @@ void	VM_ThreadLoop(void)
 				exit (-1);
 
 			default:
-				if (FD_ISSET(PtyRDFD, &test_fds)) {
-					VM_CharHandler();
-				}
-				break;
+			  if (ufds.revents==POLLIN) {
+			    VM_CharHandler();
+			  } else usleep(500); /* Probably the file has been closed */
+			  break;
 		}
+	  }
 	}
-
+	
 }
 
 	/* Application should call VM_Terminate to shut down
@@ -190,8 +176,8 @@ void		VM_Terminate(void)
 int		VM_PtySetup(char *bindir)
 {
 	int			err;
-	char		*slave_name;
 	char		mgnokiidev[200];
+	char		*slave_name;
 	char		cmdline[200];
 	int			pty_number;
 
@@ -243,29 +229,23 @@ void    VM_CharHandler(void)
     unsigned char   buffer[255];
     int             res;
 
-    res = read(PtyRDFD, buffer, 255);
 
-		/* FIXME - need something more elegant here - a -1 return
-		   indicates that the slave pty has closed... */
-	if (res < 0) {
-	  TerminateThread=true;
-		return;
-	}
+    /* If we are in command mode, get the character, otherwise leave it */
 
-
-    if (!CommandMode) {
-        DP_HandleIncomingData((u8 *)&buffer, res);
-	}
-
-		/* If we're in command mode and the AT emulator is initialised,
-		   pass byte to it for processing. */
-	else if (CommandMode && ATEM_Initialised) {
-	  /*	  printf("VM Debug: ");
-		  for (i=0;i<res;i++) printf("%c",buffer[i]);
-		  printf("\n"); */
-	  ATEM_HandleIncomingData(buffer, res);
-	}	
-
+    if (CommandMode && ATEM_Initialised) {
+      
+      res = read(PtyRDFD, buffer, 255);
+      
+      /* A returned value of -1 means something serious has gone wrong - so quit!! */
+      /* Note that file closure etc. should have been dealt with in ThreadLoop */
+      
+      if (res < 0) {	
+	TerminateThread=true;
+	return;
+      }
+	
+      ATEM_HandleIncomingData(buffer, res);
+    }	
 }     
 
 	/* Initialise GSM interface, returning GSM_Error as appropriate  */
@@ -276,7 +256,7 @@ GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Conne
 
 		/* Initialise the code for the GSM interface. */     
 
-	error = GSM_Initialise(model, port, initlength, connection, RLP_DisplayF96Frame);
+	error = GSM_Initialise(model,port, initlength, connection, RLP_DisplayF96Frame);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -345,3 +325,4 @@ int	VM_GetMasterPty(char **name) {
 
    return (master);
 }
+

@@ -287,6 +287,10 @@ char               CurrentIncomingCall[20] = " ";
 
 void               (*RLP_RXCallback)(RLP_F96Frame *frame);
 
+/* Pointer to a callback function used to return changes to a calls status */
+/* This saves unreliable polling */
+void (*CallPassup)(char c);
+
 #ifdef WIN32
 /* called repeatedly from a separate thread */
 void FB61_KeepAliveProc()
@@ -309,6 +313,7 @@ GSM_Error FB61_Initialise(char *port_device, char *initlength,
   RequestTerminate = false;
   FB61_LinkOK = false;
   RLP_RXCallback = rlp_callback;
+  CallPassup=NULL;
 
   strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -1346,7 +1351,7 @@ GSM_Error FB61_DialVoice(char *Number) {
      Maybe one day we'll know what they mean!
 */
 
-GSM_Error FB61_DialData(char *Number, char type) {
+GSM_Error FB61_DialData(char *Number, char type, void (* callpassup)(char c)) {
 
   unsigned char req[100]  = { FB61_FRAME_HEADER, 0x01 };
   unsigned char *req_end;
@@ -1370,6 +1375,8 @@ GSM_Error FB61_DialData(char *Number, char type) {
 
   int i=0;
   u8 size;
+
+  CallPassup=callpassup;
 
   switch (type) {
   case 0:
@@ -1648,7 +1655,6 @@ GSM_Error FB61_GetRevision(char *revision)
 
 GSM_Error FB61_GetModel(char *model)
 {
-
   if (strlen(Model)>0) {
     strncpy (model, Model, FB61_MAX_MODEL_LENGTH);
     return (GE_NONE);
@@ -2560,8 +2566,14 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	 between phone calls :-(
       */
 
+    case 0x02:
+      /* This may mean sequence number of 'just made' call - CK */
+
+      /* FIXME-Chris: do we really to fall through to 0x03? */
+
     case 0x03:
     
+      /* Possibly call OK */
 /* JD: I think that this means "call in progress" (incomming or outgoing) */
 #ifdef DEBUG
       fprintf(stdout, _("Message: Call message, type 0x03:"));
@@ -2570,6 +2582,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #endif /* DEBUG */
       CallSequenceNumber=MessageBuffer[4];
       CurrentIncomingCall[0]='D';
+      if (CallPassup) CallPassup('D');
 
       break;
 
@@ -2584,6 +2597,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #endif /* DEBUG */
 
       CurrentIncomingCall[0] = ' ';
+      if (CallPassup) CallPassup(' ');
 
       break;
 
@@ -2661,6 +2675,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x0a:
 
+      /* Probably means call over - CK */
+
 #ifdef DEBUG
       fprintf(stdout, _("Message: Call message, type 0x0a:"));
       fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
@@ -2668,6 +2684,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #endif /* DEBUG */
 
       CurrentIncomingCall[0] = ' ';
+      if (CallPassup) CallPassup(' ');
 
       break;
 

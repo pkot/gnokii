@@ -12,8 +12,8 @@
   calling code in gsm-api.c. Inspired by and in places copied from the Linux
   kernel AT Emulator IDSN code by Fritz Elfert and others.
   
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Mon May 15
+  Modified by Chris Kemp <ck231@cam.ac.uk>
 
 */
 
@@ -42,14 +42,15 @@
 #include "gsm-api.h"
 #include "at-emulator.h"
 #include "virtmodem.h"
+#include "datapump.h"
 
 	/* Global variables */
 bool ATEM_Initialised = false;	/* Set to true once initialised */
 extern bool    CommandMode;
 extern int ConnectCount;
 
-extern char *Model;
-extern char *Port;	/* Hmm, this is a bit iffy ? */
+char ModelName[80]; /* This seems to be needed to avoid seg-faults */
+char PortName[80];
 
 
 	/* Local variables */
@@ -71,10 +72,13 @@ int 			SMSNumber;
 
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
-bool	ATEM_Initialise(int read_fd, int write_fd)
+bool	ATEM_Initialise(int read_fd, int write_fd, char *model, char *port)
 {
 	PtyRDFD = read_fd;
 	PtyWRFD = write_fd;
+
+	strncpy(ModelName,model,80);
+	strncpy(PortName,port,80);
 
 		/* Initialise command buffer variables */
 	CurrentCmdBuffer = 0;
@@ -121,7 +125,8 @@ void	ATEM_InitRegisters(void)
 void	ATEM_HandleIncomingData(char *buffer, int length)
 {
     int             count;
-	unsigned char	out_buf[3];	
+    unsigned char	out_buf[3];	
+    unsigned char  c;
 
     for (count = 0; count < length ; count ++) {
 			/* Echo character if appropriate. */
@@ -146,7 +151,11 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 			CurrentCmdBufferIndex = 0;
 		}
 		else {
-			CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = buffer[count];
+		  /* Convert all lowercase letters to uppercase ones */
+		  c=buffer[count];
+		  if ((c>='a') && (c<='z')) c+='A'-'a';
+
+		  CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex]=c;
 			CurrentCmdBufferIndex ++;
 			if (CurrentCmdBufferIndex >= CMD_BUFFER_LENGTH) {
 				CurrentCmdBufferIndex = CMD_BUFFER_LENGTH;
@@ -180,9 +189,8 @@ void	ATEM_ParseAT(char *cmd_buffer)
 		  if (*buf=='T') buf++;
 		  if (*buf==' ') buf++;
 		  strncpy(number,buf,30);
-		  ConnectCount=0;
-		  if (ModemRegisters[S35]==0) GSM->DialData(number,1);
-		  else GSM->DialData(number,0);
+		  if (ModemRegisters[S35]==0) GSM->DialData(number,1,&DP_CallPassup);
+		  else GSM->DialData(number,0,&DP_CallPassup);
 		  ATEM_StringOut("\n\r");
 		  CommandMode=false;
 		  return;
@@ -465,7 +473,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	if (strncmp(*buf, "MM", 3) == 0) {
 		buf[0]+=2;
 
-		sprintf(buffer, "\n\rgnokii configured for %s on %s", Model, Port);
+		sprintf(buffer, "\n\rgnokii configured for %s on %s", ModelName, PortName);
 		ATEM_StringOut(buffer);
 		return (false);
 	}

@@ -1639,7 +1639,7 @@ int dialdata(char *Number)
 
   sleep(10);
 
-  GSM->DialData(Number, 0);
+  GSM->DialData(Number, 0, NULL);
 
   GSM->Terminate();
 

@@ -19,7 +19,7 @@
 #define __at_emulator_h
 
 	/* Prototypes */
-bool	ATEM_Initialise(int read_fd, int write_fd);
+bool	ATEM_Initialise(int read_fd, int write_fd, char *model, char *port);
 void	ATEM_HandleIncomingData(char *buffer, int length);
 void	ATEM_InitRegisters(void);
 void	ATEM_StringOut(char *buffer);

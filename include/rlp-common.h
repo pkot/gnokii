@@ -134,7 +134,8 @@ typedef enum {
   Disc_Ind,
   Reset_Ind,
   Data,
-  StatusChange
+  StatusChange,
+  GetData
 } RLP_UserInds;
 
 /* RLP (main) states. See GSM specification 04.22 Annex A, Section A.1.1. */
@@ -178,7 +179,7 @@ typedef struct {
 void RLP_DisplayF96Frame(RLP_F96Frame *frame);
 void RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header);
 void RLP_DisplayXID(u8 *frame);
-void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx), void (*rlp_passup)(RLP_UserInds ind, u8 *buffer, int length));
+void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx), int (*rlp_passup)(RLP_UserInds ind, u8 *buffer, int length));
 void RLP_Init_link_vars(void);
 void RLP_SetUserRequest(RLP_UserRequests type, bool value);
 void RLP_Send(char *buffer, int length);

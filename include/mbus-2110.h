@@ -78,7 +78,7 @@ GSM_Error	MB21_SetDateTime(GSM_DateTime *date_time);
 GSM_Error	MB21_GetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	MB21_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	MB21_DialVoice(char *Number);
-GSM_Error	MB21_DialData(char *Number, char type);
+GSM_Error	MB21_DialData(char *Number, char type,void (* callpassup)(char c));
 GSM_Error	MB21_GetIncomingCallNr(char *Number);
 GSM_Error	MB21_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 GSM_Error	MB21_GetCalendarNote(GSM_CalendarNote *CalendarNote);

@@ -10,3 +10,8 @@
 
 * Thu Apr  6 14:03:48 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - timeout in virtmodem changed to allow the data calls to slow networks 
+
+* Tue May 16 02:00:00 BST 2000 Chris Kemp
+- Changed method gnokiid uses to get data and other reliablity changes. 
+
+	

@@ -12,8 +12,8 @@
   fax or data mode. Converts data from/to GSM phone to virtual modem
   interface.
 
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Mon May 15
+  Modified by Chris Kemp <ck231@cam.ac.uk>
 
 */
 
@@ -30,6 +30,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/poll.h>
 #include <unistd.h>
 
 
@@ -47,6 +48,7 @@ extern bool CommandMode;
 	/* Local variables */
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
 int		PtyWRFD;	/* pty interface - only different in debug mode. */ 
+struct pollfd ufds;
 u8 pluscount;
 bool connected;
 
@@ -54,6 +56,8 @@ bool DP_Initialise(int read_fd, int write_fd)
 {
   PtyRDFD = read_fd;
   PtyWRFD = write_fd;
+  ufds.fd=PtyRDFD;
+  ufds.events=POLLIN;
   RLP_Initialise(GSM->SendRLPFrame, DP_CallBack);
   RLP_SetUserRequest(Attach_Req,true);
   pluscount=0;
@@ -62,33 +66,9 @@ bool DP_Initialise(int read_fd, int write_fd)
 }
 
 
-void DP_HandleIncomingData(u8 *buffer, int length)
+int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 {
-  /* If we're not connected yet I believe we should exit */
-  /*if (!connected) {
-    CommandMode=true;
-	ATEM_ModemResult(MR_NOCARRIER);
-    RLP_SetUserRequest(Disc_Req, true);
-    GSM->CancelCall();
-  }
-  */
-
-  /* FIXME - check +++ more thoroughly*/
-  
-  if (buffer[0]=='+') pluscount++;
-    else pluscount=0;
-  if (pluscount==3) {
-    CommandMode=true;
-	ATEM_ModemResult(MR_OK);
-    connected=false;
-  }
-  else RLP_Send(buffer, length);
-  
-}
-
-
-void DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
-{
+  int temp;
 
   switch(ind) {
   case Data:
@@ -106,22 +86,63 @@ void DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
     break;
   case Disc_Ind:
     if (CommandMode==false) ATEM_ModemResult(MR_NOCARRIER);
+    connected=false;
     CommandMode=true;
     break;
   case Reset_Ind:
     RLP_SetUserRequest(Reset_Resp,true);
     break;
+  case GetData:
+    if (poll(&ufds,1,0)) {
+
+      /* Check if the program has closed */
+      /* Return to command mode */
+      /* Note that the call will still be in progress, */
+      /* as with a normal modem (I think) */
+
+      if (ufds.revents!=POLLIN) { 
+	CommandMode=true;
+	return 0;
+      }
+
+      temp = read(PtyRDFD, buffer, length);
+
+      if (temp<0) return 0; /* FIXME - what do we do now? */
+
+      /* FIXME - check +++ more thoroughly*/
+      
+      if (buffer[0]=='+') pluscount++;
+      else pluscount=0;
+      if (pluscount==3) {
+	CommandMode=true;
+	ATEM_ModemResult(MR_OK);
+	break;
+      }
+      
+      return temp;
+    }
+    return 0;
+    break;
+
   default:
+
+  }
+  return 0;
+}
+
+void DP_CallPassup(char c)
+{
+  switch (c) {
+  case 'D':
+    connected=true;
+    break;
+  case ' ':
+    CommandMode=true;
+    ATEM_ModemResult(MR_NOCARRIER);
+    RLP_SetUserRequest(Disc_Req, true);
+    connected=false;
+    break;
+  default:
+    break;
   }
 }
-
-
-void DP_CallFinished(void)
-{
-  CommandMode=true;
-  ATEM_ModemResult(MR_NOCARRIER);
-  RLP_SetUserRequest(Disc_Req, true);
-  connected=false;
-}
-
-

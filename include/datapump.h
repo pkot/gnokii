@@ -10,8 +10,8 @@
 
   Header file for data pump code.
 	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Mon May 15th
+  Modified by Chris Kemp <ck231@cam.ac.uk>
 
 */
 
@@ -22,9 +22,8 @@
 
 void    DP_CallFinished(void);
 bool	DP_Initialise(int read_fd, int write_fd);
-void	DP_HandleIncomingData(u8 *buffer, int length);
-void    DP_CallBack(RLP_UserInds ind, u8 *buffer, int length);
-
+int     DP_CallBack(RLP_UserInds ind, u8 *buffer, int length);
+void    DP_CallPassup(char c);
 
 	/* All defines and prototypes from here down are specific to 
 	   the datapump code and so are #ifdef out if __datapump_c isn't 

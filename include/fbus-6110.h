@@ -178,7 +178,7 @@ GSM_Error FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 
 GSM_Error FB61_DialVoice(char *Number);
-GSM_Error FB61_DialData(char *Number, char type);
+GSM_Error FB61_DialData(char *Number, char type,  void (* callpassup)(char c));
 
 GSM_Error FB61_GetIncomingCallNr(char *Number);
 

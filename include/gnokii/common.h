@@ -550,7 +550,7 @@ typedef struct {
 
   GSM_Error (*DialVoice)( char *Number);
 
-  GSM_Error (*DialData)( char *Number, char type);
+  GSM_Error (*DialData)( char *Number, char type, void (* callpassup)(char c));
 
   GSM_Error (*GetIncomingCallNr)( char *Number );
 

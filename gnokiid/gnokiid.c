@@ -10,9 +10,9 @@
 
   Mainline code for gnokiid daemon. Handles command line parsing and
   various daemon functions.
-	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+  Last modification: Mon May 15
+  Modified by Chris Kemp <ck231@cam.ac.uk>	
 
 */
 
@@ -126,9 +126,7 @@ int main(int argc, char *argv[])
 	while (1) {
 	  if (TerminateThread==true) {
 	    VM_Terminate();
-	    TerminateThread=false;
-	    if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode) == false) 
-	      exit (-1);
+	    exit(1);
 	  }
 	  sleep (1);
 	}
