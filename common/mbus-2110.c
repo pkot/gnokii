@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.36  2001-02-27 22:16:25  machek
+  Revision 1.37  2001-03-05 08:02:16  machek
+  Added few static-s.
+
+  Revision 1.36  2001/02/27 22:16:25  machek
   Kill unneccessary variable and annoying warning.
 
   Revision 1.35  2001/02/25 19:15:33  machek
@@ -1000,8 +1003,8 @@ ThreadLoop(void)
 }
 
 /* Initialise variables and state machine. */
-static GSM_Error   Initialise(char *port_device, char *initlength,
-		       GSM_ConnectionType connection,
+static GSM_Error   
+Initialise(char *port_device, char *initlength, GSM_ConnectionType connection,
 		       void (*rlp_callback)(RLP_F96Frame *frame))
 {
 	RequestTerminate = false;
@@ -1025,7 +1028,8 @@ static GSM_Error   Initialise(char *port_device, char *initlength,
    application.  Will block until location is retrieved or a timeout/error
    occurs. */
 
-GSM_Error GetPhonebookLocation(GSM_PhonebookEntry *entry)
+static GSM_Error
+GetPhonebookLocation(GSM_PhonebookEntry *entry)
 {
 	u8  pkt[] = {0x1a, 0 /* 1 == phone */, 0};
 	int i;
@@ -1065,7 +1069,8 @@ GSM_Error GetPhonebookLocation(GSM_PhonebookEntry *entry)
    application code. Will block until location is written or timeout
    occurs. */
 
-GSM_Error WritePhonebookLocation(GSM_PhonebookEntry *entry)
+static GSM_Error
+WritePhonebookLocation(GSM_PhonebookEntry *entry)
 {
 	u8  pkt[999] = {0x1b, 0 /* 1 == phone */, 0};
 
@@ -1091,7 +1096,8 @@ GSM_Error WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	return (GE_NONE);
 }
 
-GSM_Error GetSMSStatus(GSM_SMSStatus *Status)
+static GSM_Error
+GetSMSStatus(GSM_SMSStatus *Status)
 {
 	Status->UnRead = 0;
 	Status->Number = 5;
