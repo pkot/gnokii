@@ -82,7 +82,9 @@ AC_CHECK_LIB(pthread, pthread_create, [
 	[ AC_MSG_ERROR(not found library: pthread !!!) ]
 )
 
-if test "$no_x" = yes 
+AC_CHECK_LIB(intl,gettext)
+
+if test "$no_x" = yes -o "$with_x" = "no"
 then
 	xpm="no"
 	XPM_CFLAGS=""
