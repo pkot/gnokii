@@ -878,6 +878,9 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		return GE_UNHANDLEDFRAME;
 
 	case 0xca:
+		dprintf("Phone not ready???\n");
+		return GE_UNHANDLEDFRAME;
+
 	default:
 		for (i = 0; i < length; i++)
 			if (isprint(message[i]))
@@ -902,20 +905,11 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 				0x00,
 				0x01, /* Location */
 				0x01, 0x65, 0x01};
-	unsigned char req_list[] = {FBUS_FRAME_HEADER, 0x96,
-					 0x09, /* Location */
-					 0x0f, 0x07};
 	GSM_Error error;
-
-	/* just testiung picture listing */
-	req_list[4] = data->SMSMessage->MemoryType;
-	if (SM_SendMessage(state, 7, 0x14, req_list) != GE_NONE) return GE_NOTREADY;
-	error = SM_Block(state, data, 0x14);
 
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
 	if (data->SMSMessage->MemoryType != data->SMSFolder->FolderID) {
-
 		dprintf("Getting list of SMS folders...\n");
 		if (SM_SendMessage(state, 6, 0x14, req_folders) != GE_NONE) return GE_NOTREADY;
 		error = SM_Block(state, data, 0x14);
@@ -970,13 +964,16 @@ static GSM_Error P7110_FindUnreadSMS(GSM_Data *data, GSM_Statemachine *state, in
 	int i, index = 0;
 
 	if (!data->SMSMessage) return GE_INTERNALERROR;
+	dprintf("Starting at %d\n", *last);
 	for (i = *last;; i++) {
 		/* Skip all read messages */
 		while (index < no_loc && locations[index] < i) index++;
 		if (locations[i] == index) continue;
 
+		dprintf("Reading: %d\n", i);
 		data->SMSMessage->Number = i;
 		error = P7110_GetSMS(data, state);
+		dprintf("ERROR: %d (%s)\n", error, print_error(error));
 		if (error == GE_EMPTYSMSLOCATION) continue;
 		if (error != GE_NONE) return error;
 		if (data->SMSMessage->Status == SMS_Unread) {
@@ -1021,7 +1018,7 @@ static GSM_Error P7110_GetIncomingSMS(GSM_Data *data, GSM_Statemachine *state)
 	/* Read unread messages */
 	if (SMSStatus.Unread) {
 		int last = 1;
-		dprintf("Looking for unread\n");
+		dprintf("Looking for unread (%d)\n", SMSStatus.Unread);
 		for (i = 0; i < SMSStatus.Unread; i++) {
 			error = P7110_FindUnreadSMS(data, state, &last, SMSFolder.locations, SMSFolder.number);
 			if (error != GE_NONE) return error;
@@ -1064,12 +1061,22 @@ static GSM_Error P7110_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x14);
 }
 
+static GSM_Error P7110_ListPictures(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x96,
+				0x09, /* Location */
+				0x0f, 0x07};
+
+	req[4] = data->SMSMessage->MemoryType;
+	if (SM_SendMessage(state, 7, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x14);
+}
 static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req_list[] = {FBUS_FRAME_HEADER, 0x96,
-					 0x09, /* location */
-					 0x0f, 0x07};
-	if (SM_SendMessage(state, 7, 0x14, req_list) != GE_NONE) return GE_NOTREADY;
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x96,
+				0x09, /* location */
+				0x0f, 0x07};
+	if (SM_SendMessage(state, 7, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
 
