@@ -1,4 +1,5 @@
 
+
 #
 # Makefile for the xGNOKII tool suite.
 #
@@ -24,7 +25,8 @@ OBJS = 	xgnokii.o \
 	xgnokii_netmon.o \
 	xgnokii_dtmf.o \
 	xgnokii_cfg.o \
-	xgnokii_speed.o
+	xgnokii_speed.o \
+	xgnokii_xkeyb.o
 
 HELP_DIR = docs/help
 
@@ -45,6 +47,9 @@ install: all
 	$(INSTALL) -m 755 -s xgnokii $(bindir)
 	$(INSTALL) -d $(xgnokii_libdir)/help
 	$(INSTALL) -m 0444 $(HELP_DIR)/*.html $(xgnokii_libdir)/help
+	$(INSTALL) -d $(xgnokii_libdir)/xpm
+	$(INSTALL) -m 0444 xpm/6110.xpm $(xgnokii_libdir)/xpm
+	$(INSTALL) -m 0444 xpm/6150.xpm $(xgnokii_libdir)/xpm
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

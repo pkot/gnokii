@@ -1,3 +1,9 @@
+* Thu Mar 20 12:06:47 CET 2000 Jan Derfinak <ja@mail.upjs.sk>
+xgnokii-20000320
+- corrected if clause for support Callers groups and Netmonitor.
+- removed option for memory type change, if phone support only SIM memory.
+- xkeyb integrated into xgnokii.
+
 * Thu Mar 16 15:45:39 CET 2000 Jan Derfinak <ja@mail.upjs.sk>
 xgnokii-20000316
 - File CHANGES renamed to ChangeLog

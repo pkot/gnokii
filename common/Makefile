@@ -49,7 +49,7 @@ gsm-filetypes.o:
 	$(CC) $(CFLAGS) -c gsm-filetypes.c
 
 clean:
-	$(RM) $(OBJS) *~ depend COMMON.o
+	$(RM) $(OBJS) *~ depend COMMON.o gsm-filetypes.o
 
 install:
 	@echo

@@ -15,3 +15,10 @@
 
 * Fri Mar 17 19:07:23 CET 2000 Chris Kemp <ck231@cam.ac.uk>
 - Xpm library linking fixed
+
+* Thu Mar 16 12:10:18 CET 2000 Jan Derfinak <ja@mail.upjs.sk>
+- fixed file packages/RedHat/gnokii.spec.in for current directory structure.
+  Gnokii rpm files are now splited into gnokii-*.rpm and xgnokii-*.rpm.
+  Xgnokii-*.rpm contains all X11 depended files.
+- removed xkeyb directory. Xkeyb is now a part of xgnokii. Also removed xkeyb
+  from Makefile.

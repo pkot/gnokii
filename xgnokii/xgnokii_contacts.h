@@ -56,6 +56,7 @@ typedef struct {
   GtkWidget *dialog;
   GtkWidget *name;
   GtkWidget *number;
+  GtkWidget *memoryBox;
   GtkWidget *memoryTypePhone;
   GtkWidget *memoryTypeSIM;
   GtkWidget *group;

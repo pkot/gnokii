@@ -66,9 +66,9 @@ static FindEntryStruct findEntryStruct = { "", 0};
 static ExportDialogData exportDialogData = {NULL};
 static MemoryPixmaps memoryPixmaps;
 static QuestMark questMark;
-static EditEntryData newEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-static EditEntryData editEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-static EditEntryData duplicateEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static EditEntryData newEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static EditEntryData editEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static EditEntryData duplicateEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 
 /* return != 0 if user has unsaved changes in contacts memory */
@@ -819,21 +819,22 @@ static void CreateEditDialog( EditEntryData *editEntryData, gchar *title,
   gtk_box_pack_end(GTK_BOX(hbox), editEntryData->number, FALSE, FALSE, 2);
   gtk_widget_show (editEntryData->number);
   
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_container_add (GTK_CONTAINER (GTK_DIALOG (editEntryData->dialog)->vbox), hbox);
-  gtk_widget_show (hbox);
+  editEntryData->memoryBox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (GTK_DIALOG (editEntryData->dialog)->vbox),
+                     editEntryData->memoryBox);
+//  gtk_widget_show (hbox);
   
   label = gtk_label_new (_("Memory:"));
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  gtk_box_pack_start(GTK_BOX (editEntryData->memoryBox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
   editEntryData->memoryTypePhone = gtk_radio_button_new_with_label (NULL, _("phone"));
-  gtk_box_pack_end (GTK_BOX (hbox), editEntryData->memoryTypePhone, TRUE, FALSE, 2);
+  gtk_box_pack_end (GTK_BOX (editEntryData->memoryBox), editEntryData->memoryTypePhone, TRUE, FALSE, 2);
   gtk_widget_show (editEntryData->memoryTypePhone);
 
   editEntryData->memoryTypeSIM = gtk_radio_button_new_with_label( 
         gtk_radio_button_group (GTK_RADIO_BUTTON (editEntryData->memoryTypePhone)), "SIM");
-  gtk_box_pack_end(GTK_BOX(hbox), editEntryData->memoryTypeSIM, TRUE, FALSE, 2);
+  gtk_box_pack_end(GTK_BOX (editEntryData->memoryBox), editEntryData->memoryTypeSIM, TRUE, FALSE, 2);
   gtk_widget_show (editEntryData->memoryTypeSIM);
   
 //  if (xgnokiiConfig.callerGroupsSupported)
@@ -886,8 +887,13 @@ static void EditPbEntry(PhonebookEntry *pbEntry, gint row)
     gtk_widget_hide (editEditEntryData.group);
     gtk_widget_hide (editEditEntryData.groupLabel);
   }
-    
-  gtk_widget_show( GTK_WIDGET (editEditEntryData.dialog));
+  
+  if (memoryStatus.MaxME > 0)
+    gtk_widget_show (GTK_WIDGET (editEditEntryData.memoryBox));
+  else
+    gtk_widget_hide (GTK_WIDGET (editEditEntryData.memoryBox));
+  
+  gtk_widget_show (GTK_WIDGET (editEditEntryData.dialog));
 }
 
 void DeletePbEntry (void)
@@ -967,6 +973,12 @@ void NewPbEntry(PhonebookEntry *pbEntry)
     gtk_widget_hide (newEditEntryData.group);
     gtk_widget_hide (newEditEntryData.groupLabel);
   }
+  
+  if (memoryStatus.MaxME > 0)
+    gtk_widget_show (GTK_WIDGET (newEditEntryData.memoryBox));
+  else
+    gtk_widget_hide (GTK_WIDGET (newEditEntryData.memoryBox));
+  
   gtk_widget_show(GTK_WIDGET (newEditEntryData.dialog));
 }
 
@@ -999,6 +1011,12 @@ void DuplicatePbEntry (PhonebookEntry *pbEntry)
     gtk_widget_hide (duplicateEditEntryData.group);
     gtk_widget_hide (duplicateEditEntryData.groupLabel);
   }
+  
+  if (memoryStatus.MaxME > 0)
+    gtk_widget_show (GTK_WIDGET (duplicateEditEntryData.memoryBox));
+  else
+    gtk_widget_hide (GTK_WIDGET (duplicateEditEntryData.memoryBox));
+  
   gtk_widget_show(GTK_WIDGET (duplicateEditEntryData.dialog));
 }
 

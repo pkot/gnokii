@@ -1,5 +1,5 @@
 %define name gnokii
-%define version @@VERSION@@
+%define version @VERSION@
 %define release 1
 
 Summary: Linux/Unix tool suite for Nokia mobile phones
@@ -7,35 +7,42 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Copyright: GPL
-Packager: Pavel Janik ml. <Pavel.Janik@linux.cz>
+Packager: Pavel Janik ml. <Pavel.Janik@linux.cz>, Jan Derfinak <ja@mail.upjs.sk>
 Group: Applications/Communications
 Source: ftp://multivac.fatburen.org/pub/gnokii/%{name}-%{version}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{version}-root
 
 %description
-Gnokii is a Linux/Unix tool suite and (eventually) modem/fax driver for Nokia
-mobile phones, released under the GPL.
+Gnokii is a Linux/Unix tool suite and (eventually) modem/fax driver for
+Nokia's mobile phones, released under the GPL.
+
+%package xgnokii
+Summary: Graphical Linux/Unix tool suite for Nokia mobile phones.
+Group: X11/Applications
+%description xgnokii
+Xgnokii is graphical Linux/Unix tool suite for Nokia's mobile phones. It
+enable you to edit your contacts book, send/read SMS's from/in
+computer and more other features.
 
 %prep
-
 %setup -q
+%configure --prefix=/usr
 
 %build
 make
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf ${RPM_BUILD_ROOT}
 
-mkdir -p $RPM_BUILD_ROOT/usr/bin \
-         $RPM_BUILD_ROOT/usr/sbin \
-         $RPM_BUILD_ROOT/etc \
-         $RPM_BUILD_ROOT/usr/lib/gnokii
+mkdir -p ${RPM_BUILD_ROOT}/usr/bin \
+         ${RPM_BUILD_ROOT}/usr/sbin \
+         ${RPM_BUILD_ROOT}/etc \
+         ${RPM_BUILD_ROOT}/usr/lib/gnokii \
+         ${RPM_BUILD_ROOT}/usr/lib/xgnokii/{help,xpm}
 
 
-cp gnokii gnokiid xgnokii/xgnokii xkeyb xlogos $RPM_BUILD_ROOT/usr/bin
-cp mgnokiidev $RPM_BUILD_ROOT/usr/sbin
-cp sample.gnokiirc $RPM_BUILD_ROOT/etc/gnokiirc
-cp pixmaps/6110.xpm pixmaps/6150.xpm $RPM_BUILD_ROOT/usr/lib/gnokii
+make prefix=${RPM_BUILD_ROOT}/usr install
+install -m 444 Docs/sample/sample.gnokiirc ${RPM_BUILD_ROOT}/etc/gnokiirc
 
 %pre
 /usr/sbin/groupadd -r -f gnokii >/dev/null 2>&1
@@ -44,17 +51,31 @@ cp pixmaps/6110.xpm pixmaps/6150.xpm $RPM_BUILD_ROOT/usr/lib/gnokii
 /usr/sbin/groupdel gnokii >/dev/null 2>&1
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc COPYING CREDITS MANIFEST README README-3810 README-6110 README-WIN32 sample.gnokiirc gettext-howto gnokii.nol gnokii-ir-howto.txt
-/usr/bin/*
-/usr/lib/gnokii/*
-%attr(4754, root, gnokii) /usr/sbin/*
+%doc COPYING ChangeLog INSTALL TODO Docs/CREDITS Docs/README Docs/README-3810
+%doc Docs/README-6110 Docs/README-WIN32 Docs/sample/sample.gnokiirc
+%doc Docs/gettext-howto gnokii.nol Docs/gnokii-ir-howto
+/usr/bin/gnokii
+%attr(4754, root, gnokii) /usr/sbin/
 %config /etc/gnokiirc
 
+%files xgnokii
+%defattr(-,root,root)
+/usr/bin/xgnokii
+/usr/bin/xlogos
+/usr/lib/xgnokii/*
+
 %changelog
+* Mon Mar 20 2000 Jan Derfinak <ja@mail.upjs.sk>
+- split package into gnokii and xgnokii
+- added configure
+- correct xgnokii installation
+- installation with make install
+- fixing paths
+
 * Thu Aug  5 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - documentation files changed
 

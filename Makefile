@@ -27,8 +27,6 @@ DIRS +=		gnokiid \
 endif
 
 GTK_DIRS =	xgnokii \
-		xgnokii/xpm \
-		xkeyb \
 		xlogos
 
 PO_DIR   = 	po

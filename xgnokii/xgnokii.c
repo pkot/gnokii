@@ -47,6 +47,7 @@
 #include "xgnokii_netmon.h"
 #include "xgnokii_dtmf.h"
 #include "xgnokii_speed.h"
+#include "xgnokii_xkeyb.h"
 #include "xgnokii_cfg.h"
 
 #include "xpm/logo.xpm"
@@ -80,7 +81,8 @@ static bool optionsDialogIsOpened;
 
 /* Widget for popup menu */
 static GtkWidget *GUI_Menu;
-static GtkWidget *netmon_menu_items;
+static GtkWidget *netmon_menu_item;
+static GtkWidget *xkeyb_menu_item;
 
 static GtkWidget *cg_names_option_frame;
 
@@ -611,9 +613,22 @@ static void ParseSMSCenters ()
         break;
     
     case GSMF_Email:
+    case GSMF_UCI:
         row[2] = g_strdup (_("E-Mail"));
         break;
-      
+    
+    case GSMF_ERMES:
+        row[2] = g_strdup (_("ERMES"));
+        break;
+        
+    case GSMF_X400:
+        row[2] = g_strdup (_("X.400"));
+        break;
+    
+    case GSMF_Voice:
+        row[2] = g_strdup (_("Voice"));
+        break;
+    
     default:
         row[2] = g_strdup (_("Text"));
         break;
@@ -806,11 +821,16 @@ void GUI_ShowMenu(GdkEventButton *event)
 {
   GdkEventButton *bevent = (GdkEventButton *) event;
   
-  if (xgnokiiConfig.netMonitorSupported)
-    gtk_widget_show (netmon_menu_items);
+  if (KeyboardSupported (xgnokiiConfig.phoneVer))
+    gtk_widget_show (xkeyb_menu_item);
   else
-    gtk_widget_hide (netmon_menu_items);
+    gtk_widget_hide (xkeyb_menu_item);
     
+  if (xgnokiiConfig.netMonitorSupported)
+    gtk_widget_show (netmon_menu_item);
+  else
+    gtk_widget_hide (netmon_menu_item);
+  
   gtk_menu_popup (GTK_MENU(GUI_Menu), NULL, NULL, NULL, NULL,
                           bevent->button, bevent->time);
 }
@@ -1034,12 +1054,15 @@ GtkWidget *GUI_CreateMenu ()
   gtk_widget_show (menu_items);
 
 
-    netmon_menu_items = gtk_menu_item_new_with_label (_("Net Monitor"));
-    gtk_menu_append (GTK_MENU (menu), netmon_menu_items);
-    gtk_signal_connect_object (GTK_OBJECT(netmon_menu_items), "activate",
-                               GTK_SIGNAL_FUNC (GUI_ShowNetmon), NULL);
-//    gtk_widget_show (menu_items);
-//  }
+  xkeyb_menu_item = gtk_menu_item_new_with_label (_("Keyboard"));
+  gtk_menu_append (GTK_MENU (menu), xkeyb_menu_item);
+  gtk_signal_connect_object (GTK_OBJECT(xkeyb_menu_item), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowXkeyb), NULL);
+                             
+  netmon_menu_item = gtk_menu_item_new_with_label (_("Net Monitor"));
+  gtk_menu_append (GTK_MENU (menu), netmon_menu_item);
+  gtk_signal_connect_object (GTK_OBJECT(netmon_menu_item), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowNetmon), NULL);
   
   menu_items = gtk_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), menu_items);
@@ -2099,6 +2122,7 @@ void GUI_TopLevelWindow () {
   GUI_CreateNetmonWindow ();
   GUI_CreateDTMFWindow ();
   GUI_CreateSpeedDialWindow ();
+  GUI_CreateXkeybWindow ();
   CreateErrorDialog (&errorDialog, GUI_MainWindow);
   CreateInCallDialog ();
   

@@ -33,16 +33,19 @@ typedef struct {
   GtkWidget *text;
 } YesNoDialog;
 
-extern void CancelDialog( GtkWidget *, gpointer );
-extern void CreateErrorDialog( ErrorDialog *, GtkWidget * );
-extern void CreateYesNoDialog(YesNoDialog *, GtkSignalFunc , GtkSignalFunc, GtkWidget * );
-extern GtkWidget* NewPixmap( gchar **, GdkWindow *, GdkColor *);
-extern void DeleteEvent( GtkWidget *, GdkEvent *, gpointer );
-extern gint LaunchProcess (gchar *, gchar *, gint , gint , gint);
-extern void RemoveZombie (gint);
-extern void Help (GtkWidget *, gpointer);
+extern void CancelDialog (const GtkWidget *, const gpointer);
+extern void CreateErrorDialog (ErrorDialog *, GtkWidget *);
+extern void CreateYesNoDialog (YesNoDialog *, const GtkSignalFunc,
+                               const GtkSignalFunc, GtkWidget *);
+extern GtkWidget* NewPixmap (gchar **, GdkWindow *, GdkColor *);
+extern void DeleteEvent (const GtkWidget *, const GdkEvent *, const gpointer );
+extern gint LaunchProcess (const gchar *, const gchar *, const gint,
+                           const gint, const gint);
+extern void RemoveZombie (const gint);
+extern void Help (const GtkWidget *, const gpointer);
 extern gint strrncmp (const gchar * const, const gchar * const, size_t);
 extern gchar *GetModel (const gchar *);
 extern bool CallerGroupSupported (const gchar *);
 extern bool NetmonitorSupported (const gchar *);
+extern bool KeyboardSupported (const gchar *);
 #endif

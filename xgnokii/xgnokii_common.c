@@ -74,7 +74,7 @@ bool CallerGroupSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 7 && i < 19)
+      if (i > 10 && i < 19)
         return TRUE;
       else
         return FALSE;
@@ -93,7 +93,7 @@ bool NetmonitorSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 10 && i < 19)
+      if (i > 7 && i < 19)
         return TRUE;
       else
         return FALSE;
@@ -104,12 +104,31 @@ bool NetmonitorSupported (const gchar *num)
   return FALSE;
 }
 
-inline void DeleteEvent (GtkWidget *widget, GdkEvent *event, gpointer data)
+bool KeyboardSupported (const gchar *num)
+{
+  register gint i = 0;
+  
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 10 && i < 18)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+  
+  return FALSE;
+}
+
+inline void DeleteEvent (const GtkWidget *widget, const GdkEvent *event, const gpointer data)
 {
   gtk_widget_hide (GTK_WIDGET (widget));
 }
 
-inline void CancelDialog (GtkWidget *widget, gpointer data)
+inline void CancelDialog (const GtkWidget *widget, const gpointer data)
 {
   gtk_widget_hide (GTK_WIDGET (data));
 }
@@ -152,8 +171,8 @@ void CreateErrorDialog (ErrorDialog *errorDialog, GtkWidget *window)
   gtk_widget_show (errorDialog->text);
 }
 
-void CreateYesNoDialog (YesNoDialog *yesNoDialog, GtkSignalFunc yesFunc,
-                        GtkSignalFunc noFunc, GtkWidget *window)
+void CreateYesNoDialog (YesNoDialog *yesNoDialog, const GtkSignalFunc yesFunc,
+                        const GtkSignalFunc noFunc, GtkWidget *window)
 {
   GtkWidget *button, *hbox, *pixmap;
   
@@ -218,7 +237,8 @@ GtkWidget* NewPixmap (gchar **data, GdkWindow *window, GdkColor *background)
   return wpixmap;
 }
 
-gint LaunchProcess (gchar *p, gchar *arg, gint infile, gint outfile, gint errfile)
+gint LaunchProcess (const gchar *p, const gchar *arg, const gint infile,
+                    const gint outfile, const gint errfile)
 {
   pid_t pid;
   
@@ -267,14 +287,14 @@ gint LaunchProcess (gchar *p, gchar *arg, gint infile, gint outfile, gint errfil
   return (0);
 }
 
-void RemoveZombie (gint sign)
+void RemoveZombie (const gint sign)
 {
   gint status;
   
   wait (&status);
 }
 
-void Help (GtkWidget *w, gpointer data)
+void Help (const GtkWidget *w, const gpointer data)
 {
   gchar buf[255] = "file:";
   
