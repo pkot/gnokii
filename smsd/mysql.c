@@ -83,7 +83,7 @@ gint DB_ConnectOutbox (DBConfig connect)
 }
 
 
-gint DB_InsertSMS (const GSM_SMSMessage * const data)
+gint DB_InsertSMS (const GSM_API_SMS * const data)
 {
   GString *buf;
   gchar *text;
@@ -100,7 +100,7 @@ gint DB_InsertSMS (const GSM_SMSMessage * const data)
   g_string_sprintf (buf, "INSERT INTO inbox (number, smsdate, \
                     text, processed) VALUES ('%s', \
                     '%04d-%02d-%02d %02d:%02d:%02d', '%s', '0')",
-                    data->RemoteNumber.number, data->Time.Year, data->Time.Month,
+                    data->Remote.Number, data->Time.Year, data->Time.Month,
                     data->Time.Day, data->Time.Hour, data->Time.Minute,
                     data->Time.Second, text);
   g_free (text);
@@ -151,21 +151,21 @@ void DB_Look (void)
   {
     GSM_SMSMessage sms;
 
-    DefaultSubmitSMS(&sms);    
-    sms.Report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
+    DefaultSubmitSMS (&sms);    
+    sms.DeliveryReport = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
-    strncpy (sms.RemoteNumber.number, row[1], MAX_BCD_STRING_LENGTH + 1);
-    sms.RemoteNumber.number[MAX_BCD_STRING_LENGTH] = '\0';
-    if (sms.RemoteNumber.number[0] == '+')
-      sms.RemoteNumber.type = SMS_International;
+    strncpy (sms.Remote.Number, row[1], MAX_BCD_STRING_LENGTH + 1);
+    sms.Remote.Number[MAX_BCD_STRING_LENGTH] = '\0';
+    if (sms.Remote.Number[0] == '+')
+      sms.Remote.Type = SMS_International;
     else
-      sms.RemoteNumber.type = SMS_Unknown;
+      sms.Remote.Type = SMS_Unknown;
     
     strncpy (sms.UserData[0].u.Text, row[2], GSM_MAX_SMS_LENGTH + 1);
     sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
 
 #ifdef XDEBUG
-    g_print ("%s, %s\n", sms.RemoteNumber.number, sms.UserData[0].u.Text);
+    g_print ("%s, %s\n", sms.Remote.Number, sms.UserData[0].u.Text);
 #endif
     
     numError = 0;

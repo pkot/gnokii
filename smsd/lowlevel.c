@@ -221,7 +221,7 @@ static void RefreshSMS (const gint number)
 {
   static GSM_Data data;
   GSM_Error error;
-  GSM_SMSMessage *msg;
+  GSM_API_SMS *msg;
   SMS_Folder folder;
   SMS_FolderList folderlist;
   register gint i;
@@ -245,10 +245,10 @@ static void RefreshSMS (const gint number)
   while (1)
   {
 //    GSM_DataClear (&data);
-    msg = g_malloc (sizeof (GSM_SMSMessage));
+    msg = g_malloc (sizeof (GSM_API_SMS));
     msg->MemoryType = GMT_SM;
     msg->Number = ++i;
-    data.SMSMessage = msg;
+    data.SMS = msg;
 
     if ((error = GetSMS (&data, &sm)) == GE_NONE)
     {
@@ -290,7 +290,7 @@ static gint A_SendSMSMessage (gpointer data)
   {
     pthread_mutex_lock (&sendSMSMutex);
     GSM_DataClear(&dt);
-    dt.SMSMessage = d->sms;
+    dt.SMS = d->sms;
     error = d->status = SendSMS ( &dt, &sm);
     pthread_cond_signal (&sendSMSCond);
     pthread_mutex_unlock (&sendSMSMutex);
@@ -309,8 +309,8 @@ static gint A_DeleteSMSMessage (gpointer data)
   GSM_Error error = GE_UNKNOWN;
 
   GSM_DataClear(&dt);
-  dt.SMSMessage = (GSM_SMSMessage *) data;
-  if (dt.SMSMessage)
+  dt.SMS = (GSM_API_SMS *) data;
+  if (dt.SMS)
   {
     error = SM_Functions (GOP_DeleteSMS, &dt, &sm);
 //    I don't use copy, I don't need free message.
@@ -338,7 +338,7 @@ gint (*DoAction[])(gpointer) = {
 void *Connect (void *a)
 {
   GSM_Data data;
-  GSM_SMSMemoryStatus SMSStatus = {0, 0};
+  SMS_Status SMSStatus = {0, 0, 0, 0};
   PhoneEvent *event;
   GSM_Error error;
 

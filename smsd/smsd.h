@@ -58,6 +58,6 @@ typedef struct {
 
 extern gchar *strEscape (const gchar *const);
 extern SmsdConfig smsdConfig;
-extern gint WriteSMS (GSM_SMSMessage *);
+extern gint WriteSMS (GSM_API_SMS *);
 
 #endif

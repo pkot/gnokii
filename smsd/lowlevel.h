@@ -47,7 +47,7 @@ typedef struct {
 } PhoneEvent;
 
 typedef struct {
-  GSM_SMSMessage *sms;
+  GSM_API_SMS *sms;
   GSM_Error status;
 } D_SMSMessage;
 

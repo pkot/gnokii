@@ -71,7 +71,7 @@ static DBConfig connection;
 void (*DB_Bye) (void) = NULL;;
 gint (*DB_ConnectInbox) (const DBConfig) = NULL;
 gint (*DB_ConnectOutbox) (const DBConfig) = NULL;
-gint (*DB_InsertSMS) (const GSM_SMSMessage * const) = NULL;
+gint (*DB_InsertSMS) (const GSM_API_SMS * const) = NULL;
 void (*DB_Look) (void) = NULL;
 
 static pthread_t db_monitor_th;
@@ -299,7 +299,7 @@ static void *SendSMS2 (void *a)
 }
 
 
-gint WriteSMS (GSM_SMSMessage *sms)
+gint WriteSMS (GSM_API_SMS *sms)
 {
   GSM_Error error;
   PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
@@ -315,7 +315,7 @@ gint WriteSMS (GSM_SMSMessage *sms)
 
 #ifdef XDEBUG
   g_print ("Address: %s\nText: %s\n",
-  sms->RemoteNumber.number,
+  sms->Remote.Number,
   sms->UserData[0].u.Text);
 #endif
 
@@ -328,7 +328,7 @@ gint WriteSMS (GSM_SMSMessage *sms)
 
 static void ReadSMS (gpointer d, gpointer userData)
 {
-  GSM_SMSMessage *data = (GSM_SMSMessage *) d;
+  GSM_API_SMS *data = (GSM_API_SMS *) d;
   PhoneEvent *e;
   
   if (data->Type == SMS_Deliver || data->Type == SMS_Delivery_Report)
@@ -341,11 +341,11 @@ static void ReadSMS (gpointer d, gpointer userData)
     else
     { 
 #ifdef XDEBUG 
-      g_print ("%d. %s   ", data->Number, data->RemoteNumber.number);
+      g_print ("%d. %s   ", data->Number, data->Remote.Number);
       g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->Time.Year,
-               data->Time.Month, data->Time.Day, data->Time.Hour,
-               data->Time.Minute, data->Time.Second, data->Time.Timezone,
-               data->UserData[0].u.Text);
+                data->Time.Month, data->Time.Day, data->Time.Hour,
+                data->Time.Minute, data->Time.Second, data->Time.Timezone,
+                data->UserData[0].u.Text);
 #endif
       (*DB_InsertSMS) (data);
     }
