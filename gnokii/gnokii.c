@@ -1174,7 +1174,7 @@ static int getsms(int argc, char *argv[])
 			}
 			if (del) {
 				data.SMS = &message;
-				if (GE_NONE != SM_Functions(GOP_DeleteSMS, &data, &State))
+				if (GE_NONE != DeleteSMS(&data, &State))
 					fprintf(stdout, _("(delete failed)\n"));
 				else
 					fprintf(stdout, _("(message deleted)\n"));
@@ -1193,6 +1193,8 @@ static int getsms(int argc, char *argv[])
 static int deletesms(int argc, char *argv[])
 {
 	GSM_API_SMS message;
+	SMS_Folder folder;
+	SMS_FolderList folderlist;
 	char *memory_type_string;
 	int start_message, end_message, count;
 	GSM_Error error;
@@ -1212,7 +1214,9 @@ static int deletesms(int argc, char *argv[])
 	for (count = start_message; count <= end_message; count++) {
 		message.Number = count;
 		data.SMS = &message;
-		error = SM_Functions(GOP_DeleteSMS, &data, &State);
+		data.SMSFolder = &folder;
+		data.SMSFolderList = &folderlist;
+		error = DeleteSMS(&data, &State);
 
 		if (error == GE_NONE)
 			fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);
