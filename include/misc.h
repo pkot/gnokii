@@ -147,10 +147,6 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 #  endif
 #endif
 
-#if (!defined _BSD_SOURCE) && (!defined _BSDTYPES_DEFINED)
-	typedef unsigned char u_char;
-#endif
-
 /* This one is for FreeBSD and similar systems without __ptr_t_ */
 /* FIXME: autoconf should take care of this. */
 #ifndef __ptr_t

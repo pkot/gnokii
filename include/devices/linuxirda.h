@@ -148,7 +148,7 @@ struct irda_ias_set {
 		unsigned int irda_attrib_int;
 		struct {
 			unsigned short len;
-			u_char octet_seq[IAS_MAX_OCTET_STRING];
+			unsigned char octet_seq[IAS_MAX_OCTET_STRING];
 		} irda_attrib_octet_seq;
 		struct {
 			unsigned char len;
