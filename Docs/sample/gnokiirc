@@ -33,6 +33,13 @@ connection = serial
 # are in the gnokii group and that the group exists...
 bindir = /usr/local/sbin/
 
+# Set this to 'yes' if you want gnokii to set and check the lock file in
+# /var/lock directory. It avoids potential conflicts with other serial
+# port software (eg. minicom). If you have wrong permissions for the
+# directory, a warning will be generated. If you don't want a lockfile, set
+# it to 'no'.
+use_locking = yes
+
 # Baudrate to use on serial port connections.
 # Currently used only by models AT and BIP/CIMD. Defaults to 19200.
 serial_baudrate = 19200

@@ -33,24 +33,27 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+
 #ifdef WIN32
 
-#include <windows.h>
-#define sleep(x) Sleep((x) * 1000)
-#define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
-#define stat _stat
-#include "win32/getopt.h"
+#  include <windows.h>
+#  define sleep(x) Sleep((x) * 1000)
+#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#  define stat _stat
+#  include "win32/getopt.h"
 
 #else
 
-#include <unistd.h>
-#include <termios.h>
-#include <fcntl.h>
-#include <getopt.h>
+#  include <unistd.h>
+#  include <termios.h>
+#  include <fcntl.h>
+#  include <getopt.h>
 
 #endif
+
+
 #ifdef USE_NLS
-#include <locale.h>
+#  include <locale.h>
 #endif
 
 
@@ -264,7 +267,7 @@ static int usage(void)
 		"          gnokii --getsecuritycodestatus\n"
 		));
 #endif
-	unlock_device(lockfile);
+	if (lockfile) unlock_device(lockfile);
 	exit(-1);
 }
 
@@ -279,6 +282,7 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 	int count = 0;
 	GSM_Error error;
 	GSM_ConnectionType connection = GCT_Serial;
+	char *aux;
 
 	GSM_DataClear(&data);
 
@@ -286,13 +290,14 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 	if (!strcasecmp(Connection, "infrared")) connection = GCT_Infrared;
 	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
 
-	lockfile = lock_device(Port);
+	aux = CFG_Get(CFG_Info, "global", "use_locking");
+	if (!strcmp(aux, "yes")) lockfile = lock_device(Port);
 
 	/* Initialise the code for the GSM interface. */
 	error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler, &State);
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! Quitting.\n"));
-		unlock_device(lockfile);
+		if (lockfile) unlock_device(lockfile);
 		exit(-1);
 	}
 
@@ -303,7 +308,7 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 
 	if (*GSM_LinkOK == false) {
 		fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting.\n"));
-		unlock_device(lockfile);
+		if (lockfile) unlock_device(lockfile);
 		exit(-1);
 	}
 }
@@ -2906,7 +2911,6 @@ static int smsreader(void)
 static int foogle(char *argv[])
 {
 	/* Fill in what you would like to test here... */
-	SM_Functions(GOP_OnSMS, &data, &State);
 	return 0;
 }
 #endif
@@ -3322,11 +3326,11 @@ int main(int argc, char *argv[])
 			break;
 
 		}
-		unlock_device(lockfile);
+		if (lockfile) unlock_device(lockfile);
 		exit(rc);
 	}
 
 	fprintf(stderr, _("Wrong number of arguments\n"));
-	unlock_device(lockfile);
+	if (lockfile) unlock_device(lockfile);
 	exit(-1);
 }
