@@ -36,6 +36,7 @@
 
 typedef enum {
 	GN_OP_AT_GetCharset = GN_OP_Max,
+	GN_OP_AT_SetCharset,
 	GN_OP_AT_SetPDUMode,
 	GN_OP_AT_Prompt,
 	GN_OP_AT_Max	/* don't append anything after this entry */
@@ -58,17 +59,17 @@ at_recv_function_type at_insert_recv_function(int type, at_recv_function_type fu
 at_send_function_type at_insert_send_function(int type, at_send_function_type func, struct gn_statemachine *state);
 
 typedef struct {
-	at_send_function_type functions[GOPAT_Max];
-	at_recv_function_type incoming_functions[GOPAT_Max];
+	at_send_function_type functions[GN_OP_AT_Max];
+	gn_incoming_function_type incoming_functions[GN_OP_AT_Max];
 	int if_pos;
 
 	gn_memory_type memorytype;
-	gn_memory _type smsmemorytype;
+	gn_memory_type smsmemorytype;
 	at_charset defaultcharset;
 	at_charset charset;
 } at_driver_instance;
 
-#define AT_DRVINST(s) ((at_driver_instance *)((s)->Phone.DriverInstance))
+#define AT_DRVINST(s) ((at_driver_instance *)((s)->driver.driver_instance))
 
 typedef struct {
 	char *line1;
@@ -78,7 +79,7 @@ typedef struct {
 	int length;
 } at_line_buffer;
 
-gn_error AT_SetMemoryType(gn_memory_type mt, struct gn_statemachine *state);
+gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state);
 
 void splitlines(at_line_buffer *buf);
 

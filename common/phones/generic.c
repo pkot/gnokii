@@ -28,31 +28,22 @@
   This file provides useful functions for all phones
   See README for more details on supported mobile phones.
 
-  The various routines are called PGEN_(whatever).
+  The various routines are called pgen_(whatever).
 
 */
 
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
-#include "misc.h"
-#include "gsm-common.h"
-#include "gsm-statemachine.h"
-#include "phones/generic.h"
-#include "links/utils.h"
+#include "gnokii-internal.h"
 
 /* If we do not support a message type, print out some debugging info */
-gn_error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state)
+gn_error pgen_incoming_default(int messagetype, unsigned char *buffer, int length, struct gn_statemachine *state)
 {
 	dprintf("Unknown Message received [type (%02x) length (%d): \n", messagetype, length);
-	SM_DumpMessage(messagetype, buffer, length);
+	sm_message_dump(messagetype, buffer, length);
 
 	return GN_ERR_NONE;
 }
 
-gn_error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state)
+gn_error pgen_terminate(gn_data *data, struct gn_statemachine *state)
 {
-	return LINK_Terminate(state);
+	return link_terminate(state);
 }
-

@@ -28,20 +28,18 @@
   This file provides useful functions for all phones
   See README for more details on supported mobile phones.
 
-  The various routines are called PGEN_...
+  Various routines are called p(hones/)gen(eric)_...
 
 */
 
-#ifndef __phones_generic_h
-#define __phones_generic_h
+#ifndef _gnokii_phones_generic_h
+#define _gnokii_phones_generic_h
 
 #include "gsm-error.h"
 #include "gsm-statemachine.h"
 
-#define GN_PHONEBOOK_ENTRY_MAX_LENGTH 1024
-
 /* Generic Functions */
-gn_error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
-gn_error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state);
+gn_error pgen_incoming_default(int messagetype, unsigned char *buffer, int length, struct gn_statemachine *state);
+gn_error pgen_terminate(gn_data *data, struct gn_statemachine *state);
 
 #endif
