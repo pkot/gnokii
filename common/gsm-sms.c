@@ -1346,6 +1346,11 @@ API gn_error gn_sms_save(gn_data *data, struct gn_statemachine *state)
 	}
 
 	error = gn_sm_functions(GN_OP_SaveSMS, data, state);
+
+	/* the message was perhaps not stored at the specified location,
+	   but the phone driver probably knows where, so copy it over */
+	data->sms->number = data->raw_sms->number;
+
 cleanup:
 	data->raw_sms = NULL;
 	return error;
