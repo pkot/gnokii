@@ -110,8 +110,10 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 #  define inline /* Not supported */
 #  define strcasecmp stricmp
 #  define strncasecmp strnicmp
-#  define sleep(x) Sleep((x) * 1000)
-#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#  ifndef HAVE_UNISTD_H
+#    define sleep(x) Sleep((x) * 1000)
+#    define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#  endif /* HAVE_UNISTD_H */
 #endif
 
 #endif

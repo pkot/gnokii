@@ -34,6 +34,7 @@
     o extended AddCall to accept text and phone number
     o added (De)Activate SMS reading in SMS window menu
     o changed the default size of SMS windows          (Markus Plail)
+ * Cygwin compilation error fixed                    (BORBELY Zoltan)
 
 0.4.0pre16
 ==========

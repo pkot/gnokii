@@ -30,9 +30,14 @@
 
 */
 
+#include "config.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -40,10 +45,6 @@
 #include "phones/nk3110.h"
 #include "links/fbus-3110.h"
 #include "phones/nokia.h"
-
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
 
 /* Prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);

@@ -26,6 +26,7 @@
 
 */
 
+#include "config.h"
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -34,11 +35,12 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "misc.h"
-
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
+
+#include "misc.h"
+
 
 void (*GSM_ELogHandler)(const char *fmt, va_list ap) = NULL;
 

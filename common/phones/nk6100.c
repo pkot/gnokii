@@ -31,9 +31,14 @@
 
 */
 
+#include "config.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -44,10 +49,6 @@
 #include "phones/nokia.h"
 #include "gsm-encoding.h"
 #include "gsm-api.h"
-
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
 
 /* Some globals */
 
