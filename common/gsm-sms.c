@@ -36,8 +36,8 @@
 #include "gsm-encoding.h"
 #include "gsm-statemachine.h"
 
-#  include "gsm-ringtones.h"
-#  include "gsm-bitmaps.h"
+#include "gsm-ringtones.h"
+#include "gsm-bitmaps.h"
 
 struct udh_data {
 	unsigned int length;
@@ -45,6 +45,20 @@ struct udh_data {
 };
 
 #define MAX_SMS_PART 128
+
+/* These are positions in the following (headers[]) table. */
+#define UDH_CONCATENATED_MESSAGES  1
+#define UDH_RINGTONES              2
+#define UDH_OPERATOR_LOGOS         3
+#define UDH_CALLER_LOGOS           4
+#define UDH_MULTIPART_MESSAGES     5
+#define UDH_WAP_VCARD              6
+#define UDH_WAP_CALENDAR           7
+#define UDH_WAP_VCARDSECURE        8
+#define UDH_WAP_VCALENDARSECURE    9
+#define UDH_VOICE_MESSAGES        10
+#define UDH_FAX_MESSAGES          11
+#define UDH_EMAIL_MESSAGES        12
 
 /* User data headers */
 static struct udh_data headers[] = {
