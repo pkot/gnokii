@@ -36,6 +36,9 @@
       probably by this policy                           (Pawel Kot)
  * 6100 driver updates
     o add Nokia 8850 support                       (Denis Pitzalis)
+ * build updates
+    o add $(LDLIBS) to libgnokii.a target               (Pawel Kot,
+                                                    Bastien Nocera)
 
 0.6.4
 =====
