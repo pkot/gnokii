@@ -19,13 +19,28 @@
     o --keysequence updated to the new API           (BORBELY Zoltan)
     o --enterchar implemented                        (BORBELY Zoltan)
     o better handling of call divert responses            (Pawel Kot)
+    o add option to send 8-bit SMS                     (Pavel Machek)
+    o fix handling of overlong messages                (Pavel Machek)
  * Makefiles' fixes                                       (Pawel Kot)
  * Docs updates
     o copy-and-paste call diverts from 6110 protocol to 7110
     protocol description                                  (Pawel Kot)
+    o remove some obsolete things                         (Pawel Kot)
  * Cleanup in the dumping code                            (Pawel Kot)
  * Won't repeat everything ttwwiiccee if compiled with --enable-debug
                                                      (BORBELY Zoltan)
+ * Don't return -1 in function returning unsigned short
+                                                       (Pavel Machek)
+ * Solaris updates
+    o replace AF_LOCAL with AF_UNIX                (Marcus Pallinger)
+ * allow to build static library                   (Marcus Pallinger)
+ * xgnokii updates
+    o fix folder name max length                          (Pawel Kot)
+ * libsms updates
+    o fix folder name max length                          (Pawel Kot)
+ * More general bitmaps handling -- remove fixed vaules   (Pawel Kot)
+ * Do not use (...) in macros if not being compiled on gcc
+                                                       (Pavel Machek)
 
 0.4.0pre14
 ==========
