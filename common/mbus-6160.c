@@ -40,6 +40,7 @@
 
 #define WRITEPHONE(a, b, c) device_write(b, c)
 
+#define	DEBUG
 
 	/* Global variables used by code in gsm-api.c to expose the
 	   functions supported by this model of phone.  */
@@ -92,7 +93,7 @@ GSM_Functions			MB61_Functions = {
 
 	/* FIXME - these are guesses only... */
 GSM_Information			MB61_Information = {
-		"5160|6160",			/* Models */
+		"5160|6160|6185",		/* Models */
 		4, 						/* Max RF Level */
 		0,						/* Min RF Level */
 		GRF_Arbitrary,			/* RF level units */
@@ -112,8 +113,13 @@ char                    PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
 u8						RequestSequenceNumber; /* 2-63 */
 int						PortFD;
 bool					GotInitResponse;
+bool					GotIDResponse;
 
 enum MB61_RX_States     RX_State;
+enum MB61_Models		ModelIdentified;
+enum MB61_Responses		ExpectedResponse;
+enum MB61_Responses		LatestResponse;
+
 int                     MessageLength;
 u8                      MessageDestination;
 u8                      MessageSource;
@@ -138,6 +144,8 @@ GSM_Error   MB61_Initialise(char *port_device, char *initlength,
 
 	RequestTerminate = false;
 	MB61_LinkOK = false;
+	ModelIdentified = MB61_ModelUnknown;
+	ExpectedResponse = MB61_Response_Unknown;
 
     strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -171,7 +179,38 @@ void		MB61_Terminate(void)
 	   retrieved or a timeout/error occurs. */
 GSM_Error	MB61_GetMemoryLocation(GSM_PhonebookEntry *entry)
 {
-	return (GE_NOTIMPLEMENTED);
+    int     timeout;
+
+        /* State machine code writes data to these variables when
+           it comes in. */
+    /*CurrentPhonebookEntry = entry;
+    CurrentPhonebookError = GE_BUSY;*/
+
+    if (entry->MemoryType != GMT_ME) {
+    	return (GE_INVALIDMEMORYTYPE);
+    }
+
+    timeout = 20;   /* 2 seconds for command to complete */
+
+        /* Return if no link has been established. */
+    if (!MB61_LinkOK) {
+        return GE_NOLINK;
+    }
+
+        /* Send request */
+    //FB38_TX_Send0x43_RequestMemoryLocation(memory_area, entry->Location);
+    
+        /* Wait for timeout or other error. */
+    while (timeout != 0/* && CurrentPhonebookError == GE_BUSY*/) {
+
+        timeout --;
+        if (timeout == 0) {
+            return (GE_TIMEOUT);
+        }
+        usleep (100000);
+    }
+
+    //return (CurrentPhonebookError);
 }
 
 	/* Routine to write phonebook location in phone. Designed to 
@@ -389,49 +428,11 @@ bool		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 	/* Everything from here down is internal to 6160 code. */
 
 
-	/* Bit of a hack in an attempt to get slightly better timing
-       this code doesn't work properly yet... */
-void	mydelay(int usecs)
-{
-	struct timeval	delay_time;
-	struct timeval	target_time;
-	struct timezone	foo; 
-	int				quit;
-	int				count;
-
-	gettimeofday(&delay_time, &foo);
-
-	target_time.tv_usec = delay_time.tv_usec + usecs;
-	if (target_time.tv_usec > 1000000) {
-		target_time.tv_sec = delay_time.tv_sec + 1;
-		target_time.tv_usec -= 1000000;
-	}
-	else {
-		target_time.tv_sec = delay_time.tv_sec;
-	}
-
-	quit = false;
-	count = 0;
-
-	while (!quit) {
-		gettimeofday(&delay_time, &foo);
-		if (delay_time.tv_sec >= target_time.tv_sec && 
-		    delay_time.tv_usec >= target_time.tv_usec) {
-			quit = true;
-		}
-		//usleep(1000);
-		count ++;
-	}
-	fprintf(stderr, "%d ", count);
-			
-}
-
 	/* This is the main loop for the MB61 functions.  When MB61_Initialise
 	   is called a thread is created to run this loop.  This loop is
 	   exited when the application calls the MB61_Terminate function. */
 void	MB61_ThreadLoop(void)
 {
-    unsigned char       init_char[1] = {0x04};
     int                 idle_timer;
 
         /* Initialise RX state machine. */
@@ -449,6 +450,40 @@ void	MB61_ThreadLoop(void)
         }
         return;
     }
+
+		/* Do initialisation sequence, sit here if it fails. */
+	if (MB61_InitialiseLink() != true) {
+         MB61_LinkOK = false;
+        
+        while (!RequestTerminate) {
+            usleep (100000);
+        }
+        return;
+    }
+
+		/* Link is up OK so sit here twiddling our thumbs until
+           told to terminate. */
+    while (!RequestTerminate) {
+        if (idle_timer == 0) {
+            idle_timer = 20;
+        }
+        else {
+            idle_timer --;
+			/*fprintf(stdout, ".");
+			fflush(stdout);*/
+        }
+
+        usleep(100000);     /* Avoid becoming a "busy" loop. */
+    }
+
+		/* Drop DTR and RTS lines before exiting */
+    device_setdtrrts(0, 0);
+}
+
+
+bool	MB61_InitialiseLink(void)
+{
+    unsigned char       init_char[1] = {0x04};
 
     fprintf(stdout, "Sending init...\n");
 
@@ -480,23 +515,23 @@ void	MB61_ThreadLoop(void)
 
 		/* RTS low, DTR high for 50ms */
     device_setdtrrts(1, 0);
-	mydelay(BASE_TIME);
+	usleep(BASE_TIME);
 
 		/* RTS low, DTR low for 50ms */
     device_setdtrrts(0, 0);
-	mydelay(BASE_TIME);
+	usleep(BASE_TIME);
 
 		/* RTS low, DTR high for 50ms */
     device_setdtrrts(1, 0);
-	mydelay(BASE_TIME);
+	usleep(BASE_TIME);
 
 		/* RTS high, DTR high for 50ms */
     device_setdtrrts(1, 1);
-	mydelay(BASE_TIME);
+	usleep(BASE_TIME);
 
 		/* RTS low, DTR low for 50ms */
     device_setdtrrts(0, 0);
-	mydelay(BASE_TIME);
+	usleep(BASE_TIME);
 
 		/* leave RTS high, DTR low for duration of session. */
 	usleep(BASE_TIME);
@@ -507,9 +542,11 @@ void	MB61_ThreadLoop(void)
 
         /* Initialise sequence number used when sending messages
            to phone. */
-    RequestSequenceNumber = 0x02;
 
         /* Send Initialisation message to phone. */
+	MB61_SetExpectedResponse(MB61_Response_0xD0_Init);
+
+    RequestSequenceNumber = 0x02;
 	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0xd0, RequestSequenceNumber, 1, init_char);
 
         /* We've now finished initialising things so sit in the loop
@@ -520,10 +557,12 @@ void	MB61_ThreadLoop(void)
 
 	fprintf(stdout, "Waiting for first response...\n");
 	fflush(stdout);
-	while(GotInitResponse == false) {
-		usleep(100000);
+
+	if(MB61_WaitForExpectedResponse(100) == false) {
+		return false;
 	}
-	GotInitResponse = false;
+
+	MB61_SetExpectedResponse(MB61_Response_0xD0_Init);
 
     RequestSequenceNumber ++;
 	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0xd0, RequestSequenceNumber, 1, init_char);
@@ -531,29 +570,55 @@ void	MB61_ThreadLoop(void)
 
 	fprintf(stdout, "Waiting for second response...\n");
 	fflush(stdout);
-	while(GotInitResponse == false) {
-		usleep(100000);
+	if(MB61_WaitForExpectedResponse(100) == false) {
+		return false;
 	}
-	GotInitResponse = false;
 
+
+	MB61_SetExpectedResponse(MB61_Response_0xD0_Init);
 	MB61_TX_SendPhoneIDRequest();
+	if(MB61_WaitForExpectedResponse(300) == false) {
+		return false;
+	}
 
-    while (!RequestTerminate) {
-        if (idle_timer == 0) {
-            idle_timer = 20;
-        }
-        else {
-            idle_timer --;
-			/*fprintf(stdout, ".");
-			fflush(stdout);*/
-        }
+	MB61_LinkOK = true;
+	return (true);
 
-        usleep(100000);     /* Avoid becoming a "busy" loop. */
-    }
-
-		/* Drop DTR and RTS lines before exiting */
-    device_setdtrrts(0, 0);
 }
+
+	/* MB61_SetExpectedResponse
+	   Used in combination with MB61_WaitForExpectedResponse, these
+       functions allow the MB61 code to specify what message it is expecting
+       a response to.  This becomes important as it appears that there is
+       no standard or unique character to identify incoming messages from
+       the phone.  A good example is the ID and Version responses which differ
+       only in their length and one of the bytes in the data portion of the
+       message.  It may be that once we understand more of the MBUS protocol
+       we can confirm that messages are unique... */
+
+void	MB61_SetExpectedResponse(enum MB61_Responses response)
+{
+	LatestResponse = MB61_Response_Unknown;
+	ExpectedResponse = response;
+}
+
+	/* MB61_WaitForExpectedResponse
+       Allows code to wait a specified number of msecs
+       for the requested response before timing out.  Returns
+       true if expected response has been recieved, false in
+       case of timeout */
+bool	MB61_WaitForExpectedResponse(int timeout)
+{
+	int		count;
+
+	count = timeout;
+	while ((count > 0) && (LatestResponse != ExpectedResponse)) {
+		count --;
+		usleep(1000);
+	}
+
+}
+      
 
     /* MB61_RX_DispatchMessage
        Once we've received a message from the phone, the command/message
@@ -567,24 +632,41 @@ enum    MB61_RX_States MB61_RX_DispatchMessage(void)
     			return MB61_RX_Sync;
 			}
     			/* Leave this uncommented if you want all messages in raw form. */
-			MB61_RX_DisplayMessage(); 
+			//MB61_RX_DisplayMessage(); 
 
 				/* Switch on the basis of the message type byte */
 			switch (MessageCommand) {
 
-					/* 0xd0 messages are the response to initialisation requests. */
-				case 0xd0:  GotInitResponse = true;
+					/* 0xd0 messages are the response to
+					   initialisation requests. */
+				case 0xd0: 	if (ExpectedResponse = MB61_Response_0xD0_Init) {
+								LatestResponse = MB61_Response_0xD0_Init;
+							}
 							break;
+
+				case 0xd2:  if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
+								fprintf(stderr, _("Standard Ack write (0xd2) failed!"));
+							}
+  							if (ExpectedResponse == MB61_Response_0xD2_ID) {
+								MB61_RX_Handle0xD2_ID();
+								LatestResponse = MB61_Response_0xD2_ID;
+							}
+							if (ExpectedResponse == MB61_Response_0xD2_Version) {
+								MB61_RX_Handle0xD2_Version();
+								LatestResponse = MB61_Response_0xD2_Version;
+							}
+							break;
+
 
 					/* Incoming 0x7f's are acks for commands we've sent. */
 				case 0x7f:  break;
 
-					/* Here we  attempt to acknowledge and display messages we don't
-					   understand fully... The phone will send the same message
-					   several (5-6) times before giving up if no ack is received.
-					   Phone also appears to refuse to send any of that message type
-					   again until an init sequence is done again. */
-				default:	if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
+					/* Here we attempt to acknowledge and display messages
+					   we don't understand fully... The phone will send
+					   the same message several (3-4) times before giving
+					   up if no ack is received.  */
+				default: 	MB61_RX_DisplayMessage(); 
+							if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
 								fprintf(stderr, _("Standard Ack write failed!"));
 							}
 							fprintf(stdout, "Sent standard Ack for unknown %02x\n", MessageCommand);
@@ -593,6 +675,59 @@ enum    MB61_RX_States MB61_RX_DispatchMessage(void)
 
     return MB61_RX_Sync;
 }
+
+	/* When we get an ID response back, we use it to set
+       model information for later and if in debug mode print it out. */
+void	MB61_RX_Handle0xD2_ID(void) 
+{
+	int		i;
+
+	if (strstr(MessageBuffer + 4, "NSW-1") != NULL) {
+		ModelIdentified = MB61_Model5160;
+#ifdef DEBUG
+		fprintf(stdout, "Identified as 5160\n");
+#endif
+	}
+	else {
+		if (strstr(MessageBuffer + 4, "NSW-3") != NULL) {
+			ModelIdentified = MB61_Model6160;
+#ifdef DEBUG
+			fprintf(stdout, "Identified as 6160\n");
+#endif
+		}
+		else {
+#ifdef DEBUG
+			fprintf(stdout, "Unknown model - please report dump below to hugh@linuxcare.com\n");
+#endif
+		}
+	}
+#ifdef DEBUG
+	for (i = 4; i < MessageLength; i++) {
+		if (isprint(MessageBuffer[i])) {
+			fprintf(stdout, "[%02x%c]", MessageBuffer[i], MessageBuffer[i]);
+		}
+		else {
+			fprintf(stdout, "[%02x ]", MessageBuffer[i]);
+		}
+		if (((i - 3) % 16) == 0) {
+			fprintf(stdout, "\n");
+		}
+	}	
+#endif
+
+	
+#ifdef DEBUG
+	fflush(stdout);
+#endif
+
+}
+
+void	MB61_RX_Handle0xD2_Version(void) 
+{
+
+
+}
+
 
 void    MB61_RX_DisplayMessage(void)
 {
@@ -630,6 +765,8 @@ void		MB61_TX_SendPhoneIDRequest(void)
 	
 	MB61_UpdateSequenceNumber();
 	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0xd1, RequestSequenceNumber, 5, message);
+
+	ExpectedResponse = MB61_Response_0xD2_ID;
 
 }
 

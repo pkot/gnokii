@@ -118,6 +118,20 @@ enum    MB61_RX_States {MB61_RX_Sync,
                         MB61_RX_GetMessage,
                         MB61_RX_GetCSum};
 
+enum	MB61_Models		{MB61_ModelUnknown,
+						 MB61_Model5160,	/* NSW-1 */
+						 MB61_Model6160,    /* NSW-3 */
+						 MB61_Model6185};   /* ????? */
+
+	/* We need to keep track of what response is expected as there
+       is no unambiguous field in responses from the phone to 
+       provide this information. */
+enum	MB61_Responses	{MB61_Response_Unknown,
+						 MB61_Response_0xD0_Init,
+						 MB61_Response_0xD2_ID,
+						 MB61_Response_0xD2_Version,
+						 MB61_Response_0x40_PhonebookRead};
+
 	/* Prototypes for internal functions. */
 void	MB61_ThreadLoop(void);
 void    MB61_SigHandler(int status);
@@ -129,9 +143,14 @@ bool	MB61_TX_SendStandardAcknowledge(u8 sequence_number);
 int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_byte, int message_length, u8 *buffer);
 void	MB61_TX_SendPhoneIDRequest(void);
 
+bool	MB61_InitialiseLink(void);
+void	MB61_SetExpectedResponse(enum MB61_Responses response);
+bool	MB61_WaitForExpectedResponse(int timeout);
 void    MB61_RX_StateMachine(char rx_byte);
 enum    MB61_RX_States MB61_RX_DispatchMessage(void);
 void    MB61_RX_DisplayMessage(void);
+void	MB61_RX_Handle0xD2_ID(void);
+void	MB61_RX_Handle0xD2_Version(void);
 
 #endif	/* __mbus_6160_c */
 
