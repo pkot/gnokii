@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.1  2001-04-25 12:54:47  machek
+  Revision 1.2  2001-04-27 16:00:01  machek
+  Better error messages.
+
+  Revision 1.1  2001/04/25 12:54:47  machek
   Partly converted nokia 2110 to "new" form, and moved it to phone
   directory.
 
@@ -179,12 +182,12 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	/* I should put my messages at least 2msec apart... */
 	dprintf(")");
 	if (write(PortFD, pkt, current) != current) /* BUGGY, we should handle -EINTR and short writes! */ {
-		perror( _("Write error!\n") );
+		perror( _("Write error:") );
 		return (GE_INTERNALERROR);
 	}
 	printf("echo?");
 	if (read(PortFD, pkt2, current) != current) {
-		perror( _("Write error!\n") );
+		perror( _("Read error:") );
 		return (GE_INTERNALERROR);
 	}
 	printf("echook");
@@ -213,6 +216,7 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 		fprintf(stderr, "[resend]");
 	}
 	fprintf(stderr, "Command not okay after 10 retries!\n");
+	exit(5);
 	return GE_NONE;
 }
 
