@@ -51,6 +51,7 @@ typedef enum {
 
 #define GSM_MAX_SMS_CENTRE_LENGTH (40)
 #define GSM_MAX_SENDER_LENGTH (40)
+#define GSM_MAX_DESTINATION_LENGHT (40)
 #define GSM_MAX_SMS_LENGTH (160)
 
 /* Define datatype for SMS messages, used for getting SMS messages from the
@@ -60,9 +61,11 @@ typedef struct {
   int Year, Month, Day;	                    /* Date of reception of messages. */
   int Hour, Minute, Second;                 /* Time of reception of messages. */
   int Length;                               /* Length of the SMS message. */
+  int Validity;                             /* Validity Period of the SMS message. */
   char MessageText[GSM_MAX_SMS_LENGTH + 1]; /* Room for null term. */
   char MessageCentre[GSM_MAX_SMS_CENTRE_LENGTH + 1]; /* SMS Centre. */
   char Sender[GSM_MAX_SENDER_LENGTH + 1];   /* Sender of the SMS message. */
+  char Destination[GSM_MAX_DESTINATION_LENGHT + 1]; /* Destination of the SMS message. */
   int MessageNumber;                        /* Location in the memory. */
   GSM_MemoryType MemoryType;                /* Type of memory message is stored in. */
 } GSM_SMSMessage;
@@ -238,7 +241,7 @@ typedef struct {
   GSM_Error (*DeleteSMSMessage)( GSM_MemoryType memory_type,
 				int location, GSM_SMSMessage *message );
 
-  GSM_Error (*SendSMSMessage)( char *message_centre, char *destination, char *text);
+  GSM_Error (*SendSMSMessage)( GSM_SMSMessage *SMS );
 
   GSM_Error (*GetRFLevel)( float *level );
 

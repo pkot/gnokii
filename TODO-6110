@@ -23,8 +23,6 @@ This is a to-do list for 6110 series.
 
 - MemoryType should be in GSM_PhonebookEntry and GSM_SMSMessages
 
-- SendSMSMessage error checking
-
 - generic timeout checking routine which gets these params: timeout,
   CurrentErrorSomething... it should wait at most timeout/10 seconds but if
   the variable CurrentErrorSomething changes state from GE_BUSY to something
@@ -34,8 +32,6 @@ This is a to-do list for 6110 series.
   function...
 
 - how NCDS saves names with ";" in it?
-
-- PIN request should be fixed
 
 - add IR support
 

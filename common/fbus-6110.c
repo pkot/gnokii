@@ -946,40 +946,80 @@ int SemiOctetPack(char *Number, unsigned char *Output) {
   return OUT-Output;
 }
 
-GSM_Error FB61_SendSMSMessage(char *message_centre, char *destination, char *text)
+GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
 {
 
   unsigned char req[256] = {
     FB61_FRAME_HEADER,
     0x01, 0x02, 0x00, /* SMS send request*/
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* SMS centre, the rest is unused */
-    0x11, 
-    0x00,
-    0x00,
-    0x00,
-    0x00, /* Message length */
+    0x11, /* TP validity period (9.2.3.1) */
+    0x00, /* TP-Protocol identifier (9.2.3.9) */
+    0x00, /* Type of sms: 00=text 22=fax 26=paging 2d=email */
+    0x00, /* 00=normal_sms  F0=flash_sms */
+    0x00, /* Message length in characters */
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* destination */
-    0xa9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /* Validity FIXME: add validity in the call */
+    0xa9, /* SMS validity: b0=1h 47=6h a7=24h a9=72h ad=1week */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   };
 
-  int size=PackSevenBitsToEight(text, req+42);
+  int size=PackSevenBitsToEight(SMS->MessageText, req+42);
+  int timeout=50;
 
-  if (strlen(text) > GSM_MAX_SMS_LENGTH)
+  CurrentSMSMessageError=GE_BUSY;
+
+  if (strlen(SMS->MessageText) > GSM_MAX_SMS_LENGTH)
     return(GE_SMSTOOLONG);
 
-  req[6]=SemiOctetPack(message_centre, req+7);
+  req[6]=SemiOctetPack(SMS->MessageCentre, req+7);
 
-  req[22]=strlen(text);
+  req[22]=strlen(SMS->MessageText);
 
-  req[23]=2*(SemiOctetPack(destination, req+24)-1);
+  req[23]=2*(SemiOctetPack(SMS->Destination, req+24)-1);
+
+  /* TP-Validity Period handling */
+
+  /* FIXME: error-checking for correct Validity - it should not be bigger then
+     63 weeks and smaller then 5minutes. We should also test intervals because
+     the SMS->Validity to TP-VP is not continuos. I think that the simplest
+     solution will be an array of correct values. We should parse it and if we
+     find the closest TP-VP value we should use it. Or is it good to take
+     closest smaller TP-VP as we do now? I think it is :-) */
+
+  /* 5 minutes intervals up to 12 hours = 720 minutes */
+
+  if (SMS->Validity <= 720)
+    req[35] = (unsigned char) (SMS->Validity/5)-1;
+
+  /* 30 minutes intervals up to 1 day */
+
+  else if ((SMS->Validity > 720) && (SMS->Validity <= 1440))
+    req[35] = (unsigned char) ((SMS->Validity-720)/30)+143;
+
+  /* 1 day intervals up to 30 days */
+
+  else if ((SMS->Validity > 1440) && (SMS->Validity <= 43200))
+    req[35] = (unsigned char) (SMS->Validity/1440)+166;
+
+  /* 1 week intervals up to 63 weeks */
+
+  else if ((SMS->Validity > 43200) && (SMS->Validity <= 635040))
+    req[35] = (unsigned char) (SMS->Validity/10080)+192;
 
   req[42+size]=0x01;
 
   FB61_TX_SendMessage(42+size+1, 0x02, req);
 
-  /* FIXME: error checking, waiting for the response. */
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
 
-  return (GE_NONE);
+    if (timeout-- == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentSMSMessageError);
 }
 
 void FB61_DumpSerial(void)
@@ -1326,6 +1366,28 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   case 0x02:
 
     switch (MessageBuffer[3]) {
+
+    case 0x02:
+
+      /* SMS message correctly sent to the network */
+
+#ifdef DEBUG
+      printf(_("Message: SMS Message correctly sent.\n"));
+#endif DEBUG
+
+      CurrentSMSMessageError = GE_SMSSENDOK;
+      break;
+
+    case 0x03:
+
+      /* SMS message send to the network failed */
+
+#ifdef DEBUG
+      printf(_("Message: Sending SMS Message failed.\n"));
+#endif DEBUG
+
+      CurrentSMSMessageError = GE_SMSSENDFAILED;
+      break;
 
     case 0x10:
 	  

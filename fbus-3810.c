@@ -357,7 +357,7 @@ GSM_Error	FB38_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
 	return(CurrentSMSMessageError);
 }
 
-GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *text)
+GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS)
 {
 	int		timeout;
 	int		text_offset;
@@ -373,7 +373,7 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 	}
 
 		/* Get and check total length, */
-	text_length = strlen(text);
+	text_length = strlen(SMS->MessageText);
 
 	if (text_length > 160) {
 		return GE_SMSTOOLONG;
@@ -397,7 +397,7 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 		DisableKeepalive = true;
 
 			/* Send header */
-		FB38_TX_Send0x23_SendSMSHeader(message_centre, destination, text_length);
+		FB38_TX_Send0x23_SendSMSHeader(SMS->MessageCentre, SMS->Destination, text_length);
 
 		timeout = 20; 	/* 2 seconds for command to complete */
 
@@ -427,7 +427,7 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 
 				/* Clear acknowledge received flag and send message. */
 			SMSBlockAckReceived = false;		
-			FB38_TX_Send0x27_SendSMSMessageText(block_count, block_length, text + text_offset);
+			FB38_TX_Send0x27_SendSMSMessageText(block_count, block_length, SMS->MessageText + text_offset);
 
 				/* update remaining and offset values for next time. */
 			text_remaining -= block_length;

@@ -242,6 +242,7 @@ int main(int argc, char *argv[])
 void sendsms(char *argv[])
 {
 
+  GSM_SMSMessage SMS;
   GSM_Error error;
   char message_buffer[200];	
   int chars_read;
@@ -267,7 +268,13 @@ void sendsms(char *argv[])
 
   /* Send the message. */
 
-  error = GSM->SendSMSMessage(argv[3], argv[2], message_buffer);
+  SMS.Validity = 4320; /* 4320 minutes == 72 hours */
+
+  strcpy (SMS.Destination, argv[2]);
+  strcpy (SMS.MessageCentre, argv[3]);
+  strcpy (SMS.MessageText, message_buffer);
+
+  error = GSM->SendSMSMessage(&SMS);
 
   if (error == GE_SMSSENDOK) {
     fprintf(stdout, _("Send succeeded!\n"));

@@ -40,8 +40,7 @@ GSM_Error	FB38_GetSMSMessage(GSM_MemoryType memory_type, int location,
 
 GSM_Error	FB38_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message);
 
-GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination,
-				 char *text);
+GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS);
 
 	/* These aren't presently implemented. */
 GSM_Error	FB38_GetRFLevel(float *level);
