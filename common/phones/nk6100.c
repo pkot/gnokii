@@ -37,34 +37,42 @@
 
 static const SMSMessage_Layout nk6100_deliver = {
 	true,
-	0, 11, 0, 0, 6, 0, 0, -1, 23, 22, 0, 20,
-	8, true, 24, true, 36, -1,
-	5, 4,
-	43, true
+	 4, true, true,
+	-1,  7, -1, -1,  2, -1, -1, -1, 19, 18, -1, 16,
+	20, true, true,
+	32, -1,
+	 1,  0,
+	39, true
 };
 
 static const SMSMessage_Layout nk6100_submit = {
 	true,
-	-1, 20, 20, 20, 6, 21, 22, -1, 24, 23, 20, 20,
-	8, true, 25, true, 37, -1,
+	 4, true, true,
+	-1, 16, 16, 16,  2, 17, 18, -1, 20, 19, 16, 16,
+	21, true, true,
+	33, -1,
 	-1, -1,
-	44, true
+	40, true
 };
 
 static const SMSMessage_Layout nk6100_delivery_report = {
 	true,
-	0, 0, 0, 0, 6, 0, 0, 0, 22, 21, -1, 20,
-	8, true, 24, true, 35, 42,
-	5, 4,
-	22, true
+	 4, true, true,
+	-1, -1, -1, -1,  2, -1, -1, -1, 18, 17, -1, 16,
+	20, true, true,
+	31, 38,
+	 1,  0,
+	18, true
 };
 
 static const SMSMessage_Layout nk6100_picture = {
 	false,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, true, 0, true, 0, 0,
-	0, 0,
-	0, true
+	-1, true, true,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, true, true,
+	-1, -1,
+	-1, -1,
+	-1, true
 };
 
 static SMSMessage_PhoneLayout nk6100_layout;
@@ -143,6 +151,8 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 
 	/* SMS Layout */
 	nk6100_layout.Type = 7;
+	nk6100_layout.SendHeader = 0;
+	nk6100_layout.ReadHeader = 4;
 	nk6100_layout.Deliver = nk6100_deliver;
 	nk6100_layout.Submit = nk6100_submit;
 	nk6100_layout.DeliveryReport = nk6100_delivery_report;
@@ -454,17 +464,44 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 		}
         /* read sms */
         case 0x08:
-                for (i = 0; i < length; i ++)
-                        if (isprint(message[i]))
-                                dprintf("[%02x%c]", message[i], message[i]);
-                        else
-                                dprintf("[%02x ]", message[i]);
-                dprintf("\n");
+		for (i = 0; i < length; i++)
+			dprintf("[%02x(%d)]", message[i], i);
+		dprintf("\n");
 
 		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
 
 		/* Short Message status */
-		/* DecodePDUSMS(message, data->SMSMessage, length); */
+		data->SMSMessage->Status = message[4];
+		dprintf("\tStatus: ");
+		switch (data->SMSMessage->Status) {
+		case SMS_Read:
+			dprintf("READ\n");
+			break;
+		case SMS_Unread:
+			dprintf("UNREAD\n");
+			break;
+		case SMS_Sent:
+			dprintf("SENT\n");
+			break;
+		case SMS_Unsent:
+			dprintf("UNSENT\n");
+			break;
+		default:
+			dprintf("UNKNOWN\n");
+			break;
+		}
+
+		/* Short Message status */
+		if (!data->RawData) {
+			data->RawData = (GSM_RawData *)malloc(sizeof(GSM_RawData));
+		}
+
+		/* Skip the frame header */
+//		data->RawData->Data = message + nk6100_layout.ReadHeader;
+		data->RawData->Length = length - nk6100_layout.ReadHeader;
+		data->RawData->Data = malloc(data->RawData->Length);
+		memcpy(data->RawData->Data, message + nk6100_layout.ReadHeader, data->RawData->Length);
+		dprintf("Everything set. Length: %d\n", data->RawData->Length);
 
                 break;
 	/* read sms failed */
