@@ -160,7 +160,6 @@ GSM_Phone phone_nokia_7110 = {
 
 static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
-	if (!data || !state) return GE_INTERNALERROR;
 	switch (op) {
 	case GOP_Init:
 		return P7110_Initialise(state);
