@@ -24,12 +24,12 @@ int monitormode(void);
   int getsecuritycodestatus(void);
 #endif
 
-int getmemory(char *argv[]);
+int getmemory(int argc, char *argv[]);
 int writephonebook(int argc, char *argv[]);
 int getspeeddial(char *number);
 int setspeeddial(char *argv[]);
-int getsms(char *argv[]);
-int deletesms(char *argv[]);
+int getsms(int argc, char *argv[]);
+int deletesms(int argc, char *argv[]);
 int sendsms(int argc, char *argv[]);
 int sendlogo(int argc, char *argv[]);
 int sendringtone(int argc, char *argv[]);
@@ -48,7 +48,7 @@ int identify(void);
 int senddtmf(char *String);
 int foogle(char *argv[]);
 int pmon(void);
-int setlogo(char *argv[]);
+int setlogo(int argc, char *argv[]);
 int getlogo(char *argv[]);
 int setringtone(int argc, char *argv[]);
 int reset(char *type);

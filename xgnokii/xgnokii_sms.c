@@ -160,7 +160,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     bdTime.tm_year = atoi (text1 + 6);
     if (bdTime.tm_year < 70)
       bdTime.tm_year += 100;
-#ifdef TM_GMT
+#ifdef HAVE_TM_GMTON
     if (text1[17] != '\0')
       bdTime.tm_gmtoff = atoi (text1 + 18) * 3600;
 #endif
@@ -176,7 +176,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     bdTime.tm_year = atoi (text2 + 6);
     if (bdTime.tm_year < 70)
       bdTime.tm_year += 100;
-#ifdef TM_GMT
+#ifdef HAVE_TM_GMTON
     if (text2[17] != '\0')
       bdTime.tm_gmtoff = atoi (text2 + 18) * 3600;
 #endif

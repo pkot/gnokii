@@ -18,6 +18,8 @@
 #ifndef _CFGREADER_H
 #define _CFGREADER_H
 
+#include "config.h"
+
 	/* Structure definitions */
 
 	/* A linked list of key/value pairs */

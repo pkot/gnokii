@@ -196,7 +196,7 @@ int usage(void)
 "          gnokii --getalarm\n"
 "          gnokii --dialvoice number\n"
 "          gnokii --getcalendarnote index [-v]\n"
-"          gnokii --writecalendarnote\n"
+"          gnokii --writecalendarnote vcardfile number\n"
 "          gnokii --deletecalendarnote index\n"
 "          gnokii --getdisplaystatus\n"
 "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
@@ -245,6 +245,8 @@ int usage(void)
 
 "          --getsms          gets SMS messages from specified memory type\n"
 "                            starting at entry [start] and ending at [end].\n"
+"                            If [end] is not specified only one location -\n"
+"                            - [start] is read.\n"
 "                            Entries are dumped to stdout.\n\n"
 
 "          --deletesms       deletes SMS messages from specified memory type\n"
@@ -280,7 +282,8 @@ int usage(void)
 "          --getcalendarnote get the note with number index from calendar.\n"
 "                             [-v] - output in vCalendar 1.0 format\n\n"
 
-"          --writecalendarnote write the note to calendar.\n\n"
+"          --writecalendarnote write the note number [number] from calendar file\n"
+"                              to calendar.\n\n"
 
 "          --deletecalendarnote  delete the note with number [index]\n"
 "                                from calendar.\n\n"
@@ -449,7 +452,7 @@ int main(int argc, char *argv[])
     { "getcalendarnote",    required_argument, NULL, OPT_GETCALENDARNOTE },
 
     // Write calendar note mode
-    { "writecalendarnote",  no_argument,       NULL, OPT_WRITECALENDARNOTE },
+    { "writecalendarnote",  required_argument, NULL, OPT_WRITECALENDARNOTE },
 
     // Delete calendar note mode
     { "deletecalendarnote", required_argument, NULL, OPT_DELCALENDARNOTE },
@@ -539,12 +542,13 @@ int main(int argc, char *argv[])
     { OPT_SETALARM,          2, 2, 0 },
     { OPT_DIALVOICE,         1, 1, 0 },
     { OPT_GETCALENDARNOTE,   1, 2, 0 },
+    { OPT_WRITECALENDARNOTE, 2, 2, 0 },
     { OPT_DELCALENDARNOTE,   1, 1, 0 },
-    { OPT_GETMEMORY,         3, 3, 0 },
+    { OPT_GETMEMORY,         2, 3, 0 },
     { OPT_GETSPEEDDIAL,      1, 1, 0 },
     { OPT_SETSPEEDDIAL,      3, 3, 0 },
-    { OPT_GETSMS,            3, 3, 0 },
-    { OPT_DELETESMS,         3, 3, 0 },
+    { OPT_GETSMS,            2, 3, 0 },
+    { OPT_DELETESMS,         2, 3, 0 },
     { OPT_SENDSMS,           1, 10, 0 },
     { OPT_SENDLOGO,          3, 4, GAL_XOR },
     { OPT_SENDRINGTONE,      2, 2, 0 },
@@ -703,7 +707,7 @@ int main(int argc, char *argv[])
 
     case OPT_GETMEMORY:
 
-      rc = getmemory(nargv);
+      rc = getmemory(nargc, nargv);
       break;
 
     case OPT_GETSPEEDDIAL:
@@ -718,12 +722,12 @@ int main(int argc, char *argv[])
 
     case OPT_GETSMS:
 
-      rc = getsms(nargv);
+      rc = getsms(nargc, nargv);
       break;
 
     case OPT_DELETESMS:
 
-      rc = deletesms(nargv);
+      rc = deletesms(nargc, nargv);
       break;
 
     case OPT_SENDSMS:
@@ -753,7 +757,7 @@ int main(int argc, char *argv[])
 
     case OPT_SETLOGO:
 
-      rc = setlogo(nargv);
+      rc = setlogo(nargc, nargv);
       break;
 
     case OPT_GETLOGO:
@@ -813,6 +817,22 @@ int main(int argc, char *argv[])
   fprintf(stderr, _("Wrong number of arguments\n"));
 
   exit(-1);
+}
+
+int GetLine(FILE *File, char *Line) {
+
+  char *ptr;
+
+  if (fgets(Line, 99, File)) {
+    ptr=Line+strlen(Line)-1;
+
+    while ( (*ptr == '\n' || *ptr == '\r') && ptr>=Line)
+      *ptr--='\0';
+
+      return strlen(Line);
+  }
+  else
+    return 0;
 }
 
 /* Send  SMS messages. */
@@ -1107,7 +1127,7 @@ int getsmsc(char *MessageCenterNumber)
 }
 
 /* Get SMS messages. */
-int getsms(char *argv[])
+int getsms(int argc, char *argv[])
 {
 
   GSM_SMSMessage message;
@@ -1173,7 +1193,8 @@ int getsms(char *argv[])
   }
 
   start_message = atoi(argv[1]);
-  end_message = atoi(argv[2]);
+  if (argc > 2) end_message = atoi(argv[2]);
+  else end_message = start_message;
 
   /* Initialise the code for the GSM interface. */     
 
@@ -1315,7 +1336,7 @@ int getsms(char *argv[])
 }
 
 /* Delete SMS messages. */
-int deletesms(char *argv[])
+int deletesms(int argc, char *argv[])
 {
 
   GSM_SMSMessage message;
@@ -1380,7 +1401,8 @@ int deletesms(char *argv[])
   }
 
   start_message = atoi (argv[1]);
-  end_message = atoi (argv[2]);
+  if (argc > 2) end_message = atoi (argv[2]);
+  else end_message = start_message;
 
   /* Initialise the code for the GSM interface. */     
 
@@ -1690,7 +1712,7 @@ int getlogo(char *argv[])
 
 /* Sending logos. */
 
-int setlogo(char *argv[])
+int setlogo(int argc, char *argv[])
 {
 
   GSM_Bitmap bitmap;
@@ -1699,9 +1721,9 @@ int setlogo(char *argv[])
   fbusinit(NULL);
 
   if (!GSM_ReadBitmapFile(argv[0], &bitmap)) {      
-    if (argv[1] && (bitmap.type==GSM_OperatorLogo))
+    if ((argc > 1) && (bitmap.type==GSM_OperatorLogo))
       strncpy(bitmap.netcode,argv[1],7);
-    if (argv[1] && (bitmap.type==GSM_CallerLogo)) {
+    if ((argc > 1) && (bitmap.type==GSM_CallerLogo)) {
       bitmap.number=argv[1][0]-'0';
       oldbit.type=GSM_CallerLogo;
       oldbit.number=bitmap.number;
@@ -1710,7 +1732,7 @@ int setlogo(char *argv[])
 	bitmap.ringtone=oldbit.ringtone;
 	strncpy(bitmap.text,oldbit.text,255);
 	if ((bitmap.number<0)||(bitmap.number>9)) bitmap.number=0;
-	if (argv[2]) strncpy(bitmap.text,argv[2],255);
+	if (argc > 2) strncpy(bitmap.text,argv[2],255);
       }
     }
   }
@@ -1720,7 +1742,7 @@ int setlogo(char *argv[])
       bitmap.text[0]=0x00;
       bitmap.dealertext[0]=0x00;
       bitmap.dealerset=(strcmp(argv[0],"dealer")==0);
-      if (argv[1]) {
+      if (argc > 1) {
         if (strcmp(argv[0],"text")==0) {
 	  strncpy(bitmap.text,argv[1],255);
 	} else {
@@ -1874,32 +1896,20 @@ int getcalendarnote(int argc, char *argv[])
 
 int writecalendarnote(char *argv[])
 {
-
   GSM_CalendarNote CalendarNote;
 
-  CalendarNote.Type=GCN_REMINDER;
-
-  CalendarNote.Time.Year=1999;
-  CalendarNote.Time.Month=12;
-  CalendarNote.Time.Day=31;
-  CalendarNote.Time.Hour=23;
-  CalendarNote.Time.Minute=59;
-
-  CalendarNote.Alarm.Year=1999;
-  CalendarNote.Alarm.Month=12;
-  CalendarNote.Alarm.Day=31;
-  CalendarNote.Alarm.Hour=23;
-  CalendarNote.Alarm.Minute=58;
-
-  /* FIXME: Hey Pavel, fix this :-)) It works... */
-  sprintf(CalendarNote.Text, "Big day ...");
-  sprintf(CalendarNote.Phone, "jhgjhgjhgjhgj");
+  if (GSM_ReadVCalendarFile(argv[0], &CalendarNote, atoi(argv[1]))) {
+    fprintf(stdout, _("Failed to load vCalendar file.\n"));
+    return(-1);
+  }
 
   fbusinit(NULL);
 
-  if (GSM->WriteCalendarNote(&CalendarNote) == GE_NONE) {
+/* Error 22=Calendar full ;-) */
+  if ((GSM->WriteCalendarNote(&CalendarNote)) == GE_NONE)
     fprintf(stdout, _("Succesfully written!\n"));
-  }
+  else
+    fprintf(stdout, _("Failed to write calendar note!\n"));
 
   GSM->Terminate();
 
@@ -2317,7 +2327,7 @@ int getprofile(int argc, char *argv[])
 /* Get requested range of memory storage entries and output to stdout in
    easy-to-parse format */
 
-int getmemory(char *argv[])
+int getmemory(int argc, char *argv[])
 {
 
   GSM_PhonebookEntry entry;
@@ -2384,7 +2394,8 @@ int getmemory(char *argv[])
   }
 
   start_entry = atoi (argv[1]);
-  end_entry = atoi (argv[2]);
+  if (argc > 2) end_entry = atoi (argv[2]);
+  else end_entry = start_entry;
 
   /* Do generic initialisation routine */
 
@@ -2423,22 +2434,6 @@ int getmemory(char *argv[])
   GSM->Terminate();
 
   return 0;
-}
-
-int GetLine(FILE *File, char *Line) {
-
-  char *ptr;
-
-  if (fgets(Line, 99, File)) {
-    ptr=Line+strlen(Line)-1;
-
-    while ( (*ptr == '\n' || *ptr == '\r') && ptr>=Line)
-      *ptr--='\0';
-
-      return strlen(Line);
-  }
-  else
-    return 0;
 }
 
 /* Read data from stdin, parse and write to phone.  The parsing is relatively
@@ -2717,6 +2712,7 @@ int netmonitor(char *Mode)
   else if (!strcmp(Mode,"next"))
          mode=0x00;
 
+  bzero(&Screen, 50);
   GSM->NetMonitor(mode, Screen);
 
   if (Screen)

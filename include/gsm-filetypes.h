@@ -15,6 +15,13 @@
 
 */
 
+int GSM_ReadVCalendarFile(char *FileName, GSM_CalendarNote *cnote,
+  int number);
+
+int GetvCalTime(GSM_DateTime *dt, char *time);
+int FillCalendarNote(GSM_CalendarNote *note, char *type,
+  char *text, char *time, char *alarm);
+
 int GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone);
 
 int GetScale (char *num);

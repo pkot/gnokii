@@ -23,8 +23,9 @@
   typedef void * __ptr_t;
 #else
   #include <unistd.h>
-  #include "misc.h"
 #endif	/* WIN32 */
+
+#include "misc.h"
 
 int serial_open(__const char *__file, int __oflag);
 int serial_close(int __fd);

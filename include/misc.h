@@ -18,6 +18,8 @@
 #ifndef __misc_h
 #define __misc_h    
 
+#include "config.h"
+
 /* Some general defines. */
 
 #ifndef false
@@ -76,5 +78,15 @@
 #ifndef __ptr_t
   typedef void * __ptr_t;
 #endif /* __ptr_t */
+
+
+/* Add here any timer operations which are not supported by libc5 */
+
+#ifndef HAVE_TIMEOPS
+#include <sys/time.h>
+#include <unistd.h>
+
+// extern int timersub(struct timeval *t1, struct timeval *t2, struct timeval *t3);
+#endif /* HAVE_TIMEOPS */
 
 #endif /* __misc_h */

@@ -1,0 +1,188 @@
+%{
+#include <string.h>
+
+#include "gsm-common.h"
+#include "gsm-filetypes.h"
+
+#define YY_DECL int yylex(char *type, char *text, char* time, char *alarm, int lexnumber)
+int veventcounter=0;
+
+%}
+
+%x vcalendar
+%x vevent
+%x category
+%x summary
+%x ttime
+%x aalarm
+%option noyywrap
+%option nounput
+
+%%
+
+BEGIN:VCALENDAR				BEGIN(vcalendar);
+
+<vcalendar>BEGIN:VEVENT			++veventcounter; BEGIN(vevent);
+
+<vevent>CATEGORIES:			BEGIN(category);
+
+<category>[[:alnum:] ]+			{
+						if(veventcounter==lexnumber)
+							strncpy(type, yytext, 21);
+						BEGIN(vevent);
+					}
+
+<vevent>SUMMARY:			BEGIN(summary);
+
+<summary>[[:alnum:] ]+			{
+						if(veventcounter==lexnumber)
+							strncpy(text, yytext, 21);
+						BEGIN(vevent);
+					}
+
+<vevent>DTSTART:			BEGIN(ttime);
+
+<ttime>[0-9]{8}T[0-9]{6}		{
+						if(veventcounter==lexnumber)
+							strncpy(time, yytext, 16);
+						BEGIN(vevent);
+					}
+
+<vevent>AALARM:				BEGIN(aalarm);
+
+<aalarm>[0-9]{8}T[0-9]{6}		{
+						if(veventcounter==lexnumber)
+							strncpy(alarm, yytext, 16);
+						BEGIN(vevent);
+					}
+
+
+<vevent>END:VEVENT			BEGIN(vcalendar);
+
+<vcalendar>END:VCALENDAR		BEGIN(0);
+<*>.|\n
+<*><<EOF>>				{
+						if((lexnumber<1) | (lexnumber>veventcounter))
+						{
+							fprintf(stderr, "Error: Invalid calendar note number!\n");
+							return -1;
+						}
+						return 0;
+					}
+
+%%
+
+/**
+* GetvCalTime
+*
+* Fills vCalendar time string into GSM_DateTime structure
+*
+* in:
+*   dt:  datetime structure
+*   time:  string in format yyyymmddThhmmss
+* out:
+*   <>0 if error
+*/
+int GetvCalTime(GSM_DateTime *dt, char *time)
+{
+  char year[5]="", month[3]="", day[3]="", hour[3]="", minute[3]="", second[3]="";
+  dt->Year=dt->Month=dt->Day=dt->Hour=dt->Minute=dt->Second=dt->Timezone=0;
+
+  strncpy(year, time, 4);
+  strncpy(month, time+4, 2);
+  strncpy(day, time+6, 2);
+  strncpy(hour, time+9, 2);
+  strncpy(minute, time+11, 2);
+  strncpy(second, time+13, 2);
+
+/* FIXME: Should check ranges... */
+  dt->Year=atoi(year);
+  dt->Month=atoi(month);
+  dt->Day=atoi(day);
+  dt->Hour=atoi(hour);
+  dt->Minute=atoi(minute);
+  dt->Second=atoi(second);
+/* FIXME */
+  dt->Timezone=0;
+
+  return 0;
+}
+
+/**
+* FillCalendarNote
+*
+* Fills calendar data from strings into calendar note
+*
+* in:
+*   note:  calendar note structure
+*   type:  type of calendar note
+*   text:  text or phonenumber
+*   time:  string in format yyyymmddThhmmss
+*   alarm: dito
+* out:
+*   <>0 if error
+*/
+int FillCalendarNote(GSM_CalendarNote *note, char *type,
+                       char *text, char *time, char *alarm)
+{
+
+  GetvCalTime(&note->Time, time);
+  GetvCalTime(&note->Alarm, alarm);
+
+  note->Location=0; 
+
+  strncpy(note->Text, text, 20);
+  strcpy(note->Phone, ""); /* correct in most cases */
+
+/* FIXME: Handle additional strings, maybee from configuration file */
+
+  if(!strcmp(type, "PHONE CALL"))
+  {
+    strncpy(note->Phone, text, 20);
+    note->Type=GCN_CALL;
+  }
+  else if(!strcmp(type, "MEETING"))
+      note->Type=GCN_MEETING;
+  else if(!strcmp(type, "SPECIAL OCASSION"))
+      note->Type=GCN_BIRTHDAY;
+  else
+      note->Type=GCN_REMINDER;
+
+  return 0;
+}
+
+/**
+* GSM_ReadVCalendarFile
+*
+* Reads vCalendar file
+*
+* in:
+*   FileName: name of vCalendar file 
+*   cnote:  pointer to calendar note
+*   number:  number in file of calendar note to read
+* out:
+*   <>0 if error
+*/
+int GSM_ReadVCalendarFile(char *FileName, GSM_CalendarNote *cnote, int number)
+{
+  FILE *file;
+  char type[21]="", text[21]="", time[16]="", alarm[16]="";
+
+  file=fopen(FileName, "r");
+  if (!file) {
+    fprintf(stderr, _("File cannot be opened!\n"));
+    return -1;
+  }
+
+  yyin=file;
+
+  if(yylex(type, text, time, alarm, number))
+  {
+    fprintf(stderr, _("Error parsing vCalendar file!\n"));
+    return -1;
+  }
+  FillCalendarNote(cnote, type, text, time, alarm);  
+
+  fclose(file);
+  return 0;
+}

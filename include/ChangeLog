@@ -33,3 +33,6 @@
 
 * Sat Jun 10 14:15:23 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - setringtone implemented.
+
+* Tue Jul  4 23:26:47 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
+- config.h support added
