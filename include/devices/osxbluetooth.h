@@ -1,7 +1,7 @@
 /*
 
   $Id$
- 
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -23,22 +23,43 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-  Copyright (C) 2002       Marcel Holtmann <marcel@holtmann.org>
+  Copyright (C) 2003       Siegfried Schloissnig
 
 */
 
-#ifndef _gnokii_unix_bluetooth_h
-#define _gnokii_unix_bluetooth_h
+#ifndef _gnokii_osx_bluetooth_h
+#define _gnokii_osx_bluetooth_h
 
-#include "config.h"
-#include "compat.h"
-#include "misc.h"
-#include "gnokii.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/socket.h>
 
-int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state);
-int bluetooth_close(int fd, struct gn_statemachine *state);
-int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state);
-int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);
-int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOBluetooth/Bluetooth.h>
+#include <IOBluetooth/IOBluetoothUserLib.h>
+#include <pthread.h>
 
-#endif /* _gnokii_unix_bluetooth_h */
+typedef struct {
+	IOBluetoothRFCOMMChannelRef rfcommChannel;
+	IOReturn ioReturnValue;
+	pthread_t threadID;
+
+	BluetoothDeviceAddress deviceAddress;
+	uint8_t nChannel;
+
+	pthread_mutex_t mutexWait;
+
+	CFMutableArrayRef arrDataReceived;
+} threadContext;
+
+typedef struct {
+	void *pData;
+	unsigned int nSize;
+} dataBlock;
+
+#endif /* _gnokii_osx_bluetooth_h */

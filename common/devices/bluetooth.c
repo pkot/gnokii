@@ -27,18 +27,36 @@
 
 */
 
-#ifndef _gnokii_unix_bluetooth_h
-#define _gnokii_unix_bluetooth_h
-
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
 
-int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state);
-int bluetooth_close(int fd, struct gn_statemachine *state);
-int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state);
-int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);
-int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
+#ifdef HAVE_BLUETOOTH
 
-#endif /* _gnokii_unix_bluetooth_h */
+#include "devices/unixbluetooth.h"
+
+static char *phone[] = {
+	"Nokia 3650",
+	"Nokia 6210",
+	"Nokia 6310",
+	"Nokia 6310i",
+	"Nokia 7650",
+	"Nokia 8910"
+};
+
+#ifdef HAVE_BLUETOOTH_MACOSX
+#  include "osxbluetooth.c"
+#else
+#  include "unixbluetooth.c"
+#endif
+
+#else /* HAVE_BLUETOOTH */
+
+int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state) { return -1; }
+int bluetooth_close(int fd, struct gn_statemachine *state) { return -1; }
+int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
+int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
+int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state) { return -1; }
+
+#endif /* HAVE_BLUETOOTH */

@@ -258,7 +258,7 @@ SOURCE=..\..\common\devices\tekram.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\devices\unixbluetooth.c
+SOURCE=..\..\common\devices\bluetooth.c
 # End Source File
 # Begin Source File
 

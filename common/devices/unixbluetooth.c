@@ -27,28 +27,25 @@
 
 */
 
-#include "config.h"
-#include "compat.h"
-#include "misc.h"
-#include "gnokii.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/socket.h>
 
-#ifdef HAVE_BLUETOOTH
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
 
-#include "devices/unixbluetooth.h"
-
-static char *phone[] = {
-	"Nokia 3650",
-	"Nokia 6210",
-	"Nokia 6310",
-	"Nokia 6310i",
-	"Nokia 7650",
-	"Nokia 8910"
-};
-
-int bluetooth_open(bdaddr_t *bdaddr, uint8_t channel, struct gn_statemachine *state)
+int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state)
 {
+	bdaddr_t bdaddr;
 	struct sockaddr_rc laddr, raddr;
 	int fd;
+
+	str2ba((char *)addr, &bdaddr);
 
 	if ((fd = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0) {
 		perror("Can't create socket");
@@ -66,7 +63,7 @@ int bluetooth_open(bdaddr_t *bdaddr, uint8_t channel, struct gn_statemachine *st
 
 	memset(&raddr, 0, sizeof(raddr));
 	raddr.rc_family = AF_BLUETOOTH;
-	bacpy(&raddr.rc_bdaddr, bdaddr);
+	bacpy(&raddr.rc_bdaddr, &bdaddr);
 	raddr.rc_channel = channel;
 	if (connect(fd, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
 		perror("Can't connect");
@@ -102,13 +99,3 @@ int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *st
 
 	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
-
-#else /* HAVE_BLUETOOTH */
-
-int bluetooth_open(void *bdaddr, uint8_t channel, struct gn_statemachine *state) { return -1; }
-int bluetooth_close(int fd, struct gn_statemachine *state) { return -1; }
-int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
-int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
-int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state) { return -1; }
-
-#endif /* HAVE_BLUETOOTH */

@@ -244,6 +244,33 @@ if test $ac_cv_have_sockaddr_rc = yes; then
 	LIBS="$LIBS -lbluetooth"
 fi
 
+
+dnl ======================== Checks for MacOSX Bluetooth support
+
+AC_MSG_CHECKING([for the MacOS X bluetooth support])
+echo
+AC_CHECK_HEADERS(CoreFoundation/CoreFoundation.h)
+AC_CHECK_HEADERS(IOBluetooth/Bluetooth.h)
+AC_CHECK_HEADERS(IOBluetooth/IOBluetoothUserLib.h)
+AC_TRY_COMPILE([#include <CoreFoundation/CoreFoundation.h>
+			#include <IOBluetooth/Bluetooth.h>
+			#include <IOBluetooth/IOBluetoothUserLib.h>],
+
+			[CFStringRef strDevice;
+			strDevice = CFStringCreateWithCString(NULL, NULL, NULL);
+			IOBluetoothNSStringToDeviceAddress(NULL, NULL);],
+
+		ac_cv_have_iobluetooth=yes,
+		ac_cv_have_iobluetooth=no)
+
+if test $ac_cv_have_iobluetooth = yes; then
+	AC_DEFINE(HAVE_BLUETOOTH)
+	AC_DEFINE(HAVE_BLUETOOTH_MACOSX,[],[Compile on Darwin / Mac OSX])
+	USE_BLUETOOTH="yes"
+	LIBS="$LIBS $PTHREAD_LIBS -framework CoreFoundation -framework IOBluetooth -framework Foundation"
+fi
+
+
 dnl ======================== Checks for X base support 
 
 if test "$no_x" = yes -o "$with_x" = "no"; then
