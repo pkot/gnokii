@@ -300,13 +300,13 @@ void ClearPreviewPoint(GtkWidget * widget, int x, int y, int update)
 
 int IsPoint(int x, int y)
 {
-	return gn_bmp_is_point(&bitmap, x, y);
+	return gn_bmp_point(&bitmap, x, y);
 }
 
 void SetPoint(GtkWidget * widget, int x, int y, int update)
 {
 	/* difference between settings points in startupLogo and others */
-	gn_bmp_set_point(&bitmap, x, y);
+	gn_bmp_point_set(&bitmap, x, y);
 
 	/* draw point to pixmap */
 	gdk_draw_pixmap(drawingPixmap, widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
@@ -333,7 +333,7 @@ void SetPoint(GtkWidget * widget, int x, int y, int update)
 void ClearPoint(GtkWidget * widget, int x, int y, int update)
 {
 	/* difference between settings points in startupLogo and others */
-	gn_bmp_clear_point(&bitmap, x, y);
+	gn_bmp_point_clear(&bitmap, x, y);
 
 	/* clear point from pixmap */
 	gdk_draw_pixmap(drawingPixmap, widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
@@ -530,7 +530,7 @@ void ToolLine(GtkWidget * widget, int x1, int y1, int x2, int y2, int draw)
 				/* now clearing line before drawing new one, we must check */
 				/* if there is a point in oldBitmap which saves bitmap before */
 				/* we starting drawing new line */
-				if (!gn_bmp_is_point(&oldBitmap, x1, y1)) {
+				if (!gn_bmp_point(&oldBitmap, x1, y1)) {
 					ClearPoint(widget, x1, y1, 0);
 				}
 			}
@@ -548,7 +548,7 @@ void ToolLine(GtkWidget * widget, int x1, int y1, int x2, int y2, int draw)
 				SetPoint(widget, x1, y1, 0);
 			} else {
 				/* check comment in delta X > delta Y */
-				if (!gn_bmp_is_point(&oldBitmap, x1, y1)) {
+				if (!gn_bmp_point(&oldBitmap, x1, y1)) {
 					ClearPoint(widget, x1, y1, 0);
 				}
 			}
@@ -596,7 +596,7 @@ void ToolFilledRectangleUpdate(GtkWidget * widget, int column, int row)
 	/* clear one now */
 	for (j = y1; j <= y2; j++)
 		for (i = x1; i <= x2; i++)
-			if (!gn_bmp_is_point(&oldBitmap, i, j))
+			if (!gn_bmp_point(&oldBitmap, i, j))
 				ClearPoint(widget, i, j, 0);
 
 	/* swap Xs to x1 < x2 */
@@ -649,16 +649,16 @@ void ToolRectangleUpdate(GtkWidget * widget, int column, int row)
 
 	/* clear old one */
 	for (i = x1; i <= x2; i++) {
-		if (!gn_bmp_is_point(&oldBitmap, i, y1))
+		if (!gn_bmp_point(&oldBitmap, i, y1))
 			ClearPoint(widget, i, y1, 0);
-		if (!gn_bmp_is_point(&oldBitmap, i, y2))
+		if (!gn_bmp_point(&oldBitmap, i, y2))
 			ClearPoint(widget, i, y2, 0);
 	}
 
 	for (j = y1; j <= y2; j++) {
-		if (!gn_bmp_is_point(&oldBitmap, x1, j))
+		if (!gn_bmp_point(&oldBitmap, x1, j))
 			ClearPoint(widget, x1, j, 0);
-		if (!gn_bmp_is_point(&oldBitmap, x2, j))
+		if (!gn_bmp_point(&oldBitmap, x2, j))
 			ClearPoint(widget, x2, j, 0);
 	}
 
@@ -826,7 +826,7 @@ gint DrawingAreaButtonPressEvent(GtkWidget * widget, GdkEventButton * event)
 
 		for (j = lowestY; j <= highestY; j++)
 			for (i = lowestX; i <= highestX; i++)
-				if (gn_bmp_is_point(&oldBitmap, i, j))
+				if (gn_bmp_point(&oldBitmap, i, j))
 					SetPoint(widget, i, j, 0);
 				else
 					ClearPoint(widget, i, j, 0);
@@ -996,7 +996,7 @@ void GetNetworkInfoEvent(GtkWidget * widget)
 
 	/* set new operator name to combo */
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry),
-			   gn_get_network_name(networkInfo.network_code));
+			   gn_network_name_get(networkInfo.network_code));
 }
 
 void GetLogoEvent(GtkWidget * widget)
@@ -1008,7 +1008,7 @@ void GetLogoEvent(GtkWidget * widget)
 	char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
 
 	/* prepare data for event */
-	strncpy(bitmap.netcode, gn_get_network_code(operator), 7);
+	strncpy(bitmap.netcode, gn_network_code_get(operator), 7);
 	data->bitmap = &bitmap;
 	e->event = Event_GetBitmap;
 	e->data = data;
@@ -1048,7 +1048,7 @@ void SetLogoEvent(GtkWidget * widget)
 	int i;
 
 	/* prepare data */
-	strncpy(bitmap.netcode, gn_get_network_code(operator), 7);
+	strncpy(bitmap.netcode, gn_network_code_get(operator), 7);
 
 	if (bitmap.type == GN_BMP_CallerLogo) {
 		/* above condition must be there, because if you launch logos before
@@ -1101,9 +1101,9 @@ void InvertLogoEvent(GtkWidget * widget)
 	for (column = 0; column < bitmap.width; column++)
 		for (row = 0; row < bitmap.height; row++)
 			if (IsPoint(column, row))
-				gn_bmp_clear_point(&bitmap, column, row);
+				gn_bmp_point_clear(&bitmap, column, row);
 			else
-				gn_bmp_set_point(&bitmap, column, row);
+				gn_bmp_point_set(&bitmap, column, row);
 
 	UpdatePoints(widget);
 }
@@ -1119,15 +1119,15 @@ void UpLogoEvent(GtkWidget * widget)
 	for (row = 0; row < bitmap.height - 1; row++)
 		for (column = 0; column < bitmap.width; column++)
 			if (IsPoint(column, row + 1))
-				gn_bmp_set_point(&bitmap, column, row);
+				gn_bmp_point_set(&bitmap, column, row);
 			else
-				gn_bmp_clear_point(&bitmap, column, row);
+				gn_bmp_point_clear(&bitmap, column, row);
 
 	for (column = 0; column < bitmap.width; column++)
-		if (gn_bmp_is_point(&tbitmap, column, 0))
-			gn_bmp_set_point(&bitmap, column, bitmap.height - 1);
+		if (gn_bmp_point(&tbitmap, column, 0))
+			gn_bmp_point_set(&bitmap, column, bitmap.height - 1);
 		else
-			gn_bmp_clear_point(&bitmap, column, bitmap.height - 1);
+			gn_bmp_point_clear(&bitmap, column, bitmap.height - 1);
 
 	UpdatePoints(widget);
 }
@@ -1143,15 +1143,15 @@ void DownLogoEvent(GtkWidget * widget)
 	for (row = bitmap.height - 1; row > 0; row--)
 		for (column = 0; column < bitmap.width; column++)
 			if (IsPoint(column, row - 1))
-				gn_bmp_set_point(&bitmap, column, row);
+				gn_bmp_point_set(&bitmap, column, row);
 			else
-				gn_bmp_clear_point(&bitmap, column, row);
+				gn_bmp_point_clear(&bitmap, column, row);
 
 	for (column = 0; column < bitmap.width; column++)
-		if (gn_bmp_is_point(&tbitmap, column, bitmap.height - 1))
-			gn_bmp_set_point(&bitmap, column, 0);
+		if (gn_bmp_point(&tbitmap, column, bitmap.height - 1))
+			gn_bmp_point_set(&bitmap, column, 0);
 		else
-			gn_bmp_clear_point(&bitmap, column, 0);
+			gn_bmp_point_clear(&bitmap, column, 0);
 
 	UpdatePoints(widget);
 }
@@ -1167,15 +1167,15 @@ void LeftLogoEvent(GtkWidget * widget)
 	for (column = 0; column < bitmap.width - 1; column++)
 		for (row = 0; row < bitmap.height; row++)
 			if (IsPoint(column + 1, row))
-				gn_bmp_set_point(&bitmap, column, row);
+				gn_bmp_point_set(&bitmap, column, row);
 			else
-				gn_bmp_clear_point(&bitmap, column, row);
+				gn_bmp_point_clear(&bitmap, column, row);
 
 	for (row = 0; row < bitmap.height; row++)
-		if (gn_bmp_is_point(&tbitmap, 0, row))
-			gn_bmp_set_point(&bitmap, bitmap.width - 1, row);
+		if (gn_bmp_point(&tbitmap, 0, row))
+			gn_bmp_point_set(&bitmap, bitmap.width - 1, row);
 		else
-			gn_bmp_clear_point(&bitmap, bitmap.width - 1, row);
+			gn_bmp_point_clear(&bitmap, bitmap.width - 1, row);
 
 	UpdatePoints(widget);
 }
@@ -1191,15 +1191,15 @@ void RightLogoEvent(GtkWidget * widget)
 	for (column = bitmap.width - 1; column > 0; column--)
 		for (row = 0; row < bitmap.height; row++)
 			if (IsPoint(column - 1, row))
-				gn_bmp_set_point(&bitmap, column, row);
+				gn_bmp_point_set(&bitmap, column, row);
 			else
-				gn_bmp_clear_point(&bitmap, column, row);
+				gn_bmp_point_clear(&bitmap, column, row);
 
 	for (row = 0; row < bitmap.height; row++)
-		if (gn_bmp_is_point(&tbitmap, bitmap.width - 1, row))
-			gn_bmp_set_point(&bitmap, 0, row);
+		if (gn_bmp_point(&tbitmap, bitmap.width - 1, row))
+			gn_bmp_point_set(&bitmap, 0, row);
 		else
-			gn_bmp_clear_point(&bitmap, 0, row);
+			gn_bmp_point_clear(&bitmap, 0, row);
 
 	UpdatePoints(widget);
 }
@@ -1212,14 +1212,14 @@ void FlipVerticalLogoEvent(GtkWidget * widget)
 		for (column = 0; column < bitmap.width; column++) {
 			temp = IsPoint(column, row);
 			if (IsPoint(column, bitmap.height - 1 - row))
-				gn_bmp_set_point(&bitmap, column, row);
+				gn_bmp_point_set(&bitmap, column, row);
 			else
-				gn_bmp_clear_point(&bitmap, column, row);
+				gn_bmp_point_clear(&bitmap, column, row);
 
 			if (temp)
-				gn_bmp_set_point(&bitmap, column, bitmap.height - 1 - row);
+				gn_bmp_point_set(&bitmap, column, bitmap.height - 1 - row);
 			else
-				gn_bmp_clear_point(&bitmap, column, bitmap.height - 1 - row);
+				gn_bmp_point_clear(&bitmap, column, bitmap.height - 1 - row);
 		}
 
 	UpdatePoints(widget);
@@ -1234,14 +1234,14 @@ void FlipHorizontalLogoEvent(GtkWidget * widget)
 			temp = IsPoint(column, row);
 
 			if (IsPoint(bitmap.width - 1 - column, row))
-				gn_bmp_set_point(&bitmap, column, row);
+				gn_bmp_point_set(&bitmap, column, row);
 			else
-				gn_bmp_clear_point(&bitmap, column, row);
+				gn_bmp_point_clear(&bitmap, column, row);
 
 			if (temp)
-				gn_bmp_set_point(&bitmap, bitmap.width - 1 - column, row);
+				gn_bmp_point_set(&bitmap, bitmap.width - 1 - column, row);
 			else
-				gn_bmp_clear_point(&bitmap, bitmap.width - 1 - column, row);
+				gn_bmp_point_clear(&bitmap, bitmap.width - 1 - column, row);
 		}
 
 	UpdatePoints(widget);
@@ -1328,7 +1328,7 @@ void ExportLogoFileMain(gchar * name)
 
 	tbitmap = bitmap;
 
-	strncpy(tbitmap.netcode, gn_get_network_code(networkInfo.network_code), 7);
+	strncpy(tbitmap.netcode, gn_network_code_get(networkInfo.network_code), 7);
 
 	error = gn_file_bitmap_save(name, &tbitmap, &statemachine.driver.phone);
 	if (error != GN_ERR_NONE) {

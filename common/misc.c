@@ -39,12 +39,11 @@
 #  include <unistd.h>
 #endif
 
-#include "misc.h"
-
+#include "gsm-data.h"
 
 API void (*gn_elog_handler)(const char *fmt, va_list ap) = NULL;
 
-API int gn_get_line(FILE *file, char *line, int count)
+API int gn_line_get(FILE *file, char *line, int count)
 {
 	char *ptr;
 
@@ -114,7 +113,7 @@ static gn_phone_model models[] = {
 	{NULL,    NULL, 0 }
 };
 
-gn_phone_model *gn_get_phone_model(const char *num)
+API gn_phone_model *gn_phone_model_get(const char *num)
 {
 	register int i = 0;
 
@@ -131,12 +130,12 @@ gn_phone_model *gn_get_phone_model(const char *num)
 	return (&models[0]);
 }
 
-char *gn_get_model(const char *num)
+API char *gn_model_get(const char *num)
 {
-	return (gn_get_phone_model(num)->model);
+	return (gn_phone_model_get(num)->model);
 }
 
-void gn_elog_write(const char *fmt, ...)
+API void gn_elog_write(const char *fmt, ...)
 {
 	va_list ap;
 
@@ -154,15 +153,15 @@ void gn_elog_write(const char *fmt, ...)
 	va_end(ap);
 }
 
-#define max_buf_len 128
+#define BUFFER_MAX_LENGTH 128
 #define lock_path "/var/lock/LCK.."
 
 /* Lock the device. Return allocated string with a lock name */
-char *gn_lock_device(const char* port)
+API char *gn_device_lock(const char* port)
 {
 #ifndef WIN32
 	char *lock_file = NULL;
-	char buffer[max_buf_len];
+	char buffer[BUFFER_MAX_LENGTH];
 	const char *aux = strrchr(port, '/');
 	int fd, len = strlen(aux) + strlen(lock_path);
 
@@ -185,7 +184,7 @@ char *gn_lock_device(const char* port)
 	/* Check for the stale lockfile.
 	 * The code taken from minicom by Miquel van Smoorenburg */
 	if ((fd = open(lock_file, O_RDONLY)) >= 0) {
-		char buf[max_buf_len];
+		char buf[BUFFER_MAX_LENGTH];
 		int pid, n = 0;
 
 		n = read(fd, buf, sizeof(buf) - 1);
@@ -249,7 +248,7 @@ failed:
 }
 
 /* Removes lock and frees memory */
-bool gn_unlock_device(char *lock_file)
+API bool gn_device_unlock(char *lock_file)
 {
 #ifndef WIN32
 	int err;

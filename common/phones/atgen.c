@@ -525,14 +525,14 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 		tmp = req + ofs;
 		switch (drvinst->charset) {
 		case AT_CHAR_GSM:
-			len = char_encode_ascii(tmp, data->phonebook_entry->name, len);
+			len = char_ascii_encode(tmp, data->phonebook_entry->name, len);
 			break;
 		case AT_CHAR_HEXGSM:
-			char_encode_hex(tmp, data->phonebook_entry->name, len);
+			char_hex_encode(tmp, data->phonebook_entry->name, len);
 			len *= 2;
 			break;
 		case AT_CHAR_UCS2:
-			char_encode_ucs2(tmp, data->phonebook_entry->name, len);
+			char_ucs2_encode(tmp, data->phonebook_entry->name, len);
 			len *= 4;
 			break; 
 		default:
@@ -799,15 +799,15 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 			l = endpos - pos;
 			switch (drvinst->charset) {
 			case AT_CHAR_GSM:
-				char_decode_ascii(data->phonebook_entry->name, pos, l);
+				char_ascii_decode(data->phonebook_entry->name, pos, l);
 				*(data->phonebook_entry->name + l) = '\0';
 				break;
 			case AT_CHAR_HEXGSM:
-				char_decode_hex(data->phonebook_entry->name, pos, l);
+				char_hex_decode(data->phonebook_entry->name, pos, l);
 				*(data->phonebook_entry->name + (l / 2)) = '\0';
 				break;
 			case AT_CHAR_UCS2:
-				char_decode_ucs2(data->phonebook_entry->name, pos, l);
+				char_ucs2_decode(data->phonebook_entry->name, pos, l);
 				*(data->phonebook_entry->name + (l / 4)) = '\0';
 				break;
 			default:

@@ -40,7 +40,7 @@
 gn_error sms_parse(int offset, gn_data *data);
 gn_error sms_request(gn_data *data, struct gn_statemachine *state);
 gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms);
-gn_timestamp *gn_misc_unpack_timestamp(u8 *Number, gn_timestamp *dt);
+gn_timestamp *timestamp_unpack(u8 *Number, gn_timestamp *dt);
 
 /* Statemachine */
 gn_error sm_initialise(struct gn_statemachine *state);
@@ -59,84 +59,86 @@ void sm_unhandled_frame_dump(int messagetype, unsigned char *message, int length
 extern void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len);
 extern void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len);
 
-int char_unpack_7bit(unsigned int offset, unsigned int in_length, unsigned int out_length,
+int char_7bit_unpack(unsigned int offset, unsigned int in_length, unsigned int out_length,
 		     unsigned char *input, unsigned char *output);
-int char_pack_7bit(unsigned int offset, unsigned char *input, unsigned char *output,
+int char_7bit_pack(unsigned int offset, unsigned char *input, unsigned char *output,
 		   unsigned int *in_len);
 
-unsigned int char_decode_unicode(unsigned char* dest, const unsigned char* src, int len);
-unsigned int char_encode_unicode(unsigned char* dest, const unsigned char* src, int len);
+unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, int len);
+unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, int len);
 
-void char_decode_ascii(unsigned char* dest, const unsigned char* src, int len);
-unsigned int char_encode_ascii(unsigned char* dest, const unsigned char* src, unsigned int len);
+void char_ascii_decode(unsigned char* dest, const unsigned char* src, int len);
+unsigned int char_ascii_encode(unsigned char* dest, const unsigned char* src, unsigned int len);
 
-void char_decode_hex(unsigned char* dest, const unsigned char* src, int len);
-void char_encode_hex(unsigned char* dest, const unsigned char* src, int len);
+void char_hex_decode(unsigned char* dest, const unsigned char* src, int len);
+void char_hex_encode(unsigned char* dest, const unsigned char* src, int len);
 
-void char_decode_ucs2(unsigned char* dest, const unsigned char* src, int len);
-void char_encode_ucs2(unsigned char* dest, const unsigned char* src, int len);
+void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len);
+void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len);
 
-unsigned char char_encode_def_alphabet(unsigned char value);
-unsigned char char_decode_def_alphabet(unsigned char value);
+unsigned char char_def_alphabet_encode(unsigned char value);
+unsigned char char_def_alphabet_decode(unsigned char value);
 
-int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest);
-int char_decode_uni_alphabet(wchar_t value, unsigned char *dest);
+int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest);
+int char_uni_alphabet_decode(wchar_t value, unsigned char *dest);
 
-extern char *char_get_bcd_number(u8 *number);
+extern char *char_bcd_number_get(u8 *number);
 extern int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type);
 
 /* Ringtones */
-int gn_vcal_get_time(gn_timestamp *dt, char *time);
-int gn_calnote_fill(gn_calnote *note, char *type, char *text, char *desc,
-		    char *time, char *alarm);
-int gn_todo_fill(gn_todo *note, char *text, char *todo_priority);
+int vcal_time_get(gn_timestamp *dt, char *time);
+int calnote_fill(gn_calnote *note, char *type, char *text, char *desc,
+		 char *time, char *alarm);
+int todo_fill(gn_todo *note, char *text, char *todo_priority);
 
 /* Ringtone Files */
-gn_error file_save_rttl(FILE *file, gn_ringtone *ringtone);
-gn_error file_save_ott(FILE *file, gn_ringtone *ringtone);
+gn_error file_rttl_save(FILE *file, gn_ringtone *ringtone);
+gn_error file_ott_save(FILE *file, gn_ringtone *ringtone);
 
-gn_error file_load_rttl(FILE *file, gn_ringtone *ringtone);
-gn_error file_load_ott(FILE *file, gn_ringtone *ringtone);
+gn_error file_rttl_load(FILE *file, gn_ringtone *ringtone);
+gn_error file_ott_load(FILE *file, gn_ringtone *ringtone);
 
 /* Bitmap Files */
 
-void file_save_nol(FILE *file, gn_bmp *bitmap, gn_phone *info);
-void file_save_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info);
-void file_save_nsl(FILE *file, gn_bmp *bitmap, gn_phone *info);
-void file_save_nlm(FILE *file, gn_bmp *bitmap);
-void file_save_ota(FILE *file, gn_bmp *bitmap);
-void file_save_bmp(FILE *file, gn_bmp *bitmap);
+void file_nol_save(FILE *file, gn_bmp *bitmap, gn_phone *info);
+void file_ngg_save(FILE *file, gn_bmp *bitmap, gn_phone *info);
+void file_nsl_save(FILE *file, gn_bmp *bitmap, gn_phone *info);
+void file_nlm_save(FILE *file, gn_bmp *bitmap);
+void file_ota_save(FILE *file, gn_bmp *bitmap);
+void file_bmp_save(FILE *file, gn_bmp *bitmap);
 
 #ifdef XPM
-void file_save_xpm(char *filename, gn_bmp *bitmap);
+void file_xpm_save(char *filename, gn_bmp *bitmap);
 #endif
 
-gn_error file_load_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info);
-gn_error file_load_nol(FILE *file, gn_bmp *bitmap, gn_phone *info);
-gn_error file_load_nsl(FILE *file, gn_bmp *bitmap);
-gn_error file_load_nlm(FILE *file, gn_bmp *bitmap);
-gn_error file_load_ota(FILE *file, gn_bmp *bitmap, gn_phone *info);
-gn_error file_load_bmp(FILE *file, gn_bmp *bitmap);
+gn_error file_ngg_load(FILE *file, gn_bmp *bitmap, gn_phone *info);
+gn_error file_nol_load(FILE *file, gn_bmp *bitmap, gn_phone *info);
+gn_error file_nsl_load(FILE *file, gn_bmp *bitmap);
+gn_error file_nlm_load(FILE *file, gn_bmp *bitmap);
+gn_error file_ota_load(FILE *file, gn_bmp *bitmap, gn_phone *info);
+gn_error file_bmp_load(FILE *file, gn_bmp *bitmap);
 
 #ifdef XPM
-gn_error file_load_xpm(char *filename, gn_bmp *bitmap);
+gn_error file_xpm_load(char *filename, gn_bmp *bitmap);
 #endif
 
-int ringtone_encode_sms(unsigned char *message, gn_ringtone *ringtone);
-int imelody_encode_sms(unsigned char *imelody, unsigned char *message);
+int ringtone_sms_encode(unsigned char *message, gn_ringtone *ringtone);
+int imelody_sms_encode(unsigned char *imelody, unsigned char *message);
 gn_error phonebook_decode(unsigned char *blockstart, int length,
 			  gn_data *data, int blocks, int memtype, int speeddial_pos);
 gn_error calnote_decode(unsigned char *message, int length, gn_data *data);
 
-int sms_nokia_pack_smart_message_part(unsigned char *msg, unsigned int size,
+int sms_nokia_smart_message_part_pack(unsigned char *msg, unsigned int size,
 				      unsigned int type, bool first);
-int sms_nokia_encode_text(unsigned char *text, unsigned char *message, bool first);
-int sms_nokia_encode_bitmap(gn_bmp *bitmap, unsigned char *message, bool first);
+int sms_nokia_text_encode(unsigned char *text, unsigned char *message, bool first);
+int sms_nokia_bitmap_encode(gn_bmp *bitmap, unsigned char *message, bool first);
 
-struct gn_cfg_header *cfg_read_file(const char *filename);
-typedef void (*cfg_get_foreach_func)(const char *section, const char *key, const char *value);
-void cfg_get_foreach(struct gn_cfg_header *cfg, const char *section, cfg_get_foreach_func func);
+struct gn_cfg_header *cfg_file_read(const char *filename);
+typedef void (*cfg_foreach_func)(const char *section, const char *key, const char *value);
+void cfg_foreach(struct gn_cfg_header *cfg, const char *section, cfg_foreach_func func);
 char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key, const char *value);
-int cfg_write_file(struct gn_cfg_header *cfg, const char *filename);
+int cfg_file_write(struct gn_cfg_header *cfg, const char *filename);
 
-#endif /* _gnokii_api_h */
+gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause);
+
+#endif /* _gnokii_internal_h */

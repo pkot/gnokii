@@ -191,7 +191,7 @@ int GSM_GetDuration(int number, unsigned char *spec)
 }
 
 
-API int gn_get_note(int number)
+API int gn_note_get(int number)
 {
 	int note = 0;
 
@@ -293,12 +293,12 @@ API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxl
 		/* PC Composer 2.0.010 doesn't like, when we start ringtone from pause:
 		   it displays that the format is invalid and
 		   hangs, when you move mouse over place, where pause is */
-		if (gn_get_note(ringtone->notes[i].note)==GN_RINGTONE_Note_Pause && oldscale==10) {
+		if (gn_note_get(ringtone->notes[i].note)==GN_RINGTONE_Note_Pause && oldscale==10) {
 			StartNote++;
 		} else {
 
 			/* we don't write Scale info before "Pause" note - it saves space */
-			if (gn_get_note(ringtone->notes[i].note)!=GN_RINGTONE_Note_Pause &&
+			if (gn_note_get(ringtone->notes[i].note)!=GN_RINGTONE_Note_Pause &&
 			    oldscale!=(newscale=GSM_GetScale(ringtone->notes[i].note))) {
 
 				/* We calculate, if we have space to add next scale instruction */
@@ -345,7 +345,7 @@ API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxl
 	for(i=StartNote; i<(EndNote+StartNote); i++) {
 
 		/* we don't write Scale info before "Pause" note - it saves place */
-		if (gn_get_note(ringtone->notes[i].note)!=GN_RINGTONE_Note_Pause &&
+		if (gn_note_get(ringtone->notes[i].note)!=GN_RINGTONE_Note_Pause &&
 		    oldscale!=(newscale=GSM_GetScale(ringtone->notes[i].note))) {
 			oldscale=newscale;
 			StartBit=BitPackByte(package, StartBit, GN_RINGTONE_ScaleInstructionId, 3);
@@ -354,7 +354,7 @@ API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxl
 
 		/* Note */
 		StartBit=BitPackByte(package, StartBit, GN_RINGTONE_NoteInstructionId, 3);
-		StartBit=BitPackByte(package, StartBit, gn_get_note(ringtone->notes[i].note), 4);
+		StartBit=BitPackByte(package, StartBit, gn_note_get(ringtone->notes[i].note), 4);
 		StartBit=BitPackByte(package, StartBit, GSM_GetDuration(ringtone->notes[i].duration,&spec), 3);
 		StartBit=BitPackByte(package, StartBit, spec, 2);
 	}
@@ -578,7 +578,7 @@ gn_error GSM_ReadRingtoneFromSMS(gn_sms *message, gn_ringtone *ringtone)
 	} else return GN_ERR_WRONGDATAFORMAT;
 }
 
-int ringtone_encode_sms(unsigned char *message, gn_ringtone *ringtone)
+int ringtone_sms_encode(unsigned char *message, gn_ringtone *ringtone)
 {
 	int j = GN_SMS_8BIT_MAX_LENGTH;
 	gn_ringtone_pack(ringtone, message, &j);
@@ -586,7 +586,7 @@ int ringtone_encode_sms(unsigned char *message, gn_ringtone *ringtone)
 }
 
 /* Returns message length */
-int imelody_encode_sms(unsigned char *imelody, unsigned char *message)
+int imelody_sms_encode(unsigned char *imelody, unsigned char *message)
 {
 	unsigned int current = 0;
 

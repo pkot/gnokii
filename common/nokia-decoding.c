@@ -84,10 +84,10 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			break;
 		case GN_PHONEBOOK_ENTRY_Name:	/* Name */
 			if (data->bitmap) {
-				char_decode_unicode(data->bitmap->text, (blockstart + 6), blockstart[5]);
+				char_unicode_decode(data->bitmap->text, (blockstart + 6), blockstart[5]);
 				dprintf("Bitmap Name: %s\n", data->bitmap->text);
 			}
-			char_decode_unicode(data->phonebook_entry->name, (blockstart + 6), blockstart[5]);
+			char_unicode_decode(data->phonebook_entry->name, (blockstart + 6), blockstart[5]);
 			data->phonebook_entry->empty = false;
 			dprintf("   Name: %s\n", data->phonebook_entry->name);
 			break;
@@ -98,7 +98,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->entry_type  = blockstart[0];
 			subentry->number_type = 0;
 			subentry->id          = blockstart[4];
-			char_decode_unicode(subentry->data.number, (blockstart + 6), blockstart[5]);
+			char_unicode_decode(subentry->data.number, (blockstart + 6), blockstart[5]);
 			dprintf("   Type: %d (%02x)\n", subentry->entry_type, subentry->entry_type);
 			dprintf("   Text: %s\n", subentry->data.number);
 			subblock_count++;
@@ -108,7 +108,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->entry_type  = blockstart[0];
 			subentry->number_type = blockstart[5];
 			subentry->id          = blockstart[4];
-			char_decode_unicode(subentry->data.number, (blockstart + 10), blockstart[9]);
+			char_unicode_decode(subentry->data.number, (blockstart + 10), blockstart[9]);
 			if (!subblock_count) strcpy(data->phonebook_entry->number, subentry->data.number);
 			dprintf("   Type: %d (%02x)\n", subentry->number_type, subentry->number_type);
 			dprintf("   Number: %s\n", subentry->data.number);
@@ -239,17 +239,17 @@ gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 	case GN_CALNOTE_MEETING:
 		e = calnote_get_times(block, data->calnote);
 		if (e != GN_ERR_NONE) return e;
-		char_decode_unicode(data->calnote->text, (block + 8), block[6] << 1);
+		char_unicode_decode(data->calnote->text, (block + 8), block[6] << 1);
 		break;
 	case GN_CALNOTE_CALL:
 		e = calnote_get_times(block, data->calnote);
 		if (e != GN_ERR_NONE) return e;
-		char_decode_unicode(data->calnote->text, (block + 8), block[6] << 1);
-		char_decode_unicode(data->calnote->phone_number, (block + 8 + block[6] * 2), block[7] << 1);
+		char_unicode_decode(data->calnote->text, (block + 8), block[6] << 1);
+		char_unicode_decode(data->calnote->phone_number, (block + 8 + block[6] * 2), block[7] << 1);
 		break;
 	case GN_CALNOTE_REMINDER:
 		data->calnote->recurrence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
-		char_decode_unicode(data->calnote->text, (block + 4), block[2] << 1);
+		char_unicode_decode(data->calnote->text, (block + 4), block[2] << 1);
 		break;
 	case GN_CALNOTE_BIRTHDAY:
 		data->calnote->time.hour = 23;
@@ -277,7 +277,7 @@ gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 		data->calnote->time.second = 0;
 		data->calnote->time.year = (((unsigned int)block[6]) << 8) + block[7];
 
-		char_decode_unicode(data->calnote->text, (block + 10), block[9] << 1);
+		char_unicode_decode(data->calnote->text, (block + 10), block[9] << 1);
 		break;
 	default:
 		return GN_ERR_UNKNOWN;

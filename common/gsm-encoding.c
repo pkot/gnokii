@@ -109,7 +109,7 @@ static bool char_def_alphabet_ext(unsigned char value)
 		retval == 0x20ac);
 }
 
-static unsigned char char_decode_def_alphabet_ext(unsigned char value)
+static unsigned char char_def_alphabet_ext_decode(unsigned char value)
 {
 	switch (value) {
 	case 0x0a: return 0x0c; break; /* form feed */
@@ -126,7 +126,7 @@ static unsigned char char_decode_def_alphabet_ext(unsigned char value)
 	}
 }
 
-static unsigned char char_encode_def_alphabet_ext(unsigned char value)
+static unsigned char char_def_alphabet_ext_encode(unsigned char value)
 {
 	switch (value) {
 	case 0x0c: return 0x0a; /* from feed */
@@ -156,13 +156,13 @@ API bool gn_char_def_alphabet(unsigned char *string)
 	return true;
 }
 
-unsigned char char_encode_def_alphabet(unsigned char value)
+unsigned char char_def_alphabet_encode(unsigned char value)
 {
 	tbl_setup_reverse();
 	return gsm_reverse_default_alphabet[value];
 }
 
-unsigned char char_decode_def_alphabet(unsigned char value)
+unsigned char char_def_alphabet_decode(unsigned char value)
 {
 	if (value < GN_CHAR_ALPHABET_SIZE) {
 		return gsm_default_alphabet[value];
@@ -173,7 +173,7 @@ unsigned char char_decode_def_alphabet(unsigned char value)
 
 #define GN_BYTE_MASK ((1 << bits) - 1)
 
-int char_unpack_7bit(unsigned int offset, unsigned int in_length, unsigned int out_length,
+int char_7bit_unpack(unsigned int offset, unsigned int in_length, unsigned int out_length,
 		     unsigned char *input, unsigned char *output)
 {
 	unsigned char *out_num = output; /* Current pointer to the output buffer */
@@ -211,7 +211,7 @@ int char_unpack_7bit(unsigned int offset, unsigned int in_length, unsigned int o
 	return out_num - output;
 }
 
-int char_pack_7bit(unsigned int offset, unsigned char *input,
+int char_7bit_pack(unsigned int offset, unsigned char *input,
 		   unsigned char *output, unsigned int *in_len)
 {
 
@@ -238,11 +238,11 @@ int char_pack_7bit(unsigned int offset, unsigned char *input,
 			double_char = true;
 			goto skip;
 next_char:
-			byte = char_encode_def_alphabet_ext(*in_num);
+			byte = char_def_alphabet_ext_encode(*in_num);
 			double_char = false;
 			(*in_len)++;
 		} else {
-			byte = char_encode_def_alphabet(*in_num);
+			byte = char_def_alphabet_encode(*in_num);
 		}
 skip:
 		*out_num = byte >> (7 - bits);
@@ -264,36 +264,36 @@ skip:
 	return (out_num - output);
 }
 
-void char_decode_ascii(unsigned char* dest, const unsigned char* src, int len)
+void char_ascii_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j++) {
 		if (char_is_escape(src[j]))
-			dest[i] = char_decode_def_alphabet_ext(src[++j]);
+			dest[i] = char_def_alphabet_ext_decode(src[++j]);
 		else
-			dest[i] = char_decode_def_alphabet(src[j]);
+			dest[i] = char_def_alphabet_decode(src[j]);
 	}
 	dest[i] = 0;
 	return;
 }
 
-unsigned int char_encode_ascii(unsigned char* dest, const unsigned char* src, unsigned int len)
+unsigned int char_ascii_encode(unsigned char* dest, const unsigned char* src, unsigned int len)
 {
 	int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j++) {
 		if (char_def_alphabet_ext(src[j])) {
 			dest[i++] = GN_CHAR_ESCAPE;
-			dest[i] = char_encode_def_alphabet_ext(src[j]);
+			dest[i] = char_def_alphabet_ext_encode(src[j]);
 		} else {
-			dest[i] = char_encode_def_alphabet(src[j]);
+			dest[i] = char_def_alphabet_encode(src[j]);
 		}
 	}
 	return i;
 }
 
-void char_decode_hex(unsigned char* dest, const unsigned char* src, int len)
+void char_hex_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	char buf[3];
@@ -301,22 +301,22 @@ void char_decode_hex(unsigned char* dest, const unsigned char* src, int len)
 	buf[2] = '\0';
 	for (i = 0; i < (len / 2); i++) {
 		buf[0] = *(src + i * 2); buf[1] = *(src + i * 2 + 1);
-		dest[i] = char_decode_def_alphabet(strtol(buf, NULL, 16));
+		dest[i] = char_def_alphabet_decode(strtol(buf, NULL, 16));
 	}
 	return;
 }
 
-void char_encode_hex(unsigned char* dest, const unsigned char* src, int len)
+void char_hex_encode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 
 	for (i = 0; i < (len / 2); i++) {
-		sprintf(dest + i * 2, "%x", char_encode_def_alphabet(src[i]));
+		sprintf(dest + i * 2, "%x", char_def_alphabet_encode(src[i]));
 	}
 	return;
 }
 
-int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
+int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest)
 {
 	int length;
 
@@ -330,7 +330,7 @@ int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
 	}
 }
 
-int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
+int char_uni_alphabet_decode(wchar_t value, unsigned char *dest)
 {
 	int length;
 
@@ -344,7 +344,7 @@ int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
 	}
 }
 
-void char_decode_ucs2(unsigned char* dest, const unsigned char* src, int len)
+void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i_len = 0, o_len = 0, length;
 	char buf[5];
@@ -355,7 +355,7 @@ void char_decode_ucs2(unsigned char* dest, const unsigned char* src, int len)
 		buf[1] = *(src + i_len * 4 + 1);
 		buf[2] = *(src + i_len * 4 + 2); 
 		buf[3] = *(src + i_len * 4 + 3);
-		switch (length = char_decode_uni_alphabet(strtol(buf, NULL, 16), dest + o_len)) {
+		switch (length = char_uni_alphabet_decode(strtol(buf, NULL, 16), dest + o_len)) {
 		case -1:
 			o_len++;
 			break;
@@ -367,13 +367,13 @@ void char_decode_ucs2(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-void char_encode_ucs2(unsigned char* dest, const unsigned char* src, int len)
+void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 {
 	wchar_t wc;
 	int i_len = 0, o_len, length;
  
 	for (o_len = 0; i_len < len ; o_len++) {
-		switch (length = char_encode_uni_alphabet(src + i_len, &wc)) {
+		switch (length = char_uni_alphabet_encode(src + i_len, &wc)) {
 		case -1:
 			i_len++;
 			break;
@@ -386,12 +386,12 @@ void char_encode_ucs2(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-unsigned int char_decode_unicode(unsigned char* dest, const unsigned char* src, int len)
+unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i, length = 0, pos = 0;
 
 	for (i = 0; i < len / 2; i++) {
-		length = char_decode_uni_alphabet((src[i * 2] << 8) | src[(i * 2) + 1], dest);
+		length = char_uni_alphabet_decode((src[i * 2] << 8) | src[(i * 2) + 1], dest);
 		dest += length;
 		pos += length;
 	}
@@ -399,13 +399,13 @@ unsigned int char_decode_unicode(unsigned char* dest, const unsigned char* src, 
 	return pos;
 }
 
-unsigned int char_encode_unicode(unsigned char* dest, const unsigned char* src, int len)
+unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int length, offset = 0, pos = 0;
 	wchar_t  wc;
 
 	while (offset < len) {
-		switch (length = char_encode_uni_alphabet(src + offset, &wc)) {
+		switch (length = char_uni_alphabet_encode(src + offset, &wc)) {
 		case -1:
 			dest[pos++] =  wc >> 8 & 0xFF;
 			dest[pos++] =  wc & 0xFF;
@@ -507,7 +507,7 @@ int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type
 	return (2 * (out_num - output - 1) - (count % 2));
 }
 
-char *char_get_bcd_number(u8 *number)
+char *char_bcd_number_get(u8 *number)
 {
 	static char buffer[GN_BCD_STRING_MAX_LENGTH] = "";
 	int length = number[0]; /* This is the length of BCD coded number */
@@ -517,7 +517,7 @@ char *char_get_bcd_number(u8 *number)
 	memset(buffer, 0, GN_BCD_STRING_MAX_LENGTH);
 	switch (number[1]) {
 	case GN_GSM_NUMBER_Alphanumeric:
-		char_unpack_7bit(0, length, length, number + 2, buffer);
+		char_7bit_unpack(0, length, length, number + 2, buffer);
 		buffer[length] = 0;
 		break;
 	case GN_GSM_NUMBER_International:

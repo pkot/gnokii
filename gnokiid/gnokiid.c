@@ -78,7 +78,7 @@ static void usage()
 static void busterminate(void)
 {
 	gn_vm_terminate();
-	if (lockfile) gn_unlock_device(lockfile);
+	if (lockfile) gn_device_unlock(lockfile);
 }
 
 /* Main function - handles command line arguments, passes them to separate
@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
 
 	short_version();
 
-	if (gn_cfg_readconfig(&BinDir) < 0) {
+	if (gn_cfg_read(&BinDir) < 0) {
 		exit(-1);
 	}
-	if (!gn_cfg_load_phone("", &temp_state)) exit(-1);
+	if (!gn_cfg_phone_load("", &temp_state)) exit(-1);
 
 	/* Handle command line arguments. */
 	if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_lock_device(temp_state.config.port_device);
+		lockfile = gn_device_lock(temp_state.config.port_device);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);

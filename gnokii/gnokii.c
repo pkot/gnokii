@@ -340,7 +340,7 @@ static int cb_widx = 0;
 static void busterminate(void)
 {
 	gn_sm_functions(GN_OP_Terminate, NULL, &state);
-	if (lockfile) gn_unlock_device(lockfile);
+	if (lockfile) gn_device_unlock(lockfile);
 }
 
 static void businit(void)
@@ -361,7 +361,7 @@ static void businit(void)
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_lock_device(state.config.port_device);
+		lockfile = gn_device_lock(state.config.port_device);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);
@@ -755,7 +755,7 @@ static int savesms(int argc, char *argv[])
 #endif
 		case 'f': /* Specify the folder where to save the message */
 			snprintf(memory_type, 19, "%s", optarg);
-			if (gn_str_to_memory_type(memory_type) == GN_MT_XX) {
+			if (gn_str2memory_type(memory_type) == GN_MT_XX) {
 				fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
 				return -1;
 			}
@@ -829,7 +829,7 @@ static int savesms(int argc, char *argv[])
 		return -1;
 	}
 	if (memory_type[0] != '\0')
-		sms.memory_type = gn_str_to_memory_type(memory_type);
+		sms.memory_type = gn_str2memory_type(memory_type);
 
 	sms.user_data[0].type = GN_SMS_DATA_Text;
 	strncpy(sms.user_data[0].u.text, message_buffer, chars_read);
@@ -1098,7 +1098,7 @@ static int getsms(int argc, char *argv[])
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[2];
-	if (gn_str_to_memory_type(memory_type_string) == GN_MT_XX) {
+	if (gn_str2memory_type(memory_type_string) == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[2]);
 		return -1;
 	}
@@ -1145,7 +1145,7 @@ static int getsms(int argc, char *argv[])
 		int offset = 0;
 
 		memset(&message, 0, sizeof(gn_sms));
-		message.memory_type = gn_str_to_memory_type(memory_type_string);
+		message.memory_type = gn_str2memory_type(memory_type_string);
 		message.number = count;
 		data.sms = &message;
 
@@ -1258,21 +1258,21 @@ static int getsms(int argc, char *argv[])
 					fprintf(stdout, _("Text:\n"));
 					break;
 				case GN_SMS_UDH_OpLogo:
-					fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, gn_get_network_name(bitmap.netcode));
+					fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, gn_network_name_get(bitmap.netcode));
 					if (!strcmp(message.remote.number, "+998000005") && !strcmp(message.smsc.number, "+886935074443")) fprintf(stdout, _("Saved by Logo Express\n"));
 					if (!strcmp(message.remote.number, "+998000002") || !strcmp(message.remote.number, "+998000003")) fprintf(stdout, _("Saved by Operator Logo Uploader by Thomas Kessler\n"));
 					offset = 3;
 				case GN_SMS_UDH_CallerIDLogo:
 					fprintf(stdout, _("Logo:\n"));
 					/* put bitmap into bitmap structure */
-					gn_bmp_read_sms(GN_BMP_OperatorLogo, message.user_data[0].u.text + 2 + offset, message.user_data[0].u.text, &bitmap);
+					gn_bmp_sms_read(GN_BMP_OperatorLogo, message.user_data[0].u.text + 2 + offset, message.user_data[0].u.text, &bitmap);
 					gn_bmp_print(&bitmap, stdout);
 					if (*filename) {
 						error = GN_ERR_NONE;
 						if ((stat(filename, &buf) == 0)) {
 							fprintf(stdout, _("File %s exists.\n"), filename);
 							fprintf(stdout, _("Overwrite? (yes/no) "));
-							gn_get_line(stdin, ans, 4);
+							gn_line_get(stdin, ans, 4);
 							if (!strcmp(ans, _("yes"))) {
 								error = gn_file_bitmap_save(filename, &bitmap, phone);
 							}
@@ -1346,7 +1346,7 @@ static int deletesms(int argc, char *argv[])
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
-	message.memory_type = gn_str_to_memory_type(memory_type_string);
+	message.memory_type = gn_str2memory_type(memory_type_string);
 	if (message.memory_type == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[0]);
 		return -1;
@@ -1705,7 +1705,7 @@ static gn_error SaveBitmapFileDialog(char *FileName, gn_bmp *bitmap, gn_phone *i
 		confirm = 0;
 		while (!confirm) {
 			fprintf(stderr, _("Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "), FileName);
-			gn_get_line(stdin, ans, 4);
+			gn_line_get(stdin, ans, 4);
 			if (!strcmp(ans, _("O")) || !strcmp(ans, _("o"))) confirm = 1;
 			if (!strcmp(ans, _("N")) || !strcmp(ans, _("n"))) confirm = 2;
 			if (!strcmp(ans, _("S")) || !strcmp(ans, _("s"))) return GN_ERR_USERCANCELED;
@@ -1713,7 +1713,7 @@ static gn_error SaveBitmapFileDialog(char *FileName, gn_bmp *bitmap, gn_phone *i
 		if (confirm == 1) break;
 		if (confirm == 2) {
 			fprintf(stderr, _("Enter name of new file: "));
-			gn_get_line(stdin, FileName, 50);
+			gn_line_get(stdin, FileName, 50);
 			if (!FileName || (*FileName == 0)) return GN_ERR_USERCANCELED;
 		}
 	}
@@ -1768,10 +1768,10 @@ static int getlogo(int argc, char *argv[])
 			case GN_BMP_NewOperatorLogo:
 				if (!bitmap.width) goto empty_bitmap;
 				fprintf(stdout, _("Operator logo for %s (%s) network got succesfully\n"),
-					bitmap.netcode, gn_get_network_name(bitmap.netcode));
+					bitmap.netcode, gn_network_name_get(bitmap.netcode));
 				if (argc == 3) {
 					strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
-					if (!strcmp(gn_get_network_name(bitmap.netcode), "unknown")) {
+					if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
 					}
@@ -1782,7 +1782,7 @@ static int getlogo(int argc, char *argv[])
 				fprintf(stdout, _("Startup logo got successfully\n"));
 				if (argc == 3) {
 					strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
-					if (!strcmp(gn_get_network_name(bitmap.netcode), "unknown")) {
+					if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
 					}
@@ -1793,7 +1793,7 @@ static int getlogo(int argc, char *argv[])
 				fprintf(stdout, _("Caller logo got successfully\n"));
 				if (argc == 4) {
 					strncpy(bitmap.netcode, argv[3], sizeof(bitmap.netcode) - 1);
-					if (!strcmp(gn_get_network_name(bitmap.netcode), "unknown")) {
+					if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
 					}
@@ -1876,7 +1876,7 @@ static int setlogo(int argc, char *argv[])
 
 		if (argc == 3) {
 			strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
-			if (!strcmp(gn_get_network_name(bitmap.netcode), "unknown")) {
+			if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
 				fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 				return -1;
 			}
@@ -2079,7 +2079,7 @@ static int writetodo(char *argv[])
 	data.todo = &todo;
 
 #ifndef WIN32
-	error = gn_vcal_read_file_todo(argv[0], &todo, atoi(argv[1]));
+	error = gn_vcal_file_todo_read(argv[0], &todo, atoi(argv[1]));
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
 		return -1;
@@ -2261,7 +2261,7 @@ static int writecalendarnote(char *argv[])
 	data.calnote = &calnote;
 
 #ifndef WIN32
-	error = gn_vcal_read_file_event(argv[0], &calnote, atoi(argv[1]));
+	error = gn_vcal_file_event_read(argv[0], &calnote, atoi(argv[1]));
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
 		return -1;
@@ -2598,7 +2598,7 @@ static int monitormode(void)
 			fprintf(stdout, _("SMS Messages: Unread %d, Number %d\n"), smsstatus.unread, smsstatus.number);
 
 		if (gn_sm_functions(GN_OP_GetNetworkInfo, &data, &state) == GN_ERR_NONE)
-			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), gn_get_network_name(networkinfo.network_code), gn_get_country_name(networkinfo.network_code), networkinfo.LAC[0], networkinfo.LAC[1], networkinfo.cell_id[0], networkinfo.cell_id[1]);
+			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), gn_network_name_get(networkinfo.network_code), gn_country_name_get(networkinfo.network_code), networkinfo.LAC[0], networkinfo.LAC[1], networkinfo.cell_id[0], networkinfo.cell_id[1]);
 
 		for (i = 0; i < GN_CALL_MAX_PARALLEL; i++)
 			displaycall(i);
@@ -2949,7 +2949,7 @@ static int getphonebook(int argc, char *argv[])
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
-	entry.memory_type = gn_str_to_memory_type(memory_type_string);
+	entry.memory_type = gn_str2memory_type(memory_type_string);
 	if (entry.memory_type == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[0]);
 		return -1;
@@ -3190,7 +3190,7 @@ static int writephonebook(int argc, char *args[])
 	/* Go through data from stdin. */
 	while (1) {
 		if (!vcard) {
-			if (!gn_get_line(stdin, line, MAX_INPUT_LINE_LEN))
+			if (!gn_line_get(stdin, line, MAX_INPUT_LINE_LEN))
 				break;
 			if ((memory_type_string = decodephonebook(&entry, oline)) == NULL)
 				continue;
@@ -3214,7 +3214,7 @@ static int writephonebook(int argc, char *args[])
 					fprintf(stdout, _("Location busy. "));
 					while (confirm < 0) {
 						fprintf(stdout, _("Overwrite? (yes/no) "));
-						gn_get_line(stdin, ans, 7);
+						gn_line_get(stdin, ans, 7);
 						if (!strcmp(ans, _("yes"))) confirm = 1;
 						else if (!strcmp(ans, _("no"))) confirm = 0;
 					}
@@ -4561,10 +4561,10 @@ int main(int argc, char *argv[])
 	short_version();
 
 	/* Read config file */
-	if (gn_cfg_readconfig(&bindir) < 0) {
+	if (gn_cfg_read(&bindir) < 0) {
 		exit(1);
 	}
-	if (!gn_cfg_load_phone("", &state)) exit(1);
+	if (!gn_cfg_phone_load("", &state)) exit(1);
 
 	/* Handle command line arguments. */
 	c = getopt_long(argc, argv, "", long_options, NULL);

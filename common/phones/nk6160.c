@@ -168,9 +168,9 @@ static gn_error initialise(struct gn_statemachine *state)
 	if (error) 
 		goto out;
 	dprintf("model: '%s'\n", model);
-	if ((pm = gn_get_phone_model(model)) == NULL) {
-		dump(_("Unsupported phone model \"%s\"\n"), model);
-		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
+	if ((pm = gn_phone_model_get(model)) == NULL) {
+		dump("Unsupported phone model \"%s\"\n", model);
+		dump("Please read Docs/Reporting-HOWTO and send a bug report!\n");
 		error = GN_ERR_INTERNALERROR;
 	}
 out:	
@@ -374,7 +374,7 @@ static gn_error bitmap_startup_logo_incoming(int messagetype, unsigned char *mes
 	for (x = 0; x < 84; x++)
 		for (b = message[5 + x], i = 0; b != 0; b >>= 1, i++)
 			if (b & 0x01)
-				gn_bmp_set_point(data->bitmap, x, 8 * drvinst->logoslice + i);
+				gn_bmp_point_set(data->bitmap, x, 8 * drvinst->logoslice + i);
 
 	return GN_ERR_NONE;
 }

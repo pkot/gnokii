@@ -73,9 +73,6 @@
 #define GNOKII_MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #define GNOKII_MIN(a, b)  (((a) < (b)) ? (a) : (b))
 
-extern API void (*gn_elog_handler)(const char *fmt, va_list ap);
-extern API void gn_elog_write(const char *fmt, ...);
-
 /* A define to make debug printfs neat */
 #ifdef __GNUC__
 #  ifndef DEBUG
@@ -101,20 +98,11 @@ extern API void gn_elog_write(const char *fmt, ...);
 #define gasprintf		asprintf
 #define gvasprintf		vasprintf
 
-API int gn_get_line(FILE *file, char *line, int count);
-
 /* This is for the bitmaps mostly, but may be useful also for the other
  * things. Counts how many octets we need to cover the given ammount of
  * the bits.
  */
 #define ceiling_to_octet(x) ((x) + 7) / 8
-
-/* For models table */
-typedef struct {
-	char *model;
-	char *number;
-	int flags;
-} gn_phone_model;
 
 #define PM_CALLERGROUP		0x0001
 #define PM_NETMONITOR		0x0002
@@ -127,11 +115,5 @@ typedef struct {
 #define PM_EXTPBK		0x0100
 #define PM_AUTHENTICATION	0x0200
 #define PM_FOLDERS		0x0400
-
-extern char *gn_get_model(const char *);
-extern gn_phone_model *gn_get_phone_model(const char *);
-
-API char *gn_lock_device(const char *);
-API bool gn_unlock_device(char *);
 
 #endif /* _gnokii_misc_h */

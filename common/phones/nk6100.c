@@ -454,9 +454,9 @@ static gn_error IdentifyPhone(struct gn_statemachine *state)
 	    (err = get_hw(&data, state)) != GN_ERR_NONE) {
 		return err;
 	}
-	if ((drvinst->pm = gn_get_phone_model(data.model)) == NULL) {
-		dump(_("Unsupported phone model \"%s\"\n"), data.model);
-		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
+	if ((drvinst->pm = gn_phone_model_get(data.model)) == NULL) {
+		dump("Unsupported phone model \"%s\"\n", data.model);
+		dump("Please read Docs/Reporting-HOWTO and send a bug report!\n");
 		return GN_ERR_INTERNALERROR;
 	}
 
@@ -722,7 +722,7 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	*pos++ = pe->location;
 	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_PB_UNICODE) {
 		*pos++ = (2 * namelen);
-		namelen = char_encode_unicode(pos, pe->name, namelen);
+		namelen = char_unicode_encode(pos, pe->name, namelen);
 	} else {
 		*pos++ = namelen;
 		pnok_string_encode(pos, namelen, pe->name);
@@ -808,7 +808,7 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			   set message[4] to 0. Newer ones set is to the location
 			   number. It can be the distinction when to read the name */
 			if (message[4] != 0)
-				char_decode_unicode(pe->name, pos, n);
+				char_unicode_decode(pe->name, pos, n);
 			else
 				pnok_string_decode(pe->name, sizeof(pe->name), pos, n);
 			pos += n;
@@ -1314,7 +1314,7 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 		 * The marked part seems to be an ISDN cause code -- bozo
 		 * 01 08 00 03 64 [01 32] 00
 		 */
-		error = isdn_cause_to_gn_error(NULL, NULL, message[5], message[6]);
+		error = isdn_cause2gn_error(NULL, NULL, message[5], message[6]);
 		switch (error) {
 		case GN_ERR_UNKNOWN: return GN_ERR_FAILED;
 		default:         return error;
@@ -1348,8 +1348,8 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 			memset(&cbmsg, 0, sizeof(cbmsg));
 			cbmsg.new = true;
 			cbmsg.channel = message[7];
-			n = char_unpack_7bit(0, length-10, sizeof(cbmsg.message)-1, message+10, cbmsg.message);
-			char_decode_ascii(cbmsg.message, cbmsg.message, n);
+			n = char_7bit_unpack(0, length-10, sizeof(cbmsg.message)-1, message+10, cbmsg.message);
+			char_ascii_decode(cbmsg.message, cbmsg.message, n);
 			DRVINSTANCE(state)->on_cell_broadcast(&cbmsg);
 		}
 		return GN_ERR_UNSOLICITED;
@@ -1426,10 +1426,10 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 			}
 			if (pos[0] % 2) pos[0]++;
 			pos[0] = pos[0] / 2 + 1;
-			snprintf(smsc->recipient.number, sizeof(smsc->recipient.number), "%s", char_get_bcd_number(pos));
+			snprintf(smsc->recipient.number, sizeof(smsc->recipient.number), "%s", char_bcd_number_get(pos));
 			smsc->recipient.type = pos[1];
 			pos += 12;
-			snprintf(smsc->smsc.number, sizeof(smsc->smsc.number), "%s", char_get_bcd_number(pos));
+			snprintf(smsc->smsc.number, sizeof(smsc->smsc.number), "%s", char_bcd_number_get(pos));
 			smsc->smsc.type = pos[1];
 			pos += 12;
 			/* FIXME: codepage must be investigated - bozo */
@@ -2579,7 +2579,7 @@ static gn_error IncomingDisplay(int messagetype, unsigned char *message, int len
 			drawmsg.cmd = GN_DISP_DRAW_Text;
 			drawmsg.data.text.x = x;
 			drawmsg.data.text.y = y;
-			char_decode_unicode(drawmsg.data.text.text, pos, n << 1);
+			char_unicode_decode(drawmsg.data.text.text, pos, n << 1);
 			disp->output_fn(&drawmsg);
 
 			dprintf("(x,y): %d,%d, len: %d, data: %s\n", x, y, n, drawmsg.data.text.text);
@@ -3025,7 +3025,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 
 	/* Remote end hang up */
 	case 0x04:
-		isdn_cause_to_gn_error(NULL, NULL, message[7], message[6]);
+		isdn_cause2gn_error(NULL, NULL, message[7], message[6]);
 		if (data->call_info) {
 			data->call_info->call_id = message[4];
 			return GN_ERR_UNKNOWN;

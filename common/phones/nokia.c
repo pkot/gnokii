@@ -74,7 +74,7 @@ static wchar_t pnok_nokia_to_uni(unsigned char ch)
 	case 0xdc: return 0x00dc; /* LATIN CAPITAL LETTER U WITH DIAERESIS (!) */
 	case 0xce: return 0x0171; /* LATIN SMALL LETTER U WITH DOUBLE ACUTE */
 	case 0xcc: return 0x0170; /* LATIN CAPITAL LETTER U WITH DOUBLE ACUTE */
-	default: return char_decode_def_alphabet(ch);
+	default: return char_def_alphabet_decode(ch);
 	}
 }
 
@@ -99,7 +99,7 @@ static unsigned char pnok_uni_to_nokia(wchar_t wch)
 	case 0x00dc: return 0x5e; /* LATIN CAPITAL LETTER U WITH DIAERESIS (!) */
 	case 0x0171: return 0xce; /* LATIN SMALL LETTER U WITH DOUBLE ACUTE */
 	case 0x0170: return 0xcc; /* LATIN CAPITAL LETTER U WITH DOUBLE ACUTE */
-	default: return char_encode_def_alphabet((unsigned char)wch);
+	default: return char_def_alphabet_encode((unsigned char)wch);
 	}
 }
 
@@ -109,7 +109,7 @@ void pnok_string_decode(unsigned char *dest, size_t max, const unsigned char *sr
 	unsigned char buf[16];
 
 	for (i = 0, j = 0; j < len; i += n, j++) {
-		n = char_decode_uni_alphabet(pnok_nokia_to_uni(src[j]), buf);
+		n = char_uni_alphabet_decode(pnok_nokia_to_uni(src[j]), buf);
 		if (i + n >= max) break;
 		memcpy(dest + i, buf, n);
 	}
@@ -122,7 +122,7 @@ size_t pnok_string_encode(unsigned char *dest, size_t max, const unsigned char *
 	wchar_t wch;
 
 	for (i = 0, j = 0; i < max && src[j]; i++, j += n) {
-		n = char_encode_uni_alphabet(src + j, &wch);
+		n = char_uni_alphabet_encode(src + j, &wch);
 		dest[i] = pnok_uni_to_nokia(wch);
 	}
 	return i;
@@ -232,7 +232,7 @@ gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int 
 		} else if (pos[0] == 0x02 && pos[1] == 0x01) {
 			pos += 2;
 			snprintf(cd->number.number, sizeof(cd->number.number),
-				 "%-*.*s", *pos+1, *pos+1, char_get_bcd_number(pos+1));
+				 "%-*.*s", *pos+1, *pos+1, char_bcd_number_get(pos+1));
 			pos += 12 + 22;
 			cd->timeout = *pos++;
 		}

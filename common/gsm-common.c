@@ -34,7 +34,7 @@ gn_error unimplemented(void)
 	return GN_ERR_NOTIMPLEMENTED;
 }
 
-API gn_memory_type gn_str_to_memory_type(const char *s)
+API gn_memory_type gn_str2memory_type(const char *s)
 {
 #define X(a) if (!strcmp(s, #a)) return GN_MT_##a;
 	X(ME);

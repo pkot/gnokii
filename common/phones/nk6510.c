@@ -774,7 +774,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		case 0x00:
 			dprintf("SMS Folder successfully created!\n");
 			data->sms_folder->folder_id = message[8];
-			char_decode_unicode(data->sms_folder->name, message + 10, length - 11);
+			char_unicode_decode(data->sms_folder->name, message + 10, length - 11);
 			dprintf("   Folder ID: %i\n", data->sms_folder->folder_id);
 			dprintf("   Name: %s\n", data->sms_folder->name);
 			break;
@@ -800,7 +800,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			data->sms_folder_list->folder_id[j] = message[i - 2];
 			dprintf("Folder(%i) name: ", message[i - 2]);
 			len = message[i - 1] << 1;
-			char_decode_unicode(data->sms_folder_list->folder[j].name, message + i, len);
+			char_unicode_decode(data->sms_folder_list->folder[j].name, message + i, len);
 			dprintf("%s\n", data->sms_folder_list->folder[j].name);
 		}
 		break;
@@ -907,7 +907,7 @@ static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *st
 
 	dprintf("Creating SMS Folder...\n");
 	
-	char_encode_unicode(req + 10, data->sms_folder->name, strlen(data->sms_folder->name));
+	char_unicode_encode(req + 10, data->sms_folder->name, strlen(data->sms_folder->name));
 	req[7] = strlen(data->sms_folder->name) * 2 + 6;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, req[7] + 6);
 }
@@ -1163,11 +1163,12 @@ static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
 	for (i = 0; i < len; i++) dprintf("%02x ", req[i]);
 	dprintf("\n");
 	*/
-	fprintf(stdout, "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
-			 "It may have to be sent to Nokia Service if something fails!\n"
-			 "Do you really want to continue? (yes/no) ");
-	gn_get_line(stdin, ans, 4);
-	if (strcmp(ans, "yes")) return GN_ERR_USERCANCELED;
+	fprintf(stdout, _("6510 series phones seem to be quite sensitive to malformed SMS messages\n"
+			  "It may have to be sent to Nokia Service if something fails!\n"
+			  "Do you really want to continue? "));
+	fprintf(stdout, _("(yes/no) "));
+	gn_line_get(stdin, ans, 4);
+	if (strcmp(ans, _("yes"))) return GN_ERR_USERCANCELED;
 
 	if (sm_message_send(len, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
 	error = sm_block(NK6510_MSG_FOLDER, data, state);
@@ -1238,12 +1239,12 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *message, int 
 					if (message[offset + 4] % 2) message[offset + 4]++;
 					message[offset + 4] = message[offset + 4] / 2 + 1;
 					snprintf(data->message_center->recipient.number,
-						 GN_SMS_NUMBER_MAX_LENGTH + 1, "%s", char_get_bcd_number(message + offset + 4));
+						 GN_SMS_NUMBER_MAX_LENGTH + 1, "%s", char_bcd_number_get(message + offset + 4));
 					data->message_center->recipient.type = message[offset + 5];
 					break;
 				case 0x02: /* SMSC number */
 					snprintf(data->message_center->smsc.number,
-						 GN_SMS_NUMBER_MAX_LENGTH + 1, "%s", char_get_bcd_number(message + offset + 4));
+						 GN_SMS_NUMBER_MAX_LENGTH + 1, "%s", char_bcd_number_get(message + offset + 4));
 					data->message_center->smsc.type = message[offset + 5];
 					break;
 				default:
@@ -1252,7 +1253,7 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *message, int 
 				}
 				break;
 			case 0x81: /* SMSC name */
-				char_decode_unicode(data->message_center->name,
+				char_unicode_decode(data->message_center->name,
 					      message + offset + 4,
 					      message[offset + 2] << 1);
 				break;
@@ -1553,23 +1554,23 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	switch (data->bitmap->number) {
 	case 0:
 		string[0] = 0x0d;
-		char_encode_unicode(string + 1, "Family", 6);
+		char_unicode_encode(string + 1, "Family", 6);
 		break;
 	case 1:
 		string[0] = 0x07;
-		char_encode_unicode(string + 1, "VIP", 3);
+		char_unicode_encode(string + 1, "VIP", 3);
 		break;
 	case 2:
 		string[0] = 0x0f;
-		char_encode_unicode(string + 1, "Friends", 7);
+		char_unicode_encode(string + 1, "Friends", 7);
 		break;
 	case 3:
 		string[0] = 0x15;
-		char_encode_unicode(string + 1, "Colleagues", 10);
+		char_unicode_encode(string + 1, "Colleagues", 10);
 		break;
 	case 4:
 		string[0] = 0x0d;
-		char_encode_unicode(string + 1, "Others", 6);
+		char_unicode_encode(string + 1, "Others", 6);
 		break;
 	default:
 		string[0] = 0x00;
@@ -1652,7 +1653,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	if ((*(entry->name)) && (*(entry->number))) {
 		/* Name */
 		j = strlen(entry->name);
-		char_encode_unicode((string + 1), entry->name, j);
+		char_unicode_encode((string + 1), entry->name, j);
 		/* Length ot the string + length field + terminating 0 */
 		string[0] = j * 2;
 		count += PackBlock(0x07, j * 2 + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
@@ -1673,7 +1674,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 			string[0] = entry->subentries[defaultn].number_type;
 			string[1] = string[2] = string[3] = 0;
 			j = strlen(entry->subentries[defaultn].data.number);
-			char_encode_unicode((string + 5), entry->subentries[defaultn].data.number, j);
+			char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
 			string[4] = j * 2;
 			count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 		}
@@ -1685,14 +1686,14 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 					string[0] = entry->subentries[i].number_type;
 					string[1] = string[2] = string[3] = 0;
 					j = strlen(entry->subentries[i].data.number);
-					char_encode_unicode((string + 5), entry->subentries[i].data.number, j);
+					char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
 					string[4] = j * 2;
 					count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 				}
 			} else {
 				j = strlen(entry->subentries[i].data.number);
 				string[0] = j * 2;
-				char_encode_unicode((string + 1), entry->subentries[i].data.number, j);
+				char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 				count += PackBlock(entry->subentries[i].entry_type, j * 2 + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 			}
 
@@ -2050,7 +2051,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		dprintf("Count before encode = %d\n", count);
 		dprintf("Meeting Text is = \"%s\"\n", calnote->text);
 
-		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
 		count = count + 2 * strlen(calnote->text);
 		break;
 
@@ -2080,9 +2081,9 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* fixed 0x00 */
 		req[count++] = strlen(calnote->phone_number);   /* Field 19 */
 		/* Text */
-		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
 		count += 2 * strlen(calnote->text);
-		char_encode_unicode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
+		char_unicode_encode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
 		count += 2 * strlen(calnote->phone_number);
 		break;
 	case GN_CALNOTE_BIRTHDAY:
@@ -2122,7 +2123,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* Text */
 		dprintf("Count before encode = %d\n", count);
 
-		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
+		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
 		count = count + 2 * strlen(calnote->text);
 		break;
 
@@ -2137,7 +2138,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* fixed 0x00 */
 		req[count++] = 0x00; /* Field 15 */
 		/* Text */
-		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
+		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
 		count += 2 * strlen(calnote->text);
 		break;
 	}
@@ -2205,7 +2206,7 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 					break;
 				}
 				operatorname = malloc(blockstart[5] + 1);
-				char_decode_unicode(operatorname, blockstart + 6, blockstart[5] << 1);
+				char_unicode_decode(operatorname, blockstart + 6, blockstart[5] << 1);
 				dprintf("Operator Name: %s\n", operatorname);
 				break;
 			case 0x09:  /* Operator details */
@@ -2456,7 +2457,7 @@ reply: 0x7a / 0x0036
 		switch (message[4]) {
 		case 0x01:
 			dprintf("Greeting text received\n");
-			char_decode_unicode(data->bitmap->text, message + 6, length - 7);
+			char_unicode_decode(data->bitmap->text, message + 6, length - 7);
 			return GN_ERR_NONE;
 			break;
 		case 0x05:
@@ -2625,7 +2626,7 @@ static gn_error NK6510_IncomingProfile(int messagetype, unsigned char *message, 
 				data->profile->caller_groups = blockstart[7];
 				break;
 			case 0x0c:
-				char_decode_unicode(data->profile->name, blockstart + 7, blockstart[6] << 1);
+				char_unicode_decode(data->profile->name, blockstart + 7, blockstart[6] << 1);
 				dprintf("Profile Name: %s\n", data->profile->name);
 				break;
 			default:
@@ -2828,7 +2829,7 @@ static gn_error NK6510_SetProfile(gn_data *data, struct gn_statemachine *state)
 	memcpy(req + length + 3, "\xcc\xad\xff", 3);
 	/* Name */
 	j = strlen(data->profile->name);
-	char_encode_unicode((req + length + 7), data->profile->name, j);
+	char_unicode_encode((req + length + 7), data->profile->name, j);
 	/* Terminating 0 */
 	req[j * 2 + 1] = 0;
 	/* Length of the string + length field + terminating 0 */
@@ -3053,7 +3054,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		char_decode_unicode(dummy, message + 7, message[6] << 1);
+		char_unicode_decode(dummy, message + 7, message[6] << 1);
 		dprintf("Number: %s\n", dummy);
 		break;		
 	case 0x04:
@@ -3067,7 +3068,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		char_decode_unicode(dummy, message + 7, message[6] << 1);
+		char_unicode_decode(dummy, message + 7, message[6] << 1);
 		dprintf("From: %s\n", dummy);
 		break;
 	case 0x07:
@@ -3096,7 +3097,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		char_decode_unicode(dummy, message + 7, message[6] << 1);
+		char_unicode_decode(dummy, message + 7, message[6] << 1);
 		dprintf("To: %s\n", dummy);
 		break;
 	default:
@@ -3135,7 +3136,7 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_ENTRYTOOLONG;
 	}
 	req[pos++] = len;
-	char_encode_unicode(req + pos, data->call_info->number, len);
+	char_unicode_encode(req + pos, data->call_info->number, len);
 	pos += len << 1;
 	req[pos++] = 0x01; /* one block */
 	req[pos++] = 0x01; /* type */
@@ -3190,13 +3191,13 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("WAP bookmark received\n");
 		string_length = (message[6] << 8 | message[7]) << 1;
 
-		char_decode_unicode(data->wap_bookmark->name, message + 8, string_length);
+		char_unicode_decode(data->wap_bookmark->name, message + 8, string_length);
 		dprintf("Name: %s\n", data->wap_bookmark->name);
 		pos = string_length + 8;
 
 		string_length = message[pos++] << 8;
 		string_length |= message[pos++];
-		char_decode_unicode(data->wap_bookmark->URL, message + pos, string_length << 1);
+		char_unicode_decode(data->wap_bookmark->URL, message + pos, string_length << 1);
 		dprintf("URL: %s\n", data->wap_bookmark->URL);
 		break;
 	case 0x0a:
@@ -3213,14 +3214,14 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("WAP setting received\n");
 
 		string_length = (message[4] << 8 | message[5]) << 1;
-		char_decode_unicode(data->wap_setting->name, message + 6, string_length);
+		char_unicode_decode(data->wap_setting->name, message + 6, string_length);
 		dprintf("Name: %s\n", data->wap_setting->name);
 		pos = string_length + 6;
 		if (!(string_length % 2)) pad = 1;
 
 		string_length = message[pos++] << 8; 
 		string_length = (string_length | message[pos++]) << 1;
-		char_decode_unicode(data->wap_setting->home, message + pos, string_length);
+		char_unicode_decode(data->wap_setting->home, message + pos, string_length);
 		dprintf("Home: %s\n", data->wap_setting->home);
 		pos += string_length;
 
@@ -3248,25 +3249,25 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("GSM data:\n");
 
 		string_length = message[pos++] << 1;
-		char_decode_unicode(data->wap_setting->gsm_data_ip, message + pos, string_length);
+		char_unicode_decode(data->wap_setting->gsm_data_ip, message + pos, string_length);
 		dprintf("   IP: %s\n", data->wap_setting->gsm_data_ip);
 		pos += string_length;
 
   		string_length = message[pos++] << 8; 
 		string_length = (string_length | message[pos++]) << 1;
-		char_decode_unicode(data->wap_setting->number, message + pos, string_length);
+		char_unicode_decode(data->wap_setting->number, message + pos, string_length);
 		dprintf("   Number: %s\n", data->wap_setting->number);
 		pos += string_length;
 
   		string_length = message[pos++] << 8; 
 		string_length = (string_length | message[pos++]) << 1;
-		char_decode_unicode(data->wap_setting->gsm_data_username, message + pos, string_length);
+		char_unicode_decode(data->wap_setting->gsm_data_username, message + pos, string_length);
 		dprintf("   Username: %s\n", data->wap_setting->gsm_data_username);
 		pos += string_length;
 
   		string_length = message[pos++] << 8; 
 		string_length = (string_length | message[pos++]) << 1;
-		char_decode_unicode(data->wap_setting->gsm_data_password, message + pos, string_length);
+		char_unicode_decode(data->wap_setting->gsm_data_password, message + pos, string_length);
 		dprintf("   Password: %s\n", data->wap_setting->gsm_data_password);
 		pos += string_length;
 
@@ -3280,26 +3281,26 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		data->wap_setting->gprs_login = message[pos++];
 
 		string_length = message[pos++] << 1;
-		char_decode_unicode(data->wap_setting->access_point_name, message + pos, string_length);
+		char_unicode_decode(data->wap_setting->access_point_name, message + pos, string_length);
 		dprintf("   Access point: %s\n", data->wap_setting->access_point_name);
 		pos += string_length;
 
   		string_length = message[pos++] << 8; 
 		string_length = (string_length | message[pos++]) << 1;
-		char_decode_unicode(data->wap_setting->gprs_ip, message + pos, string_length);
+		char_unicode_decode(data->wap_setting->gprs_ip, message + pos, string_length);
 		dprintf("   IP: %s\n", data->wap_setting->gprs_ip);
 		pos += string_length;
 
   		string_length = message[pos++] << 8; 
 		string_length = (string_length | message[pos++]) << 1;
-		char_decode_unicode(data->wap_setting->gprs_username, message + pos, string_length);
+		char_unicode_decode(data->wap_setting->gprs_username, message + pos, string_length);
 		dprintf("   Username: %s\n", data->wap_setting->gprs_username);
 		pos += string_length;
 
 		if (message[pos] != 0x80) {
 			string_length = message[pos++] << 8; 
 			string_length |= message[pos++];
-			char_decode_unicode(data->wap_setting->gprs_password, message + pos, string_length);
+			char_unicode_decode(data->wap_setting->gprs_password, message + pos, string_length);
 			dprintf("   Password: %s\n", data->wap_setting->gprs_password);
 			pos += string_length;
 		} else
@@ -3362,7 +3363,7 @@ static int PackWAPString(unsigned char *dest, unsigned char *string, int length_
 		dest[0] = length % 256;
 	}
 
-	char_encode_unicode(dest + length_size, string, length);
+	char_unicode_encode(dest + length_size, string, length);
 	return ((length << 1) + length_size);
 }
 
@@ -3595,7 +3596,7 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 			data->todo->priority = message[4];
 		}
 		dprintf("Priority: %i\n", message[4]);
-		char_decode_unicode(data->todo->text, message + 14, length - 16);
+		char_unicode_decode(data->todo->text, message + 14, length - 16);
 		dprintf("Text: \"%s\"\n", data->todo->text);
 		break;
 	case 0x10:
@@ -3685,7 +3686,7 @@ static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state)
 	req[8] = data->todo->location / 256;
 	req[9] = data->todo->location % 256;
 
-	char_encode_unicode(text, data->todo->text, strlen(data->todo->text));
+	char_unicode_encode(text, data->todo->text, strlen(data->todo->text));
 	memcpy(req + 10, text, strlen(data->todo->text) * 2);
 
 	dprintf("Setting ToDo\n");

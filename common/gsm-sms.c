@@ -132,13 +132,13 @@ API void gn_sms_default_deliver(gn_sms *sms)
  ***/
 
 /**
- * sms_print_date_time - formats date and time in the human readable manner
+ * sms_timestamp_print - formats date and time in the human readable manner
  * @number: binary coded date and time
  *
  * The function converts binary date time into a easily readable form.
  * It is Y2K compliant.
  */
-static char *sms_print_date_time(u8 *number)
+static char *sms_timestamp_print(u8 *number)
 {
 #ifdef DEBUG
 #define LOCAL_DATETIME_MAX_LENGTH 23
@@ -178,14 +178,14 @@ static char *sms_print_date_time(u8 *number)
 }
 
 /**
- * gn_sms_unpack_date_time - converts binary datetime to the gnokii's datetime struct
+ * sms_timestamp_unpack - converts binary datetime to the gnokii's datetime struct
  * @number: binary coded date and time
  * @dt: datetime structure to be filled
  *
  * The function fills int gnokii datetime structure basing on the given datetime
  * in the binary format. It is Y2K compliant.
  */
-gn_timestamp *gn_sms_unpack_date_time(u8 *number, gn_timestamp *dt)
+static gn_timestamp *sms_timestamp_unpack(u8 *number, gn_timestamp *dt)
 {
 	if (!dt) return NULL;
 	memset(dt, 0, sizeof(gn_timestamp));
@@ -217,12 +217,12 @@ gn_timestamp *gn_sms_unpack_date_time(u8 *number, gn_timestamp *dt)
 }
 
 /**
- * gn_sms_pack_date_time - converts gnokii's datetime struct to the binary datetime
+ * sms_timestamp_pack - converts gnokii's datetime struct to the binary datetime
  * @number: binary variable to be filled
  * @dt: datetime structure to be read
  *
  */
-u8 *gn_sms_pack_date_time(gn_timestamp *dt, u8 *number)
+static u8 *sms_timestamp_pack(gn_timestamp *dt, u8 *number)
 {
 	if (!number) return NULL;
 	memset(number, 0, sizeof(unsigned char));
@@ -391,7 +391,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 }
 
 /**
- * sms_decode_data - decodes encoded text from the SMS.
+ * sms_data_decode - decodes encoded text from the SMS.
  * @message: encoded text
  * @output: room for the encoded text
  * @length: decoded text length
@@ -402,13 +402,13 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
  * This function decodes either 7bit or 8bit os Unicode text to the
  * readable text format according to the locale set.
  */
-static gn_error sms_decode_data(unsigned char *message, unsigned char *output, unsigned int length,
+static gn_error sms_data_decode(unsigned char *message, unsigned char *output, unsigned int length,
 				 unsigned int size, unsigned int udhlen, gn_sms_dcs dcs)
 {
 	/* Unicode */
 	if ((dcs.type & 0x08) == 0x08) {
 		dprintf("Unicode message\n");
-		char_decode_unicode(output, message, length);
+		char_unicode_decode(output, message, length);
 	} else {
 		/* 8bit SMS */
 		if ((dcs.type & 0xf4) == 0xf4) {
@@ -418,8 +418,8 @@ static gn_error sms_decode_data(unsigned char *message, unsigned char *output, u
 		} else {
 			dprintf("Default Alphabet\n");
 			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
-			char_unpack_7bit((7-udhlen)%7, size, length, message, output);
-			char_decode_ascii(output, output, length);
+			char_7bit_unpack((7-udhlen)%7, size, length, message, output);
+			char_ascii_decode(output, output, length);
 		}
 	}
 	dprintf("%s\n", output);
@@ -427,7 +427,7 @@ static gn_error sms_decode_data(unsigned char *message, unsigned char *output, u
 }
 
 /**
- * sms_decode_udh - interprete the User Data Header contents
+ * sms_udh_decode - interprete the User Data Header contents
  * @message: received UDH
  * @sms: SMS structure to fill in
  *
@@ -436,7 +436,7 @@ static gn_error sms_decode_data(unsigned char *message, unsigned char *output, u
  *   - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
  *   - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  */
-static gn_error sms_decode_udh(unsigned char *message, gn_sms_udh *udh)
+static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 {
 	unsigned char length, pos, nr;
 
@@ -535,7 +535,7 @@ static gn_error sms_decode_udh(unsigned char *message, gn_sms_udh *udh)
 }
 
 /**
- * sms_decode_header - Doecodes PDU SMS header
+ * sms_header_decode - Doecodes PDU SMS header
  * @rawsms:
  * @sms:
  * @udh:
@@ -544,7 +544,7 @@ static gn_error sms_decode_udh(unsigned char *message, gn_sms_udh *udh)
  * them in hihger level SMS struct. It also checks for the UDH and when
  * it's found calls the function to extract the UDH.
  */
-static gn_error sms_decode_header(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *udh)
+static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *udh)
 {
 	switch (sms->type = rawsms->type) {
 	case GN_SMS_MT_Deliver:
@@ -574,22 +574,22 @@ static gn_error sms_decode_header(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 	}
 
 	/* Sending date */
-	gn_sms_unpack_date_time(rawsms->smsc_time, &(sms->smsc_time));
-	dprintf("\tDate: %s\n", sms_print_date_time(rawsms->smsc_time));
+	sms_timestamp_unpack(rawsms->smsc_time, &(sms->smsc_time));
+	dprintf("\tDate: %s\n", sms_timestamp_print(rawsms->smsc_time));
 
 	/* Remote number */
 	rawsms->remote_number[0] = (rawsms->remote_number[0] + 1) / 2 + 1;
-	snprintf(sms->remote.number, sizeof(sms->remote.number), "%s", char_get_bcd_number(rawsms->remote_number));
+	snprintf(sms->remote.number, sizeof(sms->remote.number), "%s", char_bcd_number_get(rawsms->remote_number));
 	dprintf("\tRemote number (recipient or sender): %s\n", sms->remote.number);
 
 	/* Short Message Center */
-	snprintf(sms->smsc.number, sizeof(sms->smsc.number), "%s", char_get_bcd_number(rawsms->message_center));
+	snprintf(sms->smsc.number, sizeof(sms->smsc.number), "%s", char_bcd_number_get(rawsms->message_center));
 	dprintf("\tSMS center number: %s\n", sms->smsc.number);
 
 	/* Delivery time */
 	if (sms->type == GN_SMS_MT_DeliveryReport) {
-		gn_sms_unpack_date_time(rawsms->time, &(sms->time));
-		dprintf("\tDelivery date: %s\n", sms_print_date_time(rawsms->time));
+		sms_timestamp_unpack(rawsms->time, &(sms->time));
+		dprintf("\tDelivery date: %s\n", sms_timestamp_print(rawsms->time));
 	}
 
 	/* Data Coding Scheme */
@@ -598,26 +598,26 @@ static gn_error sms_decode_header(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 	/* User Data Header */
 	if (rawsms->udh_indicator & 0x40) { /* UDH header available */
 		dprintf("UDH found\n");
-		sms_decode_udh(rawsms->user_data, udh);
+		sms_udh_decode(rawsms->user_data, udh);
 	}
 
 	return GN_ERR_NONE;
 }
 
 /**
- * sms_decode_pdu - This function decodes the PDU SMS
+ * sms_pdu_decode - This function decodes the PDU SMS
  * @rawsms - SMS read by the phone driver
  * @sms - place to store the decoded message
  *
  * This function decodes SMS as described in GSM 03.40 version 6.1.0
  * Release 1997, section 9
  */
-static gn_error sms_decode_pdu(gn_sms_raw *rawsms, gn_sms *sms)
+static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
 {
 	unsigned int size = 0;
 	gn_error error;
 
-	error = sms_decode_header(rawsms, sms, &sms->udh);
+	error = sms_header_decode(rawsms, sms, &sms->udh);
 	ERROR();
 	switch (sms->type) {
 	case GN_SMS_MT_DeliveryReport:
@@ -636,14 +636,14 @@ static gn_error sms_decode_pdu(gn_sms_raw *rawsms, gn_sms *sms)
 
 			/* First part is a Picture */
 			sms->user_data[0].type = GN_SMS_DATA_Bitmap;
-			gn_bmp_read_sms(GN_BMP_PictureMessage, rawsms->user_data,
+			gn_bmp_sms_read(GN_BMP_PictureMessage, rawsms->user_data,
 					NULL, &sms->user_data[0].u.bitmap);
 			gn_bmp_print(&sms->user_data[0].u.bitmap, stderr);
 
 			size = rawsms->user_data_length - 4 - sms->user_data[0].u.bitmap.size;
 			/* Second part is a text */
 			sms->user_data[1].type = GN_SMS_DATA_NokiaText;
-			sms_decode_data(rawsms->user_data + 5 + sms->user_data[0].u.bitmap.size,
+			sms_data_decode(rawsms->user_data + 5 + sms->user_data[0].u.bitmap.size,
 					(unsigned char *)&(sms->user_data[1].u.text),
 					rawsms->length - sms->user_data[0].u.bitmap.size - 4,
 					size, 0, sms->dcs);
@@ -653,13 +653,13 @@ static gn_error sms_decode_pdu(gn_sms_raw *rawsms, gn_sms *sms)
 
 			/* First part is a text */
 			sms->user_data[1].type = GN_SMS_DATA_NokiaText;
-			sms_decode_data(rawsms->user_data + 3,
+			sms_data_decode(rawsms->user_data + 3,
 					(unsigned char *)&(sms->user_data[1].u.text),
 					rawsms->user_data[1], rawsms->user_data[0], 0, sms->dcs);
 
 			/* Second part is a Picture */
 			sms->user_data[0].type = GN_SMS_DATA_Bitmap;
-			gn_bmp_read_sms(GN_BMP_PictureMessage,
+			gn_bmp_sms_read(GN_BMP_PictureMessage,
 					rawsms->user_data + rawsms->user_data[0] + 7,
 					NULL, &sms->user_data[0].u.bitmap);
 			gn_bmp_print(&sms->user_data[0].u.bitmap, stderr);
@@ -668,7 +668,7 @@ static gn_error sms_decode_pdu(gn_sms_raw *rawsms, gn_sms *sms)
 	/* Plain text message */
 	default:
 		size = rawsms->length - sms->udh.length;
-		sms_decode_data(rawsms->user_data + sms->udh.length,        /* Skip the UDH */
+		sms_data_decode(rawsms->user_data + sms->udh.length,        /* Skip the UDH */
 				(unsigned char *)&sms->user_data[0].u.text, /* With a plain text message we have only 1 part */
 				rawsms->length,                            /* Length of the decoded text */
 				size,                                      /* Length of the encoded text (in full octets) without UDH */
@@ -692,7 +692,7 @@ API gn_error gn_sms_parse(gn_data *data)
 {
 	if (!data->raw_sms || !data->sms) return GN_ERR_INTERNALERROR;
 	/* Let's assume at the moment that all messages are PDU coded */
-	return sms_decode_pdu(data->raw_sms, data->sms);
+	return sms_pdu_decode(data->raw_sms, data->sms);
 }
 
 /**
@@ -946,7 +946,7 @@ API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemachine *st
 
 
 /**
- * sms_encode_udh - encodes User Data Header
+ * sms_udh_encode - encodes User Data Header
  * @sms: SMS structure with the data source
  * @type:
  *
@@ -957,7 +957,7 @@ API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemachine *st
  *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  *  o Smart Messaging Specification, Revision 3.0.0
  */
-static char *sms_encode_udh(gn_sms_raw *rawsms, int type)
+static char *sms_udh_encode(gn_sms_raw *rawsms, int type)
 {
 	unsigned char pos;
 	char *udh = rawsms->user_data;
@@ -1001,7 +1001,7 @@ static char *sms_encode_udh(gn_sms_raw *rawsms, int type)
 }
 
 /**
- * encode_concat_header - Adds concatenated messages header
+ * sms_concat_header_encode - Adds concatenated messages header
  * @rawsms: processed SMS
  * @this: current part number
  * @total: total parts number
@@ -1009,9 +1009,9 @@ static char *sms_encode_udh(gn_sms_raw *rawsms, int type)
  * This function adds sequent part of the concatenated messages header. Note
  * that this header should be the first of all headers.
  */
-static gn_error sms_encode_concat_header(gn_sms_raw *rawsms, int this, int total)
+static gn_error sms_concat_header_encode(gn_sms_raw *rawsms, int this, int total)
 {
-	char *header = sms_encode_udh(rawsms, GN_SMS_UDH_ConcatenatedMessages);
+	char *header = sms_udh_encode(rawsms, GN_SMS_UDH_ConcatenatedMessages);
 	if (!header) return GN_ERR_NOTSUPPORTED;
 	header[2] = 0xce;		/* Message serial number. Is 0xce value somehow special? -- pkot */
 	header[3] = total;
@@ -1020,7 +1020,7 @@ static gn_error sms_encode_concat_header(gn_sms_raw *rawsms, int this, int total
 }
 
 /**
- * encode_data - encodes the date from the SMS structure to the phone frame
+ * sms_data_encode - encodes the date from the SMS structure to the phone frame
  *
  * @SMS: SMS structure to be encoded
  * @dcs: Data Coding Scheme field in the frame to be set
@@ -1031,7 +1031,7 @@ static gn_error sms_encode_concat_header(gn_sms_raw *rawsms, int this, int total
  * This function does the phone frame encoding basing on the given SMS
  * structure. This function is capable to create only one frame at a time.
  */
-static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
+static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 {
 	gn_sms_dcs_alphabet_type al = GN_SMS_DCS_DefaultAlphabet;
 	unsigned int i, size = 0;
@@ -1075,14 +1075,14 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 		case GN_SMS_DATA_Bitmap:
 			switch (sms->user_data[0].u.bitmap.type) {
 			case GN_BMP_PictureMessage:
-				size = sms_nokia_encode_bitmap(&(sms->user_data[i].u.bitmap),
+				size = sms_nokia_bitmap_encode(&(sms->user_data[i].u.bitmap),
 							       rawsms->user_data + rawsms->user_data_length,
 							       (i == 0));
 				break;
 			case GN_BMP_OperatorLogo:
-				if (!sms_encode_udh(rawsms, GN_SMS_UDH_OpLogo)) return GN_ERR_NOTSUPPORTED;
+				if (!sms_udh_encode(rawsms, GN_SMS_UDH_OpLogo)) return GN_ERR_NOTSUPPORTED;
 			default:
-				size = gn_bmp_encode_sms(&(sms->user_data[i].u.bitmap),
+				size = gn_bmp_sms_encode(&(sms->user_data[i].u.bitmap),
 							 rawsms->user_data + rawsms->user_data_length);
 				break;
 			}
@@ -1095,7 +1095,7 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 		case GN_SMS_DATA_Animation: {
 			int j;
 			for (j = 0; j < 4; j++) {
-				size = gn_bmp_encode_sms(&(sms->user_data[i].u.animation[j]), rawsms->user_data + rawsms->user_data_length);
+				size = gn_bmp_sms_encode(&(sms->user_data[i].u.animation[j]), rawsms->user_data + rawsms->user_data_length);
 				rawsms->length += size;
 				rawsms->user_data_length += size;
 			}
@@ -1111,7 +1111,7 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 			switch (al) {
 			case GN_SMS_DCS_DefaultAlphabet:
 #define UDH_Length 0
-				size = char_pack_7bit((7 - (UDH_Length % 7)) % 7,
+				size = char_7bit_pack((7 - (UDH_Length % 7)) % 7,
 						      sms->user_data[i].u.text,
 						      rawsms->user_data + offset,
 						      &length);
@@ -1125,7 +1125,7 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 				break;
 			case GN_SMS_DCS_UCS2:
 				rawsms->dcs |= 0x08;
-				char_encode_unicode(rawsms->user_data + offset, sms->user_data[i].u.text, length);
+				char_unicode_encode(rawsms->user_data + offset, sms->user_data[i].u.text, length);
 				length *= 2;
 				rawsms->user_data_length = rawsms->length = length + offset;
 				break;
@@ -1136,7 +1136,7 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 		}
 
 		case GN_SMS_DATA_NokiaText:
-			size = sms_nokia_encode_text(sms->user_data[i].u.text,
+			size = sms_nokia_text_encode(sms->user_data[i].u.text,
 						     rawsms->user_data + rawsms->user_data_length,
 						     (i == 0));
 			rawsms->length += size;
@@ -1144,7 +1144,7 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 			break;
 
 		case GN_SMS_DATA_iMelody:
-			size = imelody_encode_sms(sms->user_data[i].u.text, rawsms->user_data + rawsms->user_data_length);
+			size = imelody_sms_encode(sms->user_data[i].u.text, rawsms->user_data + rawsms->user_data_length);
 			dprintf("Imelody, size %d\n", size);
 			rawsms->length += size;
 			rawsms->user_data_length += size;
@@ -1154,8 +1154,8 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 
 		case GN_SMS_DATA_Multi:
 			size = sms->user_data[0].length;
-			if (!sms_encode_udh(rawsms, GN_SMS_UDH_MultipartMessage)) return GN_ERR_NOTSUPPORTED;
-			error = sms_encode_concat_header(rawsms, sms->user_data[i].u.multi.this, sms->user_data[i].u.multi.total);
+			if (!sms_udh_encode(rawsms, GN_SMS_UDH_MultipartMessage)) return GN_ERR_NOTSUPPORTED;
+			error = sms_concat_header_encode(rawsms, sms->user_data[i].u.multi.this, sms->user_data[i].u.multi.total);
 			ERROR();
 
 			memcpy(rawsms->user_data + rawsms->user_data_length, sms->user_data[i].u.multi.binary, MAX_SMS_PART);
@@ -1165,8 +1165,8 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 			break;
 
 		case GN_SMS_DATA_Ringtone:
-			if (!sms_encode_udh(rawsms, GN_SMS_UDH_Ringtone)) return GN_ERR_NOTSUPPORTED;
-			size = ringtone_encode_sms(rawsms->user_data + rawsms->length, &sms->user_data[i].u.ringtone);
+			if (!sms_udh_encode(rawsms, GN_SMS_UDH_Ringtone)) return GN_ERR_NOTSUPPORTED;
+			size = ringtone_sms_encode(rawsms->user_data + rawsms->length, &sms->user_data[i].u.ringtone);
 			rawsms->length += size;
 			rawsms->user_data_length += size;
 			rawsms->dcs = 0xf5;
@@ -1176,7 +1176,7 @@ static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 			dprintf("Encoding concat header\n");
 			al = GN_SMS_DCS_8bit;
 			rawsms->dcs = 0xf5;
-			sms_encode_concat_header(rawsms, sms->user_data[i].u.concat.this, sms->user_data[i].u.concat.total);
+			sms_concat_header_encode(rawsms, sms->user_data[i].u.concat.this, sms->user_data[i].u.concat.total);
 			break;
 
 		case GN_SMS_DATA_None:
@@ -1208,7 +1208,7 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 	rawsms->validity_indicator = GN_SMS_VP_RelativeFormat;
 	rawsms->validity[0] = 0xa9;
 
-	sms_encode_data(sms, rawsms);
+	sms_data_encode(sms, rawsms);
 
 	return GN_ERR_NONE;
 }
@@ -1311,8 +1311,8 @@ API gn_error gn_sms_save(gn_data *data, struct gn_statemachine *state)
 	data->raw_sms->status = data->sms->status;
 	data->raw_sms->memory_type = data->sms->memory_type;
 
-	gn_sms_pack_date_time(&data->sms->smsc_time, data->raw_sms->smsc_time);
-	dprintf("\tDate: %s\n", sms_print_date_time(data->raw_sms->smsc_time));
+	sms_timestamp_pack(&data->sms->smsc_time, data->raw_sms->smsc_time);
+	dprintf("\tDate: %s\n", sms_timestamp_print(data->raw_sms->smsc_time));
 
 	if (data->sms->smsc.number[0] != '\0') {
 		data->raw_sms->message_center[0] = 

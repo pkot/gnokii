@@ -33,7 +33,7 @@
 #include <string.h>
 #include "gsm-networks.h"
 
-gn_country countries[] = {
+static gn_country countries[] = {
 	{ "202", "Greece" },
 	{ "204", "Netherlands" },
 	{ "206", "Belgium" },
@@ -403,7 +403,7 @@ gn_network networks[] = {
 	{ "undefined", "unknown" }
 };
 
-API char *gn_get_network_name(char *network_code)
+API char *gn_network_name_get(char *network_code)
 {
 	int index = 0;
 
@@ -413,7 +413,7 @@ API char *gn_get_network_name(char *network_code)
 	return networks[index].name;
 }
 
-API char *gn_get_network_code(char *network_name)
+API char *gn_network_code_get(char *network_name)
 {
 	int index = 0;
 
@@ -423,7 +423,7 @@ API char *gn_get_network_code(char *network_name)
 	return networks[index].code;
 }
 
-API char *gn_get_country_name(char *country_code)
+API char *gn_country_name_get(char *country_code)
 {
 	int index = 0;
 
@@ -433,7 +433,7 @@ API char *gn_get_country_name(char *country_code)
 	return countries[index].name;
 }
 
-API char *gn_get_country_code(char *country_name)
+API char *gn_country_code_get(char *country_name)
 {
 	int index = 0;
 

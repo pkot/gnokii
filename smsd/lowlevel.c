@@ -98,11 +98,11 @@ static gn_error InitModelInf (void)
     
   g_free (phoneMonitor.phone.model);
   phoneMonitor.phone.version = g_strdup (model);
-  phoneMonitor.phone.model = gn_get_phone_model (model)->model;
+  phoneMonitor.phone.model = gn_phone_model_get (model)->model;
   if (phoneMonitor.phone.model == NULL)
     phoneMonitor.phone.model = g_strdup (_("unknown"));
 
-  phoneMonitor.supported = gn_get_phone_model (model)->flags;
+  phoneMonitor.supported = gn_phone_model_get (model)->flags;
 
   g_free (phoneMonitor.phone.revision);
   phoneMonitor.phone.revision = g_strdup (rev);
@@ -121,7 +121,7 @@ static gn_error InitModelInf (void)
 static void busterminate(void)
 {
 	gn_sm_functions(GN_OP_Terminate, NULL, &sm);
-	if (lockfile) gn_unlock_device(lockfile);
+	if (lockfile) gn_device_unlock(lockfile);
 }
 
 
@@ -138,12 +138,12 @@ static gn_error fbusinit (const char *iname, bool enable_monitoring)
 	}
 	/* signal(SIGINT, bussignal); */
 
-	if (!gn_cfg_load_phone(iname, &sm)) exit(-1);
+	if (!gn_cfg_phone_load(iname, &sm)) exit(-1);
 
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_lock_device(sm.config.port_device);
+		lockfile = gn_device_lock(sm.config.port_device);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);

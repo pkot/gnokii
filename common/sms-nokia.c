@@ -31,8 +31,9 @@
 #include <string.h>
 #include "misc.h"
 #include "sms-nokia.h"
-#include "gsm-encoding.h"
-#include "gsm-bitmaps.h"
+
+#include "gnokii-internal.h"
+#include "gsm-api.h"
 
 /**
  * PackSmartMessagePart - Adds Smart Message header to the certain part of the message
@@ -44,7 +45,7 @@
  * This function adds the header as specified in the Nokia Smart Messaging
  * Specification v3.
  */
-int sms_nokia_pack_smart_message_part(unsigned char *msg, unsigned int size,
+int sms_nokia_smart_message_part_pack(unsigned char *msg, unsigned int size,
 				      unsigned int type, bool first)
 {
 	unsigned char current = 0;
@@ -57,7 +58,7 @@ int sms_nokia_pack_smart_message_part(unsigned char *msg, unsigned int size,
 }
 
 /* Returns used length */
-int sms_nokia_encode_text(unsigned char *text, unsigned char *message, bool first)
+int sms_nokia_text_encode(unsigned char *text, unsigned char *message, bool first)
 {
 	int len, current = 0;
 	/* FIXME: unicode length is not as simple as strlen */
@@ -66,21 +67,21 @@ int sms_nokia_encode_text(unsigned char *text, unsigned char *message, bool firs
 	len = strlen(text);
 	if (type == GN_SMS_MULTIPART_UNICODE) len *= 2;
 
-	current = sms_nokia_pack_smart_message_part(message, len, type, first);
+	current = sms_nokia_smart_message_part_pack(message, len, type, first);
 
 	if (type == GN_SMS_MULTIPART_UNICODE)
-		char_encode_unicode(message + current, text, strlen(text));
+		char_unicode_encode(message + current, text, strlen(text));
 	else
 		memcpy(message + current, text, strlen(text));
 	current += len;
 	return current;
 }
 
-int sms_nokia_encode_bitmap(gn_bmp *bitmap, unsigned char *message, bool first)
+int sms_nokia_bitmap_encode(gn_bmp *bitmap, unsigned char *message, bool first)
 {
 	unsigned int current;
 
 	/* FIXME: allow for the different sizes */
-	current = sms_nokia_pack_smart_message_part(message, 256, GN_SMS_MULTIPART_BITMAP, first);
-	return gn_bmp_encode_sms(bitmap, message + current) + current;
+	current = sms_nokia_smart_message_part_pack(message, 256, GN_SMS_MULTIPART_BITMAP, first);
+	return gn_bmp_sms_encode(bitmap, message + current) + current;
 }

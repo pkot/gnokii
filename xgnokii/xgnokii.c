@@ -47,8 +47,12 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
+
 #include "gsm-api.h"
+
 #include "xgnokii.h"
 #include "xgnokii_common.h"
 #include "xgnokii_lowlevel.h"
@@ -2290,10 +2294,10 @@ static void ReadConfig(void)
 			if ((xgnokiiConfig.locale = getenv("LANG")) == NULL)
 				xgnokiiConfig.locale = "POSIX";
 #endif
-	if (gn_cfg_readconfig(&xgnokiiConfig.bindir) < 0) {
+	if (gn_cfg_read(&xgnokiiConfig.bindir) < 0) {
 		exit(-1);
 	}
-	if (!gn_cfg_load_phone("", &statemachine)) exit(-1);
+	if (!gn_cfg_phone_load("", &statemachine)) exit(-1);
 
 	xgnokiiConfig.model = statemachine.config.model;
 	xgnokiiConfig.port = statemachine.config.port_device;

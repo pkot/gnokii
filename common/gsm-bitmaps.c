@@ -55,7 +55,7 @@ API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info)
 	return GN_ERR_NONE;
 }
 
-API void gn_bmp_set_point(gn_bmp *bmp, int x, int y)
+API void gn_bmp_point_set(gn_bmp *bmp, int x, int y)
 {
 	switch (bmp->type) {
 	case GN_BMP_NewOperatorLogo:
@@ -77,7 +77,7 @@ API void gn_bmp_set_point(gn_bmp *bmp, int x, int y)
 	}
 }
 
-API void gn_bmp_clear_point(gn_bmp *bmp, int x, int y)
+API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y)
 {
 	switch (bmp->type) {
 	case GN_BMP_StartupLogo:
@@ -99,7 +99,7 @@ API void gn_bmp_clear_point(gn_bmp *bmp, int x, int y)
 	}
 }
 
-API bool gn_bmp_is_point(gn_bmp *bmp, int x, int y)
+API bool gn_bmp_point(gn_bmp *bmp, int x, int y)
 {
 	int i = 0;
 
@@ -185,7 +185,7 @@ API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info)
 
 	for (y = 0; y < copyheight; y++) {
 		for (x = 0; x < copywidth; x++)
-			if (gn_bmp_is_point(&backup, x, y)) gn_bmp_set_point(bitmap, x, y);
+			if (gn_bmp_point(&backup, x, y)) gn_bmp_point_set(bitmap, x, y);
 	}
 }
 
@@ -195,7 +195,7 @@ API void gn_bmp_print(gn_bmp *bitmap, FILE *f)
 
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
-			if (gn_bmp_is_point(bitmap, x, y)) {
+			if (gn_bmp_point(bitmap, x, y)) {
 				fprintf(f, "#");
 			} else {
 				fprintf(f, " ");
@@ -206,7 +206,7 @@ API void gn_bmp_print(gn_bmp *bitmap, FILE *f)
 }
 
 
-API gn_error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap)
+API gn_error gn_bmp_sms_read(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap)
 {
 	int offset = 0;
 
@@ -245,7 +245,7 @@ API gn_error gn_bmp_read_sms(int type, unsigned char *message, unsigned char *co
 
 
 /* Returns message length */
-API int gn_bmp_encode_sms(gn_bmp *bitmap, unsigned char *message)
+API int gn_bmp_sms_encode(gn_bmp *bitmap, unsigned char *message)
 {
 	unsigned int current = 0;
 

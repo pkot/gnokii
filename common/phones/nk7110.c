@@ -720,7 +720,7 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	block = 1;
 	/* Name */
 	i = strlen(data->bitmap->text);
-	char_encode_unicode((string + 1), data->bitmap->text, i);
+	char_unicode_encode((string + 1), data->bitmap->text, i);
 	string[0] = i * 2;
 	count += PackBlock(0x07, i * 2 + 1, block++, string, req + count);
 	/* Ringtone */
@@ -789,7 +789,7 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	if ((*(entry->name)) && (*(entry->number))) {
 		/* Name */
 		i = strlen(entry->name);
-		char_encode_unicode((string + 1), entry->name, i);
+		char_unicode_encode((string + 1), entry->name, i);
 		/* Terminating 0 */
 		string[i * 2 + 1] = 0;
 		/* Length ot the string + length field + terminating 0 */
@@ -809,7 +809,7 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 			string[0] = entry->subentries[defaultn].number_type;
 			string[1] = string[2] = string[3] = 0;
 			j = strlen(entry->subentries[defaultn].data.number);
-			char_encode_unicode((string + 5), entry->subentries[defaultn].data.number, j);
+			char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
 			string[j * 2 + 1] = 0;
 			string[4] = j * 2;
 			count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
@@ -821,7 +821,7 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 					string[0] = entry->subentries[i].number_type;
 					string[1] = string[2] = string[3] = 0;
 					j = strlen(entry->subentries[i].data.number);
-					char_encode_unicode((string + 5), entry->subentries[i].data.number, j);
+					char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
 					string[j * 2 + 1] = 0;
 					string[4] = j * 2;
 					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
@@ -829,7 +829,7 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 			} else {
 				j = strlen(entry->subentries[i].data.number);
 				string[0] = j * 2;
-				char_encode_unicode((string + 1), entry->subentries[i].data.number, j);
+				char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 				string[j * 2 + 1] = 0;
 				count += PackBlock(entry->subentries[i].entry_type, j * 2 + 2, block++, string, req + count);
 			}
@@ -1064,7 +1064,7 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 			nextfolder += 0x08;
 			if (nextfolder == 0x28) nextfolder++;
 			i -= len + 1;
-			char_decode_unicode(data->sms_folder_list->folder[j].name, message + i, len);
+			char_unicode_decode(data->sms_folder_list->folder[j].name, message + i, len);
 			dprintf("%s\n", data->sms_folder_list->folder[j].name);
 			i += len + 2;
 		}
@@ -1340,11 +1340,11 @@ static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		dprintf("%d\n", message[9]);
 		snprintf(data->message_center->recipient.number,
 			 sizeof(data->message_center->recipient.number),
-			 "%s", char_get_bcd_number(message + 9));
+			 "%s", char_bcd_number_get(message + 9));
 		data->message_center->recipient.type = message[10];
 		snprintf(data->message_center->smsc.number,
 			 sizeof(data->message_center->smsc.number),
-			 "%s", char_get_bcd_number(message + 21));
+			 "%s", char_bcd_number_get(message + 21));
 		data->message_center->smsc.type = message[22];
 
 		if (strlen(data->message_center->recipient.number) == 0) {
@@ -1663,7 +1663,7 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		dprintf("Count before encode = %d\n", count);
 		dprintf("Meeting Text is = \"%s\"\n", calnote->text);
 
-		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
 		count = count + 2 * strlen(calnote->text);
 		break;
 
@@ -1693,9 +1693,9 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* fixed 0x00 */
 		req[count++] = strlen(calnote->phone_number);   /* Field 19 */
 		/* Text */
-		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
 		count += 2 * strlen(calnote->text);
-		char_encode_unicode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
+		char_unicode_encode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
 		count += 2 * strlen(calnote->phone_number);
 		break;
 
@@ -1736,7 +1736,7 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* Text */
 		dprintf("Count before encode = %d\n", count);
 
-		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
+		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
 		count = count + 2 * strlen(calnote->text);
 		break;
 
@@ -1751,7 +1751,7 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		/* fixed 0x00 */
 		req[count++] = 0x00; /* Field 15 */
 		/* Text */
-		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
+		char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
 		count = count + 2 * strlen(calnote->text);
 		break;
 	}
@@ -1995,12 +1995,12 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("WAP bookmark received\n");
 		string_length = message[6] << 1;
 
-		char_decode_unicode(data->wap_bookmark->name, message + 7, string_length);
+		char_unicode_decode(data->wap_bookmark->name, message + 7, string_length);
 		dprintf("Name: %s\n", data->wap_bookmark->name);
 		pos = string_length + 7;
 
 		string_length = message[pos++] << 1;
-		char_decode_unicode(data->wap_bookmark->URL, message + pos, string_length);
+		char_unicode_decode(data->wap_bookmark->URL, message + pos, string_length);
 		dprintf("URL: %s\n", data->wap_bookmark->URL);
 		break;
 	case 0x0a:
@@ -2020,14 +2020,14 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 
 		string_length = message[4] << 1;
 		if (!data->wap_setting->read_before_write)
-			char_decode_unicode(data->wap_setting->name, message + 5, string_length);
+			char_unicode_decode(data->wap_setting->name, message + 5, string_length);
 		dprintf("Name: %s\n", data->wap_setting->name);
 		pos = string_length + 5;
 		if (!(string_length % 4)) pad = 1;
 
 		string_length = message[pos++] << 1;
 		if (!data->wap_setting->read_before_write)
-			char_decode_unicode(data->wap_setting->home, message + pos, string_length);
+			char_unicode_decode(data->wap_setting->home, message + pos, string_length);
 		dprintf("Home: %s\n", data->wap_setting->home);
 		pos += string_length;
 
@@ -2062,12 +2062,12 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 			dprintf("SMS:\n");
 			pos = 6;
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->wap_setting->sms_service_number, message + pos, string_length);
+			char_unicode_decode(data->wap_setting->sms_service_number, message + pos, string_length);
 			dprintf("   Service number: %s\n", data->wap_setting->sms_service_number);
 			pos += string_length;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->wap_setting->sms_server_number, message + pos, string_length);
+			char_unicode_decode(data->wap_setting->sms_server_number, message + pos, string_length);
 			dprintf("   Server number: %s\n", data->wap_setting->sms_server_number);
 			pos += string_length;
 			break;
@@ -2080,22 +2080,22 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 			pos++;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->wap_setting->gsm_data_ip, message + pos, string_length);
+			char_unicode_decode(data->wap_setting->gsm_data_ip, message + pos, string_length);
 			dprintf("   IP: %s\n", data->wap_setting->gsm_data_ip);
 			pos += string_length;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->wap_setting->number, message + pos, string_length);
+			char_unicode_decode(data->wap_setting->number, message + pos, string_length);
 			dprintf("   Number: %s\n", data->wap_setting->number);
 			pos += string_length;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->wap_setting->gsm_data_username, message + pos, string_length);
+			char_unicode_decode(data->wap_setting->gsm_data_username, message + pos, string_length);
 			dprintf("   Username: %s\n", data->wap_setting->gsm_data_username);
 			pos += string_length;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->wap_setting->gsm_data_password, message + pos, string_length);
+			char_unicode_decode(data->wap_setting->gsm_data_password, message + pos, string_length);
 			dprintf("   Password: %s\n", data->wap_setting->gsm_data_password);
 			pos += string_length;
 			break;
@@ -2160,7 +2160,7 @@ static int PackWAPString(unsigned char *dest, unsigned char *string, int length_
 		dest[0] = length % 256;
 	}
 
-	char_encode_unicode(dest + length_size, string, length);
+	char_unicode_encode(dest + length_size, string, length);
 	return ((length << 1) + length_size);
 }
 

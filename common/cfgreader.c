@@ -45,7 +45,7 @@ API struct gn_cfg_header *gn_cfg_info;
 static gn_config gn_config_default, gn_config_global;
 
 /* Read configuration information from a ".INI" style file */
-struct gn_cfg_header *cfg_read_file(const char *filename)
+struct gn_cfg_header *cfg_file_read(const char *filename)
 {
 	FILE *handle;
 	char *line;
@@ -64,7 +64,7 @@ struct gn_cfg_header *cfg_read_file(const char *filename)
 
 	/* Open file */
 	if ((handle = fopen(filename, "r")) == NULL) {
-		dprintf("cfg_read_file - open %s: %s\n", filename, strerror(errno));
+		dprintf("cfg_file_read - open %s: %s\n", filename, strerror(errno));
 		return NULL;
 	}
 	else
@@ -178,8 +178,7 @@ struct gn_cfg_header *cfg_read_file(const char *filename)
 }
 
 /*  Write configuration information to a config file */
-
-int cfg_write_file(struct gn_cfg_header *cfg, const char *filename)
+int cfg_file_write(struct gn_cfg_header *cfg, const char *filename)
 {
 	/* Not implemented - tricky to do and preserve comments */
 	return 0;
@@ -189,7 +188,6 @@ int cfg_write_file(struct gn_cfg_header *cfg, const char *filename)
  * Find the value of a key in a config file.  Return value associated
  * with key or NULL if no such key exists.
  */
-
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key)
 {
 	struct gn_cfg_header *h;
@@ -216,10 +214,9 @@ API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char 
 }
 
 /*
- * Return all the entries of the fiven section.
+ * Return all the entries of the given section.
  */
-
-void cfg_get_foreach(struct gn_cfg_header *cfg, const char *section, cfg_get_foreach_func func)
+void cfg_foreach(struct gn_cfg_header *cfg, const char *section, cfg_foreach_func func)
 {
 	struct gn_cfg_header *h;
 	struct gn_cfg_entry *e;
@@ -240,7 +237,6 @@ void cfg_get_foreach(struct gn_cfg_header *cfg, const char *section, cfg_get_for
 
 /*  Set the value of a key in a config file.  Return the new value if
     the section/key can be found, else return NULL.  */
-
 char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key,
 	      const char *value)
 {
@@ -271,7 +267,7 @@ char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key,
 	return NULL;
 }
 
-static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_config *def)
+static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_config *def)
 {
 	const char *val;
 	char ch;
@@ -383,7 +379,7 @@ static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_c
 	return true;
 }
 
-API int gn_cfg_readconfig(char **bindir)
+API int gn_cfg_read(char **bindir)
 {
 	char *homedir;
 	char rcfile[200];
@@ -410,9 +406,9 @@ API int gn_cfg_readconfig(char **bindir)
 
 #ifdef WIN32
 	/* Try opening .gnokirc from users home directory first */
-	if ((gn_cfg_info = cfg_read_file(rcfile)) == NULL) {
+	if ((gn_cfg_info = cfg_file_read(rcfile)) == NULL) {
 		/* It failed so try for gnokiirc */
-		if ((gn_cfg_info = cfg_read_file("gnokiirc")) == NULL) {
+		if ((gn_cfg_info = cfg_file_read("gnokiirc")) == NULL) {
 			/* That failed too so exit */
 			fprintf(stderr, _("Couldn't open %s or gnokiirc. Exiting now...\n"), rcfile);
 			return -1;
@@ -420,9 +416,9 @@ API int gn_cfg_readconfig(char **bindir)
 	}
 #else
 	/* Try opening .gnokirc from users home directory first */
-	if ((gn_cfg_info = cfg_read_file(rcfile)) == NULL) {
+	if ((gn_cfg_info = cfg_file_read(rcfile)) == NULL) {
 		/* It failed so try for /etc/gnokiirc */
-		if ((gn_cfg_info = cfg_read_file("/etc/gnokiirc")) == NULL) {
+		if ((gn_cfg_info = cfg_file_read("/etc/gnokiirc")) == NULL) {
 			/* That failed too so exit */
 			fprintf(stderr, _("Couldn't open %s or /etc/gnokiirc. Exiting now...\n"), rcfile);
 			return -1;
@@ -442,7 +438,7 @@ API int gn_cfg_readconfig(char **bindir)
 	strcpy(gn_config_default.connect_script, "");
 	strcpy(gn_config_default.disconnect_script, "");
 
-	if (!gn_cfg_load_psection(&gn_config_global, "global", &gn_config_default))
+	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default))
 		return -2;
 
 	/* hack to support [sms] / smsc_timeout parameter */
@@ -459,7 +455,7 @@ API int gn_cfg_readconfig(char **bindir)
 	return 0;
 }
 
-API bool gn_cfg_load_phone(const char *iname, struct gn_statemachine *state)
+API bool gn_cfg_phone_load(const char *iname, struct gn_statemachine *state)
 {
 	char section[256];
 
@@ -467,7 +463,7 @@ API bool gn_cfg_load_phone(const char *iname, struct gn_statemachine *state)
 		state->config = gn_config_global;
 	else {
 		snprintf(section, sizeof(section), "phone_%s", iname);
-		if (!gn_cfg_load_psection(&state->config, section, &gn_config_global))
+		if (!cfg_psection_load(&state->config, section, &gn_config_global))
 			return false;
 	}
 

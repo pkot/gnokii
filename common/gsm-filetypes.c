@@ -118,11 +118,11 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 
 	switch (filetype) {
 	case GN_FT_RTTL:
-		error = file_load_rttl(file, ringtone);
+		error = file_rttl_load(file, ringtone);
 		fclose(file);
 		break;
 	case GN_FT_OTT:
-		error = file_load_ott(file, ringtone);
+		error = file_ott_load(file, ringtone);
 		fclose(file);
 		break;
 	default:
@@ -134,7 +134,7 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 }
 
 
-gn_error file_load_ott(FILE *file, gn_ringtone *ringtone)
+gn_error file_ott_load(FILE *file, gn_ringtone *ringtone)
 {
 	char buffer[2000];
 	int i;
@@ -145,7 +145,7 @@ gn_error file_load_ott(FILE *file, gn_ringtone *ringtone)
 }
 
 
-gn_error file_load_rttl(FILE *file, gn_ringtone *ringtone)
+gn_error file_rttl_load(FILE *file, gn_ringtone *ringtone)
 {
 	int nr_note = 0;
 
@@ -274,16 +274,16 @@ gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone)
 	/* FIXME... */
 	/* We need a way of passing these functions a filetype rather than rely on the extension */
 	if (strstr(filename, ".ott")) {
-		error = file_save_ott(file, ringtone);
+		error = file_ott_save(file, ringtone);
 	} else {
-		error = file_save_rttl(file, ringtone);
+		error = file_rttl_save(file, ringtone);
 	}
 	fclose(file);
 	return error;
 }
 
 
-gn_error file_save_ott(FILE *file, gn_ringtone *ringtone)
+gn_error file_ott_save(FILE *file, gn_ringtone *ringtone)
 {
 	char buffer[2000];
 	int i = 2000;
@@ -299,7 +299,7 @@ gn_error file_save_ott(FILE *file, gn_ringtone *ringtone)
 	}
 }
 
-gn_error file_save_rttl(FILE *file, gn_ringtone *ringtone)
+gn_error file_rttl_save(FILE *file, gn_ringtone *ringtone)
 {
 	int default_duration, default_scale = 2, current_note;
 	int buffer[6];
@@ -440,7 +440,7 @@ gn_error file_save_rttl(FILE *file, gn_ringtone *ringtone)
 		}
 
 		/* Now save the actual note */
-		switch (gn_get_note(current_note)) {
+		switch (gn_note_get(current_note)) {
 		case GN_RINGTONE_Note_C  : fprintf(file, "c");  break;
 		case GN_RINGTONE_Note_Cis: fprintf(file, "c#"); break;
 		case GN_RINGTONE_Note_D  : fprintf(file, "d");  break;
@@ -516,26 +516,26 @@ gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info)
 
 	switch (filetype) {
 	case GN_FT_NOL:
-		error = file_load_nol(file, bitmap, info);
+		error = file_nol_load(file, bitmap, info);
 		break;
 	case GN_FT_NGG:
-		error = file_load_ngg(file, bitmap, info);
+		error = file_ngg_load(file, bitmap, info);
 		break;
 	case GN_FT_NSL:
-		error = file_load_nsl(file, bitmap);
+		error = file_nsl_load(file, bitmap);
 		break;
 	case GN_FT_NLM:
-		error = file_load_nlm(file, bitmap);
+		error = file_nlm_load(file, bitmap);
 		break;
 	case GN_FT_OTA:
-		error = file_load_ota(file, bitmap, info);
+		error = file_ota_load(file, bitmap, info);
 		break;
 	case GN_FT_BMP:
-		error = file_load_bmp(file, bitmap);
+		error = file_bmp_load(file, bitmap);
 		break;
 	case GN_FT_XPMF:
 #ifdef XPM
-		error = file_load_xpm(filename, bitmap);
+		error = file_xpm_load(filename, bitmap);
 		break;
 #else
 		fprintf(stderr, "Sorry, gnokii was not compiled with XPM support.\n");
@@ -552,7 +552,7 @@ gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info)
 
 
 #ifdef XPM
-gn_error file_load_xpm(char *filename, gn_bmp *bitmap)
+gn_error file_xpm_load(char *filename, gn_bmp *bitmap)
 {
 	int error, x, y;
 	XpmImage image;
@@ -589,7 +589,7 @@ gn_error file_load_xpm(char *filename, gn_bmp *bitmap)
 
 	for (y = 0; y < image.height; y++) {
 		for (x = 0; x < image.width; x++) {
-			if (image.data[y * image.width + x] == 0) gn_bmp_set_point(bitmap, x, y);
+			if (image.data[y * image.width + x] == 0) gn_bmp_point_set(bitmap, x, y);
 		}
 	}
 
@@ -601,7 +601,7 @@ gn_error file_load_xpm(char *filename, gn_bmp *bitmap)
 /* Marcin-Wiacek@Topnet.PL */
 
 /* This loads the image as a startup logo - but is resized as necessary later */
-gn_error file_load_bmp(FILE *file, gn_bmp *bitmap)
+gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 {
 	unsigned char buffer[34];
 	bool first_white;
@@ -685,9 +685,9 @@ gn_error file_load_bmp(FILE *file, gn_bmp *bitmap)
 			}
 			if (x <= bitmap->width && y <= bitmap->height) { /* we have top left corner ! */
 				if (!first_white) {
-					if ((buffer[0] & (1 << pos)) <= 0) gn_bmp_set_point(bitmap, x, y);
+					if ((buffer[0] & (1 << pos)) <= 0) gn_bmp_point_set(bitmap, x, y);
 				} else {
-					if ((buffer[0] & (1 << pos)) > 0) gn_bmp_set_point(bitmap, x, y);
+					if ((buffer[0] & (1 << pos)) > 0) gn_bmp_point_set(bitmap, x, y);
 				}
 			}
 			pos--;
@@ -706,7 +706,7 @@ gn_error file_load_bmp(FILE *file, gn_bmp *bitmap)
 	return GN_ERR_NONE;
 }
 
-gn_error file_load_nol(FILE *file, gn_bmp *bitmap, gn_phone *info)
+gn_error file_nol_load(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 	unsigned char buffer[GN_BMP_MAX_SIZE + 20];
 	int i, j;
@@ -750,7 +750,7 @@ gn_error file_load_nol(FILE *file, gn_bmp *bitmap, gn_phone *info)
 	return GN_ERR_NONE;
 }
 
-gn_error file_load_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info)
+gn_error file_ngg_load(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 	unsigned char buffer[2000];
 	int i, j;
@@ -791,7 +791,7 @@ gn_error file_load_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info)
 	return GN_ERR_NONE;
 }
 
-gn_error file_load_nsl(FILE *file, gn_bmp *bitmap)
+gn_error file_nsl_load(FILE *file, gn_bmp *bitmap)
 {
 	unsigned char block[6], buffer[870];
 	int block_size, count;
@@ -845,7 +845,7 @@ gn_error file_load_nsl(FILE *file, gn_bmp *bitmap)
 	return GN_ERR_NONE;
 }
 
-gn_error file_load_nlm (FILE *file, gn_bmp *bitmap)
+gn_error file_nlm_load(FILE *file, gn_bmp *bitmap)
 {
 	unsigned char buffer[84*48];
 	int pos, pos2, x, y;
@@ -887,16 +887,16 @@ gn_error file_load_nlm (FILE *file, gn_bmp *bitmap)
 	pos = 0; pos2 = 7;
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
-			if ((buffer[pos] & (1 << pos2)) > 0) gn_bmp_set_point(bitmap, x, y);
+			if ((buffer[pos] & (1 << pos2)) > 0) gn_bmp_point_set(bitmap, x, y);
 			pos2--;
-			if (pos2 < 0) {pos2 = 7; pos++;} //going to new byte
+			if (pos2 < 0) {pos2 = 7; pos++;} /*going to new byte */
 		}
-		if (pos2 != 7) {pos2 = 7; pos++;} //for startup logos-new line means new byte
+		if (pos2 != 7) {pos2 = 7; pos++;} /* for startup logos-new line means new byte */
 	}
 	return GN_ERR_NONE;
 }
 
-gn_error file_load_ota(FILE *file, gn_bmp *bitmap, gn_phone *info)
+gn_error file_ota_load(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 	char buffer[4];
 
@@ -933,7 +933,7 @@ gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info)
 
 #ifdef XPM
 	if (strstr(filename, ".xpm")) {
-		file_save_xpm(filename, bitmap);
+		file_xpm_save(filename, bitmap);
 	} else {
 #endif
 
@@ -942,46 +942,46 @@ gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info)
 		if (!file) return GN_ERR_FAILED;
 
 		if (strstr(filename, ".nlm")) {
-			file_save_nlm(file, bitmap);
+			file_nlm_save(file, bitmap);
 			done = true;
 		}
 		if (strstr(filename, ".ngg")) {
-			file_save_ngg(file, bitmap, info);
+			file_ngg_save(file, bitmap, info);
 			done = true;
 		}
 		if (strstr(filename, ".nsl")) {
-			file_save_nsl(file, bitmap, info);
+			file_nsl_save(file, bitmap, info);
 			done = true;
 		}
 		if (strstr(filename, ".otb")) {
-			file_save_ota(file, bitmap);
+			file_ota_save(file, bitmap);
 			done = true;
 		}
 		if (strstr(filename, ".nol")) {
-			file_save_nol(file, bitmap, info);
+			file_nol_save(file, bitmap, info);
 			done = true;
 		}
 		if (strstr(filename, ".bmp") ||
 		    strstr(filename, ".ggp") ||
 		    strstr(filename, ".i61")) {
-			file_save_bmp(file, bitmap);
+			file_bmp_save(file, bitmap);
 			done = true;
 		}
 
 		if (!done) {
 			switch (bitmap->type) {
 			case GN_BMP_CallerLogo:
-				file_save_ngg(file, bitmap, info);
+				file_ngg_save(file, bitmap, info);
 				break;
 			case GN_BMP_OperatorLogo:
 			case GN_BMP_NewOperatorLogo:
-				file_save_nol(file, bitmap, info);
+				file_nol_save(file, bitmap, info);
 				break;
 			case GN_BMP_StartupLogo:
-				file_save_nsl(file, bitmap, info);
+				file_nsl_save(file, bitmap, info);
 				break;
 			case GN_BMP_PictureMessage:
-				file_save_nlm(file, bitmap);
+				file_nlm_save(file, bitmap);
 				break;
 			case GN_BMP_WelcomeNoteText:
 			case GN_BMP_DealerNoteText:
@@ -1015,7 +1015,7 @@ int gn_file_text_save(char *filename, char *text, int mode)
 		fprintf(stdout, _("File %s exists.\n"), filename);
 		while (confirm < 0) {
 			fprintf(stderr, _("Overwrite? (yes/no) "));
-			gn_get_line(stdin, ans, 4);
+			gn_line_get(stdin, ans, 4);
 			if (!strcmp(ans, _("yes"))) confirm = 1;
 			else if (!strcmp(ans, _("no"))) confirm = 0;
 		}
@@ -1036,7 +1036,7 @@ int gn_file_text_save(char *filename, char *text, int mode)
 
 
 #ifdef XPM
-void file_save_xpm(char *filename, gn_bmp *bitmap)
+void file_xpm_save(char *filename, gn_bmp *bitmap)
 {
 	XpmColor colors[2] = {{".","c","#000000","#000000","#000000","#000000"},
 			      {"#","c","#ffffff","#ffffff","#ffffff","#ffffff"}};
@@ -1053,7 +1053,7 @@ void file_save_xpm(char *filename, gn_bmp *bitmap)
 
 	for (y = 0; y < image.height; y++) {
 		for (x = 0; x < image.width; x++)
-			if (gn_bmp_is_point(bitmap, x, y))
+			if (gn_bmp_point(bitmap, x, y))
 				data[y * image.width + x] = 0;
 			else
 				data[y * image.width + x] = 1;
@@ -1065,7 +1065,7 @@ void file_save_xpm(char *filename, gn_bmp *bitmap)
 
 /* Based on the article from the Polish Magazine "Bajtek" 11/92 */
 /* Marcin-Wiacek@Topnet.PL */
-void file_save_bmp(FILE *file, gn_bmp *bitmap)
+void file_bmp_save(FILE *file, gn_bmp *bitmap)
 {
 	int x, y, pos, i, sizeimage;
 	unsigned char buffer[1];
@@ -1143,7 +1143,7 @@ void file_save_bmp(FILE *file, gn_bmp *bitmap)
 				if(i == 5) i = 1; //each line is written in multiply of 4 bytes
 				buffer[0] = 0;
 			}
-			if (gn_bmp_is_point(bitmap, x, y)) buffer[0] |= (1 << pos);
+			if (gn_bmp_point(bitmap, x, y)) buffer[0] |= (1 << pos);
 			pos--;
 			if (pos < 0) pos = 7; //going to new byte
 		}
@@ -1157,7 +1157,7 @@ void file_save_bmp(FILE *file, gn_bmp *bitmap)
 	}
 }
 
-void file_save_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info)
+void file_ngg_save(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 
 	char header[] = {'N', 'G', 'G', 0x00, 0x01, 0x00,
@@ -1189,7 +1189,7 @@ void file_save_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info)
 	}
 }
 
-void file_save_nol(FILE *file, gn_bmp *bitmap, gn_phone *info)
+void file_nol_save(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 
 	char header[] = {'N','O','L',0x00,0x01,0x00,
@@ -1228,7 +1228,7 @@ void file_save_nol(FILE *file, gn_bmp *bitmap, gn_phone *info)
 	}
 }
 
-void file_save_nsl(FILE *file, gn_bmp *bitmap, gn_phone *info)
+void file_nsl_save(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 
 	u8 header[] = {'F','O','R','M', 0x01,0xFE,  /* File ID block,      size 1*256+0xFE=510*/
@@ -1245,7 +1245,7 @@ void file_save_nsl(FILE *file, gn_bmp *bitmap, gn_phone *info)
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
 }
 
-void file_save_ota(FILE *file, gn_bmp *bitmap)
+void file_ota_save(FILE *file, gn_bmp *bitmap)
 {
 	char header[] = {0x01,
 		         0x00, /* Width */
@@ -1260,7 +1260,7 @@ void file_save_ota(FILE *file, gn_bmp *bitmap)
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
 }
 
-void file_save_nlm(FILE *file, gn_bmp *bitmap)
+void file_nlm_save(FILE *file, gn_bmp *bitmap)
 {
 	char header[] = {'N','L','M', /* Nokia Logo Manager file ID. */
 		         0x20,
@@ -1303,7 +1303,7 @@ void file_save_nlm(FILE *file, gn_bmp *bitmap)
 	for (y = 0; y < bitmap->height; y++) {
 		for (x = 0; x < bitmap->width; x++) {
 			if (pos2 == 7) buffer[pos] = 0;
-			if (gn_bmp_is_point(bitmap, x, y)) buffer[pos] |= (1 << pos2);
+			if (gn_bmp_point(bitmap, x, y)) buffer[pos] |= (1 << pos2);
 			pos2--;
 			if (pos2 < 0) {pos2 = 7; pos++;} /* going to new line */
 		}
@@ -1329,7 +1329,7 @@ gn_error gn_file_bitmap_show(char *filename)
 
 	for (i = 0; i < bitmap.height; i++) {
 		for (j = 0; j < bitmap.width; j++)
-			printf("%c", gn_bmp_is_point(&bitmap, j, i) ? '#' : ' ');
+			printf("%c", gn_bmp_point(&bitmap, j, i) ? '#' : ' ');
 		printf("\n");
 	}
 

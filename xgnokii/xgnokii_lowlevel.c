@@ -158,11 +158,11 @@ static gn_error InitModelInf(void)
 	error = gn_sm_functions(GN_OP_GetModel, &gdat, &statemachine);
 	if (error != GN_ERR_NONE) return error;
 	phoneMonitor.phone.version = g_malloc(sizeof(gdat.model));
-	phoneMonitor.phone.model = gn_get_model(gdat.model);
+	phoneMonitor.phone.model = gn_model_get(gdat.model);
 
 	if (phoneMonitor.phone.model == NULL)
 		phoneMonitor.phone.model = g_strdup(_("unknown"));
-	phoneMonitor.supported = gn_get_phone_model(buf)->flags;
+	phoneMonitor.supported = gn_phone_model_get(buf)->flags;
 
 	gdat.revision = buf;
 	gdat.model = NULL;
@@ -206,7 +206,7 @@ static gn_error InitModelInf(void)
 static void busterminate(void)
 {
 	gn_sm_functions(GN_OP_Terminate, NULL, &statemachine);
-	if (lockfile) gn_unlock_device(lockfile);
+	if (lockfile) gn_device_unlock(lockfile);
 }
 
 
@@ -225,7 +225,7 @@ static gn_error fbusinit(bool enable_monitoring)
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_lock_device(xgnokiiConfig.port);
+		lockfile = gn_device_lock(xgnokiiConfig.port);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);

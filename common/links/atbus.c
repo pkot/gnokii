@@ -35,15 +35,13 @@
 /* Various header file */
 #include "config.h"
 #include "misc.h"
-#include "gsm-common.h"
-#include "gsm-ringtones.h"
-#include "gsm-networks.h"
-#include "gsm-api.h"
-#include "device.h"
-#include "gsm-statemachine.h"
 #include "links/atbus.h"
+#include "links/utils.h"
 
 #include "gnokii-internal.h"
+#include "gsm-api.h"
+
+#include "device.h"
 
 /* 
  * FIXME - when sending an AT command while another one is still in progress,
