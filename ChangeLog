@@ -37,6 +37,8 @@
  * libsms fixes
     o allow to input more then 160 characters for the text sms
                                                          (Pawel Kot)
+    o bring back to life sending text concatenated messages
+                                                         (Pawel Kot)
 
 0.5.2
 =====

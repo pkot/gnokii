@@ -45,7 +45,7 @@ struct sms_udh_data {
 	char *header;
 };
 
-#define MAX_SMS_PART 128
+#define MAX_SMS_PART 140
 
 /* These are positions in the following (headers[]) table. */
 #define SMS_UDH_CONCATENATED_MESSAGES  1
@@ -1044,6 +1044,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 	/* Additional Headers */
 	switch (sms->dcs.type) {
 	case GN_SMS_DCS_GeneralDataCoding:
+		dprintf("General Data Coding\n");
 		switch (sms->dcs.u.general.m_class) {
 		case 0: break;
 		case 1: rawsms->dcs |= 0xf0; break; /* Class 0 */
@@ -1071,8 +1072,6 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 	default:
 		return GN_ERR_WRONGDATAFORMAT;
 	}
-
-	rawsms->length = rawsms->user_data_length = 0;
 
 	for (i = 0; i < GN_SMS_PART_MAX_NUMBER; i++) {
 		switch (sms->user_data[i].type) {
@@ -1106,6 +1105,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 
 		case GN_SMS_DATA_Animation: {
 			int j;
+
 			for (j = 0; j < 4; j++) {
 				size = gn_bmp_sms_encode(&(sms->user_data[i].u.animation[j]), rawsms->user_data + rawsms->user_data_length);
 				rawsms->length += size;
@@ -1117,13 +1117,14 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 		}
 
 		case GN_SMS_DATA_Text: {
-			unsigned int length, offset = rawsms->user_data_length;
+			unsigned int length, udh_length, offset = rawsms->user_data_length;
 
 			length = strlen(sms->user_data[i].u.text);
 			switch (al) {
 			case GN_SMS_DCS_DefaultAlphabet:
-#define UDH_Length 0
-				size = char_7bit_pack((7 - (UDH_Length % 7)) % 7,
+				if (sms->udh.length) udh_length = sms->udh.length+1;
+				else udh_length = 0;
+				size = char_7bit_pack((7 - (udh_length % 7)) % 7,
 						      sms->user_data[i].u.text,
 						      rawsms->user_data + offset,
 						      &length);
@@ -1169,8 +1170,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 			if (!sms_udh_encode(rawsms, GN_SMS_UDH_MultipartMessage)) return GN_ERR_NOTSUPPORTED;
 			error = sms_concat_header_encode(rawsms, sms->user_data[i].u.multi.curr, sms->user_data[i].u.multi.total);
 			ERROR();
-
-			memcpy(rawsms->user_data + rawsms->user_data_length, sms->user_data[i].u.multi.binary, MAX_SMS_PART);
+			memcpy(rawsms->user_data + rawsms->user_data_length, sms->user_data[i].u.multi.binary, MAX_SMS_PART - 6);
 			rawsms->length += size;
 			rawsms->user_data_length += size;
 			rawsms->dcs = 0xf5;
@@ -1194,7 +1194,6 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 			break;
 
 		case GN_SMS_DATA_Concat:
-			dprintf("Encoding concat header\n");
 			al = GN_SMS_DCS_8bit;
 			rawsms->dcs = 0xf5;
 			sms_concat_header_encode(rawsms, sms->user_data[i].u.concat.curr, sms->user_data[i].u.concat.total);
@@ -1213,6 +1212,8 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 
 gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 {
+	int i;
+
 	switch (rawsms->type = sms->type) {
 	case GN_SMS_MT_Submit:
 	case GN_SMS_MT_Deliver:
@@ -1229,6 +1230,10 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 	rawsms->validity_indicator = GN_SMS_VP_RelativeFormat;
 	rawsms->validity[0] = 0xa9;
 
+	for (i = 0; i < sms->udh.number; i++)
+		if (sms->udh.udh[i].type == GN_SMS_UDH_ConcatenatedMessages)
+			sms_concat_header_encode(rawsms, sms->udh.udh[i].u.concatenated_short_message.current_number,
+						sms->udh.udh[i].u.concatenated_short_message.maximum_number);
 	sms_data_encode(sms, rawsms);
 
 	return GN_ERR_NONE;
@@ -1281,12 +1286,14 @@ API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 	error = sms_prepare(data->sms, data->raw_sms);
 	ERROR();
 
-	if (data->raw_sms->length > GN_SMS_MAX_LENGTH) {
+	sms_dump_raw(data->raw_sms);
+	if (data->raw_sms->user_data_length > MAX_SMS_PART) {
 		dprintf("SMS is too long? %d\n", data->raw_sms->length);
 		error = sms_send_long(data, state);
 		goto cleanup;
 	}
 
+	dprintf("Sending\n");
 	error = gn_sm_functions(GN_OP_SendSMS, data, state);
  cleanup:
 	free(data->raw_sms);
@@ -1294,29 +1301,80 @@ API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+API int gn_sms_udh_add(gn_sms *sms, gn_sms_udh_type type)
+{
+	sms->udh.length += headers[type].length;
+	sms->udh.udh[sms->udh.number].type = type;
+	sms->udh.number++;
+	return sms->udh.number - 1;
+}
+
 static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 {
-	int i, count;
-	gn_sms_raw LongSMS, *rawsms = &LongSMS;	/* We need local copy for our dirty tricks */
+	int i, count, start, copied, total, isConcat = -1;
 	gn_sms sms;
+	gn_sms_user_data ud[GN_SMS_PART_MAX_NUMBER];
 	gn_error error = GN_ERR_NONE;
 
-	LongSMS = *data->raw_sms;
 	sms = *data->sms;
 
-	count = (rawsms->user_data_length + MAX_SMS_PART - 1) / MAX_SMS_PART;
+	/* If there's no concat header we need to add one */
+	for (i = 0; i < data->sms->number; i++)
+		if (data->sms->udh.udh[i].type == GN_SMS_UDH_ConcatenatedMessages) isConcat = i;
+
+	if (isConcat == -1)
+		isConcat = gn_sms_udh_add(data->sms, GN_SMS_UDH_ConcatenatedMessages);
+
+	/* Count the total length of the octets to be sent */
+	total = 0;
+	i = 0;
+	while (data->sms->user_data[i].type != GN_SMS_DATA_None) {
+		switch (data->sms->dcs.u.general.alphabet) {
+		case GN_SMS_DCS_DefaultAlphabet:
+			total += ((data->sms->udh.length+1) % 8 + data->sms->user_data[i].length) * 7 / 8;
+			break;
+		default:
+			total += data->sms->user_data[i].length;
+			break;
+		}
+		memcpy(&ud[i], &data->sms->user_data[i], sizeof(gn_sms_user_data));
+		i++;
+	}
+	total += (data->sms->udh.length+1);
+
+	/* Count number of SMS to be sent */
+	count = (total + MAX_SMS_PART - 1)/ MAX_SMS_PART;
 	dprintf("Will need %d sms-es\n", count);
+
+	start = 0;
+	copied = 0;
 	for (i = 0; i < count; i++) {
 		dprintf("Sending sms #%d\n", i);
-		sms.user_data[0].type = GN_SMS_DATA_Multi;
-		sms.user_data[0].length = MAX_SMS_PART;
-		if (i + 1 == count)
-			sms.user_data[0].length = rawsms->user_data_length % MAX_SMS_PART;
-		memcpy(sms.user_data[0].u.multi.binary, rawsms->user_data + i*MAX_SMS_PART, MAX_SMS_PART);
-		sms.user_data[0].u.multi.curr = i + 1;
-		sms.user_data[0].u.multi.total = count;
-		sms.user_data[1].type = GN_SMS_DATA_None;
-		data->sms = &sms;
+		data->sms->udh.udh[isConcat].u.concatenated_short_message.reference_number = 0;
+		data->sms->udh.udh[isConcat].u.concatenated_short_message.maximum_number = count;
+		data->sms->udh.udh[isConcat].u.concatenated_short_message.current_number = i+1;
+		switch (data->sms->dcs.u.general.alphabet) {
+		case GN_SMS_DCS_DefaultAlphabet:
+			start += copied;
+			copied = (ud[0].length - start) % ((MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7);
+			if (copied == 0)
+				copied = ((MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7);
+			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
+			data->sms->user_data[0].type = ud[0].type;
+			data->sms->user_data[0].length = copied;
+			memcpy(data->sms->user_data[0].u.text, ud[0].u.text+start, copied);
+			break;
+		default:
+			switch (ud[0].type) {
+			case GN_SMS_DATA_Bitmap:
+				break;
+			case GN_SMS_DATA_Ringtone:
+				break;
+			default:
+				break;
+			}
+			break;
+		}
 		error = gn_sms_send(data, state);
 		ERROR();
 	}
