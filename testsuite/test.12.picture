@@ -1,0 +1,4 @@
+#
+# Try to send a picture SMS.
+#
+$GNOKII --sendlogo picture 0604343103 /usr/src/gnokii/Docs/gnokii.xpm "Ahoj, tohle je mala zprava na testovani telefonu"
