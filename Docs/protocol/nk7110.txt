@@ -38,6 +38,22 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
 ?   r terminated call       { 0x0009, seqnr }
 ?   r call msg              { 0x000a, seqnr }
     Note: in 6210 4.27 all msg from 0x01 seems to be unavailable
+    s Get call status       { 0x20 }
+    r Get call status       { 0x21, num of calls, 0xff, callinfo }
+                            where callinfo: { 0x64, blklen (0xd4), seqnr (1-8),
+			        channel (1-2), state, prevstate, ?, ?, ?, ?,
+				namelen, numlen,
+				name (49 unicode chars + 0x00, 0x00),
+				number (49 unicode chars + 0x00, 0x00) }
+				where state is:
+				   0x00: incoming call
+				   0x02: dialing
+				   0x03: ringing (out)
+				   0x04: ringing (in)
+				   0x05: established
+				   0x06: call held
+				   0x07: remote hangup
+
 0x02: SMS handling
     s Send SMS message      { 0x0001, 0x02, 0x00 (SEND REQUEST), ... }
     r Message sent          { 0x0002 }

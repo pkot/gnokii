@@ -108,6 +108,11 @@ static gn_error NK7110_GetRingtoneList(gn_data *data, struct gn_statemachine *st
 static gn_error NK7110_GetProfile(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_SetProfile(gn_data *data, struct gn_statemachine *state);
 
+static gn_error NK7110_GetActiveCalls(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_MakeCall(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_CancelCall(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_AnswerCall(gn_data *data, struct gn_statemachine *state);
+
 static gn_error NK7110_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetWAPBookmark(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_WriteWAPBookmark(gn_data *data, struct gn_statemachine *state);
@@ -129,6 +134,7 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 static gn_error NK7110_IncomingKeypress(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_IncomingProfile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_IncomingRingtone(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingCommstatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static int get_memory_type(gn_memory_type memory_type);
 static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type);
@@ -149,6 +155,7 @@ static gn_incoming_function_type nk7110_incoming_functions[] = {
 	{ NK7110_MSG_KEYPRESS_RESP,	NK7110_IncomingKeypress },
 	{ NK7110_MSG_PROFILE,		NK7110_IncomingProfile },
 	{ NK7110_MSG_RINGTONE,		NK7110_IncomingRingtone },
+	{ NK7110_MSG_COMMSTATUS,	NK7110_IncomingCommstatus },
 	{ 0, NULL }
 };
 
@@ -256,12 +263,14 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 		return pnok_call_divert(data, state);
 	case GN_OP_NetMonitor:
 		return pnok_netmonitor(data, state);
+	case GN_OP_GetActiveCalls:
+		return NK7110_GetActiveCalls(data, state);
 	case GN_OP_MakeCall:
-		return pnok_call_make(data, state);
+		return NK7110_MakeCall(data, state);
 	case GN_OP_AnswerCall:
-		return pnok_call_answer(data, state);
+		return NK7110_AnswerCall(data, state);
 	case GN_OP_CancelCall:
-		return pnok_call_cancel(data, state);
+		return NK7110_CancelCall(data, state);
 	case GN_OP_GetSecurityCode:
 		return NK7110_GetSecurityCode(data, state);
 	case GN_OP_GetSMSFolders:
@@ -3066,4 +3075,159 @@ static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_d
     memcpy(req + 11, rawsms.user_data, rawsms.user_data_length);
 
     return sm_message_send(n, 0x00, req, state);
+}
+
+
+/*****************************/
+/******* COMM STATUS *********/
+/*****************************/
+static gn_error NK7110_IncomingCommstatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char *pos;
+	int i;
+	gn_call_active *ca;
+
+	switch (message[3]) {
+	/* get call status */
+	case 0x21:
+		if (!data->call_active) return GN_ERR_INTERNALERROR;
+		if (message[5] != 0xff) return GN_ERR_UNHANDLEDFRAME;
+		pos = message + 6;
+		ca = data->call_active;
+		memset(ca, 0x00, 2 * sizeof(gn_call_active));
+		for (i = 0; i < message[4]; i++) {
+			if (pos[0] != 0x64) return GN_ERR_UNHANDLEDFRAME;
+			ca[i].call_id = pos[2];
+			ca[i].channel = pos[3];
+			switch (pos[4]) {
+			case 0x00: ca[i].state = GN_CALL_Idle; break; /* missing number, wait a little */
+			case 0x02: ca[i].state = GN_CALL_Dialing; break;
+			case 0x03: ca[i].state = GN_CALL_Ringing; break;
+			case 0x04: ca[i].state = GN_CALL_Incoming; break;
+			case 0x05: ca[i].state = GN_CALL_Established; break;
+			case 0x06: ca[i].state = GN_CALL_Held; break;
+			case 0x07: ca[i].state = GN_CALL_RemoteHangup; break;
+			default: return GN_ERR_UNHANDLEDFRAME;
+			}
+			switch (pos[5]) {
+			case 0x00: ca[i].prev_state = GN_CALL_Idle; break; /* missing number, wait a little */
+			case 0x02: ca[i].prev_state = GN_CALL_Dialing; break;
+			case 0x03: ca[i].prev_state = GN_CALL_Ringing; break;
+			case 0x04: ca[i].prev_state = GN_CALL_Incoming; break;
+			case 0x05: ca[i].prev_state = GN_CALL_Established; break;
+			case 0x06: ca[i].prev_state = GN_CALL_Held; break;
+			case 0x07: ca[i].prev_state = GN_CALL_RemoteHangup; break;
+			default: return GN_ERR_UNHANDLEDFRAME;
+			}
+			char_unicode_decode(ca[i].name, pos + 12, 2 * pos[10]);
+			char_unicode_decode(ca[i].number, pos + 112, 2 * pos[11]);
+			pos += pos[1];
+		}
+		dprintf("Call status:\n");
+		for (i = 0; i < 2; i++) {
+			if (ca[i].state == GN_CALL_Idle) continue;
+			dprintf("ch#%d: id#%d st#%d pst#%d %s (%s)\n",
+				ca[i].channel, ca[i].call_id, ca[i].state, ca[i].prev_state, ca[i].number, ca[i].name);
+		}
+		break;
+
+	/* hangup */
+	case 0x04:
+		dprintf("Hangup!\n");
+		dprintf("Call ID: %i\n", message[4]);
+		dprintf("Cause Type: %i\n", message[5]);
+		dprintf("Cause ID: %i\n", message[6]);
+		return GN_ERR_UNKNOWN;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+}
+
+static gn_error NK7110_GetActiveCalls(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x20};
+
+	if (!data->call_active) return GN_ERR_INTERNALERROR;
+
+	if (sm_message_send(4, NK7110_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(NK7110_MSG_COMMSTATUS, data, state);
+}
+
+static gn_error NK7110_MakeCall(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01};
+	unsigned char voice_end[] = {0x05, 0x01, 0x05, 0x00, 0x02, 0x00, 0x00, 0x00};
+	int pos = 4, len;
+	gn_call_active active[2];
+	gn_data d;
+
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
+
+	switch (data->call_info->type) {
+	case GN_CALL_Voice:
+		break;
+
+	case GN_CALL_NonDigitalData:
+	case GN_CALL_DigitalData:
+		dprintf("Unsupported call type %d\n", data->call_info->type);
+		return GN_ERR_NOTSUPPORTED;
+
+	default:
+		dprintf("Invalid call type %d\n", data->call_info->type);
+		return GN_ERR_INTERNALERROR;
+	}
+
+	len = strlen(data->call_info->number);
+	if (len > GN_PHONEBOOK_NUMBER_MAX_LENGTH) {
+		dprintf("number too long\n");
+		return GN_ERR_ENTRYTOOLONG;
+	}
+	len = char_unicode_encode(req + pos + 1, data->call_info->number, len);
+	req[pos++] = len / 2;
+	pos += len;
+
+	switch (data->call_info->send_number) {	
+	case GN_CALL_Never:   voice_end[5] = 0x01; break;
+	case GN_CALL_Always:  voice_end[5] = 0x00; break;
+	case GN_CALL_Default: voice_end[5] = 0x00; break;
+	default: return GN_ERR_INTERNALERROR;
+	}
+	memcpy(req + pos, voice_end, sizeof(voice_end));
+	pos += sizeof(voice_end);
+
+	if (sm_message_send(pos, NK7110_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	if (sm_block_ack(state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+
+	memset(active, 0, sizeof(*active));
+	gn_data_clear(&d);
+	d.call_active = active;
+	if (NK7110_GetActiveCalls(&d, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	data->call_info->call_id = active[0].call_id;
+
+	return GN_ERR_NONE;
+}
+
+static gn_error NK7110_CancelCall(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x08, 0x00};
+
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
+
+	req[4] = data->call_info->call_id;
+
+	if (sm_message_send(5, NK7110_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	return sm_block_ack(state);
+}
+
+static gn_error NK7110_AnswerCall(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x06, 0x00};
+
+	if (!data->call_info) return GN_ERR_INTERNALERROR;
+
+	req[4] = data->call_info->call_id;
+
+	if (sm_message_send(5, NK7110_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	return sm_block_ack(state);
 }
