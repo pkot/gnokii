@@ -44,12 +44,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc BUGS COPYING MANIFEST README TODO-6110 TODO-gnokiid sample.gnokiirc gettext-howto gnokii.nol
+%doc COPYING CREDITS MANIFEST README README-3810 README-6110 sample.gnokiirc gettext-howto gnokii.nol gnokii-ir-howto.txt
 /usr/bin/*
 %attr(4754, root, gnokii) /usr/sbin/*
 %config /etc/gnokiirc
 
 %changelog
+* Thu Aug  5 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- documentation files changed
+
 * Sat Jul 24 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - stripping of binaries
 

@@ -427,7 +427,7 @@ GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS)
 		DisableKeepalive = true;
 
 			/* Send header */
-		FB38_TX_Send0x23_SendSMSHeader(SMS->MessageCentre, SMS->Destination, text_length);
+		FB38_TX_Send0x23_SendSMSHeader(SMS->MessageCenter, SMS->Destination, text_length);
 
 		timeout = 20; 	/* 2 seconds for command to complete */
 
@@ -1134,13 +1134,13 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 
 			/* We send an 0x3f message to the phone to request a different
 			   type of status dump - this one seemingly concerned with 
-			   SMS message centre details.  Phone responds with an ack to
+			   SMS message center details.  Phone responds with an ack to
 			   our 0x3f request then sends an 0x41 message that has the
 			   actual data in it. */
 		case 0x3f:	break;	/* Don't send ack. */
 
 			/* 0x41 Messages are sent in response to an 0x3f request. */
-		case 0x41: 	FB38_RX_Handle0x41_SMSMessageCentreData();
+		case 0x41: 	FB38_RX_Handle0x41_SMSMessageCenterData();
 					break;
 
 			/* We send 0x42 messages to write a SIM location. */
@@ -1409,17 +1409,17 @@ void    FB38_TX_Send0x4c_RequestIMEIRevisionModelData(void)
 }
 
 
-void	FB38_TX_Send0x23_SendSMSHeader(char *message_centre, char *destination, u8 total_length)
+void	FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, u8 total_length)
 {
 	
 	u8		message[255];
-	u8		message_centre_length, destination_length;
+	u8		message_center_length, destination_length;
 
 		/* Update sequence number. */
 	FB38_TX_UpdateSequenceNumber();
 
-		/* Get length of message centre and destination numbers. */
-	message_centre_length = strlen (message_centre);
+		/* Get length of message center and destination numbers. */
+	message_center_length = strlen (message_center);
 	destination_length = strlen (destination);
 
 		/* Build and send message.  No idea what first 10 bytes are at this
@@ -1436,18 +1436,18 @@ void	FB38_TX_Send0x23_SendSMSHeader(char *message_centre, char *destination, u8 
 	message[8] = 0x00;
 	message[9] = 0x00;
 
-		/* Add total length and message_centre number length fields. */
+		/* Add total length and message_center number length fields. */
 	message[10] = total_length;
-	message[11] = message_centre_length;
+	message[11] = message_center_length;
 
-		/* Copy in the actual message centre number. */
-	memcpy (message + 12, message_centre, message_centre_length);
+		/* Copy in the actual message center number. */
+	memcpy (message + 12, message_center, message_center_length);
 
 		/* Now add destination length and number. */
-	message[12 + message_centre_length] = destination_length;
-	memcpy (message + 13 + message_centre_length, destination, destination_length);
+	message[12 + message_center_length] = destination_length;
+	memcpy (message + 13 + message_center_length, destination, destination_length);
 
-	if (FB38_TX_SendMessage(13 + message_centre_length + destination_length, 0x23, RequestSequenceNumber, message) != true) {
+	if (FB38_TX_SendMessage(13 + message_center_length + destination_length, 0x23, RequestSequenceNumber, message) != true) {
 		fprintf(stderr, _("Send SMS header failed!"));	
 	}
 
@@ -1783,7 +1783,7 @@ void	FB38_RX_Handle0x0e_OutgoingCallAnswered(void)
 void	FB38_RX_Handle0x2c_SMSHeader(void)
 {
 	u8		sender_length;
-	u8		message_centre_length;
+	u8		message_center_length;
 
 		/* Acknowlege. */
 	if (FB38_TX_SendStandardAcknowledge(0x2c) != true) {
@@ -1815,25 +1815,25 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 	CurrentSMSMessage->Minute = (MessageBuffer[12] >> 4) + (10 * (MessageBuffer[12] & 0x0f)); 
 	CurrentSMSMessage->Second = (MessageBuffer[13] >> 4) + (10 * (MessageBuffer[13] & 0x0f)); 
 
-		/* Now get sender and message centre information. */
-	message_centre_length = MessageBuffer[16];
-	sender_length = MessageBuffer[16 +  message_centre_length + 1];
+		/* Now get sender and message center information. */
+	message_center_length = MessageBuffer[16];
+	sender_length = MessageBuffer[16 +  message_center_length + 1];
 
 		/* Check they're not too long. */
 	if (sender_length > FB38_MAX_SENDER_LENGTH) {
 		sender_length = FB38_MAX_SENDER_LENGTH;
 	}
 		
-	if (message_centre_length > FB38_MAX_SMS_CENTRE_LENGTH) {
-		message_centre_length = FB38_MAX_SMS_CENTRE_LENGTH;
+	if (message_center_length > FB38_MAX_SMS_CENTER_LENGTH) {
+		message_center_length = FB38_MAX_SMS_CENTER_LENGTH;
 	}
 
 		/* Now copy to strings... Note they are in reverse order to
 		   0x30 message*/
-	memcpy(CurrentSMSMessage->MessageCentre, MessageBuffer + 17, message_centre_length);
-	CurrentSMSMessage->MessageCentre[message_centre_length] = 0;	/* Ensure null terminated. */
+	memcpy(CurrentSMSMessage->MessageCenter, MessageBuffer + 17, message_center_length);
+	CurrentSMSMessage->MessageCenter[message_center_length] = 0;	/* Ensure null terminated. */
 	
-	strncpy(CurrentSMSMessage->Sender, MessageBuffer + 18 + message_centre_length, sender_length);
+	strncpy(CurrentSMSMessage->Sender, MessageBuffer + 18 + message_center_length, sender_length);
 	CurrentSMSMessage->Sender[sender_length] = 0;
 
 }
@@ -1847,8 +1847,8 @@ void	FB38_RX_Handle0x30_IncomingSMSNotification(void)
 	char	sender[255];			/* Sender details */
 	u8		sender_length;
 
-	char	message_centre[255];	/* And message centre number/ID */
-	u8		message_centre_length;
+	char	message_center[255];	/* And message center number/ID */
+	u8		message_center_length;
 
 	u8		message_body_length;	/* Length of actual SMS message itself. */
 
@@ -1881,27 +1881,27 @@ void	FB38_RX_Handle0x30_IncomingSMSNotification(void)
 	minute = (MessageBuffer[11] >> 4) + (10 * (MessageBuffer[11] & 0x0f)); 
 	second = (MessageBuffer[12] >> 4) + (10 * (MessageBuffer[12] & 0x0f)); 
 
-		/* Now get sender and message centre information. */
+		/* Now get sender and message center information. */
 	sender_length = MessageBuffer[15];
-	message_centre_length = MessageBuffer[15 +  sender_length + 1];
+	message_center_length = MessageBuffer[15 +  sender_length + 1];
 
 		/* Now copy to strings... */
 	strncpy(sender, MessageBuffer + 16, sender_length);
 	sender[sender_length] = 0;	/* Ensure null terminated. */
 	
-	strncpy(message_centre, MessageBuffer + 17 + sender_length, message_centre_length);
-	message_centre[message_centre_length] = 0;
+	strncpy(message_center, MessageBuffer + 17 + sender_length, message_center_length);
+	message_center[message_center_length] = 0;
 
 		/* Get last byte, purpose unknown. */
-	unk_end = MessageBuffer[17 + sender_length + message_centre_length];
+	unk_end = MessageBuffer[17 + sender_length + message_center_length];
 
 		/* And output. */
 	if (EnableMonitoringOutput == false) {
 		return;
 	}
 
-	fprintf(stdout, _("Incoming SMS %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"),
-			year, month, day, hour, minute, second, sender, message_centre);
+	fprintf(stdout, _("Incoming SMS %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n"),
+			year, month, day, hour, minute, second, sender, message_center);
 	fprintf(stdout, _("   Msg Length %d, Msg number %d,  Unknown bytes: %02x %02x %02x %02x %02x %02x\n"), 
 			message_body_length, msg_number, unk0, unk2, unk3, unk4, unk9, unk_end);
 	fflush(stdout);
@@ -1996,13 +1996,13 @@ void	FB38_RX_Handle0x4d_IMEIRevisionModelData(void)
 
 
 	/* Handle 0x41 message which is sent by phone in response to an
-	   0x3f request.  Contains data about the Message Centre in use,
+	   0x3f request.  Contains data about the Message Center in use,
 	   the only bit understood at this time is the phone number portion
 	   at the end of the message.  This number appears to be null terminated
 	   unlike others but we don't rely on it at this stage! */
-void	FB38_RX_Handle0x41_SMSMessageCentreData(void)
+void	FB38_RX_Handle0x41_SMSMessageCenterData(void)
 {
-	u8		centre_number_length;
+	u8		center_number_length;
 	int		count;
 	
 		/* As usual, acknowledge first. */
@@ -2010,8 +2010,8 @@ void	FB38_RX_Handle0x41_SMSMessageCentreData(void)
 		fprintf(stderr, _("Write failed!"));
 	}
 
-		/* Get Message Centre number length, which is byte 13 in message. */
-	centre_number_length = MessageBuffer[13];
+		/* Get Message Center number length, which is byte 13 in message. */
+	center_number_length = MessageBuffer[13];
 
 		/* First 12 bytes are status values, purpose unknown.  For now
 		   simply display for user to mull over... */
@@ -2019,17 +2019,17 @@ void	FB38_RX_Handle0x41_SMSMessageCentreData(void)
 		return;
 	}
 
-	fprintf(stdout, _("SMS Message Centre Data status bytes ="));
+	fprintf(stdout, _("SMS Message Center Data status bytes ="));
 	for (count = 0; count < 12; count ++) {
 		fprintf(stdout, "0x%02x ", MessageBuffer[2 + count]);
 	}
 
-	if (centre_number_length == 0) {
+	if (center_number_length == 0) {
 		fprintf(stdout, _("Number field emtpy."));
 	}
 	else {
 		fprintf(stdout, _("Number: "));
-		for (count = 0; count < centre_number_length; count ++) {
+		for (count = 0; count < center_number_length; count ++) {
 			fprintf(stdout, "%c", MessageBuffer[14 + count]);
 		}
 	}

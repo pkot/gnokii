@@ -60,7 +60,7 @@ phones.
   either SIM or (again in the case of 8110s) internal memory.
   
 - Sending an SMS message to a specified recipient via a specified
-  message centre number.
+  message center number.
   
 - By way of a message in --monitor mode, receive notification 
   of the following occuring;

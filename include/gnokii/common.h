@@ -68,10 +68,18 @@ typedef enum {
 
 /* Limits of SMS messages. */
 
-#define GSM_MAX_SMS_CENTRE_LENGTH  (40)
+#define GSM_MAX_SMS_CENTER_LENGTH  (40)
 #define GSM_MAX_SENDER_LENGTH      (40)
-#define GSM_MAX_DESTINATION_LENGHT (40)
+#define GSM_MAX_DESTINATION_LENGTH (40)
 #define GSM_MAX_SMS_LENGTH         (160)
+
+/* Define datatype for SMS Message Center */
+
+typedef struct {
+  int No;        /* Number of the SMSC in the phone memory */
+  char Name[20]; /* Name of the SMSC */
+  char Number[GSM_MAX_SMS_CENTER_LENGTH]; /* Number of the SMSC */
+} GSM_MessageCenter;
 
 /* Define datatype for SMS messages, used for getting SMS messages from the
    phones memory. */
@@ -82,9 +90,9 @@ typedef struct {
   int Length;                               /* Length of the SMS message. */
   int Validity;                             /* Validity Period of the SMS message. */
   char MessageText[GSM_MAX_SMS_LENGTH + 1]; /* Room for null term. */
-  char MessageCentre[GSM_MAX_SMS_CENTRE_LENGTH + 1]; /* SMS Centre. */
+  char MessageCenter[GSM_MAX_SMS_CENTER_LENGTH + 1]; /* SMS Center. */
   char Sender[GSM_MAX_SENDER_LENGTH + 1];   /* Sender of the SMS message. */
-  char Destination[GSM_MAX_DESTINATION_LENGHT + 1]; /* Destination of the message. */
+  char Destination[GSM_MAX_DESTINATION_LENGTH + 1]; /* Destination of the message. */
   int MessageNumber;                        /* Location in the memory. */
   GSM_MemoryType MemoryType;                /* Type of memory message is stored in. */
 } GSM_SMSMessage;

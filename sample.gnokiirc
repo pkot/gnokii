@@ -7,7 +7,7 @@
 port = /dev/ttyS0
 
 # Set model to the model number of your phone
-model = 3810
+model = 6110
 
 # Initlength controls the number of characters sent to the
 # phone during initialisation.  You can either set it to

@@ -338,7 +338,7 @@ name and numbers.  These are selected according to whether
 internal or SIM memory is specified.
 
 Fixed bugs reported in 0.2.1 (errno.h and reversal of message
-centre and sender fields)
+center and sender fields)
 
 19990216 Version 0.2.1
 Fixed bug that caused phone book entries containing spaces to be

@@ -373,9 +373,9 @@ void GUI_ReadConfig(void)
   strncpy(rcfile, homedir, 200);
   strncat(rcfile, "/.gnokiirc", 200);
 
-  if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
-    fprintf(stderr, "error opening %s, using default config\n", 
-	    rcfile);
+  if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL )
+    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
+      fprintf(stderr, "error opening %s, using default config\n", rcfile);
 
   Model = CFG_Get(cfg_info, "global", "model");
   if (Model == NULL)

@@ -84,7 +84,7 @@ void usage(void)
           gnokii [--writephonebook]
           gnokii [--getsms] [memory type] [start] [end]
           gnokii [--deletesms] [memory type] [start] [end]
-          gnokii [--sendsms] [destination] [message centre]
+          gnokii [--sendsms] [destination] [message center]
           gnokii [--setdatetime] [YYYY] [MM] [DD] [HH] [MM]
           gnokii [--getdatetime]
           gnokii [--setalarm] [HH] [MM]
@@ -118,7 +118,7 @@ void usage(void)
                             starting at entry [start] and ending at [end].
 
           --sendsms         sends an SMS message to [destination] via
-                            [message centre].  Message text is taken from
+                            [message center].  Message text is taken from
                             stdin.  This function has had limited testing
                             and may not work at all on your network.
 
@@ -342,7 +342,7 @@ void sendsms(char *argv[])
 
   message_buffer[chars_read] = 0x00;	
 
-  fprintf(stdout, _("Sending SMS to %s via message centre %s\n"), argv[2], argv[3]);
+  fprintf(stdout, _("Sending SMS to %s via message center %s\n"), argv[2], argv[3]);
 
   /* Initialise the GSM interface. */     
 
@@ -353,7 +353,7 @@ void sendsms(char *argv[])
   SMS.Validity = 4320; /* 4320 minutes == 72 hours */
 
   strcpy (SMS.Destination, argv[2]);
-  strcpy (SMS.MessageCentre, argv[3]);
+  strcpy (SMS.MessageCenter, argv[3]);
   strcpy (SMS.MessageText, message_buffer);
 
   error = GSM->SendSMSMessage(&SMS);
@@ -453,7 +453,7 @@ void getsms(char *argv[])
 
     case GE_NONE:
 
-      fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"), message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCentre);
+      fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n"), message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCenter);
 
       fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
 
@@ -1045,10 +1045,10 @@ void	readconfig(void)
 	strncpy(rcfile, homedir, 200);
 	strncat(rcfile, "/.gnokiirc", 200);
 
-    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
-		fprintf(stderr, "error opening %s, using default config\n", 
+    if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL )
+       if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
+		fprintf(stderr, _("error opening %s, using default config\n"), 
 		  rcfile);
-    }
 
     Model = CFG_Get(cfg_info, "global", "model");
     if (Model == NULL) {

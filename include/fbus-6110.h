@@ -144,7 +144,7 @@ GSM_Error FB61_GetPowerSource(GSM_PowerSource *source);
 
 GSM_Error FB61_EnterPin(char *pin);
 
-GSM_Error FB61_GetSMSCenter(u8 priority);
+GSM_Error FB61_GetSMSCenter(GSM_MessageCenter *MessageCenter);
 
 GSM_Error FB61_GetIMEI(char *imei);
 GSM_Error FB61_GetRevision(char *revision);

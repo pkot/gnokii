@@ -41,7 +41,9 @@ struct CFG_Header *CFG_ReadFile(char *filename)
     /* Open file */
 
     if ((handle = fopen(filename, "r")) == NULL) {
+#ifdef DEBUG
 		perror("CFG_ReadFile - open");
+#endif DEBUG
 		return NULL;
     }
 

@@ -74,17 +74,17 @@ bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType
 	}
 
 	if (VM_GSMInitialise(model, port, initlength, connection) != GE_NONE) {
-		fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n\r"));
+		fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
 		return (false);
 	}
 
 	if (VM_PtySetup() < 0) {
-		fprintf (stderr, _("VM_Initialise - VM_PtySetup failed!\n\r"));
+		fprintf (stderr, _("VM_Initialise - VM_PtySetup failed!\n"));
 		return (false);
 	}
 
 	if (ATEM_Initialise(PtyRDFD, PtyWRFD) != true) {
-		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n\r"));
+		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n"));
 		return (false);
 	}
 
@@ -176,7 +176,7 @@ int		VM_PtySetup(void)
 	
 	PtyRDFD = VM_GetMasterPty(&slave_name);
 	if (PtyRDFD < 0) {
-		fprintf (stderr, "Couldn't open pty!\n\r");
+		fprintf (stderr, _("Couldn't open pty!\n"));
 		return(-1);
 	}
 	PtyWRFD = PtyRDFD;
@@ -184,11 +184,11 @@ int		VM_PtySetup(void)
 		/* Check we haven't been installed setuid root for some reason
 		   if so, don't create /dev/gnokii */
 	if (getuid() != geteuid()) {
-		fprintf(stderr, "gnokiid should not be installed setuid root!\n\r");
+		fprintf(stderr, _("gnokiid should not be installed setuid root!\n"));
 		return (0);
 	}
 
-	fprintf (stderr, "Slave pty is %s, calling %s to create /dev/gnokii.\n\r", slave_name, mgnokiidev);
+	fprintf (stderr, _("Slave pty is %s, calling %s to create /dev/gnokii.\n"), slave_name, mgnokiidev);
 
 		/* Get pty number */
 	pty_number = atoi(slave_name + 9);

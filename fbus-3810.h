@@ -97,7 +97,7 @@ GSM_Error	FB38_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 #define		FB38_MAX_PHONEBOOK_NUMBER_LENGTH			(30)
 
 	/* Limits to do with SMS messages. */
-#define		FB38_MAX_SMS_CENTRE_LENGTH					(30)
+#define		FB38_MAX_SMS_CENTER_LENGTH					(30)
 #define		FB38_MAX_SENDER_LENGTH						(30)
 #define		FB38_MAX_SMS_LENGTH							(160)
 
@@ -125,7 +125,7 @@ void	FB38_RX_Handle0x30_IncomingSMSNotification(void);
 void    FB38_RX_Handle0x0d_IncomingCallAnswered(void);
 void    FB38_RX_Handle0x0e_OutgoingCallAnswered(void);
 void	FB38_RX_Handle0x2c_SMSHeader(void);
-void	FB38_RX_Handle0x41_SMSMessageCentreData(void);
+void	FB38_RX_Handle0x41_SMSMessageCenterData(void);
 void    FB38_RX_Handle0x46_MemoryLocationData(void);
 void	FB38_RX_Handle0x4d_IMEIRevisionModelData(void);
 
@@ -136,7 +136,7 @@ int		FB38_TX_SendMessage(u8 message_length, u8 message_type, u8 sequence_byte, u
 void 	FB38_TX_Send0x25_RequestSMSMemoryLocation(u8 memory_type, u8 location); 
 void 	FB38_TX_Send0x26_DeleteSMSMemoryLocation(u8 memory_type, u8 location);
 
-void	FB38_TX_Send0x23_SendSMSHeader(char *message_centre, char *destination, u8 total_length);
+void	FB38_TX_Send0x23_SendSMSHeader(char *message_center, char *destination, u8 total_length);
 void	FB38_TX_Send0x27_SendSMSMessageText(u8 block_number, u8 block_length, char *text);
 void 	FB38_TX_Send0x3fMessage(void); 
 void 	FB38_TX_Send0x4aMessage(void);

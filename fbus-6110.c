@@ -185,11 +185,14 @@ int                CurrentSMSPointer;
 GSM_MemoryStatus   *CurrentMemoryStatus;
 GSM_Error          CurrentMemoryStatusError;
 
-GSM_NetworkInfo    *CurrentNetworkInfo;
+GSM_NetworkInfo    *CurrentNetworkInfo = NULL;
 GSM_Error          CurrentNetworkInfoError;
 
 GSM_SMSStatus      *CurrentSMSStatus;
 GSM_Error          CurrentSMSStatusError;
+
+GSM_MessageCenter  *CurrentMessageCenter;
+GSM_Error          CurrentMessageCenterError;
 
 GSM_Error          PINError;
 
@@ -633,15 +636,6 @@ void FB61_ThreadLoop(void)
 
   FB61_TX_SendMessage(45, 0x64, magic_connect);
   
-  /* Get the primary SMS Center */
-
-  /* It's very strange that if I send this request again (with different
-     number) it fails. But if I send it alone it succeds. It seems that 6110
-     is refusing to tell you all the SMS Centers information at once :-(
-     And even when I'm authenticated correctly... */
-
-  //    FB61_GetSMSCenter(1);
-
   // 	FB61_GetCalendarNote(1);
 
   //    FB61_SendRingtone("GNOKIItune", 250);
@@ -980,23 +974,23 @@ GSM_Error FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
   return (CurrentAlarmError);
 }
 
-/* This function sends to the mobile phone a request for the SMS Center of
-   rank `priority' */
+/* This function sends to the mobile phone a request for the SMS Center */
 
-GSM_Error FB61_GetSMSCenter(u8 priority)
+GSM_Error FB61_GetSMSCenter(GSM_MessageCenter *MessageCenter)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x33, 0x64, 0x01};
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x33, 0x64, 0x00};
   int timeout=10;
 
-  req[5]=priority;
+  req[5]=MessageCenter->No;
 
-  CurrentSMSStatusError = GE_BUSY;
+  CurrentMessageCenter=MessageCenter;
+  CurrentMessageCenterError = GE_BUSY;
 
   FB61_TX_SendMessage(6, 0x02, req);
 
   /* Wait for timeout or other error. */
-  while (timeout != 0 && CurrentSMSStatusError == GE_BUSY ) {
+  while (timeout != 0 && CurrentMessageCenterError == GE_BUSY ) {
 
     if (--timeout == 0)
       return (GE_TIMEOUT);
@@ -1312,7 +1306,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   unsigned char req[256] = {
     FB61_FRAME_HEADER,
     0x01, 0x02, 0x00, /* SMS send request*/
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* SMS centre, the rest is unused */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* SMS center, the rest is unused */
     0x11, /* TP validity period (9.2.3.1) */
     0x00, /* TP-Protocol identifier (9.2.3.9) */
     0x00, /* Type of sms: 00=text 22=fax 26=paging 2d=email */
@@ -1331,7 +1325,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   if (strlen(SMS->MessageText) > GSM_MAX_SMS_LENGTH)
     return(GE_SMSTOOLONG);
 
-  req[6]=SemiOctetPack(SMS->MessageCentre, req+7);
+  req[6]=SemiOctetPack(SMS->MessageCenter, req+7);
   if (req[6] % 2) req[6]++;
   req[6] = req[6] / 2 + 1;
 
@@ -1828,13 +1822,17 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x34:
 
+      CurrentMessageCenter->No=MessageBuffer[4];
+      sprintf(CurrentMessageCenter->Name, "%s", MessageBuffer+33);
+      sprintf(CurrentMessageCenter->Number, "%s", FB61_GetBCDNumber(MessageBuffer+21));
+
 #ifdef DEBUG
       printf(_("Message: SMS Center received:\n"));
-      printf(_("   %d. SMS Center name is %s\n"), MessageBuffer[4], MessageBuffer+33);
-      printf(_("   %d. SMS Center number is %s\n"), MessageBuffer[4], FB61_GetBCDNumber(MessageBuffer+21));
+      printf(_("   %d. SMS Center name is %s\n"), CurrentMessageCenter->No, CurrentMessageCenter->Name);
+      printf(_("   %d. SMS Center number is %s\n"), CurrentMessageCenter->No, CurrentMessageCenter->Number);
 #endif DEBUG
 
-      CurrentSMSStatusError=GE_NONE;
+      CurrentMessageCenterError=GE_NONE;
 
       break;
 
@@ -2152,20 +2150,22 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
   case 0x0a:
 
-    sprintf(CurrentNetworkInfo->NetworkCode, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
+    if (CurrentNetworkInfo) {
+      sprintf(CurrentNetworkInfo->NetworkCode, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
 
-    sprintf(CurrentNetworkInfo->CellID, "%02x%02x", MessageBuffer[10], MessageBuffer[11]);
+      sprintf(CurrentNetworkInfo->CellID, "%02x%02x", MessageBuffer[10], MessageBuffer[11]);
 
-    sprintf(CurrentNetworkInfo->LAC, "%02x%02x", MessageBuffer[12], MessageBuffer[13]);
+      sprintf(CurrentNetworkInfo->LAC, "%02x%02x", MessageBuffer[12], MessageBuffer[13]);
 
 #ifdef DEBUG
-    printf(_("Message: Network informations:\n"));
+      printf(_("Message: Network informations:\n"));
 
-    printf(_("   CellID: %s\n"), CurrentNetworkInfo->CellID);
-    printf(_("   LAC: %s\n"), CurrentNetworkInfo->LAC);
-    printf(_("   Network code: %s\n"), CurrentNetworkInfo->NetworkCode);
-    printf(_("   Network name: %s (%s)\n"), GSM_GetNetworkName(CurrentNetworkInfo->NetworkCode), GSM_GetCountryName(CurrentNetworkInfo->NetworkCode));
+      printf(_("   CellID: %s\n"), CurrentNetworkInfo->CellID);
+      printf(_("   LAC: %s\n"), CurrentNetworkInfo->LAC);
+      printf(_("   Network code: %s\n"), CurrentNetworkInfo->NetworkCode);
+      printf(_("   Network name: %s (%s)\n"), GSM_GetNetworkName(CurrentNetworkInfo->NetworkCode), GSM_GetCountryName(CurrentNetworkInfo->NetworkCode));
 #endif DEBUG
+    }
 
     CurrentNetworkInfoError = GE_NONE;
 
@@ -2383,7 +2383,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       strcpy(CurrentSMSMessage->Sender, FB61_GetBCDNumber(MessageBuffer+20+offset));
 
-      strcpy(CurrentSMSMessage->MessageCentre, FB61_GetBCDNumber(MessageBuffer+8));
+      strcpy(CurrentSMSMessage->MessageCenter, FB61_GetBCDNumber(MessageBuffer+8));
 
       CurrentSMSMessage->Length=MessageBuffer[23];
 
