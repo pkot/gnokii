@@ -672,14 +672,14 @@ void GUI_ShowOptions(void)
 
 	gtk_entry_set_text(GTK_ENTRY(configDialogData.connection.bindir), xgnokiiConfig.bindir);
 
-	if (!strcmp(xgnokiiConfig.connection, "serial")) {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(configDialogData.connection.serial),
+	if (xgnokiiConfig.connection == GN_CT_Irda) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(configDialogData.connection.irda),
 					     TRUE);
-	} else if (!strcmp(xgnokiiConfig.connection, "infrared")) {
+	} else if (xgnokiiConfig.connection == GN_CT_Infrared || xgnokiiConfig.connection == GN_CT_Tekram) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON
 					     (configDialogData.connection.infrared), TRUE);
 	} else {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(configDialogData.connection.irda),
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(configDialogData.connection.serial),
 					     TRUE);
 	}
 
@@ -2290,11 +2290,15 @@ static void ReadConfig(void)
 			if ((xgnokiiConfig.locale = getenv("LANG")) == NULL)
 				xgnokiiConfig.locale = "POSIX";
 #endif
-	if (gn_cfg_readconfig(&xgnokiiConfig.model, &xgnokiiConfig.port,
-			      &xgnokiiConfig.initlength, &xgnokiiConfig.connection,
-			      &xgnokiiConfig.bindir) < 0) {
+	if (gn_cfg_readconfig(&xgnokiiConfig.bindir) < 0) {
 		exit(-1);
 	}
+	if (!gn_cfg_load_phone("", &statemachine)) exit(-1);
+
+	xgnokiiConfig.model = statemachine.config.model;
+	xgnokiiConfig.port = statemachine.config.port_device;
+	asprintf(&xgnokiiConfig.initlength, "%d", statemachine.config.init_length);
+	xgnokiiConfig.connection = statemachine.config.connection_type;
 
 	GUI_ReadXConfig();
 	max_phonebook_name_length = atoi(xgnokiiConfig.maxPhoneLen);

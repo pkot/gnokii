@@ -78,11 +78,7 @@
 
 /* Prototypes */
 static int  VM_PtySetup(char *bindir);
-static gn_error VM_GSMInitialise(char *model,
-			   char *port,
-			   char *initlength,
-			   const char *connection,
-			   struct gn_statemachine *sm);
+static gn_error VM_GSMInitialise(struct gn_statemachine *sm);
 
 /* Global variables */
 
@@ -101,7 +97,7 @@ struct vm_queue queue;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
-bool gn_vm_initialise(char *model,char *port, char *initlength, const char *connection, char *bindir, bool debug_mode, bool GSMInit)
+bool gn_vm_initialise(const char *iname, char *bindir, bool debug_mode, bool GSMInit)
 {
 	static struct gn_statemachine State;
 	sm = &State;
@@ -119,7 +115,8 @@ bool gn_vm_initialise(char *model,char *port, char *initlength, const char *conn
 
 	if (GSMInit) {
 		dprintf("Initialising GSM\n");
-		if ((VM_GSMInitialise(model, port, initlength, connection, sm) != GN_ERR_NONE)) {
+		if (!gn_cfg_load_phone(iname, sm)) return false;
+		if ((VM_GSMInitialise(sm) != GN_ERR_NONE)) {
 			fprintf (stderr, _("gn_vm_initialise - VM_GSMInitialise failed!\n"));
 			return (false);
 		}
@@ -352,12 +349,12 @@ static int VM_PtySetup(char *bindir)
 }
 
 /* Initialise GSM interface, returning gn_error as appropriate  */
-static gn_error VM_GSMInitialise(char *model, char *port, char *initlength, const char *connection, struct gn_statemachine *sm)
+static gn_error VM_GSMInitialise(struct gn_statemachine *sm)
 {
 	gn_error error;
 
 	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(model, port, initlength, connection, sm);
+	error = gn_gsm_initialise(sm);
 
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("GSM/FBUS init failed!\n"));

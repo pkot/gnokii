@@ -45,17 +45,10 @@
 
 /* Global variables */
 bool DebugMode;		/* When true, run in debug mode */
-char *Model;		/* Model from .gnokiirc file. */
-char *Port;		/* Serial port from .gnokiirc file */
-char *Initlength;	/* Init length from .gnokiirc file */
-char *Connection;	/* Connection type from .gnokiirc file */
 char *BinDir;		/* Directory of the mgnokiidev command */
 char *lockfile = NULL;
 bool GTerminateThread;
 
-/* Local variables */
-char *DefaultConnection = "serial";
-char *DefaultBinDir = "/usr/local/sbin";
 
 static void short_version()
 {
@@ -66,8 +59,8 @@ static void version()
 {
 	fprintf(stderr, _("Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999\n"
 			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999\n"
-			  "Built %s %s for %s on %s \n"),
-			  __TIME__, __DATE__, Model, Port);
+			  "Built %s %s\n"),
+			  __TIME__, __DATE__);
 }
 
 /* The function usage is only informative - it prints this program's usage and
@@ -95,6 +88,7 @@ int main(int argc, char *argv[])
 {
 	char *aux;
 	static bool atexit_registered = false;
+	struct gn_statemachine temp_state;
 
 	/* For GNU gettext */
 #ifdef ENABLE_NLS
@@ -103,9 +97,10 @@ int main(int argc, char *argv[])
 
 	short_version();
 
-	if (gn_cfg_readconfig(&Model, &Port, &Initlength, &Connection, &BinDir) < 0) {
+	if (gn_cfg_readconfig(&BinDir) < 0) {
 		exit(-1);
 	}
+	if (!gn_cfg_load_phone("", &temp_state)) exit(-1);
 
 	/* Handle command line arguments. */
 	if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
@@ -134,7 +129,7 @@ int main(int argc, char *argv[])
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_lock_device(Port);
+		lockfile = gn_lock_device(temp_state.config.port_device);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);
@@ -142,7 +137,7 @@ int main(int argc, char *argv[])
 	}
 
 	while (1) {
-		if (gn_vm_initialise(Model, Port, Initlength, Connection, BinDir, DebugMode, true) == false) {
+		if (gn_vm_initialise("", BinDir, DebugMode, true) == false) {
 			exit (-1);
 		}
 

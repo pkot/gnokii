@@ -125,7 +125,7 @@ static void busterminate(void)
 }
 
 
-static gn_error fbusinit (bool enable_monitoring)
+static gn_error fbusinit (const char *iname, bool enable_monitoring)
 {
   gn_error error = GN_ERR_NOLINK;
   char *aux;
@@ -138,10 +138,12 @@ static gn_error fbusinit (bool enable_monitoring)
 	}
 	/* signal(SIGINT, bussignal); */
 
+	if (!gn_cfg_load_phone(iname, &sm)) exit(-1);
+
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_lock_device(smsdConfig.port);
+		lockfile = gn_lock_device(sm.config.port_device);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);
@@ -150,8 +152,7 @@ static gn_error fbusinit (bool enable_monitoring)
 
   /* Initialise the code for the GSM interface. */     
 
-  error = gn_gsm_initialise (smsdConfig.model, smsdConfig.port,
-			     smsdConfig.initlength, smsdConfig.connection, &sm);
+  error = gn_gsm_initialise (&sm);
 
 #ifdef XDEBUG
   g_print ("fbusinit: error %d\n", error);
@@ -364,7 +365,7 @@ void *Connect (void *a)
   g_print ("Initializing connection...\n");
 # endif
 
-  if (fbusinit (true) != GN_ERR_NONE)
+  if (fbusinit ("", true) != GN_ERR_NONE)
   {
     free (data);
     exit (1);

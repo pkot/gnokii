@@ -72,9 +72,7 @@ API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
 				struct gn_statemachine *state);
 
 /* Prototype for the functions actually provided by gsm-api.c. */
-API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
-			       const char *connection,
-			       struct gn_statemachine *sm);
+API gn_error gn_gsm_initialise(struct gn_statemachine *sm);
 
 /* Ringtones */
 gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone);
@@ -120,7 +118,7 @@ API int gn_get_note(int number);
 
 /* Functions */
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
-API int gn_cfg_readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
+API int gn_cfg_readconfig(char **bindir);
 API bool gn_cfg_load_phone(const char *iname, struct gn_statemachine *state);
 
 API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *addon);

@@ -97,8 +97,7 @@ static inline void EnableData(GtkWidget * widget, gpointer data)
 {
 
 	GTerminateThread = false;
-	gn_vm_initialise(xgnokiiConfig.model, xgnokiiConfig.port,
-		      0, 0, xgnokiiConfig.bindir, false, false);
+	gn_vm_initialise("", xgnokiiConfig.bindir, false, false);
 	enabled = true;
 	UpdateStatus();
 }

@@ -154,10 +154,6 @@ typedef enum {
 	OPT_LISTNETWORKS,
 } opt_index;
 
-static char *model;      /* Model from .gnokiirc file. */
-static char *port;       /* Serial port from .gnokiirc file */
-static char *initlength; /* Init length from .gnokiirc file */
-static char *connection; /* Connection type from .gnokiirc file */
 static char *bindir;     /* Binaries directory from .gnokiirc file - not used here yet */
 static FILE *logfile = NULL;
 static char *lockfile = NULL;
@@ -246,7 +242,7 @@ static void version(void)
 			  "gnokii is free software, covered by the GNU General Public License, and you are\n"
 			  "welcome to change it and/or distribute copies of it under certain conditions.\n"
 			  "There is absolutely no warranty for gnokii.  See GPL for details.\n"
-			  "Built %s %s for %s on %s \n"), __TIME__, __DATE__, model, port);
+			  "Built %s %s\n"), __TIME__, __DATE__);
 }
 
 /* The function usage is only informative - it prints this program's usage and
@@ -347,7 +343,7 @@ static void busterminate(void)
 	if (lockfile) gn_unlock_device(lockfile);
 }
 
-static void businit(void (*rlp_handler)(gn_rlp_f96_frame *frame))
+static void businit(void)
 {
 	gn_error error;
 	char *aux;
@@ -365,7 +361,7 @@ static void businit(void (*rlp_handler)(gn_rlp_f96_frame *frame))
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_lock_device(port);
+		lockfile = gn_lock_device(state.config.port_device);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);
@@ -373,7 +369,7 @@ static void businit(void (*rlp_handler)(gn_rlp_f96_frame *frame))
 	}
 
 	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(model, port, initlength, connection, &state);
+	error = gn_gsm_initialise(&state);
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Telephone interface init failed: %s Quitting.\n"), gn_error_print(error));
 		exit(2);
@@ -3753,7 +3749,7 @@ static int pmon(void)
 	gn_error error;
 
 	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(model, port, initlength, "serial", &state);
+	error = gn_gsm_initialise(&state);
 
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
@@ -4565,9 +4561,10 @@ int main(int argc, char *argv[])
 	short_version();
 
 	/* Read config file */
-	if (gn_cfg_readconfig(&model, &port, &initlength, &connection, &bindir) < 0) {
+	if (gn_cfg_readconfig(&bindir) < 0) {
 		exit(1);
 	}
+	if (!gn_cfg_load_phone("", &state)) exit(1);
 
 	/* Handle command line arguments. */
 	c = getopt_long(argc, argv, "", long_options, NULL);
@@ -4608,7 +4605,7 @@ int main(int argc, char *argv[])
 #endif
 
 		/* Initialise the code for the GSM interface. */
-		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE && c != OPT_LISTNETWORKS) businit(NULL);
+		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE && c != OPT_LISTNETWORKS) businit();
 
 		switch(c) {
 		case OPT_MONITOR:

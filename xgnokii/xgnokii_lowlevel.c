@@ -233,9 +233,7 @@ static gn_error fbusinit(bool enable_monitoring)
 	}
 
 	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(xgnokiiConfig.model, xgnokiiConfig.port,
-				  xgnokiiConfig.initlength, xgnokiiConfig.connection,
-				  &statemachine);
+	error = gn_gsm_initialise(&statemachine);
 
 #ifdef XDEBUG
 	g_print("fbusinit: error %d\n", error);

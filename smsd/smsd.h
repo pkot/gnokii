@@ -39,10 +39,6 @@ typedef enum {
 } SMSDSettings;
 
 typedef struct {
-  gchar *initlength; /* Init length from .gnokiirc file */
-  gchar *model;      /* Model from .gnokiirc file. */
-  gchar *port;       /* Serial port from .gnokiirc file */
-  gchar *connection; /* Connection type from .gnokiirc file */
   gchar *bindir;
   gchar *dbMod;
   gchar *libDir;

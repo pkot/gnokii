@@ -92,7 +92,7 @@ API gn_phone *gn_gsm_info;
 /* Initialise interface to the phone. Model number should be a string such as
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
-static gn_error register_driver(gn_driver *driver, char *model, char *setupmodel, struct gn_statemachine *sm)
+static gn_error register_driver(gn_driver *driver, const char *model, char *setupmodel, struct gn_statemachine *sm)
 {
 	gn_data *data = NULL;
 	gn_data *p_data;
@@ -114,17 +114,13 @@ static gn_error register_driver(gn_driver *driver, char *model, char *setupmodel
 
 #define REGISTER_DRIVER(x, y) { \
 	extern gn_driver driver_##x; \
-	if ((ret = register_driver(&driver_##x, model, y, sm)) != GN_ERR_UNKNOWNMODEL) \
+	if ((ret = register_driver(&driver_##x, sm->config.model, y, sm)) != GN_ERR_UNKNOWNMODEL) \
 		return ret; \
 }
 
-API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
-			       const char *connection,
-			       struct gn_statemachine *sm)
+API gn_error gn_gsm_initialise(struct gn_statemachine *sm)
 {
 	gn_error ret;
-
-	if (!gn_cfg_load_phone("", sm)) return GN_ERR_FAILED;
 
 	if (sm->config.model[0] == '\0') return GN_ERR_UNKNOWNMODEL;
 	if (sm->config.port_device[0] == '\0') return GN_ERR_FAILED;
@@ -140,7 +136,7 @@ API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
 #endif
 #endif
 	REGISTER_DRIVER(fake, NULL);
-	REGISTER_DRIVER(at, model);
+	REGISTER_DRIVER(at, sm->config.model);
 	REGISTER_DRIVER(nokia_6160, NULL);
 
 	return GN_ERR_UNKNOWNMODEL;

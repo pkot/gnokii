@@ -260,8 +260,7 @@ static void ReadConfig (gint argc, gchar *argv[])
     exit (-2);
   }
   
-  if (gn_cfg_readconfig (&smsdConfig.model, &smsdConfig.port, &smsdConfig.initlength,
-			 &smsdConfig.connection, &smsdConfig.bindir) < 0)
+  if (gn_cfg_readconfig (&smsdConfig.bindir) < 0)
     exit (-1);
 }
 

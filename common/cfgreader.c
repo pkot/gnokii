@@ -373,12 +373,10 @@ static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_c
 	return true;
 }
 
-API int gn_cfg_readconfig(char **model, char **port, char **initlength,
-			  char **connection, char **bindir)
+API int gn_cfg_readconfig(char **bindir)
 {
 	char *homedir;
 	char rcfile[200];
-	char *default_connection = "serial";
 	char *default_bindir     = "/usr/local/sbin/";
 	char *val;
 
@@ -442,15 +440,6 @@ API int gn_cfg_readconfig(char **model, char **port, char **initlength,
 		else
 			gn_config_global.smsc_timeout = 10 * atoi(val);
 	}
-
-	*model = gn_config_global.model;
-	*port = gn_config_global.port_device;
-
-	(char *)*initlength = gn_cfg_get(gn_cfg_info, "global", "initlength");
-	if (!*initlength) (char *)*initlength = "default";
-
-	(char *)*connection = gn_cfg_get(gn_cfg_info, "global", "connection");
-	if (!*connection) (char *)*connection = default_connection;
 
 	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
 	if (!*bindir) (char *)*bindir = default_bindir;

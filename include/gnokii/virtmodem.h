@@ -45,10 +45,7 @@ extern struct vm_queue queue;
 
 
 /* Prototypes */
-API bool gn_vm_initialise(char *model,
-			  char *port,
-			  char *initlength,
-			  const char *connection,
+API bool gn_vm_initialise(const char *iname,
 			  char *bindir,
 			  bool debug_mode,
 			  bool gn_init);

@@ -36,6 +36,7 @@
     o state populated to the device layer           (BORBELY Zoltan)
     o config settings moved into state->config      (BORBELY Zoltan)
     o high level config reading function added      (BORBELY Zoltan)
+    o gn_gsm_initialise and config handling cleanup (BORBELY Zoltan)
  * 6110 series updates:
     o M2BUS support added                           (BORBELY Zoltan)
  * 7110 series updates:
