@@ -26,7 +26,8 @@
 
 /* A few useful functions for bitmaps */
 
-void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y) {
+void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
+{
 	if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8);
 	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8));
 
@@ -34,7 +35,8 @@ void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y) {
 	if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8));
 }
 
-void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y) {
+void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
+{
 	if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] &= 255 - (1 << (y%8));
 	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[(y*bmp->width+x)/8] &= 255 - (1 << (7-((y*bmp->width+x)%8)));
 
@@ -42,22 +44,25 @@ void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y) {
 	if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] &= 255 - (1 << (7-(x%8)));
 }
 
-bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y) {
-	int i=0;
+bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
+{
+	int i = 0;
 
-	if (bmp->type == GSM_StartupLogo) i=(bmp->bitmap[((y/8)*bmp->width) + x] & 1<<((y%8)));
-	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) i=(bmp->bitmap[(y*bmp->width+x)/8] & 1 << (7-((y*bmp->width+x)%8)));
+	if (bmp->type == GSM_StartupLogo) i = (bmp->bitmap[((y/8)*bmp->width) + x] & 1<<((y%8)));
+	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo)
+		i = (bmp->bitmap[(y*bmp->width+x)/8] & 1 << (7-((y*bmp->width+x)%8)));
 	/* Testing only ! */
-	if (bmp->type == GSM_PictureImage) i=(bmp->bitmap[9*y + (x/8)] & 1<<(7-(x%8)));
+	if (bmp->type == GSM_PictureImage) i = (bmp->bitmap[9*y + (x/8)] & 1<<(7-(x%8)));
  
-	if (i) return true; else return false;
+	if (i) return true;
+	else return false;
 }
 
 void GSM_ClearBitmap(GSM_Bitmap *bmp)
 {
 	int i;
 
-	for (i=0;i<bmp->size;i++) bmp->bitmap[i]=0;
+	for (i = 0; i < bmp->size; i++) bmp->bitmap[i] = 0;
 }
 
 
@@ -118,61 +123,58 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Informati
 
 void GSM_PrintBitmap(GSM_Bitmap *bitmap)
 {
-	int x,y;
+	int x, y;
 
-	for (y=0;y<bitmap->height;y++) {
-		for (x=0;x<bitmap->width;x++) {
-			if (GSM_IsPointBitmap(bitmap,x,y)) {
-				fprintf(stdout, _("#"));
+	for (y = 0; y < bitmap->height; y++) {
+		for (x = 0; x < bitmap->width; x++) {
+			if (GSM_IsPointBitmap(bitmap, x, y)) {
+				fprintf(stdout, "#");
 			} else {
-				fprintf(stdout, _(" "));
+				fprintf(stdout, " ");
 			}
 		}
-		fprintf(stdout, _("\n"));
+		fprintf(stdout, "\n");
 	}
 }
 
 
-GSM_Error GSM_ReadSMSBitmap(GSM_SMSMessage *message, GSM_Bitmap *bitmap)
+GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bitmap)
 {
-	int offset = 1;
+	int offset = 0;
 
-	switch (message->UDH[0].Type) {
+	switch (type) {
 	case SMS_OpLogo:
-		if (message->Length!=133+7) return GE_UNKNOWN;
-    
+		if (!code) return GE_UNKNOWN;
+
 		bitmap->type = SMS_OpLogo;
 
-		bitmap->netcode[0] = '0' + (message->MessageText[0] & 0x0f);
-		bitmap->netcode[1] = '0' + (message->MessageText[0] >> 4);
-		bitmap->netcode[2] = '0' + (message->MessageText[1] & 0x0f);
+		bitmap->netcode[0] = '0' + (message[0] & 0x0f);
+		bitmap->netcode[1] = '0' + (message[0] >> 4);
+		bitmap->netcode[2] = '0' + (message[1] & 0x0f);
 		bitmap->netcode[3] = ' ';
-		bitmap->netcode[4] = '0' + (message->MessageText[2] & 0x0f);
-		bitmap->netcode[5] = '0' + (message->MessageText[2] >> 4);
+		bitmap->netcode[4] = '0' + (message[2] & 0x0f);
+		bitmap->netcode[5] = '0' + (message[2] >> 4);
 		bitmap->netcode[6] = 0;
 
-		offset = 4;
 		break;
-
 	case SMS_CallerIDLogo:
-		if (message->Length != 130+7) return GE_UNKNOWN;
 		bitmap->type = SMS_CallerIDLogo;
+		break;
+	case SMS_Picture:
+		offset = 2;
+		bitmap->type = GSM_PictureImage;
 		break;
 	default: /* error */
 		return GE_UNKNOWN;
 		break;
 	}
-	bitmap->width = message->MessageText[offset];
-	bitmap->height = message->MessageText[offset + 1];
-  
-	if (bitmap->width!=72 || bitmap->height!=14) return GE_INVALIDIMAGESIZE;
+	bitmap->width = message[0];
+	bitmap->height = message[1];
   
 	bitmap->size = (bitmap->width * bitmap->height) / 8;
-	memcpy(bitmap->bitmap, message->MessageText + offset + 3, bitmap->size);
+	memcpy(bitmap->bitmap, message + offset + 2, bitmap->size);
 
-#ifdef DEBUG
-	fprintf(stdout, _("Bitmap from SMS: width %i, height %i\n"),bitmap->width,bitmap->height);
-#endif
+	dprintf("Bitmap from SMS: width %i, height %i\n", bitmap->width, bitmap->height);
 
 	return GE_NONE;
 }

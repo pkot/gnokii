@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.149  2001-11-19 16:00:15  pkot
+  Revision 1.150  2001-11-20 16:22:22  pkot
+  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
+
+  Revision 1.149  2001/11/19 16:00:15  pkot
   Another typo
 
   Revision 1.148  2001/11/19 13:46:43  pkot
@@ -1166,6 +1169,7 @@ int getsms(int argc, char *argv[])
 	data.SMSFolder = &folder;
 	/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count ++) {
+		int offset = 0;
 
 		message.Number = count;
 		data.SMSMessage = &message;
@@ -1235,10 +1239,11 @@ int getsms(int argc, char *argv[])
 					fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
 					if (!strcmp(message.RemoteNumber.number, "+998000005") && !strcmp(message.MessageCenter.Number, "+886935074443")) dprintf(_("Saved by Logo Express\n"));
 					if (!strcmp(message.RemoteNumber.number, "+998000002") || !strcmp(message.RemoteNumber.number, "+998000003")) dprintf(_("Saved by Operator Logo Uploader by Thomas Kessler\n"));
+					offset = 3;
 				case SMS_CallerIDLogo:
 					fprintf(stdout, ("Logo:\n"));
 					/* put bitmap into bitmap structure */
-					GSM_ReadSMSBitmap(&message, &bitmap);
+					GSM_ReadSMSBitmap(message.UDH[0].Type, message.MessageText+2+offset, message.MessageText, &bitmap);
 					GSM_PrintBitmap(&bitmap);
 					if (*filename) {
 						error = GE_NONE;
@@ -1296,7 +1301,7 @@ int getsms(int argc, char *argv[])
 			fprintf(stderr, _("SMS location %s %d empty.\n"), memory_type_string, count);
 			break;
 		default:
-			fprintf(stdout, _("GetSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
+			fprintf(stdout, _("GetSMS %s %d failed!(%s)\n\n"), memory_type_string, count, print_error(error));
 			break;
 		}
 	}

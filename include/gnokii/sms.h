@@ -13,7 +13,10 @@
   Include file for SMS library.
 
   $Log$
-  Revision 1.4  2001-11-19 13:09:40  pkot
+  Revision 1.5  2001-11-20 16:22:23  pkot
+  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
+
+  Revision 1.4  2001/11/19 13:09:40  pkot
   Begin work on sms sending
 
   Revision 1.3  2001/11/18 00:54:32  pkot
@@ -248,6 +251,7 @@ typedef enum {                     /* Bits meaning */
 	SMS_Submit_Report   = 0x03, /* 01 1 */
 	SMS_Command         = 0x04, /* 10 0 mark a report */
 	SMS_Status_Report   = 0x05, /* 10 1 Section 9.2.3.1; 3rd digit is to */
+	SMS_Picture         = 0x07  /* Looks like Happy N*kia Engineers (TM) invention */
 } SMS_MessageType;
 
 typedef enum {

@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.10  2001-11-19 13:09:40  pkot
+  Revision 1.11  2001-11-20 16:22:22  pkot
+  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
+
+  Revision 1.10  2001/11/19 13:09:40  pkot
   Begin work on sms sending
 
   Revision 1.9  2001/11/18 00:54:32  pkot
@@ -49,9 +52,11 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "gsm-common.h"
 #include "gsm-encoding.h"
+#include "gsm-bitmaps.h"
 
 struct udh_data {
 	unsigned int length;
@@ -379,9 +384,6 @@ GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 {
 	GSM_Error error = GE_NONE;
 	int i;
-
-	/* Clear all */
-	memset(message, 0, 200);
 
 	dprintf("Sending SMS to %s via message center %s\n", SMS->RemoteNumber.number, SMS->MessageCenter.Number);
 
@@ -723,11 +725,31 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 */
 GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength)
 {
+	int size;
+	GSM_Bitmap bitmap;
+
 	DecodeSMSHeader(message, SMS);
-	if (SMS->Type == SMS_Delivery_Report) {
+	switch (SMS->Type) {
+	case SMS_Delivery_Report:
 		SMSStatus(message[17], SMS);
-	} else {
-		int size = MessageLength -
+		break;
+	case SMS_Picture:
+		dprintf("Picture!!!\n");
+		GSM_ReadSMSBitmap(SMS_Picture, message + 41, NULL, &bitmap);
+		GSM_PrintBitmap(&bitmap);
+		for (size = 40; size < 50; size++) {
+			dprintf("%d %d\n", size, message[size + bitmap.size]);
+		}
+		size = MessageLength - 45 - bitmap.size;
+		SMS->Length = message[45 + bitmap.size];
+		printf("%d %d %d\n", SMS->Length, bitmap.size, size);
+		DecodeData(message + 46 + bitmap.size,
+			   (unsigned char *)&(SMS->MessageText),
+			   SMS->Length, size, 0, SMS->DCS);
+		SMS->MessageText[SMS->Length] = 0;
+		break;
+	default:
+		size = MessageLength -
 			   34 -                    /* Header Length */
 			   DataOffset[SMS->Type] - /* offset */
 			   SMS->UDH_Length -       /* UDH Length */
@@ -737,6 +759,7 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 			   SMS->Length, size, SMS->UDH_Length, SMS->DCS);
 		/* Just in case */
 		SMS->MessageText[SMS->Length] = 0;
+		break;
 	}
 	
 	return GE_NONE;

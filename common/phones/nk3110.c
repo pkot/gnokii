@@ -15,7 +15,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.5  2001-11-19 13:03:18  pkot
+  Revision 1.6  2001-11-20 16:22:22  pkot
+  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
+
+  Revision 1.5  2001/11/19 13:03:18  pkot
   nk3110.c cleanup
 
   Revision 1.4  2001/11/17 16:42:47  pkot
@@ -244,6 +247,7 @@ static GSM_Error P3110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 		if (P3110_MEMORY_SIZE_ME == 0) return GE_NOTREADY;
 		return P3110_GetSMSInfo(data, state);
 	default:
+		break;
 	}
 	return GE_NOTREADY;
 }
@@ -785,6 +789,7 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 		break;
 	default:
 		data->SMSMessage->MemoryType = GMT_XX;
+		break;
 	}
 
 	Set location in memory
@@ -1045,6 +1050,7 @@ static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, 
 			data->MemoryStatus->Free = P3110_MEMORY_SIZE_ME - message[3];
 			break;
 		default:
+			break;
 		}
 	}
 

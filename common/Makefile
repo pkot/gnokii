@@ -28,6 +28,7 @@ OBJS =	cfgreader.o \
 	gsm-bitmaps.o \
 	gsm-common.o \
 	gsm-encoding.o \
+	gsm-error.o \
 	gsm-statemachine.o
 
 all: libgnokii.so gsm-filetypes.o
