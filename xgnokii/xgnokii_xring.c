@@ -330,11 +330,11 @@ static void tone_stop(struct GUI *gui)
 	play_tone(0, 0, -1);
 
 	if (gui->releasetime < gui->presstime) {
-		gui->ringtone.notes_count--;
+		if (gui->ringtone.notes_count) gui->ringtone.notes_count--;
 		return;
 	}
 
-	gn_ringtone_set_duration(&gui->ringtone, gui->ringtone.notes_count - 1, usec);
+	gn_ringtone_set_duration(&gui->ringtone, gui->ringtone.notes_count ? gui->ringtone.notes_count - 1 : 0, usec);
 
 #if 0
 	printf("%d %d %3d\n", gui->ringtone.notes[gui->ringtone.notes_count - 1].note / 14,
@@ -348,11 +348,6 @@ static void tone_start(struct GUI *gui)
 	int note, pressed, freq, usec;
 
 	if (!gui->pressed) return;
-
-	if (gui->ringtone.notes_count >= GN_RINGTONE_MAX_NOTES) {
-		gui->pressed = 0;
-		return;
-	}
 
 	set_pixmap(gui, TRUE);
 
@@ -369,6 +364,11 @@ static void tone_start(struct GUI *gui)
 
 	gn_ringtone_get_tone(&gui->ringtone, gui->ringtone.notes_count - 1, &freq, &usec);
 	play_tone(freq, gui->volume, -1);
+
+	if (gui->ringtone.notes_count >= GN_RINGTONE_MAX_NOTES - 1) {
+		gui->pressed = 0;
+		return;
+	}
 }
 
 static void load_ringtone_list(void)

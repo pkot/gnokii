@@ -288,7 +288,7 @@ API unsigned char gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package
 	   Default Tempo and Style are instructions too. */
 	HowMany=2; /* Default Tempo and Style */
 
-	for(i=0; i<ringtone->notes_count; i++) {
+	for(i = 0; i < ringtone->notes_count; i++) {
 
 		/* PC Composer 2.0.010 doesn't like, when we start ringtone from pause:
 		   it displays that the format is invalid and
@@ -557,7 +557,7 @@ API gn_error gn_ringtone_unpack(gn_ringtone *ringtone, unsigned char *package, i
 			if (duration==GN_RINGTONE_Duration_1_32 && spec == GN_RINGTONE_NoSpecialDuration)
 				ringtone->notes[ringtone->notes_count].duration=4;
 
-			if (ringtone->notes_count==GN_RINGTONE_MAX_NOTES) break;
+			if (ringtone->notes_count == GN_RINGTONE_MAX_NOTES-1) break;
 
 			ringtone->notes_count++;
 			break;

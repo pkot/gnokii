@@ -595,7 +595,6 @@ recode:
 				lastp += p;
 				p = lastp;
 			} else {
-				if (ringtone->notes_count >= GN_RINGTONE_MAX_NOTES) return GN_ERR_INVALIDSIZE;
 				note = ringtone->notes + ringtone->notes_count++;
 				lastc = c;
 				lastp = p;
@@ -610,7 +609,6 @@ recode:
 				lastp += p;
 				p = lastp;
 			} else {
-				if (ringtone->notes_count >= GN_RINGTONE_MAX_NOTES) return GN_ERR_INVALIDSIZE;
 				note = ringtone->notes + ringtone->notes_count++;
 				lastc = c;
 				lastp = p;

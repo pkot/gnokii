@@ -1048,7 +1048,7 @@ static void addnote(struct MFX *mfx, int pitch, int duration, int special)
 	int notes[] = { 0,  1,  2,  3,  4,  6,  7,  8,  9, 10, 11, 12 };
 
 	/* truncate the ringtone if it's too long */
-	if (mfx->ringtone->notes_count >= GN_RINGTONE_MAX_NOTES)
+	if (mfx->ringtone->notes_count == GN_RINGTONE_MAX_NOTES-1)
 		return;
 
 	note = mfx->ringtone->notes + mfx->ringtone->notes_count;

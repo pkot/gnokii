@@ -2,6 +2,10 @@
 ======
  * build system updates
     o update spec file to install all libs              (Pawel Kot)
+ * libgnokii updates
+    o correctly use gn_ringtone->notes_count; this is unsigned char
+      and therefore it will be always less then
+      GN_RINGTONE_MAX_NOTES which is 256                (Pawel Kot)
 
 0.5.9
 =====
