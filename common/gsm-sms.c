@@ -1077,7 +1077,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 			/* FIXME Is this an ugly hack or correct? */
 			/* at least it works with 6210, 6510 and 6110 with the message I tested */
 			message[llayout.RemoteNumber] = (message[llayout.RemoteNumber] + 1) / 2 + 1;
-			strncpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber), SMS_MAX_ADDRESS_LENGTH - 1);
+			strncpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber,SMS_MAX_ADDRESS_LENGTH - 1), SMS_MAX_ADDRESS_LENGTH - 1);
 			dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
 		} else {
 			/* SMS struct should be zeroed for now, so there's no
@@ -1091,7 +1091,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	/* Short Message Center */
 	if (llayout.MessageCenter > -1) {
 		if (llayout.IsMessageCenterCoded) {
-			strncpy(SMS->MessageCenter.Number, GetBCDNumber(message +  llayout.MessageCenter), GSM_MAX_SMS_CENTER_LENGTH - 1);
+			strncpy(SMS->MessageCenter.Number, GetBCDNumber(message + llayout.MessageCenter, GSM_MAX_SMS_CENTER_LENGTH - 30 ), GSM_MAX_SMS_CENTER_LENGTH - 1);
 			dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
 			SMS->ReplyViaSameSMSC = false;
 			if (SMS->RemoteNumber.number[0] == 0 && (message[llayout.ReplyViaSameSMSC] & 0x80)) {
@@ -1159,7 +1159,7 @@ static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int M
 			SMS->UDH[0].Type = SMS_MultipartMessage;
 			/* First part is a Picture */
 			SMS->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
+			GSM_ReadSMSBitmap(GSM_PictureImage, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
 			GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
 
 			size = MessageLength - llayout.UserData - 4 - SMS->UserData[0].u.Bitmap.size;
@@ -1228,6 +1228,26 @@ GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	memset(&rawdata, 0, sizeof(GSM_RawData));
 	data->RawData = &rawdata;
 	error = RequestSMS(data, state);
+	if (error != GE_NONE) goto cleanup;
+	error = ParseSMS(data, layout.ReadHeader);
+cleanup:
+	if (data->RawData->Data) free(data->RawData->Data);
+	return error;
+}
+
+GSM_Error RequestSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+{
+	return SM_Functions(GOP_GetSMSnoValidate, data, state);
+}
+
+GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Error error;
+	GSM_RawData rawdata;
+
+	memset(&rawdata, 0, sizeof(GSM_RawData));
+	data->RawData = &rawdata;
+	error = RequestSMSnoValidate(data, state);
 	if (error != GE_NONE) goto cleanup;
 	error = ParseSMS(data, layout.ReadHeader);
 cleanup:
@@ -1460,14 +1480,16 @@ GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_fold
 		if ((error = FreeDeletedMessages(data, i)) != GE_NONE) return error;
 
 		data->SMSFolder = &SMSFolder;
-		data->SMSFolder->FolderID = tmp_list.FolderID[i];
+		data->SMSFolder->FolderID = (GSM_MemoryType) i + 12;
 		dprintf("GetFolderChanges: Getting folder status for folder #%i\n", data->SMSFolder->FolderID);
 		if ((error = SM_Functions(GOP_GetSMSFolderStatus, data, state)) != GE_NONE) return error;
 		memcpy(&tmp_folder, data->SMSFolder, sizeof(SMS_Folder));	/* We need it because data->SMSFolder can get garbled */
 		tmp_folder.FolderID = i;	/* so we don't need to do a modulo 8 each time */
 
-		dprintf("GetFolderChanges: Reading unread messages for folder #%i\n", i);	/* Only for INBOX */
-		if (i == 0) if ((error = GetUnreadMessages(data, state, tmp_folder)) != GE_NONE) return error;
+		if (i == 0) {
+			dprintf("GetFolderChanges: Reading unread messages for folder #%i\n", i);	/* Only for INBOX */
+			if ((error = GetUnreadMessages(data, state, tmp_folder)) != GE_NONE) return error;
+		}
 
 		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->SMSFolder->number, i);
 		if ((error = GetReadMessages(data, tmp_folder)) != GE_NONE) return error;

@@ -69,6 +69,7 @@ static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_PollSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
@@ -228,6 +229,8 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_DeleteCalendarNote(data, state);
 	case GOP_GetSMS:
 		return P7110_GetSMS(data, state);
+	case GOP_GetSMSnoValidate:
+		return P7110_GetSMSnoValidate(data, state);
 	case GOP_OnSMS:
 		/* Register notify when running for the first time */
 		if (data->OnSMS) {
@@ -745,7 +748,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		/* Number of SMS in folder */
 		data->SMSMessage->Number = (message[6] << 8) | message[7];
 
-		/* MessageType/FolderID */
+		/* MemoryType/FolderID */
 		data->SMSMessage->MemoryType = message[5];
 
 		/* Short Message status */
@@ -824,8 +827,12 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	case 0x6C:
 		dprintf("Message: SMS Folder status received\n" );
 		if (!data->SMSFolder) return GE_INTERNALERROR;
+		i = data->SMSFolder->FolderID;
 		memset(data->SMSFolder, 0, sizeof(SMS_Folder));
+
+		data->SMSFolder->FolderID = i;
 		data->SMSFolder->number = (message[4] << 8) | message[5];
+		
 /*		if (data->SMSStatus) data->SMSStatus->Number = data->SMSFolder->number; */
 		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->number);
 		dprintf("Message: IDs of Entries : ");
@@ -900,7 +907,7 @@ static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Getting SMS (without validating)...\n");
 	data->SMSFolder = NULL;
-	req[4] = data->SMSMessage->MemoryType;
+	req[4] = GetMemoryType(data->SMSMessage->MemoryType);
 	req[5] = (data->SMSMessage->Number & 0xff00) >> 8;
 	req[6] = data->SMSMessage->Number & 0x00ff;
 	if (SM_SendMessage(state, 10, 0x14, req) != GE_NONE) return GE_NOTREADY;
@@ -918,28 +925,34 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 				0x01, 0x65, 0x01};
 	GSM_Error error;
 
+	/* Handle MemoryType = 0 explicitely, because SMSFolder->FolderID = 0 by default */
+	if (data->SMSMessage->MemoryType == 0) return GE_INVALIDMEMORYTYPE;
+
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
-	if ((data->SMSFolder) && (data->SMSMessage->MemoryType != data->SMSFolder->FolderID)) {
+	if ((!data->SMSFolder) || 
+	    ((data->SMSFolder) && (data->SMSMessage->MemoryType != data->SMSFolder->FolderID))) {
 		if ((error = P7110_GetSMSFolders(data, state)) != GE_NONE) return error;
-		if (data->SMSMessage->MemoryType > data->SMSFolderList->FolderID[data->SMSFolderList->number-1])
+		if ( (GetMemoryType(data->SMSMessage->MemoryType) > 
+		      data->SMSFolderList->FolderID[data->SMSFolderList->number-1]) ||
+		     (data->SMSMessage->MemoryType < 12))
 			return GE_INVALIDMEMORYTYPE;
-
 		data->SMSFolder->FolderID = data->SMSMessage->MemoryType;
 		if ((error = P7110_GetSMSFolderStatus(data, state)) != GE_NONE) return error;
-
-		if (data->SMSFolder->number + 2 < data->SMSMessage->Number) {
-			if (data->SMSMessage->Number > MAX_SMS_MESSAGES)
-				return GE_INVALIDSMSLOCATION;
-			else
-				return GE_EMPTYSMSLOCATION;
-		} else {
-			data->SMSMessage->Number = data->SMSFolder->locations[data->SMSMessage->Number - 1];
-		}
 	}
 
-	dprintf("Getting SMS...\n");
-	req[4] = data->SMSMessage->MemoryType;
+	if (data->SMSFolder->number + 2 < data->SMSMessage->Number) {
+		if (data->SMSMessage->Number > MAX_SMS_MESSAGES)
+			return GE_INVALIDSMSLOCATION;
+		else
+			return GE_EMPTYSMSLOCATION;
+	} else {
+		data->SMSMessage->Number = data->SMSFolder->locations[data->SMSMessage->Number - 1];
+	}
+
+
+	dprintf("Getting SMS (validating)...\n");
+	req[4] = GetMemoryType(data->SMSMessage->MemoryType);
 	req[5] = (data->SMSMessage->Number & 0xff00) >> 8;
 	req[6] = data->SMSMessage->Number & 0x00ff;
 	if (SM_SendMessage(state, 10, 0x14, req) != GE_NONE) return GE_NOTREADY;
@@ -953,7 +966,7 @@ static GSM_Error P7110_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	if (!data->SMSMessage) return GE_INTERNALERROR;
 	dprintf("Removing SMS %d\n", data->SMSMessage->Number);
-	req[4] = data->SMSMessage->MemoryType;
+	req[4] = GetMemoryType(data->SMSMessage->MemoryType);
 	req[5] = (data->SMSMessage->Number & 0xff00) >> 8;
 	req[6] = data->SMSMessage->Number & 0x00ff;
 	if (SM_SendMessage(state, 8, 0x14, req) != GE_NONE) return GE_NOTREADY;
@@ -966,7 +979,7 @@ static GSM_Error P7110_ListPictures(GSM_Data *data, GSM_Statemachine *state)
 				0x09, /* Location */
 				0x0f, 0x07};
 
-	req[4] = data->SMSMessage->MemoryType;
+	req[4] = GetMemoryType(data->SMSMessage->MemoryType);
 	if (SM_SendMessage(state, 7, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
@@ -1000,7 +1013,7 @@ static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 	 * SMSStatus does not change! Workaround: get Templates folder status, which
 	 * does show these messages.
 	 */
-	fld.FolderID = 0x20;
+	fld.FolderID = GMT_TE;
 	data->SMSFolder = &fld;
 	if (P7110_GetSMSFolderStatus(data, state) != GE_NONE) return GE_NOTREADY;
 	if (SM_SendMessage(state, 5, 0x14, req) != GE_NONE) return GE_NOTREADY;
@@ -1021,7 +1034,7 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 				0x08, // Folder ID
 				0x0F, 0x01};
 
-	req[4] = data->SMSFolder->FolderID;
+	req[4] = GetMemoryType(data->SMSFolder->FolderID);
 	dprintf("Getting SMS Folder Status...\n");
 	if (SM_SendMessage(state, 7, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
@@ -1062,8 +1075,8 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		sprintf(data->MessageCenter->Name, "%s", message + 33);
 		data->MessageCenter->DefaultName = -1;	/* FIXME */
 
-		strcpy(data->MessageCenter->Recipient, GetBCDNumber(message+9));
-		strcpy(data->MessageCenter->Number, GetBCDNumber(message+21));
+		strcpy(data->MessageCenter->Recipient, GetBCDNumber(message + 9, GSM_MAX_SMS_CENTER_LENGTH - 1));
+		strcpy(data->MessageCenter->Number, GetBCDNumber(message + 21, GSM_MAX_SMS_CENTER_LENGTH - 1));
 		data->MessageCenter->Type = message[22];
 
 		if (strlen(data->MessageCenter->Recipient) == 0) {
@@ -1724,6 +1737,78 @@ static int GetMemoryType(GSM_MemoryType memory_type)
 		break;
 	case GMT_MC:
 		result = P7110_MEMORY_MC;
+		break;
+	case GMT_IN:
+		result = P7110_MEMORY_IN;
+		break;
+	case GMT_OU:
+		result = P7110_MEMORY_OU;
+		break;
+	case GMT_AR:
+		result = P7110_MEMORY_AR;
+		break;
+	case GMT_TE:
+		result = P7110_MEMORY_TE;
+		break;
+	case GMT_F1:
+		result = P7110_MEMORY_F1;
+		break;
+	case GMT_F2:
+		result = P7110_MEMORY_F2;
+		break;
+	case GMT_F3:
+		result = P7110_MEMORY_F3;
+		break;
+	case GMT_F4:
+		result = P7110_MEMORY_F4;
+		break;
+	case GMT_F5:
+		result = P7110_MEMORY_F5;
+		break;
+	case GMT_F6:
+		result = P7110_MEMORY_F6;
+		break;
+	case GMT_F7:
+		result = P7110_MEMORY_F7;
+		break;
+	case GMT_F8:
+		result = P7110_MEMORY_F8;
+		break;
+	case GMT_F9:
+		result = P7110_MEMORY_F9;
+		break;
+	case GMT_F10:
+		result = P7110_MEMORY_F10;
+		break;
+	case GMT_F11:
+		result = P7110_MEMORY_F11;
+		break;
+	case GMT_F12:
+		result = P7110_MEMORY_F12;
+		break;
+	case GMT_F13:
+		result = P7110_MEMORY_F13;
+		break;
+	case GMT_F14:
+		result = P7110_MEMORY_F14;
+		break;
+	case GMT_F15:
+		result = P7110_MEMORY_F15;
+		break;
+	case GMT_F16:
+		result = P7110_MEMORY_F16;
+		break;
+	case GMT_F17:
+		result = P7110_MEMORY_F17;
+		break;
+	case GMT_F18:
+		result = P7110_MEMORY_F18;
+		break;
+	case GMT_F19:
+		result = P7110_MEMORY_F19;
+		break;
+	case GMT_F20:
+		result = P7110_MEMORY_F20;
 		break;
 	default:
 		result = P7110_MEMORY_XX;

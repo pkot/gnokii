@@ -286,33 +286,10 @@ typedef enum {
 } SMS_MessageStatus;
 
 /* In contrast to GSM_MemoryType, SMS_MemoryType is phone dependant */
+/*
 typedef enum {
-	GMT_IN = 0x08, /* Inbox in 6210/7110 */
-	GMT_OU = 0x10, /* Outbox in 6210/7110 */
-	GMT_AR = 0x18, /* Archive in 6210/6110 */
-	GMT_TE = 0x20, /* Templates in 6210/7110 */
-	GMT_F1 = 0x29, /* 1st CUSTOM FOLDER in 6210/7110*/
-	GMT_F2 = 0x31,
-	GMT_F3 = 0x39,
-	GMT_F4 = 0x41,
-	GMT_F5 = 0x49,
-	GMT_F6 = 0x51,
-	GMT_F7 = 0x59,
-	GMT_F8 = 0x61,
-	GMT_F9 = 0x69,
-	GMT_F10 = 0x71,
-	GMT_F11 = 0x79,
-	GMT_F12 = 0x81,
-	GMT_F13 = 0x89,
-	GMT_F14 = 0x91,
-	GMT_F15 = 0x99,
-	GMT_F16 = 0xA1,
-	GMT_F17 = 0xA9,
-	GMT_F18 = 0xB1,
-	GMT_F19 = 0xB9,
-	GMT_F20 = 0xC1 /* 20th CUSTOM FOLDER in 6210/7110 */
 } SMS_MemoryType;
-
+*/
 typedef enum {
 	SMS_NoData       = 0x00,
 	SMS_PlainText    = 0x01,
@@ -385,7 +362,7 @@ typedef struct {
 	SMS_DateTime Time;                             /* Discharge Time (9.2.3.13) */
 
 	/* Other fields */
-	SMS_MemoryType MemoryType;                     /* memoryType (for 6210/7110: folder indicator */
+	GSM_MemoryType MemoryType;                     /* memoryType (for 6210/7110: folder indicator */
 	SMS_MessageStatus Status;                      /* Status of the message: sent/read or unsent/unread */
 	int Verify;				 /* Should we verify reading of messages? (only 6210 at the moment */
 

@@ -134,6 +134,30 @@ extern bool P7110_LinkOK;
 #define P7110_MEMORY_MT		0x09	/* ?? combined ME and SIM phonebook */
 #define P7110_MEMORY_VOICE	0x0b	/* Voice Mailbox */
 
+#define P7110_MEMORY_IN		0x08	/* INBOX */
+#define P7110_MEMORY_OU		0x10	/* OUTBOX */
+#define P7110_MEMORY_AR		0x18	/* ARCHIVE */
+#define P7110_MEMORY_TE		0x20	/* TEMPLATES */
+#define P7110_MEMORY_F1		0x29	/* MY FOLDERS 1 */
+#define P7110_MEMORY_F2		0x31
+#define P7110_MEMORY_F3		0x39
+#define P7110_MEMORY_F4		0x41
+#define P7110_MEMORY_F5		0x49
+#define P7110_MEMORY_F6		0x51
+#define P7110_MEMORY_F7		0x59
+#define P7110_MEMORY_F8		0x61
+#define P7110_MEMORY_F9		0x69
+#define P7110_MEMORY_F10	 	0x71
+#define P7110_MEMORY_F11	 	0x79
+#define P7110_MEMORY_F12	 	0x81
+#define P7110_MEMORY_F13	 	0x89
+#define P7110_MEMORY_F14	 	0x91
+#define P7110_MEMORY_F15	 	0x99
+#define P7110_MEMORY_F16	 	0xA1
+#define P7110_MEMORY_F17	 	0xA9
+#define P7110_MEMORY_F18	 	0xB1
+#define P7110_MEMORY_F19	 	0xB9
+#define P7110_MEMORY_F20	 	0xC1	/* MY FOLDERS 20 */
 /* This is used when the memory type is unknown. */
 #define P7110_MEMORY_XX 0xff
 
