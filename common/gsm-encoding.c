@@ -230,7 +230,7 @@ void DecodeUnicode (unsigned char* dest, const unsigned char* src, int len)
 		wc = src[(2*i)+1] | (src[2*i] << 8);
 		dest[i] = DecodeWithUnicodeAlphabet(wc);
 	}
-	dest[len]=0;
+	dest[len] = 0;
 	return;
 }
 

@@ -23,6 +23,13 @@
 
 #include "gsm-data.h"
 
+typedef enum {
+	GOP7110_GetSMSFolders = GOP_Max,
+	GOP7110_GetSMSFolderStatus,
+	GOP7110_GetPicture,
+	GOP7110_Max       /* don't append anything after this entry */
+} GSM7110_Operation;
+                                
 extern bool P7110_LinkOK;
 
 /* Message types */
@@ -128,72 +135,5 @@ extern bool P7110_LinkOK;
 #define P7110_ENTRYTYPE_LOGO		0x1b	/* Group logo */
 #define P7110_ENTRYTYPE_LOGOSWITCH	0x1c	/* Group logo on/off */
 #define P7110_ENTRYTYPE_GROUP		0x1e	/* Group number for phonebook entry */
-
-#ifdef __phones_nk7110_c  /* Prototype functions for phone-7110.c only */
-
-static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_Initialise(GSM_Statemachine *state);
-static GSM_Error P7110_GetModel(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetRevision(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
-#if 0
-static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
-#endif
-static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state);
-
-static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
-
-static int GetMemoryType(GSM_MemoryType memory_type);
-
-#if 0
-static GSM_Error P7110_Initialise(char *port_device, char *initlength,
-		 GSM_ConnectionType connection,
-		 void (*rlp_callback)(RLP_F96Frame *frame));
-static GSM_Error P7110_GenericCRHandler(int messagetype, unsigned char *buffer, int length);
-static GSM_Error P7110_IncomingDefault(int messagetype, unsigned char *buffer, int length);
-static GSM_Error P7110_GetIMEI(char *imei);
-static GSM_Error P7110_GetRevision(char *revision);
-static GSM_Error P7110_GetModel(char *model);
-static GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry);
-static GSM_Error P7110_WritePhonebookLocation(GSM_PhonebookEntry *entry);
-static GSM_Error P7110_GetMemoryStatus(GSM_MemoryStatus *status);
-static GSM_Error P7110_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
-static GSM_Error P7110_GetRFLevel(GSM_RFUnits *units, float *level);
-static GSM_Error P7110_GetBitmap(GSM_Bitmap *bitmap);
-static GSM_Error P7110_SetBitmap(GSM_Bitmap *bitmap);
-static GSM_Error P7110_DialVoice(char *Number);
-static void P7110_Terminate();
-static bool P7110_SendRLPFrame( RLP_F96Frame *frame, bool out_dtx );
-
-#endif
-
-
-#endif  /* #ifdef __phones_nk7110_c */
 
 #endif  /* #ifndef __phones_nk7110_h */

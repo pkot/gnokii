@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#define __phones_nk7110_c  /* Turn on prototypes in phones/nk7110.h */
 #include "misc.h"
 #include "gsm-common.h"
 #include "phones/generic.h"
@@ -36,6 +35,45 @@
 #ifdef WIN32
 #define snprintf _snprintf
 #endif
+
+/* Functions prototypes */
+static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_Initialise(GSM_Statemachine *state);
+static GSM_Error P7110_GetModel(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetRevision(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state);
+
+static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
+
+static int GetMemoryType(GSM_MemoryType memory_type);
 
 /* Some globals */
 
@@ -164,11 +202,12 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_SendSMS(data, state);
 	case GOP_CallDivert:
 		return P7110_CallDivert(data, state);
-/* I'm not sure yet if folder functions will be shared or local
-	case GOP_GetSMSFolders:
+	case GOP7110_GetSMSFolders:
 		return P7110_GetSMSFolders(data, state);
-	case GOP_GetSMSFolderStatus:
-	return P7110_GetSMSFolderStatus(data, state);*/
+	case GOP7110_GetSMSFolderStatus:
+		return P7110_GetSMSFolderStatus(data, state);
+	case GOP7110_GetPicture:
+		return P7110_GetPicture(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -834,7 +873,6 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x14);
 }
 
-#if 0
 static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req_list[] = {FBUS_FRAME_HEADER, 0x96, 
@@ -864,7 +902,6 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 	if (SM_SendMessage(state, 7, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
-#endif
 
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
