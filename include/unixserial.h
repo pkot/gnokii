@@ -26,10 +26,6 @@
   #include "misc.h"
 #endif	/* WIN32 */
 
-/* FIXME: autoconf and config.h should take care of this. */
-#define HAVE_TERMIOS_CSPEED
-#define HAVE_CFSETSPEED
-
 int serial_open(__const char *__file, int __oflag);
 int serial_close(int __fd);
 

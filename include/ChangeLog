@@ -27,3 +27,6 @@
 
 * Tue May 16 11:49:27 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - comments and FIXMEs added
+
+* Mon May 22 07:11:01 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- cleaning of unixserial.h from Pawel
