@@ -6,6 +6,8 @@
     o install po/ directory with make install         (Guido Falsi)
     o libtool support added              (PLD Team, BORBELY Zoltan)
     o mingw cross compilation fixes                (BORBELY Zoltan)
+    o update po files                                   (Pawel Kot)
+    o update config/ to the more recent versions        (Pawel Kot)
  * smsd updates
     o update README with some module clarification      (Pawel Kot)
  * xgnokii updates
