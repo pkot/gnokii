@@ -3979,15 +3979,24 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	
       } else { /* CurrentSMSMessage->Type == SM_DR (Delivery Report) */
 
-        CurrentSMSMessage->Time.Year=10*(MessageBuffer[39+offset]&0x0f)+(MessageBuffer[39+offset]>>4);
-        CurrentSMSMessage->Time.Month=10*(MessageBuffer[40+offset]&0x0f)+(MessageBuffer[40+offset]>>4);
-        CurrentSMSMessage->Time.Day=10*(MessageBuffer[41+offset]&0x0f)+(MessageBuffer[41+offset]>>4);
-        CurrentSMSMessage->Time.Hour=10*(MessageBuffer[42+offset]&0x0f)+(MessageBuffer[42+offset]>>4);
-        CurrentSMSMessage->Time.Minute=10*(MessageBuffer[43+offset]&0x0f)+(MessageBuffer[43+offset]>>4);
-        CurrentSMSMessage->Time.Second=10*(MessageBuffer[44+offset]&0x0f)+(MessageBuffer[44+offset]>>4);
-        CurrentSMSMessage->Time.Timezone=(10*(MessageBuffer[45+offset]&0x07)+(MessageBuffer[45+offset]>>4))/4;
-        if (MessageBuffer[45]&0x08) CurrentSMSMessage->Time.Timezone = -CurrentSMSMessage->Time.Timezone;
+        CurrentSMSMessage->Time.Year=10*(MessageBuffer[32+offset]&0x0f)+(MessageBuffer[32+offset]>>4);
+        CurrentSMSMessage->Time.Month=10*(MessageBuffer[33+offset]&0x0f)+(MessageBuffer[33+offset]>>4);
+        CurrentSMSMessage->Time.Day=10*(MessageBuffer[34+offset]&0x0f)+(MessageBuffer[34+offset]>>4);
+        CurrentSMSMessage->Time.Hour=10*(MessageBuffer[35+offset]&0x0f)+(MessageBuffer[35+offset]>>4);
+        CurrentSMSMessage->Time.Minute=10*(MessageBuffer[36+offset]&0x0f)+(MessageBuffer[36+offset]>>4);
+        CurrentSMSMessage->Time.Second=10*(MessageBuffer[37+offset]&0x0f)+(MessageBuffer[37+offset]>>4);
+        CurrentSMSMessage->Time.Timezone=(10*(MessageBuffer[38+offset]&0x07)+(MessageBuffer[38+offset]>>4))/4;
+        if (MessageBuffer[48]&0x08) CurrentSMSMessage->Time.Timezone = -CurrentSMSMessage->Time.Timezone;
 
+        /* SMSC Response time */
+        CurrentSMSMessage->SMSCTime.Year=10*(MessageBuffer[39+offset]&0x0f)+(MessageBuffer[39+offset]>>4);
+        CurrentSMSMessage->SMSCTime.Month=10*(MessageBuffer[40+offset]&0x0f)+(MessageBuffer[40+offset]>>4);
+        CurrentSMSMessage->SMSCTime.Day=10*(MessageBuffer[41+offset]&0x0f)+(MessageBuffer[41+offset]>>4);
+        CurrentSMSMessage->SMSCTime.Hour=10*(MessageBuffer[42+offset]&0x0f)+(MessageBuffer[42+offset]>>4);
+        CurrentSMSMessage->SMSCTime.Minute=10*(MessageBuffer[43+offset]&0x0f)+(MessageBuffer[43+offset]>>4);
+        CurrentSMSMessage->SMSCTime.Second=10*(MessageBuffer[44+offset]&0x0f)+(MessageBuffer[44+offset]>>4);
+        CurrentSMSMessage->SMSCTime.Timezone=(10*(MessageBuffer[45+offset]&0x07)+(MessageBuffer[45+offset]>>4))/4;
+        if (MessageBuffer[45]&0x08) CurrentSMSMessage->SMSCTime.Timezone = -CurrentSMSMessage->SMSCTime.Timezone;
         if (MessageBuffer[22] < 0x03) {
           strcpy(CurrentSMSMessage->MessageText,_("Delivered"));
 

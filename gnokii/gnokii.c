@@ -1218,14 +1218,14 @@ int getsms(char *argv[])
           fprintf(stdout, "\n");
 
           fprintf(stdout, _("Response date/time: %d/%d/%d %d:%02d:%02d "), \
-                  message.Time.Day, message.Time.Month, message.Time.Year, \
-                  message.Time.Hour, message.Time.Minute, message.Time.Second);
+                  message.SMSCTime.Day, message.SMSCTime.Month, message.SMSCTime.Year, \
+                  message.SMSCTime.Hour, message.SMSCTime.Minute, message.SMSCTime.Second);
 
-          if (message.Time.Timezone) {
-            if (message.Time.Timezone > 0)
-              fprintf(stdout,_("+%02d00"),message.Time.Timezone);
+          if (message.SMSCTime.Timezone) {
+            if (message.SMSCTime.Timezone > 0)
+              fprintf(stdout,_("+%02d00"),message.SMSCTime.Timezone);
             else
-              fprintf(stdout,_("%02d00"),message.Time.Timezone);
+              fprintf(stdout,_("%02d00"),message.SMSCTime.Timezone);
           }
 
           fprintf(stdout, "\n");

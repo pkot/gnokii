@@ -183,6 +183,7 @@ typedef enum {
 
 typedef struct {
   GSM_DateTime Time;	                    /* Date of reception/response of messages. */
+  GSM_DateTime SMSCTime;	            /* Date of SMSC response if DeliveryReport messages. */
   int Length;                               /* Length of the SMS message. */
   int Validity;                             /* Validity Period of the SMS message. */
   GSM_UDH UDHType;                          /* If UDH is present - type of UDH */

@@ -1,3 +1,6 @@
 * Fri Mar  3 10:12:58 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - XPM support (Christopher Kemp)
 
+* Sun Mar  5 14:02:38 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- Date of SMSC response fixed (Gary Reuter)
+
