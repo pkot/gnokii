@@ -62,6 +62,8 @@ typedef struct {
 	bool RLP_OutDTX;
 	void (*RLP_RX_Callback)(RLP_F96Frame *Frame);
 	GSM_SecurityCode *SecurityCode;
+	const char *DTMFString;
+	unsigned char ResetType;
 } GSM_Data;
 
 /* Global structures intended to be independant of phone etc */
@@ -148,6 +150,8 @@ typedef enum {
 	GOP_EnterSecurityCode,
 	GOP_GetSecurityCodeStatus,
 	GOP_ChangeSecurityCode,
+	GOP_SendDTMF,
+	GOP_Reset,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

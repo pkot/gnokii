@@ -35,4 +35,6 @@
 /* This is used when the memory type is unknown. */
 #define P6100_MEMORY_XX 0xff
 
+#define	P6100_MAX_SMS_MESSAGES	12 /* maximum number of sms messages */
+
 #endif  /* #ifndef __phones_nk6100_h */

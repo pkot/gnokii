@@ -29,6 +29,7 @@
 #include "links/fbus-phonet.h"
 #include "phones/nokia.h"
 #include <gsm-encoding.h>
+#include <gsm-api.h>
 
 #ifdef WIN32
 #define snprintf _snprintf
@@ -84,9 +85,11 @@ static SMSMessage_PhoneLayout nk6100_layout;
 
 static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 /* FIXME: we should get rid on it */
+static GSM_Statemachine *State = NULL;
 static void (*OnCellBroadcast)(GSM_CBMessage *Message) = NULL;
 static void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo) = NULL;
 static void (*RLP_RXCallback)(RLP_F96Frame *Frame) = NULL;
+static GSM_Error (*OnSMS)(GSM_SMSMessage *Message) = NULL;
 
 /* static functions prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
@@ -100,6 +103,7 @@ static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetOnSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state);
@@ -137,6 +141,8 @@ static GSM_Error SetRLPRXCallback(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SendDTMF(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error Reset(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -232,6 +238,11 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetNetworkInfo(data, state);
 	case GOP_SendSMS:
 		return SendSMSMessage(data, state);
+	case GOP_OnSMS:
+		return SetOnSMS(data, state);
+	case GOP_PollSMS:
+		SM_Loop(state, 1);
+		return GE_NONE;
 	case GOP_GetSMS:
 		return GetSMSMessage(data, state);
 	case GOP_SaveSMS:
@@ -290,7 +301,12 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	case GOP_ChangeSecurityCode:
 		return ChangeSecurityCode(data, state);
 #endif
+	case GOP_SendDTMF:
+		return SendDTMF(data, state);
+	case GOP_Reset:
+		return Reset(data, state);
 	default:
+		dprintf("NK61xx unimplemented operation: %d\n", op);
 		return GE_NOTIMPLEMENTED;
 	}
 }
@@ -331,6 +347,8 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 
 	/* Now test the link and authenticate ourself */
 	if (Authentication(state) != GE_NONE) return GE_NOTSUPPORTED;
+
+	State = state;
 
 	return GE_NONE;
 }
@@ -949,6 +967,48 @@ static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	return SM_BlockNoRetry(state, data, 0x02);
 }
 
+static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
+{
+	GSM_Data data;
+	GSM_SMSMessage sms;
+	GSM_Error error;
+
+	if (!OnSMS) {
+		return false;
+	}
+
+	memset(&sms, 0, sizeof(sms));
+	sms.MemoryType = GMT_SM;
+	sms.Number = pos;
+	GSM_DataClear(&data);
+	data.SMSMessage = &sms;
+
+	dprintf("trying to fetch sms#%hd\n", sms.Number);
+	if ((error = GetSMS(&data, state)) != GE_NONE) return false;
+
+	OnSMS(&sms);
+
+	dprintf("deleting sms#%hd\n", sms.Number);
+	DeleteSMSMessage(&data, state);
+
+	return true;
+}
+
+static GSM_Error SetOnSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	int	i;
+
+	if (data->OnSMS) {
+		OnSMS = data->OnSMS;
+		for (i = 1; i <= P6100_MAX_SMS_MESSAGES; i++)
+			CheckIncomingSMS(state, i);
+	} else {
+		OnSMS = NULL;
+	}
+
+	return GE_NONE;
+}
+
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	SMS_MessageCenter *smsc;
@@ -973,7 +1033,8 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 
 	/* SMS message received */
 	case 0x10:
-		/* FIXME: unsolicited SMS notification */
+		dprintf("SMS received, location: %d\n", message[5]);
+		CheckIncomingSMS(State, message[5]);
 		return GE_UNSOLICITED;
 
 	/* FIXME: unhandled frame, request: Get HW&SW version !!! */
@@ -1203,6 +1264,9 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 	case 0x09:
 		dprintf("SMS reading failed:\n");
 		switch (message[4]) {
+		case 0x00:
+			dprintf("\tUnknown reason!\n");
+			return GE_UNKNOWN;
 		case 0x02:
 			dprintf("\tInvalid location!\n");
 			return GE_INVALIDSMSLOCATION;
@@ -1218,6 +1282,17 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 	case 0x0b:
 		dprintf("Message: SMS deleted successfully.\n");
 		break;
+	
+	/* delete sms failed */
+	case 0x0c:
+		switch (message[4]) {
+		case 0x00:
+			return GE_UNKNOWN;
+		case 0x02:
+			return GE_INVALIDSMSLOCATION;
+		default:
+			return GE_UNHANDLEDFRAME;
+		}
 
 	/* sms status succeded */
 	case 0x37:
@@ -2185,19 +2260,40 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 }
 
 
+static GSM_Error EnableExtendedCmds(GSM_Data *data, GSM_Statemachine *state, unsigned char type)
+{
+	unsigned char req[] = {0x00, 0x01, 0x64, 0x00};
+
+	if (type == 0x06) {
+		dump(_("Tried to activate CONTACT SERVICE\n"));
+		return GE_INTERNALERROR;
+	}
+
+	req[3] = type;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
 static GSM_Error NetMonitor(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req1[] = {0x00, 0x01, 0x64, 0x01};
-	unsigned char req2[] = {0x00, 0x01, 0x7e, 0x00};
+	unsigned char req[] = {0x00, 0x01, 0x7e, 0x00};
 	GSM_Error error;
 
-	req2[3] = data->NetMonitor->Field;
+	req[3] = data->NetMonitor->Field;
 
-	if (SM_SendMessage(state, 4, 0x40, req1) != GE_NONE) return GE_NOTREADY;
-	if ((error = SM_Block(state, data, 0x40)) != GE_NONE) return error;
+	if ((error = EnableExtendedCmds(data, state, 0x01)) != GE_NONE) return error;
 
-	if (SM_SendMessage(state, 4, 0x40, req2) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 4, 0x40, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x40);
+}
+
+static GSM_Error Reset(GSM_Data *data, GSM_Statemachine *state)
+{
+	if (!data) return GE_INTERNALERROR;
+	if (data->ResetType != 0x03 && data->ResetType != 0x04) return GE_INTERNALERROR;
+
+	return EnableExtendedCmds(data, state, data->ResetType);
 }
 
 static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -2347,6 +2443,23 @@ static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
+static GSM_Error SendDTMF(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[5+256] = {FBUS_FRAME_HEADER, 0x50};
+	int len;
+
+	if (!data || !data->DTMFString) return GE_INTERNALERROR;
+
+	len = strlen(data->DTMFString);
+	if (len < 0 || len >= 256) return GE_INTERNALERROR;
+
+	req[4] = len;
+	memcpy(req + 5, data->DTMFString, len);
+
+	if (SM_SendMessage(state, 5 + len, 0x01, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x01);
+}
+
 static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_CallInfo cinfo;
@@ -2425,7 +2538,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 			CallNotification(GSM_CS_CallResumed, &cinfo);
 		return GE_UNSOLICITED;
 
-	/* Send DTMF/voice call reply */
+	/* voice call reply */
 	case 0x40:
 		break;
 
@@ -2438,6 +2551,10 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
   	
 	/* FIXME: response from answer1? - bozo */
 	case 0x44:
+		break;
+	
+	/* DTMF sent */
+	case 0x51:
 		break;
 
 	default:

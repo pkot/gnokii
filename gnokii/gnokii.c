@@ -2214,9 +2214,6 @@ static int monitormode(void)
 		if (SM_Functions(GOP_GetSMSStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("SMS Messages: Unread %d, Number %d\n"), SMSStatus.Unread, SMSStatus.Number);
 
-//		if (GSM->GetIncomingCallNr(Number) == GE_NONE)
-//			fprintf(stdout, _("Incoming call: %s\n"), Number);
-
 		if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE)
 			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC[0], NetworkInfo.LAC[1], NetworkInfo.CellID[0], NetworkInfo.CellID[1]);
 
@@ -2927,30 +2924,31 @@ static int identify(void)
 
 static int senddtmf(char *String)
 {
-/*	if (GSM && GSM->SendDTMF) GSM->SendDTMF(String);*/
-	return 0;
+	GSM_DataClear(&data);
+	data.DTMFString = String;
+
+	return SM_Functions(GOP_SendDTMF, &data, &State);
 }
 
 /* Resets the phone */
 static int reset(char *type)
 {
-	unsigned char _type = 0x03;
+	GSM_DataClear(&data);
+	data.ResetType = 0x03;
 
 	if (type) {
 		if (!strcmp(type, "soft"))
-			_type = 0x03;
+			data.ResetType = 0x03;
 		else
 			if (!strcmp(type, "hard")) {
-				_type = 0x04;
+				data.ResetType = 0x04;
 			} else {
 				fprintf(stderr, _("What kind of reset do you want??\n"));
 				return -1;
 			}
 	}
 
-/*	if (GSM && GSM->Reset) GSM->Reset(_type); */
-
-	return 0;
+	return SM_Functions(GOP_Reset, &data, &State);
 }
 
 /* pmon allows fbus code to run in a passive state - it doesn't worry about

@@ -147,6 +147,8 @@ void	ATEM_InitRegisters(void)
 /* This gets called to indicate an incoming call */
 void ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
 {
+	dprintf("ATEM_CallPassup called with %d\n", CallStatus);
+
 	if (CallStatus == GSM_CS_IncomingCall) {
 		ATEM_ModemResult(MR_RING);
 		IncomingCallNo = CallInfo->CallID;

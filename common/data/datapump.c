@@ -161,6 +161,8 @@ static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 
 void DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
 {
+	dprintf("DP_CallPassup called with %d\n", CallStatus);
+
 	switch (CallStatus) {
 	case GSM_CS_IncomingCall:
 		if (CommandMode == false) ATEM_ModemResult(MR_CARRIER);

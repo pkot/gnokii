@@ -312,6 +312,10 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 					m->FramesToGo--;
 
+					/* Send an ack (for all for now) */
+
+					FBUS_TX_SendAck(i->MessageType, seq_num & 0x0f);
+
 					/* Finally dispatch if ready */
 
 					if (m->FramesToGo == 0) {
@@ -320,10 +324,6 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 						m->MessageBuffer = NULL;
 						m->Malloced = 0;
 					}
-
-					/* Send an ack (for all for now) */
-
-					FBUS_TX_SendAck(i->MessageType, seq_num & 0x0f);
 				}
 			} else {
 				dprintf("Bad checksum!\n");
