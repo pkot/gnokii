@@ -213,7 +213,7 @@ gn_driver driver_nokia_6510 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6800|6810|6820|6820b|6610i|6230|6650|7210", /* Supported models */
+		"6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6800|6810|6820|6820b|6610i|6230|6650|7210|7250|7250i", /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GN_RF_Percentage,      /* RF level units */
@@ -398,6 +398,13 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	gn_error err = GN_ERR_NONE;
 	bool connected = false;
 	unsigned int attempt = 0;
+	int i;
+	char *irda_blacklist[] = {"NPL-2",	/* 6100 */
+				  "RM-37",	/* 6610i */
+				  "NHL-4",	/* 7210 */
+				  "NHL-4J",	/* 7250 -- I'm not sure, but don't risk it -- bozo */
+				  "NHL-4JX",	/* 7250i */
+				  NULL};
 
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_nokia_6510, sizeof(gn_driver));
@@ -465,12 +472,16 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 
 		/* Refuse to work on 6100 only on Linux with IrDA connection */
 #ifdef __linux__
-		if ((!strncmp(data.model, "NPL-2", 5) || !strncmp(data.model, "RM-37", 5) || !strncmp(data.model, "NHL-4", 5)) && (state->config.connection_type == GN_CT_Irda || state->config.connection_type == GN_CT_Infrared)) {
-			fprintf(stderr, _("Sorry, this function is known to break your phone (Nokia 6100). Refusing to\n"
-					  "do it. You may try to use AT driver. If you are brave enough to test the\n"
-					  "driver anyway, please contact developers at gnokii-users@nongnu.org.\n"
-					  "See also http://thread.gmane.org/gmane.linux.drivers.gnokii/3195"));
-			return GN_ERR_NOTIMPLEMENTED;
+		if (state->config.connection_type == GN_CT_Irda || state->config.connection_type == GN_CT_Infrared) {
+			for (i = 0; irda_blacklist[i]; i++) {
+				if (!strcmp(data.model, irda_blacklist[i])) {
+					fprintf(stderr, _("Sorry, this function is known to break your phone (Nokia 6100). Refusing to\n"
+							  "do it. You may try to use AT driver. If you are brave enough to test the\n"
+							  "driver anyway, please contact developers at gnokii-users@nongnu.org.\n"
+							  "See also http://thread.gmane.org/gmane.linux.drivers.gnokii/3195"));
+					return GN_ERR_NOTIMPLEMENTED;
+				}
+			}
 		}
 #endif
 

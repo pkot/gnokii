@@ -72,6 +72,9 @@
     o IrDA disabled for Nokia 6610i and 7210       (BORBELY Zoltan)
     o add Nokia 6230 support                       (BORBELY Zoltan)
     o empty phonebook was reported as an error     (BORBELY Zoltan)
+    o IrDA blacklist handling generalized          (BORBELY Zoltan)
+    o add Nokia 7250 and 7250i support             (BORBELY Zoltan)
+    o Nokia 7250 and 7250i blacklisted             (BORBELY Zoltan)
  * portability changes
     o NetBSD also fall into unices category     (Richard M Kreuter)
     o NetBSD needs the same tricks as OpenBSD and FreeBSD in
