@@ -430,8 +430,6 @@ if test $ac_cv_func_vsnprintf = yes; then
 	AC_DEFINE(HAVE_C99_VSNPRINTF)
 fi
 
-AM_PROG_LEX
-
 CFLAGS="$CFLAGS $NLS_CFLAGS"
 LIBS="$LIBS $NLS_LIBS"
 
