@@ -64,7 +64,8 @@ Thank you to, in no particular order...
  
 *  Karel Zak for his enthusiasm (and patches) for the autoconf stuff.
   
-*  Harri Yli-Torkko for investigative work & code on the 3810/8110. 
+*  Harri Yli-Torkko for investigative work & code on the 3810/8110 and
+   protocol updates for Nokia 3330.
 
 *  Stano Meduna for misc code and build process work.
   

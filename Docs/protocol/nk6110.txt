@@ -196,7 +196,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                   feature: see 0x05/0x0014
     r Get profile feature   { 0x0014, 1, nr, feature, 4, a, b, c, d, 1 }
       Features and answers (in a, b, c, d form):
-         0x00: keypad notes (in Nokia 3310 feature 0x00)
+         0x00: keypad tones
                xx, 1, 0, 2
                    xx: 0xff: off
                        0x00: level 1
@@ -206,7 +206,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                xx, 0, 0, 1
                    xx: 0x00: off
                        0x??: on (maybe 0x01)
-         0x02: incoming call alert (in Nokia 3310 feature 0x01)
+         0x02: incoming call alert (in Nokia 3310/3330 feature 0x01)
                xx, 1, 0, 7
                    xx: 1: ringing,
                        2: beep once,
@@ -215,29 +215,29 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                        5: ring once
                        6: ascending
                        7: caller groups (see feature #0x08)
-         0x03: ringing tone (in Nokia 3310 feature 0x02)
+         0x03: ringing tone (in Nokia 3310/3330 feature 0x02)
                xx, 0, 0, 0
                    xx: 0x12: ring ring
                        0x13: low
                        etc
-         0x04: ringing volume (in Nokia 3310 feature 0x03)
+         0x04: ringing volume (in Nokia 3310/3330 feature 0x03)
                xx, 0, 0, 0
                    xx: level 1 (0x06) - level 5 (0x0a)
-         0x05: message alert tone (in Nokia 3310 feature 0x04)
+         0x05: message alert tone (in Nokia 3310/3330 feature 0x04)
                xx, 1, 0, 4
                    xx: 0: no tone
                        1: standard
                        2: special
                        3: beep once
                        4: ascending
-	 0x06: vibration (in Nokia 3310 feature 0x05)
+	 0x06: vibration (in Nokia 3310/3330 feature 0x05)
 	       xx: 0: off
 	           1: on
-         0x07: warning and game tones (in Nokia 3310 feature 0x06 called warning tones)
+         0x07: warning and game tones (in Nokia 3310/3330 feature 0x06 called warning tones)
                xx, 4, 0, 4
                    xx: 0xff: off
                        0x04: on
-	 0x07: screen saver - Nokia 3310
+	 0x07: screen saver - Nokia 3310/3330
 	       xx: 1: on
 	           0: off
          0x08: incoming caller groups (what number in Nokia 3310 ?)
@@ -251,6 +251,101 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                xx, 0, 0, 1
                    xx: 0x00: off
                        0x01: on 
+	The following frames are valid only in Nokia 3330. Features for a <=
+	0x09 are separately set to each profile, other are common for all
+	profiles:
+         0x08 Screen saver -> Timeout:
+               0x00 = 5 sec
+               0x01 = 20 sec
+
+         0x09 Screen saver -> Screen saver:
+               0x00 ... 0x0d = Number of picture image
+
+         0x17	Phone book -> Options -> Memory in use:
+               0x00 = Phone
+               0x01 = SIM card
+
+         0x18 Settings -> Phone settings -> Network selection:
+               0x00 = Automatic
+               0x01 = Manual
+
+         0x19 Settings -> Call settings -> Automatic redial:
+               0x00 = Off
+               0x01 = On
+
+         0x1a Settings -> Call settings -> Speed dialling:
+               0x00 = Off
+               0x01 = On
+
+         0x1b Settings -> Call settings -> Own number sending:
+               0x00 = Set by network
+               0x01 = On
+               0x02 = Off
+
+         0x1c Settings -> Phone settings -> Cell info display:
+               0x00 = Off
+
+         0x1d Phone book -> Options -> Type of view:
+               0x00 = Name list
+               0x01 = Name, number
+               0x02 = Large font
+
+         0x1e Settings -> Phone settings -> Language:
+               0x00 = English
+               0x07 = Dansk
+               0x08 = Svenska
+               0x09 = Suomi
+               0x0c = Turcke
+               0x0e = Norsk
+               0x10 = Automatic
+
+               0x32 = Reboots ME
+
+         0x20 Messages ->  Message settings -> Common -> Reply via same centre:
+               0x00 = No
+               0x01 = Yes
+
+         0x21 Messages ->  Message settings -> Common -> Delivery reports:
+               0x00 = No
+               0x01 = Yes
+ 
+         0x22 Clock -> Clock settings -> Show/Hide clock:
+               0x00 = Show
+               0x01 = Hide
+
+         0x23 Clock -> Clock settings -> Time format:
+               0x00 = 24-hour
+               0x01 = 12-hour
+
+         0x24 Select profile:
+               0x00 = General
+               0x01 ... 0x05 = rest of them
+
+         0x26 Settings -> Phone settings -> Confirm SIM service actions:
+               0x00 = Not asked
+               0x01 = Asked
+
+         0x27 Messages -> Write messages -> Options -> Dictionary:
+               0x00 = Off
+               0x01 = English
+               0x0a = Suomi
+
+         0x28 Messages -> Message settings -> Common -> Character support:
+               0x00 = Automatic
+               0x01 = GSM alphabet
+               0x02 = Unicode
+
+         0x29 Startup logo settings:
+               0x00 = Your own uploaded logo
+               0x01 = Nokia
+               0x02 = Draft HUMAN technology(tm)
+               0x03 = Itineris
+
+         0x2d Clock -> Auto update of date and time:
+               0x00 = Off
+               0x01 = Confirm first
+               0x02 = On
+
     s Get welcome message   { 0x0016 }
     r Get welcome message   { 0x0017, no.of blocks, { block } * }
                             where block: { id, {blockspecific} }
@@ -391,7 +486,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     s get date and time     { 0x0062 }
     r date and time recvd   { 0x0063,date_set?,time_set?,?,?,yearh,yearl,month,mday,hour,min,second }
                             where: date_set & time_set==0x01 - set
-			                                0x00 - not set, ?,?,yearh,yearl,month,mday,hour,min,second
+                                                        0x00 - not set, ?,?,yearh,yearl,month,mday,hour,min,second
                                                                not available in frame
     s set alarm             { 0x006b, 1,32,3,0x02(on-off),hour,min,0x00 }
     r alarm set             { 0x006c }
@@ -400,7 +495,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
 0x12: Connect to NBS port (61xx only ?)
     s Send                  {+0x0c, 0x01, UDH header, data}
                             (without 0,1 header  -- for oplogo, cli, ringtone etc upload)
-			    where: UDH header = 0x06, 0x05, 0x04,destporth,destportl,srcporth,srcportl
+                            where: UDH header = 0x06, 0x05, 0x04,destporth,destportl,srcporth,srcportl
                             Seems not to work in MBUS!
 0x13: Calendar notes
     s Write calendar note   { 0x0064, 0x01, 0x10, length, type, yearH, yearL, month, day, hour, timezone,
@@ -409,7 +504,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r Write cal.note report { 0x0065, return }
                             where return: 0x01: ok
                                           0x73: failure
-					  0x81: calendar functions busy. Exit Calendar menu and try again
+                                          0x81: calendar functions busy. Exit Calendar menu and try again
     s Calendar notes set    { 0x0066... }
     r Calendar note recvd   { 0x0067, 0x01, ?, length, type, yrH,yrL,mon,day,hr,tz,alrm yrH,yrL,mon,day,hr,tz,textlen,"text"}
     r Cal.note recvd error  { 0x0067, err }
@@ -431,7 +526,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                           0x09: reading failed
                                   subtype: 0x02: invalid mem type
                                            0x07: empty SMS location
-					   0x0c: no access to memory (no PIN in card, etc.)
+                                           0x0c: no access to memory (no PIN in card, etc.)
     s Delete SMS message    { 0x000a, 0x02, location }
     r Delete OK             { 0x000b }
     s SMS status request    { 0x0036, 0x64 }
@@ -447,14 +542,14 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     s Enable extended cmds  { 0x64, cmd }
                             where cmd: 0x00: off
                                        0x01: on
-				       0x02: enter service mode ?
+                                       0x02: enter service mode ?
                                        0x03: reset (doesn't ask for PIN again)
                                        0x04: reset (PIN is requested)
                                              In 5110 makes reset without PIN
                                        0x06: CONTACT SERVICE!!! Don't try it!
     s Reset phone settings  { 0x65, value, 0x00 }
                             where value: 0x08 - reset UI (User Interface) settings
-			                 0x38 - reset UI, SCM and call counters
+                                         0x38 - reset UI, SCM and call counters
     r Reset phone settings  { 0x65, 0x00 }
     s Get IMEI              { 0x66 }
     r Get IMEI              { 0x66, 0x01, IMEI, 0x00}
@@ -495,10 +590,10 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
       Counters (nm->test36) { 0x74 }
     s Call commands         { 0x7c, block }
                             where where: command, (values)
-			          command: 0x01
-				      values: number(ASCII), 0x00 - makes voice call
-				  command: 0x02 - answer call
-				  command: 0x03 - release call
+                                 command: 0x01
+                                     values: number(ASCII), 0x00 - makes voice call
+                                 command: 0x02 - answer call
+                                 command: 0x03 - release call
     r Call commands         { 0x7c, command }
     s Netmonitor            { 0x7e, field }
                             where: field: 00: next
@@ -508,9 +603,9 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                           F3: developer menus
     s Open simlock 2        { 0x81, 0x01, locknumber, 0x10, 0x10, 0x10, 0x10, 0x10 }
                             Note: sets simlock type to factory?
-			    where locknumber: 1,2,4,8
+                            where locknumber: 1,2,4,8
     s Open simlock 2        { 0x81, 0x01, locknumber }
-			    where locknumber: 1,2,4,8
+                            where locknumber: 1,2,4,8
     s Close simlock         { 0x82, 0x01, locknumber, 0x00, 0x00, locksinfo(lock1,4,2,3), 0x00 }
                             where locknumber: 1,2,4,8
     r Close simlock         { 0x82, the rest like in 0x40/0x8a }
@@ -530,8 +625,8 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r ACD Readings ?        { 0x91, parameter?, value? }
     s Sleep mode test       { 0x92, 0x00, 0x00, howlong(2 bytes), enable }
                             where: enable == 0x01 - enable after test
-			                     0x00 - don't enable after test
-				   howlong (ms) = 0x07, 0xd0 = 2000
+                                             0x00 - don't enable after test
+                                   howlong (ms) = 0x07, 0xd0 = 2000
     s ???(N6150)            { 0x98, 0x00 }
     r ???(N6150)            { 0x98, 0x00, 0x04 }
     s Get bin ringtone      { 0x9e, location }
@@ -626,16 +721,16 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r ACD Readings(N6150)?  { 0xd4, 0x02, 0x00, 0x02, 0x00, 0x0e, 0x01, ?}
     s Get EEPROM            { 0xd4, 0x02, 0x00, 0xa0, locationLo, locationHi, numofbytes }
                             where: numofbytes - how many bytes to read
-			    Note: Works ONLY in MBUS
+                            Note: Works ONLY in MBUS
     r Get EEPROM            { 0xd4, 0x02, 0x00, 0xa0, locationLo, locationHi, numofbytes, contest... }
                             where numofbytes - how many bytes available
-			             contest - bytes with contests (if numofbytes != 0)
+                                  contest - bytes with contests (if numofbytes != 0)
 0x41: Snake game ?
 0x47:
     s Get Picture Image     { 0x0001, location }
     r Get Picture Image     when contains sender number
                             { 0x0002, location, number(like in SMS), 0x00, len, text, 0x00, width, height, 0x01, bitmap }
-			    NOTE:
+                              NOTE:
                               Supports only 0x81 and 0x91 coding (NOT alphanumeric numbers!)
                               in sender without sender number
                             { 0x0002, location, 0x00, 0x00, 0x00, len, text, 0x00, width, height, 0x01, bitmap }
