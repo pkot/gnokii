@@ -28,6 +28,7 @@ rm -rf /tmp/gnokii-${VERSION}/include/obsolete
    autoconf
    autoheader
    ./configure
+   make -C common vcal.c
    cp packaging/RedHat/gnokii.spec .
    make distclean
    chmod 755 mkinstalldirs

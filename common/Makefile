@@ -69,7 +69,10 @@ vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so gsm-filetypes.o vcal.c phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so gsm-filetypes.o phones/PHONES.o links/LINKS.o devices/DEVICES.o
+
+distclean:
+	$(RM) vcal.c
 
 install:
 	$(INSTALL) -d $(DESTDIR)/$(libdir)
@@ -94,4 +97,3 @@ endif
 
 
 .PHONY: all install clean dep depend
-

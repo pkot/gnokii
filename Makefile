@@ -79,7 +79,8 @@ endif
 
 	@echo "done"
 
-distclean:	clean
+distclean: clean
+	$(MAKE) -C common distclean
 	@if [ -e $(PO_DIR)/Makefile ]; then \
 		$(MAKE) -C $(PO_DIR) distclean; \
 	fi

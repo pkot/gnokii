@@ -52,6 +52,9 @@
     o allow to define SMS send timeout in the config file,
       defaults to 10 seconds                              (Pawel Kot)
     o convert some printfs to dprintfs                    (Pawel Kot)
+ * tarballs will contain vcal.c not to require users to have flex,
+   cvs users will still meet the requirement, note that after
+   make distclean vcal.c will be removed                  (Pawel Kot)
 
 0.4.0
 =====
