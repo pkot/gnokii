@@ -1,5 +1,4 @@
 /* This is bus for dancall phones.
-   It is currently not used by anything, and probably was never tested.
 */
 
 /* System header files */
@@ -21,7 +20,7 @@
 #include "links/utils.h"
 
 #define __links_cbus_
-#include "cbus.h"
+#include "links/cbus.h"
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -34,7 +33,8 @@ GSM_Phone *gphone;
 CBUS_Link clink;	/* CBUS specific stuff, internal to this file */
 
 int init_okay = 0;
-
+int seen_okay;
+char reply_buf[10240];
 
 /*--------------------------------------------------------------------------*/
 
@@ -157,8 +157,64 @@ sendpacket(unsigned char *msg, int len, unsigned short cmd)
 
 /* -------------------------------------------------------------------- */
 
+
+static GSM_Error CommandAck(int messagetype, unsigned char *buffer, int length)
+{
+	printf("[ack]");
+	return GE_NONE;
+}
+
+static GSM_Error PhoneReply(int messagetype, unsigned char *buffer, int length)
+{
+	if (!strncmp(buffer, "OK", 2)) {
+		seen_okay = 1;
+		printf("Phone okays\n");
+	} else {
+		strncpy(reply_buf, buffer, length);
+		reply_buf[length+1] = '\0';
+		printf("Phone says: %s\n", reply_buf);
+	}
+	{
+		u8 buf[2] = { 0x3e, 0x68 };
+		usleep(10000);
+		CBUS_SendMessage(2, 0x3f, buf);
+	}
+
+	return GE_NONE;
+}
+
+void
+sendat(char *msg)
+{
+	usleep(10000);
+	printf("AT command: %s\n", msg);
+        CBUS_SendMessage(strlen(msg), 0x3c, msg);
+	seen_okay = 0;
+	while (!seen_okay)
+		CBUS_Loop(NULL);
+//	getpacket();	/* This should be phone's acknowledge of AT command */
+}
+
+
+/* -------------------------------------------------- */
+
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
+
+void
+internal_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
+{
+	int c;
+
+	switch(type) {
+	case '=': CommandAck(type, buf, len);
+		break;
+	case '>': PhoneReply(type, buf, len);
+		break;
+	default: dprintf("Unknown Frame Type 68/ %02x\n", type);
+		break;
+	}
+}
 
 void CBUS_RX_StateMachine(unsigned char rx_byte)
 {
@@ -252,7 +308,7 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 
 			switch(i->FrameType2) {
 			case 0x68:
-				link_dispatch(glink, gphone, i->FrameType1, i->buffer, i->MessageLength);
+				internal_dispatch(glink, gphone, i->FrameType1, i->buffer, i->MessageLength);
 				break;
 			case 0x70:
 				if (i->FrameType1 == 0x91) {
@@ -277,6 +333,12 @@ void CBUS_RX_StateMachine(unsigned char rx_byte)
 int CBUS_SendMessage(u16 message_length, u8 message_type, void * buffer)
 {
 	sendpacket(buffer, message_length, message_type);
+	return true;
+}
+
+int AT_SendMessage(u16 message_length, u8 message_type, void * buffer)
+{
+	sendat(buffer);
 	return true;
 }
 
@@ -326,7 +388,7 @@ GSM_Error CBUS_Initialise(GSM_Link * newlink, GSM_Phone * newphone)
 
 	/* Fill in the link functions */
 	glink->Loop = &CBUS_Loop;
-	glink->SendMessage = &CBUS_SendMessage;
+	glink->SendMessage = &AT_SendMessage;
 
 	if (glink->ConnectionType == GCT_Serial) {
 		if (!CBUS_OpenSerial())
