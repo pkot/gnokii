@@ -537,7 +537,7 @@ static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_U
 	dprintf("\tSMS center number: %s\n", sms->SMSC.Number);
 
 	/* Delivery time */
-	if (sms->Type = SMS_DeliveryReport) {
+	if (sms->Type == SMS_Delivery_Report) {
 		UnpackDateTime(rawsms->Time, &(sms->Time));
 		dprintf("\tDelivery date: %s\n", PrintDateTime(rawsms->Time));
 	}
