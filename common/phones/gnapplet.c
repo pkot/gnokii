@@ -160,7 +160,7 @@ static unsigned char gnapplet_get_semi(const unsigned char *addr)
 	if (!addr[0]) return 0;
 
 	l = 2 * (addr[0] - 1);
-	return (addr[addr[0]] & 0xf0 == 0xf0) ? l - 1 : l;
+	return ((addr[addr[0]] & 0xf0) == 0xf0) ? l - 1 : l;
 }
 
 

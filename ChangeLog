@@ -4,6 +4,8 @@
     o wrong permissions for gnapplet.sis             (Ville Skyttä)
  * AT driver updates
     o add more workarounds for SonyEricssons            (Hugo Haas)
+ * gnapplet driver updates
+    o fix incorrect bracketing                           (Greg Alt)
 
 0.6.3
 =====
