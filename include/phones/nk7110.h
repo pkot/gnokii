@@ -191,6 +191,7 @@ typedef struct {
 	bool new_sms;	/* Do we have a new SMS? */
 	int ll_memtype;
 	int ll_location;
+	int userdef_location;
 } nk7110_driver_instance;
 
 #endif  /* _gnokii_phones_nk7110_h */

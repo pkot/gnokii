@@ -2,6 +2,9 @@
 ========================
  * 6110 series updates
     o missing German characters added              (BORBELY Zoltan)
+ * 7110 series updates
+    o raw ringtone upload/download support added   (BORBELY Zoltan)
+    o ringtone upload/download/list support added  (BORBELY Zoltan)
  * portability fixes
     o libgnokii.dsp (Visual Studio) updated        (BORBELY Zoltan)
     o VC debug and release flags differs                    (Ender)

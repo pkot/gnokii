@@ -99,7 +99,11 @@ static gn_error NK7110_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 static gn_error NK7110_GetSMSStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press);
+static gn_error NK7110_GetRawRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_SetRawRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_SetRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetRingtoneList(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetProfile(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK7110_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state);
@@ -122,6 +126,7 @@ static gn_error NK7110_IncomingSecurity(int messagetype, unsigned char *message,
 static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_IncomingKeypress(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_IncomingProfile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingRingtone(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static int get_memory_type(gn_memory_type memory_type);
 static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type);
@@ -141,6 +146,7 @@ static gn_incoming_function_type nk7110_incoming_functions[] = {
 	{ NK7110_MSG_WAP,		NK7110_IncomingWAP },
 	{ NK7110_MSG_KEYPRESS_RESP,	NK7110_IncomingKeypress },
 	{ NK7110_MSG_PROFILE,		NK7110_IncomingProfile },
+	{ NK7110_MSG_RINGTONE,		NK7110_IncomingRingtone },
 	{ 0, NULL }
 };
 
@@ -276,8 +282,16 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK7110_PressOrReleaseKey(data, state, true);
 	case GN_OP_ReleasePhoneKey:
 		return NK7110_PressOrReleaseKey(data, state, false);
+	case GN_OP_GetRawRingtone:
+		return NK7110_GetRawRingtone(data, state);
+	case GN_OP_SetRawRingtone:
+		return NK7110_SetRawRingtone(data, state);
+	case GN_OP_GetRingtone:
+		return NK7110_GetRingtone(data, state);
 	case GN_OP_SetRingtone:
 		return NK7110_SetRingtone(data, state);
+	case GN_OP_GetRingtoneList:
+		return NK7110_GetRingtoneList(data, state);
 	case GN_OP_PlayTone:
 		return pnok_play_tone(data, state);
 	case GN_OP_GetLocksInfo:
@@ -355,6 +369,9 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 	if (strcmp(model, "NSE-5") == 0) {
 		state->driver.phone.startup_logo_height = 65;
 		dprintf("7110 detected - startup logo height set to 65\n");
+		DRVINSTANCE(state)->userdef_location = 0x75;
+	} else {
+		DRVINSTANCE(state)->userdef_location = 0x8a;
 	}
 
 	pnok_extended_cmds_enable(0x01, &data, state);
@@ -2564,13 +2581,148 @@ static gn_error NK7110_GetProfile(gn_data *data, struct gn_statemachine *state)
 /*****************************/
 /********* RINGTONE **********/
 /*****************************/
-static gn_error NK7110_SetRingtone(gn_data *data, struct gn_statemachine *state)
+static gn_error NK7110_IncomingRingtone(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
+	switch (message[3]) {
+	case 0x23:
+		if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
+		data->ringtone->location = message[5];
+		char_unicode_decode(data->ringtone->name, message + 6, 2 * 15);
+		if (data->raw_data->length < length - 36) return GN_ERR_MEMORYFULL;
+		if (data->raw_data && data->raw_data->data) {
+			memcpy(data->raw_data->data, message + 36, length - 36);
+			data->raw_data->length = length - 35;
+		}
+		break;
+
+	case 0x24:
+		return GN_ERR_INVALIDLOCATION;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
+}
+
+static gn_error NK7110_GetRawRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x22, 0x00, 0x00};
+	gn_error error;
+
+	if (!data || !data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
+	if (data->ringtone->location < 0) return GN_ERR_INVALIDLOCATION;
+
+	req[5] = data->ringtone->location;
+
+	if (sm_message_send(6, NK7110_MSG_RINGTONE, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(NK7110_MSG_RINGTONE, data, state);
+}
+
+static gn_error NK7110_SetRawRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x1f, 0x00, 0x00};
+	gn_error error;
+	int len;
+
+	if (!data || !data->ringtone || !data->raw_data || !data->raw_data->data)
+		return GN_ERR_INTERNALERROR;
+	if (sizeof(req) < 36 + data->raw_data->length) return GN_ERR_MEMORYFULL;
+	if (data->ringtone->location < 0) {
+		/* FIXME: search first free location */
+		data->ringtone->location = DRVINSTANCE(state)->userdef_location;
+	}
+
+	req[5] = data->ringtone->location;
+	char_unicode_encode(req + 6, data->ringtone->name, strlen(data->ringtone->name));
+	memcpy(req + 36, data->raw_data->data, data->raw_data->length);
+	len = 36 + data->raw_data->length;
+
+	if (sm_message_send(len, NK7110_MSG_RINGTONE, req, state)) return GN_ERR_NOTREADY;
+	return sm_block_ack(state);
+}
+
+static gn_error NK7110_GetRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	gn_data d;
+	gn_error err;
+	gn_raw_data rawdata;
+	char buf[4096];
+
 	if (!data->ringtone) return GN_ERR_INTERNALERROR;
 
-	data->ringtone->location = -1;
+	memset(&rawdata, 0, sizeof(gn_raw_data));
+	rawdata.data = buf;
+	rawdata.length = sizeof(buf);
+	gn_data_clear(&d);
+	d.ringtone = data->ringtone;
+	d.raw_data = &rawdata;
 
-	return NBSUpload(data, state, GN_SMS_DATA_Ringtone);
+	if ((err = NK7110_GetRawRingtone(&d, state)) != GN_ERR_NONE) return err;
+
+	return pnok_ringtone_from_raw(data->ringtone, rawdata.data, rawdata.length);
+}
+
+static gn_error NK7110_SetRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	gn_data d;
+	gn_error err;
+	gn_raw_data rawdata;
+	char buf[4096];
+
+	if (!data->ringtone) return GN_ERR_INTERNALERROR;
+
+	memset(&rawdata, 0, sizeof(gn_raw_data));
+	rawdata.data = buf;
+	rawdata.length = sizeof(buf);
+	gn_data_clear(&d);
+	d.ringtone = data->ringtone;
+	d.raw_data = &rawdata;
+
+	if ((err = pnok_ringtone_to_raw(rawdata.data, &rawdata.length, data->ringtone, 0)) != GN_ERR_NONE)
+		return err;
+
+	return NK7110_SetRawRingtone(&d, state);
+}
+
+static gn_error NK7110_GetRingtoneList(gn_data *data, struct gn_statemachine *state)
+{
+	gn_ringtone_list *rl;
+	gn_ringtone ringtone;
+	gn_data d;
+	int i;
+
+#define ADDRINGTONE(id, str) \
+	rl->ringtone[rl->count].location = (id); \
+	strcpy(rl->ringtone[rl->count].name, (str)); \
+	rl->ringtone[rl->count].user_defined = 0; \
+	rl->ringtone[rl->count].readable = 0; \
+	rl->ringtone[rl->count].writable = 0; \
+	rl->count++;
+
+	if (!(rl = data->ringtone_list)) return GN_ERR_INTERNALERROR;
+	rl->count = 0;
+	rl->userdef_location = DRVINSTANCE(state)->userdef_location;
+	rl->userdef_count = 5;
+
+	memset(&ringtone, 0, sizeof(ringtone));
+	gn_data_clear(&d);
+	d.ringtone = &ringtone;
+	for (i = 0; i < rl->userdef_count; i++) {
+		ringtone.location = rl->userdef_location + i;
+		if (NK7110_GetRingtone(&d, state) == GN_ERR_NONE) {
+			rl->ringtone[rl->count].location = ringtone.location;
+			strcpy(rl->ringtone[rl->count].name, ringtone.name);
+			rl->ringtone[rl->count].user_defined = 1;
+			rl->ringtone[rl->count].readable = 1;
+			rl->ringtone[rl->count].writable = 1;
+			rl->count++;
+		}
+	}
+
+#undef ADDRINGTONE
+
+	return GN_ERR_NONE;
 }
 
 

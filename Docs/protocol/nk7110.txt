@@ -337,8 +337,8 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
                                 0x00, 0x55, ??, ?? }
     s Set ringtone          { 0x011f, 0x00, location, 0x00, name(Unicode),
                               ringtone(format the same to 0x40/0x019e and 0x40/0x01a0) }
-                              where: location: 0x87 to 0x8b on N6210
-                                               0x74 to ... on N7110
+                              where: location: 0x8a to 0x8e on N6210
+                                               0x75 to ... on N7110
 ?   s Get ringtone          { 0x0122, 0x00, location}
 ?   r Get ringtone          { 0x0123, 0x00, location, name(Unicode), 0x00,...,0x00, 0x02,0xFC,0x09(ringtone contenst)}
 0x39:
