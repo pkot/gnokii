@@ -466,7 +466,7 @@ AC_CACHE_CHECK(for long double, ac_cv_c_long_double,
 	[AC_TRY_RUN([int main() { long double foo = 0.0; exit(sizeof(long double) < sizeof(double)); }],
 		ac_cv_c_long_double=yes, ac_cv_c_long_double=no, ac_cv_c_long_double=no)])
 if test $ac_cv_c_long_double = yes; then
-	AC_DEFINE(HAVE_LONG_DOUBLE)
+	AC_DEFINE(HAVE_LONG_DOUBLE, 1, [Define if your compiler supports the \`long double' type.])
 fi
 
 
