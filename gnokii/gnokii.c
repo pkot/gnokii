@@ -3581,10 +3581,11 @@ static int deletephonebook(int argc, char *argv[])
 				 gn_memory_type2str(entry.memory_type), entry.location);
 			break;
 		default:
-			fprintf (stderr, _("Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"), 
-				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location);
 			if (last_location == INT_MAX)
 				last_location = 0;
+			else
+				fprintf (stderr, _("Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"), 
+					 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location);
 			break;
 		}
 	}
