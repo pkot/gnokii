@@ -62,7 +62,7 @@ static void *thread_main(void *pArg)
 	IOBluetoothDeviceRef device = IOBluetoothDeviceCreateWithAddress(&(pContext->deviceAddress));
 	IOBluetoothRFCOMMChannelRef rfcommChannel;
 
-	if(IOBluetoothDeviceOpenRFCOMMChannel(device, pContext->nChannel,
+	if (IOBluetoothDeviceOpenRFCOMMChannel(device, pContext->nChannel,
 				      &rfcommChannel) != kIOReturnSuccess) {
 		rfcommChannel = 0;
 	} else {
@@ -117,7 +117,7 @@ int bluetooth_open(const char* addr, uint8_t channel, struct gn_statemachine* st
 
 int bluetooth_close(int fd, struct gn_statemachine *state)
 {
-	threadContext * pContext = (threadContext *)fd;
+	threadContext *pContext = (threadContext *)fd;
         IOBluetoothDeviceRef device;
 
 	sleep(2);
