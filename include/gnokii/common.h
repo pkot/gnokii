@@ -89,6 +89,14 @@ typedef struct {
   GSM_MemoryType MemoryType;                /* Type of memory message is stored in. */
 } GSM_SMSMessage;
 
+/* This structure is used to get the current network status */
+
+typedef struct {
+  char NetworkCode[10]; /* GSM network code */
+  char CellID[10];      /* CellID */
+  char LAC[10];         /* LAC */
+} GSM_NetworkInfo;
+
 /* Limits for sizing of array in GSM_PhonebookEntry. Individual handsets may
    not support these lengths so they have their own limits set. */
 
@@ -301,6 +309,8 @@ typedef struct {
   GSM_Error (*GetIncomingCallNr)( char *Number );
 
   GSM_Error (*SendBitmap) ( char *NetworkCode, int width, int height, unsigned char *bitmap);
+
+  GSM_Error (*GetNetworkInfo) ( GSM_NetworkInfo *NetworkInfo );
 
 } GSM_Functions;
 

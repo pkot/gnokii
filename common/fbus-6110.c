@@ -77,7 +77,8 @@ GSM_Functions FB61_Functions = {
   FB61_DialVoice,
   FB61_DialData,
   FB61_GetIncomingCallNr,
-  FB61_SendBitmap
+  FB61_SendBitmap,
+  FB61_GetNetworkInfo
 };
 
 /* Mobile phone information */
@@ -180,6 +181,9 @@ int                CurrentSMSPointer;
 
 GSM_MemoryStatus   *CurrentMemoryStatus;
 GSM_Error          CurrentMemoryStatusError;
+
+GSM_NetworkInfo    *CurrentNetworkInfo;
+GSM_Error          CurrentNetworkInfoError;
 
 GSM_SMSStatus      *CurrentSMSStatus;
 GSM_Error          CurrentSMSStatusError;
@@ -322,6 +326,31 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentMemoryStatusError == GE_BUSY ) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (GE_NONE);
+}
+
+GSM_Error FB61_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo)
+{
+
+  unsigned char req[] = { FB61_FRAME_HEADER,
+			  0x70
+                        };
+  int timeout=20;
+
+  CurrentNetworkInfo = NetworkInfo;
+  CurrentNetworkInfoError = GE_BUSY;
+  
+  FB61_TX_SendMessage(4, 0x0a, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentNetworkInfoError == GE_BUSY ) {
 
     if (--timeout == 0)
       return (GE_TIMEOUT);
@@ -2110,21 +2139,26 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     break;
 
-    /* Network status */
+    /* Network Info received. */
 
   case 0x0a:
 
+    sprintf(CurrentNetworkInfo->NetworkCode, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
+
+    sprintf(CurrentNetworkInfo->CellID, "%02x%02x", MessageBuffer[10], MessageBuffer[11]);
+
+    sprintf(CurrentNetworkInfo->LAC, "%02x%02x", MessageBuffer[12], MessageBuffer[13]);
+
 #ifdef DEBUG
-    printf(_("Message: Network registration:\n"));
+    printf(_("Message: Network informations:\n"));
 
-    printf(_("   CellID: %02x%2x\n"), MessageBuffer[10], MessageBuffer[11]);
-    printf(_("   LAC: %02x%02x\n"), MessageBuffer[12], MessageBuffer[13]);
-
-    sprintf(output, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
-
-    printf(_("   Network code: %s\n"), output);
-    printf(_("   Network name: %s (%s)\n"), GSM_GetNetworkName(output), GSM_GetCountryName(output));
+    printf(_("   CellID: %s\n"), CurrentNetworkInfo->CellID);
+    printf(_("   LAC: %s\n"), CurrentNetworkInfo->LAC);
+    printf(_("   Network code: %s\n"), CurrentNetworkInfo->NetworkCode);
+    printf(_("   Network name: %s (%s)\n"), GSM_GetNetworkName(CurrentNetworkInfo->NetworkCode), GSM_GetCountryName(CurrentNetworkInfo->NetworkCode));
 #endif DEBUG
+
+    CurrentNetworkInfoError = GE_NONE;
 
     break;
 

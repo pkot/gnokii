@@ -32,6 +32,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
+#include "gsm-networks.h"
 #include "cfgreader.h"
 
 /* Prototypes. */
@@ -758,6 +759,8 @@ void monitormode(void)
   GSM_RFUnits rf_units = GRF_Arbitrary;
   GSM_BatteryUnits batt_units = GBU_Arbitrary;
 
+  GSM_NetworkInfo NetworkInfo;
+
   GSM_MemoryStatus SIMMemoryStatus = {GMT_SM, 0, 0};
   GSM_MemoryStatus PhoneMemoryStatus = {GMT_ME, 0, 0};
   GSM_MemoryStatus DC_MemoryStatus = {GMT_DC, 0, 0};
@@ -831,6 +834,9 @@ void monitormode(void)
 
     if (GSM->GetIncomingCallNr(Number) == GE_NONE)
       fprintf(stdout, _("Incoming call: %s\n"), Number);
+
+    if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE)
+      fprintf(stdout, _("Network: %s (%s), LAC: %s, CellID: %s\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC, NetworkInfo.CellID);
 	    
     sleep(1);
   }

@@ -63,7 +63,8 @@ GSM_Functions			FB38_Functions = {
 		FB38_DialVoice,
 		FB38_DialData,
 		FB38_GetIncomingCallNr,
-		FB38_SendBitmap
+		FB38_SendBitmap,
+		FB38_GetNetworkInfo
 };
 
 GSM_Information			FB38_Information = {
@@ -733,6 +734,11 @@ GSM_Error	FB38_GetIncomingCallNr(char *Number)
 }
 
 GSM_Error	FB38_SendBitmap (char *NetworkCode, int width, int height, unsigned char *bitmap)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_GetNetworkInfo (GSM_NetworkInfo *NetworkInfo)
 {
 	return (GE_NOTIMPLEMENTED);
 }

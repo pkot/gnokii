@@ -164,6 +164,8 @@ GSM_Error FB61_GetIncomingCallNr(char *Number);
 GSM_Error FB61_SendBitmap(char *NetworkCode, int width, int height,
                           unsigned char *bitmap);
 
+GSM_Error FB61_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
+
 /* States for receive code. */
 
 enum FB61_RX_States {
