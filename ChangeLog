@@ -64,6 +64,11 @@
       length                                         (BORBELY Zoltan)
     o M2BUS idle channel check and channel flushing added
                                                      (BORBELY Zoltan)
+ * 6160 series updates:
+    o experimental driver added                      (BORBELY Zoltan)
+    o Identify implemented                           (BORBELY Zoltan)
+    o ReadPhonebook implemented                      (BORBELY Zoltan)
+    o WritePhonebook implemented                     (BORBELY Zoltan)
 
 0.4.0pre20
 ==========

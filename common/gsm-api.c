@@ -139,6 +139,7 @@ API GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Co
 #endif
 	REGISTER_PHONE(fake, NULL);
 	REGISTER_PHONE(at, model);
+	REGISTER_PHONE(nokia_6160, NULL);
 
 	return (GE_UNKNOWNMODEL);
 }
