@@ -3,6 +3,8 @@
  * portability fixes
     o build atsoer.c under MSVC                        (Phil Ashby)
     o remove not used win32/fcopy.bat                   (Pawel Kot)
+ * build system updates
+    o build intl/ only when it's needed                 (Pawel Kot)
  * libgnokii changes
     o protect atsoer.h with _gnokii_atsoer_h, not _gnokii_ateric_h
                                                        (Phil Ashby)

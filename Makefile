@@ -22,7 +22,11 @@ BIN_DIRS += gnokiid utils
 DATA_DIR = common/data
 endif
 
-DIRS =  common/phones \
+ifdef NEED_LCHARSET
+DIRS = intl
+endif
+
+DIRS += common/phones \
 	common/links \
 	common/devices \
 	$(DATA_DIR) \
@@ -41,7 +45,7 @@ INSTALL_SIMPLE =	po \
 
 DOCS_DIR = 	Docs
 
-all: intl $(DIRS)
+all: $(DIRS)
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
 		    if [ -e $$dir/Makefile ]; then \
@@ -71,14 +75,14 @@ $(DIRS): dummy
 
 clean:
 	$(RM) *~ *.orig *.rej include/*~ include/*.orig include/*.rej testsuite/myout*
-	@for dir in intl $(DIRS); do \
+	@for dir in $(DIRS); do \
 	    if [ -e $$dir/Makefile ]; then \
 		$(MAKE) -C $$dir clean; \
 	    fi; \
 	done
 
 ifdef OWN_GETOPT
-		$(MAKE) -C getopt clean
+	$(MAKE) -C getopt clean
 endif
 
 	@if [ "$(GTK_LIBS)" ]; then \
