@@ -65,6 +65,7 @@ static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *st
 static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *state, bool save_sms);
 static gn_error P3110_ReadPhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_WritePhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_MakeCall(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_SendRLPFrame(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_SetRLPRXCallback(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -185,6 +186,8 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return P3110_ReadPhonebook(data, state);
 	case GN_OP_WritePhonebook:
 		return P3110_WritePhonebook(data, state);
+	case GN_OP_MakeCall:
+		return P3110_MakeCall(data, state);
 	case GN_OP_SendRLPFrame:
 		return P3110_SendRLPFrame(data, state);
 	case GN_OP_SetRLPRXCallback:
@@ -539,6 +542,57 @@ static gn_error P3110_WritePhonebook(gn_data *data, struct gn_statemachine *stat
 	
 	return sm_block(0x44, data, state);
 }
+
+static gn_error P3110_MakeCall(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[256], call_type;
+	int pos = 0, numlen;
+	
+	switch (data->call_info->type) {
+	case GN_CALL_Voice:
+		call_type = 0x05;
+		break;
+	case GN_CALL_DigitalData:
+	case GN_CALL_NonDigitalData:
+		call_type = 0x01;
+		break;
+	default:
+		dprintf("Invalid call type %d\n", data->call_info->type);
+		return GN_ERR_INTERNALERROR;
+	}
+
+	numlen = strlen(data->call_info->number);
+
+	req[pos++] = call_type;
+	req[pos++] = 0x01;	/* Address / number type? */
+	req[pos++] = numlen;
+		
+	memcpy(req + pos, data->call_info->number, numlen);
+	pos += numlen;
+	
+	/* Magic bytes taken from gnokii 0.3.5 code
+	 * These probably set up some timers or something...
+	 * According to old comments, InitField1 is not needed for
+	 * voice calls, but doesn't seem to do any harm. */
+	
+	req[pos++] = 0x07; /* Length of InitField1 */
+	req[pos++] = 0xa2; /* InitField1 content */
+	req[pos++] = 0x88;
+	req[pos++] = 0x81;
+	req[pos++] = 0x21;
+	req[pos++] = 0x15;
+	req[pos++] = 0x63;
+	req[pos++] = 0xa8;
+
+	req[pos++] = 0x00; /* Length of InitField2 */
+	req[pos++] = 0x00; /* Length of InitField2 */	
+
+	if (sm_message_send(pos, 0x0a, req, state) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
+	
+	return sm_block_no_retry_timeout(0x0e, 500, data, state);
+}
+
 
 static gn_error P3110_SendRLPFrame(gn_data *data, struct gn_statemachine *state)
 {
