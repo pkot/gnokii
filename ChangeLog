@@ -11,6 +11,7 @@
     o extern symbols marked                        (BORBELY Zoltan)
     o Bluetooth support on Mac OSX
                          (Olivier Kaloudoff, Siegfried Schloissnig)
+    o Bluetooth support on FreeBSD                 (BORBELY Zoltan)
  * translations updates
     o Estonian translation updated                  (Hans Motshärg)
     o French translation updated                (Olivier Kaloudoff)

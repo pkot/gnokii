@@ -36,8 +36,55 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 
+#ifdef HAVE_BLUETOOTH_NETGRAPH	/* FreeBSD / netgraph */
+
+#include <bitstring.h>
+#include <netgraph/bluetooth/include/ng_hci.h>
+#include <netgraph/bluetooth/include/ng_l2cap.h>
+#include <netgraph/bluetooth/include/ng_btsocket.h>
+
+#define BTPROTO_RFCOMM BLUETOOTH_PROTO_RFCOMM
+#define BDADDR_ANY NG_HCI_BDADDR_ANY
+#define sockaddr_rc sockaddr_rfcomm
+#define rc_family rfcomm_family
+#define rc_bdaddr rfcomm_bdaddr
+#define rc_channel rfcomm_channel
+#define bacpy(dst, src) memcpy((dst), (src), sizeof(bdaddr_t))
+
+#ifndef HAVE_BT_ATON
+
+static int bt_aton(const char *str, bdaddr_t *ba)
+{
+	char ch;
+	unsigned int b[6];
+
+	memset(ba, 0, sizeof(*ba));
+	if (sscanf(str, "%x:%x:%x:%x:%x:%x%c", b + 0, b + 1, b + 2, b + 3, b + 4, b + 5, &ch) != 6) return 0;
+	if ((b[0] | b[1] | b[2] | b[3] | b[4] | b[5]) > 0xff) return 0;
+
+	ba->b[0] = b[0];
+	ba->b[1] = b[1];
+	ba->b[2] = b[2];
+	ba->b[3] = b[3];
+	ba->b[4] = b[4];
+	ba->b[5] = b[5];
+
+	return 1;
+}
+
+#endif
+
+static int str2ba(const char *str, bdaddr_t *ba)
+{
+	return !bt_aton(str, ba);
+}
+
+#else	/* Linux / BlueZ support */
+
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
+
+#endif
 
 int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state)
 {
@@ -45,7 +92,10 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	struct sockaddr_rc laddr, raddr;
 	int fd;
 
-	str2ba((char *)addr, &bdaddr);
+	if (str2ba((char *)addr, &bdaddr)) {
+		fprintf(stderr, "Invalid bluetooth address \"%s\"\n", addr);
+		return -1;
+	}
 
 	if ((fd = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0) {
 		perror("Can't create socket");
