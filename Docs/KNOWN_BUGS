@@ -20,3 +20,8 @@ on, it works again. Configuration knowns to be affected:
 and
 	model = 6310
 	connection = dlr3p
+
+4. Nokia 6510 series (e.g. 6310) will be silent after gnokii --playringtone.
+We don't know how to restore the original settings, so you have to power
+cycle your phone. Don't worry, it won't destroy your phone, it's just
+annoying.
