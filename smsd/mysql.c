@@ -178,7 +178,7 @@ void DB_Look (void)
       error = WriteSMS (&sms);
       sleep (1);
     }
-    while ((error == GE_TIMEOUT || error == GE_SMSSENDFAILED) && numError++ < 3);
+    while ((error == GE_TIMEOUT || error == GE_FAILED) && numError++ < 3);
 
     g_string_sprintf (buf, "UPDATE outbox SET processed='1', error='%d', \
                             processed_date=NULL WHERE id='%s'",
