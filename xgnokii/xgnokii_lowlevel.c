@@ -125,7 +125,7 @@ static inline void FreeArray(GSList ** array)
 
 static GSM_Error InitModelInf(void)
 {
-	gchar buf[64], buf2[64];
+	gchar buf[64];
 	gint i, j;
 	GSM_Error error;
 	SMS_Status *SMSStatus;
@@ -135,34 +135,32 @@ static GSM_Error InitModelInf(void)
 	GSM_DataClear(&gdat);
 
 	gdat.Model = buf;
-	gdat.Revision = buf2;
 	error = SM_Functions(GOP_GetModel, &gdat, &statemachine);
-	if (error != GE_NONE)
-		return error;
-/*	g_free(phoneMonitor.phone.model); */
-
-	phoneMonitor.phone.version = g_strdup(buf);
-	phoneMonitor.phone.model = GetModel(buf);
+	if (error != GE_NONE) return error;
+	phoneMonitor.phone.version = g_malloc(sizeof(gdat.Model));
+	phoneMonitor.phone.model = GetModel(gdat.Model);
 
 	if (phoneMonitor.phone.model == NULL)
 		phoneMonitor.phone.model = g_strdup(_("unknown"));
 	phoneMonitor.supported = GetPhoneModel(buf)->flags;
 
+	gdat.Revision = buf;
+	gdat.Model = NULL;
 	error = SM_Functions(GOP_GetRevision, &gdat, &statemachine);
-	if (error != GE_NONE)
-		return error;
-
-	g_free(phoneMonitor.phone.revision);
-	phoneMonitor.phone.revision = g_strdup(buf);
-
-
-	gdat.Imei = buf;
-/*	error = SM_Functions(GOP_GetImei, &gdat, &statemachine);
 	if (error != GE_NONE) return error;
+	phoneMonitor.phone.version = g_malloc(sizeof(gdat.Revision));
+	phoneMonitor.phone.revision = g_malloc(sizeof(gdat.Revision));
+	phoneMonitor.phone.version = g_strdup(gdat.Revision);
+	phoneMonitor.phone.revision = g_strdup(gdat.Revision);
 
-	g_free(phoneMonitor.phone.imei);
-	phoneMonitor.phone.imei = g_strdup(buf);
-*/
+	gdat.Revision = NULL;
+	gdat.Model = NULL;
+	gdat.Imei = buf;
+	error = SM_Functions(GOP_GetImei, &gdat, &statemachine);
+	if (error != GE_NONE) return error;
+	phoneMonitor.phone.imei = g_malloc(sizeof(gdat.Imei));
+	phoneMonitor.phone.imei = g_strdup(gdat.Imei);
+
 	SMSStatus = g_malloc(sizeof(SMS_Status));
 	memset(SMSStatus, 0, sizeof(SMS_Status));
 	gdat.SMSStatus = SMSStatus;
@@ -209,6 +207,9 @@ static GSM_Error fbusinit(bool enable_monitoring)
 
 	if (!strcmp(xgnokiiConfig.connection, "irda"))
 		connection = GCT_Irda;
+
+	if (!strcmp(xgnokiiConfig.connection, "dau9p"))
+		connection = GCT_DAU9P;
 
 	/* Initialise the code for the GSM interface. */
 
@@ -491,7 +492,8 @@ static gint A_GetMemoryLocationAll(gpointer data)
 		/* If the phonebook location was invalid - just fill up the rest */
 		/* This works on a 7110 anyway... */
 		/* No it does not, at least on my 6210 (Markus) */
-		/*		if ((error == GE_INVALIDPHBOOKLOCATION) || (error == GE_EMPTYMEMORYLOCATION)) {
+		/*
+		  if ((error == GE_INVALIDPHBOOKLOCATION) || (error == GE_EMPTYMEMORYLOCATION)) {
 			mla->InsertEntry(&entry);
 			continue;
 			}*/
@@ -505,7 +507,8 @@ static gint A_GetMemoryLocationAll(gpointer data)
 			}
 			*/
 
-		if (error == GE_NONE) error = mla->InsertEntry(&entry); /* FIXME: It only works this way at the moment */
+		error = mla->InsertEntry(&entry); 
+		/* FIXME: It only works this way at the moment */
 		/*		if (error != GE_NONE)
 				break;*/
 	}
@@ -537,51 +540,16 @@ static gint A_WriteMemoryLocation(gpointer data)
 	return (error);
 }
 
-
 static gint A_WriteMemoryLocationAll(gpointer data)
 {
-	GSM_PhonebookEntry entry;
 	GSM_Error error;
 	D_MemoryLocationAll *mla = (D_MemoryLocationAll *) data;
-	register gint i;
+	GSM_Data gdat;
 
-	error = mla->status = GE_NONE;
-	/*
-	entry.MemoryType = mla->type;
+	error = mla->status = GE_UNKNOWN;
 
-	pthread_mutex_lock (&memoryMutex);
-	for (i = mla->min; i <= mla->max; i++) {
-		entry.Location = i;
-		error = GSM->GetMemoryLocation (&entry);
-		if (error != GE_NONE) {
-			gint err_count = 0;
-
-			while (error != GE_NONE) {
-				g_print (_("%s: line %d: Can't get memory entry number %d from memory %d! %d\n"),
-					 __FILE__, __LINE__, i, entry.MemoryType, error);
-				if (err_count++ > 3) {
-					mla->ReadFailed (i);
-					mla->status = error;
-					pthread_cond_signal (&memoryCond);
-					pthread_mutex_unlock (&memoryMutex);
-					return (error);
-				}
-
-				error = GSM->GetMemoryLocation (&entry);
-				sleep (2);
-			}
-		}
-		error = mla->InsertEntry (&entry);
-		if (error != GE_NONE)
-			break;
-	}
-	mla->status = error;
-	pthread_cond_signal (&memoryCond);
-	pthread_mutex_unlock (&memoryMutex);
-	*/
-	return (error);
+	return error;
 }
-
 
 static gint A_GetCalendarNote(gpointer data)
 {
@@ -609,7 +577,7 @@ static gint A_GetCalendarNoteAll(gpointer data)
 	GSM_CalendarNotesList list;
 	GSM_CalendarNote entry;
 	D_CalendarNoteAll *cna = (D_CalendarNoteAll *) data;
-	GSM_Error e;
+	GSM_Error error;
 	GSM_Data gdat;
 	register gint i = 1;
 
@@ -620,7 +588,7 @@ static gint A_GetCalendarNoteAll(gpointer data)
 		/* GSM_DataClear(&gdat); */
 		gdat.CalendarNote = &entry;
 		gdat.CalendarNotesList = &list;
-		if ((e = SM_Functions(GOP_GetCalendarNote, &gdat, &statemachine)) != GE_NONE)
+		if ((error = SM_Functions(GOP_GetCalendarNote, &gdat, &statemachine)) != GE_NONE)
 			break;
 
 		if (cna->InsertEntry(&entry) != GE_NONE)
@@ -629,10 +597,10 @@ static gint A_GetCalendarNoteAll(gpointer data)
 
 	pthread_mutex_unlock(&calendarMutex);
 	g_free(cna);
-	if (e == GE_INVALIDCALNOTELOCATION)
+	if (error == GE_INVALIDCALNOTELOCATION)
 		return (GE_NONE);
 	else
-		return (e);
+		return (error);
 }
 
 
@@ -745,17 +713,17 @@ static gint A_GetSMSCenter(gpointer data)
 
 static gint A_SetSMSCenter(gpointer data)
 {
-	D_SMSCenter *c = (D_SMSCenter *) data;
+	D_SMSCenter *smsc = (D_SMSCenter *) data;
 	GSM_Error error;
 	GSM_Data tmp_gdat;
 
-	error = c->status = GE_UNKNOWN;
-	if (c) {
+	error = smsc->status = GE_UNKNOWN;
+	if (smsc) {
 		GSM_DataClear(&tmp_gdat);
-		tmp_gdat.MessageCenter = c->center;
+		tmp_gdat.MessageCenter = smsc->center;
 		pthread_mutex_lock(&smsCenterMutex);
-		error = c->status = SM_Functions(GOP_GetSMSCenter, &tmp_gdat, &statemachine);
-		g_free(c);
+		error = smsc->status = SM_Functions(GOP_GetSMSCenter, &tmp_gdat, &statemachine);
+		g_free(smsc);
 		pthread_cond_signal(&smsCenterCond);
 		pthread_mutex_unlock(&smsCenterMutex);
 	}
@@ -1057,6 +1025,7 @@ void *GUI_Connect(void *a)
 	GSM_RFUnits rf_units = GRF_Percentage;
 	GSM_BatteryUnits batt_units = GBU_Percentage;
 	GSM_DateTime Alarm;
+	time_t newtime, oldtime;
 /*
 	SMS_Folder *SMSFolder;
 	SMS_FolderList *SMSFolderList;
@@ -1089,6 +1058,8 @@ void *GUI_Connect(void *a)
 	gdat.BatteryLevel = &phoneMonitor.batteryLevel;
 	gdat.DateTime = &Alarm;
 	gdat.IncomingCallNr = number;
+	oldtime = time(&oldtime);
+	oldtime += 2;
 
 	while (1) {
 		phoneMonitor.working = NULL;
@@ -1117,20 +1088,6 @@ void *GUI_Connect(void *a)
 			phoneMonitor.alarm = TRUE;
 		else
 			phoneMonitor.alarm = FALSE;
-
-		if ((GetFolderChanges(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS)))
-		    == GE_NONE) {
-			dprintf("old UR: %i, new UR: %i, old total: %i, new total: %i\n",
-				phoneMonitor.sms.unRead, gdat.SMSStatus->Unread,
-				phoneMonitor.sms.number, gdat.SMSStatus->Number);
-			phoneMonitor.sms.changed += gdat.SMSStatus->Changed;
-			if (gdat.SMSStatus->Changed) {
-				phoneMonitor.working = _("Refreshing SMSes...");
-				RefreshSMS(gdat.SMSStatus->Number);
-				phoneMonitor.working = NULL;
-			}
-			phoneMonitor.sms.unRead = gdat.SMSStatus->Unread;
-		}
 
 		if (SM_Functions(GOP_GetIncomingCallNr, &gdat, &statemachine) == GE_NONE) {
 #ifdef XDEBUG
@@ -1183,5 +1140,23 @@ void *GUI_Connect(void *a)
 						event->event, error);
 			g_free(event);
 		}
+		newtime = time(&newtime);
+		if (newtime < oldtime + 2) continue;
+		oldtime = newtime;
+
+		if ((GetFolderChanges(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS)))
+		    == GE_NONE) {
+			dprintf("old UR: %i, new UR: %i, old total: %i, new total: %i\n",
+				phoneMonitor.sms.unRead, gdat.SMSStatus->Unread,
+				phoneMonitor.sms.number, gdat.SMSStatus->Number);
+			phoneMonitor.sms.changed += gdat.SMSStatus->Changed;
+			if (gdat.SMSStatus->Changed) {
+				phoneMonitor.working = _("Refreshing SMSes...");
+				RefreshSMS(gdat.SMSStatus->Number);
+				phoneMonitor.working = NULL;
+			}
+			phoneMonitor.sms.unRead = gdat.SMSStatus->Unread;
+		}
+
 	}
 }

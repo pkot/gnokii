@@ -107,8 +107,8 @@ typedef struct {
 	gint max;
 	GSM_MemoryType type;
 	gint status;
-	 gint(*InsertEntry) (GSM_PhonebookEntry *);
-	 gint(*ReadFailed) (gint);
+	gint(*InsertEntry) (GSM_PhonebookEntry *);
+	gint(*ReadFailed) (gint);
 } D_MemoryLocationAll;
 
 typedef struct {

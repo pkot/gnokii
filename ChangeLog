@@ -13,6 +13,13 @@
     o other Phonebook fixes                            (Markus Plail)
  * 6110 series fixes
     o IMEI correctly read                              (Markus Plail)
+ * libsms updates
+    o support for the remote number when receiving the message
+                                                       (Markus Plail)
+ * xgnokii updates
+    o cleanups                                         (Markus Plail)
+    o Phonebook got back to work                       (Markus Plail)
+    o Calendar got back to work                        (Markus Plail)
 
 0.4.0pre15
 ==========

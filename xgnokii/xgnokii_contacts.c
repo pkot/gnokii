@@ -1965,7 +1965,6 @@ void GUI_RefreshContacts(void)
 		pbEntry = g_ptr_array_index(contactsMemory, i);
 		if (pbEntry->status != E_Empty && pbEntry->status != E_Deleted) {
 			row[0] = pbEntry->entry.Name;
-
 			row[1] = pbEntry->entry.Number;
 
 			if (pbEntry->entry.MemoryType == GMT_ME)
