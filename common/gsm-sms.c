@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.4  2001-11-14 11:26:18  pkot
+  Revision 1.5  2001-11-14 14:26:18  pkot
+  Changed offset of DCS field to the right value in 6210/7110
+
+  Revision 1.4  2001/11/14 11:26:18  pkot
   Getting SMS in 6210/7110 does finally work in some cases :)
 
   Revision 1.3  2001/11/13 16:12:20  pkot
@@ -642,7 +645,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 
 	/* Data Coding Scheme */
 	if (SMS->Type != SMS_Delivery_Report)
-		SMS->DCS.Type = message[18 + DataOffset[SMS->Type]];
+		SMS->DCS.Type = message[13 + DataOffset[SMS->Type]];
 	else
 		SMS->DCS.Type = 0;
 
