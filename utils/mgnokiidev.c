@@ -72,10 +72,10 @@ int main(int argc, char *argv[])
 
   /* Now become root */
   setuid(0);
-	
+
   /* Change group of slave pty to group of mgnokiidev */
-  err = chown(dev_name, -1, getgid());
-	
+  err = chown(dev_name, -1, getegid());
+
   if (err < 0) {
     perror("mgnokiidev - chown: ");
     exit (-2);
