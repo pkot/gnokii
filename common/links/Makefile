@@ -21,6 +21,7 @@ OBJS =	fbus.o \
 	fbus-phonet.o \
 	cbus.o \
 	atbus.o \
+	fbus-3110.o \
 	utils.o
 
 all: LINKS.o
