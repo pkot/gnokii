@@ -93,8 +93,10 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 }
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
-#define STORE2(a, b, c) if (BEGINS(a)) { c; strcpy(b, buf+strlen(a)+1); continue; }
+#define STORE3(a, b) if (BEGINS(a)) { strcpy(b, buf+strlen(a)); }
+#define STORE2(a, b, c) if (BEGINS(a)) { c; strcpy(b, buf+strlen(a)); continue; }
 #define STORE(a, b) STORE2(a, b, (void) 0)
+#define STOREINT(a, b) if (BEGINS(a)) { b = atoi(buf+strlen(a)); continue; }
 
 #define STORESUB(a, c) STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
 				entry->subentries[entry->subentries_count].entry_type = c);
@@ -109,7 +111,9 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 {
 	char buf[10240];
+	char memloc[10];
 
+	memset(memloc, 0, 10);
 	while (1) {
 		if (!fgets(buf, 1024, f))
 			return -1;
@@ -129,6 +133,16 @@ API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 		STORESUB("EMAIL;INTERNET:", GN_PHONEBOOK_ENTRY_Email);
 		STORESUB("ADR;HOME:", GN_PHONEBOOK_ENTRY_Postal);
 		STORESUB("NOTE:", GN_PHONEBOOK_ENTRY_Note);
+
+		STORE3("X_GSM_STORE_AT:", memloc);
+		/* if the field is present and correctly formed */
+		if (memloc && (strlen(memloc) > 2)) {
+			entry->location = atoi(memloc + 2);
+			memloc[2] = 0;
+			entry->memory_type = gn_str2memory_type(memloc);
+			continue;
+		}
+		STOREINT("X_GSM_CALLERGROUP:", entry->caller_group);
 
 		STORENUM("TEL;HOME:", GN_PHONEBOOK_NUMBER_Home);
 		STORENUM("TEL;CELL:", GN_PHONEBOOK_NUMBER_Mobile);
