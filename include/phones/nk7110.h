@@ -57,6 +57,7 @@ typedef enum {
 #define NK7110_MSG_CLOCK	0x19	/* Date & alarm */
 #define NK7110_MSG_IDENTITY	0x1b	/* Brief product info */
 #define NK7110_MSG_RINGTONE	0x1f	/* Ringtone handling */
+#define NK7110_MSG_PROFILE	0x39	/* Profile handling */
 #define NK7110_MSG_WAP		0x3f	/* WAP */
 #define NK7110_MSG_SECURITY	0x40	/* Security */
 #define NK7110_MSG_STLOGO	0x7a	/* Startup logo */

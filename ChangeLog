@@ -9,8 +9,11 @@
  * 7110 series updates
     o PlayTone implemented                         (BORBELY Zoltan)
     o GetLocksInfo implemented                     (BORBELY Zoltan)
+    o GetProfile implemented                       (BORBELY Zoltan)
  * libgnokii changes
     o Tomi Ollila's readmidi.c added               (BORBELY Zoltan)
+ * Documentation updates
+    o nk7110 profile reading messages updated      (BORBELY Zoltan)
 
 0.5.4
 =====

@@ -100,6 +100,7 @@ static gn_error NK7110_GetSMSStatus(gn_data *data, struct gn_statemachine *state
 static gn_error NK7110_GetSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press);
 static gn_error NK7110_SetRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetProfile(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK7110_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetWAPBookmark(gn_data *data, struct gn_statemachine *state);
@@ -120,6 +121,7 @@ static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message,
 static gn_error NK7110_IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_IncomingKeypress(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingProfile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static int get_memory_type(gn_memory_type memory_type);
 static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type);
@@ -138,6 +140,7 @@ static gn_incoming_function_type nk7110_incoming_functions[] = {
 	{ NK7110_MSG_SECURITY,		NK7110_IncomingSecurity },
 	{ NK7110_MSG_WAP,		NK7110_IncomingWAP },
 	{ NK7110_MSG_KEYPRESS_RESP,	NK7110_IncomingKeypress },
+	{ NK7110_MSG_PROFILE,		NK7110_IncomingProfile },
 	{ 0, NULL }
 };
 
@@ -279,6 +282,8 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 		return pnok_play_tone(data, state);
 	case GN_OP_GetLocksInfo:
 		return pnok_get_locks_info(data, state);
+	case GN_OP_GetProfile:
+		return NK7110_GetProfile(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -2469,6 +2474,90 @@ static gn_error NK7110_PressOrReleaseKey(gn_data *data, struct gn_statemachine *
 		return NK7110_PressKey(data, state);
 	else
 		return NK7110_ReleaseKey(data, state);
+}
+
+/*****************************/
+/********** PROFILE **********/
+/*****************************/
+static gn_error NK7110_IncomingProfile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	switch (message[3]) {
+	case 0x02:
+		if (!data->profile) return GN_ERR_INTERNALERROR;
+		switch (message[6]) {
+		case 0xff:
+			char_unicode_decode(data->profile->name, message + 10, message[9]);
+			data->profile->default_name = -1; //!!!FIXME
+			break;
+		case 0x00:
+			data->profile->keypad_tone = (unsigned char)(message[10] - 1);
+			break;
+		case 0x01:
+			//!!!FIXME
+			data->profile->lights = message[10];
+			break;
+		case 0x02:
+			switch (message[10]) {
+			case 0x00: data->profile->call_alert = GN_PROFILE_CALLALERT_Ringing; break;
+			case 0x01: data->profile->call_alert = GN_PROFILE_CALLALERT_Ascending; break;
+			case 0x02: data->profile->call_alert = GN_PROFILE_CALLALERT_RingOnce; break;
+			case 0x03: data->profile->call_alert = GN_PROFILE_CALLALERT_BeepOnce; break;
+			case 0x04: data->profile->call_alert = GN_PROFILE_CALLALERT_CallerGroups; break;
+			case 0x05: data->profile->call_alert = GN_PROFILE_CALLALERT_Off; break;
+			default: return GN_ERR_UNHANDLEDFRAME; break;
+			}
+			break;
+		case 0x03:
+			//!!!FIXME: check it!
+			data->profile->ringtone = message[10];
+			break;
+		case 0x04:
+			data->profile->volume = message[10] + 6;
+			break;
+		case 0x05:
+			data->profile->message_tone = message[10];
+			break;
+		case 0x06:
+			data->profile->vibration = message[10];
+			break;
+		case 0x07:
+			data->profile->warning_tone = message[10] ? GN_PROFILE_WARNING_On : GN_PROFILE_WARNING_Off;
+			break;
+		case 0x08:
+			data->profile->caller_groups = message[10];
+			break;
+		case 0x09:
+			data->profile->automatic_answer = message[10];
+			break;
+		default:
+			return GN_ERR_UNHANDLEDFRAME;
+			break;
+		}
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x39 (%d)\n", message[3]);
+		return GN_ERR_UNHANDLEDFRAME;
+		break;
+	}
+	return GN_ERR_NONE;
+}
+
+static gn_error NK7110_GetProfile(gn_data *data, struct gn_statemachine *state)
+{
+	char req[] = {FBUS_FRAME_HEADER, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00};
+	unsigned char i;
+	gn_error err;
+
+	if (!data->profile) return GN_ERR_INTERNALERROR;
+
+	req[7] = data->profile->number + 1;
+	for (i = 0xff; i != 0x0a; i++) {
+		req[8] = i;
+		if (sm_message_send(9, NK7110_MSG_PROFILE, req, state)) return GN_ERR_NOTREADY;
+		if ((err = sm_block(NK7110_MSG_PROFILE, data, state)) != GN_ERR_NONE) return err;
+	}
+
+	return GN_ERR_NONE;
 }
 
 

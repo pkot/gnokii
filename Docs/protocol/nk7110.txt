@@ -342,12 +342,73 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
 ?   s Get ringtone          { 0x0122, 0x00, location}
 ?   r Get ringtone          { 0x0123, 0x00, location, name(Unicode), 0x00,...,0x00, 0x02,0xFC,0x09(ringtone contenst)}
 0x39:
-    s get profile feature ? { 0x0101, 0x01, 0x01, 0x01, number1, number2}
+    s get profile feature   { 0x0101, 0x01, 0x01, 0x01, number1, number2}
                             where number1: from 0x00 to 0x07 (for each profile ?)
                                   number2: 0x00 - 0x09, 0x0A, 0x16 - 0x19, 0x1a - 0x1f, 0x20 - 0x29, 0x2a - 0x2c, 0xff
-    r get profile feature ? { 0x0102, 0x01, number1, number2, block...}
-                            for number2==0xff: block: 0x01, 0x01, length, name(Unicode), 0x00, 0x00
-
+				     where 0x00: keypad tones
+					   0x02: incoming call alert
+				           0x03: ringtone number
+					   0x04: ringing volume
+					   0x05: message alert tone
+					   0x06: vibration
+					   0x07: warning tones
+					   0x08: caller groups alert for
+					   0x09: automatic answer
+					   0xff: name
+    r get profile feature   { 0x0102, 0x01, number1, number2, block...}
+                            for number2==0xff: (Profile Name)
+                              block: 0x01, 0x01, length, name(Unicode), 0x00, 0x00
+                            for number2==0x00: (Keypad Tones)
+                              block: 0x01, 0x01, 0x01, Type, 0x01
+                              where: Type : 0x00 = Off
+                                            0x01 to 0x03 = Level1 .. Level3
+                            for number2==0x02: (Incoming Call Alert)
+                              block: 0x01, 0x01, 0x01, Type, 0x01
+                              where: Type : 0x00 = Ringing
+                                            0x01 = Ascending
+                                            0x02 = Ring Once
+                                            0x03 = Beep Once
+                                            0x04 = Caller Groups?
+                                            0x05 = Off
+                            for number2==0x03: (Ringtone Number)
+                              block: 0x01, 0x01, 0x01, Number, 0x01
+                              where: Number : 0x40 to 0x62 - gives number of factory ringtone. The number of menu is
+                                              obtained by doing (Number - 0x3f);
+                              where: Number : 0x89 to 0x8d - gives number of uploaded ringtone. The number of menu is
+                                              obtained by doing (Number - 0x65),while the uploaded ringtone number is
+                                              obtained by doing (Number - 0x88).
+                            for number2==0x04: (Ringing volume)
+                              block: 0x01, 0x??, 0x??, Volume, 0x01
+                              where: Volume : 0 = Level1 .. to 4 = Level5
+                            for number2==0x05: (Message Alert Tone)
+                              block: 0x01, 0x01, 0x??, Type, 0x01
+                              where: Type : 0x00 = Off
+                                            0x01 = Standard
+                                            0x02 = Special
+                                            0x03 = Beep Once
+                                            0x04 = Ascending
+                            for number2==0x06: (Vibration)
+                              block: 0x01, 0x??, 0x??, Switch, 0x01
+                              where: Switch : 0 = Off, 1 = On
+                            for number2==0x07: (Warning Tones)
+                              block: 0x01, 0x??, 0x??, Switch, 0x01
+                              where: Switch : 0 = Off, 1 = On
+                            for number2==0x08: (Caller groups Alert for)
+                              block: 0x01, 0x??, 0x??, Callers, 0x01
+                              where: Callers : 0xff = All calls alert (Read below *)
+                                               0x01 = Family
+                                               0x02 = VIP
+                                               0x04 = Friends
+                                               0x08 = Colleagues
+                                               0x10 = Others
+                                     All logical OR among groups are valid, so if you select from one phone's profile
+                                     alert for Friends and Collegues, a 0x0c will return (because 0x04 OR 0x08 = 0x0c).
+                                 (*) If Callers==0xff, means "Alert for All calls". Then, in this case, you don't
+                                     need to read other groups selection.
+                            for number2==0x09: (Automatic answer)
+                              block: 0x01, 0x??, 0x??, Switch, 0x01
+                              where: Switch : 0 = Off, 1 = On
+                                N.B. This feature is valid for Handsfree and Headset profiles only!
     s ???                   { 0x0101, 0x04, 0x01, 0x01, 0xff, 0x03 }
     r ???                   { 0x0102, 0x01, 0x02, 0x03, 0x01, 0x01, 0x01, 0x85/0x087 }
 
