@@ -43,6 +43,7 @@
 #include "gsm-common.h"
 #include "fbus-6110.h"
 #include "fbus-6110-auth.h"
+#include "fbus-6110-ringtones.h"
 #include "gsm-networks.h"
 
 /* Global variables used by code in gsm-api.c to expose the functions
@@ -608,6 +609,8 @@ void FB61_ThreadLoop(void)
   //    FB61_GetSMSCenter(1);
 
   // 	FB61_GetCalendarNote(1);
+
+  //    FB61_SendRingtone("GNOKIItune", 250);
 
   idle_timer=0;
 

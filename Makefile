@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.0-pre5
+VERSION = 0.3.0-pre6
 
 #
 # Compiler to use.
@@ -78,7 +78,7 @@ GTKLDFLAGS=`gtk-config --libs`
 #
 
 COMMON=-Wall -g -O0 \
-       ${MODEL} ${PORT}  \
+       ${MODEL} ${PORT} \
        ${INFRARED} \
        ${GETTEXT} \
        ${DEBUG} \
@@ -102,7 +102,7 @@ LDFLAGS = -lpthread ${GTKLDFLAGS}
 
 COMMON_OBJS = gsm-api.o \
               fbus-3810.o \
-              fbus-6110.o fbus-6110-auth.o \
+              fbus-6110.o fbus-6110-auth.o fbus-6110-ringtones.o \
               gsm-networks.o cfgreader.o
 
 #
@@ -156,5 +156,6 @@ gsm-api.o: gsm-api.c fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-3810.o: fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-6110.o: fbus-6110.c fbus-6110.h misc.h gsm-common.h gsm-networks.h
 fbus-6110-auth.o: fbus-6110-auth.c fbus-6110-auth.h
+fbus-6110-ringtones.o: fbus-6110-ringtones.c fbus-6110-ringtones.h
 xgnokii.o: xgnokii.c gsm-api.c gsm-api.h misc.h gsm-common.h
 cfgreader.o: cfgreader.c cfgreader.h
