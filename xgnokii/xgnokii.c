@@ -1751,7 +1751,6 @@ static GtkWidget *CreateOptionsDialog (void)
   gtk_widget_show (configDialogData.phone.imei);
 
   /***  Alarm notebook  ***/
-
   xgnokiiConfig.alarmSupported = TRUE;
 
   frame = gtk_frame_new (_("Alarm setting"));

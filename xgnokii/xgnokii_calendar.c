@@ -54,9 +54,41 @@ inline void GUI_ShowCalendar ()
   gtk_widget_show (GUI_CalendarWindow);
 }
 
+
+static gint InsertCalendarEntry (GSM_CalendarNote *note)
+{
+  g_print ("%d: %s\n", note->Location, note->Text);
+  return (GE_NONE);
+}
+
+
+static inline gint ReadCalendarFailed (gint i)
+{
+  return (0);
+}
+
+ 
+static void ReadCalNotes (void)
+{
+  PhoneEvent *e;
+  D_CalendarNoteAll *cna;
+  
+  gtk_clist_clear (GTK_CLIST (cal.notesClist));
+  
+  cna = (D_CalendarNoteAll *) g_malloc (sizeof (D_CalendarNoteAll));
+  cna->InsertEntry = InsertCalendarEntry;
+  cna->ReadFailed = ReadCalendarFailed;
+  
+  e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
+  e->event = Event_GetCalendarNoteAll;
+  e->data = cna;
+  GUI_InsertEvent (e);
+}
+
+
 static GtkItemFactoryEntry menu_items[] = {
   { NULL,		NULL,		NULL, 0, "<Branch>"},
-  { NULL,		"<control>R",	NULL, 0, NULL},
+  { NULL,		"<control>R",	ReadCalNotes, 0, NULL},
   { NULL,		"<control>S",	NULL, 0, NULL},
   { "/File/sep1",	NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>I",	NULL, 0, NULL},
@@ -143,7 +175,7 @@ void GUI_CreateCalendarWindow ()
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Read from phone"), NULL,
                            NewPixmap(Read_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) ReadCalNotes, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Save to phone"), NULL,
                            NewPixmap(Send_xpm, GUI_CalendarWindow->window,
                            &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),

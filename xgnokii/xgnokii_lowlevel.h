@@ -35,6 +35,8 @@ typedef enum {
   Event_GetMemoryLocationAll,
   Event_WriteMemoryLocation,
   Event_WriteMemoryLocationAll,
+  Event_GetCalendarNote,
+  Event_GetCalendarNoteAll,
   Event_GetCallerGroup,
   Event_SendCallerGroup,
   Event_GetSMSCenter,
@@ -104,6 +106,17 @@ typedef struct {
 } D_MemoryLocationAll;
 
 typedef struct {
+  GSM_CalendarNote *entry;
+  gint status;
+} D_CalendarNote;
+
+typedef struct {
+  gint status;
+  gint (*InsertEntry)(GSM_CalendarNote *);
+  gint (*ReadFailed)(gint);
+} D_CalendarNoteAll;
+
+typedef struct {
   gfloat rfLevel;
   gfloat batteryLevel;
   GSM_PowerSource powerSource;
@@ -146,6 +159,8 @@ extern pthread_t monitor_th;
 extern PhoneMonitor phoneMonitor;
 extern pthread_mutex_t memoryMutex;
 extern pthread_cond_t  memoryCond;
+extern pthread_mutex_t calendarMutex;
+extern pthread_cond_t  calendarCond;
 extern pthread_mutex_t smsMutex;
 extern pthread_mutex_t sendSMSMutex;
 extern pthread_cond_t  sendSMSCond;

@@ -141,7 +141,7 @@ bool KeyboardSupported (const gchar *num)
   {
     if (strcmp (num, models[i].number) == 0)
     {
-      if (i > 10 && i < 18)
+      if (i > 7 && i < 18)
         return TRUE;
       else
         return FALSE;

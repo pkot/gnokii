@@ -29,7 +29,7 @@ computer and more other features.
 %setup -q
 
 %build
-./configure --prefix=/usr --with-x #--enable-debug --enable-rlpdebug
+./configure --prefix=/usr --with-x --enable-nls #--enable-debug --enable-rlpdebug
 make
 
 %install
@@ -39,7 +39,7 @@ make prefix=${RPM_BUILD_ROOT}/usr install
 
 mkdir -p ${RPM_BUILD_ROOT}/etc/
 
-sed 's#/usr/local/sbin/#/usr/sbin/#' <Docs/sample/sample.gnokiirc >${RPM_BUILD_ROOT}/etc/gnokiirc
+sed 's#/usr/local/sbin/#/usr/sbin/#' <Docs/sample.gnokiirc >${RPM_BUILD_ROOT}/etc/gnokiirc
 
 %pre
 /usr/sbin/groupadd -r -f gnokii >/dev/null 2>&1
@@ -52,9 +52,9 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc COPYING INSTALL TODO Docs/CREDITS Docs/DataCalls-QuickStart Docs/README
-%doc Docs/README-3810 Docs/README-6110 Docs/README-WIN32 Docs/sample/sample.gnokiirc
-%doc Docs/gettext-howto gnokii.nol Docs/gnokii-ir-howto Docs/packaging-howto
+%doc Docs/CREDITS Docs/DataCalls-QuickStart Docs/README
+%doc Docs/README-3810 Docs/README-6110 Docs/README-WIN32 Docs/sample.gnokiirc
+%doc Docs/gettext-howto Docs/gnokii.nol Docs/gnokii-ir-howto Docs/packaging-howto
 %attr(0750, root, gnokii) /usr/bin/gnokii
 %attr(0750, root, gnokii) /usr/sbin/gnokiid
 %attr(4750, root, gnokii) /usr/sbin/mgnokiidev

@@ -42,9 +42,15 @@
 * Sat May 13 20:58:39 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
 - TODO file renewed! Please take a note.
 
-* Mon May 15 19:40:47 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz
+* Mon May 15 19:40:47 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
 - checking for cpp added.
 
-* Tue May 16 00:37:50 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz
+* Tue May 16 00:37:50 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
 - TODO file updated.
 - FreeBSD build should be OK, waiting for reports :-))
+
+* Wed May 17 17:56:07 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- Removed checking for cp command in configure.in and Makefile.global.in.
+
+* Wed May 17 22:22:44 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz>
+- gnokii.nol moved to Docs directory

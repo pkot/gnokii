@@ -10,10 +10,9 @@
   do not hesitate to send me the patch with your name :-) If you do not have
   nothing, you should do something or your name will not be there :-))
 - test RLP setup as per RLP-guide in Docs.
-- Marcin's profile and dealer note patches.
-- update Docs/gettext-howto
+- Marcin's setprofile
 - test all gnokii options and xgnokii
-
+- --disable-debug should really disable debug :-)
 
 0.4.0 THINGS:
 

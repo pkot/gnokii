@@ -30,6 +30,8 @@ pthread_t monitor_th;
 PhoneMonitor phoneMonitor;
 pthread_mutex_t memoryMutex;
 pthread_cond_t  memoryCond;
+pthread_mutex_t calendarMutex;
+pthread_cond_t  calendarCond;
 pthread_mutex_t smsMutex;
 pthread_mutex_t sendSMSMutex;
 pthread_cond_t  sendSMSCond;
@@ -197,6 +199,8 @@ void GUI_InitPhoneMonitor (void)
   *phoneMonitor.netmonitor.screen4 = *phoneMonitor.netmonitor.screen5 = '\0';
   pthread_mutex_init (&memoryMutex, NULL);
   pthread_cond_init (&memoryCond, NULL);
+  pthread_mutex_init (&calendarMutex, NULL);
+  pthread_cond_init (&calendarCond, NULL);
   pthread_mutex_init (&smsMutex, NULL);
   pthread_mutex_init (&sendSMSMutex, NULL);
   pthread_cond_init (&sendSMSCond, NULL);
@@ -415,6 +419,53 @@ static gint A_WriteMemoryLocationAll (gpointer data)
   pthread_cond_signal (&memoryCond);
   pthread_mutex_unlock (&memoryMutex); */
   return (error);
+}
+
+
+static gint A_GetCalendarNote (gpointer data)
+{
+  GSM_Error error;
+  D_CalendarNote *cn = (D_CalendarNote *) data;
+
+  error = cn->status = GE_UNKNOWN;
+
+  if (cn)
+  {
+    pthread_mutex_lock (&calendarMutex);
+    error = cn->status = GSM->GetCalendarNote (cn->entry);
+    pthread_cond_signal (&calendarCond);
+    pthread_mutex_unlock (&calendarMutex);
+  }
+
+  return (error);
+}
+
+
+static gint A_GetCalendarNoteAll (gpointer data)
+{
+  GSM_CalendarNote entry;
+  D_CalendarNoteAll *cna = (D_CalendarNoteAll *) data;
+  register gint i = 1;
+
+  pthread_mutex_lock (&calendarMutex);
+  while (1)
+  {
+    GSM_Error e;
+    entry.Location = i++;
+
+    if ((e = GSM->GetCalendarNote (&entry)) != GE_NONE)
+    {
+      g_print ("%d\n", e);
+      break;
+    }
+
+    if (cna->InsertEntry (&entry) != GE_NONE)
+      break;
+  }
+
+  pthread_mutex_unlock (&calendarMutex);
+  g_free (cna);
+  return (GE_NONE);
 }
 
 
@@ -699,6 +750,8 @@ gint (*DoAction[])(gpointer) = {
   A_GetMemoryLocationAll,
   A_WriteMemoryLocation,
   A_WriteMemoryLocationAll,
+  A_GetCalendarNote,
+  A_GetCalendarNoteAll,
   A_GetCallerGroup,
   A_SendCallerGroup,
   A_GetSMSCenter,

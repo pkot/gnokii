@@ -48,7 +48,12 @@ install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -m 755 -s xgnokii $(bindir)
 	$(INSTALL) -d $(xgnokii_libdir)/help
-	$(CP) -a $(HELP_DIR)/* $(xgnokii_libdir)/help/
+	( cd $(HELP_DIR); \
+	  find ./ -type d \! -path "*CVS*" \
+	       -exec $(INSTALL) -d $(xgnokii_libdir)/help/{} \; ; \
+	  find ./ -type f \! -path "*CVS*" \
+	       -exec $(INSTALL) -m 0444 {} $(xgnokii_libdir)/help/{} \; \
+	)
 	(cd $(xgnokii_libdir)/help; ln -s en_US C; ln -s en_US POSIX)
 	$(INSTALL) -d $(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6110.xpm $(xgnokii_libdir)/xpm

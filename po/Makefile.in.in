@@ -27,7 +27,7 @@
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 @SET_MAKE@
 
 srcdir = @srcdir@
@@ -107,7 +107,7 @@ install-exec:
 install-data: install-data-@USE_NLS@
 install-data-no: all
 install-data-yes: all
-	/bin/sh $(top_srcdir)/mkinstalldirs $(datadir); \
+	${SHELL} $(top_srcdir)/mkinstalldirs $(datadir); \
 	catalogs='$(CATALOGS)'; \
 	for cat in $$catalogs; do \
 	  case "$$cat" in \
@@ -116,7 +116,7 @@ install-data-yes: all
 	  esac; \
 	  lang=`echo $$cat | sed 's/$(CATOBJEXT)$$//'`; \
 	  dir=$$destdir/$$lang/LC_MESSAGES; \
-	  /bin/sh $(top_srcdir)/mkinstalldirs $$dir; \
+	  ${SHELL} $(top_srcdir)/mkinstalldirs $$dir; \
 	  if test -r $$cat; then \
 	    $(INSTALL_DATA) $$cat $$dir/$(PACKAGE)$(INSTOBJEXT); \
 	    echo "installing $$cat as $$dir/$(PACKAGE)$(INSTOBJEXT)"; \

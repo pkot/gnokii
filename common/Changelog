@@ -76,3 +76,5 @@
 * Wed May 17 01:00:00 BST 2000 Chris Kemp <ck231@cam.ac.uk>
 - Altered the way the fbus-6110 state machine syncs to improve rlp reliablity.
 
+* Wed May 17 19:35:40 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- SMS changes from Pawel

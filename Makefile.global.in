@@ -8,7 +8,7 @@
 
 
 
-SHELL		= /bin/sh
+SHELL		= @SHELL@
 
 LD		= @LD@
 LDREL		= -r
@@ -41,7 +41,6 @@ TEXT_MODE	= 0444
 
 INSTALL		= @INSTALL@
 RM		= @RM@ -f
-CP		= @CP@
 MAKE		= @MAKE@
 XGETTEXT	= @XGETTEXT@
 MSGFMT		= @MSGFMT@
