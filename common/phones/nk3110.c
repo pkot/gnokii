@@ -798,11 +798,10 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 		return GE_INTERNALERROR;
 	}
 
-	if (data->RawData) free(data->RawData);
-	data->RawData = calloc(sizeof(GSM_RawData), 1);
+	if (!data->RawData) return GE_INTERNALERROR;
 
 	data->RawData->Length = length;
-	data->RawData->Data = malloc(length);
+	data->RawData->Data = calloc(length, 1);
 	memcpy(data->RawData->Data, message, length);
 
 	/* All these moved to gsm-sms.c

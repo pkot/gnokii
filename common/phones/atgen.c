@@ -876,7 +876,7 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 	if (buf.line1 == NULL)
 		return GE_INTERNALERROR;
 
-	if (!data->RawData) data->RawData = calloc(sizeof(GSM_RawData), 1);
+	if (!data->RawData) return GE_INTERNALERROR;
 	data->RawData->Length = strlen(buf.line3) / 2 + 1;
 	data->RawData->Data = calloc(data->RawData->Length, 1);
 	dprintf("%s\n", buf.line3);

@@ -725,24 +725,6 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 		/* Short Message status */
 		data->SMSMessage->Status = message[4];
-		dprintf("\tStatus: ");
-		switch (data->SMSMessage->Status) {
-		case SMS_Read:
-			dprintf("READ\n");
-			break;
-		case SMS_Unread:
-			dprintf("UNREAD\n");
-			break;
-		case SMS_Sent:
-			dprintf("SENT\n");
-			break;
-		case SMS_Unsent:
-			dprintf("UNSENT\n");
-			break;
-		default:
-			dprintf("UNKNOWN\n");
-			break;
-		}
 
 		/* See if message# is given back by phone. If not and status is unread */
 		/* we want it, if status is not unread it's a "random" message given back */
@@ -757,14 +739,12 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			if (!found && data->SMSMessage->Status != SMS_Unread) return GE_INVALIDSMSLOCATION;
 		}
 
-		if (!data->RawData) {
-			data->RawData = (GSM_RawData *)malloc(sizeof(GSM_RawData));
-		}
+		if (!data->RawData) return GE_INTERNALERROR;
 
 		/* Skip the frame header */
-		data->RawData->Data = message + nk7110_layout.ReadHeader;
 		data->RawData->Length = length - nk7110_layout.ReadHeader;
-		dprintf("Everything set\n");
+		data->RawData->Data = calloc(data->RawData->Length, 1);
+		memcpy(data->RawData->Data, message + nk7110_layout.ReadHeader, data->RawData->Length);
 
 		break;
 
@@ -994,14 +974,18 @@ static GSM_Error P7110_GetIncomingSMS(GSM_Data *data, GSM_Statemachine *state)
 	SMS_Folder SMSFolder;
 	GSM_SMSMemoryStatus SMSStatus;
 	GSM_SMSMessage SMS;
+	GSM_RawData rawdata;
 	int i, j;
 
 	data->SMSFolder = &SMSFolder;
 	data->SMSStatus = &SMSStatus;
 	data->SMSMessage = &SMS;
+	data->RawData = &rawdata;
 
 	/* Mark reregistering */
 	SMSLoop = true;
+
+	memset(&rawdata, sizeof(GSM_RawData), 0);
 
 	/* Check overall SMS Status */
 	error = P7110_GetSMSStatus(data, state);
@@ -1022,6 +1006,10 @@ static GSM_Error P7110_GetIncomingSMS(GSM_Data *data, GSM_Statemachine *state)
 		dprintf("Looking for unread (%d)\n", SMSStatus.Unread);
 		for (i = 0; i < SMSStatus.Unread; i++) {
 			error = P7110_FindUnreadSMS(data, state, &last, SMSFolder.locations, SMSFolder.number);
+			if (data->RawData->Data) {
+				free(data->RawData->Data);
+				data->RawData->Data = NULL;
+			}
 			if (error != GE_NONE) return error;
 		}
 	}
@@ -1039,6 +1027,10 @@ static GSM_Error P7110_GetIncomingSMS(GSM_Data *data, GSM_Statemachine *state)
 		dprintf("Read(%d)\n", SMS.Number);
 		if (data->OnSMS) data->OnSMS(&SMS);
 		P7110_DeleteSMS(data, state);
+		if (data->RawData->Data) {
+			free(data->RawData->Data);
+			data->RawData->Data = NULL;
+		}
 	}
 
 	if (NewSMS) {

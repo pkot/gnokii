@@ -978,9 +978,9 @@ static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x07, 0x02 /* Unknown */, 0x00 /* Location */, 0x01, 0x64 };
 
-	req[5] = data->SMSMessage->Number;
-
 	if (!data->SMSMessage) return GE_INTERNALERROR;
+
+	req[5] = data->SMSMessage->Number;
 	if (SM_SendMessage(state, 8, 0x02, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
@@ -1030,36 +1030,16 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 
 		/* Short Message status */
 		data->SMSMessage->Status = message[4];
-		dprintf("\tStatus: ");
-		switch (data->SMSMessage->Status) {
-		case SMS_Read:
-			dprintf("READ\n");
-			break;
-		case SMS_Unread:
-			dprintf("UNREAD\n");
-			break;
-		case SMS_Sent:
-			dprintf("SENT\n");
-			break;
-		case SMS_Unsent:
-			dprintf("UNSENT\n");
-			break;
-		default:
-			dprintf("UNKNOWN\n");
-			break;
-		}
+		/* Short Message number */
+		data->SMSMessage->Number = message[6];
 
 		/* Short Message status */
-		if (!data->RawData) {
-			data->RawData = (GSM_RawData *)calloc(sizeof(GSM_RawData), 0);
-		}
+		if (!data->RawData) return GE_INTERNALERROR;
 
 		/* Skip the frame header */
-/*		data->RawData->Data = message + nk6100_layout.ReadHeader; */
 		data->RawData->Length = length - nk6100_layout.ReadHeader;
-		data->RawData->Data = calloc(data->RawData->Length, 0);
+		data->RawData->Data = calloc(data->RawData->Length, 1);
 		memcpy(data->RawData->Data, message + nk6100_layout.ReadHeader, data->RawData->Length);
-		dprintf("Everything set. Length: %d\n", data->RawData->Length);
 
 		break;
 
