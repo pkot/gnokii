@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.125  2001-02-03 23:56:12  chris
+  Revision 1.126  2001-02-06 14:35:55  pkot
+  Few more cleanups on authentication
+
+  Revision 1.125  2001/02/03 23:56:12  chris
   Start of work on irda support (now we just need fbus-irda.c!)
   Proper unicode support in 7110 code (from pkot)
 
@@ -852,10 +855,10 @@ static void FB61_Authentication()
   
 					 0x00, 0x00, 0x00, 0x00};
 
-	usleep(100); FB61_GetPhoneInfo();
+	usleep(100); FB61_GetPhoneInfo(); usleep(100);
 
 	if (*Model && (GetPhoneModel(Model)->flags & PM_AUTHENTICATION)) {
-		usleep(100); FB61_TX_SendMessage(7, 0x02, connect1);
+		FB61_TX_SendMessage(7, 0x02, connect1);
 		usleep(100); FB61_TX_SendMessage(5, 0x02, connect2);
 		usleep(100); FB61_TX_SendMessage(7, 0x02, connect3);
 		usleep(100); FB61_TX_SendMessage(4, 0x64, connect4);
@@ -3645,6 +3648,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void)
 		Revision[FB61_MAX_SW_LENGTH-1] = 0;
 #endif
 		dprintf(_("Phone info:\n%s\n"), MessageBuffer + 4);
+		CurrentPhoneInfoError = GE_NONE;
 		break;
 
 		/***** RLP frame received. *****/
