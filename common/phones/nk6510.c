@@ -1212,7 +1212,7 @@ static GSM_Error P6510_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 
 	c->Time.Hour = block[0];
 	c->Time.Minute = block[1];
-	c->Recurance = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
+	c->Recurrence = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
 	alarmdiff = (((unsigned int)block[2]) << 8) + block[3];
 
 	if (alarmdiff != 0xffff) {
@@ -1261,7 +1261,7 @@ static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message,
 			break;
 		case P6510_NOTE_REMINDER:
 			data->CalendarNote->Type = GCN_REMINDER;
-			data->CalendarNote->Recurance = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
+			data->CalendarNote->Recurrence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
 			DecodeUnicode(data->CalendarNote->Text, (block + 4), block[2]);
 			break;
 		case P6510_NOTE_BIRTHDAY:
