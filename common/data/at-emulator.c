@@ -30,8 +30,6 @@
 
 */
 
-#define		__data_at_emulator_c
-
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -58,6 +56,46 @@
 #include "data/datapump.h"
 
 #define MAX_LINE_LENGTH 256
+
+#define	MAX_CMD_BUFFERS	(2)
+#define	CMD_BUFFER_LENGTH (100)
+
+/* Definition of some special Registers of AT-Emulator, pinched in
+   part from ISDN driver in Linux kernel */
+#define REG_RINGATA   0
+#define REG_RINGCNT   1
+#define REG_ESC       2
+#define REG_CR        3
+#define REG_LF        4
+#define REG_BS        5
+#define S35           6
+#define REG_CTRLZ     7
+#define REG_ESCAPE    8
+
+#define REG_RESP     12
+#define BIT_RESP      1
+#define REG_RESPNUM  12
+#define BIT_RESPNUM   2
+#define REG_ECHO     12
+#define BIT_ECHO      4
+#define REG_DCD      12
+#define BIT_DCD       8
+#define REG_CTS      12
+#define BIT_CTS      16
+#define REG_DTRR     12
+#define BIT_DTRR     32
+#define REG_DSR      12
+#define BIT_DSR      64
+#define REG_CPPP     12
+#define BIT_CPPP    128
+
+
+#define	MAX_MODEM_REGISTERS	20
+
+/* Message format definitions */
+#define PDU_MODE      0
+#define TEXT_MODE     1
+#define INTERACT_MODE 2
 
 /* Global variables */
 bool ATEM_Initialised = false;	/* Set to true once initialised */

@@ -28,11 +28,14 @@
 
 */
 
-#ifndef __data_datapump_h
-#define __data_datapump_h
+#ifndef _gnokii_data_datapump_h
+#define _gnokii_data_datapump_h
+
+#include "gsm-statemachine"
+#include "gsm-call.h"
 
 /* Prototypes */
-bool	DP_Initialise(int read_fd, int write_fd);
-void    DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state);
+bool	dp_Initialise(int read_fd, int write_fd);
+void    dp_CallPassup(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
 
-#endif	/* __data_datapump_h */
+#endif	/* _gnokii_data_datapump_h */

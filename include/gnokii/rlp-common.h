@@ -31,77 +31,69 @@
 
 */
 
-#ifndef __data_rlp_common_h
-#define __data_rlp_common_h
+#ifndef _gnokii_data_rlp_common_h
+#define _gnokii_data_rlp_common_h
 
-#ifndef __misc_h
-#  include "misc.h"
-#endif
-
-/* Global variables */
-
-/* Defines */
-
-/* Data types */
+#include "misc.h"
 
 /* Typedef for frame type - they are the same for RLP version 0, 1 and 2. */
 typedef enum {
-	RLPFT_X, /* Unknown. */
-	RLPFT_U, /* Unnumbered frame. */
-	RLPFT_S, /* Supervisory frame. */
-	RLPFT_IS /* Information plus Supervisory (I+S) frame. */
-} RLP_FrameType;
+	RLP_FT_X, /* Unknown. */
+	RLP_FT_U, /* Unnumbered frame. */
+	RLP_FT_S, /* Supervisory frame. */
+	RLP_FT_IS /* Information plus Supervisory (I+S) frame. */
+} rlp_frame_type;
 
 /* Define the various Unnumbered frame types. Numbering is bit reversed
    relative to ETSI GSM 04.22 for easy parsing. */
 typedef enum {
-	RLPU_SABM  = 0x07, /* Set Asynchronous Balanced Mode. */
-	RLPU_UA    = 0x0c, /* Unnumbered Acknowledge. */
-	RLPU_DISC  = 0x08, /* Disconnect. */
-	RLPU_DM    = 0x03, /* Disconnected Mode. */
-	RLPU_NULL  = 0x0f, /* Null information. */
-	RLPU_UI    = 0x00, /* Unnumbered Information. */
-	RLPU_XID   = 0x17, /* Exchange Identification. */
-	RLPU_TEST  = 0x1c, /* Test. */
-	RLPU_REMAP = 0x11  /* Remap. */
-} RLP_UFrameType;
+	RLP_U_SABM  = 0x07, /* Set Asynchronous Balanced Mode. */
+	RLP_U_UA    = 0x0c, /* Unnumbered Acknowledge. */
+	RLP_U_DISC  = 0x08, /* Disconnect. */
+	RLP_U_DM    = 0x03, /* Disconnected Mode. */
+	RLP_U_NULL  = 0x0f, /* Null information. */
+	RLP_U_UI    = 0x00, /* Unnumbered Information. */
+	RLP_U_XID   = 0x17, /* Exchange Identification. */
+	RLP_U_TEST  = 0x1c, /* Test. */
+	RLP_U_REMAP = 0x11  /* Remap. */
+} rlp_uframe_type;
 
 /* Define supervisory frame field. */
 typedef enum {
-	RLPS_RR   = 0x00, /* Receive Ready. */
-	RLPS_REJ  = 0x02, /* Reject. */
-	RLPS_RNR  = 0x01, /* Receive Not Ready. */
-	RLPS_SREJ = 0x03  /* Selective Reject. */
-} RLP_SFrameField;
+	RLP_S_RR   = 0x00, /* Receive Ready. */
+	RLP_S_REJ  = 0x02, /* Reject. */
+	RLP_S_RNR  = 0x01, /* Receive Not Ready. */
+	RLP_S_SREJ = 0x03  /* Selective Reject. */
+} rlp_sframe_field;
 
 /* Used for CurrentFrameType. */
 typedef enum {
-	RLPFT_U_SABM = 0x00,
-	RLPFT_U_UA,
-	RLPFT_U_DISC,
-	RLPFT_U_DM,
-	RLPFT_U_NULL,
-	RLPFT_U_UI,
-	RLPFT_U_XID,
-	RLPFT_U_TEST,
-	RLPFT_U_REMAP,
-	RLPFT_S_RR,
-	RLPFT_S_REJ,
-	RLPFT_S_RNR,
-	RLPFT_S_SREJ,
-	RLPFT_SI_RR,
-	RLPFT_SI_REJ,
-	RLPFT_SI_RNR,
-	RLPFT_SI_SREJ,
-	RLPFT_BAD
-} RLP_FrameTypes;
+	RLP_FT_U_SABM = 0x00,
+	RLP_FT_U_UA,
+	RLP_FT_U_DISC,
+	RLP_FT_U_DM,
+	RLP_FT_U_NULL,
+	RLP_FT_U_UI,
+	RLP_FT_U_XID,
+	RLP_FT_U_TEST,
+	RLP_FT_U_REMAP,
+	RLP_FT_S_RR,
+	RLP_FT_S_REJ,
+	RLP_FT_S_RNR,
+	RLP_FT_S_SREJ,
+	RLP_FT_SI_RR,
+	RLP_FT_SI_REJ,
+	RLP_FT_SI_RNR,
+	RLP_FT_SI_SREJ,
+	RLP_FT_BAD
+} rlp_frame_types;
 
 /* Frame definition for TCH/F9.6 frame. */
 typedef struct {
 	u8 Header[2];
 	u8 Data[25];
 	u8 FCS[3];
-} RLP_F96Frame;
+} gn_rlp_f96_frame;
 
 /* Header data "split up" for TCH/F9.6 frame. */
 typedef struct {
@@ -111,8 +103,8 @@ typedef struct {
 	u8            S;    /* Status. */
 	bool          PF;   /* Poll/Final. */
 	bool          CR;   /* Command/Response. */
-	RLP_FrameType Type; /* Frame type. */
-} RLP_F96Header;
+	rlp_frame_type Type; /* Frame type. */
+} rlp_f96_header;
 
 
 /* RLP User requests */
@@ -122,7 +114,7 @@ typedef struct {
 	bool Conn_Req_Neg;
 	bool Reset_Resp;
 	bool Disc_Req;
-} RLP_UserRequestStore;
+} rlp_user_request_store;
 
 typedef enum {
 	Conn_Req,
@@ -130,7 +122,7 @@ typedef enum {
 	Conn_Req_Neg,
 	Reset_Resp,
 	Disc_Req
-} RLP_UserRequests;
+} rlp_user_requests;
 
 typedef enum {
 	Conn_Ind,
@@ -140,7 +132,7 @@ typedef enum {
 	Data,		/* FIXME: This should really be called RLP_Data, otherwise it hogs name "Data"! */
 	StatusChange,
 	GetData
-} RLP_UserInds;
+} rlp_user_inds;
 
 /* RLP (main) states. See GSM specification 04.22 Annex A, Section A.1.1. */
 typedef enum {
@@ -153,7 +145,7 @@ typedef enum {
 	RLP_S6, /* Pending Reset Request */
 	RLP_S7, /* Pending Reset Indication */
 	RLP_S8  /* Error */
-} RLP_State;
+} rlp_state;
 
 /* RLP specification defines several states in which variables can be. */
 typedef enum {
@@ -164,21 +156,21 @@ typedef enum {
 	_ackn,
 	_rej,
 	_srej
-} RLP_StateVariable;
+} rlp_state_variable;
 
 /* RLP Data */
 typedef struct {
 	u8 Data[25];
-	RLP_StateVariable State;
-} RLP_Data;
+	rlp_state_variable State;
+} rlp_data;
 
 /* Prototypes for functions. */
-void RLP_DisplayF96Frame(RLP_F96Frame *frame);
-void RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header);
-void RLP_DisplayXID(u8 *frame);
-void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx), int (*rlp_passup)(RLP_UserInds ind, u8 *buffer, int length));
-void RLP_Init_link_vars(void);
-void RLP_SetUserRequest(RLP_UserRequests type, bool value);
-void RLP_Send(char *buffer, int length);
+void rlp_f96_frame_display(gn_rlp_f96_frame *frame);
+void rlp_f96_header_decode(gn_rlp_f96_frame *frame, rlp_f96_header *header);
+void rlp_xid_display(u8 *frame);
+void rlp_initialise(bool (*rlp_send_function)(gn_rlp_f96_frame *frame, bool out_dtx), int (*rlp_passup)(rlp_user_inds ind, u8 *buffer, int length));
+void rlp_link_vars_init(void);
+void rlp_user_request_set(rlp_user_requests type, bool value);
+void rlp_send(char *buffer, int length);
 
-#endif	/* __data_rlp_common_h */
+#endif	/* _gnokii_data_rlp_common_h */
