@@ -34,20 +34,27 @@
 #define CBUS_MAX_TRANSMIT_LENGTH 256
 #define CBUS_MAX_MSG_LENGTH 256
 
-enum CBUS_RX_States {
+typedef enum {
 	CBUS_RX_Header,
 	CBUS_RX_FrameType1,
 	CBUS_RX_FrameType2,
 	CBUS_RX_GetLengthLB,
 	CBUS_RX_GetLengthHB,
 	CBUS_RX_GetMessage,
-	CBUS_RX_GetCSum
-};
+	CBUS_RX_GetCSum,
+	CBUS_RX_GetAck
+} CBUS_RX_State;
+
+typedef enum {
+	CBUS_PKT_None,
+	CBUS_PKT_Ready,
+	CBUS_PKT_CSumErr
+} CBUS_PKT_State;
 
 typedef struct{
 	int checksum;
 	int BufferCount;
-	enum CBUS_RX_States state;
+	CBUS_RX_State state;
 	int FrameHeader1;
 	int FrameHeader2;
 	int FrameType1;
@@ -63,11 +70,9 @@ typedef struct {
 } CBUS_OutgoingMessage;
 
 typedef struct{
-	CBUS_IncomingFrame i;
+	CBUS_IncomingFrame frame;
 } CBUS_Link;
 
 gn_error CBUS_Initialise(GSM_Statemachine *state);
-
-void sendat(unsigned char *msg);
 
 #endif   /* #ifndef __cbus_h */

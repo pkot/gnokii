@@ -26,6 +26,7 @@
  * AT series updates:
     o Bosch support. Tested with Bosch 909           (Ladislav Michl)
     o implement SetCharset                           (Ladislav Michl)
+ * cbus updates/clanups                              (Ladislav Michl)
 
 0.5.0pre1
 =========
