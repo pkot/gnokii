@@ -13,6 +13,7 @@
     o French translation updated                (Olivier Kaloudoff)
  * libgnokii updates
     o utf8 encoding/decoding fixed                 (BORBELY Zoltan)
+    o too many lost reply caused phone lockups     (BORBELY Zoltan)
 
 0.5.6
 =====

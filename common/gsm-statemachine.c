@@ -43,8 +43,8 @@ gn_error sm_message_send(u16 messagesize, u8 messagetype, void *message, struct 
 {
 	if (state->current_state != GN_SM_Startup) {
 #ifdef	DEBUG
-	dump("Message sent: ");
-	sm_message_dump(messagetype, message, messagesize);
+		dump("Message sent: ");
+		sm_message_dump(messagetype, message, messagesize);
 #endif
 		state->last_msg_size = messagesize;
 		state->last_msg_type = messagetype;
@@ -250,6 +250,8 @@ static gn_error __sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_
 
 	if (s == GN_SM_ResponseReceived) return sm_error_get(waitfor, state);
 
+	sm_reset(state);
+
 	return GN_ERR_TIMEOUT;
 }
 
@@ -311,6 +313,8 @@ gn_error sm_block_ack(struct gn_statemachine *state)
 		err = sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
 		if (err != GN_ERR_NONE) return err;
 	}
+
+	sm_reset(state);
 
 	return GN_ERR_TIMEOUT;
 }
