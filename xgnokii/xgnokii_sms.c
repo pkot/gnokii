@@ -625,7 +625,7 @@ static void SaveToMailbox(gchar *mailbox_name)
 	struct flock lock;
 	time_t caltime;
 	gint row;
-	gchar *number, *text, *loc, dummy;
+	gchar *number, *text, *loc, dummy[6];
 
 
 	if ((f = fopen(mailbox_name, "a")) == NULL) {
@@ -669,18 +669,20 @@ static void SaveToMailbox(gchar *mailbox_name)
 		row = GPOINTER_TO_INT(sel->data);
 		sel = sel->next;
 		gtk_clist_get_text(GTK_CLIST(SMS.smsClist), row, 1, &text);
-		snprintf(&dummy, 3, "%s", text + 17);
-		t.tm_sec = atoi(&dummy);
-		snprintf(&dummy, 3, "%s", text + 14);
-		t.tm_min = atoi(&dummy);
-		snprintf(&dummy, 3, "%s", text + 11);
-		t.tm_hour = atoi(&dummy);
-		snprintf(&dummy, 3, "%s", text);
-		t.tm_mday = atoi(&dummy);
-		snprintf(&dummy, 3, "%s", text + 3);
-		t.tm_mon = atoi(&dummy) - 1;
-		snprintf(&dummy, 5, "%s", text + 6);
-		t.tm_year = atoi(&dummy) - 1900;
+		dummy[3] = 0;
+		snprintf(dummy, 3, "%s", text + 17);
+		t.tm_sec = atoi(dummy);
+		snprintf(dummy, 3, "%s", text + 14);
+		t.tm_min = atoi(dummy);
+		snprintf(dummy, 3, "%s", text + 11);
+		t.tm_hour = atoi(dummy);
+		snprintf(dummy, 3, "%s", text);
+		t.tm_mday = atoi(dummy);
+		snprintf(dummy, 3, "%s", text + 3);
+		t.tm_mon = atoi(dummy) - 1;
+		dummy[5] = 0;
+		snprintf(dummy, 5, "%s", text + 6);
+		t.tm_year = atoi(dummy) - 1900;
 #ifdef HAVE_TM_GMTON
 		if (text[19] != '\0')
 			t.tm_gmtoff = atoi(text + 18) * 3600;
