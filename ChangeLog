@@ -62,6 +62,7 @@
     o add Nokia 6610i support                    
                    (Julien LOLLIVIER, vee.lehtinen@dnainternet.net)
     o add Nokia 6650 support                       (BORBELY Zoltan)
+    o capabilities was missing from Nokia 6810     (BORBELY Zoltan)
  * portability changes
     o NetBSD also fall into unices category     (Richard M Kreuter)
     o NetBSD needs the same tricks as OpenBSD and FreeBSD in
