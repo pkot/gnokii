@@ -15,6 +15,8 @@
  * 6510 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
+    o add create/delete SMS folder                     (Markus Plail)
+    o add save SMS (may be dangerous)                  (Markus Plail)
  * 7110 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
@@ -27,12 +29,15 @@
     o DialVoice converted to the new api             (BORBELY Zoltan)
     o SendDTMF implemented again                     (BORBELY Zoltan)
     o get rid of the global GSM_Data                   (Markus Plail)
+    o fix deleting SMS messages                        (Markus Plail)
+    o fix date when saving SMS messages to mailbox     (Markus Plail)
  * gnokii updates:
     o remove SMSFolder hack from getsms                (Markus Plail)
     o call status display added                      (BORBELY Zoltan)
     o dialvoice uses the call management API         (BORBELY Zoltan)
     o don't exit after the first loop in the writephonebook
                                     (Emanuele Pucciarelli, Pawel Kot)
+    o add create/delete SMS folder                     (Markus Plail)
  * nokia-decoding updates:
     o name can be assigned to both bitmap and phonebook entry
                                                        (Markus Plail)
