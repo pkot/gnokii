@@ -6,12 +6,17 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 2000 Pavel Machek <pavel@ucw.cz>
+  Copyright (C) 2000, 2001 Pavel Machek <pavel@ucw.cz>
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.3  2001-05-07 14:13:03  machek
+  Revision 1.4  2001-05-09 20:18:46  machek
+  Cleaned up code a bit. Made it use device_() interface. Reworked delay
+  system; now it is 4 times faster. 5 times faster if you hold * key on
+  phone (?!).
+
+  Revision 1.3  2001/05/07 14:13:03  machek
   nokia-2110 module converted to suit new API better. --identify now works.
 
   Revision 1.2  2001/04/27 16:00:01  machek
@@ -49,6 +54,7 @@
 #include "gsm-common.h"
 #include "mbus-2110.h"
 #include "phones/nokia.h"
+#include "device.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -59,13 +65,6 @@
 #include "phones/generic.h"
 
 #define MYID 0x78
-
-#define VELO
-#ifdef VELO
-#define usleep(x) do { usleep(x); SigHandler(0); } while (0)
-#endif
-
-#define msleep(x) do { usleep(x*1000); } while (0)
 
 static GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
@@ -106,16 +105,13 @@ GSM_Phone phone_nokia_2110 = {
 
 /* Local variables */
 static volatile bool RequestTerminate;
-static int PortFD;
-static struct termios old_termios; /* old termios */
 static u8 TXPacketNumber = 0x01;
 #define MAX_MODEL_LENGTH 16
 static bool ModelValid     = false;
 static volatile unsigned char PacketData[256];
 static volatile bool
 	ACKOK    = false,
-	PacketOK = false,
-	EchoOK   = false;
+	PacketOK = false;
 
 static volatile int SMSpos = 0;
 static volatile unsigned char SMSData[256];
@@ -130,16 +126,42 @@ GetTime(void)
 	gettimeofday(&tv, NULL);
 	return (long long) tv.tv_sec * 1000000 + tv.tv_usec;
 }
+static void SigHandler(int status);
+#define POLLIT do { SigHandler(0); } while (0)
+
+static void
+yield(void)
+{
+//	usleep(5000);
+}
 
 static void
 Wait(long long from, int msec)
 {
-	while (GetTime() < from + ((long long) msec)*1000)
-		usleep(5000);
+	while (GetTime() < from + ((long long) msec)*1000) {
+		yield();
+		POLLIT;
+	}
 }
 
-#undef usleep
-#define usleep(x) do { Wait(GetTime(), x/1000); } while (0)
+static void
+Wait2(long long from, int msec)
+{
+	while (GetTime() < from + ((long long) msec)*1000) {
+		yield();
+	}
+}
+
+#define msleep(x) do { usleep(x*1000); } while (0)
+#define msleep_poll(x) do { Wait(GetTime(), x); } while (0)
+
+#define waitfor(condition, maxtime) \
+do { \
+	while (!(condition)) { \
+		yield(); \
+		POLLIT; \
+        } \
+} while(0)
 
 /* Checksum calculation */
 static u8
@@ -151,6 +173,48 @@ GetChecksum( u8 * packet, int len )
 	for( i = 0; i < len; i++ ) checksum ^= packet[i]; /* calculate checksum */
 	return checksum;
 }
+
+/* --------------- */
+
+static int xread(unsigned char *d, int len)
+{
+	int res;
+	while (len) {
+		res = device_read(d, len);
+		if (res == -1) {
+			if (errno != EAGAIN) {
+				printf("I/O error : %m?!\n");
+				return -1;
+			} else device_select(NULL);
+		} else {
+			d += res;
+			len -= res;
+			printf("(%d)", len);
+		}
+	}
+	return 0;
+}
+
+static int xwrite(unsigned char *d, int len)
+{
+	int res;
+	while (len) {
+		res = device_write(d, len);
+		if (res == -1) {
+			if (errno != EAGAIN) {
+				printf("I/O error : %m?!\n");
+				return -1;
+			}
+		} else {
+			d += res;
+			len -= res;
+			printf("<%d>", len);
+		}
+	}
+	return 0;
+}
+
+/* --------------------------- */
 
 static GSM_Error
 SendFrame( u8 *buffer, u8 command, u8 length )
@@ -179,26 +243,20 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	}
 #endif /* DEBUG */
 	/* Send it out... */
-	EchoOK = false;
 	dprintf("(");
-	Wait(LastChar, 3);
+	Wait2(LastChar, 3);
 	/* I should put my messages at least 2msec apart... */
 	dprintf(")");
-	if (write(PortFD, pkt, current) != current) /* BUGGY, we should handle -EINTR and short writes! */ {
-		perror( _("Write error:") );
+	printf("writing...");
+	LastChar = GetTime();
+	if (xwrite(pkt, current) == -1)
 		return (GE_INTERNALERROR);
-	}
-	printf("echo?");
-	if (read(PortFD, pkt2, current) != current) {
-		if (errno == EAGAIN)
-			return (GE_NONE);
-		perror( _("Read error:") );
+	if (xread(pkt2, current) == -1)
 		return (GE_INTERNALERROR);
-	}
 	printf("echook");
 	if (memcmp(pkt, pkt2, current)) {
-		fprintf(stderr, "Bad echo!");
-		usleep(1000000);
+		fprintf(stderr, "Bad echo?!");
+		msleep(1000);
 		return (GE_TIMEOUT);
 	}
 	return (GE_NONE);
@@ -208,16 +266,34 @@ static GSM_Error
 SendCommand( u8 *buffer, u8 command, u8 length )
 {
 	int time, retries = 10;
+	char pkt[10240];
+
+//	msleep(2);
+	while ((time = device_read(pkt, 10240)) != -1) {
+		int j;
+		char b;
+		printf("Spurious? (%d)", time);
+					printf( _("Phone: ") );
+					for( j = 0; j < time; j++ ) {
+						b = pkt[j];
+						printf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
+					}
+		msleep(2);
+	}
 
 	ACKOK = false;
+	time = 30;
 	while (retries--) {
+		long long now;
 		SendFrame(buffer, command, length);
-		time = 20;
-		while (time--) {
+		now = GetTime();
+		while ((GetTime() - now) < time*1000) {
 			if (ACKOK)
 				return GE_NONE;
-			msleep(10);
+			yield();
+			POLLIT;
 		}
+		time = 50;		/* 5 seems to be enough */
 		fprintf(stderr, "[resend]");
 	}
 	fprintf(stderr, "Command not okay after 10 retries!\n");
@@ -231,11 +307,7 @@ Terminate(void)
 {
 	/* Request termination of thread */
 	RequestTerminate = true;
-	/* Close serial port. */
-	if( PortFD >= 0 ) {
-		tcsetattr(PortFD, TCSANOW, &old_termios);
-		close( PortFD );
-	}
+	device_close();
 }
 
 static GSM_Error
@@ -252,14 +324,7 @@ SMS(GSM_SMSMessage *message, int command)
 	message->MessageNumber = message->Location;
 
 	SendCommand(pkt, 0x38 /* LN_SMS_COMMAND */, sizeof(pkt));
-	while(!PacketOK) {
-		dprintf(".");
-		usleep(100000);
-		if(0) {
-			fprintf(stderr, _("Impossible timeout?\n"));
-			return GE_BUSY;
-		}
-	}
+	waitfor(PacketOK, 0);
 	if (PacketData[3] != 0x37 /* LN_SMS_EVENT */) {
 		fprintf(stderr, _("Something is very wrong with GetValue\n"));
 		return GE_BUSY; /* FIXME */
@@ -327,7 +392,7 @@ GetSMSMessage(GSM_SMSMessage *m)
 	m->MessageCenter.No = 0;
 	strcpy(m->MessageCenter.Name, "(unknown)");
 	m->UDHType = GSM_NoUDH;
-	usleep(300000);		/* If phone lost our ack, it might retransmit data */
+	msleep_poll(300);		/* If phone lost our ack, it might retransmit data */
 	return (GE_NONE);
 }
 
@@ -374,9 +439,7 @@ GetValue(u8 index, u8 type)
 	dprintf("\nRequesting value(%d)", index);
 	SendCommand(pkt, 0xe5, 3);
 
-	while(!PacketOK) {
-		usleep(1000000);
-	}
+	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xe6) ||
 	    (PacketData[4] != index) || 
 	    (PacketData[5] != type))
@@ -558,20 +621,16 @@ SigHandler(int status)
 	int                  i, res;
 	static unsigned int  Index = 0, Length = 5;
 	static unsigned char pkt[256];
-#ifdef DEBUG
 	int                  j;
-#endif
 
-	res = read(PortFD, buffer, 256);
+	res = device_read(buffer, 256);
 	if( res < 0 ) return;
 	for(i = 0; i < res ; i++) {
 		b = buffer[i];
 //	 fprintf(stderr, "(%x)", b, Index);
 		if (!Index && b != MYID && b != 0xf8 && b != 0x00) /* MYID is code of computer */ {
 			/* something strange goes from phone. Just ignore it */
-#ifdef DEBUG
-			fprintf( stdout, "Get [%02X %c]\n", b, b >= 0x20 ? b : '.' );
-#endif /* DEBUG */
+			dprintf( "Get [%02X %c]\n", b, b >= 0x20 ? b : '.' );
 			continue;
 		} else {
 			pkt[Index++] = b;
@@ -582,14 +641,12 @@ SigHandler(int status)
 			}
 			if(Index >= Length) {
 				if((pkt[0] == MYID || pkt[0]==0xf8) && pkt[1] == 0x00) /* packet from phone */ {
-#ifdef DEBUG
-					fprintf( stdout, _("Phone: ") );
+					dprintf( _("Phone: ") );
 					for( j = 0; j < Length; j++ ) {
 						b = pkt[j];
-						fprintf( stdout, "[%02X %c]", b, b >= 0x20 ? b : '.' );
+						dprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
 					}
-					fprintf( stdout, "\n" );
-#endif /* DEBUG */
+					dprintf( "\n" );
 					/* ensure that we received valid packet */
 					if(pkt[Length - 1] != GetChecksum(pkt, Length-1)) {
 						fprintf( stderr, "***bad checksum***");
@@ -610,31 +667,31 @@ SigHandler(int status)
 							fprintf( stderr, "[data]" );
 							memcpy((void *) PacketData,pkt,Length);
 							/* send acknowledge packet to phone */
-							usleep(100000);
+							msleep(10);
 							ack[0] = 0x00;                     /* Construct the header.   */
 							ack[1] = pkt[0];                   /* Send back id            */
 							ack[2] = 0x7F;                     /* Set special size value  */
 							ack[3] = pkt[Length - 2];          /* Send back packet number */
 							ack[4] = GetChecksum( ack, 4); /* Set checksum            */
-#ifdef DEBUG
-							fprintf( stdout, _("PC   : ") );
+							dprintf( _("PC   : ") );
 							for( j = 0; j < 5; j++ ) {
 								b = ack[j];
-								fprintf( stdout, "[%02X %c]", b, b >= 0x20 ? b : '.' );
+								dprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
 							}
-							fprintf( stdout, "\n" );
-#endif /* DEBUG */
-							if( write( PortFD, ack, 5 ) != 5 )
+							dprintf( "\n" );
+							LastChar = GetTime();
+							if( xwrite( ack, 5 ) == -1 )
 								perror( _("Write error!\n") );
+							if( xread( ack, 5 ) == -1 )
+								perror( _("Read ack error!\n") );
+
 							/* Set validity flag */
 							if (!HandlePacket())
 								PacketOK = true;
 						}
 					}
-				} else {
-					fprintf(stderr, "[echo]\n");
-					EchoOK = true;
-				}
+				} else
+					fprintf(stderr, "Got my own echo? That should not be possible!\n");
 				/* Look for new packet */
 				Index  = 0;
 				Length = 5;
@@ -646,56 +703,20 @@ SigHandler(int status)
 /* Called by initialisation code to open comm port in asynchronous mode. */
 bool OpenSerial(void)
 {
-	struct termios    new_termios;
-	struct sigaction  sig_io;
-	unsigned int      flags;
+	int result;
 
-#ifdef DEBUG
-	fprintf(stdout, _("Setting MBUS communication with 2110...\n"));
-#endif /* DEBUG */
- 
-	PortFD = open(PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
-	if ( PortFD < 0 ) { 
+	dprintf(_("Setting MBUS communication with 2110...\n"));
+
+	result = device_open(PortDevice, true, false, GCT_Serial);
+ 	if (!result) { 
 		fprintf(stderr, "Failed to open %s ...\n", PortDevice);
 		return (false);
 	}
 
-#ifdef DEBUG
-	fprintf(stdout, "%s opened...\n", PortDevice);
-#endif /* DEBUG */
+	dprintf("%s opened...\n", PortDevice);
 
-	sig_io.sa_handler = SigHandler;
-	sig_io.sa_flags = 0;
-	sigaction (SIGIO, &sig_io, NULL);
-	/* Allow process/thread to receive SIGIO */
-	fcntl(PortFD, F_SETOWN, getpid());
-#ifndef VELO
-	/* Make filedescriptor asynchronous. */
-	fcntl(PortFD, F_SETFL, FASYNC);
-#endif
-	/* Save old termios */
-	tcgetattr(PortFD, &old_termios);
-	/* set speed , 8bit, odd parity */
-	memset( &new_termios, 0, sizeof(new_termios) );
-	new_termios.c_cflag = B9600 | CS8 | CLOCAL | CREAD | PARODD | PARENB; 
-	new_termios.c_iflag = 0;
-	new_termios.c_lflag = 0;
-	new_termios.c_oflag = 0;
-	new_termios.c_cc[VMIN] = 1;
-	new_termios.c_cc[VTIME] = 0;
-	tcflush(PortFD, TCIFLUSH);
-	tcsetattr(PortFD, TCSANOW, &new_termios);
-	/* setting the RTS & DTR bit */
-	flags = TIOCM_DTR;
-	ioctl(PortFD, TIOCMBIS, &flags);
-	flags = TIOCM_RTS;
-	ioctl(PortFD, TIOCMBIS, &flags);
-#ifdef DEBUG
-	ioctl(PortFD, TIOCMGET, &flags);
-	fprintf(stdout, _("DTR is %s.\n"), flags & TIOCM_DTR ? _("up") : _("down"));
-	fprintf(stdout, _("RTS is %s.\n"), flags & TIOCM_RTS ? _("up") : _("down"));
-	fprintf(stdout, "\n");
-#endif /* DEBUG */
+	device_changespeed(9600);
+	device_setdtrrts(1, 1);
 	return (true);
 }
 
@@ -708,8 +729,7 @@ SetKey(int c, int up)
 	fprintf(stderr, "\n Pressing %d\n", c );
 	PacketOK = false;
 	SendCommand( reg, 0xe5, 4 );
-	while (!PacketOK)
-		usleep(20000);
+	waitfor(PacketOK, 0);
 	return GE_NONE;
 }
 
@@ -779,7 +799,7 @@ PressString(char *s, int upcase)
 		PressKey(*s, 0);
 		if (upcase != lastupcase) {
 			fprintf(stderr, "***size change");
-			usleep(1500000);
+			msleep_poll(1500);
 			PressKey(*s, 1);
 			lastupcase = upcase;
 		}
@@ -790,6 +810,7 @@ PressString(char *s, int upcase)
 /*
  * This is able to press keys at 62letters/36seconds, tested on message
  * "Tohle je testovaci zprava schvalne za jak dlouho ji to napise"
+ * Well, it is possible to write that message in 17seconds...
  */
 static void
 HandleKey(char c)
@@ -908,10 +929,8 @@ EnableDisplayOutput(void)
 	PacketOK = false;
 
 	SendCommand(pkt, 0x19, 5);
-	while(!PacketOK) {
-		fprintf(stderr, "\nGrabbing display");
-		usleep(1000000);
-	}
+	fprintf(stderr, "\nGrabbing display");
+	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xcd) ||
 	    (PacketData[2] != 1) || 
 	    (PacketData[4] != 1 /* LN_UC_REQUEST_OK */))
@@ -935,14 +954,11 @@ ThreadLoop(void)
 		return;
 	}
 
-	usleep(100000);
+	msleep(100);
 	while(!N2110_LinkOK) {
 		fprintf(stderr, "registration... ");
 		Register();
-		msleep(100);
-		msleep(100);
-		msleep(100);
-		msleep(100);
+		msleep_poll(100);
 	}
 	fprintf(stderr, "okay\n");
 }
@@ -955,6 +971,8 @@ Initialise(char *port_device, char *initlength,
 {
 	RequestTerminate = false;
 	N2110_LinkOK      = false;
+	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stderr, NULL, _IONBF, 0);
 	memset(VersionInfo,0,sizeof(VersionInfo));
 	strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 	switch (connection) {
@@ -984,8 +1002,7 @@ GetPhonebookLocation(GSM_PhonebookEntry *entry)
 	
 	PacketOK = false;
 	SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3);
-	while (!PacketOK)
-		msleep(100);
+	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xc9) ||
 	    (PacketData[4] != 0x1a)) {
 		fprintf(stderr, "Something is very wrong with GetPhonebookLocation\n");
@@ -1026,9 +1043,7 @@ WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	
 	PacketOK = false;
 	SendCommand(pkt, /* LN_LOC_COMMAND */ 0x1f, 3+strlen(entry->Number)+strlen(entry->Name)+2);
-	while(!PacketOK) {
-		usleep(1000000);
-	}
+	waitfor(PacketOK, 0);
 	printf("okay?\n");
 	if ((PacketData[3] != 0xc9) ||
 	    (PacketData[4] != 0x1b)) {
