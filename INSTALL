@@ -1,56 +1,125 @@
+Gnokii installation instructions
+================================
 
- TODO: write me!
+[NOTE: For package building see the 'Docs/packaging-howto' file.]
 
- For package building see the 'Docs/packaging-howto' file.
 
-0/	If you got an CVS version
+Quickstart
+==========
 
-	autoconf
+    $ autoconf			# only for CVS copies
+    $ ./configure [<options>]
+    $ make
+    # groupadd gnokii
+    # make [install|install-suid|install-strip|install-ss]
+    # make install-docs
+    $ cp Docs/sample/gnokiirc ~/.gnokiirc
+    $ $EDITOR ~/.gnokiirc
 
-1/
-	./configure [ option ]
 
-	where basic options:
+Verbose instructions
+====================
 
-		--prefix=DIR
-			Install path prefix. Default /usr/local/
+Preparations
+------------
 
-		--without-x
-			Compile without GTK (X11) programs
+If you retrieved this copy from CVS, then first call
+
+    $ autoconf
+
+Now you have to determine your system specific settings.
+
+    $ ./configure [<options>]
+
+Basic options are:
+
+    --prefix=DIR
+	Sets the install path prefix. Default is /usr/local/.
+
+    --without-x
+	Compiles without GTK (X11) programs.
 		
-		--disable-nls
-			Set if you don't have/want GNU gettext support
-		
-		--enable-security
-			Set if you want to enable all security features
+    --disable-nls
+	Set if you don't have/want GNU gettext support.
 
-		--enable-debug
-			Set if you want debug code in gnokii
+    --enable-security
+	Set if you want to enable all security features supported by your 
+        mobile (PIN change, etc.).
 
-		--help		
-			show all options
+    --enable-debug
+	Set if you want debug code compiled in.
+
+    --help		
+	Shows all options.
+
+This example is commonly used:
+
+    $ ./configure --prefix=/usr --enable-security
 
 
-	Good default (example):
+Compilation
+-----------
 
-		./configure --prefix=/usr \
-			    --enable-security
+Start the compilation process by typing
 
-2/
-	compilation:
-	
-		make (or make gnokii-debug to create staticlly linked binary
-			-- mainly for debugging)
-		groupadd gnokii  - it is really needed
-		(make dep - if you want/need) 
-		make install or make install-suid or make install-strip or
-			make install-ss (suid + strip)
-		make install-docs
+    $ make
 
-	clean source:
-	
-		make clean	 - standard clean
-		make distclean   - clean all ./configure outputs
-				   (after this command you must run
-				    ./configure again if you need use
-                                    any Makefile)
+or
+
+    $ make gnokii-debug
+
+The second form creates statically linked binaries. These are mainly used 
+for debugging the software.
+
+
+Installation
+------------
+
+Now switch to the root account and add a group named "gnokii". Gnokii 
+really needs an own group. It is added with
+
+    # groupadd gnokii
+
+
+Install the binaries into the system with one of the four following lines:
+
+    # make install
+    # make install-suid
+    # make install-strip
+    # make install-ss          # <-- suid AND strip
+
+
+To install the documentation type
+
+    # make install-docs
+
+
+Clean-up
+--------
+
+To remove products of the compile process, type
+
+    $ make clean
+
+Calling
+
+    $ make distclean
+
+additionaly cleans all ./configure outputs. After this command you must 
+run ./configure again if you need to use any Makefile.
+
+
+Configuration
+-------------
+
+Copy the example config file for gnokii from the Docs/sample/ directory to
+your home directory:
+
+    $ cp Docs/sample/gnokiirc ~/.gnokiirc
+
+It is a plain ASCII file which can be read in any editor. Make sure you do 
+not save it in a wordprocessor's binary-format. It has to remain plain 
+text. vi, mcedit, kedit are good examples.
+
+Change the settings to fit your system. Lines beginning with a `#' are 
+comments. The file should be self-explaining.
