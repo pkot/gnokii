@@ -25,9 +25,7 @@ rm -rf /tmp/gnokii-${VERSION}/include/obsolete
 
 (
    cd /tmp/gnokii-${VERSION}
-   autoconf
-   autoheader
-   ./configure
+   ./autogen.sh
    make -C common vcal.c
    cp packaging/RedHat/gnokii.spec .
    make distclean
