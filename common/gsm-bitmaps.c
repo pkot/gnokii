@@ -38,7 +38,8 @@ void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] &= 255 - (1 << (y%8));
-	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[(y*bmp->width+x)/8] &= 255 - (1 << (7-((y*bmp->width+x)%8)));
+	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo)
+		bmp->bitmap[(y*bmp->width+x)/8] &= 255 - (1 << (7-((y*bmp->width+x)%8)));
 
 	/* Testing only ! */
 	if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] &= 255 - (1 << (7-(x%8)));
@@ -52,8 +53,8 @@ bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo)
 		i = (bmp->bitmap[(y*bmp->width+x)/8] & 1 << (7-((y*bmp->width+x)%8)));
 	/* Testing only ! */
-	if (bmp->type == GSM_PictureImage) i = (bmp->bitmap[9*y + (x/8)] & 1<<(7-(x%8)));
- 
+	if (bmp->type == SMS_Picture) i = (bmp->bitmap[9 * y + (x / 8)] & 1 << (7 - (x % 8)));
+
 	if (i) return true;
 	else return false;
 }
@@ -217,8 +218,7 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 /* Returns message length */
 int GSM_SaveSMSBitmap(GSM_SMSMessage *message, GSM_Bitmap *bitmap)
 {
-	int current=0;
-  
+	int current = 0;
 	char UserDataHeader[7] = {	0x06, /* UDH Length */
 					0x05, /* IEI: application port addressing scheme, 16 bit address */
 					0x04, /* IEI length */

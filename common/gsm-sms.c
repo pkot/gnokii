@@ -25,6 +25,7 @@
 
 SMSMessage_PhoneLayout layout;
 static SMSMessage_Layout llayout;
+static unsigned short header_offset;
 
 struct udh_data {
 	unsigned int length;
@@ -548,7 +549,7 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 /* This function encodes SMS as described in:
    - GSM 03.40 version 6.1.0 Release 1997, section 9
 */
-int EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num)
+static int EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num)
 {
 	GSM_Error error = GE_NONE;
 	int i, mm = 0;
@@ -601,6 +602,7 @@ GSM_Error SendSMS(GSM_SMSMessage *SMS, GSM_Data *data, GSM_Statemachine *state)
 	GSM_Error error = GE_NONE;
 	unsigned short i, count;
 
+	header_offset = layout.SendHeader;
 	count = CountSMSParts(SMS);
 	if (count < 1) return GE_SMSWRONGFORMAT;
 	for (i = 0; i < count; i++) {
@@ -873,7 +875,7 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 {
 	/* Short Message Type */
-	SMS->Type = message[layout.Type];
+	SMS->Type = message[layout.Type - header_offset];
 	switch (SMS->Type) {
 	case SMS_Deliver:
 		llayout = layout.Deliver;
@@ -954,7 +956,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 /* This function decodes SMS as described in:
    - GSM 03.40 version 6.1.0 Release 1997, section 9
 */
-GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength)
+static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength)
 {
 	int size;
 	GSM_Error error;
@@ -1003,9 +1005,11 @@ GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	GSM_Error error;
 
 	dprintf("Reading\n");
+	header_offset = layout.ReadHeader;
 	error = SM_Functions(GOP_GetSMS, data, state);
 	dprintf("Actual decoding\n");
 	if (error != GE_NONE) return error;
+	if (!data->RawData || !data->SMSMessage) return GE_INTERNALERROR;
 	error = DecodePDUSMS(data->RawData->Data, data->SMSMessage, data->RawData->Length);
 	dprintf("Finished\n");
 	return error;

@@ -40,35 +40,55 @@
 /* Some globals */
 
 static const SMSMessage_Layout nk7110_deliver = {
-	true,
-	0, 21, 0, 0, 7, 0, 0, -1, 24, 23, 0, 21,
-	9, true, 25, true, 37, -1,
-	5, 4,
-	44, true
+	true,						/* Is the SMS type supported */
+	 5, true, true,					/* SMSC */
+	-1, 17, -1, -1,  3, -1, -1, -1, 20, 19, -1, 17,
+	21, true, true,					/* Remote Number */
+	33, -1,						/* Time */
+	 1,  0,						/* Nonstandard fields */
+	40, true					/* User Data */
 };
 
+/* sending */
 static const SMSMessage_Layout nk7110_submit = {
 	true,
-	-1, 18, 18, 18, -1, 19, 20, -1, 22, 21, 18, 18,
-	6, true, 23, true, -1, -1,
+	 5, true, true,
+	-1, 17, 17, 17, -1, 18, 19, -1, 21, 20, 17, 17,
+	22, true, true,
 	-1, -1,
-	42, true
+	-1, -1,
+	41, true
 };
+
+/* saving
+static const SMSMessage_Layout nk7110_submit = {
+	true,
+	 9, true, true,
+	-1, 21, 21, 21, -1, 22, 23, -1, 25, 24, 21, 21,
+	26, true, true,
+	-1, -1,
+	-1, -1,
+	45, true
+};*/
 
 static const SMSMessage_Layout nk7110_delivery_report = {
 	true,
-	0, 0, 0, 0, 7, 0, 0, 0, 23, 22, -1, 21,
-	9, true, 24, true, 36, 43,
-	5, 4,
-	23, true
+	 5, true, true,
+	-1, -1, -1, -1,  3, -1, -1, -1, 19, 18, -1, 17,
+	20, true, true,
+	32, 39,
+	 1,  0,
+	10, true
 };
 
 static const SMSMessage_Layout nk7110_picture = {
 	true,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	9, true, 22, true, 34, -1,
-	0, 0,
-	47, true
+	 5, true, true,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	18, true, true,
+	30, -1,
+	-1, -1,
+	43, true
 };
 
 static SMSMessage_PhoneLayout nk7110_layout;
@@ -181,7 +201,9 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 	memcpy(&(state->Phone), &phone_nokia_7110, sizeof(GSM_Phone));
 
 	/* SMS Layout */
-	nk7110_layout.Type = 8; /* Locate the Type of the mesage field */
+	nk7110_layout.Type = 8; /* Locate the Type of the mesage field. */
+	nk7110_layout.SendHeader = 6;
+	nk7110_layout.ReadHeader = 4;
 	nk7110_layout.Deliver = nk7110_deliver;
 	nk7110_layout.Submit = nk7110_submit;
 	nk7110_layout.DeliveryReport = nk7110_delivery_report;
@@ -558,7 +580,7 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 		switch (message[6]) {
 		case 0x3d: return GE_PHBOOKWRITEFAILED;
 		case 0x3e: return GE_PHBOOKWRITEFAILED;
-		default: return GE_NONE;
+		default:   return GE_NONE;
 		}
 		break;	
 	default:
@@ -584,7 +606,7 @@ static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state)
 	SM_GetError(state, 0x1b);
 	
 	/* Check that we are back at state Initialised */
-	if (SM_Loop(state,0)!=Initialised) return GE_UNKNOWN;
+	if (SM_Loop(state,0) != Initialised) return GE_UNKNOWN;
 	return GE_NONE;
 }
 
@@ -679,6 +701,8 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
                                 dprintf("[%02x ]", message[i]);
                 dprintf("\n");
 
+		if (!data->SMSMessage) return GE_INTERNALERROR;
+
 		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
 
 		/* Number of SMS in folder */
@@ -707,21 +731,27 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("UNKNOWN\n");
 			break;
 		}
+
 		/* See if message# is given back by phone. If not and status is unread */
 		/* we want it, if status is not unread it's a "random" message given back */
 		/* by the phone because we want a message of which the # doesn't exist */
-		found = false;
-		for (i = 0; i < data->SMSFolder->number; i++) {
-			if (data->SMSMessage->Number == data->SMSFolder->locations[i]) 
-				found = true;
+		if (data->SMSFolder) {
+			found = false;
+			for (i = 0; i < data->SMSFolder->number; i++) {
+				if (data->SMSMessage->Number == data->SMSFolder->locations[i]) 
+					found = true;
+			}
+			/* Should we return here GE_INVALIDSMSLOCATION or GE_EMPTYSMSLOCATION ? */
+			if (!found && data->SMSMessage->Status != SMS_Unread) return GE_INVALIDSMSLOCATION;
 		}
-		if (!found && data->SMSMessage->Status != SMS_Unread) return GE_INVALIDSMSLOCATION;
 
 		if (!data->RawData) {
 			data->RawData = (GSM_RawData *)malloc(sizeof(GSM_RawData));
 		}
-		data->RawData->Data = message;
-		data->RawData->Length = length;
+
+		/* Skip the frame header */
+		data->RawData->Data = message + nk7110_layout.ReadHeader;
+		data->RawData->Length = length - nk7110_layout.ReadHeader;
 		dprintf("Everything set\n");
 
                 break;
@@ -844,9 +874,10 @@ static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 		P7110_GetSMSCenter(data, state);
 	}
 
-	/* length = EncodePDUSMS(data->SMSMessage, req); */
-	length = data->RawData->Length;
-	if (!length) return GE_SMSWRONGFORMAT;
+	/* 6 is the frame header as above */
+	length = data->RawData->Length + 6;
+	if (length < 0) return GE_SMSWRONGFORMAT;
+	memcpy(req + 6, data->RawData->Data, data->RawData->Length);
 	dprintf("Sending SMS...(%d)\n", length);
 	for (i = 0; i < length; i++) {
 		dprintf("%02x ", req[i]);

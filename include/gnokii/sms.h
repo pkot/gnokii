@@ -335,35 +335,60 @@ typedef struct {
 } GSM_SMSMessage;
 
 /* Define the layout of the SMS message header */
+/* Misc notes:
+ *   - value -1 indicates in the location field means that the field is not
+ *     supported,
+ *   - when SMSC/Remote numbers have variable width all other fields should
+ *     contain values as its value was 1 ('0x00' as the length) -- if field X
+ *     follows SMSCNumber, X's locations would be SMSC's location + 1,
+ *   - see the examples in common/phones/7110.c, commmon/phones/6100.c,
+ *     common/phones/atgen.c.
+ */
 typedef struct {
-	bool IsSupported;
-	short MoreMessages;
-	short ReplyViaSameSMSC;
-	short RejectDuplicates;
-	short Report;
-	short Number;
-	short Reference;
-	short PID;
-	short ReportStatus;
-	short Length;
-	short DataCodingScheme;
-	short Validity;
-	short UserDataHeader;
-	short MessageCenter;
-	bool IsMessageCenterCoded;
-	short RemoteNumber;
-	bool IsRemoteNumberCoded;
-	short SMSCTime;
-	short Time;
-	short MemoryType;
-	short Status;
-	short UserData;
-	bool IsUserDataCoded;
+	bool IsSupported;		/* Indicates if SMS is supported */
+
+	short MessageCenter;		/* Location of the MessageCenter */
+	bool IsMessageCenterCoded;	/* Indicates if the MessageCenter address is BCD coded */
+	bool HasMessageCenterFixedLen;	/* Indicates if the MessageCenter field has always the fixed length */
+
+	short MoreMessages;		/* Location of the MoreMessages bit */
+	short ReplyViaSameSMSC;		/* Location of the ReplyPath bit */
+	short RejectDuplicates;		/* Location of the RejectDuplicates bit */
+	short Report;			/* Location of the Report bit */
+	short Number;			/* Location of the MessageReference number */
+	short Reference;		/* Location of the Reference bit */
+	short PID;			/* Location of the ProtocolIdentifier bit */
+	short ReportStatus;		/* Location of the ReportStatus bit */
+	short Length;			/* Location of the UserDataLength field */
+	short DataCodingScheme;		/* Location of the DataCodingScheme field */
+	short Validity;			/* Location of the Validity field */
+	short UserDataHeader;		/* Location of the UserDataHeader indicator bit */
+
+	short RemoteNumber;		/* Location of the RemoteNumber */
+	bool IsRemoteNumberCoded;	/* Indicates if the RemoteNumber address is BCD coded */
+	bool HasRemoteNumberFixedLen;	/* Indicates if the MessageCenter field has always the fixed length */
+
+	short SMSCTime;			/* Location of the SMSC Reposnse time */
+	short Time;			/* Location of the Delivery time */
+
+	short MemoryType;		/* Location of the Memory Type field */
+	short Status;			/* Location of the Status field */
+	short UserData;			/* Location of the UserData field */
+	bool IsUserDataCoded;		/* Indicates if the UserData should be PDU coded */
 } SMSMessage_Layout;
 
 /* Define set of SMS Headers for the phone series */
 typedef struct {
 	unsigned short Type;
+	/* These are used to distinct between frames:
+	 *    - saved in outbox/templates
+	 *    - used to send message
+	 * The only difference between them is the header length. We can
+	 * distinct these two layouts only by the function from which we
+	 * call it.
+	 */
+	unsigned short SendHeader;
+	unsigned short ReadHeader;
 	SMSMessage_Layout Deliver;
 	SMSMessage_Layout Submit;
 	SMSMessage_Layout DeliveryReport;
@@ -403,10 +428,6 @@ typedef struct {
 	char Message[GSM_MAX_CB_MESSAGE + 1];
 	int New;
 } GSM_CBMessage;
-
-/* Depreciated */
-extern int EncodePDUSMS(GSM_SMSMessage *SMS, char *frame, unsigned short num);
-extern GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength);
 
 /* Utils */
 extern char *GetBCDNumber(u8 *Number);

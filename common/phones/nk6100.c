@@ -464,7 +464,7 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
 
 		/* Short Message status */
-		DecodePDUSMS(message, data->SMSMessage, length);
+		/* DecodePDUSMS(message, data->SMSMessage, length); */
 
                 break;
 	/* read sms failed */
