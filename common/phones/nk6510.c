@@ -1286,7 +1286,7 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *message, int 
 		if (e != GN_ERR_NONE) break;
 
 		data->message_center->id = message[8];
-		data->message_center->format = message[4];
+		data->message_center->format = message[10];
 		data->message_center->validity = message[12];  /* due to changes in format */
 
 		parts_no = message[13];

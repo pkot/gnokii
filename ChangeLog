@@ -8,6 +8,7 @@
     o ringtone handling unified                    (BORBELY Zoltan)
     o PlayTone support added                       (BORBELY Zoltan)
     o DeleteRingtone support added                 (BORBELY Zoltan)
+    o smsc format parsed incorrectly               (BORBELY Zoltan)
  * 6110 series updates
     o phonebook reading fixes                      (BORBELY Zoltan)
     o add nokia 3390 to supported models           (BORBELY Zoltan)
@@ -36,6 +37,7 @@
     o TCP device added to the phone drivers        (BORBELY Zoltan)
  * Documentation updates
     o nk6510 ringtone handling messages updated    (BORBELY Zoltan)
+    o nk6510 getsmsc request/response updated      (BORBELY Zoltan)
  * xgnokii updates
     o ringtone editor crash bug fixed              (BORBELY Zoltan)
     o ringtone editor enhanced                     (BORBELY Zoltan)

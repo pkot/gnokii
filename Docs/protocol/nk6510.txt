@@ -85,10 +85,13 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
 			      blocks... }
     r Send SMS              { 0x03, 0x00, 0x01, 0x0c, 0x08, 0x00, 0x00, 0xdb, 0x55, 0x55, 0x00 }
 
-    s Get SMSC              { 0x14, 0x01, 0x00 }
-    r Get SMSC              { 0x15, format,  0x01, 0x0b, 0x28, # of SMSC, 0xf8, 0x00, validity, 0x55 
-                              #blocks,
-                              blocks ...}
+    s Get SMSC              { 0x14, location, 0x00 }
+    r Get SMSC              { 0x15, err,  0x01, 0x0b, 0x28?, location, 0xf8?,
+                              format, 0x00, validity, #blocks, blocks ...}
+			    where: err - 0x00 ok, 0x02 - empty
+			           name block: { 0x81, blklen, namelen (bytes), 0x00, name (unicode) }
+				   number block: { 0x82, blklen, type, ?, number (bcd) }
+				   where type: 0x01 - default, 0x02 - number
 
 0x03: PHONEBOOK HANDLING
 
