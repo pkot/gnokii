@@ -32,6 +32,7 @@
     o added new FAQ entry regrading win32 setup and the relvant
       sample in Docs/sample/gnokiirc                    (Pawel Kot)
     o gnokii --divert alternative added to the FAQ    (Oliver Rath)
+    o added gnokiid AT command set documentation    (Daniele Forsi)
  * libgnokii updates
     o add the function to validate the given date       (Pawel Kot)
     o add optional parameter to disable the retransmission policy;
@@ -63,6 +64,8 @@
  * smsd updates
     o make configurable where to look for the new messages
                                                      (David Vrabel)
+ * gnokiid updates
+    o use correct time field from the sms structure (Daniele Forsi)
 
 0.6.4
 =====

@@ -1,0 +1,282 @@
+AT command reference for gnokiid
+Draft 1 01-feb-2005 by Daniele Forsi
+
+AT* Read SMS
+AT# Set/Get caller ID mode
+AT+ Get phone information
+ATA Answer call
+ATD Dial number
+ATE Set echo on/off
+ATH Hang up call
+ATI Get modem information
+ATQ Set quiet mode on/off
+ATS Set/Get S-register value
+ATV Set verbose on/off
+ATX Choose connect messages
+ATZ Reset modem
+
+
+AT*
+Extended commands "*"
+
+AT*NOKIATEST
+This command is ignored.
+
+AT*C
+Start reading SMS messages
+
+After AT*C modem responds with OK, then the following commands are accepted:
+DIR, EXIT, HELP.
+
+After sending the DIR command you can type the following key followed by the
+Enter key:
+                P: show previous SMS
+                N: show next SMS
+                D: delete current SMS
+                Q: quit to AT*C mode
+
+HELP shows this message:
+The following commands work...
+DIR
+EXIT
+HELP
+
+EXIT: exit to command mode
+
+
+AT# Extended commands "#"
+
+AT#CID Set/Get Caller ID mode
+
+AT#CID? Print current settings
+AT#CID=<n>
+        <n>: 0 Disable caller ID (default)
+        <n>: 1 Enable formatted caller ID
+AT#CID=? Print supported settings, currently (0,1)
+Note: when caller ID is disabled application gets only one RING, when it is
+enabled it gets one RING, then caller ID data, then a second RING.
+
+
+AT+
+Extended commands "+"
+
+AT+C
+Extended commands "+C"
+
+AT+CSQ
+Get RF Level
+<code>
+AT+CSQ
++CSQ: 31, 99
+OK
+</code>
+First number is SQM (Signal Quality Measurement) range is 0..31 or 99 if not
+known or not detectable.
+Second number is FER (Frame Error Rate) range is 0..7 or 99 if not known or
+not detectable (in this version it is always 99).
+
+AT+CGMI
+Print manufacturer information
+<code>
+AT+CGMI
+Nokia Mobile Phones
+OK
+</code>
+
+AT+CGSN
+Print IMEI
+<code>
+AT+CGSN
+350601234567890
+OK
+</code>
+
+AT+CGMR
+Print hardware revision
+<code>
+AT+CGMR
+SW 04.30, HW 0911
+OK
+</code>
+
+AT+CGMM
+Print model code
+<code>
+AT+CGMM
+NHM-6
+OK
+</code>
+
+AT+CMGD Delete SMS
+        AT+CMGD=<n>
+        <n>: message number
+AT+CMGF Select SMS format
+        AT+CMGF=<n>
+                0: PDU_MODE (default)
+                1: TEXT_MODE
+        AT+CMGF? Show current format; only TEXT_MODE is supported by AT+CMGL
+AT+CMGR Read SMS message
+        AT+CMGR=<n>
+        <n>: message number
+AT+CMGS Send SMS
+        AT+CMGS="<n>"
+        <n>: destination phone number (quotes are mandatory)
+        CTRL+Z to send, ESC to abort
+AT+CMGL List SMS
+        AT+CMGL=<stat>
+                <stat>: (empty) 1 3 "REC READ" "REC SENT"
+                0 2 "REC UNREAD" "REC UNSENT"
+                4 "ALL"
+Note: quotes are mandatory
+
+
+AT+G
+Extended commands "+G"
+
+AT+GMI Print manufacturer information for the TA (Terminal Adaptor)
+                Hugh Blemings, Pavel Janik ml. and others...
+
+AT+GMR Print revision information for the TA (Terminal Adaptor)
+gnokiid version, compile date and time
+<code>
+AT+GMR
+0.6.4 10:49:37 Jan 31 2005
+OK
+</code>
+
+AT+GMM Print model information for the TA (Terminal Adaptor)
+The string is "gnokii configured on %s for models %s"
+<code>
+AT+GMM
+gnokii configured on /dev/ttyS0 for models
+6110|6130|6150|6190|5110|5130|5190|31
+OK
+</code>
+
+AT+GSN
+Print serial number for the TA (Terminal Adaptor)
+<code>
+AT+GSN
+none built in, choose your own
+OK
+</code>
+
+
+ATA
+Answer call
+
+Answer incoming call
+
+
+D
+Dial number
+
+"T" and "P" are ignored, all subsequent characters are passed to phone
+Before dialing you must set S35 == 0 for DigitalData mode or S35 != 0 for
+NonDigitalData mode.
+; is not supported
+(FIXME: ATD needs a better explanation)
+
+
+ATE
+Set character echo on or off
+
+ATE, ATE0 local echo off.
+ATE1 local echo on (default).
+Sets bit 2 of register S14.
+
+
+ATH
+Modem on/off hook
+
+ATH, ATH0 hang up current call
+ATH1 do nothing
+
+
+ATI
+Get modem information
+
+ATI<n>
+        <n>: 0..4
+ATI, ATI0:      /* Print terminal id (print register S39 as decimal) */
+ATI0
+0
+OK
+
+ATI1:   /* Print serial number (IMEI) */
+
+Read from phone
+ATI1
+350601234567890
+OK
+
+ATI2: /* Print phone revision */
+
+Read from phone
+ATI2
+SW 04.30, HW 0911
+OK
+
+ATI3: /* Print modem revision */
+        gnokiid version
+ATI3
+gnokiid 0.6.4
+OK
+
+ATI4: /* Print OEM string */
+
+Read from phone
+ATI4
+Nokia NHM-6
+OK
+
+
+ATQ
+Set results on or off
+
+ATQ, ATQ0 quiet off, print results according to ATV (default).
+ATQ1 quiet on, print nothing.
+Sets bit 4 of register S14.
+This command is ignored.
+
+
+ATS
+Set or get S-register value
+
+ATS<r>?
+Print current value of register
+
+ATS<r>=<v> Set register <r> to value <v>
+        <r>: 0..101
+        <v>: 0..255
+To enable auto answer use ATS0=<v> where <v> is a number greater than zero;
+use ATS0=0 to disable auto answer.
+Note: when auto answer is enabled phone responds immediatly ignoring the value
+of <v>.
+
+
+ATV
+Set verbosity level
+
+ATV, ATV0 verbose off, modem responds with numbers (0, 4)
+ATV1 verbose on, modem responds with words (OK, ERROR) (default)
+Set bit 8 of register S14. This does not affect extended commands.
+
+
+ATX
+Set verbosity of connect messages
+
+ATX<n>
+<n> 0..5
+Set register S22
+This command is ignored.
+
+
+ATZ
+Reset modem and load stored profile
+
+ATZ, ATZ0, ATZ1 all load the same profile
+ATS0=0S1=0S2=43S3=10S4=13S5=8S35=7ATQ1E1S100=26S101=27
+Other registers are set to zero.
+This only resets the virtual modem and not the phone.
+
