@@ -36,6 +36,8 @@
 #include "gsm-common.h"
 #include "phones/generic.h"
 #include "gsm-encoding.h"
+
+#include "gnokii-internal.h"
 #include "gsm-api.h"
 
 /* Some globals */
