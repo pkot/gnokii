@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.25  2001-11-19 16:24:31  pkot
+  Revision 1.26  2001-11-19 17:09:59  pkot
+  Bugfixes
+
+  Revision 1.25  2001/11/19 16:24:31  pkot
   Grrrr... I should have check if I have fixed this typo
 
   Revision 1.24  2001/11/19 15:53:16  pkot
@@ -706,7 +709,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Message: %d SMS Folders received:\n", message[4]);
 
 		strcpy(data->SMSFolderList->Folder[1].Name, "               ");
-		data->SMSFolderList->number = 5;
+		data->SMSFolderList->number = message[4];
       
                 for (j = 0; j < message[4]; j++) {
 			int len;
@@ -834,7 +837,7 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 		if (SM_SendMessage(state, 6, 0x14, req_folders) != GE_NONE) return GE_NOTREADY;
 		error = SM_Block(state, data, 0x14);
 
-		if (data->SMSMessage->MemoryType > data->SMSFolderList->FolderID[data->SMSFolderList->number])
+		if (data->SMSMessage->MemoryType > data->SMSFolderList->FolderID[data->SMSFolderList->number-1])
 			return GE_INVALIDMEMORYTYPE;
 		data->SMSFolder->FolderID = data->SMSMessage->MemoryType;
 		req_status[4] = data->SMSMessage->MemoryType;
