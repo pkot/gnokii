@@ -118,6 +118,19 @@ unsigned char GSM_Default_Alphabet[] = {
   'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
 
+const char *FB61_MemoryType_String [] = {
+  "", 	/* 0x00 */
+  "MT", /* 0x01 */
+  "ME", /* 0x02 */
+  "SM", /* 0x03 */
+  "FD", /* 0x04 */
+  "ON", /* 0x05 */
+  "EN", /* 0x06 */
+  "DC", /* 0x07 */
+  "RC", /* 0x08 */
+  "MC", /* 0x09 */
+};
+
 /* Local variables */
 
 int PortFD; /* Filedescriptor of the mobile phone's device */
@@ -1679,9 +1692,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Message: Memory status received:\n"));
 
-      /* FIXME: Should have some generic function for this... */
-
-      printf(_("   Memory Type: %s\n"), (MessageBuffer[4]==FB61_MEMORY_ME)?_("int"):_("sim"));
+      printf(_("   Memory Type: %s\n"), FB61_MemoryType_String[MessageBuffer[4]]);
       printf(_("   Used: %d\n"), MessageBuffer[6]);
       printf(_("   Free: %d\n"), MessageBuffer[5]);
 #endif DEBUG

@@ -566,6 +566,13 @@ void monitormode(void)
 
   GSM_MemoryStatus SIMMemoryStatus = {GMT_SM, 0, 0};
   GSM_MemoryStatus PhoneMemoryStatus = {GMT_ME, 0, 0};
+  GSM_MemoryStatus DC_MemoryStatus = {GMT_DC, 0, 0};
+  GSM_MemoryStatus EN_MemoryStatus = {GMT_EN, 0, 0};
+  GSM_MemoryStatus FD_MemoryStatus = {GMT_FD, 0, 0};
+  GSM_MemoryStatus LD_MemoryStatus = {GMT_LD, 0, 0};
+  GSM_MemoryStatus MC_MemoryStatus = {GMT_MC, 0, 0};
+  GSM_MemoryStatus ON_MemoryStatus = {GMT_ON, 0, 0};
+  GSM_MemoryStatus RC_MemoryStatus = {GMT_RC, 0, 0};
 
   GSM_SMSStatus SMSStatus = {0, 0};
 
@@ -603,6 +610,27 @@ void monitormode(void)
 
     if (GSM->GetMemoryStatus(&PhoneMemoryStatus) == GE_NONE)
       fprintf(stdout, _("Phone: Used %d, Free %d\n"), PhoneMemoryStatus.Used, PhoneMemoryStatus.Free);
+
+    if (GSM->GetMemoryStatus(&DC_MemoryStatus) == GE_NONE)
+      fprintf(stdout, _("DC: Used %d, Free %d\n"), DC_MemoryStatus.Used, DC_MemoryStatus.Free);
+
+    if (GSM->GetMemoryStatus(&EN_MemoryStatus) == GE_NONE)
+      fprintf(stdout, _("EN: Used %d, Free %d\n"), EN_MemoryStatus.Used, EN_MemoryStatus.Free);
+
+    if (GSM->GetMemoryStatus(&FD_MemoryStatus) == GE_NONE)
+      fprintf(stdout, _("FD: Used %d, Free %d\n"), FD_MemoryStatus.Used, FD_MemoryStatus.Free);
+
+    if (GSM->GetMemoryStatus(&LD_MemoryStatus) == GE_NONE)
+      fprintf(stdout, _("LD: Used %d, Free %d\n"), LD_MemoryStatus.Used, LD_MemoryStatus.Free);
+
+    if (GSM->GetMemoryStatus(&MC_MemoryStatus) == GE_NONE)
+      fprintf(stdout, _("MC: Used %d, Free %d\n"), MC_MemoryStatus.Used, MC_MemoryStatus.Free);
+
+    if (GSM->GetMemoryStatus(&ON_MemoryStatus) == GE_NONE)
+      fprintf(stdout, _("ON: Used %d, Free %d\n"), ON_MemoryStatus.Used, ON_MemoryStatus.Free);
+
+    if (GSM->GetMemoryStatus(&RC_MemoryStatus) == GE_NONE)
+      fprintf(stdout, _("RC: Used %d, Free %d\n"), RC_MemoryStatus.Used, RC_MemoryStatus.Free);
 
     if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE)
       fprintf(stdout, _("SMS Messages: UnRead %d, Number %d\n"), SMSStatus.UnRead, SMSStatus.Number);
