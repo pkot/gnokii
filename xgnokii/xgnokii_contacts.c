@@ -2610,7 +2610,7 @@ inline void GUI_ShowContacts(void)
 
 static void ExportVCARD(FILE * f)
 {
-	gchar buf2[10];
+	gchar buf2[1024];
 	register gint i, j;
 	PhonebookEntry *pbEntry;
 
@@ -2620,29 +2620,15 @@ static void ExportVCARD(FILE * f)
 		if (pbEntry->status == E_Deleted || pbEntry->status == E_Empty)
 			continue;
 
-		fprintf(f, "BEGIN:VCARD\n");
-		fprintf(f, "VERSION:3.0\n");
-		fprintf(f, "FN:%s\n", pbEntry->entry.Name);
-		fprintf(f, "TEL;PREF:%s\n", pbEntry->entry.Number);
-
 		if (pbEntry->entry.MemoryType == GMT_ME)
-			sprintf(buf2, "ME%d", i + 1);
+			sprintf(buf2, "X_GSM_STORE_AT:ME%d\n", i + 1);
 		else
-			sprintf(buf2, "SM%d", i - memoryStatus.MaxME + 1);
+			sprintf(buf2, "X_GSM_STORE_AT:SM%d\n", i - memoryStatus.MaxME + 1);
 
 		fprintf(f, "X_GSM_STORE_AT:%s\n", buf2);
 		fprintf(f, "X_GSM_CALLERGROUP:%d\n", pbEntry->entry.Group);
 
-		/* Add ext. pbk info if required */
-		if (phoneMonitor.supported & PM_EXTPBK)
-			for (j = 0; j < pbEntry->entry.SubEntriesCount; j++) {
-				if (pbEntry->entry.SubEntries[j].EntryType == GSM_Number)
-					fprintf(f, "TEL;UNKNOWN_%d:%s\n",
-						pbEntry->entry.SubEntries[j].NumberType,
-						pbEntry->entry.SubEntries[j].data.Number);
-			}
-
-		fprintf(f, "END:VCARD\n\n");
+		phonebook2vcard(f, &pbEntry->entry, buf2);
 	}
 
 	fclose(f);
@@ -2790,7 +2776,7 @@ static void ExportContacts(void)
 	}
 }
 
-
+/* FIXME: This is very similar to gnokii.c: decodephonebook */
 static bool ParseLine(GSM_PhonebookEntry * entry, gint * num, gchar * buf)
 {
 	register gint i = 0;

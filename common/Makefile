@@ -34,6 +34,7 @@ OBJS =	cfgreader.o \
 	compat.o \
 	snprintf.o \
 	nokia-decoding.o \
+	vcard.o \
 	gsm-call.o
 
 ifdef NO_SHARED

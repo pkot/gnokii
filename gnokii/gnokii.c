@@ -264,7 +264,7 @@ static int usage(FILE *f)
 	fprintf(f, _("   usage: gnokii [--help|--monitor|--version]\n"
 		     "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
 		     "                 [-r|--raw]\n"
-		     "          gnokii --writephonebook [-i]\n"
+		     "          gnokii --writephonebook [-iv]\n"
 		     "          gnokii --getwapbookmark number\n"
 		     "          gnokii --writewapbookmark name URL\n"
 		     "          gnokii --deletewapbookmark number\n"
@@ -2967,7 +2967,7 @@ static int getphonebook(int argc, char *argv[])
 	int count, start_entry, end_entry = 0;
 	gn_error error;
 	char *memory_type_string;
-	bool all = false, raw = false;
+	bool all = false, raw = false, vcard = false;
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
@@ -2983,7 +2983,9 @@ static int getphonebook(int argc, char *argv[])
 		break;
 	case 4:
 		if (!strcmp(argv[3], "-r") || !strcmp(argv[3], "--raw")) raw = true;
-		else usage(stderr);
+		else 
+			if (!strcmp(argv[3], "-v") || !strcmp(argv[3], "--vcard")) vcard = true;
+			else usage(stderr);
 	case 3:
 		if (!strcmp(argv[2], "end")) all = true;
 		else if (!strcmp(argv[2], "-r") || !strcmp(argv[2], "--raw")) raw = true;
@@ -3014,6 +3016,10 @@ static int getphonebook(int argc, char *argv[])
 				fprintf(stdout, "\n");
 				if (entry.MemoryType == GMT_MC || entry.MemoryType == GMT_DC || entry.MemoryType == GMT_RC)
 					fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.Date.Day, entry.Date.Month, entry.Date.Year, entry.Date.Hour, entry.Date.Minute, entry.Date.Second);
+			} else if (vcard) {
+				char buf[10240];
+				sprintf(buf, "X_GSM_STORE_AT:%s%d\n", memory_type_string, entry.Location);
+				phonebook2vcard(stdout, &entry, buf);
 			} else {
 				fprintf(stdout, _("%d. Name: %s\nNumber: %s\nGroup id: %d\n"), entry.Location, entry.Name, entry.Number, entry.Location);
 				for (i = 0; i < entry.SubEntriesCount; i++) {
@@ -3083,6 +3089,106 @@ static int getphonebook(int argc, char *argv[])
 	return 0;
 }
 
+static char * decodephonebook(GSM_PhonebookEntry *entry, char *OLine)
+{
+	char *Line = OLine;
+	char *ptr;
+	char *memory_type_string;
+	char BackLine[MAX_INPUT_LINE_LEN];
+	int subentry;
+
+	strcpy(BackLine, Line);
+	memset(entry, 0, sizeof(GSM_PhonebookEntry));
+
+	ptr = strsep(&Line, ";");
+	if (ptr) strncpy(entry->Name, ptr, sizeof(entry->Name) - 1);
+
+	ptr = strsep(&Line, ";");
+	if (ptr) strncpy(entry->Number, ptr, sizeof(entry->Number) - 1);
+
+	ptr = strsep(&Line, ";");
+
+	if (!ptr) {
+		fprintf(stderr, _("Format problem on line [%s]\n"), BackLine);
+		Line = OLine;
+		return NULL;
+	}
+
+	if (!strncmp(ptr, "ME", 2)) {
+		memory_type_string = "int";
+		entry->MemoryType = GMT_ME;
+	} else {
+		if (!strncmp(ptr, "SM", 2)) {
+			memory_type_string = "sim";
+			entry->MemoryType = GMT_SM;
+		} else {
+			fprintf(stderr, _("Format problem on line [%s]\n"), BackLine);
+			return NULL;
+		}
+	}
+
+	ptr = strsep(&Line, ";");
+	if (ptr) entry->Location = atoi(ptr);
+	else entry->Location = 0;
+
+	ptr = strsep(&Line, ";");
+	if (ptr) entry->Group = atoi(ptr);
+	else entry->Group = 0;
+
+	if (!ptr) {
+		fprintf(stderr, _("Format problem on line [%s]\n"), BackLine);
+		return NULL;
+	}
+
+	for (subentry = 0; ; subentry++) {
+		ptr = strsep(&Line, ";");
+
+		if (ptr && *ptr != 0)
+			entry->SubEntries[subentry].EntryType = atoi(ptr);
+		else
+			break;
+
+		ptr = strsep(&Line, ";");
+		if (ptr) entry->SubEntries[subentry].NumberType = atoi(ptr);
+
+		/* Phone Numbers need to have a number type. */
+		if (!ptr && entry->SubEntries[subentry].EntryType == GSM_Number) {
+			fprintf(stderr, _("Missing phone number type on line %d"
+					  " entry [%s]\n"), subentry, BackLine);
+			subentry--;
+			break;
+		}
+
+		ptr = strsep(&Line, ";");
+		if (ptr) entry->SubEntries[subentry].BlockNumber = atoi(ptr);
+
+		ptr = strsep(&Line, ";");
+
+		/* 0x13 Date Type; it is only for Dailed Numbers, etc.
+		   we don't store to this memories so it's an error to use it. */
+		if (!ptr || entry->SubEntries[subentry].EntryType == GSM_Date) {
+			fprintf(stderr, _("There is no phone number on line [%s] entry %d\n"),
+				BackLine, subentry);
+			subentry--;
+			break;
+		} else
+			strncpy(entry->SubEntries[subentry].data.Number, ptr, sizeof(entry->SubEntries[subentry].data.Number) - 1);
+	}
+
+	entry->SubEntriesCount = subentry;
+
+	/* This is to send other exports (like from 6110) to 7110 */
+	if (!entry->SubEntriesCount) {
+		entry->SubEntriesCount = 1;
+		entry->SubEntries[subentry].EntryType   = GSM_Number;
+		entry->SubEntries[subentry].NumberType  = GSM_General;
+		entry->SubEntries[subentry].BlockNumber = 2;
+		strcpy(entry->SubEntries[subentry].data.Number, entry->Number);
+	}
+	return memory_type_string;
+}
+
+
 /* Read data from stdin, parse and write to phone.  The parsing is relatively
    crude and doesn't allow for much variation from the stipulated format. */
 /* FIXME: I guess there's *very* similar code in xgnokii */
@@ -3091,111 +3197,29 @@ static int writephonebook(int argc, char *args[])
 	GSM_PhonebookEntry entry;
 	gn_error error = GN_ERR_NOTSUPPORTED;
 	char *memory_type_string;
-	int line_count = 0;
-	int subentry;
-	char *Line, OLine[MAX_INPUT_LINE_LEN], BackLine[MAX_INPUT_LINE_LEN];
-	char *ptr;
+	char *Line, OLine[MAX_INPUT_LINE_LEN];
+	int vcard = 0;
 
 	/* Check argument */
-	if (argc && (strcmp("-i", args[0])))
+	if (argc && (strcmp("-i", args[0])) && (strcmp("-v", args[0])))
 		usage(stderr);
+
+	if (!strcmp("-v", args[0]))
+		vcard = 1;
 
 	Line = OLine;
 
-	memset(&entry, 0, sizeof(GSM_PhonebookEntry));
-
 	/* Go through data from stdin. */
-	while (GetLine(stdin, Line, MAX_INPUT_LINE_LEN)) {
-		strcpy(BackLine, Line);
-		line_count++;
-
-		ptr = strsep(&Line, ";");
-		if (ptr) strncpy(entry.Name, ptr, sizeof(entry.Name) - 1);
-
-		ptr = strsep(&Line, ";");
-		if (ptr) strncpy(entry.Number, ptr, sizeof(entry.Number) - 1);
-
-		ptr = strsep(&Line, ";");
-
-		if (!ptr) {
-			fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
-			Line = OLine;
-			continue;
-		}
-
-		if (!strncmp(ptr, "ME", 2)) {
-			memory_type_string = "int";
-			entry.MemoryType = GMT_ME;
+	while (1) {
+		if (!vcard) {
+			if (!GetLine(stdin, Line, MAX_INPUT_LINE_LEN))
+				break;
+			if (decodephonebook(&entry, OLine))
+				continue;
 		} else {
-			if (!strncmp(ptr, "SM", 2)) {
-				memory_type_string = "sim";
-				entry.MemoryType = GMT_SM;
-			} else {
-				fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
+			if (vcard2phonebook(stdin, &entry))
 				break;
-			}
 		}
-
-		ptr = strsep(&Line, ";");
-		if (ptr) entry.Location = atoi(ptr);
-		else entry.Location = 0;
-
-		ptr = strsep(&Line, ";");
-		if (ptr) entry.Group = atoi(ptr);
-		else entry.Group = 0;
-
-		if (!ptr) {
-			fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
-			continue;
-		}
-
-		for (subentry = 0; ; subentry++) {
-			ptr = strsep(&Line, ";");
-
-			if (ptr && *ptr != 0)
-				entry.SubEntries[subentry].EntryType = atoi(ptr);
-			else
-				break;
-
-			ptr = strsep(&Line, ";");
-			if (ptr) entry.SubEntries[subentry].NumberType = atoi(ptr);
-
-			/* Phone Numbers need to have a number type. */
-			if (!ptr && entry.SubEntries[subentry].EntryType == GSM_Number) {
-				fprintf(stderr, _("Missing phone number type on line %d"
-						  " entry %d [%s]\n"), line_count, subentry, BackLine);
-				subentry--;
-				break;
-			}
-
-			ptr = strsep(&Line, ";");
-			if (ptr) entry.SubEntries[subentry].BlockNumber = atoi(ptr);
-
-			ptr = strsep(&Line, ";");
-
-			/* 0x13 Date Type; it is only for Dailed Numbers, etc.
-			   we don't store to this memories so it's an error to use it. */
-			if (!ptr || entry.SubEntries[subentry].EntryType == GSM_Date) {
-				fprintf(stderr, _("There is no phone number on line %d entry %d [%s]\n"),
-					line_count, subentry, BackLine);
-				subentry--;
-				break;
-			} else
-				strncpy(entry.SubEntries[subentry].data.Number, ptr, sizeof(entry.SubEntries[subentry].data.Number) - 1);
-		}
-
-		entry.SubEntriesCount = subentry;
-
-		/* This is to send other exports (like from 6110) to 7110 */
-		if (!entry.SubEntriesCount) {
-			entry.SubEntriesCount = 1;
-			entry.SubEntries[subentry].EntryType   = GSM_Number;
-			entry.SubEntries[subentry].NumberType  = GSM_General;
-			entry.SubEntries[subentry].BlockNumber = 2;
-			strcpy(entry.SubEntries[subentry].data.Number, entry.Number);
-		}
-
-		Line = OLine;
 
 		if (argc) {
 			GSM_PhonebookEntry aux;
@@ -3216,7 +3240,7 @@ static int writephonebook(int argc, char *args[])
 						if (!strcmp(ans, _("yes"))) confirm = 1;
 						else if (!strcmp(ans, _("no"))) confirm = 0;
 					}
-					if (!confirm) continue;
+					if (!confirm) return -1;
 				}
 			} else {
 				fprintf(stderr, _("Error (%s)\n"), gn_error_print(error));
