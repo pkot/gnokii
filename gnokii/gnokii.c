@@ -113,7 +113,7 @@ typedef enum {
 	OPT_WRITECALENDARNOTE,
 	OPT_DELCALENDARNOTE,
 	OPT_GETDISPLAYSTATUS,
-	OPT_GETMEMORY,
+	OPT_GETPHONEBOOK,
 	OPT_WRITEPHONEBOOK,
 	OPT_GETSPEEDDIAL,
 	OPT_SETSPEEDDIAL,
@@ -247,7 +247,7 @@ static void version(void)
 static int usage(FILE *f)
 {
 	fprintf(f, _("   usage: gnokii [--help|--monitor|--version]\n"
-		     "          gnokii --getmemory memory_type start_number [end_number|end]\n"
+		     "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
 		     "          gnokii --writephonebook [-i]\n"
 		     "          gnokii --getspeeddial number\n"
 		     "          gnokii --setspeeddial number memory_type location\n"
@@ -2674,7 +2674,7 @@ static int setprofile()
 
 /* Get requested range of memory storage entries and output to stdout in
    easy-to-parse format */
-static int getmemory(int argc, char *argv[])
+static int getphonebook(int argc, char *argv[])
 {
 	GSM_PhonebookEntry entry;
 	int count, start_entry, end_entry = 0;
@@ -3664,7 +3664,7 @@ int main(int argc, char *argv[])
 		{ "getdisplaystatus",   no_argument,       NULL, OPT_GETDISPLAYSTATUS },
 
 		/* Get memory mode */
-		{ "getmemory",          required_argument, NULL, OPT_GETMEMORY },
+		{ "getphonebook",       required_argument, NULL, OPT_GETPHONEBOOK },
 
 		/* Write phonebook (memory) mode */
 		{ "writephonebook",     optional_argument, NULL, OPT_WRITEPHONEBOOK },
@@ -3774,7 +3774,7 @@ int main(int argc, char *argv[])
 		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
 		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
-		{ OPT_GETMEMORY,         2, 3, 0 },
+		{ OPT_GETPHONEBOOK,      2, 3, 0 },
 		{ OPT_GETSPEEDDIAL,      1, 1, 0 },
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
 		{ OPT_GETSMS,            2, 5, 0 },
@@ -3917,8 +3917,8 @@ int main(int argc, char *argv[])
 		case OPT_WRITECALENDARNOTE:
 			rc = writecalendarnote(nargv);
 			break;
-		case OPT_GETMEMORY:
-			rc = getmemory(nargc, nargv);
+		case OPT_GETPHONEBOOK:
+			rc = getphonebook(nargc, nargv);
 			break;
 		case OPT_GETSPEEDDIAL:
 			rc = getspeeddial(optarg);

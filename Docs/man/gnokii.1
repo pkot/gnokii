@@ -10,7 +10,7 @@ gnokii \- modem/fax driver for Nokia mobile phones
 is a Linux/Unix tool suite and (eventually) modem/fax driver for Nokia mobile phones, released under the GPL.
 .PP 
 .B gnokii
-supports most phones from the 3810/8110 and 5110/6110 series, details including bugs specific to each series appear in the files Docs/README\-3810 and Docs/README\-6110 respectively.  
+supports most of the Nokia mobiles including 6100 series, 7110/6210/6250, and some recent models as 6310. It supports also the phones that are capable to understand AT commands. Tested AT phones are: Nokia 7110/6210/6250/6310/6510/8210, Siemens S25, Siemens SL45i, Ericsson T39, SonyEricsson T68i.
 
 .SH "OPTIONS"
 The options that are recognized by
@@ -137,7 +137,7 @@ set the \fIrtttlfile\fR as ringtone (on 6110).
 
 .SS PHONEBOOK
 .TP 
-.BR "\-\-getmemory \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP]"
+.BR "\-\-getphonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP]"
 reads specificed memory location from phone.
 If [\fIend_number\fR] is not specified only one location \- [\fIstart\fR] is
 read.
