@@ -5,7 +5,7 @@
 # Written by Pawe³ Kot <pkot@linuxnews.pl>
 #
 
-ARCH=i386
+ARCH=@ARCH@
 PN=@PACKAGE@
 PV=@VERSION@
 
