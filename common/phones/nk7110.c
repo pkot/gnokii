@@ -39,6 +39,7 @@
 
 #include "misc.h"
 #include "gsm-common.h"
+#include "nokia-decoding.h"
 #include "phones/generic.h"
 #include "phones/nk7110.h"
 #include "links/fbus.h"
@@ -444,9 +445,6 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 	unsigned char *blockstart;
 	unsigned char blocks;
 	unsigned char subblockcount;
-	char *str;
-	int i;
-	GSM_SubPhonebookEntry* subEntry = NULL;
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */
@@ -1107,8 +1105,7 @@ static GSM_Error P7110_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Error			e = GE_NONE;
-	unsigned char			*block;
-	int				i, alarm, year;
+	int				i, year;
 
 	if (!data || !data->CalendarNote) return GE_INTERNALERROR;
 

@@ -1194,10 +1194,7 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	unsigned char *blockstart;
 	unsigned char blocks;
-	unsigned char subblockcount;
-	int i;
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */
@@ -1629,7 +1626,7 @@ static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Error			e = GE_NONE;
-	int				i, alarm, year;
+	int				i, year;
 
 	if (!data || !data->CalendarNote) return GE_INTERNALERROR;
 
