@@ -159,6 +159,7 @@ char *GetProfileVibrationString(int code) {
   }
 }
 
+/*FIXME: correct only for N6110*/
 char *GetRingtoneName(int code) {
 
   switch (code) {
@@ -250,6 +251,7 @@ int usage(void)
 "          gnokii --getlogo logofile {caller|op|startup} [caller group number]\n"
 "          gnokii --sendringtone destionation rtttlfile\n"
 "          gnokii --reset [soft|hard]\n"
+"          gnokii --showprofile [number]\n"
   ));
 #ifdef SECURITY
   fprintf(stdout, _(
@@ -339,6 +341,8 @@ int usage(void)
 "          --sendringtone    send the rtttlfile to destination as ringtone\n\n"
 
 "          --reset [soft|hard] resets the phone.\n\n"
+
+"          --showprofile [number] show settings for selected(all) profile(s)\n\n"
   ));
 #ifdef SECURITY
   fprintf(stdout, _(
@@ -540,6 +544,9 @@ int main(int argc, char *argv[])
 
     // Get logo
     { "getlogo",            required_argument, NULL, OPT_GETLOGO },
+    
+    // Show profile
+    { "showprofile",        optional_argument, NULL, OPT_SHOWPROFILE },
 
 #ifndef WIN32
     // For development purposes: insert you function calls here
@@ -581,6 +588,7 @@ int main(int argc, char *argv[])
     { OPT_SETLOGO,           1, 3, 0 },
     { OPT_GETLOGO,           2, 3, 0 },
     { OPT_RESET,             0, 1, 0 },
+    { OPT_SHOWPROFILE,       0, 1, 0 },
 
     { 0, 0, 0, 0 },
   };
@@ -792,7 +800,11 @@ int main(int argc, char *argv[])
       
       rc = getlogo(nargv);
       break;
-     
+    
+    case OPT_SHOWPROFILE:
+    
+      rc = showprofile(nargc, nargv);
+      break;
 
 #ifndef WIN32
     case OPT_FOOGLE:
@@ -1130,10 +1142,7 @@ int getsms(char *argv[])
 
   /* Handle command line args that set type, start and end locations. */
 
-  /* FIXME: This is done more than once in gnokii, should be in some function
-     or should not be here at all if we can not store SMS in different types
-     of memory */
-
+  
   if (strcmp(argv[0], "ME") == 0) {
     message.MemoryType = GMT_ME;
     memory_type_string = "ME";
@@ -2163,6 +2172,139 @@ int monitormode(void)
   return 0;
 }
 
+/* Reads profile from phone and displays its' settings */
+
+int showprofile(int argc, char *argv[])
+{
+
+/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
+  char model[64];
+
+  int max_profiles;
+  int start, stop, i;
+  GSM_Profile profile;
+  GSM_Error error;
+  
+/* Initialise the code for the GSM interface. */     
+
+  fbusinit(NULL);
+  
+  profile.Number = 0;
+  error=GSM->GetProfile(&profile);
+
+  if (error == GE_NONE)
+  {
+    max_profiles=6;
+    /*for N5110*/
+    /*FIXME: N5130 and 3210 too */
+    /*but how to get ringtone number in these phones?*/
+    if (profile.Ringtone==48) max_profiles=3;
+    
+    if (argc>0)
+    {
+      profile.Number=atoi (argv[0]);
+      profile.Number=profile.Number-1;
+      start=profile.Number;
+      stop=profile.Number+1;
+    
+      if (profile.Number < 0)
+      {
+         fprintf(stderr, _("Profile number must be value from 1 to %i!\n"), max_profiles);
+         GSM->Terminate();
+         return -1;
+      }
+    
+      if (profile.Number >= max_profiles)
+      {
+         fprintf(stderr, _("This phone supports only %i profiles!\n"), max_profiles);
+         GSM->Terminate();
+         return -1;
+      }
+    } else
+    {
+      start=0;
+      stop=max_profiles;
+    }
+
+    while (GSM->GetModel(model)  != GE_NONE)
+      sleep(1);
+    
+    i=start;
+    while (i<stop)
+    {
+      profile.Number=i;
+      
+      if (profile.Number!=0) GSM->GetProfile(&profile);
+
+      printf("%i. \"%s\"", (profile.Number+1), profile.Name);
+      if (profile.DefaultName==-1) printf(" (name defined)");
+      
+#ifdef DEBUG
+   printf("\nKeypad tones: %i\n", profile.KeypadTone);
+   printf("Lights: %i\n", profile.Lights);      
+   printf("Call alert: %i\n", profile.CallAlert);
+   printf("Ringtone number: %i\n", profile.Ringtone);
+   printf("Volume: %i\n", profile.Volume);
+   printf("Message tone: %i\n", profile.MessageTone);
+   printf("Warning tone: %i\n", profile.WarningTone);
+   printf("Vibration: %i\n", profile.Vibration);
+   printf("Caller groups: 0x%02x\n", profile.CallerGroups);
+   printf("Automatic answer: %i\n", profile.AutomaticAnswer);
+#endif      
+      
+      printf("\nKeypad tones: %s\n", GetProfileKeypadToneString(profile.KeypadTone));
+    
+      /*FIX ME: Light settings is only used for Car*/
+      if (profile.Number==(max_profiles-2)) printf("Lights: %s\n", profile.Lights ? "on" : "off");
+    
+      printf("Call alert: %s\n", GetProfileCallAlertString(profile.CallAlert));
+    
+      if (profile.Ringtone!=48)
+      {
+        /*For different phones different ringtones names*/
+        if (model=="NSE-3") //N6110
+        {
+          printf("Ringtone: %s\n", GetRingtoneName(profile.Ringtone));
+        } else
+        {
+          printf("Ringtone number: %i\n", profile.Ringtone);
+        }
+      }
+    
+      printf("Volume: %s\n", GetProfileVolumeString(profile.Volume));
+      printf("Message tone: %s\n", GetProfileMessageToneString(profile.MessageTone));
+      printf("Warning tone: %s\n", GetProfileWarningToneString(profile.WarningTone));
+      printf("Vibration: %s\n", GetProfileVibrationString(profile.Vibration));
+
+      /*FIX ME: it will be nice to add here reading caller group name */
+      if (profile.Ringtone!=48) printf("Caller groups: 0x%02x\n", profile.CallerGroups);
+      
+      /*FIX ME: Automatic answer is only used for Car and Headset*/
+      if (profile.Number>=(max_profiles-2)) printf("Automatic answer: %s\n", profile.AutomaticAnswer ? "On" : "Off");
+
+      printf("\n");
+ 
+      i++;
+    }
+  } else {
+    if (error == GE_NOTIMPLEMENTED) {
+       fprintf(stderr, _("Function not implemented in %s model!\n"), model);
+       GSM->Terminate();
+       return -1;
+    } else
+    {
+      fprintf(stderr, _("Unspecified error\n"));
+      GSM->Terminate();
+      return -1;
+    }
+  }
+ 
+  GSM->Terminate();
+
+  return 0;
+
+}
+
 /* Get requested range of memory storage entries and output to stdout in
    easy-to-parse format */
 
@@ -2585,36 +2727,10 @@ int reset( char *type)
 int foogle(char *argv[])
 {
 
-#if 0
-  int i;
-  GSM_Profile profile;
-#endif
-
   /* Initialise the code for the GSM interface. */     
 
   fbusinit(NULL);
   
-#if 0
-  for (i = 0; i <= 6; i++) {
-
-    profile.Number = i;
-    GSM->GetProfile(&profile);
-
-    printf("%i. \"%s\"\n", profile.Number, profile.Name);
-    printf("Keypad tones: %s\n", GetProfileKeypadToneString(profile.KeypadTone));
-    printf("Lights: %s\n", profile.Lights ? "on" : "off");
-    printf("Call alert: %s\n", GetProfileCallAlertString(profile.CallAlert));
-    printf("Ringtone: %s\n", GetRingtoneName(profile.Ringtone));
-    printf("Volume: %s\n", GetProfileVolumeString(profile.Volume));
-    printf("Message tone: %s\n", GetProfileMessageToneString(profile.MessageTone));
-    printf("Warning tone: %s\n", GetProfileWarningToneString(profile.WarningTone));
-    printf("Vibration: %s\n", GetProfileVibrationString(profile.Vibration));
-    printf("Caller groups: 0x%02x\n", profile.CallerGroups);
-    printf("Automatic answer: %s\n", profile.AutomaticAnswer ? "On" : "Off");
-    printf("\n");
-  }
-#endif
-
   FB61_SendRingtoneRTTL("/tmp/q.txt");
 
   sleep(5);

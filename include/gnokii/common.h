@@ -429,6 +429,7 @@ typedef struct {
 typedef struct {
   int Number;          /* The number of the profile. */
   char Name[40];       /* The name of the profile. */
+  int DefaultName;     /* 0-6, when default name is used, -1, when not */
   int KeypadTone;      /* Volumen level for keypad tones. */
   int Lights;          /* Lights on/off. */
   int CallAlert;       /* Incoming call alert. */

@@ -52,6 +52,7 @@ int pmon(void);
 int setlogo(char *argv[]);
 int getlogo(char *argv[]);
 int reset(char *type);
+int showprofile(int argc, char *argv[]);
 void readconfig(void);
 
 typedef enum {
@@ -89,6 +90,7 @@ typedef enum {
   OPT_RESET,
   OPT_SETLOGO,
   OPT_GETLOGO,
+  OPT_SHOWPROFILE,
   OPT_FOOGLE
 } opt_index;
 
@@ -135,6 +137,7 @@ struct gnokii_arg_len {
 #define PROFILE_KEYPAD_LEVEL1  0x00
 #define PROFILE_KEYPAD_LEVEL2  0x01
 #define PROFILE_KEYPAD_LEVEL3  0x02
+//in 5110 I had also once 0x03
 
 #define PROFILE_VOLUME_LEVEL1  0x06
 #define PROFILE_VOLUME_LEVEL2  0x07
