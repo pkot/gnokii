@@ -18,15 +18,15 @@ TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
 OBJS =	tekram.o \
-	unixirda.o \
-	bluetooth.o \
-	unixbluetooth.o \
-	osxbluetooth.o
+	bluetooth.o
 
 ifdef WIN32
 	OBJS += winserial.o
 else
 	OBJS += unixserial.o \
+		unixirda.o \
+		unixbluetooth.o \
+		osxbluetooth.o \
 		tcp.o
 endif
 

@@ -63,6 +63,8 @@
 #  define O_NONBLOCK  0
 #endif
 
+#ifndef WIN32
+
 /* Open the serial port and store the settings. */
 
 static int tcp_open(const char *file)
@@ -205,3 +207,5 @@ size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *st
 {
 	return write(fd, buf, n);
 }
+
+#endif /* WIN32 */
