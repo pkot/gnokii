@@ -120,6 +120,50 @@ API char *gn_memory_type2str(gn_memory_type mt)
 	}
 }
 
+/**
+ * gn_number_sanitize - Remove all white charactes from the string
+ * @number: input/output number string
+ * @maxlen: maximal number length
+ *
+ * Use this function to sanitize GSM phone number format. It changes
+ * number argument.
+ */
+API void gn_number_sanitize(char *number, int maxlen)
+{
+	char *iter, *e;
+
+	iter = e = number;
+	while (*iter && *e && (e - number < maxlen)) {
+		*iter = *e;
+		if (isspace(*iter)) {
+			while (*e && isspace(*e) && (e - number < maxlen)) {
+				e++;
+			}
+		}
+		*iter = *e;
+		iter++;
+		e++;
+	}
+	*iter = 0;
+}
+
+/**
+ * gn_phonebook_entry_sanitize - Remove all white charactes from the string
+ * @entry: phonebook entry to sanitize
+ *
+ * Use this function before any attempt to write an entry to the phone.
+ */
+API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry)
+{
+	int i;
+
+	gn_number_sanitize(entry->number, GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1);
+	for (i = 0; i < entry->subentries_count; i++) {
+		if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number)
+			gn_number_sanitize(entry->subentries[i].data.number, GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1);
+	}
+}
+
 /* 
  * This very small function is just to make it easier to clear
  * the data struct every time one is created 

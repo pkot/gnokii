@@ -3384,6 +3384,7 @@ static int writephonebook(int argc, char *args[])
 		}
 
 		/* Do write and report success/failure. */
+		gn_phonebook_entry_sanitize(&entry);
 		data.phonebook_entry = &entry;
 		error = gn_sm_functions(GN_OP_WritePhonebook, &data, &state);
 

@@ -97,6 +97,9 @@ API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry);
 API int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number);
 API int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number);
 
+API void gn_number_sanitize(char *number, int maxlen);
+API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry);
+
 extern API void (*gn_elog_handler)(const char *fmt, va_list ap);
 API void gn_elog_write(const char *fmt, ...);
 

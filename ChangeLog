@@ -69,6 +69,11 @@
     o don't clear gn_phonebook_entry when reading vCard or
       LDIF file -- caller may have already prepared something
       (defaults)                                         (Pawel Kot)
+    o add sanitize functions: phones (at least Nokia) do not accept
+      numbers with whitespaces in the phonebook;
+      gn_phonebook_entry_sanitize() and gn_number_sanitize() can
+      be used to remove white characters either from all number
+      entries in the phonebook or in a single number     (Pawel Kot)
 
 0.5.2
 =====
