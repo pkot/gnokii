@@ -1,4 +1,5 @@
 /*
+  $Id$
 
   G N O K I I
 
@@ -14,9 +15,11 @@
   (AT-emulator) and "online" mode where the data pump code translates data
   from/to the GSM handset and the modem data/fax stream.
 
-  Last modification: Mon May 15
-  Modified by Chris Kemp <ck231@cam.ac.uk>
+  $Log$
+  Revision 1.3  2000-12-27 10:54:14  pkot
+  Added Unix98 PTYs support (Michael Mráka).
 
+  
 */
 
 #define		__virtmodem_c
@@ -178,7 +181,6 @@ int		VM_PtySetup(char *bindir)
 	char		mgnokiidev[200];
 	char		*slave_name;
 	char		cmdline[200];
-	int			pty_number;
 
 	if (bindir) {
 		strncpy(mgnokiidev, bindir, 200);
@@ -208,11 +210,8 @@ int		VM_PtySetup(char *bindir)
 
 	fprintf (stderr, _("Slave pty is %s, calling %s to create /dev/gnokii.\n"), slave_name, mgnokiidev);
 
-		/* Get pty number, handle numbers greater than 9 correctly */
-	pty_number = strtol(slave_name + 9, (char **) NULL, 16);
-
 		/* Create command line, something line ./mkgnokiidev ttyp0 */
-	sprintf(cmdline, "%s %d", mgnokiidev, pty_number);
+	sprintf(cmdline, "%s %s", mgnokiidev, slave_name);
 
 		/* And use system to call it. */	
 	err = system (cmdline);
@@ -289,7 +288,21 @@ GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Conne
 
 int	VM_GetMasterPty(char **name) { 
 
-   int i = 0, j = 0;
+#ifdef USE_UNIX98PTYS
+	int master, err;
+
+	master = open("/dev/ptmx", O_RDWR | O_NOCTTY | O_NONBLOCK);
+	if (master >= 0) {
+		err = grantpt(master);
+		err = err || unlockpt(master);
+		if (!err) {
+			*name = ptsname(master);
+		} else {
+			return(-1);
+		}
+	}
+#else
+   int i = 0 , j = 0;
    /* default to returning error */
    int master = -1;
 
@@ -321,6 +334,8 @@ int	VM_GetMasterPty(char **name) {
     * name into the slave pty name.
     */
    (*name)[5] = 't';
+
+#endif /* USE_UNIX98PTYS */
 
    return (master);
 }

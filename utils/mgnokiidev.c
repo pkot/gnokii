@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -8,16 +10,14 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Mgnokiidev gets passed a slave pty number by gnokiid and uses this
+  Mgnokiidev gets passed a slave pty name by gnokiid and uses this
   information to create a symlink from the pty to /dev/gnokii.
 
-  Using a number rather than a partial device name is more secure but may be
-  limiting on some systems. If it is on yours, please tell me and/or submit
-  a patch...
-	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.6  2000-12-27 10:54:15  pkot
+  Added Unix98 PTYs support (Michael Mráka).
 
+  
 */
 
 #include <stdio.h>
@@ -33,11 +33,13 @@
 #include <unistd.h>
 #include <ctype.h>
 
+#define DEVLEN	30
+#define MAXLEN	12
+
 int main(int argc, char *argv[])
 {
   int count, err;
-  int dev_number;
-  char dev_name[30];
+  char dev_name[DEVLEN];
 
   /* Check we have one and only one command line argument. */
   if (argc != 2) {
@@ -45,30 +47,20 @@ int main(int argc, char *argv[])
     exit(-2);
   }
 
-  /* Check if argument has a reasonable length (less than 8 characters) */
-  if (strlen(argv[1]) >= 8) {
-    fprintf(stderr, "Argument must be less than 8 characters.\n");
+  /* Check if argument has a reasonable length (less than MAXLEN characters) */
+  if (strlen(argv[1]) >= MAXLEN) {
+    fprintf(stderr, "Argument must be less than %d characters.\n", MAXLEN);
     exit (-2);
   }
 
+  strncpy(dev_name, argv[1], DEVLEN);
+
   /* Check for suspicious characters. */
-  for (count = 0; count < strlen(argv[1]); count ++)
-    if (!isalnum(argv[1][count])) {
+  for (count = 0; count < strlen(dev_name); count ++)
+    if (!(isalnum(dev_name[count]) || dev_name[count]=='/')) {
       fprintf(stderr, "Suspicious character at index %d in argument.\n", count);
       exit (-2);
     }
-
-  /* Get device number */	
-  dev_number = atoi(argv[1]);
-
-  /* Sanity check. */
-  if (dev_number < 0 || dev_number > 100) {
-    fprintf(stderr, "tty number was bizzare!.\n");
-    exit (-2);
-  }
-
-  /* Turn device number into full path */
-  sprintf(dev_name, "/dev/ttyp%x", dev_number);
 
   /* Now become root */
   setuid(0);

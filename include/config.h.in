@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.3  2000-12-19 16:18:19  pkot
+  Revision 1.4  2000-12-27 10:54:14  pkot
+  Added Unix98 PTYs support (Michael Mráka).
+
+  Revision 1.3  2000/12/19 16:18:19  pkot
   configure script updates and added shared function for configfile reading
 
 
@@ -54,6 +57,9 @@
 
 /* Define if you want NLS */
 #undef USE_NLS
+
+/* Define if you want to use Unix98 PTYs */
+#undef USE_UNIX98PTYS
 
 /* Define if you compile for M$ Windows */
 #undef WIN32
