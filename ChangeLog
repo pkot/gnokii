@@ -5,6 +5,8 @@
       smsreader problems            (Keary Griffin & BORBELY Zoltan)
  * general fixes
     o caller logo sending fixed                   (Anton V.Dorofeev)
+ * 6110 series updates
+    o "calendar functions busy" messages handled    (BORBELY Zoltan)
 
 0.5.0
 =====

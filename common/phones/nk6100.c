@@ -2462,6 +2462,9 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 			case 0x73:
 			case 0x7d:
 				return GN_ERR_UNKNOWN;
+		        case 0x81:
+		        	/* calendar functions are busy. well, this status code is better than nothing */
+		        	return GN_ERR_LINEBUSY;
 			default:
 				return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -2519,6 +2522,9 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 		switch (message[4]) {
 		case 0x01:
 			break;
+		case 0x81:
+			/* calendar functions are busy. well, this status code is better than nothing */
+			return GN_ERR_LINEBUSY;
 		case 0x93:
 			return GN_ERR_EMPTYLOCATION;
 		default:
