@@ -564,10 +564,8 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 {
 	int size;
 	GSM_Error error;
-	SMS_UserDataHeader udh;
 
-	memset(&udh, 0, sizeof(SMS_UserDataHeader));
-	error = DecodeSMSHeader(rawsms, sms, &udh);
+	error = DecodeSMSHeader(rawsms, sms, &sms->UDH);
 	if (error != GE_NONE) return error;
 	switch (sms->Type) {
 	case SMS_Delivery_Report:
@@ -616,12 +614,12 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 		break;
 	/* Plain text message */
 	default:
-		size = rawsms->Length - udh.Length;
-		DecodeData(rawsms->UserData + udh.Length,             /* Skip the UDH */
+		size = rawsms->Length - sms->UDH.Length;
+		DecodeData(rawsms->UserData + sms->UDH.Length,        /* Skip the UDH */
 			   (unsigned char *)&sms->UserData[0].u.Text, /* With a plain text message we have only 1 part */
 			   rawsms->Length,                            /* Length of the decoded text */
 			   size,                                      /* Length of the encoded text (in full octets) without UDH */
-			   udh.Length,                                /* To skip the certain number of bits when unpacking 7bit message */
+			   sms->UDH.Length,                          /* To skip the certain number of bits when unpacking 7bit message */
 			   sms->DCS);
 		break;
 	}
