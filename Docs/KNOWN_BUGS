@@ -6,7 +6,7 @@ and
 	model = 7110
 	connection = irda
 
-2. Nokia 6100 with old firmware (04.07 reported) breaks when used with
+2. Nokia 6100 with old firmware (04.01 reported) breaks when used with
 nk6510 driver. Newer firmare (04.17 reported) is known to work.
 Configurations known to be affected:
 	model = 6100
