@@ -407,5 +407,34 @@ typedef struct {
 	unsigned char *Data;
 } GSM_RawData;
 
+typedef enum {
+	GSM_Draw_ClearScreen,
+	GSM_Draw_DisplayText,
+	GSM_Draw_DisplayStatus
+} GSM_DrawCommand;
+
+#define	DRAW_MAX_SCREEN_WIDTH 27
+#define	DRAW_MAX_SCREEN_HEIGHT 5
+
+typedef struct {
+	int x;
+	int y;
+	unsigned char text[DRAW_MAX_SCREEN_WIDTH + 1];
+} GSM_DrawData_DisplayText;
+
+typedef struct {
+	GSM_DrawCommand Command;
+	union {
+		GSM_DrawData_DisplayText DisplayText;
+		int DisplayStatus;
+	} Data;
+} GSM_DrawMessage;
+
+typedef struct {
+	void (*OutputFn)(GSM_DrawMessage *DrawMessage);
+	int State;
+	struct timeval Last;
+} GSM_DisplayOutput;
+
 
 #endif	/* __gsm_common_h */

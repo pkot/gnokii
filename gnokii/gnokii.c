@@ -1918,29 +1918,74 @@ static int monitormode(void)
 }
 
 
+static void  PrintDisplayStatus(int Status)
+{
+	fprintf(stdout, _("Call in progress: %-3s\n"), Status & (1<<DS_Call_In_Progress)?_("on"):_("off"));
+	fprintf(stdout, _("Unknown: %-3s\n"),          Status & (1<<DS_Unknown)?_("on"):_("off"));
+	fprintf(stdout, _("Unread SMS: %-3s\n"),       Status & (1<<DS_Unread_SMS)?_("on"):_("off"));
+	fprintf(stdout, _("Voice call: %-3s\n"),       Status & (1<<DS_Voice_Call)?_("on"):_("off"));
+	fprintf(stdout, _("Fax call active: %-3s\n"),  Status & (1<<DS_Fax_Call)?_("on"):_("off"));
+	fprintf(stdout, _("Data call active: %-3s\n"), Status & (1<<DS_Data_Call)?_("on"):_("off"));
+	fprintf(stdout, _("Keyboard lock: %-3s\n"),    Status & (1<<DS_Keyboard_Lock)?_("on"):_("off"));
+	fprintf(stdout, _("SMS storage full: %-3s\n"), Status & (1<<DS_SMS_Storage_Full)?_("on"):_("off"));
+}
+
 #define ESC "\e"
 
-static GSM_Error PrettyOutputFn(char *Display, char *Indicators)
+static void NewOutputFn(GSM_DrawMessage *DrawMessage)
 {
-	if (Display)
-		printf(ESC "[10;0H Display is:\n%s\n", Display);
-	if (Indicators)
-		printf(ESC "[9;0H Indicators: %s                                                    \n", Indicators);
-	printf(ESC "[1;1H");
-	return GE_NONE;
-}
+	int x, y, n;
+	static int status;
+	static unsigned char screen[DRAW_MAX_SCREEN_HEIGHT][DRAW_MAX_SCREEN_WIDTH];
+	static bool init = false;
 
-#if 0
-/* Uncomment it if used */
-static GSM_Error OutputFn(char *Display, char *Indicators)
-{
-	if (Display)
-		printf("New display is:\n%s\n", Display);
-	if (Indicators)
-		printf("Indicators: %s\n", Indicators);
-	return GE_NONE;
+	if (!init) {
+		for (y = 0; y < DRAW_MAX_SCREEN_HEIGHT; y++)
+			for (x = 0; x < DRAW_MAX_SCREEN_WIDTH; x++)
+				screen[y][x] = ' ';
+		status = 0;
+		init = true;
+	}
+
+	printf(ESC "[1;1H");
+
+	switch (DrawMessage->Command) {
+	case GSM_Draw_ClearScreen:
+		for (y = 0; y < DRAW_MAX_SCREEN_HEIGHT; y++)
+			for (x = 0; x < DRAW_MAX_SCREEN_WIDTH; x++)
+				screen[y][x] = ' ';
+		break;
+
+	case GSM_Draw_DisplayText:
+		x = DrawMessage->Data.DisplayText.x*DRAW_MAX_SCREEN_WIDTH/84;
+		y = DrawMessage->Data.DisplayText.y*DRAW_MAX_SCREEN_HEIGHT/48;
+		n = strlen(DrawMessage->Data.DisplayText.text);
+		if (n > DRAW_MAX_SCREEN_WIDTH)
+			return;
+		if (x + n > DRAW_MAX_SCREEN_WIDTH)
+			x = DRAW_MAX_SCREEN_WIDTH-n;
+		if (y > DRAW_MAX_SCREEN_HEIGHT)
+			y = DRAW_MAX_SCREEN_HEIGHT-1;
+		memcpy(&screen[y][x], DrawMessage->Data.DisplayText.text, n);
+		break;
+
+	case GSM_Draw_DisplayStatus:
+		status = DrawMessage->Data.DisplayStatus;
+		break;
+
+	default:
+		return;
+	}
+
+	for (y = 0; y < DRAW_MAX_SCREEN_HEIGHT; y++) {
+		for (x = 0; x < DRAW_MAX_SCREEN_WIDTH; x++)
+			printf("%c", screen[y][x]);
+		printf("\n");
+	}
+
+	printf("\n");
+	PrintDisplayStatus(status);
 }
-#endif
 
 static void console_raw(void)
 {
@@ -1961,8 +2006,12 @@ static int displayoutput(void)
 {
 	GSM_Data data;
 	GSM_Error error;
+	GSM_DisplayOutput output;
 
-	data.OutputFn = PrettyOutputFn;
+	GSM_DataClear(&data);
+	memset(&output, 0, sizeof(output));
+	output.OutputFn = NewOutputFn;
+	data.DisplayOutput = &output;
 
 	error = SM_Functions(GOP_DisplayOutput, &data, &State);
 	console_raw();
@@ -1982,18 +2031,19 @@ static int displayoutput(void)
 			char buf[105];
 			memset(&buf[0], 0, 102);
 			while (read(0, buf, 100) > 0) {
-				fprintf(stderr, "handling keys (%d).\n", strlen(buf));
-/*				if (GSM && GSM->HandleString && GSM->HandleString(buf) != GE_NONE)
-					fprintf(stdout, _("Key press simulation failed.\n"));*/
+//				fprintf(stderr, "handling keys (%d).\n", strlen(buf));
+//				if (GSM && GSM->HandleString && GSM->HandleString(buf) != GE_NONE)
+//					fprintf(stdout, _("Key press simulation failed.\n"));
 				memset(buf, 0, 102);
 			}
 			SM_Loop(&State, 1);
+			SM_Functions(GOP_PollDisplay, &data, &State);
 		}
 		fprintf (stderr, "Shutting down\n");
 
 		fprintf (stderr, _("Leaving display monitor mode...\n"));
-		data.OutputFn = NULL;
 
+		output.OutputFn = NULL;
 		error = SM_Functions(GOP_DisplayOutput, &data, &State);
 		if (error != GE_NONE)
 			fprintf (stderr, _("Error!\n"));
@@ -2489,16 +2539,7 @@ static int getdisplaystatus(void)
 	data.DisplayStatus = &Status;
 
 	error = SM_Functions(GOP_GetDisplayStatus, &data, &State);
-	if (error == GE_NONE) {
-		fprintf(stdout, _("Call in progress: %s\n"), Status & (1<<DS_Call_In_Progress)?_("on"):_("off"));
-		fprintf(stdout, _("Unknown: %s\n"),          Status & (1<<DS_Unknown)?_("on"):_("off"));
-		fprintf(stdout, _("Unread SMS: %s\n"),       Status & (1<<DS_Unread_SMS)?_("on"):_("off"));
-		fprintf(stdout, _("Voice call: %s\n"),       Status & (1<<DS_Voice_Call)?_("on"):_("off"));
-		fprintf(stdout, _("Fax call active: %s\n"),  Status & (1<<DS_Fax_Call)?_("on"):_("off"));
-		fprintf(stdout, _("Data call active: %s\n"), Status & (1<<DS_Data_Call)?_("on"):_("off"));
-		fprintf(stdout, _("Keyboard lock: %s\n"),    Status & (1<<DS_Keyboard_Lock)?_("on"):_("off"));
-		fprintf(stdout, _("SMS storage full: %s\n"), Status & (1<<DS_SMS_Storage_Full)?_("on"):_("off"));
-	}
+	if (error == GE_NONE) PrintDisplayStatus(Status);
 
 	return error;
 }
@@ -2851,7 +2892,10 @@ static int foogle(char *argv[])
 #endif
 
 static void  gnokii_error_logger(const char *fmt, va_list ap) {
-	if (logfile) vfprintf(logfile, fmt, ap);
+	if (logfile) {
+		vfprintf(logfile, fmt, ap);
+		fflush(logfile);
+	}
 }
 
 static int install_log_handler(void)

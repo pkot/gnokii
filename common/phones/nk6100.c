@@ -28,6 +28,7 @@
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
 #include "phones/nokia.h"
+#include <gsm-encoding.h>
 
 #ifdef WIN32
 #define snprintf _snprintf
@@ -116,6 +117,7 @@ static GSM_Error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetDisplayStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error DisplayOutput(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error PollDisplay(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -229,6 +231,8 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetDisplayStatus(data, state);
 	case GOP_DisplayOutput:
 		return DisplayOutput(data, state);
+	case GOP_PollDisplay:
+		return PollDisplay(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -1693,11 +1697,21 @@ static GSM_Error GetDisplayStatus(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x0d);
 }
 
+static GSM_Error PollDisplay(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Data dummy;
+
+	GSM_DataClear(&dummy);
+	GetDisplayStatus(&dummy, state);
+
+	return GE_NONE;
+}
+
 static GSM_Error DisplayOutput(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x53, 0x00};
 
-	req[4] = data->OutputFn ? 0x01 : 0x02;
+	req[4] = data->DisplayOutput->OutputFn ? 0x01 : 0x02;
 
 	if (SM_SendMessage(state, 5, 0x0d, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x0d);
@@ -1710,12 +1724,15 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 			       1 << DS_Fax_Call, 1 << DS_Data_Call,
 			       1 << DS_Keyboard_Lock, 1 << DS_SMS_Storage_Full };
 	unsigned char *pos;
-	int n;
+	int n, x, y, st;
+	GSM_DrawMessage drawmsg;
+	static GSM_DisplayOutput *disp = NULL;
+	struct timeval now, time_diff, time_limit;
 
 	switch (message[3]) {
 	/* Display output */
 	case 0x50:
-		if (data->OutputFn) {
+		if (disp) {
 			switch (message[4]) {
 			case 0x01:
 				break;
@@ -1723,25 +1740,65 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 				return GE_UNHANDLEDFRAME;
 			}
 			pos = message + 5;
-			dprintf("(x,y): %d/%d, len: %d, data: ", pos[1], pos[0], pos[2]);
-			n = pos[2];
-			pos += 3;
-			for ( ; n > 0; n--, pos += 2) dprintf("%c", pos[1]);
-			dprintf("\n");
+			y = *pos++;
+			x = *pos++;
+			n = *pos++;
+			if (n > DRAW_MAX_SCREEN_WIDTH) return GE_INTERNALERROR;
+
+			/*
+			 * WARNING: the following part can damage your mind!
+			 * This is so ugly, but there's no other way. Nokia
+			 * forgot the clear screen from the protocol, so we
+			 * must implement some heuristic here... :-( - bozo
+			 */
+			time_limit.tv_sec = 0;
+			time_limit.tv_usec = 200000;
+			gettimeofday(&now, NULL);
+			timersub(&now, &disp->Last, &time_diff);
+			if (y > 9 && timercmp(&time_diff, &time_limit, >))
+				disp->State = true;
+			disp->Last = now;
+
+			if (disp->State && y > 9) {
+				disp->State = false;
+				memset(&drawmsg, 0, sizeof(drawmsg));
+				drawmsg.Command = GSM_Draw_ClearScreen;
+				disp->OutputFn(&drawmsg);
+			}
+			/* Maybe this is unneeded, please leave uncommented
+			if (x == 0 && y == 46 && pos[1] != 'M') {
+				disp->State = true;
+			}
+			*/
+
+			memset(&drawmsg, 0, sizeof(drawmsg));
+			drawmsg.Command = GSM_Draw_DisplayText;
+			drawmsg.Data.DisplayText.x = x;
+			drawmsg.Data.DisplayText.y = y;
+			DecodeUnicode(drawmsg.Data.DisplayText.text, pos, n);
+			disp->OutputFn(&drawmsg);
+
+			dprintf("(x,y): %d,%d, len: %d, data: %s\n", x, y, n, drawmsg.Data.DisplayText.text);
 		}
 		break;
 
 	/* Display status */
 	case 0x52:
-		if (data->DisplayStatus) {
-			*data->DisplayStatus = 0;
-			pos = message + 4;
-			for ( n = *pos++; n > 0; n--, pos += 2) {
-				if ((pos[0] < 1) || (pos[0] > 8))
-					return GE_UNHANDLEDFRAME;
-				if (pos[1] == 0x02)
-					*data->DisplayStatus |= state_table[pos[0] - 1];
-			}
+		st = 0;
+		pos = message + 4;
+		for ( n = *pos++; n > 0; n--, pos += 2) {
+			if ((pos[0] < 1) || (pos[0] > 8))
+				return GE_UNHANDLEDFRAME;
+			if (pos[1] == 0x02)
+				st |= state_table[pos[0] - 1];
+		}
+		if (data->DisplayStatus)
+			*data->DisplayStatus = st;
+		if (disp) {
+			memset(&drawmsg, 0, sizeof(drawmsg));
+			drawmsg.Command = GSM_Draw_DisplayStatus;
+			drawmsg.Data.DisplayStatus = st;
+			disp->OutputFn(&drawmsg);
 		}
 		break;
 	
@@ -1753,6 +1810,8 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
+		//!!!FIXME: remove this hack if data is valid in DisplayOutput
+		disp = data->DisplayOutput->OutputFn ? data->DisplayOutput : NULL;
 		break;
 
 	default:

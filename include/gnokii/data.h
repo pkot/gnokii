@@ -42,7 +42,7 @@ typedef struct {
 	float *BatteryLevel;
 	GSM_RFUnits *RFUnits;
 	float *RFLevel;
-	GSM_Error (*OutputFn)(char *Display, char *Indicators);
+	GSM_DisplayOutput *DisplayOutput;
 	char *IncomingCallNr;
 	GSM_PowerSource *PowerSource;
 	GSM_DateTime *DateTime;
@@ -118,6 +118,7 @@ typedef enum {
 	GOP_DeleteCalendarNote,
 	GOP_SetSpeedDial,
 	GOP_GetDisplayStatus,
+	GOP_PollDisplay,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

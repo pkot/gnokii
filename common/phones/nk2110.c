@@ -564,7 +564,7 @@ Display(u8 b, int shift, char *s, char *buf)
 	return buf;
 }
 
-static GSM_Error (*OutputFn)(char *text, char *ctrl);
+static void (*OutputFn)(GSM_DrawMessage *DrawMessage);
 static GSM_Error (*OnSMSFn)(GSM_SMSMessage *m);
 int SMSReady = 0;
 
@@ -588,18 +588,39 @@ CheckIncomingSMS(int at)
 static int
 HandlePacket(void)
 {
+	GSM_DrawMessage drawmsg;
+	int i;
+	int lsize[5] = {10, 10, 10, 3, 12};
+	char *t;
+
 	eprintf("[%x]", PacketData[3]);
 	switch(PacketData[3]) {
 	case 0x12: {			/* Text from display */
-		char buf[10240], *s = buf, *t;
-		t = (char *)&PacketData[8];
-#define COPY(x) strncpy(s, t, x); t+=x; s+=x; *s++ = '\n'
-		COPY(10); COPY(10); COPY(10); COPY(3); COPY(12); *s++ = 0;
+		drawmsg.Command = GSM_Draw_ClearScreen;
 		if (OutputFn)
-			(*OutputFn)(buf, NULL);
+			OutputFn(&drawmsg);
+		t = (char *)&PacketData[8];
+		for (i = 0; i < 5; i++) {
+			drawmsg.Command = GSM_Draw_DisplayText;
+			drawmsg.Data.DisplayText.x = 0;
+			drawmsg.Data.DisplayText.y = i*48/DRAW_MAX_SCREEN_HEIGHT;
+			strncpy(drawmsg.Data.DisplayText.text, t, lsize[i]);
+			drawmsg.Data.DisplayText.text[ lsize[i] ] = 0;
+			if (OutputFn)
+				OutputFn(&drawmsg);
+			t += lsize[i];
+		}
 		return 1;
 	}
 	case 0x2f: {			/* Display lights */
+#define	COPYFLAG(x, y, z) if (PacketData[x] & (1 << (y))) drawmsg.Data.DisplayStatus |= (1 << (z))
+		drawmsg.Data.DisplayStatus = 0;
+		drawmsg.Command = GSM_Draw_DisplayStatus;
+		COPYFLAG(7, 2, DS_Unread_SMS);
+		if (OutputFn)
+			OutputFn(&drawmsg);
+#if 0
+// Please convert it. I didn't managed to convert the rest... :-( - bozo
 		char buf[10240], *s = buf;
 #undef COPY
 #define COPY(x, y, z) s = Display(PacketData[x], y, z, s)
@@ -614,6 +635,7 @@ HandlePacket(void)
 			(*OutputFn)(NULL, buf);
 		return 1;
 #undef COPY
+#endif
 	}
 	case LM_SMS_EVENT:		/* SMS Data */
 		/* copy bytes 5+ to smsbuf */
@@ -1184,8 +1206,8 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		break;
 #endif
 	case GOP_DisplayOutput:
-		printf("DisplayOutput(%px)\n", data->OutputFn);
-		OutputFn = data->OutputFn;
+		printf("DisplayOutput(%px)\n", data->DisplayOutput->OutputFn);
+		OutputFn = data->DisplayOutput->OutputFn;
 		printf("Enable\n");
 		err = EnableDisplayOutput(state);
 		break;
@@ -1214,6 +1236,7 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		}
 		break;		
 	case GOP_PollSMS:			/* Our phone is able to notify us */
+	case GOP_PollDisplay:
 		break;
 	default:
 		err = GE_NOTIMPLEMENTED;
