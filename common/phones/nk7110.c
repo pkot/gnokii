@@ -83,7 +83,6 @@ static GSM_Error P7110_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_PollSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetPictureList(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
@@ -211,7 +210,7 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		if (NewSMS) return GE_NONE; /* FIXME P7110_GetIncomingSMS(data, state); */
 		break;
 	case GOP_SendSMS:
-		return P7110_SendSMS(data, state);
+		return PNOK_FBUS_SendSMS(data, state);
 	case GOP_DeleteSMS:
 		return P7110_DeleteSMS(data, state);
 	case GOP_GetSMSStatus:
@@ -1014,31 +1013,6 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 	req[4] = GetMemoryType(data->SMSFolder->FolderID);
 	dprintf("Getting SMS Folder Status...\n");
 	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 7);
-}
-
-static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
-	int i;
-
-	memset(req + 6, 0, 249);
-	memcpy(req + 6, data->RawSMS->MessageCenter, 12);
-	req[18] = 0x01; /* SMS Submit */
-	if (data->RawSMS->ReplyViaSameSMSC)  req[18] |= 0x80;
-	if (data->RawSMS->RejectDuplicates)  req[18] |= 0x04;
-	if (data->RawSMS->Report)            req[18] |= 0x20;
-	if (data->RawSMS->UDHIndicator)      req[18] |= 0x40;
-	if (data->RawSMS->ValidityIndicator) req[18] |= 0x10;
-	req[19] = data->RawSMS->Reference;
-	req[20] = data->RawSMS->PID;
-	req[21] = data->RawSMS->DCS;
-	req[22] = data->RawSMS->Length;
-	memcpy(req + 23, data->RawSMS->RemoteNumber, 12);
-	memcpy(req + 35, data->RawSMS->Validity, 7);
-	memcpy(req + 42, data->RawSMS->UserData, data->RawSMS->UserDataLength);
-	dprintf("Sending SMS...(%d)\n", 42 + data->RawSMS->UserDataLength);
-	if (SM_SendMessage(state, 42 + data->RawSMS->UserDataLength, P7110_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetryTimeout(state, data, P7110_MSG_SMS, 100);
 }
 
 /* handle messages of type 0x02 (SMS Handling) */

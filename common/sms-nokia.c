@@ -28,6 +28,7 @@
 
 */
 
+#include <string.h>
 #include "sms-nokia.h"
 #include "gsm-encoding.h"
 

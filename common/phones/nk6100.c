@@ -74,7 +74,6 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetOnSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state);
@@ -232,7 +231,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	case GOP_GetNetworkInfo:
 		return GetNetworkInfo(data, state);
 	case GOP_SendSMS:
-		return SendSMSMessage(data, state);
+		return PNOK_FBUS_SendSMS(data, state);
 	case GOP_OnSMS:
 		return SetOnSMS(data, state);
 	case GOP_PollSMS:
@@ -1059,22 +1058,6 @@ static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state)
 
 	if (SM_SendMessage(state, 10, 0x02, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x02);
-}
-
-static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
-	int length;
-
-	if (!data->RawData || !data->RawData->Data) return GE_INTERNALERROR;
-	if (data->RawData->Length < 0) return GE_SMSWRONGFORMAT;
-
-	length = data->RawData->Length - 4;
-	if (6 + length > sizeof(req)) return GE_SMSWRONGFORMAT;
-	memcpy(req + 6, data->RawData->Data + 4, length);
-
-	if (SM_SendMessage(state, 6 + length, 0x02, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetryTimeout(state, data, 0x02, 100);
 }
 
 static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)

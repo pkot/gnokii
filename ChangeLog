@@ -15,6 +15,7 @@
     o correct some header includes -- move them where they are
       needed, explicit dependencies are better            (Pawel Kot)
     o don't use RawData in SMS subsystem                  (Pawel Kot)
+    o SendSMS was moved from nk7110.c to nokia.c     (BORBELY Zoltan)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
     o added Terminate to GOP functions

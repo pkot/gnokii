@@ -37,6 +37,7 @@
 
 #include "gsm-data.h"
 #include "links/fbus.h"
+#include "phones/nokia.h"
 
 /* This function provides a way to detect the manufacturer of a phone
  * because it is only used by the fbus/mbus protocol phones and only
@@ -192,4 +193,28 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 	}
 
 	return GE_NONE;
+}
+
+GSM_Error PNOK_FBUS_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
+
+	memset(req + 6, 0, 249);
+	memcpy(req + 6, data->RawSMS->MessageCenter, 12);
+	req[18] = 0x01; /* SMS Submit */
+	if (data->RawSMS->ReplyViaSameSMSC)  req[18] |= 0x80;
+	if (data->RawSMS->RejectDuplicates)  req[18] |= 0x04;
+	if (data->RawSMS->Report)            req[18] |= 0x20;
+	if (data->RawSMS->UDHIndicator)      req[18] |= 0x40;
+	if (data->RawSMS->ValidityIndicator) req[18] |= 0x10;
+	req[19] = data->RawSMS->Reference;
+	req[20] = data->RawSMS->PID;
+	req[21] = data->RawSMS->DCS;
+	req[22] = data->RawSMS->Length;
+	memcpy(req + 23, data->RawSMS->RemoteNumber, 12);
+	memcpy(req + 35, data->RawSMS->Validity, 7);
+	memcpy(req + 42, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+	dprintf("Sending SMS...(%d)\n", 42 + data->RawSMS->UserDataLength);
+	if (SM_SendMessage(state, 42 + data->RawSMS->UserDataLength, PNOK_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
+	return SM_BlockNoRetryTimeout(state, data, PNOK_MSG_SMS, 100);
 }
