@@ -1425,7 +1425,11 @@ static int sendlogo(int argc, char *argv[])
 	strncpy(SMS.RemoteNumber.number, argv[1], sizeof(SMS.RemoteNumber.number) - 1);
 
 	/* The third argument is the bitmap file. */
-	GSM_ReadBitmapFile(argv[2], &SMS.UserData[0].u.Bitmap, info);
+	error = GSM_ReadBitmapFile(argv[2], &SMS.UserData[0].u.Bitmap, info);
+	if (error != GE_NONE) {
+		fprintf(stdout, _("Could not load bitmap: %d (%m)\n"), error);
+		return -1;
+	}
 
 	/* If we are sending op logo we can rewrite network code. */
 	if (SMS.UDH[0].Type == GSM_OperatorLogo) {
