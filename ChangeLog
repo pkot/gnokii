@@ -11,6 +11,11 @@
     o add more workarounds for SonyEricssons            (Hugo Haas)
  * gnapplet driver updates
     o fix incorrect bracketing                           (Greg Alt)
+    o deletesms support                            (BORBELY Zoltan)
+    o unvalidated version of getsms and deletesms  (BORBELY Zoltan)
+    o unfinished movesms support                   (BORBELY Zoltan)
+    o setsmscenter support                         (BORBELY Zoltan)
+    o getsmscenter set the id field incorrectly    (BORBELY Zoltan)
  * gnokii updates
     o initialize error variables                             (SuSE)
 

@@ -95,10 +95,16 @@ static gn_error gnapplet_sms_folder_list(gn_data *data, struct gn_statemachine *
 static gn_error gnapplet_sms_folder_status(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_folder_create(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_folder_delete(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_message_read_nv(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_message_read(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_message_write(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_message_send(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_message_delete_nv(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_message_delete(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_message_move_nv(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_message_move(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_center_write(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -431,14 +437,28 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_sms_folder_create(data, state);
 	case GN_OP_DeleteSMSFolder:
 		return gnapplet_sms_folder_delete(data, state);
+	case GN_OP_GetSMSnoValidate:
+		return gnapplet_sms_message_read_nv(data, state);
 	case GN_OP_GetSMS:
 		return gnapplet_sms_message_read(data, state);
 	case GN_OP_SaveSMS:
 		return gnapplet_sms_message_write(data, state);
 	case GN_OP_SendSMS:
 		return gnapplet_sms_message_send(data, state);
+	case GN_OP_DeleteSMSnoValidate:
+		return gnapplet_sms_message_delete_nv(data, state);
+	case GN_OP_DeleteSMS:
+		return gnapplet_sms_message_delete(data, state);
+	/*
+	case GN_OP_MoveSMSnoValidate:
+		return gnapplet_sms_message_move_nv(data, state);
+	case GN_OP_MoveSMS:
+		return gnapplet_sms_message_move(data, state);
+	*/
 	case GN_OP_GetSMSCenter:
 		return gnapplet_sms_center_read(data, state);
+	case GN_OP_SetSMSCenter:
+		return gnapplet_sms_center_write(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -938,7 +958,7 @@ static gn_error gnapplet_sms_validate(gn_data *data, struct gn_statemachine *sta
 }
 
 
-static gn_error gnapplet_sms_message_read(gn_data *data, struct gn_statemachine *state)
+static gn_error gnapplet_sms_message_read_nv(gn_data *data, struct gn_statemachine *state)
 {
 	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	gn_error error;
@@ -946,14 +966,24 @@ static gn_error gnapplet_sms_message_read(gn_data *data, struct gn_statemachine 
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
-	if ((error = gnapplet_sms_validate(data, state)) != GN_ERR_NONE) return error;
-	data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
-
 	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_MESSAGE_READ_REQ);
 	pkt_put_uint16(&pkt, data->raw_sms->memory_type);
 	pkt_put_uint32(&pkt, data->raw_sms->number);
 
 	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
+static gn_error gnapplet_sms_message_read(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+
+	if ((error = gnapplet_sms_validate(data, state)) != GN_ERR_NONE) return error;
+	data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
+
+	return gnapplet_sms_message_read_nv(data, state);
 }
 
 
@@ -1003,6 +1033,65 @@ static gn_error gnapplet_sms_message_send(gn_data *data, struct gn_statemachine 
 }
 
 
+static gn_error gnapplet_sms_message_delete_nv(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	gn_error error;
+	REQUEST_DEF;
+
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_MESSAGE_DELETE_REQ);
+	pkt_put_uint16(&pkt, data->raw_sms->memory_type);
+	pkt_put_uint32(&pkt, data->raw_sms->number);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
+static gn_error gnapplet_sms_message_delete(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+
+	if ((error = gnapplet_sms_validate(data, state)) != GN_ERR_NONE) return error;
+	data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
+
+	return gnapplet_sms_message_delete_nv(data, state);
+}
+
+
+static gn_error gnapplet_sms_message_move_nv(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	gn_error error;
+	REQUEST_DEF;
+
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_MESSAGE_MOVE_REQ);
+	pkt_put_uint16(&pkt, data->raw_sms->memory_type);
+	pkt_put_uint32(&pkt, data->raw_sms->number);
+	pkt_put_uint16(&pkt, 0); /* FIXME */
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
+static gn_error gnapplet_sms_message_move(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+
+	if ((error = gnapplet_sms_validate(data, state)) != GN_ERR_NONE) return error;
+	data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
+
+	return gnapplet_sms_message_move_nv(data, state);
+}
+
+
 static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *state)
 {
 	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
@@ -1012,6 +1101,29 @@ static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *
 
 	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_CENTER_READ_REQ);
 	pkt_put_uint16(&pkt, data->message_center->id - 1);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
+static gn_error gnapplet_sms_center_write(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	gn_error error;
+	REQUEST_DEF;
+
+	if (!data->message_center) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_CENTER_WRITE_REQ);
+	pkt_put_uint16(&pkt, data->message_center->id - 1);
+	pkt_put_string(&pkt, data->message_center->name);
+	pkt_put_int16(&pkt, data->message_center->default_name);
+	pkt_put_uint8(&pkt, data->message_center->format);
+	pkt_put_uint8(&pkt, data->message_center->validity);
+	pkt_put_uint8(&pkt, data->message_center->smsc.type);
+	pkt_put_string(&pkt, data->message_center->smsc.number);
+	pkt_put_uint8(&pkt, data->message_center->recipient.type);
+	pkt_put_string(&pkt, data->message_center->recipient.number);
 
 	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
 }
@@ -1093,11 +1205,21 @@ static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, i
 		if (error != GN_ERR_NONE) return error;
 		break;
 		
+	case GNAPPLET_MSG_SMS_MESSAGE_DELETE_RESP:
+		if (!(rawsms = data->raw_sms)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		break;
+		
+	case GNAPPLET_MSG_SMS_MESSAGE_MOVE_RESP:
+		if (!(rawsms = data->raw_sms)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		break;
+		
 	case GNAPPLET_MSG_SMS_CENTER_READ_RESP:
 		if (!(smsc=data->message_center)) return GN_ERR_INTERNALERROR;
 		if (error != GN_ERR_NONE) return error;
 		memset(smsc, 0, sizeof(*smsc));
-		smsc->id = pkt_get_uint16(&pkt);
+		smsc->id = pkt_get_uint16(&pkt) + 1;
 		pkt_get_string(smsc->name, sizeof(smsc->name), &pkt);
 		smsc->default_name = pkt_get_int16(&pkt);
 		smsc->format = pkt_get_uint8(&pkt);
@@ -1106,6 +1228,12 @@ static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, i
 		pkt_get_string(smsc->smsc.number, sizeof(smsc->smsc.number), &pkt);
 		smsc->recipient.type = pkt_get_uint8(&pkt);
 		pkt_get_string(smsc->recipient.number, sizeof(smsc->recipient.number), &pkt);
+		break;
+		
+	case GNAPPLET_MSG_SMS_CENTER_WRITE_RESP:
+		if (!(smsc=data->message_center)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		smsc->id = pkt_get_uint16(&pkt) + 1;
 		break;
 
 	default:
