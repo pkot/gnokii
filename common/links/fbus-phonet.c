@@ -74,7 +74,7 @@ static bool phonet_open(struct gn_statemachine *state)
 					 0x05};
 
 	if (!state)
-		return;
+		return false;
 
 	memset(&init_resp, 0, 7);
 
