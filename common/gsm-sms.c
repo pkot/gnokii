@@ -574,51 +574,51 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 	case SMS_Delivery_Report:
 		SMSStatus(rawsms->ReportStatus, sms);
 		break;
-#if 0
 	case SMS_PictureTemplate:
 	case SMS_Picture:
 		/* This is incredible. Nokia violates it's own format in 6210 */
 		/* Indicate that it is Multipart Message. Remove it if not needed */
-		if ((message[llayout.UserData] == 0x48) && (message[llayout.UserData + 1] == 0x1c)) {
+		sms->UDH.Number = 1;
+		dprintf("0x%02x 0x%02x\n", rawsms->UserData[0], rawsms->UserData[1]);
+		if ((rawsms->UserData[0] == 0x48) && (rawsms->UserData[1] == 0x1c)) {
 			dprintf("First picture then text!\n");
-			SMS->UDH_No = 1;
-			SMS->UDH[0].Type = SMS_MultipartMessage;
+			sms->UDH.UDH[0].Type = SMS_MultipartMessage;
 			/* First part is a Picture */
-			SMS->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(GSM_PictureMessage, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
-			GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
+			sms->UserData[0].Type = SMS_BitmapData;
+			GSM_ReadSMSBitmap(GSM_PictureMessage, rawsms->UserData, NULL, &sms->UserData[0].u.Bitmap);
+			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap);
 
-			size = MessageLength - llayout.UserData - 4 - SMS->UserData[0].u.Bitmap.size;
-			SMS->Length = message[llayout.UserData + 4 + SMS->UserData[0].u.Bitmap.size];
+			size = rawsms->UserDataLength - 4 - sms->UserData[0].u.Bitmap.size;
 			/* Second part is a text */
-			SMS->UserData[1].Type = SMS_PlainText;
-			DecodeData(message + llayout.UserData + 5 + SMS->UserData[0].u.Bitmap.size,
-				   (unsigned char *)&(SMS->UserData[1].u.Text),
-				   SMS->Length, size, 0, SMS->DCS);
-			SMS->UserData[1].u.Text[SMS->Length] = 0;
+			sms->UserData[1].Type = SMS_PlainText;
+			dprintf("lengths: %d %d %d\n", sms->UserData[0].u.Bitmap.size, size, rawsms->Length);
+			DecodeData(rawsms->UserData + 5 + sms->UserData[0].u.Bitmap.size,
+				   (unsigned char *)&(sms->UserData[1].u.Text),
+				   rawsms->Length, size, 0, sms->DCS);
+//			sms->UserData[1].u.Text[rawsms->Length] = 0;
+#if 0
 		} else {
 			dprintf("First text then picture!\n");
 			/* First part is a text */
-			SMS->UDH_No = 1;
-			SMS->UserData[1].Type = SMS_PlainText;
+			sms->UserData[1].Type = SMS_PlainText;
 			size = MessageLength - llayout.UserData - 4 - (72 * 28 / 8);
-			SMS->Length = message[llayout.UserData];
+			sms->Length = message[llayout.UserData];
 			dprintf("SMS length: %i, size: %i \n", SMS->Length, size);
-			if (size > SMS->Length) {
+			if (size > sms->Length) {
 				DecodeData(message + llayout.UserData + 1,
-					   (unsigned char *)&(SMS->UserData[1].u.Text),
-					   SMS->Length, size, 0, SMS->DCS);
-				SMS->UserData[1].u.Text[SMS->Length] = 0;
+					   (unsigned char *)&(sms->UserData[1].u.Text),
+					   sms->Length, size, 0, sms->DCS);
+				sms->UserData[1].u.Text[sms->Length] = 0;
 			}
 
-			SMS->UDH[0].Type = SMS_MultipartMessage;
+			sms->UDH[0].Type = SMS_MultipartMessage;
 			/* Second part is a Picture */
-			SMS->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData + size, NULL, &SMS->UserData[0].u.Bitmap);
-			GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
+			sms->UserData[0].Type = SMS_BitmapData;
+			GSM_ReadSMSBitmap(GSM_PictureImage, message + llayout.UserData + size, NULL, &sms->UserData[0].u.Bitmap);
+			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap);
+#endif
 		}
 		break;
-#endif
 	/* Plain text message */
 	default:
 		size = rawsms->Length - udh.Length;

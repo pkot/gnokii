@@ -109,7 +109,6 @@ static int GetMemoryType(GSM_MemoryType memory_type);
 static bool SMSLoop = false; /* Are we in infinite SMS reading loop? */
 static bool NewSMS  = false; /* Do we have a new SMS? */
 
-#if 0
 static const SMSMessage_Layout nk7110_deliver = {
 	true,						/* Is the SMS type supported */
 	 5, true, true,					/* SMSC */
@@ -153,9 +152,6 @@ static const SMSMessage_Layout nk7110_picture = {
 	-1, -1,
 	43, true
 };
-
-static SMSMessage_PhoneLayout nk7110_layout;
-#endif
 
 static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ P7110_MSG_FOLDER,	P7110_IncomingFolder },
@@ -243,7 +239,7 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_DeleteCalendarNote(data, state);
 	case GOP_GetSMS:
 		dprintf("Getting SMS (validating)...\n");
-		return P7110_GetSMS(data, state);
+		return P7110_GetSMSnoValidate(data, state);
 	case GOP_GetSMSnoValidate:
 		dprintf("Getting SMS (without validating)...\n");
 		data->SMSFolder = NULL;
@@ -730,6 +726,19 @@ static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *message,
 }
 
 
+static inline unsigned int getdata(SMS_MessageType T, unsigned int a,
+				    unsigned int b, unsigned int c,
+				    unsigned int d)
+{
+	switch (T) {
+	case SMS_Deliver:         return a;
+	case SMS_Submit:          return b;
+	case SMS_Delivery_Report: return c;
+	case SMS_Picture:         return d;
+	default:                  return 0;
+	}
+}
+
 /**
  * P7110_IncomingFolder - handle SMS and folder related messages (0x14 type)
  * @messagetype: message type, 0x14 (P7110_MSG_FOLDER)
@@ -752,7 +761,7 @@ static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *message,
  */
 static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	int i, j;
+	int i, j, T;
 	int nextfolder = 0x10;
 
 	/* Message suptype */
@@ -762,8 +771,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		if (!data->RawSMS) return GE_INTERNALERROR;
 
 		memset(data->RawSMS, 0, sizeof(GSM_SMSMessage));
-
-		data->RawSMS->Type             = message[8];
+		T = data->RawSMS->Type         = message[8];
 		data->RawSMS->Number           = (message[6] << 8) | message[7];
 		data->RawSMS->MemoryType       = message[5];
 		data->RawSMS->Status           = message[4];
@@ -783,9 +791,10 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		memcpy(data->RawSMS->RemoteNumber,  message + 25, 12);
 
 		data->RawSMS->DCS              = message[23];
-		data->RawSMS->Length           = message[24];
-		data->RawSMS->UDHIndicator     = message[21];
-		memcpy(data->RawSMS->UserData,      message + 44, data->RawSMS->Length);
+		data->RawSMS->Length           = message[getdata(T, 24, 0, 0, 45)];
+		if (T == SMS_Picture) data->RawSMS->Length |= (message[44] << 8);
+		data->RawSMS->UDHIndicator     = message[getdata(T, 21, 0, 0, 18)];
+		memcpy(data->RawSMS->UserData,      message + getdata(T, 44, 0, 0, 47), data->RawSMS->Length);
 
 		data->RawSMS->ValidityIndicator = 0;
 		memcpy(data->RawSMS->Validity,      message, 0);

@@ -57,7 +57,7 @@
 #define MAX_DATETIME_LENGTH   7
 #define MAX_SMSC_NAME_LEN    16
 #define MAX_NUMBER_LEN       12
-#define SMS_USER_DATA_LEN   160
+#define SMS_USER_DATA_LEN   256
 #define MAX_VALIDITY_LENGTH   8
 
 /*** MEMORY INFO ***/
@@ -436,7 +436,7 @@ typedef struct {
 	unsigned int Length;                           /* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
 	bool UDHIndicator;
 	unsigned char UserData[SMS_USER_DATA_LEN];     /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
-	int UserDataLength;				/* Length of just previous field */
+	int UserDataLength;                            /* Length of just previous field */
 
 	bool ValidityIndicator;
 	unsigned char Validity[MAX_VALIDITY_LENGTH];   /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
