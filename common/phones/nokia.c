@@ -201,6 +201,8 @@ gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int 
 {
 	unsigned char *pos;
 	gn_call_divert *cd;
+	int n;
+	char buf[1024];
 
 	switch (message[3]) {
 	/* Get call diverts ok */
@@ -246,6 +248,14 @@ gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int 
 
 	/* FIXME: call divert is active */
 	case 0x06:
+		return GN_ERR_UNSOLICITED;
+
+	/* FIXME: is this common between models? - bozo */
+	/* get prepaid info */
+	case 0x05:
+		n = char_7bit_unpack(0, message[7], sizeof(buf), message + 8, buf);
+		char_ascii_decode(buf, buf, n);
+		dprintf("Message: Prepaid info received: \"%s\"\n", buf);
 		return GN_ERR_UNSOLICITED;
 
 	default:
