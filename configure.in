@@ -33,7 +33,7 @@ AM_ICONV
 dnl ======================== Default setting
 ALL_LINGUAS="cs de et fi nl sk pl it sl fr"
 AC_CHECK_HEADERS(libintl.h)
-AM_GNU_GETTEXT
+AM_GNU_GETTEXT([use-libtool])
 
 dnl ======================== Check for include/config.h.in
 AC_MSG_CHECKING([for include/config.h.in])
@@ -479,7 +479,7 @@ AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(mktime gettimeofday select poll)
-AC_CHECK_FUNCS(strdup strstr strtol strtok strsep asprintf vasprintf)
+AC_CHECK_FUNCS(strchr strdup strstr strtol strtok strsep asprintf vasprintf)
 AC_CHECK_FUNCS(snprintf vsnprintf)
 AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf_c99,
 	[AC_TRY_RUN([

@@ -69,7 +69,7 @@ WIN32_CROSS    = @WIN32_CROSS@
 DESTDIR        =
 
 ifeq (@USE_NLS@, yes)
-	LIBS += @INTLLIBS@
+	LIBS += @LTLIBINTL@
 endif
 ifeq (@USE_INCLUDED_LIBINTL@, yes)
 	CFLAGS += -I$(TOPDIR)/intl

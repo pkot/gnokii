@@ -59,7 +59,9 @@ all: intl $(DIRS)
 dummy:
 
 intl: dummy
-	$(MAKE) -C intl CFLAGS=-I../include
+	-ln -sf include/config.h config.h
+	$(MAKE) -C intl
+	-$(RM) config.h
 
 $(DIRS): dummy
 	$(MAKE) -C $@
