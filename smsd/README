@@ -177,9 +177,7 @@ COMPILATION
 
 SMSD is not compiled by default with gnokii 'make' command. You must compile it
 manually by typing 'make' in smsd directory. But before SMSD compilation
-you must right configure gnokii (autoconf, configure). You must edit
-"DB Modules" section in smsd's Makefile and adapt paths to your system and
-compile module for your DB server.
+you must right configure gnokii (autoconf, configure).
 
 For example:
 (in gnokii directory)
