@@ -55,3 +55,6 @@
 
 * Tue May 16 00:20:33 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - ringtones filled in for 6110. Please test with 5110 and comment.
+
+* Wed May 24 09:27:48 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- --diadata removed

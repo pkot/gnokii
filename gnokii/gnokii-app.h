@@ -39,7 +39,6 @@ int getdatetime(void);
 int setalarm(char *argv[]);
 int getalarm(void);
 int dialvoice(char *number);
-int dialdata(char *number);
 int getcalendarnote(int argc, char *argv[]);
 int writecalendarnote(char *argv[]);
 int deletecalendarnote(char *index);
@@ -66,7 +65,6 @@ typedef enum {
   OPT_SETALARM,
   OPT_GETALARM,
   OPT_DIALVOICE,
-  OPT_DIALDATA, 
   OPT_GETCALENDARNOTE,
   OPT_WRITECALENDARNOTE,
   OPT_DELCALENDARNOTE,

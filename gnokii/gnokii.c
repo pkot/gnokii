@@ -166,8 +166,8 @@ int version(void)
 {
 
   fprintf(stdout, _("GNOKII Version %s\n"
-"Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999\n"
-"Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999\n"
+"Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999, 2000\n"
+"Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999, 2000\n"
 "Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, model, Port);
 
   return 0;
@@ -195,7 +195,6 @@ int usage(void)
 "          gnokii --setalarm HH MM\n"
 "          gnokii --getalarm\n"
 "          gnokii --dialvoice number\n"
-"          gnokii --dialdata number\n"
 "          gnokii --getcalendarnote index [-v]\n"
 "          gnokii --writecalendarnote\n"
 "          gnokii --deletecalendarnote index\n"
@@ -272,8 +271,6 @@ int usage(void)
 "          --getalarm        shows current alarm.\n\n"
 
 "          --dialvoice       initiate voice call.\n\n"
-
-"          --dialdata        initiate data call.\n\n"
 
 "          --getcalendarnote get the note with number index from calendar.\n"
 "                             [-v] - output in vCalendar 1.0 format\n\n"
@@ -439,9 +436,6 @@ int main(int argc, char *argv[])
     // Voice call mode
     { "dialvoice",          required_argument, NULL, OPT_DIALVOICE },
 
-    // Data call mode
-    { "dialdata",           required_argument, NULL, OPT_DIALDATA },
-
     // Get calendar note mode
     { "getcalendarnote",    required_argument, NULL, OPT_GETCALENDARNOTE },
 
@@ -529,7 +523,6 @@ int main(int argc, char *argv[])
     { OPT_SETDATETIME,       0, 5, 0 },
     { OPT_SETALARM,          2, 2, 0 },
     { OPT_DIALVOICE,         1, 1, 0 },
-    { OPT_DIALDATA,          1, 1, 0 },
     { OPT_GETCALENDARNOTE,   1, 2, 0 },
     { OPT_DELCALENDARNOTE,   1, 1, 0 },
     { OPT_GETMEMORY,         3, 3, 0 },
@@ -674,11 +667,6 @@ int main(int argc, char *argv[])
     case OPT_DIALVOICE:
 
       rc = dialvoice(optarg);
-      break;
-
-    case OPT_DIALDATA:
-
-      rc = dialdata(optarg);
       break;
 
     case OPT_GETCALENDARNOTE:
@@ -1630,22 +1618,6 @@ int sendlogo(int argc, char *argv[])
   return 0;
 }
 
-/* Data dialing mode. */
-
-int dialdata(char *Number)
-{
-
-  fbusinit(NULL);
-
-  sleep(10);
-
-  GSM->DialData(Number, 0, NULL);
-
-  GSM->Terminate();
-
-  return 0;
-}
-
 /* Getting logos. */
 
 int getlogo(char *argv[])
@@ -1962,7 +1934,7 @@ int setdatetime(int argc, char *argv[])
     /* Well, this thing is copyrighted in U.S. This technique is known as
        Windowing and you can read something about it in LinuxWeekly News:
        http://lwn.net/1999/features/Windowing.phtml. This thing is beeing
-       written in Czech republic and Poland where algorhitms are not allowed
+       written in Czech republic and Poland where algorithms are not allowed
        to be patented. */
 
     if (Date.Year>90)
