@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-16 14:29:54  chris
+  Revision 1.1  2001-02-21 19:57:13  chris
+  More fiddling with the directory layout
+
+  Revision 1.1  2001/02/16 14:29:54  chris
   Restructure of common/.  Fixed a problem in fbus-phonet.c
   Lots of dprintfs for Marcin
   Any size xpm can now be loaded (eg for 7110 startup logos)
@@ -41,8 +44,8 @@
 
 */
 
-#ifndef __phone_nk7110_h
-#define __phone_nk7110_h
+#ifndef __phones_nk7110_h
+#define __phones_nk7110_h
 
 #include <gsm-common.h>
 
@@ -83,7 +86,7 @@ extern GSM_Information P7110_Information;
 #define P7110_ENTRYTYPE_GROUP  0x1e   /* Group number for phonebook entry */
 
 
-#ifdef __phone_nk7110_c  /* Prototype functions for phone-7110.c only */
+#ifdef __phones_nk7110_c  /* Prototype functions for phone-7110.c only */
 
 static GSM_Error P7110_Initialise(char *port_device, char *initlength,
 		 GSM_ConnectionType connection,
@@ -107,9 +110,9 @@ static bool P7110_SendRLPFrame( RLP_F96Frame *frame, bool out_dtx );
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
-#endif  /* #ifdef __phone_nk7110_c */
+#endif  /* #ifdef __phones_nk7110_c */
 
-#endif  /* #ifndef __phone_nk7110_h */
+#endif  /* #ifndef __phones_nk7110_h */
 
 
 

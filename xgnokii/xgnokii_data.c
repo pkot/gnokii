@@ -20,7 +20,7 @@
 #include "xgnokii.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii_data.h"
-#include "virtmodem.h"
+#include "data/virtmodem.h"
 
 static GtkWidget *GUI_DataWindow;
 bool TerminateThread = false;

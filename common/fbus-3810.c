@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.83  2001-02-17 22:40:48  chris
+  Revision 1.84  2001-02-21 19:56:55  chris
+  More fiddling with the directory layout
+
+  Revision 1.83  2001/02/17 22:40:48  chris
   ATA support
 
   Revision 1.82  2001/02/03 23:56:12  chris
@@ -98,9 +101,9 @@
 
 #include    "misc.h"
 #include    "gsm-common.h"
-#include    "rlp-common.h"
+#include    "data/rlp-common.h"
 #include    "fbus-3810.h"
-#include    "phone-nokia.h"
+#include    "phones/nokia.h"
 
     /* Global variables used by code in gsm-api.c to expose the
        functions supported by this model of phone.  */

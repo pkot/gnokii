@@ -16,7 +16,10 @@
   from/to the GSM handset and the modem data/fax stream.
 
   $Log$
-  Revision 1.1  2001-02-16 14:29:51  chris
+  Revision 1.2  2001-02-21 19:57:02  chris
+  More fiddling with the directory layout
+
+  Revision 1.1  2001/02/16 14:29:51  chris
   Restructure of common/.  Fixed a problem in fbus-phonet.c
   Lots of dprintfs for Marcin
   Any size xpm can now be loaded (eg for 7110 startup logos)
@@ -79,10 +82,10 @@
 #include "misc.h"
 #include "gsm-api.h"
 #include "gsm-common.h"
-#include "at-emulator.h"
-#include "datapump.h"
-#include "virtmodem.h"
-#include "rlp-common.h"
+#include "data/at-emulator.h"
+#include "data/datapump.h"
+#include "data/virtmodem.h"
+#include "data/rlp-common.h"
 
 	/* Global variables */
 

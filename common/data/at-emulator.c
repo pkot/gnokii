@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -12,12 +14,14 @@
   calling code in gsm-api.c. Inspired by and in places copied from the Linux
   kernel AT Emulator IDSN code by Fritz Elfert and others.
   
-  Last modification: Fri May 19 13:15:07 EST 2000 
-                     Hugh Blemings <hugh@linuxcare.com>
+  $Log$
+  Revision 1.3  2001-02-21 19:56:59  chris
+  More fiddling with the directory layout
+
 
 */
 
-#define		__at_emulator_c
+#define		__data_at_emulator_c
 
 
 #include <stdio.h>
@@ -42,9 +46,9 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
-#include "at-emulator.h"
-#include "virtmodem.h"
-#include "datapump.h"
+#include "data/at-emulator.h"
+#include "data/virtmodem.h"
+#include "data/datapump.h"
 
 	/* Global variables */
 bool ATEM_Initialised = false;	/* Set to true once initialised */

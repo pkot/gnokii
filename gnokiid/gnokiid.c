@@ -14,7 +14,10 @@
   various daemon functions.
 
   $Log$
-  Revision 1.17  2000-12-19 16:18:18  pkot
+  Revision 1.18  2001-02-21 19:57:09  chris
+  More fiddling with the directory layout
+
+  Revision 1.17  2000/12/19 16:18:18  pkot
   configure script updates and added shared function for configfile reading
 
   
@@ -34,7 +37,7 @@
 #include "cfgreader.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
-#include "virtmodem.h"
+#include "data/virtmodem.h"
 
 
 /* Global variables */

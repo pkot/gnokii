@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -12,13 +14,15 @@
 
   Header file for CRC24 (aka FCS) implementation in RLP.
 
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.1  2001-02-21 19:57:11  chris
+  More fiddling with the directory layout
+
 
 */
 
-#ifndef __rlp_crc24_h
-#define __rlp_crc24_h
+#ifndef __data_rlp_crc24_h
+#define __data_rlp_crc24_h
 
 #ifndef __misc_h
   #include    "misc.h"

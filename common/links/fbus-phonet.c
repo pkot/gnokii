@@ -17,7 +17,10 @@
   The various routines are called PHONET_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-16 14:29:52  chris
+  Revision 1.2  2001-02-21 19:57:06  chris
+  More fiddling with the directory layout
+
+  Revision 1.1  2001/02/16 14:29:52  chris
   Restructure of common/.  Fixed a problem in fbus-phonet.c
   Lots of dprintfs for Marcin
   Any size xpm can now be loaded (eg for 7110 startup logos)
@@ -44,11 +47,10 @@
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
 #include "device.h"
-#include "unixirda.h"
 
-#define __fbus_phonet_c
-#include "fbus-generic.h"
-#include "fbus-phonet.h"
+#define __links_fbus_phonet_c
+#include "links/fbus.h"
+#include "links/fbus-phonet.h"
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */

@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,12 +12,14 @@
 
   CRC24 (aka FCS) implementation in RLP.
 
-  Last modification: Mon Mar 20 22:06:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.2  2001-02-21 19:57:02  chris
+  More fiddling with the directory layout
+
 
 */
 
-#include "rlp-crc24.h"
+#include "data/rlp-crc24.h"
 
 /* CRC-24 table is used for computation of RLP checksum. */
 

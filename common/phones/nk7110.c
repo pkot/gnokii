@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-16 14:29:53  chris
+  Revision 1.1  2001-02-21 19:57:07  chris
+  More fiddling with the directory layout
+
+  Revision 1.1  2001/02/16 14:29:53  chris
   Restructure of common/.  Fixed a problem in fbus-phonet.c
   Lots of dprintfs for Marcin
   Any size xpm can now be loaded (eg for 7110 startup logos)
@@ -55,14 +58,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#define __phone_nk7110_c  /* Turn on prototypes in phone-7110.h */
+#define __phones_nk7110_c  /* Turn on prototypes in phones/nk7110.h */
 #include "misc.h"
 #include "gsm-common.h"
-#include "phone-generic.h"
-#include "phone-nk7110.h"
-#include "fbus-generic.h"
-#include "fbus-phonet.h"
-#include "phone-nokia.h"
+#include "phones/generic.h"
+#include "phones/nk7110.h"
+#include "links/fbus.h"
+#include "links/fbus-phonet.h"
+#include "phones/nokia.h"
 
 
 /* Some globals */
@@ -76,11 +79,12 @@ GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ 0x0a, P7110_GenericCRHandler },
 	{ 0x17, P7110_GenericCRHandler },
 	{ 0x1b, P7110_GenericCRHandler },
+	{ 0x40, P7110_GenericCRHandler },
 	{ 0x79, P7110_GenericCRHandler },
 	{ 0x7a, P7110_GenericCRHandler }
 };
 GSM_Phone phone = {
-	7,  /* No of functions in array */
+	8,  /* No of functions in array */
 	P7110_IncomingFunctions,
 	P7110_IncomingDefault
 };
@@ -262,9 +266,13 @@ static GSM_Error P7110_GetModel(char *model)
 static GSM_Error P7110_DialVoice(char *Number)
 {
 
-#if 0  /* Doesn't work (yet) */    /* 3 2 1 5 2 30 35 */
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x02, 0x01, 0x01, 0x05, 0x01, 0x01, 0x01,0x01,0x01};
-	//  unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01, 0x00, 0x20, 0x01, 0x46};
+  /* Doesn't work (yet) */    /* 3 2 1 5 2 30 35 */
+
+	unsigned char req0[100] = { 0x00, 0x01, 0x64, 0x01 };
+
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x01, 0x01, 0x01, 0x05, 0x00, 0x01, 0x03, 0x02, 0x91, 0x00, 0x031, 0x32, 0x00};
+	//unsigned char req[100]={0x00, 0x01, 0x7c, 0x01, 0x31, 0x37, 0x30, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01};
+        //  unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01, 0x00, 0x20, 0x01, 0x46};
 	unsigned char req_end[] = {0x05, 0x01, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01};
 	int len = 0, i;
 
@@ -277,23 +285,20 @@ static GSM_Error P7110_DialVoice(char *Number)
 
 	//len=6+strlen(Number);
 
-	len = 20;
+	//len = 4;
 
-	PGEN_DebugMessage(01, req, len);
+	
+	//PGEN_CommandResponse(&link, req0, &len, 0x40, 0x40, 100);
+	
+	len=17;
 
-#if 0
 	if (PGEN_CommandResponse(&link, req, &len, 0x01, 0x01, 100)==GE_NONE) {
 		PGEN_DebugMessage(1, req, len);
-		return GE_NONE;
-	} else return GE_NOTIMPLEMENTED;
-#endif
- 
-	link.SendMessage(len,0x01,req);
-	sleep(1);
-	link.SendMessage(len,0x01,req);
+//		return GE_NONE;
 
+	}
+//	} else return GE_NOTIMPLEMENTED;
 
-#endif
  
 	while(1){
 		link.Loop(NULL);

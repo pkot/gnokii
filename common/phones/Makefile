@@ -19,9 +19,9 @@ include $(TOPDIR)/Makefile.global
 
 CFLAGS += $(PTHREAD_CFLAGS)
 
-OBJS =	phone-generic.o \
-	phone-nokia.o \
-	phone-nk7110.o
+OBJS =	generic.o \
+	nokia.o \
+	nk7110.o
 
 all: PHONES.o
 

@@ -28,13 +28,13 @@
 
 #include "misc.h"
 #include "gsm-common.h"
-#include "rlp-common.h"
+#include "data/rlp-common.h"
 #include "fbus-3810.h"
 #include "fbus-6110.h"
 #include "mbus-2110.h"
 #include "mbus-6160.h"
 #include "mbus-640.h"
-#include "phone-nk7110.h"
+#include "phones/nk7110.h"
 
 /* GSM_LinkOK is set to true once normal communications with the phone have
    been established. */

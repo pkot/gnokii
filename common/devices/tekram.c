@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2001-02-16 14:29:51  chris
+ * Revision 1.2  2001-02-21 19:57:03  chris
+ * More fiddling with the directory layout
+ *
+ * Revision 1.1  2001/02/16 14:29:51  chris
  * Restructure of common/.  Fixed a problem in fbus-phonet.c
  * Lots of dprintfs for Marcin
  * Any size xpm can now be loaded (eg for 7110 startup logos)
@@ -46,12 +49,12 @@
 #include <string.h>
 
 #ifndef WIN32
-#include "unixserial.h"
+#include "devices/unixserial.h"
 #else
 #include "winserial.h"
 #endif
 
-#include "tekram.h"
+#include "devices/tekram.h"
 
 
 

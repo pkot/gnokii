@@ -37,7 +37,7 @@
 #include	"gsm-common.h"
 #include	"mbus-6160.h"
 #include	"device.h"
-#include	"phone-nokia.h"
+#include	"phones/nokia.h"
 
 #define WRITEPHONE(a, b, c) device_write(b, c)
 

@@ -1,4 +1,6 @@
 /*
+  
+  $Id$
 
   G N O K I I
 
@@ -8,8 +10,10 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sat May 13 20:33:48 CEST 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.2  2001-02-21 19:57:05  chris
+  More fiddling with the directory layout
+
 
 */
 
@@ -27,7 +31,7 @@
 #endif
 
 #include <termios.h>
-#include "unixserial.h"
+#include "devices/unixserial.h"
 
 #ifdef HAVE_SYS_IOCTL_COMPAT_H
   #include <sys/ioctl_compat.h>

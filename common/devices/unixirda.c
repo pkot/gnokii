@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2001-02-20 21:55:10  pkot
+ * Revision 1.3  2001-02-21 19:57:04  chris
+ * More fiddling with the directory layout
+ *
+ * Revision 1.2  2001/02/20 21:55:10  pkot
  * Small #include updates
  *
  * Revision 1.1  2001/02/16 14:29:52  chris
@@ -53,7 +56,7 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 
-#include "unixirda.h"
+#include "devices/unixirda.h"
 #include "linuxirda.h"
 
 

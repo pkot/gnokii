@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -15,13 +17,15 @@
 
   Header file for RLP protocol.
 
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Hugh Blemings <hugh@linuxcare.com>
+  $Log$
+  Revision 1.1  2001-02-21 19:57:11  chris
+  More fiddling with the directory layout
+
 
 */
 
-#ifndef __rlp_common_h
-#define __rlp_common_h
+#ifndef __data_rlp_common_h
+#define __data_rlp_common_h
 
 #ifndef __misc_h
   #include "misc.h"
@@ -184,4 +188,4 @@ void RLP_Init_link_vars(void);
 void RLP_SetUserRequest(RLP_UserRequests type, bool value);
 void RLP_Send(char *buffer, int length);
 
-#endif	/* __rlp_common_h */
+#endif	/* __data_rlp_common_h */

@@ -15,13 +15,16 @@
   interface.
 
   $Log$
-  Revision 1.2  2001-02-17 22:40:51  chris
+  Revision 1.3  2001-02-21 19:57:00  chris
+  More fiddling with the directory layout
+
+  Revision 1.2  2001/02/17 22:40:51  chris
   ATA support
 
 
 */
 
-#define		__datapump_c
+#define		__data_datapump_c
 
 
 #include <stdio.h>
@@ -41,10 +44,10 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
-#include "at-emulator.h"
-#include "virtmodem.h"
-#include "datapump.h"
-#include "rlp-common.h"
+#include "data/at-emulator.h"
+#include "data/virtmodem.h"
+#include "data/datapump.h"
+#include "data/rlp-common.h"
 
 /* Global variables */
 extern bool CommandMode;

@@ -41,7 +41,7 @@
 #include	"misc.h"
 #include	"gsm-common.h"
 #include	"mbus-640.h"
-#include	"phone-nokia.h"
+#include	"phones/nokia.h"
 
 	/* Global variables used by code in gsm-api.c to expose the
 	   functions supported by this model of phone.  */

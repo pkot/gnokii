@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 
-#include "rlp-common.h"
+#include "data/rlp-common.h"
 
 
 /* Type of connection. Now we support serial connection with FBUS cable and

@@ -17,14 +17,17 @@
   The various routines are called PHONET_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-06 21:15:37  chris
+  Revision 1.1  2001-02-21 19:57:12  chris
+  More fiddling with the directory layout
+
+  Revision 1.1  2001/02/06 21:15:37  chris
   Preliminary irda support for 7110 etc.  Not well tested!
 
 
 */
 
-#ifndef __fbus_phonet_h
-#define __fbus_phonet_h
+#ifndef __links_fbus_phonet_h
+#define __links_fbus_phonet_h
 
 
 #define PHONET_MAX_FRAME_LENGTH    1010
@@ -39,7 +42,7 @@
 GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Phone *newphone);
 
 
-#ifdef __fbus_phonet_c  /* Prototype functions for fbus-phonet.c only */
+#ifdef __links_fbus_phonet_c  /* Prototype functions for fbus-phonet.c only */
 
 typedef struct{
   int BufferCount;
@@ -58,6 +61,6 @@ int PHONET_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
 GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message);
 int PHONET_TX_SendAck(u8 message_type, u8 message_seq);
 
-#endif   /* #ifdef __fbus_phonet_c */
+#endif   /* #ifdef __links_fbus_phonet_c */
 
-#endif   /* #ifndef __fbus_phonet_h */
+#endif   /* #ifndef __links_fbus_phonet_h */

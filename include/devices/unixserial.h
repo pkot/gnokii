@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -8,13 +10,15 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Wed Apr 12 20:29:55 PDT 2000
-  Modified by Hugh Blemings <hugh@linuxcare.com>
+  $Log$
+  Revision 1.1  2001-02-21 19:57:12  chris
+  More fiddling with the directory layout
+
 
 */
 
-#ifndef __unixserial_h
-#define __unixserial_h
+#ifndef __devices_unixserial_h
+#define __devices_unixserial_h
 
 #ifdef WIN32
   #include <stddef.h>
@@ -40,4 +44,8 @@ size_t serial_write(int __fd, __const __ptr_t __buf, size_t __n);
 
 int serial_select(int fd, struct timeval *timeout);
 
-#endif  /* __unixserial_h */
+#endif  /* __devices_unixserial_h */
+
+
+
+

@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.128  2001-02-17 22:40:48  chris
+  Revision 1.129  2001-02-21 19:56:55  chris
+  More fiddling with the directory layout
+
+  Revision 1.128  2001/02/17 22:40:48  chris
   ATA support
 
   Revision 1.127  2001/02/06 21:15:34  chris
@@ -104,7 +107,7 @@ extern HANDLE hPhone;
 #include <pthread.h>
 #include <errno.h>
 #include "device.h"
-#include "unixserial.h"
+#include "devices/unixserial.h"
 
 #endif
 
@@ -117,8 +120,8 @@ extern HANDLE hPhone;
 #include "fbus-6110-auth.h"
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
-#include "phone-generic.h"
-#include "phone-nokia.h"
+#include "phones/generic.h"
+#include "phones/nokia.h"
 
 /* Global variables used by code in gsm-api.c to expose the functions
    supported by this model of phone. */

@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,13 +12,15 @@
 
   Header file for data pump code.
 	
-  Last modification: Mon May 15th
-  Modified by Chris Kemp <ck231@cam.ac.uk>
+  $Log$
+  Revision 1.1  2001-02-21 19:57:11  chris
+  More fiddling with the directory layout
+
 
 */
 
-#ifndef __datapump_h
-#define __datapump_h 
+#ifndef __data_datapump_h
+#define __data_datapump_h 
 
 	/* Prototypes */
 
@@ -28,7 +32,7 @@ void    DP_CallPassup(char c);
 	/* All defines and prototypes from here down are specific to 
 	   the datapump code and so are #ifdef out if __datapump_c isn't 
 	   defined. */
-#ifdef	__datapump_c
+#ifdef	__data_datapump_c
 
 
 
@@ -36,6 +40,6 @@ void    DP_CallPassup(char c);
 
 
 
-#endif	/* __datapump_c */
+#endif	/* __data_datapump_c */
 
-#endif	/* __datapump_h */
+#endif	/* __data_datapump_h */

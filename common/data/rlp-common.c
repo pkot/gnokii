@@ -17,7 +17,10 @@
   downloadable from www.etsi.org (if you register with them)
 
   $Log$
-  Revision 1.2  2001-02-17 22:40:51  chris
+  Revision 1.3  2001-02-21 19:57:00  chris
+  More fiddling with the directory layout
+
+  Revision 1.2  2001/02/17 22:40:51  chris
   ATA support
 
 
@@ -28,8 +31,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "rlp-common.h"
-#include "rlp-crc24.h"
+#include "data/rlp-common.h"
+#include "data/rlp-crc24.h"
 #include "gsm-common.h" /* For GSM error and RLP send function. */
 #include "misc.h" /* For u8, u32 etc. */
 

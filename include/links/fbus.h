@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.3  2001-02-06 21:15:36  chris
+  Revision 1.1  2001-02-21 19:57:12  chris
+  More fiddling with the directory layout
+
+  Revision 1.3  2001/02/06 21:15:36  chris
   Preliminary irda support for 7110 etc.  Not well tested!
 
   Revision 1.2  2001/01/17 02:54:55  chris
@@ -30,8 +33,8 @@
 
 */
 
-#ifndef __fbus_generic_h
-#define __fbus_generic_h
+#ifndef __links_fbus_h
+#define __links_fbus_h
 
 #include <sys/time.h>
 
@@ -112,7 +115,7 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Phone *newphone);
 
 
 
-#ifdef __fbus_generic_c  /* Prototype functions for fbus-generic.c only */
+#ifdef __links_fbus_c  /* Prototype functions for fbus-generic.c only */
 
 bool FBUS_OpenSerial();
 void FBUS_RX_StateMachine(unsigned char rx_byte);
@@ -120,9 +123,9 @@ int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
 GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message);
 int FBUS_TX_SendAck(u8 message_type, u8 message_seq);
 
-#endif   /* #ifdef __fbus_generic_c */
+#endif   /* #ifdef __links_fbus_c */
 
-#endif   /* #ifndef __fbus_generic_h */
+#endif   /* #ifndef __links_fbus_h */
 
 
 

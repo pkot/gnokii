@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.33  2001-02-20 21:30:28  machek
+  Revision 1.34  2001-02-21 19:56:58  chris
+  More fiddling with the directory layout
+
+  Revision 1.33  2001/02/20 21:30:28  machek
   We really have 150 addressbook places, better
   getrflevel/getbatterylevel, wait one second on collision.
 
@@ -80,7 +83,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "mbus-2110.h"
-#include "phone-nokia.h"
+#include "phones/nokia.h"
 
 #define MYID 0x78
 

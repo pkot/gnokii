@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,13 +12,15 @@
 	
   Header file for AT emulator code.
 
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.1  2001-02-21 19:57:11  chris
+  More fiddling with the directory layout
+
 
 */
 
-#ifndef __at_emulator_h
-#define __at_emulator_h
+#ifndef __data_at_emulator_h
+#define __data_at_emulator_h
 
 	/* Prototypes */
 bool	ATEM_Initialise(int read_fd, int write_fd, char *model, char *port);
@@ -51,7 +55,7 @@ bool	ATEM_Initialised;
 	/* All defines and prototypes from here down are specific to 
 	   the at-emulator code and so are #ifdef out if __at_emulator_c isn't 
 	   defined. */
-#ifdef	__at_emulator_c
+#ifdef	__data_at_emulator_c
 
 
 #define	MAX_CMD_BUFFERS	(2)
@@ -87,9 +91,9 @@ bool	ATEM_Initialised;
 
 #define	MAX_MODEM_REGISTERS	20
 
-#endif	/* __at_emulator_c */
+#endif	/* __data_at_emulator_c */
 
-#endif	/* __at_emulator_h */
+#endif	/* __data_at_emulator_h */
 
 
 

@@ -17,7 +17,10 @@
   The various routines are called PGEN_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-16 14:29:53  chris
+  Revision 1.1  2001-02-21 19:57:07  chris
+  More fiddling with the directory layout
+
+  Revision 1.1  2001/02/16 14:29:53  chris
   Restructure of common/.  Fixed a problem in fbus-phonet.c
   Lots of dprintfs for Marcin
   Any size xpm can now be loaded (eg for 7110 startup logos)
@@ -46,7 +49,7 @@
 #include <ctype.h>
 
 #include "gsm-common.h"
-#include "phone-generic.h"
+#include "phones/generic.h"
 #include "misc.h"
 
 /* Useful debug function */

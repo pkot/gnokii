@@ -27,8 +27,8 @@
 #endif
 
 /* Ditto rlp_common.h... */
-#ifndef __rlp_common_h
-  #include "rlp-common.h"
+#ifndef __data_rlp_common_h
+  #include "data/rlp-common.h"
 #endif
 
 /* Define these as externs so that app code can pick them up. */

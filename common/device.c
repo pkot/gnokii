@@ -14,7 +14,10 @@
   Modified by Hugh Blemings <hugh@linuxcare.com>
 
   $Log$
-  Revision 1.7  2001-02-09 18:12:53  chris
+  Revision 1.8  2001-02-21 19:56:55  chris
+  More fiddling with the directory layout
+
+  Revision 1.7  2001/02/09 18:12:53  chris
   Marcel's tekram support
 
   Revision 1.6  2001/02/03 23:56:12  chris
@@ -26,9 +29,9 @@
 
 #ifndef WIN32
 
-#include "unixserial.h"
-#include "unixirda.h"
-#include "tekram.h"
+#include "devices/unixserial.h"
+#include "devices/unixirda.h"
+#include "devices/tekram.h"
 #include "device.h"
 
 /*
