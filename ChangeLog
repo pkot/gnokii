@@ -16,6 +16,8 @@
     o support decoding extension of the default alphabet  (Pawel Kot)
     o support for sending the characters from the default alphabet
       extension                                           (Pawel Kot)
+    o distinct between currency and euro symbols based on locale
+      set                                                 (Pawel Kot)
 
 0.4.2a
 ======

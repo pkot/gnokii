@@ -94,6 +94,9 @@ static bool IsEscapeChar(unsigned char value)
 
 static bool IsDefaultAlphabetExtensionChar(unsigned char value)
 {
+	wchar_t retval;
+
+	if (mbtowc(&retval, &value, 1) == -1) return false;
 	return (value == 0x0c ||
 		value == '^' ||
 		value == '{' ||
@@ -103,7 +106,7 @@ static bool IsDefaultAlphabetExtensionChar(unsigned char value)
 		value == '~' ||
 		value == ']' ||
 		value == '|' ||
-		value == 0xa4);
+		retval == 0x20ac);
 }
 
 static unsigned char DecodeWithDefaultAlphabetExtension(unsigned char value)
