@@ -18,7 +18,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.138  2001-06-28 00:28:45  pkot
+  Revision 1.139  2001-07-01 23:16:45  pkot
+  Fixed a typo in gnokii.c avoiding saving logo (Jan Havelka)
+
+  Revision 1.138  2001/06/28 00:28:45  pkot
   Small docs updates (Pawel Kot)
 
   Revision 1.137  2001/06/27 23:52:50  pkot
@@ -1673,9 +1676,9 @@ int getlogo(int argc, char *argv[])
 					default:
 						fprintf(stdout,"Unknown bitmap type.\n");
 						break;
+					}
 					if (argc > 1) {
 						if (SaveBitmapFileOnConsole(argv[1], &bitmap) != GE_NONE) return (-1);
-					}
 					}
 				} else {
 					fprintf(stdout,"Your phone doesn't have logo uploaded !\n");
