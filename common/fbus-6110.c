@@ -1278,7 +1278,7 @@ int PackSevenBitsToEight(int fillbits, unsigned char *String, unsigned char* Buf
 
   while ((IN-String)<strlen(String)) {
 
-    unsigned char Byte=GetAlphabetValue(*IN & 0x7f);
+    unsigned char Byte=GetAlphabetValue(*IN);
 
     *OUT=Byte>>(7-Bits);
 
