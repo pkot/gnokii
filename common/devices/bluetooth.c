@@ -22,8 +22,9 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2002       Marcel Holtmann <marcel@holtmann.org>
+
+  Fake definitions for the bluetooth handling functions.
 
 */
 
@@ -33,20 +34,7 @@
 #include "gnokii.h"
 #include "devices/unixbluetooth.h"
 
-#ifdef HAVE_BLUETOOTH
-
-#if 0
-static char *phone[] = {
-	"Nokia 3650",
-	"Nokia 6210",
-	"Nokia 6310",
-	"Nokia 6310i",
-	"Nokia 7650",
-	"Nokia 8910"
-};
-#endif
-
-#else /* HAVE_BLUETOOTH */
+#ifndef HAVE_BLUETOOTH
 
 int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state) { return -1; }
 int bluetooth_close(int fd, struct gn_statemachine *state) { return -1; }

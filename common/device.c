@@ -31,7 +31,7 @@
 #include "misc.h"
 #include "gnokii.h"
 #include "device.h"
-#include "devices/unixirda.h"
+#include "devices/irda.h"
 #include "devices/unixbluetooth.h"
 #ifndef WIN32
 #  include "devices/unixserial.h"

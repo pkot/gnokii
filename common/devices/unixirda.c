@@ -25,12 +25,24 @@
  *
  */
 
+#include "config.h"
 #include "misc.h"
 #include "gnokii.h"
 
 #ifdef HAVE_IRDA
 
-#include "devices/unixirda.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <linux/types.h>
+#include <linux/irda.h>
+
+#include "devices/irda.h"
 
 #ifndef AF_IRDA
 #  define AF_IRDA 23

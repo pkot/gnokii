@@ -9,15 +9,13 @@
     o serial_opendevice sets handshake and speed in the
       win32 version too                            (BORBELY Zoltan)
     o add irda support for Windows systems             (Phil Ashby)
-    o add direct.h detection                            (Pawel Kot)
-    o split up shared part of !HAVE_IRDA to a separate file
-                                                        (Pawel Kot)
-    o add buildin irda for WIN32 in the Makefile       (Phil Ashby)
  * build system updates
     o update Slackware build scripts; we have now 2 scripts to
       to build with and without X11 support             (Pawel Kot)
     o add the information about possibility to have smaller
       binaries with MSVC                               (Phil Ashby)
+    o add buildin irda for WIN32 in the Makefile       (Phil Ashby)
+    o add direct.h detection                            (Pawel Kot)
  * gnapplet series updates
     o folder management support (list, status, create,
       delete) support added                        (BORBELY Zoltan)
@@ -30,6 +28,7 @@
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)
     o display --getsecuritycodestatus error code   (BORBELY Zoltan)
+    o link with irda libraries on win32 build          (Phil Ahsby)
  * libgnokii updates
     o understand escaped semicolon in the phonebook csv input
                                                         (Pawel Kot)
@@ -55,6 +54,9 @@
     o gnokii_strsplit() crash bug fixed            (BORBELY Zoltan)
     o use libical as the primary vCal handling way      (Pawel Kot,
                                                    Martin GoldHahn)
+    o split up shared part of !HAVE_IRDA to a separate file
+                                                        (Pawel Kot)
+    o clean up irda code: headers usage, etc            (Pawel Kot)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

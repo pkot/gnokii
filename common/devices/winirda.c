@@ -28,7 +28,13 @@
 
 #ifdef HAVE_IRDA
 
-#include "devices/unixirda.h"
+#define WIN32_LEAN_AND_MEAN
+#include <winsock.h>
+#include <mmsystem.h>
+
+#include "compat.h"
+#include "misc.h"
+#include "devices/irda.h"
 /* 'cause af_irda needs it.. */
 #define _WIN32_WINDOWS
 #include "devices/af_irda.h"
@@ -108,7 +114,8 @@ static DWORD irda_discover_device(SOCKET fd)
 	return daddr;
 }
 
-int irda_open(struct gn_statemachine *state) {
+int irda_open(struct gn_statemachine *state)
+{
 	WSADATA wsaData;
 	SOCKADDR_IRDA	peer;
 	SOCKET fd = INVALID_SOCKET;
@@ -134,22 +141,26 @@ int irda_open(struct gn_statemachine *state) {
 	return (int)fd;
 }
 
-int irda_close(int fd, struct gn_statemachine *state) {
+int irda_close(int fd, struct gn_statemachine *state)
+{
 	shutdown(fd, 0);
 	closesocket((SOCKET)fd);
 	WSACleanup();
 	return 0;
 }
 
-int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) {
+int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
+{
 	return send((SOCKET)fd, bytes, size, 0);
 }
 
-int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) {
+int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
+{
 	return recv((SOCKET)fd, bytes, size, 0);
 }
 
-int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state) {
+int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+{
 	fd_set readfds;
 
 	FD_ZERO(&readfds);
