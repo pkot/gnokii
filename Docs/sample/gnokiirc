@@ -21,7 +21,10 @@ model = 6110
 # to understand what this changes if you're curious.
 initlength = default
 
-# The type of the connection, for IR set this to infrared
+# The type of the connection, for IR set this to infrared or irda.
+# If you have 6210/6250/7110 phone and dau9p cable (the one you can
+# use with 6100 series and cannot use hardware modem from the phone)
+# you may want to use 'dau9p' value to get faster initialization.
 connection = serial
 
 # Set bindir to point to the location of the various gnokii binaries.
