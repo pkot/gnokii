@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2004 Pawe³ Kot
-                 Last update  3 June 2004  Version 0.6.2
+                 Last update  5 July 2004  Version 0.6.3
 
 - Contents -
 
@@ -126,7 +126,7 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.6.2-i386.rpm
+rpm -i gnokii-0.6.3-i386.rpm
 
 If you are using a Debian based system, you can use dpackage to do the
 installation. On Slackware you use installpkg or pkgtool.
@@ -388,6 +388,9 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20040705 Version 0.6.3
+Small fixes for MSVC compilation problems.
+
 20040703 Version 0.6.2
 This version brings many portability and build system updates. Gnokii should
 build cleanly on Linux, Windows (cygwin and MSVC), FreeBSD and OpenBSD
