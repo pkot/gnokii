@@ -26,20 +26,19 @@ Q. What models are supported?
 
 A. Currently the supported phones are (All Nokia models unless
    noted otherwise):
-         + 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330|3360|3410|8210|8290
-         + 5160|6160|6185
-         + 7110|6210|6250|7190
-         + 6210|7110|6250
-         + 6310|6310i|6510|8310
+         + Nokia 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330|3360|2290|3410|8210|8250|8290|RPM-1
+         + Nokia 7110|6210|6250|7190
+         + Nokia 6510|6310|8310|6310i|6360|6610|6100|5100
+         + Nokia 3110|3810|8110|8110i
+         + Nokia 5160|6160|6185
          + AT mode compatible phones (namely Nokia 62X0, Nokia 7110,
            Nokia 8210, Nokia 6310, Nokia 6510, Ericsson T39, Sony-Ericsson
            T68i, Siemens S25 are known to work)
 
    The following models are no longer being actively supported by the
    core team and the underlying code may have undergone some bit rot:
-         + 640
-         + 3110|3810|8110|8110i
-         + 2110|2140|6080
+         + Nokia 2110|2140|6080
+         + Nokia 640
          + Dancall 2711 and 2713
 
 -------------------------------------------------------------------------------
@@ -112,7 +111,7 @@ A. We don't have any formal documentation of the protocols in use.
        {Seem to have dissapeared, anyone have a new link ? - Hugh}
 
 -------------------------------------------------------------------------------
-Q. Does gnokii work under Solaris?
+Q. Does gnokii work under Sun's Solaris?
 
 A. In general yes, but it depends on hardware -- your serial port
    must support at least 115200 baud rate. Sun Enterprise 250 machine is known
@@ -125,7 +124,6 @@ A. In general yes, but it depends on hardware -- your serial port
 
 -------------------------------------------------------------------------------
 Q. Could you tell me the key for on, off and select menu in
-
     gnokii --keysequence function?
 
 A. M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
@@ -182,6 +180,16 @@ Q. I can't compile gnokii. It fails when building the po directory.
 A. You need to run gettextize. See autogen.sh and INSTALL files. If you don't
    have it on your system, grab the -current tarball which should have all
    needed files already generated.
+
+-------------------------------------------------------------------------------
+Q. When connecting by IrDA I got "Couldn't open PHONET device: No route to
+   host" message. What can be wrong?
+
+A. Something's wrong with the irda device setup. Try to run:
+
+echo 115200 > /proc/sys/net/irda/max_baud_rate
+
+   and see whether it helps.
 
 -------------------------------------------------------------------------------
 Q. My phone is not mentioned as supported by gnokii, but it seems that it is

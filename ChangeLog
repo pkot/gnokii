@@ -6,6 +6,8 @@
  * nk6510 driver
     o added Nokia 3510i to the supported phones list
                                                     (Rafal Czlonka)
+ * documentation updates
+    o FAQ update and synchronize with WWW version       (Pawel Kot)
 
 0.5.7
 =====
