@@ -27,7 +27,9 @@ typedef struct {
 	GSM_PhonebookEntry *PhonebookEntry;
 	GSM_SpeedDial *SpeedDial;
 	GSM_MemoryStatus *MemoryStatus;
-	GSM_SMSMemoryStatus *SMSStatus;
+	SMS_MessagesList *MessagesList[MAX_SMS_MESSAGES][MAX_SMS_FOLDERS];
+	SMS_Status *SMSStatus;
+	SMS_FolderStats *FolderStats[MAX_SMS_FOLDERS];
 	SMS_MessageCenter *MessageCenter;
 	char *Imei;
 	char *Revision;
@@ -105,6 +107,10 @@ typedef enum {
 	GOP_GetIncomingCallNr,
 	GOP_GetNetworkInfo,
 	GOP_GetSMS,
+	GOP_GetSMSFolders,
+	GOP_GetSMSFolderStatus,
+	GOP_GetIncomingSMS,	
+	GOP_FindUnreadSMS,	
 	GOP_GetNextSMS,
 	GOP_DeleteSMS,
 	GOP_SendSMS,

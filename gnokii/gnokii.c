@@ -2058,7 +2058,7 @@ static int monitormode(void)
 	GSM_MemoryStatus ON_MemoryStatus   = {GMT_ON, 0, 0};
 	GSM_MemoryStatus RC_MemoryStatus   = {GMT_RC, 0, 0};
 
-	GSM_SMSMemoryStatus SMSStatus = {0, 0};
+	SMS_Status SMSStatus = {0, 0, 0, 0};
 
 //	char Number[20];
 

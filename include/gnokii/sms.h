@@ -41,12 +41,17 @@
 /* FIXME: what value should be here? (Pawel Kot) */
 #define SMS_MAX_UDH_NUMBER              10
 
+/* Maximal number of SMS folders */
+#define MAX_SMS_FOLDERS 24
+#define MAX_SMS_MESSAGES 190
+
 /*** MEMORY INFO ***/
 
 typedef struct {
-	int Unread; /* Number of unread messages */
-	int Number; /* Number of all messages */
+	int Unread;		/* Number of unread messages */
+	int Number;		/* Number of all messages */
 } GSM_SMSMemoryStatus;
+
 
 /*** DATE AND TIME ***/
 
@@ -289,6 +294,38 @@ typedef enum {
 	SMS_OtherData    = 0x04
 } SMS_DataType;
 
+/*** FOLDER INFO ***/
+
+typedef enum {
+	SMS_Old		= 0x00,
+	SMS_New		= 0x01,
+	SMS_Deleted	= 0x02,
+	SMS_ToBeRemoved	= 0x03,
+	SMS_NotRead	= 0x04,
+	SMS_NotReadHandled	= 0x05,
+	SMS_Changed	= 0x06
+} ActionType;
+	
+typedef struct {
+	ActionType Type;		/* deleted, new, old, ToBeRemoved */
+	unsigned int Location;
+	SMS_MessageType MessageType;
+} SMS_MessagesList;
+
+typedef struct {
+	int Number;		/* -1 if folder is not supported by the phone */
+	unsigned int Unread;	/* only valid for INBOX */
+	unsigned int Changed;
+	unsigned int Used;	/* because 'Used' can vary from 'Number' when we have deleted messages */
+} SMS_FolderStats;
+
+typedef struct {
+	unsigned int Number;	/* Number of message we get from GetSMSStatus */
+	unsigned int Unread;	/* Number of unread messages we get from GetSMSStatus */
+	unsigned int Changed;	/* because when a message is moved between folders status wouldn't change */
+	unsigned int NumberOfFolders;	/* Number of Folders we get from GetFolders */
+} SMS_Status;
+
 typedef struct {
 	SMS_DataType Type;
 	unsigned int Length;
@@ -402,10 +439,6 @@ typedef struct {
 extern SMSMessage_PhoneLayout layout;
 
 /*** FOLDERS ***/
-
-/* Maximal number of SMS folders */
-#define MAX_SMS_FOLDERS 24
-#define MAX_SMS_MESSAGES 160
 
 /* Datatype for SMS folders ins 6210/7110 */
 typedef struct {
