@@ -1253,6 +1253,8 @@ static void sms_dump_raw(gn_sms_raw *rawsms)
 	bin2hex(buf, rawsms->user_data, rawsms->user_data_length);
 	dprintf("user_data: %s\n", buf);
 }
+#else
+static void sms_dump_raw(gn_sms_raw *rawsms) {}
 #endif
 
 static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state);
