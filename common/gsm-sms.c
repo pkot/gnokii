@@ -34,12 +34,20 @@
 #include "gsm-data.h"
 #include "gsm-encoding.h"
 #include "gsm-statemachine.h"
-#include "gsm-ringtones.h"
-#include "gsm-bitmaps.h"
+
+#define BITMAP_SUPPORT 1
+#define RINGTONE_SUPPORT 1
+
+#ifdef BITMAP_SUPPORT
+#  include "gsm-ringtones.h"
+#endif
+#ifdef RINGTONE_SUPPORT
+#  include "gsm-bitmaps.h"
+#endif
 
 SMSMessage_PhoneLayout layout;
 static SMSMessage_Layout llayout;
-static unsigned short header_offset;
+static unsigned int header_offset;
 
 struct udh_data {
 	unsigned int length;
@@ -181,6 +189,15 @@ SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
 	return dt;
 }
 
+/**
+ * CountSMSParts - returns the number of the single SMSes to be able to send
+ *                 the data contained by the SMS structure
+ * @SMS: SMS structure to be analised
+ *
+ * The single SMS can contain up to 140 octets in the UserData field. If the
+ * ammount of the UserData octet exeeds 140 it has to be splitted. This
+ * function returns the number of the SMS needed to send the given data.
+ */
 static int CountSMSParts(GSM_SMSMessage *SMS)
 {
 	unsigned int i, j, count, length = 0, header = 0;
@@ -263,6 +280,7 @@ static int CountSMSParts(GSM_SMSMessage *SMS)
 	/* Smart Messaging Specification number */
 	if (multi) length++;
 
+	/* Now count the number of the messages */
 	if (length + header > (GSM_MAX_8BIT_SMS_LENGTH - (SMS->UDH_No ? 1 : 0))) {
 		count = (length + header) /
 			(GSM_MAX_8BIT_SMS_LENGTH - 1 -
@@ -284,12 +302,13 @@ static int CountSMSParts(GSM_SMSMessage *SMS)
  * RemoteNumber have variable length */
 
 /* Returns a new offset of the field */
-static short change_offset(short base, short orig, short offset)
+static int change_offset(int base, int orig, int offset)
 {
 	if (orig <= base) return orig;
 	else return (orig + offset);
 }
-static void change_offsets2(short pos, short offset)
+
+static void change_offsets2(int pos, int offset)
 {
 	if (pos < 0) return;
 	llayout.MessageCenter = change_offset(pos, llayout.MessageCenter, offset);
@@ -339,7 +358,7 @@ static void change_offsets(unsigned char *message)
 static void change_offsets_struct(SMS_MessageCenter mc, SMS_Number rn)
 {
 	unsigned char aux[16];
-	unsigned short mc_len, rn_len;
+	unsigned int mc_len, rn_len;
 
 	mc_len = SemiOctetPack(mc.Number, aux, mc.Type);
 	rn_len = SemiOctetPack(rn.number, aux, rn.type);
@@ -370,11 +389,23 @@ static void change_offsets_struct(SMS_MessageCenter mc, SMS_Number rn)
  *** ENCODING SMS
  ***/
 
+/**
+ * EncodeData - encodes the date from the SMS structure to the phone frame
+ *
+ * @SMS: SMS structure to be encoded
+ * @dcs: Data Coding Scheme field in the frame to be set
+ * @message: phone frame to be filled in
+ * @multipart: do we send one message or more?
+ * @clen: coded data length
+ *
+ * This function does the phone frame encoding basing on the given SMS
+ * structure. This function is capable to create only one frame at a time.
+ */
 static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool multipart, int *clen)
 {
 	SMS_AlphabetType al;
-	unsigned short i, length, size = 0, offset = 0;
-	short text_index = -1, bitmap_index = -1, ringtone_index = -1;
+	unsigned int i, length, size = 0, offset = 0;
+	int text_index = -1, bitmap_index = -1, ringtone_index = -1;
 
 	/* Decide what to encode */
 	if (multipart) {
@@ -485,24 +516,39 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 
 	/* Bitmap coding */
 	if (bitmap_index != -1) {
+#ifdef BITMAP_SUPPORT
 		size = GSM_EncodeSMSBitmap(&(SMS->UserData[bitmap_index].u.Bitmap), message + SMS->Length);
 		SMS->Length += size;
 		*clen += size;
+#else
+		return GE_NOTSUPPORTED;
+#endif
 	}
 
 	/* Ringtone coding */
 	if (ringtone_index != -1) {
+#ifdef RINGTONE_SUPPORT
 		size = GSM_EncodeSMSRingtone(message + SMS->Length, &SMS->UserData[ringtone_index].u.Ringtone);
 		SMS->Length += size;
 		*clen += size;
+#else
+		return GE_NOTSUPPORTED;
+#endif
 	}
 	return GE_NONE;
 }
 
-/* This function encodes the UserDataHeader as described in:
-   - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
-   - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
-*/
+/**
+ * EncodeUDH - encodes User Data Header
+ * @UDHi: User Data Header information
+ * @SMS: SMS structure with the data source
+ * @UDH: phone frame where to save User Data Header
+ *
+ * This function encodes the UserDataHeader as described in:
+ *  o GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
+ *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
+ *  o Smart Messaging Specification, Revision 3.0.0
+ */
 static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, GSM_SMSMessage *SMS, char *UDH)
 {
 	unsigned char pos;
@@ -531,6 +577,13 @@ static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, GSM_SMSMessage *SMS, char *UDH)
 	return GE_NONE;
 }
 
+/**
+ * EncodeSMSSubmitHeader - prepares a phone frame with a SMS header
+ * @SMS - SMS structure with a data source
+ * @frame - a phone frame to fill in
+ *
+ * We prepare here a part of the frame with a submit header (phone originated)
+ */
 static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 {
 	GSM_Error error = GE_NONE;
@@ -613,11 +666,25 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 	return error;
 }
 
+/**
+ * EncodeSMSDeliverHeader - prepares a phone frame with a SMS header
+ * @SMS - SMS structure with a data source
+ * @frame - a phone frame to fill in
+ *
+ * We prepare here a part of the frame with a deliver header (phone terminated)
+ */
 static GSM_Error EncodeSMSDeliverHeader()
 {
 	return GE_NONE;
 }
 
+/**
+ * EncodeSMSHeader - prepares a phone frame with a SMS header
+ * @SMS - SMS structure with a data source
+ * @frame - a phone frame to fill in
+ *
+ * We prepare here a part of the frame with a header
+ */
 static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 /* We can create either SMS DELIVER (for saving in Inbox) or SMS SUBMIT
    (for sending or saving in Outbox) message */
@@ -633,10 +700,17 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 	}
 }
 
-/* This function encodes SMS as described in:
-   - GSM 03.40 version 6.1.0 Release 1997, section 9
-*/
-static GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num, int *length)
+/**
+ * EncodePDUSMS - prepares a phone frame with a given SMS
+ * @SMS:
+ * @message:
+ * @num:
+ * @length:
+ *
+ * This function encodes SMS as described in:
+ *  o GSM 03.40 version 6.1.0 Release 1997, section 9
+ */
+static GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned int num, int *length)
 {
 	GSM_Error error = GE_NONE;
 	int i, clen, mm = 0;
@@ -690,6 +764,11 @@ static GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short
 	return GE_NONE;
 }
 
+/**
+ * SendSMS - The main function for the SMS sending
+ * @data:
+ * @state:
+ */
 GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;

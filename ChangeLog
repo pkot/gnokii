@@ -8,6 +8,12 @@
                                                           (Pawel Kot)
  * We moved to savannah.gnu.org                           (Pawel Kot)
  * More accurate INSTALL file                  (Robert Steinhaeusser)
+ * libsms updates
+    o start documenting libsms. The source code is documented in
+      the linux kernel manner, so you can use its tools   (Pawel Kot)
+    o replace 'short' type with 'int' type                (Pawel Kot)
+    o prepare to be able to compile libsms without bitmaps or
+      ringtones support                                   (Pawel Kot)
 
 0.4.0pre16
 ==========

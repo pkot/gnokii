@@ -1,0 +1,36 @@
+libsms is a part of the libgnokii, a library providing functionality for all
+gnokii applications (at the moment: gnokii, xgnokii and smsd).
+
+libsms is a library that offers possibilities to handle the short messages
+also known as SMS.
+
+The functionality of the libsms is covered by the 3 functions:
+
+	SendSMS()
+		Allows to send all kind of the short messages allowing to
+		send logos, ringtones, picture messages, profiles, business
+		cards, concatenated messages as well as allows to compose a
+		message using default alphabet, 8bit alphabet and unicode.
+		A message is being sent to the given remote address. The
+		supported address type are: international number, national
+		number and unknown number (treated as national number).
+
+	SaveSMS()
+		Offers the same functionality as SendSMS() but instead of
+		sending is saves it in the given location and memory type.
+		If the phone supports it, the message can be saved in an
+		arbitrary folder. If the location is not given, the message
+		is being saved to the first empty location in the given
+		memory type/folder.
+
+	GetSMS()
+		Reads the message from the given location and memory
+		type/folder.
+
+There are several helping functions that can be also used by the higher
+level applications:
+	ParseSMS()
+		Does the SMS frame parsing and fills in the SMS struct.
+
+	RequestSMS()
+		Requests the frame from the phone driver.
