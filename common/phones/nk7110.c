@@ -1078,7 +1078,7 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 			sprintf(data->MessageCenter->SMSC.Number, "(none)");
 		}
 		if(strlen(data->MessageCenter->Name) == 0) {
-			sprintf(data->MessageCenter->Name, "(none)");
+			data->MessageCenter->Name = '\0';
 		}
 
 		break;
