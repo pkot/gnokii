@@ -22,17 +22,7 @@ Q. How do you pronounce gnokii ?
 A. You can pronounce gnokii as "gnooki" or "gnocki" at your option :-)
 
 -------------------------------------------------------------------------------
-Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
-   running gnokii. What's wrong ?
-
-A. Gnokii cannot connect to the phone.  Possible reasons are:
-    - wrong serial port is defined in gnokii config file,
-    - you are using the wrong cable,
-    - you are using not supported phone model,
-    - you don't have permission to write to /dev/ttySX device.
-
--------------------------------------------------------------------------------
-Q. What models are supported?
+Q. What models are supported ?
 
 A. Currently supported phone models are:
          + 6110|6130|6150|6190|5110|5130|5190|3310|3210
@@ -47,7 +37,17 @@ A. Currently supported phone models are:
          + Ericsson GA628 and similiar
 
 -------------------------------------------------------------------------------
-Q. `make install' sets mgnokiidev suid root.  Is this correct ?
+Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
+   running gnokii. What's wrong ?
+
+A. Gnokii cannot connect to the phone.  Possible reasons are:
+    - wrong serial port is defined in gnokii config file,
+    - you are using the wrong cable,
+    - you are using not supported phone model,
+    - you don't have permission to write to /dev/ttySX device.
+
+-------------------------------------------------------------------------------
+Q. Does mgnokiidev need to be suid root ?
 
 A. Yes.  gnokiid needs to create a symbolic link in the /dev directory.
    mgnokiidev is the program which does this and hence it must be suid
@@ -64,7 +64,14 @@ A. No.  There's no need for it.
 Q. Does gnokii support Nokia 3210/3310/6210/7110 phone ?
 
 A. Yes it does. Support is not as full as with 6110 series but it is improving
-every day now.
+almost every day now.
+
+-------------------------------------------------------------------------------
+Q: Can I use IrDA with 6210/7110 and gnokii ?
+
+A: Yes. Just put:
+connection = irda
+line into your config file.
 
 -------------------------------------------------------------------------------
 Q. Can I get a copy of the protocol for the <insert phone model here> ?
@@ -86,4 +93,14 @@ A. We don't have any formal documentation of the protocols in use.
 
      Marcin Wiacek's pages are also useful;
        http://www.fkn.pl/marcinw/
+
+     Nagy Balazs' pages:
+       http://www.lsc.hu/dl/
+
+-------------------------------------------------------------------------------
+Q. Does gnokii work under Sun's Solaris ?
+
+A. Generally yes, but in fact it depends on hardware -- your serial port
+must support at least 115200 baud rate. Sun Enterprise 250 machine is known
+to work with gnokii.
 

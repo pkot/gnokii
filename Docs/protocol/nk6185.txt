@@ -1,0 +1,52 @@
+$Id$
+
+Assembled by
+                     <arnu@venia.net>
+	... and other members of gnokii mailing list
+            and authors of some WWW pages.
+
+The data provided is for information purposes only. 
+Some of the frames might be hazardous to your phone. Be careful!!! 
+We do not take any responsibility or liability for damages, etc.
+
+NOTE: this information isn't (and can't be) complete.  If you know anything
+about features not listed here or you noticed a bug in this list, please
+notify us via e-mail.  Thank you.
+
+Document describing frames used in
+CDMA Nokia 6185.
+Correct format is MBUS version 2
+(see nokia.txt for protocol details):
+
+ List:
+
+0x07: Phonebook functions ?
+    s Set mem location      {0x0710, 0x00, memory, 0x00, location, length, number(each byte contains two digits), 0x00, ..., name[23], 0x00 }
+                            where: memory 0x22 - internal phonebook
+                                   max. length for name 15
+                                   max. length for number 15 bytes (30 digits)
+    s Get mem location      {0x0711, 0x00, memory, 0x00, location }
+                            where: memory 0x22 - internal phonebook
+0x40:
+?   s Read phonebook        {+0x00, 0x00, 0x07, 0x11, 0x00, 0x10, 0x00, location }
+    s Get phone memory ?    {+0x00, 0x01, 0xc8, 0xXX}
+0xd1:
+?   s Registration request? {+0x00, 0xF8, 0x05, 0xE9, 0x00, 0x02, 0x1D, 0x00, 0x1D}
+    s Get HW&SW version     { 0x0003, 0x00 }
+?   s Get phone version?    { 0x000D, 0x00, 0x00, 0x02}
+?   s ???                   { 0x47, 0x00, 0x00}
+?   s ???                   { 0x47, 0x00, 0x05}
+    s Press key             { 0x51, 0x00, 0x01, KEY }
+                              dials in digital CDMA default mode?
+    s Key release           { 0x52, 0x00, 0x01, KEY }
+0xd2:
+    r Get HW&SW version     { 0x0003 "V " "firmware\n" "firmware date\n"
+                              "model\n" "(c) NMP." }
+?   r Get phone version     { 0x000D, "V " "firmware\n" "firmware date\n"}
+?   r ???                   {+0x01, 0x00, 0x47, 0x00}
+0xdd: Phonebook functions ?
+    r Get mem location      {+0x01, 0x00, block, length, number(each byte contains two digits), 0x00, ..., name[23], 0x00 }
+                            where: block: 0x11, 0x00, memory, 0x00, location (bytes like in 0x07/0x0711)
+                                   memory 0x22 - internal phonebook
+                                   max. length for name 15
+                                   max. length for number 15 bytes (30 digits)

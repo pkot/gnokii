@@ -1,0 +1,33 @@
+$Id$
+
+Assembled by
+        Andrew Kozin
+	... and other members of gnokii mailing list
+            and authors of some WWW pages.
+
+The data provided is for information purposes only. 
+Some of the frames might be hazardous to your phone. Be careful!!! 
+We do not take any responsibility or liability for damages, etc.
+
+NOTE: this information isn't (and can't be) complete.  If you know anything
+about features not listed here or you noticed a bug in this list, please
+notify us via e-mail.  Thank you.
+
+Document describing frames used in NMT Nokia 640 and derivatives:
+Correct format is MBUS version 1 (see nokia.txt for protocol details):
+
+ List:
+
+0x0f:
+    r Get serial number     {+0x19, 0x03, 0x00, 0x01, 0x0b, 0x00, 0x00}
+    s Get mem location      {+0x2d, 0x03, 0x00, 0x07, 0x1f, 0x7f, 0xf0, 0x00, location?, 0x00, 0x00}
+    s Get startup logo      {+0x60, 0x03, 0x00, 0x07, 0x3A, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00}
+0x10:
+    s Set startup logo      {+0x08,0x03,0x00,0x07,0x3A,0x7F,0xF0,0x00,0x00,0x00,0x00,0x54, bitmap }
+    s Set mem location      {+0x10,0x08,0x03,0x00,0x07,0x1F,0x7F,0xF0,0x00,
+                              location,0x00,0x00,0x00,0x21,numlen,number,name[starts on 30 byte],0x00,0x05[starts on 46 byte]}
+0x19:
+    s Get RF level          {+0x02,0x01,0x07}
+    s Get battery level     {+0x02,0x01,0x00}
+0x43:
+    s Reset                 {+0x00, 0x00}

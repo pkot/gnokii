@@ -1,0 +1,98 @@
+$Id$
+
+Assembled by
+                     <arnu@venia.net>
+	... and other members of gnokii mailing list
+            and authors of some WWW pages.
+
+The data provided is for information purposes only. 
+Some of the frames might be hazardous to your phone. Be careful!!! 
+We do not take any responsibility or liability for damages, etc.
+
+NOTE: this information isn't (and can't be) complete.  If you know anything
+about features not listed here or you noticed a bug in this list, please
+notify us via e-mail.  Thank you.
+
+Document describing frames used in
+TDMA NOKIA 5120 / 5160 / 6120 / 6160
+
+TDMA phones support simultaneously both MBUS protocols
+(see nokia.txt for protocol details)
+the old one (version1) and the new (version2). Both protocols can be used
+at the same time on the MBUS. The phone will decode both and react accordingly.
+
+Correct format is MBUS version 1:
+
+ List:
+
+0x17:
+    s Release key           {+0x00, keynum }
+    s Press key             {+0x01, keynum }
+0xe9:
+    s Start connection      {+0x01 0x01 0x1c 0x01 0x1c}
+      (3Com cell modem card)Note: this is message with SrcDEV = 0xf8 !
+                            ACK frame for it is (DestDEV = 0xf8 too) 0x1c, 0x01, 0x1c
+    s Start connection      {+0x00 0x02 0x1d 0x00 0x1d}
+                            Note: this is message with SrcDEV = 0xf8 !
+
+Other frames from 3Com cell modem card (MBUS version 1):
+   unknown purpose : 00 E0 00 1D SQ CS
+       probably request 
+       Alive response from cellmodem 
+   UC_RESERVE_REQ:   00 E0 05 19 00 00 01 01 00 SQ CS
+       register system state info presentation 
+   UC_RESERVE_REQ:   E0 00 01 CD 01 SQ CS
+       phone tries to register some info from cellmodem 
+
+   Dialing as cellmodem forces the phone into analoge AMPS mode,
+   answering a call as cellmodem answers in AMPS mode 
+   This allows transparent transmission of the analoge modem tones since
+   digital TDMA won't transmit them transparently. 
+   It also switches audio to the XEAR , XMIC pins automatically. 
+
+   LN_ALIVE_REQ:     E0 00 00 1E SQ CS
+       checks if cellmodem is still present (sent 1 /sec.) 
+   SYS_STATE_IND:    FF 02 07 CA 1C Con 02 01 0E 0F 00 SQ CS
+       sytems state information 
+       Con holds the connection state 
+         00 = idle 
+         01 = ringing 
+         02 = connecting 
+         03 = talk 
+         04 = ringing / alternating with 01
+       the destignation is the Global object and the source
+       is subaddress 02 of the Nokia phone. 
+
+Correct format is MBUS version 2:
+
+ List:
+
+0x40:
+    s Read phonebook(2way)  {+0x00, 0x00, 0x07, 0x11, 0x00, 0x10, 0x00, location }
+                            Note: works also on CDMA 6185
+    s Read phonebook(1way)  { 0x1F, 0x01, 0x04, 0x86, location }
+    s Write phonebook       { 0x1f, 0x01, 0x04, 0x87, number, 0x00, name, 0x00 }
+    s Enable extended cmds  { 0x64, cmd }
+                            where 
+                              cmd(probably): 0x00: off
+                                             0x01: on
+                                             0x03: reset (doesn't ask for PIN again)
+                                             0x04: reset (PIN is requested)
+                                                   In 5110 makes reset without PIN
+                                             0x06: CONTACT SERVICE!!! Don't try it!
+0xd1:
+    s Registration request? {+0x00, 0xF8, 0x05, 0xE9, 0x00, 0x02, 0x1D, 0x00, 0x1D}
+    s Get HW&SW version     { 0x0003, 0x00 }
+    s Get phone version?    { 0x000D, 0x00, 0x00, 0x02}
+    s ???                   { 0x47, 0x00, 0x00}
+    s ???                   { 0x47, 0x00, 0x05}
+    s Key release(1way)     { 0x50, 0x00, 0x00, KEY }
+    s Key press             { 0x50, 0x00, 0x01, KEY }
+                              dials in digital TDMA default mode ?
+    s Key release(2way)     { 0x51, 0x00, 0x01, KEY }
+0xd2:
+    r Get HW&SW version     { 0x0003 "V " "firmware\n" "firmware date\n"
+                              "model\n" "(c) NMP." }
+    r Get phone version     { 0x000D, "V " "firmware\n" "firmware date\n" }
+    r Key press             {+0x01, 0x00, 0x50, 0x00}
+    r ???                   {+0x01, 0x00, 0x47, 0x00}

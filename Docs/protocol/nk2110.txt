@@ -1,0 +1,200 @@
+$Id$
+
+Assembled by
+	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)
+        Pavel Machek <pavel@ucw.cz>
+	... and other members of gnokii mailing list
+            and authors of some WWW pages.
+
+The data provided is for information purposes only. 
+Some of the frames might be hazardous to your phone. Be careful!!! 
+We do not take any responsibility or liability for damages, etc.
+
+NOTE: this information isn't (and can't be) complete.  If you know anything
+about features not listed here or you noticed a bug in this list, please
+notify us via e-mail.  Thank you.
+
+Document describing frames used in GSM Nokia 2110 and derivatives:
+Correct format is MBUS version 1 (see nokia.txt for protocol details):
+
+ List:
+
+0x12:
+    r Display               {+?, ?, ?, x, y, string, 0x00 }
+0x19:
+    s Enable display status {+0x03, 0x03, 0x00, 0x00, 0x01}
+0x1f: phonebook
+    s Get mem location      {+0x1a, memtype, location }
+                            where: memtype:
+                                      0x03: telephone phonebook
+                                      0x04: SIM phonebook
+    s Set mem location      {+0x1b, memtype, location, name, 0x00, number, 0x00 }
+                            where: memtype: see 0x1f/0x1a
+0x2f:
+    r Status                {+?, byte1, byte2, byte3, byte4, byte5}
+                            where byte1 (for N2110):
+                                     bit 0 - "d",      bit 2 - "b",        bit 4 - "a",          bit 6 - "lights"
+                                  byte2 (for N2110):
+                                     bit 0 - "service",bit 2 - "scroll_up",bit 4 - "scroll_down",bit 6 - "ABC"
+                                  byte3 (for N2110):
+                                     bit 0 - "2.>",    bit 2 - "1.>",      bit 4 - "roam",       bit 6 - "handset"
+                                  byte4 (for N2110):
+                                     bit 0 - "vmail",  bit 2 - "envelope", bit 4 - "battery bar",bit 6 - "3.>"
+                                  byte5 (for N2110):
+                                                                           bit 4 - "fieldbar",   bit 6 - "ring"
+0x37: SMS
+    r SendSMS/GetSMS/DelSMS/{+0x10, code, frame }
+      SetSMSC/GetSMSC       where:
+                              code: 0x08 - SMS send OK
+                                    frame:
+                                      0x1d 0x24 0x25 (latter 2 in order)
+                                    0x0b - SMS get OK
+                                    Frame:
+                                      memtype, location, msgstatus, unknown2, unknown2, 0x00, date(7 bytes) in BCD, msglen, msgtext, recipient,
+                                      0x00, smsc, 0x00
+                                      Where:
+                                        memtype, msglen, msgtext: see 0x38/0x1002 frame
+                                        msgstatus, unknown2, unknown3: see 0x37/0x21
+                                      Note: This frame used only, when FrameLength < 0x75
+                                    0x0d - SMS delete OK
+                                    0x0f - SMS delete failed
+                                    0x10 - SMS send failed
+                                    frame:
+                                      0x1d 0x24 0x25 (latter 2 in order)
+                                    0x10 - SMS get failed
+                                    0x1a - SMS message received (by phone).
+                                    Frame:
+                                      memtype, location, unknown1, unknown2, 0x00, date(7 bytes) in BCD, msglen, sender,
+                                      0x00, smsc, 0x00
+                                      where
+                                        memtype: see 0x38/0x1002 frame
+                                        unknown1: 0x00 0x00 0x04 more messages?
+                                          true:0x00
+                                          false:0x04
+                                        unknown2: 0x20 0x20 0x20
+                                    0x1c - SMSC set OK
+                                    0x1d - SMSC set failed
+                                    0x2f - SMSC get OK
+                                    Frame:
+                                      0x00, 0x00, unknown1, unknown2, 0x00, 0x00, unknown3, unknown4, unknown5,
+                                      0x00, smsc, 0x00
+                                      Where:
+                                        unknown1: 0x05 0x08
+                                          last memtype location used or number of messages??
+                                        unknown2: 0x02 0x00
+                                          unread messages indicator??
+                                        unknown3: 0xff
+                                          validity period?
+                                        unknown4: accept reply costs?
+                                                    no:0x01
+                                                    yes:0x02
+                                        unknown5: status reports
+                                                    no:0x01
+                                                    yes:0x02
+                                    0x30 - SMSC get failed
+    r Get SMS part 2        {+0x20, ... continuation of 0x37/0x21 frame }
+    r Get SMS part 1        {+0x21, 0x0b, memtype, location, msgstatus, unknown2, unknown3, 0x00, date(7 bytes) in BCD, msglen, msgtext}
+                            where memtype: see 0x38/0x1002
+                                  msgstatus:
+                                    message status
+                                      not sent: 0x07
+                                      sent: 0x05
+                                      unread: 0x03:
+                                      read: 0x01
+                                  unknown2: more messages ?
+                                    true: 0x00
+                                    false: 0x04
+                                  this flag seems to be set by locust when a message (e.g. tv) is split across more than 1 sms
+                                  unknown3: 0x20
+0x38: SMS
+    s Send SMS message      {+0x1000, unknown, pr, 0x00, validity, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                    msglen, msgtxt, recipient, 0x00, smsc, 0x00}
+                            where: unknown:   0x11 or 0x91 parameter mask?
+                                              (data, data coding, protocol but 0x80?)
+                                   pr:        0x00 or protocol id + 0x20
+                                   validity:  0x0b:  1 hour
+                                              0x47:  6 hours
+                                              0xa7: 24 hours
+                                              0xad:  1 week
+                                              0xff: max.time
+                                   msglen:    SMS message length
+                                   msgtext:   message string (unterminated)
+                                   recipient: receipient`s number string
+                                   smsc:      SMS centre number string
+                            Note: Used when FrameLength < 0x75
+    s Get SMS message       {+0x1002, memtype, location }
+                            where: memtype:
+                                     0x01: default
+                                     0x02: SIM
+                                     0x03: phone
+    s Delete SMS message    {+0x1003, memtype, location }
+                            where: memtype: see 0x38/0x1002
+    r ???                   {+0x1006...}
+    s Reserve SMS           {+0x1012, <do you want normal reserve or only new messages indication?>}
+    s Enable cell broadcast {+0x1013, ...}
+    s Kill reserve SMS      {+0x1014}
+    r New msg from network ?{+0x1015...}
+    r Reserve SMS OK        {+0x1016}
+    r Reserve SMS err       {+0x1017, error}
+    s Set SMSC              {+0x101b, unknown, pr, 0x00, validity, reply, report, 0x00, smsc, 0x00, 0x00 }
+                            where:
+                               pr:        protocol id + 0x20 
+                               validity:  0x0b:  1 hour
+                                          0x47:  6 hours
+                                          0xa7: 24 hours
+                                          0xad:  1 week
+                                          0xff: max.time
+                               reply:     reply via same SMSC:
+                                            0x01: no
+                                            0x02: yes
+                               report:    delivery reports:
+                                            0x01: no
+                                            0x02: yes
+                               unknown:   0x74, 0x75 parameter mask ??
+    s Get SMSC              {+0x101e, 0x09, 0xe9} 
+    s Send SMS message 2part{+0x20, continuation of 0x38/0x21 frame }
+                            Note: Used when FrameLength >= 0x75
+                                  Format the same to 0x38/0x1000 frame
+    s Send SMS message 1part{+0x21, unknown, pr, 0x00, validity, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                             msglen, msgtext }
+                            Note: Used when FrameLength >= 0x75
+                                  Format the same to 0x38/0x1000 frame
+0xc9: phonebook
+    r Get mem location      {+0a1a, memtype, location, code, {name}, 0x00, {number}, 0x00 }
+                            where: memtype: see 0x1f/0x1a
+                                   code:
+                                     0x64 - invalid location
+                                     0x65 - device failure
+                                     0x66 - device not available
+                                     0x67 - entry locked
+                                     0x68 - communication error
+                                     0x69 - update impossible
+                                     0x6a - number too long
+                                     0x6b - name too long
+                                     0x82 - store ok
+                                     0x83 - read ok
+                                     0x84 - number overflow
+                                   name: name string, only present on "read ok" code
+                                   number: phone number string, only present on "read ok" code
+    r Set mem location      {+0a1a, memtype, location, code }
+                            where: memtype: see 0x1f/0x1a
+                                   code: see "Get mem location"
+0xe9:
+    s Start connection      {+0x00, 0x02, 0x1c, 0x00, 0x1c}
+                            Note: this is message with SrcDEV = 0xf8 !
+                            ACK frame for it is (DestDEV = 0xf8 too) 0x1c, 0x01, 0x1c
+                            According to http://www.gadgets.demon.co.uk/nokia21xx/protocol.html
+    s Start connection      {+0x01, 0x01, 0x0f, 0x01, 0x0f}
+                            Note: frame according to mbus-2110.c from gnokii (Normal DestDEV)
+0xcd:
+    r Enable display status {+0x01}
+0xe5:
+    s Phone ID request      {+0x11, 0x03, 0x00}
+    s Get RF level          {+0x84, 0x02, 0x00}
+    s Get battery level     {+0x85, 0x02, 0x00}
+    s Press key             {+press: ?; release: ?; 0x00, 0x01, keycode } 
+                            where keycode:
+0xe6:
+    r Phone ID request      {+0x11, 0x03, "revision", "\n", "revision_date", "\n", "model"}
+    r Get RF level          {+0x84, 0x02, 0x00, ?, value}
+    r Get battery level     {+0x85, 0x02, 0x00, ?, value}
