@@ -54,7 +54,8 @@
 
 #  include <windows.h>
 #  include <process.h>
-#  include "getopt.h"
+#  include <dirent.h>
+#  include "win32/getopt.h"
 
 #else
 
