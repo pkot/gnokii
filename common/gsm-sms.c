@@ -711,7 +711,7 @@ API gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
 }
 
 /**
- * gn_sms _get- High-level function for reading SMS
+ * gn_sms_get- High-level function for reading SMS
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *

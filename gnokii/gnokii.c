@@ -1326,7 +1326,7 @@ static int getsms(int argc, char *argv[])
 		default:
 			fprintf(stderr, _("GetSMS %s %d failed! (%s)\n"), memory_type_string, count, gn_error_print(error));
 			if (error == GN_ERR_INVALIDMEMORYTYPE)
-				fprintf(stderr, _("See the gnokii manual page for the supported memory types with the phone\nyou use\n"));
+				fprintf(stderr, _("See the gnokii manual page for the supported memory types with the phone\nyou use.\n"));
 			break;
 		}
 	}
