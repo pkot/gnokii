@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.2  2001-02-21 19:57:05  chris
+  Revision 1.3  2001-03-06 22:27:46  pkot
+  Misc docs and Makefiles updates and cleanups
+
+  Revision 1.2  2001/02/21 19:57:05  chris
   More fiddling with the directory layout
 
 
@@ -234,7 +237,8 @@ void serial_changespeed(int __fd, int __speed) {
   // This is not needed! We set up the speed via cfsetspeed
   //  t.c_cflag &= ~CBAUD;
   //  t.c_cflag |= speed;
-  cfsetspeed(&t, speed);
+  if (cfsetspeed(&t, speed) == -1)
+  	dprintf(_("Serial port speed setting failed\n"));
 
   tcsetattr(__fd, TCSADRAIN, &t);
 #else

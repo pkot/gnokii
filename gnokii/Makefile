@@ -27,10 +27,10 @@ all: gnokii
 
 gnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/gsm-filetypes.o
 
-$(TOPDIR)/common/COMMON.o: 
+$(TOPDIR)/common/COMMON.o:
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
 
-$(TOPDIR)/common/gsm-filetypes.o: 
+$(TOPDIR)/common/gsm-filetypes.o:
 	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
 
 $(TOPDIR)/getopt/libgetopt.a:

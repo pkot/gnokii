@@ -9,7 +9,7 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 CFLAGS += $(PTHREAD_CFLAGS) \
-	  `glib-config --cflags` 
+	  `glib-config --cflags`
 
 LDFLAGS += $(PTHREAD_LIBS) \
 	   `glib-config --libs` -lpq
@@ -20,14 +20,14 @@ endif
 
 OBJS = 	db.o \
 	smsd.o \
-        lowlevel.o 
+        lowlevel.o
 
 all: smsd
 
 
 smsd: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/gsm-filetypes.o
 
-$(TOPDIR)/common/COMMON.o: 
+$(TOPDIR)/common/COMMON.o:
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
 
 $(TOPDIR)/common/gsm-filetypes.o:

@@ -18,7 +18,7 @@ all: gnokiid
 
 gnokiid: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/data/DATA.o
 
-$(TOPDIR)/common/COMMON.o: 
+$(TOPDIR)/common/COMMON.o:
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
 
 $(TOPDIR)/common/data/DATA.o:

@@ -1,6 +1,6 @@
 #
 #
-#  Makefile for gnokii I18n, 
+#  Makefile for gnokii I18n,
 #             based on the Makefile.in.in that comes with gettext
 #
 #  Erwin Dieterich, 20. 1. 1998 Erwin.Dieterich.ED@Bayer-AG.de
@@ -55,7 +55,7 @@ DEFS = @DEFS@
 CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 
-INCLUDES = -I.. 
+INCLUDES = -I..
 
 COMPILE = $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(XCFLAGS)
 
@@ -68,7 +68,7 @@ CATOBJEXT = @CATOBJEXT@
 INSTOBJEXT = @INSTOBJEXT@
 
 .SUFFIXES:
-.SUFFIXES: .c .o .po .pox .gmo .mo .msg 
+.SUFFIXES: .c .o .po .pox .gmo .mo .msg
 
 .c.o:
 	$(COMPILE) $<

@@ -19,7 +19,7 @@ include $(TOPDIR)/Makefile.global
 
 CFLAGS += $(PTHREAD_CFLAGS)
 
-OBJS =	tekram.o 
+OBJS =	tekram.o
 
 ifdef WIN32
 	OBJS += $(TOPDIR)/win32/winserial.o

@@ -50,11 +50,6 @@ please let me know.
 
 - X interface :-)
 
-- generic timeout checking routine which gets these params: timeout,
-  CurrentErrorSomething... it should wait at most timeout/10 seconds but if
-  the variable CurrentErrorSomething changes state from GE_BUSY to something
-  else it should return.
-
 - how NCDS saves names with ";" in it?
 
 - make util directory with support utilities, clean up the source tree...

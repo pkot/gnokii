@@ -56,16 +56,16 @@ OWN_GETOPT     = @OWN_GETOPT@
 USE_NLS        = @USE_NLS@
 
 #
-# Global include directory 
+# Global include directory
 #	($TOPDIR is defined in Makefile)
 #
-GNOKII_INCLUDE = $(TOPDIR)/include 
+GNOKII_INCLUDE = $(TOPDIR)/include
 
 #
 # Win32 option
 #
 ifdef WIN32
-	WIN32 += -I $(TOPDIR)/win32
+	WIN32 += -I$(TOPDIR)/win32
 endif
 
 

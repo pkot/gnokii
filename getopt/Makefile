@@ -20,7 +20,7 @@ distclean clean::
 
 #####
 # DO NOT DELETE THIS LINE -- make depend depends on it.
- 
+
 ifeq (depend,$(wildcard depend))
 include depend
 endif

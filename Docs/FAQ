@@ -1,7 +1,25 @@
 GNOKII FAQ
 Pawe³ Kot, pkot@linuxnews.pl
+Hugh Blemings, hugh@misc.nu
 
 $Id$
+
+-------------------------------------------------------------------------------
+Q. What is gnokii ?
+
+A. It is a name of project. The aim of it is to develop tools and drivers
+for Nokia mobile phones. Of course, I think in this moment about really
+different tools - for example, modem drivers, console tools, etc.
+All created here software is released under the GNU
+General Public License. Please see COPYING file for more details on
+license/copying issues, the lack of warranty and where to send a postcard
+if you like gnokii :-). Anyway, our software works on many software
+(Linux, Free BSD, etc.) and hardware (Intel, etc.) platforms...
+
+-------------------------------------------------------------------------------
+Q. How do you pronounce gnokii ?
+
+A. You can pronounce gnokii as "gnooki" or "gnocki" at your option :-)
 
 -------------------------------------------------------------------------------
 Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
@@ -10,14 +28,23 @@ Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
 A. Gnokii cannot connect to the phone.  Possible reasons are:
     - wrong serial port is defined in gnokii config file,
     - you are using the wrong cable,
-    - you are using not supported phone model; currently supported phone models
-      are:
-         + 6110|6130|6150|6190|5110|5130|5190|3210
+    - you are using not supported phone model,
+    - you don't have permission to write to /dev/ttySX device.
+
+-------------------------------------------------------------------------------
+Q. What models are supported?
+
+A. Currently supported phone models are:
+         + 6110|6130|6150|6190|5110|5130|5190|3310|3210
          + 3110|3810|8110|8110i
          + 2110|2140|6080
          + 640
          + 5160|6160|6185
-    - you don't have permission to write to /dev/ttySX device.
+         + 6210|7110
+   Support for these models is planned:
+         + Dancall 2711
+         + 8210|8250
+         + Ericsson GA628 and similiar
 
 -------------------------------------------------------------------------------
 Q. `make install' sets mgnokiidev suid root.  Is this correct ?
@@ -29,22 +56,27 @@ A. Yes.  gnokiid needs to create a symbolic link in the /dev directory.
    problems.
 
 -------------------------------------------------------------------------------
-Q. Does gnokii support Nokia 3210 phone ?
+Q. Should any other gnokii binary be installed suid root?
 
-A. Yes it does, but support is presently limited.
+A. No.  There's no need for it.
 
 -------------------------------------------------------------------------------
-Q. Does gnokii support Nokia 6210/7110 phone ?
+Q. Does gnokii support Nokia 3210/3310/6210/7110 phone ?
 
-A. There is limited support but it is improving every day now.
+A. Yes it does. Support is not as full as with 6110 series but it is improving
+every day now.
 
 -------------------------------------------------------------------------------
 Q. Can I get a copy of the protocol for the <insert phone model here> ?
 
 A. We don't have any formal documentation of the protocols in use.
-   If you take a look at the source code this should provide some
-   pointers, alternatively there are some web sites that have
-   collated some information;
+   The best source we can give you now is all our knowlegde assembled
+   together by Nagy Balazs and Marcin Wiacek. You can find result of their
+   work in Docs/protocol/ subdirectory in gnokii sources. Note that not all
+   known protocol is already implemented in gnokii.
+
+   Alternatively there are some web sites that have collated some
+   information:
    
      Nokia 3110/3810/8110
        http://www.tec.puv.fi/~s98114/GSM/FBUS.html  

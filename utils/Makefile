@@ -13,7 +13,7 @@ OBJS = mgnokiidev.o
 
 all: mgnokiidev
 
-mgnokiidev: $(OBJS) 
+mgnokiidev: $(OBJS)
 
 clean:
 	$(RM) $(OBJS) *~ depend mgnokiidev *.exe core *.bak

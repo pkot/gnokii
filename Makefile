@@ -80,6 +80,9 @@ endif
 		    fi; \
 		done \
 	fi
+
+	$(MAKE) -C Docs clean
+
 	@echo "done"
 
 distclean:	clean
@@ -95,7 +98,7 @@ distclean:	clean
 		po/Makefile.in \
 		debian
 
-dep: 
+dep:
 	@for dir in $(DIRS); do \
 	    if [ -e $$dir/Makefile ]; then \
 		$(MAKE) -C $$dir dep; \

@@ -16,7 +16,7 @@ OBJS =	getopt.o \
 all: $(OBJS)
 
 clean:
-	$(RM) $(OBJS) *~ depend 
+	$(RM) $(OBJS) *~ depend
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

@@ -26,7 +26,7 @@ INSTALL_DOCS = 	README \
 
 GNOKII_MAN = man/gnokii.1
 
-all: 
+all:
 	@echo
 
 install:
@@ -40,7 +40,7 @@ install:
 	@echo "done"
 
 clean:
-	$(RM) *~ 
+	$(RM) *~
 
 depend dep:
 	@echo
