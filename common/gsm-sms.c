@@ -58,11 +58,11 @@ static struct udh_data headers[] = {
 	{ 0x06, "\x05\x04\x15\x81\x00\x00" }, /* Ringtones */
 	{ 0x06, "\x05\x04\x15\x82\x00\x00" }, /* Operator logos */
 	{ 0x06, "\x05\x04\x15\x83\x00\x00" }, /* Caller logos */
-	{ 0x06, "\x05\x04\x15\x8a\x00\x00" }, /* Multipart Message */
+	{ 0x0B, "\x05\x04\x15\x8a\x00\x00\x00\x03\xce\x03\x01" }, /* Multipart Message */
 	{ 0x06, "\x05\x04\x23\xf4\x00\x00" }, /* WAP vCard */
-	{ 0x06, "\x05\0x4\x23\xf5\x00\x00" }, /* WAP vCalendar */
+	{ 0x06, "\x05\x04\x23\xf5\x00\x00" }, /* WAP vCalendar */
 	{ 0x06, "\x05\x04\x23\xf6\x00\x00" }, /* WAP vCardSecure */
-	{ 0x06, "\x05\0x4\x23\xf7\x00\x00" }, /* WAP vCalendarSecure */
+	{ 0x06, "\x05\x04\x23\xf7\x00\x00" }, /* WAP vCalendarSecure */
 	{ 0x04, "\x03\x01\x00\x00" },         /* Voice Messages */
 	{ 0x04, "\x03\x01\x01\x00" },         /* Fax Messages */
 	{ 0x04, "\x03\x01\x02\x00" },         /* Email Messages */
@@ -1019,15 +1019,10 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 {
 	SMS_AlphabetType al;
 	unsigned int i, length, size = 0, offset = 0;
-	int text_index = -1, bitmap_index = -1, ringtone_index = -1, imelody_index = -1;
+	int text_index = -1, bitmap_index = -1, ringtone_index = -1, imelody_index = -1, multi_index = -1;
 	char *message = rawsms->UserData;
 	GSM_Error error;
 
-#if 0
-	/* Version: Smart Messaging Specification 3.0.0 */
-	if (multipart)
-		message[0] = 0x30;
-#endif
 	for (i = 0; i < 3; i++) {
 		switch (sms->UserData[i].Type) {
 		case SMS_PlainText:
@@ -1038,6 +1033,8 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 			ringtone_index = i; break;
 		case SMS_iMelodyText:
 			imelody_index = i; break;
+		case SMS_MultiData:
+			multi_index = i; break;
 		case SMS_NoData:
 			break;
 		default:
@@ -1135,12 +1132,27 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 		rawsms->UDHIndicator = 1;
 	}
 
+	/* MultiData coding */
+	if (multi_index != -1) {
+		size = 128;
+		error = EncodeUDH(rawsms, 0x05, message);
+		rawsms->UserData[10] = sms->UserData[multi_index].u.Multi.total;
+		rawsms->UserData[11] = sms->UserData[multi_index].u.Multi.this;
+		if (error != GE_NONE) return error;
+		memcpy(message + rawsms->UserDataLength, sms->UserData[multi_index].u.Multi.Binary, 128);
+		rawsms->Length += size;
+		rawsms->UserDataLength += size;
+		rawsms->DCS = 0xf5;
+		rawsms->UDHIndicator = 1;		
+	}
+
 	/* Bitmap coding */
 	if (bitmap_index != -1) {
 		error = GE_NONE;
 		switch (sms->UserData[0].u.Bitmap.type) {
 		case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo, message); break;
 		case GSM_EMSPicture:
+		case GSM_PictureMessage:
 		case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
 		}
 		if (error != GE_NONE) return error;
@@ -1208,6 +1220,32 @@ void DumpRawSMS(GSM_SMSMessage *rawsms)
 	printf("UserData: %s\n", buf);
 }
 
+API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	int i, count;
+	GSM_SMSMessage LongSMS, *rawsms = &LongSMS;	/* We need local copy for our dirty tricks */
+	GSM_API_SMS sms;
+	GSM_Error error = GE_NONE;
+
+	LongSMS = *data->RawSMS;
+	sms = *data->SMS;
+
+	DumpRawSMS(rawsms);
+	count = (rawsms->UserDataLength + 127) / 128;
+	printf("Will need %d sms-es\n", count);
+	for (i=0; i<count; i++) {
+		printf("Sending sms #%d\n", i);
+		sms.UserData[0].Type = SMS_MultiData;
+		memcpy(sms.UserData[0].u.Multi.Binary, rawsms->UserData + i*128, 128);
+		sms.UserData[0].u.Multi.this = i+1;
+		sms.UserData[0].u.Multi.total = count;
+		data->SMS = &sms;
+		error = SendSMS(data, state);
+		if (error != GE_NONE) return error;
+	}
+	return GE_NONE;
+}
+
 /**
  * SendSMS - The main function for the SMS sending
  * @data:
@@ -1217,9 +1255,8 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 	GSM_RawData rawdata;
-	int i, count;
+	int i;
 
-	count = 1;
 #if 0
 	/* AT does not need smsc */
 	if (data->SMS->MessageCenter.No) {
@@ -1229,25 +1266,25 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	}
 #endif
 
-	if (count < 1) return GE_SMSWRONGFORMAT;
-
 	memset(&rawdata, 0, sizeof(rawdata));
 	data->RawData = &rawdata;
 	data->RawSMS = malloc(sizeof(*data->RawSMS));
 	memset(data->RawSMS, 0, sizeof(*data->RawSMS));
 
-	for (i = 0; i < count; i++) {
-		data->RawData->Data = calloc(256, 1);
+	data->RawData->Data = calloc(10240, 1);
 
-		error = PrepareSMS(data, i);
-		if (error != GE_NONE) break;
+	error = PrepareSMS(data, 0);
+	if (error != GE_NONE) return error;
 
-//		DumpRawSMS(data->RawSMS);		Usefull for debugging...
-		error = SM_Functions(GOP_SendSMS, data, state);
-
-		free(data->RawData->Data);
-		if (error != GE_NONE) break;
+	if (data->RawSMS->Length > 171) {
+		printf("SMS is too long? %d\n", data->RawSMS->Length);
+		return SendLongSMS(data, state);
 	}
+
+	error = SM_Functions(GOP_SendSMS, data, state);
+
+	free(data->RawData->Data);
+
 	data->RawData = NULL;
 	return error;
 }

@@ -25,9 +25,13 @@
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2002 	   Pavel Machek <pavel@ucw.cz>
 
+  Based on work from mygnokii, thanks go to Marcin Wiacek.
+
   Functions for common bitmap operations.
 
 */
+
+//#define DEBUG
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -215,6 +219,7 @@ API GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap 
 int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 {
 	unsigned short size, current = 0;
+	int i;
 
 	switch (bitmap->type) {
 	case GSM_OperatorLogo:
@@ -226,13 +231,40 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 		break;
 	case GSM_PictureMessage:
 		dprintf("Picture Image\n");
-		/* Type of multipart message - picture image */
-		message[current++] = 0x02;
-		/* Size of the message */
-		size = bitmap->size + 4; /* for bitmap the header */
-		message[current++] = (size & 0xff00) >> 8;
-		message[current++] = size & 0x00ff;
-		break;
+
+		strcpy(bitmap->text, "");
+
+		message[current++]=0x30;     /* SM version. Here 3.0 */
+		message[current++]=0x06;     /* ID for bitmap, 0x06 is id for screensaver */
+		message[current++]=0x01;     /* Length for picture part, hi */
+		message[current++]=0x00;     /* length lo */
+
+		/* Set the logo size */
+		message[current++] = 0x00;
+		message[current++] = bitmap->width;
+		message[current++] = bitmap->height;
+		message[current++] = 0x01;
+
+		memcpy(message+current,bitmap->bitmap,bitmap->size);
+		current=current+bitmap->size;
+
+		if (strlen(bitmap->text)!=0) {
+			/* FIXME: unicode length is not as simple as strlen */
+			int uni = 0, len;		     /* 0 .. ISO-8859-1, 1 .. Unicode */
+
+			message[current++]=uni;
+
+			/* Length for text part */
+			len = strlen(bitmap->text)*(uni + 1);
+			message[current++]=0x00;
+			message[current++]=len;
+			if (uni)
+				EncodeUnicode (message+current,bitmap->text,strlen(bitmap->text));
+			else
+				memcpy(message+current,bitmap->text,strlen(bitmap->text));
+			current += len;
+		}
+		return current;
 	case GSM_EMSPicture:
 		dprintf("EMS picture\n");
 		if (bitmap->width % 8) {

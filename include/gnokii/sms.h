@@ -303,7 +303,8 @@ typedef enum {
 	SMS_BitmapData   = 0x02,
 	SMS_RingtoneData = 0x03,
 	SMS_iMelodyText  = 0x04,
-	SMS_OtherData    = 0x05
+	SMS_MultiData	 = 0x05,
+	SMS_OtherData    = 0x06
 } SMS_DataType;
 
 /*** FOLDER INFO ***/
@@ -332,10 +333,16 @@ typedef struct {
 } SMS_FolderStats;
 
 typedef struct {
+	unsigned char Binary[GSM_MAX_SMS_LENGTH];
+	int this, total;	/* Number of this part, total number of parts */
+} GSM_Multi;
+
+typedef struct {
 	SMS_DataType Type;
 	unsigned int Length;
 	union {
 		unsigned char Text[GSM_MAX_SMS_LENGTH];
+		GSM_Multi Multi;
 		GSM_Bitmap Bitmap;
 		GSM_Ringtone Ringtone;
 	} u;
@@ -435,7 +442,7 @@ typedef struct {
 	unsigned int DCS;                              /* Data Coding Scheme (9.2.3.10) */
 	unsigned int Length;                           /* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
 	bool UDHIndicator;
-	unsigned char UserData[SMS_USER_DATA_LEN];     /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
+	unsigned char UserData[10240]; 		       /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
 	int UserDataLength;                            /* Length of just previous field */
 
 	bool ValidityIndicator;
