@@ -1005,10 +1005,12 @@ void GetLogoEvent(GtkWidget * widget)
 	int i;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_Bitmap *data = (D_Bitmap *) g_malloc(sizeof(D_Bitmap));
-	char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
+	char *netcou = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
+	char network[64], country[24];
 
 	/* prepare data for event */
-	strncpy(bitmap.netcode, gn_network_code_get(operator), 7);
+	sscanf(netcou, "%s (%[^)])", network, country);
+	strncpy(bitmap.netcode, gn_network_code_find(network, country), 7);
 	data->bitmap = &bitmap;
 	e->event = Event_GetBitmap;
 	e->data = data;
@@ -1044,11 +1046,13 @@ void SetLogoEvent(GtkWidget * widget)
 	gn_error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_Bitmap *data = (D_Bitmap *) g_malloc(sizeof(D_Bitmap));
-	char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
+	char *netcou = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
+	char network[64], country[24];
 	int i;
 
 	/* prepare data */
-	strncpy(bitmap.netcode, gn_network_code_get(operator), 7);
+	sscanf(netcou, "%s (%[^)])", network, country);
+	strncpy(bitmap.netcode, gn_network_code_find(network, country), 7);
 
 	if (bitmap.type == GN_BMP_CallerLogo) {
 		/* above condition must be there, because if you launch logos before

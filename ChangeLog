@@ -51,6 +51,8 @@
     o in the logo manager, in the operator drop down list, notice
       the country origin for each operator (to let choose the right
       operator in case of the names conflict)           (Pawel Kot)
+    o as we have the above, let's allow to set the network code in
+      the bitmap for the operator logo                  (Pawel Kot)
  * AT driver updates
     o use all three parameters to AT+CMPS command to set message
       store of all operations kind (we used just the finst one so
