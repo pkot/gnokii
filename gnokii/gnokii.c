@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.132  2001-03-21 23:36:06  chris
+  Revision 1.133  2001-04-23 17:20:01  pkot
+  Added possibility for viewing logos (currently nol and ngg) on console (Bartek Klepacz)
+
+  Revision 1.132  2001/03/21 23:36:06  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -315,12 +318,12 @@ int usage(void)
 			  "          gnokii --getlogo startup [logofile] [network code]\n"
 			  "          gnokii --getlogo caller [logofile][caller group number][network code]\n"
 			  "          gnokii --getlogo {dealer|text}\n"
+			  "          gnokii --viewlogo logofile\n"
 			  "          gnokii --setringtone rtttlfile\n"
 			  "          gnokii --reset [soft|hard]\n"
 			  "          gnokii --getprofile [number]\n"
 			  "          gnokii --displayoutput\n"
 			  "          gnokii --keysequence\n"
-
 		));
 #ifdef SECURITY
 	fprintf(stdout, _(
@@ -515,6 +518,9 @@ int main(int argc, char *argv[])
 		// Get logo
 		{ "getlogo",            required_argument, NULL, OPT_GETLOGO },
 
+		// View logo
+		{ "viewlogo",           required_argument, NULL, OPT_VIEWLOGO },
+
 		// Show profile
 		{ "getprofile",         optional_argument, NULL, OPT_GETPROFILE },
 
@@ -522,7 +528,7 @@ int main(int argc, char *argv[])
 		{ "displayoutput",      no_argument,       NULL, OPT_DISPLAYOUTPUT },
 
 		// Simulate pressing the keys
-		{ "keysequence",           no_argument,       NULL, OPT_KEYPRESS },
+		{ "keysequence",        no_argument,       NULL, OPT_KEYPRESS },
     
 #ifndef WIN32
 		// For development purposes: insert you function calls here
@@ -563,6 +569,7 @@ int main(int argc, char *argv[])
 		{ OPT_SENDDTMF,          1, 1, 0 },
 		{ OPT_SETLOGO,           1, 4, 0 },
 		{ OPT_GETLOGO,           1, 4, 0 },
+		{ OPT_VIEWLOGO,          1, 1, 0 },
 		{ OPT_SETRINGTONE,       1, 1, 0 },
 		{ OPT_RESET,             0, 1, 0 },
 		{ OPT_GETPROFILE,        0, 1, 0 },
@@ -713,6 +720,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_GETLOGO:
 			rc = getlogo(nargc, nargv);
+			break;
+		case OPT_VIEWLOGO:
+			rc = viewlogo(optarg);
 			break;
 		case OPT_SETRINGTONE:
 			rc = setringtone(nargc, nargv);
@@ -1920,6 +1930,14 @@ int setlogo(int argc, char *argv[])
 	return 0;
 }
 
+
+int viewlogo(char *filename)
+{
+	GSM_Error error;
+
+	error = GSM_ShowBitmapFile(filename);
+	return 0;
+}
 
 /* Calendar notes receiving. */
 int getcalendarnote(int argc, char *argv[])

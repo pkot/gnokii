@@ -46,6 +46,7 @@ GSM_Error loadott(FILE *file, GSM_Ringtone *ringtone);
 GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap);
 GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap);
 int GSM_SaveTextFile(char *FileName, char *text, int mode);
+GSM_Error GSM_ShowBitmapFile(char *FileName);
 
 void savenol(FILE *file, GSM_Bitmap *bitmap);
 void savengg(FILE *file, GSM_Bitmap *bitmap);

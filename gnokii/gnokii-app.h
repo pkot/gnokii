@@ -13,7 +13,10 @@
   Header file for test utility.
 
   $Log$
-  Revision 1.25  2001-01-15 17:00:51  pkot
+  Revision 1.26  2001-04-23 17:20:02  pkot
+  Added possibility for viewing logos (currently nol and ngg) on console (Bartek Klepacz)
+
+  Revision 1.25  2001/01/15 17:00:51  pkot
   Initial keypress sequence support. Disable compilation warning
 
   Revision 1.24  2000/12/19 16:18:19  pkot
@@ -58,6 +61,7 @@ int foogle(char *argv[]);
 int pmon(void);
 int setlogo(int argc, char *argv[]);
 int getlogo(int argc, char *argv[]);
+int viewlogo(char *);
 int setringtone(int argc, char *argv[]);
 int reset(char *type);
 int getprofile(int argc, char *argv[]);
@@ -99,6 +103,7 @@ typedef enum {
   OPT_RESET,
   OPT_SETLOGO,
   OPT_GETLOGO,
+  OPT_VIEWLOGO,
   OPT_SETRINGTONE,
   OPT_GETPROFILE,
   OPT_DISPLAYOUTPUT,
