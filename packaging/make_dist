@@ -16,12 +16,11 @@ fi
 
 VERSION=`cat ../VERSION`
 
-rm -rf /tmp/gnokii-${VERSION}
-cp -r ../../gnokii /tmp/gnokii-${VERSION}
+PWD=`pwd`
+SRC_DIR=`dirname ${PWD}`
 
-# Some files and directories in CVS are useless
-rm -rf /tmp/gnokii-${VERSION}/common/obsolete
-rm -rf /tmp/gnokii-${VERSION}/include/obsolete
+rm -rf /tmp/gnokii-${VERSION}
+cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
 
 (
    cd /tmp/gnokii-${VERSION}
