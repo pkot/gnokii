@@ -949,23 +949,23 @@ static int getsms(int argc, char *argv[])
 				else
 					fprintf(stdout, _("(not read)\n"));
 				fprintf(stdout, _("Sending date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
-					message.Time.Day, message.Time.Month, message.Time.Year, \
-					message.Time.Hour, message.Time.Minute, message.Time.Second);
-				if (message.Time.Timezone) {
-					if (message.Time.Timezone > 0)
-						fprintf(stdout,_("+%02d00"), message.Time.Timezone);
-					else
-						fprintf(stdout,_("%02d00"), message.Time.Timezone);
-				}
-				fprintf(stdout, "\n");
-				fprintf(stdout, _("Response date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.SMSCTime.Day, message.SMSCTime.Month, message.SMSCTime.Year, \
 					message.SMSCTime.Hour, message.SMSCTime.Minute, message.SMSCTime.Second);
 				if (message.SMSCTime.Timezone) {
 					if (message.SMSCTime.Timezone > 0)
-						fprintf(stdout,_("+%02d00"),message.SMSCTime.Timezone);
+						fprintf(stdout,_("+%02d00"), message.SMSCTime.Timezone);
 					else
-						fprintf(stdout,_("%02d00"),message.SMSCTime.Timezone);
+						fprintf(stdout,_("%02d00"), message.SMSCTime.Timezone);
+				}
+				fprintf(stdout, "\n");
+				fprintf(stdout, _("Response date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
+					message.Time.Day, message.Time.Month, message.Time.Year, \
+					message.Time.Hour, message.Time.Minute, message.Time.Second);
+				if (message.SMSCTime.Timezone) {
+					if (message.Time.Timezone > 0)
+						fprintf(stdout,_("+%02d00"), message.Time.Timezone);
+					else
+						fprintf(stdout,_("%02d00"), message.Time.Timezone);
 				}
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.Remote.Number, message.SMSC.Number);
@@ -974,13 +974,13 @@ static int getsms(int argc, char *argv[])
 			case SMS_Picture:
 				fprintf(stdout, _("Picture Message\n"));
 				fprintf(stdout, _("Date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
-					message.Time.Day, message.Time.Month, message.Time.Year, \
-					message.Time.Hour, message.Time.Minute, message.Time.Second);
-				if (message.Time.Timezone) {
-					if (message.Time.Timezone > 0)
-						fprintf(stdout,_("+%02d00"),message.Time.Timezone);
+					message.SMSCTime.Day, message.SMSCTime.Month, message.SMSCTime.Year, \
+					message.SMSCTime.Hour, message.SMSCTime.Minute, message.SMSCTime.Second);
+				if (message.SMSCTime.Timezone) {
+					if (message.SMSCTime.Timezone > 0)
+						fprintf(stdout,_("+%02d00"), message.SMSCTime.Timezone);
 					else
-						fprintf(stdout,_("%02d00"),message.Time.Timezone);
+						fprintf(stdout,_("%02d00"), message.SMSCTime.Timezone);
 				}
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Remote.Number, message.SMSC.Number);
@@ -1009,13 +1009,13 @@ static int getsms(int argc, char *argv[])
 					break;
 				}
 				fprintf(stdout, _("Date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
-					message.Time.Day, message.Time.Month, message.Time.Year, \
-					message.Time.Hour, message.Time.Minute, message.Time.Second);
-				if (message.Time.Timezone) {
-					if (message.Time.Timezone > 0)
-						fprintf(stdout,_("+%02d00"),message.Time.Timezone);
+					message.SMSCTime.Day, message.SMSCTime.Month, message.SMSCTime.Year, \
+					message.SMSCTime.Hour, message.SMSCTime.Minute, message.SMSCTime.Second);
+				if (message.SMSCTime.Timezone) {
+					if (message.SMSCTime.Timezone > 0)
+						fprintf(stdout,_("+%02d00"), message.SMSCTime.Timezone);
 					else
-						fprintf(stdout,_("%02d00"),message.Time.Timezone);
+						fprintf(stdout,_("%02d00"), message.SMSCTime.Timezone);
 				}
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Remote.Number, message.SMSC.Number);
@@ -1023,7 +1023,7 @@ static int getsms(int argc, char *argv[])
 				if (!message.UDH.Number) message.UDH.UDH[0].Type = SMS_NoUDH;
 				switch (message.UDH.UDH[0].Type) {
 				case SMS_NoUDH:
-					fprintf(stdout, _("Text:\n%s\n\n"), message.UserData[0].u.Text);
+					fprintf(stdout, _("Text:\n"));
 					break;
 				case SMS_OpLogo:
 					fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));

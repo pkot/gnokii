@@ -1,10 +1,12 @@
 0.4.0pre21 (not released yet)
 ==========
  * Rewrite of the SMS subsystem             (Pawel Kot, Pavel Machek)
+    o readind of SMS splitted into 2 stages               (Pawel Kot)
     o first tries at EMS picture SMSes	               (Pavel Machek)
     o support for sending nokia ringtones	       (Pavel Machek)
     o support for sending iMelody		       (Pavel Machek)
- * Security functions for AT phones                 (Manfred Jonsson)
+ * AT series updates:
+    o Security functions for AT phones              (Manfred Jonsson)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
     o added Terminate to GOP functions
@@ -17,13 +19,18 @@
     o update to compile with the new SMS subsystem     (Markus Plail)
  * gnokii updates:
     o let gnokii display usage instruction to stdout when it's
-    called with --help or -h and to stderr otherwise      (Pawel Kot)
+      called with --help or -h and to stderr otherwise    (Pawel Kot)
+    o fixes for getsms() to not output the text twice and correctly
+      use SMSCTime and Time fields                        (Pawel Kot)
  * Support Nokia Card Phone RPM-1              (Friedrich Lobenstock)
  * More verbose reporting when detecting the model
                                                (Friedrich Lobenstock)
  * Cleanups in the 7110 driver                            (Pawel Kot)
  * 7110 series updates
     o added writing of non GSM_Number subentries       (Markus Plail)
+    o cleanups in the driver - recommended to toher driver to follow
+      this code                                           (Pawel Kot)
+    o support for the new SMS subsystem                   (Pawel Kot)
  * 6510 series updates
     o update to work with new SMS subsystem            (Markus Plail)
 
