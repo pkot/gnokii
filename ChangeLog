@@ -4,6 +4,7 @@
     o add missing break when reading concatenated mesages;
       catched by Markus Plail                             (Pawel Kot)
     o raise writephonebook buffer from 99 to 254       (Markus Plail)
+    o use print_error() when reporting the error          (Pawel Kot)
  * 6510 series updates
     o major SMS layout rewrite, the messages are now parsed, rather
       than using hardcoded numbers                     (Markus Plail)
@@ -22,6 +23,9 @@
     o add speed dials reading/writing                  (Markus Plail)
  * 7110 series
     o typo in P7110_WritePhonebookLocation             (Markus Plail)
+ * 6160 series updates:
+    o Nokia 5120 (NSC-1) added to misc.c             (BORBELY Zoltan)
+    o Startup logo reading implemented               (BORBELY Zoltan)
  * New supported phones:
     o Nokia 6310i                                      (Markus Plail)
     o Nokia 7650 (hope it works with nk6510 driver)       (Pawel Kot)
@@ -33,9 +37,9 @@
     o add Get startup logo to nk6160.txt             (BORBELY Zoltan)
     o improve --keysequence hints in FAQ             (BORBELY Zoltan)
     o www.flosys.com/tdma page added to FAQ          (BORBELY Zoltan)
- * 6160 series updates:
-    o Nokia 5120 (NSC-1) added to misc.c             (BORBELY Zoltan)
-    o Startup logo reading implemented               (BORBELY Zoltan)
+ * Cleanups in the error handling system: simplify and decrease
+   the ammount of the available return codes -- we don't need
+   them all in this form in fact                          (Pawel Kot)
 
 0.4.0
 =====

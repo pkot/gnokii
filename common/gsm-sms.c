@@ -733,7 +733,7 @@ static GSM_Error FindUnreadSMS(GSM_Data *data, GSM_Statemachine *state, int *las
 		data->RawSMS->Number = i;
 		data->RawSMS->MemoryType = GMT_IN;
 		error = SM_Functions(GOP_GetSMS, data, state);
-		if (error == GE_EMPTYSMSLOCATION) continue;
+		if (error == GE_EMPTYLOCATION) continue;
 		ERROR();
 		if (data->RawSMS->Status == SMS_Unread) {
 			dprintf("Got unread %d\n", i);
@@ -986,7 +986,7 @@ static char *EncodeUDH(GSM_SMSMessage *rawsms, int type)
 {
 	unsigned char pos;
 	char *UDH = rawsms->UserData;
-	char *res;
+	char *res = NULL;
 
 	pos = UDH[0];
 
@@ -1090,7 +1090,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 
 		break;
 	default:
-		return GE_SMSWRONGFORMAT;
+		return GE_WRONGDATAFORMAT;
 	}
 
 	rawsms->Length = rawsms->UserDataLength = 0;
@@ -1152,7 +1152,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 				rawsms->UserDataLength = rawsms->Length = length + offset;
 				break;
 			default:
-				return GE_SMSWRONGFORMAT;
+				return GE_WRONGDATAFORMAT;
 			}
 			break;
 		}

@@ -704,12 +704,12 @@ static int savesms(int argc, char *argv[])
 				return 0;
 			}
 			else break;
-		case GE_INVALIDSMSLOCATION:
-			fprintf(stderr, _("Invalid location\n"));
-			return -1;
-		default:
+		case GE_EMPTYLOCATION:
 			dprintf("Location %d empty. Saving\n", sms.Number);
 			break;
+		default:
+			fprintf(stderr, _("Error: %s\n"), print_error(error));
+			return -1;
 		}
 	}
 
@@ -741,11 +741,10 @@ static int savesms(int argc, char *argv[])
 	data.SMS = &sms;
 	error = SaveSMS(&data, &State);
 
-	if (error == GE_NONE) {
+	if (error == GE_NONE)
 		fprintf(stdout, _("Saved to %d!\n"), sms.Number);
-	} else {
+	else
 		fprintf(stdout, _("Saving failed (%s)\n"), print_error(error));
-	}
 
 	return error;
 }
@@ -808,11 +807,8 @@ static int getsmsc(int argc, char *argv[])
 		switch (error) {
 		case GE_NONE:
 			break;
-		case GE_NOTIMPLEMENTED:
-			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-			return GE_NOTIMPLEMENTED;
 		default:
-			fprintf(stderr, _("SMS center %d can not be found\n"), i);
+			fprintf(stderr, _("Error: %s\n"), print_error(error));
 			return error;
 		}
 
@@ -931,7 +927,7 @@ static int setsmsc()
 
 		error = SM_Functions(GOP_SetSMSCenter, &data, &State);
 		if (error != GE_NONE) {
-			fprintf(stderr, _("Cannot set SMS center %d\n"), MessageCenter.No);
+			fprintf(stderr, _("Error: %s\n"), print_error(error));
 			return error;
 		}
 	}
@@ -1183,15 +1179,6 @@ static int getsms(int argc, char *argv[])
 					fprintf(stdout, _("(message deleted)\n"));
 			}
 			break;
-		case GE_NOTIMPLEMENTED:
-			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-			return -1;
-		case GE_INVALIDSMSLOCATION:
-			fprintf(stderr, _("Invalid location: %s %d\n"), memory_type_string, count);
-			break;
-		case GE_EMPTYSMSLOCATION:
-			fprintf(stderr, _("SMS location %s %d empty.\n"), memory_type_string, count);
-			break;
 		default:
 			fprintf(stdout, _("GetSMS %s %d failed! (%s)\n\n"), memory_type_string, count, print_error(error));
 			break;
@@ -1229,11 +1216,8 @@ static int deletesms(int argc, char *argv[])
 		if (error == GE_NONE)
 			fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);
 		else {
-			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-				return -1;
-			}
 			fprintf(stdout, _("DeleteSMS %s %d failed!(%s)\n\n"), memory_type_string, count, print_error(error));
+			return error;
 		}
 	}
 
@@ -1269,7 +1253,7 @@ int get_password(const char *prompt, char *pass, int length)
    phone. */
 static int entersecuritycode(char *type)
 {
-	GSM_Error test;
+	GSM_Error error;
 	GSM_SecurityCode SecurityCode;
 
 	if (!strcmp(type, "PIN"))
@@ -1293,17 +1277,17 @@ static int entersecuritycode(char *type)
 	GSM_DataClear(&data);
 	data.SecurityCode = &SecurityCode;
 
-	test = SM_Functions(GOP_EnterSecurityCode, &data, &State);
-	if (test == GE_INVALIDSECURITYCODE)
-		fprintf(stdout, _("Error: invalid code.\n"));
-	else if (test == GE_NONE)
-		fprintf(stdout, _("Code ok.\n"));
-	else if (test == GE_NOTIMPLEMENTED)
-		fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-	else
-		fprintf(stdout, _("Other error.\n"));
+	error = SM_Functions(GOP_EnterSecurityCode, &data, &State);
 
-	return 0;
+	switch (error) {
+	case GE_NONE:
+		fprintf(stdout, _("Code ok.\n"));
+		break;
+	default:
+		fprintf(stdout, _("Error: %s\n"), print_error(error));
+		break;
+	}
+	return error;
 }
 
 static int getsecuritycodestatus(void)
@@ -1381,17 +1365,12 @@ static int changesecuritycode(char *type)
 
 	error = SM_Functions(GOP_ChangeSecurityCode, &data, &State);
 	switch (error) {
-	case GE_INVALIDSECURITYCODE:
-		fprintf(stdout, _("Error: invalid code.\n"));
-		break;
 	case GE_NONE:
 		fprintf(stdout, _("Code changed.\n"));
 		break;
-	case GE_NOTIMPLEMENTED:
-		fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-		break;
 	default:
-		fprintf(stdout, _("Other error.\n"));
+		fprintf(stdout, _("Error: %s\n"), print_error(error));
+		break;
 	}
 
 	return error;
@@ -1557,7 +1536,7 @@ static int sendlogo(int argc, char *argv[])
 	if (error == GE_NONE) fprintf(stdout, _("Send succeeded!\n"));
 	else fprintf(stdout, _("SMS Send failed (%s)\n"), print_error(error));
 
-	return 0;
+	return error;
 }
 
 /* Getting logos. */
@@ -1589,7 +1568,7 @@ static GSM_Error SaveBitmapFileDialog(char *FileName, GSM_Bitmap *bitmap, GSM_In
 	error = GSM_SaveBitmapFile(FileName, bitmap, info);
 
 	switch (error) {
-	case GE_CANTOPENFILE:
+	case GE_FAILED:
 		fprintf(stderr, _("Failed to write file \"%s\"\n"), FileName);
 		break;
 	default:
@@ -1679,14 +1658,8 @@ static int getlogo(int argc, char *argv[])
 			}
 			if ((argc > 1) && (SaveBitmapFileDialog(argv[1], &bitmap, info) != GE_NONE)) return (-1);
 			break;
-		case GE_NOTIMPLEMENTED:
-			fprintf(stderr, _("Function not implemented !\n"));
-			return -1;
-		case GE_NOTSUPPORTED:
-			fprintf(stderr, _("This kind of logo is not supported !\n"));
-			return -1;
 		default:
-			fprintf(stderr, _("Error getting logo !\n"));
+			fprintf(stderr, _("Error: %s\n"), print_error(error));
 			return -1;
 		}
 	} else {
@@ -1704,33 +1677,13 @@ GSM_Error ReadBitmapFileDialog(char *FileName, GSM_Bitmap *bitmap, GSM_Informati
 	GSM_Error error;
 
 	error = GSM_ReadBitmapFile(FileName, bitmap, info);
-
 	switch (error) {
-	case GE_CANTOPENFILE:
-		fprintf(stderr, _("Failed to read file \"%s\"\n"), FileName);
-		break;
-	case GE_WRONGNUMBEROFCOLORS:
-		fprintf(stderr, _("Wrong number of colors in \"%s\" logofile (accepted only 2-colors files) !\n"), FileName);
-		break;
-	case GE_WRONGCOLORS:
-		fprintf(stderr, _("Wrong colors in \"%s\" logofile !\n"), FileName);
-		break;
-	case GE_INVALIDFILEFORMAT:
-		fprintf(stderr, _("Invalid format of \"%s\" logofile !\n"), FileName);
-		break;
-	case GE_SUBFORMATNOTSUPPORTED:
-		fprintf(stderr, _("Sorry, gnokii doesn't support used subformat in file \"%s\" !\n"), FileName);
-		break;
-	case GE_FILETOOSHORT:
-		fprintf(stderr, _("\"%s\" logofile is too short !\n"), FileName);
-		break;
-	case GE_INVALIDIMAGESIZE:
-		fprintf(stderr, _("Bitmap size doesn't supported by fileformat or different from 72x14, 84x48 and 72x28 !\n"));
+	case GE_NONE:
 		break;
 	default:
+		fprintf(stderr, _("Error while reading file \"%s\": %s\n"), FileName, print_error(error));
 		break;
 	}
-
 	return error;
 }
 
@@ -1862,14 +1815,8 @@ static int setlogo(int argc, char *argv[])
 		}
 		if (ok) fprintf(stdout, _("Done.\n"));
 		break;
-	case GE_NOTIMPLEMENTED:
-		fprintf(stderr, _("Function not implemented.\n"));
-		break;
-	case GE_NOTSUPPORTED:
-		fprintf(stderr, _("This kind of logo is not supported.\n"));
-		break;
 	default:
-		fprintf(stderr, _("Error !\n"));
+		fprintf(stderr, _("Error: %s\n"), print_error(error));
 		break;
 	}
 
@@ -2008,11 +1955,8 @@ static int getcalendarnote(int argc, char *argv[])
 					fprintf(stdout, _("   Phone: %s\n"), CalendarNote.Phone);
 			}
 			break;
-		case GE_NOTIMPLEMENTED:
-			fprintf(stderr, _("Function not implemented.\n"));
-			break;
 		default:
-			fprintf(stderr, _("The calendar note can not be read\n"));
+			fprintf(stderr, _("The calendar note can not be read: %s\n"), print_error(error));
 			break;
 		}
 	}
@@ -2025,22 +1969,24 @@ static int writecalendarnote(char *argv[])
 {
 	GSM_CalendarNote CalendarNote;
 	GSM_Data data;
+	GSM_Error error;
 
 	GSM_DataClear(&data);
 	data.CalendarNote = &CalendarNote;
 
 #ifndef WIN32
-	if (GSM_ReadVCalendarFile(argv[0], &CalendarNote, atoi(argv[1]))) {
-		fprintf(stdout, _("Failed to load vCalendar file.\n"));
+	error = GSM_ReadVCalendarFile(argv[0], &CalendarNote, atoi(argv[1]));
+	if (error != GE_NONE) {
+		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), print_error(error));
 		return -1;
 	}
 #endif
 
-	/* Error 22 = Calendar full ;-) */
-	if (SM_Functions(GOP_WriteCalendarNote, &data, &State) == GE_NONE)
+	error = SM_Functions(GOP_WriteCalendarNote, &data, &State);
+	if (error == GE_NONE)
 		fprintf(stdout, _("Succesfully written!\n"));
 	else {
-		fprintf(stdout, _("Failed to write calendar note!\n"));
+		fprintf(stderr, _("Failed to write calendar note: %s\n"), print_error(error));
 		return -1;
 	}
 
@@ -2053,6 +1999,7 @@ static int deletecalendarnote(int argc, char *argv[])
 	GSM_CalendarNote CalendarNote;
 	int i, first_location, last_location;
 	GSM_Data data;
+	GSM_Error error = GE_NONE;
 
 	GSM_DataClear(&data);
 	data.CalendarNote = &CalendarNote;
@@ -2064,15 +2011,16 @@ static int deletecalendarnote(int argc, char *argv[])
 
 		CalendarNote.Location = i;
 
-		if (SM_Functions(GOP_DeleteCalendarNote, &data, &State) == GE_NONE) {
-			fprintf(stdout, _("   Calendar note deleted.\n"));
+		error = SM_Functions(GOP_DeleteCalendarNote, &data, &State);
+		if (error == GE_NONE) {
+			fprintf(stdout, _("Calendar note deleted.\n"));
 		} else {
-			fprintf(stderr, _("The calendar note cannot be deleted\n"));
+			fprintf(stderr, _("The calendar note cannot be deleted: %s\n"), print_error(error));
 		}
 
 	}
 
-	return 0;
+	return error;
 }
 
 /* Setting the date and time. */
@@ -2137,11 +2085,8 @@ static int getdatetime(void)
 		fprintf(stdout, _("Date: %4d/%02d/%02d\n"), date_time.Year, date_time.Month, date_time.Day);
 		fprintf(stdout, _("Time: %02d:%02d:%02d\n"), date_time.Hour, date_time.Minute, date_time.Second);
 		break;
-	case GE_NOTIMPLEMENTED:
-		fprintf(stdout, _("Function not implemented in %s !\n"), model);
-		break;
 	default:
-		fprintf(stdout, _("Internal error\n"));
+		fprintf(stdout, _("Error: %s\n"), print_error(error));
 		break;
 	}
 
@@ -2191,11 +2136,8 @@ static int getalarm(void)
 		fprintf(stdout, _("Alarm: %s\n"), (date_time.AlarmEnabled==0)?"off":"on");
 		fprintf(stdout, _("Time: %02d:%02d\n"), date_time.Hour, date_time.Minute);
 		break;
-	case GE_NOTIMPLEMENTED:
-		fprintf(stdout, _("Function not implemented in %s !\n"), model);
-		break;
 	default:
-		fprintf(stdout, _("Internal error\n"));
+		fprintf(stdout, _("Error: %s\n"), print_error(error));
 		break;
 	}
 
@@ -2457,8 +2399,8 @@ static int displayoutput(void)
 	fcntl(fileno(stdin), F_SETFL, O_NONBLOCK);
 #endif
 
-	if (error == GE_NONE) {
-
+	switch (error) {
+	case GE_NONE:
 		/* We do not want to see texts forever - press Ctrl+C to stop. */
 		signal(SIGINT, interrupted);
 
@@ -2486,9 +2428,12 @@ static int displayoutput(void)
 		output.OutputFn = NULL;
 		error = SM_Functions(GOP_DisplayOutput, &data, &State);
 		if (error != GE_NONE)
-			fprintf (stderr, _("Error!\n"));
-	} else
-		fprintf (stderr, _("Error!\n"));
+			fprintf (stderr, _("Error: %s\n"), print_error(error));
+		break;
+	default:
+		fprintf (stderr, _("Error: %s\n"), print_error(error));
+		break;
+	}
 
 	return 0;
 }
@@ -2539,11 +2484,8 @@ static int getprofile(int argc, char *argv[])
 	switch (error) {
 	case GE_NONE:
 		break;
-	case GE_NOTIMPLEMENTED:
-		fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-		return -1;
 	default:
-		fprintf(stderr, _("Unspecified error\n"));
+		fprintf(stderr, _("Error: %s\n"), print_error(error));
 		return -1;
 	}
 
@@ -2586,7 +2528,7 @@ static int getprofile(int argc, char *argv[])
 
 		if (p.Number != 0) {
 			error = SM_Functions(GOP_GetProfile, &data, &State);
-			if (error != GE_NONE ) {
+			if (error != GE_NONE) {
 				fprintf(stderr, _("Cannot get profile %d\n"), i);
 				return -1;
 			}
@@ -2601,27 +2543,19 @@ static int getprofile(int argc, char *argv[])
 		} else {
 			fprintf(stdout, "%d. \"%s\"\n", p.Number, p.Name);
 			if (p.DefaultName == -1) fprintf(stdout, _(" (name defined)\n"));
-
 			fprintf(stdout, _("Incoming call alert: %s\n"), GetProfileCallAlertString(p.CallAlert));
-
 			/* For different phones different ringtones names */
-
 			if (!strcmp(model, "NSE-3"))
 				fprintf(stdout, _("Ringing tone: %s (%d)\n"), RingingTones[p.Ringtone], p.Ringtone);
 			else
 				fprintf(stdout, _("Ringtone number: %d\n"), p.Ringtone);
-
 			fprintf(stdout, _("Ringing volume: %s\n"), GetProfileVolumeString(p.Volume));
-
 			fprintf(stdout, _("Message alert tone: %s\n"), GetProfileMessageToneString(p.MessageTone));
-
 			fprintf(stdout, _("Keypad tones: %s\n"), GetProfileKeypadToneString(p.KeypadTone));
-
 			fprintf(stdout, _("Warning and game tones: %s\n"), GetProfileWarningToneString(p.WarningTone));
 
 			/* FIXME: Light settings is only used for Car */
 			if (p.Number == (max_profiles - 2)) fprintf(stdout, _("Lights: %s\n"), p.Lights ? _("On") : _("Automatic"));
-
 			fprintf(stdout, _("Vibration: %s\n"), GetProfileVibrationString(p.Vibration));
 
 			/* FIXME: it will be nice to add here reading caller group name. */
@@ -2629,7 +2563,6 @@ static int getprofile(int argc, char *argv[])
 
 			/* FIXME: Automatic answer is only used for Car and Headset. */
 			if (p.Number >= (max_profiles - 2)) fprintf(stdout, _("Automatic answer: %s\n"), p.AutomaticAnswer ? _("On") : _("Off"));
-
 			fprintf(stdout, "\n");
 		}
 	}
@@ -2667,7 +2600,7 @@ static int setprofile()
 
 		error = SM_Functions(GOP_SetProfile, &data, &State);
 		if (error != GE_NONE) {
-			fprintf(stderr, _("Cannot set profile %d\n"), p.Number);
+			fprintf(stderr, _("Cannot set profile: %s\n"), print_error(error));
 			return error;
 		}
 	}
@@ -2721,14 +2654,8 @@ static int getphonebook(int argc, char *argv[])
 			if (entry.MemoryType == GMT_MC || entry.MemoryType == GMT_DC || entry.MemoryType == GMT_RC)
 				fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.Date.Day, entry.Date.Month, entry.Date.Year, entry.Date.Hour, entry.Date.Minute, entry.Date.Second);
 			break;
-		case GE_NOTIMPLEMENTED:
-			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-			return -1;
-		case GE_INVALIDMEMORYTYPE:
-			fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
-			return -1;
-		case GE_INVALIDPHBOOKLOCATION:
-			fprintf(stderr, _("%s|%d|Bad location or other error!\n"), memory_type_string, count);
+		case GE_INVALIDLOCATION:
+			fprintf(stderr, _("Error saving at location %d in memory %s\n"), count, memory_type_string);
 			if (all) {
 				/* Ensure that we quit the loop */
 				all = false;
@@ -2736,11 +2663,8 @@ static int getphonebook(int argc, char *argv[])
 				end_entry = -1;
 			}
 			break;
-		case GE_EMPTYMEMORYLOCATION:
-			fprintf(stderr, "%d. empty phonebook entry\n", count);
-			break;
 		default:
-			fprintf(stderr, "Unknown error: %s\n", print_error(error));
+			fprintf(stderr, "Error: %s\n", print_error(error));
 			return -1;
 		}
 		count++;
@@ -2885,7 +2809,7 @@ static int writephonebook(int argc, char *args[])
 					if (!confirm) continue;
 				}
 			} else {
-				fprintf(stderr, _("Unknown error (%s)\n"), print_error(error));
+				fprintf(stderr, _("Error (%s)\n"), print_error(error));
 				return 0;
 			}
 		}
@@ -2923,11 +2847,8 @@ static int getspeeddial(char *Number)
 	case GE_NONE:
 		fprintf(stdout, _("SpeedDial nr. %d: %d:%d\n"), SpeedDial.Number, SpeedDial.MemoryType, SpeedDial.Location);
 		break;
-	case GE_NOTIMPLEMENTED:
-		fprintf(stdout, _("Function not implemented in %s !\n"), model);
-		break;
 	default:
-		fprintf(stdout, _("Internal error\n"));
+		fprintf(stdout, _("Error: %s\n"), print_error(error));
 		break;
 	}
 
@@ -3082,7 +3003,7 @@ static int pmon(void)
 	error = GSM_Initialise(model, Port, Initlength, connection, NULL, &State);
 
 	if (error != GE_NONE) {
-		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
+		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
 		return -1;
 	}
 
@@ -3172,7 +3093,7 @@ static int getringtone(int argc, char *argv[])
 	else
 		error = SM_Functions(GOP_GetRingtone, &data, &State);
 	if (error != GE_NONE) {
-		fprintf(stdout, _("Getting ringtone %d failed\n"), ringtone.Location);
+		fprintf(stdout, _("Getting ringtone %d failed: %s\n"), ringtone.Location, print_error(error));
 		return error;
 	}
 	fprintf(stdout, _("Getting ringtone %d (\"%s\") succeeded!\n"), ringtone.Location, ringtone.name);
@@ -3187,8 +3108,8 @@ static int getringtone(int argc, char *argv[])
 		fwrite(rawdata.Data, 1, rawdata.Length, f);
 		fclose(f);
 	} else {
-		if (GSM_SaveRingtoneFile(argv[optind], &ringtone)) {
-			fprintf(stdout, _("Failed to save ringtone.\n"));
+		if (GSM_SaveRingtoneFile(argv[optind], &ringtone) != GE_NONE) {
+			fprintf(stdout, _("Failed to save ringtone: %s\n"), print_error(error));
 			return(-1);
 		}
 	}
@@ -3271,7 +3192,7 @@ static int setringtone(int argc, char *argv[])
 	if (error == GE_NONE)
 		fprintf(stdout, _("Send succeeded!\n"));
 	else
-		fprintf(stdout, _("Send failed\n"));
+		fprintf(stdout, _("Send failed: %s\n"), print_error(error));
 
 	return 0;
 }
@@ -3462,7 +3383,7 @@ static int divert(int argc, char **argv)
 		} else
 			fprintf(stdout, _("Divert isn't active.\n"));
 	} else {
-		fprintf(stderr, "%s\n", print_error(error));
+		fprintf(stderr, "Error: %s\n", print_error(error));
 	}
 	return 0;
 }
@@ -3499,7 +3420,7 @@ static GSM_Error smsslave(GSM_API_SMS *message)
 	else	sprintf(buf, "/tmp/sms/sms_%s_%d_%d", number, getpid(), unknown++);
 	if ((output = fopen(buf, "r")) != NULL) {
 		fprintf(stderr, _("### Exists?!\n"));
-		return GE_CANTOPENFILE;
+		return GE_FAILED;
 	}
 	output = fopen(buf, "w+");
 
@@ -3545,9 +3466,9 @@ static int smsreader(void)
 
 		error = SM_Functions(GOP_OnSMS, &data, &State);
 		if (error != GE_NONE)
-			fprintf(stderr, _("Error!\n"));
+			fprintf(stderr, _("Error: %s\n"), print_error(error));
 	} else
-		fprintf(stderr, _("Error!\n"));
+		fprintf(stderr, _("Error: %s\n"), print_error(error));
 
 	return 0;
 }

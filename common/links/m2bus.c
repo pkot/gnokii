@@ -543,10 +543,10 @@ GSM_Error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	flink.i.state = M2BUS_RX_Sync;
 
 	if (glink->ConnectionType == GCT_Infrared) {
-		return GE_DEVICEOPENFAILED;
+		return GE_FAILED;
 	} else {		/* ConnectionType == GCT_Serial */
 		if (!M2BUS_OpenSerial())
-			return GE_DEVICEOPENFAILED;
+			return GE_FAILED;
 	}
 
 	return GE_NONE;

@@ -168,7 +168,7 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 		default: return GE_UNHANDLEDFRAME;
 		}
 		if (message[4] == 0x04 && pos[0] == 0x00) {
-			return GE_EMPTYMEMORYLOCATION;
+			return GE_EMPTYLOCATION;
 		} else if (message[4] == 0x04 || (pos[0] == 0x01 && pos[1] == 0x00)) {
 			cd->Number.Type = SMS_Unknown;
 			memset(cd->Number.Number, 0, sizeof(cd->Number.Number));

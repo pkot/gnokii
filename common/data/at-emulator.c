@@ -728,7 +728,7 @@ bool	ATEM_CommandPlusC(char **buf)
 						ATEM_StringOut(buffer);
 					}
 					break;
-				case GE_EMPTYSMSLOCATION:
+				case GE_EMPTYLOCATION:
 					/* don't care if this storage is empty */
 					break;
 				default:

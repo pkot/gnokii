@@ -102,7 +102,7 @@ GSM_Error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 	file = fopen(FileName, "rb");
 
 	if (!file)
-		return(GE_CANTOPENFILE);
+		return(GE_FAILED);
 
 	/* FIXME: for now identify the filetype based on the extension */
 	/* I don't like this but I haven't got any .ott files to work out a better way */
@@ -124,7 +124,7 @@ GSM_Error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 		fclose(file);
 		break;
 	default:
-		error = GE_INVALIDFILEFORMAT;
+		error = GE_WRONGDATAFORMAT;
 		break;
 	}
 
@@ -138,7 +138,7 @@ GSM_Error loadott(FILE *file, GSM_Ringtone *ringtone)
 	int i;
 
 	i = fread(Buffer, 1, 2000, file);
-	if (!feof(file)) return GE_FILETOOLONG;
+	if (!feof(file)) return GE_INVALIDSIZE;
 	return GSM_UnPackRingtone(ringtone, Buffer, i);
 }
 
@@ -267,7 +267,7 @@ GSM_Error GSM_SaveRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 
 	file = fopen(FileName, "wb");
 
-	if (!file) return(GE_CANTOPENFILE);
+	if (!file) return(GE_FAILED);
 
 	/* FIXME... */
 	/* We need a way of passing these functions a filetype rather than rely on the extension */
@@ -293,7 +293,7 @@ GSM_Error saveott(FILE *file, GSM_Ringtone *ringtone)
 		fwrite(Buffer, 1, i, file);
 		return GE_NONE;
 	} else {
-		return GE_FILETOOLONG;
+		return GE_INVALIDSIZE;
 	}
 }
 
@@ -488,7 +488,7 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 	file = fopen(FileName, "rb");
 
 	if (!file)
-		return(GE_CANTOPENFILE);
+		return(GE_FAILED);
 
 	fread(buffer, 1, 9, file); /* Read the header of the file. */
 
@@ -540,7 +540,7 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 		/* FALLTHRU */
 #endif
 	default:
-		error = GE_INVALIDFILEFORMAT;
+		error = GE_WRONGDATAFORMAT;
 		break;
 	}
 
@@ -560,19 +560,19 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 
 	switch (error) {
 	case XpmColorError:
-		return GE_WRONGCOLORS;
+		return GE_WRONGDATAFORMAT;
 	case XpmColorFailed:
-		return GE_WRONGCOLORS;
+		return GE_WRONGDATAFORMAT;
 	case XpmOpenFailed:
-		return GE_CANTOPENFILE;
+		return GE_FAILED;
 	case XpmFileInvalid:
-		return GE_INVALIDFILEFORMAT;
+		return GE_WRONGDATAFORMAT;
 	case XpmSuccess:
 	default:
 		break;
 	}
 
-	if (image.ncolors != 2) return GE_WRONGNUMBEROFCOLORS;
+	if (image.ncolors != 2) return GE_WRONGDATAFORMAT;
 
 	bitmap->height = image.height;
 	bitmap->width = image.width;
@@ -580,7 +580,7 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 
 	if (bitmap->size > GSM_MAX_BITMAP_SIZE) {
 		fprintf(stdout, "Bitmap too large\n");
-		return GE_INVALIDIMAGESIZE;
+		return GE_INVALIDSIZE;
 	}
 
 	GSM_ClearBitmap(bitmap);
@@ -625,16 +625,16 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 		break;
 	case 4:
 		dprintf("16 (not supported by gnokii)\n");
-		return GE_WRONGNUMBEROFCOLORS;
+		return GE_WRONGDATAFORMAT;
 	case 8:
 		dprintf("256 (not supported by gnokii)\n");
-		return GE_WRONGNUMBEROFCOLORS;
+		return GE_WRONGDATAFORMAT;
 	case 24:
 		dprintf("True Color (not supported by gnokii)\n");
-		return GE_WRONGNUMBEROFCOLORS;
+		return GE_WRONGDATAFORMAT;
 	default:
 		dprintf("unknown color type (not supported by gnokii)\n");
-		return GE_WRONGNUMBEROFCOLORS;
+		return GE_WRONGDATAFORMAT;
 	}
 
 	dprintf("Compression in BMP file: ");
@@ -644,13 +644,13 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 		break;
 	case 1:
 		dprintf("RLE8 (not supported by gnokii)\n");
-		return GE_SUBFORMATNOTSUPPORTED;
+		return GE_WRONGDATAFORMAT;
 	case 2:
 		dprintf("RLE4 (not supported by gnokii)\n");
-		return GE_SUBFORMATNOTSUPPORTED;
+		return GE_WRONGDATAFORMAT;
 	default:
 		dprintf("unknown compression type (not supported by gnokii)\n");
-		return GE_SUBFORMATNOTSUPPORTED;
+		return GE_WRONGDATAFORMAT;
 	}
 
 	pos = buffer[10] - 34;
@@ -722,7 +722,7 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	    ((bitmap->height != 21) || (bitmap->width != 78)) && /* standard size */
 	    (!info || (bitmap->height != info->OpLogoH) || (bitmap->width != info->OpLogoW))) {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
-		return GE_INVALIDIMAGESIZE;
+		return GE_INVALIDSIZE;
 	}
 
 	for (i = 0; i < bitmap->size; i++) {
@@ -733,7 +733,7 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 					bitmap->bitmap[i] |= (1 << j);
 		} else {
 			dprintf("too short\n");
-			return(GE_FILETOOSHORT);
+			return(GE_INVALIDSIZE);
 		}
 	}
 
@@ -764,7 +764,7 @@ GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	    ((bitmap->height != 21) || (bitmap->width != 78)) && /* standard size */
 	    (!info || (bitmap->height != info->OpLogoH) || (bitmap->width != info->OpLogoW))) {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
-		return GE_INVALIDIMAGESIZE;
+		return GE_INVALIDSIZE;
 	}
 
 	for (i = 0; i < bitmap->size; i++) {
@@ -774,7 +774,7 @@ GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 				if (buffer[7-j] == '1')
 					bitmap->bitmap[i] |= (1 << j);
 		} else {
-			return(GE_FILETOOSHORT);
+			return(GE_INVALIDSIZE);
 		}
 	}
 
@@ -802,7 +802,7 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 		if (!strncmp(block, "FORM", 4)) {
 			dprintf("  File ID\n");
 		} else {
-			if (block_size > 504) return(GE_INVALIDFILEFORMAT);
+			if (block_size > 504) return(GE_WRONGDATAFORMAT);
 
 			if (block_size != 0) {
 
@@ -826,7 +826,7 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 			}
 		}
 	}
-	if (bitmap->size == 0) return(GE_FILETOOSHORT);
+	if (bitmap->size == 0) return(GE_INVALIDSIZE);
 	return(GE_NONE);
 }
 
@@ -853,7 +853,7 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 		bitmap->type = GSM_PictureMessage;
 		break;
 	default:
-		return(GE_SUBFORMATNOTSUPPORTED);
+		return GE_WRONGDATAFORMAT;
 	}
 
 	fread(buffer, 1, 4, file);
@@ -865,7 +865,7 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 	if (division.rem != 0) division.quot++; /* For startup logos */
 
 	if (fread(buffer, 1, (division.quot * bitmap->height), file) != (division.quot * bitmap->height))
-		return(GE_FILETOOSHORT);
+		return GE_INVALIDSIZE;
 
 	GSM_ClearBitmap(bitmap);
 
@@ -901,11 +901,11 @@ GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 		bitmap->type = GSM_CallerLogo;
 	} else {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
-		return GE_INVALIDIMAGESIZE;
+		return GE_INVALIDSIZE;
 	}
 	if (fread(bitmap->bitmap, 1, bitmap->size,file) != bitmap->size)
-		return(GE_FILETOOSHORT);
-	return(GE_NONE);
+		return GE_INVALIDSIZE;
+	return GE_NONE;
 }
 
 /* This overwrites an existing file - so this must be checked before calling */
@@ -924,7 +924,7 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 
 		file = fopen(FileName, "wb");
 
-		if (!file) return(GE_CANTOPENFILE);
+		if (!file) return(GE_FAILED);
 
 		if (strstr(FileName, ".nlm")) {
 			savenlm(file, bitmap);

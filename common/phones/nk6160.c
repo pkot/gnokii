@@ -203,11 +203,11 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("Writing phonebook location (%d): %s\n", pe->Location, pe->Name);
 	if (namelen > GSM_MAX_PHONEBOOK_NAME_LENGTH) {
 		dprintf("name too long\n");
-		return GE_PHBOOKNAMETOOLONG;
+		return GE_ENTRYTOOLONG;
 	}
 	if (numlen > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
 		dprintf("number too long\n");
-		return GE_PHBOOKNUMBERTOOLONG;
+		return GE_ENTRYTOOLONG;
 	}
 	if (pe->SubEntriesCount > 1) {
 		dprintf("6160 doesn't support subentries\n");
@@ -249,8 +249,8 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 
 		switch (message[7]) {
 		case 0x01: break;
-		case 0x05: return GE_INVALIDPHBOOKLOCATION; break;
-		default: return GE_UNHANDLEDFRAME; break;
+		case 0x05: return GE_INVALIDLOCATION;
+		default: return GE_UNHANDLEDFRAME;
 		}
 		snprintf(pe->Number, sizeof(pe->Number), "%s", pos);
 		pos += strlen(pos) + 1;
@@ -265,14 +265,13 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 	case 0x87:
 		switch (message[7]) {
 		case 0x01: break;
-		case 0x05: return GE_INVALIDPHBOOKLOCATION; break;
-		default: return GE_UNHANDLEDFRAME; break;
+		case 0x05: return GE_INVALIDLOCATION;
+		default: return GE_UNHANDLEDFRAME;
 		}
 		break;
 
 	default:
 		return GE_UNHANDLEDFRAME;
-		break;
 	}
 
 	return GE_NONE;

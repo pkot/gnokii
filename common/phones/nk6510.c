@@ -415,7 +415,7 @@ static void ResetLayout(unsigned char *message, GSM_Data *data)
 static void ParseLayout(unsigned char *message, GSM_Data *data)
 {
 	int i, subblocks;
-	unsigned char *block;
+	unsigned char *block = message;
 
 	ResetLayout(message, data);
 	/*
@@ -576,10 +576,10 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		switch (message[4]) {
 		case 0x02:
 			dprintf("\tInvalid location!\n");
-			return GE_INVALIDSMSLOCATION;
+			return GE_INVALIDLOCATION;
 		case 0x07:
 			dprintf("\tEmpty SMS location.\n");
-			return GE_EMPTYSMSLOCATION;
+			return GE_EMPTYLOCATION;
 		default:
 			dprintf("\tUnknown reason.\n");
 			return GE_UNHANDLEDFRAME;
@@ -595,7 +595,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		switch (message[4]) {
 		case 0x02:
 			dprintf("Invalid location\n");
-			return GE_INVALIDSMSLOCATION;
+			return GE_INVALIDLOCATION;
 		default:
 			dprintf("Unknown reason.\n");
 			return GE_UNHANDLEDFRAME;
@@ -785,9 +785,9 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	if (data->SMSFolder->Number + data->nk6510_SIM_Inbox_Number + 2 < data->RawSMS->Number) {
 		if (data->RawSMS->Number < MAX_SMS_MESSAGES)
-			return GE_EMPTYSMSLOCATION;
+			return GE_EMPTYLOCATION;
 		else
-			return GE_INVALIDSMSLOCATION;
+			return GE_INVALIDLOCATION;
 	} else {
 		if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number + 1) req[4] = 0x01;
 		data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
@@ -826,7 +826,7 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 			break;
 		case 0x02:
 			dprintf("SMSC reception failed\n");
-			e = GE_EMPTYMEMORYLOCATION;
+			e = GE_EMPTYLOCATION;
 			break;
 		default:
 			dprintf("Unknown response subtype: %02x\n", message[4]);
@@ -901,12 +901,12 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 
 		case P6510_SUBSMS_SMS_SEND_FAIL: /* 0x01 */
 			dprintf("SMS sending failed\n");
-			e = GE_SMSSENDFAILED;
+			e = GE_FAILED;
 			break;
 
 		default:
 			dprintf("Unknown status of the SMS sending -- assuming failure\n");
-			e = GE_SMSSENDFAILED;
+			e = GE_FAILED;
 			break;
 		}
 		break;
@@ -1063,9 +1063,10 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 			case 0x30:
 				return GE_INVALIDMEMORYTYPE;
 			case 0x33:
-				return GE_EMPTYMEMORYLOCATION;
+
+				return GE_EMPTYLOCATION;
 			case 0x34:
-				return GE_INVALIDPHBOOKLOCATION;
+				return GE_INVALIDLOCATION;
 			default:
 				return GE_UNKNOWN;
 			}
@@ -1201,8 +1202,8 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 	case 0x0c:
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
-			case 0x3d: return GE_PHBOOKWRITEFAILED;
-			case 0x3e: return GE_PHBOOKWRITEFAILED;
+			case 0x3d: return GE_FAILED;
+			case 0x3e: return GE_FAILED;
 			default:   return GE_UNHANDLEDFRAME;
 			}
 		}
@@ -1941,7 +1942,7 @@ static GSM_Error P6510_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *stat
 			req[4] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] << 8;
 			req[5] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] & 0xff;
 		} else {
-			return GE_INVALIDCALNOTELOCATION;
+			return GE_INVALIDLOCATION;
 		}
 	}
 
@@ -2209,7 +2210,8 @@ static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n", 
 			state->Phone.Info.StartupLogoH, state->Phone.Info.StartupLogoW, 
 			data->Bitmap->height, data->Bitmap->width);
-	    return GE_INVALIDIMAGESIZE;
+
+	    return GE_INVALIDSIZE;
 	}
 
 	req[12] = data->Bitmap->height;

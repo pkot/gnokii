@@ -37,57 +37,46 @@
    some internal functions such as SIM read/write in the model specific code. */
 
 typedef enum {
-	GE_NONE = 0,              /* 0. No error. */
-	GE_DEVICEOPENFAILED,	  /* 1. Couldn't open specified serial device. */
-	GE_UNKNOWNMODEL,          /* 2. Model specified isn't known/supported. */
-	GE_NOLINK,                /* 3. Couldn't establish link with phone. */
-	GE_TIMEOUT,               /* 4. Command timed out. */
-	GE_TRYAGAIN,              /* 5. Try again. */
-	GE_INVALIDSECURITYCODE,   /* 6. Invalid Security code. */
-	GE_NOTIMPLEMENTED,        /* 7. Command called isn't implemented in model. */
-	GE_INVALIDSMSLOCATION,    /* 8. Invalid SMS location. */
-	GE_INVALIDPHBOOKLOCATION, /* 9. Invalid phonebook location. */
-	GE_INVALIDMEMORYTYPE,     /* 10. Invalid type of memory. */
-	GE_INVALIDSPEEDDIALLOCATION, /* 11. Invalid speed dial location. */
-	GE_INVALIDCALNOTELOCATION,/* 12. Invalid calendar note location. */
-	GE_INVALIDDATETIME,       /* 13. Invalid date, time or alarm specification. */
-	GE_EMPTYSMSLOCATION,      /* 14. SMS location is empty. */
-	GE_PHBOOKNAMETOOLONG,     /* 15. Phonebook name is too long. */
-	GE_PHBOOKNUMBERTOOLONG,   /* 16. Phonebook number is too long. */
-	GE_PHBOOKWRITEFAILED,     /* 17. Phonebook write failed. */
-	GE_RESERVED_1,            /* 18. SMS was send correctly. */
-	GE_SMSSENDFAILED,         /* 19. SMS send fail. */
-	GE_SMSWAITING,            /* 20. Waiting for the next part of SMS. */
-	GE_SMSTOOLONG,            /* 21. SMS message too long. */
-	GE_SMSWRONGFORMAT,        /* 22. Wrong format of the SMS */
-	GE_NONEWCBRECEIVED,       /* 23. Attempt to read CB when no new CB received */
-	GE_INTERNALERROR,         /* 24. Problem occured internal to model specific code. */
-	GE_CANTOPENFILE,          /* 25. Can't open file with bitmap/ringtone */
-	GE_WRONGNUMBEROFCOLORS,   /* 26. Wrong number of colors in specified bitmap file */
-	GE_WRONGCOLORS,           /* 27. Wrong colors in bitmap file */
-	GE_INVALIDFILEFORMAT,     /* 28. Invalid format of file */
-	GE_SUBFORMATNOTSUPPORTED, /* 29. Subformat of file not supported */
-	GE_FILETOOSHORT,          /* 30. Too short file to read */
-	GE_FILETOOLONG,           /* 31. Too long file to read */
-	GE_INVALIDIMAGESIZE,      /* 32. Invalid size of bitmap (in file, sms etc.) */
-	GE_NOTSUPPORTED,          /* 33. Function not supported by the phone */
-	GE_BUSY,                  /* 34. Command is still being executed. */
-	GE_USERCANCELED,          /* 35. */
-	GE_UNKNOWN,               /* 36. Unknown error - well better than nothing!! */
-	GE_MEMORYFULL,            /* 37. */
-	GE_NOTWAITING,            /* 38. Not waiting for a response from the phone */
-	GE_NOTREADY,              /* 39. */
-	GE_EMPTYMEMORYLOCATION,   /* 40. */
+	/* General codes */
+	GE_NONE = 0,              /* No error. */
+	GE_FAILED,                /* Command failed. */
+	GE_UNKNOWNMODEL,          /* Model specified isn't known/supported. */
+	GE_INVALIDSECURITYCODE,   /* Invalid Security code. */
+	GE_INTERNALERROR,         /* Problem occured internal to model specific code. */
+	GE_NOTIMPLEMENTED,        /* Command called isn't implemented in model. */
+	GE_NOTSUPPORTED,          /* Function not supported by the phone */
+	GE_USERCANCELED,          /* User aborted the action. */
+	GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
+	GE_MEMORYFULL,            /* The specified memory is full. */
+
+	/* Statemachine */
+	GE_NOLINK,                /* Couldn't establish link with phone. */
+	GE_TIMEOUT,               /* Command timed out. */
+	GE_TRYAGAIN,              /* Try again. */
+	GE_WAITING,               /* Waiting for the next part of the message. */
+	GE_NOTREADY,              /* Device not ready. */
+	GE_BUSY,                  /* Command is still being executed. */
+	
+	/* Locations */
+	GE_INVALIDLOCATION,       /* The given memory location is empty. */
+	GE_INVALIDMEMORYTYPE,     /* Invalid type of memory. */
+	GE_EMPTYLOCATION,         /* The given location is empty. */
+
+	/* Format */
+	GE_ENTRYTOOLONG,          /* The given entry is too long */
+	GE_WRONGDATAFORMAT,       /* Data format is not valid */
+	GE_INVALIDSIZE,           /* Wrong size of the object */
 
 	/* The following are here in anticipation of data call requirements. */
-
-	GE_LINEBUSY,              /* 41. Outgoing call requested reported line busy */
-	GE_NOCARRIER,             /* 42. No Carrier error during data call setup ? */
+	GE_LINEBUSY,              /* Outgoing call requested reported line busy */
+	GE_NOCARRIER,             /* No Carrier error during data call setup ? */
 
 	/* The following value signals the current frame is unhandled */
+	GE_UNHANDLEDFRAME,        /* The current frame isn't handled by the incoming function */
+	GE_UNSOLICITED,           /* Unsolicited message received. */
 
-	GE_UNHANDLEDFRAME,        /* 43. The current frame isn't handled by the incoming function */
-	GE_UNSOLICITED            /* 44. Unsolicited message received. */
+	/* Other */
+	GE_NONEWCBRECEIVED        /* Attempt to read CB when no new CB received */
 } GSM_Error;
 
 API char *print_error(GSM_Error e);

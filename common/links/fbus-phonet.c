@@ -243,7 +243,7 @@ static GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned ch
 
 GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 {
-	GSM_Error error = GE_INTERNALERROR;
+	GSM_Error error = GE_FAILED;
 
 	/* 'Copy in' the global structures */
 	glink = newlink;
@@ -260,11 +260,7 @@ GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 			/* Init variables */
 			imessage.state = FBUS_RX_Sync;
 			imessage.BufferCount = 0;
-		} else {
-			error = GE_DEVICEOPENFAILED;
 		}
-	} else {
-		error = GE_DEVICEOPENFAILED;	/* ConnectionType == GCT_Serial etc */
 	}
 
 	return error;

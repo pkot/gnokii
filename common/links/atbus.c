@@ -215,10 +215,10 @@ GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int mode)
 	if ((state->Link.ConnectionType == GCT_Serial) ||
 	    (state->Link.ConnectionType == GCT_Irda)) {
 		if (!ATBUS_OpenSerial(mode, state->Link.PortDevice))
-			return GE_DEVICEOPENFAILED;
+			return GE_FAILED;
 	} else {
-		fprintf(stderr, "Device not supported by ATBUS\n");
-		return GE_DEVICEOPENFAILED;
+		dprintf("Device not supported by ATBUS\n");
+		return GE_FAILED;
 	}
 
 	return GE_NONE;

@@ -90,13 +90,13 @@ static int xread(unsigned char *d, int len)
 		res = device_read(d, len);
 		if (res == -1) {
 			if (errno != EAGAIN) {
-				printf("I/O error : %m?!\n");
+				dprintf("I/O error : %m?!\n");
 				return -1;
 			} else device_select(NULL);
 		} else {
 			d += res;
 			len -= res;
-			printf("(%d)", len);
+			dprintf("(%d)", len);
 		}
 	}
 	return 0;
@@ -109,13 +109,13 @@ static int xwrite(unsigned char *d, int len)
 		res = device_write(d, len);
 		if (res == -1) {
 			if (errno != EAGAIN) {
-				printf("I/O error : %m?!\n");
+				dprintf("I/O error : %m?!\n");
 				return -1;
 			}
 		} else {
 			d += res;
 			len -= res;
-			printf("<%d>", len);
+			dprintf("<%d>", len);
 		}
 	}
 	return 0;
@@ -129,23 +129,23 @@ static void say(unsigned char *c, int len)
 	xread(d, len);
 	if (memcmp(c, d, len)) {
 		int i;
-		printf("Did not get my own echo?: ");
-		for (i=0; i<len; i++)
-			printf("%x ", d[i]);
-		printf("\n");
+		dprintf("Did not get my own echo?: ");
+		for (i = 0; i < len; i++)
+			dprintf("%x ", d[i]);
+		dprintf("\n");
 	}
 }
 
 static int waitack(void)
 {
 	unsigned char c;
-	printf("Waiting ack\n");
+	dprintf("Waiting ack\n");
 	if (xread(&c, 1) == 0) {
-		printf("Got %x\n", c);
+		dprintf("Got %x\n", c);
 		if (c != 0xa5)
-			printf("???\n");
+			dprintf("???\n");
 		else return 1;
-	} else printf("Timeout?\n");
+	} else dprintf("Timeout?\n");
 	return 0;
 }
 
@@ -165,18 +165,18 @@ static void sendpacket(unsigned char *msg, int len, unsigned short cmd)
 	pos = 6+len;
 	{
 		int i;
-		for (i=0; i<pos; i++) {
+		for (i = 0; i < pos; i++) {
 			csum = csum ^ p[i];
 		}
 	}
 	p[pos] = csum;
 	{
 		int i;
-		printf("Sending: ");
-		for (i=0; i<=pos; i++) {
-			printf("%x ", p[i]);
+		dprintf("Sending: ");
+		for (i = 0; i <= pos; i++) {
+			dprintf("%x ", p[i]);
 		}
-		printf("\n");
+		dprintf("\n");
 	}
 	say(p, pos+1);
 	waitack();
@@ -187,7 +187,7 @@ static void sendpacket(unsigned char *msg, int len, unsigned short cmd)
 
 static GSM_Error CommandAck(int messagetype, unsigned char *buffer, int length)
 {
-	printf("[ack]");
+	dprintf("[ack]");
 	return GE_NONE;
 }
 
@@ -195,11 +195,11 @@ static GSM_Error PhoneReply(int messagetype, unsigned char *buffer, int length)
 {
 	if (!strncmp(buffer, "OK", 2)) {
 		seen_okay = 1;
-		printf("Phone okays\n");
+		dprintf("Phone okays\n");
 	} else {
 		strncpy(reply_buf, buffer, length);
 		reply_buf[length+1] = '\0';
-		printf("Phone says: %s\n", reply_buf);
+		dprintf("Phone says: %s\n", reply_buf);
 	}
 	{
 		u8 buf[2] = { 0x3e, 0x68 };
@@ -213,7 +213,7 @@ static GSM_Error PhoneReply(int messagetype, unsigned char *buffer, int length)
 void sendat(unsigned char *msg)
 {
 	usleep(10000);
-	printf("AT command: %s\n", msg);
+	dprintf("AT command: %s\n", msg);
 	CBUS_SendMessage(strlen(msg), 0x3c, msg);
 	seen_okay = 0;
 	while (!seen_okay)
@@ -323,7 +323,7 @@ static void CBUS_RX_StateMachine(unsigned char rx_byte)
 			xwrite(&ack, 1);
 			xread(&ack, 1);
 			if (ack != 0xa5)
-				printf("ack lost, expect armagedon!\n");
+				dprintf("ack lost, expect armagedon!\n");
 
 			/* Got checksum, matches calculated one, so
 			 * now pass to appropriate dispatch handler. */
@@ -337,9 +337,9 @@ static void CBUS_RX_StateMachine(unsigned char rx_byte)
 			case 0x70:
 				if (i->FrameType1 == 0x91) {
 					init_okay = 1;
-					printf("Registration acknowledged\n");
+					dprintf("Registration acknowledged\n");
 				} else
-					printf("Unknown message\n");
+					dprintf("Unknown message\n");
 			}
 		} else {
 			/* checksum doesn't match so ignore. */
@@ -410,27 +410,27 @@ GSM_Error CBUS_Initialise(GSM_Statemachine *state)
 
 	if (glink->ConnectionType == GCT_Serial) {
 		if (!CBUS_OpenSerial())
-			return GE_DEVICEOPENFAILED;
+			return GE_FAILED;
 	} else {
-		fprintf(stderr, "Device not supported by CBUS");
-		return GE_DEVICEOPENFAILED;
+		dprintf("Device not supported by CBUS");
+		return GE_FAILED;
 	}
 
 	dprintf("Saying hello...");
 	{
 		char init1[] = { 0, 0x38, 0x19, 0xa6, 0x70, 0x00, 0x00, 0xf7, 0xa5 };
-		say( init1, 8 );
-		say( init1, 8 );
+		say(init1, 8);
+		say(init1, 8);
 	}
 	usleep(10000);
 	dprintf("second hello...");
 	{
 		char init1[] = { 0x38, 0x19, 0x90, 0x70, 0x01, 0x00, 0x1f, 0xdf };
-		say( init1, 8 );
+		say(init1, 8);
 		if (!waitack())
 			return GE_BUSY;
 	}
-	while(!init_okay)
+	while (!init_okay)
 		CBUS_Loop(NULL);
 	return GE_NONE;
 }

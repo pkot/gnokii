@@ -266,7 +266,7 @@ static void RefreshSMS (const gint number)
 
       pthread_mutex_unlock (&smsMutex);
     }
-    else if (error == GE_INVALIDSMSLOCATION)   /* All positions are readed */
+    else if (error == GE_INVALIDLOCATION)   /* All positions are readed */
     {
       g_free (msg);
       pthread_cond_signal (&smsCond);

@@ -422,13 +422,13 @@ API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, unsigned char *package,
 	StartBit = BitUnPackInt(package, StartBit, &l, 8);
 	if (l != 0x02) {
 		dprintf("Not header\n");
-		return GE_SUBFORMATNOTSUPPORTED;
+		return GE_WRONGDATAFORMAT;
 	}
 
 	StartBit = BitUnPackInt(package, StartBit, &l, 7);
 	if (l != RingingToneProgramming) {
 		dprintf("Not RingingToneProgramming\n");
-		return GE_SUBFORMATNOTSUPPORTED;
+		return GE_WRONGDATAFORMAT;
 	}
 
 /* The page 3-23 of the specs says that <command-part> is always
@@ -438,13 +438,13 @@ API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, unsigned char *package,
 	StartBit = BitUnPackInt(package, StartBit, &l, 7);
 	if (l != Sound) {
 		dprintf("Not Sound\n");
-		return GE_SUBFORMATNOTSUPPORTED;
+		return GE_WRONGDATAFORMAT;
 	}
 
 	StartBit = BitUnPackInt(package, StartBit, &l, 3);
 	if (l != BasicSongType) {
 		dprintf("Not BasicSongType\n");
-		return GE_SUBFORMATNOTSUPPORTED;
+		return GE_WRONGDATAFORMAT;
 	}
 
 /* Getting length of the tune name */
@@ -456,12 +456,12 @@ API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, unsigned char *package,
 	ringtone->name[l] = 0;
 
 	StartBit = BitUnPackInt(package, StartBit, &l, 8);
-	if (l != 1) return GE_SUBFORMATNOTSUPPORTED; //we support only one song pattern
+	if (l != 1) return GE_WRONGDATAFORMAT;
 
 	StartBit = BitUnPackInt(package, StartBit, &l, 3);
 	if (l != PatternHeaderId) {
 		dprintf("Not PatternHeaderId\n");
-		return GE_SUBFORMATNOTSUPPORTED;
+		return GE_WRONGDATAFORMAT;
 	}
 
 	StartBit += 2; //Pattern ID - we ignore it
@@ -563,7 +563,7 @@ API GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, unsigned char *package,
 			break;
 		default:
 			dprintf("Unsupported block\n");
-			return GE_SUBFORMATNOTSUPPORTED;
+			return GE_WRONGDATAFORMAT;
 		}
 	}
 
@@ -575,7 +575,7 @@ GSM_Error GSM_ReadRingtoneFromSMS(GSM_API_SMS *message, GSM_Ringtone *ringtone)
 {
 	if (message->UDH.UDH[0].Type == SMS_Ringtone) {
 		return GSM_UnPackRingtone(ringtone, message->UserData[0].u.Text, message->UserData[0].Length);
-	} else return GE_SUBFORMATNOTSUPPORTED;
+	} else return GE_WRONGDATAFORMAT;
 }
 
 int GSM_EncodeSMSRingtone(unsigned char *message, GSM_Ringtone *ringtone)

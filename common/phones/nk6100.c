@@ -568,11 +568,11 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("Writing phonebook location (%d/%d): %s\n", pe->MemoryType, pe->Location, pe->Name);
 	if (namelen > GSM_MAX_PHONEBOOK_NAME_LENGTH) {
 		dprintf("name too long\n");
-		return GE_PHBOOKNAMETOOLONG;
+		return GE_ENTRYTOOLONG;
 	}
 	if (numlen > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
 		dprintf("number too long\n");
-		return GE_PHBOOKNUMBERTOOLONG;
+		return GE_ENTRYTOOLONG;
 	}
 	if (pe->SubEntriesCount > 1) {
 		dprintf("61xx doesn't support subentries\n");
@@ -684,7 +684,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		break;
 	case 0x03:
 		if ((message[4] == 0x7d) || (message[4] == 0x74)) {
-			return GE_INVALIDPHBOOKLOCATION;
+			return GE_INVALIDLOCATION;
 		}
 		return GE_UNHANDLEDFRAME;
 	case 0x05:
@@ -693,9 +693,9 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		switch (message[4]) {
 		case 0x7d:
 		case 0x90:
-			return GE_PHBOOKNAMETOOLONG;
+			return GE_ENTRYTOOLONG;
 		case 0x74:
-			return GE_INVALIDPHBOOKLOCATION;
+			return GE_INVALIDLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -746,7 +746,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 	case 0x12:
 		switch (message[4]) {
 		case 0x7d:
-			return GE_INVALIDPHBOOKLOCATION;
+			return GE_INVALIDLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -755,7 +755,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 	case 0x15:
 		switch (message[4]) {
 		case 0x7d:
-			return GE_INVALIDPHBOOKLOCATION;
+			return GE_INVALIDLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -779,7 +779,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 
 	/* Get speed dial error */
 	case 0x18:
-		return GE_INVALIDSPEEDDIALLOCATION;
+		return GE_INVALIDLOCATION;
 
 	/* Set speed dial OK */
 	case 0x1a:
@@ -787,7 +787,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 
 	/* Set speed dial error */
 	case 0x1b:
-		return GE_INVALIDSPEEDDIALLOCATION;
+		return GE_INVALIDLOCATION;
 
 	default:
 		return GE_UNHANDLEDFRAME;
@@ -1163,10 +1163,9 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 		 */
 		error = ISDNCauseToGSMError(NULL, NULL, message[5], message[6]);
 		switch (error) {
-		case GE_UNKNOWN: return GE_SMSSENDFAILED;
-		default: return error;
+		case GE_UNKNOWN: return GE_FAILED;
+		default:         return error;
 		}
-		return GE_UNHANDLEDFRAME;
 
 	/* SMS message received */
 	case 0x10:
@@ -1204,7 +1203,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 	case 0x32:
 		switch (message[4]) {
 		case 0x02:
-			return GE_EMPTYMEMORYLOCATION;
+			return GE_EMPTYLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -1287,7 +1286,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 	case 0x35:
 		switch (message[4]) {
 		case 0x01:
-			return GE_EMPTYMEMORYLOCATION;
+			return GE_EMPTYLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -1327,7 +1326,7 @@ static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	if (!data->RawSMS) return GE_INTERNALERROR;
 
 	if (44 + data->RawSMS->UserDataLength > sizeof(req))
-		return GE_SMSWRONGFORMAT;
+		return GE_WRONGDATAFORMAT;
 
 	if (data->RawSMS->Status == SMS_Unsent)
 		req[4] |= 0x02;
@@ -1375,7 +1374,7 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 			return GE_MEMORYFULL;
 		case 0x03:
 			dprintf("\tInvalid location!\n");
-			return GE_INVALIDSMSLOCATION;
+			return GE_INVALIDLOCATION;
 		default:
 			dprintf("\tUnknown reason.\n");
 			return GE_UNHANDLEDFRAME;
@@ -1428,10 +1427,10 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 			return GE_UNKNOWN;
 		case 0x02:
 			dprintf("\tInvalid location!\n");
-			return GE_INVALIDSMSLOCATION;
+			return GE_INVALIDLOCATION;
 		case 0x07:
 			dprintf("\tEmpty SMS location.\n");
-			return GE_EMPTYSMSLOCATION;
+			return GE_EMPTYLOCATION;
 		default:
 			dprintf("\tUnknown reason.\n");
 			return GE_UNHANDLEDFRAME;
@@ -1448,7 +1447,7 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 		case 0x00:
 			return GE_UNKNOWN;
 		case 0x02:
-			return GE_INVALIDSMSLOCATION;
+			return GE_INVALIDLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -1964,7 +1963,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 	case 0x32:
 		switch (message[4]) {
 		case 0x7d:
-			return GE_INVALIDPHBOOKLOCATION;
+			return GE_INVALIDLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -2256,7 +2255,7 @@ static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int l
 		case 0x01:
 			break;
 		case 0x93:
-			return GE_EMPTYMEMORYLOCATION;
+			return GE_EMPTYLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -2303,7 +2302,7 @@ static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int l
 		case 0x01:
 			break;
 		case 0x93:
-			return GE_EMPTYMEMORYLOCATION;
+			return GE_EMPTYLOCATION;
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
@@ -2597,7 +2596,7 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 	n = strlen(data->CallInfo->Number);
 	if (n > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
 		dprintf("number too long\n");
-		return GE_PHBOOKNUMBERTOOLONG;
+		return GE_ENTRYTOOLONG;
 	}
 
 	pos = req + 4;

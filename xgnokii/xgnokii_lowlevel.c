@@ -436,7 +436,7 @@ static void RefreshSMS(const gint number)
 				pthread_mutex_unlock(&smsMutex);
 				if (phoneMonitor.sms.number == number)
 					return;
-			} else if (error == GE_INVALIDSMSLOCATION) {	/* All positions are read */
+			} else if (error == GE_INVALIDLOCATION) {	/* All positions are read */
 				g_free(list);
 				g_free(raw);
 				g_free(fld);
@@ -509,8 +509,8 @@ static gint A_GetMemoryLocationAll(gpointer data)
 	for (i = mla->min; i <= mla->max; i++) {
 		entry.Location = i;
 		error = SM_Functions(GOP_ReadPhonebook, &gdat, &statemachine);
-		if (error != GE_NONE && error != GE_INVALIDPHBOOKLOCATION &&
-		    error != GE_EMPTYMEMORYLOCATION && error != GE_INVALIDMEMORYTYPE) {
+		if (error != GE_NONE && error != GE_INVALIDLOCATION &&
+		    error != GE_EMPTYLOCATION && error != GE_INVALIDMEMORYTYPE) {
 			gint err_count = 0;
 
 			while (error != GE_NONE) {
@@ -643,7 +643,7 @@ static gint A_GetCalendarNoteAll(gpointer data)
 
 	pthread_mutex_unlock(&calendarMutex);
 	g_free(cna);
-	if (error == GE_INVALIDCALNOTELOCATION)
+	if (error == GE_INVALIDLOCATION)
 		return (GE_NONE);
 	else
 		return (error);
