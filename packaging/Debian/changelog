@@ -1,3 +1,12 @@
+gnokii (0.3.3_pre25) unstable; urgency=low
+
+  * incorporation of IRDA patch
+  * incorporation of Debian packaging patches
+  * incorporation of Makefile patch to break up the install targets
+    into pieces in preparation for proper Debian-style package building
+    
+ -- Erik Rossen (Linux consultant) <rossen@freesurf.ch>  Thu, 21 Jun 2001 10:54:02 +0200
+
 gnokii (0.3.3_pre24) unstable; urgency=low
 
   * other itsy-bitsy changes in order to get gnokii to pass lintian
