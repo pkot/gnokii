@@ -663,7 +663,13 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			pos = message + 5;
 			pe->Empty = false;
 			n = *pos++;
-			PNOK_DecodeString(pe->Name, sizeof(pe->Name), pos, n);
+			/* It seems that older phones (at least Nokia 5110 and 6130)
+			   set message[4] to 0. Newer ones set is to the location
+			   number. It can be the distinction when to read the name */
+			if (message[4] != 0)
+				DecodeUnicode(pe->Name, pos, n / 2);
+			else
+				PNOK_DecodeString(pe->Name, sizeof(pe->Name), pos, n);
 			pos += n;
 			n = *pos++;
 			PNOK_DecodeString(pe->Number, sizeof(pe->Number), pos, n);
