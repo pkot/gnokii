@@ -18,7 +18,7 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 MAJOR_NUMBER = 1
-MINOR_NUMBER = 4
+MINOR_NUMBER = 5
 
 OBJS =	gsm-api.o \
 	gsm-error.o \
