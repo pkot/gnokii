@@ -72,6 +72,7 @@
     o fix mixed name/number entry field usage        (Peter Grandi)
     o don't force file mode on installation where not necessary
       (install -m mode)                   (Ville Skyttä, Pawel Kot)
+    o update html documentation                         (Pawel Kot)
  * nk6510 series updates
     o added Nokia 3595 to the supported models  (Gunnar Sigurdsson)
     o don't refuse to work with Nokia 6100 with configuration other
