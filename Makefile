@@ -90,7 +90,7 @@ endif
 	@echo "done"
 
 distclean:	clean
-	@if [ "x$(USE_NLS)" = xyes ]; then \
+	@if [ -e $(PO_DIR)/Makefile ]; then \
 		$(MAKE) -C $(PO_DIR) distclean; \
 	fi
 	$(RM) Makefile.global config.cache config.log config.status \

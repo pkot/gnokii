@@ -12,16 +12,16 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
+ifdef XPM_LIBS
+    LDFLAGS += $(XPM_LIBS)
+    CFLAGS  += $(XPM_CFLAGS)
+endif
+
 CFLAGS += $(PTHREAD_CFLAGS) \
 	  $(GTK_CFLAGS)
 
 LDFLAGS += $(PTHREAD_LIBS) \
 	   $(GTK_LIBS)
-
-ifdef XPM_LIBS
-    LDFLAGS += $(XPM_LIBS)
-    CFLAGS  += $(XPM_CFLAGS)
-endif
 
 OBJS = 	xgnokii.o \
 	xgnokii_common.o \
