@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.2.5-pre14
+VERSION = 0.2.5-pre15
 
 #
 # Compiler to use.
@@ -61,7 +61,7 @@ GETTEXT=-DGNOKII_GETTEXT
 # Set up compilation/linking flags for Linux.
 #
 
-COMMON=-Wall -g -O0 ${MODEL} ${PORT} ${GETTEXT} ${DEBUG}
+COMMON=-Wall -g -O0 ${MODEL} ${PORT} ${GETTEXT} ${DEBUG} -DVERSION=\"${VERSION}\"
 
 CFLAGS = -D_REENTRANT ${COMMON}
 LDFLAGS = -lpthread

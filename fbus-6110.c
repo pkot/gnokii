@@ -46,8 +46,6 @@
 
 bool FB61_LinkOK;
 
-GSM_Error FB61_DialVoice(char *Number);
-
 GSM_Functions FB61_Functions = {
   FB61_Initialise,
   FB61_Terminate,
@@ -67,7 +65,8 @@ GSM_Functions FB61_Functions = {
   FB61_SetDateTime,
   FB61_GetAlarm,
   FB61_SetAlarm,
-  FB61_DialVoice
+  FB61_DialVoice,
+  FB61_GetIncomingCallNr
 };
 
 /* Mobile phone information */
@@ -123,9 +122,14 @@ GSM_Error          CurrentDateTimeError;
 GSM_DateTime       *CurrentAlarm;
 GSM_Error          CurrentAlarmError;
 
+GSM_Error          CurrentSetDateTimeError;
+GSM_Error          CurrentSetAlarmError;
+
 int                CurrentRFLevel,
                    CurrentBatteryLevel,
                    CurrentPowerSource;
+
+char               CurrentIncomingCall[20];
 
 #define FB61_FRAME_HEADER 0x00, 0x01, 0x00
 
@@ -420,6 +424,16 @@ GSM_Error FB61_DialVoice(char *Number) {
   return(GE_NONE);
 }
 
+GSM_Error FB61_GetIncomingCallNr(char *Number) {
+
+  if (strlen(CurrentIncomingCall)>0) {
+    strcpy(Number, CurrentIncomingCall);
+    return GE_NONE;
+  }
+  else
+    return GE_BUSY;
+}
+
 GSM_Error FB61_EnterPin(char *pin)
 {
 
@@ -555,29 +569,65 @@ GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code)
 
 GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time)
 {
-	unsigned char req[] = {FB61_FRAME_HEADER,
-			       0x60, /* set-time subtype */
-			       0x01, 0x01, 0x07, /* unknown */
-			       0x07, 0xcf, /* Year (0x07cf = 1999) */
-			       0x04, 0x16, /* Month Day */
-			       0x17, 0x15, /* Hours Minutes */
-			       0x00, /* Unknown, but not seconds - try 59 and wait 1 sec. */
-			       0x01 };
+  unsigned char req[] = {FB61_FRAME_HEADER,
+			 0x60, /* set-time subtype */
+			 0x01, 0x01, 0x07, /* unknown */
+			 0x00, 0x00, /* Year (0x07cf = 1999) */
+			 0x00, 0x00, /* Month Day */
+			 0x00, 0x00, /* Hours Minutes */
+			 0x00, /* Unknown, but not seconds - try 59 and wait 1 sec. */
+			 0x01 };
+  int timeout=20;
 
-        req[7] = date_time->Year / 256;
-        req[8] = date_time->Year % 256;
-        req[9] = date_time->Month;
-        req[10] = date_time->Day;
-        req[11] = date_time->Hour;
-        req[12] = date_time->Minute;
+  req[7] = date_time->Year / 256;
+  req[8] = date_time->Year % 256;
+  req[9] = date_time->Month;
+  req[10] = date_time->Day;
+  req[11] = date_time->Hour;
+  req[12] = date_time->Minute;
 
-	FB61_TX_SendMessage(0x0f, 0x11, req);
-	return (GE_NONE);
+  CurrentSetDateTimeError=GE_BUSY;
+
+  FB61_TX_SendMessage(0x0f, 0x11, req);
+
+  while (timeout != 0 && CurrentSetDateTimeError == GE_BUSY) {
+    timeout --;
+    if (timeout == 0)
+      return (GE_TIMEOUT);
+    usleep (100000);
+  }
+
+  return (CurrentSetDateTimeError);
 }
+
+/* FIXME: we should also allow to set the alarm off :-) */
 
 GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 {
-	return (GE_NOTIMPLEMENTED);
+  unsigned char req[] = {FB61_FRAME_HEADER,
+			 0x6b, /* set-alarm subtype */
+			 0x01, 0x20, 0x03, /* unknown */
+			 0x02,       /* should be alarm on/off, but it don't works */
+			 0x00, 0x00, /* Hours Minutes */
+			 0x00, /* Unknown, but not seconds - try 59 and wait 1 sec. */
+			 0x01 };
+  int timeout=20;
+
+  req[8] = date_time->Hour;
+  req[9] = date_time->Minute;
+
+  CurrentSetAlarmError=GE_BUSY;
+
+  FB61_TX_SendMessage(0x0c, 0x11, req);
+
+  while (timeout != 0 && CurrentSetAlarmError == GE_BUSY) {
+    timeout --;
+    if (timeout == 0)
+      return (GE_TIMEOUT);
+    usleep (100000);
+  }
+
+  return (CurrentSetAlarmError);
 }
 
 	/* Routine to get specifed phone book location.  Designed to 
@@ -586,7 +636,7 @@ GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 GSM_Error	FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry) {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00, 0x01};
-  int timeout;
+  int timeout=20; /* 2 seconds for command to complete */
 
   CurrentPhonebookEntry = entry;
   CurrentPhonebookError = GE_BUSY;
@@ -601,20 +651,7 @@ GSM_Error	FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GS
 
   req[5] = location;
 
-  timeout = 20; /* 2 seconds for command to complete */
-
-  /* Return if no link has been established. */
-
-  if (!FB61_LinkOK) {
-    printf("returning no link :-(\n");
-    return GE_NOLINK;
-  }
-
-  /* Send request */
-
   FB61_TX_SendMessage(0x08, 0x03, req);
-
-  /* Wait for timeout or other error. */
 
   while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
     timeout --;
@@ -1022,22 +1059,32 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 		      between phone calls :-(
 	    */
 	  case 0x03:
+
+#ifdef DEBUG
 	    printf("Message: Call message, type 0x03:");
 	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
 	    printf("   Exact meaning not known yet, sorry :-(\n");
+#endif DEBUG
+
 	    break;
 
 	    /* Remote end has gone away before you answer the call.  Probably
                your mother-in-law or banker (which is worse?) ... */
 	  case 0x04:
 
+#ifdef DEBUG
 	    printf("Message: Remote end hang up.\n");
 	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
+#endif DEBUG
+
+	    CurrentIncomingCall[0]=0;
+
 	    break;
 
 	    /* Incoming call alert */
 	  case 0x05:
 
+#ifdef DEBUG
 	    printf("Message: Incoming call alert:\n");
 
 	    /* We can have more then one call ringing - we can distinguish
@@ -1046,7 +1093,7 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
 	    printf("   Number: ");
 	    count=MessageBuffer[6];
-	  
+
 	    for (tmp=0; tmp <count; tmp++)
 	      printf("%c", MessageBuffer[7+tmp]);
 
@@ -1058,20 +1105,33 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	      printf("%c", MessageBuffer[8+count+tmp]);
 
 	    printf("\n");
+#endif DEBUG
+
+	    count=MessageBuffer[6];
+
+	    for (tmp=0; tmp <count; tmp++)
+	      sprintf(CurrentIncomingCall, "%s%c", CurrentIncomingCall, MessageBuffer[7+tmp]);
+
 	    break;
 
 	    /* Call answered. Probably your girlfriend...*/
 	  case 0x07:
 
+#ifdef DEBUG
 	    printf("Message: Call answered.\n");
 	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
+#endif DEBUG
+
 	    break;
 
 	    /* Call ended. Girlfriend is girlfriend, but time is money :-) */
 	  case 0x09:
 
+#ifdef DEBUG
 	    printf("Message: Call ended by your phone.\n");
 	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
+#endif DEBUG
+
 	    break;
 
 	    /* This message has been seen with the message of subtype 0x09
@@ -1090,15 +1150,22 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	    */
 	  case 0x0a:
 
+#ifdef DEBUG
 	    printf("Message: Call message, type 0x0a:");
 	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
 	    printf("   Exact meaning not known yet, sorry :-(\n");
+#endif DEBUG
+
+	    CurrentIncomingCall[0]=0;
+
 	    break;
 
 	  default:
+
 #ifdef DEBUG
 	    printf("Message: Unknown message of type 0x01\n");
 #endif DEBUG
+
 	}
 
 	break;
@@ -1377,7 +1444,12 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	  switch (MessageBuffer[3]) {
 
 	  case 0x61:
+
+#ifdef DEBUG
 	    printf("Message: Date and time set correctly\n");
+#endif DEBUG
+
+	    CurrentSetDateTimeError=GE_NONE;
 
 	    break;
 
@@ -1400,6 +1472,17 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	    CurrentDateTimeError=GE_NONE;
 
 	    break;
+
+	  case 0x6c:
+
+#ifdef DEBUG
+	    printf("Message: Alarm set correctly\n");
+#endif DEBUG
+
+	    CurrentSetAlarmError=GE_NONE;
+
+	    break;
+
 
 	  case 0x6e:
 

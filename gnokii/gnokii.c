@@ -43,16 +43,17 @@ void deletesms(char *argv[]);
 void sendsms(char *argv[]);
 void setdatetime(char *argv[]);
 void getdatetime(void);
+void setalarm(char *argv[]);
 void getalarm(void);
 void dialvoice(char *argv[]);
 
 void version(void)
 {
 
-  fprintf(stdout, _("GNOKII Version 0.2.4
+  fprintf(stdout, _("GNOKII Version %s
 Copyright (C) Hugh Blemings <hugh@vsb.com.au>, 1999
 Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999
-Built %s %s for %s on %s \n"), __TIME__, __DATE__, MODEL, PORT);
+Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, MODEL, PORT);
 }
 
 /* The function usage is only informative - it prints this program's usage and
@@ -69,6 +70,7 @@ void usage(void)
           gnokii [--sendsms] [destination] [message centre]
           gnokii [--setdatetime] [YYYY] [MM] [DD] [HH] [MM]
           gnokii [--getdatetime]
+          gnokii [--setalarm] [HH] [MM]
           gnokii [--getalarm]
           gnokii [--dialvoice] [number]
 
@@ -106,6 +108,8 @@ void usage(void)
           --setdatetime     set the date and the time of the phone.
 
           --getdatetime     shows current date and time in the phone.
+
+          --setalarm        set the alarm of the phone.
 
           --getalarm        shows current alarm.
 
@@ -179,9 +183,19 @@ int main(int argc, char *argv[])
     enterpin();
   }
 
+  /* Set Date and Time. */
+  if (strcmp(argv[1], "--setdatetime") == 0 && argc==7) {
+    setdatetime(argv);
+  }
+
   /* Get date/time mode. */
   if (strcmp(argv[1], "--getdatetime") == 0) {
     getdatetime();
+  }
+
+  /* Set Alarm. */
+  if (strcmp(argv[1], "--setalarm") == 0 && argc==4) {
+    setalarm(argv);
   }
 
   /* Get alarm mode. */
@@ -192,11 +206,6 @@ int main(int argc, char *argv[])
   /* Voice call mode. */
   if (strcmp(argv[1], "--dialvoice") == 0) {
     dialvoice(argv);
-  }
-
-  /* Set Date and Time. */
-  if (strcmp(argv[1], "--setdatetime") == 0 && argc==7) {
-    setdatetime(argv);
   }
 
 		/* Get phonebook command. */
@@ -459,18 +468,37 @@ void	getdatetime(void) {
 	GSM->Terminate(); exit(0);
 }
 
+void setalarm(char *argv[])
+{
+  GSM_DateTime Date;
+
+  fbusinit(false);
+
+  Date.Hour = atoi(argv[2]);
+  Date.Minute = atoi(argv[3]);
+
+  GSM->SetAlarm(1, &Date);
+
+  GSM->Terminate();
+
+  exit(0);
+}
+
+
 void	getalarm(void) {
 
   GSM_DateTime date_time;
 
-	fbusinit(false);
+  fbusinit(false);
 
-	if (GSM->GetAlarm(0, &date_time)==GE_NONE) {
-		fprintf(stdout, "Alarm: %s\n", (date_time.AlarmEnabled==0)?"off":"on");
-		fprintf(stdout, "Time: %02d:%02d\n", date_time.Hour, date_time.Minute);
-	}
+  if (GSM->GetAlarm(0, &date_time)==GE_NONE) {
+    fprintf(stdout, "Alarm: %s\n", (date_time.AlarmEnabled==0)?"off":"on");
+    fprintf(stdout, "Time: %02d:%02d\n", date_time.Hour, date_time.Minute);
+  }
 
-	GSM->Terminate(); exit(0);
+  GSM->Terminate();
+
+  exit(0);
 }
 
 /* In monitor mode we don't do much, we just initialise the fbus code with
@@ -486,6 +514,8 @@ void monitormode(void)
   GSM_MemoryStatus PhoneMemoryStatus = {GMT_INTERNAL, 0, 0};
 
   GSM_SMSStatus SMSStatus = {0, 0};
+
+  char Number[20];
     
   /* We do not want to monitor serial line forever - press Ctrl+C to stop the
      monitoring mode. */
@@ -523,6 +553,9 @@ void monitormode(void)
     if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE)
       fprintf(stdout, "SMS Messages: UnRead %d, Number %d\n", SMSStatus.UnRead, SMSStatus.Number);
 
+    if (GSM->GetIncomingCallNr(Number) == GE_NONE)
+      fprintf(stdout, "Incoming call: %s\n", Number);
+	    
     sleep(1);
   }
 
