@@ -801,16 +801,13 @@ static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0C, 
-			       0x01, /* 0x01 SIM, 0x02 ME*/
+			       0x02, /* 0x01 SIM, 0x02 ME*/
 			       0x00, /* Folder ID */
 			       0x0F, 0x55, 0x55, 0x55};
 
 	req[5] = GetMemoryType(data->SMSFolder->FolderID);
 
-	if (req[5] == P6510_MEMORY_IN) 
-		req[4] = 0x02;
-	else
-		req[4] = 0x02;
+	if (req[5] == P6510_MEMORY_IN) req[4] = 0x01;
 
 	dprintf("Getting SMS Folder (%i) status (%i)...\n", req[5], req[4]);
 
@@ -821,7 +818,7 @@ static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0E, 
-			       0x01, /* 0x01 Inbox, 0x02 others*/
+			       0x02, /* 0x01 Inbox, 0x02 others*/
 			       0x00, /* Folder ID */
 			       0x00, 
 			       0x00, /* Location */
@@ -830,10 +827,7 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 	dprintf("Getting SMS message (%i) status (%i)...\n", data->RawSMS->Number, data->RawSMS->MemoryType);
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
-	if (req[5] == P6510_MEMORY_IN) 
-		req[4] = 0x02;
-	else
-		req[4] = 0x02;
+	if (req[5] == P6510_MEMORY_IN) req[4] = 0x01;
 	req[7] = data->RawSMS->Number;
 
 	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
@@ -843,7 +837,7 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02,
-				   0x01, /* 0x01 for INBOX, 0x02 for others */
+				   0x02, /* 0x01 for INBOX, 0x02 for others */
 				   0x00, /* FolderID */
 				   0x00,
 				   0x02, /* Location */
@@ -880,10 +874,7 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 
-	if (req[5] == P6510_MEMORY_IN) 
-		req[4] = 0x02;
-	else
-		req[4] = 0x02;
+	if (req[5] == P6510_MEMORY_IN) req[4] = 0x01;
 
 	req[7] = data->RawSMS->Number;
 

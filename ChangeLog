@@ -80,6 +80,9 @@
     o capitalization caused compilation problem      (BORBELY Zoltan)
     o make SMS sending work (only for 6310 now)           (Pawel Kot)
     o correctly read SMSC information                     (Pawel Kot)
+    o fix wrong memory types for SMS, it still needs fixing for
+      Inbox - we can have messages stored on either SIM or in the
+      phone memory                                        (Pawel Kot)
  * 6110 series updates:
     o SMS reading works with the new SMS subsystem   (BORBELY Zoltan)
     o "call divert is active" frame marked as unsolicited in nokia.c
