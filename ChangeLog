@@ -1,7 +1,5 @@
 0.4.0pre17 (not released yet)
 ==========
- * Another dummy update to test CVS-commit notify     (Hugh Blemings)
- * Dummy update to test CVS-commit notification       (Hugh Blemings)
  * Updates to address GNU GPL requirements                (Pawel Kot)
  * Change from .gif to .png for documentation         (Hugh Blemings)
  * Fixed small typo in include/devices/linuxirda.h    (Hugh Blemings)
