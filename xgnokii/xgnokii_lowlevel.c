@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.16  2001-05-24 20:47:31  chris
+  Revision 1.17  2001-06-10 11:40:06  machek
+  xgnokii converted to new structure w.r.t. SMS messages.
+
+  Revision 1.16  2001/05/24 20:47:31  chris
   More updating of 7110 code and some of xgnokii_lowlevel changed over.
 
   Revision 1.15  2001/03/23 08:24:57  ja
@@ -291,11 +294,14 @@ static void RefreshSMS (const gint number)
   i = 0;
   while (1)
   {
+    GSM_Data gdat;
+    GSM_DataClear(&gdat);
     msg = g_malloc (sizeof (GSM_SMSMessage));
     msg->MemoryType = GMT_SM;
     msg->Location = ++i;
+    gdat.SMSMessage = msg;
 
-    if ((error = GSM->GetSMSMessage (msg)) == GE_NONE)
+    if ((error = SM_Functions(GOP_GetSMS, &gdat, &statemachine)) == GE_NONE)
     {
       pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
@@ -672,7 +678,10 @@ static gint A_DeleteSMSMessage (gpointer data)
 
   if (sms)
   {
-    error = GSM->DeleteSMSMessage(sms);
+    GSM_Data gdat;
+    GSM_DataClear(&gdat);
+    gdat.SMSMessage = sms;
+    error = SM_Functions(GOP_DeleteSMS, &gdat, &statemachine);
     g_free (sms);
   }
 
