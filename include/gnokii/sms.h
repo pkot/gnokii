@@ -36,6 +36,7 @@
 #include "gsm-common.h"
 #include "gsm-bitmaps.h"
 #include "gsm-ringtones.h"
+#include "gsm-encoding.h"
 
 /* Maximum length of SMS center name */
 
@@ -492,8 +493,6 @@ typedef struct {
 } GSM_CBMessage;
 
 /* Utils */
-extern char *GetBCDNumber(u8 *Number);
-extern int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type);
 extern SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt);
 
 #endif /* __gnokii_sms_h_ */
