@@ -36,7 +36,6 @@
 #undef DEBUG
 #include "misc.h"
 #include "gsm-common.h"
-#include "mbus-2110.h"
 #include "device.h"
 #include "gsm-sms.h"
 #include "gsm-statemachine.h"
