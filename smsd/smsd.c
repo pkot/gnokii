@@ -36,8 +36,10 @@
 
 #include "gsm-common.h"
 #include "gsm-api.h"
-#include "fbus-6110.h"
-#include "fbus-3810.h"
+#include "phones/nk7110.h"
+#include "phones/nk6100.h"
+#include "phones/nk3110.h"
+#include "phones/nk2110.h"
 #include "cfgreader.h"
 #include "smsd.h"
 #include "lowlevel.h"
@@ -175,9 +177,9 @@ static void ReadSMS (gpointer d, gpointer userData)
   GSM_SMSMessage *data = (GSM_SMSMessage *) d;
   PhoneEvent *e;
   
-  if (data->Type == GST_MT || data->Type == GST_DR)
+  if (data->Type == SMS_Deliver || data->Type == SMS_Delivery_Report)
   {
-    if (data->Type == GST_DR)
+    if (data->Type == SMS_Delivery_Report)
     {
 #ifdef XDEBUG
       g_print ("Report\n");

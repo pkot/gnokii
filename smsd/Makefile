@@ -1,8 +1,9 @@
 #
-# Makefile for the xGNOKII tool suite.
+# Makefile for the smsd.
 #
 # Copyright (C) 1999 Hugh Blemings & Pavel Janík ml. & Jan Derfinak
 #               2000 Karel Zak
+# $Id$
 #
 
 TOPDIR=..
@@ -12,9 +13,17 @@ CFLAGS += $(PTHREAD_CFLAGS) \
 	  `glib-config --cflags`
 
 LDFLAGS += $(PTHREAD_LIBS) \
-	   `glib-config --libs` -lpq
+	   `glib-config --libs`
 
 LDFLAGS += -L$(TOPDIR) -lgnokii
+
+# Change this according to your system
+# FIXME: detect it in configure
+CFLAGS += -I/usr/include/pgsql
+# CFLAGS += -I/usr/include/psql
+LDFLAGS += -L/usr/lib/pgsql -lpq
+# LDFLAGS += -L/usr/lib/psql -lpq
+# LDFLAGS += -lpq
 
 ifdef XPM_LIBS
     LDFLAGS +=$(XPM_LIBS)

@@ -15,7 +15,7 @@
 
 #include <string.h>
 #include <glib.h>
-#include <pgsql/libpq-fe.h>
+#include <libpq-fe.h>
 #include "db.h"
 #include "smsd.h"
 #include "gsm-common.h"
@@ -71,7 +71,7 @@ gint DB_InsertSMS (const GSM_SMSMessage * const data)
   buf = g_string_sized_new (128);
   g_string_sprintf (buf, "INSERT INTO inbox VALUES ('%s',
                     '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', 'f')",
-                    data->Sender, data->Time.Year + 2000, data->Time.Month,
+                    data->RemoteNumber.number, data->Time.Year + 2000, data->Time.Month,
                     data->Time.Day, data->Time.Hour, data->Time.Minute,
                     data->Time.Second, data->MessageText);
   res = PQexec(connIn, buf->str);
@@ -121,15 +121,20 @@ void DB_Look (void)
     GSM_SMSMessage sms;
     
     sms.MessageCenter.No = 1;
-    sms.Type = GST_MO;
-    sms.Class = -1;
-    sms.Compression = false;
-    sms.EightBit = false;
-    sms.Validity = 4320;
-    sms.UDHType = GSM_NoUDH;
-    
-    strncpy (sms.Destination, PQgetvalue (res1, i, 1), GSM_MAX_DESTINATION_LENGTH + 1);
-    sms.Destination[GSM_MAX_DESTINATION_LENGTH] = '\0';
+    sms.Type = SMS_Submit;
+    sms.DCS.Type = SMS_GeneralDataCoding;
+    sms.DCS.u.General.Compressed = false;
+    sms.DCS.u.General.Alphabet = SMS_DefaultAlphabet;
+    sms.DCS.u.General.Class = 0;
+    sms.Validity.VPF = SMS_RelativeFormat;
+    sms.Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
+    sms.UDH_No = 0;
+    sms.Report = false;
+
+    strncpy (sms.RemoteNumber.number, PQgetvalue (res1, i, 1), GSM_MAX_DESTINATION_LENGTH + 1);
+    sms.RemoteNumber.number[GSM_MAX_DESTINATION_LENGTH] = '\0';
+    if (sms.RemoteNumber.number[0] == '+') sms.RemoteNumber.type = SMS_International;
+    else sms.RemoteNumber.type = SMS_Unknown;
     
     strncpy (sms.MessageText, PQgetvalue (res1, i, 2), GSM_MAX_SMS_LENGTH + 1);
     sms.MessageText[GSM_MAX_SMS_LENGTH] = '\0';

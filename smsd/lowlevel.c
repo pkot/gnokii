@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.4  2001-05-30 14:36:47  pkot
+  Revision 1.5  2001-12-03 15:34:54  pkot
+  Update to libsms and new structure
+
+  Revision 1.4  2001/05/30 14:36:47  pkot
   Fix smsd to use StateMachine and let it compile.
 
   Revision 1.3  2001/03/29 08:42:59  ja
@@ -30,8 +33,10 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
-#include "fbus-6110.h"
-#include "fbus-3810.h"
+#include "phones/nk7110.h"
+#include "phones/nk6100.h"
+#include "phones/nk3110.h"
+#include "phones/nk2110.h"
 #include "smsd.h"
 #include "lowlevel.h"
 
@@ -218,7 +223,7 @@ static void RefreshSMS (const gint number)
   {
     msg = g_malloc (sizeof (GSM_SMSMessage));
     msg->MemoryType = GMT_SM;
-    msg->Location = ++i;
+    msg->Number = ++i;
 
     if ((error = GSM->GetSMSMessage (msg)) == GE_NONE)
     {
@@ -301,7 +306,7 @@ gint (*DoAction[])(gpointer) = {
 
 void *Connect (void *a)
 {
-  GSM_SMSStatus SMSStatus = {0, 0};
+  GSM_SMSMemoryStatus SMSStatus = {0, 0};
   PhoneEvent *event;
   GSM_Error error;
 
@@ -323,7 +328,7 @@ void *Connect (void *a)
 
     if (GSM->GetSMSStatus (&SMSStatus) == GE_NONE)
     {
-      if (phoneMonitor.sms.unRead != SMSStatus.UnRead ||
+      if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
           phoneMonitor.sms.number != SMSStatus.Number)
       {
         phoneMonitor.working = TRUE;
@@ -331,7 +336,7 @@ void *Connect (void *a)
         phoneMonitor.working = FALSE;
       }
 
-      phoneMonitor.sms.unRead = SMSStatus.UnRead;
+      phoneMonitor.sms.unRead = SMSStatus.Unread;
     }
 
     while ((event = RemoveEvent ()) != NULL)

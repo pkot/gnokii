@@ -1,3 +1,7 @@
 * Fri 02 Feb 2001 Jan Derfinak <ja@mail.upjs.sk>
 - Fixed smsd to new capability code.
-.
+
+* Mon Dec  3 2001 Pawel Kot <pkot@linuxnews.pl>
+- Updated to the new libsms.
+- Be more friendly to the other postgresql includes and libraries locations.
+- Use libgnokii.so.
