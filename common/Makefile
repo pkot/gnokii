@@ -33,8 +33,9 @@ OBJS =	gsm-api.lo \
 	gsm-statemachine.lo \
 	cfgreader.lo \
 	device.lo \
-	vcal.lo \
 	vcard.lo \
+	vcal.lo \
+	gnvcal.lo \
 	ldif.lo \
 	gsm-networks.lo \
 	gsm-filetypes.lo \
@@ -73,8 +74,8 @@ gnokii-debug: $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.l
 libgnokii.la: $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la
 	$(LIBTOOL) --mode=link $(CC) $(LIBTOOL_UNDEF) -o libgnokii.la $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la $(INTL_LIBS) $(LIBTOOL_VER) $(LIBTOOL_RPATH)
 
-vcal.c: vcal.lx
-	$(LEX) -ovcal.c vcal.lx
+gnvcal.c: vcal.lx
+	$(LEX) -ognvcal.c vcal.lx
 
 clean:
 	$(MAKE) -C data clean
@@ -85,7 +86,7 @@ clean:
 	$(RM) *~ depend
 
 distclean:
-	$(RM) vcal.c
+	$(RM) gnvcal.c
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(libdir)

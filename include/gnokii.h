@@ -105,18 +105,27 @@ API int gn_cfg_file_read(const char *filename);
 API int gn_cfg_read_default();
 API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state);
 
+/* In/Out routines, file formats */
 API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location);
 API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
 
 API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry);
 API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry);
 
+/* DEPRECATED */
 API int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number);
 API int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number);
+
+API int gn_calnote2ical(FILE *f, gn_calnote *calnote);
+API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id);
+
+API int gn_todo2ical(FILE *f, gn_todo *ctodo);
+API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id);
 
 API void gn_number_sanitize(char *number, int maxlen);
 API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry);
 
+/* Debugging */
 extern API gn_log_target gn_log_debug_mask;
 extern API gn_log_target gn_log_rlpdebug_mask;
 extern API gn_log_target gn_log_xdebug_mask;

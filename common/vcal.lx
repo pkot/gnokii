@@ -184,7 +184,7 @@ int vcal_time_get(gn_timestamp *dt, char *time)
 * out:
 *   <>0 if error
 */
-int gn_calnote_fill(gn_calnote *note, char *type, char *text,
+static int gn_calnote_fill(gn_calnote *note, char *type, char *text,
 		    char *desc, char *time, char *alarm)
 {
 	vcal_time_get(&note->time, time);
@@ -226,6 +226,7 @@ int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number)
 	FILE *file;
 	char type[21] = "", text[257] = "", desc[257] = "", time[16] = "", alarm[16] = "", todo_priority[2] = "";
 
+	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead."));
 	file = fopen(filename, "r");
 	if (!file) {
 		fprintf(stderr, _("File cannot be opened!\n"));
@@ -258,7 +259,7 @@ int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number)
 * out:
 *   <>0 if error
 */
-int gn_todo_fill(gn_todo *todonote, char *text, char *todo_priority)
+static int gn_todo_fill(gn_todo *todonote, char *text, char *todo_priority)
 {
 	snprintf(todonote->text, GN_TODO_MAX_LENGTH, "%s", text);
 	todonote->priority = GN_TODO_MEDIUM;
@@ -283,6 +284,7 @@ int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number)
 	FILE *file;
 	char type[21] = "", text[258] = "", desc[258] = "", time[16] = "", alarm[16] = "", todo_priority[3] = "";
 
+	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead"));
 	file = fopen(filename, "r");
 	if (!file) {
 		fprintf(stderr, _("File cannot be opened!\n"));

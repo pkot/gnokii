@@ -2137,7 +2137,7 @@ static int gettodo(int argc, char *argv[])
 	int		i, first_location, last_location;
 
 	struct option options[] = {
-		{ "vCard",   optional_argument, NULL, '1'},
+		{ "vCal",    optional_argument, NULL, '1'},
 		{ NULL,      0,                 NULL, 0}
 	};
 
@@ -2171,13 +2171,7 @@ static int gettodo(int argc, char *argv[])
 		switch (error) {
 		case GN_ERR_NONE:
 			if (vcal) {
-				fprintf(stdout, "BEGIN:VCALENDAR\r\n");
-				fprintf(stdout, "VERSION:1.0\r\n");
-				fprintf(stdout, "BEGIN:VTODO\r\n");
-				fprintf(stdout, "PRIORITY:%i\r\n", todo.priority);
-				fprintf(stdout, "SUMMARY:%s\r\n", todo.text);
-				fprintf(stdout, "END:VTODO\r\n");
-				fprintf(stdout, "END:VCALENDAR\r\n");
+				gn_todo2ical(stdout, &todo);
 			} else {
 				fprintf(stdout, _("Todo: %s\n"), todo.text);
 				fprintf(stdout, _("Priority: "));
@@ -2211,23 +2205,45 @@ static int writetodo(char *argv[])
 	gn_todo todo;
 	gn_data data;
 	gn_error error;
+	int location;
+	FILE *f;
 
 	gn_data_clear(&data);
 	data.todo = &todo;
 
-#ifndef WIN32
-	error = gn_vcal_file_todo_read(argv[0], &todo, atoi(argv[1]));
+	f = fopen(argv[0], "r");
+	if (!f) {
+		fprintf(stderr, _("Cannot read file %s\n"), argv[0]);
+		return GN_ERR_FAILED;
+	}
+
+	location = atoi(argv[1]);
+
+	error = gn_ical2todo(f, &todo, location);
+	fclose(f);
+	if (error == GN_ERR_NOTIMPLEMENTED) {
+		switch (gn_vcal_file_todo_read(argv[0], &todo, location)) {
+		case 0:
+			error = GN_ERR_NONE;
+			break;
+		default:
+			error = GN_ERR_FAILED;
+			break;
+		}
+	}
+
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
 		return error;
 	}
-#endif
 
 	error = gn_sm_functions(GN_OP_WriteToDo, &data, &state);
-	if (error == GN_ERR_NONE)
+
+	if (error == GN_ERR_NONE) {
 		fprintf(stderr, _("Succesfully written!\n"));
-	else
-		fprintf(stderr, _("Failed to write calendar note: %s\n"), gn_error_print(error));
+		fprintf(stderr, _("Priority %d. %s\n"), data.todo->priority, data.todo->text);
+	} else
+		fprintf(stderr, _("Failed to write todo note: %s\n"), gn_error_print(error));
 	return error;
 }
 
@@ -2243,7 +2259,7 @@ static int deletealltodos()
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Succesfully deleted all ToDo notes!\n"));
 	else
-		fprintf(stderr, _("Failed to write calendar note: %s\n"), gn_error_print(error));
+		fprintf(stderr, _("Failed to delete todo note: %s\n"), gn_error_print(error));
 	return error;
 }
 
@@ -2258,7 +2274,7 @@ static int getcalendarnote(int argc, char *argv[])
 	bool			vcal = false;
 
 	struct option options[] = {
-		{ "vCard",   optional_argument, NULL, '1'},
+		{ "vCal",    optional_argument, NULL, '1'},
 		{ NULL,      0,                 NULL, 0}
 	};
 
@@ -2295,67 +2311,11 @@ static int getcalendarnote(int argc, char *argv[])
 		data.calnote_list = &calnotelist;
 
 		error = gn_sm_functions(GN_OP_GetCalendarNote, &data, &state);
-		switch (error) {
-		case GN_ERR_NONE:
-			if (vcal) {
-				fprintf(stdout, "BEGIN:VCALENDAR\r\n");
-				fprintf(stdout, "VERSION:1.0\r\n");
-				fprintf(stdout, "BEGIN:VEVENT\r\n");
-				fprintf(stdout, "CATEGORIES:");
-				switch (calnote.type) {
-				case GN_CALNOTE_REMINDER:
-					fprintf(stdout, "MISCELLANEOUS\r\n");
-					break;
-				case GN_CALNOTE_CALL:
-					fprintf(stdout, "PHONE CALL\r\n");
-					fprintf(stdout, "SUMMARY:%s\r\n", calnote.phone_number);
-					fprintf(stdout, "DESCRIPTION:%s\r\n", calnote.text);
-					break;
-				case GN_CALNOTE_MEETING:
-					fprintf(stdout, "MEETING\r\n");
-					break;
-				case GN_CALNOTE_BIRTHDAY:
-					fprintf(stdout, "SPECIAL OCCASION\r\n");
-					break;
-				default:
-					fprintf(stdout, "UNKNOWN\r\n");
-					break;
-				}
-				if (calnote.type != GN_CALNOTE_CALL) fprintf(stdout, "SUMMARY:%s\r\n",calnote.text);
-				fprintf(stdout, "DTSTART:%04d%02d%02dT%02d%02d%02d\r\n", calnote.time.year,
-					calnote.time.month, calnote.time.day, calnote.time.hour,
-					calnote.time.minute, calnote.time.second);
-				if (calnote.alarm.enabled) {
-					fprintf(stdout, "AALARM:%04d%02d%02dT%02d%02d%02d\r\n", calnote.alarm.timestamp.year,
-						calnote.alarm.timestamp.month, calnote.alarm.timestamp.day, calnote.alarm.timestamp.hour,
-						calnote.alarm.timestamp.minute, calnote.alarm.timestamp.second);
-				}
-				switch (calnote.recurrence) {
-				case GN_CALNOTE_NEVER:
-					break;
-				case GN_CALNOTE_DAILY:
-					fprintf(stdout, "RRULE:FREQ=DAILY\r\n");
-					break;
-				case GN_CALNOTE_WEEKLY:
-					fprintf(stdout, "RRULE:FREQ=WEEKLY\r\n");
-					break;
-				case GN_CALNOTE_2WEEKLY:
-					fprintf(stdout, "RRULE:FREQ=WEEKLY;INTERVAL=2\r\n");
-					break;
-				case GN_CALNOTE_MONTHLY:
-					fprintf(stdout, "RRULE:FREQ=MONTHLY\r\n");
-					break;
-				case GN_CALNOTE_YEARLY:
-					fprintf(stdout, "RRULE:FREQ=YEARLY\r\n");
-					break;
-				default:
-					fprintf(stdout, "RRULE:FREQ=HOURLY;INTERVAL=%d\r\n", calnote.recurrence);
-					break;
-				}
-				fprintf(stdout, "END:VEVENT\r\n");
-				fprintf(stdout, "END:VCALENDAR\r\n");
 
-			} else {  /* not vcal */
+		if (error == GN_ERR_NONE) {
+			if (vcal) {
+				gn_calnote2ical(stdout, &calnote);
+			} else {  /* plaint text output */
 				fprintf(stdout, _("   Type of the note: "));
 
 				switch (calnote.type) {
@@ -2424,13 +2384,12 @@ static int getcalendarnote(int argc, char *argv[])
 				if (calnote.type == GN_CALNOTE_CALL)
 					fprintf(stdout, _("   Phone: %s\n"), calnote.phone_number);
 			}
-			break;
-		default:
+
+		} else { /* error != GN_ERR_NONE */
 			fprintf(stderr, _("The calendar note can not be read: %s\n"), gn_error_print(error));
 			/* stop processing if the last note was specified as "end" */
 			if (last_location == INT_MAX)
 				last_location = 0;
-			break;
 		}
 	}
 
@@ -2443,19 +2402,41 @@ static int writecalendarnote(char *argv[])
 	gn_calnote calnote;
 	gn_data data;
 	gn_error error;
+	int location;
+	FILE *f;
 
 	gn_data_clear(&data);
 	data.calnote = &calnote;
 
-#ifndef WIN32
-	error = gn_vcal_file_event_read(argv[0], &calnote, atoi(argv[1]));
+	f = fopen(argv[0], "r");
+	if (f == NULL) {
+		fprintf(stderr, _("Cannot read file %s\n"), argv[0]);
+		return GN_ERR_FAILED;
+	}
+
+	location = atoi(argv[1]);
+
+	error = gn_ical2calnote(f, &calnote, location);
+	fclose(f);
+
+	if (error == GN_ERR_NOTIMPLEMENTED) {
+		switch (gn_vcal_file_event_read(argv[0], &calnote, location)) {
+		case 0:
+			error = GN_ERR_NONE;
+			break;
+		default:
+			error = GN_ERR_FAILED;
+			break;
+		}
+	}
+
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
 		return error;
 	}
-#endif
-
+	
 	error = gn_sm_functions(GN_OP_WriteCalendarNote, &data, &state);
+
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Succesfully written!\n"));
 	else
