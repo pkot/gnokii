@@ -2633,40 +2633,38 @@ static int monitormode(void)
 	return 0;
 }
 
-#if 0
-FIXAPI
 static void printdisplaystatus(int status)
 {
 	fprintf(stdout, _("Call in progress: %-3s\n"),
-		status & (1 << DS_Call_In_Progress) ? _("on") : _("off"));
+		status & (1 << GN_DISP_Call_In_Progress) ? _("on") : _("off"));
 	fprintf(stdout, _("Unknown: %-3s\n"),
-		status & (1 << DS_Unknown)          ? _("on") : _("off"));
+		status & (1 << GN_DISP_Unknown)          ? _("on") : _("off"));
 	fprintf(stdout, _("Unread SMS: %-3s\n"),
-		status & (1 << DS_Unread_SMS)       ? _("on") : _("off"));
+		status & (1 << GN_DISP_Unread_SMS)       ? _("on") : _("off"));
 	fprintf(stdout, _("Voice call: %-3s\n"),
-		status & (1 << DS_Voice_Call)       ? _("on") : _("off"));
+		status & (1 << GN_DISP_Voice_Call)       ? _("on") : _("off"));
 	fprintf(stdout, _("Fax call active: %-3s\n"),
-		status & (1 << DS_Fax_Call)         ? _("on") : _("off"));
+		status & (1 << GN_DISP_Fax_Call)         ? _("on") : _("off"));
 	fprintf(stdout, _("Data call active: %-3s\n"),
-		status & (1 << DS_Data_Call)        ? _("on") : _("off"));
+		status & (1 << GN_DISP_Data_Call)        ? _("on") : _("off"));
 	fprintf(stdout, _("Keyboard lock: %-3s\n"),
-		status & (1 << DS_Keyboard_Lock)    ? _("on") : _("off"));
+		status & (1 << GN_DISP_Keyboard_Lock)    ? _("on") : _("off"));
 	fprintf(stdout, _("SMS storage full: %-3s\n"),
-		status & (1 << DS_SMS_Storage_Full) ? _("on") : _("off"));
+		status & (1 << GN_DISP_SMS_Storage_Full) ? _("on") : _("off"));
 }
 
 #define ESC "\e"
 
-static void NewOutputFn(GSM_DrawMessage *DrawMessage)
+static void newoutputfn(gn_display_draw_msg *drawmessage)
 {
 	int x, y, n;
 	static int status;
-	static unsigned char screen[DRAW_MAX_SCREEN_HEIGHT][DRAW_MAX_SCREEN_WIDTH];
+	static unsigned char screen[GN_DRAW_SCREEN_MAX_HEIGHT][GN_DRAW_SCREEN_MAX_WIDTH];
 	static bool init = false;
 
 	if (!init) {
-		for (y = 0; y < DRAW_MAX_SCREEN_HEIGHT; y++)
-			for (x = 0; x < DRAW_MAX_SCREEN_WIDTH; x++)
+		for (y = 0; y < GN_DRAW_SCREEN_MAX_HEIGHT; y++)
+			for (x = 0; x < GN_DRAW_SCREEN_MAX_WIDTH; x++)
 				screen[y][x] = ' ';
 		status = 0;
 		init = true;
@@ -2674,47 +2672,43 @@ static void NewOutputFn(GSM_DrawMessage *DrawMessage)
 
 	fprintf(stdout, ESC "[1;1H");
 
-	switch (DrawMessage->Command) {
-	case GSM_Draw_ClearScreen:
-		for (y = 0; y < DRAW_MAX_SCREEN_HEIGHT; y++)
-			for (x = 0; x < DRAW_MAX_SCREEN_WIDTH; x++)
+	switch (drawmessage->cmd) {
+	case GN_DISP_DRAW_Clear:
+		for (y = 0; y < GN_DRAW_SCREEN_MAX_HEIGHT; y++)
+			for (x = 0; x < GN_DRAW_SCREEN_MAX_WIDTH; x++)
 				screen[y][x] = ' ';
 		break;
 
-	case GSM_Draw_DisplayText:
-		x = DrawMessage->Data.DisplayText.x*DRAW_MAX_SCREEN_WIDTH / 84;
-		y = DrawMessage->Data.DisplayText.y*DRAW_MAX_SCREEN_HEIGHT / 48;
-		n = strlen(DrawMessage->Data.DisplayText.text);
-		if (n > DRAW_MAX_SCREEN_WIDTH)
+	case GN_DISP_DRAW_Text:
+		x = drawmessage->data.text.x*GN_DRAW_SCREEN_MAX_WIDTH / 84;
+		y = drawmessage->data.text.y*GN_DRAW_SCREEN_MAX_HEIGHT / 48;
+		n = strlen(drawmessage->data.text.text);
+		if (n > GN_DRAW_SCREEN_MAX_WIDTH)
 			return;
-		if (x + n > DRAW_MAX_SCREEN_WIDTH)
-			x = DRAW_MAX_SCREEN_WIDTH - n;
-		if (y > DRAW_MAX_SCREEN_HEIGHT)
-			y = DRAW_MAX_SCREEN_HEIGHT - 1;
-		memcpy(&screen[y][x], DrawMessage->Data.DisplayText.text, n);
+		if (x + n > GN_DRAW_SCREEN_MAX_WIDTH)
+			x = GN_DRAW_SCREEN_MAX_WIDTH - n;
+		if (y > GN_DRAW_SCREEN_MAX_HEIGHT)
+			y = GN_DRAW_SCREEN_MAX_HEIGHT - 1;
+		memcpy(&screen[y][x], drawmessage->data.text.text, n);
 		break;
 
-	case GSM_Draw_DisplayStatus:
-		status = DrawMessage->Data.DisplayStatus;
+	case GN_DISP_DRAW_Status:
+		status = drawmessage->data.status;
 		break;
 
 	default:
 		return;
 	}
 
-	for (y = 0; y < DRAW_MAX_SCREEN_HEIGHT; y++) {
-		for (x = 0; x < DRAW_MAX_SCREEN_WIDTH; x++)
+	for (y = 0; y < GN_DRAW_SCREEN_MAX_HEIGHT; y++) {
+		for (x = 0; x < GN_DRAW_SCREEN_MAX_WIDTH; x++)
 			fprintf(stdout, "%c", screen[y][x]);
 		fprintf(stdout, "\n");
 	}
 
 	fprintf(stdout, "\n");
-	PrintDisplayStatus(status);
+	printdisplaystatus(status);
 }
-#endif
-static void printdisplaystatus(int status) {return; }
-static void newoutputfn(gn_display_draw_msg *drawmessage) {return; }
-#define ESC "\e"
 
 static void console_raw(void)
 {
@@ -4536,8 +4530,8 @@ int main(int argc, char *argv[])
 		{ OPT_GETPHONEBOOK,      2, 4, 0 },
 		{ OPT_GETSPEEDDIAL,      1, 1, 0 },
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
-		{ OPT_CREATESMSFOLDER,      1, 1, 0 },
-		{ OPT_DELETESMSFOLDER,      1, 1, 0 },
+		{ OPT_CREATESMSFOLDER,   1, 1, 0 },
+		{ OPT_DELETESMSFOLDER,   1, 1, 0 },
 		{ OPT_GETSMS,            2, 5, 0 },
 		{ OPT_DELETESMS,         2, 3, 0 },
 		{ OPT_SENDSMS,           1, 10, 0 },
