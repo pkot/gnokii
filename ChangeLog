@@ -50,6 +50,8 @@
  * 6510 series updates:
     o fix incorrect order for SEND_MESSAGE_BLOCK and
       SEND_MESSAGE_WAITFOR arguments                     (Pawel Kot)
+ * AT series updates:
+    o fix smsc timestamp reading with getsms             (Pawel Kot)
  * libgnokii changes:
     o Renamed Greek operator PANAFON to Vodafone      (P. Christeas)
     o max sms length increased to 160 chars         (BORBELY Zoltan)
