@@ -1,9 +1,11 @@
 0.4.0pre20 (Not released yet)
 ==========
+ * SMSes from AT phones fixed                          (Pavel Machek)
+ * Ericsson a1018 support done nicely                  (Pavel Machek)
+ * Added testsuite				       (Pavel Machek)
+    o Add testing ringtone -- star.rtttl
  * gnokii updates                                      (Markus Plail)
     o fix segfault when reading more than one message in a row
- * Added support for AT-9600,needed for ericsson a1018 (Pavel Machek)
- * Added testsuite                                     (Pavel Machek)
  * 6110 series updates
     o PollSMS race condition eliminated              (BORBELY Zoltan)
     o SMS sending error codes updated                (BORBELY Zoltan)
