@@ -226,13 +226,22 @@ Last dialed numbers
 You can use also \fI\-r\fR or \fI\-\-raw\fR switch to get the raw output.
 You can use it then with \fI\-\-writephonebook\fR. Normally you got verbose output.
 .TP 
-.BR "\-\-writephonebook [\-i]"
-reads data from stdin and writes to phonebook
+.BR "\-\-writephonebook [\-o|\-\-overwrite] [\-f|\-\-find\-free]"
+reads data from stdin and writes to phonebook.
 When \-i option is used, refuses to overwrite existing entries.
 Uses the same format as provided by the output of the getphonebook command.
+See below for details.
 .PP
-The format is very simple.  Each line represents one entry.  Fields are
-separated by semicolons.  Semicolons aren't allowed inside a field.  The
+When the \-o or \-\-overwrite option is used, existing entries at a given
+location are overwritten.
+.PP
+When the \-f or \-\-find\-free option is given,
+.B gnokii
+tries to find a free location.  In this case, you can omit the location field
+in the input data.
+.PP
+The phonebook format is very simple.  Each line represents one entry.  Fields
+are separated by semicolons.  Semicolons aren't allowed inside a field.  The
 fields have to be in this order (the subentries are optional, ie. you can
 repeat all subetry field multiple times, but they have to be alltogether in
 the given order):
@@ -337,6 +346,12 @@ number is the general number
 .PP
 For the subentry types that don't care about number type (at text files)
 this should be set to 0. 
+
+.BR "\-\-deletephonebook  \fImemory_type\fP \fIstart_number\fP [\fIend_number\fP]"
+\" [\fIend_number|end\fP]"
+delete entries with \fIstart_number\fR to \fIend_number\fR from the phone
+book in \fImemory_type\fR. \fIend_number\fR can be either a number or a keyword
+end that denotes 'everything till the end'.
 
 .SS WAP
 .TP 

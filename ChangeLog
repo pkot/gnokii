@@ -58,6 +58,8 @@
     o NetBSD needs the same tricks as OpenBSD and FreeBSD in
       utils/mgnokiidev.c and common/data/virtmodem.c
                                                 (Richard M Kreuter)
+ * documentation updates
+    o update gnokii.1 manpage                        (Reiner Steib)
 
 0.6.3
 =====
