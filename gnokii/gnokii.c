@@ -2348,11 +2348,9 @@ void readconfig(void)
 
 #ifdef WIN32
   homedir = getenv("HOMEDRIVE");
-  if (homedir)
-    strncpy(rcfile, homedir, 200);
+  strncpy(rcfile, homedir ? homedir : "", 200);
   homedir = getenv("HOMEPATH");
-  if (homedir)
-    strncat(rcfile, homedir, 200);
+  strncat(rcfile, homedir ? homedir : "", 200);
   strncat(rcfile, "\\_gnokiirc", 200);
 #else
   homedir = getenv("HOME");

@@ -24,3 +24,6 @@
   
 * Thu Mar 16 16:48:33 EST 2000 Hugh Blemings <hugh@linuxcare.com>
 - Added Andrew Kozin's latest NMT-450 code.
+
+* Thu Mar 16 17:38:22 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- Feico's patch for debugging errors in opening config files.

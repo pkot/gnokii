@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
+
 #include "cfgreader.h"
 
 #ifdef WIN32
@@ -49,10 +51,14 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 
     if ((handle = fopen(filename, "r")) == NULL) {
 #ifdef DEBUG
-		perror("CFG_ReadFile - open");
+		fprintf( stderr, "CFG_ReadFile - open %s: %s\n", filename, strerror(errno));
 #endif DEBUG
 		return NULL;
     }
+#ifdef DEBUG
+    else
+		fprintf( stderr, "Opened configuration file %s\n", filename );
+#endif /* DEBUG */
 
     /* Iterate over lines in the file */
 
@@ -61,19 +67,16 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 		line = buf;
 		/* Strip leading, trailing whitespace */
 
-		while(isspace(*line)) {
-	    	line++;
-		}
+		while(isspace(*line))
+		    	line++;
 
-		while((strlen(line) > 0) && isspace(line[strlen(line) - 1])) {
-		    line[strlen(line) - 1] = '\0';
-		}
+		while((strlen(line) > 0) && isspace(line[strlen(line) - 1]))
+			line[strlen(line) - 1] = '\0';
 	
 		/* Ignore blank lines and comments */
 	
-		if ((*line == '\n') || (*line == '\0') || (*line == '#')) {
-		    continue;
-		}
+		if ((*line == '\n') || (*line == '\0') || (*line == '#'))
+			continue;
 
 		/* Look for "headings" enclosed in square brackets */
 

@@ -25,3 +25,6 @@
 
 * Fri Mar 10 00:04:16 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - vCal support (Gary Reuter)
+
+* Thu Mar 16 17:42:13 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- WIN32 rcfile changes
