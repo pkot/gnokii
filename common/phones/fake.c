@@ -32,13 +32,12 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
-#include "phones/generic.h"
-#include "gnokii/encoding.h"
-
-#include "gnokii-internal.h"
 #include "gnokii.h"
+#include "phones/generic.h"
+#include "gnokii-internal.h"
 
 /* Some globals */
 

@@ -48,15 +48,15 @@
 #include <string.h>
 
 #undef DEBUG
+
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
+#include "gnokii.h"
 #include "device.h"
-#include "gnokii/statemachine.h"
 #include "phones/generic.h"
 #include "phones/nk2110.h"
 #include "phones/nokia.h"
-
-#include "gnokii.h"
 
 #define MYID 0x78
 #define ddprintf(x...)

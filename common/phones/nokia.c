@@ -35,6 +35,8 @@
 
 #include <string.h>
 
+#include "config.h"
+#include "compat.h"
 #include "gnokii-internal.h"
 #include "gnokii.h"
 #include "links/fbus.h"

@@ -33,9 +33,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
-#include "gnokii/statemachine.h"
+#include "gnokii.h"
 #include "phones/generic.h"
 #include "phones/atgen.h"
 #include "phones/atsie.h"
