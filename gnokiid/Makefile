@@ -16,9 +16,15 @@ LDLIBS += -L$(TOPDIR)/common -lgnokii
 
 OBJS = gnokiid.o
 
+ifdef NO_SHARED
+        GNOKII_LIB=libgnokii.a
+else
+        GNOKII_LIB=libgnokii.so
+endif
+
 all: gnokiid
 
-gnokiid: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/libgnokii.so
+gnokiid: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/$(GNOKII_LIB)
 	$(CC) $(LDFLAGS) $(OBJS) $(TOPDIR)/common/data/DATA.o $(LDLIBS) -o $@
 
 clean:

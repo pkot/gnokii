@@ -19,11 +19,17 @@ ifdef OWN_GETOPT
 	OBJS += $(TOPDIR)/getopt/libgetopt.a
 endif
 
+ifdef NO_SHARED
+	GNOKII_LIB=libgnokii.a
+else
+	GNOKII_LIB=libgnokii.so
+endif
+
 LDLIBS += -L$(TOPDIR)/common -lgnokii
 
 all: gnokii
 
-gnokii: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/libgnokii.so
+gnokii: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/$(GNOKII_LIB)
 	$(CC) $(LDFLAGS) $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(LDLIBS) -o $@
 
 $(TOPDIR)/getopt/libgetopt.a:

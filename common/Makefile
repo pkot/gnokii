@@ -31,7 +31,13 @@ OBJS =	cfgreader.o \
 	gsm-error.o \
 	gsm-statemachine.o
 
-all: libgnokii.so gsm-filetypes.o
+ifdef NO_SHARED
+GNOKII_LIB=libgnokii.a
+else
+GNOKII_LIB=libgnokii.so
+endif
+
+all: $(GNOKII_LIB) gsm-filetypes.o
 
 phones/PHONES.o:
 	$(MAKE) -C phones PHONES.o
@@ -48,6 +54,11 @@ gnokii-debug: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o gsm-filety
 libgnokii.so: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	$(CC) -shared -o libgnokii.so $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
+libgnokii.a: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	rm -f libgnokii.a
+	$(AR) rc libgnokii.a $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o 
+	ranlib libgnokii.a
+
 gsm-filetypes.o: gsm-filetypes.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(XPM_CFLAGS) -c gsm-filetypes.c
 
@@ -55,7 +66,7 @@ vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) *~ depend libgnokii.so gsm-filetypes.o vcal.c phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so gsm-filetypes.o vcal.c phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 install:
 	$(INSTALL) -d $(libdir)
