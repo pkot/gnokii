@@ -87,11 +87,12 @@ extern bool P6510_LinkOK;
 #define P6510_SUBSMS_SMSC_FAIL		0x32	/* Set SMS center failure */
 
 /* Clock handling message subtypes (send) */
-#define P6510_SUBCLO_GET_DATE	0x0A	/* Get date & time */
-#define P6510_SUBCLO_GET_ALARM	0x6D	/* Get alarm */
+#define P6510_SUBCLO_GET_DATE	0x0a	/* Get date & time */
+#define P6510_SUBCLO_GET_ALARM	0x1b	/* Get alarm */
 /* Clock handling message subtypes (recv) */
-#define P6510_SUBCLO_DATE_RCVD	0x0B	/* Received date & time */
-#define P6510_SUBCLO_ALARM_RCVD	0xF0	/* Received alarm */
+#define P6510_SUBCLO_DATE_RCVD	0x0b	/* Received date & time */
+#define P6510_SUBCLO_DATE_UPD_RCVD	0x0e	/* Received update on date & time */
+#define P6510_SUBCLO_ALARM_RCVD	0xff	/* Received alarm */
 /* Alarm on/off */
 #define P6510_ALARM_ENABLED	0x02	/* Alarm enabled */
 #define P6510_ALARM_DISABLED	0x01	/* Alarm disabled */
