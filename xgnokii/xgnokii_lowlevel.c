@@ -329,7 +329,7 @@ static gint compare_number(const GSM_SMSMessage * a, const GSM_SMSMessage * b)
 static void RefreshSMS(const gint number)
 {
 	GSM_Error error;
-	GSM_SMSMessage *msg, *tmp_msg;
+	GSM_API_SMS *msg, *tmp_msg;
 	SMS_Folder *fld;
 	SMS_FolderList *list;
 	GSM_RawData *raw;
@@ -366,7 +366,7 @@ static void RefreshSMS(const gint number)
 					tmp_list =
 					    g_slist_find_custom(phoneMonitor.sms.messages, msg,
 								(GCompareFunc) compare_number);
-					tmp_msg = (GSM_SMSMessage *) tmp_list->data;
+					tmp_msg = (GSM_API_SMS *) tmp_list->data;
 					phoneMonitor.sms.messages =
 					    g_slist_remove(phoneMonitor.sms.messages, tmp_msg);
 					g_free(tmp_msg);
@@ -380,14 +380,14 @@ static void RefreshSMS(const gint number)
 					msg = g_malloc(sizeof(GSM_SMSMessage));
 					list = g_malloc(sizeof(SMS_FolderList));
 					raw = g_malloc(sizeof(GSM_RawData));
-					gdat.SMSMessage = msg;
+					gdat.SMS = msg;
 					gdat.SMSFolder = NULL;
 					gdat.SMSFolderList = list;
 					gdat.RawData = raw;
 
-					gdat.SMSMessage->Number = gdat.MessagesList[j][i]->Location;
-					gdat.SMSMessage->MemoryType =(GSM_MemoryType) i + 12 ;
-					dprintf("#: %i, mt: %i\n", gdat.SMSMessage->Number, gdat.SMSMessage->MemoryType);
+					gdat.SMS->Number = gdat.MessagesList[j][i]->Location;
+					gdat.SMS->MemoryType =(GSM_MemoryType) i + 12 ;
+					dprintf("#: %i, mt: %i\n", gdat.SMS->Number, gdat.SMS->MemoryType);
 					if ((error = GetSMSnoValidate(&gdat, &statemachine)) == GE_NONE) {
 						dprintf("Found valid SMS ...\n %s\n",
 							msg->UserData[0].u.Text);
@@ -423,7 +423,7 @@ static void RefreshSMS(const gint number)
 			msg->MemoryType = GMT_SM;
 			msg->Number = i;
 
-			gdat.SMSMessage = msg;
+			gdat.SMS = msg;
 			gdat.SMSFolder = fld;
 			gdat.SMSFolderList = list;
 			gdat.RawData = raw;
@@ -786,7 +786,7 @@ static gint A_SendSMSMessage(gpointer data)
 	error = d->status = GE_UNKNOWN;
 	if (d) {
 		GSM_DataClear(&tmp_gdat);
-		tmp_gdat.SMSMessage = d->sms;
+		tmp_gdat.SMS = d->sms;
 		pthread_mutex_lock(&sendSMSMutex);
 		error = d->status = SendSMS(&tmp_gdat, &statemachine);
 		pthread_cond_signal(&sendSMSCond);
@@ -798,13 +798,13 @@ static gint A_SendSMSMessage(gpointer data)
 
 static gint A_DeleteSMSMessage(gpointer data)
 {
-	GSM_SMSMessage *sms = (GSM_SMSMessage *) data;
+	GSM_API_SMS *sms = (GSM_API_SMS *) data;
 	GSM_Error error = GE_UNKNOWN;
 	GSM_Data tmp_gdat;
 
 	if (sms) {
 		GSM_DataClear(&tmp_gdat);
-		tmp_gdat.SMSMessage = sms;
+		tmp_gdat.SMS = sms;
 		error = SM_Functions(GOP_DeleteSMS, &tmp_gdat, &statemachine);
 		g_free(sms);
 	}

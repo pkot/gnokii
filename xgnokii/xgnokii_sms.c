@@ -218,7 +218,7 @@ static inline void DestroyMsgPtrs(gpointer data)
 
 static int IsValidSMSforFolder(gpointer d, gpointer userData)
 {
-	GSM_SMSMessage *data = (GSM_SMSMessage *) d;
+	GSM_API_SMS *data = (GSM_API_SMS *) d;
 	int folder_idx;
 
 	if (phoneMonitor.supported & PM_FOLDERS) {
@@ -238,7 +238,7 @@ static int IsValidSMSforFolder(gpointer d, gpointer userData)
 
 static void InsertFolderElement(gpointer d, gpointer userData)
 {
-	GSM_SMSMessage *data = (GSM_SMSMessage *) d;
+	GSM_API_SMS *data = (GSM_API_SMS *) d;
 	MessagePointers *msgPtrs;
 	SMS_DateTime *dt = NULL;
 	gint valid;
@@ -264,7 +264,6 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 				row[0] = g_strdup(_("read report"));
 			else
 				row[0] = g_strdup(_("unread report"));
-			dt = &(data->SMSCTime);
 		} else if (data->Type == SMS_Picture) {
 			if (data->Status == SMS_Read)
 				row[0] = g_strdup(_("seen picture"));
@@ -283,9 +282,7 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 				row[0] = g_strdup(_("sent"));
 			if (data->Status == SMS_Unsent)
 				row[0] = g_strdup(_("not sent"));
-			dt = &(data->Time);
 		}
-
 
 		if (dt) {
 			if (dt->Timezone)
@@ -304,9 +301,9 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 					    01);
 		}
 
-		row[2] = GUI_GetName(data->RemoteNumber.number);
+		row[2] = GUI_GetName(data->Remote.Number);
 		if (row[2] == NULL)
-			row[2] = data->RemoteNumber.number;
+			row[2] = data->Remote.Number;
 		if (data->Type == SMS_Picture)
 			row[3] = g_strdup(_("Picture Message"));
 		else
@@ -314,9 +311,9 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		gtk_clist_append(GTK_CLIST(SMS.smsClist), row);
 		msgPtrs = (MessagePointers *) g_malloc(sizeof(MessagePointers));
 		msgPtrs->count = msgPtrs->number = 1;
-		msgPtrs->validity = data->Validity.u.Relative;
+		msgPtrs->validity = data->Validity;
 /*		msgPtrs->class = data->Class; */
-		strcpy(msgPtrs->sender, data->RemoteNumber.number);
+		strcpy(msgPtrs->sender, data->Remote.Number);
 		msgPtrs->msgPtr = (gint *) g_malloc(sizeof(gint));
 		*(msgPtrs->msgPtr) = (int) data->Number;
 		gtk_clist_set_row_data_full(GTK_CLIST(SMS.smsClist), SMS.row_i++,
@@ -413,7 +410,7 @@ inline void GUI_ShowSMS(void)
 
 static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 {
-	GSM_SMSMessage *message;
+	GSM_API_SMS *message;
 	PhoneEvent *e;
 	GList *sel;
 //  GSM_Error error;
@@ -433,7 +430,7 @@ static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 		     ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->
 		     count; count++) {
 			int number;
-			message = (GSM_SMSMessage *) g_malloc(sizeof(GSM_SMSMessage));
+			message = (GSM_API_SMS *) g_malloc(sizeof(GSM_API_SMS));
 			number =
 			    *(((MessagePointers *)
 			       gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist),
@@ -882,7 +879,7 @@ static void ShowSelectContactsDialog(void)
 }
 
 
-static gint SendSMSCore(GSM_SMSMessage * sms)
+static gint SendSMSCore(GSM_API_SMS * sms)
 {
 	GSM_Error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
@@ -898,7 +895,7 @@ static gint SendSMSCore(GSM_SMSMessage * sms)
 
 #ifdef XDEBUG
 	g_print("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
-		sms->RemoteNumber.number, sms->UserData[0].u.Text,
+		sms->Remote.Number, sms->UserData[0].u.Text,
 		GTK_TOGGLE_BUTTON(sendSMS.report)->active, sendSMS.center);
 #endif
 
@@ -907,12 +904,12 @@ static gint SendSMSCore(GSM_SMSMessage * sms)
 
 	if (error != GE_NONE) {
 		gchar *buf = g_strdup_printf(_("SMS send to %s failed\n(error=%d)"),
-					     sms->RemoteNumber.number, error);
+					     sms->Remote.Number, error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
 	} else
-		g_print("Message sent to: %s\n", sms->RemoteNumber.number);
+		g_print("Message sent to: %s\n", sms->Remote.Number);
 
 	return (error);
 }
@@ -920,7 +917,7 @@ static gint SendSMSCore(GSM_SMSMessage * sms)
 
 static void DoSendSMS(void)
 {
-	GSM_SMSMessage sms;
+	GSM_API_SMS sms;
 	AddressPar aps;
 	char udh[256];
 	GSList *r;
@@ -957,21 +954,21 @@ static void DoSendSMS(void)
 			number = addresses[i];
 
 		DefaultSubmitSMS(&sms);
-		sms.MessageCenter = xgnokiiConfig.smsSetting[sendSMS.center];
-		sms.MessageCenter.No = 0;
+		strcpy(sms.SMSC.Number, xgnokiiConfig.smsSetting[sendSMS.center].Number);
+		/*		sms.SMSC.No = 0;*/
 
 		if (GTK_TOGGLE_BUTTON(sendSMS.report)->active)
-			sms.Report = true;
+			sms.DeliveryReport = true;
 		else
-			sms.Report = false;
+			sms.DeliveryReport = false;
 		sms.Type = SMS_Submit;
 
-		strncpy(sms.RemoteNumber.number, number, MAX_BCD_STRING_LENGTH + 1);
-		sms.RemoteNumber.number[MAX_BCD_STRING_LENGTH] = '\0';
+		strncpy(sms.Remote.Number, number, MAX_BCD_STRING_LENGTH + 1);
+		sms.Remote.Number[MAX_BCD_STRING_LENGTH] = '\0';
 
 		if (l > GSM_MAX_SMS_LENGTH) {
 			if (longSMS) {
-				sms.UDH[0].Type = SMS_ConcatenatedMessages;
+				sms.UserData[0].Type = SMS_ConcatenatedMessages;
 				nr_msg = ((l - 1) / 153) + 1;
 				udh[0] = 0x05;	// UDH length
 				udh[1] = 0x00;	// concatenated messages (IEI)
@@ -989,7 +986,7 @@ static void DoSendSMS(void)
 					sms.UserData[0].u.Text[153] = '\0';
 
 					buf = g_strdup_printf(_("Sending SMS to %s (%d/%d) ...\n"),
-							      sms.RemoteNumber.number, j + 1,
+							      sms.Remote.Number, j + 1,
 							      nr_msg);
 					gtk_label_set_text(GTK_LABEL(infoDialog.text), buf);
 					gtk_widget_show_now(infoDialog.dialog);
@@ -1006,7 +1003,7 @@ static void DoSendSMS(void)
 					sleep(1);
 				}
 			} else {
-				sms.UDH_Length = 0;
+				sms.UDH.Length = 0;
 				nr_msg = ((l - 1) / 153) + 1;
 				if (nr_msg > 99)	// We have place only for 99 messages in header.
 					nr_msg = 99;
@@ -1020,7 +1017,7 @@ static void DoSendSMS(void)
 					sms.UserData[0].u.Text[160] = '\0';
 
 					buf = g_strdup_printf(_("Sending SMS to %s (%d/%d) ...\n"),
-							      sms.RemoteNumber.number, j + 1,
+							      sms.Remote.Number, j + 1,
 							      nr_msg);
 					gtk_label_set_text(GTK_LABEL(infoDialog.text), buf);
 					gtk_widget_show_now(infoDialog.dialog);
@@ -1040,12 +1037,12 @@ static void DoSendSMS(void)
 				}
 			}
 		} else {
-			sms.UDH_Length = 0;
+			sms.UDH.Length = 0;
 			strncpy(sms.UserData[0].u.Text, text, GSM_MAX_SMS_LENGTH + 1);
 			sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
 
 			buf =
-			    g_strdup_printf(_("Sending SMS to %s ...\n"), sms.RemoteNumber.number);
+			    g_strdup_printf(_("Sending SMS to %s ...\n"), sms.Remote.Number);
 			gtk_label_set_text(GTK_LABEL(infoDialog.text), buf);
 			gtk_widget_show_now(infoDialog.dialog);
 			g_free(buf);
@@ -1321,7 +1318,7 @@ static void ForwardSMS(void)
 /*
 static inline gint CompareSMSMessageLocation (gconstpointer a, gconstpointer b)
 {
-  return !(((GSM_SMSMessage *) a)->Number == ((GSM_SMSMessage *) b)->Number);
+  return !(((GSM_API_SMS *) a)->Number == ((GSM_API_SMS *) b)->Number);
 }
 */
 
@@ -1330,7 +1327,7 @@ static void ReplySMS(void)
 {
 	gchar *buf;
 //  GSList *r;
-//  GSM_SMSMessage msg;
+//  GSM_API_SMS msg;
 
 	if (GTK_CLIST(SMS.smsClist)->selection == NULL)
 		return;
