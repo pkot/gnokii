@@ -344,7 +344,7 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 	/* Initialise the code for the GSM interface. */
 	error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler, &State);
 	if (error != GE_NONE) {
-		fprintf(stderr, _("GSM/FBUS init failed! Quitting.\n"));
+		fprintf(stderr, _("Telephone interface init failed! Quitting.\n"));
 		if (lockfile) unlock_device(lockfile);
 		exit(2);
 	}
@@ -1433,8 +1433,7 @@ static int sendlogo(int argc, char *argv[])
 	/* Send the message. */
 	data.SMSMessage = &SMS;
 
-	/* Send the message. */
-	error = SM_Functions(GOP_SendSMS, &data, &State);
+	SendSMS(&data, &State);
 
 	if (error == GE_SMSSENDOK)
 		fprintf(stdout, _("Send succeeded!\n"));
