@@ -270,22 +270,21 @@ int at_encode(int charset, char *dst, char *src, int len)
 void at_decode(int charset, char *dst, char *src, int len)
 {
 	switch (charset) {
+	/* char_*_decode() functions null terminate the strings */
 	case AT_CHAR_GSM:
 		char_ascii_decode(dst, src, len);
 		break;
 	case AT_CHAR_HEXGSM:
 		char_hex_decode(dst, src, len);
-		len *= 2;
 		break;
 	case AT_CHAR_UCS2:
 		char_ucs2_decode(dst, src, len);
-		len *= 4;
 		break;
 	default:
 		memcpy(dst, src, len);
+		dst[len] = 0;
 		break;
 	}
-	dst[len] = '\0';
 }
 
 at_recv_function_type at_insert_recv_function(int type, at_recv_function_type func, struct gn_statemachine *state)

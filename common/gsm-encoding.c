@@ -282,6 +282,7 @@ skip:
 	return (out_num - output);
 }
 
+/* null terminates the string */
 void char_ascii_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i, j;
@@ -311,6 +312,7 @@ unsigned int char_ascii_encode(unsigned char* dest, const unsigned char* src, un
 	return i;
 }
 
+/* null terminates the string */
 void char_hex_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
@@ -370,6 +372,7 @@ int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs)
 	}
 }
 
+/* null terminates the string */
 void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i_len = 0, o_len = 0, length;
@@ -420,6 +423,7 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
+/* null terminates the string */
 unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i, length = 0, pos = 0;

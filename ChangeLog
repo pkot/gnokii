@@ -67,6 +67,8 @@
     o use all three parameters to AT+CMPS command to set message
       store of all operations kind (we used just the finst one so
       far)                                           (David Vrabel)
+    o fix an overflow with AT_CHAR_UCS2 charset within the
+      phonebook                                              (Jens)
  * smsd updates
     o make configurable where to look for the new messages
                                                      (David Vrabel)
