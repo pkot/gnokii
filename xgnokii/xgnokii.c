@@ -126,7 +126,7 @@ char folders[MAX_SMS_FOLDERS][MAX_SMS_FOLDER_NAME_LENGTH];
 gint foldercount = 0, lastfoldercount = 0;
 
 /* Local variables */
-static char *DefaultXGnokiiDir = XGNOKIIDIR "/share";
+static char *DefaultXGnokiiDir = XGNOKIIDIR "/share/xgnokii";
 static bool SMSSettingsInitialized = FALSE;
 static bool CallersGroupsInitialized = FALSE;
 static gint hiddenCallDialog;
