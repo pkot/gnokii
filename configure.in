@@ -26,7 +26,7 @@ AC_PROG_INSTALL
 
 dnl ======================== Default setting
 ALL_LINGUAS="cs de et fi nl sk pl it sl"
-AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT
 
 dnl ======================== Check for include/config.h.in
 AC_MSG_CHECKING([for include/config.h.in])
@@ -368,7 +368,7 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h)
 AC_CHECK_HEADERS(string.h strings.h ctype.h stdlib.h stdarg.h)
-AC_CHECK_HEADERS(stddef.h sys/socket.h sys/modem.h sys/filio.h)
+AC_CHECK_HEADERS(stddef.h sys/socket.h sys/modem.h)
 
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -390,7 +390,7 @@ if test $ac_cv_c_long_double = yes; then
 	AC_DEFINE(HAVE_LONG_DOUBLE, 1, [Define if your compiler supports the \`long double' type.])
 fi
 
-
+AC_CHECK_TYPES(__ptr_t, AC_DEFINE(HAVE_PTR_T))
 
 dnl ======================== Checks for library functions.
 AC_PROG_GCC_TRADITIONAL

@@ -35,11 +35,9 @@
 
 @TOP@
 
-
 #undef VERSION
 #undef XVERSION
 #undef XGNOKIIDIR
-
 
 /***** Features *****/
 
@@ -67,6 +65,9 @@
 
 
 /**** Platform specific *****/
+
+/* Define if you have __ptr_t type defined. It misses eg on FreeBSD. */
+#undef HAVE_PTR_T
 
 /* Define if you have timerisset, timerclear, timercmp, timeradd and timersub */
 #undef HAVE_TIMEOPS

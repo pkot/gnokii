@@ -42,25 +42,25 @@
 #include "misc.h"
 
 
-API void (*GSM_ELogHandler)(const char *fmt, va_list ap) = NULL;
+API void (*gn_elog_handler)(const char *fmt, va_list ap) = NULL;
 
-API int GetLine(FILE *File, char *Line, int count)
+API int gn_get_line(FILE *file, char *line, int count)
 {
 	char *ptr;
 
-	if (fgets(Line, count, File)) {
-		ptr = Line + strlen(Line) - 1;
+	if (fgets(line, count, file)) {
+		ptr = line + strlen(line) - 1;
 
-		while ((*ptr == '\n' || *ptr == '\r') && ptr >= Line)
+		while ((*ptr == '\n' || *ptr == '\r') && ptr >= line)
 			*ptr-- = '\0';
 
-		return strlen(Line);
+		return strlen(line);
 	} else {
 		return 0;
 	}
 }
 
-static PhoneModel models[] = {
+static gn_phone_model models[] = {
 	{NULL,    "", 0 },
 	{"2711",  "?????", PM_SMS },		/* Dancall */
 	{"2731",  "?????", PM_SMS },
@@ -114,7 +114,7 @@ static PhoneModel models[] = {
 	{NULL,    NULL, 0 }
 };
 
-PhoneModel *GetPhoneModel (const char *num)
+gn_phone_model *gn_get_phone_model(const char *num)
 {
 	register int i = 0;
 
@@ -131,19 +131,19 @@ PhoneModel *GetPhoneModel (const char *num)
 	return (&models[0]);
 }
 
-char *GetModel (const char *num)
+char *gn_get_model(const char *num)
 {
-	return (GetPhoneModel(num)->model);
+	return (gn_get_phone_model(num)->model);
 }
 
-void GSM_WriteErrorLog(const char *fmt, ...)
+void gn_elog_write(const char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
 
-	if (GSM_ELogHandler) {
-		GSM_ELogHandler(fmt, ap);
+	if (gn_elog_handler) {
+		gn_elog_handler(fmt, ap);
 	} else {
 #ifndef	DEBUG
 		vfprintf(stderr, fmt, ap);
@@ -158,7 +158,7 @@ void GSM_WriteErrorLog(const char *fmt, ...)
 #define lock_path "/var/lock/LCK.."
 
 /* Lock the device. Return allocated string with a lock name */
-char *lock_device(const char* port)
+char *gn_lock_device(const char* port)
 {
 #ifndef WIN32
 	char *lock_file = NULL;
@@ -249,7 +249,7 @@ failed:
 }
 
 /* Removes lock and frees memory */
-bool unlock_device(char *lock_file)
+bool gn_unlock_device(char *lock_file)
 {
 #ifndef WIN32
 	int err;

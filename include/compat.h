@@ -28,8 +28,8 @@
 
 */
 
-#ifndef	__gnokii_compat_h
-#define	__gnokii_compat_h
+#ifndef	_gnokii_compat_h
+#define	_gnokii_compat_h
 
 #include "config.h"
 
@@ -164,6 +164,41 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 #    define sleep(x) Sleep((x) * 1000)
 #    define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #  endif /* HAVE_UNISTD_H */
+#endif
+
+#ifndef HAVE_PTR_T
+	typedef void * __ptr_t;
+#endif
+
+/* Get rid of long defines. Use #if __unices__ */
+#define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__)
+#if __unices__
+#  include <strings.h>
+#  include <sys/file.h>
+#endif
+
+/* This one is for NLS. */
+#ifdef ENABLE_NLS
+#  include <libintl.h>
+#  define _(x) gettext(x)
+#  define N_(x) gettext_noop(x)
+#else
+#  define _(x) (x)
+#  define N_(x) (x)
+#endif /* ENABLE_NLS */
+
+/* Definitions for u8, u16 and u32, borrowed from
+   /usr/src/linux/include/asm-i386/types.h */
+#ifndef u8
+	typedef unsigned char u8;
+#endif
+
+#ifndef u16
+	typedef unsigned short u16;
+#endif
+
+#ifndef u32
+	typedef unsigned int u32;
 #endif
 
 #endif

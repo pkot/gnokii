@@ -28,8 +28,8 @@
 
 */
 
-#ifndef __misc_h
-#define __misc_h
+#ifndef _gnokii_misc_h
+#define _gnokii_misc_h
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -73,15 +73,18 @@
 #define GNOKII_MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #define GNOKII_MIN(a, b)  (((a) < (b)) ? (a) : (b))
 
+extern API void (*gn_elog_handler)(const char *fmt, va_list ap);
+extern API void gn_elog_write(const char *fmt, ...);
+
 /* A define to make debug printfs neat */
 #ifdef __GNUC__
-#  /* Use it for error reporting */
-#  define dump(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0)
 #  ifndef DEBUG
 #    define dprintf(a...) do { } while (0)
 #  else
 #    define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0)
 #  endif /* DEBUG */
+#  /* Use it for error reporting */
+#  define dump(a...) do { dprintf(a); gn_elog_write(a); } while (0)
 #else
 #  ifndef DEBUG
 #    define dump while (0)
@@ -92,68 +95,13 @@
 #  endif /* DEBUG */
 #endif /* __GNUC__ */
 
-extern API void (*GSM_ELogHandler)(const char *fmt, va_list ap);
-extern void GSM_WriteErrorLog(const char *fmt, ...);
-
 /* Use gsprintf instead of sprintf and sprintf */
 #define gsprintf		snprintf
 #define gvsprintf		vsnprintf
 #define gasprintf		asprintf
 #define gvasprintf		vasprintf
 
-/* Get rid of long defines. Use #if __unices__ */
-#define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__)
-#if __unices__
-#  include <strings.h>
-#  include <sys/file.h>
-#endif
-
-/* This one is for NLS. */
-#ifdef ENABLE_NLS
-#  include <libintl.h>
-#  define _(x) gettext(x)
-#  define N_(x) gettext_noop(x)
-#else
-#  define _(x) (x)
-#  define N_(x) (x)
-#endif /* ENABLE_NLS */
-
-/* Definitions for u8, u16, u32 and u64, borrowed from
-   /usr/src/linux/include/asm-i38/types.h */
-
-#ifndef u8
-	typedef unsigned char u8;
-#endif
-
-#ifndef u16
-	typedef unsigned short u16;
-#endif
-
-#ifndef u32
-	typedef unsigned int u32;
-#endif
-
-#ifndef s32
-	typedef int s32;
-#endif
-
-#if defined(__GNUC__) && !defined(__STRICT_ANSI__)
-#  ifndef u64
-	typedef unsigned long long u64;
-#  endif
-
-#  ifndef s64
-	typedef signed long long s64;
-#  endif
-#endif
-
-/* This one is for FreeBSD and similar systems without __ptr_t_ */
-/* FIXME: autoconf should take care of this. */
-#ifndef __ptr_t
-	typedef void * __ptr_t;
-#endif /* __ptr_t */
-
-API int GetLine(FILE *File, char *Line, int count);
+API int gn_get_line(FILE *file, char *line, int count);
 
 /* This is for the bitmaps mostly, but may be useful also for the other
  * things. Counts how many octets we need to cover the given ammount of
@@ -166,7 +114,7 @@ typedef struct {
 	char *model;
 	char *number;
 	int flags;
-} PhoneModel;
+} gn_phone_model;
 
 #define PM_CALLERGROUP		0x0001
 #define PM_NETMONITOR		0x0002
@@ -180,10 +128,10 @@ typedef struct {
 #define PM_AUTHENTICATION	0x0200
 #define PM_FOLDERS		0x0400
 
-extern char *GetModel (const char *);
-extern PhoneModel *GetPhoneModel (const char *);
+extern char *gn_get_model(const char *);
+extern gn_phone_model *gn_get_phone_model(const char *);
 
-API char *lock_device(const char*);
-API bool unlock_device(char *);
+API char *gn_lock_device(const char *);
+API bool gn_unlock_device(char *);
 
-#endif /* __misc_h */
+#endif /* _gnokii_misc_h */

@@ -7,6 +7,9 @@
        + new entry on how to test the new model          (Pawel Kot)
     o be more up-to-date with gnokii-hackers howto; still needs
       updates and verification                           (Pawel Kot)
+ * Compability changes:
+    o move some parts from misc.{ch} to compat.{ch}      (Pawel Kot)
+    o detect ptr_t                                       (Pawel Kot)
 
 0.5.0pre2
 =========
