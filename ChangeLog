@@ -4,6 +4,8 @@
     o using strchr() for better portability         (BORBELY Zoltan)
     o enable tekram device on win32 platform        (BORBELY Zoltan)
     o ease a bit compilation procedure on MacOS X   (Ruotger Skupin)
+    o cz and sk operator names changes             (Vitezslav Samel,
+                                                    Ernest Beinrohr)
  * build system updated
     o avoid problems with recursive loop when installing
       locales in xgnokii                          (Malte Schünemann)
@@ -16,7 +18,7 @@
 0.5.0pre6
 =========
  * Misc updates, cleanups and fixes
-    o updated Germany operator names                (Ruotger.Skupin)
+    o updated German operator names                 (Ruotger Skupin)
     o using increasing instead of constant timeout values
       in message retransmission                     (BORBELY Zoltan)
     o define gn_elog_handler as NULL in xgnokii, gnokiid and smsd
