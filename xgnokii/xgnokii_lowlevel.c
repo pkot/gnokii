@@ -510,6 +510,8 @@ static gint A_GetMemoryLocationAll(gpointer data)
 				entry.Name[0] = 0;
 				entry.Number[0] = 0;
 				for (j = mla->min; j <= mla->max; j++) error = mla->InsertEntry(&entry);
+				pthread_cond_signal(&memoryCond);
+				pthread_mutex_unlock(&memoryMutex);
 				return GE_NONE;
 			}
 		}

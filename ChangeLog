@@ -1,3 +1,8 @@
+0.4.0pre21 (not released yet)
+==========
+ * xgnokii fixes:
+    o lockup during the phonebook reading fixed      (BORBELY Zoltan)
+
 0.4.0pre20
 ==========
  * SMSes from AT phones fixed                          (Pavel Machek)
