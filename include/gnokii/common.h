@@ -265,6 +265,7 @@ typedef enum {
 	GN_CALNOTE_DAILY   = 24,
 	GN_CALNOTE_WEEKLY  = 168,
 	GN_CALNOTE_2WEEKLY = 336,
+	GN_CALNOTE_MONTHLY = 65534,
 	GN_CALNOTE_YEARLY  = 65535
 } gn_calnote_recurrence;
 
