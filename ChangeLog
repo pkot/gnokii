@@ -11,6 +11,8 @@
     o PlayTone implemented                         (BORBELY Zoltan)
     o GetLocksInfo implemented                     (BORBELY Zoltan)
     o GetProfile implemented                       (BORBELY Zoltan)
+ * 6510 series updates
+    o Nokia 6100 support added                     (Tobias Gebhard)
  * libgnokii changes
     o Tomi Ollila's readmidi.c added               (BORBELY Zoltan)
     o Nokia raw ringtone conversion functions      (BORBELY Zoltan)
