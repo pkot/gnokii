@@ -796,7 +796,7 @@ bool	gn_atem_command_plusg(char **buf)
 	if (strncasecmp(*buf, "MI", 3) == 0) {
 		buf[0] += 2;
 
-		gn_atem_string_out(_("\n\rHugh Blemings, Pavel Janík ml. and others..."));
+		gn_atem_string_out(_("\n\rHugh Blemings, Pavel Janik ml. and others..."));
 		return (false);
 	}
 

@@ -8,6 +8,8 @@
     o add make install target for includes subdir        (Pawel Kot)
     o move win32/gnokii_v6 to win32/MSVC6                (Pawel Kot)
     o add missing headers in include/gnokii/*            (Pawel Kot)
+    o s/Janík/Janik/ (sorry Pavel), s/Pawe³/Pawel/ in translatable
+      strings to avoid problems with newer xgettext      (Pawel Kot)
  * Docs updates
     o add dancall.txt                               (Ladislav Michl)
  * SMSD updates

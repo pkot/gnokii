@@ -57,7 +57,7 @@ static void short_version()
 static void version()
 {
 	fprintf(stderr, _("Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999\n"
-			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999\n"
+			  "Copyright (C) Pavel Janik ml. <Pavel.Janik@suse.cz>, 1999\n"
 			  "Built %s %s\n"),
 			  __TIME__, __DATE__);
 }
