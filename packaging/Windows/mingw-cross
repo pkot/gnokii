@@ -10,6 +10,7 @@ BUILD_ROOT=/tmp/gnokii-$VERSION-win32-build
 ZIPFILE=`pwd`/gnokii-$VERSION-win32.zip
 
 rm -r $BUILD_ROOT
+mkdir $BUILD_ROOT
 win32/mingw-cross/mingw-cross.sh
 
 make DESTDIR=$BUILD_ROOT install
