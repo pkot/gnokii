@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.23  2001-11-19 13:46:42  pkot
+  Revision 1.24  2001-11-19 15:53:16  pkot
+  Typos
+
+  Revision 1.23  2001/11/19 13:46:42  pkot
   reading unread SMS in 6210 from Inbox. Folder updates (Markus Plail)
 
   Revision 1.22  2001/11/17 20:18:32  pkot
@@ -696,7 +699,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
         /* getfolders */
         case 0x7B:
                 i = 5;
-		memset(data->SMSFolderList, 0, sizeof(GSM_SMSFolderList));
+		memset(data->SMSFolderList, 0, sizeof(SMSFolderList));
 		dprintf("Message: %d SMS Folders received:\n", message[4]);
 
 		strcpy(data->SMSFolderList->Folder[1].Name, "               ");
@@ -727,7 +730,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
         /* getfolderstatus */
         case 0x6C:
-		memset(data->SMSFolder, 0, sizeof(GSM_SMSFolder));
+		memset(data->SMSFolder, 0, sizeof(SMSFolder));
                 dprintf("Message: SMS Folder status received: \n" );
 		data->SMSFolder->FolderID = data->SMSMessage->MemoryType;
                 data->SMSFolder->number = (message[5] * 256) + message[5];
