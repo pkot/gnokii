@@ -46,6 +46,8 @@ static GSM_Error ReplyGetPrompt(int messagetype, unsigned char *buffer, int leng
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state);
@@ -63,6 +65,7 @@ static GSM_Error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char *cmd);
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 
 typedef struct {
 	int gop;
@@ -92,7 +95,8 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_SendSMS, AT_SendSMS, ReplySendSMS },
 	{ GOP_SaveSMS, AT_SaveSMS, ReplySendSMS },
 	{ GOP_GetSMS, AT_GetSMS, ReplyGetSMS },
-	{ GOPAT_GetCharset, AT_GetCharset, ReplyGetCharset }
+	{ GOPAT_GetCharset, AT_GetCharset, ReplyGetCharset },
+	{ GOP_GetSMSCenter, AT_GetSMSCenter, ReplyGetSMSCenter }
 };
 
 
@@ -635,7 +639,15 @@ static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, GOP_GetSMS);
 }
 
-
+static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[16];
+	sprintf(req, "AT+CSCA?\r");
+ 	if (SM_SendMessage(state, 9, GOP_GetSMSCenter, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_GetSMSCenter);
+}
+			
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (op == GOP_Init)
@@ -726,6 +738,40 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 	return GE_NONE;
 }
 
+static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	AT_LineBuffer buf;
+	char *pos;
+
+	buf.line1 = buffer;
+	buf.length= length;
+
+	splitlines(&buf);
+	if (buf.line1 == NULL)
+		return GE_UNKNOWN; /* FIXME */
+	
+	if (data->MessageCenter) {
+		if (strstr(buf.line2,"+CSCA")) {
+			pos = strchr(buf.line2 + 8, '\"');
+			if (pos) {
+				*pos = '\0';
+				data->MessageCenter->No = 1;
+				strncpy(data->MessageCenter->Number, buf.line2 + 8, GSM_MAX_SMS_CENTER_LENGTH);
+		                data->MessageCenter->Number[GSM_MAX_SMS_CENTER_LENGTH-1] = '\0';
+				data->MessageCenter->Type = atoi(++pos);
+			} else {
+				data->MessageCenter->No = 0;
+				strncpy(data->MessageCenter->Name, "SMS Center", GSM_MAX_SMS_CENTER_NAME_LENGTH);
+				data->MessageCenter->Type = SMS_Unknown;
+			}
+			data->MessageCenter->DefaultName = 1; /* use default name */
+			data->MessageCenter->Format = SMS_FText; /* whatever */
+			data->MessageCenter->Validity = SMS_VMax;
+			strncpy(data->MessageCenter->Recipient, "", GSM_MAX_SMS_CENTER_LENGTH) ;
+		}
+	}
+	return GE_NONE;
+}
 
 static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
