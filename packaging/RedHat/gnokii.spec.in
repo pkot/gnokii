@@ -34,13 +34,6 @@ make
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-mkdir -p ${RPM_BUILD_ROOT}/usr/bin \
-         ${RPM_BUILD_ROOT}/usr/sbin \
-         ${RPM_BUILD_ROOT}/etc \
-         ${RPM_BUILD_ROOT}/usr/lib/gnokii \
-         ${RPM_BUILD_ROOT}/usr/lib/xgnokii/{help,xpm}
-
-
 make prefix=${RPM_BUILD_ROOT}/usr install
 install -m 444 Docs/sample/sample.gnokiirc ${RPM_BUILD_ROOT}/etc/gnokiirc
 
@@ -69,6 +62,9 @@ rm -rf ${RPM_BUILD_ROOT}
 /usr/lib/xgnokii/*
 
 %changelog
+* Mon Mar 20 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- mkdir of directories in install removed
+
 * Mon Mar 20 2000 Jan Derfinak <ja@mail.upjs.sk>
 - split package into gnokii and xgnokii
 - added configure
