@@ -31,8 +31,9 @@
                                                           (Pawel Kot)
     o terminate decoded unicode string with \0       (Bertrik Sikken)
  * AT series updates:
-    o Bosch support. Tested with Bosch 909           (Ladislav Michl)
+    o Bosch support. Tested with Bosch 909 Dual S    (Ladislav Michl)
     o implement SetCharset                           (Ladislav Michl)
+    o implement WritePhonebook                       (Ladislav Michl)
  * cbus updates/clanups                              (Ladislav Michl)
 
 0.5.0pre1
