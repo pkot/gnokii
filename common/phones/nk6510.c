@@ -469,7 +469,7 @@ static gn_error NK6510_Identify(gn_data *data, struct gn_statemachine *state)
 	sm_error_get(0x1b, state);
 
 	/* Check that we are back at state Initialised */
-	if (gn_sm_loop(0i, state) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
+	if (gn_sm_loop(0, state) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
 	return GN_ERR_NONE;
 }
 
