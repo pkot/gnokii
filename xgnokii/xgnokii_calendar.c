@@ -39,7 +39,7 @@
 #include "xpm/Send.xpm"
 #include "xpm/Open.xpm"
 #include "xpm/Save.xpm"
-#include "xpm/Edit.xpm"
+/* #include "xpm/Edit.xpm" */
 #include "xpm/Delete.xpm"
 #include "xpm/SendSMS.xpm"
 #include "xpm/NewBD.xpm"
