@@ -13,7 +13,10 @@
   Header file for miscellaneous defines, typedefs etc.
 
   $Log$
-  Revision 1.25  2001-07-03 15:27:14  pkot
+  Revision 1.26  2001-11-14 10:46:12  pkot
+  Small cleanup with __unices__
+
+  Revision 1.25  2001/07/03 15:27:14  pkot
   AT commands for SMS handling support (Tamas Bondar)
   Small at-emulator code cleanup (me)
 
@@ -26,7 +29,7 @@
 #ifndef __misc_h
 #define __misc_h    
 
-#include <config.h>
+#include "config.h"
 
 /* Some general defines. */
 
@@ -58,6 +61,10 @@
 
 /* Get rid of long defines. Use #if __unices__ */
 #define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#if __unices__
+# include <strings.h>
+# include <sys/file.h>
+#endif
 
 /* This one is for NLS. */
 #ifdef USE_NLS

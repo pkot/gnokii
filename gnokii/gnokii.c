@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.144  2001-11-08 16:34:19  pkot
+  Revision 1.145  2001-11-14 10:46:12  pkot
+  Small cleanup with __unices__
+
+  Revision 1.144  2001/11/08 16:34:19  pkot
   Updates to work with new libsms
 
   Revision 1.143  2001/09/14 13:30:07  pkot
@@ -154,7 +157,6 @@
   
 */
 
-#include "config.h"
 #include "misc.h"
 
 #include <stdio.h>

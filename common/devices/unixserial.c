@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.9  2001-09-14 12:15:28  pkot
+  Revision 1.10  2001-11-14 10:46:12  pkot
+  Small cleanup with __unices__
+
+  Revision 1.9  2001/09/14 12:15:28  pkot
   Cleanups from 0.3.3 (part1)
 
   Revision 1.8  2001/08/20 23:27:37  pkot
@@ -36,7 +39,6 @@
   Revision 1.2  2001/02/21 19:57:05  chris
   More fiddling with the directory layout
 
-
 */
 
 #include "misc.h"
@@ -49,10 +51,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <string.h>
-
-#if __unices__
-#  include <sys/file.h>
-#endif
 
 #include <termios.h>
 #include "devices/unixserial.h"

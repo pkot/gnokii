@@ -15,7 +15,10 @@
   Modified from code by Tim Potter.
 
   $Log$
-  Revision 1.15  2001-06-10 11:24:57  machek
+  Revision 1.16  2001-11-14 10:46:12  pkot
+  Small cleanup with __unices__
+
+  Revision 1.15  2001/06/10 11:24:57  machek
   Kill "slash star" inside comment.
 
   Revision 1.14  2001/03/19 23:43:45  pkot
@@ -43,9 +46,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if __unices__
-#  include <strings.h>
-#endif
 #include <ctype.h>
 #include <errno.h>
 
