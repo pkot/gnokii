@@ -504,9 +504,7 @@ static gn_error Initialise(struct gn_statemachine *state)
 		state->config.connection_type = GN_CT_DAU9P;
 	case GN_CT_Infrared:
 	case GN_CT_DAU9P:
-#ifndef WIN32
 	case GN_CT_Tekram:
-#endif
 		err = fbus_initialise(0, state);
 		break;
 	case GN_CT_Irda:
@@ -2824,7 +2822,7 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		case 0x01:
 			if (data->revision) {
 				aux = message + 7;
-				aux2 = index(aux, 0x0a);
+				aux2 = strchr(aux, 0x0a);
 				if (data->revision[0]) {
 					dprintf("Niepusty\n");
 					strcat(data->revision, ", SW ");
@@ -2836,12 +2834,12 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 				}
 				dprintf("Received %s\n", data->revision);
 			}
-			aux = index(message + 5, 0x0a);
+			aux = strchr(message + 5, 0x0a);
 			aux++;
-			aux = index(aux, 0x0a);
+			aux = strchr(aux, 0x0a);
 			aux++;
 			if (data->model) {
-				aux2 = index(aux, 0x0a);
+				aux2 = strchr(aux, 0x0a);
 				*aux2 = 0;
 				snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", aux);
 				dprintf("Received model %s\n", data->model);

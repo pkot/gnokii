@@ -59,11 +59,7 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 
 #define FBUSINST(s) ((fbus_link *)((s)->link.link_instance))
 
-#ifndef WIN32
-#  define	IR_MODE(s) ((s)->config.connection_type == GN_CT_Infrared || (s)->config.connection_type == GN_CT_Tekram)
-#else
-#  define	IR_MODE(s) ((s)->config.connection_type == GN_CT_Infrared)
-#endif
+#define	IR_MODE(s) ((s)->config.connection_type == GN_CT_Infrared || (s)->config.connection_type == GN_CT_Tekram)
 
 
 /*--------------------------------------------*/
@@ -551,9 +547,7 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 
 	switch (state->config.connection_type) {
 	case GN_CT_Infrared:
-#ifndef WIN32
 	case GN_CT_Tekram:
-#endif
 		connection = fbus_ir_open(state);
 		break;
 	case GN_CT_Serial:

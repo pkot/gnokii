@@ -64,10 +64,10 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 		state->device.fd = irda_open(state);
 		break;
 #endif
-#ifndef WIN32
 	case GN_CT_Tekram:
 		state->device.fd = tekram_open(file, state);
 		break;
+#ifndef WIN32
 	case GN_CT_TCP:
 		state->device.fd = tcp_opendevice(file, with_async, state);
 		break;
@@ -93,10 +93,10 @@ void device_close(struct gn_statemachine *state)
 		irda_close(state->device.fd, state);
 		break;
 #endif
-#ifndef WIN32
 	case GN_CT_Tekram:
 		tekram_close(state->device.fd, state);
 		break;
+#ifndef WIN32
 	case GN_CT_TCP:
 		tcp_close(state->device.fd, state);
 		break;
@@ -129,8 +129,9 @@ void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 	case GN_CT_Irda:
 		break;
 #endif
-#ifndef WIN32
 	case GN_CT_Tekram:
+		break;
+#ifndef WIN32
 	case GN_CT_TCP:
 		break;
 #endif
@@ -147,13 +148,15 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		serial_changespeed(state->device.fd, speed, state);
+		break;
 #ifdef HAVE_IRDA
 	case GN_CT_Irda:
 		break;
 #endif
-#ifndef WIN32
 	case GN_CT_Tekram:
 		tekram_changespeed(state->device.fd, speed, state);
+		break;
+#ifndef WIN32
 	case GN_CT_TCP:
 		break;
 #endif
@@ -172,9 +175,9 @@ size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 	case GN_CT_Irda:
 		return irda_read(state->device.fd, buf, nbytes, state);
 #endif
-#ifndef WIN32
 	case GN_CT_Tekram:
 		return tekram_read(state->device.fd, buf, nbytes, state);
+#ifndef WIN32
 	case GN_CT_TCP:
 		return tcp_read(state->device.fd, buf, nbytes, state);
 #endif
@@ -194,9 +197,9 @@ size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 	case GN_CT_Irda:
 		return irda_write(state->device.fd, buf, n, state);
 #endif
-#ifndef WIN32
 	case GN_CT_Tekram:
 		return tekram_write(state->device.fd, buf, n, state);
+#ifndef WIN32
 	case GN_CT_TCP:
 		return tcp_write(state->device.fd, buf, n, state);
 #endif
@@ -216,9 +219,9 @@ int device_select(struct timeval *timeout, struct gn_statemachine *state)
 	case GN_CT_Irda:
 		return irda_select(state->device.fd, timeout, state);
 #endif
-#ifndef WIN32
 	case GN_CT_Tekram:
 		return tekram_select(state->device.fd, timeout, state);
+#ifndef WIN32
 	case GN_CT_TCP:
 		return tcp_select(state->device.fd, timeout, state);
 #endif

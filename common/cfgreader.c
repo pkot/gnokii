@@ -304,9 +304,9 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 #ifndef WIN32
 		else if (!strcasecmp(val, "tcp"))
 			cfg->connection_type = GN_CT_TCP;
+#endif
 		else if (!strcasecmp(val, "tekram"))
 			cfg->connection_type = GN_CT_Tekram;
-#endif
 		else {
 			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "connection", val);
 			return false;
