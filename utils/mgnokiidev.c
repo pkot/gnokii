@@ -112,7 +112,7 @@ static int GetMasterPty(char **name)
 	master = open("/dev/ptmx", O_RDWR | O_NOCTTY | O_NONBLOCK);
 	if (master >= 0) {
 		if (!grantpt(master) || !unlockpt(master)) {
-			*name = ptsname(master);
+			*name = strdup(ptsname(master));
 		} else {
 			return(-1);
 		}
@@ -131,18 +131,11 @@ static int GetMasterPty(char **name)
 			(*name)[8] = ptyp8[i];
 			(*name)[9] = ptyp9[j];
 			/* open the master pty */
-			if ((master = open(*name, O_RDWR | O_NOCTTY | O_NONBLOCK )) < 0) {
-				if (errno == ENOENT) {
-					/* we are out of pty devices */
-					free(*name);
-					return (master);
-				}
-			}
+			master = open(*name, O_RDWR | O_NOCTTY | O_NONBLOCK );
 		}
 	}
 	if ((master < 0) && (i == 16) && (j == 16)) {
 		/* must have tried every pty unsuccessfully */
-		free(*name);
 		return (master);
 	}
 
@@ -177,6 +170,7 @@ int main(int argc, char **argv)
 
 	if (PtyRDFD < 0 || name == NULL) {
 		fprintf (stderr, _("Couldn't open pty!\n"));
+		perror("mgnokiidev - GetMasterPty");
 		goto error;
 	}
 
@@ -187,13 +181,13 @@ int main(int argc, char **argv)
 
 	/* Change group of slave pty to group of mgnokiidev */
 	if (chown(name, -1, getgid()) < 0) {
-		perror("mgnokiidev - chown: ");
+		perror("mgnokiidev - chown");
 		goto error;
 	}
 
 	/* Change permissions to rw by group */
 	if (chmod(name, S_IRGRP | S_IWGRP | S_IRUSR | S_IWUSR) < 0) {
-		perror("mgnokiidev - chmod: ");
+		perror("mgnokiidev - chmod");
 		goto error;
 	}
 
@@ -208,12 +202,13 @@ int main(int argc, char **argv)
 
 	/* Create symlink */
 	if (symlink(name, "/dev/gnokii") < 0) {
-		perror("mgnokiidev - symlink: ");
+		perror("mgnokiidev - symlink");
 		goto error;
 	}
 
 	/* Now pass the descriptor to the caller */
 	if ((n = gwrite(atoi(argv[1]), "", 1, PtyRDFD)) < 0) {
+		perror("mgnokiidev - gwrite");
 		goto error;
 	}
 
