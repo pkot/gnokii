@@ -807,7 +807,7 @@ inline void GUI_HideAbout(void)
 }
 
 
-static void MainExit(void)
+void MainExit(void)
 {
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 

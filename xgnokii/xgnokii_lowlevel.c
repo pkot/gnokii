@@ -230,7 +230,7 @@ static gn_error fbusinit(bool enable_monitoring)
 		lockfile = gn_device_lock(xgnokiiConfig.port);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
-			exit(1);
+			MainExit();
 		}
 	}
 
@@ -1229,7 +1229,7 @@ gint(*DoAction[])(gpointer) = {
 
 void *GUI_Connect(void *a)
 {
-/* Define required unit types for RF and Battery level meters. */
+	/* Define required unit types for RF and Battery level meters. */
 	gn_rf_unit rf_units = GN_RF_Percentage;
 	gn_battery_unit batt_units = GN_BU_Percentage;
 	gn_calnote_alarm Alarm;
@@ -1251,8 +1251,7 @@ void *GUI_Connect(void *a)
 #ifdef XDEBUG
 		g_print("Initialization failed...\n");
 #endif
-		/* FIXME: Add some popup */
-		exit(1);
+		MainExit();
 	}
 
 #ifdef XDEBUG

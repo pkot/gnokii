@@ -5,6 +5,8 @@
     o caller group name and ringtone will be shown (BORBELY Zoltan)
  * smsd updates
     o update README with some module clarification      (Pawel Kot)
+ * xgnokii updates
+    o don't segfault on incorrect initialization        (Pawel Kot)
 
 0.5.8
 =====

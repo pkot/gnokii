@@ -80,5 +80,6 @@ extern gint max_phonebook_sim_number_length;
 extern void GUI_InitCallerGroupsInf(void);
 extern void GUI_InitSMSSettings(void);
 extern void GUI_ShowAbout(void);
+extern void MainExit();
 
 #endif				/* XGNOKII_H */
