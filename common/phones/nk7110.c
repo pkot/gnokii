@@ -785,16 +785,16 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		data->RawSMS->PID              = 0;
 		data->RawSMS->ReportStatus     = 0;
 
-		memcpy(data->RawSMS->SMSCTime,      message + 37, 7);
-		memcpy(data->RawSMS->Time,          message + 37, 0);
+		memcpy(data->RawSMS->SMSCTime,      message + getdata(T, 37, 38, 36, 0), 7);
+		if (T == SMS_Delivery_Report) memcpy(data->RawSMS->Time, message + 42, 7);
 		memcpy(data->RawSMS->MessageCenter, message + 9,  12);
-		memcpy(data->RawSMS->RemoteNumber,  message + 25, 12);
+		memcpy(data->RawSMS->RemoteNumber,  message + getdata(T, 25, 26, 24, 22), 12);
 
 		data->RawSMS->DCS              = message[23];
-		data->RawSMS->Length           = message[getdata(T, 24, 0, 0, 45)];
+		data->RawSMS->Length           = message[getdata(T, 24, 25, 0, 45)];
 		if (T == SMS_Picture) data->RawSMS->Length |= (message[44] << 8);
-		data->RawSMS->UDHIndicator     = message[getdata(T, 21, 0, 0, 18)];
-		memcpy(data->RawSMS->UserData,      message + getdata(T, 44, 0, 0, 47), data->RawSMS->Length);
+		data->RawSMS->UDHIndicator     = message[getdata(T, 21, 22, 0, 18)];
+		memcpy(data->RawSMS->UserData,      message + getdata(T, 44, 45, 0, 47), data->RawSMS->Length);
 
 		data->RawSMS->ValidityIndicator = 0;
 		memcpy(data->RawSMS->Validity,      message, 0);
