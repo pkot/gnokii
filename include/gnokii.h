@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-  Copyright (C) 2001, 2002, 2003 Pawe³ Kot
+  Copyright (C) 2001-2005 Pawe³ Kot
   
   Main header file for gnokii. Include just this file in your app.
 */

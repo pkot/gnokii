@@ -1,4 +1,3 @@
-
 #
 # $Id$
 #
@@ -6,6 +5,7 @@
 #
 # Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 #               2000 Karel Zak
+#		2002-2005 Pawel Kot
 #
 
 #
