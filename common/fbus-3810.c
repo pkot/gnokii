@@ -1669,7 +1669,7 @@ void	FB38_RX_Handle0x4b_Status(void)
 
 		/* Only output connection status byte now as the RF and Battery
 	 	   levels are displayed by the main gnokii code. */
-	fprintf(stdout, _("Status: Connection Status %02x.\n"), MessageBuffer[2]);
+	fprintf(stdout, _("Status: Connection Status %02x Batt %02x RF %02x.\n"), MessageBuffer[2], MessageBuffer[4], MessageBuffer[3]);
 
 }
 

@@ -161,26 +161,44 @@ void		VM_Terminate(void)
 
 int		VM_PtySetup(void)
 {
-	int						err;
-	char					*slave_name;
+	int			err;
+	char		*slave_name;
+	//char		*mgnokiidev = "/home/hugh/work/gnokii/mgnokiidev";			
+	char		*mgnokiidev = "./mgnokiidev";			
+	char		cmdline[200];
+	int			pty_number;
 
 	if (UseSTDIO) {
 		PtyRDFD = STDIN_FILENO;
 		PtyWRFD = STDOUT_FILENO;
+		return (0);
 	}
-	else {
-		PtyRDFD = VM_GetMasterPty(&slave_name);
-		if (PtyRDFD < 0) {
-			fprintf (stderr, "Couldn't open pty!\n\r");
-			return(-1);
-		}
-		PtyWRFD = PtyRDFD;
+	
+	PtyRDFD = VM_GetMasterPty(&slave_name);
+	if (PtyRDFD < 0) {
+		fprintf (stderr, "Couldn't open pty!\n\r");
+		return(-1);
+	}
+	PtyWRFD = PtyRDFD;
 
-		fprintf (stderr, "Slave pty is %s.\n\r", slave_name);
-		/* Here we'd setup the symlink for /dev/gnokii etc. etc. */
- 
+		/* Check we haven't been installed setuid root for some reason
+		   if so, don't create /dev/gnokii */
+	if (getuid() != geteuid()) {
+		fprintf(stderr, "gnokiid should not be installed setuid root!\n\r");
+		return (0);
 	}
 
+	fprintf (stderr, "Slave pty is %s, calling %s to create /dev/gnokii.\n\r", slave_name, mgnokiidev);
+
+		/* Get pty number */
+	pty_number = atoi(slave_name + 9);
+
+		/* Create command line, something line ./mkgnokiidev ttyp0 */
+	sprintf(cmdline, "%s %d", mgnokiidev, pty_number);
+
+		/* And use system to call it. */	
+	err = system (cmdline);
+	
 	return (err);
 
 }

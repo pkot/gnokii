@@ -127,6 +127,16 @@ libraries, they are standard on most modern Linux distributions.
 Note that gnokii is not only for Linux - you can use it on
 FreeBSD and similar systems too.
 
+In order to make use of the AT emulator through /dev/gnokii,
+you must;
+
+* Create a group called gnokii (edit /etc/group).
+* Ensure you are in the gnokii group.
+* Ensure that the mgnokiidev executable has permissions 4754
+* Ensure that mgnokiidev is owned by root and in group gnokii.
+
+Copy the sample.gnokiirc file to your home directory and
+rename it to .gnokiirc.  Edit it to suit your setup.
 
 - Known Bugs -
 
@@ -316,8 +326,11 @@ Thank you to, in no particular order...
 
 *  Martin Hamilton for looking after the mailing list.
 
-*  Tim Potter some of the ideas that are now incorporated in gnokii
-   to provide multiple model support.
+*  Tim Potter for some of the ideas that are now incorporated in gnokii
+   to provide multiple model support and config file code.
+
+*  Paul Mackerras and Andrew Tridgell for discussions about pseudo
+   ttys, setuid programs and such.  
 
 *  Richard Kalton for his excellent page about Nokia 6110 protocol.
 

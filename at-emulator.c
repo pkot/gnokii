@@ -301,7 +301,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	if (strncmp(*buf, "MM", 3) == 0) {
 		buf[0]+=2;
 
-		sprintf(buffer, "\n\rgnokii built for %s on %s", Model, Port);
+		sprintf(buffer, "\n\rgnokii configured for %s on %s", Model, Port);
 		ATEM_StringOut(buffer);
 		return (false);
 	}

@@ -115,14 +115,18 @@ XGNOKII_OBJS = xgnokii.o
 
 GNOKIID_OBJS = gnokiid.o at-emulator.o virtmodem.o datapump.o
 
+MGNOKIIDEV_OBJS = mgnokiidev.o
+
 # Build executable
-all: gnokii gnokiid xgnokii
+all: gnokii gnokiid xgnokii mgnokiidev
 
 gnokii: $(GNOKII_OBJS) $(COMMON_OBJS)
 
 gnokiid: $(GNOKIID_OBJS) $(COMMON_OBJS)
 
 xgnokii: $(XGNOKII_OBJS) $(COMMON_OBJS)
+
+mgnokiidev: $(MGNOKIIDEV_OBJS) 
 
 # Misc targets
 clean:

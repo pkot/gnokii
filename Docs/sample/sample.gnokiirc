@@ -2,5 +2,15 @@
 # home directory and named it .gnokiirc.
 #
 [global]
+
+# Set port to the physical serial port used to connect to your phone
 port = /dev/ttyS0
+
+# Set model to the model number of your phone
 model = 3810
+
+# Set bindir to point to the location of the various gnokii binaries.
+# In particular ensure that mgnokiidev is in this location, with
+# permissions 4754, owned by root, group gnokii.  Ensure you
+# are in the gnokii group...
+bindir = /home/hugh/work/gnokii
