@@ -120,4 +120,7 @@
 #define PM_AUTHENTICATION	0x0200
 #define PM_FOLDERS		0x0400
 
+char **gnokii_strsplit(const char *string, const char *delimiter, int tokens);
+void gnokii_strfreev(char **str_array);
+
 #endif /* _gnokii_misc_h */

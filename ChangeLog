@@ -37,6 +37,8 @@
     o return international strings when no matching
       operator/country name was found for the given code
                                                         (Pawel Kot)
+    o add gnokii_strsplit() and gnokii_strfreev() to ease AT
+      commands parsing                                 (Igor Popik)
  * AT series updates
     o support for make call command                    (Igor Popik)
     o set data->phonebook_entry->empty when the phonebook location

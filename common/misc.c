@@ -289,3 +289,55 @@ API bool gn_device_unlock(char *lock_file)
 	return true;
 #endif /* WIN32 */
 }
+
+/*
+ * Splits string into NULL-terminated string array
+ */
+char **gnokii_strsplit(const char *string, const char *delimiter, int tokens)
+{
+	const char *left = string;
+	char *tmp, *str;
+	int count = 0;
+	char **strings;
+
+	if (!string || !delimiter || !tokens)
+		return NULL;
+
+	strings = malloc(sizeof(char *) * (tokens + 1));
+	strings[tokens] = NULL; /* last element in array */
+
+	while ((tmp = strstr(left, delimiter)) != NULL && (count < tokens)) {
+		str = malloc((tmp - left) + 1);
+		memset(str, 0, (tmp - left) + 1);
+		memcpy(str, left, tmp - left);
+		strings[count] = str;
+		left = tmp + strlen(delimiter);
+		count++;
+	}
+
+	strings[count] = strdup(left);
+
+	for (count = 0; count < tokens; count++) {
+		dprintf("strings[%d] = %s\n", count, strings[count]);
+	}
+
+	return strings;
+}
+
+/*
+ * frees NULL-terminated array of strings
+ */
+void gnokii_strfreev(char **str_array)
+{
+	char **tmp = str_array;
+
+	if (!str_array)
+		return;
+
+	while (*tmp) {
+		free(*tmp);
+		tmp++;
+	}
+	free(str_array);
+}
+
