@@ -499,7 +499,7 @@ API int gn_cfg_file_read(const char *file)
 	gn_config_default.sm_retry = 0;
 
 	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default)) {
-		fprintf(stderr, _("No global section in % config file.\n"), file);
+		fprintf(stderr, _("No global section in %s config file.\n"), file);
 		return -2;
 	}
 
