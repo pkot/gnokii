@@ -6,6 +6,7 @@
                                                          (Pawel Kot)
     o portability fixes for OpenBSD                 (BORBELY Zoltan)
     o F_SETOWN disabled for OpenBSD                      (Pawel Kot)
+    o u8 removed from gn_ringtone_pack                (Helge Deller)
 
 0.5.0rc2
 ========

@@ -251,7 +251,7 @@ int GSM_GetScale(int number)
    Function returns number of packed notes and changes maxlength to
    number of used chars in "package" */
 
-API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength)
+API unsigned char gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength)
 {
 	int StartBit=0;
 	int i;
