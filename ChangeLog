@@ -2,6 +2,8 @@
 ==========
  * 6110 series updates
     o PollSMS race condition eliminated              (BORBELY Zoltan)
+ * Add GPL compatible preamble in tcp.[ch] files          (Pawel Kot)
+ * Make tcp.[ch] compatible with gnokii coding style      (Pawel Kot)
 
 0.4.0pre19
 ==========
