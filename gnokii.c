@@ -174,13 +174,18 @@ void usage(void)
 
           --deletecalendarnote  delete the note with number [index]
                                 from calendar.
-"));
+"));  /*"*/
+}
+
+void foop(RLP_F96Frame *foo)
+{
+   fprintf(stdout, "Foo called! %d \n", foo->Header[0]);
 }
 
 /* fbusinit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
 
-void fbusinit(bool enable_monitoring)
+void fbusinit(bool enable_monitoring, void (*rlp_handler)(RLP_F96Frame *frame))
 {
   int count=0;
   GSM_Error error;
@@ -192,7 +197,7 @@ void fbusinit(bool enable_monitoring)
     
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(Model, Port, Initlength, connection, enable_monitoring);
+  error = GSM_Initialise(Model, Port, Initlength, connection, enable_monitoring, rlp_handler);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -364,6 +369,11 @@ int main(int argc, char *argv[])
   if (argc == 3 && strcmp(argv[1], "--getsmsc") == 0)
     getsmsc(argv);
 
+  /* Run in passive monitoring mode (for development porpoises. */
+  if (strcmp(argv[1], "--pmon") == 0) {
+	  pmon(argv);
+  }
+
     /* Foogle function - insert you own function calls here 
      when testing stuff.  This is for the developer/hackers
      convenience only :) */
@@ -485,7 +495,7 @@ void sendsms(int argc, char *argv[])
 
   /* Initialise the GSM interface. */     
 
-  fbusinit(true);
+  fbusinit(true, NULL);
 
   strcpy (SMS.MessageText, message_buffer);
 
@@ -511,7 +521,7 @@ void getsmsc(char *argv[])
   
   MessageCenter.No=atoi(argv[2]);
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->GetSMSCenter(&MessageCenter) == GE_NONE)
     fprintf(stdout, _("%d. SMS center number is %s\n"), MessageCenter.No, MessageCenter.Number);
@@ -596,7 +606,7 @@ void getsms(char *argv[])
 
   /* Initialise the code for the GSM interface. */     
 
-  fbusinit(true);
+  fbusinit(true, NULL);
 
   /* Now retrieve the requested entries. */
 
@@ -792,7 +802,7 @@ void deletesms(char *argv[])
 
   /* Initialise the code for the GSM interface. */     
 
-  fbusinit(true);
+  fbusinit(true, NULL);
 
   /* Now delete the requested entries. */
 
@@ -837,7 +847,7 @@ void enterpin(void)
 
   char *pin=getpass(_("Enter your PIN: "));
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->EnterPin(pin) == GE_INVALIDPIN)
     fprintf(stdout, _("Error: invalid PIN\n"));
@@ -851,7 +861,7 @@ void enterpin(void)
 void dialvoice(char *argv[])
 {
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (argv[2])
     GSM->DialVoice(argv[2]);
@@ -863,7 +873,7 @@ void dialvoice(char *argv[])
 void dialdata(char *argv[])
 {
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   sleep(10);
 
@@ -884,7 +894,7 @@ void sendoplogo(char *argv[])
   int width, height;
 
   if (argv[2] && !ReadBitmapFile(argv[2], NetworkCode, logo, &width, &height)) {
-    fbusinit(false);
+    fbusinit(false, NULL);
 
     if (argv[3])
       NetworkCode=argv[3];
@@ -908,7 +918,7 @@ void sendclicon(char *argv[])
   int width, height;
 
   if (argv[2] && !ReadBitmapFile(argv[2], NULL, logo, &width, &height)) {
-    fbusinit(false);
+    fbusinit(false, NULL);
     GSM->SendBitmap(NULL, width, height, logo);
   }
   else {
@@ -927,7 +937,7 @@ void getcalendarnote(char *argv[])
 
   CalendarNote.Location=atoi(argv[2]);
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->GetCalendarNote(&CalendarNote) == GE_NONE) {
 
@@ -1013,7 +1023,7 @@ void writecalendarnote(char *argv[])
   sprintf(CalendarNote.Text, "Big day ...");
   sprintf(CalendarNote.Phone, "jhgjhgjhgjhgj");
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->WriteCalendarNote(&CalendarNote) == GE_NONE) {
     fprintf(stdout, _("Succesfully written!\n"));
@@ -1030,7 +1040,7 @@ void deletecalendarnote(char *argv[])
 
   CalendarNote.Location=atoi(argv[2]);
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->DeleteCalendarNote(&CalendarNote) == GE_NONE) {
     fprintf(stdout, _("   Calendar note deleted.\n"));
@@ -1052,7 +1062,7 @@ void setdatetime(int argc, char *argv[])
   time_t nowh;
   GSM_DateTime Date;
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (argc==7) {
     Date.Year = atoi (argv[2]);
@@ -1089,7 +1099,7 @@ void getdatetime(void) {
 
   GSM_DateTime date_time;
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->GetDateTime(&date_time)==GE_NONE) {
     fprintf(stdout, _("Date: %4d/%02d/%02d\n"), date_time.Year, date_time.Month, date_time.Day);
@@ -1105,7 +1115,7 @@ void setalarm(char *argv[])
 
   GSM_DateTime Date;
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   Date.Hour = atoi(argv[2]);
   Date.Minute = atoi(argv[3]);
@@ -1120,7 +1130,7 @@ void getalarm(void) {
 
   GSM_DateTime date_time;
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->GetAlarm(0, &date_time)==GE_NONE) {
     fprintf(stdout, _("Alarm: %s\n"), (date_time.AlarmEnabled==0)?"off":"on");
@@ -1168,7 +1178,7 @@ void monitormode(void)
 
   /* Initialise the code for the GSM interface. */     
 
-  fbusinit(true);
+  fbusinit(true, NULL);
 
   /* Loop here indefinitely - allows you to see messages from GSM code in
      response to unknown messages etc. The loops ends after pressing the
@@ -1304,7 +1314,7 @@ void getmemory(char *argv[])
 
   /* Do generic initialisation routine, monitoring disabled. */
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   /* Now retrieve the requested entries. */
 
@@ -1368,7 +1378,7 @@ void writephonebook(void)
 
   /* Initialise fbus code, enable monitoring for debugging purposes... */
 
-  fbusinit(true);
+  fbusinit(true, NULL);
 
   /* Go through data from stdin. */
 
@@ -1422,7 +1432,7 @@ void getspeeddial(char *argv[]) {
 
   entry.Location = atoi (argv[2]);
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->GetSpeedDial(&entry)==GE_NONE) {
     fprintf(stdout, _("SpeedDial nr. %d: %d:%d\n"), entry.Location, entry.MemoryType, entry.Number);
@@ -1456,7 +1466,7 @@ void setspeeddial(char *argv[]) {
   entry.Number = atoi(argv[2]);
   entry.Location = atoi(argv[4]);
 
-  fbusinit(false);
+  fbusinit(false, NULL);
 
   if (GSM->SetSpeedDial(&entry) == GE_NONE) {
     fprintf(stdout, _("Succesfully written!\n"));
@@ -1515,9 +1525,9 @@ void foogle(char *argv[])
 
   /* Initialise the code for the GSM interface. */     
 
-  fbusinit(true);
+  fbusinit(true, RLP_DisplayF96Frame);
 
-  GSM->DialData(NULL);
+  GSM->DialData("62401000");
   
   sleep (60);
   GSM->Terminate();
@@ -1541,7 +1551,7 @@ void pmon(char *argv[])
 
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(Model, Port, Initlength, connection, true);
+  error = GSM_Initialise(Model, Port, Initlength, connection, true, RLP_DisplayF96Frame);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));

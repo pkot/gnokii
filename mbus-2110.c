@@ -95,7 +95,10 @@ bool					MB21_LinkOK;
 	/* The following functions are made visible to gsm-api.c and friends. */
 
 	/* Initialise variables and state machine. */
-GSM_Error	MB21_Initialise(char *port_device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring)
+GSM_Error   MB21_Initialise(char *port_device, char *initlength,
+                            GSM_ConnectionType connection,
+                            bool enable_monitoring,
+                            void (*rlp_callback)(RLP_F96Frame *frame))
 {
 
 	/* ConnectionType is ignored in 3810 code. */

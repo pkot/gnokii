@@ -104,7 +104,7 @@ COMMON_OBJS = gsm-api.o \
 # Object files for each utility
 #
 
-GNOKII_OBJS = gnokii.o
+GNOKII_OBJS = gnokii.o rlp-common.o
 
 XLOGOS_OBJS = xlogos.o
 

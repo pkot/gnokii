@@ -227,6 +227,10 @@ unsigned char      Model[FB61_MAX_MODEL_LENGTH];
 
 char               CurrentIncomingCall[20];
 
+    /* Pointer to callback function in user code to be called when
+       RLP frames are received. */
+void               (*RLP_RXCallback)(RLP_F96Frame *frame);
+
 /* Every (well, almost every) frame from the computer starts with this
    sequence. */
 
@@ -234,7 +238,10 @@ char               CurrentIncomingCall[20];
 
 /* Initialise variables and state machine. */
 
-GSM_Error FB61_Initialise(char *port_device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring)
+GSM_Error FB61_Initialise(char *port_device, char *initlength,
+                            GSM_ConnectionType connection,
+                            bool enable_monitoring,
+                            void (*rlp_callback)(RLP_F96Frame *frame))
 {
 
   int rtn;

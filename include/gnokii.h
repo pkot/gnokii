@@ -25,6 +25,11 @@
   #include "gsm-common.h"
 #endif
 
+/* Ditto rlp_common.h... */
+#ifndef __rlp_common_h
+  #include "rlp-common.h"
+#endif
+
 /* Define these as externs so that app code can pick them up. */
 
 extern bool *GSM_LinkOK;
@@ -33,7 +38,9 @@ extern GSM_Functions *GSM;
 
 /* Prototype for the functions actually provided by gsm-api.c. */
 
-GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring);
+/*GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring);*/
+GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring, void (*rlp_handler)(RLP_F96Frame *frame));
+
 
 /* All the rest of the API functions are contained in the GSM_Function
    structure which ultimately points into the model specific code. */

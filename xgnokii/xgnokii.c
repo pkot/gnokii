@@ -104,7 +104,8 @@ GSM_Error fbusinit(bool enable_monitoring)
 
   if (error==GE_NOLINK)
     error = GSM_Initialise(xgnokiiConfig.model, xgnokiiConfig.port,
-                           xgnokiiConfig.initlength, connection, enable_monitoring);
+                           xgnokiiConfig.initlength, connection, 
+                           enable_monitoring, NULL);
 
 #ifdef XDEBUG
   g_print("fbusinit: error %d\n", error);

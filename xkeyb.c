@@ -180,7 +180,8 @@ void fbusinit(bool enable_monitoring)
     
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(Model, Port, Initlength, connection, enable_monitoring);
+  error = GSM_Initialise(Model, Port, Initlength, connection,
+                         enable_monitoring, NULL);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));

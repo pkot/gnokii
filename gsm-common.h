@@ -18,6 +18,10 @@
 #ifndef __gsm_common_h
 #define __gsm_common_h
 
+#ifndef __rlp_common_h
+    #include "rlp-common.h"
+#endif
+
 /* Type of connection. Now we support serial connection with FBUS cable and
    IR (only with 61x0 models) */
 
@@ -319,8 +323,10 @@ typedef struct {
 
   /* FIXME: comment this. */
 
-  GSM_Error (*Initialise)( char *port_device, char *initlength, 
-		  				   GSM_ConnectionType connection, bool enable_monitoring );
+  GSM_Error (*Initialise)( char *port_device, char *initlength,
+                           GSM_ConnectionType connection,
+                           bool enable_monitoring,
+                           void (*rlp_callback)(RLP_F96Frame *frame));
 
   void (*Terminate)(void);	
 

@@ -237,7 +237,7 @@ GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Conne
 
 		/* Initialise the code for the GSM interface. */     
 
-	error = GSM_Initialise(model, port, initlength, connection, false);
+	error = GSM_Initialise(model, port, initlength, connection, false, NULL);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));

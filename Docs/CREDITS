@@ -8,7 +8,8 @@ Thank you to, in no particular order...
 *  Pavel Janík ml. for the majority of work on gnokii 6110 series
    support, spelling corrections and miscellaneous code cleanups.
 
-*  Serge Odinokov for 6110 series authentication protocol. Many thanks...
+*  Serge Odinokov for 6110 series authentication protocol and
+   example Delphi RLP code. Many thanks...
 
 *  Nick Lamb for operator logos, CLI uploading and AT*C command support
 
@@ -54,6 +55,8 @@ Thank you to, in no particular order...
 
 *  Goran Dokic, Samuli Sorvakko and anonymous for gettext files for
    Dutch, Finnish and German translations.
+   
+*  Marcel Holtman for RLP FCS code.
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this :)
