@@ -108,11 +108,19 @@ GSM_Error	MB61_CancelCall(void);
 #define		MSG_ADDR_UNKNOWN				(0xf8)
 #define		MSG_ADDR_GLOBAL					(0xff)
 
-#define		MAX_5160_PHONEBOOK_ENTRIES		(100)
-#define		MAX_6160_PHONEBOOK_ENTRIES		(199)
-#define		MAX_6161_PHONEBOOK_ENTRIES		(199)
-#define		MAX_6162_PHONEBOOK_ENTRIES		(199)
-#define		MAX_6185_PHONEBOOK_ENTRIES		(200)	/* Assumed */
+#define		MAX_5160_PHONEBOOK_ENTRIES			(100)
+#define		MAX_5160_PHONEBOOK_NUMBER_LENGTH	(16)
+#define		MAX_5160_PHONEBOOK_NAME_LENGTH		(16)
+
+#define		MAX_6160_PHONEBOOK_ENTRIES			(199)
+#define		MAX_6161_PHONEBOOK_ENTRIES			(199)	/* Assumed */
+#define		MAX_6162_PHONEBOOK_ENTRIES			(199)	/* Assumed */ 
+#define		MAX_616X_PHONEBOOK_NUMBER_LENGTH	(16)
+#define		MAX_616X_PHONEBOOK_NAME_LENGTH		(16)
+
+#define		MAX_6185_PHONEBOOK_ENTRIES			(200)	/* Assumed */
+#define		MAX_6185_PHONEBOOK_NUMBER_LENGTH	(16)	/* Assumed */
+#define		MAX_6185_PHONEBOOK_NAME_LENGTH		(16)	/* Assumed */
 
     /* States for receive code. */
 enum    MB61_RX_States {MB61_RX_Sync,
@@ -125,13 +133,18 @@ enum    MB61_RX_States {MB61_RX_Sync,
                         MB61_RX_GetCSum};
 
     /* This table duplicates info in xgnokii, maybe we need a single
-       data structure for this someplace... HAB */
+       data structure for this someplace in the common codebase ... HAB */
 enum	MB61_Models		{MB61_ModelUnknown,
 						 MB61_Model5160,	/* NSW-1 */
+						 MB61_Model6110,    /* NSE-3 */
 						 MB61_Model6160,    /* NSW-3 */
 						 MB61_Model6161,	/* ????? */
 						 MB61_Model6162,	/* ????? */
-						 MB61_Model6185};   /* NSD-3 */
+						 MB61_Model6185,    /* NSD-3 */
+						 MB61_Model7110     /* NSE-5 */
+
+};
+					
 
 	/* We need to keep track of what response is expected as there
        is no unambiguous field in responses from the phone to 
@@ -140,7 +153,9 @@ enum	MB61_Responses	{MB61_Response_Unknown,
 						 MB61_Response_0xD0_Init,
 						 MB61_Response_0xD2_ID,
 						 MB61_Response_0xD2_Version,
-						 MB61_Response_0x40_PhonebookRead};
+						 MB61_Response_0x40_WriteAcknowledge,
+						 MB61_Response_0x40_PhonebookRead,
+						 MB61_Response_0x40_LongPhonebookRead};
 
 	/* Prototypes for internal functions. */
 void	MB61_ThreadLoop(void);
@@ -152,8 +167,9 @@ bool	MB61_TX_SendStandardAcknowledge(u8 sequence_number);
 
 int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_byte, int message_length, u8 *buffer);
 void	MB61_TX_SendPhoneIDRequest(void);
-bool	MB61_TX_SendPhoneBookRequest(u8 entry);
-bool	MB61_TX_SendLongPhoneBookRequest(u8 entry);
+bool	MB61_TX_SendPhonebookReadRequest(u8 entry);
+bool	MB61_TX_SendLongPhonebookReadRequest(u8 entry);
+GSM_Error	MB61_TX_SendPhonebookWriteRequest(GSM_PhonebookEntry *entry);
 
 bool	MB61_InitialiseLink(void);
 void	MB61_SetExpectedResponse(enum MB61_Responses response);
@@ -161,6 +177,8 @@ bool	MB61_WaitForExpectedResponse(int timeout);
 void    MB61_RX_StateMachine(char rx_byte);
 enum    MB61_RX_States MB61_RX_DispatchMessage(void);
 void    MB61_RX_DisplayMessage(void);
+void	MB61_RX_Handle0x40_PhonebookRead(void);
+void	MB61_RX_Handle0x40_LongPhonebookRead(void);
 void	MB61_RX_Handle0xD2_ID(void);
 void	MB61_RX_Handle0xD2_Version(void);
 

@@ -40,7 +40,7 @@
 
 #define WRITEPHONE(a, b, c) device_write(b, c)
 
-#define	DEBUG
+//#define	DEBUG
 
 	/* Global variables used by code in gsm-api.c to expose the
 	   functions supported by this model of phone.  */
@@ -120,6 +120,9 @@ enum MB61_Models		ModelIdentified;
 enum MB61_Responses		ExpectedResponse;
 enum MB61_Responses		LatestResponse;
 
+GSM_PhonebookEntry		*CurrentPhonebookEntry;
+GSM_Error				CurrentPhonebookError;
+
 int                     MessageLength;
 u8                      MessageDestination;
 u8                      MessageSource;
@@ -146,6 +149,9 @@ GSM_Error   MB61_Initialise(char *port_device, char *initlength,
 	MB61_LinkOK = false;
 	ModelIdentified = MB61_ModelUnknown;
 	ExpectedResponse = MB61_Response_Unknown;
+	CurrentPhonebookEntry = NULL;
+	CurrentPhonebookError = GE_NONE;
+
 
     strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -199,38 +205,44 @@ GSM_Error	MB61_GetMemoryLocation(GSM_PhonebookEntry *entry)
 			if (entry->Location >= MAX_5160_PHONEBOOK_ENTRIES) {
 				return (GE_INVALIDPHBOOKLOCATION);
 			}
-			MB61_TX_SendPhoneBookRequest(entry->Location);
+		 	CurrentPhonebookEntry = entry;
+		 	CurrentPhonebookError = GE_BUSY;
+			MB61_SetExpectedResponse(MB61_Response_0x40_PhonebookRead);
+			MB61_TX_SendPhonebookReadRequest(entry->Location);
 			break;
 
 		case MB61_Model6160:
 			if (entry->Location >= MAX_6160_PHONEBOOK_ENTRIES) {
 				return (GE_INVALIDPHBOOKLOCATION);
 			}
-			MB61_TX_SendPhoneBookRequest(entry->Location);
+		 	CurrentPhonebookEntry = entry;
+		 	CurrentPhonebookError = GE_BUSY;
+			MB61_SetExpectedResponse(MB61_Response_0x40_PhonebookRead);
+			MB61_TX_SendPhonebookReadRequest(entry->Location);
 			break;
 
 		case MB61_Model6185:
 			if (entry->Location >= MAX_6185_PHONEBOOK_ENTRIES) {
 				return (GE_INVALIDPHBOOKLOCATION);
 			}
-			MB61_TX_SendLongPhoneBookRequest(entry->Location);
+		 	CurrentPhonebookEntry = entry;
+		 	CurrentPhonebookError = GE_BUSY;
+			MB61_SetExpectedResponse(MB61_Response_0x40_LongPhonebookRead);
+			MB61_TX_SendLongPhonebookReadRequest(entry->Location);
 			break;
 
 		default:
 			return(GE_NOTIMPLEMENTED);
 	}
-				
-        /* Wait for timeout or other error. */
-    while (timeout != 0/* && CurrentPhonebookError == GE_BUSY*/) {
 
-        timeout --;
-        if (timeout == 0) {
-            return (GE_TIMEOUT);
-        }
-        usleep (100000);
-    }
+		/* When response is received, data is copied into entry
+           by handler code or if error has occured, CurrentPhonebookEntry
+           is set accordingly. */
+	if (MB61_WaitForExpectedResponse(2000) != true) {
+		return (GE_INTERNALERROR);
+	}
+	return (CurrentPhonebookError);
 
-    return (GE_NONE);
 }
 
 	/* Routine to write phonebook location in phone. Designed to 
@@ -238,7 +250,65 @@ GSM_Error	MB61_GetMemoryLocation(GSM_PhonebookEntry *entry)
 	   is written or timeout occurs.  */
 GSM_Error	MB61_WritePhonebookLocation(GSM_PhonebookEntry *entry)
 {
-	return (GE_NOTIMPLEMENTED);
+
+    if (entry->MemoryType != GMT_ME) {
+    	return (GE_INVALIDMEMORYTYPE);
+    }
+
+        /* Return if no link has been established. */
+    if (!MB61_LinkOK) {
+        return GE_NOLINK;
+    }
+
+        /* Process depending on model identified */
+	switch (ModelIdentified) {
+
+		case MB61_Model5160:
+			if (entry->Location >= MAX_5160_PHONEBOOK_ENTRIES) {
+				return (GE_INVALIDPHBOOKLOCATION);
+			}
+			if (strlen(entry->Name) > MAX_5160_PHONEBOOK_NAME_LENGTH) {
+				return (GE_PHBOOKNAMETOOLONG);
+			}
+			if (strlen(entry->Name) > MAX_5160_PHONEBOOK_NUMBER_LENGTH) {
+				return (GE_PHBOOKNAMETOOLONG);
+			}
+		 	CurrentPhonebookError = GE_BUSY;
+			MB61_SetExpectedResponse(MB61_Response_0x40_WriteAcknowledge);
+			MB61_TX_SendPhonebookWriteRequest(entry);
+			break;
+
+		case MB61_Model6160:
+			if (entry->Location >= MAX_6160_PHONEBOOK_ENTRIES) {
+				return (GE_INVALIDPHBOOKLOCATION);
+			}
+			if (strlen(entry->Name) > MAX_616X_PHONEBOOK_NAME_LENGTH) {
+				return (GE_PHBOOKNAMETOOLONG);
+			}
+			if (strlen(entry->Name) > MAX_616X_PHONEBOOK_NUMBER_LENGTH) {
+				return (GE_PHBOOKNAMETOOLONG);
+			}
+		 	CurrentPhonebookError = GE_BUSY;
+			MB61_SetExpectedResponse(MB61_Response_0x40_WriteAcknowledge);
+			MB61_TX_SendPhonebookWriteRequest(entry);
+			break;
+
+		case MB61_Model6185:
+			return (GE_NOTIMPLEMENTED);
+			break;
+
+		default:
+			return(GE_NOTIMPLEMENTED);
+	}
+
+		/* When response is received, data is copied into entry
+           by handler code or if error has occured, CurrentPhonebookEntry
+           is set accordingly. */
+	if (MB61_WaitForExpectedResponse(2000) != true) {
+		return (GE_INTERNALERROR);
+	}
+	return (CurrentPhonebookError);
+
 }
 
 GSM_Error	MB61_GetSpeedDial(GSM_SpeedDial *entry)
@@ -662,25 +732,45 @@ enum    MB61_RX_States MB61_RX_DispatchMessage(void)
 				/* Switch on the basis of the message type byte */
 			switch (MessageCommand) {
 
+				case 0x40:
+					if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
+						fprintf(stderr, _("Standard Ack write (0x40) failed!"));
+					}
+
+					if (ExpectedResponse == MB61_Response_0x40_PhonebookRead) {
+						MB61_RX_Handle0x40_PhonebookRead();
+						LatestResponse = MB61_Response_0x40_PhonebookRead;
+						break;
+					}
+
+					if (ExpectedResponse == MB61_Response_0x40_WriteAcknowledge) {
+						LatestResponse = MB61_Response_0x40_WriteAcknowledge;
+						CurrentPhonebookError = GE_NONE;
+						break;
+					}
+					break;
+
 					/* 0xd0 messages are the response to
 					   initialisation requests. */
-				case 0xd0: 	if (ExpectedResponse == MB61_Response_0xD0_Init) {
-								LatestResponse = MB61_Response_0xD0_Init;
-							}
-							break;
+				case 0xd0:
+					if (ExpectedResponse == MB61_Response_0xD0_Init) {
+						LatestResponse = MB61_Response_0xD0_Init;
+					}
+					break;
 
-				case 0xd2:  if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
-								fprintf(stderr, _("Standard Ack write (0xd2) failed!"));
-							}
-  							if (ExpectedResponse == MB61_Response_0xD2_ID) {
-								MB61_RX_Handle0xD2_ID();
-								LatestResponse = MB61_Response_0xD2_ID;
-							}
-							if (ExpectedResponse == MB61_Response_0xD2_Version) {
-								MB61_RX_Handle0xD2_Version();
-								LatestResponse = MB61_Response_0xD2_Version;
-							}
-							break;
+				case 0xd2:
+					if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
+						fprintf(stderr, _("Standard Ack write (0xd2) failed!"));
+					}
+  					if (ExpectedResponse == MB61_Response_0xD2_ID) {
+						MB61_RX_Handle0xD2_ID();
+					LatestResponse = MB61_Response_0xD2_ID;
+					}
+					if (ExpectedResponse == MB61_Response_0xD2_Version) {
+						MB61_RX_Handle0xD2_Version();
+						LatestResponse = MB61_Response_0xD2_Version;
+					}
+					break;
 
 
 					/* Incoming 0x7f's are acks for commands we've sent. */
@@ -691,21 +781,88 @@ enum    MB61_RX_States MB61_RX_DispatchMessage(void)
 					   the same message several (3-4) times before giving
 					   up if no ack is received.  */
 				default: 	MB61_RX_DisplayMessage(); 
-							if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
-								fprintf(stderr, _("Standard Ack write failed!"));
-							}
-							fprintf(stdout, "Sent standard Ack for unknown %02x\n", MessageCommand);
-                    		break;
+					if (MB61_TX_SendStandardAcknowledge(MessageSequenceNumber) != true) {
+						fprintf(stderr, _("Standard Ack write failed!"));
+					}
+					fprintf(stdout, "Sent standard Ack for unknown %02x\n", MessageCommand);
+                   	break;
     }
 
     return MB61_RX_Sync;
 }
 
+	/* "Short" phonebook reads have 8 bytes of data (unknown/unstudied)
+       then a null terminated string for the number and then a null
+       terminated string which is the name. */
+void	MB61_RX_Handle0x40_PhonebookRead(void)
+{
+	int		i, j;
+	bool	got_null;
+
+	if (CurrentPhonebookEntry == NULL) {
+		CurrentPhonebookError = GE_INTERNALERROR;
+		return;
+	}
+
+		/* First do number */
+	i = 8;
+	got_null = false;
+	j = 0;
+
+	while ((i < MessageLength) && (!got_null) && (j < GSM_MAX_PHONEBOOK_NUMBER_LENGTH)) {
+		CurrentPhonebookEntry->Number[j] = MessageBuffer[i];
+		i++;
+		j++;
+		if (MessageBuffer[i] == 0) {
+			got_null = true;
+		}
+	}
+	CurrentPhonebookEntry->Number[j] = 0;
+
+		/* Now name */
+	got_null = false;
+	j = 0;
+	i ++;
+
+	while ((i < MessageLength) && (!got_null) && (j < GSM_MAX_PHONEBOOK_NAME_LENGTH)) {
+		CurrentPhonebookEntry->Name[j] = MessageBuffer[i];
+		i++;
+		j++;
+		if (MessageBuffer[i] == 0) {
+			got_null = true;
+		}
+	}
+	CurrentPhonebookEntry->Name[j] = 0;
+	
+	if ((strlen(CurrentPhonebookEntry->Number) != 0) ||
+	    (strlen(CurrentPhonebookEntry->Name) != 0)) {
+		CurrentPhonebookEntry->Empty = false;
+	}
+	else {
+		CurrentPhonebookEntry->Empty = true;
+	}
+	CurrentPhonebookEntry->Group = GSM_GROUPS_NOT_SUPPORTED;   	
+
+		/* Done */
+	CurrentPhonebookError = GE_NONE;
+
+}
+
+void	MB61_RX_Handle0x40_LongPhonebookRead(void)
+{
+
+
+}
+
+
+
 	/* When we get an ID response back, we use it to set
        model information for later and if in debug mode print it out. */
 void	MB61_RX_Handle0xD2_ID(void) 
 {
+#ifdef DEBUG
 	int		i;
+#endif
 
 	if (strstr(MessageBuffer + 4, "NSW-1") != NULL) {
 		ModelIdentified = MB61_Model5160;
@@ -754,7 +911,6 @@ void	MB61_RX_Handle0xD2_ID(void)
 #endif
 
 }
-
 void	MB61_RX_Handle0xD2_Version(void) 
 {
 
@@ -791,7 +947,44 @@ void    MB61_RX_DisplayMessage(void)
 
 }
 
-bool		MB61_TX_SendPhoneBookRequest(u8 entry)
+	/* Higher level code does bounds checks for length of name/number
+       as well as entry number. */
+GSM_Error	MB61_TX_SendPhonebookWriteRequest(GSM_PhonebookEntry *entry)
+{
+		/* 7 - header and null terminators, 17 - number length, 
+		   17 - name length. */
+	u8		message[7 + 17 + 17];
+	int		name_length;
+	int 	number_length;
+	int		message_length;
+
+	name_length = strlen(entry->Name);
+	number_length = strlen(entry->Number);
+
+ 		/* Header plus two terminating nulls plus name/number themselves */
+	message_length = 7 + name_length + 1 + number_length + 1;
+
+	message[0] = 0x00; /* Header bytes, purpose not investigated */
+	message[1] = 0x01; 
+	message[2] = 0x1f; 
+	message[3] = 0x01; 
+	message[4] = 0x04; 
+	message[5] = 0x87; 	
+
+	message[6] = entry->Location; 
+
+	strncpy(message + 7, entry->Number, 16);
+
+	strncpy(message + 8 + number_length, entry->Name, 16);
+
+	MB61_UpdateSequenceNumber();
+	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0x40, RequestSequenceNumber, message_length, message);
+
+	return (GE_NONE);
+
+}
+
+bool		MB61_TX_SendPhonebookReadRequest(u8 entry)
 {
 	u8		message[7] = {0x00, 0x01, 0x1f, 0x01, 0x04, 0x86, 0x01};
 
@@ -800,13 +993,13 @@ bool		MB61_TX_SendPhoneBookRequest(u8 entry)
 	MB61_UpdateSequenceNumber();
 	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0x40, RequestSequenceNumber, 7, message);
 
-	//ExpectedResponse = MB61_Response_0x40_PhoneBook;
+	ExpectedResponse = MB61_Response_0x40_PhonebookRead;
 
 	return (true);
 }
 
 	/* 6185 requires a different phone book request apparently */
-bool		MB61_TX_SendLongPhoneBookRequest(u8 entry)
+bool		MB61_TX_SendLongPhonebookReadRequest(u8 entry)
 {
 	u8		message[8] = {0x00, 0x00, 0x07, 0x11, 0x00, 0x10, 0x00, 0x00};
 
@@ -815,7 +1008,7 @@ bool		MB61_TX_SendLongPhoneBookRequest(u8 entry)
 	MB61_UpdateSequenceNumber();
 	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0x40, RequestSequenceNumber, 8, message);
 
-	//ExpectedResponse = MB61_Response_0x40_PhoneBook;
+	ExpectedResponse = MB61_Response_0x40_PhonebookRead;
 
 	return (true);
 }
@@ -1014,7 +1207,7 @@ void    MB61_SigHandler(int status)
     res = device_read(buffer, 255);
 
     for (count = 0; count < res ; count ++) {
-		//fprintf(stdout, "{%02x}", buffer[count]);
+		//fprintf(stdout, "<%02x>", buffer[count]);
         MB61_RX_StateMachine(buffer[count]);
     }
 	//fprintf(stdout, "\n");
@@ -1067,6 +1260,21 @@ int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_b
         perror(_("TX_SendMessage - write:"));
         return (false);
     }
+
+#ifdef DEBUG
+	for (count = 0; count < message_length + 8; count++) {
+		if (isprint(out_buffer[count])) {
+			fprintf(stdout, "{%02x%c}", out_buffer[count], out_buffer[count]);
+		}
+		else {
+			fprintf(stdout, "{%02x }", out_buffer[count]);
+		}
+		if (((count + 1) % 16) == 0) {
+			fprintf(stdout, "\n");
+		}
+	}	
+	fflush(stdout);
+#endif
 	
     return (true);
 }
