@@ -503,66 +503,61 @@ static void DeleteSMS (void)
 
 static void SaveToMailbox (void)
 {
-  gchar buf[255];
-  FILE *f;
-  gint fd;
-  GList *sel;
-  struct tm t, *loctime;
-  struct flock lock;
-  time_t caltime;
-  gint row;
-  gchar *number, *text, *loc;
+	gchar buf[255];
+	FILE *f;
+	gint fd;
+	GList *sel;
+	struct tm t, *loctime;
+	struct flock lock;
+	time_t caltime;
+	gint row;
+	gchar *number, *text, *loc;
 
 
-  if ((f = fopen (xgnokiiConfig.mailbox, "a")) == NULL)
-  {
-    snprintf (buf, 255, _("Cannot open mailbox %s for appending!"), xgnokiiConfig.mailbox);
-    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
-    gtk_widget_show (errorDialog.dialog);
-    return;
-  }
+	if ((f = fopen (xgnokiiConfig.mailbox, "a")) == NULL) {
+		snprintf (buf, 255, _("Cannot open mailbox %s for appending!"), xgnokiiConfig.mailbox);
+		gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+		gtk_widget_show (errorDialog.dialog);
+		return;
+	}
 
-  fd = fileno (f);
-  lock.l_type = F_WRLCK;
-  lock.l_whence = SEEK_SET;
-  lock.l_start = 0;
-  lock.l_len = 0;
+	fd = fileno (f);
+	lock.l_type = F_WRLCK;
+	lock.l_whence = SEEK_SET;
+	lock.l_start = 0;
+	lock.l_len = 0;
   
-  if (fcntl (fd, F_GETLK, &lock) != -1 && lock.l_type != F_UNLCK)
-  {
-    snprintf (buf, 255, _("Cannot save to mailbox %s.\n\
-%s is locked for process %d!"), xgnokiiConfig.mailbox, xgnokiiConfig.mailbox,
-              lock.l_pid);
-    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
-    gtk_widget_show (errorDialog.dialog);
-    fclose (f);
-    return;
-  }
+	if (fcntl (fd, F_GETLK, &lock) != -1 && lock.l_type != F_UNLCK) {
+			snprintf (buf, 255, _("Cannot save to mailbox %s.\n\%s is locked for process %d!"),
+			xgnokiiConfig.mailbox, xgnokiiConfig.mailbox, lock.l_pid);
+		gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+		gtk_widget_show (errorDialog.dialog);
+		fclose (f);
+		return;
+	}
   
-  lock.l_type = F_WRLCK;
-  lock.l_whence = SEEK_SET;
-  lock.l_start = 0;
-  lock.l_len = 0;
-  if (fcntl (fd, F_SETLK, &lock) == -1)
-  {
-    snprintf (buf, 255, _("Cannot lock mailbox %s!"), xgnokiiConfig.mailbox);
-    gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
-    gtk_widget_show (errorDialog.dialog);
-    fclose (f);
-    return;
-  }
+	lock.l_type = F_WRLCK;
+	lock.l_whence = SEEK_SET;
+	lock.l_start = 0;
+	lock.l_len = 0;
+	if (fcntl (fd, F_SETLK, &lock) == -1) {
+		snprintf (buf, 255, _("Cannot lock mailbox %s!"), xgnokiiConfig.mailbox);
+		gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
+		gtk_widget_show (errorDialog.dialog);
+		fclose (f);
+		return;
+	}
   
-  sel = GTK_CLIST (SMS.smsClist)->selection;
+	sel = GTK_CLIST (SMS.smsClist)->selection;
 
-  while (sel != NULL)
-  {
-    row = GPOINTER_TO_INT (sel->data);
-    sel = sel->next;
-    gtk_clist_get_text (GTK_CLIST (SMS.smsClist), row, 1, &text);
-    t.tm_sec  = atoi (text + 15);
-    t.tm_min  = atoi (text + 12);
-    t.tm_hour = atoi (text + 9);
-    t.tm_mday = atoi (text);
+	while (sel != NULL) {
+		row = GPOINTER_TO_INT (sel->data);
+		sel = sel->next;
+		gtk_clist_get_text (GTK_CLIST (SMS.smsClist), row, 1, &text);
+		t.tm_sec  = atoi (text + 15);
+		t.tm_min  = atoi (text + 12);
+		t.tm_hour = atoi (text + 9);
+		t.tm_mday = atoi (text);
     t.tm_mon  = atoi (text + 3) - 1;
     t.tm_year = atoi (text + 6);
     if (t.tm_year < 70)
@@ -644,77 +639,70 @@ static inline gint RefreshSMSLength (GtkWidget   *widget,
 
 static inline void SetActiveCenter (GtkWidget *item, gpointer data)
 {
-  sendSMS.center = GPOINTER_TO_INT (data);
+	sendSMS.center = GPOINTER_TO_INT (data);
 }
 
 
 void GUI_RefreshSMSCenterMenu (void)
 {
-  static GtkWidget *smscMenu = NULL;
-  GtkWidget *item;
-  register gint i;
+	static GtkWidget *smscMenu = NULL;
+	GtkWidget *item;
+	register gint i;
 
-  if (!sendSMS.smscOptionMenu)
-    return;
+	if (!sendSMS.smscOptionMenu) return;
 
-  if (smscMenu)
-  {
-    gtk_option_menu_remove_menu (GTK_OPTION_MENU (sendSMS.smscOptionMenu));
-    if (GTK_IS_WIDGET (smscMenu))
-      gtk_widget_destroy (GTK_WIDGET (smscMenu));
-    smscMenu = NULL;
-  }
+	if (smscMenu) {
+		gtk_option_menu_remove_menu (GTK_OPTION_MENU (sendSMS.smscOptionMenu));
+		if (GTK_IS_WIDGET (smscMenu)) gtk_widget_destroy (GTK_WIDGET (smscMenu));
+		smscMenu = NULL;
+	}
 
-  smscMenu = gtk_menu_new();
+	smscMenu = gtk_menu_new();
 
-  for (i = 0; i < xgnokiiConfig.smsSets; i++)
-  {
-    if (*(xgnokiiConfig.smsSetting[i].Name) == '\0')
-    {
-      gchar *buf = g_strdup_printf (_("Set %d"), i + 1);
-      item = gtk_menu_item_new_with_label (buf);
-      g_free (buf);
-    }
-    else
-      item = gtk_menu_item_new_with_label (xgnokiiConfig.smsSetting[i].Name);
+	for (i = 0; i < xgnokiiConfig.smsSets; i++) {
+		if (*(xgnokiiConfig.smsSetting[i].Name) == '\0') {
+			gchar *buf = g_strdup_printf (_("Set %d"), i + 1);
+			item = gtk_menu_item_new_with_label (buf);
+			g_free (buf);
+		} else
+			item = gtk_menu_item_new_with_label (xgnokiiConfig.smsSetting[i].Name);
 
-    gtk_signal_connect (GTK_OBJECT (item), "activate",
-                        GTK_SIGNAL_FUNC (SetActiveCenter),
-                        (gpointer) i);
+		gtk_signal_connect (GTK_OBJECT (item), "activate",
+			GTK_SIGNAL_FUNC (SetActiveCenter), (gpointer) i);
 
-    gtk_widget_show (item);
-    gtk_menu_append (GTK_MENU (smscMenu), item);
-  }
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (sendSMS.smscOptionMenu), smscMenu);
+		gtk_widget_show (item);
+		gtk_menu_append (GTK_MENU (smscMenu), item);
+	}
+	gtk_option_menu_set_menu (GTK_OPTION_MENU (sendSMS.smscOptionMenu), smscMenu);
 }
 
 
 static inline void InitAddressLine (gpointer d, gpointer userData)
 {
-  ((AddressPar *) d)->used = 0;
+	((AddressPar *) d)->used = 0;
 }
 
 
 #ifdef XDEBUG
 static inline void PrintAddressLine (gpointer d, gpointer userData)
 {
-  g_print ("Name: %s\nNumber: %s\nUsed: %d\n",
-           ((AddressPar *) d)->name,
-           ((AddressPar *) d)->number,
-           ((AddressPar *) d)->used);
+	g_print ("Name: %s\nNumber: %s\nUsed: %d\n",
+			((AddressPar *) d)->name,
+			((AddressPar *) d)->number,
+			((AddressPar *) d)->used);
 }
 #endif
 
 
 static inline gint CompareAddressLineName (gconstpointer a, gconstpointer b)
 {
-  return strcmp (((AddressPar *) a)->name, ((AddressPar *) b)->name);
+	return strcmp (((AddressPar *) a)->name, ((AddressPar *) b)->name);
 }
 
 
 static inline gint CompareAddressLineUsed (gconstpointer a, gconstpointer b)
 {
-  return !(((AddressPar *) a)->used == ((AddressPar *) b)->used);
+	return !(((AddressPar *) a)->used == ((AddressPar *) b)->used);
 }
 
 
@@ -889,207 +877,183 @@ static void ShowSelectContactsDialog (void)
 
 static gint SendSMSCore (GSM_SMSMessage *sms)
 {
-  GSM_Error error;
-  PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-  D_SMSMessage *m = (D_SMSMessage *) g_malloc (sizeof (D_SMSMessage));
-  
-  m->sms = sms;
-  e->event = Event_SendSMSMessage;
-  e->data = m;
-  GUI_InsertEvent (e);
-  pthread_mutex_lock (&sendSMSMutex);
-  pthread_cond_wait (&sendSMSCond, &sendSMSMutex);
-  pthread_mutex_unlock (&sendSMSMutex);
+	GSM_Error error;
+	PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
+	D_SMSMessage *m = (D_SMSMessage *) g_malloc (sizeof (D_SMSMessage));
+	
+	m->sms = sms;
+	e->event = Event_SendSMSMessage;
+	e->data = m;
+	GUI_InsertEvent (e);
+	pthread_mutex_lock (&sendSMSMutex);
+	pthread_cond_wait (&sendSMSCond, &sendSMSMutex);
+	pthread_mutex_unlock (&sendSMSMutex);
 
 #ifdef XDEBUG
-  g_print ("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
-           sms->RemoteNumber.number,
-           sms->UserData[0].u.Text,
-           GTK_TOGGLE_BUTTON (sendSMS.report)->active,
-           sendSMS.center);
+	g_print ("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
+			sms->RemoteNumber.number, sms->UserData[0].u.Text,
+			GTK_TOGGLE_BUTTON (sendSMS.report)->active, sendSMS.center);
 #endif
 
-  error = m->status;
-  g_free (m);
-
-  if (error != GE_SMSSENDOK)
-  {
-    gchar *buf = g_strdup_printf (_("SMS send to %s failed\n(error=%d)"),
-                                  sms->RemoteNumber.number, error);
-    gtk_label_set_text (GTK_LABEL(errorDialog.text), buf);
-    gtk_widget_show (errorDialog.dialog);
-    g_free (buf);
-  }
-  else
-    g_print ("Message sent to: %s\n", sms->RemoteNumber.number);
-
-  return (error);
+	error = m->status;
+	g_free (m);
+	
+	if (error != GE_SMSSENDOK) {
+		gchar *buf = g_strdup_printf (_("SMS send to %s failed\n(error=%d)"),
+				sms->RemoteNumber.number, error);
+		gtk_label_set_text (GTK_LABEL(errorDialog.text), buf);
+		gtk_widget_show (errorDialog.dialog);
+		g_free (buf);
+	} else
+		g_print ("Message sent to: %s\n", sms->RemoteNumber.number);
+		
+	return (error);
 }
 
 
 static void SendSMS (void)
 {
-  GSM_SMSMessage sms;
-  AddressPar aps;
-  char udh[256];
-  GSList *r;
-  gchar *text, *number;
-  gchar **addresses;
-  gchar *buf;
-  gint offset, nr_msg, l;
-  gint longSMS;
-  register gint i = 0, j;
+	GSM_SMSMessage sms;
+	AddressPar aps;
+	char udh[256];
+	GSList *r;
+	gchar *text, *number;
+	gchar **addresses;
+	gchar *buf;
+	gint offset, nr_msg, l;
+	gint longSMS;
+	register gint i = 0, j;
 
-  if (CheckAddressMain ())
-  {
-    gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Address line contains illegal address!"));
-    gtk_widget_show(errorDialog.dialog);
-    return;
-  }
+	if (CheckAddressMain ()) {
+		gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Address line contains illegal address!"));
+		gtk_widget_show(errorDialog.dialog);
+		return;
+	}
 
-  text = gtk_editable_get_chars (GTK_EDITABLE (sendSMS.smsSendText), 0, -1);
-  l = strlen (text);
+	text = gtk_editable_get_chars (GTK_EDITABLE (sendSMS.smsSendText), 0, -1);
+	l = strlen (text);
 
-  addresses = g_strsplit (gtk_entry_get_text (GTK_ENTRY (sendSMS.addr)), ",", 0);
+	addresses = g_strsplit (gtk_entry_get_text (GTK_ENTRY (sendSMS.addr)), ",", 0);
 
-  longSMS = GTK_TOGGLE_BUTTON (sendSMS.longSMS)->active;
+	longSMS = GTK_TOGGLE_BUTTON (sendSMS.longSMS)->active;
 
-  while (addresses[i])
-  {
-    g_strstrip (addresses[i]);
-    if ((number = GUI_GetNumber (addresses[i])))
-    {
-      aps.name = addresses[i];
-      if ((r = g_slist_find_custom (sendSMS.addressLine, &aps, CompareAddressLineName)))
-        number = ((AddressPar *) r->data)->number;
-    }
-    else
-      number = addresses[i];
+	while (addresses[i]) {
+		g_strstrip (addresses[i]);
+		if ((number = GUI_GetNumber (addresses[i]))) {
+			aps.name = addresses[i];
+			if ((r = g_slist_find_custom (sendSMS.addressLine, &aps, CompareAddressLineName)))
+				number = ((AddressPar *) r->data)->number;
+		} else
+			number = addresses[i];
 
-    sms.MessageCenter = xgnokiiConfig.smsSetting[sendSMS.center];
-    sms.MessageCenter.No = 0;
+		sms.MessageCenter = xgnokiiConfig.smsSetting[sendSMS.center];
+		sms.MessageCenter.No = 0;
 
-    if (GTK_TOGGLE_BUTTON (sendSMS.report)->active)
-      sms.Report = true;
-    else
-      sms.Report = false;
-    sms.Type = SMS_Submit;
+		if (GTK_TOGGLE_BUTTON (sendSMS.report)->active)
+			sms.Report = true;
+		else
+			sms.Report = false;
+		sms.Type = SMS_Submit;
 
-    sms.DCS.Type = SMS_GeneralDataCoding;
-    sms.DCS.u.General.Compressed = false;
-    sms.DCS.u.General.Alphabet = SMS_DefaultAlphabet;
-    sms.DCS.u.General.Class = 0;
-    sms.MessageCenter.No = 1;
-    sms.Validity.VPF = SMS_RelativeFormat;
-    sms.Validity.u.Relative = sms.MessageCenter.Validity; /* 4320 minutes == 72 hours */
-    sms.UDH_No = 0;
+		sms.DCS.Type = SMS_GeneralDataCoding;
+		sms.DCS.u.General.Compressed = false;
+		sms.DCS.u.General.Alphabet = SMS_DefaultAlphabet;
+		sms.DCS.u.General.Class = 0;
+		sms.MessageCenter.No = 1;
+		sms.Validity.VPF = SMS_RelativeFormat;
+		sms.Validity.u.Relative = sms.MessageCenter.Validity; /* 4320 minutes == 72 hours */
+		sms.UDH_No = 0;
 
-    strncpy (sms.RemoteNumber.number, number, GSM_MAX_DESTINATION_LENGTH + 1);
-    sms.RemoteNumber.number[GSM_MAX_DESTINATION_LENGTH] = '\0';
+		strncpy (sms.RemoteNumber.number, number, GSM_MAX_DESTINATION_LENGTH + 1);
+		sms.RemoteNumber.number[GSM_MAX_DESTINATION_LENGTH] = '\0';
 
-    if (l > GSM_MAX_SMS_LENGTH)
-    {
-      if (longSMS)
-      {
-        sms.UDH[0].Type = SMS_ConcatenatedMessages;
-        nr_msg = ((l - 1) / 153) + 1;
-        udh[0] = 0x05;	// UDH length
-        udh[1] = 0x00;	// concatenated messages (IEI)
-        udh[2] = 0x03;	// IEI data length
-        udh[3] = 0x01;	// reference number
-        udh[4] = nr_msg;	// number of messages
-        udh[5] = 0x00;	// message reference number
-        offset = 6;
+		if (l > GSM_MAX_SMS_LENGTH) {
+			if (longSMS) {
+				sms.UDH[0].Type = SMS_ConcatenatedMessages;
+				nr_msg = ((l - 1) / 153) + 1;
+				udh[0] = 0x05;	// UDH length
+				udh[1] = 0x00;	// concatenated messages (IEI)
+				udh[2] = 0x03;	// IEI data length
+				udh[3] = 0x01;	// reference number
+				udh[4] = nr_msg;	// number of messages
+				udh[5] = 0x00;	// message reference number
+				offset = 6;
 
-        for (j = 0; j < nr_msg; j++)
-        {
-          udh[5] = j + 1;
+				for (j = 0; j < nr_msg; j++) {
+					udh[5] = j + 1;
+					memcpy(sms.UserData[0].u.Text,udh,offset);
+					strncpy (sms.UserData[0].u.Text+offset, text + (j * 153), 153);
+					sms.UserData[0].u.Text[153] = '\0';
 
-          memcpy(sms.UserData[0].u.Text,udh,offset);
-          strncpy (sms.UserData[0].u.Text+offset, text + (j * 153), 153);
-          sms.UserData[0].u.Text[153] = '\0';
+					buf = g_strdup_printf (_("Sending SMS to %s (%d/%d) ...\n"),
+							sms.RemoteNumber.number, j + 1, nr_msg);
+					gtk_label_set_text (GTK_LABEL (infoDialog.text), buf);
+					gtk_widget_show_now (infoDialog.dialog);
+					g_free (buf);
+					GUI_Refresh ();
 
-          buf = g_strdup_printf (_("Sending SMS to %s (%d/%d) ...\n"),
-                                 sms.RemoteNumber.number, j + 1, nr_msg);
-          gtk_label_set_text (GTK_LABEL (infoDialog.text), buf);
-          gtk_widget_show_now (infoDialog.dialog);
-          g_free (buf);
-          GUI_Refresh ();
-
-          if (SendSMSCore (&sms) != GE_SMSSENDOK)
-          {
-            gtk_widget_hide (infoDialog.dialog);
-            GUI_Refresh ();
-            break;
-          }
-
-          gtk_widget_hide (infoDialog.dialog);
-          GUI_Refresh ();
-
-          sleep (1);
-        }
-      }
-      else
-      {
-        sms.UDH_Length = 0;
-        nr_msg = ((l - 1) / 153) + 1;
-        if (nr_msg > 99) // We have place only for 99 messages in header.
-          nr_msg = 99;
-        for (j = 0; j < nr_msg; j++)
-        {
-          gchar header[8];
-
-          g_snprintf (header, 8, "%2d/%-2d: ", j + 1, nr_msg);
-          header[7] = '\0';
-
-          strcpy (sms.UserData[0].u.Text, header);
-          strncat (sms.UserData[0].u.Text, text + (j * 153), 153);
-          sms.UserData[0].u.Text[160] = '\0';
-
-          buf = g_strdup_printf (_("Sending SMS to %s (%d/%d) ...\n"),
-                                 sms.RemoteNumber.number, j + 1, nr_msg);
-          gtk_label_set_text (GTK_LABEL (infoDialog.text), buf);
-          gtk_widget_show_now (infoDialog.dialog);
-          g_free (buf);
-          GUI_Refresh ();
-
-          if (SendSMSCore (&sms) != GE_SMSSENDOK)
-          {
-            gtk_widget_hide (infoDialog.dialog);
-            GUI_Refresh ();
-            break;
-          }
-
-          gtk_widget_hide (infoDialog.dialog);
-          GUI_Refresh ();
-
-          sleep (1);
-        }
-      }
-    }
-    else
-    {
-      sms.UDH_Length = 0;
-      strncpy (sms.UserData[0].u.Text, text, GSM_MAX_SMS_LENGTH + 1);
-      sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
-
-      buf = g_strdup_printf (_("Sending SMS to %s ...\n"), sms.RemoteNumber.number);
-      gtk_label_set_text (GTK_LABEL (infoDialog.text), buf);
-      gtk_widget_show_now (infoDialog.dialog);
-      g_free (buf);
-      GUI_Refresh ();
-
-      (void) SendSMSCore (&sms);
-      gtk_widget_hide (infoDialog.dialog);
-      GUI_Refresh ();
-    }
-
-    i++;
-  }
-
-  g_strfreev (addresses);
-
-  g_free (text);
+					if (SendSMSCore (&sms) != GE_SMSSENDOK) {
+						gtk_widget_hide (infoDialog.dialog);
+						GUI_Refresh ();
+						break;
+					}
+					gtk_widget_hide (infoDialog.dialog);
+					GUI_Refresh ();
+					sleep (1);
+				}
+			} else {
+				sms.UDH_Length = 0;
+				nr_msg = ((l - 1) / 153) + 1;
+				if (nr_msg > 99) // We have place only for 99 messages in header.
+				nr_msg = 99;
+				for (j = 0; j < nr_msg; j++) {
+					gchar header[8];
+					g_snprintf (header, 8, "%2d/%-2d: ", j + 1, nr_msg);
+					header[7] = '\0';
+					
+					strcpy (sms.UserData[0].u.Text, header);
+					strncat (sms.UserData[0].u.Text, text + (j * 153), 153);
+					sms.UserData[0].u.Text[160] = '\0';
+					
+					buf = g_strdup_printf (_("Sending SMS to %s (%d/%d) ...\n"),
+							sms.RemoteNumber.number, j + 1, nr_msg);
+					gtk_label_set_text (GTK_LABEL (infoDialog.text), buf);
+					gtk_widget_show_now (infoDialog.dialog);
+					g_free (buf);
+					GUI_Refresh ();
+					
+					if (SendSMSCore (&sms) != GE_SMSSENDOK) {
+						gtk_widget_hide (infoDialog.dialog);
+						GUI_Refresh ();
+						break;
+					}
+					
+					gtk_widget_hide (infoDialog.dialog);
+					GUI_Refresh ();
+					
+					sleep (1);
+				}
+			}
+		} else {
+			sms.UDH_Length = 0;
+			strncpy (sms.UserData[0].u.Text, text, GSM_MAX_SMS_LENGTH + 1);
+			sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
+			
+			buf = g_strdup_printf (_("Sending SMS to %s ...\n"), sms.RemoteNumber.number);
+			gtk_label_set_text (GTK_LABEL (infoDialog.text), buf);
+			gtk_widget_show_now (infoDialog.dialog);
+			g_free (buf);
+			GUI_Refresh ();
+			
+			(void) SendSMSCore (&sms);
+			gtk_widget_hide (infoDialog.dialog);
+			GUI_Refresh ();
+		}
+		i++;
+	}
+	
+	g_strfreev (addresses);
+	g_free (text);
 }
 
 
