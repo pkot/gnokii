@@ -31,6 +31,8 @@
     o fbus echo cancellation and statemachine fix  (BORBELY Zoltan)
     o todo vcalendar import/export functions was mixed
       when libical support is missing              (BORBELY Zoltan)
+    o clear phonebook entry before parsing an input into it
+                                                        (Pawel Kot)
  * xgnokii updates
     o xgnokii tried to open the HTML file according to locale set,
       be smart and try to match the best one is the default is not

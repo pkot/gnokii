@@ -1462,6 +1462,8 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	int length, o, offset = 0;
 	gn_error error = GN_ERR_NONE;
 
+	memset(entry, 0, sizeof(gn_phonebook_entry));
+
 	length = strlen(line);
 	strcpy(backline, line);
 	entry->empty = true;
