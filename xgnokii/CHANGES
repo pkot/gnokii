@@ -1,0 +1,29 @@
+xgnokii-19990906
+Changes in Contacts window:
+- Duplicate is working.
+- Delete accept multiple selection.
+- 'Change memory type' is working and accept multiple selection.
+- 'Select all' is working.
+- Find and 'Find next' is working.
+- Caller groups are working in xgnokii, but in GSM->WritePhonebookLocation
+  function is something wrong and it don't save caller group to phone.
+- New toolbar and xgnokii use some new pixmaps from Robert Vojta.
+Changes in SMS window:
+- We can get SMS's from phone. (Andri Saar <andri@marknet.ee>)
+
+
+xgnokii-19990824
+Changes in Contacts window:
+- Read/Save from/to phone is working.
+- New, Delete, Edit is working.
+- Export to file simply dump memory to standart output.
+- Import, Duplicate, 'Change memory type', 'Sellect all' is not working.
+
+
+xgnokii-19990816
+- My first release of xgnokii.
+- Simple options menu.
+- Application skeleton and some code cleanup.
+- Base for contacts window.
+
+Jan Derfinak <ja@mail.upjs.sk>

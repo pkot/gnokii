@@ -70,6 +70,8 @@ GTKLDFLAGS=`gtk-config --libs`
 # Set up compilation/linking flags for Linux.
 #
 
+export MODEL PORT GETTEXT DEBUG VERSION
+
 COMMON=-Wall -g -O0 \
        ${MODEL} ${PORT} \
        ${GETTEXT} \
@@ -103,8 +105,6 @@ COMMON_OBJS = gsm-api.o \
 
 GNOKII_OBJS = gnokii.o
 
-XGNOKII_OBJS = xgnokii.o
-
 XLOGOS_OBJS = xlogos.o
 
 XKEYB_OBJS = xkeyb.o
@@ -114,13 +114,14 @@ GNOKIID_OBJS = gnokiid.o at-emulator.o virtmodem.o datapump.o
 MGNOKIIDEV_OBJS = mgnokiidev.o
 
 # Build executable
-all: gnokii gnokiid mgnokiidev xgnokii xlogos xkeyb
+all: gnokii gnokiid mgnokiidev bin/xgnokii xlogos xkeyb
 
 gnokii: $(GNOKII_OBJS) $(COMMON_OBJS)
 
 gnokiid: $(GNOKIID_OBJS) $(COMMON_OBJS)
 
-xgnokii: $(XGNOKII_OBJS) $(COMMON_OBJS)
+bin/xgnokii: $(COMMON_OBJS)
+	make -C xgnokii
 
 xlogos: $(XLOGOS_OBJS) $(COMMON_OBJS)
 
@@ -134,11 +135,11 @@ clean:
                $(COMMON_OBJS) \
                gnokii $(GNOKII_OBJS) \
                gnokiid $(GNOKIID_OBJS) \
-               xgnokii $(XGNOKII_OBJS) \
                xlogos $(XLOGOS_OBJS) \
                xkeyb $(XKEYB_OBJS) \
                mgnokiidev $(MGNOKIIDEV_OBJS) \
                gnokii-${VERSION}.tar.gz
+	make -C xgnokii clean
 
 dist:	clean
 	@mkdir -p /tmp/gnokii-${VERSION}
@@ -166,5 +167,4 @@ fbus-3810.o: fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-6110.o: fbus-6110.c fbus-6110.h misc.h gsm-common.h gsm-networks.h
 fbus-6110-auth.o: fbus-6110-auth.c fbus-6110-auth.h
 fbus-6110-ringtones.o: fbus-6110-ringtones.c fbus-6110-ringtones.h
-xgnokii.o: xgnokii.c gsm-api.c gsm-api.h misc.h gsm-common.h
 cfgreader.o: cfgreader.c cfgreader.h
