@@ -454,10 +454,7 @@ API int gn_cfg_read(char **bindir)
 	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
 	if (!*bindir) (char *)*bindir = default_bindir;
 
-	if (!(val = gn_cfg_get(gn_cfg_info, "bluetooth", "rfcomm_cn")))
-		gn_config_global.rfcomm_cn = 14;
-	else
-		gn_config_global.rfcomm_cn = atoi(val);
+	gn_config_global.rfcomm_cn = 1;
 
 	return 0;
 }

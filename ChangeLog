@@ -16,7 +16,9 @@
                                                          (Pawel Kot)
     o do the same for Solaris                            (Pawel Kot)
     o don't modify const variable                        (Pawel Kot)
-    o use the correct order in linking xgnokii
+    o use the correct order in linking xgnokii           (Pawel Kot)
+    o don't expose rfcomm channel to the config file, autodetect
+      the correct channel                          (Marcel Holtmann)
  * general updates
     o Bluetooth support for FBUS mode in nk6510 series   (Pawel Kot,
                                                     Marcel Holtmann)

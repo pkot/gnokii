@@ -94,9 +94,3 @@ smsc_timeout = 10
 [connect_script]
 TELEPHONE = 12345678
 [disconnect_script]
-
-[bluetooth]
-# Bluetooth settings
-# For AT phones and Nokia 6210 use rfcomm channel 1. For other Nokia
-# phones to use FBUS mode you need to use channel 14.
-rfcomm_cn = 1
