@@ -182,9 +182,11 @@ AC_ARG_WITH(libpthread,
 )
 
 dnl Check for libpthread
+PTHREAD_LIBS_SAVE="$PTHREAD_LIBS"
+PTHREAD_LIBS=error
 AC_CHECK_LIB(pthread, pthread_attr_init, [
                       PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_REENTRANT"
-		      PTHREAD_LIBS="$PTHREAD_LIBS -pthread" ])
+		      PTHREAD_LIBS="$PTHREAD_LIBS_SAVE -pthread" ])
 
 dnl FIXME: test this on *BSD and report results immediatelly to the ml please
 dnl If it is not found, try to check for c_r (on FreeBSD)
@@ -200,7 +202,6 @@ if test "x$PTHREAD_LIBS" = xerror; then
 		AC_MSG_ERROR(not found library: pthread !!!))
 fi
 
-dnl ---- FIXME: Check this one
 AC_TRY_CPP([#include <getopt.h>], AC_MSG_RESULT(
 	[checking for getopt.h... yes]), [
 	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
@@ -210,6 +211,10 @@ AC_TRY_CPP([#include <getopt.h>], AC_MSG_RESULT(
 		[checking for getopt.h... /usr/local/include/getopt.h])],
 		AC_MSG_ERROR(not found header file: getopt.h !!!))
 	])
+AC_CHECK_FUNC(getopt_long, , [
+        LIBS="$LIBS -L/usr/local/lib"
+	        AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt",
+		                AC_MSG_ERROR(not found library: gnugetopt !!!))])
 
 dnl ======================== Checks for X base support 
 
