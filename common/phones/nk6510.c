@@ -921,7 +921,13 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	req[14] = data->RawSMS->PID;
 	req[15] = data->RawSMS->DCS;
 	req[16] = 0x00;
+
+	/* Magic. Nokia new ideas: coding SMS in the sequent blocks */
 	req[17] = 0x03; /* total blocks */
+
+	/* FIXME. Do it in the loop */
+
+	/* Block 1. Remote Number */
 	req[18] = 0x82; /* type: number */
 	req[19] = 0x0c; /* offset to next block starting from start of block (req[18]) */
 	req[20] = 0x01; /* first number field => RemoteNumber */
@@ -929,22 +935,25 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	memcpy(req + 22, data->RawSMS->RemoteNumber, 8);
 
+	/* Block 2. SMSC Number */
 	memcpy(req + 30, "\x82\x0c\x02\x08", 4); /* as above 0x02 => MessageCenterNumber */
 	memcpy(req + 34, data->RawSMS->MessageCenter, 8);
 
+	/* Block 3. User Data */
 	req[42] = 0x80; /* type: User Data */
 
 	req[43] = data->RawSMS->UserDataLength + 1; /* same as req[11] but starting from req[42] */
 		/*0x08 + 4 * ((data->RawSMS->UserDataLength - 1) / 4); Don't ask me why. */
-                     
 	req[44] = data->RawSMS->Length; /* Don't know. Normally it should be a little less than text length */
 	req[45] = data->RawSMS->Length;
 	memcpy(req + 46, data->RawSMS->UserData, data->RawSMS->UserDataLength);
 
+	/* Block 4. Validity Period ? */
 	//	memcpy(req + 46 + data->RawSMS->UserDataLength, "\x00\x6f\x31\xc1", 4); /* What's this? */
+
 	dprintf("Sending SMS...(%d)\n", 46 + data->RawSMS->UserDataLength);
 	if (SM_SendMessage(state, 46 + data->RawSMS->UserDataLength, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
-	SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, 100);
+	return SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, 100);
 }
 
 /**********************/
