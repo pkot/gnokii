@@ -508,10 +508,6 @@ static gint A_GetMemoryLocationAll(gpointer data)
 	entry.MemoryType = mla->type;
 	gdat.PhonebookEntry = &entry;
 
-	gdat.Bitmap = NULL; /* FIXME: do we need the bitmap here? I don't think so. Unfortunately
-			       gdat doesn't seem to be nulled at the moment. This is just workaround.
-			       The correct fix would be to be sure that unneded entries are nulled.*/
-
 	pthread_mutex_lock(&memoryMutex);
 	for (i = mla->min; i <= mla->max; i++) {
 		entry.Location = i;
