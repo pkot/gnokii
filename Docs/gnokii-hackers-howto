@@ -17,13 +17,13 @@ Overview:
 Application (gnokii/xgnoki)
     |  do_something()
 (Middle-layer aka gnokii API)
-    |  GSM->Function() 
+    |  gsm->function() 
 gsm-api
-    |  P*_Functions()
+    |  p*_functions()
 Phone specific code (eg nk7110.c)
-    |  SM_SendMessage(), SM_Wait(), SM_Loop()
+    |  gn_sm_message_send(), gn_sm_wait(), gn_sm_loop()
 StateMachine
-    |  SendMessage(), Loop()
+    |  sm_send_message(), sm_loop()
 Link specific code  (eg fbus.c)
     |
 Hardware code
@@ -40,12 +40,12 @@ The gnokii application (eg gnokii, xgnokii) decides on the phone type and
 required connection method from the config file.  It then calls the
 gsm-api init code which in turn calls the init code for the correct phone.  
 This code is located in a series of files phone/*.c.  This code creates a
-GSM_State structure (which contains a GSM_Link structure) and passes this
-to the common code for the specific link (eg FBUS_Initialise, contained in
-fbus.c).  The link code fills in the GSM_Link part of state (and
+gn_state structure (which contains a gn_link structure) and passes this
+to the common code for the specific link (eg fbus_initialise, contained in
+fbus.c).  The link code fills in the gn_link part of state (and
 also stores state to use later).  The phone code chooses the appropriate
 link and is free to perform any phone specific init.  It then initialises
-the StateMachine by passing it the state struct and a GSM_Phone struct.
+the StateMachine by passing it the state struct and a gn_driver struct.
 
 
 The Link:
@@ -53,17 +53,17 @@ The Link:
 The link serves to deal with bits of the phone protocol which are common to
 every exchange for that particular phone.
 
-The GSM_Link structure is used to contain any information about the link
+The gn_link structure is used to contain any information about the link
 which is required by the StateMachine.  Two vital functions in the link
-are SendMessage and Loop:
+are sm_send_message and sm_loop:
 
-SendMessage(u16 messagesize, u8 messagetype, void *message)
+sm_send_message(u16 messagesize, u8 messagetype, void *message)
    is the function called by the statemachine code to send a message 'down
    the pipe'.  The parameters are intended to be generic (though with 
    obvious origins :-)  For example 'at' commands could be enumerated and 
    passed as messagetype.
 
-Loop(struct timeval *timeout)
+sm_loop(struct timeval *timeout)
    is a function which must be called regularly by the statemachine code
    to enable to link code to process date from the phone.  This is due to 
    the code now being single threaded and using select/poll.  The timeout 
@@ -102,7 +102,7 @@ information.  Lastly the phone may send the computer unrequested
 information (ring!).  Therefore the functions in the phone code need to 
 process one of these three things:
 
-1) Just sending out is easy - we simply call SM_SendMessage - which in
+1) Just sending out is easy - we simply call gn_sm_send_message - which in
 turn calls the link sendmessage.
 
 2) Command and response.  There are two ways to do this.  In both cases we
@@ -120,7 +120,7 @@ but the phone code merely remembers it and does not return any data.
 
 
 So, the phone file contains two types of functions.  Some are called by
-the application (via GSM_Functions) - and some by the statemachine
+the application (via gn_functions) - and some by the statemachine
 (IncomingFunctions[]).  The application ones assemble a request and pass
 it on down to the statemachine.  They then block to the statemachine until
 the answer is ready.  The statemachine recieves data from the link and
@@ -138,30 +138,30 @@ MessageSent
 Waiting
 AnswerReady
 
-When SM_SendMessage is called by the phone (application code), we go to
+When gn_sm_send_message is called by the phone (application code), we go to
 state MessageSent.  The message is passed on to the link, but stored
 internally as well in-case it needs to be resent.
 
 If at any point an message from the link is received this is passed onto
 the phone (incoming) code.
 
-If the phone code calls SM_WaitFor, we go to state Waiting.  Now if an
+If the phone code calls gn_sm_waitfor, we go to state Waiting.  Now if an
 answer comes back from the phone code (eg a received logo) we store it
 internally in the statemachine and go to state AnswerReady.
 
-When the phone code calls SM_GetAnswer, we pass up the stored answer and
+When the phone code calls sm_get_answer, we pass up the stored answer and
 go back to Initialised.
 
 Note that all of this can, or can not be done as a seperate thread.  For
-now, we will have a SM_Loop function (which blocks for a required time and
+now, we will have a gn_sm_loop function (which blocks for a required time and
 returns the current state) so that we can work within one thread.
 
 
 PhoneGeneric:
 
 This now contains one handy helper function which serves only to call
-SM_WaitFor, then SM_Loop repeatedly until the state goes to AnswerReady,
-and then SM_GetAnswer.  This is just to save repeating code.
+gn_sm_waitfor, then gn_sm_loop repeatedly until the state goes to AnswerReady,
+and then sm_get_answer.  This is just to save repeating code.
 
 
 -----------------------
@@ -169,10 +169,10 @@ and then SM_GetAnswer.  This is just to save repeating code.
 Note that this leaves the phone code very similar to the basic layout of
 eg fbus-6110.c but removes all the:
 
-static GSM_DateTime       *CurrentAlarm;
-static gn_error          CurrentAlarmError;
+static gn_timestamp	*CurrentAlarm;
+static gn_error		CurrentAlarmError;
 
-,makes everything well orderd and splits up DispatchMessage into byte
+makes everything well orderd and splits up DispatchMessage into byte
 sized chunks!
 
 -----------------------
