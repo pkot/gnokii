@@ -804,10 +804,10 @@ static gn_error sms_free_deleted(gn_data *data, int folder)
 			dprintf("Found deleted message, which will now be freed! %i , %i\n",
 					i, data->message_list[i][folder]->location);
 			for (j = i; j < data->folder_stats[folder]->used; j++) {
-				data->folder_stats[folder]->used--;
 				memcpy(data->message_list[j][folder], data->message_list[j + 1][folder],
 						sizeof(gn_sms_message_list));
 			}
+			data->folder_stats[folder]->used--;
 			i--;
 		}
 	}
