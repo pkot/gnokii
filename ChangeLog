@@ -14,6 +14,7 @@
     o lockup during the phonebook reading fixed      (BORBELY Zoltan)
     o added extended phonebook support                 (Markus Plail)
     o some minor fixes in contacts                     (Markus Plail)
+    o update to compile with the new SMS subsystem     (Markus Plail)
  * gnokii updates:
     o let gnokii display usage instruction to stdout when it's
     called with --help or -h and to stderr otherwise      (Pawel Kot)
@@ -23,6 +24,8 @@
  * Cleanups in the 7110 driver                            (Pawel Kot)
  * 7110 series updates
     o added writing of non GSM_Number subentries       (Markus Plail)
+ * 6510 series updates
+    o update to work with new SMS subsystem            (Markus Plail)
 
 0.4.0pre20
 ==========
