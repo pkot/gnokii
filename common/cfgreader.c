@@ -24,6 +24,7 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 {
     FILE *handle;
     char *line;
+    char *buf;
     struct CFG_Header *cfg_info = NULL, *cfg_head = NULL;
 
     /* Error check */
@@ -34,10 +35,10 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 
     /* Initialisation */
 
-    if ((line = (char *)malloc(255)) == NULL) {
+    if ((buf = (char *)malloc(255)) == NULL) {
 		return NULL;
     }
-
+    
     /* Open file */
 
     if ((handle = fopen(filename, "r")) == NULL) {
@@ -49,8 +50,9 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 
     /* Iterate over lines in the file */
 
-    while (fgets(line, 255, handle) != NULL) {
+    while (fgets(buf, 255, handle) != NULL) {
 
+		line = buf;
 		/* Strip leading, trailing whitespace */
 
 		while(isspace(*line)) {

@@ -24,7 +24,7 @@ static char *Send_xpm[] = {
 "b c #008000",
 "c c #00ff00",
 "i c #808080",
-"  c #d6d6d6",
+"  c None",
 "l c #ffffff",
 
 "                    ",

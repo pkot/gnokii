@@ -134,7 +134,7 @@ mgnokiidev: $(MGNOKIIDEV_OBJS)
 
 # Misc targets
 clean:
-	@rm -f core *~ *% *.bak bin \
+	@rm -f core *~ *% *.bak bin/* \
                $(COMMON_OBJS) \
                gnokii $(GNOKII_OBJS) \
                gnokiid $(GNOKIID_OBJS) \

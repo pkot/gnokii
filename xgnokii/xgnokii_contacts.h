@@ -8,7 +8,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Mon Aug 23 1999
+  Last modification: Mon Sep 22 1999
   Modified by Jan Derfinak
 
 */
@@ -26,10 +26,10 @@
 
 /* Structure to keep memory status information */
 typedef struct {
-  int MaxME;
-  int UsedME;
-  int FreeME;
-  int MaxSM;
+  int MaxME;		/* Maximum Phone memory entries. */
+  int UsedME;		/* Actualy used Phone memory entries. */
+  int FreeME;		/* FreeME = MaxME - UsedME */
+  int MaxSM;		/* Maximum SIM memory entries. */
   int UsedSM;
   int FreeSM;
 } MemoryStatus;
@@ -39,16 +39,16 @@ typedef GPtrArray* ContactsMemory;
 
 /* Structure to keep contacts memory entry status */
 typedef enum {
-  E_Unchanged,
-  E_Changed,
-  E_Deleted,
-  E_Empty
+  E_Unchanged,		/* Entry is not empty and is unchanged. */
+  E_Changed,		/* Entry is not empty and is changed. */
+  E_Deleted,		/* Entry was deleted. */
+  E_Empty		/* Entry is empty. */
 } EntryStatus;
 
-/* Structure of status memory entry */
+/* Memory entry data */
 typedef struct {
-  GSM_PhonebookEntry entry;
-  EntryStatus status;
+  GSM_PhonebookEntry entry;	/* Phonebook entry self. */
+  EntryStatus status;		/* Entry status. */
 } PhonebookEntry;
 
 /* Structure to hold information of Edit and New dialogs */
@@ -64,6 +64,7 @@ typedef struct {
   gint      row;
 } EditEntryData;
 
+/* Structure to hold information for FindEntry dialog. */
 typedef struct {
   GtkWidget *dialog;
   GtkWidget *pattern;
@@ -71,18 +72,35 @@ typedef struct {
   GtkWidget *numberB;
 } FindEntryData;
 
+/* Contains fileName for Export dialog. */
 typedef struct {
   gchar *fileName;
 } ExportDialogData;
 
+/* Hold widgets for SelectContactDialog */
+typedef struct {
+  GtkWidget *dialog;
+  GtkWidget *clist;			/* list of contacts */
+  GtkWidget *clistScrolledWindow;
+  GtkWidget *okButton;			/* Ok and Cancel button widgets */
+  GtkWidget *cancelButton;
+} SelectContactData;
+
+typedef struct {
+  GtkWidget *clist;
+  gint       column;
+} SortColumn;
+
+/* Max length for status line. (Line that shows used/max information for
+   memories). */
 #define STATUS_INFO_LENGTH	40
 
 /* Structure to hold information for status line (bottom line of window) */
 typedef struct {
   GtkWidget *label;
-  gchar text[STATUS_INFO_LENGTH];
-  gint ch_ME:1;
-  gint ch_SM:1;
+  gchar text[STATUS_INFO_LENGTH];	/* Status line text. */
+  gint ch_ME:1;				/* 1 if phone memory was changed */
+  gint ch_SM:1;				/* 1 if phone SIM was changed */
 } StatusInfo;
 
 /* Structure to hold information for progress dialog */
@@ -92,6 +110,7 @@ typedef struct {
   GtkWidget *pbarSM;
 } ProgressDialog;
 
+/* Search type. */
 typedef enum {
   FIND_NAME = 0,
   FIND_NUMBER
@@ -120,7 +139,7 @@ extern void GUI_ShowContacts();
 /* return != 0 if user has unsaved changes in contacts memory */ 
 extern gint GUI_ContactsIsChanged();
 
-/* return TRUE is user had read memory from phone */
+/* return TRUE if Contacts memory was read from phone or from file */
 extern bool GUI_ContactsIsIntialized();
 
 /* Read contacts from phone */
@@ -129,5 +148,18 @@ extern void GUI_ReadContacts();
 /* Save contacts to phone */
 extern void GUI_SaveContacts();
 
+/* Create save question dialog and can end application */
 extern void GUI_QuitSaveContacts();
+
+extern void GUI_RefreshContacts();
+
+/* Function take number and return name belonged to number.
+   If no name is found, return NULL;
+   Do not modify returned name!					*/
+extern gchar *GUI_GetName(gchar *number);
+
+/* Function show dialog with contacts and let select entries.
+   See xgnokii_contacts.c for sample of use.			*/
+extern SelectContactData *GUI_SelectContactDialog();
+
 #endif

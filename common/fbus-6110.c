@@ -1299,7 +1299,13 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 
   current+=strlen(entry->Number);
 
-  req[current++]=entry->Group;
+  /* Jano: This allow to save 14 characters name into SIM memory, when
+     No Group is selected. */
+
+  if (entry->Group == 5)
+    req[current++]=0xff;
+  else
+    req[current++]=entry->Group;
 
   FB61_TX_SendMessage(current, 3, req);
 

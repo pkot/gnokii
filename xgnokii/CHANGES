@@ -1,3 +1,21 @@
+xgnokii-19991010
+Changes in Options window:
+- Added User information edit window (needed for Business Card).
+- Added SMS settings windows. Xgnokii can only read SMS centers numbers from
+  phone. I can't read SMS set name, SMS format and Validity period from phone.
+  I can't also write any SMS setting in phone. And I don't know differencies
+  between SMS formats. :(
+- Added Groups names edit window. I can change group names in xgnokii. But
+  I can't read or write group names from/to phone because I don't have support
+  in gnokii. 
+- Added Alarm window. Xgnokii can read alarm from phone and set alarm in
+  phone. It can't unset alarm because lack support in gnokii.
+Changes in Contacts window:
+- Added Voice dial function.
+- Allowed sort order changing by clicking on titles.
+- Removed bug, when contacts in SIM card was not removed from phone, when
+  deleted in xgnokii.
+
 xgnokii-19990915
 Changes in Contacts window:
 - Fixed scrolling.

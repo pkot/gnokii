@@ -1,0 +1,181 @@
+/*
+
+  X G N O K I I
+  
+  A Linux/Unix GUI for Nokia mobile phones.
+  Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
+  & Ján Derfiòák <ja@mail.upjs.sk>.
+  
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+  
+  Last modification: Mon Oct 10 1999
+  Modified by Jan Derfinak
+              
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+
+#include "xgnokii_cfg.h"
+#include "xgnokii.h"
+
+ConfigEntry config[] = {
+ {"name",      &(xgnokiiConfig.user.name)},
+ {"title",     &(xgnokiiConfig.user.title)},
+ {"company",   &(xgnokiiConfig.user.company)},
+ {"telephone", &(xgnokiiConfig.user.telephone)},
+ {"fax",       &(xgnokiiConfig.user.fax)},
+ {"email",     &(xgnokiiConfig.user.email)},
+ {"address",   &(xgnokiiConfig.user.address)},
+ {"",          NULL}
+};
+
+static void GetDefaultValues()
+{
+  xgnokiiConfig.user.name = g_strdup ("");
+  xgnokiiConfig.user.title = g_strdup ("");
+  xgnokiiConfig.user.company = g_strdup ("");
+  xgnokiiConfig.user.telephone = g_strdup ("");
+  xgnokiiConfig.user.fax = g_strdup ("");
+  xgnokiiConfig.user.email = g_strdup ("");
+  xgnokiiConfig.user.address = g_strdup ("");
+}
+
+void GUI_ReadXConfig()
+{
+  FILE *file;
+  gchar *line;
+  gchar *homedir;
+  gchar *rcfile;
+  gchar *current;
+  register gint len;
+  register gint i;
+  
+  GetDefaultValues();
+  
+  if ((homedir = getenv("HOME")) == NULL)
+  {
+    g_print("WARNING: Can't find HOME enviroment variable!\n");
+    return;
+  }
+  
+  if ((rcfile = g_strconcat (homedir, "/.xgnokiirc", NULL)) == NULL)
+  {
+    g_print("WARNING: Can't allocate memory for config reading!\n");
+    return;
+  }
+    
+  if ((file = fopen (rcfile, "r")) == NULL)
+  {
+    g_free(rcfile);
+    return;
+  }
+  
+  g_free(rcfile);
+  
+  if ((line = (char *) g_malloc(255)) == NULL)
+  {
+    g_print("WARNING: Can't allocate memory for config reading!\n");
+    fclose(file);
+    return;
+  }
+  
+  while (fgets(line, 255, file) != NULL)
+  {
+    current = line;
+    
+    /* Strip leading, trailing whitespace */
+    
+    while(isspace(*current))
+      current++;
+    
+    while((strlen(current) > 0) && isspace(current[strlen(current) - 1]))
+      current[strlen(current) - 1] = '\0';
+      
+    /* Ignore blank lines and comments */
+            
+    if ((*current == '\n') || (*current == '\0') || (*current == '#'))
+      continue;
+    
+    i = 0;
+    while (*config[i].key != '\0')
+    {
+      len = strlen(config[i].key);
+      if (g_strncasecmp (config[i].key, current, len) == 0)
+      {
+        current += len;
+        while(isspace(*current))
+          current++;
+        if (*current == '=')
+        {
+          current++;
+          while(isspace(*current))
+            current++;
+          g_free(*config[i].value);
+          if (i == 3 || i == 4)
+            *config[i].value = g_strndup (current, max_phonebook_number_length);
+          else
+            *config[i].value = g_strndup (current, MAX_BUSINESS_CARD_LENGTH);  
+        }
+      }  
+      i++;
+    }
+  }
+  
+  fclose(file);
+  g_free(line);
+}
+
+gint GUI_SaveXConfig()
+{
+  FILE *file;
+  gchar *line;
+  gchar *homedir;
+  gchar *rcfile;
+  register gint i;
+  
+  if ((homedir = getenv("HOME")) == NULL)
+  {
+    g_print("ERROR: Can't find HOME enviroment variable!\n");
+    return(1);
+  }
+  
+  if ((rcfile = g_strconcat (homedir, "/.xgnokiirc", NULL)) == NULL)
+  {
+    g_print("ERROR: Can't allocate memory for config writing!\n");
+    return(2);
+  }
+    
+  if ((file = fopen (rcfile, "w")) == NULL)
+  {
+    g_print("ERROR: Can't open file %s for writing!\n", rcfile);
+    g_free(rcfile);
+    return(3);
+  }
+  
+  g_free(rcfile);
+  
+  i = 0;
+  while (*config[i].key != '\0')
+  {
+    if ((line = g_strdup_printf ("%s = %s\n", config[i].key, *config[i].value)) == NULL)
+    {
+      g_print ("ERROR: Can't allocate memory for config writing!\n");
+      fclose (file);
+      return (2);
+    }
+    if (fputs ( line, file) == EOF)
+    {
+      g_print ("ERROR: Can't write file config file!\n");
+      g_free (line);
+      fclose (file);
+      return (4);
+    }
+    g_free (line);
+    i++;
+  }
+  
+  fclose (file);
+  return (0);
+}

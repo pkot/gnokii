@@ -8,7 +8,7 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Mon Aug 23 1999
+  Last modification: Mon Oct 10 1999
   Modified by Jan Derfinak
 
 */
@@ -32,6 +32,7 @@
 #include "../pixmaps/Duplicate.xpm"
 #include "../pixmaps/Edit.xpm"
 #include "../pixmaps/Delete.xpm"
+#include "../pixmaps/Dial.xpm"
 #include "../pixmaps/sim.xpm"
 #include "../pixmaps/phone.xpm"
 #include "../pixmaps/quest.xpm"
@@ -40,9 +41,8 @@
 static GtkWidget *GUI_ContactsWindow;
 static bool contactsMemoryInitialized;
 static MemoryStatus memoryStatus;
-static ContactsMemory contactsMemory;
+static ContactsMemory contactsMemory;	/* Hold contacts. */
 static GtkWidget *clist;
-static GtkWidget *clistScrolledWindow;
 static StatusInfo statusInfo;
 static ProgressDialog progressDialog = {NULL, NULL, NULL};
 static ErrorDialog errorDialog = {NULL, NULL};
@@ -51,11 +51,13 @@ static ExportDialogData exportDialogData = {NULL};
 static MemoryPixmaps memoryPixmaps;
 static QuestMark questMark;
 
+/* return != 0 if user has unsaved changes in contacts memory */
 inline gint GUI_ContactsIsChanged()
 {
   return statusInfo.ch_ME | statusInfo.ch_SM;
 }
 
+/* return TRUE if Contacts memory was read from phone or from file */
 inline bool GUI_ContactsIsIntialized()
 {
   return contactsMemoryInitialized;
@@ -80,32 +82,32 @@ void RefreshStatusInfo()
   gtk_label_set_text(GTK_LABEL (statusInfo.label), statusInfo.text);
 }
 
-inline void SetGroup0( GtkWidget *item, gpointer data)
+static inline void SetGroup0( GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 0;
 }
 
-inline void SetGroup1( GtkWidget *item, gpointer data)
+static inline void SetGroup1( GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 1;
 }
 
-inline void SetGroup2( GtkWidget *item, gpointer data)
+static inline void SetGroup2( GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 2;
 }
 
-inline void SetGroup3( GtkWidget *item, gpointer data)
+static inline void SetGroup3( GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 3;
 }
 
-inline void SetGroup4( GtkWidget *item, gpointer data)
+static inline void SetGroup4( GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 4;
 }
 
-inline void SetGroup5( GtkWidget *item, gpointer data)
+static inline void SetGroup5( GtkWidget *item, gpointer data)
 {
   ((EditEntryData *) data)->newGroup = 5;
 }
@@ -1121,8 +1123,26 @@ static void SelectAll()
   gtk_clist_select_all(GTK_CLIST (clist));
 }
 
+static void DialVoice()
+{
+  PhonebookEntry *pbEntry;
+  
+  if (contactsMemoryInitialized)
+  {
+    if (GTK_CLIST (clist)->selection == NULL)
+      return;
+    
+    pbEntry = (PhonebookEntry *) gtk_clist_get_row_data(GTK_CLIST (clist),
+                GPOINTER_TO_INT(GTK_CLIST (clist)->selection->data));
+                
+    GSM->DialVoice(pbEntry->entry.Number);
+  }
+}
+
 static gint CListCompareFunc(GtkCList *clist, gconstpointer ptr1, gconstpointer ptr2)
 {
+  static gchar phoneText[] = "B";
+  static gchar simText[] = "A";
   char *text1 = NULL;
   char *text2 = NULL;
   gint ret;
@@ -1153,6 +1173,18 @@ static gint CListCompareFunc(GtkCList *clist, gconstpointer ptr1, gconstpointer 
       break;
     }
 
+  if (clist->sort_column == 2)
+  {
+    if (((PhonebookEntry *) row1->data)->entry.MemoryType == GMT_ME)
+      text1 = phoneText;
+    else
+      text1 = simText;
+    if (((PhonebookEntry *) row2->data)->entry.MemoryType == GMT_ME)
+      text2 = phoneText;
+    else
+      text2 = simText;
+  }
+  
   if (!text2)
     return (text1 != NULL);
 
@@ -1168,6 +1200,12 @@ static gint CListCompareFunc(GtkCList *clist, gconstpointer ptr1, gconstpointer 
   }
   
   return ret;      
+}
+
+static void SetSortColumn( GtkWidget *widget, SortColumn *data)
+{
+  gtk_clist_set_sort_column(GTK_CLIST (data->clist), data->column);
+  gtk_clist_sort(GTK_CLIST (data->clist));
 }
 
 static void CreateProgressDialog(gint maxME, gint maxSM)
@@ -1227,7 +1265,11 @@ static void SaveContacts()
     for(i = 0; i < memoryStatus.MaxME; i++)
     {
       pbEntry = g_ptr_array_index(contactsMemory, i);
-    
+#ifdef XDEBUG    
+      g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.Empty, pbEntry->entry.Name,
+              pbEntry->entry.Number, (int) pbEntry->entry.MemoryType, pbEntry->entry.Group,
+              (int) pbEntry->status);
+#endif
       if (pbEntry->status == E_Changed || pbEntry->status == E_Deleted)
       {
         if (pbEntry->status == E_Deleted)
@@ -1252,9 +1294,21 @@ static void SaveContacts()
     for(i = memoryStatus.MaxME; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
     {
       pbEntry = g_ptr_array_index(contactsMemory, i);
-    
+
+#ifdef XDEBUG    
+      g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.Empty, pbEntry->entry.Name,
+              pbEntry->entry.Number, (int) pbEntry->entry.MemoryType, pbEntry->entry.Group,
+              (int) pbEntry->status);
+#endif
+
       if (pbEntry->status == E_Changed || pbEntry->status == E_Deleted)
       {
+        if (pbEntry->status == E_Deleted)
+        {
+          pbEntry->entry.Name[0] = '\0';
+          pbEntry->entry.Number[0] = '\0';
+          pbEntry->entry.Group = 5;
+        }
         error = GSM->WritePhonebookLocation( i - memoryStatus.MaxME + 1, &pbEntry->entry);
         if (error != GE_NONE)
         {
@@ -1327,13 +1381,63 @@ static GtkWidget *CreateSaveQuestionDialog( GtkSignalFunc SaveFunc,
   return dialog;
 }
 
+void GUI_RefreshContacts()
+{
+  PhonebookEntry *pbEntry;
+  gint row_i = 0;
+  register gint i;
+  
+  if (contactsMemoryInitialized == FALSE)
+    return;
+    
+  gtk_clist_freeze(GTK_CLIST (clist));
+
+  gtk_clist_clear(GTK_CLIST (clist));
+
+  for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
+  {
+    gchar *row[4];
+    
+    pbEntry = g_ptr_array_index(contactsMemory, i);
+    if (pbEntry->status != E_Empty)
+    {
+      row[0] = pbEntry->entry.Name;
+      row[1] = pbEntry->entry.Number;
+      if( pbEntry->entry.MemoryType == GMT_ME)
+        row[2] = "P";
+      else
+        row[2] = "S";
+      if (xgnokiiConfig.callerGroupsSupported)
+        row[3] = xgnokiiConfig.callerGroups[pbEntry->entry.Group];
+      else
+        row[3] = "";
+      gtk_clist_append( GTK_CLIST (clist), row);
+      if (pbEntry->entry.MemoryType == GMT_ME)
+        gtk_clist_set_pixmap( GTK_CLIST (clist), row_i, 2,
+                              memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
+      else
+        gtk_clist_set_pixmap( GTK_CLIST (clist), row_i, 2,
+                              memoryPixmaps.simMemPix, memoryPixmaps.mask);
+         
+      gtk_clist_set_row_data( GTK_CLIST (clist), row_i++, (gpointer) pbEntry);
+    }
+#ifdef XDEBUG    
+    g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.Empty, pbEntry->entry.Name,
+            pbEntry->entry.Number, (int) pbEntry->entry.MemoryType, pbEntry->entry.Group,
+            (int) pbEntry->status);
+#endif
+  }
+  
+  gtk_clist_sort(GTK_CLIST (clist));
+  gtk_clist_thaw(GTK_CLIST (clist));
+}
+
 static void ReadContactsMain()
 {
   GSM_MemoryStatus gsm_MemoryStatus;
   PhonebookEntry *pbEntry;
-  register int i;
+  register gint i;
   GSM_Error error;
-  gint row_i = 0;
   bool fbus3810 = FALSE;
    
   if (contactsMemoryInitialized == TRUE)
@@ -1345,7 +1449,7 @@ static void ReadContactsMain()
     }
     g_ptr_array_free(contactsMemory, TRUE);
     contactsMemory = NULL;
-    gtk_clist_clear((GtkCList *) clist);
+    gtk_clist_clear(GTK_CLIST (clist));
     contactsMemoryInitialized = FALSE;
     memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME =
     memoryStatus.MaxSM = memoryStatus.UsedSM = memoryStatus.FreeSM = 0;
@@ -1493,48 +1597,11 @@ Max SIM entries set to 100!\n");
   }
   
 
-
-  gtk_clist_freeze((GtkCList*) clist);
-  for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
-  {
-    gchar *row[4];
-    
-    pbEntry = g_ptr_array_index(contactsMemory, i);
-    if (pbEntry->status != E_Empty)
-    {
-      row[0] = pbEntry->entry.Name;
-      row[1] = pbEntry->entry.Number;
-      if( pbEntry->entry.MemoryType == GMT_ME)
-        row[2] = "P";
-      else
-        row[2] = "S";
-      if (xgnokiiConfig.callerGroupsSupported)
-        row[3] = xgnokiiConfig.callerGroups[pbEntry->entry.Group];
-      else
-        row[3] = "";
-      gtk_clist_append( GTK_CLIST (clist), row);
-      if (pbEntry->entry.MemoryType == GMT_ME)
-        gtk_clist_set_pixmap( GTK_CLIST (clist), row_i, 2,
-                              memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
-      else
-        gtk_clist_set_pixmap( GTK_CLIST (clist), row_i, 2,
-                              memoryPixmaps.simMemPix, memoryPixmaps.mask);
-         
-      gtk_clist_set_row_data( GTK_CLIST (clist), row_i++, (gpointer) pbEntry);
-    }
-#ifdef XDEBUG    
-    g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.Empty, pbEntry->entry.Name,
-            pbEntry->entry.Number, (int) pbEntry->entry.MemoryType, pbEntry->entry.Group,
-            (int) pbEntry->status);
-#endif
-  }
-  
-  gtk_clist_sort((GtkCList*) clist);
-  gtk_clist_thaw((GtkCList*) clist);
   gtk_widget_hide(progressDialog.dialog);
   
   contactsMemoryInitialized = TRUE;
   statusInfo.ch_ME = statusInfo.ch_SM = 0;
+  GUI_RefreshContacts();
 }   
 
 static void ReadSaveCallback( GtkWidget *widget, gpointer data)
@@ -1568,6 +1635,7 @@ static void ReadContacts()
     ReadContactsMain();
 }
  
+
 inline void GUI_ReadContacts()
 {
   ReadContacts();
@@ -1701,6 +1769,7 @@ static void ExportContacts()
     gtk_widget_show(fileDialog);
   }
 }
+
 
 static bool ParseLine( GSM_PhonebookEntry *entry, gint *num, gchar *buf)
 {
@@ -1842,7 +1911,6 @@ static void OkImportDialog( GtkWidget *w, GtkFileSelection *fs)
   gchar *fileName;
   GSM_Error error;
   gint i;
-  gint row_i = 0;
    
   fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION (fs));
   gtk_widget_hide(GTK_WIDGET (fs));
@@ -1983,47 +2051,9 @@ Max SIM entries set to 100!\n");
     }
   }
   
-  RefreshStatusInfo();
-  
-  gtk_clist_freeze(GTK_CLIST (clist));
-  for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
-  {
-    gchar *row[4];
-    
-    pbEntry = g_ptr_array_index(contactsMemory, i);
-    if (pbEntry->status != E_Empty)
-    {
-      row[0] = pbEntry->entry.Name;
-      row[1] = pbEntry->entry.Number;
-      if( pbEntry->entry.MemoryType == GMT_ME)
-       row[2] = "P";
-      else
-       row[2] = "S";
-      if (xgnokiiConfig.callerGroupsSupported)
-        row[3] = xgnokiiConfig.callerGroups[pbEntry->entry.Group];
-      else
-        row[3] = "";
-      gtk_clist_append(GTK_CLIST (clist), row);
-      if (pbEntry->entry.MemoryType == GMT_ME)
-        gtk_clist_set_pixmap( GTK_CLIST (clist), row_i, 2,
-                              memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
-      else
-        gtk_clist_set_pixmap( GTK_CLIST (clist), row_i, 2,
-                              memoryPixmaps.simMemPix, memoryPixmaps.mask);
-
-      gtk_clist_set_row_data(GTK_CLIST (clist), row_i++, (gpointer) pbEntry);
-    }
-#ifdef XDEBUG    
-    g_print("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.Empty, pbEntry->entry.Name,
-            pbEntry->entry.Number, (int) pbEntry->entry.MemoryType, pbEntry->entry.Group,
-            (int) pbEntry->status);
-#endif
-  }
-  
-  gtk_clist_sort(GTK_CLIST (clist));
-  gtk_clist_thaw(GTK_CLIST (clist));
-  
   contactsMemoryInitialized = TRUE;
+  RefreshStatusInfo();
+  GUI_RefreshContacts();
 }
 
 static void ImportContactsFileDialog()
@@ -2099,6 +2129,230 @@ void GUI_QuitSaveContacts()
   gtk_widget_show( dialog);
 }
 
+/* Function take number and return name belonged to number.
+   If no name is found, return NULL;
+   Do not modify returned name!
+*/
+gchar *GUI_GetName(gchar *number)
+{
+  gchar noCountryNum[11];
+  PhonebookEntry *pbEntry;
+  gint len;
+  register gint i;
+  
+  if (contactsMemoryInitialized == FALSE || number == NULL)
+    return (gchar *)NULL;
+  
+  len = strlen(number);
+  if (len > 9)
+  {
+    for (i = len; (len - i) < 10; i--)
+      noCountryNum[10 + i - len] = number[i];
+    noCountryNum[0] = '0';
+  }
+  else
+    noCountryNum[0] = '\0';
+    
+  for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
+  {
+    pbEntry = g_ptr_array_index(contactsMemory, i);
+    
+    if (pbEntry->status == E_Empty || pbEntry->status == E_Deleted)
+      continue;
+    
+    if (strcmp(pbEntry->entry.Number, number) == 0)
+      return pbEntry->entry.Name;
+      
+    if (*noCountryNum != '\0' && strcmp(pbEntry->entry.Number, noCountryNum) == 0)
+      return pbEntry->entry.Name;
+  }
+    
+  return NULL;
+}
+
+static void SelectDialogClickEntry( GtkWidget        *clist,
+                                    gint              row,
+                                    gint              column,
+                                    GdkEventButton   *event,
+                                    SelectContactData *data )
+{
+  if(event && event->type == GDK_2BUTTON_PRESS)
+    gtk_signal_emit_by_name(GTK_OBJECT (data->okButton), "clicked");
+}
+
+/**************************************************************************
+Function SelectContactDialog() show dialog with contacts and let select
+entries.
+
+Sample signals and events handlers for SelectContactDialog.
+
+static void DeleteSelectContactDialog( GtkWidget *widget, GdkEvent *event,
+                                       SelectNumberData *data)
+{
+  gtk_widget_destroy(GTK_WIDGET (data->clist));
+  gtk_widget_destroy(GTK_WIDGET (data->clistScrolledWindow));
+  gtk_widget_destroy(GTK_WIDGET (widget));
+}
+
+static void CancelSelectContactDialog( GtkWidget *widget,
+                                       SelectContactData *data)
+{
+  gtk_widget_destroy(GTK_WIDGET (data->clist));
+  gtk_widget_destroy(GTK_WIDGET (data->clistScrolledWindow));
+  gtk_widget_destroy(GTK_WIDGET (data->dialog));
+}
+
+static void OkSelectContactDialog( GtkWidget *widget,
+                                   SelectContactData *data)
+{
+  GList *sel;
+  PhonebookEntry *pbEntry;
+  
+  if ((sel = GTK_CLIST (data->clist)->selection) != NULL)
+    while (sel != NULL)
+    {
+      pbEntry = gtk_clist_get_row_data(GTK_CLIST (clist),
+                                       GPOINTER_TO_INT (sel->data));
+      g_print("%s\n", pbEntry->entry.Name);
+      
+      sel = sel->next;
+    }
+  
+  gtk_widget_destroy(GTK_WIDGET (data->clist));
+  gtk_widget_destroy(GTK_WIDGET (data->clistScrolledWindow));
+  gtk_widget_destroy(GTK_WIDGET (data->dialog));
+}
+
+
+Create Select contact dialog and connect signals and events
+void aaa()
+{
+  SelectContactData *r;
+  
+  if ((r = GUI_SelectContactDialog()) == NULL)
+    return;
+    
+  gtk_signal_connect(GTK_OBJECT (r->dialog), "delete_event",
+                     GTK_SIGNAL_FUNC (DeleteSelectContactDialog), (gpointer) r);
+    
+  gtk_signal_connect(GTK_OBJECT (r->okButton), "clicked",
+                     GTK_SIGNAL_FUNC (OkSelectContactDialog), (gpointer) r);
+  gtk_signal_connect(GTK_OBJECT (r->cancelButton), "clicked",
+                     GTK_SIGNAL_FUNC (CancelSelectContactDialog), (gpointer) r);
+}
+***************************************************************************/
+
+SelectContactData *GUI_SelectContactDialog()
+{
+  PhonebookEntry *pbEntry;
+  static SelectContactData selectContactData;
+  SortColumn *sColumn;
+  gchar *titles[4] = { "Name", "Number", "Memory", "Group"};
+  gint row_i = 0;
+  register gint i;
+  
+  if (contactsMemoryInitialized == FALSE)
+    return NULL;
+    
+  selectContactData.dialog = gtk_dialog_new();
+  gtk_widget_set_usize(GTK_WIDGET (selectContactData.dialog), 436, 200);
+  gtk_window_set_title(GTK_WINDOW (selectContactData.dialog), "Select contacts");
+  gtk_window_set_modal(GTK_WINDOW (selectContactData.dialog), TRUE);
+    
+  selectContactData.okButton = gtk_button_new_with_label("Ok");
+  gtk_box_pack_start(GTK_BOX (GTK_DIALOG (selectContactData.dialog)->action_area),
+                      selectContactData.okButton, TRUE, TRUE, 10);
+  GTK_WIDGET_SET_FLAGS(selectContactData.okButton, GTK_CAN_DEFAULT);                               
+  gtk_widget_grab_default(selectContactData.okButton);
+  gtk_widget_show(selectContactData.okButton);
+  
+  selectContactData.cancelButton = gtk_button_new_with_label("Cancel");
+  gtk_box_pack_start(GTK_BOX (GTK_DIALOG (selectContactData.dialog)->action_area),
+                     selectContactData.cancelButton, TRUE, TRUE, 10);
+  gtk_widget_show(selectContactData.cancelButton);
+
+  
+  selectContactData.clist = gtk_clist_new_with_titles( 4, titles);
+  gtk_clist_set_shadow_type(GTK_CLIST (selectContactData.clist), GTK_SHADOW_OUT);
+  gtk_clist_set_compare_func(GTK_CLIST (selectContactData.clist), CListCompareFunc);
+  gtk_clist_set_sort_column(GTK_CLIST (selectContactData.clist), 0);
+  gtk_clist_set_sort_type(GTK_CLIST (selectContactData.clist), GTK_SORT_ASCENDING);
+  gtk_clist_set_auto_sort(GTK_CLIST (selectContactData.clist), FALSE);
+  gtk_clist_set_selection_mode(GTK_CLIST (selectContactData.clist), GTK_SELECTION_EXTENDED);
+  
+  gtk_clist_set_column_width(GTK_CLIST(selectContactData.clist), 0, 150);
+  gtk_clist_set_column_width(GTK_CLIST(selectContactData.clist), 1, 115);
+  gtk_clist_set_column_width(GTK_CLIST(selectContactData.clist), 3, 70);
+  gtk_clist_set_column_justification(GTK_CLIST(selectContactData.clist), 2, GTK_JUSTIFY_CENTER);
+  gtk_clist_set_column_visibility( GTK_CLIST(selectContactData.clist), 3, xgnokiiConfig.callerGroupsSupported);
+
+  for (i = 0; i < 4; i++)
+  {
+    if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL)
+    {
+      g_print("Error: %s: line %d: Can't allocate memory!\n", __FILE__, __LINE__);
+      return NULL;
+    }
+    sColumn->clist = selectContactData.clist;
+    sColumn->column = i;
+    gtk_signal_connect( GTK_OBJECT (GTK_CLIST (selectContactData.clist)->column[i].button), "clicked",
+                        GTK_SIGNAL_FUNC (SetSortColumn), (gpointer) sColumn);
+  }
+  
+  gtk_signal_connect(GTK_OBJECT(selectContactData.clist), "select_row",
+                     GTK_SIGNAL_FUNC(SelectDialogClickEntry),
+                     (gpointer) &selectContactData);
+  
+  selectContactData.clistScrolledWindow = gtk_scrolled_window_new(NULL, NULL);
+  gtk_container_add(GTK_CONTAINER (selectContactData.clistScrolledWindow),
+                    selectContactData.clist);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (selectContactData.clistScrolledWindow),
+                                 GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_box_pack_start(GTK_BOX (GTK_DIALOG (selectContactData.dialog)->vbox),
+                     selectContactData.clistScrolledWindow, 
+                     TRUE, TRUE, 0);
+  
+  gtk_widget_show(selectContactData.clist);
+  gtk_widget_show(selectContactData.clistScrolledWindow);
+  
+  gtk_clist_freeze(GTK_CLIST (selectContactData.clist));
+  for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
+  {
+    gchar *row[4];
+    
+    pbEntry = g_ptr_array_index(contactsMemory, i);
+    if (pbEntry->status != E_Empty)
+    {
+      row[0] = pbEntry->entry.Name;
+      row[1] = pbEntry->entry.Number;
+      if( pbEntry->entry.MemoryType == GMT_ME)
+        row[2] = "P";
+      else
+        row[2] = "S";
+      if (xgnokiiConfig.callerGroupsSupported)
+        row[3] = xgnokiiConfig.callerGroups[pbEntry->entry.Group];
+      else
+        row[3] = "";
+      gtk_clist_append( GTK_CLIST (selectContactData.clist), row);
+      if (pbEntry->entry.MemoryType == GMT_ME)
+        gtk_clist_set_pixmap( GTK_CLIST (selectContactData.clist), row_i, 2,
+                              memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
+      else
+        gtk_clist_set_pixmap( GTK_CLIST (selectContactData.clist), row_i, 2,
+                              memoryPixmaps.simMemPix, memoryPixmaps.mask);
+      
+     gtk_clist_set_row_data( GTK_CLIST (selectContactData.clist), row_i++, (gpointer) pbEntry);
+    }
+  }
+  
+  gtk_clist_sort(GTK_CLIST (selectContactData.clist));
+  gtk_clist_thaw(GTK_CLIST (selectContactData.clist));
+  
+  gtk_widget_show(selectContactData.dialog);
+  
+  return &selectContactData;
+}
+
 
 static GtkItemFactoryEntry menu_items[] = {
   {"/_File",		NULL,		NULL, 0, "<Branch>"},
@@ -2121,6 +2375,8 @@ static GtkItemFactoryEntry menu_items[] = {
   {"/Edit/Find ne_xt",	"<control>L",	SearchEntry, 0, NULL},
   {"/Edit/sep5",	NULL,		NULL, 0, "<Separator>"},
   {"/Edit/Select _all",	"<control>A",	SelectAll, 0, NULL},
+  {"/_Dial",		NULL,		NULL, 0, "<Branch>"},
+  {"/Dial/Dial _voice", "<control>V",	DialVoice, 0, NULL},
   {"/_Help",		NULL,		NULL, 0, "<LastBranch>"},
   {"/_Help/About",	NULL,		GUI_ShowAbout, 0, NULL},
 };
@@ -2131,20 +2387,23 @@ void GUI_CreateContactsWindow()
   int nmenu_items = sizeof(menu_items) / sizeof(menu_items[0]);
   GtkItemFactory *item_factory;
   GtkAccelGroup *accel_group;
+  SortColumn *sColumn;
   GtkWidget *menubar;
   GtkWidget *main_vbox;
   GtkWidget *toolbar;
+  GtkWidget *clistScrolledWindow;
   GtkWidget *status_hbox;
+  register gint i;
   
-  gchar *titles[4] = { "Name", "Number", "Memory", "Group" };
+  gchar *titles[4] = { "Name", "Number", "Memory", "Group"};
       
   contactsMemoryInitialized = FALSE;
   GUI_ContactsWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (GUI_ContactsWindow), "Contacts");
+  gtk_window_set_title(GTK_WINDOW (GUI_ContactsWindow), "Contacts");
   gtk_widget_set_usize(GTK_WIDGET(GUI_ContactsWindow), 436, 220);
   //gtk_container_set_border_width (GTK_CONTAINER (GUI_ContactsWindow), 10);
-  gtk_signal_connect (GTK_OBJECT (GUI_ContactsWindow), "delete_event",
-                      GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+  gtk_signal_connect(GTK_OBJECT (GUI_ContactsWindow), "delete_event",
+                     GTK_SIGNAL_FUNC (DeleteEvent), NULL);
   gtk_widget_realize(GUI_ContactsWindow);
   
   accel_group = gtk_accel_group_new();
@@ -2209,7 +2468,14 @@ void GUI_CreateContactsWindow()
                           NewPixmap(Delete_xpm, GUI_ContactsWindow->window,
                           &GUI_ContactsWindow->style->bg[GTK_STATE_NORMAL]),
                           (GtkSignalFunc) DeleteEntry, NULL);
-                                                  
+  
+  gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
+  
+  gtk_toolbar_append_item(GTK_TOOLBAR (toolbar), NULL, "Dial voice", NULL,
+                          NewPixmap(Dial_xpm, GUI_ContactsWindow->window,
+                          &GUI_ContactsWindow->style->bg[GTK_STATE_NORMAL]),
+                          (GtkSignalFunc) DialVoice, NULL);
+  
   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
   
   gtk_box_pack_start (GTK_BOX (main_vbox), toolbar, FALSE, FALSE, 0);
@@ -2230,11 +2496,23 @@ void GUI_CreateContactsWindow()
   gtk_clist_set_column_width(GTK_CLIST(clist), 1, 115);
   gtk_clist_set_column_width(GTK_CLIST(clist), 3, 70);
   gtk_clist_set_column_justification(GTK_CLIST(clist), 2, GTK_JUSTIFY_CENTER);
-  gtk_clist_column_titles_passive(GTK_CLIST(clist));
   gtk_clist_set_column_visibility( GTK_CLIST(clist), 3, xgnokiiConfig.callerGroupsSupported);
   
-  gtk_signal_connect(GTK_OBJECT(clist), "select_row",
-                     GTK_SIGNAL_FUNC(ClickEntry), NULL);
+  for (i = 0; i < 4; i++)
+  {
+    if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL)
+    {
+      g_print("Error: %s: line %d: Can't allocate memory!\n", __FILE__, __LINE__);
+      gtk_main_quit();
+    }
+    sColumn->clist = clist;
+    sColumn->column = i;
+    gtk_signal_connect( GTK_OBJECT (GTK_CLIST (clist)->column[i].button), "clicked",
+                        GTK_SIGNAL_FUNC (SetSortColumn), (gpointer) sColumn);
+  }
+                        
+  gtk_signal_connect( GTK_OBJECT(clist), "select_row",
+                      GTK_SIGNAL_FUNC(ClickEntry), NULL);
   
   clistScrolledWindow = gtk_scrolled_window_new(NULL, NULL);
   gtk_container_add(GTK_CONTAINER (clistScrolledWindow), clist);

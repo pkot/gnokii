@@ -22,7 +22,7 @@ static char *Open_xpm[] = {
 "* c #000000",
 ". c #808000",
 "a c #ffff00",
-"  c #d6d6d6",
+"  c None",
 "e c #ffffff",
 
 "                    ",

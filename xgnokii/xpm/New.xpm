@@ -20,7 +20,7 @@ static char *New_xpm[] = {
 "20 18 3 1",
 
 "* c #000000",
-"  c #d6d6d6",
+"  c None",
 ". c #ffffff",
 
 "                    ",
