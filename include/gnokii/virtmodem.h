@@ -26,14 +26,14 @@ bool VM_Initialise(char *model,
 		   char *bindir,
 		   bool debug_mode,
 		   bool GSM_Init);
-int  VM_PtySetup(char *bindir);
+/*int  VM_PtySetup(char *bindir);
 void VM_ThreadLoop(void);
 void VM_CharHandler(void);
-int  VM_GetMasterPty(char **name);
+int  VM_GetMasterPty(char **name);*/
 void VM_Terminate(void);
-GSM_Error VM_GSMInitialise(char *model,
+/*GSM_Error VM_GSMInitialise(char *model,
 			   char *port,
 			   char *initlength,
-			   GSM_ConnectionType connection);
+			   GSM_ConnectionType connection);*/
 
 #endif	/* __virtmodem_h */

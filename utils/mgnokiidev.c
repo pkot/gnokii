@@ -42,21 +42,22 @@ int main(int argc, char *argv[])
 		exit(-2);
 	}
 
+	aux = strlen(argv[1]);
+
 	/* Check if argument has a reasonable length (less than MAXLEN characters) */
-	if (strlen(argv[1]) >= MAXLEN) {
+	if (aux >= MAXLEN) {
 		fprintf(stderr, "Argument must be less than %d characters.\n", MAXLEN);
 		exit (-2);
 	}
 
-	strncpy(dev_name, argv[1], DEVLEN);
-
 	/* Check for suspicious characters. */
-	aux = strlen(dev_name);
-	for (count = 0; count < aux; count ++)
-		if (!(isalnum(dev_name[count]) || dev_name[count]=='/')) {
+	for (count = 0; count < aux; count++)
+		if (!(isalnum(dev_name[count]) || dev_name[count] == '/')) {
 			fprintf(stderr, "Suspicious character at index %d in argument.\n", count);
 			exit (-2);
 		}
+
+	snprintf("/dev/%s", DEVLEN, argv[1]);
 
 	/* Now become root */
 	setuid(0);

@@ -47,6 +47,16 @@
 #include "data/virtmodem.h"
 #include "data/rlp-common.h"
 
+/* Prototypes */
+static int  VM_PtySetup(char *bindir);
+static void VM_ThreadLoop(void);
+static void VM_CharHandler(void);
+static int  VM_GetMasterPty(char **name);
+static GSM_Error VM_GSMInitialise(char *model,
+			   char *port,
+			   char *initlength,
+			   GSM_ConnectionType connection);
+
 /* Global variables */
 
 extern bool TerminateThread;
@@ -112,7 +122,7 @@ bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 	return (true);
 }
 
-void VM_ThreadLoop(void)
+static void VM_ThreadLoop(void)
 {
 	int res;
 	struct pollfd ufds;
@@ -168,7 +178,7 @@ void VM_Terminate(void)
 
 /* Open pseudo tty interface and (in due course create a symlink
    to be /dev/gnokii etc. ) */
-int VM_PtySetup(char *bindir)
+static int VM_PtySetup(char *bindir)
 {
 	int err;
 	char mgnokiidev[200];
@@ -194,13 +204,6 @@ int VM_PtySetup(char *bindir)
 	}
 	PtyWRFD = PtyRDFD;
 
-	/* Check we haven't been installed setuid root for some reason
-	   if so, don't create /dev/gnokii */
-	if (getuid() != geteuid()) {
-		fprintf(stderr, _("gnokiid should not be installed setuid root!\n"));
-		return (0);
-	}
-
 	dprintf("Slave pty is %s, calling %s to create /dev/gnokii.\n", slave_name, mgnokiidev);
 
 	/* Create command line, something line ./mkgnokiidev ttyp0 */
@@ -214,7 +217,7 @@ int VM_PtySetup(char *bindir)
 
 /* Handler called when characters received from serial port.
    calls state machine code to process it. */
-void VM_CharHandler(void)
+static void VM_CharHandler(void)
 {
 	unsigned char buffer[255];
 	int res;
@@ -235,7 +238,7 @@ void VM_CharHandler(void)
 }
 
 /* Initialise GSM interface, returning GSM_Error as appropriate  */
-GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection)
+static GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection)
 {
 	GSM_Error error;
 	static GSM_Statemachine sm;
@@ -257,7 +260,7 @@ GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Connec
    corresponding slave pty.  Once the slave pty has been opened,
    you are responsible to free *name.  Code is from Developing Linux
    Applications by Troan and Johnson */
-int VM_GetMasterPty(char **name)
+static int VM_GetMasterPty(char **name)
 {
 #ifdef USE_UNIX98PTYS
 	int master, err;
