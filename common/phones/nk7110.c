@@ -1547,6 +1547,7 @@ static gn_error NK7110_GetClock(char req_type, gn_data *data, struct gn_statemac
 /**********************************/
 /*********** CALENDAR *************/
 /**********************************/
+
 static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error e = GN_ERR_NONE;
@@ -1566,14 +1567,16 @@ static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message,
 		dprintf("Location of Notes: ");
 		for (i = 0; i < data->calnote_list->number; i++) {
 			if (8 + 2 * i >= length) break;
-			data->calnote_list->location[i] = message[8 + 2 * i] * 256 + message[9 + 2 * i];
-			dprintf("%i ", data->calnote_list->location[i]);
+			data->calnote_list->location[data->calnote_list->last+i] = message[8 + 2 * i] * 256 + message[9 + 2 * i];
+			dprintf("%i ", data->calnote_list->location[data->calnote_list->last+i]);
 		}
+		data->calnote_list->last += i;
 		dprintf("\n");
 		break;
 	case NK7110_SUBCAL_FREEPOS_RCVD:
 		dprintf("First free position received: %i!\n", message[4]  * 256 + message[5]);
 		data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
+		dprintf("DEBUG: %d %d\n", message[4], message[5]);
 		break;
 	case NK7110_SUBCAL_DEL_NOTE_RESP:
 		dprintf("Succesfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
@@ -1838,12 +1841,27 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, count);
 }
 
+#define LAST_INDEX (data->calnote_list->last > 0 ? data->calnote_list->last - 1 : 0)
 static gn_error NK7110_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, NK7110_SUBCAL_GET_INFO, 0xff, 0xfe};
+	gn_error error;
 
-	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 6);
+	/* Some magic: we need to set req[4-5] to {0xff, 0xfe} with the first loop */
+	data->calnote_list->location[0] = 0xff * 256 + 0xfe;
+	/* Be sure it is 0 */
+	data->calnote_list->last = 0;
+	do {
+		dprintf("Read %d of %d calendar entries\n", data->calnote_list->last, data->calnote_list->number);
+		req[4] = data->calnote_list->location[LAST_INDEX] / 256;
+		req[5] = data->calnote_list->location[LAST_INDEX] % 256;
+		if (sm_message_send(6, NK7110_MSG_CALENDAR, req, state)) return GN_ERR_NOTREADY;
+		error = sm_block(NK7110_MSG_CALENDAR, data, state);
+		if (error != GN_ERR_NONE) return error;
+	} while (data->calnote_list->last < data->calnote_list->number);
+	return error;
 }
+#undef LAST_INDEX
 
 static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
@@ -1861,8 +1879,10 @@ static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 		    data->calnote->location > 0) {
 			if (sm_message_send(4, NK7110_MSG_CLOCK, date, state) == GN_ERR_NONE) {
 				sm_block(NK7110_MSG_CLOCK, &tmpdata, state);
-				req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
-				req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+				if (data->calnote_list->location[data->calnote->location - 1] > 0) {
+					req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+					req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+				}
 				data->calnote->time.year = tmptime.year;
 			} else
 				return GN_ERR_UNKNOWN; /* FIXME */

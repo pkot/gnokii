@@ -1936,10 +1936,11 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 		data->calnote_list->number = message[4] * 256 + message[5];
 		dprintf("Location of Notes: ");
 		for (i = 0; i < data->calnote_list->number; i++) {
-			data->calnote_list->location[i] = message[8 + 2 * i] * 256 + message[9 + 2 * i];
-			dprintf("%i ", data->calnote_list->location[i]); 
+			data->calnote_list->location[data->calnote_list->last+i] = message[8 + 2 * i] * 256 + message[9 + 2 * i];
+			dprintf("%i ", data->calnote_list->location[data->calnote_list->last+i]); 
 		}
 		dprintf("\n");
+		data->calnote_list->last += i;
 		break;
 	case NK6510_SUBCAL_FREEPOS_RCVD:
 		dprintf("First free position received: %i!\n", message[4] * 256 + message[5]);
@@ -1966,13 +1967,27 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 }
 
 
+#define LAST_INDEX (data->calnote_list->last > 0 ? data->calnote_list->last - 1 : 0)
 static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, NK6510_SUBCAL_GET_INFO, 0xff, 0xfe};
-	
-	dprintf("Getting calendar notes info...\n");
-	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 6);
+	gn_error error;
+
+	/* Some magic: we need to set req[4-5] to {0xff, 0xfe} with the first loop */
+	data->calnote_list->location[0] = 0xff * 256 + 0xfe;
+	/* Be sure it is 0 */
+	data->calnote_list->last = 0;
+	do {
+		dprintf("Read %d of %d calendar entries\n", data->calnote_list->last, data->calnote_list->number);
+		req[4] = data->calnote_list->location[LAST_INDEX] / 256;
+		req[5] = data->calnote_list->location[LAST_INDEX] % 256;
+		if (sm_message_send(6, NK6510_MSG_CALENDAR, req, state)) return GN_ERR_NOTREADY;
+		error = sm_block(NK6510_MSG_CALENDAR, data, state);
+		if (error != GN_ERR_NONE) return error;
+	} while (data->calnote_list->last < data->calnote_list->number);
+	return error;
 }
+#undef LAST_INDEX
 
 static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
