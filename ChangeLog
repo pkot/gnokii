@@ -6,6 +6,7 @@
  * 7110 series updates
     o raw ringtone upload/download support added   (BORBELY Zoltan)
     o ringtone upload/download/list support added  (BORBELY Zoltan)
+    o SetProfile implemented                       (BORBELY Zoltan)
  * 6510 series updates
     o keyboard emulation isn't working, only up and down messages
       are known                                    (BORBELY Zoltan)

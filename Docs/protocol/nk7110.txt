@@ -417,6 +417,8 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
                               block: 0x01, 0x??, 0x??, Switch, 0x01
                               where: Switch : 0 = Off, 1 = On
                                 N.B. This feature is valid for Handsfree and Headset profiles only!
+    s set profile feature   { 0x0103, 0x01, 0x01, 0x03, feat_id, profile_id, 0x01, value }
+                            where feat_id: feature id (see get profile feature)
     s ???                   { 0x0101, 0x04, 0x01, 0x01, 0xff, 0x03 }
     r ???                   { 0x0102, 0x01, 0x02, 0x03, 0x01, 0x01, 0x01, 0x85/0x087 }
 

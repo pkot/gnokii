@@ -105,6 +105,7 @@ static gn_error NK7110_GetRingtone(gn_data *data, struct gn_statemachine *state)
 static gn_error NK7110_SetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetRingtoneList(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetProfile(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_SetProfile(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK7110_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetWAPBookmark(gn_data *data, struct gn_statemachine *state);
@@ -298,6 +299,8 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 		return pnok_get_locks_info(data, state);
 	case GN_OP_GetProfile:
 		return NK7110_GetProfile(data, state);
+	case GN_OP_SetProfile:
+		return NK7110_SetProfile(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -2574,6 +2577,76 @@ static gn_error NK7110_GetProfile(gn_data *data, struct gn_statemachine *state)
 		if (sm_message_send(9, NK7110_MSG_PROFILE, req, state)) return GN_ERR_NOTREADY;
 		if ((err = sm_block(NK7110_MSG_PROFILE, data, state)) != GN_ERR_NONE) return err;
 	}
+
+	return GN_ERR_NONE;
+}
+
+static gn_error NK7110_SetProfileFeature(gn_data *data, struct gn_statemachine *state, int id, unsigned char value)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x01, 0x03, 0x00, 0x00, 0x01, 0x00};
+
+	if (!data->profile) return GN_ERR_INTERNALERROR;
+
+	req[7] = id;
+	req[8] = data->profile->number;
+	req[10] = value;
+
+	if (sm_message_send(11, NK7110_MSG_PROFILE, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(NK7110_MSG_PROFILE, data, state);
+}
+
+static gn_error NK7110_SetProfile(gn_data *data, struct gn_statemachine *state)
+{
+	gn_profile *p;
+	gn_error err;
+
+	if (!(p = data->profile)) return GN_ERR_INTERNALERROR;
+	dprintf("Setting profile %d (%s)\n", p->number, p->name);
+
+	if (p->default_name < 0 ) {
+		/* FIXME: set profile name */
+	}
+	if ((err = NK7110_SetProfileFeature(data, state, 0x00, p->keypad_tone + 1)) != GN_ERR_NONE)
+		return err;
+
+	if ((err = NK7110_SetProfileFeature(data, state, 0x01, p->lights)) != GN_ERR_NONE)
+		return err;
+
+	switch (p->call_alert) {
+	case GN_PROFILE_CALLALERT_Ringing: err = NK7110_SetProfileFeature(data, state, 0x02, 0x00); break;
+	case GN_PROFILE_CALLALERT_Ascending: err = NK7110_SetProfileFeature(data, state, 0x02, 0x01); break;
+	case GN_PROFILE_CALLALERT_RingOnce: err = NK7110_SetProfileFeature(data, state, 0x02, 0x02); break;
+	case GN_PROFILE_CALLALERT_BeepOnce: err = NK7110_SetProfileFeature(data, state, 0x02, 0x03); break;
+	case GN_PROFILE_CALLALERT_CallerGroups: err = NK7110_SetProfileFeature(data, state, 0x02, 0x04); break;
+	case GN_PROFILE_CALLALERT_Off: err = NK7110_SetProfileFeature(data, state, 0x02, 0x05); break;
+	default: return GN_ERR_UNKNOWN;
+	}
+	if (err != GN_ERR_NONE) return err;
+
+	if ((err = NK7110_SetProfileFeature(data, state, 0x03, p->ringtone)) != GN_ERR_NONE)
+		return err;
+
+	if ((err = NK7110_SetProfileFeature(data, state, 0x04, p->volume - 6)) != GN_ERR_NONE)
+		return err;
+
+	if ((err = NK7110_SetProfileFeature(data, state, 0x05, p->message_tone)) != GN_ERR_NONE)
+		return err;
+
+	if ((err = NK7110_SetProfileFeature(data, state, 0x06, p->vibration)) != GN_ERR_NONE)
+		return err;
+
+	switch (p->warning_tone) {
+	case GN_PROFILE_WARNING_Off: err = NK7110_SetProfileFeature(data, state, 0x07, 0x00); break;
+	case GN_PROFILE_WARNING_On: err = NK7110_SetProfileFeature(data, state, 0x07, 0x01); break;
+	default: return GN_ERR_UNKNOWN;
+	}
+	if (err != GN_ERR_NONE) return err;
+
+	if ((err = NK7110_SetProfileFeature(data, state, 0x08, p->caller_groups)) != GN_ERR_NONE)
+		return err;
+
+	if ((err = NK7110_SetProfileFeature(data, state, 0x09, p->automatic_answer)) != GN_ERR_NONE)
+		return err;
 
 	return GN_ERR_NONE;
 }
