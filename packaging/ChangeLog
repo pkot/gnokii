@@ -1,8 +1,0 @@
-* Mon May 22 06:08:34 CEST Pavel Janik ml. <Pavel.Janik@linux.cz>
-- script make_dist included in the CVS
-
-* Wed Jun  7 13:45:33 CEST Pavel Janik ml. <Pavel.Janik@linux.cz>
-- configure removed from CVS, so we should add it into tarball
-
-* Fri Jun 23 11:36:09 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
-- Slackware build system added (Pawel)
