@@ -81,8 +81,8 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len);
 unsigned char char_def_alphabet_encode(unsigned char value);
 unsigned char char_def_alphabet_decode(unsigned char value);
 
-int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest);
-int char_uni_alphabet_decode(wchar_t value, unsigned char *dest);
+int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest, MBSTATE *mbs);
+int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs);
 
 extern char *char_bcd_number_get(u8 *number);
 extern int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type);

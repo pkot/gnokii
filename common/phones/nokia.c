@@ -115,9 +115,11 @@ void pnok_string_decode(unsigned char *dest, size_t max, const unsigned char *sr
 {
 	size_t i, j, n;
 	unsigned char buf[16];
+	MBSTATE mbs;
 
+	MBSTATE_DEC_CLEAR(mbs);
 	for (i = 0, j = 0; j < len; i += n, j++) {
-		n = char_uni_alphabet_decode(pnok_nokia_to_uni(src[j]), buf);
+		n = char_uni_alphabet_decode(pnok_nokia_to_uni(src[j]), buf, &mbs);
 		if (i + n >= max) break;
 		memcpy(dest + i, buf, n);
 	}
@@ -128,9 +130,11 @@ size_t pnok_string_encode(unsigned char *dest, size_t max, const unsigned char *
 {
 	size_t i, j, n;
 	wchar_t wch;
+	MBSTATE mbs;
 
+	MBSTATE_ENC_CLEAR(mbs);
 	for (i = 0, j = 0; i < max && src[j]; i++, j += n) {
-		n = char_uni_alphabet_encode(src + j, &wch);
+		n = char_uni_alphabet_encode(src + j, &wch, &mbs);
 		dest[i] = pnok_uni_to_nokia(wch);
 	}
 	return i;

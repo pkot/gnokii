@@ -329,11 +329,15 @@ void char_hex_encode(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest)
+int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest, MBSTATE *mbs)
 {
 	int length;
 
+#ifdef HAVE_WCRTOMB
+	switch (length = mbrtowc(dest, value, MB_CUR_MAX, mbs)) {
+#else
 	switch (length = mbtowc(dest, value, MB_CUR_MAX)) {
+#endif
 	case -1:
 		dprintf("Error calling mctowb!\n");
 		*dest = '?';
@@ -343,11 +347,15 @@ int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest)
 	}
 }
 
-int char_uni_alphabet_decode(wchar_t value, unsigned char *dest)
+int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs)
 {
 	int length;
 
+#ifdef HAVE_WCRTOMB
+	switch (length = wcrtomb(dest, value, mbs)) {
+#else
 	switch (length = wctomb(dest, value)) {
+#endif
 	case -1:
 		*dest = '?';
 		length = 1;
@@ -360,14 +368,16 @@ void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i_len = 0, o_len = 0, length;
 	char buf[5];
+	MBSTATE mbs;
 
+	MBSTATE_DEC_CLEAR(mbs);
 	buf[4] = '\0';
 	for (i_len = 0; i_len < len ; i_len++) {
 		buf[0] = *(src + i_len * 4);
 		buf[1] = *(src + i_len * 4 + 1);
 		buf[2] = *(src + i_len * 4 + 2);
 		buf[3] = *(src + i_len * 4 + 3);
-		switch (length = char_uni_alphabet_decode(strtol(buf, NULL, 16), dest + o_len)) {
+		switch (length = char_uni_alphabet_decode(strtol(buf, NULL, 16), dest + o_len, &mbs)) {
 		case -1:
 			o_len++;
 			length = 1;
@@ -387,9 +397,11 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 {
 	wchar_t wc;
 	int i_len = 0, o_len, length;
+	MBSTATE mbs;
 
+	MBSTATE_ENC_CLEAR(mbs);
 	for (o_len = 0; i_len < len ; o_len++) {
-		switch (length = char_uni_alphabet_encode(src + i_len, &wc)) {
+		switch (length = char_uni_alphabet_encode(src + i_len, &wc, &mbs)) {
 		case -1:
 			i_len++;
 			break;
@@ -405,9 +417,11 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i, length = 0, pos = 0;
+	MBSTATE mbs;
 
+	MBSTATE_DEC_CLEAR(mbs);
 	for (i = 0; i < len / 2; i++) {
-		length = char_uni_alphabet_decode((src[i * 2] << 8) | src[(i * 2) + 1], dest);
+		length = char_uni_alphabet_decode((src[i * 2] << 8) | src[(i * 2) + 1], dest, &mbs);
 		dest += length;
 		pos += length;
 	}
@@ -419,9 +433,11 @@ unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, 
 {
 	int length, offset = 0, pos = 0;
 	wchar_t  wc;
+	MBSTATE mbs;
 
+	MBSTATE_ENC_CLEAR(mbs);
 	while (offset < len) {
-		switch (length = char_uni_alphabet_encode(src + offset, &wc)) {
+		switch (length = char_uni_alphabet_encode(src + offset, &wc, &mbs)) {
 		case -1:
 			dest[pos++] =  wc >> 8 & 0xFF;
 			dest[pos++] =  wc & 0xFF;
