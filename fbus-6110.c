@@ -80,7 +80,10 @@ GSM_Functions FB61_Functions = {
   FB61_DialData,
   FB61_GetIncomingCallNr,
   FB61_SendBitmap,
-  FB61_GetNetworkInfo
+  FB61_GetNetworkInfo,
+  FB61_GetCalendarNote,
+  FB61_WriteCalendarNote,
+  FB61_DeleteCalendarNote
 };
 
 /* Mobile phone information */
@@ -202,6 +205,9 @@ GSM_Error          CurrentDateTimeError;
 
 GSM_DateTime       *CurrentAlarm;
 GSM_Error          CurrentAlarmError;
+
+GSM_CalendarNote   *CurrentCalendarNote;
+GSM_Error          CurrentCalendarNoteError;
 
 GSM_Error          CurrentSetDateTimeError;
 GSM_Error          CurrentSetAlarmError;
@@ -374,16 +380,119 @@ GSM_Error FB61_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo)
   return (GE_NONE);
 }
 
-GSM_Error FB61_GetCalendarNote(int location)
+GSM_Error FB61_GetCalendarNote(GSM_CalendarNote *CalendarNote)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x66, 0x00};
+  unsigned char req[] = { FB61_FRAME_HEADER,
+                          0x66, 0x00
+                        };
+  int timeout=20;
 
-  req[4]=location;
+  req[4]=CalendarNote->Location;
+
+  CurrentCalendarNote = CalendarNote;
+  CurrentCalendarNoteError = GE_BUSY;
 
   FB61_TX_SendMessage(5, 0x13, req);
 
-  return (GE_NONE);
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentCalendarNoteError == GE_BUSY ) {
+          
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+                    
+    usleep (100000);
+  }
+                          
+  return (CurrentCalendarNoteError);
+}
+
+GSM_Error FB61_WriteCalendarNote(GSM_CalendarNote *CalendarNote)
+{
+
+  unsigned char req[200] = { FB61_FRAME_HEADER,
+                             0x64, 0x01, 0x10,
+                             0x00, /* Length of the rest of the frame. */
+                             0x00, /* The type of calendar note */
+                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                        };
+  int timeout=20, i, current;
+
+  req[7]=CalendarNote->Type;
+
+  req[8]  = CalendarNote->Time.Year / 256;
+  req[9]  = CalendarNote->Time.Year % 256;
+  req[10] = CalendarNote->Time.Month;
+  req[11] = CalendarNote->Time.Day;
+  req[12] = CalendarNote->Time.Hour;
+  req[13] = CalendarNote->Time.Minute;
+  req[14] = CalendarNote->Time.Timezone;
+
+  if (CalendarNote->Alarm.Year) {
+    req[15] = CalendarNote->Alarm.Year / 256;
+    req[16] = CalendarNote->Alarm.Year % 256;
+    req[17] = CalendarNote->Alarm.Month;
+    req[18] = CalendarNote->Alarm.Day;
+    req[19] = CalendarNote->Alarm.Hour;
+    req[20] = CalendarNote->Alarm.Minute;
+    req[21] = CalendarNote->Alarm.Timezone;
+  }
+
+  req[22]=strlen(CalendarNote->Text);
+
+  current=23;
+
+  for (i=0; i<strlen(CalendarNote->Text); i++)
+    req[current++]=CalendarNote->Text[i];
+
+  req[current]=strlen(CalendarNote->Phone);
+
+  for (i=0; i<strlen(CalendarNote->Text); i++)
+    req[current++]=CalendarNote->Text[i];
+
+  CurrentCalendarNote = CalendarNote;
+  CurrentCalendarNoteError = GE_BUSY;
+
+  FB61_TX_SendMessage(current-1, 0x13, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentCalendarNoteError == GE_BUSY ) {
+          
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+                    
+    usleep (100000);
+  }
+                          
+  return (CurrentCalendarNoteError);
+
+}
+
+GSM_Error FB61_DeleteCalendarNote(GSM_CalendarNote *CalendarNote)
+{
+
+  unsigned char req[] = { FB61_FRAME_HEADER,
+                          0x68, 0x00
+                        };
+  int timeout=20;
+
+  req[4]=CalendarNote->Location;
+
+  CurrentCalendarNoteError = GE_BUSY;
+
+  FB61_TX_SendMessage(5, 0x13, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentCalendarNoteError == GE_BUSY ) {
+          
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+                    
+    usleep (100000);
+  }
+                          
+  return (CurrentCalendarNoteError);
 }
 
 void FB61_InitIR(void)
@@ -2348,33 +2457,180 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     switch (MessageBuffer[3]) {
 
+    case 0x65:
+
+      switch(MessageBuffer[4]) {
+
+      case 0x01:
+
+        /* This message is also sent when the user enters the new entry on keypad */
+
+#ifdef DEBUG
+        fprintf(stdout, _("Message: Calendar note write succesfull!\n"));
+#endif DEBUG      
+
+        CurrentCalendarNoteError=GE_NONE;
+
+      break;
+      
+      case 0x73:
+
+#ifdef DEBUG
+        fprintf(stdout, _("Message: Calendar note write failed!\n"));
+#endif DEBUG      
+
+        CurrentCalendarNoteError=GE_INTERNALERROR;
+
+       break;
+
+      default:
+#ifdef DEBUG
+        fprintf(stdout, _("Unknown message of type 0x13 and subtype 0x65\n"));
+#endif DEBUG      
+
+      }
+    
+      break;
+
     case 0x67:
+
+      switch (MessageBuffer[4]) {
+
+      case 0x01:
+      
+      CurrentCalendarNote->Type=MessageBuffer[8];
+
+      CurrentCalendarNote->Time.Year=256*MessageBuffer[9]+MessageBuffer[10];
+      CurrentCalendarNote->Time.Month=MessageBuffer[11];
+      CurrentCalendarNote->Time.Day=MessageBuffer[12];
+
+      CurrentCalendarNote->Time.Hour=MessageBuffer[13];
+      CurrentCalendarNote->Time.Minute=MessageBuffer[14];
+      CurrentCalendarNote->Time.Second=MessageBuffer[15];
+
+      CurrentCalendarNote->Alarm.Year=256*MessageBuffer[16]+MessageBuffer[17];
+      CurrentCalendarNote->Alarm.Month=MessageBuffer[18];
+      CurrentCalendarNote->Alarm.Day=MessageBuffer[19];
+
+      CurrentCalendarNote->Alarm.Hour=MessageBuffer[20];
+      CurrentCalendarNote->Alarm.Minute=MessageBuffer[21];
+      CurrentCalendarNote->Alarm.Second=MessageBuffer[22];
+
+      memcpy(CurrentCalendarNote->Text,MessageBuffer+24,MessageBuffer[23]);
+
+      if (CurrentCalendarNote->Type == GCN_CALL)
+        memcpy(CurrentCalendarNote->Phone,MessageBuffer+24+MessageBuffer[23]+1,MessageBuffer[24+MessageBuffer[23]]);
 
 #ifdef DEBUG
       printf(_("Message: Calendar note received.\n"));
 
-      printf(_("   Date: %d-%02d-%02d\n"), 256*MessageBuffer[9]+MessageBuffer[10], MessageBuffer[11], MessageBuffer[12]);
+      printf(_("   Date: %d-%02d-%02d\n"), CurrentCalendarNote->Time.Year,
+                                           CurrentCalendarNote->Time.Month,
+                                           CurrentCalendarNote->Time.Day);
 
-      printf(_("   Time: %02d:%02d:%02d\n"), MessageBuffer[13], MessageBuffer[14], MessageBuffer[15]);
+      printf(_("   Time: %02d:%02d:%02d\n"), CurrentCalendarNote->Time.Hour,
+                                             CurrentCalendarNote->Time.Minute,
+                                             CurrentCalendarNote->Time.Second);
 
       /* Some messages do not have alarm set up */
 
-      if (256*MessageBuffer[16]+MessageBuffer[17] != 0) {
-	printf(_("   Alarm date: %d-%02d-%02d\n"), 256*MessageBuffer[16]+MessageBuffer[17], MessageBuffer[18], MessageBuffer[19]);
-	printf(_("   Alarm time: %02d:%02d:%02d\n"), MessageBuffer[20], MessageBuffer[21], MessageBuffer[22]);
+      if (CurrentCalendarNote->Alarm.Year != 0) {
+	printf(_("   Alarm date: %d-%02d-%02d\n"), CurrentCalendarNote->Alarm.Year,
+	                                           CurrentCalendarNote->Alarm.Month,
+	                                           CurrentCalendarNote->Alarm.Day);
+
+	printf(_("   Alarm time: %02d:%02d:%02d\n"), CurrentCalendarNote->Alarm.Hour,
+	                                             CurrentCalendarNote->Alarm.Minute,
+	                                             CurrentCalendarNote->Alarm.Second);
       }
 
-      printf(_("   Number: %d\n"), MessageBuffer[8]);
-      printf(_("   Text: "));
+      printf(_("   Type: %d\n"), CurrentCalendarNote->Type);
+      printf(_("   Text: %s\n"), CurrentCalendarNote->Text);
 
-      tmp=MessageBuffer[23];
-
-      for(i=0;i<tmp;i++)
-	printf("%c", MessageBuffer[24+i]);
-
-      printf("\n");
+      if (CurrentCalendarNote->Type == GCN_CALL)
+        printf(_("   Phone: %s\n"), CurrentCalendarNote->Phone);
 #endif DEBUG
 
+      CurrentCalendarNoteError=GE_NONE;
+
+      break;
+
+      case 0x93:
+
+#ifdef DEBUG
+      printf(_("Message: Calendar note not available\n"));
+#endif DEBUG
+
+      CurrentCalendarNoteError=GE_INVALIDCALNOTELOCATION;
+
+      break;
+
+      default:
+
+#ifdef DEBUG
+      printf(_("Message: Calendar note error\n"));
+#endif DEBUG
+
+      CurrentCalendarNoteError=GE_INTERNALERROR;
+
+      break;
+
+      }
+
+      break;
+
+    case 0x69:
+
+      switch (MessageBuffer[4]) {
+
+        /* This message is also sent when the user deletes an old entry on
+           keypad or moves an old entry somewhere (there is also `write'
+           message). */
+
+      case 0x01:
+
+#ifdef DEBUG
+      printf(_("Message: Calendar note deleted\n"));
+#endif DEBUG
+
+      CurrentCalendarNoteError=GE_NONE;
+
+        break;
+
+      case 0x93:
+
+
+#ifdef DEBUG
+      printf(_("Message: Calendar note can't be deleted\n"));
+#endif DEBUG
+
+      CurrentCalendarNoteError=GE_INVALIDCALNOTELOCATION;
+
+        break;
+
+      default:
+
+#ifdef DEBUG
+      printf(_("Message: Calendar note deleting error\n"));
+#endif DEBUG
+
+      CurrentCalendarNoteError=GE_INTERNALERROR;
+
+      break;
+      }
+
+      break;
+
+    case 0x6a:
+
+      /* Jano will probably implement something similar to IncomingCall
+         notification for easy integration into xgnokii */
+
+#ifdef DEBUG
+      printf(_("Message: Calendar Alarm active\n"));
+      printf(_("   Item number: %d\n"), MessageBuffer[4]);
+#endif DEBUG
+    
       break;
 
     default:

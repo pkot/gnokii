@@ -208,6 +208,26 @@ typedef enum {
   GBU_Minutes
 } GSM_BatteryUnits;
 
+/* Define enums for Calendar Note types */
+
+typedef enum {
+  GCN_REMINDER=1, /* Reminder */
+  GCN_CALL,       /* Call */
+  GCN_MEETING,    /* Meeting */
+  GCN_BIRTHDAY    /* Birthday */
+} GSM_CalendarNoteType;
+
+/* Calendar note type */
+
+typedef struct {
+  int Location;              /* The number of the note in the phone memory */
+  GSM_CalendarNoteType Type; /* The type of the note */
+  GSM_DateTime Time;         /* The time of the note */
+  GSM_DateTime Alarm;        /* The alarm of the note */
+  char Text[20];             /* The text of the note */
+  char Phone[20];            /* For Call only: the phone number */
+} GSM_CalendarNote;
+
 /* This structure is provided to allow common information about the particular
    model to be looked up in a model independant way. Some of the values here
    define minimum and maximum levels for values retrieved by the various Get
@@ -258,6 +278,7 @@ typedef enum {
   GE_INVALIDSMSLOCATION,    /* Invalid SMS location. */
   GE_INVALIDPHBOOKLOCATION, /* Invalid phonebook location. */
   GE_INVALIDMEMORYTYPE,     /* Invalid type of memory. */
+  GE_INVALIDCALNOTELOCATION,/* Invalid calendar note location. */
   GE_EMPTYSMSLOCATION,      /* SMS location is empty. */
   GE_PHBOOKNAMETOOLONG,     /* Phonebook name is too long. */
   GE_PHBOOKNUMBERTOOLONG,   /* Phonebook number is too long. */
@@ -345,6 +366,12 @@ typedef struct {
   GSM_Error (*SendBitmap) ( char *NetworkCode, int width, int height, unsigned char *bitmap);
 
   GSM_Error (*GetNetworkInfo) ( GSM_NetworkInfo *NetworkInfo );
+
+  GSM_Error (*GetCalendarNote) ( GSM_CalendarNote *CalendarNote);
+
+  GSM_Error (*WriteCalendarNote) ( GSM_CalendarNote *CalendarNote);
+
+  GSM_Error (*DeleteCalendarNote) ( GSM_CalendarNote *CalendarNote);
 
 } GSM_Functions;
 

@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1-pre5
+VERSION = 0.3.1-pre6
 
 #
 # Compiler to use.
@@ -133,7 +133,7 @@ mgnokiidev: $(MGNOKIIDEV_OBJS)
 
 # Misc targets
 clean:
-	@rm -f core *~ *% *.bak \
+	@rm -f core *~ *% *.bak bin \
                $(COMMON_OBJS) \
                gnokii $(GNOKII_OBJS) \
                gnokiid $(GNOKIID_OBJS) \

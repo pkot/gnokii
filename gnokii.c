@@ -54,6 +54,9 @@ void dialvoice(char *argv[]);
 void dialdata(char *argv[]);
 void sendoplogo(char *argv[]);
 void sendclicon(char *argv[]);
+void getcalendarnote(char *argv[]);
+void writecalendarnote(char *argv[]);
+void deletecalendarnote(char *argv[]);
 void foogle(char *argv[]);
 void readconfig(void);
 
@@ -99,6 +102,9 @@ void usage(void)
           gnokii [--dialdata] [number]
           gnokii [--sendoplogo] [logofile] [network code]
           gnokii [--sendclicon] [logofile]
+          gnokii [--getcalendarnote] [index]
+          gnokii [--writecalendarnote]
+          gnokii [--deletecalendarnote] [index]
 
           --help            display usage information.
 
@@ -154,7 +160,13 @@ void usage(void)
 
           --sendclicon      send CL icon.
 
-          \n"));
+          --getcalendarnote get the note with number [index] from calendar.
+
+          --writecalendarnote write the note to calendar.
+
+          --deletecalendarnote  delete the note with number [index]
+                                from calendar.
+"));
 }
 
 /* fbusinit is the generic function which waits for the FBUS link. The limit
@@ -308,6 +320,21 @@ int main(int argc, char *argv[])
   /* Send CL icon mode. */
   if (strcmp(argv[1], "--sendclicon") == 0) {
     sendclicon(argv);
+  }
+
+  /* Get calendar note mode. */
+  if (argc == 3 && strcmp(argv[1], "--getcalendarnote") == 0) {
+    getcalendarnote(argv);
+  }
+
+  /* Write calendar note mode. */
+  if (strcmp(argv[1], "--writecalendarnote") == 0) {
+    writecalendarnote(argv);
+  }
+
+  /* Delete calendar note mode. */
+  if (argc == 3 && strcmp(argv[1], "--deletecalendarnote") == 0) {
+    deletecalendarnote(argv);
   }
 
   /* Get memory command. */
@@ -885,6 +912,133 @@ void sendclicon(char *argv[])
   GSM->Terminate();
   exit(0);
 }
+
+void getcalendarnote(char *argv[])
+{
+
+  GSM_CalendarNote CalendarNote;
+
+  CalendarNote.Location=atoi(argv[2]);
+
+  fbusinit(false);
+
+  if (GSM->GetCalendarNote(&CalendarNote) == GE_NONE) {
+
+	fprintf(stdout, _("   Type of the note: "));
+
+	switch (CalendarNote.Type) {
+
+	case GCN_REMINDER:
+	  fprintf(stdout, _("Reminder\n"));
+	  break;
+
+	case GCN_CALL:
+	  fprintf(stdout, _("Call\n"));
+	  break;
+
+	case GCN_MEETING:
+	  fprintf(stdout, _("Meeting\n"));
+	  break;
+
+	case GCN_BIRTHDAY:
+	  fprintf(stdout, _("Birthday\n"));
+	  break;
+
+	default:
+	  fprintf(stdout, _("Unknown\n"));
+
+	}
+
+        fprintf(stdout, _("   Date: %d-%02d-%02d\n"), CalendarNote.Time.Year,
+                                                      CalendarNote.Time.Month,
+                                                      CalendarNote.Time.Day);
+
+        fprintf(stdout, _("   Time: %02d:%02d:%02d\n"), CalendarNote.Time.Hour,
+                                                        CalendarNote.Time.Minute,
+                                                        CalendarNote.Time.Second);
+
+        if (CalendarNote.Alarm.Year!=0) {
+          fprintf(stdout, _("   Alarm date: %d-%02d-%02d\n"), CalendarNote.Alarm.Year,
+                                                            CalendarNote.Alarm.Month,
+                                                            CalendarNote.Alarm.Day);
+
+          fprintf(stdout, _("   Alarm time: %02d:%02d:%02d\n"), CalendarNote.Alarm.Hour,
+                                                              CalendarNote.Alarm.Minute,
+                                                              CalendarNote.Alarm.Second);
+        }
+
+        fprintf(stdout, _("   Text: %s\n"), CalendarNote.Text);
+
+        if (CalendarNote.Type == GCN_CALL)
+          fprintf(stdout, _("   Phone: %s\n"), CalendarNote.Phone);
+
+  }
+  else {
+    fprintf(stderr, _("The calendar note can not be read\n"));
+
+    GSM->Terminate();
+    exit(-1);
+  }
+
+  GSM->Terminate();
+  exit(0);
+}
+
+void writecalendarnote(char *argv[])
+{
+
+  GSM_CalendarNote CalendarNote;
+
+  CalendarNote.Type=GCN_REMINDER;
+
+  CalendarNote.Time.Year=1999;
+  CalendarNote.Time.Month=12;
+  CalendarNote.Time.Day=31;
+  CalendarNote.Time.Hour=23;
+  CalendarNote.Time.Minute=59;
+
+  CalendarNote.Alarm.Year=1999;
+  CalendarNote.Alarm.Month=12;
+  CalendarNote.Alarm.Day=31;
+  CalendarNote.Alarm.Hour=23;
+  CalendarNote.Alarm.Minute=58;
+
+  sprintf(CalendarNote.Text, "Big day ...");
+  sprintf(CalendarNote.Phone, "jhgjhgjhgjhgj");
+
+  fbusinit(false);
+
+  if (GSM->WriteCalendarNote(&CalendarNote) == GE_NONE) {
+    fprintf(stdout, _("Succesfully written!"));
+  }
+
+  GSM->Terminate();
+  exit(0);
+}
+
+void deletecalendarnote(char *argv[])
+{
+
+  GSM_CalendarNote CalendarNote;
+
+  CalendarNote.Location=atoi(argv[2]);
+
+  fbusinit(false);
+
+  if (GSM->DeleteCalendarNote(&CalendarNote) == GE_NONE) {
+    fprintf(stdout, _("   Calendar note deleted.\n"));
+  }
+  else {
+    fprintf(stderr, _("The calendar note can not be deleted\n"));
+
+    GSM->Terminate();
+    exit(-1);
+  }
+
+  GSM->Terminate();
+  exit(0);
+}
+
 
 void setdatetime(int argc, char *argv[])
 {

@@ -167,6 +167,10 @@ GSM_Error FB61_SendBitmap(char *NetworkCode, int width, int height,
 
 GSM_Error FB61_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 
+GSM_Error FB61_GetCalendarNote(GSM_CalendarNote *CalendarNote);
+GSM_Error FB61_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
+GSM_Error FB61_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
+
 /* States for receive code. */
 
 enum FB61_RX_States {

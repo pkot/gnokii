@@ -64,6 +64,9 @@ GSM_Error	FB38_DialData(char *Number);
 GSM_Error	FB38_GetIncomingCallNr(char *Number);
 GSM_Error	FB38_SendBitmap(char *NetworkCode, int width, int height, unsigned char *bitmap);
 GSM_Error	FB38_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
+GSM_Error	FB38_GetCalendarNote(GSM_CalendarNote *CalendarNote);
+GSM_Error	FB38_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
+GSM_Error	FB38_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
 
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __fbus_3810_c isn't 

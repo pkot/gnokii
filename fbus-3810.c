@@ -67,7 +67,10 @@ GSM_Functions			FB38_Functions = {
 		FB38_DialData,
 		FB38_GetIncomingCallNr,
 		FB38_SendBitmap,
-		FB38_GetNetworkInfo
+		FB38_GetNetworkInfo,
+		FB38_GetCalendarNote,
+		FB38_WriteCalendarNote,
+		FB38_DeleteCalendarNote
 };
 
 GSM_Information			FB38_Information = {
@@ -794,6 +797,21 @@ GSM_Error	FB38_SendBitmap (char *NetworkCode, int width, int height, unsigned ch
 }
 
 GSM_Error	FB38_GetNetworkInfo (GSM_NetworkInfo *NetworkInfo)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_GetCalendarNote (GSM_CalendarNote *CalendarNote)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_WriteCalendarNote (GSM_CalendarNote *CalendarNote)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
 {
 	return (GE_NOTIMPLEMENTED);
 }
