@@ -229,7 +229,6 @@ int usage(void)
 "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
 "                 [--long n]\n"
 "          gnokii --getsmsc message_center_number\n"
-"          gnokii --sendoplogoviasms destionation logofile [network code]\n"
 "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
 "          gnokii --getdatetime\n"
 "          gnokii --setalarm HH MM\n"
@@ -243,6 +242,7 @@ int usage(void)
 "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
 "          gnokii --identify\n"
 "          gnokii --senddtmf string\n"
+"          gnokii --sendlogo {caller|op} destionation logofile [network code]\n"
 "          gnokii --setlogo logofile [network code]\n"
 "          gnokii --setlogo logofile [caller group number] [group name]\n"
 "          gnokii --setlogo text [startup text]\n"
@@ -299,9 +299,6 @@ int usage(void)
 "          --getsmsc         show the SMSC number from location\n"
 "                            [message_center_number].\n\n"
 
-"          --sendoplogoviasms send the logofile to destination as operator\n"
-"                             logo\n\n"
-
 "          --setdatetime     set the date and the time of the phone.\n\n"
 
 "          --getdatetime     shows current date and time in the phone.\n\n"
@@ -327,9 +324,16 @@ int usage(void)
 "          --netmonitor      setting/querying netmonitor mode.\n\n"
 
 "          --identify        get IMEI, model and revision\n\n"
+
 "          --senddtmf        send DTMF sequence\n\n"
+
+"          --sendlogo        send the logofile to destination as operator\n"
+"                            or CLI logo\n\n"
+
 "          --setlogo         set caller, startup or operator logo\n\n"
+
 "          --getlogo         get caller, startup or operator logo\n\n"
+
 "          --reset [soft|hard] resets the phone.\n\n"
   ));
 #ifdef SECURITY
@@ -503,8 +507,8 @@ int main(int argc, char *argv[])
     // Send SMS message mode
     { "sendsms",            required_argument, NULL, OPT_SENDSMS },
 
-    // Send SMS message mode
-    { "sendoplogoviasms",   required_argument, NULL, OPT_SENDOPLOGOVIASMS },
+    // Send logo as SMS message mode
+    { "sendlogo",           required_argument, NULL, OPT_SENDLOGO },
 
     // Get SMS center number mode
     { "getsmsc",            required_argument, NULL, OPT_GETSMSC },
@@ -560,7 +564,7 @@ int main(int argc, char *argv[])
     { OPT_GETSMS,            3, 3, 0 },
     { OPT_DELETESMS,         3, 3, 0 },
     { OPT_SENDSMS,           1, 10, 0 },
-    { OPT_SENDOPLOGOVIASMS,  2, 3, GAL_XOR },
+    { OPT_SENDLOGO,          3, 4, GAL_XOR },
     { OPT_GETSMSC,           1, 1, 0 },
     { OPT_GETWELCOMENOTE,    1, 1, 0 },
     { OPT_SETWELCOMENOTE,    1, 1, 0 },
@@ -746,9 +750,9 @@ int main(int argc, char *argv[])
       rc = sendsms(nargc, nargv);
       break;
 
-    case OPT_SENDOPLOGOVIASMS:
+    case OPT_SENDLOGO:
 
-      rc = sendoplogoviasms(nargc, nargv);
+      rc = sendlogo(nargc, nargv);
       break;
 
     case OPT_GETSMSC:
@@ -1544,22 +1548,26 @@ int dialvoice(char *Number)
   return 0;
 }
 
-/* The following function allows to send the operator logos using SMS */
-int sendoplogoviasms(int argc, char *argv[])
+/* The following function allows to send logos using SMS */
+int sendlogo(int argc, char *argv[])
 {
   GSM_SMSMessage SMS;
   GSM_Bitmap bitmap;
   GSM_Error error;
 
-  char UserDataHeader[7] = {	0x06,	/* UDH Length */
-		  		0x05,	/* IEI: application port addressing scheme, 16 bit address */
-		  		0x04,	/* IEI length */
-                		0x15, 0x82,	/* destination address */
-                		0x00, 0x00};	/* originator address */
-  char Data[7] = {0x00, 0x00, 0x00,
-                 0x00, 0x00, 0x00, 0x01};
+  char UserDataHeader[7] = {	0x06, /* UDH Length */
+		  		0x05, /* IEI: application port addressing scheme, 16 bit address */
+		  		0x04, /* IEI length */
+                		0x15, /* destination address: high byte */
+				0x00, /* destination address: low byte */
+                		0x00, /* originator address */
+				0x00};
 
-  /* Default settings:
+  char Data[7] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+  int current=0;
+
+  /* Default settings for SMS message:
       - no delivery report
       - Class Message 1
       - no compression
@@ -1575,39 +1583,62 @@ int sendoplogoviasms(int argc, char *argv[])
   SMS.EightBit = true;
   SMS.MessageCenter.No = 1;
   SMS.Validity = 4320; /* 4320 minutes == 72 hours */
-  SMS.UDHType = GSM_OpLogo;
 
-  /* The first argument is the destionation, ie the phone number of recipient. */
-  strcpy(SMS.Destination,argv[0]);
+  /* The first argument is the type of the logo. */
+  if (!strcmp(argv[0], "op")) {
+    SMS.UDHType = GSM_OpLogo;
+    UserDataHeader[4] = 0x82; /* NBS port 0x1582 */
+    fprintf(stdout, _("Sending operator logo.\n"));
+  } else if (!strcmp(argv[0], "caller")) {
+    SMS.UDHType = GSM_CallerIDLogo;
+    UserDataHeader[4] = 0x83; /* NBS port 0x1583 */
+    fprintf(stdout, _("Sending caller line identification logo.\n"));
+  } else {
+    fprintf(stderr, _("You should specify what kind of logo to send!\n"));
+    return (-1);
+  }
 
-  /* The second argument is the bitmap file. */
-  GSM_ReadBitmapFile(argv[1], &bitmap);
+  /* The second argument is the destionation, ie the phone number of recipient. */
+  strcpy(SMS.Destination,argv[1]);
 
-  /*
-   * The third argument, if present, is the Network code of the operator.
-   * Network code is in this format: "xxx yy".
-   */
-  if (argc > 2)
-    strcpy(bitmap.netcode, argv[2]);
+  /* The third argument is the bitmap file. */
+  GSM_ReadBitmapFile(argv[2], &bitmap);
+
+  /* If we are sending op logo we can rewrite network code. */
+  if (!strcmp(argv[0], "op")){
+    /*
+     * The fourth argument, if present, is the Network code of the operator.
+     * Network code is in this format: "xxx yy".
+     */
+    if (argc > 3) {
+      strcpy(bitmap.netcode, argv[3]);
+#ifdef DEBUG
+      fprintf(stdout, _("Operator code: %s\n"), argv[3]);
+#endif
+    }
+
+    /* Set the network code */
+    Data[current++] = ((bitmap.netcode[1] & 0x0f) << 4) | (bitmap.netcode[0] & 0xf);
+    Data[current++] = 0xf0 | (bitmap.netcode[2] & 0x0f);
+    Data[current++] = ((bitmap.netcode[5] & 0x0f) << 4) | (bitmap.netcode[4] & 0xf);
+  }
 
   /* Set the logo size */
-  Data[4] = bitmap.width;
-  Data[5] = bitmap.height;
+  current++;
+  Data[current++] = bitmap.width;
+  Data[current++] = bitmap.height;
 
-  /* Set the network code */
-  Data[0] = ((bitmap.netcode[1] & 0x0f) << 4) | (bitmap.netcode[0] & 0xf);
-  Data[1] = 0xf0 | (bitmap.netcode[2] & 0x0f);
-  Data[2] = ((bitmap.netcode[5] & 0x0f) << 4) | (bitmap.netcode[4] & 0xf);
+  Data[current++] = 0x01;
 
   memcpy(SMS.UDH,UserDataHeader,7);
-  memcpy(SMS.MessageText,Data,7);
-  memcpy(SMS.MessageText+7,bitmap.bitmap,bitmap.size);
+  memcpy(SMS.MessageText,Data,current);
+  memcpy(SMS.MessageText+current,bitmap.bitmap,bitmap.size);
 
   /* Initialise the GSM interface. */
   fbusinit(NULL);
   
   /* Send the message. */
-  error = GSM->SendSMSMessage(&SMS,7+bitmap.size);
+  error = GSM->SendSMSMessage(&SMS,current+bitmap.size);
 
   if (error == GE_SMSSENDOK)
     fprintf(stdout, _("Send succeeded!\n"));
@@ -2562,6 +2593,8 @@ int foogle(char *argv[])
     printf("\n");
   }
 #endif
+
+  sleep(5);
  
   GSM->Terminate();
 

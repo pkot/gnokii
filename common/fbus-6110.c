@@ -14,7 +14,7 @@
   The various routines are called FB61 (whatever) as a concatenation of FBUS
   and 6110.
 
-  Last modification: Mon Mar 20 21:03:09 CET 2000
+  Last modification: Thu Apr  6 01:32:14 CEST 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -938,7 +938,7 @@ void FB61_ThreadLoop(void)
   /* FIXME: we should implement better support for ringtones and the utility
      to set ringtones. */
 
-  //    FB61_SendRingtone("GNOKIItune", 250);
+  // FB61_SendRingtoneRTTL("/tmp/coca.txt");
 
   idle_timer=0;
 

@@ -11,7 +11,7 @@
   This file provides definitions of macros from the Smart Messaging
   Specification. It is mainly rewrite of the spec to C :-) Viva Nokia!
 
-  Last modification: Mon Mar 20 21:51:59 CET 2000
+  Last modification: Thu Apr  6 01:32:14 CEST 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -20,6 +20,9 @@
 #define __fbus_6110_ringtones_h
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include "misc.h"
 #include "gsm-common.h"
 #include "fbus-6110.h"
@@ -106,6 +109,7 @@
 /* Definition of the Note type */
 
 typedef struct {
+  int Scale;
   int NoteID;
   int Duration;
   int DurationSpecifier;

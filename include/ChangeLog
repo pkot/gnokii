@@ -9,3 +9,6 @@
 
 * Mon Mar 20 21:03:09 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - PhoneBook_Entry contain Date
+
+* Wed Apr  5 18:11:51 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- support for group logo sending via SMS

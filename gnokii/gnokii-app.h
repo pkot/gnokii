@@ -31,7 +31,7 @@ int setspeeddial(char *argv[]);
 int getsms(char *argv[]);
 int deletesms(char *argv[]);
 int sendsms(int argc, char *argv[]);
-int sendoplogoviasms(int argc, char *argv[]);
+int sendlogo(int argc, char *argv[]);
 int getsmsc(char *mcn);
 int setdatetime(int argc, char *argv[]);
 int getdatetime(void);
@@ -76,7 +76,7 @@ typedef enum {
   OPT_GETSMS,
   OPT_DELETESMS,
   OPT_SENDSMS,
-  OPT_SENDOPLOGOVIASMS,
+  OPT_SENDLOGO,
   OPT_GETSMSC,
   OPT_GETWELCOMENOTE,
   OPT_SETWELCOMENOTE,

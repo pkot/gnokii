@@ -10,7 +10,7 @@
 
   This file provides support for ringtones.
 
-  Last modification: Mon Mar 20 21:51:59 CET 2000
+  Last modification: Thu Apr  6 01:32:14 CEST 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -119,7 +119,9 @@ void FB61_Ringtone(char *Name, int Beats, int NrNotes, Note *Notes)
 					 0x05,       /* IEI FIXME: What is this? */
 					 0x04,       /* IEDL FIXME: What is this? */
 					 0x15, 0x81, /* Destination port */
-					 0x15, 0x81  /* Originator port, only to fill in the two bytes :-) */
+					 0x15, 0x81  /* Originator port, only
+                                                        to fill in the two
+                                                        bytes :-) */
   };
 
   unsigned char CommandLength = 0x02;
@@ -128,13 +130,14 @@ void FB61_Ringtone(char *Name, int Beats, int NrNotes, Note *Notes)
   StartBit=FB61_BitPackByte(req, StartBit, CommandLength, 8);
   StartBit=FB61_BitPackByte(req, StartBit, RingingToneProgramming, 7);
 
-  /* The page 3-23 of the specs says that <command-part> is always octet-aligned */
+  /* The page 3-23 of the specs says that <command-part> is always
+     octet-aligned. */
   StartBit=FB61_OctetAlign(req, StartBit);
 
   StartBit=FB61_BitPackByte(req, StartBit, Sound, 7);
   StartBit=FB61_BitPackByte(req, StartBit, BasicSongType, 3);
 
-  /* Packing the name of the tune */
+  /* Packing the name of the tune. */
   StartBit=FB61_BitPackByte(req, StartBit, strlen(Name)<<4, 4);
   StartBit=FB61_BitPack(req, StartBit, Name, 8*strlen(Name));
 
@@ -143,8 +146,9 @@ void FB61_Ringtone(char *Name, int Beats, int NrNotes, Note *Notes)
   StartBit=FB61_BitPackByte(req, StartBit, 0x00, 8);
   StartBit=FB61_BitPackByte(req, StartBit, 0x00, 1);
 
-  /* Number of notes in the tune (+3). FIXME: It works, but why +3? :-) */
-  StartBit=FB61_BitPackByte(req, StartBit, NrNotes+3, 8);
+  /* Number of instructions in the tune. Each Note contains two instructions -
+     Scale and Note. Default Tempo and Style are instructions too.  */
+  StartBit=FB61_BitPackByte(req, StartBit, 2*NrNotes+2, 8);
 
   /* Style */
   StartBit=FB61_BitPackByte(req, StartBit, StyleInstructionId, 3);
@@ -154,12 +158,12 @@ void FB61_Ringtone(char *Name, int Beats, int NrNotes, Note *Notes)
   StartBit=FB61_BitPackByte(req, StartBit, TempoInstructionId, 3);
   StartBit=FB61_BitPackByte(req, StartBit, FB61_GetTempo(Beats), 5);
 
-  /* Note Scale */
-  StartBit=FB61_BitPackByte(req, StartBit, ScaleInstructionId, 3);
-  StartBit=FB61_BitPackByte(req, StartBit, Scale1, 2);
-
   /* Notes packing */
   for(i=0; i<NrNotes; i++) {
+    /* Scale */
+    StartBit=FB61_BitPackByte(req, StartBit, ScaleInstructionId, 3);
+    StartBit=FB61_BitPackByte(req, StartBit, Notes[i].Scale, 2);
+    /* Note */
     StartBit=FB61_BitPackByte(req, StartBit, NoteInstructionId, 3);
     StartBit=FB61_BitPackByte(req, StartBit, Notes[i].NoteID, 4);
     StartBit=FB61_BitPackByte(req, StartBit, Notes[i].Duration, 3);
@@ -178,16 +182,208 @@ void FB61_Ringtone(char *Name, int Beats, int NrNotes, Note *Notes)
 
 void FB61_SendRingtone(char *Name, int Beats)
 {
-  int NrNotes=14;
-  Note Notes[14] = {
-    { Note_A, Duration_Full, NoSpecialDuration},
-    { Note_H, Duration_Full, NoSpecialDuration},
-    { Note_C, Duration_Full, NoSpecialDuration},
-    { Note_D, Duration_Full, NoSpecialDuration},
-    { Note_E, Duration_Full, NoSpecialDuration},
-    { Note_F, Duration_Full, NoSpecialDuration},
-    { Note_G, Duration_Full, NoSpecialDuration}
+  int NrNotes=11;
+  Note Notes[11] = {
+    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
+    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
+    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
+    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
+    { Scale2, Note_G, Duration_1_4, NoSpecialDuration},
+    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
+    { Scale2, Note_E, Duration_1_4, NoSpecialDuration},
+    { Scale2, Note_E, Duration_1_8, NoSpecialDuration},
+    { Scale2, Note_A, Duration_1_8, NoSpecialDuration},
+    { Scale2, Note_Fis, Duration_1_4, NoSpecialDuration},
+    { Scale2, Note_D, Duration_1_4, NoSpecialDuration}
   };
 
   FB61_Ringtone(Name, Beats, NrNotes, Notes);
+}
+
+int GetDuration(int number) {
+
+  int duration=0;
+
+  switch (number) {
+  case 1:
+    duration=Duration_Full; break;
+  case 2:
+    duration=Duration_1_2; break;
+  case 4:
+    duration=Duration_1_4; break;
+  case 8:
+    duration=Duration_1_8; break;
+  case 16:
+    duration=Duration_1_16; break;
+  case 32:
+    duration=Duration_1_32; break;
+  }
+
+  return duration;
+}
+
+int GetScale(int number) {
+
+  int scale=0;
+
+  switch (number) {
+  case 5:
+    scale=Scale1; break;
+  case 6:
+    scale=Scale2; break;
+  case 7:
+    scale=Scale3; break;
+  case 8:
+    scale=Scale4; break;
+  }
+
+  return scale;
+}
+
+void FB61_SendRingtoneRTTL(char *FileName)
+{
+  int NrNotes=0;
+  Note Notes[100];
+
+  char Name[10];
+
+  int DefNoteDuration=Duration_1_4;
+  int DefNoteScale=Scale2;
+  int DefBeats=63;
+
+  unsigned char buffer[2000];
+  unsigned char *def, *notes, *ptr;
+  FILE *fd;
+
+  fd=fopen(FileName, "r");
+  if (!fd) {
+    fprintf(stderr, _("File can not be opened!\n"));
+    return;
+  }
+
+  fread(buffer, 2000, 1, fd);
+
+#define RTTTL_SEP ":"
+
+  strtok(buffer, RTTTL_SEP);
+
+  sprintf(Name, "%s", buffer);
+
+  def=strtok(NULL, RTTTL_SEP);
+
+  notes=strtok(NULL, RTTTL_SEP);
+
+  ptr=strtok(def, ", ");
+  /* Parsing the <defaults> section. */
+  while (ptr) {
+
+    switch(*ptr) {
+    case 'd':
+    case 'D':
+      DefNoteDuration=GetDuration(atoi(ptr+2));
+      break;
+    case 'o':
+    case 'O':
+      DefNoteScale=GetScale(atoi(ptr+2));
+      break;
+    case 'b':
+    case 'B':
+      DefBeats=atoi(ptr+2);
+      break;
+    }
+
+    ptr=strtok(NULL,", ");
+  }
+
+  /* Parsing the <note-command>+ section. */
+  ptr=strtok(notes, ", ");
+  while (ptr) {
+
+    /* [<duration>] */
+    Notes[NrNotes].Duration=GetDuration(atoi(ptr));
+    if (Notes[NrNotes].Duration==0)
+      Notes[NrNotes].Duration=DefNoteDuration;
+
+    /* Skip all numbers in duration specification. */
+    while(isdigit(*ptr))
+      ptr++;
+
+    /* <note> */
+
+    switch(*ptr) {
+    case 'p':
+    case 'P':
+      Notes[NrNotes].NoteID=Note_Pause;
+      break;
+    case 'c':
+    case 'C':
+      Notes[NrNotes].NoteID=Note_C;
+      if (*(ptr+1)=='#') {
+	Notes[NrNotes].NoteID=Note_Cis;
+	ptr++;
+      }
+      break;
+    case 'd':
+    case 'D':
+      Notes[NrNotes].NoteID=Note_D;
+      if (*(ptr+1)=='#') {
+	Notes[NrNotes].NoteID=Note_Dis;
+	ptr++;
+      }
+      break;
+    case 'e':
+    case 'E':
+      Notes[NrNotes].NoteID=Note_E;
+      break;
+    case 'f':
+    case 'F':
+      Notes[NrNotes].NoteID=Note_F;
+      if (*(ptr+1)=='#') {
+	Notes[NrNotes].NoteID=Note_Fis;
+	ptr++;
+      }
+      break;
+    case 'g':
+    case 'G':
+      Notes[NrNotes].NoteID=Note_G;
+      if (*(ptr+1)=='#') {
+	Notes[NrNotes].NoteID=Note_Gis;
+	ptr++;
+      }
+      break;
+    case 'a':
+    case 'A':
+      Notes[NrNotes].NoteID=Note_A;
+      if (*(ptr+1)=='#') {
+	Notes[NrNotes].NoteID=Note_Ais;
+	ptr++;
+      }
+      break;
+    case 'h':
+    case 'H':
+      Notes[NrNotes].NoteID=Note_H;
+      break;
+    }
+    ptr++;
+
+    /* [<scale>] */
+
+    Notes[NrNotes].Scale=GetScale(atoi(ptr));
+    if (Notes[NrNotes].Scale==0)
+      Notes[NrNotes].Scale=DefNoteScale;
+
+    /* Skip the number in scale specification. */
+    if(isdigit(*ptr))
+      ptr++;
+
+    /* [<special-duration>] */
+
+    if (*ptr=='.')
+      Notes[NrNotes].DurationSpecifier=DottedNote;
+
+    NrNotes++;
+    ptr=strtok(NULL, ", ");
+  }
+
+  FB61_Ringtone(Name, DefBeats, NrNotes, Notes);
 }

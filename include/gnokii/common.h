@@ -11,7 +11,7 @@
   Header file for the definitions, enums etc. that are used by all models of
   handset.
 
-  Last modification: Mon Mar 20 21:45:41 CET 2000
+  Last modification: Wed Apr  5 18:11:51 CEST 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -180,7 +180,8 @@ typedef struct {
 typedef enum {
   GSM_NoUDH,
   GSM_ConcatenatedMessages,
-  GSM_OpLogo
+  GSM_OpLogo,
+  GSM_CallerIDLogo
 } GSM_UDH;
 
 /* Define datatype for SMS messages, used for getting SMS messages from the

@@ -34,3 +34,7 @@
 
 * Sun Apr  2 15:18:10 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - arguments checking for getlogo
+
+* Wed Apr  5 19:04:30 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- support for group logo sending via SMS
+
