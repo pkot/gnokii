@@ -1,3 +1,8 @@
+0.5.6 (not released yet)
+========================
+ * 6510 series updates
+    o GetRawRingtone reply differs on 6310         (BORBELY Zoltan)
+
 0.5.5
 =====
  * translation updates

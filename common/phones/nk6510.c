@@ -2502,9 +2502,6 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 		if (data->raw_data->length < i) return GN_ERR_INVALIDSIZE;
 		data->raw_data->length = i;
 		memcpy(data->raw_data->data, pos, i);
-		pos += i;
-		if (pos + 2 - message != length || pos[0] != 0 || pos[1] != 0)
-			return GN_ERR_UNHANDLEDFRAME;
 		break;
 
 	/* get raw ringtone failed */
