@@ -37,6 +37,8 @@
       probably by this policy                           (Pawel Kot)
     o add new_message_store field of gn_memory_type type to
       gn_sms_status                                  (David Vrabel)
+    o skip leading '+' in the numbers of unknown type
+                                                     (David Vrabel)
  * 6100 driver updates
     o add Nokia 8850 support                       (Denis Pitzalis)
  * build system updates
