@@ -189,11 +189,6 @@ int usage(void)
   return 0;
 }
 
-void foop(RLP_F96Frame *foo)
-{
-  fprintf(stdout, "Foo called! %d \n", foo->Header[0]);
-}
-
 /* fbusinit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
 
@@ -2217,6 +2212,8 @@ int foogle(char *argv[])
 
   /* Pavel's one */
   GSM->DialData("4670");
+
+  // RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL);
 
   sleep (60);
   GSM->Terminate();

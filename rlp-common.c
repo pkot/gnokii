@@ -1,20 +1,33 @@
-    /* G N O K I I
-       A Linux/Unix toolset and driver for Nokia mobile phones.
-       Copyright (C) Hugh Blemings, 1999  Released under the terms of 
-       the GNU GPL, see file COPYING for more details.
-    
-       This file:  rlp-common.c   Version 0.3.1
+/*
 
-       Common/generic RLP functions. */
+  G N O K I I
 
-#include    <stdio.h>
-#include    <ctype.h>
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+  Copyright (C) Hugh Blemings & Pavel Janík ml., 1999.
 
+  Released under the terms of the GNU GPL, see file COPYING for more details.
 
-#include    "rlp-common.h"
-#include    "rlp-crc24.h"
-#include    "misc.h"        /* For u8, u32 etc. */
+  The development of RLP protocol is sponsored by SuSE CR, s.r.o. (Pavel use
+  the SIM card from SuSE for testing purposes).
 
+  This file:  rlp-common.c   Version 0.3.1
+
+  Actual implementation of RLP protocol.
+
+  Last modification: Fri Dec  3 00:15:55 CET 1999
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+*/
+
+#include <stdio.h>
+#include <ctype.h>
+
+#include "rlp-common.h"
+#include "rlp-crc24.h"
+#include "misc.h" /* For u8, u32 etc. */
+
+/* Our state machine which handles all of nine possible states of RLP
+   machine. */
 void MAIN_STATE_MACHINE(RLP_F96Frame *frame);
 
 /* This is the type we are just handling. */
@@ -34,6 +47,7 @@ u8 RLP_M = 62; /* Number of different sequence numbers (modulus) */
 u8 RLP_N2 = 15; /* Maximum number of retransmisions. GSM spec says 6 here, but
                    Nokia will XID this. */
 
+
 /* Previous sequence number. */
 u8 Decr(x) {
 
@@ -49,22 +63,260 @@ u8 Incr(x) {
     return (x+1) % RLP_M;
 }
 
+/* FIXME: Remove this after finishing. */
+
+void X(RLP_F96Frame *frame) {
+
+  int i;
+
+  for (i=0; i<30; i++)
+    printf("byte[%2d]: %02x\n", i, *( (u8 *)frame+i));
+   
+}
+
 /* This function is used for sending RLP frames to the phone. */
 
-void RLP_SendF96Frame(RLP_FrameTypes FrameType, u8 OuTCR, u8 OutPF,
+void RLP_SendF96Frame(RLP_FrameTypes FrameType,
+                      u8 OutCR, u8 OutPF,
                       u8 OutNR, u8 OutNS,
                       u8 *OutData)
-
 {
 
-  /* RLP_F96Frame frame; */
+  RLP_F96Frame frame;
+  u8 req[60] = { 0x01, 0xd9 };
+  int i;
+
+  frame.Header[0]=0;
+  frame.Header[1]=0;
+
+#define SetCRBit frame.Header[0]|=0x01;
+#define SetPFBit frame.Header[1]|=0x02;
+
+#define ClearCRBit frame.Header[0]&=(~0x01);
+#define ClearPFBit frame.Header[1]&=(~0x02);
+
+  /* If Command/Response bit is set, set it in the header. */
+  if (OutCR)
+    SetCRBit;
+
+
+  /* If Poll/Final bit is set, set it in the header. */
+  if (OutPF)
+    SetPFBit;
+
+
+  /* If OutData is not specified (ie. is NULL) we want to clear frame.Data
+     array for the user. */
+  if (!OutData) {
+
+    frame.Data[0]=0x1f;
+
+    for (i=1; i<25; i++)
+      frame.Data[i]=0;
+  }
+
+#define PackM(x)  frame.Header[1]|=((x)<<2);
+#define PackS(x)  frame.Header[0]|=((x)<<1);
+#define PackNR frame.Header[1]|=(OutNR<<2);
+#define PackNS frame.Header[0]|=(OutNS<<3);frame.Header[1]|=(OutNS>>5);
+
+  switch (FrameType) {
+
+    /* Unnumbered frames. Be careful - some commands are used as commands
+       only, so we have to set C/R bit later. We should not allow user for
+       example to send SABM as response because in the spec is: The SABM
+       encoding is used as command only. */
+
+  case RLPFT_U_SABM:
+
+    frame.Header[0]|=0xf8; /* See page 11 of the GSM 04.22 spec - 0 X X 1 1 1 1 1 */
+    frame.Header[1]|=0x01; /* 1 P/F M1 M2 M3 M4 M5 X */
+
+    SetCRBit; /* The SABM encoding is used as a command only. */
+    SetPFBit; /* It is always used with the P-bit set to "1". */
+
+    PackM(RLPU_SABM);
+
+    break;
+
+  case RLPFT_U_UA:
+
+    frame.Header[0]|=0xf8;
+    frame.Header[1]|=0x01;
+
+    ClearCRBit; /* The UA encoding is used as a response only. */
+
+    PackM(RLPU_UA);
+
+    break;
+
+  case RLPFT_U_DISC:
+
+    frame.Header[0]|=0xf8;
+    frame.Header[1]|=0x01;
+
+    SetCRBit; /* The DISC encoding is used as a command only. */
+
+    PackM(RLPU_DISC);
+
+    break;
+
+  case RLPFT_U_DM:
+
+    frame.Header[0]|=0xf8;
+    frame.Header[1]|=0x01;
+
+    ClearCRBit; /* The DM encoding is used as a response only. */
+
+    PackM(RLPU_DM);
+
+    break;
+
+  case RLPFT_U_NULL:
+
+    frame.Header[0]|=0xf8;
+    frame.Header[1]|=0x01;
+
+    PackM(RLPU_NULL);
+
+    break;
+
+  case RLPFT_U_UI:
+
+    frame.Header[0]|=0xf8;
+    frame.Header[1]|=0x01;
+
+    PackM(RLPU_UI);
+
+    break;
+
+  case RLPFT_U_XID:
+
+    frame.Header[0]|=0xf8;
+    frame.Header[1]|=0x01;
+
+    SetPFBit; /* XID frames are always used with the P/F-bit set to "1". */
+
+    PackM(RLPU_XID);
+
+    break;
+
+  case RLPFT_U_TEST:
+
+    frame.Header[0]|=0xf8;
+    frame.Header[1]|=0x01;
+
+    PackM(RLPU_TEST);
+
+    break;
+
+  case RLPFT_U_REMAP:
+
+    frame.Header[0]|=0xf8;
+    frame.Header[1]|=0x01;
+
+    ClearPFBit; /* REMAP frames are always used with P/F-bit set to "0". */
+
+    PackM(RLPU_REMAP);
+
+    break;
+
+  case RLPFT_S_RR:
+
+    frame.Header[0]|=0xf0;  /* See page 11 of the GSM 04.22 spec - 0 X X 1 1 1 1 1 */
+    frame.Header[1]|=0x01; /* 1 P/F ...N(R)... */
+
+    PackNR;
+
+    PackS(RLPS_RR);
+
+    break;
+
+  case RLPFT_S_REJ:
+
+    frame.Header[0]|=0xf0;
+    frame.Header[1]|=0x01;
+
+    PackNR;
+
+    PackS(RLPS_REJ);
+
+    break;
+
+  case RLPFT_S_RNR:
+
+    frame.Header[0]|=0xf0;
+    frame.Header[1]|=0x01;
+
+    PackNR;
+
+    PackS(RLPS_RNR);
+
+    break;
+
+  case RLPFT_S_SREJ:
+
+    frame.Header[0]|=0xf0;
+    frame.Header[1]|=0x01;
+
+    PackNR;
+
+    PackS(RLPS_SREJ);
+
+    break;
+
+  case RLPFT_SI_RR:
+
+    PackNR;
+    PackNS;
+
+    PackS(RLPS_RR);
+
+    break;
+
+  case RLPFT_SI_REJ:
+    PackNR;
+    PackNS;
+
+    PackS(RLPS_REJ);
+
+    break;
+
+  case RLPFT_SI_RNR:
+
+    PackNR;
+    PackNS;
+
+    PackS(RLPS_RNR);
+
+    break;
+
+  case RLPFT_SI_SREJ:
+    PackNR;
+    PackNS;
+
+    PackS(RLPS_SREJ);
+
+    break;
+
+  default:
+    break;
+  }
+
 
   /* u8 req[64]; */
 
   /* Store FCS in the frame. */
+  RLP_CalculateCRC24Checksum((u8 *)&frame, 27, frame.FCS);
 
-  // RLP_CheckCRC24FCS((u8 *)frame, 30);
+  // X(&frame);
 
+  //  RLP_DisplayF96Frame(&frame);
+
+  memcpy(req+2, (u8 *) &frame, 32);
+
+  /* FIXME: how should we send RLP frames? */
+  FB61_TX_SendFrame(32, 0xf0, req);
 }
 
 /* Check_input_PDU in Serge's code. */
@@ -206,7 +458,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
     case RLPFT_S: /* Supervisory frames. */
 
 #ifdef DEBUG
-      fprintf(stdout, "Supervisory Frame S=%x N(R)=%02x", header.S, header.Nr);
+      fprintf(stdout, "Supervisory Frame S=%x N(R)=%02x ", header.S, header.Nr);
 #endif
 
       switch (header.S) {
@@ -294,7 +546,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
       case RLPS_RNR:
 
 #ifdef DEBUG
-      fprintf(stdout, "RRN");
+      fprintf(stdout, "RNR");
 #endif
 
       CurrentFrameType=RLPFT_SI_RNR;
@@ -365,6 +617,10 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
        failures? Nothing is printed, because in the first stage of connection
        there are too many bad RLP frames... */
 
+#ifdef DEBUG
+    fprintf(stdout, _("Frame FCS is bad. Ignoring...\n"));
+#endif DEBUG
+
   }
 
   MAIN_STATE_MACHINE(frame);
@@ -377,6 +633,39 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 }
 
 void MAIN_STATE_MACHINE(RLP_F96Frame *frame) {
+
+  switch (CurrentState) {
+
+
+  case RLP_S0:
+
+#ifdef DEBUG
+    fprintf(stdout, _("RLP state 0.\n"));
+#endif
+
+    /* FIXME: handling of DISC and SABM, but do we really need it? */
+
+    /* FIXME: Solve user events. What about "automagically" set Attach_Req
+       here? */
+
+    if (CurrentFrameType!=RLPFT_BAD)
+      RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL);
+
+    break;
+
+
+  case RLP_S1:
+
+#ifdef DEBUG
+    fprintf(stdout, _("RLP state 1.\n"));
+#endif
+
+
+    break;
+
+  default:
+
+  }
 
 }
 
