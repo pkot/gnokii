@@ -102,6 +102,7 @@ static PhoneModel models[] = {
 	{"540",   "THF-11", 0 },
 	{"650",   "THF-12", 0 },
 	{"640",   "THF-13", 0 },
+	{"RPM-1", "Nokia Card Phone RPM-1 GSM900/1800", PM_SMS | PM_DTMF | PM_DATA | PM_AUTHENTICATION },
 	{NULL,    NULL, 0 }
 };
 
