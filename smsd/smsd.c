@@ -49,6 +49,9 @@
 /* Hold main configuration data for smsd */
 SmsdConfig smsdConfig;
 
+/* Global variables */
+bool TerminateThread;
+
 /* Local variables */
 static gchar *connect;
 
@@ -276,6 +279,7 @@ int main (int argc, char *argv[])
 #endif
 
   ReadConfig (argc, argv);
+  TerminateThread = false;
   Run ();
 
   return(0);

@@ -25,10 +25,13 @@ OBJS = 	db.o \
 all: smsd
 
 
-smsd: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/gsm-filetypes.o
+smsd: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o
 
 $(TOPDIR)/common/COMMON.o:
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
+
+$(TOPDIR)/common/data/DATA.o:
+	$(MAKE) -C $(TOPDIR)/common/data DATA.o
 
 $(TOPDIR)/common/gsm-filetypes.o:
 	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
