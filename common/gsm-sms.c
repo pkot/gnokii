@@ -41,6 +41,9 @@
 
 #include "sms-nokia.h"
 
+#include "gnokii-internal.h"
+#include "gnokii-api.h"
+
 #define ERROR() do { if (error != GN_ERR_NONE) return error; } while (0)
 
 struct sms_udh_data {
@@ -95,32 +98,32 @@ static struct sms_udh_data headers[] = {
  *  - message validity for 3 days
  *  - unsent status
  */
-static void sms_default(GSM_API_SMS *sms)
+static void sms_default(gn_sms *sms)
 {
-	memset(sms, 0, sizeof(GSM_API_SMS));
+	memset(sms, 0, sizeof(gn_sms));
 
-	sms->Type = SMS_Deliver;
-	sms->DeliveryReport = false;
-	sms->Status = SMS_Unsent;
-	sms->Validity = 4320; /* 4320 minutes == 72 hours */
-	sms->DCS.Type = SMS_GeneralDataCoding;
-	sms->DCS.u.General.Compressed = false;
-	sms->DCS.u.General.Alphabet = SMS_DefaultAlphabet;
-	sms->DCS.u.General.Class = 0;
+	sms->type = GN_SMS_MT_Deliver;
+	sms->delivery_report = false;
+	sms->status = GN_SMS_Unsent;
+	sms->validity = 4320; /* 4320 minutes == 72 hours */
+	sms->dcs.type = GN_SMS_DCS_GeneralDataCoding;
+	sms->dcs.u.general.compressed = false;
+	sms->dcs.u.general.alphabet = GN_SMS_DCS_DefaultAlphabet;
+	sms->dcs.u.general.class = 0;
 }
 
-API void gn_sms_default_submit(GSM_API_SMS *sms)
+API void gn_sms_default_submit(gn_sms *sms)
 {
 	sms_default(sms);
-	sms->Type = SMS_Submit;
-	sms->MemoryType = GMT_SM;
+	sms->type = GN_SMS_MT_Submit;
+	sms->memory_type = GN_MT_SM;
 }
 
-API void gn_sms_default_deliver(GSM_API_SMS *sms)
+API void gn_sms_default_deliver(gn_sms *sms)
 {
 	sms_default(sms);
-	sms->Type = SMS_Deliver;
-	sms->MemoryType = GMT_ME;
+	sms->type = GN_SMS_MT_Deliver;
+	sms->memory_type = GN_MT_ME;
 }
 
 
@@ -182,33 +185,33 @@ static char *sms_print_date_time(u8 *number)
  * The function fills int gnokii datetime structure basing on the given datetime
  * in the binary format. It is Y2K compliant.
  */
-SMS_DateTime *gn_sms_unpack_date_time(u8 *number, SMS_DateTime *dt)
+gn_timestamp *gn_sms_unpack_date_time(u8 *number, gn_timestamp *dt)
 {
 	if (!dt) return NULL;
-	memset(dt, 0, sizeof(SMS_DateTime));
+	memset(dt, 0, sizeof(gn_timestamp));
 	if (!number) return dt;
 
-	dt->Year     =  10 * (number[0] & 0x0f) + (number[0] >> 4);
+	dt->year     =  10 * (number[0] & 0x0f) + (number[0] >> 4);
 
 	/* Ugly hack, but according to the GSM specs, the year is stored
          * as the 2 digit number. */
-	if (dt->Year < 70) dt->Year += 2000;
-	else dt->Year += 1900;
+	if (dt->year < 70) dt->year += 2000;
+	else dt->year += 1900;
 
-	dt->Month    =  10 * (number[1] & 0x0f) + (number[1] >> 4);
-	dt->Day      =  10 * (number[2] & 0x0f) + (number[2] >> 4);
-	dt->Hour     =  10 * (number[3] & 0x0f) + (number[3] >> 4);
-	dt->Minute   =  10 * (number[4] & 0x0f) + (number[4] >> 4);
-	dt->Second   =  10 * (number[5] & 0x0f) + (number[5] >> 4);
+	dt->month    =  10 * (number[1] & 0x0f) + (number[1] >> 4);
+	dt->day      =  10 * (number[2] & 0x0f) + (number[2] >> 4);
+	dt->hour     =  10 * (number[3] & 0x0f) + (number[3] >> 4);
+	dt->minute   =  10 * (number[4] & 0x0f) + (number[4] >> 4);
+	dt->second   =  10 * (number[5] & 0x0f) + (number[5] >> 4);
 
 	/* The timezone is given in quarters. The base is GMT */
-	dt->Timezone = (10 * (number[6] & 0x07) + (number[6] >> 4)) / 4;
+	dt->timezone = (10 * (number[6] & 0x07) + (number[6] >> 4)) / 4;
 	/* The GSM spec is not clear what is the sign of the timezone when the
 	 * 6th bit is set. Some SMSCs are compatible with our interpretation,
 	 * some are not. If your operator does use incompatible SMSC and wrong
 	 * sign disturbs you, change the sign here.
 	 */
-	if (number[6] & 0x08) dt->Timezone = -dt->Timezone;
+	if (number[6] & 0x08) dt->timezone = -dt->timezone;
 
 	return dt;
 }
@@ -219,7 +222,7 @@ SMS_DateTime *gn_sms_unpack_date_time(u8 *number, SMS_DateTime *dt)
  * @dt: datetime structure to be read
  *
  */
-u8 *gn_sms_pack_date_time(SMS_DateTime *dt, u8 *number)
+u8 *gn_sms_pack_date_time(gn_timestamp *dt, u8 *number)
 {
 	if (!number) return NULL;
 	memset(number, 0, sizeof(unsigned char));
@@ -227,24 +230,24 @@ u8 *gn_sms_pack_date_time(SMS_DateTime *dt, u8 *number)
 
 	/* Ugly hack, but according to the GSM specs, the year is stored
          * as the 2 digit number. */
-	if (dt->Year < 2000) dt->Year -= 1900;
-	else dt->Year -= 2000;
+	if (dt->year < 2000) dt->year -= 1900;
+	else dt->year -= 2000;
 
-	number[0]    = (dt->Year   / 10) | ((dt->Year   % 10) << 4);
-	number[1]    = (dt->Month  / 10) | ((dt->Month  % 10) << 4);
-	number[2]    = (dt->Day    / 10) | ((dt->Day    % 10) << 4);
-	number[3]    = (dt->Hour   / 10) | ((dt->Hour   % 10) << 4);
-	number[4]    = (dt->Minute / 10) | ((dt->Minute % 10) << 4);
-	number[5]    = (dt->Second / 10) | ((dt->Second % 10) << 4);
+	number[0]    = (dt->year   / 10) | ((dt->year   % 10) << 4);
+	number[1]    = (dt->month  / 10) | ((dt->month  % 10) << 4);
+	number[2]    = (dt->day    / 10) | ((dt->day    % 10) << 4);
+	number[3]    = (dt->hour   / 10) | ((dt->hour   % 10) << 4);
+	number[4]    = (dt->minute / 10) | ((dt->minute % 10) << 4);
+	number[5]    = (dt->second / 10) | ((dt->second % 10) << 4);
 
 	/* The timezone is given in quarters. The base is GMT */
-	number[6]    = (dt->Timezone / 10) | ((dt->Second % 10) << 4) * 4;
+	number[6]    = (dt->timezone / 10) | ((dt->second % 10) << 4) * 4;
 	/* The GSM spec is not clear what is the sign of the timezone when the
 	 * 6th bit is set. Some SMSCs are compatible with our interpretation,
 	 * some are not. If your operator does use incompatible SMSC and wrong
 	 * sign disturbs you, change the sign here.
 	 */
-	if (dt->Timezone < 0) number[6] |= 0x08;
+	if (dt->timezone < 0) number[6] |= 0x08;
 
 	return number;
 }
@@ -265,12 +268,12 @@ u8 *gn_sms_pack_date_time(SMS_DateTime *dt, u8 *number)
  * contain only one part, so it is assumed all other part except 0th are
  * NULL.
  */
-static gn_error sms_status(unsigned char status, GSM_API_SMS *sms)
+static gn_error sms_status(unsigned char status, gn_sms *sms)
 {
-	sms->UserData[0].Type = SMS_PlainText;
-	sms->UserData[1].Type = SMS_NoData;
+	sms->user_data[0].type = GN_SMS_DATA_Text;
+	sms->user_data[1].type = GN_SMS_DATA_None;
 	if (status < 0x03) {
-		strcpy(sms->UserData[0].u.Text, _("Delivered"));
+		strcpy(sms->user_data[0].u.text, _("Delivered"));
 		switch (status) {
 		case 0x00:
 			dprintf("SM received by the SME");
@@ -283,7 +286,7 @@ static gn_error sms_status(unsigned char status, GSM_API_SMS *sms)
 			break;
 		}
 	} else if (status & 0x40) {
-		strcpy(sms->UserData[0].u.Text, _("Failed"));
+		strcpy(sms->user_data[0].u.text, _("Failed"));
 		/* more detailed reason only for debug */
 		if (status & 0x20) {
 			dprintf("Temporary error, SC is not making any more transfer attempts\n");
@@ -350,7 +353,7 @@ static gn_error sms_status(unsigned char status, GSM_API_SMS *sms)
 			}
 		}
 	} else if (status & 0x20) {
-		strcpy(sms->UserData[0].u.Text, _("Pending"));
+		strcpy(sms->user_data[0].u.text, _("Pending"));
 		/* more detailed reason only for debug */
 		dprintf("Temporary error, SC still trying to transfer SM\n");
 		switch (status) {
@@ -377,13 +380,13 @@ static gn_error sms_status(unsigned char status, GSM_API_SMS *sms)
 			break;
 		}
 	} else {
-		strcpy(sms->UserData[0].u.Text, _("Unknown"));
+		strcpy(sms->user_data[0].u.text, _("Unknown"));
 
 		/* more detailed reason only for debug */
 		dprintf("Reserved/Specific to SC: %x", status);
 	}
 	dprintf("\n");
-	sms->UserData[0].Length = strlen(sms->UserData[0].u.Text);
+	sms->user_data[0].length = strlen(sms->user_data[0].u.text);
 	return GN_ERR_NONE;
 }
 
@@ -400,15 +403,15 @@ static gn_error sms_status(unsigned char status, GSM_API_SMS *sms)
  * readable text format according to the locale set.
  */
 static gn_error sms_decode_data(unsigned char *message, unsigned char *output, unsigned int length,
-				 unsigned int size, unsigned int udhlen, SMS_DataCodingScheme dcs)
+				 unsigned int size, unsigned int udhlen, gn_sms_dcs dcs)
 {
 	/* Unicode */
-	if ((dcs.Type & 0x08) == 0x08) {
+	if ((dcs.type & 0x08) == 0x08) {
 		dprintf("Unicode message\n");
 		char_decode_unicode(output, message, length);
 	} else {
 		/* 8bit SMS */
-		if ((dcs.Type & 0xf4) == 0xf4) {
+		if ((dcs.type & 0xf4) == 0xf4) {
 			dprintf("8bit message\n");
 			memcpy(output, message + udhlen, length);
 		/* 7bit SMS */
@@ -433,11 +436,11 @@ static gn_error sms_decode_data(unsigned char *message, unsigned char *output, u
  *   - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
  *   - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  */
-static gn_error sms_decode_udh(unsigned char *message, SMS_UserDataHeader *udh)
+static gn_error sms_decode_udh(unsigned char *message, gn_sms_udh *udh)
 {
 	unsigned char length, pos, nr;
 
-	udh->Length = length = message[0];
+	udh->length = length = message[0];
 	pos = 1;
 	nr = 0;
 	while (length > 1) {
@@ -447,70 +450,70 @@ static gn_error sms_decode_udh(unsigned char *message, SMS_UserDataHeader *udh)
 		switch (message[pos]) {
 		case 0x00: /* Concatenated short messages */
 			dprintf("Concatenated messages\n");
-			udh->UDH[nr].Type = SMS_ConcatenatedMessages;
-			udh->UDH[nr].u.ConcatenatedShortMessage.ReferenceNumber = message[pos + 2];
-			udh->UDH[nr].u.ConcatenatedShortMessage.MaximumNumber   = message[pos + 3];
-			udh->UDH[nr].u.ConcatenatedShortMessage.CurrentNumber   = message[pos + 4];
+			udh->udh[nr].type = GN_SMS_UDH_ConcatenatedMessages;
+			udh->udh[nr].u.concatenated_short_message.reference_number = message[pos + 2];
+			udh->udh[nr].u.concatenated_short_message.maximum_number   = message[pos + 3];
+			udh->udh[nr].u.concatenated_short_message.current_number   = message[pos + 4];
 			break;
 		case 0x01: /* Special SMS Message Indication */
 			switch (message[pos + 2] & 0x03) {
 			case 0x00:
 				dprintf("Voice Message\n");
-				udh->UDH[nr].Type = SMS_VoiceMessage;
+				udh->udh[nr].type = GN_SMS_UDH_VoiceMessage;
 				break;
 			case 0x01:
 				dprintf("Fax Message\n");
-				udh->UDH[nr].Type = SMS_FaxMessage;
+				udh->udh[nr].type = GN_SMS_UDH_FaxMessage;
 				break;
 			case 0x02:
 				dprintf("Email Message\n");
-				udh->UDH[nr].Type = SMS_EmailMessage;
+				udh->udh[nr].type = GN_SMS_UDH_EmailMessage;
 				break;
 			default:
 				dprintf("Unknown\n");
-				udh->UDH[nr].Type = SMS_UnknownUDH;
+				udh->udh[nr].type = GN_SMS_UDH_Unknown;
 				break;
 			}
-			udh->UDH[nr].u.SpecialSMSMessageIndication.Store = (message[pos + 2] & 0x80) >> 7;
-			udh->UDH[nr].u.SpecialSMSMessageIndication.MessageCount = message[pos + 3];
+			udh->udh[nr].u.special_sms_message_indication.store = (message[pos + 2] & 0x80) >> 7;
+			udh->udh[nr].u.special_sms_message_indication.message_count = message[pos + 3];
 			break;
 		case 0x05: /* Application port addression scheme, 16 bit address */
 			switch (((0x00ff & message[pos + 2]) << 8) | (0x00ff & message[pos + 3])) {
 			case 0x1581:
 				dprintf("Ringtone\n");
-				udh->UDH[nr].Type = SMS_Ringtone;
+				udh->udh[nr].type = GN_SMS_UDH_Ringtone;
 				break;
 			case 0x1582:
 				dprintf("Operator Logo\n");
-				udh->UDH[nr].Type = SMS_OpLogo;
+				udh->udh[nr].type = GN_SMS_UDH_OpLogo;
 				break;
 			case 0x1583:
 				dprintf("Caller Icon\n");
-				udh->UDH[nr].Type = SMS_CallerIDLogo;
+				udh->udh[nr].type = GN_SMS_UDH_CallerIDLogo;
 				break;
 			case 0x158a:
 				dprintf("Multipart Message\n");
-				udh->UDH[nr].Type = SMS_MultipartMessage;
+				udh->udh[nr].type = GN_SMS_UDH_MultipartMessage;
 				break;
 			case 0x23f4:
 				dprintf("WAP vCard\n");
-				udh->UDH[nr].Type = SMS_WAPvCard;
+				udh->udh[nr].type = GN_SMS_UDH_WAPvCard;
 				break;
 			case 0x23f5:
 				dprintf("WAP vCalendar\n");
-				udh->UDH[nr].Type = SMS_WAPvCalendar;
+				udh->udh[nr].type = GN_SMS_UDH_WAPvCalendar;
 				break;
 			case 0x23f6:
 				dprintf("WAP vCardSecure\n");
-				udh->UDH[nr].Type = SMS_WAPvCardSecure;
+				udh->udh[nr].type = GN_SMS_UDH_WAPvCardSecure;
 				break;
 			case 0x23f7:
 				dprintf("WAP vCalendarSecure\n");
-				udh->UDH[nr].Type = SMS_WAPvCalendarSecure;
+				udh->udh[nr].type = GN_SMS_UDH_WAPvCalendarSecure;
 				break;
 			default:
 				dprintf("Unknown\n");
-				udh->UDH[nr].Type = SMS_UnknownUDH;
+				udh->udh[nr].type = GN_SMS_UDH_Unknown;
 				break;
 			}
 			break;
@@ -518,7 +521,7 @@ static gn_error sms_decode_udh(unsigned char *message, SMS_UserDataHeader *udh)
 		case 0x06: /* SMSC Control Parameters */
 		case 0x07: /* UDH Source Indicator */
 		default:
-			udh->UDH[nr].Type = SMS_UnknownUDH;
+			udh->udh[nr].type = GN_SMS_UDH_Unknown;
 			dprintf("Not supported UDH\n");
 			break;
 		}
@@ -526,7 +529,7 @@ static gn_error sms_decode_udh(unsigned char *message, SMS_UserDataHeader *udh)
 		pos += (udh_length + 2);
 		nr++;
 	}
-	udh->Number = nr;
+	udh->number = nr;
 
 	return GN_ERR_NONE;
 }
@@ -541,61 +544,61 @@ static gn_error sms_decode_udh(unsigned char *message, SMS_UserDataHeader *udh)
  * them in hihger level SMS struct. It also checks for the UDH and when
  * it's found calls the function to extract the UDH.
  */
-static gn_error sms_decode_header(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_UserDataHeader *udh)
+static gn_error sms_decode_header(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *udh)
 {
-	switch (sms->Type = rawsms->Type) {
-	case SMS_Deliver:
+	switch (sms->type = rawsms->type) {
+	case GN_SMS_MT_Deliver:
 		dprintf("Mobile Terminated message:\n");
 		break;
-	case SMS_Delivery_Report:
+	case GN_SMS_MT_DeliveryReport:
 		dprintf("Delivery Report:\n");
 		break;
-	case SMS_Submit:
+	case GN_SMS_MT_Submit:
 		dprintf("Mobile Originated (stored) message:\n");
 		break;
-	case SMS_SubmitSent:
+	case GN_SMS_MT_SubmitSent:
 		dprintf("Mobile Originated (sent) message:\n");
 		break;
-	case SMS_Picture:
+	case GN_SMS_MT_Picture:
 		dprintf("Picture Message:\n");
 		break;
-	case SMS_PictureTemplate:
+	case GN_SMS_MT_PictureTemplate:
 		dprintf("Picture Template:\n");
 		break;
-	case SMS_TextTemplate:
+	case GN_SMS_MT_TextTemplate:
 		dprintf("Text Template:\n");
 		break;
 	default:
-		dprintf("Not supported message type: %d\n", sms->Type);
+		dprintf("Not supported message type: %d\n", sms->type);
 		return GN_ERR_NOTSUPPORTED;
 	}
 
 	/* Sending date */
-	gn_sms_unpack_date_time(rawsms->SMSCTime, &(sms->SMSCTime));
-	dprintf("\tDate: %s\n", sms_print_date_time(rawsms->SMSCTime));
+	gn_sms_unpack_date_time(rawsms->smsc_time, &(sms->smsc_time));
+	dprintf("\tDate: %s\n", sms_print_date_time(rawsms->smsc_time));
 
 	/* Remote number */
-	rawsms->RemoteNumber[0] = (rawsms->RemoteNumber[0] + 1) / 2 + 1;
-	snprintf(sms->Remote.Number, sizeof(sms->Remote.Number), "%s", char_get_bcd_number(rawsms->RemoteNumber));
-	dprintf("\tRemote number (recipient or sender): %s\n", sms->Remote.Number);
+	rawsms->remote_number[0] = (rawsms->remote_number[0] + 1) / 2 + 1;
+	snprintf(sms->remote.number, sizeof(sms->remote.number), "%s", char_get_bcd_number(rawsms->remote_number));
+	dprintf("\tRemote number (recipient or sender): %s\n", sms->remote.number);
 
 	/* Short Message Center */
-	snprintf(sms->SMSC.Number, sizeof(sms->SMSC.Number), "%s", char_get_bcd_number(rawsms->MessageCenter));
-	dprintf("\tSMS center number: %s\n", sms->SMSC.Number);
+	snprintf(sms->smsc.number, sizeof(sms->smsc.number), "%s", char_get_bcd_number(rawsms->message_center));
+	dprintf("\tSMS center number: %s\n", sms->smsc.number);
 
 	/* Delivery time */
-	if (sms->Type == SMS_Delivery_Report) {
-		gn_sms_unpack_date_time(rawsms->Time, &(sms->Time));
-		dprintf("\tDelivery date: %s\n", sms_print_date_time(rawsms->Time));
+	if (sms->type == GN_SMS_MT_DeliveryReport) {
+		gn_sms_unpack_date_time(rawsms->time, &(sms->time));
+		dprintf("\tDelivery date: %s\n", sms_print_date_time(rawsms->time));
 	}
 
 	/* Data Coding Scheme */
-	sms->DCS.Type = rawsms->DCS;
+	sms->dcs.type = rawsms->dcs;
 
 	/* User Data Header */
-	if (rawsms->UDHIndicator & 0x40) { /* UDH header available */
+	if (rawsms->udh_indicator & 0x40) { /* UDH header available */
 		dprintf("UDH found\n");
-		sms_decode_udh(rawsms->UserData, udh);
+		sms_decode_udh(rawsms->user_data, udh);
 	}
 
 	return GN_ERR_NONE;
@@ -609,68 +612,68 @@ static gn_error sms_decode_header(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_
  * This function decodes SMS as described in GSM 03.40 version 6.1.0
  * Release 1997, section 9
  */
-static gn_error sms_decode_pdu(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
+static gn_error sms_decode_pdu(gn_sms_raw *rawsms, gn_sms *sms)
 {
 	unsigned int size = 0;
 	gn_error error;
 
-	error = sms_decode_header(rawsms, sms, &sms->UDH);
+	error = sms_decode_header(rawsms, sms, &sms->udh);
 	ERROR();
-	switch (sms->Type) {
-	case SMS_Delivery_Report:
-		sms_status(rawsms->ReportStatus, sms);
+	switch (sms->type) {
+	case GN_SMS_MT_DeliveryReport:
+		sms_status(rawsms->report_status, sms);
 		break;
-	case SMS_PictureTemplate:
-	case SMS_Picture:
+	case GN_SMS_MT_PictureTemplate:
+	case GN_SMS_MT_Picture:
 		/* This is incredible. Nokia violates it's own format in 6210 */
 		/* Indicate that it is Multipart Message. Remove it if not needed */
 		/* [I believe Nokia said in their manuals that any order is permitted --pavel] */
-		sms->UDH.Number = 1;
-		sms->UDH.UDH[0].Type = SMS_MultipartMessage;
-		if ((rawsms->UserData[0] == 0x48) && (rawsms->UserData[1] == 0x1c)) {
+		sms->udh.number = 1;
+		sms->udh.udh[0].type = GN_SMS_UDH_MultipartMessage;
+		if ((rawsms->user_data[0] == 0x48) && (rawsms->user_data[1] == 0x1c)) {
 
 			dprintf("First picture then text!\n");
 
 			/* First part is a Picture */
-			sms->UserData[0].Type = SMS_BitmapData;
-			gn_bmp_read_sms(GN_BMP_PictureMessage, rawsms->UserData,
-					NULL, &sms->UserData[0].u.Bitmap);
-			gn_bmp_print(&sms->UserData[0].u.Bitmap, stderr);
+			sms->user_data[0].type = GN_SMS_DATA_Bitmap;
+			gn_bmp_read_sms(GN_BMP_PictureMessage, rawsms->user_data,
+					NULL, &sms->user_data[0].u.bitmap);
+			gn_bmp_print(&sms->user_data[0].u.bitmap, stderr);
 
-			size = rawsms->UserDataLength - 4 - sms->UserData[0].u.Bitmap.size;
+			size = rawsms->user_data_length - 4 - sms->user_data[0].u.bitmap.size;
 			/* Second part is a text */
-			sms->UserData[1].Type = SMS_NokiaText;
-			sms_decode_data(rawsms->UserData + 5 + sms->UserData[0].u.Bitmap.size,
-					(unsigned char *)&(sms->UserData[1].u.Text),
-					rawsms->Length - sms->UserData[0].u.Bitmap.size - 4,
-					size, 0, sms->DCS);
+			sms->user_data[1].type = GN_SMS_DATA_NokiaText;
+			sms_decode_data(rawsms->user_data + 5 + sms->user_data[0].u.bitmap.size,
+					(unsigned char *)&(sms->user_data[1].u.text),
+					rawsms->length - sms->user_data[0].u.bitmap.size - 4,
+					size, 0, sms->dcs);
 		} else {
 
 			dprintf("First text then picture!\n");
 
 			/* First part is a text */
-			sms->UserData[1].Type = SMS_NokiaText;
-			sms_decode_data(rawsms->UserData + 3,
-					(unsigned char *)&(sms->UserData[1].u.Text),
-					rawsms->UserData[1], rawsms->UserData[0], 0, sms->DCS);
+			sms->user_data[1].type = GN_SMS_DATA_NokiaText;
+			sms_decode_data(rawsms->user_data + 3,
+					(unsigned char *)&(sms->user_data[1].u.text),
+					rawsms->user_data[1], rawsms->user_data[0], 0, sms->dcs);
 
 			/* Second part is a Picture */
-			sms->UserData[0].Type = SMS_BitmapData;
+			sms->user_data[0].type = GN_SMS_DATA_Bitmap;
 			gn_bmp_read_sms(GN_BMP_PictureMessage,
-					rawsms->UserData + rawsms->UserData[0] + 7,
-					NULL, &sms->UserData[0].u.Bitmap);
-			gn_bmp_print(&sms->UserData[0].u.Bitmap, stderr);
+					rawsms->user_data + rawsms->user_data[0] + 7,
+					NULL, &sms->user_data[0].u.bitmap);
+			gn_bmp_print(&sms->user_data[0].u.bitmap, stderr);
 		}
 		break;
 	/* Plain text message */
 	default:
-		size = rawsms->Length - sms->UDH.Length;
-		sms_decode_data(rawsms->UserData + sms->UDH.Length,        /* Skip the UDH */
-				(unsigned char *)&sms->UserData[0].u.Text, /* With a plain text message we have only 1 part */
-				rawsms->Length,                            /* Length of the decoded text */
+		size = rawsms->length - sms->udh.length;
+		sms_decode_data(rawsms->user_data + sms->udh.length,        /* Skip the UDH */
+				(unsigned char *)&sms->user_data[0].u.text, /* With a plain text message we have only 1 part */
+				rawsms->length,                            /* Length of the decoded text */
 				size,                                      /* Length of the encoded text (in full octets) without UDH */
-				sms->UDH.Length,                          /* To skip the certain number of bits when unpacking 7bit message */
-				sms->DCS);
+				sms->udh.length,                          /* To skip the certain number of bits when unpacking 7bit message */
+				sms->dcs);
 		break;
 	}
 
@@ -681,15 +684,15 @@ static gn_error sms_decode_pdu(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
  * gn_sms_parse - High-level function for the SMS parsing
  * @data: GSM data from the phone driver
  *
- * This function parses the SMS message from the lowlevel RawSMS to
- * the highlevel SMS. In data->RawSMS there's SMS read by the phone
- * driver, data->SMS is the place for the parsed SMS.
+ * This function parses the SMS message from the lowlevel raw_sms to
+ * the highlevel SMS. In data->raw_sms there's SMS read by the phone
+ * driver, data->sms is the place for the parsed SMS.
  */
-API gn_error gn_sms_parse(GSM_Data *data)
+API gn_error gn_sms_parse(gn_data *data)
 {
-	if (!data->RawSMS || !data->SMS) return GN_ERR_INTERNALERROR;
+	if (!data->raw_sms || !data->sms) return GN_ERR_INTERNALERROR;
 	/* Let's assume at the moment that all messages are PDU coded */
-	return sms_decode_pdu(data->RawSMS, data->SMS);
+	return sms_decode_pdu(data->raw_sms, data->sms);
 }
 
 /**
@@ -698,13 +701,13 @@ API gn_error gn_sms_parse(GSM_Data *data)
  * @state: current statemachine state
  *
  * This is the function for explicit requesting the SMS from the
- * phone driver. Not that RawSMS field in the GSM_Data structure must
+ * phone driver. Not that raw_sms field in the gn_data structure must
  * be initialized
  */
-API gn_error gn_sms_request(GSM_Data *data, GSM_Statemachine *state)
+API gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
 {
-	if (!data->RawSMS) return GN_ERR_INTERNALERROR;
-	return SM_Functions(GOP_GetSMS, data, state);
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+	return gn_sm_functions(GN_OP_GetSMS, data, state);
 }
 
 /**
@@ -713,21 +716,21 @@ API gn_error gn_sms_request(GSM_Data *data, GSM_Statemachine *state)
  * @state: current statemachine state
  *
  * This function is the frotnend for reading SMS. Note that SMS field
- * in the GSM_Data structure must be initialized.
+ * in the gn_data structure must be initialized.
  */
-API gn_error gn_sms_get(GSM_Data *data, GSM_Statemachine *state)
+API gn_error gn_sms_get(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
-	GSM_SMSMessage rawsms;
+	gn_sms_raw rawsms;
 
-	if (!data->SMS) return GN_ERR_INTERNALERROR;
-	memset(&rawsms, 0, sizeof(GSM_SMSMessage));
-	rawsms.Number = data->SMS->Number;
-	rawsms.MemoryType = data->SMS->MemoryType;
-	data->RawSMS = &rawsms;
+	if (!data->sms) return GN_ERR_INTERNALERROR;
+	memset(&rawsms, 0, sizeof(gn_sms_raw));
+	rawsms.number = data->sms->number;
+	rawsms.memory_type = data->sms->memory_type;
+	data->raw_sms = &rawsms;
 	error = gn_sms_request(data, state);
 	ERROR();
-	data->SMS->Status = rawsms.Status;
+	data->sms->status = rawsms.status;
 	return gn_sms_parse(data);
 }
 
@@ -737,71 +740,71 @@ API gn_error gn_sms_get(GSM_Data *data, GSM_Statemachine *state)
  * @state: current statemachine state
  *
  * This function is the frontend for deleting SMS. Note that SMS field
- * in the GSM_Data structure must be initialized.
+ * in the gn_data structure must be initialized.
  */
-API gn_error gn_sms_delete(GSM_Data *data, GSM_Statemachine *state)
+API gn_error gn_sms_delete(gn_data *data, struct gn_statemachine *state)
 {
-	GSM_SMSMessage rawsms;
+	gn_sms_raw rawsms;
 
-	if (!data->SMS) return GN_ERR_INTERNALERROR;
-	memset(&rawsms, 0, sizeof(GSM_SMSMessage));
-	rawsms.Number = data->SMS->Number;
-	rawsms.MemoryType = data->SMS->MemoryType;
-	data->RawSMS = &rawsms;
-	return SM_Functions(GOP_DeleteSMS, data, state);
+	if (!data->sms) return GN_ERR_INTERNALERROR;
+	memset(&rawsms, 0, sizeof(gn_sms_raw));
+	rawsms.number = data->sms->number;
+	rawsms.memory_type = data->sms->memory_type;
+	data->raw_sms = &rawsms;
+	return gn_sm_functions(GN_OP_DeleteSMS, data, state);
 }
 
 /***
  *** OTHER FUNCTIONS
  ***/
 
-static gn_error sms_request_no_validate(GSM_Data *data, GSM_Statemachine *state)
+static gn_error sms_request_no_validate(gn_data *data, struct gn_statemachine *state)
 {
-	return SM_Functions(GOP_GetSMSnoValidate, data, state);
+	return gn_sm_functions(GN_OP_GetSMSnoValidate, data, state);
 }
 
-API gn_error gn_sms_get_no_validate(GSM_Data *data, GSM_Statemachine *state)
+API gn_error gn_sms_get_no_validate(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
-	GSM_SMSMessage rawsms;
+	gn_sms_raw rawsms;
 
-	if (!data->SMS) return GN_ERR_INTERNALERROR;
-	memset(&rawsms, 0, sizeof(GSM_SMSMessage));
-	rawsms.Number = data->SMS->Number;
-	rawsms.MemoryType = data->SMS->MemoryType;
-	data->RawSMS = &rawsms;
+	if (!data->sms) return GN_ERR_INTERNALERROR;
+	memset(&rawsms, 0, sizeof(gn_sms_raw));
+	rawsms.number = data->sms->number;
+	rawsms.memory_type = data->sms->memory_type;
+	data->raw_sms = &rawsms;
 	error = sms_request_no_validate(data, state);
 	ERROR();
-	data->SMS->Status = rawsms.Status;
+	data->sms->status = rawsms.status;
 	return gn_sms_parse(data);
 }
 
-API gn_error gn_sms_delete_no_validate(GSM_Data *data, GSM_Statemachine *state)
+API gn_error gn_sms_delete_no_validate(gn_data *data, struct gn_statemachine *state)
 {
-	GSM_SMSMessage rawsms;
+	gn_sms_raw rawsms;
 
-	if (!data->SMS) return GN_ERR_INTERNALERROR;
-	memset(&rawsms, 0, sizeof(GSM_SMSMessage));
-	rawsms.Number = data->SMS->Number;
-	rawsms.MemoryType = data->SMS->MemoryType;
-	data->RawSMS = &rawsms;
-	return SM_Functions(GOP_DeleteSMSnoValidate, data, state);
+	if (!data->sms) return GN_ERR_INTERNALERROR;
+	memset(&rawsms, 0, sizeof(gn_sms_raw));
+	rawsms.number = data->sms->number;
+	rawsms.memory_type = data->sms->memory_type;
+	data->raw_sms = &rawsms;
+	return gn_sm_functions(GN_OP_DeleteSMSnoValidate, data, state);
 }
 
-static gn_error sms_free_deleted(GSM_Data *data, int folder)
+static gn_error sms_free_deleted(gn_data *data, int folder)
 {
 	int i, j;
 
-	if (!data->SMSStatus) return GN_ERR_INTERNALERROR;
+	if (!data->sms_status) return GN_ERR_INTERNALERROR;
 
-	for (i = 0; i < data->FolderStats[folder]->Used; i++) {		/* for all previously found locations */
-		if (data->MessagesList[i][folder]->Type == SMS_ToBeRemoved) {	/* previously deleted and read message */
+	for (i = 0; i < data->folder_stats[folder]->used; i++) {		/* for all previously found locations */
+		if (data->message_list[i][folder]->status == GN_SMS_FLD_ToBeRemoved) {	/* previously deleted and read message */
 			dprintf("Found deleted message, which will now be freed! %i , %i\n",
-					i, data->MessagesList[i][folder]->Location);
-			data->FolderStats[folder]->Used--;
-			for (j = i; j < data->FolderStats[folder]->Used; j++) {
-				memcpy(data->MessagesList[j][folder], data->MessagesList[j + 1][folder],
-						sizeof(SMS_MessagesList));
+					i, data->message_list[i][folder]->location);
+			data->folder_stats[folder]->used--;
+			for (j = i; j < data->folder_stats[folder]->used; j++) {
+				memcpy(data->message_list[j][folder], data->message_list[j + 1][folder],
+						sizeof(gn_sms_message_list));
 			}
 			i--;
 		}
@@ -809,69 +812,69 @@ static gn_error sms_free_deleted(GSM_Data *data, int folder)
 	return GN_ERR_NONE;
 }
 
-static gn_error sms_get_read(GSM_Data *data)
+static gn_error sms_get_read(gn_data *data)
 {
 	int i, j, found;
 
-	if (!data->MessagesList || !data->FolderStats) return GN_ERR_INTERNALERROR;
+	if (!data->message_list || !data->folder_stats) return GN_ERR_INTERNALERROR;
 
-	for (i = 0; i < data->SMSFolder->Number; i++) {		/* cycle through all messages in phone */
+	for (i = 0; i < data->sms_folder->number; i++) {		/* cycle through all messages in phone */
 		found = 0;
-		for (j = 0; j < data->FolderStats[data->SMSFolder->FolderID]->Used; j++) {		/* and compare them to those alread in list */
-			if (data->SMSFolder->Locations[i] == data->MessagesList[j][data->SMSFolder->FolderID]->Location) found = 1;
+		for (j = 0; j < data->folder_stats[data->sms_folder->folder_id]->used; j++) {		/* and compare them to those alread in list */
+			if (data->sms_folder->locations[i] == data->message_list[j][data->sms_folder->folder_id]->location) found = 1;
 		}
 		if (!found) {
-			dprintf("Found new (read) message. Will store it at #%i!\n", data->FolderStats[data->SMSFolder->FolderID]->Used);
-			dprintf("%i\n", data->SMSFolder->Locations[i]);
-			data->MessagesList[data->FolderStats[data->SMSFolder->FolderID]->Used][data->SMSFolder->FolderID]->Location = 
-				data->SMSFolder->Locations[i];
-			data->MessagesList[data->FolderStats[data->SMSFolder->FolderID]->Used][data->SMSFolder->FolderID]->Type = SMS_New;
-			data->FolderStats[data->SMSFolder->FolderID]->Used++;
-			data->FolderStats[data->SMSFolder->FolderID]->Changed++;
-			data->SMSStatus->Changed++;
+			dprintf("Found new (read) message. Will store it at #%i!\n", data->folder_stats[data->sms_folder->folder_id]->used);
+			dprintf("%i\n", data->sms_folder->locations[i]);
+			data->message_list[data->folder_stats[data->sms_folder->folder_id]->used][data->sms_folder->folder_id]->location = 
+				data->sms_folder->locations[i];
+			data->message_list[data->folder_stats[data->sms_folder->folder_id]->used][data->sms_folder->folder_id]->status = GN_SMS_FLD_New;
+			data->folder_stats[data->sms_folder->folder_id]->used++;
+			data->folder_stats[data->sms_folder->folder_id]->changed++;
+			data->sms_status->changed++;
 		}
 	}
 	return GN_ERR_NONE;
 }
 
-static gn_error sms_get_deleted(GSM_Data *data)
+static gn_error sms_get_deleted(gn_data *data)
 {
 	int i, j, found = 0;
 
-	for (i = 0; i < data->FolderStats[data->SMSFolder->FolderID]->Used; i++) {		/* for all previously found locations in folder */
+	for (i = 0; i < data->folder_stats[data->sms_folder->folder_id]->used; i++) {		/* for all previously found locations in folder */
 		found = 0;
 
-		for (j = 0; j < data->SMSFolder->Number; j++) {	/* see if there is a corresponding message in phone */
-			if (data->MessagesList[i][data->SMSFolder->FolderID]->Location == data->SMSFolder->Locations[j]) found = 1;
+		for (j = 0; j < data->sms_folder->number; j++) {	/* see if there is a corresponding message in phone */
+			if (data->message_list[i][data->sms_folder->folder_id]->location == data->sms_folder->locations[j]) found = 1;
 		}
-		if ((found == 0) && (data->MessagesList[i][data->SMSFolder->FolderID]->Type == SMS_Old)) {	/* we have found a deleted message */
+		if ((found == 0) && (data->message_list[i][data->sms_folder->folder_id]->status == GN_SMS_FLD_Old)) {	/* we have found a deleted message */
 			dprintf("found a deleted message!!!! i: %i, loc: %i, MT: %i \n",
-					i, data->MessagesList[i][data->SMSFolder->FolderID]->Location, data->SMSFolder->FolderID);
+					i, data->message_list[i][data->sms_folder->folder_id]->location, data->sms_folder->folder_id);
 
-			data->MessagesList[i][data->SMSFolder->FolderID]->Type = SMS_Deleted;
-			data->SMSStatus->Changed++;
-			data->FolderStats[data->SMSFolder->FolderID]->Changed++;
+			data->message_list[i][data->sms_folder->folder_id]->status = GN_SMS_FLD_Deleted;
+			data->sms_status->changed++;
+			data->folder_stats[data->sms_folder->folder_id]->changed++;
 		}
 	}
 	return GN_ERR_NONE;
 }
 
-static gn_error sms_verify_status(GSM_Data *data)
+static gn_error sms_verify_status(gn_data *data)
 {
 	int i, j, found = 0;
 
-	for (i = 0; i < data->FolderStats[data->SMSFolder->FolderID]->Used; i++) {		/* Cycle through all messages we know of */
+	for (i = 0; i < data->folder_stats[data->sms_folder->folder_id]->used; i++) {		/* Cycle through all messages we know of */
 		found = 0;
-		if ((data->MessagesList[i][data->SMSFolder->FolderID]->Type == SMS_NotRead) ||	/* if it is a unread one, i.e. not in folderstatus */
-				(data->MessagesList[i][data->SMSFolder->FolderID]->Type == SMS_NotReadHandled)) {
-			for (j = 0; j < data->SMSFolder->Number; j++) {
-				if (data->MessagesList[i][data->SMSFolder->FolderID]->Location == data->SMSFolder->Locations[j]) {
+		if ((data->message_list[i][data->sms_folder->folder_id]->status == GN_SMS_FLD_NotRead) ||	/* if it is a unread one, i.e. not in folderstatus */
+				(data->message_list[i][data->sms_folder->folder_id]->status == GN_SMS_FLD_NotReadHandled)) {
+			for (j = 0; j < data->sms_folder->number; j++) {
+				if (data->message_list[i][data->sms_folder->folder_id]->location == data->sms_folder->locations[j]) {
 					/* We have a found a formerly unread message which has been read in the meantime */
 					dprintf("Found a formerly unread message which has been read in the meantime: loc: %i\n",
-							data->MessagesList[i][data->SMSFolder->FolderID]->Location);
-					data->MessagesList[i][data->SMSFolder->FolderID]->Type = SMS_Changed;
-					data->SMSStatus->Changed++;
-					data->FolderStats[data->SMSFolder->FolderID]->Changed++;
+							data->message_list[i][data->sms_folder->folder_id]->location);
+					data->message_list[i][data->sms_folder->folder_id]->status = GN_SMS_FLD_Changed;
+					data->sms_status->changed++;
+					data->folder_stats[data->sms_folder->folder_id]->changed++;
 				}
 			}
 		}
@@ -880,49 +883,49 @@ static gn_error sms_verify_status(GSM_Data *data)
 }
 
 
-API gn_error gn_sms_get_folder_changes(GSM_Data *data, GSM_Statemachine *state, int has_folders)
+API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemachine *state, int has_folders)
 {
 	gn_error error;
-	SMS_Folder  SMSFolder;
-	SMS_FolderList SMSFolderList;
+	gn_sms_folder  sms_folder;
+	gn_sms_folder_list sms_folder_list;
 	int i, previous_unread, previous_total;
 
-	previous_total = data->SMSStatus->Number;
-	previous_unread = data->SMSStatus->Unread;
-	dprintf("GetFolderChanges: Old status: %d %d\n", data->SMSStatus->Number, data->SMSStatus->Unread);
+	previous_total = data->sms_status->number;
+	previous_unread = data->sms_status->unread;
+	dprintf("GetFolderChanges: Old status: %d %d\n", data->sms_status->number, data->sms_status->unread);
 
-	error = SM_Functions(GOP_GetSMSStatus, data, state);	/* Check overall SMS Status */
+	error = gn_sm_functions(GN_OP_GetSMSStatus, data, state);	/* Check overall SMS Status */
 	ERROR();
-	dprintf("GetFolderChanges: Status: %d %d\n", data->SMSStatus->Number, data->SMSStatus->Unread);
+	dprintf("GetFolderChanges: Status: %d %d\n", data->sms_status->number, data->sms_status->unread);
 
 	if (!has_folders) {
-		if ((previous_total == data->SMSStatus->Number) && (previous_unread == data->SMSStatus->Unread))
-			data->SMSStatus->Changed = 0;
+		if ((previous_total == data->sms_status->number) && (previous_unread == data->sms_status->unread))
+			data->sms_status->changed = 0;
 		else
-			data->SMSStatus->Changed = 1;
+			data->sms_status->changed = 1;
 		return GN_ERR_NONE;
 	}
 
-	data->SMSFolderList = &SMSFolderList;
-	error = SM_Functions(GOP_GetSMSFolders, data, state);
+	data->sms_folder_list = &sms_folder_list;
+	error = gn_sm_functions(GN_OP_GetSMSFolders, data, state);
 	ERROR();
 
-	data->SMSStatus->NumberOfFolders = data->SMSFolderList->Number;
+	data->sms_status->folders_count = data->sms_folder_list->number;
 
-	for (i = 0; i < data->SMSStatus->NumberOfFolders; i++) {
+	for (i = 0; i < data->sms_status->folders_count; i++) {
 		dprintf("GetFolderChanges: Freeing deleted messages for folder #%i\n", i);
 		error = sms_free_deleted(data, i);
 		ERROR();
 
-		data->SMSFolder = &SMSFolder;
-		data->SMSFolder->FolderID = (GSM_MemoryType) i + 12;
-		dprintf("GetFolderChanges: Getting folder status for folder #%i\n", data->SMSFolder->FolderID);
-		error = SM_Functions(GOP_GetSMSFolderStatus, data, state);
+		data->sms_folder = &sms_folder;
+		data->sms_folder->folder_id = (gn_memory_type) i + 12;
+		dprintf("GetFolderChanges: Getting folder status for folder #%i\n", data->sms_folder->folder_id);
+		error = gn_sm_functions(GN_OP_GetSMSFolderStatus, data, state);
 		ERROR();
 
-		data->SMSFolder->FolderID = i;	/* so we don't need to do a modulo 8 each time */
+		data->sms_folder->folder_id = i;	/* so we don't need to do a modulo 8 each time */
 			
-		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->SMSFolder->Number, i);
+		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->sms_folder->number, i);
 		error = sms_get_read(data);
 		ERROR();
 
@@ -954,45 +957,45 @@ API gn_error gn_sms_get_folder_changes(GSM_Data *data, GSM_Statemachine *state, 
  *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  *  o Smart Messaging Specification, Revision 3.0.0
  */
-static char *sms_encode_udh(GSM_SMSMessage *rawsms, int type)
+static char *sms_encode_udh(gn_sms_raw *rawsms, int type)
 {
 	unsigned char pos;
-	char *UDH = rawsms->UserData;
+	char *udh = rawsms->user_data;
 	char *res = NULL;
 
-	pos = UDH[0];
+	pos = udh[0];
 
 	switch (type) {
-	case SMS_NoUDH:
+	case GN_SMS_UDH_None:
 		break;
-	case SMS_VoiceMessage:
-	case SMS_FaxMessage:
-	case SMS_EmailMessage:
+	case GN_SMS_UDH_VoiceMessage:
+	case GN_SMS_UDH_FaxMessage:
+	case GN_SMS_UDH_EmailMessage:
 		return NULL;
 #if 0
-		UDH[pos+4] = UDHi.u.SpecialSMSMessageIndication.MessageCount;
-		if (UDHi.u.SpecialSMSMessageIndication.Store) UDH[pos+3] |= 0x80;
+		udh[pos+4] = udhi.u.SpecialSMSMessageIndication.MessageCount;
+		if (udhi.u.SpecialSMSMessageIndication.Store) udh[pos+3] |= 0x80;
 #endif
-	case SMS_ConcatenatedMessages:
+	case GN_SMS_UDH_ConcatenatedMessages:
 		dprintf("Adding ConcatMsg header\n");
-	case SMS_OpLogo:
-	case SMS_CallerIDLogo:
-	case SMS_Ringtone:
-	case SMS_MultipartMessage:
-		UDH[0] += headers[type].length;
-		res = UDH+pos+1;
+	case GN_SMS_UDH_OpLogo:
+	case GN_SMS_UDH_CallerIDLogo:
+	case GN_SMS_UDH_Ringtone:
+	case GN_SMS_UDH_MultipartMessage:
+		udh[0] += headers[type].length;
+		res = udh+pos+1;
 		memcpy(res, headers[type].header, headers[type].length);
-		rawsms->UserDataLength += headers[type].length;
-		rawsms->Length += headers[type].length;
+		rawsms->user_data_length += headers[type].length;
+		rawsms->length += headers[type].length;
 		break;
 	default:
 		dprintf("Not supported User Data Header type\n");
 		break;
 	}
-	if (!rawsms->UDHIndicator) {
-		rawsms->UDHIndicator = 1;
-		rawsms->Length++;		/* Length takes one byte, too */
-		rawsms->UserDataLength++;
+	if (!rawsms->udh_indicator) {
+		rawsms->udh_indicator = 1;
+		rawsms->length++;		/* Length takes one byte, too */
+		rawsms->user_data_length++;
 	}
 	return res;
 }
@@ -1006,9 +1009,9 @@ static char *sms_encode_udh(GSM_SMSMessage *rawsms, int type)
  * This function adds sequent part of the concatenated messages header. Note
  * that this header should be the first of all headers.
  */
-static gn_error sms_encode_concat_header(GSM_SMSMessage *rawsms, int this, int total)
+static gn_error sms_encode_concat_header(gn_sms_raw *rawsms, int this, int total)
 {
-	char *header = sms_encode_udh(rawsms, SMS_ConcatenatedMessages);
+	char *header = sms_encode_udh(rawsms, GN_SMS_UDH_ConcatenatedMessages);
 	if (!header) return GN_ERR_NOTSUPPORTED;
 	header[2] = 0xce;		/* Message serial number. Is 0xce value somehow special? -- pkot */
 	header[3] = total;
@@ -1028,103 +1031,103 @@ static gn_error sms_encode_concat_header(GSM_SMSMessage *rawsms, int this, int t
  * This function does the phone frame encoding basing on the given SMS
  * structure. This function is capable to create only one frame at a time.
  */
-static gn_error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
+static gn_error sms_encode_data(gn_sms *sms, gn_sms_raw *rawsms)
 {
-	SMS_AlphabetType al = SMS_DefaultAlphabet;
+	gn_sms_dcs_alphabet_type al = GN_SMS_DCS_DefaultAlphabet;
 	unsigned int i, size = 0;
 	gn_error error;
 
 	/* Additional Headers */
-	switch (sms->DCS.Type) {
-	case SMS_GeneralDataCoding:
-		switch (sms->DCS.u.General.Class) {
+	switch (sms->dcs.type) {
+	case GN_SMS_DCS_GeneralDataCoding:
+		switch (sms->dcs.u.general.class) {
 		case 0: break;
-		case 1: rawsms->DCS |= 0xf0; break; /* Class 0 */
-		case 2: rawsms->DCS |= 0xf1; break; /* Class 1 */
-		case 3: rawsms->DCS |= 0xf2; break; /* Class 2 */
-		case 4: rawsms->DCS |= 0xf3; break; /* Class 3 */
+		case 1: rawsms->dcs |= 0xf0; break; /* Class 0 */
+		case 2: rawsms->dcs |= 0xf1; break; /* Class 1 */
+		case 3: rawsms->dcs |= 0xf2; break; /* Class 2 */
+		case 4: rawsms->dcs |= 0xf3; break; /* Class 3 */
 		default: dprintf("What ninja-mutant class is this?\n"); break; 
 		}
-		if (sms->DCS.u.General.Compressed) {
+		if (sms->dcs.u.general.compressed) {
 			/* Compression not supported yet */
 			/* dcs[0] |= 0x20; */
 		}
-		al = sms->DCS.u.General.Alphabet;
+		al = sms->dcs.u.general.alphabet;
 		break;
-	case SMS_MessageWaiting:
-		al = sms->DCS.u.MessageWaiting.Alphabet;
-		if (sms->DCS.u.MessageWaiting.Discard) rawsms->DCS |= 0xc0;
-		else if (sms->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) rawsms->DCS |= 0xe0;
-		else rawsms->DCS |= 0xd0;
+	case GN_SMS_DCS_MessageWaiting:
+		al = sms->dcs.u.message_waiting.alphabet;
+		if (sms->dcs.u.message_waiting.discard) rawsms->dcs |= 0xc0;
+		else if (sms->dcs.u.message_waiting.alphabet == GN_SMS_DCS_UCS2) rawsms->dcs |= 0xe0;
+		else rawsms->dcs |= 0xd0;
 
-		if (sms->DCS.u.MessageWaiting.Active) rawsms->DCS |= 0x08;
-		rawsms->DCS |= (sms->DCS.u.MessageWaiting.Type & 0x03);
+		if (sms->dcs.u.message_waiting.active) rawsms->dcs |= 0x08;
+		rawsms->dcs |= (sms->dcs.u.message_waiting.type & 0x03);
 
 		break;
 	default:
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 
-	rawsms->Length = rawsms->UserDataLength = 0;
+	rawsms->length = rawsms->user_data_length = 0;
 
-	for (i = 0; i < SMS_MAX_PART_NUMBER; i++) {
-		switch (sms->UserData[i].Type) {
-		case SMS_BitmapData:
-			switch (sms->UserData[0].u.Bitmap.type) {
+	for (i = 0; i < GN_SMS_PART_MAX_NUMBER; i++) {
+		switch (sms->user_data[i].type) {
+		case GN_SMS_DATA_Bitmap:
+			switch (sms->user_data[0].u.bitmap.type) {
 			case GN_BMP_PictureMessage:
-				size = sms_nokia_encode_bitmap(&(sms->UserData[i].u.Bitmap),
-							       rawsms->UserData + rawsms->UserDataLength,
+				size = sms_nokia_encode_bitmap(&(sms->user_data[i].u.bitmap),
+							       rawsms->user_data + rawsms->user_data_length,
 							       (i == 0));
 				break;
 			case GN_BMP_OperatorLogo:
-				if (!sms_encode_udh(rawsms, SMS_OpLogo)) return GN_ERR_NOTSUPPORTED;
+				if (!sms_encode_udh(rawsms, GN_SMS_UDH_OpLogo)) return GN_ERR_NOTSUPPORTED;
 			default:
-				size = gn_bmp_encode_sms(&(sms->UserData[i].u.Bitmap),
-							 rawsms->UserData + rawsms->UserDataLength);
+				size = gn_bmp_encode_sms(&(sms->user_data[i].u.bitmap),
+							 rawsms->user_data + rawsms->user_data_length);
 				break;
 			}
-			rawsms->Length += size;
-			rawsms->UserDataLength += size;
-			rawsms->DCS = 0xf5;
-			rawsms->UDHIndicator = 1;
+			rawsms->length += size;
+			rawsms->user_data_length += size;
+			rawsms->dcs = 0xf5;
+			rawsms->udh_indicator = 1;
 			break;
 
-		case SMS_AnimationData: {
+		case GN_SMS_DATA_Animation: {
 			int j;
 			for (j = 0; j < 4; j++) {
-				size = gn_bmp_encode_sms(&(sms->UserData[i].u.Animation[j]), rawsms->UserData + rawsms->UserDataLength);
-				rawsms->Length += size;
-				rawsms->UserDataLength += size;
+				size = gn_bmp_encode_sms(&(sms->user_data[i].u.animation[j]), rawsms->user_data + rawsms->user_data_length);
+				rawsms->length += size;
+				rawsms->user_data_length += size;
 			}
-			rawsms->DCS = 0xf5;
-			rawsms->UDHIndicator = 1;
+			rawsms->dcs = 0xf5;
+			rawsms->udh_indicator = 1;
 			break;
 		}
 
-		case SMS_PlainText: {
-			unsigned int length, offset = rawsms->UserDataLength;
+		case GN_SMS_DATA_Text: {
+			unsigned int length, offset = rawsms->user_data_length;
 
-			length = strlen(sms->UserData[i].u.Text);
+			length = strlen(sms->user_data[i].u.text);
 			switch (al) {
-			case SMS_DefaultAlphabet:
+			case GN_SMS_DCS_DefaultAlphabet:
 #define UDH_Length 0
 				size = char_pack_7bit((7 - (UDH_Length % 7)) % 7,
-						      sms->UserData[i].u.Text,
-						      rawsms->UserData + offset,
+						      sms->user_data[i].u.text,
+						      rawsms->user_data + offset,
 						      &length);
-				rawsms->Length = length;
-				rawsms->UserDataLength = size + offset;
+				rawsms->length = length;
+				rawsms->user_data_length = size + offset;
 				break;
-			case SMS_8bit:
-				rawsms->DCS |= 0xf4;
-				memcpy(rawsms->UserData + offset, sms->UserData[i].u.Text, sms->UserData[i].u.Text[0]);
-				rawsms->UserDataLength = rawsms->Length = length + offset;
+			case GN_SMS_DCS_8bit:
+				rawsms->dcs |= 0xf4;
+				memcpy(rawsms->user_data + offset, sms->user_data[i].u.text, sms->user_data[i].u.text[0]);
+				rawsms->user_data_length = rawsms->length = length + offset;
 				break;
-			case SMS_UCS2:
-				rawsms->DCS |= 0x08;
-				char_encode_unicode(rawsms->UserData + offset, sms->UserData[i].u.Text, length);
+			case GN_SMS_DCS_UCS2:
+				rawsms->dcs |= 0x08;
+				char_encode_unicode(rawsms->user_data + offset, sms->user_data[i].u.text, length);
 				length *= 2;
-				rawsms->UserDataLength = rawsms->Length = length + offset;
+				rawsms->user_data_length = rawsms->length = length + offset;
 				break;
 			default:
 				return GN_ERR_WRONGDATAFORMAT;
@@ -1132,201 +1135,201 @@ static gn_error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			break;
 		}
 
-		case SMS_NokiaText:
-			size = sms_nokia_encode_text(sms->UserData[i].u.Text,
-						     rawsms->UserData + rawsms->UserDataLength,
+		case GN_SMS_DATA_NokiaText:
+			size = sms_nokia_encode_text(sms->user_data[i].u.text,
+						     rawsms->user_data + rawsms->user_data_length,
 						     (i == 0));
-			rawsms->Length += size;
-			rawsms->UserDataLength += size;
+			rawsms->length += size;
+			rawsms->user_data_length += size;
 			break;
 
-		case SMS_iMelodyText:
-			size = GSM_EncodeSMSiMelody(sms->UserData[i].u.Text, rawsms->UserData + rawsms->UserDataLength);
+		case GN_SMS_DATA_iMelody:
+			size = imelody_encode_sms(sms->user_data[i].u.text, rawsms->user_data + rawsms->user_data_length);
 			dprintf("Imelody, size %d\n", size);
-			rawsms->Length += size;
-			rawsms->UserDataLength += size;
-			rawsms->DCS = 0xf5;
-			rawsms->UDHIndicator = 1;
+			rawsms->length += size;
+			rawsms->user_data_length += size;
+			rawsms->dcs = 0xf5;
+			rawsms->udh_indicator = 1;
 			break;
 
-		case SMS_MultiData:
-			size = sms->UserData[0].Length;
-			if (!sms_encode_udh(rawsms, SMS_MultipartMessage)) return GN_ERR_NOTSUPPORTED;
-			error = sms_encode_concat_header(rawsms, sms->UserData[i].u.Multi.this, sms->UserData[i].u.Multi.total);
+		case GN_SMS_DATA_Multi:
+			size = sms->user_data[0].length;
+			if (!sms_encode_udh(rawsms, GN_SMS_UDH_MultipartMessage)) return GN_ERR_NOTSUPPORTED;
+			error = sms_encode_concat_header(rawsms, sms->user_data[i].u.multi.this, sms->user_data[i].u.multi.total);
 			ERROR();
 
-			memcpy(rawsms->UserData + rawsms->UserDataLength, sms->UserData[i].u.Multi.Binary, MAX_SMS_PART);
-			rawsms->Length += size;
-			rawsms->UserDataLength += size;
-			rawsms->DCS = 0xf5;
+			memcpy(rawsms->user_data + rawsms->user_data_length, sms->user_data[i].u.multi.binary, MAX_SMS_PART);
+			rawsms->length += size;
+			rawsms->user_data_length += size;
+			rawsms->dcs = 0xf5;
 			break;
 
-		case SMS_RingtoneData:
-			if (!sms_encode_udh(rawsms, SMS_Ringtone)) return GN_ERR_NOTSUPPORTED;
-			size = GSM_EncodeSMSRingtone(rawsms->UserData + rawsms->Length, &sms->UserData[i].u.Ringtone);
-			rawsms->Length += size;
-			rawsms->UserDataLength += size;
-			rawsms->DCS = 0xf5;
+		case GN_SMS_DATA_Ringtone:
+			if (!sms_encode_udh(rawsms, GN_SMS_UDH_Ringtone)) return GN_ERR_NOTSUPPORTED;
+			size = ringtone_encode_sms(rawsms->user_data + rawsms->length, &sms->user_data[i].u.ringtone);
+			rawsms->length += size;
+			rawsms->user_data_length += size;
+			rawsms->dcs = 0xf5;
 			break;
 
-		case SMS_Concat:
+		case GN_SMS_DATA_Concat:
 			dprintf("Encoding concat header\n");
-			al = SMS_8bit;
-			rawsms->DCS = 0xf5;
-			sms_encode_concat_header(rawsms, sms->UserData[i].u.Concat.this, sms->UserData[i].u.Concat.total);
+			al = GN_SMS_DCS_8bit;
+			rawsms->dcs = 0xf5;
+			sms_encode_concat_header(rawsms, sms->user_data[i].u.concat.this, sms->user_data[i].u.concat.total);
 			break;
 
-		case SMS_NoData:
+		case GN_SMS_DATA_None:
 			return GN_ERR_NONE;
 
 		default:
-			dprintf("What kind of ninja-mutant UserData is this?\n");
+			dprintf("What kind of ninja-mutant user_data is this?\n");
 			break;
 		}
 	}
 	return GN_ERR_NONE;
 }
 
-gn_error sms_prepare(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
+gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 {
-	switch (rawsms->Type = sms->Type) {
-	case SMS_Submit:
-	case SMS_Deliver:
-	case SMS_Picture:
+	switch (rawsms->type = sms->type) {
+	case GN_SMS_MT_Submit:
+	case GN_SMS_MT_Deliver:
+	case GN_SMS_MT_Picture:
 		break;
-	case SMS_Delivery_Report:
+	case GN_SMS_MT_DeliveryReport:
 	default:
-		dprintf("Not supported message type: %d\n", rawsms->Type);
+		dprintf("Not supported message type: %d\n", rawsms->type);
 		return GN_ERR_NOTSUPPORTED;
 	}
 	/* Encoding the header */
-	rawsms->Report = sms->DeliveryReport;
-	rawsms->RemoteNumber[0] = char_semi_octet_pack(sms->Remote.Number, rawsms->RemoteNumber + 1, sms->Remote.Type);
-	rawsms->ValidityIndicator = SMS_RelativeFormat;
-	rawsms->Validity[0] = 0xa9;
+	rawsms->report = sms->delivery_report;
+	rawsms->remote_number[0] = char_semi_octet_pack(sms->remote.number, rawsms->remote_number + 1, sms->remote.type);
+	rawsms->validity_indicator = GN_SMS_VP_RelativeFormat;
+	rawsms->validity[0] = 0xa9;
 
 	sms_encode_data(sms, rawsms);
 
 	return GN_ERR_NONE;
 }
 
-static void sms_dump_raw(GSM_SMSMessage *rawsms)
+static void sms_dump_raw(gn_sms_raw *rawsms)
 {
 	char buf[10240];
 
 	memset(buf, 0, 10240);
 
-	dprintf("DCS: 0x%x\n", rawsms->DCS);
-	dprintf("Length: 0x%x\n", rawsms->Length);
-	dprintf("UserDataLength: 0x%x\n", rawsms->UserDataLength);
-	dprintf("ValidityIndicator: %d\n", rawsms->ValidityIndicator);
-	bin2hex(buf, rawsms->UserData, rawsms->UserDataLength);
-	dprintf("UserData: %s\n", buf);
+	dprintf("dcs: 0x%x\n", rawsms->dcs);
+	dprintf("Length: 0x%x\n", rawsms->length);
+	dprintf("user_data_length: 0x%x\n", rawsms->user_data_length);
+	dprintf("ValidityIndicator: %d\n", rawsms->validity_indicator);
+	bin2hex(buf, rawsms->user_data, rawsms->user_data_length);
+	dprintf("user_data: %s\n", buf);
 }
 
-static gn_error sms_send_long(GSM_Data *data, GSM_Statemachine *state);
+static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state);
 
 /**
  * gn_sms_send - The main function for the SMS sending
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
- * The high level function to send SMS. You need to fill in data->SMS
- * (GSM_API_SMS) in the higher level. This is converted to RawSMS here,
+ * The high level function to send SMS. You need to fill in data->sms
+ * (gn_sms) in the higher level. This is converted to raw_sms here,
  * and then phone driver takes the fields it needs and sends it in the
  * phone specific way to the phone.
  */
-API gn_error gn_sms_send(GSM_Data *data, GSM_Statemachine *state)
+API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 
-	if (!data->SMS) return GN_ERR_INTERNALERROR;
+	if (!data->sms) return GN_ERR_INTERNALERROR;
 
-	data->RawSMS = malloc(sizeof(*data->RawSMS));
-	memset(data->RawSMS, 0, sizeof(*data->RawSMS));
+	data->raw_sms = malloc(sizeof(*data->raw_sms));
+	memset(data->raw_sms, 0, sizeof(*data->raw_sms));
 
-	data->RawSMS->Status = SMS_Sent;
+	data->raw_sms->status = GN_SMS_Sent;
 
-	data->RawSMS->MessageCenter[0] = char_semi_octet_pack(data->SMS->SMSC.Number, data->RawSMS->MessageCenter + 1, data->SMS->SMSC.Type);
-	if (data->RawSMS->MessageCenter[0] % 2) data->RawSMS->MessageCenter[0]++;
-	data->RawSMS->MessageCenter[0] = data->RawSMS->MessageCenter[0] / 2 + 1;
+	data->raw_sms->message_center[0] = char_semi_octet_pack(data->sms->smsc.number, data->raw_sms->message_center + 1, data->sms->smsc.type);
+	if (data->raw_sms->message_center[0] % 2) data->raw_sms->message_center[0]++;
+	data->raw_sms->message_center[0] = data->raw_sms->message_center[0] / 2 + 1;
 
-	error = sms_prepare(data->SMS, data->RawSMS);
+	error = sms_prepare(data->sms, data->raw_sms);
 	ERROR();
 
-	if (data->RawSMS->Length > GSM_MAX_SMS_LENGTH) {
-		dprintf("SMS is too long? %d\n", data->RawSMS->Length);
+	if (data->raw_sms->length > GN_SMS_MAX_LENGTH) {
+		dprintf("SMS is too long? %d\n", data->raw_sms->length);
 		error = sms_send_long(data, state);
 		goto cleanup;
 	}
 
-	error = SM_Functions(GOP_SendSMS, data, state);
+	error = gn_sm_functions(GN_OP_SendSMS, data, state);
  cleanup:
-	free(data->RawSMS);
-	data->RawSMS = NULL;
+	free(data->raw_sms);
+	data->raw_sms = NULL;
 	return error;
 }
 
-static gn_error sms_send_long(GSM_Data *data, GSM_Statemachine *state)
+static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 {
 	int i, count;
-	GSM_SMSMessage LongSMS, *rawsms = &LongSMS;	/* We need local copy for our dirty tricks */
-	GSM_API_SMS sms;
+	gn_sms_raw LongSMS, *rawsms = &LongSMS;	/* We need local copy for our dirty tricks */
+	gn_sms sms;
 	gn_error error = GN_ERR_NONE;
 
-	LongSMS = *data->RawSMS;
-	sms = *data->SMS;
+	LongSMS = *data->raw_sms;
+	sms = *data->sms;
 
-	count = (rawsms->UserDataLength + MAX_SMS_PART - 1) / MAX_SMS_PART;
+	count = (rawsms->user_data_length + MAX_SMS_PART - 1) / MAX_SMS_PART;
 	dprintf("Will need %d sms-es\n", count);
 	for (i = 0; i < count; i++) {
 		dprintf("Sending sms #%d\n", i);
-		sms.UserData[0].Type = SMS_MultiData;
-		sms.UserData[0].Length = MAX_SMS_PART;
+		sms.user_data[0].type = GN_SMS_DATA_Multi;
+		sms.user_data[0].length = MAX_SMS_PART;
 		if (i + 1 == count)
-			sms.UserData[0].Length = rawsms->UserDataLength % MAX_SMS_PART;
-		memcpy(sms.UserData[0].u.Multi.Binary, rawsms->UserData + i*MAX_SMS_PART, MAX_SMS_PART);
-		sms.UserData[0].u.Multi.this = i + 1;
-		sms.UserData[0].u.Multi.total = count;
-		sms.UserData[1].Type = SMS_NoData;
-		data->SMS = &sms;
+			sms.user_data[0].length = rawsms->user_data_length % MAX_SMS_PART;
+		memcpy(sms.user_data[0].u.multi.binary, rawsms->user_data + i*MAX_SMS_PART, MAX_SMS_PART);
+		sms.user_data[0].u.multi.this = i + 1;
+		sms.user_data[0].u.multi.total = count;
+		sms.user_data[1].type = GN_SMS_DATA_None;
+		data->sms = &sms;
 		error = gn_sms_send(data, state);
 		ERROR();
 	}
 	return GN_ERR_NONE;
 }
 
-API gn_error gn_sms_save(GSM_Data *data, GSM_Statemachine *state)
+API gn_error gn_sms_save(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
-	GSM_SMSMessage rawsms;
+	gn_sms_raw rawsms;
 
-	data->RawSMS = &rawsms;
+	data->raw_sms = &rawsms;
 	memset(&rawsms, 0, sizeof(rawsms));
 
-	data->RawSMS->Number = data->SMS->Number;
-	data->RawSMS->Status = data->SMS->Status;
-	data->RawSMS->MemoryType = data->SMS->MemoryType;
+	data->raw_sms->number = data->sms->number;
+	data->raw_sms->status = data->sms->status;
+	data->raw_sms->memory_type = data->sms->memory_type;
 
-	gn_sms_pack_date_time(&data->SMS->SMSCTime, data->RawSMS->SMSCTime);
-	dprintf("\tDate: %s\n", sms_print_date_time(data->RawSMS->SMSCTime));
+	gn_sms_pack_date_time(&data->sms->smsc_time, data->raw_sms->smsc_time);
+	dprintf("\tDate: %s\n", sms_print_date_time(data->raw_sms->smsc_time));
 
-	if (data->SMS->SMSC.Number[0] != '\0') {
-		data->RawSMS->MessageCenter[0] = 
-			char_semi_octet_pack(data->SMS->SMSC.Number, data->RawSMS->MessageCenter + 1, data->SMS->SMSC.Type);
-		if (data->RawSMS->MessageCenter[0] % 2) data->RawSMS->MessageCenter[0]++;
-		data->RawSMS->MessageCenter[0] = data->RawSMS->MessageCenter[0] / 2 + 1;
+	if (data->sms->smsc.number[0] != '\0') {
+		data->raw_sms->message_center[0] = 
+			char_semi_octet_pack(data->sms->smsc.number, data->raw_sms->message_center + 1, data->sms->smsc.type);
+		if (data->raw_sms->message_center[0] % 2) data->raw_sms->message_center[0]++;
+		data->raw_sms->message_center[0] = data->raw_sms->message_center[0] / 2 + 1;
 	}
-	error = sms_prepare(data->SMS, data->RawSMS);
+	error = sms_prepare(data->sms, data->raw_sms);
 	ERROR();
 
-	if (data->RawSMS->Length > GSM_MAX_SMS_LENGTH) {
-		dprintf("SMS is too long? %d\n", data->RawSMS->Length);
+	if (data->raw_sms->length > GN_SMS_MAX_LENGTH) {
+		dprintf("SMS is too long? %d\n", data->raw_sms->length);
 		goto cleanup;
 	}
 
-	error = SM_Functions(GOP_SaveSMS, data, state);
+	error = gn_sm_functions(GN_OP_SaveSMS, data, state);
 cleanup:
-	data->RawSMS = NULL;
+	data->raw_sms = NULL;
 	return error;
 }
