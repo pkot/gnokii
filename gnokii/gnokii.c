@@ -2253,6 +2253,8 @@ static int getcalendarnote(int argc, char *argv[])
 	}
 
 	for (i = first_location; i <= last_location; i++) {
+		memset(&calnote, 0, sizeof(calnote));
+		memset(&calnotelist, 0, sizeof(calnotelist));
 		calnote.location = i;
 
 		gn_data_clear(&data);
@@ -2294,6 +2296,28 @@ static int getcalendarnote(int argc, char *argv[])
 					fprintf(stdout, "AALARM:%04d%02d%02dT%02d%02d%02d\r\n", calnote.alarm.timestamp.year,
 						calnote.alarm.timestamp.month, calnote.alarm.timestamp.day, calnote.alarm.timestamp.hour,
 						calnote.alarm.timestamp.minute, calnote.alarm.timestamp.second);
+				}
+				switch (calnote.recurrence) {
+				case GN_CALNOTE_NEVER:
+					break;
+				case GN_CALNOTE_DAILY:
+					fprintf(stdout, "RRULE:FREQ=DAILY\r\n");
+					break;
+				case GN_CALNOTE_WEEKLY:
+					fprintf(stdout, "RRULE:FREQ=WEEKLY\r\n");
+					break;
+				case GN_CALNOTE_2WEEKLY:
+					fprintf(stdout, "RRULE:FREQ=WEEKLY;INTERVAL=2\r\n");
+					break;
+				case GN_CALNOTE_MONTHLY:
+					fprintf(stdout, "RRULE:FREQ=MONTHLY\r\n");
+					break;
+				case GN_CALNOTE_YEARLY:
+					fprintf(stdout, "RRULE:FREQ=YEARLY\r\n");
+					break;
+				default:
+					fprintf(stdout, "RRULE:FREQ=HOURLY;INTERVAL=%d\r\n", calnote.recurrence);
+					break;
 				}
 				fprintf(stdout, "END:VEVENT\r\n");
 				fprintf(stdout, "END:VCALENDAR\r\n");
@@ -2337,6 +2361,29 @@ static int getcalendarnote(int argc, char *argv[])
 						calnote.alarm.timestamp.hour,
 						calnote.alarm.timestamp.minute,
 						calnote.alarm.timestamp.second);
+				}
+
+				switch (calnote.recurrence) {
+				case GN_CALNOTE_NEVER:
+					break;
+				case GN_CALNOTE_DAILY:
+					fprintf(stdout, _("   Repeat: every day\n"));
+					break;
+				case GN_CALNOTE_WEEKLY:
+					fprintf(stdout, _("   Repeat: every week\n"));
+					break;
+				case GN_CALNOTE_2WEEKLY:
+					fprintf(stdout, _("   Repeat: every 2 weeks\n"));
+					break;
+				case GN_CALNOTE_MONTHLY:
+					fprintf(stdout, _("   Repeat: every month\n"));
+					break;
+				case GN_CALNOTE_YEARLY:
+					fprintf(stdout, _("   Repeat: every year\n"));
+					break;
+				default:
+					fprintf(stdout, _("   Repeat: %d hours\n"), calnote.recurrence);
+					break;
 				}
 
 				fprintf(stdout, _("   Text: %s\n"), calnote.text);

@@ -22,6 +22,11 @@
     o GNOKIIDLL_IMPORTS required on win32 platform (BORBELY Zoltan)
     o set default values of memory type and location to the sane
       values when using --writephonebook                (Pawel Kot)
+    o output repeat/recurrence value when reading calendar entry
+                                                        (Pawel Kot)
+    o clean the structures so we don't have garbage from the
+      previous loop when reading multiple calendar entries
+                                                        (Pawel Kot)
  * documentation updates
     o add short description of --getphonebook raw format to the
       gnokii manual page                             (Reiner Steib)
