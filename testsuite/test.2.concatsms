@@ -1,0 +1,1 @@
+echo "This is beggining of the message" | $GNOKII --sendsms 0800123456 --concat "1;2;2"

@@ -475,7 +475,7 @@ static int sendsms(int argc, char *argv[])
 		{ "8bit",    0,                 NULL, '8'},
 		{ "imelody", 0,                 NULL, 'i'},
 		{ "animation",required_argument,NULL, 'a'},
-		{ "concat",  required_argument, NULL, 'c'},
+		{ "concat",  required_argument, NULL, 'o'},
 		{ NULL,      0,                 NULL, 0}
 	};
 
@@ -492,8 +492,8 @@ static int sendsms(int argc, char *argv[])
 	optarg = NULL;
 	optind = 0;
 
-	while ((i = getopt_long(argc, argv, "r8cC:v:i", options, NULL)) != -1) {
-		switch (i) {       /* -8 is for 8-bit data, -c for compression. both are not yet implemented. */
+	while ((i = getopt_long(argc, argv, "r8co:C:v:i", options, NULL)) != -1) {
+		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
 			strncpy(sms.SMSC.Number, optarg, sizeof(sms.SMSC.Number) - 1);
 			if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
@@ -535,6 +535,19 @@ static int sendsms(int argc, char *argv[])
 			}
 			sms.UserData[++curpos].Type = SMS_NoData;
 			curpos = -1;
+			break;
+		}
+
+		case 'o': /* Concat header */ {
+			printf("Adding concat header\n");
+			sms.UserData[curpos].Type = SMS_Concat;
+			if (3 != sscanf(optarg, "%d;%d;%d", &sms.UserData[curpos].u.Concat.this, 
+					&sms.UserData[curpos].u.Concat.total, 
+					&sms.UserData[curpos].u.Concat.serial)) {
+				fprintf(stderr, "Wrong --concat option\n");
+				break;
+			}
+			curpos++;
 			break;
 		}
 
