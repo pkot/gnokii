@@ -66,7 +66,7 @@ static struct udh_data headers[] = {
 	{ 0x04, "\x03\x01\x00\x00" },         /* Voice Messages */
 	{ 0x04, "\x03\x01\x01\x00" },         /* Fax Messages */
 	{ 0x04, "\x03\x01\x02\x00" },         /* Email Messages */
-	{ 0x00, "" }
+	{ 0x00, "" },
 };
 
 
@@ -980,8 +980,6 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type, char *UDH)
 	unsigned char pos;
 
 	pos = UDH[0];
-	dprintf("Encoding UDH. (%d, %d).\n", type, pos);
-	type = 3;
 
 	switch (type) {
 	case SMS_NoUDH:
@@ -997,7 +995,6 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type, char *UDH)
 	case SMS_ConcatenatedMessages:
 		dprintf("Adding ConcatMsg header\n");
 	case SMS_OpLogo:
-		dprintf("Adding OpLogo header\n");
 	case SMS_CallerIDLogo:
 	case SMS_Ringtone:
 	case SMS_MultipartMessage:
@@ -1134,7 +1131,12 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 	/* Bitmap coding */
 	if (bitmap_index != -1) {
 		rawsms->UDHIndicator = 1;
-		error = EncodeUDH(rawsms, sms->UserData[0].u.Bitmap.type, message);
+		error = GE_NONE;
+		switch (sms->UserData[0].u.Bitmap.type) {
+		case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo, message); break;
+		case GSM_EMSPicture:
+		case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
+		}
 		if (error != GE_NONE) return error;
 
 #ifdef BITMAP_SUPPORT

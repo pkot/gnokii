@@ -1414,6 +1414,7 @@ static int sendlogo(int argc, char *argv[])
 	}
 
 	sms.UserData[0].Type = SMS_BitmapData;
+	GSM_NullBitmap(&sms.UserData[0].u.Bitmap, info);
 
 	/* The second argument is the destination, ie the phone number of recipient. */
 	memset(&sms.Remote.Number, 0, sizeof(sms.Remote.Number));

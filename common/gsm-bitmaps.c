@@ -57,6 +57,7 @@ API void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	switch (bmp->type) {
 	case GSM_StartupLogo:  bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8); break;
+	case GSM_EMSPicture:
 	case GSM_OperatorLogo:
 	case GSM_CallerLogo:   bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8)); break;
 		               /* Testing only! */	
@@ -68,6 +69,7 @@ API void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	switch (bmp->type) {
 	case GSM_StartupLogo:  bmp->bitmap[((y/8)*bmp->width)+x] &= ~(1 << (y%8)); break;
+	case GSM_EMSPicture:
 	case GSM_OperatorLogo:
 	case GSM_CallerLogo:   bmp->bitmap[(y*bmp->width+x)/8] &= ~(1 << (7-((y*bmp->width+x)%8))); break;
 		               /* Testing only! */	
@@ -238,6 +240,10 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 			fprintf(stderr, "EMS needs bitmap size 8, 16, 24, ... \n");
 			return GE_NOTSUPPORTED;
 		}
+		message[current++] = bitmap->width/8*bitmap->height+5;
+		message[current++] = 0x12; 	/* Picture code */
+		message[current++] = bitmap->width/8*bitmap->height+3; /* Picture size */;
+		message[current++] = 0;		      /* Position in text this picture is at */
 		message[current++] = bitmap->width/8; /* Horizontal size / 8 */
 		message[current++] = bitmap->height;
 		break;

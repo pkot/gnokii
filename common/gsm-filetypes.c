@@ -576,11 +576,18 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 
 	/* All xpms are loaded as startup logos - but can be resized later */
 
-	bitmap->type = GSM_StartupLogo;
-
-	bitmap->height = image.height;
-	bitmap->width = image.width;
-	bitmap->size = ((bitmap->height / 8) + (bitmap->height % 8 > 0)) * bitmap->width;
+	switch (bitmap->type) {
+	case GSM_EMSPicture:
+		bitmap->height = image.height;
+		bitmap->width = image.width;
+		bitmap->size = ((bitmap->width + 7) / 8) * bitmap->height;
+		break;
+	default:
+		bitmap->height = image.height;
+		bitmap->width = image.width;
+		bitmap->size = ((bitmap->height / 8) + (bitmap->height % 8 > 0)) * bitmap->width;
+		break;
+	}
 
 	if (bitmap->size > GSM_MAX_BITMAP_SIZE) {
 		fprintf(stdout, "Bitmap too large\n");
