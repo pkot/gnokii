@@ -130,7 +130,19 @@ Q. Could you tell me the key for on, off and select menu in
 
 A. M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
    +: increase volume, -: decrease volume, 0123456789#* as is. N means
-   cancel for Nokia 3210 and 3310.
+   cancel for Nokia 3210 and 3310. Only the nk6100 (6110 and compatibles)
+   and nk7110 (7110 and compatibles) drivers supports this functionality.
+
+-------------------------------------------------------------------------------
+Q. How can I redirect a call without the broken gnokii --divert command?
+
+A. You can use the gsm-code *21*yournumber# for this. Pipe it in per
+   stdout to gnokii with the following command: "echo '*21*yournumber#G' |
+   gnokii --keysequence". The 'G' at the end stands for the handy key with
+   'Green phone'-symbol on it. Note: This will take some time, because your
+   provider has to affirm it. I.e. redirecting to a number in munich,
+   Germany (tested on Nokia 8210):
+   echo '*21*089123455678#G' | gnokii --keysequence
 
 -------------------------------------------------------------------------------
 Q. I get 'undefined symbol: GSM_ELogHandler' when runnig gnokii. What's

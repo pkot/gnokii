@@ -28,6 +28,7 @@
  * documentation updates
     o added new FAQ entry regrading win32 setup and the relvant
       sample in Docs/sample/gnokiirc                    (Pawel Kot)
+    o gnokii --divert alternative added to the FAQ    (Oliver Rath)
  * libgnokii updates
     o add the function to validate the given date       (Pawel Kot)
     o add optional parameter to disable the retransmission policy;
