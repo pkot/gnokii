@@ -541,7 +541,8 @@ static void SaveToMailbox (void)
   if (fcntl (fd, F_GETLK, &lock) != -1 && lock.l_type != F_UNLCK)
   {
     snprintf (buf, 255, _("Cannot save to mailbox %s.\n\
-%s is locked for process %d!"), xgnokiiConfig.mailbox, lock.l_pid);
+%s is locked for process %d!"), xgnokiiConfig.mailbox, xgnokiiConfig.mailbox,
+              lock.l_pid);
     gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
     gtk_widget_show (errorDialog.dialog);
     fclose (f);

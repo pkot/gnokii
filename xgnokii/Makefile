@@ -63,7 +63,7 @@ install: all
 	$(INSTALL) -m 0444 ../COPYING $(xgnokii_libdir)/help/en_US
 	$(INSTALL) -d $(xgnokii_libdir)/help/en_US/sample
 	$(INSTALL) -m 0444 ../Docs/sample.gnokiirc $(xgnokii_libdir)/help/en_US/sample
-	(cd $(xgnokii_libdir)/help; ln -s en_US C; ln -s en_US POSIX)
+	(cd $(xgnokii_libdir)/help; ln -sf en_US C; ln -sf en_US POSIX)
 	$(INSTALL) -d $(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6110.xpm $(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6150.xpm $(xgnokii_libdir)/xpm

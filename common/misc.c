@@ -13,6 +13,7 @@
 
 */
 
+#include <string.h>
 #include "misc.h"
 
 #ifndef HAVE_TIMEOPS

@@ -289,7 +289,7 @@ GSM_Error 	VM_GSMInitialise(char *model, char *port, char *initlength, GSM_Conne
 
 int	VM_GetMasterPty(char **name) { 
 
-   int i, j;
+   int i = 0, j = 0;
    /* default to returning error */
    int master = -1;
 
