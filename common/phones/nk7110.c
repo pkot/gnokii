@@ -918,7 +918,7 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 
        	if (req[4] == P7110_MEMORY_IN) { /* special case INBOX */
 
-		dprintf("Special case IN/OUTBOX in GetSMSFolderStatus!\n");
+		dprintf("Special case INBOX in GetSMSFolderStatus!\n");
 
 		if (SM_SendMessage(state, 7, P7110_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 		error = SM_Block(state, data, P7110_MSG_FOLDER);
