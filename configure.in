@@ -208,7 +208,8 @@ AC_CHECK_HEADER(linux/irda.h,
 	[AC_DEFINE(HAVE_IRDA)
 	 USE_IRDA="yes"],,
 	[#include <sys/socket.h>
-	 #include <sys/ioctl.h>])
+	 #include <sys/ioctl.h>
+	 #include <linux/types.h>])
 
 dnl ======================== Checks for Linux Bluetooth support
 bluetooth="no"

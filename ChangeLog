@@ -43,6 +43,7 @@
  * build system updates
     o avoid warnings on Linux when irda headers are detected
                                                          (Pawel Kot)
+    o linux/irda.h requires linux/types.h too       (BORBELY Zoltan)
  * libsms fixes
     o allow to input more then 160 characters for the text sms
                                                          (Pawel Kot)
