@@ -40,6 +40,7 @@
       incoming/deleted messages                        (Ulrich Hopp)
     o mark read messages as read                       (Ulrich Hopp)
     o sort sms alphabetically                          (Ulrich Hopp)
+    o save sms to mailbox                              (Ulrich Hopp)
  * documentation updates
     o new Estonian translation                       (Hans Motshärg)
     o man page update for gnokii --getlocksinfo     (Bertrik Sikken)

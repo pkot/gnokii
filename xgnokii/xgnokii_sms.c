@@ -92,7 +92,11 @@ typedef struct {
 	GSList *addressLine;
 } SendSMSWidget;
 
+  static gchar *mailbox_name=NULL;
+
+
 static GtkWidget *GUI_SMSWindow;
+static GtkWidget* create_SaveSMStoMailbox (void);
 static SMSWidget SMS = { NULL, NULL, NULL };
 static SendSMSWidget sendSMS = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL };
 static ErrorDialog errorDialog = { NULL, NULL };
@@ -611,8 +615,7 @@ static void DelSMS(void)
 	gtk_widget_show(GTK_WIDGET(dialog));
 }
 
-
-static void SaveToMailbox(void)
+static void SaveToMailbox(gchar *mailbox_name)
 {
 	gchar buf[255];
 	FILE *f;
@@ -625,9 +628,9 @@ static void SaveToMailbox(void)
 	gchar *number, *text, *loc, dummy;
 
 
-	if ((f = fopen(xgnokiiConfig.mailbox, "a")) == NULL) {
+	if ((f = fopen(mailbox_name, "a")) == NULL) {
 		snprintf(buf, 255, _("Cannot open mailbox %s for appending!"),
-			 xgnokiiConfig.mailbox);
+			 mailbox_name);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		return;
@@ -641,7 +644,7 @@ static void SaveToMailbox(void)
 
 	if (fcntl(fd, F_GETLK, &lock) != -1 && lock.l_type != F_UNLCK) {
 		snprintf(buf, 255, _("Cannot save to mailbox %s.\n\%s is locked for process %d!"),
-			 xgnokiiConfig.mailbox, xgnokiiConfig.mailbox, lock.l_pid);
+			mailbox_name, mailbox_name, lock.l_pid);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		fclose(f);
@@ -653,7 +656,7 @@ static void SaveToMailbox(void)
 	lock.l_start = 0;
 	lock.l_len = 0;
 	if (fcntl(fd, F_SETLK, &lock) == -1) {
-		snprintf(buf, 255, _("Cannot lock mailbox %s!"), xgnokiiConfig.mailbox);
+		snprintf(buf, 255, _("Cannot lock mailbox %s!"), mailbox_name);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		fclose(f);
@@ -706,12 +709,79 @@ static void SaveToMailbox(void)
 	lock.l_start = 0;
 	lock.l_len = 0;
 	if (fcntl(fd, F_SETLK, &lock) == -1) {
-		snprintf(buf, 255, _("Cannot unlock mailbox %s!"), xgnokiiConfig.mailbox);
+		snprintf(buf, 255, _("Cannot unlock mailbox %s!"), mailbox_name);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 	}
 
 	fclose(f);
+}
+
+static void OKSaveSMStoMailbox(GtkWidget * widget, gpointer data)
+{
+  mailbox_name = gtk_file_selection_get_filename(GTK_FILE_SELECTION(data));
+  SaveToMailbox(mailbox_name);
+  gtk_widget_hide(GTK_WIDGET(data));
+}
+
+
+static void SaveSMStoMailbox_dialog (void)
+{
+  static GtkWidget *SaveSMS_dialog = NULL;
+  
+  if ( SaveSMS_dialog == NULL) SaveSMS_dialog = create_SaveSMStoMailbox();
+  
+  if (mailbox_name == NULL) {
+    mailbox_name = g_malloc (strlen(xgnokiiConfig.mailbox)+1);
+    mailbox_name = strcpy ( mailbox_name, xgnokiiConfig.mailbox);
+  };
+  gtk_file_selection_set_filename (GTK_FILE_SELECTION(SaveSMS_dialog), mailbox_name);
+  
+  gtk_widget_show(GTK_WIDGET(SaveSMS_dialog));
+
+}
+
+static void SaveSMStoMailbox (void)
+{
+
+SaveToMailbox(xgnokiiConfig.mailbox);
+
+}
+
+/* created with the help of glade */
+
+static GtkWidget*
+create_SaveSMStoMailbox (void)
+{
+  GtkWidget *SaveSMStoMailbox;
+  GtkWidget *ok_button1;
+  GtkWidget *cancel_button1;
+
+  SaveSMStoMailbox = gtk_file_selection_new (_("Choose Mailbox File"));
+  gtk_object_set_data (GTK_OBJECT (SaveSMStoMailbox), "SaveSMStoMailbox", SaveSMStoMailbox);
+  gtk_container_set_border_width (GTK_CONTAINER (SaveSMStoMailbox), 10);
+  GTK_WINDOW (SaveSMStoMailbox)->type = GTK_WINDOW_DIALOG;
+
+  ok_button1 = GTK_FILE_SELECTION (SaveSMStoMailbox)->ok_button;
+  gtk_object_set_data (GTK_OBJECT (SaveSMStoMailbox), "ok_button1", ok_button1);
+  gtk_widget_show (ok_button1);
+  GTK_WIDGET_SET_FLAGS (ok_button1, GTK_CAN_DEFAULT);
+
+  cancel_button1 = GTK_FILE_SELECTION (SaveSMStoMailbox)->cancel_button;
+  gtk_object_set_data (GTK_OBJECT (SaveSMStoMailbox), "cancel_button1", cancel_button1);
+  gtk_widget_show (cancel_button1);
+  GTK_WIDGET_SET_FLAGS (cancel_button1, GTK_CAN_DEFAULT);
+
+  gtk_signal_connect (GTK_OBJECT (ok_button1), "clicked",
+                      GTK_SIGNAL_FUNC (OKSaveSMStoMailbox),
+                      (gpointer) SaveSMStoMailbox);
+  gtk_signal_connect(GTK_OBJECT(SaveSMStoMailbox), "delete_event",
+		     GTK_SIGNAL_FUNC(DeleteEvent), NULL);
+  gtk_signal_connect (GTK_OBJECT (cancel_button1), "clicked",
+                      GTK_SIGNAL_FUNC (CancelDialog),
+                      (gpointer) SaveSMStoMailbox );
+
+  return SaveSMStoMailbox;
 }
 
 
@@ -1569,7 +1639,8 @@ static void NewBC(void)
 static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Branch>"},
 	{NULL, "<control>S", NULL, 0, NULL},
-	{NULL, "<control>M", SaveToMailbox, 0, NULL},
+	{NULL, "<control>M", SaveSMStoMailbox, 0, NULL},
+	{NULL, "<control>T", SaveSMStoMailbox_dialog, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>W", CloseSMS, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
@@ -1593,6 +1664,7 @@ static void InitMainMenu(void)
 	menu_items[i++].path = g_strdup(_("/_File"));
 	menu_items[i++].path = g_strdup(_("/File/_Save"));
 	menu_items[i++].path = g_strdup(_("/File/Save to mailbo_x"));
+	menu_items[i++].path = g_strdup(_("/File/Save to _file"));
 	menu_items[i++].path = g_strdup(_("/File/Sep1"));
 	menu_items[i++].path = g_strdup(_("/File/_Close"));
 	menu_items[i++].path = g_strdup(_("/_Messages"));
