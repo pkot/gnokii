@@ -62,7 +62,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <todosummary>[[:alnum:] ]+		{
 						if(vtodocounter == lexnumber)
-							strncpy(text, yytext, 256);
+							snprintf(text, 256, "%s", yytext);
 						BEGIN(vtodo);
 					}
 
@@ -70,7 +70,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <priority>[0-9]{1}			{
 						if(vtodocounter == lexnumber)
-							strncpy(todo_priority, yytext, 1);
+							snprintf(todo_priority, 1, "%s", yytext);
 						BEGIN(vtodo);
 					}
 
@@ -78,7 +78,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <category>[[:alnum:] ]+			{
 						if(veventcounter == lexnumber)
-							strncpy(type, yytext, 21);
+							snprintf(type, 21, "%s", yytext);
 						BEGIN(vevent);
 					}
 
@@ -86,7 +86,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <summary>[[:alnum:] ]+			{
 						if(veventcounter == lexnumber)
-							strncpy(text, yytext, 256);
+							snprintf(text, 256, "%s", yytext);
 						BEGIN(vevent);
 					}
 
@@ -94,7 +94,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <description>[[:alnum:] ]+		{
 						if(veventcounter == lexnumber)
-							strncpy(desc, yytext, 256);
+							snprintf(desc, 256, "%s", yytext);
 						BEGIN(vevent);
 					}
 
@@ -102,7 +102,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <ttime>[0-9]{8}T[0-9]{6}		{
 						if(veventcounter == lexnumber)
-							strncpy(time, yytext, 16);
+							snprintf(time, 16, "%s", yytext);
 						BEGIN(vevent);
 					}
 
@@ -147,12 +147,12 @@ int GetvCalTime(GSM_DateTime *dt, char *time)
 	char year[5] = "", month[3] = "", day[3] = "", hour[3] = "", minute[3] = "", second[3] = "";
 	dt->Year = dt->Month = dt->Day = dt->Hour = dt->Minute = dt->Second = dt->Timezone = 0;
 
-	strncpy(year, time, 4);
-	strncpy(month, time + 4, 2);
-	strncpy(day, time + 6, 2);
-	strncpy(hour, time + 9, 2);
-	strncpy(minute, time + 11, 2);
-	strncpy(second, time + 13, 2);
+	snprintf(year, 4, "%s", time);
+	snprintf(month, 2, "%s", time + 4);
+	snprintf(day, 2, "%s", time + 6);
+	snprintf(hour, 2, "%s", time + 9);
+	snprintf(minute, 2, "%s", time + 11);
+	snprintf(second, 2, "%s", time + 13);
 
 	/* FIXME: Should check ranges... */
 	dt->Year = atoi(year);
@@ -190,13 +190,13 @@ int FillCalendarNote(GSM_CalendarNote *note, char *type,
 
 	note->Location = 0;
 
-	strncpy(note->Text, text, 256);
-	strcpy(note->Phone, ""); /* correct in most cases */
+	snprintf(note->Text, 256, "%s", text);
+	snprintf(note->Phone, 0, "%s", "");
 
 	/* FIXME: Handle additional strings, maybee from configuration file */
 	if (!strcmp(type, "PHONE CALL")) {
-		strncpy(note->Phone, text, 48);
-		if (desc[0] != 0) strncpy(note->Text, desc, 256);
+		snprintf(note->Phone, 48, "%s", text);
+		if (desc[0] != 0) snprintf(note->Text, 256, "%s", desc);
 		note->Type = GCN_CALL;
 	} else if (!strcmp(type, "MEETING"))
 		note->Type = GCN_MEETING;
@@ -259,7 +259,7 @@ int FillToDo(GSM_ToDo *note, char *text, char *todo_priority)
 {
 	note->Location = 0;
 
-	strncpy(note->Text, text, 256);
+	snprintf(note->Text, 256, "%s", text);
 	note->Priority = 2;
 	if (todo_priority) note->Priority = atoi(todo_priority);
 	return 0;
