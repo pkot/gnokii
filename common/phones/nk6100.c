@@ -2278,7 +2278,7 @@ static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *mess
 
 			dprintf("Message: Alarm\n");
 			dprintf("   Alarm: %02d:%02d\n", date->Hour, date->Minute);
-			dprintf("   Alarm is %s\n", date->AlarmEnabled ? _("on") : _("off"));
+			dprintf("   Alarm is %s\n", date->AlarmEnabled ? "on" : "off");
 		}
 		break;
 
@@ -3224,13 +3224,13 @@ static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, i
 	case 0x08:
 		dprintf("Message: Security Code status received: ");
 		switch (message[4]) {
-		case GSCT_SecurityCode: dprintf(_("waiting for Security Code.\n")); break;
-		case GSCT_Pin: dprintf(_("waiting for PIN.\n")); break;
-		case GSCT_Pin2: dprintf(_("waiting for PIN2.\n")); break;
-		case GSCT_Puk: dprintf(_("waiting for PUK.\n")); break;
-		case GSCT_Puk2: dprintf(_("waiting for PUK2.\n")); break;
-		case GSCT_None: dprintf(_("nothing to enter.\n")); break;
-		default: dprintf(_("Unknown!\n")); return GE_UNHANDLEDFRAME;
+		case GSCT_SecurityCode: dprintf("waiting for Security Code.\n"); break;
+		case GSCT_Pin: 	dprintf("waiting for PIN.\n"); break;
+		case GSCT_Pin2: dprintf("waiting for PIN2.\n"); break;
+		case GSCT_Puk: 	dprintf("waiting for PUK.\n"); break;
+		case GSCT_Puk2: dprintf("waiting for PUK2.\n"); break;
+		case GSCT_None: dprintf("nothing to enter.\n"); break;
+		default: dprintf("Unknown!\n"); return GE_UNHANDLEDFRAME;
 		}
 		if (data->SecurityCode) data->SecurityCode->Type = message[4];
 		break;
