@@ -3202,12 +3202,19 @@ static int getphonebook(int argc, char *argv[])
 			case 1:
 				fprintf(stdout, "%s;%s;%s;%d;%d", entry.name, entry.number, memory_type_string, entry.location, entry.caller_group);
 				for (i = 0; i < entry.subentries_count; i++) {
-					fprintf(stdout, ";%d;%d;%d;%s", entry.subentries[i].entry_type, entry.subentries[i].number_type,
-						entry.subentries[i].id, entry.subentries[i].data.number);
+					switch (entry.subentries[i].entry_type) {
+					case GN_PHONEBOOK_ENTRY_Date:
+						break;
+					default:
+						fprintf(stdout, ";%d;%d;%d;%s", entry.subentries[i].entry_type, entry.subentries[i].number_type, entry.subentries[i].id,
+							entry.subentries[i].data.number);
+						break;
+					}
 				}
-				fprintf(stdout, "\n");
 				if (entry.memory_type == GN_MT_MC || entry.memory_type == GN_MT_DC || entry.memory_type == GN_MT_RC)
-					fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);
+					fprintf(stdout, "%d;0;0;%02u.%02u.%04u %02u:%02u:%02u", GN_PHONEBOOK_ENTRY_Date,
+						entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);
+				fprintf(stdout, "\n");
 				break;
 			case 2:
 				sprintf(location, "%s%d", memory_type_string, entry.location);
@@ -3254,11 +3261,14 @@ static int getphonebook(int argc, char *argv[])
 					case GN_PHONEBOOK_ENTRY_URL:
 						fprintf(stdout, _("WWW address: "));
 						break;
+					case GN_PHONEBOOK_ENTRY_Date:
+						break;
 					default:
 						fprintf(stdout, _("Unknown (%d): "), entry.subentries[i].entry_type);
 						break;
 					}
-					fprintf(stdout, "%s\n", entry.subentries[i].data.number);
+					if (entry.subentries[i].entry_type != GN_PHONEBOOK_ENTRY_Date)
+						fprintf(stdout, "%s\n", entry.subentries[i].data.number);
 				}
 				if (entry.memory_type == GN_MT_MC || entry.memory_type == GN_MT_DC || entry.memory_type == GN_MT_RC)
 					fprintf(stdout, _("Date: %02u.%02u.%04u %02u:%02u:%02u\n"), entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);

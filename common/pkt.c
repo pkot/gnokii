@@ -120,6 +120,16 @@ void pkt_put_string(pkt_buffer *buf, const char *x)
 	char_unicode_encode(b, x, n);
 }
 
+void pkt_put_timestamp(pkt_buffer *buf, const gn_timestamp *x)
+{
+	pkt_put_uint16(buf, x->year);
+	pkt_put_uint8(buf, x->month);
+	pkt_put_uint8(buf, x->day);
+	pkt_put_uint8(buf, x->hour);
+	pkt_put_uint8(buf, x->minute);
+	pkt_put_uint8(buf, x->second);
+}
+
 int8_t pkt_get_int8(pkt_buffer *buf)
 {
 	uint8_t *b = buffer_expand(buf, 1);
@@ -174,4 +184,17 @@ char *pkt_get_string(char *s, int slen, pkt_buffer *buf)
 	char_unicode_decode(s, b, l < slen - 1 ? 2 * l : 2 * slen - 2);
 
 	return s;
+}
+
+gn_timestamp *pkt_get_timestamp(gn_timestamp *t, pkt_buffer *buf)
+{
+	t->year = pkt_get_uint16(buf);
+	t->month = pkt_get_uint8(buf);
+	t->day = pkt_get_uint8(buf);
+	t->hour = pkt_get_uint8(buf);
+	t->minute = pkt_get_uint8(buf);
+	t->second = pkt_get_uint8(buf);
+	t->timezone = 0;
+
+	return t;
 }

@@ -26,6 +26,8 @@
  * gnokii updates
     o accept range in --deletephonebook            (BORBELY Zoltan)
     o deletephonebook initialisation fix           (BORBELY Zoltan)
+    o getphonebook didn't show the date field correctly
+                                                   (BORBELY Zoltan)
  * documentation updates
     o update TODO to reflect real issues                (Pawel Kot)
     o mention default caller groups in the manpage   (Reiner Steib)
@@ -35,6 +37,7 @@
     o gnapplet support added                       (BORBELY Zoltan)
     o minimal phonebook management support         (BORBELY Zoltan)
     o GetMemoryStatus support added                (BORBELY Zoltan)
+    o DC/MC/RC memory handling added               (BORBELY Zoltan)
 
 0.6.0
 =====

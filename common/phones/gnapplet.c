@@ -332,6 +332,7 @@ static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *mess
 		entry->name[0] = '\0';
 		entry->number[0] = '\0';
 		entry->subentries_count = 0;
+		memset(&entry->date, 0, sizeof(entry->date));
 		if (error != GN_ERR_NONE) return error;
 		n = pkt_get_uint16(&pkt);
 		assert(n < GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER);
@@ -344,15 +345,22 @@ static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *mess
 				pkt_get_string(entry->name, sizeof(entry->name), &pkt);
 				break;
 			case GN_PHONEBOOK_ENTRY_Number:
+				se->entry_type = type;
+				se->number_type = subtype;
+				se->id = 0;
+				pkt_get_string(se->data.number, sizeof(se->data.number), &pkt);
+				entry->subentries_count++;
 				if (!entry->number[0]) {
-					pkt_get_string(entry->number, sizeof(entry->number), &pkt);
-				} else {
-					se->entry_type = type;
-					se->number_type = subtype;
-					se->id = 0;
-					pkt_get_string(se->data.number, sizeof(se->data.number), &pkt);
-					entry->subentries_count++;
+					snprintf(entry->number, sizeof(entry->number), "%s", se->data.number);
 				}
+				break;
+			case GN_PHONEBOOK_ENTRY_Date:
+				se->entry_type = type;
+				se->number_type = subtype;
+				se->id = 0;
+				pkt_get_timestamp(&se->data.date, &pkt);
+				entry->subentries_count++;
+				entry->date = se->data.date;
 				break;
 			default:
 				se->entry_type = type;
