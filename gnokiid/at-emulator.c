@@ -44,6 +44,7 @@
 	/* Global variables */
 bool ATEM_Initialised = false;	/* Set to true once initialised */
 extern bool    CommandMode;
+extern int ConnectCount;
 
 extern char *Model;
 extern char *Port;	/* Hmm, this is a bit iffy ? */
@@ -173,12 +174,13 @@ void	ATEM_ParseAT(char *cmd_buffer)
 		  if (*buf=='T') buf++;
 		  if (*buf==' ') buf++;
 		  strncpy(number,buf,30);
-		   if (ModemRegisters[S35]==0) GSM->DialData(number,1);
-		   else GSM->DialData(number,0);
-		   ATEM_StringOut("\n\r");
-		   CommandMode=false;
-		   return;
-		   break;
+		  ConnectCount=0;
+		  if (ModemRegisters[S35]==0) GSM->DialData(number,1);
+		  else GSM->DialData(number,0);
+		  ATEM_StringOut("\n\r");
+		  CommandMode=false;
+		  return;
+		  break;
 		case 'H':
 		  /* Hang Up */
 		  buf++;

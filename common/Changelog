@@ -27,3 +27,6 @@
 
 * Thu Mar 16 17:38:22 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - Feico's patch for debugging errors in opening config files.
+
+* Thr Mar 16 13:50:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
+- Improved error handling in RLP code.  Virtual-Modem is more flexible.

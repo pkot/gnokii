@@ -45,6 +45,9 @@
 
 	/* Global variables */
 
+extern bool TerminateThread;
+int ConnectCount;
+
 	/* Local variables */
 
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
@@ -55,6 +58,7 @@ bool	CommandMode;
 
 pthread_t		Thread;
 bool			RequestTerminate;
+bool                    GSMInit=true;
 
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
@@ -73,16 +77,22 @@ bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType
 		UseSTDIO = false;
 	}
 
-	if (VM_GSMInitialise(model, port, initlength, connection) != GE_NONE) {
+	if (GSMInit) {
+	  fprintf (stdout, "Initialising GSM\n");
+	  if ((VM_GSMInitialise(model, port, initlength, connection) != GE_NONE)) {
 		fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
 		return (false);
+	  }
 	}
+	GSMInit=false;
+
 
 	if (VM_PtySetup(bindir) < 0) {
 		fprintf (stderr, _("VM_Initialise - VM_PtySetup failed!\n"));
 		return (false);
 	}
 
+    
 	if (ATEM_Initialise(PtyRDFD, PtyWRFD) != true) {
 		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n"));
 		return (false);
@@ -92,7 +102,6 @@ bool	VM_Initialise(char *model, char *port, char *initlength, GSM_ConnectionType
 		fprintf (stderr, _("VM_Initialise - DP_Initialise failed!\n"));
 		return (false);
 	}
-
 
 		/* Create and start thread, */
 	rtn = pthread_create(&Thread, NULL, (void *) VM_ThreadLoop, (void *)NULL);
@@ -109,6 +118,7 @@ void	VM_ThreadLoop(void)
 	int				res;
 	fd_set			input_fds, test_fds;
 	struct timeval	timeout;	
+	char name[20];
 
 		/* Note we can't use signals here as they are already used
 		   in the FBUS code.  This may warrant changing the FBUS
@@ -120,11 +130,20 @@ void	VM_ThreadLoop(void)
 	FD_ZERO(&input_fds);
 	FD_SET(PtyRDFD, &input_fds);
 
-
 	while (!RequestTerminate) {
 		test_fds = input_fds;
 		timeout.tv_usec =0;
 		timeout.tv_usec = 500000;	/* Timeout after 500mS */	
+	        if (!CommandMode) {
+		  ConnectCount++;
+		  if (ConnectCount>20) {
+
+		    /* If we are in data mode check if the call is still going! */
+		    if ((!CommandMode) && (GSM->GetIncomingCallNr(name)==GE_BUSY))
+		      DP_CallFinished();
+		    ConnectCount=10;
+		  }
+		}
 
 		res = select(FD_SETSIZE, &test_fds, (fd_set *)0, (fd_set *)0, &timeout);
 
@@ -150,10 +169,11 @@ void	VM_ThreadLoop(void)
 	   the virtual modem thread */
 void		VM_Terminate(void)
 {
-		/* Request termination of thread */
+     
+	/* Request termination of thread */
 	RequestTerminate = true;
 
-		/* Now wait for thread to terminate. */
+	/* Now wait for thread to terminate. */
 	pthread_join(Thread, NULL);
 
 	if (!UseSTDIO) {
@@ -226,6 +246,7 @@ void    VM_CharHandler(void)
 		/* FIXME - need something more elegant here - a -1 return
 		   indicates that the slave pty has closed... */
 	if (res < 0) {
+	  TerminateThread=true;
 		return;
 	}
 

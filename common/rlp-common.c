@@ -29,6 +29,12 @@
 #include "gsm-common.h" /* For GSM error and RLP send function. */
 #include "misc.h" /* For u8, u32 etc. */
 
+
+/* We should force rlp_debug for now until it is more stable and then */
+/* it can become an option in configure */
+/* This way only interesting information (and not passwords) is recorded */
+#define RLP_DEBUG
+
 /* Our state machine which handles all of nine possible states of RLP
    machine. */
 void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header);
@@ -85,8 +91,15 @@ RLP_UserRequestStore UserRequests;
 bool Poll_xchg;
 u8 Poll_Count=0;
 
+/* For now timing is done based on a frame reception rate of 20ms */
+/* Serge has measured it as 18.4ms */
+#define RLP_T_Scaling 2
+
+/* Timers - a value of -1 means not set */
+/* To set, timer is loaded with RLP_Timeout1_Limit/RLP_T_Scaling. */
+/* Each received frame (including NULLS / errors) any >0 timer is decrease */
+
 int T;
-int T_RCVR=0;
 int T_RCVS[RLP_M_max];
 
 bool UA_FBit=true;
@@ -94,7 +107,6 @@ bool Ackn_FBit=false;
 bool DM_FBit=false;  /* FIXME - not handled */
 bool RRReady=false;
 bool LRReady=true;
-bool DataToTransmit=false;
 bool DISC_PBit=false;
 
 u8 LastStatus=0;   /* Last Status byte */
@@ -126,6 +138,8 @@ u8 *SendRingBuffer;
 
 void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx), void (*rlp_passup)(RLP_UserInds ind, u8 *buffer, int length))
 {
+  int i;
+
   RLPSendFunction = rlp_send_function;
   RLP_Passup=rlp_passup;
   UserRequests.Conn_Req=false;
@@ -138,6 +152,8 @@ void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx)
   if (SendRingBuffer==NULL) fprintf(stdout,"Not enough memory for the Send ring buffer!\n");
   SendTail=0;
   SendHead=0;
+  T=-1;
+  for (i=0;i<RLP_M_max;i++) T_RCVS[i]=-1;
 }
 
 
@@ -229,6 +245,11 @@ bool RLP_GetUserRequest(RLP_UserRequests type) {
   return result;
 }
 
+void RLP_SetTimer(int *timer)
+{
+  *timer=(int)(RLP_Timeout1_Limit/RLP_T_Scaling);
+}
+
 
 /* Previous sequence number. */
 u8 Decr(x) {
@@ -294,7 +315,6 @@ void RLP_AddRingBufferDataToSlots()
 
     S[VD].State=_send;
     VD=Incr(VD);
-    DataToTransmit=true;
   }  
 }
 
@@ -314,8 +334,9 @@ void X(RLP_F96Frame *frame) {
  
 void ResetAllT_RCVS(void)
 {
+
   int i;
-  for (i=0;i<RLP_M;i++) T_RCVS[i]=0; 
+  for (i=0;i<RLP_M;i++) T_RCVS[i]=-1; 
 }
 
 
@@ -567,15 +588,11 @@ void RLP_SendF96Frame(RLP_FrameTypes FrameType,
 
 void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 {
-
-#ifdef DEBUG
   int           count;
-#endif
   RLP_F96Header header;
 
-  /*
-    FIXME: IncrementTimes();
-  */
+  if (T>0) T--;
+  for (count=0;count<RLP_M;count++) if (T_RCVS[count]>0) T_RCVS[count]--;
 
   CurrentFrameType=RLPFT_BAD;
 
@@ -592,7 +609,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
     case RLPFT_U: /* Unnumbered frames. */
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "Unnumbered Frame [$%02x%02x] M=%02x ", frame->Header[0],
                                                               frame->Header[1],
                                                               header.M);
@@ -602,7 +619,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPU_SABM :
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
 	fprintf(stdout, "Set Asynchronous Balanced Mode (SABM) ");
 #endif
 
@@ -612,7 +629,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPU_UA:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
 	fprintf(stdout, "Unnumbered Acknowledge (UA) ");
 #endif
 
@@ -622,7 +639,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPU_DISC:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
 	fprintf(stdout, "Disconnect (DISC) ");
 #endif
 
@@ -632,7 +649,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPU_DM:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
 	fprintf(stdout, "Disconnected Mode (DM) ");
 #endif
 	CurrentFrameType=RLPFT_U_DM;
@@ -641,7 +658,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPU_UI:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
 	fprintf(stdout, "Unnumbered Information (UI) ");
 #endif
 
@@ -651,7 +668,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPU_XID:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
 	fprintf(stdout, "Exchange Information (XID) \n");
 	RLP_DisplayXID(frame->Data);
 #endif
@@ -692,7 +709,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
                     
       default :
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
 	fprintf(stdout, _("Unknown!!! "));
 #endif
 
@@ -705,7 +722,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
             
     case RLPFT_S: /* Supervisory frames. */
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "Supervisory Frame [$%02x%02x] S=%x N(R)=%02x ",
                       frame->Header[0],
                       frame->Header[1],
@@ -717,7 +734,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPS_RR:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "RR");
 #endif
 
@@ -727,7 +744,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPS_REJ:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "REJ");
 #endif
 
@@ -737,7 +754,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPS_RNR:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "RNR");
 #endif
 
@@ -747,7 +764,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPS_SREJ:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "SREJ");
 #endif
 
@@ -769,7 +786,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
             
     default:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "Info+Supervisory Frame [$%02x%02x] S=%x N(S)=%02x N(R)=%02x ",
                       frame->Header[0],
                       frame->Header[1],
@@ -782,7 +799,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPS_RR:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "RR");
 #endif
 
@@ -792,7 +809,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPS_REJ:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "REJ");
 #endif
 
@@ -802,7 +819,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPS_RNR:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "RNR");
 #endif
 
@@ -812,7 +829,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
       case RLPS_SREJ:
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
       fprintf(stdout, "SREJ");
 #endif
 
@@ -833,11 +850,14 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
       break;
     }   
 
-#ifdef DEBUG
+#ifdef RLP_DEBUG
 
     /* Command/Response and Poll/Final bits. */
 
     fprintf(stdout, " C/R=%d P/F=%d", header.CR, header.PF);
+#endif
+
+#ifdef DEBUG
 
     /* Information. */
     
@@ -857,6 +877,8 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
       }
     }
 
+#endif
+#ifdef RLP_DEBUG
     /* FCS. */
     
     fprintf (stdout, " FCS: %02x %02x %02x\n\n", frame->FCS[0],
@@ -1008,15 +1030,6 @@ bool Send_TXU(RLP_F96Frame *frame, RLP_F96Header *header) {
     return true;
   }
 
-  
-  /* This isn't in the spec but I suppose it goes here */
-
-  else if (DISC_State==_send){
-    RLP_SendF96Frame(RLPFT_U_DISC, true, DISC_PBit, 0, 0, NULL, false);
-    DISC_State = _wait;
-    return true;
-  }
-
   /*
 
   else if (XID_C_State == _send ) && !Poll_xchg ) {
@@ -1070,7 +1083,7 @@ void RLP_MarkMissingIF(u8 Ns)
 {
   u8 i;
   for (i=VR; i!=Ns; i=Incr(i)) {
-    if (R[i].State==_idle) R[i].State=_send;
+    if (R[i].State==_idle) R[i].State=_srej;
   }
 }
 
@@ -1084,13 +1097,15 @@ bool RLP_I_Handler(RLP_F96Frame *frame, RLP_F96Header *header)
     return true;
   }
   if (header->Ns==VR) {
+    /* This is not in the spec but I think it is necessary */
+    if (R[header->Ns].State==_wait) T_RCVS[header->Ns]=-1;
     R[VR].State=_rcvd;
     memcpy(R[VR].Data,frame->Data,25);
     RLP_DeliverAllInSeqIF();
-    Ackn_State=true;
+    Ackn_State=_send;
   }
-  else {  /* Use SREJ */
-    if (R[header->Ns].State==_wait) T_RCVS[header->Ns]=0;
+  else {  /* Its a SREJ */
+    if (R[header->Ns].State==_wait) T_RCVS[header->Ns]=-1;
     R[header->Ns].State=_rcvd;
     memcpy(R[header->Ns].Data,frame->Data,25);
     RLP_MarkMissingIF(header->Ns);
@@ -1129,11 +1144,13 @@ void RLP_S_Handler(RLP_F96Frame *frame, RLP_F96Header *header)
 
   if ((header->CR) && (header->PF)) {
     /* Special exchange (ie. error) - counter? */
-    Ackn_State=true;
+#ifdef RLP_DEBUG
+    fprintf(stdout, "Got Poll command\n");
+#endif
+    Ackn_State=_send;
     Ackn_FBit=true;
     for (i=0; i<RLP_M; i++) R[i].State=_idle;
     ResetAllT_RCVS();
-    T_RCVR=0;
   }
   if (Poll_State!=_idle) {
     if (header->PF==0) return;
@@ -1158,10 +1175,11 @@ void RLP_S_Handler(RLP_F96Frame *frame, RLP_F96Header *header)
     RLP_AdvanceVA(header->Nr);
     RRReady=true;
     RLP_DecreaseVS(header->Nr);
+    break;
   case RLPFT_S_SREJ:
   case RLPFT_SI_SREJ:
     S[header->Nr].State=_srej;
-    T=0;
+    T=-1;
     break;
   default:
   }
@@ -1187,21 +1205,23 @@ bool RLP_SREJSlot(u8 *x)
 
 /* Check if any SREJ frames need sending, if not send the next in line */
 
-u8 RLP_PrepareDataToTransmit()
+bool RLP_PrepareDataToTransmit(u8 *p)
 {
   u8 i,j;
 
   j=Incr(VS);
   for (i=0; i<RLP_M-1;i++) if (S[j].State==_srej) {
     S[j].State=_wait;
-    T=1;
-    return j;
+    RLP_SetTimer(&T);
+    *p=j;
+    return true;
   } else j=Incr(j);
+  if (VS==VD) return false;
   j=VS;
   S[VS].State=_wait;
   VS=Incr(VS);
-  if (VS==VD) DataToTransmit=false;
-  return j;
+  *p=j;
+  return true;
 }
 
 
@@ -1213,26 +1233,36 @@ void RLP_SendSREJ(u8 x)
   u8 k;
   
   if ((!Poll_xchg) && (Poll_State==_send)) {
+
+#ifdef RLP_DEBUG
+    fprintf(stdout, "Sending SREJ with poll\n");
+#endif
+
     RLP_SendF96Frame(RLPFT_S_SREJ, true, true, x , 0 , NULL, false);    
     R[x].State=_wait;
-    T_RCVS[x]=1;
+    RLP_SetTimer(&T_RCVS[x]);
     Poll_Count++;
     Poll_State=_wait;
     Poll_xchg=true;
-    T=1;
+    RLP_SetTimer(&T);
     Ackn_State=false;  /* Serge does not have these */
   }
-  else if (DataToTransmit && RRReady) {
-    k=RLP_PrepareDataToTransmit();
+  else if (RRReady && RLP_PrepareDataToTransmit(&k)) {
+#ifdef RLP_DEBUG
+    fprintf(stdout, "Sending SREJ for %d along with frame %d\n",x,k);
+#endif
     RLP_SendF96Frame(RLPFT_SI_SREJ, true, false, x , k , S[k].Data, false); 
     R[x].State=_wait;
-    T_RCVS[x]=1;
+    RLP_SetTimer(&T_RCVS[x]);
     Ackn_State=false; /* Serge does not have these */
   }
   else {
+#ifdef RLP_DEBUG
+    fprintf(stdout, "Sending SREJ for %d\n",x);
+#endif
     RLP_SendF96Frame(RLPFT_S_SREJ, true, false, x , 0 , NULL, false); 
     R[x].State=_wait;
-    T_RCVS[x]=1;
+    RLP_SetTimer(&T_RCVS[x]);
     Ackn_State=false;  /* Serge does not have these */
   }
 }
@@ -1245,19 +1275,28 @@ void RLP_Send_XX_Cmd(RLP_FrameTypes type)
  u8 k;
 
  if ((!Poll_xchg) && (Poll_State==_send)) {
-    RLP_SendF96Frame(RLPFT_S_SREJ, true, true, VR , 0 , NULL, false);    
+    RLP_SendF96Frame(type, true, true, VR , 0 , NULL, false);    
+#ifdef RLP_DEBUG
+    fprintf(stdout, "Sending Comd %x with Poll\n",type);
+#endif
     Poll_Count++;
     Poll_State=_wait;
     Poll_xchg=true;
-    T=1;
+    RLP_SetTimer(&T);
     Ackn_State=false;
   }
-  else if (DataToTransmit && RRReady) {
-    k=RLP_PrepareDataToTransmit();
+  else if (RRReady && RLP_PrepareDataToTransmit(&k)) {
+#ifdef RLP_DEBUG
+    fprintf(stdout, "Sending Comd %x with frame %d\n",type,k);
+#endif
     RLP_SendF96Frame(type+4, true, false, VR , k , S[k].Data, false); 
     Ackn_State=false;
   }
   else {
+#ifdef RLP_DEBUG
+    if (type!=9)
+      fprintf(stdout, "Sending Comd %x\n",type);
+#endif
     RLP_SendF96Frame(type, true, false, VR , 0 , NULL, false); 
     Ackn_State=false;
     DTX_SF=type;
@@ -1272,15 +1311,20 @@ void RLP_Send_XX_Resp(RLP_FrameTypes type)
 {
   u8 k;
   
-  if (DataToTransmit && RRReady) {
-    k=RLP_PrepareDataToTransmit();
+  if (RRReady && RLP_PrepareDataToTransmit(&k)) {
+#ifdef RLP_DEBUG
+    fprintf(stdout, "Sending Resp %x with frame %d\n",type+4,k);
+#endif
     RLP_SendF96Frame(type+4, false, true, VR , k , S[k].Data, false); 
     Ackn_State=false;
     Ackn_FBit=false;
-    /* Set T=1 in spec */
+    RLP_SetTimer(&T);
   }
   else {
-    RLP_SendF96Frame(type, true, false, VR , 0 , NULL, false); 
+#ifdef RLP_DEBUG
+    fprintf(stdout, "Sending Resp %x\n",type);
+#endif
+    RLP_SendF96Frame(type, false, true, VR , 0 , NULL, false); 
     Ackn_State=false;
     Ackn_FBit=false;
   }
@@ -1297,7 +1341,10 @@ void RLP_SendData()
     RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0 , 0 , NULL, false);    
     UA_State=_idle;
   }
-  else if (Ackn_FBit==1) {
+  else if (Ackn_FBit==true) {
+
+    printf("About to send Poll resp\n");
+
     if (LRReady) RLP_Send_XX_Resp(RLPFT_S_RR);
     else RLP_Send_XX_Resp(RLPFT_S_RNR);
   }
@@ -1307,7 +1354,7 @@ void RLP_SendData()
 }
 
 void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
-
+  int i;
 
   switch (CurrentState) {
 
@@ -1405,22 +1452,20 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
     }
     
-    
-    
-    {
+ 
       
       /* This is only used for setting Conn_Req to true. */
-      
+    {
       static int FIXMEcounter=0;
 
       FIXMEcounter++;
-      //      printf("FIXMEcounter=%d\n", FIXMEcounter);
+      //  printf("FIXMEcounter=%d\n", FIXMEcounter);
       
       if (FIXMEcounter==500) {
 	RLP_SetUserRequest(Conn_Req,true);
+  
       }
     }
-
   
 
     break;
@@ -1468,7 +1513,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 #endif
 
 	if (SABM_State == _wait && header->PF) {
-	  T=0;
+	  T=-1;
 	  // Conn_Conf=true;
 	  // Init_Link_Vars;
 	  NextState=RLP_S4;
@@ -1507,8 +1552,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     }
 
     if (RLP_GetUserRequest(Disc_Req)) {
-      T=0;
-      T_RCVR=0;
+      T=-1;
       DISC_State=_send;
       DISC_Count=0;
       DISC_PBit=Poll_xchg;
@@ -1566,8 +1610,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     
 
     if (RLP_GetUserRequest(Disc_Req)) {
-      T=0;
-      T_RCVR=0;
+      T=-1;
       DISC_State=_send;
       DISC_Count=0;
       DISC_PBit=Poll_xchg;
@@ -1592,8 +1635,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	TEST_Handling();
 	break;
       case RLPFT_U_DISC:
-	T=0;
-	T_RCVR=0;
+	T=-1;
 	ResetAllT_RCVS();
 	RLP_Passup(Disc_Ind,NULL,0);
 	UA_State=_send;
@@ -1601,8 +1643,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	NextState=RLP_S1;
 	break;
       case RLPFT_U_SABM:
-	T=0;
-	T_RCVR=0;
+	T=-1;
 	ResetAllT_RCVS();
 	RLP_Passup(Reset_Ind,NULL,0);
 	NextState=RLP_S7;
@@ -1611,22 +1652,48 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
       case RLPFT_S_RNR:
       case RLPFT_S_REJ:
       case RLPFT_S_SREJ:
-	if ((!header->PF) && (header->Nr < RLP_M)) RLP_S_Handler(frame,header);  /* Check as Serge, the spec is more thorough */
+	/* Should check here for unsolicited Fbit */
+	if (header->Nr < RLP_M) RLP_S_Handler(frame,header);  /* Check as Serge, the spec is more thorough */
 	break;
       case RLPFT_SI_RR:
       case RLPFT_SI_RNR:
       case RLPFT_SI_REJ:
       case RLPFT_SI_SREJ:
-	if ((!header->PF) && (header->Nr < RLP_M)) /* Check as Serge, spec more thorough */
+	/* Should check here for unsolicited Fbit */
+	if (header->Nr < RLP_M) /* Check as Serge, spec more thorough */
 	  if (!RLP_I_Handler(frame,header)) RLP_S_Handler(frame,header);
 	break;
       default:
       }
     }    
     
-    
-    /* FIXME - deal with timeouts */
+    for (i=0;i<RLP_M;i++) if (T_RCVS[i]==0) {
+#ifdef RLP_DEBUG
+	  fprintf(stdout, "T_RCVS[%d] Timeout in State 4\n",i);
+#endif
+      R[i].State=_srej;
+    }
+    if (T==0) {
 
+#ifdef RLP_DEBUG
+	  fprintf(stdout, "T Timeout in State 4\n");
+#endif      
+
+      Poll_xchg=_idle;
+      if (Poll_State==_idle) {
+	Poll_State=_send;
+	Poll_Count=0;
+      }
+      else {
+	if (Poll_Count>RLP_N2) {
+#ifdef RLP_DEBUG
+	  fprintf(stdout, "N2 Errors in State 4\n");
+#endif
+	}
+	Poll_State=_send;
+	Poll_Count++;
+      }
+    }
 
     if (!Send_TXU(frame,header)) {
       if (UA_State == _send) {
@@ -1640,14 +1707,15 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     /* Load any data from the Send ringbuffer into the send slots */
     if (SendHead!=SendTail) RLP_AddRingBufferDataToSlots();
 
-#ifdef DEBUG
-    fprintf(stdout, "SendHead=%d, SendTail=%d, VD=%d, VA=%d\n",SendHead,SendTail,VD,VA);
+#ifdef RLP_DEBUG
+    //    if (CurrentFrameType!=RLPFT_BAD) 
+      fprintf(stdout, "SendHead=%d, SendTail=%d, VD=%d, VA=%d, VS=%d, VR=%d\n",SendHead,SendTail,VD,VA,VS,VR);
 #endif    
 
 
     if (RLP_GetUserRequest(Disc_Req)) {
-      T=0;
-      T_RCVR=0;
+      T=-1;
+      ResetAllT_RCVS();
       DISC_State=_send;
       DISC_Count=0;
       DISC_PBit=Poll_xchg;
@@ -1673,12 +1741,12 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
       case RLPFT_U_DM:
 	if ((DISC_State==_wait) && (DISC_PBit==header->PF)) {
 	  if (DISC_PBit==true) Poll_xchg=false;
-	  T=0;
+	  T=-1;
 	  NextState=1;
 	}
 	break;
       case RLPFT_U_DISC:
-	T=0;
+	T=-1;
 	UA_State=_send;
 	UA_FBit=header->PF;
 	NextState=1;
@@ -1689,16 +1757,30 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     }
     
     if (!Send_TXU(frame,header)) {
-      if (UA_State == _send) {
-	RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
-	UA_State=_idle;
+      if ((DISC_State!=_wait) && !((DISC_PBit==1) && (Poll_xchg==_wait))) {
+	RLP_SendF96Frame(RLPFT_U_DISC, true, DISC_PBit, 0, 0, NULL, false);
+	if (DISC_PBit==1) Poll_xchg=_wait;
+	DISC_State=_wait;
+	DISC_Count++;
+	RLP_SetTimer(&T);
       }
       else
 	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
     }
-    
-    /* FIXME - Deal with a timeout from T */
-    
+ 
+    if (T==0) {
+      if (DISC_PBit==1) Poll_xchg=_idle;
+      DISC_Count++;
+      if (DISC_Count>RLP_N2) {
+
+#ifdef RLP_DEBUG
+	fprintf(stdout, "N2 error in State 5!\n");
+#endif
+      
+      }
+      DISC_State=_send;
+    }
+
     break;
 
     /***** RLP State 6. *****/
@@ -1722,8 +1804,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     }
 
     if (RLP_GetUserRequest(Disc_Req)) {
-      T=0;
-      T_RCVR=0;
+      T=-1;
       DISC_State=_send;
       DISC_Count=0;
       DISC_PBit=Poll_xchg;
@@ -1762,17 +1843,12 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     }
 
     if (!Send_TXU(frame,header)) {
-      if (UA_State == _send) {
-	RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
-	UA_State=_idle;
-      }
-      else
-	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
+      RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
     }
 
     if (RLP_GetUserRequest(Disc_Req)) {
-      T=0;
-      T_RCVR=0;
+      T=-1;
+      ResetAllT_RCVS();
       DISC_State=_send;
       DISC_Count=0;
       DISC_PBit=Poll_xchg;
@@ -1941,3 +2017,5 @@ void RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header)
 
   return;
 }
+
+

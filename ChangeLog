@@ -7,3 +7,6 @@
 * Fri Mar 10 22:10:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
 - RLP code largely functional, data calls possible.
 
+* Thr Mar 16 13:50:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
+- Improved error handling in RLP code.  Virtual-Modem is more flexible.
+

@@ -40,11 +40,11 @@
 	/* Global variables */
 extern bool CommandMode;
 
-
 	/* Local variables */
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
 int		PtyWRFD;	/* pty interface - only different in debug mode. */ 
 u8 pluscount;
+bool connected;
 
 bool DP_Initialise(int read_fd, int write_fd)
 {
@@ -53,14 +53,24 @@ bool DP_Initialise(int read_fd, int write_fd)
   RLP_Initialise(GSM->SendRLPFrame, DP_CallBack);
   RLP_SetUserRequest(Attach_Req,true);
   pluscount=0;
+  connected=false;
   return true;
 }
-
 
 
 void DP_HandleIncomingData(u8 *buffer, int length)
 {
   char ok[]="OK\n\r";
+  char carrierlost[]="NO CARRIER\n\r";
+
+  /* If we're not connected yet I believe we should exit */
+  /*if (!connected) {
+    CommandMode=true;
+    write(PtyWRFD, carrierlost, strlen(carrierlost));
+    RLP_SetUserRequest(Disc_Req, true);
+    GSM->CancelCall();
+  }
+  */
 
   /* FIXME - check +++ more thoroughly*/
   
@@ -69,6 +79,7 @@ void DP_HandleIncomingData(u8 *buffer, int length)
   if (pluscount==3) {
     CommandMode=true;
     write(PtyWRFD, ok, strlen(ok));
+    connected=false;
   }
   else RLP_Send(buffer, length);
   
@@ -79,7 +90,7 @@ void DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 {
   char carrier[]="CARRIER\n\r";
   char connect[]="CONNECT\n\r";
-  char carrierlost[]="CARRIER LOST\n\r";
+  char carrierlost[]="NO CARRIER\n\r";
 
   switch(ind) {
   case Data:
@@ -91,6 +102,7 @@ void DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
     break;
   case StatusChange:
     if (buffer[0]==0) {
+      connected=true;
       if (CommandMode==false) write(PtyWRFD, connect, strlen(connect));
     }
     break;
@@ -104,4 +116,16 @@ void DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
   default:
   }
 }
+
+
+void DP_CallFinished(void)
+{
+  char carrierlost[]="NO CARRIER\n\r";
+
+  CommandMode=true;
+  write(PtyWRFD, carrierlost, strlen(carrierlost));
+  RLP_SetUserRequest(Disc_Req, true);
+  connected=false;
+}
+
 
