@@ -1767,6 +1767,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       printf(_("   Date: %4d/%02d/%02d\n"), 256*MessageBuffer[8]+MessageBuffer[9], MessageBuffer[10], MessageBuffer[11]);
 #endif DEBUG
 
+      /* FIXME: (PJ) we should count this before printing above ... */
+
       CurrentDateTime->Year=256*MessageBuffer[8]+MessageBuffer[9];
       CurrentDateTime->Month=MessageBuffer[10];
       CurrentDateTime->Day=MessageBuffer[11];
@@ -1890,7 +1892,19 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       strcpy(CurrentSMSMessage->MessageCentre, FB61_GetBCDNumber(MessageBuffer+8));
 
-      tmp=UnpackEightBitsToSeven(MessageLength-43-2, MessageBuffer+43, output);
+      /* FIXME: is there any valid-length field? */
+
+      /* Fixes reading SMS Outbox msgs: skips first byte if null --GR */
+      if (MessageBuffer[43] == 0) {
+
+#ifdef DEBUG
+         printf(_("Note: We are probably reading SMS Outbox message\n"));
+#endif DEBUG
+
+         tmp=UnpackEightBitsToSeven(MessageLength-44-2, MessageBuffer+44, output);
+      }
+      else
+         tmp=UnpackEightBitsToSeven(MessageLength-43-2, MessageBuffer+43, output);
 
       for (i=0; i<tmp;i++) {
 
