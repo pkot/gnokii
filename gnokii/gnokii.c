@@ -53,7 +53,7 @@
 #ifdef WIN32
 
 #  include <windows.h>
-#  define stat _stat
+#  include <process.h>
 #  include "getopt.h"
 
 #else

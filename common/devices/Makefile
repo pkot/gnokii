@@ -20,7 +20,7 @@ include $(TOPDIR)/Makefile.global
 OBJS =	tekram.o
 
 ifdef WIN32
-	OBJS += $(TOPDIR)/win32/winserial.o
+	OBJS += winserial.o
 else
 	OBJS += unixserial.o \
 	        unixirda.o

@@ -41,7 +41,7 @@ HANDLE hPhone;
 OVERLAPPED osWrite, osRead;
 
 /* Open the serial port and store the settings. */
-int serial_open(char *file)
+int serial_open(const char *file, int oflags)
 {
     COMMTIMEOUTS  CommTimeOuts;
 
@@ -112,10 +112,10 @@ int serial_close(int fd)
 /* Open a device with standard options.
  * Use value (-1) for "with_hw_handshake" if its specification is required from the user.
  */
-int serial_opendevice(char *file, int with_odd_parity,
+int serial_opendevice(const char *file, int with_odd_parity,
 		      int with_async, int with_hw_handshake)
 {
-	serial_open(file);
+	serial_open(file, 0);
 	return true;
 }
 
@@ -239,7 +239,7 @@ size_t serial_write(int fd, __ptr_t buf, size_t n)
     DWORD       dwBytesWritten;
     DWORD       dwErrorFlags;
     DWORD   	dwError;
-    DWORD       dwBytesSent=0;
+    DWORD       dwBytesSent = 0;
     COMSTAT     ComStat;
 
     fWriteStat = WriteFile(hPhone, buf, n, &n, &osWrite);

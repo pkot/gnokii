@@ -3,6 +3,9 @@
  * Updates to address GNU GPL requirements                (Pawel Kot)
  * Change from .gif to .png for documentation         (Hugh Blemings)
  * Fixed small typo in include/devices/linuxirda.h    (Hugh Blemings)
+ * Updates to make cygwin compile
+ (./configure --enable-win32 --disable-shared --disable-nls)
+                                                          (Pawel Kot)
 
 0.4.0pre16
 ==========

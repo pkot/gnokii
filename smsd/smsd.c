@@ -64,7 +64,7 @@
 SmsdConfig smsdConfig;
 
 /* Global variables */
-bool TerminateThread;
+bool GTerminateThread;
 
 /* Local variables */
 static DBConfig connect;
@@ -423,7 +423,7 @@ int main (int argc, char *argv[])
 #endif
 
   ReadConfig (argc, argv);
-  TerminateThread = false;
+  GTerminateThread = false;
   Run ();
 
   return(0);

@@ -53,7 +53,7 @@ char *Port;		/* Serial port from .gnokiirc file */
 char *Initlength;	/* Init length from .gnokiirc file */
 char *Connection;	/* Connection type from .gnokiirc file */
 char *BinDir;		/* Directory of the mgnokiidev command */
-bool TerminateThread;
+bool GTerminateThread;
 
 /* Local variables */
 char *DefaultConnection = "serial";
@@ -123,14 +123,14 @@ int main(int argc, char *argv[])
 		connection = GCT_Infrared;
 	}
 
-	TerminateThread=false;
+	GTerminateThread = false;
 
 	if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode, true) == false) {
 		exit (-1);
 	}
 
 	while (1) {
-		if (TerminateThread == true) {
+		if (GTerminateThread == true) {
 			VM_Terminate();
 			exit(1);
 		}

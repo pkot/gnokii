@@ -242,7 +242,6 @@ AC_MSG_CHECKING(for timersub)
 AC_TRY_LINK([#include <sys/time.h>],
         [struct timeval tv; timersub(&tv, &tv, &tv)],
         [AC_DEFINE(HAVE_TIMEOPS)
-         AC_DEFINE(HAVE_TIMEOPS)
          AC_MSG_RESULT(yes)],
         [AC_MSG_RESULT(no)])
 
@@ -250,7 +249,6 @@ AC_MSG_CHECKING(for gettimeofday)
 AC_TRY_LINK([#include <sys/time.h>],
         [gettimeofday(0, 0)],
         [AC_DEFINE(HAVE_GETTIMEOFDAY)
-         AC_DEFINE(HAVE_GETTIMEOFDAY)
          AC_MSG_RESULT(yes)],
         [AC_MSG_RESULT(no)])
 
@@ -269,7 +267,6 @@ if test $have_termios = "no"; then
    AC_TRY_LINK([#include <termios.h>],
                [struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);],
                [AC_DEFINE(HAVE_CFSETISPEED)
-                AC_DEFINE(HAVE_CFSETOSPEED)
                 have_termios="yes"
                 AC_MSG_RESULT(yes)],
                [AC_MSG_RESULT(no)])
@@ -398,6 +395,7 @@ AC_ARG_ENABLE(shared,
 AC_ARG_ENABLE(win32, 
    [  --enable-win32          if you want win32 suport ],
    [ AC_DEFINE(WIN32)
+     WIN32=1
      win32="-DWIN32" ],
    [ win32=""]
 )
@@ -509,6 +507,7 @@ AC_SUBST(NO_SHARED)
 AC_SUBST(GLDFLAGS)
 AC_SUBST(USE_UNIX98PTYS)
 AC_SUBST(HAVE_XGNOKII)
+AC_SUBST(WIN32)
 
 AC_OUTPUT(
    include/config.h.in

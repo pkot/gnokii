@@ -77,6 +77,7 @@
 #    error AF_LOCAL not defined
 #  endif
 #endif
+
 /* Prototypes */
 static int  VM_PtySetup(char *bindir);
 static void VM_ThreadLoop(void);
@@ -89,7 +90,7 @@ static GSM_Error VM_GSMInitialise(char *model,
 
 /* Global variables */
 
-extern bool TerminateThread;
+extern bool GTerminateThread;
 int ConnectCount;
 
 /* Local variables */
@@ -165,7 +166,7 @@ static void VM_ThreadLoop(void)
 	ufds[1].fd = device_getfd();
 	ufds[1].events = POLLIN;
 
-	while (!TerminateThread) {
+	while (!GTerminateThread) {
 		if (!CommandMode) {
 			sleep(1);
 		} else {  /* If we are in data mode, leave it to datapump to get the data */
@@ -182,11 +183,11 @@ static void VM_ThreadLoop(void)
 
 			default:
 				if (ufds[0].revents & (POLLHUP | POLLERR | POLLNVAL)) {
-					TerminateThread = true;
+					GTerminateThread = true;
 					return;
 				}
 				if (ufds[1].revents & (POLLHUP | POLLERR | POLLNVAL)) {
-					TerminateThread = true;
+					GTerminateThread = true;
 					return;
 				}
 				if (ufds[0].revents & POLLIN)
@@ -204,7 +205,7 @@ static void VM_ThreadLoop(void)
 void VM_Terminate(void)
 {
 	/* Request termination of thread */
-	TerminateThread = true;
+	GTerminateThread = true;
 
 	/* Now wait for thread to terminate. */
 	pthread_join(Thread, NULL);
@@ -355,7 +356,7 @@ static void VM_CharHandler(void)
 		/* A returned value of -1 means something serious has gone wrong - so quit!! */
 		/* Note that file closure etc. should have been dealt with in ThreadLoop */
 		if (res <= 0) {
-			TerminateThread = true;
+			GTerminateThread = true;
 			return;
 		}
 

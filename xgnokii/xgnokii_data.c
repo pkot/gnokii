@@ -37,7 +37,7 @@
 #include "data/virtmodem.h"
 
 static GtkWidget *GUI_DataWindow;
-bool TerminateThread = false;
+bool GTerminateThread = false;
 bool enabled = false;
 static GtkWidget *label = NULL;
 
@@ -69,10 +69,10 @@ inline void GUI_ShowData(void)
 	if (!phoneMonitor.supported & PM_DATA)
 		return;
 
-	if (TerminateThread) {
+	if (GTerminateThread) {
 		VM_Terminate();
 		enabled = false;
-		TerminateThread = false;
+		GTerminateThread = false;
 	}
 	UpdateStatus();
 
@@ -96,7 +96,7 @@ static inline void DisableData(GtkWidget * widget, gpointer data)
 static inline void EnableData(GtkWidget * widget, gpointer data)
 {
 
-	TerminateThread = false;
+	GTerminateThread = false;
 	VM_Initialise(xgnokiiConfig.model, xgnokiiConfig.port,
 		      0, 0, xgnokiiConfig.bindir, false, false);
 	enabled = true;
