@@ -22,16 +22,21 @@ mobile phones, released under the GPL.
 
 %build
 make
-strip gnokii gnokiid xgnokii mgnokiidev
+strip gnokii gnokiid xgnokii xlogos xkeyb mgnokiidev
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/usr/bin $RPM_BUILD_ROOT/usr/sbin $RPM_BUILD_ROOT/etc
+mkdir -p $RPM_BUILD_ROOT/usr/bin \
+         $RPM_BUILD_ROOT/usr/sbin \
+         $RPM_BUILD_ROOT/etc \
+         $RPM_BUILD_ROOT/usr/lib/gnokii
 
-cp gnokii gnokiid xgnokii $RPM_BUILD_ROOT/usr/bin
+
+cp gnokii gnokiid xgnokii xkeyb xlogos $RPM_BUILD_ROOT/usr/bin
 cp mgnokiidev $RPM_BUILD_ROOT/usr/sbin
 cp sample.gnokiirc $RPM_BUILD_ROOT/etc/gnokiirc
+cp pixmaps/6110.xpm pixmaps/6150.xpm $RPM_BUILD_ROOT/usr/lib/gnokii
 
 %pre
 /usr/sbin/groupadd -r -f gnokii >/dev/null 2>&1
@@ -46,12 +51,16 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc COPYING CREDITS MANIFEST README README-3810 README-6110 sample.gnokiirc gettext-howto gnokii.nol gnokii-ir-howto.txt
 /usr/bin/*
+/usr/lib/gnokii/*
 %attr(4754, root, gnokii) /usr/sbin/*
 %config /etc/gnokiirc
 
 %changelog
 * Thu Aug  5 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - documentation files changed
+
+* Thu Aug  5 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- xkeyb and xlogos added to RPM package
 
 * Sat Jul 24 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - stripping of binaries

@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.0
+VERSION = 0.3.1-pre1
 
 #
 # Compiler to use.
@@ -105,18 +105,26 @@ GNOKII_OBJS = gnokii.o
 
 XGNOKII_OBJS = xgnokii.o
 
+XLOGOS_OBJS = xlogos.o
+
+XKEYB_OBJS = xkeyb.o
+
 GNOKIID_OBJS = gnokiid.o at-emulator.o virtmodem.o datapump.o
 
 MGNOKIIDEV_OBJS = mgnokiidev.o
 
 # Build executable
-all: gnokii gnokiid mgnokiidev xgnokii
+all: gnokii gnokiid mgnokiidev xgnokii xlogos xkeyb
 
 gnokii: $(GNOKII_OBJS) $(COMMON_OBJS)
 
 gnokiid: $(GNOKIID_OBJS) $(COMMON_OBJS)
 
 xgnokii: $(XGNOKII_OBJS) $(COMMON_OBJS)
+
+xlogos: $(XLOGOS_OBJS) $(COMMON_OBJS)
+
+xkeyb: $(XKEYB_OBJS) $(COMMON_OBJS)
 
 mgnokiidev: $(MGNOKIIDEV_OBJS) 
 
@@ -127,6 +135,8 @@ clean:
                gnokii $(GNOKII_OBJS) \
                gnokiid $(GNOKIID_OBJS) \
                xgnokii $(XGNOKII_OBJS) \
+               xlogos $(XLOGOS_OBJS) \
+               xkeyb $(XKEYB_OBJS) \
                mgnokiidev $(MGNOKIIDEV_OBJS) \
                gnokii-${VERSION}.tar.gz
 
@@ -146,6 +156,8 @@ rpm:	dist
 # Dependencies - simplified for now
 gnokii.o: gnokii.c gsm-api.c gsm-api.h misc.h gsm-common.h
 gnokiid.o: gnokiid.c gsm-api.c gsm-api.h misc.h gsm-common.h
+xlogos.o: xlogos.c gsm-api.c gsm-api.h misc.h gsm-common.h
+xkeyb.o: xkeyb.c gsm-api.c gsm-api.h misc.h gsm-common.h
 virtmodem.o: virtmodem.c at-emulator.c gsm-api.c gsm-api.h misc.h gsm-common.h
 datapump.o: datapump.c gsm-api.c gsm-api.h misc.h gsm-common.h
 at-emulator.o: at-emulator.c gsm-api.c gsm-api.h misc.h gsm-common.h
