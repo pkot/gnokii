@@ -361,8 +361,11 @@ typedef struct {
 	short ReportStatus;		/* Location of the ReportStatus bit */
 	short Length;			/* Location of the UserDataLength field */
 	short DataCodingScheme;		/* Location of the DataCodingScheme field */
-	short Validity;			/* Location of the Validity field */
 	short UserDataHeader;		/* Location of the UserDataHeader indicator bit */
+
+	short ValidityIndicator;	/* Location of the ValidityType Indicator field */
+	short Validity;			/* Location of the Validity field */
+	short ValidityLen;		/* Length ot the Validity field. -1 if the length is variable (as with GSM SPEC) */
 
 	short RemoteNumber;		/* Location of the RemoteNumber */
 	bool IsRemoteNumberCoded;	/* Indicates if the RemoteNumber address is BCD coded */

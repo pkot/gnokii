@@ -99,6 +99,7 @@ typedef enum {
 	GOP_GetIncomingCallNr,
 	GOP_GetNetworkInfo,
 	GOP_GetSMS,
+	GOP_GetNextSMS,
 	GOP_DeleteSMS,
 	GOP_SendSMS,
 	GOP_GetSpeedDial,
@@ -164,134 +165,6 @@ struct _GSM_Statemachine {
 	/* Data structure to be filled in with the response */
 	GSM_Data *Data[SM_MAXWAITINGFOR];
 };
- 
-/* Define the structure used to hold pointers to the various API functions.
-   This is in effect the master list of functions provided by the gnokii API.
-   Modules containing the model specific code each contain one of these
-   structures which is "filled in" with the corresponding function within the
-   model specific code.  If a function is not supported or not implemented, a
-   generic not implemented function is used to return a GE_NOTIMPLEMENTED
-   error code. */
-
-typedef struct {
-	/* FIXME: comment this. */
-
-	GSM_Error (*Initialise)( char *port_device, char *initlength,
-				 GSM_ConnectionType connection,
-				 void (*rlp_callback)(RLP_F96Frame *frame));
-
-	void (*Terminate)(void);	
-
-	GSM_Error (*GetMemoryLocation)( GSM_PhonebookEntry *entry );
-
-	GSM_Error (*WritePhonebookLocation)( GSM_PhonebookEntry *entry );
-
-	GSM_Error (*GetSpeedDial)( GSM_SpeedDial *entry);
-
-	GSM_Error (*SetSpeedDial)( GSM_SpeedDial *entry);
-
-	GSM_Error (*GetMemoryStatus)( GSM_MemoryStatus *Status);
-
-	GSM_Error (*GetSMSStatus)( GSM_SMSMemoryStatus *Status);
-
-	GSM_Error (*GetSMSCenter)( SMS_MessageCenter *MessageCenter );
-
-	GSM_Error (*SetSMSCenter)( SMS_MessageCenter *MessageCenter );
-
-	GSM_Error (*GetSMSMessage)( GSM_SMSMessage *Message );
-
-	GSM_Error (*DeleteSMSMessage)( GSM_SMSMessage *Message );
-
-	GSM_Error (*SendSMSMessage)( GSM_SMSMessage *Message, int size );
-
-	GSM_Error (*SaveSMSMessage)( GSM_SMSMessage *Message );
-
-	/* If units is set to a valid GSM_RFUnits value, the code
-	   will return level in these units if it is able.  Otherwise
-	   value will be returned as GRF_Arbitary.  If phone doesn't
-	   support GetRFLevel, function returns GE_NOTSUPPORTED */
-	GSM_Error (*GetRFLevel)( GSM_RFUnits *units, float *level );
-
-	/* Works the same as GetRFLevel, except returns battery
-	   level if known. */
-	GSM_Error (*GetBatteryLevel)( GSM_BatteryUnits *units, float *level );
-
-	GSM_Error (*GetPowerSource)( GSM_PowerSource *source);
-
-	GSM_Error (*GetDisplayStatus)( int *Status);
-
-	GSM_Error (*EnterSecurityCode)( GSM_SecurityCode Code);
-
-	GSM_Error (*GetSecurityCodeStatus)( int *Status );
-
-	GSM_Error (*GetIMEI)( char *imei );
-
-	GSM_Error (*GetRevision)( char *revision );
-
-	GSM_Error (*GetModel)( char *model );
-
-	GSM_Error (*GetManufacturer)( char *manufacturer );
-
-	GSM_Error (*GetDateTime)( GSM_DateTime *date_time);
-
-	GSM_Error (*SetDateTime)( GSM_DateTime *date_time);
-
-	GSM_Error (*GetAlarm)( int alarm_number, GSM_DateTime *date_time );
-
-	GSM_Error (*SetAlarm)( int alarm_number, GSM_DateTime *date_time );
-
-	GSM_Error (*DialVoice)( char *Number);
-
-	GSM_Error (*DialData)( char *Number, char type, void (* callpassup)(char c));
-
-	GSM_Error (*GetIncomingCallNr)( char *Number );
-
-	GSM_Error (*GetNetworkInfo) ( GSM_NetworkInfo *NetworkInfo );
-
-	GSM_Error (*GetCalendarNote) ( GSM_CalendarNote *CalendarNote);
-
-	GSM_Error (*WriteCalendarNote) ( GSM_CalendarNote *CalendarNote);
-
-	GSM_Error (*DeleteCalendarNote) ( GSM_CalendarNote *CalendarNote);
-
-	GSM_Error (*NetMonitor) ( unsigned char mode, char *Screen );
-
-	GSM_Error (*SendDTMF) ( char *String );
-
-	GSM_Error (*GetBitmap) ( GSM_Bitmap *Bitmap );
-  
-	GSM_Error (*SetBitmap) ( GSM_Bitmap *Bitmap );
-
-	GSM_Error (*SetRingtone) ( GSM_Ringtone *ringtone );
-
-	GSM_Error (*SendRingtone) ( GSM_Ringtone *ringtone, char *dest );
-
-	GSM_Error (*Reset) ( unsigned char type );
-
-	GSM_Error (*GetProfile) ( GSM_Profile *Profile );
-
-	GSM_Error (*SetProfile) ( GSM_Profile *Profile );
-  
-	bool      (*SendRLPFrame) ( RLP_F96Frame *frame, bool out_dtx );
-
-	GSM_Error (*CancelCall) ();
-  
-	GSM_Error (*EnableDisplayOutput) ();
-  
-	GSM_Error (*DisableDisplayOutput) ();
- 
-	GSM_Error (*EnableCellBroadcast) ();
-
-	GSM_Error (*DisableCellBroadcast) ();
-
-	GSM_Error (*ReadCellBroadcast) ( GSM_CBMessage *Message );
-  
-	GSM_Error (*SetKey) (int c, int up);
-  
-	GSM_Error (*HandleString) (char *s);
-	
-	GSM_Error (*AnswerCall) (char s);
-} GSM_Functions;
 
 /* Undefined functions in fbus/mbus files */
 extern GSM_Error Unimplemented(void);

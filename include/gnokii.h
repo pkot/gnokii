@@ -26,7 +26,6 @@
 
 extern bool *GSM_LinkOK;
 extern GSM_Information *GSM_Info;
-extern GSM_Functions *GSM;
 extern GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
 /* Prototype for the functions actually provided by gsm-api.c. */

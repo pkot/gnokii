@@ -19,12 +19,9 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
-//#include "6110.h"
-//#include "fbus-3810.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii.h"
 #include "gsm-statemachine.h"
-//#include "xgnokii_common.h"
 
 pthread_t monitor_th;
 PhoneMonitor phoneMonitor;
@@ -475,13 +472,16 @@ static gint A_GetCalendarNote (gpointer data)
 {
   GSM_Error error;
   D_CalendarNote *cn = (D_CalendarNote *) data;
+  GSM_Data gdat;
 
   error = cn->status = GE_UNKNOWN;
 
   if (cn)
   {
     pthread_mutex_lock (&calendarMutex);
-    error = cn->status = GSM->GetCalendarNote (cn->entry);
+    GSM_DataClear(&gdat);
+    gdat.CalendarNote = cn->entry;
+    error = cn->status = SM_Functions(GOP_GetCalendarNote, &gdat, &statemachine);
     pthread_cond_signal (&calendarCond);
     pthread_mutex_unlock (&calendarMutex);
   }
@@ -495,6 +495,7 @@ static gint A_GetCalendarNoteAll (gpointer data)
   GSM_CalendarNote entry;
   D_CalendarNoteAll *cna = (D_CalendarNoteAll *) data;
   GSM_Error e;
+  GSM_Data gdat;
   register gint i = 1;
 
   pthread_mutex_lock (&calendarMutex);
@@ -502,7 +503,9 @@ static gint A_GetCalendarNoteAll (gpointer data)
   {
     entry.Location = i++;
 
-    if ((e = GSM->GetCalendarNote (&entry)) != GE_NONE)
+    GSM_DataClear(&gdat);
+    gdat.CalendarNote = &entry;
+    if ((e = SM_Functions(GOP_GetCalendarNote, &gdat, &statemachine)) != GE_NONE)
       break;
 
     if (cna->InsertEntry (&entry) != GE_NONE)
@@ -522,13 +525,16 @@ static gint A_WriteCalendarNote (gpointer data)
 {
   GSM_Error error;
   D_CalendarNote *cn = (D_CalendarNote *) data;
+  GSM_Data gdat;
 
   error = cn->status = GE_UNKNOWN;
 
   if (cn)
   {
     pthread_mutex_lock (&calendarMutex);
-    error = cn->status = GSM->WriteCalendarNote (cn->entry);
+    GSM_DataClear(&gdat);
+    gdat.CalendarNote = cn->entry;
+    error = cn->status = SM_Functions(GOP_WriteCalendarNote, &gdat, &statemachine);
     pthread_cond_signal (&calendarCond);
     pthread_mutex_unlock (&calendarMutex);
   }
@@ -541,10 +547,13 @@ static gint A_DeleteCalendarNote (gpointer data)
 {
   GSM_CalendarNote *note = (GSM_CalendarNote *) data;
   GSM_Error error = GE_UNKNOWN;
+  GSM_Data gdat;
 
   if (note)
   {
-    error = GSM->DeleteCalendarNote (note);
+    GSM_DataClear(&gdat);
+    gdat.CalendarNote = note;
+    error = SM_Functions(GOP_DeleteCalendarNote, &gdat, &statemachine);
     g_free (note);
   }
 
@@ -567,8 +576,8 @@ static gint A_GetCallerGroup (gpointer data)
 
     pthread_mutex_lock (&callerGroupMutex);
     GSM_DataClear(&gdat);
-    gdat.Bitmap=&bitmap;
-    error = cg->status = SM_Functions(GOP_GetBitmap,&gdat,&statemachine);
+    gdat.Bitmap = &bitmap;
+    error = cg->status = SM_Functions(GOP_GetBitmap, &gdat, &statemachine);
     strncpy (cg->text, bitmap.text, 256);
     cg->text[255] = '\0';
     pthread_cond_signal (&callerGroupCond);
@@ -584,13 +593,16 @@ static gint A_SendCallerGroup (gpointer data)
   GSM_Bitmap bitmap;
   D_CallerGroup *cg = (D_CallerGroup *) data;
   GSM_Error error;
+  GSM_Data gdat;
 
   if (!cg)
     return (GE_UNKNOWN);
 
   bitmap.type = GSM_CallerLogo;
   bitmap.number = cg->number;
-  if ((error = GSM->GetBitmap (&bitmap)) != GE_NONE)
+  GSM_DataClear(&gdat);
+  gdat.Bitmap = &bitmap;
+  if ((error = SM_Functions(GOP_GetBitmap, &gdat, &statemachine)) != GE_NONE)
   {
     g_free (cg);
     return (error);
@@ -598,7 +610,7 @@ static gint A_SendCallerGroup (gpointer data)
   strncpy (bitmap.text, cg->text, 256);
   bitmap.text[255] = '\0';
   g_free (cg);
-  return (GSM->SetBitmap (&bitmap));
+  return (SM_Functions(GOP_SetBitmap, &gdat, &statemachine));
 }
 
 
@@ -606,12 +618,15 @@ static gint A_GetSMSCenter (gpointer data)
 {
   D_SMSCenter *c = (D_SMSCenter *) data;
   GSM_Error error;
+  GSM_Data gdat;
 
   error = c->status = GE_UNKNOWN;
   if (c)
   {
     pthread_mutex_lock (&smsCenterMutex);
-    error = c->status = GSM->GetSMSCenter (c->center);
+    GSM_DataClear(&gdat);
+    gdat.MessageCenter = c->center;
+    error = c->status = SM_Functions(GOP_GetSMSCenter, &gdat, &statemachine);
     pthread_cond_signal (&smsCenterCond);
     pthread_mutex_unlock (&smsCenterMutex);
   }
@@ -624,15 +639,18 @@ static gint A_SetSMSCenter (gpointer data)
 {
   D_SMSCenter *c = (D_SMSCenter *) data;
   GSM_Error error;
+  GSM_Data gdat;
 
   error = c->status = GE_UNKNOWN;
   if (c)
   {
-    //pthread_mutex_lock (&smsCenterMutex);
-    error = c->status = GSM->SetSMSCenter (c->center);
+    GSM_DataClear(&gdat);
+    gdat.MessageCenter = c->center;
+    pthread_mutex_lock (&smsCenterMutex);
+    error = c->status = SM_Functions(GOP_GetSMSCenter, &gdat, &statemachine);
     g_free (c);
-    //pthread_cond_signal (&smsCenterCond);
-    //pthread_mutex_unlock (&smsCenterMutex);
+    pthread_cond_signal (&smsCenterCond);
+    pthread_mutex_unlock (&smsCenterMutex);
   }
 
   return (error);
@@ -643,12 +661,15 @@ static gint A_SendSMSMessage (gpointer data)
 {
   D_SMSMessage *d = (D_SMSMessage *) data;
   GSM_Error error;
+  GSM_Data gdat;
 
   error = d->status = GE_UNKNOWN;
   if (d)
   {
+    GSM_DataClear(&gdat);
+    gdat.SMSMessage = d->sms;
     pthread_mutex_lock (&sendSMSMutex);
-    error = d->status = GSM->SendSMSMessage (d->sms, 0);
+    error = d->status = SendSMS(&gdat, &statemachine);
     pthread_cond_signal (&sendSMSCond);
     pthread_mutex_unlock (&sendSMSMutex);
   }
@@ -682,13 +703,16 @@ static gint A_GetSpeedDial (gpointer data)
 {
   D_SpeedDial *d = (D_SpeedDial *) data;
   GSM_Error error;
+  GSM_Data gdat;
 
   error = d->status = GE_UNKNOWN;
 
   if (d)
   {
+    GSM_DataClear(&gdat);
+    gdat.SpeedDial = &d->entry;
     pthread_mutex_lock (&speedDialMutex);
-    error = d->status = GSM->GetSpeedDial (&(d->entry));
+    error = d->status = SM_Functions(GOP_GetSpeedDial, &gdat, &statemachine);
     pthread_cond_signal (&speedDialCond);
     pthread_mutex_unlock (&speedDialMutex);
   }
@@ -707,7 +731,7 @@ static gint A_SendSpeedDial (gpointer data)
   if (d)
   {
     //pthread_mutex_lock (&speedDialMutex);
-    error = d->status = GSM->SetSpeedDial (&(d->entry));
+//    error = d->status = GSM->SetSpeedDial (&(d->entry));
     g_free (d);
     //pthread_cond_signal (&speedDialCond);
     //pthread_mutex_unlock (&speedDialMutex);
@@ -724,7 +748,7 @@ static gint A_SendDTMF (gpointer data)
 
   if (buf) 
   {
-    error = GSM->SendDTMF (buf);
+//    error = GSM->SendDTMF (buf);
     g_free (buf);
   }
 
@@ -738,10 +762,10 @@ static gint A_NetMonOnOff (gpointer data)
   gint mode = GPOINTER_TO_INT (data);
   GSM_Error error = GE_UNKNOWN;
 
-  if (mode)
-    error = GSM->NetMonitor (0xf3, screen);
-  else
-    error = GSM->NetMonitor (0xf1, screen);
+//  if (mode)
+//    error = GSM->NetMonitor (0xf3, screen);
+//  else
+//    error = GSM->NetMonitor (0xf1, screen);
 
   return (error);
 }
@@ -767,7 +791,7 @@ static gint A_DialVoice (gpointer data)
 
   if (number)
   {
-    error = GSM->DialVoice (number);
+//    error = GSM->DialVoice (number);
     g_free (number);
   }
 
@@ -779,6 +803,7 @@ static gint A_GetAlarm (gpointer data)
 {
   D_Alarm *a = (D_Alarm *) data;
   GSM_Error error;
+  GSM_Data gdat;
 
   error = GE_UNKNOWN;
 
@@ -786,7 +811,9 @@ static gint A_GetAlarm (gpointer data)
   {
     a->status = GE_UNKNOWN;
     pthread_mutex_lock (&alarmMutex);
-    error = a->status = GSM->GetAlarm (0, &(a->time));
+    GSM_DataClear(&gdat);
+    gdat.DateTime = &a->time;
+    error = a->status = SM_Functions(GOP_GetAlarm, &gdat, &statemachine);
     pthread_cond_signal (&alarmCond);
     pthread_mutex_unlock (&alarmMutex);
   }
@@ -799,12 +826,15 @@ static gint A_SetAlarm (gpointer data)
 {
   D_Alarm *a = (D_Alarm *) data;
   GSM_Error error;
+  GSM_Data gdat;
 
   error = a->status = GE_UNKNOWN;
 
   if (a)
   {
-    error = a->status = GSM->SetAlarm (0, &(a->time));
+    GSM_DataClear(&gdat);
+    gdat.DateTime = &a->time;
+    error = a->status = SM_Functions(GOP_SetAlarm, &gdat, &statemachine);
     g_free (a);
   }
 
@@ -1009,7 +1039,7 @@ void *GUI_Connect (void *a)
       g_print ("Call in progress: %s\n", phoneMonitor.call.callNum);
 #   endif
 
-      GSM->GetDisplayStatus (&status);
+//      GSM->GetDisplayStatus (&status);
       if (status & (1<<DS_Call_In_Progress))
       {
         pthread_mutex_lock (&callMutex);
@@ -1035,11 +1065,11 @@ void *GUI_Connect (void *a)
     pthread_mutex_lock (&netMonMutex);
     if (phoneMonitor.netmonitor.number)
     {
-      GSM->NetMonitor (phoneMonitor.netmonitor.number,
-                       phoneMonitor.netmonitor.screen);
-      GSM->NetMonitor (3, phoneMonitor.netmonitor.screen3);
-      GSM->NetMonitor (4, phoneMonitor.netmonitor.screen4);
-      GSM->NetMonitor (5, phoneMonitor.netmonitor.screen5);
+//      GSM->NetMonitor (phoneMonitor.netmonitor.number,
+//                       phoneMonitor.netmonitor.screen);
+//      GSM->NetMonitor (3, phoneMonitor.netmonitor.screen3);
+//      GSM->NetMonitor (4, phoneMonitor.netmonitor.screen4);
+//      GSM->NetMonitor (5, phoneMonitor.netmonitor.screen5);
     }
     else
     {

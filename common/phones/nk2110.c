@@ -1140,65 +1140,7 @@ GetSMSStatus(GSM_SMSMemoryStatus *Status)
 	return GE_NONE;
 }
 
-
-GSM_Functions N2110_Functions = {
-	Initialise,
-	Terminate,
-	GetPhonebookLocation,
-	WritePhonebookLocation,
-	NULL,
-	NULL,
-	GetMemoryStatus,
-	GetSMSStatus,
-	NULL,
-	NULL,
-	GetSMSMessage,
-	DeleteSMSMessage,
-	NULL,
-	NULL,
-	GetRFLevel,
-	GetBatteryLevel,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	PNOK_GetManufacturer,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	SendRLPFrame,
-	NULL,
-	EnableDisplayOutput,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	SetKey,
-	HandleString,
-	NULL
-};
-
-#endif
+#endif /* WIN32 */
 
 static GSM_Error link_Loop(struct timeval *tm)
 {

@@ -87,7 +87,7 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 		if (CommandMode == false) ATEM_ModemResult(MR_NOCARRIER);
 		connected = false;
 		/* Set the call passup back to the at emulator */
-		GSM->DialData(NULL, -1, &ATEM_CallPassup);
+/*		GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
 		CommandMode = true;
 		break;
 	case Reset_Ind:
@@ -104,7 +104,7 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 			if (ufds.revents != POLLIN) { 
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
-				GSM->DialData(NULL, -1, &ATEM_CallPassup);
+/*				GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
 				return 0;
 			}
 
@@ -131,7 +131,7 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 			if (pluscount == 3) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
-				GSM->DialData(NULL, -1, &ATEM_CallPassup);
+/*				GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
 				ATEM_ModemResult(MR_OK);
 				break;
 			}
@@ -156,7 +156,7 @@ void DP_CallPassup(char c)
 	case ' ':
 		CommandMode = true;
 		/* Set the call passup back to the at emulator */
-		GSM->DialData(NULL, -1, &ATEM_CallPassup);
+/*		GSM->DialData(NULL, -1, &ATEM_CallPassup);*/
 		ATEM_ModemResult(MR_NOCARRIER);
 		RLP_SetUserRequest(Disc_Req, true);
 		connected = false;

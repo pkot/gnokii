@@ -21,7 +21,6 @@
 
 /* Global variables */
 extern bool			MB21_LinkOK;
-extern GSM_Functions		MB21_Functions;
 extern GSM_Information		MB21_Information;
 
 #endif	/* __mbus_2110_h */

@@ -44,11 +44,6 @@ GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 bool *GSM_LinkOK;
 bool LinkAlwaysOK = true;
 
-/* Define pointer to the GSM_Functions structure used by external code to call
-   relevant API functions. This structure is defined in gsm-common.h. */
-
-GSM_Functions *GSM;
-
 /* Define pointer to the GSM_Information structure used by external code to
    obtain information that varies from model to model. This structure is also
    defined in gsm-common.h */
@@ -75,18 +70,6 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 	return GE_UNKNOWNMODEL;
 }
 
-#define MODULE(x) { \
-	extern GSM_Functions x##_Functions; \
-	extern GSM_Information x##_Information; \
-	extern bool x##_LinkOK; \
-	if (strstr(x##_Information.Models, model) != NULL) { \
-		GSM = & x##_Functions; \
-	        GSM_Info = & x##_Information; \
-		GSM_LinkOK = & x##_LinkOK; \
-		return (GSM->Initialise(device, initlength, connection, rlp_callback)); \
-	} \
-}
-
 #define REGISTER_PHONE(x, y) { \
         extern GSM_Phone phone_##x; \
         if ((ret = register_phone(&phone_##x, model, y, sm)) != GE_UNKNOWNMODEL) \
@@ -103,7 +86,6 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
 		memcpy(&(sm->Phone), &phone_nokia_2110, sizeof(GSM_Phone));
 		sm->Phone.Functions(GOP_Init, NULL, sm);
 	}
-	MODULE(N2110);
  
         GSM_LinkOK = &LinkAlwaysOK;
         sm->Link.ConnectionType=connection;
@@ -113,6 +95,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
         REGISTER_PHONE(nokia_7110, NULL);
 	REGISTER_PHONE(nokia_6100, NULL);
 	REGISTER_PHONE(nokia_3110, NULL);
+	REGISTER_PHONE(nokia_2110, NULL);
 	REGISTER_PHONE(at, model);
 
 #endif /* WIN32 */ 
