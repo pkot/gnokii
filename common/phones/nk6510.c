@@ -2284,13 +2284,15 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 		dprintf("Calendar Notes Info received!\n Total count: %i\n", message[4] * 256 + message[5]);
 		data->calnote_list->number = message[4] * 256 + message[5];
 		dprintf("Location of Notes: ");
-		for (i = 0; i < data->calnote_list->number; i++) {
+		for (i = 0; i < message[6]; i++) {
 			if (8 + 2 * i >= length) break;
 			data->calnote_list->location[data->calnote_list->last+i] = message[8 + 2 * i] * 256 + message[9 + 2 * i];
 			dprintf("%i ", data->calnote_list->location[data->calnote_list->last+i]); 
 		}
 		dprintf("\n");
 		data->calnote_list->last += i;
+		if (message[7] != 0)
+			data->calnote_list->number = data->calnote_list->last;
 		break;
 	case NK6510_SUBCAL_FREEPOS_RCVD:
 		dprintf("First free position received: %i!\n", message[4] * 256 + message[5]);

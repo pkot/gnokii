@@ -244,7 +244,9 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
     r Get first free pos    { 0x0032, location (2bytes) }
 
     s Get notes info        { 0x003a, 0xFF, 0xFE}
-    r Get notes info        { 0x003b, how many notes used (2 bytes), 0x01, 0x07, { two bytes with location for each note} *}
+    r Get notes info        { 0x003b, how many notes used (2 bytes), n, more, { two bytes with location for each note} *}
+                            where: n - number of entries in this message
+			           more - 0x00: more entries, 0x07: last msg
 
 0x14: FOLDER/PICTURE SMS HANDLING
 
