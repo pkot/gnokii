@@ -2041,8 +2041,8 @@ static void DialVoice(void)
 
 static gint CListCompareFunc(GtkCList * clist, gconstpointer ptr1, gconstpointer ptr2)
 {
-	static gchar phoneText[] = "B";
-	static gchar simText[] = "A";
+	static gchar phoneText[] = "ME";
+	static gchar simText[] = "SM";
 	char *text1 = NULL;
 	char *text2 = NULL;
 	gint ret;
