@@ -167,10 +167,6 @@ static const SMSMessage_Layout at_submit = {
 	 8, true					/* User Data */
 };
 
-static const SMSMessage_Layout at_not_supported = { false };
-
-static SMSMessage_PhoneLayout at_layout;
-
 static GSM_MemoryType memorytype = GMT_XX;
 static GSMAT_Charset atdefaultcharset = CHARNONE;
 static GSMAT_Charset atcharset = CHARNONE;
@@ -578,8 +574,8 @@ static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 	if (data->CallDivert->Operation == GSM_CDV_Register)
 		sprintf(req, "%s,%d,\"%s\",%d,,,%d", req,
 			data->CallDivert->Operation,
-			data->CallDivert->Number.number,
-			data->CallDivert->Number.type,
+			data->CallDivert->Number.Number,
+			data->CallDivert->Number.Type,
 			data->CallDivert->Timeout);
 	else
 		sprintf(req, "%s,%d", req, data->CallDivert->Operation);
@@ -604,11 +600,13 @@ static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
+	EncodeByLayout(data, &at_submit, 0);
 	return AT_WriteSMS(data, state, "CMGS");
 }
 
 static GSM_Error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 {
+	EncodeByLayout(data, &at_deliver, 0);
 	return AT_WriteSMS(data, state, "CMGW");
 }
 
@@ -652,7 +650,7 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[16];
-	sprintf(req, "AT+CMGR=%d\r", data->SMSMessage->Number);
+	sprintf(req, "AT+CMGR=%d\r", data->SMS->Number);
 	dprintf("%s", req);
 	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GE_NONE)
 		return GE_NOTREADY;
@@ -971,9 +969,9 @@ static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length
 	/* SendSMS or SaveSMS */
 	if (!strncmp("+CMGW:", buf.line2, 6) ||
 	    !strncmp("+CMGS:", buf.line2, 6))
-		data->SMSMessage->Number = atoi(buf.line2 + 6);
+		data->SMS->Number = atoi(buf.line2 + 6);
 	else
-		data->SMSMessage->Number = -1;
+		data->SMS->Number = -1;
 	dprintf("Message sent okay\n");
 	return GE_NONE;
 }
@@ -1107,16 +1105,6 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_at, sizeof(GSM_Phone));
-
-	/* SMS Layout */
-	at_layout.Type = 0; /* Locate the Type of the mesage field. */
-	at_layout.SendHeader = 0;
-	at_layout.ReadHeader = 0;
-	at_layout.Deliver = at_deliver;
-	at_layout.Submit = at_submit;
-	at_layout.DeliveryReport = at_not_supported;
-	at_layout.Picture = at_not_supported;
-	layout = at_layout;
 
 	for (i = 0; i < GOPAT_Max; i++) {
 		AT_Functions[i] = NULL;
