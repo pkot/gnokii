@@ -156,13 +156,13 @@ API bool gn_char_def_alphabet(unsigned char *string)
 	return true;
 }
 
-unsigned char char_encode_def_alphabet(unsigned char value)
+static unsigned char char_encode_def_alphabet(unsigned char value)
 {
 	tbl_setup_reverse();
 	return gsm_reverse_default_alphabet[value];
 }
 
-unsigned char char_decode_def_alphabet(unsigned char value)
+static unsigned char char_decode_def_alphabet(unsigned char value)
 {
 	if (value < GN_CHAR_ALPHABET_SIZE) {
 		return gsm_default_alphabet[value];
@@ -316,7 +316,7 @@ void char_encode_hex(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
+static int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
 {
 	int length;
 
@@ -330,7 +330,7 @@ int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
 	}
 }
 
-int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
+static int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
 {
 	int length;
 
@@ -468,7 +468,7 @@ void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len)
 
 /* This function implements packing of numbers (SMS Center number and
    destination number) for SMS sending function. */
-int char_semi_octet_pack(char *number, unsigned char *output, SMS_NumberType type)
+int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type)
 {
 	unsigned char *in_num = number;  /* Pointer to the input number */
 	unsigned char *out_num = output; /* Pointer to the output */
@@ -481,8 +481,8 @@ int char_semi_octet_pack(char *number, unsigned char *output, SMS_NumberType typ
 	   only international and unknown number. */
 
 	*out_num++ = type;
-	if (type == SMS_International) in_num++; /* Skip '+' */
-	if ((type == SMS_Unknown) && (*in_num == '+')) in_num++; /* Optional '+' in Unknown number type */
+	if (type == GN_GSM_NUMBER_International) in_num++; /* Skip '+' */
+	if ((type == GN_GSM_NUMBER_Unknown) && (*in_num == '+')) in_num++; /* Optional '+' in Unknown number type */
 
 	/* The next field is the number. It is in semi-octet representation - see
 	   GSM scpecification 03.40 version 6.1.0, section 9.1.2.3, page 31. */
@@ -509,25 +509,25 @@ int char_semi_octet_pack(char *number, unsigned char *output, SMS_NumberType typ
 
 char *char_get_bcd_number(u8 *number)
 {
-	static char buffer[MAX_BCD_STRING_LENGTH] = "";
+	static char buffer[GN_BCD_STRING_MAX_LENGTH] = "";
 	int length = number[0]; /* This is the length of BCD coded number */
 	int count, digit;
 
-	if (length > MAX_BCD_STRING_LENGTH) length = MAX_BCD_STRING_LENGTH;
-	memset(buffer, 0, MAX_BCD_STRING_LENGTH);
+	if (length > GN_BCD_STRING_MAX_LENGTH) length = GN_BCD_STRING_MAX_LENGTH;
+	memset(buffer, 0, GN_BCD_STRING_MAX_LENGTH);
 	switch (number[1]) {
-	case SMS_Alphanumeric:
+	case GN_GSM_NUMBER_Alphanumeric:
 		char_unpack_7bit(0, length, length, number + 2, buffer);
 		buffer[length] = 0;
 		break;
-	case SMS_International:
+	case GN_GSM_NUMBER_International:
 		sprintf(buffer, "+");
-		if (length == MAX_BCD_STRING_LENGTH) length--; /* avoid overflow */
-	case SMS_Unknown:
-	case SMS_National:
-	case SMS_Network:
-	case SMS_Subscriber:
-	case SMS_Abbreviated:
+		if (length == GN_BCD_STRING_MAX_LENGTH) length--; /* avoid overflow */
+	case GN_GSM_NUMBER_Unknown:
+	case GN_GSM_NUMBER_National:
+	case GN_GSM_NUMBER_Network:
+	case GN_GSM_NUMBER_Subscriber:
+	case GN_GSM_NUMBER_Abbreviated:
 	default:
 		for (count = 0; count < length - 1; count++) {
 			digit = number[count+2] & 0x0f;
