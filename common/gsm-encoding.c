@@ -397,7 +397,7 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 			i_len += length;
 			break;
 		}
-		sprintf(dest + (o_len << 2), "%lx", wc);
+		sprintf(dest + (o_len << 2), "%04lx", wc);
 	}
 	return;
 }

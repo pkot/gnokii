@@ -21,6 +21,7 @@
       decoding; proper solution will be to change the signature of
       encoding/decoding functions adding an extra parameter with
       the maximal leghth of the bytes to be written     (Pawel Kot)
+    o fix char_ucs2_encode                             (Igor Popik)
  * AT series updates
     o getnetworkinfo always terminates the result  (BORBELY Zoltan)
     o manufacturer for +CGMI request can be quoted    (Ron Yorston)
