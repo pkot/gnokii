@@ -5,6 +5,8 @@
                                                         (Pawel Kot)
     o don't build unixirda.c, unixbluetooth.c and osxbluetoooth.c
       under win32                                       (Pawel Kot)
+    o use $(CC) detected by configure instead of hardcoded gcc
+      in smsd Makefile; taken from FreeBSD port       (Guido Falsi)
  * 6510 series updates
     o added Nokia 3510i to the supported phones list
                                                     (Rafal Czlonka)

@@ -1,9 +1,16 @@
+* Fri Jan 02 2003 Guido Falsi <mad@madpilot.net>
+- Use $(CC) detected by configure script instead of hardcoded gcc.
+  Taken from FreeBSD ports.
+
+
 * Sun Oct 05 2003 Jan Derfinak <ja@mail.upjs.sk>
 - Added possibility to run multiple instances at the same time.
 - Version changed to 1.2.
 
+
 * Tue Sep 30 2003 Jan Derfinak <ja@mail.upjs.sk>
 - added alpha support for glib2
+
 
 * Fri Aug 29 2003 Pawel Kot <pkot@linuxnews.pl>
 - Add the manual page
