@@ -61,8 +61,8 @@ extern bool P7110_LinkOK;
 #define P7110_MSG_WAP		0x3f	/* WAP */
 #define P7110_MSG_SECURITY	0x40	/* Security */
 #define P7110_MSG_STLOGO	0x7a	/* Startup logo */
-#define P7110_MSG_VERREQ	0xd1	/* HW&SW version request */
-#define P7110_MSG_VERRESP	0xd2	/* HW&SW version response */
+#define P7110_MSG_KEYPRESS	0xd1	/* Keypress? */
+#define P7110_MSG_KEYPRESS_RESP	0xd2	/* Keypress response */
 
 /* SMS handling message subtypes (send) */
 #define P7110_SUBSMS_SEND_SMS		0x01	/* Send SMS */

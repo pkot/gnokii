@@ -94,6 +94,7 @@ static gn_error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state
 static gn_error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state);
+static gn_error P7110_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 
 static gn_error P7110_DeleteWAPBookmark(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_GetWAPBookmark(GSM_Data *data, GSM_Statemachine *state);
@@ -113,6 +114,7 @@ static gn_error P7110_IncomingClock(int messagetype, unsigned char *message, int
 static gn_error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 static gn_error P7110_IncomingWAP(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error P7110_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -134,6 +136,7 @@ static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ P7110_MSG_DIVERT,	PNOK_IncomingCallDivert },
 	{ P7110_MSG_SECURITY,	P7110_IncomingSecurity },
 	{ P7110_MSG_WAP,	P7110_IncomingWAP },
+	{ P7110_MSG_KEYPRESS_RESP,	P7110_IncomingKeypress },
 	{ 0, NULL }
 };
 
@@ -257,6 +260,10 @@ static gn_error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachi
 		return P7110_ActivateWAPSetting(data, state);
 	case GOP_WriteWAPSetting:
 		return P7110_WriteWAPSetting(data, state);
+	case GOP_PressPhoneKey:
+		return P7110_PressOrReleaseKey(data, state, true);
+	case GOP_ReleasePhoneKey:
+		return P7110_PressOrReleaseKey(data, state, false);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -2408,6 +2415,54 @@ static gn_error P7110_ActivateWAPSetting(GSM_Data *data, GSM_Statemachine *state
 
 	return FinishWAP(data, state);
 }
+
+/*****************************/
+/********** KEYPRESS *********/
+/*****************************/
+static gn_error P7110_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+{
+	switch(message[2]) {
+	case 0x46:
+		dprintf("Key succesfully pressed\n");
+		break;
+	case 0x47:
+		dprintf("Key succesfully released\n");
+		break;
+	default:
+		dprintf("Unknown keypress command\n");
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+	return GN_ERR_NONE;
+}
+
+static gn_error P7110_PressKey(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x46, 0x00, 0x01,
+			       0x0a};		/* keycode */
+
+	dprintf("Pressing key...\n");
+	req[5] = data->KeyCode;
+	if (SM_SendMessage(state, 6, P7110_MSG_KEYPRESS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return SM_Block(state, data, P7110_MSG_KEYPRESS_RESP);
+}
+
+static gn_error P7110_ReleaseKey(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x47, 0x00, 0x01, 0x0c};
+
+	dprintf("Releasing key...\n");
+	if (SM_SendMessage(state, 6, P7110_MSG_KEYPRESS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return SM_Block(state, data, P7110_MSG_KEYPRESS_RESP);
+}
+
+static gn_error P7110_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press)
+{
+	if (press) 
+		return P7110_PressKey(data, state);
+	else
+		return P7110_ReleaseKey(data, state);
+}
+
 
 /*****************************/
 /********** OTHERS ***********/
