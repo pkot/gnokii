@@ -634,7 +634,7 @@ int sendsms(int argc, char *argv[])
 
   chars_read = fread(message_buffer, 1, 160, stdin);
 
-  if (chars_read == 0) {
+  if (chars_read == 0) { // FIXME: If we read more than 160 chars, an error should be returned.
 
     fprintf(stderr, _("Couldn't read from stdin!\n"));	
     return -1;
@@ -661,8 +661,11 @@ int sendsms(int argc, char *argv[])
 
   strcpy(SMS.Destination,argv[0]);
 
-  while ((i = getopt_long(argc, argv, "r8cC:v:", options, NULL)) != EOF) {
-    switch (i) {
+  optarg = NULL,
+  optind = 0;
+
+  while ((i = getopt_long(argc, argv, "r8cC:v:", options, NULL)) != -1) {
+    switch (i) {       // -8 is for 8-bit data, -c for compression. both are not yet implemented.
 
       case '1': /* SMSC number */
         SMS.MessageCenter.No = 0;
@@ -719,7 +722,7 @@ int sendsms(int argc, char *argv[])
         break;
 
       default:
-        usage();
+        usage(); // Would be better to have an sendsms_usage() here.
         return -1;
     }
   }
