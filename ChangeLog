@@ -16,6 +16,7 @@
  * typos in et.po                                       (Ulrich Hopp)
  * gnokiid updates:
     o threads eliminated from gnokiid                (BORBELY Zoltan)
+    o minor cleanup in the RLP module                (BORBELY Zoltan)
 
 0.5.0pre1
 =========

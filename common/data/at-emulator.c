@@ -261,11 +261,12 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			else
 				data.CallInfo->Type = GSM_CT_NonDigitalDataCall;
 			data.CallInfo->SendNumber = GSM_CSN_Default;
-			if (SM_Functions(GOP_MakeCall, &data, sm) != GN_ERR_NONE)
+			CommandMode = false;
+			RLP_SetUserRequest(Conn_Req, true);
+			if (SM_Functions(GOP_MakeCall, &data, sm) != GN_ERR_NONE) {
+				CommandMode = true;
 				DP_CallPassup(GSM_CS_RemoteHangup, NULL, NULL);
-			else {
-				CommandMode = false;
-				RLP_SetUserRequest(Conn_Req, true);
+			} else {
 				IncomingCallNo = data.CallInfo->CallID;
 			}
 			return;

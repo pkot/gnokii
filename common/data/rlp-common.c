@@ -345,6 +345,154 @@ void RLP_AddRingBufferDataToSlots(void)
 }
 
 
+static void  RLP_DumpF96Frame(RLP_F96Frame *frame)
+{
+	RLP_F96Header header;
+
+	RLP_DecodeF96Header(frame, &header);
+
+	switch (header.Type) {
+
+	case RLPFT_U: /* Unnumbered frames. */
+		rlpprintf("Unnumbered Frame [$%02x%02x] M=%02x ", frame->Header[0],
+			  frame->Header[1],
+			  header.M);
+
+		switch (header.M) {
+		case RLPU_SABM :
+			rlpprintf("Set Asynchronous Balanced Mode (SABM) ");
+			break;
+
+		case RLPU_UA:
+			rlpprintf("Unnumbered Acknowledge (UA) ");
+			break;
+
+		case RLPU_DISC:
+			rlpprintf("Disconnect (DISC) ");
+			break;
+
+		case RLPU_DM:
+			rlpprintf("Disconnected Mode (DM) ");
+			break;
+
+		case RLPU_UI:
+			rlpprintf("Unnumbered Information (UI) ");
+			break;
+
+		case RLPU_XID:
+			rlpprintf("Exchange Information (XID) \n");
+			RLP_DisplayXID(frame->Data);
+			break;
+
+		case RLPU_TEST:
+			rlpprintf("Test (TEST) ");
+			break;
+
+		case RLPU_NULL:
+			rlpprintf("Null information (NULL) ");
+			break;
+
+		case RLPU_REMAP:
+			rlpprintf("Remap (REMAP) ");
+			break;
+
+		default:
+			rlpprintf("Unknown!!! ");
+			break;
+		}
+		break;
+
+	case RLPFT_S: /* Supervisory frames. */
+		rlpprintf("Supervisory Frame [$%02x%02x] S=0x%x N(R)=%d ",
+			  frame->Header[0],
+			  frame->Header[1],
+			  header.S,
+			  header.Nr);
+
+		switch (header.S) {
+		case RLPS_RR:
+			rlpprintf("RR");
+			break;
+
+		case RLPS_REJ:
+			rlpprintf("REJ");
+			break;
+
+		case RLPS_RNR:
+			rlpprintf("RNR");
+			break;
+
+		case RLPS_SREJ:
+			rlpprintf("SREJ");
+			break;
+
+		default:
+			rlpprintf("BAD");
+			break;
+		}
+		break;
+
+	default:
+		rlpprintf("Info+Supervisory Frame [$%02x%02x] S=0x%x N(S)=%d N(R)=%d ",
+			  frame->Header[0],
+			  frame->Header[1],
+			  header.S,
+			  header.Ns,
+			  header.Nr);
+
+		switch (header.S) {
+		case RLPS_RR:
+			rlpprintf("RR");
+			break;
+
+		case RLPS_REJ:
+			rlpprintf("REJ");
+			break;
+
+		case RLPS_RNR:
+			rlpprintf("RNR");
+			break;
+
+		case RLPS_SREJ:
+			rlpprintf("SREJ");
+			break;
+
+		default:
+			rlpprintf("BAD");
+			break;
+		}
+
+		break;
+	}
+
+	/* Command/Response and Poll/Final bits. */
+	rlpprintf(" C/R=%d P/F=%d", header.CR, header.PF);
+
+	/* Information. */
+	/*
+	if (CurrentFrameType != RLPFT_U_NULL) {
+
+		dprintf("\n");
+
+		for (count = 0; count < 25; count ++) {
+
+			if (isprint(frame->Data[count]))
+				dprintf("[%02x%c]", frame->Data[count], frame->Data[count]);
+			else
+				dprintf("[%02x ]", frame->Data[count]);
+
+			if (count == 15)
+				dprintf("\n");
+		}
+	}
+	*/
+
+	/* FCS. */
+	rlpprintf(" FCS: %02x %02x %02x\n\n", frame->FCS[0],
+		  frame->FCS[1],
+		  frame->FCS[2]);
+}
+
 /* FIXME: Remove this after finishing. */
 void X(RLP_F96Frame *frame)
 {
@@ -529,7 +677,10 @@ void RLP_SendF96Frame(RLP_FrameTypes FrameType,
 	/* Store FCS in the frame. */
 	RLP_CalculateCRC24Checksum((u8 *)&frame, 27, frame.FCS);
 
-	X(&frame);
+	/* X(&frame); */
+
+	rlpprintf("S ");
+	RLP_DumpF96Frame(&frame);
 
 	if (RLPSendFunction)
 		RLPSendFunction(&frame, OutDTX);
@@ -554,139 +705,107 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 		/* Here we have correct RLP frame so we can parse the field of the header
 		   to out structure. */
 
+		rlpprintf("R ");
+		RLP_DumpF96Frame(frame);
+
 		RLP_DecodeF96Header(frame, &header);
 
 		switch (header.Type) {
 
 		case RLPFT_U: /* Unnumbered frames. */
-			rlpprintf("Unnumbered Frame [$%02x%02x] M=%02x ", frame->Header[0],
-				  frame->Header[1],
-				  header.M);
 
 			switch (header.M) {
 			case RLPU_SABM :
 				if (header.CR == 0 || header.PF == 0) break;
-				rlpprintf("Set Asynchronous Balanced Mode (SABM) ");
 				CurrentFrameType = RLPFT_U_SABM;
 				break;
 
 			case RLPU_UA:
 				if (header.CR == 1) break;
-				rlpprintf("Unnumbered Acknowledge (UA) ");
 				CurrentFrameType = RLPFT_U_UA;
 				break;
 
 			case RLPU_DISC:
 				if (header.CR == 0) break;
-				rlpprintf("Disconnect (DISC) ");
 				CurrentFrameType = RLPFT_U_DISC;
 				break;
 
 			case RLPU_DM:
 				if (header.CR == 1) break;
-				rlpprintf("Disconnected Mode (DM) ");
 				CurrentFrameType = RLPFT_U_DM;
 				break;
 
 			case RLPU_UI:
-				rlpprintf("Unnumbered Information (UI) ");
 				CurrentFrameType = RLPFT_U_UI;
 				break;
 
 			case RLPU_XID:
-				rlpprintf("Exchange Information (XID) \n");
-				RLP_DisplayXID(frame->Data);
 				CurrentFrameType = RLPFT_U_XID;
 				break;
 
 			case RLPU_TEST:
-				rlpprintf("Test (TEST) ");
 				CurrentFrameType = RLPFT_U_TEST;
 				break;
 
 			case RLPU_NULL:
-				rlpprintf("Null information (NULL) ");
 				CurrentFrameType = RLPFT_U_NULL;
 				break;
 
 			case RLPU_REMAP:
-				rlpprintf("Remap (REMAP) ");
 				CurrentFrameType = RLPFT_U_REMAP;
 				break;
 
 			default:
-				rlpprintf(stdout, _("Unknown!!! "));
 				CurrentFrameType = RLPFT_BAD;
 				break;
 			}
 			break;
 
 		case RLPFT_S: /* Supervisory frames. */
-			rlpprintf("Supervisory Frame [$%02x%02x] S=0x%x N(R)=%d ",
-				  frame->Header[0],
-				  frame->Header[1],
-				  header.S,
-				  header.Nr);
 
 			switch (header.S) {
 			case RLPS_RR:
-				rlpprintf("RR");
 				CurrentFrameType = RLPFT_S_RR;
 				break;
 
 			case RLPS_REJ:
-				rlpprintf("REJ");
 				CurrentFrameType = RLPFT_S_REJ;
 				break;
 
 			case RLPS_RNR:
-				rlpprintf("RNR");
 				CurrentFrameType = RLPFT_S_RNR;
 				break;
 
 			case RLPS_SREJ:
-				rlpprintf("SREJ");
 				CurrentFrameType = RLPFT_S_SREJ;
 				break;
 
 			default:
-				rlpprintf("BAD");
 				CurrentFrameType = RLPFT_BAD;
 				break;
 			}
 			break;
 
 		default:
-			rlpprintf("Info+Supervisory Frame [$%02x%02x] S=0x%x N(S)=%d N(R)=%d ",
-				  frame->Header[0],
-				  frame->Header[1],
-				  header.S,
-				  header.Ns,
-				  header.Nr);
 
 			switch (header.S) {
 			case RLPS_RR:
-				rlpprintf("RR");
 				CurrentFrameType = RLPFT_SI_RR;
 				break;
 
 			case RLPS_REJ:
-				rlpprintf("REJ");
 				CurrentFrameType = RLPFT_SI_REJ;
 				break;
 
 			case RLPS_RNR:
-				rlpprintf("RNR");
 				CurrentFrameType = RLPFT_SI_RNR;
 				break;
 
 			case RLPS_SREJ:
-				rlpprintf("SREJ");
 				CurrentFrameType = RLPFT_SI_SREJ;
 				break;
 
 			default:
-				rlpprintf("BAD");
 				CurrentFrameType = RLPFT_BAD;
 				break;
 			}
@@ -694,30 +813,6 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 			break;
 		}
 
-		/* Command/Response and Poll/Final bits. */
-		rlpprintf(" C/R=%d P/F=%d", header.CR, header.PF);
-
-		/* Information. */
-		if (CurrentFrameType != RLPFT_U_NULL) {
-
-			dprintf("\n");
-
-			for (count = 0; count < 25; count ++) {
-
-				if (isprint(frame->Data[count]))
-					dprintf("[%02x%c]", frame->Data[count], frame->Data[count]);
-				else
-					dprintf("[%02x ]", frame->Data[count]);
-
-				if (count == 15)
-					dprintf("\n");
-			}
-		}
-
-		/* FCS. */
-		rlpprintf(" FCS: %02x %02x %02x\n\n", frame->FCS[0],
-			  frame->FCS[1],
-			  frame->FCS[2]);
 	} else {
 		/* RLP Checksum failed - don't we need some statistics about these
 		   failures? Nothing is printed, because in the first stage of connection
@@ -1238,23 +1333,21 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header)
 
 			case RLPFT_U_SABM:
 				/*
-				  T = 0;
 				  Conn_Conf = true;
-				  UA_State = _send;
-				  UA_FBit = true;
-				  Init_Link_Vars;
-				  NextState = 4;
 				*/
+				T = -1;
+				UA_State = _send;
+				UA_FBit = true;
+				RLP_Init_link_vars();
+				NextState = RLP_S4;
 				break;
 
 			case RLPFT_U_DISC:
-				/*
-				  T = 0;
-				  DISC_Ind;
-				  UA_State = _send;
-				  UA_FBit = header->PF;
-				  NextState = RLP_S1;
-				*/
+				T = -1;
+				RLP_Passup(Disc_Ind, NULL, 0);
+				UA_State = _send;
+				UA_FBit = header->PF;
+				NextState = RLP_S1;
 				break;
 
 			case RLPFT_U_UA:
@@ -1262,8 +1355,8 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header)
 
 				if (SABM_State == _wait && header->PF) {
 					T = -1;
-					/* Conn_Conf = true;
-					   Init_Link_Vars; */
+					/* Conn_Conf = true; */
+					RLP_Init_link_vars();
 					NextState = RLP_S4;
 				}
 				break;
