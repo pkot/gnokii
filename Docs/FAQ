@@ -27,7 +27,7 @@ Q. What models are supported?
 A. Currently supported phone models are (if not marked, it's a Nokia phone):
          + 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330|8210
          + 7110|6210|6250
-         + 6310|6510
+         + 6310|6510|8310
          + 6210|7110|6250
          + AT mode compatible phones (namely Nokia 62X0, Nokia 7110,
            Nokia 8210, Nokia 6310, Nokia 6510, Ericsson T39, Sony-Ericsson
@@ -67,13 +67,6 @@ A. No. There's no need for it. gnokii isn't intended for setuid/setgid
    risk. All you need it read/write permission for the device you are using
    for connection (port option in the config file). You can safely do it
    using groups management.
-
--------------------------------------------------------------------------------
-Q: Can I use IrDA with 6210/7110 and gnokii?
-
-A: Yes. Just put:
-connection = irda
-   line into your config file.
 
 -------------------------------------------------------------------------------
 Q: Can I use IrDA with 6210/7110 and gnokii?
