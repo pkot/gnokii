@@ -661,7 +661,7 @@ int sendsms(int argc, char *argv[])
 
   strcpy(SMS.Destination,argv[0]);
 
-  optarg = NULL,
+  optarg = NULL;
   optind = 0;
 
   while ((i = getopt_long(argc, argv, "r8cC:v:", options, NULL)) != -1) {
