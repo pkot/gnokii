@@ -1574,12 +1574,12 @@ msgstr "WAP järjehoidja nr. %d kustutatud!\n"
 #: gnokii/gnokii.c:3244
 #, c-format
 msgid "Name: %s\n"
-msgstr "Nimi: %d\n"
+msgstr "Nimi: %s\n"
 
 #: gnokii/gnokii.c:3245
 #, c-format
 msgid "Home: %s\n"
-msgstr "Kodu Number: %d\n"
+msgstr "Kodu Number: %s\n"
 
 #: gnokii/gnokii.c:3246
 msgid "Session mode: "
