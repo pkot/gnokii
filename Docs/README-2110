@@ -21,9 +21,7 @@ should work well with any sort of cable.
 
 - SMS sending.
 
-- Implement collision protocol properly.
-
 - Implement functionanlity such as reading internal A/D convertors and
-  ability to turn on netmon.
+  ability to turn on netmon. [Not sure if all 2110s even have netmon.]
 
 

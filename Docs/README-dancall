@@ -1,0 +1,17 @@
+-- README-dancall                                     --
+-- Notes, bugs and a todo list for the Dancall phones --
+
+* Notes *
+
+Dancalls are crappy telephones, commonly found in czech republic. In
+bazaar, you can find good phones on one table, bad phones on another
+table, and dancalls in nearby trashcan. Dancall for $10 is too
+expensive, in fact it is $10 more than it is worth.
+
+OTOH, dancalls try to speak something like AT-commands over serial
+cable, which made their decoding pretty easy. And they include netmon
+by default (just type *#9993#).
+
+* Known Bugs *
+
+* To-do *
