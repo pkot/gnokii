@@ -554,9 +554,9 @@ char *char_bcd_number_get(u8 *number)
 int utf8_decode(char *outstring, int outlen, const char *instring, int inlen)
 {
 	size_t nconv;
-	char *pin, *pout;
 
 #if defined(HAVE_ICONV) && defined(HAVE_LANGINFO_CODESET)
+	char *pin, *pout;
 	iconv_t cd;
 
 	pin = (char *)instring;
@@ -567,37 +567,55 @@ int utf8_decode(char *outstring, int outlen, const char *instring, int inlen)
 	iconv_close(cd);
 	*pout = 0;
 #else
-	nconv = 0;
-	pin = (char *)instring;
+	unsigned char *pin, *pout;
+
+	pin = (unsigned char *)instring;
 	pout = outstring;
 
 	while (inlen > 0 && outlen > 0) {
-		if (*pin < 0 || *pin > 127)
-			*pout = '?';
-		else
+		if (*pin < 0x80) {
 			*pout = *pin;
-
-		inlen--;
+			nconv = 1;
+		} else if (*pin < 0xc0) {
+			*pout = '?';
+			nconv = 1;
+		} else if (*pin < 0xe0) {
+			*pout = '?';
+			nconv = 2;
+		} else if (*pin < 0xf0) {
+			*pout = '?';
+			nconv = 3;
+		} else if (*pin < 0xf8) {
+			*pout = '?';
+			nconv = 4;
+		} else if (*pin < 0xfc) {
+			*pout = '?';
+			nconv = 5;
+		} else {
+			*pout = '?';
+			nconv = 6;
+		}
+		inlen -= nconv;
 		outlen--;
-		pin++;
+		pin += nconv;
 		if (*pout++ == '\0') break;
 	}
+	nconv = 0;
 #endif
-	return (nconv < 0) ?  -1 : pout - outstring;
+	return (nconv < 0) ?  -1 : (char *)pout - outstring;
 }
 
 int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
+#if defined(HAVE_ICONV) && defined(HAVE_LANGINFO_CODESET)
 	size_t outleft, inleft, nconv;
 	char *pin, *pout;
+	iconv_t cd;
 
 	outleft = outlen;
 	inleft = inlen;
 	pin = (char *)instring;
 	pout = outstring;
-
-#if defined(HAVE_ICONV) && defined(HAVE_LANGINFO_CODESET)
-	iconv_t cd;
 
 	cd = iconv_open("UTF-8", nl_langinfo(CODESET));
 
@@ -605,12 +623,15 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 	*pout = 0;
 	iconv_close(cd);
 #else
+	size_t nconv;
+	unsigned char *pin, *pout;
+
 	nconv = 0;
-	pin = (char *)instring;
+	pin = (unsigned char *)instring;
 	pout = outstring;
 
 	while (inlen > 0 && outlen > 0) {
-		if (*pin < 0 || *pin > 127)
+		if (*pin >= 0x80)
 			*pout = '?';
 		else
 			*pout = *pin;
@@ -621,7 +642,7 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 		if (*pout++ == '\0') break;
 	}
 #endif
-	return (nconv < 0) ?  -1 : pout - outstring;
+	return (nconv < 0) ?  -1 : (char *)pout - outstring;
 }
 
 

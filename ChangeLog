@@ -10,6 +10,8 @@
     o VC debug and release flags differs                    (Ender)
  * translations updates
     o Estonian translation updated                  (Hans Motshärg)
+ * libgnokii updates
+    o utf8 encoding/decoding fixed                 (BORBELY Zoltan)
 
 0.5.6
 =====
