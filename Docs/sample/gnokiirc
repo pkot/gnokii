@@ -9,6 +9,9 @@
 port = /dev/ttyS0
 # For MacOSX you will need something like:
 # port = /dev/cu.USA28X1P1.1
+#
+# Use this setting also for the Bluetooth connection:
+# port = aa:bb:cc:dd:ee:ff
  
 # Set model to the model number of your phone
 model = 6110
@@ -94,5 +97,6 @@ TELEPHONE = 12345678
 
 [bluetooth]
 # Bluetooth settings
+# For AT phones and Nokia 6210 use rfcomm channel 1. For other Nokia
+# phones to use FBUS mode you need to use channel 14.
 rfcomm_cn = 1
-bt_address = aa:bb:cc:dd:ee:ff

@@ -391,6 +391,7 @@ API int gn_cfg_read(char **bindir)
 	char rcfile[200];
 	char *default_bindir     = "/usr/local/sbin/";
 	char *val;
+	char aux[GN_DEVICE_NAME_MAX_LENGTH];
 
 	/* I know that it doesn't belong here but currently there is now generic
 	 * application init function anywhere.
@@ -458,15 +459,14 @@ API int gn_cfg_read(char **bindir)
 	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
 	if (!*bindir) (char *)*bindir = default_bindir;
 
-#ifdef HAVE_BLUETOOTH
 	if (!(val = gn_cfg_get(gn_cfg_info, "bluetooth", "rfcomm_cn")))
-		gn_config_global.rfcomm_cn = 1;
+		gn_config_global.rfcomm_cn = 14;
 	else
 		gn_config_global.rfcomm_cn = atoi(val);
-	if (!(val = gn_cfg_get(gn_cfg_info, "bluetooth", "bt_address")))
-		baswap(&gn_config_global.bt_address, BDADDR_ANY);
-	else
-		str2ba(val, &gn_config_global.bt_address);
+#ifdef HAVE_BLUETOOTH
+	memset(aux, 0, GN_DEVICE_NAME_MAX_LENGTH);
+	strncpy(aux, gn_config_global.port_device, GN_DEVICE_NAME_MAX_LENGTH);
+	str2ba(aux, (bdaddr_t *)&gn_config_global.port_device);
 #endif
 
 	return 0;
