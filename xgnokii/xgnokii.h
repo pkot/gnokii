@@ -61,7 +61,7 @@ typedef struct {
 	gchar *maxSIMLen;	/* Max length of names on SIM card */
 	gchar *maxPhoneLen;	/* Max length of names in phone */
 	gchar *locale;
-	SMS_MessageCenter smsSetting[MAX_SMS_CENTER];
+	gn_sms_message_center smsSetting[MAX_SMS_CENTER];
 	UserInf user;
 	gchar *callerGroups[6];
 	gint smsSets:4;
@@ -72,7 +72,7 @@ typedef struct {
 extern XgnokiiConfig xgnokiiConfig;
 
 extern gint lastfoldercount, foldercount;
-extern char folders[MAX_SMS_FOLDERS][MAX_SMS_FOLDER_NAME_LENGTH];
+extern char folders[GN_SMS_FOLDER_MAX_NUMBER][GN_SMS_MESSAGE_MAX_NUMBER];
 extern gint max_phonebook_name_length;
 extern gint max_phonebook_number_length;
 extern gint max_phonebook_sim_name_length;

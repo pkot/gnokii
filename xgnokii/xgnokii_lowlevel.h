@@ -82,17 +82,17 @@ typedef struct {
 } PhoneEvent;
 
 typedef struct {
-	GSM_SpeedDial entry;
+	gn_speed_dial entry;
 	gn_error status;
 } D_SpeedDial;
 
 typedef struct {
-	GSM_API_SMS *sms;
+	gn_sms *sms;
 	gn_error status;
 } D_SMSMessage;
 
 typedef struct {
-	SMS_MessageCenter *center;
+	gn_sms_message_center *center;
 	gn_error status;
 } D_SMSCenter;
 
@@ -103,17 +103,18 @@ typedef struct {
 } D_CallerGroup;
 
 typedef struct {
-	GSM_DateTime time;
+	gn_timestamp time;
+	bool enabled;
 	gint status;
 } D_Alarm;
 
 typedef struct {
-	GSM_MemoryStatus memoryStatus;
+	gn_memory_status memoryStatus;
 	gint status;
 } D_MemoryStatus;
 
 typedef struct {
-	GSM_PhonebookEntry *entry;
+	gn_phonebook_entry *entry;
 	gint status;
 } D_MemoryLocation;
 
@@ -121,20 +122,20 @@ typedef struct {
 	gint min;
 	gint max;
 	gint used;
-	GSM_MemoryType type;
+	gn_memory_type type;
 	gint status;
-	gint(*InsertEntry) (GSM_PhonebookEntry *);
+	gint (*InsertEntry)(gn_phonebook_entry *);
 	gint(*ReadFailed) (gint);
 } D_MemoryLocationAll;
 
 typedef struct {
-	GSM_CalendarNote *entry;
+	gn_calnote *entry;
 	gint status;
 } D_CalendarNote;
 
 typedef struct {
 	gint status;
-	gint(*InsertEntry) (GSM_CalendarNote *);
+	gint (*InsertEntry)(gn_calnote *);
 	gint(*ReadFailed) (gint);
 } D_CalendarNoteAll;
 
@@ -145,13 +146,13 @@ typedef struct {
 
 typedef struct {
 	gn_error status;
-	GSM_NetworkInfo *info;
+	gn_network_info *info;
 } D_NetworkInfo;
 
 typedef struct {
 	gfloat rfLevel;
 	gfloat batteryLevel;
-	GSM_PowerSource powerSource;
+	gn_power_source powerSource;
 	gchar *working;
 	bool alarm;
 	struct {
@@ -205,7 +206,7 @@ extern pthread_mutex_t setBitmapMutex;
 extern pthread_cond_t setBitmapCond;
 extern pthread_mutex_t getNetworkInfoMutex;
 extern pthread_cond_t getNetworkInfoCond;
-extern GSM_Statemachine statemachine;
+extern struct gn_statemachine statemachine;
 extern void GUI_InitPhoneMonitor(void);
 extern void *GUI_Connect(void *a);
 extern void GUI_InsertEvent(PhoneEvent * event);

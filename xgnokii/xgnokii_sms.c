@@ -61,7 +61,7 @@ typedef struct {
 	gint validity;
 	gint class;
 	gint memory;
-	gchar sender[MAX_BCD_STRING_LENGTH + 1];
+	gchar sender[GN_BCD_STRING_MAX_LENGTH + 1];
 } MessagePointers;
 
 typedef struct {
@@ -98,7 +98,7 @@ static SendSMSWidget sendSMS = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 static ErrorDialog errorDialog = { NULL, NULL };
 static InfoDialog infoDialog = { NULL, NULL };
 static QuestMark questMark;
-static GtkWidget *treeFolderItem[MAX_SMS_FOLDERS], *subTree;
+static GtkWidget *treeFolderItem[GN_SMS_FOLDER_MAX_NUMBER], *subTree;
 
 static inline void Help1(GtkWidget * w, gpointer data)
 {
@@ -219,17 +219,17 @@ static inline void DestroyMsgPtrs(gpointer data)
 
 static int IsValidSMSforFolder(gpointer d, gpointer userData)
 {
-	GSM_API_SMS *data = (GSM_API_SMS *) d;
+	gn_sms *data = (gn_sms *) d;
 	int folder_idx;
 
 	if (phoneMonitor.supported & PM_FOLDERS) {
-		folder_idx = data->MemoryType - 12;
+		folder_idx = data->memory_type - 12;
 		if (folder_idx == SMS.currentBox)
 			return 1;
 	} else {
-		if ((data->Type == SMS_Deliver && !SMS.currentBox) ||
-		    (data->Type == SMS_Delivery_Report && !SMS.currentBox) ||
-		    (data->Type == SMS_Submit && SMS.currentBox))
+		if ((data->type == GN_SMS_MT_Deliver && !SMS.currentBox) ||
+		    (data->type == GN_SMS_MT_DeliveryReport && !SMS.currentBox) ||
+		    (data->type == GN_SMS_MT_Submit && SMS.currentBox))
 			return 1;
 	}
 	return 0;
@@ -238,17 +238,17 @@ static int IsValidSMSforFolder(gpointer d, gpointer userData)
 
 static void InsertFolderElement(gpointer d, gpointer userData)
 {
-	GSM_API_SMS *data = (GSM_API_SMS *) d;
+	gn_sms *data = (gn_sms *) d;
 	MessagePointers *msgPtrs;
-	SMS_DateTime *dt = NULL;
+	gn_timestamp *dt = NULL;
 	gint valid;
 
-	dt = &data->SMSCTime;
+	dt = &data->smsc_time;
 
 	if ((valid = IsValidSMSforFolder(d, userData))) {
 
 		/*
-		if (data->Type == GST_MT && data->UDHType == GSM_ConcatenatedMessages) {
+		if (data->type == GST_MT && data->UDHtype == GSM_ConcatenatedMessages) {
 			msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
 			msgPtrs->count = data->UDH[4];
 			msgPtrs->number = data->UDH[5];
@@ -261,29 +261,29 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		else { 
 		*/
 		gchar *row[4];
-		switch (data->Type) {
-		case SMS_Delivery_Report:
-			switch (data->Status) {
-			case SMS_Read:
+		switch (data->type) {
+		case GN_SMS_MT_DeliveryReport:
+			switch (data->status) {
+			case GN_SMS_Read:
 				row[0] = g_strdup(_("read report"));
 				break;
 			default:
 				row[0] = g_strdup(_("unread report"));
 				break;
 			}
-		case SMS_Picture:
-		case SMS_PictureTemplate:
-			switch (data->Status) {
-			case SMS_Read:
+		case GN_SMS_MT_Picture:
+		case GN_SMS_MT_PictureTemplate:
+			switch (data->status) {
+			case GN_SMS_Read:
 				row[0] = g_strdup(_("seen picture"));
 				break;
-			case SMS_Unread:
+			case GN_SMS_Unread:
 				row[0] = g_strdup(_("unseen picture"));
 				break;
-			case SMS_Sent:
+			case GN_SMS_Sent:
 				row[0] = g_strdup(_("sent picture"));
 				break;
-			case SMS_Unsent:
+			case GN_SMS_Unsent:
 				row[0] = g_strdup(_("not sent picture"));
 				break;
 			default:
@@ -291,17 +291,17 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 				break;
 			}
 		default:
-			switch (data->Status) {
-			case SMS_Read:
+			switch (data->status) {
+			case GN_SMS_Read:
 				row[0] = g_strdup(_("read"));
 				break;
-			case SMS_Unread:
+			case GN_SMS_Unread:
 				row[0] = g_strdup(_("unread"));
 				break;
-			case SMS_Sent:
+			case GN_SMS_Sent:
 				row[0] = g_strdup(_("sent"));
 				break;
-			case SMS_Unsent:
+			case GN_SMS_Unsent:
 				row[0] = g_strdup(_("not sent"));
 				break;
 			default:
@@ -311,40 +311,40 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		}
 
 		if (dt) {
-			if (dt->Timezone)
+			if (dt->timezone)
 				row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d %c%02d00",
-							 dt->Day, dt->Month, dt->Year,
-							 dt->Hour, dt->Minute, dt->Second,
-							 dt->Timezone > 0 ? '+' : '-',
-							 abs(dt->Timezone));
+							 dt->day, dt->month, dt->year,
+							 dt->hour, dt->minute, dt->second,
+							 dt->timezone > 0 ? '+' : '-',
+							 abs(dt->timezone));
 			else
 				row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d",
-							 dt->Day, dt->Month, dt->Year,
-							 dt->Hour, dt->Minute, dt->Second);
+							 dt->day, dt->month, dt->year,
+							 dt->hour, dt->minute, dt->second);
 		} else {
 			row[1] =
 			    g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d", 01, 01, 0001, 01, 01,
 					    01);
 		}
 
-		row[2] = GUI_GetName(data->Remote.Number);
+		row[2] = GUI_GetName(data->remote.number);
 		if (row[2] == NULL)
-			row[2] = data->Remote.Number;
-		if ((data->Type == SMS_Picture) || (data->Type == SMS_PictureTemplate))
-			row[3] = g_strdup_printf("Picture Message: %s", data->UserData[1].u.Text);
+			row[2] = data->remote.number;
+		if ((data->type == GN_SMS_MT_Picture) || (data->type == GN_SMS_MT_PictureTemplate))
+			row[3] = g_strdup_printf("Picture Message: %s", data->user_data[1].u.text);
 		else
-			row[3] = data->UserData[0].u.Text;
+			row[3] = data->user_data[0].u.text;
 
 		gtk_clist_append(GTK_CLIST(SMS.smsClist), row);
 
 		msgPtrs = (MessagePointers *) g_malloc(sizeof(MessagePointers));
 		msgPtrs->count = msgPtrs->number = 1;
-		msgPtrs->validity = data->Validity;
+		msgPtrs->validity = data->validity;
 /*		msgPtrs->class = data->Class; */
-		strcpy(msgPtrs->sender, data->Remote.Number);
+		strcpy(msgPtrs->sender, data->remote.number);
 		msgPtrs->msgPtr = (gint *) g_malloc(sizeof(gint));
-		*(msgPtrs->msgPtr) = (int) data->Number;
-		msgPtrs->memory = data->MemoryType;
+		*(msgPtrs->msgPtr) = (int) data->number;
+		msgPtrs->memory = data->memory_type;
 
 		gtk_clist_set_row_data_full(GTK_CLIST(SMS.smsClist), SMS.row_i++,
 					    msgPtrs, DestroyMsgPtrs);
@@ -440,7 +440,7 @@ inline void GUI_ShowSMS(void)
 
 static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 {
-	GSM_API_SMS *message;
+	gn_sms *message;
 	PhoneEvent *e;
 	GList *sel;
 	gint row, count, number;
@@ -456,14 +456,14 @@ static void OkDeleteSMSDialog(GtkWidget * widget, gpointer data)
 		for (count = 0; 
 		     count < ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->count; 
 		     count++) {
-			message = (GSM_API_SMS *) g_malloc(sizeof(GSM_API_SMS));
+			message = (gn_sms *) g_malloc(sizeof(gn_sms));
 			number = *(((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->msgPtr + count);
 			if (number == -1) {
 				g_free(message);
 				continue;
 			}
-			message->Number = number;
-			message->MemoryType = ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->memory;
+			message->number = number;
+			message->memory_type = ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST(SMS.smsClist), row))->memory;
 
 			e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 			e->event = Event_DeleteSMSMessage;
@@ -649,7 +649,7 @@ static inline void RefreshSMSStatus(void)
 
 	l = gtk_text_get_length(GTK_TEXT(sendSMS.smsSendText));
 
-	if (l <= GSM_MAX_SMS_LENGTH)
+	if (l <= GN_SMS_MAX_LENGTH)
 		buf = g_strdup_printf("%d/1", l);
 	else {
 		m = l % 153;
@@ -685,7 +685,7 @@ static inline void SetActiveCenter(GtkWidget * item, gpointer data)
 }
 
 
-void GUI_RefreshSMSCenterMenu(void)
+void GUI_RefreshsmscenterMenu(void)
 {
 	static GtkWidget *smscMenu = NULL;
 	GtkWidget *item;
@@ -704,12 +704,12 @@ void GUI_RefreshSMSCenterMenu(void)
 	smscMenu = gtk_menu_new();
 
 	for (i = 0; i < xgnokiiConfig.smsSets; i++) {
-		if (*(xgnokiiConfig.smsSetting[i].Name) == '\0') {
+		if (*(xgnokiiConfig.smsSetting[i].name) == '\0') {
 			gchar *buf = g_strdup_printf(_("Set %d"), i + 1);
-			item = gtk_menu_item_new_with_label(xgnokiiConfig.smsSetting[i].SMSC.Number);
+			item = gtk_menu_item_new_with_label(xgnokiiConfig.smsSetting[i].smsc.number);
 			g_free(buf);
 		} else
-			item = gtk_menu_item_new_with_label(xgnokiiConfig.smsSetting[i].Name);
+			item = gtk_menu_item_new_with_label(xgnokiiConfig.smsSetting[i].name);
 
 		gtk_signal_connect(GTK_OBJECT(item), "activate",
 				   GTK_SIGNAL_FUNC(SetActiveCenter), (gpointer) i);
@@ -863,8 +863,8 @@ static void OkSelectContactDialog(GtkWidget * widget, SelectContactData * data)
 
 			pbEntry = gtk_clist_get_row_data(GTK_CLIST(data->clist),
 							 GPOINTER_TO_INT(sel->data));
-			ap->number = g_strdup(pbEntry->entry.Number);
-			ap->name = g_strdup(pbEntry->entry.Name);
+			ap->number = g_strdup(pbEntry->entry.number);
+			ap->name = g_strdup(pbEntry->entry.name);
 			ap->used = 1;
 			sendSMS.addressLine = g_slist_append(sendSMS.addressLine, ap);
 			if (strlen(gtk_entry_get_text(GTK_ENTRY(sendSMS.addr))) > 0)
@@ -902,19 +902,19 @@ static void ShowSelectContactsDialog(void)
 }
 
 
-static gint SendSMSCore(GSM_API_SMS * sms)
+static gint Sendsmscore(gn_sms * sms)
 {
 	gn_error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_SMSMessage *m = (D_SMSMessage *) g_malloc(sizeof(D_SMSMessage));
 	unsigned int i = 0;
 
-	while (sms->UserData[i].Type != SMS_NoData) {
-		if ((sms->UserData[i].Type == SMS_PlainText ||
-		     sms->UserData[i].Type == SMS_NokiaText ||
-		     sms->UserData[i].Type == SMS_iMelodyText) &&
-		     !gn_char_def_alphabet(sms->UserData[i].u.Text))
-			sms->DCS.u.General.Alphabet = SMS_UCS2;
+	while (sms->user_data[i].type != GN_SMS_DATA_None) {
+		if ((sms->user_data[i].type == GN_SMS_DATA_Text ||
+		     sms->user_data[i].type == GN_SMS_DATA_NokiaText ||
+		     sms->user_data[i].type == GN_SMS_DATA_iMelody) &&
+		     !gn_char_def_alphabet(sms->user_data[i].u.text))
+			sms->dcs.u.general.alphabet = GN_SMS_DCS_UCS2;
 		i++;
 	}
 	m->sms = sms;
@@ -927,7 +927,7 @@ static gint SendSMSCore(GSM_API_SMS * sms)
 
 #ifdef XDEBUG
 	g_print("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
-		sms->Remote.Number, sms->UserData[0].u.Text,
+		sms->remote.number, sms->user_data[0].u.text,
 		GTK_TOGGLE_BUTTON(sendSMS.report)->active, sendSMS.center);
 #endif
 
@@ -936,12 +936,12 @@ static gint SendSMSCore(GSM_API_SMS * sms)
 
 	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("SMS send to %s failed\n(error=%d)"),
-					     sms->Remote.Number, error);
+					     sms->remote.number, error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
 	} else
-		g_print("Message sent to: %s\n", sms->Remote.Number);
+		g_print("Message sent to: %s\n", sms->remote.number);
 
 	return (error);
 }
@@ -949,7 +949,7 @@ static gint SendSMSCore(GSM_API_SMS * sms)
 
 static void DoSendSMS(void)
 {
-	GSM_API_SMS sms;
+	gn_sms sms;
 	AddressPar aps;
 	char udh[256];
 	GSList *r;
@@ -986,25 +986,25 @@ static void DoSendSMS(void)
 			number = addresses[i];
 
 		gn_sms_default_submit(&sms);
-		strcpy(sms.SMSC.Number, xgnokiiConfig.smsSetting[sendSMS.center].SMSC.Number);
-		sms.SMSC.Type = xgnokiiConfig.smsSetting[sendSMS.center].SMSC.Type;
+		strcpy(sms.smsc.number, xgnokiiConfig.smsSetting[sendSMS.center].smsc.number);
+		sms.smsc.type = xgnokiiConfig.smsSetting[sendSMS.center].smsc.type;
 
 		if (GTK_TOGGLE_BUTTON(sendSMS.report)->active)
-			sms.DeliveryReport = true;
+			sms.delivery_report = true;
 		else
-			sms.DeliveryReport = false;
-		sms.Type = SMS_Submit;
+			sms.delivery_report = false;
+		sms.type = GN_SMS_MT_Submit;
 
-		strncpy(sms.Remote.Number, number, MAX_BCD_STRING_LENGTH + 1);
-		sms.Remote.Number[MAX_BCD_STRING_LENGTH] = '\0';
-		if (sms.Remote.Number[0] == '+') 
-			sms.Remote.Type = SMS_International;
+		strncpy(sms.remote.number, number, GN_BCD_STRING_MAX_LENGTH + 1);
+		sms.remote.number[GN_BCD_STRING_MAX_LENGTH] = '\0';
+		if (sms.remote.number[0] == '+')
+			sms.remote.type = GN_GSM_NUMBER_International;
 		else 
-			sms.Remote.Type = SMS_Unknown;
+			sms.remote.type = GN_GSM_NUMBER_Unknown;
 
-		if (l > GSM_MAX_SMS_LENGTH) {
+		if (l > GN_SMS_MAX_LENGTH) {
 			if (longSMS) {
-				sms.UserData[0].Type = SMS_ConcatenatedMessages;
+				sms.user_data[0].type = GN_SMS_DATA_Concat;
 				nr_msg = ((l - 1) / 153) + 1;
 				udh[0] = 0x05;	/* UDH length */
 				udh[1] = 0x00;	/* concatenated messages (IEI) */
@@ -1016,20 +1016,20 @@ static void DoSendSMS(void)
 
 				for (j = 0; j < nr_msg; j++) {
 					udh[5] = j + 1;
-					memcpy(sms.UserData[0].u.Text, udh, offset);
-					strncpy(sms.UserData[0].u.Text + offset, text + (j * 153),
+					memcpy(sms.user_data[0].u.text, udh, offset);
+					strncpy(sms.user_data[0].u.text + offset, text + (j * 153),
 						153);
-					sms.UserData[0].u.Text[153] = '\0';
+					sms.user_data[0].u.text[153] = '\0';
 
 					buf = g_strdup_printf(_("Sending SMS to %s (%d/%d) ...\n"),
-							      sms.Remote.Number, j + 1,
+							      sms.remote.number, j + 1,
 							      nr_msg);
 					gtk_label_set_text(GTK_LABEL(infoDialog.text), buf);
 					gtk_widget_show_now(infoDialog.dialog);
 					g_free(buf);
 					GUI_Refresh();
 
-					if (SendSMSCore(&sms) != GN_ERR_NONE) {
+					if (Sendsmscore(&sms) != GN_ERR_NONE) {
 						gtk_widget_hide(infoDialog.dialog);
 						GUI_Refresh();
 						break;
@@ -1039,8 +1039,8 @@ static void DoSendSMS(void)
 					sleep(1);
 				}
 			} else {
-				sms.UDH.Length = 0;
-				sms.UserData[0].Type = SMS_PlainText;
+				sms.udh.length = 0;
+				sms.user_data[0].type = GN_SMS_DATA_Text;
 				nr_msg = ((l - 1) / 153) + 1;
 				if (nr_msg > 99)	/* We have place only for 99 messages in header. */
 					nr_msg = 99;
@@ -1049,19 +1049,19 @@ static void DoSendSMS(void)
 					g_snprintf(header, 8, "%2d/%-2d: ", j + 1, nr_msg);
 					header[7] = '\0';
 
-					strcpy(sms.UserData[0].u.Text, header);
-					strncat(sms.UserData[0].u.Text, text + (j * 153), 153);
-					sms.UserData[0].u.Text[160] = '\0';
+					strcpy(sms.user_data[0].u.text, header);
+					strncat(sms.user_data[0].u.text, text + (j * 153), 153);
+					sms.user_data[0].u.text[160] = '\0';
 
 					buf = g_strdup_printf(_("Sending SMS to %s (%d/%d) ...\n"),
-							      sms.Remote.Number, j + 1,
+							      sms.remote.number, j + 1,
 							      nr_msg);
 					gtk_label_set_text(GTK_LABEL(infoDialog.text), buf);
 					gtk_widget_show_now(infoDialog.dialog);
 					g_free(buf);
 					GUI_Refresh();
 
-					if (SendSMSCore(&sms) != GN_ERR_NONE) {
+					if (Sendsmscore(&sms) != GN_ERR_NONE) {
 						gtk_widget_hide(infoDialog.dialog);
 						GUI_Refresh();
 						break;
@@ -1074,18 +1074,18 @@ static void DoSendSMS(void)
 				}
 			}
 		} else {
-			sms.UDH.Length = 0;
-			sms.UserData[0].Type = SMS_PlainText;
-			strncpy(sms.UserData[0].u.Text, text, GSM_MAX_SMS_LENGTH + 1);
-			sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
+			sms.udh.length = 0;
+			sms.user_data[0].type = GN_SMS_DATA_Text;
+			strncpy(sms.user_data[0].u.text, text, GN_SMS_MAX_LENGTH + 1);
+			sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';
 
-			buf = g_strdup_printf(_("Sending SMS to %s ...\n"), sms.Remote.Number);
+			buf = g_strdup_printf(_("Sending SMS to %s ...\n"), sms.remote.number);
 			gtk_label_set_text(GTK_LABEL(infoDialog.text), buf);
 			gtk_widget_show_now(infoDialog.dialog);
 			g_free(buf);
 			GUI_Refresh();
 
-			(void) SendSMSCore(&sms);
+			(void) Sendsmscore(&sms);
 			gtk_widget_hide(infoDialog.dialog);
 			GUI_Refresh();
 		}
@@ -1357,7 +1357,7 @@ static void ForwardSMS(void)
 /*
 static inline gint CompareSMSMessageLocation (gconstpointer a, gconstpointer b)
 {
-  return !(((GSM_API_SMS *) a)->Number == ((GSM_API_SMS *) b)->Number);
+  return !(((gn_sms *) a)->Number == ((gn_sms *) b)->Number);
 }
 */
 
@@ -1367,7 +1367,7 @@ static void ReplySMS(void)
 	gchar *buf;
 	/*
 	GSList *r;
-	GSM_API_SMS msg;
+	gn_sms msg;
 	*/
 
 	if (GTK_CLIST(SMS.smsClist)->selection == NULL)
@@ -1726,6 +1726,6 @@ void GUI_CreateSMSWindow(void)
 							&GUI_SMSWindow->style->bg[GTK_STATE_NORMAL],
 							quest_xpm);
 
-	GUIEventAdd(GUI_EVENT_SMS_CENTERS_CHANGED, GUI_RefreshSMSCenterMenu);
+	GUIEventAdd(GUI_EVENT_SMS_CENTERS_CHANGED, GUI_RefreshsmscenterMenu);
 	GUIEventAdd(GUI_EVENT_SMS_NUMBER_CHANGED, GUI_RefreshMessageWindow);
 }

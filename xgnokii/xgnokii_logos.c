@@ -42,6 +42,8 @@
 #include "gsm-networks.h"
 #include "gsm-filetypes.h"
 #include "gsm-bitmaps.h"
+#include "gnokii-internal.h"
+/* FIXME: shouldn't the bmp read/save move elsewhere? */
 
 #include "xgnokii_logos.h"
 #include "xgnokii_common.h"
@@ -71,7 +73,7 @@
 #include "xpm/Tool_rectangle.xpm"
 #include "xpm/Tool_filled_rectangle.xpm"
 
-extern GSM_Network GSM_Networks[];
+extern gn_network networks[];
 
 GtkWidget *GUI_LogosWindow;
 
@@ -94,7 +96,7 @@ int previewAvailable = 1, showPreviewErrorDialog = 1;
 int previewPixmapNumber = 0;
 
 gn_bmp bitmap, oldBitmap;
-GSM_NetworkInfo networkInfo;
+gn_network_info networkInfo;
 
 /* widgets for toolbar - some, need global variables */
 GtkWidget *buttonStartup, *buttonOperator, *buttonCaller;
@@ -1001,7 +1003,7 @@ void GetNetworkInfoEvent(GtkWidget * widget)
 
 	/* set new operator name to combo */
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry),
-			   GSM_GetNetworkName(networkInfo.NetworkCode));
+			   gn_get_network_name(networkInfo.network_code));
 }
 
 void GetLogoEvent(GtkWidget * widget)
@@ -1013,12 +1015,12 @@ void GetLogoEvent(GtkWidget * widget)
 	char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
 
 	/* prepare data for event */
-	strncpy(bitmap.netcode, GSM_GetNetworkCode(operator), 7);
+	strncpy(bitmap.netcode, gn_get_network_code(operator), 7);
 	data->bitmap = &bitmap;
 	e->event = Event_GetBitmap;
 	e->data = data;
 	if (phoneMonitor.supported & PM_CALLERGROUP) {
-		for (i = 0; i < GSM_MAX_CALLER_GROUPS; i++)
+		for (i = 0; i < GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER; i++)
 			if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(callerCombo)->entry)),
 				   xgnokiiConfig.callerGroups[i]) == 0)
 				bitmap.number = i;
@@ -1053,14 +1055,14 @@ void SetLogoEvent(GtkWidget * widget)
 	int i;
 
 	/* prepare data */
-	strncpy(bitmap.netcode, GSM_GetNetworkCode(operator), 7);
+	strncpy(bitmap.netcode, gn_get_network_code(operator), 7);
 
 	if (bitmap.type == GN_BMP_CallerLogo) {
 		/* above condition must be there, because if you launch logos before
 		 * callerGroups are available, you will see segfault - callerGroups not initialized 
 		 */
 		if (phoneMonitor.supported & PM_CALLERGROUP) {
-			for (i = 0; i < GSM_MAX_CALLER_GROUPS; i++)
+			for (i = 0; i < GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER; i++)
 				if (strcmp
 				    (gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(callerCombo)->entry)),
 				     xgnokiiConfig.callerGroups[i]) == 0)
@@ -1272,14 +1274,14 @@ gint LogoTypeEvent(GtkWidget * widget)
 {
 	int clear = 0;
 	g_print("LogoTypeEvent called!\n");
-	g_print("height: %i, width: %i\n", statemachine.Phone.Info.StartupLogoH,
-		statemachine.Phone.Info.StartupLogoW);
+	g_print("height: %i, width: %i\n", statemachine.driver.phone.startup_logo_height,
+		statemachine.driver.phone.startup_logo_width);
 	/* is startupLogo? */
 	/* Resize and clear anyway - CK */
 	if (GTK_TOGGLE_BUTTON(buttonStartup)->active) {
 		/* look for old bitmap type, clean if another */
 		clear = 1;
-		gn_bmp_resize(&bitmap, GN_BMP_StartupLogo, &statemachine.Phone.Info);
+		gn_bmp_resize(&bitmap, GN_BMP_StartupLogo, &statemachine.driver.phone);
 	}
 
 	/* has phone support for callerGroups? */
@@ -1288,7 +1290,7 @@ gint LogoTypeEvent(GtkWidget * widget)
 			/* previous was startup? clear and draw batteries, signal, ... */
 			/* Clear anyway for 7110...CK */
 			clear = 1;
-			gn_bmp_resize(&bitmap, GN_BMP_CallerLogo, &statemachine.Phone.Info);
+			gn_bmp_resize(&bitmap, GN_BMP_CallerLogo, &statemachine.driver.phone);
 		}
 	}
 
@@ -1298,10 +1300,10 @@ gint LogoTypeEvent(GtkWidget * widget)
 		/* previous startup? clear and draw batteries, signal, ... */
 		/* Clear anyway for 7110..CK */
 		clear = 1;
-		if (!strncmp(statemachine.Phone.Info.Models, "6510", 4))
-			gn_bmp_resize(&bitmap, GN_BMP_NewOperatorLogo, &statemachine.Phone.Info);
+		if (!strncmp(statemachine.driver.phone.models, "6510", 4))
+			gn_bmp_resize(&bitmap, GN_BMP_NewOperatorLogo, &statemachine.driver.phone);
 		else
-			gn_bmp_resize(&bitmap, GN_BMP_OperatorLogo, &statemachine.Phone.Info);
+			gn_bmp_resize(&bitmap, GN_BMP_OperatorLogo, &statemachine.driver.phone);
 	}
 
 	/* must clear? */
@@ -1333,9 +1335,9 @@ void ExportLogoFileMain(gchar * name)
 
 	tbitmap = bitmap;
 
-	strncpy(tbitmap.netcode, GSM_GetNetworkCode(networkInfo.NetworkCode), 7);
+	strncpy(tbitmap.netcode, gn_get_network_code(networkInfo.network_code), 7);
 
-	error = GSM_SaveBitmapFile(name, &tbitmap, &statemachine.Phone.Info);
+	error = gn_file_bitmap_save(name, &tbitmap, &statemachine.driver.phone);
 	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error saving file\n(error=%d)"), error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
@@ -1394,7 +1396,7 @@ void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 	} else
 		fclose(f);
 
-	error = GSM_ReadBitmapFile(fileName, &tbitmap, &statemachine.Phone.Info);
+	error = gn_file_bitmap_read(fileName, &tbitmap, &statemachine.driver.phone);
 	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error reading file\n(error=%d)"), error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
@@ -1628,9 +1630,9 @@ void GUI_CreateLogosWindow(void)
 
 	networkCombo = gtk_combo_new();
 	gtk_combo_set_use_arrows_always(GTK_COMBO(networkCombo), 1);
-	while (strcmp(GSM_Networks[i].Name, "unknown"))
+	while (strcmp(networks[i].name, "unknown"))
 		glistNetwork = g_list_insert_sorted(glistNetwork,
-						    GSM_Networks[i++].Name, (GCompareFunc) strcmp);
+						    networks[i++].name, (GCompareFunc) strcmp);
 	gtk_combo_set_popdown_strings(GTK_COMBO(networkCombo), glistNetwork);
 	gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(networkCombo)->entry), FALSE);
 	gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), networkCombo, "", "");
@@ -1806,7 +1808,7 @@ void GUI_RefreshLogosGroupsCombo(void)
 	int i;
 
 	/* All groups + no group */
-	for (i = 0; i < GSM_MAX_CALLER_GROUPS + 1; i++)
+	for (i = 0; i < GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER + 1; i++)
 		callerList = g_list_insert(callerList, xgnokiiConfig.callerGroups[i], i);
 
 	gtk_combo_set_popdown_strings(GTK_COMBO(callerCombo), callerList);

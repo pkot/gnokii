@@ -110,12 +110,12 @@ static void OkSelectContactDialog(GtkWidget * widget, SelectContactData * data)
 
 		gtk_clist_get_text(GTK_CLIST(clist), selectedKey, 0, &key);
 
-		gtk_clist_set_text(GTK_CLIST(clist), selectedKey, 1, pbEntry->entry.Name);
-		gtk_clist_set_text(GTK_CLIST(clist), selectedKey, 2, pbEntry->entry.Number);
+		gtk_clist_set_text(GTK_CLIST(clist), selectedKey, 1, pbEntry->entry.name);
+		gtk_clist_set_text(GTK_CLIST(clist), selectedKey, 2, pbEntry->entry.number);
 
-		d->entry.Number = *key - '0';
-		d->entry.MemoryType = pbEntry->entry.MemoryType + 2;
-		d->entry.Location = pbEntry->entry.Location;
+		d->entry.number = *key - '0';
+		d->entry.memory_type = pbEntry->entry.memory_type + 2;
+		d->entry.location = pbEntry->entry.location;
 
 		gtk_clist_set_row_data_full(GTK_CLIST(clist), selectedKey,
 					    (gpointer) d, DestroyCListData);
@@ -197,7 +197,7 @@ static void ReadSpeedDial(void)
 			return;
 		}
 		memset(d, 0, sizeof(D_SpeedDial));
-		d->entry.Number = i;
+		d->entry.number = i;
 		if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {
 			g_print(_("Cannot allocate memory!"));
 			g_free(d);
@@ -216,18 +216,18 @@ static void ReadSpeedDial(void)
 			row[1] = '\0';
 			row[2] = '\0';
 		} else {
-			if (d->entry.Location == 0)
+			if (d->entry.location == 0)
 				location = i;
 			else
-				location = d->entry.Location;
-			if ((pbEntry = GUI_GetEntry(d->entry.MemoryType, location)) == NULL) {
+				location = d->entry.location;
+			if ((pbEntry = GUI_GetEntry(d->entry.memory_type, location)) == NULL) {
 				g_free(d);
 				continue;
 			}
 			*buf = i + '0';
 			row[0] = buf;
-			row[1] = pbEntry->entry.Name;
-			row[2] = pbEntry->entry.Number;
+			row[1] = pbEntry->entry.name;
+			row[2] = pbEntry->entry.number;
 
 		}
 		gtk_clist_append(GTK_CLIST(clist), row);
@@ -255,8 +255,8 @@ static void SaveSpeedDial(void)
 	if (speedDialInitialized) {
 		for (i = 1; i < 10; i++) {
 			if ((d = (D_SpeedDial *) gtk_clist_get_row_data(GTK_CLIST(clist), i - 1))) {
-				dprintf("locaction: %i\n", d->entry.Location);
-				if (d->entry.Location == 0)
+				dprintf("locaction: %i\n", d->entry.location);
+				if (d->entry.location == 0)
 					continue;
 				if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {
 					g_print(_("Cannot allocate memory!"));
@@ -271,7 +271,7 @@ static void SaveSpeedDial(void)
 				pthread_mutex_unlock (&speedDialMutex);
 
 				if (d->status != GN_ERR_NONE) {
-					g_print(_("Error writing speed dial for key %d!\n"), d->entry.Number);
+					g_print(_("Error writing speed dial for key %d!\n"), d->entry.number);
 					/*
 					  gtk_label_set_text (GTK_LABEL (errorDialog.text), buf);
 					  gtk_widget_show (errorDialog.dialog);
@@ -289,20 +289,20 @@ static bool ParseLine(D_SpeedDial * d, gchar * buf)
 {
 	gchar **strings = g_strsplit(buf, ";", 3);
 
-	d->entry.Number = *strings[0] - '0';
-	if (d->entry.Number < 1 || d->entry.Number > 9) {
+	d->entry.number = *strings[0] - '0';
+	if (d->entry.number < 1 || d->entry.number > 9) {
 		g_strfreev(strings);
 		return FALSE;
 	}
 
-	d->entry.MemoryType = *strings[1] - '0';
-	if (d->entry.MemoryType < 2 || d->entry.MemoryType > 3) {
+	d->entry.memory_type = *strings[1] - '0';
+	if (d->entry.memory_type < 2 || d->entry.memory_type > 3) {
 		g_strfreev(strings);
 		return FALSE;
 	}
 
-	d->entry.Location = atoi(strings[2]);
-	if (d->entry.Location == LONG_MIN || d->entry.Location == LONG_MAX || d->entry.Location < 0) {
+	d->entry.location = atoi(strings[2]);
+	if (d->entry.location == LONG_MIN || d->entry.location == LONG_MAX || d->entry.location < 0) {
 		g_strfreev(strings);
 		return FALSE;
 	}
@@ -350,7 +350,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 			return;
 		}
 		if (ParseLine(d, buf)) {
-			if (d->entry.Number != i) {
+			if (d->entry.number != i) {
 				g_free(d);
 				gtk_clist_clear(GTK_CLIST(clist));
 				gtk_label_set_text(GTK_LABEL(errorDialog.text),
@@ -360,19 +360,19 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 				gtk_clist_thaw(GTK_CLIST(clist));
 				return;
 			}
-			if (d->entry.Location == 0)
+			if (d->entry.location == 0)
 				location = i;
 			else
-				location = d->entry.Location;
-			if ((pbEntry = GUI_GetEntry(d->entry.MemoryType - 2, location)) == NULL) {
+				location = d->entry.location;
+			if ((pbEntry = GUI_GetEntry(d->entry.memory_type - 2, location)) == NULL) {
 				g_free(d);
 				continue;
 			}
 			*buf = i + '0';
 			*(buf + 1) = '\0';
 			row[0] = buf;
-			row[1] = pbEntry->entry.Name;
-			row[2] = pbEntry->entry.Number;
+			row[1] = pbEntry->entry.name;
+			row[2] = pbEntry->entry.number;
 			gtk_clist_append(GTK_CLIST(clist), row);
 			gtk_clist_set_row_data_full(GTK_CLIST(clist), row_i++,
 						    (gpointer) d, DestroyCListData);
@@ -428,8 +428,8 @@ static void ExportSpeedDialMain(gchar * name)
 
 	for (i = 1; i < 10; i++) {
 		if ((d = (D_SpeedDial *) gtk_clist_get_row_data(GTK_CLIST(clist), i - 1))) {
-			sprintf(buf, "%d;%d;%d;", d->entry.Number, d->entry.MemoryType,
-				d->entry.Location);
+			sprintf(buf, "%d;%d;%d;", d->entry.number, d->entry.memory_type,
+				d->entry.location);
 			fprintf(f, "%s\n", buf);
 		}
 	}

@@ -131,97 +131,97 @@ inline void GUI_ShowCalendar()
 }
 
 
-static gint InsertCalendarEntry(GSM_CalendarNote * note)
+static gint InsertCalendarEntry(gn_calnote * note)
 {
 	gchar *row[7];
 
-	row[0] = g_strdup_printf("%d", note->Location);
+	row[0] = g_strdup_printf("%d", note->location);
 
-	switch (note->Type) {
-	case GCN_REMINDER:
+	switch (note->type) {
+	case GN_CALNOTE_REMINDER:
 		row[1] = _("Reminder");
-		row[2] = g_strdup_printf("%02d/%02d/%04d", note->Time.Day,
-					 note->Time.Month, note->Time.Year);
+		row[2] = g_strdup_printf("%02d/%02d/%04d", note->time.day,
+					 note->time.month, note->time.year);
 		row[5] = "";
-		switch (note->Recurrence / 60) {
-		case GCN_NEVER:
+		switch (note->recurrence / 60) {
+		case GN_CALNOTE_NEVER:
 			row[6] = _("never");
 			break;
-		case GCN_DAILY:
+		case GN_CALNOTE_DAILY:
 			row[6] = _("daily");
 			break;
-		case GCN_WEEKLY:
+		case GN_CALNOTE_WEEKLY:
 			row[6] = _("weekly");
 			break;
-		case GCN_2WEEKLY:
+		case GN_CALNOTE_2WEEKLY:
 			row[6] = _("every two weeks");
 			break;
-		case GCN_YEARLY:
+		case GN_CALNOTE_YEARLY:
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d minutes", note->Recurrence);
+			row[6] = g_strdup_printf("every %d minutes", note->recurrence);
 		}
 		break;
 
-	case GCN_CALL:
+	case GN_CALNOTE_CALL:
 		row[1] = _("Call");
-		row[2] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->Time.Day,
-					 note->Time.Month, note->Time.Year,
-					 note->Time.Hour, note->Time.Minute);
-		row[5] = note->Phone;
-		switch (note->Recurrence / 60) {
-		case GCN_NEVER:
+		row[2] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->time.day,
+					 note->time.month, note->time.year,
+					 note->time.hour, note->time.minute);
+		row[5] = note->phone_number;
+		switch (note->recurrence / 60) {
+		case GN_CALNOTE_NEVER:
 			row[6] = _("never");
 			break;
-		case GCN_DAILY:
+		case GN_CALNOTE_DAILY:
 			row[6] = _("daily");
 			break;
-		case GCN_WEEKLY:
+		case GN_CALNOTE_WEEKLY:
 			row[6] = _("weekly");
 			break;
-		case GCN_2WEEKLY:
+		case GN_CALNOTE_2WEEKLY:
 			row[6] = _("every two weeks");
 			break;
-		case GCN_YEARLY:
+		case GN_CALNOTE_YEARLY:
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d minutes", note->Recurrence);
+			row[6] = g_strdup_printf("every %d minutes", note->recurrence);
 		}
 		break;
 
-	case GCN_MEETING:
+	case GN_CALNOTE_MEETING:
 		row[1] = _("Meeting");
-		row[2] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->Time.Day,
-					 note->Time.Month, note->Time.Year,
-					 note->Time.Hour, note->Time.Minute);
+		row[2] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->time.day,
+					 note->time.month, note->time.year,
+					 note->time.hour, note->time.minute);
 		row[5] = "";
-		switch (note->Recurrence / 60) {
-		case GCN_NEVER:
+		switch (note->recurrence / 60) {
+		case GN_CALNOTE_NEVER:
 			row[6] = _("never");
 			break;
-		case GCN_DAILY:
+		case GN_CALNOTE_DAILY:
 			row[6] = _("daily");
 			break;
-		case GCN_WEEKLY:
+		case GN_CALNOTE_WEEKLY:
 			row[6] = _("weekly");
 			break;
-		case GCN_2WEEKLY:
+		case GN_CALNOTE_2WEEKLY:
 			row[6] = _("every two weeks");
 			break;
-		case GCN_YEARLY:
+		case GN_CALNOTE_YEARLY:
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d minutes", note->Recurrence);
+			row[6] = g_strdup_printf("every %d minutes", note->recurrence);
 		}
 		break;
 
-	case GCN_BIRTHDAY:
+	case GN_CALNOTE_BIRTHDAY:
 		row[1] = _("Birthday");
-		row[2] = g_strdup_printf("%02d/%02d/%04d", note->Time.Day,
-					 note->Time.Month, note->Time.Year);
+		row[2] = g_strdup_printf("%02d/%02d/%04d", note->time.day,
+					 note->time.month, note->time.year);
 		row[5] = "";
 		row[6] = "";
 		break;
@@ -232,14 +232,14 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 		break;
 	}
 
-	row[3] = note->Text;
+	row[3] = note->text;
 
-	if (note->Alarm.Year == 0)
+	if (note->alarm.timestamp.year == 0)
 		row[4] = "";
 	else
-		row[4] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->Alarm.Day,
-					 note->Alarm.Month, note->Alarm.Year,
-					 note->Alarm.Hour, note->Alarm.Minute);
+		row[4] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->alarm.timestamp.day,
+					 note->alarm.timestamp.month, note->alarm.timestamp.year,
+					 note->alarm.timestamp.hour, note->alarm.timestamp.minute);
 
 	gtk_clist_freeze(GTK_CLIST(cal.notesClist));
 	gtk_clist_append(GTK_CLIST(cal.notesClist), row);
@@ -499,7 +499,7 @@ static gint ReverseSelection(gconstpointer a, gconstpointer b)
 }
 
 
-static gint AddCalendarNote(GSM_CalendarNote * cnote)
+static gint AddCalendarNote(gn_calnote * cnote)
 {
 	gn_error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
@@ -533,26 +533,26 @@ static gint AddCalendarNote(GSM_CalendarNote * cnote)
 
 static void OkAddReminderDialog(GtkWidget * widget, gpointer data)
 {
-	GSM_CalendarNote note;
+	gn_calnote note;
 
-	note.Type = GCN_REMINDER;
-	note.Location = 0;
-	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData *) data)->date.date.year;
-	note.Time.Month = ((AddDialogData *) data)->date.date.month;
-	note.Time.Day = ((AddDialogData *) data)->date.date.day;
-	note.Time.Hour = note.Time.Minute = note.Time.Second = note.Time.Timezone = 0;
+	note.type = GN_CALNOTE_REMINDER;
+	note.location = 0;
+	strncpy(note.text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
+	note.time.year = ((AddDialogData *) data)->date.date.year;
+	note.time.month = ((AddDialogData *) data)->date.date.month;
+	note.time.day = ((AddDialogData *) data)->date.date.day;
+	note.time.hour = note.time.minute = note.time.second = note.time.timezone = 0;
 	if (GTK_TOGGLE_BUTTON(((AddDialogData *) data)->alarmCheck)->active) {
-		note.Alarm.Year = ((AddDialogData *) data)->alarm.date.year;
-		note.Alarm.Month = ((AddDialogData *) data)->alarm.date.month;
-		note.Alarm.Day = ((AddDialogData *) data)->alarm.date.day;
-		note.Alarm.Hour = ((AddDialogData *) data)->alarm.hours;
-		note.Alarm.Minute = ((AddDialogData *) data)->alarm.minutes;
-		note.Alarm.Second = note.Alarm.Timezone = 0;
+		note.alarm.timestamp.year = ((AddDialogData *) data)->alarm.date.year;
+		note.alarm.timestamp.month = ((AddDialogData *) data)->alarm.date.month;
+		note.alarm.timestamp.day = ((AddDialogData *) data)->alarm.date.day;
+		note.alarm.timestamp.hour = ((AddDialogData *) data)->alarm.hours;
+		note.alarm.timestamp.minute = ((AddDialogData *) data)->alarm.minutes;
+		note.alarm.timestamp.second = note.alarm.timestamp.timezone = 0;
 	} else {
-		note.Alarm.Year = 0;
+		note.alarm.timestamp.year = 0;
 	}
-	note.Recurrence = ((AddDialogData *) data)->recurrence;
+	note.recurrence = ((AddDialogData *) data)->recurrence;
 	AddCalendarNote(&note);
 	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->text), "");
 	gtk_widget_hide(((AddDialogData *) data)->dialog);
@@ -560,29 +560,29 @@ static void OkAddReminderDialog(GtkWidget * widget, gpointer data)
 
 static void OkAddCallDialog(GtkWidget * widget, gpointer data)
 {
-	GSM_CalendarNote note;
+	gn_calnote note;
 
-	note.Type = GCN_CALL;
-	note.Location = 0;
-	strncpy(note.Phone, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->phone)), 20);
-	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData *) data)->date.date.year;
-	note.Time.Month = ((AddDialogData *) data)->date.date.month;
-	note.Time.Day = ((AddDialogData *) data)->date.date.day;
-	note.Time.Hour = ((AddDialogData *) data)->date.hours;
-	note.Time.Minute = ((AddDialogData *) data)->date.minutes;
-	note.Time.Second = note.Time.Timezone = 0;
+	note.type = GN_CALNOTE_CALL;
+	note.location = 0;
+	strncpy(note.phone_number, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->phone)), 20);
+	strncpy(note.text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
+	note.time.year = ((AddDialogData *) data)->date.date.year;
+	note.time.month = ((AddDialogData *) data)->date.date.month;
+	note.time.day = ((AddDialogData *) data)->date.date.day;
+	note.time.hour = ((AddDialogData *) data)->date.hours;
+	note.time.minute = ((AddDialogData *) data)->date.minutes;
+	note.time.second = note.time.timezone = 0;
 	if (GTK_TOGGLE_BUTTON(((AddDialogData *) data)->alarmCheck)->active) {
-		note.Alarm.Year = ((AddDialogData *) data)->alarm.date.year;
-		note.Alarm.Month = ((AddDialogData *) data)->alarm.date.month;
-		note.Alarm.Day = ((AddDialogData *) data)->alarm.date.day;
-		note.Alarm.Hour = ((AddDialogData *) data)->alarm.hours;
-		note.Alarm.Minute = ((AddDialogData *) data)->alarm.minutes;
-		note.Alarm.Second = note.Alarm.Timezone = 0;
+		note.alarm.timestamp.year = ((AddDialogData *) data)->alarm.date.year;
+		note.alarm.timestamp.month = ((AddDialogData *) data)->alarm.date.month;
+		note.alarm.timestamp.day = ((AddDialogData *) data)->alarm.date.day;
+		note.alarm.timestamp.hour = ((AddDialogData *) data)->alarm.hours;
+		note.alarm.timestamp.minute = ((AddDialogData *) data)->alarm.minutes;
+		note.alarm.timestamp.second = note.alarm.timestamp.timezone = 0;
 	} else {
-		note.Alarm.Year = 0;
+		note.alarm.timestamp.year = 0;
 	}
-	note.Recurrence = ((AddDialogData *) data)->recurrence;
+	note.recurrence = ((AddDialogData *) data)->recurrence;
 	AddCalendarNote(&note);
 	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->text), "");
 	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->phone), "");
@@ -591,28 +591,28 @@ static void OkAddCallDialog(GtkWidget * widget, gpointer data)
 
 static void OkAddMeetingDialog(GtkWidget * widget, gpointer data)
 {
-	GSM_CalendarNote note;
+	gn_calnote note;
 
-	note.Type = GCN_MEETING;
-	note.Location = 0;
-	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData *) data)->date.date.year;
-	note.Time.Month = ((AddDialogData *) data)->date.date.month;
-	note.Time.Day = ((AddDialogData *) data)->date.date.day;
-	note.Time.Hour = ((AddDialogData *) data)->date.hours;
-	note.Time.Minute = ((AddDialogData *) data)->date.minutes;
-	note.Time.Second = note.Time.Timezone = 0;
+	note.type = GN_CALNOTE_MEETING;
+	note.location = 0;
+	strncpy(note.text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
+	note.time.year = ((AddDialogData *) data)->date.date.year;
+	note.time.month = ((AddDialogData *) data)->date.date.month;
+	note.time.day = ((AddDialogData *) data)->date.date.day;
+	note.time.hour = ((AddDialogData *) data)->date.hours;
+	note.time.minute = ((AddDialogData *) data)->date.minutes;
+	note.time.second = note.time.timezone = 0;
 	if (GTK_TOGGLE_BUTTON(((AddDialogData *) data)->alarmCheck)->active) {
-		note.Alarm.Year = ((AddDialogData *) data)->alarm.date.year;
-		note.Alarm.Month = ((AddDialogData *) data)->alarm.date.month;
-		note.Alarm.Day = ((AddDialogData *) data)->alarm.date.day;
-		note.Alarm.Hour = ((AddDialogData *) data)->alarm.hours;
-		note.Alarm.Minute = ((AddDialogData *) data)->alarm.minutes;
-		note.Alarm.Second = note.Alarm.Timezone = 0;
+		note.alarm.timestamp.year = ((AddDialogData *) data)->alarm.date.year;
+		note.alarm.timestamp.month = ((AddDialogData *) data)->alarm.date.month;
+		note.alarm.timestamp.day = ((AddDialogData *) data)->alarm.date.day;
+		note.alarm.timestamp.hour = ((AddDialogData *) data)->alarm.hours;
+		note.alarm.timestamp.minute = ((AddDialogData *) data)->alarm.minutes;
+		note.alarm.timestamp.second = note.alarm.timestamp.timezone = 0;
 	} else {
-		note.Alarm.Year = 0;
+		note.alarm.timestamp.year = 0;
 	}
-	note.Recurrence = ((AddDialogData *) data)->recurrence;
+	note.recurrence = ((AddDialogData *) data)->recurrence;
 	AddCalendarNote(&note);
 	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->text), "");
 	gtk_widget_hide(((AddDialogData *) data)->dialog);
@@ -620,24 +620,24 @@ static void OkAddMeetingDialog(GtkWidget * widget, gpointer data)
 
 static void OkAddBdayDialog(GtkWidget * widget, gpointer data)
 {
-	GSM_CalendarNote note;
+	gn_calnote note;
 
-	note.Type = GCN_BIRTHDAY;
-	note.Location = 0;
-	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData *) data)->date.date.year;
-	note.Time.Month = ((AddDialogData *) data)->date.date.month;
-	note.Time.Day = ((AddDialogData *) data)->date.date.day;
-	note.Time.Hour = note.Time.Minute = note.Time.Second = note.Time.Timezone = 0;
+	note.type = GN_CALNOTE_BIRTHDAY;
+	note.location = 0;
+	strncpy(note.text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
+	note.time.year = ((AddDialogData *) data)->date.date.year;
+	note.time.month = ((AddDialogData *) data)->date.date.month;
+	note.time.day = ((AddDialogData *) data)->date.date.day;
+	note.time.hour = note.time.minute = note.time.second = note.time.timezone = 0;
 	if (GTK_TOGGLE_BUTTON(((AddDialogData *) data)->alarmCheck)->active) {
-		note.Alarm.Year = ((AddDialogData *) data)->alarm.date.year;
-		note.Alarm.Month = ((AddDialogData *) data)->alarm.date.month;
-		note.Alarm.Day = ((AddDialogData *) data)->alarm.date.day;
-		note.Alarm.Hour = ((AddDialogData *) data)->alarm.hours;
-		note.Alarm.Minute = ((AddDialogData *) data)->alarm.minutes;
-		note.Alarm.Second = note.Alarm.Timezone = 0;
+		note.alarm.timestamp.year = ((AddDialogData *) data)->alarm.date.year;
+		note.alarm.timestamp.month = ((AddDialogData *) data)->alarm.date.month;
+		note.alarm.timestamp.day = ((AddDialogData *) data)->alarm.date.day;
+		note.alarm.timestamp.hour = ((AddDialogData *) data)->alarm.hours;
+		note.alarm.timestamp.minute = ((AddDialogData *) data)->alarm.minutes;
+		note.alarm.timestamp.second = note.alarm.timestamp.timezone = 0;
 	} else {
-		note.Alarm.Year = 0;
+		note.alarm.timestamp.year = 0;
 	}
 	AddCalendarNote(&note);
 	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->text), "");
@@ -1397,7 +1397,7 @@ static void AddBirthday(void)
 
 static void OkDeleteNoteDialog(GtkWidget * widget, gpointer data)
 {
-	GSM_CalendarNote *note;
+	gn_calnote *note;
 	PhoneEvent *e;
 	GList *sel;
 	gint row;
@@ -1414,9 +1414,9 @@ static void OkDeleteNoteDialog(GtkWidget * widget, gpointer data)
 		row = GPOINTER_TO_INT(sel->data);
 		sel = sel->next;
 
-		note = (GSM_CalendarNote *) g_malloc(sizeof(GSM_CalendarNote));
+		note = (gn_calnote *) g_malloc(sizeof(gn_calnote));
 		gtk_clist_get_text(GTK_CLIST(cal.notesClist), row, 0, &buf);
-		note->Location = atoi(buf);
+		note->location = atoi(buf);
 
 		e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 		e->event = Event_DeleteCalendarNote;
