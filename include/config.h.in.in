@@ -64,6 +64,9 @@
 /* Define if you have vasprintf */
 #undef HAVE_VASPRINTF
 
+/* Define if you have strsep */
+#undef HAVE_STRSEP
+
 /* Define debug level */
 #undef DEBUG
 #undef XDEBUG

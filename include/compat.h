@@ -86,6 +86,10 @@
 int gettimeofday(struct timeval *tv, void *tz);
 #endif
 
+#ifndef	HAVE_STRSEP
+char *strsep(char **stringp, const char *delim);
+#endif
+
 #if !defined(HAVE_SNPRINTF) && !defined(HAVE_C99_SNPRINTF)
 int snprintf(char *str, size_t size, const char *format, ...);
 #endif
