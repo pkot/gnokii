@@ -607,7 +607,6 @@ AC_SUBST(WIN32_CROSS)
 
 AC_OUTPUT(
    Makefile.global
-   intl/Makefile 
    po/Makefile.in
    packaging/RedHat/gnokii.spec
    packaging/Slackware/SlackBuild
