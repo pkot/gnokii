@@ -44,3 +44,6 @@
 - FB61_SendRingtoneRTTL will send specified filename in RTTL format to the
   phone (6110) only, via SMS soon.
 
+* Sat Apr 15 13:18:39 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- RTTTL without name supported
+- minor spelling fixes
