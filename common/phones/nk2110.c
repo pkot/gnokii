@@ -325,6 +325,7 @@ SMS(GSM_SMSMessage *message, int command)
 		eprintf("Wanted message @%d, got message at @%d!\n", message->Number, SMSData[2]);
 		return GE_BUSY;
 	}
+	SMSpos = 0;
 	return (GE_NONE);
 }
 
@@ -423,7 +424,7 @@ SendSMSMessage(GSM_SMSMessage *m)
 }
 #endif
 
-static GSM_Error	DeleteSMSMessage(GSM_SMSMessage *message)
+static GSM_Error DeleteSMSMessage(GSM_SMSMessage *message)
 {
 	ddprintf("deleting...");
 	return SMS(message, 3);
@@ -564,6 +565,25 @@ Display(u8 b, int shift, char *s, char *buf)
 }
 
 static GSM_Error (*OutputFn)(char *text, char *ctrl);
+static GSM_Error (*OnSMSFn)(GSM_SMSMessage *m);
+int SMSReady = 0;
+
+static int
+CheckIncomingSMS(int at)
+{
+	GSM_SMSMessage m;
+	eprintf("Check message at %d\n", at);
+	memset(&m, 0, sizeof(m));
+	m.Number = at;
+	m.MemoryType = GMT_ME;
+	if (GetSMSMessage(&m) != GE_NONE) {
+		return 0;
+	}
+	if (OnSMSFn)
+		OnSMSFn(&m);
+	DeleteSMSMessage(&m);
+	return 1;
+}
 
 static int
 HandlePacket(void)
@@ -606,6 +626,33 @@ HandlePacket(void)
 			}
 			fflush(stdout);
 		}
+
+		/* Handle incoming sms notifications */
+		{
+			switch (SMSData[0]) {
+			case LM_SMS_RECEIVED_PP_DATA:
+				eprintf("Data came!\n");
+				SMSpos = 0;
+				return 1;
+			case LM_SMS_ALIVE_TEST:
+				eprintf("Am I alive?\n");
+				SMSpos = 0;
+				return 1;
+			case LM_SMS_NEW_MESSAGE_INDICATION:
+			{
+				int i, at;
+				SMSpos = 0;
+				at = SMSData[2];
+				eprintf("New message indicated @%d\n", at);
+				msleep_poll(200);
+				for (i=0; i<sizeof(SMSData); i++)
+					SMSData[i] = 0;
+				SMSReady = at;
+				return 1;
+			}
+			}
+		}
+
 		return ((PacketData[4] & 0xf) != 0);
 		/* Make all but last fragment "secret" */
 
@@ -699,6 +746,12 @@ SigHandler(int status)
 				Length = 5;
 			}
 		}
+	}
+	if (SMSReady) {
+		int at = SMSReady;
+		SMSReady = 0;
+		if (!CheckIncomingSMS(at))
+			eprintf("Could not find promissed message?\n");
 	}
 }
 
@@ -949,6 +1002,7 @@ static GSM_Error SMS_Reserve(GSM_Statemachine *sm)
 {
 	u8 pkt[] = { 0x10, LM_SMS_RESERVE_PP, LN_SMS_NORMAL_RESERVE };
 	PacketOK = false;
+	msleep_poll(3000);
 	SendCommand(pkt, LM_SMS_COMMAND, sizeof(pkt));
 	PacketOK = 0;
 	waitfor(PacketOK, 100);
@@ -958,47 +1012,8 @@ static GSM_Error SMS_Reserve(GSM_Statemachine *sm)
 		eprintf("Bad reply trying to reserve SMS-es\n");
 	if (SMSData[0] != LM_SMS_PP_RESERVE_COMPLETE)
 		eprintf("Not okay trying to reserve SMS-es (%d)\n", SMSData[0]);
+	SMSpos = 0;
 	return GE_NONE;
-}
-
-static GSM_Error SMS_Slave(GSM_Statemachine *sm)
-{
-	SMS_Reserve(sm);
-	eprintf("Reserved okay\n");
-	while (1) {
-		PacketOK = 0;
-		SMSpos = 0;
-		memset((void *) &SMSData[0], 0, 255);
-		waitfor(PacketOK, 1000000);
-		if (PacketData[3] != LM_SMS_EVENT)
-			eprintf("Wrong packet came!\n");
-		switch (SMSData[0]) {
-		case LM_SMS_RECEIVED_PP_DATA:
-			eprintf("Data came!\n");
-			break;
-		case LM_SMS_ALIVE_TEST:
-			eprintf("Am I alive?\n");
-			break;
- 		case LM_SMS_NEW_MESSAGE_INDICATION:
-			{
-				GSM_SMSMessage m;
-				eprintf("New message indicated @%d\n", SMSData[2]);
-				msleep_poll(200);
-				memset(&m, 0, sizeof(m));
-				m.Number = SMSData[2];
-				m.MemoryType = GMT_ME;
-				if (GetSMSMessage(&m) != GE_NONE)
-					eprintf("Could not find promissed message?\n");
-#if 0
-				else
-					slave_process(&m, SMSData[2]);
-#endif
-			}
-			break;
-		default:
-			eprintf("Unexpected packet came: %x\n", SMSData[0]);
-		}
-	}
 }
 
 /* This is the main loop for the MB21 functions.  When N2110_Initialise
@@ -1226,9 +1241,6 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		err = EnableDisplayOutput(state);
 		break;
 	case GOP_GetSMS:
-#if 0
-		SMS_Slave(state);	/* FIXME!!! */
-#endif
 		msleep(100);
 		err = GetSMSMessage(data->SMSMessage);
 		break;
@@ -1241,8 +1253,18 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 	case GOP_WritePhonebook:
 	  	err = WritePhonebookLocation(data->PhonebookEntry);
 		break;
-	case GOP_GetAlarm:
-		err = SMS_Slave(state);		/* Dirty hack, Fallthrough */
+	case GOP_OnSMS:
+		OnSMSFn = data->OnSMS;
+		if (OnSMSFn) {
+			CheckIncomingSMS(1);
+			CheckIncomingSMS(2);
+			CheckIncomingSMS(3);
+			CheckIncomingSMS(4);
+			CheckIncomingSMS(5);
+			err = SMS_Reserve(state);
+		}
+		break;		
+	case GOP_PollSMS:			/* Our phone is able to notify us */
 		break;
 	default:
 		err = GE_NOTIMPLEMENTED;

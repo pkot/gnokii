@@ -107,6 +107,7 @@ typedef enum {
 	OPT_DISPLAYOUTPUT,
 	OPT_KEYPRESS,
 	OPT_DIVERT,
+	OPT_SMSREADER,
 	OPT_FOOGLE
 } opt_index;
 
@@ -2661,6 +2662,78 @@ static int divert(int argc, char **argv)
 	return 0;
 }
 
+static int smsslave(GSM_SMSMessage *message)
+{
+	FILE *output;
+	char *s = message->UserData[0].u.Text;
+	char buf[10240];
+	int i = message->Number;
+	int i1, i2, msgno, msgpart;
+	static int unknown = 0;
+	char c;
+
+	while (*s == 'W')
+		s++;
+	fprintf(stderr, "Got message %d: %s\n", i, s);
+	if ((sscanf(s, "%d/%d:%d-%c-", &i1, &i2, &msgno, &c)==4) && (c == 'X'))
+		sprintf(buf, "/tmp/sms/mail_%d_", msgno);
+	else if (sscanf(s, "%d/%d:%d-%d-", &i1, &i2, &msgno, &msgpart)==4)
+		sprintf(buf, "/tmp/sms/mail_%d_%03d", msgno, msgpart);
+	else	sprintf(buf, "/tmp/sms/unknown_%d_%d", getpid(), unknown++);
+	if ((output = fopen(buf, "r"))) {
+		fprintf(stderr, "### Exists?!\n");
+		fclose(output);
+	}
+	output = fopen(buf, "w+");
+	if (strstr(buf, "unknown"))
+		fprintf(output, "%s", message->UserData[0].u.Text);
+	else {
+		s = message->UserData[0].u.Text;
+		while (!(*s == '-'))
+			s++;
+		s++;
+		while (!(*s == '-'))
+			s++;
+		s++;
+		fprintf(output, "%s", s);
+	}
+	fclose(output);
+}
+
+static int smsreader(void)
+{
+	GSM_Data data;
+	GSM_Statemachine *sm = &State;
+	GSM_Error error;
+
+	data.OnSMS = smsslave;
+	error = SM_Functions(GOP_OnSMS, &data, sm);
+	if (error == GE_NONE) {
+		/* We do not want to see texts forever - press Ctrl+C to stop. */
+		signal(SIGINT, interrupted);    
+		fprintf (stderr, _("Entered sms reader mode...\n"));
+
+		/* Loop here indefinitely - allows you to read texts from phone's
+		   display. The loops ends after pressing the Ctrl+C. */
+		while (!bshutdown) {
+			SM_Loop(sm, 1);
+			usleep(1000);
+		}
+		fprintf (stderr, "Shutting down\n");
+
+		fprintf (stderr, _("Exiting sms reader mode...\n"));
+		data.OnSMS = NULL;
+
+		error = SM_Functions(GOP_OnSMS, &data, sm);
+		if (error != GE_NONE)
+			fprintf (stderr, _("Error!\n"));
+	} else
+		fprintf (stderr, _("Error!\n"));
+
+	if (GSM && GSM->Terminate) GSM->Terminate();
+	return 0;
+}
+
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 #ifndef WIN32
@@ -2800,6 +2873,9 @@ int main(int argc, char *argv[])
 
 		/* Divert calls */
 		{ "divert",		required_argument, NULL, OPT_DIVERT },
+
+		/* SMS reader */
+		{ "smsreader",          no_argument,       NULL, OPT_SMSREADER },
 
 		// For development purposes: insert you function calls here
 		{ "foogle",             no_argument,       NULL, OPT_FOOGLE },
@@ -3016,6 +3092,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_DIVERT:
 			rc = divert(argc, argv);
+			break;
+		case OPT_SMSREADER:
+			rc = smsreader();
 			break;
 #ifndef WIN32
 		case OPT_FOOGLE:
