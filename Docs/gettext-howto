@@ -100,3 +100,25 @@ SnowWhite:/tmp/gnokii$
 The second line is in czech language :-) There are some problems - for
 example with "Mar" which is substitute by the C preprocessor.
 
+6. How to use locale in the gnokii code
+
+It's simple. Instead uf using:
+"some string"
+use:
+_("some string")
+
+In some cases _() cannot be used but the text still needs to be localized.
+In such cases use:
+N_("some string")
+For more detailes refer to gettext info pages.
+
+When sending us the patches and writing code for gnokii follow the rules:
+ - do NOT translate DEBUG output (usually done by dprintf()),
+ - translate all other output
+ - do not output to stdout, unless you are in the application level code
+ (gnokii/*.c, gnokiid/*.c, xgnokii/*.c, smsd/*.c)
+
+-- 
+$Id$
+Pavel Janik
+Pawel Kot
