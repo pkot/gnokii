@@ -9,8 +9,8 @@
 #
 
 #
-# For this common directory is used "subsystem.o" .o files concept.
-#   (the list of object files to be linked together (to COMMON.o),
+# For this common directory is used "subsystem.la" .la files concept.
+#   (the list of object files to be linked together (to COMMON.la),
 #   and other dirs is used this _one_ file (instead of all OBJS)
 #
 
