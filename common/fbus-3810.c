@@ -2335,7 +2335,7 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
     }
 
     if (center_number_length == 0) {
-        fprintf(stdout, _("Number field emtpy."));
+        fprintf(stdout, _("Number field empty."));
     }
     else {
         fprintf(stdout, _("Number: "));

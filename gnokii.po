@@ -10,7 +10,7 @@ msgstr ""
 msgid "   %d. SMS Center name is %s\n"
 msgstr ""
 
-#: fbus-6110.c:3490 gnokii.c:1515
+#: fbus-6110.c:3490 gnokii.c:1510
 msgid "   Alarm date: %d-%02d-%02d\n"
 msgstr ""
 
@@ -18,7 +18,7 @@ msgstr ""
 msgid "   Alarm is %s\n"
 msgstr ""
 
-#: fbus-6110.c:3494 gnokii.c:1519
+#: fbus-6110.c:3494 gnokii.c:1514
 msgid "   Alarm time: %02d:%02d:%02d\n"
 msgstr ""
 
@@ -30,7 +30,7 @@ msgstr ""
 msgid "   Battery Level: %d\n"
 msgstr ""
 
-#: gnokii.c:1590
+#: gnokii.c:1585
 msgid "   Calendar note deleted.\n"
 msgstr ""
 
@@ -42,7 +42,7 @@ msgstr ""
 msgid "   Date: %4d/%02d/%02d\n"
 msgstr ""
 
-#: fbus-6110.c:3479 gnokii.c:1506
+#: fbus-6110.c:3479 gnokii.c:1501
 msgid "   Date: %d-%02d-%02d\n"
 msgstr ""
 
@@ -154,7 +154,7 @@ msgstr ""
 msgid "   Number: %d\n"
 msgstr ""
 
-#: fbus-6110.c:3503 gnokii.c:1527
+#: fbus-6110.c:3503 gnokii.c:1522
 msgid "   Phone: %s\n"
 msgstr ""
 
@@ -210,7 +210,7 @@ msgstr ""
 msgid "   Status: "
 msgstr ""
 
-#: fbus-6110.c:3500 gnokii.c:1524
+#: fbus-6110.c:3500 gnokii.c:1519
 msgid "   Text: %s\n"
 msgstr ""
 
@@ -222,11 +222,11 @@ msgstr ""
 msgid "   The request for SMS Center failed.\n"
 msgstr ""
 
-#: fbus-6110.c:3333 fbus-6110.c:3483 gnokii.c:1510
+#: fbus-6110.c:3333 fbus-6110.c:3483 gnokii.c:1505
 msgid "   Time: %02d:%02d:%02d\n"
 msgstr ""
 
-#: gnokii.c:1481
+#: gnokii.c:1476
 msgid "   Type of the note: "
 msgstr ""
 
@@ -368,23 +368,23 @@ msgstr ""
 msgid "%02d/%02d/%02d %02d:%02d:%02d GMT%+dh"
 msgstr ""
 
-#: gnokii.c:997 gnokii.c:1010 gnokii.c:1037
+#: gnokii.c:992 gnokii.c:1005 gnokii.c:1032
 msgid "%d"
 msgstr ""
 
-#: gnokii.c:983
+#: gnokii.c:978
 msgid "%d. Delivery Report "
 msgstr ""
 
-#: gnokii.c:1022
+#: gnokii.c:1017
 msgid "%d. Inbox Message "
 msgstr ""
 
-#: gnokii.c:970
+#: gnokii.c:965
 msgid "%d. Outbox Message "
 msgstr ""
 
-#: gnokii.c:807
+#: gnokii.c:802
 msgid "%d. SMS center (%s) number is %s\n"
 msgstr ""
 
@@ -412,27 +412,27 @@ msgstr ""
 msgid "%s: line: %d:Can't write ME memory entry number %d! Error: %d\n"
 msgstr ""
 
-#: gnokii.c:1898
+#: gnokii.c:1893
 msgid "%s|%d|Bad location or other error!(%d)\n"
 msgstr ""
 
-#: gnokii.c:987 gnokii.c:1027
+#: gnokii.c:982 gnokii.c:1022
 msgid "(not read)\n"
 msgstr ""
 
-#: gnokii.c:975
+#: gnokii.c:970
 msgid "(not sent)\n"
 msgstr ""
 
-#: gnokii.c:985 gnokii.c:1025
+#: gnokii.c:980 gnokii.c:1020
 msgid "(read)\n"
 msgstr ""
 
-#: gnokii.c:973
+#: gnokii.c:968
 msgid "(sent)\n"
 msgstr ""
 
-#: gnokii.c:995 gnokii.c:1008 gnokii.c:1035
+#: gnokii.c:990 gnokii.c:1003 gnokii.c:1030
 msgid "+%dh"
 msgstr ""
 
@@ -496,11 +496,11 @@ msgstr ""
 msgid "1 h"
 msgstr ""
 
-#: fbus-6110.c:2579 gnokii.c:840
+#: fbus-6110.c:2579 gnokii.c:835
 msgid "1 hour"
 msgstr ""
 
-#: fbus-6110.c:2595 gnokii.c:856 xgnokii/xgnokii.c:448 xgnokii/xgnokii.c:1118
+#: fbus-6110.c:2595 gnokii.c:851 xgnokii/xgnokii.c:448 xgnokii/xgnokii.c:1118
 msgid "1 week"
 msgstr ""
 
@@ -508,7 +508,7 @@ msgstr ""
 msgid "24 h"
 msgstr ""
 
-#: fbus-6110.c:2587 gnokii.c:848
+#: fbus-6110.c:2587 gnokii.c:843
 msgid "24 hours"
 msgstr ""
 
@@ -516,7 +516,7 @@ msgstr ""
 msgid "6 h"
 msgstr ""
 
-#: fbus-6110.c:2583 gnokii.c:844
+#: fbus-6110.c:2583 gnokii.c:839
 msgid "6 hours"
 msgstr ""
 
@@ -524,7 +524,7 @@ msgstr ""
 msgid "72 h"
 msgstr ""
 
-#: fbus-6110.c:2591 gnokii.c:852
+#: fbus-6110.c:2591 gnokii.c:847
 msgid "72 hours"
 msgstr ""
 
@@ -540,7 +540,7 @@ msgstr ""
 msgid "?Constant voltage charging display"
 msgstr ""
 
-#: gnokii.c:1752
+#: gnokii.c:1747
 msgid "AC/DC"
 msgstr ""
 
@@ -580,7 +580,7 @@ msgstr ""
 msgid "Alarm setting"
 msgstr ""
 
-#: gnokii.c:1692
+#: gnokii.c:1687
 msgid "Alarm: %s\n"
 msgstr ""
 
@@ -588,7 +588,7 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
-#: rlp-common.c:257
+#: rlp-common.c:509
 msgid "BAD"
 msgstr ""
 
@@ -600,7 +600,7 @@ msgstr ""
 msgid "Bad checksum!\n"
 msgstr ""
 
-#: gnokii.c:1749
+#: gnokii.c:1744
 msgid "Battery: %d\n"
 msgstr ""
 
@@ -608,7 +608,7 @@ msgstr ""
 msgid "Bindir:"
 msgstr ""
 
-#: gnokii.c:1498
+#: gnokii.c:1493
 msgid "Birthday\n"
 msgstr ""
 
@@ -644,11 +644,11 @@ msgstr ""
 msgid "CTS is %s.\n"
 msgstr ""
 
-#: gnokii.c:1490
+#: gnokii.c:1485
 msgid "Call\n"
 msgstr ""
 
-#: gnokii.c:2101
+#: gnokii.c:2096
 msgid "Call in progress: %s\n"
 msgstr ""
 
@@ -740,7 +740,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: gnokii.c:1226
+#: gnokii.c:1221
 msgid "Code ok.\n"
 msgstr ""
 
@@ -796,7 +796,7 @@ msgstr ""
 msgid "Couldn't open pty!\n"
 msgstr ""
 
-#: gnokii.c:684
+#: gnokii.c:679
 msgid "Couldn't read from stdin!\n"
 msgstr ""
 
@@ -804,7 +804,7 @@ msgstr ""
 msgid "Counter for PLMN Search and Cell reselection (Singleband)"
 msgstr ""
 
-#: gnokii.c:1761
+#: gnokii.c:1756
 msgid "DC: Used %d, Free %d\n"
 msgstr ""
 
@@ -820,7 +820,7 @@ msgstr ""
 msgid "DTX, Cipher, Hopping"
 msgstr ""
 
-#: gnokii.c:2106
+#: gnokii.c:2101
 msgid "Data call active: %s\n"
 msgstr ""
 
@@ -828,7 +828,7 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: gnokii.c:1029
+#: gnokii.c:1024
 msgid "Date/time: %d/%d/%d %d:%02d:%02d GMT"
 msgstr ""
 
@@ -836,7 +836,7 @@ msgstr ""
 msgid "Date: "
 msgstr ""
 
-#: gnokii.c:1655
+#: gnokii.c:1650
 msgid "Date: %4d/%02d/%02d\n"
 msgstr ""
 
@@ -856,13 +856,13 @@ msgstr ""
 msgid "Delete message"
 msgstr ""
 
-#: gnokii.c:1167
+#: gnokii.c:1162
 msgid ""
 "DeleteSMS %s %d failed!(%d)\n"
 "\n"
 msgstr ""
 
-#: gnokii.c:1160
+#: gnokii.c:1155
 msgid "Deleted SMS %s %d\n"
 msgstr ""
 
@@ -902,7 +902,7 @@ msgstr ""
 msgid "E-Mail:"
 msgstr ""
 
-#: gnokii.c:1764
+#: gnokii.c:1759
 msgid "EN: Used %d, Free %d\n"
 msgstr ""
 
@@ -934,15 +934,15 @@ msgstr ""
 msgid "Edit entry"
 msgstr ""
 
-#: fbus-6110.c:2565 gnokii.c:826
+#: fbus-6110.c:2565 gnokii.c:821
 msgid "Email"
 msgstr ""
 
-#: gnokii.c:1218
+#: gnokii.c:1213
 msgid "Enter your code: "
 msgstr ""
 
-#: gnokii.c:1734
+#: gnokii.c:1729
 msgid "Entering monitor mode...\n"
 msgstr ""
 
@@ -966,7 +966,7 @@ msgstr ""
 msgid "Error: %s: line %d: Can't allocate memory!\n"
 msgstr ""
 
-#: gnokii.c:1224
+#: gnokii.c:1219
 msgid "Error: invalid code\n"
 msgstr ""
 
@@ -982,7 +982,7 @@ msgstr ""
 msgid "Export to file"
 msgstr ""
 
-#: gnokii.c:1767
+#: gnokii.c:1762
 msgid "FD: Used %d, Free %d\n"
 msgstr ""
 
@@ -994,11 +994,11 @@ msgstr ""
 msgid "Familly"
 msgstr ""
 
-#: fbus-6110.c:2561 gnokii.c:822 xgnokii/xgnokii.c:417 xgnokii/xgnokii.c:1046
+#: fbus-6110.c:2561 gnokii.c:817 xgnokii/xgnokii.c:417 xgnokii/xgnokii.c:1046
 msgid "Fax"
 msgstr ""
 
-#: gnokii.c:2105
+#: gnokii.c:2100
 msgid "Fax call active: %s\n"
 msgstr ""
 
@@ -1020,12 +1020,16 @@ msgstr ""
 msgid "Format"
 msgstr ""
 
-#: gnokii.c:1965
+#: gnokii.c:1960
 msgid "Format problem on line %d [%s]\n"
 msgstr ""
 
 #: xgnokii/xgnokii_sms.c:292
 msgid "Forward Message"
+msgstr ""
+
+#: rlp-common.c:621
+msgid "Frame FCS is bad. Ignoring...\n"
 msgstr ""
 
 #: xgnokii/xgnokii.c:2006
@@ -1036,7 +1040,7 @@ msgstr ""
 msgid "From: "
 msgstr ""
 
-#: gnokii.c:1052 gnokii.c:1163 gnokii.c:1888
+#: gnokii.c:1047 gnokii.c:1158 gnokii.c:1883
 msgid "Function not implemented in %s model!\n"
 msgstr ""
 
@@ -1048,17 +1052,17 @@ msgid ""
 "Built %s %s for %s on %s \n"
 msgstr ""
 
-#: gnokii.c:215 gnokii.c:2247 virtmodem.c:243 xgnokii/xgnokii.c:176 xkeyb.c:181 xlogos.c:130
+#: gnokii.c:210 gnokii.c:2244 virtmodem.c:243 xgnokii/xgnokii.c:176 xkeyb.c:181 xlogos.c:130
 msgid "GSM/FBUS init failed! (Unknown model ?). Quitting.\n"
 msgstr ""
 
-#: gnokii.c:1070
+#: gnokii.c:1065
 msgid ""
 "GetSMS %s %d failed!(%d)\n"
 "\n"
 msgstr ""
 
-#: gnokii.c:1408
+#: gnokii.c:1403
 msgid "Getting Logo.\n"
 msgstr ""
 
@@ -1102,11 +1106,11 @@ msgstr ""
 msgid "Help viewer"
 msgstr ""
 
-#: gnokii.c:226 virtmodem.c:255 xkeyb.c:192 xlogos.c:141
+#: gnokii.c:221 virtmodem.c:255 xkeyb.c:192 xlogos.c:141
 msgid "Hmmm... GSM_LinkOK never went true. Quitting. \n"
 msgstr ""
 
-#: gnokii.c:2155
+#: gnokii.c:2150
 msgid "IMEI:     %s\n"
 msgstr ""
 
@@ -1144,7 +1148,7 @@ msgstr ""
 msgid "Incoming call terminated.\n"
 msgstr ""
 
-#: gnokii.c:1785
+#: gnokii.c:1780
 msgid "Incoming call: %s\n"
 msgstr ""
 
@@ -1176,7 +1180,7 @@ msgstr ""
 msgid "Init length:"
 msgstr ""
 
-#: gnokii.c:1735
+#: gnokii.c:1730
 msgid "Initialising GSM interface...\n"
 msgstr ""
 
@@ -1184,11 +1188,11 @@ msgstr ""
 msgid "Interrupted MultiFrame-Message - Ingnoring it !!!\n"
 msgstr ""
 
-#: gnokii.c:1058
+#: gnokii.c:1053
 msgid "Invalid location: %s %d\n"
 msgstr ""
 
-#: gnokii.c:2107
+#: gnokii.c:2102
 msgid "Keyboard lock: %s\n"
 msgstr ""
 
@@ -1196,11 +1200,11 @@ msgstr ""
 msgid "L2-Timeouts"
 msgstr ""
 
-#: gnokii.c:1770
+#: gnokii.c:1765
 msgid "LD: Used %d, Free %d\n"
 msgstr ""
 
-#: gnokii.c:1793
+#: gnokii.c:1788
 msgid "Leaving monitor mode...\n"
 msgstr ""
 
@@ -1208,11 +1212,11 @@ msgstr ""
 msgid "Load"
 msgstr ""
 
-#: gnokii.c:1453
+#: gnokii.c:1448
 msgid "Logo file error.\n"
 msgstr ""
 
-#: gnokii.c:1773
+#: gnokii.c:1768
 msgid "MC: Used %d, Free %d\n"
 msgstr ""
 
@@ -1228,11 +1232,11 @@ msgstr ""
 msgid "Max. time"
 msgstr ""
 
-#: fbus-6110.c:2599 gnokii.c:860
+#: fbus-6110.c:2599 gnokii.c:855
 msgid "Maximum time"
 msgstr ""
 
-#: gnokii.c:1494
+#: gnokii.c:1489
 msgid "Meeting\n"
 msgstr ""
 
@@ -1244,7 +1248,7 @@ msgstr ""
 msgid "Memory status before reset"
 msgstr ""
 
-#: gnokii.c:1893
+#: gnokii.c:1888
 msgid "Memory type %s not supported!\n"
 msgstr ""
 
@@ -1256,7 +1260,7 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: gnokii.c:835
+#: gnokii.c:830
 msgid "Message validity is "
 msgstr ""
 
@@ -1564,7 +1568,7 @@ msgstr ""
 msgid "Message: the rest of the SMS message received.\n"
 msgstr ""
 
-#: gnokii.c:809
+#: gnokii.c:804
 msgid "Messages sent as "
 msgstr ""
 
@@ -1576,7 +1580,7 @@ msgstr ""
 msgid "Model:"
 msgstr ""
 
-#: gnokii.c:2156
+#: gnokii.c:2151
 msgid "Model:    %s\n"
 msgstr ""
 
@@ -1662,7 +1666,7 @@ msgstr ""
 msgid "Net Monitor"
 msgstr ""
 
-#: gnokii.c:1788
+#: gnokii.c:1783
 msgid "Network: %s (%s), LAC: %s, CellID: %s\n"
 msgstr ""
 
@@ -1707,7 +1711,7 @@ msgid "Number"
 msgstr ""
 
 #: fbus-3810.c:2338
-msgid "Number field emtpy."
+msgid "Number field empty."
 msgstr ""
 
 #: xgnokii/xgnokii_contacts.c:721
@@ -1722,7 +1726,7 @@ msgstr ""
 msgid "Number: %d\n"
 msgstr ""
 
-#: gnokii.c:1776
+#: gnokii.c:1771
 msgid "ON: Used %d, Free %d\n"
 msgstr ""
 
@@ -1774,7 +1778,7 @@ msgstr ""
 msgid "Page:"
 msgstr ""
 
-#: fbus-6110.c:2557 gnokii.c:818 xgnokii/xgnokii.c:413 xgnokii/xgnokii.c:1053
+#: fbus-6110.c:2557 gnokii.c:813 xgnokii/xgnokii.c:413 xgnokii/xgnokii.c:1053
 msgid "Paging"
 msgstr ""
 
@@ -1806,7 +1810,7 @@ msgstr ""
 msgid "Phone powering off..."
 msgstr ""
 
-#: gnokii.c:1758
+#: gnokii.c:1753
 msgid "Phone: Used %d, Free %d\n"
 msgstr ""
 
@@ -1818,7 +1822,7 @@ msgstr ""
 msgid "Port:"
 msgstr ""
 
-#: gnokii.c:1752
+#: gnokii.c:1747
 msgid "Power Source: %s\n"
 msgstr ""
 
@@ -1830,12 +1834,20 @@ msgstr ""
 msgid "Quality of service not aviable"
 msgstr ""
 
-#: gnokii.c:1779
+#: gnokii.c:1774
 msgid "RC: Used %d, Free %d\n"
 msgstr ""
 
-#: gnokii.c:1746
+#: gnokii.c:1741
 msgid "RFLevel: %d\n"
+msgstr ""
+
+#: rlp-common.c:643
+msgid "RLP state 0.\n"
+msgstr ""
+
+#: rlp-common.c:660
+msgid "RLP state 1.\n"
 msgstr ""
 
 #: fbus-6110.c:2135
@@ -1850,11 +1862,11 @@ msgstr ""
 msgid "Read from phone"
 msgstr ""
 
-#: gnokii.c:1015
+#: gnokii.c:1010
 msgid "Receiver: %s Msg Center: %s\n"
 msgstr ""
 
-#: gnokii.c:1486
+#: gnokii.c:1481
 msgid "Reminder\n"
 msgstr ""
 
@@ -1894,11 +1906,11 @@ msgstr ""
 msgid "Reset-Counter"
 msgstr ""
 
-#: gnokii.c:1002
+#: gnokii.c:997
 msgid "Response date/time: %d/%d/%d %d:%02d:%02d GMT"
 msgstr ""
 
-#: gnokii.c:2157
+#: gnokii.c:2152
 msgid "Revision: %s\n"
 msgstr ""
 
@@ -1914,7 +1926,7 @@ msgstr ""
 msgid "SIM memory..."
 msgstr ""
 
-#: gnokii.c:1755
+#: gnokii.c:1750
 msgid "SIM: Used %d, Free %d\n"
 msgstr ""
 
@@ -1958,7 +1970,7 @@ msgstr ""
 msgid "SMS Message Center Data status bytes ="
 msgstr ""
 
-#: gnokii.c:1782
+#: gnokii.c:1777
 msgid "SMS Messages: UnRead %d, Number %d\n"
 msgstr ""
 
@@ -1966,19 +1978,19 @@ msgstr ""
 msgid "SMS Send attempt failed, trying again (%d of %d)\n"
 msgstr ""
 
-#: gnokii.c:787 gnokii.c:1365
+#: gnokii.c:782 gnokii.c:1360
 msgid "SMS Send failed (error=%d)\n"
 msgstr ""
 
-#: gnokii.c:871
+#: gnokii.c:866
 msgid "SMS center can not be found :-(\n"
 msgstr ""
 
-#: gnokii.c:1064
+#: gnokii.c:1059
 msgid "SMS location %s %d empty.\n"
 msgstr ""
 
-#: gnokii.c:2108
+#: gnokii.c:2103
 msgid "SMS storage full: %s\n"
 msgstr ""
 
@@ -2006,7 +2018,7 @@ msgstr ""
 msgid "Saving entries"
 msgstr ""
 
-#: gnokii.c:1242
+#: gnokii.c:1237
 msgid "Security code status: "
 msgstr ""
 
@@ -2022,7 +2034,7 @@ msgstr ""
 msgid "Send SMS header failed!"
 msgstr ""
 
-#: gnokii.c:785 gnokii.c:1363
+#: gnokii.c:780 gnokii.c:1358
 msgid "Send succeeded!\n"
 msgstr ""
 
@@ -2030,7 +2042,7 @@ msgstr ""
 msgid "Sender"
 msgstr ""
 
-#: gnokii.c:1042
+#: gnokii.c:1037
 msgid "Sender: %s Msg Center: %s\n"
 msgstr ""
 
@@ -2038,7 +2050,7 @@ msgstr ""
 msgid "Sending Format:"
 msgstr ""
 
-#: gnokii.c:1459
+#: gnokii.c:1454
 msgid "Sending Logo.\n"
 msgstr ""
 
@@ -2046,7 +2058,7 @@ msgstr ""
 msgid "Sending SMS to %s via message center %s\n"
 msgstr ""
 
-#: gnokii.c:989
+#: gnokii.c:984
 msgid "Sending date/time: %d/%d/%d %d:%02d:%02d GMT"
 msgstr ""
 
@@ -2118,7 +2130,7 @@ msgid ""
 "because you save it into SIM memory!"
 msgstr ""
 
-#: gnokii.c:2001
+#: gnokii.c:1996
 msgid "SpeedDial nr. %d: %d:%d\n"
 msgstr ""
 
@@ -2142,7 +2154,7 @@ msgstr ""
 msgid "Status: Connection Status %02x Batt %02x RF %02x.\n"
 msgstr ""
 
-#: gnokii.c:1570 gnokii.c:2039
+#: gnokii.c:1565 gnokii.c:2034
 msgid "Succesfully written!\n"
 msgstr ""
 
@@ -2178,29 +2190,29 @@ msgstr ""
 msgid "Temporary error, SC still trying to transfer SM\n"
 msgstr ""
 
-#: fbus-6110.c:2553 gnokii.c:814 xgnokii/xgnokii.c:409 xgnokii/xgnokii.c:425 xgnokii/xgnokii.c:1039
+#: fbus-6110.c:2553 gnokii.c:809 xgnokii/xgnokii.c:409 xgnokii/xgnokii.c:425 xgnokii/xgnokii.c:1039
 msgid "Text"
 msgstr ""
 
-#: gnokii.c:977 gnokii.c:1016 gnokii.c:1043
+#: gnokii.c:972 gnokii.c:1011 gnokii.c:1038
 msgid ""
 "Text: %s\n"
 "\n"
 msgstr ""
 
-#: gnokii.c:1593
+#: gnokii.c:1588
 msgid "The calendar note can not be deleted\n"
 msgstr ""
 
-#: gnokii.c:1531
+#: gnokii.c:1526
 msgid "The calendar note can not be read\n"
 msgstr ""
 
-#: gnokii.c:1693
+#: gnokii.c:1688
 msgid "Time: %02d:%02d\n"
 msgstr ""
 
-#: gnokii.c:1656
+#: gnokii.c:1651
 msgid "Time: %02d:%02d:%02d\n"
 msgstr ""
 
@@ -2212,15 +2224,15 @@ msgstr ""
 msgid "Title:"
 msgstr ""
 
-#: fbus-6110.c:2569 fbus-6110.c:2603 fbus-6110.c:3963 fbus-6110.c:4404 gnokii.c:830 gnokii.c:864
+#: fbus-6110.c:2569 fbus-6110.c:2603 fbus-6110.c:3963 fbus-6110.c:4404 gnokii.c:825 gnokii.c:859
 msgid "Unknown"
 msgstr ""
 
-#: gnokii.c:1502
+#: gnokii.c:1497
 msgid "Unknown\n"
 msgstr ""
 
-#: gnokii.c:943 gnokii.c:1140 gnokii.c:1865 gnokii.c:2028
+#: gnokii.c:938 gnokii.c:1135 gnokii.c:1860 gnokii.c:2023
 msgid "Unknown memory type %s!\n"
 msgstr ""
 
@@ -2240,7 +2252,7 @@ msgstr ""
 msgid "Unknown message!\n"
 msgstr ""
 
-#: gnokii.c:646
+#: gnokii.c:641
 msgid "Unknown option: %d\n"
 msgstr ""
 
@@ -2248,11 +2260,11 @@ msgstr ""
 msgid "Unknown type\n"
 msgstr ""
 
-#: fbus-6110.c:3167 gnokii.c:1278
+#: fbus-6110.c:3167 gnokii.c:1273
 msgid "Unknown!\n"
 msgstr ""
 
-#: rlp-common.c:196
+#: rlp-common.c:448
 msgid "Unknown!!! "
 msgstr ""
 
@@ -2260,11 +2272,11 @@ msgstr ""
 msgid "Unknown: "
 msgstr ""
 
-#: gnokii.c:2102
+#: gnokii.c:2097
 msgid "Unknown: %s\n"
 msgstr ""
 
-#: gnokii.c:2103
+#: gnokii.c:2098
 msgid "Unread SMS: %s\n"
 msgstr ""
 
@@ -2272,7 +2284,7 @@ msgstr ""
 msgid "Uplink DTX"
 msgstr ""
 
-#: gnokii.c:472
+#: gnokii.c:467
 msgid "Use '%s --help' for usage informations.\n"
 msgstr ""
 
@@ -2308,7 +2320,7 @@ msgstr ""
 msgid "Viewer:"
 msgstr ""
 
-#: gnokii.c:2104
+#: gnokii.c:2099
 msgid "Voice call: %s\n"
 msgstr ""
 
@@ -2320,15 +2332,15 @@ msgstr ""
 msgid "WARNING: Can't find HOME enviroment variable!\n"
 msgstr ""
 
-#: gnokii.c:2189
+#: gnokii.c:2184
 msgid "What kind of reset do you want??\n"
 msgstr ""
 
-#: gnokii.c:1981
+#: gnokii.c:1976
 msgid "Write FAILED(%d): memory type: %s, loc: %d, name: %s, number: %s\n"
 msgstr ""
 
-#: gnokii.c:1979
+#: gnokii.c:1974
 msgid "Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"
 msgstr ""
 
@@ -2336,7 +2348,7 @@ msgstr ""
 msgid "Write failed!"
 msgstr ""
 
-#: gnokii.c:656
+#: gnokii.c:651
 msgid "Wrong number of arguments\n"
 msgstr ""
 
@@ -2365,7 +2377,7 @@ msgstr ""
 msgid "automatic"
 msgstr ""
 
-#: gnokii.c:1752
+#: gnokii.c:1747
 msgid "battery"
 msgstr ""
 
@@ -2381,7 +2393,7 @@ msgstr ""
 msgid "down"
 msgstr ""
 
-#: gnokii.c:2069 xgnokii/xgnokii.c:1962 xkeyb.c:112 xlogos.c:94
+#: gnokii.c:2064 xgnokii/xgnokii.c:1962 xkeyb.c:112 xlogos.c:94
 msgid "error opening %s, using default config\n"
 msgstr ""
 
@@ -2409,15 +2421,15 @@ msgstr ""
 msgid "not registered in the network"
 msgstr ""
 
-#: fbus-6110.c:3162 gnokii.c:1273
+#: fbus-6110.c:3162 gnokii.c:1268
 msgid "nothing to enter.\n"
 msgstr ""
 
-#: fbus-6110.c:3372 gnokii.c:2101 gnokii.c:2102 gnokii.c:2103 gnokii.c:2104 gnokii.c:2105 gnokii.c:2106 gnokii.c:2107 gnokii.c:2108
+#: fbus-6110.c:3372 gnokii.c:2096 gnokii.c:2097 gnokii.c:2098 gnokii.c:2099 gnokii.c:2100 gnokii.c:2101 gnokii.c:2102 gnokii.c:2103
 msgid "off"
 msgstr ""
 
-#: fbus-6110.c:3372 gnokii.c:2101 gnokii.c:2102 gnokii.c:2103 gnokii.c:2104 gnokii.c:2105 gnokii.c:2106 gnokii.c:2107 gnokii.c:2108
+#: fbus-6110.c:3372 gnokii.c:2096 gnokii.c:2097 gnokii.c:2098 gnokii.c:2099 gnokii.c:2100 gnokii.c:2101 gnokii.c:2102 gnokii.c:2103
 msgid "on"
 msgstr ""
 
@@ -2481,23 +2493,23 @@ msgstr ""
 msgid "up"
 msgstr ""
 
-#: fbus-6110.c:3142 gnokii.c:1253
+#: fbus-6110.c:3142 gnokii.c:1248
 msgid "waiting for PIN.\n"
 msgstr ""
 
-#: fbus-6110.c:3147 gnokii.c:1258
+#: fbus-6110.c:3147 gnokii.c:1253
 msgid "waiting for PIN2.\n"
 msgstr ""
 
-#: fbus-6110.c:3152 gnokii.c:1263
+#: fbus-6110.c:3152 gnokii.c:1258
 msgid "waiting for PUK.\n"
 msgstr ""
 
-#: fbus-6110.c:3157 gnokii.c:1268
+#: fbus-6110.c:3157 gnokii.c:1263
 msgid "waiting for PUK2.\n"
 msgstr ""
 
-#: fbus-6110.c:3137 gnokii.c:1248
+#: fbus-6110.c:3137 gnokii.c:1243
 msgid "waiting for Security Code.\n"
 msgstr ""
 
