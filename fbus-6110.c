@@ -162,7 +162,6 @@ pthread_t Thread;
 bool RequestTerminate;
 bool DisableKeepalive=false;
 struct termios OldTermios; /* To restore termio on close. */
-bool EnableMonitoringOutput;
 
 /* Local variables used by get/set phonebook entry code. Buffer is used as a
    source or destination for phonebook data and other functions... Error is
@@ -217,7 +216,6 @@ GSM_Error FB61_Initialise(char *port_device, bool enable_monitoring)
 
   RequestTerminate = false;
   FB61_LinkOK = false;
-  EnableMonitoringOutput = enable_monitoring;
 
   strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -455,7 +453,7 @@ bool FB61_OpenIR(void)
   
   tcflush(PortFD, TCIFLUSH);
   tcsetattr(PortFD, TCSANOW, &new_termios);
-  
+
   FB61_InitIR();
   
   new_termios.c_cflag = FB61_BAUDRATE | CS8 | CLOCAL | CREAD;
