@@ -159,7 +159,9 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r mem location recvd    { 0x0002, 0x00,namelen,"name",numlen,"number",groupID, 0x01?, yearLO, yearHI, month, day, hour, minute, sec. }
                             Note: in 3310 all entries have null name ("feature" or bug ?)
     r mem loc error recvd   { 0x0003, errtype }
-                            where errtype: 0x7d: invalid memory type
+                            where errtype: 0x6f: SIM card not ready
+                                           0x74: invalid location
+                                           0x7d: invalid memory type
     s Set mem location      { 0x0004, memtype,location,namelen,"Name",numlen,"number",groupID }
     r mem set OK            { 0x0005 }
     r mem set error         { 0x0006, errtype }
@@ -616,6 +618,11 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                   subtype: 0x02: invalid mem type
                                            0x07: empty SMS location
                                            0x0c: no access to memory (no PIN in card, etc.)
+    r SMS read error        { 0x0009, errcode }
+                            where errcode: 0x00: unknown reason
+                                           0x02: invalid location
+                                           0x06: SIM card not ready
+                                           0x07: empty location
     s Delete SMS message    { 0x000a, 0x02, location }
     r Delete OK             { 0x000b }
     s SMS status request    { 0x0036, 0x64 }

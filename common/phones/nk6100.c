@@ -891,10 +891,18 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 		}
 		break;
 	case 0x03:
-		if ((message[4] == 0x7d) || (message[4] == 0x74)) {
+		switch (message[4]) {
+		case 0x6f: /* This gets returned when issuing --getphonebook
+			    * command and the phone displays 'Insert SIM card'
+			    * on Nokia 3330 (Daniele Forsi).
+			    */
+			return GN_ERR_NOTREADY;
+		case 0x74:
+		case 0x7d:
 			return GN_ERR_INVALIDLOCATION;
+		default:
+			return GN_ERR_UNHANDLEDFRAME;
 		}
-		return GN_ERR_UNHANDLEDFRAME;
 	case 0x05:
 		break;
 	case 0x06:
@@ -1715,6 +1723,9 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 		case 0x02:
 			dprintf("\tInvalid location!\n");
 			return GN_ERR_INVALIDLOCATION;
+		case 0x06:
+			dprintf("\tInsert SIM card!\n");
+			return GN_ERR_NOTREADY;
 		case 0x07:
 			dprintf("\tEmpty SMS location.\n");
 			return GN_ERR_EMPTYLOCATION;
