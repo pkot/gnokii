@@ -245,7 +245,7 @@ gn_network networks[] = {
 	{ "262 01", "D1 TELEKOM" },
 	{ "262 02", "D2 PRIVAT" },
 	{ "262 03", "E-Plus" },
-	{ "262 07", "Interkom" },
+	{ "262 07", "O2 Germany" },
 	{ "266 01", "Gibtel GSM" },
 	{ "268 01", "TELECEL" },
 	{ "268 03", "OPTIMUS" },
