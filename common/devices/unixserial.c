@@ -381,19 +381,19 @@ GSM_Error serial_changespeed(int fd, int speed)
 
 	switch (speed) {
 	case 9600:
-		speed = B9600;
+		new_speed = B9600;
 		break;
 	case 19200:
-		speed = B19200;
+		new_speed = B19200;
 		break;
 	case 38400:
-		speed = B38400;
+		new_speed = B38400;
 		break;
 	case 57600:
-		speed = B57600;
+		new_speed = B57600;
 		break;
 	case 115200:
-		speed = B115200;
+		new_speed = B115200;
 		break;
 	default:
 		fprintf(stderr, _("Serial port speed %d not supported!\n"), speed);
