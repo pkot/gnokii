@@ -6,12 +6,15 @@
     o GetRingtoneList command added                (BORBELY Zoltan)
     o This driver will support the 5100 model         (Peter Pilsl)
     o ringtone handling unified                    (BORBELY Zoltan)
+    o PlayTone support added                       (BORBELY Zoltan)
+    o DeleteRingtone support added                 (BORBELY Zoltan)
  * 6110 series updates
     o phonebook reading fixes                      (BORBELY Zoltan)
     o add nokia 3390 to supported models           (BORBELY Zoltan)
     o GetRingtoneList for 61xx models added        (BORBELY Zoltan)
     o ringtone handling unified                    (BORBELY Zoltan)
     o datacall cleanup                             (BORBELY Zoltan)
+    o DeleteRingtone support added                 (BORBELY Zoltan)
  * 7110 series updates
     o ringtone handling unified                    (BORBELY Zoltan)
  * gnokiid updates
@@ -22,11 +25,15 @@
     o writephonebook fixes                         (BORBELY Zoltan)
     o getringtonelist command added                (BORBELY Zoltan)
     o getprofile shows the real ringtone name      (BORBELY Zoltan)
+    o deleteringtone command added                 (BORBELY Zoltan)
  * libgnokii updates
     o Nokia 6250 has irda                               (Pawel Kot)
     o utf8, base64 and LDIF export fix            (Martin Goldhahn)
     o RLP fixes (SABM retransmission, Conn_Req)    (BORBELY Zoltan)
     o AT emulator improved                         (BORBELY Zoltan)
+    o dct3/4 raw ringtones handled differently     (BORBELY Zoltan)
+ * Documentation updates
+    o nk6510 ringtone handling messages updated    (BORBELY Zoltan)
 
 0.5.5
 =====

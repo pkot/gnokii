@@ -115,6 +115,7 @@ static gn_error GetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error DeleteRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey(bool press, gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey1(bool press, gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey2(bool press, gn_data *data, struct gn_statemachine *state);
@@ -351,6 +352,8 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return GetRawRingtone(data, state);
 	case GN_OP_SetRawRingtone:
 		return SetRawRingtone(data, state);
+	case GN_OP_DeleteRingtone:
+		return DeleteRingtone(data, state);
 	case GN_OP_PlayTone:
 		return pnok_play_tone(data, state);
 	case GN_OP_PressPhoneKey:
@@ -2776,12 +2779,13 @@ static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state)
 
 static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[512] = {0x00, 0x01, 0xa0, 0x00, 0x00,
-				  0x0c, 0x2c, 0x01,
-				  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-				  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-				  0x02, 0xfc, 0x09};
+	unsigned char req[512] = {0x00, 0x01, 0xa0,
+				  0x00,				/* location */
+				  0x00, 0x0c, 0x2c, 0x01, 0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x02, 0xfc, 0x09};	/* data */
 	gn_error error;
+	int len;
 
 	if (!data || !data->ringtone || !data->raw_data || !data->raw_data->data)
 		return GN_ERR_INTERNALERROR;
@@ -2789,12 +2793,40 @@ static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state)
 
 	req[3] = data->ringtone->location - 17;
 	snprintf(req + 8, 13, "%s", data->ringtone->name);
-	memcpy(req + 24, data->raw_data->data, data->raw_data->length);
+	if (memcmp(data->raw_data->data, req + 20, 3) == 0) {
+		memcpy(req + 20, data->raw_data->data, data->raw_data->length);
+		len = 20 + data->raw_data->length;
+	} else {
+		/* compatibility */
+		memcpy(req + 24, data->raw_data->data, data->raw_data->length);
+		len = 24 + data->raw_data->length;
+	}
 
 	if ((error = pnok_extended_cmds_enable(0x01, data, state))) return error;
 
-	if (sm_message_send(24 + data->raw_data->length, 0x40, req, state)) return GN_ERR_NOTREADY;
+	if (sm_message_send(len, 0x40, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x40, data, state);
+}
+
+static gn_error DeleteRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	gn_ringtone ringtone;
+	gn_raw_data rawdata;
+	unsigned char buf[] = {0x00, 0x02, 0xfc, 0x0b};
+	gn_data d;
+
+	if (!data->ringtone) return GN_ERR_INTERNALERROR;
+
+	memset(&ringtone, 0, sizeof(ringtone));
+	ringtone.location = (data->ringtone->location < 0) ? 17 : data->ringtone->location;
+	memset(&rawdata, 0, sizeof(gn_raw_data));
+	rawdata.data = buf;
+	rawdata.length = sizeof(buf);
+	gn_data_clear(&d);
+	d.ringtone = &ringtone;
+	d.raw_data = &rawdata;
+
+	return SetRawRingtone(&d, state);
 }
 
 static gn_error get_imei(gn_data *data, struct gn_statemachine *state)
@@ -2886,9 +2918,10 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		if (!data->ringtone) return GN_ERR_INTERNALERROR;
 		data->ringtone->location = message[3] + 17;
 		snprintf(data->ringtone->name, sizeof(data->ringtone->name), "%s", message + 8);
+		if (data->raw_data->length < length - 20) return GN_ERR_MEMORYFULL;
 		if (data->raw_data && data->raw_data->data) {
-			memcpy(data->raw_data->data, message + 24, length - 24);
-			data->raw_data->length = length - 24;
+			memcpy(data->raw_data->data, message + 20, length - 20);
+			data->raw_data->length = length - 20;
 		}
 		break;
 	

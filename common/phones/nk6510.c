@@ -122,6 +122,8 @@ static gn_error NK6510_GetRawRingtone(gn_data *data, struct gn_statemachine *sta
 static gn_error NK6510_SetRawRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SetRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_DeleteRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_PlayTone(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetProfile(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SetProfile(gn_data *data, struct gn_statemachine *state);
 
@@ -159,6 +161,7 @@ static gn_error NK6510_IncomingSubscribe(int messagetype, unsigned char *message
 static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_IncomingSound(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 #ifdef  SECURITY
 static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -196,6 +199,7 @@ static gn_incoming_function_type nk6510_incoming_functions[] = {
 	{ NK6510_MSG_COMMSTATUS,	NK6510_IncomingCommStatus },
 	{ NK6510_MSG_WAP,	NK6510_IncomingWAP },
 	{ NK6510_MSG_TODO,	NK6510_IncomingToDo },
+	{ NK6510_MSG_SOUND,	NK6510_IncomingSound },
 	{ 0, NULL }
 };
 
@@ -363,6 +367,10 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_SetRingtone(data, state);
 	case GN_OP_GetRingtoneList:
 		return NK6510_GetRingtoneList(data, state);
+	case GN_OP_DeleteRingtone:
+		return NK6510_DeleteRingtone(data, state);
+	case GN_OP_PlayTone:
+		return NK6510_PlayTone(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -2495,12 +2503,23 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 
 	/* set raw ringtone result */
 	case 0x0f:
-		if (message[4] == 0x00 && message[5] == 0x00) {
-			break;
-		} else if (message[4] == 0x03 || message[5] == 0x00) {
-			/* FIXME: some kind of ringtone error */
-			return GN_ERR_UNKNOWN;
-		} else return GN_ERR_UNHANDLEDFRAME;
+		if (message[5] != 0x00) return GN_ERR_UNHANDLEDFRAME;
+		switch (message[4]) {
+		case 0x00: break;
+		case 0x03: return GN_ERR_INVALIDLOCATION;
+		default:   return GN_ERR_UNHANDLEDFRAME;
+		}
+		break;
+
+	/* delete ringtone result */
+	case 0x11:
+		if (message[5] != 0x00) return GN_ERR_UNHANDLEDFRAME;
+		switch (message[4]) {
+		case 0x00: break;
+		case 0x03: return GN_ERR_INVALIDLOCATION;
+		case 0x0a: return GN_ERR_EMPTYLOCATION;
+		default:   return GN_ERR_UNHANDLEDFRAME;
+		}
 		break;
 
 	/* get raw ringtone result */
@@ -2550,15 +2569,22 @@ static gn_error NK6510_GetRawRingtone(gn_data *data, struct gn_statemachine *sta
 
 static gn_error NK6510_SetRawRingtone(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[32768] = {FBUS_FRAME_HEADER, 0x0e, 0x7f, 0xff, 0xfe};
+	unsigned char req[32768] = {FBUS_FRAME_HEADER, 0x0e, 0x00, 0x00, 0xfe};
 	unsigned char *pos;
 
 	if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
-	/* FIXME: where is the location field? */
-	if (data->ringtone->location < 0) data->ringtone->location = NK6510_RINGTONE_USERDEF_LOCATION;
 
 	dprintf("Setting raw ringtone %d...\n", data->ringtone->location);
-	pos = req + 7;
+
+	pos = req + 4;
+	if (data->ringtone->location < 0) {
+		*pos++ = 0x7f;
+		*pos++ = 0xff;
+	} else {
+		*pos++ = data->ringtone->location / 256;
+		*pos++ = data->ringtone->location % 256;
+	}
+	pos++;
 	*pos = strlen(data->ringtone->name);
 	char_unicode_encode(pos + 1, data->ringtone->name, *pos);
 	pos += 1 + 2 * *pos;
@@ -2610,10 +2636,27 @@ static gn_error NK6510_SetRingtone(gn_data *data, struct gn_statemachine *state)
 	d.ringtone = data->ringtone;
 	d.raw_data = &rawdata;
 
-	if ((err = pnok_ringtone_to_raw(rawdata.data, &rawdata.length, data->ringtone)) != GN_ERR_NONE)
+	if ((err = pnok_ringtone_to_raw(rawdata.data, &rawdata.length, data->ringtone, 1)) != GN_ERR_NONE)
 		return err;
 
 	return NK6510_SetRawRingtone(&d, state);
+}
+
+static gn_error NK6510_DeleteRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x00, 0x00};
+
+	if (!data->ringtone) return GN_ERR_INTERNALERROR;
+
+	if (data->ringtone->location < 0) {
+		req[4] = 0x7f;
+		req[5] = 0xfe;
+	} else {
+		req[4] = data->ringtone->location / 256;
+		req[5] = data->ringtone->location % 255;
+	}
+
+	SEND_MESSAGE_BLOCK(NK6510_MSG_RINGTONE, 6);
 }
 
 
@@ -3872,6 +3915,61 @@ static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Setting ToDo\n");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10 + strlen(data->todo->text) * 2);
+}
+
+/********************/
+/****** SOUND *******/
+/********************/
+
+static gn_error NK6510_IncomingSound(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	switch (message[3]) {
+	/* response to init1 - meaning unknown */
+	case 0x01:
+	case 0x02:
+		break;
+
+	/* buzzer on/off - meaning unknown */
+	case 0x14:
+	case 0x15:
+	case 0x16:
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
+}
+
+static gn_error NK6510_PlayTone(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char init1[] = {0x00, 0x06, 0x01, 0x00, 0x07, 0x00};
+	unsigned char init2[] = {0x00, 0x06, 0x01, 0x14, 0x05, 0x05, 0x00, 0x00,
+				 0x00, 0x01, 0x03, 0x08, 0x05, 0x00, 0x00, 0x08,
+				 0x00, 0x00};
+	unsigned char req[] = {0x00, 0x06, 0x01, 0x14, 0x05, 0x04, 0x00, 0x00,
+			       0x00, 0x03, 0x03, 0x08, 0x00, 0x00, 0x00, 0x01,
+			       0x00, 0x00, 0x03, 0x08, 0x01, 0x00,
+			       0x00, 0x00,	/* frequency */
+			       0x00, 0x00, 0x03, 0x08, 0x02, 0x00, 0x00,
+			       0x05,		/* volume */
+			       0x00, 0x00};
+	gn_error err;
+
+	if (!data->tone) return GN_ERR_INTERNALERROR;
+
+	if (sm_message_send(6, 0x0b, init1, state)) return GN_ERR_NOTREADY;
+	if ((err = sm_block(NK6510_MSG_SOUND, data, state)) != GN_ERR_NONE) return err;
+	if (sm_message_send(18, 0x0b, init2, state)) return GN_ERR_NOTREADY;
+	if ((err = sm_block(NK6510_MSG_SOUND, data, state)) != GN_ERR_NONE) return err;
+
+	req[31] = data->tone->volume;
+	req[22] = data->tone->frequency / 256;
+	req[23] = data->tone->frequency % 255;
+
+	dprintf("Playing tone\n");
+	SEND_MESSAGE_BLOCK(NK6510_MSG_SOUND, 34);
 }
 
 /********************************/

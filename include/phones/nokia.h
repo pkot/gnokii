@@ -44,7 +44,7 @@ void pnok_string_decode(unsigned char *dest, size_t max, const unsigned char *sr
 size_t pnok_string_encode(unsigned char *dest, size_t max, const unsigned char *src);
 
 gn_error pnok_ringtone_from_raw(gn_ringtone *ringtone, const unsigned char *raw, int rawlen);
-gn_error pnok_ringtone_to_raw(char *raw, int *rawlen, const gn_ringtone *ringtone);
+gn_error pnok_ringtone_to_raw(char *raw, int *rawlen, const gn_ringtone *ringtone, int dct4);
 
 /* Common functions for misc Nokia drivers */
 /* Call divert: nk6100, nk7110 */

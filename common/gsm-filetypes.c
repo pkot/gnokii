@@ -306,8 +306,10 @@ gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone)
 		error = file_ott_save(file, ringtone);
 	} else if (strstr(filename, ".mid")) {
 		error = file_midi_save(file, ringtone);
+	} else if (strstr(filename, ".raw3")) {
+		error = file_nokraw_save(file, ringtone, 0);
 	} else if (strstr(filename, ".raw")) {
-		error = file_nokraw_save(file, ringtone);
+		error = file_nokraw_save(file, ringtone, 1);
 	} else {
 		error = file_rttl_save(file, ringtone);
 	}
@@ -510,13 +512,13 @@ gn_error file_rttl_save(FILE *file, gn_ringtone *ringtone)
 	return GN_ERR_NONE;
 }
 
-gn_error file_nokraw_save(FILE *file, gn_ringtone *ringtone)
+gn_error file_nokraw_save(FILE *file, gn_ringtone *ringtone, int dct4)
 {
 	int n = 4096;
 	char buf[n];
 	gn_error err;
 
-	if ((err = pnok_ringtone_to_raw(buf, &n, ringtone)) != GN_ERR_NONE) return err;
+	if ((err = pnok_ringtone_to_raw(buf, &n, ringtone, dct4)) != GN_ERR_NONE) return err;
 
 	if (fwrite(buf, n, 1, file) != 1) return GN_ERR_UNKNOWN;
 

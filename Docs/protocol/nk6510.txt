@@ -339,9 +339,15 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
 					      name (unicode)...  }
 			    where type: 0x01 - built-in, 0x02 - user defined
 
-    s Set raw ringtone      { 0x0e, 0x7f, 0xff, 0xfe, name length (chars), name (unicode),
+    s Set raw ringtone      { 0x0e, locationHI, locationLO, 0xfe, name length (chars), name (unicode),
                               datalenHI, datalenLO, data (MIDI file or raw ringtone), 0x00, 0x00 }
+			    where location = 0x7fff means first unused entry
     r Set raw ringtone      { 0x0f, err, 0x00 } where err = 0 means ok
+
+    s Delete ringtone       { 0x10, locationHI, locationLO }
+			    where location = 0x7ffe means all user defined
+    r Delete ringtone       { 0x11, err, 0x00 }
+                            where err: 0x00 - ok, 0x03 - inv loc, 0x0a - empty
 
     s Get raw ringtone      { 0x12, numberHI, numberLO }
     r Get raw ringtone      { 0x13, numberHI, numberLO, ?, name length (chars), name (unicode),

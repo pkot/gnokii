@@ -159,7 +159,8 @@ typedef enum {
 	OPT_LISTNETWORKS,
 	OPT_GETNETWORKINFO,
 	OPT_GETLOCKSINFO,
-	OPT_GETRINGTONELIST
+	OPT_GETRINGTONELIST,
+	OPT_DELETERINGTONE
 } opt_index;
 
 static char *bindir;     /* Binaries directory from .gnokiirc file - not used here yet */
@@ -315,6 +316,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --playringtone rtttlfile [--volume vol]\n"
 		     "          gnokii --ringtoneconvert source destination\n"
 		     "          gnokii --getringtonelist\n"
+		     "          gnokii --deleteringtone start [end]\n"
 		     "          gnokii --reset [soft|hard]\n"
 		     "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
 		     "          gnokii --setprofile\n"
@@ -4095,7 +4097,7 @@ static int setringtone(int argc, char *argv[])
 	gn_raw_data rawdata;
 	gn_error error;
 	unsigned char buff[512];
-	int i;
+	int i, location;
 
 	bool raw = false;
 	char name[16] = "";
@@ -4136,7 +4138,7 @@ static int setringtone(int argc, char *argv[])
 		return -1;
 	}
 
-	ringtone.location = (argc > optind + 1) ? atoi(argv[optind + 1]) : -1;
+	location = (argc > optind + 1) ? atoi(argv[optind + 1]) : -1;
 
 	if (raw) {
 		FILE *f;
@@ -4147,6 +4149,7 @@ static int setringtone(int argc, char *argv[])
 		}
 		rawdata.length = fread(rawdata.data, 1, rawdata.length, f);
 		fclose(f);
+		ringtone.location = location;
 		if (*name)
 			snprintf(ringtone.name, sizeof(ringtone.name), "%s", name);
 		else
@@ -4157,6 +4160,7 @@ static int setringtone(int argc, char *argv[])
 			fprintf(stderr, _("Failed to load ringtone.\n"));
 			return error;
 		}
+		ringtone.location = location;
 		if (*name) snprintf(ringtone.name, sizeof(ringtone.name), "%s", name);
 		error = gn_sm_functions(GN_OP_SetRingtone, &data, &state);
 	}
@@ -4296,6 +4300,41 @@ static int getringtonelist(void)
 			ringtone_list.ringtone[i].writable,
 			ringtone_list.ringtone[i].user_defined,
 			ringtone_list.ringtone[i].name);
+	}
+
+	return GN_ERR_NONE;
+}
+
+static gn_error deleteringtone(int argc, char *argv[])
+{
+	gn_ringtone ringtone;
+	gn_error error;
+	int i, start, end;
+
+	memset(&ringtone, 0, sizeof(ringtone));
+	gn_data_clear(&data);
+	data.ringtone = &ringtone;
+
+	switch (argc) {
+	case 1:
+		start = atoi(argv[0]);
+		end = start;
+		break;
+	case 2:
+		start = atoi(argv[0]);
+		end = atoi(argv[1]);
+		break;
+	default:
+		usage(stderr, -1);
+		return -1;
+	}
+
+	for (i = start; i <= end; i++) {
+		ringtone.location = i;
+		if ((error = gn_sm_functions(GN_OP_DeleteRingtone, &data, &state)) == GN_ERR_NONE)
+			printf(_("Ringtone %d deleted\n"), i);
+		else
+			printf(_("Failed to delete ringtone %d: %s\n"), i, gn_error_print(error));
 	}
 
 	return GN_ERR_NONE;
@@ -4843,6 +4882,9 @@ int main(int argc, char *argv[])
 		/* Get list of the ringtones */
 		{ "getringtonelist",    no_argument,       NULL, OPT_GETRINGTONELIST },
 
+		/* Delete ringtones */
+		{ "deleteringtone",     required_argument, NULL, OPT_DELETERINGTONE },
+
 		/* Get SMS center number mode */
 		{ "getsmsc",            optional_argument, NULL, OPT_GETSMSC },
 
@@ -4977,6 +5019,7 @@ int main(int argc, char *argv[])
 		{ OPT_SETRINGTONE,       1, 5, 0 },
 		{ OPT_PLAYRINGTONE,      1, 3, 0 },
 		{ OPT_RINGTONECONVERT,   2, 2, 0 },
+		{ OPT_DELETERINGTONE,    1, 2, 0 },
 		{ OPT_RESET,             0, 1, 0 },
 		{ OPT_GETPROFILE,        0, 3, 0 },
 		{ OPT_SETACTIVEPROFILE,  1, 1, 0 },
@@ -5186,6 +5229,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_GETRINGTONELIST:
 			rc = getringtonelist();
+			break;
+		case OPT_DELETERINGTONE:
+			rc = deleteringtone(nargc, nargv);
 			break;
 		case OPT_RINGTONECONVERT:
 			rc = ringtoneconvert(nargc, nargv);
