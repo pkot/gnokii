@@ -31,6 +31,10 @@
 #ifndef __misc_h
 #define __misc_h
 
+#include <stdio.h>
+#include <stdarg.h>
+#include <sys/types.h>
+
 #include "config.h"
 #include "compat.h"
 
@@ -84,7 +88,6 @@
 #  define dprintf printf
 #endif /* __GNUC__ */
 
-#include <stdarg.h>
 extern void (*GSM_ELogHandler)(const char *fmt, va_list ap);
 extern void GSM_WriteErrorLog(const char *fmt, ...);
 
@@ -102,7 +105,6 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 #ifdef HAVE_ASPRINTF
 #  define gasprintf		asprintf
 #else
-#  include <stdarg.h>
 extern int gasprintf(char **destp, const char *fmt,...);
 #endif
 #ifdef HAVE_VASPRINTF
@@ -157,7 +159,6 @@ extern int gvasprintf(char **destp, const char *fmt, va_list ap);
 #  endif
 #endif
 
-#include <sys/types.h>
 #if (!defined _BSD_SOURCE) && (!defined _BSDTYPES_DEFINED)
 	typedef unsigned char u_char;
 #endif
@@ -168,7 +169,6 @@ extern int gvasprintf(char **destp, const char *fmt, va_list ap);
 	typedef void * __ptr_t;
 #endif /* __ptr_t */
 
-#include <stdio.h>
 extern int GetLine(FILE *File, char *Line, int count);
 
 /* For models table */
