@@ -129,7 +129,8 @@ Q. Could you tell me the key for on, off and select menu in
     gnokii --keysequence function?
 
 A. M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
-   +: increase volume, -: decrease volume, 0123456789#* as is.
+   +: increase volume, -: decrease volume, 0123456789#* as is. N means
+   cancel for Nokia 3210 and 3310.
 
 -------------------------------------------------------------------------------
 Q. I get 'undefined symbol: GSM_ELogHandler' when runnig gnokii. What's
