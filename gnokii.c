@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
 {
   int c, i, rc = -1;
   int nargc = argc-2;
-  char **nargv; 
+  char **nargv;
 
   /* Every option should be in this array. */
 
@@ -454,7 +454,7 @@ int main(int argc, char *argv[])
   if((nargv = malloc(sizeof(char *) * argc)) != NULL) {
 
     for(i = 2; i < argc; i++)
-      nargv[i-2] = argv[i]; 
+      nargv[i-2] = argv[i];
 	
     if(checkargs(c, gals, nargc)) {
 
@@ -698,14 +698,10 @@ int sendsms(int argc, char *argv[])
       case '2': /* SMSC number index in phone memory */
         SMS.MessageCenter.No = atoi(optarg);
 
-        /* FIXME: this is done in main so we can safely remove it. */
-
-	/*
 	if (SMS.MessageCenter.No < 1 || SMS.MessageCenter.No > 5) {
 	  usage();
-          return -1; 
+          return -1;
 	}
-	*/
 
         break;
 
