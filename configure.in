@@ -204,7 +204,7 @@ AC_ARG_WITH(bluetooth,
 	[ if test x$withval = xyes; then
 		AC_MSG_WARN(Usage is: --with-bluetooth=DIR)
 	  else
-		LDLIBS="$LDLIBS -L$withval/lib"
+		LIBS="$LIBS -L$withval/lib"
 		CFLAGS="$CFLAGS -I$withval/include"
 	  fi
 	]
@@ -494,6 +494,8 @@ AC_SUBST(PTHREAD_LIBS)
 AC_SUBST(OWN_GETOPT)
 AC_SUBST(USE_UNIX98PTYS)
 
+AC_SUBST(LIBS)
+
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 AC_SUBST(XPM_CFLAGS)
@@ -507,6 +509,7 @@ AC_OUTPUT(
    po/Makefile
    packaging/RedHat/gnokii.spec
    packaging/Slackware/SlackBuild
+   common/gnokii.pc
    )
 
 
