@@ -73,7 +73,8 @@ Thank you to, in no particular order...
    
 *  Alessandro Zummo for reset and getopts code.
 
-*  Manfred Jonsson for his manufacturer and windows patch.
+*  Manfred Jonsson for his manufacturer and windows patch, and AT command
+   support.
 
 *  Mark Looi for Cell Broadcast code - based on protocol decoded by
    Colin Paton.
@@ -90,7 +91,30 @@ Thank you to, in no particular order...
 
 *  Tamar Bondar for updates on SMS handling on 3810 series.
 
-*  Marek Rogozinski for help in tracing some nasty bugs
+*  Marek Rogoziñski for help in tracing some nasty bugs.
+
+*  Pavel Machek for developing 2110 and Duncall support and many clever
+   hints.
+
+*  Bo¹tjan Müller for Slovenian translation and other things.
+
+*  Hans Motshärg for Estonian translation.
+
+*  Marcin P³awiñski for preview logos.
+
+*  Martin Lucina for any kind of help he is providing ;-)
+
+*  Gabriele Stella for Italian translation.
+
+*  Andrea Scopece for bug reports and other help.
+ 
+*  Panagiotis Astithas, Daniel O'Connor, Sheldon Hearn for help with FreeBSD.
+
+*  Artur Kubiak for help with Solaris.
+
+*  Markus Plail for work on 7110 support.
+
+*  Simon Huggins for help with 6210 and IrDA.
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this.  Rachael for new parent induced insomnia...
@@ -98,3 +122,6 @@ Thank you to, in no particular order...
 *  Last not least: Mirka for allowing Pavel to work on gnokii
    and for _great_ gnokii operator logos...
 
+We tried to mentioned everyone who contributed to gnokii project but we
+might to forgot someone. If anyone does feel that we missed him and his
+name should be mentioned here do not hesitate to contact us :-)
