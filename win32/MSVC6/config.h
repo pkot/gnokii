@@ -40,7 +40,7 @@
 
 	
 #undef VERSION
-#define VERSION "0.6.0"
+#define VERSION "0.6.1"
 
 /* No bluetooth and no IRDA */
 #undef HAVE_BLUETOOTH
