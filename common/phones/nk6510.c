@@ -4283,7 +4283,7 @@ static gn_error NK6510_ActivateWAPSetting(gn_data *data, struct gn_statemachine 
 
 static gn_error NK6510_GetToDo_Internal(gn_data *data, struct gn_statemachine *state, int location)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER,0x03, 
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 
 			       0x00, 0x00, 0x80, 0x00,
 			       0x00, 0x01};		/* Location */
 
@@ -4395,7 +4395,7 @@ static gn_error GetNextFreeToDoLocation(gn_data *data, struct gn_statemachine *s
 
 static gn_error NK6510_GetToDo(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER,0x03, 
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 
 			       0x00, 0x00, 0x80, 0x00,
 			       0x00, 0x01};		/* Location */
 	gn_error error;
@@ -4418,7 +4418,9 @@ static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[300] = {FBUS_FRAME_HEADER, 0x01, 
 				  0x02, /* prority */
-				  0x0D, 0x80, 0x00, 0x00, 0x01};	/* Location */
+				  0x0E, /* length of the text + 1 */
+				  0x80, 0x00,
+				  0x00, 0x01};	/* Location */
 	unsigned char text[257];
 	int length;
 	gn_error error;
@@ -4426,15 +4428,26 @@ static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state)
 	error = GetNextFreeToDoLocation(data, state);
 	if (error != GN_ERR_NONE) return error;
 
+	length = char_unicode_encode(text, data->todo->text, strlen(data->todo->text));
+	if (length > GN_TODO_MAX_LENGTH) return GN_ERR_ENTRYTOOLONG;
+
+	/* priority */
 	req[4] = data->todo->priority;
+
+	/* length */
+	req[5] = length + 1;
+
+	/* location */
 	req[8] = data->todo->location / 256;
 	req[9] = data->todo->location % 256;
 
-	length = char_unicode_encode(text, data->todo->text, strlen(data->todo->text));
+	/* text */
 	memcpy(req + 10, text, length);
+	/* 0-terminated string */
+	req[10+length] = req[10+length+1] = 0;
 
 	dprintf("Setting ToDo\n");
-	if (sm_message_send(length, NK6510_MSG_TODO, req, state)) return GN_ERR_NOTREADY;
+	if (sm_message_send(length + 12, NK6510_MSG_TODO, req, state)) return GN_ERR_NOTREADY;
 	error = sm_block(NK6510_MSG_TODO, data, state);
 	if (error == GN_ERR_NONE) {
 		error = NK6510_GetToDo_Internal(data, state, data->todo->location);
