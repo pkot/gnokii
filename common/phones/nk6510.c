@@ -97,17 +97,13 @@ static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 */
-
 static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state);
 
-static GSM_Error P6510_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-/*
 static GSM_Error P6510_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-*/
 static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -115,7 +111,6 @@ static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message,
 /*
 static GSM_Error P6510_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
 */
-static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 
@@ -135,9 +130,10 @@ static GSM_IncomingFunctionType P6510_IncomingFunctions[] = {
 	{ P6510_MSG_BATTERY,	P6510_IncomingBattLevel },
 	{ P6510_MSG_CLOCK,	P6510_IncomingClock },
 	{ P6510_MSG_IDENTITY,	P6510_IncomingIdentify },
-	/*	{ P6510_MSG_STLOGO,	P6510_IncomingStartup },
-		{ P6510_MSG_DIVERT,	P6510_IncomingCallDivert },*/
-	{ P6510_MSG_SECURITY,	P6510_IncomingSecurity },
+	{ P6510_MSG_STLOGO,	P6510_IncomingStartup },
+	/*
+	{ P6510_MSG_DIVERT,	P6510_IncomingCallDivert },
+	*/
 	{ P6510_MSG_RINGTONE,	P6510_IncomingRingtone },
 	{ 0, NULL }
 };
@@ -236,15 +232,12 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		*/
 	case GOP_SendSMS:
 		return P6510_SendSMS(data, state);
-	case GOP_NetMonitor:
-		return P6510_NetMonitor(data, state);
 	case GOP_GetSMSFolderStatus:
 		return P6510_GetSMSFolderStatus(data, state);
 	case GOP_GetSMS:
 		return P6510_GetSMS(data, state);
 	case GOP_GetSMSFolders:
 		return P6510_GetSMSFolders(data, state);
-
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -1402,6 +1395,15 @@ static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Error error = GE_NONE;
+	/*
+Unknown subtype of type 0x19 (clock handling): 0x1c
+UNHANDLED FRAME RECEIVED
+request: 0x19 / 0x0004
+00 01 00 1b                                     |                 
+reply: 0x19 / 0x0012
+01 23 00 1c 06 01 ff ff ff ff 00 00 49 4c 01 3e |  #    ÿÿÿÿ  IL >
+01 56
+	*/
 
 	dprintf("Incoming clock!\n");
 	if (!data || !data->DateTime) return GE_INTERNALERROR;
@@ -1416,6 +1418,8 @@ static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, in
 
 		break;
 	case P6510_SUBCLO_ALARM_RCVD:
+		/*
+		*/
 		switch(message[8]) {
 		case P6510_ALARM_ENABLED:
 			data->DateTime->AlarmEnabled = 1;
@@ -1445,9 +1449,14 @@ static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, in
 static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, req_type};
-
-	if (SM_SendMessage(state, 4, P6510_MSG_CLOCK, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, P6510_MSG_CLOCK);
+	int i;
+	
+	for (i=0x22; i < 0xff; i++) {
+		req[3] = i;
+		if (SM_SendMessage(state, 4, P6510_MSG_CLOCK, req) != GE_NONE) return GE_NOTREADY;
+		SM_BlockNoRetryTimeout(state, data, P6510_MSG_CLOCK, 5);
+	}
+	return GE_UNKNOWN;
 }
 
 /*********************/
@@ -1909,61 +1918,6 @@ static GSM_Error P6510_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *stat
 	SEND_MESSAGE_WAITFOR(P6510_MSG_CALENDAR, 6);
 }
 
-/*********************/
-/* SECURITY COMMANDS */
-/*********************/
-
-static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
-{
-	if (!data || !data->NetMonitor) return GE_INTERNALERROR;
-	switch (message[3]) {
-	case P6510_SUBSEC_NETMONITOR:
-		switch(message[4]) {
-		case 0x00:
-			dprintf("Message: Netmonitor correctly set.\n");
-			break;
-		default:
-			dprintf("Message: Netmonitor menu %d received:\n", message[4]);
-			dprintf("%s\n", message + 5);
-			strcpy(data->NetMonitor->Screen, message + 5);
-			break;
-		}
-		break;
-	default:
-		dprintf("Unknown subtype of type 0x%02x (Security): 0x%02x\n", P6510_MSG_SECURITY, message[3]);
-		return GE_UNHANDLEDFRAME;
-	}
-	return GE_NONE;
-}
-
-static GSM_Error P6510_EnableExtendedCmds(GSM_Data *data, GSM_Statemachine *state, unsigned char type)
-{
-	unsigned char req[] = {0x00, 0x01, 0x64, 0x00};
-
-	dprintf("Enabling extended commands...\n");
-
-	if (type == 0x06) {
-		dump(_("Tried to activate CONTACT SERVICE\n"));
-		return GE_INTERNALERROR;
-	}
-
-       	req[3] = type;
-
-	if (SM_SendMessage(state, 4, 0x42, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x42);
-}
-
-static GSM_Error P6510_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[] = {0x00, 0x01, 0xc8, 0x01}; /* P6510_SUBSEC_NETMONITOR};*/
-	GSM_Error error;
-
-	//	req2[4] = data->NetMonitor->Field;
-	error = P6510_EnableExtendedCmds(data, state, 0x01);
-       	if (SM_SendMessage(state, 4, 0x42, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x42);
-}
-
 /********************/
 /* INCOMING NETWORK */
 /********************/
@@ -2006,7 +1960,22 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 			blockstart += blockstart[1];
 		}
 		break;
-	case 0x1E:
+	case 0x0c: /* RF Level */
+		if (data->RFLevel) {
+			*(data->RFUnits) = GRF_Percentage;
+			*(data->RFLevel) = message[8];
+			dprintf("RF level %f\n",*(data->RFLevel));
+		}
+		break;
+	case 0x1e: /* RF Level change notify */
+		/*
+		  01 56 00 1E 0D 65
+		  01 56 00 1E 0C 65
+		  01 56 00 1E 0B 65
+		  01 56 00 1E 09 66
+		  01 56 00 1E 08 66
+		  01 56 00 1E 0A 66
+		*/
 		if (data->RFLevel) {
 			*(data->RFUnits) = GRF_Percentage;
 			*(data->RFLevel) = message[5];
@@ -2055,7 +2024,7 @@ static GSM_Error P6510_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P6510_GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x01, 0x00, 0x00, 0x00};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x02, 0x00, 0x00, 0x00};
 	/* 00 01 00 0B 00 01 00 00 00 00 
 	   00 01 00 02 01 00 00 04 01 00
 	*/
@@ -2068,8 +2037,6 @@ static GSM_Error GetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x23, 0x00, 0x00, 0x55, 0x55, 0x55};
 	/*  00 01 00 23 00 00 55 55 55 */
-
-
 	dprintf("Getting op logo...\n");
 	if (SM_SendMessage(state, 9, P6510_MSG_NETSTATUS, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_NETSTATUS);
@@ -2085,7 +2052,7 @@ static GSM_Error P6510_IncomingBattLevel(int messagetype, unsigned char *message
 	case 0x0B:
 		if (data->BatteryLevel) {
 			*(data->BatteryUnits) = GBU_Percentage;
-			*(data->BatteryLevel) = message[5];
+			*(data->BatteryLevel) = message[9] / 7 * 100;
 			dprintf("Battery level %f\n",*(data->BatteryLevel));
 		}
 		break;
@@ -2146,6 +2113,92 @@ static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, P6510_MSG_RINGTONE);
 }
 
+/*************/
+/* START UP  */
+/*************/
+
+static GSM_Error P6510_IncomingStartup(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	/*
+UNHANDLED FRAME RECEIVED
+request: 0x7a / 0x0005
+00 01 00 02 0b                                  |                 
+reply: 0x7a / 0x0036
+01 44 00 03 0b 00 00 00 01 38 00 00 00 00 00 00 |  D       8      
+35 5f 00 00 00 00 00 00 00 3e 00 00 00 00 00 00 | 5_       >      
+36 97 00 00 00 00 01 55 55 55 55 55 55 55 55 55 | 6      UUUUUUUUU
+55 55 55 55 55 55                               | UUUUUU          
+	*/
+	switch (message[4]) {
+	case 0x02:
+		dprintf("Startup logo set ok\n");
+		return GE_NONE;
+		break;
+	case 0x0f:
+		if (data->Bitmap) {
+			/* I'm sure there are blocks here but never mind! */
+			data->Bitmap->type = GSM_StartupLogo;
+			data->Bitmap->height = message[13];
+			data->Bitmap->width = message[17];
+			data->Bitmap->size = ((data->Bitmap->height / 8) + (data->Bitmap->height % 8 > 0)) * 
+				data->Bitmap->width; /* Can't see this coded anywhere */
+			memcpy(data->Bitmap->bitmap, message + 22, data->Bitmap->size);
+			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->Bitmap->height, data->Bitmap->width);
+		}
+		return GE_NONE;
+		break;
+	case 0x1c:
+		dprintf("Succesfully got security code: ");
+		memcpy(data->SecurityCode->Code, message + 6, 5);
+		dprintf("%s \n", data->SecurityCode->Code);
+		return GE_NONE;
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x7a (%d)\n", message[3]);
+		return GE_UNHANDLEDFRAME;
+		break;
+	}
+}
+
+static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[1000] = {FBUS_FRAME_HEADER, 0xec, 0x15, 0x00, 0x00, 0x00, 0x04, 0xc0, 0x02, 0x00,
+				   0x00,           /* Height */
+				   0xc0, 0x03, 0x00,
+				   0x00,           /* Width */
+				   0xc0, 0x04, 0x03, 0x00 };
+
+	/* 
+00 01 00 04 0F 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+	*/
+	int count = 21;
+
+
+	if ((data->Bitmap->width != state->Phone.Info.StartupLogoW) ||
+	    (data->Bitmap->height != state->Phone.Info.StartupLogoH)) {
+		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n", 
+			state->Phone.Info.StartupLogoH, state->Phone.Info.StartupLogoW, 
+			data->Bitmap->height, data->Bitmap->width);
+	    return GE_INVALIDIMAGESIZE;
+	}
+
+	req[12] = data->Bitmap->height;
+	req[16] = data->Bitmap->width;
+	memcpy(req + count, data->Bitmap->bitmap, data->Bitmap->size);
+	count += data->Bitmap->size;
+	dprintf("Setting startup logo...\n");
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, count);
+}
+
+static GSM_Error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x0F};
+
+	dprintf("Getting startup logo...\n");
+	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, 5);
+}
+
 /********************************/
 /* NOT FRAME SPECIFIC FUNCTIONS */
 /********************************/
@@ -2157,9 +2210,8 @@ static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		return GetCallerBitmap(data, state);
 	case GSM_OperatorLogo:
 		return GetOperatorBitmap(data, state);
-		/*	case GSM_StartupLogo:
+	case GSM_StartupLogo:
 		return GetStartupBitmap(data, state);
-		*/
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
