@@ -44,7 +44,7 @@
 
 #else
 
-  #define WRITEPHONE write
+  #define WRITEPHONE(a, b, c) device_write(b, c)
   #include <unistd.h>
   #include <termios.h>
   #include <fcntl.h>
@@ -55,6 +55,7 @@
   #include <sys/time.h>
   #include <pthread.h>
   #include <errno.h>
+  #include "device.h"
 
 #endif
 
@@ -178,9 +179,6 @@ const char *FB61_MemoryType_String [] = {
 
 /* Local variables */
 
-#ifndef WIN32
-int PortFD; /* Filedescriptor of the mobile phone's device */
-#endif
 
 char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
 
@@ -211,7 +209,6 @@ int       InitLength;
 
 #ifndef WIN32
 
-  struct termios OldTermios; /* To restore termio on close. */
   pthread_t Thread;
 
 #endif
@@ -699,14 +696,15 @@ void FB61_InitIR(void)
   unsigned char end_init_char = FB61_IR_END_INIT_BYTE;
   
   for ( i = 0; i < 32; i++ )
-    write (PortFD, &init_char, 1);
+    device_write(&init_char, 1);
 
-  write (PortFD, &end_init_char, 1);
+  device_write(&end_init_char, 1);
   usleep(100000);
 }
 
 bool FB61_InitIR115200(void)
 {
+  int PortFD;
   u8 connect_seq[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
 
   bool ret         = true;
@@ -724,7 +722,9 @@ bool FB61_InitIR115200(void)
   /* Wait for 1 sec. */
   timeout.tv_sec  = 1;
   timeout.tv_usec = 0;
-  
+
+  PortFD = device_getfd();
+
   do {
     FD_ZERO(&ready);
     FD_SET(PortFD, &ready);
@@ -759,75 +759,48 @@ bool FB61_InitIR115200(void)
   return(ret);
 }
 
-/* This function is used to open the IR connection with the phone */
+/* This function is used to open the IR connection with the phone. */
 
 bool FB61_OpenIR(void)
 {
+
+  int result;
   bool ret = false;
-  struct termios new_termios;
   struct sigaction sig_io;
   u8 i = 0;
-  
-  /* Open device. */
-  
-  PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
-  
-  if (PortFD < 0) {
-    perror(_("Couldn't open FB61 infrared device: "));
-    return (false);
-  }
   
   /* Set up and install handler before enabling async IO on port. */
   
   sig_io.sa_handler = FB61_SigHandler;
   sig_io.sa_flags = 0;
   sigaction (SIGIO, &sig_io, NULL);
-  
-  /* Allow process/thread to receive SIGIO */
-  
-  fcntl(PortFD, F_SETOWN, getpid());
-  
-  /* Make filedescriptor asynchronous. */
 
-  fcntl(PortFD, F_SETFL, FASYNC);
+  /* Open device. */
   
-  /* Save current port attributes so they can be restored on exit. */
-  
-  tcgetattr(PortFD, &OldTermios);
-  
-  /* Set port settings for canonical input processing */
-  
-  new_termios.c_cflag = FB61_IR_INIT_SPEED | CS8 | CLOCAL | CREAD;
-  new_termios.c_iflag = IGNPAR;
-  new_termios.c_oflag = 0;
-  new_termios.c_lflag = 0;
-  new_termios.c_cc[VMIN] = 1;
-  new_termios.c_cc[VTIME] = 0;
-  
-  tcflush(PortFD, TCIFLUSH);
-  tcsetattr(PortFD, TCSANOW, &new_termios);
+  result = device_open(PortDevice);
+
+  if (!result) {
+    perror(_("Couldn't open FB61 infrared device"));
+    return false;
+  }
+
+  device_changespeed(9600);
 
   FB61_InitIR();
-  
-  new_termios.c_cflag = FB61_BAUDRATE | CS8 | CLOCAL | CREAD;
-  tcflush(PortFD, TCIFLUSH);
-  tcsetattr(PortFD, TCSANOW, &new_termios);
-  
+
+  device_changespeed(115200);
+
   ret = FB61_InitIR115200();
 
   if ( ! ret ) {
     for ( i = 0; i < 4 ; i++) {
       usleep (500000);
       
-      new_termios.c_cflag = FB61_IR_INIT_SPEED | CS8 | CLOCAL | CREAD;
-      tcflush(PortFD, TCIFLUSH);
-      tcsetattr(PortFD, TCSANOW, &new_termios);
+      device_changespeed(9600);
       
       FB61_InitIR();
       
-      new_termios.c_cflag = FB61_BAUDRATE | CS8 | CLOCAL | CREAD;
-      tcflush(PortFD, TCIFLUSH);
-      tcsetattr(PortFD, TCSANOW, &new_termios);
+      device_changespeed(115200);
       
       ret = FB61_InitIR115200();
       if ( ret ) {
@@ -839,8 +812,6 @@ bool FB61_OpenIR(void)
   return (ret);
 }
 
-
-
 /* This is the main loop for the FB61 functions. When FB61_Initialise is
    called a thread is created to run this loop. This loop is exited when the
    application calls the FB61_Terminate function. */
@@ -848,7 +819,6 @@ bool FB61_OpenIR(void)
 void FB61_ThreadLoop(void)
 {
   
-
   unsigned char init_char = 0x55;
   unsigned char connect1[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
   unsigned char connect2[] = {FB61_FRAME_HEADER, 0x20, 0x02};
@@ -874,7 +844,6 @@ void FB61_ThreadLoop(void)
   int count, idle_timer, timeout=50;
 
   CurrentPhonebookEntry = NULL;  
-
 
   if ( CurrentConnectionType == GCT_Infrared ) {
 
@@ -905,8 +874,6 @@ void FB61_ThreadLoop(void)
       return;
     }
   }
-
-
 
   /* Initialise link with phone or what have you */
 
@@ -949,7 +916,8 @@ void FB61_ThreadLoop(void)
 
   FB61_TX_SendMessage(45, 0x64, magic_connect);
   
-  // 	FB61_GetCalendarNote(1);
+  /* FIXME: we should implement better support for ringtones and the utility
+     to set ringtones. */
 
   //    FB61_SendRingtone("GNOKIItune", 250);
 
@@ -1007,14 +975,13 @@ void InitializeLink()
   
   0x00, 0x00, 0x00, 0x00};
 
-
   /* Daxer Added for infared support */
   if ( CurrentConnectionType == GCT_Infrared ) {
-	  dcb.DCBlength = sizeof(DCB);
+    dcb.DCBlength = sizeof(DCB);
 
-	  GetCommState(hPhone, &dcb);
-	  dcb.BaudRate=CBR_9600;
-	  SetCommState(hPhone, &dcb);
+    GetCommState(hPhone, &dcb);
+    dcb.BaudRate=CBR_9600;
+    SetCommState(hPhone, &dcb);
   }
 
   /* Send init string to phone, this is a bunch of 0x55 characters. Timing is
@@ -1025,14 +992,13 @@ void InitializeLink()
     WRITEPHONE(PortFD, &init_char, 1);
   }
 
-	WRITEPHONE(PortFD, &end_init_char, 1);
+  WRITEPHONE(PortFD, &end_init_char, 1);
 
   if ( CurrentConnectionType == GCT_Infrared ) {
-	  dcb.BaudRate=CBR_115200;
-	  SetCommState(hPhone, &dcb);
+    dcb.BaudRate=CBR_115200;
+    SetCommState(hPhone, &dcb);
   }
  
-
   FB61_TX_SendStatusRequest();
 
   usleep(100);
@@ -1063,10 +1029,6 @@ void InitializeLink()
   FB61_GetNokiaAuth(IMEI, MagicBytes, magic_connect+4);
 
   FB61_TX_SendMessage(45, 0x64, magic_connect);
-  
-  // 	FB61_GetCalendarNote(1);
-
-  //    FB61_SendRingtone("GNOKIItune", 250);
 }
 #endif
 
@@ -1083,9 +1045,8 @@ void FB61_Terminate(void)
   pthread_join(Thread, NULL);
 
   /* Close serial port. */
-  tcsetattr(PortFD, TCSANOW, &OldTermios);
+  device_close();
 
-  close (PortFD);
 #else
   CloseConnection();
 #endif
@@ -2252,8 +2213,11 @@ GSM_Error FB61_Reset(unsigned char type)
 
 void FB61_DumpSerial(void)
 {
-
+  int PortFD;
   unsigned int Flags=0;
+
+
+  PortFD = device_getfd();
 
   ioctl(PortFD, TIOCMGET, &Flags);
 
@@ -2295,23 +2259,13 @@ void FB61_DumpSerial(void)
 
 void FB61_SetFBUS()
 {
-
-  unsigned int Flags=0;
-
 #ifdef DEBUG
   FB61_DumpSerial();  
   fprintf(stdout, _("Setting FBUS communication...\n"));
 #endif /* DEBUG */
 
-  /* clearing the RTS bit */
-
-  Flags=TIOCM_RTS;
-  ioctl(PortFD, TIOCMBIC, &Flags);
-
-  /* setting the DTR bit */
-
-  Flags=TIOCM_DTR;
-  ioctl(PortFD, TIOCMBIS, &Flags);
+  /* clearing the RTS bit and setting the DTR bit*/
+  device_setdtrrts(1, 0);
 
 #ifdef DEBUG
   FB61_DumpSerial();  
@@ -2322,18 +2276,9 @@ void FB61_SetFBUS()
 
 bool FB61_OpenSerial(void)
 {
-
-  struct termios new_termios;
+  int result;
   struct sigaction sig_io;
 
-  /* Open device. */
-
-  PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
-
-  if (PortFD < 0) {
-    perror(_("Couldn't open FB61 device: "));
-    return (false);
-  }
 
   /* Set up and install handler before enabling async IO on port. */
 
@@ -2341,29 +2286,17 @@ bool FB61_OpenSerial(void)
   sig_io.sa_flags = 0;
   sigaction (SIGIO, &sig_io, NULL);
 
-  /* Allow process/thread to receive SIGIO */
 
-  fcntl(PortFD, F_SETOWN, getpid());
+  /* Open device. */
 
-  /* Make filedescriptor asynchronous. */
+  result = device_open(PortDevice);
 
-  fcntl(PortFD, F_SETFL, FASYNC);
+  if (!result) {
+    perror(_("Couldn't open FB61 device"));
+    return false;
+  }
 
-  /* Save current port attributes so they can be restored on exit. */
-
-  tcgetattr(PortFD, &OldTermios);
-
-  /* Set port settings for canonical input processing */
-
-  new_termios.c_cflag = FB61_BAUDRATE | CS8 | CLOCAL | CREAD;
-  new_termios.c_iflag = IGNPAR;
-  new_termios.c_oflag = 0;
-  new_termios.c_lflag = 0;
-  new_termios.c_cc[VMIN] = 1;
-  new_termios.c_cc[VTIME] = 0;
-
-  tcflush(PortFD, TCIFLUSH);
-  tcsetattr(PortFD, TCSANOW, &new_termios);
+  device_changespeed(115200);
 
   FB61_SetFBUS();
 
@@ -2376,7 +2309,7 @@ void FB61_SigHandler(int status)
   unsigned char buffer[255];
   int count, res;
 
-  res = read(PortFD, buffer, 255);
+  res = device_read(buffer, 255);
 
   for (count = 0; count < res ; count ++)
     FB61_RX_StateMachine(buffer[count]);

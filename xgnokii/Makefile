@@ -37,6 +37,7 @@ COMMON_OBJS = ../gsm-api.o \
               ../fbus-3810.o \
               ../mbus-2110.o \
               ../fbus-6110.o ../fbus-6110-auth.o ../fbus-6110-ringtones.o \
+              ../device.o ../unixserial.o ../win32/winserial.o \
               ../gsm-networks.o ../cfgreader.o
 
 #

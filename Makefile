@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1_pre33
+VERSION = 0.3.1_pre34
 
 #
 # Compiler to use.
@@ -147,7 +147,7 @@ COMMON_OBJS = gsm-api.o \
               mbus-2110.o \
               fbus-6110.o fbus-6110-auth.o fbus-6110-ringtones.o \
               gsm-networks.o cfgreader.o gsm-filetypes.o \
-              win32/winserial.o
+              device.o unixserial.o win32/winserial.o
 
 #
 # RLP objects - only needed for data calls
@@ -257,4 +257,6 @@ fbus-6110.o: fbus-6110.c fbus-6110.h misc.h gsm-common.h gsm-networks.h
 fbus-6110-auth.o: fbus-6110-auth.c fbus-6110-auth.h
 fbus-6110-ringtones.o: fbus-6110-ringtones.c fbus-6110-ringtones.h
 cfgreader.o: cfgreader.c cfgreader.h
+device.o: device.c device.h
+unixserial.o: unixserial.c unixserial.h
 win32/winserial.o: win32/winserial.c win32/winserial.h
