@@ -1,5 +1,6 @@
 0.4.0pre20 (Not released yet)
 ==========
+ * Added short docs about ericsson phones              (Pavel Machek)
  * Added testsuite				       (Pavel Machek)
  * 6110 series updates
     o PollSMS race condition eliminated              (BORBELY Zoltan)

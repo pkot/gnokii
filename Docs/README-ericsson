@@ -1,0 +1,14 @@
+A1018s
+======
+
+* Communicates with AT commands, with few possible extensions like
+pressing keys (AT+CKPD="X", x is 0..9, # * < > s==yes, e==no, c==clr).
+
+* Contains AVR RISC cpu, and its internals are pretty well known (see
+http://www.subdimension.com/community/scitech/ga628/a1018.htm), people
+are writing their own firmware with arkanoid, for example.
+
+* Its quite easy to flash firmware there.
+
+* Currently does not work with gnokii
+
