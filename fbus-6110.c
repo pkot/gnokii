@@ -300,7 +300,6 @@ void KeepAliveProc()
 
 GSM_Error FB61_Initialise(char *port_device, char *initlength,
                           GSM_ConnectionType connection,
-                          bool enable_monitoring,
                           void (*rlp_callback)(RLP_F96Frame *frame))
 {
 

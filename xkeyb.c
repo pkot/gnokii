@@ -170,7 +170,7 @@ button_press_event (GtkWidget *widget, GdkEventButton *event)
 /* fbusinit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
 
-void fbusinit(bool enable_monitoring)
+void fbusinit(void)
 {
   int count=0;
   GSM_Error error;
@@ -181,8 +181,7 @@ void fbusinit(bool enable_monitoring)
     
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(Model, Port, Initlength, connection,
-                         enable_monitoring, NULL);
+  error = GSM_Initialise(Model, Port, Initlength, connection, NULL);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -264,7 +263,7 @@ void main (int argc, char *argv[])
 
   readconfig();
 
-  fbusinit(false);
+  fbusinit();
 
   gtk_widget_show_all (window);
 

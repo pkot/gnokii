@@ -110,7 +110,6 @@ u8                      RequestSequenceNumber;
 pthread_t               Thread;
 bool                    RequestTerminate;
 struct termios          OldTermios; /* To restore termio on close. */
-bool                    EnableMonitoringOutput;
 bool                    DisableKeepalive;
 float                   CurrentRFLevel;
 float                   CurrentBatteryLevel;
@@ -160,7 +159,6 @@ GSM_Error               CurrentMessageCenterError;
     /* Initialise variables and state machine. */
 GSM_Error   FB38_Initialise(char *port_device, char *initlength,
                             GSM_ConnectionType connection,
-                            bool enable_monitoring,
                             void (*rlp_callback)(RLP_F96Frame *frame))
 {
 
@@ -170,7 +168,6 @@ GSM_Error   FB38_Initialise(char *port_device, char *initlength,
 
     RequestTerminate = false;
     FB38_LinkOK = false;
-    EnableMonitoringOutput = enable_monitoring;
     DisableKeepalive = false;
     CurrentRFLevel = -1;
     CurrentBatteryLevel = -1;
@@ -214,9 +211,9 @@ void        FB38_Terminate(void)
     tcsetattr(PortFD, TCSANOW, &OldTermios);
 
         /* If in monitor mode, show number of checksum failures. */ 
-    if (EnableMonitoringOutput) {
-        fprintf (stderr, "Checksum failures: %ld\n", ChecksumFails);
-    }
+#ifdef DEBUG
+    fprintf (stderr, "Checksum failures: %ld\n", ChecksumFails);
+#endif
     
     close (PortFD);
 }
@@ -1044,13 +1041,14 @@ void    FB38_RX_StateMachine(char rx_byte)
                     /* Phone is currently off.  Wait for 0x55 before
                        restarting */
         case FB38_RX_Off:
-                if (rx_byte != 0x55)
+                if (rx_byte != 0x55) {
                     break;
+				}
 
                 /* Seen 0x55, restart at 0x04 */
-                if (EnableMonitoringOutput == true) {
+#ifdef DEBUG
                     fprintf(stdout, _("restarting.\n"));
-                }
+#endif
 
                 RX_State = FB38_RX_Sync;
 
@@ -1210,16 +1208,17 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
             /* 0x13 messages are sent after the phone restarts. 
                Re-initialise */
         case 0x13:  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
-                RequestSequenceNumber = 0x10;
-                FB38_TX_Send0x15Message(0x11);
-                break;
+					RequestSequenceNumber = 0x10;
+					FB38_TX_Send0x15Message(0x11);
+					break;
             
             /* 0x15 messages are sent by the phone in response to the
                init sequence sent so we don't acknowledge them! */
-        case 0x15:  if (EnableMonitoringOutput == true) {
-                        fprintf(stdout, _("0x15 Registration Response 0x%02x\n"), MessageBuffer[1]);
-                    }
-                    DisableKeepalive = false;
+        case 0x15:  DisableKeepalive = false;
+
+#ifdef DEBUG
+					fprintf(stdout, _("0x15 Registration Response 0x%02x\n"), MessageBuffer[1]);
+#endif
                     break;
 
             /* 0x16 messages are sent by the phone during initialisation,
@@ -1230,9 +1229,10 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
                0x30 0x02.  The actual data byte (0x02) is unchanged. 
                Go figure :) */ 
         case 0x16:  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
-                    if (EnableMonitoringOutput == true) {
-                        fprintf(stdout, _("0x16 Registration Response 0x%02x 0x%02x\n"), MessageBuffer[1], MessageBuffer[2]);
-                    }
+
+#ifdef DEBUG
+                    fprintf(stdout, _("0x16 Registration Response 0x%02x 0x%02x\n"), MessageBuffer[1], MessageBuffer[2]);
+#endif 
                     break;
 
             /* We send 0x23 messages to phone as a header for outgoing SMS
@@ -1370,19 +1370,20 @@ enum FB38_RX_States     FB38_RX_DispatchMessage(void)
                message is received and the PIN (if any) has been entered
                correctly. */
         case 0x48:  FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
-                    if (EnableMonitoringOutput == true) {
-                        fprintf(stdout, _("PIN [possibly] entered.\n"));
-                    }
+
+#ifdef DEBUG
+                    fprintf(stdout, _("PIN [possibly] entered.\n"));
+#endif
                     break;
 
             /* 0x49 is sent when the phone is switched off.  Disable
                keepalives and wait for 0x55 from the phone.  */
         case 0x49:  DisableKeepalive = true;
                     FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
-                    if (EnableMonitoringOutput == true) {
-                        fprintf(stdout, _("Phone powering off..."));
-                        fflush(stdout);
-                    }
+#ifdef DEBUG
+                    fprintf(stdout, _("Phone powering off..."));
+                    fflush(stdout);
+#endif
                     return FB38_RX_Off;
     
             /* 0x4a message is a response to our 0x4a request, assumed to
@@ -1429,10 +1430,10 @@ void    FB38_RX_DisplayMessage(void)
     int     count;
     int     line_count; 
 
-        /* If monitoring output is disabled, don't display anything. */
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
+        /* If debugging is disabled, don't display anything. */
+#ifndef DEBUG
+    return;
+#endif
     
     line_count = 0;
     fprintf(stdout, _("Unknown: "));
@@ -1845,14 +1846,13 @@ void    FB38_RX_Handle0x0b_IncomingCall(void)
     }
     buffer[count] = 0x00;
 
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
         /* Now display incoming call message. */
     fprintf(stdout, _("Incoming call - status %02x %02x %02x, Number %s.\n"), MessageBuffer[2], MessageBuffer[3], MessageBuffer[4], buffer);
 
     fflush (stdout);
+#endif
+
 }
 
     /* 0x27 messages are a little unusual when sent by the phone in that
@@ -1928,13 +1928,11 @@ void    FB38_RX_Handle0x4b_Status(void)
         /* GetBatteryLevel does conversion into required units. */
     CurrentBatteryLevel = MessageBuffer[4];
 
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
         /* Only output connection status byte now as the RF and Battery
            levels are displayed by the main gnokii code. */
     fprintf(stdout, _("Status: Connection Status %02x Batt %02x RF %02x.\n"), MessageBuffer[2], MessageBuffer[4], MessageBuffer[3]);
+#endif
 
 }
 
@@ -1946,12 +1944,10 @@ void    FB38_RX_Handle0x10_EndOfOutgoingCall(void)
         fprintf(stderr, _("0x10 Write failed!"));
     }
 
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
     fprintf(stdout, _("Outgoing call terminated (0x10 message).\n"));
     fflush(stdout);
+#endif
 
 }
 
@@ -1962,12 +1958,10 @@ void    FB38_RX_Handle0x11_EndOfIncomingCall(void)
         fprintf(stderr, _("Write failed!"));
     }
 
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
     fprintf(stdout, _("Incoming call terminated.\n"));
     fflush(stdout);
+#endif
 
 }
 
@@ -1978,12 +1972,10 @@ void    FB38_RX_Handle0x12_EndOfOutgoingCall(void)
         fprintf(stderr, _("Write failed!"));
     }
 
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
     fprintf(stdout, _("Outgoing call terminated (0x12 message).\n"));
     fflush(stdout);
+#endif
 
 }
 
@@ -1994,12 +1986,10 @@ void    FB38_RX_Handle0x0d_IncomingCallAnswered(void)
         fprintf(stderr, _("Write failed!"));
     }
 
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
     fprintf(stdout, _("Incoming call answered.\n"));
     fflush(stdout);
+#endif
 
 }
 
@@ -2010,12 +2000,10 @@ void    FB38_RX_Handle0x0e_OutgoingCallAnswered(void)
         fprintf(stderr, _("Write failed!"));
     }
 
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
     fprintf(stdout, _("Outgoing call answered - status bytes %02x %02x %02x.\n"), MessageBuffer[2], MessageBuffer[3], MessageBuffer[4]);
     fflush(stdout);
+#endif
 
 }
 
@@ -2184,15 +2172,13 @@ void    FB38_RX_Handle0x30_IncomingSMSNotification(void)
     unk_end = MessageBuffer[17 + sender_length + message_center_length];
 
         /* And output. */
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
     fprintf(stdout, _("Incoming SMS %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n"),
             year, month, day, hour, minute, second, sender, message_center);
     fprintf(stdout, _("   Msg Length %d, Msg number %d,  Unknown bytes: %02x %02x %02x %02x %02x %02x\n"), 
             message_body_length, msg_number, unk0, unk2, unk3, unk4, unk9, unk_end);
     fflush(stdout);
+#endif
 }
 
 
@@ -2281,16 +2267,14 @@ void    FB38_RX_Handle0x4d_IMEIRevisionModelData(void)
     strncpy(Model, MessageBuffer + 4 + imei_length + rev_length, FB38_MAX_MODEL_LENGTH);
     ModelValid = true;
 
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
-
+#ifdef DEBUG
     fprintf(stdout, _("Mobile phone identification received:\n"));
     fprintf(stdout, _("   IMEI:     %s\n"), IMEI);
 
     fprintf(stdout, _("   Model:    %s\n"), Model);
 
     fprintf(stdout, _("   Revision: %s\n"), Revision);
+#endif
 }
 
 
@@ -2302,7 +2286,10 @@ void    FB38_RX_Handle0x4d_IMEIRevisionModelData(void)
 void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 {
     u8      center_number_length;
+
+#ifdef DEBUG
     int     count;
+#endif
     
         /* As usual, acknowledge first. */
     if (!FB38_TX_SendStandardAcknowledge(0x41)) {
@@ -2336,12 +2323,10 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
     CurrentMessageCenter->No = 0;
     CurrentMessageCenterError = GE_NONE;
 
-        /* First 12 bytes are status values, purpose unknown.  For now
-           simply display for user to mull over if monitoring is on... */
-    if (EnableMonitoringOutput == false) {
-        return;
-    }
 
+#ifdef DEBUG
+        /* First 12 bytes are status values, purpose unknown.  For now
+           simply display for user to mull over if debugging is on... */
     fprintf(stdout, _("SMS Message Center Data status bytes ="));
     for (count = 0; count < 12; count ++) {
         fprintf(stdout, "0x%02x ", MessageBuffer[2 + count]);
@@ -2359,5 +2344,6 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 
     fprintf(stdout, "\n");
     fflush(stdout);
+#endif
 
 }

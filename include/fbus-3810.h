@@ -24,7 +24,6 @@ extern void                 (*FB38_RLP_RXCallback)(RLP_F96Frame *frame);
     /* Prototypes for the functions designed to be used externally. */
 GSM_Error   FB38_Initialise(char *port_device, char *initlength,
                             GSM_ConnectionType connection,
-                            bool enable_monitoring,
                             void (*rlp_callback)(RLP_F96Frame *frame));
 
 bool        FB38_OpenSerial(void);

@@ -404,7 +404,6 @@ typedef struct {
 
   GSM_Error (*Initialise)( char *port_device, char *initlength,
                            GSM_ConnectionType connection,
-                           bool enable_monitoring,
                            void (*rlp_callback)(RLP_F96Frame *frame));
 
   void (*Terminate)(void);	

@@ -38,8 +38,8 @@ extern GSM_Functions *GSM;
 
 /* Prototype for the functions actually provided by gsm-api.c. */
 
-/*GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring);*/
-GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring, void (*rlp_handler)(RLP_F96Frame *frame));
+/*GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection);*/
+GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_handler)(RLP_F96Frame *frame));
 
 
 /* All the rest of the API functions are contained in the GSM_Function

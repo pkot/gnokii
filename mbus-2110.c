@@ -104,7 +104,6 @@ bool					MB21_LinkOK;
 	/* Initialise variables and state machine. */
 GSM_Error   MB21_Initialise(char *port_device, char *initlength,
                             GSM_ConnectionType connection,
-                            bool enable_monitoring,
                             void (*rlp_callback)(RLP_F96Frame *frame))
 {
 

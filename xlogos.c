@@ -101,7 +101,7 @@ void readconfig(void)
 /* fbusinit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
 
-void fbusinit(bool enable_monitoring)
+void fbusinit(void)
 {
   int count=0;
   GSM_Error error;
@@ -112,8 +112,7 @@ void fbusinit(bool enable_monitoring)
     
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(Model, Port, Initlength, connection,
-                         enable_monitoring,NULL);
+  error = GSM_Initialise(Model, Port, Initlength, connection, NULL);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -501,7 +500,7 @@ void show_logo()
   int i;
 
   readconfig();
-  fbusinit(false);
+  fbusinit();
 
   bitmap.height=14;
   bitmap.width=72;
@@ -528,7 +527,7 @@ void get_logo()
   int i;
 
   readconfig();
-  fbusinit(false);
+  fbusinit();
 
   if (strcmp(operator, "Group Graphics Logo")) {
     strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
@@ -553,7 +552,7 @@ void get_operator()
   GSM_NetworkInfo NetworkInfo;
 
   readconfig();
-  fbusinit(true);
+  fbusinit();
 
   if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE)
     gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(Combo)->entry), GSM_GetNetworkName(NetworkInfo.NetworkCode));
@@ -648,7 +647,7 @@ main (int argc, char *argv[])
   /* Caller Group List */
 
   readconfig();
-  fbusinit(false);
+  fbusinit();
 
   Combo2 = gtk_combo_new();
   gtk_combo_set_use_arrows_always(GTK_COMBO(Combo2),1);

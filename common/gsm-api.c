@@ -50,12 +50,10 @@ GSM_Information		*GSM_Info;
 
 /* Initialise interface to the phone. Model number should be a string such as
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
-   user must have write permission to the device. Finally, if
-   enable_monitoring is true and the model specific code supports it,
-   additional information will be output when communicating with the phone. */
+   user must have write permission to the device. */
 
 
-GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, bool enable_monitoring, void (*rlp_callback)(RLP_F96Frame *frame))
+GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame))
 {
   bool found_match=false;
 
@@ -108,5 +106,5 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
 
   /* Now call model specific initialisation code. */
 
-  return (GSM->Initialise(device, initlength, connection, enable_monitoring, rlp_callback));
+  return (GSM->Initialise(device, initlength, connection, rlp_callback));
 }
