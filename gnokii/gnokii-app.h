@@ -50,7 +50,7 @@ int senddtmf(char *String);
 int foogle(char *argv[]);
 int pmon(void);
 int setlogo(int argc, char *argv[]);
-int getlogo(char *argv[]);
+int getlogo(int argc, char *argv[]);
 int setringtone(int argc, char *argv[]);
 int reset(char *type);
 int getprofile(int argc, char *argv[]);

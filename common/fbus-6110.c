@@ -14,8 +14,8 @@
   The various routines are called FB61 (whatever) as a concatenation of FBUS
   and 6110.
 
-  Last modification: Thu Apr  6 01:32:14 CEST 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Wed 6 Dec 2000
+  Modified by Chris Kemp
 
 */
 
@@ -67,7 +67,7 @@
 #include "gsm-common.h"
 #include "fbus-6110.h"
 #include "fbus-6110-auth.h"
-#include "fbus-6110-ringtones.h"
+#include "gsm-ringtones.h"
 #include "gsm-networks.h"
 
 /* Global variables used by code in gsm-api.c to expose the functions
@@ -2602,6 +2602,14 @@ GSM_Error FB61_GetBitmap(GSM_Bitmap *Bitmap) {
     req[count++]=0x16;
     FB61_TX_SendMessage(count, 0x05, req);
     break;
+  case GSM_WelcomeNoteText:
+    req[count++]=0x16;
+    FB61_TX_SendMessage(count, 0x05, req);
+    break;
+  case GSM_DealerNoteText:
+    req[count++]=0x16;
+    FB61_TX_SendMessage(count, 0x05, req);
+    break;  
   case GSM_OperatorLogo:
     req[count++]=0x33;
     req[count++]=0x01; /* Location 1 */
@@ -2639,7 +2647,7 @@ GSM_Error FB61_GetBitmap(GSM_Bitmap *Bitmap) {
 GSM_Error FB61_SetRingTone(GSM_Ringtone *ringtone)
 {
   
-  char package[FB61_MAX_RINGTONE_PACKAGE_LENGTH+10] =
+  char package[GSM_MAX_RINGTONE_PACKAGE_LENGTH+10] =
   { 0x0c, 0x01, /* FBUS RingTone header */
     /* Next bytes are from Smart Messaging Specification version 2.0.0 */
     0x06,       /* User Data Header Length */
@@ -2650,9 +2658,9 @@ GSM_Error FB61_SetRingTone(GSM_Ringtone *ringtone)
 		   to fill in the two
 		   bytes :-) */
   };
-  int size=FB61_MAX_RINGTONE_PACKAGE_LENGTH;
+  int size=GSM_MAX_RINGTONE_PACKAGE_LENGTH;
   
-  FB61_PackRingtone(ringtone, package+9, &size);
+  GSM_PackRingtone(ringtone, package+9, &size);
   package[size+9]=0x01;
 
   FB61_TX_SendMessage((size+10), 0x12, package);
@@ -2666,8 +2674,8 @@ GSM_Error FB61_SendRingTone(GSM_Ringtone *ringtone, char *dest)
   GSM_SMSMessage SMS;
   GSM_Error error;
 
-  int size=FB61_MAX_RINGTONE_PACKAGE_LENGTH;
-  char Package[FB61_MAX_RINGTONE_PACKAGE_LENGTH];
+  int size=GSM_MAX_RINGTONE_PACKAGE_LENGTH;
+  char Package[GSM_MAX_RINGTONE_PACKAGE_LENGTH];
   char udh[]= {
     0x06,       /* User Data Header Length */
     0x05,       /* IEI FIXME: What is this? */
@@ -2700,7 +2708,7 @@ GSM_Error FB61_SendRingTone(GSM_Ringtone *ringtone, char *dest)
 
   strcpy(SMS.Destination,dest);
 
-  FB61_PackRingtone(ringtone, Package, &size);
+  GSM_PackRingtone(ringtone, Package, &size);
 
   memcpy(SMS.UDH,udh,7);
   memcpy(SMS.MessageText,Package,size);
@@ -2895,8 +2903,9 @@ char *FB61_GetPackedDateTime(u8 *Number) {
 
 enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
-  int i, tmp, count, offset, off;
+  int i, tmp, count, offset, off, length;
   unsigned char output[160];
+  bool supported;
 
   if (RX_Multiple)
     return FB61_RX_Sync;
@@ -3736,71 +3745,87 @@ stdout);
 
      if (GetBitmap!=NULL) {
        
-       GetBitmap->height=0; // in some phones (51?0) we have no 01 block
-       GetBitmap->width=0; // and it is better to set bitmap to 'default'
-       GetBitmap->size=0;
-
-       GetBitmap->text[0]=0;
-       GetBitmap->dealertext[0]=0;
+       supported=false;
        
        count=5;
        
        for (tmp=0;tmp<MessageBuffer[4];tmp++){
 	 switch (MessageBuffer[count++]) {
 	 case 0x01:
-	   GetBitmap->height=MessageBuffer[count++];
-	   GetBitmap->width=MessageBuffer[count++];
-	   GetBitmap->size=GetBitmap->height*GetBitmap->width/8;
-	   memcpy(GetBitmap->bitmap,MessageBuffer+count,GetBitmap->size);
-	   count+=GetBitmap->size;
+	   if (GetBitmap->type==GSM_StartupLogo) {
+             GetBitmap->height=MessageBuffer[count++];
+	     GetBitmap->width=MessageBuffer[count++];
+	     GetBitmap->size=GetBitmap->height*GetBitmap->width/8;
+	     length=GetBitmap->size;
+	     memcpy(GetBitmap->bitmap,MessageBuffer+count,length);
+           } else {
+	     length=MessageBuffer[count++];
+	     length=length*MessageBuffer[count++]/8;
+	   }
+	   count+=length;
 #ifdef DEBUG
 	   fprintf(stdout, _("Startup logo supported - "));
-	   if (GetBitmap->size!=0)
+	   if (length!=0)
 	   {
 	     fprintf(stdout, _("currently set\n"));
 	   } else {
 	     fprintf(stdout, _("currently empty\n"));
 	   }
 #endif
+           if (GetBitmap->type==GSM_StartupLogo) supported=true;
 	   break;
 	 case 0x02:
-	   memcpy(GetBitmap->text,MessageBuffer+count+1,MessageBuffer[count]);
-	   GetBitmap->text[MessageBuffer[count]]=0;
-	   count+=MessageBuffer[count]+1;
+	   length=MessageBuffer[count];
+	   if (GetBitmap->type==GSM_WelcomeNoteText) {
+             memcpy(GetBitmap->text,MessageBuffer+count+1,length);
+	     GetBitmap->text[length]=0;
+	   }
 #ifdef DEBUG
-	   fprintf(stdout, _("Startup Text supported - "));
-	   if (GetBitmap->text[0]!=0)
+  	   fprintf(stdout, _("Startup Text supported - "));
+	   if (length!=0)
 	   {
-	     fprintf(stdout, _("currently set to \"%s\"\n"), GetBitmap->text);
+	     fprintf(stdout, _("currently set to \""));
+	     for (i=0;i<length;i++) fprintf(stdout, _("%c"),MessageBuffer[count+1+i]);
+	     fprintf(stdout, _("\"\n"));
 	   } else {
              fprintf(stdout, _("currently empty\n"));
 	   }
 #endif
+	   count+=length+1;
+           if (GetBitmap->type==GSM_WelcomeNoteText) supported=true;
 	   break;
 	 case 0x03:
-	   memcpy(GetBitmap->dealertext,MessageBuffer+count+1,MessageBuffer[count]);
-	   GetBitmap->dealertext[MessageBuffer[count]]=0;
-	   count+=MessageBuffer[count]+1;
+	   length=MessageBuffer[count];
+	   if (GetBitmap->type==GSM_DealerNoteText) {
+             memcpy(GetBitmap->text,MessageBuffer+count+1,length);
+	     GetBitmap->text[length]=0;
+	   }
 #ifdef DEBUG
-	   fprintf(stdout, _("Dealer welcome note supported - "));
-	   if (GetBitmap->dealertext[0]!=0)
+  	   fprintf(stdout, _("Dealer Welcome supported - "));
+	   if (length!=0)
 	   {
-	     fprintf(stdout, _("currently set to \"%s\"\n"), GetBitmap->dealertext);
+	     fprintf(stdout, _("currently set to \""));
+	     for (i=0;i<length;i++) fprintf(stdout, _("%c"),MessageBuffer[count+1+i]);
+	     fprintf(stdout, _("\"\n"));
 	   } else {
              fprintf(stdout, _("currently empty\n"));
 	   }
 #endif
-           break;
+	   count+=length+1;
+           if (GetBitmap->type==GSM_DealerNoteText) supported=true;
+	   break;
 	 }
        }
-       GetBitmapError=GE_NONE;
-     }
+       if (supported) GetBitmapError=GE_NONE;
+                   else GetBitmapError=GE_NOTSUPPORTED;
+      }
       else {
 #ifdef DEBUG
 	fprintf(stdout, _("Message: Startup logo received but not requested!\n"));
 #endif
       }
       break;
+
 
     case 0x19:   /* Set startup OK */
     

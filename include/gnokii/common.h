@@ -91,6 +91,9 @@ typedef enum {
    255 * 153 = 39015 default alphabet characters */
 #define GSM_MAX_CONCATENATED_SMS_LENGTH	(39015)
 
+/* FIXME: what value should be here? (Marcin Wiacek) */
+#define GSM_MAX_SMS_8_BIT_LENGTH (132)
+
 /* FIXME: what value should be here? (Pawel Kot) */
 #define GSM_MAX_USER_DATA_HEADER_LENGTH (10)
 
@@ -398,8 +401,9 @@ typedef enum {
   GE_FILETOOSHORT,          /* Too short file to read */
   GE_FILETOOLONG,           /* Too long file to read */
   GE_INVALIDIMAGESIZE,      /* Invalid size of bitmap (in file, sms etc.) */
-
+  GE_NOTSUPPORTED,          /* Function not supported by the phone */
   GE_BUSY,                  /* Command is still being executed. */
+  GE_USERCANCELED,
   GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
   GE_MEMORYFULL,
 

@@ -21,7 +21,7 @@ OBJS =	cfgreader.o \
 	device.o \
 	fbus-3810.o \
 	fbus-6110-auth.o \
-	fbus-6110-ringtones.o \
+	gsm-ringtones.o \
 	fbus-6110.o \
 	gsm-api.o \
 	gsm-networks.o \

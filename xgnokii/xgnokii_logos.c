@@ -12,6 +12,8 @@
 #include "cfgreader.h"
 #include "gsm-networks.h"
 #include "gsm-filetypes.h"
+#include "gsm-bitmaps.h"
+
 #include "xgnokii_logos.h"
 #include "xgnokii_common.h"
 #include "xgnokii_lowlevel.h"
@@ -73,6 +75,15 @@ static int toolStartX, toolStartY, toolLastX, toolLastY;
 /* tools for drawing */
 static GtkWidget *buttonBrush, *buttonLine, *buttonRectangle;
 static GtkWidget *buttonFilledRectangle;
+
+/* Contains fileName for Export dialog. */
+typedef struct {
+  gchar *fileName;
+} ExportDialogData;
+
+static ExportDialogData exportDialogData = {NULL};
+
+GtkWidget *FileSelection;
 
 static int callersGroupsInitialized = 0;
 
@@ -189,37 +200,13 @@ void ClearPreviewPoint(GtkWidget *widget, int x, int y, int update) {
   }
 }
 
-/* this is because, when someone changes function how to store bitmap,
- * we change it in this two functions and everything works fine
- */
-void SetPointBitmap(GSM_Bitmap *bmp, int x, int y) {
-  if (bmp->type == GSM_StartupLogo)
-    bmp->bitmap[((y/8)*84)+x] |= 1 << ((y%8));
-  else
-    bmp->bitmap[9*y + (x/8)] |= 1 << ((7-(x%8)));
-}
-
-void ClearPointBitmap(GSM_Bitmap *bmp, int x, int y) {
-  if (bmp->type == GSM_StartupLogo)
-    bmp->bitmap[((y/8)*84)+x] &= 255 - (1 << (y%8));
-  else
-    bmp->bitmap[9*y + (x/8)] &= 255 - (1 << (7-(x%8)));
-}
-
-int IsPointBitmap(GSM_Bitmap *bmp, int x, int y) {
-  if (bmp->type == GSM_StartupLogo)
-    return (bmp->bitmap[((y/8)*84) + x] & 1<<((y%8)));
-  else
-   return (bmp->bitmap[9*y + (x/8)] & 1<<(7-(x%8)));
-}
-
 int IsPoint(int x, int y) {
-  return IsPointBitmap(&bitmap,x,y);
+  return GSM_IsPointBitmap(&bitmap,x,y);
 }
 
 void SetPoint(GtkWidget *widget, int x, int y, int update) {
   /* difference between settings points in startupLogo and others */
-  SetPointBitmap(&bitmap,x,y);
+  GSM_SetPointBitmap(&bitmap,x,y);
 
   /* draw point to pixmap */
   gdk_draw_pixmap(drawingPixmap,widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
@@ -244,7 +231,7 @@ void SetPoint(GtkWidget *widget, int x, int y, int update) {
 
 void ClearPoint(GtkWidget *widget, int x, int y, int update) {
   /* difference between settings points in startupLogo and others */
-  ClearPointBitmap(&bitmap,x,y);
+  GSM_ClearPointBitmap(&bitmap,x,y);
 
   /* clear point from pixmap */
   gdk_draw_pixmap(drawingPixmap,widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
@@ -408,7 +395,7 @@ static void ToolLineUpdate(GtkWidget *widget, int column, int row) {
     delta = ((double)(y2-y1))/((double)(x2-x1));
     y = (double)y1;
     for (i = x1;i <= x2;i++) {
-      if (!IsPointBitmap(&oldBitmap,i,(int)y)) ClearPoint(widget,i,(int)y,0);
+      if (!GSM_IsPointBitmap(&oldBitmap,i,(int)y)) ClearPoint(widget,i,(int)y,0);
       y += delta;
     }
   } else {
@@ -427,7 +414,7 @@ static void ToolLineUpdate(GtkWidget *widget, int column, int row) {
 
     x = (double)x1;
     for (i = y1;i <= y2;i++) {
-      if (!IsPointBitmap(&oldBitmap,(int)x,i)) ClearPoint(widget,(int)x,i,0);
+      if (!GSM_IsPointBitmap(&oldBitmap,(int)x,i)) ClearPoint(widget,(int)x,i,0);
       x += delta;
     }
   } 
@@ -496,7 +483,7 @@ static void ToolFilledRectangleUpdate(GtkWidget *widget, int column, int row) {
 
   for (j = y1;j <= y2;j++)
     for (i = x1;i <= x2;i++)
-      if (!IsPointBitmap(&oldBitmap,i,j)) ClearPoint(widget,i,j,0);
+      if (!GSM_IsPointBitmap(&oldBitmap,i,j)) ClearPoint(widget,i,j,0);
 
   if (toolStartX > column) {
     x1 = column;
@@ -541,13 +528,13 @@ static void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
   }
 
   for (i = x1;i <= x2;i++) {
-    if (!IsPointBitmap(&oldBitmap,i,y1)) ClearPoint(widget,i,y1,0);
-    if (!IsPointBitmap(&oldBitmap,i,y2)) ClearPoint(widget,i,y2,0);                
+    if (!GSM_IsPointBitmap(&oldBitmap,i,y1)) ClearPoint(widget,i,y1,0);
+    if (!GSM_IsPointBitmap(&oldBitmap,i,y2)) ClearPoint(widget,i,y2,0);                
   }
 
   for (j = y1;j <= y2;j++) {
-    if (!IsPointBitmap(&oldBitmap,x1,j)) ClearPoint(widget,x1,j,0);
-    if (!IsPointBitmap(&oldBitmap,x2,j)) ClearPoint(widget,x2,j,0);
+    if (!GSM_IsPointBitmap(&oldBitmap,x1,j)) ClearPoint(widget,x1,j,0);
+    if (!GSM_IsPointBitmap(&oldBitmap,x2,j)) ClearPoint(widget,x2,j,0);
   }
 
   /* draw new rectangle */
@@ -690,7 +677,7 @@ static gint DrawingAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event
 
     for (j = lowestY;j <= highestY;j++)
       for (i = lowestX;i <= highestX;i++)
-        if (IsPointBitmap(&oldBitmap,i,j))
+        if (GSM_IsPointBitmap(&oldBitmap,i,j))
           SetPoint(widget,i,j,0);
         else
           ClearPoint(widget,i,j,0);
@@ -917,11 +904,10 @@ static void SetLogoEvent(GtkWidget *widget) {
 }
 
 static void ClearLogoEvent(GtkWidget *widget) {
-  int column, row;
-
-  for (column = 0;column < bitmap.width;column++)
-    for (row = 0;row < bitmap.height;row++)
-      ClearPointBitmap(&bitmap,column,row);
+  
+  bitmap.size=bitmap.width*bitmap.height/8;
+  
+  GSM_ClearBitmap(&bitmap);
 
   UpdatePoints(widget);
 }
@@ -932,9 +918,9 @@ static void InvertLogoEvent(GtkWidget *widget) {
   for (column = 0;column < bitmap.width;column++)
     for (row = 0;row < bitmap.height;row++)
       if (IsPoint(column,row))
-	ClearPointBitmap(&bitmap,column,row);
+	GSM_ClearPointBitmap(&bitmap,column,row);
       else
-	SetPointBitmap(&bitmap,column,row);
+	GSM_SetPointBitmap(&bitmap,column,row);
 
   UpdatePoints(widget);
 }
@@ -942,15 +928,22 @@ static void InvertLogoEvent(GtkWidget *widget) {
 static void UpLogoEvent(GtkWidget *widget) {
   int column, row;
 
+  GSM_Bitmap tbitmap;
+  
+  memcpy(&tbitmap,&bitmap,sizeof(GSM_Bitmap));
+  
   for (row = 0;row < bitmap.height-1;row++)
     for (column = 0;column < bitmap.width;column++)
       if (IsPoint(column,row+1))
-	SetPointBitmap(&bitmap,column,row);
+	GSM_SetPointBitmap(&bitmap,column,row);
       else
-	ClearPointBitmap(&bitmap,column,row);
+	GSM_ClearPointBitmap(&bitmap,column,row);
 
   for (column = 0;column < bitmap.width;column++)
-    ClearPointBitmap(&bitmap,column,bitmap.height-1);
+    if (GSM_IsPointBitmap(&tbitmap,column,0))
+      GSM_SetPointBitmap(&bitmap,column,bitmap.height-1);
+    else
+      GSM_ClearPointBitmap(&bitmap,column,bitmap.height-1);    
 
   UpdatePoints(widget); 
 }
@@ -958,15 +951,22 @@ static void UpLogoEvent(GtkWidget *widget) {
 static void DownLogoEvent(GtkWidget *widget) {
   int column, row;
 
+  GSM_Bitmap tbitmap;
+  
+  memcpy(&tbitmap,&bitmap,sizeof(GSM_Bitmap));
+
   for (row = bitmap.height-1;row > 0;row--)
     for (column = 0;column < bitmap.width;column++)
       if (IsPoint(column,row-1))
-        SetPointBitmap(&bitmap,column,row);
+        GSM_SetPointBitmap(&bitmap,column,row);
       else
-        ClearPointBitmap(&bitmap,column,row);
+        GSM_ClearPointBitmap(&bitmap,column,row);
 
   for (column = 0;column < bitmap.width;column++)
-    ClearPointBitmap(&bitmap,column,0);
+    if (GSM_IsPointBitmap(&tbitmap,column,bitmap.height-1))
+      GSM_SetPointBitmap(&bitmap,column,0);
+    else
+      GSM_ClearPointBitmap(&bitmap,column,0);
 
   UpdatePoints(widget);
 }
@@ -974,15 +974,22 @@ static void DownLogoEvent(GtkWidget *widget) {
 static void LeftLogoEvent(GtkWidget *widget) {
   int column, row;
 
+  GSM_Bitmap tbitmap;
+  
+  memcpy(&tbitmap,&bitmap,sizeof(GSM_Bitmap));
+
   for (column = 0; column < bitmap.width-1;column++)
     for (row = 0;row < bitmap.height;row++)
       if (IsPoint(column+1,row))
-        SetPointBitmap(&bitmap,column,row);
+        GSM_SetPointBitmap(&bitmap,column,row);
       else
-	ClearPointBitmap(&bitmap,column,row);
+	GSM_ClearPointBitmap(&bitmap,column,row);
 
   for (row = 0;row < bitmap.height;row++)
-    ClearPointBitmap(&bitmap,bitmap.width-1,row);
+    if (GSM_IsPointBitmap(&tbitmap,0,row))
+      GSM_SetPointBitmap(&bitmap,bitmap.width-1,row);
+    else
+      GSM_ClearPointBitmap(&bitmap,bitmap.width-1,row);
 
   UpdatePoints(widget);
 }
@@ -990,15 +997,22 @@ static void LeftLogoEvent(GtkWidget *widget) {
 static void RightLogoEvent(GtkWidget *widget) {
   int column, row;
 
+  GSM_Bitmap tbitmap;
+  
+  memcpy(&tbitmap,&bitmap,sizeof(GSM_Bitmap));
+
   for (column = bitmap.width-1;column > 0;column--)
     for (row = 0;row < bitmap.height;row++)
       if (IsPoint(column-1,row))
-        SetPointBitmap(&bitmap,column,row);
+        GSM_SetPointBitmap(&bitmap,column,row);
       else
-        ClearPointBitmap(&bitmap,column,row);
+        GSM_ClearPointBitmap(&bitmap,column,row);
 
   for (row = 0;row < bitmap.height;row++)
-    ClearPointBitmap(&bitmap,0,row);
+    if (GSM_IsPointBitmap(&tbitmap,bitmap.width-1,row))
+      GSM_SetPointBitmap(&bitmap,0,row);
+    else
+      GSM_ClearPointBitmap(&bitmap,0,row);
 
   UpdatePoints(widget);
 }
@@ -1010,14 +1024,14 @@ static void FlipVerticalLogoEvent(GtkWidget *widget) {
     for (column = 0;column < bitmap.width;column++) {
       temp = IsPoint(column,row);
       if (IsPoint(column,bitmap.height-1-row))
-	SetPointBitmap(&bitmap,column,row);
+	GSM_SetPointBitmap(&bitmap,column,row);
       else
-	ClearPointBitmap(&bitmap,column,row);
+	GSM_ClearPointBitmap(&bitmap,column,row);
 
       if (temp)
-	SetPointBitmap(&bitmap,column,bitmap.height-1-row);
+	GSM_SetPointBitmap(&bitmap,column,bitmap.height-1-row);
       else
-	ClearPointBitmap(&bitmap,column,bitmap.height-1-row);
+	GSM_ClearPointBitmap(&bitmap,column,bitmap.height-1-row);
     }
 
   UpdatePoints(widget);
@@ -1031,14 +1045,14 @@ static void FlipHorizontalLogoEvent(GtkWidget *widget) {
       temp = IsPoint(column,row);
 
       if (IsPoint(bitmap.width-1-column,row))
-	SetPointBitmap(&bitmap,column,row);
+	GSM_SetPointBitmap(&bitmap,column,row);
       else
-        ClearPointBitmap(&bitmap,column,row);
+        GSM_ClearPointBitmap(&bitmap,column,row);
 
       if (temp)
-	SetPointBitmap(&bitmap,bitmap.width-1-column,row);
+	GSM_SetPointBitmap(&bitmap,bitmap.width-1-column,row);
       else
-	ClearPointBitmap(&bitmap,bitmap.width-1-column,row);
+	GSM_ClearPointBitmap(&bitmap,bitmap.width-1-column,row);
     }
 
   UpdatePoints(widget);
@@ -1063,37 +1077,27 @@ static gint LogoTypeEvent(GtkWidget *widget) {
   if (GTK_TOGGLE_BUTTON(buttonStartup)->active && bitmap.type != GSM_StartupLogo) {
     /* look for old bitmap type, clean if another */
     clear = 1;
-    bitmap.type = GSM_StartupLogo;
-    bitmap.height = 48;
-    bitmap.width = 84;
-    bitmap.size = bitmap.width * bitmap.height / 8;
+    GSM_ResizeBitmap(&bitmap,GSM_StartupLogo);
   }
-  /* him phone support for callerGroups? */
+
+  /* has phone support for callerGroups? */
   if (phoneMonitor.supported.callerGroups) {
-    /* yes, watch if new type is callerLogo */
     if (GTK_TOGGLE_BUTTON(buttonCaller)->active && bitmap.type != GSM_CallerLogo) {
       /* previous was startup? clear and draw batteries, signal, ... */      
       if (bitmap.type == GSM_StartupLogo) clear = 1;
-      bitmap.type = GSM_CallerLogo;
-      bitmap.height = 14;
-      bitmap.width = 72;
-      bitmap.size = bitmap.width * bitmap.height / 8;
-    }  
+      GSM_ResizeBitmap(&bitmap,GSM_CallerLogo);
+    }
   }
+
   /* is new type operatorLogo? */
   if (GTK_TOGGLE_BUTTON(buttonOperator)->active && bitmap.type != GSM_OperatorLogo) {
     /* previous startup? clear and draw batteries, signal, ... */      
     if (bitmap.type == GSM_StartupLogo) clear = 1;
-    bitmap.type = GSM_OperatorLogo;
-    bitmap.height = 14;
-    bitmap.width = 72;
-    bitmap.size = bitmap.height * bitmap.width / 8;
+    GSM_ResizeBitmap(&bitmap,GSM_OperatorLogo);
   }
 
   /* must clear? */
   if (clear) {
-    memset(bitmap.bitmap,0,sizeof(bitmap.bitmap));
-          
     if (previewAvailable) {
       /* configure event reload pixmap from disk and redraws */
       gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
@@ -1115,11 +1119,148 @@ static inline void CloseLogosWindow (void) {
   gtk_widget_hide(GUI_LogosWindow);
 }
 
+void ExportLogoFileMain(gchar *name)
+{
+  GSM_Bitmap tbitmap;
+  GSM_Error error;
+  
+  tbitmap=bitmap;
+
+  strncpy(tbitmap.netcode,GSM_GetNetworkCode(networkInfo.NetworkCode),7);
+
+  error=GSM_SaveBitmapFile(name,&tbitmap);
+  if (error!=GE_NONE) {
+    gchar *buf = g_strdup_printf(_("Error saving file\n(error=%d)"),error);
+    gtk_label_set_text(GTK_LABEL(errorDialog.text),buf);
+    gtk_widget_show(errorDialog.dialog);
+    g_free(buf);
+  }
+}
+
+static void YesLogoFileExportDialog (GtkWidget *w, gpointer data)
+{
+  gtk_widget_hide (GTK_WIDGET (data));
+  ExportLogoFileMain(exportDialogData.fileName);
+}
+
+static void ExportFileSelected (GtkWidget *w, GtkFileSelection *fs)
+{
+  static YesNoDialog dialog = { NULL, NULL};
+  FILE *f;
+  gchar err[80];
+
+  exportDialogData.fileName = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
+  gtk_widget_hide (GTK_WIDGET (fs));
+
+  if ((f = fopen (exportDialogData.fileName, "r")) != NULL)
+  {
+    fclose (f);
+    if (dialog.dialog == NULL)
+    {
+      CreateYesNoDialog (&dialog, YesLogoFileExportDialog, CancelDialog, GUI_LogosWindow);
+      gtk_window_set_title (GTK_WINDOW (dialog.dialog), _("Overwrite file?"));
+      g_snprintf ( err, 80, _("File %s already exist.\nOverwrite?"), exportDialogData.fileName); 
+      gtk_label_set_text (GTK_LABEL(dialog.text), err);
+    }
+    gtk_widget_show (dialog.dialog);
+  }
+  else
+    ExportLogoFileMain(exportDialogData.fileName);
+}
+
+void ImportFileSelected(GtkWidget *w, GtkFileSelection *fs)
+{
+  GSM_Bitmap tbitmap;
+  GSM_Error error=0;
+  
+  gchar *fileName;
+  FILE *f;
+
+  fileName = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
+  gtk_widget_hide (GTK_WIDGET (fs));
+
+  if ((f = fopen (fileName, "r")) == NULL) {
+    gchar *buf = g_strdup_printf(_("Can't open file %s for reading !"),fileName);
+    gtk_label_set_text(GTK_LABEL(errorDialog.text),buf);
+    gtk_widget_show(errorDialog.dialog);
+    g_free(buf);
+    return;
+  } else fclose(f);
+
+  error=GSM_ReadBitmapFile(fileName,&tbitmap);
+  if (error!=GE_NONE) {
+    gchar *buf = g_strdup_printf(_("Error reading file\n(error=%d)"),error);
+    gtk_label_set_text(GTK_LABEL(errorDialog.text),buf);
+    gtk_widget_show(errorDialog.dialog);
+    g_free(buf);
+    return;
+  }
+
+  exportDialogData.fileName=fileName;
+  
+  gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonStartup),false);
+  gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonOperator),false);
+  gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonCaller),false);
+  
+  if (tbitmap.type==GSM_OperatorLogo) gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonOperator),true);
+  if (tbitmap.type==GSM_StartupLogo) gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonStartup),true);
+  if (tbitmap.type==GSM_CallerLogo) gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonCaller),true);
+  
+  memcpy(&bitmap,&tbitmap,sizeof(GSM_Bitmap));
+  
+  UpdatePoints(drawingArea);
+}
+
+void SaveLogoAs(GtkWidget *widget)
+{
+  FileSelection=gtk_file_selection_new ("Save logo as ...");
+
+  gtk_signal_connect (
+	GTK_OBJECT (GTK_FILE_SELECTION (FileSelection)->ok_button),
+	"clicked", (GtkSignalFunc) ExportFileSelected, FileSelection);
+    
+  gtk_signal_connect_object (
+	GTK_OBJECT(GTK_FILE_SELECTION(FileSelection)->cancel_button),
+	"clicked", (GtkSignalFunc) gtk_widget_destroy,
+        GTK_OBJECT (FileSelection));
+    
+  gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION(FileSelection));
+
+  gtk_widget_show(FileSelection);
+}
+
+void SaveLogo(GtkWidget *widget)
+{
+  if (exportDialogData.fileName==NULL) {
+    SaveLogoAs(widget);
+  } else {
+    ExportLogoFileMain(exportDialogData.fileName);
+  }
+}
+
+void OpenLogo(GtkWidget *widget)
+{
+  FileSelection=gtk_file_selection_new ("Open logo...");
+
+  gtk_signal_connect (
+	GTK_OBJECT (GTK_FILE_SELECTION (FileSelection)->ok_button),
+	"clicked", (GtkSignalFunc) ImportFileSelected, FileSelection);
+    
+  gtk_signal_connect_object (
+	GTK_OBJECT(GTK_FILE_SELECTION(FileSelection)->cancel_button),
+	"clicked", (GtkSignalFunc) gtk_widget_destroy,
+        GTK_OBJECT (FileSelection));
+    
+  gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION(FileSelection));
+
+  gtk_widget_show(FileSelection);
+}
+
 static GtkItemFactoryEntry logosMenuItems[] = {
   { NULL,	NULL,		NULL,			 0, "<Branch>"},
-  { NULL,       "<control>O",   NULL,		         0, NULL},
-  { NULL,       "<control>S",   NULL,		         0, NULL},
-  { NULL,	NULL,		NULL,			 0, NULL},
+  { NULL,       "<control>O",   OpenLogo,		 0, NULL},
+  { NULL,       "<control>S",   SaveLogo,		 0, NULL},
+  { NULL,	NULL,		SaveLogoAs,	         0, NULL},
   { NULL,       NULL,           NULL,                    0, "<Separator>"},
   { NULL,       "<control>G",   GetNetworkInfoEvent,     0, NULL},
   { NULL,       NULL,           GetLogoEvent,            0, NULL},
@@ -1413,8 +1554,10 @@ void GUI_CreateLogosWindow (void) {
 void GUI_RefreshLogosGroupsCombo (void) {
   GList *callerList = NULL;
   int i;
+  
   for (i = 0;i < 6;i++)
     callerList = g_list_insert(callerList,xgnokiiConfig.callerGroups[i],i);
+  
   gtk_combo_set_popdown_strings(GTK_COMBO(callerCombo),callerList);
   g_list_free(callerList);
 

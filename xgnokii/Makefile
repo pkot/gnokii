@@ -18,6 +18,10 @@ CFLAGS += -DXVERSION=\"$(XVERSION)\" \
 LDFLAGS += $(PTHREAD_LIBS) \
 	   $(GTK_LIBS) 
 
+ifdef XPM_LIBS
+    LDFLAGS +=$(XPM_LIBS)
+endif
+
 OBJS = 	xgnokii.o \
 	xgnokii_common.o \
 	xgnokii_contacts.o \
@@ -38,13 +42,16 @@ HELP_DIR = docs/help
 all: xgnokii
 
 
-xgnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/DATA.o
+xgnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/DATA.o $(TOPDIR)/common/gsm-filetypes.o
 
 $(TOPDIR)/common/COMMON.o: 
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
 
 $(TOPDIR)/common/DATA.o:
 	$(MAKE) -C $(TOPDIR)/common DATA.o
+
+$(TOPDIR)/common/gsm-filetypes.o:
+	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
 
 clean:
 	$(RM) $(OBJS) *~ xpm/*~ depend xgnokii

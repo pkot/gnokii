@@ -10,7 +10,7 @@
 	
   Functions to read and write common file types.
  
-  Last modified: Sat 18 Nov 2000 by Chris Kemp
+  Last modified: Wed 6 Dec 2000 by Chris Kemp
 
 */
 
@@ -23,7 +23,7 @@
 #include "gsm-common.h"
 #include "gsm-filetypes.h"
 #include "gsm-bitmaps.h"
-#include "fbus-6110-ringtones.h"
+#include "gsm-ringtones.h"
 
 #ifdef XPM
   #include <X11/xpm.h>
@@ -85,7 +85,7 @@ GSM_Error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
   GSM_Error error;
   GSM_Filetypes filetype;
   
-  file = fopen(FileName, "r");
+  file = fopen(FileName, "rb");
 
   if (!file)
     return(GE_CANTOPENFILE);
@@ -126,10 +126,8 @@ GSM_Error loadott(FILE *file, GSM_Ringtone *ringtone)
   i=fread(Buffer, 1, 2000, file);
 
   if (!feof(file)) return GE_FILETOOLONG;
-  
-  /* FIXME - this should be a generic function */
 
-  return FB61_UnPackRingtone(ringtone, Buffer, i);
+  return GSM_UnPackRingtone(ringtone, Buffer, i);
 }
 
 
@@ -288,7 +286,7 @@ GSM_Error saveott(FILE *file, GSM_Ringtone *ringtone)
   int i=2000;
   
   /* PackRingtone writes up to i chars and returns in i the number written */
-  FB61_PackRingtone(ringtone, Buffer, &i);
+  GSM_PackRingtone(ringtone, Buffer, &i);
 
   if (i<2000) {
     fwrite(Buffer, 1, i, file);
@@ -313,21 +311,27 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
   for (i=0;i<ringtone->NrNotes;i++) {
     switch (ringtone->notes[i].duration) {
       case 192:
+	buffer[0]++; break;
       case 128: 
 	buffer[0]++; break;
-      case 96:
+      case 96:	
+	buffer[1]++; break;
       case 64: 
 	buffer[1]++; break;
       case 48:
+	buffer[2]++; break;
       case 32: 
 	buffer[2]++; break;
       case 24:
+	buffer[3]++; break;
       case 16: 
 	buffer[3]++; break;
       case 12:
+	buffer[4]++; break;
       case 8: 
 	buffer[4]++; break;
       case 6: 
+	buffer[5]++; break;
       case 4:
 	buffer[5]++; break;
     }
@@ -412,37 +416,37 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
     /* This note has a duration different than the default. We must save it */
     if (ringtone->notes[i].duration!=DefDuration) {
       switch (ringtone->notes[i].duration) {
-        case 192:  //192=128*1.5
+        case 192:                      //192=128*1.5
+	  fprintf(file,_("1")); break;
         case 128:
-	  fprintf(file,_("1"));
-	  break;
-        case 96:  //96=64*1.5
+	  fprintf(file,_("1")); break;
+        case 96:                       //96=64*1.5
+	  fprintf(file,_("2")); break;
         case 64:
-	  fprintf(file,_("2"));
-	  break;
-        case 48:  //48=32*1.5
+	  fprintf(file,_("2")); break;
+        case 48:                       //48=32*1.5
+	  fprintf(file,_("4")); break;
         case 32:
-	  fprintf(file,_("4"));
-	  break;
-        case 24:  //24=16*1.5;
+	  fprintf(file,_("4")); break;
+        case 24:                       //24=16*1.5;
+	  fprintf(file,_("8")); break;
         case 16:
-	  fprintf(file,_("8"));
-	  break;
-        case 12:  //12=8*1.5
+	  fprintf(file,_("8")); break;
+        case 12:                       //12=8*1.5
+	  fprintf(file,_("16")); break;
         case 8:
-	  fprintf(file,_("16"));
-	  break;
-        case 6:  //6=4*1.5
+	  fprintf(file,_("16")); break;
+        case 6:                        //6=4*1.5
+	  fprintf(file,_("32")); break;
         case 4:
-	  fprintf(file,_("32"));
-	  break;
+	  fprintf(file,_("32")); break;
         default: 
 	  break;
       }
     }
     
     /* Now save the actual note */
-    switch (FB61_GetNote(CurrentNote)) {
+    switch (GSM_GetNote(CurrentNote)) {
       case Note_C  :fprintf(file,_("c"));break;
       case Note_Cis:fprintf(file,_("c#"));break;
       case Note_D  :fprintf(file,_("d"));break;
@@ -493,7 +497,7 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
   int error;
   GSM_Filetypes filetype=None;
 
-  file = fopen(FileName, "r");
+  file = fopen(FileName, "rb");
 
   if (!file)
     return(GE_CANTOPENFILE);
@@ -516,6 +520,8 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
     filetype=XPMF;
   } else filetype=None;
 
+  if (strstr(FileName,".otb")) filetype=OTA; /* OTA files saved by NCDS3 */
+  
   rewind(file);
 
   switch (filetype) {
@@ -613,7 +619,7 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 /* Based on the article from the Polish Magazine "Bajtek" 11/92 */
                                      /* Marcin-Wiacek@Topnet.PL */
 
-/* This seems to load only startup logos */
+/* This loads the image as a startup logo - but is resized as necessary later */
 
 GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 {
@@ -884,10 +890,11 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 
 GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 {
+  unsigned char buffer[84*48];
+  int pos,pos2,x,y;
+  div_t division;
 
-  unsigned char buffer[4];
-
-  fread(buffer,1,4,file);
+  fread(buffer,1,5,file);
   fread(buffer,1,1,file);
 
   switch (buffer[0]) {
@@ -904,29 +911,66 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
     bitmap->type=GSM_PictureImage;
     break;
   default:
-    return(-1);
+    return(GE_SUBFORMATNOTSUPPORTED);
+  }
+  
+  fread(buffer,1,4,file);
+  bitmap->width=buffer[1];
+  bitmap->height=buffer[2];
+  bitmap->size=bitmap->width*bitmap->height/8;
+
+  division=div(bitmap->width,8);
+  if (division.rem!=0) division.quot++; /* For startup logos */
+  
+  if (fread(buffer,1,(division.quot*bitmap->height),file)!=(division.quot*bitmap->height))
+    return(GE_FILETOOSHORT);
+    
+  GSM_ClearBitmap(bitmap);
+  
+  pos=0;pos2=7;
+  for (y=0;y<bitmap->height;y++) {
+    for (x=0;x<bitmap->width;x++) {
+      if ((buffer[pos]&(1<<pos2))>0) GSM_SetPointBitmap(bitmap,x,y);
+      pos2--;
+      if (pos2<0) {pos2=7;pos++;} //going to new byte
+    }
+    if (pos2!=7) {pos2=7;pos++;} //for startup logos-new line means new byte
   }
 
-  return (loadota(file,bitmap));
+  return (GE_NONE);
 }
+
 
 GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap)
 {
 
   char buffer[4];
-  do {
-    fread(buffer,1,1,file);
-  } while ((buffer[0]&0x40)==0x40);  /* 7th bit indicates extd. info */
-  fread(buffer,1,1,file); /* It seems to need this */
 
-  fread(buffer,1,3,file);
-  bitmap->width=buffer[0];
-  bitmap->height=buffer[1];
+  /* We could check for extended info here - indicated by the 7th bit being set in the first byte */
+	
+  fread(buffer,1,4,file);
+
+  bitmap->width=buffer[1];
+  bitmap->height=buffer[2];
   bitmap->size=bitmap->width*bitmap->height/8;
-  if (fread(bitmap->bitmap,1,bitmap->size,file)!=bitmap->size)
-    return(-1);
 
-  return(0);
+  if ((bitmap->height==48) && (bitmap->width==84)) {
+    bitmap->type=GSM_StartupLogo;
+  }
+  else if ((bitmap->height==14) && (bitmap->width==72)) {
+    bitmap->type=GSM_CallerLogo;
+  }
+  else {
+#ifdef DEBUG
+    printf("Invalid Image Size (%dx%d).\n",bitmap->width,bitmap->height);
+#endif
+    return GE_INVALIDIMAGESIZE;
+  }
+  
+  if (fread(bitmap->bitmap,1,bitmap->size,file)!=bitmap->size)
+    return(GE_FILETOOSHORT);
+
+  return(GE_NONE);
 }
 
 
@@ -953,9 +997,7 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
       
    if (!file)
      return(GE_CANTOPENFILE);
-
-   /* FIXME - I think this needs fixing - what happens if we try and save a caller logo as .nsl ?? */
-   	
+  	
    if (strstr(FileName,".nlm"))
    {
      savenlm(file, bitmap);
@@ -1074,7 +1116,7 @@ void savexpm(char *filename, GSM_Bitmap *bitmap)
 		      {"#","c","#ffffff","#ffffff","#ffffff","#ffffff"}};
   XpmImage image;
   unsigned int data[4032];
-  int i,j;
+  int x,y;
 
   image.height=bitmap->height;
   image.width=bitmap->width;
@@ -1083,26 +1125,15 @@ void savexpm(char *filename, GSM_Bitmap *bitmap)
   image.colorTable=colors;
   image.data=data;
 
-  if (bitmap->type==GSM_StartupLogo)
-    {
-      for(i=0;i<bitmap->height;i++) {
-	for(j=0;j<bitmap->width;j++) {
-	  if (bitmap->bitmap[((i/8)*84) + j] & 1<<((i%8))) data[i*bitmap->width+j]=0;
-	  else data[i*bitmap->width+j]=1;
-	}
-      }
-    }
-  else {
-    for(i=0;i<bitmap->height;i++) {
-	for(j=0;j<bitmap->width;j++) {
-	  if (bitmap->bitmap[9*i + (j/8)] & 1<<(7-(j%8))) data[i*bitmap->width+j]=0;
-	  else data[i*bitmap->width+j]=1;
-	}
-      }
-  } 
- 
+  for (y=0;y<image.height;y++) {
+    for (x=0;x<image.width;x++)
+      if (GSM_IsPointBitmap(bitmap,x,y))
+        data[y*image.width+x]=0;
+      else
+        data[y*image.width+x]=1;
+  }
+  
   XpmWriteFileFromXpmImage(filename,&image,NULL);
-
 }
 
 #endif

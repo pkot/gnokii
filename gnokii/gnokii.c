@@ -56,6 +56,7 @@
 #include "gnokii.h"
 #include "gsm-filetypes.h"
 #include "gsm-bitmaps.h"
+#include "gsm-ringtones.h"
 
 char *model;      /* Model from .gnokiirc file. */
 char *Port;       /* Serial port from .gnokiirc file */
@@ -209,12 +210,15 @@ int usage(void)
 "          gnokii --identify\n"
 "          gnokii --senddtmf string\n"
 "          gnokii --sendlogo {caller|op} destination logofile [network code]\n"
-"          gnokii --setlogo logofile [network code]\n"
-"          gnokii --setlogo logofile [caller group number] [group name]\n"
-"          gnokii --setlogo text [startup text]\n"
-"          gnokii --setlogo dealer [dealer startup text]\n"
-"          gnokii --getlogo logofile {caller|op|startup} [caller group number]\n"
 "          gnokii --sendringtone destination rtttlfile\n"
+"          gnokii --setlogo op [logofile] [network code]\n"
+"          gnokii --setlogo startup [logofile]\n"
+"          gnokii --setlogo caller [logofile] [caller group number] [group name]\n"
+"          gnokii --setlogo {dealer|text} [text]\n"
+"          gnokii --getlogo op [logofile] [network code]\n"
+"          gnokii --getlogo startup [logofile] [network code]\n"
+"          gnokii --getlogo caller [logofile][caller group number][network code]\n"
+"          gnokii --getlogo {dealer|text}\n"
 "          gnokii --setringtone rtttlfile\n"
 "          gnokii --reset [soft|hard]\n"
 "          gnokii --getprofile [number]\n"
@@ -469,8 +473,8 @@ int main(int argc, char *argv[])
     { OPT_SETWELCOMENOTE,    1, 1, 0 },
     { OPT_NETMONITOR,        1, 1, 0 },
     { OPT_SENDDTMF,          1, 1, 0 },
-    { OPT_SETLOGO,           1, 3, 0 },
-    { OPT_GETLOGO,           2, 3, 0 },
+    { OPT_SETLOGO,           1, 4, 0 },
+    { OPT_GETLOGO,           1, 4, 0 },
     { OPT_SETRINGTONE,       1, 1, 0 },
     { OPT_RESET,             0, 1, 0 },
     { OPT_GETPROFILE,        0, 1, 0 },
@@ -684,7 +688,7 @@ int main(int argc, char *argv[])
 
     case OPT_GETLOGO:
 
-      rc = getlogo(nargv);
+      rc = getlogo(nargc, nargv);
       break;
 
     case OPT_SETRINGTONE:
@@ -1759,55 +1763,176 @@ int sendlogo(int argc, char *argv[])
 
 /* Getting logos. */
 
-int getlogo(char *argv[])
+GSM_Error SaveBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap)
+{
+  int confirm,confirm2;
+  char ans[4];
+  struct stat buf;
+  GSM_Error error;
+
+  /* Ask before overwriting */
+  while (stat(FileName, &buf) == 0) {
+  
+    confirm=-1;
+    confirm2=-1;
+    
+    while (confirm < 0) {
+      fprintf(stderr, _("Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "),FileName);
+      GetLine(stdin, ans, 4);
+      if (!strcmp(ans, "O") || !strcmp(ans, "o")) confirm = 1;
+      if (!strcmp(ans, "N") || !strcmp(ans, "n")) confirm = 2;
+      if (!strcmp(ans, "S") || !strcmp(ans, "s")) return GE_USERCANCELED;
+    }  
+    if (confirm==1) break;
+    if (confirm==2) {
+      while (confirm2 < 0) {
+        fprintf(stderr, _("Enter name of new file: "));
+        GetLine(stdin, FileName, 50);
+        if (&FileName[0]==0) return GE_USERCANCELED;
+	confirm2=1;
+      }  
+    }
+  }
+  
+  error=GSM_SaveBitmapFile(FileName,bitmap);
+  
+  switch (error) {
+    case GE_CANTOPENFILE:        fprintf(stderr, _("Failed to write file \"%s\"\n"),FileName);
+                                 break;
+    default:                     break;
+  }
+  
+  return error;
+}
+
+
+
+int getlogo(int argc, char *argv[])
 {
   GSM_Bitmap bitmap;
-  char ans[5];
-  struct stat buf;
   GSM_Error error;
 
   sleep(1);
 
   /* We need to make sure that the init is finished to avoid interrupted */
   /* multiframe packets... */
-
-  fbusinit(NULL);
-
+  
   bitmap.type=GSM_None;
 
-  if (strcmp(argv[1],"op")==0)
+  if (!strcmp(argv[0],"op"))
     bitmap.type=GSM_OperatorLogo;
-  if (strcmp(argv[1],"caller")==0) {
+    
+  if (!strcmp(argv[0],"caller")) {
     /* There is caller group number missing in argument list. */
-    if (!argv[2]) {
-      usage();
-      exit(-1);
+    if (argc==3) {     
+      bitmap.number=argv[2][0]-'0';
+      if ((bitmap.number<0)||(bitmap.number>9)) bitmap.number=0;
+    } else
+    {
+      bitmap.number=0;
     }
-    bitmap.number=argv[2][0]-'0';
     bitmap.type=GSM_CallerLogo;
-    if ((bitmap.type<0)||(bitmap.type>9)) bitmap.type=0;
-    }
-  if (strcmp(argv[1],"startup")==0)
+  }
+    
+  if (!strcmp(argv[0],"startup"))
     bitmap.type=GSM_StartupLogo;
+    
+  if (!strcmp(argv[0],"dealer"))
+    bitmap.type=GSM_DealerNoteText;  
+    
+  if (!strcmp(argv[0],"text"))
+    bitmap.type=GSM_WelcomeNoteText;  
 
   if (bitmap.type!=GSM_None) {
-    fprintf(stdout, _("Getting Logo.\n"));
-    if (GSM->GetBitmap(&bitmap)==GE_NONE && bitmap.width!=0){
-      error = GE_NONE;
-      if ((stat(argv[0], &buf) == 0)) {
-	fprintf(stdout, _("File %s exists.\n"), argv[0]);
-	fprintf(stderr, _("Overwrite? (yes/no) "));
-	GetLine(stdin, ans, 4);
-	if (!strcmp(ans, "yes")) {
-	  error = GSM_SaveBitmapFile(argv[0], &bitmap);
-	}
-      } else error = GSM_SaveBitmapFile(argv[0], &bitmap);	       
-      if (error!=GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), argv[0]);
-    }
+  
+    fbusinit(NULL);
     
+    fprintf(stdout, _("Getting Logo\n"));
+        
+    error=GSM->GetBitmap(&bitmap);
+ 
+    switch (error)
+    {
+      case GE_NONE:
+        if (bitmap.type==GSM_DealerNoteText) fprintf(stdout, _("Dealer welcome note "));
+        if (bitmap.type==GSM_WelcomeNoteText) fprintf(stdout, _("Welcome note "));	
+        if (bitmap.type==GSM_DealerNoteText || bitmap.type==GSM_WelcomeNoteText)
+	{
+          if (bitmap.text[0]!=0)
+	  {
+	    fprintf(stdout, _("currently set to \"%s\"\n"), bitmap.text);
+	  } else {
+            fprintf(stdout, _("currently empty\n"));
+	  }
+        } else
+        {
+          if (bitmap.width!=0)
+          {
+            if (bitmap.type==GSM_OperatorLogo)
+	    {
+              fprintf(stdout,"Operator logo for %s (%s) network got succesfully\n",bitmap.netcode,GSM_GetNetworkName(bitmap.netcode));
+	      if (argc==3)
+	      {
+	        strncpy(bitmap.netcode,argv[2],7);
+		if (!strcmp(GSM_GetNetworkName(bitmap.netcode),"unknown"))
+		{
+	          fprintf(stderr,"Sorry, gnokii doesn't know %s network !\n",bitmap.netcode);
+	          return -1;
+		}
+	      }
+	    }
+            if (bitmap.type==GSM_StartupLogo)
+	    {
+              fprintf(stdout,"Startup logo got successfully\n");
+	      if (argc==3)
+	      {
+	        strncpy(bitmap.netcode,argv[2],7);
+		if (!strcmp(GSM_GetNetworkName(bitmap.netcode),"unknown"))
+		{
+	          fprintf(stderr,"Sorry, gnokii doesn't know %s network !\n",bitmap.netcode);
+	          return -1;
+		}
+	      }
+	    }
+            if (bitmap.type==GSM_CallerLogo)
+	    {
+              fprintf(stdout,"Caller logo got successfully\n");
+	      if (argc==4)
+	      {
+	        strncpy(bitmap.netcode,argv[3],7);
+		if (!strcmp(GSM_GetNetworkName(bitmap.netcode),"unknown"))
+		{
+	          fprintf(stderr,"Sorry, gnokii doesn't know %s network !\n",bitmap.netcode);
+	          return -1;
+		}
+	      }
+	    }
+            if (argc>1)
+	    {
+	      if (SaveBitmapFileOnConsole(argv[1], &bitmap)!=GE_NONE) return(-1);
+	    }
+          } else
+          {
+            fprintf(stdout,"Your phone doesn't have logo uploaded !\n");
+	    return -1;
+          }
+        } break;
+      case GE_NOTIMPLEMENTED:
+        fprintf(stderr, _("Function not implemented !\n"));
+        return -1;
+      case GE_NOTSUPPORTED:
+        fprintf(stderr, _("This kind of logo is not supported !\n"));
+        return -1;
+      default:
+        fprintf(stderr, _("Error getting logo !\n"));
+        return -1;
+    }
+    GSM->Terminate();
+  } else
+  {
+    fprintf(stderr, _("What kind of logo do you want to get ?\n"));
+    return -1;
   }
-
-  GSM->Terminate();
 
   return 0;
 }
@@ -1815,57 +1940,194 @@ int getlogo(char *argv[])
 
 /* Sending logos. */
 
+GSM_Error ReadBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap)
+{
+  GSM_Error error;
+  
+  error=GSM_ReadBitmapFile(FileName, bitmap);
+  
+  switch (error) {
+    case GE_CANTOPENFILE:         fprintf(stderr, _("Failed to read file \"%s\"\n"),FileName);
+                                  break;
+    case GE_WRONGNUMBEROFCOLORS:  fprintf(stderr, _("Wrong number of colors in \"%s\" logofile (accepted only 2-colors files) !\n"),FileName);
+                                  break;
+    case GE_WRONGCOLORS:          fprintf(stderr, _("Wrong colors in \"%s\" logofile !\n"),FileName);
+                                  break;
+    case GE_INVALIDFILEFORMAT:    fprintf(stderr, _("Invalid format of \"%s\" logofile !\n"),FileName);
+                                  break;
+    case GE_SUBFORMATNOTSUPPORTED:fprintf(stderr, _("Sorry, gnokii doesn't support used subformat in file \"%s\" !\n"),FileName);
+                                  break;
+    case GE_FILETOOSHORT:             fprintf(stderr, _("\"%s\" logofile is too short !\n"),FileName);
+                                  break;  
+    case GE_INVALIDIMAGESIZE:     fprintf(stderr, _("Bitmap size doesn't supported by fileformat or different from 72x14, 84x48 and 72x28 !\n"));
+                                  break;
+    default:                      break;
+  }
+  
+  return error;
+}
+
+
 int setlogo(int argc, char *argv[])
 {
 
-  GSM_Bitmap bitmap;
-  GSM_Bitmap oldbit;
-
+  GSM_Bitmap bitmap,oldbit;
+  GSM_NetworkInfo NetworkInfo;
+  GSM_Error error;
+  
+  bool ok=true;
+    int i;
+  
   fbusinit(NULL);
-
-  if (!GSM_ReadBitmapFile(argv[0], &bitmap)) {      
-    if ((argc > 1) && (bitmap.type==GSM_OperatorLogo))
-      strncpy(bitmap.netcode,argv[1],7);
-    if ((argc > 1) && (bitmap.type==GSM_CallerLogo)) {
-      bitmap.number=argv[1][0]-'0';
-      oldbit.type=GSM_CallerLogo;
-      oldbit.number=bitmap.number;
-      if (GSM->GetBitmap(&oldbit)==0) {
-	/* We have to get the old name and ringtone!! */
-	bitmap.ringtone=oldbit.ringtone;
-	strncpy(bitmap.text,oldbit.text,255);
-	if ((bitmap.number<0)||(bitmap.number>9)) bitmap.number=0;
-	if (argc > 2) strncpy(bitmap.text,argv[2],255);
-      }
-    }
-  }
-  else {
-    if (strcmp(argv[0],"text")==0 || strcmp(argv[0],"dealer")==0){
-      bitmap.type=GSM_StartupLogo;
-      bitmap.text[0]=0x00;
-      bitmap.dealertext[0]=0x00;
-      bitmap.dealerset=(strcmp(argv[0],"dealer")==0);
-      if (argc > 1) {
-        if (strcmp(argv[0],"text")==0) {
-	  strncpy(bitmap.text,argv[1],255);
-	} else {
-          strncpy(bitmap.dealertext,argv[1],255);
+  
+  if (!strcmp(argv[0],"text") || !strcmp(argv[0],"dealer"))
+  {
+    if (!strcmp(argv[0],"text")) bitmap.type=GSM_WelcomeNoteText;
+                            else bitmap.type=GSM_DealerNoteText;
+    bitmap.text[0]=0x00;
+    if (argc>1) strncpy(bitmap.text,argv[1],255);
+  } else
+  {
+    if (!strcmp(argv[0],"op") || !strcmp(argv[0],"startup") || !strcmp(argv[0],"caller"))
+    {
+      if (argc>1)
+      {
+        if (ReadBitmapFileOnConsole(argv[1], &bitmap)!=GE_NONE) {
+	  GSM->Terminate();
+	  return(-1);
 	}
-      }
-      bitmap.size=0;
-    } else {
-      fprintf(stdout, _("Logo file error.\n"));
+
+        if (!strcmp(argv[0],"op"))
+        {
+          if (bitmap.type!=GSM_OperatorLogo || argc<3)
+          {
+	    if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE) strncpy(bitmap.netcode,NetworkInfo.NetworkCode,7);
+	  }
+          GSM_ResizeBitmap(&bitmap,GSM_OperatorLogo);
+	  if (argc==3)
+	  {
+	    strncpy(bitmap.netcode,argv[2],7);
+	    if (!strcmp(GSM_GetNetworkName(bitmap.netcode),"unknown"))
+	    {
+	      fprintf(stderr,"Sorry, gnokii doesn't know %s network !\n",bitmap.netcode);
+	      return -1;
+	    }
+	  }
+        }
+        if (!strcmp(argv[0],"startup"))
+        {
+          GSM_ResizeBitmap(&bitmap,GSM_StartupLogo);
+        }
+        if (!strcmp(argv[0],"caller"))
+        {
+          GSM_ResizeBitmap(&bitmap,GSM_CallerLogo);
+          if (argc>2)
+	  {
+	    bitmap.number=argv[2][0]-'0';
+	    if ((bitmap.number<0)||(bitmap.number>9)) bitmap.number=0;
+          } else
+	  {
+	    bitmap.number=0;
+	  }
+          oldbit.type=GSM_CallerLogo;
+          oldbit.number=bitmap.number;
+          if (GSM->GetBitmap(&oldbit)==GE_NONE)
+	  {
+            /* We have to get the old name and ringtone!! */
+	    bitmap.ringtone=oldbit.ringtone;
+	    strncpy(bitmap.text,oldbit.text,255);
+	  }
+          if (argc>3) strncpy(bitmap.text,argv[3],255);	  
+        }
+	fprintf(stdout, _("Setting Logo.\n"));
+      } else
+      {
+        /* FIX ME: is it possible to permanently remove op logo ? */
+        if (!strcmp(argv[0],"op"))
+        {
+	  bitmap.type=GSM_OperatorLogo;
+	  strncpy(bitmap.netcode,"000 00",7);
+	  bitmap.width=72;
+	  bitmap.height=14;
+	  bitmap.size=bitmap.width*bitmap.height/8;
+	  GSM_ClearBitmap(&bitmap);
+	}
+	/* FIX ME: how to remove startup and group logos ? */
+	fprintf(stdout, _("Removing Logo.\n"));
+      }  
+    } else
+    {
+      fprintf(stderr, _("What kind of logo do you want to set ?\n"));
       GSM->Terminate();
-      return (-1);
+      return -1;
     }
   }
+    
+  error=GSM->SetBitmap(&bitmap);
+  
+  switch (error)
+  {
+    case GE_NONE: oldbit.type=bitmap.type;
+                  oldbit.number=bitmap.number;
+                  if (GSM->GetBitmap(&oldbit)==GE_NONE) {
+		    if (bitmap.type==GSM_WelcomeNoteText ||
+		        bitmap.type==GSM_DealerNoteText) {
+		      if (strcmp(bitmap.text,oldbit.text)) {
+                        fprintf(stderr, _("Error setting"));
+			if (bitmap.type==GSM_DealerNoteText) fprintf(stderr, _(" dealer"));
+			fprintf(stderr, _(" welcome note - "));
 
-  fprintf(stdout, _("Sending Logo.\n"));
-  GSM->SetBitmap(&bitmap);
+                        /* I know, it looks horrible, but... */
+			/* I set it to the short string - if it won't be set */
+			/* it means, PIN is required. If it will be correct, previous */
+			/* (user) text was too long */
+
+			/* Without it, I could have such thing: */
+			/* user set text to very short string (for example, "Marcin") */
+			/* then enable phone without PIN and try to set it to the very long (too long for phone) */
+			/* string (which start with "Marcin"). If we compare them as only length different, we could think, */
+			/* that phone accepts strings 6 chars length only (length of "Marcin") */
+			/* When we make it correct, we don't have this mistake */
+			
+			strcpy(oldbit.text,"!\0");
+			GSM->SetBitmap(&oldbit);
+			GSM->GetBitmap(&oldbit);
+			if (oldbit.text[0]!='!') {
+			  fprintf(stderr, _("SIM card and PIN is required\n"));
+			} else {
+			  GSM->SetBitmap(&bitmap);
+			  GSM->GetBitmap(&oldbit);
+			  fprintf(stderr, _("too long, truncated to \"%s\" (length %i)\n"),oldbit.text,strlen(oldbit.text));
+			}
+                        ok=false;
+		      }
+	            } else {
+		      if (bitmap.type==GSM_StartupLogo) {
+		        for (i=0;i<oldbit.size;i++) {
+		          if (oldbit.bitmap[i]!=bitmap.bitmap[i]) {
+			    fprintf(stderr, _("Error setting startup logo - SIM card and PIN is required\n"));
+			    ok=false;
+			    break;
+			  }
+		        }
+		      }
+		    }
+		  }
+		  if (ok) fprintf(stdout, _("Done.\n"));
+                  break;
+    case GE_NOTIMPLEMENTED:fprintf(stderr, _("Function not implemented.\n"));
+                           break;
+    case GE_NOTSUPPORTED:fprintf(stderr, _("This kind of logo is not supported.\n"));
+                           break;
+    default:fprintf(stderr, _("Error !\n"));
+            break;
+  }
+  
   GSM->Terminate();
 
   return 0;
 }
+
 
 /* Calendar notes receiving. */
 

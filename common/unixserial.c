@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <string.h>
 
 #if defined(__svr4__) || defined(__FreeBSD__)
 #  include <sys/file.h>
