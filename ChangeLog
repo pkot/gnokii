@@ -1,7 +1,8 @@
 0.4.0pre21 (not released yet)
 ==========
  * Rewrite of the SMS subsystem             (Pawel Kot, Pavel Machek)
- * First tries at EMS picture SMSes	               (Pavel Machek)
+    o first tries at EMS picture SMSes	               (Pavel Machek)
+    o support for sending nokia ringtones	       (Pavel Machek)
  * Security functions for AT phones                 (Manfred Jonsson)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
