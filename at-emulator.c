@@ -39,6 +39,9 @@
 	/* Global variables */
 bool	ATEM_Initialised = false;	/* Set to true once initialised */
 
+extern char *Model;
+extern char *Port;	/* Hmm, this is a bit iffy ? */
+
 	/* Local variables */
 
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
@@ -48,7 +51,6 @@ u8		ModemRegisters[MAX_MODEM_REGISTERS];
 char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
 int		CurrentCmdBuffer;
 int		CurrentCmdBufferIndex;
-
 
 
 	/* If initialised in debug mode, stdin/out is used instead
@@ -299,7 +301,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	if (strncmp(*buf, "MM", 3) == 0) {
 		buf[0]+=2;
 
-		sprintf(buffer, "\n\rgnokii built for %s on %s", MODEL, PORT);
+		sprintf(buffer, "\n\rgnokii built for %s on %s", Model, Port);
 		ATEM_StringOut(buffer);
 		return (false);
 	}

@@ -95,6 +95,7 @@ bool					EnableMonitoringOutput;
 bool					DisableKeepalive;
 float					CurrentRFLevel;
 float					CurrentBatteryLevel;
+int						ExploreMessage; /* FIXME - for debugging/investigation only */
 
 	/* These three are the information returned by AT+CGSN, AT+CGMR and
 	   AT+CGMM commands respectively. */
@@ -142,6 +143,7 @@ GSM_Error	FB38_Initialise(char *port_device, bool enable_monitoring)
 	IMEIValid = false;
 	RevisionValid = false;
 	ModelValid = false;
+	ExploreMessage = -1;
 
 	strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -950,19 +952,14 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 	/* Uncomment this if you want all messages in raw form. */
 	/*FB38_RX_DisplayMessage(); */
 
+		/* If the explore message function is in use, ensures
+		   the message we generate isn't acknowleged. */
+	if (MessageBuffer[0] == ExploreMessage) {
+		return FB38_RX_Sync;
+	}
+
 		/* Switch on the basis of the message type byte */
 	switch (MessageBuffer[0]) {
-	
-			/* 0x4a message is a response to our 0x4a request, assumed to
-			   be a keepalive message of sorts.  No response required. */
-		case 0x4a:	break;
-
-			/* 0x4b messages are sent by phone in response (it seems)
-			   to the keep alive packet.  We must acknowledge these it seems
-			   by sending a response with the "sequence number" byte loaded
-			   appropriately. */
-		case 0x4b:	FB38_RX_Handle0x4b_Status();
-					break;
 
 			/* 0x0b messages are sent by phone when an incoming call occurs,
 			   this message must be acknowledged. */
@@ -1171,8 +1168,19 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 						fprintf(stdout, _("Phone powering off..."));
 						fflush(stdout);
 					}
-
 					return FB38_RX_Off;
+	
+			/* 0x4a message is a response to our 0x4a request, assumed to
+			   be a keepalive message of sorts.  No response required. */
+		case 0x4a:	break;
+
+			/* 0x4b messages are sent by phone in response (it seems)
+			   to the keep alive packet.  We must acknowledge these it seems
+			   by sending a response with the "sequence number" byte loaded
+			   appropriately. */
+		case 0x4b:	FB38_RX_Handle0x4b_Status();
+					break;
+
 			/* We send 0x4c to request IMEI, Revision and Model info. */
 		case 0x4c:	break;
 
@@ -1276,6 +1284,21 @@ void 	FB38_TX_Send0x4aMessage(void)
 	
 	if (FB38_TX_SendMessage(0, 0x4a, RequestSequenceNumber, NULL) != true) {
 		fprintf(stderr, _("0x4a Write failed!"));	
+	}
+}
+
+	/* Send arbitrary command - used to try and map out some
+ 	   more of the protocol (hopefully Cell Info for one!) */
+void 	FB38_TX_SendExploreMessage(u8 message) 
+{
+	DisableKeepalive = true;
+
+	FB38_TX_UpdateSequenceNumber();
+
+	ExploreMessage = message;
+
+	if (FB38_TX_SendMessage(0, message, RequestSequenceNumber, NULL) != true) {
+		fprintf(stderr, _("Explore Write failed!"));	
 	}
 }
 
@@ -1930,7 +1953,7 @@ void	FB38_RX_Handle0x4d_IMEIRevisionModelData(void)
 	int		rev_length;
 
 		/* As usual, acknowledge first. */
-	if (!FB38_TX_SendStandardAcknowledge(0x41)) {
+	if (!FB38_TX_SendStandardAcknowledge(0x4d)) {
 		fprintf(stderr, _("Write failed!"));
 	}
 

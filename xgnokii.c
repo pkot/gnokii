@@ -21,6 +21,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
+#include "cfgreader.h"
 
 #include "pixmaps/logo.xpm"
 #include "pixmaps/background.xpm"
@@ -41,6 +42,13 @@ static GdkPixmap *BackgroundPixmap = NULL;
 
 static GdkPixmap *SMSPixmap = NULL;
 
+char *Model;	/* Model from .gnokiirc file. */
+char *Port;		/* Serial port from .gnokiirc file */
+
+	/* Local variables */
+char *DefaultModel = MODEL;	/* From Makefile */
+char *DefaultPort = PORT;
+
 /* Variables which contains current signal and battery. */
 
 static float rflevel=-1, batterylevel=-1;
@@ -56,7 +64,7 @@ GSM_Error fbusinit(bool enable_monitoring)
   /* Initialise the code for the GSM interface. */     
 
   if (error==GE_NOLINK)
-    error = GSM_Initialise(MODEL, PORT, enable_monitoring);
+    error = GSM_Initialise(Model, Port, enable_monitoring);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -304,6 +312,34 @@ int GUI_RemoveSplash(GtkWidget *Win) {
   return FALSE;
 }
 
+void	GUI_ReadConfig(void)
+{
+    struct CFG_Header *cfg_info;
+	char				*homedir;
+	char				rcfile[200];
+
+	homedir = getenv("HOME");
+
+	strncpy(rcfile, homedir, 200);
+	strncat(rcfile, "/.gnokiirc", 200);
+
+    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
+		fprintf(stderr, "error opening %s, using default config\n", 
+		  rcfile);
+    }
+
+    Model = CFG_Get(cfg_info, "global", "model");
+    if (Model == NULL) {
+		Model = DefaultModel;
+    }
+
+    Port = CFG_Get(cfg_info, "global", "port");
+    if (Port == NULL) {
+		Port = DefaultPort;
+    }
+
+}
+
 int main (int argc, char *argv[])
 {
 
@@ -314,6 +350,8 @@ int main (int argc, char *argv[])
   GUI_SplashScreen();
 
   /* Remove it after a while. */
+	
+  GUI_ReadConfig();
 
   (void) gtk_timeout_add(3000, (GtkFunction)GUI_RemoveSplash, (gpointer) GUI_SplashWindow);
 

@@ -24,14 +24,23 @@
 #include <string.h>
 
 #include "misc.h"
+#include "cfgreader.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
 #include "virtmodem.h"
 
-/* Prototypes. */
 
-/* Global variables */
+	/* Prototypes. */
+void	read_config(void);
+
+	/* Global variables */
 bool		DebugMode;	/* When true, run in debug mode */
+char		*Model;		/* Model from .gnokiirc file. */
+char		*Port;		/* Serial port from .gnokiirc file */
+
+	/* Local variables */
+char		*DefaultModel = MODEL;	/* From Makefile */
+char		*DefaultPort = PORT;
 
 void version(void)
 {
@@ -39,7 +48,7 @@ void version(void)
   fprintf(stdout, _("gnokiid Version %s
 Copyright (C) Hugh Blemings <hugh@vsb.com.au>, 1999
 Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999
-Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, MODEL, PORT);
+Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
 }
 
 /* The function usage is only informative - it prints this program's usage and
@@ -64,25 +73,27 @@ void usage(void)
 int main(int argc, char *argv[])
 {
 
-  /* For GNU gettext */
+		/* For GNU gettext */
 
-#ifdef GNOKII_GETTEXT
-  textdomain("gnokii");
-#endif
+	#ifdef GNOKII_GETTEXT
+  		textdomain("gnokii");
+	#endif
 
-  /* Handle command line arguments. */
+	read_config();
 
-  if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
-    usage();
-    exit(0);
-  }
+  		/* Handle command line arguments. */
 
-  /* Display version, copyright and build information. */
+	if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
+		usage();
+    	exit(0);
+  	}
 
-  if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
-    version();
-    exit(0);
-  }
+		/* Display version, copyright and build information. */
+
+	if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
+    	version();
+	    exit(0);
+	}
 
 	if (argc >= 2 && strcmp(argv[1], "--debug") == 0) {
 		DebugMode = true;	
@@ -91,14 +102,40 @@ int main(int argc, char *argv[])
 		DebugMode = false;	
 	}
 
-		/* FIXME Debug mode forced for now! */
-//	DebugMode = true;
 
-	if (VM_Initialise(DebugMode) == false) {
+	if (VM_Initialise(Model, Port, DebugMode) == false) {
 		exit (-1);
 	}
 	while (1) {
 		sleep (1);
 	}
 	exit (0);
+}
+
+void	read_config(void)
+{
+    struct CFG_Header 	*cfg_info;
+	char				*homedir;
+	char				rcfile[200];
+
+	homedir = getenv("HOME");
+
+	strncpy(rcfile, homedir, 200);
+	strncat(rcfile, "/.gnokiirc", 200);
+
+    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
+		fprintf(stderr, "error opening %s, using default config\n", 
+		  rcfile);
+    }
+
+    Model = CFG_Get(cfg_info, "global", "model");
+    if (Model == NULL) {
+		Model = DefaultModel;
+    }
+
+    Port = CFG_Get(cfg_info, "global", "port");
+    if (Port == NULL) {
+		Port = DefaultPort;
+    }
+
 }

@@ -1,0 +1,6 @@
+# This is a sample ~/.gnokiirc file.  Copy it into your
+# home directory and named it .gnokiirc.
+#
+[global]
+port = /dev/ttyS0
+model = 3810

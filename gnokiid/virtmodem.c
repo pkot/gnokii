@@ -58,7 +58,7 @@ bool			RequestTerminate;
 
 	/* If initialised in debug mode, stdin/out is used instead
 	   of ptys for interface. */
-bool	VM_Initialise(bool debug_mode)
+bool	VM_Initialise(char *model, char *port, bool debug_mode)
 {
 	int		rtn;
 
@@ -73,7 +73,7 @@ bool	VM_Initialise(bool debug_mode)
 		UseSTDIO = false;
 	}
 
-	if (VM_GSMInitialise() != GE_NONE) {
+	if (VM_GSMInitialise(model, port) != GE_NONE) {
 		fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n\r"));
 		return (false);
 	}
@@ -212,14 +212,14 @@ void    VM_CharHandler(void)
 }     
 
 	/* Initialise GSM interface, returning GSM_Error as appropriate  */
-GSM_Error 	VM_GSMInitialise(void)
+GSM_Error 	VM_GSMInitialise(char *model, char *port)
 {
 	int 		count=0;
 	GSM_Error 	error;
 
 		/* Initialise the code for the GSM interface. */     
 
-	error = GSM_Initialise(MODEL, PORT, false);
+	error = GSM_Initialise(model, port, false);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));

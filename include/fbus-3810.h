@@ -143,7 +143,7 @@ int		FB38_TX_Send0x42_WriteMemoryLocation(u8 memory_area, u8 location, char *lab
 void    FB38_TX_Send0x43_RequestMemoryLocation(u8 memory_area, u8 location);
 void    FB38_TX_Send0x4c_RequestIMEIRevisionModelData(void);
 void    FB38_TX_Send0x15Message(u8 sequence_number);
-
+void 	FB38_TX_SendExploreMessage(u8 message);
 
 #endif	/* __fbus_3810_c */
 

@@ -32,6 +32,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
+#include "cfgreader.h"
 
 /* Prototypes. */
 void monitormode(void);
@@ -47,14 +48,21 @@ void setalarm(char *argv[]);
 void getalarm(void);
 void dialvoice(char *argv[]);
 void dialdata(char *argv[]);
+void readconfig(void);
 
+char		*Model;		/* Model from .gnokiirc file. */
+char		*Port;		/* Serial port from .gnokiirc file */
+
+	/* Local variables */
+char		*DefaultModel = MODEL;	/* From Makefile */
+char		*DefaultPort = PORT;
 void version(void)
 {
 
   fprintf(stdout, _("GNOKII Version %s
 Copyright (C) Hugh Blemings <hugh@vsb.com.au>, 1999
 Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999
-Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, MODEL, PORT);
+Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
 }
 
 /* The function usage is only informative - it prints this program's usage and
@@ -117,9 +125,7 @@ void usage(void)
 
           --dialdata        initiate data call.
 
-   [memory type] is one of the following:
-          A ... SIM card memory
-          B ... internal memory of the phone\n"));
+          \n"));
 }
 
 /* fbusinit is the generic function which waits for the FBUS link. The limit
@@ -132,7 +138,7 @@ void fbusinit(bool enable_monitoring)
 
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(MODEL, PORT, enable_monitoring);
+  error = GSM_Initialise(Model, Port, enable_monitoring);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -162,6 +168,9 @@ int main(int argc, char *argv[])
 #ifdef GNOKII_GETTEXT
   textdomain("gnokii");
 #endif
+
+  /* Read config file */
+  readconfig();
 
   /* Handle command line arguments. */
 
@@ -347,7 +356,7 @@ void getsms(char *argv[])
 
     case GE_NOTIMPLEMENTED:
 
-      fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
+      fprintf(stderr, _("Function not implemented in %s model!\n"), Model);
       GSM->Terminate();
       exit(-1);	
 
@@ -416,7 +425,7 @@ void deletesms(char *argv[])
       fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);
     else {
       if (error == GE_NOTIMPLEMENTED) {
-	fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
+	fprintf(stderr, _("Function not implemented in %s model!\n"), Model);
 	GSM->Terminate();
 	exit(-1);	
       }
@@ -733,7 +742,7 @@ void getmemory(char *argv[])
       fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, count, entry.Group);
     else {
       if (error == GE_NOTIMPLEMENTED) {
-	fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
+	fprintf(stderr, _("Function not implemented in %s model!\n"), Model);
 	GSM->Terminate();
 	exit(-1);
       }
@@ -830,4 +839,32 @@ void writephonebook(void)
 
   GSM->Terminate();
   exit(0);
+}
+
+void	readconfig(void)
+{
+    struct CFG_Header 	*cfg_info;
+	char				*homedir;
+	char				rcfile[200];
+
+	homedir = getenv("HOME");
+
+	strncpy(rcfile, homedir, 200);
+	strncat(rcfile, "/.gnokiirc", 200);
+
+    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
+		fprintf(stderr, "error opening %s, using default config\n", 
+		  rcfile);
+    }
+
+    Model = CFG_Get(cfg_info, "global", "model");
+    if (Model == NULL) {
+		Model = DefaultModel;
+    }
+
+    Port = CFG_Get(cfg_info, "global", "port");
+    if (Port == NULL) {
+		Port = DefaultPort;
+    }
+
 }
