@@ -58,37 +58,37 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {
 		switch (entry->subentries[i].entry_type) {
-		case 0x08:
+		case GN_PHONEBOOK_ENTRY_Email:
 			fprintf(f, "mail: %s\n", entry->subentries[i].data.number);
 			break;
-		case 0x09:
+		case GN_PHONEBOOK_ENTRY_Postal:
 			fprintf(f, "homePostalAddress: %s\n", entry->subentries[i].data.number);
 			break;
-		case 0x0a:
+		case GN_PHONEBOOK_ENTRY_Note:
 			fprintf(f, "Description: %s\n", entry->subentries[i].data.number);
 			break;
-		case 0x0b:
+		case GN_PHONEBOOK_ENTRY_Number:
 			switch (entry->subentries[i].number_type) {
-			case 0x02:
+			case GN_PHONEBOOK_NUMBER_Home:
 				fprintf(f, "homePhone: %s\n", entry->subentries[i].data.number);
 				break;
-			case 0x03:
+			case GN_PHONEBOOK_NUMBER_Mobile:
 				fprintf(f, "mobile: %s\n", entry->subentries[i].data.number);
 				break;
-			case 0x04:
+			case GN_PHONEBOOK_NUMBER_Fax:
 				fprintf(f, "fax: %s\n", entry->subentries[i].data.number);
 				break;
-			case 0x06:
+			case GN_PHONEBOOK_NUMBER_Work:
 				fprintf(f, "workPhone: %s\n", entry->subentries[i].data.number);
 				break;
-			case 0x0a:
+			case GN_PHONEBOOK_NUMBER_General:
 				fprintf(f, "telephoneNumber: %s\n", entry->subentries[i].data.number);
 				break;
 			default:
 				break;
 			}
 			break;
-		case 0x2c:
+		case GN_PHONEBOOK_ENTRY_URL:
 			fprintf(f, "homeurl: %s\n", entry->subentries[i].data.number);
 			break;
 		default:
@@ -132,16 +132,16 @@ API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 		STORE("cn: ", entry->name);
 		STORE("telephoneNumber: ", entry->number);
 
-		STORESUB("homeurl: ", 0x2c);
-		STORESUB("mail: ", 0x08);
-		STORESUB("homePostalAddress: ", 0x09);
-		STORESUB("Description: ", 0x0a);
+		STORESUB("homeurl: ", GN_PHONEBOOK_ENTRY_URL);
+		STORESUB("mail: ", GN_PHONEBOOK_ENTRY_Email);
+		STORESUB("homePostalAddress: ", GN_PHONEBOOK_ENTRY_Postal);
+		STORESUB("Description: ", GN_PHONEBOOK_ENTRY_Note);
 
-		STORENUM("homePhone: ", 0x02);
-		STORENUM("mobile: ", 0x03);
-		STORENUM("fax: ", 0x04);
-		STORENUM("workPhone: ", 0x06);
-		STORENUM("telephoneNumber: ", 0x0a);
+		STORENUM("homePhone: ", GN_PHONEBOOK_NUMBER_Home);
+		STORENUM("mobile: ", GN_PHONEBOOK_NUMBER_Mobile);
+		STORENUM("fax: ", GN_PHONEBOOK_NUMBER_Fax);
+		STORENUM("workPhone: ", GN_PHONEBOOK_NUMBER_Work);
+		STORENUM("telephoneNumber: ", GN_PHONEBOOK_NUMBER_General);
 
 		if (BEGINS("\n"))
 			break;

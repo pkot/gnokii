@@ -48,30 +48,30 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {
 		switch (entry->subentries[i].entry_type) {
-		case 0x08:
+		case GN_PHONEBOOK_ENTRY_Email:
 			fprintf(f, "EMAIL;INTERNET:%s\n", entry->subentries[i].data.number);
 			break;
-		case 0x09:
+		case GN_PHONEBOOK_ENTRY_Postal:
 			fprintf(f, "ADR;HOME:%s\n", entry->subentries[i].data.number);
 			break;
-		case 0x0a:
+		case GN_PHONEBOOK_ENTRY_Note:
 			fprintf(f, "NOTE:%s\n", entry->subentries[i].data.number);
 			break;
-		case 0x0b:
+		case GN_PHONEBOOK_ENTRY_Number:
 			switch (entry->subentries[i].number_type) {
-			case 0x02:
+			case GN_PHONEBOOK_NUMBER_Home:
 				fprintf(f, "TEL;HOME:%s\n", entry->subentries[i].data.number);
 				break;
-			case 0x03:
+			case GN_PHONEBOOK_NUMBER_Mobile:
 				fprintf(f, "TEL;CELL:%s\n", entry->subentries[i].data.number);
 				break;
-			case 0x04:
+			case GN_PHONEBOOK_NUMBER_Fax:
 				fprintf(f, "TEL;FAX:%s\n", entry->subentries[i].data.number);
 				break;
-			case 0x06:
+			case GN_PHONEBOOK_NUMBER_Work:
 				fprintf(f, "TEL;WORK:%s\n", entry->subentries[i].data.number);
 				break;
-			case 0x0a:
+			case GN_PHONEBOOK_NUMBER_General:
 				fprintf(f, "TEL;PREF:%s\n", entry->subentries[i].data.number);
 				break;
 			default:
@@ -79,7 +79,7 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 				break;
 			}
 			break;
-		case 0x2c:
+		case GN_PHONEBOOK_ENTRY_URL:
 			fprintf(f, "URL:%s\n", entry->subentries[i].data.number);
 			break;
 		default:
@@ -123,16 +123,16 @@ API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 		STORE("FN:", entry->name);
 		STORE("TEL;VOICE:", entry->number);
 
-		STORESUB("URL:", 0x2c);
-		STORESUB("EMAIL;INTERNET:", 0x08);
-		STORESUB("ADR;HOME:", 0x09);
-		STORESUB("NOTE:", 0x0a);
+		STORESUB("URL:", GN_PHONEBOOK_ENTRY_URL);
+		STORESUB("EMAIL;INTERNET:", GN_PHONEBOOK_ENTRY_Email);
+		STORESUB("ADR;HOME:", GN_PHONEBOOK_ENTRY_Postal);
+		STORESUB("NOTE:", GN_PHONEBOOK_ENTRY_Note);
 
-		STORENUM("TEL;HOME:", 0x02);
-		STORENUM("TEL;CELL:", 0x03);
-		STORENUM("TEL;FAX:", 0x04);
-		STORENUM("TEL;WORK:", 0x06);
-		STORENUM("TEL;PREF:", 0x0a);
+		STORENUM("TEL;HOME:", GN_PHONEBOOK_NUMBER_Home);
+		STORENUM("TEL;CELL:", GN_PHONEBOOK_NUMBER_Mobile);
+		STORENUM("TEL;FAX:", GN_PHONEBOOK_NUMBER_Fax);
+		STORENUM("TEL;WORK:", GN_PHONEBOOK_NUMBER_Work);
+		STORENUM("TEL;PREF:", GN_PHONEBOOK_NUMBER_General);
 
 		if (BEGINS("END:VCARD"))
 			break;
