@@ -42,10 +42,13 @@ static char *phone[] = {
 	"Nokia 6310i",
 	"Nokia 6510",
 	"Nokia 7110",
-	"Nokia 7650",
 	"Nokia 7190",
+	"Nokia 7650",
 	"Nokia 8210",
-	"Nokia 8310"
+	"Nokia 8290",
+	"Nokia 8310",
+	"Nokia 9110",
+	"Nokia 9210"
 };
 
 double d_time(void)
