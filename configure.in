@@ -294,8 +294,19 @@ if test "$no_x" = yes -o "$with_x" = "no"; then
    GTK_LIBS=""
 else
    AC_PATH_X
+   AC_CHECK_HEADERS(X11/xpm.h,
+                    [ XPMINC="yes" ],
+                    [ XPMINC="no" ])
 
-   if test "x$x_libraries" = "xNONE"; then
+   if test "x$XPMINC" = "xno"; then
+      x_support="no"
+      XPM_CFLAGS=""
+      XPM_LIBS=""
+      GTK_CFLAGS=""
+      GTK_LIBS=""
+      AC_MSG_WARN(Cannot find include X11/xpm.h)
+      AC_MSG_WARN(Disabling xgnokii.)
+   elif test "x$x_libraries" = "xNONE"; then
       x_support="no"
       XPM_CFLAGS=""
       XPM_LIBS=""
@@ -459,6 +470,7 @@ echo "
     Win32:              $win32 
     Prefix:             $prefix
 
-  Type '${MAKE}' for compilation.
+  Type '${MAKE}' for compilation. Before doing '${MAKE} install', add gnokii
+  group typing 'groupadd gnokii' as root.
  
 "

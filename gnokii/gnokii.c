@@ -18,7 +18,12 @@
   useful :-)
 
   $Log$
-  Revision 1.109  2000-12-29 15:39:07  pkot
+  Revision 1.110  2001-01-08 15:11:37  pkot
+  Documentation updates.
+  Fixed some bugs and removed FIXMEs.
+  We need to move some stuff from configure.in to aclocal.m4
+
+  Revision 1.109  2000/12/29 15:39:07  pkot
   Reverted a change in fbus-3810.c which broke compling with --enable-debug.
   Small fixes in gnokii.c
 
@@ -33,7 +38,7 @@
 #include <signal.h>
 #include <string.h>
 #if defined(__svr4__) || defined(__FreeBSD__)
-#  include <strings.h>	/* for bzero */
+#  include <strings.h>	/* for memset */
 #endif
 #include <time.h>
 
@@ -1218,7 +1223,7 @@ int getsms(int argc, char *argv[])
     return (-1);
   }
 
-  bzero(&filename, 64);
+  memset(&filename, 0, 64);
 
   start_message = atoi(argv[3]);
   if (argc > 4) {
@@ -3032,7 +3037,7 @@ int netmonitor(char *Mode)
   else if (!strcmp(Mode,"next"))
          mode=0x00;
 
-  bzero(&Screen, 50);
+  memset(&Screen, 0, 50);
   GSM->NetMonitor(mode, Screen);
 
   if (Screen)

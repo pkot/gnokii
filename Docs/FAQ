@@ -1,0 +1,37 @@
+GNOKII FAQ
+Pawe³ Kot, pkot@linuxnews.pl
+v0.1, 8 January 2001
+
+-------------------------------------------------------------------------------
+Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
+   running gnokii. What's wrong?
+
+A. Gnokii program cannot connect to the phone. Possible reasons are:
+    - wrong serial port is defined in gnokii config file,
+    - you are using the wrong cable,
+    - you are using not supported phone model; currently supported phone models
+      are:
+         + 6110|6130|6150|6190|5110|5130|5190
+         + 3110|3810|8110|8110i
+         + 2110|2140|6080
+         + 640
+         + 5160|6160|6185
+    - you don't have permission to write to /dev/ttySX device.
+
+-------------------------------------------------------------------------------
+Q. `make install' sets mgnokiidev suid root. Is it correct?
+
+A. Yes, it is correct. gnokiid requires to have a new created device in /dev
+   directory. mgnokiidev is the code which does it and nothing else. mgnokiidev
+   is executable only for gnokii group members (and root). You don't have to
+   worry.
+
+-------------------------------------------------------------------------------
+Q. Does gnokii support Nokia 3210 phone?
+
+A. Not yet. But hopefully will be very soon.
+
+-------------------------------------------------------------------------------
+Q. Does gnokii support Nokia 6210/7110 phone?
+
+A. Not yet. But hopefully will be very soon.

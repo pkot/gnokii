@@ -17,7 +17,12 @@
   and 6110.
 
   $Log$
-  Revision 1.117  2000-12-21 15:13:46  pkot
+  Revision 1.118  2001-01-08 15:11:36  pkot
+  Documentation updates.
+  Fixed some bugs and removed FIXMEs.
+  We need to move some stuff from configure.in to aclocal.m4
+
+  Revision 1.117  2000/12/21 15:13:46  pkot
   Fixed functions converting ascii to and from PDU
 
   Revision 1.116  2000/12/19 16:27:16  pkot
@@ -2689,8 +2694,8 @@ GSM_Error FB61_SendRingTone(GSM_Ringtone *ringtone, char *dest)
   char Package[GSM_MAX_RINGTONE_PACKAGE_LENGTH];
   char udh[]= {
     0x06,       /* User Data Header Length */
-    0x05,       /* IEI FIXME: What is this? */
-    0x04,       /* IEDL FIXME: What is this? */
+    0x05,       /* IEI */
+    0x04,       /* IEDL */
     0x15, 0x81, /* Destination port */
     0x15, 0x81  /* Originator port, only
 		   to fill in the two

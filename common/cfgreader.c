@@ -15,7 +15,12 @@
   Modified from code by Tim Potter.
 
   $Log$
-  Revision 1.11  2001-01-02 09:09:07  pkot
+  Revision 1.12  2001-01-08 15:11:36  pkot
+  Documentation updates.
+  Fixed some bugs and removed FIXMEs.
+  We need to move some stuff from configure.in to aclocal.m4
+
+  Revision 1.11  2001/01/02 09:09:07  pkot
   Misc fixes and updates.
 
   Revision 1.10  2000/12/19 16:18:15  pkot
@@ -35,10 +40,6 @@
 
 #include "cfgreader.h"
 #include "misc.h"
-
-#ifdef WIN32
-        #define index strchr
-#endif
 
 /* Read configuration information from a ".INI" style file */
 struct CFG_Header *CFG_ReadFile(char *filename)
@@ -126,8 +127,7 @@ struct CFG_Header *CFG_ReadFile(char *filename)
 
                 /* Process key/value line */
 
-                /* FIXME: index is not ANSI C compliant. */
-                if ((index(line, '=') != NULL) && cfg_info != NULL) {
+                if ((strchr(line, '=') != NULL) && cfg_info != NULL) {
                         struct CFG_Entry *entry;
                         char *value;
 
@@ -139,8 +139,7 @@ struct CFG_Header *CFG_ReadFile(char *filename)
                         /* Fill in fields */
                         memset(entry, '\0', sizeof(*entry));
 
-                        /* FIXME: index is not ANSI C compliant. */
-                        value = index(line, '=');
+                        value = strchr(line, '=');
                         *value = '\0';                /* Split string */
                         value++;
             

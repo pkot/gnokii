@@ -16,7 +16,12 @@
   from/to the GSM handset and the modem data/fax stream.
 
   $Log$
-  Revision 1.4  2001-01-02 09:09:09  pkot
+  Revision 1.5  2001-01-08 15:11:37  pkot
+  Documentation updates.
+  Fixed some bugs and removed FIXMEs.
+  We need to move some stuff from configure.in to aclocal.m4
+
+  Revision 1.4  2001/01/02 09:09:09  pkot
   Misc fixes and updates.
 
   Revision 1.3  2000/12/27 10:54:14  pkot
@@ -27,6 +32,7 @@
 
 #define		__virtmodem_c
 
+#include <config.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -34,7 +40,6 @@
 #include <signal.h>
 #include <termios.h>
 #include <grp.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>

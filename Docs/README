@@ -30,9 +30,9 @@ warranty and where to send a postcard if you like gnokii :).  This
 release provides the much awaited ability to place data calls for
 all platforms except Win32.  Fax calls are not supported.
 
-gnokii supports most phones from the 3810/8110 and 5110/6110 series,
-details including bugs specific to each series appear in the files
-README-3810 and README-6110 respectively.  
+gnokii supports most phones from the 3810/8110, 5110/6110, and 2110
+series, details including bugs specific to each series appear in the
+files README-3810, README-6110 and README-2110 respectively.  
 
 In the early stages of the project there were indications that
 Nokia would provide some support for the project.  Regrettably, these
@@ -123,9 +123,7 @@ the source tree for your system by typing
 
 You can also run configure with the --help flag to get a list of 
 available options.  There are about a dozen or so that are specific
-to gnokii, --with-model and --with-port being particularly
-relevant as they specify the defaults used in the absence of
-a .gnokiirc file.
+to gnokii.
 
 Once you've run ./configure successfully, you should be able to
 simply do a make and make install to compile and install your 
@@ -361,10 +359,17 @@ is the Australian mirror, there will be one nearby to you too :)
 5110/Omnitel (Italy)
 5110/Paegas (Czech Republic)
 5110/ERA GSM (Poland)
-5130/IDEA Centertel (Poland) (GSM 1800)
+5110/Plus GSM (Poland)
+5130/IDEA Centertel (Poland)
 5190/Microcel (Canada) (GSM 1900)
 
 3210 (some functions does not not work yet)
+
+2110 Series
+
+6160 Series
+
+640 Series
 
 
 - 14.0 Credits -

@@ -1,0 +1,18 @@
+-- README-2110                                     --
+-- Notes, bugs and a todo list for the 2110 series --
+
+* Notes *
+
+Code for the 2110 phones has been tested with home-built cable.
+
+* Known Bugs *
+
+- Nokia protocol is not followed. We use hacks instead of collision
+  detection protocol nokia suggests.
+
+- Many. Look at code, needs cleanup, etc. Contact pavel@ucw.cz
+  if you want to help.
+
+* To-do *
+
+- SMS sending

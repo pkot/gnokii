@@ -6,23 +6,20 @@
 e.g.
 
    cd /usr/src
-   tar xvfz /tmp/gnokii-0.3.2.tar.gz
-   cd gnokii-0.3.2
-   ./configure --enable-nls --with-x --with-model=6110 --with-port=/dev/ttyS2
+   tar xvfz /tmp/gnokii-0.3.3pre10.tar.gz
+   cd gnokii-0.3.3pre10
+   ./configure --enable-nls --with-x
    make
-   make install
-
    groupadd gnokii
-   chown root:gnokii /usr/local/sbin/mgnokiidev
-   chmod 4750 /usr/local/sbin/mgnokiidev
+   make install
 
 (2) Create /etc/gnokiirc or ~/.gnokiirc
 
-   cp Docs/sample.gnokiirc /etc/gnokiirc
+   cp Docs/sample/gnokiirc /etc/gnokiirc
    
    or
    
-   cp Docs/sample.gnokiirc ~/.gnokiirc
+   cp Docs/sample/gnokiirc ~/.gnokiirc
 
    Edit to suit; in my case:
 
@@ -43,7 +40,7 @@ e.g.
    the phone.  If you're using a 3810 series phone you won't see anything
    on the phones LCD.
 
-   I run gnokiid as root; it will probably work for another user who is
+   I run gnokiid as root; it will also work for another user who is
    in group gnokii, as long as the serial port is accessible to that
    user as well.  It's not recommended that you run gnokiid as root
    permanently however - it is better to put yourself in group gnokii
@@ -75,3 +72,5 @@ XXXX.demon.co.uk	demon-gnokii	<yourpassword>
     
 (6) As gnokiid is still under development, ensure your data call has
     hung up by checking your phone display at the end of the call.
+
+(7) See also example files in Docs/sample directory.
