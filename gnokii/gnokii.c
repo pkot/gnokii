@@ -449,12 +449,12 @@ static GSM_Error loadbitmap(GSM_Bitmap *bitmap, char *s, int type)
 	bitmap->type = type;
 	error = GSM_NullBitmap(bitmap, &State.Phone.Info);	
 	if (error != GE_NONE) {
-		fprintf(stdout, _("Could not null bitmap: %d (%m)\n"), error);
+		fprintf(stdout, _("Could not null bitmap: %s\n"), print_error(error));
 		return error;
 	}
 	error = GSM_ReadBitmapFile(s, bitmap, &State.Phone.Info);
 	if (error != GE_NONE) {
-		fprintf(stdout, _("Could not load bitmap from %s: %d (%m)\n"), s, error);
+		fprintf(stdout, _("Could not load bitmap from %s: %s\n"), s, print_error(error));
 		return error;
 	}
 	return GE_NONE;
@@ -744,7 +744,7 @@ static int savesms(int argc, char *argv[])
 	if (error == GE_NONE) {
 		fprintf(stdout, _("Saved to %d!\n"), sms.Number);
 	} else {
-		fprintf(stdout, _("Saving failed (error=%d)\n"), error);
+		fprintf(stdout, _("Saving failed (%s)\n"), print_error(error));
 	}
 
 	return error;
@@ -997,7 +997,7 @@ static int getsms(int argc, char *argv[])
 	}
 	folder.FolderID = 0;
 	/* Now retrieve the requested entries. */
-	for (count = start_message; count <= end_message; count ++) {
+	for (count = start_message; count <= end_message; count++) {
 		bool done = false;
 		int offset = 0;
 
@@ -1232,7 +1232,7 @@ static int deletesms(int argc, char *argv[])
 				fprintf(stderr, _("Function not implemented in %s model!\n"), model);
 				return -1;
 			}
-			fprintf(stdout, _("DeleteSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
+			fprintf(stdout, _("DeleteSMS %s %d failed!(%s)\n\n"), memory_type_string, count, print_error(error));
 		}
 	}
 
@@ -1554,7 +1554,7 @@ static int sendlogo(int argc, char *argv[])
 	error = SendSMS(&data, &State);
 
 	if (error == GE_NONE) fprintf(stdout, _("Send succeeded!\n"));
-	else fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+	else fprintf(stdout, _("SMS Send failed (%s)\n"), print_error(error));
 
 	return 0;
 }
@@ -1880,7 +1880,7 @@ static int viewlogo(char *filename)
 	GSM_Error error;
 	error = GSM_ShowBitmapFile(filename);
 	if (error != GE_NONE)
-		fprintf(stdout, _("Could not load bitmap: %d (%m)\n"), error);
+		fprintf(stdout, _("Could not load bitmap: %s\n"), print_error(error));
 	return error;
 }
 
@@ -2727,7 +2727,7 @@ static int getphonebook(int argc, char *argv[])
 			fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
 			return -1;
 		case GE_INVALIDPHBOOKLOCATION:
-			fprintf(stderr, _("%s|%d|Bad location or other error!(%d)\n"), memory_type_string, count, error);
+			fprintf(stderr, _("%s|%d|Bad location or other error!\n"), memory_type_string, count);
 			if (all) {
 				/* Ensure that we quit the loop */
 				all = false;
@@ -2884,7 +2884,7 @@ static int writephonebook(int argc, char *args[])
 					if (!confirm) continue;
 				}
 			} else {
-				fprintf(stderr, _("Unknown error (%d)\n"), error);
+				fprintf(stderr, _("Unknown error (%s)\n"), print_error(error));
 				return 0;
 			}
 		}
@@ -3116,7 +3116,7 @@ static int sendringtone(int argc, char *argv[])
 	if (error == GE_NONE)
 		fprintf(stdout, _("Send succeeded!\n"));
 	else
-		fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+		fprintf(stdout, _("SMS Send failed (%s)\n"), print_error(error));
 
 	return 0;
 }
@@ -3280,7 +3280,7 @@ static void presskey(void)
 	error = SM_Functions(GOP_PressPhoneKey, &data, &State);
 	if (error == GE_NONE)
 		error = SM_Functions(GOP_ReleasePhoneKey, &data, &State);
-	fprintf(stdout, "Failed to press key: %d\n", error);
+	fprintf(stdout, "Failed to press key: %s\n", print_error(error));
 }
 
 static int presskeysequence(void)
@@ -3333,7 +3333,7 @@ static int enterchar(void)
 			data.Character = ch;
 			error = SM_Functions(GOP_EnterChar, &data, &State);
 			if (error != GE_NONE)
-				printf("Error entering char: %d\n", error);
+				printf("Error entering char: %s\n", print_error(error));
 			break;
 		}
 	}
