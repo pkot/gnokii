@@ -5,6 +5,7 @@
     o GetSMSFolders hardcoded blocklen fixed  (Michael H. Warfield)
  * 6110 series updates
     o phonebook reading fixes                      (BORBELY Zoltan)
+    o add nokia 3390 to supported models           (BORBELY Zoltan)
  * gnokiid updates
     o double free bug eliminated from mgnokiidev   (BORBELY Zoltan)
     o traditional pty support fixed                (BORBELY Zoltan)
