@@ -29,11 +29,13 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
 	cat $patch | patch -p0
    done
    make -C common vcal.c
+   mv common/vcal.c common/vcal2.c
    # RedHat thing
    cp packaging/RedHat/gnokii.spec .
    # and Debian one
    cp -r packaging/Debian debian
    make distclean
+   mv common/vcal2.c common/vcal.c
    cd ..
    tar cfz /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION} --exclude CVS
    echo "Distribution generated in /tmp/gnokii-${VERSION}.tar.gz"

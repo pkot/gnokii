@@ -16,6 +16,10 @@
       confusion                                         (Pawel Kot)
     o when building the release tarball, apply all patches from
       patches/ subdir                                   (Pawel Kot)
+    o when building the release tarball we first make vcal.c with
+      flex and then clean it with 'make distclean'; fix it keeping
+      in mind that 'make -C common vcal.c' won't work after 'make
+      distclean'                                        (Pawel Kot)
  * gnokii updates
     o accept range in --deletephonebook            (BORBELY Zoltan)
  * documentation updates
