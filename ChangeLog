@@ -7,6 +7,7 @@
     o CREDITS - again, thanks to everyone who helped     (Pawel Kot)
     o bring dpkg build scripts up to date                (Pawel Kot)
     o bring gnokii.spec up to date                       (Pawel Kot)
+    o increase max calnotes number to 1024               (Pawel Kot)
  * Build system fixes
     o fix a stupid bug in configure that made configure not detect
       many functions/types when user didn't explicitely give
