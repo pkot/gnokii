@@ -3,6 +3,8 @@
  * link layer updates
     o making fbus layer reentrant, it will fix possible
       smsreader problems            (Keary Griffin & BORBELY Zoltan)
+ * general fixes
+    o caller logo sending fixed                   (Anton V.Dorofeev)
 
 0.5.0
 =====

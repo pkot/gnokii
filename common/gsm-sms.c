@@ -1077,7 +1077,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 	for (i = 0; i < GN_SMS_PART_MAX_NUMBER; i++) {
 		switch (sms->user_data[i].type) {
 		case GN_SMS_DATA_Bitmap:
-			switch (sms->user_data[0].u.bitmap.type) {
+			switch (sms->user_data[i].u.bitmap.type) {
 			case GN_BMP_PictureMessage:
 				size = sms_nokia_bitmap_encode(&(sms->user_data[i].u.bitmap),
 							       rawsms->user_data + rawsms->user_data_length,
@@ -1085,6 +1085,14 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 				break;
 			case GN_BMP_OperatorLogo:
 				if (!sms_udh_encode(rawsms, GN_SMS_UDH_OpLogo)) return GN_ERR_NOTSUPPORTED;
+				size = gn_bmp_sms_encode(&(sms->user_data[i].u.bitmap),
+							 rawsms->user_data + rawsms->user_data_length);
+				break;
+			case GN_BMP_CallerLogo:
+				if (!sms_udh_encode(rawsms, GN_SMS_UDH_CallerIDLogo)) return GN_ERR_NOTSUPPORTED;
+				size = gn_bmp_sms_encode(&(sms->user_data[i].u.bitmap),
+							 rawsms->user_data + rawsms->user_data_length);
+				break;
 			default:
 				size = gn_bmp_sms_encode(&(sms->user_data[i].u.bitmap),
 							 rawsms->user_data + rawsms->user_data_length);
