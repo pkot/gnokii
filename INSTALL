@@ -7,15 +7,15 @@ Gnokii installation instructions
 Quickstart
 ==========
 
-    $ gettextize                # only for CVS copies
-    $ libtoolize		# only for CVS copies
-    $ aclocal			# only for CVS copies
-    $ autoheader		# only for CVS copies
-    $ autoconf			# only for CVS copies
+    $ gettextize -c -f --intl --no-changelog	# only for CVS copies
+    $ libtoolize -c -f				# only for CVS copies
+    $ aclocal					# only for CVS copies
+    $ autoheader				# only for CVS copies
+    $ autoconf					# only for CVS copies
     $ ./configure [<options>]
     [ If you use latest Red Hat with new (0.11) gettext version ]
     [ run autogen.sh with configure options instead of the      ]
-    [ above commands. It will do all needed things.             ]
+    [ above commands. It will do all required things.           ]
     $ make
     # groupadd gnokii
     # make [install|install-suid|install-strip|install-ss]
