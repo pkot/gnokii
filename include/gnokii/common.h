@@ -157,7 +157,7 @@ typedef struct {
 	int Free;                  /* Number of free positions */
 } GSM_MemoryStatus;
 
-/* Some phones (at the moment 6210/7110) supports extended phonebook
+/* Some phones (at the moment 7110/6510 series) supports extended phonebook
    with additional data.  Here we have structures for them */
 
 typedef enum {
@@ -279,7 +279,7 @@ typedef enum {
 /* Calendar note type */
 
 #define MAX_CALENDAR_NOTES (500) /* FIXME how many are possible? */
-#define MAX_CALENDAR_NOTES_LENGTH (257)
+#define MAX_CALENDAR_NOTES_LENGTH (258)
 #define MAX_CALENDAR_CALL_LENGTH (49)
 
 typedef struct {
@@ -317,6 +317,82 @@ typedef struct {
 	int Location[MAX_CALENDAR_NOTES];	/* Location of the nth note */
 } GSM_ToDoList;
 
+
+/* WAP */
+#define MAX_WAP_URL_LENGTH (258)
+#define MAX_WAP_NAME_LENGTH (52)
+#define MAX_WAP_SETTING_USERNAME_LENGTH (34)
+#define MAX_WAP_SETTING_NAME_LENGTH (22)
+#define MAX_WAP_SETTING_HOME_LENGTH (95)
+#define MAX_WAP_SETTING_ACCESS_LENGTH (102)
+
+/* bookmarks */
+typedef struct {
+	int Location;
+	char Name[MAX_WAP_NAME_LENGTH];
+	char URL[MAX_WAP_URL_LENGTH];
+} GSM_WAPBookmark;
+
+/* settings */
+typedef enum {
+	GWP_TEMPORARY = 0,
+	GWP_PERMANENT
+} GSM_WAPSession;
+
+typedef enum {
+	GWP_NORMAL = 0,
+	GWP_SECURE
+} GSM_WAPAuthentication;
+
+typedef enum {
+	GWP_GSMDATA = 1,
+	GWP_GPRS = 3
+} GSM_WAPBearer;
+
+typedef enum {
+	GWP_ANALOGUE,
+	GWP_ISDN
+} GSM_WAPCallType;
+
+typedef enum {
+	GWP_AUTOMATIC,
+	GWP_9600,
+	GWP_14400
+} GSM_WAPCallSpeed;
+
+typedef enum {
+	GWP_MANUAL,
+	GWP_AUTOLOG
+} GSM_WAPLogin;
+
+typedef enum {
+	GWP_ALWAYS,
+	GWP_NEEDED
+} GSM_WAPGPRSConnection;
+
+typedef struct {
+	int Location;
+	char Number[MAX_WAP_SETTING_NAME_LENGTH];
+	char GSMdataIP[MAX_WAP_SETTING_NAME_LENGTH];
+	char GPRSIP[MAX_WAP_SETTING_NAME_LENGTH];
+	char Name[MAX_WAP_SETTING_NAME_LENGTH];
+	char Home[MAX_WAP_SETTING_HOME_LENGTH];
+	char GSMdataUsername[MAX_WAP_SETTING_USERNAME_LENGTH];
+	char GSMdataPassword[MAX_WAP_SETTING_NAME_LENGTH];
+	char GPRSUsername[MAX_WAP_SETTING_USERNAME_LENGTH];
+	char GPRSPassword[MAX_WAP_SETTING_NAME_LENGTH];
+	char AccessPoint[MAX_WAP_SETTING_ACCESS_LENGTH];
+	GSM_WAPSession Session;
+	bool Security;
+	GSM_WAPBearer Bearer;
+	GSM_WAPAuthentication GSMdataAuthentication;
+	GSM_WAPAuthentication GPRSAuthentication;
+	GSM_WAPCallType CallType;
+	GSM_WAPCallSpeed CallSpeed;
+	GSM_WAPLogin GPRSLogin;
+	GSM_WAPLogin GSMdataLogin;
+	GSM_WAPGPRSConnection GPRSConnection;
+} GSM_WAPSetting;
 
 /* This structure is provided to allow common information about the particular
    model to be looked up in a model independant way. Some of the values here
