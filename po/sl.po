@@ -107,7 +107,7 @@ msgid ""
 "device_script(\"%s\"): fork() failure: %s!\n"
 ""
 msgstr ""
-"device_script(\"s\"): fork() neuspel: %s!\n"
+"device_script(\"%s\"): fork() neuspel: %s!\n"
 ""
 
 #: common/devices/unixserial.c:116
@@ -163,7 +163,7 @@ msgid ""
 "Serial port speed %d not supported!\n"
 ""
 msgstr ""
-"Hitrost serijskega porta %s ni podprta!\n"
+"Hitrost serijskega porta %d ni podprta!\n"
 ""
 
 #: common/devices/unixserial.c:453
@@ -2551,7 +2551,7 @@ msgid ""
 "Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"
 ""
 msgstr ""
-"Zapis NEUSPE©EN(%d): vrsta spomina: %s, loc: %d, ime: %s, ¹tevilka: %s\n"
+"Zapis NEUSPE©EN(%s): vrsta spomina: %s, loc: %d, ime: %s, ¹tevilka: %s\n"
 ""
 
 #: gnokii/gnokii.c:2835
