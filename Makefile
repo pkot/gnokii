@@ -39,7 +39,7 @@ INSTALL_DIRS =	$(BIN_DIRS) \
 DOCS_DIR = 	Docs
 INCLUDE_DIR =	include
 
-all: $(DIRS)
+all: intl $(DIRS)
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
 		    if [ -e $$dir/Makefile ]; then \
@@ -58,12 +58,15 @@ all: $(DIRS)
 
 dummy:
 
+intl: dummy
+	$(MAKE) -C intl CFLAGS=-I../include
+
 $(DIRS): dummy
 	$(MAKE) -C $@
 
 clean:
 	$(RM) *~ *.orig *.rej include/*~ include/*.orig include/*.rej testsuite/myout*
-	@for dir in $(DIRS); do \
+	@for dir in intl $(DIRS); do \
 	    if [ -e $$dir/Makefile ]; then \
 		$(MAKE) -C $$dir clean; \
 	    fi; \
@@ -116,7 +119,7 @@ test:
 	( cd testsuite; ./testit )
 
 install: all
-	@for dir in $(INSTALL_DIRS); do \
+	@for dir in intl $(INSTALL_DIRS); do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir install; \
 		fi; \

@@ -66,7 +66,7 @@ gnokii-debug: $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.l
 	$(LIBTOOL) --mode=link $(CC) -o gnokii-debug $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la ../gnokii/gnokii.o
 
 libgnokii.la: $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la
-	$(LIBTOOL) --mode=link $(CC) $(LIBTOOL_UNDEF) -o libgnokii.la $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la $(LIBTOOL_VER) $(LIBTOOL_RPATH)
+	$(LIBTOOL) --mode=link $(CC) $(LIBTOOL_UNDEF) -o libgnokii.la $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la $(INTL_LIBS) $(LIBTOOL_VER) $(LIBTOOL_RPATH)
 
 vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
