@@ -8,6 +8,7 @@ Quickstart
 ==========
 
     $ autoconf			# only for CVS copies
+    $ autoheader		# only for CVS copies
     $ ./configure [<options>]
     $ make
     # groupadd gnokii
@@ -26,6 +27,7 @@ Preparations
 If you retrieved this copy from CVS, then first call
 
     $ autoconf
+    $ autoheader
 
 Now you have to determine your system specific settings.
 

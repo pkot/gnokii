@@ -8,6 +8,11 @@
  * xgnokii fixes
     o some strange problem with xgnokii linking (reported
       by few people)                                      (Pawel Kot)
+ * build system updates:
+    o autoheader support added (based on Jan Kratochvil's autoheader
+      patch for mygnokii)                            (BORBELY Zoltan)
+    o configure.in updates for autoheader            (BORBELY Zoltan)
+    o config.h.in.in removed                         (BORBELY Zoltan)
 
 0.4.0pre17
 ==========

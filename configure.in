@@ -531,6 +531,11 @@ PACKAGE=gnokii
 XPACKAGE=xgnokii
 VERSION=`cat VERSION`
 XVERSION=`cat xgnokii/VERSION`
+AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
+AC_DEFINE_UNQUOTED(XVERSION, "$XVERSION")
+if test "$x_support" = yes; then
+	AC_DEFINE_UNQUOTED(XGNOKIIDIR, "`eval echo $XGNOKIIDIR/$XPACKAGE`")
+fi
 HAVE_XGNOKII=$x_support
 
 case "$INSTALL" in
@@ -570,7 +575,6 @@ AC_SUBST(HAVE_XGNOKII)
 AC_SUBST(WIN32)
 
 AC_OUTPUT(
-   include/config.h.in
    Makefile.global
    po/Makefile.in
    packaging/RedHat/gnokii.spec
