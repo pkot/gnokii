@@ -632,7 +632,7 @@ API void gn_ringtone_get_tone(const gn_ringtone *ringtone, int n, int *freq, int
 		case 1: *freq = f * 2; break;
 		case 2: *freq = f * 4; break;
 		case 3: *freq = f * 8; break;
-		defalt: *freq = 0; break;
+		default: *freq = 0; break;
 		}
 	}
 
