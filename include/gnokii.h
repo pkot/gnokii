@@ -71,8 +71,7 @@ API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
 
 /* Prototype for the functions actually provided by gsm-api.c. */
 API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
-			       gn_connection_type connection,
-			       void (*rlp_handler)(gn_rlp_f96_frame *frame),
+			       const char *connection,
 			       struct gn_statemachine *sm);
 
 /* Bitmaps */

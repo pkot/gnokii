@@ -119,14 +119,32 @@ static gn_error register_driver(gn_driver *driver, char *model, char *setupmodel
 }
 
 API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
-			       gn_connection_type connection,
-			       void (*rlp_handler)(gn_rlp_f96_frame *frame),
+			       const char *connection,
 			       struct gn_statemachine *sm)
 {
 	gn_error ret;
 	char *sms_timeout;
 
-	sm->link.connection_type = connection;
+	if (!strcasecmp(connection, "serial"))
+		sm->link.connection_type = GN_CT_Serial;
+	else if (!strcasecmp(connection, "dau9p"))
+		sm->link.connection_type = GN_CT_DAU9P;
+	else if (!strcasecmp(connection, "dlr3p"))
+		sm->link.connection_type = GN_CT_DLR3P;
+	else if (!strcasecmp(connection, "infrared"))
+		sm->link.connection_type = GN_CT_Infrared;
+#ifdef HAVE_IRDA
+	else if (!strcasecmp(connection, "irda"))
+		sm->link.connection_type = GN_CT_Irda;
+#endif
+#ifndef WIN32
+	else if (!strcasecmp(connection, "tcp"))
+		sm->link.connection_type = GN_CT_TCP;
+	else if (!strcasecmp(connection, "tekram"))
+		sm->link.connection_type = GN_CT_Tekram;
+#endif
+	else return GN_ERR_NOTSUPPORTED;
+
 	sm->link.init_length = atoi(initlength);
 	sms_timeout = gn_cfg_get(gn_cfg_info, "sms", "timeout");
 	if (!sms_timeout) sm->link.sms_timeout = 100;
