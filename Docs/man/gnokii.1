@@ -227,38 +227,60 @@ subentry_id
 subentry_text
 .PP
 Possible subentry types are described in the \fIgnokii/common.h\fR file:
-.RS
-.nf
-typedef enum {
-        GN_PHONEBOOK_ENTRY_Name       = 0x07,
-        GN_PHONEBOOK_ENTRY_Email      = 0x08,
-        GN_PHONEBOOK_ENTRY_Postal     = 0x09,
-        GN_PHONEBOOK_ENTRY_Note       = 0x0a,
-        GN_PHONEBOOK_ENTRY_Number     = 0x0b,
-        GN_PHONEBOOK_ENTRY_Ringtone   = 0x0c,
-        GN_PHONEBOOK_ENTRY_Date       = 0x13,
-        GN_PHONEBOOK_ENTRY_Pointer    = 0x1a,
-        GN_PHONEBOOK_ENTRY_Logo       = 0x1b,
-        GN_PHONEBOOK_ENTRY_LogoSwitch = 0x1c,
-        GN_PHONEBOOK_ENTRY_Group      = 0x1e,
-        GN_PHONEBOOK_ENTRY_URL        = 0x2c,
-} gn_phonebook_entry_type;
-.fi
-.RE
+.IP
+.B 7
+subentry is the name
+.IP
+.B 8
+subentry is the email address
+.IP
+.B 9
+subentry is the postal address (snail mail)
+.IP
+.B 10
+subentry is the note (text field)
+.IP
+.B 11
+subentry is the number
+.IP
+.B 12
+subentry is the ringtone
+.IP
+.B 19
+subentry is the date
+.IP
+.B 26
+subentry is the pointer
+.IP
+.B 27
+subentry is the logo
+.IP
+.B 28
+subentry is the logo switch
+.IP
+.B 30
+subentry is the group
+.IP
+.B 44
+subentry is the URL
 .PP
 Possible subentry number types are described in the \fIgnokii/common.h\fR
 file:
-.RS
-.nf
-typedef enum {
-        GN_PHONEBOOK_NUMBER_Home    = 0x02,
-        GN_PHONEBOOK_NUMBER_Mobile  = 0x03,
-        GN_PHONEBOOK_NUMBER_Fax     = 0x04,
-        GN_PHONEBOOK_NUMBER_Work    = 0x06,
-        GN_PHONEBOOK_NUMBER_General = 0x0a,
-} gn_phonebook_number_type;
-.fi
-.RE
+.IP
+.B 2
+number is the home phone number
+.IP
+.B 3
+number is the mobile phone number
+.IP
+.B 4
+number is the fax number
+.IP
+.B 6
+number is the work phone number
+.IP
+.B 10
+number is the general number
 .PP
 For the subentry types that don't care about number type (at text files)
 this should be set to 0. 
