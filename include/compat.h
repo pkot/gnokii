@@ -241,13 +241,13 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 #endif
 
 #ifdef HAVE_WCRTOMB
-#define MBSTATE mbstate_t
-#define MBSTATE_ENC_CLEAR(x) memset(&(x), 0, sizeof(mbstate_t))
-#define MBSTATE_DEC_CLEAR(x) memset(&(x), 0, sizeof(mbstate_t))
+#  define MBSTATE mbstate_t
+#  define MBSTATE_ENC_CLEAR(x) memset(&(x), 0, sizeof(mbstate_t))
+#  define MBSTATE_DEC_CLEAR(x) memset(&(x), 0, sizeof(mbstate_t))
 #else
-#define MBSTATE char
-#define MBSTATE_ENC_CLEAR(x) mbtowc(NULL, NULL, 0)
-#define MBSTATE_DEC_CLEAR(x) wctomb(NULL, 0)
+#  define MBSTATE char
+#  define MBSTATE_ENC_CLEAR(x) mbtowc(NULL, NULL, 0)
+#  define MBSTATE_DEC_CLEAR(x) wctomb(NULL, 0)
 #endif
 
 #endif
