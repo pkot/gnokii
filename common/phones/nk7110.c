@@ -109,50 +109,6 @@ static int GetMemoryType(GSM_MemoryType memory_type);
 static bool SMSLoop = false; /* Are we in infinite SMS reading loop? */
 static bool NewSMS  = false; /* Do we have a new SMS? */
 
-static const SMSMessage_Layout nk7110_deliver = {
-	true,						/* Is the SMS type supported */
-	 5, true, true,					/* SMSC */
-	-1, 17, -1, -1,  3, -1, -1, -1, 20, 19, 17,
-	-1, -1, -1,					/* Validity */
-	21, true, true,					/* Remote Number */
-	33, -1,						/* Time */
-	 1,  0,						/* Nonstandard fields */
-	40, true					/* User Data */
-};
-
-static const SMSMessage_Layout nk7110_submit = {
-	true,
-	 5, true, true,
-	-1, 17, 17, 17, -1, 18, 19, -1, 21, 20, 17,
-	17, -1, -1,
-	22, true, true,
-	-1, -1,
-	-1, -1,
-	41, true
-};
-
-static const SMSMessage_Layout nk7110_delivery_report = {
-	true,
-	 5, true, true,
-	-1, -1, -1, -1,  3, -1, -1, -1, 19, 18, 17,
-	-1, -1, -1,
-	20, true, true,
-	32, 39,
-	 1,  0,
-	19, true
-};
-
-static const SMSMessage_Layout nk7110_picture = {
-	true,
-	 5, true, true,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1,
-	18, true, true,
-	30, -1,
-	-1, -1,
-	43, true
-};
-
 static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ P7110_MSG_FOLDER,	P7110_IncomingFolder },
 	{ P7110_MSG_SMS,	P7110_IncomingSMS },
@@ -1063,14 +1019,25 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
-	int length;
+	int i;
 
-	/* 6 is the frame header as above */
-	length = data->RawData->Length + 1;
-	if (length < 0) return GE_SMSWRONGFORMAT;
-	memcpy(req + 6, data->RawData->Data + 5, data->RawData->Length);
-	dprintf("Sending SMS...(%d)\n", length);
-	if (SM_SendMessage(state, length, P7110_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
+	memset(req + 6, 0, 249);
+	memcpy(req + 6, data->RawSMS->MessageCenter, 12);
+	req[18] = 0x01; /* SMS Submit */
+	if (data->RawSMS->ReplyViaSameSMSC)  req[18] |= 0x80;
+	if (data->RawSMS->RejectDuplicates)  req[18] |= 0x04;
+	if (data->RawSMS->Report)            req[18] |= 0x20;
+	if (data->RawSMS->UDHIndicator)      req[18] |= 0x40;
+	if (data->RawSMS->ValidityIndicator) req[18] |= 0x10;
+	req[19] = data->RawSMS->Reference;
+	req[20] = data->RawSMS->PID;
+	req[21] = data->RawSMS->DCS;
+	req[22] = data->RawSMS->Length;
+	memcpy(req + 23, data->RawSMS->RemoteNumber, 12);
+	memcpy(req + 35, data->RawSMS->Validity, 7);
+	memcpy(req + 42, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+	dprintf("Sending SMS...(%d)\n", 42 + data->RawSMS->UserDataLength);
+	if (SM_SendMessage(state, 42 + data->RawSMS->UserDataLength, P7110_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
 	return SM_BlockNoRetryTimeout(state, data, P7110_MSG_SMS, 100);
 }
 

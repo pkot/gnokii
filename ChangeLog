@@ -14,6 +14,7 @@
                                                           (Pawel Kot)
     o correct some header includes -- move them where they are
       needed, explicit dependencies are better            (Pawel Kot)
+    o don't use RawData in SMS subsystem                  (Pawel Kot)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
     o added Terminate to GOP functions

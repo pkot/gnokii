@@ -707,16 +707,10 @@ GSM_Error RequestSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 API GSM_Error GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
-	GSM_RawData rawdata;
 
-	memset(&rawdata, 0, sizeof(GSM_RawData));
-	data->RawData = &rawdata;
 	error = RequestSMSnoValidate(data, state);
-	if (error != GE_NONE) goto cleanup;
-	error = ParseSMS(data);
-cleanup:
-	if (data->RawData->Data) free(data->RawData->Data);
-	return error;
+	ERROR();
+	return ParseSMS(data);
 }
 
 /* Find the fist unread message in given folder statting from the *last position
@@ -1125,7 +1119,6 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 
 		case SMS_AnimationData: {
 			int j;
-			error = GE_NONE;
 			for (j = 0; j < 4; j++) {
 				size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Animation[j]), rawsms->UserData + rawsms->UserDataLength);
 				rawsms->Length += size;
@@ -1212,28 +1205,31 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 
 		default:
 			dprintf("What kind of ninja-mutant UserData is this?\n");
+			break;
 		}
 	}
 	return GE_NONE;
 }
 
-GSM_Error PrepareSMS(GSM_Data *data, int i)
+GSM_Error PrepareSMS(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 {
-	GSM_API_SMS *SMS = data->SMS;
-	GSM_SMSMessage *rawsms = data->RawSMS;
-
-	switch (rawsms->Type = SMS->Type) {
+	switch (rawsms->Type = sms->Type) {
 	case SMS_Submit:
 	case SMS_Deliver:
-		break;
 	case SMS_Picture:
+		break;
 	case SMS_Delivery_Report:
 	default:
 		dprintf("Not supported message type: %d\n", rawsms->Type);
 		return GE_NOTSUPPORTED;
 	}
+	/* Encoding the header */
+	rawsms->Report = sms->DeliveryReport;
+	rawsms->RemoteNumber[0] = SemiOctetPack(sms->Remote.Number, rawsms->RemoteNumber + 1, sms->Remote.Type);
+	rawsms->ValidityIndicator = true;
+	rawsms->Validity[0] = 0xa9;
 
-	EncodeData(SMS, rawsms);
+	EncodeData(sms, rawsms);
 
 	return GE_NONE;
 }
@@ -1267,40 +1263,26 @@ GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state);
 API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
-	GSM_RawData rawdata;
 
-#if 0
-	/* AT does not need smsc */
-	if (data->SMS->MessageCenter.No) {
-		data->MessageCenter = &data->SMS->MessageCenter;
-		error = SM_Functions(GOP_GetSMSCenter, data, state);
-		ERROR();
-	}
-#endif
-
-	memset(&rawdata, 0, sizeof(rawdata));
-	data->RawData = &rawdata;
 	data->RawSMS = malloc(sizeof(*data->RawSMS));
 	memset(data->RawSMS, 0, sizeof(*data->RawSMS));
 
-	data->RawData->Data = calloc(10240, 1);
+	data->RawSMS->MessageCenter[0] = SemiOctetPack(data->SMS->SMSC.Number, data->RawSMS->MessageCenter + 1, data->SMS->SMSC.Type);
+	if (data->RawSMS->MessageCenter[0] % 2) data->RawSMS->MessageCenter[0]++;
+	data->RawSMS->MessageCenter[0] = data->RawSMS->MessageCenter[0] / 2 + 1;
 
-	error = PrepareSMS(data, 0);
+	error = PrepareSMS(data->SMS, data->RawSMS);
 	ERROR();
 
-	if (data->RawSMS->Length > 171) {
+	if (data->RawSMS->Length > GSM_MAX_SMS_LENGTH) {
 		dprintf("SMS is too long? %d\n", data->RawSMS->Length);
 		error = SendLongSMS(data, state);
 		goto cleanup;
 	}
 
 	error = SM_Functions(GOP_SendSMS, data, state);
-
-
  cleanup:
 	free(data->RawSMS);
-	free(data->RawData->Data);
-	data->RawData = NULL;
 	return error;
 }
 
@@ -1314,16 +1296,16 @@ API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
 	LongSMS = *data->RawSMS;
 	sms = *data->SMS;
 
-	count = (rawsms->UserDataLength + MAX_SMS_PART -1) / MAX_SMS_PART;
+	count = (rawsms->UserDataLength + MAX_SMS_PART - 1) / MAX_SMS_PART;
 	dprintf("Will need %d sms-es\n", count);
-	for (i=0; i<count; i++) {
+	for (i = 0; i < count; i++) {
 		printf("Sending sms #%d\n", i);
 		sms.UserData[0].Type = SMS_MultiData;
 		sms.UserData[0].Length = MAX_SMS_PART;
-		if (i+1 == count)
+		if (i + 1 == count)
 			sms.UserData[0].Length = rawsms->UserDataLength % MAX_SMS_PART;
 		memcpy(sms.UserData[0].u.Multi.Binary, rawsms->UserData + i*MAX_SMS_PART, MAX_SMS_PART);
-		sms.UserData[0].u.Multi.this = i+1;
+		sms.UserData[0].u.Multi.this = i + 1;
 		sms.UserData[0].u.Multi.total = count;
 		sms.UserData[1].Type = SMS_NoData;
 		data->SMS = &sms;
