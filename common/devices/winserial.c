@@ -34,6 +34,7 @@
 
 #include "misc.h"
 #include "gnokii.h"
+#include "devices/winserial.h"
 
 #define USECOMM      /* yes, we need the COMM API */
 
@@ -111,8 +112,32 @@ int serial_opendevice(const char *file, int with_odd_parity,
 		      int with_async, int with_hw_handshake,
 		      struct gn_statemachine *state)
 {
-	serial_open(file, 0);
-	return true;
+	DCB        dcb;
+
+	if (!serial_open(file, 0)) return -1;
+
+	/* set handshake */
+
+	dcb.DCBlength = sizeof(DCB);
+	GetCommState(hPhone, &dcb);
+	dcb.fOutxDsrFlow = 0;
+	if (state->config.hardware_handshake) {
+		dcb.fOutxCtsFlow = TRUE;
+		dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
+	} else {
+		dcb.fOutxCtsFlow = FALSE;
+		dcb.fRtsControl = RTS_CONTROL_ENABLE;
+	}
+	if (!SetCommState(hPhone, &dcb)) {
+		fprintf(stderr, "Gnokii serial_opendevice: cannot set handshake\n");
+		serial_close(0, state);
+		return -1;
+	}
+
+	if (serial_changespeed(0, state->config.serial_baudrate, state) != GN_ERR_NONE)
+		serial_changespeed(0, 19200 /* default value */, state);
+
+	return 0;
 }
 
 /* Set the DTR and RTS bit of the serial device. */

@@ -6,6 +6,8 @@
                                                     (Shawn Kennedy)
     o fix Windows build (link gnapplet to libgnokii.dll)(Pawel Kot)
     o pkt.c was missing from the Windows build     (BORBELY Zoltan)
+    o serial_opendevice sets handshake and speed in the
+      win32 version too                            (BORBELY Zoltan)
  * build system updates
     o use libtool --tag=CXX to be able to build gnokii with distcc
       or ccache (and probably crosscompile with newer autotools)
@@ -41,6 +43,8 @@
       check the return code                             (Pawel Kot)
     o try to get rid of 'bindir' config variable, it is usable only
       for gnokiid, but let's stay backward compatible   (Pawel Kot)
+    o at_dprintf() emitted debug messages unconditionally
+                                                   (BORBELY Zoltan)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

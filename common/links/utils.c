@@ -82,6 +82,6 @@ void at_dprintf(char *prefix, char *buf, int len)
 	debug_buf[out++] =']';
 	debug_buf[out++] ='\n';
 	debug_buf[out] ='\0';
-	fprintf(stderr, debug_buf);
+	dprintf("%s", debug_buf);
 #endif
 }
