@@ -215,13 +215,15 @@ static gn_error __sm_block_timeout(int waitfor, int t, int noretry, gn_data *dat
 	int retry, timeout;
 	gn_state s;
 	gn_error err;
+	int tfact[3] = {50, 100, 150};
 
 	for (retry = 0; retry < 3; retry++) {
-		timeout = t;
+		timeout = (t * tfact[retry]) / 100;
+		if (timeout < 1) timeout = 1;
 		err = sm_wait_for(waitfor, data, state);
 		if (err != GN_ERR_NONE) return err;
 
-		do {            /* ~3secs timeout */
+		do {
 			s = gn_sm_loop(1, state);  /* Timeout=100ms */
 			timeout--;
 		} while ((timeout > 0) && (s == GN_SM_WaitingForResponse));

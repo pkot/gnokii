@@ -2,6 +2,8 @@
 ========
  * Misc updates, cleanups and fixes
     o updated Germany operator names                (Ruotger.Skupin)
+    o using increasing instead of constant timeout values
+      in message retransmission                     (BORBELY Zoltan)
  * SMSD updated
     o English grammar corrections in README            (Peter Nixon)
 
