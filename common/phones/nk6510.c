@@ -112,124 +112,6 @@ static int GetMemoryType(GSM_MemoryType memory_type);
 static bool SMSLoop = false; /* Are we in infinite SMS reading loop? */
 static bool NewSMS  = false; /* Do we have a new SMS? */
 
-#if 0
-static const SMSMessage_Layout nk6510_deliver = {
-	true,			/* Is the SMS type supported */
-	33, true, true,		/* SMSC */
-	-1, 
-	3, 			/* Reply via same SMSC */
-	-1, -1,  
-	3, 			/* message freference number */
-	-1, -1, -1,
-	44, 41, 40,		/* UD length, DCS field, UDH indicator */
-	-1, -1, -1,		/* Validity */
-	21, true, true,		/* Remote Number */
-	6, -1,			/* Time */
-	1,  0,			/* Nonstandard fields */
-	45, true			/* User Data */
-};
-
-static const SMSMessage_Layout nk6510_submit_stored = {
-	true,
-	-1, true, true,		/* SMSC */
-	-1, 
-	-1, -1, -1,		/* Reply via same SMSC, RejectDuplicates, Report */
-	-1, 
-	18, 19, 			/* Reference, PID */
-	-1, 
-	28, 20, 17,	       	/* UserDataLength Field, DCS Field, UDH bit */
-	17, 			/* Valdity Type */
-	-1, -1,			/* Validity Field, length */
-	-1, true, true,		/* Remote Number, is coded?, fixed length? */
-	-1, -1,			/* SMSC Response, delivery time */
-	-1, -1,			/* MT, UserData */
-	29, true			/* UserData field, UserData PDU (?) */
-};
-
-static const SMSMessage_Layout nk6510_submit_sent = {
-	true,
-	25, true, true,		/* SMSC */
-	-1, 
-	-1, -1, -1,		/* Reply via same SMSC, RejectDuplicates, Report */
-	-1, 
-	18, 19, 			/* Reference, PID */
-	-1, 
-	35, 20, 17,	       	/* UserDataLength Field, DCS Field, UDH bit */
-	17, 			/* Valdity Type */
-	-1, -1,			/* Validity Field, length */
-	13, true, true,		/* Remote Number, is coded?, fixed length? */
-	-1, -1,			/* SMSC Response, delivery time */
-	-1, -1,			/* MT, UserData */
-	37, true			/* UserData field, UserData PDU (?) */
-};
-
-static const SMSMessage_Layout nk6510_text_template = {
-	true,
-	-1, true, true,			/* SMSC */
-	-1, 
-	-1, -1, -1,			/* Reply via same SMSC, RejectDuplicates, Report */
-	-1, 
-	18, 19, 				/* Reference, PID */
-	-1, 
-	12, 8, 9,		       	/* UserDataLength Field, DCS Field, UDH bit */
-	17, 				/* Valdity Type */
-	-1, -1,				/* Validity Field, length */
-	-1, true, true,			/* Remote Number, is coded?, fixed length? */
-	-1, -1,				/* SMSC Response, delivery time */
-	-1, -1,				/* MT, UserData */
-	13, true				/* UserData field, UserData PDU (?) */
-};
-
-static const SMSMessage_Layout nk6510_picture_template = {
-	true,
-	-1, true, true,			/* SMSC */
-	-1, 
-	-1, -1, -1,			/* Reply via same SMSC, RejectDuplicates, Report */
-	-1, 
-	18, 19, 				/* Reference, PID */
-	-1, 
-	12, 8, 9,		       	/* UserDataLength Field, DCS Field, UDH bit */
-	17, 				/* Valdity Type */
-	-1, -1,				/* Validity Field, length */
-	-1, true, true,			/* Remote Number, is coded?, fixed length? */
-	-1, -1,				/* SMSC Response, delivery time */
-	-1, -1,				/* MT, UserData */
-	13, true				/* UserData field, UserData PDU (?) */
-};
-
-static const SMSMessage_Layout nk6510_delivery_report = {
-	true,
-	 5, true, true,
-	-1, 
-	-1, -1, -1,  
-	3, 
-	-1, -1, 
-	-1, 
-	19, 18, 17,
-	-1, 
-	-1, -1,
-	20, true, true,
-	32, 39,
-	 1,  0,
-	25, true
-};
-
-static const SMSMessage_Layout nk6510_picture = {
-	true,
-	37, true, true,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1,
-	25, true, true,
-	10, -1,
-	-1, -1,
-	52, true
-};
-
-
-static SMSMessage_PhoneLayout nk6510_layout;
-
-#endif
-
 static GSM_IncomingFunctionType P6510_IncomingFunctions[] = {
        	{ P6510_MSG_FOLDER,	P6510_IncomingFolder },
 	{ P6510_MSG_SMS,	P6510_IncomingSMS },
@@ -364,21 +246,6 @@ static GSM_Error P6510_Initialise(GSM_Statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_6510, sizeof(GSM_Phone));
 
-#if 0
-	/* SMS Layout */
-	nk6510_layout.Type = 14; /* Locate the Type of the message field. */
-	nk6510_layout.SendHeader = 6;
-	nk6510_layout.ReadHeader = 13;
-	nk6510_layout.Deliver = nk6510_deliver;
-	nk6510_layout.Submit = nk6510_submit_stored;
-	nk6510_layout.DeliveryReport = nk6510_delivery_report;
-	nk6510_layout.Picture = nk6510_picture;
-	nk6510_layout.TextTemplate = nk6510_text_template;
-	nk6510_layout.PictureTemplate = nk6510_picture_template;
-	nk6510_layout.SubmitSent = nk6510_submit_sent;
-
-	layout = nk6510_layout;
-#endif
 	dprintf("Connecting\n");
 	while (!connected) {
 		switch (state->Link.ConnectionType) {
@@ -622,7 +489,7 @@ static void PictureTemplateLayout (unsigned char *message, GSM_Data *data)
 	memcpy(data->RawSMS->RemoteNumber,  message, 0);
 	
 	data->RawSMS->DCS              = message[21];
-	data->RawSMS->Length           = message[25];
+	data->RawSMS->Length           = 256; // message[25];
 	data->RawSMS->UDHIndicator     = message[22];
 	memcpy(data->RawSMS->UserData, message + 26, data->RawSMS->Length);
 	
@@ -666,13 +533,13 @@ static void PictureLayout (unsigned char *message, GSM_Data *data)
 	
 	memcpy(data->RawSMS->SMSCTime,      message, 0);
 	memcpy(data->RawSMS->Time,          message + 19, 7);
-	memcpy(data->RawSMS->MessageCenter, message + 46,  12);
-	memcpy(data->RawSMS->RemoteNumber,  message + 34, 12);
+	memcpy(data->RawSMS->MessageCenter, message + 50,  12);
+	memcpy(data->RawSMS->RemoteNumber,  message + 38, 12);
 	
-	data->RawSMS->DCS              = message[54];
-	data->RawSMS->Length           = message[57];
-	data->RawSMS->UDHIndicator     = message[53];
-	memcpy(data->RawSMS->UserData, message + 58, data->RawSMS->Length);
+	data->RawSMS->DCS              = message[55];
+	data->RawSMS->Length           = 256; //message[58];
+	data->RawSMS->UDHIndicator     = message[54];
+	memcpy(data->RawSMS->UserData, message + 63, data->RawSMS->Length);
 	
 	data->RawSMS->ValidityIndicator = 0;
 	memcpy(data->RawSMS->Validity, message, 0);
@@ -740,10 +607,16 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 			data->RawSMS->Type = SMS_Picture;
 			PictureLayout(message, data);
 			break;
-		case 0xa0: /* Picture Template */
-			dprintf("Type: PictureTemplate\n");
-			data->RawSMS->Type = SMS_PictureTemplate;
-			PictureTemplateLayout(message, data);	/* picture template */
+		case 0xa0: /* Pictures */
+			if (message[15] == 0x01) {
+				dprintf("Type: PictureTemplate\n");
+				data->RawSMS->Type = SMS_PictureTemplate;
+				PictureTemplateLayout(message, data);	/* picture template */
+			} else {
+				dprintf("Type: Picture\n");
+				data->RawSMS->Type = SMS_Picture;
+				PictureLayout(message, data);
+			}
 			break;
 		default:
 			return GE_INTERNALERROR;
@@ -880,14 +753,14 @@ static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0C, 
-			       0x01, /* 0x01 Inbox, 0x02 others*/
+			       0x01, /* 0x01 SIM, 0x02 ME*/
 			       0x00, /* Folder ID */
 			       0x0F, 0x55, 0x55, 0x55};
 
 	req[5] = GetMemoryType(data->SMSFolder->FolderID);
 
 	if (req[5] == P6510_MEMORY_IN) 
-		req[4] = 0x01;
+		req[4] = 0x02;
 	else
 		req[4] = 0x02;
 
@@ -910,7 +783,7 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	if (req[5] == P6510_MEMORY_IN) 
-		req[4] = 0x01;
+		req[4] = 0x02;
 	else
 		req[4] = 0x02;
 	req[7] = data->RawSMS->Number;
@@ -931,19 +804,25 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
-
-       	if ((data->SMSFolder) && (data->RawSMS->MemoryType != data->SMSFolder->FolderID)) {
-		dprintf("Getting list of SMS folders...\n");
+	if ((!data->SMSFolder) ||
+	    ((data->SMSFolder) &&
+	     (data->RawSMS->MemoryType != data->SMSFolder->FolderID))) {
 		if ((error = P6510_GetSMSFolders(data, state)) != GE_NONE) return error;
-		
-		if (GetMemoryType(data->RawSMS->MemoryType) > 
-		    data->SMSFolderList->FolderID[data->SMSFolderList->number-1])
+		if ((GetMemoryType(data->RawSMS->MemoryType) >
+		     data->SMSFolderList->FolderID[data->SMSFolderList->number - 1]) ||
+		    (data->RawSMS->MemoryType < 12))
 			return GE_INVALIDMEMORYTYPE;
-
 		data->SMSFolder->FolderID = data->RawSMS->MemoryType;
-
-		dprintf("Getting entries for SMS folder %i...\n", data->RawSMS->MemoryType);
 		if ((error = P6510_GetSMSFolderStatus(data, state)) != GE_NONE) return error;
+	}
+
+	if (data->SMSFolder->number + 2 < data->RawSMS->Number) {
+		if (data->RawSMS->Number > MAX_SMS_MESSAGES)
+			return GE_INVALIDSMSLOCATION;
+		else
+			return GE_EMPTYSMSLOCATION;
+	} else {
+		data->RawSMS->Number = data->SMSFolder->locations[data->RawSMS->Number - 1];
 	}
 
 	error = P6510_GetSMSMessageStatus(data, state);
@@ -953,7 +832,7 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 
 	if (req[5] == P6510_MEMORY_IN) 
-		req[4] = 0x01;
+		req[4] = 0x02;
 	else
 		req[4] = 0x02;
 
