@@ -3492,7 +3492,10 @@ static int writephonebook(int argc, char *args[])
 						gn_line_get(stdin, ans, 7);
 						if (!strcmp(ans, _("yes"))) confirm = 1;
 						else if (!strcmp(ans, _("no"))) confirm = 0;
-						else fprintf(stdout, "\nIncorrect answer [%s]\n", ans);
+						else {
+							fprintf(stdout, "\nIncorrect answer [%s]. Assuming 'no'.\n", ans);
+							confirm = 0;
+						}
 					}
 					/* User chose not to overwrite */
 					if (!confirm) continue;

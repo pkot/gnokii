@@ -28,6 +28,9 @@
  * gnokii updates
     o initialize error variables                             (SuSE)
     o make --writephonebook --find-free work            (Pawel Kot)
+    o --writephonebook does not wait infinitely for answer in the
+      interactive mode; it assumes no with the incorrect answer
+                                                     (Reiner Steib)
  * libgnokii updates
     o fbus echo cancellation and statemachine fix  (BORBELY Zoltan)
     o todo vcalendar import/export functions was mixed
