@@ -2,6 +2,10 @@
 =====
  * portability fixes
     o Windows portability fixes                    (BORBELY Zoltan)
+ * build system updates
+    o use libtool --tag=CXX to be able to build gnokii with distcc
+      or ccache (and probably crosscompile with newer autotools)
+                                                        (Pawel Kot)
 
 0.6.1
 =====
