@@ -104,6 +104,7 @@ int usage(void)
           gnokii --deletecalendarnote index
           gnokii --getdisplaystatus
           gnokii --netmonitor {reset|off|field|devel|next|nr}
+          gnokii --identify
 
           --help            display usage information.
 
@@ -173,6 +174,8 @@ int usage(void)
           --getdisplaystatus shows what icons are displayed.
 
           --netmonitor      setting/querying netmonitor mode.
+
+          --identify        get IMEI, model and revision
 "));  /*"*/
 
   return 0;
@@ -383,6 +386,9 @@ int main(int argc, char *argv[])
 
     // NetMonitor mode
     { "netmonitor",         required_argument, NULL, OPT_NETMONITOR },
+
+    // Identify
+    { "identify",           no_argument,       NULL, OPT_IDENTIFY },
 
     // For development purposes: insert you function calls here
     { "foogle",             optional_argument, NULL, OPT_FOOGLE },
@@ -601,6 +607,11 @@ int main(int argc, char *argv[])
     case OPT_NETMONITOR:
 
       rc = netmonitor(optarg);
+      break;
+
+    case OPT_IDENTIFY:
+
+      rc = identify();
       break;
 
     case OPT_FOOGLE:
@@ -1832,14 +1843,14 @@ int getdisplaystatus()
 
   GSM->GetDisplayStatus(&Status);
 
-  printf("Call in progress: %s\n", Status & (1<<DS_Call_In_Progress)?"on":"off");
-  printf("Unknown: %s\n",          Status & (1<<DS_Unknown)?"on":"off");
-  printf("Unread SMS: %s\n",       Status & (1<<DS_Unread_SMS)?"on":"off");
-  printf("Voice call: %s\n",       Status & (1<<DS_Voice_Call)?"on":"off");
-  printf("Fax call active: %s\n",  Status & (1<<DS_Fax_Call)?"on":"off");
-  printf("Data call active: %s\n", Status & (1<<DS_Data_Call)?"on":"off");
-  printf("Keyboard lock: %s\n",    Status & (1<<DS_Keyboard_Lock)?"on":"off");
-  printf("SMS storage full: %s\n", Status & (1<<DS_SMS_Storage_Full)?"on":"off");
+  printf(_("Call in progress: %s\n"), Status & (1<<DS_Call_In_Progress)?_("on"):_("off"));
+  printf(_("Unknown: %s\n"),          Status & (1<<DS_Unknown)?_("on"):_("off"));
+  printf(_("Unread SMS: %s\n"),       Status & (1<<DS_Unread_SMS)?_("on"):_("off"));
+  printf(_("Voice call: %s\n"),       Status & (1<<DS_Voice_Call)?_("on"):_("off"));
+  printf(_("Fax call active: %s\n"),  Status & (1<<DS_Fax_Call)?_("on"):_("off"));
+  printf(_("Data call active: %s\n"), Status & (1<<DS_Data_Call)?_("on"):_("off"));
+  printf(_("Keyboard lock: %s\n"),    Status & (1<<DS_Keyboard_Lock)?_("on"):_("off"));
+  printf(_("SMS storage full: %s\n"), Status & (1<<DS_SMS_Storage_Full)?_("on"):_("off"));
 
   GSM->Terminate();
 
@@ -1869,6 +1880,26 @@ int netmonitor(char *Mode)
 
   if (Screen)
     printf("%s\n", Screen);
+
+  GSM->Terminate();
+
+  return 0;
+}
+
+int identify( void )
+{
+  /* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
+  char imei[64], model[64], rev[64];
+
+  fbusinit(false, NULL);
+
+  GSM->GetIMEI(imei);
+  GSM->GetRevision(rev);
+  GSM->GetModel(model);
+
+  printf(  "IMEI:     %s\n", imei);
+  printf(_("Model:    %s\n"), model);
+  printf(_("Revision: %s\n"), rev);
 
   GSM->Terminate();
 

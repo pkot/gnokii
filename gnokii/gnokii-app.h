@@ -40,6 +40,7 @@ int writecalendarnote(char *argv[]);
 int deletecalendarnote(char *index);
 int getdisplaystatus();
 int netmonitor(char *_mode);
+int identify( void );
 int foogle(char *argv[]);
 int pmon( void );
 void readconfig( void );
@@ -73,6 +74,7 @@ typedef enum {
   OPT_SETWELCOMENOTE,
   OPT_PMON,
   OPT_NETMONITOR,
+  OPT_IDENTIFY,
   OPT_FOOGLE
 } opt_index;
 

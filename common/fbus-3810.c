@@ -435,26 +435,19 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS)
     u8      block_count;
     u8      block_length;
     int     retry_count;
+    GSM_Error error;
 
         /* Return if no link has been established. */
     if (!FB38_LinkOK) {
         return GE_NOLINK;
     }
 
-/* FIXME: Hugh, please check this and implement necessary... Hmm, as I'm
-   looking at it it can not run as is :-)) */
-
         /* Get SMSC number */
-    /* When FB38_GetSMSCenter function will appear uncomment following
-       lines */
-/*
     if (SMS->MessageCenter.No) {
         error = FB38_GetSMSCenter(&SMS->MessageCenter);
         if (error != GE_NONE)
             return error;
     }
-*/
-
     
     fprintf(stdout, _("Sending SMS to %s via message center %s\n"), SMS->Destination, SMS->MessageCenter.Number);
 
@@ -2254,6 +2247,16 @@ void    FB38_RX_Handle0x4d_IMEIRevisionModelData(void)
     strncpy(Model, MessageBuffer + 4 + imei_length + rev_length, FB38_MAX_MODEL_LENGTH);
     ModelValid = true;
 
+    if (EnableMonitoringOutput == false) {
+        return;
+    }
+
+    fprintf(stdout, _("Mobile phone identification received:\n"));
+    fprintf(stdout, _("   IMEI:     %s\n"), IMEI);
+
+    fprintf(stdout, _("   Model:    %s\n"), Model);
+
+    fprintf(stdout, _("   Revision: %s\n"), Revision);
 }
 
 
