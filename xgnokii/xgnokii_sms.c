@@ -13,6 +13,8 @@
 
 */
 
+#include <time.h>
+#include <stdlib.h>
 #include <gtk/gtk.h>
 #include "../misc.h"
 #include "../gsm-api.h"
@@ -22,6 +24,7 @@
 #include "xgnokii_sms.h"
 #include "../pixmaps/Edit.xpm"
 #include "../pixmaps/Delete.xpm"
+#include "../pixmaps/quest.xpm"
 
 static GtkWidget *GUI_SMSWindow;
 static GtkWidget *smsClist;
@@ -32,6 +35,7 @@ static gint row_i;
 static gint currentBox;
 static GdkColormap *cmap;
 static GdkColor colour;
+static QuestMark questMark;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
@@ -43,17 +47,99 @@ static inline void CloseSMS (GtkWidget *w, gpointer data)
   gtk_widget_hide (GUI_SMSWindow);
 }
 
+static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer ptr2)
+{
+  char *text1 = NULL;
+  char *text2 = NULL;
+
+  GtkCListRow *row1 = (GtkCListRow *) ptr1;
+  GtkCListRow *row2 = (GtkCListRow *) ptr2;
+
+  switch (row1->cell[clist->sort_column].type)
+  {
+    case GTK_CELL_TEXT:
+      text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
+      break;
+    case GTK_CELL_PIXTEXT:
+      text1 = GTK_CELL_PIXTEXT (row1->cell[clist->sort_column])->text;
+      break;
+    default:
+      break;
+  }
+  switch (row2->cell[clist->sort_column].type)
+  {
+    case GTK_CELL_TEXT:
+      text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
+      break;
+    case GTK_CELL_PIXTEXT:
+      text2 = GTK_CELL_PIXTEXT (row2->cell[clist->sort_column])->text;
+      break;
+    default:
+      break;
+  }
+
+  
+  if (!text2)
+    return (text1 != NULL);
+
+  if (!text1)
+    return -1;
+
+  if (clist->sort_column == 1 && !currentBox)
+  {
+    struct tm bdTime;
+    time_t time1, time2;
+    
+    
+    bdTime.tm_sec  = atoi (text1 + 15);
+    bdTime.tm_min  = atoi (text1 + 12);
+    bdTime.tm_hour = atoi (text1 + 9);
+    bdTime.tm_mday = atoi (text1);
+    bdTime.tm_mon  = atoi (text1 + 3);
+    bdTime.tm_year = atoi (text1 + 6);
+    bdTime.tm_gmtoff = atoi (text1 + 21);
+    
+    time1 = mktime (&bdTime);
+    
+    bdTime.tm_sec  = atoi (text2 + 15);
+    bdTime.tm_min  = atoi (text2 + 12);
+    bdTime.tm_hour = atoi (text2 + 9);
+    bdTime.tm_mday = atoi (text2);
+    bdTime.tm_mon  = atoi (text2 + 3);
+    bdTime.tm_year = atoi (text1 + 6);
+    bdTime.tm_gmtoff = atoi (text2 + 21);
+        
+    time2 = mktime (&bdTime);
+    
+    if (time1 < time2)
+      return (-1);
+    else if (time1 > time2)
+      return (1);
+    else 
+      return 0;
+  }
+  
+  return (g_strcasecmp (text1, text2));
+}
+
+static inline void SetSortColumn (GtkWidget *widget, SortColumn *data)
+{
+  gtk_clist_set_sort_column (GTK_CLIST (data->clist), data->column);
+  gtk_clist_sort (GTK_CLIST (data->clist));
+}
+
 static inline void FreeElement (gpointer data, gpointer userData)
 {
   g_free ((GSM_SMSMessage *) data);
 }
 
-static inline void FreeArray (GSList *array)
+static inline void FreeArray (GSList **array)
 {
-  if (array)
+  if (*array)
   {
-    g_slist_foreach (array, FreeElement, NULL);
-    g_slist_free (array);
+    g_slist_foreach (*array, FreeElement, NULL);
+    g_slist_free (*array);
+    *array = NULL;
   }
 }
 
@@ -73,12 +159,12 @@ static void InsertInboxElement (gpointer d, gpointer userData)
       row[0] = g_strdup (_("unread"));
 
     if (data->Time.Timezone)
-      row[1] = g_strdup_printf (_("%02d/%02d/%02d %02d:%02d:%02d GMT%+dh"),
+      row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d GMT%+dh",
                                 data->Time.Day, data->Time.Month, data->Time.Year,
                                 data->Time.Hour, data->Time.Minute, data->Time.Second,
                                 data->Time.Timezone);
     else
-      row[1] = g_strdup_printf (_("%02d/%02d/%02d %02d:%02d:%02d GMT"),
+      row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d GMT",
                                 data->Time.Day, data->Time.Month, data->Time.Year,
                                 data->Time.Hour, data->Time.Minute, data->Time.Second);
       
@@ -166,7 +252,7 @@ void GUI_RefreshSMS ()
   GSM_SMSMessage *msg;
   register gint i;
   
-  FreeArray (messages);
+  FreeArray (&messages);
   
   for (i = 1; i <= 10; i++)
   {
@@ -174,9 +260,10 @@ void GUI_RefreshSMS ()
     msg->MemoryType = GMT_SM;
     msg->Location = i;
     
-    if (GSM->GetSMSMessage(msg) == GE_NONE)
+    if (GSM->GetSMSMessage (msg) == GE_NONE)
       messages = g_slist_append (messages, msg);
   }
+  GUI_RefreshMessageWindow ();
 }
 
 static void ClickEntry (GtkWidget      *clist,
@@ -224,19 +311,109 @@ inline void GUI_ShowSMS ()
   GUI_RefreshMessageWindow ();
 }
 
+static void OkDeleteSMSDialog(GtkWidget *widget, gpointer data )
+{
+  GSM_SMSMessage message;
+  GList *sel;
+  GSM_Error error;
+  gint row;
+  
+  
+  sel = GTK_CLIST (smsClist)->selection;
+  
+  gtk_clist_freeze(GTK_CLIST (smsClist));
+
+  while (sel != NULL)
+  {
+    row = GPOINTER_TO_INT(sel->data); 
+    message.Location = GPOINTER_TO_INT (gtk_clist_get_row_data(GTK_CLIST (smsClist), row));
+    sel = sel->next;
+    
+    message.MemoryType = GMT_SM;
+    
+    error = GSM->DeleteSMSMessage(&message);
+    
+    if (error != GE_NONE)
+    {
+      if (error == GE_NOTIMPLEMENTED)
+      {
+        gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Function not implemented!"));  
+        gtk_widget_show(errorDialog.dialog);
+      }
+      else
+      {
+        gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Delete SMS failed!"));  
+        gtk_widget_show(errorDialog.dialog);
+      }
+    }
+  }
+  
+  gtk_widget_hide(GTK_WIDGET (data));
+  
+  gtk_clist_thaw(GTK_CLIST (smsClist));
+}
+
+void DeleteSMS()
+{
+  static GtkWidget *dialog = NULL;
+  GtkWidget *button, *hbox, *label, *pixmap;
+  
+  if (dialog == NULL)
+  {
+    dialog = gtk_dialog_new();
+    gtk_window_set_title (GTK_WINDOW (dialog), _("Delete SMS"));
+    gtk_window_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
+    gtk_window_set_modal(GTK_WINDOW (dialog), TRUE);
+    gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
+    gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
+                        GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+    
+    button = gtk_button_new_with_label (_("Ok"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (OkDeleteSMSDialog), (gpointer) dialog);
+    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);                               
+    gtk_widget_grab_default (button);
+    gtk_widget_show (button);
+    button = gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
+                        button, TRUE, TRUE, 10);
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                        GTK_SIGNAL_FUNC (CancelDialog), (gpointer) dialog);
+    gtk_widget_show (button);
+
+    gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), 5);
+   
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), hbox);
+    gtk_widget_show (hbox);
+    
+    pixmap = gtk_pixmap_new (questMark.pixmap, questMark.mask);
+    gtk_box_pack_start(GTK_BOX(hbox), pixmap, FALSE, FALSE, 10);
+    gtk_widget_show(pixmap);
+    
+    label = gtk_label_new(_("Do you want delete selected SMS?"));
+    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 10);
+    gtk_widget_show(label);
+  }
+  
+  gtk_widget_show(GTK_WIDGET (dialog));
+}
+
 static GtkItemFactoryEntry menu_items[] = {
-  {"/_File",		NULL,		NULL, 0, "<Branch>"},
-  {"/File/_Save",	"<control>S",	NULL, 0, NULL},
-  {"/File/sep1",	NULL,		NULL, 0, "<Separator>"},
-  {"/File/_Close",	"<control>W",	CloseSMS, 0, NULL},
-  {"/_Messages",		NULL,		NULL, 0, "<Branch>"},
-  {"/Messages/_New",	NULL,		NULL, 0, NULL},
-  {"/Messages/_Forward",NULL,		NULL, 0, NULL},
-  {"/Messages/_Reply",	NULL,		NULL, 0, NULL},
-  {"/Messages/_Delete",	NULL,		NULL, 0, NULL},
-  {"/_Help",		NULL,		NULL, 0, "<LastBranch>"},
-  {"/Help/_Help",	NULL,		Help1, 0, NULL},
-  {"/Help/_About",	NULL,		GUI_ShowAbout, 0, NULL},
+  {"/_File",		NULL,		NULL,		0, "<Branch>"},
+  {"/File/_Save",	"<control>S",	NULL,		0, NULL},
+  {"/File/sep1",	NULL,		NULL,		0, "<Separator>"},
+  {"/File/_Close",	"<control>W",	CloseSMS,	0, NULL},
+  {"/_Messages",	NULL,		NULL,		0, "<Branch>"},
+  {"/Messages/_New",	NULL,		NULL,		0, NULL},
+  {"/Messages/_Forward",NULL,		NULL,		0, NULL},
+  {"/Messages/_Reply",	NULL,		NULL,		0, NULL},
+  {"/Messages/_Delete",	"<control>D",	DeleteSMS,	0, NULL},
+  {"/_Help",		NULL,		NULL,		0, "<LastBranch>"},
+  {"/Help/_Help",	NULL,		Help1,		0, NULL},
+  {"/Help/_About",	NULL,		GUI_ShowAbout,	0, NULL},
 };
 
 void GUI_CreateSMSWindow ()
@@ -248,10 +425,11 @@ void GUI_CreateSMSWindow ()
   GtkWidget *main_vbox;
   GtkWidget *toolbar;
   GtkWidget *scrolledWindow;
-
   GtkWidget *vpaned, *hpaned;
   GtkWidget *tree, *treeSMSItem, *treeInboxItem, *treeOutboxItem, *subTree;
-  gchar *titles[4] = { _("Status"), _("Date"), _("Sender"), _("Message")};
+  SortColumn *sColumn;
+  register gint i;
+  gchar *titles[4] = { _("Status"), _("Date / Time"), _("Sender"), _("Message")};
   
   
   GUI_SMSWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -303,7 +481,7 @@ void GUI_CreateSMSWindow ()
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Delete message"), NULL,
                            NewPixmap(Delete_xpm, GUI_SMSWindow->window,
                            &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) NULL, NULL);
+                           (GtkSignalFunc) DeleteSMS, NULL);
   
   gtk_box_pack_start (GTK_BOX (main_vbox), toolbar, FALSE, FALSE, 0);
   gtk_widget_show (toolbar);
@@ -378,18 +556,17 @@ void GUI_CreateSMSWindow ()
   /* Messages list */
   smsClist = gtk_clist_new_with_titles (4, titles);
   gtk_clist_set_shadow_type (GTK_CLIST (smsClist), GTK_SHADOW_OUT);
-  //gtk_clist_set_compare_func (GTK_CLIST (smsClist), CListCompareFunc);
+  gtk_clist_set_compare_func (GTK_CLIST (smsClist), CListCompareFunc);
   gtk_clist_set_sort_column (GTK_CLIST (smsClist), 1);
   gtk_clist_set_sort_type (GTK_CLIST (smsClist), GTK_SORT_ASCENDING);
   gtk_clist_set_auto_sort (GTK_CLIST (smsClist), FALSE);
-  //gtk_clist_set_selection_mode (GTK_CLIST (smsClist), GTK_SELECTION_EXTENDED);
   
   //gtk_clist_set_column_width (GTK_CLIST (smsClist), 0, 150);
   gtk_clist_set_column_width (GTK_CLIST (smsClist), 1, 155);
   gtk_clist_set_column_width (GTK_CLIST (smsClist), 2, 135);
   //gtk_clist_set_column_justification (GTK_CLIST (smsClist), 2, GTK_JUSTIFY_CENTER);
   
-/*  for (i = 0; i < 4; i++)
+  for (i = 0; i < 4; i++)
   {
     if ((sColumn = g_malloc (sizeof (SortColumn))) == NULL)
     {
@@ -401,7 +578,7 @@ void GUI_CreateSMSWindow ()
     gtk_signal_connect (GTK_OBJECT (GTK_CLIST (smsClist)->column[i].button), "clicked",
                         GTK_SIGNAL_FUNC (SetSortColumn), (gpointer) sColumn);
   }
-  */                      
+                     
   gtk_signal_connect (GTK_OBJECT (smsClist), "select_row",
                       GTK_SIGNAL_FUNC (ClickEntry), NULL);
   
@@ -424,7 +601,11 @@ void GUI_CreateSMSWindow ()
   colour.red = 0xffff;
   colour.green = 0;
   colour.blue = 0;
-  if (!gdk_color_alloc (cmap, &colour)) {
+  if (!gdk_color_alloc (cmap, &colour))
     g_error ("couldn't allocate colour");
-  }
+  
+  questMark.pixmap = gdk_pixmap_create_from_xpm_d (GUI_SMSWindow->window,
+                         &questMark.mask,
+                         &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL],
+                         quest_xpm);
 }

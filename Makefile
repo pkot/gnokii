@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1_pre30
+VERSION = 0.3.1_pre31
 
 #
 # Compiler to use.
@@ -90,7 +90,6 @@ GTKLDFLAGS=`gtk-config --libs`
 #
 
 DESTDIR=/usr/local
-XGNOKIIDIR=${DESTDIR}/lib/xgnokii
 
 #
 # Install utility
@@ -112,7 +111,7 @@ INSTALL=install
 # Set up compilation/linking flags for Linux.
 #
 
-export CC MODEL PORT GETTEXT DEBUG VERSION WIN32 SECURITY GTKCFLAGS GTKLDFLAGS XGNOKIIDIR
+export CC INSTALL MODEL PORT GETTEXT DEBUG VERSION WIN32 SECURITY GTKCFLAGS GTKLDFLAGS DESTDIR
 
 COMMON=-Wall -O2 \
        ${MODEL} ${PORT} \
@@ -212,7 +211,7 @@ dist:	clean
 install: gnokii gnokiid xgnokii xlogos xkeyb
 	@echo "Installing files..."
 
-	@mkdir -p $(DESTDIR)/bin $(DESTDIR)/sbin $(DESTDIR)/lib/gnokii $(XGNOKIIDIR)/help
+	@mkdir -p $(DESTDIR)/bin $(DESTDIR)/sbin $(DESTDIR)/lib/gnokii
 
 	@$(INSTALL) gnokii $(DESTDIR)/bin
 	@echo " $(DESTDIR)/bin/gnokii"
@@ -222,9 +221,6 @@ install: gnokii gnokiid xgnokii xlogos xkeyb
 
 	@$(INSTALL) mgnokiidev $(DESTDIR)/sbin
 	@echo " $(DESTDIR)/sbin/mgnokiidev"
-
-	@$(INSTALL) xgnokii/xgnokii $(DESTDIR)/bin
-	@echo " $(DESTDIR)/bin/xgnokii"
 
 	@$(INSTALL) xlogos $(DESTDIR)/bin
 	@echo " $(DESTDIR)/bin/xlogos"
@@ -238,8 +234,7 @@ install: gnokii gnokiid xgnokii xlogos xkeyb
 	@$(INSTALL) pixmaps/6150.xpm $(DESTDIR)/lib/gnokii/6150.xpm
 	@echo " $(DESTDIR)/lib/gnokii/6150.xpm"
 
-	@echo "Installing help files for xgnokii..."
-	@$(INSTALL) -m 0444 xgnokii/docs/help/* $(XGNOKIIDIR)/help
+	@make -sC xgnokii install
 
 	@echo "done."
 

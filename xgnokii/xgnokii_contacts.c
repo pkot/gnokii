@@ -840,6 +840,7 @@ void DeletePbEntry()
   {
     dialog = gtk_dialog_new();
     gtk_window_set_title (GTK_WINDOW (dialog), _("Delete entries"));
+    gtk_window_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
     gtk_window_set_modal(GTK_WINDOW (dialog), TRUE);
     gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
     gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
@@ -1032,6 +1033,7 @@ void ChMemType()
     {
       dialog = gtk_dialog_new();
       gtk_window_set_title (GTK_WINDOW (dialog), _("Changing memory type"));
+      gtk_window_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
       gtk_window_set_modal(GTK_WINDOW (dialog), TRUE);
       gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
       gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
@@ -1166,7 +1168,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
   GtkCListRow *row2 = (GtkCListRow *) ptr2;
 
   switch (row1->cell[clist->sort_column].type)
-    {
+  {
     case GTK_CELL_TEXT:
       text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
       break;
@@ -1175,9 +1177,9 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
       break;
     default:
       break;
-    }
+  }
   switch (row2->cell[clist->sort_column].type)
-    {
+  {
     case GTK_CELL_TEXT:
       text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
       break;
@@ -1186,7 +1188,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
       break;
     default:
       break;
-    }
+  }
 
   if (clist->sort_column == 2)
   {
@@ -1206,11 +1208,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
   if (!text1)
     return -1;
 
-#ifndef WIN32
-  if ((ret = strcasecmp (text1, text2)) == 0)
-#else
-  if ((ret = strcmpi (text1, text2)) == 0)
-#endif
+  if ((ret = g_strcasecmp (text1, text2)) == 0)
   {
     if (((PhonebookEntry *) row1->data)->entry.MemoryType < ((PhonebookEntry *) row2->data)->entry.MemoryType)
       ret = -1;
@@ -1221,7 +1219,7 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
   return ret;      
 }
 
-static void SetSortColumn (GtkWidget *widget, SortColumn *data)
+static inline void SetSortColumn (GtkWidget *widget, SortColumn *data)
 {
   gtk_clist_set_sort_column (GTK_CLIST (data->clist), data->column);
   gtk_clist_sort (GTK_CLIST (data->clist));
@@ -1363,6 +1361,7 @@ static GtkWidget *CreateSaveQuestionDialog (GtkSignalFunc SaveFunc,
   
   dialog = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (dialog), _("Save changes?"));
+  gtk_window_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
   gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
   gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
   gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",

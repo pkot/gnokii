@@ -16,6 +16,7 @@
 #include <stdio.h>   /* for printf */
 #include <stdlib.h>  /* for getenv */
 #include <string.h>  /* for strtok */
+#include <time.h>    /* for time   */
 
 #ifndef WIN32
 # include <unistd.h>  /* for usleep */
@@ -93,6 +94,13 @@ static char *DefaultPort = PORT;
 static char *DefaultBindir = "/usr/sbin/";
 static char *DefaultConnection = "serial";
 static char *DefaultXGnokiiDir = XGNOKIIDIR;
+
+static gint hiddenCallDialog;
+
+static struct CallDialog {
+  GtkWidget *dialog;
+  GtkWidget *label;
+} inCallDialog;
 
 typedef struct {
   GtkWidget *alarmSwitch;
@@ -272,11 +280,56 @@ void GUI_DrawSMSReceived (GtkWidget *data) {
 		  33, 25, _("Short Message received"));
 }
 
-gint GUI_Update (gpointer data) {
+inline void HideCallDialog (GtkWidget *widget, gpointer data)
+{
+  hiddenCallDialog = 1;
+  gtk_widget_hide (GTK_WIDGET (data));
+}
 
-  static int initialized = 0;
-  static int smsNumber = 0;
-  gchar callNum[20];
+void CreateInCallDialog ()
+{
+  GtkWidget *button, *hbox;
+  
+  inCallDialog.dialog = gtk_dialog_new ();
+  gtk_window_position (GTK_WINDOW (inCallDialog.dialog), GTK_WIN_POS_MOUSE);
+  gtk_window_set_title (GTK_WINDOW (inCallDialog.dialog), _("Call in progress"));
+  gtk_container_set_border_width (GTK_CONTAINER (inCallDialog.dialog), 5);
+  gtk_signal_connect (GTK_OBJECT (inCallDialog.dialog), "delete_event",
+                      GTK_SIGNAL_FUNC (DeleteEvent), NULL);
+  
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (GTK_DIALOG (inCallDialog.dialog)->vbox), hbox, FALSE, FALSE, 5);
+  gtk_widget_show (hbox);
+  
+  inCallDialog.label = gtk_label_new ("");
+  gtk_box_pack_start (GTK_BOX (hbox), inCallDialog.label, FALSE, FALSE, 0);
+  gtk_widget_show (inCallDialog.label);
+  
+  button = gtk_button_new_with_label (_("Hide"));
+  gtk_box_pack_start (GTK_BOX (GTK_DIALOG (inCallDialog.dialog)->action_area),
+                      button, TRUE, FALSE, 0);
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                      GTK_SIGNAL_FUNC (HideCallDialog), (gpointer) inCallDialog.dialog);
+  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);                               
+  gtk_widget_grab_default (button);
+  gtk_widget_show (button);
+}
+
+gint GUI_Update (gpointer data)
+{
+  static gchar callNum[20];
+  static gchar callBuf[80];
+  static gchar timeBuf[10];
+  static gchar anonym[] = "anonymous";
+  static struct tm stm;
+  static gint initialized = 0;
+  static gint smsNumber = 0;
+  static gint callTimerStart = 0;
+  gint callTimer = 0;
+  time_t t;
+  gchar *name;
+  gint status;
+    
 
   /* Define required unit types for RF and Battery level meters. */
   GSM_RFUnits rf_units = GRF_Arbitrary;
@@ -335,7 +388,13 @@ gint GUI_Update (gpointer data) {
       GUI_DrawSMS (data);
   
       if (SMSStatus.UnRead > smsold && smsold != -1)
+      {
+        GUI_RefreshSMS ();
         smsreceived = 10; /* The message "Short Message Received" is displayed for 10s */
+      }
+      else if (smsNumber != SMSStatus.Number)
+        GUI_RefreshSMS ();
+        
       smsold=SMSStatus.UnRead;
     }
     if (smsNumber != SMSStatus.Number)
@@ -349,11 +408,43 @@ gint GUI_Update (gpointer data) {
     smsreceived--;
   }
 
-  *callNum = '\0';
-  GSM->GetIncomingCallNr (callNum);
-  if (*callNum != '\0')
-    g_print ("%s\n",callNum);
+  if (GSM->GetIncomingCallNr (callNum) == GE_NONE)
+  {
+    GSM->GetDisplayStatus (&status);
+    if (status & (1<<DS_Call_In_Progress))
+    {
+      if (!callTimerStart)
+        callTimerStart = callTimer = time (NULL);
+      else
+        callTimer = time (NULL);
+    }
     
+    if (*callNum == '\0')
+      name = anonym;
+    else
+    {
+      name = GUI_GetName (callNum);
+      if (!name)
+        name = callNum;
+    }
+    t = (time_t) difftime (callTimer, callTimerStart);
+    (void) gmtime_r (&t, &stm);
+    strftime (timeBuf, 10, "%T", &stm);
+    g_snprintf (callBuf, 80, _("Incomming call from: %s\nTime: %s"),
+                name, timeBuf);
+    
+    gtk_label_set_text (GTK_LABEL (inCallDialog.label), callBuf);
+    if (!GTK_WIDGET_VISIBLE (inCallDialog.dialog) && !hiddenCallDialog)
+      gtk_widget_show (inCallDialog.dialog);
+  }
+  else
+  {  
+    callTimerStart = callTimer = 0;
+    if (GTK_WIDGET_VISIBLE (inCallDialog.dialog))
+      gtk_widget_hide (inCallDialog.dialog);
+    hiddenCallDialog = 0;
+  }
+  
   gtk_widget_draw (data,NULL);
 
   
@@ -1879,6 +1970,7 @@ void GUI_TopLevelWindow () {
   GUI_CreateNetmonWindow ();
   GUI_CreateDTMFWindow ();
   CreateErrorDialog (&errorDialog, GUI_MainWindow);
+  CreateInCallDialog ();
   
   act.sa_handler = RemoveZombie;
   sigemptyset (&(act.sa_mask));
@@ -1889,6 +1981,8 @@ void GUI_TopLevelWindow () {
   GUI_Refresh ();
 
   gtk_timeout_add (1800, (GtkFunction) GUI_Update, GUI_MainWindow);
+  
+  hiddenCallDialog = 0;
 }
 
 void GUI_SplashScreen () {
@@ -1941,11 +2035,13 @@ void GUI_ReadConfig(void)
   gchar *rcfile;
 
 #ifdef WIN32
-  homedir = getenv("HOMEDRIVE");
-  g_strconcat(homedir, getenv("HOMEPATH"), NULL);
+/*  homedir = getenv("HOMEDRIVE"); */
+/*  g_strconcat(homedir, getenv("HOMEPATH"), NULL); */
+  homedir = g_get_home_dir ();
   rcfile=g_strconcat(homedir, "\\_gnokiirc", NULL);
 #else
-  if ((homedir = getenv ("HOME")) == NULL)
+/*  if ((homedir = getenv ("HOME")) == NULL) */
+  if ((homedir = g_get_home_dir ()) == NULL)
   {
     g_print (_("WARNING: Can't find HOME enviroment variable!\n"));
     exit (-1);

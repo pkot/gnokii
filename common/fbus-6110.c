@@ -280,7 +280,7 @@ unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
 unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
 unsigned char      Model[FB61_MAX_MODEL_LENGTH];
 
-char               CurrentIncomingCall[20];
+char               CurrentIncomingCall[20] = " ";
 
 /* Pointer to callback function in user code to be called when RLP frames
    are received. */
@@ -1349,9 +1349,10 @@ GSM_Error FB61_DialData(char *Number) {
   return(GE_NONE);
 }
 
-GSM_Error FB61_GetIncomingCallNr(char *Number) {
+GSM_Error FB61_GetIncomingCallNr(char *Number)
+{
 
-  if (strlen(CurrentIncomingCall)>0) {
+  if (*CurrentIncomingCall != ' ') {
     strcpy(Number, CurrentIncomingCall);
     return GE_NONE;
   }
@@ -2502,7 +2503,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
 #endif /* DEBUG */
 
-      CurrentIncomingCall[0]=0;
+      CurrentIncomingCall[0] = ' ';
 
       break;
 
@@ -2535,6 +2536,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       count=MessageBuffer[6];
 
+      CurrentIncomingCall[0] = 0;
       for (tmp=0; tmp <count; tmp++)
 	sprintf(CurrentIncomingCall, "%s%c", CurrentIncomingCall, MessageBuffer[7+tmp]);
 
@@ -2585,7 +2587,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       fprintf(stdout, _("   Exact meaning not known yet, sorry :-(\n"));
 #endif /* DEBUG */
 
-      CurrentIncomingCall[0]=0;
+      CurrentIncomingCall[0] = ' ';
 
       break;
 

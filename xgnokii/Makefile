@@ -1,4 +1,6 @@
-XVERSION = 19991116
+XVERSION = 19991207
+
+XGNOKIIDIR=${DESTDIR}/lib/xgnokii
 
 # DEBUG += -DXDEBUG 
 
@@ -49,6 +51,20 @@ all: xgnokii
 
 xgnokii: $(XGNOKII_OBJS) $(COMMON_OBJS)
 
+install: $(XGNOKII_OBJS) $(COMMON_OBJS)
+	@echo "Installing xgnokii files..."
+
+	@mkdir -p $(DESTDIR)/bin $(XGNOKIIDIR)/help
+
+	@$(INSTALL) -m 755 -s xgnokii $(DESTDIR)/bin
+	@echo " $(DESTDIR)/bin/xgnokii"
+
+	@echo "Installing help files for xgnokii..."
+	@$(INSTALL) -m 0444 docs/help/*.html $(XGNOKIIDIR)/help
+
+	@echo "done xgnokii."
+
+	
 # Misc targets
 clean:
 	@rm -f core *~ *% *.bak xgnokii $(XGNOKII_OBJS)

@@ -1,3 +1,13 @@
+xgnokii-19991207
+- replaced 'getenv ("{HOME,HOMEDRIVE,HOMEPATH}")' with 'g_get_home_dir ()',
+  which is (I hope) more portable under MS Windows. 
+- added incoming call notification with stop watch.
+Changes in SMS window:
+- corrected GSList handling. (xgnokii have catch sigseg or end in
+  endless loop when SMS's number in phone had changed.)
+- added delete SMS functionality.
+- added sorting in SMS's list. 
+
 xgnokii-19991130
 - Added DTMF window.
 - Added execution of html viewer as help viewer. We need to write nice help

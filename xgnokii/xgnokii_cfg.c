@@ -58,11 +58,13 @@ void GUI_ReadXConfig ()
   GetDefaultValues ();
   
 #ifdef WIN32
-  homedir = getenv("HOMEDRIVE");
-  g_strconcat(homedir, getenv("HOMEPATH"), NULL);
+/*  homedir = getenv("HOMEDRIVE");
+  g_strconcat(homedir, getenv("HOMEPATH"), NULL); */
+  homedir = g_get_home_dir ();
   rcfile=g_strconcat(homedir, "\\_xgnokiirc", NULL);
 #else
-  if ((homedir = getenv ("HOME")) == NULL)
+/*  if ((homedir = getenv ("HOME")) == NULL) */
+  if ((homedir = g_get_home_dir ()) == NULL)
   {
     g_print (_("WARNING: Can't find HOME enviroment variable!\n"));
     return;
