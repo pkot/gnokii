@@ -20,6 +20,7 @@ PRGNAME=gnokii
 else
 PRGNAME=gnokii.exe
 TARGET=-mconsole
+CFLAGS+=-DGNOKIIDLL_IMPORTS
 endif
 
 LDLIBS += $(TOPDIR)/common/libgnokii.la

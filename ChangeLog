@@ -11,6 +11,8 @@
       by earlier changes                              (Ron Yorston)
  * 6100 series updates
     o add support for DeletePhonebook              (BORBELY Zoltan)
+ * gnokii updates
+    o GNOKIIDLL_IMPORTS required on win32 platform (BORBELY Zoltan)
 
 0.5.10
 ======
