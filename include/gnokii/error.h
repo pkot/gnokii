@@ -13,7 +13,10 @@
   Error codes.
 
   $Log$
-  Revision 1.2  2001-11-08 16:34:20  pkot
+  Revision 1.3  2002-01-10 14:23:38  pkot
+  Allow to read all phonebook entries easily (Simon Huggins)
+
+  Revision 1.2  2001/11/08 16:34:20  pkot
   Updates to work with new libsms
 
   Revision 1.1  2001/10/24 22:33:00  pkot
@@ -69,11 +72,12 @@ typedef enum {
 	GE_MEMORYFULL,            /* 37. */
 	GE_NOTWAITING,            /* 38. Not waiting for a response from the phone */
 	GE_NOTREADY,              /* 39. */
+	GE_EMPTYMEMORYLOCATION,   /* 40. */
 
 	/* The following are here in anticipation of data call requirements. */
 
-	GE_LINEBUSY,              /* 40. Outgoing call requested reported line busy */
-	GE_NOCARRIER              /* 41. No Carrier error during data call setup ? */
+	GE_LINEBUSY,              /* 41. Outgoing call requested reported line busy */
+	GE_NOCARRIER              /* 42. No Carrier error during data call setup ? */
 } GSM_Error;
 
 extern char *print_error(GSM_Error e);

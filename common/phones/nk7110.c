@@ -430,12 +430,15 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 			data->PhonebookEntry->Date.Minute = 0;
 			data->PhonebookEntry->Date.Second = 0;
 		}
-		if (message[6] == 0x0f) { // not found
-			if (message[10] == 0x34 || message[10] == 0x33 || message[10] == 0x30) {
-				dprintf("Invalid caller location\n");
+		if (message[6] == 0x0f) { /* not found */
+			switch (message[10]) {
+			case 0x30:
+				return GE_INVALIDMEMORYTYPE;
+			case 0x33:
+				return GE_EMPTYMEMORYLOCATION;
+			case 0x34:
 				return GE_INVALIDPHBOOKLOCATION;
-			} else {
-				dprintf("Unknown error getting phonebook\n");
+			default:
 				return GE_NOTIMPLEMENTED;
 			}
 		}

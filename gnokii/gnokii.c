@@ -208,7 +208,7 @@ static void version(void)
 static int usage(void)
 {
 	fprintf(stderr, _("   usage: gnokii [--help|--monitor|--version]\n"
-			  "          gnokii --getmemory memory_type start [end]\n"
+			  "          gnokii --getmemory memory_type start_number [end_number|end]\n"
 			  "          gnokii --writephonebook [-i]\n"
 			  "          gnokii --getspeeddial number\n"
 			  "          gnokii --setspeeddial number memory_type location\n"
@@ -2122,11 +2122,10 @@ static int getprofile(int argc, char *argv[])
 static int getmemory(int argc, char *argv[])
 {
 	GSM_PhonebookEntry entry;
-	int count;
+	int count, start_entry, end_entry = 0;
 	GSM_Error error;
 	char *memory_type_string;
-	int start_entry;
-	int end_entry;
+	bool all = false;
 	
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
@@ -2137,20 +2136,24 @@ static int getmemory(int argc, char *argv[])
 	}
 
 	start_entry = atoi(argv[1]);
-	if (argc > 2) end_entry = atoi(argv[2]);
+	if (argc > 2) {
+		if (argv[2] && (strlen(argv[2]) == 3) && !strcmp(argv[2], "end")) {
+			all = true;
+		} else end_entry = atoi(argv[2]);
+	}
 	else end_entry = start_entry;
 
 	/* Now retrieve the requested entries. */
-	for (count = start_entry; count <= end_entry; count ++) {
-
+	count = start_entry;
+	while (all || count <= end_entry) {
 		entry.Location = count;
 
       		data.PhonebookEntry = &entry;
 		error = SM_Functions(GOP_ReadPhonebook, &data, &State);
 
-		if (error == GE_NONE) {
+		switch (error) {
 			int i;
-
+		case GE_NONE:
 			fprintf(stdout, "%s;%s;%s;%d;%d", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
 			for (i = 0; i < entry.SubEntriesCount; i++) {
 				fprintf(stdout, ";%d;%d;%d;%s", entry.SubEntries[i].EntryType, entry.SubEntries[i].NumberType,
@@ -2159,17 +2162,30 @@ static int getmemory(int argc, char *argv[])
 			fprintf(stdout, "\n");
 			if (entry.MemoryType == GMT_MC || entry.MemoryType == GMT_DC || entry.MemoryType == GMT_RC)
 				fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.Date.Day, entry.Date.Month, entry.Date.Year, entry.Date.Hour, entry.Date.Minute, entry.Date.Second);
-		} else {
-			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-				return -1;
-			} else if (error == GE_INVALIDMEMORYTYPE) {
-				fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
-				return -1;
+			break;
+		case GE_NOTIMPLEMENTED:
+			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
+			return -1;
+		case GE_INVALIDMEMORYTYPE:
+			fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
+			return -1;
+		case GE_INVALIDPHBOOKLOCATION:
+			fprintf(stderr, _("%s|%d|Bad location or other error!(%d)\n"), memory_type_string, count, error);
+			if (all) {
+				/* Ensure that we quit the loop */
+				all = false;
+				count = 0;
+				end_entry = -1;
 			}
-
-			fprintf(stdout, _("%s|%d|Bad location or other error!(%d)\n"), memory_type_string, count, error);
+			break;
+		case GE_EMPTYMEMORYLOCATION:
+			fprintf(stderr, "%d. empty phonebook entry\n", count);
+			break;
+		default:
+			fprintf(stderr, "Unknown error: %s\n", print_error(error));
+			return -1;
 		}
+		count++;
 	}
 	return 0;
 }
