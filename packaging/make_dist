@@ -9,7 +9,7 @@
 # DeMorgan rules applied :-) I like math...
 #
 
-if [ "x`whoami`" != xpavel -a "x`whoami`" != xhugh -a "x`whoami`" != xpkot ]
+if [ "x`whoami`" != xpavel -a "x`whoami`" != xhugh -a "x`whoami`" != xpkot -a "x`whoami`" != xbozo ]
 then
    echo "No way to test this :-)"
 fi
