@@ -15,7 +15,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.2  2001-11-09 13:47:58  pkot
+  Revision 1.3  2001-11-09 14:25:04  pkot
+  DEBUG cleanups
+
+  Revision 1.2  2001/11/09 13:47:58  pkot
   Removed pthreads from 3110 support. It may break it.
 
   Revision 1.1  2001/11/08 16:39:09  pkot
@@ -864,8 +867,8 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 		message[6], message[7], message[14], message[4], message[5]);
 
 	dprintf("Message Read:\n");
-	dprintf("  Location: %d. Type: %d Status: %d\n", data->SMSMessage->Location, data->SMSMessage->Type, data->SMSMessage->Status);
-	dprintf("  Sender: %s\n", data->SMSMessage->Sender);
+	dprintf("  Location: %d. Type: %d Status: %d\n", data->SMSMessage->Number, data->SMSMessage->Type, data->SMSMessage->Status);
+	dprintf("  Sender: %s\n", data->SMSMessage->RemoteNumber.number);
 	dprintf("  Message Center: %s\n", data->SMSMessage->MessageCenter.Number);
 	dprintf("  Time: %02d.%02d.%02d %02d:%02d:%02d\n",
 		data->SMSMessage->Time.Day, data->SMSMessage->Time.Month, data->SMSMessage->Time.Year, data->SMSMessage->Time.Hour, data->SMSMessage->Time.Minute, data->SMSMessage->Time.Second);
@@ -951,8 +954,8 @@ static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *mess
 	data->SMSMessage->MessageCenter.Number[l] = 0;
 	*/
 
-	dprintf("Message [0x%02x] Delivered!\n", data->SMSMessage->MessageNumber);
-	dprintf("   Destination: %s\n", data->SMSMessage->Destination);
+	dprintf("Message [0x%02x] Delivered!\n", data->SMSMessage->Number);
+	dprintf("   Destination: %s\n", data->SMSMessage->RemoteNumber.number);
 	dprintf("   Message Center: %s\n", data->SMSMessage->MessageCenter.Number);
 	dprintf("   Unknowns: 0x%02x 0x%02x 0x%02x\n", U0, U1, U2);
 	dprintf("   Discharge Time: %02d.%02d.%02d %02d:%02d:%02d\n",

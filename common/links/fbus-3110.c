@@ -16,7 +16,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.1  2001-11-09 12:55:07  pkot
+  Revision 1.2  2001-11-09 14:25:04  pkot
+  DEBUG cleanups
+
+  Revision 1.1  2001/11/09 12:55:07  pkot
   Forgot about fbus support for 3110. FIXME: is it really needed?
 
 
@@ -151,7 +154,7 @@ void FB3110_RX_StateMachine(unsigned char rx_byte)
 				dprintf("--> %02x:%02x:", i->FrameType, i->FrameLength);
 				for (count = 0; count < i->BufferCount; count++)
 					dprintf("%02hhx:", i->Buffer[count]);
-				dprintf(stderr, "\n");
+				dprintf("\n");
 				/* Transfer message to state machine */
 				SM_IncomingFunction(statemachine, i->Buffer[0], i->Buffer, i->FrameLength);
 

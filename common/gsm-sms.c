@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.1  2001-11-08 16:23:21  pkot
+  Revision 1.2  2001-11-09 14:25:04  pkot
+  DEBUG cleanups
+
+  Revision 1.1  2001/11/08 16:23:21  pkot
   New version of libsms. Not functional yet, but it reasonably stable API.
 
   Revision 1.1  2001/07/09 23:06:26  pkot
@@ -317,7 +320,7 @@ GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *frame)
 			return error;
 		strcpy(SMS->MessageCenter.Number, "0");
 	}
-	dprintf("Sending SMS to %s via message center %s\n", SMS->Sender, SMS->MessageCenter.Number);
+	dprintf("Sending SMS to %s via message center %s\n", SMS->RemoteNumber.number, SMS->MessageCenter.Number);
 
 	/* Header coding */
 //	EncodeUDH(SMS, frame);
@@ -617,7 +620,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *sms)
 
         /* Remote number */
         message[20+DataOffset[sms->Type]] = ((message[20+DataOffset[sms->Type]])+1)/2+1;
-        dprintf("\tRemote number (recipient or sender): %s\n", GSM_GetBCDNumber(message + 20 + DataOffset[sms->Type]));
+        dprintf("\tRemote number (recipient or sender): %s\n", GetBCDNumber(message + 20 + DataOffset[sms->Type]));
         strcpy(sms->RemoteNumber.number, GetBCDNumber(message + 20 + DataOffset[sms->Type]));
 
 	UnpackDateTime(message + 24 + DataOffset[sms->Type], &(sms->Time));
