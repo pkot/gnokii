@@ -686,8 +686,8 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		break;
 	/* get message status */
 	case 0x0f:
-		dprintf("Message: SMS message(%i in folder %i) status received!\n", 
-			(message[10] << 8) | message[11],  message[12]);
+		dprintf("Message: SMS message(%i in folder %i) status received: %i\n", 
+			(message[10] << 8) | message[11],  message[12], message[13]);
 
 		if (!data->RawSMS) return GE_INTERNALERROR;
 
@@ -818,7 +818,7 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 
 	if ((data->RawSMS->MemoryType == GMT_IN) || (data->RawSMS->MemoryType == GMT_OU)) {
 		if (data->RawSMS->Number > 1024) {
-			req[7] = data->RawSMS->Number - 0xc8;
+			req[7] = data->RawSMS->Number - 1024;
 		} else {
 			req[4] = 0x01;
 			req[7] = data->RawSMS->Number;
@@ -856,6 +856,7 @@ static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
+	req[7] = data->RawSMS->Number;
 
 	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_FOLDER);
@@ -2949,6 +2950,8 @@ static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int
 
 	switch (message[3]) {
 	case 0x04:
+		if (!data->ToDo) return GE_INTERNALERROR;
+		if (length == 14) return GE_INVALIDLOCATION;
 		dprintf("ToDo received!\n");
 		if ((message[4] > 0) && (message[4] < 4)) {
 			data->ToDo->Priority = message[4];
@@ -2958,6 +2961,7 @@ static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int
 		dprintf("Text: \"%s\"\n", data->ToDo->Text);
 		break;
 	case 0x16:
+		if (!data->ToDo) return GE_INTERNALERROR;
 		dprintf("ToDo locations received!\n");
 		data->ToDoList->Number = (message[6] << 8) | message[7];
 		dprintf("Number of Entries: %i\n", data->ToDoList->Number);
