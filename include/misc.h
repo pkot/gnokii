@@ -13,7 +13,10 @@
   Header file for miscellaneous defines, typedefs etc.
 
   $Log$
-  Revision 1.27  2001-11-26 18:06:08  pkot
+  Revision 1.28  2002-01-21 11:53:57  pkot
+  New dump logging facility for libgnokii (BORBELY Zoltan)
+
+  Revision 1.27  2001/11/26 18:06:08  pkot
   Checking for *printf functions, N_(x) for localization, generic ARRAY_LEN, SAFE_STRNCPY, G_GNUC_PRINTF (Jan Kratochvil)
 
   Revision 1.26  2001/11/14 10:46:12  pkot
@@ -77,6 +80,14 @@
 #  define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
 #endif
 
+#include <stdarg.h>
+extern void (*GSM_ELogHandler)(const char *fmt, va_list ap);
+extern void GSM_WriteErrorLog(const char *fmt, ...);
+
+/* Use it for error reporting */
+
+#define eprintf(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0) 
+
 /* Use gsprintf instead of sprintf and sprintf */
 #ifdef HAVE_SNPRINTF
 #  define gsprintf(a, b, c...) snprintf(a, b, c)
@@ -97,7 +108,6 @@ extern int gasprintf(char **destp, const char *fmt,...);
 #ifdef HAVE_VASPRINTF
 #  define gvasprintf(a...) vasprintf(a)
 #else
-#include <stdarg.h>
 extern int gvasprintf(char **destp, const char *fmt, va_list ap);
 #endif
 

@@ -550,7 +550,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			n = bmp->height * bmp->width / 8;
 			if (bmp->size > n) bmp->size = n;
 			if (bmp->size > sizeof(bmp->bitmap))
-				return GE_INTERNALERROR;
+				return GE_UNHANDLEDFRAME;
 			memcpy(bmp->bitmap, pos, bmp->size);
 		}
 		break;
@@ -1210,7 +1210,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 					bmp->width = *pos++;
 					bmp->size = bmp->height * bmp->width / 8;
 					if (bmp->size > sizeof(bmp->bitmap)) {
-						return GE_INTERNALERROR;
+						return GE_UNHANDLEDFRAME;
 					}
 					memcpy(bmp->bitmap, pos, bmp->size);
 					pos += bmp->size;
@@ -1305,7 +1305,7 @@ static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int le
 			i = bmp->height * bmp->width / 8;
 			if (bmp->size > i) bmp->size = i;
 			if (bmp->size > sizeof(bmp->bitmap)) {
-				return GE_INTERNALERROR;
+				return GE_UNHANDLEDFRAME;
 			}
 			memcpy(bmp->bitmap, pos, bmp->size);
 		}

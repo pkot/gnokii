@@ -117,6 +117,7 @@ static char *Port;       /* Serial port from .gnokiirc file */
 static char *Initlength; /* Init length from .gnokiirc file */
 static char *Connection; /* Connection type from .gnokiirc file */
 static char *BinDir;     /* Binaries directory from .gnokiirc file - not used here yet */
+static FILE *logfile = NULL;
 
 /* Local variables */
 static char *GetProfileCallAlertString(int code)
@@ -2890,6 +2891,90 @@ static int foogle(char *argv[])
 }
 #endif
 
+static void  gnokii_error_logger(const char *fmt, va_list ap) {
+	if (logfile) vfprintf(logfile, fmt, ap);
+}
+
+static int install_log_handler(void)
+{
+#ifdef	WIN32
+	if ((logfile = fopen("gnokii-errors", "a")) == NULL) {
+		perror("fopen");
+		return -1;
+	}
+
+	return 0;
+#else
+	int log_fd;
+	struct stat st1, st2;
+	uid_t euid;
+	gid_t egid;
+	char logname[256];
+
+	if (getenv("HOME") == NULL) {
+		fprintf(stderr, "HOME variable missing\n");
+		return -1;
+	}
+	snprintf(logname, sizeof(logname), "%s/.gnokii-errors", getenv("HOME"));
+
+	memset(&st1, 0, sizeof(struct stat));
+	memset(&st2, 0, sizeof(struct stat));
+	log_fd = -1;
+	euid = geteuid();
+	egid = getegid();
+	if (setegid(getgid()) || seteuid(getuid())) {
+		perror("seteuid/setegid");
+		exit(1);
+	}
+
+	if (lstat(logname, &st1) == 0) {
+		if (!S_ISREG(st1.st_mode)) {
+			fprintf(stderr, "logfile isn't a regular file\n");
+			goto fail;
+		}
+		log_fd = open(logname, O_WRONLY | O_APPEND);
+		if (log_fd < 0) {
+			perror("cannot open logfile");
+			goto fail;
+		}
+		fstat(log_fd, &st2);
+	} else {
+		log_fd = open(logname, O_WRONLY | O_CREAT | O_EXCL, 0600);
+		if (log_fd < 0) {
+			perror("cannot create logfile");
+			goto fail;
+		}
+		fstat(log_fd, &st2);
+		memcpy(&st1, &st2, sizeof(struct stat));
+	}
+	if ((st1.st_dev != st2.st_dev) || (st1.st_ino != st2.st_ino) || (st2.st_nlink != 1) || (st1.st_mode != st2.st_mode)) {
+		fprintf(stderr, "something strange happened with logfile\n");
+		goto fail;
+	}
+	if ((st2.st_uid != getuid()) || (st2.st_gid != getgid())) {
+		fprintf(stderr, "invalid logfile owner/group\n");
+		goto fail;
+	}
+
+	if ((logfile = fdopen(log_fd, "a")) == NULL) {
+		perror("fdopen");
+		goto fail;
+	}
+
+	GSM_ELogHandler = gnokii_error_logger;
+
+	seteuid(euid);
+	setegid(egid);
+	return 0;
+
+fail:
+	close(log_fd);
+	seteuid(euid);
+	setegid(egid);
+	return -1;
+#endif
+}
+
 /* Main function - handles command line arguments, passes them to separate
    functions accordingly. */
 int main(int argc, char *argv[])
@@ -3073,6 +3158,10 @@ int main(int argc, char *argv[])
 
 		{ 0, 0, 0, 0 },
 	};
+
+	if (install_log_handler()) {
+		fprintf(stderr, "WARNING: cannot open logfile, logs will be directed to stderr\n");
+	}
 
 	opterr = 0;
 

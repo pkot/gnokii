@@ -237,22 +237,22 @@ void SM_DumpUnhandledFrame(GSM_Statemachine *state, int messagetype, unsigned ch
 {
 	int i;
 
-	dprintf("UNHANDLED FRAME RECEIVED\n"
-		"request: 0x%02x / 0x%04x", state->LastMsgType, state->LastMsgSize);
+	eprintf(_("UNHANDLED FRAME RECEIVED\n"
+		  "request: 0x%02x / 0x%04x"), state->LastMsgType, state->LastMsgSize);
 	for (i = 0; i < state->LastMsgSize; i++) {
 		if (i % 16 == 0)
-			dprintf("\n    ");
-		dprintf("%02x ", ((unsigned char *)state->LastMsg)[i]);
+			eprintf("\n    ");
+		eprintf("%02x ", ((unsigned char *)state->LastMsg)[i]);
 	}
-	dprintf("\n");
+	eprintf("\n");
 
-	dprintf("reply: 0x%02x / 0x%04x", messagetype, messagesize);
+	eprintf(_("reply: 0x%02x / 0x%04x"), messagetype, messagesize);
 	for (i = 0; i < messagesize; i++) {
 		if (i % 16 == 0)
-			dprintf("\n    ");
-		dprintf("%02x ", message[i]);
+			eprintf("\n    ");
+		eprintf("%02x ", message[i]);
 	}
-	dprintf("\n");
+	eprintf("\n");
 
-	dprintf("Please read the Docs/* and send a bug report!\n");
+	eprintf(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
 }
