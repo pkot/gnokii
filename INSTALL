@@ -29,17 +29,23 @@ Requirements
 
 Additional libraries and header files needed for the various gnokii parts:
 
-xgnokii: libX11, libXpm, glib-1.2, gtk+-1.2
-bitmap support: libXpm for xpm files support, gnokii can deal without this
-irda support: linux kernel includes
-bluetooth support: bluez
+xgnokii:		libX11, libXpm, glib-1.2, gtk+-1.2
+bitmap support:		libXpm for xpm files support, gnokii can deal without
+			this
+irda support:		Linux kernel includes
+bluetooth support:	bluez (Linux Bluetooth stack)
+libical support:	libical-0.24, you may want to use gnokii internal iCal
+			implementation but it is limited, no longer developed
+			and deprecated. This is only for converting calendar
+			and todo entries into iCal files and reading such
+			files.
 
 Sources:
-http://www.xfree86.org/		libX11, libXpm
-http://www.gtk.org/		glib, gtk
-http://www.kernel.org/		linux kernel includes
-http://bluez.sf.net/		bluez (Linux Bluetooth)
-
+http://www.xfree86.org/				libX11, libXpm
+http://www.gtk.org/				glib, gtk
+http://www.kernel.org/				Linux kernel includes
+http://bluez.sf.net/				bluez (Linux Bluetooth stack)
+http://softwarestudio.org/libical/index.html	libical
 
 Verbose instructions
 ====================
