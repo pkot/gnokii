@@ -13,7 +13,10 @@
   Include file for SMS library.
 
   $Log$
-  Revision 1.1  2001-11-08 16:23:20  pkot
+  Revision 1.2  2001-11-13 16:12:21  pkot
+  Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
+
+  Revision 1.1  2001/11/08 16:23:20  pkot
   New version of libsms. Not functional yet, but it reasonably stable API.
 
   Revision 1.1  2001/07/09 23:06:26  pkot
@@ -259,8 +262,32 @@ typedef enum {
 	SMS_Unsent = 0x07
 } SMS_MessageStatus;
 
+/* In contrast to GSM_MemoryType, SMS_MemoryType is phone dependant */
 typedef enum {
-	SMS_XXX = 0x01
+	GMT_IN = 0x08, /* Inbox in 6210/7110 */
+	GMT_OU = 0x10, /* Outbox in 6210/7110 */
+	GMT_AR = 0x18, /* Archive in 6210/6110 */
+	GMT_TE = 0x20, /* Templates in 6210/7110 */
+	GMT_F1 = 0x29, /* 1st CUSTOM FOLDER in 6210/7110*/
+	GMT_F2 = 0x31,
+	GMT_F3 = 0x39,
+	GMT_F4 = 0x41,
+	GMT_F5 = 0x49,
+	GMT_F6 = 0x51,
+	GMT_F7 = 0x59,
+	GMT_F8 = 0x61,
+	GMT_F9 = 0x69,
+	GMT_F10 = 0x71,
+	GMT_F11 = 0x79,
+	GMT_F12 = 0x81,
+	GMT_F13 = 0x89,
+	GMT_F14 = 0x91,
+	GMT_F15 = 0x99,
+	GMT_F16 = 0xA1,
+	GMT_F17 = 0xA9,
+	GMT_F18 = 0xB1,
+	GMT_F19 = 0xB9,
+	GMT_F20 = 0xC1 /* 20th CUSTOM FOLDER in 6210/7110 */
 } SMS_MemoryType;
         
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
@@ -298,11 +325,6 @@ typedef struct {
 //	unsigned char Parameter[???];                  /* Parameter Indicator (9.2.3.27); FIXME: how to use it??? */
 } GSM_SMSMessage;
 
-extern GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *frame);
-extern GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength);
-extern GSM_Error EncodeTextSMS();
-extern GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS);
-
 /*** FOLDERS ***/
 
 /* Maximal number of SMS folders */
@@ -319,7 +341,7 @@ typedef struct {
 
 typedef struct {
 	SMS_Folder Folder[MAX_SMS_FOLDERS];
-	u8 FoldersID[MAX_SMS_FOLDERS]; /* ID specific for this folder and phone. */
+	u8 FolderID[MAX_SMS_FOLDERS]; /* ID specific for this folder and phone. */
 	                               /* Used in internal functions. Do not use it. */
 	u8 number;                     /* number of SMS folders */
 } SMS_FolderList;
@@ -334,5 +356,12 @@ typedef struct {
 	char Message[GSM_MAX_CB_MESSAGE + 1];
 	int New;
 } GSM_CBMessage;
+
+extern GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *frame);
+extern GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength);
+
+/* Do not use these yet */
+extern GSM_Error EncodeTextSMS();
+extern GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS);
 
 #endif /* __gnokii_sms_h_ */

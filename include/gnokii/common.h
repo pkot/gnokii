@@ -14,7 +14,10 @@
   handset.
 
   $Log$
-  Revision 1.81  2001-11-08 16:34:20  pkot
+  Revision 1.82  2001-11-13 16:12:21  pkot
+  Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
+
+  Revision 1.81  2001/11/08 16:34:20  pkot
   Updates to work with new libsms
 
   Revision 1.80  2001/08/20 23:36:27  pkot
@@ -416,7 +419,6 @@ typedef struct {
 #define DCS_CLASS3      0xf3
 
 /* Limits for IMEI, Revision and Model string storage. */
-
 #define GSM_MAX_IMEI_LENGTH     (20)
 #define GSM_MAX_REVISION_LENGTH (6)
 #define GSM_MAX_MODEL_LENGTH    (6)
@@ -426,6 +428,8 @@ typedef struct {
 /* This is a generic holder for high level information - eg a GSM_Bitmap */
 
 typedef struct {
+	SMS_Folder *SMSFolder;
+	SMS_FolderList *SMSFolderList;
 	GSM_SMSMessage *SMSMessage;
 	GSM_PhonebookEntry *PhonebookEntry;
 	GSM_SpeedDial *SpeedDial;

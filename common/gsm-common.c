@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.7  2001-11-08 16:34:19  pkot
+  Revision 1.8  2001-11-13 16:12:20  pkot
+  Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
+
+  Revision 1.7  2001/11/08 16:34:19  pkot
   Updates to work with new libsms
 
   Revision 1.6  2001/09/14 12:15:28  pkot
@@ -37,8 +40,8 @@
 
 */
 
-#include <gsm-common.h>
 #include <string.h>
+#include "gsm-common.h"
 
 GSM_Error Unimplemented(void)
 {
@@ -58,6 +61,30 @@ GSM_MemoryType StrToMemoryType(const char *s)
 	X(MC);
 	X(LD);
 	X(MT);
+	X(IN);
+	X(OU);
+	X(AR);
+	X(TE);
+	X(F1);
+	X(F2);
+	X(F3);
+	X(F4);
+	X(F5);
+	X(F6);
+	X(F7);
+	X(F8);
+	X(F9);
+	X(F10);
+	X(F11);
+	X(F12);
+	X(F13);
+	X(F14);
+	X(F15);
+	X(F16);
+	X(F17);
+	X(F18);
+	X(F19);
+	X(F20);
 	return GMT_XX;
 #undef X
 }

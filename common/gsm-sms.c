@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.2  2001-11-09 14:25:04  pkot
+  Revision 1.3  2001-11-13 16:12:20  pkot
+  Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
+
+  Revision 1.2  2001/11/09 14:25:04  pkot
   DEBUG cleanups
 
   Revision 1.1  2001/11/08 16:23:21  pkot
@@ -348,10 +351,10 @@ GSM_Error EncodeTextSMS()
  *** DECODING SMS
  ***/
 
-static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *sms)
+static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 {
 	if (status < 0x03) {
-		strcpy(sms->MessageText, _("Delivered"));
+		strcpy(SMS->MessageText, _("Delivered"));
 		switch (status) {
 		case 0x00:
 			dprintf(_("SM received by the SME"));
@@ -363,10 +366,10 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *sms)
 			dprintf(_("SM replaced by the SC"));
 			break;
 		}
-		sms->Length = 10;
+		SMS->Length = 10;
 	} else if (status & 0x40) {
 
-		strcpy(sms->MessageText, _("Failed"));
+		strcpy(SMS->MessageText, _("Failed"));
 
 		/* more detailed reason only for debug */
 
@@ -434,9 +437,9 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *sms)
 				break;
 			}
 		}
-		sms->Length = 6;
+		SMS->Length = 6;
 	} else if (status & 0x20) {
-		strcpy(sms->MessageText, _("Pending"));
+		strcpy(SMS->MessageText, _("Pending"));
 
 		/* more detailed reason only for debug */
 		dprintf(_("Temporary error, SC still trying to transfer SM\n"));
@@ -463,13 +466,13 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *sms)
 			dprintf(_("Reserved/Specific to SC: %x"), status);
 			break;
 		}
-		sms->Length = 7;
+		SMS->Length = 7;
 	} else {
-		strcpy(sms->MessageText, _("Unknown"));
+		strcpy(SMS->MessageText, _("Unknown"));
 
 		/* more detailed reason only for debug */
 		dprintf(_("Reserved/Specific to SC: %x"), status);
-		sms->Length = 8;
+		SMS->Length = 8;
 	}
 	return GE_NONE;
 }
@@ -478,15 +481,18 @@ static GSM_Error DecodeData(char *message, char *output, int length, SMS_DataCod
 {
 	/* Unicode */
 	if ((dcs.Type & 0x08) == 0x08) {
+		dprintf("Unicode message\n");
 		length = (length - udhlen)/2;
 		DecodeUnicode(output, message, length);
-	/* 8bit SMS */
 	} else {
+		/* 8bit SMS */
 		if ((dcs.Type & 0xf4) == 0xf4) {
+			dprintf("8bit message\n");
 			memcpy(output, message, length);
-			/* 7bit SMS */
+		/* 7bit SMS */
 		} else {
-			length = length - (udhlen * 8 + ((7-udhlen)%7)) / 7;
+			dprintf("Default Alphabet\n");
+			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
 			Unpack7BitCharacters((7-udhlen)%7, size, length, message, output);
 		}
 		DecodeAscii(output, output, length);
@@ -499,7 +505,7 @@ static GSM_Error DecodeData(char *message, char *output, int length, SMS_DataCod
    - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
    - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
 */
-static GSM_Error DecodeUDH(char *SMSMessage, SMS_UDHInfo **UDHi, GSM_SMSMessage *sms)
+static GSM_Error DecodeUDH(char *SMSMessage, SMS_UDHInfo **UDHi, GSM_SMSMessage *SMS)
 {
 	unsigned char length, pos, nr;
 
@@ -551,7 +557,7 @@ static GSM_Error DecodeUDH(char *SMSMessage, SMS_UDHInfo **UDHi, GSM_SMSMessage 
 		pos += (udh_length + 2);
 		nr++;
 	}
-	sms->UDH_No = nr;
+	SMS->UDH_No = nr;
 
 	return GE_NONE;
 }
@@ -566,17 +572,17 @@ static GSM_Error DecodeSMSDeliver()
 	return GE_NONE;
 }
 
-static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *sms)
+static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 {
 	/* Short Message Type */
-        switch (sms->Type = message[7]) {
+        switch (SMS->Type = message[7]) {
 	case SMS_Deliver:
 		dprintf("Mobile Terminated message:\n");
 		break;
 	case SMS_Delivery_Report:
 		dprintf("Delivery Report:\n");
-		UnpackDateTime(message + 39 + DataOffset[sms->Type], &(sms->Time));
-		dprintf("\tDelivery date: %s\n", PrintDateTime(message + 39 + DataOffset[sms->Type]));
+		UnpackDateTime(message + 39 + DataOffset[SMS->Type], &(SMS->Time));
+		dprintf("\tDelivery date: %s\n", PrintDateTime(message + 39 + DataOffset[SMS->Type]));
 		break;
 	case SMS_Submit:
 		dprintf("Mobile Originated message:\n");
@@ -586,9 +592,9 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *sms)
 		break;
 	}
 	/* Short Message status */
-	sms->Status = message[4];
+	SMS->Status = message[4];
 	dprintf("\tStatus: ");
-	switch (sms->Status) {
+	switch (SMS->Status) {
 	case SMS_Read:
 		dprintf("READ\n");
 		break;
@@ -607,36 +613,36 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *sms)
 	}
 
 	/* Short Message location in memory */
-	sms->Number = message[6];
-	dprintf("\tLocation: %d\n", sms->Number);
+	SMS->Number = message[6];
+	dprintf("\tLocation: %d\n", SMS->Number);
 
 	/* Short Message Center */
-        strcpy(sms->MessageCenter.Number, GetBCDNumber(message));
-        dprintf("\tSMS center number: %s\n", sms->MessageCenter.Number);
-        sms->ReplyViaSameSMSC = false;
-        if (sms->RemoteNumber.number[0] == 0 && (message[12] & 0x80)) {
-		sms->ReplyViaSameSMSC = true;
+        strcpy(SMS->MessageCenter.Number, GetBCDNumber(message));
+        dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
+        SMS->ReplyViaSameSMSC = false;
+        if (SMS->RemoteNumber.number[0] == 0 && (message[12] & 0x80)) {
+		SMS->ReplyViaSameSMSC = true;
 	}
 
         /* Remote number */
-        message[20+DataOffset[sms->Type]] = ((message[20+DataOffset[sms->Type]])+1)/2+1;
-        dprintf("\tRemote number (recipient or sender): %s\n", GetBCDNumber(message + 20 + DataOffset[sms->Type]));
-        strcpy(sms->RemoteNumber.number, GetBCDNumber(message + 20 + DataOffset[sms->Type]));
+        message[20+DataOffset[SMS->Type]] = ((message[20+DataOffset[SMS->Type]])+1)/2+1;
+        dprintf("\tRemote number (recipient or sender): %s\n", GetBCDNumber(message + 20 + DataOffset[SMS->Type]));
+        strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + 20 + DataOffset[SMS->Type]));
 
-	UnpackDateTime(message + 24 + DataOffset[sms->Type], &(sms->Time));
-        dprintf("\tDate: %s\n", PrintDateTime(message + 24 + DataOffset[sms->Type]));
+	UnpackDateTime(message + 24 + DataOffset[SMS->Type], &(SMS->Time));
+        dprintf("\tDate: %s\n", PrintDateTime(message + 24 + DataOffset[SMS->Type]));
 
 	/* Data Coding Scheme */
-	if (sms->Type != SMS_Delivery_Report)
-		sms->DCS.Type = message[18 + DataOffset[sms->Type]];
+	if (SMS->Type != SMS_Delivery_Report)
+		SMS->DCS.Type = message[18 + DataOffset[SMS->Type]];
 	else
-		sms->DCS.Type = 0;
+		SMS->DCS.Type = 0;
 
 	/* User Data Header */
         if (message[20] & 0x40) /* UDH header available */
-                DecodeUDH(message + 31 + DataOffset[sms->Type], (SMS_UDHInfo **)sms->UDH, sms);
+                DecodeUDH(message + 31 + DataOffset[SMS->Type], (SMS_UDHInfo **)SMS->UDH, SMS);
 	else                    /* No UDH */
-		sms->UDH_No = 0;
+		SMS->UDH_No = 0;
 
 	return GE_NONE;
 }
@@ -670,24 +676,24 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 }
 
 /* This function does simple SMS decoding - no PDU coding */
-GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *sms)
+GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS)
 {
 #if 0
         int w, tmp, i;
         unsigned char output[161];
         
-        sms->EightBit = false;
+        SMS->EightBit = false;
         w = (7 - off) % 7;
         if (w < 0) w = (14 - off) % 14;
-        sms->Length = message[9 + 11 + offset] - (off * 8 + w) / 7;
+        SMS->Length = message[9 + 11 + offset] - (off * 8 + w) / 7;
         offset += off;
         w = (7 - off) % 7;
         if (w < 0) w = (14 - off) % 14;
-        tmp = Unpack7BitCharacters(w, length-31-9-offset, sms->Length, message+9+31+offset, output);
-        dprintf("   7 bit SMS, body is (length %i): ",sms->Length);
+        tmp = Unpack7BitCharacters(w, length-31-9-offset, SMS->Length, message+9+31+offset, output);
+        dprintf("   7 bit SMS, body is (length %i): ",SMS->Length);
         for (i = 0; i < tmp; i++) {
                 dprintf("%c", DecodeWithDefaultAlphabet(output[i]));
-                sms->MessageText[i] = DecodeWithDefaultAlphabet(output[i]);
+                SMS->MessageText[i] = DecodeWithDefaultAlphabet(output[i]);
         }
         dprintf("\n");
 #endif
