@@ -43,7 +43,7 @@ static bool speedDialInitialized;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/speeddial/index.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/windows/speeddial/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }
@@ -517,10 +517,10 @@ static GtkItemFactoryEntry menu_items[] = {
   { NULL,		NULL,		NULL, 0, "<Branch>"},
   { NULL,		"<control>R",	ReadSpeedDial, 0, NULL},
   { NULL,		"<control>S",	SaveSpeedDial, 0, NULL},
-  { "/File/sep1",	NULL,		NULL, 0, "<Separator>"},
+  { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL, "<control>I", ImportSpeedDial, 0, NULL},
   { NULL, "<control>E", ExportSpeedDial, 0, NULL},
-  { "/File/sep2",	NULL,		NULL, 0, "<Separator>"},
+  { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>W",	CloseSpeedDial, 0, NULL},
   { NULL,		NULL,		NULL, 0, "<Branch>"},
   { NULL,		NULL,		EditKey, 0, NULL},
@@ -535,8 +535,10 @@ static void InitMainMenu (void)
   menu_items[0].path = g_strdup (_("/_File"));
   menu_items[1].path = g_strdup (_("/File/_Read from phone"));
   menu_items[2].path = g_strdup (_("/File/_Save to phone"));
+  menu_items[3].path = g_strdup (_("/File/Sep1"));
   menu_items[4].path = g_strdup (_("/File/_Import from file"));
   menu_items[5].path = g_strdup (_("/File/_Export to file"));
+  menu_items[6].path = g_strdup (_("/File/Sep2"));
   menu_items[7].path = g_strdup (_("/File/_Close"));
   menu_items[8].path = g_strdup (_("/_Edit"));
   menu_items[9].path = g_strdup (_("/Edit/_Edit"));

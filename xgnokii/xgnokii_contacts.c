@@ -91,7 +91,7 @@ inline bool GUI_ContactsIsIntialized (void)
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/contacts/index.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/windows/contacts/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }
@@ -1605,7 +1605,7 @@ static GtkWidget *CreateSaveQuestionDialog (GtkSignalFunc SaveFunc,
   gtk_widget_show (pixmap);
 
   label = gtk_label_new (_("You have made changes in your\ncontacts directory.\n\
-\n\nWant you save these changes into phone?\n"));
+\n\nDo you want save these changes into phone?\n"));
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
@@ -2810,22 +2810,22 @@ static GtkItemFactoryEntry menu_items[] = {
   { NULL,		NULL,		NULL, 0, "<Branch>"},
   { NULL,		"<control>R",	ReadContacts, 0, NULL},
   { NULL,		"<control>S",	SaveContacts, 0, NULL},
-  { "/File/sep1",	NULL,		NULL, 0, "<Separator>"},
+  { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>I",	ImportContacts, 0, NULL},
   { NULL,		"<control>E",	ExportContacts, 0, NULL},
-  { "/File/sep2",	NULL,		NULL, 0, "<Separator>"},
+  { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>W",	CloseContacts, 0, NULL},
   { NULL,		NULL,		NULL, 0, "<Branch>"},
   { NULL,		"<control>N",	NewEntry, 0, NULL},
   { NULL,		"<control>U",	DuplicateEntry, 0, NULL},
   { NULL,		NULL,		EditEntry, 0, NULL},
   { NULL,		"<control>D",	DeleteEntry, 0, NULL},
-  { "/Edit/sep3",	NULL,		NULL, 0, "<Separator>"},
+  { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>C",	ChMemType, 0, NULL},
-  { "/Edit/sep4",	NULL,		NULL, 0, "<Separator>"},
+  { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>F",	FindFirstEntry, 0, NULL},
   { NULL,		"<control>L",	SearchEntry, 0, NULL},
-  { "/Edit/sep5",	NULL,		NULL, 0, "<Separator>"},
+  { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>A",	SelectAll, 0, NULL},
   { NULL,		NULL,		NULL, 0, "<Branch>"},
   { NULL,		"<control>V",	DialVoice, 0, NULL},
@@ -2840,17 +2840,22 @@ static void InitMainMenu (void)
   menu_items[0].path = g_strdup (_("/_File"));
   menu_items[1].path = g_strdup (_("/File/_Read from phone"));
   menu_items[2].path = g_strdup (_("/File/_Save to phone"));
+  menu_items[3].path = g_strdup (_("/File/Sep1"));
   menu_items[4].path = g_strdup (_("/File/_Import from file"));
   menu_items[5].path = g_strdup (_("/File/_Export to file"));
+  menu_items[6].path = g_strdup (_("/File/Sep2"));
   menu_items[7].path = g_strdup (_("/File/_Close"));
   menu_items[8].path = g_strdup (_("/_Edit"));
   menu_items[9].path = g_strdup (_("/Edit/_New"));
   menu_items[10].path = g_strdup (_("/Edit/D_uplicate"));
   menu_items[11].path = g_strdup (_("/Edit/_Edit"));
   menu_items[12].path = g_strdup (_("/Edit/_Delete"));
+  menu_items[13].path = g_strdup (_("/Edit/Sep3"));
   menu_items[14].path = g_strdup (_("/Edit/_Change memory type"));
+  menu_items[15].path = g_strdup (_("/Edit/Sep4"));
   menu_items[16].path = g_strdup (_("/Edit/_Find"));
   menu_items[17].path = g_strdup (_("/Edit/Find ne_xt"));
+  menu_items[18].path = g_strdup (_("/Edit/Sep5"));
   menu_items[19].path = g_strdup (_("/Edit/Select _all"));
   menu_items[20].path = g_strdup (_("/_Dial"));
   menu_items[21].path = g_strdup (_("/Dial/Dial _voice"));

@@ -84,7 +84,7 @@ static QuestMark questMark;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/sms/index.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/windows/sms/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }
@@ -993,10 +993,10 @@ static GtkItemFactoryEntry send_menu_items[] = {
   { NULL,		NULL,		NULL,		0, "<Branch>"},
   { NULL,		"<control>X",	SendSMS,	0, NULL},
   { NULL,		"<control>S",	NULL,		0, NULL},
-  { "/File/sep1",	NULL,		NULL,		0, "<Separator>"},
+  { NULL,		NULL,		NULL,		0, "<Separator>"},
   { NULL,		"<control>N",	CheckAddress,	0, NULL},
   { NULL,		"<control>C",	ShowSelectContactsDialog, 0, NULL},
-  { "/File/sep2",	NULL,		NULL,		0, "<Separator>"},
+  { NULL,		NULL,		NULL,		0, "<Separator>"},
   { NULL,		"<control>W",	CloseSMSSend,	0, NULL},
   { NULL,		NULL,		NULL,		0, "<LastBranch>"},
   { NULL,		NULL,		Help2,		0, NULL},
@@ -1009,8 +1009,10 @@ static void InitSendMenu (void)
   send_menu_items[0].path = g_strdup (_("/_File"));
   send_menu_items[1].path = g_strdup (_("/File/Sen_d"));
   send_menu_items[2].path = g_strdup (_("/File/_Save"));
+  send_menu_items[3].path = g_strdup (_("/File/Sep1"));
   send_menu_items[4].path = g_strdup (_("/File/Check _Names"));
   send_menu_items[5].path = g_strdup (_("/File/C_ontacts"));
+  send_menu_items[6].path = g_strdup (_("/File/Sep2"));
   send_menu_items[7].path = g_strdup (_("/File/_Close"));
   send_menu_items[8].path = g_strdup (_("/_Help"));
   send_menu_items[9].path = g_strdup (_("/Help/_Help"));
@@ -1370,14 +1372,14 @@ static void NewBC (void)
 static GtkItemFactoryEntry menu_items[] = {
   { NULL,		NULL,		NULL,		0, "<Branch>"},
   { NULL,		"<control>S",	NULL,		0, NULL},
-  { "/File/sep1",	NULL,		NULL,		0, "<Separator>"},
+  { NULL,		NULL,		NULL,		0, "<Separator>"},
   { NULL,		"<control>W",	CloseSMS,	0, NULL},
   { NULL,		NULL,		NULL,		0, "<Branch>"},
   { NULL,		"<control>N",	NewSMS,		0, NULL},
   { NULL,		"<control>F",	ForwardSMS,	0, NULL},
   { NULL,		"<control>R",	ReplySMS,	0, NULL},
   { NULL,		"<control>D",	DeleteSMS,	0, NULL},
-  { "/Messages/sep3",	NULL,		NULL,		0, "<Separator>"},
+  { NULL,		NULL,		NULL,		0, "<Separator>"},
   { NULL,		"<control>B",	NewBC,		0, NULL},
   { NULL,		NULL,		NULL,		0, "<LastBranch>"},
   { NULL,		NULL,		Help1,		0, NULL},
@@ -1389,13 +1391,14 @@ static void InitMainMenu (void)
 {
   menu_items[0].path = g_strdup (_("/_File"));
   menu_items[1].path = g_strdup (_("/File/_Save"));
- // menu_items[3].path = g_strdup (_("/File/_Refresh"));
+  menu_items[2].path = g_strdup (_("/File/Sep1"));
   menu_items[3].path = g_strdup (_("/File/_Close"));
   menu_items[4].path = g_strdup (_("/_Messages"));
   menu_items[5].path = g_strdup (_("/_Messages/_New"));
   menu_items[6].path = g_strdup (_("/_Messages/_Forward"));
   menu_items[7].path = g_strdup (_("/_Messages/_Reply"));
   menu_items[8].path = g_strdup (_("/_Messages/_Delete"));
+  menu_items[9].path = g_strdup (_("/Messages/Sep3"));
   menu_items[10].path = g_strdup (_("/_Messages/_Bussiness card"));
   menu_items[11].path = g_strdup (_("/_Help"));
   menu_items[12].path = g_strdup (_("/Help/_Help"));

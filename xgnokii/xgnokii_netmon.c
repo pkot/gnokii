@@ -36,7 +36,7 @@ static GtkWidget *tableProgress[7];
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/netmon/index.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/windows/netmon/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }
@@ -501,19 +501,19 @@ void GUI_CreateNetmonWindow ()
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "83", _("Control of task information displays"),
                            NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 83);
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "84", _("Information of task numbers 0-7"),
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "84", _("Information about task numbers 0-7"),
                            NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 84);
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "85", _("Information of task numbers 8-15"),
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "85", _("Information about task numbers 8-15"),
                            NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 85);
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "86", _("Information of task numbers 16-23"),
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "86", _("Information about task numbers 16-23"),
                            NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 86);
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "87", _("Information of OS_SYSTEM_STACK"),
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "87", _("Information about OS_SYSTEM_STACK"),
                            NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 87);
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "88", _("Information of the current MCU and DSP software versions"),
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "88", _("Information about current MCU and DSP software versions"),
                            NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 88);
 
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), "89", _("Hardware version"),

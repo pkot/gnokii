@@ -1339,7 +1339,7 @@ static void ShowEditSMSSetDialog (GtkWidget *w, gpointer data)
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), hbox);
     gtk_widget_show (hbox);
 
-    label = gtk_label_new (_("Set name:"));
+    label = gtk_label_new (_("Set's name:"));
     gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
     gtk_widget_show (label);
 
@@ -1554,7 +1554,7 @@ static GtkWidget *CreateOptionsDialog (void)
   GtkWidget *button, *hbox, *vbox, *label, *notebook, *frame, *clistScrolledWindow;
   register gint i;
   GtkAdjustment *adj;
-  gchar *titles[4] = { _("Set name"), _("Center number"), _("Format"), _("Validity")};
+  gchar *titles[4] = { _("Set's name"), _("Center number"), _("Format"), _("Validity")};
 
   dialog = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (dialog), _("Options"));

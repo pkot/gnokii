@@ -33,7 +33,7 @@ static gchar *saveFileName;
 
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
-  gchar *indx = g_strdup_printf ("/help/%s/dtmf/index.html", xgnokiiConfig.locale);
+  gchar *indx = g_strdup_printf ("/help/%s/windows/dtmf/index.html", xgnokiiConfig.locale);
   Help (w, indx);
   g_free (indx);
 }
@@ -204,7 +204,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { NULL,		NULL,		NULL, 0, "<Branch>"},
   { NULL,		"<control>O",	LoadFileDialog, 0, NULL},
   { NULL,		"<control>S",	SaveFileDialog, 0, NULL},
-  {"/File/sep1",	NULL,		NULL, 0, "<Separator>"},
+  { NULL,		NULL,		NULL, 0, "<Separator>"},
   { NULL,		"<control>W",	CloseDTMF, 0, NULL},
   { NULL,		NULL,		NULL, 0, "<LastBranch>"},
   { NULL,		NULL,		Help1, 0, NULL},
@@ -217,6 +217,7 @@ static void InitMainMenu (void)
   menu_items[0].path = g_strdup (_("/_File"));
   menu_items[1].path = g_strdup (_("/File/_Open"));
   menu_items[2].path = g_strdup (_("/File/_Save"));
+  menu_items[3].path = g_strdup (_("/File/Sep1"));
   menu_items[4].path = g_strdup (_("/File/_Close"));
   menu_items[5].path = g_strdup (_("/_Help"));
   menu_items[6].path = g_strdup (_("/Help/_Help"));

@@ -2366,7 +2366,7 @@ msgstr "Krátka správa prijatá"
 
 #: xgnokii/xgnokii.c:333
 msgid "Working ..."
-msgstr "Pracuje ..."
+msgstr "Pracujem ..."
 
 #: xgnokii/xgnokii.c:350
 msgid "Call in progress"
@@ -2397,7 +2397,7 @@ msgstr ""
 #: xgnokii/xgnokii.c:516 xgnokii/xgnokii_sms.c:571
 #, c-format
 msgid "Set %d"
-msgstr "Nastavi» %d"
+msgstr "Súbor %d"
 
 #: xgnokii/xgnokii.c:538 xgnokii/xgnokii.c:1397
 msgid "E-Mail"
@@ -2499,7 +2499,7 @@ msgstr ""
 "gnokii verzia: %s\n"
 "\n"
 "Copyright (C) 1999 Pavel Janík ml.,\n"
-"Hugh Blemings & Jan Derfinak\n"
+"Hugh Blemings & Ján Derfiòák\n"
 
 #: xgnokii/xgnokii.c:1315
 msgid "Edit SMS Setting"
@@ -2515,8 +2515,8 @@ msgid "Cancel"
 msgstr "Zru¹i»"
 
 #: xgnokii/xgnokii.c:1342
-msgid "Set name:"
-msgstr "Nastavi» meno:"
+msgid "Set's name:"
+msgstr "Meno súboru:"
 
 #: xgnokii/xgnokii.c:1355
 msgid "Center:"
@@ -2535,8 +2535,8 @@ msgid "Max. Time"
 msgstr "Max. èas"
 
 #: xgnokii/xgnokii.c:1557
-msgid "Set name"
-msgstr "Nastavi» meno"
+msgid "Set's name"
+msgstr "Meno súboru"
 
 #: xgnokii/xgnokii.c:1557
 msgid "Center number"
@@ -2617,7 +2617,7 @@ msgstr "IMEI:"
 
 #: xgnokii/xgnokii.c:1756
 msgid "Alarm setting"
-msgstr "Nastavenie budíku"
+msgstr "Nastavenie budíka"
 
 #: xgnokii/xgnokii.c:1763 xgnokii/xgnokii.c:1770
 msgid "Alarm"
@@ -2710,7 +2710,7 @@ msgid "ERROR: Can't open file %s for writing!\n"
 msgstr "CHYBA: Nie je mo¾né otvori» súbor %s pre zápis!\n"
 
 #: xgnokii/xgnokii_cfg.c:186
-msgid "ERROR: Can't write file config file!\n"
+msgid "ERROR: Can't write config file!\n"
 msgstr "CHYBA: Nie je mo¾né zapísa» konfiguraèný súbor!\n"
 
 #: xgnokii/xgnokii_common.c:233
@@ -2795,7 +2795,7 @@ msgstr "Nová polo¾ka"
 
 #: xgnokii/xgnokii_contacts.c:1012 xgnokii/xgnokii_contacts.c:2937
 msgid "Duplicate entry"
-msgstr "Duplicitná polo¾ka"
+msgstr "Duplikova» polo¾ku"
 
 #: xgnokii/xgnokii_contacts.c:1078 xgnokii/xgnokii_contacts.c:1088
 #: xgnokii/xgnokii_contacts.c:1113
@@ -2850,7 +2850,7 @@ msgstr "Pamä» SIM..."
 
 #: xgnokii/xgnokii_contacts.c:1468
 msgid "Saving entries"
-msgstr "Ulo¾enie polo¾iek"
+msgstr "Ukladám polo¾ky"
 
 #: xgnokii/xgnokii_contacts.c:1502
 #, c-format
@@ -2876,7 +2876,7 @@ msgid ""
 "contacts directory.\n"
 "\n"
 "\n"
-"Want you save these changes into phone?\n"
+"Do you want save these changes into phone?\n"
 msgstr ""
 "Vo va¹om adresári kontaktov\n"
 "ste urobili zmeny.\n"
@@ -2902,7 +2902,7 @@ msgstr ""
 
 #: xgnokii/xgnokii_contacts.c:1821
 msgid "Getting entries"
-msgstr "Naèítanie polo¾iek"
+msgstr "Naèítavam polo¾ky"
 
 #: xgnokii/xgnokii_contacts.c:2093 xgnokii/xgnokii_dtmf.c:128
 #: xgnokii/xgnokii_speed.c:434
@@ -3095,6 +3095,57 @@ msgstr "/Súbor/Otvori»"
 msgid "/File/_Save"
 msgstr "/Súbor/Ulo¾i»"
 
+#: xgnokii/xgnokii_calendar.c:243 xgnokii/xgnokii_contacts.c:2843
+#: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_sms.c:1012
+#: xgnokii/xgnokii_sms.c:1394 xgnokii/xgnokii_speed.c:538
+msgid "/File/Sep1"
+msgstr "/Súbor/Sep1"
+
+#: xgnokii/xgnokii_calendar.c:245 xgnokii/xgnokii_contacts.c:2846
+#: xgnokii/xgnokii_sms.c:1015 xgnokii/xgnokii_speed.c:541
+msgid "/File/Sep2"
+msgstr "/Súbor/Sep2"
+
+#: xgnokii/xgnokii_calendar.c:248
+msgid "/File/Sep3"
+msgstr "/Súbor/Sep3"
+
+#: xgnokii/xgnokii_contacts.c:2853
+msgid "/Edit/Sep3"
+msgstr "/Úpravy/Sep3"
+
+#: xgnokii/xgnokii_calendar.c:257 xgnokii/xgnokii_contacts.c:2855
+msgid "/Edit/Sep4"
+msgstr "/Úpravy/Sep4"
+
+#: xgnokii/xgnokii_contacts.c:2858
+msgid "/Edit/Sep5"
+msgstr "/Úpravy/Sep5"
+
+#: xgnokii/xgnokii_sms.c:1401
+msgid "/Messages/Sep3"
+msgstr "/Správy/Sep3"
+
+#: xgnokii/xgnokii_calendar.c:244
+msgid "/File/Send via S_MS"
+msgstr "/Súbor/Po¹li ako SMS"
+
+#: xgnokii/xgnokii_calendar.c:251
+msgid "/Edit/Add _reminder"
+msgstr "/Úpravy/Pridaj pripomienku"
+
+#: xgnokii/xgnokii_calendar.c:252
+msgid "/Edit/Add _call"
+msgstr "/Úpravy/Pridaj volanie"
+
+#: xgnokii/xgnokii_calendar.c:253
+msgid "/Edit/Add _meeting"
+msgstr "/Úpravy/Pridaj schôdzku"
+
+#: xgnokii/xgnokii_calendar.c:254
+msgid "/Edit/Add _birthday"
+msgstr "/Úpravy/Pridaj narodeniny"
+
 #: xgnokii/xgnokii_dtmf.c:244
 msgid "Dial Tone"
 msgstr "Tónová voµba"
@@ -3201,7 +3252,7 @@ msgstr "Èítaè handoverov (duálny)"
 
 #: xgnokii/xgnokii_netmon.c:464
 msgid "L2-Timeouts"
-msgstr "Lµ-Timeouty"
+msgstr "L2-Timeouty"
 
 #: xgnokii/xgnokii_netmon.c:467
 msgid "SIM"
@@ -3240,23 +3291,23 @@ msgid "Control of task information displays"
 msgstr "Riadenie zobrazenia informácií o úlohe"
 
 #: xgnokii/xgnokii_netmon.c:504
-msgid "Information of task numbers 0-7"
+msgid "Information about task numbers 0-7"
 msgstr "Informácie o úlohách 0-7"
 
 #: xgnokii/xgnokii_netmon.c:507
-msgid "Information of task numbers 8-15"
+msgid "Information about task numbers 8-15"
 msgstr "Informácie o úlohách 8-15"
 
 #: xgnokii/xgnokii_netmon.c:510
-msgid "Information of task numbers 16-23"
+msgid "Information about task numbers 16-23"
 msgstr "Informácie o úlohách 16-23"
 
 #: xgnokii/xgnokii_netmon.c:513
-msgid "Information of OS_SYSTEM_STACK"
+msgid "Information about OS_SYSTEM_STACK"
 msgstr "Informácie o OS_SYSTEM_STACK"
 
 #: xgnokii/xgnokii_netmon.c:516
-msgid "Information of the current MCU and DSP software versions"
+msgid "Information about current MCU and DSP software versions"
 msgstr "Informácia o aktuálnych verziách softvéru MCU a DSP"
 
 #: xgnokii/xgnokii_netmon.c:519

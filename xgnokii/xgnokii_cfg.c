@@ -183,7 +183,7 @@ gint GUI_SaveXConfig ()
     }
     if (fputs (line, file) == EOF)
     {
-      g_print (_("ERROR: Can't write file config file!\n"));
+      g_print (_("ERROR: Can't write config file!\n"));
       g_free (line);
       fclose (file);
       return (4);
