@@ -35,7 +35,7 @@
 #define DISCOVERY_SLEEP		0.4
 
 static char *phone[] = {
-	"Nokia 7110", "Nokia 6210"
+	"Nokia 7110", "Nokia 6210", "Nokia 8210", "Nokia 8310"
 };
 
 double d_time(void)
