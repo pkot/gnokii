@@ -14,7 +14,10 @@
   phones. See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.2  2002-01-10 10:14:09  pkot
+  Revision 1.3  2002-01-11 11:11:46  pkot
+  Character set setting in AT mode (Manfred Jonsson)
+
+  Revision 1.2  2002/01/10 10:14:09  pkot
   Reading SMS in AT mode
 
   Revision 1.1  2001/11/19 13:03:18  pkot
@@ -22,6 +25,21 @@
 
 
 */
+
+typedef enum {
+	GOPAT_GetCharset = GOP_Max,
+	GOPAT_Max,	/* don't append anything after this entry */
+} GSMAT_Operation;
+
+typedef enum {
+	CHARNONE,
+	CHARUNKNOWN,
+	CHARGSM,
+	CHARCP437,
+	CHARHEXGSM,
+	CHARHEX437,
+	CHARUCS2,
+} GSMAT_Charset;
 
 typedef GSM_Error (*GSM_RecvFunctionType)(int type, unsigned char *buffer, int length, GSM_Data *data);
 typedef GSM_Error (*AT_SendFunctionType)(GSM_Data *data, GSM_Statemachine *s);

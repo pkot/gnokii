@@ -15,6 +15,7 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #define NUMBER_OF_7_BIT_ALPHABET_ELEMENTS 128
 
@@ -170,6 +171,53 @@ void EncodeAscii (unsigned char* dest, const unsigned char* src, int len)
 
 	for (i = 0; i < len; i++)
 		dest[i] = EncodeWithDefaultAlphabet(src[i]);
+	return;
+}
+
+void DecodeHex (unsigned char* dest, const unsigned char* src, int len)
+{
+	int i;
+	char buf[3];
+
+	buf[2] = '\0';
+	for (i = 0; i < (len / 2); i++) {
+		buf[0] = *(src + i * 2); buf[1] = *(src + i * 2 + 1);
+		dest[i] = DecodeWithDefaultAlphabet(strtol(buf,NULL,16));
+	}
+	return;
+}
+
+void EncodeHex (unsigned char* dest, const unsigned char* src, int len)
+{
+	int i;
+
+	for (i = 0; i < (len / 2); i++) {
+		sprintf(dest + i * 2, "%x", EncodeWithDefaultAlphabet(src[i]));
+	}
+	return;
+}
+
+void DecodeUCS2 (unsigned char* dest, const unsigned char* src, int len)
+{
+	int i;
+	char buf[5];
+
+	buf[4] = '\0';
+	for (i = 0; i < (len / 4); i++) {
+		buf[0] = *(src + i * 4); buf[1] = *(src + i * 4 + 1);
+		buf[2] = *(src + i * 4 + 2); buf[3] = *(src + i * 4 + 3);
+		dest[i] = DecodeWithUnicodeAlphabet(strtol(buf,NULL,16));
+	}
+	return;
+}
+
+void EncodeUCS2 (unsigned char* dest, const unsigned char* src, int len)
+{
+	int i;
+
+	for (i = 0; i < (len / 4); i++) {
+		sprintf(dest + i * 4, "%lx", EncodeWithUnicodeAlphabet(src[i]));
+	}
 	return;
 }
 

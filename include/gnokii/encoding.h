@@ -13,7 +13,10 @@
   Include file for encoding functions.
 
   $Log$
-  Revision 1.2  2001-11-08 16:34:20  pkot
+  Revision 1.3  2002-01-11 11:11:46  pkot
+  Character set setting in AT mode (Manfred Jonsson)
+
+  Revision 1.2  2001/11/08 16:34:20  pkot
   Updates to work with new libsms
 
   Revision 1.1  2001/10/24 22:37:25  pkot
@@ -34,5 +37,11 @@ void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len);
 
 void DecodeAscii (unsigned char* dest, const unsigned char* src, int len);
 void EncodeAscii (unsigned char* dest, const unsigned char* src, int len);
+
+void DecodeHex (unsigned char* dest, const unsigned char* src, int len);
+void EncodeHex (unsigned char* dest, const unsigned char* src, int len);
+
+void DecodeUCS2 (unsigned char* dest, const unsigned char* src, int len);
+void EncodeUCS2 (unsigned char* dest, const unsigned char* src, int len);
 
 #endif

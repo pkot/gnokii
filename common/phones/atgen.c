@@ -43,6 +43,7 @@ static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int l
 static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplySendSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state);
@@ -56,6 +57,7 @@ static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
 
 typedef struct {
 	int gop;
@@ -65,8 +67,8 @@ typedef struct {
 
 
 /* Mobile phone information */
-static AT_SendFunctionType AT_Functions[GOP_Max];
-static GSM_IncomingFunctionType IncomingFunctions[GOP_Max];
+static AT_SendFunctionType AT_Functions[GOPAT_Max];
+static GSM_IncomingFunctionType IncomingFunctions[GOPAT_Max];
 static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_Init, NULL, Reply },
 	{ GOP_GetModel, AT_GetModel, ReplyIdentify },
@@ -81,7 +83,8 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
 	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert },
 	{ GOP_SendSMS, AT_SendSMS, ReplySendSMS },
-	{ GOP_GetSMS, AT_GetSMS, ReplyGetSMS }
+	{ GOP_GetSMS, AT_GetSMS, ReplyGetSMS },
+	{ GOPAT_GetCharset, AT_GetCharset, ReplyGetCharset }
 };
 
 
@@ -135,7 +138,8 @@ static const SMSMessage_Layout at_not_supported = { false };
 static SMSMessage_PhoneLayout at_layout;
 
 static GSM_MemoryType memorytype = GMT_XX;
-static int atcharset = 0;
+static GSMAT_Charset atdefaultcharset = CHARNONE;
+static GSMAT_Charset atcharset = CHARNONE;
 
 static char *memorynames[] = {
 	"ME", /* Internal memory of the mobile equipment */
@@ -162,7 +166,7 @@ GSM_RecvFunctionType AT_InsertRecvFunction(int type, GSM_RecvFunctionType func)
 	int i;
 	GSM_RecvFunctionType oldfunc;
 
-	if (type >= GOP_Max) {
+	if (type >= GOPAT_Max) {
 		return (GSM_RecvFunctionType) -1;
 	}
 	if (pos == 0) {
@@ -178,7 +182,7 @@ GSM_RecvFunctionType AT_InsertRecvFunction(int type, GSM_RecvFunctionType func)
 			return oldfunc;
 		}
 	}
-	if (pos < GOP_Max-1) {
+	if (pos < GOPAT_Max-1) {
 		IncomingFunctions[pos].MessageType = type;
 		IncomingFunctions[pos].Functions = func;
 		pos++;
@@ -197,6 +201,16 @@ AT_SendFunctionType AT_InsertSendFunction(int type, AT_SendFunctionType func)
 }
 
 
+static GSM_Error SoftReset(GSM_Data *data, GSM_Statemachine *state)
+{
+	char req[128];
+
+	sprintf(req, "ATZ\r\n");
+	if (SM_SendMessage(state, 5, GOP_Init, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, GOP_Init);
+}
+
+
 static GSM_Error SetEcho(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
@@ -204,6 +218,42 @@ static GSM_Error SetEcho(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "ATE1\r\n");
 	if (SM_SendMessage(state, 6, GOP_Init, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, GOP_Init);
+}
+
+
+/* StoreDefaultCharset
+ *
+ * for a correct communication with the phone for phonebook entries or
+ * SMS text mode, we need to set a suited charset. a suited charset
+ * doesn't contain characters which are also used by the serial line for
+ * software handshake. so the GSM charset (or PC437, latin-1, etc) are
+ * a bad choice.
+ * so the GSM specification defines the HEX charset which is a hexidecimal
+ * representation of the "original" charset. this is a good choice for the
+ * above problem. but the GSM specification defines the default charset and
+ * no "original" charset.
+ * so what we do is to ask the phone (after a reset) for its original
+ * charset and store the result for future referece. we don't do a full
+ * initialization for speed reason. at further processing we can chose
+ * a working charset if needed.
+ * 
+ * see also AT_SetCharset, AT_GetCharset
+ *
+ * GSM_Data has no field for charset so i misuse Model.
+ */
+static void StoreDefaultCharset(GSM_Statemachine *state)
+{
+	GSM_Data data;
+	GSM_Error ret = GE_NONE;
+	char buf[256];
+
+	GSM_DataClear(&data);
+	data.Model = buf;
+	ret = state->Phone.Functions(GOPAT_GetCharset, &data, state);
+	if (ret != GE_NONE) return;
+	if (!strncmp(buf, "GSM", 3)) atdefaultcharset = CHARGSM;
+	if (strstr(buf, "437")) atdefaultcharset = CHARCP437;
+	return;
 }
 
 
@@ -227,24 +277,123 @@ GSM_Error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
 }
 
 
+/* SetCharset
+ *
+ * before we start sending or receiving phonebook entries from the phone,
+ * we should set a charset. this is done once before the first read or write.
+ * 
+ * we try to chose a charset with hexadecimal representation. first ucs2 
+ * (which is a hexencoded unicode charset) is tested and set if available.
+ * if this fails for any reason, it is checked if the original charset is
+ * GSM. if this is true, we try to set HEX (a hexencoded GSM charset). if
+ * this again fails or is impossible, we try to use the GSM charset. if
+ * the original charset was GSM nothing is done (we rely on not changing
+ * anything by the failing tries before). if the original charset was
+ * something else, we set the GSM charset. if this too fails, the user is
+ * on his own, characters will be copied from or to the phone without
+ * conversion.
+ *
+ * the whole bunch is needed to get a reasonable support for different
+ * phones. eg a siemens s25 has GSM as original charset and aditional
+ * supports only UCS2, a nokia 7110 has PCCP437 as original charset which
+ * renders HEX unusable for us (in this case HEX will give a hexadecimal
+ * encoding of the PCCP437 charset) and no UCS2. a ericsson t39 uses
+ * GSM as original charset but has never heard of any hex encoded charset.
+ * but this doesn't matter with IRDA and i haven't found a serial cable
+ * in a shop yet, so this is no problem
+ *
+ * FIXME because errorreporting is broken, one may not end up with the
+ * desired charset.
+ *
+ * see AT_GetCharset, StoreDefaultCharset
+ *
+ * GSM_Data has no field for charset so i misuse Model.
+ */
 static GSM_Error SetCharset(GSM_Statemachine *state)
 {
 	char req[128];
+	char charsets[256];
 	GSM_Error ret = GE_NONE;
 	GSM_Data data;
 
-	if (atcharset == 0) {
-		sprintf(req, "AT+CSCS=\"GSM\"\r\n");
-		ret = SM_SendMessage(state, 15, GOP_Init, req);
+	if (atcharset == CHARNONE) {
+		/* check if ucs2 is available */
+		sprintf(req, "AT+CSCS=?\r\n");
+		ret = SM_SendMessage(state, 11, GOPAT_GetCharset, req);
 		if (ret != GE_NONE)
 			return GE_NOTREADY;
 		GSM_DataClear(&data);
-		ret = SM_Block(state, &data, GOP_Init);
-		if (ret == GE_NONE)
-			atcharset = 1;
+		*charsets = '\0';
+		data.Model = charsets;
+		ret = SM_Block(state, &data, GOPAT_GetCharset);
+		if (ret != GE_NONE) {
+			*charsets = '\0';
+		}
+		else if (strstr(charsets, "UCS2")) {
+			/* ucs2 charset found. try to set it */
+			sprintf(req, "AT+CSCS=\"UCS2\"\r\n");
+			ret = SM_SendMessage(state, 16, GOP_Init, req);
+			if (ret != GE_NONE)
+				return GE_NOTREADY;
+			GSM_DataClear(&data);
+			ret = SM_Block(state, &data, GOP_Init);
+			if (ret == GE_NONE)
+				atcharset = CHARUCS2;
+		}
+		if (atcharset == CHARNONE) {
+			/* no ucs2 charset found or error occured */
+			if (atdefaultcharset == CHARGSM) {
+				atcharset = CHARGSM;
+				if (!strstr(charsets, "HEX")) {
+					/* no hex charset found! */
+					return GE_NONE;
+				}
+				/* try to set hex charset */
+				sprintf(req, "AT+CSCS=\"HEX\"\r\n");
+				ret = SM_SendMessage(state, 15, GOP_Init, req);
+				if (ret != GE_NONE)
+					return GE_NOTREADY;
+				GSM_DataClear(&data);
+				ret = SM_Block(state, &data, GOP_Init);
+				if (ret == GE_NONE)
+					atcharset = CHARHEXGSM;
+			} else {
+				sprintf(req, "AT+CSCS=\"GSM\"\r\n");
+				ret = SM_SendMessage(state, 15, GOP_Init, req);
+				if (ret != GE_NONE)
+					return GE_NOTREADY;
+				GSM_DataClear(&data);
+				ret = SM_Block(state, &data, GOP_Init);
+				if (ret == GE_NONE)
+					atcharset = CHARGSM;
+			}
+		}
 	}
 	return ret;
 }
+
+
+/* AT_GetCharset
+ *
+ * this function detects the current charset used by the phone. if it is
+ * called immediatedly after a reset of the phone, this is also the
+ * original charset of the phone.
+ *
+ * GSM_Data has no field for charset so you must misuse Model. the Model
+ * string must be initialized with a length of 256 bytes.
+ */
+static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state)
+{
+	char req[128];
+	GSM_Error ret = GE_NONE;
+
+	sprintf(req, "AT+CSCS?\r\n");
+	ret = SM_SendMessage(state, 10, GOPAT_GetCharset, req);
+	if (ret != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOPAT_GetCharset);
+}
+
 
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state)
@@ -432,7 +581,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 {
 	if (op == GOP_Init)
 		return Initialise(data, state);
-	if ((op > GOP_Init) && (op < GOP_Max))
+	if ((op > GOP_Init) && (op < GOPAT_Max))
 		if (AT_Functions[op])
 			return (*AT_Functions[op])(data, state);
 	return GE_NOTIMPLEMENTED;
@@ -467,6 +616,8 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 	if (data->PhonebookEntry) {
 		data->PhonebookEntry->Group = 0;
 		data->PhonebookEntry->SubEntriesCount = 0;
+
+		/* store number */
 		pos = strchr(buf.line2, '\"');
 		endpos = NULL;
 		if (pos)
@@ -475,19 +626,42 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 			*endpos = '\0';
 			strcpy(data->PhonebookEntry->Number, pos);
 		}
+
+		/* store name */
 		pos = NULL;
 		if (endpos)
 			pos = strchr(++endpos, '\"');
 		endpos = NULL;
 		if (pos) {
 			pos++;
-			l = pos - (char *)buffer;
-			endpos = memchr(pos, '\"', length - l);
-		}
-		if (endpos) {
+			/* parse the string form behind for quotation.
+			 * this will allways succede because quotation
+			 * was found at pos.
+			 */
+			endpos = buffer + length - 1;
+			for (;;) {
+				if (*endpos == '\"') break;
+				endpos--;
+			}
 			l = endpos - pos;
-			DecodeAscii(data->PhonebookEntry->Name, pos, l);
-			*(data->PhonebookEntry->Name + l) = '\0';
+			switch (atcharset) {
+			case CHARGSM:
+				DecodeAscii(data->PhonebookEntry->Name, pos, l);
+				*(data->PhonebookEntry->Name + l) = '\0';
+				break;
+			case CHARHEXGSM:
+				DecodeHex(data->PhonebookEntry->Name, pos, l);
+				*(data->PhonebookEntry->Name + (l / 2)) = '\0';
+				break;
+			case CHARUCS2:
+				DecodeUCS2(data->PhonebookEntry->Name, pos, l);
+				*(data->PhonebookEntry->Name + (l / 4)) = '\0';
+				break;
+			default:
+				memcpy(data->PhonebookEntry->Name, pos, l);
+				*(data->PhonebookEntry->Name + l) = '\0';
+				break;
+			}
 		}
 	}
 	return GE_NONE;
@@ -639,6 +813,44 @@ static GSM_Error ReplyGetSMS(int messagetype, unsigned char *buffer, int length,
 }
 
 
+/* ReplyGetCharset
+ *
+ * parses the reponse from a check for the actual charset or the 
+ * available charsets. a bracket in the response is taken as a request
+ * for available charsets.
+ *
+ * GSM_Data has no field for charset so you must misuse Model. the Model
+ * string must be initialized with a length of 256 bytes.
+ */
+static GSM_Error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	AT_LineBuffer buf;
+	char *pos;
+	int error = 0;
+
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+	if (buf.line1 == NULL)
+		error = 1;
+
+	if ((!strncmp(buffer, "AT+CSCS", 7)) && (data->Model)) {
+		/* if a opening bracket is in the string don't skip anything */
+		pos = strchr(buf.line2, '(');
+		if (pos) {
+			strncpy(data->Model, buf.line2, 255);
+			return GE_NONE;
+		}
+		/* skip leading +CSCS: and quotation */
+		pos = strchr(buf.line2 + 8, '\"');
+                if (pos) *pos = '\0';
+		strncpy(data->Model, buf.line2 + 8, 255);
+		(data->Model)[255] = '\0';
+	}
+	return GE_NONE;
+}
+
+
 static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	AT_LineBuffer buf;
@@ -677,7 +889,7 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	at_layout.Picture = at_not_supported;
 	layout = at_layout;
 
-	for (i = 0; i < GOP_Max; i++) {
+	for (i = 0; i < GOPAT_Max; i++) {
 		AT_Functions[i] = NULL;
 		IncomingFunctions[i].MessageType = 0;
 		IncomingFunctions[i].Functions = NULL;
@@ -703,8 +915,13 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	}
 	SM_Initialise(state);
 
+	SoftReset(&data, state);
 	SetEcho(&data, state);
+	StoreDefaultCharset(state);
 
+	/*
+	 * detect manufacturer and model for further initialization
+	 */
 	GSM_DataClear(&data);
 	data.Model = model;
 	ret = state->Phone.Functions(GOP_GetModel, &data, state);
