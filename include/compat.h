@@ -67,6 +67,10 @@
 #  include <sys/types.h>
 #endif
 
+#ifdef HAVE_CTYPE_H
+#  include <ctype.h>
+#endif
+
 #ifdef HAVE_SYS_FILE_H
 #  include <sys/file.h>
 #endif
