@@ -131,19 +131,11 @@ void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx)
 void RLP_SendF96Frame(RLP_FrameTypes FrameType,
                       bool OutCR, bool OutPF,
                       u8 OutNR, u8 OutNS,
-                      u8 *OutData,
-		              u8 OutDTX)
+                      u8 *OutData, u8 OutDTX)
 {
 
   RLP_F96Frame frame;
-  u8 req[60] = { 0x00, 0xd9 };
   int i;
-
-  /* Discontinuos transmission (DTX).  See section 5.6 of GSM 04.22 version
-     7.0.1. */
-
-  if (OutDTX)
-    req[1]=0x01;
 
   frame.Header[0]=0;
   frame.Header[1]=0;
@@ -367,37 +359,14 @@ void RLP_SendF96Frame(RLP_FrameTypes FrameType,
   }
 
 
-  /* u8 req[64]; */
-
   /* Store FCS in the frame. */
   RLP_CalculateCRC24Checksum((u8 *)&frame, 27, frame.FCS);
 
   // X(&frame);
 
-  //  RLP_DisplayF96Frame(&frame);
+  if (RLPSendFunction)
+    RLPSendFunction(&frame, OutDTX);
 
-  memcpy(req+2, (u8 *) &frame, 32);
-
-  /* FIXME: how should we send RLP frames? Some pointer to the actual
-     function? */
-
-  FB61_TX_SendFrame(32, 0xf0, req);
- 
-    /* FIX ME This code is untested hence the return function to skip it */ 
-  return;
-
-  if (RLPSendFunction == NULL) {
-    return;
-  }
-
-  if (OutDTX) {
-  	RLPSendFunction(&frame, true);
-  }
-  else {
-  	RLPSendFunction(&frame, false);
-  }
-		  	
-  
 }
 
 /* Check_input_PDU in Serge's code. */
@@ -904,7 +873,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
       FIXMEcounter++;
       printf("FIXMEcounter=%d\n", FIXMEcounter);
       
-      if (FIXMEcounter==300) {
+      if (FIXMEcounter==500) {
 	Conn_Req=true;
       }
     }

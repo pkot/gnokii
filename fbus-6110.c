@@ -572,21 +572,19 @@ GSM_Error FB61_SetProfile(GSM_Profile *Profile)
   return (GE_NONE);
 }
 
-	/* This code is taken from Pavel's quick workaround in
-	   rlp-common.c   I've not tested it (no 6110 :)  - HAB */
 bool FB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 {
   u8 req[60] = { 0x00, 0xd9 };
 		
+  /* Discontinuos transmission (DTX).  See section 5.6 of GSM 04.22 version
+     7.0.1. */
+       
   if (out_dtx)
     req[1]=0x01;
 
-  memcpy(req+2, (u8 *) &frame, 32);
+  memcpy(req+2, (u8 *) frame, 32);
 
-  if (FB61_TX_SendFrame(32, 0xf0, req) == true) {
-    return (true);
-  }
-  return (false);
+  return (FB61_TX_SendFrame(32, 0xf0, req));
 }
 
 

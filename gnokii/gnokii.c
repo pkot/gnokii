@@ -2367,7 +2367,7 @@ int foogle(char *argv[])
   /* Pavel's one */
   GSM->DialData("4670");
 
-  // RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, Data);
+  // RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
 
 #if 0
   for (i = 0; i <= 6; i++) {
