@@ -64,7 +64,7 @@ serial_baudrate = 19200
 
 # If defined (not commented out by '#') it will quit Gnokii anytime
 # when DCD line will drop.
-require_dcd = 1
+#require_dcd = 1
 
 # Run the specified script(s) right after opening and initializing the device
 # and before any communucation (right before closing for disconnect_script).
