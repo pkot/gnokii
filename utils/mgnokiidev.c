@@ -46,6 +46,11 @@
 #endif
 
 /* See common/data/virtmodem.c for explanation */
+#ifdef	__NetBSD__
+#  include <sys/types.h>
+#endif
+
+/* See common/data/virtmodem.c for explanation */
 #define _XOPEN_SOURCE 500
 
 #include "misc.h"

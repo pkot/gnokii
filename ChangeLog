@@ -45,6 +45,11 @@
     o add Nokia 6800 and family support            (Chris de Vidal)
     o fix incorrect set of operator_logo_width in Nokia 8310
                                                   (Giorgio Rusconi)
+ * portability changes
+    o NetBSD also fall into unices category     (Richard M Kreuter)
+    o NetBSD needs the same tricks as OpenBSD and FreeBSD in
+      utils/mgnokiidev.c and common/data/virtmodem.c
+                                                (Richard M Kreuter)
 
 0.6.3
 =====

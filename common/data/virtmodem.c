@@ -52,6 +52,11 @@
 #  define	__BSD_VISIBLE	1
 #endif
 
+/* same for NetBSD */
+#ifdef	__NetBSD__
+#  include <sys/types.h>
+#endif
+
 /* This is the correct way to include stdlib with _XOPEN_SOURCE = 500 defined.
  * Needed for clean unlockpt() declaration.
  * msghdr structure in Solaris depends on _XOPEN_SOURCE = 500 too. - bozo
