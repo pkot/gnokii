@@ -2248,6 +2248,7 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 
 	switch (data->CallInfo->Type) {
 	case GSM_CT_VoiceCall:
+		dprintf("Voice Call\n");
 		switch (data->CallInfo->SendNumber) {
 		case GSM_CSN_Never:
 			voice_end[5] = 0x02;
@@ -2271,15 +2272,18 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 		break;
 
 	case GSM_CT_NonDigitalDataCall:
+		dprintf("Non Digital Data Call\n");
 		memcpy(pos, data_nondigital_end, ARRAY_LEN(data_nondigital_end));
 		pos += ARRAY_LEN(data_nondigital_end);
 		if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
-/*		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY; */
+		usleep(500000);
+		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY;
 		if (SM_SendMessage(state, ARRAY_LEN(data_nondigital_final), 0x01, data_nondigital_final) != GE_NONE) return GE_NOTREADY;
-		return GE_NONE;
+		usleep(500000);
 		break;
 
 	case GSM_CT_DigitalDataCall:
+		dprintf("Digital Data Call\n");
 		if (SM_SendMessage(state, ARRAY_LEN(data_digital_pred1), 0x01, data_digital_pred1) != GE_NONE) return GE_NOTREADY;
 		if (SM_Block(state, data, 0x01) != GE_NONE) return GE_NOTREADY;
 		if (SM_SendMessage(state, ARRAY_LEN(data_digital_pred2), 0x01, data_digital_pred2) != GE_NONE) return GE_NOTREADY;
@@ -2411,7 +2415,14 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 	/* Send DTMF/voice call reply */
 	case 0x40:
 		break;
-	
+
+	/* FIXME: response from "Sent after issuing data call (non digital lines)"
+	 * that's what we call data_nondigital_final in MakeCall()
+	 */
+	case 0x43:
+		if (message[4] != 0x02) return GE_UNHANDLEDFRAME;
+		break;
+  	
 	/* FIXME: response from answer1? - bozo */
 	case 0x44:
 		break;

@@ -29,6 +29,7 @@ GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype);
 GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor);
 GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor);
 GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm);
+void SM_DumpMessage(int messagetype, unsigned char *message, int length);
 void SM_DumpUnhandledFrame(GSM_Statemachine *state, int messagetype, unsigned char *message, int length);
 
 #endif	/* __gsm_statemachine_h */

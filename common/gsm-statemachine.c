@@ -27,6 +27,10 @@ GSM_Error SM_Initialise(GSM_Statemachine *state)
 GSM_Error SM_SendMessage(GSM_Statemachine *state, u16 messagesize, u8 messagetype, void *message)
 {
 	if (state->CurrentState != Startup) {
+#ifdef	DEBUG
+	dump("Message sent: ");
+	SM_DumpMessage(messagetype, message, messagesize);
+#endif
 		state->LastMsgSize = messagesize;
 		state->LastMsgType = messagetype;
 		state->LastMsg = message;
@@ -77,6 +81,10 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 	GSM_Error res = GE_INTERNALERROR;
 	int waitingfor = -1;
 
+#ifdef	DEBUG
+	dump("Message received: ");
+	SM_DumpMessage(messagetype, message, messagesize);
+#endif
 	GSM_DataClear(&emptydata);
 
 	/* See if we need to pass the function the data struct */
@@ -234,27 +242,38 @@ GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm)
 	return sm->Phone.Functions(op, data, sm);
 }
 
+/* Dumps a message */
+void SM_DumpMessage(int messagetype, unsigned char *message, int messagesize)
+{
+	int i;
+	char buf[17];
+
+	buf[16] = 0;
+
+	dump("0x%02x / 0x%04x", messagetype, messagesize);
+
+	for (i = 0; i < messagesize; i++) {
+		if (i % 16 == 0) {
+			if (i != 0) dump(" %s", buf);
+			dump("\n    ");
+			memset(buf, ' ', 16);
+		}
+		dump("%02x ", message[i]);
+		if (isprint(message[i])) buf[i % 16] = message[i];
+	}
+
+	if (i % 16) dump("%*s %s", 3 * (16 - i % 16), "", buf);
+	dump("\n");
+}
+
 /* Prints a warning message about unhandled frames */
 void SM_DumpUnhandledFrame(GSM_Statemachine *state, int messagetype, unsigned char *message, int messagesize)
 {
-	int i;
+	dump(_("UNHANDLED FRAME RECEIVED\nrequest: "));
+	SM_DumpMessage(state->LastMsgType, state->LastMsg, state->LastMsgSize);
 
-	dump(_("UNHANDLED FRAME RECEIVED\n"
-		  "request: 0x%02x / 0x%04x"), state->LastMsgType, state->LastMsgSize);
-	for (i = 0; i < state->LastMsgSize; i++) {
-		if (i % 16 == 0)
-			dump("\n    ");
-		dump("%02x ", ((unsigned char *)state->LastMsg)[i]);
-	}
-	dump("\n");
-
-	dump(_("reply: 0x%02x / 0x%04x"), messagetype, messagesize);
-	for (i = 0; i < messagesize; i++) {
-		if (i % 16 == 0)
-			dump("\n    ");
-		dump("%02x ", message[i]);
-	}
-	dump("\n");
+	dump(_("reply: "));
+	SM_DumpMessage(messagetype, message, messagesize);
 
 	dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
 }
