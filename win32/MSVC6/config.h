@@ -104,11 +104,6 @@
 #define XDEBUG 1
 #define RLP_DEBUG 1
 
-/* Define debug level */
-#ifdef _DEBUG
-#   define	DEBUG
-#endif
-
 /* Decide if you want security options enabled */
 #define SECURITY
 
