@@ -24,6 +24,11 @@
       as they won't work with this series.             (Markus Plail)
     o add profile reading                              (Markus Plail)
     o add speed dials reading/writing                  (Markus Plail)
+    o add welcome note and anykey answer reading       (Markus Plail)
+    o minor cleanups                                   (Markus Plail)
+    o add IncomingRadio (no functionality yet)         (Markus Plail)
+    o initial keypress emulation code (not very functional yet)
+	                                               (Markus Plail)
  * 7110 series
     o typo in P7110_WritePhonebookLocation             (Markus Plail)
  * 6160 series updates:
