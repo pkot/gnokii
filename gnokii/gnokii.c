@@ -411,6 +411,35 @@ static void sendsms_usage()
 	exit(1);
 }
 
+static GSM_Error readtext(SMS_UserData *udata, int input_len)
+{
+	char message_buffer[255 * GSM_MAX_SMS_LENGTH];
+	int chars_read;
+
+	fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
+
+	/* Get message text from stdin. */
+	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
+
+	if (chars_read == 0) {
+		fprintf(stderr, _("Couldn't read from stdin!\n"));
+		return GE_INTERNALERROR;
+	} else if (chars_read > input_len || chars_read > sizeof(udata->u.Text) - 1) {
+		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, input_len);
+		return GE_INTERNALERROR;
+	}
+
+	/*  Null terminate. */
+	message_buffer[chars_read] = 0x00;
+	if (udata->Type != SMS_iMelodyText && chars_read > 0 && message_buffer[chars_read - 1] == '\n') 
+		message_buffer[--chars_read] = 0x00;
+	strncpy(udata->u.Text, message_buffer, chars_read);
+	udata->u.Text[chars_read] = 0;
+	udata->Length = chars_read;
+
+	return GE_NONE;
+}
+
 /* Send  SMS messages. */
 static int sendsms(int argc, char *argv[])
 {
@@ -418,8 +447,7 @@ static int sendsms(int argc, char *argv[])
 	GSM_Error error;
 	/* The maximum length of an uncompressed concatenated short message is
 	   255 * 153 = 39015 default alphabet characters */
-	char message_buffer[255 * GSM_MAX_SMS_LENGTH];
-	int input_len, chars_read;
+	int input_len;
 	int i;
 
 	struct option options[] = {
@@ -504,30 +532,14 @@ static int sendsms(int argc, char *argv[])
 			sendsms_usage();
 		}
 	}
-
-	fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
-
-	/* Get message text from stdin. */
-	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
-
-	if (chars_read == 0) {
-		fprintf(stderr, _("Couldn't read from stdin!\n"));
-		return -1;
-	} else if (chars_read > input_len || chars_read > sizeof(sms.UserData[0].u.Text) - 1) {
-		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, input_len);
-		return -1;
-	}
-
-	/*  Null terminate. */
-	message_buffer[chars_read] = 0x00;
-	if (sms.UserData[0].Type != SMS_iMelodyText && chars_read > 0 && message_buffer[chars_read - 1] == '\n') 
-		message_buffer[--chars_read] = 0x00;
-	if (chars_read < 1) {
+	
+	error = readtext(&sms.UserData[0], input_len);
+	if (error != GE_NONE) return -1;
+	if (sms.UserData[0].Length < 1) {
 		fprintf(stderr, _("Empty message. Quitting.\n"));
 		return -1;
 	}
-	strncpy(sms.UserData[0].u.Text, message_buffer, chars_read);
-	sms.UserData[0].u.Text[chars_read] = 0;
+
 	data.SMS = &sms;
 
 	/* Send the message. */
@@ -1449,8 +1461,9 @@ static int sendlogo(int argc, char *argv[])
 	sms.UserData[1].Type = SMS_NoData;
 	if (sms.UserData[0].u.Bitmap.type == GSM_PictureMessage) {
 		sms.UserData[1].Type = SMS_PlainText;
+		readtext(&sms.UserData[1], 120);
 		sms.UserData[2].Type = SMS_NoData;
-		strcpy(sms.UserData[1].u.Text, "testtest");
+		//		strcpy(sms.UserData[1].u.Text, "Ahoj, tohle je mala zprava na testovani telefonu");
 	}
 
 	/* Send the message. */

@@ -232,10 +232,13 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 	case GSM_PictureMessage:
 		dprintf("Picture Image\n");
 
-		strcpy(bitmap->text, "");
-
 		message[current++]=0x30;     /* SM version. Here 3.0 */
+#if 1
+		message[current++]=0x02;     /* ID for bitmap, 0x06 is id for screensaver */
+#else
 		message[current++]=0x06;     /* ID for bitmap, 0x06 is id for screensaver */
+		strcpy(bitmap->text, "");
+#endif
 		message[current++]=0x01;     /* Length for picture part, hi */
 		message[current++]=0x00;     /* length lo */
 

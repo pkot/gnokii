@@ -1026,9 +1026,9 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 	for (i = 0; i < 3; i++) {
 		switch (sms->UserData[i].Type) {
 		case SMS_PlainText:
-			text_index     = i; break;
+			text_index = i; break;
 		case SMS_BitmapData:
-			bitmap_index   = i; break;
+			bitmap_index = i; break;
 		case SMS_RingtoneData:
 			ringtone_index = i; break;
 		case SMS_iMelodyText:
@@ -1078,6 +1078,35 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 
 	if ((al == SMS_8bit) && multipart) al = SMS_DefaultAlphabet;
 	rawsms->Length = rawsms->UserDataLength = 0;
+
+	/* Bitmap coding */
+	if (bitmap_index != -1) {
+		error = GE_NONE;
+		switch (sms->UserData[0].u.Bitmap.type) {
+		case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo, message); break;
+		case GSM_EMSPicture:
+		case GSM_PictureMessage:
+		case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
+		}
+		if (error != GE_NONE) return error;
+
+#ifdef BITMAP_SUPPORT
+		if (text_index != -1) {		/* This is quite a dirty hack */
+			if (sms->UserData[0].u.Bitmap.type != GSM_PictureMessage)
+				return GE_SMSWRONGFORMAT;
+			strcpy(sms->UserData[bitmap_index].u.Bitmap.text, sms->UserData[text_index].u.Text);
+			text_index = -1;
+		}
+
+		size = GSM_EncodeSMSBitmap(&(sms->UserData[bitmap_index].u.Bitmap), message + rawsms->UserDataLength);
+		rawsms->Length += size;
+		rawsms->UserDataLength += size;
+		rawsms->DCS = 0xf5;
+		rawsms->UDHIndicator = 1;
+#else
+		return GE_NOTSUPPORTED;
+#endif
+	}
 
 	/* Text Coding */
 	if (text_index != -1) {
@@ -1134,7 +1163,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 
 	/* MultiData coding */
 	if (multi_index != -1) {
-		size = 128;
+		size = sms->UserData[0].Length;
 		error = EncodeUDH(rawsms, 0x05, message);
 		rawsms->UserData[10] = sms->UserData[multi_index].u.Multi.total;
 		rawsms->UserData[11] = sms->UserData[multi_index].u.Multi.this;
@@ -1146,27 +1175,6 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 		rawsms->UDHIndicator = 1;		
 	}
 
-	/* Bitmap coding */
-	if (bitmap_index != -1) {
-		error = GE_NONE;
-		switch (sms->UserData[0].u.Bitmap.type) {
-		case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo, message); break;
-		case GSM_EMSPicture:
-		case GSM_PictureMessage:
-		case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
-		}
-		if (error != GE_NONE) return error;
-
-#ifdef BITMAP_SUPPORT
-		size = GSM_EncodeSMSBitmap(&(sms->UserData[bitmap_index].u.Bitmap), message + rawsms->UserDataLength);
-		rawsms->Length += size;
-		rawsms->UserDataLength += size;
-		rawsms->DCS = 0xf5;
-		rawsms->UDHIndicator = 1;
-#else
-		return GE_NOTSUPPORTED;
-#endif
-	}
 
 	/* Ringtone coding */
 	if (ringtone_index != -1) {
@@ -1236,9 +1244,13 @@ API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
 	for (i=0; i<count; i++) {
 		printf("Sending sms #%d\n", i);
 		sms.UserData[0].Type = SMS_MultiData;
+		sms.UserData[0].Length = 128;
+		if (i+1 == count)
+			sms.UserData[0].Length = rawsms->UserDataLength % 128;
 		memcpy(sms.UserData[0].u.Multi.Binary, rawsms->UserData + i*128, 128);
 		sms.UserData[0].u.Multi.this = i+1;
 		sms.UserData[0].u.Multi.total = count;
+		sms.UserData[1].Type = SMS_NoData;
 		data->SMS = &sms;
 		error = SendSMS(data, state);
 		if (error != GE_NONE) return error;
