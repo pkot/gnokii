@@ -29,8 +29,6 @@
 
 */
 
-#define DEBUG
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -977,14 +975,12 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
  *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
  *  o Smart Messaging Specification, Revision 3.0.0
  */
-static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, GSM_API_SMS *SMS, int i, char *UDH)
+static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, int type, char *UDH)
 {
 	unsigned char pos;
-	int type;
 
 	pos = UDH[0];
-	type = SMS->UserData[i].Type;
-	printf("Encoding UDH. (%d, %d).\n", type, pos);
+	dprintf("Encoding UDH. (%d, %d).\n", type, pos);
 	type = 3;
 
 	switch (type) {
@@ -999,15 +995,16 @@ static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, GSM_API_SMS *SMS, int i, char
 		if (UDHi.u.SpecialSMSMessageIndication.Store) UDH[pos+3] |= 0x80;
 #endif
 	case SMS_ConcatenatedMessages:
-		printf("Adding ConcatMsg header\n");
+		dprintf("Adding ConcatMsg header\n");
 	case SMS_OpLogo:
-		printf("Adding OpLogo header\n");
+		dprintf("Adding OpLogo header\n");
 	case SMS_CallerIDLogo:
 	case SMS_Ringtone:
 	case SMS_MultipartMessage:
 		UDH[0] += headers[type].length;
 		memcpy(UDH+pos+1, headers[type].header, headers[type].length);
 		rawsms->UserDataLength += headers[type].length + 1;	/* FIXME: I don't know why + 1 is needed */
+		rawsms->Length += headers[type].length + 1;	/* FIXME: I don't know why + 1 is needed */
 		break;
 	default:
 		dprintf("Not supported User Data Header type\n");
@@ -1061,11 +1058,12 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 	switch (sms->DCS.Type) {
 	case SMS_GeneralDataCoding:
 		switch (sms->DCS.u.General.Class) {
+		case 0: break;
 		case 1: rawsms->DCS |= 0xf0; break; /* Class 0 */
 		case 2: rawsms->DCS |= 0xf1; break; /* Class 1 */
 		case 3: rawsms->DCS |= 0xf2; break; /* Class 2 */
 		case 4: rawsms->DCS |= 0xf3; break; /* Class 3 */
-		default: break;
+		default: fprintf(stderr, "What ninja-mutant class is this?\n"); break; 
 		}
 		if (sms->DCS.u.General.Compressed) {
 			/* Compression not supported yet */
@@ -1136,13 +1134,14 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 	/* Bitmap coding */
 	if (bitmap_index != -1) {
 		rawsms->UDHIndicator = 1;
-		error = EncodeUDH(rawsms, sms, bitmap_index, message);
+		error = EncodeUDH(rawsms, sms->UserData[0].u.Bitmap.type, message);
 		if (error != GE_NONE) return error;
 
 #ifdef BITMAP_SUPPORT
 		size = GSM_EncodeSMSBitmap(&(sms->UserData[bitmap_index].u.Bitmap), message + rawsms->UserDataLength);
 		rawsms->Length += size;
 		rawsms->UserDataLength += size;
+		rawsms->DCS = 0xf5;
 #else
 		return GE_NOTSUPPORTED;
 #endif
@@ -1182,6 +1181,20 @@ GSM_Error PrepareSMS(GSM_Data *data, int i)
 	return GE_NONE;
 }
 
+void DumpRawSMS(GSM_SMSMessage *rawsms)
+{
+	char buf[10240];
+
+	memset(buf, 0, 10240);
+
+	printf("DCS: 0x%x\n", rawsms->DCS);
+	printf("Length: 0x%x\n", rawsms->Length);
+	printf("UserDataLength: 0x%x\n", rawsms->UserDataLength);
+	printf("ValidityIndicator: %d\n", rawsms->ValidityIndicator);
+	bin2hex(buf, rawsms->UserData, rawsms->UserDataLength);
+	printf("UserData: %s\n", buf);
+}
+
 /**
  * SendSMS - The main function for the SMS sending
  * @data:
@@ -1216,9 +1229,9 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 		error = PrepareSMS(data, i);
 		if (error != GE_NONE) break;
 
+//		DumpRawSMS(data->RawSMS);		Usefull for debugging...
 		error = SM_Functions(GOP_SendSMS, data, state);
 
-		// dprintf("%d\n", data->RawSMS->Length);
 		free(data->RawData->Data);
 		if (error != GE_NONE) break;
 	}
