@@ -3862,7 +3862,7 @@ int main(int argc, char *argv[])
 #endif
 
 		/* Initialise the code for the GSM interface. */
-		if (c != OPT_VIEWLOGO) businit(NULL);
+		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE) businit(NULL);
 
 		switch(c) {
 		case OPT_MONITOR:
