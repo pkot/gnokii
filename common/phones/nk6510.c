@@ -382,24 +382,47 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 			err = fbus_initialise(attempt++, state);
 			break;
 		case GN_CT_Bluetooth:
-			attempt = 2;
-			err = fbus_initialise(attempt++, state);
-			break;
+#ifdef HAVE_BLUETOOTH
+			/* Quoting Marcel Holtmann from gnokii-ml:
+			 * "I discovered some secrets of the Nokia Bluetooth support in the 6310
+			 * generation. They use a special SDP entry, which is not in the public
+			 * browse group of their SDP database. And here it is:
+			 *
+			 *	Attribute Identifier : 0x0 - ServiceRecordHandle
+			 *	  Integer : 0x10006
+			 *	Attribute Identifier : 0x1 - ServiceClassIDList
+			 *	  Data Sequence
+			 *	    UUID128 : 0x00005002-0000-1000-8000-0002ee00-0001
+			 *	    Attribute Identifier : 0x4 - ProtocolDescriptorList
+			 *	  Data Sequence
+			 *	    Data Sequence
+			 *	      UUID16 : 0x0100 - L2CAP
+			 *	    Data Sequence
+			 *	      UUID16 : 0x0003 - RFCOMM
+			 *	      Channel/Port (Integer) : 0xe
+ 			 *
+			 * The main secret of this is that they use RFCOMM channel 14 for their
+			 * communication protocol."
+			 */
+			state->config.rfcomm_cn = 14;
+#endif
 		case GN_CT_Infrared:
 		case GN_CT_Irda:
 			err = phonet_initialise(state);
+			/* Don't loop forever */
+			attempt = 3;
 			break;
 		default:
 			return GN_ERR_NOTSUPPORTED;
 		}
-	
+
 		if (err != GN_ERR_NONE) {
 			dprintf("Error in link initialisation: %d\n", err);
 			continue;
 		}
-	
+
 		sm_initialise(state);
-	
+
 		/* Now test the link and get the model */
 		gn_data_clear(&data);
 		data.model = model;
