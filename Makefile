@@ -70,7 +70,7 @@ GTKLDFLAGS=`gtk-config --libs`
 # Set up compilation/linking flags for Linux.
 #
 
-export MODEL PORT GETTEXT DEBUG VERSION
+export CC MODEL PORT GETTEXT DEBUG VERSION
 
 COMMON=-Wall -g -O0 \
        ${MODEL} ${PORT} \
@@ -114,13 +114,13 @@ GNOKIID_OBJS = gnokiid.o at-emulator.o virtmodem.o datapump.o
 MGNOKIIDEV_OBJS = mgnokiidev.o
 
 # Build executable
-all: gnokii gnokiid mgnokiidev bin/xgnokii xlogos xkeyb
+all: gnokii gnokiid mgnokiidev xgnokii xlogos xkeyb
 
 gnokii: $(GNOKII_OBJS) $(COMMON_OBJS)
 
 gnokiid: $(GNOKIID_OBJS) $(COMMON_OBJS)
 
-bin/xgnokii: $(COMMON_OBJS)
+xgnokii: $(COMMON_OBJS)
 	make -C xgnokii
 
 xlogos: $(XLOGOS_OBJS) $(COMMON_OBJS)
@@ -128,6 +128,8 @@ xlogos: $(XLOGOS_OBJS) $(COMMON_OBJS)
 xkeyb: $(XKEYB_OBJS) $(COMMON_OBJS)
 
 mgnokiidev: $(MGNOKIIDEV_OBJS) 
+
+.PHONY: xgnokii
 
 # Misc targets
 clean:

@@ -1,3 +1,20 @@
+xgnokii-19990915
+Changes in Contacts window:
+- Fixed scrolling.
+- Fixed SIGSEG error due uninitialized variable.
+
+xgnokii-19990914
+- Fixed error in FB61_GetMemoryStatus. (FB61_GetMemoryStatus had ignore all
+  error status except GE_TIMEOUT. This break Contacts memory reading for
+  phone with only SIM memory.)
+  I think that Contacts memory reading is working also in 38xx series, but I
+  can't test it.
+Changes in Contacts window:
+- Export to file is working.
+- Import from file is working. Xgnokii uses extended format from NCDS (with
+  group entry) and is capable reading NCDS files.
+- More icons.
+
 xgnokii-19990906
 Changes in Contacts window:
 - Duplicate is working.

@@ -1,4 +1,6 @@
-XVERSION = 19990906
+XVERSION = 19990914
+BIN = ../bin
+LN = /bin/ln
 
 #DEBUG += -DXDEBUG 
 
@@ -41,19 +43,24 @@ COMMON_OBJS = ../gsm-api.o \
 # Object files for each utility
 #
 
-XGNOKII_OBJS = xgnokii.o xgnokii_contacts.o xgnokii_sms.o
+XGNOKII_OBJS = xgnokii.o xgnokii_common.o xgnokii_contacts.o xgnokii_sms.o
 
 # Build executable
 all: xgnokii
 
 xgnokii: $(XGNOKII_OBJS) $(COMMON_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(XGNOKII_OBJS) $(COMMON_OBJS) $(LDFLAGS)
+	if [ ! -d $(BIN) ]; then mkdir $(BIN); fi 
+	if [ -f $(BIN)/xgnokii ]; then rm -f $(BIN)/xgnokii; fi
+	$(LN) xgnokii $(BIN)/xgnokii
 
 # Misc targets
 clean:
 	@rm -f core *~ *% *.bak \
-               xgnokii $(XGNOKII_OBJS)
+               xgnokii $(BIN)/xgnokii $(XGNOKII_OBJS)
 
 # Dependencies - simplified for now
-xgnokii.o: xgnokii.c xgnokii.h ../gsm-api.c ../gsm-api.h ../misc.h ../gsm-common.h
-xgnokii_contacts.o: xgnokii_contacts.c xgnokii_contacts.h xgnokii.h ../misc.h ../gsm-api.c ../gsm-api.h ../gsm-common.h
-xgnokii_sms.o: xgnokii_sms.c xgnokii_sms.h xgnokii.h ../misc.h ../gsm-api.h ../gsm-api.c ../gsm-common.h
+xgnokii.o: xgnokii.c xgnokii.h xgnokii_common.h ../gsm-api.c ../gsm-api.h ../misc.h ../gsm-common.h
+xgnokii_contacts.o: xgnokii_contacts.c xgnokii_contacts.h xgnokii_common.h xgnokii.h ../misc.h ../gsm-api.c ../gsm-api.h ../gsm-common.h
+xgnokii_sms.o: xgnokii_sms.c xgnokii_sms.h xgnokii_common.h xgnokii.h ../misc.h ../gsm-api.h ../gsm-api.c ../gsm-common.h
+xgnokii_common.o: xgnokii_common.c xgnokii_common.h

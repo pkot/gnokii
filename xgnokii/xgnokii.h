@@ -25,6 +25,4 @@ extern gint max_phonebook_sim_number_length;
 
 void GUI_ShowAbout();
 
-void delete_event( GtkWidget *, GdkEvent *, gpointer );
-
 #endif XGNOKII_H

@@ -15,7 +15,7 @@
 
 */
 
-static char *Save[] = {
+static char *Save_xpm[] = {
 
 "20 18 3 1",
 

@@ -15,7 +15,7 @@
 
 */
 
-static char *Invert[] = {
+static char *Invert_xpm[] = {
 
 "20 18 4 1",
 

@@ -723,18 +723,18 @@ main (int argc, char *argv[])
   toolbar = gtk_toolbar_new (GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
   gtk_toolbar_set_button_relief (GTK_TOOLBAR (toolbar), GTK_RELIEF_NORMAL);
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "New logo", NULL, new_pixmap (New, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) newlogo, toolbar);
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Invert logo", NULL, new_pixmap (Invert, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) invertlogo, toolbar);
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "New logo", NULL, new_pixmap (New_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) newlogo, toolbar);
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Invert logo", NULL, new_pixmap (Invert_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) invertlogo, toolbar);
 
   gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Open", NULL, new_pixmap (Open, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) openlogo, toolbar);
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Open", NULL, new_pixmap (Open_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) openlogo, toolbar);
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Save", NULL, new_pixmap (Save, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) savelogo, toolbar);
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Save", NULL, new_pixmap (Save_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) savelogo, toolbar);
 
   gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
 
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Send logo", NULL, new_pixmap (Send, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) show_logo, toolbar);
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Send logo", NULL, new_pixmap (Send_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) show_logo, toolbar);
 
   gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
   

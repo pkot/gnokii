@@ -15,7 +15,7 @@
 
 */
 
-static char *New[] = {
+static char *New_xpm[] = {
 
 "20 18 3 1",
 

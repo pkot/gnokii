@@ -23,6 +23,7 @@
 #include "../gsm-common.h"
 #include "../gsm-api.h"
 #include "xgnokii_sms.h"
+#include "xgnokii_common.h"
 #include "xgnokii.h"
 
 
@@ -43,7 +44,7 @@ static GtkItemFactoryEntry SMSWindowMenu[] = {
  {"/Messages/separator1",	NULL,		NULL,	0,	"<Separator>" },
  {"/Messages/_Refresh",		NULL,		SMSWindowRefresh,	0,	NULL },
  {"/Messages/separator2",	NULL,		NULL,	0,	"<Separator>" },
- {"/Messages/_Close Window",	"<control>C",	GTK_SIGNAL_FUNC(delete_event),	0,	NULL },
+ {"/Messages/_Close Window",	"<control>C",	GTK_SIGNAL_FUNC(DeleteEvent),	0,	NULL },
  {"/_Help",			NULL,		NULL,	0,	"<Branch>" },
  {"/Help/About",		NULL,		NULL,	0,	NULL }
 };
@@ -270,7 +271,7 @@ GtkWidget *SMSWindow_CreateToolbar(GtkWidget *SMSWindow)
     			"Close Window",
     			"Private",
     			NULL,
-    			GTK_SIGNAL_FUNC(delete_event),
+    			GTK_SIGNAL_FUNC(DeleteEvent),
     			NULL);
     
     
@@ -295,7 +296,7 @@ void GUI_CreateSMSWindow()
  GUI_SMSWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
  gtk_window_set_title (GTK_WINDOW (GUI_SMSWindow), "SMS");
  gtk_signal_connect (GTK_OBJECT(GUI_SMSWindow), "delete_event",
-                     GTK_SIGNAL_FUNC(delete_event), NULL);
+                     GTK_SIGNAL_FUNC(DeleteEvent), NULL);
  vbox = gtk_vbox_new (FALSE, 1);
  gtk_container_add (GTK_CONTAINER (GUI_SMSWindow), vbox);
  gtk_widget_show (vbox);

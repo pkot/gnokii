@@ -25,6 +25,7 @@
 #include "../fbus-3810.h"
 #include "../cfgreader.h"
 #include "xgnokii.h"
+#include "xgnokii_common.h"
 #include "xgnokii_contacts.h"
 #include "xgnokii_sms.h"
 
@@ -394,11 +395,6 @@ void GUI_Refresh() {
     gtk_main_iteration();
 }
 
-void delete_event( GtkWidget *widget, GdkEvent *event, gpointer data )
-{
-  gtk_widget_hide(widget);
-}
-
 void optionsSaveCallback( GtkWidget *widget, gpointer data )
 {
   gtk_widget_hide(GTK_WIDGET(data));
@@ -466,7 +462,7 @@ GtkWidget *GUI_CreateAboutDialog()
   gtk_window_set_title (GTK_WINDOW (dialog), "About");
   gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
   gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
-                      GTK_SIGNAL_FUNC (delete_event), NULL);
+                      GTK_SIGNAL_FUNC (DeleteEvent), NULL);
   button = gtk_button_new_with_label ("Ok");
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
                       button, TRUE, FALSE, 5);
@@ -498,7 +494,7 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_window_set_title (GTK_WINDOW (dialog), "Options");
   gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
   gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
-                      GTK_SIGNAL_FUNC (delete_event), NULL);
+                      GTK_SIGNAL_FUNC (DeleteEvent), NULL);
   button = gtk_button_new_with_label ("Save");
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
                       button, TRUE, TRUE, 10);
@@ -593,7 +589,7 @@ GtkWidget *GUI_CreateCardWindow()
   gtk_window_set_title (GTK_WINDOW (window), "Busines Cards");
   gtk_container_set_border_width (GTK_CONTAINER (window), 10);
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                      GTK_SIGNAL_FUNC (delete_event), NULL);
+                      GTK_SIGNAL_FUNC (DeleteEvent), NULL);
   
   return window;
 }

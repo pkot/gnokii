@@ -22,6 +22,8 @@
 #include "../gsm-api.h"
 #include "xgnokii.h"
 
+#define IO_BUF_LEN	160
+
 /* Structure to keep memory status information */
 typedef struct {
   int MaxME;
@@ -70,9 +72,8 @@ typedef struct {
 } FindEntryData;
 
 typedef struct {
-  GtkWidget *dialog;
-  GtkWidget *text;
-} ErrorDialog;
+  gchar *fileName;
+} ExportDialogData;
 
 #define STATUS_INFO_LENGTH	40
 
@@ -101,6 +102,16 @@ typedef struct {
   gint lastRow;
   FindType type;
 } FindEntryStruct;
+
+typedef struct {
+  GdkPixmap *simMemPix, *phoneMemPix;
+  GdkBitmap *mask;
+} MemoryPixmaps;
+
+typedef struct {
+  GdkPixmap *pixmap;
+  GdkBitmap *mask;
+} QuestMark;
 
 extern void GUI_CreateContactsWindow();
 

@@ -346,7 +346,7 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
     usleep (100000);
   }
 
-  return (GE_NONE);
+  return (CurrentMemoryStatusError);
 }
 
 GSM_Error FB61_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo)
