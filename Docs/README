@@ -231,10 +231,10 @@ large changes and/or submitting big patches.
 - 10.0 gnokii by CVS -
 
 The gnokii project has a new CVS server thanks to Andrew Tridgell
-and the Samba team.  The server's address is cvs.samba.org.  If you
+and the Samba team.  The server's address is pserver.samba.org.  If you
 are already familiar with CVS, set the CVSROOT to 
 
-	:pserver:cvs@cvs.samba.org:/cvsroot
+	:pserver:cvs@pserver.samba.org:/cvsroot
 
 and use the password cvs for checking out the repository with the name
 gnokii.
@@ -245,7 +245,7 @@ Just install the cvs package for your distribution and follow these steps:
 	1. set your environmental variable CVSROOT. If you have bash (Bourne
            Again Shell):
 
-	export CVSROOT=:pserver:cvs@cvs.samba.org:/cvsroot
+	export CVSROOT=:pserver:cvs@pserver.samba.org:/cvsroot
 
 	   If you have different shell, use different command (e.g. setenv).
 
@@ -263,7 +263,15 @@ Just install the cvs package for your distribution and follow these steps:
 
 If you prefer, there is a WWW interface to the CVS server at
 
-http://samba.org/cgi-bin/cvsweb/gnokii/
+http://pserver.samba.org/cgi-bin/cvsweb/gnokii/
+
+Once you have the sources, you will need to run the following commands
+
+	autoconf
+	./configure
+	make
+
+to build the sources.
 
 Now you are on your own - you have the current sources on your disk
 in the directory gnokii.  If you are going to make substantial changes
