@@ -202,8 +202,7 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		dprintf("Getting SMS (validating)...\n");
 		return P7110_GetSMS(data, state);
 	case GOP_GetSMSnoValidate:
-		dprintf("Getting SMS (without validating)...\n");
-		data->SMSFolder = NULL;
+		dprintf("Getting SMS (no validating)...\n");
 		return P7110_GetSMSnoValidate(data, state);
 	case GOP_OnSMS:
 		/* Register notify when running for the first time */
@@ -1060,7 +1059,6 @@ static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 				0x01, /* Location */
 				0x01, 0x65, 0x01};
 
-	data->SMSFolder = NULL;
 	req[4] = GetMemoryType(data->RawSMS->MemoryType);
 	req[5] = (data->RawSMS->Number & 0xff00) >> 8;
 	req[6] = data->RawSMS->Number & 0x00ff;
@@ -1162,8 +1160,9 @@ static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-	SMS_Folder fld;
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x36, 0x64};
+	SMS_Folder status_fld, *old_fld;
+	GSM_Error error;
 
 	dprintf("Getting SMS Status...\n");
 
@@ -1172,10 +1171,22 @@ static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 	 * SMSStatus does not change! Workaround: get Templates folder status, which
 	 * does show these messages.
 	 */
-	fld.FolderID = GMT_TE;
-	data->SMSFolder = &fld;
-	if (P7110_GetSMSFolderStatus(data, state) != GE_NONE) return GE_NOTREADY;
-	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 5);
+	
+	old_fld = data->SMSFolder;
+
+	data->SMSFolder = &status_fld;
+	data->SMSFolder->FolderID = GMT_TE;
+
+	error = P7110_GetSMSFolderStatus(data, state);
+	if (error != GE_NONE) goto out;
+
+	error = SM_SendMessage(state, 6, P7110_MSG_FOLDER, req);
+	if (error != GE_NONE) goto out;
+
+	error = SM_Block(state, data, P7110_MSG_FOLDER);
+ out:
+	data->SMSFolder = old_fld;
+	return error;
 }
 
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state)
@@ -1223,6 +1234,7 @@ static GSM_Error P7110_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 				   0x00,0x00,		/* location */
 				   0x00 };		/* type */
 #if 0
+	/* FIXME: we can write a description here */
 	unsigned char req2[200] = { FBUS_FRAME_HEADER, 0x83};
 	GSM_Error		error;
 #endif
