@@ -16,6 +16,8 @@
                                                       (Mariusz Mazur)
     o add po/Makevars                                 (Mariusz Mazur)
     o few corrections for the po files copyrights         (Pawel Kot)
+    o __ptr_t detection fixed to work with older autoconf
+      packages                                       (BORBELY Zoltan)
  * New API for gnokii
     [some of these changes are temporary -- they will allow be to
      better control the changes]
