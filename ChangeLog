@@ -85,6 +85,7 @@
  * FreeBSD compatibility fixes: FBSD does not like local variables
    with the type of large size; we convert these variables to the
    pointers and alloc them dynamically.     (Jan Derfinak, Pawel Kot)
+ * MacOS X compability                               (Ruotger Skupin)
 
 0.4.3
 =====

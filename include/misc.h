@@ -102,7 +102,7 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 #define gvasprintf		vasprintf
 
 /* Get rid of long defines. Use #if __unices__ */
-#define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__)
+#define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__)
 #if __unices__
 #  include <strings.h>
 #  include <sys/file.h>

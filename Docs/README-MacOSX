@@ -1,0 +1,38 @@
+README for MacOS X
+
+Status
+The MacOS X port of Gnokii currently supports only Gnokii for the Nokia 6210
+phone. Other phones in the 7110 family are likely to work also with this
+version.
+
+XGnokii, and others
+The graphical X version, the AT-emulater and virtual device are not ported
+to MacOS X. This might change in the future but as far as I know no work is
+in progress. Of course the effort of porting only makes sense if there is a
+need. Do you have the need for extended MacOS X functionality don't ask me
+but let us all know on the Gnokii mailing list.
+
+Hardware
+So far Gnokii has only been tested with a Keyspan USA-28Xb USB to Serial
+adapter and a Nokia dlr-3p cable.
+The MacOS X version does not work with IrDA (and probably never will). This
+is not a problem of Gnokii but a problem with Apple. The MacOS X IrDA
+protocol stack is completely undocumented thus unusable. Unless they change
+this or someone ports the IrDA stack from linux we're out of luck, sorry.
+
+Contents of my .gnokiirc file:
+port = /dev/cu.USA28X21P1.1
+model = 6210
+initlength = default
+connection = dlr3p
+#require_dcd = 1
+
+
+Disclaimer
+==========
+
+No warranty, you are on your own. If you have questions or remarks, please let me
+know on my email address mentioned below.
+
+Author:	Ruotger Skupin (Ruotger.Skupin@berlin.de)
+Date:	September 12, 2002
