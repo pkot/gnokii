@@ -80,6 +80,7 @@ GSM_Error	FB61_SendSMSMessage(char *message_centre, char *destination,
 
 GSM_Error	FB61_GetRFLevel(float *level);
 GSM_Error	FB61_GetBatteryLevel(float *level);
+GSM_Error	FB61_GetPowerSource(GSM_PowerSource *source);
 GSM_Error	FB61_EnterPin(char *pin);
 GSM_Error	FB61_GetSMSCenter(u8 priority);
 GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code);

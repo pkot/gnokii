@@ -14,7 +14,7 @@
   Warning: this code is only the test tool. It is not intented to real work -
   wait for GUI application.
 
-  Last modification: Sun Apr 25 20:29:07 CEST 1999
+  Last modification: Thu May  6 00:51:48 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <termios.h>
-#include <libintl.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -453,6 +452,9 @@ void	getalarm(void) {
 void monitormode(void)
 {
 
+  float rflevel=-1, batterylevel=-1;
+  GSM_PowerSource powersource=-1;
+
   /* We do not want to monitor serial line forever - press Ctrl+C to stop the
      monitoring mode. */
 
@@ -469,8 +471,19 @@ void monitormode(void)
      response to unknown messages etc. The loops ends after pressing the
      Ctrl+C. */
 
-  while (!shutdown)
+  while (!shutdown) {
+
+    if (GSM->GetRFLevel(&rflevel)==GE_NONE)
+      fprintf(stdout, "RFLevel: %d\n", (int)rflevel);
+
+    if (GSM->GetBatteryLevel(&batterylevel) == GE_NONE)
+      fprintf(stdout, "Battery: %d\n", (int)batterylevel);
+
+    if (GSM->GetPowerSource(&powersource) == GE_NONE)
+      fprintf(stdout, "Power Source: %s\n", (powersource==GPS_ACDC)?"AC/DC":"battery");
+
     sleep(1);
+  }
 
   fprintf (stderr, _("Leaving monitor mode...\n"));
 

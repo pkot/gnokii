@@ -10,7 +10,7 @@
   Header file for the definitions, enums etc. that are used by all models of
   handset.
 
-  Last modification: Sun Apr 25 20:18:27 CEST 1999
+  Last modification: Thu May  6 00:51:48 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -31,6 +31,13 @@ typedef enum {
   GMT_INTERNAL, /* Internal memory of the mobile equipment */
   GMT_SIM       /* SIM card memory */
 } GSM_MemoryType;
+
+/* Power source types */
+
+typedef enum {
+  GPS_ACDC=1,     /* AC/DC powered (charging) */
+  GPS_BATTERY /* Internal battery */
+} GSM_PowerSource;
 
 /* Limits of SMS messages. */
 
@@ -205,6 +212,8 @@ typedef struct {
   GSM_Error (*GetRFLevel)( float *level );
 
   GSM_Error (*GetBatteryLevel)( float *level );
+
+  GSM_Error (*GetPowerSource)( GSM_PowerSource *source);
 
   GSM_Error (*EnterPin)( char *pin );
 

@@ -21,7 +21,6 @@
 
 #include	<termios.h>
 #include	<stdio.h>
-#include	<libintl.h>
 #include	<unistd.h>
 #include	<fcntl.h>
 #include	<ctype.h>
@@ -50,6 +49,7 @@ GSM_Functions			FB38_Functions = {
 		FB38_SendSMSMessage,
 		FB38_GetRFLevel,
 		FB38_GetBatteryLevel,
+		FB38_GetPowerSource,
 		FB38_EnterPin,
 		FB38_GetIMEIAndCode,
 		FB38_GetDateTime,
@@ -475,6 +475,11 @@ GSM_Error	FB38_GetRFLevel(float *level)
 }
 
 GSM_Error	FB38_GetBatteryLevel(float *level)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_GetPowerSource(GSM_PowerSource *source)
 {
 	return (GE_NOTIMPLEMENTED);
 }
@@ -1672,6 +1677,9 @@ void	FB38_RX_Handle0x46_MemoryLocationData(void)
 		CurrentPhonebookEntry->Number[number_length] = 0x00;
 		CurrentPhonebookEntry->Empty = false;
 	}
+
+	/* FIXME: define macros for groups etc... No magic constants... */
+	CurrentPhonebookEntry->Group=5; /* No group.*/
 
 		/* Signal no error to calling code. */
 	CurrentPhonebookError = GE_NONE;

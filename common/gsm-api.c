@@ -17,14 +17,13 @@
   Unless otherwise noted, all functions herein block until they complete.  The
   functions themselves are defined in a structure in gsm-common.h.
 
-  Last modification: Fri Apr 23 21:30:12 CEST 1999
+  Last modification: Thu May  6 00:51:48 CEST 1999  
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
 
 #include <stdio.h>
 #include <string.h>
-#include <libintl.h>
 
 #include "misc.h"
 #include "gsm-common.h"

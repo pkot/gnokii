@@ -57,10 +57,13 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc BUGS COPYING MANIFEST README
+%doc BUGS COPYING MANIFEST README TODO-6110
 /usr/bin/*
 
 %changelog
+* Thu May  6 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- TODO-6110 file added to documentation files
+
 * Sun Mar 28 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - upgraded to gnokii-0.2.4
 - 6110 version of gnokii added

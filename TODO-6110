@@ -1,0 +1,25 @@
+This is a to-do list for 6110 series.
+
+- sending SMS messages
+
+- writing documentation of the protocol
+
+- how do we answer the incoming call (aka ATA?)
+
+- check out errors when reading phonebook entries
+
+- delete all FIXME from the sources
+
+- implement correct settime function - it should be very easy
+
+- implement calendar notes infrastructure and --getcalendarnote
+
+- --writecalendarnote
+
+- implement function FB61_GetStatus which should return {"Waiting for PIN",
+  "Registered within the network", "Call in progress" ...}
+
+- phonebook group handling
+
+- X interface :-)
+

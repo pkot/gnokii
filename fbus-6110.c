@@ -13,7 +13,7 @@
   The various routines are called FB61 (whatever) as a concatenation of FBUS
   and 6110.
 
-  Last modification: Mon Apr 26 22:54:51 CEST 1999
+  Last modification: Thu May  6 00:51:48 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
-#include <libintl.h>
 #include <fcntl.h>
 #include <ctype.h>
 #include <signal.h>
@@ -59,6 +58,7 @@ GSM_Functions FB61_Functions = {
   FB61_SendSMSMessage,
   FB61_GetRFLevel,
   FB61_GetBatteryLevel,
+  FB61_GetPowerSource,
   FB61_EnterPin,
   FB61_GetIMEIAndCode,
   FB61_GetDateTime,
@@ -114,6 +114,10 @@ GSM_Error          CurrentDateTimeError;
 
 GSM_DateTime       *CurrentAlarm;
 GSM_Error          CurrentAlarmError;
+
+int                CurrentRFLevel=-1,
+                   CurrentBatteryLevel=-1,
+                   CurrentPowerSource=-1;
 
 #define FB61_FRAME_HEADER 0x00, 0x01, 0x00
 
@@ -291,17 +295,37 @@ void		FB61_Terminate(void)
 	close (PortFD);
 }
 
-	/* These are the actual functions used by the higher level code, 
-	   accessed by the GSM_Functions structure.  For now these are
-	   all return GE_NOTIMPLEMENTED! */
-GSM_Error	FB61_GetRFLevel(float *level)
+GSM_Error FB61_GetRFLevel(float *level)
 {
-	return (GE_NOTIMPLEMENTED);
+
+  if (CurrentRFLevel != -1) {
+    *level=CurrentRFLevel;
+    return (GE_NONE);
+  }
+  else
+    return (GE_NOLINK);
 }
 
-GSM_Error	FB61_GetBatteryLevel(float *level)
+GSM_Error FB61_GetBatteryLevel(float *level)
 {
-	return (GE_NOTIMPLEMENTED);
+
+  if (CurrentBatteryLevel != -1) {
+    *level=CurrentBatteryLevel;
+    return (GE_NONE);
+  }
+  else
+    return (GE_NOLINK);
+}
+
+GSM_Error FB61_GetPowerSource(GSM_PowerSource *source)
+{
+
+  if (CurrentPowerSource != -1) {
+    *source=CurrentPowerSource;
+    return (GE_NONE);
+  }
+  else
+    return (GE_NOLINK);
 }
 
 GSM_Error FB61_DialVoice(char *Number) {
@@ -1085,6 +1109,14 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 
 	    break;
 
+	  case 0x09:
+
+#ifdef DEBUG
+	    printf(_("Message: Memory status error, probably not authorized by PIN\n"));
+#endif DEBUG
+
+	    break;
+
 	  default:
 
 #ifdef DEBUG
@@ -1151,6 +1183,10 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	    printf("   Signal strength: %d\n", MessageBuffer[5]);
 
 #endif DEBUG
+
+            CurrentRFLevel=MessageBuffer[5];
+            CurrentBatteryLevel=MessageBuffer[8];
+            CurrentPowerSource=MessageBuffer[7];
 
 	    break;
 
@@ -1397,6 +1433,14 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 #endif DEBUG
 
 	  break;
+
+          case 0x38:
+
+#ifdef DEBUG
+	    printf(_("Message: SMS Status error, probably not authorized by PIN\n"));
+#endif DEBUG
+
+	  break;
 	  
 	  default:
 
@@ -1475,16 +1519,22 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 
 	case 0xd0:
 
+#ifdef DEBUG
 	  printf(_("Message: The phone is powered on - seq 1.\n"));
 	  FB61_RX_DisplayMessage();
+#endif DEBUG
+
 	  break;
 
 	  /* Power on message */
 
 	case 0xf4:
 
+#ifdef DEBUG
 	  printf(_("Message: The phone is powered on - seq 2.\n"));
 	  FB61_RX_DisplayMessage();
+#endif DEBUG
+
 	  break;
 
 	  /* Unknown message - if you think that you know the exact meaning of

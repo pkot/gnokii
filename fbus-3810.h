@@ -43,6 +43,7 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination,
 	/* These aren't presently implemented. */
 GSM_Error	FB38_GetRFLevel(float *level);
 GSM_Error	FB38_GetBatteryLevel(float *level);
+GSM_Error	FB38_GetPowerSource(GSM_PowerSource *source);
 GSM_Error	FB38_EnterPin(char *pin);
 GSM_Error	FB38_GetIMEIAndCode(char *imei, char *code);
 GSM_Error	FB38_GetDateTime(GSM_DateTime *date_time);

@@ -9,7 +9,7 @@
 
   Header file for miscellaneous defines, typedefs etc.
 
-  Last modification: Fri Apr 23 21:12:59 CEST 1999
+  Last modification: Thu May  6 00:51:04 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -34,7 +34,11 @@
   #define bool int
 #endif
 
-/* For GNU gettext */
-#define _(x) gettext(x)
+#ifdef GNOKII_GETTEXT
+  #include <libintl.h>
+  #define _(x) gettext(x)
+#else
+  #define _(x) (x)
+#endif GNOKII_GETTEXT
 
 #endif	/* __misc_h */
