@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.18  2001-11-15 12:04:06  pkot
+  Revision 1.19  2001-11-15 12:12:34  pkot
+  7110 and 6110 series phones introduce as Nokia
+
+  Revision 1.18  2001/11/15 12:04:06  pkot
   Faster initialization for 6100 series (don't check for dlr3 cable)
 
   Revision 1.17  2001/11/14 10:48:03  pkot
@@ -627,6 +630,7 @@ static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req2[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
   
 	dprintf("Identifying...\n");
+	PNOK_GetManufacturer(data->Manufacturer);
 	if (SM_SendMessage(state, 4, 0x1b, req) != GE_NONE) return GE_NOTREADY;
 	if (SM_SendMessage(state, 6, 0x1b, req2) != GE_NONE) return GE_NOTREADY;
 	SM_WaitFor(state, data, 0x1b);

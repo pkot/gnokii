@@ -17,7 +17,10 @@
   The various routines are called PNOK_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:07  chris
+  Revision 1.2  2001-11-15 12:12:34  pkot
+  7110 and 6110 series phones introduce as Nokia
+
+  Revision 1.1  2001/02/21 19:57:07  chris
   More fiddling with the directory layout
 
   Revision 1.1  2001/02/16 14:29:53  chris
@@ -47,6 +50,6 @@
 
 GSM_Error PNOK_GetManufacturer(char *manufacturer)
 {
-	strncpy (manufacturer, "Nokia", PNOK_MAX_MANUFACTURER_LENGTH);
+	strcpy (manufacturer, "Nokia");
 	return (GE_NONE);
 }

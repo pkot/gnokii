@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.4  2001-11-15 12:04:06  pkot
+  Revision 1.5  2001-11-15 12:12:34  pkot
+  7110 and 6110 series phones introduce as Nokia
+
+  Revision 1.4  2001/11/15 12:04:06  pkot
   Faster initialization for 6100 series (don't check for dlr3 cable)
 
   Revision 1.3  2001/08/17 00:01:53  pkot
@@ -279,8 +282,9 @@ static GSM_Error Incoming0x03(int messagetype, unsigned char *message, int lengt
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x10 };
-  
+
 	dprintf("Identifying...\n");
+	PNOK_GetManufacturer(data->Manufacturer);
 	if (SM_SendMessage(state, 4, 0x64, req) != GE_NONE) return GE_NOTREADY;
 	SM_WaitFor(state, data, 0x64);
        	SM_Block(state, data, 0x64); /* waits for all requests */
