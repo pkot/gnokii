@@ -40,6 +40,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <sys/uio.h>
 
 #include "misc.h"
 #include "gsm-api.h"
