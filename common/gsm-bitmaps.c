@@ -44,12 +44,12 @@
 
 /* A few useful functions for bitmaps */
 
-API gn_error gn_bmp_null(gn_bmp *bmp, GSM_Information *info)
+API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info)
 {
 	if (!bmp || !info) return GN_ERR_INTERNALERROR;
 	strcpy(bmp->netcode, "000 00");
-	bmp->width = info->OpLogoW;
-	bmp->height = info->OpLogoH;
+	bmp->width = info->operator_logo_width;
+	bmp->height = info->operator_logo_height;
 	bmp->size = ceiling_to_octet(bmp->width * bmp->height);
 	gn_bmp_clear(bmp);
 	return GN_ERR_NONE;
@@ -126,7 +126,7 @@ API void gn_bmp_clear(gn_bmp *bmp)
 	memset(bmp->bitmap, 0, bmp->size);
 }
 
-API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, GSM_Information *info)
+API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info)
 {
 	gn_bmp backup;
 	int x, y, copywidth, copyheight;
@@ -136,26 +136,26 @@ API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, GSM_Information *inf
 
 	switch (target) {
 	case GN_BMP_StartupLogo:
-		bitmap->width = info->StartupLogoW;
-		bitmap->height = info->StartupLogoH;
-		if ((!strncmp(info->Models, "6510", 4)) || (!strncmp(info->Models, "7110", 4)))
+		bitmap->width = info->startup_logo_width;
+		bitmap->height = info->startup_logo_height;
+		if ((!strncmp(info->models, "6510", 4)) || (!strncmp(info->models, "7110", 4)))
 			bitmap->size = ceiling_to_octet(bitmap->height) * bitmap->width;
 		else 
 			bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
 	case GN_BMP_NewOperatorLogo:
-		bitmap->width = info->OpLogoW;
-		bitmap->height = info->OpLogoH;
+		bitmap->width = info->operator_logo_width;
+		bitmap->height = info->operator_logo_height;
 		bitmap->size = ceiling_to_octet(bitmap->height) * bitmap->width;
 		break;
 	case GN_BMP_OperatorLogo:
-		bitmap->width = info->OpLogoW;
-		bitmap->height = info->OpLogoH;
+		bitmap->width = info->operator_logo_width;
+		bitmap->height = info->operator_logo_height;
 		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
 	case GN_BMP_CallerLogo:
-		bitmap->width = info->CallerLogoW;
-		bitmap->height = info->CallerLogoH;
+		bitmap->width = info->caller_logo_width;
+		bitmap->height = info->caller_logo_height;
 		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
 	case GN_BMP_PictureMessage:
