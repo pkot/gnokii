@@ -1409,7 +1409,7 @@ void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonOperator), false);
 	gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonCaller), false);
 
-	if (tbitmap.type == GSM_OperatorLogo || tbitmap.type == GSM_OperatorLogo)
+	if (tbitmap.type == GSM_NewOperatorLogo || tbitmap.type == GSM_OperatorLogo)
 		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonOperator), true);
 	if (tbitmap.type == GSM_StartupLogo)
 		gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonStartup), true);
