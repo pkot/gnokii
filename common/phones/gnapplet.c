@@ -75,6 +75,7 @@
 /* static functions prototypes */
 static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_initialise(struct gn_statemachine *state);
+static gn_error gnapplet_get_phone_info(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_identify(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_read_phonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_write_phonebook(gn_data *data, struct gn_statemachine *state);
@@ -181,18 +182,9 @@ static gn_error gnapplet_initialise(struct gn_statemachine *state)
 }
 
 
-static gn_error gnapplet_identify(gn_data *data, struct gn_statemachine *state)
+static gn_error gnapplet_get_phone_info(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
-
-	/*
-	if (data->manufacturer) pnok_manufacturer_get(data->manufacturer);
-	if (data->model) strcpy(data->model, drvinst->model);
-	if (data->imei) strcpy(data->imei, drvinst->imei);
-	if (data->revision) snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", drvinst->sw_version, drvinst->hw_version);
-	data->phone = drvinst->pm;
-	*/
 
 	pkt_put_uint16(&pkt, GNAPPLET_MSG_INFO_ID_REQ);
 
@@ -200,34 +192,50 @@ static gn_error gnapplet_identify(gn_data *data, struct gn_statemachine *state)
 }
 
 
+static gn_error gnapplet_identify(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	gn_error error;
+
+	if (!drvinst->manufacturer[0]) {
+		if ((error = gnapplet_get_phone_info(data, state)) != GN_ERR_NONE)
+			return error;
+	}
+
+	if (data->manufacturer) snprintf(data->manufacturer, 20, "%s", drvinst->manufacturer);
+	if (data->model) snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", drvinst->model);
+	if (data->imei) snprintf(data->imei, GN_IMEI_MAX_LENGTH, "%s", drvinst->imei);
+	if (data->revision) snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", drvinst->sw_version, drvinst->hw_version);
+	//data->phone = drvinst->phone;
+
+	return GN_ERR_NONE;
+}
+
+
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	char sw_version[16], hw_version[16];
-	int proto_major, proto_minor;
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REPLY_DEF;
 
 	switch (code) {
 
 	case GNAPPLET_MSG_INFO_ID_RESP:
 		if (error != GN_ERR_NONE) return error;
-		proto_major = pkt_get_uint16(&pkt);
-		proto_minor = pkt_get_uint16(&pkt);
+		drvinst->proto_major = pkt_get_uint16(&pkt);
+		drvinst->proto_minor = pkt_get_uint16(&pkt);
 		/* Compatibility isn't important early in the development */
 		/* if (proto_major != GNAPPLET_MAJOR_VERSION) { */
-		if (proto_major != GNAPPLET_MAJOR_VERSION || proto_minor != GNAPPLET_MINOR_VERSION) {
+		if (drvinst->proto_major != GNAPPLET_MAJOR_VERSION || drvinst->proto_minor != GNAPPLET_MINOR_VERSION) {
 			dprintf("gnapplet version: %d.%d, gnokii driver: %d.%d\n",
-				proto_major, proto_minor,
+				drvinst->proto_major, drvinst->proto_minor,
 				GNAPPLET_MAJOR_VERSION, GNAPPLET_MINOR_VERSION);
 			return GN_ERR_INTERNALERROR;
 		}
-		if (data->manufacturer) pkt_get_string(data->manufacturer, 20, &pkt);
-		if (data->model) pkt_get_string(data->model, GN_MODEL_MAX_LENGTH, &pkt);
-		if (data->imei) pkt_get_string(data->imei, GN_IMEI_MAX_LENGTH, &pkt);
-		if (data->revision) {
-			pkt_get_string(sw_version, sizeof(sw_version), &pkt);
-			pkt_get_string(hw_version, sizeof(hw_version), &pkt);
-			snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", sw_version, hw_version);
-		}
+		pkt_get_string(drvinst->manufacturer, sizeof(drvinst->manufacturer), &pkt);
+		pkt_get_string(drvinst->model, sizeof(drvinst->model), &pkt);
+		pkt_get_string(drvinst->imei, sizeof(drvinst->imei), &pkt);
+		pkt_get_string(drvinst->sw_version, sizeof(drvinst->sw_version), &pkt);
+		pkt_get_string(drvinst->hw_version, sizeof(drvinst->hw_version), &pkt);
 		break;
 
 	default:

@@ -38,6 +38,7 @@
     o minimal phonebook management support         (BORBELY Zoltan)
     o GetMemoryStatus support added                (BORBELY Zoltan)
     o DC/MC/RC memory handling added               (BORBELY Zoltan)
+    o Identify will cache the result               (BORBELY Zoltan)
 
 0.6.0
 =====
