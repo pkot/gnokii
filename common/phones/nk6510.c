@@ -114,6 +114,7 @@ static GSM_Error P6510_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *s
 static GSM_Error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 #endif
 static GSM_Error P6510_GetToDo(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_WriteToDo(GSM_Data *data, GSM_Statemachine *state);
 
 
 static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
@@ -242,6 +243,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		*/
 	case GOP_GetToDo:
 		return P6510_GetToDo(data, state);
+	case GOP_WriteToDo:
+		return P6510_WriteToDo(data, state);
 	case GOP_GetCalendarNote:
 		return P6510_GetCalendarNote(data, state);
 	case GOP_WriteCalendarNote:
@@ -885,7 +888,7 @@ static GSM_Error ValidateSMS(GSM_Data *data, GSM_Statemachine *state)
 		if ((error = P6510_GetSMSFolderStatus(data, state)) != GE_NONE) return error;
 	}
 
-	if (data->SMSFolder->Number + 2 < data->RawSMS->Number) {
+	if (data->SMSFolder->Number < data->RawSMS->Number) {
 		if (data->RawSMS->Number < MAX_SMS_MESSAGES)
 			return GE_EMPTYLOCATION;
 		else
@@ -1655,7 +1658,6 @@ static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message,
 	case P6510_SUBCAL_DEL_NOTE_RESP:
 		dprintf("Succesfully deleted calendar note: %i!\n", (message[4] << 8) | message[5]);
 		break;
-
 	case P6510_SUBCAL_ADD_MEETING_RESP:
 	case P6510_SUBCAL_ADD_CALL_RESP:
 	case P6510_SUBCAL_ADD_BIRTHDAY_RESP:
@@ -1672,7 +1674,7 @@ static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message,
 
 static GSM_Error P6510_GetCalendarNotesInfo(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, P6510_SUBCAL_GET_INFO, 0xFF, 0xFE};
+	unsigned char req[] = {FBUS_FRAME_HEADER, P6510_SUBCAL_GET_INFO, 0xff, 0xfe};
 	dprintf("Getting calendar notes info...\n");
 	if (SM_SendMessage(state, 6, P6510_MSG_CALENDAR, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_CALENDAR);
@@ -1681,8 +1683,8 @@ static GSM_Error P6510_GetCalendarNotesInfo(GSM_Data *data, GSM_Statemachine *st
 static GSM_Error P6510_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error	error = GE_NOTREADY;
-	unsigned char	req[] = {FBUS_FRAME_HEADER, P6510_SUBCAL_GET_NOTE, 0x00, 0x00};
-	unsigned char	date[] = {FBUS_FRAME_HEADER, P6510_SUBCLO_GET_DATE};
+	unsigned char	req[] = { FBUS_FRAME_HEADER, P6510_SUBCAL_GET_NOTE, 0x00, 0x00 };
+	unsigned char	date[] = { FBUS_FRAME_HEADER, P6510_SUBCLO_GET_DATE };
 	GSM_Data	tmpdata;
 	GSM_DateTime	tmptime;
 
@@ -1756,7 +1758,7 @@ static GSM_Error P6510_FirstCalendarFreePos(GSM_Data *data, GSM_Statemachine *st
 
 static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[200] = { FBUS_FRAME_HEADER,
+	unsigned char req[350] = { FBUS_FRAME_HEADER,
 				   0x01,       /* note type ... */
 				   0x00, 0x00, /* location */
 				   0x00,       /* entry type */
@@ -1873,7 +1875,6 @@ static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		EncodeUnicode(req + count, CalendarNote->Phone, strlen(CalendarNote->Phone)); /* Fields (N+1)->n */
 		count += 2 * strlen(CalendarNote->Phone);
 		break;
-
 	case GCN_BIRTHDAY:
 		req[count++] = 0x00; /* Field 12 Fixed */
 		req[count++] = 0x00; /* Field 13 Fixed */
@@ -1927,13 +1928,13 @@ static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		req[count++] = 0x00; /* Field 15 */
 		/* Text */
 		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 16->N */
-		count = count + 2 * strlen(CalendarNote->Text);
+		count += 2 * strlen(CalendarNote->Text);
 		break;
 	}
 
 	/* padding */
 	req[count] = 0x00;
-
+	count++;
 	dprintf("Count after padding = %d\n", count);
 
 	SEND_MESSAGE_WAITFOR(P6510_MSG_CALENDAR, count);
@@ -2950,10 +2951,13 @@ static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int
 	int i;
 
 	switch (message[3]) {
+	case 0x02:
+		dprintf("ToDo set!\n");
+		break;
 	case 0x04:
-		if (!data->ToDo) return GE_INTERNALERROR;
-		if (length == 14) return GE_INVALIDLOCATION;
 		dprintf("ToDo received!\n");
+		if (!data->ToDo) return GE_INTERNALERROR;
+		if (message[5] == 0x08) return GE_INVALIDLOCATION;
 		if ((message[4] > 0) && (message[4] < 4)) {
 			data->ToDo->Priority = message[4];
 		}
@@ -2961,9 +2965,15 @@ static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int
 		DecodeUnicode(data->ToDo->Text, message + 14, length - 16);
 		dprintf("Text: \"%s\"\n", data->ToDo->Text);
 		break;
-	case 0x16:
+	case 0x10:
+		dprintf("Next free ToDo location received!\n");
 		if (!data->ToDo) return GE_INTERNALERROR;
+		data->ToDo->Location = (message[8] << 8) | message[9];
+		dprintf("   location: %i\n", data->ToDo->Location);
+		break;
+	case 0x16:
 		dprintf("ToDo locations received!\n");
+		if (!data->ToDo) return GE_INTERNALERROR;
 		data->ToDoList->Number = (message[6] << 8) | message[7];
 		dprintf("Number of Entries: %i\n", data->ToDoList->Number);
 
@@ -2992,6 +3002,13 @@ static GSM_Error P6510_GetToDoLocations(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P6510_MSG_TODO, 10);
 }
 
+static GSM_Error GetNextFreeToDoLocation(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {	FBUS_FRAME_HEADER, 0x0f };
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_TODO, 4);
+}
+
 static GSM_Error P6510_GetToDo(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER,0x03, 
@@ -3008,6 +3025,28 @@ static GSM_Error P6510_GetToDo(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Getting ToDo\n");
 	SEND_MESSAGE_BLOCK(P6510_MSG_TODO, 10);
+}
+
+static GSM_Error P6510_WriteToDo(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[300] = {FBUS_FRAME_HEADER, 0x01, 
+				  0x02, /* prority */
+				  0x0D, 0x80, 0x00, 0x00, 0x01};	/* Location */
+	unsigned char text[257];
+	GSM_Error error;
+
+	error = GetNextFreeToDoLocation(data, state);
+	if (error != GE_NONE) return error;
+
+	req[4] = data->ToDo->Priority;
+	req[8] = data->ToDo->Location / 256;
+	req[9] = data->ToDo->Location % 256;
+
+	EncodeUnicode(text, data->ToDo->Text, strlen(data->ToDo->Text));
+	memcpy(req + 10, text, strlen(data->ToDo->Text) * 2);
+
+	dprintf("Setting ToDo\n");
+	SEND_MESSAGE_BLOCK(P6510_MSG_TODO, 10 + strlen(data->ToDo->Text) * 2);
 }
 
 /********************************/
