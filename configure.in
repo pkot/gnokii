@@ -363,8 +363,11 @@ if test "$no_x" = yes -o "$with_x" = "no"; then
 else
    AC_PATH_X
    if test "x$x_includes" != "x"; then
-      CPPFLAGS="$CPPFLAGS -I$x_includes"
+      XINCL="-I$x_includes"
+   else
+      XINCL=""
    fi
+   CPPFLAGS="$CPPFLAGS $XINCL"
    AC_CHECK_HEADERS(X11/xpm.h)
 
    if test "x$x_libraries" = "xNONE"; then
@@ -377,7 +380,7 @@ else
       AC_MSG_WARN(Disabling xgnokii.)
    else
       AC_CHECK_LIB(Xpm, XpmWriteFileFromXpmImage,
-            [ XPM_CFLAGS="-I$x_includes" XPM_LIBS="-L$x_libraries -lXpm -lX11"
+            [ XPM_CFLAGS="$XINCL" XPM_LIBS="-L$x_libraries -lXpm -lX11"
               AC_DEFINE(XPM) ],
             AC_MSG_WARN(Cannot found library libXpm - disabling XPM support.),
             [ -L$x_libraries -lX11 ]

@@ -2,6 +2,9 @@
 ========================
  * build system updates
     o wrong permissions for gnapplet.sis             (Ville Skyttä)
+    o when AC_PATH_X returns empty set of x_includes, but X11
+      libraries are present in the system, configure would
+      incorrectly add -I to XPM_CFLAGS                  (Pawel Kot)
  * AT driver updates
     o add more workarounds for SonyEricssons            (Hugo Haas)
  * gnapplet driver updates
