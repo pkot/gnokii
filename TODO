@@ -15,7 +15,7 @@
     o syncml support
     o support new phones with filesystems, cameras and other bell'n'whistles
     o Nokia 9210 and family
-    o irda and bluetooth support for win32
+    o bluetooth support for win32
 
  * GNOME/KDE support
     o external apps
