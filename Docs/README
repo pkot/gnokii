@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2002 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2002 Pawe³ Kot
-                  Last update 23 Jul 2002    Version 0.4.2
+                  Last update 23 Jul 2002    Version 0.4.3
 
 - Contents - 			   
 
@@ -363,8 +363,14 @@ to recognise those who have helped so far!
 
 
 - 15.0 Release Notes -
+20020805 Version 0.4.3
+Many functional updates. They touch mainly nk6510 and nk6110 drivers
+functionality, also updates in nk7110 driver. Add new functionality to
+gnokii/xgnokii (TODO list). More phone models are known to work. SMSD should
+work with the drivers supporting SMS folders.
+
 20020722 Version 0.4.2
-Minor updated. Mainly fixes and updates in nk6510 driver: sms sending and
+Minor updates. Mainly fixes and updates in nk6510 driver: sms sending and
 reading, dlr3p cable support. sendsms can recognize messages not written in
 the default alphabet and automatically sends them in unicode. Also many
 reported nasty bugs fixed.
