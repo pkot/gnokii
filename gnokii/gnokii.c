@@ -490,8 +490,10 @@ static int sendsms(int argc, char *argv[])
 
 	memset(&sms.Remote.Number, 0, sizeof(sms.Remote.Number));
 	strncpy(sms.Remote.Number, argv[0], sizeof(sms.Remote.Number) - 1);
-	if (sms.Remote.Number[0] == '+') sms.Remote.Type = SMS_International;
-	else sms.Remote.Type = SMS_Unknown;
+	if (sms.Remote.Number[0] == '+') 
+		sms.Remote.Type = SMS_International;
+	else 
+		sms.Remote.Type = SMS_Unknown;
 
 	optarg = NULL;
 	optind = 0;
@@ -500,7 +502,10 @@ static int sendsms(int argc, char *argv[])
 		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
 			strncpy(sms.SMSC.Number, optarg, sizeof(sms.SMSC.Number) - 1);
-			if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
+			if (sms.SMSC.Number[0] == '+') 
+				sms.SMSC.Type = SMS_International;
+			else
+				sms.SMSC.Type = SMS_Unknown;
 			break;
 
 		case '2': /* SMSC number index in phone memory */
@@ -1722,9 +1727,15 @@ static int setlogo(int argc, char *argv[])
 		if (error != GE_NONE) return -1;
 			
 		memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
-		if (bitmap.type != GSM_OperatorLogo || argc < 3)
-			if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE) strncpy(bitmap.netcode, NetworkInfo.NetworkCode, sizeof(bitmap.netcode) - 1);
-		GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, info);
+		if (argc < 3)
+			if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE) 
+				strncpy(bitmap.netcode, NetworkInfo.NetworkCode, sizeof(bitmap.netcode) - 1);
+
+		if (!strncmp(State.Phone.Info.Models, "6510", 4))
+			GSM_ResizeBitmap(&bitmap, GSM_NewOperatorLogo, info);
+		else
+			GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, info);
+
 		if (argc == 3) {
 			strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
 			if (!strcmp(GSM_GetNetworkName(bitmap.netcode), "unknown")) {
@@ -1742,8 +1753,8 @@ static int setlogo(int argc, char *argv[])
 		GSM_ResizeBitmap(&bitmap, GSM_CallerLogo, info);
 		if (argc > 2) {
 			bitmap.number = argv[2][0] - '0';
+			dprintf("%i \n", bitmap.number);
 			if ((bitmap.number < 0) || (bitmap.number > 9)) bitmap.number = 0;
-			else bitmap.number = 0;
 			oldbit.type = GSM_CallerLogo;
 			oldbit.number = bitmap.number;
 			data.Bitmap = &oldbit;
@@ -1810,6 +1821,7 @@ static int setlogo(int argc, char *argv[])
 				for (i = 0; i < oldbit.size; i++) {
 					if (oldbit.bitmap[i] != bitmap.bitmap[i]) {
 						fprintf(stderr, _("Error setting startup logo - SIM card and PIN is required\n"));
+						fprintf(stderr, _("i: %i, %2x %2x\n"), i, oldbit.bitmap[i], bitmap.bitmap[i]);
 						ok = false;
 						break;
 					}
