@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.2.6-pre3
+VERSION = 0.2.6-pre4
 
 #
 # Compiler to use.
@@ -32,7 +32,7 @@ MODEL=-DMODEL="\"3810\""
 # For Nokia 6110/5110 uncomment the next line
 #
 
-# MODEL=-DMODEL="\"6110\""
+MODEL=-DMODEL="\"6110\""
 
 #
 # Serial port for communication
@@ -63,8 +63,8 @@ GETTEXT=-DGNOKII_GETTEXT
 
 COMMON=-Wall -g -O0 ${MODEL} ${PORT} ${GETTEXT} ${DEBUG} -DVERSION=\"${VERSION}\"
 
-CFLAGS = -D_REENTRANT ${COMMON}
-LDFLAGS = -lpthread
+CFLAGS = -D_REENTRANT ${COMMON} `gtk-config --cflags`
+LDFLAGS = -lpthread `gtk-config --libs`
 
 #
 # For FreeBSD uncomment the following lines
@@ -75,20 +75,42 @@ LDFLAGS = -lpthread
 
 ################## Nothing interesting after this line ##################
 
-GNOKII_OBJS = gnokii.o gsm-api.o fbus-3810.o fbus-6110.o gsm-networks.o
+#
+# Common objects - these files are needed for all utilities
+#
 
-GNOKIID_OBJS = gnokiid.o virtmodem.o datapump.o at-emulator.o gsm-api.o fbus-3810.o fbus-6110.o
+COMMON_OBJS = gsm-api.o \
+              fbus-3810.o \
+              fbus-6110.o fbus-6110-auth.o \
+              gsm-networks.o
+
+#
+# Object files for each utility
+#
+
+GNOKII_OBJS = gnokii.o
+
+XGNOKII_OBJS = xgnokii.o
+
+GNOKIID_OBJS = gnokiid.o at-emulator.o virtmodem.o datapump.o
 
 # Build executable
-all: gnokii gnokiid
+all: gnokii gnokiid xgnokii
 
-gnokii: $(GNOKII_OBJS)
+gnokii: $(GNOKII_OBJS) $(COMMON_OBJS)
 
-gnokiid: $(GNOKIID_OBJS)
+gnokiid: $(GNOKIID_OBJS) $(COMMON_OBJS)
+
+xgnokii: $(XGNOKII_OBJS) $(COMMON_OBJS)
 
 # Misc targets
 clean:
-	@rm -f core *~ *% *.bak gnokii $(GNOKII_OBJS) gnokiid $(GNOKIID_OBJS) gnokii-${VERSION}.tar.gz
+	@rm -f core *~ *% *.bak \
+               $(COMMON_OBJS) \
+               gnokii $(GNOKII_OBJS) \
+               gnokiid $(GNOKIID_OBJS) \
+               xgnokii $(XGNOKII_OBJS) \
+               gnokii-${VERSION}.tar.gz
 
 dist:	clean
 	@mkdir -p /tmp/gnokii-${VERSION}
@@ -111,3 +133,5 @@ at-emulator.o: at-emulator.c gsm-api.c gsm-api.h misc.h gsm-common.h
 gsm-api.o: gsm-api.c fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-3810.o: fbus-3810.c fbus-3810.h misc.h gsm-common.h
 fbus-6110.o: fbus-6110.c fbus-6110.h misc.h gsm-common.h gsm-networks.h
+fbus-6110-auth.o: fbus-6110-auth.c fbus-6110-auth.h
+xgnokii.o: xgnokii.c gsm-api.c gsm-api.h misc.h gsm-common.h

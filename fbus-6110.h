@@ -33,9 +33,17 @@
 
 /* Nokia 6110 has different numbers for Phone and SIM memory then GMT_??? */
 
-#define FB61_MEMORY_PHONE 0x02
-#define FB61_MEMORY_SIM 0x03
+#define FB61_MEMORY_PHONE       0x02
+#define FB61_MEMORY_SIM         0x03
+#define FB61_MEMORY_FIXED_DIALS 0x04
+#define FB61_MEMORY_OWN_NUMBERS 0x05
 
+/* What is this???? */
+#define FB61_MEMORY_EN_UNKNOWN  0x06
+#define FB61_MEMORY_DIALLED     0x07
+#define FB61_MEMORY_RECEIVED    0x08
+#define FB61_MEMORY_MiSSED      0x09
+            
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
    6110 phones */
 
@@ -98,6 +106,7 @@ GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time);
 GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	FB61_DialVoice(char *Number);
+GSM_Error	FB61_DialData(char *Number);
 GSM_Error	FB61_GetIncomingCallNr(char *Number);
 
 	/* All defines and prototypes from here down are specific to 

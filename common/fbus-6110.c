@@ -42,6 +42,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "fbus-6110.h"
+#include "fbus-6110-auth.h"
 #include "gsm-networks.h"
 
 /* Global variables used by code in gsm-api.c to expose the functions
@@ -73,6 +74,7 @@ GSM_Functions FB61_Functions = {
   FB61_GetAlarm,
   FB61_SetAlarm,
   FB61_DialVoice,
+  FB61_DialData,
   FB61_GetIncomingCallNr
 };
 
@@ -131,6 +133,14 @@ unsigned char MessageLength,
               MessageDestination,
               MessageSource,
               MessageUnknown;
+
+/* Magic bytes from the phone. */
+
+unsigned char MagicBytes[4]= { 0x00, 0x00, 0x00, 0x00 };
+GSM_Error CurrentMagicError = GE_BUSY;
+
+/* IMEI from the phone. */
+unsigned char IMEI[20];
 
 enum FB61_RX_States RX_State;
 
@@ -225,19 +235,27 @@ GSM_Error FB61_TX_SendStatusRequest(void)
 GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x07, 0x00, 0x01};
-  int timeout=10;
+  unsigned char req[] = { FB61_FRAME_HEADER,
+                          0x07, /* MemoryStatus request */
+                          0x00, /* MemoryType */
+                          0x01};
+  int timeout=20;
+  int memory_area;
 
   CurrentMemoryStatus = Status;
   CurrentMemoryStatusError = GE_BUSY;
 
+  /* FIXME: some memorytype parsing function? */
+
   if (Status->MemoryType == GMT_INTERNAL)
-    req[4] = FB61_MEMORY_PHONE;
+    memory_area = FB61_MEMORY_PHONE;
   else
     if (Status->MemoryType == GMT_SIM)
-      req[4] = FB61_MEMORY_SIM;
+      memory_area = FB61_MEMORY_SIM;
     else
       return (GE_INVALIDMEMORYTYPE);
+
+  req[4] = memory_area;
 
   FB61_TX_SendMessage(0x06, 0x03, req);
 
@@ -269,7 +287,7 @@ GSM_Error	FB61_GetCalendarNote(int location)
    called a thread is created to run this loop. This loop is exited when the
    application calls the FB61_Terminate function. */
 
-void	FB61_ThreadLoop(void)
+void FB61_ThreadLoop(void)
 {
 
   unsigned char init_char[] = {0x55};
@@ -277,7 +295,24 @@ void	FB61_ThreadLoop(void)
   unsigned char connect2[] = {FB61_FRAME_HEADER, 0x20, 0x02, 0x01};
   unsigned char connect3[] = {FB61_FRAME_HEADER, 0x0d, 0x01, 0x00, 0x02, 0x01};
   unsigned char connect4[] = {FB61_FRAME_HEADER, 0x10, 0x01};
-  int count, idle_timer;
+
+  unsigned char magic_connect[] = {FB61_FRAME_HEADER,
+  0x12,
+
+  /* The real magic goes here ... These bytes are filled in with the
+     external function FB61_GetNokiaAuth(). */
+
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+
+  /* NOKIA&GNOKII Accessory */
+
+  0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x26, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x20,
+  0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x79,
+  
+  0x00, 0x00, 0x00, 0x00, 0x01};
+
+  int count, idle_timer, timeout=50;
 
   CurrentPhonebookEntry = NULL;  
 
@@ -323,15 +358,27 @@ void	FB61_ThreadLoop(void)
 
   FB61_TX_SendMessage(5, 0x64, connect4);
 
-  usleep(100);
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentMagicError == GE_BUSY ) {
 
+    if (timeout-- == 0)
+      return;
+
+    usleep (100000);
+  }                       
+
+  FB61_GetNokiaAuth(IMEI, MagicBytes, magic_connect+4);
+
+  FB61_TX_SendMessage(46, 0x64, magic_connect);
+  
   /* Get the primary SMS Center */
 
   /* It's very strange that if I send this request again (with different
      number) it fails. But if I send it alone it succeds. It seems that 6110
-     is refusing to tell you all the SMS Centers information at once :-( */
+     is refusing to tell you all the SMS Centers information at once :-(
+     And even when I'm authenticated correctly... */
 
-  //	FB61_GetSMSCenter(1);
+  //    FB61_GetSMSCenter(1);
 
   // 	FB61_GetCalendarNote(1);
 
@@ -527,6 +574,24 @@ GSM_Error FB61_DialVoice(char *Number) {
   memcpy(req+5+strlen(Number), req_end, 10);
 
   FB61_TX_SendMessage(14+strlen(Number), 0x01, req);
+
+  return(GE_NONE);
+}
+
+GSM_Error FB61_DialData(char *Number) {
+
+  unsigned char req[100]={FB61_FRAME_HEADER, 0x01};
+  unsigned char req_end[]={0x01, 0x02, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01, 0x02, 0x0a, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x15, 0x63, 0xa8, 0x00, 0x00, 0x01};
+  int i=0;
+
+  req[4]=strlen(Number);
+
+  for(i=0; i < strlen(Number) ; i++)
+   req[5+i]=Number[i];
+
+  memcpy(req+5+strlen(Number), req_end, 23);
+
+  FB61_TX_SendMessage(27+strlen(Number), 0x01, req);
 
   return(GE_NONE);
 }
@@ -860,7 +925,7 @@ GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMe
   FB61_TX_SendMessage(0x09, 0x02, req);
 
   /* Wait for timeout or other error. */
-  while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
+  while (timeout != 0 && (CurrentSMSMessageError == GE_BUSY || CurrentSMSMessageError == GE_SMSWAITING)) {
 
     if (timeout-- == 0)
       return (GE_TIMEOUT);
@@ -1525,6 +1590,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	CurrentPhonebookError = GE_INTERNALERROR;
       }
 
+      break;
+
     case 0x05:
 
 #ifdef DEBUG
@@ -1904,7 +1971,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       strcpy(CurrentSMSMessage->MessageCentre, FB61_GetBCDNumber(MessageBuffer+8));
 
-      /* FIXME: is there any valid-length field? */
+      CurrentSMSMessage->Length=MessageBuffer[23];
 
       /* Fixes reading SMS Outbox msgs: skips first byte if null --GR */
       if (MessageBuffer[43] == 0) {
@@ -1936,7 +2003,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
  
       /* Signal no error to calling code. */
 
-      if (MessageBuffer[MessageLength-2]==2)
+      /* CurrentSMSMessage->Length > tmp indicates additional frames pending */
+      if (CurrentSMSMessage->Length > tmp)
 	CurrentSMSMessageError = GE_SMSWAITING;
       else
 	CurrentSMSMessageError = GE_NONE;
@@ -2014,31 +2082,31 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	  
     default:
 
-      /* FIXME: this is very bad! Should identify specific type for "rest of msg" */
+      if (CurrentSMSMessageError == GE_SMSWAITING) {
 
 #ifdef DEBUG
-      printf(_("Message: the rest of the SMS message received.\n"));
+         printf(_("Message: the rest of the SMS message received.\n"));
 #endif DEBUG
 
-      tmp=UnpackEightBitsToSeven(MessageLength-2, MessageBuffer, output);
+         tmp=UnpackEightBitsToSeven(MessageLength-2, MessageBuffer, output);
 
-      for (i=0; i<tmp;i++) {
+         for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-	printf("%c", GSM_Default_Alphabet[output[i]]);
+	   printf("%c", GSM_Default_Alphabet[output[i]]);
 #endif DEBUG
 
-	CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=GSM_Default_Alphabet[output[i]];
+           CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=GSM_Default_Alphabet[output[i]];
+         }
+
+         CurrentSMSMessage->MessageText[CurrentSMSPointer+tmp]=0;
+
+         CurrentSMSMessageError = GE_NONE;
+
+#ifdef DEBUG
+         printf("\n");
+#endif DEBUG
       }
-
-      CurrentSMSMessage->MessageText[CurrentSMSPointer+tmp]=0;
-
-      CurrentSMSMessageError = GE_NONE;
-
-#ifdef DEBUG
-      printf("\n");
-#endif DEBUG
-
     }
 
     break;
@@ -2049,7 +2117,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 #ifdef DEBUG
     printf(_("Message: Mobile phone identification received:\n"));
-    printf(_("   Serial No. %s\n"), MessageBuffer+4);
+    printf(_("   IMEI: %s\n"), MessageBuffer+4);
 
     /* FIXME: What is this? My phone reports: NSE-3 */
 
@@ -2066,6 +2134,17 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     printf(_("   Magic bytes: %02x %02x %02x %02x\n"), MessageBuffer[50], MessageBuffer[51], MessageBuffer[52], MessageBuffer[53]);
 #endif DEBUG
+
+    MagicBytes[0]=MessageBuffer[50];
+    MagicBytes[1]=MessageBuffer[51];
+    MagicBytes[2]=MessageBuffer[52];
+    MagicBytes[3]=MessageBuffer[53];
+
+    /* We should skip the string `NOKIA' */
+
+    sprintf(IMEI, MessageBuffer+4+5);
+
+    CurrentMagicError=GE_NONE;
 
     break;
 
