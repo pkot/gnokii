@@ -183,6 +183,10 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 	case 0x03:
 		return GE_UNHANDLEDFRAME;
 	
+	/* FIXME: call divert is active */
+	case 0x06:
+		return GE_UNSOLICITED;
+
 	default:
 		return GE_UNHANDLEDFRAME;
 	}

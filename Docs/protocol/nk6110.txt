@@ -474,6 +474,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
 			          data: { 0x01, 0x00 } - isn't active
 				        { 0x02, 0x01, number(packed like in SMS), 0x00, 0x00..., timeout }
     r Get prepaid(?) info   { 0x0005, ?,?,?,length,message(packed like in 7bit SMS)}
+    r Call diverts active   { 0x0006, ??? }
 0x07:
     s ???                   { 0x0022, ? (1&2 sounds OK) }
     r ??? OK                { 0x0023, ?,?,? }
