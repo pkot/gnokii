@@ -496,17 +496,18 @@ static int sendsms(int argc, char *argv[])
 		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
 			strncpy(sms.SMSC.Number, optarg, sizeof(sms.SMSC.Number) - 1);
-			if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
-			else sms.SMSC.Type = SMS_Unknown;
 			break;
 
 		case '2': /* SMSC number index in phone memory */
 			data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
 			data.MessageCenter->No = atoi(optarg);
-			if (data.MessageCenter->No < 1 || data.MessageCenter->No > 5)
+			if (data.MessageCenter->No < 1 || data.MessageCenter->No > 5) {
+				free(data.MessageCenter);
 				sendsms_usage();
+			}
 			if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE)
 				strcpy(sms.SMSC.Number, data.MessageCenter->Number);
+			free(data.MessageCenter);
 			break;
 
 		case '3': /* we send long message */
@@ -589,6 +590,17 @@ static int sendsms(int argc, char *argv[])
 			sendsms_usage();
 		}
 	}
+
+	if (!sms.SMSC.Number[0]) {
+		data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
+		data.MessageCenter->No = 1;
+		if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE)
+			strcpy(sms.SMSC.Number, data.MessageCenter->Number);
+		free(data.MessageCenter);
+	}
+
+	if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
+	else sms.SMSC.Type = SMS_Unknown;
 
 	if (curpos != -1) {
 		error = readtext(&sms.UserData[curpos], input_len);
