@@ -47,6 +47,8 @@
     o set default browser to preview the help pages to mozilla as
       it seems to be much popular then netscape these days (seen
       in FreeBSD patches)                               (Pawel Kot)
+ * gnokii updates
+    o reorganize --help output                          (Pawel Kot)
 
 0.5.9
 =====
