@@ -11,7 +11,10 @@
     o cleanups                                         (Markus Plail)
     o phonebook fixes thanks to hints from Len Trigg   (Markus Plail)
  * xgnokii fixes:
-    o fix SMS reading                                  (Markus Plail)    
+    o fix SMS reading                                  (Markus Plail)
+    o fix date/time display for SMS messages           (Markus Plail)
+    o fix RF/battery level display for 6110 series     (Markus Plail)
+
 0.4.1
 =====
  * gnokii fixes
