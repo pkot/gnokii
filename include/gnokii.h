@@ -43,7 +43,7 @@ extern "C" {
 #  include <inttypes.h>
 #  include <sys/time.h>
 #elif defined(_MSC_VER) && defined(WIN32)
-#  include <Winsock2.h>
+#  include <Winsock.h>	/* for struct timeval */
 typedef unsigned char uint8_t;
 #endif
 	
