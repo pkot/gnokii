@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,8 +12,10 @@
 
   Header file for miscellaneous defines, typedefs etc.
 
-  Last modification: Mon May  1 10:18:04 CEST 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.24  2001-06-28 00:28:46  pkot
+  Small docs updates (Pawel Kot)
+
 
 */
 

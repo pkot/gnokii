@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,8 +12,10 @@
   
   Functions to read and write common file types.
 
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  $Log$
+  Revision 1.10  2001-06-28 00:28:46  pkot
+  Small docs updates (Pawel Kot)
+
 
 */
 

@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -11,8 +13,10 @@
   This file provides definitions of macros from the Smart Messaging
   Specification. It is mainly rewrite of the spec to C :-) Viva Nokia!
 
-  Last modification: Wed 6 Dec 2000
-  Modified by Chris Kemp
+  $Log$
+  Revision 1.2  2001-06-28 00:28:46  pkot
+  Small docs updates (Pawel Kot)
+
 
 */
 

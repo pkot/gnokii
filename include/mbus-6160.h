@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,8 +12,10 @@
 
   Header file for 6160 code.	
 
-  Last modification: Fri May 19 15:31:26 EST 2000
-  Modified by Hugh Blemings <hugh@linuxcare.com>
+  $Log$
+  Revision 1.16  2001-06-28 00:28:46  pkot
+  Small docs updates (Pawel Kot)
+
 
 */
 

@@ -18,7 +18,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.137  2001-06-27 23:52:50  pkot
+  Revision 1.138  2001-06-28 00:28:45  pkot
+  Small docs updates (Pawel Kot)
+
+  Revision 1.137  2001/06/27 23:52:50  pkot
   7110/6210 updates (Marian Jancar)
 
   Revision 1.136  2001/06/10 23:49:49  pkot
@@ -254,8 +257,8 @@ char *GetProfileVibrationString(int code)
 int version(void)
 {
 	fprintf(stdout, _("GNOKII Version %s\n"
-			  "Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999, 2000\n"
-			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999, 2000\n"
+			  "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
+			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 			  "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
 			  "gnokii is free software, covered by the GNU General Public License, and you are\n"
 			  "welcome to change it and/or distribute copies of it under certain conditions.\n"

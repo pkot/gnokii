@@ -14,7 +14,10 @@
   various daemon functions.
 
   $Log$
-  Revision 1.18  2001-02-21 19:57:09  chris
+  Revision 1.19  2001-06-28 00:28:45  pkot
+  Small docs updates (Pawel Kot)
+
+  Revision 1.18  2001/02/21 19:57:09  chris
   More fiddling with the directory layout
 
   Revision 1.17  2000/12/19 16:18:18  pkot
@@ -57,8 +60,8 @@ void version(void)
 {
 
         fprintf(stdout, _("gnokiid Version %s\n"
-"Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999\n"
-"Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999\n"
+"Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999\n"
+"Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999\n"
 "Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
 }
 

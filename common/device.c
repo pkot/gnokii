@@ -10,11 +10,11 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Wed Apr 12 18:29:55 PDT 2000
-  Modified by Hugh Blemings <hugh@linuxcare.com>
-
   $Log$
-  Revision 1.8  2001-02-21 19:56:55  chris
+  Revision 1.9  2001-06-28 00:28:45  pkot
+  Small docs updates (Pawel Kot)
+
+  Revision 1.8  2001/02/21 19:56:55  chris
   More fiddling with the directory layout
 
   Revision 1.7  2001/02/09 18:12:53  chris

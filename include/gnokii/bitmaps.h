@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,8 +12,10 @@
   
   Functions for common bitmap operations.
 
-  Last modification: Sun 19th Nov 2000
-  Modified by Chris Kemp
+  $Log$
+  Revision 1.3  2001-06-28 00:28:45  pkot
+  Small docs updates (Pawel Kot)
+
 
 */
 
