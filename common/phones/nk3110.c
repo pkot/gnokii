@@ -65,7 +65,10 @@ static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *st
 static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *state, bool save_sms);
 static gn_error P3110_ReadPhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_WritePhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_SendRLPFrame(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_SetRLPRXCallback(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingRLPFrame(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingCall(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingCallAnswered(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingCallEstablished(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -92,6 +95,7 @@ static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsig
 static int get_memory_type(gn_memory_type memory_type);
 
 static gn_incoming_function_type incoming_functions[] = {
+	{ 0x02, P3110_IncomingRLPFrame },
 	{ 0x0a, P3110_IncomingNothing },
 	{ 0x0b, P3110_IncomingCall },
 	{ 0x0c, P3110_IncomingNothing },
@@ -181,6 +185,10 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return P3110_ReadPhonebook(data, state);
 	case GN_OP_WritePhonebook:
 		return P3110_WritePhonebook(data, state);
+	case GN_OP_SendRLPFrame:
+		return P3110_SendRLPFrame(data, state);
+	case GN_OP_SetRLPRXCallback:
+		return P3110_SetRLPRXCallback(data, state);
 
 	case GN_OP_GetPowersource:
 	case GN_OP_GetAlarm:
@@ -532,10 +540,49 @@ static gn_error P3110_WritePhonebook(gn_data *data, struct gn_statemachine *stat
 	return sm_block(0x44, data, state);
 }
 
+static gn_error P3110_SendRLPFrame(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[31];
+	
+	req[0] = (data->rlp_out_dtx) ? 0x01 : 0x00;
+	memcpy(req + 1, (unsigned char *) data->rlp_frame, 30);
+	
+	return sm_message_send(31, 0x01, req, state);
+}
+
+static gn_error P3110_SetRLPRXCallback(gn_data *data, struct gn_statemachine *state)
+{
+	DRVINSTANCE(state)->rlp_rx_callback = data->rlp_rx_callback;
+	
+	return GN_ERR_NONE;
+}
+
+
 static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	return GN_ERR_NONE;
 }
+
+static gn_error P3110_IncomingRLPFrame(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	gn_rlp_f96_frame frame;
+	
+	if (!DRVINSTANCE(state)->rlp_rx_callback) return GN_ERR_NONE;
+
+	frame.Header[0] = message[2];
+	frame.Header[1] = message[3];
+	
+	memcpy(frame.Data, message + 4, 25);
+	
+	frame.FCS[0] = message[29];
+	frame.FCS[1] = message[30];
+	frame.FCS[2] = message[31];
+	
+	DRVINSTANCE(state)->rlp_rx_callback(&frame);
+	
+	return GN_ERR_NONE;
+}
+
 
 /* 0x0b messages are sent by phone when an incoming call occurs,
    this message must be acknowledged. */

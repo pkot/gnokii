@@ -47,6 +47,7 @@ typedef struct {
 	bool sim_available;
 	unsigned char user_data[GN_SMS_MAX_LENGTH];
 	int user_data_count;
+	void (*rlp_rx_callback)(gn_rlp_f96_frame *frame);
 } nk3110_driver_instance;
 
 #endif  /* #ifndef _gnokii_phones_nk3110_h */

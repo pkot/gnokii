@@ -277,7 +277,11 @@ static gn_error fb3110_message_send(unsigned int messagesize, unsigned char mess
 
 	/* Data (RLP) frame always have message type 0x01 */
 	if (messagetype == 0x01) {
-		seqnum = 0xd9; /* always constant for RLP frames */
+		/* this is a bit of a hack: outgoing RLP frames have and
+		   extra byte between msgtype and seqno, indicating DTX;
+		   thus we swap seqnum with message[0] */
+		seqnum = message[0];
+		message[0] = 0xd9; /* seqno constant for RLP frames */
 		frame_type = FB3110_FRAME_TYPE_OUT_RLP;
 	} else { /* normal command frame */
 		fb3110_sequence_number_update(state);
