@@ -412,21 +412,21 @@ static void RefreshSMS(const gint number)
 		FreeArray(&(phoneMonitor.sms.messages));
 		phoneMonitor.sms.number = 0;
 		pthread_mutex_unlock(&smsMutex);
+
+		fld = g_malloc(sizeof(SMS_Folder));
+		list = g_malloc(sizeof(SMS_FolderList));
+		gdat.SMSFolder = fld;
+		gdat.SMSFolderList = list;
+
 		i = 0;
 		while (1) {
 			i++;
-			fld = g_malloc(sizeof(SMS_Folder));
-			list = g_malloc(sizeof(SMS_FolderList));
-			raw = g_malloc(sizeof(GSM_RawData));
 			msg = g_malloc(sizeof(GSM_API_SMS));
 
 			msg->MemoryType = GMT_SM;
 			msg->Number = i;
 
 			gdat.SMS = msg;
-			gdat.SMSFolder = fld;
-			gdat.SMSFolderList = list;
-			gdat.RawData = raw;
 			if ((error = GetSMS(&gdat, &statemachine)) == GE_NONE) {
 				dprintf("Found valid SMS ...\n");
 				pthread_mutex_lock(&smsMutex);
@@ -434,18 +434,18 @@ static void RefreshSMS(const gint number)
 				    g_slist_append(phoneMonitor.sms.messages, msg);
 				phoneMonitor.sms.number++;
 				pthread_mutex_unlock(&smsMutex);
-				if (phoneMonitor.sms.number == number)
+				if (phoneMonitor.sms.number == number) {
+					g_free(list);
+					g_free(fld);
+					g_free(msg);
 					return;
+				}
 			} else if (error == GE_INVALIDLOCATION) {	/* All positions are read */
 				g_free(list);
-				g_free(raw);
 				g_free(fld);
 				g_free(msg);
 				break;
 			} else {
-				g_free(list);
-				g_free(raw);
-				g_free(fld);
 				g_free(msg);
 				usleep(750000);
 			}
@@ -457,11 +457,9 @@ static gint A_GetMemoryStatus(gpointer data)
 {
 	GSM_Error error;
 	D_MemoryStatus *ms = (D_MemoryStatus *) data;
-	GSM_Data gdat;
 
 	error = ms->status = GE_UNKNOWN;
 	if (ms) {
-		/* GSM_DataClear(&gdat); */
 		pthread_mutex_lock(&memoryMutex);
 		gdat.MemoryStatus = &(ms->memoryStatus);
 		error = ms->status = SM_Functions(GOP_GetMemoryStatus, &gdat, &statemachine);
@@ -476,12 +474,10 @@ static gint A_GetMemoryLocation(gpointer data)
 {
 	GSM_Error error;
 	D_MemoryLocation *ml = (D_MemoryLocation *) data;
-	GSM_Data gdat;
 
 	error = ml->status = GE_UNKNOWN;
 
 	if (ml) {
-		/* GSM_DataClear(&gdat); */
 		pthread_mutex_lock(&memoryMutex);
 		gdat.PhonebookEntry = (ml->entry);
 		error = ml->status = SM_Functions(GOP_ReadPhonebook, &gdat, &statemachine);
@@ -502,7 +498,6 @@ static gint A_GetMemoryLocationAll(gpointer data)
 
 	error = mla->status = GE_NONE;
 	entry.MemoryType = mla->type;
-	/* GSM_DataClear(&gdat); */
 	gdat.PhonebookEntry = &entry;
 
 	pthread_mutex_lock(&memoryMutex);
@@ -543,6 +538,7 @@ static gint A_GetMemoryLocationAll(gpointer data)
 			}
 		}
 		if (error == GE_NONE) read++;
+		dprintf("Name: %s\n", entry.Name);
 		error = mla->InsertEntry(&entry); 
 		/* FIXME: It only works this way at the moment */
 		/*		if (error != GE_NONE)
@@ -570,11 +566,9 @@ static gint A_WriteMemoryLocation(gpointer data)
 {
 	GSM_Error error;
 	D_MemoryLocation *ml = (D_MemoryLocation *) data;
-	GSM_Data gdat;
 
 	error = ml->status = GE_UNKNOWN;
 
-	/* GSM_DataClear(&gdat); */
 	gdat.PhonebookEntry = (ml->entry);
 
 	if (ml) {
@@ -601,13 +595,11 @@ static gint A_GetCalendarNote(gpointer data)
 {
 	GSM_Error error;
 	D_CalendarNote *cn = (D_CalendarNote *) data;
-	GSM_Data gdat;
 
 	error = cn->status = GE_UNKNOWN;
 
 	if (cn) {
 		pthread_mutex_lock(&calendarMutex);
-		/* GSM_DataClear(&gdat); */
 		gdat.CalendarNote = cn->entry;
 		error = cn->status = SM_Functions(GOP_GetCalendarNote, &gdat, &statemachine);
 		pthread_cond_signal(&calendarCond);
@@ -631,7 +623,6 @@ static gint A_GetCalendarNoteAll(gpointer data)
 	while (1) {
 		entry.Location = i++;
 
-		/* GSM_DataClear(&gdat); */
 		gdat.CalendarNote = &entry;
 		gdat.CalendarNotesList = &list;
 		if ((error = SM_Functions(GOP_GetCalendarNote, &gdat, &statemachine)) != GE_NONE)
@@ -654,13 +645,11 @@ static gint A_WriteCalendarNote(gpointer data)
 {
 	GSM_Error error;
 	D_CalendarNote *cn = (D_CalendarNote *) data;
-	GSM_Data gdat;
 
 	error = cn->status = GE_UNKNOWN;
 
 	if (cn) {
 		pthread_mutex_lock(&calendarMutex);
-		/* GSM_DataClear(&gdat); */
 		gdat.CalendarNote = cn->entry;
 		error = cn->status = SM_Functions(GOP_WriteCalendarNote, &gdat, &statemachine);
 		pthread_cond_signal(&calendarCond);
@@ -675,10 +664,8 @@ static gint A_DeleteCalendarNote(gpointer data)
 {
 	GSM_CalendarNote *note = (GSM_CalendarNote *) data;
 	GSM_Error error = GE_UNKNOWN;
-	GSM_Data gdat;
 
 	if (note) {
-		/* GSM_DataClear(&gdat); */
 		gdat.CalendarNote = note;
 		error = SM_Functions(GOP_DeleteCalendarNote, &gdat, &statemachine);
 		g_free(note);
@@ -692,7 +679,6 @@ static gint A_GetCallerGroup(gpointer data)
 	GSM_Bitmap bitmap;
 	GSM_Error error;
 	D_CallerGroup *cg = (D_CallerGroup *) data;
-	GSM_Data tmp;
 
 	error = cg->status = GE_UNKNOWN;
 
@@ -701,11 +687,9 @@ static gint A_GetCallerGroup(gpointer data)
 		bitmap.number = cg->number;
 
 		pthread_mutex_lock(&callerGroupMutex);
-		GSM_DataClear(&tmp);
-		tmp.Bitmap = &bitmap;
-		error = cg->status = SM_Functions(GOP_GetBitmap, &tmp, &statemachine);
-		strncpy(cg->text, bitmap.text, 256);
-		cg->text[255] = '\0';
+		gdat.Bitmap = &bitmap;
+		error = cg->status = SM_Functions(GOP_GetBitmap, &gdat, &statemachine);
+		snprintf(cg->text, 256, "%s", bitmap.text);
 		pthread_cond_signal(&callerGroupCond);
 		pthread_mutex_unlock(&callerGroupMutex);
 	}
@@ -718,14 +702,12 @@ static gint A_SendCallerGroup(gpointer data)
 	GSM_Bitmap bitmap;
 	D_CallerGroup *cg = (D_CallerGroup *) data;
 	GSM_Error error;
-	GSM_Data gdat;
 
 	if (!cg)
 		return (GE_UNKNOWN);
 
 	bitmap.type = GSM_CallerLogo;
 	bitmap.number = cg->number;
-	/* GSM_DataClear(&gdat); */
 	gdat.Bitmap = &bitmap;
 	if ((error = SM_Functions(GOP_GetBitmap, &gdat, &statemachine)) != GE_NONE) {
 		g_free(cg);
@@ -742,14 +724,12 @@ static gint A_GetSMSCenter(gpointer data)
 {
 	D_SMSCenter *c = (D_SMSCenter *) data;
 	GSM_Error error;
-	GSM_Data tmp_gdat;
 
 	error = c->status = GE_UNKNOWN;
 	if (c) {
 		pthread_mutex_lock(&smsCenterMutex);
-		GSM_DataClear(&tmp_gdat);
-		tmp_gdat.MessageCenter = c->center;
-		error = c->status = SM_Functions(GOP_GetSMSCenter, &tmp_gdat, &statemachine);
+		gdat.MessageCenter = c->center;
+		error = c->status = SM_Functions(GOP_GetSMSCenter, &gdat, &statemachine);
 		pthread_cond_signal(&smsCenterCond);
 		pthread_mutex_unlock(&smsCenterMutex);
 	}
@@ -761,14 +741,12 @@ static gint A_SetSMSCenter(gpointer data)
 {
 	D_SMSCenter *smsc = (D_SMSCenter *) data;
 	GSM_Error error;
-	GSM_Data tmp_gdat;
 
 	error = smsc->status = GE_UNKNOWN;
 	if (smsc) {
-		GSM_DataClear(&tmp_gdat);
-		tmp_gdat.MessageCenter = smsc->center;
+		gdat.MessageCenter = smsc->center;
 		pthread_mutex_lock(&smsCenterMutex);
-		error = smsc->status = SM_Functions(GOP_GetSMSCenter, &tmp_gdat, &statemachine);
+		error = smsc->status = SM_Functions(GOP_GetSMSCenter, &gdat, &statemachine);
 		g_free(smsc);
 		pthread_cond_signal(&smsCenterCond);
 		pthread_mutex_unlock(&smsCenterMutex);
@@ -781,14 +759,12 @@ static gint A_SendSMSMessage(gpointer data)
 {
 	D_SMSMessage *d = (D_SMSMessage *) data;
 	GSM_Error error;
-	GSM_Data tmp_gdat;
 
 	error = d->status = GE_UNKNOWN;
 	if (d) {
-		GSM_DataClear(&tmp_gdat);
-		tmp_gdat.SMS = d->sms;
+		gdat.SMS = d->sms;
 		pthread_mutex_lock(&sendSMSMutex);
-		error = d->status = SendSMS(&tmp_gdat, &statemachine);
+		error = d->status = SendSMS(&gdat, &statemachine);
 		pthread_cond_signal(&sendSMSCond);
 		pthread_mutex_unlock(&sendSMSMutex);
 	}
@@ -800,15 +776,13 @@ static gint A_DeleteSMSMessage(gpointer data)
 {
 	GSM_API_SMS *sms = (GSM_API_SMS *) data;
 	GSM_Error error = GE_UNKNOWN;
-	GSM_Data tmp_gdat;
 
 	if (sms) {
-		GSM_DataClear(&tmp_gdat);
-		tmp_gdat.SMS = sms;
+		gdat.SMS = sms;
 		if (phoneMonitor.supported & PM_FOLDERS)
-			error = DeleteSMSnoValidate(&tmp_gdat, &statemachine);
+			error = DeleteSMSnoValidate(&gdat, &statemachine);
 		else
-			error = DeleteSMS(&tmp_gdat, &statemachine);
+			error = DeleteSMS(&gdat, &statemachine);
 		g_free(sms);
 	}
 	return (error);
@@ -819,12 +793,10 @@ static gint A_GetSpeedDial(gpointer data)
 {
 	D_SpeedDial *d = (D_SpeedDial *) data;
 	GSM_Error error;
-	GSM_Data gdat;
 
 	error = d->status = GE_UNKNOWN;
 
 	if (d) {
-		/* GSM_DataClear(&gdat); */
 		gdat.SpeedDial = &d->entry;
 		pthread_mutex_lock(&speedDialMutex);
 		error = d->status = SM_Functions(GOP_GetSpeedDial, &gdat, &statemachine);
@@ -840,7 +812,6 @@ static gint A_SendSpeedDial(gpointer data)
 {
 	D_SpeedDial *d = (D_SpeedDial *) data;
 	GSM_Error error;
-	GSM_Data gdat;
 
 	error = d->status = GE_UNKNOWN;
 
@@ -873,10 +844,8 @@ static gint A_SendDTMF(gpointer data)
 static gint A_NetMonOnOff(gpointer data)
 {
 	gint mode = GPOINTER_TO_INT(data);
-	GSM_Data gdat;
 	GSM_NetMonitor nm;
 
-	/* GSM_DataClear(&gdat); */
 	gdat.NetMonitor = &nm;
 	if (mode)
 		nm.Field = 0xf3;
@@ -917,14 +886,12 @@ static gint A_GetAlarm(gpointer data)
 {
 	D_Alarm *a = (D_Alarm *) data;
 	GSM_Error error;
-	GSM_Data gdat;
 
 	error = GE_UNKNOWN;
 
 	if (a) {
 		a->status = GE_UNKNOWN;
 		pthread_mutex_lock(&alarmMutex);
-/*    GSM_DataClear(&gdat); */
 		gdat.DateTime = &a->time;
 		error = a->status = SM_Functions(GOP_GetAlarm, &gdat, &statemachine);
 		pthread_cond_signal(&alarmCond);
@@ -939,12 +906,10 @@ static gint A_SetAlarm(gpointer data)
 {
 	D_Alarm *a = (D_Alarm *) data;
 	GSM_Error error;
-	GSM_Data gdat;
 
 	error = a->status = GE_UNKNOWN;
 
 	if (a) {
-/*		GSM_DataClear(&gdat); */
 		gdat.DateTime = &a->time;
 		error = a->status = SM_Functions(GOP_SetAlarm, &gdat, &statemachine);
 		g_free(a);
@@ -971,9 +936,7 @@ static gint A_GetBitmap(gpointer data)
 {
 	GSM_Error error;
 	D_Bitmap *d = (D_Bitmap *) data;
-	GSM_Data gdat;
 
-/*	GSM_DataClear(&gdat); */
 	pthread_mutex_lock(&getBitmapMutex);
 	gdat.Bitmap = d->bitmap;
 	error = d->status = SM_Functions(GOP_GetBitmap, &gdat, &statemachine);
@@ -987,9 +950,6 @@ static gint A_SetBitmap(gpointer data)
 	GSM_Error error;
 	D_Bitmap *d = (D_Bitmap *) data;
 	GSM_Bitmap bitmap;
-	GSM_Data gdat;
-
-/* GSM_DataClear(&gdat); */
 
 	pthread_mutex_lock(&setBitmapMutex);
 	if (d->bitmap->type == GSM_CallerLogo) {
@@ -1016,13 +976,10 @@ static gint A_GetNetworkInfo(gpointer data)
 {
 	GSM_Error error;
 	D_NetworkInfo *d = (D_NetworkInfo *) data;
-	GSM_Data tmp;
-
-	GSM_DataClear(&tmp);
 
 	pthread_mutex_lock(&getNetworkInfoMutex);
-	tmp.NetworkInfo = d->info;
-	error = d->status = SM_Functions(GOP_GetNetworkInfo, &tmp, &statemachine);
+	gdat.NetworkInfo = d->info;
+	error = d->status = SM_Functions(GOP_GetNetworkInfo, &gdat, &statemachine);
 	pthread_cond_signal(&getNetworkInfoCond);
 	pthread_mutex_unlock(&getNetworkInfoMutex);
 	return error;
@@ -1033,7 +990,6 @@ static gint A_Exit(gpointer data)
 	pthread_exit(0);
 	return (0);		/* just to be proper */
 }
-
 
 gint(*DoAction[])(gpointer) = {
 	    A_GetMemoryStatus,
