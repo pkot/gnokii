@@ -47,6 +47,9 @@
  * 6160 series updates:
     o static and global variables have been eliminated from the
       the source                                    (Ladislav Michl)
+ * 6510 series updates:
+    o fix incorrect order for SEND_MESSAGE_BLOCK and
+      SEND_MESSAGE_WAITFOR arguments                     (Pawel Kot)
  * libgnokii changes:
     o Renamed Greek operator PANAFON to Vodafone      (P. Christeas)
     o max sms length increased to 160 chars         (BORBELY Zoltan)
@@ -56,9 +59,9 @@
     o static and global variables have been eliminated from the
       fbus sources, passing state to everywhere     (BORBELY Zoltan)
     o link driver initialisation cleanup            (BORBELY Zoltan)
+    o fix type mismatch from fbus_initialise             (Pawel Kot)
  * misc cleanups
     o format the output when config file is incorrect    (Pawel Kot)
-    o fix type mismatch from fbus_initialise             (Pawel Kot)
 
 0.5.0pre2
 =========

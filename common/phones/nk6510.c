@@ -49,13 +49,13 @@
 #include "gnokii-internal.h"
 #include "gsm-api.h"
 
-#define SEND_MESSAGE_BLOCK(type, length) \
+#define SEND_MESSAGE_BLOCK(length, type) \
 do { \
 	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
 	return sm_block(type, data, state); \
 } while (0)
 
-#define SEND_MESSAGE_WAITFOR(type, length) \
+#define SEND_MESSAGE_WAITFOR(length, type) \
 do { \
 	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
 	return sm_wait_for(type, data, state); \
