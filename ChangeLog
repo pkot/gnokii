@@ -14,6 +14,8 @@
       series work                                      (Markus Plail)
  * libsms updates
     o support decoding extension of the default alphabet  (Pawel Kot)
+    o support for sending the characters from the default alphabet
+      extension                                           (Pawel Kot)
 
 0.4.2a
 ======

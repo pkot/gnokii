@@ -1068,8 +1068,11 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			switch (al) {
 			case SMS_DefaultAlphabet:
 #define UDH_Length 0
-				size = Pack7BitCharacters((7 - (UDH_Length % 7)) % 7, sms->UserData[i].u.Text, rawsms->UserData + offset);
-				rawsms->Length = strlen(sms->UserData[i].u.Text);
+				size = Pack7BitCharacters((7 - (UDH_Length % 7)) % 7,
+							  sms->UserData[i].u.Text,
+							  rawsms->UserData + offset,
+							  &length);
+				rawsms->Length = length;
 				rawsms->UserDataLength = size + offset;
 				break;
 			case SMS_8bit:

@@ -38,13 +38,14 @@ extern void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int 
 
 int Unpack7BitCharacters(unsigned int offset, unsigned int in_length, unsigned int out_length,
 			unsigned char *input, unsigned char *output);
-int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output);
+int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output,
+		       unsigned int *in_len);
 
 void DecodeUnicode(unsigned char* dest, const unsigned char* src, int len);
 void EncodeUnicode(unsigned char* dest, const unsigned char* src, int len);
 
 void DecodeAscii(unsigned char* dest, const unsigned char* src, int len);
-void EncodeAscii(unsigned char* dest, const unsigned char* src, int len);
+unsigned int EncodeAscii(unsigned char* dest, const unsigned char* src, unsigned int len);
 
 void DecodeHex(unsigned char* dest, const unsigned char* src, int len);
 void EncodeHex(unsigned char* dest, const unsigned char* src, int len);

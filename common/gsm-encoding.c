@@ -38,6 +38,8 @@
 
 #define NUMBER_OF_7_BIT_ALPHABET_ELEMENTS 128
 
+#define ESCAPE_CHAR 0x1b
+
 static unsigned char GSM_DefaultAlphabet[NUMBER_OF_7_BIT_ALPHABET_ELEMENTS] = {
 
 	/* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet */
@@ -80,7 +82,7 @@ static void SetupReverse()
 
 static bool IsEscapeChar(unsigned char value)
 {
-	return (value == 0x1b);
+	return (value == ESCAPE_CHAR);
 }
 
 /*
@@ -89,6 +91,21 @@ static bool IsEscapeChar(unsigned char value)
  * only 10, and probably they will never change, so hardcoding them
  * here is rather safe.
  */
+
+static bool IsDefaultAlphabetExtensionChar(unsigned char value)
+{
+	return (value == 0x0c ||
+		value == '^' ||
+		value == '{' ||
+		value == '}' ||
+		value == '\\' ||
+		value == '[' ||
+		value == '~' ||
+		value == ']' ||
+		value == '|' ||
+		value == 0xa4);
+}
+
 static unsigned char DecodeWithDefaultAlphabetExtension(unsigned char value)
 {
 	switch (value) {
@@ -106,13 +123,31 @@ static unsigned char DecodeWithDefaultAlphabetExtension(unsigned char value)
 	}
 }
 
+static unsigned char EncodeWithDefaultAlphabetExtension(unsigned char value)
+{
+	switch (value) {
+	case 0x0c: return 0x0a; break; /* from feed */
+	case '^':  return 0x14; break;
+	case '{':  return '{';  break;
+	case '}':  return '}';  break;
+	case '\\': return '\\'; break;
+	case '[':  return '[';  break;
+	case '~':  return '~';  break;
+	case ']':  return ']';  break;
+	case '|':  return '|';  break;
+	case 0xa4: return 0x65; break; /* euro */
+	default: return 0x00;   break; /* invalid character */
+	}
+}
+
 bool IsDefaultAlphabetString(unsigned char *string)
 {
 	unsigned int i, len = strlen(string);
 
 	SetupReverse();
 	for (i = 0; i < len; i++)
-		if (GSM_ReverseDefaultAlphabet[string[i]] == 0x3f &&
+		if (!IsDefaultAlphabetExtensionChar(string[i]) &&
+		    GSM_ReverseDefaultAlphabet[string[i]] == 0x3f &&
 		    string[i] != '?')
 			return false;
 	return true;
@@ -190,7 +225,7 @@ int Unpack7BitCharacters(unsigned int offset, unsigned int in_length, unsigned i
 	return OUT_NUM - output;
 }
 
-int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output)
+int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output, unsigned int *in_len)
 {
 
 	unsigned char *OUT_NUM = output; /* Current pointer to the output buffer */
@@ -208,8 +243,21 @@ int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char 
 	}
 
 	while ((IN_NUM - input) < strlen(input)) {
+		unsigned char Byte;
+		bool double_char = false;
 
-		unsigned char Byte = EncodeWithDefaultAlphabet(*IN_NUM);
+		if (IsDefaultAlphabetExtensionChar(*IN_NUM)) {
+			Byte = ESCAPE_CHAR;
+			double_char = true;
+			goto skip;
+next_char:
+			Byte = EncodeWithDefaultAlphabetExtension(*IN_NUM);
+			double_char = false;
+			(*in_len)++;
+		} else {
+			Byte = EncodeWithDefaultAlphabet(*IN_NUM);
+		}
+skip:
 		*OUT_NUM = Byte >> (7 - Bits);
 		/* If we don't write at 0th bit of the octet, we should write
 		   a second part of the previous octet */
@@ -220,6 +268,8 @@ int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char 
 
 		if (Bits == -1) Bits = 7;
 		else OUT_NUM++;
+
+		if (double_char) goto next_char;
 
 		IN_NUM++;
 	}
@@ -241,13 +291,19 @@ void DecodeAscii(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-void EncodeAscii(unsigned char* dest, const unsigned char* src, int len)
+unsigned int EncodeAscii(unsigned char* dest, const unsigned char* src, unsigned int len)
 {
-	int i;
+	int i, j;
 
-	for (i = 0; i < len; i++)
-		dest[i] = EncodeWithDefaultAlphabet(src[i]);
-	return;
+	for (i = 0, j = 0; j < len; i++, j++) {
+		if (IsDefaultAlphabetExtensionChar(src[j])) {
+			dest[i++] = ESCAPE_CHAR;
+			dest[i] = EncodeWithDefaultAlphabetExtension(src[j]);
+		} else {
+			dest[i] = EncodeWithDefaultAlphabet(src[j]);
+		}
+	}
+	return i;
 }
 
 void DecodeHex(unsigned char* dest, const unsigned char* src, int len)
