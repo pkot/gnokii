@@ -1601,7 +1601,8 @@ static int getsecuritycodestatus(void)
 			fprintf(stdout, _("Unknown!\n"));
 			break;
 		}
-	}
+	} else
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(err));
 
 	return err;
 }

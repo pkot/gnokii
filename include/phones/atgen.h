@@ -54,13 +54,16 @@ typedef enum {
 
 typedef gn_error (*at_recv_function_type)(int type, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 typedef gn_error (*at_send_function_type)(gn_data *data, struct gn_statemachine *state);
+typedef gn_error (*at_error_function_type)(int type, int code, struct gn_statemachine *state);
 
 at_recv_function_type at_insert_recv_function(int type, at_recv_function_type func, struct gn_statemachine *state);
 at_send_function_type at_insert_send_function(int type, at_send_function_type func, struct gn_statemachine *state);
+at_error_function_type at_insert_manufacturer_error_function(at_error_function_type func, struct gn_statemachine *state);
 
 typedef struct {
 	at_send_function_type functions[GN_OP_AT_Max];
 	gn_incoming_function_type incoming_functions[GN_OP_AT_Max];
+	at_error_function_type manufacturer_error;
 	int if_pos;
 
 	gn_memory_type memorytype;
@@ -83,6 +86,7 @@ typedef struct {
 } at_line_buffer;
 
 gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state);
+gn_error at_error_get(unsigned char *buffer, struct gn_statemachine *state);
 
 void splitlines(at_line_buffer *buf);
 

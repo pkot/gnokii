@@ -324,6 +324,16 @@ at_send_function_type at_insert_send_function(int type, at_send_function_type fu
 	return f;
 }
 
+at_error_function_type at_insert_manufacturer_error_function(at_error_function_type func, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	at_error_function_type f;
+
+	f = drvinst->manufacturer_error;
+	drvinst->manufacturer_error = func;
+	return f;
+}
+
 static gn_error SoftReset(gn_data *data, struct gn_statemachine *state)
 {
 	if (sm_message_send(4, GN_OP_Init, "ATZ\r", state)) return GN_ERR_NOTREADY;
@@ -334,6 +344,123 @@ static gn_error SetEcho(gn_data *data, struct gn_statemachine *state)
 {
 	if (sm_message_send(5, GN_OP_Init, "ATE1\r", state)) return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_Init, data, state);
+}
+
+static gn_error SetExtendedError(gn_data *data, struct gn_statemachine *state)
+{
+	if (sm_message_send(10, GN_OP_Init, "AT+CMEE=1\r", state)) return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_Init, data, state);
+}
+
+gn_error at_error_get(unsigned char *buffer, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	int code;
+
+	switch (buffer[0]) {
+	case GN_AT_OK:
+		return GN_ERR_NONE;
+
+	case GN_AT_ERROR:
+		return GN_ERR_UNKNOWN;
+
+	case GN_AT_CMS:
+		code = 256 * buffer[1] + buffer[2];
+		switch (code) {
+		case 300: return GN_ERR_FAILED;		/* ME failure */
+		case 301: return GN_ERR_FAILED;		/* SMS service of ME reserved */
+		case 302: return GN_ERR_FAILED;		/* operation not allowed */
+		case 303: return GN_ERR_NOTSUPPORTED;	/* operation not supported */
+		case 304: return GN_ERR_WRONGDATAFORMAT;/* invalid PDU mode parameter */
+		case 305: return GN_ERR_WRONGDATAFORMAT;/* invalid text mode parameter */
+
+		case 310: return GN_ERR_SIMPROBLEM;	/* SIM not inserted */
+		case 311: return GN_ERR_CODEREQUIRED;	/* SIM PIN required */
+		case 312: return GN_ERR_CODEREQUIRED;	/* PH-SIM PIN required */
+		case 313: return GN_ERR_SIMPROBLEM;	/* SIM failure */
+		case 314: return GN_ERR_TRYAGAIN;	/* SIM busy */
+		case 315: return GN_ERR_SIMPROBLEM;	/* SIM wrong */
+		case 316: return GN_ERR_CODEREQUIRED;	/* SIM PUK required */
+		case 317: return GN_ERR_CODEREQUIRED;	/* SIM PIN2 required */
+		case 318: return GN_ERR_CODEREQUIRED;	/* SIM PUK2 required */
+
+		case 320: return GN_ERR_FAILED;		/* memory failure */
+		case 321: return GN_ERR_INVALIDLOCATION;/* invalid memory index */
+		case 322: return GN_ERR_MEMORYFULL;	/* memory full */
+		
+		case 330: return GN_ERR_FAILED;		/* SMSC address unknown */
+		case 331: return GN_ERR_NOCARRIER;	/* no network service */
+		case 332: return GN_ERR_TIMEOUT;	/* network timeout */
+
+		case 340: return GN_ERR_FAILED;		/* no +CNMA acknowledgement expected */
+
+		case 500: return GN_ERR_UNKNOWN;	/* unknown error */
+
+		default:
+			if (code >= 512 && drvinst->manufacturer_error)
+				return drvinst->manufacturer_error(GN_AT_CMS, code, state);
+			break;
+		}
+		break;
+
+	case GN_AT_CME:
+		code = 256 * buffer[1] + buffer[2];
+		switch (code) {
+		case   0: return GN_ERR_FAILED;		/* phone failure */
+		case   1: return GN_ERR_NOLINK;		/* no connection to phone */
+		case   2: return GN_ERR_BUSY;		/* phone-adaptor link reserved */
+		case   3: return GN_ERR_FAILED;		/* operation not allowed */
+		case   4: return GN_ERR_NOTSUPPORTED;	/* operation not supported */
+		case   5: return GN_ERR_CODEREQUIRED;	/* PH-SIM PIN required */
+		case   6: return GN_ERR_CODEREQUIRED;	/* PH-FSIM PIN required */
+		case   7: return GN_ERR_CODEREQUIRED;	/* PH-FSIM PUK required */
+
+		case  10: return GN_ERR_SIMPROBLEM;	/* SIM not inserted */
+		case  11: return GN_ERR_CODEREQUIRED;	/* SIM PIN required */
+		case  12: return GN_ERR_CODEREQUIRED;	/* SIM PUK required */
+		case  13: return GN_ERR_SIMPROBLEM;	/* SIM failure */
+		case  14: return GN_ERR_TRYAGAIN;	/* SIM busy */
+		case  15: return GN_ERR_SIMPROBLEM;	/* SIM wrong */
+		case  16: return GN_ERR_INVALIDSECURITYCODE;	/* incorrect password */
+		case  17: return GN_ERR_CODEREQUIRED;	/* SIM PIN2 required */
+		case  18: return GN_ERR_CODEREQUIRED;	/* SIM PUK2 required */
+
+		case  20: return GN_ERR_MEMORYFULL;	/* memory full */
+		case  21: return GN_ERR_INVALIDLOCATION;/* invalid index */
+		case  22: return GN_ERR_EMPTYLOCATION;	/* not found */
+		case  23: return GN_ERR_FAILED;		/* memory failure */
+		case  24: return GN_ERR_ENTRYTOOLONG;	/* text string too long */
+		case  25: return GN_ERR_WRONGDATAFORMAT;/* invalid characters in text string */
+		case  26: return GN_ERR_ENTRYTOOLONG;	/* dial string too long */
+		case  27: return GN_ERR_WRONGDATAFORMAT;/* invalid characters in dial string */
+
+		case  30: return GN_ERR_NOCARRIER;	/* no network service */
+		case  31: return GN_ERR_TIMEOUT;	/* network timeout */
+		case  32: return GN_ERR_FAILED;		/* network not allowed - emergency calls only */
+		
+		case  40: return GN_ERR_CODEREQUIRED;	/* network personalisation PIN required */
+		case  41: return GN_ERR_CODEREQUIRED;	/* network personalisation PUK required */
+		case  42: return GN_ERR_CODEREQUIRED;	/* network subset personalisation PIN required */
+		case  43: return GN_ERR_CODEREQUIRED;	/* network subset personalisation PUK required */
+		case  44: return GN_ERR_CODEREQUIRED;	/* service provider personalisation PIN required */
+		case  45: return GN_ERR_CODEREQUIRED;	/* service provider personalisation PUK required */
+		case  46: return GN_ERR_CODEREQUIRED;	/* corporate personalisation PIN required */
+		case  47: return GN_ERR_CODEREQUIRED;	/* corporate personalisation PUK required */
+
+		case 100: return GN_ERR_UNKNOWN;	/* unknown */
+
+		default:
+			if (code >= 512 && drvinst->manufacturer_error)
+				return drvinst->manufacturer_error(GN_AT_CME, code, state);
+			break;
+		}
+		break;
+
+	default:
+		return GN_ERR_INTERNALERROR;	/* shouldn't happen */
+	}
+
+	return GN_ERR_UNKNOWN;
 }
 
 /* StoreDefaultCharset
@@ -476,7 +603,7 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 			drvinst->charset = AT_CHAR_HEXGSM;
 	} else {
 		drvinst->charset = drvinst->defaultcharset;
-		error = (drvinst->charset == AT_CHAR_UNKNOWN) ? GN_ERR_FAILED : GN_ERR_NONE;
+		error = (drvinst->charset == AT_CHAR_UNKNOWN) ? error : GN_ERR_NONE;
 	}
 	return error;
 }
@@ -903,10 +1030,11 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
 	char *pos, *endpos;
+	gn_error error;
 	int l;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_INVALIDLOCATION;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return (error == GN_ERR_UNKNOWN) ? GN_ERR_INVALIDLOCATION : error;
 
 	buf.line1 = buffer + 1;
 	buf.length = length;
@@ -958,9 +1086,9 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 {
 	at_line_buffer buf;
 	unsigned char *pos, *aux;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_UNKNOWN; /* FIXME */
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -1001,9 +1129,10 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
 	char *pos;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_INVALIDMEMORYTYPE;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return (error == GN_ERR_UNKNOWN) ? GN_ERR_INVALIDMEMORYTYPE : error;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -1034,12 +1163,12 @@ static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int len
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
 	char *pos, *s, *t;
+	gn_error error;
 
 	drvinst->memoryoffset = 0;
 	drvinst->memorysize = 100;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_UNKNOWN;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -1070,9 +1199,9 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 {
 	at_line_buffer buf;
 	char *pos;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_UNKNOWN;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -1103,10 +1232,10 @@ static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int leng
 {
 	at_line_buffer buf;
 	char *pos1, *pos2;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_UNKNOWN;
-		
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+
 	buf.line1 = buffer + 1;
 	buf.length= length;
 	
@@ -1128,9 +1257,10 @@ static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int leng
 static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_line_buffer buf;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_UNKNOWN;		/* FIXME */
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+
 	buf.line1 = buffer + 1;
 	buf.length = length;
 	splitlines(&buf);
@@ -1155,14 +1285,19 @@ static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int leng
 
 static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
-	return (buffer[0] == GN_AT_PROMPT) ? GN_ERR_NONE : GN_ERR_INTERNALERROR;
+	switch (buffer[0]) {
+	case GN_AT_PROMPT: return GN_ERR_NONE;
+	case GN_AT_OK: return GN_ERR_INTERNALERROR;
+	default: return at_error_get(buffer, state);
+	}
 }
 
 static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_line_buffer buf;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK) return GN_ERR_FAILED;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
 	buf.line1 = buffer + 1;
 	buf.length = length;
@@ -1181,9 +1316,9 @@ static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int le
 static gn_error ReplySendSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_line_buffer buf;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_FAILED;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
 	buf.line1 = buffer + 1;
 	buf.length = length;
@@ -1205,10 +1340,10 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	gn_error ret = GN_ERR_NONE;
 	unsigned int sms_len, l, offset = 0;
 	char *tmp;
-	
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_INTERNALERROR;
+	gn_error error;
 
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+	
 	buf.line1 = buffer + 1;
 	buf.length = length;
 
@@ -1280,9 +1415,9 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
 	int i;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_UNKNOWN;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -1314,10 +1449,10 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
 {
 	at_line_buffer buf;
 	char *pos;
+	gn_error error;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_UNKNOWN;
-		
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+
 	buf.line1 = buffer + 1;
 	buf.length= length;
 	splitlines(&buf);
@@ -1360,12 +1495,12 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 	at_line_buffer buf;
 	char *pos;
 	char **strings;
+	gn_error error;
 
 	if (!data->network_info)
 		return GN_ERR_INTERNALERROR;
 
-	if (buffer[0] != GN_AT_OK)
-		return GN_ERR_UNKNOWN;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
@@ -1460,7 +1595,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
  * for reference */
 static gn_error Reply(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
-	return (buffer[0] != GN_AT_OK) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
+	return at_error_get(buffer, state);
 }
 
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
@@ -1482,6 +1617,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 
 	state->driver.incoming_functions = drvinst->incoming_functions;
 	AT_DRVINST(state) = drvinst;
+	drvinst->manufacturer_error = NULL;
 	drvinst->memorytype = GN_MT_XX;
 	drvinst->memoryoffset = 0;
 	drvinst->memorysize = 100;
@@ -1521,6 +1657,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 
 	SoftReset(&data, state);
 	SetEcho(&data, state);
+	SetExtendedError(&data, state);
 
 	/*
 	 * detect manufacturer and model for further initialization

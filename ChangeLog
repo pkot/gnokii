@@ -25,6 +25,7 @@
     o folder id display fix in --deletesmsfolder   (BORBELY Zoltan)
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)
+    o display --getsecuritycodestatus error code   (BORBELY Zoltan)
  * libgnokii updates
     o understand escaped semicolon in the phonebook csv input
                                                         (Pawel Kot)
@@ -45,6 +46,8 @@
       for gnokiid, but let's stay backward compatible   (Pawel Kot)
     o at_dprintf() emitted debug messages unconditionally
                                                    (BORBELY Zoltan)
+    o new error codes for SIM related problems     (BORBELY Zoltan)
+    o packet dump was incorrect when len % 16 == 0 (BORBELY Zoltan)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)
@@ -60,6 +63,7 @@
     o extra spaces skipped in the identify replies (BORBELY Zoltan)
     o network code can be specified without quotes (BORBELY Zoltan)
     o GetSecurityCodeStatus fixed                  (BORBELY Zoltan)
+    o extended error handling (CME and CMS erros)  (BORBELY Zoltan)
 
 0.6.1
 =====

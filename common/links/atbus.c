@@ -175,11 +175,15 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 		else if (bi->rbuf_pos > 7 && !strncmp(start, "ERROR", 5))
 			bi->rbuf[0] = GN_AT_ERROR;
 		/* FIXME: use error codes some useful way */
-		else if (sscanf(start, "+CMS ERROR: %d", &error) == 1)
-			bi->rbuf[0] = GN_AT_ERROR;
-		else if (sscanf(start, "+CME ERROR: %d", &error) == 1)
-			bi->rbuf[0] = GN_AT_ERROR;
-		else if (*start == '+') {
+		else if (sscanf(start, "+CMS ERROR: %d", &error) == 1) {
+			bi->rbuf[0] = GN_AT_CMS;
+			bi->rbuf[1] = error / 256;
+			bi->rbuf[2] = error % 256;
+		} else if (sscanf(start, "+CME ERROR: %d", &error) == 1) {
+			bi->rbuf[0] = GN_AT_CME;
+			bi->rbuf[1] = error / 256;
+			bi->rbuf[2] = error % 256;
+		} else if (*start == '+') {
 			/* check for possible unsolicited responses */
 			unsolicited = 0;
 			if (!strncmp(start + 1, "CREG:", 5)) {
