@@ -49,6 +49,7 @@
 #include "phones/nokia.h"
 #include "gsm-encoding.h"
 #include "gsm-api.h"
+#include "gsm-sms.h"
 
 #define	DRVINSTANCE(s) ((NK6100_DriverInstance *)((s)->Phone.DriverInstance))
 #define	FREE(p) do { free(p); (p) = NULL; } while (0)
@@ -118,6 +119,7 @@ static GSM_Error AnswerCall2(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error CancelCall2(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 static GSM_Error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
@@ -198,14 +200,16 @@ GSM_Phone phone_nokia_6100 = {
 
 struct {
 	char *Model;
+	char *SWVersion;
 	int Capabilities;
 } static P6100_capabilities[] = {
     	/*
 	 * Capability setup for phone models.
 	 * Example:
-	 * { "NSE-3",	P6100_CAP_OLD_CALL_API }
+	 * { "NSE-3",	NULL,		P6100_CAP_OLD_CALL_API }
 	 */
-	{ NULL,		0 }
+	{ "NSE-3",	"-4.06",	P6100_CAP_NBS_UPLOAD },
+	{ NULL,		NULL,		0 }
 };
 
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
@@ -427,11 +431,12 @@ static GSM_Error IdentifyPhone(GSM_Statemachine *state)
 	NK6100_DriverInstance *drvinst = DRVINSTANCE(state);
 	GSM_Error err;
 	GSM_Data data;
+	char revision[GSM_MAX_REVISION_LENGTH];
 
 	GSM_DataClear(&data);
 	data.Model = drvinst->Model;
 	data.Imei = drvinst->IMEI;
-	data.Revision = drvinst->Revision;
+	data.Revision = revision;
 
 	if ((err = PhoneInfo2(&data, state)) != GE_NONE) {
 		return err;
@@ -450,7 +455,27 @@ static GSM_Error IdentifyPhone(GSM_Statemachine *state)
 		GetPhoneID(&data, state);
 	}
 
+	sscanf(revision, "SW %9[^ 	,], HW %9s", drvinst->SWVersion, drvinst->HWVersion);
+
 	return GE_NONE;
+}
+
+static bool match_phone(NK6100_DriverInstance *drvinst, int i)
+{
+	if (P6100_capabilities[i].Model != NULL && strcmp(P6100_capabilities[i].Model, drvinst->Model))
+		return false;
+
+	if (P6100_capabilities[i].SWVersion != NULL) {
+		if (P6100_capabilities[i].SWVersion[0] == '-' && strcmp(P6100_capabilities[i].SWVersion + 1, drvinst->SWVersion) >= 0)
+			return true;
+		if (P6100_capabilities[i].SWVersion[0] == '+' && strcmp(P6100_capabilities[i].SWVersion + 1, drvinst->SWVersion) <= 0)
+			return true;
+		if (!strcmp(P6100_capabilities[i].SWVersion + 1, drvinst->SWVersion))
+			return true;
+		return false;
+	}
+
+	return true;
 }
 
 /* Initialise is the only function allowed to 'use' state */
@@ -496,11 +521,12 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 		return err;
 	}
 
-	for (i = 0; P6100_capabilities[i].Model != NULL; i++)
-		if (!strcmp(P6100_capabilities[i].Model, DRVINSTANCE(state)->Model)) {
+	for (i = 0;; i++) {
+		if (match_phone(DRVINSTANCE(state), i)) {
 			DRVINSTANCE(state)->Capabilities = P6100_capabilities[i].Capabilities;
 			break;
 		}
+	}
 
 	if (DRVINSTANCE(state)->PM->flags & PM_AUTHENTICATION) {
 		/* Now test the link and authenticate ourself */
@@ -526,7 +552,7 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 	if (data->Manufacturer) PNOK_GetManufacturer(data->Manufacturer);
 	if (data->Model) strcpy(data->Model, drvinst->Model);
 	if (data->Imei) strcpy(data->Imei, drvinst->IMEI);
-	if (data->Revision) strcpy(data->Revision, drvinst->Revision);
+	if (data->Revision) snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW %s, HW %s", drvinst->SWVersion, drvinst->HWVersion);
 	data->Phone = drvinst->PM;
 
 	return GE_NONE;
@@ -1157,17 +1183,17 @@ static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
-    GSM_Data dtemp;
+	GSM_Data dtemp;
 
-    /*
-     * FIXME:
-     * Ugly hack. The phone seems to drop the SendSMS message if the link
-     * had been idle too long. -- bozo
-     */
-    GSM_DataClear(&dtemp);
-    GetNetworkInfo(&dtemp, state);
+	/*
+	 * FIXME:
+	 * Ugly hack. The phone seems to drop the SendSMS message if the link
+	 * had been idle too long. -- bozo
+	 */
+	GSM_DataClear(&dtemp);
+	GetNetworkInfo(&dtemp, state);
 
-    return PNOK_FBUS_SendSMS(data, state);
+	return PNOK_FBUS_SendSMS(data, state);
 }
 
 static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
@@ -1680,6 +1706,8 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 			dprintf("OperatorLogo is too long\n");
 			return GE_INTERNALERROR;
 		}
+		if (DRVINSTANCE(state)->Capabilities & P6100_CAP_NBS_UPLOAD)
+			return NBSUpload(data, state);
 		*pos++ = 0x30;	/* Store Op Logo */
 		*pos++ = 0x01;	/* location */
 		*pos++ = ((bmp->netcode[1] & 0x0f) << 4) | (bmp->netcode[0] & 0x0f);
@@ -3389,6 +3417,31 @@ static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length
 	}
 
 	return GE_NONE;
+}
+
+
+static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[512] = {0x0c, 0x01};
+	GSM_API_SMS sms;
+	GSM_SMSMessage rawsms;
+	GSM_Error err;
+	int n;
+
+	DefaultSubmitSMS(&sms);
+	sms.UserData[0].Type = SMS_BitmapData;
+	sms.UserData[1].Type = SMS_NoData;
+	memcpy(&sms.UserData[0].u.Bitmap, data->Bitmap, sizeof(GSM_Bitmap));
+
+	memset(&rawsms, 0, sizeof(rawsms));
+
+	if ((err = PrepareSMS(&sms, &rawsms)) != GE_NONE) return err;
+
+	n = 2 + rawsms.UserDataLength;
+	if (n > sizeof(req)) return GE_INTERNALERROR;
+	memcpy(req + 2, rawsms.UserData, rawsms.UserDataLength);
+
+	return SM_SendMessage(state, n, 0x12, req);
 }
 
 

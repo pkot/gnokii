@@ -27,6 +27,8 @@
       supporting the 0x64 type message               (BORBELY Zoltan)
     o GetProfile doesn't call PhoneInfo2 any longer  (BORBELY Zoltan)
     o old style call management API added            (BORBELY Zoltan)
+    o NBS upload for operator logo                   (BORBELY Zoltan)
+    o phone matching code improved                   (BORBELY Zoltan)
  * 7110 series updates:
     o use nokia-decoding                               (Markus Plail)
  * bitmap support

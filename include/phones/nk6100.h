@@ -53,6 +53,7 @@
 #define	P6100_MAX_SMS_MESSAGES	12 /* maximum number of sms messages */
 
 #define	P6100_CAP_OLD_CALL_API	1
+#define	P6100_CAP_NBS_UPLOAD	2
 
 typedef struct {
 	GSM_KeyCode Key;
@@ -74,7 +75,8 @@ typedef struct {
 
 	char Model[GSM_MAX_MODEL_LENGTH];
 	char IMEI[GSM_MAX_IMEI_LENGTH];
-	char Revision[GSM_MAX_REVISION_LENGTH];
+	char SWVersion[10];
+	char HWVersion[10];
 	PhoneModel *PM;
 } NK6100_DriverInstance;
 
