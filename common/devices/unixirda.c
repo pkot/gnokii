@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.5  2001-06-27 23:52:48  pkot
+ * Revision 1.6  2001-08-17 00:18:12  pkot
+ * Removed recv() from IrDA initializing procedure (many people)
+ *
+ * Revision 1.5  2001/06/27 23:52:48  pkot
  * 7110/6210 updates (Marian Jancar)
  *
  * Revision 1.4  2001/06/20 21:27:34  pkot
@@ -169,12 +172,12 @@ int irda_open(void)
 		peer.sir_addr = daddr;
 		strcpy(peer.sir_name, "Nokia:PhoNet");
 		
-		if (connect(fd, (struct sockaddr *)&peer, sizeof(peer)) == 0) {	/* Connect to service "Nokia:PhoNet" */
-			recv(fd, NULL, 0, 0);		/* call recv first to make select work correctly */
-		} else {
+		if (connect(fd, (struct sockaddr *)&peer, sizeof(peer))) {	/* Connect to service "Nokia:PhoNet" */
 			perror("connect");
 			close(fd);
 			fd = -1;
+/*		} else { FIXME: It does not work in most cases. Why? Or why it should work?
+			recv(fd, NULL, 0, 0);		 call recv first to make select work correctly */
 		}
 	}
 	
