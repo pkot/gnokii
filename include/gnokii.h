@@ -55,7 +55,7 @@ struct gn_statemachine;
 
 #include <gnokii/statemachine.h>
 
-API struct gn_cfg_header *gn_cfg_info;
+extern API struct gn_cfg_header *gn_cfg_info;
 
 /* Files */
 API int gn_file_text_save(char *filename, char *text, int mode);
@@ -63,8 +63,8 @@ API int gn_file_text_save(char *filename, char *text, int mode);
 /* Misc */
 API gn_memory_type gn_str2memory_type(const char *s);
 API void gn_data_clear(gn_data *data);
-API gn_phone *gn_gsm_info;
-API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
+extern API gn_phone *gn_gsm_info;
+extern API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
 			 struct gn_statemachine *state);
 API gn_error gn_gsm_initialise(struct gn_statemachine *sm);
 
@@ -79,7 +79,7 @@ API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
 API int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number);
 API int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number);
 
-API void (*gn_elog_handler)(const char *fmt, va_list ap);
+extern API void (*gn_elog_handler)(const char *fmt, va_list ap);
 API void gn_elog_write(const char *fmt, ...);
 
 API int gn_line_get(FILE *file, char *line, int count);

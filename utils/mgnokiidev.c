@@ -33,6 +33,12 @@
 */
 
 /* See common/data/virtmodem.c for explanation */
+#ifdef	__OpenBSD__
+#  include <sys/types.h>
+#  define HAVE_MSGHDR_MSG_CONTROL 1
+#endif
+
+/* See common/data/virtmodem.c for explanation */
 #define _XOPEN_SOURCE 500
 
 #include "misc.h"
