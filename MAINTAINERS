@@ -18,8 +18,8 @@ ringtones		Pavel Machek, Chris Kemp
 6110 driver		BORBELY Zoltan
 6210 driver		Pawel Kot, Markus Plail, BORBELY Zoltan
 6510 driver		Markus Plail
-AT driver		Manfred Jonsson, Pavel Machek, Pawel Kot
-link layer		Chris Kemp, BORBELY Zoltan
+AT driver		Manfred Jonsson, Pavel Machek, Pawel Kot, Ladislav Michl
+link layer		Chris Kemp, BORBELY Zoltan, Ladislav Michl
 device layer		Manfred Jonsson, Chris Kemp
 documentation		Pawel Kot
 autoconf		Pawel Kot, BORBELY Zoltan
