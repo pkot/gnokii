@@ -10,3 +10,6 @@
 * Sun Mar  5 14:02:38 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - Date of SMSC response fixed (Gary Reuter)
 
+* Sun Mar  5 19:20:56 EST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- change to ignore unsolicited NetworkInfo frames in 6110 (Gary Reuter)
+

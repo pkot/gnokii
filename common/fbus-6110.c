@@ -3392,7 +3392,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x71:
 
-      if (CurrentNetworkInfo) {
+      /* Make sure we are expecting NetworkInfo frame */
+      if (CurrentNetworkInfo && CurrentNetworkInfoError == GE_BUSY) {
 
         sprintf(CurrentNetworkInfo->NetworkCode, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
 
