@@ -60,6 +60,7 @@
 #define HAVE_STDLIB_H 1
 #define HAVE_DIRECT_H 1
 #define HAVE_LIMITS_H 1
+#define HAVE_SYS_STAT_H 1
 
 /* Define if your compiler supports long long */
 #undef HAVE_LONG_LONG
