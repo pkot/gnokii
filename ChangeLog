@@ -8,6 +8,8 @@
     o SMS sending error codes updated                (BORBELY Zoltan)
     o explicitly name 3360 in misc.h (for xgnokii) and in unixirda.c
       (for irda connections)                           (Kevin Thayer)
+    o handle the case when operator does not allow to send
+      the SMS                                             (Pawel Kot)
  * Add GPL compatible preamble in tcp.[ch] files          (Pawel Kot)
  * Make tcp.[ch] compatible with gnokii coding style      (Pawel Kot)
  * SMSD updates
