@@ -134,7 +134,7 @@ GSM_Phone phone_nokia_6510 = {
 	PGEN_IncomingDefault,
 	/* Mobile phone information */
 	{
-		"6510|6310|8310",      /* Supported models */
+		"6510|6310|8310|6310i",      /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GRF_Percentage,        /* RF level units */
@@ -376,48 +376,6 @@ static GSM_Error P6510_GetRevision(GSM_Data *data, GSM_Statemachine *state)
 /*******************************/
 /* SMS/PICTURE/FOLDER HANDLING */
 /*******************************/
-/**
- * P6510_SendSMS - low level SMS sending function for 6310/6510 phones
- * @data: gsm data
- * @state: statemachine
- *
- * Nokia changed the format of the SMS frame completly. Currently there are
- * here some magic numbers (well, many) but hopefully we'll get their meaning
- * soon.
- */
-static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
-				  0x00, 0x00, 0x00, 0x55, 0x55, 0x01, 0x02}; /* What's this? */
-	int padding;
-
-	memset(req + 11, 0, 244);
-	req[11] = 0x2c + 4 * ((data->RawSMS->UserDataLength - 1) / 4); /* Don't ask my why. */
-	req[12] = 0x01; /* SMS Submit */
-	if (data->RawSMS->ReplyViaSameSMSC)  req[12] |= 0x80;
-	if (data->RawSMS->RejectDuplicates)  req[12] |= 0x04;
-	if (data->RawSMS->Report)            req[12] |= 0x20;
-	if (data->RawSMS->UDHIndicator)      req[12] |= 0x40;
-	if (data->RawSMS->ValidityIndicator) req[12] |= 0x10;
-	req[13] = data->RawSMS->Reference;
-	req[14] = data->RawSMS->PID;
-	req[15] = data->RawSMS->DCS;
-	memcpy(req + 16, "\x00\x04\x82\x0c\x01\x07", 6); /* What's this? */
-	memcpy(req + 22, data->RawSMS->RemoteNumber, 12);
-	memcpy(req + 30, "\x82\x0c\x02\x08", 4); /* What's this? */
-	memcpy(req + 34, data->RawSMS->MessageCenter, 8);
-	req[42] = 0x80; /* What's this? */
-	req[43] = 0x08 + 4 * ((data->RawSMS->UserDataLength - 1) / 4); /* Don't ask me why. */
-	req[44] = req[45] = data->RawSMS->Length; /* These octets seems to be equal */
-	memcpy(req + 46, data->RawSMS->UserData, data->RawSMS->UserDataLength);
-	padding = data->RawSMS->UserDataLength % 4;
-	if (padding) padding = 4 - padding; /* We fill UserData with 0's to match 4 octets boundary */
-	memcpy(req + 46 + data->RawSMS->UserDataLength + padding, "\x08\x04\x01\xa7", 4); /* What's this? */
-	dprintf("Sending SMS...(%d)\n", 46 + data->RawSMS->UserDataLength + 4 + padding);
-	if (SM_SendMessage(state, 46 + data->RawSMS->UserDataLength + 4 + padding, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, 100);
-}
-
 static void ResetLayout(unsigned char *message, GSM_Data *data)
 {
 	/* reset everything */
@@ -930,6 +888,64 @@ static GSM_Error P6510_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, P6510_MSG_SMS);
 }
 
+/**
+ * P6510_SendSMS - low level SMS sending function for 6310/6510 phones
+ * @data: gsm data
+ * @state: statemachine
+ *
+ * Nokia changed the format of the SMS frame completly. Currently there are
+ * here some magic numbers (well, many) but hopefully we'll get their meaning
+ * soon.
+ * 10.07.2002: Almost all frames should be known know :-) (Markus)
+ */
+static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
+				  0x00, 0x00, 0x00, 0x55, 0x55}; /* What's this? */
+
+	memset(req + 9, 0, 244);
+	req[9] = 0x01; /* one big block */
+	req[10] = 0x02; /* message type: submit */
+	req[11] = 46 - 9 + data->RawSMS->UserDataLength;
+		/*0x2c + 4 * ((data->RawSMS->UserDataLength - 1) / 4); Don't ask my why. */
+	/*        req[11] is supposed to be the length of the whole message 
+		  starting from req[10], which is the message type */
+	req[12] = 0x01; /* SMS Submit */
+	if (data->RawSMS->ReplyViaSameSMSC)  req[12] |= 0x80;
+	if (data->RawSMS->RejectDuplicates)  req[12] |= 0x04;
+	if (data->RawSMS->Report)            req[12] |= 0x20;
+	if (data->RawSMS->UDHIndicator)      req[12] |= 0x40;
+	if (data->RawSMS->ValidityIndicator) req[12] |= 0x00;
+
+	req[13] = data->RawSMS->Reference;
+	req[14] = data->RawSMS->PID;
+	req[15] = data->RawSMS->DCS;
+	req[16] = 0x00;
+	req[17] = 0x03; /* total blocks */
+	req[18] = 0x82; /* type: number */
+	req[19] = 0x0c; /* offset to next block starting from start of block (req[18]) */
+	req[20] = 0x01; /* first number field => RemoteNumber */
+	req[21] = 0x08; /* actual data length in this block */
+
+	memcpy(req + 22, data->RawSMS->RemoteNumber, 8);
+
+	memcpy(req + 30, "\x82\x0c\x02\x08", 4); /* as above 0x02 => MessageCenterNumber */
+	memcpy(req + 34, data->RawSMS->MessageCenter, 8);
+
+	req[42] = 0x80; /* type: User Data */
+
+	req[43] = data->RawSMS->UserDataLength + 1; /* same as req[11] but starting from req[42] */
+		/*0x08 + 4 * ((data->RawSMS->UserDataLength - 1) / 4); Don't ask me why. */
+                     
+	req[44] = data->RawSMS->Length; /* Don't know. Normally it should be a little less than text length */
+	req[45] = data->RawSMS->Length;
+	memcpy(req + 46, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+
+	//	memcpy(req + 46 + data->RawSMS->UserDataLength, "\x00\x6f\x31\xc1", 4); /* What's this? */
+	dprintf("Sending SMS...(%d)\n", 46 + data->RawSMS->UserDataLength);
+	if (SM_SendMessage(state, 46 + data->RawSMS->UserDataLength, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
+	SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, 100);
+}
 
 /**********************/
 /* PHONEBOOK HANDLING */
