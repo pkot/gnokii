@@ -29,7 +29,7 @@ computer and more other features.
 %setup -q
 
 %build
-./configure --prefix=/usr --enable-nls --with-x #--enable-debug --enable-rlpdebug
+./configure --prefix=/usr --with-x #--enable-debug --enable-rlpdebug
 make
 
 %install
