@@ -32,3 +32,38 @@ connection = serial
 # permissions 4750, owned by root, group gnokii.  Ensure you
 # are in the gnokii group and that the group exists...
 bindir = /usr/local/sbin/
+
+# Baudrate to use on serial port connections.
+# Currently used only by models AT and BIP/CIMD. Defaults to 19200.
+serial_baudrate = 19200
+
+# Force waiting after each send character the specified usec time.
+# Value -1 forces the fastest 'block' writing,
+# value 0 writes each character separately without any explicite waiting,
+# other positive values specify the appropriate 1/1000000 sec delaying.
+# Siemens M20 requires at least "1"!  FIXME: Model-driven autodetection
+#serial_write_usleep = 10000
+
+# Force serial port handshaking mode, useful primarily for "AT" model.
+# Gnokii "AT" model uses software handshake by default.
+# Possible values: hardware (RTS/CTS - 7 wires) or software (XON/XOFF - 3 wires)
+#handshake = software
+
+# If defined (not commented out by '#') it will quit Gnokii anytime
+# when DCD line will drop.
+require_dcd = 1
+
+# Run the specified script(s) right after opening and initializing the device
+# and before any communucation (right before closing for disconnect_script).
+# You may find handy to use it to connect your modem to SMS Center
+# when using BIP or CIMD protocols
+# Non-absolute path is relative to the specific directory where gnokii is run!
+#connect_script = /absolute/path/to/gnokii/Docs/sample/cimd-connect
+#disconnect_script =
+
+# Any entries in the following two sections will be set as environment
+# variables when running the scripts.
+# Handy for use for $VAR substitutions in your chat(8) script.
+[connect_script]
+TELEPHONE = 12345678
+[disconnect_script]

@@ -1,0 +1,7 @@
+#! /usr/sbin/chat -vEf
+# ^^^ all options MUST be given as ONE word only (all are passed as ARGV[1])
+#     add/remove letter 'v' to echo all the commends to your syslog
+TIMEOUT 3 "" "ATZ" "OK-ATZ-OK" "" ABORT "BUSY" ABORT "NO CARRIER" ABORT "NO DIAL TONE" ABORT "ERROR" ABORT "VOICE" ""
+ATL2 OK
+ATD$TELEPHONE
+TIMEOUT 90 CONNECT \c ^M \c
