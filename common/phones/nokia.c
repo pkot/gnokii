@@ -8,6 +8,7 @@
 
   Copyright (C) 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001 Manfred Jonsson
+  Copyright (C) 2002 BORBELY Zoltan
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -32,6 +33,27 @@
 
 GSM_Error PNOK_GetManufacturer(char *manufacturer)
 {
-	strcpy (manufacturer, "Nokia");
+	strcpy(manufacturer, "Nokia");
 	return (GE_NONE);
+}
+
+
+void PNOK_DecodeString(unsigned char *dest, size_t max, const unsigned char *src, size_t len)
+{
+	int i, n;
+
+	n = (len >= max) ? max-1 : len;
+
+	for (i = 0; i < n; i++)
+		dest[i] = src[i];
+	dest[i] = 0;
+}
+
+size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *src)
+{
+	size_t i;
+
+	for (i = 0; i < max && src[i]; i++)
+		dest[i] = src[i];
+	return i;
 }
