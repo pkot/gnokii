@@ -705,7 +705,6 @@ API GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
  */
 API GSM_Error DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error error;
 	GSM_SMSMessage rawsms;
 
 	if (!data->SMS) return GE_INTERNALERROR;
