@@ -8,6 +8,8 @@
  * portability fixes
     o libgnokii.dsp (Visual Studio) updated        (BORBELY Zoltan)
     o VC debug and release flags differs                    (Ender)
+ * translations updates
+    o Estonian translation updated                  (Hans Motshärg)
 
 0.5.6
 =====
