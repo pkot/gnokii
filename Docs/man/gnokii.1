@@ -59,6 +59,18 @@ setting/querying netmonitor mode.
 .BR "\-\-reset [\fIsoft\fP|\fIhard\fP]"
 resets the phone.
 
+.SS TODO
+.TP 
+.BR "\-\-gettodo \fIstart\fP [\fIsend\fP] [\-v]"
+get the notes with numbers from \fIstart\fR to \fIend\fR from calendar.
+.PP 
+[\-v] \- output in vCalendar 1.0 format
+.TP 
+.BR "\-\-writetodo \fIvCalendarfile \fInumber"
+write the notes to ToDo list.
+.PP
+number \- location of the note in the vCalendar file
+
 .SS CALENDAR
 .TP 
 .BR "\-\-getcalendarnote \fIstart\fP [\fIsend\fP] [\-v]"
