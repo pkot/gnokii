@@ -36,8 +36,8 @@
     o Renamed Greek operator PANAFON to Vodafone      (P. Christeas)
     o max sms length increased to 160 chars         (BORBELY Zoltan)
  * link driver updates:
-    o static and global variables have been eliminated from
-      the source, passing state to everywhere       (BORBELY Zoltan)
+    o static and global variables have been eliminated from the
+      m2bus source, passing state to everywhere     (BORBELY Zoltan)
 
 0.5.0pre2
 =========
