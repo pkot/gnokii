@@ -22,11 +22,13 @@ INSTALL_DOCS = 	README \
 		gnokii.nol \
 		gnokii-ir-howto \
 		packaging-howto \
-		sample.gnokiirc \
+		sample.gnokiirc
+
+GNOKII_MAN = gnokii.1
 
 all: 
 	@echo
-	
+
 install:
 	$(INSTALL) -d $(docdir)
 	@for xxx in $(INSTALL_DOCS); do \
@@ -34,6 +36,7 @@ install:
 		$(INSTALL) -m 0444 $$xxx $(docdir)/$$xxx; \
 	    fi; \
 	done
+	$(INSTALL) $(GNOKII_MAN) $(mandir)
 	@echo "done"
 
 clean:
