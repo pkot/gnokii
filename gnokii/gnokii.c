@@ -3565,12 +3565,12 @@ static int deletephonebook(int argc, char *argv[])
 		if (!strcasecmp(argv[2], "end"))
 			last_location = INT_MAX;
 		else
-			last_location = atoi(argv[1]);
+			last_location = atoi(argv[2]);
 	}
 	if (last_location < first_location)
 		last_location = first_location;
 
-	for (i = last_location; i <= last_location; i++) {
+	for (i = first_location; i <= last_location; i++) {
 		entry.location = i;
 		entry.empty = true;
 		data.phonebook_entry = &entry;
