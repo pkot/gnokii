@@ -1481,55 +1481,55 @@ static int changesecuritycode(char *type)
 
 #endif
 
-static void callnotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state)
+static void callnotifier(GSM_CallStatus call_status, GSM_CallInfo *call_info, GSM_Statemachine *state)
 {
-	switch (CallStatus) {
+	switch (call_status) {
 	case GSM_CS_IncomingCall:
-		fprintf(stdout, _("INCOMING CALL: ID: %d, Number: %s, Name: \"%s\"\n"), CallInfo->CallID, CallInfo->Number, CallInfo->Name);
+		fprintf(stdout, _("INCOMING CALL: ID: %d, Number: %s, Name: \"%s\"\n"), call_info->CallID, call_info->Number, call_info->Name);
 		break;
 	case GSM_CS_LocalHangup:
-		fprintf(stdout, _("CALL %d TERMINATED (LOCAL)\n"), CallInfo->CallID);
+		fprintf(stdout, _("CALL %d TERMINATED (LOCAL)\n"), call_info->CallID);
 		break;
 	case GSM_CS_RemoteHangup:
-		fprintf(stdout, _("CALL %d TERMINATED (REMOTE)\n"), CallInfo->CallID);
+		fprintf(stdout, _("CALL %d TERMINATED (REMOTE)\n"), call_info->CallID);
 		break;
 	case GSM_CS_Established:
-		fprintf(stdout, _("CALL %d ACCEPTED BY THE REMOTE SIDE\n"), CallInfo->CallID);
+		fprintf(stdout, _("CALL %d ACCEPTED BY THE REMOTE SIDE\n"), call_info->CallID);
 		break;
 	case GSM_CS_CallHeld:
-		fprintf(stdout, _("CALL %d PLACED ON HOLD\n"), CallInfo->CallID);
+		fprintf(stdout, _("CALL %d PLACED ON HOLD\n"), call_info->CallID);
 		break;
 	case GSM_CS_CallResumed:
-		fprintf(stdout, _("CALL %d RETRIEVED FROM HOLD\n"), CallInfo->CallID);
+		fprintf(stdout, _("CALL %d RETRIEVED FROM HOLD\n"), call_info->CallID);
 		break;
 	default:
 		break;
 	}
 
-	GN_CallNotifier(CallStatus, CallInfo, state);
+	gn_call_notifier(call_status, call_info, state);
 }
 
 /* Voice dialing mode. */
-static int dialvoice(char *Number)
+static int dialvoice(char *number)
 {
-    	GSM_CallInfo CallInfo;
+    	GSM_CallInfo call_info;
 	GSM_Error error;
-	int CallId;
+	int call_id;
 
-	memset(&CallInfo, 0, sizeof(CallInfo));
-	snprintf(CallInfo.Number, sizeof(CallInfo.Number), "%s", Number);
-	CallInfo.Type = GSM_CT_VoiceCall;
-	CallInfo.SendNumber = GSM_CSN_Default;
+	memset(&call_info, 0, sizeof(call_info));
+	snprintf(call_info.Number, sizeof(call_info.Number), "%s", number);
+	call_info.Type = GSM_CT_VoiceCall;
+	call_info.SendNumber = GSM_CSN_Default;
 
 	GSM_DataClear(&data);
-	data.CallInfo = &CallInfo;
+	data.CallInfo = &call_info;
 
-	if ((error = GN_CallDial(&CallId, &data, &State)) != GE_NONE) {
+	if ((error = gn_call_dial(&call_id, &data, &State)) != GE_NONE) {
 		fprintf(stderr, _("Dialing failed: %s\n"), print_error(error));
 	    	return error;
 	}
 
-	fprintf(stdout, _("Dialled call, id: %d (lowlevel id: %d)\n"), CallId, CallInfo.CallID);
+	fprintf(stdout, _("Dialled call, id: %d (lowlevel id: %d)\n"), call_id, call_info.CallID);
 
 	return 0;
 }
@@ -2403,33 +2403,33 @@ static GSM_Error ReadCBMessage(GSM_CBMessage *Message)
 	return GE_NONE;
 }
 
-static void DisplayCall(int CallId)
+static void DisplayCall(int call_id)
 {
-	GN_API_Call *call;
+	gn_call *call;
 	struct timeval now, delta;
 	char *s;
 
-	if ((call = GN_CallGetActive(CallId)) == NULL)
+	if ((call = gn_call_get_active(call_id)) == NULL)
 	{
-		fprintf(stdout, _("CALL%d: IDLE\n"), CallId);
+		fprintf(stdout, _("CALL%d: IDLE\n"), call_id);
 		return;
 	}
 
 	gettimeofday(&now, NULL);
 	switch (call->Status) {
-	case GN_API_CS_Ringing:
+	case GN_CALL_Ringing:
 		s = "RINGING";
 		timersub(&now, &call->StartTime, &delta);
 		break;
-	case GN_API_CS_Dialing:
+	case GN_CALL_Dialing:
 		s = "DIALING";
 		timersub(&now, &call->StartTime, &delta);
 		break;
-	case GN_API_CS_Established:
+	case GN_CALL_Established:
 		s = "ESTABLISHED";
 		timersub(&now, &call->AnswerTime, &delta);
 		break;
-	case GN_API_CS_Held:
+	case GN_CALL_Held:
 		s = "ON HOLD";
 		timersub(&now, &call->AnswerTime, &delta);
 		break;
@@ -2439,7 +2439,7 @@ static void DisplayCall(int CallId)
 		break;
 	}
 
-	fprintf(stderr, _("CALL%d: %s %s(%s) (duration: %d sec)\n"), CallId, s,
+	fprintf(stderr, _("CALL%d: %s %s(%s) (duration: %d sec)\n"), call_id, s,
 		call->RemoteNumber, call->RemoteName,
 		(int)delta.tv_sec);
 }
@@ -2552,7 +2552,7 @@ static int monitormode(void)
 		if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE)
 			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC[0], NetworkInfo.LAC[1], NetworkInfo.CellID[0], NetworkInfo.CellID[1]);
 
-		for (i = 0; i < GN_MAX_PARALLEL_CALL; i++)
+		for (i = 0; i < GN_CALL_MAX_PARALLEL; i++)
 			DisplayCall(i);
 
 		if (ReadCBMessage(&CBMessage) == GE_NONE)

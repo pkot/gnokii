@@ -28,38 +28,38 @@
 
 */
 
-#ifndef __gnokii_call_h_
-#define __gnokii_call_h_
+#ifndef _gnokii_gsm_call_h
+#define _gnokii_gsm_call_h
 
 #include "gsm-common.h"
 #include "gsm-data.h"
 
 typedef enum {
-	GN_API_CS_Idle,
-	GN_API_CS_Ringing,
-	GN_API_CS_Dialing,
-	GN_API_CS_Established,
-	GN_API_CS_Held
-} GN_API_CallStatus;
+	GN_CALL_Idle,
+	GN_CALL_Ringing,
+	GN_CALL_Dialing,
+	GN_CALL_Established,
+	GN_CALL_Held
+} gn_call_status;
 
 typedef struct {
 	GSM_Statemachine *state;
 	int CallID;
-	GN_API_CallStatus Status;
+	gn_call_status Status;
 	GSM_CallType Type;
 	char RemoteNumber[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1];
 	char RemoteName[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];
 	struct timeval StartTime;
 	struct timeval AnswerTime;
 	bool LocalOriginated;
-} GN_API_Call;
+} gn_call;
 
-#define	GN_MAX_PARALLEL_CALL 2
+#define	GN_CALL_MAX_PARALLEL 2
 
-API void GN_CallNotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state);
-API GSM_Error GN_CallDial(int *CallId, GSM_Data *data, GSM_Statemachine *state);
-API GSM_Error GN_CallAnswer(int CallId);
-API GSM_Error GN_CallCancel(int CallId);
-API GN_API_Call *GN_CallGetActive(int CallId);
+API void gn_call_notifier(gn_call_status call_status, GSM_CallInfo *call_info, GSM_Statemachine *state);
+API GSM_Error gn_call_dial(int *call_id, GSM_Data *data, GSM_Statemachine *state);
+API GSM_Error gn_call_answer(int call_id);
+API GSM_Error gn_call_cancel(int call_id);
+API gn_call *gn_call_get_active(int call_id);
 
-#endif
+#endif /* _gnokii_gsm_call_h */

@@ -34,27 +34,27 @@
 #include "gsm-statemachine.h"
 #include "gsm-call.h"
 
-static GN_API_Call calltable[GN_MAX_PARALLEL_CALL];
+static gn_call calltable[GN_CALL_MAX_PARALLEL];
 
 
-static GN_API_Call *search_call(GSM_Statemachine *state, int CallID)
+static gn_call *search_call(GSM_Statemachine *state, int call_id)
 {
 	int i;
 
-	for (i = 0; i < GN_MAX_PARALLEL_CALL; i++)
-		if (calltable[i].state == state && calltable[i].CallID == CallID)
+	for (i = 0; i < GN_CALL_MAX_PARALLEL; i++)
+		if (calltable[i].state == state && calltable[i].CallID == call_id)
 			return calltable + i;
 
 	return NULL;
 }
 
-API void GN_CallNotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state)
+API void gn_call_notifier(gn_call_status call_status, GSM_CallInfo *call_info, GSM_Statemachine *state)
 {
-	GN_API_Call *call;
+	gn_call *call;
 
-	call = search_call(state, CallInfo->CallID);
+	call = search_call(state, call_info->CallID);
 
-	switch (CallStatus) {
+	switch (call_status) {
 	case GSM_CS_IncomingCall:
 		if (call != NULL) break;
 		if ((call = search_call(NULL, 0)) == NULL) {
@@ -62,11 +62,11 @@ API void GN_CallNotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_
 			break;
 		}
 		call->state = state;
-		call->CallID = CallInfo->CallID;
-		call->Status = GN_API_CS_Ringing;
-		call->Type = CallInfo->Type;
-		strcpy(call->RemoteNumber, CallInfo->Number);
-		strcpy(call->RemoteName, CallInfo->Name);
+		call->CallID = call_info->CallID;
+		call->Status = GN_CALL_Ringing;
+		call->Type = call_info->Type;
+		strcpy(call->RemoteNumber, call_info->Number);
+		strcpy(call->RemoteName, call_info->Name);
 		gettimeofday(&call->StartTime, NULL);
 		memset(&call->AnswerTime, 0, sizeof(call->AnswerTime));
 		call->LocalOriginated = false;
@@ -76,7 +76,7 @@ API void GN_CallNotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_
 	case GSM_CS_RemoteHangup:
 		if (call == NULL) break;
 		memset(call, 0, sizeof(*call));
-		call->Status = GN_API_CS_Idle;
+		call->Status = GN_CALL_Idle;
 		break;
 
 	case GSM_CS_Established:
@@ -86,40 +86,40 @@ API void GN_CallNotifier(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_
 				break;
 			}
 			call->state = state;
-			call->CallID = CallInfo->CallID;
-			call->Type = CallInfo->Type;
-			strcpy(call->RemoteNumber, CallInfo->Number);
-			strcpy(call->RemoteName, CallInfo->Name);
+			call->CallID = call_info->CallID;
+			call->Type = call_info->Type;
+			strcpy(call->RemoteNumber, call_info->Number);
+			strcpy(call->RemoteName, call_info->Name);
 			gettimeofday(&call->StartTime, NULL);
 			memcpy(&call->AnswerTime, &call->StartTime, sizeof(call->AnswerTime));
 			call->LocalOriginated = false;
 		} else
 			gettimeofday(&call->AnswerTime, NULL);
-		call->Status = GN_API_CS_Established;
+		call->Status = GN_CALL_Established;
 		break;
 
 	case GSM_CS_CallResumed:
 		if (call == NULL) break;
-		call->Status = GN_API_CS_Established;
+		call->Status = GN_CALL_Established;
 		break;
 
 	case GSM_CS_CallHeld:
 		if (call == NULL) break;
-		call->Status = GN_API_CS_Held;
+		call->Status = GN_CALL_Held;
 		break;
 
 	default:
-		dprintf("Invalid call notification code: %d\n", CallStatus);
+		dprintf("Invalid call notification code: %d\n", call_status);
 		break;
 	}
 }
 
-API GSM_Error GN_CallDial(int *CallId, GSM_Data *data, GSM_Statemachine *state)
+API GSM_Error gn_call_dial(int *call_id, GSM_Data *data, GSM_Statemachine *state)
 {
-	GN_API_Call *call;
+	gn_call *call;
 	GSM_Error err;
 
-	*CallId = -1;
+	*call_id = -1;
 	if ((call = search_call(NULL, 0)) == NULL) {
 		dprintf("Call table overflow!\n");
 		return GE_INTERNALERROR;
@@ -130,7 +130,7 @@ API GSM_Error GN_CallDial(int *CallId, GSM_Data *data, GSM_Statemachine *state)
 
 	call->state = state;
 	call->CallID = data->CallInfo->CallID;
-	call->Status = GN_API_CS_Dialing;
+	call->Status = GN_CALL_Dialing;
 	call->Type = data->CallInfo->Type;
 	strcpy(call->RemoteNumber, data->CallInfo->Number);
 	strcpy(call->RemoteName, data->CallInfo->Name);
@@ -138,44 +138,44 @@ API GSM_Error GN_CallDial(int *CallId, GSM_Data *data, GSM_Statemachine *state)
 	memset(&call->AnswerTime, 0, sizeof(call->AnswerTime));
 	call->LocalOriginated = true;
 
-	*CallId = call - calltable;
+	*call_id = call - calltable;
 
 	return GE_NONE;
 }
 
-API GSM_Error GN_CallAnswer(int CallId)
+API GSM_Error gn_call_answer(int call_id)
 {
 	GSM_Data data;
-	GSM_CallInfo CallInfo;
+	GSM_CallInfo call_info;
 
-	if (calltable[CallId].Status == GN_API_CS_Idle) return GE_NONE;
+	if (calltable[call_id].Status == GN_CALL_Idle) return GE_NONE;
 
-	memset(&CallInfo, 0, sizeof(CallInfo));
-	CallInfo.CallID = calltable[CallId].CallID;
+	memset(&call_info, 0, sizeof(call_info));
+	call_info.CallID = calltable[call_id].CallID;
 	GSM_DataClear(&data);
-	data.CallInfo = &CallInfo;
+	data.CallInfo = &call_info;
 
-	return SM_Functions(GOP_AnswerCall, &data, calltable[CallId].state);
+	return SM_Functions(GOP_AnswerCall, &data, calltable[call_id].state);
 }
 
-API GSM_Error GN_CallCancel(int CallId)
+API GSM_Error gn_call_cancel(int call_id)
 {
 	GSM_Data data;
-	GSM_CallInfo CallInfo;
+	GSM_CallInfo call_info;
 
-	if (calltable[CallId].Status == GN_API_CS_Idle) return GE_NONE;
+	if (calltable[call_id].Status == GN_CALL_Idle) return GE_NONE;
 
-	memset(&CallInfo, 0, sizeof(CallInfo));
-	CallInfo.CallID = calltable[CallId].CallID;
+	memset(&call_info, 0, sizeof(call_info));
+	call_info.CallID = calltable[call_id].CallID;
 	GSM_DataClear(&data);
-	data.CallInfo = &CallInfo;
+	data.CallInfo = &call_info;
 
-	return SM_Functions(GOP_AnswerCall, &data, calltable[CallId].state);
+	return SM_Functions(GOP_AnswerCall, &data, calltable[call_id].state);
 }
 
-API GN_API_Call *GN_CallGetActive(int CallId)
+API gn_call *gn_call_get_active(int call_id)
 {
-	if (calltable[CallId].Status == GN_API_CS_Idle) return NULL;
+	if (calltable[call_id].Status == GN_CALL_Idle) return NULL;
 
-	return calltable + CallId;
+	return calltable + call_id;
 }
