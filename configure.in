@@ -339,7 +339,7 @@ else
          GTK_LIBS=`$GTK_CONFIG --libs`
          x_support="yes"   
 
-         XGNOKIIDIR="${prefix}/share"
+         XGNOKIIDIR='${prefix}/share'
          AC_ARG_WITH(xgnokiidir,
             [  --with-xgnokiidir=DIR   specifies the base for xgnokii],
             [ if test x$withval = xyes; then 
