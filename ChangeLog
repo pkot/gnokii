@@ -1,3 +1,9 @@
+0.4.0pre18
+ * smsd updates
+    o replaced GSM_MAX_DESTINATION_LENGTH with MAX_BCD_STRING_LENGTH
+                                                          (Pawel Kot)
+ * gnokii fixes
+    o fixed wrong check in smsreader                      (Pawel Kot)
 0.4.0pre17
 ==========
  * We moved to savannah.gnu.org                           (Pawel Kot)
