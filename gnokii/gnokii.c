@@ -620,7 +620,7 @@ static int sendsms(int argc, char *argv[])
 		sms.UserData[curpos].Type = SMS_PlainText;
 		if (!IsDefaultAlphabetString(sms.UserData[curpos].u.Text))
 			sms.DCS.u.General.Alphabet = SMS_UCS2;
-		sms.UserData[curpos].Type = SMS_NoData;
+		sms.UserData[++curpos].Type = SMS_NoData;
 	}
 
 	data.SMS = &sms;
