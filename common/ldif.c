@@ -35,7 +35,7 @@
 #include "config.h"
 #include "compat.h"
 #include "gnokii.h"
-
+#include "gnokii-internal.h"
 
 /* a utility function to reuse code */
 static int ldif_entry_write(FILE *f, const char *parameter, const char *value, int convertToUTF8)
