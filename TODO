@@ -1,6 +1,5 @@
  * multiple phone support:
     o config subsystem cleanup
-    o adding state to incoming functions
     o moving static variables into state
 
  * international support:
