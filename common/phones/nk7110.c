@@ -137,6 +137,7 @@ static gn_error NK7110_IncomingRingtone(int messagetype, unsigned char *message,
 static gn_error NK7110_IncomingCommstatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static int get_memory_type(gn_memory_type memory_type);
+static gn_memory_type get_gn_memory_type(int memory_type);
 static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type);
 
 static gn_incoming_function_type nk7110_incoming_functions[] = {
@@ -1127,10 +1128,9 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 	case NK7110_SUBSMS_FOLDER_STATUS_OK: /* Folder status OK, 0x6C */
 		dprintf("Message: SMS Folder status received\n");
 		if (!data->sms_folder) return GN_ERR_INTERNALERROR;
-		i = data->sms_folder->folder_id;
-		memset(data->sms_folder, 0, sizeof(gn_sms_folder));
 
-		data->sms_folder->folder_id = i;
+		data->sms_folder->sms_data = 0;
+		memset(data->sms_folder->locations, 0, sizeof(data->sms_folder->locations));
 		data->sms_folder->number = (message[4] << 8) | message[5];
 
 		dprintf("Message: Number of Entries: %i\n" , data->sms_folder->number);
@@ -1154,7 +1154,8 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 		for (j = 0; j < message[4]; j++) {
 			int len;
 			strcpy(data->sms_folder_list->folder[j].name, "               ");
-			data->sms_folder_list->folder_id[j] = message[i];
+			data->sms_folder_list->folder_id[j] = get_gn_memory_type(message[i]);
+			data->sms_folder_list->folder[j].folder_id = data->sms_folder_list->folder_id[j];
 			dprintf("Folder Index: %d", data->sms_folder_list->folder_id[j]);
 			i += 2;
 			dprintf("\tFolder name: ");
@@ -3040,6 +3041,114 @@ static int get_memory_type(gn_memory_type memory_type)
 		break;
 	default:
 		result = NK7110_MEMORY_XX;
+		break;
+	}
+	return result;
+}
+
+static gn_memory_type get_gn_memory_type(int memory_type)
+{
+	int result;
+
+	switch (memory_type) {
+	case NK7110_MEMORY_MT:
+		result = GN_MT_MT;
+		break;
+	case NK7110_MEMORY_ME:
+		result = GN_MT_ME;
+		break;
+	case NK7110_MEMORY_SM:
+		result = GN_MT_SM;
+		break;
+	case NK7110_MEMORY_FD:
+		result = GN_MT_FD;
+		break;
+	case NK7110_MEMORY_ON:
+		result = GN_MT_ON;
+		break;
+	case NK7110_MEMORY_DC:
+		result = GN_MT_DC;
+		break;
+	case NK7110_MEMORY_RC:
+		result = GN_MT_RC;
+		break;
+	case NK7110_MEMORY_MC:
+		result = GN_MT_MC;
+		break;
+	case NK7110_MEMORY_IN:
+		result = GN_MT_IN;
+		break;
+	case NK7110_MEMORY_OU:
+		result = GN_MT_OU;
+		break;
+	case NK7110_MEMORY_AR:
+		result = GN_MT_AR;
+		break;
+	case NK7110_MEMORY_TE:
+		result = GN_MT_TE;
+		break;
+	case NK7110_MEMORY_F1:
+		result = GN_MT_F1;
+		break;
+	case NK7110_MEMORY_F2:
+		result = GN_MT_F2;
+		break;
+	case NK7110_MEMORY_F3:
+		result = GN_MT_F3;
+		break;
+	case NK7110_MEMORY_F4:
+		result = GN_MT_F4;
+		break;
+	case NK7110_MEMORY_F5:
+		result = GN_MT_F5;
+		break;
+	case NK7110_MEMORY_F6:
+		result = GN_MT_F6;
+		break;
+	case NK7110_MEMORY_F7:
+		result = GN_MT_F7;
+		break;
+	case NK7110_MEMORY_F8:
+		result = GN_MT_F8;
+		break;
+	case NK7110_MEMORY_F9:
+		result = GN_MT_F9;
+		break;
+	case NK7110_MEMORY_F10:
+		result = GN_MT_F10;
+		break;
+	case NK7110_MEMORY_F11:
+		result = GN_MT_F11;
+		break;
+	case NK7110_MEMORY_F12:
+		result = GN_MT_F12;
+		break;
+	case NK7110_MEMORY_F13:
+		result = GN_MT_F13;
+		break;
+	case NK7110_MEMORY_F14:
+		result = GN_MT_F14;
+		break;
+	case NK7110_MEMORY_F15:
+		result = GN_MT_F15;
+		break;
+	case NK7110_MEMORY_F16:
+		result = GN_MT_F16;
+		break;
+	case NK7110_MEMORY_F17:
+		result = GN_MT_F17;
+		break;
+	case NK7110_MEMORY_F18:
+		result = GN_MT_F18;
+		break;
+	case NK7110_MEMORY_F19:
+		result = GN_MT_F19;
+		break;
+	case NK7110_MEMORY_F20:
+		result = GN_MT_F20;
+		break;
+	default:
+		result = GN_MT_XX;
 		break;
 	}
 	return result;
