@@ -63,9 +63,7 @@
  * whose source files include this file see API functions as being imported 
  * from a DLL, wheras this DLL sees symbols defined with this macro as being 
  * exported.
- *
  */
-
 #if defined(WIN32) && defined(_USRDLL)
 #  ifdef GNOKIIDLL_EXPORTS
 #    define API __declspec(dllexport)
