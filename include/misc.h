@@ -130,7 +130,7 @@ typedef struct {
 #define PM_AUTHENTICATION 0x0200
 
 extern char *GetModel (const char *);
-PhoneModel *GetPhoneModel (const char *);
+extern PhoneModel *GetPhoneModel (const char *);
 
 #endif /* __misc_h */
 
