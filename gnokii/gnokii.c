@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.150  2001-11-20 16:22:22  pkot
+  Revision 1.151  2001-11-22 17:56:53  pkot
+  smslib update. sms sending
+
+  Revision 1.150  2001/11/20 16:22:22  pkot
   First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
 
   Revision 1.149  2001/11/19 16:00:15  pkot
@@ -813,6 +816,8 @@ int sendsms(int argc, char *argv[])
 	   - unset user data header indicator
 	*/
 
+	memset(&SMS, 0, sizeof(GSM_SMSMessage));
+	
 	SMS.Type = SMS_Submit;
 	SMS.DCS.Type = SMS_GeneralDataCoding;
 	SMS.DCS.u.General.Compressed = false;
@@ -824,6 +829,8 @@ int sendsms(int argc, char *argv[])
 	SMS.UDH_No = 0;
 
 	strcpy(SMS.RemoteNumber.number, argv[0]);
+	if (SMS.RemoteNumber.number[0] == '+') SMS.RemoteNumber.type = SMS_International;
+	else SMS.RemoteNumber.type = SMS_Unknown;
 
 	optarg = NULL;
 	optind = 0;
@@ -832,13 +839,15 @@ int sendsms(int argc, char *argv[])
 		switch (i) {       // -8 is for 8-bit data, -c for compression. both are not yet implemented.
 		case '1': /* SMSC number */
 			SMS.MessageCenter.No = 0;
-			strcpy(SMS.MessageCenter.Number,optarg);
+			strcpy(SMS.MessageCenter.Number, optarg);
 			break;
 		case '2': /* SMSC number index in phone memory */
 			SMS.MessageCenter.No = atoi(optarg);
 
 			if (SMS.MessageCenter.No < 1 || SMS.MessageCenter.No > 5)
 				usage();
+			data.MessageCenter = &SMS.MessageCenter;
+			error = SM_Functions(GOP_GetSMSCenter, &data, &State);
 			break;
 		case '3': /* we send long message */
 			input_len = atoi(optarg);
@@ -889,9 +898,11 @@ int sendsms(int argc, char *argv[])
 
 	/*  Null terminate. */
 	message_buffer[chars_read] = 0x00;	
+	strncpy(SMS.MessageText, message_buffer, chars_read);
+	data.SMSMessage = &SMS;
 
 	/* Send the message. */
-	error = GSM->SendSMSMessage(&SMS,0);
+	error = SM_Functions(GOP_SendSMS, &data, &State);
 
 	if (error == GE_SMSSENDOK) {
 		fprintf(stdout, _("Send succeeded!\n"));
@@ -899,7 +910,7 @@ int sendsms(int argc, char *argv[])
 		fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
 	}
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }

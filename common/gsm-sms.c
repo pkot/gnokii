@@ -13,7 +13,10 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.11  2001-11-20 16:22:22  pkot
+  Revision 1.12  2001-11-22 17:56:53  pkot
+  smslib update. sms sending
+
+  Revision 1.11  2001/11/20 16:22:22  pkot
   First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
 
   Revision 1.10  2001/11/19 13:09:40  pkot
@@ -133,13 +136,13 @@ static int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType typ
 	return (2 * (OUT - Output - 1) - (count % 2));
 }
 
-static char *GetBCDNumber(u8 *Number)
+char *GetBCDNumber(u8 *Number)
 {
         static char Buffer[20] = "";
         int length = Number[0]; /* This is the length of BCD coded number */
         int count, Digit;
 
-	Buffer[0] = 0;
+	memset(Buffer, 0, 20);
         switch (Number[1]) {
 	case SMS_Alphanumeric:
 		Unpack7BitCharacters(0, length, length, Number+2, Buffer);
@@ -295,20 +298,23 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 {
 	GSM_Error error = GE_NONE;
 
+	/* Standard Header: */
+	memcpy(frame, "\x11\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xa9\x00\x00\x00\x00\x00\x00", 24);
+
 	/* Reply Path */
-	if (SMS->ReplyViaSameSMSC) frame[13] |= 0x80;
+	if (SMS->ReplyViaSameSMSC) frame[0] |= 0x80;
 
 	/* User Data Header Indicator */
-	if (SMS->UDH_No) frame[13] |= 0x40;
+	if (SMS->UDH_No) frame[0] |= 0x40;
 
 	/* Status (Delivery) Report Request */
-	if (SMS->ReportStatus) frame[13] |= 0x20;
+	if (SMS->ReportStatus) frame[0] |= 0x20;
 
 	/* Validity Period Format: mask - 0x00, 0x10, 0x08, 0x18 */
-	frame[13] |= ((SMS->Validity.VPF & 0x03) << 3);
+	frame[0] |= ((SMS->Validity.VPF & 0x03) << 3);
 
 	/* Reject Duplicates */
-	if (SMS->RejectDuplicates) frame[13] |= 0x04;
+	if (SMS->RejectDuplicates) frame[0] |= 0x04;
 
 	/* Message Type is already set */
 
@@ -318,21 +324,21 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 	/* Protocol Identifier */
 	/* FIXME: allow to change this in better way.
 	   currently only 0x5f == `Return Call Message' is used */
-	if (SMS->PID) frame[16] = SMS->PID;
+	if (SMS->PID) frame[3] = SMS->PID;
 
 	/* Data Coding Scheme */
 	switch (SMS->DCS.Type) {
 	case SMS_GeneralDataCoding:
-		if (SMS->DCS.u.General.Compressed) frame[17] |= 0x20;
-		if (SMS->DCS.u.General.Class) frame[17] |= (0x10 | (SMS->DCS.u.General.Class - 1));
-		frame[17] |= ((SMS->DCS.u.General.Alphabet & 0x03) << 2);
+		if (SMS->DCS.u.General.Compressed) frame[4] |= 0x20;
+		if (SMS->DCS.u.General.Class) frame[4] |= (0x10 | (SMS->DCS.u.General.Class - 1));
+		frame[4] |= ((SMS->DCS.u.General.Alphabet & 0x03) << 2);
 		break;
 	case SMS_MessageWaiting:
-		if (SMS->DCS.u.MessageWaiting.Discard) frame[17] |= 0xc0;
-		else if (SMS->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) frame[17] |= 0xe0;
-		else frame[17] |= 0xd0;
-		if (SMS->DCS.u.MessageWaiting.Active) frame[17] |= 0x80;
-		frame[17] |= (SMS->DCS.u.MessageWaiting.Type & 0x03);
+		if (SMS->DCS.u.MessageWaiting.Discard) frame[4] |= 0xc0;
+		else if (SMS->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) frame[4] |= 0xe0;
+		else frame[4] |= 0xd0;
+		if (SMS->DCS.u.MessageWaiting.Active) frame[4] |= 0x80;
+		frame[4] |= (SMS->DCS.u.MessageWaiting.Type & 0x03);
 		break;
 	default:
 		dprintf("Wrong Data Coding Scheme (DCS) format\n");
@@ -340,6 +346,7 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 	}
 
 	/* Destination Address */
+	frame[5] = SemiOctetPack(SMS->RemoteNumber.number, frame + 6, SMS->RemoteNumber.type);
 
 	/* Validity Period */
 	switch (SMS->Validity.VPF) {
@@ -380,7 +387,7 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 /* This function encodes SMS as described in:
    - GSM 03.40 version 6.1.0 Release 1997, section 9
 */
-GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
+int EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 {
 	GSM_Error error = GE_NONE;
 	int i;
@@ -388,27 +395,26 @@ GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 	dprintf("Sending SMS to %s via message center %s\n", SMS->RemoteNumber.number, SMS->MessageCenter.Number);
 
 	/* SMSC number */
-	if (SMS->MessageCenter.Number) {
-		message[0] = SemiOctetPack(SMS->MessageCenter.Number, message + 1, SMS->MessageCenter.Type);
-		if (message[0] % 2) message[0]++;
-		message[0] = message[0] / 2;
-	}
+	dprintf("%d %s\n", SMS->MessageCenter.Type, SMS->MessageCenter.Number);
+	message[0] = SemiOctetPack(SMS->MessageCenter.Number, message + 1, SMS->MessageCenter.Type);
+	if (message[0] % 2) message[0]++;
+	message[0] = message[0] / 2 + 1;
 
 	/* Common Header */
-	error = EncodeSMSHeader(SMS, message + 11);
+	error = EncodeSMSHeader(SMS, message + 12);
 	if (error != GE_NONE) return error;
 
 	/* User Data Header - if present */
-	for (i = 0; i < SMS->UDH_No; i++) {
-		error = EncodeUDH(SMS->UDH[i], message + 24);
-		if (error != GE_NONE) return error;
-	}
+//	for (i = 0; i < SMS->UDH_No; i++) {
+//		error = EncodeUDH(SMS->UDH[i], message + 24);
+//		if (error != GE_NONE) return error;
+//	}
+	SMS->UDH_Length = 0;
 
 	/* User Data */
-	EncodeData(SMS, message + 14, message + 24 + SMS->UDH_Length);
-	message[15] = SMS->Length;
-
-	return error;
+	EncodeData(SMS, message + 14, message + 36 + SMS->UDH_Length);
+	message[16] = SMS->Length;
+	return SMS->Length + 35;
 }
 
 /* This function does simple SMS encoding - no PDU coding */
@@ -703,7 +709,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	SMS->Length = message[14+DataOffset[SMS->Type]];
 
 	/* Data Coding Scheme */
-	if (SMS->Type != SMS_Delivery_Report)
+	if (SMS->Type != SMS_Delivery_Report && SMS->Type != SMS_Picture)
 		SMS->DCS.Type = message[13 + DataOffset[SMS->Type]];
 	else
 		SMS->DCS.Type = 0;
@@ -737,9 +743,6 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 		dprintf("Picture!!!\n");
 		GSM_ReadSMSBitmap(SMS_Picture, message + 41, NULL, &bitmap);
 		GSM_PrintBitmap(&bitmap);
-		for (size = 40; size < 50; size++) {
-			dprintf("%d %d\n", size, message[size + bitmap.size]);
-		}
 		size = MessageLength - 45 - bitmap.size;
 		SMS->Length = message[45 + bitmap.size];
 		printf("%d %d %d\n", SMS->Length, bitmap.size, size);

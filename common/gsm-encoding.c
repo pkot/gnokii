@@ -13,7 +13,10 @@
   Functions for encoding SMS, calendar and other things.
 
   $Log$
-  Revision 1.3  2001-11-17 20:15:31  pkot
+  Revision 1.4  2001-11-22 17:56:53  pkot
+  smslib update. sms sending
+
+  Revision 1.3  2001/11/17 20:15:31  pkot
   Typo in default alphabet
 
   Revision 1.2  2001/11/08 16:34:19  pkot
@@ -149,7 +152,6 @@ int Pack7BitCharacters(int offset, unsigned char *input, unsigned char *output)
         while ((IN - input) < strlen(input)) {
 
                 unsigned char Byte = EncodeWithDefaultAlphabet(*IN);
-
                 *OUT = Byte >> (7 - Bits);
                 /* If we don't write at 0th bit of the octet, we should write
                    a second part of the previous octet */

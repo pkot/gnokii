@@ -215,11 +215,11 @@ Correct format is FBUS version 2/Infrared/MBUS version 2
                               where location: 0x21 (always ?)
     r Set Picture Image     { 0x0051, location, number[2 bytes], 0x07 }
                               where location: 0x21 (always ?)
-    s List Picture Images   { 0x0096, location, 0x0f, 0x07 }
-                              where location:
-			         LM tries with 0x09, 0x11, 0x19, 0x21, 0x29, 0x31, 0x39, 0x41, 0x49
-				 Returned value with 0x21
+
+    s List Picture Images   { 0x0096, FolderID, 0x0f, 0x07 }
+                              where: FolderID - see 0x14/0x017B
     r List Picture Images   { 0x0097, number of pictures[2 bytes], number1[2 bytes], number2[2 bytes], ..., }
+
     s Get SMS from folder   { 0x0107, folderID, 0x00, location, 0x01, 0x65, 0x01}
                             where: folderID - see 0x14/0x017B
     r Get SMS from folder   { 0x0108, status, folderID, 0x00, location, type, sender number,...}

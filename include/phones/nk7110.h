@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.6  2001-11-08 16:47:48  pkot
+  Revision 1.7  2001-11-22 17:56:53  pkot
+  smslib update. sms sending
+
+  Revision 1.6  2001/11/08 16:47:48  pkot
   Start fiddling with 7110 and SMS
 
   Revision 1.5  2001/06/27 23:52:52  pkot
@@ -192,6 +195,7 @@ static GSM_Error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 

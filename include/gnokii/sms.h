@@ -13,7 +13,10 @@
   Include file for SMS library.
 
   $Log$
-  Revision 1.5  2001-11-20 16:22:23  pkot
+  Revision 1.6  2001-11-22 17:56:53  pkot
+  smslib update. sms sending
+
+  Revision 1.5  2001/11/20 16:22:23  pkot
   First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
 
   Revision 1.4  2001/11/19 13:09:40  pkot
@@ -369,11 +372,13 @@ typedef struct {
 	int New;
 } GSM_CBMessage;
 
-extern GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *frame);
+extern int EncodePDUSMS(GSM_SMSMessage *SMS, char *frame);
 extern GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength);
-
 /* Do not use these yet */
 extern GSM_Error EncodeTextSMS();
 extern GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS);
+
+/* FIXME: make this static */
+extern char *GetBCDNumber(u8 *Number);
 
 #endif /* __gnokii_sms_h_ */

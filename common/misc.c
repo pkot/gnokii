@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.18  2001-09-09 21:45:49  machek
+  Revision 1.19  2001-11-22 17:56:53  pkot
+  smslib update. sms sending
+
+  Revision 1.18  2001/09/09 21:45:49  machek
   Cleanups from Ladislav Michl <ladis@psi.cz>:
 
   *) do *not* internationalize debug messages
@@ -82,7 +85,7 @@ static PhoneModel models[] = {
 	{"616x",  "NSW-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"6185",  "NSD-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"6190",  "NSB-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
-	{"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_EXTPBK },
+	{"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_EXTPBK | PM_SMS},
 	{"6250",  "NHM-3", PM_CALLERGROUP | PM_CALENDAR | PM_EXTPBK },
 	{"7110",  "NSE-5", PM_CALLERGROUP | PM_SPEEDDIAL | PM_EXTPBK },
 	{"8810",  "NSE-6", PM_SMS | PM_DTMF | PM_DATA },

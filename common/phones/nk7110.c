@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.26  2001-11-19 17:09:59  pkot
+  Revision 1.27  2001-11-22 17:56:53  pkot
+  smslib update. sms sending
+
+  Revision 1.26  2001/11/19 17:09:59  pkot
   Bugfixes
 
   Revision 1.25  2001/11/19 16:24:31  pkot
@@ -133,7 +136,6 @@
   Revision 1.1  2001/01/14 22:46:59  chris
   Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
-
 */
 
 #include <string.h>
@@ -234,7 +236,9 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_GetCalendarNote(data, state);
 	case GOP_GetSMS:
 		return P7110_GetSMS(data, state);
-/* I'm not suer yet if folder functions will be shared or local
+	case GOP_SendSMS:
+		return P7110_SendSMS(data, state);
+/* I'm not sure yet if folder functions will be shared or local
 	case GOP_GetSMSFolders:
 		return P7110_GetSMSFolders(data, state);
 	case GOP_GetSMSFolderStatus:
@@ -344,13 +348,12 @@ static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *message
 			*(data->BatteryLevel) = message[5];
 			dprintf("Battery level %f\n",*(data->BatteryLevel));
 		}
-		return GE_NONE;
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x17 (%d)\n", message[3]);
 		return GE_UNKNOWN;
-		break;
 	}
+	return GE_NONE;
 }
 
 static GSM_Error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
@@ -425,7 +428,6 @@ static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *message, 
 			}
 			blockstart += blockstart[1];
 		}
-		return GE_NONE;
 		break;
 	case 0x82:
 		if (data->RFLevel) { 
@@ -433,16 +435,15 @@ static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *message, 
 			*(data->RFLevel) = message[4];
 			dprintf("RF level %f\n",*(data->RFLevel));
 		}
-		return GE_NONE;
 		break;
 	case 0xa4:
 		dprintf("Op Logo Set OK\n");
-		return GE_NONE;
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
 		return GE_UNKNOWN;
-		break;
 	}
+	return GE_NONE;
 }
 
 static GSM_Error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
@@ -473,14 +474,11 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 				data->MemoryStatus->Used = (message[16] << 8) + message[17];
 				data->MemoryStatus->Free = ((message[14] << 8) + message[15]) - data->MemoryStatus->Used;
 				dprintf("Memory status - location = %d\n", (message[8] << 8) + message[9]);
-				return GE_NONE;
 			} else {
 				dprintf("Unknown error getting mem status\n");
 				return GE_NOTIMPLEMENTED;
-				
 			}
 		}
-		return GE_NONE;
 		break;
 	case 0x08:  /* Read Memory response */
 		if (data->PhonebookEntry) {
@@ -629,20 +627,19 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 			}
 			blockstart += blockstart[3];
 		}
-		return GE_NONE;
 		break;
 	case 0x0c:
 		switch (message[6]) {
-		case 0x3d: return GE_PHBOOKWRITEFAILED; break;
-		case 0x3e: return GE_PHBOOKWRITEFAILED; break;
-		default: return GE_NONE; break;	
+		case 0x3d: return GE_PHBOOKWRITEFAILED;
+		case 0x3e: return GE_PHBOOKWRITEFAILED;
+		default: return GE_NONE;
 		}
 		break;	
 	default:
 		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
 		return GE_UNKNOWN;
-		break;
 	}
+	return GE_NONE;
 }
 
 /* Just as an example.... */
@@ -673,7 +670,6 @@ static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int
 			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
 			dprintf("Received imei %s\n",data->Imei);
 		}
-		return GE_NONE;
 		break;
 	case 04:
 		if (data->Model) { 
@@ -684,13 +680,12 @@ static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int
 			snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "%s", message + 7);
 			dprintf("Received revision %s\n",data->Revision);
 		}
-		return GE_NONE;
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x1b (%d)\n", message[3]);
 		return GE_UNKNOWN;
-		break;
 	}
+	return GE_NONE;
 }
 
 
@@ -751,7 +746,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
         /* getsms */    
         case 0x08:
-                for (i = 0; i < length-2; i ++)
+                for (i = 0; i < length; i ++)
                         if (isprint(message[i]))
                                 dprintf("[%02x%c]", message[i], message[i]);
                         else
@@ -800,10 +795,20 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		DecodePDUSMS(message + 6, data->SMSMessage, length);
 
                 break;
-    
+
+		/* get list of SMS pictures */
+		case 0x97:
+		dprintf("Getting list of SMS pictures...\n");
+		for (i = 0; i < length; i ++)
+			if (isprint(message[i]))
+				dprintf("[%02x%c]", message[i], message[i]);
+			else
+				dprintf("[%02x ]", message[i]);
+		dprintf("\n");
+		break;
         default:
 
-		for (i = 0; i < length-2; i ++)
+		for (i = 0; i < length; i ++)
 			if (isprint(message[i]))
 				dprintf("[%02x%c]", message[i], message[i]);
 			else
@@ -811,7 +816,6 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
                 dprintf("\n");
                 dprintf("Message: Unknown message of type 14 : %d  length: %d\n", message[3], length);
 		return GE_UNKNOWN;
-		break;
         }
         return GE_NONE;
 }
@@ -827,8 +831,16 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	                        0x00, 
 	                        0x01, // Location
 	                        0x01, 0x65, 0x01};
+	unsigned char req_list[] = {FBUS_FRAME_HEADER, 0x96, 
+	                                 0x09, /* location */
+	                                 0x0f, 0x07};
 	GSM_Error error;
-      
+
+	/* just testiung picture listing */
+	req_list[4] = data->SMSMessage->MemoryType;
+	if (SM_SendMessage(state, 7, 0x14, req_list) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, 0x14);
+
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
 	if (data->SMSMessage->MemoryType != data->SMSFolder->FolderID) {
@@ -852,10 +864,18 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	req_sms[6] = data->SMSMessage->Number;
 	if (SM_SendMessage(state, 10, 0x14, req_sms) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
-	return GE_NONE;
 }
 
+static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req_list[] = {FBUS_FRAME_HEADER, 0x96, 
+	                                 0x09, /* location */
+	                                 0x0f, 0x07};
+	if (SM_SendMessage(state, 7, 0x14, req_list) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x14);
+}
 
+#if 0
 static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x7A, 0x00, 0x00};
@@ -875,28 +895,56 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 	dprintf("Getting SMS Folder Status...\n");
 	if (SM_SendMessage(state, 7, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
-	return GE_NONE;
+}
+#endif
+
+static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
+	unsigned char smsc_req[] = {FBUS_FRAME_HEADER, 0x33, 0x64, 0x00};
+	int length, i;
+
+	if (data->SMSMessage->MessageCenter.No) {
+		data->MessageCenter = &data->SMSMessage->MessageCenter;
+		P7110_GetSMSCenter(data, state);
+//		SM_SendMessage(state, 6, 0x02, smsc_req);
+//		SM_Block(state, data, 0x02);
+	}
+
+	length = EncodePDUSMS(data->SMSMessage, req + 6);
+	if (!length) return GE_SMSWRONGFORMAT;
+	dprintf("Sending SMS...(%d)\n", length);
+	for (i = 0; i < length + 6; i++) {
+		dprintf("%02x ", req[i]);
+	}
+	dprintf("\n");
+	if (SM_SendMessage(state, length+6, 0x02, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x02);
 }
 
 static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Error	e = GE_NONE;
-	int		digits, bytes;
-	
-	if (!data || !data->MessageCenter) return GE_INTERNALERROR;
+	int		digits, bytes, i;
+
+	if (!data) return GE_INTERNALERROR;
 
 	switch (message[3]) {
 	case P7110_SUBSMS_SMSC_RCVD:
+		dprintf("SMSC Received\n");
 		/* FIXME: Implement all these in gsm-sms.c */
 		data->MessageCenter->No = message[4];
 		data->MessageCenter->Format = message[6];
 		data->MessageCenter->Validity = message[8];  /* due to changes in format */
-		
 		digits = message[9];
 		bytes = message[21] - 1;
 		
 
 		sprintf(data->MessageCenter->Name, "%s", message + 33);
+		
+		strcpy(data->MessageCenter->Recipient, GetBCDNumber(message+9));
+		strcpy(data->MessageCenter->Number, GetBCDNumber(message+21));
+		data->MessageCenter->Type = message[22];
 		
 		if (strlen(data->MessageCenter->Recipient) == 0) {
 			sprintf(data->MessageCenter->Recipient, "(none)");
@@ -909,8 +957,17 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		}
 		
 		break;
+
 	case P7110_SUBSMS_SMS_SENT:
+		dprintf("SMS sent\n");
+		e = GE_SMSSENDOK;
+		break;
+
 	case P7110_SUBSMS_SEND_FAIL:
+		dprintf("SMS sending failed\n");
+		e = GE_SMSSENDFAILED;
+		break;
+
 	case P7110_SUBSMS_SMS_RCVD:
 	case P7110_SUBSMS_CELLBRD_OK:
 	case P7110_SUBSMS_CELLBRD_FAIL:
@@ -921,6 +978,7 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		dprintf("Subtype 0x%02x of type 0x%02x (SMS handling) not implemented\n", message[3], P7110_MSG_SMS);
 		e = GE_NOTIMPLEMENTED;
 		break;
+
 	default:
 		dprintf("Unknown subtype of type 0x%02x (SMS handling): 0x%02x\n", P7110_MSG_SMS, message[3]);
 		e = GE_UNKNOWN;
@@ -1532,7 +1590,7 @@ static GSM_Error P7110_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error	error;
-	unsigned char	req[2000] = {FBUS_FRAME_HEADER, P7110_SUBSMS_GET_SMSC, 0x64, 0x00};
+	unsigned char	req[] = {FBUS_FRAME_HEADER, P7110_SUBSMS_GET_SMSC, 0x64, 0x00};
 	
 	req[5] = data->MessageCenter->No;
 	
@@ -1545,7 +1603,7 @@ static GSM_Error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error	error;
-	unsigned char	req[2000] = {FBUS_FRAME_HEADER, req_type};
+	unsigned char	req[] = {FBUS_FRAME_HEADER, req_type};
 	
 	if (SM_SendMessage(state, 4, P7110_MSG_CLOCK, req) != GE_NONE) return GE_NOTREADY;
 	error = SM_Block(state, data, P7110_MSG_CLOCK);
@@ -1556,8 +1614,8 @@ static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error	error = GE_NOTREADY;
-	unsigned char	req[2000] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_NOTE, 0x00, 0x00};
-	unsigned char	date[2000] = {FBUS_FRAME_HEADER, P7110_SUBCLO_GET_DATE};
+	unsigned char	req[] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_NOTE, 0x00, 0x00};
+	unsigned char	date[] = {FBUS_FRAME_HEADER, P7110_SUBCLO_GET_DATE};
 	GSM_Data	tmpdata;
 	GSM_DateTime	tmptime;
 	
