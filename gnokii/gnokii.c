@@ -88,7 +88,7 @@ void usage(void)
           gnokii [--getsms] [memory type] [start] [end]
           gnokii [--deletesms] [memory type] [start] [end]
           gnokii [--sendsms] [destination] [--smsc message_center_number |
-                  --smscno message_center_index] [-r] [-C n] 
+                  --smscno message_center_index] [-r] [-C n] [-v n]
           gnokii [--getsmsc] [message_center_number]
           gnokii [--setdatetime] [YYYY] [MM] [DD] [HH] [MM]
           gnokii [--getdatetime]
@@ -132,6 +132,7 @@ void usage(void)
                             network. Meaning of other optional parameters:
                              [-r] - request for delivery report
                              [-C n] - Class Message n, where n can be 0..3
+                             [-v n] - validity in minutes
 
           --getsmsc         show the SMSC number from location
                             [message_center_number].
@@ -388,10 +389,9 @@ void sendsms(int argc, char *argv[])
   SMS.Compression = false;
   SMS.EightBit = false;
   SMS.MessageCenter.No = 1;
-
   SMS.Validity = 4320; /* 4320 minutes == 72 hours */
 
-  while ((i = getopt_long(argc, argv, "r8cC:", options, NULL)) != EOF) {
+  while ((i = getopt_long(argc, argv, "r8cC:v:", options, NULL)) != EOF) {
     switch (i) {
 
       case '1': /* Remote number */
@@ -440,6 +440,10 @@ void sendsms(int argc, char *argv[])
             exit(-1);
 
         }
+        break;
+      
+      case 'v':
+        SMS.Validity = atoi(optarg);
         break;
 
       default:

@@ -1356,7 +1356,9 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
       return error;
   }
 
+#ifdef DEBUG
   fprintf(stdout, _("Sending SMS to %s via message center %s\n"), SMS->Destination, SMS->MessageCenter.Number);
+#endif DEBUG
 
   CurrentSMSMessageError=GE_BUSY;
 
@@ -1374,11 +1376,11 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   /* Message Class */
   switch (SMS->Class) {
 
-    case 0:
+    case 0: /* flash SMS */
       req[21] = req[21] | 0x10;
       break;
 
-    case 1: /* flash SMS */
+    case 1:
       req[21] = req[21] | 0x11;
       break;
 
@@ -1393,43 +1395,15 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   }
   
   /* Mask for 8 bit data */
-  if (SMS->EightBit) req[21] = req[21] | 0x02;
+
+  /* FIXME: 8 bit data is currently not supported so the following line
+     is commented out */
+/*  if (SMS->EightBit) req[21] = req[21] | 0x02; */
   
   /* Mask for compression */
-  /* FIXME: Compression currently not supported so following line is commented out */
+  /* FIXME: Compression is currently not supported so following line is commented out */
   /* See GSM 03.42 */
 /*  if (SMS->Compression) req[21] = req[21] | 0x20; */
-
-  /* The following also works for me:
-     comment lines above and uncomment lines below and try it out :-)
-     In this case DO NOT use compression it won't work (according to
-     GSM 03.38) */
-   
-  /* Class Message */
-
-/*  switch (SMS->Class) {
-
-    case 0:
-      req[21] = req[21] | 0xf0;
-      break;
-
-    case 1:
-      req[21] = req[21] | 0xf1;
-      break;
-
-    case 2:
-      req[21] = req[21] | 0xf2;
-      break;
-
-    case 3:
-      req[21] = req[21] | 0xf3;
-      break;
-
-  }
-*/
-
-  /* Mask for 8 bit data */
-/*  if (SMS->EightBit) req[21] = req[21] | 0xf4; */
 
   req[22]=strlen(SMS->MessageText);
 
@@ -1912,7 +1886,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       printf(_("   Date: %s\n"), FB61_GetPackedDateTime(MessageBuffer+35));
       printf(_("   SMS: "));
 
-      tmp=UnpackEightBitsToSeven(MessageLength-42-2, MessageBuffer[22], output);
+      tmp=UnpackEightBitsToSeven(MessageLength-42-2, MessageBuffer[22], MessageBuffer+42, output);
 
       for (i=0; i<tmp;i++)
 	printf("%c", GSM_Default_Alphabet[output[i]]);
