@@ -3202,7 +3202,8 @@ static char *escape_semicolon(char *src)
 static int getphonebook(int argc, char *argv[])
 {
 	gn_phonebook_entry entry;
-	int count, start_entry, end_entry = 0;
+	gn_memory_status memstat;
+	int count, start_entry, end_entry, num_entries = INT_MAX;
 	gn_error error = GN_ERR_NONE;
 	char *memory_type_string;
 	char location[32];
@@ -3212,7 +3213,6 @@ static int getphonebook(int argc, char *argv[])
 				2 - vCard
 				3 - LDIF
 			*/
-	bool all = false;
 
 	if (argc < 2) {
 		usage(stderr, -1);
@@ -3236,7 +3236,7 @@ static int getphonebook(int argc, char *argv[])
 		else if (!strcmp(argv[3], "-l") || !strcmp(argv[3], "--ldif")) type = 3;
 		else usage(stderr, -1);
 	case 3:
-		if (!strcmp(argv[2], "end")) all = true;
+		if (!strcmp(argv[2], "end")) end_entry = INT_MAX;
 		else if (!strcmp(argv[2], "-r") || !strcmp(argv[2], "--raw")) type = 1;
 		else if (!strcmp(argv[2], "-v") || !strcmp(argv[2], "--vcard")) type = 2;
 		else if (!strcmp(argv[2], "-l") || !strcmp(argv[2], "--ldif")) type = 3;
@@ -3247,9 +3247,17 @@ static int getphonebook(int argc, char *argv[])
 		break;
 	}
 
+	if (end_entry == INT_MAX) {
+		data.memory_status = &memstat;
+		memstat.memory_type = entry.memory_type;
+		if ((error = gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state)) == GN_ERR_NONE) {
+			num_entries = memstat.used;
+		}
+	}
+
 	/* Now retrieve the requested entries. */
 	count = start_entry;
-	while (all || count <= end_entry) {
+	while (num_entries > 0 && count <= end_entry) {
 		entry.location = count;
 
 		data.phonebook_entry = &entry;
@@ -3258,6 +3266,7 @@ static int getphonebook(int argc, char *argv[])
 		switch (error) {
 			int i;
 		case GN_ERR_NONE:
+			num_entries--;
 			switch (type) {
 			case 1:
 				do {
@@ -3352,11 +3361,9 @@ static int getphonebook(int argc, char *argv[])
 			break;
 		case GN_ERR_INVALIDLOCATION:
 			fprintf(stderr, _("Error reading from the location %d in memory %s\n"), count, memory_type_string);
-			if (all) {
+			if (end_entry == INT_MAX) {
 				/* Ensure that we quit the loop */
-				all = false;
-				count = 0;
-				end_entry = -1;
+				num_entries = 0;
 			}
 			break;
 		default:

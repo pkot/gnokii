@@ -36,6 +36,8 @@
       --deletecalendarnote and --deletephonebook        (Pawel Kot)
     o fix behaviour of --deletephonebook with 'end' keyword
                                                         (Pawel Kot)
+    o --getphonebook end stops after every entry read
+                                     (Marco Canini, BORBELY Zoltan)
  * libgnokii updates
     o fbus echo cancellation and statemachine fix  (BORBELY Zoltan)
     o todo vcalendar import/export functions was mixed
