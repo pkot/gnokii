@@ -28,11 +28,14 @@ OBJS =	cfgreader.o \
 	rlp-common.o \
 	rlp-crc24.o
 
-	
 ifdef WIN32
 	OBJS += $(TOPDIR)/win32/winserial.o
 else
 	OBJS += unixserial.o
+endif
+
+ifdef XPM_CFLAGS
+    CFLAGS += $(XPM_CFLAGS)
 endif
 
 all: COMMON.o

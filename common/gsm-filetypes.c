@@ -19,6 +19,10 @@
 #include "gsm-common.h"
 #include "gsm-filetypes.h"
 
+#ifdef XPM
+#include <X11/xpm.h>
+#endif
+
 int GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 {
 
@@ -32,7 +36,7 @@ int GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
   if (!file)
     return(-1);
 
-  fread(buffer, 1, 3, file); /* Read the header of the file. */
+  fread(buffer, 1, 9, file); /* Read the header of the file. */
 
   /* Attempt to identify filetype */
 
@@ -40,33 +44,102 @@ int GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
     filetype=NOL;
   } else if (memcmp(buffer, "NGG",3)==0) {  /* NGG files have 'NGG' at the start */
     filetype=NGG;
-  } else if (memcmp(buffer, "FOR",3)==0) {  /* NSL files have 'FORM' at the start */
+  } else if (memcmp(buffer, "FORM",4)==0) {  /* NSL files have 'FORM' at the start */
     filetype=NSL;
   } else if (memcmp(buffer, "NLM",3)==0) {  /* NLM files have 'NLM' at the start */
     filetype=NLM;
+  } else if (memcmp(buffer, "/* XPM */",9)==0) {  /* XPM files have 'XPM' at the start */  
+    filetype=XPMF;
   } else filetype=None;
+
+  rewind(file);
 
   switch (filetype) {
 
   case NOL:
     error=loadnol(file,bitmap);
+    fclose(file);
     break;
   case NGG:
     error=loadngg(file,bitmap);
+    fclose(file);
     break;
   case NSL:
     error=loadnsl(file,bitmap);
+    fclose(file);
     break;
   case NLM:
     error=loadnlm(file,bitmap);
+    fclose(file);
     break;
+#ifdef XPM
+  case XPMF:
+    fclose(file);
+    error=loadxpm(FileName,bitmap);
+    break;
+#endif
   default:
     error=-1;
   }
 
-  fclose(file);
   return(error);
 }
+
+#ifdef XPM
+
+int loadxpm(char *filename, GSM_Bitmap *bitmap)
+{
+  int error,i,j;
+  XpmImage image;
+  XpmInfo info;
+
+  error=XpmReadFileToXpmImage(filename,&image,&info);
+
+  if (error!=0) return error;
+
+  if (image.ncolors!=2) {
+    printf("Wrong number of colors\n");
+    return -1;
+  }
+
+  if ((image.height==48) && (image.width==84)) {
+    bitmap->type=GSM_StartupLogo;
+  }
+  else if ((image.height==14) && (image.width==72)) {
+    bitmap->type=GSM_CallerLogo;
+  }
+  else {
+    printf("Invalid Image Size (%dx%d).\n",image.height,image.width);
+    return -1;
+  }
+
+  bitmap->height=image.height;
+  bitmap->width=image.width;
+  bitmap->size=bitmap->height*bitmap->width/8;
+
+  if (bitmap->type==GSM_StartupLogo)
+    {
+      for(i=0;i<bitmap->height;i++) {
+	for(j=0;j<bitmap->width;j++) {
+	  if (image.data[i*bitmap->width+j]==1) 
+	    bitmap->bitmap[((i/8)*84) + j ]&= 255 - (1<<((i%8)));
+	  else bitmap->bitmap[((i/8)*84) + j]|=1<<((i%8));
+	}
+      }
+    }
+  else {
+    for(i=0;i<bitmap->height;i++) {
+	for(j=0;j<bitmap->width;j++) {
+	  if (image.data[i*bitmap->width+j]==1) 
+	    bitmap->bitmap[9*i + (j/8)]&= 255 - (1<<(7-(j%8)));
+	  else bitmap->bitmap[9*i + (j/8)]|=1<<(7-(j%8));
+	}
+      }
+  }
+  return error;
+}
+
+#endif
 
 int loadnol(FILE *file, GSM_Bitmap *bitmap)
 {
@@ -76,7 +149,7 @@ int loadnol(FILE *file, GSM_Bitmap *bitmap)
 
   bitmap->type=GSM_OperatorLogo;
 
-  fread(buffer, 1, 3, file);
+  fread(buffer, 1, 6, file);
   fread(buffer, 1, 4, file);
   sprintf(bitmap->netcode, "%d %02d", buffer[0]+256*buffer[1], buffer[2]);
 
@@ -109,7 +182,7 @@ int loadngg(FILE *file, GSM_Bitmap *bitmap)
 
   bitmap->type=GSM_CallerLogo;
 
-  fread(buffer, 1, 3, file);
+  fread(buffer, 1, 6, file);
   fread(buffer, 1, 4, file); /* Width and height of the icon. */
   bitmap->width=buffer[0];
   bitmap->height=buffer[2];
@@ -170,8 +243,9 @@ int loadnsl(FILE *file, GSM_Bitmap *bitmap)
 int loadnlm (FILE *file, GSM_Bitmap *bitmap)
 {
 
-  unsigned char buffer[2];
-  
+  unsigned char buffer[4];
+
+  fread(buffer,1,4,file);
   fread(buffer,1,1,file);
 
   switch (buffer[0]) {
@@ -195,10 +269,10 @@ int loadota(FILE *file, GSM_Bitmap *bitmap)
 {
 
   char buffer[4];
-
   do {
     fread(buffer,1,1,file);
   } while ((buffer[0]&0x40)==0x40);  /* 7th bit indicates extd. info */
+  fread(buffer,1,1,file); /* It seems to need this */
 
   fread(buffer,1,3,file);
   bitmap->width=buffer[0];
@@ -215,29 +289,83 @@ int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 
   FILE *file;
 
-  file = fopen(FileName, "w");
+  /* Does the filename contain  .xpm ? */
 
-  if (!file)
-    return(-1);
+#ifdef XPM
+  if (strstr(FileName,".xpm")) savexpm(FileName, bitmap);
+  else {
+#endif    
 
-  switch (bitmap->type) {
-  case GSM_CallerLogo:
-    savengg(file, bitmap);
-    break;
-  case GSM_OperatorLogo:
+    file = fopen(FileName, "w");
+    
+    if (!file)
+      return(-1);
+    
+    switch (bitmap->type) {
+    case GSM_CallerLogo:
+      savengg(file, bitmap);
+      break;
+    case GSM_OperatorLogo:
     savenol(file, bitmap);
     break;
-  case GSM_StartupLogo:
-    savensl(file, bitmap);
-    break;
-  case GSM_None:
-    break;
+    case GSM_StartupLogo:
+      savensl(file, bitmap);
+      break;
+    case GSM_None:
+      break;
+    }
+    
+    fclose(file);
+    
+#ifdef XPM
   }
-
-  fclose(file);
+#endif
 
   return 0;
 }
+
+
+#ifdef XPM
+
+void savexpm(char *filename, GSM_Bitmap *bitmap)
+{
+  XpmColor colors[2]={{".","c","#000000","#000000","#000000","#000000"},
+		      {"#","c","#ffffff","#ffffff","#ffffff","#ffffff"}};
+  XpmImage image;
+  unsigned int data[4032];
+  int i,j;
+
+  image.height=bitmap->height;
+  image.width=bitmap->width;
+  image.cpp=1;
+  image.ncolors=2;
+  image.colorTable=colors;
+  image.data=data;
+
+  if (bitmap->type==GSM_StartupLogo)
+    {
+      for(i=0;i<bitmap->height;i++) {
+	for(j=0;j<bitmap->width;j++) {
+	  if (bitmap->bitmap[((i/8)*84) + j] & 1<<((i%8))) data[i*bitmap->width+j]=0;
+	  else data[i*bitmap->width+j]=1;
+	}
+      }
+    }
+  else {
+    for(i=0;i<bitmap->height;i++) {
+	for(j=0;j<bitmap->width;j++) {
+	  if (bitmap->bitmap[9*i + (j/8)] & 1<<(7-(j%8))) data[i*bitmap->width+j]=0;
+	  else data[i*bitmap->width+j]=1;
+	}
+      }
+  } 
+ 
+  XpmWriteFileFromXpmImage(filename,&image,NULL);
+
+}
+
+
+#endif
 
 void savengg(FILE *file, GSM_Bitmap *bitmap)
 {

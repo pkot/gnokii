@@ -1,6 +1,3 @@
-* Tue Jan 11 00:00:00 CET 2000 Karel Zak - Zakkr <zakkr@zf.jcu.cz>
-- rewrite build system 
-
 * Fri Mar  3 10:12:58 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - XPM support (Christopher Kemp)
 

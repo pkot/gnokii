@@ -19,17 +19,20 @@ int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap);
 void savenol(FILE *file, GSM_Bitmap *bitmap);
 void savengg(FILE *file, GSM_Bitmap *bitmap);
 void savensl(FILE *file, GSM_Bitmap *bitmap);
+void savexpm(char *filename, GSM_Bitmap *bitmap);
 
 int loadngg(FILE *file, GSM_Bitmap *bitmap);
 int loadnol(FILE *file, GSM_Bitmap *bitmap);
 int loadnsl(FILE *file, GSM_Bitmap *bitmap);
 int loadnlm(FILE *file, GSM_Bitmap *bitmap);
 int loadota(FILE *file, GSM_Bitmap *bitmap);
+int loadxpm(char *filename, GSM_Bitmap *bitmap);
 
 typedef enum {
   None=0,
   NOL,
   NGG,
   NSL,
-  NLM
+  NLM,
+  XPMF
 } GSM_Filetypes;

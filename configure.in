@@ -82,6 +82,17 @@ AC_CHECK_LIB(pthread, pthread_create, [
 	[ AC_MSG_ERROR(not found library: pthread !!!) ]
 )
 
+if test "$no_x" = yes 
+then
+	xpm="no"
+	XPM_CFLAGS=""
+	XPM_LIBS=""
+else
+	xpm="yes"	
+	XPM_CFLAGS="-DXPM"
+	XPM_LIBS="-L$x_libraries -lX11 -lXpm"
+fi
+
 
 dnl ======================== Additional switches
 
@@ -148,6 +159,8 @@ AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LIBS)
+AC_SUBST(XPM_CFLAGS)
+AC_SUBST(XPM_LIBS)
 
 AC_OUTPUT(Makefile.global packaging/RedHat/gnokii.spec)
 
@@ -174,6 +187,7 @@ echo "
     Phone model:        $model
     Serial port:        $port
     GTK:                $gtk
+    Xpm support:        $xpm
     Debug:              $debug
     Gettext:            $gettext
     Security:           $security
