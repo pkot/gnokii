@@ -18,6 +18,8 @@
 #  include <windows.h>
 #  include <sys/timeb.h>
 #  include <time.h>
+#  define ftime _ftime
+#  define timeb _timeb
 #else
 #  include <sys/time.h>
 #endif
@@ -27,19 +29,15 @@
 
 #ifndef	HAVE_GETTIMEOFDAY
 
-int gettimeofday(struct timeval *tv, struct timezone *tz)
+int gettimeofday(struct timeval *tv, void *tz)
 {
-	struct _timeb t;
+	struct timeb t;
 
-	_ftime(&t);
+	ftime(&t);
 
 	if (tv) {
 		tv->tv_sec = t.time;
 		tv->tv_usec = 1000 * t.millitm;
-	}
-	if (tz) {			/* historic */
-		tz->tz_dsttime = t.dstflag;
-		tz->tz_minuteswest = t.timezone;
 	}
 
 	return 0;

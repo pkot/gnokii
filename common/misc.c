@@ -182,7 +182,7 @@ char *lock_device(const char* port)
 #ifndef WIN32
 	char *lock_file = NULL;
 	char buffer[max_buf_len];
-	const char *aux = rindex(port, '/');
+	const char *aux = strrchr(port, '/');
 	int fd, len = strlen(aux) + strlen(lock_path);
 
 	/* Remove leading '/' */

@@ -27,8 +27,6 @@
 #  define WRITEPHONE(a, b, c) WriteCommBlock(b, c)
 #  undef IN
 #  undef OUT
-#  define sleep(x) Sleep((x) * 1000)
-#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
 #endif
 
 #include <gdk/gdkkeysyms.h>

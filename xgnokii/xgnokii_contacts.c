@@ -22,9 +22,6 @@
 #  include <unistd.h>
 #else
 #  include <windows.h>
-#  define sleep(x) Sleep((x) * 1000)
-#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
-#  define index strchr
 #endif
 
 #include <stdlib.h>
@@ -2315,7 +2312,7 @@ static void ExportNative(FILE * f)
 		pbEntry = g_ptr_array_index(contactsMemory, i);
 
 		if (pbEntry->status != E_Deleted && pbEntry->status != E_Empty) {
-			if (index(pbEntry->entry.Name, ';') != NULL) {
+			if (strchr(pbEntry->entry.Name, ';') != NULL) {
 				strcpy(buf, "\"");
 				strcat(buf, pbEntry->entry.Name);
 				strcat(buf, "\";");
@@ -2324,7 +2321,7 @@ static void ExportNative(FILE * f)
 				strcat(buf, ";");
 			}
 
-			if (index(pbEntry->entry.Number, ';') != NULL) {
+			if (strchr(pbEntry->entry.Number, ';') != NULL) {
 				strcat(buf, "\"");
 				strcat(buf, pbEntry->entry.Number);
 				strcat(buf, "\";");
@@ -2348,7 +2345,7 @@ static void ExportNative(FILE * f)
 							pbEntry->entry.SubEntries[j].NumberType);
 						strcat(buf, buf2);
 
-						if (index
+						if (strchr
 						    (pbEntry->entry.SubEntries[j].data.Number,
 						     ';') != NULL) {
 							strcat(buf, "\"");

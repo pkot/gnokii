@@ -33,10 +33,6 @@
 #include "gsm-statemachine.h"
 
 #include "device.h"
-#ifdef WIN32
-#  define sleep(x) Sleep((x) * 1000)
-#  define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
-#endif
 
 #include "links/fbus-3110.h"
 
