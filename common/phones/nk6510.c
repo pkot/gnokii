@@ -137,6 +137,14 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_CancelCall(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_AnswerCall(gn_data *data, struct gn_statemachine *state);
 
+static gn_error NK6510_Reset(gn_data *data, struct gn_statemachine *state);
+
+static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetFileId(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state);
+
 #ifdef  SECURITY
 static gn_error NK6510_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
@@ -167,11 +175,13 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingSound(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_IncomingReset(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_IncomingRadio(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 #ifdef  SECURITY
 static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 #endif
-
 
 static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
 static int get_memory_type(gn_memory_type memory_type);
@@ -182,6 +192,7 @@ static bool sms_loop = false; /* Are we in infinite SMS reading loop? */
 static bool new_sms  = false; /* Do we have a new SMS? */
 
 static gn_incoming_function_type nk6510_incoming_functions[] = {
+	{ NK6510_MSG_RESET,	NK6510_IncomingReset },
        	{ NK6510_MSG_FOLDER,	NK6510_IncomingFolder },
 	{ NK6510_MSG_SMS,	NK6510_IncomingSMS },
 	{ NK6510_MSG_PHONEBOOK,	NK6510_IncomingPhonebook },
@@ -205,6 +216,8 @@ static gn_incoming_function_type nk6510_incoming_functions[] = {
 	{ NK6510_MSG_WAP,	NK6510_IncomingWAP },
 	{ NK6510_MSG_TODO,	NK6510_IncomingToDo },
 	{ NK6510_MSG_SOUND,	NK6510_IncomingSound },
+	{ NK6510_MSG_RADIO,	NK6510_IncomingRadio },
+	{ NK6510_MSG_FILE,      NK6510_IncomingFile },
 	{ 0, NULL }
 };
 
@@ -213,7 +226,7 @@ gn_driver driver_nokia_6510 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6800|6810|6820|6820b|6610i|6230|6650|7210|7250|7250i", /* Supported models */
+		"6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6800|6810|6820|6820b|6610i|6230|6650|7210|7250|7250i|7600", /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GN_RF_Percentage,      /* RF level units */
@@ -384,6 +397,18 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_DeleteRingtone(data, state);
 	case GN_OP_PlayTone:
 		return NK6510_PlayTone(data, state);
+	case GN_OP_Reset:
+		return NK6510_Reset(data, state);
+	case GN_OP_GetFileList:
+		return NK6510_GetFileList(data, state);
+	case GN_OP_GetFileId:
+		return NK6510_GetFileId(data, state);
+	case GN_OP_GetFile:
+		return NK6510_GetFile(data, state);
+	case GN_OP_PutFile:
+		return NK6510_PutFile(data, state);
+	case GN_OP_DeleteFile:
+		return NK6510_DeleteFile(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -450,6 +475,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 			 */
 			state->config.rfcomm_cn = 14;
 		case GN_CT_Infrared:
+		case GN_CT_DKU2:
 		case GN_CT_Irda:
 			err = phonet_initialise(state);
 			/* Don't loop forever */
@@ -495,6 +521,16 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 			state->driver.phone.startup_logo_height = 48;
 			state->driver.phone.max_battery_level = 4;
 		}
+
+		if (!strncmp(data.model, "NMM-3", 5)) {
+			state->driver.phone.max_battery_level = 4;
+			state->driver.phone.operator_logo_width = 0;
+			state->driver.phone.operator_logo_height = 0;
+			state->driver.phone.startup_logo_width = 0;
+			state->driver.phone.startup_logo_height = 0;
+			state->driver.phone.max_battery_level = 4;
+		}
+
 	}
 	if (!connected) return err;
 	return GN_ERR_NONE;
@@ -1478,6 +1514,242 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+/*****************/
+/* FILE HANDLING */
+/*****************/
+
+static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x68, 0x00};
+	int i;
+	
+  	if (!data->file_list) return GN_ERR_INTERNALERROR;
+	data->file_list->file_count = 0;
+
+	i = strlen(data->file_list->path);
+	req[5] = char_unicode_encode(req+6, data->file_list->path, i);
+
+	if (sm_message_send(req[5]+9, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY; 
+	return sm_block(NK6510_MSG_FILE, data, state); 
+}
+
+static gn_error NK6510_GetFileId(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x82, 0x00};
+	int i;
+	
+  	if (!data->file) return GN_ERR_INTERNALERROR;
+
+	i = strlen(data->file->name);
+	req[5] = char_unicode_encode(req+6, data->file->name, i);
+
+	if ( sm_message_send(req[5]+9, NK6510_MSG_FILE, req, state) ) return GN_ERR_NOTREADY; 
+	return sm_block(NK6510_MSG_FILE, data, state); 
+}
+
+static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x68, 0x00};
+	unsigned char req2[512] = {FBUS_FRAME_HEADER, 0x72, 0x00, 0x00, 0x00};
+	unsigned char req3[] = {FBUS_FRAME_HEADER, 0x5e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 
+				0x00, 0x00, 0x00, 0x00, // Start position
+			        0x00, 0x00, 0x04, 0x00, 
+				0x00, 0x00, 0x00, 0x00}; // Size
+	unsigned char req4[] = {FBUS_FRAME_HEADER, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
+	gn_error err;
+	int i;
+	
+  	if (!data->file) return GN_ERR_INTERNALERROR;
+	i = strlen(data->file->name);
+
+	/* Get the file size */
+	req[5] = char_unicode_encode(req+6, data->file->name, i);
+	if (sm_message_send(req[5]+9, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY; 
+	err = sm_block(NK6510_MSG_FILE, data, state); 
+	if (err!=GN_ERR_NONE) return err;
+	data->file->file = malloc(data->file->file_length);
+	if (!data->file->file) return GN_ERR_INTERNALERROR;
+
+	/* Start the transfer */
+	req2[7] = char_unicode_encode(req2+8, data->file->name, i);
+	data->file->togo = 0;
+      	if (sm_message_send(req2[7]+12, NK6510_MSG_FILE, req2, state)) return GN_ERR_NOTREADY; 
+	err = sm_block(NK6510_MSG_FILE, data, state); 
+	if (err!=GN_ERR_NONE) return err;
+	if (data->file->togo!=data->file->file_length) return GN_ERR_INTERNALERROR;
+
+	/* Get the data */
+	while (data->file->togo>0) {
+		i = data->file->file_length-data->file->togo;
+		req3[11] = (i&0xff0000)>>16;
+		req3[12] = (i&0xff00)>>8;
+		req3[13] = i&0xff;
+		if (data->file->togo>0x100) {
+			req3[20] = 0x01;
+		} else {
+			req3[19] = (data->file->togo&0xff0000)>>16;
+			req3[20] = (data->file->togo&0xff00)>>8;
+			req3[21] = data->file->togo&0xff;
+		}
+		if (sm_message_send(sizeof(req3), NK6510_MSG_FILE, req3, state)) return GN_ERR_NOTREADY; 
+		err = sm_block(NK6510_MSG_FILE, data, state); 
+		if (err!=GN_ERR_NONE) return err;
+	}
+	
+	/* Finish the transfer */
+	if (sm_message_send(sizeof(req4), NK6510_MSG_FILE, req4, state)) return GN_ERR_NOTREADY; 
+	return sm_block(NK6510_MSG_FILE, data, state); 
+}
+
+static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req1[512] = {FBUS_FRAME_HEADER, 0x72, 0x11, 0x00, 0x00};
+	unsigned char req2[512] = {FBUS_FRAME_HEADER, 0x58, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 
+				0x00, 0x00, 0x00, 0x00}; // Size
+	unsigned char req3[] = {FBUS_FRAME_HEADER, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
+	gn_error err;
+	int i;
+	
+  	if (!data->file) return GN_ERR_INTERNALERROR;
+	i = strlen(data->file->name);
+
+	/* Start the transfer */
+	req1[7] = char_unicode_encode(req1+8, data->file->name, i);
+	data->file->togo = 0;
+      	if (sm_message_send(req1[7]+12, NK6510_MSG_FILE, req1, state)) return GN_ERR_NOTREADY; 
+	err = sm_block(NK6510_MSG_FILE, data, state); 
+	if (err!=GN_ERR_NONE) return err;
+	if (data->file->togo!=data->file->file_length) return GN_ERR_INTERNALERROR;
+
+	/* Put the data */
+	while (data->file->togo>0) {
+		i = data->file->togo;
+		if (data->file->togo>0x100) {
+			req2[12] = 0x01;
+			data->file->just_sent = 0x100;
+		} else {
+			req2[11] = (data->file->togo&0xff0000)>>16;
+			req2[12] = (data->file->togo&0xff00)>>8;
+			req2[13] = data->file->togo&0xff;
+			data->file->just_sent = data->file->togo;
+		}
+		memcpy(req2+14, data->file->file + data->file->file_length - data->file->togo, data->file->just_sent);
+		if (sm_message_send(14+data->file->just_sent, NK6510_MSG_FILE, req2, state)) return GN_ERR_NOTREADY; 
+		err = sm_block(NK6510_MSG_FILE, data, state); 
+		if (err!=GN_ERR_NONE) return err;
+		if (data->file->togo!=i-data->file->just_sent) return GN_ERR_INTERNALERROR;
+	}
+	
+	/* Finish the transfer */
+	if (sm_message_send(sizeof(req3), NK6510_MSG_FILE, req3, state)) return GN_ERR_NOTREADY; 
+	return sm_block(NK6510_MSG_FILE, data, state);
+}
+
+static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x62, 0x00};
+	gn_error err;
+	int i;
+	
+  	if (!data->file) return GN_ERR_INTERNALERROR;
+	i = strlen(data->file->name);
+
+	req[5] = char_unicode_encode(req+6, data->file->name, i);
+	if (sm_message_send(req[5]+9, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY; 
+	return sm_block(NK6510_MSG_FILE, data, state); 
+}
+
+
+static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state) {
+	int i;
+	char string[300];
+	gn_file *file;
+
+       switch ( message[3] ) {
+	case 0x59:
+		// Sent a block of file ok
+		if (data->file) {
+			data->file->togo -= data->file->just_sent;
+			return GN_ERR_NONE;
+		}
+		break;
+	case 0x5f:
+		// Recv a block of file
+		if (data->file) {
+			i= (message[8]<<8) + message[9];
+			memcpy(data->file->file + data->file->file_length - data->file->togo, message+10, i);
+			data->file->togo -= i;
+			return GN_ERR_NONE;
+   		}
+		break;
+	case 0x63:
+		// Deleted ok
+		if (message[4]==0x06) {
+			dprintf("Invalid path\n");
+			return GN_ERR_INVALIDLOCATION;
+		}
+		return GN_ERR_NONE;
+		break;
+	case 0x6d:
+	case 0x69:
+		if (message[04]==0x06) {
+			dprintf("Invalid path\n");
+			return GN_ERR_INVALIDLOCATION;
+		}
+		if (message[04]==0x0e) {
+			dprintf("Empty directory\n");
+			return GN_ERR_NONE; 
+		}
+		if (data->file) { 
+			file = data->file;
+		} else if (data->file_list) {
+			data->file_list->files[data->file_list->file_count] = malloc(sizeof(gn_file));
+			file = data->file_list->files[data->file_list->file_count];
+			data->file_list->file_count++;
+			i = message[31]*2;
+			char_unicode_decode(file->name, message+32, i);
+		}
+		if (!file) return GN_ERR_INTERNALERROR;
+		dprintf("Filename: %s\n", file->name);
+		dprintf("   Status bytes: %02x %02x %02x\n", message[8], message[9], message[29]);
+		file->file_length = (message[11]<<16) + (message[12]<<8) + message[13];
+		dprintf("   Filesize: %d\n", file->file_length);
+		file->year = (message[14]<<8) + message[15];
+		file->month = message[16];
+		file->day = message[17];
+		file->hour = message[18];
+		file->minute = message[19];
+		file->second = message[20];
+		dprintf("   Date: %04u.%02u.%02u\n", file->year, file->month, file->day);
+		dprintf("   Time: %02u:%02u:%02u\n", file->hour, file->minute, file->second);
+		if (message[4]==0x0d) return GN_ERR_WAITING;
+		break;
+	case 0x73:
+		if (data->file) {
+			if (message[4]==0x0c) {
+				data->file->togo = -1;
+			} else if (message[4]==0x00) {
+				data->file->togo = data->file->file_length;
+			}
+		}
+		break;
+	case 0x75:
+		// file transfer complete ok
+		return GN_ERR_NONE;
+		break;
+	case 0x83:
+		if (data->file) {
+			memcpy(data->file->id, message+4, 6);
+		}
+		break;
+	default:
+		break;
+	}
+	return GN_ERR_NONE;
+}
+
+
+
 /**********************/
 /* PHONEBOOK HANDLING */
 /**********************/
@@ -1652,13 +1924,14 @@ static gn_error NK6510_SetSpeedDial(gn_data *data, struct gn_statemachine *state
 
 static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[200] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x01, 0x01, 0x00, 0x00, 0x10, 
+	unsigned char req[400] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x01, 0x01, 0x00, 0x00, 0x10, 
 				 0xFF, 0x10, 
 				 0x00, 0x06, /* number */
 				 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 				 0x01}; /* blocks */
 	unsigned int count = 22, block = 0;
 	char string[150];
+	int i;
 
 /*
   00 01 00 0B 00 01 01 00 00 10 
@@ -1680,7 +1953,7 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	string[0] = data->bitmap->number + 1;
 	string[1] = 0;
 	string[2] = 0x55;
-	count += PackBlock(0x1e, 3, block++, string, req + count, 200 - count);
+	count += PackBlock(0x1e, 3, block++, string, req + count, 400 - count);
 
 	/* Logo */
 	string[0] = data->bitmap->width;
@@ -1688,37 +1961,36 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	string[2] = string[3] = 0x00;
 	string[4] = 0x7e;
 	memcpy(string + 5, data->bitmap->bitmap, data->bitmap->size);
-	count += PackBlock(0x1b, data->bitmap->size + 5, block++, string, req + count, 200 - count);
+	count += PackBlock(0x1b, data->bitmap->size + 5, block++, string, req + count, 400 - count);
 
-#if 0
 	/* Name */
-	switch (data->bitmap->number) {
-	case 0:
-		string[0] = 0x0d;
-		char_unicode_encode(string + 1, "Family", 6);
-		break;
-	case 1:
-		string[0] = 0x07;
-		char_unicode_encode(string + 1, "VIP", 3);
-		break;
-	case 2:
-		string[0] = 0x0f;
-		char_unicode_encode(string + 1, "Friends", 7);
-		break;
-	case 3:
-		string[0] = 0x15;
-		char_unicode_encode(string + 1, "Colleagues", 10);
-		break;
-	case 4:
-		string[0] = 0x0d;
-		char_unicode_encode(string + 1, "Others", 6);
-		break;
-	default:
+	i = strlen(data->bitmap->text);
+	i = char_unicode_encode((string + 1), data->bitmap->text, i);
+	string[0] = i;
+	count += PackBlock(0x07, i + 1, block++, string, req + count, 400 - count);
+
+	/* Ringtone */
+	if(data->bitmap->ringtone<0) {
 		string[0] = 0x00;
-		break;
+		string[7] = 0x00;
+		string[8] = 0x00;
+		string[9] = 0x00;
+		string[10] = 0x01;
+		memcpy(string+1, data->bitmap->ringtone_id, 6);
+	} else {
+		string[0] = 0x00;
+		string[1] = 0x00;
+		string[2] = 0x00;
+		string[3] = 0x00;
+		string[4] = 0x00;
+		string[5] = (data->bitmap->ringtone&0xff00) >> 8;
+		string[6] = (data->bitmap->ringtone&0x00ff);
+		string[7] = 0x00;
+		string[8] = 0x00;
+		string[9] = 0x00;
+		string[10] = 0x07;
 	}
-	if (string[0]) count += PackBlock(0x07, string[0], block++, string, req + count, 200 - count);
-#endif
+	count += PackBlock(0x37, 11, block++, string, req + count, 400-count);
 
 	req[21] = block;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_PHONEBOOK, count);
@@ -2517,13 +2789,15 @@ static gn_error GetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 
 static gn_error SetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[300] = {FBUS_FRAME_HEADER, 0x25, 0x01, 0x55, 0x00, 0x00, 0x55,
+	//unsigned char req[1000] = {FBUS_FRAME_HEADER, 0x25, 0x01, 0x55, 0x00, 0x00, 0x55,
+	unsigned char req[1000] = {FBUS_FRAME_HEADER, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00,
 				  0x02, /* Blocks */
 				  0x0c, 0x08, /* type, length */
-				  0x62, 0xf2, 0x20, 0x03, 0x55, 0x55,
-				  0x1a};
+				  //0x62, 0xf2, 0x20, 0x03, 0x55, 0x55,
+				   0x62, 0xf2, 0x20, 0x03, 0x00, 0x00,
+				  0x1a}; 
 
-	memset(req + 19, 0, 281);
+	memset(req + 19, 0, 881);
 	/*
 	  00 01 00 25 01 55 00 00 55 02 
 	  0C 08 62 F2 20 03 55 55 
@@ -2545,11 +2819,10 @@ static gn_error SetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 		req[20] = data->bitmap->width;
 		req[21] = data->bitmap->height;
 		req[23] = req[25] = data->bitmap->size;
-		req[19] = req[23] + 8;
 		memcpy(req + 26, data->bitmap->bitmap, data->bitmap->size);
 	}
 	dprintf("Setting op logo...\n");
-	SEND_MESSAGE_BLOCK(NK6510_MSG_NETSTATUS, req[19] + req[11] + 10);
+	SEND_MESSAGE_BLOCK(NK6510_MSG_NETSTATUS, req[19] + req[11] + 14);
 }
 
 /*********************/
@@ -2562,7 +2835,7 @@ static gn_error NK6510_IncomingBattLevel(int messagetype, unsigned char *message
 	case 0x0B:
 		if (!data->battery_level) return GN_ERR_INTERNALERROR;
 		*(data->battery_unit) = GN_BU_Percentage;
-		*(data->battery_level) = message[9] * 100 / 7;
+		*(data->battery_level) = message[9] * 100 / state->driver.phone.max_battery_level;
 		dprintf("Battery level %f\n\n", *(data->battery_level));
 		break;
 	default:
@@ -3213,6 +3486,16 @@ static gn_error NK6510_IncomingRadio(int messagetype, unsigned char *message, in
 00 01 00 05 00 00 00 2C 00 02 00 00 00 01 00 00
 
 	 */
+
+	switch (message[3]) {
+	case 0x02:
+		/* Hard reset ok */
+		return GN_ERR_NONE;
+		break;
+	default:
+		break;
+	}
+
 	return GN_ERR_NOTIMPLEMENTED;
 }
 
@@ -3379,10 +3662,40 @@ static gn_error NK6510_Subscribe(gn_data *data, struct gn_statemachine *state)
 	SEND_MESSAGE_BLOCK(NK6510_MSG_SUBSCRIBE, 39);
 }
 
+/*************/
+/*** RESET ***/
+/*************/
 
-/*****************/
+static gn_error NK6510_IncomingReset(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	switch (message[3]) {
+	default:
+		dprintf("Incoming Reset\n");
+		return GN_ERR_UNHANDLEDFRAME;
+		break;
+	}
+	return GN_ERR_NONE;
+}
+
+static gn_error NK6510_Reset(gn_data *data, struct gn_statemachine *state)
+{
+       unsigned char req[] = {FBUS_FRAME_HEADER,0x05,0x80,0x00};
+	unsigned char req2[] = {FBUS_FRAME_HEADER,0x01,0,0,0,0,0,0x01};
+
+	if (data->reset_type == 0x03) {
+		printf("Soft resetting....\n");
+		SEND_MESSAGE_BLOCK(NK6510_MSG_RESET, 6);
+	}
+	else if (data->reset_type == 0x04) {
+		printf("Hard resetting....\n");
+		if (sm_message_send(10, NK6510_MSG_RADIO, req2, state)) return GN_ERR_NOTREADY;
+		return sm_block(NK6510_MSG_RADIO, data, state); 
+	} else return GN_ERR_INTERNALERROR;
+}
+
+/******************/
 /*** COMMSTATUS ***/
-/*****************/
+/******************/
 
 static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {

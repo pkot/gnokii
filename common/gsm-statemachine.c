@@ -129,8 +129,12 @@ void sm_incoming_function(u8 messagetype, void *message, u16 messagesize, struct
 		dprintf("Unsolicited frame, skipping...\n");
 		free(edata);
 		return;
-	} else if (res == GN_ERR_UNHANDLEDFRAME)
+	} else if (res == GN_ERR_UNHANDLEDFRAME) {
 		sm_unhandled_frame_dump(messagetype, message, messagesize, state);
+	} else if (res == GN_ERR_WAITING) {
+		free(edata);
+		return;
+	}
 	if (temp != 0) {
 		dprintf("Unknown Frame Type %02x\n", messagetype);
 		state->driver.default_function(messagetype, message, messagesize, state);

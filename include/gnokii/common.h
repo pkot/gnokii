@@ -185,6 +185,7 @@ typedef enum {
 	GN_PHONEBOOK_ENTRY_LogoSwitch = 0x1c,
 	GN_PHONEBOOK_ENTRY_Group      = 0x1e,
 	GN_PHONEBOOK_ENTRY_URL        = 0x2c,
+	GN_PHONEBOOK_ENTRY_RingtoneAdv= 0x37,
 } gn_phonebook_entry_type;
 
 typedef struct {
@@ -666,5 +667,28 @@ typedef enum {
 	GN_LOG_T_NONE = 0,
 	GN_LOG_T_STDERR = 1
 } gn_log_target;
+
+typedef struct {
+	unsigned char id[6];
+	char name[512];
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minute;
+	int second;
+	int file_length;
+	int togo;
+	int just_sent;
+	unsigned char *file;
+} gn_file;
+
+#define GN_FILES_MAX_COUNT 100
+
+typedef struct {
+	char path[512];
+	gn_file *files[GN_FILES_MAX_COUNT];
+	int file_count;
+} gn_file_list;
 
 #endif	/* _gnokii_common_h */

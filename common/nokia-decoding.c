@@ -38,7 +38,7 @@
 gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			  int blocks, int memtype, int speeddial_pos)
 {
-	int subblock_count = 0, i;
+	int subblock_count = 0, i, j;
 	gn_phonebook_subentry* subentry = NULL;
 
 
@@ -51,6 +51,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_LogoSwitch &&
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_Group &&
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_Pointer &&
+		    blockstart[0] != GN_PHONEBOOK_ENTRY_RingtoneAdv &&
 		    /* the last one can be the case of the bitmap name -- we
 		     * don't have phonebook entry allocated then, but a bitmap;
 		     * we handle this later on
@@ -187,6 +188,22 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			if (data->bitmap)
 				data->bitmap->number = blockstart[5] - 1;
 			dprintf("   Group: %d\n", blockstart[5] - 1);
+			break;
+		case GN_PHONEBOOK_ENTRY_RingtoneAdv:   /* Newer ringtones */
+			switch(blockstart[15]) {
+			case 0x01:
+				memcpy(data->bitmap->ringtone_id, blockstart+6, 6);
+				dprintf("   Gallery ringtone id: %02x %02x %02x %02x %02x %02x\n", blockstart[6], blockstart[7], blockstart[8], blockstart[9], blockstart[10], blockstart[11]);
+				data->bitmap->ringtone = -1;
+				break;
+			case 0x07:
+				data->bitmap->ringtone = blockstart[11];
+				dprintf("   Standard ringtone: %d\n", blockstart[11]);
+				break;
+			default:
+				dprintf("   Unknown ringtone entry!\n");
+				break;
+			}
 			break;
 		default:
 			dprintf("Unknown phonebook block %02x\n", blockstart[0]);

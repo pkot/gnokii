@@ -7,9 +7,13 @@
     o --monitor once will run only once            (BORBELY Zoltan)
     o add the ability to set datetime with gnokii --savesms
                                                  (Adam Go³êbiowski)
+    o support for basic file manipulation              (Chris Kemp)
  * 6510 driver updates
     o correctly read SMS datetime                       (Pawel Kot)
     o deleting sms can return an unhandled message (BORBELY Zoltan)
+    o various file (gallery) functions added           (Chris Kemp)
+    o full reset function added                        (Chris Kemp)
+    o DKU2 support added                               (Chris Kemp)
  * 7110 driver updates
     o ringtone list will return fix entries too    (BORBELY Zoltan)
     o call status query function added             (BORBELY Zoltan)

@@ -56,6 +56,7 @@ typedef enum {
 #define NK6510_MSG_SUBSCRIBE	0x10	/* subscribe to channels */
 #define NK6510_MSG_CALENDAR	0x13	/* Calendar notes */
 #define NK6510_MSG_FOLDER	0x14	/* Folders handling */
+#define NK6510_MSG_RESET        0x15	/* Reset */
 #define NK6510_MSG_BATTERY	0x17	/* Battery info */
 #define NK6510_MSG_CLOCK	0x19	/* Date & alarm */
 #define NK6510_MSG_IDENTITY	0x1b	/* Brief product info */
@@ -63,8 +64,9 @@ typedef enum {
 #define NK6510_MSG_PROFILE	0x39	/* Profiles */
 #define NK6510_MSG_NOTKNOWN	0x3E	/*          */
 #define NK6510_MSG_WAP		0x3F	/* WAP */
-#define NK6510_MSG_RADIO    	0x43	/* Radio (6510/8310) */
+#define NK6510_MSG_RADIO    	0x43	/* Radio (6510/8310) + hard reset */
 #define NK6510_MSG_TODO    	0x55	/* ToDo */
+#define NK6510_MSG_FILE	        0x6d	/* File Handling */
 #define NK6510_MSG_STLOGO	0x7a	/* Startup logo */
 
 /* SMS handling message subtypes (send) */

@@ -69,6 +69,7 @@ typedef struct {
 	unsigned char bitmap[GN_BMP_MAX_SIZE]; /* Actual Bitmap */
 	char number;             /* Caller group number */
 	int ringtone;            /* Ringtone no sent with caller group */
+	unsigned char ringtone_id[6];
 } gn_bmp;
 
 API gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info);
