@@ -1624,6 +1624,11 @@ int getlogo(char *argv[])
 {
   GSM_Bitmap bitmap;
 
+  sleep(1);
+
+  /* We need to make sure that the init is finished to avoid interrupted */
+  /* multiframe packets... */
+
   fbusinit(NULL);
 
   bitmap.type=GSM_None;
