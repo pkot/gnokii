@@ -213,7 +213,7 @@ void GUIRefresh() {
     gtk_main_iteration();
 }
 
-void main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
 
   /* Meta widgets */
@@ -270,4 +270,6 @@ void main (int argc, char *argv[])
   gtk_widget_show_all (window);
 
   gtk_main ();
+  
+  return 0;
 }

@@ -753,7 +753,7 @@ static void SendSMS (void)
     sms.Compression = false;
     sms.EightBit = false;
     sms.Validity = sms.MessageCenter.Validity;
-    sms.UserDataHeaderIndicator = false;
+    sms.UDHType = GSM_NoUDH;
     
     strncpy (sms.Destination, number, GSM_MAX_DESTINATION_LENGTH + 1);
     sms.Destination[GSM_MAX_DESTINATION_LENGTH] = '\0';
@@ -762,7 +762,7 @@ static void SendSMS (void)
     strncpy (sms.MessageText, text, GSM_MAX_SMS_LENGTH + 1);
     sms.MessageText[GSM_MAX_SMS_LENGTH] = '\0';
     
-    error = GSM->SendSMSMessage(&sms);
+    error = GSM->SendSMSMessage(&sms,strlen(sms.MessageText));
     
     if (error != GE_SMSSENDOK)
     {

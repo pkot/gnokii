@@ -433,7 +433,7 @@ GSM_Error   FB38_DeleteSMSMessage(GSM_SMSMessage *message)
     return(CurrentSMSMessageError);
 }
 
-GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS)
+GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 {
     int     timeout;
     int     text_offset;

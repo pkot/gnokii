@@ -1071,9 +1071,8 @@ void FB61_Terminate(void)
 
 #define ByteMask ((1<<NumOfBytes)-1)
 
-int UnpackEightBitsToSeven(int in_length, int out_length, unsigned char *input, unsigned char *output)
+int UnpackEightBitsToSeven(int fillbits, int in_length, int out_length, unsigned char *input, unsigned char *output)
 {
-
   int NumOfBytes=7;
   unsigned char Rest=0x00;
 
@@ -1084,6 +1083,12 @@ int UnpackEightBitsToSeven(int in_length, int out_length, unsigned char *input, 
 
     *OUT = ((*IN & ByteMask) << (7-NumOfBytes)) | Rest;
 
+    if (IN == input && fillbits != 0) {
+      *OUT = *OUT>>fillbits;
+      NumOfBytes = 1;
+      OUT--;
+    }
+    
     Rest = *IN >> NumOfBytes;
 
     IN++;OUT++;
@@ -1108,14 +1113,16 @@ unsigned char GetAlphabetValue(unsigned char value)
 
   unsigned char i;
   
+  if (value == '?') return  0x3f;
+  
   for (i = 0 ; i < 128 ; i++)
     if (GSM_Default_Alphabet[i] == value)
       return i;
 
-  return 0x10; /* '?' */
+  return 0x3f; /* '?' */
 }
 
-int PackSevenBitsToEight(unsigned char *String, unsigned char* Buffer)
+int PackSevenBitsToEight(int fillbits, unsigned char *String, unsigned char* Buffer)
 {
 
   unsigned char *OUT=Buffer; /* Current pointer to the output buffer */
@@ -1132,6 +1139,11 @@ int PackSevenBitsToEight(unsigned char *String, unsigned char* Buffer)
       *(OUT-1)|=(Byte & ( (1<<(7-Bits))-1))<<(Bits+1);
 
     Bits--;
+
+    if (OUT == Buffer && fillbits != 0) {
+    	*OUT = *OUT<<fillbits;
+    	Bits = 7;
+    }
 
     if (Bits==-1)
       Bits=7;
@@ -1931,9 +1943,10 @@ int SemiOctetPack(char *Number, unsigned char *Output) {
   return (2 * (OUT - Output - 1));
 }
 
-GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
+/* The second argument is the size of the data in octets,
+   excluding User Data Header - important only for 8bit data */
+GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 {
-
   GSM_Error error;
 
   unsigned char req[256] = {
@@ -1962,7 +1975,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   };
 
-  int size;
+  int size, offset;
   int timeout=70;
 
   /* First of all we should get SMSC number */
@@ -1970,24 +1983,46 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
     error = FB61_GetSMSCenter(&SMS->MessageCenter);
     if (error != GE_NONE)
       return error;
+    SMS->MessageCenter.No = 0;
   }
-
 #ifdef DEBUG
   fprintf(stdout, _("Sending SMS to %s via message center %s\n"), SMS->Destination, SMS->MessageCenter.Number);
 #endif /* DEBUG */
 
-  if (SMS->UserDataHeaderIndicator) {
-    size = 14 + SMS->MessageText[11] * SMS->MessageText[12] / 8;
-    memcpy(req + 42, SMS->MessageText, size);
-    req[22] = size;
+  if (SMS->UDHType) {
+    /* offset - length of the user data header */
+    offset = 1 + SMS->UDH[0];
+    /* we copy the udh and set the mask for the indicator */
+    memcpy(req + 42, SMS->UDH, offset);
+    req[18] = req[18] | 0x40;
   } else {
-    size = PackSevenBitsToEight(SMS->MessageText, req+42);
-    req[22]=strlen(SMS->MessageText);
+    offset = 0;
+    /* such messages should be sent as concatenated */
     if (strlen(SMS->MessageText) > GSM_MAX_SMS_LENGTH)
       return(GE_SMSTOOLONG);
   }
-  CurrentSMSMessageError=GE_BUSY;
 
+  /* size is the length of the data in octets including udh */
+  /* SMS->Length is:
+  	- integer representation of the number od octets within the user data when UD is coded using 8bit data
+  	- the sum of the number of septets in UDH including any padding and number of septets in UD in other case
+   */
+  
+  /* offset now denotes UDH length */
+  if (SMS->EightBit) {
+    memcpy(req + 42 + offset, SMS->MessageText, data_size);
+    SMS->Length = size = data_size + offset;
+    /* the mask for the 8-bit data */
+    req[21] = req[21] | 0xf4;
+  } else {
+    size = PackSevenBitsToEight((7-offset)%7, SMS->MessageText, req + 42 + offset);
+    size += offset;
+    SMS->Length = (offset*8 + ((7-offset)%7)) / 7 + strlen(SMS->MessageText);
+  }
+
+  req[22] = SMS->Length;
+
+  CurrentSMSMessageError=GE_BUSY;
 
   req[6]=SemiOctetPack(SMS->MessageCenter.Number, req+7);
   if (req[6] % 2) req[6]++;
@@ -2018,18 +2053,10 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
 
   }
   
-  /* Mask for 8 bit data */
-  /* FIXME: full support for 8 bit data */
-  if (SMS->EightBit) req[21] = req[21] | 0xf4;
-  
-  /* Mask for User Data Header Indicator */
-  if (SMS->UserDataHeaderIndicator) req[18] = req[18] | 0x40;
-
   /* Mask for compression */
   /* FIXME: support for compression */
   /* See GSM 03.42 */
 /*  if (SMS->Compression) req[21] = req[21] | 0x20; */
-
 
   req[23]=SemiOctetPack(SMS->Destination, req+24);
 
@@ -2381,9 +2408,8 @@ char *FB61_GetPackedDateTime(u8 *Number) {
 
 enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
-  int i, tmp, count, offset;
+  int i, tmp, count, offset, off;
   unsigned char output[160];
-  static unsigned char SMSText[256];
 
   if (RX_Multiple)
     return FB61_RX_Sync;
@@ -2591,7 +2617,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       fprintf(stdout, _("   Date: %s\n"), FB61_GetPackedDateTime(MessageBuffer+35));
       fprintf(stdout, _("   SMS: "));
 
-      tmp=UnpackEightBitsToSeven(MessageLength-42-2, MessageBuffer[22], MessageBuffer+42, output);
+      tmp=UnpackEightBitsToSeven(0, MessageLength-42-2, MessageBuffer[22], MessageBuffer+42, output);
 
       for (i=0; i<tmp;i++)
 	fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
@@ -3763,42 +3789,6 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
   case 0x14:
 
-    if (CurrentSMSMessageError == GE_SMSWAITING) {
-
-#ifdef DEBUG
-      fprintf(stdout, _("Message: the rest of the SMS message received.\n"));
-#endif /* DEBUG */
-
-      for (i=0; i<MessageLength-2;i++) {
-        SMSText[CurrentSMSPointer+i] = MessageBuffer[i];
-      }
-
-      tmp=UnpackEightBitsToSeven(CurrentSMSPointer+MessageLength-2,
-                                 CurrentSMSMessage->Length,
-                                 SMSText,
-                                 output);
-
-      for (i=0; i<tmp;i++) {
-
-#ifdef DEBUG
-        fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
-#endif /* DEBUG */
-
-        CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
-      }
-
-      CurrentSMSMessage->MessageText[CurrentSMSMessage->Length]=0;
-
-      CurrentSMSMessageError = GE_NONE;
-
-#ifdef DEBUG
-      fprintf(stdout, "\n");
-#endif /* DEBUG */
-
-      break;
-
-    }
-
     switch (MessageBuffer[3]) {
 
     case 0x08:
@@ -3845,6 +3835,29 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       else
         CurrentSMSMessage->Status = GSS_SENTREAD;
 
+      off = 0;
+      if (MessageBuffer[20] & 0x40) {
+      	switch (MessageBuffer[40+offset]) {
+	  	case 0x00: /* concatenated messages */
+#ifdef DEBUG
+			fprintf(stderr,_("Concatenated message!!!\n"));
+#endif /* DEBUG */
+		        CurrentSMSMessage->UDHType = GSM_ConcatenatedMessages;
+	  		if (MessageBuffer[41+offset] != 0x03) {
+	  		/* should be some error */
+	  		}
+		        break;
+		default:
+			break;
+        }
+	/* Skip user data header when reading data */
+	off = (MessageBuffer[39+offset] + 1);
+	for (i = 0; i < off; i++)
+		CurrentSMSMessage->UDH[i] = MessageBuffer[39+offset+i];
+      } else {
+        CurrentSMSMessage->UDHType = GSM_NoUDH;
+      }
+      
       MessageBuffer[20+offset] = (MessageBuffer[20+offset]+1)/2+1;
 
 #ifdef DEBUG
@@ -3874,7 +3887,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
           else
             fprintf(stdout, _("Not read\n"));
 
-          fprintf(stdout, _("   Date: %s GMT"), FB61_GetPackedDateTime(MessageBuffer+32+offset));
+          fprintf(stdout, _("   Date: %s "), FB61_GetPackedDateTime(MessageBuffer+32+offset));
 
           if (MessageBuffer[38+offset]) {
             if (MessageBuffer[38+offset] & 0x08)
@@ -3882,14 +3895,14 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
             else
               fprintf(stdout, "+");
 
-            fprintf(stdout, _("%dh"), (10*(MessageBuffer[38+offset]&0x07)+(MessageBuffer[38+offset]>>4))/4);
+            fprintf(stdout, _("%02d00"), (10*(MessageBuffer[38+offset]&0x07)+(MessageBuffer[38+offset]>>4))/4);
           }
 
           fprintf(stdout, "\n");
 
           if (CurrentSMSMessage->Type == GST_DR) {
 
-            fprintf(stdout, _("   SMSC response date: %s GMT"), FB61_GetPackedDateTime(MessageBuffer+39+offset));
+            fprintf(stdout, _("   SMSC response date: %s "), FB61_GetPackedDateTime(MessageBuffer+39+offset));
 
             if (MessageBuffer[45+offset]) {
 
@@ -3898,7 +3911,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
               else
                 fprintf(stdout, "+");
 
-              fprintf(stdout, _("%dh"),(10*(MessageBuffer[45+offset]&0x07)+(MessageBuffer[45+offset]>>4))/4);
+              fprintf(stdout, _("%02d00"),(10*(MessageBuffer[45+offset]&0x07)+(MessageBuffer[45+offset]>>4))/4);
             }
 
             fprintf(stdout, "\n");
@@ -3929,7 +3942,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
         CurrentSMSMessage->Time.Second=10*(MessageBuffer[37+offset]&0x0f)+(MessageBuffer[37+offset]>>4);
         CurrentSMSMessage->Time.Timezone=(10*(MessageBuffer[38+offset]&0x07)+(MessageBuffer[38+offset]>>4))/4;
 
-        if (MessageBuffer[38]&0x08)
+        if (MessageBuffer[38+offset]&0x08)
           CurrentSMSMessage->Time.Timezone = -CurrentSMSMessage->Time.Timezone;
  
         strcpy(CurrentSMSMessage->Sender, FB61_GetBCDNumber(MessageBuffer+20+offset));
@@ -3940,23 +3953,27 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       if (CurrentSMSMessage->Type != GST_DR) {
 
-        CurrentSMSMessage->Length=MessageBuffer[19+offset];
-        if (MessageBuffer[MessageLength-2] > 0x01) {
-          tmp = MessageLength-39-offset-2;
-          for (i=0; i<tmp;i++) {
-            SMSText[i] = (MessageBuffer+39+offset)[i];
-          }
-        } else {
-          tmp=UnpackEightBitsToSeven(MessageLength-39-offset-2, CurrentSMSMessage->Length, MessageBuffer+39+offset, output);
-          for (i=0; i<tmp;i++) {
+        /* 8bit SMS */
+	if ((MessageBuffer[18+offset] & 0xf4) == 0xf4) {
+	  CurrentSMSMessage->EightBit = true;
+	  tmp=CurrentSMSMessage->Length=MessageBuffer[19+offset];
+	  memcpy(output,MessageBuffer-39-offset-2,tmp-offset);
+	/* 7bit SMS */
+	} else {
+	  CurrentSMSMessage->EightBit = false;
+          CurrentSMSMessage->Length=MessageBuffer[19+offset] - (off*8 + ((7-off)%7)) / 7;
+	  offset += off;
+          tmp=UnpackEightBitsToSeven((7-off)%7,MessageLength-39-offset-2, CurrentSMSMessage->Length, MessageBuffer+39+offset, output);
+        }
+        for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-            fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
+          fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
 #endif /* DEBUG */
 
-	    CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
-	  }
+	  CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
 	}
+	
       } else { /* CurrentSMSMessage->Type == SM_DR (Delivery Report) */
 
         CurrentSMSMessage->Time.Year=10*(MessageBuffer[39+offset]&0x0f)+(MessageBuffer[39+offset]>>4);
@@ -4136,16 +4153,13 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       CurrentSMSMessage->MessageText[CurrentSMSMessage->Length]=0;
 
       CurrentSMSPointer=tmp;
-
+      
       CurrentSMSMessage->MemoryType = MessageBuffer[5];
       CurrentSMSMessage->MessageNumber = MessageBuffer[6];
  
       /* Signal no error to calling code. */
 
-      if (MessageBuffer[MessageLength-2] > 0x01)
-	CurrentSMSMessageError = GE_SMSWAITING;
-      else
-	CurrentSMSMessageError = GE_NONE;
+      CurrentSMSMessageError = GE_NONE;
 
 #ifdef DEBUG
       fprintf(stdout, "\n");

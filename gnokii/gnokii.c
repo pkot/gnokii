@@ -227,6 +227,7 @@ int usage(void)
 "          gnokii --deletesms memory_type start end\n"
 "          gnokii --sendsms destination [--smsc message_center_number |\n"
 "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
+"                 [--long n]\n"
 "          gnokii --getsmsc message_center_number\n"
 "          gnokii --sendoplogoviasms destionation logofile [network code]\n"
 "          gnokii --setdatetime [YYYY MM DD HH MM]\n"
@@ -283,7 +284,9 @@ int usage(void)
 "                            network. Meaning of other optional parameters:\n"
 "                             [-r] - request for delivery report\n"
 "                             [-C n] - Class Message n, where n can be 0..3\n"
-"                             [-v n] - validity in minutes\n\n"
+"                             [-v n] - validity in minutes\n"
+"                             [--long n] - send no more then n characters,\n"
+"                                          default is 160\n\n"
 
 "          --getsmsc         show the SMSC number from location\n"
 "                            [message_center_number].\n\n"
@@ -541,7 +544,7 @@ int main(int argc, char *argv[])
     { OPT_SETSPEEDDIAL,      3, 3, 0 },
     { OPT_GETSMS,            3, 3, 0 },
     { OPT_DELETESMS,         3, 3, 0 },
-    { OPT_SENDSMS,           1, 8, 0 },
+    { OPT_SENDSMS,           1, 10, 0 },
     { OPT_SENDOPLOGOVIASMS,  2, 3, GAL_XOR },
     { OPT_GETSMSC,           1, 1, 0 },
     { OPT_GETWELCOMENOTE,    1, 1, 0 },
@@ -799,31 +802,23 @@ int sendsms(int argc, char *argv[])
 
   GSM_SMSMessage SMS;
   GSM_Error error;
-  char message_buffer[200];	
-  int chars_read;
-  int i;
+  char UDH[GSM_MAX_USER_DATA_HEADER_LENGTH];
+  /* The maximum length of an uncompressed concatenated short message is
+     255 * 153 = 39015 default alphabet characters */
+  char message_buffer[GSM_MAX_CONCATENATED_SMS_LENGTH];
+  int input_len, chars_read;
+  int i, offset, nr_msg, aux;
 
   struct option options[] = {
     //             { "sendsms", required_argument, NULL, '1'},
              { "smsc",    required_argument, NULL, '1'},
              { "smscno",  required_argument, NULL, '2'},
+             { "long",	  required_argument, NULL, '3'},
              { NULL,      0,                 NULL, 0}
   };
 
-  /* Get message text from stdin. */
-
-  chars_read = fread(message_buffer, 1, 160, stdin);
-
-  if (chars_read == 0) { // FIXME: If we read more than 160 chars, an error should be returned.
-
-    fprintf(stderr, _("Couldn't read from stdin!\n"));	
-    return -1;
-  }
-
-  /*  Null terminate. */
-
-  message_buffer[chars_read] = 0x00;	
-
+  input_len = GSM_MAX_SMS_LENGTH;
+  
   /* Default settings:
       - no delivery report
       - no Class Message
@@ -840,7 +835,7 @@ int sendsms(int argc, char *argv[])
   SMS.EightBit = false;
   SMS.MessageCenter.No = 1;
   SMS.Validity = 4320; /* 4320 minutes == 72 hours */
-  SMS.UserDataHeaderIndicator = false;
+  SMS.UDHType = GSM_NoUDH;
 
   strcpy(SMS.Destination,argv[0]);
 
@@ -865,6 +860,15 @@ int sendsms(int argc, char *argv[])
 
         break;
 
+      case '3': /* we send long message */
+        input_len = atoi(optarg);
+        if (input_len > GSM_MAX_CONCATENATED_SMS_LENGTH) {
+        	fprintf(stderr, _("Input too long!\n"));	
+		exit(-1);
+        }
+  
+        break;
+        
       case 'r': /* request for delivery report */
         SMS.Type = GST_DR;
         break;
@@ -906,20 +910,85 @@ int sendsms(int argc, char *argv[])
     }
   }
 
+  /* Get message text from stdin. */
+
+  chars_read = fread(message_buffer, 1, input_len, stdin);
+
+  if (chars_read == 0) {
+
+    fprintf(stderr, _("Couldn't read from stdin!\n"));	
+    return -1;
+
+  } else if (chars_read > input_len) {
+
+    fprintf(stderr, _("Input too long!\n"));	
+    return -1;
+
+  }
+
+  /*  Null terminate. */
+
+  message_buffer[chars_read] = 0x00;	
+
+  /* We send concatenated SMS if and only if we hev more then
+     GSM_MAX_SMS_LENGTH characters to send */
+  if (chars_read > GSM_MAX_SMS_LENGTH) {
+        SMS.UDHType = GSM_ConcatenatedMessages;
+  }
+  
+  /* offset - length of the UDH */
+  /* nr_msg - number of the messages to send */
+  offset = 0;
+  nr_msg = 1;
+  switch (SMS.UDHType) {
+  	case GSM_NoUDH:
+  	  break;
+    	case GSM_ConcatenatedMessages:
+    	  UDH[0] = 0x05;	// UDH length
+    	  UDH[1] = 0x00;	// concatenated messages (IEI)
+    	  UDH[2] = 0x03;	// IEI data length
+    	  UDH[3] = 0x01;	// reference number
+    	  UDH[4] = 0x00;	// number of messages
+    	  UDH[5] = 0x00;	// message reference number
+    	  offset = 6;
+    	  /* only 153 chars in single uncompressed message */
+    	  nr_msg += chars_read/153;
+    	  break;
+    	default:
+    	  break;
+  }
+  
+  UDH[4] = nr_msg;	// number of messages
   /* Initialise the GSM interface. */     
 
   fbusinit(NULL);
 
-  strcpy (SMS.MessageText, message_buffer);
+  for (i = 0; i < nr_msg; i++) {
 
-  /* Send the message. */
+    UDH[5] = i + 1;	// message reference number
+    aux = i*153;	// aux - how many character we have already sent
 
-  error = GSM->SendSMSMessage(&SMS);
+    if (SMS.UDHType) {
+      memcpy(SMS.UDH,UDH,offset);
+      strncpy (SMS.MessageText, message_buffer+aux, 153);
+      SMS.MessageText[153] = 0;
+    } else {
+      strncpy (SMS.MessageText,message_buffer,chars_read);
+      SMS.MessageText[chars_read] = 0;
+    }
+ 
+    /* Send the message. */
 
-  if (error == GE_SMSSENDOK)
-    fprintf(stdout, _("Send succeeded!\n"));
-  else
-    fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+    error = GSM->SendSMSMessage(&SMS,0);
+
+    if (error == GE_SMSSENDOK) {
+      fprintf(stdout, _("Send succeeded!\n"));
+    } else {
+      fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+      break;
+    }
+    sleep(10);
+  }
 
   GSM->Terminate();
 
@@ -1121,28 +1190,28 @@ int getsms(char *argv[])
           else
             fprintf(stdout, _("(not read)\n"));
 
-          fprintf(stdout, _("Sending date/time: %d/%d/%d %d:%02d:%02d GMT"), \
+          fprintf(stdout, _("Sending date/time: %d/%d/%d %d:%02d:%02d "), \
                   message.Time.Day, message.Time.Month, message.Time.Year, \
                   message.Time.Hour, message.Time.Minute, message.Time.Second);
 
           if (message.Time.Timezone) {
             if (message.Time.Timezone > 0)
-              fprintf(stdout,_("+%dh"), message.Time.Timezone);
+              fprintf(stdout,_("+%02d00"), message.Time.Timezone);
             else
-              fprintf(stdout,_("%d"), message.Time.Timezone);
+              fprintf(stdout,_("%02d00"), message.Time.Timezone);
           }
 
           fprintf(stdout, "\n");
 
-          fprintf(stdout, _("Response date/time: %d/%d/%d %d:%02d:%02d GMT"), \
+          fprintf(stdout, _("Response date/time: %d/%d/%d %d:%02d:%02d "), \
                   message.Time.Day, message.Time.Month, message.Time.Year, \
                   message.Time.Hour, message.Time.Minute, message.Time.Second);
 
           if (message.Time.Timezone) {
             if (message.Time.Timezone > 0)
-              fprintf(stdout,_("+%dh"),message.Time.Timezone);
+              fprintf(stdout,_("+%02d00"),message.Time.Timezone);
             else
-              fprintf(stdout,_("%d"),message.Time.Timezone);
+              fprintf(stdout,_("%02d00"),message.Time.Timezone);
           }
 
           fprintf(stdout, "\n");
@@ -1161,21 +1230,31 @@ int getsms(char *argv[])
           else
             fprintf(stdout, _("(not read)\n"));
 
-          fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d GMT"), \
+          fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d "), \
                   message.Time.Day, message.Time.Month, message.Time.Year, \
                   message.Time.Hour, message.Time.Minute, message.Time.Second);
 
           if (message.Time.Timezone) {
             if (message.Time.Timezone > 0)
-              fprintf(stdout,_("+%dh"),message.Time.Timezone);
+              fprintf(stdout,_("+%02d00"),message.Time.Timezone);
             else
-              fprintf(stdout,_("%d"),message.Time.Timezone);
+              fprintf(stdout,_("%02d00"),message.Time.Timezone);
           }
 
           fprintf(stdout, "\n");
-
           fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
-          fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
+
+	  switch (message.UDHType) {
+	  		case GSM_NoUDH:
+	  			break;
+	  		case GSM_ConcatenatedMessages:
+	  			fprintf(stdout,_("Linked (%d/%d):\n"),message.UDH[5],message.UDH[4]);
+	  			break;
+	  		default:
+	  			break;
+	  }
+
+          fprintf(stdout, _("Text:\n%s\n\n"), message.MessageText); 
 
           break;
       }
@@ -1443,9 +1522,12 @@ int sendoplogoviasms(int argc, char *argv[])
   GSM_Bitmap bitmap;
   GSM_Error error;
 
-  char UserDataHeader[14] = {0x06, 0x05, 0x04,
-                 0x15, 0x82, 0x00, 0x00,
-                 0x00, 0x00, 0x00,
+  char UserDataHeader[7] = {	0x06,	/* UDH Length */
+		  		0x05,	/* IEI: application port addressing scheme, 16 bit address */
+		  		0x04,	/* IEI length */
+                		0x15, 0x82,	/* destination address */
+                		0x00, 0x00};	/* originator address */
+  char Data[7] = {0x00, 0x00, 0x00,
                  0x00, 0x00, 0x00, 0x01};
 
   /* Default settings:
@@ -1464,7 +1546,7 @@ int sendoplogoviasms(int argc, char *argv[])
   SMS.EightBit = true;
   SMS.MessageCenter.No = 1;
   SMS.Validity = 4320; /* 4320 minutes == 72 hours */
-  SMS.UserDataHeaderIndicator = true;
+  SMS.UDHType = GSM_OpLogo;
 
   /* The first argument is the destionation, ie the phone number of recipient. */
   strcpy(SMS.Destination,argv[0]);
@@ -1477,22 +1559,23 @@ int sendoplogoviasms(int argc, char *argv[])
     strcpy(bitmap.netcode, argv[2]);
 
   /* Set the logo size */
-  UserDataHeader[11] = bitmap.width;
-  UserDataHeader[12] = bitmap.height;
+  Data[4] = bitmap.width;
+  Data[5] = bitmap.height;
 
   /* Set the network code */
-  UserDataHeader[7] = ((bitmap.netcode[1] & 0x0f) << 4) | (bitmap.netcode[0] & 0xf);
-  UserDataHeader[8] = 0xf0 | (bitmap.netcode[2] & 0x0f);
-  UserDataHeader[9] = ((bitmap.netcode[5] & 0x0f) << 4) | (bitmap.netcode[4] & 0xf);
+  Data[0] = ((bitmap.netcode[1] & 0x0f) << 4) | (bitmap.netcode[0] & 0xf);
+  Data[1] = 0xf0 | (bitmap.netcode[2] & 0x0f);
+  Data[2] = ((bitmap.netcode[5] & 0x0f) << 4) | (bitmap.netcode[4] & 0xf);
 
-  memcpy(SMS.MessageText,UserDataHeader,14);
-  memcpy(SMS.MessageText+14,bitmap.bitmap,bitmap.size);
+  memcpy(SMS.UDH,UserDataHeader,7);
+  memcpy(SMS.MessageText,Data,7);
+  memcpy(SMS.MessageText+7,bitmap.bitmap,bitmap.size);
 
   /* Initialise the GSM interface. */
   fbusinit(NULL);
   
   /* Send the message. */
-  error = GSM->SendSMSMessage(&SMS);
+  error = GSM->SendSMSMessage(&SMS,7+bitmap.size);
 
   if (error == GE_SMSSENDOK)
     fprintf(stdout, _("Send succeeded!\n"));

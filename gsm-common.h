@@ -84,6 +84,13 @@ typedef enum {
 #define GSM_MAX_DESTINATION_LENGTH (40)
 #define GSM_MAX_SMS_LENGTH         (160)
 
+/* The maximum length of an uncompressed concatenated short message is
+   255 * 153 = 39015 default alphabet characters */
+#define GSM_MAX_CONCATENATED_SMS_LENGTH	(39015)
+
+/* FIXME: what value should be here? (Pawel Kot, 1999.12.25) */
+#define GSM_MAX_USER_DATA_HEADER_LENGTH (10)
+
 /* Define datatype for SMS Message Type */
 
 typedef enum {
@@ -164,6 +171,13 @@ typedef struct {
   int Timezone;      /* The difference between local time and GMT */
 } GSM_DateTime;
 
+/* types of User Data Header */
+typedef enum {
+  GSM_NoUDH,
+  GSM_ConcatenatedMessages,
+  GSM_OpLogo
+} GSM_UDH;
+
 /* Define datatype for SMS messages, used for getting SMS messages from the
    phones memory. */
 
@@ -171,6 +185,8 @@ typedef struct {
   GSM_DateTime Time;	                    /* Date of reception/response of messages. */
   int Length;                               /* Length of the SMS message. */
   int Validity;                             /* Validity Period of the SMS message. */
+  GSM_UDH UDHType;                          /* If UDH is present - type of UDH */
+  char UDH[GSM_MAX_USER_DATA_HEADER_LENGTH]; /* If UDH is present - content of UDH */
   char MessageText[GSM_MAX_SMS_LENGTH + 1]; /* Room for null term. */
   GSM_MessageCenter MessageCenter;          /* SMS Center. */
   char Sender[GSM_MAX_SENDER_LENGTH + 1];   /* Sender of the SMS message. */
@@ -182,7 +198,6 @@ typedef struct {
   int Class;                                /* Class Message: 0, 1, 2, 3 or none; see GSM 03.38 */
   bool EightBit;                            /* Indicates whether SMS contains 8 bit data */
   bool Compression;                         /* Indicates whether SMS contains compressed data */
-  bool UserDataHeaderIndicator;             /* Indicates whether SMS data is preceded by the user data header */
   int Location;                             /* Location in the memory. */
 } GSM_SMSMessage;
 
@@ -453,7 +468,7 @@ typedef struct {
 
   GSM_Error (*DeleteSMSMessage)( GSM_SMSMessage *Message );
 
-  GSM_Error (*SendSMSMessage)( GSM_SMSMessage *Message );
+  GSM_Error (*SendSMSMessage)( GSM_SMSMessage *Message, int size );
 
     /* If units is set to a valid GSM_RFUnits value, the code
        will return level in these units if it is able.  Otherwise

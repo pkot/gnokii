@@ -180,7 +180,7 @@ GSM_Error	MB21_DeleteSMSMessage(GSM_SMSMessage *message)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	MB21_SendSMSMessage(GSM_SMSMessage *SMS)
+GSM_Error	MB21_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 {
 	return (GE_NOTIMPLEMENTED);
 }

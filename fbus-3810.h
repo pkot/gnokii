@@ -50,7 +50,7 @@ GSM_Error   FB38_SetSMSCenter(GSM_MessageCenter *MessageCenter);
 
 GSM_Error   FB38_DeleteSMSMessage(GSM_SMSMessage *message);
 
-GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS);
+GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int size);
 
 GSM_Error   FB38_GetRFLevel(GSM_RFUnits *units, float *level);
 
