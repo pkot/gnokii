@@ -6,6 +6,9 @@
       in message retransmission                     (BORBELY Zoltan)
  * SMSD updated
     o English grammar corrections in README            (Peter Nixon)
+ * AT driver updates
+    o avoid ReplyGetCharset segfaults with more then 2 charsets
+      availale                                           (Pawel Kot)
 
 0.5.0pre5
 =========

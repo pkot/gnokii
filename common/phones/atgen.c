@@ -1074,7 +1074,7 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 
 	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_UNKNOWN;
-		
+
 	buf.line1 = buffer + 1;
 	buf.length= length;
 	splitlines(&buf);
@@ -1082,16 +1082,20 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 	if (!strncmp(buf.line1, "AT+CSCS?", 8)) {
 		/* return current charset */
 		drvinst->charset = AT_CHAR_UNKNOWN; i = 0;
-		while (atcharsets[i++].str && drvinst->charset != AT_CHAR_UNKNOWN)
+		while (atcharsets[i].str && drvinst->charset != AT_CHAR_UNKNOWN) {
 			if (strstr(buf.line2, atcharsets[i].str))
 				drvinst->charset = atcharsets[i].charset;
+			i++;
+		}
 		return GN_ERR_NONE;
 	} else if (!strncmp(buf.line1, "AT+CSCS=", 8)) {
 		/* return available charsets */
 		drvinst->availcharsets = 0; i = 0;
-		while (atcharsets[i++].str)
+		while (atcharsets[i].str) {
 			if (strstr(buf.line2, atcharsets[i].str))
 				drvinst->availcharsets |= atcharsets[i].charset;
+			i++;
+		}
 		return GN_ERR_NONE;
 	}
 	return GN_ERR_FAILED;
