@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.127  2001-03-08 00:18:13  pkot
+  Revision 1.128  2001-03-08 00:49:06  pkot
+  Fixed bug (introduced by me) in getmemory function. Now gnokii.c should compile
+
+  Revision 1.127  2001/03/08 00:18:13  pkot
   Fixed writephonebook once again. Someone kick me please...
 
   Revision 1.126  2001/03/07 21:46:12  pkot
@@ -2425,10 +2428,9 @@ int getmemory(int argc, char *argv[])
 	int end_entry;
 
 	/* Handle command line args that set type, start and end locations. */
-	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
-	message.MemoryType = StrToMemoryType(memory_type_string);
-	if (message.MemoryType == GMT_XX) {
+	entry.MemoryType = StrToMemoryType(memory_type_string);
+	if (entry.MemoryType == GMT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[0]);
 		return (-1);
 	}
