@@ -28,6 +28,9 @@
     o call management API updated                  (BORBELY Zoltan)
  * gnokii updates
     o phone keyboard emulation reports only errors (BORBELY Zoltan)
+    o usage of the sendsms and getcalendarnote will be sent
+      to the appropriate device                   (Martin Goldhahn)
+    o "end" keyword added to getcalendarnote      (Martin Goldhahn)
  * Documentation updates
     o network registration message updated         (Rodolfo Hansen)
 

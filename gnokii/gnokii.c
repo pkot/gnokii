@@ -49,6 +49,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <limits.h>
 
 
 #ifdef WIN32
@@ -293,7 +294,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --gettodo start [end] [-v]\n"
 		     "          gnokii --writetodo vcardfile number\n"
 		     "          gnokii --deletealltodos\n"
-		     "          gnokii --getcalendarnote start [end] [-v]\n"
+		     "          gnokii --getcalendarnote start_number [end_number|end] [-v]\n"
 		     "          gnokii --writecalendarnote vcardfile number\n"
 		     "          gnokii --deletecalendarnote start [end]\n"
 		     "          gnokii --getdisplaystatus\n"
@@ -425,9 +426,9 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc)
 	else return 1;
 }
 
-static void sendsms_usage()
+static void sendsms_usage(FILE *f, int exitval)
 {
-	fprintf(stderr, _(" usage: gnokii --sendsms destination\n"
+	fprintf(f, _(" usage: gnokii --sendsms destination\n"
 	                  "               [--smsc message_center_number | --smscno message_center_index]\n"
 	                  "               [-r] [-C n] [-v n] [--long n] [--animation file;file;file;file]\n"
 	                  "               [--concat this;total;serial]\n"
@@ -441,7 +442,19 @@ static void sendsms_usage()
 			  "   --long n    - read n bytes from the input; default is 160\n"
 			  "\n"
 		));
-	exit(-1);
+	exit(exitval);
+}
+
+static void getcalendarnote_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: gnokii --getcalendarnote start_number [end_number | end] [-v]\n"
+					 "       start_number - entry number in the phone calendar (numeric)\n"
+					 "       end_number   - until this entry in the phone calendar (numeric, optional)\n"
+					 "       end          - the string \"end\" indicates all entries from start to end\n"
+					 "       -v           - output in iCalendar format\n"
+					 "  NOTE: if no end is given, only the start entry is written\n"
+	));
+	exit(exitval);
 }
 
 static gn_error readtext(gn_sms_user_data *udata, int input_len)
@@ -580,7 +593,7 @@ static int sendsms(int argc, char *argv[])
 			data.message_center->id = atoi(optarg);
 			if (data.message_center->id < 1 || data.message_center->id > 5) {
 				free(data.message_center);
-				sendsms_usage();
+				sendsms_usage(stderr, -1);
 			}
 			if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
 				strcpy(sms.smsc.number, data.message_center->smsc.number);
@@ -642,7 +655,7 @@ static int sendsms(int argc, char *argv[])
 			case '1': sms.dcs.u.general.m_class = 2; break;
 			case '2': sms.dcs.u.general.m_class = 3; break;
 			case '3': sms.dcs.u.general.m_class = 4; break;
-			default: sendsms_usage();
+			default: sendsms_usage(stderr, -1);
 			}
 			break;
 
@@ -667,7 +680,7 @@ static int sendsms(int argc, char *argv[])
 			curpos = -1;
 			break;
 		default:
-			sendsms_usage();
+			sendsms_usage(stderr, -1);
 		}
 	}
 
@@ -783,7 +796,7 @@ static int savesms(int argc, char *argv[])
 			data.message_center->id = atoi(optarg);
 			if (data.message_center->id < 1 || data.message_center->id > 5) {
 				free(data.message_center);
-				sendsms_usage();
+				sendsms_usage(stderr, -1);
 			}
 			if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
 				strcpy(sms.smsc.number, data.message_center->smsc.number);
@@ -2195,8 +2208,13 @@ static int getcalendarnote(int argc, char *argv[])
 
 	first_location = last_location = atoi(argv[0]);
 	if ((argc > 1) && (argv[1][0] != '-')) {
-		last_location = atoi(argv[1]);
+		if (!strcasecmp(argv[1], "end"))
+			last_location = INT_MAX;
+		else
+			last_location = atoi(argv[1]);
 	}
+	if (last_location < first_location)
+		last_location = first_location;
 
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {
@@ -2204,8 +2222,7 @@ static int getcalendarnote(int argc, char *argv[])
 			vcal = true;
 			break;
 		default:
-			usage(stderr, -1); /* Would be better to have an calendar_usage() here. */
-			return -1;
+			getcalendarnote_usage(stderr, -1);
 		}
 	}
 
@@ -2304,6 +2321,9 @@ static int getcalendarnote(int argc, char *argv[])
 			break;
 		default:
 			fprintf(stderr, _("The calendar note can not be read: %s\n"), gn_error_print(error));
+			/* stop processing if the last note was specified as "end" */
+			if (last_location == INT_MAX)
+				last_location = 0;
 			break;
 		}
 	}
