@@ -470,7 +470,7 @@ void	ATEM_ParseSMSText(char *buff)
 			sms.UserData[0].Length = index;
 			index = 0;
 			Parser = ATEM_ParseAT;
-			dprintf("Sending SMS to %s (text: %s)\n", data.SMSMessage->RemoteNumber.number, data.SMSMessage->UserData[0].u.Text);
+			dprintf("Sending SMS to %s (text: %s)\n", data.SMS->Remote.Number, data.SMS->UserData[0].u.Text);
 
 			/* FIXME: set more SMS fields before sending */
 			error = SendSMS(&data, sm);
