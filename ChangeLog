@@ -32,6 +32,9 @@
     o M2BUS support added                           (BORBELY Zoltan)
  * 7110 series updates:
     o M2BUS support added                           (BORBELY Zoltan)
+ * 6160 series updates:
+    o static and global variables have been eliminated from the
+      the source                                    (Ladislav Michl)
  * libgnokii changes:
     o Renamed Greek operator PANAFON to Vodafone      (P. Christeas)
     o max sms length increased to 160 chars         (BORBELY Zoltan)

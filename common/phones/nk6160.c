@@ -55,11 +55,11 @@ do { \
 	return sm_block(type, data, state); \
 } while (0)
 
-/* Some globals */
+typedef struct {
+	int logoslice;
+} nk6160_driver_instance;
 
-/* FIXME: we should get rid on it */
-static struct gn_statemachine *state = NULL;
-static int logoslice;
+#define NK6160_DRVINST(s) ((nk6160_driver_instance *)((s)->driver.driver_instance))
 
 /* static functions prototypes */
 static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
@@ -85,19 +85,19 @@ gn_driver driver_nokia_6160 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"6160|5120",           /* Supported models */
-		4,                     /* Max RF Level */
-		0,                     /* Min RF Level */
-		GN_RF_Arbitrary,       /* RF level units */
-		4,                     /* Max Battery Level */
-		0,                     /* Min Battery Level */
-		GN_BU_Arbitrary,       /* Battery level units */
-		GN_DT_DateTime,        /* Have date/time support */
-		GN_DT_TimeOnly,	     /* Alarm supports time only */
-		1,                     /* Alarms available - FIXME */
-		48, 84,                /* Startup logo size */
-		14, 72,                /* Op logo size */
-		14, 72                 /* Caller logo size */
+		"6160|5120",		/* Supported models */
+		4,			/* Max RF Level */
+		0,			/* Min RF Level */
+		GN_RF_Arbitrary,	/* RF level units */
+		4,			/* Max Battery Level */
+		0,			/* Min Battery Level */
+		GN_BU_Arbitrary,	/* Battery level units */
+		GN_DT_DateTime,		/* Have date/time support */
+		GN_DT_TimeOnly,		/* Alarm supports time only */
+		1,			/* Alarms available - FIXME */
+		48, 84,			/* Startup logo size */
+		14, 72,			/* Op logo size */
+		14, 72			/* Caller logo size */
 	},
 	functions,
 	NULL
@@ -129,31 +129,34 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 }
 
 /* Initialise is the only function allowed to 'use' state */
-static gn_error initialise(struct gn_statemachine *lstate)
+static gn_error initialise(struct gn_statemachine *state)
 {
-	gn_error err;
+	nk6160_driver_instance *drvinst;
+	gn_error error;
 	char model[GN_MODEL_MAX_LENGTH + 1];
 	gn_data data;
 	gn_phone_model *pm;
 
 	/* Copy in the phone info */
-	memcpy(&(lstate->driver), &driver_nokia_6160, sizeof(gn_driver));
+	memcpy(&(state->driver), &driver_nokia_6160, sizeof(gn_driver));
 
-	switch (lstate->link.connection_type) {
+	if (!(drvinst = malloc(sizeof(nk6160_driver_instance))))
+		return GN_ERR_FAILED;
+	state->driver.driver_instance = drvinst;
+	
+	switch (state->link.connection_type) {
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		err = m2bus_initialise(lstate);
+		error = m2bus_initialise(state);
 		break;
 	default:
-		return GN_ERR_NOTSUPPORTED;
+		error = GN_ERR_NOTSUPPORTED;
 	}
 
-	if (err != GN_ERR_NONE) {
-		dprintf("Error in link initialisation\n");
-		return GN_ERR_NOTSUPPORTED;
-	}
+	if (error)
+		goto out;
 
-	sm_initialise(lstate);
+	sm_initialise(state);
 
 	/* We need to identify the phone first in order to know whether we can
 	   authorize or set keytable */
@@ -161,19 +164,23 @@ static gn_error initialise(struct gn_statemachine *lstate)
 	gn_data_clear(&data);
 	data.model = model;
 
-	if ((err = identify(&data, lstate)) != GN_ERR_NONE) return err;
+	error = identify(&data, state);
+	if (error) 
+		goto out;
 	dprintf("model: '%s'\n", model);
 	if ((pm = gn_get_phone_model(model)) == NULL) {
 		dump(_("Unsupported phone model \"%s\"\n"), model);
 		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
-		return GN_ERR_INTERNALERROR;
+		error = GN_ERR_INTERNALERROR;
 	}
-
-	state = lstate;
-
-	return GN_ERR_NONE;
+out:	
+	if (error) {
+		dprintf("Initialization failed (%d)\n", error);
+		free(NK6160_DRVINST(state));
+		NK6160_DRVINST(state) = NULL;
+	}
+	return error;
 }
-
 
 static gn_error phonebook_read(gn_data *data, struct gn_statemachine *state)
 {
@@ -312,9 +319,10 @@ static gn_error phone_info_incoming(int messagetype, unsigned char *message, int
 
 static gn_error get_bitmap_startup_slice(gn_data *data, struct gn_statemachine *state, int s)
 {
+	nk6160_driver_instance *drvinst = NK6160_DRVINST(state);
 	unsigned char req[] = {0x00, 0x01, 0x07, 0x07, 0x08, 0x00};
 
-	logoslice = s;
+	drvinst->logoslice = s;
 	req[5] = (unsigned char)s + 1;
 	SEND_MESSAGE_BLOCK(6, 0x40);
 }
@@ -353,6 +361,7 @@ static gn_error bitmap_get(gn_data *data, struct gn_statemachine *state)
 
 static gn_error bitmap_startup_logo_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
+	nk6160_driver_instance *drvinst = NK6160_DRVINST(state) ;
 	int x, i;
 	unsigned char b;
 
@@ -365,7 +374,7 @@ static gn_error bitmap_startup_logo_incoming(int messagetype, unsigned char *mes
 	for (x = 0; x < 84; x++)
 		for (b = message[5 + x], i = 0; b != 0; b >>= 1, i++)
 			if (b & 0x01)
-				gn_bmp_set_point(data->bitmap, x, 8 * logoslice + i);
+				gn_bmp_set_point(data->bitmap, x, 8 * drvinst->logoslice + i);
 
 	return GN_ERR_NONE;
 }
