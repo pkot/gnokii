@@ -22,6 +22,7 @@ OBJS =	fbus.o \
 	cbus.o \
 	atbus.o \
 	fbus-3110.o \
+	m2bus.o \
 	utils.o
 
 all: LINKS.o

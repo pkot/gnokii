@@ -52,6 +52,7 @@
  * Build system updates:
     o fixed Makefile to install libgnokii.so for all install*
       targets                                             (Pawel Kot)
+ * initial version of the M2BUS link driver added    (BORBELY Zoltan)
 
 0.4.0pre20
 ==========
