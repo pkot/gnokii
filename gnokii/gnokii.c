@@ -1711,6 +1711,10 @@ static int sendlogo(int argc, char *argv[])
 
 	if (loadbitmap(&sms.user_data[0].u.bitmap, argv[2], type) != GN_ERR_NONE)
 		return -1;
+	if (type != sms.user_data[0].u.bitmap.type) {
+		fprintf(stderr, _("Cannot send logo: specified and loaded bitmap type differ!\n"));
+		return -1;
+	}
 
 	/* If we are sending op logo we can rewrite network code. */
 	if ((sms.user_data[0].u.bitmap.type == GN_BMP_OperatorLogo) && (argc > 3)) {
