@@ -28,11 +28,12 @@
 
 */
 
+#include <string.h>
+
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
-#include <string.h>
-#include "gnokii/networks.h"
+#include "gnokii.h"
 
 static gn_country countries[] = {
 	{ "202", "Greece" },

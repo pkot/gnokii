@@ -32,9 +32,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
-#include "gnokii/encoding.h"
+#include "gnokii.h"
 
 #define GN_CHAR_ALPHABET_SIZE 128
 

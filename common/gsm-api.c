@@ -40,12 +40,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
-#include "cfgreader.h"
 #include "gnokii.h"
-#include "gnokii/rlp-common.h"
-#include "gnokii/statemachine.h"
+#include "cfgreader.h"
 #include "phones/nk6510.h"
 #include "phones/nk7110.h"
 #include "phones/nk6100.h"

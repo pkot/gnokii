@@ -31,11 +31,9 @@
 
 #include <time.h>
 
-#include "gnokii/common.h"
-#include "nokia-decoding.h"
-
 #include "gnokii-internal.h" 
 #include "gnokii.h"
+#include "nokia-decoding.h"
 
 gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			  int blocks, int memtype, int speeddial_pos)

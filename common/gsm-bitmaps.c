@@ -37,9 +37,9 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
-#include "gnokii/bitmaps.h"
 #include "gnokii.h"
 
 /* A few useful functions for bitmaps */

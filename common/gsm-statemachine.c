@@ -26,12 +26,9 @@
 
 */
 
-#include "misc.h"
-#include "gnokii/common.h"
-#include "gnokii/statemachine.h"
-
 #include "gnokii-internal.h"
 #include "gnokii.h"
+#include "misc.h"
 
 gn_error sm_initialise(struct gn_statemachine *state)
 {

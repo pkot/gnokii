@@ -30,9 +30,9 @@
 
 */
 
-#include "gnokii/sms.h"
-#include "gnokii/common.h"
-#include "gnokii/ringtones.h"
+#include "config.h"
+#include "compat.h"
+#include "gnokii.h"
 #include "misc.h"
 
 /* Beats-per-Minute Encoding */

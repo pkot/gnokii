@@ -29,8 +29,9 @@
 */
 
 #include "config.h"
-#include "gnokii/error.h"
+#include "compat.h"
 #include "misc.h"
+#include "gnokii.h"
 
 API char *gn_error_print(gn_error e)
 {

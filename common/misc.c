@@ -42,7 +42,7 @@
 #endif
 
 #include "misc.h"
-#include "gnokii/data.h"
+#include "gnokii.h"
 
 API void (*gn_elog_handler)(const char *fmt, va_list ap) = NULL;
 

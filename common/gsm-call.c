@@ -30,10 +30,6 @@
 
 #include <stdio.h>
 
-#include "gnokii/common.h"
-#include "gnokii/statemachine.h"
-#include "gnokii/call.h"
-
 #include "gnokii-internal.h"
 #include "gnokii.h"
 

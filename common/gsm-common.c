@@ -27,8 +27,9 @@
 */
 
 #include <string.h>
+#include "config.h"
 #include "compat.h"
-#include "gnokii/data.h"
+#include "gnokii.h"
 
 gn_error unimplemented(void)
 {

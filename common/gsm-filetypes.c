@@ -34,13 +34,11 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
-#include "gnokii/common.h"
-#include "gsm-filetypes.h"
-#include "gnokii/bitmaps.h"
-#include "gnokii/ringtones.h"
-
+#include "config.h"
+#include "compat.h"
 #include "gnokii-internal.h"
 #include "gnokii.h"
+#include "gsm-filetypes.h"
 
 #ifdef HAVE_X11_XPM_H
 #  include <X11/xpm.h>
