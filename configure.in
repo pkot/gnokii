@@ -32,6 +32,13 @@ AC_ARG_ENABLE(debug,
         [ debug="no"  ]
 )
 
+AC_ARG_ENABLE(xdebug, 
+	[  --enable-xdebug         compile with xdebug code],
+	[ CFLAGS="$CFLAGS -DXDEBUG"
+          xdebug="yes" ],
+        [ xdebug="no"  ]
+)
+
 dnl ======================= GTK
 
 AC_ARG_ENABLE(gtk, 
@@ -191,6 +198,7 @@ echo "
     GTK:                $gtk
     Xpm support:        $xpm
     Debug:              $debug
+    XDebug:             $xdebug
     Gettext:            $gettext
     Security:           $security
     Win32:              $win32 

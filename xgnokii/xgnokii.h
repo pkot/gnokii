@@ -45,8 +45,13 @@ typedef struct {
   GSM_MessageCenter smsSetting[MAX_SMS_CENTER];
   UserInf user;
   gchar *callerGroups[6];
+  gchar *phoneModel;
+  gchar *phoneImei;
+  gchar *phoneRevision;
+  gchar *phoneVer;
   gint   smsSets:4;
   bool   callerGroupsSupported:1;
+  bool   netMonitorSupported:1;
   bool   alarmSupported:1;
 } XgnokiiConfig;
   
@@ -59,6 +64,7 @@ extern gint max_phonebook_sim_name_length;
 extern gint max_phonebook_sim_number_length;
 
 extern void GUI_InitSMSSettings (void);
+extern void GUI_InitCallerGroupsInf (void);
 extern void GUI_ShowAbout (void);
 
 #endif XGNOKII_H

@@ -10,3 +10,5 @@
 * Thr Mar 16 13:50:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
 - Improved error handling in RLP code.  Virtual-Modem is more flexible.
 
+* Thu Mar 16 16:41:59 CET 2000 Jan Derfinak <ja@mail.upjs.sk>
+- added --enable-xdebug in configure.in

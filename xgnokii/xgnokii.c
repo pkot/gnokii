@@ -54,6 +54,7 @@
 #include "xpm/sms.xpm"
 #include "xpm/alarm.xpm"
 
+
 static GtkWidget *GUI_SplashWindow;
 static GtkWidget *GUI_MainWindow;
 static GtkWidget *GUI_AboutDialog;
@@ -79,6 +80,9 @@ static bool optionsDialogIsOpened;
 
 /* Widget for popup menu */
 static GtkWidget *GUI_Menu;
+static GtkWidget *netmon_menu_items;
+
+static GtkWidget *cg_names_option_frame;
 
 /* Hold main configuration data for xgnokii */
 XgnokiiConfig xgnokiiConfig;
@@ -117,6 +121,13 @@ typedef struct {
 } ConnectionWidgets;
 
 typedef struct {
+  GtkWidget *model;
+  GtkWidget *version;
+  GtkWidget *revision;
+  GtkWidget *imei;
+} PhoneWidgets;
+
+typedef struct {
   GtkWidget *set;
   GtkWidget *number;
   GtkWidget *format;
@@ -140,6 +151,7 @@ typedef struct {
 static struct ConfigDialogData
 {
   ConnectionWidgets connection;
+  PhoneWidgets phone;
   GtkWidget *groups[6];
   AlarmWidgets alarm;
   SMSWidgets sms;
@@ -159,6 +171,89 @@ static GSM_SMSStatus SMSStatus = {0, 0};
 static inline void Help1 (GtkWidget *w, gpointer data)
 {
   Help (w, _("/help/index.html"));
+}
+
+void InitModelInf (void)
+{
+  gchar buf[64];
+  GSM_Error error;
+  register gint i = 0;
+  
+  while ((error = GSM->GetModel(buf)) != GE_NONE && i++ < 5)
+    sleep(1);
+  
+  if (error != GE_NONE)
+  {
+    xgnokiiConfig.phoneModel = g_strdup (_("unknown"));
+    xgnokiiConfig.phoneVer = xgnokiiConfig.phoneModel;
+    xgnokiiConfig.callerGroupsSupported = FALSE;
+    xgnokiiConfig.netMonitorSupported = FALSE;
+  }
+  else
+  {
+    xgnokiiConfig.phoneVer = g_strdup (buf);
+    xgnokiiConfig.phoneModel = GetModel (buf);
+    if (xgnokiiConfig.phoneModel == NULL)
+      xgnokiiConfig.phoneModel = g_strdup (_("unknown"));
+
+    xgnokiiConfig.callerGroupsSupported = CallerGroupSupported (buf);
+    xgnokiiConfig.netMonitorSupported = NetmonitorSupported (buf);
+  }
+  
+  i = 0;
+  while ((error = GSM->GetRevision (buf)) != GE_NONE && i++ < 5)
+    sleep(1);
+  
+  if (error != GE_NONE)
+    xgnokiiConfig.phoneRevision = g_strdup (_("unknown"));
+  else
+    xgnokiiConfig.phoneRevision = g_strdup (buf);
+    
+  i = 0;
+  while ((error = GSM->GetIMEI (buf)) != GE_NONE && i++ < 5)
+    sleep(1);
+  
+  if (error != GE_NONE)
+    xgnokiiConfig.phoneImei = g_strdup (_("unknown"));
+  else
+    xgnokiiConfig.phoneImei = g_strdup (buf);
+    
+  
+#ifdef XDEBUG
+  g_print ("Version: %s\n", xgnokiiConfig.phoneVer);
+  g_print ("Model: %s\n", xgnokiiConfig.phoneModel);
+  g_print ("Caller Groups: %d\n", xgnokiiConfig.callerGroupsSupported);
+  g_print ("Netmonitor: %d\n", xgnokiiConfig.netMonitorSupported);
+  g_print ("IMEI: %s\n", xgnokiiConfig.phoneImei);
+  g_print ("Revision: %s\n", xgnokiiConfig.phoneRevision);
+#endif
+}
+
+void GUI_InitCallerGroupsInf (void)
+{
+  GSM_Bitmap bitmap;
+  register gint i;
+  
+  xgnokiiConfig.callerGroups[0] = g_strndup( _("Familly"), MAX_CALLER_GROUP_LENGTH);
+  xgnokiiConfig.callerGroups[1] = g_strndup( _("VIP"), MAX_CALLER_GROUP_LENGTH);
+  xgnokiiConfig.callerGroups[2] = g_strndup( _("Friends"), MAX_CALLER_GROUP_LENGTH);
+  xgnokiiConfig.callerGroups[3] = g_strndup( _("Colleagues"), MAX_CALLER_GROUP_LENGTH);
+  xgnokiiConfig.callerGroups[4] = g_strndup( _("Other"), MAX_CALLER_GROUP_LENGTH);
+  xgnokiiConfig.callerGroups[5] = g_strndup( _("No group"), MAX_CALLER_GROUP_LENGTH);
+
+  bitmap.type = GSM_CallerLogo;
+  
+  if (xgnokiiConfig.callerGroupsSupported)
+    for (i = 0; i < 5; i++)
+    {
+      bitmap.number = i;
+      GSM->GetBitmap (&bitmap);
+      if (*bitmap.text != '\0')
+      {
+        g_free (xgnokiiConfig.callerGroups[i]);
+        xgnokiiConfig.callerGroups[i] = g_strndup (bitmap.text, MAX_CALLER_GROUP_LENGTH);
+      }
+    }
 }
 
 GSM_Error fbusinit(bool enable_monitoring)
@@ -195,6 +290,8 @@ GSM_Error fbusinit(bool enable_monitoring)
   g_print("Za usleep. GSM_LinkOK: %d\n", *GSM_LinkOK);
 #endif
 
+  InitModelInf ();
+  
   return *GSM_LinkOK;
 }
 
@@ -219,6 +316,8 @@ void GUI_DrawNetwork (GtkWidget *data, int rflevel) {
 
   int i;
 
+  if (rflevel > 4)
+    rflevel = 4;
   for (i=1; i<=rflevel; i++)
     gdk_draw_rectangle (Pixmap,
 		        GTK_WIDGET(data)->style->white_gc,
@@ -238,8 +337,10 @@ void GUI_DrawBattery (GtkWidget *data, int batterylevel) {
 
   int i;
 
-  if (batterylevel>=0) {
-    for (i=1; i<=batterylevel; i++)
+  if (batterylevel >= 0) {
+    if (batterylevel > 4)
+      batterylevel = 4;
+    for (i = 1; i <= batterylevel; i++)
       gdk_draw_rectangle (Pixmap,
 			  GTK_WIDGET (data)->style->white_gc,
 			  TRUE,
@@ -489,11 +590,7 @@ static void ParseSMSCenters ()
   {
     gchar *row[4];
     if (*(configDialogData.sms.smsSetting[i].Name) == '\0')
-    {
- //     row[0] = (gchar *) g_malloc (GSM_MAX_SMS_CENTER_NAME_LENGTH);
- //     g_snprintf (row[0], GSM_MAX_SMS_CENTER_NAME_LENGTH, _("Set %d"), i + 1);
       row[0] = g_strdup_printf (_("Set %d"), i + 1);
-    }
     else
       row[0] = g_strdup (configDialogData.sms.smsSetting[i].Name);
     
@@ -613,27 +710,27 @@ static void GUI_ShowOptions ()
     return;
     
   gtk_entry_set_text (GTK_ENTRY (configDialogData.connection.port), xgnokiiConfig.port);
-//  gtk_entry_select_region (GTK_ENTRY (configDialogData.connection.port),
-//                               0, GTK_ENTRY(configDialogData.connection.port)->text_length);
   
   gtk_entry_set_text (GTK_ENTRY (configDialogData.connection.model), xgnokiiConfig.model);
-//  gtk_entry_select_region (GTK_ENTRY (configDialogData.connection.model),
-//                               0, GTK_ENTRY(configDialogData.connection.model)->text_length);
 
   gtk_entry_set_text (GTK_ENTRY (configDialogData.connection.init), xgnokiiConfig.initlength);
-//  gtk_entry_select_region (GTK_ENTRY (configDialogData.connection.init),
-//                               0, GTK_ENTRY(configDialogData.connection.init)->text_length);
 
   gtk_entry_set_text (GTK_ENTRY (configDialogData.connection.bindir), xgnokiiConfig.bindir);
-//  gtk_entry_select_region (GTK_ENTRY (configDialogData.connection.bindir),
-//                               0, GTK_ENTRY(configDialogData.connection.bindir)->text_length);
 
   if (!strcmp(xgnokiiConfig.connection, "serial"))
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (configDialogData.connection.serial), TRUE);
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (configDialogData.connection.infrared), TRUE);
   
+  /* Phone */
+  gtk_entry_set_text (GTK_ENTRY (configDialogData.phone.model), xgnokiiConfig.phoneModel);
   
+  gtk_entry_set_text (GTK_ENTRY (configDialogData.phone.version), xgnokiiConfig.phoneVer);
+
+  gtk_entry_set_text (GTK_ENTRY (configDialogData.phone.revision), xgnokiiConfig.phoneRevision);
+
+  gtk_entry_set_text (GTK_ENTRY (configDialogData.phone.imei), xgnokiiConfig.phoneImei);
+
   /* Alarm */
   if (GSM->GetAlarm(0, &date_time) != GE_NONE)
   {
@@ -678,8 +775,14 @@ static void GUI_ShowOptions ()
   
   /* Groups */
   if (xgnokiiConfig.callerGroupsSupported)
+  {
+    gtk_widget_show (cg_names_option_frame);
+    GUI_InitCallerGroupsInf ();
     for ( i = 0; i < 6; i++)
       gtk_entry_set_text (GTK_ENTRY (configDialogData.groups[i]), xgnokiiConfig.callerGroups[i]);
+  }
+  else
+    gtk_widget_hide (cg_names_option_frame);
 
   /* Help */
   gtk_entry_set_text (GTK_ENTRY (configDialogData.help),
@@ -702,6 +805,12 @@ void GUI_HideAbout()
 void GUI_ShowMenu(GdkEventButton *event)
 {
   GdkEventButton *bevent = (GdkEventButton *) event;
+  
+  if (xgnokiiConfig.netMonitorSupported)
+    gtk_widget_show (netmon_menu_items);
+  else
+    gtk_widget_hide (netmon_menu_items);
+    
   gtk_menu_popup (GTK_MENU(GUI_Menu), NULL, NULL, NULL, NULL,
                           bevent->button, bevent->time);
 }
@@ -749,7 +858,7 @@ static gint GUI_ButtonPressEvent (GtkWidget *widget, GdkEventButton *event)
     }
   } /* Right button */
   else if (event->button == 3)
-    GUI_ShowMenu(event); 
+    GUI_ShowMenu (event); 
 
   // g_print ("event->x: %f\n", event->x);
   // g_print ("event->y: %f\n", event->y);
@@ -763,7 +872,7 @@ void GUI_Refresh() {
 }
 
 
-void optionsApplyCallback (GtkWidget *widget, gpointer data )
+static void optionsApplyCallback (GtkWidget *widget, gpointer data )
 {
   GSM_DateTime date_time;
   register gint i;
@@ -818,8 +927,9 @@ void optionsApplyCallback (GtkWidget *widget, gpointer data )
   GUI_RefreshContacts();
 }
 
-void optionsSaveCallback( GtkWidget *widget, gpointer data )
+static void optionsSaveCallback( GtkWidget *widget, gpointer data )
 {
+  GSM_Bitmap bitmap;
   register gint i;
   
   //gtk_widget_hide(GTK_WIDGET(data));
@@ -833,6 +943,58 @@ void optionsSaveCallback( GtkWidget *widget, gpointer data )
       gtk_widget_show (errorDialog.dialog);
     }
   }
+
+  if (xgnokiiConfig.callerGroupsSupported)
+  {
+    bitmap.type = GSM_CallerLogo;
+    
+    bitmap.number = 0;
+    GSM->GetBitmap (&bitmap);
+    if (strcmp (xgnokiiConfig.callerGroups[0], _("Familly")) == 0)
+      *bitmap.text = '\0';
+    else
+      strncpy (bitmap.text, xgnokiiConfig.callerGroups[0], 256);
+    bitmap.text[255] = '\0';
+    GSM->SetBitmap (&bitmap);
+    
+    bitmap.number = 1;
+    GSM->GetBitmap (&bitmap);
+    if (strcmp (xgnokiiConfig.callerGroups[1], _("VIP")) == 0)
+      *bitmap.text = '\0';
+    else
+      strncpy (bitmap.text, xgnokiiConfig.callerGroups[1], 256);
+    bitmap.text[255] = '\0';
+    GSM->SetBitmap (&bitmap);
+    
+    bitmap.number = 2;
+    GSM->GetBitmap (&bitmap);
+    if (strcmp (xgnokiiConfig.callerGroups[2], _("Friends")) == 0)
+      *bitmap.text = '\0';
+    else
+      strncpy (bitmap.text, xgnokiiConfig.callerGroups[2], 256);
+    bitmap.text[255] = '\0';
+    GSM->SetBitmap (&bitmap);
+    
+    bitmap.number = 3;
+    GSM->GetBitmap (&bitmap);
+    if (strcmp (xgnokiiConfig.callerGroups[3], _("Colleagues")) == 0)
+      *bitmap.text = '\0';
+    else
+      strncpy (bitmap.text, xgnokiiConfig.callerGroups[3], 256);
+    bitmap.text[255] = '\0';
+    GSM->SetBitmap (&bitmap);
+    
+    bitmap.number = 4;
+    GSM->GetBitmap (&bitmap);
+    if (strcmp (xgnokiiConfig.callerGroups[4], _("Other")) == 0)
+      *bitmap.text = '\0';
+    else
+      strncpy (bitmap.text, xgnokiiConfig.callerGroups[4], 256);
+    bitmap.text[255] = '\0';
+    GSM->SetBitmap (&bitmap);
+  }
+
+  
   if (GUI_SaveXConfig())
   {
     gtk_label_set_text (GTK_LABEL(errorDialog.text), _("Error writing configuration file!"));
@@ -859,12 +1021,6 @@ GtkWidget *GUI_CreateMenu ()
                              GTK_SIGNAL_FUNC (GUI_ShowSMS), NULL);
   gtk_widget_show (menu_items);
   
-  menu_items = gtk_menu_item_new_with_label (_("Net Monitor"));
-  gtk_menu_append (GTK_MENU (menu), menu_items);
-  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
-                             GTK_SIGNAL_FUNC (GUI_ShowNetmon), NULL);
-  gtk_widget_show (menu_items);
-
   menu_items = gtk_menu_item_new_with_label (_("DTMF"));
   gtk_menu_append (GTK_MENU (menu), menu_items);
   gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
@@ -877,6 +1033,14 @@ GtkWidget *GUI_CreateMenu ()
                              GTK_SIGNAL_FUNC (GUI_ShowSpeedDial), NULL);
   gtk_widget_show (menu_items);
 
+
+    netmon_menu_items = gtk_menu_item_new_with_label (_("Net Monitor"));
+    gtk_menu_append (GTK_MENU (menu), netmon_menu_items);
+    gtk_signal_connect_object (GTK_OBJECT(netmon_menu_items), "activate",
+                               GTK_SIGNAL_FUNC (GUI_ShowNetmon), NULL);
+//    gtk_widget_show (menu_items);
+//  }
+  
   menu_items = gtk_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), menu_items);
   gtk_widget_show (menu_items);
@@ -1383,7 +1547,9 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.connection.port = gtk_entry_new_with_max_length (10);
-
+  gtk_widget_set_usize (configDialogData.connection.port, 220, 22);
+  gtk_entry_set_editable (GTK_ENTRY (configDialogData.connection.port),
+                          FALSE); 
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.port, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.port);
   
@@ -1396,6 +1562,9 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.connection.model = gtk_entry_new_with_max_length (5);
+  gtk_widget_set_usize (configDialogData.connection.model, 220, 22);
+  gtk_entry_set_editable (GTK_ENTRY (configDialogData.connection.model),
+                          FALSE);
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.model, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.model);
   
@@ -1408,6 +1577,9 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.connection.init = gtk_entry_new_with_max_length (100);
+  gtk_widget_set_usize (configDialogData.connection.init, 220, 22);
+  gtk_entry_set_editable (GTK_ENTRY (configDialogData.connection.init),
+                          FALSE);
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.init, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.init);
   
@@ -1420,6 +1592,9 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.connection.bindir = gtk_entry_new_with_max_length (100);
+  gtk_widget_set_usize (configDialogData.connection.bindir, 220, 22);
+  gtk_entry_set_editable (GTK_ENTRY (configDialogData.connection.bindir),
+                          FALSE);
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.bindir, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.bindir);
 
@@ -1439,6 +1614,77 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.serial, TRUE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.serial);
   
+  /***  Phone notebook  ***/
+  frame = gtk_frame_new (_("Phone information"));
+  gtk_widget_show (frame);
+  
+  vbox = gtk_vbox_new( FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (frame), vbox);
+  gtk_widget_show (vbox);
+
+  label = gtk_label_new (_("Phone"));
+  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), frame, label);
+  
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (vbox), hbox);
+  gtk_widget_show (hbox);
+  
+  label = gtk_label_new (_("Model:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
+  
+  configDialogData.phone.model = gtk_entry_new_with_max_length (5);
+  gtk_widget_set_usize (configDialogData.phone.model, 220, 22);
+  gtk_entry_set_editable (GTK_ENTRY (configDialogData.phone.model),
+                          FALSE); 
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.phone.model, FALSE, FALSE, 2);
+  gtk_widget_show (configDialogData.phone.model);
+  
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (vbox), hbox);
+  gtk_widget_show (hbox);
+  
+  label = gtk_label_new (_("Version:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
+  
+  configDialogData.phone.version = gtk_entry_new_with_max_length (5);
+  gtk_widget_set_usize (configDialogData.phone.version, 220, 22);
+  gtk_entry_set_editable (GTK_ENTRY (configDialogData.phone.version),
+                          FALSE);
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.phone.version, FALSE, FALSE, 2);
+  gtk_widget_show (configDialogData.phone.version);
+  
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (vbox), hbox);
+  gtk_widget_show (hbox);
+  
+  label = gtk_label_new (_("Revision:"));
+  gtk_box_pack_start (GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
+  
+  configDialogData.phone.revision = gtk_entry_new_with_max_length (64);
+  gtk_widget_set_usize (configDialogData.phone.revision, 220, 22);
+  gtk_entry_set_editable (GTK_ENTRY (configDialogData.phone.revision),
+                          FALSE);
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.phone.revision, FALSE, FALSE, 2);
+  gtk_widget_show (configDialogData.phone.revision);
+  
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (vbox), hbox);
+  gtk_widget_show (hbox);
+  
+  label = gtk_label_new (_("IMEI:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
+  
+  configDialogData.phone.imei = gtk_entry_new_with_max_length (64);
+  gtk_widget_set_usize (configDialogData.phone.imei, 220, 22);
+  gtk_entry_set_editable (GTK_ENTRY (configDialogData.phone.imei),
+                          FALSE);
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.phone.imei, FALSE, FALSE, 2);
+  gtk_widget_show (configDialogData.phone.imei);
+
   /***  Alarm notebook  ***/
   
   xgnokiiConfig.alarmSupported = TRUE;
@@ -1497,7 +1743,7 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_clist_set_auto_sort (GTK_CLIST (SMSClist), FALSE);
   
   gtk_clist_set_column_width (GTK_CLIST (SMSClist), 0, 70);
-  gtk_clist_set_column_width (GTK_CLIST (SMSClist), 1, 100);
+  gtk_clist_set_column_width (GTK_CLIST (SMSClist), 1, 115);
   gtk_clist_set_column_width (GTK_CLIST (SMSClist), 2, 40);
   gtk_clist_set_column_width (GTK_CLIST (SMSClist), 3, 55);
 //  gtk_clist_set_column_justification (GTK_CLIST (SMSClist), 1, GTK_JUSTIFY_RIGHT);
@@ -1561,6 +1807,7 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.user.name = gtk_entry_new_with_max_length(configDialogData.user.max);
+  gtk_widget_set_usize (configDialogData.user.name, 220, 22);
   gtk_signal_connect_after (GTK_OBJECT (configDialogData.user.name),
                       "key_press_event",
                       GTK_SIGNAL_FUNC(RefreshUserStatusCallBack), (gpointer) NULL);
@@ -1586,6 +1833,7 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.user.title = gtk_entry_new_with_max_length(configDialogData.user.max);
+  gtk_widget_set_usize (configDialogData.user.title, 220, 22);
   gtk_signal_connect_after (GTK_OBJECT (configDialogData.user.title),
                       "key_press_event",
                       GTK_SIGNAL_FUNC(RefreshUserStatusCallBack), (gpointer) NULL);
@@ -1611,6 +1859,7 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.user.company = gtk_entry_new_with_max_length(configDialogData.user.max);
+  gtk_widget_set_usize (configDialogData.user.company, 220, 22);
   gtk_signal_connect_after (GTK_OBJECT (configDialogData.user.company),
                       "key_press_event",
                       GTK_SIGNAL_FUNC(RefreshUserStatusCallBack), (gpointer) NULL);
@@ -1636,6 +1885,7 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.user.telephone = gtk_entry_new_with_max_length(max_phonebook_number_length);
+  gtk_widget_set_usize (configDialogData.user.telephone, 220, 22);
   gtk_signal_connect_after (GTK_OBJECT (configDialogData.user.telephone),
                       "key_press_event",
                       GTK_SIGNAL_FUNC(RefreshUserStatusCallBack), (gpointer) NULL);
@@ -1660,6 +1910,7 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.user.fax = gtk_entry_new_with_max_length(max_phonebook_number_length);
+  gtk_widget_set_usize (configDialogData.user.fax, 220, 22);
   gtk_signal_connect_after (GTK_OBJECT (configDialogData.user.fax),
                       "key_press_event",
                       GTK_SIGNAL_FUNC(RefreshUserStatusCallBack), (gpointer) NULL);
@@ -1684,6 +1935,7 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.user.email = gtk_entry_new_with_max_length(configDialogData.user.max);
+  gtk_widget_set_usize (configDialogData.user.email, 220, 22);
   gtk_signal_connect_after (GTK_OBJECT (configDialogData.user.email),
                       "key_press_event",
                       GTK_SIGNAL_FUNC(RefreshUserStatusCallBack), (gpointer) NULL);
@@ -1709,6 +1961,7 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.user.address = gtk_entry_new_with_max_length(configDialogData.user.max);
+  gtk_widget_set_usize (configDialogData.user.address, 220, 22);
   gtk_signal_connect_after (GTK_OBJECT (configDialogData.user.address),
                       "key_press_event",
                       GTK_SIGNAL_FUNC(RefreshUserStatusCallBack), (gpointer) NULL);
@@ -1727,34 +1980,32 @@ GtkWidget *GUI_CreateOptionsDialog ()
   
 
   /***  Groups notebook  ***/
-  if (xgnokiiConfig.callerGroupsSupported)
-  {
-    frame = gtk_frame_new (_("Groups names"));
-    gtk_widget_show (frame);
+  cg_names_option_frame = gtk_frame_new (_("Caller groups names"));
   
-    vbox = gtk_vbox_new (FALSE, 0);
-    gtk_container_add (GTK_CONTAINER (frame), vbox);
-    gtk_widget_show (vbox);
 
-    label = gtk_label_new (_("Groups"));
-    gtk_notebook_append_page( GTK_NOTEBOOK (notebook), frame, label);
-    
-    for ( i = 0; i < 6; i++)
-    {
-      hbox = gtk_hbox_new (FALSE, 0);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 3);
-      gtk_widget_show (hbox);
-    
-      g_snprintf (labelBuffer, 10, _("Group %d:"), i + 1);
-      label = gtk_label_new (labelBuffer);
-      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-      gtk_widget_show (label);
-    
-      configDialogData.groups[i] = gtk_entry_new_with_max_length (MAX_CALLER_GROUP_LENGTH);
+  vbox = gtk_vbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (cg_names_option_frame), vbox);
+  gtk_widget_show (vbox);
 
-      gtk_box_pack_end (GTK_BOX (hbox), configDialogData.groups[i], FALSE, FALSE, 2);
-      gtk_widget_show (configDialogData.groups[i]);
-    }
+  label = gtk_label_new (_("Groups"));
+  gtk_notebook_append_page( GTK_NOTEBOOK (notebook), cg_names_option_frame, label);
+  
+  for ( i = 0; i < 6; i++)
+  {
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 3);
+    gtk_widget_show (hbox);
+  
+    g_snprintf (labelBuffer, 10, _("Group %d:"), i + 1);
+    label = gtk_label_new (labelBuffer);
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+    gtk_widget_show (label);
+  
+    configDialogData.groups[i] = gtk_entry_new_with_max_length (MAX_CALLER_GROUP_LENGTH);
+    gtk_widget_set_usize (configDialogData.groups[i], 220, 22);
+
+    gtk_box_pack_end (GTK_BOX (hbox), configDialogData.groups[i], FALSE, FALSE, 2);
+    gtk_widget_show (configDialogData.groups[i]);
   }
   
   /* Help */
@@ -1777,10 +2028,11 @@ GtkWidget *GUI_CreateOptionsDialog ()
   gtk_widget_show (label);
   
   configDialogData.help = gtk_entry_new_with_max_length (HTMLVIEWER_LENGTH - 1);
-
+  gtk_widget_set_usize (configDialogData.help, 220, 22);
+  
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.help, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.help);
-  
+
     
   optionsDialogIsOpened = FALSE;
   return dialog;
@@ -1963,24 +2215,15 @@ void GUI_ReadConfig (void)
   
   if (strstr(FB38_Information.Models, xgnokiiConfig.model) != NULL)
   {
-    xgnokiiConfig.callerGroupsSupported = FALSE;
     max_phonebook_name_length = 20;
     max_phonebook_number_length = 30;
-    max_phonebook_sim_name_length = 10;
+    max_phonebook_sim_name_length = 14;
     max_phonebook_sim_number_length = 30;
   }
   else 
 #endif
   if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL)
   {
-    xgnokiiConfig.callerGroupsSupported = TRUE;
-    /* FIX ME: Can I read this from phone? */
-    xgnokiiConfig.callerGroups[0] = g_strndup( _("Familly"), MAX_CALLER_GROUP_LENGTH); 
-    xgnokiiConfig.callerGroups[1] = g_strndup( _("VIP"), MAX_CALLER_GROUP_LENGTH);
-    xgnokiiConfig.callerGroups[2] = g_strndup( _("Friends"), MAX_CALLER_GROUP_LENGTH);
-    xgnokiiConfig.callerGroups[3] = g_strndup( _("Colleagues"), MAX_CALLER_GROUP_LENGTH);
-    xgnokiiConfig.callerGroups[4] = g_strndup( _("Other"), MAX_CALLER_GROUP_LENGTH);
-    xgnokiiConfig.callerGroups[5] = g_strndup( _("No group"), MAX_CALLER_GROUP_LENGTH);
     max_phonebook_name_length = FB61_MAX_PHONEBOOK_NAME_LENGTH;
     max_phonebook_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
     max_phonebook_sim_name_length = 14;
@@ -1988,11 +2231,13 @@ void GUI_ReadConfig (void)
   }
   else
   {
-    xgnokiiConfig.callerGroupsSupported = FALSE;
     max_phonebook_name_length = max_phonebook_sim_name_length = GSM_MAX_PHONEBOOK_NAME_LENGTH;
     max_phonebook_number_length = max_phonebook_sim_number_length = GSM_MAX_PHONEBOOK_NUMBER_LENGTH;
   }
   
+  xgnokiiConfig.callerGroups[0] = xgnokiiConfig.callerGroups[1] =
+  xgnokiiConfig.callerGroups[2] = xgnokiiConfig.callerGroups[3] =
+  xgnokiiConfig.callerGroups[4] = xgnokiiConfig.callerGroups[5] = NULL;
   xgnokiiConfig.smsSets = 0;
   GUI_ReadXConfig();
 }

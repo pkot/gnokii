@@ -12,7 +12,7 @@
   Modified by Jan Derfinak
 
 */
-
+#include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,6 +36,15 @@
 #include "xpm/quest.xpm"
 
 typedef struct {
+  gint  count;		// Messages count
+  gint  number;		// Number of tail in Long SMS;
+  gint *msgPtr;		// Array of MessageNumber;
+  gint  validity;
+  gint  class;
+  gchar sender[GSM_MAX_SENDER_LENGTH + 1];
+} MessagePointers;
+
+typedef struct {
   gchar *number;
   gchar *name;
   gint used:1;
@@ -56,6 +65,7 @@ typedef struct {
   GtkWidget *addr;
   GtkWidget *status;
   GtkWidget *report;
+  GtkWidget *longSMS;
   GtkWidget *smscOptionMenu;
   GtkTooltips *addrTip;
   gint       center;
@@ -64,7 +74,7 @@ typedef struct {
 
 static GtkWidget *GUI_SMSWindow;
 static SMSWidget SMS = {NULL, NULL, NULL};
-static SendSMSWidget sendSMS = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
+static SendSMSWidget sendSMS = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
 static ErrorDialog errorDialog = {NULL, NULL};
 static QuestMark questMark;
 
@@ -126,11 +136,11 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
   if (!text1)
     return -1;
 
+
   if (clist->sort_column == 1 && !SMS.currentBox)
   {
     struct tm bdTime;
     time_t time1, time2;
-    
     
     bdTime.tm_sec  = atoi (text1 + 15);
     bdTime.tm_min  = atoi (text1 + 12);
@@ -138,7 +148,10 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     bdTime.tm_mday = atoi (text1);
     bdTime.tm_mon  = atoi (text1 + 3);
     bdTime.tm_year = atoi (text1 + 6);
+    if (bdTime.tm_year < 70)
+      bdTime.tm_year += 100;
     bdTime.tm_gmtoff = atoi (text1 + 21);
+    bdTime.tm_isdst = -1;
     
     time1 = mktime (&bdTime);
     
@@ -147,15 +160,18 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     bdTime.tm_hour = atoi (text2 + 9);
     bdTime.tm_mday = atoi (text2);
     bdTime.tm_mon  = atoi (text2 + 3);
-    bdTime.tm_year = atoi (text1 + 6);
+    bdTime.tm_year = atoi (text2 + 6);
+    if (bdTime.tm_year < 70)
+      bdTime.tm_year += 100;
     bdTime.tm_gmtoff = atoi (text2 + 21);
-        
+    bdTime.tm_isdst = -1;
+    
     time2 = mktime (&bdTime);
     
     if (time1 < time2)
-      return (-1);
-    else if (time1 > time2)
       return (1);
+    else if (time1 > time2)
+      return (-1);
     else 
       return 0;
   }
@@ -184,47 +200,78 @@ static inline void FreeArray (GSList **array)
   }
 }
 
+static inline void DestroyMsgPtrs (gpointer data)
+{
+  g_free (((MessagePointers *) data)->msgPtr);
+  g_free ((MessagePointers *) data);
+}
+
 static void InsertInboxElement (gpointer d, gpointer userData)
 {
   GSM_SMSMessage *data = (GSM_SMSMessage *) d;
+  MessagePointers *msgPtrs;
   
   if (data->Type == GST_MT || data->Type == GST_DR)
   {
-    gchar *row[4];
-
-    if (data->Type == GST_DR)
-      row[0] = g_strdup (_("report"));
-    else if (data->Status)
-      row[0] = g_strdup (_("read"));
-    else
-      row[0] = g_strdup (_("unread"));
-
-    if (data->Time.Timezone)
-      row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d GMT%+dh",
-                                data->Time.Day, data->Time.Month, data->Time.Year,
-                                data->Time.Hour, data->Time.Minute, data->Time.Second,
-                                data->Time.Timezone);
-    else
-      row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d GMT",
-                                data->Time.Day, data->Time.Month, data->Time.Year,
-                                data->Time.Hour, data->Time.Minute, data->Time.Second);
+/*    if (data->Type == GST_MT && data->UDHType == GSM_ConcatenatedMessages)
+    {
+      //FIX ME
       
-    row[2] = GUI_GetName(data->Sender);
-    if (row[2] == NULL)
-      row[2] = data->Sender;
-    row[3] = data->MessageText;
-      
-    gtk_clist_append( GTK_CLIST (SMS.smsClist), row);
-    gtk_clist_set_row_data (GTK_CLIST (SMS.smsClist), SMS.row_i++,
-                            GINT_TO_POINTER (data->MessageNumber));
-    g_free (row[0]);
-    g_free (row[1]);
+      msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
+      msgPtrs->count = data->UDH[4];
+      msgPtrs->number = data->UDH[5];
+      msgPtrs->validity = data->Validity;
+      msgPtrs->class = data->Class;
+      strcpy (msgPtrs->sender, data->Sender);
+      msgPtrs->msgPtr = (gint *) g_malloc (msgPtrs->count * sizeof (gint));
+      *(msgPtrs->msgPtr + msgPtrs->number - 1) = data->MessageNumber;
+    }
+    else */
+    {
+      gchar *row[4];
+
+      if (data->Type == GST_DR)
+        row[0] = g_strdup (_("report"));
+      else if (data->Status)
+        row[0] = g_strdup (_("read"));
+      else
+        row[0] = g_strdup (_("unread"));
+
+      if (data->Time.Timezone)
+        row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d GMT%+dh",
+                                  data->Time.Day, data->Time.Month, data->Time.Year,
+                                  data->Time.Hour, data->Time.Minute, data->Time.Second,
+                                  data->Time.Timezone);
+      else
+        row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d GMT",
+                                  data->Time.Day, data->Time.Month, data->Time.Year,
+                                  data->Time.Hour, data->Time.Minute, data->Time.Second);
+        
+      row[2] = GUI_GetName (data->Sender);
+      if (row[2] == NULL)
+        row[2] = data->Sender;
+      row[3] = data->MessageText;
+        
+      gtk_clist_append (GTK_CLIST (SMS.smsClist), row);
+      msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
+      msgPtrs->count = msgPtrs->number = 1;
+      msgPtrs->validity = data->Validity;
+      msgPtrs->class = data->Class;
+      strcpy (msgPtrs->sender, data->Sender);
+      msgPtrs->msgPtr = (gint *) g_malloc (sizeof (gint));
+      *(msgPtrs->msgPtr) = data->MessageNumber;
+      gtk_clist_set_row_data_full (GTK_CLIST (SMS.smsClist), SMS.row_i++,
+                                   msgPtrs, DestroyMsgPtrs);
+      g_free (row[0]);
+      g_free (row[1]);
+    }
   }
 }
                               
 static inline void RefreshInbox (void)
 {
   gtk_clist_freeze (GTK_CLIST (SMS.smsClist));
+  
   gtk_clist_clear (GTK_CLIST (SMS.smsClist));
   
   SMS.row_i = 0;
@@ -237,6 +284,7 @@ static inline void RefreshInbox (void)
 static void InsertOutboxElement (gpointer d, gpointer userData)
 {
   GSM_SMSMessage *data = (GSM_SMSMessage *) d;
+  MessagePointers *msgPtrs;
   
   if (data->Type == GST_MO)
   {
@@ -252,8 +300,15 @@ static void InsertOutboxElement (gpointer d, gpointer userData)
     row[3] = data->MessageText;
       
     gtk_clist_append( GTK_CLIST (SMS.smsClist), row);
-    gtk_clist_set_row_data (GTK_CLIST (SMS.smsClist), SMS.row_i++,
-                            GINT_TO_POINTER (data->MessageNumber));
+    msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
+    msgPtrs->count = msgPtrs->number = 1;
+    msgPtrs->validity = data->Validity;
+    msgPtrs->class = data->Class;
+    strcpy (msgPtrs->sender, data->Sender);
+    msgPtrs->msgPtr = (gint *) g_malloc (sizeof (gint));
+    *(msgPtrs->msgPtr) = data->MessageNumber;
+    gtk_clist_set_row_data_full (GTK_CLIST (SMS.smsClist), SMS.row_i++,
+                                 msgPtrs, DestroyMsgPtrs);
     g_free (row[0]);
     g_free (row[1]);
   }
@@ -356,6 +411,7 @@ static void OkDeleteSMSDialog (GtkWidget *widget, gpointer data)
   GList *sel;
   GSM_Error error;
   gint row;
+  gint count;
   
   
   sel = GTK_CLIST (SMS.smsClist)->selection;
@@ -364,25 +420,29 @@ static void OkDeleteSMSDialog (GtkWidget *widget, gpointer data)
 
   while (sel != NULL)
   {
-    row = GPOINTER_TO_INT(sel->data); 
-    message.Location = GPOINTER_TO_INT (gtk_clist_get_row_data(GTK_CLIST (SMS.smsClist), row));
+    row = GPOINTER_TO_INT(sel->data);
     sel = sel->next;
-    
-    message.MemoryType = GMT_SM;
-    
-    error = GSM->DeleteSMSMessage(&message);
-    
-    if (error != GE_NONE)
+    for (count = 0; count < ((MessagePointers *) gtk_clist_get_row_data (GTK_CLIST (SMS.smsClist), row))->count; count++)
     {
-      if (error == GE_NOTIMPLEMENTED)
+      message.Location = *(((MessagePointers *) gtk_clist_get_row_data (GTK_CLIST (SMS.smsClist), row))->msgPtr + count);
+      if (message.Location == -1)
+        continue;
+      message.MemoryType = GMT_SM;
+    
+      error = GSM->DeleteSMSMessage(&message);
+    
+      if (error != GE_NONE)
       {
-        gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Function not implemented!"));  
-        gtk_widget_show(errorDialog.dialog);
-      }
-      else
-      {
-        gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Delete SMS failed!"));  
-        gtk_widget_show(errorDialog.dialog);
+        if (error == GE_NOTIMPLEMENTED)
+        {
+          gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Function not implemented!"));  
+          gtk_widget_show(errorDialog.dialog);
+        }
+        else
+        {
+          gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Delete SMS failed!"));  
+          gtk_widget_show(errorDialog.dialog);
+        }
       }
     }
   }
@@ -449,8 +509,14 @@ static inline void RefreshSMSStatus (void)
   
   l = gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText));
   
-  m = l % 160;
-  buf = g_strdup_printf ("%d/%d", l == 0 ? 1 : ((l - 1) / 160) + 1, l > 0 && !m ? 160 : m); 
+  if (l <= GSM_MAX_SMS_LENGTH)
+    buf = g_strdup_printf ("%d/1", l);
+  else
+  {
+    m = l % 153;
+    buf = g_strdup_printf ("%d/%d", l > 0 && !m ? 153 : m, l == 0 ? 1 : ((l - 1) / 153) + 1);
+  }
+  
   gtk_frame_set_label (GTK_FRAME (sendSMS.status), buf);
   g_free (buf);
 }
@@ -708,15 +774,43 @@ static void ShowSelectContactsDialog (void)
                       GTK_SIGNAL_FUNC (CancelSelectContactDialog), (gpointer) r);
 }
 
+static gint SendSMSCore (GSM_SMSMessage *sms)
+{
+  GSM_Error error = GSM->SendSMSMessage (sms, 0);
+  
+#ifdef XDEBUG
+  g_print ("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
+           sms->Destination,
+           sms->MessageText,
+           GTK_TOGGLE_BUTTON (sendSMS.report)->active,
+           sendSMS.center);
+#endif
+  
+  if (error != GE_SMSSENDOK)
+  {
+    gchar *buf = g_strdup_printf (_("SMS send to %s failed\n(error=%d)"),
+                                  sms->Destination, error);
+    gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
+    gtk_widget_show(errorDialog.dialog);
+    g_free (buf);
+    return (error);
+  }
+  
+  g_print ("Message sent to: %s\n", sms->Destination);
+  return (error);
+}
+    
 static void SendSMS (void)
 {
   GSM_SMSMessage sms;
-  GSM_Error error;
   AddressPar aps;
+  char udh[GSM_MAX_USER_DATA_HEADER_LENGTH];
   GSList *r;
   gchar *text, *number;
   gchar **addresses;
-  register gint i = 0;
+  gint offset, nr_msg, l;
+  gint longSMS;
+  register gint i = 0, j;
   
   if (CheckAddressMain ())
   {
@@ -726,9 +820,12 @@ static void SendSMS (void)
   }
   
   text = gtk_editable_get_chars (GTK_EDITABLE (sendSMS.smsSendText), 0, -1);
+  l = strlen (text);
   
   addresses = g_strsplit (gtk_entry_get_text (GTK_ENTRY (sendSMS.addr)), ",", 0);
   
+  longSMS = GTK_TOGGLE_BUTTON (sendSMS.longSMS)->active;
+    
   while (addresses[i])
   {
     g_strstrip (addresses[i]);
@@ -753,36 +850,71 @@ static void SendSMS (void)
     sms.Compression = false;
     sms.EightBit = false;
     sms.Validity = sms.MessageCenter.Validity;
-    sms.UDHType = GSM_NoUDH;
     
     strncpy (sms.Destination, number, GSM_MAX_DESTINATION_LENGTH + 1);
     sms.Destination[GSM_MAX_DESTINATION_LENGTH] = '\0';
     
-    /* FIX ME - What about long messages? */
-    strncpy (sms.MessageText, text, GSM_MAX_SMS_LENGTH + 1);
-    sms.MessageText[GSM_MAX_SMS_LENGTH] = '\0';
-    
-    error = GSM->SendSMSMessage(&sms,strlen(sms.MessageText));
-    
-    if (error != GE_SMSSENDOK)
+    if (l > GSM_MAX_SMS_LENGTH)
     {
-      gchar *buf = g_strdup_printf (_("SMS send failed (error=%d)"), error);
-      gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
-      gtk_widget_show(errorDialog.dialog);
-      g_free (buf);
+      if (longSMS)
+      {
+        sms.UDHType = GSM_ConcatenatedMessages;
+        nr_msg = (l / 153) + 1;
+        udh[0] = 0x05;	// UDH length
+        udh[1] = 0x00;	// concatenated messages (IEI)
+        udh[2] = 0x03;	// IEI data length
+        udh[3] = 0x01;	// reference number
+        udh[4] = nr_msg;	// number of messages
+        udh[5] = 0x00;	// message reference number
+        offset = 6;
+        
+        for (j = 0; j < nr_msg; j++)
+        {
+          udh[5] = j + 1;
+        
+          memcpy(sms.UDH,udh,offset);
+          strncpy (sms.MessageText, text + (j * 153), 153);
+          sms.MessageText[153] = '\0';
+          
+          if (SendSMSCore (&sms) != GE_SMSSENDOK)
+            break;
+          
+          sleep (3);
+        }
+      }
+      else
+      {
+        sms.UDHType = GSM_NoUDH;
+        nr_msg = (l / 153) + 1;
+        if (nr_msg > 99) // We have place only for 99 messages in header.
+          nr_msg = 99;
+        for (j = 0; j < nr_msg; j++)
+        {
+          gchar header[8];
+          
+          g_snprintf (header, 8, "%2d/%-2d: ", j + 1, nr_msg);
+          header[7] = '\0';
+        
+          strcpy (sms.MessageText, header);
+          strncat (sms.MessageText, text + (j * 153), 153);
+          sms.MessageText[160] = '\0';
+          
+          if (SendSMSCore (&sms) != GE_SMSSENDOK)
+            break;
+          
+          sleep (3);
+        }
+      }
     }
     else
-      g_print ("Message sent to: %s\n", sms.Destination);
+    {
+      sms.UDHType = GSM_NoUDH;
+      strncpy (sms.MessageText, text, GSM_MAX_SMS_LENGTH + 1);
+      sms.MessageText[GSM_MAX_SMS_LENGTH] = '\0';
+      (void) SendSMSCore (&sms);
+    }
     
     i++;
-
-#ifdef XDEBUG    
-    g_print ("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
-            number,
-            text,
-            GTK_TOGGLE_BUTTON (sendSMS.report)->active,
-            sendSMS.center);
-#endif
   }
   
   g_strfreev (addresses);
@@ -914,7 +1046,7 @@ static void CreateSMSSendWindow (void)
   gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 3);
   gtk_widget_show (vbox);
   
-  sendSMS.status = gtk_frame_new ("1/0");
+  sendSMS.status = gtk_frame_new ("0/1");
   gtk_frame_set_label_align (GTK_FRAME (sendSMS.status), 1.0, 0.0);
   gtk_frame_set_shadow_type (GTK_FRAME (sendSMS.status), GTK_SHADOW_OUT);
   
@@ -952,6 +1084,10 @@ static void CreateSMSSendWindow (void)
   sendSMS.report = gtk_check_button_new_with_label (_("Delivery report"));
   gtk_box_pack_start (GTK_BOX (vbox), sendSMS.report, FALSE, FALSE, 3);
   gtk_widget_show (sendSMS.report);
+  
+  sendSMS.longSMS = gtk_check_button_new_with_label (_("Send as Long SMS"));
+  gtk_box_pack_start (GTK_BOX (vbox), sendSMS.longSMS, FALSE, FALSE, 3);
+  gtk_widget_show (sendSMS.longSMS);
   
   label = gtk_label_new (_("SMS Center:"));
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 1);
@@ -1029,8 +1165,8 @@ static inline gint CompareSMSMessageLocation (gconstpointer a, gconstpointer b)
 static void ReplySMS (void)
 {
   gchar *buf;
-  GSList *r;
-  GSM_SMSMessage msg;
+//  GSList *r;
+//  GSM_SMSMessage msg;
   
   if (GTK_CLIST (SMS.smsClist)->selection == NULL)
     return;
@@ -1038,26 +1174,29 @@ static void ReplySMS (void)
   if (!sendSMS.SMSSendWindow)
     CreateSMSSendWindow ();
   
-  gtk_window_set_title (GTK_WINDOW (sendSMS.SMSSendWindow), _("Forward Message"));
+  gtk_window_set_title (GTK_WINDOW (sendSMS.SMSSendWindow), _("Reply Message"));
 
   gtk_text_freeze (GTK_TEXT (sendSMS.smsSendText));
   gtk_text_set_point (GTK_TEXT (sendSMS.smsSendText), 0);
-  gtk_text_forward_delete (GTK_TEXT (sendSMS.smsSendText), gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText)));
+  gtk_text_forward_delete (GTK_TEXT (sendSMS.smsSendText),
+                           gtk_text_get_length (GTK_TEXT (sendSMS.smsSendText)));
   gtk_clist_get_text (GTK_CLIST (SMS.smsClist),
                       GPOINTER_TO_INT(GTK_CLIST (SMS.smsClist)->selection->data),
                       3, &buf);
     
-  gtk_text_insert (GTK_TEXT (sendSMS.smsSendText), NULL, &(sendSMS.smsSendText->style->black), NULL,
-                   buf, -1);
+  gtk_text_insert (GTK_TEXT (sendSMS.smsSendText), NULL,
+                   &(sendSMS.smsSendText->style->black), NULL, buf, -1);
     
   gtk_text_thaw (GTK_TEXT (sendSMS.smsSendText));
 
-  msg.Location = GPOINTER_TO_INT (gtk_clist_get_row_data(GTK_CLIST (SMS.smsClist),
-                 GPOINTER_TO_INT (GTK_CLIST (SMS.smsClist)->selection->data)));
+  //msg.Location = *(((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST (SMS.smsClist),
+  //               GPOINTER_TO_INT (GTK_CLIST (SMS.smsClist)->selection->data)))->msgPtr);
 
-  r = g_slist_find_custom (SMS.messages, &msg, CompareSMSMessageLocation);
-  if (r)
-    gtk_entry_set_text (GTK_ENTRY (sendSMS.addr), ((GSM_SMSMessage*) r->data)->Sender);  
+  //r = g_slist_find_custom (SMS.messages, &msg, CompareSMSMessageLocation);
+  //if (r)
+  gtk_entry_set_text (GTK_ENTRY (sendSMS.addr),
+                      ((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST (SMS.smsClist),
+                      GPOINTER_TO_INT (GTK_CLIST (SMS.smsClist)->selection->data)))->sender);
   
   CheckAddressMain ();
   RefreshSMSStatus ();
@@ -1308,6 +1447,7 @@ void GUI_CreateSMSWindow (void)
   gtk_clist_set_sort_column (GTK_CLIST (SMS.smsClist), 1);
   gtk_clist_set_sort_type (GTK_CLIST (SMS.smsClist), GTK_SORT_ASCENDING);
   gtk_clist_set_auto_sort (GTK_CLIST (SMS.smsClist), FALSE);
+  gtk_clist_set_selection_mode (GTK_CLIST (SMS.smsClist), GTK_SELECTION_EXTENDED);
   
   gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 0, 40);
   gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 1, 155);

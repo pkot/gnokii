@@ -19,6 +19,11 @@
 #include <gtk/gtk.h>
 
 typedef struct {
+  gchar model[6];
+  gchar number[6];
+} Model;
+
+typedef struct {
   GtkWidget *dialog;
   GtkWidget *text;
 } ErrorDialog;
@@ -36,4 +41,8 @@ extern void DeleteEvent( GtkWidget *, GdkEvent *, gpointer );
 extern gint LaunchProcess (gchar *, gchar *, gint , gint , gint);
 extern void RemoveZombie (gint);
 extern void Help (GtkWidget *, gpointer);
+extern gint strrncmp (const gchar * const, const gchar * const, size_t);
+extern gchar *GetModel (const gchar *);
+extern bool CallerGroupSupported (const gchar *);
+extern bool NetmonitorSupported (const gchar *);
 #endif

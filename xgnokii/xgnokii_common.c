@@ -27,6 +27,83 @@
 #include "xpm/quest.xpm"
 #include "xpm/stop.xpm"
 
+static Model models[] = {
+  {"1611",  "NHE-5"},
+  {"2110i", "NHE-4"},
+  {"2148i", "NHK-4"},
+  {"8810",  "NSE-6"},
+  {"8110i", "NHE-6"},
+  {"3110",  "NHE-8"},
+  {"3210",  "NSE-8"},
+  {"3810",  "NHE-9"},
+  {"5110",  "NSE-1"},
+  {"5130",  "NSK-1"},
+  {"5190",  "NSB-1"},
+  {"6110",  "NSE-3"},
+  {"6120",  "NSC-3"},
+  {"6130",  "NSK-3"},
+  {"6150",  "NSM-1"},
+  {"616x",  "NSW-3"},
+  {"6185",  "NSD-3"},
+  {"6190",  "NSB-3"},
+  {"7110",  "NSE-5"},
+  {"9000i", "RAE-4"},
+  {"9110",  "RAE-2"},
+  {{0},    {0}}
+};
+
+gchar *GetModel (const gchar *num)
+{
+  register gint i = 0;
+  
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+      return (models[i].model);
+    i++;
+  }
+  
+  return NULL;
+}
+
+bool CallerGroupSupported (const gchar *num)
+{
+  register gint i = 0;
+  
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 7 && i < 19)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+  
+  return FALSE;
+}
+
+bool NetmonitorSupported (const gchar *num)
+{
+  register gint i = 0;
+  
+  while (models[i].number != 0)
+  {
+    if (strcmp (num, models[i].number) == 0)
+    {
+      if (i > 10 && i < 19)
+        return TRUE;
+      else
+        return FALSE;
+    }
+    i++;
+  }
+  
+  return FALSE;
+}
+
 inline void DeleteEvent (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   gtk_widget_hide (GTK_WIDGET (widget));
@@ -206,4 +283,25 @@ void Help (GtkWidget *w, gpointer data)
   strncat (buf, (gchar *) data, 255 - strlen (buf));
   buf[254] = '\0';
   LaunchProcess (xgnokiiConfig.helpviewer, buf, STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
+}
+
+inline gint strrncmp (const gchar * const s1, const gchar * const s2, size_t n)
+{
+  gint l1 = strlen (s1);
+  gint l2 = strlen (s2);
+  
+  if (l1 == 0 && l2 != 0)
+    return (-1);
+  else if (l1 != 0 && l2 == 0)
+    return (1);
+    
+  while (l1-- > 0 && l2-- > 0 && n-- > 0)
+  {
+    if (s1[l1] < s2[l2])
+      return (-1);
+    else if (s1[l1] > s2[l2])
+      return (1);
+  }
+  
+  return (0);
 }

@@ -179,7 +179,7 @@ inline void GUI_ShowDTMF ()
 
 static GtkItemFactoryEntry menu_items[] = {
   {"/_File",		NULL,		NULL, 0, "<Branch>"},
-  {"/File/_Load",	"<control>L",	LoadFileDialog, 0, NULL},
+  {"/File/_Open",	"<control>O",	LoadFileDialog, 0, NULL},
   {"/File/_Save",	"<control>S",	SaveFileDialog, 0, NULL},
   {"/File/sep1",	NULL,		NULL, 0, "<Separator>"},
   {"/File/_Close",	"<control>W",	CloseDTMF, 0, NULL},
@@ -229,7 +229,7 @@ void GUI_CreateDTMFWindow ()
   gtk_box_pack_start (GTK_BOX (main_vbox), menubar, FALSE, FALSE, 0);
   gtk_widget_show (menubar);
   
-  table = gtk_table_new (7, 3, TRUE);
+  table = gtk_table_new (8, 3, TRUE);
   
   frame = gtk_frame_new (NULL);
   gtk_container_add (GTK_CONTAINER (frame), table);
@@ -270,13 +270,24 @@ void GUI_CreateDTMFWindow ()
                       GTK_SIGNAL_FUNC (ButtonCB), (gpointer) '#');
   gtk_table_attach_defaults (GTK_TABLE (table), button, 2, 3, 5, 6);
   
+  
+  button = gtk_button_new_with_label ("Pause");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                      GTK_SIGNAL_FUNC (ButtonCB), (gpointer) 'p');
+  gtk_table_attach_defaults (GTK_TABLE (table), button, 0, 1, 6, 7);
+  
+  button = gtk_button_new_with_label ("Wait");
+  gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                      GTK_SIGNAL_FUNC (ButtonCB), (gpointer) 'w');
+  gtk_table_attach_defaults (GTK_TABLE (table), button, 1, 2, 6, 7);
+  
   button = gtk_button_new ();
   pixmap = NewPixmap(Send_xpm, GUI_DTMFWindow->window,
                      &GUI_DTMFWindow->style->bg[GTK_STATE_NORMAL]);
   gtk_container_add (GTK_CONTAINER (button), pixmap);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
                       GTK_SIGNAL_FUNC (SendCB), (gpointer) NULL);
-  gtk_table_attach_defaults (GTK_TABLE (table), button, 0, 2, 6, 7);
+  gtk_table_attach_defaults (GTK_TABLE (table), button, 0, 3, 7, 8);
   
   button = gtk_button_new ();
   pixmap = NewPixmap(Delete_xpm, GUI_DTMFWindow->window,

@@ -66,9 +66,9 @@ static FindEntryStruct findEntryStruct = { "", 0};
 static ExportDialogData exportDialogData = {NULL};
 static MemoryPixmaps memoryPixmaps;
 static QuestMark questMark;
-static EditEntryData newEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-static EditEntryData editEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-static EditEntryData duplicateEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static EditEntryData newEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static EditEntryData editEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static EditEntryData duplicateEditEntryData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 
 /* return != 0 if user has unsaved changes in contacts memory */
@@ -836,23 +836,23 @@ static void CreateEditDialog( EditEntryData *editEntryData, gchar *title,
   gtk_box_pack_end(GTK_BOX(hbox), editEntryData->memoryTypeSIM, TRUE, FALSE, 2);
   gtk_widget_show (editEntryData->memoryTypeSIM);
   
-  if (xgnokiiConfig.callerGroupsSupported)
-  {
+//  if (xgnokiiConfig.callerGroupsSupported)
+//  {
     hbox = gtk_hbox_new (FALSE, 0);
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG (editEntryData->dialog)->vbox), hbox);
     gtk_widget_show (hbox);
   
-    label = gtk_label_new (_("Caller group:"));
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-    gtk_widget_show (label);
+    editEntryData->groupLabel = gtk_label_new (_("Caller group:"));
+    gtk_box_pack_start (GTK_BOX (hbox), editEntryData->groupLabel, FALSE, FALSE, 2);
+//    gtk_widget_show (label);
 
     editEntryData->group = gtk_option_menu_new ();
     
     CreateGroupMenu (editEntryData);
     
     gtk_box_pack_start (GTK_BOX (hbox), editEntryData->group, TRUE, TRUE, 0);
-    gtk_widget_show (editEntryData->group);
-  }
+//    gtk_widget_show (editEntryData->group);
+//  }
 }
 
 static void EditPbEntry(PhonebookEntry *pbEntry, gint row)
@@ -876,7 +876,18 @@ static void EditPbEntry(PhonebookEntry *pbEntry, gint row)
   gtk_option_menu_set_history( GTK_OPTION_MENU (editEditEntryData.group),
                                pbEntry->entry.Group);
     
-  gtk_widget_show(GTK_WIDGET (editEditEntryData.dialog));
+  if (xgnokiiConfig.callerGroupsSupported)
+  {
+    gtk_widget_show (editEditEntryData.group);
+    gtk_widget_show (editEditEntryData.groupLabel);
+  }
+  else
+  {
+    gtk_widget_hide (editEditEntryData.group);
+    gtk_widget_hide (editEditEntryData.groupLabel);
+  }
+    
+  gtk_widget_show( GTK_WIDGET (editEditEntryData.dialog));
 }
 
 void DeletePbEntry (void)
@@ -946,6 +957,16 @@ void NewPbEntry(PhonebookEntry *pbEntry)
   gtk_option_menu_set_history( GTK_OPTION_MENU (newEditEntryData.group),
                                pbEntry->entry.Group);
   
+  if (xgnokiiConfig.callerGroupsSupported)
+  {
+    gtk_widget_show (newEditEntryData.group);
+    gtk_widget_show (newEditEntryData.groupLabel);
+  }
+  else
+  {
+    gtk_widget_hide (newEditEntryData.group);
+    gtk_widget_hide (newEditEntryData.groupLabel);
+  }
   gtk_widget_show(GTK_WIDGET (newEditEntryData.dialog));
 }
 
@@ -968,6 +989,16 @@ void DuplicatePbEntry (PhonebookEntry *pbEntry)
   gtk_option_menu_set_history( GTK_OPTION_MENU (duplicateEditEntryData.group),
                                pbEntry->entry.Group);
     
+  if (xgnokiiConfig.callerGroupsSupported)
+  {
+    gtk_widget_show (duplicateEditEntryData.group);
+    gtk_widget_show (duplicateEditEntryData.groupLabel);
+  }
+  else
+  {
+    gtk_widget_hide (duplicateEditEntryData.group);
+    gtk_widget_hide (duplicateEditEntryData.groupLabel);
+  }
   gtk_widget_show(GTK_WIDGET (duplicateEditEntryData.dialog));
 }
 
@@ -1768,6 +1799,10 @@ inline void GUI_SaveContacts (void)
 
 inline void GUI_ShowContacts (void)
 {
+  if (xgnokiiConfig.callerGroups[0] == NULL)
+    GUI_InitCallerGroupsInf ();
+  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, xgnokiiConfig.callerGroupsSupported);
+  GUI_RefreshContacts ();
   gtk_widget_show (GUI_ContactsWindow);
 //  if (!contactsMemoryInitialized)
 //    ReadContacts ();
@@ -2258,15 +2293,15 @@ void GUI_QuitSaveContacts (void)
 */
 gchar *GUI_GetName (gchar *number)
 {
-  gchar noCountryNum[11];
+//  gchar noCountryNum[11];
   PhonebookEntry *pbEntry;
-  gint len;
+//  gint len;
   register gint i;
   
   if (contactsMemoryInitialized == FALSE || number == NULL)
     return (gchar *)NULL;
   
-  len = strlen (number);
+/*  len = strlen (number);
   if (len > 9)
   {
     for (i = len; (len - i) < 10; i--)
@@ -2275,7 +2310,7 @@ gchar *GUI_GetName (gchar *number)
   }
   else
     noCountryNum[0] = '\0';
-    
+*/    
   for(i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
   {
     pbEntry = g_ptr_array_index (contactsMemory, i);
@@ -2285,8 +2320,16 @@ gchar *GUI_GetName (gchar *number)
     
     if (strcmp (pbEntry->entry.Number, number) == 0)
       return pbEntry->entry.Name;
-      
-    if (*noCountryNum != '\0' && strcmp (pbEntry->entry.Number, noCountryNum) == 0)
+  }
+  
+  for (i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
+  {
+    pbEntry = g_ptr_array_index (contactsMemory, i);
+    
+    if (pbEntry->status == E_Empty || pbEntry->status == E_Deleted)
+      continue;
+    
+    if (strrncmp (pbEntry->entry.Number, number, 9) == 0)
       return pbEntry->entry.Name;
   }
     
@@ -2419,6 +2462,9 @@ SelectContactData *GUI_SelectContactDialog (void)
   
   gtk_widget_show (selectContactData.clist);
   gtk_widget_show (selectContactData.clistScrolledWindow);
+  
+  if (xgnokiiConfig.callerGroups[0] == NULL)
+    GUI_InitCallerGroupsInf ();
   
   gtk_clist_freeze (GTK_CLIST (selectContactData.clist));
   for (i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
@@ -2600,7 +2646,7 @@ void GUI_CreateContactsWindow (void)
   gtk_clist_set_column_width (GTK_CLIST (clist), 1, 115);
   gtk_clist_set_column_width (GTK_CLIST (clist), 3, 70);
   gtk_clist_set_column_justification (GTK_CLIST (clist), 2, GTK_JUSTIFY_CENTER);
-  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, xgnokiiConfig.callerGroupsSupported);
+//  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, xgnokiiConfig.callerGroupsSupported);
   
   for (i = 0; i < 4; i++)
   {

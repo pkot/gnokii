@@ -59,6 +59,7 @@ typedef struct {
   GtkWidget *memoryTypePhone;
   GtkWidget *memoryTypeSIM;
   GtkWidget *group;
+  GtkWidget *groupLabel;
   GtkWidget *groupMenu;
   gint      newGroup;
   gint      row;
