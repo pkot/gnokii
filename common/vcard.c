@@ -93,8 +93,8 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 }
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
-#define STORE3(a, b) if (BEGINS(a)) { strcpy(b, buf+strlen(a)); }
-#define STORE2(a, b, c) if (BEGINS(a)) { c; strcpy(b, buf+strlen(a)); continue; }
+#define STORE3(a, b) if (BEGINS(a)) { strncpy(b, buf+strlen(a), line_len - strlen(a)); }
+#define STORE2(a, b, c) if (BEGINS(a)) { c; strncpy(b, buf+strlen(a), line_len - strlen(a)); continue; }
 #define STORE(a, b) STORE2(a, b, (void) 0)
 #define STOREINT(a, b) if (BEGINS(a)) { b = atoi(buf+strlen(a)); continue; }
 
@@ -112,6 +112,7 @@ API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 {
 	char buf[10240];
 	char memloc[10];
+	int line_len;
 
 	memset(memloc, 0, 10);
 	while (1) {
@@ -122,10 +123,17 @@ API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	}
 
 	while (1) {
+		char *cr, *lf;
 		if (!fgets(buf, 1024, f)) {
 			ERROR("Vcard began but not ended?");
 			return -1;
 		}
+		/* There's either "\n" or "\r\n' sequence at the
+		 * end of the line */
+		cr = strchr(buf, '\r');
+		lf = strchr(buf, '\n');
+		line_len = cr ? cr - buf : (lf ? lf - buf : strlen(buf));
+
 		STORE("FN:", entry->name);
 		STORE("TEL;VOICE:", entry->number);
 
