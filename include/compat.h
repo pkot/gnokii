@@ -41,6 +41,9 @@
 #  ifdef HAVE_DIRECT_H
 #    include <direct.h>
 #  endif
+#  ifdef HAVE_SYS_STAT_H
+#    include <sys/stat.h>
+#  endif
 #endif
 
 #ifdef HAVE_STDARG_H
