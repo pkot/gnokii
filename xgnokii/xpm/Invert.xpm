@@ -1,3 +1,4 @@
+/* XPM */
 /*
 
   G N O K I I
@@ -20,7 +21,7 @@ static char *Invert_xpm[] = {
 "20 18 4 1",
 
 "* c #000000",
-"  c #d6d6d6",
+"  c None",
 "b c #dfdfdf",
 ". c #ffffff",
 

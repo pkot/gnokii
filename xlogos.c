@@ -18,6 +18,7 @@ extern GSM_Network GSM_Networks[];
 
 #include "pixmaps/New.xpm"
 #include "pixmaps/Invert.xpm"
+#include "pixmaps/Flip.xpm"
 #include "pixmaps/Open.xpm"
 #include "pixmaps/Save.xpm"
 #include "pixmaps/Send.xpm"
@@ -194,11 +195,11 @@ int is_point(int x, int y)
 
 /* Draw a rectangle on the screen */
 static void
-draw_brush (GtkWidget *widget, gdouble x, gdouble y)
+draw_brush (GtkWidget *widget, gdouble x, gdouble y, int button)
 {
   int row = y/5, column = x/5;
 
-  if ( is_point(column,row) )
+  if (button > 1)
     clear_point(widget, column, row);
   else
     set_point(widget, column, row);
@@ -286,7 +287,7 @@ void leftlogo(){
     	clear_point(drawing_area, 71, row);
 }
 
-void fliphorizlogo()
+void flipvertlogo()
 {
   int row, column, temp;
 
@@ -307,7 +308,7 @@ void fliphorizlogo()
     }
 }
 
-void flipvertlogo()
+void fliphorizlogo()
 {
   int row, column, temp;
 
@@ -457,8 +458,9 @@ static gint
 button_press_event (GtkWidget *widget, GdkEventButton *event)
 {
 
-  if (event->button == 1 && pixmap != NULL)
-    draw_brush (widget, event->x, event->y);
+  if (pixmap != NULL) {
+    draw_brush (widget, event->x, event->y, event->button);
+  }
 
   return TRUE;
 }
@@ -479,7 +481,9 @@ motion_notify_event (GtkWidget *widget, GdkEventMotion *event)
     }
     
   if (state & GDK_BUTTON1_MASK && pixmap != NULL)
-    draw_brush (widget, x, y);
+    draw_brush (widget, x, y, 1);
+  if (state & GDK_BUTTON2_MASK && pixmap != NULL)
+    draw_brush (widget, x, y, 2);
   
   return TRUE;
 }
@@ -725,7 +729,6 @@ main (int argc, char *argv[])
   gtk_toolbar_set_button_relief (GTK_TOOLBAR (toolbar), GTK_RELIEF_NORMAL);
 
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "New logo", NULL, new_pixmap (New_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) newlogo, toolbar);
-  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Invert logo", NULL, new_pixmap (Invert_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) invertlogo, toolbar);
 
   gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
 
@@ -738,6 +741,9 @@ main (int argc, char *argv[])
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Send logo", NULL, new_pixmap (Send_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) show_logo, toolbar);
 
   gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Invert logo", NULL, new_pixmap (Invert_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) invertlogo, toolbar);
+
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Flip Horizontal", NULL, new_pixmap (Flip_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) fliphorizlogo, toolbar);
   
   gtk_toolbar_append_widget (GTK_TOOLBAR (toolbar), Combo, "", "");
 
