@@ -579,7 +579,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		switch (**buf) {
 		case '=':
 			buf[0]++;
-			sscanf(*buf, "%d", &index);
+			index = atoi(*buf);
 			buf[0] += strlen(*buf);
 
 			data.SMSMessage->MemoryType = SMSType;
@@ -637,7 +637,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		switch (**buf) {
 		case '=':
 			buf[0]++;
-			sscanf(*buf, "%d", &index);
+			index = atoi(*buf);
 			buf[0] += strlen(*buf);
 
 			data.SMSMessage->MemoryType = SMSType;

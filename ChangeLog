@@ -11,6 +11,7 @@
  * Build system updates
     o give the consistant information about --with-gnugetopt
                                                           (Pawel Kot)
+    o autogen.sh added                               (BORBELY Zoltan)
  * 6110 series updates
     o explicitly name 3360 in misc.h (for xgnokii) and in unixirda.c
       (for irda connections)                           (Kevin Thayer)
@@ -18,6 +19,8 @@
     o begin cleaning up bitmap code; rewrite bitmap handling in
       gnokii.c in the readable way                        (Pawel Kot)
  * Updated TODO                           (BORBELY Zoltan, Pawel Kot)
+ * code cleanups
+    o minor portability fixes        (Jan Kratochvil, BORBELY Zoltan)
 
 0.4.0pre19
 ==========

@@ -104,6 +104,8 @@ static int GetMasterPty(char **name)
 	}
 #else /* USE_UNIX98PTYS */
 	int i = 0 , j = 0;
+	char *ptyp8 = "pqrstuvwxyzPQRST";
+	char *ptyp9 = "0123456789abcdef";
 
 	/* create a dummy name to fill in */
 	*name = strdup("/dev/ptyXX");
@@ -111,8 +113,8 @@ static int GetMasterPty(char **name)
 	/* search for an unused pty */
 	for (i = 0; i < 16 && master <= 0; i++) {
 		for (j = 0; j < 16 && master <= 0; j++) {
-			(*name)[8] = "pqrstuvwxyzPQRST"[i];
-			(*name)[9] = "0123456789abcdef"[j];
+			(*name)[8] = ptyp8[i];
+			(*name)[9] = ptyp9[j];
 			/* open the master pty */
 			if ((master = open(*name, O_RDWR | O_NOCTTY | O_NONBLOCK )) < 0) {
 				if (errno == ENOENT) {
