@@ -12,6 +12,8 @@
                                                    (Torsten Kunkel,
                                                          Pawel Kot)
     o reflect the changes on savannah, our host site    (Pawel Kot)
+    o fix a typo causing formatting error in gnokii.1
+                                                   (Torsten Kunkel)
  * libgnokii changes
     o rttl is rtttl (ringing tone text transfer language (changes
       internal API                                 (Torsten Kunkel,
