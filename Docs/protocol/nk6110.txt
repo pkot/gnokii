@@ -598,6 +598,76 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     s SMS status request    { 0x0036, 0x64 }
     r SMS status            { 0x0037,?,?,?,?,?,?,msgnumber,unread }
     r SMS status error      { 0x0038 }
+0x3f: WAP 
+    s Enable WAP frames     { 0x0000}
+    r Enable WAP frames     { 0x0002, 0x01}
+
+    s  ??                   { 0x0003}
+    r  ??                   { 0x0004}
+
+    s Get WAP bookmark      { 0x0006, 0x00, location}
+                              where location: 0 - 14
+    r Get WAP bookmark      { 0x0007, 0x00, name_len, name(unicode),
+                              url_len, url(unicode), 0x01,0x80,0x00[7]}
+    r Get WAP bookmark err  { 0x0008, error }
+                              where error:
+                                0x00(?)invalid position
+                                0x01   user inside "Bookmarks" menu. Must leave it
+                                0x02   invalid/too high/empty location
+
+    s Set WAP bookmark      { 0x0009, 0xff, 0xff, name_len, name(unicode),
+                              url_len, url(unicode), 0x01,0x80,0x00[7] }
+                              Note: bookmark is added to the first free location.
+    r Set WAP bookmark OK   {+0x01, 0x36, 0x0a, block }
+                              where block:
+                                0x0a, location_of_just_written_bookmark(?),
+                                0x00, next_free_location(?)
+    r Set WAP bookmark err  {+0x01, 0x36, 0x0b, error }
+                              where error:
+                               0x04 - memory is full
+                               0x01 - we are in the bookmark menu
+                               0x00 - unknown reason for now ;(
+
+?   s Delete WAP bookmark   { 0x000c, 0x00, location }
+                              where: location = 0-14
+?   r Delete WAR bookmark OK{ 0x000d }
+?   r Delete WAPbookmark err{ 0x000e, 0x02 }
+
+    s ??                    { 0x000F}
+    r ??                    { 0x0010, 0x00}
+
+    s Get WAP settings 1    { 0x0015, location}
+                            where location: 0x00 - 0x05
+    r Get WAP settings 1 OK { 0x0016, title length, title (Unicode), URL length, URL(Unicode),con_type, ???[6 bytes],location, ???[5 bytes],security,...}
+                            where:
+                              con_type: 0x00 - temporary
+                                        0x01 - continuous
+                              location: when use "Get WAP settings 2 frame", must give it
+                              security: 0x00 = no, 0x01 = yes
+    r Get WAP settings 1 err{ 0x0017, error }
+                              where error:
+                                0x01   user inside "Settings" menu. Must leave it
+                                0x02   invalid/too high/empty location
+
+    s Get WAP settings 2    { 0x001b, location}
+                            where location: 0x00 - 0x1d (you get it in "Get WAP settings 1" frame)
+    r Get WAP settings 2 OK { 0x001c, 0x01, type, frame...}
+                            where type : 0x00 - SMS bearer
+                                           frame:
+                                             service_num_len, service_num (Unicode), server_num_len, server_num(Unicode)
+                                         0x01 - data bearer
+                                           frame:
+                                             auth, call_type, call_speed, ?, IP len, IP (Unicode), dialup len, dialup (Unicode),
+                                             user len, user (Unicode), password len, password (Unicode)
+                                             where auth: 0x00 - normal, 0x01 - secure
+                                                   call_type: 0x00 - analogue, 0x01 - ISDN
+                                                   call_speed: 0x00 - 9600, 0x01 - 14400
+					 0x02 - USSD bearer
+					   frame: type, service number len/IP len,service num (Unicode)/IP (Unicode),service code len,
+					          service code (Unicode)
+					     where type: 0x01 - service number, 0x00 - IP
+    r Get WAP settings 2 err{ 0x001d,error}
+                            where: error=0x05    
 0x40: Security commands
     s ???                   {+0x00, 0x00, 0x07, 0x11, 0x00, 0x10, 0x00, 0x00}
                             This frame hangs phone (N3310 4.02). Meaning unknown !
