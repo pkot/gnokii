@@ -173,6 +173,7 @@ typedef enum {
 	GSM_Postal  = 0x09,
 	GSM_Email   = 0x08,
 	GSM_Name    = 0x07,
+	GSM_URL     = 0x2c,
 	GSM_Date    = 0x13   /* Date is used for DC,RC,etc (last calls) */
 } GSM_EntryType;
 
