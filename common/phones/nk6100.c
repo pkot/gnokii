@@ -123,6 +123,7 @@ static GSM_Error PollDisplay(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -133,6 +134,7 @@ static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, in
 static GSM_Error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -147,6 +149,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x02, IncomingSMS1 },
 	{ 0x14, IncomingSMS },
 	{ 0x64, IncomingPhoneInfo },
+	{ 0x40, IncomingSecurity },
 	{ 0, NULL}
 };
 
@@ -245,6 +248,8 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return SetSMSCenter(data, state);
 	case GOP_SetCellBroadcast:
 		return SetCellBroadcast(data, state);
+	case GOP_NetMonitor:
+		return NetMonitor(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -959,7 +964,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 			snprintf(smsc->Number, sizeof(smsc->Number), "%s", GetBCDNumber(pos));
 			smsc->Type = pos[1];
 			pos += 12;
-			//!!!FIXME: codepage must be investigated - bozo
+			/* FIXME: codepage must be investigated - bozo */
 			if (pos[0] == 0x00) {
 				snprintf(smsc->Name, sizeof(smsc->Name), _("Set %d"), smsc->No);
 				smsc->DefaultName = smsc->No;
@@ -2060,8 +2065,44 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 		default:
 			return GE_UNHANDLEDFRAME;
 		}
-		//!!!FIXME: remove this hack if data is valid in DisplayOutput
+		/* FIXME: remove this hack if data is valid in DisplayOutput */
 		disp = data->DisplayOutput->OutputFn ? data->DisplayOutput : NULL;
+		break;
+
+	default:
+		return GE_UNHANDLEDFRAME;
+	}
+
+	return GE_NONE;
+}
+
+
+static GSM_Error NetMonitor(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req1[] = {0x00, 0x01, 0x64, 0x01};
+	unsigned char req2[] = {0x00, 0x01, 0x7e, 0x00};
+	GSM_Error error;
+
+	req2[3] = data->NetMonitor->Field;
+
+	if (SM_SendMessage(state, 4, 0x40, req1) != GE_NONE) return GE_NOTREADY;
+	if ((error = SM_Block(state, data, 0x40)) != GE_NONE) return error;
+
+	if (SM_SendMessage(state, 4, 0x40, req2) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[2]) {
+	/* FIXME: maybe "Enable extended cmds" reply? - bozo */
+	case 0x64:
+		break;
+
+	/* Netmonitor */
+	case 0x7e:
+		if (message[3] != 0x00 && data->NetMonitor)
+			snprintf(data->NetMonitor->Screen, sizeof(data->NetMonitor->Screen), "%s", message + 4);
 		break;
 
 	default:
