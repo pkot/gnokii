@@ -325,7 +325,7 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return GetSecurityCodeStatus(data, state);
 	case GN_OP_ChangeSecurityCode:
 		return ChangeSecurityCode(data, state);
-	case GOP_GetSecurityCode:
+	case GN_OP_GetSecurityCode:
 		return get_security_code(data, state);
 #endif
 	case GN_OP_SendDTMF:
@@ -3201,14 +3201,14 @@ static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state)
 	unsigned char *pos;
 	int len;
 
-	if (!data->SecurityCode) return GN_ERR_INTERNALERROR;
+	if (!data->security_code) return GN_ERR_INTERNALERROR;
 
-	len = strlen(data->SecurityCode->Code);
+	len = strlen(data->security_code->code);
 	if (len < 0 || len >= 10) return GN_ERR_INTERNALERROR;
 
 	pos = req + 4;
-	*pos++ = data->SecurityCode->type;
-	memcpy(pos, data->SecurityCode->Code, len);
+	*pos++ = data->security_code->type;
+	memcpy(pos, data->security_code->code, len);
 	pos += len;
 	*pos++ = 0;
 	*pos++ = 0;
@@ -3221,7 +3221,7 @@ static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *sta
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07};
 
-	if (!data->SecurityCode) return GN_ERR_INTERNALERROR;
+	if (!data->security_code) return GN_ERR_INTERNALERROR;
 
 	if (sm_message_send(state, 4, 0x08, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	return sm_block(state, data, 0x08);
@@ -3233,18 +3233,18 @@ static gn_error ChangeSecurityCode(gn_data *data, struct gn_statemachine *state)
 	unsigned char *pos;
 	int len1, len2;
 
-	if (!data->SecurityCode) return GN_ERR_INTERNALERROR;
+	if (!data->security_code) return GN_ERR_INTERNALERROR;
 
-	len1 = strlen(data->SecurityCode->Code);
-	len2 = strlen(data->SecurityCode->NewCode);
+	len1 = strlen(data->security_code->code);
+	len2 = strlen(data->security_code->new_code);
 	if (len1 < 0 || len1 >= 10 || len2 < 0 || len2 >= 10) return GN_ERR_INTERNALERROR;
 
 	pos = req + 4;
-	*pos++ = data->SecurityCode->type;
-	memcpy(pos, data->SecurityCode->Code, len1);
+	*pos++ = data->security_code->type;
+	memcpy(pos, data->security_code->code, len1);
 	pos += len1;
 	*pos++ = 0;
-	memcpy(pos, data->SecurityCode->NewCode, len2);
+	memcpy(pos, data->security_code->new_code, len2);
 	pos += len2;
 	*pos++ = 0;
 
@@ -3269,15 +3269,15 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 	case 0x08:
 		dprintf("Message: Security Code status received: ");
 		switch (message[4]) {
-		case GSCT_SecurityCode: dprintf("waiting for Security Code.\n"); break;
-		case GSCT_Pin: 	dprintf("waiting for PIN.\n"); break;
-		case GSCT_Pin2: dprintf("waiting for PIN2.\n"); break;
-		case GSCT_Puk: 	dprintf("waiting for PUK.\n"); break;
-		case GSCT_Puk2: dprintf("waiting for PUK2.\n"); break;
-		case GSCT_None: dprintf("nothing to enter.\n"); break;
+		case GN_SCT_SecurityCode: dprintf("waiting for Security Code.\n"); break;
+		case GN_SCT_Pin:  dprintf("waiting for PIN.\n"); break;
+		case GN_SCT_Pin2: dprintf("waiting for PIN2.\n"); break;
+		case GN_SCT_Puk:  dprintf("waiting for PUK.\n"); break;
+		case GN_SCT_Puk2: dprintf("waiting for PUK2.\n"); break;
+		case GN_SCT_None: dprintf("nothing to enter.\n"); break;
 		default: dprintf("Unknown!\n"); return GN_ERR_UNHANDLEDFRAME;
 		}
-		if (data->SecurityCode) data->SecurityCode->type = message[4];
+		if (data->security_code) data->security_code->type = message[4];
 		break;
 	
 	/* security code OK */
