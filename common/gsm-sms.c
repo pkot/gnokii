@@ -167,7 +167,7 @@ SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
 	return dt;
 }
 
-static unsigned short CountSMSParts(GSM_SMSMessage *SMS)
+static int CountSMSParts(GSM_SMSMessage *SMS)
 {
 	unsigned int i, j, count, length = 0, header = 0;
 	bool multi = false;
@@ -680,7 +680,7 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 	GSM_RawData rawdata;
-	unsigned short i, count;
+	int i, count;
 
 	header_offset = layout.SendHeader;
 	count = CountSMSParts(data->SMSMessage);
@@ -711,7 +711,7 @@ GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 	GSM_RawData rawdata;
-	unsigned short i, count;
+	int i, count;
 
 	header_offset = layout.SendHeader;
 	count = CountSMSParts(data->SMSMessage);
