@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2002 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2002 Pawe³ Kot
-                  Last update 14 Jul 2002    Version 0.4.1
+                  Last update 23 Jul 2002    Version 0.4.2
 
 - Contents - 			   
 
@@ -338,6 +338,7 @@ Nokia 6510 Series
  + 6510
  + 6310
  + 8310
+ + 6310i
 
 Nokia 2110 Series
  + 2110
@@ -362,6 +363,12 @@ to recognise those who have helped so far!
 
 
 - 15.0 Release Notes -
+20020722 Version 0.4.2
+Minor updated. Mainly fixes and updates in nk6510 driver: sms sending and
+reading, dlr3p cable support. sendsms can recognize messages not written in
+the default alphabet and automatically sends them in unicode. Also many
+reported nasty bugs fixed.
+
 20020714 Version 0.4.1
 Minor but valuable updates. Many improvments in nk6310 driver (Nokia 6310,
 6510 and 8310), small improvements in nk6160 and nk7110 drivers, more

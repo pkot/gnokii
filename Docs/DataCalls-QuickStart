@@ -6,8 +6,8 @@
 e.g.
 
    cd /usr/src
-   tar xvfz /tmp/gnokii-0.4.1.tar.gz
-   cd gnokii-0.4.1
+   tar xvfz /tmp/gnokii-0.4.X.tar.gz
+   cd gnokii-0.4.X
    ./configure --enable-nls --with-x
    make
    groupadd gnokii
