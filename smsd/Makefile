@@ -38,8 +38,8 @@ ifdef ICONV_LIBS
 	LDLIBS += $(ICONV_LIBS)
 endif
 
-OBJS = 	smsd.o \
-	lowlevel.o
+OBJS = 	smsd.lo \
+	lowlevel.lo
 
 all: smsd
 

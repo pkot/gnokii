@@ -82,6 +82,10 @@
     o GetNetworkInfo won't crash if there's no net (BORBELY Zoltan)
  * nk7110 series updates
     o handle empty calentar entries not as an error     (Pawel Kot)
+ * smsd updates
+    o finish libtoolization: use *.lo objects instead of *.o to
+      avoid mixing fPIC (libgnokii) and non-fPIC (smsd) code
+                                          (Ville Skyttä, Pawel Kot)
 
 0.6.1
 =====
