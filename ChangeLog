@@ -10,7 +10,8 @@
       thanks to a hint from Arek Karas                 (Markus Plail)
     o cleanups                                         (Markus Plail)
     o phonebook fixes thanks to hints from Len Trigg   (Markus Plail)
-    
+ * xgnokii fixes:
+    o fix SMS reading                                  (Markus Plail)    
 0.4.1
 =====
  * gnokii fixes
