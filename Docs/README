@@ -142,7 +142,7 @@ The gnokii project now has a CVS server,  served by the Czech Linux
 Users' Group. The server's address is cvs.linux.cz. If you are
 already familiar with CVS, set the CVSROOT to 
 
-	:pserver:cvs@cvs.linux.cz:/home/cvs/gnokii
+	:pserver:cvs@cvs.linux.cz:/cvs/gnokii
 
 and use an empty password for checkout the repository with the name
 gnokii.
@@ -153,7 +153,7 @@ Just install the cvs package for your distribution and do these steps:
 	1. set your environmental variable CVSROOT. If you have bash (Bourne
            Again Shell):
 
-	export CVSROOT=:pserver:cvs@cvs.linux.cz:/home/cvs/gnokii
+	export CVSROOT=:pserver:cvs@cvs.linux.cz:/cvs/gnokii
 
 	If you have different shell, use different command (e.g. setenv).
 
