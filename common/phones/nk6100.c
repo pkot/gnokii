@@ -470,7 +470,7 @@ static bool match_phone(NK6100_DriverInstance *drvinst, int i)
 			return true;
 		if (P6100_capabilities[i].SWVersion[0] == '+' && strcmp(P6100_capabilities[i].SWVersion + 1, drvinst->SWVersion) <= 0)
 			return true;
-		if (!strcmp(P6100_capabilities[i].SWVersion + 1, drvinst->SWVersion))
+		if (!strcmp(P6100_capabilities[i].SWVersion, drvinst->SWVersion))
 			return true;
 		return false;
 	}
