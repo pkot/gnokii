@@ -1352,7 +1352,7 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 	case 0x23:
 		if (DRVINSTANCE(state)->on_cell_broadcast) {
 			memset(&cbmsg, 0, sizeof(cbmsg));
-			cbmsg.new = true;
+			cbmsg.is_new = true;
 			cbmsg.channel = message[7];
 			n = char_7bit_unpack(0, length-10, sizeof(cbmsg.message)-1, message+10, cbmsg.message);
 			char_ascii_decode(cbmsg.message, cbmsg.message, n);
