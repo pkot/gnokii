@@ -5,39 +5,37 @@
 
 First of all: Phones supported by this driver so far are:
  * Nokia 3650
+ * Nokia 6600
  * Siemens SX1
 
 untested, but it has to work:
  * Nokia 3660
  * Nokia 7650
- * Nokia 6600
  * Sony-Ericsson P800
  * Sony-Ericsson P900
 
 untested, maybe works:
  * Nokia Communicator 9210
 
-Most of the modern phones are based on the Symbian OS. These phones
-have broken the convention and replaced the traditional FBUS protocol
-framework by a new one. The new protocol provides synchronizational
-functionality, but the older one was more powerful. This is one of
-the reasons we decided that analysis of the new protocol is time
-wasting. Our plan is to create a client-server application. The client
-part is built into libgnokii, the server part runs on the phone. These
-communicate with our own protocol.
+Most of the modern phones are based on the Symbian OS. These phones have
+broken the convention and replaced the traditional FBUS protocol framework
+by a new one. The new protocol provides synchronizational functionality, but
+the older one was more powerful. This is one of the reasons we decided that
+analysis of the new protocol is time wasting. Our plan is to create a
+client-server application. The client part is built into libgnokii, the
+server part runs on the phone. These communicate with our own protocol.
 
-The client and the server application is tightly coupled, so you have
-to use the same version on both side. The source code of the server
-application (called gnapplet) is licensed under the GNU GPL, it can be
-downloaded from the gnokii cvs. Compiling gnapplet requires special
-tools, you can look into gnupoc (http://www.gnupoc.org). Installing the
-Nokia SDK isn't easy, so we provide a pre-compiled version. You can
-find the appropriate version in the Docs/ directory of the tarball
-(called gnapplet.sis).
+The client and the server application is tightly coupled, so you have to use
+the same version on both side. The source code of the server application
+(called gnapplet) is licensed under the GNU GPL, it can be downloaded from
+the gnokii cvs. Compiling gnapplet requires special tools, you can look into
+gnupoc (http://www.gnupoc.org). Installing the Nokia SDK isn't easy, so we
+provide a pre-compiled version. You can find the appropriate version in the
+Docs/ directory of the tarball (called gnapplet.sis).
 
-You can install the SIS file in the same way as another symbian
-application. You can transfer it to the phone over the OBEX protocol
-(OBEX is available over IrDA or Bluetooth).
+You can install the SIS file in the same way as another symbian application.
+You can transfer it to the phone over the OBEX protocol (OBEX is available
+over IrDA or Bluetooth).
 
 You can use the following settings in your gnokiirc to access the phone:
 
@@ -56,9 +54,9 @@ You can use the following settings in your gnokiirc to access the phone:
     model = series60
     connection = irda
 
-You have to start gnapplet first (you'll find it in the menu), then
-start gnokii or xgnokii. After gnokii disconnects (or you won't connect
-in 30 seconds), the application will terminate.
+You have to start gnapplet first (you'll find it in the menu), then start
+gnokii or xgnokii. After gnokii disconnects (or you won't connect in 30
+seconds), the application will terminate.
 
 The current code is able to:
  * identify the phone
