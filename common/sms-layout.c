@@ -143,12 +143,10 @@ static GSM_Error EncodeSMSSubmitHeader(SMSMessage_Layout *layout, GSM_API_SMS *s
 		if (rawsms->ReplyViaSameSMSC) frame[layout->ReplyViaSameSMSC] |= 0x80;
 	}
 
-#if 0
 	/* User Data Header Indicator */
 	if (layout->UserDataHeader > -1) {
-		if (rawsms->UDH_No) frame[layout->UserDataHeader] |= 0x40;
+		if (rawsms->UDHIndicator) frame[layout->UserDataHeader] |= 0x40;
 	}
-#endif
 
 	/* Status (Delivery) Report Request */
 	if (layout->Report > -1) {
@@ -174,28 +172,26 @@ static GSM_Error EncodeSMSSubmitHeader(SMSMessage_Layout *layout, GSM_API_SMS *s
 		if (rawsms->PID) frame[layout->PID] = rawsms->PID;
 	}
 
-#if 0
 	/* Data Coding Scheme */
 	if (layout->DataCodingScheme > -1) {
-		switch (SMS->DCS.Type) {
+		switch (sms->DCS.Type) {
 		case SMS_GeneralDataCoding:
-			if (SMS->DCS.u.General.Compressed) frame[layout->DataCodingScheme] |= 0x20;
-			if (SMS->DCS.u.General.Class) frame[layout->DataCodingScheme] |= (0x10 | (SMS->DCS.u.General.Class - 1));
-			frame[layout->DataCodingScheme] |= ((SMS->DCS.u.General.Alphabet & 0x03) << 2);
+			if (sms->DCS.u.General.Compressed) frame[layout->DataCodingScheme] |= 0x20;
+			if (sms->DCS.u.General.Class) frame[layout->DataCodingScheme] |= (0x10 | (sms->DCS.u.General.Class - 1));
+			frame[layout->DataCodingScheme] |= ((sms->DCS.u.General.Alphabet & 0x03) << 2);
 			break;
 		case SMS_MessageWaiting:
-			if (SMS->DCS.u.MessageWaiting.Discard) frame[layout->DataCodingScheme] |= 0xc0;
-			else if (SMS->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) frame[layout->DataCodingScheme] |= 0xe0;
+			if (sms->DCS.u.MessageWaiting.Discard) frame[layout->DataCodingScheme] |= 0xc0;
+			else if (sms->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) frame[layout->DataCodingScheme] |= 0xe0;
 			else frame[layout->DataCodingScheme] |= 0xd0;
-			if (SMS->DCS.u.MessageWaiting.Active) frame[layout->DataCodingScheme] |= 0x80;
-			frame[layout->DataCodingScheme] |= (SMS->DCS.u.MessageWaiting.Type & 0x03);
+			if (sms->DCS.u.MessageWaiting.Active) frame[layout->DataCodingScheme] |= 0x80;
+			frame[layout->DataCodingScheme] |= (sms->DCS.u.MessageWaiting.Type & 0x03);
 			break;
 		default:
 			dprintf("Wrong Data Coding Scheme (DCS) format\n");
 			return GE_SMSWRONGFORMAT;
 		}
 	}
-#endif
 
 	/* Destination Address */
 	if (layout->RemoteNumber > -1) {
@@ -259,17 +255,6 @@ GSM_Error EncodeByLayout(GSM_Data *data, SMSMessage_Layout *clayout, unsigned in
 	/* Common Header */
 	error = EncodeSMSSubmitHeader(layout, SMS, rawsms, message);	/* Very depenend on layout, basically builds header */
 	if (error != GE_NONE) return error;
-
-#if 0
-	/* User Data Header - if present */
-	for (i = 0; i < rawsms->UDH_No; i++) {
-		printf("Adding user data headers...\n");
-		error = EncodeUDH(rawsms->UDH[i], rawsms, message + layout->UserData);
-		if (rawsms->UDH[i].Type == rawsms_MultipartMessage) mm = 1;
-		if (error != GE_NONE) return error;
-	}
-	0 = ((rawsms->UDH_No > 0) ? message[layout->UserData]+1 : 0);
-#endif
 
 	memcpy(message + layout->UserData, rawsms->UserData, clen);
 	message[layout->DataCodingScheme] = rawsms->DCS;
