@@ -90,7 +90,6 @@ static GSM_Error P6510_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *stat
 
 /*
 static GSM_Error P6510_PollSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetPicture(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state);
@@ -99,6 +98,7 @@ static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
 /*
 static GSM_Error P6510_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 */
@@ -237,9 +237,9 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		break;
 	case GOP6510_GetPicture:
 		return P6510_GetPicture(data, state);
+		*/
 	case GOP_DeleteSMS:
 		return P6510_DeleteSMS(data, state);
-		*/
 	case GOP_GetSMSStatus:
 		return P6510_GetSMSStatus(data, state);
 		/*
@@ -608,12 +608,12 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		}
 
 	/* delete sms */
-	case 0x0b:
+	case 0x05:
 		dprintf("SMS deleted\n");
 		break;
 
 	/* delete sms failed */
-	case 0x0c:
+	case 0x06:
 		switch (message[4]) {
 		case 0x02:
 			dprintf("Invalid location\n");
@@ -816,14 +816,8 @@ static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
-static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error ValidateSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02,
-				   0x02, /* 0x01 for INBOX, 0x02 for others */
-				   0x00, /* FolderID */
-				   0x00,
-				   0x02, /* Location */
-				   0x01, 0x00};
 	GSM_Error error;
 
 	/* Handle MemoryType = 0 explicitely, because SMSFolder->FolderID = 0 by default */
@@ -849,10 +843,51 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 			return GE_EMPTYLOCATION;
 		else
 			return GE_INVALIDLOCATION;
-	} else {
-		if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number + 1) req[4] = 0x01;
-		data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
 	}
+	return GE_NONE;
+}
+
+static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x04,
+				   0x02, /* 0x01 for SM, 0x02 for ME */
+				   0x00, /* FolderID */
+				   0x00,
+				   0x02, /* Location */
+				   0x0F, 0x55};
+	GSM_Error error;
+
+	// 00 01 00 04 01 02 00 08 0F 55
+	dprintf("Deleting SMS...\n");
+
+	error = ValidateSMS(data, state);
+	if (error != GE_NONE) return error;
+
+	if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number + 1) req[4] = 0x01;
+	data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
+
+	req[5] = GetMemoryType(data->RawSMS->MemoryType);
+	req[7] = data->RawSMS->Number;
+
+	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_FOLDER);
+}
+
+static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02,
+				   0x02, /* 0x01 for SM, 0x02 for ME */
+				   0x00, /* FolderID */
+				   0x00,
+				   0x02, /* Location */
+				   0x01, 0x00};
+	GSM_Error error;
+
+	error = ValidateSMS(data, state);
+	if (error != GE_NONE) return error;
+
+	if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number + 1) req[4] = 0x01;
+	data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
 
 	return P6510_GetSMSnoValidate(data, state);
 }
