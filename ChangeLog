@@ -63,6 +63,7 @@
     o add add gn_sms_pack_date_time                    (Markus Plail)
  * change strncpys to snprintfs in vcal.lx             (Markus Plail)
  * spec file fixes                                        (Pawel Kot)
+ * add base bluetooth support                       (Marcel Holtmann)
 
 0.4.3
 =====

@@ -57,6 +57,8 @@
 /* Use UNIX98 style pty support instead of the traditional */
 #undef USE_UNIX98PTYS
 
+/* Define if you want Bluetooth support. Linux only */
+#undef HAVE_BLUETOOTH
 
 /***** Compiler specific *****/
 

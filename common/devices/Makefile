@@ -27,6 +27,10 @@ else
 		tcp.o
 endif
 
+ifdef HAVE_BLUETOOTH
+	OBJS += unixbluetooth.o
+endif
+
 all: DEVICES.o
 
 DEVICES.o: $(OBJS)
