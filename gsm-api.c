@@ -1,9 +1,9 @@
 	/* G N O K I I
-	   A Linux/Unix toolset and driver for Nokia mobiles.
+	   A Linux/Unix toolset and driver for Nokia mobile phones.
 	   Copyright (C) Hugh Blemings, 1999  Released under the terms of 
        the GNU GPL, see file COPYING for more details.
 	
-	   This file:  gsm-api.c  Version 0.2.3
+	   This file:  gsm-api.c  Version 0.2.4
 	
 	   Provides a generic API for accessing functions on the
 	   phone, wherever possible hiding the model specific

@@ -1,9 +1,9 @@
 	/* G N O K I I
-	   A Linux/Unix toolset and driver for the Nokia 3110/3810/8110 mobiles.
+	   A Linux/Unix toolset and driver for Nokia mobile phones.
 	   Copyright (C) Hugh Blemings, 1999  Released under the terms of 
        the GNU GPL, see file COPYING for more details.
 	
-	   This file:  gnokii.c  Version 0.2.3
+	   This file:  gnokii.c  Version 0.2.4
 
 	   Mainline code for gnokii utility.  Handles command line parsing
 	   and reading/writing phonebook entries. */
@@ -32,6 +32,7 @@ void	getphonebook(char *argv[]);
 void	writephonebook(void);
 void	fbusinit(bool enable_monitoring);
 void	getsms(char *argv[]);
+void	deletesms(char *argv[]);
 void	sendsms(char *argv[]);
 
 
@@ -51,7 +52,7 @@ int	main(int argc, char *argv[])
 
 		/* Display version,  copyright and build information. */
 	if (strcmp(argv[1], "--version") == 0) {
-		fprintf(stdout, _("GNOKII Version 0.2.3 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"));
+		fprintf(stdout, _("GNOKII Version 0.2.4 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"));
 		fprintf(stdout, _("       Built %s %s for %s on %s \n"), __TIME__, __DATE__, MODEL, PORT);
 		exit (0);
 	}
@@ -79,6 +80,11 @@ int	main(int argc, char *argv[])
 		/* Get sms message mode. */
 	if (argc == 5 && strcmp(argv[1], "--getsms") == 0) {
 		getsms(argv);
+	}
+
+		/* Delete sms message mode. */
+	if (argc == 5 && strcmp(argv[1], "--deletesms") == 0) {
+		deletesms(argv);
 	}
 
 		/* Send sms message mode. */
@@ -206,6 +212,63 @@ void	getsms(char *argv[])
 	exit(0);
 }
 
+	/* Delete SMS messages. */
+void	deletesms(char *argv[])
+{
+	GSM_SMSMessage		message;
+	GSM_MemoryType		memory_type;
+	char				*memory_type_string;
+	int					start_message, end_message, count;
+	GSM_Error			error;
+
+
+		/* Handle command line args that set type, start and end locations. */
+	if (strcmp(argv[2], "int") == 0) {
+		memory_type = GMT_INTERNAL;
+		memory_type_string = "int";
+	}
+	else {
+		if (strcmp(argv[2], "sim") == 0) {
+			memory_type = GMT_SIM;
+			memory_type_string = "sim";
+		}
+		else {
+			fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
+			exit (-1);
+		}
+	}
+
+	start_message = atoi (argv[3]);
+	end_message = atoi (argv[4]);
+
+		/* Initialise the code for the GSM interface. */     
+	fbusinit(true);
+
+		/* Now delete the requested entries. */
+	for (count = start_message; count <= end_message; count ++) {
+	
+		error = GSM->DeleteSMSMessage(memory_type, count, &message);
+
+		if (error == GE_NONE) {
+
+			fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);
+
+		}
+		else {
+
+			if (error == GE_NOTIMPLEMENTED) {
+				fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
+				GSM->Terminate();
+				exit(-1);	
+			}
+
+			fprintf(stdout, _("DeleteSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
+		}
+	}
+
+	GSM->Terminate();
+	exit(0);
+}
 
 static volatile bool shutdown = false;
 static void interrupted(int sig)
@@ -436,11 +499,14 @@ void	usage(void)
 {
 
   /* PJ: Uff, this should be one string -> easy gettextization :-) */
+  /* HB: Yeah, I agree, must be a better way than this anyway! :) */
 	fprintf(stdout, "usage: gnokii {--help|--monitor|--version}\n");
 	fprintf(stdout, "       gnokii [--getphonebook] [memory type] [start] [end]\n");
 	fprintf(stdout, "       gnokii [--writephonebook]\n");
 	
 	fprintf(stdout, "       gnokii [--getsms] [memory type] [start] [end]\n");
+	
+	fprintf(stdout, "       gnokii [--deletesms] [memory type] [start] [end]\n");
 
 	fprintf(stdout, "       gnokii [--sendsms] [destination] [message centre]\n\n");
 
@@ -463,6 +529,10 @@ void	usage(void)
 	fprintf(stdout, "          --getsms          gets SMS messages from specified memory type\n");
  	fprintf(stdout, "                            ('int' or 'sim') starting at entry [start] and\n");
 	fprintf(stdout, "                            ending at [end].  Entries are dumped to stdout.\n\n");
+
+	fprintf(stdout, "          --deletesms       deletes SMS messages from specified memory type\n");
+ 	fprintf(stdout, "                            ('int' or 'sim') starting at entry [start] and\n");
+	fprintf(stdout, "                            ending at [end].\n\n");
 
 	fprintf(stdout, "          --sendsms         sends an SMS message to [destination] via\n");
  	fprintf(stdout, "                            [message centre].  Message text is taken from\n");

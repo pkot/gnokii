@@ -1,9 +1,9 @@
 	/* G N O K I I
-	   A Linux/Unix toolset and driver for the Nokia 3110/6110/8110 mobiles.
+	   A Linux/Unix toolset and driver for Nokia mobile phones.
 	   Copyright (C) Hugh Blemings ??? , 1999  Released under the terms of 
        the GNU GPL, see file COPYING for more details.
 	
-	   This file:  fbus-6110.c  Version 0.2.3
+	   This file:  fbus-6110.c  Version 0.2.4
 	
 	   Provides an API for accessing functions on the 6110 and
 	   similar phones. 
@@ -11,11 +11,7 @@
 	   The various routines are called FB61 (whatever) as a
 	   concatenation of FBUS and 6110.
 
-	   This source file (and fbus-6110.h) are basically empty and
-	   are hacked from the 3810 code.  You may or may not find the
-	   3810 code a useful reference for handling 6110 functionality,
-	   I would imagine the protocol handling, function dispatching etc.
-	   would be pretty similar.  */
+	   */
 
 #define		__fbus_6110_c	/* "Turn on" prototypes in fbus-6110.h */
 
@@ -46,11 +42,16 @@ GSM_Functions			FB61_Functions = {
 		FB61_GetPhonebookLocation,
 		FB61_WritePhonebookLocation,
 		FB61_GetSMSMessage,
+		FB61_DeleteSMSMessage,
 		FB61_SendSMSMessage,
 		FB61_GetRFLevel,
 		FB61_GetBatteryLevel,
 		FB61_EnterPin,
-		FB61_GetIMEIAndCode
+		FB61_GetIMEIAndCode,
+		FB61_GetDateTime,
+		FB61_SetDateTime,
+		FB61_GetAlarm,
+		FB61_SetAlarm
 };
 
 	/* These are all guesses for the 6110 at this stage (HAB) */
@@ -61,7 +62,10 @@ GSM_Information			FB61_Information = {
 		GRF_Arbitrary,			/* RF level units */
 		4, 						/* Max Battery Level */
 		0,						/* Min Battery Level */
-		GBU_Arbitrary			/* Battery level units */
+		GBU_Arbitrary,			/* Battery level units */
+		GDT_DateTime,			/* Have date/time support */
+		GDT_TimeOnly,			/* Alarm supports time only ? */
+		1						/* Only one alarm available. */
 };
 
 	/* Local variables */
@@ -242,6 +246,26 @@ GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code)
 	return (GE_NOTIMPLEMENTED);
 }
 
+GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
 	/* Routine to get specifed phone book location.  Designed to 
 	   be called by application.  Will block until location is
 	   retrieved or a timeout/error occurs. */
@@ -263,6 +287,11 @@ GSM_Error	FB61_WritePhonebookLocation(GSM_MemoryType memory_type, int location, 
 }
 
 GSM_Error	FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
 {
 	return (GE_NOTIMPLEMENTED);
 }

@@ -1,9 +1,9 @@
 	/* G N O K I I
-	   A Linux/Unix toolset and driver for Nokia GSM  mobiles.
+	   A Linux/Unix toolset and driver for Nokia mobile phones.
 	   Copyright (C) Hugh Blemings, 1999  Released under the terms of 
        the GNU GPL, see file COPYING for more details.
 	
-	   This file:  gsm-common.h   Version 0.2.3
+	   This file:  gsm-common.h   Version 0.2.4
 
 	   Header file for the definitions, enums etc. that are used by
 	   all models of handset. */
@@ -55,6 +55,27 @@ typedef struct {
 	char	Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1];
 } GSM_PhonebookEntry;
 
+
+	/* Define enum used to describe what sort of date/time support is
+	   available. */
+
+typedef enum	{GDT_None, GDT_TimeOnly, GDT_DateOnly, GDT_DateTime} GSM_DateTimeSupport;
+
+	/* Structure used for passing dates/times to date/time functions
+	   such as GSM_GetTime and GSM_GetAlarm etc. */
+typedef struct {
+	bool	AlarmEnabled;	/* Only relevant to alarm functions. */
+	int		Year;			/* 1999 should be 1999 not 99 */
+	int		Month;			/* January = 1 */
+	int		Day;
+	int		Hour;
+	int		Minute;
+	int		Second;
+	int		UTOffset;		/* Offset from UT in quarter hours.  Thus
+							   +10 hours is +40, -1 hour is -4 etc. */
+} GSM_DateTime;
+
+
 	/* Define enums for RF units and Battery units */
 typedef enum	{GRF_Arbitrary, GRF_dBm, GRF_mV, GRF_uV} GSM_RFUnits;
 typedef enum	{GBU_Arbitrary, GBU_Volts, GBU_Minutes} GSM_BatteryUnits;
@@ -81,6 +102,15 @@ typedef struct {
 	float				MaxBatteryLevel;
 	float				MinBatteryLevel;
 	GSM_BatteryUnits	BatteryLevelUnits;
+
+		/* Information about date, time and alarm support.  In case
+		   of alarm information we provide value for the number
+		   of alarms supported. */
+	GSM_DateTimeSupport	DateTimeSupport;
+	GSM_DateTimeSupport	AlarmSupport;
+	int					MaximumAlarms;
+	
+	
 } GSM_Information;
 
 
@@ -135,6 +165,9 @@ typedef struct {
 		GSM_Error	(*GetSMSMessage)(GSM_MemoryType memory_type, int location,
 						 GSM_SMSMessage *message);
 
+		GSM_Error	(*DeleteSMSMessage)(GSM_MemoryType memory_type,
+						 int location, GSM_SMSMessage *message);
+
 		GSM_Error	(*SendSMSMessage)(char *message_centre, char *destination,
 						 char *text, u8 *return_code1, u8 *return_code2);
 
@@ -145,7 +178,15 @@ typedef struct {
 		GSM_Error	(*EnterPin)(char *pin);
 
 		GSM_Error	(*GetIMEIAndCode)(char *imei, char *code);
-} GSM_Functions;
 
+		GSM_Error	(*GetDateTime) (GSM_DateTime *date_time);
+
+		GSM_Error	(*SetDateTime) (GSM_DateTime *date_time);
+
+		GSM_Error	(*GetAlarm) (int alarm_number, GSM_DateTime *date_time);
+
+		GSM_Error	(*SetAlarm) (int alarm_number, GSM_DateTime *date_time);
+
+} GSM_Functions;
 
 #endif	/* __gsm_common_h */

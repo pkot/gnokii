@@ -1,9 +1,9 @@
 	/* G N O K I I
-	   A Linux/Unix toolset and driver for the Nokia 3110/6110/8110 mobiles.
+	   A Linux/Unix toolset and driver for Nokia mobile phones.
 	   Copyright (C) Hugh Blemings ?????, 1999  Released under the terms of 
        the GNU GPL, see file COPYING for more details.
 	
-	   This file:  fbus-6110.h   Version 0.2.3
+	   This file:  fbus-6110.h   Version 0.2.4
 
 	   Header file for the various functions, definitions etc. used
 	   to implement the handset interface.  See fbus-6110.c for more details. */
@@ -61,6 +61,8 @@ GSM_Error	FB61_WritePhonebookLocation(GSM_MemoryType memory_type,
 GSM_Error	FB61_GetSMSMessage(GSM_MemoryType memory_type, int location,
 				 GSM_SMSMessage *message);
 
+GSM_Error	FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message);
+
 GSM_Error	FB61_SendSMSMessage(char *message_centre, char *destination,
 				 char *text, u8 *return_code1, u8 *return_code2);
 
@@ -68,6 +70,10 @@ GSM_Error	FB61_GetRFLevel(float *level);
 GSM_Error	FB61_GetBatteryLevel(float *level);
 GSM_Error	FB61_EnterPin(char *pin);
 GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code);
+GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time);
+GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time);
+GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time);
+GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __fbus_6110_c isn't 
