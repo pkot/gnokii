@@ -1196,6 +1196,7 @@ static void lm_writetrack(struct MF *mf, int track)
 	struct MFX *mfx = (struct MFX *) mf;
 	gn_ringtone_note *note;
 	int i, delta;
+	int volume = 100;
 	char data[2];
 	int notes[] = {0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10, 11, 11};
 
@@ -1203,17 +1204,16 @@ static void lm_writetrack(struct MF *mf, int track)
 
 	for (i = 0; i < mfx->ringtone->notes_count; i++) {
 		note = mfx->ringtone->notes + i;
-		//delta = 1875 * note->duration * mfx->division / mfx->ringtone->tempo / 250;
-		delta = 7 * note->duration * mfx->division / mfx->ringtone->tempo / 2;
+		delta = note->duration * mfx->division / 32;
 		if (note->note == 0xff) {
 			data[0] = 0;
 			data[1] = 0;
 			mf_write_midi_event(mf, delta, note_off, 1, data, 2);
 		} else {
 			data[0] = 12 * (4 + note->note / 14) + notes[note->note % 14];
-			data[1] = 96; //!!!FIXME
+			data[1] = volume;
 			mf_write_midi_event(mf, 1, note_on, 1, data, 2);
-			data[1] = 0; //!!!FIXME
+			data[1] = 0;
 			mf_write_midi_event(mf, delta, note_off, 1, data, 2);
 		}
 	}
@@ -1270,7 +1270,7 @@ gn_error file_midi_save(FILE * file, gn_ringtone * ringtone)
 	mfxi.err = GN_ERR_NONE;
 
 	/* set variables to their initial values */
-	mfxi.division = 250;
+	mfxi.division = 480;
 
 	mf->Mf_putc = lm_putc;
 	mf->Mf_getpos = lm_getpos;

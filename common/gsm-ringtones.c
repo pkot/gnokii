@@ -638,3 +638,45 @@ API void gn_ringtone_get_tone(const gn_ringtone *ringtone, int n, int *freq, int
 
 	*ulen = 1875000 * ringtone->notes[n].duration / ringtone->tempo;
 }
+
+API void gn_ringtone_set_duration(gn_ringtone *ringtone, int n, int ulen)
+{
+	int l = ulen * ringtone->tempo / 240;
+	gn_ringtone_note *note = ringtone->notes + n;
+
+	if (l < 156250) {
+		if (l < 54687) {
+			if (l < 15625)
+				note->duration = 0;
+			else if (l < 39062)
+				note->duration = 4;
+			else
+				note->duration = 4 * 3/2;
+		} else {
+			if (l < 78125)
+				note->duration = 8;
+			else if (l < 109375)
+				note->duration = 8 * 3/2;
+			else
+				note->duration = 16;
+		}
+	} else {
+		if (l < 437500) {
+			if (l < 218750)
+				note->duration = 16 * 3/2;
+			else if (l < 312500)
+				note->duration = 32;
+			else
+				note->duration = 32 * 3/2;
+		} else {
+			if (l < 625000)
+				note->duration = 64;
+			else if (l < 875000)
+				note->duration = 64 * 3/2;
+			else if (l < 1250000)
+				note->duration = 128;
+			else
+				note->duration = 128 * 3/2;
+		}
+	}
+}

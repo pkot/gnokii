@@ -4134,6 +4134,7 @@ static int playringtone(int argc, char *argv[])
 	gn_tone tone;
 	gn_error error;
 	int i, ulen;
+	struct timeval t1, t2, dt;
 
 	int volume = 5;
 	struct option options[] = {
@@ -4173,20 +4174,26 @@ static int playringtone(int argc, char *argv[])
 		return error;
 	}
 
-	for (i = 0; i < ringtone.notes_count; i++) {
+	gettimeofday(&t1, NULL);
+	tone.frequency = 0;
+	tone.volume = 0;
+	gn_sm_functions(GN_OP_PlayTone, &data, &state);
+	gettimeofday(&t2, NULL);
+	timersub(&t2, &t1, &dt);
+
+	signal(SIGINT, interrupted);
+	for (i = 0; !bshutdown && i < ringtone.notes_count; i++) {
 		tone.volume = volume;
 		gn_ringtone_get_tone(&ringtone, i, &tone.frequency, &ulen);
 		if ((error = gn_sm_functions(GN_OP_PlayTone, &data, &state)) != GN_ERR_NONE) break;
-		usleep(ulen - 10000);
+		usleep(ulen - 2 * dt.tv_usec - 20000);
 		tone.volume = 0;
 		if ((error = gn_sm_functions(GN_OP_PlayTone, &data, &state)) != GN_ERR_NONE) break;
-		usleep(10000);
+		usleep(20000);
 	}
-	if (error == GN_ERR_NONE) {
-		tone.frequency = 0;
-		tone.volume = 0;
-		error = gn_sm_functions(GN_OP_PlayTone, &data, &state);
-	}
+	tone.frequency = 0;
+	tone.volume = 0;
+	gn_sm_functions(GN_OP_PlayTone, &data, &state);
 
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Play succeeded!\n"));
