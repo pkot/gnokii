@@ -14,9 +14,6 @@
                                                       (Ville Skyttä)
  * smsd updates
     o make smsd install compliant with FHS            (Ville Skyttä)
-    o let the postgres install script create the user and database,
-      connect to the database and create the index on outbox
-                                                      (Ville Skyttä)
 
 0.5.1
 =====

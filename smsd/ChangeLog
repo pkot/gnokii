@@ -1,7 +1,5 @@
 * Tue Jun 03 2003 Ville Skyttä <ville.skytta@iki.fi>
 - Make SMSD install FHS compliant.
-- Let the postgres installation script create user, database and index and
-  connect to the database.
 
 * Tue Apr 08 2003 Bernhard Minks <bm@fachschaft.informatik.fh-muenchen.de>
 - compat.h added to file.c, mysql.c and pq.c.
