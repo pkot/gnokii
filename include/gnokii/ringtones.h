@@ -153,7 +153,7 @@ typedef struct {
 API gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone);
 API gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone);
 
-API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength);
+API unsigned char gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength);
 API gn_error gn_ringtone_unpack(gn_ringtone *ringtone, unsigned char *package, int maxlength);
 API int gn_note_get(int number);
 

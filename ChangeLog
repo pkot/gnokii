@@ -4,6 +4,7 @@
     o fix stupid typo in fbus.c causing Bluetooth not work
                                                    (Marcel Holtmann)
     o s/Janík/Janik/ in the translatable strings         (Pawel Kot)
+    o don't use u8 type in the exported headers          (Pawel Kot)
 
 0.5.0rc1
 ========
