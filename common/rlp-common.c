@@ -80,7 +80,7 @@ void    RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
     fprintf(stdout, _(" P/F=%d C/R=%d \n"), header.PF, header.CR);
 
-    for (count = 0; count < 26; count ++) {
+    for (count = 0; count < 25; count ++) {
         if (isprint(frame->Data[count])) {
             fprintf(stdout, "[%02x%c]", frame->Data[count], frame->Data[count]);
         }

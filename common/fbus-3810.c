@@ -1100,12 +1100,12 @@ enum FB38_RX_States     FB38_RX_HandleRLPMessage(void)
     frame.Header[1] = MessageBuffer[3];
     
     for (count = 0; count < 25; count ++) {
-        frame.Data[count] = MessageBuffer[3 + count];
+        frame.Data[count] = MessageBuffer[4 + count];
     }
     
-    frame.FCS[0] = MessageBuffer[28];
-    frame.FCS[1] = MessageBuffer[29];
-    frame.FCS[2] = MessageBuffer[30];
+    frame.FCS[0] = MessageBuffer[29];
+    frame.FCS[1] = MessageBuffer[30];
+    frame.FCS[2] = MessageBuffer[31];
     
     RLP_RXCallback(&frame);
 

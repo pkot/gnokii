@@ -1523,7 +1523,7 @@ void foogle(char *argv[])
 
   fbusinit(true, RLP_DisplayF96Frame);
 
-  GSM->DialData("4670");
+  GSM->DialData("62401000");
   
   sleep (60);
   GSM->Terminate();
