@@ -1248,7 +1248,7 @@ void *GUI_Connect(void *a)
 		for (i = 0; i < GN_SMS_FOLDER_MAX_NUMBER; i++) {
 			gdat.folder_stats[i] = &FolderStats[i];
 			for (j = 0; j < GN_SMS_MESSAGE_MAX_NUMBER; j++)
-				gdat.message_list[i][j] = &MessagesList[i][j];
+				gdat.message_list[j][i] = &MessagesList[j][i];
 		}
 
 		if ((gn_sms_get_folder_changes(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS))) == GN_ERR_NONE) {
