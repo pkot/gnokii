@@ -1359,7 +1359,7 @@ int getsms(int argc, char *argv[])
 
             GSM_PrintBitmap(&bitmap);
 
-            if (filename) {
+            if (*filename) {
               error = GSM_SaveBitmapFile(filename, &bitmap);
 
               fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
@@ -1374,7 +1374,7 @@ int getsms(int argc, char *argv[])
           case GSM_NoUDH:
             fprintf(stdout, _("Text:\n%s\n\n"), message.MessageText);
             if (count == start_message) mode = 1; /* ask */
-            if ((mode != -1) && filename) mode = GSM_SaveTextFile(filename, message.MessageText, mode);
+            if ((mode != -1) && *filename) mode = GSM_SaveTextFile(filename, message.MessageText, mode);
             break;
           default:
             fprintf(stderr, _("Unknown\n"));
