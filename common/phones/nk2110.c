@@ -10,65 +10,6 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Log$
-  Revision 1.16  2001-11-23 22:07:44  machek
-  Fix SMS receiving to work, again. Unfortunately, it is not possible to
-  reuse much of gsm-sms.c...
-
-  Revision 1.15  2001/11/15 12:10:57  pkot
-  Removed a warning from 2110 compilation
-
-  Revision 1.14  2001/11/09 13:49:12  pkot
-  Pavel! You haven't implemented slave_process() function!
-
-  Revision 1.13  2001/11/09 13:17:11  pkot
-  Update 2110 to a new libsms api
-
-  Revision 1.12  2001/10/21 22:23:56  machek
-  Use symbolic constants instead of numbers
-
-  At least detect when we get other message than we asked for
-
-  Provide option to passively wait for sms-es
-
-  Revision 1.11  2001/08/20 23:27:37  pkot
-  Add hardware shakehand to the link layer (Manfred Jonsson)
-
-  Revision 1.10  2001/07/17 22:46:27  pkot
-  Removed warning when compiling with --enable-debug (Pawel Kot)
-
-  Revision 1.9  2001/06/17 16:42:59  machek
-  Created another level of error message (ddprintf), fixed code not to
-  exit on error condition. Now it is actualy usable on my Philips Velo.
-
-  Revision 1.8  2001/06/16 10:00:41  machek
-  Implement timeouts on waiting for SMS.
-
-  Revision 1.7  2001/06/10 23:49:49  pkot
-  Small fixes to hide compilation warnings and allow gnokii.c to compile
-
-  Revision 1.6  2001/06/10 11:28:00  machek
-  Convert GetSMS/DeleteSMS to new structure.
-
-  Revision 1.5  2001/06/06 09:05:56  machek
-  Convert Grab/Release display to new structure.
-
-  Revision 1.4  2001/05/09 20:18:46  machek
-  Cleaned up code a bit. Made it use device_() interface. Reworked delay
-  system; now it is 4 times faster. 5 times faster if you hold * key on
-  phone (?!).
-
-  Revision 1.3  2001/05/07 14:13:03  machek
-  nokia-2110 module converted to suit new API better. --identify now works.
-
-  Revision 1.2  2001/04/27 16:00:01  machek
-  Better error messages.
-
-  Revision 1.1  2001/04/25 12:54:47  machek
-  Partly converted nokia 2110 to "new" form, and moved it to phone
-  directory.
-
-
   Notice that this code was (partly) converted to "new" structure, but it 
   does not have code for bus separated. I think that separating it would
   be waste of effort... 					--pavel
@@ -691,7 +632,7 @@ SigHandler(int status)
 //	 dprintf("(%x)", b, Index);
 		if (!Index && b != MYID && b != 0xf8 && b != 0x00) /* MYID is code of computer */ {
 			/* something strange goes from phone. Just ignore it */
-			ddprintf( "Get [%02X %c]\n", b, b >= 0x20 ? b : '.' );
+			ddprintf("Get [%02X %c]\n", b, b >= 0x20 ? b : '.' );
 			continue;
 		} else {
 			pkt[Index++] = b;
@@ -702,7 +643,7 @@ SigHandler(int status)
 			}
 			if(Index >= Length) {
 				if((pkt[0] == MYID || pkt[0]==0xf8) && pkt[1] == 0x00) /* packet from phone */ {
-					ddprintf( _("Phone: ") );
+					ddprintf("Phone: ");
 					for( j = 0; j < Length; j++ ) {
 						b = pkt[j];
 						ddprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );

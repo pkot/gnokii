@@ -10,36 +10,6 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Log$
-  Revision 1.7  2001-11-17 20:16:42  pkot
-  Cleanup
-
-  Revision 1.6  2001/11/08 16:49:19  pkot
-  Cleanups
-
-  Revision 1.5  2001/09/09 21:45:49  machek
-  Cleanups from Ladislav Michl <ladis@psi.cz>:
-
-  *) do *not* internationalize debug messages
-
-  *) some whitespace fixes, do not use //
-
-  *) break is unneccessary after return
-
-  Revision 1.4  2001/07/27 00:02:20  pkot
-  Generic AT support for the new structure (Manfred Jonsson)
-
-  Revision 1.3  2001/06/10 11:26:56  machek
-  Warn if Link.Loop is not defined.
-
-  Revision 1.2  2001/05/07 14:01:51  machek
-  Warn when phone functions are missing, but do not segfault.
-
-  Revision 1.1  2001/03/21 23:36:04  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-
 */
 
 #include "gsm-common.h"

@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.11  2001-11-27 12:19:01  pkot
+  Revision 1.12  2001-11-29 17:54:56  pkot
+  Cleanup. Removed cvs logs.
+
+  Revision 1.11  2001/11/27 12:19:01  pkot
   Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
 
   Revision 1.10  2001/11/14 10:46:12  pkot
@@ -259,11 +262,8 @@ void serial_changespeed(int __fd, int __speed)
 #ifndef SGTTY
 	tcgetattr(__fd, &t);
 
-	// This is not needed! We set up the speed via cfsetspeed
-	//  t.c_cflag &= ~CBAUD;
-	//  t.c_cflag |= speed;
 	if (cfsetspeed(&t, speed) == -1)
-		dprintf(_("Serial port speed setting failed\n"));
+		dprintf("Serial port speed setting failed\n");
 
 	tcsetattr(__fd, TCSADRAIN, &t);
 #else
