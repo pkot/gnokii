@@ -13,7 +13,7 @@ AC_CANONICAL_SYSTEM
 
 dnl ======================== Default setting
 CFLAGS="-O2 -Wall"
-ALL_LINGUAS="cs de fi nl"
+ALL_LINGUAS="cs de fi nl sk"
 model="6110"
 port="/dev/ttyS0"
 
@@ -201,6 +201,43 @@ if test "x$PTHREAD_LIBS" = xerror; then
 		AC_MSG_ERROR(not found library: pthread !!!))
 fi
 
+dnl The following is taken from inn sources
+AC_MSG_CHECKING(for tm_gmtoff in struct tm)
+AC_TRY_LINK([#include <time.h>],
+        [struct tm t; t.tm_gmtoff = 0],
+        [AC_DEFINE(HAVE_TM_GMTON)
+	 TM_CFLAGS="-DTM_GMT"
+	 AC_MSG_RESULT(yes)],
+        [AC_DEFINE(HAVE_TM_GMTOFF)
+	 TM_CFLAGS=""
+	 AC_MSG_RESULT(no)])
+
+dnl Checking for setspeed in termios.h
+AC_MSG_CHECKING(for cfsetspeed in termios.h)
+AC_TRY_LINK([#include <termios.h>],
+        [struct termios t; cfsetspeed(&t, B9600);],
+        [AC_DEFINE(HAVE_CFSETSPEED)
+	 TERMIOS_CFLAGS="-DHAVE_CFSETSPEED"
+	 AC_MSG_RESULT(yes)],
+         AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(for cfsetispeed and cfsetospeed in termios.h)
+AC_TRY_LINK([#include <termios.h>],
+        [struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);],
+	[AC_DEFINE(HAVE_CFSETISPEED)
+	 AC_DEFINE(HAVE_CFSET0SPEED)
+	 TERMIOS_CFLAGS="$TERMIOS_CFLAGS -DHAVE_CFSETISPEED -DHAVE_CFSET0SPEED"
+	 AC_MSG_RESULT(yes)],
+         AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(for c_ispeed and c_ospeed in struct termios)
+AC_TRY_LINK([#include <termios.h>],
+        [struct termios t; t.c_ispeed = B9600; t->c_ospeed = B9600;],
+	[AC_DEFINE(HAVE_TERMIOS_CSPEED)
+	 TERMIOS_CFLAGS="$TERMIOS_CFLAGS -DHAVE_TERMIOS_CSPEED"
+	 AC_MSG_RESULT(yes)],
+         AC_MSG_RESULT(no))
+
 AC_TRY_CPP([#include <getopt.h>], AC_MSG_RESULT(
 	[checking for getopt.h... yes]), [
 	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
@@ -311,6 +348,8 @@ AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LIBS)
 AC_SUBST(XPM_CFLAGS)
 AC_SUBST(XPM_LIBS)
+AC_SUBST(TM_CFLAGS)
+AC_SUBST(TERMIOS_CFLAGS)
 
 AC_OUTPUT(
 	Makefile.global
