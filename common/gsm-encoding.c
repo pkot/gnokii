@@ -112,7 +112,7 @@ static bool IsDefaultAlphabetExtensionChar(unsigned char value)
 static unsigned char DecodeWithDefaultAlphabetExtension(unsigned char value)
 {
 	switch (value) {
-	case 0x0a: return 0x0c; break; /* from feed */
+	case 0x0a: return 0x0c; break; /* form feed */
 	case 0x14: return '^';  break;
 	case 0x28: return '{';  break;
 	case 0x29: return '}';  break;
