@@ -284,6 +284,7 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 	}
 
 	memcpy(message + current, bitmap->bitmap, bitmap->size);
+	current += bitmap->size;
 
-	return (current + bitmap->size);
+	return current;
 }
