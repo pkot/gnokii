@@ -9,7 +9,7 @@
 	
   Header file for GSM networks.
 
-  Last modification: Sun May  2 12:42:56 CEST 1999
+  Last modification: Sat Jul 24 14:02:12 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -24,10 +24,18 @@ typedef struct {
   char *Name; /* GSM network name */
 } GSM_Network;
 
-/* GSM networks data. */
+/* This type is used to hold information about various GSM countries. */
+
+typedef struct {
+  char *Code; /* GSM country code */
+  char *Name; /* GSM country name */
+} GSM_Country;
 
 /* These functions are used to search the structure defined above.*/
 char *GSM_GetNetworkName(char *NetworkCode);
 char *GSM_GetNetworkCode(char *NetworkName);
+
+char *GSM_GetCountryName(char *CountryCode);
+char *GSM_GetCountryCode(char *CountryName);
 
 #endif	/* __gsm_networks_h */

@@ -2123,7 +2123,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     sprintf(output, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
 
     printf(_("   Network code: %s\n"), output);
-    printf(_("   Network name: %s\n"), GSM_GetNetworkName(output));
+    printf(_("   Network name: %s (%s)\n"), GSM_GetNetworkName(output), GSM_GetCountryName(output));
 #endif DEBUG
 
     break;

@@ -9,12 +9,135 @@
 	
   This file implements GSM networks searching.
 
-  Last modification: Sun May  2 17:04:36 CEST 1999
+  Last modification: Sat Jul 24 14:02:12 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
 
+#include <string.h>
 #include "gsm-networks.h"
+
+GSM_Country GSM_Countries[] =
+{
+  { "202", "Greece" },
+  { "204", "Netherlands" },
+  { "206", "Belgium" },
+  { "208", "France" },
+  { "213", "Andorra" },
+  { "214", "Spain" },
+  { "216", "Hungary" },
+  { "218", "Bosnia Herzegovina" },
+  { "219", "Croatia" },
+  { "220", "Yugoslavia" },
+  { "222", "Italy" },
+  { "226", "Romania" },
+  { "228", "Switzerland" },
+  { "230", "Czech Republic" },
+  { "231", "Slovak Republic" },
+  { "232", "Austria" },
+  { "234", "United Kingdom" },
+  { "238", "Denmark" },
+  { "240", "Sweden" },
+  { "242", "Norway" },
+  { "244", "Finland" },
+  { "246", "Lithuania" },
+  { "247", "Latvia" },
+  { "248", "Estonia" },
+  { "250", "Russia" },
+  { "255", "Ukraine" },
+  { "259", "Moldova" },
+  { "260", "Poland" },
+  { "262", "Germany" },
+  { "266", "Gibraltar" },
+  { "268", "Portugal" },
+  { "270", "Luxembourg" },
+  { "272", "Ireland" },
+  { "274", "Iceland" },
+  { "276", "Albania" },
+  { "278", "Malta" },
+  { "280", "Cyprus" },
+  { "282", "Georgia" },
+  { "283", "Armenia" },
+  { "284", "Bulgaria" },
+  { "286", "Turkey" },
+  { "290", "Greenland" },
+  { "293", "Slovenia" },
+  { "294", "Macedonia" },
+  { "302", "Canada" },
+  { "310", "Papua New Guinea" },
+  { "310", "U.S.A." },
+  { "340", "French West Indies" },
+  { "400", "Azerbaijan" },
+  { "404", "India" },
+  { "410", "Pakistan" },
+  { "413", "Sri Lanka" },
+  { "415", "Lebanon" },
+  { "416", "Jordan" },
+  { "417", "Syria" },
+  { "418", "Iraq" },
+  { "419", "Kuwait" },
+  { "420", "Saudi Arabia" },
+  { "422", "Oman" },
+  { "424", "United Arab Emirates" },
+  { "425", "Israel" },
+  { "426", "Bahrain" },
+  { "427", "Qatar" },
+  { "432", "Iran" },
+  { "434", "Uzbekistan" },
+  { "437", "Kyrgyz Republic" },
+  { "452", "Vietnam" },
+  { "454", "Hong Kong" },
+  { "455", "Macau" },
+  { "456", "Cambodia" },
+  { "457", "Lao" },
+  { "460", "China" },
+  { "466", "Taiwan" },
+  { "470", "Bangladesh" },
+  { "502", "Malaysia" },
+  { "505", "Australia" },
+  { "510", "Indonesia" },
+  { "515", "Philippines" },
+  { "520", "Thailand" },
+  { "525", "Singapore" },
+  { "528", "Brunei Darussalam" },
+  { "530", "New Zealand" },
+  { "542", "Fiji" },
+  { "546", "New Caledonia" },
+  { "547", "French Polynesia" },
+  { "602", "Egypt" },
+  { "603", "Algeria" },
+  { "604", "Morocco" },
+  { "605", "Tunisia" },
+  { "608", "Senegal" },
+  { "611", "Guinea" },
+  { "612", "Cote d'Ivoire" },
+  { "615", "Togo" },
+  { "617", "Mauritius" },
+  { "618", "Liberia" },
+  { "620", "Ghana" },
+  { "624", "Cameroon" },
+  { "625", "Cape Verde" },
+  { "633", "Seychelles" },
+  { "634", "Mozambique" },
+  { "634", "Sudan" },
+  { "635", "Rwanda" },
+  { "636", "Ethiopia" },
+  { "640", "Tanzania" },
+  { "641", "Uganda" },
+  { "645", "Zambia" },
+  { "646", "Madagascar" },
+  { "647", "Reunion" },
+  { "648", "Zimbabwe" },
+  { "649", "Namibia" },
+  { "650", "Malawi" },
+  { "651", "Lesotho" },
+  { "652", "Botswana" },
+  { "655", "South Africa" },
+  { "730", "Chile" },
+  { "734", "Venezuela" },
+
+  { "undefined", "unknown" }
+};
 
 GSM_Network GSM_Networks[] =
 {
@@ -259,24 +382,50 @@ GSM_Network GSM_Networks[] =
   { "undefined", "unknown" }
 };
 
+char *GSM_GetNetworkName(char *NetworkCode)
+{
 
+  int index=0;
 
-char *GSM_GetNetworkName(char *NetworkCode) {
+  while ( strcmp(GSM_Networks[index].Code, NetworkCode) &&
+          strcmp(GSM_Networks[index].Code, "undefined") )
+    index++;
 
-int index=0;
-
-while (strcmp(GSM_Networks[index].Code, NetworkCode) && strcmp(GSM_Networks[index].Code, "undefined"))
-	index++;
-
-	return GSM_Networks[index].Name;
+  return GSM_Networks[index].Name;
 }
 
-char *GSM_GetNetworkCode(char *NetworkName) {
+char *GSM_GetNetworkCode(char *NetworkName)
+{
 
-int index=0;
+  int index=0;
 
-while (strcmp(GSM_Networks[index].Name, NetworkName) && strcmp(GSM_Networks[index].Code, "undefined"))
-	index++;
+  while ( strcmp(GSM_Networks[index].Name, NetworkName) &&
+          strcmp(GSM_Networks[index].Code, "undefined") )
+    index++;
 
-	return GSM_Networks[index].Code;
+  return GSM_Networks[index].Code;
+}
+
+char *GSM_GetCountryName(char *CountryCode)
+{
+
+  int index=0;
+
+  while ( strncmp(GSM_Countries[index].Code, CountryCode, 3) &&
+          strcmp(GSM_Countries[index].Code, "undefined") )
+    index++;
+
+  return GSM_Countries[index].Name;
+}
+
+char *GSM_GetCountryCode(char *CountryName)
+{
+
+  int index=0;
+
+  while ( strcmp(GSM_Countries[index].Name, CountryName) &&
+          strcmp(GSM_Countries[index].Code, "undefined") )
+    index++;
+
+  return GSM_Countries[index].Code;
 }
