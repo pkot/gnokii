@@ -137,6 +137,8 @@ int PortFD; /* Filedescriptor of the mobile phone's device */
 
 char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
 
+bool IRMode = false; /* for gnokiis ir-mode */
+
 int BufferCount;
 
 u8 MessageBuffer[FB61_MAX_RECEIVE_LENGTH];
@@ -295,9 +297,6 @@ int FB61_GetMemoryType(GSM_MemoryType memory_type)
    return (result);
 }
 
-
-
-
 /* This function is used to get storage status from the phone. It currently
    supports two different memory areas - internal and SIM. */
 
@@ -329,7 +328,7 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
   return (GE_NONE);
 }
 
-GSM_Error	FB61_GetCalendarNote(int location)
+GSM_Error FB61_GetCalendarNote(int location)
 {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x66, 0x00, 0x01};
@@ -341,6 +340,153 @@ GSM_Error	FB61_GetCalendarNote(int location)
   return (GE_NONE);
 }
 
+void FB61_InitIR(void)
+{
+  int i;
+  unsigned char init_char     = FB61_SYNC_BYTE;
+  unsigned char end_init_char = FB61_IR_END_INIT_BYTE;
+  
+  for ( i = 0; i < 32; i++ )
+    write (PortFD, &init_char, 1);
+
+  write (PortFD, &end_init_char, 1);
+  usleep(100000);
+}
+
+bool FB61_InitIR115200(void)
+{
+  u8 connect_seq[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02, 0x01};
+
+  bool ret         = true;
+  u8 nr_read       = 0;
+  u8 in_buffer[255];
+  struct timeval timeout;
+  fd_set ready;
+  int no_timeout   = 0;
+  int i;
+  int done         = 0;
+
+  /* send the connection sequence to phone */
+  FB61_TX_SendMessage(8, 0x02, connect_seq);
+
+  /* Wait for 1 sec. */
+  timeout.tv_sec  = 1;
+  timeout.tv_usec = 0;
+  
+  do {
+    FD_ZERO(&ready);
+    FD_SET(PortFD, &ready);
+    no_timeout = select(PortFD + 1, &ready, NULL, NULL, &timeout);
+    if ( FD_ISSET(PortFD, &ready) ) {
+      nr_read = read(PortFD, in_buffer, 1);
+      if ( nr_read >= 1 ) {
+	for (i=0; i < nr_read; i++) {
+	  if ( in_buffer[i] == FB61_IR_FRAME_ID ) {
+	    done = 1;
+	    ret = true;
+	    break;
+	  }
+	}
+      } else {
+	done = 1;
+	ret = false;
+      }
+    }
+
+    if ( ! no_timeout ) {
+
+#ifdef DEBUG
+      printf ("Timeout in IR-mode\n");
+#endif DEBUG
+
+      done = 1;
+      ret = false;
+    }
+  } while ( ! done );
+  
+  return(ret);
+}
+
+/* This function is used to open the IR connection with the phone */
+
+bool FB61_OpenIR(void)
+{
+  bool ret = false;
+  struct termios new_termios;
+  struct sigaction sig_io;
+  u8 i = 0;
+  
+  /* Open device. */
+  
+  PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
+  
+  if (PortFD < 0) {
+    perror(_("Couldn't open FB61 infrared device: "));
+    return (false);
+  }
+  
+  /* Set up and install handler before enabling async IO on port. */
+  
+  sig_io.sa_handler = FB61_SigHandler;
+  sig_io.sa_flags = 0;
+  sigaction (SIGIO, &sig_io, NULL);
+  
+  /* Allow process/thread to receive SIGIO */
+  
+  fcntl(PortFD, F_SETOWN, getpid());
+  
+  /* Make filedescriptor asynchronous. */
+
+  fcntl(PortFD, F_SETFL, FASYNC);
+  
+  /* Save current port attributes so they can be restored on exit. */
+  
+  tcgetattr(PortFD, &OldTermios);
+  
+  /* Set port settings for canonical input processing */
+  
+  new_termios.c_cflag = FB61_IR_INIT_SPEED | CS8 | CLOCAL | CREAD;
+  new_termios.c_iflag = IGNPAR;
+  new_termios.c_oflag = 0;
+  new_termios.c_lflag = 0;
+  new_termios.c_cc[VMIN] = 1;
+  new_termios.c_cc[VTIME] = 0;
+  
+  tcflush(PortFD, TCIFLUSH);
+  tcsetattr(PortFD, TCSANOW, &new_termios);
+  
+  FB61_InitIR();
+  
+  new_termios.c_cflag = FB61_BAUDRATE | CS8 | CLOCAL | CREAD;
+  tcflush(PortFD, TCIFLUSH);
+  tcsetattr(PortFD, TCSANOW, &new_termios);
+  
+  ret = FB61_InitIR115200();
+
+  if ( ! ret ) {
+    for ( i = 0; i < 4 ; i++) {
+      usleep (500000);
+      
+      new_termios.c_cflag = FB61_IR_INIT_SPEED | CS8 | CLOCAL | CREAD;
+      tcflush(PortFD, TCIFLUSH);
+      tcsetattr(PortFD, TCSANOW, &new_termios);
+      
+      FB61_InitIR();
+      
+      new_termios.c_cflag = FB61_BAUDRATE | CS8 | CLOCAL | CREAD;
+      tcflush(PortFD, TCIFLUSH);
+      tcsetattr(PortFD, TCSANOW, &new_termios);
+      
+      ret = FB61_InitIR115200();
+      if ( ret ) {
+	break;
+      }
+    }
+  }
+  
+  return (ret);
+}
+
 /* This is the main loop for the FB61 functions. When FB61_Initialise is
    called a thread is created to run this loop. This loop is exited when the
    application calls the FB61_Terminate function. */
@@ -348,7 +494,7 @@ GSM_Error	FB61_GetCalendarNote(int location)
 void FB61_ThreadLoop(void)
 {
 
-  unsigned char init_char[] = {0x55};
+  unsigned char init_char = 0x55;
   unsigned char connect1[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02, 0x01};
   unsigned char connect2[] = {FB61_FRAME_HEADER, 0x20, 0x02, 0x01};
   unsigned char connect3[] = {FB61_FRAME_HEADER, 0x0d, 0x01, 0x00, 0x02, 0x01};
@@ -374,20 +520,43 @@ void FB61_ThreadLoop(void)
 
   CurrentPhonebookEntry = NULL;  
 
-  /* Try to open serial port, if we fail we sit here and don't proceed to the
-     main loop. */
+  /* If the user wants the infrared communication, we just define IRMode
+     to be true here. */
 
-  if (FB61_OpenSerial() != true) {
-    FB61_LinkOK = false;
+#ifdef INFRARED
+  IRMode = true;
+#endif INFRARED
 
-    /* Fail so sit here till calling code works out there is a problem. */
+  if ( IRMode ) {
 
-    while (!RequestTerminate)
-      usleep (100000);
+#ifdef DEBUG
+    printf ("Starting IR mode...!\n");
+#endif DEBUG
 
-    return;
+    if (FB61_OpenIR() != true) {
+      FB61_LinkOK = false;
+      while (!RequestTerminate)
+	usleep (100000);
+      return;
+    }
+
+  } else {
+
+    /* Try to open serial port, if we fail we sit here and don't proceed to the
+       main loop. */
+   
+    if (FB61_OpenSerial() != true) {
+      FB61_LinkOK = false;
+      
+      /* Fail so sit here till calling code works out there is a problem. */
+      
+      while (!RequestTerminate)
+	usleep (100000);
+      
+      return;
+    }
   }
-	
+  
   /* Initialise link with phone or what have you */
 
   /* Send init string to phone, this is a bunch of 0x55 characters. Timing is
@@ -395,7 +564,7 @@ void FB61_ThreadLoop(void)
 
   for (count = 0; count < 250; count ++) {
     usleep(100);
-    write(PortFD, init_char, 1);
+    write(PortFD, &init_char, 1);
   }
 
   FB61_TX_SendStatusRequest();
@@ -543,9 +712,10 @@ int PackSevenBitsToEight(unsigned char *String, unsigned char* Buffer)
 GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level)
 {
 
-		/* FIXME - these values are from 3810 code, may be incorrect.
-           Map from values returned in status packet to the
-		   the values returned by the AT+CSQ command */
+  /* FIXME - these values are from 3810 code, may be incorrect.  Map from
+     values returned in status packet to the the values returned by the AT+CSQ
+     command. */
+
   float	csq_map[5] = {0, 8, 16, 24, 31};
   int timeout=10;
   int rf_level;
@@ -566,32 +736,30 @@ GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level)
   /* Make copy in case it changes. */
   rf_level = CurrentRFLevel;
 
-  if (rf_level == -1) {
+  if (rf_level == -1)
     return (GE_NOLINK);
-  }
- 
+
   /* Now convert between the different units we support. */
 
   /* Arbitrary units. */
   if (*units == GRF_Arbitrary) {
-	*level = rf_level;
-	return (GE_NONE);
+    *level = rf_level;
+    return (GE_NONE);
   }
 
   /* CSQ units. */
   if (*units == GRF_CSQ) {
-	if (rf_level <=4) {
-	 *level = csq_map[rf_level];
-	}
-	else {
-     *level = 99;	/* Unknown/undefined */
-    }
-   return (GE_NONE);
+
+    if (rf_level <=4)
+      *level = csq_map[rf_level];
+    else
+      *level = 99; /* Unknown/undefined */
+
+    return (GE_NONE);
   }
 
   /* Unit type is one we don't handle so return error */
   return (GE_INTERNALERROR);
-
 }
 
 GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
@@ -618,13 +786,13 @@ GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 
   if (batt_level != -1) {
 
-		/* Only units we handle at present are GBU_Arbitrary */
-	if (*units == GBU_Arbitrary) {
-		*level = batt_level;
-		return (GE_NONE);
-	}
+    /* Only units we handle at present are GBU_Arbitrary */
+    if (*units == GBU_Arbitrary) {
+      *level = batt_level;
+      return (GE_NONE);
+    }
 
-	return (GE_INTERNALERROR);
+    return (GE_INTERNALERROR);
   }
   else
     return (GE_NOLINK);
@@ -702,8 +870,6 @@ GSM_Error FB61_GetIncomingCallNr(char *Number) {
     return GE_BUSY;
 }
 
-/* FIXME: sometime it sends a wrong pin (at least for my 5 digits pin). */
-
 GSM_Error FB61_EnterPin(char *pin)
 {
 
@@ -732,7 +898,7 @@ GSM_Error FB61_EnterPin(char *pin)
   return (PINError);
 }
 
-GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time)
+GSM_Error FB61_GetDateTime(GSM_DateTime *date_time)
 {
 
   unsigned char clock_req[] = {FB61_FRAME_HEADER, 0x62, 0x01};
@@ -2350,15 +2516,26 @@ void FB61_RX_StateMachine(char rx_byte) {
 
   case FB61_RX_Sync:
 
-    if (rx_byte == FB61_FRAME_ID) {
-      BufferCount = 0;
-      RX_State = FB61_RX_GetDestination;
-
-      /* Initialize checksums. */
-      checksum[0] = FB61_FRAME_ID;
-      checksum[1] = 0;
+    if (IRMode) {
+      if (rx_byte == FB61_IR_FRAME_ID) {
+	BufferCount = 0;
+	RX_State = FB61_RX_GetDestination;
+	
+	/* Initialize checksums. */
+	checksum[0] = FB61_IR_FRAME_ID;
+	checksum[1] = 0;
+      }
+    } else {
+      if (rx_byte == FB61_FRAME_ID) {
+	BufferCount = 0;
+	RX_State = FB61_RX_GetDestination;
+	
+	/* Initialize checksums. */
+	checksum[0] = FB61_FRAME_ID;
+	checksum[1] = 0;
+      }
     }
-
+    
     break;
 
   case FB61_RX_GetDestination:
@@ -2490,7 +2667,10 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 
   /* Now construct the message header. */
 
-  out_buffer[current++] = FB61_FRAME_ID; /* Start of message indicator */
+  if (IRMode)
+    out_buffer[current++] = FB61_IR_FRAME_ID; /* Start of the IR frame indicator */
+  else
+    out_buffer[current++] = FB61_FRAME_ID;    /* Start of the frame indicator */
 
   out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
   out_buffer[current++] = FB61_DEVICE_PC;    /* Source */
@@ -2565,7 +2745,10 @@ int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
   /* Now construct the Ack header. */
 
-  out_buffer[current++] = FB61_FRAME_ID; /* Start of message indicator */
+  if (IRMode)
+    out_buffer[current++] = FB61_IR_FRAME_ID; /* Start of the IR frame indicator */
+  else
+    out_buffer[current++] = FB61_FRAME_ID;    /* Start of the frame indicator */
 
   out_buffer[current++] = FB61_DEVICE_PHONE; /* Destination */
   out_buffer[current++] = FB61_DEVICE_PC;    /* Source */

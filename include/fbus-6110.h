@@ -62,8 +62,12 @@
 #define FB61_MAX_REVISION_LENGTH (20)
 #define FB61_MAX_MODEL_LENGTH    (8)
 
+/* This byte is used to synchronize FBUS channel over cable or IR. */
+
+#define FB61_SYNC_BYTE 0x55
+
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
-   6110 phones */
+   6110 phones. */
 
 #define FB61_FRAME_ID 0x1e
 
@@ -86,15 +90,33 @@
 /* Acknowledge of the received frame. */
 #define FB61_FRTYPE_ACK 0x7f
 
-	/* Global variables */
+/* Macros for infrared communication */
+
+/* This byte is at the beginning of all GSM Frames sent over IR to Nokia 6110
+   phones. */
+
+#define FB61_IR_FRAME_ID 0x1c
+
+/* Infrared communication starts on 9600 bps. */
+
+#define FB61_IR_INIT_SPEED (B9600)
+
+/* This byte is send after all FB61_SYNC_BYTE bytes. */
+
+#define FB61_IR_END_INIT_BYTE  0xc1
+
+/* Global variables */
+
 extern bool            FB61_LinkOK;
 extern GSM_Functions   FB61_Functions;
 extern GSM_Information FB61_Information;
 
 
-	/* Prototypes for the functions designed to be used externally. */
+/* Prototypes for the functions designed to be used externally. */
+
 GSM_Error FB61_Initialise(char *port_device, bool enable_monitoring);
 bool      FB61_OpenSerial(void);
+bool      FB61_Open_Ir_Serial(void);
 void      FB61_Terminate(void);
 void      FB61_ThreadLoop(void);
 void      FB61_SigHandler(int status);
