@@ -15,6 +15,7 @@
       be sure to have all things defined (currently Linux and MSVC6)
                                                          (Pawel Kot)
     o do the same for Solaris                            (Pawel Kot)
+    o don't modify const variable                        (Pawel Kot)
  * general updates
     o Bluetooth support for FBUS mode in nk6510 series   (Pawel Kot,
                                                     Marcel Holtmann)

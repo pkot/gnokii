@@ -450,7 +450,7 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine 
 
 	while (n > 0) {
 		bs = (state->config.serial_write_usleep < 0) ? n : 1;
-		got = write(fd, buf, bs);
+		got = write(fd, buf + r, bs);
 		if (got == 0) {
 			dprintf("Serial write: oops, zero byte has written!\n");
 		}
@@ -466,7 +466,6 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine 
 			continue;
 		}
 
-		buf += got;
 		n -= got;
 		r += got;
 		if (state->config.serial_write_usleep > 0)
