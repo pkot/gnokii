@@ -39,7 +39,13 @@
 
 #ifndef	HAVE_TIMEOPS
 
-/* The following code is borrowed from glibc */
+#undef timerisset
+#undef timerclear
+#undef timercmp
+#undef timeradd
+#undef timersub
+
+/* The following code is borrowed from glibc, please don't reindent it */
 
 /* Convenience macros for operations on timevals.
    NOTE: `timercmp' does not work for >= or <=.  */

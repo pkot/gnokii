@@ -238,9 +238,9 @@ AC_TRY_LINK([#include <time.h>],
         [AC_MSG_RESULT(no)])
 
 dnl The following is taken from inn sources
-AC_MSG_CHECKING(for timersub)
+AC_MSG_CHECKING(for timer operations)
 AC_TRY_LINK([#include <sys/time.h>],
-        [struct timeval tv; timersub(&tv, &tv, &tv)],
+        [struct timeval tv; timerisset(&tv); timerclear(&tv); timercmp(&tv, &tv, <); timeradd(&tv, &tv, &tv); timersub(&tv, &tv, &tv); ],
         [AC_DEFINE(HAVE_TIMEOPS)
          AC_MSG_RESULT(yes)],
         [AC_MSG_RESULT(no)])
