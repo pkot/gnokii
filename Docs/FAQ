@@ -7,24 +7,25 @@ $Id$
 -------------------------------------------------------------------------------
 Q. What is gnokii?
 
-A. It is a name of project. The aim of it is to develop tools and drivers
-   for Nokia mobile phones. Of course, I think in this moment about really
-   different tools - for example, modem drivers, console tools, etc.
-   All created here software is released under the GNU
-   General Public License. Please see COPYING file for more details on
-   license/copying issues, the lack of warranty and where to send a postcard
-   if you like gnokii :-). Anyway, our software works on many software
-   (Linux, Free BSD, etc.) and hardware (Intel, etc.) platforms...
+A. It is the name of a project that aims to develop tools and drivers for
+   Nokia mobile phones. These tools include modem drivers, console tools,
+   GUI applications etc. All software that forms part of the project is
+   released under the GNU General Public License.  Please see the COPYING
+   file for more details on license/copying issues, the lack of warranty
+   and where to send a postcard if you like gnokii :-)  Gnokii is designed
+   to work on a variety of operating systems (Linux, FreeBSD, etc.) and
+   hardware platforms (PPC, Intel, etc.)
 
 -------------------------------------------------------------------------------
 Q. How do you pronounce gnokii?
 
-A. You can pronounce gnokii as "gnooki" or "gnocki" at your option :-)
+A. You can pronounce gnokii as "gnooki" or "gnocki" as you prefer :-)
 
 -------------------------------------------------------------------------------
 Q. What models are supported?
 
-A. Currently supported phone models are (if not marked, it's a Nokia phone):
+A. Currently the supported phones are (All Nokia models unless
+   noted otherwise):
          + 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330|3360|3410|8210|8290
          + 5160|6160|6185
          + 7110|6210|6250|7190
@@ -33,8 +34,9 @@ A. Currently supported phone models are (if not marked, it's a Nokia phone):
          + AT mode compatible phones (namely Nokia 62X0, Nokia 7110,
            Nokia 8210, Nokia 6310, Nokia 6510, Ericsson T39, Sony-Ericsson
            T68i, Siemens S25 are known to work)
-   Support for these models is obsoleted. If noone is interested in
-   development for them, the support will be dropped:
+
+   The following models are no longer being actively supported by the
+   core team and the underlying code may have undergone some bit rot:
          + 640
          + 3110|3810|8110|8110i
          + 2110|2140|6080
@@ -56,64 +58,70 @@ Q. Does mgnokiidev need to be suid root?
 A. Yes. gnokiid needs to create a symbolic link in the /dev directory.
    mgnokiidev is the program which does this and hence it must be suid
    root so it can write to the directory. mgnokiidev is executable only
-   for gnokii group members (and root) so it presents minimal security
-   problems. Be sure that you use not older then 0.3.5 gnokii version if
-   you want to install mkgnokiidev suid root and give the access for
-   execution for not trusted people. The former versions had security
+   for gnokii group members (and root) so it presents a minimal security
+   risk.
+   
+   Be sure that you don't use a version of gnokii older than 0.3.5
+   if you want to install mkgnokiidev suid root and give the access for
+   execution for untrusted users. Earlier versions had security
    problems and allowed people to write to an arbitrary file.
 
 -------------------------------------------------------------------------------
 Q. Should any other gnokii binary be installed suid root?
 
-A. No. There's no need for it. gnokii isn't intended for setuid/setgid
-   operation. If you put the setuid/setgid bit on, you takes a huge security
-   risk. All you need it read/write permission for the device you are using
+A. No. There is no need. gnokii isn't intended for setuid/setgid operation.
+   If you set the setuid/setgid bit, you're taking a huge security
+   risk. All you need is read/write permission for the device you are using
    for connection (port option in the config file). You can safely do it
    using groups management.
 
 -------------------------------------------------------------------------------
 Q: Can I use IrDA with 6210/7110 and gnokii?
 
-A: Yes. Just put:
-connection = irda
-   line into your config file.
+A: Yes. Just put this line
+
+        connection = irda
+
+   into your config file.
 
 -------------------------------------------------------------------------------
 Q. Can I get a copy of the protocol for the <insert phone model here>?
 
 A. We don't have any formal documentation of the protocols in use.
-   The best source we can give you now is all our knowlegde assembled
-   together by Nagy Balazs and Marcin Wiacek. You can find result of their
-   work in Docs/protocol/ subdirectory in gnokii sources. Note that not all
-   known protocol is already implemented in gnokii.
+
+   Since we get this request once a week on average we'll repeat the answer
+   here... :)
+
+   We don't have any formal documentation of the protocols in use.
+
+   The best source we can offer is the knowledge assembled by Nagy Balazs
+   and Marcin Wiacek. You can find result of their work in Docs/protocol/
+   subdirectory in gnokii sources. Note that not all known protocol functions
+   are implemented in gnokii.
 
    Alternatively there are some web sites that have collated some
    information:
-   
-     Nokia 3110/3810/8110
-       http://www.tec.puv.fi/~s98114/GSM/FBUS.html  
    
      Nokia 5110/6110
        http://www.gadgets.demon.co.uk/nokia61xx/protocol.html
 
      Marcin Wiacek's pages are also useful;
-       http://www.fkn.pl/marcinw/
+       http://www.mwiacek.com
 
      Nagy Balazs' pages:
-       http://www.lsc.hu/dl/
-
-     The MBUS / FBUS pages 
-       http://www.flosys.com/tdma/
+       {Seem to have dissapeared, anyone have a new link ? - Hugh}
 
 -------------------------------------------------------------------------------
-Q. Does gnokii work under Sun's Solaris?
+Q. Does gnokii work under Solaris?
 
-A. Generally yes, but in fact it depends on hardware -- your serial port
+A. In general yes, but it depends on hardware -- your serial port
    must support at least 115200 baud rate. Sun Enterprise 250 machine is known
-   to work with gnokii.
+   to work with gnokii.  Earlier Sparc machines (IPC, IPX, Classic) probably
+   won't work due to hardware limitations.
 
 -------------------------------------------------------------------------------
-Q. Could somebody tell me the key for on, off and select menu in
+Q. Could you tell me the key for on, off and select menu in
+
     gnokii --keysequence function?
 
 A. M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
@@ -123,14 +131,13 @@ A. M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
 Q. I get 'undefined symbol: GSM_ELogHandler' when runnig gnokii. What's
    wrong?
 
-A. gnokii didn't install correctly. You had installed gnokii previously and you
-   either forget to run 'make install' or the installation didn't overwrite the
-   old library. Be sure to remove the old libgnokii.so and then rerun 'make
-   install'.
+A. gnokii didn't install correctly. You probably had gnokii installed already
+   and you either forgot to run 'make install' or the installation didn't
+   overwrite the old library. Remove the old libgnokii.so and then rerun
+   'make install'.
 
 -------------------------------------------------------------------------------
-Q. I got problems during the compilation with vcal.lx/vcal.c. What should I
-   do?
+Q. I had problems during compilation with vcal.lx/vcal.c. What should I do?
 
 A. Install flex. It should be available in every Linux distribution as well
    as in CygWin.
@@ -139,15 +146,15 @@ A. Install flex. It should be available in every Linux distribution as well
 Q. Which cable for the Nokia phones should I use?
 
 A. For Nokia 61X0/51X0 models you should use DAU9P cable. Nokia 61X0 models are
-   also capable to make an infrared connection.
+   also able to use an infrared connection.
 
    For Nokia 7110/62X0/6310 models you need either DAU9P or DLR3P cable. With
    DLR3P cable you can use AT commands to talk to the phone. These phones are
-   able to make an irda connection.
+   also able to use an irda connection.
 
    Most Nokia phones that have no visible connector have one under the battery.
-   See our cables page (http://www.gnokii.org/cables.shtml) to find the sites
-   with more detailes, also the places where to buy the cable.
+   See our cables page (http://www.gnokii.org/cables.shtml) to find sites
+   with more details and some suggested places to buy the cable.
 
    Most of the modern phones have the irda connector (3XXX series models don't
    have them).
@@ -156,8 +163,8 @@ A. For Nokia 61X0/51X0 models you should use DAU9P cable. Nokia 61X0 models are
 Q. I get 'Sorry, phone has not yet been converted to new style.
    Phone.Functions == NULL!' message. What's wrong?
 
-A. You use ancient version of gnokii! Upgrade! See our downloads page for the
-   detailes (http://www.gnokii.org/downloads.shtml).
+A. You're using an ancient version of gnokii! Upgrade! See our downloads
+   page for the details (http://www.gnokii.org/downloads.shtml).
 
 -------------------------------------------------------------------------------
 Q. I get 'ERROR: Modem DCD is down and global/require_dcd parameter is set!'
@@ -166,7 +173,7 @@ Q. I get 'ERROR: Modem DCD is down and global/require_dcd parameter is set!'
 A. Either comment out require_dcd variable in the config file or set it to 0
 
 -------------------------------------------------------------------------------
-Q. I can't compile gnokii. It failes with po directory building.
+Q. I can't compile gnokii. It fails when building the po directory.
 
 A. You need to run gettextize. See autogen.sh and INSTALL files. If you don't
    have it on your system, grab the -current tarball which should have all
@@ -174,35 +181,37 @@ A. You need to run gettextize. See autogen.sh and INSTALL files. If you don't
 
 -------------------------------------------------------------------------------
 Q. My phone is not mentioned as supported by gnokii, but it seems that it is
-   similiar to the one of the mentioned in the supported phones list? What
+   similar to the one of the mentioned in the supported phones list? What
    should I do to check this out?
 
 A. It is quite simple. If you use AT compatible phone you can just use
    'model = AT' in the config file. If you have Nokia and you would like to
    enable FBUS mode (it has more facilities then AT mode), there are few
-   things you should do. Let's say, you want to check the support for Nokia
-   6211, which should be compatible with Nokia 6210. First, let's find the
+   things you should do.
+   
+   For example, let's say you want to check the support for Nokia
+   6211, which should be compatible with Nokia 6210. First, find the
    correct driver. The drivers are located in the common/phones/ directory
    within the gnokii sources:
 
 pkot@bzzzt:~/gnokii/common/phones$ grep -n 6210 *
-nk7110.c:148:           "7110|6210|6250|7190",      /* Supported models */
-nk7110.c:958:           /* This is ugly hack. But the picture message format in 6210
+nk7110.c:148:      "7110|6210|6250|7190",      /* Supported models */
+nk7110.c:958:   /* This is ugly hack. But the picture message format in 6210
 nk7110.c:1197:  /* Nokia 6210 and family does not show not "fixed" messages from the
 nk7110.c:1610:  /* 6210/7110 needs to seek the first free pos to inhabit with next note */
 
-   Interesting is the line 148. We define GSM_Phone structure there. Just
-   add new model there, so the line will contain:
+   Line 148 in this case is the one you want as it is where we define
+   the GSM_Phone structure. Just add new model, so the line will contain:
 
 7110|6210|6250|7190|6211
 
-   Once this is done, look into the common/misc.c file. We have there large
-   phone capabilities table. Find the one for the phone that is similiar to
-   your. In our case this is 6210:
+   Once this is done, look in the file common/misc.c.  It contains a large
+   phone capabilities table. Find the one for the phone that is similar to
+   yours. In our case this is 6210:
 
 {"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS }
 
-   We will replace two first fields as for our phone. The second fiels is
+   We will replace two first fields as for our phone. The second field is
    the phone model identifier. In most of the phones to get this type on
    your phone keyboard the following sequence: *#0000#. If it doesn't work
    search the Internet for the information. Let's say in our example that
