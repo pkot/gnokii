@@ -35,6 +35,8 @@
     o add optional parameter to disable the retransmission policy;
       it is disabled by defaults due to the breakage reports caused
       probably by this policy                           (Pawel Kot)
+    o add new_message_store field of gn_memory_type type to
+      gn_sms_status                                  (David Vrabel)
  * 6100 driver updates
     o add Nokia 8850 support                       (Denis Pitzalis)
  * build system updates
@@ -45,6 +47,13 @@
     o in the logo manager, in the operator drop down list, notice
       the country origin for each operator (to let choose the right
       operator in case of the names conflict)           (Pawel Kot)
+ * AT driver updates
+    o use all three parameters to AT+CMPS command to set message
+      store of all operations kind (we used just the finst one so
+      far)                                           (David Vrabel)
+ * smsd updates
+    o make configurable where to look for the new messages
+                                                     (David Vrabel)
 
 0.6.4
 =====

@@ -22,8 +22,9 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2001 Manfred Jonsson <manfred.jonsson@gmx.de>
-  Copyright (C) 2002 Pawel Kot <pkot@linuxnews.pl>
+  Copyright (C) 2001 Manfred Jonsson
+  Copyright (C) 2002 Pawel Kot
+  Copyright (C) 2005 David Vrabel
 
   This file provides functions specific to generic AT command compatible
   phones. See README for more details on supported mobile phones.
@@ -519,19 +520,36 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
 	return ret;
 }
 
+/* GSM 07.05 section 3.2.3 specified the +CPMS (Preferred Message Store) AT
+ * command as taking 3 memory parameters <mem1>, <mem2> and <mem3>.  Each of
+ * these stores is used for different purposes:
+ *   <mem1> - memory from which messages are read and deleted
+ *   <mem2> - memory to which writing and sending operations are made
+ *   <mem3> - memory to which received SMs are preferred to be stored
+ *
+ * To avoid confusing the user by changing <mem3> we set it to the current
+ * setting.
+ */
 gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_data data;
+	gn_sms_status sms_status;
 	char req[32];
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->smsmemorytype) {
-		sprintf(req, "AT+CPMS=\"%s\"\r", memorynames[mt]);
-		ret = sm_message_send(13, GN_OP_Init, req, state);
+		gn_data_clear(&data);
+		data.sms_status = &sms_status;
+		ret = AT_GetSMSStatus(&data, state);
+		if (ret != GN_ERR_NONE)
+			return ret;
+
+		sprintf(req, "AT+CPMS=\"%s\",\"%s\",\"%s\"\r", memorynames[mt], memorynames[mt],
+			memorynames[data.sms_status->new_message_store]);
+		ret = sm_message_send(23, GN_OP_Init, req, state);
 		if (ret != GN_ERR_NONE)
 			return GN_ERR_NOTREADY;
-		gn_data_clear(&data);
 		ret = sm_block_no_retry(GN_OP_Init, &data, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->smsmemorytype = mt;
@@ -830,7 +848,13 @@ static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->sms_status) return GN_ERR_INTERNALERROR;
 
-	ret = sm_message_send(13, GN_OP_GetSMSStatus, "AT+CPMS=\"SM\"\r", state);
+        if (data->memory_status) {
+                ret = AT_SetSMSMemoryType(data->memory_status->memory_type,  state);
+                if (ret != GN_ERR_NONE)
+                        return ret;
+        }
+
+	ret = sm_message_send(9, GN_OP_GetSMSStatus, "AT+CPMS?\r", state);
 	if (ret != GN_ERR_NONE)
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_GetSMSStatus, data, state);
@@ -1317,6 +1341,8 @@ static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int le
 {
 	at_line_buffer buf;
 	gn_error error;
+	char store[3] = "XX";
+	int i;
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
@@ -1324,12 +1350,21 @@ static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int le
 	buf.length = length;
 	splitlines(&buf);
 
-	if (sscanf(buf.line2, "+CPMS: %d", &data->sms_status->number) != 1)
+	if (sscanf(buf.line2, "+CPMS: \"%*c%*c\",%d,%*d,\"%*c%*c\",%*d,%*d,\"%c%c\",%*d,%*d",
+		   &data->sms_status->number, &store[0], &store[1]) != 3)
 		return GN_ERR_FAILED;
 
 	data->sms_status->unread = 0;
 	data->sms_status->changed = 0;
 	data->sms_status->folders_count = 0;
+
+	data->sms_status->new_message_store = GN_MT_ME;
+	for (i = 0; i < sizeof(memorynames)/sizeof(char *); i++) {
+		if (strcmp(store, memorynames[i]) == 0) {
+			data->sms_status->new_message_store = i;
+			break;
+		}
+	}
 
 	return GN_ERR_NONE;
 }

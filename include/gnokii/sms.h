@@ -75,6 +75,9 @@ typedef struct {
 	unsigned int changed;
 	/* Number of Folders we get from GetFolders */
 	unsigned int folders_count;
+	/* Message store used for new received messages (this is used
+	 * internally by AT_SetSMSMemoryType() in common/phones/atgen.c). */
+	gn_memory_type new_message_store;
 } gn_sms_status;
 
 
