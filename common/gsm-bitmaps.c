@@ -63,42 +63,48 @@ void GSM_ClearBitmap(GSM_Bitmap *bmp)
 
 void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target)
 {
-  GSM_Bitmap new;
-  int x,y;
+  GSM_Bitmap backup;
+  int x,y,copywidth,copyheight;
+
+  /* Copy into the backup */
+  memcpy(&backup,bitmap,sizeof(GSM_Bitmap));
       
   if (target==GSM_StartupLogo) {
-    new.width=84;
-    new.height=48;
+    bitmap->width=84;
+    bitmap->height=48;
   }
   if (target==GSM_OperatorLogo || target==GSM_CallerLogo) {
-    new.width=72;
-    new.height=14;
+    bitmap->width=72;
+    bitmap->height=14;
   }
   if (target==GSM_PictureImage) {
-    new.width=72;
-    new.height=28;
+    bitmap->width=72;
+    bitmap->height=28;
   }
-  new.type=target;
-  new.size=new.width*new.height/8;
-  
-#ifdef DEBUG
-  if (bitmap->width>new.width)
-    fprintf(stdout,_("We lost some part of image - it's cut (width from %i to %i) !\n"),backup.width,width);
-#endif /* DEBUG */
+  bitmap->type=target;
+  bitmap->size=bitmap->width*bitmap->height/8;
 
+  if (backup.width>bitmap->width) {
+    copywidth=bitmap->width;
 #ifdef DEBUG
-  if (bitmap->height<height)
-    fprintf(stdout,_("We lost some part of image - it's cut (height from %i to %i) !\n"),backup.height,height);
+    fprintf(stdout,_("We lost some part of image - it's cut (width from %i to %i) !\n"),backup.width,bitmap->width);
 #endif /* DEBUG */
+  } else copywidth=backup.width;
+
+  if (backup.height>bitmap->height) {
+    copyheight=bitmap->height;
+#ifdef DEBUG
+    fprintf(stdout,_("We lost some part of image - it's cut (height from %i to %i) !\n"),backup.height,bitmap->height);
+#endif /* DEBUG */
+  } else copyheight=backup.height;
   
-  GSM_ClearBitmap(&new);
+
+  GSM_ClearBitmap(bitmap);
   
-  for (y=0;y<new.height;y++) {
-    for (x=0;x<new.width;x++)
-      if (GSM_IsPointBitmap(bitmap,x,y)) GSM_SetPointBitmap(&new,x,y);
+  for (y=0;y<copyheight;y++) {
+    for (x=0;x<copywidth;x++)
+      if (GSM_IsPointBitmap(&backup,x,y)) GSM_SetPointBitmap(bitmap,x,y);
   }
-  
-  memcpy(bitmap,&new,sizeof(GSM_Bitmap));
 }
 
 void GSM_PrintBitmap(GSM_Bitmap *bitmap)

@@ -109,10 +109,22 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 
       if (temp<0) return 0; /* FIXME - what do we do now? */
 
-      /* FIXME - check +++ more thoroughly*/
+      /* This will only check +++ and the beginning of a read */
+      /* But there should be a pause before it anyway */
       
-      if (buffer[0]=='+') pluscount++;
-      else pluscount=0;
+      if (buffer[0]=='+') {
+	pluscount++;
+	if (temp>1) {
+	  if (buffer[1]=='+') pluscount++;
+	  else pluscount=0;
+	  if (temp>2) {
+	    if (buffer[2]=='+') pluscount++;
+	    else pluscount=0;
+	    if (temp>3) pluscount=0;
+	  }
+	}
+      } else pluscount=0;
+      
       if (pluscount==3) {
 	CommandMode=true;
 	ATEM_ModemResult(MR_OK);
@@ -134,6 +146,8 @@ void DP_CallPassup(char c)
 {
   switch (c) {
   case 'D':
+    if (CommandMode==false) ATEM_ModemResult(MR_CARRIER);
+    RLP_SetUserRequest(Conn_Req,true);
     connected=true;
     break;
   case ' ':

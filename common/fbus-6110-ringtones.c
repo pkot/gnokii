@@ -66,6 +66,17 @@ int FB61_OctetAlign(unsigned char *Dest, int CurrentBit)
   return CurrentBit+i;
 }
 
+int FB61_OctetAlignNumber(int CurrentBit)
+{
+  int i=0;
+
+  while((CurrentBit+i)%8) {
+    i++;
+  }
+
+  return CurrentBit+i;
+}
+
 int FB61_BitPack(unsigned char *Dest, int CurrentBit, unsigned char *Source, int Bits)
 {
 

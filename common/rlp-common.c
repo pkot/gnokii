@@ -1196,7 +1196,7 @@ bool RLP_SREJSlot(u8 *x)
 {
   u8 i;
 
-  for (i=VA; i!=VS; i=Incr(i)) if (R[i].State==_srej) {
+  for (i=Incr(VR); i!=VR; i=Incr(i)) if (R[i].State==_srej) {
     *x=i;
     return true;
   }
@@ -1453,23 +1453,6 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
       else
 	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
     }
-    
- 
-      
-      /* This is only used for setting Conn_Req to true. */
-    {
-      static int FIXMEcounter=0;
-
-      FIXMEcounter++;
-      //  printf("FIXMEcounter=%d\n", FIXMEcounter);
-      
-      if (FIXMEcounter==500) {
-	RLP_SetUserRequest(Conn_Req,true);
-  
-      }
-    }
-  
-
     break;
   
     /***** RLP State 2. *****/

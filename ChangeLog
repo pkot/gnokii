@@ -96,3 +96,6 @@
 * Sun 19 Nov 2000 Chris Kemp <ck231@cam.ac.uk>
 - gsm-filetype changes (Marcin)		
 
+* Mon 20 Nov 2000 Chris Kemp <ck231@cam.ac.uk>
+- corrections to GSM_ResizeBitmap, removal of fixme timer, rlp fix.
+
