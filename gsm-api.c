@@ -61,6 +61,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
 
   /* Scan through the models supported by the FB38 code and see if we get a
      match. */
+#ifndef WIN32 /* FB38 not support in WIN32 */
 
   if (strstr(FB38_Information.Models, model) != NULL) {
     found_match = true;
@@ -72,6 +73,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
     GSM_LinkOK = &FB38_LinkOK;
   }
   else
+#endif /* WIN32 */
 
   /* Scan through the models supported by the FB61 code and see if we get a
      match. */
@@ -85,6 +87,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
       GSM_Info = &FB61_Information;
       GSM_LinkOK = &FB61_LinkOK;
     }
+#ifndef WIN32	/* MB21 not supported in win32 */
     else 
 	/* Scan through models supported by the MB21 code... */
     if (strstr(MB21_Information.Models, model) != NULL) {
@@ -96,6 +99,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
       GSM_Info = &MB21_Information;
       GSM_LinkOK = &MB21_LinkOK;
     }
+#endif /* WIN32 */ 
 
   /* If we didn't get a model match, return error code. */
 

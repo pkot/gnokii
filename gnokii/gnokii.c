@@ -21,15 +21,27 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <termios.h>
-#include <fcntl.h>
 #include <signal.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #include <string.h>
-#include <getopt.h>
 #include <time.h>
+
+#ifdef WIN32
+
+  #include <windows.h>
+  #define sleep(x) Sleep((x) * 1000)
+  #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+  #include "win32/getopt.h"
+
+#else
+
+  #include <unistd.h>
+  #include <termios.h>
+  #include <fcntl.h>
+  #include <sys/types.h>
+  #include <sys/time.h>
+  #include <getopt.h>
+
+#endif
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -1066,7 +1078,7 @@ int deletesms(char *argv[])
   return 0;
 }
 
-static volatile bool shutdown = false;
+static volatile bool bshutdown = false;
 
 /* SIGINT signal handler. */
 
@@ -1074,7 +1086,8 @@ static void interrupted(int sig)
 {
 
   signal(sig, SIG_IGN);
-  shutdown = true;
+  bshutdown = true;
+
 }
 
 /* In this mode we get the pin from the keyboard and send it to the mobile
@@ -1083,7 +1096,13 @@ static void interrupted(int sig)
 int enterpin(void)
 {
 
+#ifdef WIN32
+  char pin[20];
+  printf("Enter your PIN: ");
+  gets(pin);
+#else
   char *pin=getpass(_("Enter your PIN: "));
+#endif
 
   fbusinit(false, NULL);
 
@@ -1452,9 +1471,7 @@ int monitormode(void)
   /* Loop here indefinitely - allows you to see messages from GSM code in
      response to unknown messages etc. The loops ends after pressing the
      Ctrl+C. */
-
-  while (!shutdown) {
-
+  while (!bshutdown) {
     if (GSM->GetRFLevel(&rf_units, &rflevel) == GE_NONE)
       fprintf(stdout, _("RFLevel: %d\n"), (int)rflevel);
 
@@ -1763,10 +1780,18 @@ void	readconfig(void)
 	char				*homedir;
 	char				rcfile[200];
 
+#ifdef WIN32
+	homedir = getenv("HOMEDRIVE");
+	strncpy(rcfile, homedir, 200);
+	homedir = getenv("HOMEPATH");
+	strncat(rcfile, homedir, 200);
+	strncat(rcfile, "\\_gnokiirc", 200);
+#else
 	homedir = getenv("HOME");
 
 	strncpy(rcfile, homedir, 200);
 	strncat(rcfile, "/.gnokiirc", 200);
+#endif
 
     if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL )
        if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
@@ -1854,6 +1879,13 @@ int netmonitor(char *Mode)
    API stuff which doesn't warrant a "proper" command line
    function. */
 
+#ifdef WIN32
+
+  void foogle(char *argv[]) {
+  }
+
+#else
+
 int foogle(char *argv[])
 { 
   /* Initialise the code for the GSM interface. */     
@@ -1877,6 +1909,7 @@ int foogle(char *argv[])
 
   return 0;
 }
+#endif
 
 /* pmon allows fbus code to run in a passive state - it doesn't worry about
    whether comms are established with the phone.  A debugging/development

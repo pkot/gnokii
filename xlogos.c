@@ -1,12 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <termios.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/types.h>
-#include <sys/time.h>
 #include <string.h>
+
+#ifndef WIN32
+
+  #include <unistd.h>  /* for usleep */
+  #include <termios.h>
+  #include <sys/time.h>
+
+#else
+
+  #include <windows.h>
+  #include "win32/winserial.h"
+
+  #undef IN
+  #undef OUT
+
+  #define WRITEPHONE(a, b, c) WriteCommBlock(b, c)
+  #define sleep(x) Sleep((x) * 1000)
+  #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+
+#endif
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -29,51 +46,54 @@ extern GSM_Network GSM_Networks[];
 static GdkPixmap *pixmap = NULL;
 
 GtkWidget *FileSelection;
-
+GtkWidget *drawing_area;
 GtkWidget *Combo;
 
 unsigned char *logo;
 
-char		*Model;		/* Model from .gnokiirc file. */
-char		*Port;		/* Serial port from .gnokiirc file */
-char 		*Initlength;	/* Init length from .gnokiirc file */
-char		*Connection;	/* Connection type from .gnokiirc file */
-
-  GtkWidget *drawing_area;
-
-
+char *Model;      /* Model from .gnokiirc file. */
+char *Port;       /* Serial port from .gnokiirc file */
+char *Initlength; /* Init length from .gnokiirc file */
+char *Connection; /* Connection type from .gnokiirc file */
 
 void mycallback()
 {
   printf("Not implemented yet, sorry!\n");
 }
 
-void	readconfig(void)
+void readconfig(void)
 {
-    struct CFG_Header 	*cfg_info;
-	char				*homedir;
-	char				rcfile[200];
+  struct CFG_Header *cfg_info;
+  char *homedir;
+  char rcfile[200];
 
-	homedir = getenv("HOME");
+#ifdef WIN32
 
-	strncpy(rcfile, homedir, 200);
-	strncat(rcfile, "/.gnokiirc", 200);
+  homedir = getenv("HOMEDRIVE");
+  strncpy(rcfile, homedir, 200);
+  homedir = getenv("HOMEPATH");
+  strncat(rcfile, homedir, 200);
+  strncat(rcfile, "\\_gnokiirc", 200);
 
-    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
-		fprintf(stderr, "error opening %s, using default config\n", 
-		  rcfile);
-    }
+#else
 
-    Initlength = CFG_Get(cfg_info, "global", "initlength");
-    if (Initlength == NULL) {
-		Initlength = "default";
-    }
+  homedir = getenv("HOME");
+  strncpy(rcfile, homedir, 200);
+  strncat(rcfile, "/.gnokiirc", 200);
 
-    Model = CFG_Get(cfg_info, "global", "model");
-    Port = CFG_Get(cfg_info, "global", "port");
-    Connection = CFG_Get(cfg_info, "global", "connection");
+#endif
+
+  if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
+    fprintf(stderr, "error opening %s, using default config\n", rcfile);
+
+  Initlength = CFG_Get(cfg_info, "global", "initlength");
+  if (Initlength == NULL)
+    Initlength = "default";
+
+  Model = CFG_Get(cfg_info, "global", "model");
+  Port = CFG_Get(cfg_info, "global", "port");
+  Connection = CFG_Get(cfg_info, "global", "connection");
 }
-
 
 /* fbusinit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
@@ -84,6 +104,9 @@ void fbusinit(bool enable_monitoring)
   GSM_Error error;
   GSM_ConnectionType connection=GCT_Serial;
 
+    if (!strcmp(Connection, "infrared"))
+		connection = GCT_Infrared;
+    
   /* Initialise the code for the GSM interface. */     
 
   error = GSM_Initialise(Model, Port, Initlength, connection,

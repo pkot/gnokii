@@ -22,7 +22,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <termios.h>
 #include <grp.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +29,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifndef WIN32
+
+  #include <termios.h>
+
+#endif
 
 #include "misc.h"
 #include "gsm-common.h"

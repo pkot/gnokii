@@ -25,18 +25,37 @@
 /* System header files */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <termios.h>
-#include <fcntl.h>
-#include <ctype.h>
-#include <signal.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <string.h>
-#include <pthread.h>
-#include <errno.h>
+
+#ifdef WIN32
+
+  #include <windows.h>
+  #include "win32/winserial.h"
+
+  #undef IN
+  #undef OUT
+
+  #define WRITEPHONE(a, b, c) WriteCommBlock(b, c)
+  #define sleep(x) Sleep((x) * 1000)
+  #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+  extern HANDLE hPhone;
+
+#else
+
+  #define WRITEPHONE write
+  #include <stdlib.h>
+  #include <unistd.h>
+  #include <termios.h>
+  #include <fcntl.h>
+  #include <ctype.h>
+  #include <signal.h>
+  #include <sys/ioctl.h>
+  #include <sys/types.h>
+  #include <sys/time.h>
+  #include <string.h>
+  #include <pthread.h>
+  #include <errno.h>
+
+#endif
 
 /* Various header file */
 
@@ -51,6 +70,12 @@
    supported by this model of phone. */
 
 bool FB61_LinkOK;
+
+#ifdef WIN32
+
+  void InitializeLink();
+
+#endif
 
 /* Here we initialise model specific functions. */
 
@@ -145,7 +170,9 @@ const char *FB61_MemoryType_String [] = {
 
 /* Local variables */
 
+#ifndef WIN32
 int PortFD; /* Filedescriptor of the mobile phone's device */
+#endif
 
 char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
 
@@ -168,13 +195,17 @@ GSM_Error CurrentMagicError = GE_BUSY;
 enum FB61_RX_States RX_State;
 bool RX_Multiple = false;
 
-u8 RequestSequenceNumber = 0x00;
-pthread_t Thread;
-bool RequestTerminate;
-bool DisableKeepalive = false;
-int	InitLength;
+u8        RequestSequenceNumber = 0x00;
+bool      RequestTerminate;
+bool      DisableKeepalive = false;
+int       InitLength;
 
-struct termios OldTermios; /* To restore termio on close. */
+#ifndef WIN32
+
+  struct termios OldTermios; /* To restore termio on close. */
+  pthread_t Thread;
+
+#endif
 
 /* Local variables used by get/set phonebook entry code. Buffer is used as a
    source or destination for phonebook data and other functions... Error is
@@ -243,6 +274,16 @@ void               (*RLP_RXCallback)(RLP_F96Frame *frame);
 
 #define FB61_FRAME_HEADER 0x00, 0x01, 0x00
 
+#ifdef WIN32
+/* called repeatedly from a separate thread */
+void KeepAliveProc()
+{
+    if (!DisableKeepalive)
+	FB61_TX_SendStatusRequest();
+    Sleep(2000);
+}
+#endif
+
 /* Initialise variables and state machine. */
 
 GSM_Error FB61_Initialise(char *port_device, char *initlength,
@@ -269,7 +310,16 @@ GSM_Error FB61_Initialise(char *port_device, char *initlength,
 
   /* Create and start main thread. */
 
+#ifdef WIN32
+  DisableKeepalive = true;
+  rtn = ! OpenConnection(PortDevice, FB61_RX_StateMachine, KeepAliveProc);
+  if (rtn == 0) {
+      InitializeLink(); /* makes more sense to do this in 'this' thread */
+      DisableKeepalive = false;
+  }
+#else
   rtn = pthread_create(&Thread, NULL, (void *)FB61_ThreadLoop, (void *)NULL);
+#endif
 
   if (rtn != 0)
     return (GE_INTERNALERROR);
@@ -515,6 +565,9 @@ GSM_Error FB61_DeleteCalendarNote(GSM_CalendarNote *CalendarNote)
   return (CurrentCalendarNoteError);
 }
 
+/* Init ir for win32 is made in winserial.c */
+#ifndef WIN32
+
 void FB61_InitIR(void)
 {
   int i;
@@ -662,12 +715,15 @@ bool FB61_OpenIR(void)
   return (ret);
 }
 
+
+
 /* This is the main loop for the FB61 functions. When FB61_Initialise is
    called a thread is created to run this loop. This loop is exited when the
    application calls the FB61_Terminate function. */
 
 void FB61_ThreadLoop(void)
 {
+  
 
   unsigned char init_char = 0x55;
   unsigned char connect1[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
@@ -694,6 +750,7 @@ void FB61_ThreadLoop(void)
   int count, idle_timer, timeout=50;
 
   CurrentPhonebookEntry = NULL;  
+
 
   if ( CurrentConnectionType == GCT_Infrared ) {
 
@@ -724,7 +781,9 @@ void FB61_ThreadLoop(void)
       return;
     }
   }
-  
+
+
+
   /* Initialise link with phone or what have you */
 
   /* Send init string to phone, this is a bunch of 0x55 characters. Timing is
@@ -732,7 +791,7 @@ void FB61_ThreadLoop(void)
 
   for (count = 0; count < InitLength; count ++) {
     usleep(100);
-    write(PortFD, &init_char, 1);
+    WRITEPHONE(PortFD, &init_char, 1);
   }
 
   FB61_TX_SendStatusRequest();
@@ -791,6 +850,101 @@ void FB61_ThreadLoop(void)
     usleep(100000);		/* Avoid becoming a "busy" loop. */
   }
 }
+#endif /* WIN32 */
+
+#ifdef WIN32
+void InitializeLink()
+{
+  int count, timeout=50;
+  DCB        dcb;
+
+  unsigned char init_char = 0x55;
+  /* Daxer */
+  unsigned char end_init_char = 0xc1;
+
+  unsigned char connect1[] = {FB61_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
+  unsigned char connect2[] = {FB61_FRAME_HEADER, 0x20, 0x02};
+  unsigned char connect3[] = {FB61_FRAME_HEADER, 0x0d, 0x01, 0x00, 0x02};
+  unsigned char connect4[] = {FB61_FRAME_HEADER, 0x10};
+
+  unsigned char magic_connect[] = {FB61_FRAME_HEADER,
+  0x12,
+
+  /* The real magic goes here ... These bytes are filled in with the
+     external function FB61_GetNokiaAuth(). */
+
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+
+  /* NOKIA&GNOKII Accessory */
+
+  0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x26, 0x4e, 0x4f, 0x4b, 0x49, 0x41, 0x20,
+  0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x79,
+  
+  0x00, 0x00, 0x00, 0x00};
+
+
+  /* Daxer Added for infared support */
+  if ( CurrentConnectionType == GCT_Infrared ) {
+	  dcb.DCBlength = sizeof(DCB);
+
+	  GetCommState(hPhone, &dcb);
+	  dcb.BaudRate=CBR_9600;
+	  SetCommState(hPhone, &dcb);
+  }
+
+  /* Send init string to phone, this is a bunch of 0x55 characters. Timing is
+     empirical. */
+
+  for (count = 0; count < 32; count ++) {
+    usleep(100);
+    WRITEPHONE(PortFD, &init_char, 1);
+  }
+
+	WRITEPHONE(PortFD, &end_init_char, 1);
+
+  if ( CurrentConnectionType == GCT_Infrared ) {
+	  dcb.BaudRate=CBR_115200;
+	  SetCommState(hPhone, &dcb);
+  }
+ 
+
+  FB61_TX_SendStatusRequest();
+
+  usleep(100);
+
+  FB61_TX_SendMessage(7, 0x02, connect1);
+
+  usleep(100);
+
+  FB61_TX_SendMessage(5, 0x02, connect2);
+
+  usleep(100);
+
+  FB61_TX_SendMessage(7, 0x02, connect3);
+
+  usleep(100);
+
+  FB61_TX_SendMessage(4, 0x64, connect4);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentMagicError == GE_BUSY ) {
+
+    if (--timeout == 0)
+      return;
+
+    usleep (100000);
+  }                       
+
+  FB61_GetNokiaAuth(IMEI, MagicBytes, magic_connect+4);
+
+  FB61_TX_SendMessage(45, 0x64, magic_connect);
+  
+  // 	FB61_GetCalendarNote(1);
+
+  //    FB61_SendRingtone("GNOKIItune", 250);
+}
+#endif
 
 /* Applications should call FB61_Terminate to shut down the FB61 thread and
    close the serial port. */
@@ -800,6 +954,7 @@ void FB61_Terminate(void)
   /* Request termination of thread */
   RequestTerminate = true;
 
+#ifndef WIN32
   /* Now wait for thread to terminate. */
   pthread_join(Thread, NULL);
 
@@ -807,6 +962,9 @@ void FB61_Terminate(void)
   tcsetattr(PortFD, TCSANOW, &OldTermios);
 
   close (PortFD);
+#else
+  CloseConnection();
+#endif
 }
 
 #define ByteMask ((1<<NumOfBytes)-1)
@@ -1758,6 +1916,8 @@ GSM_Error FB61_SendBitmap(char *NetworkCode, int width, int height, unsigned cha
   return (GE_NONE);
 }
 
+#ifndef WIN32
+
 void FB61_DumpSerial(void)
 {
 
@@ -1889,6 +2049,7 @@ void FB61_SigHandler(int status)
   for (count = 0; count < res ; count ++)
     FB61_RX_StateMachine(buffer[count]);
 }
+#endif WIN32
 
 char *FB61_GetBCDNumber(u8 *Number) {
 
@@ -2102,7 +2263,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Message: Unknown message of type 0x01\n"));
 #endif DEBUG
-
+	  break;	/* Visual C Don't like empty cases */
     }
 
     break;
@@ -2413,7 +2574,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Message: Unknown message of type 0x03\n"));
 #endif DEBUG
-
+	  break;	/* Visual C Don't like empty cases */
     }
 
     break;
@@ -2502,7 +2663,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Message: Unknown message of type 0x04\n"));
 #endif DEBUG
-
+	  break;	/* Visual C Don't like empty cases */
     }
 
     break;
@@ -2583,6 +2744,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Message: Unknown message of type 0x0a\n"));
 #endif DEBUG
+	  break;	/* Visual C Don't like empty cases */
     }
 
   break;
@@ -2725,7 +2887,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Message: Unknown message of type 0x11\n"));
 #endif /* DEBUG */
-
+	  break;	/* Visual C Don't like empty cases */
     }
 
     break;
@@ -2776,7 +2938,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
         fprintf(stdout, _("Unknown message of type 0x13 and subtype 0x65\n"));
 #endif DEBUG      
-
+	  break;	/* Visual C Don't like empty cases */
       }
     
       break;
@@ -2927,7 +3089,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Message: Unknown message of type 0x13\n"));
 #endif DEBUG
-   
+	  break;	/* Visual C Don't like empty cases */   
     }
 
     break;
@@ -3444,7 +3606,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Unknown message of type 0x40.\n"));
 #endif DEBUG
-
+	  break;	/* Visual C Don't like empty cases */
     }
 
     break;
@@ -3454,10 +3616,15 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   case 0x64:
 
     /* We should skip the string `NOKIA' */
-
+#ifdef WIN32
+    sprintf(IMEI, "%s", MessageBuffer+4+5);
+    sprintf(Model, "%s", MessageBuffer+25);
+    sprintf(Revision, "SW%s: HW%s\n", MessageBuffer+44, MessageBuffer+39);
+#else
     snprintf(IMEI, FB61_MAX_IMEI_LENGTH, "%s", MessageBuffer+4+5);
     snprintf(Model, FB61_MAX_MODEL_LENGTH, "%s", MessageBuffer+25);
     snprintf(Revision, FB61_MAX_REVISION_LENGTH, "SW%s: HW%s\n", MessageBuffer+44, MessageBuffer+39);
+#endif
 
 #ifdef DEBUG
     printf(_("Message: Mobile phone identification received:\n"));
@@ -3652,10 +3819,10 @@ void FB61_RX_StateMachine(char rx_byte) {
 	if (MessageType != FB61_FRTYPE_ACK && MessageType != 0xf1) {
 	  FB61_TX_SendAck(MessageType, MessageBuffer[MessageLength-1] & 0x0f);
 
-          if (MessageBuffer[MessageLength-2] == 0x01)
-            RX_Multiple = false;
+          if ((MessageLength > 1) && (MessageBuffer[MessageLength-2] != 0x01))
+            RX_Multiple = true;
 	  else
-	    RX_Multiple = true;
+	    RX_Multiple = false;
         }
 
         FB61_RX_DispatchMessage();
@@ -3813,7 +3980,7 @@ int FB61_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer) {
 
   /* Send it out... */
   
-  if (write(PortFD, out_buffer, current) != current)
+  if (WRITEPHONE(PortFD, out_buffer, current) != current)
     return (false);
 
   return (true);

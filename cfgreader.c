@@ -19,6 +19,12 @@
 #include <ctype.h>
 #include "cfgreader.h"
 
+#ifdef WIN32
+
+  #define index strchr
+
+#endif
+
 	/* Read configuration information from a ".INI" style file */
 struct CFG_Header *CFG_ReadFile(char *filename)
 {
