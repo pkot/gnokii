@@ -88,11 +88,10 @@ inline static PhoneEvent *RemoveEvent (void)
 static GSM_Error InitModelInf (void)
 {
   GSM_Data data;
-  gchar buf[64];
   GSM_Error error;
   char model[64], rev[64], manufacturer[64];
 
-  GSM_DataClear(&data);
+  GSM_DataClear (&data);
   data.Manufacturer = manufacturer;
   data.Model = model;
   data.Revision = rev;
@@ -107,7 +106,7 @@ static GSM_Error InitModelInf (void)
   if (phoneMonitor.phone.model == NULL)
     phoneMonitor.phone.model = g_strdup (_("unknown"));
 
-  phoneMonitor.supported = GetPhoneModel (buf)->flags;
+  phoneMonitor.supported = GetPhoneModel (model)->flags;
 
   g_free (phoneMonitor.phone.revision);
   phoneMonitor.phone.revision = g_strdup (rev);
@@ -139,6 +138,12 @@ static GSM_Error fbusinit (bool enable_monitoring)
 
   if (!strcmp(smsdConfig.connection, "infrared"))
     connection = GCT_Infrared;
+  if (!strcmp(smsdConfig.connection, "irda"))
+    connection = GCT_Irda;
+  if (!strcmp(smsdConfig.connection, "dau9p"))
+    connection = GCT_DAU9P;
+  if (!strcmp(smsdConfig.connection, "dlr3p"))
+    connection = GCT_DLR3P;
   if (!strcmp(smsdConfig.connection, "tcp"))
     connection = GCT_TCP;
 
@@ -244,13 +249,15 @@ static void RefreshSMS (const gint number)
   i = 0;
   while (1)
   {
-//    GSM_DataClear (&data);
     msg = g_malloc (sizeof (GSM_API_SMS));
     memset (msg, 0, sizeof (GSM_API_SMS));
-    msg->MemoryType = GMT_SM;
+    if (phoneMonitor.supported & PM_FOLDERS)
+      msg->MemoryType = GMT_IN;
+    else
+      msg->MemoryType = GMT_SM;
     msg->Number = ++i;
     data.SMS = msg;
-
+    
     if ((error = GetSMS (&data, &sm)) == GE_NONE)
     {
       pthread_mutex_lock (&smsMutex);
@@ -275,7 +282,7 @@ static void RefreshSMS (const gint number)
     else
       g_free (msg);
 
-    usleep (750000);
+    usleep (500000);
   }
 }
 
@@ -324,12 +331,16 @@ static gint A_DeleteSMSMessage (gpointer data)
 {
   GSM_Data dt;
   GSM_Error error = GE_UNKNOWN;
+  SMS_Folder SMSFolder;
+  SMS_FolderList SMSFolderList;
 
   GSM_DataClear(&dt);
   dt.SMS = (GSM_API_SMS *) data;
+  dt.SMSFolder = &SMSFolder;
+  dt.SMSFolderList = &SMSFolderList;
   if (dt.SMS)
   {
-    error = SM_Functions (GOP_DeleteSMS, &dt, &sm);
+    error = DeleteSMS (&dt, &sm);
 //    I don't use copy, I don't need free message.
 //    g_free (sms);
   }
@@ -356,11 +367,11 @@ void *Connect (void *a)
 {
   GSM_Data data;
   SMS_Status SMSStatus = {0, 0, 0, 0};
+  SMS_Folder SMSFolder;
   PhoneEvent *event;
   GSM_Error error;
 
   GSM_DataClear(&data);
-  data.SMSStatus = &SMSStatus;
   
 # ifdef XDEBUG
   g_print ("Initializing connection...\n");
@@ -377,17 +388,36 @@ void *Connect (void *a)
   {
     phoneMonitor.working = FALSE;
 
-    if ((error = SM_Functions (GOP_GetSMSStatus, &data, &sm)) == GE_NONE)
+    if (phoneMonitor.supported & PM_FOLDERS)
     {
-      if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
-          phoneMonitor.sms.number != SMSStatus.Number)
+      data.SMSFolder = &SMSFolder;
+      SMSFolder.FolderID = GMT_IN;
+      if ((error = SM_Functions (GOP_GetSMSFolderStatus, &data, &sm)) == GE_NONE)
       {
-        phoneMonitor.working = TRUE;
-        RefreshSMS (SMSStatus.Number);
-        phoneMonitor.working = FALSE;
+        if (phoneMonitor.sms.number != SMSFolder.Number)
+        {
+          phoneMonitor.working = TRUE;
+          g_print ("%d\n", SMSFolder.Number);
+          RefreshSMS (SMSFolder.Number);
+          phoneMonitor.working = FALSE;
+        }
+        phoneMonitor.sms.unRead = 0;
       }
-
-      phoneMonitor.sms.unRead = SMSStatus.Unread;
+    }
+    else
+    {
+      data.SMSStatus = &SMSStatus;
+      if ((error = SM_Functions (GOP_GetSMSStatus, &data, &sm)) == GE_NONE)
+      {
+        if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
+            phoneMonitor.sms.number != SMSStatus.Number)
+        {
+          phoneMonitor.working = TRUE;
+          RefreshSMS (SMSStatus.Number);
+          phoneMonitor.working = FALSE;
+        }
+        phoneMonitor.sms.unRead = SMSStatus.Unread;
+      }
     }
 
     while ((event = RemoveEvent ()) != NULL)
@@ -402,6 +432,6 @@ void *Connect (void *a)
       g_free (event);
     }
     
-    sleep (2);
+    sleep (1);
   }
 }
