@@ -1,3 +1,9 @@
+0.5.0pre (not released yet)
+========
+ * libgnokii updates
+    o don't send the initial sequence with FBUS over Bluetooth
+                                                   (Marcel Holtmann)
+
 0.5.0pre8
 =========
  * nk3110 driver updates
