@@ -4,6 +4,8 @@
     o updated Estonian translation                  (Hans Motshärg)
     o xgnokii_xring.c was missing from POTFILES.in  (Hans Motshärg)
     o Chinese translation added                        (Funda Wang)
+    o update all *.po files (automatically with msgmerge)
+                                                        (Pawel Kot)
  * gnokii updates
     o --monitor once will run only once            (BORBELY Zoltan)
     o add the ability to set datetime with gnokii --savesms
