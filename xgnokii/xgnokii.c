@@ -1298,9 +1298,9 @@ static void OkEditSMSSetDialog(GtkWidget * w, gpointer data)
 	strncpy(configDialogData.sms.smsSetting
 		[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].Number,
 		gtk_entry_get_text(GTK_ENTRY(configDialogData.sms.number)),
-		GSM_MAX_SMS_CENTER_LENGTH);
+		MAX_BCD_STRING_LENGTH);
 	configDialogData.sms.smsSetting[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].
-	    Number[GSM_MAX_SMS_CENTER_LENGTH]
+	    Number[MAX_BCD_STRING_LENGTH]
 	    = '\0';
 
 	configDialogData.sms.smsSetting[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].
@@ -1380,7 +1380,7 @@ static void ShowEditSMSSetDialog(GtkWidget * w, gpointer data)
 		gtk_widget_show(label);
 
 		configDialogData.sms.number =
-		    gtk_entry_new_with_max_length(GSM_MAX_SMS_CENTER_LENGTH - 1);
+		    gtk_entry_new_with_max_length(MAX_BCD_STRING_LENGTH - 1);
 		gtk_widget_set_usize(configDialogData.sms.number, 110, 22);
 		gtk_box_pack_end(GTK_BOX(hbox), configDialogData.sms.number, FALSE, FALSE, 2);
 		gtk_widget_show(configDialogData.sms.number);

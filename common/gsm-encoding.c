@@ -364,21 +364,22 @@ int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
 	return (2 * (OUT_NUM - Output - 1) - (count % 2));
 }
 
-char *GetBCDNumber(u8 *Number, int maxlen)
+char *GetBCDNumber(u8 *Number)
 {
-	static char Buffer[20] = "";
+	static char Buffer[MAX_BCD_STRING_LENGTH] = "";
 	int length = Number[0]; /* This is the length of BCD coded number */
 	int count, Digit;
 
-	if (length > maxlen) length = maxlen;
-	memset(Buffer, 0, 20);
+	if (length > MAX_BCD_STRING_LENGTH) length = MAX_BCD_STRING_LENGTH;
+	memset(Buffer, 0, MAX_BCD_STRING_LENGTH);
 	switch (Number[1]) {
 	case SMS_Alphanumeric:
-		Unpack7BitCharacters(0, length, length, Number+2, Buffer);
+		Unpack7BitCharacters(0, length, length, Number + 2, Buffer);
 		Buffer[length] = 0;
 		break;
 	case SMS_International:
 		sprintf(Buffer, "+");
+		length--;
 	case SMS_Unknown:
 	case SMS_National:
 	case SMS_Network:

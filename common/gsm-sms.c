@@ -1077,21 +1077,21 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 			/* FIXME Is this an ugly hack or correct? */
 			/* at least it works with 6210, 6510 and 6110 with the message I tested */
 			message[llayout.RemoteNumber] = (message[llayout.RemoteNumber] + 1) / 2 + 1;
-			strncpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber,SMS_MAX_ADDRESS_LENGTH - 1), SMS_MAX_ADDRESS_LENGTH - 1);
+			snprintf(SMS->RemoteNumber.number, sizeof(SMS->RemoteNumber.number), "%s", GetBCDNumber(message + llayout.RemoteNumber));
 			dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
 		} else {
 			/* SMS struct should be zeroed for now, so there's no
 			 * need to add an extra '\0' at the end of the string */
 			strncpy(SMS->RemoteNumber.number,
 				message + 1 + llayout.RemoteNumber,
-				message[llayout.RemoteNumber] < GSM_MAX_SMS_CENTER_LENGTH ? message[llayout.RemoteNumber] : GSM_MAX_SMS_CENTER_LENGTH);
+				message[llayout.RemoteNumber] < MAX_BCD_STRING_LENGTH ? message[llayout.RemoteNumber] : MAX_BCD_STRING_LENGTH);
 		}
 	}
 
 	/* Short Message Center */
 	if (llayout.MessageCenter > -1) {
 		if (llayout.IsMessageCenterCoded) {
-			strncpy(SMS->MessageCenter.Number, GetBCDNumber(message + llayout.MessageCenter, GSM_MAX_SMS_CENTER_LENGTH - 30 ), GSM_MAX_SMS_CENTER_LENGTH - 1);
+			snprintf(SMS->MessageCenter.Number, sizeof(SMS->MessageCenter.Number), "%s", GetBCDNumber(message +  llayout.MessageCenter));
 			dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
 			SMS->ReplyViaSameSMSC = false;
 			if (SMS->RemoteNumber.number[0] == 0 && (message[llayout.ReplyViaSameSMSC] & 0x80)) {
@@ -1102,7 +1102,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 			 * need to add an extra '\0' at the end of the string */
 			strncpy(SMS->MessageCenter.Number,
 				message + 1 + llayout.MessageCenter,
-				message[llayout.MessageCenter] < GSM_MAX_SMS_CENTER_LENGTH ? message[llayout.MessageCenter] : GSM_MAX_SMS_CENTER_LENGTH);
+				message[llayout.MessageCenter] < MAX_BCD_STRING_LENGTH ? message[llayout.MessageCenter] : MAX_BCD_STRING_LENGTH);
 			SMS->ReplyViaSameSMSC = false;
 		}
 	}

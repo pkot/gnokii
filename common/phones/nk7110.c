@@ -1075,8 +1075,8 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		sprintf(data->MessageCenter->Name, "%s", message + 33);
 		data->MessageCenter->DefaultName = -1;	/* FIXME */
 
-		strcpy(data->MessageCenter->Recipient, GetBCDNumber(message + 9, GSM_MAX_SMS_CENTER_LENGTH - 1));
-		strcpy(data->MessageCenter->Number, GetBCDNumber(message + 21, GSM_MAX_SMS_CENTER_LENGTH - 1));
+		snprintf(data->MessageCenter->Recipient, sizeof(data->MessageCenter->Recipient), "%s", GetBCDNumber(message+9));
+		snprintf(data->MessageCenter->Number, sizeof(data->MessageCenter->Number), "%s", GetBCDNumber(message+21));
 		data->MessageCenter->Type = message[22];
 
 		if (strlen(data->MessageCenter->Recipient) == 0) {

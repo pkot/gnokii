@@ -433,11 +433,11 @@ typedef enum {
 	SMS_Abbreviated   = 0xe1  /* Abbreviated number */
 } SMS_NumberType;
 
-#define SMS_MAX_ADDRESS_LENGTH          40
+#define MAX_BCD_STRING_LENGTH		40
 
 typedef struct {
 	SMS_NumberType type;
-	char number[SMS_MAX_ADDRESS_LENGTH];
+	char number[MAX_BCD_STRING_LENGTH];
 } SMS_Number;
 
 typedef struct {

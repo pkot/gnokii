@@ -60,7 +60,7 @@ typedef struct {
 	gint *msgPtr;		// Array of MessageNumber;
 	gint validity;
 	gint class;
-	gchar sender[GSM_MAX_SENDER_LENGTH + 1];
+	gchar sender[MAX_BCD_STRING_LENGTH + 1];
 } MessagePointers;
 
 typedef struct {
@@ -966,8 +966,8 @@ static void DoSendSMS(void)
 			sms.Report = false;
 		sms.Type = SMS_Submit;
 
-		strncpy(sms.RemoteNumber.number, number, GSM_MAX_DESTINATION_LENGTH + 1);
-		sms.RemoteNumber.number[GSM_MAX_DESTINATION_LENGTH] = '\0';
+		strncpy(sms.RemoteNumber.number, number, MAX_BCD_STRING_LENGTH + 1);
+		sms.RemoteNumber.number[MAX_BCD_STRING_LENGTH] = '\0';
 
 		if (l > GSM_MAX_SMS_LENGTH) {
 			if (longSMS) {

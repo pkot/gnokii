@@ -773,8 +773,8 @@ static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int l
 			if (pos) {
 				*pos = '\0';
 				data->MessageCenter->No = 1;
-				strncpy(data->MessageCenter->Number, buf.line2 + 8, GSM_MAX_SMS_CENTER_LENGTH);
-		                data->MessageCenter->Number[GSM_MAX_SMS_CENTER_LENGTH-1] = '\0';
+				strncpy(data->MessageCenter->Number, buf.line2 + 8, MAX_BCD_STRING_LENGTH);
+		                data->MessageCenter->Number[MAX_BCD_STRING_LENGTH - 1] = '\0';
 				data->MessageCenter->Type = atoi(++pos);
 			} else {
 				data->MessageCenter->No = 0;
@@ -784,7 +784,7 @@ static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int l
 			data->MessageCenter->DefaultName = 1; /* use default name */
 			data->MessageCenter->Format = SMS_FText; /* whatever */
 			data->MessageCenter->Validity = SMS_VMax;
-			strncpy(data->MessageCenter->Recipient, "", GSM_MAX_SMS_CENTER_LENGTH) ;
+			strcpy(data->MessageCenter->Recipient, "") ;
 		}
 	}
 	return GE_NONE;

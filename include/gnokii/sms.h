@@ -39,15 +39,9 @@
 #include "gsm-encoding.h"
 
 /* Maximum length of SMS center name */
-
 #define GSM_MAX_SMS_CENTER_NAME_LENGTH	20
 
 /* Limits of SMS messages. */
-
-#define GSM_MAX_SMS_CENTER_LENGTH       40
-#define GSM_MAX_SENDER_LENGTH           40
-#define GSM_MAX_DESTINATION_LENGTH      40
-
 #define GSM_MAX_SMS_LENGTH             160
 #define GSM_MAX_8BIT_SMS_LENGTH        140
 
@@ -247,8 +241,8 @@ typedef struct {
 	int			DefaultName;				/* >= 1 if default name used, otherwise -1 */
 	SMS_MessageFormat	Format;					/* SMS is sent as text/fax/paging/email. */
 	SMS_ValidityPeriod	Validity;				/* Validity of SMS Message. */
-	char			Number[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the SMSC. */
-	char			Recipient[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the default recipient. */
+	char			Number[MAX_BCD_STRING_LENGTH];		/* Number of the SMSC. */
+	char			Recipient[MAX_BCD_STRING_LENGTH];	/* Number of the default recipient. */
 } SMS_MessageCenter;
 
 /*** SHORT MESSAGE CORE ***/
