@@ -39,6 +39,9 @@
    phone drivers                                     (BORBELY Zoltan)
  * DriverInstance pointer added to the GSM_Phone strucutre. It can
    be used by the phone drivers to store its state   (BORBELY Zoltan)
+ * build system changes:
+    o install xgnokii in the same place as gnokii by default, you
+      can change this behaviour with --with-xgnokii-dir   (Pawel Kot)
 
 0.4.2a
 ======
