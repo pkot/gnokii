@@ -14,21 +14,6 @@
   calling code in gsm-api.c. Inspired by and in places copied from the Linux
   kernel AT Emulator IDSN code by Fritz Elfert and others.
   
-  $Log$
-  Revision 1.6  2001-11-27 12:19:01  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.5  2001/11/08 16:34:19  pkot
-  Updates to work with new libsms
-
-  Revision 1.4  2001/07/03 15:27:03  pkot
-  AT commands for SMS handling support (Tamas Bondar)
-  Small at-emulator code cleanup (me)
-
-  Revision 1.3  2001/02/21 19:56:59  chris
-  More fiddling with the directory layout
-
-
 */
 
 #define		__data_at_emulator_c

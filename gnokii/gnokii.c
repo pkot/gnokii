@@ -200,7 +200,12 @@ int usage(void)
 			  "          gnokii --getprofile [number]\n"
 			  "          gnokii --displayoutput\n"
 			  "          gnokii --keysequence\n"
-		));
+			  "          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
+			  "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
+			  "                 {--call|-c} {all|voice|fax|data}\n"
+			  "                 [{--timeout|-m} time_in_seconds]\n"
+			  "                 [{--number|-n} number]\n"
+          		));
 #ifdef SECURITY
 	fprintf(stderr, _(
 		"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
@@ -405,7 +410,10 @@ int main(int argc, char *argv[])
 
 		// Simulate pressing the keys
 		{ "keysequence",        no_argument,       NULL, OPT_KEYPRESS },
-    
+
+		/* Divert calls */
+		{ "divert",		required_argument, NULL, OPT_DIVERT },
+
 		// For development purposes: insert you function calls here
 		{ "foogle",             no_argument,       NULL, OPT_FOOGLE },
 
@@ -448,6 +456,7 @@ int main(int argc, char *argv[])
 		{ OPT_RESET,             0, 1, 0 },
 		{ OPT_GETPROFILE,        0, 1, 0 },
 		{ OPT_WRITEPHONEBOOK,    0, 1, 0 },
+		{ OPT_DIVERT,            6, 10, 0 },
 
 		{ 0, 0, 0, 0 },
 	};
@@ -474,12 +483,12 @@ int main(int argc, char *argv[])
 		usage();
 
 	switch(c) {
-	// First, error conditions
+	/* First, error conditions */
 	case '?':
 	case ':':
 		fprintf(stderr, _("Use '%s --help' for usage informations.\n"), argv[0]);
 		exit(0);
-	// Then, options with no arguments
+	/* Then, options with no arguments */
 	case OPT_HELP:
 		usage();
 	case OPT_VERSION:
@@ -536,7 +545,7 @@ int main(int argc, char *argv[])
 		case OPT_WRITEPHONEBOOK:
 			rc = writephonebook(nargc, nargv);
 			break;
-		// Now, options with arguments
+		/* Now, options with arguments */
 		case OPT_SETDATETIME:
 			rc = setdatetime(nargc, nargv);
 			break;
@@ -612,17 +621,20 @@ int main(int argc, char *argv[])
 		case OPT_KEYPRESS:
 			rc = presskeysequence();
 			break;
-#ifndef WIN32
-		case OPT_FOOGLE:
-			rc = foogle(nargv);
-			break;
-#endif
 		case OPT_SENDDTMF:
 			rc = senddtmf(optarg);
 			break;
 		case OPT_RESET:
 			rc = reset(optarg);
 			break;
+		case OPT_DIVERT:
+			rc = divert(argc, argv);
+			break;
+#ifndef WIN32
+		case OPT_FOOGLE:
+			rc = foogle(nargv);
+			break;
+#endif
 		default:
 			fprintf(stderr, _("Unknown option: %d\n"), c);
 			break;
@@ -834,17 +846,17 @@ int savesms(int argc, char *argv[])
 				if (!strcmp(ans, _("yes"))) confirm = 1;
 				else if (!strcmp(ans, _("no"))) confirm = 0;
 			}  
-			if (!confirm) { GSM->Terminate(); return 0; }
+			if (!confirm) {
+				if (GSM && GSM->Terminate) GSM->Terminate();
+				return 0;
+			}
 			else break;
 		case GE_INVALIDSMSLOCATION:
 			fprintf(stderr, _("Invalid location\n"));
-			GSM->Terminate();
+			if (GSM && GSM->Terminate) GSM->Terminate();
 			return -1;
 		default:
-/* FIXME: Remove this fprintf when the function is thoroughly tested */
-#ifdef DEBUG
-			fprintf(stderr, _("Location %d empty. Saving\n"), SMS.Number);
-#endif
+			dprintf("Location %d empty. Saving\n", SMS.Number);
 			break;
 		}
 	}
@@ -873,7 +885,7 @@ int savesms(int argc, char *argv[])
 		fprintf(stdout, _("Saving failed (error=%d)\n"), error);
 	}
 	sleep(10);
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -886,7 +898,7 @@ int getsmsc(char *MessageCenterNumber)
 	GSM_Error		error;
 	
 	memset(&MessageCenter, 0, sizeof(MessageCenter));
-	MessageCenter.No=atoi(MessageCenterNumber);
+	MessageCenter.No = atoi(MessageCenterNumber);
 	
 	if (GSM && GSM->GetSMSCenter && GSM->Terminate) {
 		error = GSM->GetSMSCenter(&MessageCenter);
@@ -1206,14 +1218,14 @@ int deletesms(int argc, char *argv[])
 		else {
 			if (error == GE_NOTIMPLEMENTED) {
 				fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-				GSM->Terminate();
+				if (GSM && GSM->Terminate) GSM->Terminate();
 				return -1;	
 			}
 			fprintf(stdout, _("DeleteSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
 		}
 	}
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -1236,17 +1248,18 @@ int entersecuritycode(char *type)
 	GSM_Error test;
 	GSM_SecurityCode SecurityCode;
 
-	if (!strcmp(type,"PIN"))
-		SecurityCode.Type=GSCT_Pin;
-	else if (!strcmp(type,"PUK"))
-		SecurityCode.Type=GSCT_Puk;
-	else if (!strcmp(type,"PIN2"))
-		SecurityCode.Type=GSCT_Pin2;
-	else if (!strcmp(type,"PUK2"))
-		SecurityCode.Type=GSCT_Puk2;
-	// FIXME: Entering of SecurityCode does not work :-(
-	//  else if (!strcmp(type,"SecurityCode"))
-	//    SecurityCode.Type=GSCT_SecurityCode;
+	if (!strcmp(type, "PIN"))
+		SecurityCode.Type = GSCT_Pin;
+	else if (!strcmp(type, "PUK"))
+		SecurityCode.Type = GSCT_Puk;
+	else if (!strcmp(type, "PIN2"))
+		SecurityCode.Type = GSCT_Pin2;
+	else if (!strcmp(type, "PUK2"))
+		SecurityCode.Type = GSCT_Puk2;
+	/* FIXME: Entering of SecurityCode does not work :-(
+	else if (!strcmp(type, "SecurityCode"))
+		SecurityCode.Type = GSCT_SecurityCode;
+	*/
 	else
 		usage();
 
@@ -1254,10 +1267,10 @@ int entersecuritycode(char *type)
 	printf("Enter your code: ");
 	gets(SecurityCode.Code);
 #else
-	strcpy(SecurityCode.Code,getpass(_("Enter your code: ")));
+	strcpy(SecurityCode.Code, getpass(_("Enter your code: ")));
 #endif
 
-	test = GSM->EnterSecurityCode(SecurityCode);
+	if (GSM && GSM->EnterSecurityCode) test = GSM->EnterSecurityCode(SecurityCode);
 	if (test == GE_INVALIDSECURITYCODE)
 		fprintf(stdout, _("Error: invalid code.\n"));
 	else if (test == GE_NONE)
@@ -1267,7 +1280,7 @@ int entersecuritycode(char *type)
 	else
 		fprintf(stdout, _("Other error.\n"));
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -1276,7 +1289,7 @@ int getsecuritycodestatus(void)
 {
 	int Status;
 
-	if (GSM->GetSecurityCodeStatus(&Status) == GE_NONE) {
+	if (GSM && GSM->GetSecurityCodeStatus && GSM->GetSecurityCodeStatus(&Status) == GE_NONE) {
 
 		fprintf(stdout, _("Security code status: "));
 
@@ -1305,7 +1318,7 @@ int getsecuritycodestatus(void)
 		}
 	}
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -1316,9 +1329,9 @@ int getsecuritycodestatus(void)
 /* Voice dialing mode. */
 int dialvoice(char *Number)
 {
-	GSM->DialVoice(Number);
+	if (GSM && GSM->DialVoice) GSM->DialVoice(Number);
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -1627,13 +1640,13 @@ int setlogo(int argc, char *argv[])
 		if (!strcmp(argv[0], "op") || !strcmp(argv[0], "startup") || !strcmp(argv[0], "caller")) {
 			if (argc > 1) {
 				if (ReadBitmapFileOnConsole(argv[1], &bitmap) != GE_NONE) {
-					GSM->Terminate();
+					if (GSM && GSM->Terminate) GSM->Terminate();
 					return(-1);
 				}
 
 				if (!strcmp(argv[0], "op")) {
 					if (bitmap.type != GSM_OperatorLogo || argc < 3) {
-						if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE) strncpy(bitmap.netcode, NetworkInfo.NetworkCode, 7);
+						if (GSM && GSM->GetNetworkInfo && GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE) strncpy(bitmap.netcode, NetworkInfo.NetworkCode, 7);
 					}
 					GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, GSM_Info);
 					if (argc == 3) {
@@ -1657,7 +1670,7 @@ int setlogo(int argc, char *argv[])
 					}
 					oldbit.type = GSM_CallerLogo;
 					oldbit.number = bitmap.number;
-					if (GSM->GetBitmap(&oldbit) == GE_NONE) {
+					if (GSM && GSM->GetBitmap && GSM->GetBitmap(&oldbit) == GE_NONE) {
 						/* We have to get the old name and ringtone!! */
 						bitmap.ringtone = oldbit.ringtone;
 						strncpy(bitmap.text, oldbit.text, 255);
@@ -1681,18 +1694,18 @@ int setlogo(int argc, char *argv[])
 			}  
 		} else {
 			fprintf(stderr, _("What kind of logo do you want to set ?\n"));
-			GSM->Terminate();
+			if (GSM && GSM->Terminate) GSM->Terminate();
 			return -1;
 		}
 	}
     
-	error=GSM->SetBitmap(&bitmap);
+	if (GSM && GSM->SetBitmap) error = GSM->SetBitmap(&bitmap);
   
 	switch (error) {
 	case GE_NONE:
 		oldbit.type = bitmap.type;
 		oldbit.number = bitmap.number;
-		if (GSM->GetBitmap(&oldbit) == GE_NONE) {
+		if (GSM && GSM->GetBitmap && GSM->GetBitmap(&oldbit) == GE_NONE) {
 			if (bitmap.type == GSM_WelcomeNoteText ||
 			    bitmap.type == GSM_DealerNoteText) {
 				if (strcmp(bitmap.text, oldbit.text)) {
@@ -1713,13 +1726,13 @@ int setlogo(int argc, char *argv[])
 					/* When we make it correct, we don't have this mistake */
 			
 					strcpy(oldbit.text, "!\0");
-					GSM->SetBitmap(&oldbit);
-					GSM->GetBitmap(&oldbit);
+					if (GSM && GSM->SetBitmap) GSM->SetBitmap(&oldbit);
+					if (GSM && GSM->GetBitmap) GSM->GetBitmap(&oldbit);
 					if (oldbit.text[0]!='!') {
 						fprintf(stderr, _("SIM card and PIN is required\n"));
 					} else {
-						GSM->SetBitmap(&bitmap);
-						GSM->GetBitmap(&oldbit);
+						if (GSM && GSM->SetBitmap) GSM->SetBitmap(&bitmap);
+						if (GSM && GSM->GetBitmap) GSM->GetBitmap(&oldbit);
 						fprintf(stderr, _("too long, truncated to \"%s\" (length %i)\n"),oldbit.text,strlen(oldbit.text));
 					}
 					ok = false;
@@ -1749,7 +1762,7 @@ int setlogo(int argc, char *argv[])
 		break;
 	}
   
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -1898,7 +1911,7 @@ int getcalendarnote(int argc, char *argv[])
 		}
 	}
 	
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return error;
 }
 
@@ -1913,12 +1926,12 @@ int writecalendarnote(char *argv[])
 	}
 
         /* Error 22=Calendar full ;-) */
-	if ((GSM->WriteCalendarNote(&CalendarNote)) == GE_NONE)
+	if (GSM && GSM->WriteCalendarNote && GSM->WriteCalendarNote(&CalendarNote) == GE_NONE)
 		fprintf(stdout, _("Succesfully written!\n"));
 	else
 		fprintf(stdout, _("Failed to write calendar note!\n"));
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -1936,7 +1949,7 @@ int deletecalendarnote(int argc, char *argv[])
 
 		CalendarNote.Location = i;
 
-		if (GSM->DeleteCalendarNote(&CalendarNote) == GE_NONE) {
+		if (GSM && GSM->DeleteCalendarNote && GSM->DeleteCalendarNote(&CalendarNote) == GE_NONE) {
 			fprintf(stdout, _("   Calendar note deleted.\n"));
 		} else {
 			fprintf(stderr, _("The calendar note can not be deleted\n"));
@@ -1944,7 +1957,7 @@ int deletecalendarnote(int argc, char *argv[])
 
 	}
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -1987,15 +2000,16 @@ int setdatetime(int argc, char *argv[])
 	}
 
 	/* FIXME: Error checking should be here. */
-	GSM->SetDateTime(&Date);
+	if (GSM && GSM->SetDateTime) GSM->SetDateTime(&Date);
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
 
 /* In this mode we receive the date and time from mobile phone. */
-int getdatetime(void) {
+int getdatetime(void)
+{
 	GSM_Data	data;
 	GSM_DateTime	date_time;
 	GSM_Error	error;
@@ -2034,9 +2048,9 @@ int setalarm(char *argv[])
 	Date.Hour = atoi(argv[0]);
 	Date.Minute = atoi(argv[1]);
 
-	GSM->SetAlarm(1, &Date);
+	if (GSM && GSM->SetAlarm) GSM->SetAlarm(1, &Date);
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -2117,55 +2131,55 @@ int monitormode(void)
 	/* Loop here indefinitely - allows you to see messages from GSM code in
 	   response to unknown messages etc. The loops ends after pressing the
 	   Ctrl+C. */
-	data.RFUnits=&rf_units;
-	data.RFLevel=&rflevel;
-	data.BatteryUnits=&batt_units;
-	data.BatteryLevel=&batterylevel;
+	data.RFUnits = &rf_units;
+	data.RFLevel = &rflevel;
+	data.BatteryUnits = &batt_units;
+	data.BatteryLevel = &batterylevel;
 
 	while (!bshutdown) {
-		if (SM_Functions(GOP_GetRFLevel,&data,sm) == GE_NONE)
+		if (SM_Functions(GOP_GetRFLevel, &data, sm) == GE_NONE)
 			fprintf(stdout, _("RFLevel: %d\n"), (int)rflevel);
 
-		if (SM_Functions(GOP_GetBatteryLevel,&data,sm) == GE_NONE)
+		if (SM_Functions(GOP_GetBatteryLevel, &data, sm) == GE_NONE)
 			fprintf(stdout, _("Battery: %d\n"), (int)batterylevel);
 
 //		if (GSM->GetPowerSource(&powersource) == GE_NONE)
 //			fprintf(stdout, _("Power Source: %s\n"), (powersource==GPS_ACDC)?_("AC/DC"):_("battery"));
 
-		data.MemoryStatus=&SIMMemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &SIMMemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("SIM: Used %d, Free %d\n"), SIMMemoryStatus.Used, SIMMemoryStatus.Free);
 
-		data.MemoryStatus=&PhoneMemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &PhoneMemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("Phone: Used %d, Free %d\n"), PhoneMemoryStatus.Used, PhoneMemoryStatus.Free);
 
-		data.MemoryStatus=&DC_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &DC_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("DC: Used %d, Free %d\n"), DC_MemoryStatus.Used, DC_MemoryStatus.Free);
 
-		data.MemoryStatus=&EN_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &EN_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("EN: Used %d, Free %d\n"), EN_MemoryStatus.Used, EN_MemoryStatus.Free);
 
-		data.MemoryStatus=&FD_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &FD_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("FD: Used %d, Free %d\n"), FD_MemoryStatus.Used, FD_MemoryStatus.Free);
 
-		data.MemoryStatus=&LD_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &LD_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("LD: Used %d, Free %d\n"), LD_MemoryStatus.Used, LD_MemoryStatus.Free);
 
-		data.MemoryStatus=&MC_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &MC_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("MC: Used %d, Free %d\n"), MC_MemoryStatus.Used, MC_MemoryStatus.Free);
 
-		data.MemoryStatus=&ON_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &ON_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("ON: Used %d, Free %d\n"), ON_MemoryStatus.Used, ON_MemoryStatus.Free);
 
-		data.MemoryStatus=&RC_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus,&data,sm) == GE_NONE)
+		data.MemoryStatus = &RC_MemoryStatus;
+		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
 			fprintf(stdout, _("RC: Used %d, Free %d\n"), RC_MemoryStatus.Used, RC_MemoryStatus.Free);
 
 //		if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE)
@@ -2183,9 +2197,7 @@ int monitormode(void)
 		sleep(1);
 	}
 
-	fprintf (stderr, _("Leaving monitor mode...\n"));
-
-	//GSM->Terminate();
+	fprintf(stderr, _("Leaving monitor mode...\n"));
 
 	return 0;
 }
@@ -2204,7 +2216,7 @@ static GSM_Error PrettyOutputFn(char *Display, char *Indicators)
 }
 
 #if 0
-// Uncomment it if used
+/* Uncomment it if used */
 static GSM_Error OutputFn(char *Display, char *Indicators)
 {
 	if (Display)
@@ -2257,7 +2269,7 @@ int displayoutput(void)
 			memset(&buf[0], 0, 102);
 			while (read(0, buf, 100) > 0) {
 				fprintf(stderr, "handling keys (%d).\n", strlen(buf));
-				if (GSM->HandleString(buf) != GE_NONE)
+				if (GSM && GSM->HandleString && GSM->HandleString(buf) != GE_NONE)
 					fprintf(stdout, _("Key press simulation failed.\n"));
 				memset(buf, 0, 102);
 			}
@@ -2274,7 +2286,7 @@ int displayoutput(void)
 	} else
 		fprintf (stderr, _("Error!\n"));
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 
@@ -2290,18 +2302,18 @@ int getprofile(int argc, char *argv[])
 	char model[64];
 
 	profile.Number = 0;
-	error = GSM->GetProfile(&profile);
+	if (GSM && GSM->GetProfile) error = GSM->GetProfile(&profile);
 
 	if (error == GE_NONE) {
   
-		while (GSM->GetModel(model) != GE_NONE)
+		while (GSM && GSM->GetModel && GSM->GetModel(model) != GE_NONE)
 			sleep(1);
 
 		max_profiles = 7; /* This is correct for 6110 (at least my). How do we get
 				     the number of profiles? */
 
-		/*For N5110*/
-		/*FIX ME: It should be set to 3 for N5130 and 3210 too*/
+		/* For N5110 */
+		/* FIXME: It should be set to 3 for N5130 and 3210 too */
 		if (!strcmp(model, "NSE-1"))
 			max_profiles = 3;
 
@@ -2312,13 +2324,13 @@ int getprofile(int argc, char *argv[])
 
 			if (profile.Number < 0) {
 				fprintf(stderr, _("Profile number must be value from 1 to %d!\n"), max_profiles);
-				GSM->Terminate();
+				if (GSM && GSM->Terminate) GSM->Terminate();
 				return -1;
 			}
 
 			if (profile.Number >= max_profiles) {
 				fprintf(stderr, _("This phone supports only %d profiles!\n"), max_profiles);
-				GSM->Terminate();
+				if (GSM && GSM->Terminate) GSM->Terminate();
 				return -1;
 			}
 		} else {
@@ -2331,7 +2343,7 @@ int getprofile(int argc, char *argv[])
 			profile.Number = i;
 
 			if (profile.Number != 0)
-				GSM->GetProfile(&profile);
+				if (GSM && GSM->GetProfile) GSM->GetProfile(&profile);
 
 			fprintf(stdout, "%d. \"%s\"\n", profile.Number + 1, profile.Name);
 			if (profile.DefaultName == -1) fprintf(stdout, _(" (name defined)\n"));
@@ -2371,16 +2383,16 @@ int getprofile(int argc, char *argv[])
 	} else {
 		if (error == GE_NOTIMPLEMENTED) {
 			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-			GSM->Terminate();
+			if (GSM && GSM->Terminate) GSM->Terminate();
 			return -1;
 		} else {
 			fprintf(stderr, _("Unspecified error\n"));
-			GSM->Terminate();
+			if (GSM && GSM->Terminate) GSM->Terminate();
 			return -1;
 		}
 	}
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 
@@ -2413,8 +2425,8 @@ int getmemory(int argc, char *argv[])
 
 		entry.Location = count;
 
-      		data.PhonebookEntry=&entry;
-		error=SM_Functions(GOP_ReadPhonebook,&data,sm);
+      		data.PhonebookEntry = &entry;
+		error = SM_Functions(GOP_ReadPhonebook, &data, sm);
 
 		if (error == GE_NONE) {
 			fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
@@ -2558,7 +2570,7 @@ int writephonebook(int argc, char *args[])
 			GSM_PhonebookEntry aux;
 
 			aux.Location = entry.Location;
-			error = GSM->GetMemoryLocation(&aux);
+			if (GSM && GSM->GetMemoryLocation) error = GSM->GetMemoryLocation(&aux);
 			
 			if (error == GE_NONE) {
 				if (!aux.Empty) {
@@ -2576,13 +2588,13 @@ int writephonebook(int argc, char *args[])
 				}
 			} else {
 				fprintf(stderr, _("Unknown error (%d)\n"), error);
-				GSM->Terminate();
+				if (GSM && GSM->Terminate) GSM->Terminate();
 				return 0;
 			}
 		}
 
 		/* Do write and report success/failure. */
-		error = GSM->WritePhonebookLocation(&entry);
+		if (GSM && GSM->WritePhonebookLocation) error = GSM->WritePhonebookLocation(&entry);
 
 		if (error == GE_NONE)
 			fprintf (stdout, _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), memory_type_string, entry.Location, entry.Name, entry.Number);
@@ -2591,7 +2603,7 @@ int writephonebook(int argc, char *args[])
 
 	}
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 
@@ -2652,11 +2664,11 @@ int setspeeddial(char *argv[])
 	entry.Number = atoi(argv[0]);
 	entry.Location = atoi(argv[2]);
 
-	if (GSM->SetSpeedDial(&entry) == GE_NONE) {
+	if (GSM && GSM->SetSpeedDial && GSM->SetSpeedDial(&entry) == GE_NONE) {
 		fprintf(stdout, _("Succesfully written!\n"));
 	}
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 
@@ -2665,7 +2677,7 @@ int getdisplaystatus(void)
 { 
 	int Status;
 
-	GSM->GetDisplayStatus(&Status);
+	if (GSM && GSM->GetDisplayStatus) GSM->GetDisplayStatus(&Status);
 
 	fprintf(stdout, _("Call in progress: %s\n"), Status & (1<<DS_Call_In_Progress)?_("on"):_("off"));
 	fprintf(stdout, _("Unknown: %s\n"),          Status & (1<<DS_Unknown)?_("on"):_("off"));
@@ -2676,7 +2688,7 @@ int getdisplaystatus(void)
 	fprintf(stdout, _("Keyboard lock: %s\n"),    Status & (1<<DS_Keyboard_Lock)?_("on"):_("off"));
 	fprintf(stdout, _("SMS storage full: %s\n"), Status & (1<<DS_SMS_Storage_Full)?_("on"):_("off"));
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 
@@ -2697,12 +2709,12 @@ int netmonitor(char *Mode)
 		mode = 0x00;
 
 	memset(&Screen, 0, 50);
-	GSM->NetMonitor(mode, Screen);
+	if (GSM && GSM->NetMonitor) GSM->NetMonitor(mode, Screen);
 
 	if (Screen)
 		fprintf(stdout, "%s\n", Screen);
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 
@@ -2712,10 +2724,10 @@ int identify(void)
 	char imei[64], model[64], rev[64], manufacturer[64];
 	GSM_Statemachine *sm = &State;
 
-	data.Manufacturer=manufacturer;
-	data.Model=model;
-	data.Revision=rev;
-	data.Imei=imei;
+	data.Manufacturer = manufacturer;
+	data.Model = model;
+	data.Revision = rev;
+	data.Imei = imei;
 
 	/* Retrying is bad idea: what if function is simply not implemented?
 	   Anyway let's wait 2 seconds for the right packet from the phone. */
@@ -2733,15 +2745,13 @@ int identify(void)
 	fprintf(stdout, _("Model:    %s\n"), model);
 	fprintf(stdout, _("Revision: %s\n"), rev);
 
-	//GSM->Terminate();
-
 	return 0;
 }
 
 int senddtmf(char *String)
 {
-	GSM->SendDTMF(String);
-	GSM->Terminate();
+	if (GSM && GSM->SendDTMF) GSM->SendDTMF(String);
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 
@@ -2762,8 +2772,8 @@ int reset( char *type)
 			}
 	}
 
-	GSM->Reset(_type);
-	GSM->Terminate();
+	if (GSM && GSM->Reset) GSM->Reset(_type);
+	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }
@@ -2773,7 +2783,6 @@ int reset( char *type)
    tool. */
 int pmon(void)
 { 
-
 	GSM_Error error;
 	GSM_ConnectionType connection=GCT_Serial;
 	GSM_Statemachine sm;
@@ -2803,16 +2812,15 @@ int sendringtone(int argc, char *argv[])
 		return(-1);
 	}  
 
-	error = GSM->SendRingtone(&ringtone,argv[1]);
+	if (GSM && GSM->SendRingtone) error = GSM->SendRingtone(&ringtone,argv[1]);
 
 	if (error == GE_NONE) 
 		fprintf(stdout, _("Send succeeded!\n"));
 	else
 		fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
-
 }
 
 
@@ -2826,16 +2834,15 @@ int setringtone(int argc, char *argv[])
 		return(-1);
 	}  
 
-	error = GSM->SetRingtone(&ringtone);
+	if (GSM && GSM->SetRingtone) error = GSM->SetRingtone(&ringtone);
 
 	if (error == GE_NONE) 
 		fprintf(stdout, _("Send succeeded!\n"));
 	else
 		fprintf(stdout, _("Send failed\n"));
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
-
 }
 
 int presskeysequence(void)
@@ -2847,23 +2854,124 @@ int presskeysequence(void)
 	memset(&buf[0], 0, 102);
 	while (read(0, buf, 100) > 0) {
 		fprintf(stderr, "handling keys (%d).\n", strlen(buf));
-		if (GSM->HandleString(buf) != GE_NONE)
+		if (GSM && GSM->HandleString && GSM->HandleString(buf) != GE_NONE)
 			fprintf(stdout, _("Key press simulation failed.\n"));
 		memset(buf, 0, 102);
 	}
 
-	GSM->Terminate();
+	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
- 
+
+/* Options for --divert:
+   --op, -o [register|enable|query|disable|erasure]  REQ
+   --type, -t [all|busy|noans|outofreach|notavail]   REQ
+   --call, -c [all|voice|fax|data]                   REQ
+   --timeout, m time_in_seconds                      OPT
+   --number, -n number                               OPT
+ */
+int divert(int argc, char **argv)
+{
+	int opt;
+	GSM_CallDivert cd;
+	GSM_Statemachine *sm = &State;
+	GSM_Data data;
+	GSM_Error error;
+	struct option options[] = {
+		{ "op",      required_argument, NULL, 'o'},
+		{ "type",    required_argument, NULL, 't'},
+		{ "call",    required_argument, NULL, 'c'},
+		{ "number",  required_argument, NULL, 'n'},
+		{ "timeout", required_argument, NULL, 'm'},
+		{ NULL,      0,                 NULL, 0}
+	};
+
+	optarg = NULL;
+	optind = 0;
+
+	/* Skip --divert */
+	argc--; argv++;
+
+	memset(&cd, 0, sizeof(GSM_CallDivert));
+
+	while ((opt = getopt_long(argc, argv, "o:t:n:c:m:", options, NULL)) != -1) {
+		switch (opt) {
+		case 'o':
+			if (!strcmp("register", optarg)) {
+				cd.Operation = GSM_CDV_Register;
+			} else if (!strcmp("enable", optarg)) {
+				cd.Operation = GSM_CDV_Enable;
+			} else if (!strcmp("disable", optarg)) {
+				cd.Operation = GSM_CDV_Disable;
+			} else if (!strcmp("erasure", optarg)) {
+				cd.Operation = GSM_CDV_Erasure;
+			} else if (!strcmp("query", optarg)) {
+				cd.Operation = GSM_CDV_Query;
+			} else {
+				usage();
+				exit(-1);
+			}
+			break;
+		case 't':
+			if (!strcmp("all", optarg)) {
+				cd.DType = GSM_CDV_AllTypes;
+			} else if (!strcmp("busy", optarg)) {
+				cd.DType = GSM_CDV_Busy;
+			} else if (!strcmp("noans", optarg)) {
+				cd.DType = GSM_CDV_NoAnswer;
+			} else if (!strcmp("outofreach", optarg)) {
+				cd.DType = GSM_CDV_OutOfReach;
+			} else if (!strcmp("notavail", optarg)) {
+				cd.DType = GSM_CDV_NotAvailable;
+			} else {
+				usage();
+				exit(-1);
+			}
+			break;
+		case 'c':
+			if (!strcmp("all", optarg)) {
+				cd.CType = GSM_CDV_AllCalls;
+			} else if (!strcmp("voice", optarg)) {
+				cd.CType = GSM_CDV_VoiceCalls;
+			} else if (!strcmp("fax", optarg)) {
+				cd.CType = GSM_CDV_FaxCalls;
+			} else if (!strcmp("data", optarg)) {
+				cd.CType = GSM_CDV_DataCalls;
+			} else {
+				usage();
+				exit(-1);
+			}
+			break;
+		case 'm':
+			cd.Timeout = atoi(optarg);
+			break;
+		case 'n':
+			strcpy(cd.Number.number, optarg);
+			if (cd.Number.number[0] == '+') cd.Number.type = SMS_International;
+			else cd.Number.type = SMS_Unknown;
+			break;
+		default:
+			usage();
+			exit(-1);
+		}
+	}
+	data.CallDivert = &cd;
+	error = SM_Functions(GOP_CallDivert, &data, sm);
+
+	if (error == GE_NONE) {
+		fprintf(stderr, "Divert succeeded.\n");
+	} else {
+		fprintf(stderr, "%s\n", print_error(error));
+	}
+	return 0;
+}
+
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 #ifndef WIN32
 int foogle(char *argv[])
 {
-	/* Initialise the code for the GSM interface. */     
-	fbusinit(NULL);
-	// Fill in what you would like to test here...
+	/* Fill in what you would like to test here... */
 	return 0;
 }
 #endif

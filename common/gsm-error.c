@@ -13,7 +13,10 @@
   Error codes.
 
   $Log$
-  Revision 1.2  2001-11-08 16:34:19  pkot
+  Revision 1.3  2001-12-14 14:37:41  pkot
+  Cleanups. Call divert support for at and 7110 series
+
+  Revision 1.2  2001/11/08 16:34:19  pkot
   Updates to work with new libsms
 
   Revision 1.1  2001/10/24 22:33:01  pkot
@@ -34,7 +37,7 @@ char *print_error(GSM_Error e)
 	case GE_TIMEOUT:                  return "Command timed out.";
 	case GE_TRYAGAIN:                 return "Try again.";
 	case GE_INVALIDSECURITYCODE:      return "Invalid Security code.";
-	case GE_NOTIMPLEMENTED:           return "Command called isn't implemented in model.";
+	case GE_NOTIMPLEMENTED:           return "Called command is not implemented for the used model.";
 	case GE_INVALIDSMSLOCATION:       return "Invalid SMS location.";
 	case GE_INVALIDPHBOOKLOCATION:    return "Invalid phonebook location.";
 	case GE_INVALIDMEMORYTYPE:        return "Invalid type of memory.";

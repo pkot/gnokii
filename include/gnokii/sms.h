@@ -399,11 +399,13 @@ typedef struct {
 
 extern int EncodePDUSMS(GSM_SMSMessage *SMS, char *frame);
 extern GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength);
+
 /* Do not use these yet */
 extern GSM_Error EncodeTextSMS();
 extern GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS);
 
-/* FIXME: make this static */
+/* We really do need this in the other code */
 extern char *GetBCDNumber(u8 *Number);
+extern int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type);
 
 #endif /* __gnokii_sms_h_ */

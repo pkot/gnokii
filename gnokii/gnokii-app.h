@@ -13,7 +13,10 @@
   Header file for test utility.
 
   $Log$
-  Revision 1.27  2001-09-14 12:53:00  pkot
+  Revision 1.28  2001-12-14 14:37:44  pkot
+  Cleanups. Call divert support for at and 7110 series
+
+  Revision 1.27  2001/09/14 12:53:00  pkot
   New preview logos.
   Localization fixes.
   Set valid operator on logos xgnokii screen.
@@ -72,6 +75,7 @@ int reset(char *type);
 int getprofile(int argc, char *argv[]);
 int displayoutput();
 int presskeysequence();
+int divert(int argc, char *argv[]);
 
 typedef enum {
   OPT_HELP,
@@ -113,6 +117,7 @@ typedef enum {
   OPT_GETPROFILE,
   OPT_DISPLAYOUTPUT,
   OPT_KEYPRESS,
+  OPT_DIVERT,
   OPT_FOOGLE
 } opt_index;
 

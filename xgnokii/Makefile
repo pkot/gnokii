@@ -23,7 +23,7 @@ CFLAGS += $(PTHREAD_CFLAGS) \
 LDFLAGS += $(PTHREAD_LIBS) \
 	   $(GTK_LIBS)
 
-LDFLAGS += -L$(TOPDIR) -lgnokii
+LDFLAGS += -L$(TOPDIR)/common -lgnokii
 
 OBJS = 	xgnokii.o \
 	xgnokii_common.o \

@@ -13,28 +13,6 @@
   This file provides functions specific to generic at command compatible
   phones. See README for more details on supported mobile phones.
 
-  $Log$
-  Revision 1.7  2001-11-26 18:06:08  pkot
-  Checking for *printf functions, N_(x) for localization, generic ARRAY_LEN, SAFE_STRNCPY, G_GNUC_PRINTF (Jan Kratochvil)
-
-  Revision 1.6  2001/11/19 13:03:18  pkot
-  nk3110.c cleanup
-
-  Revision 1.5  2001/11/08 16:49:19  pkot
-  Cleanups
-
-  Revision 1.4  2001/08/20 23:36:27  pkot
-  More cleanup in AT code (Manfred Jonsson)
-
-  Revision 1.3  2001/08/20 23:27:37  pkot
-  Add hardware shakehand to the link layer (Manfred Jonsson)
-
-  Revision 1.2  2001/08/09 11:51:39  pkot
-  Generic AT support updates and cleanup (Manfred Jonsson)
-
-  Revision 1.1  2001/07/27 00:02:21  pkot
-  Generic AT support for the new structure (Manfred Jonsson)
-
 */
 
 #include <string.h>
@@ -62,6 +40,7 @@ static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int len
 static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state);
@@ -72,6 +51,7 @@ static GSM_Error AT_GetBattery(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
+static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 
 typedef struct {
 	int gop;
@@ -95,6 +75,7 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_GetRFLevel, AT_GetRFLevel, ReplyGetRFLevel },
 	{ GOP_GetMemoryStatus, AT_GetMemoryStatus, ReplyMemoryStatus },
 	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
+	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert }
 };
 
 
@@ -360,6 +341,48 @@ static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state)
 }
 
 
+static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
+{
+	char req[64];
+
+	if (!data->CallDivert) return GE_UNKNOWN;
+
+	sprintf(req, "AT+CCFC=");
+
+	switch (data->CallDivert->DType) {
+	case GSM_CDV_AllTypes:
+		strcat(req, "4");
+		break;
+	case GSM_CDV_Busy:
+		strcat(req, "1");
+		break;
+	case GSM_CDV_NoAnswer:
+		strcat(req, "2");
+		break;
+	case GSM_CDV_OutOfReach:
+		strcat(req, "3");
+		break;
+	default:
+		dprintf("3. %d\n", data->CallDivert->DType);
+		return GE_NOTIMPLEMENTED;
+	}
+	if (data->CallDivert->Operation == GSM_CDV_Register)
+		sprintf(req, "%s,%d,\"%s\",%d,,,%d", req,
+			data->CallDivert->Operation,
+			data->CallDivert->Number.number,
+			data->CallDivert->Number.type,
+			data->CallDivert->Timeout);
+	else
+		sprintf(req, "%s,%d", req, data->CallDivert->Operation);
+
+	strcat(req, "\r\n");
+
+	dprintf("%s", req);
+	if (SM_SendMessage(state, strlen(req), GOP_CallDivert, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_WaitFor(state, data, GOP_CallDivert);
+}
+
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
 	if (op == GOP_Init)
@@ -534,6 +557,15 @@ static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int lengt
 	return GE_NONE;
 }
 
+static GSM_Error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	int i;
+	for (i = 0; i < length; i++) {
+		dprintf("%02x ", buffer[i]);
+	}
+	dprintf("\n");
+	return GE_NONE;
+}
 
 static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {

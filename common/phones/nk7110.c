@@ -83,6 +83,7 @@ static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ P7110_MSG_CLOCK,	P7110_IncomingClock },
 	{ P7110_MSG_IDENTITY,	P7110_Incoming0x1b },
 	{ P7110_MSG_STLOGO,	P7110_IncomingStartup },
+	{ P7110_MSG_DIVERT,	P7110_IncomingCallDivert },
 	{ 0, NULL }
 };
 
@@ -153,6 +154,8 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_GetSMS(data, state);
 	case GOP_SendSMS:
 		return P7110_SendSMS(data, state);
+	case GOP_CallDivert:
+		return P7110_CallDivert(data, state);
 /* I'm not sure yet if folder functions will be shared or local
 	case GOP_GetSMSFolders:
 		return P7110_GetSMSFolders(data, state);
@@ -822,7 +825,7 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error e;
+	GSM_Error e = GE_NONE;
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
 	int length, i;
 
@@ -1107,6 +1110,80 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 		break;
 	}
 	return e;
+}
+
+static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned short length = 0x09;
+	char req[55] = { FBUS_FRAME_HEADER, 0x01, 0x00, /* operation */
+						0x00,
+						0x00, /* divert type */
+						0x00, /* call type */
+						0x00 };
+	if (!data->CallDivert) return GE_UNKNOWN;
+	switch (data->CallDivert->Operation) {
+	case GSM_CDV_Query:
+		req[4] = 0x05;
+		break;
+	case GSM_CDV_Register:
+		req[4] = 0x03;
+		length = 0x16;
+		req[8] = 0x01;
+		req[9] = SemiOctetPack(data->CallDivert->Number.number, req + 10, data->CallDivert->Number.type);
+		req[21] = data->CallDivert->Timeout;
+		break;
+	case GSM_CDV_Erasure:
+		req[4] = 0x04;
+		break;
+	default:
+		return GE_NOTIMPLEMENTED;
+	}
+	switch (data->CallDivert->CType) {
+	case GSM_CDV_AllCalls:
+		break;
+	case GSM_CDV_VoiceCalls:
+		req[7] = 0x0b;
+		break;
+	case GSM_CDV_FaxCalls:
+		req[7] = 0x0d;
+		break;
+	case GSM_CDV_DataCalls:
+		req[7] = 0x19;
+		break;
+	default:
+		return GE_NOTIMPLEMENTED;
+	}
+	switch (data->CallDivert->DType) {
+	case GSM_CDV_AllTypes:
+		req[6] = 0x15;
+		break;
+	case GSM_CDV_Busy:
+		req[6] = 0x43;
+		break;
+	case GSM_CDV_NoAnswer:
+		req[6] = 0x3d;
+		break;
+	case GSM_CDV_OutOfReach:
+		req[6] = 0x3e;
+		break;
+	default:
+		return GE_NOTIMPLEMENTED;
+	}
+	if ((data->CallDivert->DType == GSM_CDV_AllTypes) && (data->CallDivert->CType == GSM_CDV_AllCalls))
+		req[6] = 0x02;
+
+	if (SM_SendMessage(state, length, P7110_MSG_DIVERT, req) != GE_NONE) return GE_NOTREADY;
+	return SM_WaitFor(state, data, P7110_MSG_DIVERT);
+}
+
+static GSM_Error P7110_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	int i;
+	for (i = 0; i < length; i++) {
+		dprintf("%02x ", message[i]);
+	}
+	dprintf("\n");
+	return GE_NONE;
 }
 
 static int GetMemoryType(GSM_MemoryType memory_type)

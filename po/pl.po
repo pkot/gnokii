@@ -1676,7 +1676,7 @@ msgstr ""
 #: gnokii/gnokii.c:371 gnokii/gnokii.c:2634 gnokiid/virtmodem.c:282
 #: xgnokii/xgnokii.c:281 xlogos/xlogos.c:139
 msgid "GSM/FBUS init failed! (Unknown model ?). Quitting.\n"
-msgstr "Inicjalizacha GSM/FBUS nieudana! (Nieznany model?). Koñczê pracê.\n"
+msgstr "Inicjalizacja GSM/FBUS nieudana! (Nieznany model?). Koñczê pracê.\n"
 
 #: gnokii/gnokii.c:382
 msgid "Hmmm... GSM_LinkOK never went true. Quitting.\n"

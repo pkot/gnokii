@@ -13,26 +13,6 @@
   Header file for the definitions, enums etc. that are used by all models of
   handset.
 
-  $Log$
-  Revision 1.83  2001-11-17 20:18:33  pkot
-  Added dau9p connection type for 6210/7110
-
-  Revision 1.82  2001/11/13 16:12:21  pkot
-  Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
-
-  Revision 1.81  2001/11/08 16:34:20  pkot
-  Updates to work with new libsms
-
-  Revision 1.80  2001/08/20 23:36:27  pkot
-  More cleanup in AT code (Manfred Jonsson)
-
-  Revision 1.79  2001/07/27 00:02:22  pkot
-  Generic AT support for the new structure (Manfred Jonsson)
-
-  Revision 1.78  2001/06/28 00:28:45  pkot
-  Small docs updates (Pawel Kot)
-
-
 */
 
 #ifndef __gsm_common_h
@@ -427,7 +407,37 @@ typedef struct {
 #define GSM_MAX_REVISION_LENGTH (6)
 #define GSM_MAX_MODEL_LENGTH    (6)
 
+/* Data structures for the call divert */
+typedef enum {
+	GSM_CDV_Busy = 0x01,
+	GSM_CDV_NoAnswer,
+	GSM_CDV_OutOfReach,
+	GSM_CDV_NotAvailable,
+	GSM_CDV_AllTypes
+} GSM_CDV_DivertTypes;
 
+typedef enum {
+	GSM_CDV_VoiceCalls = 0x01,
+	GSM_CDV_FaxCalls,
+	GSM_CDV_DataCalls,
+	GSM_CDV_AllCalls
+} GSM_CDV_CallTypes;
+
+typedef enum {
+	GSM_CDV_Disable  = 0x00,
+	GSM_CDV_Enable   = 0x01,
+	GSM_CDV_Query    = 0x02,
+	GSM_CDV_Register = 0x03,
+	GSM_CDV_Erasure  = 0x04
+} GSM_CDV_Opers;
+
+typedef struct {
+	GSM_CDV_DivertTypes DType;
+	GSM_CDV_CallTypes   CType;
+	GSM_CDV_Opers       Operation;
+	SMS_Number          Number;
+	unsigned int        Timeout;
+} GSM_CallDivert;
 
 /* This is a generic holder for high level information - eg a GSM_Bitmap */
 
@@ -457,6 +467,7 @@ typedef struct {
 	char *IncomingCallNr;
 	GSM_PowerSource *PowerSource;
 	GSM_DateTime *DateTime;
+	GSM_CallDivert *CallDivert;
 } GSM_Data;
 
 
@@ -517,6 +528,7 @@ typedef enum {
 	GOP_GetSMSCenter,
 	GOP_GetDateTime,
 	GOP_GetCalendarNote,
+	GOP_CallDivert,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

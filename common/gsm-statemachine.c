@@ -199,7 +199,7 @@ GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 
 		dprintf("SM_Block Retry - %d\n\r", retry);
 		SM_Reset(state);
-		if (retry<2) SM_SendMessage(state, state->LastMsgSize, state->LastMsgType, state->LastMsg);
+		if (retry < 2) SM_SendMessage(state, state->LastMsgSize, state->LastMsgType, state->LastMsg);
 	}
 
 	return GE_TIMEOUT;

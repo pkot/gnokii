@@ -16,51 +16,6 @@
 
   The various routines are called P7110_(whatever).
 
-  $Log$
-  Revision 1.7  2001-11-22 17:56:53  pkot
-  smslib update. sms sending
-
-  Revision 1.6  2001/11/08 16:47:48  pkot
-  Start fiddling with 7110 and SMS
-
-  Revision 1.5  2001/06/27 23:52:52  pkot
-  7110/6210 updates (Marian Jancar)
-
-  Revision 1.4  2001/05/24 20:47:30  chris
-  More updating of 7110 code and some of xgnokii_lowlevel changed over.
-
-  Revision 1.3  2001/03/23 13:40:25  chris
-  Pavel's patch and a few fixes.
-
-  Revision 1.2  2001/03/21 23:36:08  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.1  2001/02/21 19:57:13  chris
-  More fiddling with the directory layout
-
-  Revision 1.1  2001/02/16 14:29:54  chris
-  Restructure of common/.  Fixed a problem in fbus-phonet.c
-  Lots of dprintfs for Marcin
-  Any size xpm can now be loaded (eg for 7110 startup logos)
-  nk7110 code detects 7110/6210 and alters startup logo size to suit
-  Moved Marcin's extended phonebook code into gnokii.c
-
-  Revision 1.4  2001/01/29 17:14:44  chris
-  dprintf now in misc.h (and fiddling with 7110 code)
-
-  Revision 1.3  2001/01/23 15:32:44  chris
-  Pavel's 'break' and 'static' corrections.
-  Work on logos for 7110.
-
-  Revision 1.2  2001/01/17 02:54:56  chris
-  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
-  I can now edit my phonebook in xgnokii but it is 'work in progress'.
-
-  Revision 1.1  2001/01/14 22:47:01  chris
-  Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
-
-
 */
 
 #ifndef __phones_nk7110_h
@@ -75,6 +30,7 @@ extern bool P7110_LinkOK;
 #define P7110_MSG_COMMSTATUS	0x01	/* Communication status */
 #define P7110_MSG_SMS		0x02	/* SMS handling */
 #define P7110_MSG_PHONEBOOK	0x03	/* Phonebook functions */
+#define P7110_MSG_DIVERT	0x06	/* Call Divert */
 #define P7110_MSG_NETSTATUS	0x0a	/* Network status */
 #define P7110_MSG_CALENDAR	0x13	/* Calendar notes */
 #define P7110_MSG_FOLDER	0x14	/* Folders handling */
@@ -198,6 +154,7 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -208,6 +165,7 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *buffer, int l
 static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 

@@ -50,7 +50,7 @@ static struct udh_data headers[] = {
 
 /* This function implements packing of numbers (SMS Center number and
    destination number) for SMS sending function. */
-static int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
+int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
 {
 	unsigned char *IN = Number;  /* Pointer to the input number */
 	unsigned char *OUT = Output; /* Pointer to the output */
