@@ -160,6 +160,7 @@ typedef enum {
 	OPT_DELETEWAPBOOKMARK,
 	OPT_DELETESMSFOLDER,
 	OPT_CREATESMSFOLDER,
+	OPT_LISTNETWORKS,
 } opt_index;
 
 static char *model;      /* Model from .gnokiirc file. */
@@ -327,6 +328,7 @@ static int usage(FILE *f)
 		     "                 {--call|-c} {all|voice|fax|data}\n"
 		     "                 [{--timeout|-m} time_in_seconds]\n"
 		     "                 [{--number|-n} number]\n"
+		     "          gnokii --listnetworks\n"
 		     "          gnokii --getsecuritycode\n"
 		));
 #ifdef SECURITY
@@ -4260,6 +4262,17 @@ static int getsecuritycode()
 	return error;
 }
 
+static void list_gsm_networks(void)
+{
+	extern GSM_Network GSM_Networks[];
+	int i;
+
+	printf("Network  Name\n");
+	printf("-----------------------------------------\n");
+	for (i = 0; strcmp(GSM_Networks[i].Name, "unknown"); i++)
+		printf("%-7s  %s\n", GSM_Networks[i].Code, GSM_Networks[i].Name);
+}
+
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 #ifndef WIN32
@@ -4501,6 +4514,9 @@ int main(int argc, char *argv[])
 		/* Activate WAP setting */
 		{ "activatewapsetting", required_argument, NULL, OPT_ACTIVATEWAPSETTING },
 
+		/* List GSM networks */
+		{ "listnetworks",       no_argument,       NULL, OPT_LISTNETWORKS },
+
 		{ 0, 0, 0, 0},
 	};
 
@@ -4614,7 +4630,7 @@ int main(int argc, char *argv[])
 #endif
 
 		/* Initialise the code for the GSM interface. */
-		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE) businit(NULL);
+		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE && c != OPT_LISTNETWORKS) businit(NULL);
 
 		switch(c) {
 		case OPT_MONITOR:
@@ -4787,6 +4803,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_ACTIVATEWAPSETTING:
 			rc = activatewapsetting(optarg);
+			break;
+		case OPT_LISTNETWORKS:
+			list_gsm_networks();
 			break;
 #ifndef WIN32
 		case OPT_FOOGLE:
