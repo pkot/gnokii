@@ -76,6 +76,7 @@ API int gn_file_text_save(char *filename, char *text, int mode);
 
 /* Misc */
 API gn_memory_type gn_str2memory_type(const char *s);
+API char *gn_memory_type2str(gn_memory_type mt);
 API void gn_data_clear(gn_data *data);
 extern API gn_phone *gn_gsm_info;
 extern API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
