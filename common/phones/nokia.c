@@ -52,23 +52,78 @@ gn_error PNOK_GetManufacturer(char *manufacturer)
 }
 
 
+static wchar_t PNOK_nokia_to_uni(unsigned char ch)
+{
+	switch (ch) {
+	case 0x82: return 0x00e1; /* LATIN SMALL LETTER A WITH ACUTE */
+	case 0x1c: return 0x00c1; /* LATIN CAPITAL LETTER A WITH ACUTE */
+	case 0xe9: return 0x00e9; /* LATIN SMALL LETTER E WITH ACUTE (!) */
+	case 0xc9: return 0x00c9; /* LATIN CAPITAL LETTER E WITH ACUTE (!) */
+	case 0x8a: return 0x00ed; /* LATIN SMALL LETTER I WITH ACUTE */
+	case 0x5e: return 0x00cd; /* LATIN CAPITAL LETTER I WITH ACUTE */
+	case 0x90: return 0x00f3; /* LATIN SMALL LETTER O WITH ACUTE */
+	case 0x7d: return 0x00d3; /* LATIN CAPITAL LETTER O WITH ACUTE */
+	case 0xf6: return 0x00f6; /* LATIN SMALL LETTER O WITH DIAERESIS (!) */
+	case 0xd6: return 0x00d6; /* LATIN CAPITAL LETTER O WITH DIAERESIS (!) */
+	case 0x96: return 0x0151; /* LATIN SMALL LETTER O WITH DOUBLE ACUTE */
+	case 0x95: return 0x0150; /* LATIN CAPITAL LETTER O WITH DOUBLE ACUTE */
+	case 0x97: return 0x00fa; /* LATIN SMALL LETTER U WITH ACUTE */
+	case 0x80: return 0x00da; /* LATIN CAPITAL LETTER U WITH ACUTE */
+	case 0xfc: return 0x00fc; /* LATIN SMALL LETTER U WITH DIAERESIS (!) */
+	case 0xdc: return 0x00dc; /* LATIN CAPITAL LETTER U WITH DIAERESIS (!) */
+	case 0xce: return 0x0171; /* LATIN SMALL LETTER U WITH DOUBLE ACUTE */
+	case 0xcc: return 0x0170; /* LATIN CAPITAL LETTER U WITH DOUBLE ACUTE */
+	default: return char_decode_def_alphabet(ch);
+	}
+}
+
+static unsigned char PNOK_uni_to_nokia(wchar_t wch)
+{
+	switch (wch) {
+	case 0x00e1: return 0x82; /* LATIN SMALL LETTER A WITH ACUTE */
+	case 0x00c1: return 0x1c; /* LATIN CAPITAL LETTER A WITH ACUTE */
+	case 0x00e9: return 0x05; /* LATIN SMALL LETTER E WITH ACUTE (!) */
+	case 0x00c9: return 0x1f; /* LATIN CAPITAL LETTER E WITH ACUTE (!) */
+	case 0x00ed: return 0x8a; /* LATIN SMALL LETTER I WITH ACUTE */
+	case 0x00cd: return 0x5e; /* LATIN CAPITAL LETTER I WITH ACUTE */
+	case 0x00f3: return 0x90; /* LATIN SMALL LETTER O WITH ACUTE */
+	case 0x00d3: return 0x7d; /* LATIN CAPITAL LETTER O WITH ACUTE */
+	case 0x00f6: return 0x7c; /* LATIN SMALL LETTER O WITH DIAERESIS (!) */
+	case 0x00d6: return 0x5c; /* LATIN CAPITAL LETTER O WITH DIAERESIS (!) */
+	case 0x0151: return 0x96; /* LATIN SMALL LETTER O WITH DOUBLE ACUTE */
+	case 0x0150: return 0x95; /* LATIN CAPITAL LETTER O WITH DOUBLE ACUTE */
+	case 0x00fa: return 0x97; /* LATIN SMALL LETTER U WITH ACUTE */
+	case 0x00da: return 0x80; /* LATIN CAPITAL LETTER U WITH ACUTE */
+	case 0x00fc: return 0x7e; /* LATIN SMALL LETTER U WITH DIAERESIS (!) */
+	case 0x00dc: return 0x5e; /* LATIN CAPITAL LETTER U WITH DIAERESIS (!) */
+	case 0x0171: return 0xce; /* LATIN SMALL LETTER U WITH DOUBLE ACUTE */
+	case 0x0170: return 0xcc; /* LATIN CAPITAL LETTER U WITH DOUBLE ACUTE */
+	default: return char_encode_def_alphabet((unsigned char)wch);
+	}
+}
+
 void PNOK_DecodeString(unsigned char *dest, size_t max, const unsigned char *src, size_t len)
 {
-	int i, n;
+	size_t i, j, n;
+	unsigned char buf[16];
 
-	n = (len >= max) ? max-1 : len;
-
-	for (i = 0; i < n; i++)
-		dest[i] = src[i];
+	for (i = 0, j = 0; j < len; i += n, j++) {
+		n = char_decode_uni_alphabet(PNOK_nokia_to_uni(src[j]), buf);
+		if (i + n >= max) break;
+		memcpy(dest + i, buf, n);
+	}
 	dest[i] = 0;
 }
 
 size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *src)
 {
-	size_t i;
+	size_t i, j, n;
+	wchar_t wch;
 
-	for (i = 0; i < max && src[i]; i++)
-		dest[i] = src[i];
+	for (i = 0, j = 0; i < max && src[j]; i++, j += n) {
+		n = char_encode_uni_alphabet(src + j, &wch);
+		dest[i] = PNOK_uni_to_nokia(wch);
+	}
 	return i;
 }
 

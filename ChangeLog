@@ -10,6 +10,9 @@
       targets                                             (Pawel Kot)
     o update config file description -- # only at the line
       beginning denotes the comment                       (Pawel Kot)
+ * 6110 series updates:
+    o non-ASCII character set support experimental version
+                                                     (BORBELY Zoltan)
 
 0.5.0pre1
 =========
