@@ -43,6 +43,10 @@
     o libtoolization finished                      (BORBELY Zoltan)
  * 3110 series updates
     o fix alternate range of sequence numbers       (Osma Suominen)
+ * xgnokii updates
+    o set default browser to preview the help pages to mozilla as
+      it seems to be much popular then netscape these days (seen
+      in FreeBSD patches)                               (Pawel Kot)
 
 0.5.9
 =====
