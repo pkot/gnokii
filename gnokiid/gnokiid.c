@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 	static bool atexit_registered = false;
 
 	/* For GNU gettext */
-#ifdef USE_NLS
+#ifdef ENABLE_NLS
 	textdomain("gnokii");
 #endif
 

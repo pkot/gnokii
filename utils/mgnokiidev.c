@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 	char *name = NULL; /* Device name */
 
 	/* For GNU gettext */
-#ifdef USE_NLS
+#ifdef ENABLE_NLS
 	textdomain("gnokii");
 #endif
 

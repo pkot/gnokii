@@ -425,7 +425,7 @@ static void Run (void)
 
 int main (int argc, char *argv[])
 {
-#ifdef USE_NLS
+#ifdef ENABLE_NLS
   textdomain("gnokii");
 #endif
 

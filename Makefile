@@ -25,19 +25,15 @@ DIRS =  common/phones \
 	common/links \
 	common/devices \
 	common/data \
+	po \
 	common \
 	$(BIN_DIRS)
 
 GTK_DIRS =  xgnokii
 
-PO_DIR   = 	po
 DOCS_DIR = 	Docs
 
 all: $(DIRS)
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR); \
-	fi
-
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
 		    if [ -e $$dir/Makefile ]; then \
@@ -66,9 +62,6 @@ clean:
 		$(MAKE) -C $$dir clean; \
 	    fi; \
 	done
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR) clean; \
-	fi
 
 ifdef OWN_GETOPT
 		$(MAKE) -C getopt clean
@@ -88,9 +81,6 @@ endif
 
 distclean: clean
 	$(MAKE) -C common distclean
-	@if [ -e $(PO_DIR)/Makefile ]; then \
-		$(MAKE) -C $(PO_DIR) distclean; \
-	fi
 	$(RM) Makefile.global config.cache config.log config.status \
 		include/config.h \
 		packaging/RedHat/gnokii.spec \
@@ -125,9 +115,6 @@ install: all
 			$(MAKE) -C $$dir install; \
 		fi; \
 	done
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR) install; \
-	fi
 
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
@@ -148,9 +135,6 @@ install-strip:
 			$(MAKE) -C $$dir install-strip; \
 		fi; \
 	done
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR) install; \
-	fi
 
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
@@ -167,9 +151,6 @@ install-suid:
 			$(MAKE) -C $$dir install-suid; \
 		fi; \
 	done
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR) install; \
-	fi
 
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
@@ -186,9 +167,6 @@ install-ss:
 			$(MAKE) -C $$dir install-ss; \
 		fi; \
 	done
-	@if [ "x$(USE_NLS)" = xyes ]; then \
-		$(MAKE) -C $(PO_DIR) install; \
-	fi
 
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \

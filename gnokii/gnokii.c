@@ -66,7 +66,7 @@
 #endif
 
 
-#ifdef USE_NLS
+#ifdef ENABLE_NLS
 #  include <locale.h>
 #endif
 
@@ -4534,7 +4534,7 @@ int main(int argc, char *argv[])
 	opterr = 0;
 
 	/* For GNU gettext */
-#ifdef USE_NLS
+#ifdef ENABLE_NLS
 	textdomain("gnokii");
 	setlocale(LC_ALL, "");
 #endif

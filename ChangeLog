@@ -64,6 +64,9 @@
  * change strncpys to snprintfs in vcal.lx             (Markus Plail)
  * spec file fixes                                        (Pawel Kot)
  * add base bluetooth support                       (Marcel Holtmann)
+ * build system changes
+    o use NLS detection from autoconf/automake makros
+                                 (Pawel Kot, Mariusz Mazur, PLD Team)
 
 0.4.3
 =====

@@ -109,14 +109,14 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 #endif
 
 /* This one is for NLS. */
-#ifdef USE_NLS
+#ifdef ENABLE_NLS
 #  include <libintl.h>
 #  define _(x) gettext(x)
 #  define N_(x) gettext_noop(x)
 #else
 #  define _(x) (x)
 #  define N_(x) (x)
-#endif /* USE_NLS */
+#endif /* ENABLE_NLS */
 
 /* Definitions for u8, u16, u32 and u64, borrowed from
    /usr/src/linux/include/asm-i38/types.h */

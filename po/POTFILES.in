@@ -14,7 +14,6 @@ common/phones/nk7110.c
 common/phones/nk6100.c
 common/phones/nk3110.c
 common/phones/nk2110.c
-common/vcal.c
 common/vcal.lx
 gnokiid/gnokiid.c
 gnokii/gnokii.c

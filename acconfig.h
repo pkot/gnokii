@@ -51,9 +51,6 @@
 /* Define if you want security options enabled */
 #undef SECURITY
 
-/* Define if you want NLS support */
-#undef USE_NLS
-
 /* Use UNIX98 style pty support instead of the traditional */
 #undef USE_UNIX98PTYS
 

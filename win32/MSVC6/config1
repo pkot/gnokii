@@ -75,8 +75,8 @@
 #undef XPM
 
 /* Define if you want NLS */
-//#define USE_NLS 1
-#undef USE_NLS
+//#define ENABLE_NLS 1
+#undef ENABLE_NLS
 
 /* Define if you want to use Unix98 PTYs */
 //#define USE_UNIX98PTYS 1
