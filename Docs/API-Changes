@@ -7,6 +7,16 @@ libgnokii API changes
 = means no change
 o change description
 
+v1.8 2004-??-??
+
+	2004-01-25
+	o new element in the enum
+		|typedef enum {
+		=...
+		+	GN_OP_DeletePhonebook,
+		=...
+		|} gn_operation;
+
 v1.7 2004-01-19
 
 	2004-01-16

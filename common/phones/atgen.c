@@ -74,6 +74,7 @@ static gn_error AT_GetRFLevel(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_GetMemoryStatus(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_ReadPhonebook(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_WritePhonebook(gn_data *data,  struct gn_statemachine *state);
+static gn_error AT_DeletePhonebook(gn_data *data,  struct gn_statemachine *state);
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state);
@@ -111,6 +112,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetMemoryStatus,       AT_GetMemoryStatus,       ReplyMemoryStatus },
 	{ GN_OP_ReadPhonebook,         AT_ReadPhonebook,         ReplyReadPhonebook },
 	{ GN_OP_WritePhonebook,        AT_WritePhonebook,        Reply },
+	{ GN_OP_DeletePhonebook,       AT_DeletePhonebook,       Reply },
 	{ GN_OP_CallDivert,            AT_CallDivert,            ReplyCallDivert },
 	{ GN_OP_AT_SetPDUMode,         AT_SetPDUMode,            Reply },
 	{ GN_OP_AT_Prompt,             NULL,                     ReplyGetPrompt },
@@ -505,8 +507,8 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
-	if (data->phonebook_entry->empty)
-		len = sprintf(req, "AT+CPBW=%d\r", data->phonebook_entry->location);
+	if (data->phonebook_entry->empty || (!(*(data->phonebook_entry->name)) && !(*(data->phonebook_entry->number))))
+		return AT_DeletePhonebook(data, state);
 	else {
 		ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
 		if (ret)
@@ -539,6 +541,23 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(len, GN_OP_WritePhonebook, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_WritePhonebook, data, state);
+}
+
+static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
+{
+	int len;
+	char req[64];
+	gn_error ret;
+
+	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
+	if (ret)
+		return ret;
+
+	len = sprintf(req, "AT+CPBW=%d\r", data->phonebook_entry->location);
+
+	if (sm_message_send(len, GN_OP_DeletePhonebook, req, state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_DeletePhonebook, data, state);
 }
 
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)

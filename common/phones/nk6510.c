@@ -76,6 +76,8 @@ static gn_error NK6510_GetBitmap(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_ReadPhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_DeletePhonebookLocation(gn_data *data, struct gn_statemachine *state);
+
 static gn_error NK6510_GetSpeedDial(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SetSpeedDial(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
@@ -260,6 +262,8 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_ReadPhonebook(data, state);
 	case GN_OP_WritePhonebook:
 		return NK6510_WritePhonebookLocation(data, state);
+	case GN_OP_DeletePhonebook:
+		return NK6510_DeletePhonebookLocation(data, state);
 	case GN_OP_GetNetworkInfo:
 		return NK6510_GetNetworkInfo(data, state);
 	case GN_OP_GetSpeedDial:
@@ -1732,7 +1736,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	req[13] = entry->location & 0xff;
 
 	block = 1;
-	if ((*(entry->name)) && (*(entry->number))) {
+	if (!entry->empty && (*(entry->name)) && (*(entry->number))) {
 		/* Name */
 		j = strlen(entry->name);
 		char_unicode_encode((string + 1), entry->name, j);

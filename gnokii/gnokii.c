@@ -79,9 +79,9 @@
 #define MAX_INPUT_LINE_LEN 512
 
 struct gnokii_arg_len {
-	int gal_opt;
-	int gal_min;
-	int gal_max;
+	int gal_opt; /* option name (opt_index) */
+	int gal_min; /* minimal number of arguments to give */
+	int gal_max; /* maximal number of arguments to give */
 	int gal_flags;
 };
 
@@ -114,6 +114,7 @@ typedef enum {
 	OPT_GETDISPLAYSTATUS,
 	OPT_GETPHONEBOOK,
 	OPT_WRITEPHONEBOOK,
+	OPT_DELETEPHONEBOOK,
 	OPT_GETSPEEDDIAL,
 	OPT_SETSPEEDDIAL,
 	OPT_GETSMS,
@@ -265,6 +266,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
 		     "                 [-m|--memory-type|--memory] [-n|--memory-location|--memory]\n"
 		     "                 [[-v|--vcard]|[-l|--ldif]]\n"
+		     "          gnokii --deletephonebook memory_type location\n"
 		     "          gnokii --getwapbookmark number\n"
 		     "          gnokii --writewapbookmark name URL\n"
 		     "          gnokii --deletewapbookmark number\n"
@@ -3480,6 +3482,41 @@ static int writephonebook(int argc, char *args[])
 	return error;
 }
 
+/* Delete phonebook entry */
+static int deletephonebook(int argc, char *argv[])
+{
+	gn_phonebook_entry entry;
+	gn_error error;
+	char *memory_type_string;
+
+	if (argc < 2) {
+		usage(stderr, -1);
+	}
+
+	/* Handle command line args that set memory type and location. */
+	memory_type_string = argv[0];
+	entry.memory_type = gn_str2memory_type(memory_type_string);
+	if (entry.memory_type == GN_MT_XX) {
+		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[0]);
+		return -1;
+	}
+
+	entry.location = atoi(argv[1]);
+	entry.empty = true;
+	error = gn_sm_functions(GN_OP_DeletePhonebook, &data, &state);
+	switch (error) {
+	case GN_ERR_NONE:
+		fprintf (stderr, _("Phonebook entry removed: memory type: %s, loc: %d\n"), 
+			 gn_memory_type2str(entry.memory_type), entry.location);
+		break;
+	default:
+		fprintf (stderr, _("Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"), 
+			 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location);
+		break;
+	}
+	return error;
+}
+
 /* Getting WAP bookmarks. */
 static int getwapbookmark(char *number)
 {
@@ -4874,6 +4911,9 @@ int main(int argc, char *argv[])
 		/* Write phonebook (memory) mode */
 		{ "writephonebook",     optional_argument, NULL, OPT_WRITEPHONEBOOK },
 
+		/* Delete phonebook entry from memory mode */
+		{ "deletephonebook",    required_argument, NULL, OPT_DELETEPHONEBOOK },
+
 		/* Get speed dial mode */
 		{ "getspeeddial",       required_argument, NULL, OPT_GETSPEEDDIAL },
 
@@ -5034,6 +5074,7 @@ int main(int argc, char *argv[])
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
 		{ OPT_GETPHONEBOOK,      2, 4, 0 },
 		{ OPT_WRITEPHONEBOOK,    0, 10, 0 },
+		{ OPT_DELETEPHONEBOOK,   2, 2, 0 },
 		{ OPT_GETSPEEDDIAL,      1, 1, 0 },
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
 		{ OPT_CREATESMSFOLDER,   1, 1, 0 },
@@ -5164,9 +5205,6 @@ int main(int argc, char *argv[])
 		case OPT_PMON:
 			rc = pmon();
 			break;
-		case OPT_WRITEPHONEBOOK:
-			rc = writephonebook(argc, argv);
-			break;
 		/* Now, options with arguments */
 		case OPT_SETDATETIME:
 			rc = setdatetime(nargc, nargv);
@@ -5203,6 +5241,12 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_GETPHONEBOOK:
 			rc = getphonebook(nargc, nargv);
+			break;
+		case OPT_WRITEPHONEBOOK:
+			rc = writephonebook(argc, argv);
+			break;
+		case OPT_DELETEPHONEBOOK:
+			rc = deletephonebook(nargc, nargv);
 			break;
 		case OPT_GETSPEEDDIAL:
 			rc = getspeeddial(optarg);

@@ -14,6 +14,9 @@
     o correctly use gn_ringtone->notes_count; this is unsigned char
       and therefore it will be always less then
       GN_RINGTONE_MAX_NOTES which is 256                (Pawel Kot)
+    o add support for explicit DeletePhonebook entry: AT, nk7110,
+      nk6510 drivers and gnokii have it implemented    (Igor Popik,
+                                                         Pawel Kot)
  * AT series updates
     o getnetworkinfo always terminates the result  (BORBELY Zoltan)
  * smsd updates

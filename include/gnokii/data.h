@@ -154,6 +154,7 @@ typedef enum {
 	GN_OP_GetMemoryStatus,
 	GN_OP_ReadPhonebook,
 	GN_OP_WritePhonebook,
+	GN_OP_DeletePhonebook,
 	GN_OP_GetPowersource,
 	GN_OP_GetAlarm,
 	GN_OP_GetSMSStatus,
