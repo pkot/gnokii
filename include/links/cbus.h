@@ -27,8 +27,8 @@
 
  */
 
-#ifndef _cbus_h
-#define _cbus_h
+#ifndef _gnokii_links_cbus_h
+#define _gnokii_links_cbus_h
 
 #define CBUS_MAX_FRAME_LENGTH 256
 #define CBUS_MAX_MSG_LENGTH 256
@@ -37,38 +37,28 @@ typedef enum {
 	CBUS_RX_Header,
 	CBUS_RX_FrameType1,
 	CBUS_RX_FrameType2,
-	CBUS_RX_GetLengthLB,
-	CBUS_RX_GetLengthHB,
-	CBUS_RX_GetMessage,
-	CBUS_RX_GetCSum,
-	CBUS_RX_GetAck
+	CBUS_RX_LengthLB,
+	CBUS_RX_LengthHB,
+	CBUS_RX_Message,
+	CBUS_RX_CSum,
+	CBUS_RX_Ack
 } cbus_rx_state;
 
-typedef enum {
-	CBUS_PKT_None,
-	CBUS_PKT_Ready,
-	CBUS_PKT_CSumErr
-} cbus_pkt_state;
-
 typedef struct{
-	int checksum;
-	int rx_buffer_pos;
-	int rx_buffer_count;
-	int buffer_count;
 	cbus_rx_state state;
 	int frame_header1;
 	int frame_header2;
 	int frame_type1;
 	int frame_type2;
-	int message_len;
-	unsigned char rx_buffer[CBUS_MAX_FRAME_LENGTH];
-	unsigned char buffer[CBUS_MAX_FRAME_LENGTH];
+	int msg_len;
+	int msg_pos;
+	unsigned char csum;
+	unsigned char msg[CBUS_MAX_MSG_LENGTH];
 	unsigned char prev_rx_byte;
-	unsigned char at_reply[CBUS_MAX_MSG_LENGTH];
 } cbus_instance;
 
 #define CBUSINST(s) ((cbus_instance *)((s)->link.link_instance))
 
 gn_error cbus_initialise(struct gn_statemachine *state);
 
-#endif   /* #ifndef _cbus_h */
+#endif   /* #ifndef _gnokii_links_cbus_h */

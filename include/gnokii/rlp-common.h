@@ -95,13 +95,13 @@ typedef struct {
 
 /* Header data "split up" for TCH/F9.6 frame. */
 typedef struct {
-	unsigned char            Ns;   /* Send sequence number. */
-	unsigned char            Nr;   /* Receive sequence number. */
-	unsigned char            M;    /* Unumbered frame type. */
-	unsigned char            S;    /* Status. */
-	int          PF;   /* Poll/Final. */
-	int          CR;   /* Command/Response. */
-	rlp_frame_type Type; /* Frame type. */
+	unsigned char Ns;	/* Send sequence number. */
+	unsigned char Nr;	/* Receive sequence number. */
+	unsigned char M;	/* Unumbered frame type. */
+	unsigned char S;	/* Status. */
+	int PF;			/* Poll/Final. */
+	int CR;			/* Command/Response. */
+	rlp_frame_type Type;	/* Frame type. */
 } rlp_f96_header;
 
 

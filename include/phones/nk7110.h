@@ -45,8 +45,6 @@ typedef enum {
 	GN_OP_NK7110_Max       /* don't append anything after this entry */
 } gn_nk7100_operation;
 
-extern bool nk7110_link_ok;
-
 /* Message types */
 #define NK7110_MSG_COMMSTATUS	0x01	/* Communication status */
 #define NK7110_MSG_SMS		0x02	/* SMS handling */
@@ -56,14 +54,14 @@ extern bool nk7110_link_ok;
 #define NK7110_MSG_CALENDAR	0x13	/* Calendar notes */
 #define NK7110_MSG_FOLDER	0x14	/* Folders handling */
 #define NK7110_MSG_BATTERY	0x17	/* Battery info */
-#define NK7110_MSG_CLOCK		0x19	/* Date & alarm */
+#define NK7110_MSG_CLOCK	0x19	/* Date & alarm */
 #define NK7110_MSG_IDENTITY	0x1b	/* Brief product info */
 #define NK7110_MSG_RINGTONE	0x1f	/* Ringtone handling */
 #define NK7110_MSG_WAP		0x3f	/* WAP */
 #define NK7110_MSG_SECURITY	0x40	/* Security */
 #define NK7110_MSG_STLOGO	0x7a	/* Startup logo */
 #define NK7110_MSG_KEYPRESS	0xd1	/* Keypress? */
-#define NK7110_MSG_KEYPRESS_RESP	0xd2	/* Keypress response */
+#define NK7110_MSG_KEYPRESS_RESP 0xd2	/* Keypress response */
 
 /* SMS handling message subtypes (send) */
 #define NK7110_SUBSMS_SEND_SMS		0x01	/* Send SMS */
@@ -78,7 +76,7 @@ extern bool nk7110_link_ok;
 #define NK7110_SUBSMS_DELETE_OK		0x0b	/* SMS deleted */
 #define NK7110_SUBSMS_DELETE_FAIL	0x0c	/* SMS delete failed */
 #define NK7110_SUBSMS_SMS_RCVD		0x10	/* SMS received */
-#define NK7110_SUBSMS_CELLBRD_OK		0x21	/* Set cell broadcast success*/
+#define NK7110_SUBSMS_CELLBRD_OK	0x21	/* Set cell broadcast success*/
 #define NK7110_SUBSMS_CELLBRD_FAIL	0x22	/* Set cell broadcast failure */
 #define NK7110_SUBSMS_READ_CELLBRD	0x23	/* Read cell broadcast */
 #define NK7110_SUBSMS_SMSC_OK		0x31	/* Set SMS center success*/
@@ -95,7 +93,7 @@ extern bool nk7110_link_ok;
 #define NK7110_SUBCLO_GET_ALARM		0x6D	/* Get alarm */
 /* Clock handling message subtypes (recv) */
 #define NK7110_SUBCLO_DATE_RCVD		0x63	/* Received date & time */
-#define NK7110_SUBCLO_ALARM_RCVD		0x6E	/* Received alarm */
+#define NK7110_SUBCLO_ALARM_RCVD	0x6E	/* Received alarm */
 /* Alarm on/off */
 #define NK7110_ALARM_ENABLED		0x02	/* Alarm enabled */
 #define NK7110_ALARM_DISABLED		0x01	/* Alarm disabled */
@@ -120,18 +118,18 @@ extern bool nk7110_link_ok;
 #define NK7110_SUBCAL_INFO_RCVD		0x3b	/* Received calendar summary*/
 /* Calendar note types */
 #define NK7110_NOTE_MEETING		0x01	/* Metting */
-#define NK7110_NOTE_CALL			0x02	/* Call */
+#define NK7110_NOTE_CALL		0x02	/* Call */
 #define NK7110_NOTE_BIRTHDAY		0x04	/* Birthday */
 #define NK7110_NOTE_REMINDER		0x08	/* Reminder */
 
 /* Phone Memory types */
-#define NK7110_MEMORY_DIALLED	0x01	/* Dialled numbers */
-#define NK7110_MEMORY_MISSED	0x02	/* Missed calls */
-#define NK7110_MEMORY_RECEIVED	0x03	/* Received calls */
-#define NK7110_MEMORY_PHONE	0x05	/* Telephone phonebook */
-#define NK7110_MEMORY_SIM	0x06	/* SIM phonebook */
+#define NK7110_MEMORY_DIALLED		0x01	/* Dialled numbers */
+#define NK7110_MEMORY_MISSED		0x02	/* Missed calls */
+#define NK7110_MEMORY_RECEIVED		0x03	/* Received calls */
+#define NK7110_MEMORY_PHONE		0x05	/* Telephone phonebook */
+#define NK7110_MEMORY_SIM		0x06	/* SIM phonebook */
 #define NK7110_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
-#define NK7110_MEMORY_GROUPS	0x10	/* Caller groups */
+#define NK7110_MEMORY_GROUPS		0x10	/* Caller groups */
 
 #define NK7110_MEMORY_DC		0x01	/* ME dialled calls list */
 #define NK7110_MEMORY_MC		0x02	/* ME missed (unanswered received) calls list */
@@ -142,7 +140,7 @@ extern bool nk7110_link_ok;
 #define NK7110_MEMORY_ON		0x07	/* ?? SIM (or ME) own numbers list */
 #define NK7110_MEMORY_EN		0x08	/* ?? SIM (or ME) emergency number */
 #define NK7110_MEMORY_MT		0x09	/* ?? combined ME and SIM phonebook */
-#define NK7110_MEMORY_VOICE	0x0b	/* Voice Mailbox */
+#define NK7110_MEMORY_VOICE		0x0b	/* Voice Mailbox */
 
 #define NK7110_MEMORY_IN		0x08	/* INBOX */
 #define NK7110_MEMORY_OU		0x10	/* OUTBOX */
@@ -172,7 +170,7 @@ extern bool nk7110_link_ok;
 #define NK7110_MEMORY_XX 0xff
 
 /* Entry Types for the enhanced phonebook */
-#define NK7110_ENTRYTYPE_POINTER		0x04	/* Pointer to other memory */
+#define NK7110_ENTRYTYPE_POINTER	0x04	/* Pointer to other memory */
 #define NK7110_ENTRYTYPE_NAME		0x07	/* Name always the only one */
 #define NK7110_ENTRYTYPE_EMAIL		0x08	/* Email Adress (TEXT) */
 #define NK7110_ENTRYTYPE_POSTAL		0x09	/* Postal Address (Text) */
@@ -185,7 +183,7 @@ extern bool nk7110_link_ok;
 #define NK7110_ENTRYTYPE_GROUP		0x1e	/* Group number for phonebook entry */
 
 /* Entry types for the security commands */
-#define NK7110_SUBSEC_ENABLE_EXTENDED_CMDS 0x64  /* Enable extended commands */
-#define NK7110_SUBSEC_NETMONITOR         0x7e    /* Netmonitor */
+#define NK7110_SUBSEC_ENABLE_EXTENDED_CMDS 0x64	/* Enable extended commands */
+#define NK7110_SUBSEC_NETMONITOR	0x7e	/* Netmonitor */
 
 #endif  /* _gnokii_phones_nk7110_h */

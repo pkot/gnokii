@@ -44,8 +44,6 @@ typedef enum {
 	GN_OP_NK6510_Max       /* don't append anything after this entry */
 } GSM6510_Operation;
 
-extern bool nk6510_link_ok;
-
 /* Message types */
 #define NK6510_MSG_COMMSTATUS	0x01	/* Communication status */
 #define NK6510_MSG_SMS		0x02	/* SMS handling */
@@ -58,7 +56,7 @@ extern bool nk6510_link_ok;
 #define NK6510_MSG_CALENDAR	0x13	/* Calendar notes */
 #define NK6510_MSG_FOLDER	0x14	/* Folders handling */
 #define NK6510_MSG_BATTERY	0x17	/* Battery info */
-#define NK6510_MSG_CLOCK		0x19	/* Date & alarm */
+#define NK6510_MSG_CLOCK	0x19	/* Date & alarm */
 #define NK6510_MSG_IDENTITY	0x1b	/* Brief product info */
 #define NK6510_MSG_RINGTONE	0x1f	/* Ringtone handling */
 #define NK6510_MSG_PROFILE	0x39	/* Profiles */
@@ -74,20 +72,20 @@ extern bool nk6510_link_ok;
 #define NK6510_SUBSMS_SET_SMSC		0x23	/* Set SMS center */
 #define NK6510_SUBSMS_GET_SMSC		0x14	/* Get SMS center */
 /* SMS handling message subtypes (recv) */
-#define NK6510_SUBSMS_SMS_SEND_STATUS	0x03 /* SMS sending status */
+#define NK6510_SUBSMS_SMS_SEND_STATUS	0x03	/* SMS sending status */
 #define NK6510_SUBSMS_SMS_SEND_OK	0x00	/* SMS sent */
 #define NK6510_SUBSMS_SMS_SEND_FAIL	0x01	/* SMS send failed */
 #define NK6510_SUBSMS_SMS_RCVD		0x10	/* SMS received */
 #define NK6510_SUBSMS_SMSC_RCV		0x15	/* SMS center info received */
-#define NK6510_SUBSMS_CELLBRD_OK		0x21	/* Set cell broadcast success*/
+#define NK6510_SUBSMS_CELLBRD_OK	0x21	/* Set cell broadcast success*/
 #define NK6510_SUBSMS_CELLBRD_FAIL	0x22	/* Set cell broadcast failure */
 #define NK6510_SUBSMS_READ_CELLBRD	0x23	/* Read cell broadcast */
 #define NK6510_SUBSMS_SMSC_OK		0x31	/* Set SMS center success*/
 #define NK6510_SUBSMS_SMSC_FAIL		0x32	/* Set SMS center failure */
 
 /* Clock handling message subtypes (send) */
-#define NK6510_SUBCLO_GET_DATE	0x0a	/* Get date & time */
-#define NK6510_SUBCLO_GET_ALARM	0x02	/* Get alarm */
+#define NK6510_SUBCLO_GET_DATE		0x0a	/* Get date & time */
+#define NK6510_SUBCLO_GET_ALARM		0x02	/* Get alarm */
 /* Clock handling message subtypes (recv) */
 #define NK6510_SUBCLO_DATE_RCVD		0x0b	/* Received date & time */
 #define NK6510_SUBCLO_SET_DATE_RCVD	0x02	/* Received date & time set OK */
@@ -96,8 +94,8 @@ extern bool nk6510_link_ok;
 #define NK6510_SUBCLO_ALARM_TIME_RCVD	0x1a	/* Received alarm time */
 #define NK6510_SUBCLO_ALARM_STATE_RCVD	0x20	/* Received alarm state (on/off) */
 /* Alarm on/off */
-#define NK6510_ALARM_ENABLED	0x02	/* Alarm enabled */
-#define NK6510_ALARM_DISABLED	0x01	/* Alarm disabled */
+#define NK6510_ALARM_ENABLED		0x02	/* Alarm enabled */
+#define NK6510_ALARM_DISABLED		0x01	/* Alarm disabled */
 
 /* Calendar handling message subtypes (send) */
 #define NK6510_SUBCAL_ADD_MEETING	0x01	/* Add meeting note */
@@ -119,18 +117,18 @@ extern bool nk6510_link_ok;
 #define NK6510_SUBCAL_INFO_RCVD		0x3b	/* Received calendar summary*/
 /* Calendar note types */
 #define NK6510_NOTE_MEETING		0x01	/* Metting */
-#define NK6510_NOTE_CALL			0x02	/* Call */
+#define NK6510_NOTE_CALL		0x02	/* Call */
 #define NK6510_NOTE_BIRTHDAY		0x04	/* Birthday */
 #define NK6510_NOTE_REMINDER		0x08	/* Reminder */
 
 /* Phone Memory types */
-#define NK6510_MEMORY_DIALLED	0x01	/* Dialled numbers */
-#define NK6510_MEMORY_MISSED	0x02	/* Missed calls */
-#define NK6510_MEMORY_RECEIVED	0x03	/* Received calls */
-#define NK6510_MEMORY_PHONE	0x05	/* Telephone phonebook */
-#define NK6510_MEMORY_SIM	0x06	/* SIM phonebook */
+#define NK6510_MEMORY_DIALLED		0x01	/* Dialled numbers */
+#define NK6510_MEMORY_MISSED		0x02	/* Missed calls */
+#define NK6510_MEMORY_RECEIVED		0x03	/* Received calls */
+#define NK6510_MEMORY_PHONE		0x05	/* Telephone phonebook */
+#define NK6510_MEMORY_SIM		0x06	/* SIM phonebook */
 #define NK6510_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
-#define NK6510_MEMORY_GROUPS	0x10	/* Caller groups */
+#define NK6510_MEMORY_GROUPS		0x10	/* Caller groups */
 
 #define NK6510_MEMORY_DC		0x01	/* ME dialled calls list */
 #define NK6510_MEMORY_MC		0x02	/* ME missed (unanswered received) calls list */
@@ -141,7 +139,7 @@ extern bool nk6510_link_ok;
 #define NK6510_MEMORY_ON		0x07	/* ?? SIM (or ME) own numbers list */
 #define NK6510_MEMORY_EN		0x08	/* ?? SIM (or ME) emergency number */
 #define NK6510_MEMORY_MT		0x09	/* ?? combined ME and SIM phonebook */
-#define NK6510_MEMORY_VOICE	0x0b	/* Voice Mailbox */
+#define NK6510_MEMORY_VOICE		0x0b	/* Voice Mailbox */
 #define NK6510_MEMORY_IN		0x02	/* INBOX */
 #define NK6510_MEMORY_OU		0x03	/* OUTBOX */
 #define NK6510_MEMORY_AR		0x04	/* ARCHIVE */
@@ -155,22 +153,22 @@ extern bool nk6510_link_ok;
 #define NK6510_MEMORY_F7		0x12
 #define NK6510_MEMORY_F8		0x13
 #define NK6510_MEMORY_F9		0x14
-#define NK6510_MEMORY_F10	0x15
-#define NK6510_MEMORY_F11	0x16
-#define NK6510_MEMORY_F12	0x17
-#define NK6510_MEMORY_F13	0x18
-#define NK6510_MEMORY_F14	0x19
-#define NK6510_MEMORY_F15	0x20
-#define NK6510_MEMORY_F16	0x21
-#define NK6510_MEMORY_F17	0x22
-#define NK6510_MEMORY_F18	0x23
-#define NK6510_MEMORY_F19	0x24
-#define NK6510_MEMORY_F20	0x25	/* MY FOLDERS 20 */
+#define NK6510_MEMORY_F10		0x15
+#define NK6510_MEMORY_F11		0x16
+#define NK6510_MEMORY_F12		0x17
+#define NK6510_MEMORY_F13		0x18
+#define NK6510_MEMORY_F14		0x19
+#define NK6510_MEMORY_F15		0x20
+#define NK6510_MEMORY_F16		0x21
+#define NK6510_MEMORY_F17		0x22
+#define NK6510_MEMORY_F18		0x23
+#define NK6510_MEMORY_F19		0x24
+#define NK6510_MEMORY_F20		0x25	/* MY FOLDERS 20 */
 /* This is used when the memory type is unknown. */
-#define NK6510_MEMORY_XX 0xff
+#define NK6510_MEMORY_XX		0xff
 
 /* Entry Types for the enhanced phonebook */
-#define NK6510_ENTRYTYPE_POINTER		0x1a	/* Pointer to other memory */
+#define NK6510_ENTRYTYPE_POINTER	0x1a	/* Pointer to other memory */
 #define NK6510_ENTRYTYPE_NAME		0x07	/* Name always the only one */
 #define NK6510_ENTRYTYPE_EMAIL		0x08	/* Email Adress (TEXT) */
 #define NK6510_ENTRYTYPE_POSTAL		0x09	/* Postal Address (Text) */
@@ -184,7 +182,7 @@ extern bool nk6510_link_ok;
 #define NK6510_ENTRYTYPE_URL		0x2c	/* Group number for phonebook entry */
 
 /* Entry types for the security commands */
-#define NK6510_SUBSEC_ENABLE_EXTENDED_CMDS	0x64  /* Enable extended commands */
-#define NK6510_SUBSEC_NETMONITOR         	0x7e    /* Netmonitor */
+#define NK6510_SUBSEC_ENABLE_EXTENDED_CMDS	0x64	/* Enable extended commands */
+#define NK6510_SUBSEC_NETMONITOR         	0x7e	/* Netmonitor */
 
 #endif  /* _gnokii_phones_nk6510_h */
