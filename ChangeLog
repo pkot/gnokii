@@ -12,6 +12,8 @@
  * gnokii updates:
     o let gnokii display usage instruction to stdout when it's
     called with --help or -h and to stderr otherwise      (Pawel Kot)
+    o clean SMS fields in data struct when retrieving multiple
+    messages                                              (Pawel Kot)
  * Support Nokia Card Phone RPM-1              (Friedrich Lobenstock)
  * More verbose reporting when detecting the model
                                                (Friedrich Lobenstock)

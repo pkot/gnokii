@@ -860,8 +860,7 @@ static int getsms(int argc, char *argv[])
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[2];
-	message.MemoryType = StrToMemoryType(memory_type_string);
-	if (message.MemoryType == GMT_XX) {
+	if (StrToMemoryType(memory_type_string) == GMT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[2]);
 		return (-1);
 	}
@@ -905,6 +904,7 @@ static int getsms(int argc, char *argv[])
 		bool done;
 		int offset = 0;
 
+		memset(&message, 0, sizeof(GSM_API_SMS));
 		message.MemoryType = StrToMemoryType(memory_type_string);
 		message.Number = count;
 		data.SMS = &message;
