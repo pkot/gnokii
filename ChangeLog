@@ -16,6 +16,7 @@
     o rm msgtypes that never happen b/c of folding   (Osma Suominen)
     o support RLP frames in nk3110 driver code       (Osma Suominen)
     o support for making calls [only voice tested]   (Osma Suominen)
+    o keep seqno on retries; detect duplicate seqnos (Osma Suominen)
 
 0.5.2
 =====

@@ -107,6 +107,14 @@ static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemach
 
 		/* Send an ack */
 		fb3110_tx_ack_send(i->buffer[0], i->buffer[1], state);
+
+		if (FBUSINST(state)->last_incoming_sequence_number == i->buffer[1]) {
+			dprintf("Duplicate message received. Sent ack, not handling.\n");
+			return;
+		}
+
+		FBUSINST(state)->last_incoming_sequence_number = i->buffer[1];
+
 		/* Transfer message to state machine */
 		sm_incoming_function(fb3110_message_type_fold(i->buffer[0]), i->buffer, i->frame_len, state);
 
@@ -335,6 +343,7 @@ gn_error fb3110_initialise(struct gn_statemachine *state)
 		return GN_ERR_MEMORYFULL;
 
 	FBUSINST(state)->request_sequence_number = 0x10;
+	FBUSINST(state)->last_incoming_sequence_number = 0x00;
 
 	if (!fb3110_serial_open(state)) {
 		free(FBUSINST(state));

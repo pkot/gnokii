@@ -81,6 +81,7 @@ typedef struct {
 typedef struct{
 	fb3110_incoming_frame i;
 	u8 request_sequence_number;
+	u8 last_incoming_sequence_number;
 } fb3110_link;
 
 gn_error fb3110_initialise(struct gn_statemachine *state);
