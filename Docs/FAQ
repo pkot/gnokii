@@ -8,13 +8,13 @@ $Id$
 Q. What is gnokii ?
 
 A. It is a name of project. The aim of it is to develop tools and drivers
-for Nokia mobile phones. Of course, I think in this moment about really
-different tools - for example, modem drivers, console tools, etc.
-All created here software is released under the GNU
-General Public License. Please see COPYING file for more details on
-license/copying issues, the lack of warranty and where to send a postcard
-if you like gnokii :-). Anyway, our software works on many software
-(Linux, Free BSD, etc.) and hardware (Intel, etc.) platforms...
+   for Nokia mobile phones. Of course, I think in this moment about really
+   different tools - for example, modem drivers, console tools, etc.
+   All created here software is released under the GNU
+   General Public License. Please see COPYING file for more details on
+   license/copying issues, the lack of warranty and where to send a postcard
+   if you like gnokii :-). Anyway, our software works on many software
+   (Linux, Free BSD, etc.) and hardware (Intel, etc.) platforms...
 
 -------------------------------------------------------------------------------
 Q. How do you pronounce gnokii ?
@@ -24,17 +24,21 @@ A. You can pronounce gnokii as "gnooki" or "gnocki" at your option :-)
 -------------------------------------------------------------------------------
 Q. What models are supported ?
 
-A. Currently supported phone models are:
-         + 6110|6130|6150|6190|5110|5130|5190|3310|3210
+A. Currently supported phone models are (if not marked, it's a Nokia phone):
+         + 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330
          + 3110|3810|8110|8110i
          + 2110|2140|6080
-         + 640
-         + 5160|6160|6185
-         + 6210|7110
+         + 6210|7110|6250
+         + AT mode compatible phones (namely Nokia 6210, Nokia 7110,
+           Nokia 8210, Ericsson T39, Siemens S25 are known to work)
    Support for these models is planned:
          + Dancall 2711
          + 8210|8250
          + Ericsson GA628 and similiar
+   Support for these models is obsoleted. If noone is interested in
+   development for them, the support will be dropped:
+         + 640
+         + 5160|6160|6185
 
 -------------------------------------------------------------------------------
 Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
@@ -58,20 +62,25 @@ A. Yes.  gnokiid needs to create a symbolic link in the /dev directory.
 -------------------------------------------------------------------------------
 Q. Should any other gnokii binary be installed suid root?
 
-A. No.  There's no need for it.
-
--------------------------------------------------------------------------------
-Q. Does gnokii support Nokia 3210/3310/6210/7110 phone ?
-
-A. Yes it does. Support is not as full as with 6110 series but it is improving
-almost every day now.
+A. No. There's no need for it. gnokii isn't intended for setuid/setgid
+   operation. If you put the setuid/setgid bit on, you takes a huge security
+   risk. All you need it read/write permission for the device you are using
+   for connection (port option in the config file). You can safely do it
+   using groups management.
 
 -------------------------------------------------------------------------------
 Q: Can I use IrDA with 6210/7110 and gnokii ?
 
 A: Yes. Just put:
 connection = irda
-line into your config file.
+   line into your config file.
+
+-------------------------------------------------------------------------------
+Q: Can I use IrDA with 6210/7110 and gnokii ?
+
+A: Yes. Just put:
+connection = irda
+   line into your config file.
 
 -------------------------------------------------------------------------------
 Q. Can I get a copy of the protocol for the <insert phone model here> ?
@@ -101,14 +110,5 @@ A. We don't have any formal documentation of the protocols in use.
 Q. Does gnokii work under Sun's Solaris ?
 
 A. Generally yes, but in fact it depends on hardware -- your serial port
-must support at least 115200 baud rate. Sun Enterprise 250 machine is known
-to work with gnokii.
-
--------------------------------------------------------------------------------
-Q. I get "Sorry, phone has not yet been converted to new style.
-   Phone.Functions == NULL!" message. What's wrong?
-
-A. Don't worry. Nothing's wrong with your phone. Gnokii internal structure is
-   changing to be more flexible. It is quite complex process so it may take
-   some time to get everything to work. You may help us to do it -- you'll get
-   more functionality sooner.
+   must support at least 115200 baud rate. Sun Enterprise 250 machine is known
+   to work with gnokii.
