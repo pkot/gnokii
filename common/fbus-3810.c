@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.87  2001-03-19 23:43:45  pkot
+  Revision 1.88  2001-06-04 09:24:27  machek
+  Killed unneccessary functions.
+
+  Revision 1.87  2001/03/19 23:43:45  pkot
   Solaris/*BSD '#if defined' cleanup
 
   Revision 1.86  2001/03/13 01:23:17  pkot
@@ -136,7 +139,7 @@ GSM_Functions	FB38_Functions = {
 		FB38_WritePhonebookLocation,
 		UNIMPLEMENTED,
 		UNIMPLEMENTED,
-		FB38_GetMemoryStatus,
+		UNIMPLEMENTED,
 		FB38_GetSMSStatus,
 		FB38_GetSMSCenter,
 		FB38_SetSMSCenter,
@@ -1045,160 +1048,6 @@ GSM_Error   FB38_CancelCall(void)
 {
     FB38_TX_Send0x0f_HangupMessage();
     return (GE_NONE);
-}
-
-
-
-    /* Our "Not implemented" functions */
-
-GSM_Error   FB38_GetSpeedDial(GSM_SpeedDial *entry)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SetSpeedDial(GSM_SpeedDial *entry)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetMemoryStatus(GSM_MemoryStatus *Status)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetPowerSource(GSM_PowerSource *source)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetDisplayStatus(int *Status)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_EnterSecurityCode(GSM_SecurityCode SecurityCode)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetSecurityCodeStatus(int *Status)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetDateTime(GSM_DateTime *date_time)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SetDateTime(GSM_DateTime *date_time)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetAlarm(int alarm_number, GSM_DateTime *date_time)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SetAlarm(int alarm_number, GSM_DateTime *date_time)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetIncomingCallNr(char *Number)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SendBitmap (char *NetworkCode, int width, int height, unsigned char *bitmap)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetNetworkInfo (GSM_NetworkInfo *NetworkInfo)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_WriteCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_Netmonitor (unsigned char mode, char *Screen)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetBitmap (GSM_Bitmap *Bitmap)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SetBitmap (GSM_Bitmap *Bitmap)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SetRingTone (GSM_Ringtone *ringtone)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SendRingTone (GSM_Ringtone *ringtone, char *dest)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_Reset (unsigned char type)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_GetProfile(GSM_Profile *Profile)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_SetProfile(GSM_Profile *Profile)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_EnableDisplayOutput()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_DisableDisplayOutput()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_EnableCellBroadcast()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_DisableCellBroadcast()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   FB38_ReadCellBroadcast(GSM_CBMessage *Message)
-{
-    return (GE_NOTIMPLEMENTED);
 }
 
 #ifndef WIN32
