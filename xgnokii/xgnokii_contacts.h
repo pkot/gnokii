@@ -77,6 +77,7 @@ typedef struct {
 	GtkWidget *groupLabel;
 	GtkWidget *groupMenu;
 	gint newGroup;
+	gint newType;
 	gint row;
 } EditEntryData;
 
@@ -85,6 +86,7 @@ typedef struct {
 	PhonebookEntry *pbEntry;
 	GtkWidget *dialog;
 	GtkWidget *clist;
+	gint row;
 } EditNumbersData;
 
 

@@ -62,7 +62,6 @@
 #include "xpm/phone.xpm"
 #include "xpm/quest.xpm"
 
-
 typedef struct {
 	GtkWidget *dialog;
 	GtkWidget *entry;
@@ -100,6 +99,13 @@ static EditEntryData editEditEntryData =
 static EditEntryData duplicateEditEntryData =
     { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 static EditNumbersData editNumbersData = { NULL, NULL };
+
+static EditEntryData editSubEntriesData =
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+
+static void EditPbEntry(PhonebookEntry * pbEntry, gint row);
+static void NewPbEntry(PhonebookEntry * pbEntry);
+static void DuplicatePbEntry(PhonebookEntry * pbEntry);
 
 /* return != 0 if user has unsaved changes in contacts memory */
 inline gint GUI_ContactsIsChanged(void)
@@ -179,6 +185,43 @@ static inline void SetGroup5(GtkWidget * item, gpointer data)
 }
 
 
+static inline void SetType0(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 0;
+}
+static inline void SetType1(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 1;
+}
+static inline void SetType2(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 2;
+}
+static inline void SetType3(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 3;
+}
+static inline void SetType4(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 4;
+}
+static inline void SetType5(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 5;
+}
+static inline void SetType6(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 6;
+}
+static inline void SetType7(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 7;
+}
+static inline void SetType8(GtkWidget * item, gpointer data)
+{
+	((EditEntryData *) data)->newType = 8;
+}
+
 PhonebookEntry *FindFreeEntry(GSM_MemoryType type)
 {
 	PhonebookEntry *entry;
@@ -245,6 +288,7 @@ static void OkEditEntryDialog(GtkWidget * widget, gpointer data)
 	gchar *clist_row[4];
 	PhonebookEntry *entry;
 
+		/* Memory Type changed SM -> ME */
 	if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypePhone)->active &&
 	    ((EditEntryData *) data)->pbEntry->entry.MemoryType == GMT_SM) {
 		if ((entry = FindFreeEntry(GMT_ME)) == NULL) {
@@ -259,6 +303,8 @@ static void OkEditEntryDialog(GtkWidget * widget, gpointer data)
 		entry->entry.Name[max_phonebook_name_length] = '\0';
 
 		if (phoneMonitor.supported & PM_EXTPBK) {
+
+
 		} else {
 			strncpy(entry->entry.Number,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)),
@@ -279,6 +325,8 @@ static void OkEditEntryDialog(GtkWidget * widget, gpointer data)
 		statusInfo.ch_ME = statusInfo.ch_SM = 1;
 
 		((EditEntryData *) data)->pbEntry = entry;
+
+		/* Memory Type changed ME -> SM */
 	} else if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypeSIM)->active &&
 		   ((EditEntryData *) data)->pbEntry->entry.MemoryType == GMT_ME) {
 		if ((entry = FindFreeEntry(GMT_SM)) == NULL) {
@@ -301,6 +349,8 @@ because you save it into SIM memory!"));
 		}
 
 		if (phoneMonitor.supported & PM_EXTPBK) {
+
+
 		} else {
 			strncpy(entry->entry.Number,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)),
@@ -322,6 +372,7 @@ because you save it into SIM memory!"));
 
 		((EditEntryData *) data)->pbEntry = entry;
 	} else {
+		/* Memory type not changed, phone memory */
 		if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypePhone)->active) {
 			strncpy(((EditEntryData *) data)->pbEntry->entry.Name,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
@@ -330,6 +381,8 @@ because you save it into SIM memory!"));
 			    '\0';
 
 			if (phoneMonitor.supported & PM_EXTPBK) {
+
+
 			} else {
 				strncpy(((EditEntryData *) data)->pbEntry->entry.Number,
 					gtk_entry_get_text(GTK_ENTRY
@@ -338,6 +391,7 @@ because you save it into SIM memory!"));
 				((EditEntryData *) data)->pbEntry->entry.
 				    Name[max_phonebook_number_length] = '\0';
 			}
+		/* Memory type not changed, SIM memory */
 		} else {
 			strncpy(((EditEntryData *) data)->pbEntry->entry.Name,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
@@ -354,6 +408,8 @@ because you save it into SIM memory!"));
 			}
 
 			if (phoneMonitor.supported & PM_EXTPBK) {
+
+
 			} else {
 				strncpy(((EditEntryData *) data)->pbEntry->entry.Number,
 					gtk_entry_get_text(GTK_ENTRY
@@ -375,6 +431,7 @@ because you save it into SIM memory!"));
 	}
 
 	gtk_widget_hide(GTK_WIDGET(((EditEntryData *) data)->dialog));
+	((EditEntryData *) data)->dialog = NULL;
 
 	RefreshStatusInfo();
 
@@ -572,6 +629,7 @@ because you save it into SIM memory!"));
 	}
 
 	gtk_widget_hide(GTK_WIDGET(((EditEntryData *) data)->dialog));
+	((EditEntryData *) data)->dialog = NULL;
 
 	RefreshStatusInfo();
 
@@ -817,6 +875,76 @@ void CreateGroupMenu(EditEntryData * data)
 	gtk_option_menu_set_menu(GTK_OPTION_MENU(data->group), data->groupMenu);
 }
 
+void CreateTypeMenu(EditEntryData * data)
+{
+	GtkWidget *item;
+
+	if (data->groupMenu) {
+		gtk_option_menu_remove_menu(GTK_OPTION_MENU(data->group));
+		if (GTK_IS_WIDGET(data->groupMenu))
+			gtk_widget_destroy(GTK_WIDGET(data->groupMenu));
+		data->groupMenu = NULL;
+	}
+
+	data->groupMenu = gtk_menu_new();
+
+	item = gtk_menu_item_new_with_label("General");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType0), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Mobile");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType1), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Work");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType2), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Fax");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType3), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Home");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType4), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Note");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType5), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Postal");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType6), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("E-Mail");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType7), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Name");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetType8), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	gtk_option_menu_set_menu(GTK_OPTION_MENU(data->group), data->groupMenu);
+}
+
 
 inline void GUI_RefreshGroupMenu(void)
 {
@@ -830,33 +958,317 @@ inline void GUI_RefreshGroupMenu(void)
 		CreateGroupMenu(&duplicateEditEntryData);
 }
 
+void inttotype(gint int_type, gchar *type)
+{
+	switch (int_type) {
+	case 0:
+		strcpy(type, "General");
+		return;
+	case 1:
+		strcpy(type, "Mobile");
+		return;
+	case 2:
+		strcpy(type, "Work");
+		return;
+	case 3:
+		strcpy(type, "Fax");
+		return;
+	case 4:
+		strcpy(type, "Home");
+		return;
+	case 5:
+		strcpy(type, "Note");
+		return;
+	case 6:
+		strcpy(type, "Postal");
+		return;
+	case 7:
+		strcpy(type, "E-Mail");
+		return;
+	case 8:
+		strcpy(type, "Name");
+		return;
+	default:
+		return;
+	}
+}
+
+static void OkEditSubEntriesDialog(GtkWidget * clist, gpointer data)
+{
+	gchar *clist_row[3], *temp_row1;
+	gint row;
+
+	row = editNumbersData.row;
+
+	gtk_clist_get_text(GTK_CLIST(editNumbersData.clist), row, 0, &temp_row1);
+	clist_row[0] = malloc(sizeof(gchar) * 2);
+	strncpy(clist_row[0], temp_row1, 1);
+	gtk_clist_remove(GTK_CLIST(editNumbersData.clist), row);
+
+	clist_row[1] = gtk_entry_get_text(GTK_ENTRY(editSubEntriesData.number));
+	clist_row[2] = malloc(sizeof(gchar) * 15);
+	inttotype(editSubEntriesData.newType, clist_row[2]);
+	gtk_clist_insert(GTK_CLIST(editNumbersData.clist), row, clist_row);
+
+	gtk_widget_hide(GTK_WIDGET(editSubEntriesData.dialog));
+}
+
+static void DeleteEditSubEntriesDialog(GtkWidget * clist, gpointer data)
+{
+	gint row;
+
+	row = editNumbersData.row;
+	/* Do not allow to remove the 'main' entry */
+	if (row != 0) gtk_clist_remove(GTK_CLIST(editNumbersData.clist), row);
+	gtk_widget_hide(GTK_WIDGET(editSubEntriesData.dialog));
+}
+
+static void CancelEditSubEntriesDialog(GtkWidget * clist, gpointer data)
+{
+	gtk_widget_hide(GTK_WIDGET(editSubEntriesData.dialog));
+}
+
+static void CreateSubEntriesDialog(EditEntryData * editSubEntriesData, gchar * title, GtkSignalFunc okFunc, gint row)
+{
+	GtkWidget *button, *label, *hbox;
+
+	editSubEntriesData->dialog = gtk_dialog_new();
+	gtk_window_set_title(GTK_WINDOW(editSubEntriesData->dialog), "Edit subentries");
+	gtk_window_set_modal(GTK_WINDOW(editSubEntriesData->dialog), TRUE);
+	gtk_container_set_border_width(GTK_CONTAINER(editSubEntriesData->dialog), 10);
+	gtk_signal_connect(GTK_OBJECT(editSubEntriesData->dialog), "delete_event",
+			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
+
+	button = gtk_button_new_with_label(_("Ok"));
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(editSubEntriesData->dialog)->action_area),
+			   button, TRUE, TRUE, 10);
+
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			   GTK_SIGNAL_FUNC(okFunc), GINT_TO_POINTER(row));
+
+	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+	gtk_widget_grab_default(button);
+	gtk_widget_show(button);
+
+	button = gtk_button_new_with_label(_("Cancel"));
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(editSubEntriesData->dialog)->action_area),
+			   button, TRUE, TRUE, 10);
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			   GTK_SIGNAL_FUNC(CancelEditSubEntriesDialog), NULL);
+
+	gtk_widget_show(button);
+
+	button = gtk_button_new_with_label(_("Delete"));
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(editSubEntriesData->dialog)->action_area),
+			   button, TRUE, TRUE, 10);
+
+	gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			   GTK_SIGNAL_FUNC(DeleteEditSubEntriesDialog), NULL);
+
+	gtk_widget_show(button);
+
+	gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(editSubEntriesData->dialog)->vbox), 5);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(editSubEntriesData->dialog)->vbox), hbox);
+	gtk_widget_show(hbox);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(editSubEntriesData->dialog)->vbox), hbox);
+	gtk_widget_show(hbox);
+
+	label = gtk_label_new(_("Number/Text:"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_show(label);
+
+	editSubEntriesData->number = gtk_entry_new_with_max_length(max_phonebook_number_length);
+	gtk_box_pack_end(GTK_BOX(hbox), editSubEntriesData->number, FALSE, FALSE, 2);
+	gtk_widget_show(editSubEntriesData->number);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(editSubEntriesData->dialog)->vbox), hbox);
+	gtk_widget_show(hbox);
+
+	editSubEntriesData->groupLabel = gtk_label_new(_("Type:"));
+	gtk_box_pack_start(GTK_BOX(hbox), editSubEntriesData->groupLabel, FALSE, FALSE, 2);
+
+	editSubEntriesData->group = gtk_option_menu_new();
+
+	CreateTypeMenu(editSubEntriesData);
+
+	gtk_box_pack_start(GTK_BOX(hbox), editSubEntriesData->group, TRUE, TRUE, 0);
+
+}
+
+gint typetoint(gchar *type)
+{
+	if (g_strncasecmp(type, "General", 3) ==0) return (0);
+	if (g_strncasecmp(type, "Mobile", 3) == 0) return (1);
+	if (g_strncasecmp(type, "Work", 3) == 0) return (2);
+	if (g_strncasecmp(type, "Fax", 3) == 0) return (3);
+	if (g_strncasecmp(type, "Home", 3) == 0) return (4);
+	if (g_strncasecmp(type, "Note", 3) == 0) return (5);
+	if (g_strncasecmp(type, "Postal", 3) == 0) return (6);
+	if (g_strncasecmp(type, "E-Mail", 3) == 0) return (7);
+	if (g_strncasecmp(type, "Name", 3) == 0) return (8);
+	return(-1);
+}
+
 
 static void EditSubEntries(GtkWidget * clist,
 			   gint row, gint column, GdkEventButton * event, gpointer data)
 {
-	if (event && event->type == GDK_2BUTTON_PRESS)
-//    EditPbEntry((PhonebookEntry *) gtk_clist_get_row_data(GTK_CLIST (clist), row),
-//                row);
-	{
-		gchar *buf;
+	gchar *buf;
+	gint type;
 
-		gtk_clist_get_text(GTK_CLIST(clist), row, 1, &buf);
-		g_print(buf);
+	if (editSubEntriesData.dialog == NULL)
+		CreateSubEntriesDialog(&editSubEntriesData, _("Edit entry"), OkEditSubEntriesDialog, row);
+
+	gtk_clist_get_text(GTK_CLIST(clist), row, 1, &buf);
+	editNumbersData.row = row;
+	
+       	gtk_entry_set_text(GTK_ENTRY(editSubEntriesData.number), buf);
+
+	gtk_clist_get_text(GTK_CLIST(clist), row, 2, &buf);
+	type = typetoint(buf);
+	editSubEntriesData.newType = type;
+	gtk_option_menu_set_history(GTK_OPTION_MENU(editSubEntriesData.group), type);
+
+	gtk_widget_show(editSubEntriesData.group);
+	gtk_widget_show(editSubEntriesData.groupLabel);
+	
+	gtk_widget_show(GTK_WIDGET(editSubEntriesData.dialog));
+}
+
+gint typetohex(gchar *type)
+{
+	if (g_strcasecmp(type, "General") == 0) return (0x0a);
+	if (g_strcasecmp(type, "Mobile") == 0) return (0x03);
+	if (g_strcasecmp(type, "Work") == 0) return (0x06);
+	if (g_strcasecmp(type, "Fax") == 0) return (0x04);
+	if (g_strcasecmp(type, "Home") == 0) return (0x02);
+	if (g_strcasecmp(type, "Note") == 0) return (0x0a);
+	if (g_strcasecmp(type, "Postal") == 0) return (0x09);
+	if (g_strcasecmp(type, "E-Mail") == 0) return (0x08);
+	if (g_strcasecmp(type, "Name") == 0) return (0x07);
+	return(-1);
+}
+
+static void OkEditNumbersDialog(GtkWidget * c_list, EditEntryData * editEntryData)
+{
+	gchar *row_data;
+	gint found, i, type;
+
+	editEntryData->pbEntry->entry.SubEntriesCount = 0;
+
+	editEntryData->pbEntry->status = E_Changed;
+
+	for (i = 0; i < GSM_MAX_PHONEBOOK_SUB_ENTRIES; i++) {
+		found = gtk_clist_get_text(GTK_CLIST(editNumbersData.clist), i, 0, &row_data);
+		if (found != 1) break;
+		if (g_strncasecmp(row_data, "*", 1) == 0) {
+			found = gtk_clist_get_text(GTK_CLIST(editNumbersData.clist), i, 1, &row_data);
+			memcpy(editEntryData->pbEntry->entry.Number, row_data, strlen(row_data) + 1);
+		} else {
+			found = gtk_clist_get_text(GTK_CLIST(editNumbersData.clist), i, 1, &row_data);
+		}
+		memcpy(&editEntryData->pbEntry->entry.SubEntries[editEntryData->pbEntry->entry.SubEntriesCount].data,
+		       row_data,
+		       strlen(row_data) + 1);
+		found = gtk_clist_get_text(GTK_CLIST(editNumbersData.clist), i, 2, &row_data);
+		if (found != 1) break;
+		type = typetohex(row_data);
+		switch (type) {
+		case 0x0a:
+			if (g_strcasecmp(row_data, "General") == 0) {
+				editEntryData->pbEntry->entry.SubEntries
+					[editEntryData->pbEntry->entry.SubEntriesCount].EntryType = 0x0b;
+				editEntryData->pbEntry->entry.SubEntries
+					[editEntryData->pbEntry->entry.SubEntriesCount].NumberType = type; 
+			} else if (g_strcasecmp(row_data, "Note") == 0) {
+				editEntryData->pbEntry->entry.SubEntries
+					[editEntryData->pbEntry->entry.SubEntriesCount].EntryType = type; 
+				editEntryData->pbEntry->entry.SubEntries
+					[editEntryData->pbEntry->entry.SubEntriesCount].NumberType = 0x00; 
+			}
+			break;
+		case 0x02:
+		case 0x03:
+		case 0x04:
+		case 0x06:
+			editEntryData->pbEntry->entry.SubEntries
+				[editEntryData->pbEntry->entry.SubEntriesCount].EntryType = 0x0b;
+			editEntryData->pbEntry->entry.SubEntries
+				[editEntryData->pbEntry->entry.SubEntriesCount].NumberType = type; 
+			break;
+		case 0x07:
+		case 0x08:
+		case 0x09:
+			editEntryData->pbEntry->entry.SubEntries
+				[editEntryData->pbEntry->entry.SubEntriesCount].EntryType = type; 
+			editEntryData->pbEntry->entry.SubEntries
+				[editEntryData->pbEntry->entry.SubEntriesCount].NumberType = 0x00; 
+			break;
+		default:
+		}
+				
+		editEntryData->pbEntry->entry.SubEntriesCount++;
+	}
+	gtk_clist_clear(GTK_CLIST(editNumbersData.clist));
+	gtk_widget_hide(GTK_WIDGET(editNumbersData.dialog));
+
+	switch (editEntryData->row) {
+	case -1:
+		NewPbEntry(editEntryData->pbEntry);
+		break;
+	case -2:
+		DuplicatePbEntry(editEntryData->pbEntry);
+		break;
+	default:
+		EditPbEntry(editEntryData->pbEntry , editEntryData->row);
+		break;
 	}
 }
 
-
-static void EditNumbers(GtkWidget * widget, void *data)
+static void NewEditNumbersDialog(GtkWidget * c_list, EditEntryData * editEntryData)
 {
-	GtkWidget *button, *clistScrolledWindow;
+	gchar *row[3];
+
+	switch (editNumbersData.pbEntry->entry.SubEntriesCount) {
+	case 0:
+		strcpy(editNumbersData.pbEntry->entry.Number, "");
+		row[0] = "*";
+		break;
+	case GSM_MAX_PHONEBOOK_SUB_ENTRIES:
+		return;
+		break;
+	default:
+		row[0] = "";
+		break;
+	}
+
+	row[1] = "";
+	row[2] = "General";
+	gtk_clist_append(GTK_CLIST(editNumbersData.clist), row);
+	strcpy(editNumbersData.pbEntry->entry.SubEntries[editNumbersData.pbEntry->entry.SubEntriesCount].data.Number, "");
+	editNumbersData.pbEntry->entry.SubEntries[editNumbersData.pbEntry->entry.SubEntriesCount].EntryType = GSM_Number;
+	editNumbersData.pbEntry->entry.SubEntries[editNumbersData.pbEntry->entry.SubEntriesCount].NumberType = GSM_General;
+	editNumbersData.pbEntry->entry.SubEntriesCount++;
+}
+
+static void EditNumbers(GtkWidget * widget, EditEntryData *editEntryData)
+{
 	gchar *row[3];
 	register gint i;
+	GtkWidget *button, *clistScrolledWindow;
 
-
+	editNumbersData.dialog = NULL;
 	if (editNumbersData.dialog == NULL) {
 		editNumbersData.dialog = gtk_dialog_new();
 		gtk_window_set_title(GTK_WINDOW(editNumbersData.dialog), _("Numbers"));
 		gtk_window_set_modal(GTK_WINDOW(editNumbersData.dialog), TRUE);
+		gtk_window_set_default_size(GTK_WINDOW(editNumbersData.dialog), 350, 200);
+
 		gtk_container_set_border_width(GTK_CONTAINER(editNumbersData.dialog), 10);
 		gtk_signal_connect(GTK_OBJECT(editNumbersData.dialog), "delete_event",
 				   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
@@ -864,8 +1276,11 @@ static void EditNumbers(GtkWidget * widget, void *data)
 		button = gtk_button_new_with_label(_("Ok"));
 		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(editNumbersData.dialog)->action_area),
 				   button, TRUE, TRUE, 10);
-//    gtk_signal_connect (GTK_OBJECT (button), "clicked",
-//                        GTK_SIGNAL_FUNC (okFunc), (gpointer) editEntryData);
+
+		gtk_signal_connect (GTK_OBJECT (button), "clicked",
+				    GTK_SIGNAL_FUNC (OkEditNumbersDialog), 
+				    editEntryData);
+
 		GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
 		gtk_widget_grab_default(button);
 		gtk_widget_show(button);
@@ -873,16 +1288,11 @@ static void EditNumbers(GtkWidget * widget, void *data)
 		button = gtk_button_new_with_label(_("New"));
 		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(editNumbersData.dialog)->action_area),
 				   button, TRUE, TRUE, 10);
-//    gtk_signal_connect (GTK_OBJECT (button), "clicked",
-//                        GTK_SIGNAL_FUNC (okFunc), (gpointer) editEntryData);
-		gtk_widget_show(button);
 
-		button = gtk_button_new_with_label(_("Cancel"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(editNumbersData.dialog)->action_area),
-				   button, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(CancelDialog),
-				   (gpointer) editNumbersData.dialog);
+		gtk_signal_connect (GTK_OBJECT (button), "clicked",
+				    GTK_SIGNAL_FUNC (NewEditNumbersDialog), 
+				    (gpointer) editEntryData);
+
 		gtk_widget_show(button);
 
 		gtk_container_set_border_width(GTK_CONTAINER
@@ -894,8 +1304,10 @@ static void EditNumbers(GtkWidget * widget, void *data)
 		gtk_clist_set_column_width(GTK_CLIST(editNumbersData.clist), 0, 4);
 		gtk_clist_set_column_width(GTK_CLIST(editNumbersData.clist), 1, 115);
 		gtk_clist_set_column_width(GTK_CLIST(editNumbersData.clist), 2, 10);
-		//gtk_clist_set_column_justification (GTK_CLIST (editNumbersData.clist), 2, GTK_JUSTIFY_CENTER);
-
+		/*
+		gtk_clist_set_column_justification (GTK_CLIST (editNumbersData.clist), 
+						    2, GTK_JUSTIFY_CENTER);
+		*/
 		gtk_signal_connect(GTK_OBJECT(editNumbersData.clist), "select_row",
 				   GTK_SIGNAL_FUNC(EditSubEntries), NULL);
 
@@ -910,7 +1322,6 @@ static void EditNumbers(GtkWidget * widget, void *data)
 		gtk_widget_show(editNumbersData.clist);
 		gtk_widget_show(clistScrolledWindow);
 	}
-
 	gtk_clist_freeze(GTK_CLIST(editNumbersData.clist));
 	gtk_clist_clear(GTK_CLIST(editNumbersData.clist));
 
@@ -974,18 +1385,12 @@ static void EditNumbers(GtkWidget * widget, void *data)
 		}
 
 		gtk_clist_append(GTK_CLIST(editNumbersData.clist), row);
-/*      if (pbEntry->entry.MemoryType == GMT_ME)
-      gtk_clist_set_pixmap (GTK_CLIST (clist), row_i, 2,
-                            memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
-    else
-      gtk_clist_set_pixmap (GTK_CLIST (clist), row_i, 2,
-                            memoryPixmaps.simMemPix, memoryPixmaps.mask);
-*/
 	}
 
 	gtk_clist_thaw(GTK_CLIST(editNumbersData.clist));
 
 	gtk_widget_show(editNumbersData.dialog);
+
 }
 
 
@@ -1004,7 +1409,7 @@ static void CreateEditDialog(EditEntryData * editEntryData, gchar * title, GtkSi
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(editEntryData->dialog)->action_area),
 			   button, TRUE, TRUE, 10);
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			   GTK_SIGNAL_FUNC(okFunc), (gpointer) editEntryData);
+			   GTK_SIGNAL_FUNC(okFunc), editEntryData);
 	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
 	gtk_widget_grab_default(button);
 	gtk_widget_show(button);
@@ -1012,7 +1417,7 @@ static void CreateEditDialog(EditEntryData * editEntryData, gchar * title, GtkSi
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(editEntryData->dialog)->action_area),
 			   button, TRUE, TRUE, 10);
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			   GTK_SIGNAL_FUNC(CancelEditDialog), (gpointer) editEntryData);
+			   GTK_SIGNAL_FUNC(CancelEditDialog), editEntryData);
 	gtk_widget_show(button);
 
 	gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(editEntryData->dialog)->vbox), 5);
@@ -1047,7 +1452,7 @@ static void CreateEditDialog(EditEntryData * editEntryData, gchar * title, GtkSi
 		gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, TRUE, 2);
 
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(EditNumbers), NULL);
+				   GTK_SIGNAL_FUNC(EditNumbers), editEntryData);
 		gtk_widget_show_all(button);
 	} else {
 		editEntryData->number = gtk_entry_new_with_max_length(max_phonebook_number_length);
@@ -1055,24 +1460,6 @@ static void CreateEditDialog(EditEntryData * editEntryData, gchar * title, GtkSi
 		gtk_widget_show(editEntryData->number);
 	}
 
-/*  if (phoneMonitor.supported & PM_EXTPBK) {
-
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_container_add (GTK_CONTAINER (GTK_DIALOG (editEntryData->dialog)->vbox), hbox);
-//    gtk_widget_show (hbox);
-
-    label = gtk_label_new (_("Extended:"));
-    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-//    gtk_widget_show (label);
-    
-    editEntryData->extended = gtk_combo_new();
-    gtk_box_pack_end(GTK_BOX(hbox), editEntryData->extended, FALSE, FALSE, 2);
-//    gtk_widget_show (editEntryData->extended);
-
-    gtk_signal_connect (GTK_OBJECT (GTK_COMBO(editEntryData->extended)->entry), "activate",
-			GTK_SIGNAL_FUNC (ExtPbkChanged), (gpointer) editEntryData);    
-  }
-*/
 
 	editEntryData->memoryBox = gtk_hbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(editEntryData->dialog)->vbox),
@@ -1112,13 +1499,15 @@ static void CreateEditDialog(EditEntryData * editEntryData, gchar * title, GtkSi
 
 static void EditPbEntry(PhonebookEntry * pbEntry, gint row)
 {
-	if (editEditEntryData.dialog == NULL)
-		CreateEditDialog(&editEditEntryData, _("Edit entry"), OkEditEntryDialog);
-
 	editEditEntryData.pbEntry = pbEntry;
 	editEditEntryData.newGroup = pbEntry->entry.Group;
 	editEditEntryData.row = row;
 	editNumbersData.pbEntry = pbEntry;
+	editSubEntriesData.pbEntry = pbEntry;
+
+	if (editEditEntryData.dialog == NULL)
+		CreateEditDialog(&editEditEntryData, _("Edit entry"), OkEditEntryDialog);
+
 
 	gtk_entry_set_text(GTK_ENTRY(editEditEntryData.name), pbEntry->entry.Name);
 
@@ -1203,19 +1592,21 @@ void DeletePbEntry(void)
 
 void NewPbEntry(PhonebookEntry * pbEntry)
 {
+	newEditEntryData.pbEntry = pbEntry;
+	newEditEntryData.newGroup = pbEntry->entry.Group;
+	newEditEntryData.row = -1;
+	editNumbersData.pbEntry = pbEntry;
+	editSubEntriesData.pbEntry = pbEntry;
+
 	if (newEditEntryData.dialog == NULL)
 		CreateEditDialog(&newEditEntryData, _("New entry"), OkNewEntryDialog);
 
-	newEditEntryData.pbEntry = pbEntry;
-	newEditEntryData.newGroup = 5;
-	editNumbersData.pbEntry = pbEntry;
-
-	gtk_entry_set_text(GTK_ENTRY(newEditEntryData.name), "");
+	gtk_entry_set_text(GTK_ENTRY(newEditEntryData.name), pbEntry->entry.Name);
 
 	if (phoneMonitor.supported & PM_EXTPBK)
-		gtk_label_set_text(GTK_LABEL(newEditEntryData.number), "");
+		gtk_label_set_text(GTK_LABEL(newEditEntryData.number), pbEntry->entry.Number);
 	else
-		gtk_entry_set_text(GTK_ENTRY(newEditEntryData.number), "");
+		gtk_entry_set_text(GTK_ENTRY(newEditEntryData.number), pbEntry->entry.Number);
 
 	if (pbEntry->entry.MemoryType == GMT_ME)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(newEditEntryData.memoryTypePhone),
@@ -1245,12 +1636,14 @@ void NewPbEntry(PhonebookEntry * pbEntry)
 
 void DuplicatePbEntry(PhonebookEntry * pbEntry)
 {
-	if (duplicateEditEntryData.dialog == NULL)
-		CreateEditDialog(&duplicateEditEntryData, _("Duplicate entry"), OkNewEntryDialog);
-
 	duplicateEditEntryData.pbEntry = pbEntry;
 	duplicateEditEntryData.newGroup = pbEntry->entry.Group;
+	duplicateEditEntryData.row = -2;
 	editNumbersData.pbEntry = pbEntry;
+	editSubEntriesData.pbEntry = pbEntry;
+
+	if (duplicateEditEntryData.dialog == NULL)
+		CreateEditDialog(&duplicateEditEntryData, _("Duplicate entry"), OkNewEntryDialog);
 
 	gtk_entry_set_text(GTK_ENTRY(duplicateEditEntryData.name), pbEntry->entry.Name);
 
@@ -1345,11 +1738,15 @@ static void NewEntry(void)
 	PhonebookEntry *entry;
 
 	if (contactsMemoryInitialized) {
-		if ((entry = FindFreeEntry(GMT_SM)) != NULL)
+		if ((entry = FindFreeEntry(GMT_ME)) != NULL) {
+			memset(entry, 0, sizeof(PhonebookEntry));
+			entry->entry.MemoryType = GMT_ME;
 			NewPbEntry(entry);
-		else if ((entry = FindFreeEntry(GMT_ME)) != NULL)
+		} else if ((entry = FindFreeEntry(GMT_SM)) != NULL) {
+			memset(entry, 0, sizeof(PhonebookEntry));
+			entry->entry.MemoryType = GMT_SM;
 			NewPbEntry(entry);
-		else {
+		} else {
 			gtk_label_set_text(GTK_LABEL(errorDialog.text),
 					   _("Can't find free memory."));
 			gtk_widget_show(errorDialog.dialog);
@@ -1732,7 +2129,7 @@ static void SaveContacts(void)
 
 				if (ml->status != GE_NONE) {
 					g_print(_
-						("%s: line: %d:Can't write ME memory entry number %d! Error: %d\n"),
+						("%s: line: %d: Can't write ME memory entry number %d! Error: %d\n"),
 						__FILE__, __LINE__, i + 1, ml->status);
 				}
 				g_free(ml);
@@ -1838,128 +2235,6 @@ static GtkWidget *CreateSaveQuestionDialog(GtkSignalFunc SaveFunc, GtkSignalFunc
 
 	return dialog;
 }
-
-
-static void OkExtPbkDialog(GtkWidget * w, gpointer data)
-{
-
-	ExtPbkDialog *d = (ExtPbkDialog *) data;
-	SMS_NumberType numtype;
-	gint i, found = 999;
-	gchar *chars;
-
-	if (w == d->gbutton)
-		numtype = GSM_General;
-	else if (w == d->mbutton)
-		numtype = GSM_Mobile;
-	else if (w == d->wbutton)
-		numtype = GSM_Work;
-	else if (w == d->fbutton)
-		numtype = GSM_Fax;
-	else if (w == d->hbutton)
-		numtype = GSM_Home;
-	else
-		numtype = GSM_General;
-
-	/* Search through subentries */
-
-	for (i = 0; i < d->pbEntry->entry.SubEntriesCount; i++) {
-		if (d->pbEntry->entry.SubEntries[i].EntryType == GSM_Number)
-			if (d->pbEntry->entry.SubEntries[i].NumberType == numtype)
-				found = i;
-	}
-
-	if (found > i) {	/* Not found */
-		found = d->pbEntry->entry.SubEntriesCount;
-		d->pbEntry->entry.SubEntriesCount++;
-		d->pbEntry->entry.SubEntries[found].EntryType = GSM_Number;
-		d->pbEntry->entry.SubEntries[found].NumberType = numtype;
-	}
-
-	chars = gtk_editable_get_chars(GTK_EDITABLE(d->entry), 0, -1);
-	strcpy(d->pbEntry->entry.SubEntries[found].data.Number, chars);
-	g_free(chars);
-
-	/* Update the entry dialog */
-	EditPbEntry(d->pbEntry, d->row);
-
-	gtk_widget_hide(d->dialog);
-}
-
-
-void ExtPbkChanged(GtkWidget * widget, gpointer data)
-{
-	static ExtPbkDialog dialog = { NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL };
-	GtkWidget *button;
-	static GtkWidget *label;
-	gchar *chars;
-
-
-	if (dialog.dialog == NULL) {
-
-		dialog.dialog = gtk_dialog_new();
-
-		gtk_window_set_title(GTK_WINDOW(dialog.dialog),
-				     _("Which Extended Phonebook Entry?"));
-		gtk_window_set_modal(GTK_WINDOW(dialog.dialog), TRUE);
-		gtk_container_set_border_width(GTK_CONTAINER(dialog.dialog), 10);
-		gtk_signal_connect(GTK_OBJECT(dialog.dialog), "delete_event",
-				   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
-
-		dialog.gbutton = gtk_button_new_with_label(_("General"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog.dialog)->vbox),
-				   dialog.gbutton, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(dialog.gbutton), "clicked",
-				   GTK_SIGNAL_FUNC(OkExtPbkDialog), (gpointer) & dialog);
-		gtk_widget_show(dialog.gbutton);
-		dialog.mbutton = gtk_button_new_with_label(_("Mobile"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog.dialog)->vbox),
-				   dialog.mbutton, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(dialog.mbutton), "clicked",
-				   GTK_SIGNAL_FUNC(OkExtPbkDialog), (gpointer) & dialog);
-		gtk_widget_show(dialog.mbutton);
-		dialog.wbutton = gtk_button_new_with_label(_("Work"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog.dialog)->vbox),
-				   dialog.wbutton, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(dialog.wbutton), "clicked",
-				   GTK_SIGNAL_FUNC(OkExtPbkDialog), (gpointer) & dialog);
-		gtk_widget_show(dialog.wbutton);
-		dialog.fbutton = gtk_button_new_with_label(_("Fax"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog.dialog)->vbox),
-				   dialog.fbutton, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(dialog.fbutton), "clicked",
-				   GTK_SIGNAL_FUNC(OkExtPbkDialog), (gpointer) & dialog);
-		gtk_widget_show(dialog.fbutton);
-		dialog.hbutton = gtk_button_new_with_label(_("Home"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog.dialog)->vbox),
-				   dialog.hbutton, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(dialog.hbutton), "clicked",
-				   GTK_SIGNAL_FUNC(OkExtPbkDialog), (gpointer) & dialog);
-		gtk_widget_show(dialog.hbutton);
-
-		button = gtk_button_new_with_label(_("Cancel"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog.dialog)->action_area),
-				   button, TRUE, TRUE, 10);
-		gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(CancelDialog), (gpointer) dialog.dialog);
-		gtk_widget_show(button);
-
-		label = gtk_label_new("");
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog.dialog)->vbox), label, FALSE, FALSE,
-				   5);
-		gtk_widget_show(label);
-	}
-
-	chars = gtk_editable_get_chars(GTK_EDITABLE(widget), 0, -1);
-	gtk_label_set_text(GTK_LABEL(label), chars);
-	g_free(chars);
-	dialog.pbEntry = ((EditEntryData *) data)->pbEntry;
-	dialog.row = ((EditEntryData *) data)->row;
-	dialog.entry = widget;
-	gtk_widget_show(dialog.dialog);
-}
-
-
 
 void GUI_RefreshContacts(void)
 {
@@ -2271,8 +2546,10 @@ inline void GUI_ShowContacts(void)
 					phoneMonitor.supported & PM_CALLERGROUP);
 	GUI_RefreshContacts();
 	gtk_widget_show(GUI_ContactsWindow);
-//  if (!contactsMemoryInitialized)
-//    ReadContacts ();
+	/*
+	if (!contactsMemoryInitialized)
+		ReadContacts ();
+	*/
 }
 
 static void ExportVCARD(FILE * f)
