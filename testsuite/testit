@@ -9,9 +9,9 @@ export HOME=`pwd`
 GNOKII=../common/gnokii-debug
 for A in test.*; do
     echo -n "Doing $A... "
-    source $A 2>&1 | grep -v ^GNOKII | grep -v '^Doing operation' > /tmp/delme
     B=`echo $A | sed s/test/out/`
-    if cmp /tmp/delme $B > /dev/null 2>&1; then
+    source $A 2>&1 | grep -v ^GNOKII | grep -v '^Doing operation' > my$B
+    if cmp my$B $B > /dev/null 2>&1; then
 	echo ok
     else
 	echo '*** FAILED'

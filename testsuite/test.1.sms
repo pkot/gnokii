@@ -1,0 +1,1 @@
+echo "This is some totally unimportant test message. I don't like czech telecom so I'm sending it to them." | $GNOKII --sendsms 0800123456
