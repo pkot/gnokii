@@ -90,6 +90,9 @@ API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state);
 API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location);
 API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
 
+API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry);
+API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry);
+
 API int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number);
 API int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number);
 

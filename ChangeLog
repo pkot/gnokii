@@ -54,6 +54,8 @@
  * libgnokii changes
     o fix vCal support; there can be multiple whitechars between
       key and colon                                      (Pawel Kot)
+    o add experimental and simple LDIF support; we will be able
+      to import/export eg. Mozilla Addressbook           (Pawel Kot)
 
 0.5.2
 =====

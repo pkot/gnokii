@@ -27,6 +27,7 @@ OBJS =	gsm-api.o \
 	device.o \
 	vcal.o \
 	vcard.o \
+	ldif.o \
 	gsm-networks.o \
 	gsm-filetypes.o \
 	gsm-ringtones.o \
