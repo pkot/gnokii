@@ -10,61 +10,70 @@
 
   Header file for miscellaneous defines, typedefs etc.
 
-  Last modification: Mon Mar 20 21:44:24 CET 2000
+  Last modification: Mon May  1 10:18:04 CEST 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
 
-#ifndef    __misc_h
-#define    __misc_h    
+#ifndef __misc_h
+#define __misc_h    
 
 /* Some general defines. */
 
 #ifndef false
-    #define false (0)
+  #define false (0)
 #endif
 
 #ifndef true
-    #define true (!false)
+  #define true (!false)
 #endif
 
 #ifndef bool    
-    #define bool int
+  #define bool int
 #endif
 
-#ifdef GNOKII_GETTEXT
-    #include <libintl.h>
-    #define _(x) gettext(x)
-#else
-    #define _(x) (x)
-#endif GNOKII_GETTEXT
+/* This one is for NLS. */
 
-    /* Definitions for u8, u16, u32 and u64, borrowed from
-       /usr/src/linux/include/asm-i38/types.h */
+#ifdef USE_NLS
+  #include <libintl.h>
+  #define _(x) gettext(x)
+#else
+  #define _(x) (x)
+#endif /* USE_NLS */
+
+/* Definitions for u8, u16, u32 and u64, borrowed from
+   /usr/src/linux/include/asm-i38/types.h */
+
 #ifndef u8
-    typedef unsigned char u8;
+  typedef unsigned char u8;
 #endif
 
 #ifndef u16
-    typedef unsigned short u16;
+  typedef unsigned short u16;
 #endif
 
 #ifndef u32
-    typedef unsigned int u32;
+  typedef unsigned int u32;
 #endif
 
 #ifndef s32
-    typedef int s32;
+  typedef int s32;
 #endif
 
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__)
-    #ifndef u64
-        typedef unsigned long long u64;
-    #endif
+  #ifndef u64
+    typedef unsigned long long u64;
+  #endif
 
-    #ifndef s64
-        typedef signed long long s64;
-    #endif
+  #ifndef s64
+    typedef signed long long s64;
+  #endif
 #endif 
 
-#endif    /* __misc_h */
+/* This one is for FreeBSD and similar systems without __ptr_t_ */
+
+#ifndef __ptr_t
+  #define __ptr_t void *
+#endif /* __ptr_t */
+
+#endif /* __misc_h */

@@ -12,3 +12,7 @@
 
 * Wed Apr  5 18:11:51 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - support for group logo sending via SMS
+
+* Mon May  1 10:34:44 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- FreeBSD patch for __ptr_t
+
