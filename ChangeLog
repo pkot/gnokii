@@ -4,6 +4,7 @@
     o GetRawRingtone reply differs on 6310         (BORBELY Zoltan)
     o GetSMSFolders hardcoded blocklen fixed  (Michael H. Warfield)
     o GetRingtoneList command added                (BORBELY Zoltan)
+    o This driver will support the 5100 model         (Peter Pilsl)
  * 6110 series updates
     o phonebook reading fixes                      (BORBELY Zoltan)
     o add nokia 3390 to supported models           (BORBELY Zoltan)

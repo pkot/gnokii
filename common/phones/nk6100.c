@@ -185,7 +185,7 @@ gn_driver driver_nokia_6100 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|3360|3390|3410|8210|8250|8290|5100|RPM-1", /* Supported models */
+		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|3360|3390|3410|8210|8250|8290|RPM-1", /* Supported models */
 		4,			/* Max RF Level */
 		0,			/* Min RF Level */
 		GN_RF_Arbitrary,	/* RF level units */
