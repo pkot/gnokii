@@ -66,7 +66,7 @@ static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
 			    gn_data *data, struct gn_statemachine *state)
 {
 	int i, ofs, len;
-	char *pos, *lenpos;
+	char *pos, *lenpos = NULL;
 	char tmp[8];
 
 	if (buffer[0] != GN_AT_OK)
@@ -89,6 +89,7 @@ static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
 			}
 		}
 	}
+	if (!lenpos) return GN_ERR_INTERNALERROR;
 	len = atoi(lenpos);
 
 	/* Do we need one more digit? */
