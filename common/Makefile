@@ -26,7 +26,6 @@ OBJS =	cfgreader.o \
 	misc.o \
 	gsm-sms.o \
 	sms-nokia.o \
-	sms-layout.o \
 	gsm-bitmaps.o \
 	gsm-common.o \
 	gsm-encoding.o \
