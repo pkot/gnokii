@@ -79,6 +79,7 @@ int bluetooth_open(bdaddr_t *bdaddr, uint8_t channel, struct gn_statemachine *st
 
 int bluetooth_close(int fd, struct gn_statemachine *state)
 {
+	sleep(2);
 	return close(fd);
 }
 

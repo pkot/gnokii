@@ -45,9 +45,8 @@
 #include "gnokii.h"
 #include "device.h"
 #include "links/fbus-phonet.h"
+#include "links/fbus.h"
 #include "gnokii-internal.h"
-
-#ifdef HAVE_IRDA
 
 static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error phonet_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
@@ -55,22 +54,51 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 
 #define FBUSINST(s) ((phonet_incoming_message *)((s)->link.link_instance))
 
+#define FBUS_PHONET_BLUETOOTH_INITSEQ 0xd0, 0x00, 0x01
 
 /*--------------------------------------------*/
 
 static bool phonet_open(struct gn_statemachine *state)
 {
-	int result;
+	int result, i, n, total = 0;
+	unsigned char init_sequence[] = { FBUS_PHONET_BLUETOOTH_FRAME_ID,
+					  FBUS_PHONET_BLUETOOTH_DEVICE_PC,
+					  FBUS_PHONET_BLUETOOTH_DEVICE_PHONE,
+					  FBUS_PHONET_BLUETOOTH_INITSEQ,
+					  0x04};
+	unsigned char init_resp[7];
+	unsigned char init_pattern[7] = { FBUS_PHONET_BLUETOOTH_FRAME_ID,
+					 FBUS_PHONET_BLUETOOTH_DEVICE_PHONE,
+					 FBUS_PHONET_BLUETOOTH_DEVICE_PC,
+					 FBUS_PHONET_BLUETOOTH_INITSEQ,
+					 0x05};
+
+	memset(&init_resp, 0, 7);
 
 	/* Open device. */
-	result = device_open(state->config.port_device, false, false, false, GN_CT_Irda, state);
+	result = device_open(state->config.port_device, false, false, false,
+			     state->config.connection_type, state);
 
 	if (!result) {
 		perror(_("Couldn't open PHONET device"));
 		return false;
 	}
 
-	return (true);
+	if (state->config.connection_type == GN_CT_Bluetooth) {
+		device_write(&init_sequence, 7, state);
+		while (total < 7) {
+			n = device_read(&init_resp + total, 7 - total, state);
+			total += n;
+		}
+		for (i = 0; i < n; i++) {
+			if (init_resp[i] != init_pattern[i]) {
+				dprintf("Incorrect byte in the answer\n");
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 /* RX_State machine for receive handling.  Called once for each character
@@ -83,7 +111,8 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 	switch (i->state) {
 
 	case FBUS_RX_Sync:
-		if (rx_byte == FBUS_PHONET_FRAME_ID) {
+		if (rx_byte == FBUS_PHONET_FRAME_ID ||
+		    rx_byte == FBUS_PHONET_BLUETOOTH_FRAME_ID) {
 			i->state = FBUS_RX_GetDestination;
 		}
 		break;
@@ -93,9 +122,10 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_destination = rx_byte;
 		i->state = FBUS_RX_GetSource;
 
-		if (rx_byte != 0x0c) {
+		if (rx_byte != FBUS_DEVICE_PHONE &&
+		    rx_byte != FBUS_PHONET_BLUETOOTH_DEVICE_PHONE) {
 			i->state = FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x0c, got %2x\n", rx_byte);
+			dprintf("The fbus stream is out of sync - expected 0x0c, got 0x%2x\n", rx_byte);
 		}
 		break;
 
@@ -104,11 +134,10 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_source = rx_byte;
 		i->state = FBUS_RX_GetType;
 
-		/* Source should be 0x00 */
-
-		if (rx_byte!=0x00)  {
+		if (rx_byte != FBUS_DEVICE_PC &&
+		    rx_byte != FBUS_PHONET_BLUETOOTH_DEVICE_PC)  {
 			i->state = FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x00, got %2x\n", rx_byte);
+			dprintf("The fbus stream is out of sync - expected 0x00, got 0x%2x\n", rx_byte);
 		}
 
 		break;
@@ -199,9 +228,15 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 
 	/* Now construct the message header. */
 
-	out_buffer[current++] = FBUS_PHONET_FRAME_ID;
-	out_buffer[current++] = FBUS_DEVICE_PHONE; /* Destination */
-	out_buffer[current++] = FBUS_DEVICE_PC;    /* Source */
+	if (state->config.connection_type == GN_CT_Bluetooth) {
+		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_FRAME_ID;
+		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_DEVICE_PC;
+		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_DEVICE_PHONE;
+	} else {
+		out_buffer[current++] = FBUS_PHONET_FRAME_ID;
+		out_buffer[current++] = FBUS_DEVICE_PHONE; /* Destination */
+		out_buffer[current++] = FBUS_DEVICE_PC;    /* Source */
+	}
 
 	out_buffer[current++] = messagetype; /* Type */
 
@@ -232,13 +267,11 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 	return GN_ERR_NONE;
 }
 
-
-
 /* Initialise variables and start the link */
-
 gn_error phonet_initialise(struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_FAILED;
+	bool connected;
 
 	/* Fill in the link functions */
 	state->link.loop = &phonet_loop;
@@ -247,10 +280,15 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	if ((FBUSINST(state) = calloc(1, sizeof(phonet_incoming_message))) == NULL)
 		return GN_ERR_MEMORYFULL;
 
-	if ((state->config.connection_type == GN_CT_Infrared) || (state->config.connection_type == GN_CT_Irda)) {
-		if (phonet_open(state) == true) {
+	switch (state->config.connection_type) {
+	case GN_CT_Infrared:
+	case GN_CT_Irda:
+	case GN_CT_Bluetooth:
+		if (phonet_open(state) == true)
 			error = GN_ERR_NONE;
-		}
+		break;
+	default:
+		break;
 	}
 	if (error != GN_ERR_NONE) {
 		free(FBUSINST(state));
@@ -264,12 +302,3 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 
 	return error;
 }
-
-#else /* HAVE_IRDA */
-
-gn_error phonet_initialise(struct gn_statemachine *state)
-{
-	return GN_ERR_NOTSUPPORTED;
-}
-
-#endif /* HAVE_IRDA */

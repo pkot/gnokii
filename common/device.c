@@ -65,7 +65,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 		break;
 #ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
-		state->device.fd = bluetooth_open(&state->config.bt_address, state->config.rfcomm_cn, state);
+		state->device.fd = bluetooth_open((bdaddr_t *)&state->config.port_device, state->config.rfcomm_cn, state);
 		break;
 #endif
 	case GN_CT_Tekram:
