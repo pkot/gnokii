@@ -11,7 +11,7 @@ Packager: Pavel Janik ml. <Pavel.Janik@linux.cz>, Jan Derfinak <ja@mail.upjs.sk>
 Group: Applications/Communications
 Source: htp://www.gnokii.org/download/%{name}-%{version}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{version}-root
-BuildPreReq: gettext, gtk+-devel >= 1.2.0
+BuildPreReq: gettext, gtk+-devel >= 1.2.0, flex
 
 %description
 Gnokii is a multisystem tool suite and (eventually) modem/fax driver for
@@ -115,6 +115,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/pkgconfig/*
 
 %changelog
+
+* Mon Feb 23 2004 BORBELY Zoltan <bozo@andrews.hu>
+- require flex at build time (suggested by Olivier Kaloudoff)
 
 * Fri Jan 30 2004 Pawel Kot <pkot@linuxnews.pl>
 - gnokii is for mobile phones not only for Nokia mobile phones and also
