@@ -161,6 +161,7 @@ typedef enum {
 	GOP_SetDateTime,
 	GOP_GetProfile,
 	GOP_SetProfile,
+	GOP_WriteToDo,
 	GOP_WriteCalendarNote,
 	GOP_DeleteCalendarNote,
 	GOP_SetSpeedDial,

@@ -112,6 +112,7 @@ typedef enum {
 	OPT_ANSWERCALL,
 	OPT_HANGUP,
 	OPT_GETTODO,
+	OPT_WRITETODO,
 	OPT_GETCALENDARNOTE,
 	OPT_WRITECALENDARNOTE,
 	OPT_DELCALENDARNOTE,
@@ -273,6 +274,7 @@ static int usage(FILE *f)
 		     "          gnokii --answercall callid\n"
 		     "          gnokii --hangup callid\n"
 		     "          gnokii --gettodo start [end] [-v]\n"
+		     "          gnokii --writetodo vcardfile number\n"
 		     "          gnokii --getcalendarnote start [end] [-v]\n"
 		     "          gnokii --writecalendarnote vcardfile number\n"
 		     "          gnokii --deletecalendarnote start [end]\n"
@@ -1862,6 +1864,7 @@ static int gettodo(int argc, char *argv[])
 	GSM_ToDo	ToDo;
 	GSM_Data	data;
 	GSM_Error	error = GE_NONE;
+	bool		vCal = false;
 	int		i, first_location, last_location;
 
 	struct option options[] = {
@@ -1880,7 +1883,7 @@ static int gettodo(int argc, char *argv[])
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {
 		case 'v':
-			//			vCal = true;
+			vCal = true;
 			break;
 		default:
 			usage(stderr); /* Would be better to have an calendar_usage() here. */
@@ -1898,21 +1901,31 @@ static int gettodo(int argc, char *argv[])
 		error = SM_Functions(GOP_GetToDo, &data, &State);
 		switch (error) {
 		case GE_NONE:
-			fprintf(stdout, _("Todo: %s\n"), ToDo.Text);
-			fprintf(stdout, _("Priority: "));
-			switch (ToDo.Priority) {
-			case GTD_LOW:
-				fprintf(stdout, _("low\n"));
-				break;
-			case GTD_MEDIUM:
-				fprintf(stdout, _("medium\n"));
-				break;
-			case GTD_HIGH:
-				fprintf(stdout, _("high\n"));
-				break;
-			default:
-				fprintf(stdout, _("unknown\n"));
-				break;
+			if (vCal) {
+				fprintf(stdout, "BEGIN:VCALENDAR\r\n");
+				fprintf(stdout, "VERSION:1.0\r\n");
+				fprintf(stdout, "BEGIN:VTODO\r\n");
+				fprintf(stdout, "PRIORITY:%i\r\n", ToDo.Priority);
+				fprintf(stdout, "SUMMARY:%s\r\n", ToDo.Text);
+				fprintf(stdout, "END:VTODO\r\n");
+				fprintf(stdout, "END:VCALENDAR\r\n");
+			} else {
+				fprintf(stdout, _("Todo: %s\n"), ToDo.Text);
+				fprintf(stdout, _("Priority: "));
+				switch (ToDo.Priority) {
+				case GTD_LOW:
+					fprintf(stdout, _("low\n"));
+					break;
+				case GTD_MEDIUM:
+					fprintf(stdout, _("medium\n"));
+					break;
+				case GTD_HIGH:
+					fprintf(stdout, _("high\n"));
+					break;
+				default:
+					fprintf(stdout, _("unknown\n"));
+					break;
+				}
 			}
 			break;
 		default:
@@ -1921,6 +1934,33 @@ static int gettodo(int argc, char *argv[])
 		}
 	}
 	return error;
+}
+
+static int writetodo(char *argv[])
+{
+	GSM_ToDo ToDo;
+	GSM_Data data;
+	GSM_Error error;
+
+	GSM_DataClear(&data);
+	data.ToDo = &ToDo;
+
+#ifndef WIN32
+	error = GSM_ReadVCalendarFileTodo(argv[0], &ToDo, atoi(argv[1]));
+	if (error != GE_NONE) {
+		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), print_error(error));
+		return -1;
+	}
+#endif
+
+	error = SM_Functions(GOP_WriteToDo, &data, &State);
+	if (error == GE_NONE)
+		fprintf(stderr, _("Succesfully written!\n"));
+	else {
+		fprintf(stderr, _("Failed to write calendar note: %s\n"), print_error(error));
+		return -1;
+	}
+	return 0;
 }
 
 /* Calendar notes receiving. */
@@ -1978,6 +2018,8 @@ static int getcalendarnote(int argc, char *argv[])
 					break;
 				case GCN_CALL:
 					fprintf(stdout, "PHONE CALL\r\n");
+					fprintf(stdout, "SUMMARY:%s\r\n", CalendarNote.Phone);
+					fprintf(stdout, "DESCRIPTION:%s\r\n", CalendarNote.Text);
 					break;
 				case GCN_MEETING:
 					fprintf(stdout, "MEETING\r\n");
@@ -1989,7 +2031,7 @@ static int getcalendarnote(int argc, char *argv[])
 					fprintf(stdout, "UNKNOWN\r\n");
 					break;
 				}
-				fprintf(stdout, "SUMMARY:%s\r\n",CalendarNote.Text);
+				if (CalendarNote.Type != GCN_CALL) fprintf(stdout, "SUMMARY:%s\r\n",CalendarNote.Text);
 				fprintf(stdout, "DTSTART:%04d%02d%02dT%02d%02d%02d\r\n", CalendarNote.Time.Year,
 					CalendarNote.Time.Month, CalendarNote.Time.Day, CalendarNote.Time.Hour,
 					CalendarNote.Time.Minute, CalendarNote.Time.Second);
@@ -2066,7 +2108,7 @@ static int writecalendarnote(char *argv[])
 	data.CalendarNote = &CalendarNote;
 
 #ifndef WIN32
-	error = GSM_ReadVCalendarFile(argv[0], &CalendarNote, atoi(argv[1]));
+	error = GSM_ReadVCalendarFileEvent(argv[0], &CalendarNote, atoi(argv[1]));
 	if (error != GE_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), print_error(error));
 		return -1;
@@ -2080,7 +2122,6 @@ static int writecalendarnote(char *argv[])
 		fprintf(stderr, _("Failed to write calendar note: %s\n"), print_error(error));
 		return -1;
 	}
-
 	return 0;
 }
 
@@ -3744,6 +3785,9 @@ int main(int argc, char *argv[])
 		/* Get ToDo note mode */
 		{ "gettodo",		required_argument, NULL, OPT_GETTODO },
 
+		/* Write ToDo note mode */
+		{ "writetodo",          required_argument, NULL, OPT_WRITETODO },
+
 		/* Get calendar note mode */
 		{ "getcalendarnote",    required_argument, NULL, OPT_GETCALENDARNOTE },
 
@@ -3865,6 +3909,7 @@ int main(int argc, char *argv[])
 		{ OPT_ANSWERCALL,        1, 1, 0 },
 		{ OPT_HANGUP,            1, 1, 0 },
 		{ OPT_GETTODO,           1, 3, 0 },
+		{ OPT_WRITETODO,         2, 2, 0 },
 		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
 		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
@@ -4007,6 +4052,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_GETTODO:
 			rc = gettodo(nargc, nargv);
+			break;
+		case OPT_WRITETODO:
+			rc = writetodo(nargv);
 			break;
 		case OPT_GETCALENDARNOTE:
 			rc = getcalendarnote(nargc, nargv);

@@ -32,17 +32,21 @@
 #include "gsm-common.h"
 #include "gsm-filetypes.h"
 
-#define YY_DECL int yylex(char *type, char *text, char* time, char *alarm, int lexnumber)
-int veventcounter=0;
+#define YY_DECL int yylex(char *type, char *text, char *desc, char *time, char *alarm, char *todo_priority, int lexnumber)
+int veventcounter = 0, vtodocounter = 0;
 
 %}
 
 %x vcalendar
 %x vevent
+%x vtodo
 %x category
 %x summary
+%x todosummary
+%x description
 %x ttime
 %x aalarm
+%x priority
 %option noyywrap
 %option nounput
 
@@ -52,10 +56,28 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <vcalendar>BEGIN:VEVENT			++veventcounter; BEGIN(vevent);
 
+<vcalendar>BEGIN:VTODO			++vtodocounter; BEGIN(vtodo);
+
+<vtodo>SUMMARY:				BEGIN(todosummary);
+
+<todosummary>[[:alnum:] ]+		{
+						if(vtodocounter == lexnumber)
+							strncpy(text, yytext, 256);
+						BEGIN(vtodo);
+					}
+
+<vtodo>PRIORITY:			BEGIN(priority);
+
+<priority>[0-9]{1}			{
+						if(vtodocounter == lexnumber)
+							strncpy(todo_priority, yytext, 1);
+						BEGIN(vtodo);
+					}
+
 <vevent>CATEGORIES:			BEGIN(category);
 
 <category>[[:alnum:] ]+			{
-						if(veventcounter==lexnumber)
+						if(veventcounter == lexnumber)
 							strncpy(type, yytext, 21);
 						BEGIN(vevent);
 					}
@@ -63,15 +85,23 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 <vevent>SUMMARY:			BEGIN(summary);
 
 <summary>[[:alnum:] ]+			{
-						if(veventcounter==lexnumber)
-							strncpy(text, yytext, 21);
+						if(veventcounter == lexnumber)
+							strncpy(text, yytext, 256);
+						BEGIN(vevent);
+					}
+
+<vevent>DESCRIPTION:			BEGIN(description);
+
+<description>[[:alnum:] ]+		{
+						if(veventcounter == lexnumber)
+							strncpy(desc, yytext, 256);
 						BEGIN(vevent);
 					}
 
 <vevent>DTSTART:			BEGIN(ttime);
 
 <ttime>[0-9]{8}T[0-9]{6}		{
-						if(veventcounter==lexnumber)
+						if(veventcounter == lexnumber)
 							strncpy(time, yytext, 16);
 						BEGIN(vevent);
 					}
@@ -79,7 +109,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 <vevent>AALARM:				BEGIN(aalarm);
 
 <aalarm>[0-9]{8}T[0-9]{6}		{
-						if(veventcounter==lexnumber)
+						if(veventcounter == lexnumber)
 							strncpy(alarm, yytext, 16);
 						BEGIN(vevent);
 					}
@@ -90,12 +120,13 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 <vcalendar>END:VCALENDAR		BEGIN(0);
 <*>.|\n
 <*><<EOF>>				{
-						if((lexnumber<1) | (lexnumber>veventcounter))
+	                                        if (((lexnumber > 0) && (lexnumber < veventcounter + 1)) ||
+						    ((lexnumber > 0) && (lexnumber < vtodocounter + 1)))
 						{
-							fprintf(stderr, "Error: Invalid calendar note number!\n");
-							return -1;
+							return 0;
 						}
-						return 0;
+						fprintf(stderr, "Error: Invalid calendar note number!\n");
+						return -1;
 					}
 
 %%
@@ -151,19 +182,21 @@ int GetvCalTime(GSM_DateTime *dt, char *time)
 *   <>0 if error
 */
 int FillCalendarNote(GSM_CalendarNote *note, char *type,
-			char *text, char *time, char *alarm)
+			char *text, char *desc, char *time, char *alarm)
 {
+
 	GetvCalTime(&note->Time, time);
 	GetvCalTime(&note->Alarm, alarm);
 
 	note->Location = 0;
 
-	strncpy(note->Text, text, 20);
+	strncpy(note->Text, text, 256);
 	strcpy(note->Phone, ""); /* correct in most cases */
 
 	/* FIXME: Handle additional strings, maybee from configuration file */
 	if (!strcmp(type, "PHONE CALL")) {
-		strncpy(note->Phone, text, 20);
+		strncpy(note->Phone, text, 48);
+		if (desc[0] != 0) strncpy(note->Text, desc, 256);
 		note->Type = GCN_CALL;
 	} else if (!strcmp(type, "MEETING"))
 		note->Type = GCN_MEETING;
@@ -176,9 +209,9 @@ int FillCalendarNote(GSM_CalendarNote *note, char *type,
 }
 
 /**
-* GSM_ReadVCalendarFile
+* GSM_ReadVCalendarFileEvent
 *
-* Reads vCalendar file
+* Reads vCalendar file and parses VEVENT entries
 *
 * in:
 *   FileName: name of vCalendar file
@@ -187,10 +220,10 @@ int FillCalendarNote(GSM_CalendarNote *note, char *type,
 * out:
 *   <>0 if error
 */
-int GSM_ReadVCalendarFile(char *FileName, GSM_CalendarNote *cnote, int number)
+int GSM_ReadVCalendarFileEvent(char *FileName, GSM_CalendarNote *cnote, int number)
 {
 	FILE *file;
-	char type[21] = "", text[21] = "", time[16] = "", alarm[16] = "";
+	char type[21] = "", text[257] = "", desc[257] = "", time[16] = "", alarm[16] = "", todo_priority[2] = "";
 
 	file = fopen(FileName, "r");
 	if (!file) {
@@ -200,11 +233,68 @@ int GSM_ReadVCalendarFile(char *FileName, GSM_CalendarNote *cnote, int number)
 
 	yyin = file;
 
-	if (yylex(type, text, time, alarm, number)) {
+	if (yylex(type, text, desc, time, alarm, todo_priority, number)) {
 		fprintf(stderr, _("Error parsing vCalendar file!\n"));
 		return -1;
 	}
-	FillCalendarNote(cnote, type, text, time, alarm);
+	FillCalendarNote(cnote, type, text, desc, time, alarm);
+
+	fclose(file);
+	return 0;
+}
+
+/**
+* FillToDo
+*
+* Fills todo data from strings into ToDo
+*
+* in:
+*   note:  todo structure
+*   text:  text or phonenumber
+*   priority:  1 (highest) - 3 (lowest)
+* out:
+*   <>0 if error
+*/
+int FillToDo(GSM_ToDo *note, char *text, char *todo_priority)
+{
+	note->Location = 0;
+
+	strncpy(note->Text, text, 256);
+	note->Priority = 2;
+	if (todo_priority) note->Priority = atoi(todo_priority);
+	return 0;
+}
+
+/**
+* GSM_ReadVCalendarFileTodo
+*
+* Reads vCalendar file and parses VTODO entries
+*
+* in:
+*   FileName: name of vCalendar file
+*   ctodo:  pointer to calendar note
+*   number:  number in file of calendar note to read
+* out:
+*   <>0 if error
+*/
+int GSM_ReadVCalendarFileTodo(char *FileName, GSM_ToDo *ctodo, int number)
+{
+	FILE *file;
+	char type[21] = "", text[258] = "", desc[258] = "", time[16] = "", alarm[16] = "", todo_priority[3] = "";
+
+	file = fopen(FileName, "r");
+	if (!file) {
+		fprintf(stderr, _("File cannot be opened!\n"));
+		return -1;
+	}
+
+	yyin = file;
+
+	if (yylex(type, text, desc, time, alarm, todo_priority, number)) {
+		fprintf(stderr, _("Error parsing vCalendar file!\n"));
+		return -1;
+	}
+	FillToDo(ctodo, text, todo_priority);
 
 	fclose(file);
 	return 0;

@@ -36,11 +36,13 @@
 #include "gsm-bitmaps.h"
 #include "gsm-ringtones.h"
 
-int GSM_ReadVCalendarFile(char *FileName, GSM_CalendarNote *cnote, int number);
+int GSM_ReadVCalendarFileEvent(char *FileName, GSM_CalendarNote *cnote, int number);
+int GSM_ReadVCalendarFileTodo(char *FileName, GSM_ToDo *cnote, int number);
 
 int GetvCalTime(GSM_DateTime *dt, char *time);
 int FillCalendarNote(GSM_CalendarNote *note, char *type,
-		     char *text, char *time, char *alarm);
+		     char *text, char *desc, char *time, char *alarm);
+int FillToDo(GSM_ToDo *note, char *text, char *todo_priority);
 
 
 /* Ringtone Files */
