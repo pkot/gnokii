@@ -2700,21 +2700,18 @@ static gn_error NK7110_IncomingRingtone(int messagetype, unsigned char *message,
 static gn_error NK7110_GetRawRingtone(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x22, 0x00, 0x00};
-	gn_error error;
 
 	if (!data || !data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
 	if (data->ringtone->location < 0) return GN_ERR_INVALIDLOCATION;
 
 	req[5] = data->ringtone->location;
 
-	if (sm_message_send(6, NK7110_MSG_RINGTONE, req, state)) return GN_ERR_NOTREADY;
-	return sm_block(NK7110_MSG_RINGTONE, data, state);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_RINGTONE, 6);
 }
 
 static gn_error NK7110_SetRawRingtone(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x1f, 0x00, 0x00};
-	gn_error error;
 	int len;
 
 	if (!data || !data->ringtone || !data->raw_data || !data->raw_data->data)
