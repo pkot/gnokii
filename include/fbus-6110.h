@@ -72,6 +72,11 @@
 
 #define FB61_FRAME_ID 0x1e
 
+/* Every (well, almost every) frame from the computer starts with this
+   sequence. */
+
+#define FB61_FRAME_HEADER 0x00, 0x01, 0x00
+
 /* The FBUS interface is 115200 */
 
 #define FB61_BAUDRATE (B115200)

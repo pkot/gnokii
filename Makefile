@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1_pre23
+VERSION = 0.3.1_pre24
 
 #
 # Compiler to use.
@@ -48,10 +48,22 @@ PORT=-DPORT="\"/dev/ttyS0\""
 # PORT=-DPORT="\"/dev/ttyS1\""
 
 #
+# Under Windows, use this syntax
+#
+
+# PORT=-DPORT="\"COM1:\""
+
+#
 # I18N - comment this line if you do not have GNU gettext installed
 #
 
 GETTEXT=-DGNOKII_GETTEXT
+
+#
+# WIN32 support for Cygwin. Uncomment when compiling under Cygwin/WIN32
+#
+
+# WIN32=-DWIN32
 
 #
 # Security - compile with -DSECURITY to enable all security features
@@ -71,13 +83,13 @@ GTKLDFLAGS=`gtk-config --libs`
 # Destination directory
 #
 
-DESTDIR=/usr/local
+DESTDIR=/tmp/usr/local
 
 #
 # Install utility
 #
 
-INSTALL=install --strip 
+INSTALL=install
 
 #
 # For more information about threads see the comp.programming.threads FAQ
@@ -93,17 +105,18 @@ INSTALL=install --strip
 # Set up compilation/linking flags for Linux.
 #
 
-export CC MODEL PORT GETTEXT DEBUG VERSION SECURITY
+export CC MODEL PORT GETTEXT DEBUG VERSION WIN32 SECURITY GTKCFLAGS GTKLDFLAGS
 
-COMMON=-Wall -g -O0 \
+COMMON=-Wall -O2 \
        ${MODEL} ${PORT} \
        ${GETTEXT} \
        ${SECURITY} \
+       ${WIN32} \
        ${DEBUG} \
        -DVERSION=\"${VERSION}\"
 
 CFLAGS = -D_REENTRANT ${COMMON} ${GTKCFLAGS}
-LDFLAGS = -lpthread ${GTKLDFLAGS}
+LDFLAGS = -s -lpthread ${GTKLDFLAGS}
 
 #
 # For FreeBSD uncomment the following lines
@@ -144,15 +157,17 @@ GNOKIID_OBJS = gnokiid.o at-emulator.o virtmodem.o datapump.o
 
 MGNOKIIDEV_OBJS = mgnokiidev.o
 
+WIN32_OBJS = win32/winserial.o
+
 # Build executable
 all: gnokii gnokiid mgnokiidev xgnokii xlogos xkeyb
 
-gnokii: $(GNOKII_OBJS) $(COMMON_OBJS)
+gnokii: $(GNOKII_OBJS) $(COMMON_OBJS) $(WIN32_OBJS)
 
 gnokiid: $(GNOKIID_OBJS) $(COMMON_OBJS)
 
 xgnokii: $(COMMON_OBJS)
-	make -C xgnokii
+	@make -sC xgnokii
 
 xlogos: $(XLOGOS_OBJS) $(COMMON_OBJS)
 
@@ -171,9 +186,9 @@ clean:
                xlogos $(XLOGOS_OBJS) \
                xkeyb $(XKEYB_OBJS) \
                mgnokiidev $(MGNOKIIDEV_OBJS) \
+               $(WIN32_OBJS) \
                gnokii-${VERSION}.tar.gz
-	@rm -rf bin
-	make -C xgnokii clean
+	@make -sC xgnokii clean
 
 dist:	clean
 	@mkdir -p /tmp/gnokii-${VERSION}
@@ -184,34 +199,34 @@ dist:	clean
 	@rm -rf /tmp/gnokii-${VERSION}
 	@mv /tmp/gnokii-${VERSION}.tar.gz .
 
-install: gnokii gnokiid
-	@echo "Installing binaries..."
+install: gnokii gnokiid xgnokii xlogos xkeyb
+	@echo "Installing files..."
 
-	@mkdir -p $(DESTDIR)/bin $(DESTDIR)/sbin
+	@mkdir -p $(DESTDIR)/bin $(DESTDIR)/sbin $(DESTDIR)/lib/gnokii
 
-	@$(INSTALL) gnokii	$(DESTDIR)/bin
+	@$(INSTALL) gnokii $(DESTDIR)/bin
 	@echo " $(DESTDIR)/bin/gnokii"
 
-	@$(INSTALL) gnokiid	$(DESTDIR)/sbin
+	@$(INSTALL) gnokiid $(DESTDIR)/sbin
 	@echo " $(DESTDIR)/sbin/gnokiid"
 
-	@if [ -f bin/xgnokii ]; \
-	then \
-		$(INSTALL) bin/xgnokii $(DESTDIR)/bin ; \
-		echo " $(DESTDIR)/bin/xgnokii" ; \
-	fi
+	@$(INSTALL) mgnokiidev $(DESTDIR)/sbin
+	@echo " $(DESTDIR)/sbin/mgnokiidev"
 
-	@if [ -f xlogos ]; \
-	then \
-		$(INSTALL) xlogos $(DESTDIR)/bin ; \
-		echo " $(DESTDIR)/xlogos" ; \
-	fi
+	@$(INSTALL) xgnokii/xgnokii $(DESTDIR)/bin
+	@echo " $(DESTDIR)/bin/xgnokii"
 
-	@if [ -f xkeyb ]; \
-	then \
-		$(INSTALL) xkeyb $(DESTDIR)/bin ; \
-		echo " $(DESTDIR)/xkeyb" ; \
-	fi
+	@$(INSTALL) xlogos $(DESTDIR)/bin
+	@echo " $(DESTDIR)/bin/xlogos"
+
+	@$(INSTALL) xkeyb $(DESTDIR)/bin
+	@echo " $(DESTDIR)/bin/xkeyb"
+
+	@$(INSTALL) pixmaps/6110.xpm $(DESTDIR)/lib/gnokii/6110.xpm
+	@echo " $(DESTDIR)/lib/gnokii/6110.xpm"
+
+	@$(INSTALL) pixmaps/6150.xpm $(DESTDIR)/lib/gnokii/6150.xpm
+	@echo " $(DESTDIR)/lib/gnokii/6150.xpm"
 
 	@echo "done."
 
@@ -234,3 +249,4 @@ fbus-6110.o: fbus-6110.c fbus-6110.h misc.h gsm-common.h gsm-networks.h
 fbus-6110-auth.o: fbus-6110-auth.c fbus-6110-auth.h
 fbus-6110-ringtones.o: fbus-6110-ringtones.c fbus-6110-ringtones.h
 cfgreader.o: cfgreader.c cfgreader.h
+win32/winserial.o: win32/winserial.c win32/winserial.h

@@ -1960,49 +1960,45 @@ int setspeeddial(char *argv[]) {
   return 0;
 }
 
-void	readconfig(void)
+void readconfig(void)
 {
-    struct CFG_Header 	*cfg_info;
-	char				*homedir;
-	char				rcfile[200];
+
+  struct CFG_Header *cfg_info;
+  char *homedir;
+  char rcfile[200];
 
 #ifdef WIN32
-	homedir = getenv("HOMEDRIVE");
-	strncpy(rcfile, homedir, 200);
-	homedir = getenv("HOMEPATH");
-	strncat(rcfile, homedir, 200);
-	strncat(rcfile, "\\_gnokiirc", 200);
+  homedir = getenv("HOMEDRIVE");
+  strncpy(rcfile, homedir, 200);
+  homedir = getenv("HOMEPATH");
+  strncat(rcfile, homedir, 200);
+  strncat(rcfile, "\\_gnokiirc", 200);
 #else
-	homedir = getenv("HOME");
+  homedir = getenv("HOME");
 
-	strncpy(rcfile, homedir, 200);
-	strncat(rcfile, "/.gnokiirc", 200);
+  strncpy(rcfile, homedir, 200);
+  strncat(rcfile, "/.gnokiirc", 200);
 #endif
 
-    if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL )
-       if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
-		fprintf(stderr, _("error opening %s, using default config\n"), 
-		  rcfile);
+  if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL )
+    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
+      fprintf(stderr, _("error opening %s, using default config\n"), rcfile);
 
-    Model = CFG_Get(cfg_info, "global", "model");
-    if (Model == NULL) {
-		Model = DefaultModel;
-    }
+  Model = CFG_Get(cfg_info, "global", "model");
+  if (!Model)
+    Model = DefaultModel;
 
-    Port = CFG_Get(cfg_info, "global", "port");
-    if (Port == NULL) {
-		Port = DefaultPort;
-    }
+  Port = CFG_Get(cfg_info, "global", "port");
+  if (!Port)
+    Port = DefaultPort;
 
-    Initlength = CFG_Get(cfg_info, "global", "initlength");
-    if (Initlength == NULL) {
-		Initlength = "default";
-    }
+  Initlength = CFG_Get(cfg_info, "global", "initlength");
+  if (!Initlength)
+    Initlength = "default";
 
-    Connection = CFG_Get(cfg_info, "global", "connection");
-    if (Connection == NULL) {
-		Connection = DefaultConnection;
-    }
+  Connection = CFG_Get(cfg_info, "global", "connection");
+  if (!Connection)
+    Connection = DefaultConnection;
 }
 
 /* Getting the status of the display. */
@@ -2126,8 +2122,6 @@ int reset( char *type)
 int foogle(char *argv[])
 { 
 
-  GSM_MessageCenter MessageCenter;
-
   /* Initialise the code for the GSM interface. */     
 
   fbusinit(RLP_DisplayF96Frame);
@@ -2138,16 +2132,7 @@ int foogle(char *argv[])
   // GSM->DialData("62401000");
 
   /* Pavel's one */
-  // GSM->DialData("0541218080");
-
-  MessageCenter.No=3;
-  strcpy(MessageCenter.Name, "Test one");
-  strcpy(MessageCenter.Number, "+123456789");
-
-  MessageCenter.Validity=GSMV_Max_Time;
-  MessageCenter.Format=GSMF_Email;
-
-  GSM->SetSMSCenter(&MessageCenter);
+  GSM->DialData("4670");
 
   sleep (60);
   GSM->Terminate();

@@ -281,11 +281,6 @@ char               CurrentIncomingCall[20];
 
 void               (*RLP_RXCallback)(RLP_F96Frame *frame);
 
-/* Every (well, almost every) frame from the computer starts with this
-   sequence. */
-
-#define FB61_FRAME_HEADER 0x00, 0x01, 0x00
-
 #ifdef WIN32
 /* called repeatedly from a separate thread */
 void KeepAliveProc()

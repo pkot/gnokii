@@ -59,6 +59,11 @@ char *Port;       /* Serial port from .gnokiirc file */
 char *Initlength; /* Init length from .gnokiirc file */
 char *Connection; /* Connection type from .gnokiirc file */
 
+/* Local variables */
+char *DefaultModel      = MODEL; /* From Makefile */
+char *DefaultPort       = PORT;
+char *DefaultConnection = "serial";
+
 void mycallback()
 {
   printf("Not implemented yet, sorry!\n");
@@ -66,36 +71,43 @@ void mycallback()
 
 void readconfig(void)
 {
+
   struct CFG_Header *cfg_info;
   char *homedir;
   char rcfile[200];
 
 #ifdef WIN32
-
   homedir = getenv("HOMEDRIVE");
   strncpy(rcfile, homedir, 200);
   homedir = getenv("HOMEPATH");
   strncat(rcfile, homedir, 200);
   strncat(rcfile, "\\_gnokiirc", 200);
-
 #else
-
   homedir = getenv("HOME");
+
   strncpy(rcfile, homedir, 200);
   strncat(rcfile, "/.gnokiirc", 200);
-
 #endif
 
-  if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
-    fprintf(stderr, "error opening %s, using default config\n", rcfile);
-
-  Initlength = CFG_Get(cfg_info, "global", "initlength");
-  if (Initlength == NULL)
-    Initlength = "default";
+  if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL )
+    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
+      fprintf(stderr, _("error opening %s, using default config\n"), rcfile);
 
   Model = CFG_Get(cfg_info, "global", "model");
+  if (!Model)
+    Model = DefaultModel;
+
   Port = CFG_Get(cfg_info, "global", "port");
+  if (!Port)
+    Port = DefaultPort;
+
+  Initlength = CFG_Get(cfg_info, "global", "initlength");
+  if (!Initlength)
+    Initlength = "default";
+
   Connection = CFG_Get(cfg_info, "global", "connection");
+  if (!Connection)
+    Connection = DefaultConnection;
 }
 
 /* fbusinit is the generic function which waits for the FBUS link. The limit

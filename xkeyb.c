@@ -10,8 +10,10 @@
 #include "cfgreader.h"
 #include "fbus-6110.h"
 
-#define Background_6110 "/usr/lib/gnokii/6110.xpm"
-#define Background_6150 "/usr/lib/gnokii/6150.xpm"
+/* FIXME: where we have these files located? */
+
+#define Background_6110 "/usr/local/lib/gnokii/6110.xpm"
+#define Background_6150 "/usr/local/lib/gnokii/6150.xpm"
 
 typedef struct {
   int top_left_x, top_left_y;
@@ -71,82 +73,76 @@ ButtonT button_6150[50] = {
   {   0,   0,   0,   0, 0x00 }
 };
 
+char *Model;      /* Model from .gnokiirc file. */
+char *Port;       /* Serial port from .gnokiirc file */
+char *Initlength; /* Init length from .gnokiirc file */
+char *Connection; /* Connection type from .gnokiirc file */
 
-char		*Model;		/* Model from .gnokiirc file. */
-char		*Port;		/* Serial port from .gnokiirc file */
-char 		*Initlength;	/* Init length from .gnokiirc file */
-char		*Connection;	/* Connection type from .gnokiirc file */
+/* Local variables */
+char *DefaultModel      = MODEL; /* From Makefile */
+char *DefaultPort       = PORT;
+char *DefaultConnection = "serial";
 
-	/* Local variables */
-char		*DefaultModel = MODEL;	/* From Makefile */
-char		*DefaultPort = PORT;
-
-char		*DefaultConnection = "serial";
-
-void	readconfig(void)
-{
-    struct CFG_Header 	*cfg_info;
-	char				*homedir;
-	char				rcfile[200];
-
-	homedir = getenv("HOME");
-
-	strncpy(rcfile, homedir, 200);
-	strncat(rcfile, "/.gnokiirc", 200);
-
-    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
-		fprintf(stderr, "error opening %s, using default config\n", 
-		  rcfile);
-    }
-
-    Model = CFG_Get(cfg_info, "global", "model");
-    if (Model == NULL) {
-		Model = DefaultModel;
-    }
-
-    Port = CFG_Get(cfg_info, "global", "port");
-    if (Port == NULL) {
-		Port = DefaultPort;
-    }
-
-    Initlength = CFG_Get(cfg_info, "global", "initlength");
-    if (Initlength == NULL) {
-		Initlength = "default";
-    }
-
-    Connection = CFG_Get(cfg_info, "global", "connection");
-    if (Connection == NULL) {
-		Connection = DefaultConnection;
-    }
-}
+GdkBitmap *mask;
 
 static GdkPixmap *Pixmap = NULL;
 
-/* Create a new backing pixmap of the appropriate size */
-static gint configure_event (GtkWidget *widget, GdkEventConfigure *event)
+void readconfig(void)
 {
-  GdkBitmap *mask;
 
-  if (!strcmp(Model, "6150")) {
-    Pixmap = gdk_pixmap_create_from_xpm(widget->window,&mask, &widget->style->white, Background_6150);
-    button=button_6150;
-  } else {
-    Pixmap = gdk_pixmap_create_from_xpm(widget->window,&mask, &widget->style->white, Background_6110);
-    button=button_6110;
-  }
-  return TRUE;
+  struct CFG_Header *cfg_info;
+  char *homedir;
+  char rcfile[200];
+
+#ifdef WIN32
+  homedir = getenv("HOMEDRIVE");
+  strncpy(rcfile, homedir, 200);
+  homedir = getenv("HOMEPATH");
+  strncat(rcfile, homedir, 200);
+  strncat(rcfile, "\\_gnokiirc", 200);
+#else
+  homedir = getenv("HOME");
+
+  strncpy(rcfile, homedir, 200);
+  strncat(rcfile, "/.gnokiirc", 200);
+#endif
+
+  if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL )
+    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
+      fprintf(stderr, _("error opening %s, using default config\n"), rcfile);
+
+  Model = CFG_Get(cfg_info, "global", "model");
+  if (!Model)
+    Model = DefaultModel;
+
+  Port = CFG_Get(cfg_info, "global", "port");
+  if (!Port)
+    Port = DefaultPort;
+
+  Initlength = CFG_Get(cfg_info, "global", "initlength");
+  if (!Initlength)
+    Initlength = "default";
+
+  Connection = CFG_Get(cfg_info, "global", "connection");
+  if (!Connection)
+    Connection = DefaultConnection;
 }
 
-static gint
-button_press_event (GtkWidget *widget, GdkEventButton *event)
+static gint button_event (GtkWidget *widget, GdkEventButton *event)
 {
 
   int tmp=0;
-  unsigned char req[] = {0x00, 0x01, 0x00, 0x42, 0x01, 0x00, 0x01};
-  unsigned char req1[] = {0x00, 0x01, 0x00, 0x42, 0x02, 0x00, 0x01};
+  unsigned char req[] = { FB61_FRAME_HEADER, 0x42, 0x01, 0x00, 0x01 };
 
   if (event->button != 1)
-    return 0;
+    return TRUE;
+
+  if (event->type == GDK_BUTTON_PRESS) 
+    req[4] = 0x01;
+  else if (event->type == GDK_BUTTON_RELEASE)
+    req[4] = 0x02;
+  else
+    return TRUE;
 
   while (button[tmp].top_left_x != 0) {
     if (button[tmp].top_left_x <= event->x &&
@@ -155,9 +151,7 @@ button_press_event (GtkWidget *widget, GdkEventButton *event)
 	event->y <= button[tmp].bottom_right_y) {
 
       req[5]=button[tmp].code;
-      req1[5]=button[tmp].code;
       FB61_TX_SendMessage(0x07, 0x0c, req);
-      FB61_TX_SendMessage(0x07, 0x0c, req1);
 
     }
 
@@ -247,6 +241,7 @@ void main (int argc, char *argv[])
   gtk_widget_set_events (drawing_area, GDK_EXPOSURE_MASK
 			 | GDK_LEAVE_NOTIFY_MASK
 			 | GDK_BUTTON_PRESS_MASK
+			 | GDK_BUTTON_RELEASE_MASK
 			 | GDK_POINTER_MOTION_MASK
 			 | GDK_POINTER_MOTION_HINT_MASK);
 
@@ -254,14 +249,21 @@ void main (int argc, char *argv[])
   gtk_box_pack_start (GTK_BOX (vbox), drawing_area, FALSE, FALSE, 3);
 
   gtk_signal_connect (GTK_OBJECT (drawing_area), "button_press_event",
-		      (GtkSignalFunc) button_press_event, NULL);
+		      (GtkSignalFunc) button_event, NULL);
+  gtk_signal_connect (GTK_OBJECT (drawing_area), "button_release_event",
+		      (GtkSignalFunc) button_event, NULL);
   gtk_signal_connect (GTK_OBJECT (drawing_area), "expose_event",
 		      (GtkSignalFunc) expose_event, NULL);
-  gtk_signal_connect (GTK_OBJECT(drawing_area),"configure_event",
-		      (GtkSignalFunc) configure_event, NULL);
-
 
   readconfig();
+
+  if (!strcmp(Model, "6150")) {
+    Pixmap = gdk_pixmap_create_from_xpm(GTK_WIDGET(drawing_area)->window,&mask, &drawing_area->style->white, Background_6150);
+    button=button_6150;
+  } else {
+    Pixmap = gdk_pixmap_create_from_xpm(GTK_WIDGET(drawing_area)->window,&mask, &drawing_area->style->white, Background_6110);
+    button=button_6110;
+  }
 
   fbusinit();
 
