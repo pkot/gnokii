@@ -224,6 +224,55 @@ AC_CHECK_FUNC(getopt_long, , [
            AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt",
             OWN_GETOPT="1")])
 
+dnl ======================== Check for libical
+AC_ARG_WITH(libical,
+   [  --with-libical=DIR      specifies the base libical],
+   [ if test x$withval = xyes
+     then
+      AC_MSG_WARN(Usage is: --with-libical=DIR)
+     else
+      ICAL_LIBS="-L$withval/lib/"
+      ICAL_CFLAGS="-I$withval/include/"
+     fi
+   ]
+)
+
+USE_LIBICAL="no"
+OLD_LIBS="$LIBS"
+OLD_CFLAGS="$CFLAGS"
+LIBS="$LIBS $ICAL_LIBS -lpthread -lical"
+CFLAGS="$CFLAGS $ICAL_CFLAGS"
+AC_MSG_CHECKING(whether libical is installed)
+AC_TRY_LINK([
+   #include <ical.h>
+   ],[
+   int priority;
+   icalcomponent *pIcal=NULL;
+   struct icaltimetype atime = icaltime_from_string("20031231T223000");
+
+   pIcal = icalcomponent_vanew(
+      ICAL_VCALENDAR_COMPONENT,
+      icalproperty_new_version("2.0"),
+      icalproperty_new_prodid("//Gnokii.org//NONSGML v.0.5.8"),
+      0
+   );
+   atime.is_daylight = 1;
+   priority = icalproperty_get_priority(icalcomponent_get_first_property(pIcal, ICAL_PRIORITY_PROPERTY));
+   ],
+   [
+      AC_MSG_RESULT(yes)
+      USE_LIBICAL="yes"
+      AC_DEFINE([HAVE_LIBICAL],[1],[Use libical])
+   ],
+   [
+      AC_MSG_RESULT(no)
+      LIBS="$OLD_LIBS"
+      CFLAGS="$OLD_CFLAGS"
+   ]
+)
+
+
+
 dnl ======================== Checks for gethostbyname support
 AC_CHECK_FUNC(gethostbyname, ,
 	AC_CHECK_LIB(nsl, gethostbyname, LIBS="$LIBS -lnsl"))
@@ -605,6 +654,8 @@ AC_SUBST(HAVE_XGNOKII)
 AC_SUBST(WIN32)
 AC_SUBST(WIN32_CROSS)
 
+AC_SUBST(HAVE_LIBICAL)
+
 AC_OUTPUT(
    Makefile.global
    intl/Makefile
@@ -642,6 +693,7 @@ echo "
     RLPDebug:           $rlpdebug
     NLS:                $USE_NLS
     IrDA:               $USE_IRDA
+    ical read support:  $USE_LIBICAL
     Bluetooth:          $USE_BLUETOOTH
     Security:           $security
     Build Shared Lib:   $shared

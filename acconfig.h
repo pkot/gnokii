@@ -52,6 +52,9 @@
 /* Use UNIX98 style pty support instead of the traditional */
 #undef USE_UNIX98PTYS
 
+/* Define if you have libical. */
+#undef HAVE_LIBICAL
+
 /* Define if you want IrDA support. Linux only */
 #undef HAVE_IRDA
 

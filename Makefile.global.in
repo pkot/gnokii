@@ -67,6 +67,8 @@ HAVE_XGNOKII   = @HAVE_XGNOKII@
 WIN32          = @WIN32@
 WIN32_CROSS    = @WIN32_CROSS@
 
+HAVE_LIBICAL   = @HAVE_LIBICAL@
+
 DESTDIR        =
 
 ifeq (@USE_NLS@, yes)

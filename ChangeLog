@@ -52,6 +52,8 @@
     o new error codes for SIM related problems     (BORBELY Zoltan)
     o packet dump was incorrect when len % 16 == 0 (BORBELY Zoltan)
     o gnokii_strsplit() crash bug fixed            (BORBELY Zoltan)
+    o use libical as the primary vCal handling way      (Pawel Kot,
+                                                   Martin GoldHahn)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)
