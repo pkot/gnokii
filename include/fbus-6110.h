@@ -20,6 +20,16 @@
 #define		FB61_MAX_TRANSMIT_LENGTH			(256)
 #define		FB61_MAX_RECEIVE_LENGTH 			(512)
 
+/* Nokia 6110 supports phonebook entries of max. 16 characters and numbers of
+   max. 30 digits */
+
+#define		FB61_MAX_PHONEBOOK_NAME_LENGTH			(16)
+#define		FB61_MAX_PHONEBOOK_NUMBER_LENGTH		(30)
+
+/* Nokia 6110 has different numbers for Phone and SIM memory then GMT_??? */
+
+#define FB61_MEMORY_PHONE 0x02
+#define FB61_MEMORY_SIM 0x03
 
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
    6110 phones */
@@ -66,7 +76,7 @@ GSM_Error	FB61_GetSMSMessage(GSM_MemoryType memory_type, int location,
 GSM_Error	FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message);
 
 GSM_Error	FB61_SendSMSMessage(char *message_centre, char *destination,
-				 char *text, u8 *return_code1, u8 *return_code2);
+				 char *text);
 
 GSM_Error	FB61_GetRFLevel(float *level);
 GSM_Error	FB61_GetBatteryLevel(float *level);
@@ -98,8 +108,9 @@ void		FB61_Terminate(void);
 void		FB61_ThreadLoop(void);
 bool		FB61_OpenSerial(void);
 void		FB61_SigHandler(int status);
-void	FB61_RX_StateMachine(char rx_byte);
-void        FB61_RX_DisplayMessage(void);
+void		FB61_RX_StateMachine(char rx_byte);
+void		FB61_RX_DisplayMessage(void);
+GSM_Error	FB61_GetSMSStatus() ;
 
 	/* Insert code here as required ? */
 

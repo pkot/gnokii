@@ -1,71 +1,168 @@
-	/* G N O K I I
-	   A Linux/Unix toolset and driver for Nokia mobile phones.
-	   Copyright (C) Hugh Blemings, 1999  Released under the terms of 
-       the GNU GPL, see file COPYING for more details.
+/*
+
+  G N O K I I
+
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+
+  Copyright (C) Hugh Blemings, 1999.
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
 	
-	   This file:  gnokii.c  Version 0.2.4
+  Mainline code for gnokii utility.  Handles command line parsing and
+  reading/writing phonebook entries.
 
-	   Mainline code for gnokii utility.  Handles command line parsing
-	   and reading/writing phonebook entries. */
+  Warning: this code is only the test tool. It is not intented to real work -
+  wait for GUI application.
 
+  Last modification: Sun Apr 25 20:29:07 CEST 1999
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
-#include	<termios.h>
-#include	<stdio.h>
-#include	<libintl.h>
-#include	<stdlib.h>
-#include	<unistd.h>
-#include	<fcntl.h>
-#include	<signal.h>
-#include	<sys/types.h>
-#include	<sys/time.h>
-#include	<string.h>
+*/
 
-#include	"misc.h"
-#include	"gsm-common.h"
-#include	"gsm-api.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <termios.h>
+#include <libintl.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <string.h>
 
-	/* Prototypes. */
-void	usage(void);
-void	monitormode(void);
-void	enterpin(void);
-void	getphonebook(char *argv[]);
-void	writephonebook(void);
-void	fbusinit(bool enable_monitoring);
-void	getsms(char *argv[]);
-void	deletesms(char *argv[]);
-void	sendsms(char *argv[]);
+#include "misc.h"
+#include "gsm-common.h"
+#include "gsm-api.h"
 
+/* Prototypes. */
+void monitormode(void);
+void enterpin(void);
+void getphonebook(char *argv[]);
+void writephonebook(void);
+void getsms(char *argv[]);
+void deletesms(char *argv[]);
+void sendsms(char *argv[]);
 
-	/* Main function - handles command line args then passes to 
-	   separate function accordingly. */
-int	main(int argc, char *argv[])
+void version(void)
 {
 
-		/* For GNU gettext */
-	textdomain("gnokii");
+  fprintf(stdout, _("GNOKII Version 0.2.4
+Copyright (C) Hugh Blemings <hugh@vsb.com.au>, 1999
+Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999
+Built %s %s for %s on %s \n"), __TIME__, __DATE__, MODEL, PORT);
+}
 
-		/* Handle command line arguments. */
-	if (argc == 1 || strcmp(argv[1], "--help") == 0) {
-		usage();
-		exit (0);
-	}
+/* The function usage is only informative - it prints this program's usage and
+   command-line options.*/
 
-		/* Display version,  copyright and build information. */
-	if (strcmp(argv[1], "--version") == 0) {
-		fprintf(stdout, _("GNOKII Version 0.2.4 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"));
-		fprintf(stdout, _("       Built %s %s for %s on %s \n"), __TIME__, __DATE__, MODEL, PORT);
-		exit (0);
-	}
+void usage(void)
+{
 
-		/* Enter monitor mode. */
-	if (strcmp(argv[1], "--monitor") == 0) {
-		monitormode();
-	}
+  fprintf(stdout, _("   usage: gnokii {--help|--monitor|--version}
+          gnokii [--getphonebook] [memory type] [start] [end]
+          gnokii [--writephonebook]
+          gnokii [--getsms] [memory type] [start] [end]
+          gnokii [--deletesms] [memory type] [start] [end]
+          gnokii [--sendsms] [destination] [message centre]
 
-		/* Enter pin. */
-	if (strcmp(argv[1], "--enterpin") == 0) {
-		enterpin();
-	}
+          --help            display usage information.
+
+          --monitor         continually updates phone status to stderr.
+
+          --version         displays version and copyright information.
+
+          --enterpin        sends the entered PIN to the mobile phone.
+
+          --getphonebook    gets phonebook entries from specified memory type
+                            ('int' or 'sim') starting at entry [start] and
+                            ending at [end].  Entries are dumped to stdout in
+                            format suitable for editing and passing back to
+                            writephonebook command.
+
+          --writephonebook  reads data from stdin and writes to phonebook.
+                            Uses the same format as provided by the output of
+                            the getphonebook command.
+
+          --getsms          gets SMS messages from specified memory type
+                            ('int' or 'sim') starting at entry [start] and
+                            ending at [end].  Entries are dumped to stdout.
+
+          --deletesms       deletes SMS messages from specified memory type
+                            ('int' or 'sim') starting at entry [start] and
+                            ending at [end].
+
+          --sendsms         sends an SMS message to [destination] via
+                            [message centre].  Message text is taken from
+                            stdin.  This function has had limited testing
+                            and may not work at all on your network.\n"));
+}
+
+/* fbusinit is the generic function which waits for the FBUS link. The limit
+   is 10 seconds. After 10 seconds we quit. */
+
+void fbusinit(bool enable_monitoring)
+{
+  int count=0;
+  GSM_Error error;
+
+  /* Initialise the code for the GSM interface. */     
+
+  error = GSM_Initialise(MODEL, PORT, enable_monitoring);
+
+  if (error != GE_NONE) {
+    fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
+    exit(-1);
+  }
+
+  /* First (and important!) wait for GSM link to be active. We allow 10
+     seconds... */
+
+  while (count++ < 200 && *GSM_LinkOK == false)
+    usleep(50000);
+
+  if (GSM_LinkOK == false) {
+    fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting. \n"));
+    exit(-1);
+  }
+}
+
+/* Main function - handles command line arguments, passes them to separate
+   functions accordingly. */
+
+int main(int argc, char *argv[])
+{
+
+  /* For GNU gettext */
+
+#ifdef GNOKII_GETTEXT
+  textdomain("gnokii");
+#endif
+
+  /* Handle command line arguments. */
+
+  if (argc == 1 || !strcmp(argv[1], "--help")) {
+    usage();
+    exit(0);
+  }
+
+  /* Display version, copyright and build information. */
+
+  if (strcmp(argv[1], "--version") == 0) {
+    version();
+    exit(0);
+  }
+
+  /* Enter monitor mode. */
+
+  if (strcmp(argv[1], "--monitor") == 0) {
+    monitormode();
+  }
+
+  /* Enter pin. */
+
+  if (strcmp(argv[1], "--enterpin") == 0) {
+    enterpin();
+  }
 
 		/* Get phonebook command. */
 	if (argc == 5 && strcmp(argv[1], "--getphonebook") == 0) {
@@ -101,7 +198,6 @@ int	main(int argc, char *argv[])
 void	sendsms(char *argv[])
 {
 	int		error;
-	u8		c1, c2;
 	char	message_buffer[200];	
 	int		chars_read;
 
@@ -121,27 +217,12 @@ void	sendsms(char *argv[])
 	fbusinit(true);
 
 		/* Send the message. */
-	error = GSM->SendSMSMessage(argv[3], argv[2], message_buffer, &c1, &c2);
-
-		/* Report success. */
-	if (error == GE_SMSSENDOK) {
-		fprintf(stdout, _("SMS Send OK. Result code  0x%02x\n"), c1);
-		GSM->Terminate();
-		exit(0);
-	}
+	error = GSM->SendSMSMessage(argv[3], argv[2], message_buffer);
 
 	if (error == GE_NOTIMPLEMENTED) {
 		fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
 		GSM->Terminate();
 		exit(-1);
-	}
-
-		/* ...or failure, lookup GE_ codes in fbus.h */
-	fprintf (stderr, _("SMS Send failed, gnokii error code was %d, network returned 0x%02x 0x%02x\n"), error, c1, c2);
-
-	/* PJ: This should be moved somewhere under 3810... */
-	if (c1 == 0x65 && c2 == 0x15) {
-		fprintf(stderr, _("0x65 0x15 means SMS sending not enabled by network (probably...)\n"));
 	}
 
 	GSM->Terminate();
@@ -181,14 +262,14 @@ void	getsms(char *argv[])
 		/* Initialise the code for the GSM interface. */     
 	fbusinit(true);
 
+	sleep(5);
+
 		/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count ++) {
 	
 		error = GSM->GetSMSMessage(memory_type, count, &message);
 
 		if (error == GE_NONE) {
-
-			fprintf(stdout, _("SMS %s %d Unknown bytes: %02x %02x %02x %02x %02x %02x Length: %d\n"), memory_type_string, count, message.Unk2, message.Unk3, message.Unk4, message.Unk5, message.Unk9, message.UnkEnd, message.Length);
 
 			fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"), message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCentre);
 
@@ -271,11 +352,14 @@ void	deletesms(char *argv[])
 }
 
 static volatile bool shutdown = false;
+
+/* SIGINT signal handler. */
+
 static void interrupted(int sig)
 {
-    signal(sig, SIG_IGN);
-    fprintf(stdout, _("Interrupted\n"));
-    shutdown = true;
+
+  signal(sig, SIG_IGN);
+  shutdown = true;
 }
 
 	/* In this mode we get the pin from the keyboard and send it to the
@@ -285,38 +369,46 @@ void	enterpin(void)
 {
 	char *pin=getpass("Enter your PIN: ");
 
-	fbusinit(true);
+	fbusinit(false);
 
-	sleep(1);
-
-	GSM->EnterPin(pin);
-
-	sleep(2);
+	if (GSM->EnterPin(pin) == GE_INVALIDPIN)
+	  fprintf(stdout, _("Error: invalid PIN\n"));
+	else
+	  fprintf(stdout, _("PIN ok.\n"));
 
 	GSM->Terminate();
 	exit(0);
 }
 
-	/* In monitor mode we don't do much, just initialise the fbus code
-	   with monitoring enabled. */
-void	monitormode(void)
+/* In monitor mode we don't do much, we just initialise the fbus code with
+   monitoring enabled and print status informations. */
+
+void monitormode(void)
 {
-	signal(SIGINT, interrupted);
 
-	fprintf (stdout, _("Monitor mode...\n"));
-	fprintf (stdout, _("Initialising GSM interface...\n"));
+  /* We do not want to monitor serial line forever - press Ctrl+C to stop the
+     monitoring mode. */
 
-		/* Initialise the code for the GSM interface. */     
-	fbusinit(true);
+  signal(SIGINT, interrupted);
 
-		/* loop here indefinitely - allows you to see messages from GSM
-		   code in response to unknown messages etc. */
-	while (!shutdown) {
-		sleep(1);
-	}
+  fprintf (stderr, _("Entering monitor mode...\n"));
+  fprintf (stderr, _("Initialising GSM interface...\n"));
 
-	GSM->Terminate();
-	exit(0);
+  /* Initialise the code for the GSM interface. */     
+
+  fbusinit(true);
+
+  /* Loop here indefinitely - allows you to see messages from GSM code in
+     response to unknown messages etc. The loops ends after pressing the
+     Ctrl+C. */
+
+  while (!shutdown)
+    sleep(1);
+
+  fprintf (stderr, _("Leaving monitor mode...\n"));
+
+  GSM->Terminate();
+  exit(0);
 }
 
 	/* Get requested range of phonebook entries and output to stdout
@@ -359,7 +451,7 @@ void	getphonebook(char *argv[])
 		/* Now retrieve the requested entries. */
 	for (count = start_entry; count <= end_entry; count ++) {
 		if (GSM->GetPhonebookLocation(memory_type, count, &entry) == 0) {
-			fprintf(stdout, "%s|%d|%s|%s\n", memory_type_string, count, entry.Name, entry.Number);
+			fprintf(stdout, "%s|%d|%s|%s|%d\n", memory_type_string, count, entry.Name, entry.Number, entry.Group);
 		}
 		else {
 
@@ -495,75 +587,3 @@ void	writephonebook(void)
 }
 
 
-void	usage(void)
-{
-
-  /* PJ: Uff, this should be one string -> easy gettextization :-) */
-  /* HB: Yeah, I agree, must be a better way than this anyway! :) */
-	fprintf(stdout, "usage: gnokii {--help|--monitor|--version}\n");
-	fprintf(stdout, "       gnokii [--getphonebook] [memory type] [start] [end]\n");
-	fprintf(stdout, "       gnokii [--writephonebook]\n");
-	
-	fprintf(stdout, "       gnokii [--getsms] [memory type] [start] [end]\n");
-	
-	fprintf(stdout, "       gnokii [--deletesms] [memory type] [start] [end]\n");
-
-	fprintf(stdout, "       gnokii [--sendsms] [destination] [message centre]\n\n");
-
-	fprintf(stdout, "          --help            display usage information.\n\n");
-	fprintf(stdout, "          --monitor         continually updates phone status to stderr.\n\n");
-	fprintf(stdout, "          --version         displays version and copyright information.\n\n");
-
-	fprintf(stdout, "          --enterpin        send the entered PIN to the phone.\n\n");
-	fprintf(stdout, "          --getphonebook    gets phonebook entries from specified memory type\n");
- 	fprintf(stdout, "                            ('int' or 'sim') starting at entry [start] and\n");
-	fprintf(stdout, "                            ending at [end].  Entries are dumped to stdout in\n");
-	fprintf(stdout, "                            format suitable for editing and passing back to\n");
-	fprintf(stdout, "                            writephonebook command.\n\n");
-
-	fprintf(stdout, "          --writephonebook  reads data from stdin in and writes to phonebook.\n");
-	fprintf(stdout, "                            Uses the same format as provided by the output of\n");
-	fprintf(stdout, "                            the getphonebook command.\n\n");
-
-
-	fprintf(stdout, "          --getsms          gets SMS messages from specified memory type\n");
- 	fprintf(stdout, "                            ('int' or 'sim') starting at entry [start] and\n");
-	fprintf(stdout, "                            ending at [end].  Entries are dumped to stdout.\n\n");
-
-	fprintf(stdout, "          --deletesms       deletes SMS messages from specified memory type\n");
- 	fprintf(stdout, "                            ('int' or 'sim') starting at entry [start] and\n");
-	fprintf(stdout, "                            ending at [end].\n\n");
-
-	fprintf(stdout, "          --sendsms         sends an SMS message to [destination] via\n");
- 	fprintf(stdout, "                            [message centre].  Message text is taken from\n");
-	fprintf(stdout, "                            stdin.  This function has had limited testing\n");
-	fprintf(stdout, "                            and may not work at all on your network.\n\n");
-}
-
-void	fbusinit(bool enable_monitoring)
-{
-	int			count;
-	GSM_Error	error;
-
-		/* Initialise the code for the GSM interface. */     
-	error = GSM_Initialise(MODEL, PORT, enable_monitoring);
-
-	if (error != GE_NONE) {
-		fprintf(stderr, _("GSM/fbus init failed! (Unknown model ?).  Quitting. \n"));
-		exit (-1);
-	}
-
-		/* First (and important!) wait for GSM link to be active. 
-		   we allow 10 seconds... */
-	count = 0;
-
-	while (count < 200 && *GSM_LinkOK == false) {
-		count ++;
-		usleep (50000);
-	}
-
-	if (GSM_LinkOK == false) {
-		fprintf (stderr, _("Hmmm... GSM_LinkOK never went true.  Quitting. \n"));
-		exit (-1);
-	}
-}

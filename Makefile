@@ -7,6 +7,13 @@
 CC = gcc
 
 #
+# Debug - uncomment this to see debugging output. It is useful only for
+# developers and testers.
+#
+
+DEBUG=-DDEBUG
+
+#
 # Model of the mobile phone
 #
 
@@ -16,7 +23,7 @@ MODEL=-DMODEL="\"3810\""
 # For Nokia 6110/5110 uncomment the next line
 #
 
-# MODEL=-DMODEL="\"6110\""
+MODEL=-DMODEL="\"6110\""
 
 #
 # Serial port for communication
@@ -30,6 +37,11 @@ PORT=-DPORT="\"/dev/ttyS0\""
 
 # PORT=-DPORT="\"/dev/ttyS1\""
 
+#
+# I18N - comment this line if you do not have GNU gettext installed
+#
+
+GETTEXT=-DGNOKII_GETTEXT
 
 #
 # For more information about threads see the comp.programming.threads FAQ
@@ -40,20 +52,21 @@ PORT=-DPORT="\"/dev/ttyS0\""
 # Set up compilation/linking flags for Linux.
 #
 
-CFLAGS = -D_REENTRANT -Wall -g -O0 ${MODEL} ${PORT}
+COMMON=-Wall -g -O0 ${MODEL} ${PORT} ${GETTEXT} ${DEBUG}
+
+CFLAGS = -D_REENTRANT ${COMMON}
 LDFLAGS = -lpthread
 
 #
 # For FreeBSD uncomment the following lines
 #
 
-# CFLAGS= -D_THREAD_SAFE -Wall -g -O2  ${MODEL} ${PORT}
+# CFLAGS= -D_THREAD_SAFE ${COMMON}
 # LDFLAGS= -pthread
 
-GNOKII_OBJS = gnokii.o gsm-api.o fbus-3810.o fbus-6110.o
-
-
 ################## Nothing interesting after this line ##################
+
+GNOKII_OBJS = gnokii.o gsm-api.o fbus-3810.o fbus-6110.o
 
 # Build executable
 all: gnokii

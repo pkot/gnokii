@@ -349,7 +349,7 @@ GSM_Error	FB38_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SM
 	return(CurrentSMSMessageError);
 }
 
-GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *text, u8 *return_code1, u8 *return_code2)
+GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *text)
 {
 	int		timeout;
 	int		text_offset;
@@ -454,15 +454,6 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 			usleep (100000);
 		}
 
-			/* Get return codes sent by network.*/
-		*return_code1 = CurrentSMSSendResponse[0];
-		*return_code2 = CurrentSMSSendResponse[1];
-
-			/* If we got a response other than retry, return, */
-		if (*return_code1 != 0x65 || *return_code2 != 0x26) {
-			DisableKeepalive = false;
-			return(CurrentSMSMessageError);
-		}
 		fprintf(stderr, _("SMS Send attempt failed, trying again (%d)\n"), retry_count);
 			/* Got a retry response so try again! */
 		retry_count --;
@@ -1517,11 +1508,6 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 		/* Extract data from message into CurrentSMSMessage. */
 	CurrentSMSMessage->MemoryType = MessageBuffer[2];
 	CurrentSMSMessage->MessageNumber = MessageBuffer[3];
-	CurrentSMSMessage->Unk2 = MessageBuffer[4];
-	CurrentSMSMessage->Unk3 = MessageBuffer[5];
-	CurrentSMSMessage->Unk4 = MessageBuffer[6];
-	CurrentSMSMessage->Unk5 = MessageBuffer[7];
-	CurrentSMSMessage->Unk9 = MessageBuffer[14];
 	CurrentSMSMessage->Length = MessageBuffer[15];
 
 		/* Extract date and time information which is packed in to 
@@ -1544,8 +1530,8 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 		sender_length = FB38_MAX_SENDER_LENGTH;
 	}
 		
-	if (message_centre_length > FB38_MAX_MSG_CENTRE_LENGTH) {
-		message_centre_length = FB38_MAX_MSG_CENTRE_LENGTH;
+	if (message_centre_length > FB38_MAX_SMS_CENTRE_LENGTH) {
+		message_centre_length = FB38_MAX_SMS_CENTRE_LENGTH;
 	}
 
 		/* Now copy to strings... Note they are in reverse order to
@@ -1555,9 +1541,6 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 	
 	strncpy(CurrentSMSMessage->Sender, MessageBuffer + 18 + message_centre_length, sender_length);
 	CurrentSMSMessage->Sender[sender_length] = 0;
-
-		/* Get last byte, purpose unknown. */
-	CurrentSMSMessage->UnkEnd = MessageBuffer[18 + sender_length + message_centre_length];
 
 }
 

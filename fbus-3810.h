@@ -38,7 +38,7 @@ GSM_Error	FB38_GetSMSMessage(GSM_MemoryType memory_type, int location,
 GSM_Error	FB38_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message);
 
 GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination,
-				 char *text, u8 *return_code1, u8 *return_code2);
+				 char *text);
 
 	/* These aren't presently implemented. */
 GSM_Error	FB38_GetRFLevel(float *level);
@@ -77,7 +77,7 @@ GSM_Error	FB38_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 #define		FB38_MAX_PHONEBOOK_NUMBER_LENGTH			(30)
 
 	/* Limits to do with SMS messages. */
-#define		FB38_MAX_MSG_CENTRE_LENGTH					(30)
+#define		FB38_MAX_SMS_CENTRE_LENGTH					(30)
 #define		FB38_MAX_SENDER_LENGTH						(30)
 #define		FB38_MAX_SMS_LENGTH							(160)
 

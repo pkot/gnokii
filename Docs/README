@@ -260,6 +260,7 @@ is the Australian mirror, there will be one nearby to you too :)
 6110 Series
 
 [Note 6110 support is still under heavy development]
+6190/Microcel (Canada) (GSM 1900)
 6110/Panafon (Greece)
 6110/Paegas (Czech Republic)
 5110/Paegas (Czech Republic)
@@ -296,11 +297,17 @@ Thank you to, in no particular order...
 *  Czech Linux Users' group for it's CVS server which hosts our
    development repository.
 
+*  Juan Altmayer Pizzorno for his help with MBUS/FBUS and other
+   debugging.
+
+*  Gary Reuter for his help when looking for a bug in phone numbers,
+   for the set-time function debugging.
+ 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this :)
-
-*  Mirka for allowing Pavel to work on gnokii...
-
+  
+*  Last not least: Mirka for allowing Pavel to work on gnokii...
+  
 
 - Release Notes -
 
