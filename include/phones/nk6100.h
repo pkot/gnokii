@@ -30,57 +30,57 @@
 
 */
 
-#ifndef __phones_nk6100_h
-#define __phones_nk6100_h
+#ifndef _gnokii_phones_nk6100_h
+#define _gnokii_phones_nk6100_h
 
 #include "gsm-data.h"
 
 /* Phone Memory types */
 
-#define P6100_MEMORY_MT 0x01 /* ?? combined ME and SIM phonebook */
-#define P6100_MEMORY_ME 0x02 /* ME (Mobile Equipment) phonebook */
-#define P6100_MEMORY_SM 0x03 /* SIM phonebook */
-#define P6100_MEMORY_FD 0x04 /* ?? SIM fixdialling-phonebook */
-#define P6100_MEMORY_ON 0x05 /* ?? SIM (or ME) own numbers list */
-#define P6100_MEMORY_EN 0x06 /* ?? SIM (or ME) emergency number */
-#define P6100_MEMORY_DC 0x07 /* ME dialled calls list */
-#define P6100_MEMORY_RC 0x08 /* ME received calls list */
-#define P6100_MEMORY_MC 0x09 /* ME missed (unanswered received) calls list */
-#define P6100_MEMORY_VOICE 0x0b /* Voice Mailbox */
+#define NK6100_MEMORY_MT 0x01 /* ?? combined ME and SIM phonebook */
+#define NK6100_MEMORY_ME 0x02 /* ME (Mobile Equipment) phonebook */
+#define NK6100_MEMORY_SM 0x03 /* SIM phonebook */
+#define NK6100_MEMORY_FD 0x04 /* ?? SIM fixdialling-phonebook */
+#define NK6100_MEMORY_ON 0x05 /* ?? SIM (or ME) own numbers list */
+#define NK6100_MEMORY_EN 0x06 /* ?? SIM (or ME) emergency number */
+#define NK6100_MEMORY_DC 0x07 /* ME dialled calls list */
+#define NK6100_MEMORY_RC 0x08 /* ME received calls list */
+#define NK6100_MEMORY_MC 0x09 /* ME missed (unanswered received) calls list */
+#define NK6100_MEMORY_VOICE 0x0b /* Voice Mailbox */
 /* This is used when the memory type is unknown. */
-#define P6100_MEMORY_XX 0xff
+#define NK6100_MEMORY_XX 0xff
 
-#define	P6100_MAX_SMS_MESSAGES	12 /* maximum number of sms messages */
+#define	NK6100_MAX_SMS_MESSAGES	12 /* maximum number of sms messages */
 
-#define	P6100_CAP_OLD_CALL_API	1
-#define	P6100_CAP_NBS_UPLOAD	2
-#define P6100_CAP_PB_UNICODE	4
-
-typedef struct {
-	GSM_KeyCode Key;
-	int Repeat;
-} NK6100_Keytable;
+#define	NK6100_CAP_OLD_CALL_API	1
+#define	NK6100_CAP_NBS_UPLOAD	2
+#define NK6100_CAP_PB_UNICODE	4
 
 typedef struct {
-	void (*OnCellBroadcast)(GSM_CBMessage *Message);
-	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state);
-	void (*RLP_RXCallback)(RLP_F96Frame *Frame);
-	gn_error (*OnSMS)(GSM_API_SMS *Message);
+	gn_key_code key;
+	int repeat;
+} nk6100_keytable;
 
-	unsigned char MagicBytes[4];
+typedef struct {
+	void (*on_cell_broadcast)(gn_cb_message *msg);
+	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
+	void (*rlp_rx_callback)(gn_rlp_f96_frame *frame);
+	gn_error (*on_sms)(gn_sms *message);
+
+	unsigned char magic_bytes[4];
 	bool sms_notification_in_progress;
 	bool sms_notification_lost;
-	GSM_DisplayOutput *DisplayOutput;
-	NK6100_Keytable Keytable[256];
-	int Capabilities;
+	gn_display_output *display_output;
+	nk6100_keytable keytable[256];
+	int capabilities;
 
-	char Model[GSM_MAX_MODEL_LENGTH];
-	char IMEI[GSM_MAX_IMEI_LENGTH];
-	char SWVersion[10];
-	char HWVersion[10];
-	PhoneModel *PM;
-} NK6100_DriverInstance;
+	char model[GN_MODEL_MAX_LENGTH];
+	char imei[GN_IMEI_MAX_LENGTH];
+	char sw_version[10];
+	char hw_version[10];
+	gn_phone_model *pm;
+} nk6100_driver_instance;
 
-void PNOK_GetNokiaAuth(unsigned char *Imei, unsigned char *MagicBytes, unsigned char *MagicResponse);
+void pnok_get_nokia_auth(unsigned char *imei, unsigned char *magic_bytes, unsigned char *magic_response);
 
-#endif  /* #ifndef __phones_nk6100_h */
+#endif  /* #ifndef _gnokii_phones_nk6100_h */

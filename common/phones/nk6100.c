@@ -51,114 +51,117 @@
 #include "gsm-api.h"
 #include "gsm-sms.h"
 
-#define	DRVINSTANCE(s) ((NK6100_DriverInstance *)((s)->Phone.DriverInstance))
+#include "gnokii-internal.h"
+#include "gsm-api.h"
+
+#define	DRVINSTANCE(s) ((nk6100_driver_instance *)((s)->driver.driver_instance))
 #define	FREE(p) do { free(p); (p) = NULL; } while (0)
 
 /* Some globals */
 
 /* static functions prototypes */
-static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
-static gn_error Initialise(GSM_Statemachine *state);
-static gn_error Authentication(GSM_Statemachine *state, char *imei);
-static gn_error BuildKeytable(GSM_Statemachine *state);
-static gn_error Identify(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
-static gn_error PhoneInfo(GSM_Data *data, GSM_Statemachine *state);
-static gn_error PhoneInfo2(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetPhoneID(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetOnSMS(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state);
-static gn_error DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetBitmap(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state);
-static gn_error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
-static gn_error WritePhonebook(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetPowersource(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetWelcomeMessage(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetOperatorLogo(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetDateTime(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetDateTime(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetAlarm(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetAlarm(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetProfile(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetProfile(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
-static gn_error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
-static gn_error DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetDisplayStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error DisplayOutput(GSM_Data *data, GSM_Statemachine *state);
-static gn_error PollDisplay(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state);
-static gn_error MakeCall1(GSM_Data *data, GSM_Statemachine *state);
-static gn_error AnswerCall1(GSM_Data *data, GSM_Statemachine *state);
-static gn_error CancelCall1(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetCallNotification(GSM_Data *data, GSM_Statemachine *state);
-static gn_error MakeCall(GSM_Data *data, GSM_Statemachine *state);
-static gn_error AnswerCall(GSM_Data *data, GSM_Statemachine *state);
-static gn_error CancelCall(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SendRLPFrame(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetRLPRXCallback(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SendDTMF(GSM_Data *data, GSM_Statemachine *state);
-static gn_error Reset(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetRingtone(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
-static gn_error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
-static gn_error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
-static gn_error EnterChar(GSM_Data *data, GSM_Statemachine *state);
-static gn_error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType type);
-static gn_error get_imei(GSM_Data *data, GSM_Statemachine *state);
-static gn_error get_phone_info(GSM_Data *data, GSM_Statemachine *state);
-static gn_error get_hw(GSM_Data *data, GSM_Statemachine *state);
+static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
+static gn_error Initialise(struct gn_statemachine *state);
+static gn_error Authentication(struct gn_statemachine *state, char *imei);
+static gn_error BuildKeytable(struct gn_statemachine *state);
+static gn_error Identify(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSpeedDial(gn_data *data, struct gn_statemachine *state);
+static gn_error SetSpeedDial(gn_data *data, struct gn_statemachine *state);
+static gn_error PhoneInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error PhoneInfo2(gn_data *data, struct gn_statemachine *state);
+static gn_error GetBatteryLevel(gn_data *data, struct gn_statemachine *state);
+static gn_error GetRFLevel(gn_data *data, struct gn_statemachine *state);
+static gn_error GetPhoneID(gn_data *data, struct gn_statemachine *state);
+static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error SendSMSMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error SetOnSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error SaveSMSMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error GetBitmap(gn_data *data, struct gn_statemachine *state);
+static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state);
+static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error GetPowersource(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error GetWelcomeMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error GetOperatorLogo(gn_data *data, struct gn_statemachine *state);
+static gn_error GetDateTime(gn_data *data, struct gn_statemachine *state);
+static gn_error SetDateTime(gn_data *data, struct gn_statemachine *state);
+static gn_error GetAlarm(gn_data *data, struct gn_statemachine *state);
+static gn_error SetAlarm(gn_data *data, struct gn_statemachine *state);
+static gn_error GetProfile(gn_data *data, struct gn_statemachine *state);
+static gn_error SetProfile(gn_data *data, struct gn_statemachine *state);
+static gn_error GetCalendarNote(gn_data *data, struct gn_statemachine *state);
+static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state);
+static gn_error DeleteCalendarNote(gn_data *data, struct gn_statemachine *state);
+static gn_error GetDisplayStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error DisplayOutput(gn_data *data, struct gn_statemachine *state);
+static gn_error PollDisplay(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSCenter(gn_data *data, struct gn_statemachine *state);
+static gn_error SetSMSCenter(gn_data *data, struct gn_statemachine *state);
+static gn_error SetCellBroadcast(gn_data *data, struct gn_statemachine *state);
+static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state);
+static gn_error AnswerCall1(gn_data *data, struct gn_statemachine *state);
+static gn_error CancelCall1(gn_data *data, struct gn_statemachine *state);
+static gn_error SetCallNotification(gn_data *data, struct gn_statemachine *state);
+static gn_error MakeCall(gn_data *data, struct gn_statemachine *state);
+static gn_error AnswerCall(gn_data *data, struct gn_statemachine *state);
+static gn_error CancelCall(gn_data *data, struct gn_statemachine *state);
+static gn_error SendRLPFrame(gn_data *data, struct gn_statemachine *state);
+static gn_error SetRLPRXCallback(gn_data *data, struct gn_statemachine *state);
+static gn_error SendDTMF(gn_data *data, struct gn_statemachine *state);
+static gn_error Reset(gn_data *data, struct gn_statemachine *state);
+static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press);
+static gn_error EnterChar(gn_data *data, struct gn_statemachine *state);
+static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type);
+static gn_error get_imei(gn_data *data, struct gn_statemachine *state);
+static gn_error get_phone_info(gn_data *data, struct gn_statemachine *state);
+static gn_error get_hw(gn_data *data, struct gn_statemachine *state);
 
-#ifdef  SECURITY
-static gn_error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
-static gn_error GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state);
-static gn_error get_security_code(GSM_Data *data, GSM_Statemachine *state);
+#ifdef SECURITY
+static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error ChangeSecurityCode(gn_data *data, struct gn_statemachine *state);
+static gn_error get_security_code(gn_data *data, struct gn_statemachine *state);
 #endif
 
-static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingSMS(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingProfile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingDisplay(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingKey(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error IncomingMisc(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
-#ifdef  SECURITY
-static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+#ifdef SECURITY
+static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 #endif
 
-static int GetMemoryType(GSM_MemoryType memory_type);
-static void FlushLostSMSNotifications(GSM_Statemachine *state);
+static int get_memory_type(gn_memory_type memory_type);
+static void FlushLostSMSNotifications(struct gn_statemachine *state);
 
-static GSM_IncomingFunctionType IncomingFunctions[] = {
+static gn_incoming_function_type nk6100_incoming_functions[] = {
 	{ 0x01, IncomingCallInfo },
 	{ 0x02, IncomingSMS1 },
 	{ 0x03, IncomingPhonebook },
 	{ 0x04, IncomingPhoneStatus },
 	{ 0x05, IncomingProfile },
-	{ 0x06, PNOK_IncomingCallDivert },
-#ifdef	SECURITY
+	{ 0x06, pnok_call_divert_incoming },
+#ifdef SECURITY
 	{ 0x08, IncomingSecurityCode },
 #endif
 	{ 0x0a, IncomingNetworkInfo },
@@ -175,20 +178,20 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0, NULL}
 };
 
-GSM_Phone phone_nokia_6100 = {
-	IncomingFunctions,
-	PGEN_IncomingDefault,
+gn_driver phone_nokia_6100 = {
+	nk6100_incoming_functions,
+	pgen_incoming_default,
 	/* Mobile phone information */
 	{
 		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|3360|3410|8210|8250|8290", /* Supported models */
 		4,                     /* Max RF Level */
 		0,                     /* Min RF Level */
-		GRF_Arbitrary,         /* RF level units */
+		GN_RF_Arbitrary,         /* RF level units */
 		4,                     /* Max Battery Level */
 		0,                     /* Min Battery Level */
-		GBU_Arbitrary,         /* Battery level units */
-		GDT_DateTime,          /* Have date/time support */
-		GDT_TimeOnly,	       /* Alarm supports time only */
+		GN_BU_Arbitrary,         /* Battery level units */
+		GN_DT_DateTime,          /* Have date/time support */
+		GN_DT_TimeOnly,	       /* Alarm supports time only */
 		1,                     /* Alarms available - FIXME */
 		48, 84,                /* Startup logo size */
 		14, 72,                /* Op logo size */
@@ -199,154 +202,154 @@ GSM_Phone phone_nokia_6100 = {
 };
 
 struct {
-	char *Model;
-	char *SWVersion;
-	int Capabilities;
-} static P6100_capabilities[] = {
+	char *model;
+	char *sw_version;
+	int capabilities;
+} static nk6100_capabilities[] = {
     	/*
 	 * Capability setup for phone models.
 	 * Example:
-	 * { "NSE-3",	NULL,		P6100_CAP_OLD_CALL_API }
+	 * { "NSE-3",	NULL,		NK6100_CAP_OLD_CALL_API }
 	 * Set NULL in the second field for all software versions.
 	 */
-	{ "NSE-3",	"-4.06",	P6100_CAP_NBS_UPLOAD },
-	{ "NHM-5",      NULL,           P6100_CAP_PB_UNICODE },
-	{ "NHM-6",      NULL,           P6100_CAP_PB_UNICODE },
-	{ "NHM-2",      NULL,           P6100_CAP_PB_UNICODE },
-	{ "NSM-3D",     NULL,           P6100_CAP_PB_UNICODE },
+	{ "NSE-3",	"-4.06",	NK6100_CAP_NBS_UPLOAD },
+	{ "NHM-5",      NULL,           NK6100_CAP_PB_UNICODE },
+	{ "NHM-6",      NULL,           NK6100_CAP_PB_UNICODE },
+	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE },
+	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE },
 	{ NULL,		NULL,		0 }
 };
 
-static gn_error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
+static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
-	if (!DRVINSTANCE(state) && op != GOP_Init) return GN_ERR_INTERNALERROR;
+	if (!DRVINSTANCE(state) && op != GN_OP_Init) return GN_ERR_INTERNALERROR;
 
 	switch (op) {
-	case GOP_Init:
+	case GN_OP_Init:
 		if (DRVINSTANCE(state)) return GN_ERR_INTERNALERROR;
 		return Initialise(state);
-	case GOP_Terminate:
+	case GN_OP_Terminate:
 		FREE(DRVINSTANCE(state));
-		return PGEN_Terminate(data, state);
-	case GOP_GetSpeedDial:
+		return pgen_terminate(data, state);
+	case GN_OP_GetSpeedDial:
 		return GetSpeedDial(data, state);
-	case GOP_SetSpeedDial:
+	case GN_OP_SetSpeedDial:
 		return SetSpeedDial(data, state);
-	case GOP_GetImei:
-	case GOP_GetModel:
-	case GOP_GetRevision:
-	case GOP_GetManufacturer:
-	case GOP_Identify:
+	case GN_OP_GetImei:
+	case GN_OP_GetModel:
+	case GN_OP_GetRevision:
+	case GN_OP_GetManufacturer:
+	case GN_OP_Identify:
 		return Identify(data, state);
-	case GOP_GetBitmap:
+	case GN_OP_GetBitmap:
 		return GetBitmap(data, state);
-	case GOP_SetBitmap:
+	case GN_OP_SetBitmap:
 		return SetBitmap(data, state);
-	case GOP_GetBatteryLevel:
+	case GN_OP_GetBatteryLevel:
 		return GetBatteryLevel(data, state);
-	case GOP_GetRFLevel:
+	case GN_OP_GetRFLevel:
 		return GetRFLevel(data, state);
-	case GOP_GetMemoryStatus:
+	case GN_OP_GetMemoryStatus:
 		return GetMemoryStatus(data, state);
-	case GOP_ReadPhonebook:
+	case GN_OP_ReadPhonebook:
 		return ReadPhonebook(data, state);
-	case GOP_WritePhonebook:
+	case GN_OP_WritePhonebook:
 		return WritePhonebook(data, state);
-	case GOP_GetPowersource:
+	case GN_OP_GetPowersource:
 		return GetPowersource(data, state);
-	case GOP_GetSMSStatus:
+	case GN_OP_GetSMSStatus:
 		return GetSMSStatus(data, state);
-	case GOP_GetNetworkInfo:
+	case GN_OP_GetNetworkInfo:
 		return GetNetworkInfo(data, state);
-	case GOP_SendSMS:
+	case GN_OP_SendSMS:
 		return SendSMSMessage(data, state);
-	case GOP_OnSMS:
+	case GN_OP_OnSMS:
 		return SetOnSMS(data, state);
-	case GOP_PollSMS:
-		SM_Loop(state, 1);
+	case GN_OP_PollSMS:
+		gn_sm_loop(state, 1);
 		return GN_ERR_NONE;
-	case GOP_GetSMS:
+	case GN_OP_GetSMS:
 		return GetSMSMessage(data, state);
-	case GOP_SaveSMS:
+	case GN_OP_SaveSMS:
 		return SaveSMSMessage(data, state);
-	case GOP_DeleteSMS:
+	case GN_OP_DeleteSMS:
 		return DeleteSMSMessage(data, state);
-	case GOP_GetDateTime:
+	case GN_OP_GetDateTime:
 		return GetDateTime(data, state);
-	case GOP_SetDateTime:
+	case GN_OP_SetDateTime:
 		return SetDateTime(data, state);
-	case GOP_GetAlarm:
+	case GN_OP_GetAlarm:
 		return GetAlarm(data, state);
-	case GOP_SetAlarm:
+	case GN_OP_SetAlarm:
 		return SetAlarm(data, state);
-	case GOP_GetProfile:
+	case GN_OP_GetProfile:
 		return GetProfile(data, state);
-	case GOP_SetProfile:
+	case GN_OP_SetProfile:
 		return SetProfile(data, state);
-	case GOP_GetCalendarNote:
+	case GN_OP_GetCalendarNote:
 		return GetCalendarNote(data, state);
-	case GOP_WriteCalendarNote:
+	case GN_OP_WriteCalendarNote:
 		return WriteCalendarNote(data, state);
-	case GOP_DeleteCalendarNote:
+	case GN_OP_DeleteCalendarNote:
 		return DeleteCalendarNote(data, state);
-	case GOP_GetDisplayStatus:
+	case GN_OP_GetDisplayStatus:
 		return GetDisplayStatus(data, state);
-	case GOP_DisplayOutput:
+	case GN_OP_DisplayOutput:
 		return DisplayOutput(data, state);
-	case GOP_PollDisplay:
+	case GN_OP_PollDisplay:
 		return PollDisplay(data, state);
-	case GOP_GetSMSCenter:
+	case GN_OP_GetSMSCenter:
 		return GetSMSCenter(data, state);
-	case GOP_SetSMSCenter:
+	case GN_OP_SetSMSCenter:
 		return SetSMSCenter(data, state);
-	case GOP_SetCellBroadcast:
+	case GN_OP_SetCellBroadcast:
 		return SetCellBroadcast(data, state);
-	case GOP_NetMonitor:
-		return PNOK_netmonitor(data, state);
-	case GOP_MakeCall:
+	case GN_OP_NetMonitor:
+		return pnok_netmonitor(data, state);
+	case GN_OP_MakeCall:
 		return MakeCall(data, state);
-	case GOP_AnswerCall:
+	case GN_OP_AnswerCall:
 		return AnswerCall(data, state);
-	case GOP_CancelCall:
+	case GN_OP_CancelCall:
 		return CancelCall(data, state);
-	case GOP_SetCallNotification:
+	case GN_OP_SetCallNotification:
 		return SetCallNotification(data, state);
-	case GOP_SendRLPFrame:
+	case GN_OP_SendRLPFrame:
 		return SendRLPFrame(data, state);
-	case GOP_SetRLPRXCallback:
+	case GN_OP_SetRLPRXCallback:
 		return SetRLPRXCallback(data, state);
-#ifdef	SECURITY
-	case GOP_EnterSecurityCode:
+#ifdef SECURITY
+	case GN_OP_EnterSecurityCode:
 		return EnterSecurityCode(data, state);
-	case GOP_GetSecurityCodeStatus:
+	case GN_OP_GetSecurityCodeStatus:
 		return GetSecurityCodeStatus(data, state);
-	case GOP_ChangeSecurityCode:
+	case GN_OP_ChangeSecurityCode:
 		return ChangeSecurityCode(data, state);
 	case GOP_GetSecurityCode:
 		return get_security_code(data, state);
 #endif
-	case GOP_SendDTMF:
+	case GN_OP_SendDTMF:
 		return SendDTMF(data, state);
-	case GOP_Reset:
+	case GN_OP_Reset:
 		return Reset(data, state);
-	case GOP_GetRingtone:
+	case GN_OP_GetRingtone:
 		return GN_ERR_NOTSUPPORTED;
-	case GOP_SetRingtone:
+	case GN_OP_SetRingtone:
 		return SetRingtone(data, state);
-	case GOP_GetRawRingtone:
+	case GN_OP_GetRawRingtone:
 		return GetRawRingtone(data, state);
-	case GOP_SetRawRingtone:
+	case GN_OP_SetRawRingtone:
 		return SetRawRingtone(data, state);
-	case GOP_PressPhoneKey:
+	case GN_OP_PressPhoneKey:
 		return PressOrReleaseKey(data, state, true);
-	case GOP_ReleasePhoneKey:
+	case GN_OP_ReleasePhoneKey:
 		return PressOrReleaseKey(data, state, false);
-	case GOP_EnterChar:
+	case GN_OP_EnterChar:
 		return EnterChar(data, state);
-	case GOP_CallDivert:
-		return PNOK_CallDivert(data, state);
+	case GN_OP_CallDivert:
+		return pnok_call_divert(data, state);
 	default:
-		dprintf("NK61xx unimplemented operation: %d\n", op);
+		dprintf("nk61xx unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
 	}
 }
@@ -433,50 +436,50 @@ void PNOK_GetNokiaAuth(unsigned char *Imei, unsigned char *MagicBytes, unsigned 
 	}
 }
 
-static gn_error IdentifyPhone(GSM_Statemachine *state)
+static gn_error IdentifyPhone(struct gn_statemachine *state)
 {
-	NK6100_DriverInstance *drvinst = DRVINSTANCE(state);
+	nk6100_driver_instance *drvinst = DRVINSTANCE(state);
 	gn_error err;
-	GSM_Data data;
-	char revision[GSM_MAX_REVISION_LENGTH];
+	gn_data data;
+	char revision[GN_REVISION_MAX_LENGTH];
 
-	GSM_DataClear(&data);
-	data.Model = drvinst->Model;
-	data.Imei = drvinst->IMEI;
-	data.Revision = revision;
+	gn_data_clear(&data);
+	data.model = drvinst->model;
+	data.imei = drvinst->imei;
+	data.revision = revision;
 
 	if ((err = get_imei(&data, state)) != GN_ERR_NONE ||
 	    (err = get_phone_info(&data, state)) != GN_ERR_NONE ||
 	    (err = get_hw(&data, state)) != GN_ERR_NONE) {
 		return err;
 	}
-	if ((drvinst->PM = GetPhoneModel(data.Model)) == NULL) {
-		dump(_("Unsupported phone model \"%s\"\n"), data.Model);
+	if ((drvinst->pm = gn_get_phone_model(data.model)) == NULL) {
+		dump(_("Unsupported phone model \"%s\"\n"), data.model);
 		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
 		return GN_ERR_INTERNALERROR;
 	}
 
-	if (drvinst->PM->flags & PM_AUTHENTICATION) {
+	if (drvinst->pm->flags & PM_AUTHENTICATION) {
 		/* Now test the link and authenticate ourself */
 		if ((err = PhoneInfo(&data, state)) != GN_ERR_NONE) return err;
 	}
 
-	sscanf(revision, "SW %9[^ 	,], HW %9s", drvinst->SWVersion, drvinst->HWVersion);
+	sscanf(revision, "SW %9[^ 	,], HW %9s", drvinst->sw_version, drvinst->hw_version);
 
 	return GN_ERR_NONE;
 }
 
-static bool match_phone(NK6100_DriverInstance *drvinst, int i)
+static bool match_phone(nk6100_driver_instance *drvinst, int i)
 {
-	if (P6100_capabilities[i].Model != NULL && strcmp(P6100_capabilities[i].Model, drvinst->Model))
+	if (nk6100_capabilities[i].model != NULL && strcmp(nk6100_capabilities[i].model, drvinst->model))
 		return false;
 
-	if (P6100_capabilities[i].SWVersion != NULL) {
-		if (P6100_capabilities[i].SWVersion[0] == '-' && strcmp(P6100_capabilities[i].SWVersion + 1, drvinst->SWVersion) >= 0)
+	if (nk6100_capabilities[i].sw_version != NULL) {
+		if (nk6100_capabilities[i].sw_version[0] == '-' && strcmp(nk6100_capabilities[i].sw_version + 1, drvinst->sw_version) >= 0)
 			return true;
-		if (P6100_capabilities[i].SWVersion[0] == '+' && strcmp(P6100_capabilities[i].SWVersion + 1, drvinst->SWVersion) <= 0)
+		if (nk6100_capabilities[i].sw_version[0] == '+' && strcmp(nk6100_capabilities[i].sw_version + 1, drvinst->sw_version) <= 0)
 			return true;
-		if (!strcmp(P6100_capabilities[i].SWVersion, drvinst->SWVersion))
+		if (!strcmp(nk6100_capabilities[i].sw_version, drvinst->sw_version))
 			return true;
 		return false;
 	}
@@ -485,32 +488,30 @@ static bool match_phone(NK6100_DriverInstance *drvinst, int i)
 }
 
 /* Initialise is the only function allowed to 'use' state */
-static gn_error Initialise(GSM_Statemachine *state)
+static gn_error Initialise(struct gn_statemachine *state)
 {
 	gn_error err;
 	int i;
 
 	/* Copy in the phone info */
-	memcpy(&(state->Phone), &phone_nokia_6100, sizeof(GSM_Phone));
+	memcpy(&(state->driver), &phone_nokia_6100, sizeof(gn_driver));
 
-	if (!(DRVINSTANCE(state) = calloc(1, sizeof(NK6100_DriverInstance))))
+	if (!(DRVINSTANCE(state) = calloc(1, sizeof(nk6100_driver_instance))))
 		return GN_ERR_MEMORYFULL;
 
-	switch (state->Link.ConnectionType) {
-	case GCT_Serial:
-		state->Link.ConnectionType = GCT_DAU9P;
-	case GCT_Infrared:
-	case GCT_DAU9P:
+	switch (state->link.connection_type) {
+	case GN_CT_Serial:
+		state->link.connection_type = GN_CT_DAU9P;
+	case GN_CT_Infrared:
+	case GN_CT_DAU9P:
 #ifndef WIN32
-	case GCT_Tekram:
+	case GN_CT_Tekram:
 #endif
-		err = FBUS_Initialise(&(state->Link), state, 0);
+		err = fbus_initialise(&(state->link), state, 0);
 		break;
-#ifdef HAVE_IRDA
-	case GCT_Irda:
-		err = PHONET_Initialise(&(state->Link), state);
+	case GN_CT_Irda:
+		err = phonet_initialise(&(state->link), state);
 		break;
-#endif
 	default:
 		FREE(DRVINSTANCE(state));
 		return GN_ERR_NOTSUPPORTED;
@@ -522,7 +523,7 @@ static gn_error Initialise(GSM_Statemachine *state)
 		return GN_ERR_NOTSUPPORTED;
 	}
 
-	SM_Initialise(state);
+	sm_initialise(state);
 
 	/* We need to identify the phone first in order to know whether we can
 	   authorize or set keytable */
@@ -533,17 +534,17 @@ static gn_error Initialise(GSM_Statemachine *state)
 	}
 
 	for (i = 0; !match_phone(DRVINSTANCE(state), i); i++) ;
-	DRVINSTANCE(state)->Capabilities = P6100_capabilities[i].Capabilities;
+	DRVINSTANCE(state)->capabilities = nk6100_capabilities[i].capabilities;
 
-	if (DRVINSTANCE(state)->PM->flags & PM_AUTHENTICATION) {
+	if (DRVINSTANCE(state)->pm->flags & PM_AUTHENTICATION) {
 		/* Now test the link and authenticate ourself */
-		if ((err = Authentication(state, DRVINSTANCE(state)->IMEI)) != GN_ERR_NONE) {
+		if ((err = Authentication(state, DRVINSTANCE(state)->imei)) != GN_ERR_NONE) {
 			FREE(DRVINSTANCE(state));
 			return err;
 		}
 	}
 
-	if (DRVINSTANCE(state)->PM->flags & PM_KEYBOARD)
+	if (DRVINSTANCE(state)->pm->flags & PM_KEYBOARD)
 		if (BuildKeytable(state) != GN_ERR_NONE) {
 			FREE(DRVINSTANCE(state));
 			return GN_ERR_NOTSUPPORTED;
@@ -552,57 +553,57 @@ static gn_error Initialise(GSM_Statemachine *state)
 	return GN_ERR_NONE;
 }
 
-static gn_error Identify(GSM_Data *data, GSM_Statemachine *state)
+static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 {
-	NK6100_DriverInstance *drvinst = DRVINSTANCE(state);
+	nk6100_driver_instance *drvinst = DRVINSTANCE(state);
 
-	if (data->Manufacturer) PNOK_GetManufacturer(data->Manufacturer);
-	if (data->Model) strcpy(data->Model, drvinst->Model);
-	if (data->Imei) strcpy(data->Imei, drvinst->IMEI);
-	if (data->Revision) snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW %s, HW %s", drvinst->SWVersion, drvinst->HWVersion);
-	data->Phone = drvinst->PM;
+	if (data->manufacturer) pnok_manufacturer_get(data->manufacturer);
+	if (data->model) strcpy(data->model, drvinst->model);
+	if (data->imei) strcpy(data->imei, drvinst->imei);
+	if (data->revision) snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", drvinst->sw_version, drvinst->hw_version);
+	data->phone = drvinst->pm;
 
 	return GN_ERR_NONE;
 }
 
 
-static gn_error GetPhoneStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetPhoneStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
 
 	dprintf("Getting phone status...\n");
-	if (SM_SendMessage(state, 4, 0x04, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x04);
+	if (sm_message_send(state, 4, 0x04, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x04);
 }
 
-static gn_error GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetRFLevel(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting rf level...\n");
 	return GetPhoneStatus(data, state);
 }
 
-static gn_error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetBatteryLevel(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting battery level...\n");
 	return GetPhoneStatus(data, state);
 }
 
-static gn_error GetPowersource(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetPowersource(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Getting power source...\n");
 	return GetPhoneStatus(data, state);
 }
 
-static gn_error GetPhoneID(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetPhoneID(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03};
 
 	dprintf("Getting phone id...\n");
-	if (SM_SendMessage(state, 4, 0x04, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x04);
+	if (sm_message_send(state, 4, 0x04, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x04);
 }
 
-static gn_error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	float csq_map[5] = {0, 8, 16, 24, 31};
 	char hw[10], sw[10];
@@ -615,42 +616,42 @@ static gn_error IncomingPhoneStatus(int messagetype, unsigned char *message, int
 		dprintf("\tBatteryLevel: %d\n", message[8]);
 		if (message[5] > 4) return GN_ERR_UNHANDLEDFRAME;
 		if (message[7] != 1 && message[7] != 2) return GN_ERR_UNHANDLEDFRAME;
-		if (data->RFLevel && data->RFUnits) {
-			switch (*data->RFUnits) {
-			case GRF_CSQ:
-				*data->RFLevel = csq_map[message[5]];
+		if (data->rf_level && data->rf_unit) {
+			switch (*data->rf_unit) {
+			case GN_RF_CSQ:
+				*data->rf_level = csq_map[message[5]];
 				break;
-			case GRF_Arbitrary:
+			case GN_RF_Arbitrary:
 			default:
-				*data->RFUnits = GRF_Arbitrary;
-				*data->RFLevel = message[5];
+				*data->rf_unit = GN_RF_Arbitrary;
+				*data->rf_level = message[5];
 				break;
 			}
 		}
-		if (data->PowerSource) {
-			*data->PowerSource = message[7];
+		if (data->power_source) {
+			*data->power_source = message[7];
 		}
-		if (data->BatteryLevel && data->BatteryUnits) {
-			*data->BatteryUnits = GBU_Arbitrary;
-			*data->BatteryLevel = message[8];
+		if (data->battery_level && data->battery_unit) {
+			*data->battery_unit = GN_BU_Arbitrary;
+			*data->battery_level = message[8];
 		}
 		break;
 
 	/* Get Phone ID */
 	case 0x04:
-		if (data->Imei) {
-			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 5);
-			dprintf("Received imei %s\n", data->Imei);
+		if (data->imei) {
+			snprintf(data->imei, GN_IMEI_MAX_LENGTH, "%s", message + 5);
+			dprintf("Received imei %s\n", data->imei);
 		}
-		if (data->Revision) {
+		if (data->revision) {
 			sscanf(message + 35, " %9s", hw);
 			sscanf(message + 40, " %9s", sw);
-			snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW %s, HW %s", sw, hw);
-			dprintf("Received revision %s\n", data->Revision);
+			snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", sw, hw);
+			dprintf("Received revision %s\n", data->revision);
 		}
-		if (data->Model) {
-			snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 21);
-			dprintf("Received model %s\n", data->Model);
+		if (data->model) {
+			snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", message + 21);
+			dprintf("Received model %s\n", data->model);
 		}
 		break;
 
@@ -662,88 +663,88 @@ static gn_error IncomingPhoneStatus(int messagetype, unsigned char *message, int
 }
 
 
-static gn_error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x00};
 
 	dprintf("Getting memory status...\n");
-	req[4] = GetMemoryType(data->MemoryStatus->MemoryType);
-	if (SM_SendMessage(state, 5, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x03);
+	req[4] = get_memory_type(data->memory_status->memory_type);
+	if (sm_message_send(state, 5, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x03);
 }
 
-static gn_error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00};
 
-	dprintf("Reading phonebook location (%d/%d)\n", data->PhonebookEntry->MemoryType, data->PhonebookEntry->Location);
-	req[4] = GetMemoryType(data->PhonebookEntry->MemoryType);
-	req[5] = data->PhonebookEntry->Location;
-	if (SM_SendMessage(state, 7, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x03);
+	dprintf("Reading phonebook location (%d/%d)\n", data->phonebook_entry->memory_type, data->phonebook_entry->location);
+	req[4] = get_memory_type(data->phonebook_entry->memory_type);
+	req[5] = data->phonebook_entry->location;
+	if (sm_message_send(state, 7, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x03);
 }
 
-static gn_error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
+static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[FBUS_MAX_FRAME_LENGTH] = {FBUS_FRAME_HEADER, 0x04};
-	GSM_PhonebookEntry *pe;
+	unsigned char req[FBUS_FRAME_MAX_LENGTH] = {FBUS_FRAME_HEADER, 0x04};
+	gn_phonebook_entry *pe;
 	unsigned char *pos;
 	int namelen, numlen;
 
-	pe = data->PhonebookEntry;
+	pe = data->phonebook_entry;
 	pos = req+4;
-	namelen = strlen(pe->Name);
-	numlen = strlen(pe->Number);
-	dprintf("Writing phonebook location (%d/%d): %s\n", pe->MemoryType, pe->Location, pe->Name);
-	if (namelen > GSM_MAX_PHONEBOOK_NAME_LENGTH) {
+	namelen = strlen(pe->name);
+	numlen = strlen(pe->number);
+	dprintf("Writing phonebook location (%d/%d): %s\n", pe->memory_type, pe->location, pe->name);
+	if (namelen > GN_PHONEBOOK_NAME_MAX_LENGTH) {
 		dprintf("name too long\n");
 		return GN_ERR_ENTRYTOOLONG;
 	}
-	if (numlen > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+	if (numlen > GN_PHONEBOOK_NUMBER_MAX_LENGTH) {
 		dprintf("number too long\n");
 		return GN_ERR_ENTRYTOOLONG;
 	}
-	if (pe->SubEntriesCount > 1) {
+	if (pe->subentries_count > 1) {
 		dprintf("61xx doesn't support subentries\n");
 		return GN_ERR_UNKNOWN;
 	}
-	if ((pe->SubEntriesCount == 1) && ((pe->SubEntries[0].EntryType != GSM_Number)
-		|| (pe->SubEntries[0].NumberType != GSM_General) || (pe->SubEntries[0].BlockNumber != 2)
-		|| strcmp(pe->SubEntries[0].data.Number, pe->Number))) {
+	if ((pe->subentries_count == 1) && ((pe->subentries[0].entry_type != GN_PHONEBOOK_ENTRY_Number)
+		|| (pe->subentries[0].number_type != GN_PHONEBOOK_NUMBER_General) || (pe->subentries[0].id != 2)
+		|| strcmp(pe->subentries[0].data.number, pe->number))) {
 		dprintf("61xx doesn't support subentries\n");
 		return GN_ERR_UNKNOWN;
 	}
-	*pos++ = GetMemoryType(pe->MemoryType);
-	*pos++ = pe->Location;
-	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_PB_UNICODE) {
+	*pos++ = get_memory_type(pe->memory_type);
+	*pos++ = pe->location;
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_PB_UNICODE) {
 		*pos++ = (2 * namelen);
-		namelen = char_encode_unicode(pos, pe->Name, namelen);
+		namelen = char_encode_unicode(pos, pe->name, namelen);
 	} else {
 		*pos++ = namelen;
-		PNOK_EncodeString(pos, namelen, pe->Name);
+		pnok_string_encode(pos, namelen, pe->name);
 	}
 	pos += namelen;
 	*pos++ = numlen;
-	PNOK_EncodeString(pos, numlen, pe->Number);
+	pnok_string_encode(pos, numlen, pe->number);
 	pos += numlen;
-	*pos++ = (pe->Group == 5) ? 0xff : pe->Group;
-	if (SM_SendMessage(state, pos-req, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x03);
+	*pos++ = (pe->caller_group == 5) ? 0xff : pe->caller_group;
+	if (sm_message_send(state, pos-req, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x03);
 }
 
-static gn_error GetCallerGroupData(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetCallerGroupData(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x00};
 
-	req[4] = data->Bitmap->number;
-	if (SM_SendMessage(state, 5, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x03);
+	req[4] = data->bitmap->number;
+	if (sm_message_send(state, 5, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x03);
 }
 
-static gn_error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Reading bitmap...\n");
-	switch (data->Bitmap->type) {
+	switch (data->bitmap->type) {
 	case GN_BMP_StartupLogo:
 		return GetWelcomeMessage(data, state);
 	case GN_BMP_WelcomeNoteText:
@@ -763,63 +764,63 @@ static gn_error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	}
 }
 
-static gn_error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetSpeedDial(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x16, 0x00};
 
-	req[4] = data->SpeedDial->Number;
+	req[4] = data->speed_dial->number;
 
-	if (SM_SendMessage(state, 5, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x03);
+	if (sm_message_send(state, 5, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x03);
 }
 
-static gn_error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetSpeedDial(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x19, 0x00, 0x00, 0x00};
 
-	req[4] = data->SpeedDial->Number;
-	req[5] = GetMemoryType(data->SpeedDial->MemoryType);
-	req[6] = data->SpeedDial->Location;
+	req[4] = data->speed_dial->number;
+	req[5] = get_memory_type(data->speed_dial->memory_type);
+	req[6] = data->speed_dial->location;
 
-	if (SM_SendMessage(state, 7, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x03);
+	if (sm_message_send(state, 7, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x03);
 }
 
-static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	GSM_PhonebookEntry *pe;
+	gn_phonebook_entry *pe;
 	gn_bmp *bmp;
 	unsigned char *pos;
 	int n;
 
 	switch (message[3]) {
 	case 0x02:
-		if (data->PhonebookEntry) {
-			pe = data->PhonebookEntry;
+		if (data->phonebook_entry) {
+			pe = data->phonebook_entry;
 			pos = message + 5;
-			pe->Empty = false;
+			pe->empty = false;
 			n = *pos++;
 			/* It seems that older phones (at least Nokia 5110 and 6130)
 			   set message[4] to 0. Newer ones set is to the location
 			   number. It can be the distinction when to read the name */
 			if (message[4] != 0)
-				char_decode_unicode(pe->Name, pos, n);
+				char_decode_unicode(pe->name, pos, n);
 			else
-				PNOK_DecodeString(pe->Name, sizeof(pe->Name), pos, n);
+				pnok_string_decode(pe->name, sizeof(pe->name), pos, n);
 			pos += n;
 			n = *pos++;
-			PNOK_DecodeString(pe->Number, sizeof(pe->Number), pos, n);
+			pnok_string_decode(pe->number, sizeof(pe->number), pos, n);
 			pos += n;
-			pe->Group = *pos++;
+			pe->caller_group = *pos++;
 			pos++;
-			pe->Date.Year = (pos[0] << 8) + pos[1];
+			pe->date.year = (pos[0] << 8) + pos[1];
 			pos += 2;
-			pe->Date.Month = *pos++;
-			pe->Date.Day = *pos++;
-			pe->Date.Hour = *pos++;
-			pe->Date.Minute = *pos++;
-			pe->Date.Second = *pos++;
-			pe->SubEntriesCount = 0;
+			pe->date.month = *pos++;
+			pe->date.day = *pos++;
+			pe->date.hour = *pos++;
+			pe->date.minute = *pos++;
+			pe->date.second = *pos++;
+			pe->subentries_count = 0;
 		}
 		break;
 	case 0x03:
@@ -840,12 +841,12 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 	case 0x08:
-		dprintf("\tMemory location: %d\n", data->MemoryStatus->MemoryType);
+		dprintf("\tMemory location: %d\n", data->memory_status->memory_type);
 		dprintf("\tUsed: %d\n", message[6]);
 		dprintf("\tFree: %d\n", message[5]);
-		if (data->MemoryStatus) {
-			data->MemoryStatus->Used = message[6];
-			data->MemoryStatus->Free = message[5];
+		if (data->memory_status) {
+			data->memory_status->used = message[6];
+			data->memory_status->free = message[5];
 			return GN_ERR_NONE;
 		}
 		break;
@@ -861,12 +862,12 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 	case 0x11:
-		if (data->Bitmap) {
-			bmp = data->Bitmap;
+		if (data->bitmap) {
+			bmp = data->bitmap;
 			pos = message+4;
 			bmp->number = *pos++;
 			n = *pos++;
-			PNOK_DecodeString(bmp->text, sizeof(bmp->text), pos, n);
+			pnok_string_decode(bmp->text, sizeof(bmp->text), pos, n);
 			pos += n;
 			bmp->ringtone = *pos++;
 			pos++;
@@ -902,18 +903,18 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 
 	/* Get speed dial OK */
 	case 0x17:
-		if (data->SpeedDial) {
+		if (data->speed_dial) {
 			switch (message[4]) {
-			case P6100_MEMORY_ME:
-				data->SpeedDial->MemoryType = GMT_ME;
+			case NK6100_MEMORY_ME:
+				data->speed_dial->memory_type = GN_MT_ME;
 				break;
-			case P6100_MEMORY_SM:
-				data->SpeedDial->MemoryType = GMT_SM;
+			case NK6100_MEMORY_SM:
+				data->speed_dial->memory_type = GN_MT_SM;
 				break;
 			default:
 				return GN_ERR_UNHANDLEDFRAME;
 			}
-			data->SpeedDial->Location = message[5];
+			data->speed_dial->location = message[5];
 		}
 		break;
 
@@ -937,20 +938,20 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 }
 
 
-static gn_error PhoneInfo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error PhoneInfo(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10};
 
 	dprintf("Getting phone info (new way)...\n");
 
-	if (SM_SendMessage(state, 4, 0x64, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x64);
+	if (sm_message_send(state, 4, 0x64, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x64);
 }
 
-static gn_error Authentication(GSM_Statemachine *state, char *imei)
+static gn_error Authentication(struct gn_statemachine *state, char *imei)
 {
 	gn_error error;
-	GSM_Data data;
+	gn_data data;
 	unsigned char connect1[] = {FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
 	unsigned char connect2[] = {FBUS_FRAME_HEADER, 0x20, 0x02};
 	unsigned char connect3[] = {FBUS_FRAME_HEADER, 0x0d, 0x01, 0x00, 0x02};
@@ -963,53 +964,53 @@ static gn_error Authentication(GSM_Statemachine *state, char *imei)
 					 'a', 'c', 'c', 'e', 's', 's', 'o', 'r', 'y',
 					 0x00, 0x00, 0x00, 0x00};
 
-	GSM_DataClear(&data);
+	gn_data_clear(&data);
 
-	if ((error = SM_SendMessage(state, 7, 0x02, connect1)) != GN_ERR_NONE)
+	if ((error = sm_message_send(state, 7, 0x02, connect1)) != GN_ERR_NONE)
 		return error;
-	if ((error = SM_Block(state, &data, 0x02)) != GN_ERR_NONE)
-		return error;
-
-	if ((error = SM_SendMessage(state, 5, 0x02, connect2)) != GN_ERR_NONE)
-		return error;
-	if ((error = SM_Block(state, &data, 0x02)) != GN_ERR_NONE)
+	if ((error = sm_block(state, &data, 0x02)) != GN_ERR_NONE)
 		return error;
 
-	if ((error = SM_SendMessage(state, 7, 0x02, connect3)) != GN_ERR_NONE)
+	if ((error = sm_message_send(state, 5, 0x02, connect2)) != GN_ERR_NONE)
 		return error;
-	if ((error = SM_Block(state, &data, 0x02)) != GN_ERR_NONE)
+	if ((error = sm_block(state, &data, 0x02)) != GN_ERR_NONE)
+		return error;
+
+	if ((error = sm_message_send(state, 7, 0x02, connect3)) != GN_ERR_NONE)
+		return error;
+	if ((error = sm_block(state, &data, 0x02)) != GN_ERR_NONE)
 		return error;
 
 	if ((error = PhoneInfo(&data, state)) != GN_ERR_NONE) return error;
 
-	PNOK_GetNokiaAuth(imei, DRVINSTANCE(state)->MagicBytes, magic_connect + 4);
+	PNOK_GetNokiaAuth(imei, DRVINSTANCE(state)->magic_bytes, magic_connect + 4);
 
-	if ((error = SM_SendMessage(state, 45, 0x64, magic_connect)) != GN_ERR_NONE)
+	if ((error = sm_message_send(state, 45, 0x64, magic_connect)) != GN_ERR_NONE)
 		return error;
 
 	return GN_ERR_NONE;
 }
 
-static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	char hw[10], sw[10];
 
 	switch (message[3]) {
 	/* Phone ID recvd */
 	case 0x11:
-		if (data->Imei) {
-			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 9);
-			dprintf("Received imei %s\n", data->Imei);
+		if (data->imei) {
+			snprintf(data->imei, GN_IMEI_MAX_LENGTH, "%s", message + 9);
+			dprintf("Received imei %s\n", data->imei);
 		}
-		if (data->Model) {
-			snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 25);
-			dprintf("Received model %s\n", data->Model);
+		if (data->model) {
+			snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", message + 25);
+			dprintf("Received model %s\n", data->model);
 		}
-		if (data->Revision) {
+		if (data->revision) {
 			sscanf(message + 39, " %9s", hw);
 			sscanf(message + 44, " %9s", sw);
-			snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW %s, HW %s", sw, hw);
-			dprintf("Received revision %s\n", data->Revision);
+			snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", sw, hw);
+			dprintf("Received revision %s\n", data->revision);
 		}
 
 		dprintf("Message: Mobile phone identification received:\n");
@@ -1024,7 +1025,7 @@ static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int l
 		   UPDATE: of course, now we have the authentication algorithm. */
 		dprintf("\tMagic bytes: %02x %02x %02x %02x\n", message[50], message[51], message[52], message[53]);
 
-		memcpy(DRVINSTANCE(state)->MagicBytes, message + 50, 4);
+		memcpy(DRVINSTANCE(state)->magic_bytes, message + 50, 4);
 		break;
 
 	default:
@@ -1035,172 +1036,172 @@ static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int l
 }
 
 
-static gn_error PhoneInfo2(GSM_Data *data, GSM_Statemachine *state)
+static gn_error PhoneInfo2(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x03, 0x00 };
 
 	dprintf("Getting phone info (old way)...\n");
 
-	if (SM_SendMessage(state, 5, 0xd1, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0xd2);
+	if (sm_message_send(state, 5, 0xd1, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0xd2);
 
 }
 
-static gn_error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	char sw[10];
 
-	if (data->Model) {
-		snprintf(data->Model, 6, "%s", message + 21);
+	if (data->model) {
+		snprintf(data->model, 6, "%s", message + 21);
 	}
-	if (data->Revision) {
+	if (data->revision) {
 		sscanf(message + 6, " %9s", sw);
-		snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW %s, HW ????", sw);
+		snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW ????", sw);
 	}
 	dprintf("Phone info:\n%s\n", message + 4);
 	return GN_ERR_NONE;
 }
 
 
-static int GetMemoryType(GSM_MemoryType memory_type)
+static int get_memory_type(gn_memory_type memory_type)
 {
 	int result;
 
 	switch (memory_type) {
-	case GMT_MT:
-		result = P6100_MEMORY_MT;
+	case GN_MT_MT:
+		result = NK6100_MEMORY_MT;
 		break;
-	case GMT_ME:
-		result = P6100_MEMORY_ME;
+	case GN_MT_ME:
+		result = NK6100_MEMORY_ME;
 		break;
-	case GMT_SM:
-		result = P6100_MEMORY_SM;
+	case GN_MT_SM:
+		result = NK6100_MEMORY_SM;
 		break;
-	case GMT_FD:
-		result = P6100_MEMORY_FD;
+	case GN_MT_FD:
+		result = NK6100_MEMORY_FD;
 		break;
-	case GMT_ON:
-		result = P6100_MEMORY_ON;
+	case GN_MT_ON:
+		result = NK6100_MEMORY_ON;
 		break;
-	case GMT_EN:
-		result = P6100_MEMORY_EN;
+	case GN_MT_EN:
+		result = NK6100_MEMORY_EN;
 		break;
-	case GMT_DC:
-		result = P6100_MEMORY_DC;
+	case GN_MT_DC:
+		result = NK6100_MEMORY_DC;
 		break;
-	case GMT_RC:
-		result = P6100_MEMORY_RC;
+	case GN_MT_RC:
+		result = NK6100_MEMORY_RC;
 		break;
-	case GMT_MC:
-		result = P6100_MEMORY_MC;
+	case GN_MT_MC:
+		result = NK6100_MEMORY_MC;
 		break;
 	default:
-		result = P6100_MEMORY_XX;
+		result = NK6100_MEMORY_XX;
 		break;
 	}
 	return (result);
 }
 
 
-static gn_error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x33, 0x64, 0x00};
 
-	req[5] = data->MessageCenter->No;
+	req[5] = data->message_center->id;
 
-	if (SM_SendMessage(state, 6, 0x02, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x02);
+	if (sm_message_send(state, 6, 0x02, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x02);
 }
 
-static gn_error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[64] = {FBUS_FRAME_HEADER, 0x30, 0x64};
-	SMS_MessageCenter *smsc;
+	gn_sms_message_center *smsc;
 	unsigned char *pos;
 
-	smsc = data->MessageCenter;
+	smsc = data->message_center;
 	pos = req+5;
-	*pos++ = smsc->No;
+	*pos++ = smsc->id;
 	pos++;
-	switch (smsc->Format) {
-		case SMS_FText:
+	switch (smsc->format) {
+		case GN_SMS_MF_Text:
 			*pos++ = 0x00;
 			break;
-		case SMS_FFax:
+		case GN_SMS_MF_Fax:
 			*pos++ = 0x22;
 			break;
-		case SMS_FVoice:
+		case GN_SMS_MF_Voice:
 			*pos++ = 0x24;
 			break;
-		case SMS_FERMES:
+		case GN_SMS_MF_ERMES:
 			*pos++ = 0x25;
 			break;
-		case SMS_FPaging:
+		case GN_SMS_MF_Paging:
 			*pos++ = 0x26;
 			break;
-		case SMS_FX400:
+		case GN_SMS_MF_X400:
 			*pos++ = 0x31;
 			break;
-		case SMS_FEmail:
+		case GN_SMS_MF_Email:
 			*pos++ = 0x32;
 			break;
 		default:
 			return GN_ERR_NOTSUPPORTED;
 	}
 	pos++;
-	switch (smsc->Validity) {
-		case SMS_V1H:
+	switch (smsc->validity) {
+		case GN_SMS_VP_1H:
 			*pos++ = 0x0b;
 			break;
-		case SMS_V6H:
+		case GN_SMS_VP_6H:
 			*pos++ = 0x47;
 			break;
-		case SMS_V24H:
+		case GN_SMS_VP_24H:
 			*pos++ = 0xa7;
 			break;
-		case SMS_V72H:
+		case GN_SMS_VP_72H:
 			*pos++ = 0xa9;
 			break;
-		case SMS_V1W:
+		case GN_SMS_VP_1W:
 			*pos++ = 0xad;
 			break;
-		case SMS_VMax:
+		case GN_SMS_VP_Max:
 			*pos++ = 0xff;
 			break;
 		default:
 			return GN_ERR_NOTSUPPORTED;
 	}
-	*pos = (char_semi_octet_pack(smsc->Recipient.Number, pos + 1, smsc->Recipient.Type) + 1) / 2 + 1;
+	*pos = (char_semi_octet_pack(smsc->recipient.number, pos + 1, smsc->recipient.type) + 1) / 2 + 1;
 	pos += 12;
-	*pos = (char_semi_octet_pack(smsc->SMSC.Number, pos + 1, smsc->SMSC.Type) + 1) / 2 + 1;
+	*pos = (char_semi_octet_pack(smsc->smsc.number, pos + 1, smsc->smsc.type) + 1) / 2 + 1;
 	pos += 12;
-	if (smsc->DefaultName < 1) {
-		snprintf(pos, 13, "%s", smsc->Name);
+	if (smsc->default_name < 1) {
+		snprintf(pos, 13, "%s", smsc->name);
 		pos += strlen(pos)+1;
 	} else
 		*pos++ = 0;
 
-	if (SM_SendMessage(state, pos-req, 0x02, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x02);
+	if (sm_message_send(state, pos-req, 0x02, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x02);
 }
 
-static gn_error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetCellBroadcast(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req_ena[] = {FBUS_FRAME_HEADER, 0x20, 0x01, 0x01, 0x00, 0x00, 0x01, 0x01};
 	unsigned char req_dis[] = {FBUS_FRAME_HEADER, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	unsigned char *req;
 
-	req = data->OnCellBroadcast ? req_ena : req_dis;
-	DRVINSTANCE(state)->OnCellBroadcast = data->OnCellBroadcast;
+	req = data->on_cell_broadcast ? req_ena : req_dis;
+	DRVINSTANCE(state)->on_cell_broadcast = data->on_cell_broadcast;
 
-	if (SM_SendMessage(state, 10, 0x02, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x02);
+	if (sm_message_send(state, 10, 0x02, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x02);
 }
 
-static gn_error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SendSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
-	GSM_Data dtemp;
+	gn_data dtemp;
 	gn_error error;
 	int len;
 
@@ -1209,28 +1210,28 @@ static gn_error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	 * Ugly hack. The phone seems to drop the SendSMS message if the link
 	 * had been idle too long. -- bozo
 	 */
-	GSM_DataClear(&dtemp);
+	gn_data_clear(&dtemp);
 	GetNetworkInfo(&dtemp, state);
 
 
-	len = PNOK_FBUS_EncodeSMS(data, state, req + 6);
+	len = pnok_fbus_sms_encode(data, state, req + 6);
 	len += 6;
 
-	if (SM_SendMessage(state, len, PNOK_MSG_SMS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(state, len, PNOK_MSG_ID_SMS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	do {
-		error = SM_BlockNoRetryTimeout(state, data, PNOK_MSG_SMS, state->Link.SMSTimeout);
-	} while (!state->Link.SMSTimeout && error == GN_ERR_TIMEOUT);
+		error = sm_block_no_retry_timeout(state, data, PNOK_MSG_ID_SMS, state->link.sms_timeout);
+	} while (!state->link.sms_timeout && error == GN_ERR_TIMEOUT);
 
 	return error;
 }
 
-static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
+static bool CheckIncomingSMS(struct gn_statemachine *state, int pos)
 {
-	GSM_Data data;
-	GSM_API_SMS sms;
+	gn_data data;
+	gn_sms sms;
 	gn_error error;
 
-	if (!DRVINSTANCE(state)->OnSMS) {
+	if (!DRVINSTANCE(state)->on_sms) {
 		return false;
 	}
 
@@ -1245,20 +1246,20 @@ static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
 	DRVINSTANCE(state)->sms_notification_in_progress = true;
 
 	memset(&sms, 0, sizeof(sms));
-	sms.MemoryType = GMT_SM;
-	sms.Number = pos;
-	GSM_DataClear(&data);
-	data.SMS = &sms;
+	sms.memory_type = GN_MT_SM;
+	sms.number = pos;
+	gn_data_clear(&data);
+	data.sms = &sms;
 
-	dprintf("trying to fetch sms#%hd\n", sms.Number);
+	dprintf("trying to fetch sms#%hd\n", sms.number);
 	if ((error = gn_sms_get(&data, state)) != GN_ERR_NONE) {
 		DRVINSTANCE(state)->sms_notification_in_progress = false;
 		return false;
 	}
 
-	DRVINSTANCE(state)->OnSMS(&sms);
+	DRVINSTANCE(state)->on_sms(&sms);
 
-	dprintf("deleting sms#%hd\n", sms.Number);
+	dprintf("deleting sms#%hd\n", sms.number);
 	DeleteSMSMessage(&data, state);
 
 	DRVINSTANCE(state)->sms_notification_in_progress = false;
@@ -1266,34 +1267,34 @@ static bool CheckIncomingSMS(GSM_Statemachine *state, int pos)
 	return true;
 }
 
-static void FlushLostSMSNotifications(GSM_Statemachine *state)
+static void FlushLostSMSNotifications(struct gn_statemachine *state)
 {
 	int i;
 
 	while (!DRVINSTANCE(state)->sms_notification_in_progress && DRVINSTANCE(state)->sms_notification_lost) {
 		DRVINSTANCE(state)->sms_notification_lost = false;
-		for (i = 1; i <= P6100_MAX_SMS_MESSAGES; i++)
+		for (i = 1; i <= NK6100_MAX_SMS_MESSAGES; i++)
 			CheckIncomingSMS(state, i);
 	}
 }
 
-static gn_error SetOnSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetOnSMS(gn_data *data, struct gn_statemachine *state)
 {
-	if (data->OnSMS) {
-		DRVINSTANCE(state)->OnSMS = data->OnSMS;
+	if (data->on_sms) {
+		DRVINSTANCE(state)->on_sms = data->on_sms;
 		DRVINSTANCE(state)->sms_notification_lost = true;
 		FlushLostSMSNotifications(state);
 	} else {
-		DRVINSTANCE(state)->OnSMS = NULL;
+		DRVINSTANCE(state)->on_sms = NULL;
 	}
 
 	return GN_ERR_NONE;
 }
 
-static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	SMS_MessageCenter *smsc;
-	GSM_CBMessage cbmsg;
+	gn_sms_message_center *smsc;
+	gn_cb_message cbmsg;
 	unsigned char *pos;
 	int n;
 	gn_error error;
@@ -1309,7 +1310,7 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 		 * The marked part seems to be an ISDN cause code -- bozo
 		 * 01 08 00 03 64 [01 32] 00
 		 */
-		error = isdn_cause2gn_error(NULL, NULL, message[5], message[6]);
+		error = isdn_cause_to_gn_error(NULL, NULL, message[5], message[6]);
 		switch (error) {
 		case GN_ERR_UNKNOWN: return GN_ERR_FAILED;
 		default:         return error;
@@ -1329,21 +1330,23 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 
 	/* Set CellBroadcast OK */
 	case 0x21:
+		dprintf("Setting CellBroadcast successful\n");
 		break;
 
 	/* Set CellBroadcast error */
 	case 0x22:
+		dprintf("Setting CellBroadcast failed\n");
 		break;
 
 	/* Read CellBroadcast */
 	case 0x23:
-		if (DRVINSTANCE(state)->OnCellBroadcast) {
+		if (DRVINSTANCE(state)->on_cell_broadcast) {
 			memset(&cbmsg, 0, sizeof(cbmsg));
-			cbmsg.New = true;
-			cbmsg.Channel = message[7];
-			n = char_unpack_7bit(0, length-10, sizeof(cbmsg.Message)-1, message+10, cbmsg.Message);
-			char_decode_ascii(cbmsg.Message, cbmsg.Message, n);
-			DRVINSTANCE(state)->OnCellBroadcast(&cbmsg);
+			cbmsg.new = true;
+			cbmsg.channel = message[7];
+			n = char_unpack_7bit(0, length-10, sizeof(cbmsg.message)-1, message+10, cbmsg.message);
+			char_decode_ascii(cbmsg.message, cbmsg.message, n);
+			DRVINSTANCE(state)->on_cell_broadcast(&cbmsg);
 		}
 		return GN_ERR_UNSOLICITED;
 
@@ -1363,32 +1366,32 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 
 	/* SMS center received */
 	case 0x34:
-		if (data->MessageCenter) {
-			smsc = data->MessageCenter;
+		if (data->message_center) {
+			smsc = data->message_center;
 			pos = message + 4;
-			smsc->No = *pos++;
+			smsc->id = *pos++;
 			pos++;
 			switch (*pos++) {
 			case 0x00:	/* text */
-				smsc->Format = SMS_FText;
+				smsc->format = GN_SMS_MF_Text;
 				break;
 			case 0x22:	/* fax */
-				smsc->Format = SMS_FFax;
+				smsc->format = GN_SMS_MF_Fax;
 				break;
 			case 0x24:	/* voice */
-				smsc->Format = SMS_FVoice;
+				smsc->format = GN_SMS_MF_Voice;
 				break;
 			case 0x25:	/* ERMES */
-				smsc->Format = SMS_FERMES;
+				smsc->format = GN_SMS_MF_ERMES;
 				break;
 			case 0x26:	/* paging */
-				smsc->Format = SMS_FPaging;
+				smsc->format = GN_SMS_MF_Paging;
 				break;
 			case 0x31:	/* X.400 */
-				smsc->Format = SMS_FX400;
+				smsc->format = GN_SMS_MF_X400;
 				break;
 			case 0x32:	/* email */
-				smsc->Format = SMS_FEmail;
+				smsc->format = GN_SMS_MF_Email;
 				break;
 			default:
 				return GN_ERR_UNHANDLEDFRAME;
@@ -1396,42 +1399,42 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 			pos++;
 			switch (*pos++) {
 			case 0x0b:	/*  1 hour */
-				smsc->Validity = SMS_V1H;
+				smsc->validity = GN_SMS_VP_1H;
 				break;
 			case 0x47:	/*  6 hours */
-				smsc->Validity = SMS_V6H;
+				smsc->validity = GN_SMS_VP_6H;
 				break;
 			case 0xa7:	/* 24 hours */
-				smsc->Validity = SMS_V24H;
+				smsc->validity = GN_SMS_VP_24H;
 				break;
 			case 0xa9:	/* 72 hours */
-				smsc->Validity = SMS_V72H;
+				smsc->validity = GN_SMS_VP_72H;
 				break;
 			case 0xad:	/*  1 week */
-				smsc->Validity = SMS_V1W;
+				smsc->validity = GN_SMS_VP_1W;
 				break;
 			case 0xff:	/* max.time */
-				smsc->Validity = SMS_VMax;
+				smsc->validity = GN_SMS_VP_Max;
 				break;
 			default:	/* Probably some error, but better treat it as 24h */
-				smsc->Validity = SMS_V24H;
+				smsc->validity = GN_SMS_VP_24H;
 				break;
 			}
 			if (pos[0] % 2) pos[0]++;
 			pos[0] = pos[0] / 2 + 1;
-			snprintf(smsc->Recipient.Number, sizeof(smsc->Recipient.Number), "%s", char_get_bcd_number(pos));
-			smsc->Recipient.Type = pos[1];
+			snprintf(smsc->recipient.number, sizeof(smsc->recipient.number), "%s", char_get_bcd_number(pos));
+			smsc->recipient.type = pos[1];
 			pos += 12;
-			snprintf(smsc->SMSC.Number, sizeof(smsc->SMSC.Number), "%s", char_get_bcd_number(pos));
-			smsc->SMSC.Type = pos[1];
+			snprintf(smsc->smsc.number, sizeof(smsc->smsc.number), "%s", char_get_bcd_number(pos));
+			smsc->smsc.type = pos[1];
 			pos += 12;
 			/* FIXME: codepage must be investigated - bozo */
 			if (pos[0] == 0x00) {
-				snprintf(smsc->Name, sizeof(smsc->Name), _("Set %d"), smsc->No);
-				smsc->DefaultName = smsc->No;
+				snprintf(smsc->name, sizeof(smsc->name), _("Set %d"), smsc->id);
+				smsc->default_name = smsc->id;
 			} else {
-				snprintf(smsc->Name, sizeof(smsc->Name), "%s", pos);
-				smsc->DefaultName = -1;
+				snprintf(smsc->name, sizeof(smsc->name), "%s", pos);
+				smsc->default_name = -1;
 			}
 		}
 		break;
@@ -1454,26 +1457,26 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 }
 
 
-static gn_error GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x36, 0x64 };
 
-	if (SM_SendMessage(state, 5, 0x14, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x14);
+	if (sm_message_send(state, 5, 0x14, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x14);
 }
 
-static gn_error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x07, 0x02 /* Unknown */, 0x00 /* Location */, 0x01, 0x64 };
 
-	if (!data->RawSMS) return GN_ERR_INTERNALERROR;
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
-	req[5] = data->RawSMS->Number;
-	if (SM_SendMessage(state, 8, 0x02, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x14);
+	req[5] = data->raw_sms->number;
+	if (sm_message_send(state, 8, 0x02, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x14);
 }
 
-static gn_error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SaveSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x04, 
 				  0x07, /* status */
@@ -1482,49 +1485,49 @@ static gn_error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 				  0x02 }; /* type */
 	int len;
 
-	if (!data->RawSMS) return GN_ERR_INTERNALERROR;
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
-	if (44 + data->RawSMS->UserDataLength > sizeof(req))
+	if (44 + data->raw_sms->user_data_length > sizeof(req))
 		return GN_ERR_WRONGDATAFORMAT;
 
-	if (data->RawSMS->Type == SMS_Deliver) {	/* Inbox */
+	if (data->raw_sms->type == GN_SMS_MT_Deliver) {	/* Inbox */
 		dprintf("INBOX!\n");
 		req[4] 		= 0x03;			/* SMS State - GSM_Unread */
 		req[7] 		= 0x00;			/* SMS Type */
 	}
 
-	if (data->RawSMS->Status == SMS_Sent)
+	if (data->raw_sms->status == GN_SMS_Sent)
 		req[4] -= 0x02;
 
-	req[6] = data->RawSMS->Number;
+	req[6] = data->raw_sms->number;
 
 #if 0
 	req[20] = 0x01; /* SMS Submit */
-	if (data->RawSMS->UDHIndicator)		req[20] |= 0x40;
-	if (data->RawSMS->ValidityIndicator)	req[20] |= 0x10;
+	if (data->raw_sms->udh_indicator)		req[20] |= 0x40;
+	if (data->raw_sms->validity_indicator)	req[20] |= 0x10;
 
-	req[24] = data->RawSMS->UserDataLength;
-	memcpy(req + 37, data->RawSMS->Validity, 7);
-	memcpy(req + 44, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+	req[24] = data->raw_sms->user_data_length;
+	memcpy(req + 37, data->raw_sms->validity, 7);
+	memcpy(req + 44, data->raw_sms->dser_data, data->raw_sms->user_data_length);
 #endif
-	len = PNOK_FBUS_EncodeSMS(data, state, req + 8);
+	len = pnok_fbus_sms_encode(data, state, req + 8);
 	len += 8;
 
-	if (SM_SendMessage(state, len, 0x14, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x14);
+	if (sm_message_send(state, len, 0x14, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x14);
 }
 
-static gn_error DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x0a, 0x02, 0x00 /* Location */ };
 
-	if (!data->SMS) return GN_ERR_INTERNALERROR;
-	req[5] = data->SMS->Number;
-	if (SM_SendMessage(state, 6, 0x14, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x14);
+	if (!data->sms) return GN_ERR_INTERNALERROR;
+	req[5] = data->sms->number;
+	if (sm_message_send(state, 6, 0x14, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x14);
 }
 
-static gn_error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingSMS(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int i;
 
@@ -1532,7 +1535,7 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 	/* save sms succeeded */
 	case 0x05:
 		dprintf("Message stored at %d\n", message[5]);
-		if (data->RawSMS) data->RawSMS->Number = message[5];
+		if (data->raw_sms) data->raw_sms->number = message[5];
 		break;
 
 	/* save sms failed */
@@ -1556,37 +1559,37 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 			dprintf("[%02x(%d)]", message[i], i);
 		dprintf("\n");
 
-		if (!data->RawSMS) return GN_ERR_INTERNALERROR;
+		if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
-		memset(data->RawSMS, 0, sizeof(GSM_SMSMessage));
+		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
 
-#define	getdata(d,dr,s)	(message[(data->RawSMS->Type == SMS_Deliver) ? (d) : ((data->RawSMS->Type == SMS_Delivery_Report) ? (dr) : (s))])
+#define	getdata(d,dr,s)	(message[(data->raw_sms->type == GN_SMS_MT_Deliver) ? (d) : ((data->raw_sms->type == GN_SMS_MT_DeliveryReport) ? (dr) : (s))])
 		switch (message[7]) {
-		case 0x00: data->RawSMS->Type	= SMS_Deliver; break;
-		case 0x01: data->RawSMS->Type	= SMS_Delivery_Report; break;
-		case 0x02: data->RawSMS->Type	= SMS_Submit; break;
+		case 0x00: data->raw_sms->type	= GN_SMS_MT_Deliver; break;
+		case 0x01: data->raw_sms->type	= GN_SMS_MT_DeliveryReport; break;
+		case 0x02: data->raw_sms->type	= GN_SMS_MT_Submit; break;
 		default: return GN_ERR_UNHANDLEDFRAME;
 		}
-		data->RawSMS->Number		= message[6];
-		data->RawSMS->MemoryType	= GMT_SM;
-		data->RawSMS->Status		= message[4];
+		data->raw_sms->number		= message[6];
+		data->raw_sms->memory_type	= GN_MT_SM;
+		data->raw_sms->status		= message[4];
 
-		data->RawSMS->DCS		= getdata(22, 21, 23);
-		data->RawSMS->Length		= getdata(23, 22, 24);
-		data->RawSMS->UDHIndicator	= message[20];
-		memcpy(data->RawSMS->UserData, &getdata(43, 22, 44), data->RawSMS->Length);
+		data->raw_sms->dcs		= getdata(22, 21, 23);
+		data->raw_sms->length		= getdata(23, 22, 24);
+		data->raw_sms->udh_indicator	= message[20];
+		memcpy(data->raw_sms->user_data, &getdata(43, 22, 44), data->raw_sms->length);
 
-		if (data->RawSMS->Type == SMS_Delivery_Report) {
-			data->RawSMS->ReplyViaSameSMSC = message[11];
-			memcpy(data->RawSMS->Time, message + 42, 7);
-			data->RawSMS->ReportStatus = message[22];
+		if (data->raw_sms->type == GN_SMS_MT_DeliveryReport) {
+			data->raw_sms->reply_via_same_smsc = message[11];
+			memcpy(data->raw_sms->time, message + 42, 7);
+			data->raw_sms->report_status = message[22];
 		}
-		if (data->RawSMS->Type != SMS_Submit) {
-			memcpy(data->RawSMS->SMSCTime, &getdata(36, 35, 0), 7);
-			memcpy(data->RawSMS->MessageCenter, message + 8, 12);
-			memcpy(data->RawSMS->RemoteNumber, &getdata(24, 23, 0), 12);
+		if (data->raw_sms->type != GN_SMS_MT_Submit) {
+			memcpy(data->raw_sms->smsc_time, &getdata(36, 35, 0), 7);
+			memcpy(data->raw_sms->message_center, message + 8, 12);
+			memcpy(data->raw_sms->remote_number, &getdata(24, 23, 0), 12);
 		}
-#undef	getdata
+#undef getdata
 		break;
 
 	/* read sms failed */
@@ -1628,8 +1631,8 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 		dprintf("Message: SMS Status Received\n");
 		dprintf("\tThe number of messages: %d\n", message[10]);
 		dprintf("\tUnread messages: %d\n", message[11]);
-		data->SMSStatus->Unread = message[11];
-		data->SMSStatus->Number = message[10];
+		data->sms_status->unread = message[11];
+		data->sms_status->number = message[10];
 		break;
 
 	/* sms status failed */
@@ -1646,31 +1649,31 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 }
 
 
-static gn_error GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x70 };
 
-	if (SM_SendMessage(state, 4, 0x0a, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x0a);
+	if (sm_message_send(state, 4, 0x0a, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x0a);
 }
 
-static gn_error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch (message[3]) {
 	/* Network info */
 	case 0x71:
-		if (data->NetworkInfo) {
-			data->NetworkInfo->CellID[0] = message[10];
-			data->NetworkInfo->CellID[1] = message[11];
-			data->NetworkInfo->LAC[0] = message[12];
-			data->NetworkInfo->LAC[1] = message[13];
-			data->NetworkInfo->NetworkCode[0] = '0' + (message[14] & 0x0f);
-			data->NetworkInfo->NetworkCode[1] = '0' + (message[14] >> 4);
-			data->NetworkInfo->NetworkCode[2] = '0' + (message[15] & 0x0f);
-			data->NetworkInfo->NetworkCode[3] = ' ';
-			data->NetworkInfo->NetworkCode[4] = '0' + (message[16] & 0x0f);
-			data->NetworkInfo->NetworkCode[5] = '0' + (message[16] >> 4);
-			data->NetworkInfo->NetworkCode[6] = 0;
+		if (data->network_info) {
+			data->network_info->cell_id[0] = message[10];
+			data->network_info->cell_id[1] = message[11];
+			data->network_info->LAC[0] = message[12];
+			data->network_info->LAC[1] = message[13];
+			data->network_info->network_code[0] = '0' + (message[14] & 0x0f);
+			data->network_info->network_code[1] = '0' + (message[14] >> 4);
+			data->network_info->network_code[2] = '0' + (message[15] & 0x0f);
+			data->network_info->network_code[3] = ' ';
+			data->network_info->network_code[4] = '0' + (message[16] & 0x0f);
+			data->network_info->network_code[5] = '0' + (message[16] >> 4);
+			data->network_info->network_code[6] = 0;
 		}
 		break;
 	default:
@@ -1681,31 +1684,31 @@ static gn_error IncomingNetworkInfo(int messagetype, unsigned char *message, int
 }
 
 
-static gn_error GetWelcomeMessage(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetWelcomeMessage(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x16};
 
-	if (SM_SendMessage(state, 4, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x05);
+	if (sm_message_send(state, 4, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x05);
 }
 
-static gn_error GetOperatorLogo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetOperatorLogo(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x33, 0x01};
 
-	req[4] = data->Bitmap->number;
-	if (SM_SendMessage(state, 5, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x05);
+	req[4] = data->bitmap->number;
+	if (sm_message_send(state, 5, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x05);
 }
 
-static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512 + GN_BMP_MAX_SIZE] = {FBUS_FRAME_HEADER};
 	gn_bmp *bmp;
 	unsigned char *pos;
 	int len;
 
-	bmp = data->Bitmap;
+	bmp = data->bitmap;
 	pos = req+3;
 
 	switch (bmp->type) {
@@ -1718,10 +1721,10 @@ static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		*pos++ = 0x18;
 		*pos++ = 0x01;	/* one block */
 		*pos++ = 0x02;
-		*pos = PNOK_EncodeString(pos+1, len, bmp->text);
+		*pos = pnok_string_encode(pos+1, len, bmp->text);
 		pos += *pos+1;
-		if (SM_SendMessage(state, pos-req, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		return SM_Block(state, data, 0x05);
+		if (sm_message_send(state, pos-req, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		return sm_block(state, data, 0x05);
 
 	case GN_BMP_DealerNoteText:
 		len = strlen(bmp->text);
@@ -1732,10 +1735,10 @@ static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		*pos++ = 0x18;
 		*pos++ = 0x01;	/* one block */
 		*pos++ = 0x03;
-		*pos = PNOK_EncodeString(pos+1, len, bmp->text);
+		*pos = pnok_string_encode(pos+1, len, bmp->text);
 		pos += *pos+1;
-		if (SM_SendMessage(state, pos-req, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		return SM_Block(state, data, 0x05);
+		if (sm_message_send(state, pos-req, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		return sm_block(state, data, 0x05);
 
 	case GN_BMP_StartupLogo:
 		if (bmp->size > GN_BMP_MAX_SIZE) {
@@ -1749,16 +1752,16 @@ static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		*pos++ = bmp->width;
 		memcpy(pos, bmp->bitmap, bmp->size);
 		pos += bmp->size;
-		if (SM_SendMessage(state, pos-req, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		return SM_Block(state, data, 0x05);
+		if (sm_message_send(state, pos-req, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		return sm_block(state, data, 0x05);
 
 	case GN_BMP_OperatorLogo:
 		if (bmp->size > GN_BMP_MAX_SIZE) {
 			dprintf("OperatorLogo is too long\n");
 			return GN_ERR_INTERNALERROR;
 		}
-		if (DRVINSTANCE(state)->Capabilities & P6100_CAP_NBS_UPLOAD)
-			return NBSUpload(data, state, SMS_BitmapData);
+		if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NBS_UPLOAD)
+			return NBSUpload(data, state, GN_SMS_DATA_Bitmap);
 		*pos++ = 0x30;	/* Store Op Logo */
 		*pos++ = 0x01;	/* location */
 		*pos++ = ((bmp->netcode[1] & 0x0f) << 4) | (bmp->netcode[0] & 0x0f);
@@ -1772,8 +1775,8 @@ static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		*pos++ = 0x01;	/* Just BW */
 		memcpy(pos, bmp->bitmap, bmp->size);
 		pos += bmp->size;
-		if (SM_SendMessage(state, pos-req, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		return SM_Block(state, data, 0x05);
+		if (sm_message_send(state, pos-req, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		return sm_block(state, data, 0x05);
 
 	case GN_BMP_CallerLogo:
 		len = strlen(bmp->text);
@@ -1787,7 +1790,7 @@ static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		}
 		*pos++ = 0x13;
 		*pos++ = bmp->number;
-		*pos = PNOK_EncodeString(pos+1, len, bmp->text);
+		*pos = pnok_string_encode(pos+1, len, bmp->text);
 		pos += *pos+1;
 		*pos++ = bmp->ringtone;
 		*pos++ = 0x01;	/* Graphic on. You can use other values as well:
@@ -1807,8 +1810,8 @@ static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		*pos++ = 0x01;	/* Just BW */
 		memcpy(pos, bmp->bitmap, bmp->size);
 		pos += bmp->size;
-		if (SM_SendMessage(state, pos-req, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		return SM_Block(state, data, 0x03);
+		if (sm_message_send(state, pos-req, 0x03, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		return sm_block(state, data, 0x03);
 
 	case GN_BMP_None:
 	case GN_BMP_PictureMessage:
@@ -1818,44 +1821,44 @@ static gn_error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	}
 }
 
-static gn_error GetProfileFeature(GSM_Data *data, GSM_Statemachine *state, int id)
+static gn_error GetProfileFeature(gn_data *data, struct gn_statemachine *state, int id)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x13, 0x01, 0x00, 0x00};
 
-	req[5] = data->Profile->Number;
+	req[5] = data->profile->number;
 	req[6] = (unsigned char)id;
 
-	if (SM_SendMessage(state, 7, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x05);
+	if (sm_message_send(state, 7, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x05);
 }
 
-static gn_error SetProfileFeature(GSM_Data *data, GSM_Statemachine *state, int id, int value)
+static gn_error SetProfileFeature(gn_data *data, struct gn_statemachine *state, int id, int value)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x01, 0x00, 0x00, 0x00, 0x01};
 
-	req[5] = data->Profile->Number;
+	req[5] = data->profile->number;
 	req[6] = (unsigned char)id;
 	req[7] = (unsigned char)value;
 	dprintf("Setting profile %d feature %d to %d\n", req[5], req[6], req[7]);
 
-	if (SM_SendMessage(state, 9, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x05);
+	if (sm_message_send(state, 9, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x05);
 }
 
-static gn_error GetProfile(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetProfile(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x1a, 0x00};
-	GSM_Profile *prof;
+	gn_profile *prof;
 	gn_error error;
 	int i;
 
-	if (!data->Profile)
+	if (!data->profile)
 		return GN_ERR_UNKNOWN;
-	prof = data->Profile;
-	req[4] = prof->Number;
+	prof = data->profile;
+	req[4] = prof->number;
 
-	if (SM_SendMessage(state, 5, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	if ((error = SM_Block(state, data, 0x05)) != GN_ERR_NONE)
+	if (sm_message_send(state, 5, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if ((error = sm_block(state, data, 0x05)) != GN_ERR_NONE)
 		return error;
 
 	for (i = 0; i <= 0x09; i++) {
@@ -1863,49 +1866,49 @@ static gn_error GetProfile(GSM_Data *data, GSM_Statemachine *state)
 			return error;
 	}
 
-	if (prof->DefaultName > -1) {
+	if (prof->default_name > -1) {
 		/* For N5110 */
 		/* FIXME: It should be set for N5130 and 3210 too */
-		if (!strcmp(DRVINSTANCE(state)->Model, "NSE-1")) {
-			switch (prof->DefaultName) {
+		if (!strcmp(DRVINSTANCE(state)->model, "NSE-1")) {
+			switch (prof->default_name) {
 			case 0x00:
-				snprintf(prof->Name, sizeof(prof->Name), _("Personal"));
+				snprintf(prof->name, sizeof(prof->name), _("Personal"));
 				break;
 			case 0x01:
-				snprintf(prof->Name, sizeof(prof->Name), _("Car"));
+				snprintf(prof->name, sizeof(prof->name), _("Car"));
 				break;
 			case 0x02:
-				snprintf(prof->Name, sizeof(prof->Name), _("Headset"));
+				snprintf(prof->name, sizeof(prof->name), _("Headset"));
 				break;
 			default:
-				snprintf(prof->Name, sizeof(prof->Name), _("Unknown (%d)"), prof->DefaultName);
+				snprintf(prof->name, sizeof(prof->name), _("Unknown (%d)"), prof->default_name);
 				break;
 			}
 		} else {
-			switch (prof->DefaultName) {
+			switch (prof->default_name) {
 			case 0x00:
-				snprintf(prof->Name, sizeof(prof->Name), _("General"));
+				snprintf(prof->name, sizeof(prof->name), _("General"));
 				break;
 			case 0x01:
-				snprintf(prof->Name, sizeof(prof->Name), _("Silent"));
+				snprintf(prof->name, sizeof(prof->name), _("Silent"));
 				break;
 			case 0x02:
-				snprintf(prof->Name, sizeof(prof->Name), _("Meeting"));
+				snprintf(prof->name, sizeof(prof->name), _("Meeting"));
 				break;
 			case 0x03:
-				snprintf(prof->Name, sizeof(prof->Name), _("Outdoor"));
+				snprintf(prof->name, sizeof(prof->name), _("Outdoor"));
 				break;
 			case 0x04:
-				snprintf(prof->Name, sizeof(prof->Name), _("Pager"));
+				snprintf(prof->name, sizeof(prof->name), _("Pager"));
 				break;
 			case 0x05:
-				snprintf(prof->Name, sizeof(prof->Name), _("Car"));
+				snprintf(prof->name, sizeof(prof->name), _("Car"));
 				break;
 			case 0x06:
-				snprintf(prof->Name, sizeof(prof->Name), _("Headset"));
+				snprintf(prof->name, sizeof(prof->name), _("Headset"));
 				break;
 			default:
-				snprintf(prof->Name, sizeof(prof->Name), _("Unknown (%d)"), prof->DefaultName);
+				snprintf(prof->name, sizeof(prof->name), _("Unknown (%d)"), prof->default_name);
 				break;
 			}
 		}
@@ -1914,18 +1917,18 @@ static gn_error GetProfile(GSM_Data *data, GSM_Statemachine *state)
 	return GN_ERR_NONE;
 }
 
-static gn_error SetProfile(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetProfile(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[64] = {FBUS_FRAME_HEADER, 0x1c, 0x01, 0x03};
-	GSM_Profile *prof;
+	gn_profile *prof;
 	gn_error error;
 
-	if (!data->Profile)
+	if (!data->profile)
 		return GN_ERR_UNKNOWN;
-	prof = data->Profile;
-	dprintf("Setting profile %d (%s)\n", prof->Number, prof->Name);
+	prof = data->profile;
+	dprintf("Setting profile %d (%s)\n", prof->number, prof->name);
 
-	if (prof->Number == 0) {
+	if (prof->number == 0) {
 		/* We cannot rename the General profile! - bozo */
 
 		/*
@@ -1935,54 +1938,54 @@ static gn_error SetProfile(GSM_Data *data, GSM_Statemachine *state)
 		 */
 		dprintf("You cannot rename General profile\n");
 		return GN_ERR_NOTSUPPORTED;
-	} else if (prof->DefaultName > -1) {
-		prof->Name[0] = 0;
+	} else if (prof->default_name > -1) {
+		prof->name[0] = 0;
 	}
 
-	req[7] = prof->Number;
-	req[8] = PNOK_EncodeString(req+9, 39, prof->Name);
+	req[7] = prof->number;
+	req[8] = pnok_string_encode(req+9, 39, prof->name);
 	req[6] = req[8] + 2;
 
-	if (SM_SendMessage(state, req[8]+9, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	if ((error = SM_Block(state, data, 0x05)) != GN_ERR_NONE)
+	if (sm_message_send(state, req[8]+9, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if ((error = sm_block(state, data, 0x05)) != GN_ERR_NONE)
 		return error;
 
-	error  = SetProfileFeature(data, state, 0x00, prof->KeypadTone);
-	error |= SetProfileFeature(data, state, 0x01, prof->Lights);
-	error |= SetProfileFeature(data, state, 0x02, prof->CallAlert);
-	error |= SetProfileFeature(data, state, 0x03, prof->Ringtone);
-	error |= SetProfileFeature(data, state, 0x04, prof->Volume);
-	error |= SetProfileFeature(data, state, 0x05, prof->MessageTone);
-	error |= SetProfileFeature(data, state, 0x06, prof->Vibration);
-	error |= SetProfileFeature(data, state, 0x07, prof->WarningTone);
-	error |= SetProfileFeature(data, state, 0x08, prof->CallerGroups);
-	error |= SetProfileFeature(data, state, 0x09, prof->AutomaticAnswer);
+	error  = SetProfileFeature(data, state, 0x00, prof->keypad_tone);
+	error |= SetProfileFeature(data, state, 0x01, prof->lights);
+	error |= SetProfileFeature(data, state, 0x02, prof->call_alert);
+	error |= SetProfileFeature(data, state, 0x03, prof->ringtone);
+	error |= SetProfileFeature(data, state, 0x04, prof->volume);
+	error |= SetProfileFeature(data, state, 0x05, prof->message_tone);
+	error |= SetProfileFeature(data, state, 0x06, prof->vibration);
+	error |= SetProfileFeature(data, state, 0x07, prof->warning_tone);
+	error |= SetProfileFeature(data, state, 0x08, prof->caller_groups);
+	error |= SetProfileFeature(data, state, 0x09, prof->automatic_answer);
 
 	return (error == GN_ERR_NONE) ? GN_ERR_NONE : GN_ERR_UNKNOWN;
 }
 
-static gn_error SetRingtone(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[7+GSM_MAX_RINGTONE_PACKAGE_LENGTH] = {FBUS_FRAME_HEADER, 0x36, 0x00, 0x00, 0x78};
+	unsigned char req[7 + GN_RINGTONE_PACKAGE_MAX_LENGTH] = {FBUS_FRAME_HEADER, 0x36, 0x00, 0x00, 0x78};
 	int size;
 
-	if (!data || !data->Ringtone) return GN_ERR_INTERNALERROR;
+	if (!data || !data->ringtone) return GN_ERR_INTERNALERROR;
 
-	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_NBS_UPLOAD)
-		return NBSUpload(data, state, SMS_RingtoneData);
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NBS_UPLOAD)
+		return NBSUpload(data, state, GN_SMS_DATA_Ringtone);
 
-	size = GSM_MAX_RINGTONE_PACKAGE_LENGTH;
-	GSM_PackRingtone(data->Ringtone, req + 7, &size);
-	req[4] = data->Ringtone->Location;
+	size = GN_RINGTONE_PACKAGE_MAX_LENGTH;
+	gn_ringtone_pack(data->ringtone, req + 7, &size);
+	req[4] = data->ringtone->location;
 
-	if (SM_SendMessage(state, 7 + size, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x05);
+	if (sm_message_send(state, 7 + size, 0x05, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x05);
 }
 
-static gn_error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingProfile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_bmp *bmp;
-	GSM_Profile *prof;
+	gn_profile *prof;
 	unsigned char *pos;
 	int i;
 	bool found;
@@ -2003,38 +2006,38 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 
 	/* Get profile feature */
 	case 0x14:
-		if (data->Profile) {
-			prof = data->Profile;
+		if (data->profile) {
+			prof = data->profile;
 			switch (message[6]) {
 			case 0x00:
-				prof->KeypadTone = message[8];
+				prof->keypad_tone = message[8];
 				break;
 			case 0x01:
-				prof->Lights = message[8];
+				prof->lights = message[8];
 				break;
 			case 0x02:
-				prof->CallAlert = message[8];
+				prof->call_alert = message[8];
 				break;
 			case 0x03:
-				prof->Ringtone = message[8];
+				prof->ringtone = message[8];
 				break;
 			case 0x04:
-				prof->Volume = message[8];
+				prof->volume = message[8];
 				break;
 			case 0x05:
-				prof->MessageTone = message[8];
+				prof->message_tone = message[8];
 				break;
 			case 0x06:
-				prof->Vibration = message[8];
+				prof->vibration = message[8];
 				break;
 			case 0x07:
-				prof->WarningTone = message[8];
+				prof->warning_tone = message[8];
 				break;
 			case 0x08:
-				prof->CallerGroups = message[8];
+				prof->caller_groups = message[8];
 				break;
 			case 0x09:
-				prof->AutomaticAnswer = message[8];
+				prof->automatic_answer = message[8];
 				break;
 			default:
 				return GN_ERR_UNHANDLEDFRAME;
@@ -2044,8 +2047,8 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 
 	/* Get Welcome Message */
 	case 0x17:
-		if (data->Bitmap) {
-			bmp = data->Bitmap;
+		if (data->bitmap) {
+			bmp = data->bitmap;
 			pos = message + 5;
 			found = false;
 			for (i = 0; i < message[4] && !found; i++) {
@@ -2069,7 +2072,7 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 						pos += *pos + 1;
 						continue;
 					}
-					PNOK_DecodeString(bmp->text, sizeof(bmp->text), pos+1, *pos);
+					pnok_string_decode(bmp->text, sizeof(bmp->text), pos+1, *pos);
 					pos += *pos + 1;
 					break;
 				case 0x03:
@@ -2077,7 +2080,7 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 						pos += *pos + 1;
 						continue;
 					}
-					PNOK_DecodeString(bmp->text, sizeof(bmp->text), pos+1, *pos);
+					pnok_string_decode(bmp->text, sizeof(bmp->text), pos+1, *pos);
 					pos += *pos + 1;
 					break;
 				default:
@@ -2095,13 +2098,13 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 
 	/* Get profile name */
 	case 0x1b:
-		if (data->Profile) {
+		if (data->profile) {
 			if (message[9] == 0x00) {
-				data->Profile->DefaultName = message[8];
-				data->Profile->Name[0] = 0;
+				data->profile->default_name = message[8];
+				data->profile->name[0] = 0;
 			} else {
-				data->Profile->DefaultName = -1;
-				PNOK_DecodeString(data->Profile->Name, sizeof(data->Profile->Name), message+10, message[9]);
+				data->profile->default_name = -1;
+				pnok_string_decode(data->profile->name, sizeof(data->profile->name), message+10, message[9]);
 			}
 			break;
 		} else {
@@ -2134,8 +2137,8 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 
 	/* Get oplogo */
 	case 0x34:
-		if (data->Bitmap) {
-			bmp = data->Bitmap;
+		if (data->bitmap) {
+			bmp = data->bitmap;
 			pos = message + 5;
 			bmp->netcode[0] = '0' + (pos[0] & 0x0f);
 			bmp->netcode[1] = '0' + (pos[0] >> 4);
@@ -2192,15 +2195,15 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 }
 
 
-static gn_error GetDateTime(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetDateTime(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x62};
 
-	if (SM_SendMessage(state, 4, 0x11, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x11);
+	if (sm_message_send(state, 4, 0x11, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x11);
 }
 
-static gn_error SetDateTime(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetDateTime(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x60, 0x01, 0x01, 0x07,
 			       0x00, 0x00,	/* year - H/L */
@@ -2208,47 +2211,48 @@ static gn_error SetDateTime(GSM_Data *data, GSM_Statemachine *state)
 			       0x00, 0x00,	/* yours, minutes */
 			       0x00};		/* Unknown, but not seconds - try 59 and wait 1 sec. */
 
-	req[7] = data->DateTime->Year >> 8;
-	req[8] = data->DateTime->Year & 0xff;
-	req[9] = data->DateTime->Month;
-	req[10] = data->DateTime->Day;
-	req[11] = data->DateTime->Hour;
-	req[12] = data->DateTime->Minute;
+	req[7] = data->datetime->year >> 8;
+	req[8] = data->datetime->year & 0xff;
+	req[9] = data->datetime->month;
+	req[10] = data->datetime->day;
+	req[11] = data->datetime->hour;
+	req[12] = data->datetime->minute;
 
-	if (SM_SendMessage(state, 14, 0x11, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x11);
+	if (sm_message_send(state, 14, 0x11, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x11);
 }
 
-static gn_error GetAlarm(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetAlarm(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x6d};
 
-	if (SM_SendMessage(state, 4, 0x11, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x11);
+	if (sm_message_send(state, 4, 0x11, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x11);
 }
 
-static gn_error SetAlarm(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetAlarm(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x6b, 0x01, 0x20, 0x03,
 			       0x02,		/* should be alarm on/off, but it doesn't works */
 			       0x00, 0x00,	/* hours, minutes */
 			       0x00};		/* Unknown, but not seconds - try 59 and wait 1 sec. */
 
-	if (data->DateTime->AlarmEnabled) {
-		req[8] = data->DateTime->Hour;
-		req[9] = data->DateTime->Minute;
+	if (data->alarm->enabled) {
+		req[8] = data->alarm->timestamp.hour;
+		req[9] = data->alarm->timestamp.minute;
 	} else {
 		dprintf("Clearing the alarm clock isn't supported\n");
 		return GN_ERR_NOTSUPPORTED;
 	}
 
-	if (SM_SendMessage(state, 11, 0x11, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x11);
+	if (sm_message_send(state, 11, 0x11, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x11);
 }
 
-static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	GSM_DateTime *date;
+	gn_timestamp *date;
+	gn_calnote_alarm *alarm;
 	unsigned char *pos;
 
 	switch (message[3]) {
@@ -2264,20 +2268,20 @@ static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *messa
 
 	/* Date and time received */
 	case 0x63:
-		if (data->DateTime) {
-			date = data->DateTime;
-			pos = message+8;
-			date->Year = (pos[0] << 8) | pos[1];
+		if (data->datetime) {
+			date = data->datetime;
+			pos = message + 8;
+			date->year = (pos[0] << 8) | pos[1];
 			pos += 2;
-			date->Month = *pos++;
-			date->Day = *pos++;
-			date->Hour = *pos++;
-			date->Minute = *pos++;
-			date->Second = *pos++;
+			date->month = *pos++;
+			date->day = *pos++;
+			date->hour = *pos++;
+			date->minute = *pos++;
+			date->second = *pos++;
 
 			dprintf("Message: Date and time\n");
-			dprintf("   Time: %02d:%02d:%02d\n", date->Hour, date->Minute, date->Second);
-			dprintf("   Date: %4d/%02d/%02d\n", date->Year, date->Month, date->Day);
+			dprintf("   Time: %02d:%02d:%02d\n", date->hour, date->minute, date->second);
+			dprintf("   Date: %4d/%02d/%02d\n", date->year, date->month, date->day);
 		}
 		break;
 
@@ -2293,17 +2297,17 @@ static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *messa
 
 	/* Alarm received */
 	case 0x6e:
-		if (data->DateTime) {
-			date = data->DateTime;
+		if (data->alarm) {
+			alarm = data->alarm;
 			pos = message + 8;
-			date->AlarmEnabled = (*pos++ == 2);
-			date->Hour = *pos++;
-			date->Minute = *pos++;
-			date->Second = 0;
+			alarm->enabled = (*pos++ == 2);
+			alarm->timestamp.hour = *pos++;
+			alarm->timestamp.minute = *pos++;
+			alarm->timestamp.second = 0;
 
 			dprintf("Message: Alarm\n");
-			dprintf("   Alarm: %02d:%02d\n", date->Hour, date->Minute);
-			dprintf("   Alarm is %s\n", date->AlarmEnabled ? "on" : "off");
+			dprintf("   Alarm: %02d:%02d\n", alarm->timestamp.hour, alarm->timestamp.minute);
+			dprintf("   Alarm is %s\n", alarm->enabled ? "on" : "off");
 		}
 		break;
 
@@ -2315,87 +2319,87 @@ static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *messa
 }
 
 
-static gn_error GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x66, 0x00};
 
-	req[4] = data->CalendarNote->Location;
+	req[4] = data->calnote->location;
 
-	if (SM_SendMessage(state, 5, 0x13, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x13);
+	if (sm_message_send(state, 5, 0x13, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x13);
 }
 
-static gn_error WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x64, 0x01, 0x10,
 				 0x00,	/* Length of the rest of the frame. */
 				 0x00};	/* The type of calendar note */
-	GSM_CalendarNote *note;
+	gn_calnote *note;
 	unsigned char *pos;
 	unsigned int numlen;
 
-	if (!data->CalendarNote)
+	if (!data->calnote)
 		return GN_ERR_UNKNOWN;
 
-	note = data->CalendarNote;
+	note = data->calnote;
 	pos = req + 7;
-	numlen = strlen(note->Phone);
-	if (numlen > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+	numlen = strlen(note->phone_number);
+	if (numlen > GN_PHONEBOOK_NUMBER_MAX_LENGTH) {
 		return GN_ERR_UNKNOWN;
 	}
 
-	*pos++ = note->Type;
+	*pos++ = note->type;
 
-	*pos++ = note->Time.Year >> 8;
-	*pos++ = note->Time.Year & 0xff;
-	*pos++ = note->Time.Month;
-	*pos++ = note->Time.Day;
-	*pos++ = note->Time.Hour;
-	*pos++ = note->Time.Minute;
-	*pos++ = note->Time.Timezone;
+	*pos++ = note->time.year >> 8;
+	*pos++ = note->time.year & 0xff;
+	*pos++ = note->time.month;
+	*pos++ = note->time.day;
+	*pos++ = note->time.hour;
+	*pos++ = note->time.minute;
+	*pos++ = note->time.timezone;
 
-	if (note->Alarm.Year) {
-		*pos++ = note->Alarm.Year >> 8;
-		*pos++ = note->Alarm.Year & 0xff;
-		*pos++ = note->Alarm.Month;
-		*pos++ = note->Alarm.Day;
-		*pos++ = note->Alarm.Hour;
-		*pos++ = note->Alarm.Minute;
-		*pos++ = note->Alarm.Timezone;
+	if (note->alarm.timestamp.year) {
+		*pos++ = note->alarm.timestamp.year >> 8;
+		*pos++ = note->alarm.timestamp.year & 0xff;
+		*pos++ = note->alarm.timestamp.month;
+		*pos++ = note->alarm.timestamp.day;
+		*pos++ = note->alarm.timestamp.hour;
+		*pos++ = note->alarm.timestamp.minute;
+		*pos++ = note->alarm.timestamp.timezone;
 	} else {
 		memset(pos, 0x00, 7);
 		pos += 7;
 	}
 	
 
-	*pos = PNOK_EncodeString(pos+1, 255, note->Text);
+	*pos = pnok_string_encode(pos+1, 255, note->text);
 	pos += *pos+1;
 
-	if (note->Type == GCN_CALL) {
+	if (note->type == GN_CALNOTE_CALL) {
 		*pos++ = numlen;
-		memcpy(pos, note->Phone, numlen);
+		memcpy(pos, note->phone_number, numlen);
 		pos += numlen;
 	} else {
 		*pos++ = 0;
 	}
 
-	if (SM_SendMessage(state, pos-req, 0x13, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x13);
+	if (sm_message_send(state, pos - req, 0x13, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x13);
 }
 
-static gn_error DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+static gn_error DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x68, 0x00};
 
-	req[4] = data->CalendarNote->Location;
+	req[4] = data->calnote->location;
 
-	if (SM_SendMessage(state, 5, 0x13, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x13);
+	if (sm_message_send(state, 5, 0x13, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x13);
 }
 
-static gn_error IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	GSM_CalendarNote *note;
+	gn_calnote *note;
 	unsigned char *pos;
 	int n;
 
@@ -2423,39 +2427,39 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
-		if (data->CalendarNote) {
-			note = data->CalendarNote;
+		if (data->calnote) {
+			note = data->calnote;
 			pos = message + 8;
 
 			/* FIXME: this supposed to be replaced by general date unpacking function :-) */
-			note->Type = *pos++;
-			note->Time.Year = (pos[0] << 8) + pos[1];
+			note->type = *pos++;
+			note->time.year = (pos[0] << 8) + pos[1];
 			pos += 2;
-			note->Time.Month = *pos++;
-			note->Time.Day = *pos++;
-			note->Time.Hour = *pos++;
-			note->Time.Minute = *pos++;
-			note->Time.Second = *pos++;
+			note->time.month = *pos++;
+			note->time.day = *pos++;
+			note->time.hour = *pos++;
+			note->time.minute = *pos++;
+			note->time.second = *pos++;
 
-			note->Alarm.Year = (pos[0] << 8) + pos[1];
+			note->alarm.timestamp.year = (pos[0] << 8) + pos[1];
 			pos += 2;
-			note->Alarm.Month = *pos++;
-			note->Alarm.Day = *pos++;
-			note->Alarm.Hour = *pos++;
-			note->Alarm.Minute = *pos++;
-			note->Alarm.Second = *pos++;
-			note->Alarm.AlarmEnabled = (note->Alarm.Year != 0);
+			note->alarm.timestamp.month = *pos++;
+			note->alarm.timestamp.day = *pos++;
+			note->alarm.timestamp.hour = *pos++;
+			note->alarm.timestamp.minute = *pos++;
+			note->alarm.timestamp.second = *pos++;
+			note->alarm.enabled = (note->alarm.timestamp.year != 0);
 			n = *pos++;
-			PNOK_DecodeString(note->Text, sizeof(note->Text), pos, n);
+			pnok_string_decode(note->text, sizeof(note->text), pos, n);
 			pos += n;
 
-			if (note->Type == GCN_CALL) {
+			if (note->type == GN_CALNOTE_CALL) {
 				/* This will be replaced later :-) */
 				n = *pos++;
-				PNOK_DecodeString(note->Phone, sizeof(note->Phone), pos, n);
+				pnok_string_decode(note->phone_number, sizeof(note->phone_number), pos, n);
 				pos += n;
 			} else {
-				note->Phone[0] = 0;
+				note->phone_number[0] = 0;
 			}
 		}
 		break;
@@ -2479,50 +2483,50 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 	return GN_ERR_NONE;
 }
 
-static gn_error GetDisplayStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetDisplayStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x51};
 
-	if (SM_SendMessage(state, 4, 0x0d, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x0d);
+	if (sm_message_send(state, 4, 0x0d, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x0d);
 }
 
-static gn_error PollDisplay(GSM_Data *data, GSM_Statemachine *state)
+static gn_error PollDisplay(gn_data *data, struct gn_statemachine *state)
 {
-	GSM_Data dummy;
+	gn_data dummy;
 
-	GSM_DataClear(&dummy);
+	gn_data_clear(&dummy);
 	GetDisplayStatus(&dummy, state);
 
 	return GN_ERR_NONE;
 }
 
-static gn_error DisplayOutput(GSM_Data *data, GSM_Statemachine *state)
+static gn_error DisplayOutput(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x53, 0x00};
 
-	if (data->DisplayOutput->OutputFn) {
-		DRVINSTANCE(state)->DisplayOutput = data->DisplayOutput;
+	if (data->display_output->output_fn) {
+		DRVINSTANCE(state)->display_output = data->display_output;
 		req[4] = 0x01;
 	} else {
-		DRVINSTANCE(state)->DisplayOutput = NULL;
+		DRVINSTANCE(state)->display_output = NULL;
 		req[4] = 0x02;
 	}
 
-	if (SM_SendMessage(state, 5, 0x0d, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x0d);
+	if (sm_message_send(state, 5, 0x0d, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x0d);
 }
 
-static gn_error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingDisplay(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	int state_table[8] = { 1 << DS_Call_In_Progress, 1 << DS_Unknown,
-			       1 << DS_Unread_SMS, 1 << DS_Voice_Call,
-			       1 << DS_Fax_Call, 1 << DS_Data_Call,
-			       1 << DS_Keyboard_Lock, 1 << DS_SMS_Storage_Full };
+	int state_table[8] = { 1 << GN_DISP_Call_In_Progress, 1 << GN_DISP_Unknown,
+			       1 << GN_DISP_Unread_SMS, 1 << GN_DISP_Voice_Call,
+			       1 << GN_DISP_Fax_Call, 1 << GN_DISP_Data_Call,
+			       1 << GN_DISP_Keyboard_Lock, 1 << GN_DISP_SMS_Storage_Full };
 	unsigned char *pos;
 	int n, x, y, st;
-	GSM_DrawMessage drawmsg;
-	GSM_DisplayOutput *disp = DRVINSTANCE(state)->DisplayOutput;
+	gn_display_draw_msg drawmsg;
+	gn_display_output *disp = DRVINSTANCE(state)->display_output;
 	struct timeval now, time_diff, time_limit;
 
 	switch (message[3]) {
@@ -2539,7 +2543,7 @@ static gn_error IncomingDisplay(int messagetype, unsigned char *message, int len
 			y = *pos++;
 			x = *pos++;
 			n = *pos++;
-			if (n > DRAW_MAX_SCREEN_WIDTH) return GN_ERR_INTERNALERROR;
+			if (n > GN_DRAW_SCREEN_MAX_WIDTH) return GN_ERR_INTERNALERROR;
 
 			/*
 			 * WARNING: the following part can damage your mind!
@@ -2550,31 +2554,31 @@ static gn_error IncomingDisplay(int messagetype, unsigned char *message, int len
 			time_limit.tv_sec = 0;
 			time_limit.tv_usec = 200000;
 			gettimeofday(&now, NULL);
-			timersub(&now, &disp->Last, &time_diff);
+			timersub(&now, &disp->last, &time_diff);
 			if (y > 9 && timercmp(&time_diff, &time_limit, >))
-				disp->State = true;
-			disp->Last = now;
+				disp->state = true;
+			disp->last = now;
 
-			if (disp->State && y > 9) {
-				disp->State = false;
+			if (disp->state && y > 9) {
+				disp->state = false;
 				memset(&drawmsg, 0, sizeof(drawmsg));
-				drawmsg.Command = GSM_Draw_ClearScreen;
-				disp->OutputFn(&drawmsg);
+				drawmsg.cmd = GN_DISP_DRAW_Clear;
+				disp->output_fn(&drawmsg);
 			}
 			/* Maybe this is unneeded, please leave uncommented
 			if (x == 0 && y == 46 && pos[1] != 'M') {
-				disp->State = true;
+				disp->state = true;
 			}
 			*/
 
 			memset(&drawmsg, 0, sizeof(drawmsg));
-			drawmsg.Command = GSM_Draw_DisplayText;
-			drawmsg.Data.DisplayText.x = x;
-			drawmsg.Data.DisplayText.y = y;
-			char_decode_unicode(drawmsg.Data.DisplayText.text, pos, n << 1);
-			disp->OutputFn(&drawmsg);
+			drawmsg.cmd = GN_DISP_DRAW_Text;
+			drawmsg.data.text.x = x;
+			drawmsg.data.text.y = y;
+			char_decode_unicode(drawmsg.data.text.text, pos, n << 1);
+			disp->output_fn(&drawmsg);
 
-			dprintf("(x,y): %d,%d, len: %d, data: %s\n", x, y, n, drawmsg.Data.DisplayText.text);
+			dprintf("(x,y): %d,%d, len: %d, data: %s\n", x, y, n, drawmsg.data.text.text);
 		}
 		return GN_ERR_UNSOLICITED;
 
@@ -2588,13 +2592,13 @@ static gn_error IncomingDisplay(int messagetype, unsigned char *message, int len
 			if (pos[1] == 0x02)
 				st |= state_table[pos[0] - 1];
 		}
-		if (data->DisplayStatus)
-			*data->DisplayStatus = st;
+		if (data->display_status)
+			*data->display_status = st;
 		if (disp) {
 			memset(&drawmsg, 0, sizeof(drawmsg));
-			drawmsg.Command = GSM_Draw_DisplayStatus;
-			drawmsg.Data.DisplayStatus = st;
-			disp->OutputFn(&drawmsg);
+			drawmsg.cmd = GN_DISP_DRAW_Status;
+			drawmsg.data.status = st;
+			disp->output_fn(&drawmsg);
 		}
 		break;
 
@@ -2616,30 +2620,30 @@ static gn_error IncomingDisplay(int messagetype, unsigned char *message, int len
 }
 
 
-static gn_error Reset(GSM_Data *data, GSM_Statemachine *state)
+static gn_error Reset(gn_data *data, struct gn_statemachine *state)
 {
 	if (!data) return GN_ERR_INTERNALERROR;
-	if (data->ResetType != 0x03 && data->ResetType != 0x04) return GN_ERR_INTERNALERROR;
+	if (data->reset_type != 0x03 && data->reset_type != 0x04) return GN_ERR_INTERNALERROR;
 
-	return PNOK_enable_extended_cmds(data, state, data->ResetType);
+	return pnok_extended_cmds_enable(data, state, data->reset_type);
 }
 
-static gn_error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x9e, 0x00};
 	gn_error error;
 
-	if (!data || !data->Ringtone || !data->RawData) return GN_ERR_INTERNALERROR;
+	if (!data || !data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
 
-	req[3] = data->Ringtone->Location;
+	req[3] = data->ringtone->location;
 
-	if ((error = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE) return error;
+	if ((error = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE) return error;
 
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-static gn_error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {0x00, 0x01, 0xa0, 0x00, 0x00,
 				  0x0c, 0x2c, 0x01,
@@ -2648,92 +2652,91 @@ static gn_error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state)
 				  0x02, 0xfc, 0x09};
 	gn_error error;
 
-	if (!data || !data->Ringtone || !data->RawData || !data->RawData->Data)
+	if (!data || !data->ringtone || !data->raw_data || !data->raw_data->data)
 		return GN_ERR_INTERNALERROR;
 
-	req[3] = data->Ringtone->Location;
-	snprintf(req + 8, 13, "%s", data->Ringtone->name);
-	memcpy(req + 24, data->RawData->Data, data->RawData->Length);
+	req[3] = data->ringtone->location;
+	snprintf(req + 8, 13, "%s", data->ringtone->name);
+	memcpy(req + 24, data->raw_data->data, data->raw_data->length);
 
-	if ((error = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE) return error;
+	if ((error = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE) return error;
 
-	if (SM_SendMessage(state, 24 + data->RawData->Length, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 24 + data->raw_data->length, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-static gn_error get_imei(GSM_Data *data, GSM_Statemachine *state)
+static gn_error get_imei(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x66};
 	gn_error err;
 
-	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
-
-	if (SM_SendMessage(state, 3, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 3, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-static gn_error get_phone_info(GSM_Data *data, GSM_Statemachine *state)
+static gn_error get_phone_info(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0xc8, 0x01};
 	gn_error err;
 
-	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
-static gn_error get_hw(GSM_Data *data, GSM_Statemachine *state)
+static gn_error get_hw(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0xc8, 0x05};
 	gn_error err;
 
-	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 
 #ifdef  SECURITY
-static gn_error get_security_code(GSM_Data *data, GSM_Statemachine *state)
+static gn_error get_security_code(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x6e, 0x01};
 	gn_error err;
 
-	if (!data->SecurityCode) return GN_ERR_INTERNALERROR;
-	req[3] = data->SecurityCode->Type;
+	if (!data->security_code) return GN_ERR_INTERNALERROR;
+	req[3] = data->security_code->type;
 
-	if ((err = PNOK_enable_extended_cmds(data, state, 0x01)) != GN_ERR_NONE)
+	if ((err = pnok_extended_cmds_enable(data, state, 0x01)) != GN_ERR_NONE)
 		return err;
 
-	if (SM_SendMessage(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x40);
+	if (sm_message_send(state, 4, 0x40, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x40);
 }
 #endif
 
-static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	char *aux, *aux2;
 
 	switch (message[2]) {
 	/* IMEI */
 	case 0x66:
-		if (data->Imei) {
+		if (data->imei) {
 			dprintf("IMEI: %s\n", message + 4);
-			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
+			snprintf(data->imei, GN_IMEI_MAX_LENGTH, "%s", message + 4);
 		}
 		break;
 
-#ifdef	SECURITY
+#ifdef SECURITY
 	/* get security code */
 	case 0x6e:
 		if (message[4] != 0x01) return GN_ERR_UNKNOWN;
-		if (data->SecurityCode) {
-			data->SecurityCode->Type = message[3];
-			snprintf(data->SecurityCode->Code, sizeof(data->SecurityCode->Code), "%s", message + 4);
+		if (data->security_code) {
+			data->security_code->type = message[3];
+			snprintf(data->security_code->code, sizeof(data->security_code->code), "%s", message + 4);
 		}
 		break;
 #endif
@@ -2748,12 +2751,12 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
-		if (!data->Ringtone) return GN_ERR_INTERNALERROR;
-		data->Ringtone->Location = message[3];
-		snprintf(data->Ringtone->name, sizeof(data->Ringtone->name), "%s", message + 8);
-		if (data->RawData && data->RawData->Data) {
-			memcpy(data->RawData->Data, message + 24, length - 24);
-			data->RawData->Length = length - 24;
+		if (!data->ringtone) return GN_ERR_INTERNALERROR;
+		data->ringtone->location = message[3];
+		snprintf(data->ringtone->name, sizeof(data->ringtone->name), "%s", message + 8);
+		if (data->raw_data && data->raw_data->data) {
+			memcpy(data->raw_data->data, message + 24, length - 24);
+			data->raw_data->length = length - 24;
 		}
 		break;
 	
@@ -2765,43 +2768,43 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 	case 0xc8:
 		switch (message[3]) {
 		case 0x01:
-			if (data->Revision) {
+			if (data->revision) {
 				aux = message + 7;
 				aux2 = index(aux, 0x0a);
-				if (data->Revision[0]) {
+				if (data->revision[0]) {
 					dprintf("Niepusty\n");
-					strcat(data->Revision, ", SW ");
-					strncat(data->Revision, aux,
+					strcat(data->revision, ", SW ");
+					strncat(data->revision, aux,
 						aux2 - aux);
 				} else {
-					snprintf(data->Revision, aux2 - aux + 4,
+					snprintf(data->revision, aux2 - aux + 4,
 						 "SW %s", aux);
 				}
-				dprintf("Received %s\n", data->Revision);
+				dprintf("Received %s\n", data->revision);
 			}
 			aux = index(message + 5, 0x0a);
 			aux++;
 			aux = index(aux, 0x0a);
 			aux++;
-			if (data->Model) {
+			if (data->model) {
 				aux2 = index(aux, 0x0a);
 				*aux2 = 0;
-				snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", aux);
-				dprintf("Received model %s\n", data->Model);
+				snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", aux);
+				dprintf("Received model %s\n", data->model);
 			}
 			break;
 		case 0x05:
-			if (data->Revision) {
-				if (data->Revision[0]) {
+			if (data->revision) {
+				if (data->revision[0]) {
 					dprintf("Niepusty\n");
-					strcat(data->Revision, ", HW ");
-					strncat(data->Revision, message + 5,
-						GSM_MAX_REVISION_LENGTH);
+					strcat(data->revision, ", HW ");
+					strncat(data->revision, message + 5,
+						GN_REVISION_MAX_LENGTH);
 				} else {
-					snprintf(data->Revision, GSM_MAX_REVISION_LENGTH,
+					snprintf(data->revision, GN_REVISION_MAX_LENGTH,
 						 "HW %s", message + 5);
 				}
-				dprintf("Received %s\n", data->Revision);
+				dprintf("Received %s\n", data->revision);
 			}
 			break;
 		default:
@@ -2810,13 +2813,13 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		break;
 
 	default:
-		return PNOK_IncomingSecurity(messagetype, message, length, data, state);
+		return pnok_security_incoming(messagetype, message, length, data, state);
 	}
 
 	return GN_ERR_NONE;
 }
 
-static gn_error MakeCall1(GSM_Data *data, GSM_Statemachine *state)
+static gn_error MakeCall1(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01};
 	/* order: req, voice_end */
@@ -2842,10 +2845,10 @@ static gn_error MakeCall1(GSM_Data *data, GSM_Statemachine *state)
 						  0x88,0x90,0x21,0x48,0x40,0xbb };
 	unsigned char *pos;
 	int n;
-	GSM_Data dtemp;
+	gn_data dtemp;
 
-	n = strlen(data->CallInfo->Number);
-	if (n > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+	n = strlen(data->call_info->number);
+	if (n > GN_PHONEBOOK_NUMBER_MAX_LENGTH) {
 		dprintf("number too long\n");
 		return GN_ERR_ENTRYTOOLONG;
 	}
@@ -2855,25 +2858,25 @@ static gn_error MakeCall1(GSM_Data *data, GSM_Statemachine *state)
 	 * Ugly hack. The phone seems to drop the SendSMS message if the link
 	 * had been idle too long. -- bozo
 	 */
-	GSM_DataClear(&dtemp);
+	gn_data_clear(&dtemp);
 	GetNetworkInfo(&dtemp, state);
 
 	pos = req + 4;
 	*pos++ = (unsigned char)n;
-	memcpy(pos, data->CallInfo->Number, n);
+	memcpy(pos, data->call_info->number, n);
 	pos += n;
 
-	switch (data->CallInfo->Type) {
-	case GSM_CT_VoiceCall:
+	switch (data->call_info->type) {
+	case GN_CALL_Voice:
 		dprintf("Voice Call\n");
-		switch (data->CallInfo->SendNumber) {
-		case GSM_CSN_Never:
+		switch (data->call_info->send_number) {
+		case GN_CALL_Never:
 			voice_end[5] = 0x02;
 			break;
-		case GSM_CSN_Always:
+		case GN_CALL_Always:
 			voice_end[5] = 0x03;
 			break;
-		case GSM_CSN_Default:
+		case GN_CALL_Default:
 			voice_end[5] = 0x01;
 			break;
 		default:
@@ -2885,167 +2888,167 @@ static gn_error MakeCall1(GSM_Data *data, GSM_Statemachine *state)
 		 */
 		memcpy(pos, voice_end, ARRAY_LEN(voice_end));
 		pos += ARRAY_LEN(voice_end);
-		if (SM_SendMessage(state, pos - req, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		if (sm_message_send(state, pos - req, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 		break;
 
-	case GSM_CT_NonDigitalDataCall:
+	case GN_CALL_NonDigitalData:
 		dprintf("Non Digital Data Call\n");
 		memcpy(pos, data_nondigital_end, ARRAY_LEN(data_nondigital_end));
 		pos += ARRAY_LEN(data_nondigital_end);
-		if (SM_SendMessage(state, pos - req, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		if (sm_message_send(state, pos - req, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 		usleep(10000);
 		dprintf("after nondigital1\n");
-		if (SM_SendMessage(state, ARRAY_LEN(data_nondigital_final), 0x01, data_nondigital_final) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		if (sm_message_send(state, ARRAY_LEN(data_nondigital_final), 0x01, data_nondigital_final) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 		dprintf("after nondigital2\n");
 		break;
 
-	case GSM_CT_DigitalDataCall:
+	case GN_CALL_DigitalData:
 		dprintf("Digital Data Call\n");
-		if (SM_SendMessage(state, ARRAY_LEN(data_digital_pred1), 0x01, data_digital_pred1) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		if (sm_message_send(state, ARRAY_LEN(data_digital_pred1), 0x01, data_digital_pred1) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 		usleep(500000);
 		dprintf("after digital1\n");
-		if (SM_SendMessage(state, ARRAY_LEN(data_digital_pred2), 0x01, data_digital_pred2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		if (sm_message_send(state, ARRAY_LEN(data_digital_pred2), 0x01, data_digital_pred2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 		usleep(500000);
 		dprintf("after digital2\n");
 		memcpy(pos, data_digital_end, ARRAY_LEN(data_digital_end));
 		pos += ARRAY_LEN(data_digital_end);
-		if (SM_SendMessage(state, pos - req, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		if (sm_message_send(state, pos - req, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 		dprintf("after digital3\n");
 		break;
 
 	default:
-		dprintf("Invalid call type %d\n", data->CallInfo->Type);
+		dprintf("Invalid call type %d\n", data->call_info->type);
 		return GN_ERR_INTERNALERROR;
 	}
 
-	return SM_BlockNoRetryTimeout(state, data, 0x01, 500);
+	return sm_block_no_retry_timeout(state, data, 0x01, 500);
 }
 
-static gn_error AnswerCall1(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AnswerCall1(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req1[] = {FBUS_FRAME_HEADER, 0x42, 0x05, 0x01, 0x07,
 				0xa2, 0x88, 0x81, 0x21, 0x15, 0x63, 0xa8, 0x00, 0x00,
 				0x07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80};
 	unsigned char req2[] = {FBUS_FRAME_HEADER, 0x06, 0x00, 0x00};
 
-	if (SM_SendMessage(state, sizeof(req1), 0x01, req1) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(state, sizeof(req1), 0x01, req1) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
-	req2[4] = data->CallInfo->CallID;
+	req2[4] = data->call_info->call_id;
 
-	if (SM_SendMessage(state, sizeof(req2), 0x01, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x01);
+	if (sm_message_send(state, sizeof(req2), 0x01, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x01);
 }
 
-static gn_error CancelCall1(GSM_Data *data, GSM_Statemachine *state)
+static gn_error CancelCall1(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x08, 0x00, 0x85};
 
-	req[4] = data->CallInfo->CallID;
+	req[4] = data->call_info->call_id;
 
-	if (SM_SendMessage(state, 6, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	SM_BlockNoRetry(state, data, 0x01);
+	if (sm_message_send(state, 6, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	sm_block_no_retry(state, data, 0x01);
 	return GN_ERR_NONE;
 }
 
-static gn_error SetCallNotification(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetCallNotification(gn_data *data, struct gn_statemachine *state)
 {
-	DRVINSTANCE(state)->CallNotification = data->CallNotification;
+	DRVINSTANCE(state)->call_notification = data->call_notification;
 
 	return GN_ERR_NONE;
 }
 
-static gn_error MakeCall(GSM_Data *data, GSM_Statemachine *state)
+static gn_error MakeCall(gn_data *data, struct gn_statemachine *state)
 {
-	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
-		return PNOK_make_call(data, state);
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_OLD_CALL_API)
+		return pnok_call_make(data, state);
 	else
 		return MakeCall1(data, state);
 }
 
-static gn_error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
+static gn_error AnswerCall(gn_data *data, struct gn_statemachine *state)
 {
-	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
-		return PNOK_answer_call(data, state);
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_OLD_CALL_API)
+		return pnok_call_answer(data, state);
 	else
 		return AnswerCall1(data, state);
 }
 
-static gn_error CancelCall(GSM_Data *data, GSM_Statemachine *state)
+static gn_error CancelCall(gn_data *data, struct gn_statemachine *state)
 {
-	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_OLD_CALL_API)
-		return PNOK_cancel_call(data, state);
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_OLD_CALL_API)
+		return pnok_call_cancel(data, state);
 	else
 		return CancelCall1(data, state);
 }
 
-static gn_error SendDTMF(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SendDTMF(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[5+256] = {FBUS_FRAME_HEADER, 0x50};
 	int len;
 
-	if (!data || !data->DTMFString) return GN_ERR_INTERNALERROR;
+	if (!data || !data->dtmf_string) return GN_ERR_INTERNALERROR;
 
-	len = strlen(data->DTMFString);
+	len = strlen(data->dtmf_string);
 	if (len < 0 || len >= 256) return GN_ERR_INTERNALERROR;
 
 	req[4] = len;
-	memcpy(req + 5, data->DTMFString, len);
+	memcpy(req + 5, data->dtmf_string, len);
 
-	if (SM_SendMessage(state, 5 + len, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x01);
+	if (sm_message_send(state, 5 + len, 0x01, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x01);
 }
 
-static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	GSM_CallInfo cinfo;
+	gn_call_info cinfo;
 	unsigned char *pos;
 
 	switch (message[3]) {
 	/* Call going msg */
 	case 0x02:
-		if (data->CallInfo)
-			data->CallInfo->CallID = message[4];
+		if (data->call_info)
+			data->call_info->call_id = message[4];
 		break;
 
 	/* Call in progress */
 	case 0x03:
 		memset(&cinfo, 0, sizeof(cinfo));
-		cinfo.CallID = message[4];
-		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_Established, &cinfo, state);
-		if (!data->CallInfo) return GN_ERR_UNSOLICITED;
-		data->CallInfo->CallID = message[4];
+		cinfo.call_id = message[4];
+		if (DRVINSTANCE(state)->call_notification)
+			DRVINSTANCE(state)->call_notification(GN_CALL_Established, &cinfo, state);
+		if (!data->call_info) return GN_ERR_UNSOLICITED;
+		data->call_info->call_id = message[4];
 		break;
 
 	/* Remote end hang up */
 	case 0x04:
-		isdn_cause2gn_error(NULL, NULL, message[7], message[6]);
-		if (data->CallInfo) {
-			data->CallInfo->CallID = message[4];
+		isdn_cause_to_gn_error(NULL, NULL, message[7], message[6]);
+		if (data->call_info) {
+			data->call_info->call_id = message[4];
 			return GN_ERR_UNKNOWN;
 		}
 		memset(&cinfo, 0, sizeof(cinfo));
-		cinfo.CallID = message[4];
-		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_RemoteHangup, &cinfo, state);
+		cinfo.call_id = message[4];
+		if (DRVINSTANCE(state)->call_notification)
+			DRVINSTANCE(state)->call_notification(GN_CALL_RemoteHangup, &cinfo, state);
 		return GN_ERR_UNSOLICITED;
 
 	/* incoming call alert */
 	case 0x05:
 		memset(&cinfo, 0, sizeof(cinfo));
 		pos = message + 4;
-		cinfo.CallID = *pos++;
+		cinfo.call_id = *pos++;
 		pos++;
-		if (*pos >= sizeof(cinfo.Number))
+		if (*pos >= sizeof(cinfo.number))
 			return GN_ERR_UNHANDLEDFRAME;
-		memcpy(cinfo.Number, pos + 1, *pos);
+		memcpy(cinfo.number, pos + 1, *pos);
 		pos += *pos + 1;
-		if (*pos >= sizeof(cinfo.Name))
+		if (*pos >= sizeof(cinfo.name))
 			return GN_ERR_UNHANDLEDFRAME;
-		memcpy(cinfo.Name, pos + 1, *pos);
+		memcpy(cinfo.name, pos + 1, *pos);
 		pos += *pos + 1;
-		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_IncomingCall, &cinfo, state);
+		if (DRVINSTANCE(state)->call_notification)
+			DRVINSTANCE(state)->call_notification(GN_CALL_Incoming, &cinfo, state);
 		return GN_ERR_UNSOLICITED;
 	
 	/* answered call */
@@ -3055,11 +3058,11 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 	/* terminated call */
 	case 0x09:
 		memset(&cinfo, 0, sizeof(cinfo));
-		cinfo.CallID = message[4];
-		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_LocalHangup, &cinfo, state);
-		if (!data->CallInfo) return GN_ERR_UNSOLICITED;
-		data->CallInfo->CallID = message[4];
+		cinfo.call_id = message[4];
+		if (DRVINSTANCE(state)->call_notification)
+			DRVINSTANCE(state)->call_notification(GN_CALL_LocalHangup, &cinfo, state);
+		if (!data->call_info) return GN_ERR_UNSOLICITED;
+		data->call_info->call_id = message[4];
 		break;
 	
 	/* message after "terminated call" */
@@ -3069,17 +3072,17 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 	/* call held */
 	case 0x23:
 		memset(&cinfo, 0, sizeof(cinfo));
-		cinfo.CallID = message[4];
-		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_CallHeld, &cinfo, state);
+		cinfo.call_id = message[4];
+		if (DRVINSTANCE(state)->call_notification)
+			DRVINSTANCE(state)->call_notification(GN_CALL_Held, &cinfo, state);
 		return GN_ERR_UNSOLICITED;
 
 	/* call resumed */
 	case 0x25:
 		memset(&cinfo, 0, sizeof(cinfo));
-		cinfo.CallID = message[4];
-		if (DRVINSTANCE(state)->CallNotification)
-			DRVINSTANCE(state)->CallNotification(GSM_CS_CallResumed, &cinfo, state);
+		cinfo.call_id = message[4];
+		if (DRVINSTANCE(state)->call_notification)
+			DRVINSTANCE(state)->call_notification(GN_CALL_Resumed, &cinfo, state);
 		return GN_ERR_UNSOLICITED;
 
 	case 0x40:
@@ -3109,7 +3112,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 }
 
 
-static gn_error SendRLPFrame(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SendRLPFrame(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[32] = {0x00, 0xd9};
 
@@ -3118,8 +3121,8 @@ static gn_error SendRLPFrame(GSM_Data *data, GSM_Statemachine *state)
 	 * See section 5.6 of GSM 04.22 version 7.0.1.
 	 */
 
-	if (data->RLP_OutDTX) req[1] = 0x01;
-	memcpy(req + 2, (unsigned char *) data->RLP_Frame, 30);
+	if (data->rlp_out_dtx) req[1] = 0x01;
+	memcpy(req + 2, (unsigned char *) data->rlp_frame, 30);
 
 	/*
 	 * It's ugly like the hell, maybe we should implement SM_SendFrame
@@ -3128,26 +3131,26 @@ static gn_error SendRLPFrame(GSM_Data *data, GSM_Statemachine *state)
 	 * return SM_SendFrame(state, 32, 0xf0, req);
 	 */
 
-	return FBUS_TX_SendFrame(32, 0xf0, req);
+	return fbus_tx_send_frame(32, 0xf0, req);
 }
 
-static gn_error SetRLPRXCallback(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetRLPRXCallback(gn_data *data, struct gn_statemachine *state)
 {
-	DRVINSTANCE(state)->RLP_RXCallback = data->RLP_RX_Callback;
+	DRVINSTANCE(state)->rlp_rx_callback = data->rlp_rx_callback;
 
 	return GN_ERR_NONE;
 }
 
-static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	RLP_F96Frame frame;
+	gn_rlp_f96_frame frame;
 
 	/*
 	 * We do not need RLP frame parsing to be done when we do not have
 	 * callback specified.
 	 */
 
-	if (!DRVINSTANCE(state)->RLP_RXCallback) return GN_ERR_NONE;
+	if (!DRVINSTANCE(state)->rlp_rx_callback) return GN_ERR_NONE;
 
 	/*
 	 * Anybody know the official meaning of the first two bytes?
@@ -3158,7 +3161,7 @@ static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int le
 	 */
 
 	if (message[0] == 0xd9 && message[1] == 0x01) {
-		DRVINSTANCE(state)->RLP_RXCallback(NULL);
+		DRVINSTANCE(state)->rlp_rx_callback(NULL);
 		return GN_ERR_NONE;
 	}
 	
@@ -3185,14 +3188,14 @@ static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int le
 
 	/* Here we pass the frame down in the input stream. */
 
-	DRVINSTANCE(state)->RLP_RXCallback(&frame);
+	DRVINSTANCE(state)->rlp_rx_callback(&frame);
 
 	return GN_ERR_NONE;
 }
 
 
 #ifdef  SECURITY
-static gn_error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[32] = {FBUS_FRAME_HEADER, 0x0a};
 	unsigned char *pos;
@@ -3204,27 +3207,27 @@ static gn_error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state)
 	if (len < 0 || len >= 10) return GN_ERR_INTERNALERROR;
 
 	pos = req + 4;
-	*pos++ = data->SecurityCode->Type;
+	*pos++ = data->SecurityCode->type;
 	memcpy(pos, data->SecurityCode->Code, len);
 	pos += len;
 	*pos++ = 0;
 	*pos++ = 0;
 
-	if (SM_SendMessage(state, pos - req, 0x08, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x08);
+	if (sm_message_send(state, pos - req, 0x08, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x08);
 }
 
-static gn_error GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07};
 
 	if (!data->SecurityCode) return GN_ERR_INTERNALERROR;
 
-	if (SM_SendMessage(state, 4, 0x08, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x08);
+	if (sm_message_send(state, 4, 0x08, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x08);
 }
 
-static gn_error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+static gn_error ChangeSecurityCode(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[32] = {FBUS_FRAME_HEADER, 0x04};
 	unsigned char *pos;
@@ -3237,7 +3240,7 @@ static gn_error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state)
 	if (len1 < 0 || len1 >= 10 || len2 < 0 || len2 >= 10) return GN_ERR_INTERNALERROR;
 
 	pos = req + 4;
-	*pos++ = data->SecurityCode->Type;
+	*pos++ = data->SecurityCode->type;
 	memcpy(pos, data->SecurityCode->Code, len1);
 	pos += len1;
 	*pos++ = 0;
@@ -3245,11 +3248,11 @@ static gn_error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state)
 	pos += len2;
 	*pos++ = 0;
 
-	if (SM_SendMessage(state, pos - req, 0x08, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x08);
+	if (sm_message_send(state, pos - req, 0x08, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x08);
 }
 
-static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch (message[3]) {
 	/* change security code ok */
@@ -3274,7 +3277,7 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 		case GSCT_None: dprintf("nothing to enter.\n"); break;
 		default: dprintf("Unknown!\n"); return GN_ERR_UNHANDLEDFRAME;
 		}
-		if (data->SecurityCode) data->SecurityCode->Type = message[4];
+		if (data->SecurityCode) data->SecurityCode->type = message[4];
 		break;
 	
 	/* security code OK */
@@ -3297,18 +3300,18 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 #endif
 
 
-static gn_error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press)
+static gn_error PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x42, 0x00, 0x00, 0x01};
 
 	req[4] = press ? 0x01 : 0x02;
-	req[5] = data->KeyCode;
+	req[5] = data->key_code;
 
-	if (SM_SendMessage(state, 7, 0x0c, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, 0x0c);
+	if (sm_message_send(state, 7, 0x0c, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, 0x0c);
 }
 
-static int ParseKey(GSM_Statemachine *state, GSM_KeyCode key, unsigned char **ppos)
+static int ParseKey(struct gn_statemachine *state, gn_key_code key, unsigned char **ppos)
 {
 	unsigned char ch;
 	int n;
@@ -3316,11 +3319,11 @@ static int ParseKey(GSM_Statemachine *state, GSM_KeyCode key, unsigned char **pp
 	ch = **ppos;
 	(*ppos)++;
 
-	if (key == GSM_KEY_NONE) return ch ? -1 : 0;
+	if (key == GN_KEY_NONE) return ch ? -1 : 0;
 
 	for (n = 1; ch; n++) {
-		DRVINSTANCE(state)->Keytable[ch].Key = key;
-		DRVINSTANCE(state)->Keytable[ch].Repeat = n;
+		DRVINSTANCE(state)->keytable[ch].key = key;
+		DRVINSTANCE(state)->keytable[ch].repeat = n;
 		ch = **ppos;
 		(*ppos)++;
 	}
@@ -3328,43 +3331,43 @@ static int ParseKey(GSM_Statemachine *state, GSM_KeyCode key, unsigned char **pp
 	return 0;
 }
 
-static gn_error BuildKeytable(GSM_Statemachine *state)
+static gn_error BuildKeytable(struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x40, 0x01};
 	gn_error error;
-	GSM_Data data;
+	gn_data data;
 	int i;
 
 	/*
 	 * This function builds a table, where the index is the character
 	 * code to type, the value is the key code and the repeat count
-	 * to press this key. The GSM_KEY_NONE means this character cannot
-	 * be represented, the GSM_KEY_ASTERISK key means special symbols.
+	 * to press this key. The GN_KEY_NONE means this character cannot
+	 * be represented, the GN_KEY_ASTERISK key means special symbols.
 	 * We just initialise the table here, it will be filled by the
 	 * IncomingKey() function which will be called as the result of
 	 * this message which we send here.
 	 */
 	for (i = 0; i < 256; i++) {
-		DRVINSTANCE(state)->Keytable[i].Key = GSM_KEY_NONE;
-		DRVINSTANCE(state)->Keytable[i].Repeat = 0;
+		DRVINSTANCE(state)->keytable[i].key = GN_KEY_NONE;
+		DRVINSTANCE(state)->keytable[i].repeat = 0;
 	}
 
-	GSM_DataClear(&data);
+	gn_data_clear(&data);
 
-	if (SM_SendMessage(state, 5, 0x0c, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	if ((error = SM_Block(state, &data, 0x0c)) != GN_ERR_NONE) return error;
+	if (sm_message_send(state, 5, 0x0c, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if ((error = sm_block(state, &data, 0x0c)) != GN_ERR_NONE) return error;
 
 	return GN_ERR_NONE;
 }
 
-static gn_error PressKey(GSM_Statemachine *state, GSM_KeyCode key, int d)
+static gn_error PressKey(struct gn_statemachine *state, gn_key_code key, int d)
 {
-	GSM_Data data;
+	gn_data data;
 	gn_error error;
 
-	GSM_DataClear(&data);
+	gn_data_clear(&data);
 
-	data.KeyCode = key;
+	data.key_code = key;
 
 	if ((error = PressOrReleaseKey(&data, state, true)) != GN_ERR_NONE) return error;
 	if (d) usleep(d*1000);
@@ -3373,11 +3376,11 @@ static gn_error PressKey(GSM_Statemachine *state, GSM_KeyCode key, int d)
 	return GN_ERR_NONE;
 }
 
-static gn_error EnterChar(GSM_Data *data, GSM_Statemachine *state)
+static gn_error EnterChar(gn_data *data, struct gn_statemachine *state)
 {
-	GSM_KeyCode key;
+	gn_key_code key;
 	gn_error error;
-	NK6100_Keytable *Keytable = DRVINSTANCE(state)->Keytable;
+	nk6100_keytable *keytable = DRVINSTANCE(state)->keytable;
 	int i, r;
 
 	/*
@@ -3386,60 +3389,60 @@ static gn_error EnterChar(GSM_Data *data, GSM_Statemachine *state)
 	 * function just "emulates" this process.
 	 */
 
-	if (isupper(data->Character)) {
+	if (isupper(data->character)) {
 		/*
 		 * the table contains only lowercase characters and symbols,
 		 * so we must translate into lowercase.
 		 */
-		i = tolower(data->Character);
-		if (Keytable[i].Key == GSM_KEY_NONE) return GN_ERR_UNKNOWN;
-	} else if (islower(data->Character)) {
+		i = tolower(data->character);
+		if (keytable[i].key == GN_KEY_NONE) return GN_ERR_UNKNOWN;
+	} else if (islower(data->character)) {
 		/*
 		 * Ok, the character in proper case, but the phone in upper
 		 * case mode (default). We must switch it into lowercase.
 		 * We just have to press the hash key.
 		 */
-		i = data->Character;
-		if (Keytable[i].Key == GSM_KEY_NONE) return GN_ERR_UNKNOWN;
-		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GN_ERR_NONE) return error;
+		i = data->character;
+		if (keytable[i].key == GN_KEY_NONE) return GN_ERR_UNKNOWN;
+		if ((error = PressKey(state, GN_KEY_HASH, 0)) != GN_ERR_NONE) return error;
 	} else {
 		/*
 		 * This is a special character (number, space, symbol) which
 		 * represents themself.
 		 */
-		i = data->Character;
-		if (Keytable[i].Key == GSM_KEY_NONE) return GN_ERR_UNKNOWN;
+		i = data->character;
+		if (keytable[i].key == GN_KEY_NONE) return GN_ERR_UNKNOWN;
 	}
-	if (Keytable[i].Key == GSM_KEY_ASTERISK) {
+	if (keytable[i].key == GN_KEY_ASTERISK) {
 		/*
 		 * This is a special symbol character, so we have to press
 		 * the asterisk key, the down key the repeat count minus one
 		 * times and finish with the ok (menu) key.
 		 */
-		if ((error = PressKey(state, GSM_KEY_ASTERISK, 0)) != GN_ERR_NONE) return error;
-		key = GSM_KEY_DOWN;
+		if ((error = PressKey(state, GN_KEY_ASTERISK, 0)) != GN_ERR_NONE) return error;
+		key = GN_KEY_DOWN;
 		r = 1;
 	}
 	else {
-		key = Keytable[i].Key;
+		key = keytable[i].key;
 		r = 0;
 	}
 
-	for (; r < Keytable[i].Repeat; r++) {
+	for (; r < keytable[i].repeat; r++) {
 		if ((error = PressKey(state, key, 0)) != GN_ERR_NONE) return error;
 	}
 
-	if (islower(data->Character)) {
+	if (islower(data->character)) {
 		/*
 		 * This was a lowercase character. We must press the hash
 		 * key again to go back to uppercase mode. We might store
 		 * the lowercase/uppercase state, but it's much simpler.
 		 */
-		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GN_ERR_NONE) return error;
+		if ((error = PressKey(state, GN_KEY_HASH, 0)) != GN_ERR_NONE) return error;
 	}
-	else if (key == GSM_KEY_DOWN) {
+	else if (key == GN_KEY_DOWN) {
 		/* This was a symbol character, press the menu key to finish */
-		if ((error = PressKey(state, GSM_KEY_MENU, 0)) != GN_ERR_NONE) return error;
+		if ((error = PressKey(state, GN_KEY_MENU, 0)) != GN_ERR_NONE) return error;
 	} else {
 		/*
 		 * Ok, the requested character is ready. But don't forget if
@@ -3448,14 +3451,14 @@ static gn_error EnterChar(GSM_Data *data, GSM_Statemachine *state)
 		 * you press the key 2 again it will be "B".) Pressing the
 		 * hash key is an easy workaround for it.
 		 */
-		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GN_ERR_NONE) return error;
-		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GN_ERR_NONE) return error;
+		if ((error = PressKey(state, GN_KEY_HASH, 0)) != GN_ERR_NONE) return error;
+		if ((error = PressKey(state, GN_KEY_HASH, 0)) != GN_ERR_NONE) return error;
 	}
 
 	return GN_ERR_NONE;
 }
 
-static gn_error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingKey(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char *pos;
 
@@ -3477,19 +3480,19 @@ static gn_error IncomingKey(int messagetype, unsigned char *message, int length,
 		 * you press the asterisk key (think about sms writeing).
 		 */
 		pos = message + 4;
-		if (ParseKey(state, GSM_KEY_1, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_2, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_3, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_4, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_5, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_6, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_7, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_8, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_9, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_0, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_NONE, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_NONE, &pos)) return GN_ERR_UNHANDLEDFRAME;
-		if (ParseKey(state, GSM_KEY_ASTERISK, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_1, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_2, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_3, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_4, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_5, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_6, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_7, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_8, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_9, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_0, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_NONE, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_NONE, &pos)) return GN_ERR_UNHANDLEDFRAME;
+		if (ParseKey(state, GN_KEY_ASTERISK, &pos)) return GN_ERR_UNHANDLEDFRAME;
 		break;
 
 	default:
@@ -3500,24 +3503,24 @@ static gn_error IncomingKey(int messagetype, unsigned char *message, int length,
 }
 
 
-static gn_error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType type)
+static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type)
 {
 	unsigned char req[512] = {0x0c, 0x01};
-	GSM_API_SMS sms;
-	GSM_SMSMessage rawsms;
+	gn_sms sms;
+	gn_sms_raw rawsms;
 	gn_error err;
 	int n;
 
 	gn_sms_default_submit(&sms);
-	sms.UserData[0].Type = type;
-	sms.UserData[1].Type = SMS_NoData;
+	sms.user_data[0].type = type;
+	sms.user_data[1].type = GN_SMS_DATA_None;
 
 	switch (type) {
-	case SMS_BitmapData:
-		memcpy(&sms.UserData[0].u.Bitmap, data->Bitmap, sizeof(gn_bmp));
+	case GN_SMS_DATA_Bitmap:
+		memcpy(&sms.user_data[0].u.bitmap, data->bitmap, sizeof(gn_bmp));
 		break;
-	case SMS_RingtoneData:
-		memcpy(&sms.UserData[0].u.Ringtone, data->Ringtone, sizeof(GSM_Ringtone));
+	case GN_SMS_DATA_Ringtone:
+		memcpy(&sms.user_data[0].u.ringtone, data->ringtone, sizeof(gn_ringtone));
 		break;
 	default:
 		return GN_ERR_INTERNALERROR;
@@ -3525,17 +3528,17 @@ static gn_error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType 
 
 	memset(&rawsms, 0, sizeof(rawsms));
 
-	if ((err = sms_prepare(&sms, &rawsms)) != GN_ERR_NONE) return err;
+	if ((err = gn_sms_prepare(&sms, &rawsms)) != GN_ERR_NONE) return err;
 
-	n = 2 + rawsms.UserDataLength;
+	n = 2 + rawsms.user_data_length;
 	if (n > sizeof(req)) return GN_ERR_INTERNALERROR;
-	memcpy(req + 2, rawsms.UserData, rawsms.UserDataLength);
+	memcpy(req + 2, rawsms.user_data, rawsms.user_data_length);
 
-	return SM_SendMessage(state, n, 0x12, req);
+	return sm_message_send(state, n, 0x12, req);
 }
 
 
-static gn_error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error IncomingMisc(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	if (messagetype == 0xda && message[0] == 0x00 && message[1] == 0x00)
 	{
