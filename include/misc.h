@@ -92,7 +92,7 @@
 #  endif /* DEBUG */
 #endif /* __GNUC__ */
 
-API void (*GSM_ELogHandler)(const char *fmt, va_list ap);
+extern API void (*GSM_ELogHandler)(const char *fmt, va_list ap);
 extern void GSM_WriteErrorLog(const char *fmt, ...);
 
 /* Use gsprintf instead of sprintf and sprintf */
