@@ -24,8 +24,8 @@
 
   Copyright (C) 2002 Ladislav Michl <ladis@linux-mips.org>
 
-  This file provides functions specific to at commands on Dancall
-  phones. See README for more details on supported mobile phones.
+  This file provides functions specific to Dancall phones.
+  See README for more details on supported mobile phones.
 
 */
 
