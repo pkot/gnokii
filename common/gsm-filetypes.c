@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -9,8 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
   Functions to read and write common file types.
+
+  $Log$
+  Revision 1.18  2001-09-20 21:46:20  pkot
+  Locale cleanups (Pawel Kot)
  
-  Last modified: Wed 6 Dec 2000 by Chris Kemp
 
 */
 
@@ -291,7 +296,7 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 	int i, j, k = 0;
   
 	/* Saves ringtone name */
-	fprintf(file, _("%s:"), ringtone->name);
+	fprintf(file, "%s:", ringtone->name);
 
 	/* Find the most frequently used duration and use this for the default */
  	for (i = 0; i < 6; i++) buffer[i] = 0;
@@ -337,31 +342,31 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 	switch (k) {
 	case 0:
 		DefDuration = 128;
-		fprintf(file, _("d=1,"));
+		fprintf(file, "d=1,");
 		break;	
 	case 1:
 		DefDuration = 64;
-		fprintf(file, _("d=2,"));
+		fprintf(file, "d=2,");
 		break;	
 	case 2:
 		DefDuration = 32;
-		fprintf(file, _("d=4,"));
+		fprintf(file, "d=4,");
 		break;	
 	case 3:
 		DefDuration = 16;
-		fprintf(file, _("d=8,"));
+		fprintf(file, "d=8,");
 		break;	
 	case 4:
 		DefDuration = 8;
-		fprintf(file, _("d=16,"));
+		fprintf(file, "d=16,");
 		break;	
 	case 5:
 		DefDuration = 4;
-		fprintf(file, _("d=32,"));
+		fprintf(file, "d=32,");
 		break;	
 	default:
 		DefDuration = 16;
-		fprintf(file, _("d=8,"));
+		fprintf(file, "d=8,");
 		break;	
 	}  
 
@@ -381,8 +386,8 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 	}
 
 	/* Save the default scale and tempo */
-	fprintf(file, _("o=%i,"), DefScale+4);
-	fprintf(file, _("b=%i:"), ringtone->tempo);
+	fprintf(file, "o=%i,", DefScale+4);
+	fprintf(file, "b=%i:", ringtone->tempo);
 
 	dprintf("DefNoteDuration=%d\n", DefDuration);
 	dprintf("DefNoteScale=%d\n", DefScale);
@@ -396,29 +401,29 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 		if (ringtone->notes[i].duration != DefDuration) {
 			switch (ringtone->notes[i].duration) {
 			case 192:                      //192=128*1.5
-				fprintf(file, _("1")); break;
+				fprintf(file, "1"); break;
 			case 128:
-				fprintf(file, _("1")); break;
+				fprintf(file, "1"); break;
 			case 96:                       //96=64*1.5
-				fprintf(file, _("2")); break;
+				fprintf(file, "2"); break;
 			case 64:
-				fprintf(file, _("2")); break;
+				fprintf(file, "2"); break;
 			case 48:                       //48=32*1.5
-				fprintf(file, _("4")); break;
+				fprintf(file, "4"); break;
 			case 32:
-				fprintf(file, _("4")); break;
+				fprintf(file, "4"); break;
 			case 24:                       //24=16*1.5;
-				fprintf(file, _("8")); break;
+				fprintf(file, "8"); break;
 			case 16:
-				fprintf(file, _("8")); break;
+				fprintf(file, "8"); break;
 			case 12:                       //12=8*1.5
-				fprintf(file, _("16")); break;
+				fprintf(file, "16"); break;
 			case 8:
-				fprintf(file, _("16")); break;
+				fprintf(file, "16"); break;
 			case 6:                        //6=4*1.5
-				fprintf(file, _("32")); break;
+				fprintf(file, "32"); break;
 			case 4:
-				fprintf(file, _("32")); break;
+				fprintf(file, "32"); break;
 			default: 
 				break;
 			}
@@ -426,19 +431,19 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
     
 		/* Now save the actual note */
 		switch (GSM_GetNote(CurrentNote)) {
-		case Note_C  :fprintf(file, _("c")); break;
-		case Note_Cis:fprintf(file, _("c#")); break;
-		case Note_D  :fprintf(file, _("d")); break;
-		case Note_Dis:fprintf(file, _("d#")); break;
-		case Note_E  :fprintf(file, _("e")); break;
-		case Note_F  :fprintf(file, _("f")); break;
-		case Note_Fis:fprintf(file, _("f#")); break;
-		case Note_G  :fprintf(file, _("g")); break;
-		case Note_Gis:fprintf(file, _("g#")); break;
-		case Note_A  :fprintf(file, _("a")); break;
-		case Note_Ais:fprintf(file, _("a#")); break;
-		case Note_H  :fprintf(file, _("h")); break;
-		default      :fprintf(file, _("p")); break; //Pause ?
+		case Note_C  :fprintf(file, "c"); break;
+		case Note_Cis:fprintf(file, "c#"); break;
+		case Note_D  :fprintf(file, "d"); break;
+		case Note_Dis:fprintf(file, "d#"); break;
+		case Note_E  :fprintf(file, "e"); break;
+		case Note_F  :fprintf(file, "f"); break;
+		case Note_Fis:fprintf(file, "f#"); break;
+		case Note_G  :fprintf(file, "g"); break;
+		case Note_Gis:fprintf(file, "g#"); break;
+		case Note_A  :fprintf(file, "a"); break;
+		case Note_Ais:fprintf(file, "a#"); break;
+		case Note_H  :fprintf(file, "h"); break;
+		default      :fprintf(file, "p"); break; //Pause ?
 		}
 
 		/* Saving info about special duration */
@@ -448,15 +453,15 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 		    ringtone->notes[i].duration == 16 * 1.5 ||
 		    ringtone->notes[i].duration == 8 * 1.5 ||
 		    ringtone->notes[i].duration == 4 * 1.5)
-			fprintf(file, _("."));
+			fprintf(file, ".");
     
 		/* This note has a scale different than the default, so save it */
 		if ( (CurrentNote != 255) && (CurrentNote/14 != DefScale))
-			fprintf(file, _("%i"),(CurrentNote/14) + 4);
+			fprintf(file, "%i",(CurrentNote/14) + 4);
     
 		/* And a separator before next note */
 		if (i!=ringtone->NrNotes - 1)
-			fprintf(file, _(","));
+			fprintf(file, ",");
 
 	}
 
@@ -988,8 +993,8 @@ int GSM_SaveTextFile(char *FileName, char *text, int mode)
 		while (confirm < 0) {
 			fprintf(stderr, _("Overwrite? (yes/no) "));
 			GetLine(stdin, ans, 4);
-			if (!strcmp(ans, "yes")) confirm = 1;
-			else if (!strcmp(ans, "no")) confirm = 0;
+			if (!strcmp(ans, _("yes"))) confirm = 1;
+			else if (!strcmp(ans, _("no"))) confirm = 0;
 		}  
 		if (!confirm) return -1;
 	}
