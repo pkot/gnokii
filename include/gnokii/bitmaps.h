@@ -12,18 +12,42 @@
   
   Functions for common bitmap operations.
 
-  $Log$
-  Revision 1.4  2001-11-20 16:22:22  pkot
-  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
-
-  Revision 1.3  2001/06/28 00:28:45  pkot
-  Small docs updates (Pawel Kot)
-
-
 */
 
 #ifndef __gsm_bitmaps_h__
 #define __gsm_bitmaps_h__
+
+#include "gsm-error.h"
+
+/* Bitmap types. */
+
+typedef enum {
+	GSM_None=0,
+	GSM_StartupLogo,
+	GSM_OperatorLogo,
+	GSM_CallerLogo,
+	GSM_PictureImage,
+	GSM_WelcomeNoteText,
+	GSM_DealerNoteText
+} GSM_Bitmap_Types;
+
+#define GSM_MAX_BITMAP_SIZE 864
+
+/* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
+
+typedef struct {
+	u8 height;               /* Bitmap height (pixels) */
+	u8 width;                /* Bitmap width (pixels) */
+	u16 size;                /* Bitmap size (bytes) */
+	GSM_Bitmap_Types type;   /* Bitmap type */
+	char netcode[7];         /* Network operator code */
+	char text[256];          /* Text used for welcome-note or callergroup name */
+	char dealertext[256];    /* Text used for dealer welcome-note */
+	bool dealerset;          /* Is dealer welcome-note set now ? */
+	unsigned char bitmap[GSM_MAX_BITMAP_SIZE]; /* Actual Bitmap */ 
+	char number;             /* Caller group number */
+	char ringtone;           /* Ringtone no sent with caller group */
+} GSM_Bitmap;
 
 void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y);
 void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y);
@@ -33,13 +57,7 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Informati
 void GSM_PrintBitmap(GSM_Bitmap *bitmap);
 
 /* SMS bitmap functions */
-
+int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message);
 GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bitmap);
-int  GSM_SaveSMSBitmap(GSM_SMSMessage *message, GSM_Bitmap *bitmap);
 
 #endif
-
-
-
-
-

@@ -715,14 +715,24 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			if (data->SMSMessage->Number == data->SMSFolder->locations[i]) 
 				found = true;
 		}
-		if (found==false && data->SMSMessage->Status != SMS_Unread) return GE_INVALIDSMSLOCATION;
+		if (!found && data->SMSMessage->Status != SMS_Unread) return GE_INVALIDSMSLOCATION;
 
-		DecodePDUSMS(message, data->SMSMessage, length);
+		if (!data->RawData) {
+			data->RawData = (GSM_RawData *)malloc(sizeof(GSM_RawData));
+		}
+		data->RawData->Data = message;
+		data->RawData->Length = length;
+		dprintf("Everything set\n");
 
                 break;
 
-		/* get list of SMS pictures */
-		case 0x97:
+	/* error? */
+	case 0x09:
+		dprintf("Location empty???\n");
+		return GE_EMPTYSMSLOCATION;
+		
+	/* get list of SMS pictures */
+	case 0x97:
 		dprintf("Getting list of SMS pictures...\n");
 		for (i = 0; i < length; i ++)
 			if (isprint(message[i]))
@@ -791,6 +801,7 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x14);
 }
 
+#if 0
 static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req_list[] = {FBUS_FRAME_HEADER, 0x96, 
@@ -800,7 +811,6 @@ static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x14);
 }
 
-#if 0
 static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x7A, 0x00, 0x00};
@@ -834,7 +844,8 @@ static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 		P7110_GetSMSCenter(data, state);
 	}
 
-	length = EncodePDUSMS(data->SMSMessage, req);
+	/* length = EncodePDUSMS(data->SMSMessage, req); */
+	length = data->RawData->Length;
 	if (!length) return GE_SMSWRONGFORMAT;
 	dprintf("Sending SMS...(%d)\n", length);
 	for (i = 0; i < length; i++) {
@@ -953,7 +964,7 @@ static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, in
 	return e;
 }
 
-GSM_Error P7110_GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *alarm)
+static GSM_Error P7110_GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *alarm)
 {
 	time_t				t_alarm;
 	struct tm			tm_time;
@@ -987,7 +998,7 @@ GSM_Error P7110_GetNoteAlarm(int alarmdiff, GSM_DateTime *time, GSM_DateTime *al
 }
 
 
-GSM_Error P7110_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
+static GSM_Error P7110_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 {
 	time_t		alarmdiff;
 	GSM_Error	e = GE_NONE;
@@ -1283,7 +1294,7 @@ static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x03);
 }
 
-inline unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
+static inline unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
 {
 	*(block++) = id;
 	*(block++) = 0;

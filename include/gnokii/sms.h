@@ -19,24 +19,27 @@
 
 #include "misc.h"
 #include "gsm-error.h"
+#include "gsm-common.h"
+#include "gsm-bitmaps.h"
+#include "gsm-ringtones.h"
 
 /* Maximum length of SMS center name */
 
-#define GSM_MAX_SMS_CENTER_NAME_LENGTH	(20)
+#define GSM_MAX_SMS_CENTER_NAME_LENGTH	20
 
 /* Limits of SMS messages. */
 
-#define GSM_MAX_SMS_CENTER_LENGTH  (40)
-#define GSM_MAX_SENDER_LENGTH      (40)
-#define GSM_MAX_DESTINATION_LENGTH (40)
+#define GSM_MAX_SMS_CENTER_LENGTH       40
+#define GSM_MAX_SENDER_LENGTH           40
+#define GSM_MAX_DESTINATION_LENGTH      40
 
-#define GSM_MAX_SMS_LENGTH         (160)
-#define GSM_MAX_8BIT_SMS_LENGTH    (140)
+#define GSM_MAX_SMS_LENGTH             160
+#define GSM_MAX_8BIT_SMS_LENGTH        140
 
-#define SMS_MAX_ADDRESS_LENGTH      (40)
+#define SMS_MAX_PART_NUMBER              3
 
 /* FIXME: what value should be here? (Pawel Kot) */
-#define SMS_MAX_UDH_NUMBER 10
+#define SMS_MAX_UDH_NUMBER              10
 
 /*** MEMORY INFO ***/
 
@@ -63,15 +66,19 @@ typedef struct {
 typedef enum {
 	SMS_NoUDH                = 0x00,
 	SMS_ConcatenatedMessages = 0x01,
-	SMS_OpLogo               = 0x02,
-	SMS_CallerIDLogo         = 0x03,
-	SMS_Ringtone             = 0x04,
-	SMS_VoiceMessage         = 0x05,
-	SMS_FaxMessage           = 0x06,
-	SMS_EmailMessage         = 0x07,
-	SMS_OtherMessage         = 0x08,
-	SMS_BusinessCard         = 0x09,
-	SMS_UnknownUDH           = 0x0a
+	SMS_Ringtone             = 0x02,
+	SMS_OpLogo               = 0x03,
+	SMS_CallerIDLogo         = 0x04,
+	SMS_MultipartMessage     = 0x05,
+	SMS_WAPvCard             = 0x06,
+	SMS_WAPvCalendar         = 0x07,
+	SMS_WAPvCardSecure       = 0x08,
+	SMS_WAPvCalendarSecure   = 0x09,
+	SMS_VoiceMessage         = 0x0a,
+	SMS_FaxMessage           = 0x0b,
+	SMS_EmailMessage         = 0x0c,
+	SMS_OtherMessage         = 0x0d,
+	SMS_UnknownUDH           = 0x0e
 } SMS_UDHType;
 
 typedef struct {
@@ -88,7 +95,6 @@ typedef struct {
 		} SpecialSMSMessageIndication; /* SMS_VoiceMessage, SMS_FaxMessage, SMS_EmailMessage, SMS_OtherMessage */
 		struct {
 			char NetworkCode[6];
-//			...
 		} Logo; /* SMS_OpLogo, SMS_CallerIDLogo */
 		struct {
 //			...
@@ -192,18 +198,6 @@ typedef struct {
 } SMS_MessageValidity;
 
 
-/* This data-type is used to specify the type of the number. See the official
-   GSM specification 03.40, version 6.1.0, section 9.1.2.5, page 35-37. */
-typedef enum {
-	SMS_Unknown       = 0x81, /* Unknown number */
-	SMS_International = 0x91, /* International number */
-	SMS_National      = 0xa1, /* National number */
-	SMS_Network       = 0xb1, /* Network specific number */
-	SMS_Subscriber    = 0xc1, /* Subscriber number */
-	SMS_Alphanumeric  = 0xd0, /* Alphanumeric number */
-	SMS_Abbreviated   = 0xe1  /* Abbreviated number */
-} SMS_NumberType;
-
 /*** MESSAGE CENTER ***/
 
 typedef enum {
@@ -228,11 +222,6 @@ typedef struct {
 } SMS_MessageCenter;
 
 /*** SHORT MESSAGE CORE ***/
-
-typedef struct {
-	SMS_NumberType type;
-	char number[SMS_MAX_ADDRESS_LENGTH];
-} SMS_Number;
 
 typedef enum {                     /* Bits meaning */
 	SMS_Deliver         = 0x00, /* 00 0 First 2 digits are taken from */
@@ -291,6 +280,24 @@ typedef enum {
 	GMT_F20 = 0xC1 /* 20th CUSTOM FOLDER in 6210/7110 */
 } SMS_MemoryType;
 
+typedef enum {
+	SMS_NoData       = 0x00,
+	SMS_PlainText    = 0x01,
+	SMS_BitmapData   = 0x02,
+	SMS_RingtoneData = 0x03,
+	SMS_OtherData    = 0x04
+} SMS_DataType;
+
+typedef struct {
+	SMS_DataType Type;
+	unsigned int Length;
+	union {
+		unsigned char Text[GSM_MAX_SMS_LENGTH];
+		GSM_Bitmap Bitmap;
+		GSM_Ringtone Ringtone;
+	} u;
+} SMS_UserData;
+
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
 typedef struct {
 	/* Specification fields */
@@ -308,11 +315,11 @@ typedef struct {
 
 	SMS_MessageCenter MessageCenter;               /* SMSC Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
 	SMS_Number RemoteNumber;                       /* Origination, destination, Recipient Address (9.2.3.7, 9.2.3.8, 9.2.3.14) */
-	unsigned char MessageText[GSM_MAX_SMS_LENGTH]; /* User Data (9.2.3.24), Command Data (9.2.3.21) */
+	SMS_UserData UserData[SMS_MAX_PART_NUMBER];    /* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
 	SMS_DataCodingScheme DCS;                      /* Data Coding Scheme (9.2.3.10) */
 	SMS_MessageValidity Validity;                  /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
   
-	unsigned short UDH_No;                         /* Number of presend UDHs */
+	unsigned short UDH_No;                         /* Number of present UDHs */
 	unsigned int UDH_Length;                       /* Length of the whole UDH */
 	SMS_UDHInfo UDH[SMS_MAX_UDH_NUMBER];           /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
 
@@ -397,14 +404,11 @@ typedef struct {
 	int New;
 } GSM_CBMessage;
 
-extern int EncodePDUSMS(GSM_SMSMessage *SMS, char *frame);
+/* Depreciated */
+extern int EncodePDUSMS(GSM_SMSMessage *SMS, char *frame, unsigned short num);
 extern GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength);
 
-/* Do not use these yet */
-extern GSM_Error EncodeTextSMS();
-extern GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS);
-
-/* We really do need this in the other code */
+/* Utils */
 extern char *GetBCDNumber(u8 *Number);
 extern int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type);
 extern SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt);

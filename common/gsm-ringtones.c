@@ -12,16 +12,10 @@
 
   This file provides support for ringtones.
 
-  $Log$
-  Revision 1.3  2001-11-08 16:34:19  pkot
-  Updates to work with new libsms
-
-  Revision 1.2  2001/09/20 21:46:21  pkot
-  Locale cleanups (Pawel Kot)
-
-
 */
 
+#include "gsm-sms.h"
+#include "gsm-common.h"
 #include "gsm-ringtones.h"
 #include "misc.h"
 
@@ -565,10 +559,16 @@ GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlengt
 GSM_Error GSM_ReadRingtoneFromSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
 {
 	if (message->UDH[0].Type==SMS_Ringtone) {
-		return GSM_UnPackRingtone(ringtone, message->MessageText, message->Length);
+		return GSM_UnPackRingtone(ringtone, message->UserData[0].u.Text, message->Length);
 	} else return GE_SUBFORMATNOTSUPPORTED;
 }
 
+int GSM_EncodeSMSRingtone(char *message, GSM_Ringtone *ringtone)
+{  
+	int j = GSM_MAX_8BIT_SMS_LENGTH;
+  
+	return GSM_PackRingtone(ringtone, message, &j);
+}
 
 int GSM_SaveRingtoneToSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
 {  
@@ -610,8 +610,8 @@ int GSM_SaveRingtoneToSMS(GSM_SMSMessage *message, GSM_Ringtone *ringtone)
   
 	message->Length = j;
   
-	memcpy(message->MessageText, UserDataHeader, 7);
-	i = GSM_PackRingtone(ringtone, message->MessageText + 7, &j);
+	memcpy(message->UserData[0].u.Text, UserDataHeader, 7);
+	i = GSM_PackRingtone(ringtone, message->UserData[0].u.Text + 7, &j);
   
 	return i;
 }

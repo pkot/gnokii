@@ -78,7 +78,7 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_GetMemoryStatus, AT_GetMemoryStatus, ReplyMemoryStatus },
 	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
 	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert },
-	{ GOP_SendSMS, AT_SendSMS, ReplyReadPhonebook }
+	{ GOP_SendSMS, AT_SendSMS, ReplySendSMS }
 };
 
 

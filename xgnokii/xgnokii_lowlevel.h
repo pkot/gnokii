@@ -17,7 +17,7 @@
 
 #include <pthread.h>
 #include <glib.h>
-#include "gsm-common.h"
+#include "gsm-sms.h"
 
 #define INCALL_NUMBER_LENGTH	20
 #define NETMON_SCREEN_LENGTH	60

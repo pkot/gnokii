@@ -161,8 +161,8 @@ gint WriteSMS (GSM_SMSMessage *sms)
 
 #ifdef XDEBUG
   g_print ("Address: %s\nText: %s\n",
-  sms->Destination,
-  sms->MessageText);
+  sms->RemoteNumber.Number,
+  sms->UserData[0].u.Text);
 #endif
 
   error = m->status;
@@ -196,7 +196,7 @@ static void ReadSMS (gpointer d, gpointer userData)
       g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->Time.Year + 2000,
                data->Time.Month, data->Time.Day, data->Time.Hour,
                data->Time.Minute, data->Time.Second, data->Time.Timezone,
-               data->MessageText);
+               data->UserData[0].u.Text);
 #endif
       DB_InsertSMS (data);
       

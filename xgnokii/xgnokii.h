@@ -19,7 +19,7 @@
 #include <gtk/gtk.h>
 #include "config.h"
 #include "misc.h"
-#include "gsm-common.h"
+#include "gsm-sms.h"
 
 #define MAX_CALLER_GROUP_LENGTH	10
 #define MAX_SMS_CENTER		10

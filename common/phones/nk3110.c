@@ -14,29 +14,6 @@
   This file provides functions specific to the 3110 series. 
   See README for more details on supported mobile phones.
 
-  $Log$
-  Revision 1.7  2001-11-27 12:19:01  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.6  2001/11/20 16:22:22  pkot
-  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
-
-  Revision 1.5  2001/11/19 13:03:18  pkot
-  nk3110.c cleanup
-
-  Revision 1.4  2001/11/17 16:42:47  pkot
-  Cleanup
-
-  Revision 1.3  2001/11/09 14:25:04  pkot
-  DEBUG cleanups
-
-  Revision 1.2  2001/11/09 13:47:58  pkot
-  Removed pthreads from 3110 support. It may break it.
-
-  Revision 1.1  2001/11/08 16:39:09  pkot
-  3810/3110 support for the new structure (Tamas Bondar)
-
-
 */
 
 #include <string.h>
@@ -340,7 +317,7 @@ static GSM_Error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 		} while (data->SMSMessage->Length < total_length);
 
 		/* Terminate message text */
-		data->SMSMessage->MessageText[data->SMSMessage->Length] = 0;
+		data->SMSMessage->UserData[0].u.Text[data->SMSMessage->Length] = 0;
 		return GE_NONE;
 	case 0x2d:
 		return error;
@@ -422,9 +399,9 @@ static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
 	int timeout, c, retry_count, block_count, block_length;
 	u8 userdata[GSM_MAX_SMS_LENGTH];
-	int userdata_length, userdata_offset, userdata_remaining;
-	u8 response, request[GSM_MAX_SMS_LENGTH];
-	GSM_Error error;
+	int userdata_length = 0, userdata_offset, userdata_remaining;
+	u8 response = 0, request[GSM_MAX_SMS_LENGTH];
+	GSM_Error error = GE_NONE;
 	SMS_MessageCenter smsc;
 	int i;
 
@@ -442,7 +419,7 @@ static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
   Moved to gsm-sms.c
   if (data->SMSMessage->UDH[0].Type) {
   userdata_offset = 1 + data->SMSMessage->udhlen;
-  memcpy(userdata, data->SMSMessage->MessageText, userdata_offset);
+  memcpy(userdata, data->SMSMessage->UserData[0].u.Text, userdata_offset);
   fo |= FO_UDHI;
   } else {
   userdata_offset = 0;
@@ -452,13 +429,13 @@ static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 /*
   Moved to gsm-sms.c
   if (data->SMSMessage->EightBit) {
-  memcpy(userdata + userdata_offset, data->SMSMessage->MessageText, data->SMSMessage->Length);
+  memcpy(userdata + userdata_offset, data->SMSMessage->UserData[0].u.Text, data->SMSMessage->Length);
   userdata_length = data->SMSMessage->Length + userdata_offset;
   max_userdata_length = GSM_MAX_SMS_8_BIT_LENGTH;
   dcs = DCS_DATA | DCS_CLASS1;
   } else {
-  userdata_length = strlen(data->SMSMessage->MessageText);
-  memcpy(userdata + userdata_offset, data->SMSMessage->MessageText, userdata_length);
+  userdata_length = strlen(data->SMSMessage->UserData[0].u.Text);
+  memcpy(userdata + userdata_offset, data->SMSMessage->UserData[0].u.Text, userdata_length);
   userdata_length += userdata_offset;
   max_userdata_length = GSM_MAX_SMS_LENGTH;
   }
@@ -483,7 +460,7 @@ static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
   memcpy(request+13+smsc_length, data->SMSMessage->Destination, dest_length);
 */
 
-	error = EncodePDUSMS(data->SMSMessage, request);
+	/* error = EncodePDUSMS(data->SMSMessage, request); */
 	if (error) return error;
 
 	/* We have a loop here as if the response from the phone is
@@ -731,7 +708,7 @@ static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *messa
 
 	/* Copy message text */
 	for (count = 0; count < length-3 && data->SMSMessage->Length < GSM_MAX_SMS_LENGTH; count++, data->SMSMessage->Length++)
-		data->SMSMessage->MessageText[data->SMSMessage->Length] = message[count + 3];
+		data->SMSMessage->UserData[0].u.Text[data->SMSMessage->Length] = message[count + 3];
 
 	return GE_NONE;
 }
@@ -1079,6 +1056,7 @@ static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *messag
 
 static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
+#ifdef DEBUG
 	/* Strings for the status byte received from phone. */
 	char *StatusStr[] = {
 		"Unknown",
@@ -1087,13 +1065,14 @@ static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *messag
 		"Call in progress",
 		"No network access"
 	};
+#endif
 
         /* There are three data bytes in the status message, two have been
            attributed to signal level, the third is presently unknown. 
            Unknown byte has been observed to be 0x01 when connected to normal
            network, 0x04 when no network available.   Steps through 0x02, 0x03
            when incoming or outgoing calls occur...*/   
-	/*FB38_LinkOK = true;*/
+	/* FB38_LinkOK = true; */
 
         /* Note: GetRFLevel function in fbus-3810.c does conversion 
 	   into required units. */

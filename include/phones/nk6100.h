@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.3  2001-11-17 16:44:07  pkot
+  Revision 1.4  2001-12-31 09:35:47  pkot
+  libsms update. Will break sms reading/sending on all models not using libsms. libsms is getting now a middle layer. More updates soon. Cleanups.
+
+  Revision 1.3  2001/11/17 16:44:07  pkot
   Cleanup. Reading SMS for 6100 series. Not that it has some bugs more and does not support UDH yet
 
   Revision 1.2  2001/11/15 12:15:04  pkot
@@ -28,8 +31,7 @@
 #ifndef __phones_nk6100_h
 #define __phones_nk6100_h
 
-#include <gsm-common.h>
-#include "gsm-statemachine.h"
+#include "gsm-data.h"
 
 /* Phone Memory types */
 

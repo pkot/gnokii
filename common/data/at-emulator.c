@@ -32,14 +32,12 @@
 #include <ctype.h>
 
 #ifndef WIN32
-
 #  include <termios.h>
-
 #endif
 
 #include "config.h"
 #include "misc.h"
-#include "gsm-common.h"
+#include "gsm-data.h"
 #include "gsm-api.h"
 #include "data/at-emulator.h"
 #include "data/virtmodem.h"
@@ -317,14 +315,14 @@ static void ATEM_PrintSMS(char *line, GSM_SMSMessage *message, int mode)
 {
 	switch (mode) {
 	case INTERACT_MODE:
-		gsprintf(line, MAX_LINE_LENGTH, _("\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\rText: %s\n\r"), message->Time.Day, message->Time.Month, message->Time.Year, message->Time.Hour, message->Time.Minute, message->Time.Second, message->RemoteNumber.number, message->MessageCenter.Number, message->MessageText);
+		gsprintf(line, MAX_LINE_LENGTH, _("\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\rText: %s\n\r"), message->Time.Day, message->Time.Month, message->Time.Year, message->Time.Hour, message->Time.Minute, message->Time.Second, message->RemoteNumber.number, message->MessageCenter.Number, message->UserData[0].u.Text);
 		break;
 	case TEXT_MODE:
 		if ((message->DCS.Type == SMS_GeneralDataCoding) &&
 		    (message->DCS.u.General.Alphabet == SMS_8bit))
 			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->RemoteNumber.number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, _("<Not implemented>"));
 		else
-			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->RemoteNumber.number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, message->MessageText);
+			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->RemoteNumber.number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, message->UserData[0].u.Text);
 		break;
 	case PDU_MODE:
 		gsprintf(line, MAX_LINE_LENGTH, _("<Not implemented>"));

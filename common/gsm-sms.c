@@ -17,8 +17,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "gsm-common.h"
+#include "gsm-data.h"
 #include "gsm-encoding.h"
+#include "gsm-statemachine.h"
+#include "gsm-ringtones.h"
 #include "gsm-bitmaps.h"
 
 SMSMessage_PhoneLayout layout;
@@ -33,13 +35,17 @@ struct udh_data {
 static struct udh_data headers[] = {
 	{ 0x00, "" },
 	{ 0x05, "\x00\x03\x01\x00\x00" },     /* Concatenated messages */
+	{ 0x06, "\x05\x04\x15\x81\x00\x00" }, /* Ringtones */
 	{ 0x06, "\x05\x04\x15\x82\x00\x00" }, /* Operator logos */
 	{ 0x06, "\x05\x04\x15\x83\x00\x00" }, /* Caller logos */
-	{ 0x06, "\x05\x04\x15\x81\x00\x00" }, /* Ringtones */
+	{ 0x06, "\x05\x04\x15\x8a\x00\x00" }, /* Multipart Message */
+	{ 0x06, "\x05\x04\x23\xf4\x00\x00" }, /* WAP vCard */
+	{ 0x06, "\x05\0x4\x23\xf5\x00\x00" }, /* WAP vCalendar */
+	{ 0x06, "\x05\x04\x23\xf6\x00\x00" }, /* WAP vCardSecure */
+	{ 0x06, "\x05\0x4\x23\xf7\x00\x00" }, /* WAP vCalendarSecure */
 	{ 0x04, "\x03\x01\x00\x00" },         /* Voice Messages */
 	{ 0x04, "\x03\x01\x01\x00" },         /* Fax Messages */
 	{ 0x04, "\x03\x01\x02\x00" },         /* Email Messages */
-	{ 0x06, "\x05\x04\x23\xf4\x00\x00" }, /* Business Card */
 	{ 0x00, "" }
 };
 
@@ -120,6 +126,7 @@ char *GetBCDNumber(u8 *Number)
 	return Buffer;
 }
 
+#ifdef DEBUG
 static char *PrintDateTime(u8 *Number) 
 {
 	static char Buffer[23] = "";
@@ -141,6 +148,7 @@ static char *PrintDateTime(u8 *Number)
 
 	return Buffer;
 }
+#endif
 
 SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
 {
@@ -158,22 +166,155 @@ SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
 	return dt;
 }
 
+static unsigned short CountSMSParts(GSM_SMSMessage *SMS)
+{
+	unsigned int i, j, count, length = 0, header = 0;
+	bool multi = false;
+	SMS_AlphabetType alph;
+
+	/* Multipart Message */
+	if (SMS->UserData[1].Type != SMS_NoData) {
+		multi = true;
+	}
+
+	for (i = 0; SMS->UserData[i].Type != SMS_NoData; i++) {
+		/* multipart message part type (1) + part's length (2) */
+		if (multi) length += 3;
+		switch (SMS->UserData[i].Type) {
+		case SMS_PlainText:
+			switch (SMS->DCS.Type) {
+			case SMS_GeneralDataCoding:
+				alph = SMS->DCS.u.General.Alphabet;
+				break;
+			case SMS_MessageWaiting:
+				alph = SMS->DCS.u.MessageWaiting.Alphabet;
+				break;
+			default:
+				/* Malformed SMS struct */
+				return -1;
+			}
+			switch (alph) {
+			case SMS_DefaultAlphabet:
+				length += (SMS->UserData[i].Length - SMS->UserData[i].Length / 8);
+				break;
+			case SMS_8bit:
+				length += SMS->UserData[i].Length;
+				break;
+			case SMS_UCS2:
+				length += SMS->UserData[i].Length;
+				break;
+			default:
+				/* Malformed SMS struct */
+				return -1;
+			}
+			break;
+		case SMS_BitmapData:
+			if (!multi) {
+				/* Look for the bitmap type in UDH headers */
+				for (j = 0; j < SMS->UDH_No; j++) {
+					bool found = false;
+					switch (SMS->UDH[j].Type) {
+					case SMS_OpLogo:
+						header += headers[SMS_OpLogo].length;
+						length += 5;
+						found = true;
+						break;
+					case SMS_CallerIDLogo:
+						length += headers[SMS_CallerIDLogo].length;
+						length += 1;
+						found = true;
+						break;
+					default:
+						break;
+					}
+					if (found) break;
+				}
+
+			}
+			break;
+		case SMS_RingtoneData:
+			/* FIXME */
+			/* All bitmaps have the same length of the UDH */
+			if (!multi) {
+				header += headers[SMS_OpLogo].length;
+			}
+			break;
+		default:
+			/* Malformed SMS struct */
+			return -1;
+		}
+	}
+	/* Smart Messaging Specification number */
+	if (multi) length++;
+
+	if (length + header > (GSM_MAX_8BIT_SMS_LENGTH - (SMS->UDH_No ? 1 : 0))) {
+		count = (length + header) /
+			(GSM_MAX_8BIT_SMS_LENGTH - 1 -
+			 headers[SMS_ConcatenatedMessages].length -
+			 (multi ? headers[SMS_MultipartMessage].length : 0));
+		if ((length + header) %
+		    (GSM_MAX_8BIT_SMS_LENGTH - 1 -
+		     headers[SMS_ConcatenatedMessages].length -
+		     (multi ? headers[SMS_MultipartMessage].length : 0)))
+			count++;
+	} else {
+		count = 1;
+	}
+	return count;
+}
+
 /***
  *** ENCODING SMS
  ***/
 
-static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message)
+static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool multipart)
 {
 	SMS_AlphabetType al;
-	unsigned short length = strlen(SMS->MessageText);
+	unsigned short i, length, size = 0, offset = 0;
+	short text_index = -1, bitmap_index = -1, ringtone_index = -1;
 
+	dprintf("EncodeData -- BEGIN\n");
+	/* Decide what to encode */
+	if (multipart) {
+		/* Version: Smart Messaging Specification 3.0.0 */
+		message[0] = 0x30;
+		for (i = 0; i < 3; i++) {
+			switch (SMS->UserData[i].Type) {
+			case SMS_PlainText:
+				text_index     = i; break;
+			case SMS_BitmapData:
+				bitmap_index   = i; break;
+			case SMS_RingtoneData:
+				ringtone_index = i; break;
+			default:
+				break;
+			}
+		}
+	} else if (SMS->UDH_No) {
+		switch (SMS->UDH[0].Type) {
+		case SMS_OpLogo:
+		case SMS_CallerIDLogo:
+			bitmap_index   = 0; break;
+		case SMS_Ringtone:
+			ringtone_index = 0; break;
+		default:
+			text_index     = 0; break;
+		}
+	} else {
+		text_index = 0;
+	}
+
+	length = strlen(SMS->UserData[0].u.Text);
+
+	dprintf("EncodeData -- Additional Headers\n");	
+	/* Additional Headers */
 	switch (SMS->DCS.Type) {
 	case SMS_GeneralDataCoding:
 		switch (SMS->DCS.u.General.Class) {
-		case 1: dcs[0] |= 0xf0; break;
-		case 2: dcs[0] |= 0xf1; break;
-		case 3: dcs[0] |= 0xf2; break;
-		case 4: dcs[0] |= 0xf3; break;
+		case 1: dcs[0] |= 0xf0; break; /* Class 0 */
+		case 2: dcs[0] |= 0xf1; break; /* Class 1 */
+		case 3: dcs[0] |= 0xf2; break; /* Class 2 */
+		case 4: dcs[0] |= 0xf3; break; /* Class 3 */
 		default: break;
 		}
 		if (SMS->DCS.u.General.Compressed) {
@@ -195,24 +336,72 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message)
 	default:
 		return GE_SMSWRONGFORMAT;
 	}
-	switch (al) {
-	case SMS_DefaultAlphabet:
-		Pack7BitCharacters((7 - (SMS->UDH_Length % 7)) % 7, SMS->MessageText, message);
-		SMS->Length = 8 * SMS->UDH_Length + (7 - (SMS->UDH_Length % 7)) % 7 + length;
-		break;
-	case SMS_8bit:
-		dcs[0] |= 0xf4;
-		memcpy(message, SMS->MessageText + 1, SMS->MessageText[0]);
-		SMS->Length = SMS->UDH_Length + SMS->MessageText[0];
-		break;
-	case SMS_UCS2:
-		dcs[0] |= 0x08;
-		EncodeUnicode(message, SMS->MessageText, length);
-		SMS->Length = length;
-		break;
-	default:
-		return GE_SMSWRONGFORMAT;
+
+	if ((al == SMS_8bit) && multipart) al = SMS_DefaultAlphabet;
+	SMS->Length = 0;
+
+	dprintf("EncodeData -- Text Coding(%d)\n", SMS->Length);
+	/* Text Coding */
+	if (text_index != -1) {
+		dprintf("Saving text at %d\n", text_index);
+		dprintf("Text: %s\n", SMS->UserData[text_index].u.Text);
+		switch (al) {
+ 		case SMS_DefaultAlphabet:
+			if (multipart) {
+				offset = 4;
+				memcpy(message + 1, "\x00\x00\x00", 3);
+				dcs[0] |= 0xf4;
+			}
+			dprintf("qq\n");
+			size = Pack7BitCharacters((7 - (SMS->UDH_Length % 7)) % 7, SMS->UserData[text_index].u.Text, message + offset);
+			// SMS->Length = 8 * SMS->UDH_Length + (7 - (SMS->UDH_Length % 7)) % 7 + length + offset;
+			SMS->Length = size + offset;
+			if (multipart) {
+				message[2] = (size & 0xff00) >> 8;
+				message[3] = (size & 0x00ff);
+			}
+			break;
+		case SMS_8bit:
+			dcs[0] |= 0xf4;
+			memcpy(message, SMS->UserData[text_index].u.Text + 1, SMS->UserData[text_index].u.Text[0]);
+			SMS->Length = SMS->UserData[text_index].u.Text[0];
+			break;
+		case SMS_UCS2:
+			if (multipart) {
+				offset = 4;
+				memcpy(message + 1, "\x02\x00\x00", 3);
+			}
+			dcs[0] |= 0x08;
+			EncodeUnicode(message + offset, SMS->UserData[text_index].u.Text, length);
+			SMS->Length = length + offset;
+			if (multipart) {
+				size = 2 * length;
+				message[2] = (size & 0xff00) >> 8;
+				message[3] = (size & 0x00ff);
+			}
+			break;
+		default:
+			return GE_SMSWRONGFORMAT;
+		}
 	}
+	
+	dprintf("EncodeData -- Bitmap Coding(%d)\n", SMS->Length);
+	/* Bitmap coding */
+	if (bitmap_index != -1) {
+		dprintf("Saving bitmap at %d\n", bitmap_index);
+		size = GSM_EncodeSMSBitmap(&(SMS->UserData[bitmap_index].u.Bitmap), message + SMS->Length);
+		dprintf("%d: %02x %02x %02x\n", SMS->Length, message[SMS->Length - 1], message[SMS->Length], message[SMS->Length + 1]);
+		SMS->Length += size;
+	}
+	
+	dprintf("EncodeData -- Ringtone Coding(%d)\n", SMS->Length);
+	/* Ringtone coding */
+	if (ringtone_index != -1) {
+		dprintf("Saving ringtone at %d\n", ringtone_index);
+		size = GSM_EncodeSMSRingtone(message + SMS->Length, &SMS->UserData[ringtone_index].u.Ringtone);
+		SMS->Length += size;
+	}
+	dprintf("EncodeData -- END(%d)\n", SMS->Length);
 	return GE_NONE;
 }
 
@@ -220,10 +409,11 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message)
    - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
    - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
 */
-static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, char *UDH)
+static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, GSM_SMSMessage *SMS, char *UDH)
 {
 	unsigned char pos;
 
+	dprintf("EncodeUDH\n");
 	pos = UDH[0];
 	switch (UDHi.Type) {
 	case SMS_NoUDH:
@@ -237,6 +427,7 @@ static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, char *UDH)
 	case SMS_OpLogo:
 	case SMS_CallerIDLogo:
 	case SMS_Ringtone:
+	case SMS_MultipartMessage:
 		UDH[0] += headers[UDHi.Type].length;
 		memcpy(UDH+pos+1, headers[UDHi.Type].header, headers[UDHi.Type].length);
 		break;
@@ -251,6 +442,7 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 {
 	GSM_Error error = GE_NONE;
 
+	dprintf("EncodeSMSSubmitHeader\n");
 	/* Standard Header: */
 	memcpy(frame + llayout.UserDataHeader, "\x11\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xa9\x00\x00\x00\x00\x00\x00", 24);
 
@@ -342,6 +534,7 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
    (for sending or saving in Outbox) message */
 {
 	/* Set SMS type */
+	dprintf("EncodeSMSHeader\n");
 	switch (SMS->Type) {
 	case SMS_Submit: /* we send SMS or save it in Outbox */
 		return EncodeSMSSubmitHeader(SMS, frame);
@@ -355,11 +548,12 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 /* This function encodes SMS as described in:
    - GSM 03.40 version 6.1.0 Release 1997, section 9
 */
-int EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
+int EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num)
 {
 	GSM_Error error = GE_NONE;
-	int i;
+	int i, mm = 0;
 
+	dprintf("EncodePDUSMS\n");
 	switch (SMS->Type) {
 	case SMS_Submit:
 		llayout = layout.Submit;
@@ -370,9 +564,6 @@ int EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 		dprintf("Saving SMS to Inbox\n");
 		break;
 	case SMS_Picture:
-		llayout = layout.Picture;
-		dprintf("Sending Picture Message\n");
-		break;
 	case SMS_Delivery_Report:
 	default:
 		dprintf("Not supported message type: %d\n", SMS->Type);
@@ -381,7 +572,6 @@ int EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 
 	/* SMSC number */
 	if (llayout.MessageCenter > -1) {
-		dprintf("%d %s\n", SMS->MessageCenter.Type, SMS->MessageCenter.Number);
 		message[llayout.MessageCenter] = SemiOctetPack(SMS->MessageCenter.Number, message + llayout.MessageCenter + 1, SMS->MessageCenter.Type);
 		if (message[llayout.MessageCenter] % 2) message[llayout.MessageCenter]++;
 		message[llayout.MessageCenter] = message[llayout.MessageCenter] / 2 + 1;
@@ -392,22 +582,32 @@ int EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 	if (error != GE_NONE) return error;
 
 	/* User Data Header - if present */
-//	for (i = 0; i < SMS->UDH_No; i++) {
-//		error = EncodeUDH(SMS->UDH[i], message + 24);
-//		if (error != GE_NONE) return error;
-//	}
+	for (i = 0; i < SMS->UDH_No; i++) {
+		error = EncodeUDH(SMS->UDH[i], SMS, message + llayout.UserData);
+		if (SMS->UDH[i].Type == SMS_MultipartMessage) mm = 1;
+		if (error != GE_NONE) return error;
+	}
 	SMS->UDH_Length = 0;
 
 	/* User Data */
-	EncodeData(SMS, message + llayout.DataCodingScheme, message + llayout.UserData + SMS->UDH_Length);
+	dprintf("Offset: %d\n", llayout.UserData + SMS->UDH_Length);
+	EncodeData(SMS, message + llayout.DataCodingScheme, message + llayout.UserData + SMS->UDH_Length, mm);
 	message[llayout.Length] = SMS->Length;
 	return SMS->Length + llayout.UserData - 1;
 }
 
-/* This function does simple SMS encoding - no PDU coding */
-GSM_Error EncodeTextSMS()
+GSM_Error SendSMS(GSM_SMSMessage *SMS, GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NONE;
+	GSM_Error error = GE_NONE;
+	unsigned short i, count;
+
+	count = CountSMSParts(SMS);
+	if (count < 1) return GE_SMSWRONGFORMAT;
+	for (i = 0; i < count; i++) {
+		data->RawData->Length = EncodePDUSMS(SMS, data->RawData->Data, i);
+		error = SM_Functions(GOP_SendSMS, data, state);
+	}
+	return error;
 }
 
 /***
@@ -417,7 +617,7 @@ GSM_Error EncodeTextSMS()
 static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 {
 	if (status < 0x03) {
-		strcpy(SMS->MessageText, _("Delivered"));
+		strcpy(SMS->UserData[0].u.Text, _("Delivered"));
 		switch (status) {
 		case 0x00:
 			dprintf("SM received by the SME");
@@ -432,7 +632,7 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 		SMS->Length = strlen(_("Delivered"));
 	} else if (status & 0x40) {
 
-		strcpy(SMS->MessageText, _("Failed"));
+		strcpy(SMS->UserData[0].u.Text, _("Failed"));
 
 		/* more detailed reason only for debug */
 
@@ -502,7 +702,7 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 		}
 		SMS->Length = strlen(_("Failed"));
 	} else if (status & 0x20) {
-		strcpy(SMS->MessageText, _("Pending"));
+		strcpy(SMS->UserData[0].u.Text, _("Pending"));
 
 		/* more detailed reason only for debug */
 		dprintf("Temporary error, SC still trying to transfer SM\n");
@@ -531,7 +731,7 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 		}
 		SMS->Length = strlen(_("Pending"));
 	} else {
-		strcpy(SMS->MessageText, _("Unknown"));
+		strcpy(SMS->UserData[0].u.Text, _("Unknown"));
 
 		/* more detailed reason only for debug */
 		dprintf("Reserved/Specific to SC: %x", status);
@@ -581,7 +781,7 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 
 		udh_length = message[pos+1];
 		switch (message[pos]) {
-		case 0x00: // Concatenated short messages
+		case 0x00: /* Concatenated short messages */
 			dprintf("Concatenated messages\n");
 			SMS->UDH[nr].Type = SMS_ConcatenatedMessages;
 			SMS->UDH[nr].u.ConcatenatedShortMessage.ReferenceNumber = message[pos + 2];
@@ -617,6 +817,7 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 			case 0x1581:
 				dprintf("Ringtone\n");
 				SMS->UDH[nr].Type = SMS_Ringtone;
+				
 				break;
 			case 0x1582:
 				dprintf("Operator Logo\n");
@@ -626,9 +827,25 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 				dprintf("Caller Icon\n");
 				SMS->UDH[nr].Type = SMS_CallerIDLogo;
 				break;
+			case 0x158a:
+				dprintf("Multipart Message\n");
+				SMS->UDH[nr].Type = SMS_MultipartMessage;
+				break;
 			case 0x23f4:
-				dprintf("Business Card\n");
-				SMS->UDH[nr].Type = SMS_BusinessCard;
+				dprintf("WAP vCard\n");
+				SMS->UDH[nr].Type = SMS_WAPvCard;
+				break;
+			case 0x23f5:
+				dprintf("WAP vCalendar\n");
+				SMS->UDH[nr].Type = SMS_WAPvCalendar;
+				break;
+			case 0x23f6:
+				dprintf("WAP vCardSecure\n");
+				SMS->UDH[nr].Type = SMS_WAPvCardSecure;
+				break;
+			case 0x23f7:
+				dprintf("WAP vCalendarSecure\n");
+				SMS->UDH[nr].Type = SMS_WAPvCalendarSecure;
 				break;
 			default:
 				dprintf("Unknown\n");
@@ -740,7 +957,6 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageLength)
 {
 	int size;
-	GSM_Bitmap bitmap;
 	GSM_Error error;
 
 	error = DecodeSMSHeader(message, SMS);
@@ -750,32 +966,47 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 		if (llayout.UserData > -1) SMSStatus(message[llayout.UserData], SMS);
 		break;
 	case SMS_Picture:
-		GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData, NULL, &bitmap);
-		GSM_PrintBitmap(&bitmap);
-		size = MessageLength - llayout.UserData - 4 - bitmap.size;
-		SMS->Length = message[llayout.UserData + 4 + bitmap.size];
-		DecodeData(message + llayout.UserData + 5 + bitmap.size,
-			   (unsigned char *)&(SMS->MessageText),
+		/* This is incredible. Nokia violates it's own format in 6210 */
+		/* Indicate that it is Multipart Message. Remove it if not needed */
+		SMS->UDH_No = 1;
+		SMS->UDH[0].Type = SMS_MultipartMessage;
+		/* First part is a Picture */
+		SMS->UserData[0].Type = SMS_BitmapData;
+		GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
+		GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
+		size = MessageLength - llayout.UserData - 4 - SMS->UserData[0].u.Bitmap.size;
+		SMS->Length = message[llayout.UserData + 4 + SMS->UserData[0].u.Bitmap.size];
+		/* Second part is a text */
+		SMS->UserData[1].Type = SMS_PlainText;
+		DecodeData(message + llayout.UserData + 5 + SMS->UserData[0].u.Bitmap.size,
+			   (unsigned char *)&(SMS->UserData[1].u.Text),
 			   SMS->Length, size, 0, SMS->DCS);
-		SMS->MessageText[SMS->Length] = 0;
+		SMS->UserData[1].u.Text[SMS->Length] = 0;
 		break;
 	default:
 		size = MessageLength -
 			llayout.UserData + 1 - /* Header Length */
 			SMS->UDH_Length;       /* UDH Length */
 		DecodeData(message + llayout.UserData + SMS->UDH_Length,
-			   (unsigned char *)&(SMS->MessageText),
+			   (unsigned char *)&(SMS->UserData[0].u.Text),
 			   SMS->Length, size, SMS->UDH_Length, SMS->DCS);
 		/* Just in case */
-		SMS->MessageText[SMS->Length] = 0;
+		SMS->UserData[0].u.Text[SMS->Length] = 0;
 		break;
 	}
 
 	return GE_NONE;
 }
 
-/* This function does simple SMS decoding - no PDU coding */
-GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS)
+GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NONE;
+	GSM_Error error;
+
+	dprintf("Reading\n");
+	error = SM_Functions(GOP_GetSMS, data, state);
+	dprintf("Actual decoding\n");
+	if (error != GE_NONE) return error;
+	error = DecodePDUSMS(data->RawData->Data, data->SMSMessage, data->RawData->Length);
+	dprintf("Finished\n");
+	return error;
 }

@@ -13,31 +13,13 @@
   Header file for the various functions, definitions etc. used to implement
   the handset interface.  See gsm-api.c for more details.
 
-  $Log$
-  Revision 1.15  2001-11-27 12:19:01  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.14  2001/06/28 00:28:45  pkot
-  Small docs updates (Pawel Kot)
-
-
 */
 
 #ifndef __gsm_api_h
 #define __gsm_api_h
 
-/* If gsm-common.h isn't included at this point, little in this file will make
-   sense so we include it here if required. */
-
-#ifndef __gsm_common_h
-#  include "gsm-common.h"
-#endif
-
-/* Ditto rlp_common.h... */
-#ifndef __data_rlp_common_h
-#  include "data/rlp-common.h"
-#endif
-
+#include "gsm-data.h"
+#include "data/rlp-common.h"
 #include "gsm-statemachine.h"
 
 /* Define these as externs so that app code can pick them up. */
@@ -50,6 +32,10 @@ extern GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 /* Prototype for the functions actually provided by gsm-api.c. */
 
 GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_handler)(RLP_F96Frame *frame), GSM_Statemachine *sm);
+
+/* SMS Functions */
+GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state);
+GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state);
 
 /* All the rest of the API functions are contained in the GSM_Function
    structure which ultimately points into the model specific code. */

@@ -22,7 +22,6 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include "misc.h"
-#include "gsm-api.h"
 #include "xgnokii_common.h"
 #include "xgnokii.h"
 #include "xgnokii_lowlevel.h"
@@ -259,7 +258,7 @@ static void InsertInboxElement (gpointer d, gpointer userData)
       row[2] = GUI_GetName (data->RemoteNumber.number);
       if (row[2] == NULL)
         row[2] = data->RemoteNumber.number;
-      row[3] = data->MessageText;
+      row[3] = data->UserData[0].u.Text;
 
       gtk_clist_append (GTK_CLIST (SMS.smsClist), row);
       msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
@@ -307,7 +306,7 @@ static void InsertOutboxElement (gpointer d, gpointer userData)
       row[0] = g_strdup (_("unsent"));
 
     row[1] = row[2] = g_strdup ("");
-    row[3] = data->MessageText;
+    row[3] = data->UserData[0].u.Text;
 
     gtk_clist_append( GTK_CLIST (SMS.smsClist), row);
     msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
@@ -918,7 +917,7 @@ static gint SendSMSCore (GSM_SMSMessage *sms)
 #ifdef XDEBUG
   g_print ("Address: %s\nText: %s\nDelivery report: %d\nSMS Center: %d\n",
            sms->RemoteNumber.number,
-           sms->MessageText,
+           sms->UserData[0].u.Text,
            GTK_TOGGLE_BUTTON (sendSMS.report)->active,
            sendSMS.center);
 #endif
@@ -1019,9 +1018,9 @@ static void SendSMS (void)
         {
           udh[5] = j + 1;
 
-          memcpy(sms.MessageText,udh,offset);
-          strncpy (sms.MessageText+offset, text + (j * 153), 153);
-          sms.MessageText[153] = '\0';
+          memcpy(sms.UserData[0].u.Text,udh,offset);
+          strncpy (sms.UserData[0].u.Text+offset, text + (j * 153), 153);
+          sms.UserData[0].u.Text[153] = '\0';
 
           buf = g_strdup_printf (_("Sending SMS to %s (%d/%d) ...\n"),
                                  sms.RemoteNumber.number, j + 1, nr_msg);
@@ -1056,9 +1055,9 @@ static void SendSMS (void)
           g_snprintf (header, 8, "%2d/%-2d: ", j + 1, nr_msg);
           header[7] = '\0';
 
-          strcpy (sms.MessageText, header);
-          strncat (sms.MessageText, text + (j * 153), 153);
-          sms.MessageText[160] = '\0';
+          strcpy (sms.UserData[0].u.Text, header);
+          strncat (sms.UserData[0].u.Text, text + (j * 153), 153);
+          sms.UserData[0].u.Text[160] = '\0';
 
           buf = g_strdup_printf (_("Sending SMS to %s (%d/%d) ...\n"),
                                  sms.RemoteNumber.number, j + 1, nr_msg);
@@ -1084,8 +1083,8 @@ static void SendSMS (void)
     else
     {
       sms.UDH_Length = 0;
-      strncpy (sms.MessageText, text, GSM_MAX_SMS_LENGTH + 1);
-      sms.MessageText[GSM_MAX_SMS_LENGTH] = '\0';
+      strncpy (sms.UserData[0].u.Text, text, GSM_MAX_SMS_LENGTH + 1);
+      sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
 
       buf = g_strdup_printf (_("Sending SMS to %s ...\n"), sms.RemoteNumber.number);
       gtk_label_set_text (GTK_LABEL (infoDialog.text), buf);

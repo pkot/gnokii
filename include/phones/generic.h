@@ -16,36 +16,12 @@
 
   The various routines are called PGEN_...
 
-  $Log$
-  Revision 1.3  2001-03-21 23:36:08  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.2  2001/03/11 11:12:21  machek
-  Added header for PGEN_IncomingDefault.
-
-  Revision 1.1  2001/02/21 19:57:12  chris
-  More fiddling with the directory layout
-
-  Revision 1.4  2001/01/29 17:14:44  chris
-  dprintf now in misc.h (and fiddling with 7110 code)
-
-  Revision 1.3  2001/01/23 15:32:44  chris
-  Pavel's 'break' and 'static' corrections.
-  Work on logos for 7110.
-
-  Revision 1.2  2001/01/17 02:54:56  chris
-  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
-  I can now edit my phonebook in xgnokii but it is 'work in progress'.
-
-
 */
 
 #ifndef __phones_generic_h
 #define __phones_generic_h
 
-#include "gsm-common.h"
-#include "misc.h"
+#include "gsm-error.h"
 
 /* Generic Functions */
 

@@ -13,11 +13,6 @@
   This file provides definitions of macros from the Smart Messaging
   Specification. It is mainly rewrite of the spec to C :-) Viva Nokia!
 
-  $Log$
-  Revision 1.2  2001-06-28 00:28:46  pkot
-  Small docs updates (Pawel Kot)
-
-
 */
 
 #ifndef __gsm_ringtones_h
@@ -28,7 +23,31 @@
 #include <string.h>
 #include <ctype.h>
 #include "misc.h"
-#include "gsm-common.h"
+#include "gsm-error.h"
+
+/* NoteValue is encoded as octave(scale)*14 + note */
+/* where for note: c=0, d=2, e=4 .... */
+/* ie. c#=1 and 5 and 13 are invalid */
+/* note=255 means a pause */
+
+#define MAX_RINGTONE_NOTES 256
+
+/* Structure to hold note of ringtone. */
+
+typedef struct {
+	u8 duration;
+	u8 note;
+} GSM_RingtoneNote;
+
+/* Structure to hold ringtones. */
+
+typedef struct {
+	char name[20];
+	u8 tempo;
+	u8 NrNotes;
+	GSM_RingtoneNote notes[MAX_RINGTONE_NOTES];
+} GSM_Ringtone;
+  
 
 #define GetBit(Stream,BitNr) Stream[(BitNr)/8] & 1<<(7-((BitNr)%8))
 #define SetBit(Stream,BitNr) Stream[(BitNr)/8] |= 1<<(7-((BitNr)%8))
@@ -118,10 +137,10 @@
 /* Definition of the Note type */
 
 typedef struct {
-  int Scale;
-  int NoteID;
-  int Duration;
-  int DurationSpecifier;
+	int Scale;
+	int NoteID;
+	int Duration;
+	int DurationSpecifier;
 } Note;
 
 #define GSM_MAX_RINGTONE_PACKAGE_LENGTH 200
@@ -129,6 +148,7 @@ typedef struct {
 /* From PC Composer help */
 #define GSM_MAX_RINGTONE_NOTES 130
 
+int GSM_EncodeSMSRingtone(char *message, GSM_Ringtone *ringtone);
 u8 GSM_PackRingtone(GSM_Ringtone *ringtone, char *package, int *maxlength);
 GSM_Error GSM_UnPackRingtone(GSM_Ringtone *ringtone, char *package, int maxlength);
 

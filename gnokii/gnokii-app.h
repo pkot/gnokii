@@ -14,8 +14,6 @@
 
 */
 
-/* Prototypes */
-
 struct gnokii_arg_len {
 	int gal_opt;
 	int gal_min;

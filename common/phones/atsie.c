@@ -50,8 +50,6 @@ static GSM_Error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)
 void AT_InitSiemens(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
 {
 	/* names for s35 etc must be escaped */
-/*
 	if (foundmodel && !strncasecmp("35", foundmodel + 1, 2))
 		writephonebook = AT_InsertSendFunction(GOP_WritePhonebook, WritePhonebook);
-*/
 }

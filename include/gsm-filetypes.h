@@ -12,19 +12,21 @@
   
   Functions to read and write common file types.
 
-  $Log$
-  Revision 1.10  2001-06-28 00:28:46  pkot
-  Small docs updates (Pawel Kot)
-
-
 */
 
-int GSM_ReadVCalendarFile(char *FileName, GSM_CalendarNote *cnote,
-  int number);
+#ifndef __gsm_filetypes_h
+#define __gsm_filetypes_h
+
+#include "gsm-error.h"
+#include "gsm-common.h"
+#include "gsm-bitmaps.h"
+#include "gsm-ringtones.h"
+
+int GSM_ReadVCalendarFile(char *FileName, GSM_CalendarNote *cnote, int number);
 
 int GetvCalTime(GSM_DateTime *dt, char *time);
 int FillCalendarNote(GSM_CalendarNote *note, char *type,
-  char *text, char *time, char *alarm);
+		     char *text, char *time, char *alarm);
 
 
 /* Ringtone Files */
@@ -60,7 +62,7 @@ void saveota(FILE *file, GSM_Bitmap *bitmap);
 void savebmp(FILE *file, GSM_Bitmap *bitmap);
 
 #ifdef XPM
-  void savexpm(char *filename, GSM_Bitmap *bitmap);
+void savexpm(char *filename, GSM_Bitmap *bitmap);
 #endif
 
 GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap);
@@ -71,18 +73,20 @@ GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap);
 GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap);
 
 #ifdef XPM
-  GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap);
+GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap);
 #endif
 
 typedef enum {
-  None=0,
-  NOL,
-  NGG,
-  NSL,
-  NLM,
-  BMP,
-  OTA,
-  XPMF,
-  RTTL,
-  OTT
+	None = 0,
+	NOL,
+	NGG,
+	NSL,
+	NLM,
+	BMP,
+	OTA,
+	XPMF,
+	RTTL,
+	OTT
 } GSM_Filetypes;
+
+#endif /* __gsm_filetypes_h */

@@ -17,7 +17,7 @@
 #ifndef __gsm_statemachine_h
 #define __gsm_statemachine_h
 
-#include "gsm-common.h"
+#include "gsm-data.h"
 
 GSM_Error SM_Initialise(GSM_Statemachine *state);
 GSM_State SM_Loop(GSM_Statemachine *state, int timeout);

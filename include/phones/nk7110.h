@@ -21,8 +21,7 @@
 #ifndef __phones_nk7110_h
 #define __phones_nk7110_h
 
-#include <gsm-common.h>
-#include "gsm-statemachine.h"
+#include "gsm-data.h"
 
 extern bool P7110_LinkOK;
 
@@ -152,8 +151,11 @@ static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
+#if 0
+static GSM_Error P7110_GetPicture(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
+#endif
 static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);

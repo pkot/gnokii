@@ -73,7 +73,7 @@ gint DB_InsertSMS (const GSM_SMSMessage * const data)
                     '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', 'f')",
                     data->RemoteNumber.number, data->Time.Year + 2000, data->Time.Month,
                     data->Time.Day, data->Time.Hour, data->Time.Minute,
-                    data->Time.Second, data->MessageText);
+                    data->Time.Second, data->UserData[0].u.Text);
   res = PQexec(connIn, buf->str);
   g_string_free(buf, TRUE);
   if (!res || PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -136,11 +136,11 @@ void DB_Look (void)
     if (sms.RemoteNumber.number[0] == '+') sms.RemoteNumber.type = SMS_International;
     else sms.RemoteNumber.type = SMS_Unknown;
     
-    strncpy (sms.MessageText, PQgetvalue (res1, i, 2), GSM_MAX_SMS_LENGTH + 1);
-    sms.MessageText[GSM_MAX_SMS_LENGTH] = '\0';
+    strncpy (sms.UserData[0].u.Text, PQgetvalue (res1, i, 2), GSM_MAX_SMS_LENGTH + 1);
+    sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
 
 #ifdef XDEBUG
-    g_print ("%s, %s\n", sms.Destination, sms.MessageText);
+    g_print ("%s, %s\n", sms.RemoteNumber.Number, sms.UserData[0].u.Text);
 #endif
     
     if (WriteSMS (&sms) != 0)

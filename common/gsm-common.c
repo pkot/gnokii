@@ -13,7 +13,7 @@
 */
 
 #include <string.h>
-#include "gsm-common.h"
+#include "gsm-data.h"
 
 GSM_Error Unimplemented(void)
 {

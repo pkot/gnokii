@@ -17,16 +17,6 @@
 
   Header file for RLP protocol.
 
-  $Log$
-  Revision 1.3  2001-11-27 12:19:01  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.2  2001/06/10 11:29:49  machek
-  It is very bad idea to name enum "Data", because it is then impossible
-  to use variable called "Data".
-
-  Revision 1.1  2001/02/21 19:57:11  chris
-  More fiddling with the directory layout
 */
 
 #ifndef __data_rlp_common_h

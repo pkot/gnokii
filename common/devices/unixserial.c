@@ -101,7 +101,7 @@ static int device_script(int fd, const char *section)
 			_exit(-1);
 		}
 		/* FIXME: close all open descriptors - how to track them?
-		*/
+		 */
 		execl("/bin/sh", "sh", "-c", scriptname, NULL);
 		fprintf(stderr, _("device_script(\"%s\"): execute script: %s\n"), scriptname, strerror(errno));
 		_exit(-1);
@@ -214,7 +214,7 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 		      int __with_async, int __with_hw_handshake)
 {
 	int fd;
-	int retcode, baudrate;
+	int retcode, baudrate = 0;
 	struct termios tp;
 	char *s;
 

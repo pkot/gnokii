@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -10,8 +12,6 @@
 	
   Functions for common bitmap operations.
  
-  Last modified: Sat 18 Nov 2000 by Chris Kemp
-
 */
 
 #include <stdio.h>
@@ -69,55 +69,51 @@ void GSM_ClearBitmap(GSM_Bitmap *bmp)
 void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Information *info)
 {
 	GSM_Bitmap backup;
-	int x,y,copywidth,copyheight;
+	int x, y, copywidth, copyheight;
 
 	/* Copy into the backup */
-	memcpy(&backup,bitmap,sizeof(GSM_Bitmap));
+	memcpy(&backup, bitmap, sizeof(GSM_Bitmap));
       
-	if (target==GSM_StartupLogo) {
-		bitmap->width=info->StartupLogoW;
-		bitmap->height=info->StartupLogoH;
-		bitmap->size=((bitmap->height/8)+(bitmap->height%8>0))*bitmap->width;
+	if (target == GSM_StartupLogo) {
+		bitmap->width = info->StartupLogoW;
+		bitmap->height = info->StartupLogoH;
+		bitmap->size = ((bitmap->height / 8) + (bitmap->height % 8 > 0)) * bitmap->width;
 	}
-	if (target==GSM_OperatorLogo) {
-		bitmap->width=info->OpLogoW;
-		bitmap->height=info->OpLogoH;
-		x=bitmap->width*bitmap->height;
-		bitmap->size=(x/8)+(x%8>0);
+	if (target == GSM_OperatorLogo) {
+		bitmap->width = info->OpLogoW;
+		bitmap->height = info->OpLogoH;
+		x = bitmap->width * bitmap->height;
+		bitmap->size = (x / 8) + (x % 8 > 0);
 	}
-	if (target==GSM_CallerLogo) {
-		bitmap->width=info->CallerLogoW;
-		bitmap->height=info->CallerLogoH;
-		x=bitmap->width*bitmap->height;
-		bitmap->size=(x/8)+(x%8>0);
+	if (target == GSM_CallerLogo) {
+		bitmap->width = info->CallerLogoW;
+		bitmap->height = info->CallerLogoH;
+		x = bitmap->width * bitmap->height;
+		bitmap->size = (x / 8) + (x % 8 > 0);
 	}
-	if (target==GSM_PictureImage) {
-		bitmap->width=72;
-		bitmap->height=28;
-		bitmap->size=bitmap->width*bitmap->height/8;
+	if (target == GSM_PictureImage) {
+		bitmap->width = 72;
+		bitmap->height = 28;
+		bitmap->size = bitmap->width * bitmap->height / 8;
 	}
-	bitmap->type=target;
+	bitmap->type = target;
 
-	if (backup.width>bitmap->width) {
-		copywidth=bitmap->width;
-#ifdef DEBUG
-		fprintf(stdout,_("We lost some part of image - it's cut (width from %i to %i) !\n"),backup.width,bitmap->width);
-#endif /* DEBUG */
-	} else copywidth=backup.width;
+	if (backup.width > bitmap->width) {
+		copywidth = bitmap->width;
+		dprintf("We lost some part of image - it's cut (width from %i to %i) !\n", backup.width, bitmap->width);
+	} else copywidth = backup.width;
 
-	if (backup.height>bitmap->height) {
-		copyheight=bitmap->height;
-#ifdef DEBUG
-		fprintf(stdout,_("We lost some part of image - it's cut (height from %i to %i) !\n"),backup.height,bitmap->height);
-#endif /* DEBUG */
-	} else copyheight=backup.height;
+	if (backup.height > bitmap->height) {
+		copyheight = bitmap->height;
+		dprintf("We lost some part of image - it's cut (height from %i to %i) !\n", backup.height, bitmap->height);
+	} else copyheight = backup.height;
   
 
 	GSM_ClearBitmap(bitmap);
   
-	for (y=0;y<copyheight;y++) {
-		for (x=0;x<copywidth;x++)
-			if (GSM_IsPointBitmap(&backup,x,y)) GSM_SetPointBitmap(bitmap,x,y);
+	for (y = 0; y < copyheight; y++) {
+		for (x = 0; x < copywidth; x++)
+			if (GSM_IsPointBitmap(&backup, x, y)) GSM_SetPointBitmap(bitmap, x, y);
 	}
 }
 
@@ -142,11 +138,10 @@ GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bit
 {
 	int offset = 0;
 
+	bitmap->type = type;
 	switch (type) {
 	case SMS_OpLogo:
 		if (!code) return GE_UNKNOWN;
-
-		bitmap->type = SMS_OpLogo;
 
 		bitmap->netcode[0] = '0' + (message[0] & 0x0f);
 		bitmap->netcode[1] = '0' + (message[0] >> 4);
@@ -158,15 +153,12 @@ GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bit
 
 		break;
 	case SMS_CallerIDLogo:
-		bitmap->type = SMS_CallerIDLogo;
 		break;
 	case SMS_Picture:
 		offset = 2;
-		bitmap->type = GSM_PictureImage;
 		break;
 	default: /* error */
 		return GE_UNKNOWN;
-		break;
 	}
 	bitmap->width = message[0];
 	bitmap->height = message[1];
@@ -181,7 +173,48 @@ GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bit
 
 
 /* Returns message length */
+int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
+{
+	unsigned short size, current = 0;
 
+	switch (bitmap->type) {
+	case SMS_OpLogo:
+		/* Set the network code */
+		dprintf("Operator Logo\n");
+		message[current++] = ((bitmap->netcode[1] & 0x0f) << 4) | (bitmap->netcode[0] & 0xf);
+		message[current++] = 0xf0 | (bitmap->netcode[2] & 0x0f);
+		message[current++] = ((bitmap->netcode[5] & 0x0f) << 4) | (bitmap->netcode[4] & 0xf);
+		break;
+	case SMS_MultipartMessage:
+		dprintf("Picture Image\n");
+		/* Type of multipart message - picture image */
+		message[current++] = 0x02;
+		/* Size of the message */
+		size = bitmap->size + 4; /* for bitmap the header */
+		message[current++] = (size & 0xff00) >> 8;
+		message[current++] = size & 0x00ff;
+		break;
+	default: /* error */
+		dprintf("gulp?\n");
+		break;
+	}
+        
+	/* Info field */
+	message[current++] = 0x00;
+	
+	/* Logo size */
+	message[current++] = bitmap->width;
+	message[current++] = bitmap->height;
+
+	/* Number of colors */
+	message[current++] = 0x01;
+
+	memcpy(message + current, bitmap->bitmap, bitmap->size);
+	
+	return (current + bitmap->size);
+}
+
+/* Returns message length */
 int GSM_SaveSMSBitmap(GSM_SMSMessage *message, GSM_Bitmap *bitmap)
 {
 	int current=0;
@@ -245,9 +278,9 @@ int GSM_SaveSMSBitmap(GSM_SMSMessage *message, GSM_Bitmap *bitmap)
 
 	Data[current++] = 0x01;
 
-	memcpy(message->MessageText, UserDataHeader, 7);
-	memcpy(message->MessageText, Data, current);
-	memcpy(message->MessageText+current, bitmap->bitmap, bitmap->size);
+	memcpy(message->UserData[0].u.Text, UserDataHeader, 7);
+	memcpy(message->UserData[0].u.Text+7, Data, current);
+	memcpy(message->UserData[0].u.Text+7+current, bitmap->bitmap, bitmap->size);
 
-	return current;
+	return (current + bitmap->size);
 }
