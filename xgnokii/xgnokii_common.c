@@ -12,9 +12,18 @@
   Modified by Jan Derfinak
 
 */
-#include "../misc.h"  /* for _() */
+
+#ifndef WIN32
+# include <unistd.h>
+# include <sys/types.h>
+# include <sys/wait.h>
+# include <signal.h>
+#endif
+#include <string.h>
 #include <gtk/gtk.h>
+#include "../misc.h"  /* for _() */
 #include "xgnokii_common.h"
+#include "xgnokii.h"
 #include "../pixmaps/quest.xpm"
 #include "../pixmaps/stop.xpm"
 
@@ -128,4 +137,71 @@ GtkWidget* NewPixmap (gchar **data, GdkWindow *window, GdkColor *background)
   wpixmap = gtk_pixmap_new (pixmap, mask);
   
   return wpixmap;
+}
+
+gint LaunchProcess (gchar *p, gchar *arg, gint infile, gint outfile, gint errfile)
+{
+  pid_t pid;
+  
+  if (p == 0)
+    return (1);
+  pid = fork ();
+  if (pid == -1)
+    return (-1);
+  if (pid == 0)
+  {
+    pid = getpid ();
+    setpgid (pid, pid);
+    if (getuid () != geteuid ())
+      seteuid (getuid ());
+      
+    signal (SIGINT, SIG_DFL);
+    signal (SIGQUIT, SIG_DFL);
+    signal (SIGTSTP, SIG_DFL);
+    signal (SIGTTIN, SIG_DFL);
+    signal (SIGTTOU, SIG_DFL);
+    signal (SIGCHLD, SIG_DFL);
+    
+    if (infile != STDIN_FILENO)
+    {
+      dup2 (infile, STDIN_FILENO);
+      close (infile);
+    }
+    if (outfile != STDOUT_FILENO)
+    {
+      dup2 (outfile, STDOUT_FILENO);
+      close (outfile);
+    }
+    if (errfile != STDERR_FILENO)
+    {
+      dup2 (errfile, STDERR_FILENO);
+      close (errfile);
+    }
+    
+    execlp (p, p, arg, NULL);
+    g_print (_("Can't exec %s\n"), p);
+    execlp ("/bin/false", p, NULL);
+    return (-1);
+  }
+  
+  setpgid (pid, pid);
+  return (0);
+}
+
+void RemoveZombie (gint sign)
+{
+  gint status;
+  
+  wait (&status);
+}
+
+void Help (GtkWidget *w, gpointer data)
+{
+  gchar buf[255] = "file:";
+  
+  strncat (buf, xgnokiiConfig.xgnokiidir, 255 - strlen (buf));
+  buf[254] = '\0';
+  strncat (buf, (gchar *) data, 255 - strlen (buf));
+  buf[254] = '\0';
+  LaunchProcess (xgnokiiConfig.helpviewer, buf, STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
 }

@@ -21,32 +21,8 @@
 #include "../gsm-common.h"
 
 #define MAX_CALLER_GROUP_LENGTH	10
-#define MAX_SMS_SET_LENGTH	15
 #define MAX_SMS_CENTER		10
 #define MAX_BUSINESS_CARD_LENGTH	139
-
-typedef enum {
-  SMSFormat_Text,
-  SMSFormat_Fax,
-  SMSFormat_Paging,
-  SMSFormat_E_Mail
-} SMSFormat;
-
-typedef enum {
-  SMSValidity_Max,
-  SMSValidity_1h,
-  SMSValidity_6h,
-  SMSValidity_24h,
-  SMSValidity_72h,
-  SMSValidity_1week
-} SMSValidity;
-
-typedef struct {
-  gchar       name[MAX_SMS_SET_LENGTH + 1];
-  gchar       number[GSM_MAX_SMS_CENTER_LENGTH + 1]; /* SMS center number */
-  SMSFormat   format;	/* SMS sending format */
-  SMSValidity validity;	/* Validity period */
-} SMSSetting;
 
 typedef struct {
   gchar *name;
@@ -59,48 +35,14 @@ typedef struct {
 } UserInf;
 
 typedef struct {
-  GtkWidget *alarmSwitch;
-  GtkWidget *alarmHour;
-  GtkWidget *alarmMin;
-} AlarmWidgets;
-
-typedef struct {
-  GtkWidget *port;
-  GtkWidget *model;
-  GtkWidget *init;
-  GtkWidget *bindir;
-  GtkWidget *serial, *infrared;
-} ConnectionWidgets;
-
-typedef struct {
-  GtkWidget *set;
-  GtkWidget *number;
-  GtkWidget *format;
-  GtkWidget *validity;
-  SMSSetting smsSetting[MAX_SMS_CENTER];
-  gint       currentSet:4;
-} SMSWidgets;
-
-typedef struct {
-  GtkWidget *name;
-  GtkWidget *title;
-  GtkWidget *company;
-  GtkWidget *telephone;
-  GtkWidget *fax;
-  GtkWidget *email;
-  GtkWidget *address;
-  GtkWidget *status;
-  gint   max;
-  gint   used;
-} UserWidget;
-
-typedef struct {
   gchar *initlength; /* Init length from .gnokiirc file */
   gchar *model;      /* Model from .gnokiirc file. */
   gchar *port;       /* Serial port from .gnokiirc file */
   gchar *connection; /* Connection type from .gnokiirc file */
   gchar *bindir;
-  SMSSetting smsSetting[MAX_SMS_CENTER];
+  gchar *xgnokiidir;
+  gchar *helpviewer;
+  GSM_MessageCenter smsSetting[MAX_SMS_CENTER];
   UserInf user;
   gchar *callerGroups[6];
   gint   smsSets:4;

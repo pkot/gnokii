@@ -1,3 +1,16 @@
+xgnokii-19991130
+- Added DTMF window.
+- Added execution of html viewer as help viewer. We need to write nice help
+  pages. :)
+Changes in Options window:
+- We can read name, number, format and validity period of SMS centers
+  from phone and also we can edit and save them to phone.
+Changes in SMS window:
+- Source completely rewriten. New design. Inbox and outbox in tree
+  hierarchy. If you have initialized contacts in xgnokii, xgnokii is trying
+  to resolve numbers to names. Messages are shown in viewer space.
+
+
 xgnokii-19991116
 - Added Net monitor. I thank Andreas Schmidt <mail@aschmidt.de> for idea
   about graphical representation of Net monitor data. I thank also Norbert

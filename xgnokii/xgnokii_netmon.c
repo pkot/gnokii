@@ -13,6 +13,9 @@
 
 */
 
+#ifndef WIN32
+# include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,7 +32,13 @@ static DisplayData displayData = {NULL, 0};
 static GtkWidget *tableLabels[4][7];
 static GtkWidget *tableProgress[7];
 
-static void CloseNetmon (GtkWidget *w, gpointer data)
+
+static inline void Help1 (GtkWidget *w, gpointer data)
+{
+  Help (w, _("/help/netmon.html"));
+}
+
+static inline void CloseNetmon (GtkWidget *w, gpointer data)
 {
   gtk_widget_hide (GUI_NetmonWindow);
 }
@@ -112,14 +121,15 @@ static void ParseScreen (gchar *screen, gint i)
   
   if (i == 6)
     return;
-    
+  
+  i++;  
   strncpy (buf, ptr, 3);
   buf[3] = '\0';
-  gtk_label_set_text (GTK_LABEL (tableLabels[0][i + 1]), buf);
+  gtk_label_set_text (GTK_LABEL (tableLabels[0][i]), buf);
   ptr += 3;
   strncpy (buf, ptr, 3);
   buf[3] = '\0';
-  gtk_label_set_text (GTK_LABEL (tableLabels[2][i + 1]), buf);
+  gtk_label_set_text (GTK_LABEL (tableLabels[2][i]), buf);
   ptr += 3;
   if (*ptr != '-')
   {
@@ -132,21 +142,22 @@ static void ParseScreen (gchar *screen, gint i)
     strncpy (buf, ptr, 3);
     buf[3] = '\0';
   }
-  gtk_label_set_text (GTK_LABEL (tableLabels[1][i + 1]), buf);
+  gtk_label_set_text (GTK_LABEL (tableLabels[1][i]), buf);
   ptr += 3;
-  gtk_progress_set_value (GTK_PROGRESS (tableProgress[i + 1]), atoi (buf));
+  gtk_progress_set_value (GTK_PROGRESS (tableProgress[i]), atoi (buf));
   strncpy (buf, ptr, 3);
   buf[3] = '\0';
-  gtk_label_set_text (GTK_LABEL (tableLabels[3][i + 1]), buf);
+  gtk_label_set_text (GTK_LABEL (tableLabels[3][i]), buf);
   ptr += 4;
   
+  i++;
   strncpy (buf, ptr, 3);
   buf[3] = '\0';
-  gtk_label_set_text (GTK_LABEL (tableLabels[0][i + 2]), buf);
+  gtk_label_set_text (GTK_LABEL (tableLabels[0][i]), buf);
   ptr += 3;
   strncpy (buf, ptr, 3);
   buf[3] = '\0';
-  gtk_label_set_text (GTK_LABEL (tableLabels[2][i + 2]), buf);
+  gtk_label_set_text (GTK_LABEL (tableLabels[2][i]), buf);
   ptr += 3;
   if (*ptr != '-')
   {
@@ -159,19 +170,19 @@ static void ParseScreen (gchar *screen, gint i)
     strncpy (buf, ptr, 3);
     buf[3] = '\0';
   }
-  gtk_label_set_text (GTK_LABEL (tableLabels[1][i + 2]), buf);
+  gtk_label_set_text (GTK_LABEL (tableLabels[1][i]), buf);
   ptr += 3;
-  gtk_progress_set_value (GTK_PROGRESS (tableProgress[i + 2]), atoi (buf));
+  gtk_progress_set_value (GTK_PROGRESS (tableProgress[i]), atoi (buf));
   strncpy (buf, ptr, 3);
   buf[3] = '\0';
-  gtk_label_set_text (GTK_LABEL (tableLabels[3][i + 2]), buf);
+  gtk_label_set_text (GTK_LABEL (tableLabels[3][i]), buf);
 }
 
 void GUI_RefreshNetmon ()
 {
   static gchar screen[50];
   
-  if (!GTK_WIDGET_VISIBLE(GUI_NetmonWindow))
+  if (!GTK_WIDGET_VISIBLE (GUI_NetmonWindow))
     return;
   
   GSM->NetMonitor (3, screen);
@@ -208,7 +219,8 @@ static GtkItemFactoryEntry menu_items[] = {
   {"/Tools/Net monitor o_n", NULL,	NetmonOnOff, 1, NULL},
   {"/Tools/Net monitor o_ff", NULL,	NetmonOnOff, 0, NULL},
   {"/_Help",		NULL,		NULL, 0, "<LastBranch>"},
-  {"/Help/About",	NULL,		GUI_ShowAbout, 0, NULL},
+  {"/Help/_Help",	NULL,		Help1, 0, NULL},
+  {"/Help/_About",	NULL,		GUI_ShowAbout, 0, NULL},
 };
 
 #define DISPLAY_X	12

@@ -33,6 +33,7 @@
 #include "../gsm-api.h"
 #include "xgnokii_contacts.h"
 #include "xgnokii_common.h"
+#include "xgnokii_sms.h"
 #include "../pixmaps/Read.xpm"
 #include "../pixmaps/Send.xpm"
 #include "../pixmaps/Open.xpm"
@@ -70,6 +71,11 @@ inline gint GUI_ContactsIsChanged()
 inline bool GUI_ContactsIsIntialized()
 {
   return contactsMemoryInitialized;
+}
+
+static inline void Help1 (GtkWidget *w, gpointer data)
+{
+  Help (w, _("/help/contacts.html"));
 }
 
 void RefreshStatusInfo()
@@ -990,7 +996,7 @@ static void NewEntry ()
   }
 }
 
-void ClickEntry (GtkWidget      *clist,
+static void ClickEntry (GtkWidget      *clist,
                  gint            row,
                  gint            column,
                  GdkEventButton *event,
@@ -1626,6 +1632,7 @@ Setting max SIM entries to 100!\n"));
   contactsMemoryInitialized = TRUE;
   statusInfo.ch_ME = statusInfo.ch_SM = 0;
   GUI_RefreshContacts ();
+  GUI_RefreshMessageWindow ();
 }   
 
 static void ReadSaveCallback (GtkWidget *widget, gpointer data)
@@ -2080,6 +2087,7 @@ Setting max SIM entries set to 100!\n"));
   contactsMemoryInitialized = TRUE;
   RefreshStatusInfo();
   GUI_RefreshContacts();
+  GUI_RefreshMessageWindow ();
 }
 
 static void ImportContactsFileDialog ()
@@ -2404,7 +2412,8 @@ static GtkItemFactoryEntry menu_items[] = {
   {"/_Dial",		NULL,		NULL, 0, "<Branch>"},
   {"/Dial/Dial _voice", "<control>V",	DialVoice, 0, NULL},
   {"/_Help",		NULL,		NULL, 0, "<LastBranch>"},
-  {"/_Help/About",	NULL,		GUI_ShowAbout, 0, NULL},
+  {"/_Help/_Help",	NULL,		Help1, 0, NULL},
+  {"/_Help/_About",	NULL,		GUI_ShowAbout, 0, NULL},
 };
   
 
@@ -2505,9 +2514,7 @@ void GUI_CreateContactsWindow ()
 //  gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
   
   gtk_box_pack_start (GTK_BOX (main_vbox), toolbar, FALSE, FALSE, 0);
-  
   gtk_widget_show (toolbar);
-                           
 
   
   clist = gtk_clist_new_with_titles (4, titles);

@@ -29,6 +29,7 @@ ConfigEntry config[] = {
  {"fax",       &(xgnokiiConfig.user.fax)},
  {"email",     &(xgnokiiConfig.user.email)},
  {"address",   &(xgnokiiConfig.user.address)},
+ {"viewer",    &(xgnokiiConfig.helpviewer)},
  {"",          NULL}
 };
 
@@ -41,6 +42,7 @@ static void GetDefaultValues ()
   xgnokiiConfig.user.fax = g_strdup ("");
   xgnokiiConfig.user.email = g_strdup ("");
   xgnokiiConfig.user.address = g_strdup ("");
+  xgnokiiConfig.helpviewer = g_strdup ("netscape");
 }
 
 void GUI_ReadXConfig ()
@@ -122,6 +124,9 @@ void GUI_ReadXConfig ()
           g_free (*config[i].value);
           if (i == 3 || i == 4)
             *config[i].value = g_strndup (current, max_phonebook_number_length);
+          else
+          if (i == 7)
+            *config[i].value = g_strndup (current, HTMLVIEWER_LENGTH);
           else
             *config[i].value = g_strndup (current, MAX_BUSINESS_CARD_LENGTH);  
         }

@@ -49,6 +49,7 @@ CLEAN :
 	-@erase "$(INTDIR)\xgnokii_contacts.obj"
 	-@erase "$(INTDIR)\xgnokii_sms.obj"
 	-@erase "$(INTDIR)\xgnokii_netmon.obj"
+	-@erase "$(INTDIR)\xgnokii_dtmf.obj"
 	-@erase "$(OUTDIR)\xgnokii.exe"
 
 "$(OUTDIR)" :
@@ -107,6 +108,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\xgnokii_common.obj" \
 	"$(INTDIR)\xgnokii_contacts.obj" \
 	"$(INTDIR)\xgnokii_netmon.obj" \
+	"$(INTDIR)\xgnokii_dtmf.obj" \
 	"$(INTDIR)\xgnokii_sms.obj"
 
 "$(OUTDIR)\xgnokii.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -139,6 +141,7 @@ CLEAN :
 	-@erase "$(INTDIR)\xgnokii_contacts.obj"
 	-@erase "$(INTDIR)\xgnokii_sms.obj"
 	-@erase "$(INTDIR)\xgnokii_netmon.obj"
+	-@erase "$(INTDIR)\xgnokii_dtmf.obj"
 	-@erase "$(OUTDIR)\xgnokii.exe"
 	-@erase "$(OUTDIR)\xgnokii.ilk"
 	-@erase "$(OUTDIR)\xgnokii.pdb"
@@ -199,6 +202,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\xgnokii_common.obj" \
 	"$(INTDIR)\xgnokii_contacts.obj" \
 	"$(INTDIR)\xgnokii_netmon.obj" \
+	"$(INTDIR)\xgnokii_dtmf.obj" \
 	"$(INTDIR)\xgnokii_sms.obj"
 
 "$(OUTDIR)\xgnokii.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -272,10 +276,14 @@ SOURCE=.\xgnokii_netmon.c
 
 "$(INTDIR)\xgnokii_netmon.obj" : $(SOURCE) "$(INTDIR)"
 
+SOURCE=.\xgnokii_dtmf.c
+
+"$(INTDIR)\xgnokii_dtmf.obj" : $(SOURCE) "$(INTDIR)"
+
 SOURCE=.\xgnokii_sms.c
 
 "$(INTDIR)\xgnokii_sms.obj" : $(SOURCE) "$(INTDIR)"
 
 
 
-!ENDIF
+!ENDIF 

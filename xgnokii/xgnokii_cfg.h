@@ -19,6 +19,8 @@
 #include <gtk/gtk.h>
 #include "xgnokii.h"
 
+#define		HTMLVIEWER_LENGTH	200
+
 typedef struct {
   gchar key[10];
   gchar **value;

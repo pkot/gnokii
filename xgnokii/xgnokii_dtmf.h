@@ -13,15 +13,11 @@
 
 */
 
-#ifndef XGNOKII_SMS_H
-#define XGNOKII_SMS_H
+#ifndef XGNOKII_DTMF_H
+#define XGNOKII_DTMF_H
 
-extern void GUI_CreateSMSWindow ();
+extern void GUI_CreateDTMFWindow ();
 
-extern void GUI_ShowSMS ();
-
-extern void GUI_RefreshSMS ();
-
-extern void GUI_RefreshMessageWindow ();
+extern void GUI_ShowDTMF ();
 
 #endif
