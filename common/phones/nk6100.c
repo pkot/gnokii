@@ -91,6 +91,7 @@ static void (*RLP_RXCallback)(RLP_F96Frame *Frame) = NULL;
 /* static functions prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Initialise(GSM_Statemachine *state);
+static GSM_Error Authentication(GSM_Statemachine *state);
 static GSM_Error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state);
@@ -284,8 +285,6 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 /* Initialise is the only function allowed to 'use' state */
 static GSM_Error Initialise(GSM_Statemachine *state)
 {
-	GSM_Data data;
-	char model[10];
 	GSM_Error err;
 
 	/* Copy in the phone info */
@@ -317,10 +316,9 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 
 	SM_Initialise(state);
 
-	/* Now test the link and get the model */
-	GSM_DataClear(&data);
-	data.Model = model;
-	if (state->Phone.Functions(GOP_GetModel, &data, state) != GE_NONE) return GE_NOTSUPPORTED;
+	/* Now test the link and authenticate ourself */
+	if (Authentication(state) != GE_NONE) return GE_NOTSUPPORTED;
+
 	return GE_NONE;
 }
 
@@ -678,6 +676,71 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 
 	/* Check that we are back at state Initialised */
 	if (SM_Loop(state, 0) != Initialised) return GE_UNKNOWN;
+	return GE_NONE;
+}
+
+static GSM_Error Authentication(GSM_Statemachine *state)
+{
+	unsigned char connect1[] = {FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
+	unsigned char connect2[] = {FBUS_FRAME_HEADER, 0x20, 0x02};
+	unsigned char connect3[] = {FBUS_FRAME_HEADER, 0x0d, 0x01, 0x00, 0x02};
+	unsigned char connect4[] = {FBUS_FRAME_HEADER, 0x10};
+
+	unsigned char magic_connect[] = {FBUS_FRAME_HEADER, 0x12,
+					 /* auth response */
+					 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					 'N', 'O', 'K', 'I', 'A', '&', 'N', 'O', 'K', 'I', 'A',
+					 'a', 'c', 'c', 'e', 's', 's', 'o', 'r', 'y',
+					 0x00, 0x00, 0x00, 0x00};
+	
+	char model[GSM_MAX_MODEL_LENGTH+1];
+	char imei[GSM_MAX_IMEI_LENGTH+1];
+	GSM_Data data;
+	GSM_Error error;
+	PhoneModel *pm;
+
+	memset(model, 0, sizeof(model));
+	memset(imei, 0, sizeof(imei));
+	GSM_DataClear(&data);
+	data.Model = model;
+	data.Imei = imei;
+
+	if ((error = Identify(&data, state)) != GE_NONE) return error;
+	dprintf("model: '%s', imei: '%s'\n", model, imei);
+	if ((pm = GetPhoneModel(model)) == NULL) {
+		dump(_("Unsupported phone model \"%s\"\n"), model);
+		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
+		return GE_INTERNALERROR;
+	}
+
+	if (pm->flags & PM_AUTHENTICATION) {
+		if ((error = SM_SendMessage(state, 7, 0x02, connect1)) != GE_NONE)
+			return error;
+		if ((error = SM_Block(state, &data, 0x02)) != GE_NONE)
+			return error;
+
+		if ((error = SM_SendMessage(state, 5, 0x02, connect2)) != GE_NONE)
+			return error;
+		if ((error = SM_Block(state, &data, 0x02)) != GE_NONE)
+			return error;
+
+		if ((error = SM_SendMessage(state, 7, 0x02, connect3)) != GE_NONE)
+			return error;
+		if ((error = SM_Block(state, &data, 0x02)) != GE_NONE)
+			return error;
+
+		if ((error = SM_SendMessage(state, 4, 0x64, connect4)) != GE_NONE)
+			return error;
+		if ((error = SM_Block(state, &data, 0x64)) != GE_NONE)
+			return error;
+		
+		PNOK_GetNokiaAuth(imei, MagicBytes, magic_connect + 4);
+
+		if ((error = SM_SendMessage(state, 45, 0x64, magic_connect)) != GE_NONE)
+			return error;
+	}
+
 	return GE_NONE;
 }
 

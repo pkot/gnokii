@@ -26,5 +26,6 @@
 GSM_Error PNOK_GetManufacturer(char *manufacturer);
 void PNOK_DecodeString(unsigned char *dest, size_t max, const unsigned char *src, size_t len);
 size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *src);
+void PNOK_GetNokiaAuth(unsigned char *Imei, unsigned char *MagicBytes, unsigned char *MagicResponse);
 
 #endif
