@@ -10,6 +10,9 @@
       win32 version too                            (BORBELY Zoltan)
     o add irda support for Windows systems             (Phil Ashby)
     o add direct.h detection                            (Pawel Kot)
+    o split up shared part of !HAVE_IRDA to a separate file
+                                                        (Pawel Kot)
+    o add buildin irda for WIN32 in the Makefile       (Phil Ashby)
  * build system updates
     o update Slackware build scripts; we have now 2 scripts to
       to build with and without X11 support             (Pawel Kot)

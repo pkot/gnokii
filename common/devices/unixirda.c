@@ -190,12 +190,4 @@ int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
 
-#else /* HAVE_IRDA */
-
-int irda_open(struct gn_statemachine *state) { return -1; }
-int irda_close(int fd, struct gn_statemachine *state) { return -1; }
-int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
-int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
-int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state) { return -1; }
-
 #endif /* HAVE_IRDA */
