@@ -88,23 +88,6 @@ typedef struct {
 	GtkWidget *groupMenu;
 } AddDialogData;
 
-/*
-typedef struct {
-	GtkWidget *dialog;
-	DateTime date;
-	DateTime alarm;
-	GtkWidget *alarmCheck;
-	GtkWidget *text;
-} AddDialogData2;
-
-typedef struct {
-	GtkWidget *dialog;
-	DateTime date;
-	DateTime alarm;
-	GtkWidget *alarmCheck;
-	GtkWidget *text;
-} AddDialogData3;
-*/
 typedef struct {
 	GtkWidget *dialog;
 	GtkWidget *cal;
@@ -312,6 +295,17 @@ static void ClickEntry(GtkWidget * clist,
 	if (*buf != '\0') {
 		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL,
 				_("Number: "), -1);
+
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
+				buf, -1);
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
+				"\n", -1);
+	}
+
+	gtk_clist_get_text(GTK_CLIST(clist), row, 6, &buf);
+	if (*buf != '\0') {
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL,
+				_("Recurrence: "), -1);
 
 		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
 				buf, -1);
@@ -985,8 +979,10 @@ static void AddReminder(void)
 		addReminderDialogData.alarmCheck = gtk_check_button_new_with_label(_("Alarm"));
 		gtk_box_pack_start(GTK_BOX(hbox), addReminderDialogData.alarmCheck, FALSE, FALSE,
 				   2);
-//    gtk_signal_connect (GTK_OBJECT (addReminderDialogData.alarmCheck), "toggled",
-//                        GTK_SIGNAL_FUNC (TogleAlarm), &addReminderDialogData);
+		/*
+		gtk_signal_connect (GTK_OBJECT (addReminderDialogData.alarmCheck), "toggled",
+				    GTK_SIGNAL_FUNC (TogleAlarm), &addReminderDialogData);
+		*/
 		gtk_widget_show(addReminderDialogData.alarmCheck);
 
 		button = gtk_button_new();
@@ -1243,8 +1239,10 @@ static void AddMeeting(void)
 
 		addMeetingDialogData.alarmCheck = gtk_check_button_new_with_label(_("Alarm"));
 		gtk_box_pack_start(GTK_BOX(hbox), addMeetingDialogData.alarmCheck, FALSE, FALSE, 2);
-//    gtk_signal_connect (GTK_OBJECT (addMeetingDialogData.alarmCheck), "toggled",
-//                        GTK_SIGNAL_FUNC (TogleAlarm), &addMeetingDialogData);
+		/*
+		gtk_signal_connect (GTK_OBJECT (addMeetingDialogData.alarmCheck), "toggled",
+				    GTK_SIGNAL_FUNC (TogleAlarm), &addMeetingDialogData);
+		*/
 		gtk_widget_show(addMeetingDialogData.alarmCheck);
 
 		button = gtk_button_new();
@@ -1501,7 +1499,9 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, "<control>C", NULL, 0, NULL},
 	{NULL, "<control>M", NULL, 0, NULL},
 	{NULL, "<control>B", NULL, 0, NULL},
+	/*
 	{NULL, NULL, NULL, 0, NULL},
+	*/
 	{NULL, "<control>D", DeleteNote, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>A", NULL, 0, NULL},
@@ -1527,13 +1527,15 @@ static void InitMainMenu(void)
 	menu_items[12].path = g_strdup(_("/Edit/Add _call"));
 	menu_items[13].path = g_strdup(_("/Edit/Add _meeting"));
 	menu_items[14].path = g_strdup(_("/Edit/Add _birthday"));
+	/*
 	menu_items[15].path = g_strdup(_("/Edit/_Edit"));
-	menu_items[16].path = g_strdup(_("/Edit/_Delete"));
-	menu_items[17].path = g_strdup(_("/Edit/Sep4"));
-	menu_items[18].path = g_strdup(_("/Edit/Select _all"));
-	menu_items[19].path = g_strdup(_("/_Help"));
-	menu_items[20].path = g_strdup(_("/Help/_Help"));
-	menu_items[21].path = g_strdup(_("/Help/_About"));
+	*/
+	menu_items[15].path = g_strdup(_("/Edit/_Delete"));
+	menu_items[16].path = g_strdup(_("/Edit/Sep4"));
+	menu_items[17].path = g_strdup(_("/Edit/Select _all"));
+	menu_items[18].path = g_strdup(_("/_Help"));
+	menu_items[19].path = g_strdup(_("/Help/_Help"));
+	menu_items[20].path = g_strdup(_("/Help/_About"));
 }
 
 void GUI_CreateCalendarWindow()
@@ -1556,7 +1558,7 @@ void GUI_CreateCalendarWindow()
 	GUI_CalendarWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_wmclass(GTK_WINDOW(GUI_CalendarWindow), "CalendarWindow", "Xgnokii");
 	gtk_window_set_title(GTK_WINDOW(GUI_CalendarWindow), _("Calendar"));
-	//gtk_widget_set_usize (GTK_WIDGET (GUI_CalendarWindow), 436, 220);
+	gtk_widget_set_usize (GTK_WIDGET (GUI_CalendarWindow), 640, 320);
 	gtk_signal_connect(GTK_OBJECT(GUI_CalendarWindow), "delete_event",
 			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 	gtk_widget_realize(GUI_CalendarWindow);
@@ -1611,11 +1613,12 @@ void GUI_CreateCalendarWindow()
 				(GtkSignalFunc) NULL, NULL);
 
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
-
+	/*
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Edit note"), NULL,
 				NewPixmap(Edit_xpm, GUI_CalendarWindow->window,
 					  &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
 				(GtkSignalFunc) NULL, NULL);
+	*/
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Add reminder"), NULL,
 				NewPixmap(NewRem_xpm, GUI_CalendarWindow->window,
 					  &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
@@ -1654,6 +1657,8 @@ void GUI_CreateCalendarWindow()
 	gtk_text_set_word_wrap(GTK_TEXT(cal.noteText), TRUE);
 
 	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_set_usize (GTK_WIDGET (scrolledWindow), 200, 120);
+
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
 				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
@@ -1685,9 +1690,10 @@ void GUI_CreateCalendarWindow()
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 0, 15);
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 1, 52);
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 2, 110);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 3, 130);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 3, 100);
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 4, 110);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 5, 110);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 5, 90);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 6, 80);
 	gtk_clist_set_column_justification(GTK_CLIST(cal.notesClist), 0, GTK_JUSTIFY_RIGHT);
 
 	for (i = 0; i < 7; i++) {
