@@ -10,26 +10,6 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Log$
-  Revision 1.9  2001-09-14 13:09:26  pkot
-  Xgnokii calendar updates
-
-  Revision 1.8  2001/02/02 08:09:57  ja
-  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
-
-  Revision 1.7  2001/01/29 15:22:22  machek
-  Use integer as bitfield instead of struct of int:1.
-
-  Be able to read phonebook saved in gnokii format from xgnokii.
-
-  Revision 1.6  2001/01/17 02:54:57  chris
-  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
-  I can now edit my phonebook in xgnokii but it is 'work in progress'.
-
-  Revision 1.5  2001/01/15 21:10:20  ja
-  Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
-
-  
 */
 
 #ifndef XGNOKII_LOWLEVEL_H
@@ -95,7 +75,7 @@ typedef struct {
 } D_SMSMessage;
 
 typedef struct {
-  GSM_MessageCenter *center;
+  SMS_MessageCenter *center;
   GSM_Error status;
 } D_SMSCenter;
 

@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   X G N O K I I
 
   A Linux/Unix GUI for Nokia mobile phones.
@@ -8,34 +10,6 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Id$
-  
-  $Log$
-  Revision 1.31  2001-11-14 10:46:12  pkot
-  Small cleanup with __unices__
-
-  Revision 1.30  2001/09/14 13:14:04  pkot
-  Xgnokii WM fixes (Martin Lucina)
-
-  Revision 1.29  2001/03/23 08:24:56  ja
-  New preview for 6210 in xgnokii's logos module.
-
-  Revision 1.28  2001/03/19 23:43:47  pkot
-  Solaris/BSD '#if defined' cleanup
-
-  Revision 1.27  2001/03/13 01:21:39  pkot
-  *BSD updates (Bert Driehuis)
-
-  Revision 1.26  2001/03/05 10:42:03  ja
-  Pavel Machek's vcard and finegrained indicators patch.
-
-  Revision 1.25  2001/02/12 15:13:46  chris
-  Fixed my bug in xgnokii_contacts.c and added <string.h> to tekram.c
-
-  Revision 1.24  2001/02/02 08:09:57  ja
-  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
-
-  
 */
 
 
@@ -1918,7 +1892,7 @@ static GtkWidget *CreateSaveQuestionDialog (GtkSignalFunc SaveFunc,
 static void OkExtPbkDialog (GtkWidget *w, gpointer data) {
 
   ExtPbkDialog *d=(ExtPbkDialog*)data;
-  GSM_NumberType numtype;
+  SMS_NumberType numtype;
   gint i, found=999;
   gchar *chars;
 
@@ -2708,7 +2682,7 @@ static bool ParseLine (GSM_PhonebookEntry *entry, gint *num, gchar *buf)
         return FALSE;
       if (i >= len)
         return FALSE;
-      entry->SubEntries[entry->SubEntriesCount].NumberType=(GSM_NumberType)strtol (s_num, &endptr, 10);
+      entry->SubEntries[entry->SubEntriesCount].NumberType=(SMS_NumberType)strtol (s_num, &endptr, 10);
       if (s_num == endptr)
         return FALSE;
       buf += (i + 1);

@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   X G N O K I I
 
   A Linux/Unix GUI for Nokia mobile phones.
@@ -8,13 +10,6 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Id$
-  
-  $Log$
-  Revision 1.12  2001-02-02 08:09:57  ja
-  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
-
-  
 */
 
 #ifndef XGNOKII_CONTACTS_H

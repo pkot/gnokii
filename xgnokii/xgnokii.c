@@ -10,49 +10,6 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Log$
-  Revision 1.39  2001-11-08 16:34:20  pkot
-  Updates to work with new libsms
-
-  Revision 1.38  2001/09/14 13:14:03  pkot
-  Xgnokii WM fixes (Martin Lucina)
-
-  Revision 1.37  2001/06/27 23:52:52  pkot
-  7110/6210 updates (Marian Jancar)
-
-  Revision 1.36  2001/06/20 21:27:36  pkot
-  IrDA patch (Marian Jancar)
-
-  Revision 1.35  2001/05/24 20:47:30  chris
-  More updating of 7110 code and some of xgnokii_lowlevel changed over.
-
-  Revision 1.34  2001/03/23 08:24:56  ja
-  New preview for 6210 in xgnokii's logos module.
-
-  Revision 1.33  2001/03/19 23:43:47  pkot
-  Solaris/BSD '#if defined' cleanup
-
-  Revision 1.32  2001/03/13 01:21:39  pkot
-  *BSD updates (Bert Driehuis)
-
-  Revision 1.31  2001/03/05 10:42:02  ja
-  Pavel Machek's vcard and finegrained indicators patch.
-
-  Revision 1.30  2001/01/29 15:22:20  machek
-  Use integer as bitfield instead of struct of int:1.
-
-  Be able to read phonebook saved in gnokii format from xgnokii.
-
-  Revision 1.29  2001/01/15 21:10:20  ja
-  Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
-
-  Revision 1.28  2000/12/20 11:49:25  ja
-  Bringing back to life smsd. It was broken after last Pawel update.
-
-  Revision 1.27  2000/12/19 16:18:21  pkot
-  configure script updates and added shared function for configfile reading
-
-  
 */
 
 #include <stdlib.h>  /* for getenv */
@@ -82,7 +39,7 @@
 #include "gsm-api.h"
 #include "cfgreader.h"
 #include "phones/nk7110.h"
-#include "phones/nk6110.h"
+#include "phones/nk6100.h"
 #include "phones/nk3110.h"
 #include "phones/nk2110.h"
 #include "xgnokii.h"
@@ -192,7 +149,7 @@ typedef struct {
   GtkWidget *number;
   GtkWidget *format;
   GtkWidget *validity;
-  GSM_MessageCenter smsSetting[MAX_SMS_CENTER];
+  SMS_MessageCenter smsSetting[MAX_SMS_CENTER];
 } SMSWidgets;
 
 typedef struct {
@@ -220,7 +177,7 @@ static struct ConfigDialogData
   GtkWidget *help;
 } configDialogData;
 
-static GSM_MessageCenter tempMessageSettings;
+static SMS_MessageCenter tempMessageSettings;
 
 
 static inline void Help1 (GtkWidget *w, gpointer data)
@@ -581,32 +538,32 @@ static void ParseSMSCenters (void)
 
     switch (configDialogData.sms.smsSetting[i].Format)
     {
-      case GSMF_Text:
+    case SMS_FText:
         row[2] = g_strdup (_("Text"));
         break;
 
-    case GSMF_Paging:
+    case SMS_FPaging:
         row[2] = g_strdup (_("Paging"));
         break;
 
-    case GSMF_Fax:
+    case SMS_FFax:
         row[2] = g_strdup (_("Fax"));
         break;
 
-    case GSMF_Email:
-    case GSMF_UCI:
+    case SMS_FEmail:
+    case SMS_FUCI:
         row[2] = g_strdup (_("E-Mail"));
         break;
 
-    case GSMF_ERMES:
+    case SMS_FERMES:
         row[2] = g_strdup (_("ERMES"));
         break;
 
-    case GSMF_X400:
+    case SMS_FX400:
         row[2] = g_strdup (_("X.400"));
         break;
 
-    case GSMF_Voice:
+    case SMS_FVoice:
         row[2] = g_strdup (_("Voice"));
         break;
 
@@ -617,27 +574,27 @@ static void ParseSMSCenters (void)
 
     switch (configDialogData.sms.smsSetting[i].Validity)
     {
-      case GSMV_1_Hour:
+      case SMS_V1H:
         row[3] = g_strdup (_("1 h"));
         break;
 
-      case GSMV_6_Hours:
+      case SMS_V6H:
         row[3] = g_strdup (_("6 h"));
         break;
 
-      case GSMV_24_Hours:
+      case SMS_V24H:
         row[3] = g_strdup (_("24 h"));
         break;
 
-      case GSMV_72_Hours:
+      case SMS_V72H:
         row[3] = g_strdup (_("72 h"));
         break;
 
-      case GSMV_1_Week:
+      case SMS_V1W:
         row[3] = g_strdup (_("1 week"));
         break;
 
-      case GSMV_Max_Time:
+      case SMS_VMax:
         row[3] = g_strdup (_("Max. time"));
         break;
 
@@ -1487,28 +1444,28 @@ static void ShowEditSMSSetDialog (GtkWidget *w, gpointer data)
     item = gtk_menu_item_new_with_label (_("Text"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetFormat),
-                        (gpointer) GSMF_Text);
+                        (gpointer) SMS_FText);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
     item = gtk_menu_item_new_with_label (_("Fax"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetFormat),
-                        (gpointer) GSMF_Fax);
+                        (gpointer) SMS_FFax);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
     item = gtk_menu_item_new_with_label (_("Paging"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetFormat),
-                        (gpointer) GSMF_Paging);
+                        (gpointer) SMS_FPaging);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
     item = gtk_menu_item_new_with_label (_("E-Mail"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetFormat),
-                        (gpointer) GSMF_Email);
+                        (gpointer) SMS_FEmail);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
@@ -1531,42 +1488,42 @@ static void ShowEditSMSSetDialog (GtkWidget *w, gpointer data)
     item = gtk_menu_item_new_with_label (_("Max. Time"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetValidity),
-                        (gpointer) GSMV_Max_Time);
+                        (gpointer) SMS_VMax);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
     item = gtk_menu_item_new_with_label (_("1 h"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetValidity),
-                        (gpointer) GSMV_1_Hour);
+                        (gpointer) SMS_V1H);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
     item = gtk_menu_item_new_with_label (_("6 h"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetValidity),
-                        (gpointer) GSMV_6_Hours);
+                        (gpointer) SMS_V6H);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
     item = gtk_menu_item_new_with_label (_("24 h"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetValidity),
-                        (gpointer) GSMV_24_Hours);
+                        (gpointer) SMS_V24H);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
     item = gtk_menu_item_new_with_label (_("72 h"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetValidity),
-                        (gpointer) GSMV_72_Hours);
+                        (gpointer) SMS_V72H);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
     item = gtk_menu_item_new_with_label (_("1 week"));
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetValidity),
-                        (gpointer) GSMV_1_Week);
+                        (gpointer) SMS_V1W);
     gtk_widget_show (item);
     gtk_menu_append (GTK_MENU (menu), item);
 
@@ -1586,22 +1543,22 @@ static void ShowEditSMSSetDialog (GtkWidget *w, gpointer data)
   switch (configDialogData.sms.smsSetting
           [GPOINTER_TO_INT(GTK_CLIST (SMSClist)->selection->data)].Format)
   {
-    case GSMF_Text:
+    case SMS_FText:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.format),
                                    0);
       break;
 
-    case GSMF_Paging:
+    case SMS_FPaging:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.format),
                                    2);
       break;
 
-    case GSMF_Fax:
+    case SMS_FFax:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.format),
                                    1);
       break;
 
-    case GSMF_Email:
+    case SMS_FEmail:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.format),
                                    3);
       break;
@@ -1614,32 +1571,32 @@ static void ShowEditSMSSetDialog (GtkWidget *w, gpointer data)
   switch (configDialogData.sms.smsSetting
           [GPOINTER_TO_INT(GTK_CLIST (SMSClist)->selection->data)].Validity)
   {
-    case GSMV_1_Hour:
+    case SMS_V1H:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.validity),
                                    1);
       break;
 
-    case GSMV_6_Hours:
+    case SMS_V6H:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.validity),
                                    2);
       break;
 
-    case GSMV_24_Hours:
+    case SMS_V24H:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.validity),
                                    3);
       break;
 
-    case GSMV_72_Hours:
+    case SMS_V72H:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.validity),
                                    4);
       break;
 
-    case GSMV_1_Week:
+    case SMS_V1W:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.validity),
                                    5);
       break;
 
-    case GSMV_Max_Time:
+    case SMS_VMax:
       gtk_option_menu_set_history (GTK_OPTION_MENU (configDialogData.sms.validity),
                                    0);
       break;
@@ -2436,23 +2393,8 @@ static void ReadConfig (void)
   
 #ifndef WIN32
   xgnokiiConfig.xgnokiidir = DefaultXGnokiiDir;
-
-  if (strstr(FB38_Information.Models, xgnokiiConfig.model) != NULL)
-  {
-    max_phonebook_number_length = 30;
-    max_phonebook_sim_number_length = 30;
-  }
-  else 
 #endif
-  if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL)
-  {
-    max_phonebook_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
-    max_phonebook_sim_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
-  }
-  else
-  {
-    max_phonebook_number_length = max_phonebook_sim_number_length = GSM_MAX_PHONEBOOK_NUMBER_LENGTH;
-  }
+  max_phonebook_number_length = max_phonebook_sim_number_length = GSM_MAX_PHONEBOOK_NUMBER_LENGTH;
 
   xgnokiiConfig.callerGroups[0] = xgnokiiConfig.callerGroups[1] =
   xgnokiiConfig.callerGroups[2] = xgnokiiConfig.callerGroups[3] =

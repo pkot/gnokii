@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+
   X G N O K I I
 
   A Linux/Unix GUI for Nokia mobile phones.
@@ -8,15 +10,12 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sun May 14 2000
-  Modified by Jan Derfinak
-
 */
 
 #include <string.h>
 #include <gtk/gtk.h>
 #include "misc.h"
-#include "fbus-6110.h"
+#include "links/fbus.h"
 #include "xgnokii_common.h"
 #include "xgnokii.h"
 #include "xgnokii_lowlevel.h"
@@ -190,7 +189,7 @@ void GUI_ShowXkeyb (void)
 
 static gint ButtonEvent (GtkWidget *widget, GdkEventButton *event)
 {
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x42, 0x01, 0x00, 0x01};
+  unsigned char req[] = {FBUS_FRAME_HEADER, 0x42, 0x01, 0x00, 0x01};
   register gint i = 0;
 
   if (button == NULL)

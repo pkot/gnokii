@@ -10,45 +10,6 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Log$
-  Revision 1.19  2001-09-14 13:09:26  pkot
-  Xgnokii calendar updates
-
-  Revision 1.18  2001/06/20 21:27:36  pkot
-  IrDA patch (Martin Jancar)
-
-  Revision 1.17  2001/06/10 11:40:06  machek
-  xgnokii converted to new structure w.r.t. SMS messages.
-
-  Revision 1.16  2001/05/24 20:47:31  chris
-  More updating of 7110 code and some of xgnokii_lowlevel changed over.
-
-  Revision 1.15  2001/03/23 08:24:57  ja
-  New preview for 6210 in xgnokii's logos module.
-
-  Revision 1.14  2001/03/21 23:36:09  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.13  2001/03/05 10:42:03  ja
-  Pavel Machek's vcard and finegrained indicators patch.
-
-  Revision 1.12  2001/02/02 08:09:57  ja
-  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
-
-  Revision 1.11  2001/01/29 15:22:20  machek
-  Use integer as bitfield instead of struct of int:1.
-
-  Be able to read phonebook saved in gnokii format from xgnokii.
-
-  Revision 1.10  2001/01/17 02:54:56  chris
-  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
-  I can now edit my phonebook in xgnokii but it is 'work in progress'.
-
-  Revision 1.9  2001/01/15 21:10:20  ja
-  Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
-
-  
 */
 
 #include <unistd.h>
@@ -58,8 +19,8 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
-#include "fbus-6110.h"
-#include "fbus-3810.h"
+//#include "6110.h"
+//#include "fbus-3810.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii.h"
 #include "gsm-statemachine.h"
@@ -307,7 +268,7 @@ static void RefreshSMS (const gint number)
     GSM_DataClear(&gdat);
     msg = g_malloc (sizeof (GSM_SMSMessage));
     msg->MemoryType = GMT_SM;
-    msg->Location = ++i;
+    msg->Number = ++i;
     gdat.SMSMessage = msg;
 
     if ((error = SM_Functions(GOP_GetSMS, &gdat, &statemachine)) == GE_NONE)
@@ -853,13 +814,14 @@ static gint A_SetAlarm (gpointer data)
 
 static gint A_SendKeyStroke (gpointer data)
 {
-  gchar *buf = (gchar *) data;
+  /*  gchar *buf = (gchar *) data;*/
 
-  if (buf) 
+  /* This is wrong. FIX IT */
+  /*  if (buf) 
   {
     FB61_TX_SendMessage(0x07, 0x0c, buf);
     g_free (buf);
-  }
+    }*/
 
   return (0);
 }
@@ -967,7 +929,7 @@ void *GUI_Connect (void *a)
   GSM_BatteryUnits batt_units = GBU_Percentage;
 
   GSM_DateTime Alarm;
-  GSM_SMSStatus SMSStatus = {0, 0};
+  GSM_SMSMemoryStatus SMSStatus = {0, 0};
   gchar number[INCALL_NUMBER_LENGTH];
   PhoneEvent *event;
   GSM_Error error;
@@ -1030,7 +992,7 @@ void *GUI_Connect (void *a)
 
     if (SM_Functions(GOP_GetSMSStatus,&data,&statemachine) == GE_NONE)
     {
-      if (phoneMonitor.sms.unRead != SMSStatus.UnRead ||
+      if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
           phoneMonitor.sms.number != SMSStatus.Number)
       {
         phoneMonitor.working = _("Refreshing SMSes...");
@@ -1038,7 +1000,7 @@ void *GUI_Connect (void *a)
         phoneMonitor.working = NULL;
       }
 
-      phoneMonitor.sms.unRead = SMSStatus.UnRead;
+      phoneMonitor.sms.unRead = SMSStatus.Unread;
     }
 
     if (SM_Functions(GOP_GetIncomingCallNr,&data,&statemachine) == GE_NONE)

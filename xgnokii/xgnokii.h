@@ -47,7 +47,7 @@ typedef struct {
   gchar *maxSIMLen;  /* Max length of names on SIM card */
   gchar *maxPhoneLen;/* Max length of names in phone */
   gchar *locale;
-  GSM_MessageCenter smsSetting[MAX_SMS_CENTER];
+  SMS_MessageCenter smsSetting[MAX_SMS_CENTER];
   UserInf user;
   gchar *callerGroups[6];
   gint   smsSets:4;
