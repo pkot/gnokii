@@ -74,6 +74,8 @@
     o fix incorrect longoptions values for sendsms(); reported
       by Martin Kozelsky                                  (Pawel Kot)
     o gnokii --listnetworks added                    (BORBELY Zoltan)
+    o correctly set memory_type_string in writephonebook()
+                                                    (Jan de Cuveland)
  * nokia-decoding updates:
     o name can be assigned to both bitmap and phonebook entry
                                                        (Markus Plail)

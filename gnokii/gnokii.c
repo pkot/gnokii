@@ -3080,7 +3080,7 @@ static int getphonebook(int argc, char *argv[])
 	return 0;
 }
 
-static char * decodephonebook(GSM_PhonebookEntry *entry, char *OLine)
+static char *decodephonebook(GSM_PhonebookEntry *entry, char *OLine)
 {
 	char *Line = OLine;
 	char *ptr;
@@ -3205,7 +3205,7 @@ static int writephonebook(int argc, char *args[])
 		if (!vcard) {
 			if (!GetLine(stdin, Line, MAX_INPUT_LINE_LEN))
 				break;
-			if (decodephonebook(&entry, OLine))
+			if ((memory_type_string = decodephonebook(&entry, OLine)) == NULL)
 				continue;
 		} else {
 			if (vcard2phonebook(stdin, &entry))
