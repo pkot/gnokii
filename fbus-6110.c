@@ -2631,6 +2631,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       fprintf(stdout, _("Unknown message!\n"));
 #endif /* DEBUG */
 
+      break;
+
     }
 
     break;
