@@ -1331,7 +1331,7 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *message, int 
 			case 0x81: /* SMSC name */
 				char_unicode_decode(data->message_center->name,
 					      message + offset + 4,
-					      message[offset + 2] << 1);
+					      message[offset + 2]);
 				break;
 			default:
 				dprintf("Unknown subtype %02x. Ignoring\n", message[offset]);

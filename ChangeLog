@@ -34,6 +34,7 @@
  * 6510 series updates
     o disable Nokia 6100 support: IT IS KNOWN TO BREAK PHONES
                                                         (Pawel Kot)
+    o getsmsc will use the correct smsc name len   (BORBELY Zoltan)
  * gnokii updates
     o playringtone won't play an endless note      (BORBELY Zoltan)
 
