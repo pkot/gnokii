@@ -93,6 +93,7 @@ static AT_SendFunctionType AT_Functions[GOPAT_Max];
 static GSM_IncomingFunctionType IncomingFunctions[GOPAT_Max];
 static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_Init, NULL, Reply },
+	{ GOP_Terminate, PGEN_Terminate, Reply }, /* Replyfunction must not be NULL */
 	{ GOP_GetModel, AT_GetModel, ReplyIdentify },
 	{ GOP_GetRevision, AT_GetRevision, ReplyIdentify },
 	{ GOP_GetImei, AT_GetIMEI, ReplyIdentify },

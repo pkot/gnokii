@@ -136,54 +136,21 @@ int device_script(int fd, const char *section)
 	/* NOTREACHED */
 }
 
-int serial_close_all_openfds[0x10];	/* -1 when entry not used, fd otherwise */
+
 int serial_close(int fd);
 
-void serial_close_all(void)
-{
-	int i;
-
-	dprintf("serial_close_all() executed\n");
-	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
-		if (serial_close_all_openfds[i] != -1)
-			serial_close(serial_close_all_openfds[i]);
-}
-
-#if 0	/* Disabled for now as atexit() functions are then called multiple times for pthreads! */
-static void unixserial_interrupted(int signo)
-{
-	exit(EXIT_FAILURE);
-	/* NOTREACHED */
-}
-#endif
 
 /* Open the serial port and store the settings. */
 int serial_open(const char *file, int oflag)
 {
 	int fd;
-	int retcode, i;
-	static bool atexit_registered = false;
-
-	if (!atexit_registered) {
-		memset(serial_close_all_openfds, -1, sizeof(serial_close_all_openfds));
-#if 0	/* Disabled for now as atexit() functions are then called multiple times for pthreads! */
-		signal(SIGINT, unixserial_interrupted);
-#endif
-		atexit(serial_close_all);
-		atexit_registered = true;
-	}
+	int retcode;
 
 	fd = open(file, oflag);
 	if (fd == -1) {
 		perror("Gnokii serial_open: open");
 		return (-1);
 	}
-
-	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
-		if (serial_close_all_openfds[i] == -1 || serial_close_all_openfds[i] == fd) {
-			serial_close_all_openfds[i] = fd;
-			break;
-		}
 
 	retcode = tcgetattr(fd, &serial_termios);
 	if (retcode == -1) {
@@ -199,12 +166,6 @@ int serial_open(const char *file, int oflag)
 /* Close the serial port and restore old settings. */
 int serial_close(int fd)
 {
-	int i;
-
-	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
-		if (serial_close_all_openfds[i] == fd)
-			serial_close_all_openfds[i] = -1;		/* fd closed */
-
 	/* handle config file disconnect_script:
 	 */
 	if (device_script(fd, "disconnect_script") == -1)

@@ -36,10 +36,12 @@
 #define __phones_generic_h
 
 #include "gsm-error.h"
+#include "gsm-statemachine.h"
 
 /* Generic Functions */
 
 GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length);
+GSM_Error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state);
 
 
 #endif

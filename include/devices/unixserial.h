@@ -51,9 +51,6 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n);
 
 int serial_select(int fd, struct timeval *timeout);
 
-extern int serial_close_all_openfds[0x10];
-extern void serial_close_all(void);
 extern int device_script(int fd, const char *section);
-extern void unixserial_interrupted(int signo);
 
 #endif  /* __devices_unixserial_h */

@@ -35,6 +35,7 @@
 #include "gsm-common.h"
 #include "gsm-api.h"
 #include "gsm-sms.h"
+#include "cfgreader.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii.h"
 
@@ -67,6 +68,7 @@ static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
 
 static GSM_Data gdat;
+static char *lockfile = NULL;
 GSM_Statemachine statemachine;
 /* FIXME - don't really know what should own the statemachine in */
 /* the xgnokii scheme of things - Chris */
@@ -211,10 +213,19 @@ static GSM_Error InitModelInf(void)
 }
 
 
+static void busterminate(void)
+{
+	SM_Functions(GOP_Terminate, NULL, &statemachine);
+	if (lockfile) unlock_device(lockfile);
+}
+
+
 static GSM_Error fbusinit(bool enable_monitoring)
 {
 	static GSM_Error error = GE_NOLINK;
 	GSM_ConnectionType connection = GCT_Serial;
+	static bool atexit_registered = false;
+	char *aux;
 
 	if (!strcmp(xgnokiiConfig.connection, "infrared"))
 		connection = GCT_Infrared;
@@ -224,6 +235,22 @@ static GSM_Error fbusinit(bool enable_monitoring)
 		connection = GCT_TCP;
 	if (!strcmp(xgnokiiConfig.connection, "dau9p"))
 		connection = GCT_DAU9P;
+
+	/* register cleanup function */
+	if (!atexit_registered) {
+		atexit_registered = true;
+		atexit(busterminate);
+	}
+
+	aux = CFG_Get(CFG_Info, "global", "use_locking");
+	/* Defaults to 'no' */
+	if (aux && !strcmp(aux, "yes")) {
+		lockfile = lock_device(xgnokiiConfig.port);
+		if (lockfile == NULL) {
+			fprintf(stderr, _("Lock file error. Exiting\n"));
+			exit(1);
+		}
+	}
 
 	/* Initialise the code for the GSM interface. */
 

@@ -187,6 +187,8 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	switch (op) {
 	case GOP_Init:
 		return P7110_Initialise(state);
+	case GOP_Terminate:
+		return PGEN_Terminate(data, state);
 	case GOP_GetModel:
 		return P7110_GetModel(data, state);
 	case GOP_GetRevision:

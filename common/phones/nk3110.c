@@ -172,6 +172,8 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	switch (op) {
 	case GOP_Init:
 		return P3110_Initialise(state);
+	case GOP_Terminate:
+		return PGEN_Terminate(data, state);
 	case GOP_GetModel:
 	case GOP_GetRevision:
 	case GOP_GetImei:

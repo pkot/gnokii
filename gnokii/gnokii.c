@@ -305,11 +305,10 @@ static int usage(FILE *f)
 		     "          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 		));
 #endif
-	if (lockfile) unlock_device(lockfile);
 	exit(-1);
 }
 
-/* fbusinit is the generic function which waits for the FBUS link. The limit
+/* businit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
 
 static GSM_Statemachine State;
@@ -318,11 +317,19 @@ static GSM_CBMessage CBQueue[16];
 static int cb_ridx = 0;
 static int cb_widx = 0;
 
-static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
+
+static void busterminate(void)
+{
+	SM_Functions(GOP_Terminate, NULL, &State);
+	if (lockfile) unlock_device(lockfile);
+}
+
+static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 {
 	GSM_Error error;
 	GSM_ConnectionType connection = GCT_Serial;
 	char *aux;
+	static bool atexit_registered = false;
 
 	GSM_DataClear(&data);
 
@@ -330,7 +337,13 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 	if (!strcasecmp(Connection, "infrared")) connection = GCT_Infrared;
 	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
 	if (!strcasecmp(Connection, "tcp"))      connection = GCT_TCP;
-	
+
+	/* register cleanup function */
+	if (!atexit_registered) {
+		atexit_registered = true;
+		atexit(busterminate);
+	}
+	/* signal(SIGINT, bussignal); */
 
 	aux = CFG_Get(CFG_Info, "global", "use_locking");
 	/* Defaults to 'no' */
@@ -338,7 +351,7 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 		lockfile = lock_device(Port);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
-			exit(-1);
+			exit(1);
 		}
 	}
 
@@ -346,7 +359,6 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 	error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler, &State);
 	if (error != GE_NONE) {
 		fprintf(stderr, _("Telephone interface init failed! Quitting.\n"));
-		if (lockfile) unlock_device(lockfile);
 		exit(2);
 	}
 }
@@ -396,8 +408,7 @@ static void sendsms_usage()
 			  "   --long n    - read n bytes from the input; default is 160\n"
 			  "\n"
 		));
-	if (lockfile) unlock_device(lockfile);
-	exit(-1);
+	exit(1);
 }
 
 /* Send  SMS messages. */
@@ -3714,7 +3725,7 @@ int main(int argc, char *argv[])
 
 	/* Read config file */
 	if (readconfig(&model, &Port, &Initlength, &Connection, &BinDir) < 0) {
-		exit(-1);
+		exit(1);
 	}
 
 	/* Handle command line arguments. */
@@ -3756,7 +3767,7 @@ int main(int argc, char *argv[])
 #endif
 
 		/* Initialise the code for the GSM interface. */
-		if (c != OPT_VIEWLOGO) fbusinit(NULL);
+		if (c != OPT_VIEWLOGO) businit(NULL);
 
 		switch(c) {
 		case OPT_MONITOR:
@@ -3904,11 +3915,9 @@ int main(int argc, char *argv[])
 			break;
 
 		}
-		if (lockfile) unlock_device(lockfile);
 		exit(rc);
 	}
 
 	fprintf(stderr, _("Wrong number of arguments\n"));
-	if (lockfile) unlock_device(lockfile);
-	exit(-1);
+	exit(1);
 }

@@ -49,7 +49,6 @@
 
 #include <termios.h>
 #include "devices/tcp.h"
-#include "devices/unixserial.h"
 
 #ifdef HAVE_SYS_IOCTL_COMPAT_H
 #  include <sys/ioctl_compat.h>
@@ -68,21 +67,10 @@
 int tcp_open(const char *file)
 {
 	int fd;
-	int i;
 	struct sockaddr_in addr;
-	static bool atexit_registered = false;
 	char *filedup,*portstr,*end;
 	unsigned long portul;
 	struct hostent *hostent;
-
-	if (!atexit_registered) {
-		memset(serial_close_all_openfds, -1, sizeof(serial_close_all_openfds));
-#if 0	/* Disabled for now as atexit() functions are then called multiple times for pthreads! */
-		signal(SIGINT, unixserial_interrupted);
-#endif
-		atexit(serial_close_all);
-		atexit_registered=true;
-	}
 
 	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1) {
@@ -125,23 +113,11 @@ int tcp_open(const char *file)
 		goto fail_close;
 	}
 
-	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
-		if (serial_close_all_openfds[i] == -1 || serial_close_all_openfds[i] == fd) {
-			serial_close_all_openfds[i] = fd;
-			break;
-		}
-
 	return fd;
 }
 
 int tcp_close(int fd)
 {
-	int i;
-
-	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
-		if (serial_close_all_openfds[i] == fd)
-			serial_close_all_openfds[i] = -1;		/* fd closed */
-
 	/* handle config file disconnect_script:
 	 */
 	if (device_script(fd,"disconnect_script") == -1)

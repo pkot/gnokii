@@ -1228,6 +1228,10 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		state->Link.Loop = link_Loop;
 		err = Initialise(state);
 		break;
+	case GOP_Terminate:
+		/* Request termination of thread */
+		RequestTerminate = true;
+		return PGEN_Terminate(data, state);
 	case GOP_Identify:
 	case GOP_GetModel:
 	case GOP_GetRevision:

@@ -245,6 +245,8 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	switch (op) {
 	case GOP_Init:
 		return Initialise(state);
+	case GOP_Terminate:
+		return PGEN_Terminate(data, state);
 	case GOP_GetSpeedDial:
 		return GetSpeedDial(data, state);
 	case GOP_SetSpeedDial:

@@ -53,6 +53,7 @@ char *Port;		/* Serial port from .gnokiirc file */
 char *Initlength;	/* Init length from .gnokiirc file */
 char *Connection;	/* Connection type from .gnokiirc file */
 char *BinDir;		/* Directory of the mgnokiidev command */
+char *lockfile = NULL;
 bool GTerminateThread;
 
 /* Local variables */
@@ -83,12 +84,21 @@ static void usage()
 "          --debug           uses stdin/stdout for virtual modem comms.\n"));
 }
 
+/* cleanup function registered by atexit() and called at exit() */
+static void busterminate(void)
+{
+	VM_Terminate();
+	if (lockfile) unlock_device(lockfile);
+}
+
 /* Main function - handles command line arguments, passes them to separate
    functions accordingly. */
 
 int main(int argc, char *argv[])
 {
 	GSM_ConnectionType connection = GCT_Serial;
+	char *aux;
+	static bool atexit_registered = false;
 
 	/* For GNU gettext */
 #ifdef USE_NLS
@@ -123,6 +133,22 @@ int main(int argc, char *argv[])
 		connection = GCT_Infrared;
 	if (!strcmp(Connection, "tcp"))
 		connection = GCT_TCP;
+
+	/* register cleanup function */
+	if (!atexit_registered) {
+		atexit_registered = true;
+		atexit(busterminate);
+	}
+
+	aux = CFG_Get(CFG_Info, "global", "use_locking");
+	/* Defaults to 'no' */
+	if (aux && !strcmp(aux, "yes")) {
+		lockfile = lock_device(Port);
+		if (lockfile == NULL) {
+			fprintf(stderr, _("Lock file error. Exiting\n"));
+			exit(1);
+		}
+	}
 
 	GTerminateThread = false;
 

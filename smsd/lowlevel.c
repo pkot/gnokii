@@ -41,6 +41,7 @@
 #include "phones/nk2110.h"
 #include "smsd.h"
 #include "lowlevel.h"
+#include "cfgreader.h"
 
 pthread_t monitor_th;
 PhoneMonitor phoneMonitor;
@@ -51,6 +52,8 @@ pthread_cond_t  sendSMSCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
 static GSM_Statemachine sm;
+static char *lockfile = NULL;
+
 
 inline void InsertEvent (PhoneEvent *event)
 {
@@ -119,16 +122,42 @@ static GSM_Error InitModelInf (void)
 }
 
 
+static void busterminate(void)
+{
+	SM_Functions(GOP_Terminate, NULL, &sm);
+	if (lockfile) unlock_device(lockfile);
+}
+
+
 static GSM_Error fbusinit (bool enable_monitoring)
 {
   GSM_Error error = GE_NOLINK;
   GSM_ConnectionType connection = GCT_Serial;
+  char *aux;
+  static bool atexit_registered = false;
   
 
   if (!strcmp(smsdConfig.connection, "infrared"))
     connection = GCT_Infrared;
   if (!strcmp(smsdConfig.connection, "tcp"))
     connection = GCT_TCP;
+
+	/* register cleanup function */
+	if (!atexit_registered) {
+		atexit_registered = true;
+		atexit(busterminate);
+	}
+	/* signal(SIGINT, bussignal); */
+
+	aux = CFG_Get(CFG_Info, "global", "use_locking");
+	/* Defaults to 'no' */
+	if (aux && !strcmp(aux, "yes")) {
+		lockfile = lock_device(smsdConfig.port);
+		if (lockfile == NULL) {
+			fprintf(stderr, _("Lock file error. Exiting\n"));
+			exit(1);
+		}
+	}
 
   /* Initialise the code for the GSM interface. */     
 

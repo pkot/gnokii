@@ -133,6 +133,8 @@ static GSM_Error Pfake_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	switch (op) {
 	case GOP_Init:
 		return Pfake_Initialise(state);
+	case GOP_Terminate:
+		return GE_NONE;
 	case GOP_SendSMS:
 		return AT_WriteSMS(data, state, "???");
 	case GOP_GetSMSCenter:

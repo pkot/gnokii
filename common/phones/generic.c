@@ -38,8 +38,9 @@
 
 #include "misc.h"
 #include "gsm-common.h"
-#include "phones/generic.h"
 #include "gsm-statemachine.h"
+#include "phones/generic.h"
+#include "links/utils.h"
 
 /* If we do not support a message type, print out some debugging info */
 GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length)
@@ -49,3 +50,9 @@ GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int lengt
 
 	return GE_NONE;
 }
+
+GSM_Error PGEN_Terminate(GSM_Data *data, GSM_Statemachine *state)
+{
+	return LINK_Terminate(state);
+}
+

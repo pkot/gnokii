@@ -108,7 +108,9 @@ pthread_t Thread;
 bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode, bool GSMInit)
 {
 	int rtn;
-	static GSM_Statemachine sm;
+
+	static GSM_Statemachine State;
+	sm = &State;
 
 	CommandMode = true;
 
@@ -120,7 +122,7 @@ bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 
 	if (GSMInit) {
 		dprintf("Initialising GSM\n");
-		if ((VM_GSMInitialise(model, port, initlength, connection, &sm) != GE_NONE)) {
+		if ((VM_GSMInitialise(model, port, initlength, connection, sm) != GE_NONE)) {
 			fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
 			return (false);
 		}
@@ -132,7 +134,7 @@ bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 		return (false);
 	}
 
-	if (ATEM_Initialise(PtyRDFD, PtyWRFD, &sm) != true) {
+	if (ATEM_Initialise(PtyRDFD, PtyWRFD, sm) != true) {
 		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n"));
 		return (false);
 	}
@@ -198,6 +200,9 @@ static void VM_ThreadLoop(void)
 			}
 		}
 	}
+
+	/* Shutdown device */
+	SM_Functions(GOP_Terminate, NULL, sm);
 }
 
 /* Application should call VM_Terminate to shut down

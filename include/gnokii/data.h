@@ -111,6 +111,7 @@ typedef struct {
 
 typedef enum {
 	GOP_Init,
+	GOP_Terminate,
 	GOP_GetModel,
 	GOP_GetRevision,
 	GOP_GetImei,
