@@ -917,7 +917,7 @@ static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 10);
 }
 
-static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error ValidateSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
 
@@ -946,6 +946,16 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	} else {
 		data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
 	}
+	return GE_NONE;
+}
+
+
+static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Error error;
+
+	error = ValidateSMS(data, state);
+	if (error != GE_NONE) return error;
 
 	return P7110_GetSMSnoValidate(data, state);
 }
@@ -954,9 +964,14 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P7110_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x00, 0x01};
+	GSM_Error error;
 
 	if (!data->RawSMS) return GE_INTERNALERROR;
 	dprintf("Removing SMS %d\n", data->RawSMS->Number);
+
+	error = ValidateSMS(data, state);
+	if (error != GE_NONE) return error;
+
 	req[4] = GetMemoryType(data->RawSMS->MemoryType);
 	req[5] = (data->RawSMS->Number & 0xff00) >> 8;
 	req[6] = data->RawSMS->Number & 0x00ff;
