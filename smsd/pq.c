@@ -23,13 +23,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
-  & Ján Derfiòák <ja@mail.upjs.sk>.
+  & Jan Derfinak <ja@mail.upjs.sk>.
   
   This file is a module to smsd for PostgreSQL db server.
 
 */
 
 #include <string.h>
+#include <stdlib.h>
 #include <glib.h>
 #include <libpq-fe.h>
 #include "smsd.h"
@@ -137,7 +138,7 @@ void DB_Look (void)
   res1 = PQexec (connOut, "BEGIN");
   PQclear (res1);
 
-  g_string_sprintf (buf, "SELECT id, number, text FROM outbox \
+  g_string_sprintf (buf, "SELECT id, number, text, dreport FROM outbox \
                           WHERE processed='f' FOR UPDATE");
 
   res1 = PQexec (connOut, buf->str);
@@ -158,7 +159,7 @@ void DB_Look (void)
     
     gn_sms_default_submit (&sms);
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
-    sms.delivery_report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
+    sms.delivery_report = atoi (PQgetvalue (res1, i, 3));
 
     strncpy (sms.remote.number, PQgetvalue (res1, i, 1), sizeof (sms.remote.number) - 1);
     sms.remote.number[sizeof(sms.remote.number) - 1] = '\0';

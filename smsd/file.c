@@ -196,7 +196,7 @@ void DB_Look (void)
      
     fclose (smsFile);
     
-    sms.delivery_report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
+//    sms.delivery_report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
     if (sms.remote.number[0] == '+')
       sms.remote.type = GN_GSM_NUMBER_International;

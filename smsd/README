@@ -1,3 +1,8 @@
+NOTE: The database format from version 1.0 to 1.1 changed! You must add column
+dreport to outbox table.
+
+
+
 INTRODUCTION
 
 The SMSD (SMS daemon) program is intended for receiving and sending SMS's.
@@ -33,6 +38,8 @@ processed      - new SMS must have this attribut set to FALSE.
 error          - This attribute contains return value of SendSMS function.
                  For explanation of numeric values see gsm-error.h in gnokii
                  source.                 
+dreport        - request for delivery report per message. Possible values
+                 are 0 for no delivery report, 1 for delivery report.
 
 SMSD is multi threaded program. If you list processes you will see more then
 one instance of smsd.
@@ -87,10 +94,6 @@ Options:
 -c, --host db_hostname
 	Specify database server host name.
 
--r, --reports
-	By default smsd does not receive or send delivery reports. You can
-	change this behaviour with this option.
- 
 -m, --module db_module
 	Specify which module to use for connection to DB server.
 	Currently supported are pq for PostgreSQL and mysql for MySQL.
@@ -100,6 +103,14 @@ Options:
 	in libdir for file libpq.so (for mysql - libmysql.so). Do not
 	interchange this plugins with default SQL libraries from database
 	distribution!
+
+-f, --logfile file
+	If used, smsd will monitor sms traffic to file "file". File is
+	reopened and closed for every message, you can simply rename or
+	delete it if you want rotate logs.
+
+-v, --version
+	Shows smsd version.
 
 -h, --help
 	Shows short help.
@@ -116,9 +127,13 @@ compile module for your DB server.
 
 For example:
 (in gnokii directory)
-autoheader
-autoconf
+gettextize                # only for CVS copies
+autoconf                  # only for CVS copies
+autoheader                # only for CVS copies
 ./configure
+[ If you use latest Red Hat with new (0.11) gettext version ]
+[ run autogen.sh with configure options instead of the      ]
+[ above commands. It will do all needed things.             ]
 cd smsd
 vi Makefile (edit paths in "DB Modules" section)
 make
@@ -126,13 +141,6 @@ make libpq.so OR make libmysql.so OR make libfile.so
 make install
 
 SMSD shares gnokii's runtime configuration file and libgnokii. 
-
-
-
-NOTES
-
-In some distributions of MySQL you need to link zlib with smsd or db module.
-Please add '-lz' to Makefile if smsd cannot load libmysql.so.
 
 
 					Jan Derfinak <ja@mail.upjs.sk>

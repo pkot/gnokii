@@ -1,0 +1,7 @@
+From: Peter Kolmisoppi
+
+Hey Jan!
+
+I just wanted to point out to you that under Tru64 there is something called
+"SysMan Station Daemon" which has "smsd" for shortname.
+So, 'killall -HUP smsd' under tru64 would not be a good idea for people.

@@ -23,13 +23,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
-  & Ján Derfiòák <ja@mail.upjs.sk>.
+  & Jan Derfinak <ja@mail.upjs.sk>.
 
 */
 
+#include <stdio.h>
 #include <string.h>
 #include <pthread.h>
 #include <getopt.h>
+#include <time.h>
 #include <dlfcn.h>
 
 #ifndef WIN32
@@ -153,16 +155,24 @@ gint LoadDB (void)
 }
 
 
+static void Version (void)
+{
+  g_print ("\nsmsd - version 1.1-cvs		(20030209)\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n");
+}
+
+
 static void Usage (gchar *p)
 {
+  Version ();
   g_print (_("\nUsage:  %s [options]\n"
-             "            -u, --user db_username OR action if -m file\n" 
-             "            -p, --password db_password\n" 
-             "            -d, --db db_name\n" 
-             "            -c, --host db_hostname OR spool directory if -m file\n" 
-             "            -r, --reports\n" 
-             "            -m, --module db_module (pq, mysql, file)\n" 
-             "            -l, --libdir path_to_db_module\n" 
+             "            -u, --user db_username OR action if -m file\n"
+             "            -p, --password db_password\n"
+             "            -d, --db db_name\n"
+             "            -c, --host db_hostname OR spool directory if -m file\n"
+             "            -m, --module db_module (pq, mysql, file)\n"
+             "            -l, --libdir path_to_db_module\n"
+             "            -f, --logfile file\n"
+             "            -v, --version\n"
              "            -h, --help\n"), p);
 }
 
@@ -175,6 +185,7 @@ static void ReadConfig (gint argc, gchar *argv[])
   connection.host = g_strdup ("");
   smsdConfig.dbMod = g_strdup ("pq");
   smsdConfig.libDir = g_strdup (MODULES_DIR);
+  smsdConfig.logFile = NULL;
   smsdConfig.smsSets = 0;
 
   while (1)
@@ -187,12 +198,14 @@ static void ReadConfig (gint argc, gchar *argv[])
       {"password", 1, 0, 'p'},
       {"db", 1, 0, 'd'},
       {"host", 1, 0, 'c'},
-      {"reports", 0, 0, 'r'},
       {"module", 1, 0, 'm'},
-      {"libdir", 1, 0, 'l'}
+      {"libdir", 1, 0, 'l'},
+      {"logfile", 1, 0, 'f'},
+      {"version", 0, 0, 'v'},
+      {"help", 0, 0, 'h'}
     };
     
-    c = getopt_long (argc, argv, "u:p:d:c:rm:l:h", longOptions, &optionIndex);
+    c = getopt_long (argc, argv, "u:p:d:c:m:l:f:vh", longOptions, &optionIndex);
     if (c == EOF)
       break;
     switch (c)
@@ -221,10 +234,6 @@ static void ReadConfig (gint argc, gchar *argv[])
         memset (optarg, 'x', strlen (optarg));
         break;
         
-      case 'r':
-        smsdConfig.smsSets = SMSD_READ_REPORTS;
-        break;
-      
       case 'm':
         g_free (smsdConfig.dbMod);
         smsdConfig.dbMod = g_strdup (optarg);
@@ -235,14 +244,25 @@ static void ReadConfig (gint argc, gchar *argv[])
         smsdConfig.libDir = g_strdup (optarg);
         break;
 
-        case 'h':
-        case '?':
-          Usage (argv[0]);
-          exit (1);
-          break;
+      case 'f':
+        if (smsdConfig.logFile)
+          g_free (smsdConfig.logFile);
+        smsdConfig.logFile = g_strdup (optarg);
+        break;
 
-        default:
-          g_print ("getopt returned 0%o\n", c);
+      case 'v':
+        Version ();
+        exit (0);
+        break;
+
+      case 'h':
+      case '?':
+        Usage (argv[0]);
+        exit (1);
+        break;
+
+      default:
+        g_print ("getopt returned 0%o\n", c);
     }
   }
   
@@ -314,6 +334,27 @@ gint WriteSMS (gn_sms *sms)
   error = m->status;
   g_free (m);
 
+  if (smsdConfig.logFile)
+  {
+    FILE *f;
+    time_t cas;
+    gchar buf[50];
+    
+    if ((f = fopen (smsdConfig.logFile, "a")) == NULL)
+      g_print (_("Warning: Cannot open file %s for appendig.\n"), smsdConfig.logFile);
+    else
+    {
+      cas = time (NULL);
+      strftime (buf, 50, "%e %b %Y %T", localtime (&cas));
+      fprintf (f, "%s: ", buf);
+      if (error)
+        fprintf (f, _("Sending to %s unsuccessful. Error %d\n"), sms->remote.number, error);
+      else
+        fprintf (f, _("Sending to %s successful.\n"), sms->remote.number);
+      fclose (f);
+    }
+  }
+
   return (error);
 }
 
@@ -322,16 +363,17 @@ static void ReadSMS (gpointer d, gpointer userData)
 {
   gn_sms *data = (gn_sms *) d;
   PhoneEvent *e;
+  gint error;
   
   if (data->type == GN_SMS_MT_Deliver || data->type == GN_SMS_MT_DeliveryReport)
   {
-    if (data->type == GN_SMS_MT_DeliveryReport)
+/*    if (data->type == GN_SMS_MT_DeliveryReport)
     {
       if (smsdConfig.smsSets & SMSD_READ_REPORTS)
-        (*DB_InsertSMS) (data);
+        error = (*DB_InsertSMS) (data);
     }
-    else
-    { 
+    else */
+    {  
 #ifdef XDEBUG 
       g_print ("%d. %s   ", data->number, data->remote.number);
       g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
@@ -339,7 +381,28 @@ static void ReadSMS (gpointer d, gpointer userData)
                 data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
                 data->user_data[0].u.text);
 #endif
-      (*DB_InsertSMS) (data);
+      error = (*DB_InsertSMS) (data);
+    }
+    
+    if (smsdConfig.logFile)
+    {
+      FILE *f;
+      time_t cas;
+      gchar buf[50];
+
+      if ((f = fopen (smsdConfig.logFile, "a")) == NULL)
+        g_print (_("Warning: Cannot open file %s for appendig.\n"), smsdConfig.logFile);
+      else
+      {
+        cas = time (NULL);
+        strftime (buf, 50, "%e %b %Y %T", localtime (&cas));
+        fprintf (f, "%s: ", buf);
+        if (error)
+          fprintf (f, _("Inserting sms from %s unsuccessful.\n"), data->remote.number);
+        else
+          fprintf (f, _("Inserting sms from %s successful.\n"), data->remote.number);
+        fclose (f);
+      }
     }
     
     e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));

@@ -35,6 +35,7 @@ CREATE TABLE outbox (
   text varchar(160) default NULL,
   processed tinyint(4) NOT NULL default '0',
   error tinyint(4) NOT NULL default '-1',
+  dreport tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
 

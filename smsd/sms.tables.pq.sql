@@ -16,5 +16,6 @@ CREATE TABLE "outbox" (
 	"text" character varying(160),
 	"processed" bool DEFAULT 'false',
 	"error" smallint DEFAULT '-1' NOT NULL,
+	"dreport" smallint DEFAULT '0' NOT NULL,
 	PRIMARY KEY  ("id")
 );

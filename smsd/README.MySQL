@@ -1,0 +1,2 @@
+In some distributions of MySQL you need to link zlib with smsd or db module.
+Please add '-lz' to Makefile if smsd cannot load libmysql.so.

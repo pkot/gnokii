@@ -1,3 +1,11 @@
+* Sun Feb 09 2003 Jan Definak <ja@mail.upjs.sk>
+- Added comment for Tru64 from Peter Kolmisoppi <peter@opoint.com>.
+- Added support for loging to file.
+- Added possibility to request delivery report per message. Global option
+  -r, --report is deprecated.
+- Version number changed from 1.0 to 1.1-cvs.
+
+
 * Sat Jan 18 2003 Pawel Kot <pkot@linuxnews.pl>
 - FreeBSD doesn't have libdl and can compile smsd without
   -ldl. Add the comment in the Makefile as well as the
