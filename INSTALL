@@ -16,7 +16,7 @@
 			Install path prefix. Default /usr/local/
 
 		--without-x
-			Compile without GTK (Xwin) programs
+			Compile without GTK (X11) programs
 		
 		--disable-nls
 			Set if you don't have/want GNU gettext support
@@ -34,15 +34,17 @@
 	Good default (example):
 
 		./configure --prefix=/usr \
-			    --enable-gettext
+			    --enable-security
 
 2/
 	compilation:
 	
-		make 
+		make (or make gnokii-debug to create staticlly linked binary
+			-- mainly for debugging)
 		groupadd gnokii  - it is really needed
 		(make dep - if you want/need) 
-		make install
+		make install or make install-suid or make install-strip or
+			make install-ss (suid + strip)
 		make install-docs
 
 	clean source:

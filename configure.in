@@ -524,5 +524,6 @@ echo "
 
   Type '${MAKE}' for compilation and then '${MAKE} install',
   '${MAKE} install-suid', '${MAKE} install-strip' or '${MAKE} install-ss' to
-  install gnokii.
+  install gnokii. If you wish to install gnokii sgid gnokii (install-suid or
+  install-ss) be sure to have 'gnokii' group in your system.
 "

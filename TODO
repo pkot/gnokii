@@ -1,45 +1,5 @@
 0.4.0 THINGS:
 
-= Documentation:
-  - update spec file for instalation of manual page
-  - write some docs about gnokiid -- beeing written
-
-- --disable-debug should really disable debug :-)
-- FreeBSD build and work - is it done already?
-- 6160 support (is this useful: http://www.venia.net/tdma/? - yes it was -HAB)
-  Please email Hugh before delving into x160 support.
-- 7110 support (fbus and/or plain AT commands)
-- integrate xlogos into xgnokii
-- incoming RLP calls (will anyone actually use this?)
-- other mobile phones (Ericsson, Siemens? - any support from vendor? Are they
-  better then Nokia? in this? Any programs already existing?)
-- getsecuritycode patch (I have it in ~/ so if there is anyone interested... We
-  must include it in ---with-security).
-- international characters in SMS messages and phonebooks - see the mailing
-  list messages in archive -- almost done for SMS
-- Business card sending via SMS (I do not know if it is already implemented or
-  not)
-- if GNU getopt is not available in the system, use compile getopt from
-  source tree (move it from win32/)
-- gnokiid and other AT commands.
-- we should report back to xgnokii what functions are and which are not
-  supported so xgnokii can disable some GUI stuff on phones which do not
-  support this functions.  (Should be an extension to existing GSM_Information
-  structure - HAB)
-- multiframed packets
-- how can we read the name of the uploaded tune? Can we do that?
-- SMS errors (Gary reported them on Fri, 25 Feb 2000 15:55:58 -0500 (EST))
-- storing of SMS messages into INBOX (Pavel already sent the dump of such
-  message) -- done, not applied
-- Marcin's setprofile patch
-- --getdisplaystatus and Alarm sign? Is there any indication of it?
-- gnokii --setlogo logofile [caller group number] [group name] is not
-  working correctly as is
-- --netmonitor field/devel should not report the menu (which contains
-  useless data)... Try it.
-- integrate Marcin's patches
-
-Additional things
-=================
-
-- ringtone editor
+ - port all 6110 functionality from the old structure
+ - stable libsms
+ - working xgnokii
