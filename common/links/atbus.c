@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.4  2001-09-09 21:45:49  machek
+  Revision 1.5  2001-11-19 13:03:18  pkot
+  nk3110.c cleanup
+
+  Revision 1.4  2001/09/09 21:45:49  machek
   Cleanups from Ladislav Michl <ladis@psi.cz>:
 
   *) do *not* internationalize debug messages
@@ -57,13 +60,18 @@
 /* FIXME - win32 stuff! */
 
 
+/* FIXME - when sending an AT command while another one is still in */
+/*         progress, the old command is aborted and the new ignored. */
+/*         the result is _one_ error message from the phone. */
+
 /* Some globals */
-static GSM_Link *glink;
+/* FIXME - if we use more than one phone these should be part of */
+/*         a statemachine. */
+
 static GSM_Statemachine *statemachine;
 static int binlength = 0;
 static char reply_buf[1024];
 static int reply_buf_pos = 0;
-
 
 static int xwrite(unsigned char *d, int len)
 {
@@ -103,7 +111,7 @@ void ATBUS_RX_StateMachine(unsigned char rx_char)
 	if (reply_buf_pos >= binlength) {
 		if (((reply_buf_pos > 3) && (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4)))
 		|| ((reply_buf_pos > 6) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))) {
-			SM_IncomingFunction(statemachine, 1, reply_buf, reply_buf_pos);
+			SM_IncomingFunction(statemachine, statemachine->LastMsgType, reply_buf, reply_buf_pos);
 			reply_buf_pos = 0;
 			binlength = 0;
 			return;
@@ -120,10 +128,10 @@ void ATBUS_RX_StateMachine(unsigned char rx_char)
 }
 
 
-bool ATBUS_OpenSerial(int hw_handshake)
+bool ATBUS_OpenSerial(int hw_handshake, char *device)
 {
 	int result;
-	result = device_open(glink->PortDevice, false, false, hw_handshake, GCT_Serial);
+	result = device_open(device, false, false, hw_handshake, GCT_Serial);
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
 		return (false);
@@ -168,15 +176,14 @@ GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
 	setvbuf(stderr, NULL, _IONBF, 0);
 
 	/* 'Copy in' the global structures */
-	glink = &(state->Link);
 	statemachine = state;
 
 	/* Fill in the link functions */
-	glink->Loop = &ATBUS_Loop;
-	glink->SendMessage = &AT_SendMessage;
+	state->Link.Loop = &ATBUS_Loop;
+	state->Link.SendMessage = &AT_SendMessage;
 
-	if (glink->ConnectionType == GCT_Serial) {
-		if (!ATBUS_OpenSerial(hw_handshake))
+	if (state->Link.ConnectionType == GCT_Serial) {
+		if (!ATBUS_OpenSerial(hw_handshake, state->Link.PortDevice))
 			return GE_DEVICEOPENFAILED;
 	} else {
 		fprintf(stderr, "Device not supported by ATBUS");

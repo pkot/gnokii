@@ -15,7 +15,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.4  2001-11-17 16:42:47  pkot
+  Revision 1.5  2001-11-19 13:03:18  pkot
+  nk3110.c cleanup
+
+  Revision 1.4  2001/11/17 16:42:47  pkot
   Cleanup
 
   Revision 1.3  2001/11/09 14:25:04  pkot
@@ -555,7 +558,7 @@ static GSM_Error P3110_SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 		case 0x29:
 			/* Got a retry response so try again! */
 			dprintf("SMS send attempt failed, trying again...\n");
-			retry_count --;
+			retry_count--;
 			/* After an empirically determined pause... */
 			usleep(500000); /* 0.5 seconds. */
 			break;
@@ -589,20 +592,16 @@ static GSM_Error P3110_IncomingCall(int messagetype, unsigned char *message, int
 	}
 	buffer[count] = 0x00;
 
-#ifdef DEBUG
         /* Now display incoming call message. */
 	dprintf("Incoming call - Type: %s. %02x, Number %s.\n",
 		(message[2] == 0x05 ? "Voice":"Data?"), message[3], buffer);
-#endif
 
 	return GE_NONE;
 }
 
 static GSM_Error P3110_IncomingCallAnswered(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-#ifdef DEBUG
 	dprintf("Incoming call answered from phone.\n");
-#endif
 
 	return GE_NONE;
 }
@@ -611,10 +610,8 @@ static GSM_Error P3110_IncomingCallAnswered(int messagetype, unsigned char *mess
    call message has three (unexplained) data bytes. */
 static GSM_Error P3110_IncomingCallEstablished(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-#ifdef DEBUG
 	dprintf("%s call established - status bytes %02x %02x.\n",
 		(message[2] == 0x05 ? "voice":"data(?)"), message[3], message[4]);
-#endif
 
 	return GE_NONE;
 }
@@ -623,9 +620,7 @@ static GSM_Error P3110_IncomingCallEstablished(int messagetype, unsigned char *m
    call terminates. */
 static GSM_Error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-#ifdef DEBUG
 	dprintf("Call terminated from phone (0x10 message).\n");
-#endif
 	/* FIXME: Tell datapump code that the call has terminated. */
 	/*if (CallPassup) {
 		CallPassup(' ');
@@ -639,9 +634,7 @@ static GSM_Error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char 
    purpose as yet undertermined. */
 static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-#ifdef DEBUG
 	dprintf("Call terminated from opposite end of line (or from network).\n");
-#endif
 
 	/* FIXME: Tell datapump code that the call has terminated. */
 	/*if (CallPassup) {
@@ -657,9 +650,7 @@ static GSM_Error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char 
    yet undertermined. */
 static GSM_Error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-#ifdef DEBUG
 	dprintf("Call terminated from phone (0x12 message).\n");
-#endif
 
 	/* FIXME: Tell datapump code that the call has terminated. */
 	/*if (CallPassup) {
@@ -700,9 +691,7 @@ static GSM_Error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *me
 static GSM_Error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	SimAvailable = (message[2] == 0x02);
-#ifdef DEBUG
 	dprintf("SIM available: %s.\n", (SimAvailable ? "Yes" : "No"));
-#endif 
 	return GE_NONE;
 }
 
@@ -975,9 +964,7 @@ static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *mess
 
 static GSM_Error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-#ifdef DEBUG
 	dprintf("SMS Message Center Data not reachable.\n");
-#endif
 	return GE_NOTREADY;
 }
 
@@ -989,9 +976,7 @@ static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, 
 {
 	u8 center_number_length;
 	u8 option_number_length;
-#ifdef DEBUG
 	int count;
-#endif
 
 	if (!data) return GE_INTERNALERROR;
 
@@ -1001,8 +986,6 @@ static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, 
 	/* Get message center length */
 	center_number_length = message[13 + option_number_length];
 
-
-#ifdef DEBUG
 	dprintf("SMS Message Center Data:\n");
 	dprintf("   Selected memory: 0x%02x\n", message[2]);
 	dprintf("   Messages in Phone: 0x%02x Unread: 0x%02x\n", message[3], message[4]);
@@ -1023,7 +1006,6 @@ static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, 
 		dprintf("%c", message[14 + option_number_length + count]);
 	}
 	dprintf("\n");
-#endif
 
 	/* Get message center related info if upper layer wants to know */
 	if (data->MessageCenter) {
@@ -1077,9 +1059,7 @@ static GSM_Error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, 
 static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	SimAvailable = true;
-#ifdef DEBUG
 	dprintf("PIN [possibly] entered.\n");
-#endif
 	return GE_NONE;
 }
 
@@ -1091,7 +1071,6 @@ static GSM_Error P3110_IncomingPINEntered(int messagetype, unsigned char *messag
 static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	/* Strings for the status byte received from phone. */
-#ifdef DEBUG
 	char *StatusStr[] = {
 		"Unknown",
 		"Ready",
@@ -1099,7 +1078,6 @@ static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *messag
 		"Call in progress",
 		"No network access"
 	};
-#endif
 
         /* There are three data bytes in the status message, two have been
            attributed to signal level, the third is presently unknown. 
@@ -1122,12 +1100,10 @@ static GSM_Error P3110_IncomingStatusInfo(int messagetype, unsigned char *messag
 		*(data->BatteryLevel) = message[4];
 	}
 
-#ifdef DEBUG
         /* Only output connection status byte now as the RF and Battery
            levels are displayed by the main gnokii code. */
 	dprintf("Status: %s, Battery level: %d, RF level: %d.\n",
 		StatusStr[message[2]], message[4], message[3]);
-#endif
 	return GE_NONE;
 }
 
@@ -1150,12 +1126,10 @@ static GSM_Error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message
 	if (data->Model)
 		strcpy(data->Model, message + 4 + imei_length + rev_length);
 
-#ifdef DEBUG
 	dprintf("Mobile Phone Identification:\n");
 	dprintf("   IMEI: %s\n", message + 2);
 	dprintf("   Model: %s\n", message + 4 + imei_length + rev_length);
 	dprintf("   Revision: %s\n", message + 3 + imei_length);
-#endif
 
 	return GE_NONE;
 }

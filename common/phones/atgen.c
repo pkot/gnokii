@@ -14,7 +14,10 @@
   phones. See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.5  2001-11-08 16:49:19  pkot
+  Revision 1.6  2001-11-19 13:03:18  pkot
+  nk3110.c cleanup
+
+  Revision 1.5  2001/11/08 16:49:19  pkot
   Cleanups
 
   Revision 1.4  2001/08/20 23:36:27  pkot
@@ -40,15 +43,25 @@
 #include "gsm-statemachine.h"
 #include "gsm-encoding.h"
 #include "phones/generic.h"
+#include "phones/atgen.h"
+#include "phones/ateric.h"
+#include "phones/atsie.h"
+#include "phones/atnok.h"
 #include "links/atbus.h"
 #include "links/cbus.h"
 
 
 #define ARRAY_LEN(x) (sizeof((x))/sizeof((x)[0]))
 
+
 static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state);
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 
 static GSM_Error AT_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state);
@@ -60,42 +73,33 @@ static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state);
 static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
 
-
-typedef GSM_Error (*AT_FunctionType)(GSM_Data *d, GSM_Statemachine *s);
 typedef struct {
 	int gop;
-	AT_FunctionType func;
+	AT_SendFunctionType sfunc;
+	GSM_RecvFunctionType rfunc;
 } AT_FunctionInitType;
 
-static AT_FunctionType AT_Functions[GOP_Max];
+
+/* Mobile phone information */
+static AT_SendFunctionType AT_Functions[GOP_Max];
+static GSM_IncomingFunctionType IncomingFunctions[GOP_Max];
 static AT_FunctionInitType AT_FunctionInit[] = {
-	{ GOP_GetModel, AT_GetModel },
-	{ GOP_GetRevision, AT_GetRevision },
-	{ GOP_GetImei, AT_GetIMEI },
-	{ GOP_GetManufacturer, AT_GetManufacturer },
-	{ GOP_Identify, AT_Identify },
-	{ GOP_GetBatteryLevel, AT_GetBattery },
-	{ GOP_GetPowersource, AT_GetBattery },
-	{ GOP_GetRFLevel, AT_GetRFLevel },
-	{ GOP_GetMemoryStatus, AT_GetMemoryStatus },
-	{ GOP_ReadPhonebook, AT_ReadPhonebook },
+	{ GOP_Init, NULL, Reply },
+	{ GOP_GetModel, AT_GetModel, ReplyIdentify },
+	{ GOP_GetRevision, AT_GetRevision, ReplyIdentify },
+	{ GOP_GetImei, AT_GetIMEI, ReplyIdentify },
+	{ GOP_GetManufacturer, AT_GetManufacturer, ReplyIdentify },
+	{ GOP_Identify, AT_Identify, ReplyIdentify },
+	{ GOP_GetBatteryLevel, AT_GetBattery, ReplyGetBattery },
+	{ GOP_GetPowersource, AT_GetBattery, ReplyGetBattery },
+	{ GOP_GetRFLevel, AT_GetRFLevel, ReplyGetRFLevel },
+	{ GOP_GetMemoryStatus, AT_GetMemoryStatus, ReplyMemoryStatus },
+	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
 };
-
-
-char *skipcrlf(char *str);
-char *findcrlf(char *str, int test);
 
 
 #define REPLY_SIMPLETEXT(l1, l2, c, t) \
 	if ((0 == strcmp(l1, c)) && (NULL != t)) strcpy(t, l2)
-
-
-/* Mobile phone information */
-
-static GSM_IncomingFunctionType IncomingFunctions[] = {
-	{ 1, Reply },
-	{ 0, NULL }
-};
 
 
 GSM_Phone phone_at = {
@@ -142,29 +146,70 @@ static char *memorynames[] = {
 bool ATGEN_LinkOK = true;
 
 
+GSM_RecvFunctionType AT_InsertRecvFunction(int type, GSM_RecvFunctionType func)
+{
+	static int pos = 0;
+	int i;
+	GSM_RecvFunctionType oldfunc;
+
+	if (type >= GOP_Max) {
+		return (GSM_RecvFunctionType) -1;
+	}
+	if (pos == 0) {
+		IncomingFunctions[pos].MessageType = type;
+		IncomingFunctions[pos].Functions = func;
+		pos++;
+		return NULL;
+	}
+	for (i=0; i < pos; i++) {
+		if (IncomingFunctions[i].MessageType == type) {
+			oldfunc = IncomingFunctions[i].Functions;
+			IncomingFunctions[i].Functions = func;
+			return oldfunc;
+		}
+	}
+	if (pos < GOP_Max-1) {
+		IncomingFunctions[pos].MessageType = type;
+		IncomingFunctions[pos].Functions = func;
+		pos++;
+	}
+	return NULL;
+}
+
+
+AT_SendFunctionType AT_InsertSendFunction(int type, AT_SendFunctionType func)
+{
+	AT_SendFunctionType f;
+
+	f = AT_Functions[type];
+	AT_Functions[type] = func;
+	return f;
+}
+
+
 static GSM_Error SetEcho(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 
 	sprintf(req, "ATE1\r\n");
-	if (SM_SendMessage(state, 6, 1, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 1);
+	if (SM_SendMessage(state, 6, GOP_Init, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, GOP_Init);
 }
 
 
-static GSM_Error SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
+GSM_Error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
 {
 	char req[128];
 	GSM_Error ret = GE_NONE;
 	GSM_Data data;
 
 	if (mt != memorytype) {
-		sprintf(req, "AT+CPBS=%s\r\n", memorynames[mt]);
-		ret = SM_SendMessage(state, 12, 1, req);
+		sprintf(req, "AT+CPBS=\"%s\"\r\n", memorynames[mt]);
+		ret = SM_SendMessage(state, 14, GOP_Init, req);
 		if (ret != GE_NONE)
 			return GE_NOTREADY;
 		GSM_DataClear(&data);
-		ret = SM_Block(state, &data, 1);
+		ret = SM_Block(state, &data, GOP_Init);
 		if (ret == GE_NONE)
 			memorytype = mt;
 	}
@@ -180,11 +225,11 @@ static GSM_Error SetCharset(GSM_Statemachine *state)
 
 	if (atcharset == 0) {
 		sprintf(req, "AT+CSCS=\"GSM\"\r\n");
-		ret = SM_SendMessage(state, 15, 1, req);
+		ret = SM_SendMessage(state, 15, GOP_Init, req);
 		if (ret != GE_NONE)
 			return GE_NOTREADY;
 		GSM_DataClear(&data);
-		ret = SM_Block(state, &data, 1);
+		ret = SM_Block(state, &data, GOP_Init);
 		if (ret == GE_NONE)
 			atcharset = 1;
 	}
@@ -211,8 +256,9 @@ static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state)
 	char req[128];
 
 	sprintf(req, "AT+CGMM\r\n");
-	if (SM_SendMessage(state, 9, 1, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 1);
+	if (SM_SendMessage(state, 9, GOP_Identify, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_Identify);
 }
 
 
@@ -221,8 +267,9 @@ static GSM_Error AT_GetManufacturer(GSM_Data *data, GSM_Statemachine *state)
 	char req[128];
 
 	sprintf(req, "AT+CGMI\r\n");
-	if (SM_SendMessage(state, 9, 1, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 1);
+	if (SM_SendMessage(state, 9, GOP_Identify, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_Identify);
 }
 
 
@@ -231,8 +278,9 @@ static GSM_Error AT_GetRevision(GSM_Data *data, GSM_Statemachine *state)
 	char req[128];
 
 	sprintf(req, "AT+CGMR\r\n");
-	if (SM_SendMessage(state, 9, 1, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 1);
+	if (SM_SendMessage(state, 9, GOP_Identify, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_Identify);
 }
 
 
@@ -241,8 +289,9 @@ static GSM_Error AT_GetIMEI(GSM_Data *data, GSM_Statemachine *state)
 	char req[128];
 
 	sprintf(req, "AT+CGSN\r\n");
-	if (SM_SendMessage(state, 9, 1, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 1);
+	if (SM_SendMessage(state, 9, GOP_Identify, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_Identify);
 }
 
 
@@ -253,8 +302,9 @@ static GSM_Error AT_GetBattery(GSM_Data *data,  GSM_Statemachine *state)
 	char req[128];
 
 	sprintf(req, "AT+CBC\r\n");
-	if (SM_SendMessage(state, 8, 1, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 1);
+	if (SM_SendMessage(state, 8, GOP_GetBatteryLevel, req) != GE_NONE)
+		return GE_NOTREADY;
+	return SM_Block(state, data, GOP_GetBatteryLevel);
 }
 
 
@@ -263,8 +313,9 @@ static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state)
 	char req[128];
  
 	sprintf(req, "AT+CSQ\r\n");
- 	if (SM_SendMessage(state, 8, 1, req) != GE_NONE) return GE_NOTREADY;
- 	return SM_Block(state, data, 1);
+ 	if (SM_SendMessage(state, 8, GOP_GetRFLevel, req) != GE_NONE)
+		return GE_NOTREADY;
+ 	return SM_Block(state, data, GOP_GetRFLevel);
 }
  
  
@@ -273,13 +324,19 @@ static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
 	char req[128];
 	GSM_Error ret;
 
-	ret = SetMemoryType(data->MemoryStatus->MemoryType,  state);
+	ret = AT_SetMemoryType(data->MemoryStatus->MemoryType,  state);
 	if (ret != GE_NONE)
 		return ret;
 	sprintf(req, "AT+CPBS?\r\n");
-	if (SM_SendMessage(state, 10, 1, req) != GE_NONE)
+	if (SM_SendMessage(state, 10, GOP_GetMemoryStatus, req) != GE_NONE)
 		return GE_NOTREADY;
-	ret = SM_Block(state, data, 1);
+	ret = SM_Block(state, data, GOP_GetMemoryStatus);
+	if (ret != GE_UNKNOWN)
+		return ret;
+	sprintf(req, "AT+CPBR=?\r\n");
+	if (SM_SendMessage(state, 11, GOP_GetMemoryStatus, req) != GE_NONE)
+		return GE_NOTREADY;
+	ret = SM_Block(state, data, GOP_GetMemoryStatus);
 	return ret;
 }
 
@@ -292,13 +349,13 @@ static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state)
 	ret = SetCharset(state);
 	if (ret != GE_NONE)
 		return ret;
-	ret = SetMemoryType(data->PhonebookEntry->MemoryType,  state);
+	ret = AT_SetMemoryType(data->PhonebookEntry->MemoryType,  state);
 	if (ret != GE_NONE)
 		return ret;
 	sprintf(req, "AT+CPBR=%d\r\n", data->PhonebookEntry->Location);
-	if (SM_SendMessage(state, strlen(req), 1, req) != GE_NONE)
+	if (SM_SendMessage(state, strlen(req), GOP_ReadPhonebook, req) != GE_NONE)
 		return GE_NOTREADY;
-	ret = SM_Block(state, data, 1);
+	ret = SM_Block(state, data, GOP_ReadPhonebook);
 	return ret;
 }
 
@@ -314,15 +371,23 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 }
 
 
-static GSM_Error ReplyReadPhonebook(GSM_Data *data, char *line, int error, int len)
+static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
+	AT_LineBuffer buf;
 	char *pos, *endpos;
 	int l;
 
-	if (error) {
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+	if (buf.line1 == NULL)
 		return GE_INVALIDPHBOOKLOCATION;
-	}
-	if (!strncmp(line, "OK", 2)) {
+
+	if (strncmp(buffer, "AT+CPBR", 7)) {
+		return GE_NONE; /*FIXME*/
+ 	}
+
+	if (!strncmp(buf.line2, "OK", 2)) {
 		if (data->PhonebookEntry) {
 			*(data->PhonebookEntry->Number) = '\0';
 			*(data->PhonebookEntry->Name) = '\0';
@@ -334,7 +399,7 @@ static GSM_Error ReplyReadPhonebook(GSM_Data *data, char *line, int error, int l
 	if (data->PhonebookEntry) {
 		data->PhonebookEntry->Group = 0;
 		data->PhonebookEntry->SubEntriesCount = 0;
-		pos = strchr(line, '\"');
+		pos = strchr(buf.line2, '\"');
 		endpos = NULL;
 		if (pos)
 			endpos = strchr(++pos, '\"');
@@ -346,10 +411,13 @@ static GSM_Error ReplyReadPhonebook(GSM_Data *data, char *line, int error, int l
 		if (endpos)
 			pos = strchr(++endpos, '\"');
 		endpos = NULL;
-		if (pos)
-			endpos = memchr(++pos, '\"', len);
+		if (pos) {
+			pos++;
+			l = pos - (char *)buffer;
+			endpos = memchr(pos, '\"', length - l);
+		}
 		if (endpos) {
-			l= endpos - pos;
+			l = endpos - pos;
 			DecodeAscii(data->PhonebookEntry->Name, pos, l);
 			*(data->PhonebookEntry->Name + l) = '\0';
 		}
@@ -358,57 +426,88 @@ static GSM_Error ReplyReadPhonebook(GSM_Data *data, char *line, int error, int l
 }
 
 
-static GSM_Error ReplyMemoryStatus(GSM_Data *data, char *line, int error)
+static GSM_Error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
+	AT_LineBuffer buf;
 	char *pos;
 
-	if (error)
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+	if (buf.line1 == NULL)
 		return GE_INVALIDMEMORYTYPE;
+
 	if (data->MemoryStatus) {
-		pos = strchr(line, ',');
-		if (pos)
-			data->MemoryStatus->Used = atoi(++pos);
-		pos = strchr(pos, ',');
-		if (pos)
-			data->MemoryStatus->Free = atoi(++pos) - data->MemoryStatus->Used;
-	}
-	return GE_NONE;
-}
-
-
-static GSM_Error ReplyBattery(GSM_Data *data, char *line, int error)
-{
-	char *pos;
-
-	if (data->BatteryLevel) {
-		*(data->BatteryUnits) = GBU_Percentage;
-		pos = strchr(line, ',');
-		if (pos) {
-			pos++;
-			*(data->BatteryLevel) = atoi(pos);
-		} else {
-			*(data->BatteryLevel) = 1;
+		if (strstr(buf.line2,"+CPBS")) {
+			pos = strchr(buf.line2, ',');
+			if (pos) {
+				data->MemoryStatus->Used = atoi(++pos);
+			} else {
+				data->MemoryStatus->Used = 100;
+				data->MemoryStatus->Free = 0;
+				return GE_UNKNOWN;
+			}
+			pos = strchr(pos, ',');
+			if (pos) {
+				data->MemoryStatus->Free = atoi(++pos) - data->MemoryStatus->Used;
+			} else {
+				return GE_UNKNOWN;
+			}
 		}
 	}
-	if (data->PowerSource) {
-		*(data->PowerSource) = 0;
-		if (*line == '1') *(data->PowerSource) = GPS_ACDC;
-		if (*line == '0') *(data->PowerSource) = GPS_BATTERY;
+	return GE_NONE;
+}
+
+
+static GSM_Error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	AT_LineBuffer buf;
+	char *pos;
+
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+	if ((buf.line1 == NULL) || (buf.line2 == NULL))
+		return GE_NONE;
+
+	if (!strncmp(buffer, "AT+CBC", 6)) {
+		if (data->BatteryLevel) {
+			*(data->BatteryUnits) = GBU_Percentage;
+			pos = strchr(buf.line2, ',');
+			if (pos) {
+				pos++;
+				*(data->BatteryLevel) = atoi(pos);
+			} else {
+				*(data->BatteryLevel) = 1;
+			}
+		}
+		if (data->PowerSource) {
+			*(data->PowerSource) = 0;
+			if (*buf.line2 == '1') *(data->PowerSource) = GPS_ACDC;
+			if (*buf.line2 == '0') *(data->PowerSource) = GPS_BATTERY;
+		}
 	}
 	return GE_NONE;
 }
 
 
-static GSM_Error ReplyRFLevel(GSM_Data *data, char *line, int error)
+static GSM_Error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
-	char *pos, *buf;
+	AT_LineBuffer buf;
+	char *pos1, *pos2;
 
-	if (data->RFUnits) {
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+	if (buf.line1 == NULL)
+		return GE_NONE;
+
+	if ((!strncmp(buffer, "AT+CSQ", 6)) && (data->RFUnits)) {
 		*(data->RFUnits) = GRF_CSQ;
-		pos = line + 6;
-		buf = strchr(line, ',');
-		if (pos < buf) {
-			*(data->RFLevel) = atoi(pos);
+		pos1 = buf.line2 + 6;
+		pos2 = strchr(buf.line2, ',');
+		if (pos1 < pos2) {
+			*(data->RFLevel) = atoi(pos1);
 		} else {
 			*(data->RFLevel) = 1;
 		}
@@ -417,46 +516,36 @@ static GSM_Error ReplyRFLevel(GSM_Data *data, char *line, int error)
 }
 
 
+static GSM_Error ReplyIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
+{
+	AT_LineBuffer buf;
+
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+	if (buf.line1 == NULL)
+		return GE_NONE;		/* Fixme */
+	if (!strncmp(buffer, "AT+CG", 5)) {
+		REPLY_SIMPLETEXT(buffer+5, buf.line2, "SN", data->Imei);
+		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MM", data->Model);
+		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MI", data->Manufacturer);
+		REPLY_SIMPLETEXT(buffer+5, buf.line2, "MR", data->Revision);
+ 	}
+	return GE_NONE;
+}
+
+
 static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
-	char *line2, *line3, *pos;
+	AT_LineBuffer buf;
 	int error = 0;
 
-	if ((length > 7) && (!strncmp(buffer+length-7, "ERROR", 5)))
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+	if (buf.line1 == NULL)
 		error = 1;
-	pos = findcrlf(buffer, 0);
-	if (pos) {
-		*pos = 0;
-		line2 = skipcrlf(++pos);
-	} else {
-		line2 = buffer;
-	}
-	pos = findcrlf(line2, 1);
-	if (pos) {
-		*pos = 0;
-		line3 = skipcrlf(++pos);
-	} else {
-		line3 = line2;
-	}
 
-	if (!strncmp(buffer, "AT+C", 4)) {
-		if (*(buffer+4) =='G') {
-			REPLY_SIMPLETEXT(buffer+5, line2, "SN", data->Imei);
-			REPLY_SIMPLETEXT(buffer+5, line2, "MM", data->Model);
-			REPLY_SIMPLETEXT(buffer+5, line2, "MI", data->Manufacturer);
-			REPLY_SIMPLETEXT(buffer+5, line2, "MR", data->Revision);
-		} else if (!strncmp(buffer+4, "SQ", 2)) {
-			ReplyRFLevel(data, line2, error);
-		} else if (!strncmp(buffer+4, "BC", 2)) {
-			ReplyBattery(data, line2, error);
-		} else if (!strncmp(buffer+4, "PB", 2)) {
-			if (*(buffer+6) == 'S') {
-				ReplyMemoryStatus(data, line2, error);
-			} else if (*(buffer+6) == 'R') {
-				ReplyReadPhonebook(data, line2, error, length);
-			}
-		}
- 	}
 	return GE_NONE;
 }
 
@@ -474,10 +563,15 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_at, sizeof(GSM_Phone));
 
-	for (i=0; i<GOP_Max; i++)
+	for (i=0; i<GOP_Max; i++) {
 		AT_Functions[i] = NULL;
-	for (i=0; i<ARRAY_LEN(AT_FunctionInit); i++)
-		AT_Functions[AT_FunctionInit[i].gop] = AT_FunctionInit[i].func;
+		IncomingFunctions[i].MessageType = 0;
+		IncomingFunctions[i].Functions = NULL;
+	}
+	for (i=0; i<ARRAY_LEN(AT_FunctionInit); i++) {
+		AT_InsertSendFunction(AT_FunctionInit[i].gop, AT_FunctionInit[i].sfunc);
+		AT_InsertRecvFunction(AT_FunctionInit[i].gop, AT_FunctionInit[i].rfunc);
+	}
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
@@ -501,21 +595,46 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	ret = state->Phone.Functions(GOP_GetModel, &data, state);
 	if (ret != GE_NONE) return ret;
 	GSM_DataClear(&data);
-	data.Model = manufacturer;
+	data.Manufacturer = manufacturer;
 	ret = state->Phone.Functions(GOP_GetManufacturer, &data, state);
 	if (ret != GE_NONE) return ret;
 
-	/*
-	if (!strcasecmp(manufacturer, "siemens"))
-		AT_InitSiemens(state, model, setupdata->Model, AT_Functions);
-	if (!strcasecmp(manufacturer, "ericsson"))
-		AT_InitEricsson(state, model, setupdata->Model, AT_Functions);
-	*/
+	if (!strncasecmp(manufacturer, "ericsson", 8))
+		AT_InitEricsson(state, model, setupdata->Model);
+	if (!strncasecmp(manufacturer, "siemens", 7))
+		AT_InitSiemens(state, model, setupdata->Model);
+	if (!strncasecmp(manufacturer, "nokia", 5))
+		AT_InitNokia(state, model, setupdata->Model);
 
 	return GE_NONE;
 }
 
  
+void splitlines(AT_LineBuffer *buf)
+{
+	char *pos;
+
+	if ((buf->length > 7) && (!strncmp(buf->line1+buf->length-7, "ERROR", 5))) {
+		buf->line1 = NULL;
+		return;
+	}
+	pos = findcrlf(buf->line1, 0, buf->length);
+	if (pos) {
+		*pos = 0;
+		buf->line2 = skipcrlf(++pos);
+	} else {
+		buf->line2 = buf->line1;
+	}
+	pos = findcrlf(buf->line2, 1, buf->length);
+	if (pos) {
+		*pos = 0;
+		buf->line3 = skipcrlf(++pos);
+	} else {
+		buf->line3 = buf->line2;
+	}
+}
+
+
 /*
  * increments the argument until a char unequal to
  * <cr> or <lf> is found. returns the new position.
@@ -535,18 +654,19 @@ char *skipcrlf(char *str)
  * searches for <cr> or <lf> and returns the first
  * occurrence. if test is set, the gsm char @ which
  * is 0x00 is not considered as end of string.
- * return NULL if test is not set and no <cr> or
- * <lf> was found.
- * TODO should ask for maximum length.
+ * return NULL if no <cr> or <lf> was found in the
+ * range of max bytes.
  */
  
-char *findcrlf(char *str, int test)
+char *findcrlf(char *str, int test, int max)
 {
         if (str == NULL)
                 return str;
-        while ((*str != '\n') && (*str != '\r') && ((*str != '\0') || test))
+        while ((*str != '\n') && (*str != '\r') && ((*str != '\0') || test) && (max > 0)) {
                 str++;
-        if (*str == '\0')
+		max--;
+	}
+        if ((*str == '\0') || ((max == 0) && (*str != '\n') && (*str != '\r')))
                 return NULL;
         return str;
 }

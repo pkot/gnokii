@@ -23,7 +23,10 @@ OBJS =	generic.o \
 	nk6100.o \
 	nk3110.o \
 	nk2110.o \
-	atgen.o
+	atgen.o \
+	ateric.o \
+	atnok.o \
+	atsie.o
 #	dc2711.o
 
 all: PHONES.o
