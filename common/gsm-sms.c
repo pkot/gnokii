@@ -1263,6 +1263,8 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 
+	if (!data->SMS) return GE_INTERNALERROR;
+
 	data->RawSMS = malloc(sizeof(*data->RawSMS));
 	memset(data->RawSMS, 0, sizeof(*data->RawSMS));
 
