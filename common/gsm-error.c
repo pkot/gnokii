@@ -66,7 +66,7 @@ API char *gn_error_print(gn_error e)
 	}
 }
 
-API gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause)
+API gn_error isdn_cause_to_gn_error(char **src, char **msg, unsigned char loc, unsigned char cause)
 {
 	char *s, *m;
 	gn_error err = GN_ERR_UNKNOWN;
