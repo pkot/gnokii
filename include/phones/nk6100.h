@@ -68,6 +68,11 @@ typedef struct {
 	bool sms_notification_lost;
 	GSM_DisplayOutput *DisplayOutput;
 	NK6100_Keytable Keytable[256];
+
+	char Model[GSM_MAX_MODEL_LENGTH];
+	char IMEI[GSM_MAX_IMEI_LENGTH];
+	char Revision[GSM_MAX_REVISION_LENGTH];
+	PhoneModel *PM;
 } NK6100_DriverInstance;
 
 void PNOK_GetNokiaAuth(unsigned char *Imei, unsigned char *MagicBytes, unsigned char *MagicResponse);
