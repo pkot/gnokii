@@ -3284,13 +3284,14 @@ static int getwapsetting(int argc, char *argv[])
 	switch (error) {
 	case GE_NONE:
 		if (raw) {
-			fprintf(stdout, ("%i;%s;%s;%i;%i;%i;%i;%i;%i;%i;%s;%s;%s;%s;%i;%i;%i;%s;%s;%s;%s;\n"), 
+			fprintf(stdout, ("%i;%s;%s;%i;%i;%i;%i;%i;%i;%i;%s;%s;%s;%s;%i;%i;%i;%s;%s;%s;%s;%s;%s;\n"), 
 				WAPSetting.Location, WAPSetting.Name, WAPSetting.Home, WAPSetting.Session, 
 				WAPSetting.Security, WAPSetting.Bearer, WAPSetting.GSMdataAuthentication, 
 				WAPSetting.CallType, WAPSetting.CallSpeed, WAPSetting.GSMdataLogin, WAPSetting.GSMdataIP, 
 				WAPSetting.Number, WAPSetting.GSMdataUsername, WAPSetting.GSMdataPassword, 
 				WAPSetting.GPRSConnection, WAPSetting.GPRSAuthentication, WAPSetting.GPRSLogin, 
-				WAPSetting.AccessPoint, WAPSetting.GPRSIP,  WAPSetting.GPRSUsername, WAPSetting.GPRSPassword);
+				WAPSetting.AccessPoint, WAPSetting.GPRSIP,  WAPSetting.GPRSUsername, WAPSetting.GPRSPassword,
+				WAPSetting.SMSServiceNumber, WAPSetting.SMSServerNumber);
 		} else {
 			fprintf(stdout, _("WAP bookmark nr. %d:\n"), WAPSetting.Location);
 			fprintf(stdout, _("Name: %s\n"), WAPSetting.Name);
@@ -3457,17 +3458,22 @@ static int writewapsetting()
 		if (n > 0 && line[n-1] == '\n') {
 			line[--n] = 0;
 		}
+		
+		n = sscanf(line, "%d;%50[^;];%256[^;];%d;%d;%d;%d;%d;%d;%d;%50[^;];%50[^;];%32[^;];%20[^;];%d;%d;%d;%100[^;];%20[^;];%32[^;];%20[^;];%20[^;];%20[^;];", 
+		/*
+		n = sscanf(line, "%d;%s;%s;%d;%d;%d;%d;%d;%d;%d;%s;%s;%s;%s;%d;%d;%d;%s;%s;%s;%s;%s;%s;", 
+		*/
+			   &WAPSetting.Location, WAPSetting.Name, WAPSetting.Home, (int*)&WAPSetting.Session, 
+			   (int*)&WAPSetting.Security, (int*)&WAPSetting.Bearer, (int*)&WAPSetting.GSMdataAuthentication, 
+			   (int*)&WAPSetting.CallType, (int*)&WAPSetting.CallSpeed, (int*)&WAPSetting.GSMdataLogin, WAPSetting.GSMdataIP, 
+			   WAPSetting.Number, WAPSetting.GSMdataUsername, WAPSetting.GSMdataPassword, 
+			   (int*)&WAPSetting.GPRSConnection, (int*)&WAPSetting.GPRSAuthentication, (int*)&WAPSetting.GPRSLogin, 
+			   WAPSetting.AccessPoint, WAPSetting.GPRSIP,  WAPSetting.GPRSUsername, WAPSetting.GPRSPassword,
+			   WAPSetting.SMSServiceNumber, WAPSetting.SMSServerNumber);
 
-		n = sscanf(line, "%d;%50[^;];%256[^;];%d;%d;%d;%d;%d;%d;%d;%50[^;];%50[^;];%32[^;];%20[^;];%d;%d;%d;%100[^;];%20[^;];%32[^;];%20[^;];", 
-				&WAPSetting.Location, WAPSetting.Name, WAPSetting.Home, (int*)&WAPSetting.Session, 
-			        (int*)&WAPSetting.Security, (int*)&WAPSetting.Bearer, (int*)&WAPSetting.GSMdataAuthentication, 
-				(int*)&WAPSetting.CallType, (int*)&WAPSetting.CallSpeed, (int*)&WAPSetting.GSMdataLogin, WAPSetting.GSMdataIP, 
-				WAPSetting.Number, WAPSetting.GSMdataUsername, WAPSetting.GSMdataPassword, 
-				(int*)&WAPSetting.GPRSConnection, (int*)&WAPSetting.GPRSAuthentication, (int*)&WAPSetting.GPRSLogin, 
-				WAPSetting.AccessPoint, WAPSetting.GPRSIP,  WAPSetting.GPRSUsername, WAPSetting.GPRSPassword);
-
-		if (n != 21) {
+		if (n != 23) {
 			fprintf(stderr, _("Input line format isn't valid\n"));
+			dprintf("n: %i\n", n);
 			return GE_UNKNOWN;
 		}
 

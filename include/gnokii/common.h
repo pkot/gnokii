@@ -373,6 +373,7 @@ typedef enum {
 } GSM_WAPGPRSConnection;
 
 typedef struct {
+	bool ReadBeforeWrite;
 	int Location;
 	int Successors[4];
 	char Number[MAX_WAP_SETTING_NAME_LENGTH];
@@ -385,8 +386,8 @@ typedef struct {
 	char GPRSUsername[MAX_WAP_SETTING_USERNAME_LENGTH];
 	char GPRSPassword[MAX_WAP_SETTING_NAME_LENGTH];
 	char AccessPoint[MAX_WAP_SETTING_ACCESS_LENGTH];
-	char SMSServiceNumber[50];
-	char SMSServerNumber[50];
+	char SMSServiceNumber[MAX_WAP_SETTING_NAME_LENGTH];
+	char SMSServerNumber[MAX_WAP_SETTING_NAME_LENGTH];
 	GSM_WAPSession Session;
 	bool Security;
 	GSM_WAPBearer Bearer;
