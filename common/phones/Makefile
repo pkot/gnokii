@@ -28,7 +28,7 @@ OBJS =	generic.o \
 all: PHONES.o
 
 PHONES.o: $(OBJS)
-	$(LD) $(LDREL) $(LDOUT) PHONES.o $(OBJS)
+	$(LD) PHONES.o $(OBJS)
 
 clean:
 	$(RM) $(OBJS) *~ depend PHONES.o

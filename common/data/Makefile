@@ -30,7 +30,7 @@ OBJS =	at-emulator.o \
 all: DATA.o
 
 DATA.o: $(OBJS)
-	$(LD) $(LDREL) $(LDOUT) DATA.o $(OBJS)
+	$(LD) DATA.o $(OBJS)
 
 clean:
 	$(RM) $(OBJS) *~ depend DATA.o

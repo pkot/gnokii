@@ -31,7 +31,7 @@ endif
 all: DEVICES.o
 
 DEVICES.o: $(OBJS)
-	$(LD) $(LDREL) $(LDOUT) DEVICES.o $(OBJS)
+	$(LD) DEVICES.o $(OBJS)
 
 clean:
 	$(RM) $(OBJS) *~ depend LINKS.o

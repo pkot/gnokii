@@ -27,7 +27,7 @@ OBJS =	fbus.o \
 all: LINKS.o
 
 LINKS.o: $(OBJS)
-	$(LD) $(LDREL) $(LDOUT) LINKS.o $(OBJS)
+	$(LD) LINKS.o $(OBJS)
 
 clean:
 	$(RM) $(OBJS) *~ depend LINKS.o
