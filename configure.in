@@ -319,6 +319,7 @@ AC_CHECK_FUNC(getopt_long, , [
 
 
 dnl ======================== Checks for Linux Bluetooth support
+bluetooth="no"
 AC_ARG_WITH(bluetooth,
 	[  --with-bluetooth=DIR   specifies the base libbluetooth],
 	[ if test x$withval = xyes; then
@@ -338,9 +339,9 @@ AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_so
 		[struct sockaddr_rc rc;],
 		ac_cv_have_sockaddr_rc=yes,
 		ac_cv_have_sockaddr_rc=no)])
-if test ac_cv_have_sockaddr_rc = yes; then
+if test $ac_cv_have_sockaddr_rc = yes; then
 	AC_DEFINE(HAVE_BLUETOOTH)
-	HAVE_BLUETOOTH=yes
+	USE_BLUETOOTH="yes"
 fi
 
 dnl ======================== Checks for X base support 
@@ -599,7 +600,7 @@ AC_SUBST(XPACKAGE)
 AC_SUBST(XGNOKIIDIR)
 AC_SUBST(exec_prefix)
 AC_SUBST(USE_NLS)
-AC_SUBST(HAVE_BLUETOOTH)
+AC_SUBST(USE_BLUETOOTH)
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 AC_SUBST(PTHREAD_CFLAGS)
@@ -647,7 +648,7 @@ echo "
     XDebug:             $xdebug
     RLPDebug:           $rlpdebug
     NLS:                $USE_NLS
-    Bluetooth:          $HAVE_BLUETOOTH
+    Bluetooth:          $USE_BLUETOOTH
     Security:           $security
     Build Shared Lib:   $shared
     Win32:              $win32 

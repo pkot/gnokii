@@ -27,7 +27,7 @@ else
 		tcp.o
 endif
 
-ifdef HAVE_BLUETOOTH
+ifdef USE_BLUETOOTH
 	OBJS += unixbluetooth.o
 endif
 
