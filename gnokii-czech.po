@@ -8,7 +8,7 @@ msgstr ""
 
 #: fbus-6110.c:1833
 msgid "   %d. SMS Center name is %s\n"
-msgstr "   %d. SMS centrum má název %s\n"
+msgstr "   %d. SMS centrum má jméno %s\n"
 
 #: fbus-6110.c:1834
 msgid "   %d. SMS Center number is %s\n"
@@ -196,11 +196,11 @@ msgstr "   Pou¾ito: %d\n"
 
 #: gnokii.c:82
 msgid "   usage: gnokii {--help|--monitor|--version}"
-msgstr ""
+msgstr "   pou¾ití: gnokii {--help|--monitor|--version}"
 
 #: gnokiid.c:63
 msgid "   usage: gnokiid {--help|--version}"
-msgstr ""
+msgstr "   pou¾ití: gnokiid {--help|--version}"
 
 #: gnokii.c:948
 msgid "%s|%d|Bad location or other error!(%d)\n"
