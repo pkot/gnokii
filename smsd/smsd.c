@@ -163,12 +163,12 @@ gint LoadDB (void)
 static void Usage (gchar *p)
 {
   g_print (_("\nUsage:  %s [options]\n"
-             "            -u, --user db_username\n" 
+             "            -u, --user db_username OR action if -m file\n" 
              "            -p, --password db_password\n" 
              "            -d, --db db_name\n" 
-             "            -c, --host db_hostname\n" 
+             "            -c, --host db_hostname OR spool directory if -m file\n" 
              "            -r, --reports\n" 
-             "            -m, --module db_module (pq, mysql)\n" 
+             "            -m, --module db_module (pq, mysql, file)\n" 
              "            -l, --libdir path_to_db_module\n" 
              "            -h, --help\n"), p);
 }
@@ -278,7 +278,7 @@ static void *SendSMS2 (void *a)
   if ((*DB_ConnectOutbox) (connection))
   {
     pthread_exit (0);
-    return (0);
+    return (NULL);
   }
 
   while (1)
@@ -288,7 +288,7 @@ static void *SendSMS2 (void *a)
     {
       pthread_mutex_unlock (&db_monitorMutex);
       pthread_exit (0);
-      return (0);
+      return (NULL);
     }
     pthread_mutex_unlock (&db_monitorMutex);
 

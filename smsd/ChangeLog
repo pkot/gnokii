@@ -1,3 +1,7 @@
+* Sun Aug 11 2002 Jan Derfinak <ja@mail.upjs.sk>
+- Added libfile.
+
+
 * Sun Aug  4 2002 Jan Derfinak <ja@mail.upjs.sk>
 - Added support for phones with sms folders.
 
@@ -6,20 +10,25 @@
 -  When some characters are not from the default alphabet
    encode them in the unicode
 
+
 * Sun Jul 07 2002 Jan Derfinak <ja@mail.upjs.sk>
 - Fixed sms's sending to reflect changes in gnokii code.
+
 
 * Fri Jun 28 2002 Jan Derfinak <ja@mail.upjs.sk>
 - Fixed sms's receiving to reflect changes in gnokii code.
 - Sms's sending still don't work.
 
+
 * Tue Apr 23 2002 Pawel Kot <pkot@linuxnews.pl>
 - Don't use 'connect' as the variable name
 - GE_SMSSENDOK is depreciated
 
+
 * Wed Mar 20 2002 BORBELY Zoltan <bozo@andrews.hu>
 - GSM_Data structures initialised correctly
 - Minor locking fixes
+
 
 * Thu Feb 14 2002 Jan Derfinak <ja@mail.upjs.sk>
 - Rewrited PostgreSQL plugin.
@@ -27,8 +36,10 @@
 - Removed GSMLinkOK test.
 - Code and documentation cleanup.
 
+
 * Sun Feb 03 2002 Jan Derfinak <ja@mail.upjs.sk>
 - MySQL support is now really working.
+
 
 * Fri Feb 01 2002 Jan Derfinak <ja@mail.upjs.sk>
 - Added experimental support for MySQL. Fixes will coming soon. 

@@ -37,13 +37,18 @@ smsd: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/libgnokii.so
 
 # PostgreSQL support
 libpq.so: smsd.h pq.c
-	gcc -shared -o libpq.so `glib-config --cflags` -I../include \
+	gcc -s -O2 -shared -o libpq.so `glib-config --cflags` -I../include \
         -I/usr/include/pgsql pq.c `glib-config --libs` -lpq
 
 # MySQL support
 libmysql.so: smsd.h mysql.c
-	gcc -shared -o libmysql.so `glib-config --cflags` -I../include \
+	gcc -s -O2 -shared -o libmysql.so `glib-config --cflags` -I../include \
         -I/usr/include/mysql mysql.c `glib-config --libs` -L/usr/lib/mysql -lmysqlclient
+
+# File support
+libfile.so: smsd.h file.c
+	gcc -s -O2 -shared -o libfile.so `glib-config --cflags` -I../include \
+        file.c `glib-config --libs`
 
 ### End of DB Modules
 
@@ -54,7 +59,7 @@ $(TOPDIR)/common/libgnokii.so:
 	$(MAKE) -C $(TOPDIR)/common libgnokii.so
 
 clean:
-	$(RM) $(OBJS) *~ depend smsd libpq.so libmysql.so core*
+	$(RM) $(OBJS) *~ depend smsd *.so core*
 
 install: all
 	$(INSTALL) -d $(DESTDIR)/$(bindir)

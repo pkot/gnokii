@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Phone number: $1"
+echo "Date: $2"
+
+cat 
+echo ""

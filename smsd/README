@@ -1,12 +1,16 @@
+INTRODUCTION
+
 The SMSD (SMS daemon) program is intended for receiving and sending SMS's.
-This code is a part of one project on which I work and I provide it for free
-use under GPL. I provide the program AS IS without any warranty.
+This code is a part of one project on which I worked and I provide it for
+free use under GPL. I provide the program AS IS without any warranty.
 
 The program is designed to use modules (plugins) to work with SQL server.
-Curently are supported PostgreSQL and MySQL. See option --module. SMSD uses
-SQL server as repository for SMS's. You must create a database (default name
-is 'sms') with tables defined in sms.tables.{module}.sql files. Table
-'inbox' is for received SMS's: 
+Curently are supported PostgreSQL, MySQL and special module 'file' which is
+designed to work without SQL database (see below for special instructions for
+file module). See option --module. SMSD uses SQL server as repository for
+SMS's. You must create a database (default name is 'sms') with tables
+defined in sms.tables.{module}.sql files. Table 'inbox' is for received
+SMS's:
 number     - phone number from which is sms received
 smsdate    - date setted by SMS center
 insertdate - date of inserting SMS in table
@@ -30,27 +34,62 @@ error          - This attribut contains return value of SendSMS function.
                  For explanation of numeric values see gsm-error.h in gnokii
                  source.                 
 
-SMSD is multi threaded program. After running SMSD you can see 5 threads.
-The first thread is thread manager, the second is for lowlevel communication
-with phone, the third for high level phone monitoring, the fourth is for
-receiving SMS's and last fifth is for SMS's sending.
+SMSD is multi threaded program. If you list processes you will see more as
+one instance of smsd.
+
+
+
+THE FILE MODULE
+
+This module don't need SQL server for its work. For incoming messages it
+work in a way that it calls a program giving phone number, date as parameter
+and the message text on stdin. In the smsd directory there is as example file
+action. It shows sms data to stdout. If you want something usefull you must
+write your own action.
+For outgoing messages you can set spool directory where smsd looks
+regularly.
+
+Incoming sms are passed in format
+action number date < sms
+
+Outgoing sms must be in format:
+number
+text
+
+The name of file is unimportant but smsd ignores all files with prefix
+"ERR.". If smsd succesfuly sends sms, it removes file from spool directory.
+If smsd cannot sends sms prepend file with "ERR." prefix and ignores it.
+
+If you use -m file, -u (--user) and -c (--host) will have other meaning.
+-u is for action (action must be executable)
+-c is for spool directory where smsd looks for sms's. Smsd must have read
+   and write permissions to this directory.
+
+-p, -d parameters have no meaning when -m file is used.
+
+If you don't specify -u, default action is to print sms to stdin.
+If you don't specify -c, sms sending will be disabled.
+
+
+
+OPTIONS
 
 Options:
 -u, --user db_username
-	Specify users name.
+	Specify user name.
 
 -p, --password db_password
-	Specify users password.
+	Specify user password.
 
 -d, --db db_name
 	Specify database name.
  
 -c, --host db_hostname
-	Specify database server.
+	Specify database server host name.
 
 -r, --reports
-	By default smsd do not receives or sends delivery reports. You can
-	change this behaviour with option.
+	By default smsd does not receive or send delivery reports. You can
+	change this behaviour with this option.
  
 -m, --module db_module
 	Specify which module to use for connection to DB server.
@@ -65,6 +104,10 @@ Options:
 -h, --help
 	Shows short help.
 
+
+
+COMPILATION
+
 SMSD is not compiled by default with gnokii 'make' command. You must compile it
 manually by typing 'make' in smsd directory. But before SMSD compilation
 you must right configure gnokii (autoconf, configure). You must edit
@@ -73,23 +116,23 @@ compile module for your DB server.
 
 For example:
 (in gnokii directory)
+autoheader
 autoconf
 ./configure
 cd smsd
 vi Makefile (edit paths in "DB Modules" section)
 make
-make libpq.so OR make libmysql.so
+make libpq.so OR make libmysql.so OR make libfile.so
 make install
 
 SMSD shares gnokii's runtime configuration file and libgnokii. 
 
-					Jan Derfinak <ja@mail.upjs.sk>
-					14 Februar 2002
 
 
+NOTES
 
 In some distributions of MySQL you need to link zlib with smsd or db module.
 Please add '-lz' to Makefile if smsd cannot load libmysql.so.
 
+
 					Jan Derfinak <ja@mail.upjs.sk>
-					07 Jul 2002
