@@ -1,0 +1,185 @@
+dnl
+dnl  Makefile for the GNOKII tool suite.
+dnl 
+dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+dnl                2000 Karel Zak
+dnl
+
+AC_INIT(gnokii/gnokii.c)
+
+AC_CONFIG_AUX_DIR(config)
+
+AC_CANONICAL_SYSTEM
+
+dnl ======================== Default setting
+CFLAGS="-O2 -Wall"
+model="6110"
+port="/dev/ttyS0"
+
+dnl ======================== Checks for programs.
+AC_PROG_CC
+AC_PATH_PROG(LD, ld, no)
+AC_PATH_PROG(RM, rm, no)
+AC_PATH_PROG(MSGFMT, msgfmt, no)
+AC_PATH_PROG(XGETTEXT, xgettext, no)
+AC_PATH_PROG(MAKE, make, no)
+AC_PATH_PROG(INSTALL, install, no)
+
+AC_ARG_ENABLE(debug, 
+	[  --enable-debug          compile with debug code],
+	[ CFLAGS="-g -Wall -DDEBUG"
+          debug="yes" ],
+        [ debug="no"  ]
+)
+
+dnl ======================= GTK
+
+AC_ARG_ENABLE(gtk, 
+	[  --disable-gtk           compile without GTK code],
+	[ gtk=no ],
+	[ gtk="yes"]	
+)
+
+if test "$gtk" = yes
+then
+	AC_PATH_X
+	AC_PATH_PROG(GTK_CONFIG, gtk-config, no)
+	if test "$GTK_CONFIG" = no
+	then
+		AC_MSG_ERROR(Cannot find gtk-config.)
+	else
+		GTK_CFLAGS=`$GTK_CONFIG --cflags`
+		GTK_LIBS=`$GTK_CONFIG --libs`
+	fi
+else
+	GTK_CFLAGS=""
+	GTK_LIBS=""
+fi
+
+dnl ======================== Checks for libraries.
+
+AC_ARG_WITH(libpthread, 
+	[  --with-libpthread=DIR   specifies the base libpthread],
+	[ if test x$withval = xyes
+	  then 
+		AC_MSG_WARN(Usage is: --with-libpthread=DIR)
+	  else
+		PTHREAD_LIBS="-L$withval/lib/"
+		PTHREAD_CFLAGS="-I$withval/include/"
+	  fi
+	]
+)
+
+AC_CHECK_LIB(pthread, pthread_create, [
+	case "$host_os" in
+		linux*) 	
+			PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_REENTRANT"
+			PTHREAD_LIBS="$PTHREAD_LIBS -lpthread" ;;
+		freebsd*)
+			PTHREAD_CFLAGS="$PTHREAD_CFLAGS -D_THREAD_SAFE"
+			PTHREAD_LIBS="$PTHREAD_LIBS -s -pthread" ;;
+	esac ],
+	[ AC_MSG_ERROR(not found library: pthread !!!) ]
+)
+
+
+dnl ======================== Additional switches
+
+AC_ARG_ENABLE(security, 
+	[  --enable-security       enable all security features ],
+	[ security="-DSECURITY" ],
+	[ security=""]
+)
+
+AC_ARG_ENABLE(gettext, 
+	[  --enable-gettext        if you want gettext suport ],
+	[ gettext="-DGNOKII_GETTEXT" ],
+	[ gettext=""]
+)
+
+AC_ARG_ENABLE(win32, 
+	[  --enable-win32          if you want win32 suport ],
+	[ win32="-DWIN32" ],
+	[ win32=""]
+)
+
+AC_ARG_WITH(model, 
+	[  --with-model=MODEL      model of the mobile phone ],
+	[ model="$withval" ]
+)
+
+AC_ARG_WITH(port, 
+	[  --with-port=PORT        serial port for communication ],
+	[ port="$withval" ]
+)
+
+
+dnl ======================== Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h)
+
+dnl ======================== Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+AC_STRUCT_TM
+
+dnl ======================== Checks for library functions.
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_MEMCMP
+AC_TYPE_SIGNAL
+AC_FUNC_STRFTIME
+AC_CHECK_FUNCS(mktime select strdup strstr strtol)
+
+VERSION=`cat VERSION`
+XVERSION=`cat xgnokii/VERSION`
+
+AC_SUBST(VERSION)
+AC_SUBST(XVERSION)
+AC_SUBST(model)
+AC_SUBST(port)
+AC_SUBST(gettext)
+AC_SUBST(security)
+AC_SUBST(win32)
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
+AC_SUBST(PTHREAD_CFLAGS)
+AC_SUBST(PTHREAD_LIBS)
+
+AC_OUTPUT(Makefile.global packaging/RedHat/gnokii.spec)
+
+dnl ======================== Final report
+
+echo "
+
+  G N O K I I
+
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+
+  Copyright (C) 1999-2000  The Gnokii Development Team.
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+ 
+  See file COPYING for more details.
+
+    Host system:	$host_os
+    Gnokii version:     $VERSION
+    Xgnokii version:	$XVERSION
+    Phone model:        $model
+    Serial port:        $port
+    GTK:                $gtk
+    Debug:              $debug
+    Gettext:            $gettext
+    Security:           $security
+    Win32:              $win32 
+    Prefix:             $prefix
+
+  Type 'make' for compilation.
+ 
+"

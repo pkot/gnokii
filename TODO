@@ -1,0 +1,4 @@
+
+	- check build system in win32, FreeBSD (-lintl is needed for gettext on FreeBSD)
+	- remove unused variable from source
+	- (re)write .spec
