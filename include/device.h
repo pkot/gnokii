@@ -42,7 +42,7 @@
 int device_getfd(void);
 
 int device_open(const char *file, int with_odd_parity, int with_async,
-		int with_hw_handshake, GSM_ConnectionType device_type);
+		int with_hw_handshake, gn_connection_type device_type);
 void device_close(void);
 void device_reset(void);
 

@@ -43,7 +43,7 @@
 static int device_portfd = -1;
 
 /* The device type to use */
-static GSM_ConnectionType devicetype;
+static gn_connection_type devicetype;
 
 int device_getfd(void)
 {
@@ -51,27 +51,27 @@ int device_getfd(void)
 }
 
 int device_open(const char *file, int with_odd_parity, int with_async,
-		int with_hw_handshake, GSM_ConnectionType device_type)
+		int with_hw_handshake, gn_connection_type device_type)
 {
 	devicetype = device_type;
 
 	dprintf("Serial device: opening device %s\n", file);
 
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		device_portfd = serial_opendevice(file, with_odd_parity, with_async, with_hw_handshake);
 		break;
 #ifdef HAVE_IRDA
-	case GCT_Irda:
+	case GN_CT_Irda:
 		device_portfd = irda_open();
 		break;
 #endif
 #ifndef WIN32
-	case GCT_Tekram:
+	case GN_CT_Tekram:
 		device_portfd = tekram_open(file);
 		break;
-	case GCT_TCP:
+	case GN_CT_TCP:
 		device_portfd = tcp_opendevice(file, with_async);
 		break;
 #endif
@@ -86,20 +86,20 @@ void device_close(void)
 	dprintf("Serial device: closing device\n");
 
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		serial_close(device_portfd);
 		break;
 #ifdef HAVE_IRDA
-	case GCT_Irda:
+	case GN_CT_Irda:
 		irda_close(device_portfd);
 		break;
 #endif
 #ifndef WIN32
-	case GCT_Tekram:
+	case GN_CT_Tekram:
 		tekram_close(device_portfd);
 		break;
-	case GCT_TCP:
+	case GN_CT_TCP:
 		tcp_close(device_portfd);
 		break;
 #endif
@@ -118,17 +118,17 @@ void device_setdtrrts(int dtr, int rts)
 	dprintf("Serial device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
 
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		serial_setdtrrts(device_portfd, dtr, rts);
 		break;
 #ifdef HAVE_IRDA
-	case GCT_Irda:
+	case GN_CT_Irda:
 		break;
 #endif
 #ifndef WIN32
-	case GCT_Tekram:
-	case GCT_TCP:
+	case GN_CT_Tekram:
+	case GN_CT_TCP:
 		break;
 #endif
 	default:
@@ -141,17 +141,17 @@ void device_changespeed(int speed)
 	dprintf("Serial device: setting speed to %d\n", speed);
 
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		serial_changespeed(device_portfd, speed);
 #ifdef HAVE_IRDA
-	case GCT_Irda:
+	case GN_CT_Irda:
 		break;
 #endif
 #ifndef WIN32
-	case GCT_Tekram:
+	case GN_CT_Tekram:
 		tekram_changespeed(device_portfd, speed);
-	case GCT_TCP:
+	case GN_CT_TCP:
 		break;
 #endif
 	default:
@@ -162,17 +162,17 @@ void device_changespeed(int speed)
 size_t device_read(__ptr_t buf, size_t nbytes)
 {
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		return (serial_read(device_portfd, buf, nbytes));
 #ifdef HAVE_IRDA
-	case GCT_Irda:
+	case GN_CT_Irda:
 		return irda_read(device_portfd, buf, nbytes);
 #endif
 #ifndef WIN32
-	case GCT_Tekram:
+	case GN_CT_Tekram:
 		return tekram_read(device_portfd, buf, nbytes);
-	case GCT_TCP:
+	case GN_CT_TCP:
 		return tcp_read(device_portfd, buf, nbytes);
 #endif
 	default:
@@ -184,17 +184,17 @@ size_t device_read(__ptr_t buf, size_t nbytes)
 size_t device_write(const __ptr_t buf, size_t n)
 {
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		return (serial_write(device_portfd, buf, n));
 #ifdef HAVE_IRDA
-	case GCT_Irda:
+	case GN_CT_Irda:
 		return irda_write(device_portfd, buf, n);
 #endif
 #ifndef WIN32
-	case GCT_Tekram:
+	case GN_CT_Tekram:
 		return tekram_write(device_portfd, buf, n);
-	case GCT_TCP:
+	case GN_CT_TCP:
 		return tcp_write(device_portfd, buf, n);
 #endif
 	default:
@@ -206,17 +206,17 @@ size_t device_write(const __ptr_t buf, size_t n)
 int device_select(struct timeval *timeout)
 {
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		return serial_select(device_portfd, timeout);
 #ifdef HAVE_IRDA
-	case GCT_Irda:
+	case GN_CT_Irda:
 		return irda_select(device_portfd, timeout);
 #endif
 #ifndef WIN32
-	case GCT_Tekram:
+	case GN_CT_Tekram:
 		return tekram_select(device_portfd, timeout);
-	case GCT_TCP:
+	case GN_CT_TCP:
 		return tcp_select(device_portfd, timeout);
 #endif
 	default:
@@ -230,8 +230,8 @@ gn_error device_nreceived(int *n)
 	*n = -1;
 
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		return serial_nreceived(device_portfd, n);
 	default:
 		return GN_ERR_NOTSUPPORTED;
@@ -241,8 +241,8 @@ gn_error device_nreceived(int *n)
 gn_error device_flush(void)
 {
 	switch (devicetype) {
-	case GCT_Serial:
-	case GCT_Infrared:
+	case GN_CT_Serial:
+	case GN_CT_Infrared:
 		return serial_flush(device_portfd);
 	default:
 		return GN_ERR_NOTSUPPORTED;
