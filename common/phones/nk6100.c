@@ -111,7 +111,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x03, IncomingPhonebook },
 
 	{ 0x64, IncomingPhoneInfo },
-        { 0xd2, IncomingModelInfo },
+	{ 0xd2, IncomingModelInfo },
 	{ 0x14, IncomingSMS },
 	{ 0x17, Incoming0x17 },
 	{ 0, NULL}
@@ -120,7 +120,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 GSM_Phone phone_nokia_6100 = {
 	IncomingFunctions,
 	PGEN_IncomingDefault,
-        /* Mobile phone information */
+	/* Mobile phone information */
 	{
 		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|8210", /* Supported models */
 		4,                     /* Max RF Level */
