@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "gsm-error.h"
+#include "misc.h"
 
 API char *print_error(GSM_Error e)
 {
@@ -80,4 +81,87 @@ API char *print_error(GSM_Error e)
 	case GE_UNSOLICITED:              return "Unsolicited message received.";
 	default:                          return "Unknown error.";
 	}
+}
+
+API GSM_Error ISDNCauseToGSMError(char **src, char **msg, unsigned char loc, unsigned char cause)
+{
+	char *s, *m;
+	GSM_Error err;
+
+	if (src == NULL) src = &s;
+	if (msg == NULL) msg = &m;
+
+	switch (loc) {
+	case 0x00: *src = "user"; break;
+	case 0x01: *src = "private network serving the local user"; break;
+	case 0x02: *src = "public network serving the local user"; break;
+	case 0x03: *src = "transit network"; break;
+	case 0x04: *src = "public network serving the remote user"; break;
+	case 0x05: *src = "private network serving the remote user"; break;
+	case 0x07: *src = "international network"; break;
+	case 0x0a: *src = "network beyond inter-working point"; break;
+	default:   *src = "unknown"; break;
+	}
+
+	switch (cause) {
+	case 0x01: *msg = "Unallocated (unassigned) number"; err = GE_UNKNOWN; break;
+	case 0x02: *msg = "No route to specified transit network"; err = GE_UNKNOWN; break;
+	case 0x03: *msg = "No route to destination"; err = GE_UNKNOWN; break;
+	case 0x06: *msg = "Channel unacceptable"; err = GE_UNKNOWN; break;
+	case 0x07: *msg = "Call awarded and being delivered in an  established channel"; err = GE_UNKNOWN; break;
+	case 0x10: *msg = "Normal call clearing"; err = GE_UNKNOWN; break;
+	case 0x11: *msg = "User busy"; err = GE_UNKNOWN; break;
+	case 0x12: *msg = "No user responding"; err = GE_UNKNOWN; break;
+	case 0x13: *msg = "No answer from user (user alerted)"; err = GE_UNKNOWN; break;
+	case 0x15: *msg = "Call rejected"; err = GE_UNKNOWN; break;
+	case 0x16: *msg = "Number changed"; err = GE_UNKNOWN; break;
+	case 0x1A: *msg = "Non-selected user clearing"; err = GE_UNKNOWN; break;
+	case 0x1B: *msg = "Destination out of order"; err = GE_UNKNOWN; break;
+	case 0x1C: *msg = "Invalid number format"; err = GE_UNKNOWN; break;
+	case 0x1D: *msg = "Facility rejected"; err = GE_UNKNOWN; break;
+	case 0x1E: *msg = "Response to status enquiry"; err = GE_UNKNOWN; break;
+	case 0x1F: *msg = "Normal, unspecified"; err = GE_UNKNOWN; break;
+	case 0x22: *msg = "No circuit or channel available"; err = GE_UNKNOWN; break;
+	case 0x26: *msg = "Network out of order"; err = GE_UNKNOWN; break;
+	case 0x29: *msg = "Temporary failure"; err = GE_UNKNOWN; break;
+	case 0x2A: *msg = "Switching equipment congestion"; err = GE_UNKNOWN; break;
+	case 0x2B: *msg = "Access information discarded"; err = GE_UNKNOWN; break;
+	case 0x2C: *msg = "Requested circuit or channel not available"; err = GE_UNKNOWN; break;
+	case 0x2F: *msg = "Resources unavailable, unspecified"; err = GE_UNKNOWN; break;
+	case 0x31: *msg = "Quality of service unavailable"; err = GE_UNKNOWN; break;
+	case 0x32: *msg = "Requested facility not subscribed"; err = GE_UNKNOWN; break;
+	case 0x39: *msg = "Bearer capability not authorised"; err = GE_UNKNOWN; break;
+	case 0x3A: *msg = "Bearer capability not presently available"; err = GE_UNKNOWN; break;
+	case 0x3F: *msg = "Service or option not available, unspecified"; err = GE_UNKNOWN; break;
+	case 0x41: *msg = "Bearer capability not implemented"; err = GE_UNKNOWN; break;
+	case 0x42: *msg = "Channel type not implemented"; err = GE_UNKNOWN; break;
+	case 0x45: *msg = "Requested facility not implemented"; err = GE_UNKNOWN; break;
+	case 0x46: *msg = "Only restricted digital information bearer"; err = GE_UNKNOWN; break;
+	case 0x4F: *msg = "Service or option not implemented, unspecified"; err = GE_UNKNOWN; break;
+	case 0x51: *msg = "Invalid call reference value"; err = GE_UNKNOWN; break;
+	case 0x52: *msg = "Identified channel does not exist"; err = GE_UNKNOWN; break;
+	case 0x53: *msg = "A  suspended  call  exists,  but this call identity does not"; err = GE_UNKNOWN; break;
+	case 0x54: *msg = "Call identity in use"; err = GE_UNKNOWN; break;
+	case 0x55: *msg = "No call suspended"; err = GE_UNKNOWN; break;
+	case 0x56: *msg = "Call having the requested call identity"; err = GE_UNKNOWN; break;
+	case 0x58: *msg = "Incompatible destination"; err = GE_UNKNOWN; break;
+	case 0x5B: *msg = "Invalid transit network selection"; err = GE_UNKNOWN; break;
+	case 0x5F: *msg = "Invalid message, unspecified"; err = GE_UNKNOWN; break;
+	case 0x60: *msg = "Mandatory information element is missing"; err = GE_UNKNOWN; break;
+	case 0x61: *msg = "Message type non-existent or not implemented"; err = GE_UNKNOWN; break;
+	case 0x62: *msg = "Message not compatible with call state  or  message or message type non existent or not implemented"; err = GE_UNKNOWN; break;
+	case 0x63: *msg = "Information  element  non-existent  or  not  implemented"; err = GE_UNKNOWN; break;
+	case 0x64: *msg = "Invalid information element content"; err = GE_UNKNOWN; break;
+	case 0x65: *msg = "Message not compatible"; err = GE_UNKNOWN; break;
+	case 0x66: *msg = "Recovery on timer expiry"; err = GE_UNKNOWN; break;
+	case 0x6F: *msg = "Protocol error, unspecified"; err = GE_UNKNOWN; break;
+	case 0x7F: *msg = "Inter working, unspecified"; err = GE_UNKNOWN; break;
+	default:   *msg = "Unknown"; err = GE_UNKNOWN; break;
+	}
+
+	dprintf("\tISDN cause: %02x %02x\n", loc, cause);
+	dprintf("\tlocation: %s\n", *src);
+	dprintf("\tcause: %s\n", *msg);
+
+	return err;
 }

@@ -75,6 +75,8 @@
     o SMS saving works with the new SMS subsystem    (BORBELY Zoltan)
     o calling GetNetworkInfo before sending an SMS (it will
       reactivate the link)                           (BORBELY Zoltan)
+    o ISDN cause codes decoded in SendSMS and MakeCall reply
+                                                     (BORBELY Zoltan)
  * 6160 series updates:
     o experimental driver added                      (BORBELY Zoltan)
     o Identify implemented                           (BORBELY Zoltan)
@@ -93,6 +95,7 @@
       length                                         (BORBELY Zoltan)
     o M2BUS idle channel check and channel flushing added
                                                      (BORBELY Zoltan)
+ * ISDN cause decoding added to gsm-error            (BORBELY Zoltan)
 
 0.4.0pre20
 ==========

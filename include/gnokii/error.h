@@ -91,5 +91,6 @@ typedef enum {
 } GSM_Error;
 
 API char *print_error(GSM_Error e);
+API GSM_Error ISDNCauseToGSMError(char **src, char **msg, unsigned char loc, unsigned char cause);
 
 #endif

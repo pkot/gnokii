@@ -1148,6 +1148,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 	GSM_CBMessage cbmsg;
 	unsigned char *pos;
 	int n;
+	GSM_Error error;
 
 	switch (message[3]) {
 	/* Message sent */
@@ -1156,16 +1157,14 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 
 	/* Send failed */
 	case 0x03:
-		/* I belive this is GE_SMSSENDFAILED in all cases -- pkot */
-		switch (message[6]) {
-		case 0x02:
-		case 0x32: /* I get this error when operator does not allow to send me the SMS.
-			    * 01 08 00 03 64 01 32 00
-			    */
-		case 0x6f: /* maybe bad sms center number */
-			return GE_SMSSENDFAILED;
-		default:
-			return GE_UNHANDLEDFRAME;
+		/*
+		 * The marked part seems to be an ISDN cause code -- bozo
+		 * 01 08 00 03 64 [01 32] 00
+		 */
+		error = ISDNCauseToGSMError(NULL, NULL, message[5], message[6]);
+		switch (error) {
+		case GE_UNKNOWN: return GE_SMSSENDFAILED;
+		default: return error;
 		}
 		return GE_UNHANDLEDFRAME;
 
@@ -2738,6 +2737,7 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 
 	/* Remote end hang up */
 	case 0x04:
+		ISDNCauseToGSMError(NULL, NULL, message[7], message[6]);
 		if (data->CallInfo) {
 			data->CallInfo->CallID = message[4];
 			return GE_UNKNOWN;
