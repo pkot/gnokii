@@ -209,15 +209,14 @@ void sm_incoming_acknowledge(struct gn_statemachine *state)
 }
 
 
-/* This function is for convinience only
-   It is called after SM_SendMessage and blocks until a response is received
-
-   t is in tenths of second
+/* This function is for convinience only.
+   It is called after SM_SendMessage and blocks until a response is received.
+   t is in tenths of second.
 */
 static gn_error __sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state)
 {
 	int retry;
-	gn_state s;
+	gn_state s = GN_SM_Startup;
 	gn_error err;
 	struct timeval now, next, timeout;
 
@@ -228,13 +227,11 @@ static gn_error __sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_
 		err = sm_wait_for(waitfor, data, state);
 		if (err != GN_ERR_NONE) return err;
 
-		if (s == GN_SM_WaitingForResponse || s == GN_SM_ResponseReceived) break;
-
 		timeradd(&now, &timeout, &next);
 		do {
 			s = gn_sm_loop(1, state);  /* Timeout=100ms */
 			gettimeofday(&now, NULL);
-		} while (timercmp(&next, &now, >) && (s == GN_SM_MessageSent));
+		} while (timercmp(&next, &now, >) && (s == GN_SM_MessageSent || s == GN_SM_Initialised));
 
 		if (s == GN_SM_WaitingForResponse || s == GN_SM_ResponseReceived) break;
 

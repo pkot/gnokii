@@ -14,6 +14,11 @@
       (currently the only driver that will support bluetooth); note
       the [bluetooth] section in .gnokiirc; it DOES NOT work yet
                                                          (Pawel Kot)
+ * statemachine changes
+    o allow sm_block and friends to be used not only directly after
+      sm_message_send but also with sm_reset in between, which sets
+      the state to GN_SM_Initialised                 (Osma Suominen)
+
 
 0.5.0pre7
 =========
