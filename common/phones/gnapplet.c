@@ -89,12 +89,14 @@ static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, 
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_netinfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_power(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_INFO,		gnapplet_incoming_info },
 	{ GNAPPLET_MSG_PHONEBOOK,	gnapplet_incoming_phonebook },
 	{ GNAPPLET_MSG_NETINFO,		gnapplet_incoming_netinfo },
 	{ GNAPPLET_MSG_POWER,		gnapplet_incoming_power },
+	{ GNAPPLET_MSG_DEBUG,		gnapplet_incoming_debug },
 	{ 0,				NULL}
 };
 
@@ -163,6 +165,7 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 static gn_error gnapplet_initialise(struct gn_statemachine *state)
 {
 	gn_error err;
+	gn_data d;
 	int i;
 
 	/* Copy in the phone info */
@@ -191,6 +194,12 @@ static gn_error gnapplet_initialise(struct gn_statemachine *state)
 	}
 
 	sm_initialise(state);
+
+	gn_data_clear(&d);
+	if ((err = gnapplet_identify(&d, state)) != GN_ERR_NONE) {
+		FREE(DRVINSTANCE(state));
+		return err;
+	}
 
 	return GN_ERR_NONE;
 }
@@ -523,4 +532,25 @@ static gn_error gnapplet_incoming_power(int messagetype, unsigned char *message,
 	}
 
 	return GN_ERR_NONE;
+}
+
+
+static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	char msg[1024];
+	REPLY_DEF;
+
+	switch (code) {
+
+	case GNAPPLET_MSG_DEBUG_NOTIFICATION:
+		if (error != GN_ERR_NONE) return error;
+		pkt_get_string(msg, sizeof(msg), &pkt);
+		dprintf("PHONE: %s\n", msg);
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_UNSOLICITED;
 }
