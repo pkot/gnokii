@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.17  2001-06-10 11:40:06  machek
+  Revision 1.18  2001-06-20 21:27:36  pkot
+  IrDA patch (Martin Jancar)
+
+  Revision 1.17  2001/06/10 11:40:06  machek
   xgnokii converted to new structure w.r.t. SMS messages.
 
   Revision 1.16  2001/05/24 20:47:31  chris
@@ -87,7 +90,7 @@ pthread_cond_t  getNetworkInfoCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
 
-GSM_Statemachine statemachine;
+static GSM_Statemachine statemachine;
 /* FIXME - don't really know what should own the statemachine in */
 /* the xgnokii scheme of things - Chris */
 
@@ -185,6 +188,9 @@ static GSM_Error fbusinit(bool enable_monitoring)
 
   if (!strcmp(xgnokiiConfig.connection, "infrared"))
     connection = GCT_Infrared;
+
+  if (!strcmp(xgnokiiConfig.connection, "irda"))
+    connection = GCT_Irda;
 
   /* Initialise the code for the GSM interface. */     
 

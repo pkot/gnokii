@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.35  2001-05-24 20:47:30  chris
+  Revision 1.36  2001-06-20 21:27:36  pkot
+  IrDA patch (Martin Jancar)
+
+  Revision 1.35  2001/05/24 20:47:30  chris
   More updating of 7110 code and some of xgnokii_lowlevel changed over.
 
   Revision 1.34  2001/03/23 08:24:56  ja
@@ -161,7 +164,7 @@ typedef struct {
   GtkWidget *model;
   GtkWidget *init;
   GtkWidget *bindir;
-  GtkWidget *serial, *infrared;
+  GtkWidget *serial, *infrared, *irda;
 } ConnectionWidgets;
 
 typedef struct {
@@ -724,10 +727,13 @@ void GUI_ShowOptions (void)
 
   gtk_entry_set_text (GTK_ENTRY (configDialogData.connection.bindir), xgnokiiConfig.bindir);
 
-  if (!strcmp(xgnokiiConfig.connection, "serial"))
+  if(!strcmp(xgnokiiConfig.connection, "serial")) {
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (configDialogData.connection.serial), TRUE);
-  else
+  } else   if(!strcmp(xgnokiiConfig.connection, "infrared")) {
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (configDialogData.connection.infrared), TRUE);
+  } else {
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (configDialogData.connection.irda), TRUE);
+  }
 
   /* Phone */
   gtk_entry_set_text (GTK_ENTRY (configDialogData.phone.model), phoneMonitor.phone.model);
@@ -1768,10 +1774,16 @@ static GtkWidget *CreateOptionsDialog (void)
   configDialogData.connection.infrared = gtk_radio_button_new_with_label (NULL, _("infrared"));
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.infrared, TRUE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.infrared);
+  
   configDialogData.connection.serial = gtk_radio_button_new_with_label ( 
             gtk_radio_button_group (GTK_RADIO_BUTTON (configDialogData.connection.infrared)), _("serial"));
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.serial, TRUE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.serial);
+  
+  configDialogData.connection.irda = gtk_radio_button_new_with_label ( 
+            gtk_radio_button_group (GTK_RADIO_BUTTON (configDialogData.connection.infrared)), _("irda"));
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.irda, TRUE, FALSE, 2);
+  gtk_widget_show (configDialogData.connection.irda);
 
   /***  Phone notebook  ***/
   frame = gtk_frame_new (_("Phone information"));

@@ -17,7 +17,10 @@
   The various routines are called PHONET_(whatever).
 
   $Log$
-  Revision 1.5  2001-05-07 16:24:03  pkot
+  Revision 1.6  2001-06-20 21:27:36  pkot
+  IrDA patch (Martin Jancar)
+
+  Revision 1.5  2001/05/07 16:24:03  pkot
   DLR-3P temporary fix. How should I do it better?
 
   Revision 1.4  2001/03/23 13:40:23  chris
@@ -190,25 +193,26 @@ void PHONET_RX_StateMachine(unsigned char rx_byte) {
 
 GSM_Error PHONET_Loop(struct timeval *timeout)
 {
-	unsigned char buffer[255];
-	int count, res;
-
-	res=device_select(timeout);
-	if ( res > 0 ) { 
-		res=device_read(buffer,255);
-		for (count=0; count<res; count++)
+	GSM_Error	error = GE_INTERNALERROR;
+	unsigned char	buffer[255];
+	int		count, res;
+	
+	res = device_select(timeout);
+	
+	if (res > 0) { 
+		res = device_read(buffer, 255);
+		for (count = 0; count < res; count++) {
 			PHONET_RX_StateMachine(buffer[count]);
+		}
+		if (res > 0) {
+			error = GE_NONE;	/* This traps errors from device_read */
+		}
+	} else if (!res) {
+		error = GE_TIMEOUT;
 	}
-	else return GE_TIMEOUT;
-
-	/* This traps errors from device_read */
-	if (res>0)
-		return GE_NONE;
-	else return GE_INTERNALERROR; 
+	
+	return error;
 }
-
-
-
 
 /* Main function to send an fbus message */
 
@@ -262,7 +266,7 @@ GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message) {
 		else current+=sent;
 	} while (current<total);
 
-	return (true);
+	return GE_NONE;
 }
 
 
@@ -271,28 +275,29 @@ GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message) {
 
 GSM_Error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 {
-	GSM_Error error=GE_INTERNALERROR;
-
+	GSM_Error error = GE_INTERNALERROR;
+	
 	/* 'Copy in' the global structures */
-	glink=newlink;
+	glink = newlink;
 	statemachine = state;
-
+	
 	/* Fill in the link functions */
-	glink->Loop=&PHONET_Loop;
-	glink->SendMessage=&PHONET_SendMessage;
-
-
+	glink->Loop = &PHONET_Loop;
+	glink->SendMessage = &PHONET_SendMessage;
+	
 	if ((glink->ConnectionType == GCT_Infrared) || (glink->ConnectionType == GCT_Irda)) {
-		if (PHONET_Open() != true) return GE_DEVICEOPENFAILED;
-	} else { /* ConnectionType == GCT_Serial etc */
-		return GE_DEVICEOPENFAILED;
+		if (PHONET_Open() == true) {
+			error = GE_NONE;
+			
+			/* Init variables */
+			imessage.state = FBUS_RX_Sync;
+			imessage.BufferCount = 0;
+		} else {
+			error = GE_DEVICEOPENFAILED;
+		}
+	} else { 
+		error = GE_DEVICEOPENFAILED;	/* ConnectionType == GCT_Serial etc */
 	}
-
-  
-	/* Init variables */
-	imessage.state=FBUS_RX_Sync;
-	imessage.BufferCount=0;
-
+	
 	return error;
 } 
-

@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2001-02-21 19:57:04  chris
+ * Revision 1.4  2001-06-20 21:27:34  pkot
+ * IrDA patch (Martin Jancar)
+ *
+ * Revision 1.3  2001/02/21 19:57:04  chris
  * More fiddling with the directory layout
  *
  * Revision 1.2  2001/02/20 21:55:10  pkot
@@ -64,113 +67,139 @@
 #define AF_IRDA 23
 #endif
 
+#define INFO_LEN		22
+#define DISCOVERY_TIMEOUT	60.0
+#define DISCOVERY_SLEEP		0.4
 
+static char *phone[] = {
+	"Nokia 7110", "Nokia 6210"
+};
 
-static int irda_discover_device(int fd)
+double d_time(void)
 {
-
-	struct irda_device_list *list;
-	unsigned char *buf;
-	int len, i;
-
-	len = sizeof(struct irda_device_list) +
-	    sizeof(struct irda_device_info) * 10;	// 10 = max devices in discover
-
-	buf = malloc(len);
-	list = (struct irda_device_list *) buf;
-
-	if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &len)) {
-		perror("getsockopt");
-		return -1;
-	}
-
-	if (len > 0) {
-		for (i = 0; i < list->len; i++) {
-		}
-
-		i = 0;
-		return (list->dev[i].daddr);
-	}
-
-	return -1;
-
+	double		time;
+	struct timeval	tv;
+	
+	gettimeofday(&tv, NULL);
+	
+	time = tv.tv_sec + (((double)tv.tv_usec) / 1000000.0);
+	
+	return time;
 }
 
+double d_sleep(double s)
+{
+	double		time;
+	struct timeval	tv1, tv2;
+	
+	gettimeofday(&tv1, NULL);
+	usleep(s * 1000000);
+	gettimeofday(&tv2, NULL);
+	
+	time = tv2.tv_sec - tv1.tv_sec + (((double)(tv2.tv_usec - tv1.tv_usec)) / 1000000.0);
+	
+	return time;
+}
+
+static int irda_discover_device(void)
+{
+
+	struct irda_device_list	*list;
+	struct irda_device_info	*dev;
+	unsigned char		*buf;
+	int			s, len, i, j, daddr = -1, fd;
+	double			t1, t2;
+	int phones = sizeof(phone) / sizeof(*phone);
+	
+	fd = socket(AF_IRDA, SOCK_STREAM, 0);
+	
+	len = sizeof(*list) + sizeof(*dev) * 10;	// 10 = max devices in discover
+	buf = malloc(len);
+	list = (struct irda_device_list *)buf;
+	dev = list->dev;
+	
+	t1 = d_time();
+	
+	do {
+		s = len;
+		memset(buf, 0, s);
+		
+		if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &s) == 0) {
+			for (i = 0; (i < list->len) && (daddr == -1); i++) {
+				for (j = 0; (j < phones) && (daddr == -1); j++) {
+					if (strncmp(dev[i].info, phone[j], INFO_LEN) == 0) {
+						daddr = dev[i].daddr;
+						dprintf("%s\t%x\n", dev[i].info, dev[i].daddr);
+					}
+				}
+				if (daddr == -1) {
+					dprintf("unknown: %s\t%x\n", dev[i].info, dev[i].daddr);
+				}
+			}
+		}
+		
+		if (daddr == -1) {
+			d_sleep(DISCOVERY_SLEEP);
+		}
+		
+		t2 = d_time();
+		
+	} while ((t2 - t1 < DISCOVERY_TIMEOUT) && (daddr == -1));
+	
+	free(buf);
+	close(fd);
+	
+	return daddr;
+}
 
 int irda_open(void)
 {
-
-	struct sockaddr_irda peer;
-	/* struct irda_ias_set ias_query; */
-	int fd, daddr;
-
-
-	/* Create socket */
-
-	fd = socket(AF_IRDA, SOCK_STREAM, 0);
-
-	if (fd < 0) perror("socket");
-
-
-	/* discover the devices */
-
-	daddr = irda_discover_device(fd);
-
-
-	/* Connect to service "Nokia:PhoNet" */
-
-	peer.sir_family = AF_IRDA;
-	peer.sir_lsap_sel = LSAP_ANY;
-	peer.sir_addr = DEV_ADDR_ANY;
-	strcpy(peer.sir_name, "Nokia:PhoNet");
-
-	if (connect(fd, (struct sockaddr *)&peer, sizeof(struct sockaddr_irda))) {
-		perror("connect");
-		return -1;
+	struct sockaddr_irda	peer;
+	int			fd = -1, daddr;
+	
+	daddr = irda_discover_device();			/* discover the devices */
+	
+	if (daddr != -1)  {
+		fd = socket(AF_IRDA, SOCK_STREAM, 0);	/* Create socket */
+		peer.sir_family = AF_IRDA;
+		peer.sir_lsap_sel = LSAP_ANY;
+		peer.sir_addr = daddr;
+		strcpy(peer.sir_name, "Nokia:PhoNet");
+		
+		if (connect(fd, (struct sockaddr *)&peer, sizeof(peer)) == 0) {	/* Connect to service "Nokia:PhoNet" */
+			recv(fd, NULL, 0, 0);		/* call recv first to make select work correctly */
+		} else {
+			perror("connect");
+			close(fd);
+			fd = -1;
+		}
 	}
-
-	/* call recv first to make select work correctly */
-
-	recv(fd, NULL, 0, 0);
-
+	
 	return fd;
-
 }
-
 
 int irda_close(int fd)
 {
-
 	shutdown(fd, 0);
 	return close(fd);
-
 }
-
 
 int irda_write(int __fd, __const __ptr_t __bytes, int __size)
 {
-
 	return (send(__fd, __bytes, __size, 0));
-
 }
-
 
 int irda_read(int __fd, __ptr_t __bytes, int __size)
 {
-
 	return (recv(__fd, __bytes, __size, 0));
-
 }
-
 
 int irda_select(int fd, struct timeval *timeout)
 {
-
 	fd_set readfds;
 
 	FD_ZERO(&readfds);
 	FD_SET(fd, &readfds);
 
 	return (select(fd + 1, &readfds, NULL, NULL, timeout));
-
 }
