@@ -4,6 +4,7 @@
     o missing German characters added              (BORBELY Zoltan)
  * portability fixes
     o libgnokii.dsp (Visual Studio) updated        (BORBELY Zoltan)
+    o VC debug and release flags differs                    (Ender)
 
 0.5.6
 =====
