@@ -1429,8 +1429,10 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 		 */
 		error = isdn_cause2gn_error(NULL, NULL, message[5], message[6]);
 		switch (error) {
-		case GN_ERR_UNKNOWN: return GN_ERR_FAILED;
-		default:         return error;
+		case GN_ERR_UNKNOWN:
+			return GN_ERR_FAILED;
+		default:
+			return error;
 		}
 
 	/* SMS message received */
