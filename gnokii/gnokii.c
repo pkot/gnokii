@@ -275,7 +275,7 @@ static int usage(void)
 			  "          gnokii --identify\n"
 			  "          gnokii --senddtmf string\n"
 			  "          gnokii --sendlogo {caller|op|picture} destination logofile [network code]\n"
-			  "          gnokii --sendringtone destination rtttlfile\n"
+			  "          gnokii --sendringtone rtttlfile destination\n"
 			  "          gnokii --setlogo op [logofile] [network code]\n"
 			  "          gnokii --setlogo startup [logofile]\n"
 			  "          gnokii --setlogo caller [logofile] [caller group number] [group name]\n"
@@ -611,15 +611,11 @@ static int savesms(int argc, char *argv[])
 	fprintf(stderr, _("storing sms"));
 
 	if (chars_read == 0) {
-
 		fprintf(stderr, _("Couldn't read from stdin!\n"));
 		return -1;
-
 	} else if (chars_read > input_len || chars_read > sizeof(SMS.UserData[0].u.Text) - 1) {
-
 		fprintf(stderr, _("Input too long!\n"));
 		return -1;
-
 	}
 
 	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
@@ -3012,6 +3008,8 @@ static int sendringtone(int argc, char *argv[])
 {
 	GSM_Ringtone ringtone;
 	GSM_Error error = GE_NOTSUPPORTED;
+
+	fprintf(stderr, "Sorry, sending ringtones is currently b0rken.\n");
 
 	if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
 		fprintf(stdout, _("Failed to load ringtone.\n"));

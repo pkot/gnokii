@@ -329,7 +329,7 @@ typedef struct {
 
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
 typedef struct {
-	/* Specification fields */
+	/* Caller to smsssend() has to fill in these */
 	SMS_MessageType Type;                          /* Message Type Indicator - 2 bits (9.2.3.1) */
 	bool MoreMessages;                             /* More Messages to Send (9.2.3.2) */
 	bool ReplyViaSameSMSC;                         /* Reply Path (9.2.3.17) - `Reply via same centre' in the phone */
@@ -348,6 +348,7 @@ typedef struct {
 	SMS_DataCodingScheme DCS;                      /* Data Coding Scheme (9.2.3.10) */
 	SMS_MessageValidity Validity;                  /* Validity Period Format & Validity Period (9.2.3.3 & 9.2.3.12) - `Message validity' in the phone */
 
+	/* This is for internal use by smsssend() */
 	unsigned short UDH_No;                         /* Number of present UDHs */
 	unsigned int UDH_Length;                       /* Length of the whole UDH */
 	SMS_UDHInfo UDH[SMS_MAX_UDH_NUMBER];           /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
