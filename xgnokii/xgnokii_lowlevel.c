@@ -1136,6 +1136,7 @@ void *GUI_Connect(void *a)
 	gdat.battery_unit = &batt_units;
 	gdat.battery_level = &phoneMonitor.batteryLevel;
 	gdat.datetime = &Alarm.timestamp;
+	gdat.alarm = &Alarm;
 	oldtime = time(&oldtime);
 	oldtime += 2;
 
