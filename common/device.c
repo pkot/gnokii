@@ -47,6 +47,8 @@ int device_open(const char *file, int with_odd_parity, int with_async, int with_
 {
 	devicetype = device_type;
 
+	dprintf("Serial device: opening device %s\n", file);
+
 	switch (devicetype) {
 	case GCT_Serial:
 	case GCT_Infrared:
@@ -68,6 +70,8 @@ int device_open(const char *file, int with_odd_parity, int with_async, int with_
 
 void device_close(void)
 {
+	dprintf("Serial device: closing device\n");
+
 	switch (devicetype) {
 	case GCT_Serial:
 	case GCT_Infrared:
@@ -93,6 +97,8 @@ void device_reset(void)
 
 void device_setdtrrts(int dtr, int rts)
 {
+	dprintf("Serial device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
+
 	switch (devicetype) {
 	case GCT_Serial:
 	case GCT_Infrared:
@@ -111,6 +117,8 @@ void device_setdtrrts(int dtr, int rts)
 
 void device_changespeed(int speed)
 {
+	dprintf("Serial device: setting speed to %d\n", speed);
+
 	switch (devicetype) {
 	case GCT_Serial:
 	case GCT_Infrared:

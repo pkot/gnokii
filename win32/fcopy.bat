@@ -21,6 +21,7 @@ copy ..\..\include\links\*.h links\*.h >nul
 mkdir phones > nul
 copy ..\..\include\phones\*.h phones\*.h >nul
 del unixserial.* > nul
+copy config1 config.h
 goto end
 :info
 echo Used by bat in subdirs for copying source files

@@ -433,8 +433,7 @@ static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *message,
 			int n;
 			unsigned char *s = strchr(message + 27, '\n');
 
-			if (s) n = s - message - 26;
-			else n = GSM_MAX_MODEL_LENGTH;
+			n = s ? s - message - 26 : GSM_MAX_MODEL_LENGTH;
 			snprintf(data->Model, GNOKII_MIN(n, GSM_MAX_MODEL_LENGTH), "%s", message + 27);
 			dprintf("Received model %s\n",data->Model);
 		}
@@ -442,8 +441,7 @@ static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *message,
 			int n;
 			unsigned char *s = strchr(message + 10, '\n');
 
-			if (s) n = s - message - 9;
-			else n = GSM_MAX_REVISION_LENGTH;
+			n = s ? s - message - 9 : GSM_MAX_REVISION_LENGTH;
 			snprintf(data->Revision, GNOKII_MIN(n, GSM_MAX_REVISION_LENGTH), "%s", message + 10);
 			dprintf("Received revision %s\n",data->Revision);
 		}

@@ -64,7 +64,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "DEBUG" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x415 /d "_DEBUG"
 # ADD RSC /l 0x415 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -106,6 +106,10 @@ SOURCE=atsie.c
 # Begin Source File
 
 SOURCE=cfgreader.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\compat.c
 # End Source File
 # Begin Source File
 
@@ -189,6 +193,10 @@ SOURCE=nk6100.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\nk6510.c
+# End Source File
+# Begin Source File
+
 SOURCE=nk7110.c
 # End Source File
 # Begin Source File
@@ -229,6 +237,22 @@ SOURCE=links\cbus.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cfgreader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\compat.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\config.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\device.h
+# End Source File
+# Begin Source File
+
 SOURCE="links\fbus-3110.h"
 # End Source File
 # Begin Source File
@@ -249,6 +273,30 @@ SOURCE=win32\getopt.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\gnokii.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\gsm-api.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\gsm-common.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\gsm-data.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\gsm-statemachine.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc.h
+# End Source File
+# Begin Source File
+
 SOURCE=phones\nk2110.h
 # End Source File
 # Begin Source File
@@ -258,6 +306,10 @@ SOURCE=phones\nk3110.h
 # Begin Source File
 
 SOURCE=phones\nk6100.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\phones\nk6510.h
 # End Source File
 # Begin Source File
 

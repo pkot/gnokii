@@ -125,7 +125,7 @@ typedef struct {
 			char NetworkCode[6];
 		} Logo; /* SMS_OpLogo, SMS_CallerIDLogo */
 		struct {
-//			...
+			char _dummy; /* FIXME: don't leave structs empty */
 		} Ringtone; /* SMS_Ringtone */
 	} u;
 } SMS_UDHInfo;
