@@ -209,8 +209,8 @@ int		VM_PtySetup(char *bindir)
 
 	fprintf (stderr, _("Slave pty is %s, calling %s to create /dev/gnokii.\n"), slave_name, mgnokiidev);
 
-		/* Get pty number */
-	pty_number = atoi(slave_name + 9);
+		/* Get pty number, handle numbers greater than 9 correctly */
+	pty_number = strtol(slave_name + 9, (char **) NULL, 16);
 
 		/* Create command line, something line ./mkgnokiidev ttyp0 */
 	sprintf(cmdline, "%s %d", mgnokiidev, pty_number);

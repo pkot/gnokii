@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
   }
 
   /* Turn device number into full path */
-  sprintf(dev_name, "/dev/ttyp%d", dev_number);
+  sprintf(dev_name, "/dev/ttyp%x", dev_number);
 
   /* Now become root */
   setuid(0);
