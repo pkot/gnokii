@@ -886,7 +886,16 @@ static gint SendSMSCore(GSM_API_SMS * sms)
 	GSM_Error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_SMSMessage *m = (D_SMSMessage *) g_malloc(sizeof(D_SMSMessage));
+	unsigned int i = 0;
 
+	while (sms->UserData[i].Type != SMS_NoData) {
+		if ((sms->UserData[i].Type == SMS_PlainText ||
+		     sms->UserData[i].Type == SMS_NokiaText ||
+		     sms->UserData[i].Type == SMS_iMelodyText) &&
+		     !IsDefaultAlphabetString(sms->UserData[i].u.Text))
+			sms->DCS.u.General.Alphabet = SMS_UCS2;
+		i++;
+	}
 	m->sms = sms;
 	e->event = Event_SendSMSMessage;
 	e->data = m;
