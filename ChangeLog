@@ -7,16 +7,19 @@
     o add --gettodo                                    (Markus Plail)
     o don't use hardcoded values               (Len Trigg, Pawel Kot)
     o add --writetodo                                  (Markus Plail)
+    o add WAP handling (only reading/deleting so far)  (Markus Plail)
  * xgnokii updates:
     o fix speeddial writing                            (Markus Plail)
     o fix logos                                        (Markus Plail)
-    o don't user hardcoded values                       (Paul Vriens)
+    o don't use hardcoded values                        (Paul Vriens)
  * 6510 series updates:
     o add bitmap writing                               (Markus Plail)
     o add ToDo reading                                 (Markus Plail)
     o fix SMS reading from IN/OUTBOX (ugly)            (Markus Plail)
     o use nokia-decoding                               (Markus Plail)
     o add ToDo writing                                 (Markus Plail)
+    o add DeleteAllToDoLocations                       (Markus Plail)
+    o add WAP handling (only reading/deleting so far)  (Markus Plail)
  * 6110 series updates:
     o Nokia 3410 is known to work                         (Pawel Kot)
     o use 0x64 frames only when PM_AUTHENTICATION is set for the
