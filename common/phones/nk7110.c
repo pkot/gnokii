@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.27  2001-11-22 17:56:53  pkot
+  Revision 1.28  2001-11-27 12:25:01  pkot
+  Cleanup
+
+  Revision 1.27  2001/11/22 17:56:53  pkot
   smslib update. sms sending
 
   Revision 1.26  2001/11/19 17:09:59  pkot
@@ -901,14 +904,11 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
-	unsigned char smsc_req[] = {FBUS_FRAME_HEADER, 0x33, 0x64, 0x00};
 	int length, i;
 
 	if (data->SMSMessage->MessageCenter.No) {
 		data->MessageCenter = &data->SMSMessage->MessageCenter;
 		P7110_GetSMSCenter(data, state);
-//		SM_SendMessage(state, 6, 0x02, smsc_req);
-//		SM_Block(state, data, 0x02);
 	}
 
 	length = EncodePDUSMS(data->SMSMessage, req + 6);
@@ -925,7 +925,7 @@ static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Error	e = GE_NONE;
-	int		digits, bytes, i;
+	int		digits, bytes;
 
 	if (!data) return GE_INTERNALERROR;
 
