@@ -1,4 +1,5 @@
 /*
+
   $Id$
 
   G N O K I I
@@ -12,31 +13,6 @@
 
   This file provides functions specific to the 6100 series. 
   See README for more details on supported mobile phones.
-
-  $Log$
-  Revision 1.8  2001-11-17 20:19:29  pkot
-  smslib cleanups, fixes and debugging
-
-  Revision 1.7  2001/11/17 16:44:07  pkot
-  Cleanup. Reading SMS for 6100 series. Not that it has some bugs more and does not support UDH yet
-
-  Revision 1.6  2001/11/15 12:15:04  pkot
-  smslib updates. begin work on sms in 6100 series
-
-  Revision 1.5  2001/11/15 12:12:34  pkot
-  7110 and 6110 series phones introduce as Nokia
-
-  Revision 1.4  2001/11/15 12:04:06  pkot
-  Faster initialization for 6100 series (don't check for dlr3 cable)
-
-  Revision 1.3  2001/08/17 00:01:53  pkot
-  Fixed a typo in 6100.c (me)
-
-  Revision 1.2  2001/08/09 12:34:34  pkot
-  3330 and 6250 support - I have no idea if it does work (mygnokii)
-
-  Revision 1.1  2001/07/09 23:55:35  pkot
-  Initial support for 6100 series in the new structure (me)
 
 */
 
@@ -58,6 +34,40 @@
 #endif
 
 /* Some globals */
+
+static const SMSMessage_Layout nk6100_deliver = {
+	true,
+	0, 11, 0, 0, 6, 0, 0, -1, 23, 22, 0, 20,
+	8, true, 24, true, 36, -1,
+	5, 4,
+	43, true
+};
+
+static const SMSMessage_Layout nk6100_submit = {
+	true,
+	-1, 20, 20, 20, 6, 21, 22, -1, 24, 23, 20, 20,
+	8, true, 25, true, 37, -1,
+	-1, -1,
+	44, true
+};
+
+static const SMSMessage_Layout nk6100_delivery_report = {
+	true,
+	0, 0, 0, 0, 6, 0, 0, 0, 22, 21, -1, 20,
+	8, true, 24, true, 35, 42,
+	5, 4,
+	22, true
+};
+
+static const SMSMessage_Layout nk6100_picture = {
+	false,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, true, 0, true, 0, 0,
+	0, 0,
+	0, true
+};
+
+static SMSMessage_PhoneLayout nk6100_layout;
 
 static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 
@@ -130,6 +140,14 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_6100, sizeof(GSM_Phone));
+
+	/* SMS Layout */
+	nk6100_layout.Type = 7;
+	nk6100_layout.Deliver = nk6100_deliver;
+	nk6100_layout.Submit = nk6100_submit;
+	nk6100_layout.DeliveryReport = nk6100_delivery_report;
+	nk6100_layout.Picture = nk6100_picture;
+	layout = nk6100_layout;
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
@@ -321,16 +339,16 @@ static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int 
 	}
 
 	dprintf("Message: Mobile phone identification received:\n");
-	dprintf("   IMEI: %s\n", data->Imei);
-	dprintf("   Model: %s\n", data->Model);
-	dprintf("   Production Code: %s\n", message + 31);
-	dprintf("   HW: %s\n", message + 39);
-	dprintf("   Firmware: %s\n", message + 44);
+	dprintf("\tIMEI: %s\n", data->Imei);
+	dprintf("\tModel: %s\n", data->Model);
+	dprintf("\tProduction Code: %s\n", message + 31);
+	dprintf("\tHW: %s\n", message + 39);
+	dprintf("\tFirmware: %s\n", message + 44);
 	
 	/* These bytes are probably the source of the "Accessory not connected"
 	   messages on the phone when trying to emulate NCDS... I hope....
 	   UPDATE: of course, now we have the authentication algorithm. */
-	dprintf(_("   Magic bytes: %02x %02x %02x %02x\n"), message[50], message[51], message[52], message[53]);
+	dprintf("\tMagic bytes: %02x %02x %02x %02x\n", message[50], message[51], message[52], message[53]);
 	
 	MagicBytes[0] = message[50];
 	MagicBytes[1] = message[51];
@@ -444,29 +462,8 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 
 		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
 
-		/* These offsets are 6210/7110 series specific */
 		/* Short Message status */
-		data->SMSMessage->Status = message[4];
-		dprintf("\tStatus: ");
-		switch (data->SMSMessage->Status) {
-		case SMS_Read:
-			dprintf("READ\n");
-			break;
-		case SMS_Unread:
-			dprintf("UNREAD\n");
-			break;
-		case SMS_Sent:
-			dprintf("SENT\n");
-			break;
-		case SMS_Unsent:
-			dprintf("UNSENT\n");
-			break;
-		default:
-			dprintf("UNKNOWN\n");
-			break;
-		}
-
-		DecodePDUSMS(message + 5, data->SMSMessage, length);
+		DecodePDUSMS(message, data->SMSMessage, length);
 
                 break;
 	/* read sms failed */

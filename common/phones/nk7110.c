@@ -7,7 +7,8 @@
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
   Copyright (C) 2000 Hugh Blemings & Pavel Janík ml.
-  Copytight (C) 2000 Chris Kemp
+  Copyright (C) 2000 Chris Kemp
+  Copyright (C) 2001 Markus Plail, Pawe³ Kot
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -15,129 +16,6 @@
   See README for more details on supported mobile phones.
 
   The various routines are called P7110_(whatever).
-
-  $Log$
-  Revision 1.28  2001-11-27 12:25:01  pkot
-  Cleanup
-
-  Revision 1.27  2001/11/22 17:56:53  pkot
-  smslib update. sms sending
-
-  Revision 1.26  2001/11/19 17:09:59  pkot
-  Bugfixes
-
-  Revision 1.25  2001/11/19 16:24:31  pkot
-  Grrrr... I should have check if I have fixed this typo
-
-  Revision 1.24  2001/11/19 15:53:16  pkot
-  Typos
-
-  Revision 1.23  2001/11/19 13:46:42  pkot
-  reading unread SMS in 6210 from Inbox. Folder updates (Markus Plail)
-
-  Revision 1.22  2001/11/17 20:18:32  pkot
-  Added dau9p connection type for 6210/7110
-
-  Revision 1.21  2001/11/17 16:44:07  pkot
-  Cleanup. Reading SMS for 6100 series. Not that it has some bugs more and does not support UDH yet
-
-  Revision 1.20  2001/11/15 12:15:04  pkot
-  smslib updates. begin work on sms in 6100 series
-
-  Revision 1.19  2001/11/15 12:12:34  pkot
-  7110 and 6110 series phones introduce as Nokia
-
-  Revision 1.18  2001/11/15 12:04:06  pkot
-  Faster initialization for 6100 series (don't check for dlr3 cable)
-
-  Revision 1.17  2001/11/14 10:48:03  pkot
-  6210/7110 debug cleanups
-
-  Revision 1.16  2001/11/13 16:12:21  pkot
-  Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
-
-  Revision 1.15  2001/11/08 16:47:48  pkot
-  Start fiddling with 7110 and SMS
-
-  Revision 1.14  2001/09/09 21:45:49  machek
-  Cleanups from Ladislav Michl <ladis@psi.cz>:
-
-  *) do *not* internationalize debug messages
-
-  *) some whitespace fixes, do not use //
-
-  *) break is unneccessary after return
-
-  Revision 1.13  2001/08/16 23:59:32  pkot
-  Fixed (hopefully) timezone mismash (Sheldon Hearn)
-
-  Revision 1.12  2001/08/09 12:34:34  pkot
-  3330 and 6250 support - I have no idea if it does work (mygnokii)
-
-  Revision 1.11  2001/07/05 10:54:53  pkot
-  Solaris 2.7 fixes - should be harmless for other OSes (Michael Wiedmann)
-
-  Revision 1.10  2001/06/27 23:52:49  pkot
-  7110/6210 updates (Marian Jancar)
-
-  Revision 1.9  2001/06/10 23:49:49  pkot
-  Small fixes to hide compilation warnings and allow gnokii.c to compile
-
-  Revision 1.8  2001/05/24 20:47:30  chris
-  More updating of 7110 code and some of xgnokii_lowlevel changed over.
-
-  Revision 1.7  2001/05/07 16:24:04  pkot
-  DLR-3P temporary fix. How should I do it better?
-
-  Revision 1.6  2001/03/23 13:40:24  chris
-  Pavel's patch and a few fixes.
-
-  Revision 1.5  2001/03/22 16:17:06  chris
-  Tidy-ups and fixed gnokii/Makefile and gnokii/ChangeLog which I somehow corrupted.
-
-  Revision 1.4  2001/03/21 23:36:06  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.3  2001/03/13 01:24:03  pkot
-  Code cleanup - no warnings during compilation
-
-  Revision 1.2  2001/03/13 01:23:18  pkot
-  Windows updates (Manfred Jonsson)
-
-  Revision 1.1  2001/02/21 19:57:07  chris
-  More fiddling with the directory layout
-
-  Revision 1.1  2001/02/16 14:29:53  chris
-  Restructure of common/.  Fixed a problem in fbus-phonet.c
-  Lots of dprintfs for Marcin
-  Any size xpm can now be loaded (eg for 7110 startup logos)
-  nk7110 code detects 7110/6210 and alters startup logo size to suit
-  Moved Marcin's extended phonebook code into gnokii.c
-
-  Revision 1.7  2001/02/06 21:15:35  chris
-  Preliminary irda support for 7110 etc.  Not well tested!
-
-  Revision 1.6  2001/02/03 23:56:15  chris
-  Start of work on irda support (now we just need fbus-irda.c!)
-  Proper unicode support in 7110 code (from pkot)
-
-  Revision 1.5  2001/02/01 15:17:31  pkot
-  Fixed --identify and added Manfred's manufacturer patch
-
-  Revision 1.4  2001/01/29 17:14:42  chris
-  dprintf now in misc.h (and fiddling with 7110 code)
-
-  Revision 1.3  2001/01/23 15:32:41  chris
-  Pavel's 'break' and 'static' corrections.
-  Work on logos for 7110.
-
-  Revision 1.2  2001/01/17 02:54:54  chris
-  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
-  I can now edit my phonebook in xgnokii but it is 'work in progress'.
-
-  Revision 1.1  2001/01/14 22:46:59  chris
-  Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
 */
 
@@ -161,6 +39,40 @@
 
 /* Some globals */
 
+static const SMSMessage_Layout nk7110_deliver = {
+	true,
+	0, 21, 0, 0, 7, 0, 0, -1, 24, 23, 0, 21,
+	9, true, 25, true, 37, -1,
+	5, 4,
+	44, true
+};
+
+static const SMSMessage_Layout nk7110_submit = {
+	true,
+	-1, 18, 18, 18, -1, 19, 20, -1, 22, 21, 18, 18,
+	6, true, 23, true, -1, -1,
+	-1, -1,
+	42, true
+};
+
+static const SMSMessage_Layout nk7110_delivery_report = {
+	true,
+	0, 0, 0, 0, 7, 0, 0, 0, 23, 22, -1, 21,
+	9, true, 24, true, 36, 43,
+	5, 4,
+	23, true
+};
+
+static const SMSMessage_Layout nk7110_picture = {
+	true,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	9, true, 22, true, 34, -1,
+	0, 0,
+	47, true
+};
+
+static SMSMessage_PhoneLayout nk7110_layout;
+
 static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ P7110_MSG_FOLDER,	P7110_IncomingFolder },
 	{ P7110_MSG_SMS,	P7110_IncomingSMS },
@@ -179,7 +91,7 @@ GSM_Phone phone_nokia_7110 = {
 	PGEN_IncomingDefault,
         /* Mobile phone information */
 	{
-		"7110|6210|6250", /* Supported models */
+		"7110|6210|6250",      /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GRF_Percentage,        /* RF level units */
@@ -187,9 +99,9 @@ GSM_Phone phone_nokia_7110 = {
 		0,                     /* Min Battery Level */
 		GBU_Percentage,        /* Battery level units */
 		GDT_DateTime,          /* Have date/time support */
-		GDT_TimeOnly,	         /* Alarm supports time only */
+		GDT_TimeOnly,	       /* Alarm supports time only */
 		1,                     /* Alarms available - FIXME */
-		60, 96,                /* Startup logo size - 7110 is fixed at init*/
+		60, 96,                /* Startup logo size - 7110 is fixed at init */
 		21, 78,                /* Op logo size */
 		14, 72                 /* Caller logo size */
 	},
@@ -264,6 +176,14 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_7110, sizeof(GSM_Phone));
+
+	/* SMS Layout */
+	nk7110_layout.Type = 8; /* Locate the Type of the mesage field */
+	nk7110_layout.Deliver = nk7110_deliver;
+	nk7110_layout.Submit = nk7110_submit;
+	nk7110_layout.DeliveryReport = nk7110_delivery_report;
+	nk7110_layout.Picture = nk7110_picture;
+	layout = nk7110_layout;
 
 	dprintf("Connecting\n");
 	while (!connected) {
@@ -759,12 +679,11 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
 
 		/* Number of SMS in folder */
-		data->SMSMessage->Number = message[7]; 
+		data->SMSMessage->Number = message[7];
 
 		/* MessageType/FolderID */
 		data->SMSMessage->MemoryType = message[5];
 
-		/* These offsets are 6210/7110 series specific */
 		/* Short Message status */
 		data->SMSMessage->Status = message[4];
 		dprintf("\tStatus: ");
@@ -795,7 +714,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		}
 		if (found==false && data->SMSMessage->Status != SMS_Unread) return GE_INVALIDSMSLOCATION;
 
-		DecodePDUSMS(message + 6, data->SMSMessage, length);
+		DecodePDUSMS(message, data->SMSMessage, length);
 
                 break;
 
@@ -903,6 +822,7 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
+	GSM_Error e;
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
 	int length, i;
 
@@ -911,15 +831,19 @@ static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 		P7110_GetSMSCenter(data, state);
 	}
 
-	length = EncodePDUSMS(data->SMSMessage, req + 6);
+	length = EncodePDUSMS(data->SMSMessage, req);
 	if (!length) return GE_SMSWRONGFORMAT;
 	dprintf("Sending SMS...(%d)\n", length);
-	for (i = 0; i < length + 6; i++) {
+	for (i = 0; i < length; i++) {
 		dprintf("%02x ", req[i]);
 	}
 	dprintf("\n");
-	if (SM_SendMessage(state, length+6, 0x02, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x02);
+	if (SM_SendMessage(state, length, 0x02, req) != GE_NONE) return GE_NOTREADY;
+	while (1) {
+		e = SM_Block(state, data, 0x02);
+		if (e == GE_SMSSENDOK || e == GE_SMSSENDFAILED) break;
+	}
+	return e;
 }
 
 static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)

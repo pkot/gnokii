@@ -12,32 +12,6 @@
 
   Include file for SMS library.
 
-  $Log$
-  Revision 1.7  2001-11-27 12:19:01  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.6  2001/11/22 17:56:53  pkot
-  smslib update. sms sending
-
-  Revision 1.5  2001/11/20 16:22:23  pkot
-  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
-
-  Revision 1.4  2001/11/19 13:09:40  pkot
-  Begin work on sms sending
-
-  Revision 1.3  2001/11/18 00:54:32  pkot
-  Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
-
-  Revision 1.2  2001/11/13 16:12:21  pkot
-  Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
-
-  Revision 1.1  2001/11/08 16:23:20  pkot
-  New version of libsms. Not functional yet, but it reasonably stable API.
-
-  Revision 1.1  2001/07/09 23:06:26  pkot
-  Moved sms.* files from my hard disk to CVS
-
-
 */
 
 #ifndef __gnokii_sms_h_
@@ -342,6 +316,44 @@ typedef struct {
 //	SMS_CommandType Command;                       /* Command Type - 8 bits (9.2.3.19); FIXME: use it!!!! */
 //	unsigned char Parameter[???];                  /* Parameter Indicator (9.2.3.27); FIXME: how to use it??? */
 } GSM_SMSMessage;
+
+/* Define the layout of the SMS message header */
+typedef struct {
+	bool IsSupported;
+	short MoreMessages;
+	short ReplyViaSameSMSC;
+	short RejectDuplicates;
+	short Report;
+	short Number;
+	short Reference;
+	short PID;
+	short ReportStatus;
+	short Length;
+	short DataCodingScheme;
+	short Validity;
+	short UserDataHeader;
+	short MessageCenter;
+	bool IsMessageCenterCoded;
+	short RemoteNumber;
+	bool IsRemoteNumberCoded;
+	short SMSCTime;
+	short Time;
+	short MemoryType;
+	short Status;
+	short UserData;
+	bool IsUserDataCoded;
+} SMSMessage_Layout;
+
+/* Define set of SMS Headers for the phone series */
+typedef struct {
+	unsigned short Type;
+	SMSMessage_Layout Deliver;
+	SMSMessage_Layout Submit;
+	SMSMessage_Layout DeliveryReport;
+	SMSMessage_Layout Picture;
+} SMSMessage_PhoneLayout;
+
+extern SMSMessage_PhoneLayout layout;
 
 /*** FOLDERS ***/
 

@@ -12,53 +12,6 @@
 
   Library for parsing and creating Short Messages (SMS).
 
-  $Log$
-  Revision 1.14  2001-11-27 12:19:00  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.13  2001/11/23 22:07:44  machek
-  Fix SMS receiving to work, again. Unfortunately, it is not possible to
-  reuse much of gsm-sms.c...
-
-  Revision 1.12  2001/11/22 17:56:53  pkot
-  smslib update. sms sending
-
-  Revision 1.11  2001/11/20 16:22:22  pkot
-  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
-
-  Revision 1.10  2001/11/19 13:09:40  pkot
-  Begin work on sms sending
-
-  Revision 1.9  2001/11/18 00:54:32  pkot
-  Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
-
-  Revision 1.8  2001/11/17 20:19:29  pkot
-  smslib cleanups, fixes and debugging
-
-  Revision 1.7  2001/11/15 12:15:04  pkot
-  smslib updates. begin work on sms in 6100 series
-
-  Revision 1.6  2001/11/14 18:21:19  pkot
-  Fixing some problems with UDH and Unicode, but still doesn't work yet :-(
-
-  Revision 1.5  2001/11/14 14:26:18  pkot
-  Changed offset of DCS field to the right value in 6210/7110
-
-  Revision 1.4  2001/11/14 11:26:18  pkot
-  Getting SMS in 6210/7110 does finally work in some cases :)
-
-  Revision 1.3  2001/11/13 16:12:20  pkot
-  Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
-
-  Revision 1.2  2001/11/09 14:25:04  pkot
-  DEBUG cleanups
-
-  Revision 1.1  2001/11/08 16:23:21  pkot
-  New version of libsms. Not functional yet, but it reasonably stable API.
-
-  Revision 1.1  2001/07/09 23:06:26  pkot
-  Moved sms.* files from my hard disk to CVS
-
 */
 
 #include <stdlib.h>
@@ -68,19 +21,12 @@
 #include "gsm-encoding.h"
 #include "gsm-bitmaps.h"
 
+SMSMessage_PhoneLayout layout;
+static SMSMessage_Layout llayout;
+
 struct udh_data {
 	unsigned int length;
 	char *header;
-};
-
-/* Number of header specific octets in SMS header (before data) */
-static unsigned short DataOffset[] = {
-	4, /* SMS Deliver */
-	3, /* SMS Deliver Report */
-	5, /* SMS Submit */
-	3, /* SMS Submit Report */
-	3, /* SMS Command */
-	3  /* SMS Status Report */
 };
 
 /* User data headers */
@@ -306,22 +252,32 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 	GSM_Error error = GE_NONE;
 
 	/* Standard Header: */
-	memcpy(frame, "\x11\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xa9\x00\x00\x00\x00\x00\x00", 24);
+	memcpy(frame + llayout.UserDataHeader, "\x11\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xa9\x00\x00\x00\x00\x00\x00", 24);
 
 	/* Reply Path */
-	if (SMS->ReplyViaSameSMSC) frame[0] |= 0x80;
+	if (llayout.ReplyViaSameSMSC > -1) {
+		if (SMS->ReplyViaSameSMSC) frame[llayout.ReplyViaSameSMSC] |= 0x80;
+	}
 
 	/* User Data Header Indicator */
-	if (SMS->UDH_No) frame[0] |= 0x40;
+	if (llayout.UserDataHeader > -1) {
+		if (SMS->UDH_No) frame[llayout.UserDataHeader] |= 0x40;
+	}
 
 	/* Status (Delivery) Report Request */
-	if (SMS->ReportStatus) frame[0] |= 0x20;
+	if (llayout.Report > -1) {
+		if (SMS->ReportStatus) frame[llayout.Report] |= 0x20;
+	}
 
 	/* Validity Period Format: mask - 0x00, 0x10, 0x08, 0x18 */
-	frame[0] |= ((SMS->Validity.VPF & 0x03) << 3);
+	if (llayout.Validity > -1) {
+		frame[llayout.Validity] |= ((SMS->Validity.VPF & 0x03) << 3);
+	}
 
 	/* Reject Duplicates */
-	if (SMS->RejectDuplicates) frame[0] |= 0x04;
+	if (llayout.RejectDuplicates > -1) {
+		if (SMS->RejectDuplicates) frame[llayout.RejectDuplicates] |= 0x04;
+	}
 
 	/* Message Type is already set */
 
@@ -331,29 +287,35 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 	/* Protocol Identifier */
 	/* FIXME: allow to change this in better way.
 	   currently only 0x5f == `Return Call Message' is used */
-	if (SMS->PID) frame[3] = SMS->PID;
+	if (llayout.PID > -1) {
+		if (SMS->PID) frame[llayout.PID] = SMS->PID;
+	}
 
 	/* Data Coding Scheme */
-	switch (SMS->DCS.Type) {
-	case SMS_GeneralDataCoding:
-		if (SMS->DCS.u.General.Compressed) frame[4] |= 0x20;
-		if (SMS->DCS.u.General.Class) frame[4] |= (0x10 | (SMS->DCS.u.General.Class - 1));
-		frame[4] |= ((SMS->DCS.u.General.Alphabet & 0x03) << 2);
-		break;
-	case SMS_MessageWaiting:
-		if (SMS->DCS.u.MessageWaiting.Discard) frame[4] |= 0xc0;
-		else if (SMS->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) frame[4] |= 0xe0;
-		else frame[4] |= 0xd0;
-		if (SMS->DCS.u.MessageWaiting.Active) frame[4] |= 0x80;
-		frame[4] |= (SMS->DCS.u.MessageWaiting.Type & 0x03);
-		break;
-	default:
-		dprintf("Wrong Data Coding Scheme (DCS) format\n");
-		return GE_SMSWRONGFORMAT;
+	if (llayout.DataCodingScheme > -1) {
+		switch (SMS->DCS.Type) {
+		case SMS_GeneralDataCoding:
+			if (SMS->DCS.u.General.Compressed) frame[llayout.DataCodingScheme] |= 0x20;
+			if (SMS->DCS.u.General.Class) frame[llayout.DataCodingScheme] |= (0x10 | (SMS->DCS.u.General.Class - 1));
+			frame[llayout.DataCodingScheme] |= ((SMS->DCS.u.General.Alphabet & 0x03) << 2);
+			break;
+		case SMS_MessageWaiting:
+			if (SMS->DCS.u.MessageWaiting.Discard) frame[llayout.DataCodingScheme] |= 0xc0;
+			else if (SMS->DCS.u.MessageWaiting.Alphabet == SMS_UCS2) frame[llayout.DataCodingScheme] |= 0xe0;
+			else frame[llayout.DataCodingScheme] |= 0xd0;
+			if (SMS->DCS.u.MessageWaiting.Active) frame[llayout.DataCodingScheme] |= 0x80;
+			frame[llayout.DataCodingScheme] |= (SMS->DCS.u.MessageWaiting.Type & 0x03);
+			break;
+		default:
+			dprintf("Wrong Data Coding Scheme (DCS) format\n");
+			return GE_SMSWRONGFORMAT;
+		}
 	}
 
 	/* Destination Address */
-	frame[5] = SemiOctetPack(SMS->RemoteNumber.number, frame + 6, SMS->RemoteNumber.type);
+	if (llayout.RemoteNumber > -1) {
+		frame[llayout.RemoteNumber] = SemiOctetPack(SMS->RemoteNumber.number, frame + llayout.RemoteNumber + 1, SMS->RemoteNumber.type);
+	}
 
 	/* Validity Period */
 	switch (SMS->Validity.VPF) {
@@ -380,7 +342,6 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
    (for sending or saving in Outbox) message */
 {
 	/* Set SMS type */
-	frame[12] |= (SMS->Type >> 1);
 	switch (SMS->Type) {
 	case SMS_Submit: /* we send SMS or save it in Outbox */
 		return EncodeSMSSubmitHeader(SMS, frame);
@@ -399,16 +360,32 @@ int EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 	GSM_Error error = GE_NONE;
 	int i;
 
-	dprintf("Sending SMS to %s via message center %s\n", SMS->RemoteNumber.number, SMS->MessageCenter.Number);
+	switch (SMS->Type) {
+	case SMS_Submit:
+		llayout = layout.Submit;
+		dprintf("Sending SMS to %s via message center %s\n", SMS->RemoteNumber.number, SMS->MessageCenter.Number);
+		break;
+	case SMS_Deliver:
+		llayout = layout.Deliver;
+		dprintf("Saving SMS to Inbox\n");
+		break;
+	case SMS_Delivery_Report:
+	case SMS_Picture:
+	default:
+		dprintf("Not supported message type: %d\n", SMS->Type);
+		return GE_NOTSUPPORTED;
+	}
 
 	/* SMSC number */
-	dprintf("%d %s\n", SMS->MessageCenter.Type, SMS->MessageCenter.Number);
-	message[0] = SemiOctetPack(SMS->MessageCenter.Number, message + 1, SMS->MessageCenter.Type);
-	if (message[0] % 2) message[0]++;
-	message[0] = message[0] / 2 + 1;
+	if (llayout.MessageCenter > -1) {
+		dprintf("%d %s\n", SMS->MessageCenter.Type, SMS->MessageCenter.Number);
+		message[llayout.MessageCenter] = SemiOctetPack(SMS->MessageCenter.Number, message + llayout.MessageCenter + 1, SMS->MessageCenter.Type);
+		if (message[llayout.MessageCenter] % 2) message[llayout.MessageCenter]++;
+		message[llayout.MessageCenter] = message[llayout.MessageCenter] / 2 + 1;
+	}
 
 	/* Common Header */
-	error = EncodeSMSHeader(SMS, message + 12);
+	error = EncodeSMSHeader(SMS, message);
 	if (error != GE_NONE) return error;
 
 	/* User Data Header - if present */
@@ -419,9 +396,9 @@ int EncodePDUSMS(GSM_SMSMessage *SMS, char *message)
 	SMS->UDH_Length = 0;
 
 	/* User Data */
-	EncodeData(SMS, message + 14, message + 36 + SMS->UDH_Length);
-	message[16] = SMS->Length;
-	return SMS->Length + 35;
+	EncodeData(SMS, message + llayout.DataCodingScheme, message + llayout.UserData + SMS->UDH_Length);
+	message[llayout.Length] = SMS->Length;
+	return SMS->Length + llayout.UserData - 1;
 }
 
 /* This function does simple SMS encoding - no PDU coding */
@@ -661,6 +638,7 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 		case 0x07: // UDH Source Indicator
 			break;
 		default:
+			dprintf("Not supported UDH\n");
 			break;
 		}
 		length -= (udh_length + 2);
@@ -675,60 +653,80 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 {
 	/* Short Message Type */
-	switch (SMS->Type = message[2]) {
+	SMS->Type = message[layout.Type];
+	switch (SMS->Type) {
 	case SMS_Deliver:
+		llayout = layout.Deliver;
 		dprintf("Mobile Terminated message:\n");
 		break;
 	case SMS_Delivery_Report:
+		llayout = layout.DeliveryReport;
 		dprintf("Delivery Report:\n");
-		UnpackDateTime(message + 34 + DataOffset[SMS->Type], &(SMS->SMSCTime));
-		dprintf("\tDelivery date: %s\n", PrintDateTime(message + 34 + DataOffset[SMS->Type]));
 		break;
 	case SMS_Submit:
+		llayout = layout.Submit;
 		dprintf("Mobile Originated message:\n");
 		break;
-	default:
-		dprintf("Not supported message type:\n");
+	case SMS_Picture:
+		llayout = layout.Picture;
+		dprintf("Picture Message:\n");
 		break;
+	default:
+		dprintf("Not supported message type: %d\n", SMS->Type);
+		return GE_NOTSUPPORTED;
+	}
+
+	if (!llayout.IsSupported) return GE_NOTSUPPORTED;
+
+	/* Delivery date */
+	if (llayout.Time > -1) {
+		UnpackDateTime(message + llayout.Time, &(SMS->SMSCTime));
+		dprintf("\tDelivery date: %s\n", PrintDateTime(message + llayout.Time));
 	}
 
 	/* Short Message location in memory */
-	SMS->Number = message[1];
-	dprintf("\tLocation: %d\n", SMS->Number);
+	if (llayout.Number > -1) {
+		SMS->Number = message[llayout.Number];
+		dprintf("\tLocation: %d\n", SMS->Number);
+	}
 
 	/* Short Message Center */
-	strcpy(SMS->MessageCenter.Number, GetBCDNumber(message + 3));
-	dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
-	SMS->ReplyViaSameSMSC = false;
-	if (SMS->RemoteNumber.number[0] == 0 && (message[6] & 0x80)) {
-		SMS->ReplyViaSameSMSC = true;
+	if (llayout.MessageCenter > -1) {
+		strcpy(SMS->MessageCenter.Number, GetBCDNumber(message + llayout.MessageCenter));
+		dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
+		SMS->ReplyViaSameSMSC = false;
+		if (SMS->RemoteNumber.number[0] == 0 && (message[llayout.ReplyViaSameSMSC] & 0x80)) {
+			SMS->ReplyViaSameSMSC = true;
+		}
 	}
 
 	/* Remote number */
-	message[15+DataOffset[SMS->Type]] = ((message[15+DataOffset[SMS->Type]])+1)/2+1;
-	dprintf("\tRemote number (recipient or sender): %s\n", GetBCDNumber(message + 15 + DataOffset[SMS->Type]));
-	strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + 15 + DataOffset[SMS->Type]));
-
-	UnpackDateTime(message + 27 + DataOffset[SMS->Type], &(SMS->Time));
-	dprintf("\tDate: %s\n", PrintDateTime(message + 27 + DataOffset[SMS->Type]));
+	if (llayout.RemoteNumber > -1) {
+		message[llayout.RemoteNumber] = ((message[llayout.RemoteNumber])+1)/2+1;
+		strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber));
+		dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
+	}
+	
+	/* Sending time */
+	if (llayout.SMSCTime > -1) {
+		UnpackDateTime(message + llayout.SMSCTime, &(SMS->Time));
+		dprintf("\tDate: %s\n", PrintDateTime(message + llayout.SMSCTime));
+	}
 
 	/* Message length */
-	SMS->Length = message[14+DataOffset[SMS->Type]];
+	if (llayout.Length > -1)
+		SMS->Length = message[llayout.Length];
 
 	/* Data Coding Scheme */
-	if (SMS->Type != SMS_Delivery_Report && SMS->Type != SMS_Picture)
-		SMS->DCS.Type = message[13 + DataOffset[SMS->Type]];
-	else
-		SMS->DCS.Type = 0;
+	if (llayout.DataCodingScheme > -1)
+		SMS->DCS.Type = message[llayout.DataCodingScheme];
 
 	/* User Data Header */
-	if (message[15] & 0x40) { /* UDH header available */
-		dprintf("UDH found\n");
-		DecodeUDH(message + 34 + DataOffset[SMS->Type], SMS);
-	} else {                    /* No UDH */
-		dprintf("No UDH\n");
-		SMS->UDH_No = 0;
-	}
+	if (llayout.UserDataHeader > -1)
+		if (message[llayout.UserDataHeader] & 0x40) { /* UDH header available */
+			dprintf("UDH found\n");
+			DecodeUDH(message + llayout.UserData, SMS);
+		}
 
 	return GE_NONE;
 }
@@ -740,31 +738,29 @@ GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int MessageL
 {
 	int size;
 	GSM_Bitmap bitmap;
+	GSM_Error error;
 
-	DecodeSMSHeader(message, SMS);
+	error = DecodeSMSHeader(message, SMS);
+	if (error != GE_NONE) return error;
 	switch (SMS->Type) {
 	case SMS_Delivery_Report:
-		SMSStatus(message[17], SMS);
+		if (llayout.UserData > -1) SMSStatus(message[llayout.UserData], SMS);
 		break;
 	case SMS_Picture:
-		dprintf("Picture!!!\n");
-		GSM_ReadSMSBitmap(SMS_Picture, message + 41, NULL, &bitmap);
+		GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData, NULL, &bitmap);
 		GSM_PrintBitmap(&bitmap);
-		size = MessageLength - 45 - bitmap.size;
-		SMS->Length = message[45 + bitmap.size];
-		printf("%d %d %d\n", SMS->Length, bitmap.size, size);
-		DecodeData(message + 46 + bitmap.size,
+		size = MessageLength - llayout.UserData - 4 - bitmap.size;
+		SMS->Length = message[llayout.UserData + 4 + bitmap.size];
+		DecodeData(message + llayout.UserData + 5 + bitmap.size,
 			   (unsigned char *)&(SMS->MessageText),
 			   SMS->Length, size, 0, SMS->DCS);
 		SMS->MessageText[SMS->Length] = 0;
 		break;
 	default:
 		size = MessageLength -
-			   34 -                    /* Header Length */
-			   DataOffset[SMS->Type] - /* offset */
-			   SMS->UDH_Length -       /* UDH Length */
-			   5;                      /* checksum */
-		DecodeData(message + 34 + DataOffset[SMS->Type] + SMS->UDH_Length,
+			llayout.UserData + 1 - /* Header Length */
+			SMS->UDH_Length;       /* UDH Length */
+		DecodeData(message + llayout.UserData + SMS->UDH_Length,
 			   (unsigned char *)&(SMS->MessageText),
 			   SMS->Length, size, SMS->UDH_Length, SMS->DCS);
 		/* Just in case */
