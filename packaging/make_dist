@@ -26,7 +26,10 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
    cd /tmp/gnokii-${VERSION}
    ./autogen.sh
    make -C common vcal.c
+   # RedHat thing
    cp packaging/RedHat/gnokii.spec .
+   # and Debian one
+   cp -r packaging/Debian debian
    make distclean
    cd ..
    tar cfz /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION} --exclude CVS

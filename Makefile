@@ -97,8 +97,7 @@ distclean: clean
 		include/config.h \
 		packaging/RedHat/gnokii.spec \
 		packaging/Slackware/SlackBuild \
-		po/Makefile.in \
-		debian
+		po/Makefile.in
 	$(RM) `$(FIND) . -name "*~"`
 	@echo "done"
 

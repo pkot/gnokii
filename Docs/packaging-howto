@@ -47,11 +47,13 @@ in this file.
 
 	rules, menu, docs, *.manpages
 
-3) Since gnokii's debian directory is in the subdirectory 'packaging'
+3) In gnokii CVS debian directory is in the subdirectory 'packaging'
 which is totally non-standard for the Debian package building system,
 you must first 'cd' to the top gnokii directory and type:
 
 	ln -s packaging/Debian debian
+
+If you use the release tarball, the directory should be already there.
 
 4) In the top gnokii directory type:
 
@@ -119,6 +121,13 @@ Win32:
 
 
 DOCUMENT HISTORY
+
+2004-01-18
+
+Pawel Kot <pkot@linuxnews.pl>
+
+* we create debian directory in the make_pkg script -- it will be present in
+the release tarballs
 
 2002-09-28
 
