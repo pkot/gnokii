@@ -3,6 +3,8 @@
  * translation updates
     o updated Estonian translation                  (Hans Motshärg)
     o xgnokii_xring.c was missing from POTFILES.in  (Hans Motshärg)
+ * gnokii updates
+    o --monitor once will run only once            (BORBELY Zoltan)
 
 0.6.4
 =====

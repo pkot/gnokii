@@ -276,7 +276,7 @@ static int usage(FILE *f, int retval)
 	fprintf(f, _("Usage:\n"
 		     "General options:\n"
 		     "          gnokii --help\n"
-		     "          gnokii --monitor [delay]\n"
+		     "          gnokii --monitor [delay|once]\n"
 		     "          gnokii --version\n"
 		     "SMS options:\n"
 		     "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
@@ -2750,7 +2750,10 @@ static int monitormode(int argc, char *argv[])
 	cb_widx = 0;
 	gn_sm_functions(GN_OP_SetCellBroadcast, &data, &state);
 
-	d = argc ? atoi(argv[0]) : 1;
+	if (argc)
+		d = !strcasecmp(argv[0], "once") ? -1 : atoi(argv[0]);
+	else
+		d = 1;
 
 	while (!bshutdown) {
 		if (gn_sm_functions(GN_OP_GetRFLevel, &data, &state) == GN_ERR_NONE)
@@ -2811,6 +2814,7 @@ static int monitormode(int argc, char *argv[])
 		if (readcbmessage(&cbmessage) == GN_ERR_NONE)
 			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), cbmessage.channel, cbmessage.message);
 
+		if (d < 0) break;
 		sleep(d);
 	}
 
