@@ -117,6 +117,7 @@ static gn_error gnapplet_clock_datetime_write(gn_data *data, struct gn_statemach
 static gn_error gnapplet_clock_alarm_read(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_clock_alarm_write(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_profile_read(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_profile_active_read(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -499,6 +500,8 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_clock_alarm_write(data, state);
 	case GN_OP_GetProfile:
 		return gnapplet_profile_read(data, state);
+	case GN_OP_GetActiveProfile:
+		return gnapplet_profile_active_read(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -1583,6 +1586,19 @@ static gn_error gnapplet_profile_read(gn_data *data, struct gn_statemachine *sta
 }
 
 
+static gn_error gnapplet_profile_active_read(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->profile) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_PROFILE_GET_ACTIVE_REQ);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_PROFILE);
+}
+
+
 static gn_error gnapplet_incoming_profile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_profile *profile;
@@ -1606,6 +1622,12 @@ static gn_error gnapplet_incoming_profile(int messagetype, unsigned char *messag
 		profile->vibration = pkt_get_uint8(&pkt);
 		profile->caller_groups = 0;
 		profile->automatic_answer = 0;
+		break;
+
+	case GNAPPLET_MSG_PROFILE_GET_ACTIVE_RESP:
+		if (!(profile = data->profile)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		profile->number = pkt_get_uint16(&pkt);
 		break;
 
 	default:
