@@ -25,7 +25,7 @@
   Copyright (C) 2001 Manfred Jonsson <manfred.jonsson@gmx.de>
   Copyright (C) 2002 Pawel Kot <pkot@linuxnews.pl>
 
-  This file provides functions specific to generic at command compatible
+  This file provides functions specific to generic AT command compatible
   phones. See README for more details on supported mobile phones.
 
 */
@@ -162,6 +162,17 @@ static char *memorynames[] = {
 	"CB", /* Currently selected memory */
 };
 
+typedef struct {
+	char *str;
+	at_charset charset;
+} at_charset_map_t;
+
+static at_charset_map_t atcharsets[] = {
+	{ "GSM",	AT_CHAR_GSM },
+	{ "HEX",	AT_CHAR_HEXGSM },
+	{ "UCS2",	AT_CHAR_UCS2 },
+	{ NULL,		AT_CHAR_UNKNOWN },
+};
 
 static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
@@ -252,16 +263,12 @@ static void StoreDefaultCharset(struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_data data;
-	char buf[256];
-	gn_error ret;
+	gn_error error;
 
 	gn_data_clear(&data);
-	drvinst->charsetstr = buf;
-	ret = state->driver.functions(GN_OP_AT_GetCharset, &data, state);
-	if (ret) return;
-	if (!strncmp(buf, "GSM", 3)) drvinst->defaultcharset = AT_CHAR_GSM;
-	if (strstr(buf, "437")) drvinst->defaultcharset = AT_CHAR_CP437;
-	return;
+	error = state->driver.functions(GN_OP_AT_GetCharset, &data, state);
+	drvinst->defaultcharset = error ? AT_CHAR_UNKNOWN : drvinst->charset;
+	drvinst->charset = AT_CHAR_UNKNOWN;
 }
 
 gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
@@ -329,68 +336,52 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
  * but this doesn't matter with IRDA and i haven't found a serial cable
  * in a shop yet, so this is no problem
  *
- * FIXME because errorreporting is broken, one may not end up with the
- * desired charset.
- *
  * see AT_GetCharset, StoreDefaultCharset
  */
 static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_data tmpdata;
-	char charsets[256];
-	gn_error ret;
+	gn_error error;
 
-	if (drvinst->charset != AT_CHAR_NONE)
+	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
-	/* check if ucs2 is available */
-	ret = sm_message_send(10, GN_OP_AT_GetCharset, "AT+CSCS=?\r", state);
-	if (ret)
-		return GN_ERR_NOTREADY;
+	/* check available charsets */
+	error = sm_message_send(10, GN_OP_AT_GetCharset, "AT+CSCS=?\r", state);
+	if (error)
+		return error;
 	gn_data_clear(&tmpdata);
-	*charsets = '\0';
-	drvinst->charsetstr = charsets;
-	ret = sm_block_no_retry(GN_OP_AT_GetCharset, &tmpdata, state);
-	if (ret) {
-		*charsets = '\0';
-	}
-	else if (strstr(charsets, "UCS2")) {
-		/* ucs2 charset found. try to set it */
-		ret = sm_message_send(15, GN_OP_Init, "AT+CSCS=\"UCS2\"\r", state);
-		if (ret)
-			return GN_ERR_NOTREADY;
-		gn_data_clear(&tmpdata);
-		ret = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
-		if (ret == GN_ERR_NONE)
+	error = sm_block_no_retry(GN_OP_AT_GetCharset, &tmpdata, state);
+	if (!error && (drvinst->availcharsets & AT_CHAR_UCS2)) {
+		/* UCS2 charset found. try to set it */
+		error = sm_message_send(15, GN_OP_Init, "AT+CSCS=\"UCS2\"\r", state);
+		if (error)
+			return error;
+		error = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
+		if (!error)
 			drvinst->charset = AT_CHAR_UCS2;
 	}
-	if (drvinst->charset != AT_CHAR_NONE)
+	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
-	/* no ucs2 charset found or error occured */
+	/* no UCS2 charset found or error occured */
 	if (drvinst->defaultcharset == AT_CHAR_GSM) {
-		drvinst->charset = AT_CHAR_GSM;
-		if (!strstr(charsets, "HEX")) {
-			/* no hex charset found! */
+		if (!(drvinst->availcharsets & AT_CHAR_HEXGSM)) {
+			/* if phone lacks HEX charset support, be happy with GSM */
+			drvinst->charset = AT_CHAR_GSM;
 			return GN_ERR_NONE;
 		}
-		/* try to set hex charset */
-		ret = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"HEX\"\r", state);
-		if (ret)
-			return GN_ERR_NOTREADY;
-		gn_data_clear(&tmpdata);
-		ret = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
-		if (ret == GN_ERR_NONE)
+		/* try to set HEX charset */
+		error = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"HEX\"\r", state);
+		if (error)
+			return error;
+		error = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
+		if (!error)
 			drvinst->charset = AT_CHAR_HEXGSM;
 	} else {
-		ret = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"GSM\"\r", state);
-		if (ret)
-			return GN_ERR_NOTREADY;
-		gn_data_clear(&tmpdata);
-		ret = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
-		if (ret == GN_ERR_NONE)
-			drvinst->charset = AT_CHAR_GSM;
+		drvinst->charset = drvinst->defaultcharset;
+		error = (drvinst->charset == AT_CHAR_UNKNOWN) ? GN_ERR_FAILED : GN_ERR_NONE;
 	}
-	return ret;
+	return error;
 }
 
 /* AT_GetCharset
@@ -1080,7 +1071,7 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
-	char *pos;
+	int i;
 
 	if (buffer[0] != GN_AT_OK)
 		return GN_ERR_UNKNOWN;
@@ -1089,20 +1080,22 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 	buf.length= length;
 	splitlines(&buf);
 
-	if (drvinst->charsetstr && !strncmp(buf.line1, "AT+CSCS", 7)) {
-		/* if a opening bracket is in the string don't skip anything */
-		pos = strchr(buf.line2, '(');
-		if (pos) {
-			strncpy(drvinst->charsetstr, buf.line2, 255);
-			return GN_ERR_NONE;
-		}
-		/* skip leading +CSCS: and quotation */
-		pos = strchr(buf.line2 + 8, '\"');
-		if (pos) *pos = '\0';
-		strncpy(drvinst->charsetstr, buf.line2 + 8, 255);
-		(drvinst->charsetstr)[255] = '\0';
+	if (!strncmp(buf.line1, "AT+CSCS?", 8)) {
+		/* return current charset */
+		drvinst->charset = AT_CHAR_UNKNOWN; i = 0;
+		while (atcharsets[i++].str && drvinst->charset != AT_CHAR_UNKNOWN)
+			if (strstr(buf.line2, atcharsets[i].str))
+				drvinst->charset = atcharsets[i].charset;
+		return GN_ERR_NONE;
+	} else if (!strncmp(buf.line1, "AT+CSCS=", 8)) {
+		/* return available charsets */
+		drvinst->availcharsets = 0; i = 0;
+		while (atcharsets[i++].str)
+			if (strstr(buf.line2, atcharsets[i].str))
+				drvinst->availcharsets |= atcharsets[i].charset;
+		return GN_ERR_NONE;
 	}
-	return GN_ERR_NONE;
+	return GN_ERR_FAILED;
 }
 
 static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
@@ -1178,8 +1171,8 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	AT_DRVINST(state) = drvinst;
 	drvinst->memorytype = GN_MT_XX;
 	drvinst->smsmemorytype = GN_MT_XX;
-	drvinst->defaultcharset = AT_CHAR_NONE;
-	drvinst->charset = AT_CHAR_NONE;
+	drvinst->defaultcharset = AT_CHAR_UNKNOWN;
+	drvinst->charset = AT_CHAR_UNKNOWN;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {

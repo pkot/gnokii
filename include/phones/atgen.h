@@ -43,13 +43,12 @@ typedef enum {
 } at_operation;
 
 typedef enum {
-	AT_CHAR_NONE,
-	AT_CHAR_UNKNOWN,
-	AT_CHAR_GSM,
-	AT_CHAR_CP437,
-	AT_CHAR_HEXGSM,
-	AT_CHAR_HEX437,
-	AT_CHAR_UCS2
+	AT_CHAR_UNKNOWN		= 0x00,
+	AT_CHAR_GSM		= 0x01,
+	AT_CHAR_CP437		= 0x02,
+	AT_CHAR_HEXGSM		= 0x04,
+	AT_CHAR_HEX437		= 0x08,
+	AT_CHAR_UCS2		= 0x10,
 } at_charset;
 
 typedef gn_error (*at_recv_function_type)(int type, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -65,9 +64,9 @@ typedef struct {
 
 	gn_memory_type memorytype;
 	gn_memory_type smsmemorytype;
+	at_charset availcharsets;
 	at_charset defaultcharset;
 	at_charset charset;
-	char *charsetstr;
 } at_driver_instance;
 
 #define AT_DRVINST(s) ((at_driver_instance *)((s)->driver.driver_instance))

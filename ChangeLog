@@ -73,6 +73,8 @@
  * 6100 series updates:
     o better fix for busy (0xc9) frame              (BORBELY Zoltan)
     o Nokia CardPhone support updated                 (Georg Moritz)
+ * AT series updates:
+    o fix charset handling                          (Ladislav Michl)
 
 0.5.0pre4
 =========

@@ -40,15 +40,9 @@
 #include "phones/atgen.h"
 #include "links/atbus.h"
 
-static gn_error GetCharset(gn_data *data, struct gn_statemachine *state)
+static gn_error FakeCharset(gn_data *data, struct gn_statemachine *state)
 {
 	AT_DRVINST(state)->charset = AT_CHAR_GSM;
-	strcpy(AT_DRVINST(state)->charsetstr, "GSM");
-	return GN_ERR_NONE;
-}
-
-static gn_error SetCharset(gn_data *data, struct gn_statemachine *state)
-{
 	return GN_ERR_NONE;
 }
 
@@ -103,8 +97,8 @@ static gn_error Unsupported(gn_data *data, struct gn_statemachine *state)
 
 void dc2711_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
-	at_insert_send_function(GN_OP_AT_GetCharset, GetCharset, state);
-	at_insert_send_function(GN_OP_AT_SetCharset, SetCharset, state);
+	at_insert_send_function(GN_OP_AT_GetCharset, FakeCharset, state);
+	at_insert_send_function(GN_OP_AT_SetCharset, FakeCharset, state);
 	at_insert_send_function(GN_OP_GetSMSStatus, GetSMSStatus, state);
 	at_insert_recv_function(GN_OP_GetSMSStatus, ReplyGetSMSStatus, state);
 	at_insert_recv_function(GN_OP_GetSMS, ReplyGetSMS, state);
