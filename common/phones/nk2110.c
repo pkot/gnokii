@@ -674,7 +674,6 @@ HandlePacket(void)
 				SMSpos = 0;
 				at = SMSData[2];
 				eprintf("New message indicated @%d\n", at);
-				msleep_poll(200);
 				for (i=0; i<sizeof(SMSData); i++)
 					SMSData[i] = 0;
 				SMSReady = at;
@@ -1249,14 +1248,26 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 			CheckIncomingSMS(4);
 			CheckIncomingSMS(5);
 			err = SMS_Reserve(state);
-		} else	err = SMS_UnReserve(state);
+		} 
+		else	err = SMS_UnReserve(state);
 		break;
 	case GOP_PollSMS:			/* Our phone is able to notify us... but we do not want to burn 100% CPU polling */
 		{
 			struct timeval tm;
+			static long long lastpoll = 0;
 			tm.tv_sec = 0;
 			tm.tv_usec = 50000;
 			device_select(&tm);
+
+			if (lastpoll + 10000000 < GetTime()) {
+				fprintf(stderr, "Trying to capture leftover messages\n");
+				CheckIncomingSMS(1);
+				CheckIncomingSMS(2);
+				CheckIncomingSMS(3);
+				CheckIncomingSMS(4);
+				CheckIncomingSMS(5);
+			}
+			sleep(4);
 		}
 		break;
 	case GOP_PollDisplay:

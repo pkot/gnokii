@@ -1,5 +1,6 @@
 0.4.0pre17 (not released yet)
 ==========
+ * 2110: smsreader updates			       (Pavel Machek)
  * Yet another test of CVS commit mailer              (Hugh Blemings)
  * Updates to address GNU GPL requirements                (Pawel Kot)
  * Change from .gif to .png for documentation         (Hugh Blemings)
