@@ -23,6 +23,10 @@
     o GN_OP_[GS]etActiveProfile implemented         (BORBELY Zoltan)
  * xgnokii fixes
     o sorting by date fixed in the sms window       (BORBELY Zoltan)
+ * AT series fixes
+    o fix logic inversion error on terminating the connection which
+      caused weired effect with connection set to incorrect value
+                                                         (Pawel Kot)
 
 0.5.1
 =====

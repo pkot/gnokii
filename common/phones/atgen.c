@@ -177,7 +177,7 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	if (op == GN_OP_Init)
 		return Initialise(data, state);
-	if (!drvinst && op == GN_OP_Terminate)
+	if (drvinst && op == GN_OP_Terminate)
 		return Terminate(data, state);
 	if (!drvinst)
 		return GN_ERR_INTERNALERROR;
