@@ -30,8 +30,8 @@ build-stamp:
 	# Compile the smsd subpackage.
 	cd smsd &&\
 	$(MAKE) &&\
-	$(MAKE) libpq.so &&\
-	$(MAKE) libmysql.so
+	$(MAKE) libpq.la &&\
+	$(MAKE) libmysql.la
 	#/usr/bin/docbook-to-man debian/gnokii.sgml > gnokii.1
 
 	touch build-stamp

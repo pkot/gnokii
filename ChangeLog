@@ -51,6 +51,8 @@
                                           (Reiner Steib, Pawel Kot)
     o use gn_file_phonebook_raw() instead of ParseLine() (finally!)
                                                         (Pawel Kot)
+ * build system updates
+    o reflecting smsd libtoolization in packages   (BORBELY Zoltan)
 
 0.5.10
 ======
