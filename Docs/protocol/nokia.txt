@@ -112,7 +112,7 @@ notify us via e-mail.  Thank you.
 
  Frame format for FBUS version 1:
 
-    { FrameID, FrameLength, MsgType, {block}, SeqNo, ChkSum }
+    { FrameID, FrameLength, MsgType, SeqNo, {block}, ChkSum }
 
          where FrameID:         0x01 Command frame from computer to Nokia 
                                 0x02 ??? - Data call frame from computer to Nokia - ??? 
@@ -120,7 +120,7 @@ notify us via e-mail.  Thank you.
                                 0x04 Command frame from Nokia to computer 
                FrameLength:     {block} + 2
                MsgType:         see List
-               SeqNum:          Sequence number of command in case where direction is
+               SeqNo:           Sequence number of command in case where direction is
                                 from ME to computer, the sequence number is 
                                 counting from 0x30 to 0x37 and resetting back to 0x30.
                                 When direction is from computer to ME,
