@@ -1,6 +1,6 @@
 %define name gnokii
 %define version @@VERSION@@
-%define release 1
+%define release 2
 
 Summary: Linux/Unix tool suite for Nokia mobile phones
 Name: %{name}
@@ -24,6 +24,8 @@ mobile phones, released under the GPL.
 make
 
 cp gnokii gnokii3810
+cp gnokiid gnokiid3810
+cp xgnokii xgnokii3810
 
 cat <<EOM |patch -p1
 --- Makefile.orig	Sun May  9 21:15:17 1999
@@ -43,13 +45,15 @@ make clean
 make
 
 cp gnokii gnokii6110
+cp gnokiid gnokiid6110
+cp xgnokii xgnokii6110
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT/usr/bin
 
-cp gnokii3810 gnokii6110 $RPM_BUILD_ROOT/usr/bin
+cp gnokii3810 gnokii6110 gnokiid3810 gnokiid6110 xgnokii3810 xgnokii6110 $RPM_BUILD_ROOT/usr/bin
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -60,6 +64,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/*
 
 %changelog
+* Mon Jun 28 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- Nokia auth. protocol is there now
+- xgnokii and gnokiid added to RPM
+
 * Sun May  9 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - included 6110-patch updated to my prepatches
 

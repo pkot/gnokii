@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.2.6-pre4
+VERSION = 0.3.0-pre1
 
 #
 # Compiler to use.
@@ -32,7 +32,7 @@ MODEL=-DMODEL="\"3810\""
 # For Nokia 6110/5110 uncomment the next line
 #
 
-MODEL=-DMODEL="\"6110\""
+# MODEL=-DMODEL="\"6110\""
 
 #
 # Serial port for communication
@@ -113,6 +113,7 @@ clean:
                gnokii-${VERSION}.tar.gz
 
 dist:	clean
+	@rm -rf /tmp/gnokii-${VERSION}
 	@mkdir -p /tmp/gnokii-${VERSION}
 	@cp -r * /tmp/gnokii-${VERSION}
 	@sed 's#@@VERSION@@#${VERSION}#' gnokii.spec >/tmp/gnokii-${VERSION}/gnokii.spec

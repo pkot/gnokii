@@ -81,7 +81,7 @@ GSM_Functions FB61_Functions = {
 /* Mobile phone information */
 
 GSM_Information FB61_Information = {
-  "6110|6150|6190|5110", /* Supported models */
+  "6110|6130|6150|6190|5110|5130", /* Supported models */
   4,                     /* Max RF Level */
   0,                     /* Min RF Level */
   GRF_Arbitrary,         /* RF level units */
@@ -1018,9 +1018,10 @@ int SemiOctetPack(char *Number, unsigned char *Output) {
   if (count & 0x01) {
     *OUT=*OUT | 0xf0;
     OUT++;
+    return (2 * (OUT - Output - 1) - 1);
   }
 
-  return OUT-Output;
+  return (2 * (OUT - Output - 1));
 }
 
 GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
@@ -1049,10 +1050,12 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
     return(GE_SMSTOOLONG);
 
   req[6]=SemiOctetPack(SMS->MessageCentre, req+7);
+  if (req[6] % 2) req[6]++;
+  req[6] = req[6] / 2 + 1;
 
   req[22]=strlen(SMS->MessageText);
 
-  req[23]=2*(SemiOctetPack(SMS->Destination, req+24)-1);
+  req[23]=SemiOctetPack(SMS->Destination, req+24);
 
   /* TP-Validity Period handling */
 
@@ -1279,7 +1282,7 @@ char *FB61_GetPackedDateTime(u8 *Number) {
 
 enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
-  int i, tmp, count;
+  int i, tmp, count, report, offset;
   unsigned char output[160];
 
 #ifdef DEBUG
@@ -1949,25 +1952,46 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x08:
 
-      MessageBuffer[24] = (MessageBuffer[24]+1)/2+1;
+      switch (MessageBuffer[20]) {
+
+      /* Nokia delivery report */
+      case 0x06:
+      
+        offset = 3;
+        report = true;
+          
+        break;
+      
+      /* SMS Message */
+      case 0x24:
+      /* If it is something else let's try to handle it like simple
+       * SMS message, but maybe it's an error
+       */
+      default:
+        offset = 4;
+        report = false;
+      }
+
+      MessageBuffer[20+offset] = (MessageBuffer[20+offset]+1)/2+1;
 
 #ifdef DEBUG
-      printf(_("Message: SMS Received.\n"));
+      if (report) printf(_("Message: Nokia delivery report.\n"));
+      else printf(_("Message: SMS Received.\n"));
       printf(_("   Number: %d\n"), MessageBuffer[6]);
 
-      printf(_("   Date: %s\n"), FB61_GetPackedDateTime(MessageBuffer+36));
+      printf(_("   Date: %s\n"), FB61_GetPackedDateTime(MessageBuffer+32+offset));
       printf(_("   SMS center number: %s\n"), FB61_GetBCDNumber(MessageBuffer+8));
-      printf(_("   Remote number: %s\n"), FB61_GetBCDNumber(MessageBuffer+24));
+      printf(_("   Remote number: %s\n"), FB61_GetBCDNumber(MessageBuffer+20+offset));
 #endif DEBUG
 
-      CurrentSMSMessage->Year=10*(MessageBuffer[36]&0x0f)+(MessageBuffer[36]>>4);
-      CurrentSMSMessage->Month=10*(MessageBuffer[37]&0x0f)+(MessageBuffer[37]>>4);
-      CurrentSMSMessage->Day=10*(MessageBuffer[38]&0x0f)+(MessageBuffer[38]>>4);
-      CurrentSMSMessage->Hour=10*(MessageBuffer[39]&0x0f)+(MessageBuffer[39]>>4);
-      CurrentSMSMessage->Minute=10*(MessageBuffer[40]&0x0f)+(MessageBuffer[40]>>4);
-      CurrentSMSMessage->Second=10*(MessageBuffer[41]&0x0f)+(MessageBuffer[41]>>4);
+      CurrentSMSMessage->Year=10*(MessageBuffer[32+offset]&0x0f)+(MessageBuffer[32+offset]>>4);
+      CurrentSMSMessage->Month=10*(MessageBuffer[33+offset]&0x0f)+(MessageBuffer[33+offset]>>4);
+      CurrentSMSMessage->Day=10*(MessageBuffer[34+offset]&0x0f)+(MessageBuffer[34+offset]>>4);
+      CurrentSMSMessage->Hour=10*(MessageBuffer[35+offset]&0x0f)+(MessageBuffer[35+offset]>>4);
+      CurrentSMSMessage->Minute=10*(MessageBuffer[36+offset]&0x0f)+(MessageBuffer[36+offset]>>4);
+      CurrentSMSMessage->Second=10*(MessageBuffer[37+offset]&0x0f)+(MessageBuffer[37+offset]>>4);
 
-      strcpy(CurrentSMSMessage->Sender, FB61_GetBCDNumber(MessageBuffer+24));
+      strcpy(CurrentSMSMessage->Sender, FB61_GetBCDNumber(MessageBuffer+20+offset));
 
       strcpy(CurrentSMSMessage->MessageCentre, FB61_GetBCDNumber(MessageBuffer+8));
 
@@ -1983,15 +2007,55 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
          tmp=UnpackEightBitsToSeven(MessageLength-44-2, MessageBuffer+44, output);
       }
       else
-         tmp=UnpackEightBitsToSeven(MessageLength-43-2, MessageBuffer+43, output);
+         if (!report) tmp=UnpackEightBitsToSeven(MessageLength-39-offset-2, MessageBuffer+39+offset, output);
 
-      for (i=0; i<tmp;i++) {
+      if (report) {
+        switch (MessageBuffer[22]) {
+        
+        case 0x00:
+        
+#ifdef DEBUG
+          printf(_("Delivered"));
+#endif DEBUG
+          strcpy(CurrentSMSMessage->MessageText,_("Delivered"));
+          tmp = 10;
+          break;
+
+        case 0x30:
+        
+#ifdef DEBUG
+          printf(_("Pending"));
+#endif DEBUG
+          strcpy(CurrentSMSMessage->MessageText,_("Pending"));
+          tmp = 8;
+          break;
+
+        case 0x46:
+        
+#ifdef DEBUG
+          printf(_("Failed"));
+#endif DEBUG
+          strcpy(CurrentSMSMessage->MessageText,_("Failed"));
+          tmp = 7;
+          break;
+
+        default:
+        
+#ifdef DEBUG
+          printf(_("Unknown"));
+#endif DEBUG
+          strcpy(CurrentSMSMessage->MessageText,_("Unknown"));
+          tmp = 8;
+        }
+      } else {
+        for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-	printf("%c", GSM_Default_Alphabet[output[i]]);
+	  printf("%c", GSM_Default_Alphabet[output[i]]);
 #endif DEBUG
 
-	CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
+	  CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
+	}
       }
 
       CurrentSMSMessage->MessageText[tmp]=0;
