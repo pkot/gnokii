@@ -8,12 +8,13 @@ libgnokii API changes
 o change description
 
 v1.9 2004-04-25
+	2004-06-01
+	o new function
+		+API int gn_cfg_file_read(const char *filename)
+
 	2004-05-09
 	o new function
-		+API int gn_cfg_read_default(char **bindir)
-	o function signature change
-		-API int gn_cfg_read(char **bindir)
-		+API int gn_cfg_read(char *filename, char **bindir);
+		+API int gn_cfg_read_default()
 
 	2004-04-25
 	o function name change

@@ -39,12 +39,6 @@ initlength = default
 # cable with nk6510 driver.
 connection = serial
 
-# Set bindir to point to the location of the various gnokii binaries.
-# In particular ensure that mgnokiidev is in this location, with
-# permissions 4750, owned by root, group gnokii.  Ensure you
-# are in the gnokii group and that the group exists...
-bindir = /usr/local/sbin/
-
 # Set this to 'yes' if you want gnokii to set and check the lock file in
 # /var/lock directory. It avoids potential conflicts with other serial
 # port software (eg. minicom). If you have wrong permissions for the
@@ -91,6 +85,13 @@ serial_baudrate = 19200
 # value is given in seconds to wait. Defaults to 10 seconds. Set to 0 to wait
 # forever.
 smsc_timeout = 10
+
+# Set bindir to point to the location of the various gnokiid binaries.
+# In particular ensure that mgnokiidev is in this location, with
+# permissions 4750, owned by root, group gnokii.  Ensure you
+# are in the gnokii group and that the group exists...
+[gnokiid]
+bindir = /usr/local/sbin/
 
 # Any entries in the following two sections will be set as environment
 # variables when running the scripts.

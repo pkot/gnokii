@@ -91,8 +91,9 @@ API gn_error gn_gsm_initialise(struct gn_statemachine *sm);
 
 /* Config file */
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
-API int gn_cfg_read(char *filename, char **bindir);
-API int gn_cfg_read_default(char **bindir);
+API int gn_cfg_read(char **bindir); /* DEPRECATED */
+API int gn_cfg_file_read(const char *filename);
+API int gn_cfg_read_default();
 API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state);
 
 API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location);

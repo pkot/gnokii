@@ -96,9 +96,13 @@ int main(int argc, char *argv[])
 
 	short_version();
 
-	if (gn_cfg_read_default(&BinDir) < 0) {
+	if (gn_cfg_read_default() < 0) {
 		exit(-1);
 	}
+	BinDir = gn_cfg_get(gn_cfg_info, "global", "bindir");
+	if (!BinDir) BinDir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
+	if (!BinDir) BinDir = "/usr/local/sbin";
+
 	if (!gn_cfg_phone_load("", &temp_state)) exit(-1);
 
 	/* Handle command line arguments. */

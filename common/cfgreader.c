@@ -68,9 +68,9 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 	if ((handle = fopen(filename, "r")) == NULL) {
 		dprintf("cfg_file_read - open %s: %s\n", filename, strerror(errno));
 		return NULL;
-	}
-	else
+	} else {
 		dprintf("Opened configuration file %s\n", filename);
+	}
 
 	/* Iterate over lines in the file */
 	while (fgets(buf, 255, handle) != NULL) {
@@ -411,7 +411,7 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 }
 
 #define MAX_PATH_LEN 200
-API int gn_cfg_read_default(char **bindir)
+API int gn_cfg_read_default()
 {
 	char *homedir;
 	char rcfile[MAX_PATH_LEN];
@@ -432,9 +432,9 @@ API int gn_cfg_read_default(char **bindir)
 #endif
 
 	/* Try opening .gnokirc from users home directory first */
-	if (gn_cfg_read(rcfile, bindir)) {
+	if (gn_cfg_file_read(rcfile)) {
 		/* It failed so try for /etc/gnokiirc */
-		if (gn_cfg_read(globalrc, bindir)) {
+		if (gn_cfg_file_read(globalrc)) {
 			/* That failed too so exit */
 			fprintf(stderr, _("Couldn't open %s or %s.\n"), rcfile, globalrc);
 			return -1;
@@ -443,9 +443,22 @@ API int gn_cfg_read_default(char **bindir)
 	return 0;
 }
 
-API int gn_cfg_read(char *file, char **bindir)
+/* DEPRECATED */
+API int gn_cfg_read(char **bindir)
 {
-	char *default_bindir     = "/usr/local/sbin/";
+	int retval;
+
+	retval = gn_cfg_read_default();
+
+	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
+	if (!*bindir) *bindir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
+	if (!*bindir) *bindir = "/usr/local/sbin";
+
+	return retval;
+}
+
+API int gn_cfg_file_read(const char *file)
+{
 	char *val;
 
 	/* I know that it doesn't belong here but currently there is now generic
@@ -486,9 +499,6 @@ API int gn_cfg_read(char *file, char **bindir)
 		else
 			gn_config_global.smsc_timeout = 10 * atoi(val);
 	}
-
-	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
-	if (!*bindir) (char *)*bindir = default_bindir;
 
 	if (!cfg_get_log_target(&gn_log_debug_mask, "debug")) return -2;
 	if (!cfg_get_log_target(&gn_log_rlpdebug_mask, "rlpdebug")) return -2;

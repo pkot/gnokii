@@ -39,6 +39,8 @@
     o the new cfgreader skipped /etc/gnokiirc      (BORBELY Zoltan)
     o fix usage of char_unicode_encode() and pnok_string_encode():
       check the return code                             (Pawel Kot)
+    o try to get rid of 'bindir' config variable, it is usable only
+      for gnokiid, but let's stay backward compatible   (Pawel Kot)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

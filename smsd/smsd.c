@@ -321,7 +321,7 @@ static void ReadConfig (gint argc, gchar *argv[])
     exit (-2);
   }
   
-  if (gn_cfg_read_default(&smsdConfig.bindir) < 0)
+  if (gn_cfg_read_default() < 0)
     exit (-1);
 }
 
