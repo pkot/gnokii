@@ -1,0 +1,1 @@
+cat ../Docs/star.imelody | $GNOKII --sendsms 0604343103 -i --concat "1;2;3"
