@@ -51,6 +51,7 @@ void dialvoice(char *argv[]);
 void dialdata(char *argv[]);
 void sendoplogo(char *argv[]);
 void sendclicon(char *argv[]);
+void foogle(char *argv[]);
 void readconfig(void);
 
 char		*Model;		/* Model from .gnokiirc file. */
@@ -313,6 +314,13 @@ int main(int argc, char *argv[])
   /* Send sms message mode. */
   if (argc == 4 && strcmp(argv[1], "--sendsms") == 0)
     sendsms(argv);
+  
+  /* Foogle function - insert you own function calls here 
+     when testing stuff.  This is for the developer/hackers
+     convenience only :) */
+  if (strcmp(argv[1], "--foogle") == 0) {
+	  foogle(argv);
+  }
 
   /* Either an unknown command or wrong number of args! */
   usage();
@@ -1070,3 +1078,27 @@ void	readconfig(void)
 		Connection = DefaultConnection;
     }
 }
+
+	/* This is a "convenience" function to allow quick test of new
+	   API stuff which doesn't warrant a "proper" command line
+	   function.  Most recently used by Hugh to test 3810
+	   GetSMSCenter function... */
+extern GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
+void foogle(char *argv[])
+{ 
+  GSM_MessageCenter msg_center;
+
+  fbusinit(false);
+
+  if (FB38_GetSMSCenter(&msg_center) != GE_NONE) {
+    fprintf(stderr,"Bzzt.  Failed.\n");
+  }
+  else {
+  	fprintf(stdout, "No: %d, Name:%s, Number:%s\n\r", 
+	  	msg_center.No, msg_center.Name, msg_center.Number);		
+  }
+
+  GSM->Terminate();
+  exit(0);
+}
+

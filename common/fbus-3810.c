@@ -98,7 +98,7 @@ bool					EnableMonitoringOutput;
 bool					DisableKeepalive;
 float					CurrentRFLevel;
 float					CurrentBatteryLevel;
-int						ExploreMessage; /* FIXME - for debugging/investigation only */
+int						ExploreMessage; /* for debugging/investigation only */
 int						InitLength;
 
 	/* These three are the information returned by AT+CGSN, AT+CGMR and
@@ -130,6 +130,9 @@ GSM_Error				CurrentSMSMessageError;
 u8						CurrentSMSSendResponse[2];	/* Set by 0x28/29 messages */
 bool					SMSBlockAckReceived;		/* Set when block ack'd */
 bool					SMSHeaderAckReceived;		/* Set when header ack'd */
+
+GSM_MessageCenter  		*CurrentMessageCenter;
+GSM_Error          		CurrentMessageCenterError;
 
 	/* The following functions are made visible to gsm-api.c and friends. */
 
@@ -681,6 +684,29 @@ GSM_Error	FB38_GetModel(char *model)
 	else {
 		return (GE_INTERNALERROR);
 	}
+}
+
+/* This function sends to the mobile phone a request for the SMS Center */
+
+GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter)
+{
+	int timeout=10;
+
+	CurrentMessageCenter = MessageCenter;
+	CurrentMessageCenterError = GE_BUSY;
+
+	FB38_TX_Send0x3fMessage();
+
+		/* Wait for timeout or other error. */
+	while (timeout != 0 && CurrentMessageCenterError == GE_BUSY ) {
+
+		if (--timeout == 0) {
+			return (GE_TIMEOUT);
+		}
+	usleep (100000);
+	}
+
+	return (GE_NONE);
 }
 
 	/* Our "Not implemented" functions */
@@ -2013,8 +2039,24 @@ void	FB38_RX_Handle0x41_SMSMessageCenterData(void)
 		/* Get Message Center number length, which is byte 13 in message. */
 	center_number_length = MessageBuffer[13];
 
+		/* Now put data into CurrentMessageCenter variable and set error
+		   flag to none. */
+	if (center_number_length == 0) {
+		CurrentMessageCenter->Number[0] = 0x00;	/* Null terminate */
+	}
+	else {
+		memcpy(CurrentMessageCenter->Number, MessageBuffer + 14, center_number_length);
+		CurrentMessageCenter->Number[center_number_length + 1] = 0x00;	/* Null terminate */
+	}
+	
+		/* 3810 series doesn't support Name or multiple center numbers
+		   so put in null data for them . */
+    CurrentMessageCenter->Name[0] = 0x00;
+    CurrentMessageCenter->No = 0;
+    CurrentMessageCenterError=GE_NONE;
+
 		/* First 12 bytes are status values, purpose unknown.  For now
-		   simply display for user to mull over... */
+		   simply display for user to mull over if monitoring is on... */
 	if (EnableMonitoringOutput == false) {
 		return;
 	}

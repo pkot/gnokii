@@ -39,6 +39,8 @@ GSM_Error	FB38_GetSMSStatus(GSM_SMSStatus *Status);
 
 GSM_Error	FB38_GetSMSMessage(int location, GSM_SMSMessage *message);
 
+GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
+
 GSM_Error	FB38_DeleteSMSMessage(int location, GSM_SMSMessage *message);
 
 GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS);
