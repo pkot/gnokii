@@ -31,6 +31,8 @@
 #ifndef _gnokii_data_virtmodem_h
 #define _gnokii_data_virtmodem_h
 
+#include "compat.h"
+
 struct vm_queue
 {
 	int n;
@@ -43,14 +45,14 @@ extern struct vm_queue queue;
 
 
 /* Prototypes */
-bool vm_initialise(char *model,
-		   char *port,
-		   char *initlength,
-		   const char *connection,
-		   char *bindir,
-		   bool debug_mode,
-		   bool GSM_Init);
-void vm_loop(void);
-void vm_terminate(void);
+API bool gn_vm_initialise(char *model,
+			  char *port,
+			  char *initlength,
+			  const char *connection,
+			  char *bindir,
+			  bool debug_mode,
+			  bool gn_init);
+API void gn_vm_loop(void);
+API void gn_vm_terminate(void);
 
 #endif	/* _gnokii_data_virtmodem_h */

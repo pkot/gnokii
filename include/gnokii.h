@@ -39,6 +39,7 @@
 #include "gsm-data.h"
 #include "gsm-networks.h"
 #include "gsm-statemachine.h"
+#include "data/virtmodem.h"
 
 API struct gn_cfg_header *gn_cfg_info;
 

@@ -101,7 +101,7 @@ struct vm_queue queue;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
-bool vm_initialise(char *model,char *port, char *initlength, const char *connection, char *bindir, bool debug_mode, bool GSMInit)
+bool gn_vm_initialise(char *model,char *port, char *initlength, const char *connection, char *bindir, bool debug_mode, bool GSMInit)
 {
 	static struct gn_statemachine State;
 	sm = &State;
@@ -120,31 +120,31 @@ bool vm_initialise(char *model,char *port, char *initlength, const char *connect
 	if (GSMInit) {
 		dprintf("Initialising GSM\n");
 		if ((VM_GSMInitialise(model, port, initlength, connection, sm) != GN_ERR_NONE)) {
-			fprintf (stderr, _("vm_initialise - VM_GSMInitialise failed!\n"));
+			fprintf (stderr, _("gn_vm_initialise - VM_GSMInitialise failed!\n"));
 			return (false);
 		}
 	}
 	GSMInit = false;
 
 	if (VM_PtySetup(bindir) < 0) {
-		fprintf (stderr, _("vm_initialise - VM_PtySetup failed!\n"));
+		fprintf (stderr, _("gn_vm_initialise - VM_PtySetup failed!\n"));
 		return (false);
 	}
 
 	if (gn_atem_initialise(PtyRDFD, PtyWRFD, sm) != true) {
-		fprintf (stderr, _("vm_initialise - gn_atem_initialise failed!\n"));
+		fprintf (stderr, _("gn_vm_initialise - gn_atem_initialise failed!\n"));
 		return (false);
 	}
 
 	if (dp_Initialise(PtyRDFD, PtyWRFD) != true) {
-		fprintf (stderr, _("vm_Initialise - dp_Initialise failed!\n"));
+		fprintf (stderr, _("gn_vm_Initialise - dp_Initialise failed!\n"));
 		return (false);
 	}
 
 	return (true);
 }
 
-void vm_loop(void)
+void gn_vm_loop(void)
 {
 	fd_set rfds;
 	struct timeval tv;
@@ -178,7 +178,7 @@ void vm_loop(void)
 			continue;
 
 		case -1:
-			perror("vm_loop - select");
+			perror("gn_vm_loop - select");
 			exit (-1);
 
 		default:
@@ -189,7 +189,7 @@ void vm_loop(void)
 			n = sizeof(queue.buf) - queue.n < sizeof(buf) ?
 				sizeof(queue.buf) - queue.n :
 				sizeof(buf);
-			if ( (n = read(PtyRDFD, buf, n)) <= 0 ) vm_terminate();
+			if ( (n = read(PtyRDFD, buf, n)) <= 0 ) gn_vm_terminate();
 
 			for (i = 0; i < n; i++) {
 				queue.buf[queue.tail++] = buf[i];
@@ -201,9 +201,9 @@ void vm_loop(void)
 	}
 }
 
-/* Application should call vm_terminate to shut down
+/* Application should call gn_vm_terminate to shut down
    the virtual modem thread */
-void vm_terminate(void)
+void gn_vm_terminate(void)
 {
 	/* Request termination of thread */
 	GTerminateThread = true;
