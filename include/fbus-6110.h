@@ -62,7 +62,8 @@
 
 #define FB61_MAX_IMEI_LENGTH     (20)
 #define FB61_MAX_REVISION_LENGTH (20)
-#define FB61_MAX_MODEL_LENGTH    (8)
+#define FB61_MAX_SW_LENGTH       (6)
+#define FB61_MAX_MODEL_LENGTH    (6)
 
 /* This byte is used to synchronize FBUS channel over cable or IR. */
 

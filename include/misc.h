@@ -118,15 +118,16 @@ typedef struct {
   int flags;
 } PhoneModel;
 
-#define PM_CALLERGROUP	0x01
-#define PM_NETMONITOR	0x02
-#define PM_KEYBOARD	0x04
-#define PM_SMS		0x08
-#define PM_CALENDAR	0x10
-#define PM_DTMF		0x20
-#define PM_DATA		0x40
-#define PM_SPEEDDIAL	0x80
-#define PM_EXTPBK       0x100
+#define PM_CALLERGROUP	  0x0001
+#define PM_NETMONITOR	  0x0002
+#define PM_KEYBOARD	  0x0004
+#define PM_SMS		  0x0008
+#define PM_CALENDAR	  0x0010
+#define PM_DTMF		  0x0020
+#define PM_DATA		  0x0040
+#define PM_SPEEDDIAL	  0x0080
+#define PM_EXTPBK         0x0100
+#define PM_AUTHENTICATION 0x0200
 
 extern char *GetModel (const char *);
 PhoneModel *GetPhoneModel (const char *);
