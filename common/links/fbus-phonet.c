@@ -62,14 +62,14 @@ static bool phonet_open(struct gn_statemachine *state)
 {
 	int result, i, n, total = 0;
 	unsigned char init_sequence[] = { FBUS_PHONET_BLUETOOTH_FRAME_ID,
+					  FBUS_DEVICE_PHONE,
 					  FBUS_PHONET_BLUETOOTH_DEVICE_PC,
-					  FBUS_PHONET_BLUETOOTH_DEVICE_PHONE,
 					  FBUS_PHONET_BLUETOOTH_INITSEQ,
 					  0x04};
 	unsigned char init_resp[7];
 	unsigned char init_pattern[7] = { FBUS_PHONET_BLUETOOTH_FRAME_ID,
-					 FBUS_PHONET_BLUETOOTH_DEVICE_PHONE,
 					 FBUS_PHONET_BLUETOOTH_DEVICE_PC,
+					 FBUS_DEVICE_PHONE,
 					 FBUS_PHONET_BLUETOOTH_INITSEQ,
 					 0x05};
 
@@ -122,8 +122,8 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_destination = rx_byte;
 		i->state = FBUS_RX_GetSource;
 
-		if (rx_byte != FBUS_DEVICE_PHONE &&
-		    rx_byte != FBUS_PHONET_BLUETOOTH_DEVICE_PHONE) {
+		if (rx_byte != FBUS_DEVICE_PC &&
+		    rx_byte != FBUS_PHONET_BLUETOOTH_DEVICE_PC) {
 			i->state = FBUS_RX_Sync;
 			dprintf("The fbus stream is out of sync - expected 0x0c, got 0x%2x\n", rx_byte);
 		}
@@ -134,8 +134,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_source = rx_byte;
 		i->state = FBUS_RX_GetType;
 
-		if (rx_byte != FBUS_DEVICE_PC &&
-		    rx_byte != FBUS_PHONET_BLUETOOTH_DEVICE_PC)  {
+		if (rx_byte != FBUS_DEVICE_PHONE) {
 			i->state = FBUS_RX_Sync;
 			dprintf("The fbus stream is out of sync - expected 0x00, got 0x%2x\n", rx_byte);
 		}
@@ -230,8 +229,8 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 
 	if (state->config.connection_type == GN_CT_Bluetooth) {
 		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_FRAME_ID;
+		out_buffer[current++] = FBUS_DEVICE_PHONE;
 		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_DEVICE_PC;
-		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_DEVICE_PHONE;
 	} else {
 		out_buffer[current++] = FBUS_PHONET_FRAME_ID;
 		out_buffer[current++] = FBUS_DEVICE_PHONE; /* Destination */
