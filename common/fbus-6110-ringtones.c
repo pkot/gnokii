@@ -105,10 +105,9 @@ int FB61_BitPackByte(unsigned char *Dest, int CurrentBit, unsigned char Command,
    tune as displayed on the Nokia is Name, beats per minute (aka tempo in
    NCDS) is stored in the variable Beats. Enjoy! */
 
-void FB61_Ringtone(char *Name, int Beats, int NrNotes, Note *Notes)
+int FB61_PackRingtone(unsigned char *req, char *Name, int Beats, int NrNotes, Note *Notes)
 {
 
-  unsigned char req[255];
   int StartBit=0, i=0;
   unsigned char FBUSRingtuneHeader[] = { 0x0c, 0x01, /* FBUS RingTone header*/
 
@@ -177,27 +176,7 @@ void FB61_Ringtone(char *Name, int Beats, int NrNotes, Note *Notes)
   /* 0x01 because we have only one frame... */
   StartBit=FB61_BitPackByte(req, StartBit, 1, 8);
 
-  FB61_TX_SendMessage(StartBit/8, 0x12, req);
-}
-
-void FB61_SendRingtone(char *Name, int Beats)
-{
-  int NrNotes=11;
-  Note Notes[11] = {
-    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
-    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
-    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
-    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
-    { Scale2, Note_G, Duration_1_4, NoSpecialDuration},
-    { Scale2, Note_Fis, Duration_1_8, NoSpecialDuration},
-    { Scale2, Note_E, Duration_1_4, NoSpecialDuration},
-    { Scale2, Note_E, Duration_1_8, NoSpecialDuration},
-    { Scale2, Note_A, Duration_1_8, NoSpecialDuration},
-    { Scale2, Note_Fis, Duration_1_4, NoSpecialDuration},
-    { Scale2, Note_D, Duration_1_4, NoSpecialDuration}
-  };
-
-  FB61_Ringtone(Name, Beats, NrNotes, Notes);
+  return StartBit/8;
 }
 
 int GetDuration(int number) {
@@ -240,8 +219,11 @@ int GetScale(int number) {
   return scale;
 }
 
-void FB61_SendRingtoneRTTL(char *FileName)
+int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName)
 {
+
+  int size;
+
   int NrNotes=0;
   Note Notes[100];
 
@@ -258,7 +240,7 @@ void FB61_SendRingtoneRTTL(char *FileName)
   fd=fopen(FileName, "r");
   if (!fd) {
     fprintf(stderr, _("File can not be opened!\n"));
-    return;
+    return 0;
   }
 
   fread(buffer, 2000, 1, fd);
@@ -297,7 +279,7 @@ void FB61_SendRingtoneRTTL(char *FileName)
 
   /* Parsing the <note-command>+ section. */
   ptr=strtok(notes, ", ");
-  while (ptr) {
+  while (ptr && NrNotes<100) {
 
     /* [<duration>] */
     Notes[NrNotes].Duration=GetDuration(atoi(ptr));
@@ -385,5 +367,15 @@ void FB61_SendRingtoneRTTL(char *FileName)
     ptr=strtok(NULL, ", ");
   }
 
-  FB61_Ringtone(Name, DefBeats, NrNotes, Notes);
+  size=FB61_PackRingtone(req, Name, DefBeats, NrNotes, Notes);
+  return size;
+}
+
+void FB61_SendRingtoneRTTL(char *FileName) {
+
+  unsigned char req[255];
+  int size=FB61_PackRingtoneRTTL(req, FileName);
+
+  if (size!=0)
+    FB61_TX_SendMessage(size, 0x12, req);
 }

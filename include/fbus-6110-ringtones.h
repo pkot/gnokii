@@ -115,6 +115,7 @@ typedef struct {
   int DurationSpecifier;
 } Note;
 
-void FB61_SendRingtone(char *Name, int Beats);
+int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName);
+void FB61_SendRingtoneRTTL(char *FileName);
 
 #endif	/* __fbus_6110_ringtones_h */

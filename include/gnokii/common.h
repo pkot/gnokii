@@ -181,7 +181,8 @@ typedef enum {
   GSM_NoUDH,
   GSM_ConcatenatedMessages,
   GSM_OpLogo,
-  GSM_CallerIDLogo
+  GSM_CallerIDLogo,
+  GSM_Ringtone
 } GSM_UDH;
 
 /* Define datatype for SMS messages, used for getting SMS messages from the

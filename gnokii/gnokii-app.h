@@ -32,6 +32,7 @@ int getsms(char *argv[]);
 int deletesms(char *argv[]);
 int sendsms(int argc, char *argv[]);
 int sendlogo(int argc, char *argv[]);
+int sendringtone(int argc, char *argv[]);
 int getsmsc(char *mcn);
 int setdatetime(int argc, char *argv[]);
 int getdatetime(void);
@@ -77,6 +78,7 @@ typedef enum {
   OPT_DELETESMS,
   OPT_SENDSMS,
   OPT_SENDLOGO,
+  OPT_SENDRINGTONE,
   OPT_GETSMSC,
   OPT_GETWELCOMENOTE,
   OPT_SETWELCOMENOTE,

@@ -38,3 +38,5 @@
 * Wed Apr  5 19:04:30 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - support for group logo sending via SMS
 
+* Thu Apr  6 14:03:48 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- ringtones in RTTTL can be send via SMS (--sendringtone)

@@ -8,3 +8,5 @@
 - Changed datapump code to use ATEM_Result function.  Added some
   #defines for Modem Result codes.
 
+* Thu Apr  6 14:03:48 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- timeout in virtmodem changed to allow the data calls to slow networks 

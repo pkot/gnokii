@@ -247,6 +247,7 @@ int usage(void)
 "          gnokii --setlogo logofile [caller group number] [group name]\n"
 "          gnokii --setlogo text [startup text]\n"
 "          gnokii --getlogo logofile {caller|op|startup} [caller group number]\n"
+"          gnokii --sendringtone destionation rtttlfile\n"
 "          gnokii --reset [soft|hard]\n"
   ));
 #ifdef SECURITY
@@ -333,6 +334,8 @@ int usage(void)
 "          --setlogo         set caller, startup or operator logo\n\n"
 
 "          --getlogo         get caller, startup or operator logo\n\n"
+
+"          --sendringtone    send the rtttlfile to destination as ringtone\n\n"
 
 "          --reset [soft|hard] resets the phone.\n\n"
   ));
@@ -510,6 +513,9 @@ int main(int argc, char *argv[])
     // Send logo as SMS message mode
     { "sendlogo",           required_argument, NULL, OPT_SENDLOGO },
 
+    // Send ringtone as SMS message
+    { "sendringtone",       required_argument, NULL, OPT_SENDRINGTONE },
+
     // Get SMS center number mode
     { "getsmsc",            required_argument, NULL, OPT_GETSMSC },
 
@@ -565,6 +571,7 @@ int main(int argc, char *argv[])
     { OPT_DELETESMS,         3, 3, 0 },
     { OPT_SENDSMS,           1, 10, 0 },
     { OPT_SENDLOGO,          3, 4, GAL_XOR },
+    { OPT_SENDRINGTONE,      2, 2, 0 },
     { OPT_GETSMSC,           1, 1, 0 },
     { OPT_GETWELCOMENOTE,    1, 1, 0 },
     { OPT_SETWELCOMENOTE,    1, 1, 0 },
@@ -753,6 +760,11 @@ int main(int argc, char *argv[])
     case OPT_SENDLOGO:
 
       rc = sendlogo(nargc, nargv);
+      break;
+
+    case OPT_SENDRINGTONE:
+
+      rc = sendringtone(nargc, nargv);
       break;
 
     case OPT_GETSMSC:
@@ -2626,5 +2638,59 @@ int pmon()
     usleep(50000);
   }
 
+  return 0;
+}
+
+/* FIXME: this can not be here... */
+int FB61_PackRingtoneRTTL(unsigned char *req, char *FileName);
+
+int sendringtone(int argc, char *argv[])
+{
+  GSM_SMSMessage SMS;
+  GSM_Error error;
+
+  int size;
+  unsigned char req[255];
+
+  /* Default settings for SMS message:
+      - no delivery report
+      - Class Message 1
+      - no compression
+      - 8 bit data
+      - SMSC no. 1
+      - validity 3 days
+      - set UserDataHeaderIndicator
+  */
+
+  SMS.Type = GST_MO;
+  SMS.Class = 1;
+  SMS.Compression = false;
+  SMS.EightBit = true;
+  SMS.MessageCenter.No = 1;
+  SMS.Validity = 4320; /* 4320 minutes == 72 hours */
+
+  SMS.UDHType = GSM_Ringtone;
+
+  /* The first argument is the destionation, ie the phone number of recipient. */
+  strcpy(SMS.Destination,argv[0]);
+
+  /* The second argument is the RTTTL file. */
+  size=FB61_PackRingtoneRTTL(req, argv[1]);
+
+  memcpy(SMS.UDH,req+2,7);
+  memcpy(SMS.MessageText,req+7,size-9);
+
+  /* Initialise the GSM interface. */
+  fbusinit(NULL);
+  
+  /* Send the message. */
+  error = GSM->SendSMSMessage(&SMS,size-9);
+
+  if (error == GE_SMSSENDOK)
+    fprintf(stdout, _("Send succeeded!\n"));
+  else
+    fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+
+  GSM->Terminate();
   return 0;
 }

@@ -40,7 +40,7 @@ ifdef XPM_CFLAGS
     CFLAGS += $(XPM_CFLAGS)
 endif
 
-all: COMMON.o
+all: COMMON.o gsm-filetypes.o
 
 COMMON.o: $(OBJS)
 	$(LD) $(LDREL) $(LDOUT) COMMON.o $(OBJS)

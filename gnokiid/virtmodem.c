@@ -138,7 +138,7 @@ void	VM_ThreadLoop(void)
 		timeout.tv_usec = 500000;	/* Timeout after 500mS */	
 	        if (!CommandMode) {
 		  ConnectCount++;
-		  if (ConnectCount>20) {
+		  if (ConnectCount>50) {
 
 		    /* If we are in data mode check if the call is still going! */
 		    if ((!CommandMode) && (GSM->GetIncomingCallNr(name)==GE_BUSY))

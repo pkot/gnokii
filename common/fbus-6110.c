@@ -938,7 +938,7 @@ void FB61_ThreadLoop(void)
   /* FIXME: we should implement better support for ringtones and the utility
      to set ringtones. */
 
-  // FB61_SendRingtoneRTTL("/tmp/coca.txt");
+  // FB61_SendRingtoneRTTL("/tmp/barbie.txt");
 
   idle_timer=0;
 
