@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.30  2001-02-01 15:17:30  pkot
+  Revision 1.31  2001-02-17 14:39:19  machek
+  Make writing/reading phonebook less verbose (as it should be).
+
+  Revision 1.30  2001/02/01 15:17:30  pkot
   Fixed --identify and added Manfred's manufacturer patch
 
   Revision 1.29  2001/01/31 11:46:50  machek
@@ -998,20 +1001,21 @@ GSM_Error GetPhonebookLocation(GSM_PhonebookEntry *entry)
 		fprintf(stderr, "Something is very wrong with GetPhonebookLocation\n");
 		return GE_BUSY;
 	}
-	printf("type= %x\n", PacketData[5]);
-	printf("location= %x\n", PacketData[6]);
-	printf("status= %x\n", PacketData[7]);
+	dprintf("type= %x\n", PacketData[5]);
+	dprintf("location= %x\n", PacketData[6]);
+	dprintf("status= %x\n", PacketData[7]);
 	for (i=8; PacketData[i]; i++) {
-		printf("%c", PacketData[i]);
+		dprintf("%c", PacketData[i]);
 	}
 	strcpy(entry->Name, (void *)&PacketData[8]);
 	i++;
 	strcpy(entry->Number, (void *)&PacketData[i]);
 	for (; PacketData[i]; i++) {
-		printf("%c", PacketData[i]);
+		dprintf("%c", PacketData[i]);
 	}
-	printf("\n");
+	dprintf("\n");
 	entry->Empty = false;
+	entry->Group = 0;
 
 	return (GE_NONE);
 }
