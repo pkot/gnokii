@@ -114,16 +114,18 @@ Part 3 gnokii configuration
 ===========================
 
 Depending on your phone, you need to set some gnokii options. for a nokia 6210
-or a nokia 7110 you would set the following in .gnokiirc:
+or a nokia 7110 you would set (at least) the following in .gnokiirc:
+	[global]
 	port = /dev/ircomm0
 	model = 6210
 	connection = irda
 For a siemens or a ericsson phone or any phone which supports the AT command
 set directly, the following should work. Please pay attention to connection
 which is set to "serial" instead of "irda":
-        port = /dev/ircomm0
-        model = AT
-        connection = serial
+	[global]
+	port = /dev/ircomm0
+	model = AT
+	connection = serial
 gnokii --monitor should now function.
 
 	[huggie@langly ~]$ gnokii --monitor
