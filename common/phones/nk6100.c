@@ -114,7 +114,6 @@ static gn_error Reset(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state);
-static gn_error play_tone(gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey(bool press, gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey1(bool press, gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey2(bool press, gn_data *data, struct gn_statemachine *state);
@@ -130,7 +129,6 @@ static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *sta
 static gn_error ChangeSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error get_security_code(gn_data *data, struct gn_statemachine *state);
 #endif
-static gn_error get_locks_info(gn_data *data, struct gn_statemachine *state);
 
 static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -338,7 +336,7 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return get_security_code(data, state);
 #endif
 	case GN_OP_GetLocksInfo:
-		return get_locks_info(data, state);
+		return pnok_get_locks_info(data, state);
 	case GN_OP_SendDTMF:
 		return SendDTMF(data, state);
 	case GN_OP_Reset:
@@ -352,7 +350,7 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 	case GN_OP_SetRawRingtone:
 		return SetRawRingtone(data, state);
 	case GN_OP_PlayTone:
-		return play_tone(data, state);
+		return pnok_play_tone(data, state);
 	case GN_OP_PressPhoneKey:
 		return PressOrReleaseKey(true, data, state);
 	case GN_OP_ReleasePhoneKey:
@@ -2814,30 +2812,9 @@ static gn_error get_security_code(gn_data *data, struct gn_statemachine *state)
 }
 #endif
 
-static gn_error get_locks_info(gn_data *data, struct gn_statemachine *state)
-{
-	unsigned char req[] = {0x00, 0x01, 0x8a, 0x00};
-
-	if (sm_message_send(4, 0x40, req, state)) return GN_ERR_NOTREADY;
-	return sm_block(0x40, data, state);
-}
-
-static gn_error play_tone(gn_data *data, struct gn_statemachine *state)
-{
-	unsigned char req[] = {0x00, 0x01, 0x8f, 0x00, 0x00, 0x00};
-
-	req[3] = data->tone->volume;
-	req[4] = data->tone->frequency / 256;
-	req[5] = data->tone->frequency % 256;
-
-	if (sm_message_send(6, 0x40, req, state)) return GN_ERR_NOTREADY;
-	return sm_block(0x40, data, state);
-}
-
 static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	char *aux, *aux2;
-	char  tmp[24];
 	int i;
 
 	switch (message[2]) {
@@ -2859,39 +2836,6 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		}
 		break;
 #endif
-
-	/* Get (sim)lock info */
-	case 0x8A:
-		for (i = 0; i < 4; i++) {
-			memset(&data->locks_info[i], 0, sizeof(gn_locks_info));
-		}
-
-		data->locks_info[0].userlock = ((message[5] & 0x01) != 0);
-		data->locks_info[1].userlock = ((message[5] & 0x02) != 0);
-		data->locks_info[2].userlock = ((message[5] & 0x04) != 0);
-		data->locks_info[3].userlock = ((message[5] & 0x08) != 0);
-
-		data->locks_info[0].closed = ((message[6] & 0x01) != 0);
-		data->locks_info[1].closed = ((message[6] & 0x02) != 0);
-		data->locks_info[2].closed = ((message[6] & 0x04) != 0);
-		data->locks_info[3].closed = ((message[6] & 0x08) != 0);
-
-		bin2hex(tmp, message + 9, 12);
-
-		strncpy(data->locks_info[0].data, tmp, 5);
-		strncpy(data->locks_info[1].data, tmp + 16, 4);
-		strncpy(data->locks_info[2].data, tmp + 20, 4);
-		strncpy(data->locks_info[3].data, tmp + 5, 10);
-
-		data->locks_info[0].counter = message[21];
-		data->locks_info[1].counter = message[22];
-		data->locks_info[2].counter = message[23];
-		data->locks_info[3].counter = message[24];
-		break;
-
-	/* Play tone */
-	case 0x8f:
-		break;
 
 	/* Get bin ringtone */
 	case 0x9e:

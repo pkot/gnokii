@@ -99,6 +99,7 @@ static gn_error NK7110_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 static gn_error NK7110_GetSMSStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press);
+static gn_error NK7110_SetRingtone(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK7110_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetWAPBookmark(gn_data *data, struct gn_statemachine *state);
@@ -121,6 +122,7 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 static gn_error NK7110_IncomingKeypress(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static int get_memory_type(gn_memory_type memory_type);
+static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type);
 
 static gn_incoming_function_type nk7110_incoming_functions[] = {
 	{ NK7110_MSG_FOLDER,		NK7110_IncomingFolder },
@@ -271,6 +273,12 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK7110_PressOrReleaseKey(data, state, true);
 	case GN_OP_ReleasePhoneKey:
 		return NK7110_PressOrReleaseKey(data, state, false);
+	case GN_OP_SetRingtone:
+		return NBSUpload(data, state, GN_SMS_DATA_Ringtone);
+	case GN_OP_PlayTone:
+		return pnok_play_tone(data, state);
+	case GN_OP_GetLocksInfo:
+		return pnok_get_locks_info(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -342,6 +350,9 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 		state->driver.phone.startup_logo_height = 65;
 		dprintf("7110 detected - startup logo height set to 65\n");
 	}
+
+	pnok_extended_cmds_enable(0x01, &data, state);
+
 	return GN_ERR_NONE;
 }
 
@@ -2601,4 +2612,36 @@ static int get_memory_type(gn_memory_type memory_type)
 		break;
 	}
 	return result;
+}
+
+static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type)
+{
+    unsigned char req[512] = {0x7c, 0x01, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    gn_sms sms;
+    gn_sms_raw rawsms;
+    gn_error err;
+    int n;
+
+    gn_sms_default_submit(&sms);
+    sms.user_data[0].type = type;
+    sms.user_data[1].type = GN_SMS_DATA_None;
+
+    switch (type) {
+    case GN_SMS_DATA_Ringtone:
+	    memcpy(&sms.user_data[0].u.ringtone, data->ringtone, sizeof(gn_ringtone));
+	    break;
+    default:
+	    return GN_ERR_INTERNALERROR;
+    }
+
+    memset(&rawsms, 0, sizeof(rawsms));
+
+    if ((err = sms_prepare(&sms, &rawsms)) != GN_ERR_NONE) return err;
+
+    req[10] = rawsms.user_data_length;
+    n = 11 + rawsms.user_data_length;
+    if (n > sizeof(req)) return GN_ERR_INTERNALERROR;
+    memcpy(req + 11, rawsms.user_data, rawsms.user_data_length);
+
+    return sm_message_send(n, 0x00, req, state);
 }

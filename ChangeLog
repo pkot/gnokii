@@ -5,6 +5,10 @@
       po/Makevars                                       (Pawel Kot)
  * 6110 series updates
     o PlayTone message and documentation fixed     (BORBELY Zoltan)
+    o get_locks_info and play_tone moved to nokia  (BORBELY Zoltan)
+ * 7110 series updates
+    o PlayTone implemented                         (BORBELY Zoltan)
+    o GetLocksInfo implemented                     (BORBELY Zoltan)
  * libgnokii changes
     o Tomi Ollila's readmidi.c added               (BORBELY Zoltan)
 

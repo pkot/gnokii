@@ -404,8 +404,31 @@ gn_error pnok_netmonitor(gn_data *data, struct gn_statemachine *state)
 	return sm_block(0x40, data, state);
 }
 
+gn_error pnok_get_locks_info(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x8a, 0x00};
+
+	if (sm_message_send(4, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
+}
+
+gn_error pnok_play_tone(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x8f, 0x00, 0x00, 0x00};
+
+	req[3] = data->tone->volume;
+	req[4] = data->tone->frequency / 256;
+	req[5] = data->tone->frequency % 256;
+
+	if (sm_message_send(6, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
+}
+
 gn_error pnok_security_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
+	char  tmp[24];
+	int i;
+
 	switch (message[2]) {
 	/* Enable extended commands */
 	case 0x64:
@@ -435,6 +458,39 @@ gn_error pnok_security_incoming(int messagetype, unsigned char *message, int len
 				snprintf(data->netmonitor->screen, sizeof(data->netmonitor->screen), "%s", message + 4);
 			break;
 		}
+		break;
+
+	/* Get (sim)lock info */
+	case 0x8a:
+		for (i = 0; i < 4; i++) {
+			memset(&data->locks_info[i], 0, sizeof(gn_locks_info));
+		}
+
+		data->locks_info[0].userlock = ((message[5] & 0x01) != 0);
+		data->locks_info[1].userlock = ((message[5] & 0x02) != 0);
+		data->locks_info[2].userlock = ((message[5] & 0x04) != 0);
+		data->locks_info[3].userlock = ((message[5] & 0x08) != 0);
+
+		data->locks_info[0].closed = ((message[6] & 0x01) != 0);
+		data->locks_info[1].closed = ((message[6] & 0x02) != 0);
+		data->locks_info[2].closed = ((message[6] & 0x04) != 0);
+		data->locks_info[3].closed = ((message[6] & 0x08) != 0);
+
+		bin2hex(tmp, message + 9, 12);
+
+		strncpy(data->locks_info[0].data, tmp, 5);
+		strncpy(data->locks_info[1].data, tmp + 16, 4);
+		strncpy(data->locks_info[2].data, tmp + 20, 4);
+		strncpy(data->locks_info[3].data, tmp + 5, 10);
+
+		data->locks_info[0].counter = message[21];
+		data->locks_info[1].counter = message[22];
+		data->locks_info[2].counter = message[23];
+		data->locks_info[3].counter = message[24];
+		break;
+
+	/* Play tone */
+	case 0x8f:
 		break;
 
 	default:

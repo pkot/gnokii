@@ -55,6 +55,8 @@ gn_error pnok_call_make(gn_data *data, struct gn_statemachine *state);
 gn_error pnok_call_answer(gn_data *data, struct gn_statemachine *state);
 gn_error pnok_call_cancel(gn_data *data, struct gn_statemachine *state);
 gn_error pnok_netmonitor(gn_data *data, struct gn_statemachine *state);
+gn_error pnok_get_locks_info(gn_data *data, struct gn_statemachine *state);
+gn_error pnok_play_tone(gn_data *data, struct gn_statemachine *state);
 gn_error pnok_security_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 #endif
