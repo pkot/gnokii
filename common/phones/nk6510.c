@@ -1959,6 +1959,7 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 		data->calnote_list->number = message[4] * 256 + message[5];
 		dprintf("Location of Notes: ");
 		for (i = 0; i < data->calnote_list->number; i++) {
+			if (8 + 2 * i >= length) break;
 			data->calnote_list->location[data->calnote_list->last+i] = message[8 + 2 * i] * 256 + message[9 + 2 * i];
 			dprintf("%i ", data->calnote_list->location[data->calnote_list->last+i]); 
 		}
