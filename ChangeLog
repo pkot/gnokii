@@ -28,6 +28,10 @@
     o writetodo support                            (BORBELY Zoltan)
     o deletealltodos support                       (BORBELY Zoltan)
     o clear empty flag when phonebook entry read   (BORBELY Zoltan)
+    o getdatetime support                          (BORBELY Zoltan)
+    o setdatetime support                          (BORBELY Zoltan)
+    o getalarm support                             (BORBELY Zoltan)
+    o setalarm support                             (BORBELY Zoltan)
  * gnokii updates
     o initialize error variables                             (SuSE)
     o make --writephonebook --find-free work            (Pawel Kot)

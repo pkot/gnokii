@@ -112,6 +112,10 @@ static gn_error gnapplet_calendar_todo_read(gn_data *data, struct gn_statemachin
 static gn_error gnapplet_calendar_todo_write(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_calendar_todo_delete(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_calendar_todo_delete_all(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_clock_datetime_read(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_clock_datetime_write(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_clock_alarm_read(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_clock_alarm_write(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -120,6 +124,7 @@ static gn_error gnapplet_incoming_power(int messagetype, unsigned char *message,
 static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_incoming_clock(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_INFO,		gnapplet_incoming_info },
@@ -129,6 +134,7 @@ static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_DEBUG,		gnapplet_incoming_debug },
 	{ GNAPPLET_MSG_SMS,		gnapplet_incoming_sms },
 	{ GNAPPLET_MSG_CALENDAR,	gnapplet_incoming_calendar },
+	{ GNAPPLET_MSG_CLOCK,		gnapplet_incoming_clock },
 	{ 0,				NULL}
 };
 
@@ -480,6 +486,14 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_calendar_todo_write(data, state);
 	case GN_OP_DeleteAllToDos:
 		return gnapplet_calendar_todo_delete_all(data, state);
+	case GN_OP_GetDateTime:
+		return gnapplet_clock_datetime_read(data, state);
+	case GN_OP_SetDateTime:
+		return gnapplet_clock_datetime_write(data, state);
+	case GN_OP_GetAlarm:
+		return gnapplet_clock_alarm_read(data, state);
+	case GN_OP_SetAlarm:
+		return gnapplet_clock_alarm_write(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -1439,6 +1453,107 @@ static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *messa
 		if (!(todo = data->todo)) return GN_ERR_INTERNALERROR;
 		if (error != GN_ERR_NONE) return error;
 		todo->location = pkt_get_uint32(&pkt);
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
+}
+
+
+static gn_error gnapplet_clock_datetime_read(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->datetime) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CLOCK_DATETIME_READ_REQ);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CLOCK);
+}
+
+
+static gn_error gnapplet_clock_datetime_write(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->datetime) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CLOCK_DATETIME_WRITE_REQ);
+	pkt_put_timestamp(&pkt, data->datetime);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CLOCK);
+}
+
+
+static gn_error gnapplet_clock_alarm_read(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->alarm) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CLOCK_ALARM_READ_REQ);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CLOCK);
+}
+
+
+static gn_error gnapplet_clock_alarm_write(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->alarm) return GN_ERR_INTERNALERROR;
+	if (!data->alarm->enabled) {
+		data->alarm->timestamp.hour = 0;
+		data->alarm->timestamp.minute = 0;
+		data->alarm->timestamp.second = 0;
+	}
+	data->alarm->timestamp.year = 0;
+	data->alarm->timestamp.month = 1;
+	data->alarm->timestamp.day = 1;
+	data->alarm->timestamp.timezone = 0;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_CLOCK_ALARM_WRITE_REQ);
+	pkt_put_bool(&pkt, data->alarm->enabled);
+	pkt_put_timestamp(&pkt, &data->alarm->timestamp);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_CLOCK);
+}
+
+
+static gn_error gnapplet_incoming_clock(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	REPLY_DEF;
+
+	switch (code) {
+
+	case GNAPPLET_MSG_CLOCK_DATETIME_READ_RESP:
+		if (!data->datetime) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		pkt_get_timestamp(data->datetime, &pkt);
+		break;
+
+	case GNAPPLET_MSG_CLOCK_DATETIME_WRITE_RESP:
+		if (data->datetime) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		break;
+
+	case GNAPPLET_MSG_CLOCK_ALARM_READ_RESP:
+		if (!data->alarm) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		data->alarm->enabled = pkt_get_bool(&pkt);
+		pkt_get_timestamp(&data->alarm->timestamp, &pkt);
+		break;
+
+	case GNAPPLET_MSG_CLOCK_ALARM_WRITE_RESP:
+		if (data->alarm) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
 		break;
 
 	default:
