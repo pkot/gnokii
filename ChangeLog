@@ -55,6 +55,8 @@
       Visual Studio 6                                 (Feico de Boer)
     o builds Cygwin Win32 with --enable-win32 --disable-shared
                                                       (Feico de Boer)
+ * 6510 series updates
+    o support also 8310                           (Christian Rishoej)
 
 0.4.0pre19
 ==========
