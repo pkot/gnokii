@@ -4159,6 +4159,7 @@ static gn_error smsslave(gn_sms *message)
 	static int unknown = 0;
 	char c, number[GN_BCD_STRING_MAX_LENGTH];
 	char *p = message->remote.number;
+	const char *smsdir = "/tmp/sms";
 
 	if (p[0] == '+') {
 		p++;
@@ -4175,15 +4176,19 @@ static gn_error smsslave(gn_sms *message)
 		s++;
 	fprintf(stderr, _("Got message %d: %s\n"), i, s);
 	if ((sscanf(s, "%d/%d:%d-%c-", &i1, &i2, &msgno, &c) == 4) && (c == 'X'))
-		sprintf(buf, "/tmp/sms/mail_%d_", msgno);
+		snprintf(buf, sizeof(buf), "%s/mail_%d_", smsdir, msgno);
 	else if (sscanf(s, "%d/%d:%d-%d-", &i1, &i2, &msgno, &msgpart) == 4)
-		sprintf(buf, "/tmp/sms/mail_%d_%03d", msgno, msgpart);
-	else	sprintf(buf, "/tmp/sms/sms_%s_%d_%d", number, getpid(), unknown++);
+		snprintf(buf, sizeof(buf), "%s/mail_%d_%03d", smsdir, msgno, msgpart);
+	else	snprintf(buf, sizeof(buf), "%s/sms_%s_%d_%d", smsdir, number, getpid(), unknown++);
 	if ((output = fopen(buf, "r")) != NULL) {
 		fprintf(stderr, _("### Exists?!\n"));
 		return GN_ERR_FAILED;
 	}
-	output = fopen(buf, "w+");
+	mkdir(smsdir, 0700);
+	if ((output = fopen(buf, "w+")) == NULL) {
+		fprintf(stderr, _("### Cannot create file %s\n"), buf);
+		return GN_ERR_FAILED;
+	}
 
 	/* Skip formatting chars */
 	if (!strstr(buf, "mail"))

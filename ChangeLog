@@ -53,6 +53,7 @@
                                                          (Pawel Kot)
     o Please enter SMS text... message displays only when
       stdin is a terminal                           (BORBELY Zoltan)
+    o --smsreader fixes                             (BORBELY Zoltan)
  * smsd fixes
     o FreeBSD doesn't have libdl and smsd can be complied there
       without -ldl                                (Peter Kolmisoppi)
@@ -73,6 +74,7 @@
  * 6100 series updates:
     o better fix for busy (0xc9) frame              (BORBELY Zoltan)
     o Nokia CardPhone support updated                 (Georg Moritz)
+    o clear data before delete the incoming sms     (BORBELY Zoltan)
  * AT series updates:
     o fix charset handling                          (Ladislav Michl)
 

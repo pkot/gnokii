@@ -1270,6 +1270,8 @@ static bool CheckIncomingSMS(struct gn_statemachine *state, int pos)
 	DRVINSTANCE(state)->on_sms(&sms);
 
 	dprintf("deleting sms#%hd\n", sms.number);
+	gn_data_clear(&data);
+	data.sms = &sms;
 	DeleteSMSMessage(&data, state);
 
 	DRVINSTANCE(state)->sms_notification_in_progress = false;
