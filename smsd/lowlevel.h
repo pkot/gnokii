@@ -72,7 +72,7 @@ extern pthread_cond_t  smsCond;
 extern pthread_mutex_t sendSMSMutex;
 extern pthread_cond_t  sendSMSCond;
 extern void InitPhoneMonitor (void);
-extern void *Connect (void *a);
+extern void *Connect (void *);
 extern void InsertEvent (PhoneEvent *event);
 
 #endif

@@ -85,27 +85,37 @@ gint DB_ConnectOutbox (DBConfig connect)
 }
 
 
-gint DB_InsertSMS (const gn_sms * const data)
+gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 {
-  GString *buf;
+  GString *buf, *phnStr;
   gchar *text;
   gint l;
+
+
+  if (phone[0] == '\0')
+    phnStr = g_string_new ("");
+  else
+  {
+    phnStr = g_string_sized_new (32);
+    g_string_sprintf (phnStr, "'%s',", phone);
+  }
 
 /* MySQL has own escape function.    
   text = strEscape (data->UserData[0].u.Text);
 */
-  
   text = g_malloc (strlen (data->user_data[0].u.text) * 2 + 1);
   mysql_real_escape_string (&mysqlIn, text, data->user_data[0].u.text, strlen (data->user_data[0].u.text));
   
   buf = g_string_sized_new (256);
   g_string_sprintf (buf, "INSERT INTO inbox (number, smsdate, \
-                    text, processed) VALUES ('%s', \
-                    '%04d-%02d-%02d %02d:%02d:%02d', '%s', '0')",
-                    data->remote.number, data->smsc_time.year, data->smsc_time.month,
-                    data->smsc_time.day, data->smsc_time.hour, data->smsc_time.minute,
-                    data->smsc_time.second, text);
+                    text, %s processed) VALUES ('%s', \
+                    '%04d-%02d-%02d %02d:%02d:%02d', '%s', %s '0')",
+                    phone[0] != '\0' ? "phone," : "", data->remote.number,
+                    data->smsc_time.year, data->smsc_time.month,
+                    data->smsc_time.day, data->smsc_time.hour,
+                    data->smsc_time.minute, data->smsc_time.second, text, phnStr->str);
   g_free (text);
+  g_string_free(phnStr, TRUE);
 
   if (mysql_real_query (&mysqlIn, buf->str, buf->len))
   {
@@ -121,18 +131,27 @@ gint DB_InsertSMS (const gn_sms * const data)
 }
 
 
-void DB_Look (void)
+void DB_Look (const gchar * const phone)
 {
-  GString *buf;
+  GString *buf, *phnStr;
   MYSQL_RES *res1;
   MYSQL_ROW row;
   gint numError, error;
 
+  if (phone[0] == '\0')
+    phnStr = g_string_new ("");
+  else
+  {
+    phnStr = g_string_sized_new (32);
+    g_string_sprintf (phnStr, "AND phone = '%s'", phone);
+  }
+
   buf = g_string_sized_new (128);
 
   g_string_sprintf (buf, "SELECT id, number, text, dreport FROM outbox \
-                          WHERE processed='0'");
-
+                          WHERE processed='0' %s", phnStr->str);
+  g_string_free (phnStr, TRUE);
+  
   if (mysql_real_query (&mysqlOut, buf->str, buf->len))
   {
     g_print (_("%d: SELECT FROM outbox command failed.\n"), __LINE__);

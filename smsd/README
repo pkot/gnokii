@@ -1,13 +1,14 @@
 NOTE: The database format from version 1.0 to 1.1 changed! You must add column
 dreport to outbox table.
 
+NOTE: The database format from version 1.1 to 1.2 changed! You must add column
+phone to outbox and inbox tables.
 
 
 INTRODUCTION
 
 The SMSD (SMS daemon) program is intended for receiving and sending SMS's.
-This code is a part of one project on which I worked and I provide it for
-free use under GPL. I provide the program AS IS without any warranty.
+I provide the program AS IS without any warranty under GPL.
 
 The program is designed to use modules (plugins) to work with an SQL server.
 Currently are supported PostgreSQL, MySQL and a special module 'file' which is
@@ -20,6 +21,8 @@ number     - phone number from which is sms received
 smsdate    - date set by SMS center
 insertdate - date SMS was inserted into table
 text       - SMS text
+phone      - number of phone to use. If you use smsd without -t option you
+             can ignore this column. See -t option below.
 processed  - smsd sets this always to FALSE. You can use it for another
              program which will parse SMS's.
 
@@ -33,6 +36,8 @@ number         - recipient's phone number
 processed_date - date of processing SMS.
 insertdate     - date of inserting SMS in table
 text           - SMS text
+phone          - number of phone to use. If you use smsd without -t option you
+                 must not fill this column. See -t option below.
 processed      - new SMS must have this attribut set to FALSE. 
                  SMSD will send this SMS and will update 'processed' to TRUE.
 error          - This attribute contains return value of gn_sms_send() function.
@@ -106,8 +111,50 @@ Options:
 
 -f, --logfile file
 	If used, smsd will monitor sms traffic to file "file". File is
-	reopened and closed for every message, you can simply rename or
-	delete it if you want rotate logs.
+	reopened and closed for every message so you can simply rename or
+	delete it if you want rotate logs. If you use '-' as filename smsd
+	will use standard output.
+
+-t, --phone phone_number
+	You can run more instances of smsd. One instance per phone. In this
+	setup you must configure phone section in gnokiirc. For example:
+
+	[global]
+	port = /dev/ttyS0
+	model = 6110
+	initlength = default
+	connection = serial
+	bindir = /usr/local/sbin/
+	use_locking = no
+	serial_baudrate = 38400
+	smsc_timeout = 10
+
+	[phone_1]
+	port = /dev/ttyS0
+	model = 6110
+	initlength = default
+	connection = serial
+	bindir = /usr/local/sbin/
+	use_locking = no
+	serial_baudrate = 38400
+
+	[phone_2]
+	port = /dev/ttyS1
+	model = AT
+	initlength = default
+	connection = serial
+	bindir = /usr/local/sbin/
+	use_locking = no
+	serial_baudrate = 38400
+	smsc_timeout = 10
+
+	In this setup if you run smsd without -t option it will use config
+	from global section. If you run smsd with -t 1 it will use config
+	from phone_1 and likewise with -t 2 uses phone_2. In case of use -t
+	option smsd fill phone number for incoming sms's and in outbox it
+	looks only for sms's with the specified phone number in column
+	'phone'. This behaviour give you possibility to run one instance
+	of smsd for every phone you have at the same time.
 
 -v, --version
 	Shows smsd version.
@@ -143,4 +190,4 @@ make install
 SMSD shares gnokii's runtime configuration file and libgnokii. 
 
 
-					Jan Derfinak <ja@mail.upjs.sk>
+Jan Derfinak <ja@mail.upjs.sk>

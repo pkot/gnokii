@@ -1,4 +1,4 @@
-.TH "smsd" "8" "August 29, 2002" "" "Gnokii"
+.TH "smsd" "8" "October  5, 2003" "" "Gnokii"
 .SH "NAME"
 smsd \- daemon for handling incoming and outgoing SMSes using libgnokii
 .SH "SYNOPSIS"
@@ -32,6 +32,10 @@ date SMS was inserted into table
 .B text
 SMS text
 .TP
+.B phone
+number of phone to use. If you use smsd without -t option you can ignore
+this column. See -t option below.
+.TP
 .B processed
 smsd sets this always to FALSE. You can use it for another program which will parse SMSes.
 .RE
@@ -61,6 +65,11 @@ date of inserting SMS in table
 .TP
 .B text
 SMS text
+
+.TP
+.B phone
+number of phone to use. If you use smsd without -t option you
+must not fill this column. See -t option below.
 
 .TP
 .B processed
@@ -158,8 +167,80 @@ Do not interchange this plugins with default SQL libraries from database distrib
 .TP
 .BR -f,\ --logfile\ file
 If used, smsd will monitor sms traffic to file "file". File is
-reopened and closed for every message, you can simply rename or
-delete it if you want rotate logs.
+reopened and closed for every message so you can simply rename or
+delete it if you want rotate logs. If you use '-' as filename smsd
+will use standard output.
+
+.TP
+.BR -t,\ --phone\ phone_number
+You can run more instances of smsd. One instance per phone. In this
+setup you must configure phone section in gnokiirc. For example:
+
+.PD 0
+.RS
+[global]
+.P
+port = /dev/ttyS0
+.P
+model = 6110
+.P
+initlength = default
+.P
+connection = serial
+.P
+bindir = /usr/local/sbin/
+.P
+use_locking = no
+.P
+serial_baudrate = 38400
+.P
+smsc_timeout = 10
+.P
+
+[phone_1]
+.P
+port = /dev/ttyS0
+.P
+model = 6110
+.P
+initlength = default
+.P
+connection = serial
+.P
+bindir = /usr/local/sbin/
+.P
+use_locking = no
+.P
+serial_baudrate = 38400
+.P
+
+[phone_2]
+.P
+port = /dev/ttyS1
+.P
+model = AT
+.P
+initlength = default
+.P
+connection = serial
+.P
+bindir = /usr/local/sbin/
+.P
+use_locking = no
+.P
+serial_baudrate = 38400
+.P
+smsc_timeout = 10
+.PD
+
+In this setup if you run smsd without -t option it will use config
+from global section. If you run smsd with -t 1 it will use config
+from phone_1 and likewise with -t 2 uses phone_2. In case of use -t
+option smsd fill phone number for incoming sms's and in outbox it
+looks only for sms's with the specified phone number in column
+'phone'. This behaviour give you possibility to run one instance
+of smsd for every phone you have at the same time.
+.RE
 
 .TP
 .BR -v,\ --version

@@ -67,8 +67,8 @@ static DBConfig connection;
 void (*DB_Bye) (void) = NULL;;
 gint (*DB_ConnectInbox) (const DBConfig) = NULL;
 gint (*DB_ConnectOutbox) (const DBConfig) = NULL;
-gint (*DB_InsertSMS) (const gn_sms * const) = NULL;
-void (*DB_Look) (void) = NULL;
+gint (*DB_InsertSMS) (const gn_sms * const, const gchar * const) = NULL;
+void (*DB_Look) (const gchar * const) = NULL;
 
 static pthread_t db_monitor_th;
 pthread_mutex_t db_monitorMutex;
@@ -158,7 +158,7 @@ gint LoadDB (void)
 
 static void Version (void)
 {
-  g_print ("\nsmsd - version 1.1-cvs		(20030209)\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n");
+  g_print ("\nsmsd - version 1.2-cvs		(20031005)\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n");
 }
 
 
@@ -173,6 +173,7 @@ static void Usage (gchar *p)
              "            -m, --module db_module (pq, mysql, file)\n"
              "            -l, --libdir path_to_db_module\n"
              "            -f, --logfile file\n"
+             "            -t, --phone phone_number\n"
              "            -v, --version\n"
              "            -h, --help\n"), p);
 }
@@ -188,7 +189,9 @@ static void LogFile (gchar *str, ...)
   if (smsdConfig.logFile == NULL)
     return;
 
-  if ((f = fopen (smsdConfig.logFile, "a")) == NULL)
+  if (strcmp (smsdConfig.logFile, "-") == 0)
+    f = stdout;
+  else if ((f = fopen (smsdConfig.logFile, "a")) == NULL)
   {
     g_print (_("Warning: Cannot open file %s for appendig.\n"), smsdConfig.logFile);
     return;
@@ -201,7 +204,10 @@ static void LogFile (gchar *str, ...)
   va_start (ap, str);
   vfprintf (f, str, ap);
   va_end (ap);
-  fclose (f);
+  if (f == stdout)
+    fflush (f);
+  else
+    fclose (f);
   return;
 }
 
@@ -215,6 +221,7 @@ static void ReadConfig (gint argc, gchar *argv[])
   smsdConfig.dbMod = g_strdup ("pq");
   smsdConfig.libDir = g_strdup (MODULES_DIR);
   smsdConfig.logFile = NULL;
+  smsdConfig.phone = g_strdup ("");
   smsdConfig.smsSets = 0;
 
   while (1)
@@ -230,11 +237,12 @@ static void ReadConfig (gint argc, gchar *argv[])
       {"module", 1, 0, 'm'},
       {"libdir", 1, 0, 'l'},
       {"logfile", 1, 0, 'f'},
+      {"phone", 1, 0, 't'},
       {"version", 0, 0, 'v'},
       {"help", 0, 0, 'h'}
     };
     
-    c = getopt_long (argc, argv, "u:p:d:c:m:l:f:vh", longOptions, &optionIndex);
+    c = getopt_long (argc, argv, "u:p:d:c:m:l:f:t:vh", longOptions, &optionIndex);
     if (c == EOF)
       break;
     switch (c)
@@ -277,6 +285,12 @@ static void ReadConfig (gint argc, gchar *argv[])
         if (smsdConfig.logFile)
           g_free (smsdConfig.logFile);
         smsdConfig.logFile = g_strdup (optarg);
+        break;
+
+      case 't':
+        if (smsdConfig.phone)
+          g_free (smsdConfig.phone);
+        smsdConfig.phone = g_strdup (optarg);
         break;
 
       case 'v':
@@ -333,7 +347,7 @@ static void *SendSMS (void *a)
     }
     pthread_mutex_unlock (&db_monitorMutex);
 
-    (*DB_Look) ();
+    (*DB_Look) (smsdConfig.phone);
 
     sleep (3);
   }
@@ -397,7 +411,7 @@ static void ReadSMS (gpointer d, gpointer userData)
                 data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
                 data->user_data[0].u.text);
 #endif
-      error = (*DB_InsertSMS) (data);
+      error = (*DB_InsertSMS) (data, smsdConfig.phone);
     }
     
     if (smsdConfig.logFile)
@@ -473,7 +487,7 @@ static void Run (void)
   InitPhoneMonitor ();
   if ((*DB_ConnectInbox) (connection))
     exit (2);
-  pthread_create (&monitor_th, NULL, Connect, NULL);
+  pthread_create (&monitor_th, NULL, Connect, smsdConfig.phone);
   db_monitor = TRUE;
   pthread_mutex_init (&db_monitorMutex, NULL);
   pthread_create (&db_monitor_th, NULL, SendSMS, NULL);

@@ -9,8 +9,8 @@
 GLIBCFLAGS = glib-config --cflags
 GLIBLDLIBS = glib-config --libs
 
-# Comment out above and uncomment below lines if you want compile smsd
-# with glib2 instead of glib1. This is not well tested so be careful.
+# Comment out above lines and uncomment below lines if you want compile smsd
+# with glib2 instead of glib1.
 #
 #GLIBCFLAGS = pkg-config --cflags glib-2.0
 #GLIBLDLIBS = pkg-config --libs glib-2.0

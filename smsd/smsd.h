@@ -42,6 +42,7 @@ typedef struct {
   gchar *dbMod;
   gchar *libDir;
   gchar *logFile;
+  gchar *phone;
   gint   smsSets:4;
 } SmsdConfig;
 

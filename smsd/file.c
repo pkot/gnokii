@@ -108,7 +108,7 @@ gint DB_ConnectOutbox (DBConfig connect)
 }
 
 
-gint DB_InsertSMS (const gn_sms * const data)
+gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 {
   FILE *p;
   GString *buf;
@@ -148,7 +148,7 @@ gint DB_InsertSMS (const gn_sms * const data)
 }
 
 
-void DB_Look (void)
+void DB_Look (const gchar * const phone)
 {
   DIR *dir;
   struct dirent *dirent;

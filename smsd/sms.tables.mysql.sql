@@ -14,6 +14,7 @@ CREATE TABLE inbox (
   smsdate datetime NOT NULL default '0000-00-00 00:00:00',
   insertdate timestamp(14) NOT NULL,
   text varchar(160) default NULL,
+  phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
@@ -33,6 +34,7 @@ CREATE TABLE outbox (
   processed_date timestamp(14) NOT NULL,
   insertdate timestamp(14) NOT NULL,
   text varchar(160) default NULL,
+  phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
   error tinyint(4) NOT NULL default '-1',
   dreport tinyint(4) NOT NULL default '0',

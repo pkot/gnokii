@@ -141,7 +141,10 @@ static gn_error fbusinit (const char * const iname)
   /* signal(SIGINT, bussignal); */
 
   if (!gn_cfg_phone_load (iname, &sm))
+  {
+    g_print (_("Cannot load phone %s!\nDo you have proper section in gnokiirc?\n"), iname);
     exit (-1);
+  }
 
   aux = gn_cfg_get (gn_cfg_info, "global", "use_locking");
   /* Defaults to 'no' */
@@ -357,7 +360,7 @@ gint (*DoAction[])(gpointer) = {
 };
 
 
-void *Connect (void *a)
+void *Connect (void *phone)
 {
   gn_data *data;
   gn_sms_status SMSStatus = {0, 0, 0, 0};
@@ -371,7 +374,7 @@ void *Connect (void *a)
   g_print ("Initializing connection...\n");
 # endif
 
-  if (fbusinit ("") != GN_ERR_NONE)
+  if (fbusinit ((gchar *)phone) != GN_ERR_NONE)
   {
     free (data);
     exit (1);
@@ -399,6 +402,8 @@ void *Connect (void *a)
         }
         phoneMonitor.sms.unRead = 0;
       }
+      else
+        g_print (_("GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\n"), __LINE__, __FILE__, error);
     }
     else
     {
@@ -414,6 +419,8 @@ void *Connect (void *a)
         }
         phoneMonitor.sms.unRead = SMSStatus.unread;
       }
+      else
+        g_print (_("GN_OP_GetSMSStatus at line %d in file %s returns error %d\n"), __LINE__, __FILE__, error);
     }
 
     while ((event = RemoveEvent ()) != NULL)

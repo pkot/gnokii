@@ -94,22 +94,32 @@ gint DB_ConnectOutbox (DBConfig connect)
 }
 
 
-gint DB_InsertSMS (const gn_sms * const data)
+gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 {
-  GString *buf;
+  GString *buf, *phnStr;
   gchar *text;
   PGresult *res;
-    
+
+  if (phone[0] == '\0')
+    phnStr = g_string_new ("");
+  else
+  {
+    phnStr = g_string_sized_new (32);
+    g_string_sprintf (phnStr, "'%s',", phone);
+  }
+
   text = strEscape (data->user_data[0].u.text);
   
   buf = g_string_sized_new (256);
   g_string_sprintf (buf, "INSERT INTO inbox (\"number\", \"smsdate\", \"insertdate\",\
-                    \"text\", \"processed\") VALUES ('%s', \
-                    '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', 'f')",
-                    data->remote.number, data->smsc_time.year, data->smsc_time.month,
-                    data->smsc_time.day, data->smsc_time.hour, data->smsc_time.minute,
-                    data->smsc_time.second, text);
+                    \"text\", %s \"processed\") VALUES ('%s', \
+                    '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', %s 'f')",
+                    phone[0] != '\0' ? "\"phone\"," : "", data->remote.number,
+                    data->smsc_time.year, data->smsc_time.month,
+                    data->smsc_time.day, data->smsc_time.hour,
+                    data->smsc_time.minute, data->smsc_time.second, text, phnStr->str);
   g_free (text);
+  g_string_free(phnStr, TRUE);
   
   res = PQexec(connIn, buf->str);
   g_string_free(buf, TRUE);
@@ -127,12 +137,20 @@ gint DB_InsertSMS (const gn_sms * const data)
 }
 
 
-void DB_Look (void)
+void DB_Look (const gchar * const phone)
 {
-  GString *buf;
+  GString *buf, *phnStr;
   PGresult *res1, *res2;
   register int i;
   gint numError, error;
+
+  if (phone[0] == '\0')
+    phnStr = g_string_new ("");
+  else
+  {
+    phnStr = g_string_sized_new (32);
+    g_string_sprintf (phnStr, "AND phone = '%s'", phone);
+  }
 
   buf = g_string_sized_new (128);
 
@@ -140,7 +158,8 @@ void DB_Look (void)
   PQclear (res1);
 
   g_string_sprintf (buf, "SELECT id, number, text, dreport FROM outbox \
-                          WHERE processed='f' FOR UPDATE");
+                          WHERE processed='f' %s FOR UPDATE", phnStr->str);
+  g_string_free (phnStr, TRUE);
 
   res1 = PQexec (connOut, buf->str);
   if (!res1 || PQresultStatus (res1) != PGRES_TUPLES_OK)
