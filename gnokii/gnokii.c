@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.119  2001-02-05 12:29:37  pkot
+  Revision 1.120  2001-02-06 08:13:32  pkot
+  One more include in gnokii.c needed
+
+  Revision 1.119  2001/02/05 12:29:37  pkot
   Changes needed to let unicode work
 
   Revision 1.118  2001/02/01 15:17:33  pkot
@@ -91,6 +94,10 @@
   #include <getopt.h>
   #include <sys/stat.h>
 
+#endif
+
+#ifdef USE_NLS
+  #include <locale.h>
 #endif
 
 #include "misc.h"
