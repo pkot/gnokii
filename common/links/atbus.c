@@ -41,9 +41,6 @@ static void at_printf(char *prefix, char *buf, int len);
 /*         the result is _one_ error message from the phone. */
 
 /* Some globals */
-/* FIXME - if we use more than one phone these should be part of */
-/*         a statemachine. */
-
 static GSM_Statemachine *statemachine;
 
 /* The buffer for phone responses not only holds the data from
@@ -201,12 +198,12 @@ GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
 	state->Link.Loop = &ATBUS_Loop;
 	state->Link.SendMessage = &AT_SendMessage;
 
-	if ((state->Link.ConnectionType == GCT_Serial)
-	|| (state->Link.ConnectionType == GCT_Irda)) {
+	if ((state->Link.ConnectionType == GCT_Serial) ||
+	    (state->Link.ConnectionType == GCT_Irda)) {
 		if (!ATBUS_OpenSerial(hw_handshake, state->Link.PortDevice))
 			return GE_DEVICEOPENFAILED;
 	} else {
-		fprintf(stderr, "Device not supported by ATBUS");
+		fprintf(stderr, "Device not supported by ATBUS\n");
 		return GE_DEVICEOPENFAILED;
 	}
 
