@@ -111,6 +111,7 @@ static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemach
 		sm_incoming_function(fb3110_message_type_fold(i->buffer[0]), i->buffer, i->frame_len, state);
 
 	} else { /* ack frame */
+		fb3110_sequence_number_update(state);
 		dprintf("Received ack for message type 0x%02x\n", i->buffer[0]);
 		sm_incoming_acknowledge(state);
 	}
@@ -285,7 +286,6 @@ static gn_error fb3110_message_send(unsigned int messagesize, unsigned char mess
 		message[0] = 0xd9; /* seqno constant for RLP frames */
 		frame_type = FB3110_FRAME_TYPE_OUT_RLP;
 	} else { /* normal command frame */
-		fb3110_sequence_number_update(state);
 		seqnum = FBUSINST(state)->request_sequence_number;
 		frame_type = FB3110_FRAME_TYPE_OUT_CMD;
 	}
