@@ -50,8 +50,7 @@
 
 
 /* Function to convert scale field in to correct number. */
-
-int GetDuration (char *num)
+static int ringtone_get_duration (char *num)
 {
 	int duration = 0;
 
@@ -79,7 +78,7 @@ int GetDuration (char *num)
 }
 
 
-int GetScale (char *num)
+static int ringtone_get_scale (char *num)
 {
 	/* This may well need improving. */
 	int scale=0;
@@ -93,13 +92,13 @@ int GetScale (char *num)
 
 /* Currently only reads rttl and ott files - can be later extended to midi etc. */
 
-gn_error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
+gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 {
 	FILE *file;
 	gn_error error;
-	GSM_Filetypes filetype;
+	gn_filetypes filetype;
 
-	file = fopen(FileName, "rb");
+	file = fopen(filename, "rb");
 
 	if (!file)
 		return GN_ERR_FAILED;
@@ -107,20 +106,20 @@ gn_error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 	/* FIXME: for now identify the filetype based on the extension */
 	/* I don't like this but I haven't got any .ott files to work out a better way */
 
-	filetype = RTTL;
-	if (strstr(FileName, ".ott")) filetype = OTT; /* OTT files saved by NCDS3 */
+	filetype = GN_FT_RTTL;
+	if (strstr(filename, ".ott")) filetype = GN_FT_OTT; /* OTT files saved by NCDS3 */
 
 	error = GN_ERR_NONE;
 
 	rewind(file);  /* Not necessary for now but safer */
 
 	switch (filetype) {
-	case RTTL:
-		error = loadrttl(file, ringtone);
+	case GN_FT_RTTL:
+		error = file_load_rttl(file, ringtone);
 		fclose(file);
 		break;
-	case OTT:
-		error = loadott(file, ringtone);
+	case GN_FT_OTT:
+		error = file_load_ott(file, ringtone);
 		fclose(file);
 		break;
 	default:
@@ -132,23 +131,23 @@ gn_error GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 }
 
 
-gn_error loadott(FILE *file, GSM_Ringtone *ringtone)
+gn_error file_load_ott(FILE *file, gn_ringtone *ringtone)
 {
-	char Buffer[2000];
+	char buffer[2000];
 	int i;
 
-	i = fread(Buffer, 1, 2000, file);
+	i = fread(buffer, 1, 2000, file);
 	if (!feof(file)) return GN_ERR_INVALIDSIZE;
-	return GSM_UnPackRingtone(ringtone, Buffer, i);
+	return gn_ringtone_unpack(ringtone, buffer, i);
 }
 
 
-gn_error loadrttl(FILE *file, GSM_Ringtone *ringtone)
+gn_error file_load_rttl(FILE *file, gn_ringtone *ringtone)
 {
-	int NrNote = 0;
+	int nr_note = 0;
 
-	int DefNoteScale = 2;
-	int DefNoteDuration = 4;
+	int default_note_scale = 2;
+	int default_note_duration = 4;
 	unsigned char buffer[2000];
 	unsigned char *def, *notes, *ptr;
 
@@ -175,32 +174,32 @@ gn_error loadrttl(FILE *file, GSM_Ringtone *ringtone)
 		switch(*ptr) {
 		case 'd':
 		case 'D':
-			DefNoteDuration=GetDuration(ptr+2);
+			default_note_duration = ringtone_get_duration(ptr+2);
 			break;
 		case 'o':
 		case 'O':
-			DefNoteScale=GetScale(ptr+2);
+			default_note_scale = ringtone_get_scale(ptr+2);
 			break;
 		case 'b':
 		case 'B':
-			ringtone->tempo=atoi(ptr+2);
+			ringtone->tempo = atoi(ptr+2);
 			break;
 		}
 
-		ptr=strtok(NULL,", ");
+		ptr = strtok(NULL,", ");
 	}
 
-	dprintf("DefNoteDuration = %d\n", DefNoteDuration);
-	dprintf("DefNoteScale = %d\n", DefNoteScale);
+	dprintf("default_note_duration = %d\n", default_note_duration);
+	dprintf("default_note_scale = %d\n", default_note_scale);
 
 	/* Parsing the <note-command>+ section. */
 	ptr = strtok(notes, ", ");
-	while (ptr && (NrNote < MAX_RINGTONE_NOTES)) {
+	while (ptr && (nr_note < GN_RINGTONE_MAX_NOTES)) {
 
 		/* [<duration>] */
-		ringtone->notes[NrNote].duration = GetDuration(ptr);
-		if (ringtone->notes[NrNote].duration == 0)
-			ringtone->notes[NrNote].duration = DefNoteDuration;
+		ringtone->notes[nr_note].duration = ringtone_get_duration(ptr);
+		if (ringtone->notes[nr_note].duration == 0)
+			ringtone->notes[nr_note].duration = default_note_duration;
 
 		/* Skip all numbers in duration specification. */
 		while (isdigit(*ptr))
@@ -208,51 +207,51 @@ gn_error loadrttl(FILE *file, GSM_Ringtone *ringtone)
 
 		/* <note> */
 
-		if ((*ptr >= 'a') && (*ptr <= 'g')) ringtone->notes[NrNote].note = ((*ptr - 'a') * 2) + 10;
-		else if ((*ptr >= 'A') && (*ptr <= 'G')) ringtone->notes[NrNote].note = ((*ptr - 'A') * 2) + 10;
-		else if ((*ptr == 'H') || (*ptr == 'h')) ringtone->notes[NrNote].note = 12;
-		else ringtone->notes[NrNote].note = 255;
+		if ((*ptr >= 'a') && (*ptr <= 'g')) ringtone->notes[nr_note].note = ((*ptr - 'a') * 2) + 10;
+		else if ((*ptr >= 'A') && (*ptr <= 'G')) ringtone->notes[nr_note].note = ((*ptr - 'A') * 2) + 10;
+		else if ((*ptr == 'H') || (*ptr == 'h')) ringtone->notes[nr_note].note = 12;
+		else ringtone->notes[nr_note].note = 255;
 
-		if ((ringtone->notes[NrNote].note > 13) && (ringtone->notes[NrNote].note != 255))
-			ringtone->notes[NrNote].note -= 14;
+		if ((ringtone->notes[nr_note].note > 13) && (ringtone->notes[nr_note].note != 255))
+			ringtone->notes[nr_note].note -= 14;
 
 		ptr++;
 
 		if (*ptr == '#') {
-			ringtone->notes[NrNote].note++;
-			if ((ringtone->notes[NrNote].note == 5) || (ringtone->notes[NrNote].note == 13))
-				ringtone->notes[NrNote].note++;
+			ringtone->notes[nr_note].note++;
+			if ((ringtone->notes[nr_note].note == 5) || (ringtone->notes[nr_note].note == 13))
+				ringtone->notes[nr_note].note++;
 			ptr++;
 		}
 
 		/* Check for dodgy rttl */
 		/* [<special-duration>] */
 		if (*ptr == '.') {
-			ringtone->notes[NrNote].duration *= 1.5;
+			ringtone->notes[nr_note].duration *= 1.5;
 			ptr++;
 		}
 
 		/* [<scale>] */
-		if (ringtone->notes[NrNote].note != 255) {
+		if (ringtone->notes[nr_note].note != 255) {
 			if (isdigit(*ptr)) {
-				ringtone->notes[NrNote].note += GetScale(ptr) * 14;
+				ringtone->notes[nr_note].note += ringtone_get_scale(ptr) * 14;
 				ptr++;
 			} else {
-				ringtone->notes[NrNote].note += DefNoteScale * 14;
+				ringtone->notes[nr_note].note += default_note_scale * 14;
 			}
 		}
 
 		/* [<special-duration>] */
 		if (*ptr == '.') {
-			ringtone->notes[NrNote].duration *= 1.5;
+			ringtone->notes[nr_note].duration *= 1.5;
 			ptr++;
 		}
 
-		NrNote++;
+		nr_note++;
 		ptr = strtok(NULL, ", ");
 	}
 
-	ringtone->NrNotes = NrNote;
+	ringtone->notes_count = nr_note;
 
 	return GN_ERR_NONE;
 }
@@ -260,46 +259,46 @@ gn_error loadrttl(FILE *file, GSM_Ringtone *ringtone)
 
 /* Save the ringtone file - this will overwrite the file */
 /* Confirming must be done before this is called */
-gn_error GSM_SaveRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
+gn_error file_ringtone_save(char *filename, gn_ringtone *ringtone)
 {
 	FILE *file;
 	gn_error error;
 
-	file = fopen(FileName, "wb");
+	file = fopen(filename, "wb");
 
 	if (!file) return GN_ERR_FAILED;
 
 	/* FIXME... */
 	/* We need a way of passing these functions a filetype rather than rely on the extension */
-	if (strstr(FileName, ".ott")) {
-		error = saveott(file, ringtone);
+	if (strstr(filename, ".ott")) {
+		error = file_save_ott(file, ringtone);
 	} else {
-		error = saverttl(file, ringtone);
+		error = file_save_rttl(file, ringtone);
 	}
 	fclose(file);
 	return error;
 }
 
 
-gn_error saveott(FILE *file, GSM_Ringtone *ringtone)
+gn_error file_save_ott(FILE *file, gn_ringtone *ringtone)
 {
-	char Buffer[2000];
+	char buffer[2000];
 	int i = 2000;
 
 	/* PackRingtone writes up to i chars and returns in i the number written */
-	GSM_PackRingtone(ringtone, Buffer, &i);
+	gn_ringtone_pack(ringtone, buffer, &i);
 
 	if (i < 2000) {
-		fwrite(Buffer, 1, i, file);
+		fwrite(buffer, 1, i, file);
 		return GN_ERR_NONE;
 	} else {
 		return GN_ERR_INVALIDSIZE;
 	}
 }
 
-gn_error saverttl(FILE *file, GSM_Ringtone *ringtone)
+gn_error file_save_rttl(FILE *file, gn_ringtone *ringtone)
 {
-	int DefDuration, DefScale = 2, CurrentNote;
+	int default_duration, default_scale = 2, current_note;
 	int buffer[6];
 	int i, j, k = 0;
 
@@ -308,7 +307,7 @@ gn_error saverttl(FILE *file, GSM_Ringtone *ringtone)
 
 	/* Find the most frequently used duration and use this for the default */
 	for (i = 0; i < 6; i++) buffer[i] = 0;
-	for (i = 0; i < ringtone->NrNotes; i++) {
+	for (i = 0; i < ringtone->notes_count; i++) {
 		switch (ringtone->notes[i].duration) {
 		case 192:
 			buffer[0]++; break;
@@ -349,38 +348,38 @@ gn_error saverttl(FILE *file, GSM_Ringtone *ringtone)
 	/* Finally convert and save the default duration */
 	switch (k) {
 	case 0:
-		DefDuration = 128;
+		default_duration = 128;
 		fprintf(file, "d=1,");
 		break;
 	case 1:
-		DefDuration = 64;
+		default_duration = 64;
 		fprintf(file, "d=2,");
 		break;
 	case 2:
-		DefDuration = 32;
+		default_duration = 32;
 		fprintf(file, "d=4,");
 		break;
 	case 3:
-		DefDuration = 16;
+		default_duration = 16;
 		fprintf(file, "d=8,");
 		break;
 	case 4:
-		DefDuration = 8;
+		default_duration = 8;
 		fprintf(file, "d=16,");
 		break;
 	case 5:
-		DefDuration = 4;
+		default_duration = 4;
 		fprintf(file, "d=32,");
 		break;
 	default:
-		DefDuration = 16;
+		default_duration = 16;
 		fprintf(file, "d=8,");
 		break;
 	}
 
 	/* Find the most frequently used scale and use this for the default */
 	for (i = 0; i < 6; i++) buffer[i] = 0;
-	for (i = 0; i < ringtone->NrNotes; i++) {
+	for (i = 0; i < ringtone->notes_count; i++) {
 		if (ringtone->notes[i].note != 255) {
 			buffer[ringtone->notes[i].note/14]++;
 		}
@@ -388,25 +387,25 @@ gn_error saverttl(FILE *file, GSM_Ringtone *ringtone)
 	j = 0;
 	for (i = 0; i < 6; i++) {
 		if (buffer[i] > j) {
-			DefScale = i;
+			default_scale = i;
 			j = buffer[i];
 		}
 	}
 
 	/* Save the default scale and tempo */
-	fprintf(file, "o=%i,", DefScale+4);
+	fprintf(file, "o=%i,", default_scale+4);
 	fprintf(file, "b=%i:", ringtone->tempo);
 
-	dprintf("DefNoteDuration=%d\n", DefDuration);
-	dprintf("DefNoteScale=%d\n", DefScale);
-	dprintf("Number of notes=%d\n",ringtone->NrNotes);
+	dprintf("default_note_duration=%d\n", default_duration);
+	dprintf("default_note_scale=%d\n", default_scale);
+	dprintf("Number of notes=%d\n",ringtone->notes_count);
 
 	/* Now loop round for each note */
-	for (i = 0; i < ringtone->NrNotes; i++) {
-		CurrentNote = ringtone->notes[i].note;
+	for (i = 0; i < ringtone->notes_count; i++) {
+		current_note = ringtone->notes[i].note;
 
 		/* This note has a duration different than the default. We must save it */
-		if (ringtone->notes[i].duration != DefDuration) {
+		if (ringtone->notes[i].duration != default_duration) {
 			switch (ringtone->notes[i].duration) {
 			case 192:                      //192=128*1.5
 				fprintf(file, "1"); break;
@@ -438,20 +437,20 @@ gn_error saverttl(FILE *file, GSM_Ringtone *ringtone)
 		}
 
 		/* Now save the actual note */
-		switch (GSM_GetNote(CurrentNote)) {
-		case Note_C  :fprintf(file, "c"); break;
-		case Note_Cis:fprintf(file, "c#"); break;
-		case Note_D  :fprintf(file, "d"); break;
-		case Note_Dis:fprintf(file, "d#"); break;
-		case Note_E  :fprintf(file, "e"); break;
-		case Note_F  :fprintf(file, "f"); break;
-		case Note_Fis:fprintf(file, "f#"); break;
-		case Note_G  :fprintf(file, "g"); break;
-		case Note_Gis:fprintf(file, "g#"); break;
-		case Note_A  :fprintf(file, "a"); break;
-		case Note_Ais:fprintf(file, "a#"); break;
-		case Note_H  :fprintf(file, "h"); break;
-		default      :fprintf(file, "p"); break; //Pause ?
+		switch (gn_get_note(current_note)) {
+		case GN_RINGTONE_Note_C  : fprintf(file, "c");  break;
+		case GN_RINGTONE_Note_Cis: fprintf(file, "c#"); break;
+		case GN_RINGTONE_Note_D  : fprintf(file, "d");  break;
+		case GN_RINGTONE_Note_Dis: fprintf(file, "d#"); break;
+		case GN_RINGTONE_Note_E  : fprintf(file, "e");  break;
+		case GN_RINGTONE_Note_F  : fprintf(file, "f");  break;
+		case GN_RINGTONE_Note_Fis: fprintf(file, "f#"); break;
+		case GN_RINGTONE_Note_G  : fprintf(file, "g");  break;
+		case GN_RINGTONE_Note_Gis: fprintf(file, "g#"); break;
+		case GN_RINGTONE_Note_A  : fprintf(file, "a");  break;
+		case GN_RINGTONE_Note_Ais: fprintf(file, "a#"); break;
+		case GN_RINGTONE_Note_H  : fprintf(file, "h");  break;
+		default                  : fprintf(file, "p");  break; /*Pause ? */
 		}
 
 		/* Saving info about special duration */
@@ -464,11 +463,11 @@ gn_error saverttl(FILE *file, GSM_Ringtone *ringtone)
 			fprintf(file, ".");
 
 		/* This note has a scale different than the default, so save it */
-		if ( (CurrentNote != 255) && (CurrentNote/14 != DefScale))
-			fprintf(file, "%i",(CurrentNote/14) + 4);
+		if ( (current_note != 255) && (current_note/14 != default_scale))
+			fprintf(file, "%i",(current_note/14) + 4);
 
 		/* And a separator before next note */
-		if (i != ringtone->NrNotes - 1)
+		if (i != ringtone->notes_count - 1)
 			fprintf(file, ",");
 	}
 
@@ -478,14 +477,14 @@ gn_error saverttl(FILE *file, GSM_Ringtone *ringtone)
 /* Bitmap file functions */
 /* ##################### */
 
-gn_error GSM_ReadBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info)
+gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info)
 {
 	FILE *file;
 	unsigned char buffer[300];
 	int error;
-	GSM_Filetypes filetype = None;
+	gn_filetypes filetype = GN_FT_None;
 
-	file = fopen(FileName, "rb");
+	file = fopen(filename, "rb");
 
 	if (!file)
 		return GN_ERR_FAILED;
@@ -495,45 +494,45 @@ gn_error GSM_ReadBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *inf
 	/* Attempt to identify filetype */
 
 	if (memcmp(buffer, "NOL", 3) == 0) {               /* NOL files have 'NOL' at the start */
-		filetype = NOL;
+		filetype = GN_FT_NOL;
 	} else if (memcmp(buffer, "NGG", 3) == 0) {        /* NGG files have 'NGG' at the start */
-		filetype = NGG;
+		filetype = GN_FT_NGG;
 	} else if (memcmp(buffer, "FORM", 4) == 0) {       /* NSL files have 'FORM' at the start */
-		filetype = NSL;
+		filetype = GN_FT_NSL;
 	} else if (memcmp(buffer, "NLM", 3) == 0) {        /* NLM files have 'NLM' at the start */
-		filetype = NLM;
+		filetype = GN_FT_NLM;
 	} else if (memcmp(buffer, "BM", 2) == 0) {         /* BMP, I61 and GGP files have 'BM' at the start */
-		filetype = BMP;
+		filetype = GN_FT_BMP;
 	} else if (memcmp(buffer, "/* XPM */", 9) == 0) {  /* XPM files have 'XPM' at the start */
-		filetype = XPMF;
+		filetype = GN_FT_XPMF;
 	}
 
-	if ((filetype == None) && strstr(FileName, ".otb")) filetype = OTA; /* OTA files saved by NCDS3 */
+	if ((filetype == GN_FT_None) && strstr(filename, ".otb")) filetype = GN_FT_OTA; /* OTA files saved by NCDS3 */
 
 	rewind(file);
 
 	switch (filetype) {
-	case NOL:
-		error = loadnol(file, bitmap, info);
+	case GN_FT_NOL:
+		error = file_load_nol(file, bitmap, info);
 		break;
-	case NGG:
-		error = loadngg(file, bitmap, info);
+	case GN_FT_NGG:
+		error = file_load_ngg(file, bitmap, info);
 		break;
-	case NSL:
-		error = loadnsl(file, bitmap);
+	case GN_FT_NSL:
+		error = file_load_nsl(file, bitmap);
 		break;
-	case NLM:
-		error = loadnlm(file, bitmap);
+	case GN_FT_NLM:
+		error = file_load_nlm(file, bitmap);
 		break;
-	case OTA:
-		error = loadota(file, bitmap, info);
+	case GN_FT_OTA:
+		error = file_load_ota(file, bitmap, info);
 		break;
-	case BMP:
-		error = loadbmp(file, bitmap);
+	case GN_FT_BMP:
+		error = file_load_bmp(file, bitmap);
 		break;
-	case XPMF:
+	case GN_FT_XPMF:
 #ifdef XPM
-		error = loadxpm(FileName, bitmap);
+		error = file_load_xpm(filename, bitmap);
 		break;
 #else
 		fprintf(stderr, "Sorry, gnokii was not compiled with XPM support.\n");
@@ -550,7 +549,7 @@ gn_error GSM_ReadBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *inf
 
 
 #ifdef XPM
-gn_error loadxpm(char *filename, gn_bmp *bitmap)
+gn_error file_load_xpm(char *filename, gn_bmp *bitmap)
 {
 	int error, x, y;
 	XpmImage image;
@@ -599,7 +598,7 @@ gn_error loadxpm(char *filename, gn_bmp *bitmap)
 /* Marcin-Wiacek@Topnet.PL */
 
 /* This loads the image as a startup logo - but is resized as necessary later */
-gn_error loadbmp(FILE *file, gn_bmp *bitmap)
+gn_error file_load_bmp(FILE *file, gn_bmp *bitmap)
 {
 	unsigned char buffer[34];
 	bool first_white;
@@ -704,7 +703,7 @@ gn_error loadbmp(FILE *file, gn_bmp *bitmap)
 	return GN_ERR_NONE;
 }
 
-gn_error loadnol(FILE *file, gn_bmp *bitmap, GSM_Information *info)
+gn_error file_load_nol(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 	unsigned char buffer[GN_BMP_MAX_SIZE + 20];
 	int i, j;
@@ -720,7 +719,7 @@ gn_error loadnol(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 
 	if (((bitmap->height != 14) || (bitmap->width != 72)) && /* standard size */
 	    ((bitmap->height != 21) || (bitmap->width != 78)) && /* standard size */
-	    (!info || (bitmap->height != info->OpLogoH) || (bitmap->width != info->OpLogoW))) {
+	    (!info || (bitmap->height != info->operator_logo_height) || (bitmap->width != info->operator_logo_width))) {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
 		return GN_ERR_INVALIDSIZE;
 	}
@@ -748,7 +747,7 @@ gn_error loadnol(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 	return GN_ERR_NONE;
 }
 
-gn_error loadngg(FILE *file, gn_bmp *bitmap, GSM_Information *info)
+gn_error file_load_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 	unsigned char buffer[2000];
 	int i, j;
@@ -762,7 +761,7 @@ gn_error loadngg(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 
 	if (((bitmap->height != 14) || (bitmap->width != 72)) && /* standard size */
 	    ((bitmap->height != 21) || (bitmap->width != 78)) && /* standard size */
-	    (!info || (bitmap->height != info->OpLogoH) || (bitmap->width != info->OpLogoW))) {
+	    (!info || (bitmap->height != info->operator_logo_height) || (bitmap->width != info->operator_logo_width))) {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
 		return GN_ERR_INVALIDSIZE;
 	}
@@ -789,7 +788,7 @@ gn_error loadngg(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 	return GN_ERR_NONE;
 }
 
-gn_error loadnsl(FILE *file, gn_bmp *bitmap)
+gn_error file_load_nsl(FILE *file, gn_bmp *bitmap)
 {
 	unsigned char block[6], buffer[870];
 	int block_size, count;
@@ -843,7 +842,7 @@ gn_error loadnsl(FILE *file, gn_bmp *bitmap)
 	return GN_ERR_NONE;
 }
 
-gn_error loadnlm (FILE *file, gn_bmp *bitmap)
+gn_error file_load_nlm (FILE *file, gn_bmp *bitmap)
 {
 	unsigned char buffer[84*48];
 	int pos, pos2, x, y;
@@ -894,7 +893,7 @@ gn_error loadnlm (FILE *file, gn_bmp *bitmap)
 	return GN_ERR_NONE;
 }
 
-gn_error loadota(FILE *file, gn_bmp *bitmap, GSM_Information *info)
+gn_error file_load_ota(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 	char buffer[4];
 
@@ -907,10 +906,10 @@ gn_error loadota(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 
 	if (((bitmap->height == 48) && (bitmap->width == 84)) || /* standard size */
 	    ((bitmap->height == 60) && (bitmap->width == 96)) || /* standard size */
-	    (info && ((bitmap->height == info->StartupLogoH) && (bitmap->width == info->StartupLogoW)))) {
+	    (info && ((bitmap->height == info->startup_logo_height) && (bitmap->width == info->startup_logo_width)))) {
 		bitmap->type = GN_BMP_StartupLogo;
 	} else if (((bitmap->height == 14) && (bitmap->width == 72)) || /* standard size */
-		   (info && ((bitmap->height == info->CallerLogoH) && (bitmap->width == info->CallerLogoW)))) {
+		   (info && ((bitmap->height == info->caller_logo_height) && (bitmap->width == info->caller_logo_width)))) {
 		bitmap->type = GN_BMP_CallerLogo;
 	} else {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
@@ -922,7 +921,7 @@ gn_error loadota(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 }
 
 /* This overwrites an existing file - so this must be checked before calling */
-gn_error GSM_SaveBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *info)
+gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info)
 {
 	FILE *file;
 	bool done = false;
@@ -930,56 +929,56 @@ gn_error GSM_SaveBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *inf
 	/* XPMs are a bit messy because we have to pass it the filename */
 
 #ifdef XPM
-	if (strstr(FileName, ".xpm")) {
-		savexpm(FileName, bitmap);
+	if (strstr(filename, ".xpm")) {
+		file_save_xpm(filename, bitmap);
 	} else {
 #endif
 
-		file = fopen(FileName, "wb");
+		file = fopen(filename, "wb");
 
 		if (!file) return GN_ERR_FAILED;
 
-		if (strstr(FileName, ".nlm")) {
-			savenlm(file, bitmap);
+		if (strstr(filename, ".nlm")) {
+			file_save_nlm(file, bitmap);
 			done = true;
 		}
-		if (strstr(FileName, ".ngg")) {
-			savengg(file, bitmap, info);
+		if (strstr(filename, ".ngg")) {
+			file_save_ngg(file, bitmap, info);
 			done = true;
 		}
-		if (strstr(FileName, ".nsl")) {
-			savensl(file, bitmap, info);
+		if (strstr(filename, ".nsl")) {
+			file_save_nsl(file, bitmap, info);
 			done = true;
 		}
-		if (strstr(FileName, ".otb")) {
-			saveota(file, bitmap);
+		if (strstr(filename, ".otb")) {
+			file_save_ota(file, bitmap);
 			done = true;
 		}
-		if (strstr(FileName, ".nol")) {
-			savenol(file, bitmap, info);
+		if (strstr(filename, ".nol")) {
+			file_save_nol(file, bitmap, info);
 			done = true;
 		}
-		if (strstr(FileName, ".bmp") ||
-		    strstr(FileName, ".ggp") ||
-		    strstr(FileName, ".i61")) {
-			savebmp(file, bitmap);
+		if (strstr(filename, ".bmp") ||
+		    strstr(filename, ".ggp") ||
+		    strstr(filename, ".i61")) {
+			file_save_bmp(file, bitmap);
 			done = true;
 		}
 
 		if (!done) {
 			switch (bitmap->type) {
 			case GN_BMP_CallerLogo:
-				savengg(file, bitmap, info);
+				file_save_ngg(file, bitmap, info);
 				break;
 			case GN_BMP_OperatorLogo:
 			case GN_BMP_NewOperatorLogo:
-				savenol(file, bitmap, info);
+				file_save_nol(file, bitmap, info);
 				break;
 			case GN_BMP_StartupLogo:
-				savensl(file, bitmap, info);
+				file_save_nsl(file, bitmap, info);
 				break;
 			case GN_BMP_PictureMessage:
-				savenlm(file, bitmap);
+				file_save_nlm(file, bitmap);
 				break;
 			case GN_BMP_WelcomeNoteText:
 			case GN_BMP_DealerNoteText:
@@ -1001,7 +1000,7 @@ gn_error GSM_SaveBitmapFile(char *FileName, gn_bmp *bitmap, GSM_Information *inf
  * mode == 1 -> ask
  * mode == 2 -> append
  */
-int GSM_SaveTextFile(char *FileName, char *text, int mode)
+int gn_file_save_text(char *filename, char *text, int mode)
 {
 	FILE *file;
 	int confirm = -1;
@@ -1009,22 +1008,22 @@ int GSM_SaveTextFile(char *FileName, char *text, int mode)
 	struct stat buf;
 
 	/* Ask before overwriting */
-	if ((mode == 1) && (stat(FileName, &buf) == 0)) {
-		fprintf(stdout, _("File %s exists.\n"), FileName);
+	if ((mode == 1) && (stat(filename, &buf) == 0)) {
+		fprintf(stdout, _("File %s exists.\n"), filename);
 		while (confirm < 0) {
 			fprintf(stderr, _("Overwrite? (yes/no) "));
-			GetLine(stdin, ans, 4);
+			gn_get_line(stdin, ans, 4);
 			if (!strcmp(ans, _("yes"))) confirm = 1;
 			else if (!strcmp(ans, _("no"))) confirm = 0;
 		}
 		if (!confirm) return -1;
 	}
 
-	if (mode == 2) file = fopen(FileName, "a");
-	else file = fopen(FileName, "w");
+	if (mode == 2) file = fopen(filename, "a");
+	else file = fopen(filename, "w");
 
 	if (!file) {
-		fprintf(stderr, _("Failed to write file %s\n"),  FileName);
+		fprintf(stderr, _("Failed to write file %s\n"),  filename);
 		return -1;
 	}
 	fprintf(file, "%s\n", text);
@@ -1034,7 +1033,7 @@ int GSM_SaveTextFile(char *FileName, char *text, int mode)
 
 
 #ifdef XPM
-void savexpm(char *filename, gn_bmp *bitmap)
+void file_save_xpm(char *filename, gn_bmp *bitmap)
 {
 	XpmColor colors[2] = {{".","c","#000000","#000000","#000000","#000000"},
 			      {"#","c","#ffffff","#ffffff","#ffffff","#ffffff"}};
@@ -1063,7 +1062,7 @@ void savexpm(char *filename, gn_bmp *bitmap)
 
 /* Based on the article from the Polish Magazine "Bajtek" 11/92 */
 /* Marcin-Wiacek@Topnet.PL */
-void savebmp(FILE *file, gn_bmp *bitmap)
+void file_save_bmp(FILE *file, gn_bmp *bitmap)
 {
 	int x, y, pos, i, sizeimage;
 	unsigned char buffer[1];
@@ -1155,7 +1154,7 @@ void savebmp(FILE *file, gn_bmp *bitmap)
 	}
 }
 
-void savengg(FILE *file, gn_bmp *bitmap, GSM_Information *info)
+void file_save_ngg(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 
 	char header[] = {'N', 'G', 'G', 0x00, 0x01, 0x00,
@@ -1187,7 +1186,7 @@ void savengg(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 	}
 }
 
-void savenol(FILE *file, gn_bmp *bitmap, GSM_Information *info)
+void file_save_nol(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 
 	char header[] = {'N','O','L',0x00,0x01,0x00,
@@ -1226,7 +1225,7 @@ void savenol(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 	}
 }
 
-void savensl(FILE *file, gn_bmp *bitmap, GSM_Information *info)
+void file_save_nsl(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 
 	u8 header[] = {'F','O','R','M', 0x01,0xFE,  /* File ID block,      size 1*256+0xFE=510*/
@@ -1243,7 +1242,7 @@ void savensl(FILE *file, gn_bmp *bitmap, GSM_Information *info)
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
 }
 
-void saveota(FILE *file, gn_bmp *bitmap)
+void file_save_ota(FILE *file, gn_bmp *bitmap)
 {
 	char header[] = {0x01,
 		         0x00, /* Width */
@@ -1258,7 +1257,7 @@ void saveota(FILE *file, gn_bmp *bitmap)
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
 }
 
-void savenlm(FILE *file, gn_bmp *bitmap)
+void file_save_nlm(FILE *file, gn_bmp *bitmap)
 {
 	char header[] = {'N','L','M', /* Nokia Logo Manager file ID. */
 		         0x20,
@@ -1315,13 +1314,13 @@ void savenlm(FILE *file, gn_bmp *bitmap)
 	fwrite(buffer, 1, (division.quot * bitmap->height), file);
 }
 
-gn_error GSM_ShowBitmapFile(char *FileName)
+gn_error gn_file_bitmap_show(char *filename)
 {
 	int i, j;
 	gn_bmp bitmap;
 	gn_error error;
 
-	error = GSM_ReadBitmapFile(FileName, &bitmap, NULL);
+	error = gn_file_bitmap_read(filename, &bitmap, NULL);
 	if (error != GN_ERR_NONE)
 		return error;
 
