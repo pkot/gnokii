@@ -70,6 +70,8 @@ Thank you to, in no particular order...
   
 *  Alfred Nurnberger for some information on the 5160/6160 MBUS
    protocol.  
+   
+*  Alessandro Zummo for reset and getopts code.
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this.  Rachael for new parent induced insomnia...
