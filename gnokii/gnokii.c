@@ -2963,9 +2963,9 @@ static GSM_Error smsslave(GSM_SMSMessage *message)
 	else if (sscanf(s, "%d/%d:%d-%d-", &i1, &i2, &msgno, &msgpart) == 4)
 		sprintf(buf, "/tmp/sms/mail_%d_%03d", msgno, msgpart);
 	else	sprintf(buf, "/tmp/sms/unknown_%d_%d", getpid(), unknown++);
-	if ((output = fopen(buf, "r"))) {
+	if ((output = fopen(buf, "r")) == NULL) {
 		fprintf(stderr, _("### Exists?!\n"));
-		fclose(output);
+		return GE_CANTOPENFILE;
 	}
 	output = fopen(buf, "w+");
 	if (strstr(buf, "unknown"))
