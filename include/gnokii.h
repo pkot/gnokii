@@ -40,6 +40,10 @@ GSM_Error ParseSMS(GSM_Data *data, int offset);
 GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state);
 GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state);
 GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_folders);
+/* Default values */
+void DefaultSMS(GSM_SMSMessage *SMS);
+void DefaultSubmitSMS(GSM_SMSMessage *SMS);
+void DefaultDeliverSMS(GSM_SMSMessage *SMS);
 
 /* All the rest of the API functions are contained in the GSM_Function
    structure which ultimately points into the model specific code. */

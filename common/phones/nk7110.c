@@ -833,7 +833,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 		for (j = 0; j < message[4]; j++) {
 			int len;
-			strcpy(data->SMSFolderList->Folder[j].Name, "               \0");
+			strcpy(data->SMSFolderList->Folder[j].Name, "               ");
 			data->SMSFolderList->FolderID[j] = message[i];
 			dprintf("Folder Index: %d", data->SMSFolderList->FolderID[j]);
 			i += 2;

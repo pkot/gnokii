@@ -22,6 +22,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include "misc.h"
+#include "gsm-api.h"
 #include "xgnokii_common.h"
 #include "xgnokii.h"
 #include "xgnokii_lowlevel.h"
@@ -910,7 +911,7 @@ static gint SendSMSCore (GSM_SMSMessage *sms)
 }
 
 
-static void SendSMS (void)
+static void DoSendSMS (void)
 {
 	GSM_SMSMessage sms;
 	AddressPar aps;
@@ -945,6 +946,7 @@ static void SendSMS (void)
 		} else
 			number = addresses[i];
 
+		DefaultSubmitSMS(&sms);
 		sms.MessageCenter = xgnokiiConfig.smsSetting[sendSMS.center];
 		sms.MessageCenter.No = 0;
 
@@ -953,15 +955,6 @@ static void SendSMS (void)
 		else
 			sms.Report = false;
 		sms.Type = SMS_Submit;
-
-		sms.DCS.Type = SMS_GeneralDataCoding;
-		sms.DCS.u.General.Compressed = false;
-		sms.DCS.u.General.Alphabet = SMS_DefaultAlphabet;
-		sms.DCS.u.General.Class = 0;
-		sms.MessageCenter.No = 1;
-		sms.Validity.VPF = SMS_RelativeFormat;
-		sms.Validity.u.Relative = sms.MessageCenter.Validity; /* 4320 minutes == 72 hours */
-		sms.UDH_No = 0;
 
 		strncpy (sms.RemoteNumber.number, number, GSM_MAX_DESTINATION_LENGTH + 1);
 		sms.RemoteNumber.number[GSM_MAX_DESTINATION_LENGTH] = '\0';
@@ -1058,7 +1051,7 @@ static void SendSMS (void)
 
 static GtkItemFactoryEntry send_menu_items[] = {
   { NULL,		NULL,		NULL,		0, "<Branch>"},
-  { NULL,		"<control>X",	SendSMS,	0, NULL},
+  { NULL,		"<control>X",	DoSendSMS,	0, NULL},
   { NULL,		"<control>S",	NULL,		0, NULL},
   { NULL,		NULL,		NULL,		0, "<Separator>"},
   { NULL,		"<control>N",	CheckAddress,	0, NULL},
@@ -1141,7 +1134,7 @@ static void CreateSMSSendWindow (void)
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Send message"), NULL,
                            NewPixmap(SendSMS_xpm, GUI_SMSWindow->window,
                            &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),
-                           (GtkSignalFunc) SendSMS, NULL);
+                           (GtkSignalFunc) DoSendSMS, NULL);
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, _("Save message to outbox"), NULL,
                            NewPixmap(Send_xpm, GUI_SMSWindow->window,
                            &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL]),

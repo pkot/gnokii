@@ -141,15 +141,7 @@ void DB_Look (void)
   {
     GSM_SMSMessage sms;
     
-    sms.MessageCenter.No = 1;
-    sms.Type = SMS_Submit;
-    sms.DCS.Type = SMS_GeneralDataCoding;
-    sms.DCS.u.General.Compressed = false;
-    sms.DCS.u.General.Alphabet = SMS_DefaultAlphabet;
-    sms.DCS.u.General.Class = 0;
-    sms.Validity.VPF = SMS_RelativeFormat;
-    sms.Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
-    sms.UDH_No = 0;
+    DefaultSubmitSMS(&sms);
     sms.Report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
     strncpy (sms.RemoteNumber.number, PQgetvalue (res1, i, 1), GSM_MAX_DESTINATION_LENGTH + 1);

@@ -29,7 +29,8 @@
     protocol description                                  (Pawel Kot)
     o remove some obsolete things                         (Pawel Kot)
  * Cleanup in the dumping code                            (Pawel Kot)
- * Won't repeat everything ttwwiiccee if compiled with --enable-debug
+ * Other cleanups                                         (Pawel Kot)
+ * Don't repeat everything ttwwiiccee if compiled with --enable-debug
                                                      (BORBELY Zoltan)
  * Don't return -1 in function returning unsigned short
                                                        (Pavel Machek)
@@ -40,9 +41,13 @@
     o fix folder name max length                          (Pawel Kot)
  * libsms updates
     o fix folder name max length                          (Pawel Kot)
+    o added DefaultSMS() function for initializing SMS struct
+                                                          (Pawel Kot)
  * More general bitmaps handling -- remove fixed vaules   (Pawel Kot)
  * Do not use (...) in macros if not being compiled on gcc
                                                        (Pavel Machek)
+ * Remove outdated functions from gsm-bitmaps and gsm-ringtones
+                                                          (Pawel Kot)
 
 0.4.0pre14
 ==========

@@ -1415,3 +1415,45 @@ GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_fold
 	}
 	return GE_NONE;
 }
+
+/**
+ * DefaultSMS - fills in SMS structure with the default values
+ * @SMS: pointer to a structure we need to fill in
+ *
+ * Default settings:
+ *  - no delivery report
+ *  - no Class Message
+ *  - no compression
+ *  - 7 bit data
+ *  - SMSC no. 1
+ *  - message validity for 3 days
+ *  - unset User Data Header Indicator
+ */
+void DefaultSMS(GSM_SMSMessage *SMS)
+{
+	memset(&SMS, 0, sizeof(GSM_SMSMessage));
+
+	SMS->Type = SMS_Deliver;
+	SMS->DCS.Type = SMS_GeneralDataCoding;
+	SMS->DCS.u.General.Compressed = false;
+	SMS->DCS.u.General.Alphabet = SMS_DefaultAlphabet;
+	SMS->DCS.u.General.Class = 0;
+	SMS->MessageCenter.No = 1;
+	SMS->Validity.VPF = SMS_RelativeFormat;
+	SMS->Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
+	SMS->UDH_No = 0;
+	SMS->Report = false;
+	SMS->Status = SMS_Unsent;
+}
+
+void DefaultSubmitSMS(GSM_SMSMessage *SMS)
+{
+	DefaultSMS(SMS);
+	SMS->Type = SMS_Submit;
+}
+
+void DefaultDeliverSMS(GSM_SMSMessage *SMS)
+{
+	DefaultSMS(SMS);
+	SMS->Type = SMS_Deliver;
+}

@@ -57,22 +57,25 @@
 
 /* A define to make debug printfs neat */
 #ifdef __GNUC__
-#ifndef DEBUG
-#  define dprintf(a...) do { } while (0)
+#  ifndef DEBUG
+#    define dprintf(a...) do { } while (0)
+#  else
+#    define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0)
+#  endif /* DEBUG */
 #else
-#  define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0)
-#endif
-#else
-#  define dprintf printf
-#endif
+#    define dprintf printf
+#endif /* __GNUC__ */
 
 #include <stdarg.h>
 extern void (*GSM_ELogHandler)(const char *fmt, va_list ap);
 extern void GSM_WriteErrorLog(const char *fmt, ...);
 
 /* Use it for error reporting */
-
-#define dump(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0)
+#ifdef __GNUC__
+#  define dump(a...) do { dprintf(a); GSM_WriteErrorLog(a); } while (0)
+#else
+#  define dump printf
+#endif
 
 /* Use gsprintf instead of sprintf and sprintf */
 #ifdef HAVE_SNPRINTF
@@ -88,7 +91,7 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 #ifdef HAVE_ASPRINTF
 #  define gasprintf		asprintf
 #else
-#include <stdarg.h>
+#  include <stdarg.h>
 extern int gasprintf(char **destp, const char *fmt,...);
 #endif
 #ifdef HAVE_VASPRINTF

@@ -353,6 +353,25 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc)
 	else return 1;
 }
 
+static void sendsms_usage()
+{
+	fprintf(stderr, _(" usage: gnokii --sendsms destination\n"
+	                  "               [--smsc message_center_number | --smscno message_center_index]\n"
+	                  "               [-r] [-C n] [-v n] [--long n]\n"
+			  " Give the text of the message to the standard input.\n"
+			  "   destination - phone number where to send SMS\n"
+			  "   --smsc      - phone number of the SMSC\n"
+			  "   --smscno    - index of the SMSC set stored in the phone\n"
+			  "   -r          - require delivery report\n"
+			  "   -C n        - message Class; values [0, 3]\n"
+			  "   -v n        - set validity period to n minutes\n"
+			  "   --long n    - read n bytes from the input; default is 160\n"
+			  "\n"
+		));
+	if (lockfile) unlock_device(lockfile);
+	exit(-1);
+}
+
 /* Send  SMS messages. */
 static int sendsms(int argc, char *argv[])
 {
@@ -375,28 +394,8 @@ static int sendsms(int argc, char *argv[])
 
 	input_len = GSM_MAX_SMS_LENGTH;
 
-	/* Default settings:
-	   - no delivery report
-	   - no Class Message
-	   - no compression
-	   - 7 bit data
-	   - SMSC no. 1
-	   - message validity for 3 days
-	   - unset user data header indicator
-	*/
-
-	memset(&SMS, 0, sizeof(GSM_SMSMessage));
-
-	SMS.Type = SMS_Submit;
-	SMS.DCS.Type = SMS_GeneralDataCoding;
-	SMS.DCS.u.General.Compressed = false;
-	SMS.DCS.u.General.Alphabet = SMS_DefaultAlphabet;
-	SMS.DCS.u.General.Class = 0;
-	SMS.MessageCenter.No = 1;
-	SMS.Validity.VPF = SMS_RelativeFormat;
-	SMS.Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
-	SMS.UDH_No = 0;
-	SMS.Report = false;
+	/* The memory is zeroed here */
+	DefaultSubmitSMS(&SMS);
 
 	memset(&SMS.RemoteNumber.number, 0, sizeof(SMS.RemoteNumber.number));
 	strncpy(SMS.RemoteNumber.number, argv[0], sizeof(SMS.RemoteNumber.number) - 1);
@@ -407,22 +406,22 @@ static int sendsms(int argc, char *argv[])
 	optind = 0;
 
 	while ((i = getopt_long(argc, argv, "r8cC:v:", options, NULL)) != -1) {
-		switch (i) {       // -8 is for 8-bit data, -c for compression. both are not yet implemented.
+		switch (i) {       /* -8 is for 8-bit data, -c for compression. both are not yet implemented. */
 		case '1': /* SMSC number */
 			SMS.MessageCenter.No = 0;
-			memset(&SMS.MessageCenter.Number, 0, sizeof(SMS.MessageCenter.Number));
 			strncpy(SMS.MessageCenter.Number, optarg, sizeof(SMS.MessageCenter.Number) - 1);
 			if (SMS.MessageCenter.Number[0] == '+') SMS.MessageCenter.Type = SMS_International;
 			else SMS.MessageCenter.Type = SMS_Unknown;
 			break;
+
 		case '2': /* SMSC number index in phone memory */
 			SMS.MessageCenter.No = atoi(optarg);
-
 			if (SMS.MessageCenter.No < 1 || SMS.MessageCenter.No > 5)
-				usage();
+				sendsms_usage();
 			data.MessageCenter = &SMS.MessageCenter;
 			error = SM_Functions(GOP_GetSMSCenter, &data, &State);
 			break;
+
 		case '3': /* we send long message */
 			input_len = atoi(optarg);
 			if (input_len > 255 * GSM_MAX_SMS_LENGTH) {
@@ -430,30 +429,25 @@ static int sendsms(int argc, char *argv[])
 				return -1;
 			}
 			break;
+
 		case '4': /* we send multipart message - picture message */
 			SMS.UDH_No = 1;
 			break;
+
 		case 'r': /* request for delivery report */
 			SMS.Report = true;
 			break;
+
 		case 'C': /* class Message */
 			switch (*optarg) {
-			case '0':
-				SMS.DCS.u.General.Class = 1;
-				break;
-			case '1':
-				SMS.DCS.u.General.Class = 2;
-				break;
-			case '2':
-				SMS.DCS.u.General.Class = 3;
-				break;
-			case '3':
-				SMS.DCS.u.General.Class = 4;
-				break;
-			default:
-				usage();
+			case '0': SMS.DCS.u.General.Class = 1; break;
+			case '1': SMS.DCS.u.General.Class = 2; break;
+			case '2': SMS.DCS.u.General.Class = 3; break;
+			case '3': SMS.DCS.u.General.Class = 4; break;
+			default: sendsms_usage();
 			}
 			break;
+
 		case 'v':
 			SMS.Validity.u.Relative = atoi(optarg);
 			break;
@@ -462,9 +456,11 @@ static int sendsms(int argc, char *argv[])
 			input_len = GSM_MAX_8BIT_SMS_LENGTH;
 			break;
 		default:
-			usage(); /* Would be better to have an sendsms_usage() here. */
+			sendsms_usage(); /* Would be better to have an sendsms_usage() here. */
 		}
 	}
+
+	fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
 
 	/* Get message text from stdin. */
 	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
@@ -481,7 +477,7 @@ static int sendsms(int argc, char *argv[])
 	message_buffer[chars_read] = 0x00;
 	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
 	if (chars_read < 1) {
-		fprintf(stderr, _("Empty message. Quitting"));
+		fprintf(stderr, _("Empty message. Quitting.\n"));
 		return -1;
 	}
 	SMS.UserData[0].Type = SMS_PlainText;
@@ -493,9 +489,9 @@ static int sendsms(int argc, char *argv[])
 	error = SendSMS(&data, &State);
 
 	if (error == GE_SMSSENDOK) {
-		fprintf(stdout, _("Send succeeded!\n"));
+		fprintf(stderr, _("Send succeeded!\n"));
 	} else {
-		fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
+		fprintf(stderr, _("SMS Send failed (%s)\n"), print_error(error));
 	}
 
 	return 0;
@@ -513,26 +509,12 @@ static int savesms(int argc, char *argv[])
 	int interactive = 0;
 	char ans[8];
 
-	memset(&SMS, 0, sizeof(GSM_SMSMessage));
-
-	/* Defaults */
-	SMS.Type = SMS_Submit;
-	SMS.DCS.Type = SMS_GeneralDataCoding;
-	SMS.DCS.u.General.Compressed = false;
-	SMS.DCS.u.General.Alphabet = SMS_DefaultAlphabet;
-	SMS.DCS.u.General.Class = 0;
-	SMS.MessageCenter.No = 1;
-	SMS.Validity.VPF = SMS_RelativeFormat;
-	SMS.Validity.u.Relative = 4320; /* 4320 minutes == 72 hours */
-	SMS.UDH_No = 0;
-	SMS.Status = SMS_Unsent;
-	SMS.Number = 0;
+	DefaultSubmitSMS(&SMS);
 
 	/* the nokia 7110 will choke if no number is present when we */
 	/* try to store a SMS on the phone. maybe others do too */
 	/* TODO should this be handled here? report an error instead */
 	/* of setting an default? */
-	memset(&SMS.RemoteNumber.number, 0, sizeof(SMS.RemoteNumber.number));
 	strcpy(SMS.RemoteNumber.number, "0");
 	SMS.RemoteNumber.type = SMS_Unknown;
 	
@@ -595,15 +577,22 @@ static int savesms(int argc, char *argv[])
 		}
 	}
 
-	fprintf(stdout,_("please enter sms text. end your input with <cr><control-D>:"));
-	chars_read = fread(message_buffer, 1, input_len, stdin);
-	fprintf(stdout,_("storing sms"));
+	fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
+
+	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
+
+	fprintf(stderr, _("storing sms"));
+
 	if (chars_read == 0) {
+
 		fprintf(stderr, _("Couldn't read from stdin!\n"));
 		return -1;
+
 	} else if (chars_read > input_len || chars_read > sizeof(SMS.UserData[0].u.Text) - 1) {
+
 		fprintf(stderr, _("Input too long!\n"));
 		return -1;
+
 	}
 
 	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
