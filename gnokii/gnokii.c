@@ -2654,7 +2654,11 @@ static void printdisplaystatus(int status)
 		status & (1 << GN_DISP_SMS_Storage_Full) ? _("on") : _("off"));
 }
 
-#define ESC "\e"
+#ifdef WIN32
+#  define ESC "\033"
+#else
+#  define ESC "\e"
+#endif
 
 static void newoutputfn(gn_display_draw_msg *drawmessage)
 {
@@ -4129,7 +4133,7 @@ static int playringtone(int argc, char *argv[])
 	gn_tone tone;
 	gn_error error;
 	unsigned char buff[512];
-	int i, freq, ulen;
+	int i, ulen;
 
 	memset(&ringtone, 0, sizeof(ringtone));
 	memset(&tone, 0, sizeof(tone));
@@ -4223,7 +4227,11 @@ static int enterchar(void)
 			data.key_code = GN_KEY_MENU;
 			presskey();
 			break;
+#ifdef WIN32
+		case '\033':
+#else
 		case '\e':
+#endif
 			data.key_code = GN_KEY_NAMES;
 			presskey();
 			break;

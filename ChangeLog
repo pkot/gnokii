@@ -4,6 +4,7 @@
     o bump the version number                           (Pawel Kot)
     o fix compilation warnings                          (Pawel Kot)
     o read() needs #include <io.h>                      (Pawel Kot)
+    o use \033 escape sequence instead of \e            (Pawel Kot)
  * libgnokii fixes
     o fix the argument order in base64_encode() caller  (Pawel Kot)
  * gnokii fixes
