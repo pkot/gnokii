@@ -250,7 +250,6 @@ void SM_DumpUnhandledFrame(GSM_Statemachine *state, int messagetype, unsigned ch
 	for (i = 0; i < messagesize; i++) {
 		if (i % 16 == 0)
 			dprintf("\n    ");
-		}
 		dprintf("%02x ", message[i]);
 	}
 	dprintf("\n");
