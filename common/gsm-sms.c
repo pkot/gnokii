@@ -1050,6 +1050,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 			break;
 		default:
 			fprintf(stderr, "What kind of ninja-mutant UserData is this?\n");
+			break;
 		}
 	}
 
