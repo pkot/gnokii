@@ -2346,14 +2346,14 @@ int reset( char *type)
 int foogle(char *argv[])
 { 
 
+#if 0
   int i;
   GSM_Profile profile;
+#endif
 
   /* Initialise the code for the GSM interface. */     
 
-  // fbusinit(RLP_DisplayF96Frame);
-
-  fbusinit(NULL);
+  fbusinit(RLP_DisplayF96Frame);
 
   sleep(5); /* Wait for phone initialisation. */
 
@@ -2361,10 +2361,11 @@ int foogle(char *argv[])
   // GSM->DialData("62401000");
 
   /* Pavel's one */
-  // GSM->DialData("4670");
+  GSM->DialData("4670");
 
   // RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, Data);
 
+#if 0
   for (i = 0; i <= 6; i++) {
 
     profile.Number = i;
@@ -2383,6 +2384,7 @@ int foogle(char *argv[])
     printf("Automatic answer: %s\n", profile.AutomaticAnswer ? "On" : "Off");
     printf("\n");
   }
+#endif
 
   sleep (60);
   GSM->Terminate();

@@ -82,14 +82,21 @@ void X(RLP_F96Frame *frame) {
 /* This function is used for sending RLP frames to the phone. */
 
 void RLP_SendF96Frame(RLP_FrameTypes FrameType,
-                      u8 OutCR, u8 OutPF,
+                      bool OutCR, bool OutPF,
                       u8 OutNR, u8 OutNS,
-                      u8 *OutData)
+                      u8 *OutData,
+		      u8 OutDTX)
 {
 
   RLP_F96Frame frame;
-  u8 req[60] = { 0x01, 0xd9 };
+  u8 req[60] = { 0x00, 0xd9 };
   int i;
+
+  /* Discontinuos transmission (DTX).  See section 5.6 of GSM 04.22 version
+     7.0.1. */
+
+  if (OutDTX)
+    req[1]=0x01;
 
   frame.Header[0]=0;
   frame.Header[1]=0;
@@ -324,7 +331,9 @@ void RLP_SendF96Frame(RLP_FrameTypes FrameType,
 
   memcpy(req+2, (u8 *) &frame, 32);
 
-  /* FIXME: how should we send RLP frames? */
+  /* FIXME: how should we send RLP frames? Some pointer to the actual
+     function? */
+
   FB61_TX_SendFrame(32, 0xf0, req);
 }
 
@@ -356,7 +365,9 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
     case RLPFT_U: /* Unnumbered frames. */
 
 #ifdef DEBUG
-      fprintf(stdout, "Unnumbered Frame M=%02x ", header.M);
+      fprintf(stdout, "Unnumbered Frame [$%02x%02x] M=%02x ", frame->Header[0],
+                                                              frame->Header[1],
+                                                              header.M);
 #endif
 
       switch (header.M) {
@@ -467,7 +478,11 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
     case RLPFT_S: /* Supervisory frames. */
 
 #ifdef DEBUG
-      fprintf(stdout, "Supervisory Frame S=%x N(R)=%02x ", header.S, header.Nr);
+      fprintf(stdout, "Supervisory Frame [$%02x%02x] S=%x N(R)=%02x ",
+                      frame->Header[0],
+                      frame->Header[1],
+	              header.S,
+                      header.Nr);
 #endif
 
       switch (header.S) {
@@ -527,7 +542,12 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
     default:
 
 #ifdef DEBUG
-      fprintf(stdout, "Info+Supervisory Frame S=%x N(S)=%02x N(R)=%02x ", header.S, header.Ns, header.Nr);
+      fprintf(stdout, "Info+Supervisory Frame [$%02x%02x] S=%x N(S)=%02x N(R)=%02x ",
+                      frame->Header[0],
+                      frame->Header[1],
+                      header.S,
+                      header.Ns,
+                      header.Nr);
 #endif
 
       switch (header.S) {
@@ -651,11 +671,12 @@ bool XID_Handling (RLP_F96Frame *frame, RLP_F96Header *header) {
     fprintf(stdout, "DEBUG: XID received in state 1.\n");
 
     for (i=0; i<25; i++) {
-      printf("XID data[%2d]: %2x\n", i, frame->Data[i]);
+      printf("XID data[%02d]: %02x\n", i, frame->Data[i]);
       Data[i]=frame->Data[i];
     }
     
-    RLP_SendF96Frame(RLPFT_U_XID, false, false, 0, 0, Data);
+    RLP_SendF96Frame(RLPFT_U_XID, false, false, 0, 0, Data, false);
+
     return true;
   }
 
@@ -696,19 +717,19 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 
     case RLPFT_U_DISC:
 
-      RLP_SendF96Frame(RLPFT_U_DM, false, header->PF, 0, 0, NULL);
+      RLP_SendF96Frame(RLPFT_U_DM, false, header->PF, 0, 0, NULL, false);
 
       break;
 
     case RLPFT_U_SABM:
 
-      RLP_SendF96Frame(RLPFT_U_DM, false, true, 0, 0, NULL);
+      RLP_SendF96Frame(RLPFT_U_DM, false, true, 0, 0, NULL, false);
 
       break;
 
     default:
 
-      RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL);
+      RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
 
       if (RLP_UserEvent(Attach_Req)) {
 	NextState=RLP_S1;
@@ -731,8 +752,18 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     // FIXME: continue here...
 
     if (!XID_Handling(frame, header)) {
-      RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL);
+
+      static FIXMEcounter=0;
+
+      FIXMEcounter++;
+      printf("FIXMEcounter: %d\n", FIXMEcounter);
+      if (FIXMEcounter==700)
+	RLP_SendF96Frame(RLPFT_U_SABM, true, true, 0, 0, NULL, false);
+      else
+	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
+
     }
+
 
     break;
 
