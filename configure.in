@@ -421,6 +421,11 @@ int main()
    ]
 )
 
+AC_TRY_COMPILE( [#include <sys/socket.h>],
+		[struct msghdr msg; msg.msg_control;],
+		AC_DEFINE(HAVE_MSGHDR_MSG_CONTROL)
+)
+
 dnl ======================== Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT

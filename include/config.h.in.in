@@ -56,4 +56,7 @@
 /* Define if you compile for M$ Windows */
 #undef WIN32
 
+/* Define if struct msghdr has msg_control field */
+#undef HAVE_MSGHDR_MSG_CONTROL
+
 #endif /* __CONFIG_H__ */

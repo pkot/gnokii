@@ -6,111 +6,160 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2002 Pawe³ Kot
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Mgnokiidev gets passed a slave pty name by gnokiid and uses this
-  information to create a symlink from the pty to /dev/gnokii.
+  The code is based on the skeleton from W. Richard Stevens' "UNIX Network Programming",
+  Volume 1, Second Edition.
+
+  Call mgnokiidev wit one and only one argument -- a socket descriptor to send a caller
+  pty device descriptor.
 
 */
 
-#include <stdio.h>
-#include <errno.h>
-#include <signal.h>
-#include <termios.h>
-#include <grp.h>
+#include "misc.h"
+
+#define __USE_XOPEN
 #include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
-#include <sys/time.h>
+#include <fcntl.h>
 #include <unistd.h>
-#include <ctype.h>
 
-#define DEVLEN	30
-#define MAXLEN	12
-
-int main(int argc, char *argv[])
+static int gwrite(int fd, void *ptr, size_t nbytes, int sendfd)
 {
-	int count, err, aux;
-	char dev_name[DEVLEN];
-	struct stat st;
+	struct msghdr msg;
+	struct iovec iov[1];
+
+#ifdef HAVE_MSGHDR_MSG_CONTROL
+	union {
+		struct cmsghdr msg;
+		char control[CMSG_SPACE(sizeof(int))];
+	} control_un;
+	struct cmsghdr *cmptr;
+
+	msg.msg_control = control_un.control;
+	msg.msg_controllen = sizeof(control_un.control);
+
+	cmptr = CMSG_FIRSTHDR(&msg);
+	cmptr->cmsg_len = CMSG_LEN(sizeof(int));
+	cmptr->cmsg_level = SOL_SOCKET;
+	cmptr->cmsg_type = SCM_RIGHTS;
+	*((int *)CMSG_DATA(cmptr)) = sendfd;
+#else
+	msg.msg_accrights = (caddr_t)&sendfd;
+	msg.msg_accrightslen = sizeof(int);
+#endif /* HAVE_MSGHDR_MSG_CONTROL */
+
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	iov[0].iov_base = ptr;
+	iov[0].iov_len = nbytes;
+	msg.msg_iov = iov;
+	msg.msg_iovlen = 1;
+
+	return (sendmsg(fd, &msg, 0));
+}
+
+
+/* VM_GetMasterPty()
+   Takes a double-indirect character pointer in which to put a slave
+   name, and returns an integer file descriptor.  If it returns < 0, an
+   error has occurred.  Otherwise, it has returned the master pty
+   file descriptor, and fills in *name with the name of the
+   corresponding slave pty.  Once the slave pty has been opened,
+   you are responsible to free *name.  Code is from Developing Linux
+   Applications by Troan and Johnson */
+static int GetMasterPty(char **name)
+{
+	int master = -1;
+#ifdef USE_UNIX98PTYS
+	master = open("/dev/ptmx", O_RDWR | O_NOCTTY | O_NONBLOCK);
+	if (master >= 0) {
+		if (!grantpt(master) || !unlockpt(master)) {
+			*name = ptsname(master);
+		} else {
+			return(-1);
+		}
+	}
+#else /* USE_UNIX98PTYS */
+	int i = 0 , j = 0;
+
+	/* create a dummy name to fill in */
+	*name = strdup("/dev/ptyXX");
+
+	/* search for an unused pty */
+	for (i = 0; i < 16 && master <= 0; i++) {
+		for (j = 0; j < 16 && master <= 0; j++) {
+			(*name)[8] = "pqrstuvwxyzPQRST"[i];
+			(*name)[9] = "0123456789abcdef"[j];
+			/* open the master pty */
+			if ((master = open(*name, O_RDWR | O_NOCTTY | O_NONBLOCK )) < 0) {
+				if (errno == ENOENT) {
+					/* we are out of pty devices */
+					free(*name);
+					return (master);
+				}
+			}
+		}
+	}
+	if ((master < 0) && (i == 16) && (j == 16)) {
+		/* must have tried every pty unsuccessfully */
+		free(*name);
+		return (master);
+	}
+
+	/* By substituting a letter, we change the master pty
+	 * name into the slave pty name.
+	 */
+	(*name)[5] = 't';
+
+#endif /* USE_UNIX98PTYS */
+
+	return (master);
+}
+
+
+int main(int argc, char **argv)
+{
+	int n, PtyRDFD = -1; /* Pty descriptor */
+	char *name = NULL; /* Device name */
+
+	/* For GNU gettext */
+#ifdef USE_NLS
+	textdomain("gnokii");
+#endif
 
 	/* Check we have one and only one command line argument. */
 	if (argc != 2) {
-		fprintf(stderr, "mgnokiidev takes one and only one argument!\n");
+		fprintf(stderr, _("mgnokiidev takes one and only one argument!\n"));
 		exit(-2);
 	}
 
-	aux = strlen(argv[1]);
+	PtyRDFD = GetMasterPty(&name);
 
-	/* Check if argument has a reasonable length (less than MAXLEN characters) */
-	if (aux >= MAXLEN) {
-		fprintf(stderr, "Argument must be less than %d characters.\n", MAXLEN);
-		exit (-2);
+	if (PtyRDFD < 0 || name == NULL) {
+		fprintf (stderr, _("Couldn't open pty!\n"));
+		goto error;
 	}
 
-	if (argv[1][0] != '/') snprintf(dev_name, DEVLEN, "/dev/%s", argv[1]);
-	else strncpy(dev_name, argv[1], DEVLEN);
-
-	/* Check for suspicious characters. */
-	for (count = 0; count < aux; count++)
-		if (!(isalnum(dev_name[count]) || dev_name[count] == '/')) {
-			fprintf(stderr, "Suspicious character at index %d in argument.\n", count);
-			exit (-2);
-		}
-
-	/* Error conditions */
-	if (stat(dev_name, &st) == -1) {
-		fprintf(stderr, "Cannot stat file %s.\n", dev_name);
-		exit(-2);
-	}
-
-	if (strncmp(dev_name, "/dev/", 5)) {
-		fprintf(stderr, "Wrong device name: %s.\n", dev_name);
-		exit(-2);
-	}
-
-	if (!S_ISCHR(st.st_mode)) {
- 		fprintf(stderr, "Given file is not a valid character device.\n");
- 		exit(-2);
-	}
-
-	/* Ensure that we access pseudoterminal */
-	/* FIXME: is it OK? */
-	/* FIXME: how to ensure that we don't change permissions to
-	   the pseudoterminal we shouldn't access? */
-#ifdef USE_UNIX98PTYS
-	if (strstr(dev_name, "pts") == NULL) {
- 		fprintf(stderr, "Given file is not a valid pseudoterminal device.\n");
- 		exit(-2);
-	}
-#else /* USE_UNIX98PTYS */
-	if (strstr(dev_name, "tty") == NULL) {
- 		fprintf(stderr, "Given file is not a valid pseudoterminal device.\n");
- 		exit(-2);
-	}
-#endif /* USE_UNIX98PTYS */
+	/* Now change permissions to the slave pty */
 
 	/* Now become root */
 	setuid(0);
 
 	/* Change group of slave pty to group of mgnokiidev */
-	err = chown(dev_name, -1, getgid());
-
-	if (err < 0) {
+	if (chown(name, -1, getgid()) < 0) {
 		perror("mgnokiidev - chown: ");
-		exit(-2);
+		goto error;
 	}
 
 	/* Change permissions to rw by group */
-	err = chmod(dev_name, S_IRGRP | S_IWGRP | S_IRUSR | S_IWUSR);
-
-	if (err < 0) {
+	if (chmod(name, S_IRGRP | S_IWGRP | S_IRUSR | S_IWUSR) < 0) {
 		perror("mgnokiidev - chmod: ");
-		exit(-2);
+		goto error;
 	}
 
 	/* FIXME: Possible bug - should check that /dev/gnokii doesn't already exist
@@ -123,13 +172,19 @@ int main(int argc, char *argv[])
 	unlink("/dev/gnokii");
 
 	/* Create symlink */
-	err = symlink(dev_name, "/dev/gnokii");
-
-	if (err < 0) {
+	if (symlink(name, "/dev/gnokii") < 0) {
 		perror("mgnokiidev - symlink: ");
-		exit(-2);
+		goto error;
+	}
+
+	/* Now pass the descriptor to the caller */
+	if ((n = gwrite(atoi(argv[1]), "", 1, PtyRDFD)) < 0) {
+		goto error;
 	}
 
 	/* Done */
-	exit (0);
+	exit(0);
+error:
+	if (name) free(name);
+	exit(-2);
 }

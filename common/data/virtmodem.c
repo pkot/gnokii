@@ -38,6 +38,8 @@
 #include <sys/poll.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
 
 #include "misc.h"
 #include "gsm-api.h"
@@ -51,7 +53,6 @@
 static int  VM_PtySetup(char *bindir);
 static void VM_ThreadLoop(void);
 static void VM_CharHandler(void);
-static int  VM_GetMasterPty(char **name);
 static GSM_Error VM_GSMInitialise(char *model,
 			   char *port,
 			   char *initlength,
@@ -176,20 +177,99 @@ void VM_Terminate(void)
 	}
 }
 
+/* The following two functions are based on the skeleton from
+ * W. Richard Stevens' "UNIX Network Programming", Volume 1, Second Edition.
+ */
+
+static int gread(int fd, void *ptr, size_t nbytes, int *recvfd)
+{
+	struct msghdr msg;
+	struct iovec iov[1];
+	int n;
+
+#ifdef HAVE_MSGHDR_MSG_CONTROL
+	union {
+		struct cmsghdr cm;
+		char control[CMSG_SPACE(sizeof(int))];
+	} control_un;
+	struct cmsghdr *cmptr;
+
+	msg.msg_control = control_un.control;
+	msg.msg_controllen = sizeof(control_un.control);
+#else
+	int newfd;
+
+	msg.msg_accrights = (caddr_t) &newfd;
+	msg.msg_accrightslen = sizeof(int);
+#endif /* HAVE_MSGHDR_MSG_CONTROL */
+
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+
+	iov[0].iov_base = ptr;
+	iov[0].iov_len = nbytes;
+	msg.msg_iov = iov;
+	msg.msg_iovlen = 1;
+
+	if ((n = recvmsg(fd, &msg, 0)) <= 0) return n;
+
+#ifdef HAVE_MSGHDR_MSG_CONTROL
+	if ((cmptr = CMSG_FIRSTHDR(&msg)) != NULL &&
+	    cmptr->cmsg_len == CMSG_LEN(sizeof(int))) {
+		if (cmptr->cmsg_level != SOL_SOCKET) perror("control level != SOL_SOCKET");
+		if (cmptr->cmsg_type != SCM_RIGHTS) perror("control type != SCM_RIGHTS");
+		*recvfd = *((int *)CMSG_DATA(cmptr));
+	} else {
+		*recvfd = -1;
+	}
+#else
+	if (msg.msg_accrightslen == sizeof(int)) *recvfd = newfd;
+	else *recvfd = -1;
+#endif /* HAVE_MSGHDR_MSG_CONTROL */
+	return (n);
+}
+
+static int gopen(const char *command)
+{
+	int fd, sockfd[2], status;
+	pid_t childpid;
+	char c, argsockfd[10];
+
+	if (socketpair(AF_LOCAL, SOCK_STREAM, 0, sockfd) < 0) return -1;
+
+	switch (childpid = fork()) {
+	case -1:
+		/* Critical error */
+		return -1;
+	case 0:
+		/* Child */
+		close(sockfd[0]);
+		snprintf(argsockfd, sizeof(argsockfd), "%d", sockfd[1]);
+		execl(command, "mgnokiidev", argsockfd, NULL);
+		perror("execl: ");
+	default:
+		/* Parent */
+		break;
+	}
+
+	close(sockfd[1]);
+	waitpid(childpid, &status, 0);
+	if (WIFEXITED(status) == 0) perror("wait: ");
+	if ((status = WEXITSTATUS(status)) == 0) {
+		gread(sockfd[0], &c, 1, &fd);
+	} else {
+		errno = status;
+		fd = -1;
+	}
+	close(sockfd[0]);
+	return(fd);
+}
+
 /* Open pseudo tty interface and (in due course create a symlink
    to be /dev/gnokii etc. ) */
 static int VM_PtySetup(char *bindir)
 {
-	int err;
 	char mgnokiidev[200];
-	char *slave_name;
-	char cmdline[200];
-
-	if (bindir) {
-		strncpy(mgnokiidev, bindir, 200);
-		strcat(mgnokiidev, "/");
-	}
-	strncat(mgnokiidev, "mgnokiidev", 200 - strlen(bindir));
 
 	if (UseSTDIO) {
 		PtyRDFD = STDIN_FILENO;
@@ -197,22 +277,21 @@ static int VM_PtySetup(char *bindir)
 		return (0);
 	}
 
-	PtyRDFD = VM_GetMasterPty(&slave_name);
+	if (bindir) {
+		strncpy(mgnokiidev, bindir, 200);
+		strcat(mgnokiidev, "/");
+	}
+	strncat(mgnokiidev, "mgnokiidev", 200 - strlen(bindir));
+
+	PtyRDFD = gopen(mgnokiidev);
+
 	if (PtyRDFD < 0) {
 		fprintf (stderr, _("Couldn't open pty!\n"));
 		return(-1);
 	}
 	PtyWRFD = PtyRDFD;
 
-	dprintf("Slave pty is %s, calling %s to create /dev/gnokii.\n", slave_name, mgnokiidev);
-
-	/* Create command line, something line ./mkgnokiidev ttyp0 */
-	sprintf(cmdline, "%s %s", mgnokiidev, slave_name);
-
-	/* And use system to call it. */
-	err = system (cmdline);
-
-	return (err);
+	return (0);
 }
 
 /* Handler called when characters received from serial port.
@@ -250,66 +329,4 @@ static GSM_Error VM_GSMInitialise(char *model, char *port, char *initlength, GSM
 		fprintf(stderr, _("GSM/FBUS init failed!\n"));
 
 	return (error);
-}
-
-/* VM_GetMasterPty()
-   Takes a double-indirect character pointer in which to put a slave
-   name, and returns an integer file descriptor.  If it returns < 0, an
-   error has occurred.  Otherwise, it has returned the master pty
-   file descriptor, and fills in *name with the name of the
-   corresponding slave pty.  Once the slave pty has been opened,
-   you are responsible to free *name.  Code is from Developing Linux
-   Applications by Troan and Johnson */
-static int VM_GetMasterPty(char **name)
-{
-#ifdef USE_UNIX98PTYS
-	int master, err;
-
-	master = open("/dev/ptmx", O_RDWR | O_NOCTTY | O_NONBLOCK);
-	if (master >= 0) {
-		err = grantpt(master);
-		err = err || unlockpt(master);
-		if (!err) {
-			*name = ptsname(master);
-		} else {
-			return(-1);
-		}
-	}
-#else /* USE_UNIX98PTYS */
-	int i = 0 , j = 0;
-	/* default to returning error */
-	int master = -1;
-
-	/* create a dummy name to fill in */
-	*name = strdup("/dev/ptyXX");
-
-	/* search for an unused pty */
-	for (i = 0; i < 16 && master <= 0; i++) {
-		for (j = 0; j < 16 && master <= 0; j++) {
-			(*name)[8] = "pqrstuvwxyzPQRST"[i];
-			(*name)[9] = "0123456789abcdef"[j];
-			/* open the master pty */
-			if ((master = open(*name, O_RDWR | O_NOCTTY | O_NONBLOCK )) < 0) {
-				if (errno == ENOENT) {
-					/* we are out of pty devices */
-					free(*name);
-					return (master);
-				}
-			}
-		}
-	}
-	if ((master < 0) && (i == 16) && (j == 16)) {
-		/* must have tried every pty unsuccessfully */
-		free(*name);
-		return (master);
-	}
-
-	/* By substituting a letter, we change the master pty
-	 * name into the slave pty name.
-	 */
-	(*name)[5] = 't';
-
-#endif /* USE_UNIX98PTYS */
-
-	return (master);
 }
