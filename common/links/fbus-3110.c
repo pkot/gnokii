@@ -46,30 +46,24 @@
 
 #include "links/fbus-3110.h"
 
-static bool fb3110_serial_open(void);
-static void fb3110_rx_state_machine(unsigned char rx_byte);
+static bool fb3110_serial_open(struct gn_statemachine *state);
+static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
 static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
 static void fb3110_tx_ack_send(u8 *message, int length);
-static void fb3110_sequence_number_update(void);
+static void fb3110_sequence_number_update(struct gn_statemachine *state);
 
-/* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
 
-
-/* Some globals */
-
-static gn_link *glink;
-static struct gn_statemachine *statemachine;
-static fb3110_link flink;	/* FBUS specific stuff, internal to this file */
+#define FBUSINST(s) ((fb3110_link *)((s)->link.link_instance))
 
 
 /*--------------------------------------------*/
 
-static bool fb3110_serial_open(void)
+static bool fb3110_serial_open(struct gn_statemachine *state)
 {
 	/* Open device. */
-	if (!device_open(glink->port_device, false, false, false, GN_CT_Serial)) {
+	if (!device_open(state->link.port_device, false, false, false, GN_CT_Serial)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -83,9 +77,9 @@ static bool fb3110_serial_open(void)
  * RX_State machine for receive handling.
  * Called once for each character received from the phone.
  */
-static void fb3110_rx_state_machine(unsigned char rx_byte)
+static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachine *state)
 {
-	fb3110_incoming_frame *i = &flink.i;
+	fb3110_incoming_frame *i = &FBUSINST(state)->i;
 	int count;
 
 	switch (i->state) {
@@ -152,7 +146,7 @@ static void fb3110_rx_state_machine(unsigned char rx_byte)
 					dprintf("%02hhx:", i->buffer[count]);
 				dprintf("\n");
 				/* Transfer message to state machine */
-				sm_incoming_function(i->buffer[0], i->buffer, i->frame_len, statemachine);
+				sm_incoming_function(i->buffer[0], i->buffer, i->frame_len, state);
 
 				/* Send an ack */
 				fb3110_tx_ack_send(i->buffer, i->frame_len);
@@ -182,7 +176,7 @@ static gn_error fb3110_loop(struct timeval *timeout, struct gn_statemachine *sta
 	if (res > 0) {
 		res = device_read(buffer, 255);
 		for (count = 0; count < res; count++)
-			fb3110_rx_state_machine(buffer[count]);
+			fb3110_rx_state_machine(buffer[count], state);
 	} else
 		return GN_ERR_TIMEOUT;
 
@@ -253,8 +247,8 @@ static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned ch
 {
 	u8 seqnum;
 
-	fb3110_sequence_number_update();
-	seqnum = flink.request_sequence_number;
+	fb3110_sequence_number_update(state);
+	seqnum = FBUSINST(state)->request_sequence_number;
 
 	return fb3110_tx_frame_send(messagesize, messagetype, seqnum, message);
 }
@@ -337,34 +331,37 @@ gn_error fb3110_initialise(gn_link *newlink, struct gn_statemachine *state)
 
 	try++;
 	if (try > 2) return GN_ERR_FAILED;
-	/* 'Copy in' the global structures */
-	glink = newlink;
-	statemachine = state;
 
 	/* Fill in the link functions */
-	glink->loop = &fb3110_loop;
-	glink->send_message = &fb3110_message_send;
+	state->link.loop = &fb3110_loop;
+	state->link.send_message = &fb3110_message_send;
 
 	/* Check for a valid init length */
-	if (glink->init_length == 0)
-		glink->init_length = 100;
+	if (state->link.init_length == 0)
+		state->link.init_length = 100;
 
 	/* Start up the link */
+	if ((FBUSINST(state) = calloc(1, sizeof(fb3110_link))) == NULL)
+		return GN_ERR_MEMORYFULL;
 
-	flink.request_sequence_number = 0x10;
+	FBUSINST(state)->request_sequence_number = 0x10;
 
-	if (!fb3110_serial_open()) return GN_ERR_FAILED;
+	if (!fb3110_serial_open(state)) {
+		free(FBUSINST(state));
+		FBUSINST(state) = NULL;
+		return GN_ERR_FAILED;
+	}
 
 	/* Send init string to phone, this is a bunch of 0x55 characters.
 	   Timing is empirical. I believe that we need/can do this for any
 	   phone to get the UART synced */
-	for (count = 0; count < glink->init_length; count++) {
+	for (count = 0; count < state->link.init_length; count++) {
 		usleep(1000);
 		device_write(&init_char, 1);
 	}
 
 	/* Init variables */
-	flink.i.state = FB3110_RX_Sync;
+	FBUSINST(state)->i.state = FB3110_RX_Sync;
 
 	return GN_ERR_NONE;
 }
@@ -375,10 +372,10 @@ gn_error fb3110_initialise(gn_link *newlink, struct gn_statemachine *state)
  * before repeating again. Perhaps more accurately, the numbers cycle
  * 0,1,2,3..7 with bit 4 of the byte premanently set. 
  */
-static void fb3110_sequence_number_update(void)
+static void fb3110_sequence_number_update(struct gn_statemachine *state)
 {
-	flink.request_sequence_number++;
+	FBUSINST(state)->request_sequence_number++;
 
-	if (flink.request_sequence_number > 0x17 || flink.request_sequence_number < 0x10)
-		flink.request_sequence_number = 0x10;
+	if (FBUSINST(state)->request_sequence_number > 0x17 || FBUSINST(state)->request_sequence_number < 0x10)
+		FBUSINST(state)->request_sequence_number = 0x10;
 }

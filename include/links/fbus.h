@@ -100,6 +100,6 @@ typedef struct {
 
 gn_error fbus_initialise(gn_link *newlink, struct gn_statemachine *state, int try);
 
-int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer);
+int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer, struct gn_statemachine *state);
 
 #endif /* #ifndef _gnokii_links_fbus_h */

@@ -51,28 +51,21 @@
 
 #include "gnokii-internal.h"
 
-static void phonet_rx_statemachine(unsigned char rx_byte);
+static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
 
-/* FIXME - pass device_* the link stuff?? */
-/* FIXME - win32 stuff! */
 
-
-/* Some globals */
-
-static gn_link *glink;
-static struct gn_statemachine *statemachine;
-static phonet_incoming_message imessage;
+#define FBUSINST(s) ((phonet_incoming_message *)((s)->link.link_instance))
 
 
 /*--------------------------------------------*/
 
-static bool phonet_open()
+static bool phonet_open(struct gn_statemachine *state)
 {
 	int result;
 
 	/* Open device. */
-	result = device_open(glink->port_device, false, false, false, GN_CT_Irda);
+	result = device_open(state->link.port_device, false, false, false, GN_CT_Irda);
 
 	if (!result) {
 		perror(_("Couldn't open PHONET device"));
@@ -85,9 +78,9 @@ static bool phonet_open()
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
-static void phonet_rx_statemachine(unsigned char rx_byte)
+static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state)
 {
-	phonet_incoming_message *i = &imessage;
+	phonet_incoming_message *i = FBUSINST(state);
 
 	switch (i->state) {
 
@@ -158,7 +151,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte)
 		/* Is that it? */
 
 		if (i->buffer_count == i->message_length) {
-			sm_incoming_function(i->message_type, i->message_buffer, i->message_length, statemachine);
+			sm_incoming_function(i->message_type, i->message_buffer, i->message_length, state);
 			i->state = FBUS_RX_Sync;
 		}
 		break;
@@ -183,7 +176,7 @@ static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *sta
 	if (res > 0) {
 		res = device_read(buffer, 255);
 		for (count = 0; count < res; count++) {
-			phonet_rx_statemachine(buffer[count]);
+			phonet_rx_statemachine(buffer[count], state);
 		}
 		if (res > 0) {
 			error = GN_ERR_NONE;	/* This traps errors from device_read */
@@ -247,23 +240,27 @@ gn_error phonet_initialise(gn_link *newlink, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_FAILED;
 
-	/* 'Copy in' the global structures */
-	glink = newlink;
-	statemachine = state;
-
 	/* Fill in the link functions */
-	glink->loop = &phonet_loop;
-	glink->send_message = &phonet_send_message;
+	state->link.loop = &phonet_loop;
+	state->link.send_message = &phonet_send_message;
 
-	if ((glink->connection_type == GN_CT_Infrared) || (glink->connection_type == GN_CT_Irda)) {
-		if (phonet_open() == true) {
+	if ((FBUSINST(state) = calloc(1, sizeof(phonet_incoming_message))) == NULL)
+		return GN_ERR_MEMORYFULL;
+
+	if ((state->link.connection_type == GN_CT_Infrared) || (state->link.connection_type == GN_CT_Irda)) {
+		if (phonet_open(state) == true) {
 			error = GN_ERR_NONE;
-
-			/* Init variables */
-			imessage.state = FBUS_RX_Sync;
-			imessage.buffer_count = 0;
 		}
 	}
+	if (error != GN_ERR_NONE) {
+		free(FBUSINST(state));
+		FBUSINST(state) = NULL;
+		return error;
+	}
+
+	/* Init variables */
+	FBUSINST(state)->state = FBUS_RX_Sync;
+	FBUSINST(state)->buffer_count = 0;
 
 	return error;
 }

@@ -38,6 +38,8 @@
  * link driver updates:
     o static and global variables have been eliminated from the
       m2bus source, passing state to everywhere     (BORBELY Zoltan)
+    o static and global variables have been eliminated from the
+      fbus sources, passing state to everywhere     (BORBELY Zoltan)
 
 0.5.0pre2
 =========

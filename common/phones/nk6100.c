@@ -3134,7 +3134,7 @@ static gn_error SendRLPFrame(gn_data *data, struct gn_statemachine *state)
 	 * return SM_SendFrame(state, 32, 0xf0, req);
 	 */
 
-	return fbus_tx_send_frame(32, 0xf0, req);
+	return fbus_tx_send_frame(32, 0xf0, req, state);
 }
 
 static gn_error SetRLPRXCallback(gn_data *data, struct gn_statemachine *state)
