@@ -162,39 +162,12 @@ static unsigned char char_encode_def_alphabet(unsigned char value)
 	return gsm_reverse_default_alphabet[value];
 }
 
-static int char_encode_uni_alphabet(unsigned char value, wchar_t *dest)
-{
-	int length;
-
-	switch (length = mbtowc(dest, &value, 4)) {
-	case -1:
-		dprintf("Error calling mctowb!\n");
-		return -1;
-	default:
-		return length;
-	}
-
-}
-
 static unsigned char char_decode_def_alphabet(unsigned char value)
 {
 	if (value < GN_CHAR_ALPHABET_SIZE) {
 		return gsm_default_alphabet[value];
 	} else {
 		return '?';
-	}
-}
-
-static int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
-{
-	int length;
-
-	switch (length = wctomb(dest, value)) {
-	case -1:
-		dprintf("Error calling wctomb!\n");
-		return -1;
-	default:
-		return length;
 	}
 }
 
@@ -343,28 +316,72 @@ void char_encode_hex(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
+static int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
+{
+	int length;
+
+	switch (length = mbtowc(dest, value, MB_CUR_MAX)) {
+	case -1:
+		dprintf("Error calling mctowb!\n");
+		*dest = '?';
+		return -1;
+	default:
+		return length;
+	}
+}
+
+static int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
+{
+	int length;
+
+	switch (length = wctomb(dest, value)) {
+	case -1:
+		dprintf("Error calling wctomb!\n");
+		*dest = '?';
+		return -1;
+	default:
+		return length;
+	}
+}
+
 void char_decode_ucs2(unsigned char* dest, const unsigned char* src, int len)
 {
-	int i;
+	int i_len = 0, o_len = 0, length;
 	char buf[5];
 
 	buf[4] = '\0';
-	for (i = 0; i < (len / 4); i++) {
-		buf[0] = *(src + i * 4); buf[1] = *(src + i * 4 + 1);
-		buf[2] = *(src + i * 4 + 2); buf[3] = *(src + i * 4 + 3);
-		char_decode_uni_alphabet(strtol(buf, NULL, 16), &dest[i]);
+	for (i_len = 0; i_len < len ; i_len++) {
+		buf[0] = *(src + i_len * 4); 
+		buf[1] = *(src + i_len * 4 + 1);
+		buf[2] = *(src + i_len * 4 + 2); 
+		buf[3] = *(src + i_len * 4 + 3);
+		switch (length = char_decode_uni_alphabet(strtol(buf, NULL, 16), dest + o_len)) {
+		case -1:
+			o_len++;
+			break;
+		default:
+			o_len += length;
+			break;
+		}
 	}
 	return;
 }
 
 void char_encode_ucs2(unsigned char* dest, const unsigned char* src, int len)
 {
-	int i;
 	wchar_t wc;
-
-	for (i = 0; i < (len / 4); i++) {
-		char_encode_uni_alphabet(src[i], &wc);
-		sprintf(dest + i * 4, "%lx", wc);
+	int i_len = 0, o_len, length;
+ 
+	for (o_len = 0; i_len < len ; o_len++) {
+		switch (length = char_encode_uni_alphabet(src + i_len, &wc)) {
+		case -1:
+			i_len++;
+			break;
+		default:
+			i_len += length;
+			break;
+		}
+		sprintf(dest + (o_len << 2), "%lx", wc); 
 	}
 	return;
 }
@@ -374,7 +391,7 @@ unsigned int char_decode_unicode(unsigned char* dest, const unsigned char* src, 
 	int i, length = 0, pos = 0;
 
 	for (i = 0; i < len / 2; i++) {
-		length = wctomb(dest, (src[i * 2] << 8) | src[(i * 2) + 1]);
+		length = char_decode_uni_alphabet((src[i * 2] << 8) | src[(i * 2) + 1], dest);
 		dest += length;
 		pos += length;
 	}
@@ -386,17 +403,19 @@ unsigned int char_encode_unicode(unsigned char* dest, const unsigned char* src, 
         int i, length, offset = 0, pos = 0;
 	wchar_t   wc;
 
-        for (i = 0; i < len; i++) {
-                switch (length = mbtowc (&wc, &src[offset], 2)){
-                case 1:         /* ASCII char */
-                case 2:         /* multi char  */
+        for (i = 0; offset < len; i++) {
+                switch (length = char_encode_uni_alphabet(src + offset, &wc)) {
+		case -1:
 			dest[pos++] =  wc >> 8 & 0xFF;
                         dest[pos++] =  wc & 0xFF;
+			offset++;
 			break;
                 default:
+			dest[pos++] =  wc >> 8 & 0xFF;
+                        dest[pos++] =  wc & 0xFF;
+			offset += length;
 			break;
                 }
-		offset += length;
         }
 	return pos;
 }
