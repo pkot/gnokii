@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.145  2001-11-14 10:46:12  pkot
+  Revision 1.146  2001-11-17 20:18:33  pkot
+  Added dau9p connection type for 6210/7110
+
+  Revision 1.145  2001/11/14 10:46:12  pkot
   Small cleanup with __unices__
 
   Revision 1.144  2001/11/08 16:34:19  pkot
@@ -186,7 +189,6 @@
 #include <getopt.h>
 
 #endif
-
 #ifdef USE_NLS
 #include <locale.h>
 #endif
@@ -355,14 +357,15 @@ static GSM_Data data;
 
 void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 {
-	int count=0;
+	int count = 0;
 	GSM_Error error;
-	GSM_ConnectionType connection=GCT_Serial;
+	GSM_ConnectionType connection = GCT_Serial;
 
 	GSM_DataClear(&data);
 
-	if (!strcmp(Connection, "infrared")) connection=GCT_Infrared;
-	if (!strcmp(Connection, "irda"))     connection=GCT_Irda;
+	if (!strcasecmp(Connection, "dau9p"))    connection = GCT_DAU9P;
+	if (!strcasecmp(Connection, "infrared")) connection = GCT_Infrared;
+	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
 
 	/* Initialise the code for the GSM interface. */     
 
@@ -1134,7 +1137,7 @@ int getsms(int argc, char *argv[])
 				mode = 0;
 			case 'f':
 				if (optarg) {
-					dprintf(_("Saving into %s\n"), optarg);
+					dprintf("Saving into %s\n", optarg);
 					strncpy(filename, optarg, 64);
 					if (strlen(optarg) > 63) {
 						fprintf(stderr, _("Filename too long - will be truncated to 63 characters.\n"));
@@ -1182,7 +1185,7 @@ int getsms(int argc, char *argv[])
 					fprintf(stdout, _("(read)\n"));
 				else
 					fprintf(stdout, _("(not read)\n"));
-				fprintf(stdout, _("Sending date/time: %d/%d/%d %d:%02d:%02d "), \
+				fprintf(stdout, _("Sending date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.Time.Day, message.Time.Month, message.Time.Year, \
 					message.Time.Hour, message.Time.Minute, message.Time.Second);
 				if (message.Time.Timezone) {
@@ -1192,7 +1195,7 @@ int getsms(int argc, char *argv[])
 						fprintf(stdout,_("%02d00"), message.Time.Timezone);
 				}
 				fprintf(stdout, "\n");
-				fprintf(stdout, _("Response date/time: %d/%d/%d %d:%02d:%02d "), \
+				fprintf(stdout, _("Response date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.SMSCTime.Day, message.SMSCTime.Month, message.SMSCTime.Year, \
 					message.SMSCTime.Hour, message.SMSCTime.Minute, message.SMSCTime.Second);
 				if (message.SMSCTime.Timezone) {
@@ -1211,7 +1214,7 @@ int getsms(int argc, char *argv[])
 					fprintf(stdout, _("(read)\n"));
 				else
 					fprintf(stdout, _("(not read)\n"));
-				fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d "), \
+				fprintf(stdout, _("Date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.Time.Day, message.Time.Month, message.Time.Year, \
 					message.Time.Hour, message.Time.Minute, message.Time.Second);
 				if (message.Time.Timezone) {

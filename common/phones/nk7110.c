@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.21  2001-11-17 16:44:07  pkot
+  Revision 1.22  2001-11-17 20:18:32  pkot
+  Added dau9p connection type for 6210/7110
+
+  Revision 1.21  2001/11/17 16:44:07  pkot
   Cleanup. Reading SMS for 6100 series. Not that it has some bugs more and does not support UDH yet
 
   Revision 1.20  2001/11/15 12:15:04  pkot
@@ -243,8 +246,11 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_7110, sizeof(GSM_Phone));
 
+	dprintf("Connecting\n");
 	while (!connected) {
 		switch (state->Link.ConnectionType) {
+		case GCT_DAU9P:
+			if (try == 0) try = 1;
 		case GCT_Serial:
 			if (try > 1) return GE_NOTSUPPORTED;
 			err = FBUS_Initialise(&(state->Link), state, 1 - try);
@@ -260,7 +266,7 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 		}
 
 		if (err != GE_NONE) {
-			dprintf("Error in link initialisation\n");
+			dprintf("Error in link initialisation: %d\n", err);
 			try++;
 			continue;
 		}

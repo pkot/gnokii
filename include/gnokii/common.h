@@ -14,7 +14,10 @@
   handset.
 
   $Log$
-  Revision 1.82  2001-11-13 16:12:21  pkot
+  Revision 1.83  2001-11-17 20:18:33  pkot
+  Added dau9p connection type for 6210/7110
+
+  Revision 1.82  2001/11/13 16:12:21  pkot
   Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
 
   Revision 1.81  2001/11/08 16:34:20  pkot
@@ -45,6 +48,7 @@
 
 typedef enum {
 	GCT_Serial,   /* Serial connection. */
+	GCT_DAU9P,     /* Serial connection using DAU9P cable; use only with 6210/7110 if you want faster initialization */
 	GCT_Infrared, /* Infrared connection. */
 	GCT_Tekram,   /* Tekram Ir-Dongle */
 	GCT_Irda
