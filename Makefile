@@ -29,7 +29,7 @@ endif
 GTK_DIRS =	xgnokii \
 		xgnokii/xpm \
 		xkeyb \
-		xlogo 
+		xlogos
 
 PO_DIR   = 	po
 DOCS_DIR = 	Docs
