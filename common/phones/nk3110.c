@@ -164,7 +164,8 @@ GSM_Phone phone_nokia_3110 = {
 		0, 0,                   /* Op logo size */
 		0, 0                    /* Caller logo size */
 	},
-	Functions
+	Functions,
+	NULL
 };
 
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)

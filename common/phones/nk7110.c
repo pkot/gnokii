@@ -145,7 +145,8 @@ GSM_Phone phone_nokia_7110 = {
 		21, 78,                /* Op logo size */
 		14, 72                 /* Caller logo size */
 	},
-	P7110_Functions
+	P7110_Functions,
+	NULL
 };
 
 /* FIXME - a little macro would help here... */

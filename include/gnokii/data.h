@@ -200,6 +200,7 @@ typedef struct {
 	GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
 	GSM_Information Info;
 	GSM_Error (*Functions)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+	void *DriverInstance;
 } GSM_Phone;
 
 

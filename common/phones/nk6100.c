@@ -192,7 +192,8 @@ GSM_Phone phone_nokia_6100 = {
 		14, 72,                /* Op logo size */
 		14, 72                 /* Caller logo size */
 	},
-	Functions
+	Functions,
+	NULL
 };
 
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)

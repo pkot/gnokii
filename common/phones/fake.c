@@ -61,7 +61,8 @@ GSM_Phone phone_fake = {
 		21, 78,                /* Op logo size */
 		14, 72                 /* Caller logo size */
 	},
-	Pfake_Functions
+	Pfake_Functions,
+	NULL
 };
 
 

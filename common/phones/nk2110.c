@@ -107,7 +107,8 @@ GSM_Phone phone_nokia_2110 = {
 	NULL,
 	NULL,
 	INFO,
-	P2110_Functions
+	P2110_Functions,
+	NULL
 };
 
 /* Local variables */

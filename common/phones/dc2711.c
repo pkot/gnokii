@@ -67,7 +67,8 @@ GSM_Information D2711_Information = INFO;
 GSM_Phone phone_dancall_2711 = {
 	D2711_IncomingFunctions,
 	PGEN_IncomingDefault,
-	INFO
+	INFO,
+	NULL
 };
 
 static void Terminate()

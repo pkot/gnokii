@@ -35,6 +35,8 @@
    NOKIA phones (phonebook, calendar for now)          (Markus Plail)
  * statemachine pointer added to the incoming functions of the
    phone drivers                                     (BORBELY Zoltan)
+ * DriverInstance pointer added to the GSM_Phone strucutre. It can
+   be used by the phone drivers to store its state   (BORBELY Zoltan)
 
 0.4.2a
 ======

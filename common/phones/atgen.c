@@ -146,7 +146,8 @@ GSM_Phone phone_at = {
 		0, 0,			/* Op logo size */
 		0, 0			/* Caller logo size */
 	},
-	Functions
+	Functions,
+	NULL
 };
 
 static GSM_MemoryType memorytype = GMT_XX;
