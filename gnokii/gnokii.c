@@ -82,6 +82,19 @@
 #include "gsm-ringtones.h"
 #include "gsm-statemachine.h"
 
+struct gnokii_arg_len {
+	int gal_opt;
+	int gal_min;
+	int gal_max;
+	int gal_flags;
+};
+
+/* This is used for checking correct argument count. If it is used then if
+   the user specifies some argument, their count should be equivalent to the
+   count the programmer expects. */
+
+#define GAL_XOR 0x01
+
 typedef enum {
 	OPT_HELP,
 	OPT_VERSION,
@@ -2933,10 +2946,10 @@ static int identify(void)
 
 	SM_Functions(GOP_Identify, &data, &State);
 
-	fprintf(stdout, _("IMEI:     %s\n"), imei);
-	fprintf(stdout, _("Manufacturer: %s\n"), manufacturer);
-	fprintf(stdout, _("Model:    %s\n"), model);
-	fprintf(stdout, _("Revision: %s\n"), rev);
+	fprintf(stdout, _("IMEI         : %s\n"), imei);
+	fprintf(stdout, _("Manufacturer : %s\n"), manufacturer);
+	fprintf(stdout, _("Model        : %s\n"), model);
+	fprintf(stdout, _("Revision     : %s\n"), rev);
 
 	return 0;
 }
@@ -3630,7 +3643,7 @@ int main(int argc, char *argv[])
 
 	/* Every command which requires arguments should have an appropriate entry
 	   in this array. */
-	struct gnokii_arg_len gals[] =
+	static struct gnokii_arg_len gals[] =
 	{
 
 #ifdef SECURITY

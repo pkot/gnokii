@@ -28,19 +28,6 @@
 
 */
 
-struct gnokii_arg_len {
-	int gal_opt;
-	int gal_min;
-	int gal_max;
-	int gal_flags;
-};
-
-/* This is used for checking correct argument count. If it is used then if
-   the user specifies some argument, their count should be equivalent to the
-   count the programmer expects. */
-
-#define GAL_XOR 0x01
-
 /* Constants for Profiles. */
 
 #define PROFILE_OFF  0x00
