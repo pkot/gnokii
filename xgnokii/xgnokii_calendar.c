@@ -77,12 +77,18 @@ typedef struct {
 
 typedef struct {
 	GtkWidget *dialog;
-	Date date;
+	DateTime date;
 	DateTime alarm;
+	gint recurrence;
 	GtkWidget *alarmCheck;
 	GtkWidget *text;
+	GtkWidget *phone;
+	GtkWidget *group;
+	GtkWidget *groupLabel;
+	GtkWidget *groupMenu;
 } AddDialogData;
 
+/*
 typedef struct {
 	GtkWidget *dialog;
 	DateTime date;
@@ -97,9 +103,8 @@ typedef struct {
 	DateTime alarm;
 	GtkWidget *alarmCheck;
 	GtkWidget *text;
-	GtkWidget *phone;
 } AddDialogData3;
-
+*/
 typedef struct {
 	GtkWidget *dialog;
 	GtkWidget *cal;
@@ -117,8 +122,8 @@ static ErrorDialog errorDialog = { NULL, NULL };
 static CalendarWidget cal = { NULL, NULL };
 static QuestMark questMark;
 static AddDialogData addReminderDialogData;
-static AddDialogData3 addCallDialogData;
-static AddDialogData2 addMeetingDialogData;
+static AddDialogData addCallDialogData;
+static AddDialogData addMeetingDialogData;
 static AddDialogData addBirthdayDialogData;
 static CalendarDialog calendarDialog = { NULL, NULL };
 static CalTimeDialog calTimeDialog = { NULL, NULL };
@@ -129,7 +134,6 @@ static inline void Help1(GtkWidget * w, gpointer data)
 	Help(w, indx);
 	g_free(indx);
 }
-
 
 static inline void CloseCalendar(GtkWidget * w, gpointer data)
 {
@@ -146,7 +150,7 @@ inline void GUI_ShowCalendar()
 
 static gint InsertCalendarEntry(GSM_CalendarNote * note)
 {
-	gchar *row[6];
+	gchar *row[7];
 
 	row[0] = g_strdup_printf("%d", note->Location);
 
@@ -156,6 +160,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 		row[2] = g_strdup_printf("%02d/%02d/%04d", note->Time.Day,
 					 note->Time.Month, note->Time.Year);
 		row[5] = "";
+		row[6] = g_strdup_printf("%04d",note->Recurrence);
 		break;
 
 	case GCN_CALL:
@@ -164,6 +169,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 					 note->Time.Month, note->Time.Year,
 					 note->Time.Hour, note->Time.Minute);
 		row[5] = note->Phone;
+		row[6] = g_strdup_printf("%04d",note->Recurrence);
 		break;
 
 	case GCN_MEETING:
@@ -172,6 +178,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 					 note->Time.Month, note->Time.Year,
 					 note->Time.Hour, note->Time.Minute);
 		row[5] = "";
+		row[6] = g_strdup_printf("%04d",note->Recurrence);
 		break;
 
 	case GCN_BIRTHDAY:
@@ -179,6 +186,7 @@ static gint InsertCalendarEntry(GSM_CalendarNote * note)
 		row[2] = g_strdup_printf("%02d/%02d/%04d", note->Time.Day,
 					 note->Time.Month, note->Time.Year);
 		row[5] = "";
+		row[6] = "";
 		break;
 
 	default:
@@ -482,9 +490,9 @@ static void OkAddReminderDialog(GtkWidget * widget, gpointer data)
 	note.Type = GCN_REMINDER;
 	note.Location = 0;
 	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData *) data)->date.year;
-	note.Time.Month = ((AddDialogData *) data)->date.month;
-	note.Time.Day = ((AddDialogData *) data)->date.day;
+	note.Time.Year = ((AddDialogData *) data)->date.date.year;
+	note.Time.Month = ((AddDialogData *) data)->date.date.month;
+	note.Time.Day = ((AddDialogData *) data)->date.date.day;
 	note.Time.Hour = note.Time.Minute = note.Time.Second = note.Time.Timezone = 0;
 	if (GTK_TOGGLE_BUTTON(((AddDialogData *) data)->alarmCheck)->active) {
 		note.Alarm.Year = ((AddDialogData *) data)->alarm.date.year;
@@ -496,6 +504,7 @@ static void OkAddReminderDialog(GtkWidget * widget, gpointer data)
 	} else {
 		note.Alarm.Year = 0;
 	}
+	note.Recurrence = ((AddDialogData *) data)->recurrence;
 	AddCalendarNote(&note);
 	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->text), "");
 	gtk_widget_hide(((AddDialogData *) data)->dialog);
@@ -507,28 +516,29 @@ static void OkAddCallDialog(GtkWidget * widget, gpointer data)
 
 	note.Type = GCN_CALL;
 	note.Location = 0;
-	strncpy(note.Phone, gtk_entry_get_text(GTK_ENTRY(((AddDialogData3 *) data)->phone)), 20);
-	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData3 *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData3 *) data)->date.date.year;
-	note.Time.Month = ((AddDialogData3 *) data)->date.date.month;
-	note.Time.Day = ((AddDialogData3 *) data)->date.date.day;
-	note.Time.Hour = ((AddDialogData3 *) data)->date.hours;
-	note.Time.Minute = ((AddDialogData3 *) data)->date.minutes;
+	strncpy(note.Phone, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->phone)), 20);
+	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
+	note.Time.Year = ((AddDialogData *) data)->date.date.year;
+	note.Time.Month = ((AddDialogData *) data)->date.date.month;
+	note.Time.Day = ((AddDialogData *) data)->date.date.day;
+	note.Time.Hour = ((AddDialogData *) data)->date.hours;
+	note.Time.Minute = ((AddDialogData *) data)->date.minutes;
 	note.Time.Second = note.Time.Timezone = 0;
-	if (GTK_TOGGLE_BUTTON(((AddDialogData3 *) data)->alarmCheck)->active) {
-		note.Alarm.Year = ((AddDialogData3 *) data)->alarm.date.year;
-		note.Alarm.Month = ((AddDialogData3 *) data)->alarm.date.month;
-		note.Alarm.Day = ((AddDialogData3 *) data)->alarm.date.day;
-		note.Alarm.Hour = ((AddDialogData3 *) data)->alarm.hours;
-		note.Alarm.Minute = ((AddDialogData3 *) data)->alarm.minutes;
+	if (GTK_TOGGLE_BUTTON(((AddDialogData *) data)->alarmCheck)->active) {
+		note.Alarm.Year = ((AddDialogData *) data)->alarm.date.year;
+		note.Alarm.Month = ((AddDialogData *) data)->alarm.date.month;
+		note.Alarm.Day = ((AddDialogData *) data)->alarm.date.day;
+		note.Alarm.Hour = ((AddDialogData *) data)->alarm.hours;
+		note.Alarm.Minute = ((AddDialogData *) data)->alarm.minutes;
 		note.Alarm.Second = note.Alarm.Timezone = 0;
 	} else {
 		note.Alarm.Year = 0;
 	}
+	note.Recurrence = ((AddDialogData *) data)->recurrence;
 	AddCalendarNote(&note);
-	gtk_entry_set_text(GTK_ENTRY(((AddDialogData3 *) data)->text), "");
-	gtk_entry_set_text(GTK_ENTRY(((AddDialogData3 *) data)->phone), "");
-	gtk_widget_hide(((AddDialogData3 *) data)->dialog);
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->text), "");
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->phone), "");
+	gtk_widget_hide(((AddDialogData *) data)->dialog);
 }
 
 static void OkAddMeetingDialog(GtkWidget * widget, gpointer data)
@@ -537,26 +547,27 @@ static void OkAddMeetingDialog(GtkWidget * widget, gpointer data)
 
 	note.Type = GCN_MEETING;
 	note.Location = 0;
-	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData2 *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData2 *) data)->date.date.year;
-	note.Time.Month = ((AddDialogData2 *) data)->date.date.month;
-	note.Time.Day = ((AddDialogData2 *) data)->date.date.day;
-	note.Time.Hour = ((AddDialogData2 *) data)->date.hours;
-	note.Time.Minute = ((AddDialogData2 *) data)->date.minutes;
+	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
+	note.Time.Year = ((AddDialogData *) data)->date.date.year;
+	note.Time.Month = ((AddDialogData *) data)->date.date.month;
+	note.Time.Day = ((AddDialogData *) data)->date.date.day;
+	note.Time.Hour = ((AddDialogData *) data)->date.hours;
+	note.Time.Minute = ((AddDialogData *) data)->date.minutes;
 	note.Time.Second = note.Time.Timezone = 0;
-	if (GTK_TOGGLE_BUTTON(((AddDialogData2 *) data)->alarmCheck)->active) {
-		note.Alarm.Year = ((AddDialogData2 *) data)->alarm.date.year;
-		note.Alarm.Month = ((AddDialogData2 *) data)->alarm.date.month;
-		note.Alarm.Day = ((AddDialogData2 *) data)->alarm.date.day;
-		note.Alarm.Hour = ((AddDialogData2 *) data)->alarm.hours;
-		note.Alarm.Minute = ((AddDialogData2 *) data)->alarm.minutes;
+	if (GTK_TOGGLE_BUTTON(((AddDialogData *) data)->alarmCheck)->active) {
+		note.Alarm.Year = ((AddDialogData *) data)->alarm.date.year;
+		note.Alarm.Month = ((AddDialogData *) data)->alarm.date.month;
+		note.Alarm.Day = ((AddDialogData *) data)->alarm.date.day;
+		note.Alarm.Hour = ((AddDialogData *) data)->alarm.hours;
+		note.Alarm.Minute = ((AddDialogData *) data)->alarm.minutes;
 		note.Alarm.Second = note.Alarm.Timezone = 0;
 	} else {
 		note.Alarm.Year = 0;
 	}
+	note.Recurrence = ((AddDialogData *) data)->recurrence;
 	AddCalendarNote(&note);
-	gtk_entry_set_text(GTK_ENTRY(((AddDialogData2 *) data)->text), "");
-	gtk_widget_hide(((AddDialogData2 *) data)->dialog);
+	gtk_entry_set_text(GTK_ENTRY(((AddDialogData *) data)->text), "");
+	gtk_widget_hide(((AddDialogData *) data)->dialog);
 }
 
 static void OkAddBdayDialog(GtkWidget * widget, gpointer data)
@@ -566,9 +577,9 @@ static void OkAddBdayDialog(GtkWidget * widget, gpointer data)
 	note.Type = GCN_BIRTHDAY;
 	note.Location = 0;
 	strncpy(note.Text, gtk_entry_get_text(GTK_ENTRY(((AddDialogData *) data)->text)), 20);
-	note.Time.Year = ((AddDialogData *) data)->date.year;
-	note.Time.Month = ((AddDialogData *) data)->date.month;
-	note.Time.Day = ((AddDialogData *) data)->date.day;
+	note.Time.Year = ((AddDialogData *) data)->date.date.year;
+	note.Time.Month = ((AddDialogData *) data)->date.date.month;
+	note.Time.Day = ((AddDialogData *) data)->date.date.day;
 	note.Time.Hour = note.Time.Minute = note.Time.Second = note.Time.Timezone = 0;
 	if (GTK_TOGGLE_BUTTON(((AddDialogData *) data)->alarmCheck)->active) {
 		note.Alarm.Year = ((AddDialogData *) data)->alarm.date.year;
@@ -753,6 +764,78 @@ static void ShowCalTime(GtkWidget * widget, DateTime * date)
 	gtk_widget_show(calTimeDialog.dialog);
 }
 
+static inline void SetRecurrence0(GtkWidget * item, gpointer data)
+{
+	((AddDialogData *) data)->recurrence = 0x0000;
+}
+
+static inline void SetRecurrence1(GtkWidget * item, gpointer data)
+{
+	((AddDialogData *) data)->recurrence = 0x0018;
+}
+
+static inline void SetRecurrence2(GtkWidget * item, gpointer data)
+{
+	((AddDialogData *) data)->recurrence = 0x00A8;
+}
+
+static inline void SetRecurrence3(GtkWidget * item, gpointer data)
+{
+	((AddDialogData *) data)->recurrence = 0x0150;
+}
+
+static inline void SetRecurrence4(GtkWidget * item, gpointer data)
+{
+	((AddDialogData *) data)->recurrence = 0xffff;
+}
+
+void CreateRecurrenceMenu(AddDialogData * data)
+{
+	GtkWidget *item;
+
+	if (data->groupMenu) {
+		gtk_option_menu_remove_menu(GTK_OPTION_MENU(data->group));
+		if (GTK_IS_WIDGET(data->groupMenu))
+			gtk_widget_destroy(GTK_WIDGET(data->groupMenu));
+		data->groupMenu = NULL;
+	}
+
+	data->groupMenu = gtk_menu_new();
+
+	item = gtk_menu_item_new_with_label("Never");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetRecurrence0), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Every Day");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetRecurrence1), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Every Week");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetRecurrence2), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Every 2 Weeks");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetRecurrence3), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	item = gtk_menu_item_new_with_label("Every Year");
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+			   GTK_SIGNAL_FUNC(SetRecurrence4), (gpointer) data);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(data->groupMenu), item);
+
+	gtk_option_menu_set_menu(GTK_OPTION_MENU(data->group), data->groupMenu);
+}
+
+
 
 static void AddReminder(void)
 {
@@ -805,23 +888,23 @@ static void AddReminder(void)
 		t = time(NULL);
 		tm = localtime(&t);
 
-		addReminderDialogData.date.year = addReminderDialogData.alarm.date.year =
+		addReminderDialogData.date.date.year = addReminderDialogData.alarm.date.year =
 		    tm->tm_year + 1900;
-		addReminderDialogData.date.month = addReminderDialogData.alarm.date.month =
+		addReminderDialogData.date.date.month = addReminderDialogData.alarm.date.month =
 		    tm->tm_mon + 1;
-		addReminderDialogData.date.day = addReminderDialogData.alarm.date.day = tm->tm_mday;
+		addReminderDialogData.date.date.day = addReminderDialogData.alarm.date.day = tm->tm_mday;
 
 		addReminderDialogData.alarm.hours = tm->tm_hour;
 		addReminderDialogData.alarm.minutes = tm->tm_min;
 
 		button = gtk_button_new();
 
-		addReminderDialogData.date.button = gtk_label_new("");
+		addReminderDialogData.date.date.button = gtk_label_new("");
 
-		gtk_container_add(GTK_CONTAINER(button), addReminderDialogData.date.button);
-		SetDateButton(&(addReminderDialogData.date));
+		gtk_container_add(GTK_CONTAINER(button), addReminderDialogData.date.date.button);
+		SetDateButton(&(addReminderDialogData.date.date));
 
-		gtk_widget_show(addReminderDialogData.date.button);
+		gtk_widget_show(addReminderDialogData.date.date.button);
 
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 2);
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
@@ -994,8 +1077,20 @@ static void AddCall(void)
 				   GTK_SIGNAL_FUNC(ShowCalTime),
 				   (gpointer) & (addCallDialogData.alarm));
 		gtk_widget_show(button);
+
+		addCallDialogData.groupLabel = gtk_label_new(_("Repeat:"));
+		gtk_box_pack_start(GTK_BOX(hbox), addCallDialogData.groupLabel, FALSE, FALSE, 2);
+
+		addCallDialogData.group = gtk_option_menu_new();
+		
+		CreateRecurrenceMenu(&addCallDialogData);
+
+		gtk_box_pack_start(GTK_BOX(hbox), addCallDialogData.group, TRUE, TRUE, 0);
+
 	}
 
+	gtk_widget_show(addCallDialogData.group);
+	gtk_widget_show(addCallDialogData.groupLabel);
 	gtk_widget_show(GTK_WIDGET(addCallDialogData.dialog));
 }
 
@@ -1112,8 +1207,20 @@ static void AddMeeting(void)
 				   GTK_SIGNAL_FUNC(ShowCalTime),
 				   (gpointer) & (addMeetingDialogData.alarm));
 		gtk_widget_show(button);
+
+		addMeetingDialogData.groupLabel = gtk_label_new(_("Repeat:"));
+		gtk_box_pack_start(GTK_BOX(hbox), addMeetingDialogData.groupLabel, FALSE, FALSE, 2);
+
+		addMeetingDialogData.group = gtk_option_menu_new();
+		
+		CreateRecurrenceMenu(&addMeetingDialogData);
+
+		gtk_box_pack_start(GTK_BOX(hbox), addMeetingDialogData.group, TRUE, TRUE, 0);
+
 	}
 
+	gtk_widget_show(addMeetingDialogData.group);
+	gtk_widget_show(addMeetingDialogData.groupLabel);
 	gtk_widget_show(GTK_WIDGET(addMeetingDialogData.dialog));
 }
 
@@ -1169,23 +1276,23 @@ static void AddBirthday(void)
 		t = time(NULL);
 		tm = localtime(&t);
 
-		addBirthdayDialogData.date.year = addBirthdayDialogData.alarm.date.year =
+		addBirthdayDialogData.date.date.year = addBirthdayDialogData.alarm.date.year =
 		    tm->tm_year + 1900;
-		addBirthdayDialogData.date.month = addBirthdayDialogData.alarm.date.month =
+		addBirthdayDialogData.date.date.month = addBirthdayDialogData.alarm.date.month =
 		    tm->tm_mon + 1;
-		addBirthdayDialogData.date.day = addBirthdayDialogData.alarm.date.day = tm->tm_mday;
+		addBirthdayDialogData.date.date.day = addBirthdayDialogData.alarm.date.day = tm->tm_mday;
 
 		addBirthdayDialogData.alarm.hours = tm->tm_hour;
 		addBirthdayDialogData.alarm.minutes = tm->tm_min;
 
 		button = gtk_button_new();
 
-		addBirthdayDialogData.date.button = gtk_label_new("");
+		addBirthdayDialogData.date.date.button = gtk_label_new("");
 
-		gtk_container_add(GTK_CONTAINER(button), addBirthdayDialogData.date.button);
-		SetDateButton(&(addBirthdayDialogData.date));
+		gtk_container_add(GTK_CONTAINER(button), addBirthdayDialogData.date.date.button);
+		SetDateButton(&(addBirthdayDialogData.date.date));
 
-		gtk_widget_show(addBirthdayDialogData.date.button);
+		gtk_widget_show(addBirthdayDialogData.date.date.button);
 
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 2);
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
@@ -1212,8 +1319,10 @@ static void AddBirthday(void)
 		addBirthdayDialogData.alarmCheck = gtk_check_button_new_with_label(_("Alarm"));
 		gtk_box_pack_start(GTK_BOX(hbox), addBirthdayDialogData.alarmCheck, FALSE, FALSE,
 				   2);
-//    gtk_signal_connect (GTK_OBJECT (addBirthdayDialogData.alarmCheck), "toggled",
-//                        GTK_SIGNAL_FUNC (TogleAlarm), &addBirthdayDialogData);
+		/*
+		  gtk_signal_connect (GTK_OBJECT (addBirthdayDialogData.alarmCheck), "toggled",
+		  GTK_SIGNAL_FUNC (TogleAlarm), &addBirthdayDialogData);
+		*/
 		gtk_widget_show(addBirthdayDialogData.alarmCheck);
 
 		button = gtk_button_new();
@@ -1230,8 +1339,9 @@ static void AddBirthday(void)
 				   GTK_SIGNAL_FUNC(ShowCalTime),
 				   (gpointer) & (addBirthdayDialogData.alarm));
 		gtk_widget_show(button);
-	}
+		gtk_box_pack_start(GTK_BOX(hbox), addBirthdayDialogData.group, TRUE, TRUE, 0);
 
+	}
 	gtk_widget_show(GTK_WIDGET(addBirthdayDialogData.dialog));
 }
 
@@ -1383,8 +1493,8 @@ void GUI_CreateCalendarWindow()
 	struct tm *tm;
 	SortColumn *sColumn;
 	register gint i;
-	gchar *titles[6] = { _("#"), _("Type"), _("Date"), _("Text"),
-		_("Alarm"), _("Number")
+	gchar *titles[7] = { _("#"), _("Type"), _("Date"), _("Text"),
+			     _("Alarm"), _("Number"), _("Recurrence")
 	};
 
 	InitMainMenu();
@@ -1476,8 +1586,10 @@ void GUI_CreateCalendarWindow()
 	gtk_widget_show(toolbar);
 
 	hpaned = gtk_hpaned_new();
-	//gtk_paned_set_handle_size (GTK_PANED (hpaned), 10);
-	//gtk_paned_set_gutter_size (GTK_PANED (hpaned), 15);
+	/*
+	gtk_paned_set_handle_size (GTK_PANED (hpaned), 10);
+	gtk_paned_set_gutter_size (GTK_PANED (hpaned), 15);
+	*/
 	gtk_box_pack_start(GTK_BOX(main_vbox), hpaned, TRUE, TRUE, 0);
 	gtk_widget_show(hpaned);
 
@@ -1507,7 +1619,7 @@ void GUI_CreateCalendarWindow()
 	gtk_widget_show(cal.calendar);
 
 	/* Notes list */
-	cal.notesClist = gtk_clist_new_with_titles(6, titles);
+	cal.notesClist = gtk_clist_new_with_titles(7, titles);
 	gtk_clist_set_shadow_type(GTK_CLIST(cal.notesClist), GTK_SHADOW_OUT);
 	gtk_clist_set_compare_func(GTK_CLIST(cal.notesClist), CListCompareFunc);
 	gtk_clist_set_sort_column(GTK_CLIST(cal.notesClist), 0);
@@ -1520,9 +1632,10 @@ void GUI_CreateCalendarWindow()
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 2, 110);
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 3, 130);
 	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 4, 110);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 5, 52);
 	gtk_clist_set_column_justification(GTK_CLIST(cal.notesClist), 0, GTK_JUSTIFY_RIGHT);
 
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < 7; i++) {
 		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
 			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__,
 				__LINE__);
