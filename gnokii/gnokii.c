@@ -3166,7 +3166,6 @@ static int writephonebook(int argc, char *args[])
 		else
 			fprintf (stderr, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
 				 print_error(error), memory_type_string, entry.Location, entry.Name, entry.Number);
-		return error;
 	}
 	return 0;
 }

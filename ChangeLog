@@ -31,6 +31,8 @@
     o remove SMSFolder hack from getsms                (Markus Plail)
     o call status display added                      (BORBELY Zoltan)
     o dialvoice uses the call management API         (BORBELY Zoltan)
+    o don't exit after the first loop in the writephonebook
+                                    (Emanuele Pucciarelli, Pawel Kot)
  * nokia-decoding updates:
     o name can be assigned to both bitmap and phonebook entry
                                                        (Markus Plail)
