@@ -217,6 +217,8 @@ typedef struct {
   GSM_Error (*GetAlarm)( int alarm_number, GSM_DateTime *date_time );
 
   GSM_Error (*SetAlarm)( int alarm_number, GSM_DateTime *date_time );
+
+  GSM_Error (*DialVoice)( char *Number);
 } GSM_Functions;
 
 #endif	/* __gsm_common_h */
