@@ -67,7 +67,7 @@ SmsdConfig smsdConfig;
 bool GTerminateThread;
 
 /* Local variables */
-static DBConfig connect;
+static DBConfig connection;
 void (*DB_Bye) (void) = NULL;;
 gint (*DB_ConnectInbox) (const DBConfig) = NULL;
 gint (*DB_ConnectOutbox) (const DBConfig) = NULL;
@@ -169,10 +169,10 @@ static void Usage (gchar *p)
 
 static void ReadConfig (gint argc, gchar *argv[])
 {
-  connect.user = g_strdup ("");
-  connect.password = g_strdup ("");
-  connect.db = g_strdup ("sms");
-  connect.host = g_strdup ("");
+  connection.user = g_strdup ("");
+  connection.password = g_strdup ("");
+  connection.db = g_strdup ("sms");
+  connection.host = g_strdup ("");
   smsdConfig.dbMod = g_strdup ("pq");
   smsdConfig.libDir = g_strdup (MODULES_DIR);
   smsdConfig.smsSets = 0;
@@ -198,26 +198,26 @@ static void ReadConfig (gint argc, gchar *argv[])
     switch (c)
     {
       case 'u':
-        g_free (connect.user);
-        connect.user = g_strdup (optarg);
+        g_free (connection.user);
+        connection.user = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
       
       case 'p':
-        g_free (connect.password);
-        connect.password = g_strdup (optarg);
+        g_free (connection.password);
+        connection.password = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
         
       case 'd':
-        g_free (connect.db);
-        connect.db = g_strdup (optarg);
+        g_free (connection.db);
+        connection.db = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
         
       case 'c':
-        g_free (connect.host);
-        connect.host = g_strdup (optarg);
+        g_free (connection.host);
+        connection.host = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
         
@@ -268,7 +268,7 @@ static void ReadConfig (gint argc, gchar *argv[])
 
 static void *SendSMS2 (void *a)
 {
-  if ((*DB_ConnectOutbox) (connect))
+  if ((*DB_ConnectOutbox) (connection))
   {
     pthread_exit (0);
     return (0);
@@ -406,7 +406,7 @@ static void Run (void)
 #endif
 
   InitPhoneMonitor ();
-  if ((*DB_ConnectInbox) (connect))
+  if ((*DB_ConnectInbox) (connection))
     exit (2);
   pthread_create (&monitor_th, NULL, Connect, NULL);
   db_monitor = TRUE;

@@ -1,3 +1,7 @@
+* Tue Apr 23 2002 Pawel Kot <pkot@linuxnews.pl
+- Don't use 'connect' as the variable name
+- GE_SMSSENDOK is depreciated
+
 * Wed Mar 20 2002 BORBELY Zoltan <bozo@andrews.hu>
 - GSM_Data structures initialised correctly
 - Minor locking fixes

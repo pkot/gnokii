@@ -4,6 +4,10 @@
     o PollSMS race condition eliminated              (BORBELY Zoltan)
  * Add GPL compatible preamble in tcp.[ch] files          (Pawel Kot)
  * Make tcp.[ch] compatible with gnokii coding style      (Pawel Kot)
+ * SMSD update
+    o don't use 'connect' as the variable name; it conflicts
+      with connect() function - introduced by tcp device
+      support                                             (Pawel Kot)
 
 0.4.0pre19
 ==========
