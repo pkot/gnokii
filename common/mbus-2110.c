@@ -11,7 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.32  2001-02-17 22:40:49  chris
+  Revision 1.33  2001-02-20 21:30:28  machek
+  We really have 150 addressbook places, better
+  getrflevel/getbatterylevel, wait one second on collision.
+
+  Revision 1.32  2001/02/17 22:40:49  chris
   ATA support
 
   Revision 1.31  2001/02/17 14:39:19  machek
@@ -100,12 +104,12 @@ static char *Revision = NULL,
 
 GSM_Information MB21_Information = {
 	"2110|2140|6080",		/* Models */
-	4, 				/* Max RF Level */
+	100, 				/* Max RF Level */
 	0,				/* Min RF Level */
-	GRF_Arbitrary,			/* RF level units */
-	4,    				/* Max Battery Level */
+	GRF_Percentage,			/* RF level units */
+	100,    				/* Max Battery Level */
 	0,				/* Min Battery Level */
-	GBU_Arbitrary,			/* Battery level units */
+	GBU_Percentage,			/* Battery level units */
 	GDT_None,			/* No date/time support */
 	GDT_None,			/* No alarm support */
 	0,				/* Max alarms = 0 */
@@ -202,7 +206,10 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	while( !EchoOK && current-- ) 
 		usleep(1300);
 	if( !EchoOK ) {
+		int i;
 		fprintf(stderr, "no echo?!");
+		for (i=0; i<100; i++)
+			usleep(10000);	/* Collision, wait; perhaps it goes away */
 		return (GE_TIMEOUT);
 	}
 	return (GE_NONE);
@@ -401,8 +408,22 @@ static GSM_Error
 GetRFLevel(GSM_RFUnits *units, float *level)
 {
 	int val = GetValue(0x84, 2);
-	*level = (100* (float) val) / 60.0;	/* This should be / 99.0 for some models other than nokia-2110 */
-	*units = GRF_Arbitrary;
+	float res;
+	if (*units == GRF_Arbitrary) {
+		res = (100* (float) val) / 60.0;	/* This should be / 99.0 for some models other than nokia-2110 */
+		*level = 0;
+		if (res > 10)
+			*level = 1;
+		if (res > 30)
+			*level = 2;
+		if (res > 50)
+			*level = 3;
+		if (res > 70)
+			*level = 4;
+	} else {
+		*level = (100* (float) val) / 60.0;	/* This should be / 99.0 for some models other than nokia-2110 */
+		*units = GRF_Percentage;
+	}
 	return (GE_NONE);
 }
 
@@ -410,8 +431,20 @@ static GSM_Error
 GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 {
 	int val = GetValue(0x85, 2);
-	*level = (100 * (float) val) / 90.0;	/* 5..first bar, 10..second bar, 90..third bar */
-	*units = GBU_Arbitrary;
+	*level = 0;
+	if (val >= 5)
+		*level = 1;
+	if (val >= 10)
+		*level = 2;
+	if (val >= 90)
+		*level = 3;
+	if (*units == GBU_Arbitrary) {
+	} else {
+/*		*level = (100 * (float) val) / 90.0;*/	/* 5..first bar, 10..second bar, 90..third bar */
+		*level = *level * 33;
+		*units = GBU_Percentage;
+	}
+
 	return (GE_NONE);
 }
 
@@ -463,7 +496,7 @@ GetMemoryStatus(GSM_MemoryStatus *Status)
 	switch(Status->MemoryType) {
 	case GMT_ME:
 		Status->Used = 0;
-		Status->Free = 10;
+		Status->Free = 150;
 		break;
 	case GMT_LD:
 		Status->Used = 5;
@@ -475,7 +508,7 @@ GetMemoryStatus(GSM_MemoryStatus *Status)
 		break;
 	case GMT_SM:
 		Status->Used = 0;
-		Status->Free = 10;
+		Status->Free = 150;
 		break;
 	default:
 		return (GE_NOTIMPLEMENTED);
