@@ -59,7 +59,8 @@ bool TerminateThread;
 /* Local variables */
 static DBConfig connect;
 void (*DB_Bye) (void) = NULL;;
-gint (*DB_Connect) (const DBConfig) = NULL;
+gint (*DB_ConnectInbox) (const DBConfig) = NULL;
+gint (*DB_ConnectOutbox) (const DBConfig) = NULL;
 gint (*DB_InsertSMS) (const GSM_SMSMessage * const) = NULL;
 void (*DB_Look) (void) = NULL;
 
@@ -111,8 +112,15 @@ gint LoadDB (void)
     g_print (error);
     return (2);
   }
-  
-  DB_Connect = dlsym(handle, "DB_Connect");
+
+  DB_ConnectInbox = dlsym(handle, "DB_ConnectInbox");
+  if ((error = dlerror ()) != NULL)
+  {
+    g_print (error);
+    return (2);
+  }
+
+  DB_ConnectOutbox = dlsym(handle, "DB_ConnectOutbox");
   if ((error = dlerror ()) != NULL)
   {
     g_print (error);
@@ -246,7 +254,7 @@ static void ReadConfig (gint argc, gchar *argv[])
 
 static void *SendSMS2 (void *a)
 {
-  if ((*DB_Connect) (connect))
+  if ((*DB_ConnectOutbox) (connect))
   {
     pthread_exit (0);
     return (0);
@@ -394,7 +402,7 @@ static void Run (void)
 #endif
 
   InitPhoneMonitor ();
-  if ((*DB_Connect) (connect))
+  if ((*DB_ConnectInbox) (connect))
     exit (2);
   pthread_create (&monitor_th, NULL, Connect, NULL);
   db_monitor = TRUE;

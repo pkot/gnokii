@@ -40,6 +40,11 @@ libpq.so: smsd.h pq.c
 	gcc -shared -o libpq.so `glib-config --cflags` -I../include \
         -I/usr/include/pgsql pq.c `glib-config --libs` -lpq
 
+# MySQL support
+libmysql.so: smsd.h mysql.c
+	gcc -shared -o libmysql.so `glib-config --cflags` -I../include \
+        -I/usr/include/mysql mysql.c `glib-config --libs` -L/usr/lib/mysql -lmysqlclient
+
 ### End of DB Modules
 
 $(TOPDIR)/common/gsm-filetypes.o:
@@ -49,7 +54,7 @@ $(TOPDIR)/common/libgnokii.so:
 	$(MAKE) -C $(TOPDIR)/common libgnokii.so
 
 clean:
-	$(RM) $(OBJS) *~ depend smsd libpq.so core*
+	$(RM) $(OBJS) *~ depend smsd libpq.so libmysql.so core*
 
 install: all
 	$(INSTALL) -d $(bindir)
