@@ -129,7 +129,14 @@ A. gnokii didn't install correctly. You had installed gnokii previously and you
    install'.
 
 -------------------------------------------------------------------------------
-Q. Which cable for the Nokia phones should I use?</h3>
+Q. I got problems during the compilation with vcal.lx/vcal.c. What should I
+   do?
+
+A. Install flex. It should be available in every Linux distribution as well
+   as in CygWin.
+
+-------------------------------------------------------------------------------
+Q. Which cable for the Nokia phones should I use?
 
 A. For Nokia 61X0/51X0 models you should use DAU9P cable. Nokia 61X0 models are
    also capable to make an infrared connection.

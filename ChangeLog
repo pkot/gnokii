@@ -8,8 +8,15 @@
       than using hardcoded numbers                     (Markus Plail)
     o SendSMS updated, almost all magic numbers are gone
 	                                               (Markus Plail)
- * added 6310i to the list of supported phones         (Markus Plail)
-	
+ * New supported phones:
+    o Nokia 6310i                                      (Markus Plail)
+    o Nokia 7650 (hope it works with nk6510 driver)       (Pawel Kot)
+    o Nokia 9210 - not really suppported, but we know its
+      identity and hopefully we'll get the support soon   (Pawel Kot)
+ * Docs updates:
+    o add --keysequence hints to FAQ                   (Pavel Machek)
+    o add vcal problems to FAQ                            (Pawel Kot)
+
 0.4.0
 =====
  * Rewrite of the SMS subsystem
