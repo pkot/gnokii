@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.2  2001-05-07 14:01:51  machek
+  Revision 1.3  2001-06-10 11:26:56  machek
+  Warn if Link.Loop is not defined.
+
+  Revision 1.2  2001/05/07 14:01:51  machek
   Warn when phone functions are missing, but do not segfault.
 
   Revision 1.1  2001/03/21 23:36:04  chris
@@ -56,6 +59,10 @@ GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
 	loop_timeout.tv_sec=0;
 	loop_timeout.tv_usec = 100000;
 
+	if (!state->Link.Loop) {
+		fprintf(stderr, "Statemachine does not have loop function\n");
+		abort();
+	}
 	for (i=0; i<timeout; i++)
 		state->Link.Loop(&loop_timeout);
 
