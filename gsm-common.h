@@ -10,7 +10,7 @@
   Header file for the definitions, enums etc. that are used by all models of
   handset.
 
-  Last modification: Sat May 15 23:44:34 CEST 1999
+  Last modification: Sun May 16 21:05:42 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -73,6 +73,10 @@ typedef struct {
 #define GSM_MAX_PHONEBOOK_NAME_LENGTH (40)
 #define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (40)
 
+/* Here is a macro for models that do not support caller groups. */
+
+#define GSM_GROUPS_NOT_SUPPORTED -1
+
 /* This data type is used to report the number of used and free positions in
    memory (sim or internal). */
 
@@ -96,6 +100,7 @@ typedef struct {
   bool Empty;                                       /* Is this entry empty? */
   char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];     /* Plus 1 for null terminator. */
   char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
+  GSM_MemoryType MemoryType;                        /* Type of memory (SIM/internal) */
   int Group;                                        /* Group */
 } GSM_PhonebookEntry;
 
@@ -121,7 +126,6 @@ typedef struct {
   int Minute;
   int Second;
 } GSM_DateTime;
-
 
 /* Define enums for RF units. */
 
@@ -222,8 +226,7 @@ typedef struct {
   GSM_Error (*GetPhonebookLocation)( GSM_MemoryType memory_type,
 				     int location, GSM_PhonebookEntry *entry );
 
-  GSM_Error (*WritePhonebookLocation)( GSM_MemoryType memory_type,
-				       int location, GSM_PhonebookEntry *entry );
+  GSM_Error (*WritePhonebookLocation)( int location, GSM_PhonebookEntry *entry );
 
   GSM_Error (*GetMemoryStatus)( GSM_MemoryStatus *Status);
 

@@ -208,7 +208,7 @@ GSM_Error	FB38_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GS
 	/* Routine to write phonebook location in phone. Designed to 
 	   be called by application code.  Will block until location
 	   is written or timeout occurs.  */
-GSM_Error	FB38_WritePhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry)
+GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 {
 
 	int		memory_area;
@@ -217,11 +217,11 @@ GSM_Error	FB38_WritePhonebookLocation(GSM_MemoryType memory_type, int location, 
 
 		/* Make sure neither name or number is too long.  We assume (as
 		   has been reported that memory_area 1 is internal, 2 is the SIM */
-	if (memory_type == GMT_INTERNAL) {
+	if (entry->MemoryType == GMT_INTERNAL) {
 		memory_area = 1;
 	}
 	else {
-		if (memory_type == GMT_SIM) {
+		if (entry->MemoryType == GMT_SIM) {
 			memory_area = 2;
 		}
 		else {
@@ -1723,8 +1723,7 @@ void	FB38_RX_Handle0x46_MemoryLocationData(void)
 		CurrentPhonebookEntry->Empty = false;
 	}
 
-	/* FIXME: define macros for groups etc... No magic constants... */
-	CurrentPhonebookEntry->Group=5; /* No group.*/
+	CurrentPhonebookEntry->Group=GSM_GROUPS_NOT_SUPPORTED;
 
 		/* Signal no error to calling code. */
 	CurrentPhonebookError = GE_NONE;

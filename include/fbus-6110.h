@@ -1,14 +1,19 @@
-	/* G N O K I I
-	   A Linux/Unix toolset and driver for Nokia mobile phones.
+/*
 
-	   Copyright (C) 1999 Pavel Janík ml. & Hugh Blemings. 
-	   Released under the terms of the GNU GPL, see file COPYING
-	   for more details.
-	
-	   This file:  fbus-6110.h   Version 0.2.4
+  G N O K I I
 
-	   Header file for the various functions, definitions etc. used
-	   to implement the handset interface.  See fbus-6110.c for more details. */
+  A Linux/Unix toolset and driver for Nokia mobile phones.
+  Copyright (C) 1999 Pavel Janík ml. & Hugh Blemings.
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+  Header file for the various functions, definitions etc. used to implement
+  the handset interface.  See fbus-6110.c for more details.
+
+  Last modification: Sun May 16 21:04:03 CEST 1999
+  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+
+*/
 
 #ifndef		__fbus_6110_h
 #define		__fbus_6110_h
@@ -67,8 +72,7 @@ int		FB61_TX_SendAck(u8 message_type, u8 message_seq);
 GSM_Error	FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location,
 				GSM_PhonebookEntry *entry);
 
-GSM_Error	FB61_WritePhonebookLocation(GSM_MemoryType memory_type, 
-				int location, GSM_PhonebookEntry *entry);
+GSM_Error	FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry);
 
 GSM_Error	FB61_GetMemoryStatus(GSM_MemoryStatus *Status);
 

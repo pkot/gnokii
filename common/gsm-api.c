@@ -17,7 +17,7 @@
   Unless otherwise noted, all functions herein block until they complete.  The
   functions themselves are defined in a structure in gsm-common.h.
 
-  Last modification: Thu May  6 00:51:48 CEST 1999  
+  Last modification: Sun May 16 21:05:42 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */

@@ -13,15 +13,17 @@
   The various routines are called FB61 (whatever) as a concatenation of FBUS
   and 6110.
 
-  Last modification: Sat May 15 23:44:34 CEST 1999
+  Last modification: Sun May 16 21:04:03 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
 
 /* "Turn on" prototypes in fbus-6110.h */
+
 #define __fbus_6110_c 
 
 /* System header files */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
@@ -36,6 +38,7 @@
 #include <errno.h>
 
 /* Various header file */
+
 #include "misc.h"
 #include "gsm-common.h"
 #include "fbus-6110.h"
@@ -45,6 +48,8 @@
    supported by this model of phone. */
 
 bool FB61_LinkOK;
+
+/* Here we initialise model specific functions. */
 
 GSM_Functions FB61_Functions = {
   FB61_Initialise,
@@ -70,25 +75,63 @@ GSM_Functions FB61_Functions = {
 };
 
 /* Mobile phone information */
+
 GSM_Information FB61_Information = {
   "6110|6150|6190|5110", /* Supported models */
-  4, /* Max RF Level */
-  0, /* Min RF Level */
-  GRF_Arbitrary, /* RF level units */
-  4, /* Max Battery Level */
-  0, /* Min Battery Level */
-  GBU_Arbitrary, /* Battery level units */
-  GDT_DateTime, /* Have date/time support */
-  GDT_TimeOnly,	/* Alarm supports time only ? */
-  1 /* Only one alarm available. */
+  4,                     /* Max RF Level */
+  0,                     /* Min RF Level */
+  GRF_Arbitrary,         /* RF level units */
+  4,                     /* Max Battery Level */
+  0,                     /* Min Battery Level */
+  GBU_Arbitrary,         /* Battery level units */
+  GDT_DateTime,          /* Have date/time support */
+  GDT_TimeOnly,	         /* Alarm supports time only */
+  1                      /* Only one alarm available */
 };
 
-	/* Local variables */
-int PortFD;
-int BufferCount;
-u8 MessageBuffer[FB61_MAX_RECEIVE_LENGTH];
-unsigned char MessageLength, MessageType, MessageDestination, MessageSource, MessageUnknown;
+unsigned char GSM_Default_Alphabet[] = {
+
+  /* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet */
+  /* Characters in hex position 10, [12 to 1a] and 24 are not present on
+     latin1 charset, so we cannot reproduce on the screen, however they are
+     greek symbol not present even on my Nokia */
+
+  '@',  0xa3, '$',  0xa5, 0xe8, 0xe9, 0xf9, 0xec, 
+  0xf2, 0xc7, '\n', 0xd8, 0xf8, '\r', 0xc5, 0xe5,
+  '?',  '_',  '?',  '?',  '?',  '?',  '?',  '?',
+  '?',  '?',  '?',  ' ',  0xc6, 0xe6, 0xdf, 0xc9,
+  ' ',  '!',  '\"', '#',  '?',  '%',  '&',  '\'',
+  '(',  ')',  '*',  '+',  ',',  '-',  '.',  '/',
+  '0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',
+  '8',  '9',  ':',  ';',  '<',  '=',  '>',  '?',
+  0xa1, 'A',  'B',  'C',  'D',  'E',  'F',  'G',
+  'H',  'I',  'J',  'K',  'L',  'M',  'N',  'O',
+  'P',  'Q',  'R',  'S',  'T',  'U',  'V',  'W',
+  'X',  'Y',  'Z',  0xc4, 0xd6, 0xd1, 0xdc, 0xa7,
+  0xbf, 'a',  'b',  'c',  'd',  'e',  'f',  'g',
+  'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',
+  'p',  'q',  'r',  's',  't',  'u',  'v',  'w',
+  'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
+};
+
+/* Local variables */
+
+int PortFD; /* Filedescriptor of the mobile phone's device */
+
 char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
+
+int BufferCount;
+
+u8 MessageBuffer[FB61_MAX_RECEIVE_LENGTH];
+
+unsigned char MessageLength,
+              MessageType,
+              MessageDestination,
+              MessageSource,
+              MessageUnknown;
+
+enum FB61_RX_States RX_State;
+
 u8 RequestSequenceNumber=0x00;
 pthread_t Thread;
 bool RequestTerminate;
@@ -96,10 +139,10 @@ bool DisableKeepalive=false;
 struct termios OldTermios; /* To restore termio on close. */
 bool EnableMonitoringOutput;
 
-/* Local variables used by get/set phonebook entry code.  ...Buffer is used as
-   a source or destination for phonebook data, ...Error is set to GE_None by
-   calling function, set to GE_COMPLETE or an error code by handler routines
-   as appropriate. */
+/* Local variables used by get/set phonebook entry code. Buffer is used as a
+   source or destination for phonebook data and other functions... Error is
+   set to GE_NONE by calling function, set to GE_COMPLETE or an error code by
+   handler routines as appropriate. */
 		   	   	   
 GSM_PhonebookEntry *CurrentPhonebookEntry;
 GSM_Error          CurrentPhonebookError;
@@ -130,6 +173,9 @@ int                CurrentRFLevel,
                    CurrentPowerSource;
 
 char               CurrentIncomingCall[20];
+
+/* Every (well, almost every) frame from the computer starts with this
+   sequence. */
 
 #define FB61_FRAME_HEADER 0x00, 0x01, 0x00
 
@@ -196,9 +242,8 @@ GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentMemoryStatusError == GE_BUSY ) {
 
-    if (timeout-- == 0) {
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
-    }    
 
     usleep (100000);
   }
@@ -234,90 +279,97 @@ void	FB61_ThreadLoop(void)
 
   CurrentPhonebookEntry = NULL;  
 
-		/* Try to open serial port, if we fail we sit here and don't proceed
-		   to the main loop. */
-	if (FB61_OpenSerial() != true) {
-		FB61_LinkOK = false;
+  /* Try to open serial port, if we fail we sit here and don't proceed to the
+     main loop. */
 
-			/* Fail so sit here till calling code works out there is a
-			   problem. */		
-		while (!RequestTerminate) {
-			usleep (100000);
-		}
-		return;
-	}
+  if (FB61_OpenSerial() != true) {
+    FB61_LinkOK = false;
+
+    /* Fail so sit here till calling code works out there is a problem. */
+
+    while (!RequestTerminate)
+      usleep (100000);
+
+    return;
+  }
 	
-		/* Initialise link with phone or what have you */
-		/* Send init string to phone, this is a bunch of 0x55
-		   characters.  Timing is empirical. */
-	for (count = 0; count < 250; count ++) {
-		usleep(100);
-		write(PortFD, init_char, 1);
-	}
+  /* Initialise link with phone or what have you */
 
+  /* Send init string to phone, this is a bunch of 0x55 characters. Timing is
+     empirical. */
+
+  for (count = 0; count < 250; count ++) {
+    usleep(100);
+    write(PortFD, init_char, 1);
+  }
+
+  FB61_TX_SendStatusRequest();
+
+  usleep(100);
+
+  FB61_TX_SendMessage(8, 0x02, connect1);
+
+  usleep(100);
+
+  FB61_TX_SendMessage(6, 0x02, connect2);
+
+  usleep(100);
+
+  FB61_TX_SendMessage(8, 0x02, connect3);
+
+  usleep(100);
+
+  FB61_TX_SendMessage(5, 0x64, connect4);
+
+  usleep(100);
+
+  /* Get the primary SMS Center */
+
+  /* It's very strange that if I send this request again (with different
+     number) it fails. But if I send it alone it succeds. It seems that 6110
+     is refusing to tell you all the SMS Centers information at once :-( */
+
+  //	FB61_GetSMSCenter(1);
+
+  // 	FB61_GetCalendarNote(1);
+
+  idle_timer=0;
+
+  /* Now enter main loop */
+
+  while (!RequestTerminate) {
+
+    if (idle_timer == 0) {
+      
+      /* Dont send keepalive and status packets when doing other transactions. */
+      
+      if (!DisableKeepalive)
 	FB61_TX_SendStatusRequest();
 
-	usleep(100);
+      idle_timer = 20;
+    }
+    else
+      idle_timer--;
 
-	FB61_TX_SendMessage(8, 0x02, connect1);
-
-	usleep(100);
-
-	FB61_TX_SendMessage(6, 0x02, connect2);
-
-	usleep(100);
-
-	FB61_TX_SendMessage(8, 0x02, connect3);
-
-	usleep(100);
-
-	FB61_TX_SendMessage(5, 0x64, connect4);
-
-	usleep(100);
-
-	/* Get the primary SMS Center */
-
-	/* It's very strange that if I send this request again (with different
-       number) it fails. But if I send it alone it succeds. It seems that 6110
-       is refusing to tell you all the SMS Centers information at once :-( */
-
-	//	FB61_GetSMSCenter(1);
-
-	// 	FB61_GetCalendarNote(1);
-
-	idle_timer=0;
-
-	/* Now enter main loop */
-	while (!RequestTerminate) {
-
-		  if (idle_timer == 0) {
-			/* Dont send keepalive and status packets when doing other transactions. */
-			if (!DisableKeepalive)
-			  FB61_TX_SendStatusRequest();
-
-			idle_timer = 20;
-		  }
-		  else
-			idle_timer--;
-
-		  usleep(100000);		/* Avoid becoming a "busy" loop. */
-	 	}
+    usleep(100000);		/* Avoid becoming a "busy" loop. */
+  }
 }
 
-	/* Applications should call FB61_Terminate to shut down
-	   the FB61 thread and close the serial port. */
-void		FB61_Terminate(void)
+/* Applications should call FB61_Terminate to shut down the FB61 thread and
+   close the serial port. */
+
+void FB61_Terminate(void)
 {
-		/* Request termination of thread */
-	RequestTerminate = true;
+  /* Request termination of thread */
+  RequestTerminate = true;
 
-		/* Now wait for thread to terminate. */
-	pthread_join(Thread, NULL);
+  /* Now wait for thread to terminate. */
+  pthread_join(Thread, NULL);
 
-		/* Close serial port. */
-	tcsetattr(PortFD, TCSANOW, &OldTermios);
-	
-	close (PortFD);
+  /* Close serial port. */
+  tcsetattr(PortFD, TCSANOW, &OldTermios);
+
+  close (PortFD);
 }
 
 #define ByteMask ((1<<NumOfBytes)-1)
@@ -328,7 +380,8 @@ int UnpackEightBitsToSeven(int length, unsigned char *input, unsigned char *outp
   int NumOfBytes=7;
   unsigned char Rest=0x00;
 
-  unsigned char *OUT=output, *IN=input;
+  unsigned char *OUT=output; /* Current pointer to the output buffer */
+  unsigned char *IN=input;   /* Current pointer to the input buffer */
 
   while ((IN-input) < length) {
 
@@ -382,6 +435,7 @@ int PackSevenBitsToEight(unsigned char *String, unsigned char* Buffer)
 
 GSM_Error FB61_GetRFLevel(float *level)
 {
+
   int timeout=10;
 
   CurrentRFLevel=-1;
@@ -391,9 +445,8 @@ GSM_Error FB61_GetRFLevel(float *level)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentRFLevel == -1 ) {
 
-    if (timeout-- == 0) {
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
-    }    
 
     usleep (100000);
   }
@@ -408,6 +461,7 @@ GSM_Error FB61_GetRFLevel(float *level)
 
 GSM_Error FB61_GetBatteryLevel(float *level)
 {
+
   int timeout=10;
 
   CurrentBatteryLevel=-1;
@@ -417,9 +471,8 @@ GSM_Error FB61_GetBatteryLevel(float *level)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentBatteryLevel == -1 ) {
 
-    if (timeout-- == 0) {
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
-    }    
 
     usleep (100000);
   }
@@ -444,9 +497,8 @@ GSM_Error FB61_GetPowerSource(GSM_PowerSource *source)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentPowerSource == -1 ) {
 
-    if (timeout-- == 0) {
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
-    }    
 
     usleep (100000);
   }
@@ -487,6 +539,8 @@ GSM_Error FB61_GetIncomingCallNr(char *Number) {
     return GE_BUSY;
 }
 
+/* FIXME: sometime it sends a wrong pin (at least for my 5 digits pin). */
+
 GSM_Error FB61_EnterPin(char *pin)
 {
 
@@ -502,26 +556,21 @@ GSM_Error FB61_EnterPin(char *pin)
 
   FB61_TX_SendMessage(6+strlen(pin), 0x08, pin_req);
 
-  DisableKeepalive=true;
-
   /* Wait for timeout or other error. */
   while (timeout != 0 && PINError == GE_BUSY) {
 
-    if (timeout-- == 0) {
-      DisableKeepalive=false;
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
-    }    
 
     usleep (100000);
   }
-
-  DisableKeepalive=false;
 
   return (PINError);
 }
 
 GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time)
 {
+
   unsigned char clock_req[] = {FB61_FRAME_HEADER, 0x62, 0x01};
   int timeout=5;
 
@@ -530,26 +579,21 @@ GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time)
 
   FB61_TX_SendMessage(0x05, 0x11, clock_req);
 
-  DisableKeepalive=true;
-
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentDateTimeError == GE_BUSY) {
 
-    if (timeout-- == 0) {
-      DisableKeepalive=false;
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
-    }    
 
     usleep (100000);
   }
-
-  DisableKeepalive=false;
 
   return (CurrentDateTimeError);
 }
 
 GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
 {
+
   unsigned char alarm_req[] = {FB61_FRAME_HEADER, 0x6d, 0x01};
   int timeout=5;
 
@@ -558,36 +602,33 @@ GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
 
   FB61_TX_SendMessage(0x05, 0x11, alarm_req);
 
-  DisableKeepalive=true;
-
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentAlarmError == GE_BUSY) {
 
-    if (timeout-- == 0) {
-      DisableKeepalive=false;
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
-    }    
 
     usleep (100000);
   }
 
-  DisableKeepalive=false;
-
   return (CurrentAlarmError);
 }
 
-	/* This function sends to the mobile phone a request for the SMS Center
-	   of rank `priority' */
+/* This function sends to the mobile phone a request for the SMS Center of
+   rank `priority' */
 
-GSM_Error	FB61_GetSMSCenter(u8 priority)
+GSM_Error FB61_GetSMSCenter(u8 priority)
 {
-	unsigned char smsc_req[] = {FB61_FRAME_HEADER, 0x33, 0x64, 0x01, 0x01};
 
-	smsc_req[5]=priority;
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x33, 0x64, 0x01, 0x01};
 
-	FB61_TX_SendMessage(0x07, 0x02, smsc_req);
+  req[5]=priority;
 
-	return (GE_NONE);
+  /* FIXME: error checking, waiting for the response. */
+
+  FB61_TX_SendMessage(0x07, 0x02, req);
+
+  return (GE_NONE);
 }
 
 GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
@@ -604,9 +645,8 @@ GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentSMSStatusError == GE_BUSY ) {
 
-    if (timeout-- == 0) {
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
-    }    
 
     usleep (100000);
   }
@@ -614,14 +654,14 @@ GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
   return (GE_NONE);
 }
 
-
 GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code)
 {
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time)
+GSM_Error FB61_SetDateTime(GSM_DateTime *date_time)
 {
+
   unsigned char req[] = {FB61_FRAME_HEADER,
 			 0x60, /* set-time subtype */
 			 0x01, 0x01, 0x07, /* unknown */
@@ -644,9 +684,10 @@ GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time)
   FB61_TX_SendMessage(0x0f, 0x11, req);
 
   while (timeout != 0 && CurrentSetDateTimeError == GE_BUSY) {
-    timeout --;
-    if (timeout == 0)
+
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
+
     usleep (100000);
   }
 
@@ -655,8 +696,9 @@ GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time)
 
 /* FIXME: we should also allow to set the alarm off :-) */
 
-GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
+GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 {
+
   unsigned char req[] = {FB61_FRAME_HEADER,
 			 0x6b, /* set-alarm subtype */
 			 0x01, 0x20, 0x03, /* unknown */
@@ -674,68 +716,73 @@ GSM_Error	FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
   FB61_TX_SendMessage(0x0c, 0x11, req);
 
   while (timeout != 0 && CurrentSetAlarmError == GE_BUSY) {
-    timeout --;
-    if (timeout == 0)
+
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
+
     usleep (100000);
   }
 
   return (CurrentSetAlarmError);
 }
 
-	/* Routine to get specifed phone book location.  Designed to 
-	   be called by application.  Will block until location is
-	   retrieved or a timeout/error occurs. */
-GSM_Error	FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry) {
+/* Routine to get specifed phone book location.  Designed to be called by
+   application.  Will block until location is retrieved or a timeout/error
+   occurs. */
+
+GSM_Error FB61_GetPhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry) {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00, 0x01};
   int timeout=20; /* 2 seconds for command to complete */
+  int memory_area;
 
   CurrentPhonebookEntry = entry;
   CurrentPhonebookError = GE_BUSY;
 
   if (memory_type == GMT_INTERNAL)
-    req[4] = FB61_MEMORY_PHONE;
+    memory_area = FB61_MEMORY_PHONE;
   else
     if (memory_type == GMT_SIM)
-      req[4] = FB61_MEMORY_SIM;
+      memory_area = FB61_MEMORY_SIM;
     else
       return (GE_INVALIDMEMORYTYPE);
 
+  req[4] = memory_area;
   req[5] = location;
 
   FB61_TX_SendMessage(0x08, 0x03, req);
 
   while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
-    timeout --;
-    if (timeout == 0)
+
+    if (timeout-- == 0)
       return (GE_TIMEOUT);
+
     usleep (100000);
   }
 
   return (CurrentPhonebookError);
 }
 
-	/* Routine to write phonebook location in phone. Designed to 
-	   be called by application code.  Will block until location
-	   is written or timeout occurs.  */
-GSM_Error	FB61_WritePhonebookLocation(GSM_MemoryType memory_type, int location, GSM_PhonebookEntry *entry)
+/* Routine to write phonebook location in phone. Designed to be called by
+   application code. Will block until location is written or timeout
+   occurs. */
+
+GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 {
 
   unsigned char req[128] = {FB61_FRAME_HEADER, 0x04, 0x00, 0x00};
   int i=0, current=0, memory_area;
+  int timeout=50;
 
-	if (memory_type == GMT_INTERNAL) {
-		memory_area = FB61_MEMORY_PHONE;
-	}
-	else {
-		if (memory_type == GMT_SIM) {
-			memory_area = FB61_MEMORY_SIM;
-		}
-		else {
-			return (GE_INVALIDMEMORYTYPE);
-		}
-	}
+  CurrentPhonebookError=GE_BUSY;
+
+  if (entry->MemoryType == GMT_INTERNAL)
+    memory_area = FB61_MEMORY_PHONE;
+  else
+    if (entry->MemoryType == GMT_SIM)
+      memory_area = FB61_MEMORY_SIM;
+    else
+      return (GE_INVALIDMEMORYTYPE);
 
   req[4] = memory_area;
   req[5] = location;
@@ -761,89 +808,80 @@ GSM_Error	FB61_WritePhonebookLocation(GSM_MemoryType memory_type, int location, 
 
   FB61_TX_SendMessage(current, 3, req);
 
-  sleep(5);
+  while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
+
+    if (timeout-- == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentPhonebookError);
+}
+
+GSM_Error FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
+{
+
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x07, 0x00, 0x00, 0x01, 0x64, 0x01};
+  int memory_area;
+  int timeout = 50; /* 5 seconds for command to complete */
+
+  /* State machine code writes data to these variables when it comes in. */
+
+  CurrentSMSMessage = message;
+  CurrentSMSMessageError = GE_BUSY;
+
+  if (memory_type == GMT_INTERNAL)
+    memory_area = FB61_MEMORY_PHONE;
+  else
+    if (memory_type == GMT_SIM)
+      memory_area = FB61_MEMORY_SIM;
+    else
+      return (GE_INVALIDMEMORYTYPE);
+
+  req[4] = memory_area;
+  req[5] = location;
+
+  /* Send request */
+
+  FB61_TX_SendMessage(0x09, 0x02, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
+
+    if (timeout-- == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentSMSMessageError);
+}
+
+/* FIXME: This is not tested yet. */
+
+GSM_Error FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
+{
+
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x01};
+  int memory_area;
+
+  if (memory_type == GMT_INTERNAL)
+    memory_area = FB61_MEMORY_PHONE;
+  else
+    if (memory_type == GMT_SIM)
+      memory_area = FB61_MEMORY_SIM;
+    else
+      return (GE_INVALIDMEMORYTYPE);
+
+  req[4] = memory_area;
+  req[5] = location;
+
+  FB61_TX_SendMessage(0x07, 0x14, req);
+
+  /* Fixme: error checking, waiting for the response. */
 
   return (GE_NONE);
-}
-
-GSM_Error	FB61_GetSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
-{
-
-	unsigned char req[] = {FB61_FRAME_HEADER, 0x07, 0x00, 0x00, 0x01, 0x64, 0x01};
-	int memory_area;
-	int timeout;
-
-		/* State machine code writes data to these variables when
-		   it comes in. */
-	CurrentSMSMessage = message;
-	CurrentSMSMessageError = GE_BUSY;
-
-	if (memory_type == GMT_INTERNAL) {
-		memory_area = FB61_MEMORY_PHONE;
-	}
-	else {
-		if (memory_type == GMT_SIM) {
-			memory_area = FB61_MEMORY_SIM;
-		}
-		else {
-			return (GE_INVALIDMEMORYTYPE);
-		}
-	}
-
-	req[4] = memory_area;
-	req[5] = location;
-
-	timeout = 50; 	/* 5 seconds for command to complete */
-
-		/* Return if no link has been established. */
-	if (!FB61_LinkOK) {
-	  printf("returning no link :-(\n");
-	  return GE_NOLINK;
-	}
-
-		/* Send request */
-	FB61_TX_SendMessage(0x09, 0x02, req);
-
-		/* Wait for timeout or other error. */
-	while (timeout != 0 && CurrentSMSMessageError != GE_NONE) {
-
-		timeout --;
-		if (timeout == 0) {
-			return (GE_TIMEOUT);
-		}
-		usleep (100000);
-	}
-
-	return (CurrentSMSMessageError);
-}
-
-/* FIXME: This is not tested yet */
-GSM_Error	FB61_DeleteSMSMessage(GSM_MemoryType memory_type, int location, GSM_SMSMessage *message)
-{
-
-	unsigned char req[] = {FB61_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x01};
-	int memory_area;
-
-	if (memory_type == GMT_INTERNAL) {
-		memory_area = FB61_MEMORY_PHONE;
-	}
-	else {
-		if (memory_type == GMT_SIM) {
-			memory_area = FB61_MEMORY_SIM;
-		}
-		else {
-			return (GE_INVALIDMEMORYTYPE);
-		}
-	}
-
-	req[4] = memory_area;
-	req[5] = location;
-
-	FB61_TX_SendMessage(0x07, 0x14, req);
-
-	return (GE_NONE);
-
-
 }
 
 /* This function implements packing of numbers (SMS Center number and
@@ -925,21 +963,27 @@ GSM_Error FB61_SendSMSMessage(char *message_centre, char *destination, char *tex
 
   FB61_TX_SendMessage(42+size+1, 0x02, req);
 
+  /* FIXME: error checking, waiting for the response. */
+
   return (GE_NONE);
 }
 
 void FB61_DumpSerial()
 {
-	unsigned int Flags=0;
 
-	ioctl(PortFD, TIOCMGET, &Flags);
+  unsigned int Flags=0;
 
-	printf("Serial flags dump:\n");
-	printf("DTR is %s.\n", Flags&TIOCM_DTR?"up":"down");
-	printf("RTS is %s.\n", Flags&TIOCM_RTS?"up":"down");
-	printf("CAR is %s.\n", Flags&TIOCM_CAR?"up":"down");
-	printf("CTS is %s.\n", Flags&TIOCM_CTS?"up":"down");
-	printf("\n");
+  ioctl(PortFD, TIOCMGET, &Flags);
+
+#ifdef DEBUG
+  printf(_("Serial flags dump:\n"));
+  printf(_("DTR is %s.\n"), Flags&TIOCM_DTR?_("up"):_("down"));
+  printf(_("RTS is %s.\n"), Flags&TIOCM_RTS?_("up"):_("down"));
+  printf(_("CAR is %s.\n"), Flags&TIOCM_CAR?_("up"):_("down"));
+  printf(_("CTS is %s.\n"), Flags&TIOCM_CTS?_("up"):_("down"));
+  printf("\n");
+#endif DEBUG
+
 }
 
 /* This functions set up the Nokia DAU-9P MBus Cable NSE-3 which is probably
@@ -974,14 +1018,16 @@ void FB61_SetFBUS()
 
 #ifdef DEBUG
   FB61_DumpSerial();  
-  printf("Setting FBUS communication...\n");
+  printf(_("Setting FBUS communication...\n"));
 #endif DEBUG
 
   /* clearing the RTS bit */
+
   Flags=TIOCM_RTS;
   ioctl(PortFD, TIOCMBIC, &Flags);
 
   /* setting the DTR bit */
+
   Flags=TIOCM_DTR;
   ioctl(PortFD, TIOCMBIS, &Flags);
 
@@ -991,63 +1037,73 @@ void FB61_SetFBUS()
 }
 
 /* Called by initialisation code to open comm port in asynchronous mode. */
-bool		FB61_OpenSerial(void)
+
+bool FB61_OpenSerial(void)
 {
-	struct termios			new_termios;
-	struct sigaction		sig_io;
 
-		/* Open device. */
-	PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
+  struct termios new_termios;
+  struct sigaction sig_io;
 
-	if (PortFD < 0) {
-		perror(_("Couldn't open FB61 device: "));
-		return (false);
-	}
+  /* Open device. */
 
-		/* Set up and install handler before enabling async IO on port. */
-	sig_io.sa_handler = FB61_SigHandler;
-	sig_io.sa_flags = 0;
-	sigaction (SIGIO, &sig_io, NULL);
+  PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
-		/* Allow process/thread to receive SIGIO */
-	fcntl(PortFD, F_SETOWN, getpid());
+  if (PortFD < 0) {
+    perror(_("Couldn't open FB61 device: "));
+    return (false);
+  }
 
-		/* Make filedescriptor asynchronous. */
-	fcntl(PortFD, F_SETFL, FASYNC);
+  /* Set up and install handler before enabling async IO on port. */
 
-		/* Save current port attributes so they can be restored on exit. */
-	tcgetattr(PortFD, &OldTermios);
+  sig_io.sa_handler = FB61_SigHandler;
+  sig_io.sa_flags = 0;
+  sigaction (SIGIO, &sig_io, NULL);
 
-		/* Set port settings for canonical input processing */
-	new_termios.c_cflag = FB61_BAUDRATE | CS8 | CLOCAL | CREAD;
-	new_termios.c_iflag = IGNPAR;
-	new_termios.c_oflag = 0;
-	new_termios.c_lflag = 0;
-	new_termios.c_cc[VMIN] = 1;
-	new_termios.c_cc[VTIME] = 0;
+  /* Allow process/thread to receive SIGIO */
 
-	tcflush(PortFD, TCIFLUSH);
-	tcsetattr(PortFD, TCSANOW, &new_termios);
+  fcntl(PortFD, F_SETOWN, getpid());
 
-	FB61_SetFBUS(PortFD);
+  /* Make filedescriptor asynchronous. */
 
-	return (true);
+  fcntl(PortFD, F_SETFL, FASYNC);
+
+  /* Save current port attributes so they can be restored on exit. */
+
+  tcgetattr(PortFD, &OldTermios);
+
+  /* Set port settings for canonical input processing */
+
+  new_termios.c_cflag = FB61_BAUDRATE | CS8 | CLOCAL | CREAD;
+  new_termios.c_iflag = IGNPAR;
+  new_termios.c_oflag = 0;
+  new_termios.c_lflag = 0;
+  new_termios.c_cc[VMIN] = 1;
+  new_termios.c_cc[VTIME] = 0;
+
+  tcflush(PortFD, TCIFLUSH);
+  tcsetattr(PortFD, TCSANOW, &new_termios);
+
+  FB61_SetFBUS(PortFD);
+
+  return (true);
 }
 
-void	FB61_SigHandler(int status)
+void FB61_SigHandler(int status)
 {
-	unsigned char 	buffer[255];
-	int				count,res;
 
-	res = read(PortFD, buffer, 255);
+  unsigned char buffer[255];
+  int count, res;
 
-	for (count = 0; count < res ; count ++) {
-		FB61_RX_StateMachine(buffer[count]);
-	}
+  res = read(PortFD, buffer, 255);
+
+  for (count = 0; count < res ; count ++)
+    FB61_RX_StateMachine(buffer[count]);
 }
 
 char *FB61_GetBCDNumber(u8 *Number) {
+
   static char Buffer[20]="";
+
   /* This is the length of BCD coded number */
   int length=Number[0];
   int count;
@@ -1062,10 +1118,12 @@ char *FB61_GetBCDNumber(u8 *Number) {
     int Digit;
 
     Digit=Number[count+2]&0x0f;
+
     if (Digit<10)
       sprintf(Buffer, "%s%d", Buffer, Digit);
     
     Digit=Number[count+2]>>4;
+
     if (Digit<10)
       sprintf(Buffer, "%s%d", Buffer, Digit);
   }
@@ -1074,6 +1132,7 @@ char *FB61_GetBCDNumber(u8 *Number) {
 }
 
 char *FB61_GetPackedDateTime(u8 *Number) {
+
   static char Buffer[20]="";
 
   sprintf(Buffer, "%d%d-", Number[0]&0xf, Number[0]>>4);
@@ -1087,33 +1146,7 @@ char *FB61_GetPackedDateTime(u8 *Number) {
 
 }
 
-unsigned char GSM_Default_Alphabet[] = {
-
-  /* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet */
-  /* char in hex position 10, [12 to 1a] and 24 are not present
-     on latin1 charset, so we cannot reproduce on the screen, 
-     however they are greek symbol not present even on my Nokia */
-
-  '@',  0xa3, '$',  0xa5, 0xe8, 0xe9, 0xf9, 0xec, 
-  0xf2, 0xc7, '\n', 0xd8, 0xf8, '\r', 0xc5, 0xe5,
-  '?',  '_',  '?',  '?',  '?',  '?',  '?',  '?',
-  '?',  '?',  '?',  ' ',  0xc6, 0xe6, 0xdf, 0xc9,
-  ' ',  '!',  '\"', '#',  '?',  '%',  '&',  '\'',
-  '(',  ')',  '*',  '+',  ',',  '-',  '.',  '/',
-  '0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',
-  '8',  '9',  ':',  ';',  '<',  '=',  '>',  '?',
-  0xa1, 'A',  'B',  'C',  'D',  'E',  'F',  'G',
-  'H',  'I',  'J',  'K',  'L',  'M',  'N',  'O',
-  'P',  'Q',  'R',  'S',  'T',  'U',  'V',  'W',
-  'X',  'Y',  'Z',  0xc4, 0xd6, 0xd1, 0xdc, 0xa7,
-  0xbf, 'a',  'b',  'c',  'd',  'e',  'f',  'g',
-  'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',
-  'p',  'q',  'r',  's',  't',  'u',  'v',  'w',
-  'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
-};
-
-enum FB61_RX_States FB61_RX_DispatchMessage(void)
-{
+enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
   int i, tmp, count;
   unsigned char output[160];
@@ -1129,723 +1162,815 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void)
 
   case 0x01:
 	  
-	  switch (MessageBuffer[3]) {
+    switch (MessageBuffer[3]) {
 
-	    /* Unknown message - it has been seen after the 0x07 message (call
-               answered). Probably it has similar meaning. If you can solve
-               this - just mail me. Pavel Janík ml.
+      /* Unknown message - it has been seen after the 0x07 message (call
+	 answered). Probably it has similar meaning. If you can solve
+	 this - just mail me. Pavel Janík ml.
 
-	       The message looks like this:
+	 The message looks like this:
 
-	       Msg Destination: PC
-	       Msg Source: Phone
-	       Msg Type: 01
-	       Msg Unknown: 00
-	       Msg Len: 0e
+	 Msg Destination: PC
+	 Msg Source: Phone
+	 Msg Type: 01
+	 Msg Unknown: 00
+	 Msg Len: 0e
 
-	       Phone: [01 ][08 ][00 ] is the header of the frame
+	 Phone: [01 ][08 ][00 ] is the header of the frame
 
-	              [03 ] is the call message subtype
+	 [03 ] is the call message subtype
 
-		      [05 ] is the call sequence number
+	 [05 ] is the call sequence number
 
-		      [05 ] unknown 
+	 [05 ] unknown 
 
-		      [00 ][01 ][03 ][02 ][91][00] are unknown but has been
-		      seen in the Incoming call message (just after the
-		      caller's name from the phonebook). But never change
-		      between phone calls :-(
-	    */
-	  case 0x03:
+	 [00 ][01 ][03 ][02 ][91][00] are unknown but has been
+	 seen in the Incoming call message (just after the
+	 caller's name from the phonebook). But never change
+	 between phone calls :-(
+      */
 
-#ifdef DEBUG
-	    printf("Message: Call message, type 0x03:");
-	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
-	    printf("   Exact meaning not known yet, sorry :-(\n");
-#endif DEBUG
-
-	    break;
-
-	    /* Remote end has gone away before you answer the call.  Probably
-               your mother-in-law or banker (which is worse?) ... */
-	  case 0x04:
+    case 0x03:
 
 #ifdef DEBUG
-	    printf("Message: Remote end hang up.\n");
-	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
+      printf(_("Message: Call message, type 0x03:"));
+      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+      printf(_("   Exact meaning not known yet, sorry :-(\n"));
 #endif DEBUG
 
-	    CurrentIncomingCall[0]=0;
+      break;
 
-	    break;
+      /* Remote end has gone away before you answer the call.  Probably your
+         mother-in-law or banker (which is worse?) ... */
 
-	    /* Incoming call alert */
-	  case 0x05:
+    case 0x04:
 
 #ifdef DEBUG
-	    printf("Message: Incoming call alert:\n");
-
-	    /* We can have more then one call ringing - we can distinguish
-               between them */
-
-	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
-	    printf("   Number: ");
-	    count=MessageBuffer[6];
-
-	    for (tmp=0; tmp <count; tmp++)
-	      printf("%c", MessageBuffer[7+tmp]);
-
-	    printf("\n");
-
-	    printf("   Name: ");
-
-	    for (tmp=0; tmp <MessageBuffer[7+count]; tmp++)
-	      printf("%c", MessageBuffer[8+count+tmp]);
-
-	    printf("\n");
+      printf(_("Message: Remote end hang up.\n"));
+      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
 #endif DEBUG
 
-	    count=MessageBuffer[6];
+      CurrentIncomingCall[0]=0;
 
-	    for (tmp=0; tmp <count; tmp++)
-	      sprintf(CurrentIncomingCall, "%s%c", CurrentIncomingCall, MessageBuffer[7+tmp]);
+      break;
 
-	    break;
+      /* Incoming call alert */
 
-	    /* Call answered. Probably your girlfriend...*/
-	  case 0x07:
+    case 0x05:
 
 #ifdef DEBUG
-	    printf("Message: Call answered.\n");
-	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
+      printf(_("Message: Incoming call alert:\n"));
+
+      /* We can have more then one call ringing - we can distinguish between
+         them */
+
+      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+      printf(_("   Number: "));
+      count=MessageBuffer[6];
+
+      for (tmp=0; tmp <count; tmp++)
+	printf("%c", MessageBuffer[7+tmp]);
+
+      printf("\n");
+
+      printf(_("   Name: "));
+
+      for (tmp=0; tmp <MessageBuffer[7+count]; tmp++)
+	printf("%c", MessageBuffer[8+count+tmp]);
+
+      printf("\n");
 #endif DEBUG
 
-	    break;
+      count=MessageBuffer[6];
 
-	    /* Call ended. Girlfriend is girlfriend, but time is money :-) */
-	  case 0x09:
+      for (tmp=0; tmp <count; tmp++)
+	sprintf(CurrentIncomingCall, "%s%c", CurrentIncomingCall, MessageBuffer[7+tmp]);
+
+      break;
+
+      /* Call answered. Probably your girlfriend...*/
+
+    case 0x07:
 
 #ifdef DEBUG
-	    printf("Message: Call ended by your phone.\n");
-	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
+      printf(_("Message: Call answered.\n"));
+      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
 #endif DEBUG
 
-	    break;
+      break;
 
-	    /* This message has been seen with the message of subtype 0x09
-               after I hang the call.
+      /* Call ended. Girlfriend is girlfriend, but time is money :-) */
 
-	       Msg Destination: PC
-	       Msg Source: Phone
-	       Msg Type: 01
-	       Msg Unknown: 00
-	       Msg Len: 08
-	       Phone: [01 ][08 ][00 ][0a ][04 ][87 ][01 ][42B][1a ][c2 ]
-
-	       What is the meaning of 87? Can you spell some magic light into
-	       this issue?
-
-	    */
-	  case 0x0a:
+    case 0x09:
 
 #ifdef DEBUG
-	    printf("Message: Call message, type 0x0a:");
-	    printf("   Sequence nr. of the call: %d\n", MessageBuffer[4]);
-	    printf("   Exact meaning not known yet, sorry :-(\n");
+      printf(_("Message: Call ended by your phone.\n"));
+      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
 #endif DEBUG
 
-	    CurrentIncomingCall[0]=0;
+      break;
 
-	    break;
+      /* This message has been seen with the message of subtype 0x09
+	 after I hang the call.
 
-	  default:
+	 Msg Destination: PC
+	 Msg Source: Phone
+	 Msg Type: 01
+	 Msg Unknown: 00
+	 Msg Len: 08
+	 Phone: [01 ][08 ][00 ][0a ][04 ][87 ][01 ][42B][1a ][c2 ]
+
+	 What is the meaning of 87? Can you spell some magic light into
+	 this issue?
+
+      */
+
+    case 0x0a:
 
 #ifdef DEBUG
-	    printf("Message: Unknown message of type 0x01\n");
+      printf(_("Message: Call message, type 0x0a:"));
+      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+      printf(_("   Exact meaning not known yet, sorry :-(\n"));
 #endif DEBUG
 
-	}
+      CurrentIncomingCall[0]=0;
+
+      break;
+
+    default:
+
+#ifdef DEBUG
+      printf(_("Message: Unknown message of type 0x01\n"));
+#endif DEBUG
+
+    }
+
+    break;
+
+    /* General phone control */
+
+  case 0x02:
+
+    switch (MessageBuffer[3]) {
+
+    case 0x10:
+	  
+#ifdef DEBUG
+      printf(_("Message: SMS Message Received\n"));
+      printf(_("   SMS center number: %s\n"), FB61_GetBCDNumber(MessageBuffer+7));
+
+      MessageBuffer[23] = (MessageBuffer[23]+1)/2+1;
+
+      printf(_("   Remote number: %s\n"), FB61_GetBCDNumber(MessageBuffer+23));
+      printf(_("   Date: %s\n"), FB61_GetPackedDateTime(MessageBuffer+35));
+      printf(_("   SMS: "));
+
+      tmp=UnpackEightBitsToSeven(MessageLength-42-2, MessageBuffer+42, output);
+
+      for (i=0; i<tmp;i++)
+	printf("%c", GSM_Default_Alphabet[output[i]]);
+
+      printf("\n");
+#endif DEBUG
+
+      break;
+
+    case 0x34:
+
+      printf(_("Message: SMS Center received:\n"));
+      printf(_("   %d. SMS Center name is %s\n"), MessageBuffer[4], MessageBuffer+33);
+      printf(_("   %d. SMS Center number is %s\n"), MessageBuffer[4], FB61_GetBCDNumber(MessageBuffer+21));
+
+      break;
+
+    case 0x35:
+
+      /* Nokia 6110 has support for three SMS centers with numbers 1, 2 and
+	 3. Each request for SMS Center without one of these numbers
+	 fail. */
+
+      printf(_("Message: SMS Center error received:\n"));
+      printf(_("   The request for SMS Center failed.\n"));
+
+      break;  
+
+    default:
+
+      FB61_RX_DisplayMessage();
+
+    }
+
+    break;
+
+    /* Phonebook handling */
+
+  case 0x03:
+
+    switch (MessageBuffer[3]) {
+
+    case 0x02:
+
+      CurrentPhonebookEntry->Empty = true;
+
+      count=MessageBuffer[5];
+	  
+#ifdef DEBUG
+      printf(_("Message: Phonebook entry received:\n"));
+      printf(_("   Name: "));
+
+      for (tmp=0; tmp <count; tmp++)
+	printf("%c", MessageBuffer[6+tmp]);
+
+      printf("\n");
+#endif DEBUG
+
+      memcpy(CurrentPhonebookEntry->Name, MessageBuffer + 6, count);
+      CurrentPhonebookEntry->Name[count] = 0x00;
+      CurrentPhonebookEntry->Empty = false;
+
+      i=7+count;
+      count=MessageBuffer[6+count];
+
+#ifdef DEBUG
+      printf(_("   Number: "));
+
+      for (tmp=0; tmp <count; tmp++)
+	printf("%c", MessageBuffer[i+tmp]);
+
+      printf("\n");
+#endif DEBUG
+
+      memcpy(CurrentPhonebookEntry->Number, MessageBuffer + i, count);
+      CurrentPhonebookEntry->Number[count] = 0x00;
+      CurrentPhonebookEntry->Group = MessageBuffer[i+count];
+
+      /* Signal no error to calling code. */
+
+      CurrentPhonebookError = GE_NONE;
+
+      break;
+
+    case 0x03:
+
+#ifdef DEBUG
+      printf(_("Message: Phonebook read entry error received:\n"));
+#endif DEBUG
+
+      switch (MessageBuffer[4]) {
+
+      case 0x7d:
+
+#ifdef DEBUG
+	printf(_("   Invalid memory type!\n"));
+#endif DEBUG
+
+	CurrentPhonebookError = GE_INVALIDMEMORYTYPE;
 
 	break;
 
-	/* General phone control */
+      default:
 
-	case 0x02:
+#ifdef DEBUG
+	printf(_("   Unknown error!\n"));
+#endif DEBUG
 
-	  switch (MessageBuffer[3]) {
+	CurrentPhonebookError = GE_INTERNALERROR;
+      }
 
-	  case 0x10:
+    case 0x05:
+
+#ifdef DEBUG
+      printf(_("Message: Phonebook written correctly.\n"));
+#endif DEBUG
+
+      CurrentPhonebookError = GE_NONE;
+
+      break;
+
+    case 0x06:
+
+      /* FIXME: Probably MessageBuffer[4] is the reason for failure. */
+
+#ifdef DEBUG
+      printf(_("Message: Phonebook not written - name is too long.\n"));
+#endif DEBUG
+
+      CurrentPhonebookError = GE_PHBOOKNAMETOOLONG;
+
+      break;
+
+    case 0x08:
+
+#ifdef DEBUG
+      printf(_("Message: Memory status received:\n"));
+      printf(_("   Memory Type: %s\n"), (MessageBuffer[4]==FB61_MEMORY_PHONE)?_("int"):_("sim"));
+      printf(_("   Used: %d\n"), MessageBuffer[6]);
+      printf(_("   Free: %d\n"), MessageBuffer[5]);
+#endif DEBUG
+
+      CurrentMemoryStatus->Used = MessageBuffer[6];
+      CurrentMemoryStatus->Free = MessageBuffer[5];
+      CurrentMemoryStatusError = GE_NONE;
+
+      break;
+
+    case 0x09:
+
+#ifdef DEBUG
+      printf(_("Message: Memory status error, probably not authorized by PIN\n"));
+#endif DEBUG
+
+      break;
+
+    default:
+
+#ifdef DEBUG
+      printf(_("Message: Unknown message of type 0x03\n"));
+#endif DEBUG
+
+    }
+
+    break;
+
+    /* Phone status */
 	  
-#ifdef DEBUG
+ case 0x04:
+    
+    switch (MessageBuffer[3]) {
 
-	  	printf(_("Message: SMS Message Received\n"));
-    	  	printf("   SMS center number: %s\n", FB61_GetBCDNumber(MessageBuffer+7));
-		MessageBuffer[23] = (MessageBuffer[23]+1)/2+1;
-		printf("   Remote number: %s\n", FB61_GetBCDNumber(MessageBuffer+23));
-      		printf("   Date: %s\n", FB61_GetPackedDateTime(MessageBuffer+35));
-		printf("   SMS: ");
-
-		tmp=UnpackEightBitsToSeven(MessageLength-42-2, MessageBuffer+42, output);
-
-		for (i=0; i<tmp;i++)
-		  printf("%c", GSM_Default_Alphabet[output[i]]);
-
-		printf("\n");
-#endif DEBUG
-
-		break;
-
-	  case 0x34:
-
-		printf(_("Message: SMS Center received:\n"));
-		printf("   %d. SMS Center name is %s\n", MessageBuffer[4], MessageBuffer+33);
-		printf("   %d. SMS Center number is %s\n", MessageBuffer[4], FB61_GetBCDNumber(MessageBuffer+21));
-
-		break;
-
-	  case 0x35:
-
-		/* Nokia 6110 has support for three SMS centers with numbers 1, 2 and
-           3. Each request for SMS Center without one of these numbers fail. */
-
-		printf(_("Message: SMS Center error received:\n"));
-		printf(_("   The request for SMS Center failed.\n"));
-
-		break;  
-
-	  default:
-	    	    FB61_RX_DisplayMessage();
-	  }
-
-	  break;
-
-	  /* Phonebook handling */
-
-	case 0x03:
-
-	  switch (MessageBuffer[3]) {
-
-	  case 0x02:
+    case 0x02:
 
 #ifdef DEBUG
-	    printf(_("Message: Phonebook entry received:\n"));
-	    printf("   Name: ");
-#endif DEBUG
+      printf(_("Message: Phone status received:\n"));
+      printf(_("   Mode: "));
 
-	    CurrentPhonebookEntry->Empty = true;
+      switch (MessageBuffer[4]) {
 
-	    count=MessageBuffer[5];
-	  
-#ifdef DEBUG
-	    for (tmp=0; tmp <count; tmp++)
-	      printf("%c", MessageBuffer[6+tmp]);
+      case 0x01:
 
-	    printf("\n");
-#endif DEBUG
+	printf(_("registered within the network\n"));
 
-	    memcpy(CurrentPhonebookEntry->Name, MessageBuffer + 6, count);
-	    CurrentPhonebookEntry->Name[count] = 0x00;
-	    CurrentPhonebookEntry->Empty = false;
-
-	    i=7+count;
-	    count=MessageBuffer[6+count];
-
-#ifdef DEBUG
-	    printf("   Number: ");
-
-	    for (tmp=0; tmp <count; tmp++)
-	      printf("%c", MessageBuffer[i+tmp]);
-
-	    printf("\n");
-#endif DEBUG
-
-	    memcpy(CurrentPhonebookEntry->Number, MessageBuffer + i, count);
-	    CurrentPhonebookEntry->Number[count] = 0x00;
-	    CurrentPhonebookEntry->Group = MessageBuffer[i+count];
-
-	    /* Signal no error to calling code. */
-	    CurrentPhonebookError = GE_NONE;
-
-	    break;
-
-	  case 0x03:
-
-#ifdef DEBUG
-	    printf(_("Message: Phonebook read entry error received:\n"));
-#endif DEBUG
-	    break;
-
-	  case 0x08:
-
-#ifdef DEBUG
-	    printf(_("Message: Memory status received:\n"));
-	    printf("   Memory Type: %s\n", (MessageBuffer[4]==FB61_MEMORY_PHONE)?"phone":"sim");
-	    printf("   Used: %d\n", MessageBuffer[6]);
-	    printf("   Free: %d\n", MessageBuffer[5]);
-#endif DEBUG
-
-	    CurrentMemoryStatus->Used = MessageBuffer[6];
-	    CurrentMemoryStatus->Free = MessageBuffer[5];
-	    CurrentMemoryStatusError = GE_NONE;
-
-	    break;
-
-	  case 0x09:
-
-#ifdef DEBUG
-	    printf(_("Message: Memory status error, probably not authorized by PIN\n"));
-#endif DEBUG
-
-	    break;
-
-	  default:
-
-#ifdef DEBUG
-	    printf("Message: Unknown message of type 0x03\n");
-#endif DEBUG
-
-	  }
-	  break;
-
-	  /* Phone status */
-	  
-	case 0x04:
-
-	  switch (MessageBuffer[3]) {
-
-	  case 0x02:
-
-#ifdef DEBUG
-	    printf(_("Message: Phone status received:\n"));
-	    printf("   Mode: ");
-
-	    switch (MessageBuffer[4]) {
-
-	    case 0x01:
-	      printf("registered within the network\n");
-	      break;
+	break;
 	      
-	      /* I was really amazing why is there a hole in the type of 0x02,
-		 now I know ... */
+	/* I was really amazing why is there a hole in the type of 0x02, now I
+	   know... */
 	      
-	    case 0x02:
-	      printf("call in progress\n"); /* ringing or already answered call */
-	      break;
+      case 0x02:
+
+	printf(_("call in progress\n")); /* ringing or already answered call */
+
+	break;
 	      
-	    case 0x03:
-	      printf("waiting for pin\n");
-	      break;
+      case 0x03:
 
-	    case 0x04:
-	    printf("powered off\n");
-	    break;
+	printf(_("waiting for pin\n"));
 
-	    default:
-	      printf("unknown\n");
-	    }
+	break;
 
-	    printf("   Power source: ");
+      case 0x04:
 
-	    switch (MessageBuffer[7]) {
+	printf(_("powered off\n"));
 
-	    case 0x01:
-	      printf("AC/DC\n");
-	      break;
+	break;
+
+      default:
+
+	printf(_("unknown\n"));
+
+      }
+
+      printf(_("   Power source: "));
+
+      switch (MessageBuffer[7]) {
+
+      case 0x01:
+
+	printf(_("AC/DC\n"));
+
+	break;
 		
-	    case 0x02:
-	      printf("battery\n");
-	      break;
+      case 0x02:
 
-	    default:
-	      printf("unknown\n");
-	    }
+	printf(_("battery\n"));
 
-	    printf("   Battery Level: %d\n", MessageBuffer[8]);
-	    printf("   Signal strength: %d\n", MessageBuffer[5]);
+	break;
 
+      default:
+
+	printf(_("unknown\n"));
+
+      }
+
+      printf(_("   Battery Level: %d\n"), MessageBuffer[8]);
+      printf(_("   Signal strength: %d\n"), MessageBuffer[5]);
 #endif DEBUG
 
-            CurrentRFLevel=MessageBuffer[5];
-            CurrentBatteryLevel=MessageBuffer[8];
-            CurrentPowerSource=MessageBuffer[7];
+      CurrentRFLevel=MessageBuffer[5];
+      CurrentBatteryLevel=MessageBuffer[8];
+      CurrentPowerSource=MessageBuffer[7];
 
-	    break;
+      break;
 
-	  default:
+    default:
 
 #ifdef DEBUG
-	    printf("Message: Unknown message of type 0x04\n");
+      printf(_("Message: Unknown message of type 0x04\n"));
 #endif DEBUG
 
-	  }
-	  break;
+    }
 
-	  /* PIN requests */
+    break;
 
-	case 0x08:
+    /* PIN requests */
 
-#ifdef DEBUG
-	  printf("Message: PIN:\n");
-#endif DEBUG
-	  if (MessageBuffer[3] != 0x0c) {
-#ifdef DEBUG
-	    printf("   Code Accepted\n");
-#endif DEBUG
-	    PINError = GE_NONE;
-	  }
-	  else {
-#ifdef DEBUG
-	    printf("   Code Error\n   You're not my big owner :-)\n");
-#endif DEBUG
-	  PINError = GE_INVALIDPIN;
-	  }
-
-	  break;
-
-	  /* Network status */
-
-	case 0x0a:
+  case 0x08:
 
 #ifdef DEBUG
-	  printf("Message: Network registration:\n");
-
-	  printf("   CellID: %02x%2x\n", MessageBuffer[10], MessageBuffer[11]);
-	  printf("   LAC: %02x%02x\n", MessageBuffer[12], MessageBuffer[13]);
-
-	  sprintf(output, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
-
-	  printf("   Network code: %s\n", output);
-	  printf("   Network name: %s\n", GSM_GetNetworkName(output));
+    printf(_("Message: PIN:\n"));
 #endif DEBUG
 
-	  break;
-
-	  /* Keyboard lock */
-
-	  /* FIXME: there are at least two types of 0x0d messages (length 09
-             and 0b(?)). The exact meaning of all bytes except keyboard
-             locked/unlocked is not known yet. */
-
-	case 0x0d:
+    if (MessageBuffer[3] != 0x0c) {
 
 #ifdef DEBUG
-	  printf("Message: Keyboard lock\n");
-	  printf("   Keyboard is %s\n", (MessageBuffer[6]==2)?"locked":"unlocked");
+      printf(_("   Code Accepted\n"));
 #endif DEBUG
 
-	  break;
-
-	  /* Phone Clock and Alarm */
-
-	case 0x11:
-
-	  switch (MessageBuffer[3]) {
-
-	  case 0x61:
+      PINError = GE_NONE;
+    }
+    else {
 
 #ifdef DEBUG
-	    printf("Message: Date and time set correctly\n");
+      printf(_("   Code Error\n   You're not my big owner :-)\n"));
 #endif DEBUG
 
-	    CurrentSetDateTimeError=GE_NONE;
+      PINError = GE_INVALIDPIN;
+    }
 
-	    break;
+    break;
 
-	  case 0x63:
+    /* Network status */
+
+  case 0x0a:
 
 #ifdef DEBUG
-	    printf("Message: Clock\n");
-	    printf("   Time: %02d:%02d:%02d\n", MessageBuffer[12], MessageBuffer[13], MessageBuffer[14]);
-	    printf("   Date: %4d/%02d/%02d\n", 256*MessageBuffer[8]+MessageBuffer[9], MessageBuffer[10], MessageBuffer[11]);
+    printf(_("Message: Network registration:\n"));
+
+    printf(_("   CellID: %02x%2x\n"), MessageBuffer[10], MessageBuffer[11]);
+    printf(_("   LAC: %02x%02x\n"), MessageBuffer[12], MessageBuffer[13]);
+
+    sprintf(output, "%x%x%x %x%x", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
+
+    printf(_("   Network code: %s\n"), output);
+    printf(_("   Network name: %s\n"), GSM_GetNetworkName(output));
 #endif DEBUG
 
-	    CurrentDateTime->Year=256*MessageBuffer[8]+MessageBuffer[9];
-	    CurrentDateTime->Month=MessageBuffer[10];
-	    CurrentDateTime->Day=MessageBuffer[11];
+    break;
 
-	    CurrentDateTime->Hour=MessageBuffer[12];
-	    CurrentDateTime->Minute=MessageBuffer[13];
-	    CurrentDateTime->Second=MessageBuffer[14];
+    /* Keyboard lock */
 
-	    CurrentDateTimeError=GE_NONE;
+    /* FIXME: there are at least two types of 0x0d messages (length 09
+       and 0b(?)). The exact meaning of all bytes except keyboard
+       locked/unlocked is not known yet. */
 
-	    break;
-
-	  case 0x6c:
+  case 0x0d:
 
 #ifdef DEBUG
-	    printf("Message: Alarm set correctly\n");
+    printf(_("Message: Keyboard lock\n"));
+    printf(_("   Keyboard is %s\n"), (MessageBuffer[6]==2)?_("locked"):_("unlocked"));
 #endif DEBUG
 
-	    CurrentSetAlarmError=GE_NONE;
+    break;
 
-	    break;
+    /* Phone Clock and Alarm */
 
+  case 0x11:
 
-	  case 0x6e:
+    switch (MessageBuffer[3]) {
+
+    case 0x61:
 
 #ifdef DEBUG
-	    printf("Message: Alarm\n");
-	    printf("   Alarm: %02d:%02d\n", MessageBuffer[9], MessageBuffer[10]);
-	    printf("   Alarm is %s\n", (MessageBuffer[8]==2) ? "on":"off");
+      printf(_("Message: Date and time set correctly\n"));
 #endif DEBUG
 
-	    CurrentAlarm->Hour=MessageBuffer[9];
-	    CurrentAlarm->Minute=MessageBuffer[10];
-	    CurrentAlarm->Second=0;
+      CurrentSetDateTimeError=GE_NONE;
 
-	    CurrentAlarm->AlarmEnabled=(MessageBuffer[8]==2);
+      break;
 
-	    CurrentAlarmError=GE_NONE;
-
-	    break;
-
-	  default:
-	    printf("Message: Unknown message of type 0x11\n");
-
-	  }
-	  break;
-
-	  /* Calendar notes handling */
-
-	case 0x13:
-
-	  switch (MessageBuffer[3]) {
-
-	  case 0x67:
-
-	    printf("Message: Calendar note received.\n");
-	    printf("   Date: %d-%02d-%02d\n", 256*MessageBuffer[9]+MessageBuffer[10], MessageBuffer[11], MessageBuffer[12]);
-	    printf("   Time: %02d:%02d:%02d\n", MessageBuffer[13], MessageBuffer[14], MessageBuffer[15]);
-
-	    /* Some messages do not have alarm set up */
-	    if (256*MessageBuffer[16]+MessageBuffer[17] != 0) {
-	      printf("   Alarm date: %d-%02d-%02d\n", 256*MessageBuffer[16]+MessageBuffer[17], MessageBuffer[18], MessageBuffer[19]);
-	      printf("   Alarm time: %02d:%02d:%02d\n", MessageBuffer[20], MessageBuffer[21], MessageBuffer[22]);
-	    }
-
-	    printf("   Number: %d\n", MessageBuffer[8]);
-	    printf("   Text: ");
-
-	    tmp=MessageBuffer[23];
-
-	    for(i=0;i<tmp;i++)
-	      printf("%c", MessageBuffer[24+i]);
-
-	    printf("\n");
-
-	    break;
-
-	  default:
+    case 0x63:
 
 #ifdef DEBUG
-	    printf("Message: Unknown message of type 0x13\n");
-#endif DEBUG
-	  }
-
-	  break;
-
-	  /* SMS Messages frame received */
-
-	case 0x14:
-
-	  switch (MessageBuffer[3]) {
-
-	  case 0x08:
-
-                MessageBuffer[24] = (MessageBuffer[24]+1)/2+1;
-
-#ifdef DEBUG
-		printf("Message: SMS Received.\n");
-		printf("   Number: %d\n", MessageBuffer[6]);
-
-		/* FIXME: This is probably bad ...
-
-		printf("   Memory Type: %s\n", (MessageBuffer[5]==FB61_MEMORY_PHONE)?"phone":"sim");
-		*/
-
-		printf("   Date: %s\n", FB61_GetPackedDateTime(MessageBuffer+36));
-	  	printf("   SMS center number: %s\n", FB61_GetBCDNumber(MessageBuffer+8));
-		printf("   Remote number: %s\n", FB61_GetBCDNumber(MessageBuffer+24));
-#endif
-
-		CurrentSMSMessage->Year=10*(MessageBuffer[36]&0x0f)+(MessageBuffer[36]>>4);
-		CurrentSMSMessage->Month=10*(MessageBuffer[37]&0x0f)+(MessageBuffer[37]>>4);
-		CurrentSMSMessage->Day=10*(MessageBuffer[38]&0x0f)+(MessageBuffer[38]>>4);
-		CurrentSMSMessage->Hour=10*(MessageBuffer[39]&0x0f)+(MessageBuffer[39]>>4);
-		CurrentSMSMessage->Minute=10*(MessageBuffer[40]&0x0f)+(MessageBuffer[40]>>4);
-		CurrentSMSMessage->Second=10*(MessageBuffer[41]&0x0f)+(MessageBuffer[41]>>4);
-
-		strcpy(CurrentSMSMessage->Sender, FB61_GetBCDNumber(MessageBuffer+24));
-
-		strcpy(CurrentSMSMessage->MessageCentre, FB61_GetBCDNumber(MessageBuffer+8));
-
-		tmp=UnpackEightBitsToSeven(MessageLength-43-2, MessageBuffer+43, output);
-
-		for (i=0; i<tmp;i++) {
-
-#ifdef DEBUG
-		  printf("%c", GSM_Default_Alphabet[output[i]]);
+      printf(_("Message: Date and time\n"));
+      printf(_("   Time: %02d:%02d:%02d\n"), MessageBuffer[12], MessageBuffer[13], MessageBuffer[14]);
+      printf(_("   Date: %4d/%02d/%02d\n"), 256*MessageBuffer[8]+MessageBuffer[9], MessageBuffer[10], MessageBuffer[11]);
 #endif DEBUG
 
-		  CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
-		}
+      CurrentDateTime->Year=256*MessageBuffer[8]+MessageBuffer[9];
+      CurrentDateTime->Month=MessageBuffer[10];
+      CurrentDateTime->Day=MessageBuffer[11];
 
-		CurrentSMSMessage->MessageText[tmp]=0;
+      CurrentDateTime->Hour=MessageBuffer[12];
+      CurrentDateTime->Minute=MessageBuffer[13];
+      CurrentDateTime->Second=MessageBuffer[14];
 
-		CurrentSMSPointer=tmp;
+      CurrentDateTimeError=GE_NONE;
 
-		CurrentSMSMessage->MemoryType = MessageBuffer[5];
-		CurrentSMSMessage->MessageNumber = MessageBuffer[6];
+      break;
+
+    case 0x6c:
+
+#ifdef DEBUG
+      printf(_("Message: Alarm set correctly\n"));
+#endif DEBUG
+
+      CurrentSetAlarmError=GE_NONE;
+
+      break;
+
+    case 0x6e:
+
+#ifdef DEBUG
+      printf(_("Message: Alarm\n"));
+      printf(_("   Alarm: %02d:%02d\n"), MessageBuffer[9], MessageBuffer[10]);
+      printf(_("   Alarm is %s\n"), (MessageBuffer[8]==2) ? _("on"):_("off"));
+#endif DEBUG
+
+      CurrentAlarm->Hour=MessageBuffer[9];
+      CurrentAlarm->Minute=MessageBuffer[10];
+      CurrentAlarm->Second=0;
+
+      CurrentAlarm->AlarmEnabled=(MessageBuffer[8]==2);
+
+      CurrentAlarmError=GE_NONE;
+
+      break;
+
+    default:
+
+      printf(_("Message: Unknown message of type 0x11\n"));
+
+    }
+
+    break;
+
+    /* Calendar notes handling */
+
+  case 0x13:
+
+    switch (MessageBuffer[3]) {
+
+    case 0x67:
+
+#ifdef DEBUG
+      printf(_("Message: Calendar note received.\n"));
+
+      printf(_("   Date: %d-%02d-%02d\n"), 256*MessageBuffer[9]+MessageBuffer[10], MessageBuffer[11], MessageBuffer[12]);
+
+      printf(_("   Time: %02d:%02d:%02d\n"), MessageBuffer[13], MessageBuffer[14], MessageBuffer[15]);
+
+      /* Some messages do not have alarm set up */
+
+      if (256*MessageBuffer[16]+MessageBuffer[17] != 0) {
+	printf(_("   Alarm date: %d-%02d-%02d\n"), 256*MessageBuffer[16]+MessageBuffer[17], MessageBuffer[18], MessageBuffer[19]);
+	printf(_("   Alarm time: %02d:%02d:%02d\n"), MessageBuffer[20], MessageBuffer[21], MessageBuffer[22]);
+      }
+
+      printf(_("   Number: %d\n"), MessageBuffer[8]);
+      printf(_("   Text: "));
+
+      tmp=MessageBuffer[23];
+
+      for(i=0;i<tmp;i++)
+	printf("%c", MessageBuffer[24+i]);
+
+      printf("\n");
+#endif DEBUG
+
+      break;
+
+    default:
+
+#ifdef DEBUG
+      printf(_("Message: Unknown message of type 0x13\n"));
+#endif DEBUG
+   
+    }
+
+    break;
+
+    /* SMS Messages frame received */
+
+  case 0x14:
+
+    switch (MessageBuffer[3]) {
+
+    case 0x08:
+
+      MessageBuffer[24] = (MessageBuffer[24]+1)/2+1;
+
+#ifdef DEBUG
+      printf(_("Message: SMS Received.\n"));
+      printf(_("   Number: %d\n"), MessageBuffer[6]);
+
+      printf(_("   Date: %s\n"), FB61_GetPackedDateTime(MessageBuffer+36));
+      printf(_("   SMS center number: %s\n"), FB61_GetBCDNumber(MessageBuffer+8));
+      printf(_("   Remote number: %s\n"), FB61_GetBCDNumber(MessageBuffer+24));
+#endif DEBUG
+
+      CurrentSMSMessage->Year=10*(MessageBuffer[36]&0x0f)+(MessageBuffer[36]>>4);
+      CurrentSMSMessage->Month=10*(MessageBuffer[37]&0x0f)+(MessageBuffer[37]>>4);
+      CurrentSMSMessage->Day=10*(MessageBuffer[38]&0x0f)+(MessageBuffer[38]>>4);
+      CurrentSMSMessage->Hour=10*(MessageBuffer[39]&0x0f)+(MessageBuffer[39]>>4);
+      CurrentSMSMessage->Minute=10*(MessageBuffer[40]&0x0f)+(MessageBuffer[40]>>4);
+      CurrentSMSMessage->Second=10*(MessageBuffer[41]&0x0f)+(MessageBuffer[41]>>4);
+
+      strcpy(CurrentSMSMessage->Sender, FB61_GetBCDNumber(MessageBuffer+24));
+
+      strcpy(CurrentSMSMessage->MessageCentre, FB61_GetBCDNumber(MessageBuffer+8));
+
+      tmp=UnpackEightBitsToSeven(MessageLength-43-2, MessageBuffer+43, output);
+
+      for (i=0; i<tmp;i++) {
+
+#ifdef DEBUG
+	printf("%c", GSM_Default_Alphabet[output[i]]);
+#endif DEBUG
+
+	CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
+      }
+
+      CurrentSMSMessage->MessageText[tmp]=0;
+
+      CurrentSMSPointer=tmp;
+
+      CurrentSMSMessage->MemoryType = MessageBuffer[5];
+      CurrentSMSMessage->MessageNumber = MessageBuffer[6];
  
-		/* Signal no error to calling code. */
-		
-		if (MessageBuffer[MessageLength-2]==2)
-		  CurrentSMSMessageError = GE_SMSWAITING;
-		else
-		  CurrentSMSMessageError = GE_NONE;
+      /* Signal no error to calling code. */
+
+      if (MessageBuffer[MessageLength-2]==2)
+	CurrentSMSMessageError = GE_SMSWAITING;
+      else
+	CurrentSMSMessageError = GE_NONE;
 
 #ifdef DEBUG
-		printf("\n");
+      printf("\n");
 #endif DEBUG
 
-		break;
+      break;
 
-	  case 0x09:
-		/* You have requested invalid or empty location. */
+    case 0x09:
+
+      /* We have requested invalid or empty location. */
 
 #ifdef DEBUG
-		printf("Message: SMS reading failed.\n");
+      printf(_("Message: SMS reading failed.\n"));
 #endif DEBUG
 
-		break;
+      switch (MessageBuffer[4]) {
 
-	  case 0x37:
+      case 0x02:
 
 #ifdef DEBUG
-		printf("Message: SMS Status Received\n");
-		printf("   The number of messages: %d\n", MessageBuffer[10]);
-		printf("   Unread messages: %d\n", MessageBuffer[11]);
+	printf(_("   Invalid memory type!\n"));
 #endif DEBUG
 
-	    CurrentSMSStatus->UnRead = MessageBuffer[11];
-	    CurrentSMSStatus->Number = MessageBuffer[10];
-	    CurrentSMSStatusError = GE_NONE;
+	CurrentSMSMessageError = GE_INVALIDMEMORYTYPE;
 
-	  break;
+	break;
 
-          case 0x38:
+      case 0x07:
 
 #ifdef DEBUG
-	    printf(_("Message: SMS Status error, probably not authorized by PIN\n"));
+	printf(_("   Empty SMS location.\n"));
 #endif DEBUG
 
-	  break;
+	CurrentSMSMessageError = GE_EMPTYSMSLOCATION;
+
+	break;
+      }
+
+      break;
+
+    case 0x37:
+
+#ifdef DEBUG
+      printf(_("Message: SMS Status Received\n"));
+      printf(_("   The number of messages: %d\n"), MessageBuffer[10]);
+      printf(_("   Unread messages: %d\n"), MessageBuffer[11]);
+#endif DEBUG
+
+      CurrentSMSStatus->UnRead = MessageBuffer[11];
+      CurrentSMSStatus->Number = MessageBuffer[10];
+      CurrentSMSStatusError = GE_NONE;
+
+      break;
+
+    case 0x38:
+
+#ifdef DEBUG
+      printf(_("Message: SMS Status error, probably not authorized by PIN\n"));
+#endif DEBUG
+
+      break;
 	  
-	  default:
+    default:
 
 #ifdef DEBUG
-	    printf("Message: the rest of the SMS message received.\n");
+      printf(_("Message: the rest of the SMS message received.\n"));
 #endif DEBUG
 
-	    tmp=UnpackEightBitsToSeven(MessageLength-2, MessageBuffer, output);
+      tmp=UnpackEightBitsToSeven(MessageLength-2, MessageBuffer, output);
 
-		for (i=0; i<tmp;i++) {
+      for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-		  printf("%c", GSM_Default_Alphabet[output[i]]);
+	printf("%c", GSM_Default_Alphabet[output[i]]);
 #endif DEBUG
 
-		  CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=GSM_Default_Alphabet[output[i]];
-		}
+	CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=GSM_Default_Alphabet[output[i]];
+      }
 
-		CurrentSMSMessage->MessageText[CurrentSMSPointer+tmp]=0;
+      CurrentSMSMessage->MessageText[CurrentSMSPointer+tmp]=0;
 
-		CurrentSMSMessageError = GE_NONE;
+      CurrentSMSMessageError = GE_NONE;
 
 #ifdef DEBUG
-		printf("\n");
+      printf("\n");
 #endif DEBUG
 
-	  }
-	  break;
+    }
 
-	  /* Mobile phone identification */
+    break;
 
-	case 0x64:
+    /* Mobile phone identification */
+
+  case 0x64:
 
 #ifdef DEBUG
+    printf(_("Message: Mobile phone identification received:\n"));
+    printf(_("   Serial No. %s\n"), MessageBuffer+4);
 
-	  printf("Message: Mobile phone identification received:\n");
-	  printf("   Serial No. %s\n", MessageBuffer+4);
+    /* FIXME: What is this? My phone reports: NSE-3 */
 
-	  /* What is this? My phone reports: NSE-3 */
-	  printf("   %s\n", MessageBuffer+25);
+    printf("   %s\n", MessageBuffer+25);
 
-	  /* What is this? My phone reports: 0501505 */
-	  printf("   Production Code: %s\n", MessageBuffer+31);
+    printf(_("   Production Code: %s\n"), MessageBuffer+31);
 
-	  printf("   HW: %s\n", MessageBuffer+39);
+    printf(_("   HW: %s\n"), MessageBuffer+39);
 
-	  printf("   Firmware: %s\n", MessageBuffer+44);
+    printf(_("   Firmware: %s\n"), MessageBuffer+44);
 
-	  /* These bytes are probably the source of the "Accessory not connected"
-             messages on the phone when trying to emulate NCDS... I hope... */
-   	  printf("   Magic byte1: %02x\n", MessageBuffer[50]);
-   	  printf("   Magic byte2: %02x\n", MessageBuffer[51]);
-   	  printf("   Magic byte3: %02x\n", MessageBuffer[52]);
-   	  printf("   Magic byte4: %02x\n", MessageBuffer[53]);
+    /* These bytes are probably the source of the "Accessory not connected"
+       messages on the phone when trying to emulate NCDS... I hope... */
 
+    printf(_("   Magic bytes: %02x %02x %02x %02x\n"), MessageBuffer[50], MessageBuffer[51], MessageBuffer[52], MessageBuffer[53]);
 #endif DEBUG
 
-	  break;
+    break;
 
-	  /* Acknowlegment */
-	  
-	case 0x7f:
+    /* Acknowlegment */
+
+  case 0x7f:
 
 #ifdef DEBUG
-  printf(_("[Received Ack of type %02x, seq: %2x]\n"), MessageBuffer[0], MessageBuffer[1]);
+    printf(_("[Received Ack of type %02x, seq: %2x]\n"), MessageBuffer[0], MessageBuffer[1]);
 #endif DEBUG
 
-  FB61_LinkOK = true;
+    FB61_LinkOK = true;
 
-	  break;
+    break;
 
-	  /* Power on message */
+    /* Power on message */
 
-	case 0xd0:
+  case 0xd0:
 
 #ifdef DEBUG
-	  printf(_("Message: The phone is powered on - seq 1.\n"));
-	  FB61_RX_DisplayMessage();
+    printf(_("Message: The phone is powered on - seq 1.\n"));
 #endif DEBUG
 
-	  break;
+    break;
 
-	  /* Power on message */
+    /* Power on message */
 
-	case 0xf4:
+  case 0xf4:
 
 #ifdef DEBUG
-	  printf(_("Message: The phone is powered on - seq 2.\n"));
-	  FB61_RX_DisplayMessage();
+    printf(_("Message: The phone is powered on - seq 2.\n"));
 #endif DEBUG
 
-	  break;
+    break;
 
-	  /* Unknown message - if you think that you know the exact meaning of
-         other messages - please let us know. */
+    /* Unknown message - if you think that you know the exact meaning of
+       other messages - please let us know. */
 
-	default:
-	  FB61_RX_DisplayMessage();
+  default:
 
+    FB61_RX_DisplayMessage();
+  }
+
+  return FB61_RX_Sync;
 }
-
-	return FB61_RX_Sync;
-}
-
-enum FB61_RX_States         RX_State;
 
 	/* RX_State machine for receive handling.  Called once for each
 	   character received from the phone/phone. */
@@ -1917,13 +2042,13 @@ char *FB61_PrintDevice(int Device)
     switch (Device) {
 
 	case FB61_DEVICE_PHONE:
-	  return "Phone";
+	  return _("Phone");
 
 	case FB61_DEVICE_PC:
-	  return "PC";
+	  return _("PC");
 
 	default:
-	  return "Unknown";
+	  return _("Unknown");
 	}
 }
 
@@ -2016,7 +2141,7 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
   out_buffer[current++] = checksum;
 
 #ifdef DEBUG
-  printf("PC: ");
+  printf(_("PC: "));
 
   for (count = 0; count < current; count++)
     printf("%02x:", out_buffer[count]);
@@ -2040,7 +2165,7 @@ int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
 #ifdef DEBUG
 
-  printf("[Sending Ack of type %02x, seq: %x]\n", message_type, message_seq);
+  printf(_("[Sending Ack of type %02x, seq: %x]\n"), message_type, message_seq);
 
 #endif DEBUG
 

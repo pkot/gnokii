@@ -14,7 +14,7 @@
   Warning: this code is only the test tool. It is not intented to real work -
   wait for GUI application.
 
-  Last modification: Thu May  6 00:51:48 CEST 1999
+  Last modification: Sun May 16 21:04:03 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -83,7 +83,7 @@ void usage(void)
           --enterpin        sends the entered PIN to the mobile phone.
 
           --getphonebook    gets phonebook entries from specified memory type
-                            ('int' or 'sim') starting at entry [start] and
+                            ('A' or 'B') starting at entry [start] and
                             ending at [end].  Entries are dumped to stdout in
                             format suitable for editing and passing back to
                             writephonebook command.
@@ -93,11 +93,11 @@ void usage(void)
                             the getphonebook command.
 
           --getsms          gets SMS messages from specified memory type
-                            ('int' or 'sim') starting at entry [start] and
+                            ('A' or 'B') starting at entry [start] and
                             ending at [end].  Entries are dumped to stdout.
 
           --deletesms       deletes SMS messages from specified memory type
-                            ('int' or 'sim') starting at entry [start] and
+                            ('A' or 'B') starting at entry [start] and
                             ending at [end].
 
           --sendsms         sends an SMS message to [destination] via
@@ -113,7 +113,11 @@ void usage(void)
 
           --getalarm        shows current alarm.
 
-          --dialvoice       initiate voice call.\n"));
+          --dialvoice       initiate voice call.
+
+   [memory type] is one of the following:
+          A ... SIM card memory
+          B ... internal memory of the phone\n"));
 }
 
 /* fbusinit is the generic function which waits for the FBUS link. The limit
@@ -208,189 +212,194 @@ int main(int argc, char *argv[])
     dialvoice(argv);
   }
 
-		/* Get phonebook command. */
-	if (argc == 5 && strcmp(argv[1], "--getphonebook") == 0) {
-		getphonebook(argv);
-	}
+  /* Get phonebook command. */
+  if (argc == 5 && strcmp(argv[1], "--getphonebook") == 0)
+    getphonebook(argv);
 
-		/* Write phonebook command. */
-	if (strcmp(argv[1], "--writephonebook") == 0) {
-		writephonebook();
-	}
+  /* Write phonebook command. */
+  if (strcmp(argv[1], "--writephonebook") == 0)
+    writephonebook();
 
-		/* Get sms message mode. */
-	if (argc == 5 && strcmp(argv[1], "--getsms") == 0) {
-		getsms(argv);
-	}
+  /* Get sms message mode. */
+  if (argc == 5 && strcmp(argv[1], "--getsms") == 0)
+    getsms(argv);
 
-		/* Delete sms message mode. */
-	if (argc == 5 && strcmp(argv[1], "--deletesms") == 0) {
-		deletesms(argv);
-	}
+  /* Delete sms message mode. */
+  if (argc == 5 && strcmp(argv[1], "--deletesms") == 0)
+    deletesms(argv);
 
-		/* Send sms message mode. */
-	if (argc == 4 && strcmp(argv[1], "--sendsms") == 0) {
-		sendsms(argv);
-	}
+  /* Send sms message mode. */
+  if (argc == 4 && strcmp(argv[1], "--sendsms") == 0)
+    sendsms(argv);
 
-		/* Either an unknown command or wrong number of args! */
-	usage();
-	exit (-1);
+  /* Either an unknown command or wrong number of args! */
+  usage();
+
+  exit (-1);
 }
 
-	/* Send  SMS messages. */
-void	sendsms(char *argv[])
+/* Send  SMS messages. */
+void sendsms(char *argv[])
 {
-	int		error;
-	char	message_buffer[200];	
-	int		chars_read;
 
-		/* Get message text from stdin. */
-	chars_read = fread(message_buffer, 1, 160, stdin);
+  GSM_Error error;
+  char message_buffer[200];	
+  int chars_read;
 
-	if (chars_read == 0) {
-		fprintf(stderr, _("Couldn't read from stdin!\n"));	
-		exit (1);
-	}
-		/*  Null terminate. */
-	message_buffer[chars_read] = 0x00;	
+  /* Get message text from stdin. */
 
-	fprintf(stdout, _("Sending SMS to %s via message centre %s\n"), argv[2], argv[3]);
+  chars_read = fread(message_buffer, 1, 160, stdin);
 
-		/* Initialise the GSM interface. */     
-	fbusinit(true);
+  if (chars_read == 0) {
+    fprintf(stderr, _("Couldn't read from stdin!\n"));	
+    exit (1);
+  }
 
-		/* Send the message. */
-	error = GSM->SendSMSMessage(argv[3], argv[2], message_buffer);
+  /*  Null terminate. */
 
-	if (error == GE_NOTIMPLEMENTED) {
-		fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
-		GSM->Terminate();
-		exit(-1);
-	}
+  message_buffer[chars_read] = 0x00;	
 
-	GSM->Terminate();
-	exit(-1);
+  fprintf(stdout, _("Sending SMS to %s via message centre %s\n"), argv[2], argv[3]);
 
+  /* Initialise the GSM interface. */     
+
+  fbusinit(true);
+
+  /* Send the message. */
+
+  error = GSM->SendSMSMessage(argv[3], argv[2], message_buffer);
+
+  GSM->Terminate();
+  exit(-1);
 }
 
-	/* Get SMS messages. */
-void	getsms(char *argv[])
+/* Get SMS messages. */
+void getsms(char *argv[])
 {
-	GSM_SMSMessage		message;
-	GSM_MemoryType		memory_type;
-	char				*memory_type_string;
-	int					start_message, end_message, count;
-	GSM_Error			error;
 
+  GSM_SMSMessage message;
+  GSM_MemoryType memory_type;
+  char *memory_type_string;
+  int start_message, end_message, count;
+  GSM_Error error;
 
-		/* Handle command line args that set type, start and end locations. */
-	if (strcmp(argv[2], "int") == 0) {
-		memory_type = GMT_INTERNAL;
-		memory_type_string = "int";
-	}
-	else {
-		if (strcmp(argv[2], "sim") == 0) {
-			memory_type = GMT_SIM;
-			memory_type_string = "sim";
-		}
-		else {
-			fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
-			exit (-1);
-		}
-	}
+  /* Handle command line args that set type, start and end locations. */
 
-	start_message = atoi (argv[3]);
-	end_message = atoi (argv[4]);
+  if (strcmp(argv[2], "B") == 0) {
+    memory_type = GMT_INTERNAL;
+    memory_type_string = "B";
+  }
+  else
+    if (strcmp(argv[2], "A") == 0) {
+      memory_type = GMT_SIM;
+      memory_type_string = "A";
+    }
+    else {
+      fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
+      exit (-1);
+    }
 
-		/* Initialise the code for the GSM interface. */     
-	fbusinit(true);
+  start_message = atoi(argv[3]);
+  end_message = atoi(argv[4]);
 
-		/* Now retrieve the requested entries. */
-	for (count = start_message; count <= end_message; count ++) {
+  /* Initialise the code for the GSM interface. */     
+
+  fbusinit(true);
+
+  /* Now retrieve the requested entries. */
+
+  for (count = start_message; count <= end_message; count ++) {
 	
-		error = GSM->GetSMSMessage(memory_type, count, &message);
+    error = GSM->GetSMSMessage(memory_type, count, &message);
 
-		if (error == GE_NONE) {
+    if (error == GE_NONE) {
 
-			fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"), message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCentre);
+      fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"), message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCentre);
 
+      fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
 
-			fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
-
-		}
-		else {
-
-			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
-				GSM->Terminate();
-				exit(-1);	
-			}
-
-			fprintf(stdout, _("GetSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
-		}
-	}
-
+    }
+    else {
+      if (error == GE_NOTIMPLEMENTED) {
+	fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
 	GSM->Terminate();
-	exit(0);
+	exit(-1);	
+      }
+      else {
+	if (error == GE_INVALIDMEMORYTYPE) {
+	  fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
+	  GSM->Terminate();
+	  exit(-1);	
+	}
+	else
+	  if (error == GE_EMPTYSMSLOCATION) {
+	    fprintf(stderr, _("Empty location: %s %d!\n"), memory_type_string, count);
+	    GSM->Terminate();
+	    exit(-1);	
+	  }
+      }
+
+      fprintf(stdout, _("GetSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
+    }
+  }
+
+  GSM->Terminate();
+  exit(0);
 }
 
-	/* Delete SMS messages. */
-void	deletesms(char *argv[])
+/* Delete SMS messages. */
+void deletesms(char *argv[])
 {
-	GSM_SMSMessage		message;
-	GSM_MemoryType		memory_type;
-	char				*memory_type_string;
-	int					start_message, end_message, count;
-	GSM_Error			error;
 
+  GSM_SMSMessage message;
+  GSM_MemoryType memory_type;
+  char *memory_type_string;
+  int start_message, end_message, count;
+  GSM_Error error;
 
-		/* Handle command line args that set type, start and end locations. */
-	if (strcmp(argv[2], "int") == 0) {
-		memory_type = GMT_INTERNAL;
-		memory_type_string = "int";
-	}
-	else {
-		if (strcmp(argv[2], "sim") == 0) {
-			memory_type = GMT_SIM;
-			memory_type_string = "sim";
-		}
-		else {
-			fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
-			exit (-1);
-		}
-	}
+  /* Handle command line args that set type, start and end locations. */
 
-	start_message = atoi (argv[3]);
-	end_message = atoi (argv[4]);
+  if (strcmp(argv[2], "B") == 0) {
+    memory_type = GMT_INTERNAL;
+    memory_type_string = "B";
+  }
+  else
+    if (strcmp(argv[2], "A") == 0) {
+      memory_type = GMT_SIM;
+      memory_type_string = "A";
+    }
+    else {
+      fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
+      exit (-1);
+    }
 
-		/* Initialise the code for the GSM interface. */     
-	fbusinit(true);
+  start_message = atoi (argv[3]);
+  end_message = atoi (argv[4]);
 
-		/* Now delete the requested entries. */
-	for (count = start_message; count <= end_message; count ++) {
-	
-		error = GSM->DeleteSMSMessage(memory_type, count, &message);
+  /* Initialise the code for the GSM interface. */     
 
-		if (error == GE_NONE) {
+  fbusinit(true);
 
-			fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);
+  /* Now delete the requested entries. */
 
-		}
-		else {
+  for (count = start_message; count <= end_message; count ++) {
 
-			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
-				GSM->Terminate();
-				exit(-1);	
-			}
+    error = GSM->DeleteSMSMessage(memory_type, count, &message);
 
-			fprintf(stdout, _("DeleteSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
-		}
-	}
-
+    if (error == GE_NONE)
+      fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);
+    else {
+      if (error == GE_NOTIMPLEMENTED) {
+	fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
 	GSM->Terminate();
-	exit(0);
+	exit(-1);	
+      }
+      fprintf(stdout, _("DeleteSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
+    }
+  }
+
+  GSM->Terminate();
+  exit(0);
 }
 
 static volatile bool shutdown = false;
@@ -404,22 +413,23 @@ static void interrupted(int sig)
   shutdown = true;
 }
 
-	/* In this mode we get the pin from the keyboard and send it to the
-	   mobile phone */
+/* In this mode we get the pin from the keyboard and send it to the mobile
+   phone */
 
-void	enterpin(void)
+void enterpin(void)
 {
-	char *pin=getpass("Enter your PIN: ");
 
-	fbusinit(false);
+  char *pin=getpass(_("Enter your PIN: "));
 
-	if (GSM->EnterPin(pin) == GE_INVALIDPIN)
-	  fprintf(stdout, _("Error: invalid PIN\n"));
-	else
-	  fprintf(stdout, _("PIN ok.\n"));
+  fbusinit(false);
 
-	GSM->Terminate();
-	exit(0);
+  if (GSM->EnterPin(pin) == GE_INVALIDPIN)
+    fprintf(stdout, _("Error: invalid PIN\n"));
+  else
+    fprintf(stdout, _("PIN ok.\n"));
+
+  GSM->Terminate();
+  exit(0);
 }
 
 void dialvoice(char *argv[])
@@ -436,6 +446,7 @@ void dialvoice(char *argv[])
 
 void setdatetime(char *argv[])
 {
+
   GSM_DateTime Date;
 
   fbusinit(false);
@@ -452,24 +463,26 @@ void setdatetime(char *argv[])
   exit(0);
 }
 
-	/* In this mode we receive the date and time from mobile phone */
+/* In this mode we receive the date and time from mobile phone */
 
-void	getdatetime(void) {
+void getdatetime(void) {
 
   GSM_DateTime date_time;
 
-	fbusinit(false);
+  fbusinit(false);
 
-	if (GSM->GetDateTime(&date_time)==GE_NONE) {
-		fprintf(stdout, "Date: %4d/%02d/%02d\n", date_time.Year, date_time.Month, date_time.Day);
-		fprintf(stdout, "Time: %02d:%02d:%02d\n", date_time.Hour, date_time.Minute, date_time.Second);
-	}
+  if (GSM->GetDateTime(&date_time)==GE_NONE) {
+    fprintf(stdout, _("Date: %4d/%02d/%02d\n"), date_time.Year, date_time.Month, date_time.Day);
+    fprintf(stdout, _("Time: %02d:%02d:%02d\n"), date_time.Hour, date_time.Minute, date_time.Second);
+  }
 
-	GSM->Terminate(); exit(0);
+  GSM->Terminate();
+  exit(0);
 }
 
 void setalarm(char *argv[])
 {
+
   GSM_DateTime Date;
 
   fbusinit(false);
@@ -480,24 +493,21 @@ void setalarm(char *argv[])
   GSM->SetAlarm(1, &Date);
 
   GSM->Terminate();
-
   exit(0);
 }
 
-
-void	getalarm(void) {
+void getalarm(void) {
 
   GSM_DateTime date_time;
 
   fbusinit(false);
 
   if (GSM->GetAlarm(0, &date_time)==GE_NONE) {
-    fprintf(stdout, "Alarm: %s\n", (date_time.AlarmEnabled==0)?"off":"on");
-    fprintf(stdout, "Time: %02d:%02d\n", date_time.Hour, date_time.Minute);
+    fprintf(stdout, _("Alarm: %s\n"), (date_time.AlarmEnabled==0)?"off":"on");
+    fprintf(stdout, _("Time: %02d:%02d\n"), date_time.Hour, date_time.Minute);
   }
 
   GSM->Terminate();
-
   exit(0);
 }
 
@@ -536,25 +546,25 @@ void monitormode(void)
   while (!shutdown) {
 
     if (GSM->GetRFLevel(&rflevel) == GE_NONE)
-      fprintf(stdout, "RFLevel: %d\n", (int)rflevel);
+      fprintf(stdout, _("RFLevel: %d\n"), (int)rflevel);
 
     if (GSM->GetBatteryLevel(&batterylevel) == GE_NONE)
-      fprintf(stdout, "Battery: %d\n", (int)batterylevel);
+      fprintf(stdout, _("Battery: %d\n"), (int)batterylevel);
 
     if (GSM->GetPowerSource(&powersource) == GE_NONE)
-      fprintf(stdout, "Power Source: %s\n", (powersource==GPS_ACDC)?"AC/DC":"battery");
+      fprintf(stdout, _("Power Source: %s\n"), (powersource==GPS_ACDC)?_("AC/DC"):_("battery"));
 
     if (GSM->GetMemoryStatus(&SIMMemoryStatus) == GE_NONE)
-      fprintf(stdout, "SIM: Used %d, Free %d\n", SIMMemoryStatus.Used, SIMMemoryStatus.Free);
+      fprintf(stdout, _("SIM: Used %d, Free %d\n"), SIMMemoryStatus.Used, SIMMemoryStatus.Free);
 
     if (GSM->GetMemoryStatus(&PhoneMemoryStatus) == GE_NONE)
-      fprintf(stdout, "Phone: Used %d, Free %d\n", PhoneMemoryStatus.Used, PhoneMemoryStatus.Free);
+      fprintf(stdout, _("Phone: Used %d, Free %d\n"), PhoneMemoryStatus.Used, PhoneMemoryStatus.Free);
 
     if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE)
-      fprintf(stdout, "SMS Messages: UnRead %d, Number %d\n", SMSStatus.UnRead, SMSStatus.Number);
+      fprintf(stdout, _("SMS Messages: UnRead %d, Number %d\n"), SMSStatus.UnRead, SMSStatus.Number);
 
     if (GSM->GetIncomingCallNr(Number) == GE_NONE)
-      fprintf(stdout, "Incoming call: %s\n", Number);
+      fprintf(stdout, _("Incoming call: %s\n"), Number);
 	    
     sleep(1);
   }
@@ -565,182 +575,149 @@ void monitormode(void)
   exit(0);
 }
 
-	/* Get requested range of phonebook entries and output to stdout
-	   in format suitable for editing and subsequent writing back
-	   to phone with writephonebook. */
+/* Get requested range of phonebook entries and output to stdout in format
+   suitable for editing and subsequent writing back to phone with
+   writephonebook. */
+
 void	getphonebook(char *argv[])
 {
-		/* Temporary entry for phonebook code. */
-	GSM_PhonebookEntry		entry;
-	int						count;
-	GSM_MemoryType			memory_type;
-	GSM_Error				error;
-	char					*memory_type_string;
-	int						start_entry;
-	int						end_entry;
 
+  GSM_PhonebookEntry entry;
+  int count;
+  GSM_MemoryType memory_type;
+  GSM_Error error;
+  char *memory_type_string;
+  int start_entry;
+  int end_entry;
 
-		/* Handle command line args that set type, start and end locations. */
-	if (strcmp(argv[2], "int") == 0) {
-		memory_type = GMT_INTERNAL;
-		memory_type_string = "int";
-	}
-	else {
-		if (strcmp(argv[2], "sim") == 0) {
-			memory_type = GMT_SIM;
-			memory_type_string = "sim";
-		}
-		else {
-			fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
-			exit (-1);
-		}
-	}
+  /* Handle command line args that set type, start and end locations. */
 
-	start_entry = atoi (argv[3]);
-	end_entry = atoi (argv[4]);
+  if (strcmp(argv[2], "B") == 0) {
+    memory_type = GMT_INTERNAL;
+    memory_type_string = "B";
+  }
+  else
+    if (strcmp(argv[2], "A") == 0) {
+      memory_type = GMT_SIM;
+      memory_type_string = "A";
+    }
+    else {
+      fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
+      exit (-1);
+    }
 
-		/* Do generic initialisation routine, monitoring disabled. */
-	fbusinit(false);
+  start_entry = atoi (argv[3]);
+  end_entry = atoi (argv[4]);
 
-		/* Now retrieve the requested entries. */
-	for (count = start_entry; count <= end_entry; count ++) {
-		if (GSM->GetPhonebookLocation(memory_type, count, &entry) == 0) {
-			fprintf(stdout, "%s|%d|%s|%s|%d\n", memory_type_string, count, entry.Name, entry.Number, entry.Group);
-		}
-		else {
+  /* Do generic initialisation routine, monitoring disabled. */
 
-			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
-				GSM->Terminate();
-				exit(-1);
-			}
+  fbusinit(false);
 
-			fprintf(stdout, _("%s|%d|Bad location or other error!\n"), memory_type_string, count);
-		}
-	}
-	
+  /* Now retrieve the requested entries. */
+
+  for (count = start_entry; count <= end_entry; count ++) {
+
+    error=GSM->GetPhonebookLocation(memory_type, count, &entry);
+ 
+    if (error == GE_NONE)
+      fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, count, entry.Group);
+    else {
+      if (error == GE_NOTIMPLEMENTED) {
+	fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
 	GSM->Terminate();
-	exit(0);
+	exit(-1);
+      }
+      else if (error == GE_INVALIDMEMORYTYPE) {
+	fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
+	GSM->Terminate();
+	exit(-1);
+      }
+
+      fprintf(stdout, _("%s|%d|Bad location or other error!(%d)\n"), memory_type_string, count, error);
+    }
+  }
+	
+  GSM->Terminate();
+  exit(0);
 }
 
-	/* Read data from stdin, parse and write to phone.  The parsing
-	   is relatively crude and doesn't allow for much variation
-	   from the stipulated format. */
+int GetLine(FILE *File, char *Line) {
 
-/* FIXME: can not parse group now...*/
+  char *ptr;
 
-void	writephonebook(void)
+  if (fgets(Line, 99, File)) {
+    ptr=Line+strlen(Line)-1;
+
+    while ( (*ptr == '\n' || *ptr == '\r') && ptr>=Line)
+      *ptr--='\0';
+
+      return strlen(Line);
+  }
+  else
+    return 0;
+}
+
+/* Read data from stdin, parse and write to phone.  The parsing is relatively
+   crude and doesn't allow for much variation from the stipulated format. */
+
+void writephonebook(void)
 {
-	GSM_PhonebookEntry		entry;
-	GSM_Error				error;
-	char					line_buffer[100];
-	int						buffer_count;
-	GSM_MemoryType			memory_type;
-	char					*memory_type_string;
-	int						entry_number, count, sub_count;
-	char					name_buffer[40], number_buffer[60];
-	int						line_count;
-	int						separator_count;
-	int						error_code;
 
-		/* Initialise fbus code, enable monitoring for debugging
-		   purposes... */
-	fbusinit(true);
+  GSM_PhonebookEntry entry;
+  GSM_Error error;
+  char *memory_type_string;
+  int entry_number;
+  int line_count=0;
 
-		/* Initialise line count. */
-	line_count = 0;
+  char Line[100], BackLine[100];
+  char *ptr;
 
-		/* Go through data from stdin. */
-	while(!feof(stdin)) {
-		buffer_count = 0;
-	
-		while ((line_buffer[buffer_count] = fgetc(stdin)) != '\n' && (buffer_count < 99) && !feof(stdin)) {
-			buffer_count ++;
-		}
-		line_buffer[buffer_count] = 0;
+  /* Initialise fbus code, enable monitoring for debugging purposes... */
 
-		if (strlen(line_buffer) == 0) {
-			break;
-		}
+  fbusinit(true);
 
-		line_count ++;
+  /* Go through data from stdin. */
 
-			/* Do initial parseo... Arrgh - gimmie PERL! :) */
-		if (strncmp(line_buffer, "int", 3) == 0) {
-			memory_type_string = "int";
-			memory_type = GMT_INTERNAL;
-		}
-		else {
-			if (strncmp(line_buffer, "sim", 3) == 0) {
-				memory_type_string = "sim";
-				memory_type = GMT_SIM;
-			}
-			else {
-				fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, line_buffer);
-			}
-		}
+  while (GetLine(stdin, Line)) {
 
-		if (sscanf(line_buffer + 4, "%d|", &entry_number) != 1) {
-			fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, line_buffer);
-		} 
-		else {
-			separator_count = 0;
-			count = 0;
+    strcpy(BackLine, Line);
 
-				/* Skip first two separators. */
-			while (count < strlen(line_buffer) && separator_count < 2) {
-				if (line_buffer[count] == '|') {
-					separator_count ++;
-				}
-				count ++;
-			}
-				/* Get next field (name) */
-			sub_count = 0;	
-			while ((count < strlen(line_buffer)) && (line_buffer[count] != '|')) {
-				name_buffer[sub_count] = line_buffer[count];
+    line_count++;
 
-				count ++;
-				sub_count ++;
-			}
-			name_buffer[sub_count] = 0;
-			count++;
+    ptr=strtok(Line, ";"); strcpy(entry.Name, ptr);
 
-				/* Get last field (number) */
-			sub_count = 0;	
-			while ((count < strlen(line_buffer)) && (line_buffer[count] != '|')) {
-				number_buffer[sub_count] = line_buffer[count];
+    ptr=strtok(NULL, ";"); strcpy(entry.Number, ptr);
 
-				count ++;
-				sub_count ++;
-			}
-			number_buffer[sub_count] = 0;
+    ptr=strtok(NULL, ";");
 
-		}
+    if (*ptr == 'B') {
+      memory_type_string = "int";
+      entry.MemoryType = GMT_INTERNAL;
+    }
+    else {
+      if (*ptr == 'A') {
+	memory_type_string = "sim";
+	entry.MemoryType = GMT_SIM;
+      }
+      else
+	fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
+    }
 
-			/* Copy into entry. */	
-		strcpy (entry.Name, name_buffer);
-		strcpy (entry.Number, number_buffer);
+    ptr=strtok(NULL, ";"); entry_number=atoi(ptr);
 
-			/* Do write and report success/failure. */
-		error_code = GSM->WritePhonebookLocation(memory_type, entry_number, &entry);
+    ptr=strtok(NULL, ";"); entry.Group=atoi(ptr);
 
-		if (error_code == GE_NONE) {
-			fprintf (stdout, _("Write Succeeded: memory type:%s, loc:%d, name: %s, number: %s\n"), memory_type_string, entry_number, entry.Name, entry.Number);
-		}
-		else {
+    /* Do write and report success/failure. */
 
-			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
-				GSM->Terminate();
-				exit(-1);
-			}
+    error = GSM->WritePhonebookLocation(entry_number, &entry);
 
-			fprintf (stdout, _("Write FAILED(%d): memory type:%s, loc:%d, name: %s, number: %s\n"), error_code, memory_type_string, entry_number, entry.Name, entry.Number);
-		}
-	}
+    if (error == GE_NONE)
+      fprintf (stdout, _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), memory_type_string, entry_number, entry.Name, entry.Number);
+    else
+      fprintf (stdout, _("Write FAILED(%d): memory type: %s, loc: %d, name: %s, number: %s\n"), error, memory_type_string, entry_number, entry.Name, entry.Number);
 
-	GSM->Terminate();
-	exit(0);
+  }
+
+  GSM->Terminate();
+  exit(0);
 }
-
-

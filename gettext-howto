@@ -42,3 +42,19 @@ SnowWhite:/tmp/gnokii$
 
 The second line is in czech language :-) There are some problems - for
 example with "Mar" which is substitute by the C preprocessor.
+
+4. Updating all .po files:
+
+	mv gnokii.po old.po
+	xgettext -a -k_ -s -v -d gnokii *.h *.c
+	mv gnokii.po new.po
+	tupdate new.po old.po >gnokii.po
+	rm -rf new.po old.po
+
+Now we have new gnokii.po file.
+
+	mv gnokii-czech.po old.po
+	tupdate gnokii.po old.po >gnokii-czech.po
+	rm -rf old.po
+
+And now we also have new gnokii-czech.po file.

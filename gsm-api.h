@@ -10,7 +10,7 @@
   Header file for the various functions, definitions etc. used to implement
   the handset interface.  See gsm-api.c for more details.
 
-  Last modification: Thu May  6 00:51:48 CEST 1999
+  Last modification: Sun May 16 21:05:42 CEST 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */

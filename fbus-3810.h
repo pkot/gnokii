@@ -29,8 +29,7 @@ void		FB38_Terminate(void);
 GSM_Error	FB38_GetPhonebookLocation(GSM_MemoryType memory_type, int location,
 				GSM_PhonebookEntry *entry);
 
-GSM_Error	FB38_WritePhonebookLocation(GSM_MemoryType memory_type, 
-				int location, GSM_PhonebookEntry *entry);
+GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry);
 
 GSM_Error	FB38_GetMemoryStatus(GSM_MemoryStatus *Status);
 

@@ -6,256 +6,821 @@ msgstr ""
 "Xgettext-Options: -a -k_ -s -v -d gnokii\n"
 "Files: fbus-3810.h fbus-6110.h gsm-api.h gsm-common.h misc.h fbus-3810.c fbus-6110.c gnokii.c gsm-api.c\n"
 
-#: gnokii.c:54
-msgid "       Built %s %s for %s on %s \n"
-msgstr "       Kompiliert: %s %s für Modell %s an Port %s \n"
+#: fbus-6110.c:1341
+msgid "   %d. SMS Center name is %s\n"
+msgstr ""
 
-#: fbus-3810.c:1506
+#: fbus-6110.c:1342
+msgid "   %d. SMS Center number is %s\n"
+msgstr ""
+
+#: fbus-6110.c:1734
+msgid "   Alarm date: %d-%02d-%02d\n"
+msgstr ""
+
+#: fbus-6110.c:1695
+msgid "   Alarm is %s\n"
+msgstr ""
+
+#: fbus-6110.c:1735
+msgid "   Alarm time: %02d:%02d:%02d\n"
+msgstr ""
+
+#: fbus-6110.c:1694
+msgid "   Alarm: %02d:%02d\n"
+msgstr ""
+
+#: fbus-6110.c:1564
+msgid "   Battery Level: %d\n"
+msgstr ""
+
+#: fbus-6110.c:1618
+msgid "   CellID: %02x%2x\n"
+msgstr ""
+
+#: fbus-6110.c:1595
+msgid "   Code Accepted\n"
+msgstr ""
+
+#: fbus-6110.c:1603
+msgid ""
+"   Code Error\n"
+"   You're not my big owner :-)\n"
+msgstr ""
+
+#: fbus-6110.c:1665
+msgid "   Date: %4d/%02d/%02d\n"
+msgstr ""
+
+#: fbus-6110.c:1727
+msgid "   Date: %d-%02d-%02d\n"
+msgstr ""
+
+#: fbus-6110.c:1325 fbus-6110.c:1775
+msgid "   Date: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1845
+msgid "   Empty SMS location.\n"
+msgstr ""
+
+#: fbus-6110.c:1198 fbus-6110.c:1293
+msgid "   Exact meaning not known yet, sorry :-(\n"
+msgstr ""
+
+#: fbus-6110.c:1922
+msgid "   Firmware: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1468
+msgid "   Free: %d\n"
+msgstr ""
+
+#: fbus-6110.c:1920
+msgid "   HW: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1424 fbus-6110.c:1835
+msgid "   Invalid memory type!\n"
+msgstr ""
+
+#: fbus-6110.c:1639
+msgid "   Keyboard is %s\n"
+msgstr ""
+
+#: fbus-6110.c:1619
+msgid "   LAC: %02x%02x\n"
+msgstr ""
+
+#: fbus-6110.c:1927
+msgid "   Magic bytes: %02x %02x %02x %02x\n"
+msgstr ""
+
+#: fbus-6110.c:1466
+msgid "   Memory Type: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1505
+msgid "   Mode: "
+msgstr ""
+
+#: fbus-3810.c:1667
 msgid "   Msg Length %d, Msg number %d,  Unknown bytes: %02x %02x %02x %02x %02x %02x\n"
 msgstr "   Nachrichtenlänge %d, Nachrichtennummer %d,  Ünbekannte Bytes: %02x %02x %02x %02x %02x %02x\n"
 
-#: gnokii.c:284
-msgid "%s|%d|Bad location or other error!\n"
-msgstr "%s|%d|Falsche Zelle oder anderer Fehler!\n"
+#: fbus-6110.c:1236 fbus-6110.c:1379
+msgid "   Name: "
+msgstr ""
 
-#: fbus-3810.c:1297
+#: fbus-6110.c:1623
+msgid "   Network code: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1624
+msgid "   Network name: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1228 fbus-6110.c:1395
+msgid "   Number: "
+msgstr ""
+
+#: fbus-6110.c:1738 fbus-6110.c:1773
+msgid "   Number: %d\n"
+msgstr ""
+
+#: fbus-6110.c:1542
+msgid "   Power source: "
+msgstr ""
+
+#: fbus-6110.c:1918
+msgid "   Production Code: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1324 fbus-6110.c:1777
+msgid "   Remote number: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1320 fbus-6110.c:1776
+msgid "   SMS center number: %s\n"
+msgstr ""
+
+#: fbus-6110.c:1326
+msgid "   SMS: "
+msgstr ""
+
+#: fbus-6110.c:1197 fbus-6110.c:1210 fbus-6110.c:1227 fbus-6110.c:1257 fbus-6110.c:1268 fbus-6110.c:1292
+msgid "   Sequence nr. of the call: %d\n"
+msgstr ""
+
+#: fbus-6110.c:1912
+msgid "   Serial No. %s\n"
+msgstr ""
+
+#: fbus-6110.c:1565
+msgid "   Signal strength: %d\n"
+msgstr ""
+
+#: fbus-6110.c:1739
+msgid "   Text: "
+msgstr ""
+
+#: fbus-6110.c:1859
+msgid "   The number of messages: %d\n"
+msgstr ""
+
+#: fbus-6110.c:1353
+msgid "   The request for SMS Center failed.\n"
+msgstr ""
+
+#: fbus-6110.c:1664 fbus-6110.c:1729
+msgid "   Time: %02d:%02d:%02d\n"
+msgstr ""
+
+#: fbus-6110.c:1434
+msgid "   Unknown error!\n"
+msgstr ""
+
+#: fbus-6110.c:1860
+msgid "   Unread messages: %d\n"
+msgstr ""
+
+#: fbus-6110.c:1467
+msgid "   Used: %d\n"
+msgstr ""
+
+#: gnokii.c:65
+msgid "   usage: gnokii {--help|--monitor|--version}"
+msgstr ""
+
+#: gnokii.c:636
+msgid "%s|%d|Bad location or other error!(%d)\n"
+msgstr ""
+
+#: fbus-3810.c:1466
 msgid "0x10 Write failed!"
 msgstr "0x10 Schreiben erfolglos!"
 
-#: fbus-3810.c:725
+#: fbus-3810.c:842
 msgid "0x15 Registration Response 0x%02x\n"
 msgstr "0x15 Registrierungs-Antwort 0x%02x\n"
 
-#: fbus-3810.c:1146
+#: fbus-3810.c:1312
 msgid "0x15 Write failed!"
 msgstr "0x15 Schreiben erfolglos!"
 
-#: fbus-3810.c:739
+#: fbus-3810.c:856
 msgid "0x16 Registration Response 0x%02x 0x%02x\n"
 msgstr "0x16 Registration Response 0x%02x 0x%02x\n"
 
-#: fbus-3810.c:1241
+#: fbus-3810.c:1407
 msgid "0x27 Write failed!"
 msgstr "0x27 Schreiben erfolglos!"
 
-#: fbus-3810.c:1383
+#: fbus-3810.c:1552
 msgid "0x2c Write failed!"
 msgstr "0x2c Schreiben erfolglos!"
 
-#: fbus-3810.c:974
+#: fbus-3810.c:1116
 msgid "0x3f Write failed!"
 msgstr "0x3f Schreiben erfolglos!"
 
-#: fbus-3810.c:964
+#: fbus-3810.c:1106
 msgid "0x4a Write failed!"
 msgstr "0x4a Schreiben erfolglos!"
 
-#: fbus-3810.c:1275
+#: fbus-3810.c:1441
 msgid "0x4b Write failed!"
 msgstr "0x4b Schreiben erfolglos!"
 
-#: gnokii.c:132
-msgid "0x65 0x15 means SMS sending not enabled by network (probably...)\n"
-msgstr "0x65 0x15: Verschicken von SMS-Nachrichten nicht vom Provider freigeschaltet (wahrscheinlich...)\n"
+#: gnokii.c:555
+msgid "AC/DC"
+msgstr ""
 
-#: fbus-3810.c:644
+#: fbus-6110.c:1548
+msgid "AC/DC\n"
+msgstr ""
+
+#: gnokii.c:506
+msgid "Alarm: %s\n"
+msgstr ""
+
+#: gnokii.c:552
+msgid "Battery: %d\n"
+msgstr ""
+
+#: fbus-6110.c:982
+msgid "CAR is %s.\n"
+msgstr ""
+
+#: fbus-3810.c:761
 msgid "CS Fail %02x != %02x"
 msgstr "Cs-Fehler %02x != %02x"
 
-#: fbus-3810.c:906
+#: fbus-6110.c:983
+msgid "CTS is %s.\n"
+msgstr ""
+
+#: fbus-3810.c:1048
 msgid ""
 "Checksum: %02x \n"
 "   "
 msgstr "Prüfsumme: %02x \n"
 
-#: fbus-3810.c:534
+#: fbus-3810.c:652
 msgid "Couldn't open FB38 device: "
 msgstr "Konnte FB38-Device nicht öffnen: "
 
-#: fbus-6110.c:307
+#: fbus-6110.c:1052
 msgid "Couldn't open FB61 device: "
 msgstr "Konnte FB61-Device nicht öffnen: "
 
-#: gnokii.c:100
+#: gnokii.c:254
 msgid "Couldn't read from stdin!\n"
 msgstr "Konnte nicht von stdin lesen!\n"
 
-#: gnokii.c:181
+#: fbus-6110.c:980
+msgid "DTR is %s.\n"
+msgstr ""
+
+#: gnokii.c:317
 msgid "Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"
 msgstr "Datum/Uhrzeit %d/%d/%d %d:%02d:%02d Absender: %s SMS-Center: %s\n"
 
-#: gnokii.c:342 gnokii.c:347
+#: gnokii.c:475
+msgid "Date: %4d/%02d/%02d\n"
+msgstr ""
+
+#: fbus-3810.c:1293
+msgid "Delete SMS Mem Loc write failed!"
+msgstr ""
+
+#: gnokii.c:397
+msgid ""
+"DeleteSMS %s %d failed!(%d)\n"
+"\n"
+msgstr ""
+
+#: gnokii.c:390
+msgid "Deleted SMS %s %d\n"
+msgstr ""
+
+#: gnokii.c:336
+msgid "Empty location: %s %d!\n"
+msgstr ""
+
+#: gnokii.c:422
+msgid "Enter your PIN: "
+msgstr ""
+
+#: gnokii.c:535
+msgid "Entering monitor mode...\n"
+msgstr ""
+
+#: gnokii.c:427
+msgid "Error: invalid PIN\n"
+msgstr ""
+
+#: gnokii.c:703
 msgid "Format problem on line %d [%s]\n"
 msgstr "Formatproblem in Zeile %d [%s]\n"
 
-#: gnokii.c:122 gnokii.c:190 gnokii.c:279 gnokii.c:396
+#: gnokii.c:324 gnokii.c:393 gnokii.c:626
 msgid "Function not implemented in %s model!\n"
 msgstr "Funktion nicht implementiert für Modell %s!\n"
 
 #: gnokii.c:53
-msgid "GNOKII Version 0.2.4 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
-msgstr "GNOKII Version 0.2.4 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
+msgid "GNOKII Version %s"
+msgstr ""
 
-#: gnokii.c:456
-msgid "GSM/fbus init failed! (Unknown model ?).  Quitting. \n"
-msgstr "Initialisierung des GSM/fbus fehlgeschlagen! (Unbekanntes Modell?). Beenden. \n"
+#: gnokii.c:136
+msgid "GSM/FBUS init failed! (Unknown model ?). Quitting.\n"
+msgstr ""
 
-#: gnokii.c:195
+#: gnokii.c:342
 msgid ""
 "GetSMS %s %d failed!(%d)\n"
 "\n"
 msgstr "GetSMS %s %d fehlgeschlagen!(%d)\n"
 
-#: gnokii.c:470
-msgid "Hmmm... GSM_LinkOK never went true.  Quitting. \n"
-msgstr "Hmmm... GSM_LinkOK nie erhalten. Beenden. \n"
+#: gnokii.c:147
+msgid "Hmmm... GSM_LinkOK never went true. Quitting. \n"
+msgstr ""
 
-#: fbus-3810.c:1504
+#: fbus-3810.c:1665
 msgid "Incoming SMS %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"
 msgstr "Ankommende SMS-Nachricht %d/%d/%d %d:%02d:%02d Absender: %s SMS-Center: %s\n"
 
-#: fbus-3810.c:1217
+#: fbus-3810.c:1383
 msgid "Incoming call - status %02x %02x %02x, Number %s.\n"
 msgstr "Ankommender Anruf - Status %02x %02x %02x, Nummer %s.\n"
 
-#: fbus-3810.c:1352
+#: fbus-3810.c:1521
 msgid "Incoming call answered.\n"
 msgstr "Ankommender Anruf beantwortet.\n"
 
-#: fbus-3810.c:1320
+#: fbus-3810.c:1489
 msgid "Incoming call terminated.\n"
 msgstr "Ankommender Anruf beendet.\n"
 
-#: gnokii.c:219
+#: gnokii.c:567
+msgid "Incoming call: %s\n"
+msgstr ""
+
+#: gnokii.c:536
 msgid "Initialising GSM interface...\n"
 msgstr "Initialisiere GSM-Schnittstelle...\n"
 
-#: gnokii.c:208
-msgid "Interrupted\n"
-msgstr "Unterbrochen\n"
+#: gnokii.c:572
+msgid "Leaving monitor mode...\n"
+msgstr ""
 
-#: gnokii.c:218
-msgid "Monitor mode...\n"
-msgstr "Monitor Modus...\n"
+#: gnokii.c:330 gnokii.c:631
+msgid "Memory type %s not supported!\n"
+msgstr ""
 
-#: fbus-3810.c:904
+#: fbus-6110.c:1693
+msgid "Message: Alarm\n"
+msgstr ""
+
+#: fbus-6110.c:1683
+msgid "Message: Alarm set correctly\n"
+msgstr ""
+
+#: fbus-6110.c:1725
+msgid "Message: Calendar note received.\n"
+msgstr ""
+
+#: fbus-6110.c:1256
+msgid "Message: Call answered.\n"
+msgstr ""
+
+#: fbus-6110.c:1267
+msgid "Message: Call ended by your phone.\n"
+msgstr ""
+
+#: fbus-6110.c:1196
+msgid "Message: Call message, type 0x03:"
+msgstr ""
+
+#: fbus-6110.c:1291
+msgid "Message: Call message, type 0x0a:"
+msgstr ""
+
+#: fbus-6110.c:1663
+msgid "Message: Date and time\n"
+msgstr ""
+
+#: fbus-6110.c:1653
+msgid "Message: Date and time set correctly\n"
+msgstr ""
+
+#: fbus-6110.c:1222
+msgid "Message: Incoming call alert:\n"
+msgstr ""
+
+#: fbus-6110.c:1638
+msgid "Message: Keyboard lock\n"
+msgstr ""
+
+#: fbus-6110.c:1480
+msgid "Message: Memory status error, probably not authorized by PIN\n"
+msgstr ""
+
+#: fbus-6110.c:1465
+msgid "Message: Memory status received:\n"
+msgstr ""
+
+#: fbus-6110.c:1911
+msgid "Message: Mobile phone identification received:\n"
+msgstr ""
+
+#: fbus-6110.c:1616
+msgid "Message: Network registration:\n"
+msgstr ""
+
+#: fbus-6110.c:1589
+msgid "Message: PIN:\n"
+msgstr ""
+
+#: fbus-6110.c:1504
+msgid "Message: Phone status received:\n"
+msgstr ""
+
+#: fbus-6110.c:1378
+msgid "Message: Phonebook entry received:\n"
+msgstr ""
+
+#: fbus-6110.c:1455
+msgid "Message: Phonebook not written - name is too long.\n"
+msgstr ""
+
+#: fbus-6110.c:1416
+msgid "Message: Phonebook read entry error received:\n"
+msgstr ""
+
+#: fbus-6110.c:1443
+msgid "Message: Phonebook written correctly.\n"
+msgstr ""
+
+#: fbus-6110.c:1209
+msgid "Message: Remote end hang up.\n"
+msgstr ""
+
+#: fbus-6110.c:1352
+msgid "Message: SMS Center error received:\n"
+msgstr ""
+
+#: fbus-6110.c:1340
+msgid "Message: SMS Center received:\n"
+msgstr ""
+
+#: fbus-6110.c:1319
+msgid "Message: SMS Message Received\n"
+msgstr ""
+
+#: fbus-6110.c:1772
+msgid "Message: SMS Received.\n"
+msgstr ""
+
+#: fbus-6110.c:1858
+msgid "Message: SMS Status Received\n"
+msgstr ""
+
+#: fbus-6110.c:1872
+msgid "Message: SMS Status error, probably not authorized by PIN\n"
+msgstr ""
+
+#: fbus-6110.c:1827
+msgid "Message: SMS reading failed.\n"
+msgstr ""
+
+#: fbus-6110.c:1949
+msgid "Message: The phone is powered on - seq 1.\n"
+msgstr ""
+
+#: fbus-6110.c:1959
+msgid "Message: The phone is powered on - seq 2.\n"
+msgstr ""
+
+#: fbus-6110.c:1303
+msgid "Message: Unknown message of type 0x01\n"
+msgstr ""
+
+#: fbus-6110.c:1488
+msgid "Message: Unknown message of type 0x03\n"
+msgstr ""
+
+#: fbus-6110.c:1577
+msgid "Message: Unknown message of type 0x04\n"
+msgstr ""
+
+#: fbus-6110.c:1710
+msgid "Message: Unknown message of type 0x11\n"
+msgstr ""
+
+#: fbus-6110.c:1754
+msgid "Message: Unknown message of type 0x13\n"
+msgstr ""
+
+#: fbus-6110.c:1880
+msgid "Message: the rest of the SMS message received.\n"
+msgstr ""
+
+#: fbus-6110.c:2066
+msgid "Msg Destination: %s\n"
+msgstr ""
+
+#: fbus-6110.c:2072
+msgid ""
+"Msg Len: %02x\n"
+"Phone: "
+msgstr ""
+
+#: fbus-3810.c:1046
 msgid "Msg Len: %02x "
 msgstr "Nachrichtenlänge: %02x"
 
-#: fbus-3810.c:903
+#: fbus-6110.c:2067
+msgid "Msg Source: %s\n"
+msgstr ""
+
+#: fbus-6110.c:2069
+msgid "Msg Type: %02x\n"
+msgstr ""
+
+#: fbus-3810.c:1045
 msgid "Msg Type: %02x "
 msgstr "Nachrichtentyp: %02x"
 
-#: fbus-3810.c:1600
+#: fbus-6110.c:2071
+msgid "Msg Unknown: %02x\n"
+msgstr ""
+
+#: fbus-3810.c:1763
 msgid "Number field emtpy."
 msgstr "Nummernfeld leer."
 
-#: fbus-3810.c:1603
+#: fbus-3810.c:1766
 msgid "Number: "
 msgstr "Nummer: "
 
-#: fbus-3810.c:1368
+#: fbus-3810.c:1537
 msgid "Outgoing call answered - status bytes %02x %02x %02x.\n"
 msgstr "Abgehender Anruf beantwortet - Statusbytes %02x %02x %02x.\n"
 
-#: fbus-3810.c:1304
+#: fbus-3810.c:1473
 msgid "Outgoing call terminated (0x10 message).\n"
 msgstr "Abgehender Anruf beendet (0x10 Nachricht).\n"
 
-#: fbus-3810.c:1336
+#: fbus-3810.c:1505
 msgid "Outgoing call terminated (0x12 message).\n"
 msgstr "Abgehender Anruf beendet (0x12 Nachricht).\n"
 
-#: fbus-3810.c:854
+#: fbus-6110.c:2048
+msgid "PC"
+msgstr ""
+
+#: fbus-6110.c:2144
+msgid "PC: "
+msgstr ""
+
+#: fbus-3810.c:996
 msgid "PIN [possibly] entered.\n"
 msgstr "PIN wurde (möglicherweise) eingegeben.\n"
 
-#: fbus-3810.c:863
+#: gnokii.c:429
+msgid "PIN ok.\n"
+msgstr ""
+
+#: fbus-6110.c:2045
+msgid "Phone"
+msgstr ""
+
+#: fbus-3810.c:1005
 msgid "Phone powering off..."
 msgstr "Mobilphone schaltet sich ab..."
 
-#: fbus-3810.c:1034
+#: gnokii.c:561
+msgid "Phone: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii.c:555
+msgid "Power Source: %s\n"
+msgstr ""
+
+#: gnokii.c:549
+msgid "RFLevel: %d\n"
+msgstr ""
+
+#: fbus-6110.c:981
+msgid "RTS is %s.\n"
+msgstr ""
+
+#: fbus-3810.c:1176
 msgid "Request Mem Loc Write failed!"
 msgstr "Anforderung zum Schreiben einer Speicherzelle fehlgeschlagen!"
 
-#: fbus-3810.c:1128
+#: fbus-3810.c:1270
 msgid "Request SMS Mem Loc Write failed!"
 msgstr "Anforderung zum Schreiben einer SMS Speicherzelle fehlgeschlagen!"
 
-#: gnokii.c:179
-msgid "SMS %s %d Unknown bytes: %02x %02x %02x %02x %02x %02x Length: %d\n"
-msgstr "SMS %s %d unbekannte Bytes: %02x %02x %02x %02x %02x %02x Länge: %d\n"
+#: gnokii.c:558
+msgid "SIM: Used %d, Free %d\n"
+msgstr ""
 
-#: fbus-3810.c:1594
+#: fbus-3810.c:1757
 msgid "SMS Message Centre Data status bytes ="
 msgstr "SMS-Center Danten-Statusbytes ="
 
-#: gnokii.c:116
-msgid "SMS Send OK. Result code  0x%02x\n"
-msgstr "SMS-Versand erfolgreich. Ergebnis-Code 0x%02x\n"
+#: gnokii.c:564
+msgid "SMS Messages: UnRead %d, Number %d\n"
+msgstr ""
 
-#: fbus-3810.c:413
+#: fbus-3810.c:465
 msgid "SMS Send attempt failed, trying again (%d)\n"
 msgstr "SMS-Sendeversuch fehlgeschlagen, automatische Wiederholung (%d)\n"
 
-#: gnokii.c:128
-msgid "SMS Send failed, gnokii error code was %d, network returned 0x%02x 0x%02x\n"
-msgstr "Senden der SMS-Nachricht fehlgeschlagen, gnokii Fehler-Nummer war %d, Netz antwortete mit 0x%02x 0x%02x\n"
-
-#: fbus-3810.c:1105
+#: fbus-3810.c:1247
 msgid "Send SMS block %d failed!"
 msgstr "Senden des SMS-Blocks %d erfolglos!"
 
-#: fbus-3810.c:1078
+#: fbus-3810.c:1220
 msgid "Send SMS header failed!"
 msgstr "Senden des SMS-Headers erfolglos!"
 
-#: gnokii.c:106
+#: gnokii.c:262
 msgid "Sending SMS to %s via message centre %s\n"
 msgstr "Sende SMS an %s via SMS-Center %s\n"
 
-#: fbus-3810.c:905
+#: fbus-3810.c:1047
 msgid "Sequence Number: %02x "
 msgstr "Sequenznummer: %02x"
 
-#: fbus-3810.c:1010
+#: fbus-6110.c:979
+msgid "Serial flags dump:\n"
+msgstr ""
+
+#: fbus-3810.c:1152
 msgid "Set Mem Loc Write failed!"
 msgstr "Schreiben der Speicherzelle schlug fehl!"
 
-#: fbus-3810.c:875
+#: fbus-6110.c:1021
+msgid "Setting FBUS communication...\n"
+msgstr ""
+
+#: fbus-3810.c:1017
 msgid "Standard Ack write failed!"
 msgstr "Senden der Standardbestätigung schlug fehl!"
 
-#: fbus-3810.c:1289
+#: fbus-3810.c:1458
 msgid "Status: RF %02x, Batt %02x, Connection Status %02x.\n"
 msgstr "Status: RF %02x, Batt %02x, Verbindungsstatus %02x.\n"
 
-#: gnokii.c:184
+#: gnokii.c:319
 msgid ""
 "Text: %s\n"
 "\n"
 msgstr "Text: %s\n"
 
-#: gnokii.c:161 gnokii.c:260
+#: gnokii.c:507
+msgid "Time: %02d:%02d\n"
+msgstr ""
+
+#: gnokii.c:476
+msgid "Time: %02d:%02d:%02d\n"
+msgstr ""
+
+#: fbus-6110.c:2051
+msgid "Unknown"
+msgstr ""
+
+#: gnokii.c:298 gnokii.c:372 gnokii.c:605
 msgid "Unknown memory type %s!\n"
 msgstr "Unbekannter Speichertyp %2!\n"
 
-#: fbus-3810.c:901
+#: fbus-3810.c:1043
 msgid "Unknown: "
 msgstr "Unbekannt: "
 
-#: gnokii.c:401
-msgid "Write FAILED(%d): memory type:%s, loc:%d, name: %s, number: %s\n"
-msgstr "Speichern erfolglos(%d): Speichertyp:%s, Zelle:%d, Name: %s, Nummer %s\n"
+#: gnokii.c:717
+msgid "Write FAILED(%d): memory type: %s, loc: %d, name: %s, number: %s\n"
+msgstr ""
 
-#: gnokii.c:391
-msgid "Write Succeeded: memory type:%s, loc:%d, name: %s, number: %s\n"
-msgstr "Speichern erfolgreich: Speichertyp:%s, Zelle:%d, Name: %s, Nummer %s\n"
+#: gnokii.c:715
+msgid "Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"
+msgstr ""
 
-#: fbus-3810.c:1200 fbus-3810.c:1313 fbus-3810.c:1329 fbus-3810.c:1345 fbus-3810.c:1361 fbus-3810.c:1462 fbus-3810.c:1523 fbus-3810.c:1582
+#: fbus-3810.c:1366 fbus-3810.c:1482 fbus-3810.c:1498 fbus-3810.c:1514 fbus-3810.c:1530 fbus-3810.c:1623 fbus-3810.c:1684 fbus-3810.c:1745
 msgid "Write failed!"
 msgstr "Schreiben erfolglos!"
 
-#: fbus-3810.c:596
+#: fbus-6110.c:1937
+msgid "[Received Ack of type %02x, seq: %2x]\n"
+msgstr ""
+
+#: fbus-6110.c:2168
+msgid "[Sending Ack of type %02x, seq: %x]\n"
+msgstr ""
+
+#: gnokii.c:555
+msgid "battery"
+msgstr ""
+
+#: fbus-6110.c:1554
+msgid "battery\n"
+msgstr ""
+
+#: fbus-6110.c:1520
+msgid "call in progress\n"
+msgstr ""
+
+#: fbus-6110.c:980 fbus-6110.c:981 fbus-6110.c:982 fbus-6110.c:983
+msgid "down"
+msgstr ""
+
+#: fbus-6110.c:1466
+msgid "int"
+msgstr ""
+
+#: fbus-6110.c:1639
+msgid "locked"
+msgstr ""
+
+#: fbus-6110.c:1695
+msgid "off"
+msgstr ""
+
+#: fbus-6110.c:1695
+msgid "on"
+msgstr ""
+
+#: fbus-6110.c:1532
+msgid "powered off\n"
+msgstr ""
+
+#: fbus-6110.c:1511
+msgid "registered within the network\n"
+msgstr ""
+
+#: fbus-3810.c:713
 msgid "restarting.\n"
 msgstr "Neustart.\n"
+
+#: fbus-6110.c:1466
+msgid "sim"
+msgstr ""
+
+#: fbus-6110.c:1538 fbus-6110.c:1560
+msgid "unknown\n"
+msgstr ""
+
+#: fbus-6110.c:1639
+msgid "unlocked"
+msgstr ""
+
+#: fbus-6110.c:980 fbus-6110.c:981 fbus-6110.c:982 fbus-6110.c:983
+msgid "up"
+msgstr ""
+
+#: fbus-6110.c:1526
+msgid "waiting for pin\n"
+msgstr ""
+# msgid "GSM/fbus init failed! (Unknown model ?).  Quitting. \n"
+# msgstr "Initialisierung des GSM/fbus fehlgeschlagen! (Unbekanntes Modell?). Beenden. \n"
+# 
+# msgid "SMS %s %d Unknown bytes: %02x %02x %02x %02x %02x %02x Length: %d\n"
+# msgstr "SMS %s %d unbekannte Bytes: %02x %02x %02x %02x %02x %02x Länge: %d\n"
+# 
+# msgid "SMS Send OK. Result code  0x%02x\n"
+# msgstr "SMS-Versand erfolgreich. Ergebnis-Code 0x%02x\n"
+# 
+# msgid "0x65 0x15 means SMS sending not enabled by network (probably...)\n"
+# msgstr "0x65 0x15: Verschicken von SMS-Nachrichten nicht vom Provider freigeschaltet (wahrscheinlich...)\n"
+# 
+# msgid "Write Succeeded: memory type:%s, loc:%d, name: %s, number: %s\n"
+# msgstr "Speichern erfolgreich: Speichertyp:%s, Zelle:%d, Name: %s, Nummer %s\n"
+# 
+# msgid "GNOKII Version 0.2.4 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
+# msgstr "GNOKII Version 0.2.4 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
+# 
+# msgid "SMS Send failed, gnokii error code was %d, network returned 0x%02x 0x%02x\n"
+# msgstr "Senden der SMS-Nachricht fehlgeschlagen, gnokii Fehler-Nummer war %d, Netz antwortete mit 0x%02x 0x%02x\n"
+# 
+# msgid "Hmmm... GSM_LinkOK never went true.  Quitting. \n"
+# msgstr "Hmmm... GSM_LinkOK nie erhalten. Beenden. \n"
+# 
+# msgid "Interrupted\n"
+# msgstr "Unterbrochen\n"
+# 
+# msgid "Monitor mode...\n"
+# msgstr "Monitor Modus...\n"
+# 
+# msgid "Write FAILED(%d): memory type:%s, loc:%d, name: %s, number: %s\n"
+# msgstr "Speichern erfolglos(%d): Speichertyp:%s, Zelle:%d, Name: %s, Nummer %s\n"
+# 
+# msgid "       Built %s %s for %s on %s \n"
+# msgstr "       Kompiliert: %s %s für Modell %s an Port %s \n"
+# 
+# msgid "%s|%d|Bad location or other error!\n"
+# msgstr "%s|%d|Falsche Zelle oder anderer Fehler!\n"
+# 
