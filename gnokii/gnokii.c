@@ -2234,6 +2234,7 @@ static int writetodo(char *argv[])
 
 	error = gn_ical2todo(f, &todo, location);
 	fclose(f);
+#ifndef WIN32
 	if (error == GN_ERR_NOTIMPLEMENTED) {
 		switch (gn_vcal_file_todo_read(argv[0], &todo, location)) {
 		case 0:
@@ -2244,7 +2245,7 @@ static int writetodo(char *argv[])
 			break;
 		}
 	}
-
+#endif
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
 		return error;
@@ -2431,7 +2432,7 @@ static int writecalendarnote(char *argv[])
 
 	error = gn_ical2calnote(f, &calnote, location);
 	fclose(f);
-
+#ifndef WIN32
 	if (error == GN_ERR_NOTIMPLEMENTED) {
 		switch (gn_vcal_file_event_read(argv[0], &calnote, location)) {
 		case 0:
@@ -2442,7 +2443,7 @@ static int writecalendarnote(char *argv[])
 			break;
 		}
 	}
-
+#endif
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
 		return error;
