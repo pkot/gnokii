@@ -6,7 +6,7 @@
 #
 
 #
-# DeMorgan rules appled :-) I like math...
+# DeMorgan rules applied :-) I like math...
 #
 
 if [ "x`whoami`" != xpavel -a "x`whoami`" != xhugh ]
@@ -19,11 +19,12 @@ VERSION=`cat ../VERSION`
 rm -rf /tmp/gnokii-${VERSION}
 cp -r ../../gnokii /tmp/gnokii-${VERSION}
 
-# Some files in CVS are useless
+# Some files and directories in CVS are useless
 rm -rf /tmp/gnokii-${VERSION}/xkeyb
 
 (
    cd /tmp/gnokii-${VERSION}
+   autoconf
    ./configure
    cp packaging/RedHat/gnokii.spec .
    make distclean

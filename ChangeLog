@@ -65,3 +65,6 @@
 - sk language added
 - checking for older libc on Linux
 - better checking for cf*speed
+
+* Wed Jun  7 13:54:01 CEST 2000 Pavel Janík ml. <Pavel.Janik@linux.cz
+- configure removed from CVS and other changes
