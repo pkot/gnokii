@@ -31,7 +31,7 @@
 #ifndef _gnokii_data_datapump_h
 #define _gnokii_data_datapump_h
 
-#include "gsm-statemachine"
+#include "gsm-statemachine.h"
 #include "gsm-call.h"
 
 /* Prototypes */
