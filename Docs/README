@@ -1,14 +1,14 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2003 Pawe³ Kot
-                Last update 19 January 2004   Version 0.5.9
+               Last update  1 February 2004   Version 0.5.10
 
-- Contents - 			   
+- Contents -
 
 1.0   Introduction
 2.0   About the applications
 3.0   Notes for specific model phones
-4.0   Installation from source 
+4.0   Installation from source
 5.0   Installation of pre-built binaries
 6.0   Configuration
 7.0   Known Bugs
@@ -21,10 +21,10 @@
 14.0  Credits
 15.0  Release Notes
 
-			   
+
 - 1.0 Introduction -
 
-This is version 0.5.9 of gnokii, a multisystem tool suite and modem driver
+This is version 0.5.10 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -48,7 +48,7 @@ bleeding edge releases through CVS and more!
 
 
 - 2.0 About the applications -
-  
+
 gnokii now consists of three main executables and a fourth "helper"
 application that is run suid root.  To get the most from gnokii it is worth
 understanding the details of them and how they interact. It is important to
@@ -88,7 +88,7 @@ takes care of calling it when required.
 
 
 - 3.0  Notes for specific model phones -
-  
+
 Please see the README-3810 file for notes specific to the 3810/8110 series,
 README-6110 for notes on the 5110/6110 series, README-2110 for notes on the
 2110 series (which is at the moment deprecated), README-7110 for notes on
@@ -117,12 +117,12 @@ to the configuration section below.
 
 
 - 5.0 Installation of pre-built binaries -
-  
+
 If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.5.9-i386.rpm
+rpm -i gnokii-0.5.10-i386.rpm
 
 If you are using a Debian based system, you can use dpackage to do the
 installation. On Slackware you use installpkg or pkgtool.
@@ -148,7 +148,7 @@ available for each model.
 
 In order to make use of the AT emulator provided by gnokiid through
 /dev/gnokii, you must read the documentation file DataCalls-QuickStart.
- 
+
 A simple test to confirm that your cable/IrDA/bluetooth link is working is
 to run gnokii with the --identify flag e.g.
 
@@ -160,7 +160,7 @@ about the phone: manufacturer, phone model, firmware version and IMEI.
 If you get an error along the lines of
 	
   Telephone interface init failed: [...]. Quitting.
-	    
+
 this indicates that gnokii could not communicate with your phone for some
 reason and you will need to do some troubleshooting.
 
@@ -373,12 +373,17 @@ AT series
 
 
 - 14.0 Credits -
-  
+
 Please take a moment to read the CREDITS file which endeavors to recognise
 those who have helped so far!
 
 
 - 15.0 Release Notes -
+20040201 Version 0.5.10
+Few bugfixes: ucs2 encoding and decoding, phonebook subentries, at driver
+responses handling. New features: answer/cancel call for AT driver, delete
+phonebook entry. Besides many documentation updates and build fixes.
+
 20040119 Version 0.5.9
 We disabled Nokia 6100 support as it is known to break the phone with the
 gnokii communication over the irda port. All tested firmwares seem to be
@@ -474,7 +479,7 @@ specific readme.  Few minor tweaks on the 3810 side but we've just about run
 out of things the 3810 can do (data and fax calls aside of course!)
 
 This release is the first to include xgnokii - an X based interface to your
-phone and gnokiid - the makings of a virtual modem/AT emulator interface. 
+phone and gnokiid - the makings of a virtual modem/AT emulator interface.
 Details of these two apps appear above.
 
 19990519 Version 0.2.5
@@ -511,14 +516,14 @@ please let me know and include your phone type and software version.
 
 Added initial cut of SMS send capability.  Caveats are discussed above.
 
-Added two different default values for length of phonebook name and numbers. 
+Added two different default values for length of phonebook name and numbers.
 These are selected according to whether internal or SIM memory is specified.
 
 Fixed bugs reported in 0.2.1 (errno.h and reversal of message center and
 sender fields)
 
 19990216 Version 0.2.1
-Fixed bug that caused phone book entries containing spaces to be mangled. 
+Fixed bug that caused phone book entries containing spaces to be mangled.
 Added retrieve SMS message function.
 
 19990213 Version 0.2.0
