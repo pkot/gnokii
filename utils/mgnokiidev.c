@@ -7,6 +7,7 @@
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2002 Pawe³ Kot
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -67,10 +68,31 @@ int main(int argc, char *argv[])
 		exit(-2);
 	}
 
+	if (strncmp(dev_name, "/dev/", 5)) {
+		fprintf(stderr, "Wrong device name: %s.\n", dev_name);
+		exit(-2);
+	}
+
 	if (!S_ISCHR(st.st_mode)) {
  		fprintf(stderr, "Given file is not a valid character device.\n");
  		exit(-2);
 	}
+
+	/* Ensure that we access pseudoterminal */
+	/* FIXME: is it OK? */
+	/* FIXME: how to ensure that we don't change permissions to
+	   the pseudoterminal we shouldn't access? */
+#ifdef USE_UNIX98PTYS
+	if (strstr(dev_name, "pts") == NULL) {
+ 		fprintf(stderr, "Given file is not a valid pseudoterminal device.\n");
+ 		exit(-2);
+	}
+#else /* USE_UNIX98PTYS */
+	if (strstr(dev_name, "tty") == NULL) {
+ 		fprintf(stderr, "Given file is not a valid pseudoterminal device.\n");
+ 		exit(-2);
+	}
+#endif /* USE_UNIX98PTYS */
 
 	/* Now become root */
 	setuid(0);
@@ -80,7 +102,7 @@ int main(int argc, char *argv[])
 
 	if (err < 0) {
 		perror("mgnokiidev - chown: ");
-		exit (-2);
+		exit(-2);
 	}
 
 	/* Change permissions to rw by group */
@@ -88,24 +110,24 @@ int main(int argc, char *argv[])
 
 	if (err < 0) {
 		perror("mgnokiidev - chmod: ");
-		exit (-2);
+		exit(-2);
 	}
 
 	/* FIXME: Possible bug - should check that /dev/gnokii doesn't already exist
-		 in case multiple users are trying to run gnokii. Well, but will be
-		 mgnokiidev called then? I do not think so - you will probably got the
-		 message serialport in use or similar. Don't you. I haven't tested it
-		 though. */
+	   in case multiple users are trying to run gnokii. Well, but will be
+	   mgnokiidev called then? I do not think so - you will probably got the
+	   message serialport in use or similar. Don't you. I haven't tested it
+	   though. */
 
-	/* Remove symlink in case it already exists. Don't care if it fails.	*/
-	unlink ("/dev/gnokii");
+	/* Remove symlink in case it already exists. Don't care if it fails. */
+	unlink("/dev/gnokii");
 
 	/* Create symlink */
 	err = symlink(dev_name, "/dev/gnokii");
 
 	if (err < 0) {
 		perror("mgnokiidev - symlink: ");
-		exit (-2);
+		exit(-2);
 	}
 
 	/* Done */
