@@ -965,6 +965,58 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
  *** ENCODING SMS
  ***/
 
+
+/**
+ * EncodeUDH - encodes User Data Header
+ * @UDHi: User Data Header information
+ * @SMS: SMS structure with the data source
+ * @UDH: phone frame where to save User Data Header
+ *
+ * This function encodes the UserDataHeader as described in:
+ *  o GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
+ *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
+ *  o Smart Messaging Specification, Revision 3.0.0
+ */
+static GSM_Error EncodeUDH(GSM_SMSMessage *rawsms, GSM_API_SMS *SMS, int i, char *UDH)
+{
+	unsigned char pos;
+	int type;
+
+	pos = UDH[0];
+	type = SMS->UserData[i].Type;
+	printf("Encoding UDH. (%d, %d).\n", type, pos);
+	type = 3;
+
+	switch (type) {
+	case SMS_NoUDH:
+		break;
+	case SMS_VoiceMessage:
+	case SMS_FaxMessage:
+	case SMS_EmailMessage:
+		return GE_NOTSUPPORTED;
+#if 0
+		UDH[pos+4] = UDHi.u.SpecialSMSMessageIndication.MessageCount;
+		if (UDHi.u.SpecialSMSMessageIndication.Store) UDH[pos+3] |= 0x80;
+#endif
+	case SMS_ConcatenatedMessages:
+		printf("Adding ConcatMsg header\n");
+	case SMS_OpLogo:
+		printf("Adding OpLogo header\n");
+	case SMS_CallerIDLogo:
+	case SMS_Ringtone:
+	case SMS_MultipartMessage:
+		UDH[0] += headers[type].length;
+		memcpy(UDH+pos+1, headers[type].header, headers[type].length);
+		rawsms->UserDataLength += headers[type].length + 1;	/* FIXME: I don't know why + 1 is needed */
+		break;
+	default:
+		dprintf("Not supported User Data Header type\n");
+		break;
+	}
+	return GE_NONE;
+}
+
+
 /**
  * EncodeData - encodes the date from the SMS structure to the phone frame
  *
@@ -983,10 +1035,13 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 	unsigned int i, length, size = 0, offset = 0;
 	int text_index = -1, bitmap_index = -1, ringtone_index = -1;
 	char *message = rawsms->UserData;
-	int *clen = &rawsms->UserDataLength;
+	GSM_Error error;
 
+#if 0
 	/* Version: Smart Messaging Specification 3.0.0 */
-	message[0] = 0x30;
+	if (multipart)
+		message[0] = 0x30;
+#endif
 	for (i = 0; i < 3; i++) {
 		switch (sms->UserData[i].Type) {
 		case SMS_PlainText:
@@ -1033,7 +1088,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 	}
 
 	if ((al == SMS_8bit) && multipart) al = SMS_DefaultAlphabet;
-	rawsms->Length = *clen = 0;
+	rawsms->Length = rawsms->UserDataLength = 0;
 
 	/* Text Coding */
 	if (text_index != -1) {
@@ -1048,7 +1103,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 			size = Pack7BitCharacters((7 - (UDH_Length % 7)) % 7, sms->UserData[text_index].u.Text, message + offset);
 			// sms->Length = 8 * 0 + (7 - (0 % 7)) % 7 + length + offset;
 			rawsms->Length = strlen(sms->UserData[text_index].u.Text);
-			*clen = size + offset;
+			rawsms->UserDataLength = size + offset;
 			if (multipart) {
 				message[2] = (size & 0xff00) >> 8;
 				message[3] = (size & 0x00ff);
@@ -1057,7 +1112,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 		case SMS_8bit:
 			rawsms->DCS |= 0xf4;
 			memcpy(message, sms->UserData[text_index].u.Text + 1, sms->UserData[text_index].u.Text[0]);
-			*clen = rawsms->Length = sms->UserData[text_index].u.Text[0];
+			rawsms->UserDataLength = rawsms->Length = sms->UserData[text_index].u.Text[0];
 			break;
 		case SMS_UCS2:
 			if (multipart) {
@@ -1067,7 +1122,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 			rawsms->DCS |= 0x08;
 			EncodeUnicode(message + offset, sms->UserData[text_index].u.Text, length);
 			length *= 2;
-			*clen = rawsms->Length = length + offset;
+			rawsms->UserDataLength = rawsms->Length = length + offset;
 			if (multipart) {
 				message[2] = (length & 0xff00) >> 8;
 				message[3] = (length & 0x00ff);
@@ -1080,10 +1135,14 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 
 	/* Bitmap coding */
 	if (bitmap_index != -1) {
+		rawsms->UDHIndicator = 1;
+		error = EncodeUDH(rawsms, sms, bitmap_index, message);
+		if (error != GE_NONE) return error;
+
 #ifdef BITMAP_SUPPORT
-		size = GSM_EncodeSMSBitmap(&(sms->UserData[bitmap_index].u.Bitmap), message + rawsms->Length);
+		size = GSM_EncodeSMSBitmap(&(sms->UserData[bitmap_index].u.Bitmap), message + rawsms->UserDataLength);
 		rawsms->Length += size;
-		*clen += size;
+		rawsms->UserDataLength += size;
 #else
 		return GE_NOTSUPPORTED;
 #endif
@@ -1094,51 +1153,10 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 #ifdef RINGTONE_SUPPORT
 		size = GSM_EncodeSMSRingtone(message + rawsms->Length, &sms->UserData[ringtone_index].u.Ringtone);
 		rawsms->Length += size;
-		*clen += size;
+		rawsms->UserDataLength += size;
 #else
 		return GE_NOTSUPPORTED;
 #endif
-	}
-	return GE_NONE;
-}
-
-/**
- * EncodeUDH - encodes User Data Header
- * @UDHi: User Data Header information
- * @SMS: SMS structure with the data source
- * @UDH: phone frame where to save User Data Header
- *
- * This function encodes the UserDataHeader as described in:
- *  o GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
- *  o Smart Messaging Specification, Revision 1.0.0, September 15, 1997
- *  o Smart Messaging Specification, Revision 3.0.0
- */
-static GSM_Error EncodeUDH(SMS_UDHInfo UDHi, GSM_SMSMessage *SMS, char *UDH)
-{
-	unsigned char pos;
-
-	pos = UDH[0];
-	switch (UDHi.Type) {
-	case SMS_NoUDH:
-		break;
-	case SMS_VoiceMessage:
-	case SMS_FaxMessage:
-	case SMS_EmailMessage:
-		UDH[pos+4] = UDHi.u.SpecialSMSMessageIndication.MessageCount;
-		if (UDHi.u.SpecialSMSMessageIndication.Store) UDH[pos+3] |= 0x80;
-	case SMS_ConcatenatedMessages:
-		printf("Adding ConcatMsg header\n");
-	case SMS_OpLogo:
-		printf("Adding OpLogo header\n");
-	case SMS_CallerIDLogo:
-	case SMS_Ringtone:
-	case SMS_MultipartMessage:
-		UDH[0] += headers[UDHi.Type].length;
-		memcpy(UDH+pos+1, headers[UDHi.Type].header, headers[UDHi.Type].length);
-		break;
-	default:
-		dprintf("Not supported User Data Header type\n");
-		break;
 	}
 	return GE_NONE;
 }
