@@ -41,6 +41,9 @@
                                                          (Pawel Kot)
     o bring back to life sending text concatenated messages
                                                          (Pawel Kot)
+ * 6510 series updates
+    o handle writephonebook error when incorrect characters
+      are attempted to be saved in the number            (Pawel Kot)
 
 0.5.2
 =====

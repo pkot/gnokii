@@ -1455,6 +1455,8 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			switch (message[10]) {
 			case 0x3d: return GN_ERR_FAILED;
 			case 0x3e: return GN_ERR_FAILED;
+			case 0x43: return GN_ERR_WRONGDATAFORMAT; /* Probably there are incorrect
+									characters to be saved */
 			default:   return GN_ERR_UNHANDLEDFRAME;
 			}
 		}
