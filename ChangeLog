@@ -17,6 +17,8 @@
  * libgnokii updates
     o understand escaped semicolon in the phonebook csv input
                                                         (Pawel Kot)
+    o allow to write empty name and empty number for the phonebook
+                                                        (Pawel Kot)
 
 0.6.1
 =====

@@ -1505,16 +1505,17 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		dprintf("Received phonebook info\n");
 		blocks     = message[21];
 		return phonebook_decode(message + 22, length - 21, data, blocks, message[11], 12);
-	case 0x0c:
+	case 0x0c: /* Write memory location */
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
 			case 0x0f: return GN_ERR_WRONGDATAFORMAT; /* I got this when sending incorrect
-									block (with 0 length) */
+								     block (with 0 length) */
+			case 0x23: return GN_ERR_WRONGDATAFORMAT; /* ';' in the name */
 			case 0x36: return GN_ERR_WRONGDATAFORMAT; /* name block is too long */
 			case 0x3d: return GN_ERR_FAILED;
 			case 0x3e: return GN_ERR_FAILED;
 			case 0x43: return GN_ERR_WRONGDATAFORMAT; /* Probably there are incorrect
-									characters to be saved */
+								     characters to be saved */
 			default:   return GN_ERR_UNHANDLEDFRAME;
 			}
 		}
@@ -1747,7 +1748,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	req[13] = entry->location & 0xff;
 
 	block = 1;
-	if (!entry->empty && (*(entry->name)) && (*(entry->number))) {
+	if (!entry->empty) {
 		/* Name */
 		j = strlen(entry->name);
 		char_unicode_encode((string + 1), entry->name, j);
