@@ -256,8 +256,8 @@ static int usage(FILE *f, int retval)
 {
 	fprintf(f, _("   usage: gnokii [--help|--monitor [delay]|--version]\n"
 		     "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
-		     "                 [-r|--raw]\n"
-		     "          gnokii --writephonebook [-iv]\n"
+		     "                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
+		     "          gnokii --writephonebook [-f|--force][[-v|--vcard]|[-l|--ldif]]\n"
 		     "          gnokii --getwapbookmark number\n"
 		     "          gnokii --writewapbookmark name URL\n"
 		     "          gnokii --deletewapbookmark number\n"
@@ -3003,7 +3003,13 @@ static int getphonebook(int argc, char *argv[])
 	int count, start_entry, end_entry = 0;
 	gn_error error;
 	char *memory_type_string;
-	bool all = false, raw = false, vcard = false;
+	int type = 0; /* Output type:
+				0 - not formatted
+				1 - CSV
+				2 - vCard
+				3 - LDIF
+			*/
+	bool all = false;
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
@@ -3018,13 +3024,15 @@ static int getphonebook(int argc, char *argv[])
 	case 2: /* Nothing to do */
 		break;
 	case 4:
-		if (!strcmp(argv[3], "-r") || !strcmp(argv[3], "--raw")) raw = true;
-		else 
-			if (!strcmp(argv[3], "-v") || !strcmp(argv[3], "--vcard")) vcard = true;
-			else usage(stderr, -1);
+		if (!strcmp(argv[3], "-r") || !strcmp(argv[3], "--raw")) type = 1;
+		else if (!strcmp(argv[3], "-v") || !strcmp(argv[3], "--vcard")) type = 2;
+		else if (!strcmp(argv[3], "-l") || !strcmp(argv[3], "--ldif")) type = 3;
+		else usage(stderr, -1);
 	case 3:
 		if (!strcmp(argv[2], "end")) all = true;
-		else if (!strcmp(argv[2], "-r") || !strcmp(argv[2], "--raw")) raw = true;
+		else if (!strcmp(argv[2], "-r") || !strcmp(argv[2], "--raw")) type = 1;
+		else if (!strcmp(argv[2], "-v") || !strcmp(argv[2], "--vcard")) type = 2;
+		else if (!strcmp(argv[2], "-l") || !strcmp(argv[2], "--ldif")) type = 3;
 		else end_entry = atoi(argv[2]);
 		break;
 	default:
@@ -3043,7 +3051,8 @@ static int getphonebook(int argc, char *argv[])
 		switch (error) {
 			int i;
 		case GN_ERR_NONE:
-			if (raw) {
+			switch (type) {
+			case 1:
 				fprintf(stdout, "%s;%s;%s;%d;%d", entry.name, entry.number, memory_type_string, entry.location, entry.caller_group);
 				for (i = 0; i < entry.subentries_count; i++) {
 					fprintf(stdout, ";%d;%d;%d;%s", entry.subentries[i].entry_type, entry.subentries[i].number_type,
@@ -3052,38 +3061,44 @@ static int getphonebook(int argc, char *argv[])
 				fprintf(stdout, "\n");
 				if (entry.memory_type == GN_MT_MC || entry.memory_type == GN_MT_DC || entry.memory_type == GN_MT_RC)
 					fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);
-			} else if (vcard) {
+				break;
+			case 2:
+			{
 				char location[32];
 				sprintf(location, "%s%d", memory_type_string, entry.location);
 				gn_phonebook2vcard(stdout, &entry, location);
-			} else {
+			}
+			case 3:
+				gn_phonebook2ldif(stdout, &entry);
+				break;
+			default:
 				fprintf(stdout, _("%d. Name: %s\nNumber: %s\nGroup id: %d\n"), entry.location, entry.name, entry.number, entry.caller_group);
 				for (i = 0; i < entry.subentries_count; i++) {
 					switch (entry.subentries[i].entry_type) {
-					case 0x08:
+					case GN_PHONEBOOK_ENTRY_Email:
 						fprintf(stdout, _("Email address: "));
 						break;
-					case 0x09:
+					case GN_PHONEBOOK_ENTRY_Postal:
 						fprintf(stdout, _("Address: "));
 						break;
-					case 0x0a:
+					case GN_PHONEBOOK_ENTRY_Note:
 						fprintf(stdout, _("Notes: "));
 						break;
-					case 0x0b:
+					case GN_PHONEBOOK_ENTRY_Number:
 						switch (entry.subentries[i].number_type) {
-						case 0x02:
+						case GN_PHONEBOOK_NUMBER_Home:
 							fprintf(stdout, _("Home number: "));
 							break;
-						case 0x03:
+						case GN_PHONEBOOK_NUMBER_Mobile:
 							fprintf(stdout, _("Cellular number: "));
 							break;
-						case 0x04:
+						case GN_PHONEBOOK_NUMBER_Fax:
 							fprintf(stdout, _("Fax number: "));
 							break;
-						case 0x06:
+						case GN_PHONEBOOK_NUMBER_Work:
 							fprintf(stdout, _("Business number: "));
 							break;
-						case 0x0a:
+						case GN_PHONEBOOK_NUMBER_General:
 							fprintf(stdout, _("Preferred number: "));
 							break;
 						default:
@@ -3091,7 +3106,7 @@ static int getphonebook(int argc, char *argv[])
 							break;
 						}
 						break;
-					case 0x2c:
+					case GN_PHONEBOOK_ENTRY_URL:
 						fprintf(stdout, _("WWW address: "));
 						break;
 					default:
@@ -3102,6 +3117,7 @@ static int getphonebook(int argc, char *argv[])
 				}
 				if (entry.memory_type == GN_MT_MC || entry.memory_type == GN_MT_DC || entry.memory_type == GN_MT_RC)
 					fprintf(stdout, _("Date: %02u.%02u.%04u %02u:%02u:%02u\n"), entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);
+				break;
 			}
 			break;
 		case GN_ERR_EMPTYLOCATION:
@@ -3125,16 +3141,13 @@ static int getphonebook(int argc, char *argv[])
 	return error;
 }
 
-static char *decodephonebook(gn_phonebook_entry *entry, char *oline)
+static int decodephonebook(gn_phonebook_entry *entry, char *oline)
 {
 	char *line = oline;
 	char *ptr;
-	char *memory_type_string;
 	char backline[MAX_INPUT_LINE_LEN];
-	int subentry;
 
 	strcpy(backline, line);
-	memset(entry, 0, sizeof(gn_phonebook_entry));
 
 	ptr = strsep(&line, ";");
 	if (ptr) strncpy(entry->name, ptr, sizeof(entry->name) - 1);
@@ -3147,19 +3160,17 @@ static char *decodephonebook(gn_phonebook_entry *entry, char *oline)
 	if (!ptr) {
 		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
 		line = oline;
-		return NULL;
+		return 0;
 	}
 
 	if (!strncmp(ptr, "ME", 2)) {
-		memory_type_string = "int";
 		entry->memory_type = GN_MT_ME;
 	} else {
 		if (!strncmp(ptr, "SM", 2)) {
-			memory_type_string = "sim";
 			entry->memory_type = GN_MT_SM;
 		} else {
 			fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -3173,55 +3184,53 @@ static char *decodephonebook(gn_phonebook_entry *entry, char *oline)
 
 	if (!ptr) {
 		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-		return NULL;
+		return 0;
 	}
 
-	for (subentry = 0; ; subentry++) {
+	for (; ; entry->subentries_count++) {
 		ptr = strsep(&line, ";");
 
 		if (ptr && *ptr != 0)
-			entry->subentries[subentry].entry_type = atoi(ptr);
+			entry->subentries[entry->subentries_count].entry_type = atoi(ptr);
 		else
 			break;
 
 		ptr = strsep(&line, ";");
-		if (ptr) entry->subentries[subentry].number_type = atoi(ptr);
+		if (ptr) entry->subentries[entry->subentries_count].number_type = atoi(ptr);
 
 		/* Phone Numbers need to have a number type. */
-		if (!ptr && entry->subentries[subentry].entry_type == GN_PHONEBOOK_ENTRY_Number) {
+		if (!ptr && entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Number) {
 			fprintf(stderr, _("Missing phone number type on line %d"
-					  " entry [%s]\n"), subentry, backline);
-			subentry--;
+					  " entry [%s]\n"), entry->subentries_count, backline);
+			entry->subentries_count--;
 			break;
 		}
 
 		ptr = strsep(&line, ";");
-		if (ptr) entry->subentries[subentry].id = atoi(ptr);
+		if (ptr) entry->subentries[entry->subentries_count].id = atoi(ptr);
 
 		ptr = strsep(&line, ";");
 
 		/* 0x13 Date Type; it is only for Dailed Numbers, etc.
 		   we don't store to this memories so it's an error to use it. */
-		if (!ptr || entry->subentries[subentry].entry_type == GN_PHONEBOOK_ENTRY_Date) {
+		if (!ptr || entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Date) {
 			fprintf(stderr, _("There is no phone number on line [%s] entry %d\n"),
-				backline, subentry);
-			subentry--;
+				backline, entry->subentries_count);
+			entry->subentries_count--;
 			break;
 		} else
-			strncpy(entry->subentries[subentry].data.number, ptr, sizeof(entry->subentries[subentry].data.number) - 1);
+			strncpy(entry->subentries[entry->subentries_count].data.number, ptr, sizeof(entry->subentries[entry->subentries_count].data.number) - 1);
 	}
-
-	entry->subentries_count = subentry;
 
 	/* This is to send other exports (like from 6110) to 7110 */
 	if (!entry->subentries_count) {
 		entry->subentries_count = 1;
-		entry->subentries[subentry].entry_type   = GN_PHONEBOOK_ENTRY_Number;
-		entry->subentries[subentry].number_type  = GN_PHONEBOOK_NUMBER_General;
-		entry->subentries[subentry].id = 2;
-		strcpy(entry->subentries[subentry].data.number, entry->number);
+		entry->subentries[entry->subentries_count].entry_type   = GN_PHONEBOOK_ENTRY_Number;
+		entry->subentries[entry->subentries_count].number_type  = GN_PHONEBOOK_NUMBER_General;
+		entry->subentries[entry->subentries_count].id = 2;
+		strcpy(entry->subentries[entry->subentries_count].data.number, entry->number);
 	}
-	return memory_type_string;
+	return 1;
 }
 
 
@@ -3231,52 +3240,142 @@ static char *decodephonebook(gn_phonebook_entry *entry, char *oline)
 static int writephonebook(int argc, char *args[])
 {
 	gn_phonebook_entry entry;
-	gn_error error = GN_ERR_NOTSUPPORTED;
-	char *memory_type_string = NULL;
+	gn_error error = GN_ERR_NONE;
+	gn_memory_type default_mt = GN_MT_XX; /* Default memory_type. Changed if given in the command line */
+	int default_location = 0; /* default location. Changed if given in the command line */
+	int find_free = 0; /* By default don't try to find a free location */
+	int confirm = 0; /* By default don't overwrite existing entries */
+	int type = 0; /* type of the output:
+				0 - CSV (default)
+				1 - vCard
+				2 - LDIF
+			*/
 	char *line, oline[MAX_INPUT_LINE_LEN];
-	int vcard = 0;
+	int i;
 
-	/* Check argument */
-	if (argc && (strcmp("-i", args[0])) && (strcmp("-v", args[0])))
-		usage(stderr, -1);
+	struct option options[] = {
+		{ "overwrite",		0,			NULL, 'o'},
+		{ "vcard",		0,			NULL, 'v'},
+		{ "ldif",		0,			NULL, 'l'},
+		{ "find-free",		0,			NULL, 'f'},
+		{ "memory-type",	required_argument,	NULL, 'm'},
+		{ "memory",		required_argument,	NULL, 'm'},
+		{ "memory-location",	required_argument,	NULL, 'n'},
+		{ "location",		required_argument,	NULL, 'n'},
+		{ NULL,			0,			NULL, 0}
+	};
 
-	if (argc && !strcmp("-v", args[0]))
-		vcard = 1;
+	/* Option parsing */
+	while ((i = getopt_long(argc, args, "ovlfm:n:", options, NULL)) != -1) {
+		switch (i) {
+		case 'o':
+			confirm = 1;
+			break;
+		case 'v':
+			type = 1;
+			break;
+		case 'l':
+			if (type) usage(stderr, -1);
+			type = 2;
+			break;
+		case 'f':
+			find_free = 0;
+			break;
+		case 'm':
+			default_mt = gn_str2memory_type(optarg);
+			break;
+		case 'n':
+			default_location = atoi(optarg);
+			break;
+		default:
+			usage(stderr, -1);
+			break;
+		}
+	}
 
 	line = oline;
 
 	/* Go through data from stdin. */
 	while (1) {
-		if (!vcard) {
-			if (!gn_line_get(stdin, line, MAX_INPUT_LINE_LEN))
-				break;
-			if ((memory_type_string = decodephonebook(&entry, oline)) == NULL)
-				continue;
-		} else {
+		memset(&entry, 0, sizeof(gn_phonebook_entry));
+		entry.memory_type = default_mt;
+		entry.location = default_location;
+		switch (type) {
+		case 1:
 			if (gn_vcard2phonebook(stdin, &entry))
-				break;
+				error = GN_ERR_WRONGDATAFORMAT;
+			break;
+		case 2:
+			if (gn_ldif2phonebook(stdin, &entry))
+				error = GN_ERR_WRONGDATAFORMAT;
+			break;
+		default:
+			if (!gn_line_get(stdin, line, MAX_INPUT_LINE_LEN) ||
+			    (decodephonebook(&entry, oline) == 0))
+				error = GN_ERR_WRONGDATAFORMAT;
+			break;
 		}
 
-		if (argc) {
+		if (error == GN_ERR_WRONGDATAFORMAT) {
+			fprintf(stderr, "%s\n", gn_error_print(error));
+			break;
+		}
+
+		error = GN_ERR_NONE;
+
+		if (find_free) {
+#if 0
+			error = gn_sm_functions(GN_OP_FindFreePhonebookEntry, &data, &state);
+			if (error == GN_ERR_NOTIMPLEMENTED) {
+#endif
+			for (i = 1; ; i++) {
+				gn_phonebook_entry aux;
+
+				memcpy(&aux, &entry, sizeof(gn_phonebook_entry));
+				data.phonebook_entry = &aux;
+				data.phonebook_entry->location = i;
+				error = gn_sm_functions(GN_OP_ReadPhonebook, &data, &state);
+				if (error != GN_ERR_NONE && error != GN_ERR_EMPTYLOCATION) {
+					break;
+				}
+				if (aux.empty) {
+					entry.location = aux.location;
+					error = GN_ERR_NONE;
+					break;
+				}
+			}
+#if 0
+			}
+#endif
+			if (error != GN_ERR_NONE) {
+				fprintf(stderr, "%s\n", gn_error_print(error));
+				break;
+			}
+		}
+
+		if (!confirm) {
 			gn_phonebook_entry aux;
 
 			memcpy(&aux, &entry, sizeof(gn_phonebook_entry));
-	      		data.phonebook_entry = &aux;
+			data.phonebook_entry = &aux;
 			error = gn_sm_functions(GN_OP_ReadPhonebook, &data, &state);
 
-			if (error == GN_ERR_NONE) {
+			if (error == GN_ERR_NONE || error == GN_ERR_EMPTYLOCATION) {
 				if (!aux.empty) {
-					int confirm = -1;
 					char ans[8];
 
 					fprintf(stdout, _("Location busy. "));
+					confirm = -1;
 					while (confirm < 0) {
 						fprintf(stdout, _("Overwrite? (yes/no) "));
 						gn_line_get(stdin, ans, 7);
 						if (!strcmp(ans, _("yes"))) confirm = 1;
 						else if (!strcmp(ans, _("no"))) confirm = 0;
+						else fprintf(stdout, "\nIncorrect answer [%s]\n", ans);
 					}
-					if (!confirm) return -1;
+					/* User chose not to overwrite */
+					if (!confirm) continue;
+					confirm = 0;
 				}
 			} else {
 				fprintf(stderr, _("Error (%s)\n"), gn_error_print(error));
@@ -3291,12 +3390,12 @@ static int writephonebook(int argc, char *args[])
 		if (error == GN_ERR_NONE)
 			fprintf (stderr, 
 				 _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), 
-				 memory_type_string, entry.location, entry.name, entry.number);
+				 gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 		else
 			fprintf (stderr, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
-				 gn_error_print(error), memory_type_string, entry.location, entry.name, entry.number);
+				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 	}
-	return error;
+	return -1;
 }
 
 /* Getting WAP bookmarks. */
@@ -4714,6 +4813,7 @@ int main(int argc, char *argv[])
 		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
 		{ OPT_GETPHONEBOOK,      2, 4, 0 },
+		{ OPT_WRITEPHONEBOOK,    0, 10, 0 },
 		{ OPT_GETSPEEDDIAL,      1, 1, 0 },
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
 		{ OPT_CREATESMSFOLDER,   1, 1, 0 },
@@ -4738,7 +4838,6 @@ int main(int argc, char *argv[])
 		{ OPT_RESET,             0, 1, 0 },
 		{ OPT_GETPROFILE,        0, 3, 0 },
 		{ OPT_SETACTIVEPROFILE,  1, 1, 0 },
-		{ OPT_WRITEPHONEBOOK,    0, 1, 0 },
 		{ OPT_DIVERT,            6, 10, 0 },
 		{ OPT_GETWAPBOOKMARK,    1, 1, 0 },
 		{ OPT_WRITEWAPBOOKMARK,  2, 2, 0 },
@@ -4844,7 +4943,7 @@ int main(int argc, char *argv[])
 			rc = pmon();
 			break;
 		case OPT_WRITEPHONEBOOK:
-			rc = writephonebook(nargc, nargv);
+			rc = writephonebook(argc, argv);
 			break;
 		/* Now, options with arguments */
 		case OPT_SETDATETIME:
