@@ -17,6 +17,8 @@
     o more fixes to SMS code                         (Osma Suominen)
  * nk6160 driver updates
     o DLR3P, DAU9P, Bluetooth and Irda added        (BORBELY Zoltan)
+ * nk6100 driver updates
+    o PressKey and ReleaseKey support for 3210      (BORBELY Zoltan)
 
 0.5.0pre9
 =========

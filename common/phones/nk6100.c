@@ -113,6 +113,8 @@ static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey(bool press, gn_data *data, struct gn_statemachine *state);
+static gn_error PressOrReleaseKey1(bool press, gn_data *data, struct gn_statemachine *state);
+static gn_error PressOrReleaseKey2(bool press, gn_data *data, struct gn_statemachine *state);
 static gn_error EnterChar(gn_data *data, struct gn_statemachine *state);
 static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type);
 static gn_error get_imei(gn_data *data, struct gn_statemachine *state);
@@ -215,6 +217,8 @@ struct {
 	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE },
 	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE },
 	{ "RPM-1",	"-4.23",	NK6100_CAP_NBS_UPLOAD },
+	{ "NSE-8",	NULL,		NK6100_CAP_OLD_KEY_API },
+	{ "NSE-9",	NULL,		NK6100_CAP_OLD_KEY_API },
 	{ NULL,		NULL,		0 }
 };
 
@@ -546,9 +550,13 @@ static gn_error Initialise(struct gn_statemachine *state)
 	}
 
 	if (DRVINSTANCE(state)->pm->flags & PM_KEYBOARD)
-		if (BuildKeytable(state) != GN_ERR_NONE) {
-			FREE(DRVINSTANCE(state));
-			return GN_ERR_NOTSUPPORTED;
+		if (DRVINSTANCE(state)->capabilities & NK6100_CAP_OLD_KEY_API) {
+			/* FIXME: build a default table */
+		} else {
+			if (BuildKeytable(state) != GN_ERR_NONE) {
+				FREE(DRVINSTANCE(state));
+				return GN_ERR_NOTSUPPORTED;
+			}
 		}
 
 	if (!strcmp(DRVINSTANCE(state)->model, "RPM-1")) {
@@ -1055,18 +1063,45 @@ static gn_error PhoneInfo2(gn_data *data, struct gn_statemachine *state)
 
 }
 
+static gn_error PressOrReleaseKey2(bool press, gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x46, 0x00, 0x01, 0x00};
+
+	req[2] = press ? 0x46 : 0x47;
+	req[5] = data->key_code;
+
+	if (sm_message_send(6, 0xd1, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0xd2, data, state);
+}
+
 static gn_error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	char sw[10];
 
-	if (data->model) {
-		snprintf(data->model, 6, "%s", message + 21);
+	switch (message[2]) {
+	/* phone id2 received */
+	case 0x03:
+		if (data->model) {
+			snprintf(data->model, 6, "%s", message + 21);
+		}
+		if (data->revision) {
+			sscanf(message + 6, " %9s", sw);
+			snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW ????", sw);
+		}
+		dprintf("Phone info:\n%s\n", message + 4);
+		break;
+	/* press key result */
+	case 0x46:
+		if (message[3] != 0x00) return GN_ERR_UNHANDLEDFRAME;
+		break;
+	/* release key result */
+	case 0x47:
+		if (message[3] != 0x00) return GN_ERR_UNHANDLEDFRAME;
+		break;
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
 	}
-	if (data->revision) {
-		sscanf(message + 6, " %9s", sw);
-		snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW ????", sw);
-	}
-	dprintf("Phone info:\n%s\n", message + 4);
+
 	return GN_ERR_NONE;
 }
 
@@ -3352,7 +3387,7 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 #endif
 
 
-static gn_error PressOrReleaseKey(bool press, gn_data *data, struct gn_statemachine *state)
+static gn_error PressOrReleaseKey1(bool press, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x42, 0x00, 0x00, 0x01};
 
@@ -3410,6 +3445,14 @@ static gn_error BuildKeytable(struct gn_statemachine *state)
 	if ((error = sm_block(0x0c, &data, state))) return error;
 
 	return GN_ERR_NONE;
+}
+
+static gn_error PressOrReleaseKey(bool press, gn_data *data, struct gn_statemachine *state)
+{
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_OLD_KEY_API)
+		return PressOrReleaseKey2(press, data, state);
+	else
+		return PressOrReleaseKey1(press, data, state);
 }
 
 static gn_error PressKey(gn_key_code key, int d, struct gn_statemachine *state)

@@ -55,6 +55,7 @@
 #define	NK6100_CAP_OLD_CALL_API	1
 #define	NK6100_CAP_NBS_UPLOAD	2
 #define NK6100_CAP_PB_UNICODE	4
+#define	NK6100_CAP_OLD_KEY_API	8
 
 typedef struct {
 	gn_key_code key;
