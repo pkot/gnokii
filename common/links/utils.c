@@ -46,6 +46,6 @@ gn_error link_terminate(struct gn_statemachine *state)
 		free(state->link.link_instance);
 		state->link.link_instance = NULL;
 	}
-	device_close();
+	device_close(state);
 	return GN_ERR_NONE; /* FIXME */
 }

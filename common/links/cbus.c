@@ -45,11 +45,11 @@
 #include "links/atbus.h"
 
 
-static gn_error bus_write(unsigned char *d, int len)
+static gn_error bus_write(unsigned char *d, int len, struct gn_statemachine *state)
 {
 	int res;
 	while (len) {
-		res = device_write(d, len);
+		res = device_write(d, len, state);
 		if (res == -1) {
 			if (errno != EAGAIN) {
 				dprintf("I/O error : %m?!\n");
@@ -63,17 +63,17 @@ static gn_error bus_write(unsigned char *d, int len)
 	return GN_ERR_NONE;
 }
 
-static gn_error bus_read(unsigned char *rx_byte, unsigned int timeout)
+static gn_error bus_read(unsigned char *rx_byte, unsigned int timeout, struct gn_statemachine *state)
 {
 	int res;
 	struct timeval tv;
 	
 	tv.tv_sec = 0;
 	tv.tv_usec = 1000 * timeout;
-/*	res = device_select(&tv);*/
-	res = device_select(NULL);
+/*	res = device_select(&tv, state);*/
+	res = device_select(NULL, state);
 	if (res > 0)
-		res = device_read(rx_byte, 1);
+		res = device_read(rx_byte, 1, state);
 	else
 		return GN_ERR_TIMEOUT;
 
@@ -84,7 +84,7 @@ static gn_error bus_read(unsigned char *rx_byte, unsigned int timeout)
 		return GN_ERR_INTERNALERROR;
 }
 
-static gn_error send_packet(unsigned char *msg, int len, unsigned short cmd, bool init)
+static gn_error send_packet(unsigned char *msg, int len, unsigned short cmd, bool init, struct gn_statemachine *state)
 {
 	unsigned char p[1024], csum = 0;
 	int i, pos;
@@ -106,13 +106,13 @@ static gn_error send_packet(unsigned char *msg, int len, unsigned short cmd, boo
 		dprintf("%02x ", p[i]);
 	dprintf("\n");
 
-	return bus_write(p, pos+1);
+	return bus_write(p, pos+1, state);
 }
 
-static void send_ack(void)
+static void send_ack(struct gn_statemachine *state)
 {
 	dprintf("CBUS: sending ack\n");
-	bus_write("\xa5", 1);
+	bus_write("\xa5", 1, state);
 }
 
 static void dump_packet(cbus_instance *bi)
@@ -294,19 +294,19 @@ static cbus_pkt_state state_machine(unsigned char rx_byte, cbus_instance *bi)
 	return state;
 }
 
-static gn_error get_packet(cbus_instance *bi)
+static gn_error get_packet(cbus_instance *bi, struct gn_statemachine *state)
 {
 	gn_error res;
-	cbus_pkt_state state = CBUS_PKT_None;
+	cbus_pkt_state pstate = CBUS_PKT_None;
 	unsigned char rx_byte;
 	int retry = 20;
 
 	bi->state = CBUS_RX_Header;
-	while (state == CBUS_PKT_None && --retry) {
-		res = bus_read(&rx_byte, 10);
+	while (pstate == CBUS_PKT_None && --retry) {
+		res = bus_read(&rx_byte, 10, state);
 		if (!res) {
 			retry = 20;
-			state = state_machine(rx_byte, bi);
+			pstate = state_machine(rx_byte, bi);
 		} else
 			usleep(1000);
 /*			if (--retry) {
@@ -316,28 +316,28 @@ static gn_error get_packet(cbus_instance *bi)
 			return res;
 		}
 		retry = 20;
-		state = state_machine(rx_byte);*/
+		pstate = state_machine(rx_byte);*/
 	}
 	dprintf("CBUS: Got packet\n");
 	return (res) ? GN_ERR_INTERNALERROR : GN_ERR_NONE;
 }
 
-static gn_error wait_ack(cbus_instance *bi)
+static gn_error wait_ack(cbus_instance *bi, struct gn_statemachine *state)
 {
 	gn_error res;
 	unsigned char rx_byte;
 	int retry = 555550;
 
 /*	do {
-		res = bus_read(&rx_byte, 10);
+		res = bus_read(&rx_byte, 10, state);
 		if (!res) {
-			device_flush();
+			device_flush(state);
 			return (rx_byte == 0xa5) ? GE_NONE : GE_INTERNALERROR;
 		}
 		usleep(5000);
 	} while (--retry);*/
 	while (--retry) {
-		res = bus_read(&rx_byte, 10);
+		res = bus_read(&rx_byte, 10, state);
 		if (!res) 
 			return (rx_byte == 0xa5) ? GN_ERR_NONE : GN_ERR_INTERNALERROR;
 		else
@@ -349,21 +349,21 @@ static gn_error wait_ack(cbus_instance *bi)
 /* 
  * send packet and wait for 'ack'. 
  */
-static gn_error send_packet_ack(unsigned char *msg, int len, unsigned short cmd, bool init, cbus_instance *bi)
+static gn_error send_packet_ack(unsigned char *msg, int len, unsigned short cmd, bool init, cbus_instance *bi, struct gn_statemachine *state)
 {
 	gn_error res;
 	int retry = 3;
 
 	do {
 		retry--;
-		res = send_packet(msg, len, cmd, init);
+		res = send_packet(msg, len, cmd, init, state);
 		if (res) {
 			dprintf("CBUS: send_packet failed\n");
 			continue;
 		}
 		usleep(50000);
 again:
-		res = get_packet(bi);
+		res = get_packet(bi, state);
 		if (res) {
 			dprintf("CBUS: get_packet failed\n");
 			continue;
@@ -372,7 +372,7 @@ again:
 			dprintf("CBUS: get_packet is not the right packet\n");
 			goto again;
 		}
-		res = wait_ack(bi);
+		res = wait_ack(bi, state);
 		if (res) {
 			dprintf("CBUS: wait_ack failed\n");
 			continue;
@@ -383,46 +383,46 @@ again:
 	return res;
 }
 
-static gn_error bus_reset(cbus_instance *bi)
+static gn_error bus_reset(cbus_instance *bi, struct gn_statemachine *state)
 {
 	gn_error res;
 
-/*	bus_write("\0\0\0\0\0", 5);*/
+/*	bus_write("\0\0\0\0\0", 5, state);*/
 	usleep(1000);
-	send_packet_ack("", 0, 0xa6, true, bi);
-	send_packet_ack("D", 1, 0x90, true, bi);
-	res = get_packet(bi);
+	send_packet_ack("", 0, 0xa6, true, bi, state);
+	send_packet_ack("D", 1, 0x90, true, bi, state);
+	res = get_packet(bi, state);
 	if (res)
 		return res;
 	if (bi->frame_type1 != 0x91) {
 		dprintf("CBUS: Bus reset failed\n");
 		return GN_ERR_NOLINK;
 	}
-	send_ack();
+	send_ack(state);
 	usleep(1000);
-	send_ack();
+	send_ack(state);
 	usleep(1000);
-	send_ack();
+	send_ack(state);
 	usleep(1000);
-	send_ack();
+	send_ack(state);
 	dprintf("CBUS: Bus reset ok\n");
 	usleep(100000);
 	return GN_ERR_NONE;
 }
 
 /*
-			send_ack();
+			send_ack(state);
 			clink.AT_message[0] = GEAT_OK;
 			strncpy(clink.AT_message + 1, buffer, length);
 			clink.AT_message_len = length;
-			send_packet("\x3e\x68", 2, 0x3f, false);
+			send_packet("\x3e\x68", 2, 0x3f, false, state);
 */
 
-static gn_error wait_at_confirmation(cbus_instance *bi)
+static gn_error wait_at_confirmation(cbus_instance *bi, struct gn_statemachine *state)
 {
 	gn_error res;
 	
-	res = get_packet(bi);
+	res = get_packet(bi, state);
 	if (res)
 		return res;
 	if (bi->frame_type1 != 0x3d) {
@@ -433,11 +433,11 @@ static gn_error wait_at_confirmation(cbus_instance *bi)
 	return GN_ERR_NONE;
 }
 
-static gn_error get_at_reply(cbus_instance *bi)
+static gn_error get_at_reply(cbus_instance *bi, struct gn_statemachine *state)
 {
 	gn_error res;
 
-	res = get_packet(bi);
+	res = get_packet(bi, state);
 	if (res)
 		return res;
 	if (bi->frame_type2 != 0x3e) {
@@ -445,36 +445,36 @@ static gn_error get_at_reply(cbus_instance *bi)
 		return GN_ERR_INTERNALERROR;
 	}
 	dprintf("CBUS: AT reply: %s", bi->buffer);
-	send_ack();
-	return send_packet_ack("\x3e\x68", 2, 0x3f, false, bi);
+	send_ack(state);
+	return send_packet_ack("\x3e\x68", 2, 0x3f, false, bi, state);
 }
 
-static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *buffer, struct gn_statemachine *sm)
+static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *buffer, struct gn_statemachine *state)
 {
 	gn_error res;
-	cbus_instance *bi = CBUSINST(sm);
+	cbus_instance *bi = CBUSINST(state);
 	
-	res = send_packet_ack(buffer, message_length, 0x3c, false, bi);
+	res = send_packet_ack(buffer, message_length, 0x3c, false, bi, state);
 	if (res)
 		return res;
 	dprintf("CBUS: AT command sent - %s\n", buffer);
 /*	usleep(100000);*/
-	res = wait_at_confirmation(bi);
+	res = wait_at_confirmation(bi, state);
 	if (res)
 		return res;
-	send_ack();
-	return get_at_reply(bi);
+	send_ack(state);
+	return get_at_reply(bi, state);
 }
 
-static bool cbus_open_serial(char *device)
+static bool cbus_open_serial(char *device, struct gn_statemachine *state)
 {
-	int result = device_open(device, false, false, false, GN_CT_Serial);
+	int result = device_open(device, false, false, false, GN_CT_Serial, state);
 	if (!result) {
 		perror(_("Couldn't open CBUS device"));
 		return false;
 	}
-	device_changespeed(9600);
-	device_setdtrrts(1, 0);
+	device_changespeed(9600, state);
+	device_setdtrrts(1, 0, state);
 	return true;
 }
 
@@ -504,8 +504,8 @@ gn_error cbus_initialise(struct gn_statemachine *state)
 	state->link.send_message = &at_send_message;
 	CBUSINST(state) = businst;
 
-	if (state->link.connection_type == GN_CT_Serial) {
-		if (!cbus_open_serial(state->link.port_device))
+	if (state->config.connection_type == GN_CT_Serial) {
+		if (!cbus_open_serial(state->config.port_device, state))
 			error = GN_ERR_FAILED;
 	} else {
 		dprintf("Device not supported by C-bus\n");
@@ -513,7 +513,7 @@ gn_error cbus_initialise(struct gn_statemachine *state)
 	}
 
 	if (!error)
-		error = bus_reset(businst);
+		error = bus_reset(businst, state);
 	if (error) {
 		dprintf("C-bus initialization failed (%d)\n", error);
 		free(CBUSINST(state));

@@ -46,6 +46,7 @@
 #include "gsm-common.h"
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
+#include "gsm-api.h"
 #include "device.h"
 #include "links/fbus-phonet.h"
 
@@ -65,7 +66,7 @@ static bool phonet_open(struct gn_statemachine *state)
 	int result;
 
 	/* Open device. */
-	result = device_open(state->link.port_device, false, false, false, GN_CT_Irda);
+	result = device_open(state->config.port_device, false, false, false, GN_CT_Irda, state);
 
 	if (!result) {
 		perror(_("Couldn't open PHONET device"));
@@ -171,10 +172,10 @@ static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *sta
 	unsigned char	buffer[255];
 	int		count, res;
 
-	res = device_select(timeout);
+	res = device_select(timeout, state);
 
 	if (res > 0) {
-		res = device_read(buffer, 255);
+		res = device_read(buffer, 255, state);
 		for (count = 0; count < res; count++) {
 			phonet_rx_statemachine(buffer[count], state);
 		}
@@ -224,7 +225,7 @@ static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned ch
 	sent = 0;
 
 	do {
-		sent = device_write(out_buffer + current, total - current);
+		sent = device_write(out_buffer + current, total - current, state);
 		if (sent < 0) return (false);
 		else current += sent;
 	} while (current < total);
@@ -247,7 +248,7 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	if ((FBUSINST(state) = calloc(1, sizeof(phonet_incoming_message))) == NULL)
 		return GN_ERR_MEMORYFULL;
 
-	if ((state->link.connection_type == GN_CT_Infrared) || (state->link.connection_type == GN_CT_Irda)) {
+	if ((state->config.connection_type == GN_CT_Infrared) || (state->config.connection_type == GN_CT_Irda)) {
 		if (phonet_open(state) == true) {
 			error = GN_ERR_NONE;
 		}

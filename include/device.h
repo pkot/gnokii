@@ -39,22 +39,23 @@
 #  include <unistd.h>
 #endif
 
-int device_getfd(void);
+int device_getfd(struct gn_statemachine *state);
 
 int device_open(const char *file, int with_odd_parity, int with_async,
-		int with_hw_handshake, gn_connection_type device_type);
-void device_close(void);
-void device_reset(void);
+		int with_hw_handshake, gn_connection_type device_type,
+		struct gn_statemachine *state);
+void device_close(struct gn_statemachine *state);
+void device_reset(struct gn_statemachine *state);
 
-void device_setdtrrts(int dtr, int rts);
-void device_changespeed(int speed);
+void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state);
+void device_changespeed(int speed, struct gn_statemachine *state);
 
-size_t device_read(__ptr_t buf, size_t nbytes);
-size_t device_write(const __ptr_t buf, size_t n);
+size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state);
+size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state);
 
-int device_select(struct timeval *timeout);
+int device_select(struct timeval *timeout, struct gn_statemachine *state);
 
-gn_error device_nreceived(int *n);
-gn_error device_flush(void);
+gn_error device_nreceived(int *n, struct gn_statemachine *state);
+gn_error device_flush(struct gn_statemachine *state);
 
 #endif  /* _gnokii_device_h */

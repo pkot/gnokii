@@ -38,6 +38,7 @@
 #include "gsm-common.h"
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
+#include "gsm-api.h"
 #include "device.h"
 #include "gsm-statemachine.h"
 #include "links/atbus.h"
@@ -52,14 +53,14 @@ static void at_printf(char *prefix, char *buf, int len);
  * message from the phone.
  */
 
-static int xwrite(unsigned char *d, int len)
+static int xwrite(unsigned char *d, int len, struct gn_statemachine *sm)
 {
 	int res;
 
 	at_printf("write: ", d, len);
 
 	while (len) {
-		res = device_write(d, len);
+		res = device_write(d, len, sm);
 		if (res == -1) {
 			if (errno != EAGAIN) {
 				perror("gnokii I/O error ");
@@ -73,9 +74,9 @@ static int xwrite(unsigned char *d, int len)
 	return 0;
 }
 
-static bool atbus_serial_open(int mode, char *device)
+static bool atbus_serial_open(int mode, char *device, struct gn_statemachine *sm)
 {
-	int result = device_open(device, false, false, mode, GN_CT_Serial);
+	int result = device_open(device, false, false, mode, GN_CT_Serial, sm);
 
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
@@ -97,14 +98,14 @@ static bool atbus_serial_open(int mode, char *device)
 		 * also wait one second before sending commands or init will
 		 * fail.
 		 */
-		device_setdtrrts(1, 1);
+		device_setdtrrts(1, 1, sm);
 		sleep(1);
-		device_setdtrrts(0, 1);
+		device_setdtrrts(0, 1, sm);
 		sleep(1);
-		device_setdtrrts(1, 1);
+		device_setdtrrts(1, 1, sm);
 		sleep(1);
 	} else {
-		device_setdtrrts(1, 1);
+		device_setdtrrts(1, 1, sm);
 	}
 	return true;
 }
@@ -112,7 +113,7 @@ static bool atbus_serial_open(int mode, char *device)
 static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *msg, struct gn_statemachine *sm)
 {
 	usleep(10000);
-	return xwrite(msg, message_length) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
+	return xwrite(msg, message_length, sm) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
 }
 
 /* 
@@ -166,9 +167,9 @@ static gn_error atbus_loop(struct timeval *timeout, struct gn_statemachine *sm)
 	unsigned char buffer[255];
 	int count, res;
 
-	res = device_select(timeout);
+	res = device_select(timeout, sm);
 	if (res > 0) {
-		res = device_read(buffer, 255);
+		res = device_read(buffer, 255, sm);
 		for (count = 0; count < res; count++)
 			atbus_rx_statemachine(buffer[count], sm);
 	} else
@@ -199,9 +200,9 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 	businst->binlen = 1;
 	AT_BUSINST(state) = businst;
 
-	if ((state->link.connection_type == GN_CT_Serial) ||
-	    (state->link.connection_type == GN_CT_Irda)) {
-		if (!atbus_serial_open(mode, state->link.port_device)) {
+	if ((state->config.connection_type == GN_CT_Serial) ||
+	    (state->config.connection_type == GN_CT_Irda)) {
+		if (!atbus_serial_open(mode, state->config.port_device, state)) {
 			error = GN_ERR_FAILED;
 			goto out;
 		}

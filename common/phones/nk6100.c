@@ -500,9 +500,9 @@ static gn_error Initialise(struct gn_statemachine *state)
 	if (!(DRVINSTANCE(state) = calloc(1, sizeof(nk6100_driver_instance))))
 		return GN_ERR_MEMORYFULL;
 
-	switch (state->link.connection_type) {
+	switch (state->config.connection_type) {
 	case GN_CT_Serial:
-		state->link.connection_type = GN_CT_DAU9P;
+		state->config.connection_type = GN_CT_DAU9P;
 	case GN_CT_Infrared:
 	case GN_CT_DAU9P:
 #ifndef WIN32
@@ -1223,8 +1223,8 @@ static gn_error SendSMSMessage(gn_data *data, struct gn_statemachine *state)
 
 	if (sm_message_send(len, PNOK_MSG_ID_SMS, req, state)) return GN_ERR_NOTREADY;
 	do {
-		error = sm_block_no_retry_timeout(PNOK_MSG_ID_SMS, state->link.sms_timeout, data, state);
-	} while (!state->link.sms_timeout && error == GN_ERR_TIMEOUT);
+		error = sm_block_no_retry_timeout(PNOK_MSG_ID_SMS, state->config.smsc_timeout, data, state);
+	} while (!state->config.smsc_timeout && error == GN_ERR_TIMEOUT);
 
 	return error;
 }

@@ -25,7 +25,8 @@
  *
  */
 
-#include "config.h"
+#include "misc.h"
+#include "gsm-api.h"
 
 #ifdef HAVE_IRDA
 
@@ -131,7 +132,7 @@ static int irda_discover_device(void)
 	return daddr;
 }
 
-int irda_open(void)
+int irda_open(struct gn_statemachine *state)
 {
 	struct sockaddr_irda	peer;
 	int			fd = -1, daddr;
@@ -157,23 +158,23 @@ int irda_open(void)
 	return fd;
 }
 
-int irda_close(int fd)
+int irda_close(int fd, struct gn_statemachine *state)
 {
 	shutdown(fd, 0);
 	return close(fd);
 }
 
-int irda_write(int fd, const __ptr_t bytes, int size)
+int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
 {
 	return send(fd, bytes, size, 0);
 }
 
-int irda_read(int fd, __ptr_t bytes, int size)
+int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
 {
 	return recv(fd, bytes, size, 0);
 }
 
-int irda_select(int fd, struct timeval *timeout)
+int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 {
 	fd_set readfds;
 
@@ -185,10 +186,10 @@ int irda_select(int fd, struct timeval *timeout)
 
 #else /* HAVE_IRDA */
 
-int irda_open(void) { return -1; }
-int irda_close(int fd) { return -1; }
-int irda_write(int fd, const __ptr_t bytes, int size) { return -1; }
-int irda_read(int fd, __ptr_t bytes, int size) { return -1; }
-int irda_select(int fd, struct timeval *timeout) { return -1; }
+int irda_open(struct gn_statemachine *state) { return -1; }
+int irda_close(int fd, struct gn_statemachine *state) { return -1; }
+int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
+int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
+int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state) { return -1; }
 
 #endif /* HAVE_IRDA */

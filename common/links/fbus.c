@@ -60,9 +60,9 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 #define FBUSINST(s) ((fbus_link *)((s)->link.link_instance))
 
 #ifndef WIN32
-#  define	IR_MODE(l) ((l)->connection_type == GN_CT_Infrared || (l)->connection_type == GN_CT_Tekram)
+#  define	IR_MODE(s) ((s)->config.connection_type == GN_CT_Infrared || (s)->config.connection_type == GN_CT_Tekram)
 #else
-#  define	IR_MODE(l) ((l)->connection_type == GN_CT_Infrared)
+#  define	IR_MODE(s) ((s)->config.connection_type == GN_CT_Infrared)
 #endif
 
 /*--------------------------------------------*/
@@ -71,14 +71,14 @@ static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 {
 	if (dlr3) dlr3 = 1;
 	/* Open device. */
-	if (!device_open(state->link.port_device, false, false, false, GN_CT_Serial)) {
+	if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
-	device_changespeed(115200);
+	device_changespeed(115200, state);
 
 	/* clearing the RTS bit and setting the DTR bit */
-	device_setdtrrts((1-dlr3), 0);
+	device_setdtrrts((1-dlr3), 0, state);
 
 	return true;
 }
@@ -91,32 +91,32 @@ static bool at2fbus_serial_open(struct gn_statemachine *state)
 	unsigned char buffer[255];
  
 	/* Open device. */
-	if (!device_open(state->link.port_device, false, false, false, GN_CT_Serial)) {
+	if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
  
-	device_setdtrrts(0, 0);
+	device_setdtrrts(0, 0, state);
 	sleep(1);
-	device_setdtrrts(1, 1);
-	device_changespeed(19200);
+	device_setdtrrts(1, 1, state);
+	device_changespeed(19200, state);
 	sleep(1);
-	device_write("AT\r", 3);
+	device_write("AT\r", 3, state);
 	sleep(1);
-	res = device_read(buffer, 255);
-	device_write("AT&F\r", 5);
+	res = device_read(buffer, 255, state);
+	device_write("AT&F\r", 5, state);
 	usleep(100000);
-	res = device_read(buffer, 255);
-	device_write("AT*NOKIAFBUS\r", 13);
+	res = device_read(buffer, 255, state);
+	device_write("AT*NOKIAFBUS\r", 13, state);
 	usleep(100000);
-	res = device_read(buffer, 255);
+	res = device_read(buffer, 255, state);
  
-	device_changespeed(115200);
+	device_changespeed(115200, state);
  
 	for (count = 0; count < 32; count++) {
-		device_write(&init_char, 1);
+		device_write(&init_char, 1, state);
 	}
-	device_write(&end_init_char, 1);
+	device_write(&end_init_char, 1, state);
 	usleep(1000000);
  
 	return true;
@@ -130,26 +130,26 @@ static bool fbus_ir_open(struct gn_statemachine *state)
 	unsigned char connect_seq[] = { FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02 };
 	unsigned int count, retry;
 
-	if (!device_open(state->link.port_device, false, false, false, state->link.connection_type)) {
+	if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
 
 	/* clearing the RTS bit and setting the DTR bit */
-	device_setdtrrts(1, 0);
+	device_setdtrrts(1, 0, state);
 
 	for (retry = 0; retry < 5; retry++) {
 		dprintf("IR init, retry=%d\n", retry);
 
-		device_changespeed(9600);
+		device_changespeed(9600, state);
 
 		for (count = 0; count < 32; count++) {
-			device_write(&init_char, 1);
+			device_write(&init_char, 1, state);
 		}
-		device_write(&end_init_char, 1);
+		device_write(&end_init_char, 1, state);
 		usleep(100000);
 
-		device_changespeed(115200);
+		device_changespeed(115200, state);
 
 		fbus_send_message(7, 0x02, connect_seq, state);
 
@@ -157,7 +157,7 @@ static bool fbus_ir_open(struct gn_statemachine *state)
 		timeout.tv_sec	= 1;
 		timeout.tv_usec	= 0;
 
-		if (device_select(&timeout)) {
+		if (device_select(&timeout, state)) {
 			dprintf("IR init succeeded\n");
 			return true;
 		}
@@ -199,7 +199,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 		/* else fall through to... */
 
 	case FBUS_RX_Sync:
-		if (IR_MODE(&state->link)) {
+		if (IR_MODE(state)) {
 			if (rx_byte == FBUS_IR_FRAME_ID) {
 				/* Initialize checksums. */
 				i->checksum[0] = FBUS_IR_FRAME_ID;
@@ -379,9 +379,9 @@ static gn_error fbus_loop(struct timeval *timeout, struct gn_statemachine *state
 	unsigned char buffer[255];
 	int count, res;
 
-	res = device_select(timeout);
+	res = device_select(timeout, state);
 	if (res > 0) {
-		res = device_read(buffer, 255);
+		res = device_read(buffer, 255, state);
 		for (count = 0; count < res; count++)
 			fbus_rx_statemachine(buffer[count], state);
 	} else
@@ -410,7 +410,7 @@ int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer, struct gn
 
 	/* Now construct the message header. */
 
-	if (IR_MODE(&state->link))
+	if (IR_MODE(state))
 		out_buffer[current++] = FBUS_IR_FRAME_ID;	/* Start of the IR frame indicator */
 	else			/* connection_type == GN_CT_Serial */
 		out_buffer[current++] = FBUS_FRAME_ID;		/* Start of the frame indicator */
@@ -455,7 +455,7 @@ int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer, struct gn
 
 	/* Send it out... */
 
-	if (device_write(out_buffer, current) != current)
+	if (device_write(out_buffer, current, state) != current)
 		return false;
 
 	return true;
@@ -539,8 +539,8 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 	state->link.send_message = &fbus_send_message;
 
 	/* Check for a valid init length */
-	if (state->link.init_length == 0)
-		state->link.init_length = 250;
+	if (state->config.init_length == 0)
+		state->config.init_length = 250;
 
 	/* Start up the link */
 	if ((FBUSINST(state) = calloc(1, sizeof(fbus_link))) == NULL)
@@ -548,7 +548,7 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 
 	FBUSINST(state)->request_sequence_number = 0;
 
-	switch (state->link.connection_type) {
+	switch (state->config.connection_type) {
 	case GN_CT_Infrared:
 #ifndef WIN32
 	case GN_CT_Tekram:
@@ -599,9 +599,9 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 	   empirical. */
 	/* I believe that we need/can do this for any phone to get the UART synced */
 
-	for (count = 0; count < state->link.init_length; count++) {
+	for (count = 0; count < state->config.init_length; count++) {
 		usleep(100);
-		device_write(&init_char, 1);
+		device_write(&init_char, 1, state);
 	}
 
 	/* Init variables */

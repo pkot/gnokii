@@ -44,15 +44,15 @@
 
 #define TEKRAM_PW      0x10 /* Pulse select bit */
 
-int tekram_open(const char *file);
-void tekram_close(int fd);
+int tekram_open(const char *file, struct gn_statemachine *state);
+void tekram_close(int fd, struct gn_statemachine *state);
 
-void tekram_setdtrrts(int fd, int dtr, int rts);
-void tekram_changespeed(int fd, int speed);
+void tekram_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state);
+void tekram_changespeed(int fd, int speed, struct gn_statemachine *state);
 
-size_t tekram_read(int fd, __ptr_t buf, size_t nbytes);
-size_t tekram_write(int fd, const __ptr_t buf, size_t n);
+size_t tekram_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state);
+size_t tekram_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state);
 
-int tekram_select(int fd, struct timeval *timeout);
+int tekram_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
 
 #endif  /* __devices_tekram_h */

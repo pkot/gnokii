@@ -144,7 +144,7 @@ static gn_error initialise(struct gn_statemachine *state)
 		return GN_ERR_FAILED;
 	state->driver.driver_instance = drvinst;
 	
-	switch (state->link.connection_type) {
+	switch (state->config.connection_type) {
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		error = m2bus_initialise(state);

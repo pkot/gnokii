@@ -371,7 +371,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	dprintf("Connecting\n");
 	while (!connected) {
 		if (try > 2) break;
-		switch (state->link.connection_type) {
+		switch (state->config.connection_type) {
 		case GN_CT_DAU9P:
 			try++;
 		case GN_CT_DLR3P:
@@ -1355,8 +1355,8 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 	dprintf("Sending SMS...(%d)\n", pos + 9);
 	if (sm_message_send(pos + 9, NK6510_MSG_SMS, req, state)) return GN_ERR_NOTREADY;
 	do {
-		error = sm_block_no_retry_timeout(NK6510_MSG_SMS, state->link.sms_timeout, data, state);
-	} while (!state->link.sms_timeout && error == GN_ERR_TIMEOUT);
+		error = sm_block_no_retry_timeout(NK6510_MSG_SMS, state->config.smsc_timeout, data, state);
+	} while (!state->config.smsc_timeout && error == GN_ERR_TIMEOUT);
 	return error;
 }
 

@@ -45,10 +45,10 @@
 
 #include "misc.h"
 
-int irda_open(void);
-int irda_close(int fd);
-int irda_write(int fd, const __ptr_t bytes, int size);
-int irda_read(int fd, __ptr_t bytes, int size);
-int irda_select(int fd, struct timeval *timeout);
+int irda_open(struct gn_statemachine *state);
+int irda_close(int fd, struct gn_statemachine *state);
+int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state);
+int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);
+int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
 
 #endif

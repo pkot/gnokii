@@ -673,8 +673,8 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	if (sm_message_send(strlen(req), GN_OP_SendSMS, req, state))
 		return GN_ERR_NOTREADY;
 	do {
-		error = sm_block_no_retry_timeout(GN_OP_SendSMS, state->link.sms_timeout, data, state);
-	} while (!state->link.sms_timeout && error == GN_ERR_TIMEOUT);
+		error = sm_block_no_retry_timeout(GN_OP_SendSMS, state->config.smsc_timeout, data, state);
+	} while (!state->config.smsc_timeout && error == GN_ERR_TIMEOUT);
 	return error;
 }
 
@@ -1197,7 +1197,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 		at_insert_recv_function(at_function_init[i].gop, at_function_init[i].rfunc, state);
 	}
 
-	switch (state->link.connection_type) {
+	switch (state->config.connection_type) {
 	case GN_CT_Serial:
 #ifdef HAVE_IRDA
 	case GN_CT_Irda:

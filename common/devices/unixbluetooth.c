@@ -27,7 +27,8 @@
 
 */
 
-#include "config.h"
+#include "misc.h"
+#include "gsm-api.h"
 
 #ifdef HAVE_BLUETOOTH
 
@@ -41,7 +42,7 @@ static char *phone[] = {
 	"Nokia 8910"
 };
 
-int bluetooth_open(bdaddr_t *bdaddr, int channel)
+int bluetooth_open(bdaddr_t *bdaddr, int channel, struct gn_statemachine *state)
 {
 	struct sockaddr_rc laddr, raddr;
 	int fd;
@@ -74,22 +75,22 @@ int bluetooth_open(bdaddr_t *bdaddr, int channel)
 	return fd;
 }
 
-int bluetooth_close(int fd)
+int bluetooth_close(int fd, struct gn_statemachine *state)
 {
 	return close(fd);
 }
 
-int bluetooth_write(int fd, const __ptr_t bytes, int size)
+int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
 {
 	return write(fd, bytes, size);
 }
 
-int bluetooth_read(int fd, __ptr_t bytes, int size)
+int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
 {
 	return read(fd, bytes, size);
 }
 
-int bluetooth_select(int fd, struct timeval *timeout)
+int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 {
 	fd_set readfds;
 
@@ -101,10 +102,10 @@ int bluetooth_select(int fd, struct timeval *timeout)
 
 #else /* HAVE_BLUETOOTH */
 
-int bluetooth_open(bdaddr_t *bdaddr, int channel) { return -1; }
-int bluetooth_close(int fd) { return -1; }
-int bluetooth_write(int fd, const __ptr_t bytes, int size) { return -1; }
-int bluetooth_read(int fd, __ptr_t bytes, int size) { return -1; }
-int bluetooth_select(int fd, struct timeval *timeout) { return -1; }
+int bluetooth_open(bdaddr_t *bdaddr, int channel, struct gn_statemachine *state) { return -1; }
+int bluetooth_close(int fd, struct gn_statemachine *state) { return -1; }
+int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
+int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
+int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state) { return -1; }
 
 #endif /* HAVE_BLUETOOTH */

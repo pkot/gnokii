@@ -38,14 +38,13 @@
 
 #include "misc.h"
 
-int tcp_open(const char *file);
-int tcp_close(int fd);
+int tcp_close(int fd, struct gn_statemachine *state);
 
-int tcp_opendevice(const char *file, int with_async);
+int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state);
 
-size_t tcp_read(int fd, __ptr_t buf, size_t nbytes);
-size_t tcp_write(int fd, __const __ptr_t buf, size_t n);
+size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state);
+size_t tcp_write(int fd, __const __ptr_t buf, size_t n, struct gn_statemachine *state);
 
-int tcp_select(int fd, struct timeval *timeout);
+int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
 
 #endif  /* __devices_tcp_h */

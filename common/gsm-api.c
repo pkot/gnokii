@@ -123,36 +123,61 @@ API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
 			       struct gn_statemachine *sm)
 {
 	gn_error ret;
-	char *sms_timeout;
+	char *val;
 
 	if (!strcasecmp(connection, "serial"))
-		sm->link.connection_type = GN_CT_Serial;
+		sm->config.connection_type = GN_CT_Serial;
 	else if (!strcasecmp(connection, "dau9p"))
-		sm->link.connection_type = GN_CT_DAU9P;
+		sm->config.connection_type = GN_CT_DAU9P;
 	else if (!strcasecmp(connection, "dlr3p"))
-		sm->link.connection_type = GN_CT_DLR3P;
+		sm->config.connection_type = GN_CT_DLR3P;
 	else if (!strcasecmp(connection, "infrared"))
-		sm->link.connection_type = GN_CT_Infrared;
+		sm->config.connection_type = GN_CT_Infrared;
 	else if (!strcasecmp(connection, "m2bus"))
-		sm->link.connection_type = GN_CT_M2BUS;
+		sm->config.connection_type = GN_CT_M2BUS;
 #ifdef HAVE_IRDA
 	else if (!strcasecmp(connection, "irda"))
-		sm->link.connection_type = GN_CT_Irda;
+		sm->config.connection_type = GN_CT_Irda;
 #endif
 #ifndef WIN32
 	else if (!strcasecmp(connection, "tcp"))
-		sm->link.connection_type = GN_CT_TCP;
+		sm->config.connection_type = GN_CT_TCP;
 	else if (!strcasecmp(connection, "tekram"))
-		sm->link.connection_type = GN_CT_Tekram;
+		sm->config.connection_type = GN_CT_Tekram;
 #endif
 	else return GN_ERR_NOTSUPPORTED;
 
-	sm->link.init_length = atoi(initlength);
-	sms_timeout = gn_cfg_get(gn_cfg_info, "sms", "timeout");
-	if (!sms_timeout) sm->link.sms_timeout = 100;
-	else sm->link.sms_timeout = atoi(sms_timeout) * 10;
-	memset(&sm->link.port_device, 0, sizeof(sm->link.port_device));
-	strncpy(sm->link.port_device, device, sizeof(sm->link.port_device) - 1);
+	sm->config.init_length = atoi(initlength);
+
+	val = gn_cfg_get(gn_cfg_info, "sms", "timeout");
+	if (!val) sm->config.smsc_timeout = 100;
+	else sm->config.smsc_timeout = atoi(val) * 10;
+
+	memset(&sm->config.port_device, 0, sizeof(sm->config.port_device));
+	strncpy(sm->config.port_device, device, sizeof(sm->config.port_device) - 1);
+
+	val = gn_cfg_get(gn_cfg_info, "global", "serial_baudrate");
+	if (!val) sm->config.serial_baudrate = 19200;
+	else sm->config.serial_baudrate = atoi(val);
+
+	val = gn_cfg_get(gn_cfg_info, "global", "serial_write_usleep");
+	if (!val) sm->config.serial_write_usleep = -1;
+	else sm->config.serial_write_usleep = atoi(val);
+
+	val = gn_cfg_get(gn_cfg_info, "global", "handshake");
+	if (!val) sm->config.hardware_handshake = false;
+	else if (!strcasecmp(val, "software") || !strcasecmp(val, "rtscts"))
+		sm->config.hardware_handshake = false;
+	else if (!strcasecmp(val, "hardware") || !strcasecmp(val, "xonxoff"))
+		sm->config.hardware_handshake = true;
+	else {
+		fprintf(stderr, _("Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value, ignoring!"),
+				 "global", "handshake", "software", "hardware");
+	}
+
+	val = gn_cfg_get(gn_cfg_info, "global", "require_dcd");
+	if (!val) sm->config.require_dcd = false;
+	else sm->config.require_dcd = atoi(val);
 
 	REGISTER_DRIVER(nokia_7110, NULL);
 	REGISTER_DRIVER(nokia_6510, NULL);

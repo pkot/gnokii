@@ -813,7 +813,7 @@ bool	gn_atem_command_plusg(char **buf)
 	if (strncasecmp(*buf, "MM", 3) == 0) {
 		buf[0] += 2;
 
-		gsprintf(buffer, MAX_LINE_LENGTH, _("\n\rgnokii configured on %s for models %s"), sm->link.port_device, sm->driver.phone.models);
+		gsprintf(buffer, MAX_LINE_LENGTH, _("\n\rgnokii configured on %s for models %s"), sm->config.port_device, sm->driver.phone.models);
 		gn_atem_string_out(buffer);
 		return (false);
 	}

@@ -33,6 +33,7 @@
 #include <memory.h>
 
 #include "misc.h"
+#include "gsm-api.h"
 #include "gsm-error.h"
 
 #define USECOMM      /* yes, we need the COMM API */
@@ -85,7 +86,7 @@ int serial_open(const char *file, int oflags)
 }
 
 /* Close the serial port and restore old settings. */
-int serial_close(int fd)
+int serial_close(int fd, struct gn_statemachine *state)
 {
 	/* disable event notification and wait for thread
 	 * to halt
@@ -108,14 +109,15 @@ int serial_close(int fd)
  * Use value (-1) for "with_hw_handshake" if its specification is required from the user.
  */
 int serial_opendevice(const char *file, int with_odd_parity,
-		      int with_async, int with_hw_handshake)
+		      int with_async, int with_hw_handshake,
+		      struct gn_statemachine *state)
 {
 	serial_open(file, 0);
 	return true;
 }
 
 /* Set the DTR and RTS bit of the serial device. */
-void serial_setdtrrts(int fd, int dtr, int rts)
+void serial_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state)
 {
 	BOOL       fRetVal;
 	DCB        dcb;
@@ -144,7 +146,7 @@ void serial_setdtrrts(int fd, int dtr, int rts)
 }
 
 
-int serial_select(int fd, struct timeval *timeout)
+int serial_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 {
 	usleep(timeout->tv_sec * 60 + timeout->tv_usec);
 	return 1;
@@ -154,7 +156,7 @@ int serial_select(int fd, struct timeval *timeout)
 /* Change the speed of the serial device.
  * RETURNS: Success
  */
-gn_error serial_changespeed(int fd, int speed)
+gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)
 {
 	BOOL  fRetVal;
 	DCB   dcb;
@@ -176,7 +178,7 @@ gn_error serial_changespeed(int fd, int speed)
 }
 
 /* Read from serial device. */
-size_t serial_read(int fd, __ptr_t buf, size_t nbytes)
+size_t serial_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 {
 	BOOL    fReadStat;
 	COMSTAT ComStat;
@@ -222,7 +224,7 @@ size_t serial_read(int fd, __ptr_t buf, size_t nbytes)
 }
 
 /* Write to serial device. */
-size_t serial_write(int fd, __ptr_t buf, size_t n)
+size_t serial_write(int fd, __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
 	BOOL    fWriteStat;
 	DWORD   dwBytesWritten;
@@ -284,12 +286,12 @@ size_t serial_write(int fd, __ptr_t buf, size_t n)
 	return n;
 }
 
-gn_error serial_nreceived(int fd, int *n)
+gn_error serial_nreceived(int fd, int *n, struct gn_statemachine *state)
 {
 	return GN_ERR_NONE;
 }
 
-gn_error serial_flush(int fd)
+gn_error serial_flush(int fd, struct gn_statemachine *state)
 {
 	return GN_ERR_NONE;
 }

@@ -64,18 +64,18 @@ static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state);
 static bool m2bus_serial_open(struct gn_statemachine *state)
 {
 	/* Open device. */
-	if (!device_open(state->link.port_device, true, false, false, GN_CT_Serial)) {
+	if (!device_open(state->config.port_device, true, false, false, GN_CT_Serial, state)) {
 		perror(_("Couldn't open M2BUS device"));
 		return false;
 	}
-	device_changespeed(9600);
+	device_changespeed(9600, state);
 
 	/*
 	 * Need to "toggle" the dtr/rts lines in the right sequence it seems
 	 * for the interface to work. Base time value is units of 50ms it
 	 * seems.
 	 */
-	device_setdtrrts(0, 1);
+	device_setdtrrts(0, 1, state);
 
 	return true;
 }
@@ -117,7 +117,7 @@ static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine 
 		/* else fall through to... */
 
 	case M2BUS_RX_Sync:
-		if (state->link.connection_type == GN_CT_Infrared) {
+		if (state->config.connection_type == GN_CT_Infrared) {
 			if (rx_byte == M2BUS_IR_FRAME_ID) {
 				/* Initialize checksums. */
 				i->checksum = M2BUS_IR_FRAME_ID;
@@ -128,7 +128,7 @@ static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine 
 				gettimeofday(&i->time_last, NULL);
 			}
 
-		} else {	/* state->link.connection_type == GN_CT_Serial */
+		} else {	/* state->config.connection_type == GN_CT_Serial */
 			if (rx_byte == M2BUS_FRAME_ID) {
 				/* Initialize checksums. */
 				i->checksum = M2BUS_FRAME_ID;
@@ -261,9 +261,9 @@ static gn_error m2bus_loop(struct timeval *timeout, struct gn_statemachine *stat
 	unsigned char buffer[255];
 	int count, res;
 
-	res = device_select(timeout);
+	res = device_select(timeout, state);
 	if (res > 0) {
-		res = device_read(buffer, sizeof(buffer));
+		res = device_read(buffer, sizeof(buffer), state);
 		for (count = 0; count < res; count++)
 			m2bus_rx_statemachine(buffer[count], state);
 	} else
@@ -277,21 +277,21 @@ static gn_error m2bus_loop(struct timeval *timeout, struct gn_statemachine *stat
 }
 
 
-static void m2bus_wait_for_idle(int timeout, bool reset)
+static void m2bus_wait_for_idle(int timeout, bool reset, struct gn_statemachine *state)
 {
 	int n, prev;
 
-	device_nreceived(&n);
+	device_nreceived(&n, state);
 	do {
 		prev = n;
 		usleep(timeout);
-		if (device_nreceived(&n) != GN_ERR_NONE) break;
+		if (device_nreceived(&n, state) != GN_ERR_NONE) break;
 	} while (n != prev);
 
 	if (reset) {
-		device_setdtrrts(0, 0);
+		device_setdtrrts(0, 0, state);
 		usleep(200000);
-		device_setdtrrts(0, 1);
+		device_setdtrrts(0, 1, state);
 		usleep(100000);
 	}
 }
@@ -337,7 +337,7 @@ static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned cha
 		/* Now construct the message header. */
 
 		i = 0;
-		if (state->link.connection_type == GN_CT_Infrared)
+		if (state->config.connection_type == GN_CT_Infrared)
 			out_buffer[i++] = M2BUS_IR_FRAME_ID;	/* Start of the IR frame indicator */
 		else			/* connection_type == GN_CT_Serial */
 			out_buffer[i++] = M2BUS_FRAME_ID;	/* Start of the frame indicator */
@@ -382,14 +382,14 @@ static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned cha
 	dprintf("\n");
 #endif
 
-	m2bus_wait_for_idle(5000, true);
+	m2bus_wait_for_idle(5000, true, state);
 
-	if (device_write(out_buffer, i) != i) {
+	if (device_write(out_buffer, i, state) != i) {
 		free(out_buffer);
 		return GN_ERR_INTERNALERROR;
 	}
 
-	device_flush();
+	device_flush(state);
 
 	free(out_buffer);
 	return GN_ERR_NONE;
@@ -403,7 +403,7 @@ static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
 
 	dprintf("[Sending Ack, seq: %x]\n", message_seq);
 
-	if (state->link.connection_type == GN_CT_Infrared)
+	if (state->config.connection_type == GN_CT_Infrared)
 		out_buffer[0] = M2BUS_IR_FRAME_ID;/* Start of the IR frame indicator */
 	else			/* connection_type == GN_CT_Serial */
 		out_buffer[0] = M2BUS_FRAME_ID;	/* Start of the frame indicator */
@@ -419,12 +419,12 @@ static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
 
 	out_buffer[5] = out_buffer[0] ^ out_buffer[1] ^ out_buffer[2] ^ out_buffer[3] ^ out_buffer[4];
 
-	m2bus_wait_for_idle(2000, false);
+	m2bus_wait_for_idle(2000, false, state);
 
-	if (device_write(out_buffer, 6) != 6)
+	if (device_write(out_buffer, 6, state) != 6)
 		return GN_ERR_INTERNALERROR;
 
-	device_flush();
+	device_flush(state);
 
 	return GN_ERR_NONE;
 }
@@ -448,7 +448,7 @@ gn_error m2bus_initialise(struct gn_statemachine *state)
 	M2BUSINST(state)->request_sequence_number = 2;
 	M2BUSINST(state)->i.state = M2BUS_RX_Sync;
 
-	if (state->link.connection_type == GN_CT_Infrared) {
+	if (state->config.connection_type == GN_CT_Infrared) {
 		err = GN_ERR_FAILED;
 	} else {		/* connection_type == GN_CT_Serial */
 		err = m2bus_serial_open(state) ? GN_ERR_NONE : GN_ERR_FAILED;

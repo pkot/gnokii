@@ -44,10 +44,10 @@
 
 #include "misc.h"
 
-int bluetooth_open(bdaddr_t *bdaddr, int channel);
-int bluetooth_close(int fd);
-int bluetooth_write(int fd, const __ptr_t bytes, int size);
-int bluetooth_read(int fd, __ptr_t bytes, int size);
-int bluetooth_select(int fd, struct timeval *timeout);
+int bluetooth_open(bdaddr_t *bdaddr, int channel, struct gn_statemachine *state);
+int bluetooth_close(int fd, struct gn_statemachine *state);
+int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state);
+int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);
+int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
 
 #endif /* _gnokii_unix_bluetooth_h */

@@ -33,6 +33,8 @@
     o use just 1 include (gsm-api.h) in xgnokii          (Pawel Kot)
     o use just 1 include (gsm-api.h) in gnokiid          (Pawel Kot)
     o make data/virtual.h part of the external API       (Pawel Kot)
+    o state populated to the device layer           (BORBELY Zoltan)
+    o config settings moved into state->config      (BORBELY Zoltan)
  * 6110 series updates:
     o M2BUS support added                           (BORBELY Zoltan)
  * 7110 series updates:

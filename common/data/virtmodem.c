@@ -153,7 +153,7 @@ void gn_vm_loop(void)
 	int i, n;
 	char buf[256];
 
-	devfd = device_getfd();
+	devfd = device_getfd(sm);
 	nfd = (PtyRDFD > devfd) ? PtyRDFD + 1 : devfd + 1;
 
 	while (!GTerminateThread) {

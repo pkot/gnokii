@@ -96,15 +96,6 @@ typedef struct {
  * The link comes 'under' the phone
  */
 typedef struct {
-	/* The port device */
-	char port_device[GN_DEVICE_NAME_MAX_LENGTH];
-	/* Number of chars sent to sync the serial port */
-	int init_length;
-	/* SMS timeout: how many seconds should we wait for the SMSC response.
-	 * Defaults to 10 seconds */
-	unsigned int sms_timeout;
-	/* Connection type, serial, ir etc */
-	gn_connection_type connection_type;
 	/* A regularly called loop function. Timeout can be used to make the
 	 * function block or not */
 	gn_error (*loop)(struct timeval *timeout, struct gn_statemachine *state);
@@ -114,6 +105,17 @@ typedef struct {
 				 struct gn_statemachine *state);
 	void *link_instance;
 } gn_link;
+
+typedef struct {
+	char port_device[GN_DEVICE_NAME_MAX_LENGTH];	/* Port device to use (e.g. /dev/ttyS0) */
+	gn_connection_type connection_type;		/* Connection type (e.g. serial, ir) */
+	int init_length;				/* Number of chars sent to sync the serial port */
+	int serial_baudrate;				/* Baud rate to use */
+	int serial_write_usleep;			/* Inter character delay or <0 to disable */
+	bool hardware_handshake;			/* Select between hardware and software handshake */
+	bool require_dcd;				/* DCD signal check */
+	unsigned int smsc_timeout;			/* How many seconds should we wait for the SMSC response, defaults to 10 seconds */
+} gn_config;
 
 typedef enum {
 	GN_OP_Init,

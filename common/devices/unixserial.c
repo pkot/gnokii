@@ -26,11 +26,7 @@
 
 */
 
-/* [global] option "serial_write_usleep" default: */
-#define SERIAL_WRITE_USLEEP_DEFAULT (-1)
-
 #include "misc.h"
-#include "cfgreader.h"
 #include "gsm-api.h"
 
 /* Do not compile this file under Win32 systems. */
@@ -148,7 +144,7 @@ int device_script(int fd, const char *section)
 }
 
 
-int serial_close(int fd);
+int serial_close(int fd, struct gn_statemachine *state);
 
 
 /* Open the serial port and store the settings. */
@@ -175,7 +171,7 @@ int serial_open(const char *file, int oflag)
 }
 
 /* Close the serial port and restore old settings. */
-int serial_close(int fd)
+int serial_close(int fd, struct gn_statemachine *state)
 {
 	/* handle config file disconnect_script:
 	 */
@@ -199,29 +195,12 @@ int serial_close(int fd)
  * Use value (-1) for "with_hw_handshake" if its specification is required from the user.
  */
 int serial_opendevice(const char *file, int with_odd_parity,
-		      int with_async, int with_hw_handshake)
+		      int with_async, int with_hw_handshake,
+		      struct gn_statemachine *state)
 {
 	int fd;
-	int retcode, baudrate = 0;
+	int retcode;
 	struct termios tp;
-	char *s;
-
-	/* handle config file handshake override: */
-	s = gn_cfg_get(gn_cfg_info, "global", "handshake");
-
-	if (s && (!strcasecmp(s, "software") || !strcasecmp(s, "rtscts")))
-		with_hw_handshake = false;
-	else if (s && (!strcasecmp(s, "hardware") || !strcasecmp(s, "xonxoff")))
-		with_hw_handshake = true;
-	else if (s)
-		fprintf(stderr, _("Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value, ignoring!"),
-				 "global", "handshake", "software", "hardware");
-
-	if (with_hw_handshake == -1) {
-		fprintf(stderr, _("[%s] option \"%s\" not found, trying to use \"%s\" value!"),
-				  "global", "handshake", "software");
-		with_hw_handshake = false;
-	}
 
 	/* Open device */
 
@@ -243,7 +222,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	} else
 		tp.c_iflag = IGNPAR;
 #ifdef CRTSCTS
-	if (with_hw_handshake)
+	if (state->config.hardware_handshake)
 		tp.c_cflag |= CRTSCTS;
 	else
 		tp.c_cflag &= ~CRTSCTS;
@@ -257,25 +236,19 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	retcode = tcflush(fd, TCIFLUSH);
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: tcflush");
-		serial_close(fd);
+		serial_close(fd, state);
 		return -1;
 	}
 
 	retcode = tcsetattr(fd, TCSANOW, &tp);
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: tcsetattr");
-		serial_close(fd);
+		serial_close(fd, state);
 		return -1;
 	}
 
-	/* Set speed */
-	s = gn_cfg_get(gn_cfg_info, "global", "serial_baudrate"); /* baud rate string */
-
-	if (s) baudrate = atoi(s);
-	if (baudrate && serial_changespeed(fd, baudrate) != GN_ERR_NONE)
-		baudrate = 0;
-	if (!baudrate)
-		serial_changespeed(fd, 19200 /* default value */ );
+	if (serial_changespeed(fd, state->config.serial_baudrate, state) != GN_ERR_NONE)
+		serial_changespeed(fd, 19200 /* default value */, state);
 
 	/* We need to turn off O_NONBLOCK now (we have CLOCAL set so it is safe).
 	 * When we run some device script it really doesn't expect NONBLOCK!
@@ -284,7 +257,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	retcode = fcntl(fd, F_SETFL, 0);
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
-		serial_close(fd);
+		serial_close(fd, state);
 		return -1;
 	}
 
@@ -292,7 +265,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	 */
 	if (device_script(fd,"connect_script") == -1) {
 		fprintf(stderr,"Gnokii serial_opendevice: connect_script\n");
-		serial_close(fd);
+		serial_close(fd, state);
 		return -1;
 	}
 
@@ -302,7 +275,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
-		serial_close(fd);
+		serial_close(fd, state);
 		return -1;
 	}
 #endif
@@ -325,7 +298,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 #endif
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
-		serial_close(fd);
+		serial_close(fd, state);
 		return -1;
 	}
 
@@ -333,7 +306,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 }
 
 /* Set the DTR and RTS bit of the serial device. */
-void serial_setdtrrts(int fd, int dtr, int rts)
+void serial_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state)
 {
 	unsigned int flags;
 
@@ -353,7 +326,7 @@ void serial_setdtrrts(int fd, int dtr, int rts)
 }
 
 
-int serial_select(int fd, struct timeval *timeout)
+int serial_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 {
 	fd_set readfds;
 
@@ -367,7 +340,7 @@ int serial_select(int fd, struct timeval *timeout)
 /* Change the speed of the serial device.
  * RETURNS: Success
  */
-gn_error serial_changespeed(int fd, int speed)
+gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)
 {
 	gn_error retcode = GN_ERR_NONE;
 #ifndef SGTTY
@@ -419,7 +392,7 @@ gn_error serial_changespeed(int fd, int speed)
 }
 
 /* Read from serial device. */
-size_t serial_read(int fd, __ptr_t buf, size_t nbytes)
+size_t serial_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 {
 	return read(fd, buf, nbytes);
 }
@@ -443,32 +416,20 @@ static void check_dcd(int fd)
 }
 
 /* Write to serial device. */
-size_t serial_write(int fd, const __ptr_t buf, size_t n)
+size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
 	size_t r = 0;
 	ssize_t got;
-	static long serial_write_usleep = LONG_MIN;
-	static int require_dcd = -1;
 
-	if (serial_write_usleep == LONG_MIN) {
-		char *s = gn_cfg_get(gn_cfg_info, "global", "serial_write_usleep");
-
-		serial_write_usleep = (!s ?
-			SERIAL_WRITE_USLEEP_DEFAULT : atol(gn_cfg_get(gn_cfg_info, "global", "serial_write_usleep")));
-	}
-
-	if (require_dcd == -1) {
-		require_dcd = (!!gn_cfg_get(gn_cfg_info, "global", "require_dcd"));
 #ifndef TIOCMGET
-		if (require_dcd)
-			fprintf(stderr, _("WARNING: global/require_dcd argument was set but it is not supported on this system!\n"));
+	if (state->config.require_dcd)
+		fprintf(stderr, _("WARNING: global/require_dcd argument was set but it is not supported on this system!\n"));
 #endif
-	}
 
-	if (require_dcd)
+	if (state->config.require_dcd)
 		check_dcd(fd);
 
-	if (serial_write_usleep < 0)
+	if (state->config.serial_write_usleep < 0)
 		return write(fd, buf, n);
 
 	while (n > 0) {
@@ -478,13 +439,13 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n)
 		buf++;
 		n--;
 		r++;
-		if (serial_write_usleep)
-			usleep(serial_write_usleep);
+		if (state->config.serial_write_usleep)
+			usleep(state->config.serial_write_usleep);
 	}
 	return r;
 }
 
-gn_error serial_nreceived(int fd, int *n)
+gn_error serial_nreceived(int fd, int *n, struct gn_statemachine *state)
 {
 	if (ioctl(fd, FIONREAD, n)) {
 		dprintf("serial_nreceived: cannot get the received data size\n");
@@ -494,7 +455,7 @@ gn_error serial_nreceived(int fd, int *n)
 	return GN_ERR_NONE;
 }
 
-gn_error serial_flush(int fd)
+gn_error serial_flush(int fd, struct gn_statemachine *state)
 {
 	if (tcdrain(fd)) {
 		dprintf("serial_flush: cannot flush serial device\n");

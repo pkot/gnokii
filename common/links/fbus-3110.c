@@ -48,9 +48,9 @@
 
 static bool fb3110_serial_open(struct gn_statemachine *state);
 static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachine *state);
-static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
+static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state);
 static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
-static void fb3110_tx_ack_send(u8 *message, int length);
+static void fb3110_tx_ack_send(u8 *message, int length, struct gn_statemachine *state);
 static void fb3110_sequence_number_update(struct gn_statemachine *state);
 
 /* FIXME - win32 stuff! */
@@ -63,11 +63,11 @@ static void fb3110_sequence_number_update(struct gn_statemachine *state);
 static bool fb3110_serial_open(struct gn_statemachine *state)
 {
 	/* Open device. */
-	if (!device_open(state->link.port_device, false, false, false, GN_CT_Serial)) {
+	if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
-	device_changespeed(115200);
+	device_changespeed(115200, state);
 
 	return true;
 }
@@ -149,7 +149,7 @@ static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachin
 				sm_incoming_function(i->buffer[0], i->buffer, i->frame_len, state);
 
 				/* Send an ack */
-				fb3110_tx_ack_send(i->buffer, i->frame_len);
+				fb3110_tx_ack_send(i->buffer, i->frame_len, state);
 
 			} else {
 				/* Checksum didn't match so ignore. */
@@ -172,9 +172,9 @@ static gn_error fb3110_loop(struct timeval *timeout, struct gn_statemachine *sta
 	unsigned char buffer[255];
 	int count, res;
 
-	res = device_select(timeout);
+	res = device_select(timeout, state);
 	if (res > 0) {
-		res = device_read(buffer, 255);
+		res = device_read(buffer, 255, state);
 		for (count = 0; count < res; count++)
 			fb3110_rx_state_machine(buffer[count], state);
 	} else
@@ -194,7 +194,7 @@ static gn_error fb3110_loop(struct timeval *timeout, struct gn_statemachine *sta
  * byte (0x01) and other values according the value specified when called.
  * Calculates checksum and then sends the lot down the pipe... 
  */
-static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer)
+static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state)
 {
 
 	u8 out_buffer[FB3110_TRANSMIT_MAX_LENGTH];
@@ -233,7 +233,7 @@ static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequ
 	dprintf("\n");
 
 	/* Send it out... */
-	if (device_write(out_buffer, current) != current)
+	if (device_write(out_buffer, current, state) != current)
 		return GN_ERR_INTERNALERROR;
 
 	return GN_ERR_NONE;
@@ -250,7 +250,7 @@ static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned ch
 	fb3110_sequence_number_update(state);
 	seqnum = FBUSINST(state)->request_sequence_number;
 
-	return fb3110_tx_frame_send(messagesize, messagetype, seqnum, message);
+	return fb3110_tx_frame_send(messagesize, messagetype, seqnum, message, state);
 }
 
 
@@ -259,7 +259,7 @@ static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned ch
  * a message it sent automatically or in response to a command sent to it.
  * The ack algorithm isn't 100% understood at this time. 
  */
-static void fb3110_tx_ack_send(u8 *message, int length)
+static void fb3110_tx_ack_send(u8 *message, int length, struct gn_statemachine *state)
 {
 	u8 t = message[0];
 
@@ -309,7 +309,7 @@ static void fb3110_tx_ack_send(u8 *message, int length)
 		/* Standard acknowledge seems to be to return an empty message
 		   with the sequence number set to equal the sequence number
 		   sent minus 0x08. */
-		if (fb3110_tx_frame_send(0, t, (message[1] & 0x1f) - 0x08, NULL))
+		if (fb3110_tx_frame_send(0, t, (message[1] & 0x1f) - 0x08, NULL, state))
 			dprintf("Failed to acknowledge message type %02x.\n", t);
 		else
 			dprintf("Acknowledged message type %02x.\n", t);
@@ -337,8 +337,8 @@ gn_error fb3110_initialise(struct gn_statemachine *state)
 	state->link.send_message = &fb3110_message_send;
 
 	/* Check for a valid init length */
-	if (state->link.init_length == 0)
-		state->link.init_length = 100;
+	if (state->config.init_length == 0)
+		state->config.init_length = 100;
 
 	/* Start up the link */
 	if ((FBUSINST(state) = calloc(1, sizeof(fb3110_link))) == NULL)
@@ -355,9 +355,9 @@ gn_error fb3110_initialise(struct gn_statemachine *state)
 	/* Send init string to phone, this is a bunch of 0x55 characters.
 	   Timing is empirical. I believe that we need/can do this for any
 	   phone to get the UART synced */
-	for (count = 0; count < state->link.init_length; count++) {
+	for (count = 0; count < state->config.init_length; count++) {
 		usleep(1000);
-		device_write(&init_char, 1);
+		device_write(&init_char, 1, state);
 	}
 
 	/* Init variables */

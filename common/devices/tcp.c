@@ -27,7 +27,7 @@
 */
 
 #include "misc.h"
-#include "cfgreader.h"
+#include "gsm-api.h"
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -65,7 +65,7 @@
 
 /* Open the serial port and store the settings. */
 
-int tcp_open(const char *file)
+static int tcp_open(const char *file)
 {
 	int fd;
 	struct sockaddr_in addr;
@@ -117,7 +117,7 @@ int tcp_open(const char *file)
 	return fd;
 }
 
-int tcp_close(int fd)
+int tcp_close(int fd, struct gn_statemachine *state)
 {
 	/* handle config file disconnect_script:
 	 */
@@ -130,7 +130,7 @@ int tcp_close(int fd)
 /* Open a device with standard options.
  * Use value (-1) for "with_hw_handshake" if its specification is required from the user
  */
-int tcp_opendevice(const char *file, int with_async)
+int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
 {
 	int fd;
 	int retcode;
@@ -146,7 +146,7 @@ int tcp_opendevice(const char *file, int with_async)
 	 */
 	if (device_script(fd,"connect_script") == -1) {
 		fprintf(stderr, "Gnokii tcp_opendevice: connect_script\n");
-		tcp_close(fd);
+		tcp_close(fd, state);
 		return -1;
 	}
 
@@ -156,7 +156,7 @@ int tcp_opendevice(const char *file, int with_async)
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1){
 		perror("Gnokii tcp_opendevice: fnctl(F_SETOWN)");
-		tcp_close(fd);
+		tcp_close(fd, state);
 		return -1;
 	}
 #endif
@@ -179,29 +179,29 @@ int tcp_opendevice(const char *file, int with_async)
 #endif
 	if (retcode == -1) {
 		perror("Gnokii tcp_opendevice: fnctl(F_SETFL)");
-		tcp_close(fd);
+		tcp_close(fd, state);
 		return -1;
 	}
   
 	return fd;
 }
 
-int tcp_select(int fd, struct timeval *timeout)
+int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 {
-	return serial_select(fd, timeout);
+	return serial_select(fd, timeout, state);
 }
 
 
 /* Read from serial device. */
 
-size_t tcp_read(int fd, __ptr_t buf, size_t nbytes)
+size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 {
 	return read(fd, buf, nbytes);
 }
 
 /* Write to serial device. */
 
-size_t tcp_write(int fd, const __ptr_t buf, size_t n)
+size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
 	return write(fd, buf, n);
 }
