@@ -78,6 +78,7 @@ static unsigned char gsm_default_alphabet[GN_CHAR_ALPHABET_SIZE] = {
 
 static unsigned char gsm_reverse_default_alphabet[256];
 static bool reversed = false;
+extern const char *locale_charset(void); /* from ../intl/localcharset.c */
 
 static void tbl_setup_reverse()
 {

@@ -11,6 +11,7 @@
     o use replacement libintl when required        (BORBELY Zoltan)
     o configure generated po/Makefile twice        (BORBELY Zoltan) 
     o fix incorrect escaping in configure.in       (BORBELY Zoltan)
+    o better win32 dll support          (Pawel Kot, BORBELY Zoltan)
  * smsd updates
     o update README with some module clarification      (Pawel Kot)
  * xgnokii updates

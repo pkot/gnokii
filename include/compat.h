@@ -92,11 +92,13 @@
  * from a DLL, wheras this DLL sees symbols defined with this macro as being 
  * exported.
  */
-#if defined(WIN32) && (defined(_USRDLL) || defined(DLL_EXPORT))
-#  if defined(GNOKIIDLL_EXPORTS) || defined(DLL_EXPORT)
+#if defined(WIN32)
+#  if defined(GNOKIIDLL_EXPORTS) || defined(_USRDLL) || defined(DLL_EXPORT)
 #    define API __declspec(dllexport)
-#  else
+#  elif defined(GNOKIIDLL_IMPORTS)
 #    define API __declspec(dllimport)
+#  else
+#    define API
 #  endif
 #else /* !WIN32 */
 #  define API
