@@ -35,8 +35,8 @@ Note that it is still not possible to make fax or data calls on either
 series of phones.  We're working on it :)
 
 As you may be aware, there were indications that Nokia may provide
-some support for the project.  These negotiations have pretty much
-stalled around the issue of binary versus open source releases.
+some support for the project.  Regrettablt, these negotiations have
+pretty much stalled over the issue of binary versus open source releases.
 
 We have a web site at http://gnokii.org which amongst other things
 gives information on how to join the gnokii mailing list, retrieving
@@ -49,7 +49,7 @@ at http://gnokii.org/users
 - 2.0 General notes -
   
 gnokii now consists of three main executables and a fourth "helper"
-application that is suid root.
+application that is run suid root.
 
 The first, gnokii is a command line utility primarily for exercising
 the api functions that have been written.  Many people now use it
@@ -103,7 +103,9 @@ in the absence of a ~/.gnokiirc file.   Note that you will
 need permissions on whatever serial port you select.
 
 Review the notes specific to your model of phone in either
-README-6110 or README-3810 as appropriate.
+README-6110 or README-3810 as appropriate.  These files
+also provide information about what functionality is
+available for each model.
 
 Copy the sample.gnokiirc file to your home directory and name
 it .gnokiirc  Edit the settings in this file to suit your
@@ -271,7 +273,7 @@ is the Australian mirror, there will be one nearby to you too :)
 6110/Panafon (Greece)
 5110/Omnitel (Italy)
 5110/Paegas (Czech Republic)
-5110/ERA (Poland)
+5110/ERA GSM (Poland)
 5130/IDEA Centertel (Poland) (GSM 1800)
 5190/Microcel (Canada) (GSM 1900)
 
@@ -284,6 +286,16 @@ to recognise those who have helped so far!
 
 
 - 14.0 Release Notes -
+199907xx Version 0.3.0
+6110 functionality has increased again, details of which are
+in the 6110 specific readme.  Few minor tweaks on the 3810
+side but we've just about run out of things the 3810 can do
+(data and fax calls aside of course!)
+
+This release is the first to include xgnokii - an X based
+interface to your phone and gnokiid - the makings of a
+virtual modem/AT emulator interface.  Details of these
+two apps appear above.
 
 19990519 Version 0.2.5
 Little has changed on the 3810 side - mostly adding stub functions

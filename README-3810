@@ -48,7 +48,33 @@ Having said all of the above about SMS sending, a number of people
 have now tested SMS sending on various networks around the world and
 in the main have found it to work correctly.
 
+* Functionality *
+ 
+The following functions/facilities are available for the 3810 series
+phones.
 
+- Retrieving and writing single or multiple phone book entries from
+  either SIM or (in the case of the 8110s) internal memory.
+  
+- Retrieving and deleting single or multiple stored SMS messages from
+  either SIM or (again in the case of 8110s) internal memory.
+  
+- Sending an SMS message to a specified recipient via a specified
+  message centre number.
+  
+- By way of a message in --monitor mode, receive notification 
+  of the following occuring;
+  
+  + Incoming call being received, answered and hung up.
+  + Outgoing call being made, answered and hung up.
+  + Incoming SMS message
+  + Current phone status (connected to network, call progress etc.)
+
+- Retrieve current RF and battery level
+  
+- Retrieve IMEI, Model and Revision information
+
+ 
 * Known Bugs *
 
 fbus-3810 code cannot (yet) automatically determine the maximum
