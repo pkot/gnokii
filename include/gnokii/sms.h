@@ -407,5 +407,6 @@ extern GSM_Error DecodeTextSMS(unsigned char *message, GSM_SMSMessage *SMS);
 /* We really do need this in the other code */
 extern char *GetBCDNumber(u8 *Number);
 extern int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type);
+extern SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt);
 
 #endif /* __gnokii_sms_h_ */

@@ -346,7 +346,7 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 	case 1: m->Type = SMS_Deliver; /* m->Status = GSS_SENTREAD;    */ ddprintf("read\n"); break;
 	}
 
-	UnpackDateTime(SMSData+7, &m->Time);
+	UnpackDateTime((u8 *)SMSData+7, &m->Time);
 
 	m->Length = len = SMSData[14];
 	ddprintf("%d bytes: ", len );
