@@ -1,5 +1,6 @@
-GNOKII - A Linux/Unix toolset and driver for the Nokia 3x10/8110/51x0/61x0
-         Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+GNOKII - A Linux/Unix toolset and driver for Nokia mobile phones
+         Copyright (C) 1999-2003 Hugh Blemings & Pavel Janík ml.
+                  Copyright (C) 2001 - 2003 Pawe³ Kot
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +18,7 @@ Place - Suite 330, Boston, MA 02111-1307, USA.
 
 You can contact authors by mail at
 
-hugh@linuxcare.com                    Pavel.Janik@suse.cz
+hugh@blemings.org                     Pavel.Janik@suse.cz
 Hugh Blemings                         Mgr. Pavel Janík, SuSE CR, s.r.o.
 PO Box 234                            Pod Pekárnami 338/12
 Belconnen ACT 2616                    190 00 Praha 9

@@ -1,3 +1,9 @@
+gnokii (0.5.0pre4) unstable; urgency=low
+
+  * update scripts to reflect the changes in the file layout
+    
+ -- Pawel Kot <pkot@linuxnews.pl>  Sat, 4 Jan 2003 15:15:26 +0100
+
 gnokii (0.4.0_pre17) unstable; urgency=low
 
   * included a test in debian/rules to check for include/config.h.in or run

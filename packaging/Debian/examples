@@ -1,5 +1,7 @@
 Docs/sample/gnokiirc
-Docs/sample/options
-Docs/sample/pap-secrets
-Docs/sample/ppp-gnokii
-Docs/sample/ppp-on
+Docs/sample/ppp/options
+Docs/sample/ppp/pap-secrets
+Docs/sample/ppp/ppp-gnokii
+Docs/sample/ppp/ppp-on
+Docs/sample/ppp/ppp-hscsd
+Docs/sample/ppp/ppp-6210-modem
