@@ -14,7 +14,7 @@ include ${TOPDIR}/Makefile.global
 # Please, use locales code for languages and for .po files,
 # instead full lang names. 
 #
-# .po file name is: "xx-gnokii.po" (where 'xx' is lang code)
+# .po file name is: "xx.po" (where 'xx' is lang code)
 #
 LANGUAGES = 	cs \
 		fi \
@@ -23,7 +23,7 @@ LANGUAGES = 	cs \
 
 .SUFFIXES: .po .mo
 
-MO_FILES = $(LANGUAGES:=-gnokii.mo)
+MO_FILES = $(LANGUAGES:=.mo)
 
 
 all: $(MO_FILES)
@@ -36,7 +36,7 @@ install:
 	$(INSTALL) -d $(locdir)
 	@for lang in $(LANGUAGES); do \
 		$(INSTALL) -d $(locdir)/$${lang}/LC_MESSAGES/; \
-                $(INSTALL) -m 0444 $${lang}-gnokii.mo $(locdir)/$${lang}/LC_MESSAGES/${PACKAGE}.mo; \
+                $(INSTALL) -m 0444 $${lang}.mo $(locdir)/$${lang}/LC_MESSAGES/${PACKAGE}.mo; \
 	done
 	@echo "done"
 
