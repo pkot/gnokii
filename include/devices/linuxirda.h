@@ -35,8 +35,8 @@
  * FIXME: does it have *ANY* chance to work under other OS then Linux?
  */
 
-#ifndef IRDA_H
-#define IRDA_H
+#ifndef __gnokii_linuxirda_h
+#define __gnokii_linuxirda_h
 
 #include <sys/types.h>
 #include <inttypes.h>
@@ -215,4 +215,4 @@ struct if_irda_req {
 #define ifr_dtr       ifr_ifru.ifru_line.dtr
 #define ifr_rts       ifr_ifru.ifru_line.rts
 
-#endif /* IRDA_H */
+#endif /* __gnokii_linuxirda_h */
