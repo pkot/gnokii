@@ -45,6 +45,12 @@ pthread_mutex_t smsCenterMutex;
 pthread_cond_t  smsCenterCond;
 pthread_mutex_t alarmMutex;  
 pthread_cond_t  alarmCond;
+pthread_mutex_t getBitmapMutex;
+pthread_cond_t  getBitmapCond;
+pthread_mutex_t setBitmapMutex;
+pthread_cond_t  setBitmapCond;
+pthread_mutex_t getNetworkInfoMutex;
+pthread_cond_t  getNetworkInfoCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
 
@@ -85,7 +91,7 @@ static void InitModelInf (void)
   GSM_Error error;
   register gint i = 0;
 
-  while ((error = GSM->GetModel(buf)) != GE_NONE && i++ < 5)
+  while ((error = GSM->GetModel(buf)) != GE_NONE && i++ < 15)
     sleep(1);
 
   if (error == GE_NONE)
@@ -214,6 +220,12 @@ void GUI_InitPhoneMonitor (void)
   pthread_cond_init (&callerGroupCond, NULL);
   pthread_mutex_init (&smsCenterMutex, NULL);
   pthread_cond_init (&smsCenterCond, NULL);
+  pthread_mutex_init (&getBitmapMutex, NULL);
+  pthread_cond_init (&getBitmapCond, NULL);
+  pthread_mutex_init (&setBitmapMutex, NULL);
+  pthread_cond_init (&setBitmapCond, NULL);
+  pthread_mutex_init (&getNetworkInfoMutex, NULL);
+  pthread_cond_init (&getNetworkInfoCond, NULL);
 }
 
 
@@ -236,6 +248,7 @@ static inline void FreeArray (GSList **array)
 
 static void RefreshSMS (const gint number)
 {
+  GSM_Error error;
   GSM_SMSMessage *msg;
   register gint i;
 
@@ -248,13 +261,14 @@ static void RefreshSMS (const gint number)
   phoneMonitor.sms.number = 0;
   pthread_mutex_unlock (&smsMutex);
 
-  for (i = 1; i <= 10; i++)
+  i = 0;
+  while (1)
   {
     msg = g_malloc (sizeof (GSM_SMSMessage));
     msg->MemoryType = GMT_SM;
-    msg->Location = i;
+    msg->Location = ++i;
 
-    if (GSM->GetSMSMessage (msg) == GE_NONE)
+    if ((error = GSM->GetSMSMessage (msg)) == GE_NONE)
     {
       pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
@@ -262,6 +276,11 @@ static void RefreshSMS (const gint number)
       pthread_mutex_unlock (&smsMutex);
       if (phoneMonitor.sms.number == number)
         return;
+    }
+    else if (error == GE_INVALIDSMSLOCATION)  /* All positions are readed */
+    {
+      g_free (msg);
+      break;
     }
     else
       g_free (msg);
@@ -736,6 +755,50 @@ static gint A_SendKeyStroke (gpointer data)
   return (0);
 }
 
+static gint A_GetBitmap(gpointer data) {
+  GSM_Error error;
+  D_Bitmap *d = (D_Bitmap *)data;
+
+  pthread_mutex_lock(&getBitmapMutex);
+  error = d->status = GSM->GetBitmap(d->bitmap);
+  pthread_cond_signal(&getBitmapCond);
+  pthread_mutex_unlock(&getBitmapMutex);
+  return error;
+}
+
+static gint A_SetBitmap(gpointer data) {
+  GSM_Error error;
+  D_Bitmap *d = (D_Bitmap *)data;
+  GSM_Bitmap bitmap;
+  
+  pthread_mutex_lock(&setBitmapMutex);
+  if (d->bitmap->type == GSM_CallerLogo) {
+    bitmap.type = d->bitmap->type;
+    bitmap.number = d->bitmap->number;
+    error = d->status = GSM->GetBitmap(&bitmap);
+    if (error == GE_NONE) {
+      strncpy(d->bitmap->text,bitmap.text,sizeof(bitmap.text));
+      d->bitmap->ringtone = bitmap.ringtone;
+      error = d->status = GSM->SetBitmap(d->bitmap);
+    }
+  } else {
+    error = d->status = GSM->SetBitmap(d->bitmap);
+  }
+  pthread_cond_signal(&setBitmapCond);
+  pthread_mutex_unlock(&setBitmapMutex);
+  return error;
+}
+
+static gint A_GetNetworkInfo(gpointer data) {
+  GSM_Error error;
+  D_NetworkInfo *d = (D_NetworkInfo *)data;
+
+  pthread_mutex_lock(&getNetworkInfoMutex);
+  error = d->status = GSM->GetNetworkInfo(d->info);
+  pthread_cond_signal(&getNetworkInfoCond);
+  pthread_mutex_unlock(&getNetworkInfoMutex);
+  return error;
+}
 
 static gint A_Exit (gpointer data)
 {
@@ -767,6 +830,9 @@ gint (*DoAction[])(gpointer) = {
   A_GetAlarm,
   A_SetAlarm,
   A_SendKeyStroke,
+  A_GetBitmap,
+  A_SetBitmap,
+  A_GetNetworkInfo,
   A_Exit
 };
 

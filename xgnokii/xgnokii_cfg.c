@@ -99,10 +99,10 @@ void GUI_ReadXConfig ()
     current = line;
 
     /* Strip leading, trailing whitespace */
-    while (isspace (*current))
+    while (isspace ((gint) *current))
       current++;
 
-    while ((strlen (current) > 0) && isspace (current[strlen (current) - 1]))
+    while ((strlen (current) > 0) && isspace ((gint) current[strlen (current) - 1]))
       current[strlen (current) - 1] = '\0';
 
     /* Ignore blank lines and comments */
@@ -117,12 +117,12 @@ void GUI_ReadXConfig ()
       if (g_strncasecmp (config[i].key, current, len) == 0)
       {
         current += len;
-        while (isspace (*current))
+        while (isspace ((int) *current))
           current++;
         if (*current == '=')
         {
           current++;
-          while(isspace (*current))
+          while(isspace ((int) *current))
             current++;
           g_free (*config[i].value);
           if (i == 3 || i == 4)

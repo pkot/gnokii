@@ -16,5 +16,4 @@ xgnokii/xgnokii_netmon.c
 xgnokii/xgnokii_sms.c
 xgnokii/xgnokii_speed.c
 xgnokii/xgnokii_xkeyb.c
-xlogos/xlogos.c
-
+xgnokii/xgnokii_logos.c

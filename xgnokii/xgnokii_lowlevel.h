@@ -52,6 +52,9 @@ typedef enum {
   Event_GetAlarm,
   Event_SetAlarm,
   Event_SendKeyStroke,
+  Event_GetBitmap,
+  Event_SetBitmap,
+  Event_GetNetworkInfo,
   Event_Exit
 } PhoneAction;
 
@@ -117,6 +120,16 @@ typedef struct {
 } D_CalendarNoteAll;
 
 typedef struct {
+  GSM_Error status;
+  GSM_Bitmap *bitmap;
+} D_Bitmap;
+
+typedef struct {
+  GSM_Error status;
+  GSM_NetworkInfo *info;
+} D_NetworkInfo;
+
+typedef struct {
   gfloat rfLevel;
   gfloat batteryLevel;
   GSM_PowerSource powerSource;
@@ -174,6 +187,12 @@ extern pthread_mutex_t smsCenterMutex;
 extern pthread_cond_t  smsCenterCond;
 extern pthread_mutex_t alarmMutex;
 extern pthread_cond_t  alarmCond;
+extern pthread_mutex_t getBitmapMutex;
+extern pthread_cond_t  getBitmapCond;
+extern pthread_mutex_t setBitmapMutex;
+extern pthread_cond_t  setBitmapCond;
+extern pthread_mutex_t getNetworkInfoMutex;
+extern pthread_cond_t  getNetworkInfoCond;
 extern void GUI_InitPhoneMonitor (void);
 extern void *GUI_Connect (void *a);
 extern void GUI_InsertEvent (PhoneEvent *event);

@@ -20,6 +20,11 @@
 #include <stdlib.h>  /* for size_t */
 
 typedef struct {
+  GtkWidget *clist;
+  gint       column;
+} SortColumn;
+
+typedef struct {
   gchar *model;
   gchar *number;
 } Model;
@@ -38,6 +43,14 @@ typedef struct {
   GtkWidget *dialog;
   GtkWidget *text;
 } YesNoDialog;
+
+typedef enum {
+  GUI_EVENT_CONTACTS_CHANGED,
+  GUI_EVENT_CALLERS_GROUPS_CHANGED,
+  GUI_EVENT_SMS_NUMBER_CHANGED,
+  GUI_EVENT_SMS_CENTERS_CHANGED,
+  GUI_EVENT_NETMON_CHANGED,
+} GUIEventType;
 
 extern void CancelDialog (const GtkWidget *, const gpointer);
 extern void CreateErrorDialog (ErrorDialog *, GtkWidget *);
@@ -60,5 +73,8 @@ extern bool CalendarSupported (const gchar *);
 extern bool DTMFSupported (const gchar *);
 extern bool SpeedDialSupported (const gchar *);
 extern void GUI_Refresh (void);
-
+extern void SetSortColumn (GtkWidget *, SortColumn *);
+extern void GUIEventAdd (GUIEventType, void (*)(void));
+extern bool GUIEventRemove (GUIEventType, void (*)(void));
+extern void GUIEventSend (GUIEventType);
 #endif

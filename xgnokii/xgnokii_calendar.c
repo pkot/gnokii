@@ -67,31 +67,31 @@ static gint InsertCalendarEntry (GSM_CalendarNote *note)
   {
     case GCN_REMINDER:
     	row[1] = _("Reminder");
-    	row[2] = g_strdup_printf ("%d-%02d-%02d", note->Time.Year,
-                                  note->Time.Month, note->Time.Day);
+    	row[2] = g_strdup_printf ("%02d/%02d/%04d", note->Time.Day,
+                                  note->Time.Month, note->Time.Year);
     	row[5] = "";
     	break;
 
     case GCN_CALL:
     	row[1] = _("Call");
-    	row[2] = g_strdup_printf ("%d-%02d-%02d  %02d:%02d", note->Time.Year,
-                                  note->Time.Month, note->Time.Day,
+    	row[2] = g_strdup_printf ("%02d/%02d/%04d  %02d:%02d", note->Time.Day,
+                                  note->Time.Month, note->Time.Year,
                                   note->Time.Hour, note->Time.Minute);
     	row[5] = note->Phone;
     	break;
 
     case GCN_MEETING:
     	row[1] = _("Meeting");
-    	row[2] = g_strdup_printf ("%d-%02d-%02d  %02d:%02d", note->Time.Year,
-                                  note->Time.Month, note->Time.Day,
+    	row[2] = g_strdup_printf ("%02d/%02d/%04d  %02d:%02d", note->Time.Day,
+                                  note->Time.Month, note->Time.Year,
                                   note->Time.Hour, note->Time.Minute);
     	row[5] = "";
     	break;
 
     case GCN_BIRTHDAY:
     	row[1] = _("Birthday");
-    	row[2] = g_strdup_printf ("%d-%02d-%02d", note->Time.Year,
-                                  note->Time.Month, note->Time.Day);
+    	row[2] = g_strdup_printf ("%02d/%02d/%04d", note->Time.Day,
+                                  note->Time.Month, note->Time.Year);
     	row[5] = "";
     	break;
 
@@ -106,8 +106,8 @@ static gint InsertCalendarEntry (GSM_CalendarNote *note)
   if (note->Alarm.Year == 0)
     row[4] = "";
   else
-    row[4] = g_strdup_printf ("%d-%02d-%02d  %02d:%02d", note->Alarm.Year,
-                               note->Alarm.Month, note->Alarm.Day,
+    row[4] = g_strdup_printf ("%02d/%02d/%04d  %02d:%02d", note->Alarm.Day,
+                               note->Alarm.Month, note->Alarm.Year,
                                note->Alarm.Hour, note->Alarm.Minute);
 
   gtk_clist_freeze (GTK_CLIST (cal.notesClist));
@@ -131,7 +131,6 @@ static void ClickEntry (GtkWidget      *clist,
 {
   gchar *buf;
 
-  /* FIXME - We must mark SMS as readed */
   gtk_text_freeze (GTK_TEXT (cal.noteText));
 
   gtk_text_set_point (GTK_TEXT (cal.noteText), 0);
@@ -152,6 +151,10 @@ static void ClickEntry (GtkWidget      *clist,
                    buf, -1);
   gtk_text_insert (GTK_TEXT (cal.noteText), NULL, &(cal.noteText->style->black), NULL,
                    "\n", -1);
+
+  gtk_calendar_select_month (GTK_CALENDAR (cal.calendar),
+                             atoi (buf + 3) - 1, atoi (buf + 6));
+  gtk_calendar_select_day (GTK_CALENDAR (cal.calendar), atoi (buf));
 
   gtk_clist_get_text (GTK_CLIST (clist), row, 4, &buf);
   if (*buf != '\0')
@@ -207,6 +210,143 @@ static void ReadCalNotes (void)
   e->event = Event_GetCalendarNoteAll;
   e->data = cna;
   GUI_InsertEvent (e);
+}
+
+
+static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer ptr2)
+{
+  char *text1 = NULL;
+  char *text2 = NULL;
+
+  GtkCListRow *row1 = (GtkCListRow *) ptr1;
+  GtkCListRow *row2 = (GtkCListRow *) ptr2;
+
+  switch (row1->cell[clist->sort_column].type)
+  {
+    case GTK_CELL_TEXT:
+      text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
+      break;
+    case GTK_CELL_PIXTEXT:
+      text1 = GTK_CELL_PIXTEXT (row1->cell[clist->sort_column])->text;
+      break;
+    default:
+      break;
+  }
+  switch (row2->cell[clist->sort_column].type)
+  {
+    case GTK_CELL_TEXT:
+      text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
+      break;
+    case GTK_CELL_PIXTEXT:
+      text2 = GTK_CELL_PIXTEXT (row2->cell[clist->sort_column])->text;
+      break;
+    default:
+      break;
+  }
+
+  if (!text2)
+    return (text1 != NULL);
+
+  if (!text1)
+    return -1;
+
+  if (*text2 == '\0')
+    return (*text1 != '\0');
+
+  if (*text1 == '\0')
+    return (-1);
+
+  if (clist->sort_column == 0)
+  {
+    gint n1 = atoi (text1);
+    gint n2 = atoi (text2);
+    
+    if (n1 > n2)
+      return (1);
+    else if (n1 < n2)
+      return (-1);
+    else 
+      return 0;
+  }
+
+  if (clist->sort_column == 2 || clist->sort_column == 4)
+  {
+    GDate *date1, *date2;
+    gint time1, time2;
+    gint ret;
+
+    date1 = g_date_new_dmy (atoi (text1), atoi (text1 + 3), atoi (text1 + 6));
+    date2 = g_date_new_dmy (atoi (text2), atoi (text2 + 3), atoi (text2 + 6));
+
+    ret = g_date_compare (date1, date2);
+
+    g_date_free (date1);
+    g_date_free (date2);
+
+    if (ret)
+      return (ret);
+
+    if (strlen (text1) > 10)
+      time1 = atoi (text1 + 11) * 60 + atoi (text1 + 14);
+    else
+      time1 = 0;
+
+    if (strlen (text2) > 10)
+      time2 = atoi (text2 + 11) * 60 + atoi (text2 + 14);
+    else
+      time2 = 0;
+
+    if (time1 > time2)
+      return (1);
+    else if (time1 < time2)
+      return (-1);
+    else 
+      return 0;
+    
+/*    struct tm bdTime;
+    time_t time1, time2;
+
+    bdTime.tm_sec  = 0;
+    if (strlen (text1) > 10)
+    {
+      bdTime.tm_min  = atoi (text1 + 14);
+      bdTime.tm_hour = atoi (text1 + 11);
+    }
+    else
+      bdTime.tm_min  = bdTime.tm_hour = 0;
+    bdTime.tm_mday = atoi (text1);
+    bdTime.tm_mon  = atoi (text1 + 3);
+    bdTime.tm_year = atoi (text1 + 6) - 1900;
+    bdTime.tm_isdst = -1;
+
+    time1 = mktime (&bdTime);
+
+    bdTime.tm_sec  = 0;
+    if (strlen (text2) > 10)
+    {
+      bdTime.tm_min  = atoi (text2 + 14);
+      bdTime.tm_hour = atoi (text2 + 11);
+    }
+    else
+      bdTime.tm_min  = bdTime.tm_hour = 0;
+    bdTime.tm_mday = atoi (text2);
+    bdTime.tm_mon  = atoi (text2 + 3);
+    bdTime.tm_year = atoi (text2 + 6) - 1900;
+    bdTime.tm_isdst = -1;
+
+    time2 = mktime (&bdTime);
+
+    g_print ("Cas1: %s - %d, Cas2: %s - %d\n", text1, time1, text2, time2);
+
+    if (time1 > time2)
+      return (1);
+    else if (time1 < time2)
+      return (-1);
+    else 
+      return 0; */
+  }
+
+  return (g_strcasecmp (text1, text2));
 }
 
 
@@ -271,6 +411,8 @@ void GUI_CreateCalendarWindow ()
   GdkColormap *cmap;
   time_t t;
   struct tm *tm;
+  SortColumn *sColumn;
+  register gint i;
   gchar *titles[6] = { _("#"), _("Type"), _("Date"), _("Text"),
                        _("Alarm"), _("Number")};
 
@@ -397,7 +539,7 @@ void GUI_CreateCalendarWindow ()
   /* Notes list */
   cal.notesClist = gtk_clist_new_with_titles (6, titles);
   gtk_clist_set_shadow_type (GTK_CLIST (cal.notesClist), GTK_SHADOW_OUT);
-//  gtk_clist_set_compare_func (GTK_CLIST (cal.notesClist), CListCompareFunc);
+  gtk_clist_set_compare_func (GTK_CLIST (cal.notesClist), CListCompareFunc);
   gtk_clist_set_sort_column (GTK_CLIST (cal.notesClist), 0);
   gtk_clist_set_sort_type (GTK_CLIST (cal.notesClist), GTK_SORT_ASCENDING);
   gtk_clist_set_auto_sort (GTK_CLIST (cal.notesClist), FALSE);
@@ -410,18 +552,18 @@ void GUI_CreateCalendarWindow ()
   gtk_clist_set_column_width (GTK_CLIST (cal.notesClist), 4, 110);
   gtk_clist_set_column_justification (GTK_CLIST (cal.notesClist), 0, GTK_JUSTIFY_RIGHT);
 
-//  for (i = 0; i < 5; i++)
-//  {
-//    if ((sColumn = g_malloc (sizeof (SortColumn))) == NULL)
-//    {
-//      g_print (_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-//      gtk_main_quit ();
-//    }
-//    sColumn->clist = SMS.smsClist;
-//    sColumn->column = i;
-//    gtk_signal_connect (GTK_OBJECT (GTK_CLIST (SMS.smsClist)->column[i].button), "clicked",
-//                        GTK_SIGNAL_FUNC (SetSortColumn), (gpointer) sColumn);
-//  }
+  for (i = 0; i < 6; i++)
+  {
+    if ((sColumn = g_malloc (sizeof (SortColumn))) == NULL)
+    {
+      g_print (_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
+      gtk_main_quit ();
+    }
+    sColumn->clist = cal.notesClist;
+    sColumn->column = i;
+    gtk_signal_connect (GTK_OBJECT (GTK_CLIST (cal.notesClist)->column[i].button), "clicked",
+                        GTK_SIGNAL_FUNC (SetSortColumn), (gpointer) sColumn);
+  }
 
   gtk_signal_connect (GTK_OBJECT (cal.notesClist), "select_row",
                       GTK_SIGNAL_FUNC (ClickEntry), NULL);

@@ -581,4 +581,5 @@ void GUI_CreateNetmonWindow ()
 
   gtk_table_set_col_spacing (GTK_TABLE (table), 4, 10);
   gtk_widget_show_all (table);
+  GUIEventAdd (GUI_EVENT_NETMON_CHANGED, GUI_RefreshNetmon);
 }

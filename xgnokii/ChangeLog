@@ -1,3 +1,14 @@
+* Tue Jun 13 01:58:56 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- Initialization timeout was extended from 5 secs to 15 secs.
+- Corrected algorithm for SMS reading. Now we can read all SMS on SIM card.
+- Changed date/time in delivery report from send date to delivery date.
+
+* Mon Jun 12 16:33:45 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+- xlogos integrated into xgnokii (Robert Vojta <penguin@clark.cz>)
+- Little progress in calendar window.
+- Cleaning code for compiling under Solaris 8 with new gcc.
+- Small changes and fixes.
+
 * Wed May 24 16:50:07 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
 - Changed structure in help directory. (Polish help don't work now.)
 

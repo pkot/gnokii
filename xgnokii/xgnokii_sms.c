@@ -161,7 +161,8 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     if (bdTime.tm_year < 70)
       bdTime.tm_year += 100;
 #ifdef TM_GMT
-    bdTime.tm_gmtoff = atoi (text1 + 21);
+    if (text1[17] != '\0')
+      bdTime.tm_gmtoff = atoi (text1 + 18) * 3600;
 #endif
     bdTime.tm_isdst = -1;
 
@@ -176,7 +177,8 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
     if (bdTime.tm_year < 70)
       bdTime.tm_year += 100;
 #ifdef TM_GMT
-    bdTime.tm_gmtoff = atoi (text2 + 21);
+    if (text2[17] != '\0')
+      bdTime.tm_gmtoff = atoi (text2 + 18) * 3600;
 #endif
     bdTime.tm_isdst = -1;
 
@@ -194,13 +196,6 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
 }
 
 
-static inline void SetSortColumn (GtkWidget *widget, SortColumn *data)
-{
-  gtk_clist_set_sort_column (GTK_CLIST (data->clist), data->column);
-  gtk_clist_sort (GTK_CLIST (data->clist));
-}
-
-
 static inline void DestroyMsgPtrs (gpointer data)
 {
   g_free (((MessagePointers *) data)->msgPtr);
@@ -212,6 +207,7 @@ static void InsertInboxElement (gpointer d, gpointer userData)
 {
   GSM_SMSMessage *data = (GSM_SMSMessage *) d;
   MessagePointers *msgPtrs;
+  GSM_DateTime *dt;
 
   if (data->Type == GST_MT || data->Type == GST_DR)
   {
@@ -233,21 +229,30 @@ static void InsertInboxElement (gpointer d, gpointer userData)
       gchar *row[4];
 
       if (data->Type == GST_DR)
+      {
         row[0] = g_strdup (_("report"));
+        dt = &(data->SMSCTime);
+      }
       else if (data->Status)
+      {
         row[0] = g_strdup (_("read"));
+        dt = &(data->Time);
+      }
       else
+      {
         row[0] = g_strdup (_("unread"));
+        dt = &(data->Time);
+      }
 
-      if (data->Time.Timezone)
-        row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d GMT%+dh",
-                                  data->Time.Day, data->Time.Month, data->Time.Year,
-                                  data->Time.Hour, data->Time.Minute, data->Time.Second,
-                                  data->Time.Timezone);
+      if (dt->Timezone)
+        row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d %c%02d00",
+                                  dt->Day, dt->Month, dt->Year,
+                                  dt->Hour, dt->Minute, dt->Second,
+                                  dt->Timezone > 0 ? '+' : '-', abs (dt->Timezone));
       else
-        row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d GMT",
-                                  data->Time.Day, data->Time.Month, data->Time.Year,
-                                  data->Time.Hour, data->Time.Minute, data->Time.Second);
+        row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d",
+                                  dt->Day, dt->Month, dt->Year,
+                                  dt->Hour, dt->Minute, dt->Second);
 
       row[2] = GUI_GetName (data->Sender);
       if (row[2] == NULL)
@@ -1181,7 +1186,7 @@ static void CreateSMSSendWindow (void)
   GUI_InitSMSSettings ();
   sendSMS.smscOptionMenu = gtk_option_menu_new();
 
-  GUI_RefreshSMSCenterMenu ();
+  GUIEventSend (GUI_EVENT_SMS_CENTERS_CHANGED);
 
   gtk_box_pack_start (GTK_BOX (vbox), sendSMS.smscOptionMenu, FALSE, FALSE, 1);
   gtk_widget_show (sendSMS.smscOptionMenu);
@@ -1559,7 +1564,7 @@ void GUI_CreateSMSWindow (void)
   gtk_clist_set_selection_mode (GTK_CLIST (SMS.smsClist), GTK_SELECTION_EXTENDED);
 
   gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 0, 40);
-  gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 1, 155);
+  gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 1, 142);
   gtk_clist_set_column_width (GTK_CLIST (SMS.smsClist), 2, 135);
   //gtk_clist_set_column_justification (GTK_CLIST (SMS.smsClist), 2, GTK_JUSTIFY_CENTER);
 
@@ -1606,4 +1611,7 @@ void GUI_CreateSMSWindow (void)
                          &questMark.mask,
                          &GUI_SMSWindow->style->bg[GTK_STATE_NORMAL],
                          quest_xpm);
+
+  GUIEventAdd (GUI_EVENT_SMS_CENTERS_CHANGED, GUI_RefreshSMSCenterMenu);
+  GUIEventAdd (GUI_EVENT_SMS_NUMBER_CHANGED, GUI_RefreshMessageWindow);
 }

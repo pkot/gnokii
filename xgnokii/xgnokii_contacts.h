@@ -88,11 +88,6 @@ typedef struct {
   GtkWidget *cancelButton;
 } SelectContactData;
 
-typedef struct {
-  GtkWidget *clist;
-  gint       column;
-} SortColumn;
-
 /* Max length for status line. (Line that shows used/max information for
    memories). */
 #define STATUS_INFO_LENGTH	40

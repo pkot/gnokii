@@ -58,6 +58,12 @@ static Model models[] = {
   {NULL,    NULL}
 };
 
+typedef struct {
+  GUIEventType type;
+  void (*func)(void);
+} GUIEvent;
+
+static GSList *guiEvents = NULL;
 
 gchar *GetModel (const gchar *num)
 {
@@ -460,4 +466,56 @@ inline void GUI_Refresh (void)
 {
   while (gtk_events_pending())
     gtk_main_iteration();
+}
+
+
+inline void SetSortColumn (GtkWidget *widget, SortColumn *data)
+{
+  gtk_clist_set_sort_column (GTK_CLIST (data->clist), data->column);
+  gtk_clist_sort (GTK_CLIST (data->clist));
+}
+
+
+inline void GUIEventAdd (GUIEventType type, void (*func)(void))
+{
+  GUIEvent *event = g_malloc (sizeof (GUIEvent));
+  
+  event->type = type;
+  event->func = func;
+  
+  guiEvents = g_slist_append (guiEvents, event);
+}
+
+
+bool GUIEventRemove (GUIEventType type, void (*func)(void))
+{
+  GUIEvent event;
+  GSList *list;
+  
+  event.type = type;
+  event.func = func;
+  
+  list = g_slist_find (guiEvents, &event);
+  if (list)
+  {
+    g_print ("Nasiel som\n");
+    guiEvents = g_slist_remove_link (guiEvents, list);
+    g_slist_free_1 (list);
+    return (TRUE);
+  }
+  
+  return (FALSE);
+}
+
+static inline void CallEvent (gpointer data, gpointer user_data)
+{
+  GUIEvent *event = (GUIEvent *) data;
+  
+  if (event->type == GPOINTER_TO_INT (user_data))
+    event->func ();
+}
+
+inline void GUIEventSend (GUIEventType type)
+{
+  g_slist_foreach (guiEvents, CallEvent, GINT_TO_POINTER (type));
 }

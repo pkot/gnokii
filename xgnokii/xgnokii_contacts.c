@@ -28,6 +28,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifdef __svr4__
+# include <strings.h>
+#endif
 #include <gtk/gtk.h>
 #include "misc.h"
 #include "gsm-common.h"
@@ -65,7 +68,6 @@ static GtkWidget *clist;
 static StatusInfo statusInfo;
 static ProgressDialog progressDialog = {NULL, NULL, NULL};
 static ErrorDialog errorDialog = {NULL, NULL};
-static InfoDialog infoDialog = {NULL, NULL};
 static FindEntryStruct findEntryStruct = { "", 0};
 static ExportDialogData exportDialogData = {NULL};
 static MemoryPixmaps memoryPixmaps;
@@ -1401,13 +1403,6 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
 }
 
 
-static inline void SetSortColumn (GtkWidget *widget, SortColumn *data)
-{
-  gtk_clist_set_sort_column (GTK_CLIST (data->clist), data->column);
-  gtk_clist_sort (GTK_CLIST (data->clist));
-}
-
-
 static void CreateProgressDialog (gint maxME, gint maxSM)
 {
   GtkWidget *vbox, *label;
@@ -1737,7 +1732,6 @@ static void ReadContactsMain (void)
 {
   PhoneEvent *e;
   D_MemoryStatus *ms;
-//  D_MemoryLocation *ml;
   D_MemoryLocationAll *mla;
   PhonebookEntry *pbEntry;
   register gint i;
@@ -1870,149 +1864,13 @@ Setting max SIM entries to 100!\n"));
   }
 
   g_free (mla);
-/*
-  for (i = 1; i <= memoryStatus.MaxME; i++)
-  {
-    if ((pbEntry = (PhonebookEntry *) g_malloc (sizeof (PhonebookEntry))) == NULL)
-    {
-      g_print (_("%s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-      g_ptr_array_free (contactsMemory, TRUE);
-      gtk_widget_hide (progressDialog.dialog);
-      return;
-    }
-    pbEntry->entry.MemoryType = GMT_ME;
-    pbEntry->entry.Location = i;
-
-    ml = (D_MemoryLocation *) g_malloc (sizeof (D_MemoryLocation));
-    ml->entry = &(pbEntry->entry);
-    e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-    e->event = Event_GetMemoryLocation;
-    e->data = ml;
-    GUI_InsertEvent (e);
-    pthread_mutex_lock (&memoryMutex);
-    pthread_cond_wait (&memoryCond, &memoryMutex);
-    pthread_mutex_unlock (&memoryMutex);
-
-    if(ml->status != GE_NONE)
-    {
-      gint err_count = 0;
-
-      g_print (_("%s: line %d: Can't get ME memory entry number %d! %d\n"), __FILE__, __LINE__, i, ml->status);
-      if (ml->status == GE_TIMEOUT)
-      {
-        while (ml->status != GE_NONE)
-        {
-          g_print (_("%s: line %d: Can't get ME memory entry number %d! %d\n"), __FILE__, __LINE__, i, ml->status);
-          if (err_count++ > 3)
-          {
-            g_ptr_array_free (contactsMemory, TRUE);
-            gtk_widget_hide (progressDialog.dialog);
-            g_free (ml);
-            return;
-          }
-          sleep (2);
-
-          e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-          e->event = Event_GetMemoryLocation;
-          e->data = ml;
-          GUI_InsertEvent (e);
-          pthread_mutex_lock (&memoryMutex);
-          pthread_cond_wait (&memoryCond, &memoryMutex);
-          pthread_mutex_unlock (&memoryMutex);
-        }
-      }
-    }
-    g_free (ml);
-
-    if (*pbEntry->entry.Name == '\0' && *pbEntry->entry.Number == '\0')
-      pbEntry->status = E_Empty;
-    else
-      pbEntry->status = E_Unchanged;
-
-    g_ptr_array_add (contactsMemory, (gpointer) pbEntry);
-    gtk_progress_set_value (GTK_PROGRESS (progressDialog.pbarME), i);
-    GUI_Refresh ();
-    pbEntry = NULL;
-  }
-
-  for (i = 1; i <= memoryStatus.MaxSM; i++)
-  {
-    if ((pbEntry = (PhonebookEntry *) g_malloc (sizeof (PhonebookEntry))) == NULL)
-    {
-      g_print (_("%s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-      g_ptr_array_free (contactsMemory, TRUE);
-      gtk_widget_hide (progressDialog.dialog);
-      return;
-    }
-    pbEntry->entry.MemoryType = GMT_SM;
-    pbEntry->entry.Location = i;
-
-    ml = (D_MemoryLocation *) g_malloc (sizeof (D_MemoryLocation));
-    ml->entry = &(pbEntry->entry);
-    e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-    e->event = Event_GetMemoryLocation;
-    e->data = ml;
-    GUI_InsertEvent (e);
-    pthread_mutex_lock (&memoryMutex);
-    pthread_cond_wait (&memoryCond, &memoryMutex);
-    pthread_mutex_unlock (&memoryMutex);
-
-    if(ml->status != GE_NONE)
-    {
-      gint err_count = 0;
-
-      g_print (_("%s: line %d: Can't get SM memory entry number %d! %d\n"), __FILE__, __LINE__, i, ml->status);
-      if (ml->status == GE_TIMEOUT)
-      {
-        while (ml->status != GE_NONE)
-        {
-          g_print (_("%s: line %d: Can't get SM memory entry number %d! %d\n"), __FILE__, __LINE__, i, ml->status);
-          if (err_count++ > 3)
-          {
-            g_ptr_array_free (contactsMemory, TRUE);
-            gtk_widget_hide (progressDialog.dialog);
-            g_free (ml);
-            return;
-          }
-          sleep(2);
-
-          e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-          e->event = Event_GetMemoryLocation;
-          e->data = ml;
-          GUI_InsertEvent (e);
-          pthread_mutex_lock (&memoryMutex);
-          pthread_cond_wait (&memoryCond, &memoryMutex);
-          pthread_mutex_unlock (&memoryMutex);
-        }
-      }
-    }
-    g_free (ml);
-
-    if (*pbEntry->entry.Name == '\0' && *pbEntry->entry.Number == '\0')
-      pbEntry->status = E_Empty;
-    else
-    {
-      pbEntry->status = E_Unchanged;
-      if (fbus3810)
-      {
-        memoryStatus.UsedSM++;
-        memoryStatus.FreeSM--;
-      }
-    }
-
-    g_ptr_array_add (contactsMemory, (gpointer) pbEntry);
-    gtk_progress_set_value (GTK_PROGRESS (progressDialog.pbarSM), i);
-    GUI_Refresh ();
-    pbEntry = NULL;
-  }
-*/
 
   gtk_widget_hide (progressDialog.dialog);
 
   contactsMemoryInitialized = TRUE;
   statusInfo.ch_ME = statusInfo.ch_SM = 0;
-  GUI_RefreshContacts ();
-  GUI_RefreshMessageWindow ();
+  GUIEventSend (GUI_EVENT_CONTACTS_CHANGED);
+  GUIEventSend (GUI_EVENT_SMS_NUMBER_CHANGED);
 }
 
 
@@ -2067,11 +1925,8 @@ inline void GUI_ShowContacts (void)
 {
   if (xgnokiiConfig.callerGroups[0] == NULL)
   {
-    gtk_label_set_text (GTK_LABEL (infoDialog.text), _("Reading caller groups names ..."));
-    gtk_widget_show_now (infoDialog.dialog);
     GUI_Refresh ();
     GUI_InitCallerGroupsInf ();
-    gtk_widget_hide (infoDialog.dialog);
   }
   gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, phoneMonitor.supported.callerGroups);
   GUI_RefreshContacts ();
@@ -2498,8 +2353,8 @@ Setting max SIM entries set to 100!\n"));
 
   contactsMemoryInitialized = TRUE;
   RefreshStatusInfo ();
-  GUI_RefreshContacts ();
-  GUI_RefreshMessageWindow ();
+  GUIEventSend (GUI_EVENT_CONTACTS_CHANGED);
+  GUIEventSend (GUI_EVENT_SMS_NUMBER_CHANGED);
 }
 
 
@@ -3034,5 +2889,6 @@ void GUI_CreateContactsWindow (void)
                          quest_xpm);
 
   CreateErrorDialog (&errorDialog, GUI_ContactsWindow);
-  CreateInfoDialog (&infoDialog, GUI_ContactsWindow);
+  GUIEventAdd (GUI_EVENT_CONTACTS_CHANGED, GUI_RefreshContacts);
+  GUIEventAdd (GUI_EVENT_CALLERS_GROUPS_CHANGED, GUI_RefreshGroupMenu);
 }

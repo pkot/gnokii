@@ -164,13 +164,6 @@ static inline void ClickEntry (GtkWidget      *clist,
 }
 
 
-static inline void SetSortColumn (GtkWidget *widget, SortColumn *data)
-{
-  gtk_clist_set_sort_column (GTK_CLIST (data->clist), data->column);
-  gtk_clist_sort (GTK_CLIST (data->clist));
-}
-
-
 static void ReadSpeedDial (void)
 {
   PhonebookEntry *pbEntry;

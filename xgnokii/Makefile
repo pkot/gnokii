@@ -28,6 +28,7 @@ OBJS = 	xgnokii.o \
 	xgnokii_speed.o \
 	xgnokii_xkeyb.o \
 	xgnokii_calendar.o \
+	xgnokii_logos.o \
 	xgnokii_lowlevel.o
 
 HELP_DIR = docs/help
@@ -63,6 +64,8 @@ install: all
 	$(INSTALL) -m 0444 xpm/6110.xpm $(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/6150.xpm $(xgnokii_libdir)/xpm
 	$(INSTALL) -m 0444 xpm/5110.xpm $(xgnokii_libdir)/xpm
+	$(INSTALL) -m 0444 xpm/Preview_6110.xpm $(xgnokii_libdir)/xpm
+	$(INSTALL) -m 0444 xpm/Preview_6150.xpm $(xgnokii_libdir)/xpm
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

@@ -50,6 +50,7 @@
 #include "xgnokii_speed.h"
 #include "xgnokii_xkeyb.h"
 #include "xgnokii_calendar.h"
+#include "xgnokii_logos.h"
 #include "xgnokii_cfg.h"
 
 #include "xpm/logo.xpm"
@@ -87,6 +88,7 @@ static GtkWidget *Menu;
 static GtkWidget *netmon_menu_item;
 static GtkWidget *sms_menu_item;
 static GtkWidget *calendar_menu_item;
+static GtkWidget *logos_menu_item;
 static GtkWidget *dtmf_menu_item;
 static GtkWidget *speedDial_menu_item;
 static GtkWidget *xkeyb_menu_item;
@@ -225,6 +227,7 @@ void GUI_InitCallerGroupsInf (void)
 
   CallersGroupsInitialized = TRUE;
   gtk_widget_hide (infoDialog.dialog);
+  GUIEventSend (GUI_EVENT_CALLERS_GROUPS_CHANGED);
 }
 
 
@@ -413,7 +416,7 @@ static gint Update (gpointer data)
       smsreceived = 10;  /* The message "Short Message Received" is displayed for 10s */
   }
   if (smsNumber != phoneMonitor.sms.number)
-    GUI_RefreshMessageWindow ();
+    GUIEventSend (GUI_EVENT_SMS_NUMBER_CHANGED);
 
   smsold = phoneMonitor.sms.unRead;
 
@@ -480,7 +483,7 @@ static gint Update (gpointer data)
 
   gtk_widget_draw (data,NULL);
 
-  GUI_RefreshNetmon ();
+  GUIEventSend (GUI_EVENT_NETMON_CHANGED);
 
   return TRUE;
 }
@@ -914,7 +917,7 @@ static void optionsApplyCallback (GtkWidget *widget, gpointer data )
   {
     for (i = 0; i < xgnokiiConfig.smsSets; i++)
       xgnokiiConfig.smsSetting[i] = configDialogData.sms.smsSetting[i];
-    GUI_RefreshSMSCenterMenu ();
+    GUIEventSend (GUI_EVENT_SMS_CENTERS_CHANGED);
   }
 
   /* BUSINESS CARD */
@@ -946,14 +949,13 @@ static void optionsApplyCallback (GtkWidget *widget, gpointer data )
               MAX_CALLER_GROUP_LENGTH);
       xgnokiiConfig.callerGroups[i][MAX_CALLER_GROUP_LENGTH] = '\0';
     }
-    GUI_RefreshGroupMenu ();
+    GUIEventSend (GUI_EVENT_CALLERS_GROUPS_CHANGED);
+    GUIEventSend (GUI_EVENT_CONTACTS_CHANGED);
   }
 
   /* Help */
   g_free(xgnokiiConfig.helpviewer);
   xgnokiiConfig.helpviewer = g_strdup (gtk_entry_get_text(GTK_ENTRY (configDialogData.help)));
-
-  GUI_RefreshContacts();
 }
 
 
@@ -1077,6 +1079,12 @@ static GtkWidget *CreateMenu (void)
   gtk_signal_connect_object (GTK_OBJECT (calendar_menu_item), "activate",
                              GTK_SIGNAL_FUNC (GUI_ShowCalendar), NULL);
 
+  logos_menu_item = gtk_menu_item_new_with_label (_("Logos"));
+  gtk_menu_append (GTK_MENU (menu), logos_menu_item);
+  gtk_signal_connect_object (GTK_OBJECT (logos_menu_item), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowLogosWindow), NULL);
+  gtk_widget_show(logos_menu_item);
+  
   dtmf_menu_item = gtk_menu_item_new_with_label (_("DTMF"));
   gtk_menu_append (GTK_MENU (menu), dtmf_menu_item);
   gtk_signal_connect_object (GTK_OBJECT (dtmf_menu_item), "activate",
@@ -2162,6 +2170,7 @@ static void TopLevelWindow (void)
   GUI_CreateSpeedDialWindow ();
   GUI_CreateXkeybWindow ();
   GUI_CreateCalendarWindow ();
+  GUI_CreateLogosWindow ();
   CreateErrorDialog (&errorDialog, GUI_MainWindow);
   CreateInfoDialog (&infoDialog, GUI_MainWindow);
   CreateInCallDialog ();
