@@ -40,6 +40,10 @@ extern GSM_Network GSM_Networks[];
 #include "pixmaps/Open.xpm"
 #include "pixmaps/Save.xpm"
 #include "pixmaps/Send.xpm"
+#include "pixmaps/Read.xpm"
+#include "pixmaps/Op.xpm"
+#include "pixmaps/Caller.xpm"
+#include "pixmaps/Startup.xpm"
 
 #include <gtk/gtk.h>
 
@@ -50,7 +54,12 @@ GtkWidget *FileSelection;
 GtkWidget *drawing_area;
 GtkWidget *Combo;
 GtkWidget *Combo2;
+GtkWidget *buttonStartup;
+GtkWidget *buttonOperator;
+GtkWidget *buttonCaller;
 
+
+GSM_Bitmap bitmap;
 unsigned char *logo;
 char groupnames[6][255];
 
@@ -145,14 +154,71 @@ void fbusinit(void)
 
 void newlogo();
 
+/* Deal with logotype buttons */
+static gint logotype(GtkWidget *widget)
+{
+  int clear=0;
+  GdkRectangle update_rect;
+
+
+  if(GTK_TOGGLE_BUTTON(buttonStartup)->active) {
+    if ((bitmap.type==GSM_CallerLogo)||(bitmap.type==GSM_OperatorLogo)) clear=1;
+    bitmap.type=GSM_StartupLogo;
+    bitmap.height=48;
+    bitmap.width=84;
+    bitmap.size=48*84/8;
+  }
+  if(GTK_TOGGLE_BUTTON(buttonCaller)->active) {
+    if (bitmap.type==GSM_StartupLogo) clear=1;
+    bitmap.type=GSM_CallerLogo;
+    bitmap.height=14;
+    bitmap.width=72;
+    bitmap.size=72*14/8;
+  }
+  if(GTK_TOGGLE_BUTTON(buttonOperator)->active) {
+    if (bitmap.type==GSM_StartupLogo) clear=1;
+    bitmap.type=GSM_OperatorLogo;
+    bitmap.height=14;
+    bitmap.width=72;
+    bitmap.size=72*14/8;
+  }
+  if (clear) {
+    newlogo();
+    gdk_draw_rectangle (pixmap,
+			drawing_area->style->white_gc,
+			TRUE,
+			0, 0,
+			drawing_area->allocation.width,
+			drawing_area->allocation.height);
+
+    update_rect.width = drawing_area->allocation.width;
+    update_rect.height = drawing_area->allocation.height;
+    update_rect.x = 0;
+    update_rect.y = 0;
+    gtk_widget_draw (drawing_area, &update_rect); 
+  }
+
+
+  update_rect.width = (bitmap.width+1)*5;
+  update_rect.height = (bitmap.height+1)*5;
+  update_rect.x = 2;
+  update_rect.y = 2;
+
+  gdk_draw_rectangle (pixmap,
+		      drawing_area->style->black_gc,
+		      false,
+		      update_rect.x, update_rect.y,
+		      update_rect.width-1, update_rect.height-1);
+
+  gtk_widget_draw (drawing_area, &update_rect);
+  return 0;
+}
+
 
 /* Create a new backing pixmap of the appropriate size */
 static gint
 configure_event (GtkWidget *widget, GdkEventConfigure *event)
 {
-
-  logo=(unsigned char *)calloc(128,1);
-
   if (pixmap)
     gdk_pixmap_unref(pixmap);
 
@@ -192,10 +258,12 @@ void clear_point(GtkWidget *widget, int x, int y){
 
   update_rect.width = 4;
   update_rect.height = 4;
-  update_rect.x = x * 5;
-  update_rect.y = y * 5;
+  update_rect.x = (x * 5)+5;
+  update_rect.y = (y * 5)+5;
 
-  logo[9*y + (x/8)] &= 255 - (1<<(7-(x%8)));
+  if (bitmap.type==GSM_StartupLogo) 
+    bitmap.bitmap[((y/8)*84) + x ]&= 255 - (1<<((y%8)));
+  else bitmap.bitmap[9*y + (x/8)]&= 255 - (1<<(7-(x%8)));
     
   gdk_draw_rectangle (pixmap,
   	widget->style->white_gc,
@@ -212,10 +280,12 @@ void set_point(GtkWidget *widget, int x, int y){
 
   update_rect.width = 4;
   update_rect.height = 4;
-  update_rect.x = x * 5;
-  update_rect.y = y * 5;
+  update_rect.x = (x * 5)+5;
+  update_rect.y = (y * 5)+5;
 
-  logo[9*y + (x/8)]|=1<<(7-(x%8));
+  if (bitmap.type==GSM_StartupLogo) bitmap.bitmap[((y/8)*84) + x]|=1<<((y%8));
+  else bitmap.bitmap[9*y + (x/8)]|=1<<(7-(x%8));
+
   gdk_draw_rectangle (pixmap,
 			widget->style->black_gc,
 			TRUE,
@@ -227,15 +297,17 @@ void set_point(GtkWidget *widget, int x, int y){
 
 int is_point(int x, int y)
 {
-	return (logo[9*y + (x/8)] & 1<<(7-(x%8)));
+  if (bitmap.type==GSM_StartupLogo) 
+    return(bitmap.bitmap[((y/8)*84) + x] & 1<<((y%8)));
+  else return (bitmap.bitmap[9*y + (x/8)] & 1<<(7-(x%8)));
 }
 
 void update_points(GtkWidget *widget)
 {
   int i,j;
   
-  for (i=0;i<74;i++) {
-    for (j=0;j<14;j++) {
+  for (i=0;i<bitmap.width;i++) {
+    for (j=0;j<bitmap.height;j++) {
       if (is_point(i,j)) {
 	set_point(widget,i,j);
       } else clear_point(widget,i,j);
@@ -248,20 +320,22 @@ void update_points(GtkWidget *widget)
 static void
 draw_brush (GtkWidget *widget, gdouble x, gdouble y, int button)
 {
-  int row = y/5, column = x/5;
-
-  if (button > 1)
-    clear_point(widget, column, row);
-  else
-    set_point(widget, column, row);
+  int row = (y/5)-1, column = (x/5)-1;
+  if ((row<bitmap.height) && (column<bitmap.width) &&(row>=0) && (column>=0
+)) {
+    if ( button > 1 )
+      clear_point(widget, column, row);
+    else
+      set_point(widget, column, row);
+  }
 }
 
 void newlogo()
 {
 	int column,row;
 
-	for (column=0; column<72; column++)
-	  for (row=0; row<14; row++)
+	for (column=0; column<bitmap.width; column++)
+	  for (row=0; row<bitmap.height; row++)
 	    clear_point(drawing_area, column, row);
 }
 
@@ -269,8 +343,8 @@ void invertlogo()
 {
 	int column,row;
 
-	for (column=0; column<72; column++)
-	  for (row=0; row<14; row++)
+	for (column=0; column<bitmap.width; column++)
+	  for (row=0; row<bitmap.height; row++)
             if (is_point(column, row))
 	      clear_point(drawing_area, column, row);
 	    else
@@ -282,14 +356,14 @@ void downlogo()
 
   int column,row;
 
-  for (row=13; row>0; row--)
-    for (column=0; column<72; column++)
+  for (row=bitmap.height-1; row>0; row--)
+    for (column=0; column<bitmap.width; column++)
       if (is_point(column, row-1))
         set_point(drawing_area, column, row);
       else
         clear_point(drawing_area, column, row);
 
-    for (column=0; column<72; column++)
+    for (column=0; column<bitmap.width; column++)
     	clear_point(drawing_area, column, 0);
 }
 
@@ -297,14 +371,14 @@ void uplogo(){
 
   int column,row;
 
-  for (row=0; row<13; row++)
-    for (column=0; column<72; column++)
+  for (row=0; row<bitmap.height-1; row++)
+    for (column=0; column<bitmap.width; column++)
       if (is_point(column, row+1))
         set_point(drawing_area, column, row);
       else
         clear_point(drawing_area, column, row);
 
-    for (column=0; column<72; column++)
+    for (column=0; column<bitmap.width; column++)
     	clear_point(drawing_area, column, 13);
 }
 
@@ -312,14 +386,14 @@ void rightlogo(){
 
   int column,row;
 
-  for (column=71; column>0; column--)
-    for (row=0; row<14; row++)
+  for (column=bitmap.width-1; column>0; column--)
+    for (row=0; row<bitmap.height; row++)
       if (is_point(column-1, row))
         set_point(drawing_area, column, row);
       else
         clear_point(drawing_area, column, row);
 
-    for (row=0; row<14; row++)
+    for (row=0; row<bitmap.height; row++)
     	clear_point(drawing_area, 0, row);
 }
 
@@ -327,14 +401,14 @@ void leftlogo(){
 
   int column,row;
 
-  for (column=0; column<71; column++)
-    for (row=0; row<14; row++)
+  for (column=0; column<bitmap.width-1; column++)
+    for (row=0; row<bitmap.height; row++)
       if (is_point(column+1, row))
         set_point(drawing_area, column, row);
       else
         clear_point(drawing_area, column, row);
 
-    for (row=0; row<14; row++)
+    for (row=0; row<bitmap.height; row++)
     	clear_point(drawing_area, 71, row);
 }
 
@@ -342,20 +416,20 @@ void flipvertlogo()
 {
   int row, column, temp;
 
-  for(row=0; row<7; row++)
-    for(column=0; column<72; column++)
+  for(row=0; row<(bitmap.height/2); row++)
+    for(column=0; column<bitmap.width; column++)
     {
       temp = is_point(column, row);
 
-      if (is_point(column,13-row))
+      if (is_point(column,bitmap.height-1-row))
         set_point(drawing_area, column,row);
       else
         clear_point(drawing_area, column,row);
 
       if (temp)
-        set_point(drawing_area, column,13-row);
+        set_point(drawing_area, column,bitmap.height-1-row);
       else
-        clear_point(drawing_area, column,13-row);
+        clear_point(drawing_area, column,bitmap.height-1-row);
     }
 }
 
@@ -363,27 +437,25 @@ void fliphorizlogo()
 {
   int row, column, temp;
 
-  for(row=0; row<14; row++)
-    for(column=0; column<36; column++)
+  for(row=0; row<bitmap.height; row++)
+    for(column=0; column<(bitmap.width/2); column++)
     {
       temp = is_point(column, row);
 
-      if (is_point(71-column,row))
+      if (is_point(bitmap.width-1-column,row))
         set_point(drawing_area, column,row);
       else
         clear_point(drawing_area, column,row);
 
       if (temp)
-        set_point(drawing_area, 71-column,row);
+        set_point(drawing_area, bitmap.width-1-column,row);
       else
-        clear_point(drawing_area, 71-column, row);
+        clear_point(drawing_area, bitmap.width-1-column, row);
     }
 }
 
 void ExportFileSelected(GtkWidget *w, GtkFileSelection *fs)
 {
-
-  GSM_Bitmap bitmap;
   char *File=(char *)
     malloc(strlen(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))+1));
   char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo)->entry));
@@ -393,38 +465,34 @@ void ExportFileSelected(GtkWidget *w, GtkFileSelection *fs)
 
   gtk_widget_destroy(FileSelection);
 
- 
-  if (strcmp(operator, "Group Graphics Logo")) {
-    strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
-    bitmap.type=GSM_OperatorLogo;
-  }
-  else { /* Group Graphics file */
-    bitmap.type=GSM_CallerLogo;
-  }
-  bitmap.width=72;
-  bitmap.height=14;
-  bitmap.size=14*72/8;
-  memcpy(bitmap.bitmap,logo,bitmap.size);
+  strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
   GSM_SaveBitmapFile(File,&bitmap);
 }
 
 void ImportFileSelected(GtkWidget *w, GtkFileSelection *fs)
 {
+  GSM_Bitmap tbitmap;
+  
   char *File=(char *)
     malloc(strlen(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))+1));
- 
-  GSM_Bitmap bitmap;
 
   strcpy(File, gtk_file_selection_get_filename (GTK_FILE_SELECTION(fs)));
 
   gtk_widget_destroy(FileSelection);
 
-  GSM_ReadBitmapFile(File,&bitmap);
+  GSM_ReadBitmapFile(File,&tbitmap);
 
-  if (bitmap.type==GSM_OperatorLogo) {
-    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(Combo)->entry), GSM_GetNetworkName(bitmap.netcode));
+  if (tbitmap.type==GSM_OperatorLogo) {
+    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(Combo)->entry), GSM_GetNetworkName(tbitmap.netcode));
+    gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonOperator),true);
   }
-  memcpy(logo,bitmap.bitmap,bitmap.size);  
+  if (tbitmap.type==GSM_StartupLogo) gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonStartup),true);
+  if (tbitmap.type==GSM_CallerLogo) gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(buttonCaller),true);
+  
+  logotype(NULL);
+  
+  memcpy(&bitmap,&tbitmap,sizeof(GSM_Bitmap));
+
   update_points(drawing_area);
 }
 
@@ -507,52 +575,30 @@ quit ()
 
 void show_logo()
 {
-  GSM_Bitmap bitmap;
   char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo)->entry));
   int i;
 
-  readconfig();
-  fbusinit();
-
-  bitmap.height=14;
-  bitmap.width=72;
-  bitmap.size=72*14/8;
-  if (strcmp(operator, "Group Graphics Logo")) {
-    strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
-    bitmap.type=GSM_OperatorLogo;
-  } else {
-    bitmap.type=GSM_CallerLogo;
-    /* Is there a better way to do this? */
-    for (i=0;i<6;i++) {
-      if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo2)->entry)),groupnames[i])==0) bitmap.number=i;
-    }    
-    if (GSM->GetBitmap(&bitmap)!=GE_NONE) return; /* Get the old name */
-  }
-  memcpy(bitmap.bitmap,logo,bitmap.size);
+  strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
+  /* Is there a better way to do this? */
+  for (i=0;i<6;i++) {
+    if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo2)->entry)),groupnames[i])==0) bitmap.number=i;
+  }    
+  strncpy(bitmap.text,groupnames[(int)bitmap.number],200);
+  printf("Type %d\n",bitmap.type);
   GSM->SetBitmap(&bitmap);
 }
 
 void get_logo()
 {
-  GSM_Bitmap bitmap;
   char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo)->entry));
   int i;
 
-  readconfig();
-  fbusinit();
-
-  if (strcmp(operator, "Group Graphics Logo")) {
-    strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
-    bitmap.type=GSM_OperatorLogo;
-  } else {
-    bitmap.type=GSM_CallerLogo;
-    /* Is there a better way to do this? */
-    for (i=0;i<6;i++) {
-      if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo2)->entry)),groupnames[i])==0) bitmap.number=i;
-    }    
-  }
+  strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
+  /* Is there a better way to do this? */
+  for (i=0;i<6;i++) {
+    if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo2)->entry)),groupnames[i])==0) bitmap.number=i;
+  }    
   if (GSM->GetBitmap(&bitmap)==GE_NONE){
-    memcpy(logo,bitmap.bitmap,bitmap.size);
     update_points(drawing_area);
   }
 }
@@ -562,9 +608,6 @@ void get_operator()
 {
 
   GSM_NetworkInfo NetworkInfo;
-
-  readconfig();
-  fbusinit();
 
   if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE)
     gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(Combo)->entry), GSM_GetNetworkName(NetworkInfo.NetworkCode));
@@ -589,8 +632,7 @@ new_pixmap (gchar      **data,
   return wpixmap;
 }
 
-int
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   GSM_Bitmap bitmap;
 
@@ -652,7 +694,7 @@ main (int argc, char *argv[])
 
   gtk_combo_set_popdown_strings(GTK_COMBO(Combo), glist);
 
-  gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(Combo)->entry), "Group Graphics Logo");
+  //  gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(Combo)->entry), "Group Graphics Logo");
 
   gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(Combo)->entry), FALSE);
 
@@ -680,6 +722,10 @@ main (int argc, char *argv[])
      glist2=g_list_insert(glist2,groupnames[i],i);
   }
   gtk_combo_set_popdown_strings(GTK_COMBO(Combo2), glist2);
+
+  gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(Combo2)->entry), FALSE);
+
+  g_list_free(glist2 );
 
   /* Now we create the menubar */
   
@@ -765,6 +811,7 @@ main (int argc, char *argv[])
   gtk_menu_append(GTK_MENU(EditMenu), EditMenu_Right);
   gtk_menu_append(GTK_MENU(EditMenu), EditMenu_Left);
 
+
   gtk_signal_connect_object (GTK_OBJECT (EditMenu_Clear), "activate",
   			GTK_SIGNAL_FUNC (newlogo), NULL);
   gtk_signal_connect_object (GTK_OBJECT (EditMenu_Invert), "activate",
@@ -824,12 +871,22 @@ main (int argc, char *argv[])
   gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
 
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Send logo", NULL, new_pixmap (Send_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) show_logo, toolbar);
+  
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Get logo", NULL, new_pixmap (Read_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) get_logo, toolbar);
 
   gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Invert logo", NULL, new_pixmap (Invert_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) invertlogo, toolbar);
 
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Flip Horizontal", NULL, new_pixmap (Flip_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) fliphorizlogo, toolbar);
   
+  gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));
+
+  buttonStartup=gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),GTK_TOOLBAR_CHILD_RADIOBUTTON,NULL,NULL,"Startup Logo","",new_pixmap (Startup_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]),GTK_SIGNAL_FUNC(logotype),NULL);
+  buttonOperator=gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),GTK_TOOLBAR_CHILD_RADIOBUTTON,buttonStartup,NULL,"Op Logo","",new_pixmap (Op_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]),GTK_SIGNAL_FUNC(logotype),NULL);
+  buttonCaller=gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),GTK_TOOLBAR_CHILD_RADIOBUTTON,buttonOperator,NULL,"Caller Logo","",new_pixmap (Caller_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]),GTK_SIGNAL_FUNC(logotype),NULL);
+
+  gtk_toolbar_append_space (GTK_TOOLBAR(toolbar));  
+
   gtk_toolbar_append_widget (GTK_TOOLBAR (toolbar), Combo, "", "");
 
   gtk_toolbar_append_widget (GTK_TOOLBAR (toolbar), Combo2, "", "");
@@ -844,7 +901,7 @@ main (int argc, char *argv[])
   /* Create the drawing area */
 
   drawing_area = gtk_drawing_area_new ();
-  gtk_drawing_area_size (GTK_DRAWING_AREA (drawing_area), 360, 70);
+  gtk_drawing_area_size (GTK_DRAWING_AREA (drawing_area), 84*6, 48*6);
   gtk_box_pack_start (GTK_BOX (vbox), drawing_area, TRUE, TRUE, 0);
 
   /* Signals used to handle backing pixmap */
@@ -868,6 +925,8 @@ main (int argc, char *argv[])
 			 | GDK_POINTER_MOTION_HINT_MASK);
 
   gtk_widget_show_all (window);
+
+  logotype(toolbar);
 
   gtk_main ();
 

@@ -2149,7 +2149,7 @@ GSM_Error FB61_GetBitmap(GSM_Bitmap *Bitmap) {
 
   unsigned char req[10] = { FB61_FRAME_HEADER };
   u8 count=3;
-  int timeout=10; /* 1 second for command to complete */
+  int timeout=50; /* 5 seconds for command to complete */
 
   GetBitmap=Bitmap;
 
@@ -2889,7 +2889,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	GetBitmap->width=MessageBuffer[count++];
 	GetBitmap->height=MessageBuffer[count++];
 	count++;
-	GetBitmap->size-=6; /* It puts out 2 unknown bytes at the end */
+	tmp=GetBitmap->height*GetBitmap->width/8;
+	if (GetBitmap->size>tmp) GetBitmap->size=tmp;
 	memcpy(GetBitmap->bitmap,MessageBuffer+count,GetBitmap->size);
 	GetBitmapError=GE_NONE;
       }
@@ -3239,7 +3240,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	GetBitmap->width=MessageBuffer[count++];
 	GetBitmap->height=MessageBuffer[count++];
 	count++;
-	GetBitmap->size-=6;  /* It puts out 2 unknown bytes at the end */
+	tmp=GetBitmap->height*GetBitmap->width/8;
+	if (GetBitmap->size>tmp) GetBitmap->size=tmp;
 	memcpy(GetBitmap->bitmap,MessageBuffer+count,GetBitmap->size);
 	GetBitmapError=GE_NONE;
       }
