@@ -28,18 +28,21 @@ DIRS =  common/phones \
 	$(DATA_DIR) \
 	po \
 	common \
+	intl \
 	$(BIN_DIRS)
 
 GTK_DIRS =	xgnokii
 
 INSTALL_DIRS =	$(BIN_DIRS) \
-		common \
-		po
+		common
+
+INSTALL_SIMPLE =	po \
+			intl \
+			include
 
 DOCS_DIR = 	Docs
-INCLUDE_DIR =	include
 
-all: intl $(DIRS)
+all: $(DIRS)
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
 		    if [ -e $$dir/Makefile ]; then \
@@ -121,7 +124,13 @@ test:
 	( cd testsuite; ./testit )
 
 install: all
-	@for dir in intl $(INSTALL_DIRS); do \
+	@for dir in $(INSTALL_DIRS); do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install; \
+		fi; \
+	done
+
+	@for dir in $(INSTALL_SIMPLE); do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir install; \
 		fi; \
@@ -134,7 +143,7 @@ install: all
 		    fi; \
 		done \
 	fi
-	$(MAKE) -C $(INCLUDE_DIR) install
+
 	@echo "done"
 	@echo "#####################################################"
 	@echo "###"
@@ -156,6 +165,12 @@ install-strip:
 		fi; \
 	done
 
+	@for dir in $(INSTALL_SIMPLE); do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install; \
+		fi; \
+	done
+
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
 			if [ -e $$dir/Makefile ]; then \
@@ -163,13 +178,19 @@ install-strip:
 			fi; \
 		done \
 	fi
-	$(MAKE) -C $(INCLUDE_DIR) install
+
 	@echo "done"
 
 install-suid:
 	@for dir in $(INSTALL_DIRS); do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir install-suid; \
+		fi; \
+	done
+
+	@for dir in $(INSTALL_SIMPLE); do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install; \
 		fi; \
 	done
 
@@ -180,13 +201,19 @@ install-suid:
 			fi; \
 		done \
 	fi
-	$(MAKE) -C $(INCLUDE_DIR) install
+
 	@echo "done"
 
 install-ss:
 	@for dir in $(INSTALL_DIRS); do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir install-ss; \
+		fi; \
+	done
+
+	@for dir in $(INSTALL_SIMPLE); do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install; \
 		fi; \
 	done
 
@@ -197,7 +224,7 @@ install-ss:
 			fi; \
 		done \
 	fi
-	$(MAKE) -C $(INCLUDE_DIR) install
+
 	@echo "done"
 
 .PHONY: all install clean distclean dep depend install-docs
