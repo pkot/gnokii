@@ -466,9 +466,9 @@ API int gn_cfg_read(char **bindir)
 	else
 		gn_config_global.rfcomm_cn = atoi(val);
 	if (!(val = gn_cfg_get(gn_cfg_info, "bluetooth", "bt_address")))
-		bacpy(&gn_config_global.bt_address, BDADDR_LOCAL);
+		baswap(&gn_config_global.bt_address, BDADDR_ANY);
 	else
-		bacpy(&gn_config_global.bt_address, strtoba(val));
+		str2ba(val, &gn_config_global.bt_address);
 #endif
 
 	return 0;
