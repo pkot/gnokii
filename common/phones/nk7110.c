@@ -692,7 +692,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	switch (message[3]) {
 	/* getsms */    
 	case 0x08:
-		for (i = 0; i < length; i ++)
+		for (i = 0; i < length; i++)
 			if (isprint(message[i]))
 				dprintf("[%02x%c]", message[i], message[i]);
 			else
@@ -785,15 +785,32 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			return GE_UNHANDLEDFRAME;
 		}
 
+	/* sms status */
+	case 0x37:
+		dprintf("SMS Status received\n");
+		dprintf("Data for debug:\n");
+		for (i = 0; i < length; i++) dprintf("%02x ", message[i]);
+		dprintf("\n");
+		data->SMSStatus->Number = ((message[ 8] << 8) | message[ 9]) +
+					  ((message[10] << 8) | message[11]) +
+					  ((message[14] << 8) | message[15]);
+		data->SMSStatus->Unread = ((message[12] << 8) | message[13]) +
+					  ((message[16] << 8) | message[17]);
+		break;
+
 	/* getfolderstatus */
 	case 0x6C:
 		dprintf("Message: SMS Folder status received: \n" );
-		data->SMSFolder->number = (message[5] * 256) + message[5];
+		for (i = 0; i < length; i++) {
+			dprintf("%02x ", message[i]);
+		}
+		dprintf("\n");
+		data->SMSFolder->number = (message[4] << 8) | message[5];
 		if (data->SMSStatus) data->SMSStatus->Number = data->SMSFolder->number;
 		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->number);
 		dprintf("Message: IDs of Entries : ");
-		for (i = 0; i < message[4] * 256 + message[5]; i++) {
-			data->SMSFolder->locations[i] = message[6+(i*2)] * 256 + message[(i*2)+7];
+		for (i = 0; i < data->SMSFolder->number; i++) {
+			data->SMSFolder->locations[i] = (message[(i * 2) + 6] << 8) | message[(i * 2) + 7];
 			dprintf("%d, ", data->SMSFolder->locations[i]);
 		}
 		dprintf("\n");
@@ -824,7 +841,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			/* see nk7110.txt */
 			nextfolder += 0x08;
 			if (nextfolder == 0x28) nextfolder++;
-			i -= 2 * len +1;
+			i -= 2 * len + 1;
 			DecodeUnicode(data->SMSFolderList->Folder[j].Name, message + i, len);
 			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
 			i += 2 * len + 2;
@@ -834,7 +851,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	/* get list of SMS pictures */
 	case 0x97:
 		dprintf("Getting list of SMS pictures...\n");
-		for (i = 0; i < length; i ++)
+		for (i = 0; i < length; i++)
 			if (isprint(message[i]))
 				dprintf("[%02x%c]", message[i], message[i]);
 			else
@@ -849,7 +866,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 	case 0xca:
 	default:
-		for (i = 0; i < length; i ++)
+		for (i = 0; i < length; i++)
 			if (isprint(message[i]))
 				dprintf("[%02x%c]", message[i], message[i]);
 			else
@@ -963,10 +980,11 @@ static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-	if (!data->SMSFolder) data->SMSFolder = (SMS_Folder *)calloc(sizeof(SMS_Folder), 1);
-	/* We need the status of the Inbox */
-	data->SMSFolder->FolderID = 0x08;
-	return P7110_GetSMSFolderStatus(data, state);
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x36, 0x64};
+      
+	dprintf("Getting SMS Status...\n");
+	if (SM_SendMessage(state, 5, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x14);
 }
 
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state)
