@@ -67,7 +67,7 @@ connect 'chat -v TIMEOUT 60 ABORT BUSY ABORT ERROR ABORT "NO CARRIER" "" AT OK A
 
    on the computer called you can use the ttyI* device, for more info read
    the following mail:
-   http://mail.nongnu.org/pipermail/gnokii-users/2002-June/001259.html
+   http://mail.nongnu.org/archive/html/gnokii-users/2002-07/msg00165.html
 
 --------------- /etc/ppp/pap-secrets ---------------------------
 XXXX.demon.co.uk	demon-gnokii	<yourpassword>
