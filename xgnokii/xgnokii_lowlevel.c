@@ -1044,13 +1044,9 @@ void *GUI_Connect(void *a)
 	GSM_RFUnits rf_units = GRF_Percentage;
 	GSM_BatteryUnits batt_units = GBU_Percentage;
 	GSM_DateTime Alarm;
+	GSM_NetMonitor netmonitor;
+	gint displaystatus;
 	time_t newtime, oldtime;
-/*
-	SMS_Folder *SMSFolder;
-	SMS_FolderList *SMSFolderList;
-	GSM_SMSMessage *SMSMessage;
-	GSM_RawData *RawData;
-*/
 
 	gchar number[INCALL_NUMBER_LENGTH];
 	PhoneEvent *event;
@@ -1112,10 +1108,9 @@ void *GUI_Connect(void *a)
 #ifdef XDEBUG
 			g_print("Call in progress: %s\n", phoneMonitor.call.callNum);
 #endif
-
-/*
-			GSM->GetDisplayStatus (&status);
-			if (status & (1<<DS_Call_In_Progress)) {
+			gdat.DisplayStatus = &displaystatus;
+			SM_Functions(GOP_GetDisplayStatus, &gdat, &statemachine);
+			if (displaystatus & (1<<DS_Call_In_Progress)) {
 				pthread_mutex_lock (&callMutex);
 				phoneMonitor.call.callInProgress = CS_InProgress;
 				pthread_mutex_unlock (&callMutex);
@@ -1125,7 +1120,6 @@ void *GUI_Connect(void *a)
 				strncpy (phoneMonitor.call.callNum, number, INCALL_NUMBER_LENGTH);
 				pthread_mutex_unlock (&callMutex);
 			}
-*/
 		} else {
 			pthread_mutex_lock(&callMutex);
 			phoneMonitor.call.callInProgress = CS_Idle;
@@ -1134,13 +1128,30 @@ void *GUI_Connect(void *a)
 		}
 
 		pthread_mutex_lock(&netMonMutex);
+
 		if (phoneMonitor.netmonitor.number) {
-/*			GSM->NetMonitor (phoneMonitor.netmonitor.number,
-					phoneMonitor.netmonitor.screen);
-			GSM->NetMonitor (3, phoneMonitor.netmonitor.screen3);
-			GSM->NetMonitor (4, phoneMonitor.netmonitor.screen4);
-			GSM->NetMonitor (5, phoneMonitor.netmonitor.screen5);
-*/
+
+			gdat.NetMonitor = &netmonitor;
+			gdat.NetMonitor->Field = phoneMonitor.netmonitor.number;
+			SM_Functions(GOP_NetMonitor, &gdat, &statemachine);
+			memcpy(phoneMonitor.netmonitor.screen, gdat.NetMonitor->Screen, 
+			       sizeof(gdat.NetMonitor->Screen));
+
+			gdat.NetMonitor->Field = 3;
+			SM_Functions(GOP_NetMonitor, &gdat, &statemachine);
+			memcpy(phoneMonitor.netmonitor.screen3, gdat.NetMonitor->Screen, 
+			       sizeof(gdat.NetMonitor->Screen));
+
+			gdat.NetMonitor->Field = 4;
+			SM_Functions(GOP_NetMonitor, &gdat, &statemachine);
+			memcpy(phoneMonitor.netmonitor.screen4, gdat.NetMonitor->Screen, 
+			       sizeof(gdat.NetMonitor->Screen));
+
+			gdat.NetMonitor->Field = 5;
+			SM_Functions(GOP_NetMonitor, &gdat, &statemachine);
+			memcpy(phoneMonitor.netmonitor.screen5, gdat.NetMonitor->Screen, 
+			       sizeof(gdat.NetMonitor->Screen));
+
 		} else {
 			*phoneMonitor.netmonitor.screen = *phoneMonitor.netmonitor.screen3 =
 			    *phoneMonitor.netmonitor.screen4 = *phoneMonitor.netmonitor.screen5 =
