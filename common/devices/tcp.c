@@ -154,7 +154,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 
 	/* Allow process/thread to receive SIGIO */
 
-#if !(unices)
+#if !(__unices__)
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1){
 		perror("Gnokii tcp_opendevice: fnctl(F_SETOWN)");

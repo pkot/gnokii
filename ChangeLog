@@ -2,6 +2,7 @@
 ======
  * libgnokii updates
     o added 5210 information                            (Pawel Kot)
+    o typo: use __unices__ instead of unices            (Pawel Kot)
  * AT series updates
     o try to handle correctly sms empty location        (Pawel Kot)
     o use actual encoding when reading network information
