@@ -8,12 +8,15 @@ gnokii/gnokii.c
 gnokiid/gnokiid.c
 common/virtmodem.c
 xgnokii/xgnokii.c
+xgnokii/xgnokii_calendar.c
 xgnokii/xgnokii_cfg.c
 xgnokii/xgnokii_common.c
 xgnokii/xgnokii_contacts.c
+xgnokii/xgnokii_data.c
 xgnokii/xgnokii_dtmf.c
+xgnokii/xgnokii_logos.c
+xgnokii/xgnokii_lowlevel.c
 xgnokii/xgnokii_netmon.c
 xgnokii/xgnokii_sms.c
 xgnokii/xgnokii_speed.c
 xgnokii/xgnokii_xkeyb.c
-xgnokii/xgnokii_logos.c

@@ -898,7 +898,8 @@ static gint ButtonPressEvent (GtkWidget *widget, GdkEventButton *event)
     {
       GUI_ShowSMS ();
     }
-    else if (event->x >= 235 && event->x <= 248 &&
+    else if (phoneMonitor.supported.calendar &&
+             event->x >= 235 && event->x <= 248 &&
              event->y >=  27 && event->y <= 75) 
     {
       GUI_ShowCalendar ();

@@ -30,6 +30,8 @@
 #include "xpm/New.xpm"
 #include "xpm/Send.xpm"
 #include "xpm/Read.xpm"
+#include "xpm/Open.xpm"
+#include "xpm/Save.xpm"
 
 #include "xpm/Edit_invert.xpm"
 #include "xpm/Edit_flip_horizontal.xpm"
@@ -42,35 +44,35 @@
 
 extern GSM_Network GSM_Networks[];
 
-static GtkWidget *GUI_LogosWindow;
+GtkWidget *GUI_LogosWindow;
 
-static ErrorDialog errorDialog = {NULL, NULL};
-static InfoDialog infoDialog = {NULL, NULL};
+ErrorDialog errorDialog = {NULL, NULL};
+InfoDialog infoDialog = {NULL, NULL};
 
 /* stuff for drawingArea */
-static GtkWidget *drawingArea = NULL;
-static GdkPixmap *drawingPixmap = NULL;
-static GdkPixmap *greenPointPixmap, *blackPointPixmap;
-static int drawingAreaWidth, drawingAreaHeight; /* in pixels */
-static int mouseButtonPushed = 0;
+GtkWidget *drawingArea = NULL;
+GdkPixmap *drawingPixmap = NULL;
+GdkPixmap *greenPointPixmap, *blackPointPixmap;
+int drawingAreaWidth, drawingAreaHeight; /* in pixels */
+int mouseButtonPushed = 0;
 
 /* stuff for previewArea */
-static GtkWidget *previewArea = NULL;
-static GdkPixmap *previewPixmap = NULL;
-static GdkPixmap *greenPixelPixmap;
-static int previewPixmapWidth, previewPixmapHeight;
-static int previewAvailable = 1, showPreviewErrorDialog = 1;
-static int previewPixmapNumber = 0;
+GtkWidget *previewArea = NULL;
+GdkPixmap *previewPixmap = NULL;
+GdkPixmap *greenPixelPixmap;
+int previewPixmapWidth, previewPixmapHeight;
+int previewAvailable = 1, showPreviewErrorDialog = 1;
+int previewPixmapNumber = 0;
 
-static GSM_Bitmap bitmap, oldBitmap;
-static GSM_NetworkInfo networkInfo;
+GSM_Bitmap bitmap, oldBitmap;
+GSM_NetworkInfo networkInfo;
 
 /* widgets for toolbar - some, need global variables */
-static GtkWidget *buttonStartup, *buttonOperator, *buttonCaller;
-static GtkWidget *networkCombo, *callerCombo;
+GtkWidget *buttonStartup, *buttonOperator, *buttonCaller;
+GtkWidget *networkCombo, *callerCombo;
 
-static int activeTool = TOOL_BRUSH;
-static int toolStartX, toolStartY, toolLastX, toolLastY;
+int activeTool = TOOL_BRUSH;
+int toolStartX, toolStartY, toolLastX, toolLastY;
 
 /* tools for drawing */
 static GtkWidget *buttonBrush, *buttonLine, *buttonRectangle;
@@ -118,7 +120,7 @@ int GetMaxFrom3(int a, int b, int c) {
 }
 
 /* load preview pixmap from file */
-static GdkPixmap *GetPreviewPixmap (GtkWidget *widget) {
+GdkPixmap *GetPreviewPixmap (GtkWidget *widget) {
   GdkPixmap *pixmap;
   GdkBitmap *mask;
   gchar *file;
@@ -374,97 +376,81 @@ void ToolBrush(GtkWidget *widget, int column, int row, int button) {
 }
 
 /* TOOL - LINE */
+
+/* this function clear or draw a line on the screen  USED BY TOOLLINEUPDATE */
+void ToolLine(GtkWidget *widget, int x1, int y1, int x2, int y2, int draw) {
+	int udx, udy, dx, dy, error, loop, xadd, yadd;
+
+	dx = x2 - x1;  /* x delta */
+	dy = y2 - y1;  /* y delta */
+
+	udx = abs(dx); /* unsigned x delta */
+	udy = abs(dy); /* unsigned y delta */
+
+	if (dx < 0) { xadd = -1; } else { xadd = 1; } /* set directions */
+	if (dy < 0) { yadd = -1; } else { yadd = 1; }
+
+	error = 0;
+	loop = 0;
+	if (udx > udy) { /* delta X > delta Y */
+		do {
+			error += udy;
+
+			if (error >= udx) {  /* is time to move up or down? */
+				error -= udx;
+				y1 += yadd;
+			}
+			loop++;
+			if (draw == 1) {
+				SetPoint(widget,x1,y1,0);
+			} else {
+				/* now clearing line before drawing new one, we must check */
+				/* if there is a point in oldBitmap which saves bitmap before */
+				/* we starting drawing new line */
+				if (!GSM_IsPointBitmap(&oldBitmap,x1,y1)) {
+					ClearPoint(widget,x1,y1,0);
+				}
+			}
+			x1 += xadd;         /* move horizontally */
+		} while (loop < udx); /* repeat for x length */
+	} else {
+		do {
+			error += udx;
+			if (error >= udy) {  /* is time to move left or right? */
+				error -= udy;
+				x1 += xadd;
+			}
+			loop++;
+			if (draw == 1) {
+				SetPoint(widget,x1,y1,0);
+			} else {
+				/* check comment in delta X > delta Y */
+				if (!GSM_IsPointBitmap(&oldBitmap,x1,y1)) {
+					ClearPoint(widget,x1,y1,0);
+				}
+			}
+			y1 += yadd;         /* move vertically */
+		} while (loop < udy); /* repeat for y length */
+	}
+}
+
 /* going to rewrite to Bresenham algorithm */ 
-static void ToolLineUpdate(GtkWidget *widget, int column, int row) {
-  double delta, y, x;
-  int i, x1, y1, x2, y2;
-  
-  if (abs(toolStartX-toolLastX) >= abs(toolStartY-toolLastY)) {
-    if (toolStartX > toolLastX) {
-      x1 = toolLastX;
-      x2 = toolStartX;
-      y1 = toolLastY;
-      y2 = toolStartY;
-    } else {
-      x1 = toolStartX;
-      x2 = toolLastX;
-      y1 = toolStartY;
-      y2 = toolLastY;
-    }
- 
-    delta = ((double)(y2-y1))/((double)(x2-x1));
-    y = (double)y1;
-    for (i = x1;i <= x2;i++) {
-      if (!GSM_IsPointBitmap(&oldBitmap,i,(int)y)) ClearPoint(widget,i,(int)y,0);
-      y += delta;
-    }
-  } else {
-    if (toolStartY > toolLastY) {
-      x1 = toolLastX;
-      x2 = toolStartX;
-      y1 = toolLastY;
-      y2 = toolStartY;      
-    } else {
-      x1 = toolStartX;
-      x2 = toolLastX;
-      y1 = toolStartY;
-      y2 = toolLastY;
-    }
-    delta = ((double)(x2-x1))/((double)(y2-y1));
-
-    x = (double)x1;
-    for (i = y1;i <= y2;i++) {
-      if (!GSM_IsPointBitmap(&oldBitmap,(int)x,i)) ClearPoint(widget,(int)x,i,0);
-      x += delta;
-    }
-  } 
-
-  if (abs(toolStartX-column) >= abs(toolStartY-row)) {
-    if (toolStartX > column) {
-      x1 = column;
-      x2 = toolStartX;
-      y1 = row;
-      y2 = toolStartY;
-    } else {
-      x1 = toolStartX;
-      x2 = column;
-      y1 = toolStartY;
-      y2 = row;
-    }
-
-    delta = ((double)(y2-y1))/((double)(x2-x1));
-    y = (double)y1;
-    for (i = x1;i <= x2;i++) {
-      SetPoint(widget,i,(int)y,0);
-      y += delta;
-    }
-  } else {
-    if (toolStartY > row) {
-      x1 = column;
-      x2 = toolStartX;
-      y1 = row;
-      y2 = toolStartY;
-    } else {
-      x1 = toolStartX;
-      x2 = column;
-      y1 = toolStartY;
-      y2 = row;
-    }
-
-    delta = ((double)(x2-x1))/((double)(y2-y1));
-
-    x = (double)x1;
-    for (i = y1;i <= y2;i++) {
-      SetPoint(widget,(int)x,i,0);
-      x += delta;
-    }
-  }
+void ToolLineUpdate(GtkWidget *widget, int column, int row) {
+	/* clear old line */
+	ToolLine(widget,toolStartX,toolStartY,toolLastX,toolLastY,0);
+	/* draw new one */
+	ToolLine(widget,toolStartX,toolStartY,column,row,1);
 }
 
 /* TOOL - FILLED RECT */
-static void ToolFilledRectangleUpdate(GtkWidget *widget, int column, int row) {
+
+/* FIXME - going to rewrite for optimalized version, clearing and */
+/*         drawing new parts only before clearing and drawing whole */
+/*         filled rectangle - it's too slow on diskless terminal ;(( */
+void ToolFilledRectangleUpdate(GtkWidget *widget, int column, int row) {
   int i, j, x1, y1, x2, y2;
 
+	/* swap Xs to x1 < x2 */
   if (toolStartX > toolLastX) {
     x1 = toolLastX;
     x2 = toolStartX;
@@ -473,6 +459,7 @@ static void ToolFilledRectangleUpdate(GtkWidget *widget, int column, int row) {
     x2 = toolLastX;
   }
 
+	/* swap Ys to y1 < y2 */
   if (toolStartY > toolLastY) {
     y1 = toolLastY;
     y2 = toolStartY;
@@ -481,10 +468,12 @@ static void ToolFilledRectangleUpdate(GtkWidget *widget, int column, int row) {
     y2 = toolLastY;
   }
 
+	/* clear one now */
   for (j = y1;j <= y2;j++)
     for (i = x1;i <= x2;i++)
       if (!GSM_IsPointBitmap(&oldBitmap,i,j)) ClearPoint(widget,i,j,0);
 
+	/* swap Xs to x1 < x2 */
   if (toolStartX > column) {
     x1 = column;
     x2 = toolStartX;
@@ -493,6 +482,7 @@ static void ToolFilledRectangleUpdate(GtkWidget *widget, int column, int row) {
     x2 = column;
   }
 
+	/* swap Ys to y1 < y2 */
   if (toolStartY > row) {
     y1 = row;
     y2 = toolStartY;
@@ -501,16 +491,18 @@ static void ToolFilledRectangleUpdate(GtkWidget *widget, int column, int row) {
     y2 = row;
   }
 
+	/* draw new one */
   for (j = y1;j <= y2;j++)
     for (i = x1;i <= x2;i++)
       SetPoint(widget,i,j,0);
 }
 
 /* TOOL - RECTANGLE */
-static void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
+void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
   int i, j, x1, y1, x2, y2;
 
   /* clear old rectangle */
+	/* swap Xs to x1 < x2 */
   if (toolStartX > toolLastX) {
     x1 = toolLastX;
     x2 = toolStartX;
@@ -519,6 +511,7 @@ static void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
     x2 = toolLastX;
   }
 
+	/* swap Ys to y1 < y2 */
   if (toolStartY > toolLastY) {
     y1 = toolLastY;
     y2 = toolStartY;
@@ -527,6 +520,7 @@ static void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
     y2 = toolLastY;
   }
 
+	/* clear old one */
   for (i = x1;i <= x2;i++) {
     if (!GSM_IsPointBitmap(&oldBitmap,i,y1)) ClearPoint(widget,i,y1,0);
     if (!GSM_IsPointBitmap(&oldBitmap,i,y2)) ClearPoint(widget,i,y2,0);                
@@ -538,6 +532,7 @@ static void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
   }
 
   /* draw new rectangle */
+	/* swap Xs to x1 < x2 */
   if (toolStartX > column) {
     x1 = column;
     x2 = toolStartX;
@@ -546,6 +541,7 @@ static void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
     x2 = column;
   }
 
+	/* swap Ys to y1 < y2 */
   if (toolStartY > row) {
     y1 = row;
     y2 = toolStartY;
@@ -554,6 +550,7 @@ static void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
     y2 = row;
   }
 
+	/* draw new one */
   for (i = x1;i <= x2;i++) {
     if (!IsPoint(i,y1)) SetPoint(widget,i,y1,0);
     if (!IsPoint(i,y2)) SetPoint(widget,i,y2,0);
@@ -565,19 +562,24 @@ static void ToolRectangleUpdate(GtkWidget *widget, int column, int row) {
   }
 }
 
-static void UpdateToolScreen(GtkWidget *widget, int x1, int y1, int x2, int y2) {
+/* this update tools actions on the screen - this is for optimalization */
+/* eg. for faster redrawing tools actions - we do not need redraw pixel */
+/* by pixel. Faster is redraw whole rectangle which contains all changes */
+void UpdateToolScreen(GtkWidget *widget, int x1, int y1, int x2, int y2) {
   GdkRectangle updateRect;
 
   /* update preview area */
-  updateRect.x = PREVIEWSTARTX+x1;
-  updateRect.y = PREVIEWSTARTY+y1;
-  if (bitmap.type != GSM_StartupLogo) {
-    updateRect.x += PREVIEWJUMPX;
-    updateRect.y += PREVIEWJUMPY;
-  }
-  updateRect.width = x2-x1+1;
-  updateRect.height = y2-y1+1;
-  gtk_widget_draw(previewArea,&updateRect);
+	if (previewAvailable) {
+	  updateRect.x = PREVIEWSTARTX+x1;
+  	updateRect.y = PREVIEWSTARTY+y1;
+	  if (bitmap.type != GSM_StartupLogo) {
+  	  updateRect.x += PREVIEWJUMPX;
+	    updateRect.y += PREVIEWJUMPY;
+  	}
+	  updateRect.width = x2-x1+1;
+  	updateRect.height = y2-y1+1;
+  	gtk_widget_draw(previewArea,&updateRect);
+	}
 
   /* update drawing area */
   updateRect.x = x1 * (POINTSIZE+1);
@@ -592,7 +594,7 @@ static void UpdateToolScreen(GtkWidget *widget, int x1, int y1, int x2, int y2) 
  * *************************************
  */
 
-static gint PreviewAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event) {
+gint PreviewAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event) {
   previewPixmapNumber++;
 
   gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
@@ -601,7 +603,7 @@ static gint PreviewAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event
   return TRUE;
 }
 
-static gint PreviewAreaConfigureEvent(GtkWidget *widget, GdkEventConfigure *event) {
+gint PreviewAreaConfigureEvent(GtkWidget *widget, GdkEventConfigure *event) {
   if (previewPixmap) gdk_pixmap_unref(previewPixmap);
   previewPixmap = GetPreviewPixmap(widget);
 
@@ -610,7 +612,7 @@ static gint PreviewAreaConfigureEvent(GtkWidget *widget, GdkEventConfigure *even
   return TRUE;
 }
 
-static gint PreviewAreaExposeEvent(GtkWidget *widget, GdkEventExpose *event) {
+gint PreviewAreaExposeEvent(GtkWidget *widget, GdkEventExpose *event) {
   /* got previewPixmap? */
   if (previewPixmap)
     /* yes - simply redraw some rectangle */      
@@ -626,7 +628,7 @@ static gint PreviewAreaExposeEvent(GtkWidget *widget, GdkEventExpose *event) {
  * ********************************
  */
 
-static gint DrawingAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event) {
+gint DrawingAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event) {
   /* got drawingPixmap? */
   if (drawingPixmap == NULL) return TRUE;
 
@@ -689,14 +691,14 @@ static gint DrawingAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event
   return TRUE;
 }
 
-static gint DrawingAreaButtonReleaseEvent(GtkWidget *widget, GdkEventButton *event) {
+gint DrawingAreaButtonReleaseEvent(GtkWidget *widget, GdkEventButton *event) {
   if (event->button == 1)
     mouseButtonPushed = 0;
 
   return TRUE;
 }
 
-static gint DrawingAreaMotionNotifyEvent(GtkWidget *widget, GdkEventMotion *event) {
+gint DrawingAreaMotionNotifyEvent(GtkWidget *widget, GdkEventMotion *event) {
   int x,y;
   GdkModifierType state;
   
@@ -760,7 +762,7 @@ static gint DrawingAreaMotionNotifyEvent(GtkWidget *widget, GdkEventMotion *even
 }
 
 /* configureEvent? -> event when someone resize windows, ... */
-static gint DrawingAreaConfigureEvent(GtkWidget *widget, GdkEventConfigure *event) {
+gint DrawingAreaConfigureEvent(GtkWidget *widget, GdkEventConfigure *event) {
   int x, y;
   /* got drawingPixmap? */
   if (drawingPixmap) gdk_pixmap_unref(drawingPixmap); /* got, erase it */
@@ -782,7 +784,7 @@ static gint DrawingAreaConfigureEvent(GtkWidget *widget, GdkEventConfigure *even
   return TRUE;
 }
 
-static gint DrawingAreaExposeEvent(GtkWidget *widget, GdkEventExpose *event) {
+gint DrawingAreaExposeEvent(GtkWidget *widget, GdkEventExpose *event) {
   /* got drawingPixmap? */
   if (drawingPixmap)
     /* got - draw it */
@@ -798,7 +800,7 @@ static gint DrawingAreaExposeEvent(GtkWidget *widget, GdkEventExpose *event) {
  * *****************************************
  */
 
-static void GetNetworkInfoEvent(GtkWidget *widget) {
+void GetNetworkInfoEvent(GtkWidget *widget) {
   GSM_Error error;
   PhoneEvent *e = (PhoneEvent *)g_malloc(sizeof(PhoneEvent));
   D_NetworkInfo *data = (D_NetworkInfo *)g_malloc(sizeof(D_NetworkInfo));
@@ -829,7 +831,7 @@ static void GetNetworkInfoEvent(GtkWidget *widget) {
                GSM_GetNetworkName(networkInfo.NetworkCode));
 }
 
-static void GetLogoEvent(GtkWidget *widget) {
+void GetLogoEvent(GtkWidget *widget) {
   GSM_Error error;
   PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
   D_Bitmap *data = (D_Bitmap *)g_malloc(sizeof(D_Bitmap));
@@ -861,7 +863,7 @@ static void GetLogoEvent(GtkWidget *widget) {
   }
 }
 
-static void SetLogoEvent(GtkWidget *widget) {
+void SetLogoEvent(GtkWidget *widget) {
   GSM_Error error;
   PhoneEvent *e = (PhoneEvent *)g_malloc(sizeof(PhoneEvent));
   D_Bitmap *data = (D_Bitmap *)g_malloc(sizeof(D_Bitmap));
@@ -912,7 +914,7 @@ static void ClearLogoEvent(GtkWidget *widget) {
   UpdatePoints(widget);
 }
 
-static void InvertLogoEvent(GtkWidget *widget) {
+void InvertLogoEvent(GtkWidget *widget) {
   int column, row;
 
   for (column = 0;column < bitmap.width;column++)
@@ -925,7 +927,7 @@ static void InvertLogoEvent(GtkWidget *widget) {
   UpdatePoints(widget);
 }
 
-static void UpLogoEvent(GtkWidget *widget) {
+void UpLogoEvent(GtkWidget *widget) {
   int column, row;
 
   GSM_Bitmap tbitmap;
@@ -948,7 +950,7 @@ static void UpLogoEvent(GtkWidget *widget) {
   UpdatePoints(widget); 
 }
 
-static void DownLogoEvent(GtkWidget *widget) {
+void DownLogoEvent(GtkWidget *widget) {
   int column, row;
 
   GSM_Bitmap tbitmap;
@@ -971,7 +973,7 @@ static void DownLogoEvent(GtkWidget *widget) {
   UpdatePoints(widget);
 }
 
-static void LeftLogoEvent(GtkWidget *widget) {
+void LeftLogoEvent(GtkWidget *widget) {
   int column, row;
 
   GSM_Bitmap tbitmap;
@@ -994,7 +996,7 @@ static void LeftLogoEvent(GtkWidget *widget) {
   UpdatePoints(widget);
 }
 
-static void RightLogoEvent(GtkWidget *widget) {
+void RightLogoEvent(GtkWidget *widget) {
   int column, row;
 
   GSM_Bitmap tbitmap;
@@ -1017,7 +1019,7 @@ static void RightLogoEvent(GtkWidget *widget) {
   UpdatePoints(widget);
 }
 
-static void FlipVerticalLogoEvent(GtkWidget *widget) {
+void FlipVerticalLogoEvent(GtkWidget *widget) {
   int row, column, temp;
 
   for (row = 0;row < (bitmap.height/2);row++)
@@ -1037,7 +1039,7 @@ static void FlipVerticalLogoEvent(GtkWidget *widget) {
   UpdatePoints(widget);
 }
 
-static void FlipHorizontalLogoEvent(GtkWidget *widget) {
+void FlipHorizontalLogoEvent(GtkWidget *widget) {
   int row, column, temp;
 
   for (row = 0;row < bitmap.height;row++)
@@ -1059,7 +1061,7 @@ static void FlipHorizontalLogoEvent(GtkWidget *widget) {
 } 
 
 /* this is launched when tool was changed */
-static gint ToolTypeEvent(GtkWidget *widget) {
+gint ToolTypeEvent(GtkWidget *widget) {
   if (GTK_TOGGLE_BUTTON(buttonBrush)->active) activeTool = TOOL_BRUSH; else
   if (GTK_TOGGLE_BUTTON(buttonLine)->active) activeTool = TOOL_LINE; else
   if (GTK_TOGGLE_BUTTON(buttonRectangle)->active) activeTool = TOOL_RECTANGLE; else
@@ -1070,7 +1072,7 @@ static gint ToolTypeEvent(GtkWidget *widget) {
 }
 
 /* this is launched when logo type was change by buttons on toolbar */
-static gint LogoTypeEvent(GtkWidget *widget) {
+gint LogoTypeEvent(GtkWidget *widget) {
   int clear = 0;
 
   /* is startupLogo? */
@@ -1115,7 +1117,7 @@ static gint LogoTypeEvent(GtkWidget *widget) {
   return 0;
 }
 
-static inline void CloseLogosWindow (void) {
+inline void CloseLogosWindow (void) {
   gtk_widget_hide(GUI_LogosWindow);
 }
 
@@ -1280,7 +1282,7 @@ static GtkItemFactoryEntry logosMenuItems[] = {
   { NULL,	"<control>V",	FlipVerticalLogoEvent,	 0, NULL},
 };
 
-static void InitLogosMenu (void) {
+void InitLogosMenu (void) {
  logosMenuItems[0].path = g_strdup(_("/_File"));
  logosMenuItems[1].path = g_strdup(_("/File/_Open"));
  logosMenuItems[2].path = g_strdup(_("/File/_Save"));
@@ -1374,6 +1376,17 @@ void GUI_CreateLogosWindow (void) {
                  (GtkSignalFunc)SetLogoEvent,toolBar);
 
   gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
+
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolBar), NULL, _("Import from file"), NULL,
+                           NewPixmap(Open_xpm, GUI_LogosWindow->window,
+                           &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
+                           (GtkSignalFunc) OpenLogo, NULL);
+  gtk_toolbar_append_item (GTK_TOOLBAR (toolBar), NULL, _("Export to file"), NULL,
+                           NewPixmap(Save_xpm, GUI_LogosWindow->window,
+                           &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
+                           (GtkSignalFunc) SaveLogo, NULL);
+
+  gtk_toolbar_append_space (GTK_TOOLBAR (toolBar));
 
   buttonStartup = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
 		  GTK_TOOLBAR_CHILD_RADIOBUTTON,NULL,NULL,"Startup logo",
