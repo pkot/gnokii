@@ -31,7 +31,10 @@
 #ifndef	__gnokii_compat_h
 #define	__gnokii_compat_h
 
-#include <sys/time.h>
+#ifdef HAVE_SYS_TIME_H
+#  include <sys/time.h>
+#endif
+
 #ifdef WIN32
 #  include <windows.h>
 #  include <string.h>

@@ -34,7 +34,9 @@
 #  include <time.h>
 #  define ftime _ftime
 #  define timeb _timeb
-#else
+#endif
+
+#ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #endif
 
