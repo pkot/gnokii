@@ -15,6 +15,8 @@
     o update po files                                    (Pawel Kot)
     o new versions of config.guess, config.rpath, config.sub,
       install-sh, mkinstalldirs                          (Pawel Kot)
+    o fix reading caller icons in nk7110 and nk6510 drivers
+                                                         (Pawel Kot)
  * Build system fixes
     o fix a stupid bug in configure that made configure not detect
       many functions/types when user didn't explicitely give

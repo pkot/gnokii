@@ -43,11 +43,19 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 	int subblock_count = 0, i;
 	gn_phonebook_subentry* subentry = NULL;
 
-	if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
 
 	for (i = 0; i < blocks; i++) {
-		subentry = &data->phonebook_entry->subentries[subblock_count];
 
+		if (blockstart[0] != GN_PHONEBOOK_ENTRY_Logo &&
+		    blockstart[0] != GN_PHONEBOOK_ENTRY_Ringtone &&
+		    blockstart[0] != GN_PHONEBOOK_ENTRY_LogoSwitch &&
+		    blockstart[0] != GN_PHONEBOOK_ENTRY_Group) {
+			subentry = &data->phonebook_entry->subentries[subblock_count];
+			if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
+		} else {
+			if (!data->bitmap) return GN_ERR_INTERNALERROR;
+		}
+ 
 		dprintf("Blockstart: %i\n", blockstart[0]);  /* FIXME ? */
 
 		switch ((gn_phonebook_entry_type)blockstart[0]) {
@@ -85,7 +93,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 		case GN_PHONEBOOK_ENTRY_Name:	/* Name */
 			if (data->bitmap) {
 				char_unicode_decode(data->bitmap->text, (blockstart + 6), blockstart[5]);
-				dprintf("Bitmap Name: %s\n", data->bitmap->text);
+				dprintf("   Bitmap Name: %s\n", data->bitmap->text);
 			}
 			char_unicode_decode(data->phonebook_entry->name, (blockstart + 6), blockstart[5]);
 			data->phonebook_entry->empty = false;
@@ -118,7 +126,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 		case GN_PHONEBOOK_ENTRY_Ringtone:  /* Ringtone */
 			if (data->bitmap) {
 				data->bitmap->ringtone = blockstart[5];
-				dprintf("Ringtone no. %d\n", data->bitmap->ringtone);
+				dprintf("   Ringtone no. %d\n", data->bitmap->ringtone);
 			}
 			break;
 		case GN_PHONEBOOK_ENTRY_Date:
@@ -139,21 +147,23 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			break;
 		case GN_PHONEBOOK_ENTRY_Logo:   /* Caller group logo */
 			if (data->bitmap) {
-				dprintf("Caller logo received (h: %i, w: %i)!\n", blockstart[5], blockstart[6]);
+				dprintf("   Caller logo received (h: %i, w: %i)!\n", blockstart[5], blockstart[6]);
 				data->bitmap->width = blockstart[5];
 				data->bitmap->height = blockstart[6];
 				data->bitmap->size = (data->bitmap->width * data->bitmap->height) / 8;
 				memcpy(data->bitmap->bitmap, blockstart + 10, data->bitmap->size);
-				dprintf("Bitmap: width: %i, height: %i\n", blockstart[5], blockstart[6]);
+				dprintf("   Bitmap: width: %i, height: %i\n", blockstart[5], blockstart[6]);
 			}
 			break;
 		case GN_PHONEBOOK_ENTRY_LogoSwitch:   /* Logo on/off */
+			dprintf("   Logo on/off\n");
 			break;
 		case GN_PHONEBOOK_ENTRY_Group:   /* Caller group number */
-			if (data->phonebook_entry) {
+			if (data->phonebook_entry)
 				data->phonebook_entry->caller_group = blockstart[5] - 1;
-				dprintf("   Group: %d\n", data->phonebook_entry->caller_group);
-			}
+			if (data->bitmap)
+				data->bitmap->number = blockstart[5] - 1;
+			dprintf("   Group: %d\n", blockstart[5] - 1);
 			break;
 		default:
 			dprintf("Unknown phonebook block %02x\n", blockstart[0]);
