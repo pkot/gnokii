@@ -6,8 +6,8 @@
 e.g.
 
    cd /usr/src
-   tar xvfz /tmp/gnokii-0.3.3pre10.tar.gz
-   cd gnokii-0.3.3pre10
+   tar xvfz /tmp/gnokii-0.4.0.tar.gz
+   cd gnokii-0.4.0
    ./configure --enable-nls --with-x
    make
    groupadd gnokii
@@ -58,6 +58,17 @@ noauth
 mtu 296
 debug
 ----------------------------------------------------------------
+
+   If you call a computer connected to an ISDN line you can use the V110
+   protocol. To use this protocoll you have to put ATS35=0 in your chat
+   script. Replace the connect line with the following:
+
+connect 'chat -v TIMEOUT 60 ABORT BUSY ABORT ERROR ABORT "NO CARRIER" "" AT OK ATS35=0 OK ATD0123456789 CONNECT'
+
+   on the computer called you can use the ttyI* device, for more info read
+   the following mail:
+   http://mail.freesoftware.fsf.org/pipermail/gnokii-users/2002-June/001259.html
+
 --------------- /etc/ppp/pap-secrets ---------------------------
 XXXX.demon.co.uk	demon-gnokii	<yourpassword>
 ----------------------------------------------------------------
