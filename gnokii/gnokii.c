@@ -134,6 +134,7 @@ typedef enum {
 	OPT_VIEWLOGO,
 	OPT_GETRINGTONE,
 	OPT_SETRINGTONE,
+	OPT_PLAYRINGTONE,
 	OPT_GETPROFILE,
 	OPT_SETPROFILE,
 	OPT_GETACTIVEPROFILE,
@@ -308,6 +309,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --viewlogo logofile\n"
 		     "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
 		     "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"
+		     "          gnokii --playringtone rtttlfile\n"
 		     "          gnokii --reset [soft|hard]\n"
 		     "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
 		     "          gnokii --setprofile\n"
@@ -4021,6 +4023,54 @@ static int setringtone(int argc, char *argv[])
 	return error;
 }
 
+static int playringtone(int argc, char *argv[])
+{
+	gn_ringtone ringtone;
+	gn_raw_data rawdata;
+	gn_tone tone;
+	gn_error error;
+	unsigned char buff[512];
+	int i, freq, ulen;
+
+	memset(&ringtone, 0, sizeof(ringtone));
+	memset(&tone, 0, sizeof(tone));
+	rawdata.data = buff;
+	rawdata.length = sizeof(buff);
+	gn_data_clear(&data);
+	data.ringtone = &ringtone;
+	data.raw_data = &rawdata;
+	data.tone = &tone;
+
+	if (argc != 1) {
+		usage(stderr, -1);
+		return -1;
+	}
+
+	if ((error = gn_file_ringtone_read(argv[0], &ringtone))) {
+		fprintf(stderr, _("Failed to load ringtone.\n"));
+		return error;
+	}
+
+	tone.volume = 5;
+	for (i = 0; i < ringtone.notes_count; i++) {
+		gn_ringtone_get_tone(&ringtone, i, &tone.frequency, &ulen);
+		if ((error = gn_sm_functions(GN_OP_PlayTone, &data, &state)) != GN_ERR_NONE) break;
+		usleep(ulen);
+	}
+	if (error == GN_ERR_NONE) {
+		tone.frequency = 0;
+		tone.volume = 0;
+		error = gn_sm_functions(GN_OP_PlayTone, &data, &state);
+	}
+
+	if (error == GN_ERR_NONE)
+		fprintf(stderr, _("Play succeeded!\n"));
+	else
+		fprintf(stderr, _("Play failed: %s\n"), gn_error_print(error));
+
+	return error;
+}
+
 static int presskey(void)
 {
 	gn_error error;
@@ -4550,6 +4600,9 @@ int main(int argc, char *argv[])
 		/* Set ringtone */
 		{ "setringtone",        required_argument, NULL, OPT_SETRINGTONE },
 
+		/* Play ringtone */
+		{ "playringtone",       required_argument, NULL, OPT_PLAYRINGTONE },
+
 		/* Get SMS center number mode */
 		{ "getsmsc",            optional_argument, NULL, OPT_GETSMSC },
 
@@ -4681,6 +4734,7 @@ int main(int argc, char *argv[])
 		{ OPT_VIEWLOGO,          1, 1, 0 },
 		{ OPT_GETRINGTONE,       1, 3, 0 },
 		{ OPT_SETRINGTONE,       1, 5, 0 },
+		{ OPT_PLAYRINGTONE,      1, 1, 0 },
 		{ OPT_RESET,             0, 1, 0 },
 		{ OPT_GETPROFILE,        0, 3, 0 },
 		{ OPT_SETACTIVEPROFILE,  1, 1, 0 },
@@ -4885,6 +4939,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_SENDRINGTONE:
 			rc = sendringtone(nargc, nargv);
+			break;
+		case OPT_PLAYRINGTONE:
+			rc = playringtone(nargc, nargv);
 			break;
 		case OPT_GETPROFILE:
 			rc = getprofile(argc, argv);

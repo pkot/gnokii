@@ -20,6 +20,9 @@
  * gnokii changes
     o --help switch should work when there's no config file
       (suggested by Pavel Janik)                         (Pawel Kot)
+    o --playringtone implemented       (Tomi Ollila, BORBELY Zoltan)
+ * 6110 series updates
+    o PlayTone implemented                          (BORBELY Zoltan)
 
 0.5.2
 =====

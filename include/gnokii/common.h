@@ -594,4 +594,9 @@ typedef struct {
 	int   counter;
 } gn_locks_info;
 
+typedef struct {
+	int frequency;
+	int volume;
+} gn_tone;
+
 #endif	/* _gnokii_common_h */

@@ -152,5 +152,6 @@ API gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone);
 API unsigned char gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength);
 API gn_error gn_ringtone_unpack(gn_ringtone *ringtone, unsigned char *package, int maxlength);
 API int gn_note_get(int number);
+API void gn_ringtone_get_tone(const gn_ringtone *ringtone, int n, int *freq, int *ulen);
 
 #endif	/* _gnokii_ringtones_h */

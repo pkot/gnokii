@@ -599,3 +599,42 @@ int imelody_sms_encode(unsigned char *imelody, unsigned char *message)
 
 	return (current + strlen(imelody));
 }
+
+API void gn_ringtone_get_tone(const gn_ringtone *ringtone, int n, int *freq, int *ulen)
+{
+	float f;
+
+	*freq = 0;
+	*ulen = 0;
+
+	if (n >= ringtone->notes_count) return;
+
+	if (ringtone->notes[n].note != 255) {
+		switch (ringtone->notes[n].note % 14) {
+		case  0: f = 261.625565; break;
+		case  1: f = 277.182631; break;
+		case  2: f = 293.664768; break;
+		case  3: f = 311.126984; break;
+		case  4: f = 329.627557; break;
+		case  5: f = 329.627557; break;
+		case  6: f = 349.228231; break;
+		case  7: f = 369.994423; break;
+		case  8: f = 391.995436; break;
+		case  9: f = 415.304698; break;
+		case 10: f = 440.000000; break;
+		case 11: f = 466.163762; break;
+		case 12: f = 493.883301; break;
+		case 13: f = 493.883301; break;
+		default: f = 0; break;
+		}
+		switch (ringtone->notes[n].note / 14) {
+		case 0: *freq = f; break;
+		case 1: *freq = f * 2; break;
+		case 2: *freq = f * 4; break;
+		case 3: *freq = f * 8; break;
+		defalt: *freq = 0; break;
+		}
+	}
+
+	*ulen = 1875000 * ringtone->notes[n].duration / ringtone->tempo;
+}

@@ -114,6 +114,7 @@ static gn_error Reset(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state);
+static gn_error play_tone(gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey(bool press, gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey1(bool press, gn_data *data, struct gn_statemachine *state);
 static gn_error PressOrReleaseKey2(bool press, gn_data *data, struct gn_statemachine *state);
@@ -350,6 +351,8 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return GetRawRingtone(data, state);
 	case GN_OP_SetRawRingtone:
 		return SetRawRingtone(data, state);
+	case GN_OP_PlayTone:
+		return play_tone(data, state);
 	case GN_OP_PressPhoneKey:
 		return PressOrReleaseKey(true, data, state);
 	case GN_OP_ReleasePhoneKey:
@@ -2818,6 +2821,18 @@ static gn_error get_locks_info(gn_data *data, struct gn_statemachine *state)
 	return sm_block(0x40, data, state);
 }
 
+static gn_error play_tone(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0x8f, 0x00, 0x00, 0x00};
+
+	req[3] = data->tone->frequency % 256;
+	req[4] = data->tone->frequency / 256;
+	req[5] = data->tone->volume;
+
+	if (sm_message_send(6, 0x40, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(0x40, data, state);
+}
+
 static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	char *aux, *aux2;
@@ -2871,6 +2886,10 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		data->locks_info[1].counter = message[22];
 		data->locks_info[2].counter = message[23];
 		data->locks_info[3].counter = message[24];
+		break;
+
+	/* Play tone */
+	case 0x8f:
 		break;
 
 	/* Get bin ringtone */
