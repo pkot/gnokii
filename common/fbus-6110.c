@@ -654,7 +654,7 @@ GSM_Error FB61_WriteCalendarNote(GSM_CalendarNote *CalendarNote)
   for (i=0; i<strlen(CalendarNote->Text); i++)
     req[current++]=CalendarNote->Text[i];
 
-  req[current]=strlen(CalendarNote->Phone);
+  req[current++]=strlen(CalendarNote->Phone);
 
   for (i=0; i<strlen(CalendarNote->Phone); i++)
     req[current++]=CalendarNote->Phone[i];
@@ -662,7 +662,7 @@ GSM_Error FB61_WriteCalendarNote(GSM_CalendarNote *CalendarNote)
   CurrentCalendarNote = CalendarNote;
   CurrentCalendarNoteError = GE_BUSY;
 
-  FB61_TX_SendMessage(current-1, 0x13, req);
+  FB61_TX_SendMessage(current, 0x13, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentCalendarNoteError == GE_BUSY ) {

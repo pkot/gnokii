@@ -5,3 +5,8 @@
 - WIN32 changes to argument checking in sendoplogoviasms(). Thanks to Jason
   Garrett
 
+* Tue Feb 22 18:58:16 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- small typo hev [it is the pronounciation of have] -> have :-)
+
+* Tue Feb 22 22:27:32 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- do not believe getenv anymore and check it's output - thx to Jason Garret

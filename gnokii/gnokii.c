@@ -15,7 +15,7 @@
   wait for GUI application. Well, our test tool is now really powerful and
   useful :-)
 
-  Last modification: Sat Dec  4 15:45:01 CET 1999
+  Last modification: Tue Feb 22 18:58:16 CET 2000
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -930,7 +930,7 @@ int sendsms(int argc, char *argv[])
 
   message_buffer[chars_read] = 0x00;	
 
-  /* We send concatenated SMS if and only if we hev more then
+  /* We send concatenated SMS if and only if we have more then
      GSM_MAX_SMS_LENGTH characters to send */
   if (chars_read > GSM_MAX_SMS_LENGTH) {
         SMS.UDHType = GSM_ConcatenatedMessages;
@@ -2274,14 +2274,17 @@ void readconfig(void)
 
 #ifdef WIN32
   homedir = getenv("HOMEDRIVE");
-  strncpy(rcfile, homedir, 200);
+  if (homedir)
+    strncpy(rcfile, homedir, 200);
   homedir = getenv("HOMEPATH");
-  strncat(rcfile, homedir, 200);
+  if (homedir)
+    strncat(rcfile, homedir, 200);
   strncat(rcfile, "\\_gnokiirc", 200);
 #else
   homedir = getenv("HOME");
 
-  strncpy(rcfile, homedir, 200);
+  if (homedir)
+    strncpy(rcfile, homedir, 200);
   strncat(rcfile, "/.gnokiirc", 200);
 #endif
 
