@@ -413,8 +413,13 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                               0x19: data calls
     s Deactivate calldiverts{ 0x0001, 0x04, 0x00, divtype, calltype, 0x00 }
                             where divtype, calltype: see above
+    r Deactivate calldiverts{ 0x0002, 0x04, 0x00, divtype, 0x02, calltype, data }
     s Get call diverts      { 0x0001, 0x05, 0x00, divtype, calltype, 0x00 }
                             where divtype, calltype: see above
+    r Get call diverts ok   { 0x0002, 0x05, 0x00, divtype, 0x02, calltype, data }
+                            where divtype, calltype: see above
+			          data: { 0x01, 0x00 } - isn't active
+				        { 0x02, 0x01, number(packed like in SMS), 0x00, 0x00..., timeout }
     r Get prepaid(?) info   { 0x0005, ?,?,?,length,message(packed like in 7bit SMS)}
 0x07:
     s ???                   { 0x0022, ? (1&2 sounds OK) }

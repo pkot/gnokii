@@ -3307,6 +3307,28 @@ static int divert(int argc, char **argv)
 
 	if (error == GE_NONE) {
 		fprintf(stderr, "Divert succeeded.\n");
+		fprintf(stdout, _("Divert type: "));
+		switch (cd.DType) {
+		case GSM_CDV_AllTypes: fprintf(stdout, _("all\n")); break;
+		case GSM_CDV_Busy: fprintf(stdout, _("busy\n")); break;
+		case GSM_CDV_NoAnswer: fprintf(stdout, _("noans\n")); break;
+		case GSM_CDV_OutOfReach: fprintf(stdout, _("outofreach\n")); break;
+		case GSM_CDV_NotAvailable: fprintf(stdout, _("notavail\n")); break;
+		default: fprintf(stdout, _("unknown(0x%02x)\n"), cd.DType);
+		}
+		fprintf(stdout, _("Call type: "));
+		switch (cd.CType) {
+		case GSM_CDV_AllCalls: fprintf(stdout, _("all\n")); break;
+		case GSM_CDV_VoiceCalls: fprintf(stdout, _("voice\n")); break;
+		case GSM_CDV_FaxCalls: fprintf(stdout, _("fax\n")); break;
+		case GSM_CDV_DataCalls: fprintf(stdout, _("data\n")); break;
+		default: fprintf(stdout, _("unknown(0x%02x)\n"), cd.CType);
+		}
+		if (cd.Number.number[0]) {
+			fprintf(stdout, _("Number: %s\n"), cd.Number.number);
+			fprintf(stdout, _("Timeout: %d\n"), cd.Timeout);
+		} else
+			fprintf(stdout, _("Divert isn't active.\n"));
 	} else {
 		fprintf(stderr, "%s\n", print_error(error));
 	}
