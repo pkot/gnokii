@@ -68,7 +68,7 @@ static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 
-static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -141,7 +141,7 @@ static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ P7110_MSG_CALENDAR,	P7110_IncomingCalendar },
 	{ P7110_MSG_BATTERY,	P7110_IncomingBattLevel },
 	{ P7110_MSG_CLOCK,	P7110_IncomingClock },
-	{ P7110_MSG_IDENTITY,	P7110_Incoming0x1b },
+	{ P7110_MSG_IDENTITY,	P7110_IncomingIdentify },
 	{ P7110_MSG_STLOGO,	P7110_IncomingStartup },
 	{ P7110_MSG_DIVERT,	P7110_IncomingCallDivert },
 	{ P7110_MSG_SECURITY,	P7110_IncomingSecurity },
@@ -312,7 +312,7 @@ static GSM_Error P7110_GetModel(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
 
 	dprintf("Getting model...\n");
-	if (SM_SendMessage(state, 6, 0x1b, req)!=GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 6, 0x1b, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x1b);
 }
 
@@ -321,7 +321,7 @@ static GSM_Error P7110_GetRevision(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
 
 	dprintf("Getting revision...\n");
-	if (SM_SendMessage(state, 6, 0x1b, req)!=GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 6, 0x1b, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x1b);
 }
 
@@ -330,7 +330,7 @@ static GSM_Error P7110_GetIMEI(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
 
 	dprintf("Getting imei...\n");
-	if (SM_SendMessage(state, 4, 0x1b, req)!=GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 4, 0x1b, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x1b);
 }
 
@@ -671,22 +671,37 @@ static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state)
 	return GE_NONE;
 }
 
-static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	switch (message[3]) {
 	case 0x02:
 		if (data->Imei) {
-			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
-			dprintf("Received imei %s\n",data->Imei);
+			int n;
+			unsigned char *s = index(message + 4, '\n');
+
+			if (s) n = s - message - 3;
+			else n = GSM_MAX_IMEI_LENGTH;
+			snprintf(data->Imei, GNOKII_MIN(n, GSM_MAX_IMEI_LENGTH), "%s", message + 4);
+			dprintf("Received imei %s\n", data->Imei);
 		}
 		break;
 	case 0x04:
 		if (data->Model) {
-			snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 22);
+			int n;
+			unsigned char *s = index(message + 22, '\n');
+
+			if (s) n = s - message - 21;
+			else n = GSM_MAX_MODEL_LENGTH;
+			snprintf(data->Model, GNOKII_MIN(n, GSM_MAX_MODEL_LENGTH), "%s", message + 22);
 			dprintf("Received model %s\n",data->Model);
 		}
 		if (data->Revision) {
-			snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "%s", message + 7);
+			int n;
+			unsigned char *s = index(message + 7, '\n');
+
+			if (s) n = s - message - 6;
+			else n = GSM_MAX_REVISION_LENGTH;
+			snprintf(data->Revision, GNOKII_MIN(n, GSM_MAX_REVISION_LENGTH), "%s", message + 7);
 			dprintf("Received revision %s\n",data->Revision);
 		}
 		break;

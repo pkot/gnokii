@@ -131,8 +131,8 @@ static void InitModelInf (void)
   GSM_Data data;
 
   GSM_DataClear(&data);
-  data.Model=buf;
-  while ((error = SM_Functions(GOP_GetModel,&data,&statemachine)) != GE_NONE && i++ < 15)
+  data.Model = buf;
+  while ((error = SM_Functions(GOP_GetModel, &data, &statemachine)) != GE_NONE && i++ < 5)
     sleep(1);
 
   if (error == GE_NONE)
@@ -148,7 +148,7 @@ static void InitModelInf (void)
 
   i = 0;
   data.Revision=buf;
-  while ((error = SM_Functions(GOP_GetRevision,&data,&statemachine)) != GE_NONE && i++ < 5)
+  while ((error = SM_Functions(GOP_GetRevision, &data, &statemachine)) != GE_NONE && i++ < 5)
     sleep(1);
 
   if (error == GE_NONE)
