@@ -13,12 +13,14 @@
   Mainline code for gnokii utility.  Handles command line parsing and
   reading/writing phonebook entries and other stuff.
 
-  WARNING: this code is only the test tool. It is not intented to real work -
-  wait for GUI application. Well, our test tool is now really powerful and
-  useful :-)
+  WARNING: this code is the test tool. Well, our test tool is now
+  really powerful and useful :-)
 
   $Log$
-  Revision 1.115  2001-01-22 01:25:10  hugh
+  Revision 1.116  2001-01-24 20:19:55  machek
+  Do not retry identification, if it is not implemented, it is bad idea.
+
+  Revision 1.115  2001/01/22 01:25:10  hugh
   Tweaks for 3810 series, datacalls seem to be broken so need to do
   some more debugging...
 
@@ -3094,14 +3096,14 @@ int identify( void )
 
   fbusinit(NULL);
 
-  while (GSM->GetIMEI(imei)    != GE_NONE)
-    sleep(1);
+  /* Retrying is bad idea: what if function is simply not implemented? */
 
-  while (GSM->GetRevision(rev) != GE_NONE)
-    sleep(1);
-
-  while (GSM->GetModel(model)  != GE_NONE)
-    sleep(1);
+  strcpy(imei, "(unknown)");
+  strcpy(model, "(unknown)");
+  strcpy(rev, "(unknown)");
+  GSM->GetIMEI(imei);
+  GSM->GetRevision(rev);
+  GSM->GetModel(model);
 
   fprintf(stdout, _("IMEI:     %s\n"), imei);
   fprintf(stdout, _("Model:    %s\n"), model);
