@@ -471,7 +471,8 @@ API int gn_cfg_file_read(const char *file)
 	 * Try opening a given config file
 	 */
 	if ((gn_cfg_info = cfg_file_read(file)) == NULL) {
-		fprintf(stderr, _("Couldn't open %s config file,\n"), file);
+		/* this is bad, but the previous was much worse - bozo */
+		dprintf(_("Couldn't open %s config file,\n"), file);
 		return -1;
 	}
 	strcpy(gn_config_default.model, "");

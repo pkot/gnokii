@@ -43,6 +43,7 @@
                                                         (Pawel Kot)
     o message dumps were written into ~/.gnokii-errors if
       debugging was enabled                        (BORBELY Zoltan)
+    o missing config file isn't an error           (BORBELY Zoltan)
  * xgnokii updates
     o xgnokii tried to open the HTML file according to locale set,
       be smart and try to match the best one is the default is not
