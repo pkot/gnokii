@@ -33,7 +33,7 @@ AC_RELOCATABLE
 AM_ICONV
 
 dnl ======================== Default setting
-ALL_LINGUAS="cs de et fi nl sk pl it sl fr"
+ALL_LINGUAS="cs de et fi nl sk pl it sl fr zh_CN"
 AC_CHECK_HEADERS(libintl.h)
 AM_GNU_GETTEXT([use-libtool])
 AC_CHECK_FUNCS(locale_charset)

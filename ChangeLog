@@ -13,6 +13,8 @@
     o ringtone list will return fix entries too    (BORBELY Zoltan)
     o call status query function added             (BORBELY Zoltan)
     o call management functions has been rewritten (BORBELY Zoltan)
+ * translation updates
+    o Chinese translation added                        (Funda Wang)
 
 0.6.4
 =====
