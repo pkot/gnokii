@@ -155,6 +155,7 @@ GSM_Error FB61_GetSMSCenter(GSM_MessageCenter *MessageCenter);
 GSM_Error FB61_GetSMSMessage(GSM_SMSMessage *Message);
 GSM_Error FB61_DeleteSMSMessage(GSM_SMSMessage *Message);
 GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *Message, int size);
+GSM_Error FB61_SaveSMSMessage(GSM_SMSMessage *Message);
 
 GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level);
 GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level);

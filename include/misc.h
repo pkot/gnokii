@@ -99,4 +99,8 @@
 
 #endif /* HAVE_TIMEOPS */
 
+
+#include <stdio.h>
+extern int GetLine(FILE *File, char *Line, int count);
+
 #endif /* __misc_h */

@@ -64,6 +64,7 @@ GSM_Error	MB61_GetRFLevel(GSM_RFUnits *units, float *level);
 GSM_Error	MB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 
 	/* These aren't presently implemented. */
+GSM_Error	MB61_SaveSMSMessage(GSM_SMSMessage *SMS);
 GSM_Error	MB61_GetPowerSource(GSM_PowerSource *source);
 GSM_Error	MB61_GetDisplayStatus(int *Status);
 

@@ -79,6 +79,7 @@ GSM_Functions           FB38_Functions = {
         FB38_GetSMSMessage,
         FB38_DeleteSMSMessage,
         FB38_SendSMSMessage,
+        FB38_SaveSMSMessage,
         FB38_GetRFLevel,
         FB38_GetBatteryLevel,
         FB38_GetPowerSource,
@@ -636,6 +637,11 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
         /* Retries must have failed. */
     DisableKeepalive = false;
     return(CurrentSMSMessageError);
+}
+
+GSM_Error   FB38_SaveSMSMessage(GSM_SMSMessage *SMS)
+{
+    return GE_NOTIMPLEMENTED;
 }
 
     /* FB38_GetRFLevel

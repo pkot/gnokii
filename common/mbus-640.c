@@ -65,6 +65,7 @@ GSM_Functions			MB640_Functions = {
  		MB640_GetSMSMessage,
 		MB640_DeleteSMSMessage,
 		MB640_SendSMSMessage,
+      MB640_SaveSMSMessage,
 		MB640_GetRFLevel,
 		MB640_GetBatteryLevel,
 		MB640_GetPowerSource,
@@ -376,6 +377,11 @@ GSM_Error	MB640_DeleteSMSMessage(GSM_SMSMessage *message)
 GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 {
 	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB640_SaveSMSMessage(GSM_SMSMessage *SMS)
+{
+    return GE_NOTIMPLEMENTED;
 }
 
 GSM_Error	MB640_CancelCall(void)

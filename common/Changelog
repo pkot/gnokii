@@ -108,3 +108,9 @@
 
 * Sat Jul 15 13:10:12 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
 - moved at-emulator.c, datapump.c, virtmodem.c from gnokiid to common.
+
+* Sun Jul 30 01:56:25 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
+- added Outbox messages saving feature in 6110 series
+
+* Sun Jul 30 21:11:28 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
+- function for logo printing in text mode

@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "gsm-common.h"
 #include "gsm-filetypes.h"
 
@@ -266,6 +269,39 @@ int GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
   return(error);
 }
 
+void GSM_ReadBitmap(char *source, GSM_Bitmap *bitmap, GSM_UDH type)
+{
+  int offset = 0;
+
+  switch (type) {
+  case GSM_OpLogo:
+    bitmap->type = GSM_OperatorLogo;
+
+    bitmap->netcode[0] = '0' + (source[0] & 0x0f);
+    bitmap->netcode[1] = '0' + (source[0] >> 4);
+    bitmap->netcode[2] = '0' + (source[1] & 0x0f);
+    bitmap->netcode[3] = ' ';
+    bitmap->netcode[4] = '0' + (source[2] & 0x0f);
+    bitmap->netcode[5] = '0' + (source[2] >> 4);
+    bitmap->netcode[6] = 0;
+
+    offset = 3;
+    break;
+
+  case GSM_CallerIDLogo:
+    bitmap->type=GSM_CallerLogo;
+
+    break;
+  default: /* error */
+    break;
+  }
+  bitmap->width = source[offset];
+  bitmap->height = source[offset + 1];
+  bitmap->size = (bitmap->width * bitmap->height) / 8;
+  memcpy(bitmap->bitmap, source + offset + 3, bitmap->size);
+
+}
+
 #ifdef XPM
 
 int loadxpm(char *filename, GSM_Bitmap *bitmap)
@@ -465,10 +501,43 @@ int loadota(FILE *file, GSM_Bitmap *bitmap)
   return(0);
 }
 
+void GSM_PrintBitmap(GSM_Bitmap *bitmap)
+{
+  int i, j;
+  int pos = 0;
+
+  for (i=0; i < bitmap->size; i++) {
+    for (j=7; j>=0;j--) {
+      if ((bitmap->bitmap[i]&(1<<j))>0) {
+        fprintf(stdout, _("#"));
+      } else {
+        fprintf(stdout, _(" "));
+      }
+      pos++;
+      if ((pos % bitmap->width) == 0) fprintf(stdout, _("\n"));
+    }
+  }
+}
+
 int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 {
 
   FILE *file;
+  int confirm = -1;
+  char ans[8];
+  struct stat buf;
+
+  /* Ask before overwriting */
+  if (stat(FileName, &buf) == 0) {
+    fprintf(stderr, _("File %s exists.\n"), FileName);
+    while (confirm < 0) {
+      fprintf(stderr, _("Overwrite? (yes/no) "));
+      GetLine(stdin, ans, 7);
+      if (!strcmp(ans, "yes")) confirm = 1;
+      else if (!strcmp(ans, "no")) confirm = 0;
+    }  
+    if (!confirm) return -1;
+  }
 
 #ifdef XPM
   /* Does the filename contain  .xpm ? */
@@ -480,8 +549,10 @@ int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 
     file = fopen(FileName, "w");
     
-    if (!file)
+    if (!file) {
+      fprintf(stderr, _("Failed to write file %s\n"),  FileName);
       return(-1);
+    }
     
     switch (bitmap->type) {
     case GSM_CallerLogo:
@@ -504,6 +575,46 @@ int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 #endif
 
   return 0;
+}
+
+/* mode == 0 -> overwrite
+ * mode == 1 -> ask
+ * mode == 2 -> append
+ */
+int GSM_SaveTextFile(char *FileName, char *text, int mode)
+{
+
+  FILE *file;
+  int confirm = -1;
+  char ans[5];
+  struct stat buf;
+
+  /* Ask before overwriting */
+  
+  if ((mode == 1) && (stat(FileName, &buf) == 0)) {
+    fprintf(stdout, _("File %s exists.\n"), FileName);
+    while (confirm < 0) {
+      fprintf(stderr, _("Overwrite? (yes/no) "));
+      GetLine(stdin, ans, 4);
+      if (!strcmp(ans, "yes")) confirm = 1;
+      else if (!strcmp(ans, "no")) confirm = 0;
+    }  
+    if (!confirm) return -1;
+  }
+
+  if (mode == 2) file = fopen(FileName, "a");
+  else file = fopen(FileName, "w");
+
+  if (!file) {
+    fprintf(stderr, _("Failed to write file %s\n"),  FileName);
+    return(-1);
+  }
+
+  fprintf(file, "%s\n", text);
+
+  fclose(file);
+
+  return 2;
 }
 
 

@@ -57,6 +57,7 @@ GSM_Error	MB640_SetSMSCenter(GSM_MessageCenter *MessageCenter);
 GSM_Error	MB640_DeleteSMSMessage(GSM_SMSMessage *message);
 
 GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS, int data_size);
+GSM_Error	MB640_SaveSMSMessage(GSM_SMSMessage *SMS);
 
 GSM_Error	MB640_GetRFLevel(GSM_RFUnits *units, float *level);
 

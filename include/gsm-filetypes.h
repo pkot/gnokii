@@ -33,6 +33,9 @@ int GetDuration (char *num);
 
 int GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap);
 int GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap);
+int GSM_SaveTextFile(char *FileName, char *text, int mode);
+void GSM_ReadBitmap(char *source, GSM_Bitmap *bitmap, GSM_UDH type);
+void GSM_PrintBitmap(GSM_Bitmap *bitmap);
 
 void savenol(FILE *file, GSM_Bitmap *bitmap);
 void savengg(FILE *file, GSM_Bitmap *bitmap);

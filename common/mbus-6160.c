@@ -60,6 +60,7 @@ GSM_Functions			MB61_Functions = {
   		MB61_GetSMSMessage,
 		MB61_DeleteSMSMessage,
 		MB61_SendSMSMessage,
+      MB61_SaveSMSMessage,
 		MB61_GetRFLevel,
 		MB61_GetBatteryLevel,
 		MB61_GetPowerSource,
@@ -341,6 +342,12 @@ GSM_Error	MB61_DeleteSMSMessage(GSM_SMSMessage *message)
 GSM_Error	MB61_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
 {
 	return (GE_NOTIMPLEMENTED);
+}
+
+
+GSM_Error   MB61_SaveSMSMessage(GSM_SMSMessage *SMS)
+{
+    return GE_NOTIMPLEMENTED;
 }
 
 	/* MB61_GetRFLevel

@@ -55,6 +55,7 @@ GSM_Functions			MB21_Functions = {
   		MB21_GetSMSMessage,
 		MB21_DeleteSMSMessage,
 		MB21_SendSMSMessage,
+		MB21_SaveSMSMessage,
 		MB21_GetRFLevel,
 		MB21_GetBatteryLevel,
 		MB21_GetPowerSource,
@@ -191,6 +192,11 @@ GSM_Error	MB21_DeleteSMSMessage(GSM_SMSMessage *message)
 }
 
 GSM_Error	MB21_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_SaveSMSMessage(GSM_SMSMessage *SMS)
 {
 	return (GE_NOTIMPLEMENTED);
 }

@@ -102,6 +102,7 @@ GSM_Functions FB61_Functions = {
   FB61_GetSMSMessage,
   FB61_DeleteSMSMessage,
   FB61_SendSMSMessage,
+  FB61_SaveSMSMessage,
   FB61_GetRFLevel,
   FB61_GetBatteryLevel,
   FB61_GetPowerSource,
@@ -2294,6 +2295,77 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
   return (CurrentSMSMessageError);
 }
 
+GSM_Error FB61_SaveSMSMessage(GSM_SMSMessage *SMS)
+{
+  unsigned char req[256] = {
+    FB61_FRAME_HEADER,
+    0x04, 0x05, 0x02, 0x00, 0x02, /* SMS save request*/
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* SMS center, the rest is unused */
+    0x11, /*  0 - TP-Reply-Path (9.2.3.17)
+    	      0 - TP-TP-User-Data-Header-Indicator (9.2.3.23)
+    	      x - TP-Status-Report-Request (9.2.3.5)
+    	           0 - no delivery report (default for gnokii)
+    	           1 - request for delivry report
+    	      xx - TP validity period (9.2.3.3, see also 9.2.3.12)
+    	           00 - not present
+    	           10 - relative format (default for gnokii)
+    	           01 - enhanced format
+    	           11 - absolute format
+    	         no support for this field yet
+    	      0 - TP-Reject-Duplicates (9.2.3.25)
+    	      01 - TP-Message-Type-Indicator (9.2.3.1) - SMS_SUBMIT */
+    0x00, /* TP-Message-Reference (9.2.3.6) */
+    0x00, /* TP-Protocol-Identifier (9.2.3.9) */
+    0x00, /* TP-Data-Coding-Scheme (9.2.3.10, GSM 03.38) */
+    0x00, /* TP-User-Data-Length (9.2.3.16) */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* destination */
+    0xa9, /* SMS validity: b0=1h 47=6h a7=24h a9=72h ad=1week */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  };
+
+  int size, offset;
+  int timeout=70;
+
+  if (SMS->Status == GSS_NOTSENTREAD)
+	 req[4] = req[4] | 0x02;
+
+  if (SMS->Location)
+	 req[6] = SMS->Location;
+
+  offset = 0;
+  /* such messages should be sent as concatenated */
+  if (strlen(SMS->MessageText) > GSM_MAX_SMS_LENGTH)
+	 return(GE_SMSTOOLONG);
+
+  /* size is the length of the data in octets including udh */
+  /* SMS->Length is:
+  	- integer representation of the number od octets within the user data when UD is coded using 8bit data
+  	- the sum of the number of septets in UDH including any padding and number of septets in UD in other case
+   */
+  
+  /* offset now denotes UDH length */
+  size = PackSevenBitsToEight((7-offset)%7, SMS->MessageText, req + 44 + offset);
+  size += offset;
+  SMS->Length = (offset*8 + ((7-offset)%7)) / 7 + strlen(SMS->MessageText);
+
+  req[24] = SMS->Length;
+
+  CurrentSMSMessageError=GE_BUSY;
+
+  FB61_TX_SendMessage(44+size, 0x14, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentSMSMessageError);
+}
+
 
 /* Enable and disable Cell Broadcasting */
 
@@ -4368,23 +4440,33 @@ stdout);
 
       off = 0;
       if (MessageBuffer[20] & 0x40) {
-      	switch (MessageBuffer[40+offset]) {
-	  	case 0x00: /* concatenated messages */
+		  switch (MessageBuffer[40+offset]) {
+		  case 0x00: /* concatenated messages */
 #ifdef DEBUG
-			fprintf(stderr,_("Concatenated message!!!\n"));
+			 fprintf(stderr,_("Concatenated message!!!\n"));
 #endif /* DEBUG */
-		        CurrentSMSMessage->UDHType = GSM_ConcatenatedMessages;
-	  		if (MessageBuffer[41+offset] != 0x03) {
-	  		/* should be some error */
-	  		}
-		        break;
-		default:
-			break;
+			 CurrentSMSMessage->UDHType = GSM_ConcatenatedMessages;
+			 if (MessageBuffer[41+offset] != 0x03) {
+				/* should be some error */
+			 }
+			 break;
+		  case 0x05: /* logos */
+			 switch (MessageBuffer[43+offset]) {
+			 case 0x82:
+				CurrentSMSMessage->UDHType = GSM_OpLogo;
+				break;
+			 case 0x83:
+				CurrentSMSMessage->UDHType = GSM_CallerIDLogo;
+				break;
+			 }
+			 break;
+		  default:
+			 break;
         }
-	/* Skip user data header when reading data */
-	off = (MessageBuffer[39+offset] + 1);
-	for (i = 0; i < off; i++)
-		CurrentSMSMessage->UDH[i] = MessageBuffer[39+offset+i];
+		  /* Skip user data header when reading data */
+		  off = (MessageBuffer[39+offset] + 1);
+		  for (i = 0; i < off; i++)
+			 CurrentSMSMessage->UDH[i] = MessageBuffer[39+offset+i];
       } else {
         CurrentSMSMessage->UDHType = GSM_NoUDH;
       }
@@ -4488,15 +4570,16 @@ stdout);
 	if ((MessageBuffer[18+offset] & 0xf4) == 0xf4) {
 	  CurrentSMSMessage->EightBit = true;
 	  tmp=CurrentSMSMessage->Length=MessageBuffer[19+offset];
+     offset += off;
 	  memcpy(output,MessageBuffer-39-offset-2,tmp-offset);
 	/* 7bit SMS */
 	} else {
 	  CurrentSMSMessage->EightBit = false;
-          CurrentSMSMessage->Length=MessageBuffer[19+offset] - (off*8 + ((7-off)%7)) / 7;
+	  CurrentSMSMessage->Length=MessageBuffer[19+offset] - (off*8 + ((7-off)%7)) / 7;
 	  offset += off;
-          tmp=UnpackEightBitsToSeven((7-off)%7,MessageLength-39-offset-2, CurrentSMSMessage->Length, MessageBuffer+39+offset, output);
-        }
-        for (i=0; i<tmp;i++) {
+	  tmp=UnpackEightBitsToSeven((7-off)%7,MessageLength-39-offset-2, CurrentSMSMessage->Length, MessageBuffer+39+offset, output);
+	}
+	for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
           fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
@@ -4698,6 +4781,29 @@ stdout);
 
       break;
     
+	 case 0x05:
+		fprintf(stdout, _("Message stored at %d\n"), MessageBuffer[5]);
+		CurrentSMSMessageError = GE_NONE;
+		break;
+
+	 case 0x06:
+		fprintf(stdout, _("SMS saving failed\n"));
+		switch (MessageBuffer[4]) {
+		case 0x02:
+		  fprintf(stdout, _("   All locations busy.\n"));
+		  CurrentSMSMessageError = GE_MEMORYFULL;
+		  break;
+		case 0x03:
+		  fprintf(stdout, _("   Invalid location!\n"));
+		  CurrentSMSMessageError = GE_INVALIDSMSLOCATION;
+		  break;
+		default:
+		  fprintf(stdout, _("   Unknown error.\n"));
+		  CurrentSMSMessageError = GE_UNKNOWN;
+		  break;
+		}
+		break;
+
     case 0x09:
 
       /* We have requested invalid or empty location. */

@@ -20,15 +20,32 @@
 /* FIXME: I have timersub defined in sys/time.h :-( PJ
    FIXME: Jano wants this function too... PJ
 
-int timersub(struct timeval *t1, struct timeval *t2, struct timeval *t3) {
-  t3->tv_usec = t1->tv_usec - t2->tv_usec;
-  t3->tv_sec = t1->tv_sec - t2->tv_sec;
-  if (t3->tv_usec < 0) {
-    t3->tv_usec = 100 - t3->tv_usec;
-	 t3->tv_sec--;
-  }
-  return 0;
+int timersub(struct timeval *a, struct timeval *b, struct timeval *result) {
+  do {
+    (result)->tv_sec = (a)->tv_sec - (b)->tv_sec;
+    (result)->tv_usec = (a)->tv_usec - (b)->tv_usec;
+    if ((result)->tv_usec < 0) {
+      --(result)->tv_sec;
+      (result)->tv_usec += 1000000;
+    }
+  } while (0);
 }
 */
 
 #endif
+
+int GetLine(FILE *File, char *Line, int count) {
+
+  char *ptr;
+
+  if (fgets(Line, count, File)) {
+    ptr=Line+strlen(Line)-1;
+
+    while ( (*ptr == '\n' || *ptr == '\r') && ptr>=Line)
+      *ptr--='\0';
+
+      return strlen(Line);
+  }
+  else
+    return 0;
+}

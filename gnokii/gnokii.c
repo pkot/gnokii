@@ -192,6 +192,7 @@ int usage(void)
 "          gnokii --sendsms destination [--smsc message_center_number |\n"
 "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
 "                 [--long n]\n"
+"          gnokii --savesms [-m] [-l n] [-i]\n"
 "          gnokii --getsmsc message_center_number\n"
 "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
 "          gnokii --getdatetime\n"
@@ -222,104 +223,6 @@ int usage(void)
   fprintf(stdout, _(
 "          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 "          gnokii --getsecuritycodestatus\n"
-  ));
-#endif
-  fprintf(stdout, _(
-"\n"
-"          --help            display usage information.\n\n"
-
-"          --monitor         continually updates phone status to stderr.\n\n"
-
-"          --version         displays version and copyright information.\n\n"
-
-"          --getmemory       reads specificed memory location from phone.\n"
-"                            Valid memory types are:\n"
-"                            ME, SM, FD, ON, EN, DC, RC, MC, LD\n\n"
-
-"          --writephonebook  reads data from stdin and writes to phonebook.\n"
-"                            When -i option is used, refuses to overwrite\n"
-"                            existing entries.\n"
-"                            Uses the same format as provided by the output of\n"
-"                            the getphonebook command.\n\n"
-
-"          --getspeeddial    reads speed dial from the specified location.\n\n"
-
-"          --setspeeddial    specify speed dial.\n\n"
-
-"          --getsms          gets SMS messages from specified memory type\n"
-"                            starting at entry [start] and ending at [end].\n"
-"                            If [end] is not specified only one location -\n"
-"                            - [start] is read.\n"
-"                            Entries are dumped to stdout.\n\n"
-
-"          --deletesms       deletes SMS messages from specified memory type\n"
-"                            starting at entry [start] and ending at [end].\n\n"
-
-"          --sendsms         sends an SMS message to [destination] via\n"
-"                            [message_center_number] or SMSC number taken from\n"
-"                            phone memory from address [message_center_index].\n"
-"                            If this argument is ommited SMSC number is taken\n"
-"                            from phone memory from location 1. Message text\n"
-"                            is taken from stdin.  This function has had\n"
-"                            limited testing and may not work at all on your\n"
-"                            network. Meaning of other optional parameters:\n"
-"                             [-r] - request for delivery report\n"
-"                             [-C n] - Class Message n, where n can be 0..3\n"
-"                             [-v n] - validity in minutes\n"
-"                             [--long n] - send no more then n characters,\n"
-"                                          default is 160\n\n"
-
-"          --getsmsc         show the SMSC number from location\n"
-"                            [message_center_number].\n\n"
-
-"          --setdatetime     set the date and the time of the phone.\n\n"
-
-"          --getdatetime     shows current date and time in the phone.\n\n"
-
-"          --setalarm        set the alarm of the phone.\n\n"
-
-"          --getalarm        shows current alarm.\n\n"
-
-"          --dialvoice       initiate voice call.\n\n"
-
-"          --getcalendarnote get the note with number index from calendar.\n"
-"                             [-v] - output in vCalendar 1.0 format\n\n"
-
-"          --writecalendarnote write the note number [number] from calendar file\n"
-"                              to calendar.\n\n"
-
-"          --deletecalendarnote  delete the note with number [index]\n"
-"                                from calendar.\n\n"
-
-"          --getdisplaystatus shows what icons are displayed.\n\n"
-
-"          --netmonitor      setting/querying netmonitor mode.\n\n"
-
-"          --identify        get IMEI, model and revision\n\n"
-
-"          --senddtmf        send DTMF sequence\n\n"
-
-"          --sendlogo        send the logofile to destination as operator\n"
-"                            or CLI logo\n\n"
-
-"          --setlogo         set caller, startup or operator logo\n\n"
-
-"          --getlogo         get caller, startup or operator logo\n\n"
-
-"          --sendringtone    send the rtttlfile to destination as ringtone\n\n"
-
-"          --setringtone     set the rtttlfile as ringtone (on 6110)\n\n"
-
-"          --reset [soft|hard] resets the phone.\n\n"
-
-"          --getprofile [number] show settings for selected(all) profile(s)\n\n"
-
-"          --displayoutput   show texts displayed in phone's screen\n\n"
-  ));
-#ifdef SECURITY
-  fprintf(stdout, _(
-"          --entersecuritycode asks for the code and sends it to the phone\n\n"
-"          --getsecuritycodestatus show if a security code is needed\n\n"
   ));
 #endif
 
@@ -484,6 +387,9 @@ int main(int argc, char *argv[])
     // Send SMS message mode
     { "sendsms",            required_argument, NULL, OPT_SENDSMS },
 
+    // Ssve SMS message mode
+    { "savesms",            optional_argument, NULL, OPT_SAVESMS },
+
     // Send logo as SMS message mode
     { "sendlogo",           required_argument, NULL, OPT_SENDLOGO },
 
@@ -550,9 +456,10 @@ int main(int argc, char *argv[])
     { OPT_GETMEMORY,         2, 3, 0 },
     { OPT_GETSPEEDDIAL,      1, 1, 0 },
     { OPT_SETSPEEDDIAL,      3, 3, 0 },
-    { OPT_GETSMS,            2, 3, 0 },
+    { OPT_GETSMS,            2, 5, 0 },
     { OPT_DELETESMS,         2, 3, 0 },
     { OPT_SENDSMS,           1, 10, 0 },
+    { OPT_SAVESMS,           0, 6, 0 },
     { OPT_SENDLOGO,          3, 4, GAL_XOR },
     { OPT_SENDRINGTONE,      2, 2, 0 },
     { OPT_GETSMSC,           1, 1, 0 },
@@ -730,7 +637,7 @@ int main(int argc, char *argv[])
 
     case OPT_GETSMS:
 
-      rc = getsms(nargc, nargv);
+      rc = getsms(argc, argv);
       break;
 
     case OPT_DELETESMS:
@@ -741,6 +648,11 @@ int main(int argc, char *argv[])
     case OPT_SENDSMS:
 
       rc = sendsms(nargc, nargv);
+      break;
+
+    case OPT_SAVESMS:
+
+      rc = savesms(argc, argv);
       break;
 
     case OPT_SENDLOGO:
@@ -825,22 +737,6 @@ int main(int argc, char *argv[])
   fprintf(stderr, _("Wrong number of arguments\n"));
 
   exit(-1);
-}
-
-int GetLine(FILE *File, char *Line) {
-
-  char *ptr;
-
-  if (fgets(Line, 99, File)) {
-    ptr=Line+strlen(Line)-1;
-
-    while ( (*ptr == '\n' || *ptr == '\r') && ptr>=Line)
-      *ptr--='\0';
-
-      return strlen(Line);
-  }
-  else
-    return 0;
 }
 
 /* Send  SMS messages. */
@@ -1041,6 +937,112 @@ int sendsms(int argc, char *argv[])
   return 0;
 }
 
+int savesms(int argc, char *argv[])
+{
+  GSM_SMSMessage SMS, SMSold;
+  GSM_Error error;
+  /* The maximum length of an uncompressed concatenated short message is
+     255 * 153 = 39015 default alphabet characters */
+  char message_buffer[GSM_MAX_CONCATENATED_SMS_LENGTH];
+  int input_len, chars_read;
+  int i, confirm = -1;
+  int interactive = 0;
+  char ans[8];
+
+  /* Defaults */
+  SMS.Type = GST_MO;
+  SMS.Class = -1;
+  SMS.Compression = false;
+  SMS.EightBit = false;
+  SMS.MessageCenter.No = 1;
+  SMS.Validity = 4320; /* 4320 minutes == 72 hours */
+  SMS.UDHType = GSM_NoUDH;
+  SMS.Status = GSS_NOTSENTREAD;
+  SMS.Location = 0;
+
+  input_len = GSM_MAX_SMS_LENGTH;
+
+  /* Option parsing */
+  while ((i = getopt(argc, argv, "ml:in:s:c:")) != -1) {
+    switch (i) {
+    case 'm': /* mark the message as sent */
+      SMS.Status = GSS_SENTREAD;
+      break;
+    case 'l': /* Specify the location */
+      SMS.Location = SMSold.Location = atoi(optarg);
+      break;
+    case 'i': /* Ask before overwriting */
+      interactive = 1;
+      break;
+    case 'n': /* Specify the from number */
+      break;
+    case 's': /* Specify the smsc number */
+      break;
+    case 'c': /* Specify the smsc location */
+      break;
+    default:
+      usage();
+      return -1;
+    }
+  }
+
+  fbusinit(NULL);
+
+  if (interactive) {
+    error = GSM->GetSMSMessage(&SMSold);
+    switch (error) {
+    case GE_NONE:
+      fprintf(stderr, _("Message at specified location exists. "));
+      while (confirm < 0) {
+        fprintf(stderr, _("Overwrite? (yes/no) "));
+        GetLine(stdin, ans, 7);
+        if (!strcmp(ans, "yes")) confirm = 1;
+        else if (!strcmp(ans, "no")) confirm = 0;
+      }  
+      if (!confirm) { GSM->Terminate(); return 0; }
+      else break;
+    case GE_INVALIDSMSLOCATION:
+      fprintf(stderr, _("Invalid location\n"));
+      GSM->Terminate();
+      return -1;
+    default:
+/* FIXME: Remove this fprintf when the function is thoroughly tested */
+#ifdef DEBUG
+      fprintf(stderr, _("Location %d empty. Saving\n"), SMS.Location);
+#endif
+      break;
+    }
+  }
+  chars_read = fread(message_buffer, 1, input_len, stdin);
+
+  if (chars_read == 0) {
+
+    fprintf(stderr, _("Couldn't read from stdin!\n"));
+    return -1;
+
+  } else if (chars_read > input_len) {
+
+    fprintf(stderr, _("Input too long!\n"));
+    return -1;
+
+  }
+
+  strncpy (SMS.MessageText, message_buffer, chars_read);
+  SMS.MessageText[chars_read] = 0;
+
+  error = GSM->SaveSMSMessage(&SMS);
+
+  if (error == GE_NONE) {
+    fprintf(stdout, _("Saved!\n"));
+  } else {
+    fprintf(stdout, _("Saving failed (error=%d)\n"), error);
+  }
+  sleep(10);
+  GSM->Terminate();
+
+  return 0;
+}
+
 /* Get SMSC number */
 
 int getsmsc(char *MessageCenterNumber)
@@ -1113,7 +1115,7 @@ int getsmsc(char *MessageCenterNumber)
 
     case GSMV_1_Week:
       fprintf(stdout, _("1 week"));
-	break;
+   break;
 
     case GSMV_Max_Time:
       fprintf(stdout, _("Maximum time"));
@@ -1140,69 +1142,110 @@ int getsms(int argc, char *argv[])
 
   GSM_SMSMessage message;
   char *memory_type_string;
-  int start_message, end_message, count;
+  int start_message, end_message, count, mode = 1;
+  char filename[64];
   GSM_Error error;
+  GSM_Bitmap bitmap;
 
   /* Handle command line args that set type, start and end locations. */
 
 
-  if (strcmp(argv[0], "ME") == 0) {
+  if (strcmp(argv[2], "ME") == 0) {
     message.MemoryType = GMT_ME;
     memory_type_string = "ME";
   }
   else
-    if (strcmp(argv[0], "SM") == 0) {
+    if (strcmp(argv[2], "SM") == 0) {
       message.MemoryType = GMT_SM;
       memory_type_string = "SM";
     }
   else
-    if (strcmp(argv[0], "FD") == 0) {
+    if (strcmp(argv[2], "FD") == 0) {
       message.MemoryType = GMT_FD;
       memory_type_string = "FD";
     }
   else
-    if (strcmp(argv[0], "ON") == 0) {
+    if (strcmp(argv[2], "ON") == 0) {
       message.MemoryType = GMT_ON;
       memory_type_string = "ON";
     }
   else
-    if (strcmp(argv[0], "EN") == 0) {
+    if (strcmp(argv[2], "EN") == 0) {
       message.MemoryType = GMT_EN;
       memory_type_string = "EN";
     }
   else
-    if (strcmp(argv[0], "DC") == 0) {
+    if (strcmp(argv[2], "DC") == 0) {
       message.MemoryType = GMT_DC;
       memory_type_string = "DC";
     }
   else
-    if (strcmp(argv[0], "RC") == 0) {
+    if (strcmp(argv[2], "RC") == 0) {
       message.MemoryType = GMT_RC;
       memory_type_string = "RC";
      }
   else
-    if (strcmp(argv[0], "MC") == 0) {
+    if (strcmp(argv[2], "MC") == 0) {
       message.MemoryType = GMT_MC;
       memory_type_string = "MC";
     }
   else
-    if (strcmp(argv[0], "LD") == 0) {
+    if (strcmp(argv[2], "LD") == 0) {
       message.MemoryType = GMT_LD;
       memory_type_string = "LD";
     }
   else
-    if (strcmp(argv[0], "MT") == 0) {
+    if (strcmp(argv[2], "MT") == 0) {
       message.MemoryType = GMT_MT;
       memory_type_string = "MT";
     }
   else {
-    fprintf(stderr, _("Unknown memory type %s!\n"), argv[0]);
-    exit (-1);
+    fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
+    return (-1);
   }
 
-  start_message = atoi(argv[1]);
-  if (argc > 2) end_message = atoi(argv[2]);
-  else end_message = start_message;
+  bzero(&filename, 64);
+
+  start_message = atoi(argv[3]);
+  if (argc > 4) {
+	 int i;
+
+
+	 /* [end] can be only argv[4] */
+	 if (argv[4][0] == '-') {
+      end_message = start_message;
+	 } else {
+      end_message = atoi(argv[4]);
+    }
+
+	 /* parse all options (beginning with '-' */
+	 while ((i = getopt(argc, argv, "f:")) != -1) {
+		switch (i) {
+		case 'f':
+		  if (optarg) {
+#ifdef DEBUG
+          fprintf(stderr, _("Saving into %s\n"), optarg);
+#endif /* DEBUG */
+			 strncpy(filename, optarg, 64);
+          if (strlen(optarg) > 63) {
+            fprintf(stderr, _("Filename too long - will be truncated to 63 charactera.\n"));
+            filename[63] = 0;
+          } else {
+            filename[strlen(optarg)] = 0;
+          }
+		  } else {
+			 usage();
+			 exit(1);
+		  }
+		  break;
+		default:
+		  usage();
+		  exit(1);
+		}
+    }
+  } else {
+	 end_message = start_message;
+  }
 
   /* Initialise the code for the GSM interface. */     
 
@@ -1297,17 +1340,45 @@ int getsms(int argc, char *argv[])
           fprintf(stdout, "\n");
           fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
 
-	  switch (message.UDHType) {
-	  		case GSM_NoUDH:
-	  			break;
-	  		case GSM_ConcatenatedMessages:
-	  			fprintf(stdout,_("Linked (%d/%d):\n"),message.UDH[5],message.UDH[4]);
-	  			break;
-	  		default:
-	  			break;
-	  }
+          switch (message.UDHType) {
 
-          fprintf(stdout, _("Text:\n%s\n\n"), message.MessageText); 
+          case GSM_OpLogo:
+
+            fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
+#ifdef DEBUG
+            if (!strcmp(message.Sender, "+998000005") && !strcmp(message.MessageCenter.Number, "+886935074443")) fprintf(stdout, _("Saved by Logo Express\n"));
+            if (!strcmp(message.Sender, "+998000002") || !strcmp(message.Sender, "+998000003")) fprintf(stdout, _("Saved by Operator Logo Uploader by Thomas Kessler\n"));
+#endif
+
+          case GSM_CallerIDLogo:
+
+            fprintf(stdout, ("Logo:\n"));
+
+            /* put bitmap into bitmap structure */
+            GSM_ReadBitmap(message.MessageText, &bitmap, message.UDHType);
+
+            GSM_PrintBitmap(&bitmap);
+
+            if (filename) {
+              error = GSM_SaveBitmapFile(filename, &bitmap);
+
+              fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
+            }
+
+            break;
+          case GSM_RingtoneUDH:
+            fprintf(stdout, ("Ringtone\n"));
+            break;
+          case GSM_ConcatenatedMessages:
+            fprintf(stdout, _("Linked (%d/%d):\n"),message.UDH[5],message.UDH[4]);
+          case GSM_NoUDH:
+            fprintf(stdout, _("Text:\n%s\n\n"), message.MessageText);
+            if (count == start_message) mode = 1; /* ask */
+            if ((mode != -1) && filename) mode = GSM_SaveTextFile(filename, message.MessageText, mode);
+            break;
+          default:
+            fprintf(stderr, _("Unknown\n"));
+          }
 
           break;
       }
@@ -2473,7 +2544,7 @@ int writephonebook(int argc, char *args[])
 
   /* Go through data from stdin. */
 
-  while (GetLine(stdin, Line)) {
+  while (GetLine(stdin, Line, 99)) {
 
     strcpy(BackLine, Line);
 
@@ -2536,12 +2607,12 @@ int writephonebook(int argc, char *args[])
       if (error == GE_NONE) {
         if (!entry.Empty) {
           int confirm = -1;
-          char ans[100];
+          char ans[8];
 
           fprintf(stderr, _("Location busy. "));
           while (confirm < 0) {
             fprintf(stderr, _("Overwrite? (yes/no) "));
-            GetLine(stdin, ans);
+            GetLine(stdin, ans, 7);
             if (!strcmp(ans, "yes")) confirm = 1;
             else if (!strcmp(ans, "no")) confirm = 0;
           }

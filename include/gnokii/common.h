@@ -391,11 +391,13 @@ typedef enum {
   GE_INTERNALERROR,         /* Problem occured internal to model specific code. */
   GE_BUSY,                  /* Command is still being executed. */
   GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
+  GE_MEMORYFULL,
+  GE_CANTOPENFILE,
 
   /* The following are here in anticipation of data call requirements. */
 
   GE_LINEBUSY,              /* Outgoing call requested reported line busy */
-  GE_NOCARRIER,             /* No Carrier error during data call setup ? */
+  GE_NOCARRIER              /* No Carrier error during data call setup ? */
 } GSM_Error;
 
 
@@ -549,6 +551,8 @@ typedef struct {
   GSM_Error (*DeleteSMSMessage)( GSM_SMSMessage *Message );
 
   GSM_Error (*SendSMSMessage)( GSM_SMSMessage *Message, int size );
+
+  GSM_Error (*SaveSMSMessage)( GSM_SMSMessage *Message );
 
     /* If units is set to a valid GSM_RFUnits value, the code
        will return level in these units if it is able.  Otherwise

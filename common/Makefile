@@ -30,9 +30,8 @@ OBJS =	cfgreader.o \
 	mbus-640.o \
 	rlp-common.o \
 	rlp-crc24.o \
-	vcal.o 
-# timersub is defined in misc.h
-#	misc.o 
+	vcal.o \
+	misc.o 
 
 DATA_OBJS = virtmodem.o \
 	at-emulator.o \

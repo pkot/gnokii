@@ -68,6 +68,7 @@ GSM_Error   FB38_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 bool		FB38_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 
     /* These aren't presently implemented. */
+GSM_Error   FB38_SaveSMSMessage(GSM_SMSMessage *SMS);
 GSM_Error   FB38_GetPowerSource(GSM_PowerSource *source);
 GSM_Error   FB38_GetDisplayStatus(int *Status);
 GSM_Error   FB38_EnterSecurityCode(GSM_SecurityCode SecurityCode);

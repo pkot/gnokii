@@ -58,6 +58,7 @@ GSM_Error	MB21_SetSMSCenter(GSM_MessageCenter *MessageCenter);
 GSM_Error	MB21_DeleteSMSMessage(GSM_SMSMessage *message);
 
 GSM_Error	MB21_SendSMSMessage(GSM_SMSMessage *SMS, int size);
+GSM_Error	MB21_SaveSMSMessage(GSM_SMSMessage *SMS);
 
 GSM_Error	MB21_GetRFLevel(GSM_RFUnits *units, float *level);
 
