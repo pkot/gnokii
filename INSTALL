@@ -1,0 +1,67 @@
+
+ TODO: write me!
+
+ For package building see the 'Docs/packaging-howto' file.
+
+
+1/
+	./configure [ option ]
+
+	where basic options:
+
+		--prefix=DIR
+			Install path prefix. Default /usr/local/
+
+		--with-model=MODEL
+			The mobil phone model (This is now only used as a
+			default if ~/.gnokiirc cannot be read.):
+
+				6110	- for Nokia 6110/5110 
+				3810	- for Nokia 3810 (default)	
+		
+		--with-port=PORT
+			Serial port for communication:
+
+				/dev/ttyS0	Linux "COM1" (default)
+				/dev/ttyS1	Linux "COM2"
+				/dev/ttyd0	FreeBSD
+				COM1		MS-Window COM1
+
+		--disable-gtk
+			Compile without GTK (Xwin) programs
+		
+		--enable-gettext
+			Set if you have/want GNU gettext support
+		
+		--enable-security
+			Set if you want to enable all security features
+
+		--enable-debug
+			Set if you want debug code. in gnokii
+
+		--help		
+			show all options
+
+
+	Good default (example):
+
+		./configure --prefix=/usr \
+			    --enable-gettext \
+			    --with-port=/dev/ttyS1 \
+			    --with-model=6110 
+
+2/
+	compilation:
+	
+		make 
+		(make dep - if you want/need) 
+		make install
+		make install-docs
+
+	clean source:
+	
+		make clean	 - standard clean
+		make distclean   - clean all ./configure outputs
+				   (after this command you must run
+				    ./configure again if you need use
+                                    any Makefile)

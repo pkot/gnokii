@@ -34,12 +34,12 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "../misc.h"
-#include "../gsm-common.h"
-#include "../gsm-api.h"
-#include "../fbus-6110.h"
-#include "../fbus-3810.h"
-#include "../cfgreader.h"
+#include "misc.h"
+#include "gsm-common.h"
+#include "gsm-api.h"
+#include "fbus-6110.h"
+#include "fbus-3810.h"
+#include "cfgreader.h"
 #include "xgnokii.h"
 #include "xgnokii_common.h"
 #include "xgnokii_contacts.h"
@@ -49,10 +49,10 @@
 #include "xgnokii_speed.h"
 #include "xgnokii_cfg.h"
 
-#include "../pixmaps/logo.xpm"
-#include "../pixmaps/background.xpm"
-#include "../pixmaps/sms.xpm"
-#include "../pixmaps/alarm.xpm"
+#include "xpm/logo.xpm"
+#include "xpm/background.xpm"
+#include "xpm/sms.xpm"
+#include "xpm/alarm.xpm"
 
 static GtkWidget *GUI_SplashWindow;
 static GtkWidget *GUI_MainWindow;

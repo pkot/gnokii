@@ -15,7 +15,9 @@ you for the PIN, you enter it and gnokii sends it to the phone
 without touching the phone's keyboard). The code also allows you
 to monitor the status of the mobile phone - it recognizes
 network signal strength, your GSM provider network and battery
-level, the clock, date and alarm setting of your phone.
+level, the clock, date and alarm setting of your phone (if the phone
+supports it - e.g. 5110 doesn't seem to support date so the date is
+bogus on it).
 
 The newest feature is that gnokii can read your mobile phone's
 preferred SMS Center so in the future you will not need to enter

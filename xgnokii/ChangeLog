@@ -1,0 +1,124 @@
+xgnokii-19991228
+- Speed Dial settings are possible view and edit. 
+Changes in SMS window:
+- minor bugfixes
+- Bussiness Card sending work. But we cannot read received bussiness card!
+
+
+xgnokii-19991216
+Changes in Contacts window:
+- Dial voice function let you to type arbitrary number.
+- Minor bugfixes in configuration refreshing stuff.
+Changes in SMS window:
+- SMS sending work! New SMS dialog look as if is possible to send long SMS
+  but this is only illusion. For now GSM->SendSMSMessage accept only first
+  160 characters.
+- New pixmaps.
+
+
+xgnokii-19991207
+- replaced 'getenv ("{HOME,HOMEDRIVE,HOMEPATH}")' with 'g_get_home_dir ()',
+  which is (I hope) more portable under MS Windows. 
+- added incoming call notification with stop watch.
+Changes in SMS window:
+- corrected GSList handling. (xgnogii have catch sigseg or end in
+  endless loop when SMS's number in phone had changed.)
+- added delete SMS functionality.
+- added sorting in SMS's list. 
+
+
+xgnokii-19991130
+- Added DTMF window.
+- Added execution of html viewer as help viewer. We need to write nice help
+  pages. :)
+Changes in Options window:
+- We can read name, number, format and validity period of SMS centers
+  from phone and also we can edit and save them to phone.
+Changes in SMS window:
+- Source completely rewriten. New design. Inbox and outbox in tree
+  hierarchy. If you have initialized contacts in xgnokii, xgnokii is trying
+  to resolve numbers to names. Messages are shown in viewer space.
+
+
+xgnokii-19991116
+- Added Net monitor. I thank Andreas Schmidt <mail@aschmidt.de> for idea
+  about graphical representation of Net monitor data. I thank also Norbert
+  Hüttisch (nobbi@nobbi.com) for his great web pages about Nokia Net Monitor.
+
+
+xgnokii-19991110
+- Added support for gettext() and messages catalogs.
+- Added Win32 support. (Acquadro Daniele <acquadro.daniele@logicasiel.it>)
+Changes in Contacts window:
+- Fixed bug when Save to phone haven't work in the case we just import 
+  contacts from file and haven't read they from phone before.
+- Fixed bug when empty contacts in phone have been not cleared when we have
+  import contacts from file and then we have save they into phone.
+
+
+xgnokii-19991010
+Changes in Options window:
+- Added User information edit window (needed for Business Card).
+- Added SMS settings windows. Xgnokii can only read SMS centers numbers from
+  phone. I can't read SMS set name, SMS format and Validity period from phone.
+  I can't also write any SMS setting in phone. And I don't know differencies
+  between SMS formats. :(
+- Added Groups names edit window. I can change group names in xgnokii. But
+  I can't read or write group names from/to phone because I don't have support
+  in gnokii. 
+- Added Alarm window. Xgnokii can read alarm from phone and set alarm in
+  phone. It can't unset alarm because lack support in gnokii.
+Changes in Contacts window:
+- Added Voice dial function.
+- Allowed sort order changing by clicking on titles.
+- Removed bug, when contacts in SIM card were not removed from phone, when
+  deleted in xgnokii.
+
+
+xgnokii-19990915
+Changes in Contacts window:
+- Fixed scrolling.
+- Fixed SIGSEG error due uninitialized variable.
+
+xgnokii-19990914
+- Fixed error in FB61_GetMemoryStatus. (FB61_GetMemoryStatus had ignore all
+  error status except GE_TIMEOUT. This break Contacts memory reading for
+  phone with only SIM memory.)
+  I think that Contacts memory reading is working also in 38xx series, but I
+  can't test it.
+Changes in Contacts window:
+- Export to file is working.
+- Import from file is working. Xgnokii uses extended format from NCDS (with
+  group entry) and is capable reading NCDS files.
+- More icons.
+
+
+xgnokii-19990906
+Changes in Contacts window:
+- Duplicate is working.
+- Delete accept multiple selection.
+- 'Change memory type' is working and accept multiple selection.
+- 'Select all' is working.
+- Find and 'Find next' is working.
+- Caller groups are working in xgnokii, but in GSM->WritePhonebookLocation
+  function is something wrong and it don't save caller group to phone.
+- New toolbar and xgnokii use some new pixmaps from Robert Vojta.
+Changes in SMS window:
+- We can get SMS's from phone. (Andri Saar <andri@marknet.ee>)
+
+
+xgnokii-19990824
+Changes in Contacts window:
+- Read/Save from/to phone is working.
+- New, Delete, Edit is working.
+- Export to file simply dump memory to standart output.
+- Import, Duplicate, 'Change memory type', 'Sellect all' is not working.
+
+
+xgnokii-19990816
+- My first release of xgnokii.
+- Simple options menu.
+- Application skeleton and some code cleanup.
+- Base for contacts window.
+
+Jan Derfinak <ja@mail.upjs.sk>

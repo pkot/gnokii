@@ -21,11 +21,11 @@
 #endif
 #include <string.h>
 #include <gtk/gtk.h>
-#include "../misc.h"  /* for _() */
+#include "misc.h"  /* for _() */
 #include "xgnokii_common.h"
 #include "xgnokii.h"
-#include "../pixmaps/quest.xpm"
-#include "../pixmaps/stop.xpm"
+#include "xpm/quest.xpm"
+#include "xpm/stop.xpm"
 
 inline void DeleteEvent (GtkWidget *widget, GdkEvent *event, gpointer data)
 {

@@ -1,0 +1,75 @@
+
+#
+# Global Makefiles configuration for the GNOKII.
+#
+# Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+#               2000 Karel Zak
+#
+
+
+
+SHELL		= /bin/sh
+
+LD		= @LD@
+LDREL		= -r
+LDOUT		= -o
+
+PACKAGE 	= gnokii
+XPACKAGE	= xgnokii
+VERSION 	= @VERSION@
+XVERSION	= @XVERSION@
+
+MODEL		= -DMODEL="\"@model@\""
+PORT		= -DPORT="\"@port@\""
+SECURITY	= @security@
+GETTEXT		= @gettext@
+WIN32		= @win32@
+
+srcdir 		= @srcdir@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+
+bindir		= @bindir@
+sbindir		= @sbindir@
+libdir		= @libdir@/${PACKAGE}
+xgnokii_libdir	= @libdir@/${XPACKAGE}
+mandir		= @mandir@/man1/
+docdir		= ${prefix}/doc/${PACKAGE}
+locdir		= @datadir@/locale
+
+BIN_MODE	= 0755
+TEXT_MODE	= 0444
+
+INSTALL		= @INSTALL@
+RM		= @RM@ -f
+MAKE		= @MAKE@
+XGETTEXT	= @XGETTEXT@
+MSGFMT		= @MSGFMT@
+
+CC		= @CC@
+CFLAGS		= @CFLAGS@
+LIBS		= @LIBS@
+
+GTK_CFLAGS	= @GTK_CFLAGS@
+GTK_LIBS	= @GTK_LIBS@
+PTHREAD_CFLAGS	= @PTHREAD_CFLAGS@
+PTHREAD_LIBS	= @PTHREAD_LIBS@
+
+#
+# Global include directory 
+#	($TOPDIR is defined in Makefile)
+#
+GNOKII_INCLUDE = $(TOPDIR)/include 
+
+#
+# Win32 option
+#
+ifdef WIN32
+	WIN32 += -I $(TOPDIR)/win32
+endif
+
+
+CFLAGS += $(MODEL) $(PORT) $(GETTEXT) $(SECURITY) $(WIN32)
+CFLAGS += -I $(GNOKII_INCLUDE) -DVERSION=\"$(VERSION)\"
+LDFLAGS = -s $(LIBS)
+

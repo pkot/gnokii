@@ -19,7 +19,7 @@ documentation how to do it.
 
 2. how to make .mo file?
 
-	msgfmt -o gnokii.mo -v gnokii-czech.po 
+	msgfmt -o gnokii.mo -v cs-gnokii.po 
 
 3. move the .mo file to /usr/share/locale/<your locale>/LC_MESSAGES/gnokii.mo 
 
@@ -27,10 +27,10 @@ I'm from Czech republic, so I did (well, I did not, but if you would like to
 localize gnokii, you should :-):
 
 	xgettext -a -k_ -s -v -d gnokii *.h *.c
-	cp gnokii.po gnokii-czech.po
-	<translating messages in gnokii-czech.po>
-	msgfmt -o gnokii.mo -v gnokii-czech.po
-	mv gnokii.mo /usr/share/locale/cs_CZ/LC_MESSAGES/gnokii.mo
+	cp gnokii.po cs-gnokii.po
+	<translating messages in cs-gnokii.po>
+	msgfmt -o gnokii.mo -v cs-gnokii.po
+	mv gnokii.mo /usr/share/locale/cs/LC_MESSAGES/gnokii.mo
 
 And now:
 
@@ -53,8 +53,20 @@ example with "Mar" which is substitute by the C preprocessor.
 
 Now we have new gnokii.po file.
 
-	mv gnokii-czech.po old.po
-	tupdate gnokii.po old.po >gnokii-czech.po
+	mv cs-gnokii.po old.po
+	tupdate gnokii.po old.po > cs-gnokii.po
 	rm -rf old.po
 
-And now we also have new gnokii-czech.po file.
+And now we also have new cs-gnokii.po file.
+
+
+5. Add your new .po file to po/Makefile.
+
+   Add your locale language code (example 'cs') to LANGUAGE variable
+   in Makefile in po directory, and don't omit - your new .po file 
+   must be named 'xx-gnokii.po' where 'xx' is your lang.	
+ 
+   Now is your new language support available for packaging proces and 
+   it will compile to .mo file itself.
+ 
+

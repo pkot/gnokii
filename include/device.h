@@ -16,9 +16,7 @@
 #ifndef __device_h
 #define __device_h
 
-#ifndef WIN32
-  #include <unistd.h>
-#endif
+#include <unistd.h>
 
 int device_getfd(void);
 

@@ -18,22 +18,22 @@
 #include <string.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include "../misc.h"
-#include "../gsm-api.h"
+#include "misc.h"
+#include "gsm-api.h"
 #include "xgnokii_common.h"
 #include "xgnokii.h"
 #include "xgnokii_contacts.h"
 #include "xgnokii_sms.h"
-#include "../pixmaps/Edit.xpm"
-#include "../pixmaps/Delete.xpm"
-#include "../pixmaps/Forward.xpm"
-#include "../pixmaps/Reply.xpm"
-#include "../pixmaps/Send.xpm"
-#include "../pixmaps/SendSMS.xpm"
-#include "../pixmaps/Check.xpm"
-#include "../pixmaps/Names.xpm"
-#include "../pixmaps/BCard.xpm"
-#include "../pixmaps/quest.xpm"
+#include "xpm/Edit.xpm"
+#include "xpm/Delete.xpm"
+#include "xpm/Forward.xpm"
+#include "xpm/Reply.xpm"
+#include "xpm/Send.xpm"
+#include "xpm/SendSMS.xpm"
+#include "xpm/Check.xpm"
+#include "xpm/Names.xpm"
+#include "xpm/BCard.xpm"
+#include "xpm/quest.xpm"
 
 typedef struct {
   gchar *number;

@@ -15,13 +15,13 @@
 
 #include <stdio.h>
 #include <gtk/gtk.h>
-#include "../misc.h"
-#include "../gsm-api.h"
+#include "misc.h"
+#include "gsm-api.h"
 #include "xgnokii_common.h"
 #include "xgnokii.h"
 #include "xgnokii_dtmf.h"
-#include "../pixmaps/Send.xpm"
-#include "../pixmaps/Delete.xpm"
+#include "xpm/Send.xpm"
+#include "xpm/Delete.xpm"
 
 #define MAX_DTMF_LENGTH		50
 

@@ -20,12 +20,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
-#include "../misc.h"
-#include "../gsm-api.h"
+#include "misc.h"
+#include "gsm-api.h"
 #include "xgnokii_common.h"
 #include "xgnokii.h"
 #include "xgnokii_netmon.h"
-#include "../pixmaps/Display.xpm"
+#include "xpm/Display.xpm"
 
 static GtkWidget *GUI_NetmonWindow;
 static DisplayData displayData = {NULL, 0};

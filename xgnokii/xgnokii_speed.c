@@ -21,12 +21,12 @@
 #include "xgnokii.h"
 #include "xgnokii_common.h"
 #include "xgnokii_speed.h"
-#include "../pixmaps/Read.xpm"
-#include "../pixmaps/Send.xpm"
-#include "../pixmaps/Open.xpm"
-#include "../pixmaps/Save.xpm"
-#include "../pixmaps/Edit.xpm"
-#include "../pixmaps/quest.xpm"
+#include "xpm/Read.xpm"
+#include "xpm/Send.xpm"
+#include "xpm/Open.xpm"
+#include "xpm/Save.xpm"
+#include "xpm/Edit.xpm"
+#include "xpm/quest.xpm"
 
 
 static GtkWidget *GUI_SpeedDialWindow;

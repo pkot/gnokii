@@ -16,14 +16,7 @@
 #ifndef __unixserial_h
 #define __unixserial_h
 
-#ifdef WIN32
-  #include <stddef.h>
-
-  #define __const const
-  typedef void * __ptr_t;
-#else
-  #include <unistd.h>
-#endif	/* WIN32 */
+#include <unistd.h>
 
 #define HAVE_TERMIOS_CSPEED
 #define HAVE_CFSETSPEED
