@@ -1,4 +1,4 @@
-1. IDA connection for nk7110 driver (Nokia 6210 and Nokia 7110) is slooow.
+1. IrDA connection for nk7110 driver (Nokia 6210 and Nokia 7110) is slooow.
 Configurations known to be affected:
 	model = 6210
 	connection = irda
@@ -22,6 +22,7 @@ on, it works again. Configuration known to be affected:
 and
 	model = 6310
 	connection = dlr3p
+[Perhaps it is just my phone/cable]
 
 4. Nokia 6510 series (e.g. 6310) will be silent after gnokii --playringtone.
 We don't know how to restore the original settings, so you have to power
