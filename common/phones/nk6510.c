@@ -185,7 +185,7 @@ GSM_Phone phone_nokia_6510 = {
 		GDT_DateTime,          /* Have date/time support */
 		GDT_TimeOnly,	       /* Alarm supports time only */
 		1,                     /* Alarms available - FIXME */
-		60, 96,                /* Startup logo size */
+		65, 96,                /* Startup logo size */
 		21, 78,                /* Op logo size */
 		14, 72                 /* Caller logo size */
 	},
@@ -2209,7 +2209,6 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 	case 0x24:
 		if (length == 18) return GE_EMPTYLOCATION;
 		if (data->Bitmap) {
-			int x;
 			data->Bitmap->netcode[0] = '0' + (message[12] & 0x0f);
 			data->Bitmap->netcode[1] = '0' + (message[12] >> 4);
 			data->Bitmap->netcode[2] = '0' + (message[13] & 0x0f);
@@ -2221,10 +2220,9 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 			data->Bitmap->type = GSM_NewOperatorLogo;
 			data->Bitmap->height = message[21];
 			data->Bitmap->width = message[20];
-			x = message[20] * message[21];
-			data->Bitmap->size = (x / 8) + (x % 8 > 0);
+			data->Bitmap->size = message[25];
 			dprintf("size: %i\n", data->Bitmap->size);
-			memcpy(data->Bitmap->bitmap, message + 26, length - 26);
+			memcpy(data->Bitmap->bitmap, message + 26, data->Bitmap->size);
 			dprintf("Logo (%dx%d) \n", data->Bitmap->height, data->Bitmap->width);
 		} else 
 			return GE_INTERNALERROR;
@@ -2362,7 +2360,7 @@ reply: 0x7a / 0x0036
 		dprintf("Startup logo set ok\n");
 		return GE_NONE;
 		break;
-	case 0x03:
+	case 0x05:
 		if (message[6] == 0)
 			dprintf("Anykey answer not set!\n");
 		else
@@ -2373,11 +2371,16 @@ reply: 0x7a / 0x0036
 	case 0x0f:
 		if (data->Bitmap) {
 			/* I'm sure there are blocks here but never mind! */
+			/* yes there are:
+			   c0 02 00 41   height
+			   c0 03 00 60   width
+			   c0 04 03 60   size
+			*/
 			data->Bitmap->type = GSM_StartupLogo;
 			data->Bitmap->height = message[13];
 			data->Bitmap->width = message[17];
-			data->Bitmap->size = ((data->Bitmap->height / 8) + (data->Bitmap->height % 8 > 0)) * 
-				data->Bitmap->width; /* Can't see this coded anywhere */
+			data->Bitmap->size = (message[20] << 8) | message[21];
+
 			memcpy(data->Bitmap->bitmap, message + 22, data->Bitmap->size);
 			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->Bitmap->height, data->Bitmap->width);
 		}
@@ -2441,7 +2444,7 @@ static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x0f};
-
+	
 	dprintf("Getting startup logo...\n");
 	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, 5);
 }
@@ -2870,7 +2873,7 @@ static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message,
 
 static GSM_Error P6510_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x011, 0x00};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x11, 0x00};
 
 	if (!data->SecurityCode) return GE_INTERNALERROR;
 
