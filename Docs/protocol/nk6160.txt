@@ -80,6 +80,8 @@ Correct format is MBUS version 2:
                                              0x04: reset (PIN is requested)
                                                    In 5110 makes reset without PIN
                                              0x06: CONTACT SERVICE!!! Don't try it!
+    s Get startup logo      { 0x00, 0x01, 0x07, 0x07, 0x08, slice }
+                            where slice in 1..6
 0xd1:
     s Registration request? {+0x00, 0xF8, 0x05, 0xE9, 0x00, 0x02, 0x1D, 0x00, 0x1D}
     s Get HW&SW version     { 0x0003, 0x00 }
@@ -96,3 +98,6 @@ Correct format is MBUS version 2:
     r Get phone version     { 0x000D, "V " "firmware\n" "firmware date\n" }
     r Key press             {+0x01, 0x00, 0x50, 0x00}
     r ???                   {+0x01, 0x00, 0x47, 0x00}
+0xdd:
+    r Get startup logo      { 0x01, 0x00, 0x07, 0x08, 84 bytes of data }
+                            where each byte contains 8 row, bit0 is the first
