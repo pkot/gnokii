@@ -162,7 +162,7 @@ static int CountSMSParts(GSM_SMSMessage *SMS)
 				length += SMS->UserData[i].Length;
 				break;
 			case SMS_UCS2:
-				length += SMS->UserData[i].Length;
+				length += (2 * SMS->UserData[i].Length);
 				break;
 			default:
 				/* Malformed SMS struct */
@@ -430,11 +430,11 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 			}
 			dcs[0] |= 0x08;
 			EncodeUnicode(message + offset, SMS->UserData[text_index].u.Text, length);
+			length *= 2;
 			*clen = SMS->Length = length + offset;
 			if (multipart) {
-				size = 2 * length;
-				message[2] = (size & 0xff00) >> 8;
-				message[3] = (size & 0x00ff);
+				message[2] = (length & 0xff00) >> 8;
+				message[3] = (length & 0x00ff);
 			}
 			break;
 		default:

@@ -187,7 +187,7 @@ int Pack7BitCharacters(int offset, unsigned char *input, unsigned char *output)
 	return (OUT_NUM - output);
 }
 
-void DecodeAscii (unsigned char* dest, const unsigned char* src, int len)
+void DecodeAscii(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 
@@ -196,7 +196,7 @@ void DecodeAscii (unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-void EncodeAscii (unsigned char* dest, const unsigned char* src, int len)
+void EncodeAscii(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 
@@ -205,7 +205,7 @@ void EncodeAscii (unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-void DecodeHex (unsigned char* dest, const unsigned char* src, int len)
+void DecodeHex(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	char buf[3];
@@ -213,12 +213,12 @@ void DecodeHex (unsigned char* dest, const unsigned char* src, int len)
 	buf[2] = '\0';
 	for (i = 0; i < (len / 2); i++) {
 		buf[0] = *(src + i * 2); buf[1] = *(src + i * 2 + 1);
-		dest[i] = DecodeWithDefaultAlphabet(strtol(buf,NULL,16));
+		dest[i] = DecodeWithDefaultAlphabet(strtol(buf, NULL, 16));
 	}
 	return;
 }
 
-void EncodeHex (unsigned char* dest, const unsigned char* src, int len)
+void EncodeHex(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 
@@ -228,7 +228,7 @@ void EncodeHex (unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-void DecodeUCS2 (unsigned char* dest, const unsigned char* src, int len)
+void DecodeUCS2(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	char buf[5];
@@ -237,12 +237,12 @@ void DecodeUCS2 (unsigned char* dest, const unsigned char* src, int len)
 	for (i = 0; i < (len / 4); i++) {
 		buf[0] = *(src + i * 4); buf[1] = *(src + i * 4 + 1);
 		buf[2] = *(src + i * 4 + 2); buf[3] = *(src + i * 4 + 3);
-		dest[i] = DecodeWithUnicodeAlphabet(strtol(buf,NULL,16));
+		dest[i] = DecodeWithUnicodeAlphabet(strtol(buf, NULL, 16));
 	}
 	return;
 }
 
-void EncodeUCS2 (unsigned char* dest, const unsigned char* src, int len)
+void EncodeUCS2(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 
@@ -252,20 +252,20 @@ void EncodeUCS2 (unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-void DecodeUnicode (unsigned char* dest, const unsigned char* src, int len)
+void DecodeUnicode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	wchar_t wc;
 
 	for (i = 0; i < len; i++) {
-		wc = src[(2*i)+1] | (src[2*i] << 8);
+		wc = src[(2 * i) + 1] | (src[2 * i] << 8);
 		dest[i] = DecodeWithUnicodeAlphabet(wc);
 	}
 	dest[len] = 0;
 	return;
 }
 
-void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len)
+void EncodeUnicode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	wchar_t wc;

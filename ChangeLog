@@ -40,6 +40,8 @@
     o fixed memset typo in DefaultSMS()                        (Ueli)
     o fix the problem with decoding BCD international numbers
                                                           (Pawel Kot)
+    o start to fix Unicode problems with SMS (reported by
+      Konstantin Smirnov)                                 (Pawel Kot)
  * 6110 series updates
     o keepalive packet won't be reported as an unhadled frame
                                                      (BORBELY Zoltan)
