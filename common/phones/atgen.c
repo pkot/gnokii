@@ -364,7 +364,7 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
 	/* no UCS2 charset found or error occured */
-	if (drvinst->defaultcharset == AT_CHAR_GSM) {
+	if (drvinst->availcharsets & (AT_CHAR_GSM | AT_CHAR_HEXGSM)) {
 		/* try to set HEX charset */
 		error = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"HEX\"\r", state);
 		if (error)
