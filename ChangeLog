@@ -15,6 +15,9 @@
     o minor battery fix                                (Markus Plail)
     o add (dummy) GetUnreadMessages                    (Markus Plail)
     o add DeleteSMS                                    (Markus Plail)
+    o re-add IncomingSecurity                          (Markus Plail)
+    o add GetSecurityCodeStatus                        (Markus Plail)
+    o add EnterSecurityCode (only PIN)                 (Markus Plail)
  * 7110 series updates
     o move GetUnreadMessages from gsm-sms.c            (Markus Plail)
     o change GOP7110_* to GOP_*                        (Markus Plail)
