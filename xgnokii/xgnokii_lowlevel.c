@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.15  2001-03-23 08:24:57  ja
+  Revision 1.16  2001-05-24 20:47:31  chris
+  More updating of 7110 code and some of xgnokii_lowlevel changed over.
+
+  Revision 1.15  2001/03/23 08:24:57  ja
   New preview for 6210 in xgnokii's logos module.
 
   Revision 1.14  2001/03/21 23:36:09  chris
@@ -50,6 +53,7 @@
 #include "fbus-3810.h"
 #include "xgnokii_lowlevel.h"
 #include "xgnokii.h"
+#include "gsm-statemachine.h"
 //#include "xgnokii_common.h"
 
 pthread_t monitor_th;
@@ -79,6 +83,10 @@ pthread_mutex_t getNetworkInfoMutex;
 pthread_cond_t  getNetworkInfoCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
+
+GSM_Statemachine statemachine;
+/* FIXME - don't really know what should own the statemachine in */
+/* the xgnokii scheme of things - Chris */
 
 
 inline void GUI_InsertEvent (PhoneEvent *event)
@@ -116,8 +124,11 @@ static void InitModelInf (void)
   gchar buf[64];
   GSM_Error error;
   register gint i = 0;
+  GSM_Data data;
 
-  while ((error = GSM->GetModel(buf)) != GE_NONE && i++ < 15)
+  GSM_DataClear(&data);
+  data.Model=buf;
+  while ((error = SM_Functions(GOP_GetModel,&data,&statemachine)) != GE_NONE && i++ < 15)
     sleep(1);
 
   if (error == GE_NONE)
@@ -132,7 +143,8 @@ static void InitModelInf (void)
   }
 
   i = 0;
-  while ((error = GSM->GetRevision (buf)) != GE_NONE && i++ < 5)
+  data.Revision=buf;
+  while ((error = SM_Functions(GOP_GetRevision,&data,&statemachine)) != GE_NONE && i++ < 5)
     sleep(1);
 
   if (error == GE_NONE)
@@ -142,7 +154,8 @@ static void InitModelInf (void)
   }
 
   i = 0;
-  while ((error = GSM->GetIMEI (buf)) != GE_NONE && i++ < 5)
+  data.Imei=buf;
+  while ((error = SM_Functions(GOP_GetImei,&data,&statemachine)) != GE_NONE && i++ < 5)
     sleep(1);
 
   if (error == GE_NONE)
@@ -166,10 +179,6 @@ static GSM_Error fbusinit(bool enable_monitoring)
   int count=0;
   static GSM_Error error=GE_NOLINK;
   GSM_ConnectionType connection=GCT_Serial;
-  static GSM_Statemachine statemachine;
-
-  /* FIXME - don't really know what should own the statemachine in */
-  /* the xgnokii scheme of things - Chris */
 
   if (!strcmp(xgnokiiConfig.connection, "infrared"))
     connection = GCT_Infrared;
@@ -312,13 +321,16 @@ static gint A_GetMemoryStatus (gpointer data)
 {
   GSM_Error error;
   D_MemoryStatus *ms = (D_MemoryStatus *) data;
+  GSM_Data gdat;
 
   error = ms->status = GE_UNKNOWN;
 
   if (ms)
   {
+    GSM_DataClear(&gdat);	  
     pthread_mutex_lock (&memoryMutex);
-    error = ms->status = GSM->GetMemoryStatus (&(ms->memoryStatus));
+    gdat.MemoryStatus=&(ms->memoryStatus);
+    error = ms->status = SM_Functions(GOP_GetMemoryStatus,&gdat,&statemachine);
     pthread_cond_signal (&memoryCond);
     pthread_mutex_unlock (&memoryMutex);
   }
@@ -331,13 +343,16 @@ static gint A_GetMemoryLocation (gpointer data)
 {
   GSM_Error error;
   D_MemoryLocation *ml = (D_MemoryLocation *) data;
+  GSM_Data gdat;
 
   error = ml->status = GE_UNKNOWN;
 
   if (ml)
   {
+    GSM_DataClear(&gdat);
     pthread_mutex_lock (&memoryMutex);
-    error = ml->status = GSM->GetMemoryLocation (ml->entry);
+    gdat.PhonebookEntry=(ml->entry);
+    error = ml->status = SM_Functions(GOP_ReadPhonebook,&gdat,&statemachine);
     pthread_cond_signal (&memoryCond);
     pthread_mutex_unlock (&memoryMutex);
   }
@@ -352,16 +367,19 @@ static gint A_GetMemoryLocationAll (gpointer data)
   GSM_Error error;
   D_MemoryLocationAll *mla = (D_MemoryLocationAll *) data;
   register gint i;
+  GSM_Data gdat;
 
   error = mla->status = GE_NONE;
   entry.MemoryType = mla->type;
+  GSM_DataClear(&gdat);
+  gdat.PhonebookEntry=&entry;
 
   pthread_mutex_lock (&memoryMutex);
   for (i = mla->min; i <= mla->max; i++)
   {
     entry.Location = i;
-    error = GSM->GetMemoryLocation (&entry);
-    if (error != GE_NONE)
+    error = SM_Functions(GOP_ReadPhonebook,&gdat,&statemachine);
+    if (error != GE_NONE && error!=GE_INVALIDPHBOOKLOCATION)
     {
       gint err_count = 0;
 
@@ -378,10 +396,24 @@ static gint A_GetMemoryLocationAll (gpointer data)
           return (error);
         }
 
-        error = GSM->GetMemoryLocation (&entry);
+        error = SM_Functions(GOP_ReadPhonebook,&gdat,&statemachine);
         sleep (2);
       }
     }
+
+    /* If the phonebook location was invalid - just fill up the rest */
+    /* This works on a 7110 anyway...*/
+
+    if (error==GE_INVALIDPHBOOKLOCATION) {
+	entry.Empty=true;
+	entry.Name[0]=0;
+        entry.Number[0]=0;
+	for (i = mla->min; i <= mla->max; i++) {
+		error = mla->InsertEntry (&entry);
+		if (error != GE_NONE) break;
+	}	
+    }
+
     error = mla->InsertEntry (&entry);
     if (error != GE_NONE)
       break;
@@ -397,13 +429,17 @@ static gint A_WriteMemoryLocation (gpointer data)
 {
   GSM_Error error;
   D_MemoryLocation *ml = (D_MemoryLocation *) data;
+  GSM_Data gdat;
 
   error = ml->status = GE_UNKNOWN;
+
+  GSM_DataClear(&gdat);
+  gdat.PhonebookEntry=(ml->entry);
 
   if (ml)
   {
     pthread_mutex_lock (&memoryMutex);
-    error = ml->status = GSM->WritePhonebookLocation (ml->entry);
+    error = ml->status = SM_Functions(GOP_WritePhonebook,&gdat,&statemachine);
     pthread_cond_signal (&memoryCond);
     pthread_mutex_unlock (&memoryMutex);
   }
@@ -525,6 +561,7 @@ static gint A_GetCallerGroup (gpointer data)
   GSM_Bitmap bitmap;
   GSM_Error error;
   D_CallerGroup *cg = (D_CallerGroup *) data;
+  GSM_Data gdat;
 
   error = cg->status = GE_UNKNOWN;
 
@@ -534,7 +571,9 @@ static gint A_GetCallerGroup (gpointer data)
     bitmap.number = cg->number;
 
     pthread_mutex_lock (&callerGroupMutex);
-    error = cg->status = GSM->GetBitmap (&bitmap);
+    GSM_DataClear(&gdat);
+    gdat.Bitmap=&bitmap;
+    error = cg->status = SM_Functions(GOP_GetBitmap,&gdat,&statemachine);
     strncpy (cg->text, bitmap.text, 256);
     cg->text[255] = '\0';
     pthread_cond_signal (&callerGroupCond);
@@ -791,9 +830,12 @@ static gint A_SendKeyStroke (gpointer data)
 static gint A_GetBitmap(gpointer data) {
   GSM_Error error;
   D_Bitmap *d = (D_Bitmap *)data;
+  GSM_Data gdat;
 
+  GSM_DataClear(&gdat);
   pthread_mutex_lock(&getBitmapMutex);
-  error = d->status = GSM->GetBitmap(d->bitmap);
+  gdat.Bitmap=d->bitmap;
+  error = d->status = SM_Functions(GOP_GetBitmap,&gdat,&statemachine);
   pthread_cond_signal(&getBitmapCond);
   pthread_mutex_unlock(&getBitmapMutex);
   return error;
@@ -803,19 +845,24 @@ static gint A_SetBitmap(gpointer data) {
   GSM_Error error;
   D_Bitmap *d = (D_Bitmap *)data;
   GSM_Bitmap bitmap;
+  GSM_Data gdat;
   
+  GSM_DataClear(&gdat);
   pthread_mutex_lock(&setBitmapMutex);
   if (d->bitmap->type == GSM_CallerLogo) {
     bitmap.type = d->bitmap->type;
     bitmap.number = d->bitmap->number;
-    error = d->status = GSM->GetBitmap(&bitmap);
+    gdat.Bitmap=&bitmap;
+    error = d->status = SM_Functions(GOP_GetBitmap,&gdat,&statemachine);
     if (error == GE_NONE) {
       strncpy(d->bitmap->text,bitmap.text,sizeof(bitmap.text));
       d->bitmap->ringtone = bitmap.ringtone;
-      error = d->status = GSM->SetBitmap(d->bitmap);
+      gdat.Bitmap=d->bitmap;
+      error = d->status = SM_Functions(GOP_SetBitmap,&gdat,&statemachine);
     }
   } else {
-    error = d->status = GSM->SetBitmap(d->bitmap);
+    gdat.Bitmap=d->bitmap;
+    error = d->status = SM_Functions(GOP_SetBitmap,&gdat,&statemachine);
   }
   pthread_cond_signal(&setBitmapCond);
   pthread_mutex_unlock(&setBitmapMutex);
@@ -825,9 +872,13 @@ static gint A_SetBitmap(gpointer data) {
 static gint A_GetNetworkInfo(gpointer data) {
   GSM_Error error;
   D_NetworkInfo *d = (D_NetworkInfo *)data;
+  GSM_Data gdat;
+  
+  GSM_DataClear(&gdat);
 
   pthread_mutex_lock(&getNetworkInfoMutex);
-  error = d->status = GSM->GetNetworkInfo(d->info);
+  gdat.NetworkInfo=d->info;
+  error = d->status = SM_Functions(GOP_GetNetworkInfo,&gdat,&statemachine);
   pthread_cond_signal(&getNetworkInfoCond);
   pthread_mutex_unlock(&getNetworkInfoMutex);
   return error;
@@ -883,7 +934,9 @@ void *GUI_Connect (void *a)
   PhoneEvent *event;
   GSM_Error error;
   gint status;
+  GSM_Data data;
 
+  GSM_DataClear(&data);
 
 # ifdef XDEBUG
   g_print ("Initializing connection...\n");
@@ -897,33 +950,47 @@ void *GUI_Connect (void *a)
   g_print ("Phone connected. Starting monitoring...\n");
 # endif
 
+  sleep(1);
+
+  data.RFLevel=&phoneMonitor.rfLevel;
+  data.RFUnits=&rf_units;
+  data.PowerSource=&phoneMonitor.powerSource;
+  data.BatteryUnits=&batt_units; 
+  data.BatteryLevel=&phoneMonitor.batteryLevel;
+  data.DateTime=&Alarm;
+  data.SMSStatus=&SMSStatus;
+  data.IncomingCallNr=number;
+
   while (1)
   {
     phoneMonitor.working = NULL;
 
-    if (GSM->GetRFLevel (&rf_units, &phoneMonitor.rfLevel) != GE_NONE)
+    /* FIXME - this loop goes mad on my 7110 - so I've put in a usleep */
+    usleep(50000);
+
+    if (SM_Functions(GOP_GetRFLevel,&data,&statemachine) != GE_NONE)
       phoneMonitor.rfLevel = -1;
 
     if (rf_units == GRF_Arbitrary)
       phoneMonitor.rfLevel *= 25;
 
-    if (GSM->GetPowerSource (&phoneMonitor.powerSource) == GE_NONE 
+    if (SM_Functions(GOP_GetPowersource,&data,&statemachine)  == GE_NONE 
         && phoneMonitor.powerSource == GPS_ACDC)
       phoneMonitor.batteryLevel = ((gint) phoneMonitor.batteryLevel + 25) % 125;
     else
     {
-      if (GSM->GetBatteryLevel (&batt_units, &phoneMonitor.batteryLevel) != GE_NONE)
+      if (SM_Functions(GOP_GetBatteryLevel,&data,&statemachine) != GE_NONE)
         phoneMonitor.batteryLevel = -1;
       if (batt_units == GBU_Arbitrary)
         phoneMonitor.batteryLevel *= 25;
     }
 
-    if (GSM->GetAlarm (0, &Alarm) == GE_NONE && Alarm.AlarmEnabled != 0)
+    if (SM_Functions(GOP_GetAlarm,&data,&statemachine) == GE_NONE && Alarm.AlarmEnabled != 0)
       phoneMonitor.alarm = TRUE;
     else
       phoneMonitor.alarm = FALSE;
 
-    if (GSM->GetSMSStatus (&SMSStatus) == GE_NONE)
+    if (SM_Functions(GOP_GetSMSStatus,&data,&statemachine) == GE_NONE)
     {
       if (phoneMonitor.sms.unRead != SMSStatus.UnRead ||
           phoneMonitor.sms.number != SMSStatus.Number)
@@ -936,7 +1003,7 @@ void *GUI_Connect (void *a)
       phoneMonitor.sms.unRead = SMSStatus.UnRead;
     }
 
-    if (GSM->GetIncomingCallNr (number) == GE_NONE)
+    if (SM_Functions(GOP_GetIncomingCallNr,&data,&statemachine) == GE_NONE)
     {
 #   ifdef XDEBUG
       g_print ("Call in progress: %s\n", phoneMonitor.call.callNum);

@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.133  2001-04-23 17:20:01  pkot
+  Revision 1.134  2001-05-24 20:47:30  chris
+  More updating of 7110 code and some of xgnokii_lowlevel changed over.
+
+  Revision 1.133  2001/04/23 17:20:01  pkot
   Added possibility for viewing logos (currently nol and ngg) on console (Bartek Klepacz)
 
   Revision 1.132  2001/03/21 23:36:06  chris
@@ -1633,12 +1636,11 @@ int getlogo(int argc, char *argv[])
 {
 	GSM_Bitmap bitmap;
 	GSM_Error error;
+	GSM_Statemachine *sm;
+	GSM_Data data;
 
-	sleep(1);
+	GSM_DataClear(&data);
 
-	/* We need to make sure that the init is finished to avoid interrupted */
-	/* multiframe packets... */
-  
 	bitmap.type=GSM_None;
 
 	if (!strcmp(argv[0], "op"))
@@ -1664,11 +1666,12 @@ int getlogo(int argc, char *argv[])
 
 	if (bitmap.type != GSM_None) {
   
-		fbusinit(NULL);
+		sm=fbusinit(NULL);
     
 		fprintf(stdout, _("Getting Logo\n"));
         
-		error=GSM->GetBitmap(&bitmap);
+		data.Bitmap=&bitmap;
+		error=SM_Functions(GOP_GetBitmap, &data,sm);
  
 		switch (error) {
 		case GE_NONE:
@@ -1736,7 +1739,6 @@ int getlogo(int argc, char *argv[])
 			fprintf(stderr, _("Error getting logo !\n"));
 			return -1;
 		}
-		GSM->Terminate();
 	} else {
 		fprintf(stderr, _("What kind of logo do you want to get ?\n"));
 		return -1;
@@ -1811,7 +1813,7 @@ int setlogo(int argc, char *argv[])
 					if (bitmap.type != GSM_OperatorLogo || argc < 3) {
 						if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE) strncpy(bitmap.netcode, NetworkInfo.NetworkCode, 7);
 					}
-					GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo);
+					GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, GSM_Info);
 					if (argc == 3) {
 						strncpy(bitmap.netcode, argv[2], 7);
 						if (!strcmp(GSM_GetNetworkName(bitmap.netcode), "unknown")) {
@@ -1821,10 +1823,10 @@ int setlogo(int argc, char *argv[])
 					}
 				}
 				if (!strcmp(argv[0], "startup")) {
-					GSM_ResizeBitmap(&bitmap, GSM_StartupLogo);
+					GSM_ResizeBitmap(&bitmap, GSM_StartupLogo, GSM_Info);
 				}
 				if (!strcmp(argv[0],"caller")) {
-					GSM_ResizeBitmap(&bitmap, GSM_CallerLogo);
+					GSM_ResizeBitmap(&bitmap, GSM_CallerLogo, GSM_Info);
 					if (argc > 2) {
 						bitmap.number = argv[2][0] - '0';
 						if ((bitmap.number < 0) || (bitmap.number > 9)) bitmap.number = 0;
@@ -2479,7 +2481,11 @@ int getmemory(int argc, char *argv[])
 	char *memory_type_string;
 	int start_entry;
 	int end_entry;
-
+	GSM_Statemachine *sm;
+	GSM_Data data;
+	
+	GSM_DataClear(&data);
+	
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
 	entry.MemoryType = StrToMemoryType(memory_type_string);
@@ -2493,14 +2499,15 @@ int getmemory(int argc, char *argv[])
 	else end_entry = start_entry;
 
 	/* Do generic initialisation routine */
-	fbusinit(NULL);
+	sm=fbusinit(NULL);
 
 	/* Now retrieve the requested entries. */
 	for (count = start_entry; count <= end_entry; count ++) {
 
 		entry.Location = count;
 
-		error = GSM->GetMemoryLocation(&entry);
+      		data.PhonebookEntry=&entry;
+		error=SM_Functions(GOP_ReadPhonebook,&data,sm);
 
 		if (error == GE_NONE) {
 			fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
@@ -2510,20 +2517,16 @@ int getmemory(int argc, char *argv[])
 		else {
 			if (error == GE_NOTIMPLEMENTED) {
 				fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-				GSM->Terminate();
 				return -1;
 			}
 			else if (error == GE_INVALIDMEMORYTYPE) {
 				fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
-				GSM->Terminate();
 				return -1;
 			}
 
 			fprintf(stdout, _("%s|%d|Bad location or other error!(%d)\n"), memory_type_string, count, error);
 		}
 	}
-	
-	GSM->Terminate();
 
 	return 0;
 }

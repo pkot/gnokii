@@ -623,6 +623,9 @@ typedef struct {
 	float *BatteryLevel;
 	GSM_RFUnits *RFUnits;
 	float *RFLevel;
+	char *IncomingCallNr;
+	GSM_PowerSource *PowerSource;
+	GSM_DateTime *DateTime;
 } GSM_Data;
 
 
@@ -666,7 +669,14 @@ typedef enum {
 	GOP_SetBitmap,
 	GOP_GetBatteryLevel,
 	GOP_GetRFLevel,
-	GOP_GetMemoryStatus
+	GOP_GetMemoryStatus,
+	GOP_ReadPhonebook,
+	GOP_WritePhonebook,
+	GOP_GetPowersource,
+	GOP_GetAlarm,
+	GOP_GetSMSStatus,
+	GOP_GetIncomingCallNr,
+	GOP_GetNetworkInfo
 } GSM_Operation;
 
 /* This structure contains the 'callups' needed by the statemachine */

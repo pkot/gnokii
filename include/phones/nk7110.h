@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.3  2001-03-23 13:40:25  chris
+  Revision 1.4  2001-05-24 20:47:30  chris
+  More updating of 7110 code and some of xgnokii_lowlevel changed over.
+
+  Revision 1.3  2001/03/23 13:40:25  chris
   Pavel's patch and a few fixes.
 
   Revision 1.2  2001/03/21 23:36:08  chris
@@ -95,11 +98,16 @@ static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_Incoming0x03(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_Incoming0x0a(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_Incoming0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-
+static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 

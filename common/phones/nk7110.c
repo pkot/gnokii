@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.7  2001-05-07 16:24:04  pkot
+  Revision 1.8  2001-05-24 20:47:30  chris
+  More updating of 7110 code and some of xgnokii_lowlevel changed over.
+
+  Revision 1.7  2001/05/07 16:24:04  pkot
   DLR-3P temporary fix. How should I do it better?
 
   Revision 1.6  2001/03/23 13:40:24  chris
@@ -94,9 +97,10 @@
 
 static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ 0x1b, P7110_Incoming0x1b },
-	{ 0x03, P7110_Incoming0x03 },
-	{ 0x0a, P7110_Incoming0x0a },
-	{ 0x17, P7110_Incoming0x17 },
+	{ 0x03, P7110_IncomingPhonebook },
+	{ 0x0a, P7110_IncomingNetwork },
+	{ 0x17, P7110_IncomingBattLevel },
+	{ 0x7a, P7110_IncomingStartup },
 	{ 0, NULL}
 };
 
@@ -151,6 +155,21 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		break;
 	case GOP_GetMemoryStatus:
 		return P7110_GetMemoryStatus(data, state);
+		break;
+	case GOP_GetBitmap:
+		return P7110_GetBitmap(data, state);
+		break;
+	case GOP_SetBitmap:
+		return P7110_SetBitmap(data, state);
+		break;
+	case GOP_ReadPhonebook:
+		return P7110_ReadPhonebook(data, state);
+		break;
+	case GOP_WritePhonebook:
+		return P7110_WritePhonebookLocation(data, state);
+		break;
+	case GOP_GetNetworkInfo:
+		return P7110_GetNetworkInfo(data, state);
 		break;
 	default:
 		return GE_NOTIMPLEMENTED;
@@ -251,7 +270,7 @@ static GSM_Error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state)
 }
 
 
-static GSM_Error P7110_Incoming0x17(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	switch (message[3]) {
 	case 0x03:
@@ -278,9 +297,72 @@ static GSM_Error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x0a);
 }
 
-static GSM_Error P7110_Incoming0x0a(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
 {
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x70};
+
+	dprintf("Getting Network Info...\n");
+	if (SM_SendMessage(state, 4, 0x0a, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x0a);
+}
+
+
+static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	unsigned char *blockstart;
+	int i;
+	
 	switch (message[3]) {
+	case 0x71:
+		blockstart = message + 6;
+		for (i = 0; i < message[4]; i++) {
+			switch (blockstart[0]) {
+			case 0x01:  /* Operator details */
+				/* Network code is stored as 0xBA 0xXC 0xED ("ABC DE"). */
+				if (data->NetworkInfo) {
+					/* Is this correct? */
+					data->NetworkInfo->CellID[0]=blockstart[4];
+					data->NetworkInfo->CellID[1]=blockstart[5];
+					data->NetworkInfo->LAC[0]=blockstart[6];
+					data->NetworkInfo->LAC[1]=blockstart[7];
+					data->NetworkInfo->NetworkCode[0] = '0' + (blockstart[8] & 0x0f);
+					data->NetworkInfo->NetworkCode[1] = '0' + (blockstart[8] >> 4);
+					data->NetworkInfo->NetworkCode[2] = '0' + (blockstart[9] & 0x0f);
+					data->NetworkInfo->NetworkCode[3] = ' ';
+					data->NetworkInfo->NetworkCode[4] = '0' + (blockstart[10] & 0x0f);
+					data->NetworkInfo->NetworkCode[5] = '0' + (blockstart[10] >> 4);
+					data->NetworkInfo->NetworkCode[6] = 0;
+				}
+				if (data->Bitmap) {
+					data->Bitmap->netcode[0] = '0' + (blockstart[8] & 0x0f);
+					data->Bitmap->netcode[1] = '0' + (blockstart[8] >> 4);
+					data->Bitmap->netcode[2] = '0' + (blockstart[9] & 0x0f);
+					data->Bitmap->netcode[3] = ' ';
+					data->Bitmap->netcode[4] = '0' + (blockstart[10] & 0x0f);
+					data->Bitmap->netcode[5] = '0' + (blockstart[10] >> 4);
+					data->Bitmap->netcode[6] = 0;
+					dprintf("Operator %s ",data->Bitmap->netcode);
+				}
+				break;
+			case 0x04: /* Logo */
+				if (data->Bitmap) {
+					dprintf("Op logo received ok ");
+					data->Bitmap->type = GSM_OperatorLogo;
+					data->Bitmap->size = blockstart[5]; /* Probably + [4]<<8 */
+					data->Bitmap->height = blockstart[3];
+					data->Bitmap->width = blockstart[2];
+					memcpy(data->Bitmap->bitmap, blockstart + 8, data->Bitmap->size);
+					dprintf("Logo (%dx%d) ", data->Bitmap->height, data->Bitmap->width);
+				}
+				break;
+			default:
+				dprintf(_("Unknown operator block %d\n"), blockstart[0]);
+				break;
+			}
+			blockstart += blockstart[1];
+		}
+		return GE_NONE;
+		break;
 	case 0x82:
 		if (data->RFLevel) { 
 			*(data->RFUnits) = GRF_Percentage;
@@ -289,6 +371,9 @@ static GSM_Error P7110_Incoming0x0a(int messagetype, unsigned char *message, int
 		}
 		return GE_NONE;
 		break;
+	case 0xa4:
+		dprintf("Op Logo Set OK\n");
+		return GE_NONE;
 	default:
 		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
 		return GE_UNKNOWN;
@@ -306,10 +391,18 @@ static GSM_Error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x03);
 }
 
-static GSM_Error P7110_Incoming0x03(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
+	unsigned char *blockstart;
+	unsigned char blocks;
+	unsigned char subblockcount;
+	int i;
+	GSM_SubPhonebookEntry* subEntry; 
+
+	PGEN_DebugMessage(messagetype, message, length);
+
 	switch (message[3]) {
-	case 0x04:
+	case 0x04:  /* Get status response */
 		if (data->MemoryStatus) {
 			if (message[5] != 0xff) {
 				data->MemoryStatus->Used = (message[16] << 8) + message[17];
@@ -324,6 +417,131 @@ static GSM_Error P7110_Incoming0x03(int messagetype, unsigned char *message, int
 		}
 		return GE_NONE;
 		break;
+	case 0x08:  /* Read Memory response */
+		if (data->PhonebookEntry) {
+			data->PhonebookEntry->Empty = true;
+			data->PhonebookEntry->Group = 0;
+			data->PhonebookEntry->Name[0] = '\0';
+			data->PhonebookEntry->Number[0] = '\0';
+			data->PhonebookEntry->SubEntriesCount = 0;
+			data->PhonebookEntry->Date.Year = 0;
+			data->PhonebookEntry->Date.Month = 0;
+			data->PhonebookEntry->Date.Day = 0;
+			data->PhonebookEntry->Date.Hour = 0;
+			data->PhonebookEntry->Date.Minute = 0;
+			data->PhonebookEntry->Date.Second = 0;
+		}
+		if (message[6] == 0x0f) { // not found
+			if (message[10] == 0x34 || message[10] == 0x33 || message[10] == 0x30) {
+				dprintf("Invalid caller location\n");
+				return GE_INVALIDPHBOOKLOCATION;
+			}
+			else {
+				dprintf("Unknown error getting phonebook\n");
+				return GE_NOTIMPLEMENTED;
+			}
+		}
+		dprintf("Received phonebook info\n");
+		blocks     = message[17];        
+		blockstart = message + 18;
+		subblockcount = 0;
+           
+		for (i = 0; i < blocks; i++) {
+			if (data->PhonebookEntry) subEntry = &data->PhonebookEntry->SubEntries[subblockcount];
+			switch (blockstart[0]) {
+			case 0x07:                   /* Name */
+				if (data->Bitmap) {
+					DecodeUnicode(data->Bitmap->text, (blockstart + 6), blockstart[5] / 2);
+					dprintf("Name: %s\n",data->Bitmap->text);
+				} else if (data->PhonebookEntry) {
+					DecodeUnicode(data->PhonebookEntry->Name, (blockstart + 6), blockstart[5] / 2);
+					data->PhonebookEntry->Empty = false;
+					dprintf(_("   Name: %s\n"), data->PhonebookEntry->Name);
+				}
+				break;
+			case 0x08:
+			case 0x09:
+			case 0x0a:
+				if (data->PhonebookEntry) {
+					subEntry->EntryType   = blockstart[0];
+					subEntry->NumberType  = 0;
+					subEntry->BlockNumber = blockstart[4];
+					DecodeUnicode(subEntry->data.Number, (blockstart + 6), blockstart[5] / 2);
+					dprintf(_("   Type: %d (%02x)\n"), subEntry->EntryType, subEntry->EntryType);
+					dprintf(_("   Text: %s\n"), subEntry->data.Number);
+					subblockcount++;
+					data->PhonebookEntry->SubEntriesCount++;
+				}
+				break;
+			case 0x0b:
+				if (data->PhonebookEntry) {
+					subEntry->EntryType   = blockstart[0];
+					subEntry->NumberType  = blockstart[5];
+					subEntry->BlockNumber = blockstart[4];
+					DecodeUnicode(subEntry->data.Number, (blockstart + 10), blockstart[9] / 2);
+					if (!subblockcount) strcpy(data->PhonebookEntry->Number, subEntry->data.Number);
+					dprintf(_("   Type: %d (%02x)\n"), subEntry->NumberType, subEntry->NumberType);
+					dprintf(_(" Number: %s\n"), subEntry->data.Number);					
+					subblockcount++;
+					data->PhonebookEntry->SubEntriesCount++;
+				}
+				break;
+			case 0x0c:                   /* Ringtone */
+				if (data->Bitmap) {
+					data->Bitmap->ringtone = blockstart[5];
+					dprintf("Ringtone no. %d\n", data->Bitmap->ringtone);
+				}
+				break;
+			case 0x13:
+				if (data->PhonebookEntry) {
+					subEntry->EntryType=blockstart[0];
+					subEntry->NumberType=blockstart[5];
+					subEntry->BlockNumber=blockstart[4];
+					subEntry->data.Date.Year=(blockstart[6] << 8) + blockstart[7];
+					subEntry->data.Date.Month  = blockstart[8];
+					subEntry->data.Date.Day    = blockstart[9];
+					subEntry->data.Date.Hour   = blockstart[10];
+					subEntry->data.Date.Minute = blockstart[11];
+					subEntry->data.Date.Second = blockstart[12];
+					dprintf(_("   Date: %02u.%02u.%04u\n"), subEntry->data.Date.Day,
+						subEntry->data.Date.Month, subEntry->data.Date.Year);
+					dprintf(_("   Time: %02u:%02u:%02u\n"), subEntry->data.Date.Hour,
+						subEntry->data.Date.Minute, subEntry->data.Date.Second);
+					subblockcount++;
+				}
+				break;
+			case 0x1b:                   /* Bitmap */
+				if (data->Bitmap) {
+					data->Bitmap->width = blockstart[5];
+					data->Bitmap->height = blockstart[6];
+					data->Bitmap->size = (data->Bitmap->width * data->Bitmap->height) / 8;
+					memcpy(data->Bitmap->bitmap, blockstart + 10, data->Bitmap->size);
+					dprintf("Bitmap\n");
+				}
+				break;
+			case 0x1c:                   /* Graphic on/off */
+				break;
+			case 0x1e:                   /* Number */
+				if (data->PhonebookEntry) {
+					data->PhonebookEntry->Group = blockstart[5] - 1;
+					dprintf(_("   Group: %d\n"), data->PhonebookEntry->Group);
+				}
+				break;
+			default:
+				dprintf(_("Unknown phonebook block %02x\n"), blockstart[0]);
+				break;
+			}
+			blockstart += blockstart[3];
+		}
+		return GE_NONE;
+		break;
+	case 0x0c:
+		switch (message[6]) {
+		case 0x3d: return GE_PHBOOKWRITEFAILED; break;
+		case 0x3e: return GE_PHBOOKWRITEFAILED; break;
+		default: return GE_NONE; break;	
+		}
+		break;	
 	default:
 		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
 		return GE_UNKNOWN;
@@ -471,67 +689,19 @@ static GSM_Error P7110_DialVoice(char *Number)
 
 	return GE_NOTIMPLEMENTED;
 }
+#endif
 
-
-static GSM_Error GetCallerBitmap(GSM_Bitmap *bitmap)
+static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
 				  0x00, 0x10 , /* memory type */
 				  0x00, 0x00,  /* location */
 				  0x00, 0x00};
-	int len = 14;
-	int blocks, i;
-	unsigned char *blockstart;
 
-	req[11] = bitmap->number + 1;
-	dprintf("Getting caller(%d) logo...\n",bitmap->number);
-	if (PGEN_CommandResponse(&link, req, &len, 0x03, 0x03, 500) == GE_NONE) {
-		if (req[6] == 0x0f) { // not found
-			if (req[10] == 0x34) {
-				dprintf("Invalid caller location\n");
-				return GE_INVALIDPHBOOKLOCATION;
-			}
-			else {
-				dprintf("Unknown error getting caller logo\n");
-				return GE_NOTIMPLEMENTED;
-			}
-		}
-		dprintf("Received caller logo\n");
-		bitmap->size = 0;
-		bitmap->height = 0;
-		bitmap->width = 0;
-		bitmap->text[0] = 0;
-		blocks     = req[17];        
-		blockstart = req + 18;
-		for (i = 0; i < blocks; i++) {
-			switch (blockstart[0]) {
-			case 0x07:                   /* Name */
-				DecodeUnicode(bitmap->text, (blockstart + 6), blockstart[5] / 2);
-				dprintf("Name: %s\n",bitmap->text);
-				break;
-			case 0x0c:                   /* Ringtone */
-				bitmap->ringtone = blockstart[5];
-				dprintf("Ringtone no. %d\n", bitmap->ringtone);
-				break;
-			case 0x1b:                   /* Bitmap */
-				bitmap->width = blockstart[5];
-				bitmap->height = blockstart[6];
-				bitmap->size = (bitmap->width * bitmap->height) / 8;
-				memcpy(bitmap->bitmap, blockstart + 10, bitmap->size);
-				dprintf("Bitmap\n");
-				break;
-			case 0x1c:                   /* Graphic on/off */
-				break;
-			case 0x1e:                   /* Number */
-				break;
-			default:
-				dprintf(_("Unknown caller logo block %02x\n"), blockstart[0]);
-				break;
-			}
-			blockstart += blockstart[3];
-		}
-		return GE_NONE;
-	} else return GE_NOTIMPLEMENTED;
+	req[11] = data->Bitmap->number + 1;
+	dprintf("Getting caller(%d) logo...\n",data->Bitmap->number);
+	if (SM_SendMessage(state, 14, 0x03, req)!=GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
 }
 
 
@@ -549,7 +719,7 @@ inline unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
 }
 
 
-static GSM_Error SetCallerBitmap(GSM_Bitmap *bitmap)
+static GSM_Error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
 				  0x00, 0x10,  /* memory type */
@@ -559,26 +729,26 @@ static GSM_Error SetCallerBitmap(GSM_Bitmap *bitmap)
 	int block, i;
 	unsigned int count = 18;
 
-	if ((bitmap->width!=P7110_Information.CallerLogoW) ||
-	    (bitmap->height!=P7110_Information.CallerLogoH )) {
-		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",P7110_Information.CallerLogoH, P7110_Information.CallerLogoW, bitmap->height, bitmap->width); 
+	if ((data->Bitmap->width!=state->Phone.Info.CallerLogoW) ||
+	    (data->Bitmap->height!=state->Phone.Info.CallerLogoH )) {
+		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",state->Phone.Info.CallerLogoH, state->Phone.Info.CallerLogoW, data->Bitmap->height, data->Bitmap->width); 
 	    return GE_INVALIDIMAGESIZE;
 	}	
 
-	req[13] = bitmap->number + 1;
-	dprintf("Setting caller(%d) bitmap...\n",bitmap->number);
+	req[13] = data->Bitmap->number + 1;
+	dprintf("Setting caller(%d) bitmap...\n",data->Bitmap->number);
 	block = 1;
 	/* Name */
-	i = strlen(bitmap->text);
-	EncodeUnicode((string + 1), bitmap->text, i);
+	i = strlen(data->Bitmap->text);
+	EncodeUnicode((string + 1), data->Bitmap->text, i);
 	string[0] = i * 2;
 	count += PackBlock(0x07, i * 2 + 1, block++, string, req + count);
 	/* Ringtone */
-	string[0] = bitmap->ringtone;
+	string[0] = data->Bitmap->ringtone;
 	string[1] = 0;
 	count += PackBlock(0x0c, 2, block++, string, req + count);
 	/* Number */
-	string[0] = bitmap->number+1;
+	string[0] = data->Bitmap->number+1;
 	string[1] = 0;
 	count += PackBlock(0x1e, 2, block++, string, req + count);
 	/* Logo on/off - assume on for now */
@@ -586,87 +756,65 @@ static GSM_Error SetCallerBitmap(GSM_Bitmap *bitmap)
 	string[1] = 0;
 	count += PackBlock(0x1c, 2, block++, string, req + count);
 	/* Logo */
-	string[0] = bitmap->width;
-	string[1] = bitmap->height;
+	string[0] = data->Bitmap->width;
+	string[1] = data->Bitmap->height;
 	string[2] = 0;
 	string[3] = 0;
 	string[4] = 0x7e; /* Size */
-	memcpy(string + 5, bitmap->bitmap, bitmap->size);
-	count += PackBlock(0x1b, bitmap->size + 5, block++, string, req + count);
+	memcpy(string + 5, data->Bitmap->bitmap, data->Bitmap->size);
+	count += PackBlock(0x1b, data->Bitmap->size + 5, block++, string, req + count);
 	req[17] = block - 1;
-	if (PGEN_CommandResponse(&link, req, &count, 0x03, 0x03, 100) != GE_NONE) {
-		dprintf("No response trying to set caller logo\n");
-		return GE_NOTIMPLEMENTED;
-	}
-	dprintf("Caller logo set ok\n");
-	return GE_NONE;
+
+	if (SM_SendMessage(state, count, 0x03, req)!=GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
 }
 
 
-static GSM_Error GetStartupBitmap(GSM_Bitmap *bitmap)
+static GSM_Error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[1000] = {FBUS_FRAME_HEADER, 0xee, 0x15};
-	int count=5;
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0xee, 0x15};
 
 	dprintf("Getting startup logo...\n");
-	if (PGEN_CommandResponse(&link, req, &count, 0x7a, 0x7a, 1000) != GE_NONE) {
-		dprintf("No response trying to set startup logo\n");
-		return GE_NOTIMPLEMENTED;
-	}
-	/* I'm sure there are blocks here but never mind! */
-	bitmap->type = GSM_StartupLogo;
-	bitmap->height = req[13];
-	bitmap->width = req[17];
-	bitmap->size=((bitmap->height/8)+(bitmap->height%8>0))*bitmap->width; /* Can't see this coded anywhere */
-	memcpy(bitmap->bitmap, req+22, bitmap->size);
-	dprintf("Startup logo got ok - height(%d) width(%d)\n", bitmap->height, bitmap->width);
-	return GE_NONE;
+	if (SM_SendMessage(state, 5, 0x7a, req)!=GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x7a);
 }
 
-static GSM_Error GetOperatorBitmap(GSM_Bitmap *bitmap)
+static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *message, int length, GSM_Data *data) 
 {
-	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x70};
-	int count = 4, i;
-	unsigned char *blockstart;
+	switch (message[3]) {
+	case 0xeb:
+		dprintf("Startup logo set ok\n");
+		return GE_NONE;
+		break;
+	case 0xed:
+		if (data->Bitmap) {
+			/* I'm sure there are blocks here but never mind! */
+			data->Bitmap->type = GSM_StartupLogo;
+			data->Bitmap->height = message[13];
+			data->Bitmap->width = message[17];
+			data->Bitmap->size=((data->Bitmap->height/8)+(data->Bitmap->height%8>0))*data->Bitmap->width; /* Can't see this coded anywhere */
+			memcpy(data->Bitmap->bitmap, message+22, data->Bitmap->size);
+			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->Bitmap->height, data->Bitmap->width);
+		}
+		return GE_NONE;
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x7a (%d)\n", message[3]);
+		return GE_UNKNOWN;
+		break;
+	}
+}
+
+static GSM_Error GetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x70};
 
 	dprintf("Getting op logo...\n");
-	if (PGEN_CommandResponse(&link, req, &count, 0x0a, 0x0a, 500) != GE_NONE) {
-		dprintf("No response trying to get op logo\n");
-		return GE_NOTIMPLEMENTED;
-	}
-	dprintf("Op logo received ok ");
-	blockstart = req + 6;
-	for (i = 0; i < req[4]; i++) {
-		switch (blockstart[0]) {
-		case 0x01:  /* Operator details */
-			/* Network code is stored as 0xBA 0xXC 0xED ("ABC DE"). */
-			bitmap->netcode[0] = '0' + (blockstart[8] & 0x0f);
-			bitmap->netcode[1] = '0' + (blockstart[8] >> 4);
-			bitmap->netcode[2] = '0' + (blockstart[9] & 0x0f);
-			bitmap->netcode[3] = ' ';
-			bitmap->netcode[4] = '0' + (blockstart[10] & 0x0f);
-			bitmap->netcode[5] = '0' + (blockstart[10] >> 4);
-			bitmap->netcode[6] = 0;
-			dprintf("Operator %s ",bitmap->netcode);
-			break;
-		case 0x04: /* Logo */
-			bitmap->type = GSM_OperatorLogo;
-			bitmap->size = blockstart[5]; /* Probably + [4]<<8 */
-			bitmap->height = blockstart[3];
-			bitmap->width = blockstart[2];
-			memcpy(bitmap->bitmap, blockstart + 8, bitmap->size);
-			dprintf("Logo (%dx%d) ", bitmap->height, bitmap->width);
-			break;
-		default:
-			dprintf(_("Unknown operator block %d\n"), blockstart[0]);
-			break;
-		}
-		blockstart += blockstart[1];
-	}
-	return GE_NONE;
+	if (SM_SendMessage(state, 4, 0x0a, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x0a);
 }
 
-static GSM_Error SetStartupBitmap(GSM_Bitmap *bitmap)
+static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[1000] = {FBUS_FRAME_HEADER, 0xec, 0x15, 0x00, 0x00, 0x00, 0x04, 0xc0, 0x02, 0x00,
 				   0x00,           /* Height */
@@ -676,26 +824,23 @@ static GSM_Error SetStartupBitmap(GSM_Bitmap *bitmap)
 	int count = 21;
 
 
-	if ((bitmap->width!=P7110_Information.StartupLogoW) ||
-	    (bitmap->height!=P7110_Information.StartupLogoH )) {
-		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",P7110_Information.StartupLogoH, P7110_Information.StartupLogoW, bitmap->height, bitmap->width); 
+	if ((data->Bitmap->width!=state->Phone.Info.StartupLogoW) ||
+	    (data->Bitmap->height!=state->Phone.Info.StartupLogoH )) {
+		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",state->Phone.Info.StartupLogoH, state->Phone.Info.StartupLogoW, data->Bitmap->height, data->Bitmap->width); 
 	    return GE_INVALIDIMAGESIZE;
 	}
 
-	req[12] = bitmap->height;
-	req[16] = bitmap->width;
-	memcpy(req + count, bitmap->bitmap, bitmap->size);
-	count += bitmap->size;
+	req[12] = data->Bitmap->height;
+	req[16] = data->Bitmap->width;
+	memcpy(req + count, data->Bitmap->bitmap, data->Bitmap->size);
+	count += data->Bitmap->size;
 	dprintf("Setting startup logo...\n");
-	if (PGEN_CommandResponse(&link, req, &count, 0x7a, 0x7a, 1000) != GE_NONE) {
-		dprintf("No response trying to set startup logo\n");
-		return GE_NOTIMPLEMENTED;
-	}
-	dprintf("Startup logo set ok\n");
-	return GE_NONE;
+
+	if (SM_SendMessage(state, count, 0x7a, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x7a);
 }
 
-static GSM_Error SetOperatorBitmap(GSM_Bitmap *bitmap)
+static GSM_Error SetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[500] = { FBUS_FRAME_HEADER, 0xa3, 0x01,
 				   0x00,              /* logo enabled */
@@ -709,134 +854,61 @@ static GSM_Error SetOperatorBitmap(GSM_Bitmap *bitmap)
 	};    
 	int count = 18;
 
-	if ((bitmap->width!=P7110_Information.OpLogoW) ||
-	    (bitmap->height!=P7110_Information.OpLogoH )) {
-		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",P7110_Information.OpLogoH, P7110_Information.OpLogoW, bitmap->height, bitmap->width); 
+	if ((data->Bitmap->width!=state->Phone.Info.OpLogoW) ||
+	    (data->Bitmap->height!=state->Phone.Info.OpLogoH )) {
+		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",state->Phone.Info.OpLogoH, state->Phone.Info.OpLogoW, data->Bitmap->height, data->Bitmap->width); 
 	    return GE_INVALIDIMAGESIZE;
 	}
 
-	if (strcmp(bitmap->netcode,"000 00")) {  /* set logo */
+	if (strcmp(data->Bitmap->netcode,"000 00")) {  /* set logo */
 		req[5] = 0x01;      // Logo enabled
-		req[6] = ((bitmap->netcode[1] & 0x0f) << 4) | (bitmap->netcode[0] & 0x0f);
-		req[7] = 0xf0 | (bitmap->netcode[2] & 0x0f);
-		req[8] = ((bitmap->netcode[5] & 0x0f) << 4) | (bitmap->netcode[4] & 0x0f);
-		req[11] = 8 + bitmap->size;
-		req[12] = bitmap->width;
-		req[13] = bitmap->height;
-		req[15] = bitmap->size;
-		memcpy(req + count, bitmap->bitmap, bitmap->size);
-		count += bitmap->size;
+		req[6] = ((data->Bitmap->netcode[1] & 0x0f) << 4) | (data->Bitmap->netcode[0] & 0x0f);
+		req[7] = 0xf0 | (data->Bitmap->netcode[2] & 0x0f);
+		req[8] = ((data->Bitmap->netcode[5] & 0x0f) << 4) | (data->Bitmap->netcode[4] & 0x0f);
+		req[11] = 8 + data->Bitmap->size;
+		req[12] = data->Bitmap->width;
+		req[13] = data->Bitmap->height;
+		req[15] = data->Bitmap->size;
+		memcpy(req + count, data->Bitmap->bitmap, data->Bitmap->size);
+		count += data->Bitmap->size;
 	}
 	dprintf("Setting op logo...\n");
-	if (PGEN_CommandResponse(&link, req, &count, 0x0a, 0x0a, 500) != GE_NONE) {
-		dprintf("No response from trying to set op logo\n");
-		return GE_NOTIMPLEMENTED;
-	}
-	if (req[3] != 0xa4) {
-		dprintf("Unknown error setting op logo\n");
-		return GE_UNKNOWN;
-	}
-	dprintf("Op logo set ok\n");
-	return GE_NONE;
+	if (SM_SendMessage(state, count, 0x0a, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x0a);
 }
 
-static GSM_Error P7110_GetBitmap(GSM_Bitmap *bitmap)
+
+static GSM_Error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	switch(bitmap->type) {
+	switch(data->Bitmap->type) {
 	case GSM_CallerLogo:
-		return GetCallerBitmap(bitmap);
+		return GetCallerBitmap(data, state);
 	case GSM_StartupLogo:
-		return GetStartupBitmap(bitmap);
+		return GetStartupBitmap(data, state);
 	case GSM_OperatorLogo:
-		return GetOperatorBitmap(bitmap);
+		return GetOperatorBitmap(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
 }
 
 
-static GSM_Error P7110_SetBitmap(GSM_Bitmap *bitmap)
+static GSM_Error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	switch(bitmap->type) {
+	switch(data->Bitmap->type) {
 	case GSM_CallerLogo:
-		return SetCallerBitmap(bitmap);
+		return SetCallerBitmap(data, state);
 	case GSM_StartupLogo:
-		return SetStartupBitmap(bitmap);
+		return SetStartupBitmap(data, state);
 	case GSM_OperatorLogo:
-		return SetOperatorBitmap(bitmap);
+		return SetOperatorBitmap(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
 }
 
 
-static GSM_Error P7110_GetMemoryStatus(GSM_MemoryStatus *status)
-{
-	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x03, 0x00, 0x00};
-	int len = 6;
-
-	dprintf("Getting memory status...\n");
-	req[5] = GetMemoryType(status->MemoryType);
-	if (PGEN_CommandResponse(&link, req, &len, 0x03, 0x03, 100) == GE_NONE) {
-		if (req[5] != 0xff) {
-			status->Used = (req[16] << 8) + req[17];
-			status->Free = ((req[14] << 8) + req[15]) - status->Used;
-			dprintf(_("Memory status - location = %d\n"), (req[8] << 8) + req[9]);
-			return GE_NONE;
-		} else {
-			dprintf("Unknown error getting mem status\n");
-			return GE_NOTIMPLEMENTED;
-
-		}
-	} else {
-		dprintf("No response about mem status\n");
-		return GE_NOTIMPLEMENTED;
-	}
-}
-
-
-
-static int GetMemoryType(GSM_MemoryType memory_type)
-{
-	int result;
-
-	switch (memory_type) {
-	case GMT_MT:
-		result = P7110_MEMORY_MT;
-		break;
-	case GMT_ME:
-		result = P7110_MEMORY_ME;
-		break;
-	case GMT_SM:
-		result = P7110_MEMORY_SM;
-		break;
-	case GMT_FD:
-		result = P7110_MEMORY_FD;
-		break;
-	case GMT_ON:
-		result = P7110_MEMORY_ON;
-		break;
-	case GMT_EN:
-		result = P7110_MEMORY_EN;
-		break;
-	case GMT_DC:
-		result = P7110_MEMORY_DC;
-		break;
-	case GMT_RC:
-		result = P7110_MEMORY_RC;
-		break;
-	case GMT_MC:
-		result = P7110_MEMORY_MC;
-		break;
-	default:
-		result = P7110_MEMORY_XX;
-		break;
-	}
-	return (result);
-}
-
-
-static GSM_Error P7110_WritePhonebookLocation(GSM_PhonebookEntry *entry)
+static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
 				  0x00, 0x00,  /* memory type */
@@ -845,6 +917,10 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	char string[500];
 	int block, i, j, defaultn;
 	unsigned int count = 18;
+	GSM_PhonebookEntry *entry;
+	
+	if (data->PhonebookEntry) entry=data->PhonebookEntry;
+	else return GE_TRYAGAIN;
 
 	req[11] = GetMemoryType(entry->MemoryType);
 	req[12] = (entry->Location >> 8);
@@ -891,113 +967,30 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_PhonebookEntry *entry)
 				} 
 		req[17] = block - 1;
 		dprintf("Writing phonebook entry %s...\n",entry->Name);
-		if (PGEN_CommandResponse(&link, req, &count, 0x03, 0x03, 500) != GE_NONE) {
-			dprintf("No response from writing phonebook\n");
-			return GE_NOTIMPLEMENTED;
-		}
 	}
-	dprintf("Phonebook written ok\n");
-	return GE_NONE;
+	if (SM_SendMessage(state, count, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
 }
 
 
 
-static GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry)
+static GSM_Error P7110_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[2000] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
 				   0x00, 0x00 , /* memory type */ //02,05
 				   0x00, 0x00,  /* location */
 				   0x00, 0x00};
-	int len = 14;
-	int blocks, blockcount, i;
-	unsigned char *pBlock;
-
-	req[9] = GetMemoryType(entry->MemoryType);
-	req[10] = (entry->Location >> 8);
-	req[11] = entry->Location & 0xff;
-	dprintf("Reading phonebook location (%d)\n",entry->Location);
-	if (PGEN_CommandResponse(&link, req, &len, 0x03, 0x03, 2000) == GE_NONE) {
-		entry->Empty = true;
-		entry->Group = 0;
-		entry->Name[0] = '\0';
-		entry->Number[0] = '\0';
-		entry->SubEntriesCount = 0;
-		entry->Date.Year = 0;
-		entry->Date.Month = 0;
-		entry->Date.Day = 0;
-		entry->Date.Hour = 0;
-		entry->Date.Minute = 0;
-		entry->Date.Second = 0;
-		if (req[6] == 0x0f) { // not found
-			if (req[10] == 0x34) return GE_INVALIDPHBOOKLOCATION;
-			else return GE_NONE;
-		}
-		blocks     = req[17];
-		blockcount = 0;
-		entry->SubEntriesCount = blocks - 1;
-		dprintf(_("Message: Phonebook entry received:\n"));
-		dprintf(_(" Blocks: %d\n"), blocks);
-		pBlock = req + 18;
-		for (i = 0; i < blocks; i++) {
-			GSM_SubPhonebookEntry* pEntry = &entry->SubEntries[blockcount];
-			switch (pBlock[0]) {
-			case P7110_ENTRYTYPE_NAME:
-				DecodeUnicode(entry->Name, (pBlock + 6), pBlock[5] / 2);
-				entry->Empty = false;
-				dprintf(_("   Name: %s\n"), entry->Name);
-				break;
-			case P7110_ENTRYTYPE_NUMBER:
-				pEntry->EntryType   = pBlock[0];
-				pEntry->NumberType  = pBlock[5];
-				pEntry->BlockNumber = pBlock[4];
-				DecodeUnicode(pEntry->data.Number, (pBlock + 10), pBlock[9] / 2);
-				if (!blockcount) strcpy(entry->Number, pEntry->data.Number);
-				dprintf(_("   Type: %d (%02x)\n"), pEntry->NumberType, pEntry->NumberType);
-				dprintf(_(" Number: %s\n"), pEntry->data.Number);
-				blockcount++;
-				break;
-			case P7110_ENTRYTYPE_DATE:
-				pEntry->EntryType        = pBlock[0];
-				pEntry->NumberType       = pBlock[5];
-				pEntry->BlockNumber      = pBlock[4];
-				pEntry->data.Date.Year   = (pBlock[6] << 8) + pBlock[7];
-				pEntry->data.Date.Month  = pBlock[8];
-				pEntry->data.Date.Day    = pBlock[9];
-				pEntry->data.Date.Hour   = pBlock[10];
-				pEntry->data.Date.Minute = pBlock[11];
-				pEntry->data.Date.Second = pBlock[12];
-				dprintf(_("   Date: %02u.%02u.%04u\n"), pEntry->data.Date.Day,
-					pEntry->data.Date.Month, pEntry->data.Date.Year);
-				dprintf(_("   Time: %02u:%02u:%02u\n"), pEntry->data.Date.Hour,
-					pEntry->data.Date.Minute, pEntry->data.Date.Second);
-				blockcount++;
-				break;
-			case P7110_ENTRYTYPE_NOTE:
-			case P7110_ENTRYTYPE_POSTAL:
-			case P7110_ENTRYTYPE_EMAIL:
-				pEntry->EntryType   = pBlock[0];
-				pEntry->NumberType  = 0;
-				pEntry->BlockNumber = pBlock[4];
-				DecodeUnicode(pEntry->data.Number, (pBlock + 6), pBlock[5] / 2);
-				dprintf(_("   Type: %d (%02x)\n"), pEntry->EntryType, pEntry->EntryType);
-				dprintf(_("   Text: %s\n"), pEntry->data.Number);
-				blockcount++;
-				break;
-			case P7110_ENTRYTYPE_GROUP:
-				entry->Group = pBlock[5] - 1;
-				dprintf(_("   Group: %d\n"), entry->Group);
-				break;
-			default:
-				dprintf(_("Unknown Entry Code (%u) received.\n"), pBlock[0] );
-				break;
-			}
-			pBlock += pBlock[3];
-		}
-		entry->SubEntriesCount = blockcount;    
-		return GE_NONE;
-	} else return GE_NOTIMPLEMENTED;
+     
+	req[9] = GetMemoryType(data->PhonebookEntry->MemoryType);
+	req[10] = (data->PhonebookEntry->Location >> 8);
+	req[11] = data->PhonebookEntry->Location & 0xff;
+	dprintf("Reading phonebook location (%d)\n",data->PhonebookEntry->Location);
+	if (SM_SendMessage(state, 14, 0x03, req)!=GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
 }
 
-#endif
+	
+	
+
 
 

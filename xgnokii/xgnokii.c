@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.34  2001-03-23 08:24:56  ja
+  Revision 1.35  2001-05-24 20:47:30  chris
+  More updating of 7110 code and some of xgnokii_lowlevel changed over.
+
+  Revision 1.34  2001/03/23 08:24:56  ja
   New preview for 6210 in xgnokii's logos module.
 
   Revision 1.33  2001/03/19 23:43:47  pkot
@@ -323,7 +326,7 @@ static inline void DrawBattery (GtkWidget *data, int batterylevel)
     if (percent > 1)
       percent = 1;
     gdk_draw_rectangle (Pixmap, GTK_WIDGET (data)->style->white_gc, TRUE,
-                        battery_levels[4 * i] + battery_levels[4 * i + 2] * (1 - percent),
+                        battery_levels[4 * i],
                         battery_levels[4 * i + 1],
                         battery_levels[4 * i + 2] * percent,
                         battery_levels[4 * i + 3]);

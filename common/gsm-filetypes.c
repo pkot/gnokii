@@ -1139,8 +1139,10 @@ void savengg(FILE *file, GSM_Bitmap *bitmap)
 
 	char buffer[8];
 	int i, j;
+	/* This could be the phone info... */
+	GSM_Information info={"",0,0,0,0,0,0,0,0,0,0,0,0,0,14,72};
 
-	GSM_ResizeBitmap(bitmap, GSM_CallerLogo);
+	GSM_ResizeBitmap(bitmap, GSM_CallerLogo, &info);
 
 	header[6] = bitmap->width;
 	header[8] = bitmap->height;
@@ -1172,8 +1174,10 @@ void savenol(FILE *file, GSM_Bitmap *bitmap)
 		         0x00};
 	char buffer[8];
 	int i, j, country, net;
+	/* This could be the phone info... */
+	GSM_Information info={"",0,0,0,0,0,0,0,0,0,0,0,14,72,0,0};
 
-	GSM_ResizeBitmap(bitmap, GSM_OperatorLogo);
+	GSM_ResizeBitmap(bitmap, GSM_OperatorLogo, &info);
 
 	sscanf(bitmap->netcode, "%d %d", &country, &net);
 
@@ -1202,8 +1206,10 @@ void savensl(FILE *file, GSM_Bitmap *bitmap)
 
 	u8 header[] = {'F','O','R','M', 0x01,0xFE,  /* File ID block,      size 1*256+0xFE=510*/
 		       'N','S','L','D', 0x01,0xF8}; /* Startup Logo block, size 1*256+0xF8=504*/
+	/* This could be the phone info... */
+	GSM_Information info={"",0,0,0,0,0,0,0,0,0,48,84,0,0,0,0};
 
-	GSM_ResizeBitmap(bitmap, GSM_StartupLogo);
+	GSM_ResizeBitmap(bitmap, GSM_StartupLogo, &info);
 
 	fwrite(header, 1, sizeof(header), file);
 
@@ -1340,8 +1346,8 @@ GSM_Error GSM_ShowBitmapFile(char *FileName)
 		break;
 #ifdef XPM
 	case XPMF:
-		error = loadxpm(file, &bitmap);
 		fclose(file);
+		error = loadxpm(FileName, &bitmap);
 		break;
 #endif
 	default:

@@ -65,4 +65,4 @@ extern void GUI_InitCallerGroupsInf (void);
 extern void GUI_InitSMSSettings (void);
 extern void GUI_ShowAbout (void);
 
-#endif XGNOKII_H
+#endif /* XGNOKII_H */

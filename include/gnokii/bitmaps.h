@@ -19,7 +19,7 @@ void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y);
 void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y);
 bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y);
 void GSM_ClearBitmap(GSM_Bitmap *bmp);
-void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target);
+void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Information *info);
 void GSM_PrintBitmap(GSM_Bitmap *bitmap);
 
 /* SMS bitmap functions */

@@ -61,7 +61,7 @@ void GSM_ClearBitmap(GSM_Bitmap *bmp)
 }
 
 
-void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target)
+void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Information *info)
 {
   GSM_Bitmap backup;
   int x,y,copywidth,copyheight;
@@ -70,19 +70,19 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target)
   memcpy(&backup,bitmap,sizeof(GSM_Bitmap));
       
   if (target==GSM_StartupLogo) {
-    bitmap->width=GSM_Info->StartupLogoW;
-    bitmap->height=GSM_Info->StartupLogoH;
+    bitmap->width=info->StartupLogoW;
+    bitmap->height=info->StartupLogoH;
     bitmap->size=((bitmap->height/8)+(bitmap->height%8>0))*bitmap->width;
   }
   if (target==GSM_OperatorLogo) {
-    bitmap->width=GSM_Info->OpLogoW;
-    bitmap->height=GSM_Info->OpLogoH;
+    bitmap->width=info->OpLogoW;
+    bitmap->height=info->OpLogoH;
     x=bitmap->width*bitmap->height;
     bitmap->size=(x/8)+(x%8>0);
   }
   if (target==GSM_CallerLogo) {
-    bitmap->width=GSM_Info->CallerLogoW;
-    bitmap->height=GSM_Info->CallerLogoH;
+    bitmap->width=info->CallerLogoW;
+    bitmap->height=info->CallerLogoH;
     x=bitmap->width*bitmap->height;
     bitmap->size=(x/8)+(x%8>0);
   }

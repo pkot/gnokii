@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
    $Log$
-   Revision 1.7  2001-03-23 08:24:56  ja
+   Revision 1.8  2001-05-24 20:47:31  chris
+   More updating of 7110 code and some of xgnokii_lowlevel changed over.
+
+   Revision 1.7  2001/03/23 08:24:56  ja
    New preview for 6210 in xgnokii's logos module.
 
          
@@ -62,6 +65,7 @@
 #include "xpm/Tool_filled_rectangle.xpm"
 
 extern GSM_Network GSM_Networks[];
+extern GSM_Statemachine statemachine;
 
 GtkWidget *GUI_LogosWindow;
 
@@ -1131,26 +1135,29 @@ gint LogoTypeEvent(GtkWidget *widget) {
   int clear = 0;
 
   /* is startupLogo? */
-  if (GTK_TOGGLE_BUTTON(buttonStartup)->active && bitmap.type != GSM_StartupLogo) {
+  /* Resize and clear anyway - CK */
+  if (GTK_TOGGLE_BUTTON(buttonStartup)->active) {
     /* look for old bitmap type, clean if another */
     clear = 1;
-    GSM_ResizeBitmap(&bitmap,GSM_StartupLogo);
+    GSM_ResizeBitmap(&bitmap,GSM_StartupLogo, &statemachine.Phone.Info);
   }
 
   /* has phone support for callerGroups? */
   if (phoneMonitor.supported & PM_CALLERGROUP) {
     if (GTK_TOGGLE_BUTTON(buttonCaller)->active && bitmap.type != GSM_CallerLogo) {
       /* previous was startup? clear and draw batteries, signal, ... */      
-      if (bitmap.type == GSM_StartupLogo) clear = 1;
-      GSM_ResizeBitmap(&bitmap,GSM_CallerLogo);
+	    /* Clear anyway for 7110...CK */
+      clear = 1;
+      GSM_ResizeBitmap(&bitmap,GSM_CallerLogo, &statemachine.Phone.Info);
     }
   }
 
   /* is new type operatorLogo? */
   if (GTK_TOGGLE_BUTTON(buttonOperator)->active && bitmap.type != GSM_OperatorLogo) {
     /* previous startup? clear and draw batteries, signal, ... */      
-    if (bitmap.type == GSM_StartupLogo) clear = 1;
-    GSM_ResizeBitmap(&bitmap,GSM_OperatorLogo);
+	  /* Clear anyway for 7110..CK */
+    clear = 1;
+    GSM_ResizeBitmap(&bitmap,GSM_OperatorLogo, &statemachine.Phone.Info);
   }
 
   /* must clear? */
@@ -1647,6 +1654,10 @@ void GUI_ShowLogosWindow (void) {
     gtk_widget_hide(buttonCaller);
     gtk_widget_hide(callerCombo); 
   }        
+
+  /* Call to reset Startup logo size */
+  LogoTypeEvent(GUI_LogosWindow);
+
   gtk_widget_show(GUI_LogosWindow);
 
   if (!previewAvailable && showPreviewErrorDialog) {
