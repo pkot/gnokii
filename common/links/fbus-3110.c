@@ -53,6 +53,7 @@ static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequ
 static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
 static void fb3110_tx_ack_send(u8 *message, int length, struct gn_statemachine *state);
 static void fb3110_sequence_number_update(struct gn_statemachine *state);
+static int fb3110_message_type_fold(int type);
 
 /* FIXME - win32 stuff! */
 
@@ -148,7 +149,7 @@ static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachin
 				dprintf("\n");
 				/* Transfer message to state machine */
 				sm_incoming_acknowledge(state);
-				sm_incoming_function(i->buffer[0], i->buffer, i->frame_len, state);
+				sm_incoming_function(fb3110_message_type_fold(i->buffer[0]), i->buffer, i->frame_len, state);
 
 				/* Send an ack */
 				fb3110_tx_ack_send(i->buffer, i->frame_len, state);
@@ -380,4 +381,47 @@ static void fb3110_sequence_number_update(struct gn_statemachine *state)
 
 	if (FBUSINST(state)->request_sequence_number > 0x17 || FBUSINST(state)->request_sequence_number < 0x10)
 		FBUSINST(state)->request_sequence_number = 0x10;
+}
+
+/* The 3110 protocol has a tendency to use different message types to
+ * indicate succesful and failed actions. These are not handled very well by
+ * the gnokii internals, so they are "folded" together and dealt with in the
+ * 3110 code instead. The logic is that each success/failure message type
+ * pair is reported as the type of the message to indicate success.
+ * The argument is the original message type i.e. first byte of message. */
+
+static int fb3110_message_type_fold(int type)
+{
+	switch (type) {
+	case 0x15:
+	case 0x16:
+	case 0x17:
+		return 0x16;	/* initialization */
+	case 0x21:
+	case 0x22:
+		return 0x21;	/* send DTMF */
+	case 0x28:
+	case 0x29:
+		return 0x28;	/* SMS sent */
+	case 0x2a:
+	case 0x2b:
+		return 0x2a;	/* SMS saved */
+	case 0x2c:
+	case 0x2d:
+		return 0x2c;	/* SMS read */
+	case 0x2e:
+	case 0x2f:
+		return 0x2e;	/* SMS deleted */
+	case 0x3d:
+	case 0x3e:
+		return 0x3d;	/* SMSC set */
+	case 0x44:
+	case 0x45:
+		return 0x44;	/* mem location set */
+	case 0x46:
+	case 0x47:
+		return 0x46;	/* mem location read */
+	default:
+		return type;	/* all others left as-is */
+	}
 }

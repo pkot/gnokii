@@ -73,17 +73,12 @@ static gn_error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *
 static gn_error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingRestart(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-static gn_error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-static gn_error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingInitFrame(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-static gn_error P3110_IncomingSMSSendError(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSSave(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-static gn_error P3110_IncomingSMSSaveError(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-static gn_error P3110_IncomingSMSError(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-static gn_error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -106,8 +101,8 @@ static gn_incoming_function_type incoming_functions[] = {
 	{ 0x12, P3110_IncomingEndOfOutgoingCall2 },
 	{ 0x13, P3110_IncomingRestart },
 	{ 0x15, P3110_IncomingInitFrame_0x15 },
-	{ 0x16, P3110_IncomingInitFrame_0x16 },
-	{ 0x17, P3110_IncomingInitFrame_0x17 },
+	{ 0x16, P3110_IncomingInitFrame },
+	{ 0x17, P3110_IncomingInitFrame },
 	{ 0x20, P3110_IncomingNothing },
 	/*{ 0x21, P3110_IncomingDTMFSucess },*/
 	/*{ 0x22, P3110_IncomingDTMFFailure },*/
@@ -117,14 +112,14 @@ static gn_incoming_function_type incoming_functions[] = {
 	{ 0x26, P3110_IncomingNothing },
 	{ 0x27, P3110_IncomingSMSUserData },
 	{ 0x28, P3110_IncomingSMSSend },
-	{ 0x29, P3110_IncomingSMSSendError },
+	{ 0x29, P3110_IncomingSMSSend },
 	{ 0x2a, P3110_IncomingSMSSave },
-	{ 0x2b, P3110_IncomingSMSSaveError },
+	{ 0x2b, P3110_IncomingSMSSave },
 	/* ... */
 	{ 0x2c, P3110_IncomingSMSHeader },
-	{ 0x2d, P3110_IncomingSMSError },
+	{ 0x2d, P3110_IncomingSMSHeader },
 	{ 0x2e, P3110_IncomingSMSDelete },
-	{ 0x2f, P3110_IncomingSMSDeleteError },
+	{ 0x2f, P3110_IncomingSMSDelete },
 	/* ... */
 	{ 0x32, P3110_IncomingSMSDelivered },
 	{ 0x3f, P3110_IncomingNothing },
@@ -686,7 +681,6 @@ static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *mes
 	return GN_ERR_NONE;
 }
 
-
 /* 0x16 messages are sent by the phone during initialisation, to response
    to the 0x15 message.
    Sequence bytes have been observed to change with differing software
@@ -695,20 +689,20 @@ static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *mes
    and 0x01 when not (e.g. when SIM card isn't inserted to phone or when
    it is waiting for PIN) */
 
-static gn_error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+static gn_error P3110_IncomingInitFrame(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	DRVINSTANCE(state)->sim_available = (message[2] == 0x02);
-	dprintf("SIM available: %s.\n", (DRVINSTANCE(state)->sim_available ? "Yes" : "No"));
-	return GN_ERR_NONE;
+	switch (message[0]) { /* unfold message type */
+	case 0x16:
+		DRVINSTANCE(state)->sim_available = (message[2] == 0x02);
+		dprintf("SIM available: %s.\n", (DRVINSTANCE(state)->sim_available ? "Yes" : "No"));
+		return GN_ERR_NONE;
+	case 0x17:
+		dprintf("0x17 Registration Response: Failure!\n");
+		return GN_ERR_NONE;
+	default:
+		return GN_ERR_INTERNALERROR;
+	}
 }
-
-
-static gn_error P3110_IncomingInitFrame_0x17(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
-{
-	dprintf("0x17 Registration Response: Failure!\n");
-	return GN_ERR_NONE;
-}
-
 
 /* 0x27 messages are a little unusual when sent by the phone in that
    they can either be an acknowledgement of an 0x27 message we sent
@@ -754,57 +748,68 @@ static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *messag
    TP-MR is send from phone within 0x32 message. TP-MR is increased
    by phone after each sent SMS */
 
-static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
-{
-	dprintf("SMS send OK (0x%02hhx)\n", message[2]);
-	data->raw_sms->number = (int) message[2];
-	return GN_ERR_NONE;
-}
-
-
 /* 0x29 messages are sent by the phone to indicate an error in
    sending an SMS message.  Observed values are 0x65 0x15 when
    the phone originated SMS was disabled by the network for
    the particular phone.  0x65 0x26 was observed too, whereupon
    the message was retried. */
 
-static gn_error P3110_IncomingSMSSendError(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	dprintf("SMS send failed (0x%02hhx 0x%02hhx)\n", message[2], message[3]);
-	return GN_ERR_FAILED;
+	switch (message[0]) { /* unfold message type */
+	case 0x28:
+		dprintf("SMS send OK (0x%02hhx)\n", message[2]);
+		data->raw_sms->number = (int) message[2];
+		return GN_ERR_NONE;
+	case 0x29:
+		dprintf("SMS send failed (0x%02hhx 0x%02hhx)\n", message[2], message[3]);
+		return GN_ERR_FAILED;
+	default:
+		return GN_ERR_INTERNALERROR;
+	}
 }
 
 /* 0x2a messages are sent by the phone to acknowledge succesful
    saving of an SMS message. */
 
-static gn_error P3110_IncomingSMSSave(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
-{
-	dprintf("SMS save OK (0x%02hhx)\n", message[2]);
-	data->raw_sms->number = (int) message[2];
-	return GN_ERR_NONE;
-}
-
-
 /* 0x2b messages are sent by the phone to indicate an error in
    saving an SMS message. */
 
-static gn_error P3110_IncomingSMSSaveError(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+static gn_error P3110_IncomingSMSSave(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	dprintf("SMS send failed (0x%02hhx)\n", message[2]);
-	return GN_ERR_FAILED;
+	switch (message[0]) { /* unfold message type */
+	case 0x2a:
+		dprintf("SMS save OK (0x%02hhx)\n", message[2]);
+		data->raw_sms->number = (int) message[2];
+		return GN_ERR_NONE;
+	case 0x2b:
+		dprintf("SMS send failed (0x%02hhx)\n", message[2]);
+		return GN_ERR_FAILED;
+	default:
+		return GN_ERR_INTERNALERROR;
+	}
 }
-
 
 /* 0x2c messages are generated by the phone when we request an SMS
    message with an 0x25 message.  Appears to have the same fields
    as the 0x30 notification but with one extra.  Immediately after
    the 0x2c nessage, the phone sends 0x27 message(s) */
 
+/* 0x2d messages are generated when an SMS message is requested
+   that does not exist or is empty. */
+
 static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int smsc_length, remote_length, l;
 	gn_gsm_number_type smsc_number_type, remote_number_type;
 	unsigned char smsc[256], remote[256];	/* should be enough for anyone */
+
+	if (message[0] == 0x2d) { /* unfold message type */
+		if (message[2] == 0x74)
+			return GN_ERR_INVALIDLOCATION;
+		else
+			return GN_ERR_EMPTYLOCATION;
+	} else if (message[0] != 0x2c) return GN_ERR_INTERNALERROR;
 
 	if (!data->raw_sms) {
 		dprintf("Unrequested SMS header received. Ignoring.\n");
@@ -877,41 +882,28 @@ static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message,
 	return GN_ERR_NONE;
 }
 
-
-/* 0x2d messages are generated when an SMS message is requested
-   that does not exist or is empty. */
-
-static gn_error P3110_IncomingSMSError(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
-{
-	if (message[2] == 0x74)
-		return GN_ERR_INVALIDLOCATION;
-	else
-		return GN_ERR_EMPTYLOCATION;
-}
-
-
 /* 0x2e messages are generated when an SMS message is deleted
    successfully. */
-
-static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
-{
-	return GN_ERR_NONE;
-}
-
 
 /* 0x2f messages are generated when an SMS message is deleted
    that does not exist.  Unlike responses to a getsms message
    no error is returned when the entry is already empty */
 
-static gn_error P3110_IncomingSMSDeleteError(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	/* Note 0x74 is the only value that has been seen! */
-	if (message[2] == 0x74)
-		return GN_ERR_INVALIDLOCATION;
-	else
-		return GN_ERR_EMPTYLOCATION;
+	switch (message[0]) { /* unfold message type */
+	case 0x2e:
+		return GN_ERR_NONE;
+	case 0x2f:
+		/* Note 0x74 is the only value that has been seen! */
+		if (message[2] == 0x74)
+			return GN_ERR_INVALIDLOCATION;
+		else
+			return GN_ERR_EMPTYLOCATION;
+	default:
+		return GN_ERR_INTERNALERROR;
+	}
 }
-
 
 /* 0x32 messages are generated when delivery notification arrives
    to phone from network */
