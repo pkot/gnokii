@@ -72,12 +72,6 @@ void PHONET_RX_StateMachine(unsigned char rx_byte)
 {
 	PHONET_IncomingMessage *i = &imessage;
 
-	if (isprint(rx_byte))
-		fprintf(stderr, "[%02x%c]", (unsigned char) rx_byte, rx_byte);
-	else
-		fprintf(stderr, "[%02x ]", (unsigned char) rx_byte);
-
-
 	switch (i->state) {
 
 	case FBUS_RX_Sync:
@@ -210,16 +204,6 @@ GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message) {
 	if (messagesize > 0) {
 		memcpy(out_buffer + current, message, messagesize);
 		current += messagesize;
-	}
-
-	{
-		int count;
-		dprintf("PC: ");
-
-		for (count = 0; count < current; count++)
-			dprintf("%02x:", out_buffer[count]);
-
-		dprintf("\n");
 	}
 
 	/* Send it out... */

@@ -137,13 +137,6 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 	int frm_num, seq_num;
 	FBUS_IncomingMessage *m;
 
-#if 0
-	if (isprint(rx_byte))
-		dprintf("[%02x%c]", (unsigned char) rx_byte, rx_byte);
-	else
-		dprintf("[%02x ]", (unsigned char) rx_byte);
-#endif
-
 	/* XOR the byte with the current checksum */
 	i->checksum[i->BufferCount & 1] ^= rx_byte;
 
@@ -421,11 +414,6 @@ int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 * buffer)
 		checksum ^= out_buffer[count];
 
 	out_buffer[current++] = checksum;
-
-	dprintf("PC: ");
-	for (count = 0; count < current; count++)
-		dprintf("%02x:", out_buffer[count]);
-	dprintf("\n");
 
 	/* Send it out... */
 

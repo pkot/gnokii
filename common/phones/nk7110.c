@@ -722,12 +722,6 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	switch (message[3]) {
 	/* getsms */
 	case 0x08:
-		for (i = 0; i < length; i++)
-			if (isprint(message[i]))
-				dprintf("[%02x%c]", message[i], message[i]);
-			else
-				dprintf("[%02x ]", message[i]);
-		dprintf("\n");
 		dprintf("Trying to get message # %i in folder # %i\n", message[7], message[5]);
 		if (!data->SMSMessage) return GE_INTERNALERROR;
 
@@ -803,9 +797,6 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	/* sms status */
 	case 0x37:
 		dprintf("SMS Status received\n");
-		dprintf("Data for debug:\n");
-		for (i = 0; i < length; i++) dprintf("%02x ", message[i]);
-		dprintf("\n");
 		/* FIXME: Don't count messages in fixed locations together with other */
 		data->SMSStatus->Number = ((message[10] << 8) | message[11]) +
 					  ((message[14] << 8) | message[15]) +
@@ -816,11 +807,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/* getfolderstatus */
 	case 0x6C:
-		dprintf("Message: SMS Folder status received: \n" );
-		for (i = 0; i < length; i++) {
-			dprintf("%02x ", message[i]);
-		}
-		dprintf("\n");
+		dprintf("Message: SMS Folder status received\n" );
 		if (!data->SMSFolder) return GE_INTERNALERROR;
 		memset(data->SMSFolder, 0, sizeof(SMS_Folder));
 		data->SMSFolder->number = (message[4] << 8) | message[5];
@@ -869,12 +856,6 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	/* get list of SMS pictures */
 	case 0x97:
 		dprintf("Getting list of SMS pictures...\n");
-		for (i = 0; i < length; i++)
-			if (isprint(message[i]))
-				dprintf("[%02x%c]", message[i], message[i]);
-			else
-				dprintf("[%02x ]", message[i]);
-		dprintf("\n");
 		break;
 
 	/* Some errors */
@@ -887,12 +868,6 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		return GE_UNHANDLEDFRAME;
 
 	default:
-		for (i = 0; i < length; i++)
-			if (isprint(message[i]))
-				dprintf("[%02x%c]", message[i], message[i]);
-			else
-				dprintf("[%02x ]", message[i]);
-		dprintf("\n");
 		dprintf("Message: Unknown message of type 14 : %02x  length: %d\n", message[3], length);
 		return GE_UNHANDLEDFRAME;
 	}
@@ -1021,17 +996,13 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
-	int length, i;
+	int length;
 
 	/* 6 is the frame header as above */
 	length = data->RawData->Length + 1;
 	if (length < 0) return GE_SMSWRONGFORMAT;
 	memcpy(req + 6, data->RawData->Data + 5, data->RawData->Length);
 	dprintf("Sending SMS...(%d)\n", length);
-	for (i = 0; i < length; i++) {
-		dprintf("%02x ", req[i]);
-	}
-	dprintf("\n");
 	if (SM_SendMessage(state, length, 0x02, req) != GE_NONE) return GE_NOTREADY;
 	return SM_BlockNoRetry(state, data, 0x02);
 }
@@ -1253,11 +1224,6 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 			break;
 		case P7110_NOTE_BIRTHDAY:
 
-			for (i = 0; i < 10; i++) {
-				dprintf("(%i:0x%02x)", i, block[i]);
-			}
-			dprintf("\n");
-
 			data->CalendarNote->Type = GCN_BIRTHDAY;
 			data->CalendarNote->Time.Year = year;
 			data->CalendarNote->Time.Hour = 23;
@@ -1297,7 +1263,7 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 		dprintf("Calendar Notes Info received! %i\n", (message[4] << 8) | message[5]);
 		data->CalendarNotesList->Number = (message[4] << 8) + message[5];
 		dprintf("Location of Notes: ");
-		for (i=0; i < data->CalendarNotesList->Number; i++) {
+		for (i = 0; i < data->CalendarNotesList->Number; i++) {
 			data->CalendarNotesList->Location[i] = (message[8 + 2 * i] << 8) | message[9 + 2 * i];
 			dprintf("%i ", data->CalendarNotesList->Location[i]); 
 		}
@@ -1385,11 +1351,6 @@ static GSM_Error P7110_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P7110_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	int i;
-	for (i = 0; i < length; i++) {
-		dprintf("%02x ", message[i]);
-	}
-	dprintf("\n");
 	return GE_NONE;
 }
 
@@ -1861,11 +1822,6 @@ static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	int i;
-
-	for (i = 0; i < length; i++) dprintf("0x%02x ", message[i]);
-	dprintf("\n");
-
 	if (!data || !data->NetMonitor) return GE_INTERNALERROR;
 	switch (message[3]) {
 	case P7110_SUBSEC_NETMONITOR:

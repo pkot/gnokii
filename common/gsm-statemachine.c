@@ -254,15 +254,15 @@ void SM_DumpMessage(int messagetype, unsigned char *message, int messagesize)
 
 	for (i = 0; i < messagesize; i++) {
 		if (i % 16 == 0) {
-			if (i != 0) dump(" %s", buf);
-			dump("\n    ");
+			if (i != 0) dump("| %s", buf);
+			dump("\n");
 			memset(buf, ' ', 16);
 		}
 		dump("%02x ", message[i]);
 		if (isprint(message[i])) buf[i % 16] = message[i];
 	}
 
-	if (i % 16) dump("%*s %s", 3 * (16 - i % 16), "", buf);
+	if (i % 16) dump("%*s| %s", 3 * (16 - i % 16), "", buf);
 	dump("\n");
 }
 
