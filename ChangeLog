@@ -13,6 +13,7 @@
       acks and commands, initial support for RLP frames, bugfixes,
       acks recognized by seqno not by message type   (Osma Suominen)
     o use sm_block_ack(), avoiding some races        (Osma Suominen)
+    o rm msgtypes that never happen b/c of folding   (Osma Suominen)
 
 0.5.2
 =====
