@@ -220,7 +220,7 @@ static gn_phone_model models[] = {
 	{"6585",  "RH-34", 0 },
 	{"6590",  "NSM-9", 0 },
 	{"6590i", "NSM-9", 0 },
-	{"6600",  "NHL-10", 0 },
+	{"6600",  "NHL-10", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS },
 	{"6610",  "NHL-4U", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_EXTPBK | PM_SMS | PM_FOLDERS },
 	{"6650",  "NHM-1", 0 },
 	{"6800",  "NHL-6", 0 },
