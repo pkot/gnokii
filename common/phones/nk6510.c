@@ -94,12 +94,14 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
-/*
 static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
+/*
 static GSM_Error P6510_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_GetStartupGreeting(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -115,6 +117,7 @@ static GSM_Error P6510_IncomingCallDivert(int messagetype, unsigned char *messag
 */
 static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 
 static int GetMemoryType(GSM_MemoryType memory_type);
@@ -139,6 +142,7 @@ static GSM_IncomingFunctionType P6510_IncomingFunctions[] = {
 	*/
 	{ P6510_MSG_PROFILE,    P6510_IncomingProfile },
 	{ P6510_MSG_RINGTONE,	P6510_IncomingRingtone },
+	{ P6510_MSG_KEYPRESS,	P6510_IncomingKeypress },
 	{ 0, NULL }
 };
 
@@ -229,8 +233,10 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_GetPicture(data, state);
 	case GOP_DeleteSMS:
 		return P6510_DeleteSMS(data, state);
+		*/
 	case GOP_GetSMSStatus:
 		return P6510_GetSMSStatus(data, state);
+		/*
 	case GOP_CallDivert:
 		return P6510_CallDivert(data, state);
 		*/
@@ -244,6 +250,10 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_GetSMSFolders(data, state);
 	case GOP_GetProfile:
 		return P6510_GetProfile(data, state);
+	case GOP_PressPhoneKey:
+		return P6510_PressOrReleaseKey(data, state, true);
+	case GOP_ReleasePhoneKey:
+		return P6510_PressOrReleaseKey(data, state, false);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -681,6 +691,29 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		return GE_UNHANDLEDFRAME;
 	}
 	return GE_NONE;
+}
+
+static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	SMS_Folder fld;
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x36, 0x64};
+
+	dprintf("Getting SMS Status...\n");
+
+	/* Nokia 6210 and family does not show not "fixed" messages from the
+	 * Templates folder, ie. when you save a message to the Templates folder,
+	 * SMSStatus does not change! Workaround: get Templates folder status, which
+	 * does show these messages.
+	 */
+	/*
+	fld.FolderID = GMT_TE;
+	data->SMSFolder = &fld;
+
+	if (P6510_GetSMSFolderStatus(data, state) != GE_NONE) return GE_NOTREADY;
+	*/
+
+	if (SM_SendMessage(state, 5, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
 
@@ -1484,13 +1517,18 @@ static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine 
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, req_type};
 	int i;
-	
+
+	/*	
 	for (i=0x22; i < 0xff; i++) {
 		req[3] = i;
-		if (SM_SendMessage(state, 4, P6510_MSG_CLOCK, req) != GE_NONE) return GE_NOTREADY;
-		SM_BlockNoRetryTimeout(state, data, P6510_MSG_CLOCK, 5);
+	if (SM_SendMessage(state, 4, P6510_MSG_CLOCK, req) != GE_NONE) return GE_NOTREADY;
+	return SM_BlockNoRetryTimeout(state, data, P6510_MSG_CLOCK, 5);
 	}
 	return GE_UNKNOWN;
+	*/
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 4);
+
 }
 
 /*********************/
@@ -2164,8 +2202,20 @@ reply: 0x7a / 0x0036
 55 55 55 55 55 55                               | UUUUUU          
 	*/
 	switch (message[4]) {
+	case 0x01:
+		dprintf("Greeting text received\n");
+		return GE_NONE;
+		break;
 	case 0x02:
 		dprintf("Startup logo set ok\n");
+		return GE_NONE;
+		break;
+	case 0x03:
+		if (message[6] == 0)
+			dprintf("Anykey answer not set!\n");
+		else
+			dprintf("Anykey answer not set!\n");
+
 		return GE_NONE;
 		break;
 	case 0x0f:
@@ -2179,12 +2229,6 @@ reply: 0x7a / 0x0036
 			memcpy(data->Bitmap->bitmap, message + 22, data->Bitmap->size);
 			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->Bitmap->height, data->Bitmap->width);
 		}
-		return GE_NONE;
-		break;
-	case 0x1c:
-		dprintf("Succesfully got security code: ");
-		memcpy(data->SecurityCode->Code, message + 6, 5);
-		dprintf("%s \n", data->SecurityCode->Code);
 		return GE_NONE;
 		break;
 	default:
@@ -2226,13 +2270,30 @@ static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, count);
 }
 
+static GSM_Error P6510_GetStartupGreeting(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x01, 0x00};
+
+	dprintf("Getting startup greeting...\n");
+	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, 6);
+}
+
+static GSM_Error P6510_GetAnykeyAnswer(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x05, 0x00, 0x7d};
+
+	dprintf("See if anykey answer is set...\n");
+	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, 7);
+}
+
 static GSM_Error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x0F};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x0f};
 
 	dprintf("Getting startup logo...\n");
 	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, 5);
 }
+
 
 /***************/
 /*   PROFILES **/
@@ -2329,19 +2390,6 @@ static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01, 0x01, 0x0C, 0x01};
 	int i, length = 7;
-	/*
-			       0x04, 0x03, 0x00, 0x01, 
-			       0x04, 0x03, 0x01, 0x01, 
-			       0x04, 0x03, 0x02, 0x01, 
-			       0x04, 0x03, 0x03, 0x01, 
-			       0x04, 0x03, 0x04, 0x01, 
-			       0x04, 0x03, 0x05, 0x01, 
-			       0x04, 0x03, 0x06, 0x01, 
-			       0x04, 0x03, 0x07, 0x01, 
-			       0x04, 0x03, 0x08, 0x01, 
-			       0x04, 0x03, 0x09, 0x01, 
-			       0x04, 0x03, 0x0C, 0x01, 0x04};
-	*/
 
 	for (i = 0; i < 0x0a; i++) {
 		req[length] = 0x04;
@@ -2362,6 +2410,66 @@ static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("Getting profile #%i...\n", data->Profile->Number);
 	P6510_GetRingtones(data, state);
 	SEND_MESSAGE_BLOCK(P6510_MSG_PROFILE, length + 1);
+}
+
+
+/*************/
+/*** RADIO  **/
+/*************/
+
+static GSM_Error P6510_IncomingRadio(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	/*
+00 01 00 0D 00 00
+00 0E 00 03 01 00 00 1C 00 14 00 00 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF 01 00 00 08 00 00 01 00 01 00 00 0C 00 01 02 00 FF 30 30 30
+
+00 01 00 05 00 00 00 2C 00 02 00 00 00 01 00 00
+01 1F 00 06 00 00 00 2C 00 02 00 00 00 01 00 00 00 00 01
+
+00 01 00 05 00 00 00 2C 00 01 00 00 00 2A 00 A8
+01 1F 00 06 00 00 00 2C 00 01 00 00 00 2A 00 A8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+00 01 00 05 00 00 00 2C 00 00 00 00 00 CA 03 28
+01 1F 00 06 00 00 00 2C 00 00 00 00 00 CA 03 28 00 00 00 many more 00
+
+00 01 00 05 00 00 00 2C 00 02 00 00 00 01 00 00
+
+	 */
+}
+
+/*****************/
+/*** KEYPRESS  ***/
+/*****************/
+
+static GSM_Error P6510_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[4]) {
+	default:
+		dprintf("Unknown subtype of type 0x3c (%d)\n", message[4]);
+		return GE_NONE;
+		break;
+	}
+}
+
+static GSM_Error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press)
+{
+
+
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x11, 
+			       0x00, 0x01, 
+			       0x00, 0x00, 
+			       0x00, 
+			       0x01, 0x01, 0x43, 0x12, 0x53};
+
+	/*
+1E 00 0C 0C 00 0C 00 01 00 11 00 01 00 00 00 01 01
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x00, 0x01};
+
+	req[5] = data->KeyCode;
+			       */
+	req[5] = press ? 0x01 : 0x02;
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_KEYPRESS, 11);
 }
 
 /********************************/
