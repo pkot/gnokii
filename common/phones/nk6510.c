@@ -1427,6 +1427,7 @@ static GSM_Error P6510_SetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
 				 0x01}; /* blocks */
 	char string[40];
 
+	dprintf("Setting speeddial...\n");
 	req[13] = (data->SpeedDial->Number >> 8);
 	req[13] = data->SpeedDial->Number & 0xff;
 
@@ -2522,7 +2523,7 @@ reply: 0x7a / 0x0036
 
 static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[810] = {FBUS_FRAME_HEADER, 0x04, 0x0f, 0x00, 0x00, 0x00, 0x04, 
+	unsigned char req[1000] = {FBUS_FRAME_HEADER, 0x04, 0x0f, 0x00, 0x00, 0x00, 0x04, 
 				   0xc0, 0x02, 0x00, 0x00,           /* Height */
 				   0xc0, 0x03, 0x00, 0x00,           /* Width */
 				   0xc0, 0x04, 0x03, 0x60 };         /* size */
@@ -3171,6 +3172,7 @@ static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	switch(data->Bitmap->type) {
 	case GSM_CallerLogo:
 		return GetCallerBitmap(data, state);
+	case GSM_NewOperatorLogo:
 	case GSM_OperatorLogo:
 		return GetOperatorBitmap(data, state);
 	case GSM_StartupLogo:
@@ -3187,6 +3189,7 @@ static GSM_Error P6510_SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 		return SetStartupBitmap(data, state);
 	case GSM_CallerLogo:
 		return SetCallerBitmap(data, state);
+	case GSM_OperatorLogo:
 	case GSM_NewOperatorLogo:
 		return SetOperatorBitmap(data, state);
 	default:
