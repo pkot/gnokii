@@ -156,13 +156,13 @@ API bool gn_char_def_alphabet(unsigned char *string)
 	return true;
 }
 
-static unsigned char char_encode_def_alphabet(unsigned char value)
+unsigned char char_encode_def_alphabet(unsigned char value)
 {
 	tbl_setup_reverse();
 	return gsm_reverse_default_alphabet[value];
 }
 
-static unsigned char char_decode_def_alphabet(unsigned char value)
+unsigned char char_decode_def_alphabet(unsigned char value)
 {
 	if (value < GN_CHAR_ALPHABET_SIZE) {
 		return gsm_default_alphabet[value];
@@ -316,7 +316,7 @@ void char_encode_hex(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-static int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
+int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
 {
 	int length;
 
@@ -330,7 +330,7 @@ static int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest)
 	}
 }
 
-static int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
+int char_decode_uni_alphabet(wchar_t value, unsigned char *dest)
 {
 	int length;
 
