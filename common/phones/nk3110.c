@@ -38,13 +38,15 @@
 /* Some globals */
 
 static SMSMessage_Layout nk3110_deliver = {
-	true,
-	16, false, true,
+	true, /* IsSupported */
+	16, false, false, /* MessageCenter */
 	-1, -1, -1, -1,  3, -1, -1, -1, 15,  7, -1,  5,
-	-1, false, true,
-	 8, -1,
-	 2,  4,
-	17, true
+	17, false, false, /* RemoteNumber */
+	 8, /* SMSC Time */
+	-1, /* Time */
+	 2, /* Memory Type */
+	 4, /* Status */
+	18, false /* User Data */
 };
 
 static SMSMessage_PhoneLayout nk3110_layout;
@@ -155,6 +157,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 
 static bool LinkOK = false;
 static bool SimAvailable = false;
+static int user_data_count = 0;
 
 /* These are related to keepalive functionality */
 static bool RequestTerminate;
@@ -726,8 +729,7 @@ static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *messa
 	if (!data->RawData) return GE_INTERNALERROR;
 
         /* If this is the first block, reset accumulated message length. */
-	if (message[2] == 1) data->RawData->Full = 0;
-	else data->RawData->Full = 1;
+	if (message[2] == 1) user_data_count = 0;
 
 	count = data->RawData->Length + length - 3;
 
@@ -735,6 +737,11 @@ static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *messa
 	data->RawData->Data = realloc(data->RawData->Data, count);
 	memcpy(data->RawData->Data + data->RawData->Length, message + 3, length - 3);
 	data->RawData->Length = count;
+
+	/* Check whether this is the last user data frame */
+	user_data_count += length - 3;
+	if (user_data_count >= data->RawData->Data[15])
+		data->RawData->Full = 1;
 
 	return GE_NONE;
 }
@@ -784,7 +791,7 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 		message[0] = SMS_Deliver;
 		break;
 	case 0x01:
-		message[1] = SMS_Submit;
+		message[0] = SMS_Submit;
 		break;
 	default:
 		return GE_INTERNALERROR;
@@ -877,7 +884,6 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 	l = sender_length < GSM_MAX_SENDER_LENGTH ? sender_length : GSM_MAX_SENDER_LENGTH;
 	strncpy(data->SMSMessage->Sender, message + 18 + smsc_length, l);
 	data->SMSMessage->Sender[l] = 0;
-*/
 
 	dprintf("PID:%02x DCS:%02x Timezone:%02x Stat1:%02x Stat2:%02x\n",
 		message[6], message[7], message[14], message[4], message[5]);
@@ -888,7 +894,7 @@ static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message
 	dprintf("  Message Center: %s\n", data->SMSMessage->MessageCenter.Number);
 	dprintf("  Time: %02d.%02d.%02d %02d:%02d:%02d\n",
 		data->SMSMessage->Time.Day, data->SMSMessage->Time.Month, data->SMSMessage->Time.Year, data->SMSMessage->Time.Hour, data->SMSMessage->Time.Minute, data->SMSMessage->Time.Second);
-
+	*/
 	return GE_NONE;
 }
 
@@ -968,7 +974,6 @@ static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *mess
 	l = smsc_length < GSM_MAX_SMS_CENTER_LENGTH ? smsc_length : GSM_MAX_SMS_CENTER_LENGTH;
 	strncpy(data->SMSMessage->MessageCenter.Number, message + 21 + dest_length, l);
 	data->SMSMessage->MessageCenter.Number[l] = 0;
-	*/
 
 	dprintf("Message [0x%02x] Delivered!\n", data->SMSMessage->Number);
 	dprintf("   Destination: %s\n", data->SMSMessage->RemoteNumber.number);
@@ -978,7 +983,7 @@ static GSM_Error P3110_IncomingSMSDelivered(int messagetype, unsigned char *mess
 		data->SMSMessage->Time.Day, data->SMSMessage->Time.Month, data->SMSMessage->Time.Year, data->SMSMessage->Time.Hour, data->SMSMessage->Time.Minute, data->SMSMessage->Time.Second);
 	dprintf("   SMSC Time Stamp:  %02d.%02d.%02d %02d:%02d:%02d\n",
 		data->SMSMessage->SMSCTime.Day, data->SMSMessage->SMSCTime.Month, data->SMSMessage->SMSCTime.Year, data->SMSMessage->SMSCTime.Hour, data->SMSMessage->SMSCTime.Minute, data->SMSMessage->SMSCTime.Second);
-
+	*/
 	return GE_NONE;
 }
 
