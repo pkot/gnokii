@@ -11,7 +11,12 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
    $Log$
-   Revision 1.8  2001-05-24 20:47:31  chris
+   Revision 1.9  2001-09-14 12:53:00  pkot
+   New preview logos.
+   Localization fixes.
+   Set valid operator on logos xgnokii screen.
+
+   Revision 1.8  2001/05/24 20:47:31  chris
    More updating of 7110 code and some of xgnokii_lowlevel changed over.
 
    Revision 1.7  2001/03/23 08:24:56  ja
@@ -167,11 +172,43 @@ GdkPixmap *GetPreviewPixmap (GtkWidget *widget) {
                              "/xpm/Preview_6150.xpm");
       previewPixmapNumber = 2;
     }
+    else if (!strcmp (xgnokiiConfig.model, "3210"))
+    {
+      file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
+                             "/xpm/Preview_3210.xpm");
+      previewPixmapNumber = 3;
+    }
+    else if (!strcmp (xgnokiiConfig.model, "3310") ||
+             !strcmp (xgnokiiConfig.model, "3330"))
+    {
+      file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
+                             "/xpm/Preview_3310.xpm");
+      previewPixmapNumber = 4;
+    }
+    else if (!strcmp (xgnokiiConfig.model, "5110") ||
+             !strcmp (xgnokiiConfig.model, "5130"))
+    {
+      file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
+                             "/xpm/Preview_5110.xpm");
+      previewPixmapNumber = 5;
+    }
+    else if (!strcmp (xgnokiiConfig.model, "6250"))
+    {
+      file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
+                             "/xpm/Preview_6250.xpm");
+      previewPixmapNumber = 6;
+    }
+    else if (!strcmp (xgnokiiConfig.model, "7110"))
+    {
+      file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
+                             "/xpm/Preview_7110.xpm");
+      previewPixmapNumber = 7;
+    }
     else
     {
       file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
                              "/xpm/Preview_6210.xpm");
-      previewPixmapNumber = 3;
+      previewPixmapNumber = 8;
     }
   }
   else
@@ -182,6 +219,21 @@ GdkPixmap *GetPreviewPixmap (GtkWidget *widget) {
               break;
       case 2: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
                                      "/xpm/Preview_6150.xpm"); 
+              break;
+      case 3: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                                     "/xpm/Preview_3210.xpm"); 
+              break;
+      case 4: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                                     "/xpm/Preview_3310.xpm"); 
+              break;
+      case 5: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                                     "/xpm/Preview_5110.xpm"); 
+              break;
+      case 6: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                                     "/xpm/Preview_6250.xpm"); 
+              break;
+      case 7: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                                     "/xpm/Preview_7110.xpm"); 
               break;
       default: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
                                       "/xpm/Preview_6210.xpm");
@@ -648,7 +700,7 @@ void UpdateToolScreen(GtkWidget *widget, int x1, int y1, int x2, int y2) {
  */
 
 gint PreviewAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event) {
-  previewPixmapNumber = (previewPixmapNumber % 3) + 1;
+  previewPixmapNumber = (previewPixmapNumber % 8) + 1;
 
   gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
                         previewPixmapWidth,previewPixmapHeight);
@@ -1277,7 +1329,7 @@ void ImportFileSelected(GtkWidget *w, GtkFileSelection *fs)
 
 void SaveLogoAs(GtkWidget *widget)
 {
-  FileSelection=gtk_file_selection_new ("Save logo as ...");
+  FileSelection=gtk_file_selection_new (_("Save logo as ..."));
 
   gtk_signal_connect (
 	GTK_OBJECT (GTK_FILE_SELECTION (FileSelection)->ok_button),
@@ -1304,7 +1356,7 @@ void SaveLogo(GtkWidget *widget)
 
 void OpenLogo(GtkWidget *widget)
 {
-  FileSelection=gtk_file_selection_new ("Open logo...");
+  FileSelection=gtk_file_selection_new (_("Open logo..."));
 
   gtk_signal_connect (
 	GTK_OBJECT (GTK_FILE_SELECTION (FileSelection)->ok_button),
@@ -1391,51 +1443,52 @@ void GUI_CreateLogosWindow (void) {
 
   /* realize top level window for logos */
   GUI_LogosWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_policy(GTK_WINDOW(GUI_LogosWindow),1,1,1);
-  gtk_window_set_title(GTK_WINDOW(GUI_LogosWindow),_("Logos"));
-  gtk_signal_connect(GTK_OBJECT(GUI_LogosWindow),"delete_event",
-                     GTK_SIGNAL_FUNC(DeleteEvent),NULL);
+  gtk_window_set_wmclass(GTK_WINDOW(GUI_LogosWindow), "LogosWindow", "Xgnokii");
+  gtk_window_set_policy(GTK_WINDOW(GUI_LogosWindow), 1, 1, 1);
+  gtk_window_set_title(GTK_WINDOW(GUI_LogosWindow), _("Logos"));
+  gtk_signal_connect(GTK_OBJECT(GUI_LogosWindow), "delete_event",
+                     GTK_SIGNAL_FUNC(DeleteEvent), NULL);
   gtk_widget_realize(GUI_LogosWindow);
 
-  CreateErrorDialog(&errorDialog,GUI_LogosWindow);
-  CreateInfoDialog(&infoDialog,GUI_LogosWindow);
+  CreateErrorDialog(&errorDialog, GUI_LogosWindow);
+  CreateInfoDialog(&infoDialog, GUI_LogosWindow);
 
   accelGroup = gtk_accel_group_new();
-  gtk_accel_group_attach(accelGroup,GTK_OBJECT(GUI_LogosWindow));
+  gtk_accel_group_attach(accelGroup, GTK_OBJECT(GUI_LogosWindow));
   
   /* create main vbox */
-  vbox = gtk_vbox_new(FALSE,1);
-  gtk_container_add(GTK_CONTAINER(GUI_LogosWindow),vbox);
+  vbox = gtk_vbox_new(FALSE, 1);
+  gtk_container_add(GTK_CONTAINER(GUI_LogosWindow), vbox);
   gtk_widget_show(vbox);
  
-  itemFactory = gtk_item_factory_new(GTK_TYPE_MENU_BAR,"<main>",accelGroup);
-  gtk_item_factory_create_items(itemFactory,nMenuItems,logosMenuItems,NULL);
-  menuBar = gtk_item_factory_get_widget(itemFactory,"<main>");
+  itemFactory = gtk_item_factory_new(GTK_TYPE_MENU_BAR, "<main>", accelGroup);
+  gtk_item_factory_create_items(itemFactory, nMenuItems, logosMenuItems, NULL);
+  menuBar = gtk_item_factory_get_widget(itemFactory, "<main>");
 
-  gtk_box_pack_start(GTK_BOX(vbox),menuBar,FALSE,FALSE,0);
+  gtk_box_pack_start(GTK_BOX(vbox), menuBar, FALSE, FALSE, 0);
   gtk_widget_show(menuBar);
 
   /* toolbar */
-  toolBar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL,GTK_TOOLBAR_ICONS);
-  gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolBar),GTK_RELIEF_NORMAL);
-  gtk_toolbar_set_style(GTK_TOOLBAR(toolBar),GTK_TOOLBAR_ICONS);
+  toolBar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
+  gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolBar), GTK_RELIEF_NORMAL);
+  gtk_toolbar_set_style(GTK_TOOLBAR(toolBar), GTK_TOOLBAR_ICONS);
 
-  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar),NULL,"Clear logo",NULL,
-		  NewPixmap(New_xpm,GUI_LogosWindow->window,
+  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Clear logo"), NULL,
+		  NewPixmap(New_xpm, GUI_LogosWindow->window,
 		  &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-		  (GtkSignalFunc)ClearLogoEvent,toolBar);
+		  (GtkSignalFunc)ClearLogoEvent, toolBar);
 
   gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
 
-  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar),NULL,"Get logo",NULL,
-                 NewPixmap(Read_xpm,GUI_LogosWindow->window,
+  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Get logo"), NULL,
+                 NewPixmap(Read_xpm, GUI_LogosWindow->window,
                  &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-                 (GtkSignalFunc)GetLogoEvent,toolBar);
+                 (GtkSignalFunc)GetLogoEvent, toolBar);
 
-  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar),NULL,"Set logo",NULL,
-                 NewPixmap(Send_xpm,GUI_LogosWindow->window,
+  gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Set logo"), NULL,
+                 NewPixmap(Send_xpm, GUI_LogosWindow->window,
                  &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-                 (GtkSignalFunc)SetLogoEvent,toolBar);
+                 (GtkSignalFunc)SetLogoEvent, toolBar);
 
   gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
 
@@ -1451,44 +1504,44 @@ void GUI_CreateLogosWindow (void) {
   gtk_toolbar_append_space (GTK_TOOLBAR (toolBar));
 
   buttonStartup = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
-		  GTK_TOOLBAR_CHILD_RADIOBUTTON,NULL,NULL,"Startup logo",
-		  "",NewPixmap(Startup_logo_xpm,GUI_LogosWindow->window,
+		  GTK_TOOLBAR_CHILD_RADIOBUTTON, NULL, NULL, _("Startup logo"),
+		  "", NewPixmap(Startup_logo_xpm, GUI_LogosWindow->window,
                   &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-		  GTK_SIGNAL_FUNC(LogoTypeEvent),NULL);
+		  GTK_SIGNAL_FUNC(LogoTypeEvent), NULL);
 
   buttonOperator = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
-                  GTK_TOOLBAR_CHILD_RADIOBUTTON,buttonStartup,NULL,"Operator logo",
-		  "",NewPixmap(Operator_logo_xpm,GUI_LogosWindow->window,
+                  GTK_TOOLBAR_CHILD_RADIOBUTTON, buttonStartup, NULL, _("Operator logo"),
+		  "", NewPixmap(Operator_logo_xpm, GUI_LogosWindow->window,
 		  &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-		  GTK_SIGNAL_FUNC(LogoTypeEvent),NULL);
+		  GTK_SIGNAL_FUNC(LogoTypeEvent), NULL);
 
   buttonCaller = gtk_toolbar_append_element(GTK_TOOLBAR(toolBar),
                  GTK_TOOLBAR_CHILD_RADIOBUTTON,
 		 buttonOperator,
-		 NULL,"Caller logo",
-		 "",NewPixmap(Caller_logo_xpm,GUI_LogosWindow->window,
+		 NULL, _("Caller logo"),
+		 "", NewPixmap(Caller_logo_xpm, GUI_LogosWindow->window,
 	         &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-		 GTK_SIGNAL_FUNC(LogoTypeEvent),NULL);
+		 GTK_SIGNAL_FUNC(LogoTypeEvent), NULL);
 
   gtk_toolbar_append_space(GTK_TOOLBAR(toolBar));
   
   networkCombo = gtk_combo_new();
-  gtk_combo_set_use_arrows_always(GTK_COMBO(networkCombo),1);
-  while (strcmp(GSM_Networks[i].Name,"unknown"))
-    glistNetwork = g_list_insert_sorted(glistNetwork,GSM_Networks[i++].Name,
+  gtk_combo_set_use_arrows_always(GTK_COMBO(networkCombo), 1);
+  while (strcmp(GSM_Networks[i].Name, "unknown"))
+    glistNetwork = g_list_insert_sorted(glistNetwork, GSM_Networks[i++].Name,
                    (GCompareFunc)strcmp);
-  gtk_combo_set_popdown_strings(GTK_COMBO(networkCombo),glistNetwork);
-  gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(networkCombo)->entry),FALSE);
-  gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar),networkCombo,"","");
+  gtk_combo_set_popdown_strings(GTK_COMBO(networkCombo), glistNetwork);
+  gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(networkCombo)->entry), FALSE);
+  gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), networkCombo, "", "");
   gtk_widget_show(networkCombo);
   g_list_free(glistNetwork);
 
   callerCombo = gtk_combo_new();
-  gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(callerCombo)->entry),FALSE);
-  gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar),callerCombo,"","");
+  gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(callerCombo)->entry), FALSE);
+  gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), callerCombo, "", "");
   gtk_widget_show(callerCombo);
   
-  gtk_box_pack_start(GTK_BOX(vbox),toolBar,FALSE,FALSE,0);
+  gtk_box_pack_start(GTK_BOX(vbox), toolBar, FALSE, FALSE, 0);
   gtk_widget_show(toolBar); 
 
   /* vertical separator */
@@ -1577,47 +1630,47 @@ void GUI_CreateLogosWindow (void) {
   gtk_toolbar_set_style(GTK_TOOLBAR(vertToolBar),GTK_TOOLBAR_ICONS);
 
   buttonBrush = gtk_toolbar_append_element(GTK_TOOLBAR(vertToolBar),
-                GTK_TOOLBAR_CHILD_RADIOBUTTON,NULL,NULL,"Brush tool",
-                "",NewPixmap(Tool_brush_xpm,GUI_LogosWindow->window,
+                GTK_TOOLBAR_CHILD_RADIOBUTTON, NULL, NULL, _("Brush tool"),
+                "", NewPixmap(Tool_brush_xpm, GUI_LogosWindow->window,
                 &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-                GTK_SIGNAL_FUNC(ToolTypeEvent),NULL);
+                GTK_SIGNAL_FUNC(ToolTypeEvent), NULL);
 
   buttonLine = gtk_toolbar_append_element(GTK_TOOLBAR(vertToolBar),
-               GTK_TOOLBAR_CHILD_RADIOBUTTON,buttonBrush,NULL,"Line tool",
-               "",NewPixmap(Tool_line_xpm,GUI_LogosWindow->window,
+               GTK_TOOLBAR_CHILD_RADIOBUTTON, buttonBrush, NULL, _("Line tool"),
+               "", NewPixmap(Tool_line_xpm, GUI_LogosWindow->window,
                &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-               GTK_SIGNAL_FUNC(ToolTypeEvent),NULL);
+               GTK_SIGNAL_FUNC(ToolTypeEvent), NULL);
 
   buttonRectangle = gtk_toolbar_append_element(GTK_TOOLBAR(vertToolBar),
-                    GTK_TOOLBAR_CHILD_RADIOBUTTON,buttonLine,NULL,"Rectangle tool",
-                    "",NewPixmap(Tool_rectangle_xpm,GUI_LogosWindow->window,
+                    GTK_TOOLBAR_CHILD_RADIOBUTTON, buttonLine, NULL, _("Rectangle tool"),
+                    "", NewPixmap(Tool_rectangle_xpm, GUI_LogosWindow->window,
                     &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-                    GTK_SIGNAL_FUNC(ToolTypeEvent),NULL);
+                    GTK_SIGNAL_FUNC(ToolTypeEvent), NULL);
 
   buttonFilledRectangle = gtk_toolbar_append_element(GTK_TOOLBAR(vertToolBar),
-                          GTK_TOOLBAR_CHILD_RADIOBUTTON,buttonRectangle,NULL,
-                          "Filled rectangle tool",
-                          "",NewPixmap(Tool_filled_rectangle_xpm,
+                          GTK_TOOLBAR_CHILD_RADIOBUTTON, buttonRectangle, NULL,
+                          _("Filled rectangle tool"),
+                          "", NewPixmap(Tool_filled_rectangle_xpm,
                           GUI_LogosWindow->window,
                           &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-                          GTK_SIGNAL_FUNC(ToolTypeEvent),NULL);
+                          GTK_SIGNAL_FUNC(ToolTypeEvent), NULL);
 
   gtk_toolbar_append_space(GTK_TOOLBAR(vertToolBar));
  
-  gtk_toolbar_append_item(GTK_TOOLBAR(vertToolBar),NULL,"Invert logo",NULL,
-                          NewPixmap(Edit_invert_xpm,GUI_LogosWindow->window,
+  gtk_toolbar_append_item(GTK_TOOLBAR(vertToolBar), NULL, _("Invert logo"), NULL,
+                          NewPixmap(Edit_invert_xpm, GUI_LogosWindow->window,
                           &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-                          (GtkSignalFunc)InvertLogoEvent,vertToolBar);
+                          (GtkSignalFunc)InvertLogoEvent, vertToolBar);
 
-  gtk_toolbar_append_item(GTK_TOOLBAR(vertToolBar),NULL,"Horizontal flip",NULL,
-                          NewPixmap(Edit_flip_horizontal_xpm,GUI_LogosWindow->window,
+  gtk_toolbar_append_item(GTK_TOOLBAR(vertToolBar), NULL, _("Horizontal flip"), NULL,
+                          NewPixmap(Edit_flip_horizontal_xpm, GUI_LogosWindow->window,
                           &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-                          (GtkSignalFunc)FlipHorizontalLogoEvent,vertToolBar);
+                          (GtkSignalFunc)FlipHorizontalLogoEvent, vertToolBar);
 
-  gtk_toolbar_append_item(GTK_TOOLBAR(vertToolBar),NULL,"Vertical flip",NULL,
-                          NewPixmap(Edit_flip_vertical_xpm,GUI_LogosWindow->window,
+  gtk_toolbar_append_item(GTK_TOOLBAR(vertToolBar), NULL, _("Vertical flip"), NULL,
+                          NewPixmap(Edit_flip_vertical_xpm, GUI_LogosWindow->window,
                           &GUI_LogosWindow->style->bg[GTK_STATE_NORMAL]),
-                          (GtkSignalFunc)FlipVerticalLogoEvent,vertToolBar);
+                          (GtkSignalFunc)FlipVerticalLogoEvent, vertToolBar);
 
   
   gtk_box_pack_start(GTK_BOX(hbox),vertToolBar,FALSE,FALSE,0);
@@ -1640,6 +1693,8 @@ void GUI_RefreshLogosGroupsCombo (void) {
 }
 
 void GUI_ShowLogosWindow (void) {
+  /* Set network name taken from the phone */
+  GetNetworkInfoEvent(NULL);
   /* if phone support caller groups, read callerGroups names */
   if (phoneMonitor.supported & PM_CALLERGROUP) {
     if (xgnokiiConfig.callerGroups[0] == NULL) {

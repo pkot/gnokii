@@ -8,6 +8,7 @@
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001  	   Pavel Machek
+  Copyright (C) 2001      Pawe³ Kot
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
@@ -18,7 +19,12 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.140  2001-07-27 00:02:21  pkot
+  Revision 1.141  2001-09-14 12:53:00  pkot
+  New preview logos.
+  Localization fixes.
+  Set valid operator on logos xgnokii screen.
+
+  Revision 1.140  2001/07/27 00:02:21  pkot
   Generic AT support for the new structure (Manfred Jonsson)
 
   Revision 1.139  2001/07/01 23:16:45  pkot
@@ -266,6 +272,7 @@ int version(void)
 			  "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 			  "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
+			  "Copyright (C) Pawe³ Kot <pkot@linuxnews.pl>, 2001\n"
 			  "gnokii is free software, covered by the GNU General Public License, and you are\n"
 			  "welcome to change it and/or distribute copies of it under certain conditions.\n"
 			  "There is absolutely no warranty for gnokii.  See GPL for details.\n"
@@ -295,9 +302,9 @@ int usage(void)
 			  "          gnokii --setalarm HH MM\n"
 			  "          gnokii --getalarm\n"
 			  "          gnokii --dialvoice number\n"
-			  "          gnokii --getcalendarnote index [-v]\n"
+			  "          gnokii --getcalendarnote start [end] [-v]\n"
 			  "          gnokii --writecalendarnote vcardfile number\n"
-			  "          gnokii --deletecalendarnote index\n"
+			  "          gnokii --deletecalendarnote start [end]\n"
 			  "          gnokii --getdisplaystatus\n"
 			  "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
 			  "          gnokii --identify\n"
@@ -541,9 +548,9 @@ int main(int argc, char *argv[])
 		{ OPT_SETDATETIME,       0, 5, 0 },
 		{ OPT_SETALARM,          2, 2, 0 },
 		{ OPT_DIALVOICE,         1, 1, 0 },
-		{ OPT_GETCALENDARNOTE,   1, 2, 0 },
+		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
 		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
-		{ OPT_DELCALENDARNOTE,   1, 1, 0 },
+		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
 		{ OPT_GETMEMORY,         2, 3, 0 },
 		{ OPT_GETSPEEDDIAL,      1, 1, 0 },
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
@@ -587,16 +594,29 @@ int main(int argc, char *argv[])
 	if (c == -1) 		/* No argument given - we should display usage. */
 		usage();
 
+	switch(c) {
+	// First, error conditions
+	case '?':
+	case ':':
+		fprintf(stderr, _("Use '%s --help' for usage informations.\n"), argv[0]);
+		exit(0);
+	// Then, options with no arguments
+	case OPT_HELP:
+		usage();
+	case OPT_VERSION:
+		return version();
+	}
+	
 	/* We have to build an array of the arguments which will be passed to the
 	   functions.  Please note that every text after the --command will be
 	   passed as arguments.  A syntax like gnokii --cmd1 args --cmd2 args will
 	   not work as expected; instead args --cmd2 args is passed as a
 	   parameter. */
-	if((nargv = malloc(sizeof(char *) * argc)) != NULL) {
-		for(i = 2; i < argc; i++)
+	if ((nargv = malloc(sizeof(char *) * argc)) != NULL) {
+		for (i = 2; i < argc; i++)
 			nargv[i-2] = argv[i];
 	
-		if(checkargs(c, gals, nargc)) {
+		if (checkargs(c, gals, nargc)) {
 			free(nargv); /* Wrong number of arguments - we should display usage. */
 			usage();
 		}
@@ -605,19 +625,6 @@ int main(int argc, char *argv[])
 		/* have to ignore SIGALARM */
 		sigignore(SIGALRM);
 #endif
-
-		switch(c) {
-		// First, error conditions
-		case '?':
-		case ':':
-			fprintf(stderr, _("Use '%s --help' for usage informations.\n"), argv[0]);
-			break;
-		// Then, options with no arguments
-		case OPT_HELP:
-			usage();
-		case OPT_VERSION:
-			return version();
-		}
 
 		/* Initialise the code for the GSM interface. */     
 		fbusinit(NULL);
@@ -663,7 +670,7 @@ int main(int argc, char *argv[])
 			rc = getcalendarnote(nargc, nargv);
 			break;
 		case OPT_DELCALENDARNOTE:
-			rc = deletecalendarnote(optarg);
+			rc = deletecalendarnote(nargc, nargv);
 			break;
 		case OPT_WRITECALENDARNOTE:
 			rc = writecalendarnote(nargv);
@@ -787,7 +794,7 @@ int sendsms(int argc, char *argv[])
 	SMS.Validity = 4320; /* 4320 minutes == 72 hours */
 	SMS.UDHType = GSM_NoUDH;
 
-	strcpy(SMS.Destination,argv[0]);
+	strcpy(SMS.Destination, argv[0]);
 
 	optarg = NULL;
 	optind = 0;
@@ -836,7 +843,7 @@ int sendsms(int argc, char *argv[])
 			SMS.Validity = atoi(optarg);
 			break;
 		default:
-			usage(); // Would be better to have an sendsms_usage() here.
+			usage(); /* Would be better to have an sendsms_usage() here. */
 		}
 	}
 
@@ -961,6 +968,7 @@ int savesms(int argc, char *argv[])
 			break;
 		default:
 			usage();
+			return -1;
 		}
 	}
 
@@ -1137,14 +1145,12 @@ int getsms(int argc, char *argv[])
 
 	memset(&filename, 0, 64);
 
-	start_message = atoi(argv[3]);
+	start_message = end_message = atoi(argv[3]);
 	if (argc > 4) {
 		int i;
 
 		/* [end] can be only argv[4] */
-		if (argv[4][0] == '-') {
-			end_message = start_message;
-		} else {
+		if (argv[4][0] != '-') {
 			end_message = atoi(argv[4]);
 		}
 
@@ -1172,8 +1178,6 @@ int getsms(int argc, char *argv[])
 				usage();
 			}
 		}
-	} else {
-		end_message = start_message;
 	}
 
 	/* Now retrieve the requested entries. */
@@ -1327,10 +1331,8 @@ int deletesms(int argc, char *argv[])
 		return (-1);
 	}
                 
-	start_message = atoi (argv[1]);
+	start_message = end_message = atoi (argv[1]);
 	if (argc > 2) end_message = atoi (argv[2]);
-	else end_message = start_message;
-
 
 	/* Now delete the requested entries. */
 	for (count = start_message; count <= end_message; count ++) {
@@ -1385,7 +1387,8 @@ int entersecuritycode(char *type)
 	// FIXME: Entering of SecurityCode does not work :-(
 	//  else if (!strcmp(type,"SecurityCode"))
 	//    SecurityCode.Type=GSCT_SecurityCode;
-	else    usage();
+	else
+		usage();
 
 #ifdef WIN32
 	printf("Enter your code: ");
@@ -1915,7 +1918,11 @@ int getcalendarnote(int argc, char *argv[])
 	
 	optarg = NULL;
 	optind = 0;
-	CalendarNote.Location = atoi(argv[0]);
+
+	first_location = last_location = atoi(argv[0]);
+	if ((argc > 1) && (argv[1][0] != '-')) {
+		last_location = atoi(argv[1]);
+	}
 	
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {       
@@ -1924,108 +1931,103 @@ int getcalendarnote(int argc, char *argv[])
 			break;
 		default:
 			usage(); // Would be better to have an calendar_usage() here.
+			return -1;
+		}
+	}
+
+	for (i = first_location; i <= last_location; i++) {
+		CalendarNote.Location = i;
+		switch (error = GSM->GetCalendarNote(&CalendarNote)) {
+		case GE_NONE:
+			if (vCal) {
+				fprintf(stdout, "BEGIN:VCALENDAR\n");
+				fprintf(stdout, "VERSION:1.0\n");
+				fprintf(stdout, "BEGIN:VEVENT\n");
+				fprintf(stdout, "CATEGORIES:");
+				switch (CalendarNote.Type) {
+				case GCN_REMINDER:
+					fprintf(stdout, "MISCELLANEOUS\n");
+					break;
+				case GCN_CALL:
+					fprintf(stdout, "PHONE CALL\n");
+					break;
+				case GCN_MEETING:
+					fprintf(stdout, "MEETING\n");
+					break;
+				case GCN_BIRTHDAY:
+					fprintf(stdout, "SPECIAL OCCASION\n");
+					break;
+				default:
+					fprintf(stdout, "UNKNOWN\n");
+					break;
+				}
+				fprintf(stdout, "SUMMARY:%s\n",CalendarNote.Text);
+				fprintf(stdout, "DTSTART:%04d%02d%02dT%02d%02d%02d\n", CalendarNote.Time.Year,
+					CalendarNote.Time.Month, CalendarNote.Time.Day, CalendarNote.Time.Hour,
+					CalendarNote.Time.Minute, CalendarNote.Time.Second);
+				if (CalendarNote.Alarm.Year!=0) {
+					fprintf(stdout, "DALARM:%04d%02d%02dT%02d%02d%02d\n", CalendarNote.Alarm.Year,
+						CalendarNote.Alarm.Month, CalendarNote.Alarm.Day, CalendarNote.Alarm.Hour,
+						CalendarNote.Alarm.Minute, CalendarNote.Alarm.Second);
+				}
+				fprintf(stdout, "END:VEVENT\n");
+				fprintf(stdout, "END:VCALENDAR\n");
+
+			} else {  /* not vCal */
+				fprintf(stdout, _("   Type of the note: "));
+
+				switch (CalendarNote.Type) {
+				case GCN_REMINDER:
+					fprintf(stdout, _("Reminder\n"));
+					break;
+				case GCN_CALL:
+					fprintf(stdout, _("Call\n"));
+					break;
+				case GCN_MEETING:
+					fprintf(stdout, _("Meeting\n"));
+					break;
+				case GCN_BIRTHDAY:
+					fprintf(stdout, _("Birthday\n"));
+					break;
+				default:
+					fprintf(stdout, _("Unknown\n"));
+					break;
+				}
+
+				fprintf(stdout, _("   Date: %d-%02d-%02d\n"), CalendarNote.Time.Year,
+					CalendarNote.Time.Month,
+					CalendarNote.Time.Day);
+
+				fprintf(stdout, _("   Time: %02d:%02d:%02d\n"), CalendarNote.Time.Hour,
+					CalendarNote.Time.Minute,
+					CalendarNote.Time.Second);
+
+				if (CalendarNote.Alarm.AlarmEnabled == 1) {
+					fprintf(stdout, _("   Alarm date: %d-%02d-%02d\n"), CalendarNote.Alarm.Year,
+						CalendarNote.Alarm.Month,
+						CalendarNote.Alarm.Day);
+
+					fprintf(stdout, _("   Alarm time: %02d:%02d:%02d\n"), CalendarNote.Alarm.Hour,
+						CalendarNote.Alarm.Minute,
+						CalendarNote.Alarm.Second);
+				}
+
+				fprintf(stdout, _("   Text: %s\n"), CalendarNote.Text);
+
+				if (CalendarNote.Type == GCN_CALL)
+					fprintf(stdout, _("   Phone: %s\n"), CalendarNote.Phone);
+			}
+			break;
+		case GE_NOTIMPLEMENTED:
+			fprintf(stderr, _("Function not implemented.\n"));
+			break;
+		default:
+			fprintf(stderr, _("The calendar note can not be read\n"));
+			break;
 		}
 	}
 	
-	if (GSM && GSM->GetCalendarNote && GSM->Terminate) {
-		error = GSM->GetCalendarNote(&CalendarNote);
-		GSM->Terminate();
-	} else {
-		GSM_DataClear(&data);
-		data.CalendarNote = &CalendarNote;
-		
-		error = SM_Functions(GOP_GetCalendarNote, &data, &State);
-	}
-	
-	switch (error) {
-	case GE_NONE:
-		if (vCal) {
-			fprintf(stdout, "BEGIN:VCALENDAR\n");
-			fprintf(stdout, "VERSION:1.0\n");
-			fprintf(stdout, "BEGIN:VEVENT\n");
-			fprintf(stdout, "CATEGORIES:");
-			switch (CalendarNote.Type) {
-			case GCN_REMINDER:
-				fprintf(stdout, "MISCELLANEOUS\n");
-				break;
-			case GCN_CALL:
-				fprintf(stdout, "PHONE CALL\n");
-				break;
-			case GCN_MEETING:
-				fprintf(stdout, "MEETING\n");
-				break;
-			case GCN_BIRTHDAY:
-				fprintf(stdout, "SPECIAL OCCASION\n");
-				break;
-			default:
-				fprintf(stdout, "UNKNOWN\n");
-				break;
-			}
-			fprintf(stdout, "SUMMARY:%s\n",CalendarNote.Text);
-			fprintf(stdout, "DTSTART:%04d%02d%02dT%02d%02d%02d\n", CalendarNote.Time.Year,
-				CalendarNote.Time.Month, CalendarNote.Time.Day, CalendarNote.Time.Hour,
-				CalendarNote.Time.Minute, CalendarNote.Time.Second);
-			if (CalendarNote.Alarm.Year!=0) {
-				fprintf(stdout, "DALARM:%04d%02d%02dT%02d%02d%02d\n", CalendarNote.Alarm.Year,
-					CalendarNote.Alarm.Month, CalendarNote.Alarm.Day, CalendarNote.Alarm.Hour,
-					CalendarNote.Alarm.Minute, CalendarNote.Alarm.Second);
-			}
-			fprintf(stdout, "END:VEVENT\n");
-			fprintf(stdout, "END:VCALENDAR\n");
-
-		} else {  /* not vCal */
-			fprintf(stdout, _("   Type of the note: "));
-
-			switch (CalendarNote.Type) {
-			case GCN_REMINDER:
-				fprintf(stdout, _("Reminder\n"));
-				break;
-			case GCN_CALL:
-				fprintf(stdout, _("Call\n"));
-				break;
-			case GCN_MEETING:
-				fprintf(stdout, _("Meeting\n"));
-				break;
-			case GCN_BIRTHDAY:
-				fprintf(stdout, _("Birthday\n"));
-				break;
-			default:
-				fprintf(stdout, _("Unknown\n"));
-				break;
-			}
-
-			fprintf(stdout, _("   Date: %d-%02d-%02d\n"), CalendarNote.Time.Year,
-				CalendarNote.Time.Month,
-				CalendarNote.Time.Day);
-
-			fprintf(stdout, _("   Time: %02d:%02d:%02d\n"), CalendarNote.Time.Hour,
-				CalendarNote.Time.Minute,
-				CalendarNote.Time.Second);
-
-			if (CalendarNote.Alarm.AlarmEnabled == 1) {
-				fprintf(stdout, _("   Alarm date: %d-%02d-%02d\n"), CalendarNote.Alarm.Year,
-					CalendarNote.Alarm.Month,
-					CalendarNote.Alarm.Day);
-
-				fprintf(stdout, _("   Alarm time: %02d:%02d:%02d\n"), CalendarNote.Alarm.Hour,
-					CalendarNote.Alarm.Minute,
-					CalendarNote.Alarm.Second);
-			}
-
-			fprintf(stdout, _("   Text: %s\n"), CalendarNote.Text);
-
-			if (CalendarNote.Type == GCN_CALL)
-				fprintf(stdout, _("   Phone: %s\n"), CalendarNote.Phone);
-		}
-		break;
-	case GE_NOTIMPLEMENTED:
-		fprintf(stderr, _("Function not implemented.\n"));
-		break;
-	default:
-		fprintf(stderr, _("The calendar note can not be read\n"));
-		break;
-	}
-	
+	GSM->Terminate();
 	return error;
 }
 
@@ -2051,19 +2053,24 @@ int writecalendarnote(char *argv[])
 }
 
 /* Calendar note deleting. */
-int deletecalendarnote(char *Index)
+int deletecalendarnote(int argc, char *argv[])
 {
 	GSM_CalendarNote CalendarNote;
+	int i, first_location, last_location;
 
-	CalendarNote.Location=atoi(Index);
+	first_location = last_location = atoi(argv[0]);
+	if (argc > 1) last_location = atoi(argv[1]);
+	
+	for (i = first_location; i <= last_location; i++) {
 
-	if (GSM->DeleteCalendarNote(&CalendarNote) == GE_NONE) {
-		fprintf(stdout, _("   Calendar note deleted.\n"));
-	} else {
-		fprintf(stderr, _("The calendar note can not be deleted\n"));
+		CalendarNote.Location = i;
 
-		GSM->Terminate();
-		return -1;
+		if (GSM->DeleteCalendarNote(&CalendarNote) == GE_NONE) {
+			fprintf(stdout, _("   Calendar note deleted.\n"));
+		} else {
+			fprintf(stderr, _("The calendar note can not be deleted\n"));
+		}
+
 	}
 
 	GSM->Terminate();
@@ -2078,8 +2085,8 @@ int setdatetime(int argc, char *argv[])
 	time_t nowh;
 	GSM_DateTime Date;
 
-	nowh=time(NULL);
-	now=localtime(&nowh);
+	nowh = time(NULL);
+	now = localtime(&nowh);
 
 	Date.Year = now->tm_year;
 	Date.Month = now->tm_mon+1;

@@ -13,7 +13,12 @@
   Header file for test utility.
 
   $Log$
-  Revision 1.26  2001-04-23 17:20:02  pkot
+  Revision 1.27  2001-09-14 12:53:00  pkot
+  New preview logos.
+  Localization fixes.
+  Set valid operator on logos xgnokii screen.
+
+  Revision 1.26  2001/04/23 17:20:02  pkot
   Added possibility for viewing logos (currently nol and ngg) on console (Bartek Klepacz)
 
   Revision 1.25  2001/01/15 17:00:51  pkot
@@ -52,7 +57,7 @@ int getalarm(void);
 int dialvoice(char *number);
 int getcalendarnote(int argc, char *argv[]);
 int writecalendarnote(char *argv[]);
-int deletecalendarnote(char *index);
+int deletecalendarnote(int argc, char *argv[]);
 int getdisplaystatus();
 int netmonitor(char *_mode);
 int identify(void);
