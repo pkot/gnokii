@@ -17,25 +17,26 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-OBJS =	cfgreader.o \
-	device.o \
-	gsm-ringtones.o \
-	gsm-api.o \
-	gsm-networks.o \
-	vcal.o \
-	misc.o \
-	gsm-sms.o \
-	sms-nokia.o \
-	gsm-bitmaps.o \
-	gsm-common.o \
-	gsm-encoding.o \
+OBJS =	gsm-api.o \
 	gsm-error.o \
 	gsm-statemachine.o \
-	compat.o \
-	snprintf.o \
-	nokia-decoding.o \
+	cfgreader.o \
+	device.o \
+	vcal.o \
 	vcard.o \
-	gsm-call.o
+	gsm-networks.o \
+	gsm-filetypes.o \
+	gsm-ringtones.o \
+	gsm-bitmaps.o \
+	gsm-sms.o \
+	gsm-call.o \
+	gsm-encoding.o \
+	gsm-common.o \
+	sms-nokia.o \
+	nokia-decoding.o \
+	compat.o \
+	misc.o \
+	snprintf.o
 
 ifdef NO_SHARED
 GNOKII_LIB=libgnokii.a
@@ -43,7 +44,7 @@ else
 GNOKII_LIB=libgnokii.so
 endif
 
-all: $(GNOKII_LIB) gsm-filetypes.o
+all: $(GNOKII_LIB)
 
 phones/PHONES.o:
 	$(MAKE) -C phones PHONES.o
@@ -54,8 +55,8 @@ links/LINKS.o:
 devices/DEVICES.o:
 	$(MAKE) -C devices DEVICES.o
 
-gnokii-debug: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o gsm-filetypes.o ../gnokii/gnokii.o
-	$(CC) -o gnokii-debug $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o gsm-filetypes.o ../gnokii/gnokii.o
+gnokii-debug: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/gnokii.o
+	$(CC) -o gnokii-debug $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/gnokii.o
 
 libgnokii.so: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	$(CC) -shared -o libgnokii.so $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
@@ -65,14 +66,11 @@ libgnokii.a: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	$(AR) rc libgnokii.a $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o 
 	ranlib libgnokii.a
 
-gsm-filetypes.o: gsm-filetypes.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(XPM_CFLAGS) -c gsm-filetypes.c
-
 vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so gsm-filetypes.o phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 distclean:
 	$(RM) vcal.c

@@ -50,8 +50,8 @@ endif
 all: xgnokii
 
 
-xgnokii: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/$(GNOKII_LIB)
-	$(CC) $(LDFLAGS) $(GLDLIBS) $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o $(LDLIBS) -o $@
+xgnokii: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/$(GNOKII_LIB)
+	$(CC) $(LDFLAGS) $(GLDLIBS) $(OBJS) $(TOPDIR)/common/data/DATA.o $(LDLIBS) -o $@
 
 clean:
 	$(RM) $(OBJS) *~ xpm/*~ depend xgnokii

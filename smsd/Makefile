@@ -27,8 +27,8 @@ OBJS = 	smsd.o \
 all: smsd
 
 
-smsd: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/libgnokii.so
-	gcc $(LDFLAGS) $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(LDLIBS) -o $@
+smsd: $(OBJS) $(TOPDIR)/common/libgnokii.so
+	gcc $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 
 ### DB Modules
@@ -51,9 +51,6 @@ libfile.so: smsd.h file.c
         file.c `glib-config --libs`
 
 ### End of DB Modules
-
-$(TOPDIR)/common/gsm-filetypes.o:
-	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
 
 $(TOPDIR)/common/libgnokii.so:
 	$(MAKE) -C $(TOPDIR)/common libgnokii.so

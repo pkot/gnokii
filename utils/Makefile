@@ -20,6 +20,7 @@ clean:
 
 install-generic:
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
+	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) todologo $(DESTDIR)$(bindir)
 	$(INSTALL) ppm2nokia $(DESTDIR)$(bindir)
 

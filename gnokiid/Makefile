@@ -11,6 +11,10 @@ include $(TOPDIR)/Makefile.global
 
 LDLIBS += -L$(TOPDIR)/common -lgnokii
 
+ifdef XPM_LIBS
+	LDLIBS += $(XPM_LIBS)
+endif
+
 OBJS = gnokiid.o
 
 ifdef NO_SHARED

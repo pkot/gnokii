@@ -23,8 +23,6 @@ OBJS =	at-emulator.o \
 	rlp-crc24.o \
 	virtmodem.o
 
-
-
 all: DATA.o
 
 DATA.o: $(OBJS)

@@ -29,8 +29,8 @@ LDLIBS += -L$(TOPDIR)/common -lgnokii
 
 all: gnokii
 
-gnokii: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/$(GNOKII_LIB)
-	$(CC) $(LDFLAGS) $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(LDLIBS) -o $@
+gnokii: $(OBJS) $(TOPDIR)/common/$(GNOKII_LIB)
+	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 $(TOPDIR)/getopt/libgetopt.a:
 	$(MAKE) -C $(TOPDIR)/getopt
