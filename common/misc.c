@@ -32,10 +32,6 @@ int GetLine(FILE *File, char *Line, int count)
 		return 0;
 }
 
-/* jano: Functions for detecting phone capabiltes. For explanation how  */
-/* to use these functions look into xgnokii_lowlevel.c                  */
-/* These function can only return 1 (TRUE) or 0 (FALSE)!		*/
-
 static PhoneModel models[] = {
 	{NULL,    "", 0 },
 	{"1611",  "NHE-5", 0 },
@@ -90,54 +86,3 @@ inline char *GetModel (const char *num)
 {
 	return (GetPhoneModel(num)->model);
 }
-
-inline int CallerGroupSupported (const char *num)
-{
-	return (GetPhoneModel(num)->flags & PM_CALLERGROUP ? 1 : 0);
-}
-
-inline int CalendarSupported (const char *num)
-{
-	return (GetPhoneModel(num)->flags & PM_CALENDAR ? 1 : 0);
-}
-
-inline int NetmonitorSupported (const char *num)
-{
-	return (GetPhoneModel(num)->flags & PM_NETMONITOR ? 1 : 0);
-}
-
-inline int KeyboardSupported (const char *num)
-{
-	return (GetPhoneModel(num)->flags & PM_KEYBOARD ? 1 : 0);
-}
-
-inline int SMSSupported (const char *num)
-{
-	int	i;
-	i = (GetPhoneModel(num)->flags & PM_SMS ? 1 : 0);
-	fprintf (stdout, "SMSSupport for %s returns %d\n\n", num, i);
-
-	return  i;
-}
-
-inline int DTMFSupported (const char *num)
-{
-	return (GetPhoneModel(num)->flags & PM_DTMF ? 1 : 0);
-}
-
-inline int DataSupported (const char *num)
-{
-	return (GetPhoneModel(num)->flags & PM_DATA ? 1 : 0);
-}
-
-inline int SpeedDialSupported (const char *num)
-{
-	return (GetPhoneModel(num)->flags & PM_SPEEDDIAL ? 1 : 0);
-}
-
-int ExtPbkSupported (const char *num)
-{
-	return ((GetPhoneModel(num)->flags & PM_EXTPBK)>0);
-}
-
-
