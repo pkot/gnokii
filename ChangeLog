@@ -1,5 +1,6 @@
 0.4.0pre18 (not released yet)
 ==========
+ * Fake phone driver added (for debugging)	       (Pavel Machek)
  * Code cleanups
     o remove compilation warnigns                         (Pawel Kot)
     o portability fixes                              (BORBELY Zoltan)
