@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.151  2001-11-22 17:56:53  pkot
+  Revision 1.152  2001-11-27 12:23:11  pkot
+  Specifying SMSC number in --sendsms works again
+
+  Revision 1.151  2001/11/22 17:56:53  pkot
   smslib update. sms sending
 
   Revision 1.150  2001/11/20 16:22:22  pkot
@@ -840,6 +843,8 @@ int sendsms(int argc, char *argv[])
 		case '1': /* SMSC number */
 			SMS.MessageCenter.No = 0;
 			strcpy(SMS.MessageCenter.Number, optarg);
+			if (SMS.MessageCenter.Number[0] == '+') SMS.MessageCenter.Type = SMS_International;
+			else SMS.MessageCenter.Type = SMS_Unknown;
 			break;
 		case '2': /* SMSC number index in phone memory */
 			SMS.MessageCenter.No = atoi(optarg);
