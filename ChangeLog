@@ -7,6 +7,7 @@
     o portability fixes for OpenBSD                 (BORBELY Zoltan)
     o F_SETOWN disabled for OpenBSD                      (Pawel Kot)
     o u8 removed from gn_ringtone_pack                (Helge Deller)
+ * cbus update                                      (Ladislav Michl)
  * nk7110 driver updates
     o get rid of global variables                   (Ladislav Michl)
 
