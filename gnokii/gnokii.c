@@ -455,16 +455,13 @@ static int sendsms(int argc, char *argv[])
 	data.SMSMessage = &SMS;
 
 	/* Send the message. */
-	/* SendSMS(&data, &State); */
-	error = SM_Functions(GOP_SendSMS, &data, &State);
+	error = SendSMS(&data, &State);
 
 	if (error == GE_SMSSENDOK) {
 		fprintf(stdout, _("Send succeeded!\n"));
 	} else {
 		fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
 	}
-
-	if (GSM && GSM->Terminate) GSM->Terminate();
 
 	return 0;
 }

@@ -868,27 +868,20 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error e = GE_NONE;
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
 	int length, i;
 
-	if (data->SMSMessage->MessageCenter.No) {
-		data->MessageCenter = &data->SMSMessage->MessageCenter;
-		P7110_GetSMSCenter(data, state);
-	}
-
 	/* 6 is the frame header as above */
-	length = data->RawData->Length + 6;
+	length = data->RawData->Length + 1;
 	if (length < 0) return GE_SMSWRONGFORMAT;
-	memcpy(req + 6, data->RawData->Data, data->RawData->Length);
+	memcpy(req + 6, data->RawData->Data + 5, data->RawData->Length);
 	dprintf("Sending SMS...(%d)\n", length);
 	for (i = 0; i < length; i++) {
 		dprintf("%02x ", req[i]);
 	}
 	dprintf("\n");
 	if (SM_SendMessage(state, length, 0x02, req) != GE_NONE) return GE_NOTREADY;
-	e = SM_BlockNoRetry(state, data, 0x02);
-	return e;
+	return SM_BlockNoRetry(state, data, 0x02);
 }
 
 static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -1671,7 +1664,7 @@ static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 		req[5] = data->CalendarNote->Location & 0xff;
 		data->CalendarNote->Time.Year = tmptime.Year;
 		
-		if(SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) == GE_NONE) {
+		if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) == GE_NONE) {
 			error = SM_Block(state, data, P7110_MSG_CALENDAR);
 		}
 	}	
