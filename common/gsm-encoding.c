@@ -13,7 +13,10 @@
   Functions for encoding SMS, calendar and other things.
 
   $Log$
-  Revision 1.2  2001-11-08 16:34:19  pkot
+  Revision 1.3  2001-11-17 20:15:31  pkot
+  Typo in default alphabet
+
+  Revision 1.2  2001/11/08 16:34:19  pkot
   Updates to work with new libsms
 
   Revision 1.1  2001/10/24 22:37:25  pkot
@@ -46,7 +49,7 @@ static unsigned char GSM_DefaultAlphabet[NUMBER_OF_7_BIT_ALPHABET_ELEMENTS] = {
 	'P',  'Q',  'R',  'S',  'T',  'U',  'V',  'W',
 	'X',  'Y',  'Z',  0xc4, 0xd6, 0xd1, 0xdc, 0xa7,
 	0xbf, 'a',  'b',  'c',  'd',  'e',  'f',  'g',
-	'H',  'i',  'j',  'k',  'l',  'm',  'n',  'o',
+	'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',
 	'p',  'q',  'r',  's',  't',  'u',  'v',  'w',
 	'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
