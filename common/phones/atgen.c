@@ -90,6 +90,8 @@ static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *stat
 static gn_error AT_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_AnswerCall(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_CancelCall(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -127,6 +129,8 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetSecurityCodeStatus, AT_GetSecurityCodeStatus, ReplyGetSecurityCodeStatus },
 	{ GN_OP_EnterSecurityCode,     AT_EnterSecurityCode,     Reply },
 	{ GN_OP_MakeCall,              AT_DialVoice,             Reply },
+	{ GN_OP_AnswerCall,            AT_AnswerCall,            Reply },
+	{ GN_OP_CancelCall,            AT_CancelCall,            Reply },
 	{ GN_OP_GetNetworkInfo,        AT_GetNetworkInfo,        ReplyGetNetworkInfo },
 };
 
@@ -797,6 +801,20 @@ static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(strlen(req), GN_OP_MakeCall, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_MakeCall, data, state);
+}
+
+static gn_error AT_AnswerCall(gn_data *data, struct gn_statemachine *state)
+{
+	if (sm_message_send(4, GN_OP_AnswerCall, "ATA\r", state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_AnswerCall, data, state);
+}
+
+static gn_error AT_CancelCall(gn_data *data, struct gn_statemachine *state)
+{
+	if (sm_message_send(8, GN_OP_CancelCall, "AT+CHUP\r", state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_CancelCall, data, state);
 }
 
 static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)

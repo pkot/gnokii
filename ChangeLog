@@ -32,6 +32,8 @@
     o name string with phonebook entry may not be quoted
                                                       (Ron Yorston)
     o avoid crash in AT_DeletePhonebook                 (Pawel Kot)
+    o add support for answering and hanging up the call
+                                                       (Igor Popik)
  * 6510 series updates
     o don't require to have any subentries filled in when writing
       phonebook entry                                   (Pawel Kot)
