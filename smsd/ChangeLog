@@ -1,4 +1,8 @@
-* Fri Jan 02 2003 Guido Falsi <mad@madpilot.net>
+* Sun Jan 04 2004 Pawel Kot <pkot@linuxnews.pl>
+- Update README with some modules clarification
+
+
+* Fri Jan 02 2004 Guido Falsi <mad@madpilot.net>
 - Use $(CC) detected by configure script instead of hardcoded gcc.
   Taken from FreeBSD ports.
 

@@ -101,7 +101,8 @@ Options:
 
 -m, --module db_module
 	Specify which module to use for connection to DB server.
-	Currently supported are pq for PostgreSQL and mysql for MySQL.
+	Currently supported are pq for PostgreSQL, mysql for MySQL and file
+	for the text file (see THE FILE MODULE section).
 
 -l, --libdir path_to_db_module
 	Specify path to DB modules. If you specify pq module, smsd searches
@@ -187,7 +188,10 @@ make
 make libpq.so OR make libmysql.so OR make libfile.so
 make install
 
-SMSD shares gnokii's runtime configuration file and libgnokii. 
+Note that you can build all of the modules (libpq, libmysql and libfile) but
+you should use just one.
+
+SMSD shares gnokii's runtime configuration file and libgnokii.
 
 
 Jan Derfinak <ja@mail.upjs.sk>
