@@ -30,6 +30,8 @@
 #ifndef _gnokii_unix_bluetooth_h
 #define _gnokii_unix_bluetooth_h
 
+#ifdef HAVE_BLUETOOTH
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -42,9 +44,17 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
 
-#include "misc.h"
+#endif
 
+#include "config.h"
+#include "compat.h"
+#include "misc.h"
+#include "gsm-api.h"
+
+#ifdef HAVE_BLUETOOTH
 int bluetooth_open(bdaddr_t *bdaddr, uint8_t channel, struct gn_statemachine *state);
+#endif
+
 int bluetooth_close(int fd, struct gn_statemachine *state);
 int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state);
 int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);

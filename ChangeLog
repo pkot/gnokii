@@ -6,6 +6,7 @@
     o remove ugly #ifdefs as they are not needed in fact (Pawel Kot)
     o move null terminating of the decoded strings to
       gsm-encoding.c                        (James Clark, Pawel Kot)
+    o fix compilation issues caused by bluetooth stuuf   (Pawel Kot)
  * translation updates
     o sync po files wuth current sources                 (Pawel Kot)
 

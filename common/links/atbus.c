@@ -223,6 +223,7 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 			goto err;
 		}
 		break;
+#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		/* If there's no valid configuration in the .gnokiirc, try
 		 * to connect over tty interface */
@@ -233,6 +234,7 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 			goto err;
 		}
 		break;
+#endif
 	default:
 		dprintf("Device not supported by AT bus\n");
 		error = GN_ERR_FAILED;

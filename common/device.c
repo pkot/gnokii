@@ -29,12 +29,8 @@
 #include "misc.h"
 #include "gsm-api.h"
 #include "device.h"
-#ifdef HAVE_IRDA
-#  include "devices/unixirda.h"
-#endif
-#ifdef HAVE_BLUETOOTH
-#  include "devices/unixbluetooth.h"
-#endif
+#include "devices/unixirda.h"
+#include "devices/unixbluetooth.h"
 #ifndef WIN32
 #  include "devices/unixserial.h"
 #  include "devices/tcp.h"
@@ -65,9 +61,11 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	case GN_CT_Irda:
 		state->device.fd = irda_open(state);
 		break;
+#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		state->device.fd = bluetooth_open(&state->config.bt_address, state->config.rfcomm_cn, state);
 		break;
+#endif
 	case GN_CT_Tekram:
 		state->device.fd = tekram_open(file, state);
 		break;

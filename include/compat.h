@@ -51,6 +51,10 @@
 #  include <sys/socket.h>
 #endif
 
+#ifdef HAVE_STDINT_H
+#  include <stdint.h>
+#endif
+
 /*
  * The following ifdef block is the standard way of creating macros which make
  * exporting from a DLL simpler. All files within this DLL are compiled with 
@@ -201,6 +205,11 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 
 #ifndef u32
 	typedef unsigned int u32;
+#endif
+
+/* for Linux Bluetooth compability */
+#ifndef HAVE_STDINT_H
+	typedef unsigned char uint8_t;
 #endif
 
 #endif

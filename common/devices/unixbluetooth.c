@@ -27,6 +27,8 @@
 
 */
 
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
 #include "gsm-api.h"
 
