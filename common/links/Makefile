@@ -18,15 +18,12 @@ TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
 OBJS =	fbus.o \
+	fbus-phonet.o \
 	cbus.o \
 	atbus.o \
 	fbus-3110.o \
 	m2bus.o \
 	utils.o
-
-ifdef USE_IRDA
-	OBJS += fbus-phonet.o
-endif
 
 all: LINKS.o
 
