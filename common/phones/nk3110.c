@@ -49,6 +49,10 @@
 #include "gnokii-internal.h"
 #include "gsm-api.h"
 
+
+#define DRVINSTANCE(s) ((nk3110_driver_instance *)((s)->driver.driver_instance))
+#define FREE(p) do { free(p); (p) = NULL; } while (0)
+
 /* Prototypes */
 static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_Initialise(struct gn_statemachine *state);
@@ -159,10 +163,14 @@ gn_driver driver_nokia_3110 = {
 
 static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
+	if (!DRVINSTANCE(state) && op != GN_OP_Init) return GN_ERR_INTERNALERROR;
+
 	switch (op) {
 	case GN_OP_Init:
+		if (DRVINSTANCE(state)) return GN_ERR_INTERNALERROR;
 		return P3110_Initialise(state);
 	case GN_OP_Terminate:
+		FREE(DRVINSTANCE(state));
 		return pgen_terminate(data, state);
 	case GN_OP_GetModel:
 	case GN_OP_GetRevision:
@@ -200,25 +208,34 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 	}
 }
 
-static bool SimAvailable = false;
-static int user_data_count = 0;
-
 /* Initialise is the only function allowed to 'use' state */
 static gn_error P3110_Initialise(struct gn_statemachine *state)
 {
 	gn_data data;
+	gn_error error = GN_ERR_NONE;
 	u8 init_sequence[20] = {0x02, 0x01, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x55, 0x63, 0xa8, 0x00, 0x00, 0x07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80};
 
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_nokia_3110, sizeof(gn_driver));
 
+	if (!(DRVINSTANCE(state) = calloc(1, sizeof(nk3110_driver_instance)))) {
+		error = GN_ERR_MEMORYFULL;
+		goto retval;
+	}
+	/* just to make things explicit: */
+	DRVINSTANCE(state)->sim_available = false;
+
 	/* Only serial connection is supported */
-	if (state->config.connection_type != GN_CT_Serial) return GN_ERR_NOTSUPPORTED;
+	if (state->config.connection_type != GN_CT_Serial) {
+		error = GN_ERR_NOTSUPPORTED;
+		goto errcond;
+	}
 
 	/* Initialise FBUS link */
 	if (fb3110_initialise(state) != GN_ERR_NONE) {
 		dprintf("Error in link initialisation\n");
-		return GN_ERR_NOTREADY;
+		error = GN_ERR_NOTREADY;
+		goto errcond;
 	}
 
 	/* Initialise state machine */
@@ -229,13 +246,23 @@ static gn_error P3110_Initialise(struct gn_statemachine *state)
 	   simply send the same sequence observed between the W95 PC and
 	   the phone.  The init sequence may still be a bit flaky and is not
 	   fully understood. */
-	if (sm_message_send(20, 0x15, init_sequence, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(20, 0x15, init_sequence, state) != GN_ERR_NONE) {
+		error = GN_ERR_NOTREADY;
+		goto errcond;
+	}
 
 	/* Wait for response to 0x15 sequence */
 	gn_data_clear(&data);
-	if (sm_block(0x16, &data, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_block(0x16, &data, state) != GN_ERR_NONE) {
+		error = GN_ERR_NOTREADY;
+		goto errcond;
+	}
 
-	return GN_ERR_NONE;
+	goto retval;
+errcond:
+	FREE(DRVINSTANCE(state));
+retval:
+	return error;
 }
 
 
@@ -267,7 +294,7 @@ static gn_error P3110_GetMemoryStatus(gn_data *data, struct gn_statemachine *sta
 	/* Check if this type of memory is available */
 	switch (data->memory_status->memory_type) {
 	case GN_MT_SM:
-		if (!SimAvailable) return GN_ERR_NOTREADY;
+		if (!(DRVINSTANCE(state)->sim_available)) return GN_ERR_NOTREADY;
 		return P3110_GetSMSInfo(data, state);
 	case GN_MT_ME:
 		if (P3110_MEMORY_SIZE_ME == 0) return GN_ERR_NOTREADY;
@@ -351,7 +378,7 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 		do {
 			dprintf("Waiting for content frames...\n");
 			sm_block(0x27, data, state);
-		} while (user_data_count < data->raw_sms->length);
+		} while (DRVINSTANCE(state)->user_data_count < data->raw_sms->length);
 
 		return GN_ERR_NONE;
 	case 0x2d:
@@ -670,8 +697,8 @@ static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *mes
 
 static gn_error P3110_IncomingInitFrame_0x16(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	SimAvailable = (message[2] == 0x02);
-	dprintf("SIM available: %s.\n", (SimAvailable ? "Yes" : "No"));
+	DRVINSTANCE(state)->sim_available = (message[2] == 0x02);
+	dprintf("SIM available: %s.\n", (DRVINSTANCE(state)->sim_available ? "Yes" : "No"));
 	return GN_ERR_NONE;
 }
 
@@ -697,17 +724,18 @@ static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *messag
 	if (length == 0x02) return GN_ERR_NONE;
 
 	/* This function may be called several times; it accumulates the
-	 * SMS content in data->raw_sms->user_data. The static global
-	 * user_data_count is used as a counter. */
+	 * SMS content in data->raw_sms->user_data.
+	 * DRVINSTANCE(state)->user_data_count is used as a counter. */
 
 	/* If this is the first block, reset accumulated message length. */
-	if (message[2] == 1) user_data_count = 0;
+	if (message[2] == 1)
+		DRVINSTANCE(state)->user_data_count = 0;
 
-	count = user_data_count + length - 3;
+	count = DRVINSTANCE(state)->user_data_count + length - 3;
 
-	memcpy(data->raw_sms->user_data + user_data_count, message + 3, length - 3);
+	memcpy(data->raw_sms->user_data + DRVINSTANCE(state)->user_data_count, message + 3, length - 3);
 
-	user_data_count += length - 3;
+	DRVINSTANCE(state)->user_data_count += length - 3;
 
 	return GN_ERR_NONE;
 }
@@ -1033,7 +1061,7 @@ static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, i
 
 static gn_error P3110_IncomingPINEntered(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	SimAvailable = true;
+	DRVINSTANCE(state)->sim_available = true;
 	dprintf("PIN [possibly] entered.\n");
 	return GN_ERR_NONE;
 }

@@ -2,6 +2,8 @@
 ========
  * nk3110 driver updates
     o remove keepalive stuff -- now obsoleted       (Osma Suominen)
+    o don't use the global variables; move them to the driver
+      instance                                      (Osma Suominen)
 
 0.5.0pre7
 =========
