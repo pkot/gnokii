@@ -15,6 +15,7 @@
     o replace 'short' type with 'int' type                (Pawel Kot)
     o prepare to be able to compile libsms without bitmaps or
       ringtones support                                   (Pawel Kot)
+    o Fix overflows when storing SMSC/remote number       (Pawel Kot)
  * win32 fixes                                        (Marcin Wiacek)
  * asprintf, vasprintf and C99 compliant snprintf and vsnprintf
    functions provided if not present                 (BORBELY Zoltan)

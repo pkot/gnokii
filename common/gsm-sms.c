@@ -1074,10 +1074,10 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	if (llayout.RemoteNumber > -1) {
 		if (llayout.IsRemoteNumberCoded) {
 			if (message[llayout.RemoteNumber] == 0x00) llayout.MessageCenter -= 4;
-				/* FIXME Is this an ugly hack or correct? */
-				/* at least it works with 6210, 6510 and 6110 with the message I tested */
+			/* FIXME Is this an ugly hack or correct? */
+			/* at least it works with 6210, 6510 and 6110 with the message I tested */
 			message[llayout.RemoteNumber] = (message[llayout.RemoteNumber] + 1) / 2 + 1;
-			strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber));
+			strncpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber), SMS_MAX_ADDRESS_LENGTH - 1);
 			dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
 		} else {
 			/* SMS struct should be zeroed for now, so there's no
@@ -1091,7 +1091,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	/* Short Message Center */
 	if (llayout.MessageCenter > -1) {
 		if (llayout.IsMessageCenterCoded) {
-			strcpy(SMS->MessageCenter.Number, GetBCDNumber(message +  llayout.MessageCenter));
+			strncpy(SMS->MessageCenter.Number, GetBCDNumber(message +  llayout.MessageCenter), GSM_MAX_SMS_CENTER_LENGTH - 1);
 			dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
 			SMS->ReplyViaSameSMSC = false;
 			if (SMS->RemoteNumber.number[0] == 0 && (message[llayout.ReplyViaSameSMSC] & 0x80)) {
