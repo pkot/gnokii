@@ -6,6 +6,7 @@
  * Cleanups with some header files, static functions and other
    things in links/* files                                (Pawel Kot)
  * Get rid of obsolete utils.[h|c]                        (Pawel Kot)
+ * Moved linuxirda.h                                      (Pawel Kot)
 
 0.4.0pre15
 ==========
