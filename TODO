@@ -1,11 +1,3 @@
-0.4.0 THINGS:
-
- * stable libsms
- * working xgnokii
-
-
-AFTER 0.4.0 THINGS:
-
  * multiple phone support:
     o config subsystem cleanup
     o adding state to incoming functions
@@ -39,4 +31,4 @@ computer ;-)
  * vccd - vCard/vCalendar daemon listening to the IrDA device and receiving
 any transmission from the phone (mainly vCards and vCalendars)
 
- * 
+ * ...

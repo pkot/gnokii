@@ -1,7 +1,7 @@
                               - G N O K I I -
-             (C) 1999, 2000, 2001 Hugh Blemings & Pavel Janík ml.
-                            (C) 2001 Pawe³ Kot
-                  Last update 27 Sep 2001    Version 0.4.0
+              (C) 1999 - 2002 Hugh Blemings & Pavel Janík ml.
+                         (C) 2001 - 2002 Pawe³ Kot
+                  Last update 10 Jul 2002    Version 0.4.0
 
 - Contents - 			   
 
@@ -27,13 +27,12 @@
 This is version 0.4.0 of gnokii, a Linux/Unix tool suite and modem
 driver for Nokia mobile phones, released under the GPL.  Please
 see COPYING for more details on license/copying issues, the lack of
-warranty and where to send a postcard if you like gnokii :).  This
-release provides the much awaited ability to place data calls for
-all platforms except Win32.  Fax calls are not supported.
+warranty and where to send a postcard if you like gnokii :).
 
-gnokii supports most phones from the 3810/8110, 5110/6110, and 2110
+gnokii supports most phones from the 5110/6110, 7110/6210 and 6510/6310
 series, details including bugs specific to each series appear in the
-files README-3810, README-6110 and README-2110 respectively.  
+files README-6110, README-7110 and README-6510 respectively. Also all AT
+compatible phones are supported.
 
 In the early stages of the project there were indications that
 Nokia would provide some support for the project.  Regrettably, these
@@ -44,10 +43,6 @@ assistance.
 We have a web site at http://gnokii.org/ which amongst other things
 gives information on how to join the gnokii mailing list, retrieving
 bleeding edge releases through CVS and more!
-
-If you haven't already done so, please indicate your interest in 
-the gnokii project by adding yourself to the user database
-at http://gnokii.org/users
 
 
 - 2.0 About the applications -
@@ -69,11 +64,11 @@ etc.  Ultimately it is intended that it will become a utility that
 communicates with gnokiid to provide a command line interface to
 the functionality provided by the gnokiid daemon.
 
-The second application provided is xgnokii which as the name suggests
-is a X-windows based application that provides a graphical interface
-to your phone.  Amongst other things, xgnokii allows you to read and
-write phone book entries, read, write and send SMS messages, monitor
-battery and received signal strength.
+The second application provided is xgnokii which as the name suggests is a
+X Window System based application that provides a graphical interface to
+your phone.  Amongst other things, xgnokii allows you to read and write
+phone book entries, read, write and send SMS messages, monitor battery and
+received signal strength.
 
 At present xgnokii works directly with the phone, however in the
 future it will more likely use the "side" interface of gnokiid.
@@ -101,9 +96,10 @@ usage as gnokiid takes care of calling it when required.
 
 - 3.0  Notes for specific model phones -
   
-Please see the README-3810 file for notes specific to the
-3810/8110 series, README-6110 for notes on the 5110/6110
-series and README-2110 for notes on 2110 series.
+Please see the README-3810 file for notes specific to the 3810/8110 series,
+README-6110 for notes on the 5110/6110 series, README-2110 for notes on the
+2110 series, README-7110 for notes on 7110/6210 series and README-6510 for
+notes on the 6510/6310 series.
 
 
 - 4.0 Installation from source -
@@ -113,7 +109,7 @@ the source tree for your system by typing
 
 ./configure
 
-You can also run configure with the --help flag to get a list of 
+You can also run the script with the --help flag to get a list of 
 available options.  There are about a dozen or so that are specific
 to gnokii.
 
@@ -159,10 +155,9 @@ Note that you will need read/write permissions on whatever
 serial port you specify in .gnokiirc.  You can now use gnokii
 and xgnokii.
 
-Review the notes specific to your model of phone in either
-README-6110 or README-3810 as appropriate.  These files
-also provide information about what functionality is
-available for each model.
+Review the notes specific to your model of phone in the
+appropriate README file. These files also provide information
+about what functionality is available for each model.
 
 In order to make use of the AT emulator provided by gnokiid
 through /dev/gnokii, you must read the documentation file
@@ -208,10 +203,12 @@ The homepage of this module is http://www.agouros.de/gnokii
 
 There are a number of ways you can help out.
 
-Code specific to each model is contained within fbus-3810.[ch] and
-fbus-6110.[ch] and other [fm]bus-*.[ch] files. All command handlers
-will dump information to stderr when they encounter a message they don't
-understand.  If this happens to you, try and work out what is going on.
+Code specific to each model is contained within common/phones/*.c and
+include/phones/*.h files. All command handlers will dump information
+to stderr when they encounter a message they don't understand.  If this
+happens to you, try and work out what is going on. When gnokii receives
+the frame with the unknown meaning it stores the frame and the triggering
+frame to $HOME/.gnokii-errors file. Report it!
 
 Suggestions on changes to the code are welcome, the preference is that
 they be aired on the mailing list so that a consensus can be reached
@@ -284,34 +281,17 @@ our CVS for the several years at cvs.samba.org.
 
 - 11.0 Protocol Details -
 
-3810 Series
-
-The protocol used between the phone and the PC has been worked out
-by a mixture of trial and error, monitoring the data that goes between
-the 3810 and its Windows 95 software and a few snippets of information
-found on the 'net relating to older Nokia models.  Feedback from
-people who played with the first release of gnokii was invaluable.
-
-
-6110 Series
-
-The same applies for 6110 Series (but I use Windows NT 4.0 for
-monitoring). The protocol of 6110 Series is somewhat different from 3810
-Series. Perhaps the first draft of the protocol for communication between
-Nokia mobile phones and PCs was not so general to support the newest features
-of Nokia's phones.
-
-You'll find the detailed protocol description in Docs/protocol directory/
+You'll find the detailed protocol description in Docs/protocol/ directory.
 
 - 12.0 References -
 
 The web site for this project is at;
 
-	http://gnokii.org
+	http://gnokii.org/
 
 Project page on savannah is at
 
-	http://savannah.gnu.org/projects/gnokii
+	http://savannah.gnu.org/projects/gnokii/
 
 The mailing list devoted to the gnokii project is
 
@@ -354,6 +334,11 @@ Nokia 7110 Series
  + 6210
  + 6250
 
+Nokia 6510 Series
+ + 6510
+ + 6310
+ + 8310
+
 Nokia 2110 Series
  + 2110
  + 2140
@@ -366,9 +351,9 @@ Nokia 640 Series
  - depreciated
 
 AT series
- - Nokia 6210
+ - Nokia 6210/7110/8210/6310/6510
  - Motorola Timeport P7389i (L series)
-
+ - Siemens S25/SL45i
 
 - 14.0 Credits -
   
@@ -377,14 +362,14 @@ to recognise those who have helped so far!
 
 
 - 15.0 Release Notes -
-2002???? Version 0.4.0
+20020710 Version 0.4.0
 Major rewrite. Internal API completly changed. Added support fot the new
-phones, maily Nokia 6210, Nokia 7110 and AT compatible not-only-Nokia
-phones. We got new libgnokii, that can be used for creating any user
-application, smsd -- sms handling daemon, libsms -- first step to extract a
-middle layer, many new options to command line gnokii and many others. Refer
-to the ChangeLog for the detailes (unfortunately it starts with 0.4.0pre9
-version)
+phones, maily Nokia 6210, Nokia 7110, Nokia 6310, Nokia 6510 and AT
+compatible not-only-Nokia phones. We got new libgnokii, that can be used for
+creating any user application, smsd -- sms handling daemon, libsms -- first
+step to extract a middle layer, many new options to command line gnokii and
+many others. Refer to the ChangeLog for the detailes (unfortunately it
+starts with 0.4.0pre9 version)
 
 20010627 Version 0.3.3
 Many 6110 series updates: mainly in SMS, bitmaps and ringtones handling.
