@@ -9,7 +9,7 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-CFLAGS += -DMODULES_DIR=\"${prefix}/share/smsd\" $(PTHREAD_CFLAGS) \
+CFLAGS += -DMODULES_DIR=\"${libdir}/smsd\" $(PTHREAD_CFLAGS) \
 	  `glib-config --cflags`
 
 LDLIBS += $(PTHREAD_LIBS) \
@@ -39,17 +39,17 @@ smsd: $(OBJS) $(TOPDIR)/common/libgnokii.so
 
 # PostgreSQL support
 libpq.so: smsd.h pq.c
-	gcc -s -O2 -shared -o libpq.so `glib-config --cflags` -I../include \
-        -I/usr/include/pgsql pq.c `glib-config --libs` -lpq
+	gcc -s -shared -o libpq.so $(CFLAGS) -I../include \
+	-I/usr/include/pgsql pq.c `glib-config --libs` -lpq
 
 # MySQL support
 libmysql.so: smsd.h mysql.c
-	gcc -s -O2 -shared -o libmysql.so `glib-config --cflags` -I../include \
-        -I/usr/include/mysql mysql.c `glib-config --libs` -L/usr/lib/mysql -lmysqlclient
+	gcc -s -shared -o libmysql.so $(CFLAGS) -I../include \
+	$(shell mysql_config --cflags) mysql.c `glib-config --libs` $(shell mysql_config --libs)
 
 # File support
 libfile.so: smsd.h file.c
-	gcc -s -O2 -shared -o libfile.so `glib-config --cflags` -I../include \
+	gcc -s -shared -o libfile.so $(CFLAGS) -I../include \
         file.c `glib-config --libs`
 
 ### End of DB Modules
@@ -61,10 +61,10 @@ clean:
 	$(RM) $(OBJS) *~ depend smsd *.so core*
 
 install: all
-	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) -m 755 -s smsd $(DESTDIR)$(bindir)
-	$(INSTALL) -d $(DESTDIR)${prefix}/share/smsd
-	$(INSTALL) lib*.so $(DESTDIR)${prefix}/share/smsd
+	$(INSTALL) -d $(DESTDIR)$(sbindir)
+	$(INSTALL) -m 755 -s smsd $(DESTDIR)$(sbindir)
+	$(INSTALL) -d $(DESTDIR)${libdir}/smsd
+	$(INSTALL) lib*.so $(DESTDIR)${libdir}/smsd
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

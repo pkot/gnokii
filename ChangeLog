@@ -12,6 +12,7 @@
  * utils updates
     o use --getphonebook and not --getmemory in sendsms utility
                                                       (Ville Skyttä)
+ * make smsd install compliant with FHS               (Ville Skyttä)
 
 0.5.1
 =====
