@@ -2,6 +2,8 @@
 =====
  * portability fixes
     o Windows portability fixes                    (BORBELY Zoltan)
+    o fix FreeBSD build: don't include stdint.h explicitely
+                                                    (Shawn Kennedy)
  * build system updates
     o use libtool --tag=CXX to be able to build gnokii with distcc
       or ccache (and probably crosscompile with newer autotools)
