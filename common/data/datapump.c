@@ -44,7 +44,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <pthread.h>
 
 
 #include "misc.h"
@@ -59,7 +58,6 @@
 /* Prototypes */
 static int	DP_CallBack(RLP_UserInds ind, u8 *buffer, int length);
 static int	DP_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
-static void	*DP_ThreadLoop(void *v);
 
 /* Global variables */
 extern bool CommandMode;
@@ -67,9 +65,6 @@ extern bool CommandMode;
 /* Local variables */
 static int	PtyRDFD;	/* File descriptor for reading and writing to/from */
 static int	PtyWRFD;	/* pty interface - only different in debug mode. */
-static int	rfds_n;
-static fd_set	rfds;
-static pthread_t dp_thread = 0;
 u8 pluscount;
 bool connected;
 
@@ -77,9 +72,6 @@ bool DP_Initialise(int read_fd, int write_fd)
 {
 	PtyRDFD = read_fd;
 	PtyWRFD = write_fd;
-	FD_ZERO(&rfds);
-	FD_SET(PtyRDFD, &rfds);
-	rfds_n = PtyRDFD + 1;
 	RLP_Initialise(DP_SendRLPFrame, DP_CallBack);
 	RLP_SetUserRequest(Attach_Req, true);
 	pluscount = 0;
@@ -87,21 +79,13 @@ bool DP_Initialise(int read_fd, int write_fd)
 	data.RLP_RX_Callback = RLP_DisplayF96Frame;
 	SM_Functions(GOP_SetRLPRXCallback, &data, sm);
 
-	if (dp_thread == 0)
-		if (pthread_create(&dp_thread, NULL, DP_ThreadLoop, NULL) != 0) {
-			dprintf("Cannot create DP thread\n");
-			return false;
-		}
-
 	return true;
 }
 
 
 static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 {
-	int temp;
-	struct timeval tv;
-	fd_set t_rfds;
+	int i, temp;
 
 	switch(ind) {
 	case Data:
@@ -129,28 +113,12 @@ static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 		RLP_SetUserRequest(Reset_Resp, true);
 		break;
 	case GetData:
-		memset(&tv, 0, sizeof(tv));
-		memcpy(&t_rfds, &rfds, sizeof(t_rfds));
-		if (select(rfds_n, &t_rfds, NULL, NULL, &tv) != 0) {
-
-			/* Check if the program has closed */
-			/* Return to command mode */
-			/* Note that the call will still be in progress, */
-			/* as with a normal modem (I think) */
-
-			if (FD_ISSET(PtyRDFD, &t_rfds))
-				temp = read(PtyRDFD, buffer, length);
-			else
-				temp = 0;
-
-			if (temp == -1 && errno == EINTR) return 0;
-
-			if (temp <= 0) {
-				CommandMode = true;
-				/* Set the call passup back to the at emulator */
-				data.CallNotification = ATEM_CallPassup;
-				SM_Functions(GOP_SetCallNotification, &data, sm);
-				return 0;
+		if (queue.n > 0) {
+			temp = queue.n < sizeof(buffer) ? queue.n : sizeof(buffer);
+			for (i = 0; i < temp; i++) {
+				buffer[i] = queue.buf[queue.head++];
+				queue.head %= sizeof(queue.buf);
+				queue.n--;
 			}
 
 			/* This will only check +++ and the beginning of a read */
@@ -217,12 +185,4 @@ static int DP_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 	data.RLP_OutDTX = out_dtx;
 
 	return SM_Functions(GOP_SendRLPFrame, &data, sm);
-}
-
-static void *DP_ThreadLoop(void *v)
-{
-	for (;;)
-	{
-		if (!CommandMode) SM_Loop(sm, 1); else usleep(100000);
-	}
 }

@@ -9,9 +9,6 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-CFLAGS += $(PTHREAD_CFLAGS)
-LDLIBS += $(PTHREAD_LIBS)
-
 LDLIBS += -L$(TOPDIR)/common -lgnokii
 
 OBJS = gnokiid.o

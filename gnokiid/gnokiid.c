@@ -144,18 +144,15 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	GTerminateThread = false;
-
-	if (VM_Initialise(Model, Port, Initlength, Connection, BinDir, DebugMode, true) == false) {
-		exit (-1);
-	}
-
 	while (1) {
-		if (GTerminateThread == true) {
-			VM_Terminate();
-			exit(1);
+		if (VM_Initialise(Model, Port, Initlength, Connection, BinDir, DebugMode, true) == false) {
+			exit (-1);
 		}
-		sleep (1);
+
+		GTerminateThread = false;
+
+		VM_Loop();
 	}
+
 	exit (0);
 }

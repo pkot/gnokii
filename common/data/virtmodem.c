@@ -52,7 +52,6 @@
 #ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #endif
-#include <pthread.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
@@ -79,8 +78,6 @@
 
 /* Prototypes */
 static int  VM_PtySetup(char *bindir);
-static void VM_ThreadLoop(void);
-static void VM_CharHandler(void);
 static gn_error VM_GSMInitialise(char *model,
 			   char *port,
 			   char *initlength,
@@ -100,16 +97,17 @@ static int PtyWRFD;	/* pty interface - only different in debug mode. */
 
 static bool UseSTDIO;	/* Use STDIO for debugging purposes instead of pty */
 
-static pthread_t Thread;
+struct VM_queue queue;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
 bool VM_Initialise(char *model,char *port, char *initlength, const char *connection, char *bindir, bool debug_mode, bool GSMInit)
 {
-	int rtn;
-
 	static GSM_Statemachine State;
 	sm = &State;
+	queue.n = 0;
+	queue.head = 0;
+	queue.tail = 0;
 
 	CommandMode = true;
 
@@ -143,63 +141,64 @@ bool VM_Initialise(char *model,char *port, char *initlength, const char *connect
 		return (false);
 	}
 
-		/* Create and start thread, */
-	rtn = pthread_create(&Thread, NULL, (void *) VM_ThreadLoop, (void *)NULL);
-
-	if (rtn == EAGAIN || rtn == EINVAL) {
-		return (false);
-	}
 	return (true);
 }
 
-static void VM_ThreadLoop(void)
+void VM_Loop(void)
 {
-	fd_set rfds, t_rfds;
+	fd_set rfds;
 	struct timeval tv;
 	int res;
-	int n, devfd;
-
-	/* Note we can't use signals here as they are already used
-	   in the FBUS code.  This may warrant changing the FBUS
-	   code around sometime to use select instead to free up
-	   the SIGIO handler for mainline code. */
+	int nfd, devfd;
+	int i, n;
+	char buf[256];
 
 	devfd = device_getfd();
-	FD_ZERO(&rfds);
-	FD_SET(PtyRDFD, &rfds);
-	FD_SET(devfd, &rfds);
-	n = (PtyRDFD > devfd) ? PtyRDFD + 1 : devfd + 1;
+	nfd = (PtyRDFD > devfd) ? PtyRDFD + 1 : devfd + 1;
 
 	while (!GTerminateThread) {
-		if (!CommandMode) {
-			sleep(1);
-		} else {  /* If we are in data mode, leave it to datapump to get the data */
+		if (CommandMode && ATEM_Initialised && queue.n != 0) {
+			ATEM_HandleIncomingData(queue.buf + queue.head, 1);
+			queue.head = (queue.head + 1) % sizeof(queue.buf);
+			queue.n--;
+			continue;
+		}
 
-			tv.tv_sec = 0;
-			tv.tv_usec = 500000;
-			memcpy(&t_rfds, &rfds, sizeof(t_rfds));
-			res = select(n, &t_rfds, NULL, NULL, &tv);
+		FD_ZERO(&rfds);
+		FD_SET(devfd, &rfds);
+		if ( queue.n < sizeof(queue.buf) ) {
+			FD_SET(PtyRDFD, &rfds);
+		}
+		tv.tv_sec = 0;
+		tv.tv_usec = 500000;
+		res = select(nfd, &rfds, NULL, NULL, &tv);
 
-			switch (res) {
-			case 0: /* Timeout */
-				break;
+		switch (res) {
+		case 0: /* Timeout */
+			continue;
 
-			case -1:
-				perror("VM_ThreadLoop - select");
-				exit (-1);
+		case -1:
+			perror("VM_Loop - select");
+			exit (-1);
 
-			default:
-				if (FD_ISSET(PtyRDFD, &t_rfds))
-					VM_CharHandler();
-				if (FD_ISSET(devfd, &t_rfds))
-					SM_Loop(sm, 1);
-				break;
+		default:
+			break;
+		}
+
+		if (FD_ISSET(PtyRDFD, &rfds)) {
+			n = sizeof(queue.buf) - queue.n < sizeof(buf) ?
+				sizeof(queue.buf) - queue.n :
+				sizeof(buf);
+			if ( (n = read(PtyRDFD, buf, n)) <= 0 ) VM_Terminate();
+
+			for (i = 0; i < n; i++) {
+				queue.buf[queue.tail++] = buf[i];
+				queue.tail %= sizeof(queue.buf);
+				queue.n++;
 			}
 		}
+		if (FD_ISSET(devfd, &rfds)) SM_Loop(sm, 1);
 	}
-
-	/* Shutdown device */
-	SM_Functions(GOP_Terminate, NULL, sm);
 }
 
 /* Application should call VM_Terminate to shut down
@@ -209,13 +208,13 @@ void VM_Terminate(void)
 	/* Request termination of thread */
 	GTerminateThread = true;
 
-	/* Now wait for thread to terminate. */
-	pthread_join(Thread, NULL);
-
 	if (!UseSTDIO) {
 		close (PtyRDFD);
 		close (PtyWRFD);
 	}
+
+	/* Shutdown device */
+	SM_Functions(GOP_Terminate, NULL, sm);
 }
 
 /* The following two functions are based on the skeleton from
@@ -345,28 +344,6 @@ static int VM_PtySetup(char *bindir)
 	PtyWRFD = PtyRDFD;
 
 	return (0);
-}
-
-/* Handler called when characters received from serial port.
-   calls state machine code to process it. */
-static void VM_CharHandler(void)
-{
-	unsigned char buffer[255];
-	int res;
-
-	/* If we are in command mode, get the character, otherwise leave it */
-
-	if (CommandMode && ATEM_Initialised) {
-		res = read(PtyRDFD, buffer, 255);
-		/* A returned value of -1 means something serious has gone wrong - so quit!! */
-		/* Note that file closure etc. should have been dealt with in ThreadLoop */
-		if (res <= 0) {
-			GTerminateThread = true;
-			return;
-		}
-
-		ATEM_HandleIncomingData(buffer, res);
-	}
 }
 
 /* Initialise GSM interface, returning gn_error as appropriate  */

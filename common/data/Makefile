@@ -17,8 +17,6 @@
 TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
-CFLAGS += $(PTHREAD_CFLAGS)
-
 OBJS =	at-emulator.o \
 	datapump.o \
 	rlp-common.o \

@@ -264,9 +264,9 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			if (SM_Functions(GOP_MakeCall, &data, sm) != GN_ERR_NONE)
 				DP_CallPassup(GSM_CS_RemoteHangup, NULL, NULL);
 			else {
+				CommandMode = false;
 				RLP_SetUserRequest(Conn_Req, true);
 				IncomingCallNo = data.CallInfo->CallID;
-				CommandMode = false;
 			}
 			return;
 			break;
