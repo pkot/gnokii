@@ -9,7 +9,9 @@
     o fix segfault on getsms, but break smsreader.     (Pavel Machek)
       (this is actually step in right direction)
  * dancall updates
-    o  make it at least compile [testers wanted]       (Pavel Machek) 
+    o make it at least compile [testers wanted]        (Pavel Machek) 
+    o remove duplicated reply_buf definition avoiding OpenBSD
+      compile                                             (Pawel Kot)
  * smsd updates
     o replaced GSM_MAX_DESTINATION_LENGTH with MAX_BCD_STRING_LENGTH
                                                           (Pawel Kot)
@@ -272,7 +274,7 @@
                                                           (Pawel Kot)
  * gnokii.c updates
     o NetMonitor updated to the new structure                   (???)
-    o remove unnessesary entries from gals[]   (Marek Micha³kiewicz,
+    o remove unnessesary entries from gals[]   (Marek Michalkiewicz,
                                                 Sindunata, Pawel Kot)
  * remove obsolete IR-Dongles patches                     (Pawel Kot)
  * wrong order of arguments to memset() in libsms fixed   (Pawel Kot)
@@ -384,7 +386,7 @@
     o indentation                                         (Pawel Kot)
     o remove redundant trailing whitespaces               (Pawel Kot)
     o fix potentially dangerous strcpy in gnokii.c        (Pawel Kot)
- * New sample chat file for HSCSD connection      (Przemek ¦widerski)
+ * New sample chat file for HSCSD connection      (Przemek Swiderski)
  * SMSD update                                         (Jan Derfinak)
 
 0.4.0pre9

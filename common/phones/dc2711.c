@@ -70,8 +70,6 @@ GSM_Phone phone_dancall_2711 = {
 	INFO
 };
 
-char reply_buf[10240];
-
 static void Terminate()
 {
 	return;
