@@ -345,6 +345,16 @@ int serial_select(int fd, struct timeval *timeout, struct gn_statemachine *state
 	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
 
+static int serial_wselect(int fd, struct timeval *timeout, struct gn_statemachine *state)
+{
+	fd_set writefds;
+
+	FD_ZERO(&writefds);
+	FD_SET(fd, &writefds);
+
+	return select(fd + 1, NULL, &writefds, NULL, timeout);
+}
+
 
 /* Change the speed of the serial device.
  * RETURNS: Success
@@ -442,17 +452,17 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine 
 		bs = (state->config.serial_write_usleep < 0) ? n : 1;
 		got = write(fd, buf, bs);
 		if (got == 0) {
-			dprintf("serial_write: oops, zero byte has written!\n");
+			dprintf("Serial write: oops, zero byte has written!\n");
 		}
 		else if (got < 0) {
 			if (errno == EINTR) continue;
 			if (errno != EAGAIN) {
-				dprintf("serial_write: write error %d\n", errno);
+				dprintf("Serial write: write error %d\n", errno);
 				return -1;
 			}
-			dprintf("serial_write: transmitter busy, waiting\n");
-			serial_select(fd, NULL, state);
-			dprintf("serial_write: transmitter ready\n");
+			dprintf("Serial write: transmitter busy, waiting\n");
+			serial_wselect(fd, NULL, state);
+			dprintf("Serial write: transmitter ready\n");
 			continue;
 		}
 
