@@ -79,7 +79,7 @@ API int gn_file_text_save(char *filename, char *text, int mode);
 API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info);
 API void gn_bmp_point_set(gn_bmp *bmp, int x, int y);
 API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y);
-API bool gn_bmp_point(gn_bmp *bmp, int x, int y);
+API int  gn_bmp_point(gn_bmp *bmp, int x, int y);
 API void gn_bmp_clear(gn_bmp *bmp);
 API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info);
 API void gn_bmp_print(gn_bmp *bitmap, FILE *f);
@@ -97,7 +97,7 @@ API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
 API gn_error gn_gsm_initialise(struct gn_statemachine *sm);
 
 /* Encoding */
-API bool gn_char_def_alphabet(unsigned char *string);
+API int gn_char_def_alphabet(unsigned char *string);
 
 /* Errors */
 API char *gn_error_print(gn_error e);
@@ -109,8 +109,8 @@ API char *gn_network_code_get(char *network_name);
 API char *gn_country_name_get(char *country_code);
 API char *gn_country_code_get(char *country_name);
 
-API bool gn_network_get(gn_network *network, int index);
-API bool gn_country_get(gn_country *country, int index);
+API int gn_network_get(gn_network *network, int index);
+API int gn_country_get(gn_country *country, int index);
 
 /* Ringtones */
 API u8 gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength);
@@ -120,7 +120,7 @@ API int gn_note_get(int number);
 /* Config file */
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
 API int gn_cfg_read(char **bindir);
-API bool gn_cfg_phone_load(const char *iname, struct gn_statemachine *state);
+API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state);
 
 API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *addon);
 API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
@@ -134,7 +134,7 @@ API void gn_elog_write(const char *fmt, ...);
 API int gn_line_get(FILE *file, char *line, int count);
 
 API char *gn_device_lock(const char *);
-API bool gn_device_unlock(char *);
+API int gn_device_unlock(char *);
 
 API char *gn_model_get(const char *);
 API gn_phone_model *gn_phone_model_get(const char *);
