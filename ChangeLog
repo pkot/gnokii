@@ -29,6 +29,8 @@
     o mention default caller groups in the manpage   (Reiner Steib)
  * xgnokii updates
     o contacts won't save a trailing semicolon     (BORBELY Zoltan)
+ * gnapplet series updates
+    o gnapplet support added                       (BORBELY Zoltan)
 
 0.6.0
 =====

@@ -29,6 +29,7 @@ OBJS =	generic.lo \
 	ateric.lo \
 	atnok.lo \
 	atsie.lo \
+	gnapplet.lo \
 	fake.lo
 
 #	nk2110.lo

@@ -47,6 +47,7 @@ OBJS =	gsm-api.lo \
 	gsm-common.lo \
 	sms-nokia.lo \
 	nokia-decoding.lo \
+	pkt.lo \
 	compat.lo \
 	misc.lo \
 	snprintf.lo

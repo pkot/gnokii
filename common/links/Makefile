@@ -22,6 +22,7 @@ OBJS =	atbus.lo \
 	fbus-phonet.lo \
 	fbus-3110.lo \
 	m2bus.lo \
+	gnbus.lo \
 	utils.lo
 
 #	cbus.lo
