@@ -154,7 +154,7 @@ A. gnokii didn't install correctly. You probably had gnokii installed already
    'make install'.
 
 -------------------------------------------------------------------------------
-Q. I had problems during compilation with vcal.lx/vcal.c. What should I do?
+Q. I had problems during compilation with gnvcal.lx/gnvcal.c. What should I do?
 
 A. Install flex. It should be available in every Linux distribution as well
    as in CygWin.
