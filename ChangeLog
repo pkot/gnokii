@@ -19,6 +19,8 @@
     o Bluetooth support for FBUS mode in nk6510 series   (Pawel Kot,
                                                     Marcel Holtmann)
     o don't loop forever with irda/bluetooth connection  (Pawel Kot)
+    o translate Bluetooth address in much nicer way
+                                                   (Marcel Holtmann)
 
 0.5.0rc3
 ========
