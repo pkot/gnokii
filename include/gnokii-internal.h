@@ -76,6 +76,12 @@ void char_encode_hex(unsigned char* dest, const unsigned char* src, int len);
 void char_decode_ucs2(unsigned char* dest, const unsigned char* src, int len);
 void char_encode_ucs2(unsigned char* dest, const unsigned char* src, int len);
 
+unsigned char char_encode_def_alphabet(unsigned char value);
+unsigned char char_decode_def_alphabet(unsigned char value);
+
+int char_encode_uni_alphabet(unsigned char const *value, wchar_t *dest);
+int char_decode_uni_alphabet(wchar_t value, unsigned char *dest);
+
 extern char *char_get_bcd_number(u8 *number);
 extern int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type);
 
