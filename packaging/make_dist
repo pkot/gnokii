@@ -30,7 +30,8 @@ rm -rf /tmp/gnokii-${VERSION}/include/obsolete
    cp packaging/RedHat/gnokii.spec .
    make distclean
    cd ..
-   tar cvfz /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION} --exclude CVS
+   tar cfz /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION} --exclude CVS
+   tar cfj /tmp/gnokii-${VERSION}.tar.bz2 gnokii-${VERSION} --exclude CVS
 )
 
 rm -rf /tmp/gnokii-${VERSION}
