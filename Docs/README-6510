@@ -41,6 +41,8 @@ The current code is able to:
  * read/write profiles
  * read WAP bookmarks/settings
  * read/write/delete ToDo entries
+ * create/delete SMS folders
+ * save SMS messages to phone (may be dangerous)
 
 Hint: For all these phones you can also use AT driver, as they all have a
 builtin hardware modem.
