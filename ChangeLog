@@ -83,3 +83,6 @@
 
 * Thu Jun 22 19:17:37 AEST 2000 Mark Looi <m.looi@qut.edu.au>
 - Cell broadcast code for 6110 implemented.
+
+* Tue Jul  4 23:26:47 CEST 2000 Pawe³ Kot <pkot@linuxnews.pl>
+- config.h support added

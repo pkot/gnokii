@@ -56,6 +56,7 @@
   #include <pthread.h>
   #include <errno.h>
   #include "device.h"
+  #include "unixserial.h"
 
 #endif
 

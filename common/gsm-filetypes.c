@@ -196,6 +196,7 @@ int GSM_ReadRingtoneFile(char *FileName, GSM_Ringtone *ringtone)
 
   ringtone->NrNotes=NrNote;
 
+  fclose(file);
   return (0);
 
 }

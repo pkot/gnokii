@@ -232,11 +232,14 @@ static inline u8 Incr(u8 x)
 }
 
 /* Difference between sequence numbers. */
-static inline u8 Diff(u8 x, u8 y)
-{
-    int result = x-y;
-    return (result >= 0) ? result : result + RLP_M;
-}
+
+/* FIXME: Not used now, so I have commented it out. PJ
+ * static inline u8 Diff(u8 x, u8 y)
+ * {
+ *   int result = x-y;
+ *   return (result >= 0) ? result : result + RLP_M;
+ * }
+*/
 
 /* Check value is within range */
 static bool InWindow(u8 val, u8 lower, u8 upper)

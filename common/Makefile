@@ -29,7 +29,9 @@ OBJS =	cfgreader.o \
 	mbus-6160.o \
 	mbus-640.o \
 	rlp-common.o \
-	rlp-crc24.o
+	rlp-crc24.o \
+	misc.o \
+	vcal.o
 
 ifdef WIN32
 	OBJS += $(TOPDIR)/win32/winserial.o
@@ -46,11 +48,14 @@ all: COMMON.o gsm-filetypes.o
 COMMON.o: $(OBJS)
 	$(LD) $(LDREL) $(LDOUT) COMMON.o $(OBJS)
 
-gsm-filetypes.o:
+gsm-filetypes.o: gsm-filetypes.c 
 	$(CC) $(CFLAGS) -c gsm-filetypes.c
 
+vcal.c: vcal.lx
+	$(LEX) -ovcal.c vcal.lx
+
 clean:
-	$(RM) $(OBJS) *~ depend COMMON.o gsm-filetypes.o
+	$(RM) $(OBJS) *~ depend COMMON.o gsm-filetypes.o vcal.c
 
 install:
 	@echo

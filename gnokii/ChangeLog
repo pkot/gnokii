@@ -70,3 +70,6 @@
 
 * Tue Jul 04 10:57:33 AEST 2000 Mark Looi <m.looi@qut.edu.au>
 - added cell broadcast to monitormode
+
+* Thu Jun 29 00:58:00 CEST 2000 Marcel Köppen <jojo@jojosoft.de>
+- Added vCalendar import to --writecalendarnote
