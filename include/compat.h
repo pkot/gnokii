@@ -247,7 +247,7 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 #else
 #define MBSTATE char
 #define MBSTATE_ENC_CLEAR(x) mbtowc(NULL, NULL, 0)
-#define MBSTATE_DEC_CLEAR(x) wctomb(NULL, NULL)
+#define MBSTATE_DEC_CLEAR(x) wctomb(NULL, (wchar_t)NULL)
 #endif
 
 #endif

@@ -2,6 +2,7 @@
 =====
  * libgnokii updates
     o bump the version number                      (BORBELY Zoltan)
+    o wctomb() second argument should be 0, not NULL    (Pawel Kot)
  * build system updates
     o require flex at rpm build time            (Olivier Kaloudoff)
  * gnokii updates
