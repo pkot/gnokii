@@ -1,10 +1,10 @@
                             - G N O K I I -
                (C) Hugh Blemings, hugh@vsb.com.au 1999
-               Last update 30 March 1999  Version 0.2.4
+               Last update 18 May 1999   Version 0.2.5
 
 - Introduction -
 
-This is version 0.2.4 of gnokii, a Linux/Unix tool suite and (eventually)
+This is version 0.2.5 of gnokii, a Linux/Unix tool suite and (eventually)
 modem/fax driver for Nokia mobile phones, released under the GPL.  Please
 see COPYING for more details on license/copying issues.
 
@@ -13,8 +13,8 @@ the most testing.  Other cables, including home made ones will very likely
 work.  Details of other handsets and networks are provided below.
 
 Code for the 6110 phones has been tested with the DAU-9P MBus Cable NSE-3.
-Note that the 6110 code is still under heavy development and
-may not work with your particular firmware.
+Note that the 6110 code is still under heavy development and may not work
+with your particular firmware though testing to date has been encouraging.
 
 Bugs where known are detailed in the file BUGS...  Play around
 with it, hack at it and see what you discover but please do so in the
@@ -25,13 +25,17 @@ In the following notes, "3810 Series" referes to the 3110, 3810 and
 8110 models.  "6110 Series" refers to the 6110, 5110 and hopefully
 others.
 
+As you may be aware, there are indications that Nokia may provide
+some support for the project.  These negotations are continuing
+and nothing is definate but are most encouraging.
+
 - Notes for 3810 Series -
 
-The 3810 was the phone used for initial gnokii development and
-hence it is somewhat better supported than the 6110.  This in
-no way reflects on the folk working on the 6110 code, indeed
-the 3810 series have a considerably simpler protocol as it
-turns out.
+Relative to the previous version, little has changed in the
+area of 3810 functionality due to (in part) a lack of (Hugh's) time 
+to work on it and to a lesser extent the hope that we may receive some
+information from Nokia which will alleviate much of the guesswork
+that has been needed to date.
 
 When built with 3810 support, the resulting executable allows you
 to read/write phonebook entries, send SMS messages to the network,
@@ -45,6 +49,8 @@ but the read code is believed to be solid.  It has been observed
 that the write code occasionally fails to write a location for
 reasons as yet unknown.  The format of the input to the write
 option is relatively unforgiving and does only very basic parsing.
+This format should be compatible with the output from the Windows
+NCDS software.
 
 Routines for retrieving SMS messages have been tested and appear
 to be bug free.  The 3810 used for testing appears to ignore the
@@ -103,15 +109,17 @@ please let me know.
 - Installation -
 
 Review the Makefile and make sure that the MODEL and PORT defines
-are correct for your setup.  THe file has comments on what to
+are correct for your setup.  The file has comments on what to
 do - if you have questions please ask them on the mailing list.
-You'll need r/w permissions on the port you select.  If you set
-MODEL to 6110 you will see lots of "Not implemented" messages
-unless that functionality has been completed. 
+You'll need r/w permissions on the port you select.  Depending
+on what functions have been implemented for your particular model,
+you may see "Not Implemented" messages when certain functions
+are used.
 
 For 3810 series users if your SIM card allows names longer than
 10 character, modify FB38_DEFAULT_SIM_PHONEBOOK_NAME_LENGTH in
-fbus-3810.h accordingly.
+fbus-3810.h accordingly.  There is a mechanism for this to be
+set automatically but it isn't yet understood :(
 
 Type make, all should build from there, it's pretty simple code
 so you shouldn't have any problems.  Note that you need pthread
@@ -155,19 +163,23 @@ Just install the cvs package for your distribution and do these steps:
 
 	export CVSROOT=:pserver:cvs@cvs.linux.cz:/cvs/gnokii
 
-	If you have different shell, use different command (e.g. setenv).
+	   If you have different shell, use different command (e.g. setenv).
 
 
 	2. Log in to the CVS server as anonymous reader by typing
 
 	cvs login
 
-	Use an empty password.
+	   Use an empty password.
 
 
 	3. If you are logged in you are ready to checkout the newest sources:
 
 	cvs co gnokii
+
+If you prefer, there is a WWW interface to the CVS server at
+
+http://odysseus.fi.muni.cz/cgi-bin/cvsweb.cgi/?cvsroot=gnokii
 
 Now you are on your own - you have the current sources on your disk
 in the directory gnokii.  If you are going to make substantial changes
@@ -185,10 +197,6 @@ the 3810 and its Windows 95 software and a few snippets of information
 found on the 'net relating to older Nokia models.  Feedback from
 people who played with the first release of gnokii was invaluable.
 
-Somewhat more of the protocol has been investigated than is presently
-included in the 3810 section of the software.  However, they are not
-yet fully understood and hence have been left out of the included
-code for now.
 
 6110 Series
 
@@ -259,7 +267,6 @@ is the Australian mirror, there will be one nearby to you too :)
 
 6110 Series
 
-[Note 6110 support is still under heavy development]
 6190/Microcel (Canada) (GSM 1900)
 6110/Panafon (Greece)
 6110/Paegas (Czech Republic)
@@ -309,6 +316,9 @@ Thank you to, in no particular order...
 *  Czech Linux Users' group for it's CVS server which hosts our
    development repository.
 
+*  Goran Dokic, Samuli Sorvakko and ?????? for gettext files for
+   Dutch, Finnish and German translations.
+
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this :)
 
@@ -316,6 +326,15 @@ Thank you to, in no particular order...
 
 
 - Release Notes -
+
+19990519 Version 0.2.5
+Little has changed on the 3810 side - mostly adding stub functions
+to stay current with the 6110 code.  A no-brainer bug was found in 
+the SMS send routines which is now corrected - could have caused
+multiple messages to be sent.
+
+6110 support has moved ahead in leaps and bounds, SMS sending is
+now in there along with many other new function.
 
 19990328 Version 0.2.4
 Largely a synchronisation release to incorporate Pavel's numerous
