@@ -374,7 +374,7 @@ because you save it into SIM memory!"));
 			strncpy(new_entry->entry.number,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)),
 				max_phonebook_sim_number_length);
-			new_entry->entry.name[max_phonebook_sim_number_length] = '\0';
+			new_entry->entry.number[max_phonebook_sim_number_length] = '\0';
 		}
 
 		new_entry->entry.caller_group = ((EditEntryData *) data)->newGroup;
@@ -397,8 +397,7 @@ because you save it into SIM memory!"));
 			strncpy(current_entry->entry.name,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
 				max_phonebook_name_length);
-			current_entry->entry.name[max_phonebook_name_length] =
-			    '\0';
+			current_entry->entry.name[max_phonebook_name_length] = '\0';
 
 			if (phoneMonitor.supported & PM_EXTPBK) {
 
@@ -407,8 +406,7 @@ because you save it into SIM memory!"));
 					gtk_entry_get_text(GTK_ENTRY
 							   (((EditEntryData *) data)->number)),
 					max_phonebook_number_length);
-				current_entry->entry.
-				    name[max_phonebook_number_length] = '\0';
+				current_entry->entry.number[max_phonebook_number_length] = '\0';
 			}
 		/* Memory type not changed, SIM memory */
 		} else {
@@ -438,7 +436,7 @@ because you save it into SIM memory!"));
 				strncpy(current_entry->entry.number,
 					gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)), 
 					max_phonebook_sim_number_length);
-				current_entry->entry.name[max_phonebook_sim_number_length] = '\0';
+				current_entry->entry.number[max_phonebook_sim_number_length] = '\0';
 			}
 		}
 
@@ -446,10 +444,13 @@ because you save it into SIM memory!"));
 
 		current_entry->status = E_Changed;
 
-		if (current_entry->entry.memory_type == GN_MT_ME)
+		if (current_entry->entry.memory_type == GN_MT_ME) {
+			statusInfo.ch_SM = 0;
 			statusInfo.ch_ME = 1;
-		else
+		} else {
 			statusInfo.ch_SM = 1;
+			statusInfo.ch_ME = 0;
+		}
 	}
 
 	gtk_widget_hide(GTK_WIDGET(((EditEntryData *) data)->dialog));
@@ -550,7 +551,7 @@ static void OkNewEntryDialog(GtkWidget * widget, gpointer data)
 			strncpy(entry->entry.number,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)),
 				max_phonebook_number_length);
-			entry->entry.name[max_phonebook_number_length] = '\0';
+			entry->entry.number[max_phonebook_number_length] = '\0';
 		}
 
 		entry->entry.caller_group = ((EditEntryData *) data)->newGroup;
@@ -584,7 +585,7 @@ because you save it into SIM memory!"));
 			strncpy(entry->entry.number,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)),
 				max_phonebook_sim_number_length);
-			entry->entry.name[max_phonebook_sim_number_length] = '\0';
+			entry->entry.number[max_phonebook_sim_number_length] = '\0';
 		}
 
 		entry->entry.caller_group = ((EditEntryData *) data)->newGroup;
@@ -597,8 +598,7 @@ because you save it into SIM memory!"));
 			strncpy(((EditEntryData *) data)->pbEntry->entry.name,
 				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
 				max_phonebook_name_length);
-			((EditEntryData *) data)->pbEntry->entry.name[max_phonebook_name_length] =
-			    '\0';
+			((EditEntryData *) data)->pbEntry->entry.name[max_phonebook_name_length] = '\0';
 
 			if (phoneMonitor.supported & PM_EXTPBK) {
 			} else {

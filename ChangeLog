@@ -33,6 +33,7 @@
     o generate the same output with phonebook export as gnokii
                                                         (Pawel Kot)
     o accept long phonebook lines (import and export)   (Pawel Kot)
+    o fix mixed name/number entry field usage        (Peter Grandi)
 
 0.6.1
 =====
