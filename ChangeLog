@@ -74,6 +74,7 @@
  * build system changes
     o use NLS detection from autoconf/automake macros
                                  (Pawel Kot, Mariusz Mazur, PLD Team)
+ * ppm2nokia script added                              (Vidar Madsen)
 
 0.4.3
 =====
