@@ -13,7 +13,7 @@
   The various routines are called FB61 (whatever) as a concatenation of FBUS
   and 6110.
 
-  Last modification: Sun May 16 21:04:03 CEST 1999
+  Last modification: Wed Nov 24 16:18:58 CET 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -636,8 +636,8 @@ bool FB61_InitIR115200(void)
     if ( ! no_timeout ) {
 
 #ifdef DEBUG
-      printf ("Timeout in IR-mode\n");
-#endif DEBUG
+      fprintf(stdout, _("Timeout in IR-mode\n"));
+#endif /* DEBUG */
 
       done = 1;
       ret = false;
@@ -767,8 +767,8 @@ void FB61_ThreadLoop(void)
   if ( CurrentConnectionType == GCT_Infrared ) {
 
 #ifdef DEBUG
-    printf ("Starting IR mode...!\n");
-#endif DEBUG
+    fprintf(stdout, _("Starting IR mode...!\n"));
+#endif /* DEBUG */
 
     if (FB61_OpenIR() != true) {
       FB61_LinkOK = false;
@@ -1874,7 +1874,7 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
 
 #ifdef DEBUG
   fprintf(stdout, _("Sending SMS to %s via message center %s\n"), SMS->Destination, SMS->MessageCenter.Number);
-#endif DEBUG
+#endif /* DEBUG */
 
   CurrentSMSMessageError=GE_BUSY;
 
@@ -2128,13 +2128,13 @@ void FB61_DumpSerial(void)
   ioctl(PortFD, TIOCMGET, &Flags);
 
 #ifdef DEBUG
-  printf(_("Serial flags dump:\n"));
-  printf(_("DTR is %s.\n"), Flags&TIOCM_DTR?_("up"):_("down"));
-  printf(_("RTS is %s.\n"), Flags&TIOCM_RTS?_("up"):_("down"));
-  printf(_("CAR is %s.\n"), Flags&TIOCM_CAR?_("up"):_("down"));
-  printf(_("CTS is %s.\n"), Flags&TIOCM_CTS?_("up"):_("down"));
-  printf("\n");
-#endif DEBUG
+  fprintf(stdout, _("Serial flags dump:\n"));
+  fprintf(stdout, _("DTR is %s.\n"), Flags&TIOCM_DTR?_("up"):_("down"));
+  fprintf(stdout, _("RTS is %s.\n"), Flags&TIOCM_RTS?_("up"):_("down"));
+  fprintf(stdout, _("CAR is %s.\n"), Flags&TIOCM_CAR?_("up"):_("down"));
+  fprintf(stdout, _("CTS is %s.\n"), Flags&TIOCM_CTS?_("up"):_("down"));
+  fprintf(stdout, "\n");
+#endif /* DEBUG */
 
 }
 
@@ -2170,8 +2170,8 @@ void FB61_SetFBUS()
 
 #ifdef DEBUG
   FB61_DumpSerial();  
-  printf(_("Setting FBUS communication...\n"));
-#endif DEBUG
+  fprintf(stdout, _("Setting FBUS communication...\n"));
+#endif /* DEBUG */
 
   /* clearing the RTS bit */
 
@@ -2185,7 +2185,7 @@ void FB61_SetFBUS()
 
 #ifdef DEBUG
   FB61_DumpSerial();  
-#endif DEBUG
+#endif /* DEBUG */
 }
 
 /* Called by initialisation code to open comm port in asynchronous mode. */
@@ -2251,7 +2251,7 @@ void FB61_SigHandler(int status)
   for (count = 0; count < res ; count ++)
     FB61_RX_StateMachine(buffer[count]);
 }
-#endif WIN32
+#endif /* WIN32 */
 
 char *FB61_GetBCDNumber(u8 *Number) {
 
@@ -2316,7 +2316,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   if (MessageType != FB61_FRTYPE_ACK && MessageType != 0xf1)
     FB61_RX_DisplayMessage();
 
-#endif DEBUG
+#endif /* DEBUG */
 
   /* Switch on the basis of the message type byte */
   switch (MessageType) {
@@ -2356,10 +2356,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x03:
 
 #ifdef DEBUG
-      printf(_("Message: Call message, type 0x03:"));
-      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
-      printf(_("   Exact meaning not known yet, sorry :-(\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Call message, type 0x03:"));
+      fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+      fprintf(stdout, _("   Exact meaning not known yet, sorry :-(\n"));
+#endif /* DEBUG */
 
       break;
 
@@ -2369,9 +2369,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x04:
 
 #ifdef DEBUG
-      printf(_("Message: Remote end hang up.\n"));
-      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
-#endif DEBUG
+      fprintf(stdout, _("Message: Remote end hang up.\n"));
+      fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+#endif /* DEBUG */
 
       CurrentIncomingCall[0]=0;
 
@@ -2382,27 +2382,27 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x05:
 
 #ifdef DEBUG
-      printf(_("Message: Incoming call alert:\n"));
+      fprintf(stdout, _("Message: Incoming call alert:\n"));
 
       /* We can have more then one call ringing - we can distinguish between
          them */
 
-      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
-      printf(_("   Number: "));
+      fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+      fprintf(stdout, _("   Number: "));
       count=MessageBuffer[6];
 
       for (tmp=0; tmp <count; tmp++)
-	printf("%c", MessageBuffer[7+tmp]);
+	fprintf(stdout, "%c", MessageBuffer[7+tmp]);
 
-      printf("\n");
+      fprintf(stdout, "\n");
 
-      printf(_("   Name: "));
+      fprintf(stdout, _("   Name: "));
 
       for (tmp=0; tmp <MessageBuffer[7+count]; tmp++)
-	printf("%c", MessageBuffer[8+count+tmp]);
+	fprintf(stdout, "%c", MessageBuffer[8+count+tmp]);
 
-      printf("\n");
-#endif DEBUG
+      fprintf(stdout, "\n");
+#endif /* DEBUG */
 
       count=MessageBuffer[6];
 
@@ -2416,9 +2416,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x07:
 
 #ifdef DEBUG
-      printf(_("Message: Call answered.\n"));
-      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
-#endif DEBUG
+      fprintf(stdout, _("Message: Call answered.\n"));
+      fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+#endif /* DEBUG */
 
       break;
 
@@ -2427,9 +2427,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x09:
 
 #ifdef DEBUG
-      printf(_("Message: Call ended by your phone.\n"));
-      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
-#endif DEBUG
+      fprintf(stdout, _("Message: Call ended by your phone.\n"));
+      fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+#endif /* DEBUG */
 
       break;
 
@@ -2451,10 +2451,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x0a:
 
 #ifdef DEBUG
-      printf(_("Message: Call message, type 0x0a:"));
-      printf(_("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
-      printf(_("   Exact meaning not known yet, sorry :-(\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Call message, type 0x0a:"));
+      fprintf(stdout, _("   Sequence nr. of the call: %d\n"), MessageBuffer[4]);
+      fprintf(stdout, _("   Exact meaning not known yet, sorry :-(\n"));
+#endif /* DEBUG */
 
       CurrentIncomingCall[0]=0;
 
@@ -2463,8 +2463,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     default:
 
 #ifdef DEBUG
-      printf(_("Message: Unknown message of type 0x01\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Unknown message of type 0x01\n"));
+#endif /* DEBUG */
 	  break;	/* Visual C Don't like empty cases */
     }
 
@@ -2481,8 +2481,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       /* SMS message correctly sent to the network */
 
 #ifdef DEBUG
-      printf(_("Message: SMS Message correctly sent.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: SMS Message correctly sent.\n"));
+#endif /* DEBUG */
 
       CurrentSMSMessageError = GE_SMSSENDOK;
       break;
@@ -2492,8 +2492,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       /* SMS message send to the network failed */
 
 #ifdef DEBUG
-      printf(_("Message: Sending SMS Message failed.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Sending SMS Message failed.\n"));
+#endif /* DEBUG */
 
       CurrentSMSMessageError = GE_SMSSENDFAILED;
       break;
@@ -2501,29 +2501,29 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x10:
 	  
 #ifdef DEBUG
-      printf(_("Message: SMS Message Received\n"));
-      printf(_("   SMS center number: %s\n"), FB61_GetBCDNumber(MessageBuffer+7));
+      fprintf(stdout, _("Message: SMS Message Received\n"));
+      fprintf(stdout, _("   SMS center number: %s\n"), FB61_GetBCDNumber(MessageBuffer+7));
 
       MessageBuffer[23] = (MessageBuffer[23]+1)/2+1;
 
-      printf(_("   Remote number: %s\n"), FB61_GetBCDNumber(MessageBuffer+23));
-      printf(_("   Date: %s\n"), FB61_GetPackedDateTime(MessageBuffer+35));
-      printf(_("   SMS: "));
+      fprintf(stdout, _("   Remote number: %s\n"), FB61_GetBCDNumber(MessageBuffer+23));
+      fprintf(stdout, _("   Date: %s\n"), FB61_GetPackedDateTime(MessageBuffer+35));
+      fprintf(stdout, _("   SMS: "));
 
       tmp=UnpackEightBitsToSeven(MessageLength-42-2, MessageBuffer[22], MessageBuffer+42, output);
 
       for (i=0; i<tmp;i++)
-	printf("%c", GSM_Default_Alphabet[output[i]]);
+	fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
 
-      printf("\n");
-#endif DEBUG
+      fprintf(stdout, "\n");
+#endif /* DEBUG */
 
       break;
 
     case 0x31:
 
 #ifdef DEBUG
-      printf(_("Message: SMS Center correctly set.\n"));
+      fprintf(stdout, _("Message: SMS Center correctly set.\n"));
 #endif
 
       CurrentMessageCenterError=GE_NONE;
@@ -2539,71 +2539,71 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       sprintf(CurrentMessageCenter->Number, "%s", FB61_GetBCDNumber(MessageBuffer+21));
 
 #ifdef DEBUG
-      printf(_("Message: SMS Center received:\n"));
-      printf(_("   %d. SMS Center name is %s\n"), CurrentMessageCenter->No, CurrentMessageCenter->Name);
-      printf(_("   SMS Center number is %s\n"), CurrentMessageCenter->Number);
+      fprintf(stdout, _("Message: SMS Center received:\n"));
+      fprintf(stdout, _("   %d. SMS Center name is %s\n"), CurrentMessageCenter->No, CurrentMessageCenter->Name);
+      fprintf(stdout, _("   SMS Center number is %s\n"), CurrentMessageCenter->Number);
 
-      printf(_("   SMS Center message format is "));
+      fprintf(stdout, _("   SMS Center message format is "));
 
       switch (CurrentMessageCenter->Format) {
 
       case GSMF_Text:
-	printf(_("Text"));
+	fprintf(stdout, _("Text"));
 	break;
 
       case GSMF_Paging:
-	printf(_("Paging"));
+	fprintf(stdout, _("Paging"));
 	break;
 
       case GSMF_Fax:
-	printf(_("Fax"));
+	fprintf(stdout, _("Fax"));
 	break;
 
       case GSMF_Email:
-	printf(_("Email"));
+	fprintf(stdout, _("Email"));
 	break;
 
       default:
-	printf(_("Unknown"));
+	fprintf(stdout, _("Unknown"));
       }
 
-      printf("\n");
+      fprintf(stdout, "\n");
 
-      printf(_("   SMS Center message validity is "));
+      fprintf(stdout, _("   SMS Center message validity is "));
 
       switch (CurrentMessageCenter->Validity) {
 
       case GSMV_1_Hour:
-	printf(_("1 hour"));
+	fprintf(stdout, _("1 hour"));
 	break;
 
       case GSMV_6_Hours:
-	printf(_("6 hours"));
+	fprintf(stdout, _("6 hours"));
 	break;
 
       case GSMV_24_Hours:
-	printf(_("24 hours"));
+	fprintf(stdout, _("24 hours"));
 	break;
 
       case GSMV_72_Hours:
-	printf(_("72 hours"));
+	fprintf(stdout, _("72 hours"));
 	break;
 
       case GSMV_1_Week:
-	printf(_("1 week"));
+	fprintf(stdout, _("1 week"));
 	break;
 
       case GSMV_Max_Time:
-	printf(_("Maximum time"));
+	fprintf(stdout, _("Maximum time"));
 	break;
 
       default:
-	printf(_("Unknown"));
+	fprintf(stdout, _("Unknown"));
       }
 
-      printf("\n");
+      fprintf(stdout, "\n");
 
-#endif DEBUG
+#endif /* DEBUG */
 
       CurrentMessageCenterError=GE_NONE;
 
@@ -2616,9 +2616,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	 fail. */
 
 #ifdef DEBUG
-      printf(_("Message: SMS Center error received:\n"));
-      printf(_("   The request for SMS Center failed.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: SMS Center error received:\n"));
+      fprintf(stdout, _("   The request for SMS Center failed.\n"));
+#endif /* DEBUG */
 
       /* FIXME: appropriate error. */
       CurrentMessageCenterError=GE_INTERNALERROR;
@@ -2628,8 +2628,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     default:
 
 #ifdef DEBUG
-      printf(_("Unknown message!\n"));
-#endif DEBUG
+      fprintf(stdout, _("Unknown message!\n"));
+#endif /* DEBUG */
 
     }
 
@@ -2648,14 +2648,14 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       count=MessageBuffer[5];
 	  
 #ifdef DEBUG
-      printf(_("Message: Phonebook entry received:\n"));
-      printf(_("   Name: "));
+      fprintf(stdout, _("Message: Phonebook entry received:\n"));
+      fprintf(stdout, _("   Name: "));
 
       for (tmp=0; tmp <count; tmp++)
-	printf("%c", MessageBuffer[6+tmp]);
+	fprintf(stdout, "%c", MessageBuffer[6+tmp]);
 
-      printf("\n");
-#endif DEBUG
+      fprintf(stdout, "\n");
+#endif /* DEBUG */
 
       memcpy(CurrentPhonebookEntry->Name, MessageBuffer + 6, count);
       CurrentPhonebookEntry->Name[count] = 0x00;
@@ -2665,13 +2665,13 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       count=MessageBuffer[6+count];
 
 #ifdef DEBUG
-      printf(_("   Number: "));
+      fprintf(stdout, _("   Number: "));
 
       for (tmp=0; tmp <count; tmp++)
-	printf("%c", MessageBuffer[i+tmp]);
+	fprintf(stdout, "%c", MessageBuffer[i+tmp]);
 
-      printf("\n");
-#endif DEBUG
+      fprintf(stdout, "\n");
+#endif /* DEBUG */
 
       memcpy(CurrentPhonebookEntry->Number, MessageBuffer + i, count);
       CurrentPhonebookEntry->Number[count] = 0x00;
@@ -2686,16 +2686,16 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x03:
 
 #ifdef DEBUG
-      printf(_("Message: Phonebook read entry error received:\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Phonebook read entry error received:\n"));
+#endif /* DEBUG */
 
       switch (MessageBuffer[4]) {
 
       case 0x7d:
 
 #ifdef DEBUG
-	printf(_("   Invalid memory type!\n"));
-#endif DEBUG
+	fprintf(stdout, _("   Invalid memory type!\n"));
+#endif /* DEBUG */
 
 	CurrentPhonebookError = GE_INVALIDMEMORYTYPE;
 
@@ -2704,8 +2704,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       default:
 
 #ifdef DEBUG
-	printf(_("   Unknown error!\n"));
-#endif DEBUG
+	fprintf(stdout, _("   Unknown error!\n"));
+#endif /* DEBUG */
 
 	CurrentPhonebookError = GE_INTERNALERROR;
       }
@@ -2715,8 +2715,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x05:
 
 #ifdef DEBUG
-      printf(_("Message: Phonebook written correctly.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Phonebook written correctly.\n"));
+#endif /* DEBUG */
 
       CurrentPhonebookError = GE_NONE;
 
@@ -2732,8 +2732,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       case 0x7d:
 
 #ifdef DEBUG
-	printf(_("Message: Phonebook not written - name is too long.\n"));
-#endif DEBUG
+	fprintf(stdout, _("Message: Phonebook not written - name is too long.\n"));
+#endif /* DEBUG */
 
 	CurrentPhonebookError = GE_PHBOOKNAMETOOLONG;
 
@@ -2742,8 +2742,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       default:
 
 #ifdef DEBUG
-	printf(_("   Unknown error!\n"));
-#endif DEBUG
+	fprintf(stdout, _("   Unknown error!\n"));
+#endif /* DEBUG */
 
 	CurrentPhonebookError = GE_INTERNALERROR;
       }
@@ -2753,12 +2753,12 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x08:
 
 #ifdef DEBUG
-      printf(_("Message: Memory status received:\n"));
+      fprintf(stdout, _("Message: Memory status received:\n"));
 
-      printf(_("   Memory Type: %s\n"), FB61_MemoryType_String[MessageBuffer[4]]);
-      printf(_("   Used: %d\n"), MessageBuffer[6]);
-      printf(_("   Free: %d\n"), MessageBuffer[5]);
-#endif DEBUG
+      fprintf(stdout, _("   Memory Type: %s\n"), FB61_MemoryType_String[MessageBuffer[4]]);
+      fprintf(stdout, _("   Used: %d\n"), MessageBuffer[6]);
+      fprintf(stdout, _("   Free: %d\n"), MessageBuffer[5]);
+#endif /* DEBUG */
 
       CurrentMemoryStatus->Used = MessageBuffer[6];
       CurrentMemoryStatus->Free = MessageBuffer[5];
@@ -2772,29 +2772,29 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 	  case 0x6f:
 #ifdef DEBUG
-	        printf(_("Message: Memory status error, phone is probably powered off.\n"));
-#endif DEBUG
+	        fprintf(stdout, _("Message: Memory status error, phone is probably powered off.\n"));
+#endif /* DEBUG */
 		CurrentMemoryStatusError = GE_TIMEOUT;
 		break;
 
 	  case 0x7d:
 #ifdef DEBUG
-	        printf(_("Message: Memory status error, memory type not supported by phone model.\n"));
-#endif DEBUG
+	        fprintf(stdout, _("Message: Memory status error, memory type not supported by phone model.\n"));
+#endif /* DEBUG */
 		CurrentMemoryStatusError = GE_INTERNALERROR;
 		break;
 
 	  case 0x8d:
 #ifdef DEBUG
-	        printf(_("Message: Memory status error, waiting for security code.\n"));
-#endif DEBUG
+	        fprintf(stdout, _("Message: Memory status error, waiting for security code.\n"));
+#endif /* DEBUG */
 		CurrentMemoryStatusError = GE_INVALIDSECURITYCODE;
 		break;
 
 	  default:
 #ifdef DEBUG
-	        printf(_("Message: Unknown Memory status error, subtype (MessageBuffer[4]) = %02x\n"),MessageBuffer[4]);
-#endif DEBUG
+	        fprintf(stdout, _("Message: Unknown Memory status error, subtype (MessageBuffer[4]) = %02x\n"),MessageBuffer[4]);
+#endif /* DEBUG */
 		break;
 	  }
 
@@ -2808,10 +2808,12 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	count=MessageBuffer[5];
 	memcpy(GetBitmap->text,MessageBuffer+6,count);
 	GetBitmap->text[count]=0;
+
 #ifdef DEBUG	
-	printf(_("Message: Caller group logo etc.\n"));
-	printf("Caller group name: %s\n",GetBitmap->text);
-#endif DEBUG
+	fprintf(stdout, _("Message: Caller group logo etc.\n"));
+	fprintf(stdout, _("Caller group name: %s\n"),GetBitmap->text);
+#endif /* DEBUG */
+
 	count+=6;
 	GetBitmap->ringtone=MessageBuffer[count++];
 	count++;
@@ -2826,9 +2828,11 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	GetBitmapError=GE_NONE;
       }
       else {
+
 #ifdef DEBUG
-	printf(_("Message: Caller group data received but not requested!\n"));
+	fprintf(stdout, _("Message: Caller group data received but not requested!\n"));
 #endif
+
       }
       break;
 
@@ -2836,7 +2840,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       
       GetBitmapError=GE_UNKNOWN;   
 #ifdef DEBUG
-	printf(_("Message: Error attempting to get caller group data.\n"));
+	fprintf(stdout, _("Message: Error attempting to get caller group data.\n"));
 #endif   
       break;
       
@@ -2844,7 +2848,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       
       SetBitmapError=GE_NONE;      
 #ifdef DEBUG
-	printf(_("Message: Caller group data set correctly.\n"));
+	fprintf(stdout, _("Message: Caller group data set correctly.\n"));
 #endif
       break;
 
@@ -2852,7 +2856,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       
       SetBitmapError=GE_UNKNOWN;      
 #ifdef DEBUG
-	printf(_("Message: Error attempting to set caller group data\n"));
+	fprintf(stdout, _("Message: Error attempting to set caller group data\n"));
 #endif
       break;  
   
@@ -2863,11 +2867,11 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       CurrentSpeedDialEntry->Number = MessageBuffer[5];
 
 #ifdef DEBUG
-      printf(_("Message: Speed dial entry received:\n"));
-      printf(_("   Location: %d\n"), CurrentSpeedDialEntry->Location);
-      printf(_("   MemoryType: %s\n"), FB61_MemoryType_String[CurrentSpeedDialEntry->MemoryType]);
-      printf(_("   Number: %d\n"), CurrentSpeedDialEntry->Number);
-#endif DEBUG
+      fprintf(stdout, _("Message: Speed dial entry received:\n"));
+      fprintf(stdout, _("   Location: %d\n"), CurrentSpeedDialEntry->Location);
+      fprintf(stdout, _("   MemoryType: %s\n"), FB61_MemoryType_String[CurrentSpeedDialEntry->MemoryType]);
+      fprintf(stdout, _("   Number: %d\n"), CurrentSpeedDialEntry->Number);
+#endif /* DEBUG */
 
       CurrentSpeedDialError=GE_NONE;
 
@@ -2876,8 +2880,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x18:
 
 #ifdef DEBUG
-      printf(_("Message: Speed dial entry error\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Speed dial entry error\n"));
+#endif /* DEBUG */
 
       CurrentSpeedDialError=GE_INVALIDSPEEDDIALLOCATION;
 
@@ -2886,8 +2890,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x1a:
 
 #ifdef DEBUG
-      printf(_("Message: Speed dial entry set.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Speed dial entry set.\n"));
+#endif /* DEBUG */
 
       CurrentSpeedDialError=GE_NONE;
 
@@ -2896,8 +2900,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x1b:
 
 #ifdef DEBUG
-      printf(_("Message: Speed dial entry setting error.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Speed dial entry setting error.\n"));
+#endif /* DEBUG */
 
       CurrentSpeedDialError=GE_INVALIDSPEEDDIALLOCATION;
 
@@ -2906,8 +2910,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     default:
 
 #ifdef DEBUG
-      printf(_("Message: Unknown message of type 0x03\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Unknown message of type 0x03\n"));
+#endif /* DEBUG */
 	  break;	/* Visual C Don't like empty cases */
     }
 
@@ -2922,14 +2926,14 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x02:
 
 #ifdef DEBUG
-      printf(_("Message: Phone status received:\n"));
-      printf(_("   Mode: "));
+      fprintf(stdout, _("Message: Phone status received:\n"));
+      fprintf(stdout, _("   Mode: "));
 
       switch (MessageBuffer[4]) {
 
       case 0x01:
 
-	printf(_("registered within the network\n"));
+	fprintf(stdout, _("registered within the network\n"));
 
 	break;
 	      
@@ -2938,53 +2942,53 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	      
       case 0x02:
 
-	printf(_("call in progress\n")); /* ringing or already answered call */
+	fprintf(stdout, _("call in progress\n")); /* ringing or already answered call */
 
 	break;
 	      
       case 0x03:
 
-	printf(_("waiting for security code\n"));
+	fprintf(stdout, _("waiting for security code\n"));
 
 	break;
 
       case 0x04:
 
-	printf(_("powered off\n"));
+	fprintf(stdout, _("powered off\n"));
 
 	break;
 
       default:
 
-	printf(_("unknown\n"));
+	fprintf(stdout, _("unknown\n"));
 
       }
 
-      printf(_("   Power source: "));
+      fprintf(stdout, _("   Power source: "));
 
       switch (MessageBuffer[7]) {
 
       case 0x01:
 
-	printf(_("AC/DC\n"));
+	fprintf(stdout, _("AC/DC\n"));
 
 	break;
 		
       case 0x02:
 
-	printf(_("battery\n"));
+	fprintf(stdout, _("battery\n"));
 
 	break;
 
       default:
 
-	printf(_("unknown\n"));
+	fprintf(stdout, _("unknown\n"));
 
       }
 
-      printf(_("   Battery Level: %d\n"), MessageBuffer[8]);
-      printf(_("   Signal strength: %d\n"), MessageBuffer[5]);
-#endif DEBUG
+      fprintf(stdout, _("   Battery Level: %d\n"), MessageBuffer[8]);
+      fprintf(stdout, _("   Signal strength: %d\n"), MessageBuffer[5]);
+#endif /* DEBUG */
 
       CurrentRFLevel=MessageBuffer[5];
       CurrentBatteryLevel=MessageBuffer[8];
@@ -2995,8 +2999,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     default:
 
 #ifdef DEBUG
-      printf(_("Message: Unknown message of type 0x04\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Unknown message of type 0x04\n"));
+#endif /* DEBUG */
 	  break;	/* Visual C Don't like empty cases */
     }
 
@@ -3013,7 +3017,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
      if (GetBitmap!=NULL) {
 #ifdef DEBUG
-	printf(_("Message: Startup Logo received.\n"));
+	fprintf(stdout, _("Message: Startup Logo received.\n"));
 #endif
        count=5;
        for (tmp=0;tmp<MessageBuffer[4];tmp++){
@@ -3030,7 +3034,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	   GetBitmap->text[MessageBuffer[count]]=0;
 	   count+=MessageBuffer[count];
 #ifdef DEBUG
-	   printf("Startup Text: %s\n",GetBitmap->text);
+	   fprintf(stdout, _("Startup Text: %s\n"),GetBitmap->text);
 #endif
 	   break;
 	 case 0x03:
@@ -3042,7 +3046,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
      }
       else {
 #ifdef DEBUG
-	printf(_("Message: Startup logo received but not requested!\n"));
+	fprintf(stdout, _("Message: Startup logo received but not requested!\n"));
 #endif
       }
       break;
@@ -3051,14 +3055,14 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     
       SetBitmapError=GE_NONE;    
 #ifdef DEBUG
-	printf(_("Message: Startup logo correctly set.\n"));
+	fprintf(stdout, _("Message: Startup logo correctly set.\n"));
 #endif  
       break;      
 
     case 0x31:   /* Set Operator Logo OK */
       
 #ifdef DEBUG
-	printf(_("Message: Operator logo correctly set.\n"));
+	fprintf(stdout, _("Message: Operator logo correctly set.\n"));
 #endif  
       SetBitmapError=GE_NONE;      
       break;
@@ -3067,7 +3071,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       
       SetBitmapError=GE_UNKNOWN;
 #ifdef DEBUG
-	printf(_("Message: Error setting operator logo!\n"));
+	fprintf(stdout, _("Message: Error setting operator logo!\n"));
 #endif        
       break;
 
@@ -3077,7 +3081,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       if (GetBitmap!=NULL) {
 #ifdef DEBUG
-	printf(_("Message: Operator Logo received.\n"));
+	fprintf(stdout, _("Message: Operator Logo received.\n"));
 #endif  
 	count=8;  /* Location and netcode ignored */
 	
@@ -3093,7 +3097,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       }
       else {
 #ifdef DEBUG
-	printf(_("Message: Operator logo received but not requested!\n"));
+	fprintf(stdout, _("Message: Operator logo received but not requested!\n"));
 #endif
       }
       
@@ -3102,7 +3106,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x35:  /* Get op logo error */
      
 #ifdef DEBUG
-	printf(_("Message: Error getting operator logo!\n"));
+	fprintf(stdout, _("Message: Error getting operator logo!\n"));
 #endif  
       GetBitmapError=GE_UNKNOWN; 
       break;
@@ -3120,46 +3124,46 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       *CurrentSecurityCodeStatus = MessageBuffer[4];
 
 #ifdef DEBUG
-      printf(_("Message: Security Code status received: "));
+      fprintf(stdout, _("Message: Security Code status received: "));
 
       switch(*CurrentSecurityCodeStatus) {
 
       case GSCT_SecurityCode:
 
-	printf(_("waiting for Security Code.\n"));
+	fprintf(stdout, _("waiting for Security Code.\n"));
 	break;
 
       case GSCT_Pin:
 
-	printf(_("waiting for PIN.\n"));
+	fprintf(stdout, _("waiting for PIN.\n"));
 	break;
 
       case GSCT_Pin2:
 
-	printf(_("waiting for PIN2.\n"));
+	fprintf(stdout, _("waiting for PIN2.\n"));
 	break;
 
       case GSCT_Puk:
 
-	printf(_("waiting for PUK.\n"));
+	fprintf(stdout, _("waiting for PUK.\n"));
 	break;
 
       case GSCT_Puk2:
 
-	printf(_("waiting for PUK2.\n"));
+	fprintf(stdout, _("waiting for PUK2.\n"));
 	break;
 
       case GSCT_None:
 
-	printf(_("nothing to enter.\n"));
+	fprintf(stdout, _("nothing to enter.\n"));
 	break;
 
       default:
 
-	printf(_("Unknown!\n"));
+	fprintf(stdout, _("Unknown!\n"));
       }
       
-#endif DEBUG
+#endif /* DEBUG */
 
       CurrentSecurityCodeError = GE_NONE;
 
@@ -3168,8 +3172,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x0b:
 
 #ifdef DEBUG
-      printf(_("Message: Security code accepted.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Security code accepted.\n"));
+#endif /* DEBUG */
 
       CurrentSecurityCodeError = GE_NONE;
 
@@ -3178,8 +3182,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     default:
 
 #ifdef DEBUG
-      printf(_("Message: Security code is wrong. You're not my big owner :-)\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Security code is wrong. You're not my big owner :-)\n"));
+#endif /* DEBUG */
 
       CurrentSecurityCodeError = GE_INVALIDSECURITYCODE;
 
@@ -3204,28 +3208,28 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
         sprintf(CurrentNetworkInfo->LAC, "%02x%02x", MessageBuffer[12], MessageBuffer[13]);
 
 #ifdef DEBUG
-        printf(_("Message: Network informations:\n"));
+        fprintf(stdout, _("Message: Network informations:\n"));
 
-        printf(_("   CellID: %s\n"), CurrentNetworkInfo->CellID);
-        printf(_("   LAC: %s\n"), CurrentNetworkInfo->LAC);
-        printf(_("   Network code: %s\n"), CurrentNetworkInfo->NetworkCode);
-        printf(_("   Network name: %s (%s)\n"),
+        fprintf(stdout, _("   CellID: %s\n"), CurrentNetworkInfo->CellID);
+        fprintf(stdout, _("   LAC: %s\n"), CurrentNetworkInfo->LAC);
+        fprintf(stdout, _("   Network code: %s\n"), CurrentNetworkInfo->NetworkCode);
+        fprintf(stdout, _("   Network name: %s (%s)\n"),
                      GSM_GetNetworkName(CurrentNetworkInfo->NetworkCode),
                      GSM_GetCountryName(CurrentNetworkInfo->NetworkCode));
-        printf(_("   Status: "));
+        fprintf(stdout, _("   Status: "));
 
         switch (MessageBuffer[8]) {
-          case 0x01: printf (_("home network selected")); break;
-          case 0x02: printf (_("roaming network")); break;
-          case 0x03: printf (_("requesting network")); break;
-          case 0x04: printf (_("not registered in the network")); break;
-          default: printf(_("unknown"));
+          case 0x01: fprintf(stdout, _("home network selected")); break;
+          case 0x02: fprintf(stdout, _("roaming network")); break;
+          case 0x03: fprintf(stdout, _("requesting network")); break;
+          case 0x04: fprintf(stdout, _("not registered in the network")); break;
+          default: fprintf(stdout, _("unknown"));
         }
 
-        printf("\n");
+        fprintf(stdout, "\n");
 
-        printf(_("   Network selection: %s\n"), MessageBuffer[9]==1?_("manual"):_("automatic"));
-#endif DEBUG
+        fprintf(stdout, _("   Network selection: %s\n"), MessageBuffer[9]==1?_("manual"):_("automatic"));
+#endif /* DEBUG */
       }
 
       CurrentNetworkInfoError = GE_NONE;
@@ -3234,8 +3238,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     default:
 #ifdef DEBUG
-      printf(_("Message: Unknown message of type 0x0a\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Unknown message of type 0x0a\n"));
+#endif /* DEBUG */
 	  break;	/* Visual C Don't like empty cases */
     }
 
@@ -3256,15 +3260,15 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
           DisplayStatus&= (0xff - (1<<(MessageBuffer[2*i+5]-1)));
 
 #ifdef DEBUG
-      printf("Call in progress: %s\n", DisplayStatus & (1<<DS_Call_In_Progress)?"on":"off");
-      printf("Unknown: %s\n",          DisplayStatus & (1<<DS_Unknown)?"on":"off");
-      printf("Unread SMS: %s\n",       DisplayStatus & (1<<DS_Unread_SMS)?"on":"off");
-      printf("Voice call: %s\n",       DisplayStatus & (1<<DS_Voice_Call)?"on":"off");
-      printf("Fax call active: %s\n",  DisplayStatus & (1<<DS_Fax_Call)?"on":"off");
-      printf("Data call active: %s\n", DisplayStatus & (1<<DS_Data_Call)?"on":"off");
-      printf("Keyboard lock: %s\n",    DisplayStatus & (1<<DS_Keyboard_Lock)?"on":"off");
-      printf("SMS storage full: %s\n", DisplayStatus & (1<<DS_SMS_Storage_Full)?"on":"off");
-#endif DEBUG
+      fprintf(stdout, "Call in progress: %s\n", DisplayStatus & (1<<DS_Call_In_Progress)?"on":"off");
+      fprintf(stdout, "Unknown: %s\n",          DisplayStatus & (1<<DS_Unknown)?"on":"off");
+      fprintf(stdout, "Unread SMS: %s\n",       DisplayStatus & (1<<DS_Unread_SMS)?"on":"off");
+      fprintf(stdout, "Voice call: %s\n",       DisplayStatus & (1<<DS_Voice_Call)?"on":"off");
+      fprintf(stdout, "Fax call active: %s\n",  DisplayStatus & (1<<DS_Fax_Call)?"on":"off");
+      fprintf(stdout, "Data call active: %s\n", DisplayStatus & (1<<DS_Data_Call)?"on":"off");
+      fprintf(stdout, "Keyboard lock: %s\n",    DisplayStatus & (1<<DS_Keyboard_Lock)?"on":"off");
+      fprintf(stdout, "SMS storage full: %s\n", DisplayStatus & (1<<DS_SMS_Storage_Full)?"on":"off");
+#endif /* DEBUG */
 
       DisplayStatusError=GE_NONE;
 
@@ -3272,7 +3276,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       
       default:
 
-        printf("Unknown message of type 0x0d.\n");
+        fprintf(stdout, _("Unknown message of type 0x0d.\n"));
       
       }
       
@@ -3291,8 +3295,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       case 0x01:
 
 #ifdef DEBUG
-        printf(_("Message: Date and time set correctly\n"));
-#endif DEBUG
+        fprintf(stdout, _("Message: Date and time set correctly\n"));
+#endif /* DEBUG */
 
         CurrentSetDateTimeError=GE_NONE;
 
@@ -3301,8 +3305,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       default:
 
 #ifdef DEBUG
-        printf(_("Message: Date and time set error\n"));
-#endif DEBUG
+        fprintf(stdout, _("Message: Date and time set error\n"));
+#endif /* DEBUG */
 
         CurrentSetDateTimeError=GE_INVALIDDATETIME;
 
@@ -3321,10 +3325,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       CurrentDateTime->Second=MessageBuffer[14];
 
 #ifdef DEBUG
-      printf(_("Message: Date and time\n"));
-      printf(_("   Time: %02d:%02d:%02d\n"), CurrentDateTime->Hour, CurrentDateTime->Minute, CurrentDateTime->Second);
-      printf(_("   Date: %4d/%02d/%02d\n"), CurrentDateTime->Year, CurrentDateTime->Month, CurrentDateTime->Day);
-#endif DEBUG
+      fprintf(stdout, _("Message: Date and time\n"));
+      fprintf(stdout, _("   Time: %02d:%02d:%02d\n"), CurrentDateTime->Hour, CurrentDateTime->Minute, CurrentDateTime->Second);
+      fprintf(stdout, _("   Date: %4d/%02d/%02d\n"), CurrentDateTime->Year, CurrentDateTime->Month, CurrentDateTime->Day);
+#endif /* DEBUG */
 
       CurrentDateTimeError=GE_NONE;
 
@@ -3337,8 +3341,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       case 0x01:
 
 #ifdef DEBUG
-        printf(_("Message: Alarm set correctly\n"));
-#endif DEBUG
+        fprintf(stdout, _("Message: Alarm set correctly\n"));
+#endif /* DEBUG */
 
         CurrentSetAlarmError=GE_NONE;
 
@@ -3347,8 +3351,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       default:
 
 #ifdef DEBUG
-        printf(_("Message: Date and time set error\n"));
-#endif DEBUG
+        fprintf(stdout, _("Message: Date and time set error\n"));
+#endif /* DEBUG */
 
         CurrentSetAlarmError=GE_INVALIDDATETIME;
 
@@ -3359,10 +3363,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x6e:
 
 #ifdef DEBUG
-      printf(_("Message: Alarm\n"));
-      printf(_("   Alarm: %02d:%02d\n"), MessageBuffer[9], MessageBuffer[10]);
-      printf(_("   Alarm is %s\n"), (MessageBuffer[8]==2) ? _("on"):_("off"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Alarm\n"));
+      fprintf(stdout, _("   Alarm: %02d:%02d\n"), MessageBuffer[9], MessageBuffer[10]);
+      fprintf(stdout, _("   Alarm is %s\n"), (MessageBuffer[8]==2) ? _("on"):_("off"));
+#endif /* DEBUG */
 
       CurrentAlarm->Hour=MessageBuffer[9];
       CurrentAlarm->Minute=MessageBuffer[10];
@@ -3377,8 +3381,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     default:
 
 #ifdef DEBUG
-      printf(_("Message: Unknown message of type 0x11\n"));
+      fprintf(stdout, _("Message: Unknown message of type 0x11\n"));
 #endif /* DEBUG */
+
 	  break;	/* Visual C Don't like empty cases */
     }
 
@@ -3400,7 +3405,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 #ifdef DEBUG
         fprintf(stdout, _("Message: Calendar note write succesfull!\n"));
-#endif DEBUG      
+#endif /* DEBUG */      
 
         CurrentCalendarNoteError=GE_NONE;
 
@@ -3410,7 +3415,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 #ifdef DEBUG
         fprintf(stdout, _("Message: Calendar note write failed!\n"));
-#endif DEBUG      
+#endif /* DEBUG */      
 
         CurrentCalendarNoteError=GE_INTERNALERROR;
 
@@ -3420,7 +3425,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 #ifdef DEBUG
         fprintf(stdout, _("Message: Calendar note write failed!\n"));
-#endif DEBUG      
+#endif /* DEBUG */      
 
         CurrentCalendarNoteError=GE_INTERNALERROR;
 
@@ -3429,7 +3434,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       default:
 #ifdef DEBUG
         fprintf(stdout, _("Unknown message of type 0x13 and subtype 0x65\n"));
-#endif DEBUG      
+#endif /* DEBUG */      
 	  break;	/* Visual C Don't like empty cases */
       }
     
@@ -3465,34 +3470,34 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
         memcpy(CurrentCalendarNote->Phone,MessageBuffer+24+MessageBuffer[23]+1,MessageBuffer[24+MessageBuffer[23]]);
 
 #ifdef DEBUG
-      printf(_("Message: Calendar note received.\n"));
+      fprintf(stdout, _("Message: Calendar note received.\n"));
 
-      printf(_("   Date: %d-%02d-%02d\n"), CurrentCalendarNote->Time.Year,
+      fprintf(stdout, _("   Date: %d-%02d-%02d\n"), CurrentCalendarNote->Time.Year,
                                            CurrentCalendarNote->Time.Month,
                                            CurrentCalendarNote->Time.Day);
 
-      printf(_("   Time: %02d:%02d:%02d\n"), CurrentCalendarNote->Time.Hour,
+      fprintf(stdout, _("   Time: %02d:%02d:%02d\n"), CurrentCalendarNote->Time.Hour,
                                              CurrentCalendarNote->Time.Minute,
                                              CurrentCalendarNote->Time.Second);
 
       /* Some messages do not have alarm set up */
 
       if (CurrentCalendarNote->Alarm.Year != 0) {
-	printf(_("   Alarm date: %d-%02d-%02d\n"), CurrentCalendarNote->Alarm.Year,
+	fprintf(stdout, _("   Alarm date: %d-%02d-%02d\n"), CurrentCalendarNote->Alarm.Year,
 	                                           CurrentCalendarNote->Alarm.Month,
 	                                           CurrentCalendarNote->Alarm.Day);
 
-	printf(_("   Alarm time: %02d:%02d:%02d\n"), CurrentCalendarNote->Alarm.Hour,
+	fprintf(stdout, _("   Alarm time: %02d:%02d:%02d\n"), CurrentCalendarNote->Alarm.Hour,
 	                                             CurrentCalendarNote->Alarm.Minute,
 	                                             CurrentCalendarNote->Alarm.Second);
       }
 
-      printf(_("   Type: %d\n"), CurrentCalendarNote->Type);
-      printf(_("   Text: %s\n"), CurrentCalendarNote->Text);
+      fprintf(stdout, _("   Type: %d\n"), CurrentCalendarNote->Type);
+      fprintf(stdout, _("   Text: %s\n"), CurrentCalendarNote->Text);
 
       if (CurrentCalendarNote->Type == GCN_CALL)
-        printf(_("   Phone: %s\n"), CurrentCalendarNote->Phone);
-#endif DEBUG
+        fprintf(stdout, _("   Phone: %s\n"), CurrentCalendarNote->Phone);
+#endif /* DEBUG */
 
       CurrentCalendarNoteError=GE_NONE;
 
@@ -3501,8 +3506,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       case 0x93:
 
 #ifdef DEBUG
-      printf(_("Message: Calendar note not available\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Calendar note not available\n"));
+#endif /* DEBUG */
 
       CurrentCalendarNoteError=GE_INVALIDCALNOTELOCATION;
 
@@ -3511,8 +3516,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       default:
 
 #ifdef DEBUG
-      printf(_("Message: Calendar note error\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Calendar note error\n"));
+#endif /* DEBUG */
 
       CurrentCalendarNoteError=GE_INTERNALERROR;
 
@@ -3533,8 +3538,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       case 0x01:
 
 #ifdef DEBUG
-      printf(_("Message: Calendar note deleted\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Calendar note deleted\n"));
+#endif /* DEBUG */
 
       CurrentCalendarNoteError=GE_NONE;
 
@@ -3544,8 +3549,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 
 #ifdef DEBUG
-      printf(_("Message: Calendar note can't be deleted\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Calendar note can't be deleted\n"));
+#endif /* DEBUG */
 
       CurrentCalendarNoteError=GE_INVALIDCALNOTELOCATION;
 
@@ -3554,8 +3559,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       default:
 
 #ifdef DEBUG
-      printf(_("Message: Calendar note deleting error\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Calendar note deleting error\n"));
+#endif /* DEBUG */
 
       CurrentCalendarNoteError=GE_INTERNALERROR;
 
@@ -3570,17 +3575,17 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
          notification for easy integration into xgnokii */
 
 #ifdef DEBUG
-      printf(_("Message: Calendar Alarm active\n"));
-      printf(_("   Item number: %d\n"), MessageBuffer[4]);
-#endif DEBUG
+      fprintf(stdout, _("Message: Calendar Alarm active\n"));
+      fprintf(stdout, _("   Item number: %d\n"), MessageBuffer[4]);
+#endif /* DEBUG */
     
       break;
 
     default:
 
 #ifdef DEBUG
-      printf(_("Message: Unknown message of type 0x13\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Unknown message of type 0x13\n"));
+#endif /* DEBUG */
 
       break; /* Visual C Don't like empty cases */   
     }
@@ -3594,8 +3599,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     if (CurrentSMSMessageError == GE_SMSWAITING) {
 
 #ifdef DEBUG
-      printf(_("Message: the rest of the SMS message received.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: the rest of the SMS message received.\n"));
+#endif /* DEBUG */
 
       for (i=0; i<MessageLength-2;i++) {
         SMSText[CurrentSMSPointer+i] = MessageBuffer[i];
@@ -3609,8 +3614,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-        printf("%c", GSM_Default_Alphabet[output[i]]);
-#endif DEBUG
+        fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
+#endif /* DEBUG */
 
         CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
       }
@@ -3620,8 +3625,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       CurrentSMSMessageError = GE_NONE;
 
 #ifdef DEBUG
-      printf("\n");
-#endif DEBUG
+      fprintf(stdout, "\n");
+#endif /* DEBUG */
 
       break;
 
@@ -3676,71 +3681,71 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       MessageBuffer[20+offset] = (MessageBuffer[20+offset]+1)/2+1;
 
 #ifdef DEBUG
-      printf(_("Number: %d\n"), MessageBuffer[6]);
+      fprintf(stdout, _("Number: %d\n"), MessageBuffer[6]);
 
       switch (CurrentSMSMessage->Type) {
 
         case GST_MO:
-          printf(_("Message: Outbox message (mobile originated)\n"));
+          fprintf(stdout, _("Message: Outbox message (mobile originated)\n"));
 
           if (CurrentSMSMessage->Status)
-            printf(_("Sent\n"));
+            fprintf(stdout, _("Sent\n"));
           else
-            printf(_("Not sent\n"));
+            fprintf(stdout, _("Not sent\n"));
           break;
 
         default:
-          printf(_("Message: Received SMS (mobile terminated)\n"));
+          fprintf(stdout, _("Message: Received SMS (mobile terminated)\n"));
 
           if (CurrentSMSMessage->Type == GST_DR)
-            printf(_("Delivery Report\n"));
+            fprintf(stdout, _("Delivery Report\n"));
           if (CurrentSMSMessage->Type == GST_UN)
-            printf(_("Unknown type\n"));
+            fprintf(stdout, _("Unknown type\n"));
 
           if (CurrentSMSMessage->Status)
-            printf(_("Read\n"));
+            fprintf(stdout, _("Read\n"));
           else
-            printf(_("Not read\n"));
+            fprintf(stdout, _("Not read\n"));
 
-          printf(_("   Date: %s GMT"), FB61_GetPackedDateTime(MessageBuffer+32+offset));
+          fprintf(stdout, _("   Date: %s GMT"), FB61_GetPackedDateTime(MessageBuffer+32+offset));
 
           if (MessageBuffer[38+offset]) {
             if (MessageBuffer[38+offset] & 0x08)
-              printf(_("-"));
+              fprintf(stdout, "-");
             else
-              printf(_("+"));
+              fprintf(stdout, "+");
 
-            printf(_("%dh"), (10*(MessageBuffer[38+offset]&0x07)+(MessageBuffer[38+offset]>>4))/4);
+            fprintf(stdout, _("%dh"), (10*(MessageBuffer[38+offset]&0x07)+(MessageBuffer[38+offset]>>4))/4);
           }
 
-          printf(_("\n"));
+          fprintf(stdout, "\n");
 
           if (CurrentSMSMessage->Type == GST_DR) {
 
-            printf(_("   SMSC response date: %s GMT"), FB61_GetPackedDateTime(MessageBuffer+39+offset));
+            fprintf(stdout, _("   SMSC response date: %s GMT"), FB61_GetPackedDateTime(MessageBuffer+39+offset));
 
             if (MessageBuffer[45+offset]) {
 
               if (MessageBuffer[45+offset] & 0x08)
-                printf(_("-"));
+                fprintf(stdout, "-");
               else
-                printf(_("+"));
+                fprintf(stdout, "+");
 
-              printf(_("%dh"),(10*(MessageBuffer[45+offset]&0x07)+(MessageBuffer[45+offset]>>4))/4);
+              fprintf(stdout, _("%dh"),(10*(MessageBuffer[45+offset]&0x07)+(MessageBuffer[45+offset]>>4))/4);
             }
 
-            printf(_("\n"));
+            fprintf(stdout, "\n");
 
           }
 
-          printf(_("   SMS center number: %s\n"), FB61_GetBCDNumber(MessageBuffer+8));
-          printf(_("   Remote number: %s\n"), FB61_GetBCDNumber(MessageBuffer+20+offset));
+          fprintf(stdout, _("   SMS center number: %s\n"), FB61_GetBCDNumber(MessageBuffer+8));
+          fprintf(stdout, _("   Remote number: %s\n"), FB61_GetBCDNumber(MessageBuffer+20+offset));
 
           break;
 
       }
      
-#endif DEBUG
+#endif /* DEBUG */
 
       /* In Outbox messages fields:
           - datetime
@@ -3779,8 +3784,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
           for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-            printf("%c", GSM_Default_Alphabet[output[i]]);
-#endif DEBUG
+            fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
+#endif /* DEBUG */
 
 	    CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
 	  }
@@ -3802,16 +3807,16 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
           switch (MessageBuffer[22]) {
             case 0x00:
-              printf(_("SM received by the SME"));
+              fprintf(stdout, _("SM received by the SME"));
               break;
             case 0x01:
-              printf(_("SM forwarded by the SC to the SME but the SC is unable to confirm delivery"));
+              fprintf(stdout, _("SM forwarded by the SC to the SME but the SC is unable to confirm delivery"));
               break;
             case 0x02:
-              printf(_("SM replaced by the SC"));
+              fprintf(stdout, _("SM replaced by the SC"));
               break;
           }
-#endif DEBUG
+#endif /* DEBUG */
 
           CurrentSMSMessage->Length = tmp = 10;
         } else if (MessageBuffer[22] & 0x40) {
@@ -3823,140 +3828,140 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
           if (MessageBuffer[22] & 0x20) {
 
-            printf(_("Temporary error, SC is not making any more transfer attempts\n"));
+            fprintf(stdout, _("Temporary error, SC is not making any more transfer attempts\n"));
 
             switch (MessageBuffer[22]) {
 
               case 0x60:
-                printf(_("Congestion"));
+                fprintf(stdout, _("Congestion"));
                 break;
 
               case 0x61:
-                printf(_("SME busy"));
+                fprintf(stdout, _("SME busy"));
                 break;
 
               case 0x62:
-                printf(_("No response from SME"));
+                fprintf(stdout, _("No response from SME"));
                 break;
 
               case 0x63:
-                printf(_("Service rejected"));
+                fprintf(stdout, _("Service rejected"));
                 break;
 
               case 0x64:
-                printf(_("Quality of service not aviable"));
+                fprintf(stdout, _("Quality of service not aviable"));
                 break;
 
               case 0x65:
-                printf(_("Error in SME"));
+                fprintf(stdout, _("Error in SME"));
                 break;
 
               default:
-                printf(_("Reserved/Specific to SC: %x"),MessageBuffer[22]);
+                fprintf(stdout, _("Reserved/Specific to SC: %x"),MessageBuffer[22]);
                 break;
 
             }
 
           } else {
 
-            printf(_("Permanent error, SC is not making any more transfer attempts\n"));
+            fprintf(stdout, _("Permanent error, SC is not making any more transfer attempts\n"));
 
             switch (MessageBuffer[22]) {
 
               case 0x40:
-                printf(_("Remote procedure error"));
+                fprintf(stdout, _("Remote procedure error"));
                 break;
 
               case 0x41:
-                printf(_("Incompatibile destination"));
+                fprintf(stdout, _("Incompatibile destination"));
                 break;
 
               case 0x42:
-                printf(_("Connection rejected by SME"));
+                fprintf(stdout, _("Connection rejected by SME"));
                 break;
 
               case 0x43:
-                printf(_("Not obtainable"));
+                fprintf(stdout, _("Not obtainable"));
                 break;
 
               case 0x44:
-                printf(_("Quality of service not aviable"));
+                fprintf(stdout, _("Quality of service not aviable"));
                 break;
 
               case 0x45:
-                printf(_("No internetworking available"));
+                fprintf(stdout, _("No internetworking available"));
                 break;
 
               case 0x46:
-                printf(_("SM Validity Period Expired"));
+                fprintf(stdout, _("SM Validity Period Expired"));
                 break;
 
               case 0x47:
-                printf(_("SM deleted by originating SME"));
+                fprintf(stdout, _("SM deleted by originating SME"));
                 break;
 
               case 0x48:
-                printf(_("SM Deleted by SC Administration"));
+                fprintf(stdout, _("SM Deleted by SC Administration"));
                 break;
 
               case 0x49:
-                printf(_("SM does not exist"));
+                fprintf(stdout, _("SM does not exist"));
                 break;
 
               default:
-                printf(_("Reserved/Specific to SC: %x"),MessageBuffer[22]);
+                fprintf(stdout, _("Reserved/Specific to SC: %x"),MessageBuffer[22]);
                 break;
 
             }
           }
 
-#endif DEBUG
+#endif /* DEBUG */
           CurrentSMSMessage->Length = tmp = 6;
         } else if (MessageBuffer[22] & 0x20) {
           strcpy(CurrentSMSMessage->MessageText,_("Pending"));
 
           /* more detailed reason only for debug */
 #ifdef DEBUG
-          printf(_("Temporary error, SC still trying to transfer SM\n"));
+          fprintf(stdout, _("Temporary error, SC still trying to transfer SM\n"));
           switch (MessageBuffer[22]) {
 
             case 0x20:
-              printf(_("Congestion"));
+              fprintf(stdout, _("Congestion"));
               break;
 
             case 0x21:
-              printf(_("SME busy"));
+              fprintf(stdout, _("SME busy"));
               break;
 
             case 0x22:
-              printf(_("No response from SME"));
+              fprintf(stdout, _("No response from SME"));
               break;
 
             case 0x23:
-              printf(_("Service rejected"));
+              fprintf(stdout, _("Service rejected"));
               break;
 
             case 0x24:
-              printf(_("Quality of service not aviable"));
+              fprintf(stdout, _("Quality of service not aviable"));
               break;
 
             case 0x25:
-              printf(_("Error in SME"));
+              fprintf(stdout, _("Error in SME"));
               break;
 
             default:
-              printf(_("Reserved/Specific to SC: %x"),MessageBuffer[22]);
+              fprintf(stdout, _("Reserved/Specific to SC: %x"),MessageBuffer[22]);
               break;
             }
-#endif DEBUG
+#endif /* DEBUG */
           CurrentSMSMessage->Length = tmp = 7;
         } else {
           strcpy(CurrentSMSMessage->MessageText,_("Unknown"));
 
           /* more detailed reason only for debug */
 #ifdef DEBUG
-          printf(_("Reserved/Specific to SC: %x"),MessageBuffer[22]);
-#endif DEBUG
+          fprintf(stdout, _("Reserved/Specific to SC: %x"),MessageBuffer[22]);
+#endif /* DEBUG */
           CurrentSMSMessage->Length = tmp = 8;
         }
       }
@@ -3976,8 +3981,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	CurrentSMSMessageError = GE_NONE;
 
 #ifdef DEBUG
-      printf("\n");
-#endif DEBUG
+      fprintf(stdout, "\n");
+#endif /* DEBUG */
 
       break;
     
@@ -3986,16 +3991,16 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       /* We have requested invalid or empty location. */
 
 #ifdef DEBUG
-      printf(_("Message: SMS reading failed.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: SMS reading failed.\n"));
+#endif /* DEBUG */
 
       switch (MessageBuffer[4]) {
 
       case 0x02:
 
 #ifdef DEBUG
-       printf(_("   Invalid location!\n"));
-#endif DEBUG
+       fprintf(stdout, _("   Invalid location!\n"));
+#endif /* DEBUG */
 
 	CurrentSMSMessageError = GE_INVALIDSMSLOCATION;
 
@@ -4004,8 +4009,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       case 0x07:
 
 #ifdef DEBUG
-	printf(_("   Empty SMS location.\n"));
-#endif DEBUG
+	fprintf(stdout, _("   Empty SMS location.\n"));
+#endif /* DEBUG */
 
 	CurrentSMSMessageError = GE_EMPTYSMSLOCATION;
 
@@ -4017,8 +4022,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x0b:	/* successful delete */
 
 #ifdef DEBUG
-      printf(_("Message: SMS deleted successfully.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: SMS deleted successfully.\n"));
+#endif /* DEBUG */
 
       CurrentSMSMessageError = GE_NONE;	
 
@@ -4027,10 +4032,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x37:
 
 #ifdef DEBUG
-      printf(_("Message: SMS Status Received\n"));
-      printf(_("   The number of messages: %d\n"), MessageBuffer[10]);
-      printf(_("   Unread messages: %d\n"), MessageBuffer[11]);
-#endif DEBUG
+      fprintf(stdout, _("Message: SMS Status Received\n"));
+      fprintf(stdout, _("   The number of messages: %d\n"), MessageBuffer[10]);
+      fprintf(stdout, _("   Unread messages: %d\n"), MessageBuffer[11]);
+#endif /* DEBUG */
 
       CurrentSMSStatus->UnRead = MessageBuffer[11];
       CurrentSMSStatus->Number = MessageBuffer[10];
@@ -4041,8 +4046,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x38:
 
 #ifdef DEBUG
-      printf(_("Message: SMS Status error, probably not authorized by PIN\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: SMS Status error, probably not authorized by PIN\n"));
+#endif /* DEBUG */
 
       CurrentSMSStatusError = GE_INTERNALERROR;
 
@@ -4072,8 +4077,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       case 0x00:
 
 #ifdef DEBUG
-        printf(_("Message: Netmonitor correctly set.\n"));
-#endif DEBUG
+        fprintf(stdout, _("Message: Netmonitor correctly set.\n"));
+#endif /* DEBUG */
 
         CurrentNetmonitorError=GE_NONE;
   
@@ -4082,10 +4087,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       default:
 
 #ifdef DEBUG
-        printf(_("Message: Netmonitor menu %d received:\n"), MessageBuffer[3]);
+        fprintf(stdout, _("Message: Netmonitor menu %d received:\n"), MessageBuffer[3]);
 
-        printf("%s\n", MessageBuffer+4);
-#endif DEBUG
+        fprintf(stdout, "%s\n", MessageBuffer+4);
+#endif /* DEBUG */
 
         strcpy(CurrentNetmonitor, MessageBuffer+4);
 
@@ -4098,8 +4103,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     default:
 
 #ifdef DEBUG
-      printf(_("Unknown message of type 0x40.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Unknown message of type 0x40.\n"));
+#endif /* DEBUG */
 	  break;	/* Visual C Don't like empty cases */
     }
 
@@ -4121,22 +4126,22 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #endif
 
 #ifdef DEBUG
-    printf(_("Message: Mobile phone identification received:\n"));
-    printf(_("   IMEI: %s\n"), IMEI);
+    fprintf(stdout, _("Message: Mobile phone identification received:\n"));
+    fprintf(stdout, _("   IMEI: %s\n"), IMEI);
 
-    printf(_("   Model: %s\n"), Model);
+    fprintf(stdout, _("   Model: %s\n"), Model);
 
-    printf(_("   Production Code: %s\n"), MessageBuffer+31);
+    fprintf(stdout, _("   Production Code: %s\n"), MessageBuffer+31);
 
-    printf(_("   HW: %s\n"), MessageBuffer+39);
+    fprintf(stdout, _("   HW: %s\n"), MessageBuffer+39);
 
-    printf(_("   Firmware: %s\n"), MessageBuffer+44);
+    fprintf(stdout, _("   Firmware: %s\n"), MessageBuffer+44);
 
     /* These bytes are probably the source of the "Accessory not connected"
        messages on the phone when trying to emulate NCDS... I hope... */
 
-    printf(_("   Magic bytes: %02x %02x %02x %02x\n"), MessageBuffer[50], MessageBuffer[51], MessageBuffer[52], MessageBuffer[53]);
-#endif DEBUG
+    fprintf(stdout, _("   Magic bytes: %02x %02x %02x %02x\n"), MessageBuffer[50], MessageBuffer[51], MessageBuffer[52], MessageBuffer[53]);
+#endif /* DEBUG */
 
     MagicBytes[0]=MessageBuffer[50];
     MagicBytes[1]=MessageBuffer[51];
@@ -4152,8 +4157,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   case 0x7f:
 
 #ifdef DEBUG
-    printf(_("[Received Ack of type %02x, seq: %2x]\n"), MessageBuffer[0], MessageBuffer[1]);
-#endif DEBUG
+    fprintf(stdout, _("[Received Ack of type %02x, seq: %2x]\n"), MessageBuffer[0], MessageBuffer[1]);
+#endif /* DEBUG */
 
     AcksReceived++;
     FB61_LinkOK = true;
@@ -4165,8 +4170,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   case 0xd0:
 
 #ifdef DEBUG
-    printf(_("Message: The phone is powered on - seq 1.\n"));
-#endif DEBUG
+    fprintf(stdout, _("Message: The phone is powered on - seq 1.\n"));
+#endif /* DEBUG */
 
     break;
 
@@ -4183,8 +4188,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   case 0xf4:
 
 #ifdef DEBUG
-    printf(_("Message: The phone is powered on - seq 2.\n"));
-#endif DEBUG
+    fprintf(stdout, _("Message: The phone is powered on - seq 2.\n"));
+#endif /* DEBUG */
 
     break;
 
@@ -4194,8 +4199,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   default:
 
 #ifdef DEBUG
-      printf(_("Message: Unknown message.\n"));
-#endif DEBUG
+      fprintf(stdout, _("Message: Unknown message.\n"));
+#endif /* DEBUG */
+
+      break;
 
   }
 
@@ -4265,10 +4272,12 @@ void FB61_RX_StateMachine(char rx_byte) {
   case FB61_RX_GetType:
 
     if ((RX_Multiple == true) && (MessageType != rx_byte)) {
+
 #ifdef DEBUG
-      printf("Interrupted MultiFrame-Message - Ingnoring it !!!\n");
-      printf("Please report it ...\n");
-#endif DEBUG
+      fprintf(stdout, _("Interrupted MultiFrame-Message - Ingnoring it !!!\n"));
+      fprintf(stdout, _("Please report it ...\n"));
+#endif /* DEBUG */
+
       BufferCount = 0;
       RX_Multiple = false;
     }
@@ -4325,8 +4334,8 @@ void FB61_RX_StateMachine(char rx_byte) {
 
 #ifdef DEBUG
       else
-	printf("Bad checksum!\n");
-#endif DEBUG
+	fprintf(stdout, _("Bad checksum!\n"));
+#endif /* DEBUG */
 
       RX_State = FB61_RX_Sync;
     }
@@ -4419,7 +4428,7 @@ void FB61_RX_DisplayMessage(void)
 
   fprintf(stdout, "\n");
   fflush(stdout);
-#endif DEBUG
+#endif /* DEBUG */
 }
 
 /* Prepares the message header and sends it, prepends the message start byte
@@ -4480,13 +4489,13 @@ int FB61_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer) {
   out_buffer[current++] = checksum;
 
 #ifdef DEBUG
-  printf(_("PC: "));
+  fprintf(stdout, _("PC: "));
 
   for (count = 0; count < current; count++)
-    printf("%02x:", out_buffer[count]);
+    fprintf(stdout, "%02x:", out_buffer[count]);
 
-  printf("\n");
-#endif DEBUG
+  fprintf(stdout, "\n");
+#endif /* DEBUG */
 
   /* Send it out... */
   
@@ -4554,8 +4563,8 @@ int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
   request[1] = message_seq;
 
 #ifdef DEBUG
-  printf(_("[Sending Ack of type %02x, seq: %x]\n"), message_type, message_seq);
-#endif DEBUG
+  fprintf(stdout, _("[Sending Ack of type %02x, seq: %x]\n"), message_type, message_seq);
+#endif /* DEBUG */
 
   return FB61_TX_SendFrame(2, FB61_FRTYPE_ACK, request);
 }
