@@ -76,6 +76,9 @@ static wchar_t pnok_nokia_to_uni(unsigned char ch)
 	case 0xdc: return 0x00dc; /* LATIN CAPITAL LETTER U WITH DIAERESIS (!) */
 	case 0xce: return 0x0171; /* LATIN SMALL LETTER U WITH DOUBLE ACUTE */
 	case 0xcc: return 0x0170; /* LATIN CAPITAL LETTER U WITH DOUBLE ACUTE */
+	case 0xe4: return 0x00e4; /* LATIN SMALL LETTER A WITH DIARESIS */
+	case 0xc4: return 0x00c4; /* LATIN CAPITAL LETTER A WITH DIARESIS */
+	case 0xdf: return 0x00df; /* LATIN SMALL LETTER SHARP S */
 	default: return char_def_alphabet_decode(ch);
 	}
 }
@@ -101,6 +104,9 @@ static unsigned char pnok_uni_to_nokia(wchar_t wch)
 	case 0x00dc: return 0xdc; /* LATIN CAPITAL LETTER U WITH DIAERESIS (!) */
 	case 0x0171: return 0xce; /* LATIN SMALL LETTER U WITH DOUBLE ACUTE */
 	case 0x0170: return 0xcc; /* LATIN CAPITAL LETTER U WITH DOUBLE ACUTE */
+	case 0x00e4: return 0xe4; /* LATIN SMALL LETTER A WITH DIARESIS */
+	case 0x00c4: return 0xc4; /* LATIN CAPITAL LETTER A WITH DIARESIS */
+	case 0x00df: return 0xdf; /* LATIN SMALL LETTER SHARP S */
 	default: return char_def_alphabet_encode((unsigned char)wch);
 	}
 }
