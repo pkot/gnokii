@@ -1,0 +1,7 @@
+SL45i
+=====
+
+Works quite okay in AT mode. sl45i has flash card, which is accessible
+using Obex protocol (apt-get install flexmem). sl45i uses
+vcard/vcalendar for its organiser (nice), use scmxx to access those
+records.
