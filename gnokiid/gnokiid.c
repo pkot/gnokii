@@ -55,10 +55,10 @@ char		*DefaultBinDir = "/usr/local/sbin";
 void version(void)
 {
 
-  fprintf(stdout, _("gnokiid Version %s
-Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999
-Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999
-Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
+  fprintf(stdout, _("gnokiid Version %s\n"
+"Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999\n"
+"Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999\n"
+"Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
 }
 
 /* The function usage is only informative - it prints this program's usage and
@@ -67,14 +67,10 @@ Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
 void usage(void)
 {
 
-  fprintf(stdout, _("   usage: gnokiid {--help|--version}
-
-          --help            display usage information.
-
-          --version         displays version and copyright information.
-          
-          --debug           uses stdin/stdout for virtual modem comms.
-  \n"));
+  fprintf(stdout, _("   usage: gnokiid {--help|--version}\n"
+"          --help            display usage information."
+"          --version         displays version and copyright information."
+"          --debug           uses stdin/stdout for virtual modem comms.\n"));
 }
 
 /* Main function - handles command line arguments, passes them to separate
