@@ -2759,7 +2759,7 @@ static int writephonebook(int argc, char *args[])
 	int line_count = 0;
 	int subentry;
 
-	char *Line, OLine[100], BackLine[100];
+	char *Line, OLine[256], BackLine[256];
 	char *ptr;
 
 	/* Check argument */
@@ -2771,7 +2771,7 @@ static int writephonebook(int argc, char *args[])
 	memset(&entry, 0, sizeof(GSM_PhonebookEntry));
 
 	/* Go through data from stdin. */
-	while (GetLine(stdin, Line, 99)) {
+	while (GetLine(stdin, Line, 255)) {
 		strcpy(BackLine, Line);
 		line_count++;
 
@@ -2895,12 +2895,13 @@ static int writephonebook(int argc, char *args[])
 		error = SM_Functions(GOP_WritePhonebook, &data, &State);
 
 		if (error == GE_NONE)
-			fprintf (stdout, _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), memory_type_string, entry.Location, entry.Name, entry.Number);
+			fprintf (stdout, 
+				 _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\nPress enter to continue"), 
+				 memory_type_string, entry.Location, entry.Name, entry.Number);
 		else
-			fprintf (stdout, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), print_error(error), memory_type_string, entry.Location, entry.Name, entry.Number);
-
+			fprintf (stdout, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
+				 print_error(error), memory_type_string, entry.Location, entry.Name, entry.Number);
 	}
-
 	return 0;
 }
 
