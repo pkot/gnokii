@@ -1012,7 +1012,7 @@ static int getsms(int argc, char *argv[])
 				case SMS_CallerIDLogo:
 					fprintf(stdout, ("Logo:\n"));
 					/* put bitmap into bitmap structure */
-					GSM_ReadSMSBitmap(message.UDH[0].Type, message.UserData[0].u.Text+2+offset, message.UserData[0].u.Text, &bitmap);
+					GSM_ReadSMSBitmap(GSM_OperatorLogo, message.UserData[0].u.Text+2+offset, message.UserData[0].u.Text, &bitmap);
 					GSM_PrintBitmap(&bitmap);
 					if (*filename) {
 						error = GE_NONE;

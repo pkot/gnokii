@@ -68,9 +68,9 @@ bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	case GSM_CallerLogo:
 		i = (bmp->bitmap[(y*bmp->width+x)/8] & 1 << (7-((y*bmp->width+x)%8)));
 		break;
-/*	case SMS_Picture:
+	case GSM_PictureImage:
 		i = (bmp->bitmap[9 * y + (x / 8)] & 1 << (7 - (x % 8)));
-		break;*/
+		break;
 	case GSM_StartupLogo:
 	case GSM_NewOperatorLogo:
 		i = (bmp->bitmap[((y/8)*bmp->width) + x] & 1<<((y%8)));
@@ -162,7 +162,10 @@ GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bit
 
 	bitmap->type = type;
 	switch (type) {
-	case SMS_OpLogo:
+	case GSM_PictureImage:
+		offset = 2;
+		break;
+	case GSM_OperatorLogo:
 		if (!code) return GE_UNKNOWN;
 
 		bitmap->netcode[0] = '0' + (message[0] & 0x0f);
@@ -174,16 +177,14 @@ GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bit
 		bitmap->netcode[6] = 0;
 
 		break;
-	case SMS_CallerIDLogo:
-		break;
-	case SMS_Picture:
-		offset = 2;
+	case GSM_CallerLogo:
 		break;
 	default: /* error */
 		return GE_UNKNOWN;
 	}
 	bitmap->width = message[0];
 	bitmap->height = message[1];
+	dprintf("offset: %i\n", offset);
 
 	bitmap->size = (bitmap->width * bitmap->height) / 8;
 	memcpy(bitmap->bitmap, message + offset + 2, bitmap->size);
