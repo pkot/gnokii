@@ -842,7 +842,6 @@ int sendsms(int argc, char *argv[])
   int i, offset, nr_msg, aux;
 
   struct option options[] = {
-    //             { "sendsms", required_argument, NULL, '1'},
              { "smsc",    required_argument, NULL, '1'},
              { "smscno",  required_argument, NULL, '2'},
              { "long",	  required_argument, NULL, '3'},
@@ -2674,7 +2673,7 @@ int sendringtone(int argc, char *argv[])
       - set UserDataHeaderIndicator
   */
 
-  SMS.Type = GST_DR;
+  SMS.Type = GST_MO;
   SMS.Class = 1;
   SMS.Compression = false;
   SMS.EightBit = true;
@@ -2690,7 +2689,7 @@ int sendringtone(int argc, char *argv[])
   size=FB61_PackRingtoneRTTL(req, argv[1]);
 
   memcpy(SMS.UDH,req+2,7);
-  memcpy(SMS.MessageText,req+7,size-9);
+  memcpy(SMS.MessageText,req+9,size-9);
 
   /* Initialise the GSM interface. */
   fbusinit(NULL);
