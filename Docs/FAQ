@@ -22,11 +22,11 @@ A. Gnokii cannot connect to the phone.  Possible reasons are:
 -------------------------------------------------------------------------------
 Q. `make install' sets mgnokiidev suid root.  Is this correct ?
 
-A. Yes.  gnokiid needs to create a symbolic link in the /dev
-   directory.  mgnokiidev is the program which does this and hence
-   it must be suid root so it can write to the directory.  mgnokiidev
-   is executable only for gnokii group members (and root).  You don't have
-   to worry.
+A. Yes.  gnokiid needs to create a symbolic link in the /dev directory.
+   mgnokiidev is the program which does this and hence it must be suid
+   root so it can write to the directory.  mgnokiidev is executable only
+   for gnokii group members (and root) so it presents minimal security
+   problems.
 
 -------------------------------------------------------------------------------
 Q. Does gnokii support Nokia 3210 phone ?
@@ -52,4 +52,6 @@ A. We don't have any formal documentation of the protocols in use.
      Nokia 5110/6110
        http://www.gadgets.demon.co.uk/nokia61xx/protocol.html
 
+     Marcin Wiacek's pages are also useful;
+       http://www.fkn.pl/marcinw/
 
