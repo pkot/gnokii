@@ -1,4 +1,4 @@
-0.5.3 (not released yet)
+0.5.3
 =====
  * code cleanups
     o change error paths in getactiveprofile/setactiveprofile
