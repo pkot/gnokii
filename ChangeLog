@@ -11,6 +11,7 @@
     o mingw-cross.sh explicitly disables X support (BORBELY Zoltan)
  * AT driver updates
     o add more workarounds for SonyEricssons            (Hugo Haas)
+    o add Nokia Premicell support                    (Jonas Berlin)
  * gnapplet driver updates
     o fix incorrect bracketing                           (Greg Alt)
     o deletesms support                            (BORBELY Zoltan)

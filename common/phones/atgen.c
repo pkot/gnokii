@@ -855,6 +855,7 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	unsigned char req[10240], req2[5120];
 	gn_error error;
 	unsigned int length, tmp, offset = 0;
+	at_driver_instance *drvinst = AT_DRVINST(state);
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
@@ -867,10 +868,14 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	dprintf("PDU mode set\n");
 
 	/* Prepare the message and count the size */
-	memcpy(req2, data->raw_sms->message_center,
-	       data->raw_sms->message_center[0] + 1);
-	offset += data->raw_sms->message_center[0];
-
+	if(drvinst->no_smsc) {
+		/* not even a length byte included */
+		offset--;
+	} else {
+		memcpy(req2, data->raw_sms->message_center,
+		       data->raw_sms->message_center[0] + 1);
+		offset += data->raw_sms->message_center[0];
+	}
 	/* Validity period in relative format */
 	req2[offset + 1] = 0x01 | 0x10;
 	if (data->raw_sms->reject_duplicates) req2[offset + 1] |= 0x04;
@@ -896,7 +901,11 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 
 	/* Length in AT mode is the length of the full message minus
 	 * SMSC field length */
-	sprintf(req, "AT+%s=%d\r", cmd, length - data->raw_sms->message_center[0] - 1);
+	if(drvinst->no_smsc) {
+		sprintf(req, "AT+%s=%d\r", cmd, length);
+	} else {
+		sprintf(req, "AT+%s=%d\r", cmd, length - data->raw_sms->message_center[0] - 1);
+	}
 	dprintf("Sending initial sequence\n");
 	if (sm_message_send(strlen(req), GN_OP_AT_Prompt, req, state))
 		return GN_ERR_NOTREADY;
@@ -1352,6 +1361,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	unsigned int sms_len, l, offset = 0;
 	char *tmp;
 	gn_error error;
+ 	at_driver_instance *drvinst = AT_DRVINST(state);
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 	
@@ -1375,14 +1385,18 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	}
 	dprintf("%s\n", buf.line3);
 	hex2bin(tmp, buf.line3, sms_len);
-	l = tmp[offset] + 1;
-	if (l > sms_len || l > GN_SMS_SMSC_NUMBER_MAX_LENGTH) {
-		dprintf("Invalid message center length (%d)\n", l);
-		ret = GN_ERR_INTERNALERROR;
-		goto out;
+
+	if(!drvinst->no_smsc) {
+		l = tmp[offset] + 1;
+		if (l > sms_len || l > GN_SMS_SMSC_NUMBER_MAX_LENGTH) {
+			dprintf("Invalid message center length (%d)\n", l);
+			ret = GN_ERR_INTERNALERROR;
+			goto out;
+		}
+		memcpy(data->raw_sms->message_center, tmp, l);
+		offset += l;
 	}
-	memcpy(data->raw_sms->message_center, tmp, l);
-	offset += l;
+
 	data->raw_sms->type                = (tmp[offset] & 0x03) << 1;
 	data->raw_sms->udh_indicator       = tmp[offset];
 	data->raw_sms->more_messages       = tmp[offset];
@@ -1638,6 +1652,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->smsmemorytype = GN_MT_XX;
 	drvinst->defaultcharset = AT_CHAR_UNKNOWN;
 	drvinst->charset = AT_CHAR_UNKNOWN;
+	drvinst->no_smsc = 0;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {

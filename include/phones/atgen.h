@@ -65,6 +65,7 @@ typedef struct {
 	gn_incoming_function_type incoming_functions[GN_OP_AT_Max];
 	at_error_function_type manufacturer_error;
 	int if_pos;
+	int no_smsc;
 
 	gn_memory_type memorytype;
 	int memoryoffset;

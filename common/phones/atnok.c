@@ -60,4 +60,9 @@ void at_nokia_init(char* foundmodel, char* setupmodel, struct gn_statemachine *s
 	/* information will be lost. */
 	if (strncasecmp("8210", foundmodel, 4))
 		writephonebook = at_insert_send_function(GN_OP_WritePhonebook, WritePhonebook, state);
+
+	/* premicell does not want sms centers in PDU packets (send & */
+	/* receive) */
+	if (!strncasecmp("0301", foundmodel, 4))
+		AT_DRVINST(state)->no_smsc = 1;
 }
