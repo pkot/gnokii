@@ -46,6 +46,8 @@ extern "C" {
 #  include <Winsock.h>	/* for struct timeval */
 typedef unsigned char uint8_t;
 #endif
+
+#include <stdarg.h>
 	
 #ifndef API
 #  define API
