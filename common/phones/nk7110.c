@@ -960,9 +960,14 @@ static void sort(unsigned int *table, unsigned int number)
 	}
 }
 
+/* Find the fist unread message in given folder statting from the *last position
+ * As a help we have the array of the sorted read locations in 'location' with
+ * no_loc entries. We can easily skip these locations.
+ */
 static GSM_Error P7110_FindUnreadSMS(GSM_Data *data, GSM_Statemachine *state, int *last, const unsigned int *locations, unsigned int no_loc)
 {
-	int i, index;
+	GSM_Error error;
+	int i, index = 0;
 
 	if (!data->SMSMessage) return GE_INTERNALERROR;
 	for (i = *last;; i++) {
@@ -971,8 +976,9 @@ static GSM_Error P7110_FindUnreadSMS(GSM_Data *data, GSM_Statemachine *state, in
 		if (locations[i] == index) continue;
 
 		data->SMSMessage->Number = i;
-		/* FIXME: check for the error. Only EMPTYLOCATION is allowed */
-		P7110_GetSMS(data, state);
+		error = P7110_GetSMS(data, state);
+		if (error == GE_EMPTYSMSLOCATION) continue;
+		if (error != GE_NONE) return error;
 		if (data->SMSMessage->Status == SMS_Unread) {
 			dprintf("Got unread %d\n", i);
 			ParseSMS(data, nk7110_layout.ReadHeader);
@@ -1141,6 +1147,7 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		bytes = message[21] - 1;
 
 		sprintf(data->MessageCenter->Name, "%s", message + 33);
+		data->MessageCenter->DefaultName = -1;	/* FIXME */
 
 		strcpy(data->MessageCenter->Recipient, GetBCDNumber(message+9));
 		strcpy(data->MessageCenter->Number, GetBCDNumber(message+21));
