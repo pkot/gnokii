@@ -60,6 +60,7 @@ void getcalendarnote(char *argv[]);
 void writecalendarnote(char *argv[]);
 void deletecalendarnote(char *argv[]);
 void getdisplaystatus();
+void netmonitor(char *argv[]);
 void foogle(char *argv[]);
 void pmon(char *argv[]);
 void readconfig(void);
@@ -112,6 +113,7 @@ void usage(void)
           gnokii [--writecalendarnote]
           gnokii [--deletecalendarnote] [index]
           gnokii [--getdisplaystatus]
+          gnokii [--netmonitor] [reset|off|field|devel|next|nr]
 
           --help            display usage information.
 
@@ -179,6 +181,8 @@ void usage(void)
                                 from calendar.
 
           --getdisplaystatus shows what icons are displayed.
+
+          --netmonitor      setting/querying netmonitor mode.
 "));  /*"*/
 }
 
@@ -381,6 +385,11 @@ int main(int argc, char *argv[])
   /* Run in passive monitoring mode (for development purposes). */
   if (strcmp(argv[1], "--pmon") == 0) {
     pmon(argv);
+  }
+
+  /* NetMonitor mode. */
+  if (argc==3 && strcmp(argv[1], "--netmonitor") == 0) {
+    netmonitor(argv);
   }
 
   /* Foogle function - insert you own function calls here 
@@ -1543,6 +1552,35 @@ void getdisplaystatus()
   printf("Data call active: %s\n", Status & (1<<DS_Data_Call)?"on":"off");
   printf("Keyboard lock: %s\n",    Status & (1<<DS_Keyboard_Lock)?"on":"off");
   printf("SMS storage full: %s\n", Status & (1<<DS_SMS_Storage_Full)?"on":"off");
+
+  GSM->Terminate();
+
+  exit(0);
+}
+
+void netmonitor(char *argv[])
+{
+
+  unsigned char mode=atoi(argv[2]);
+  char Screen[50];
+
+  fbusinit(true, NULL);
+
+  if (!strcmp(argv[2],"reset"))
+    mode=0xf0;
+  else if (!strcmp(argv[2],"off"))
+         mode=0xf1;
+  else if (!strcmp(argv[2],"field"))
+         mode=0xf2;
+  else if (!strcmp(argv[2],"devel"))
+         mode=0xf3;
+  else if (!strcmp(argv[2],"next"))
+         mode=0x00;
+
+  GSM->NetMonitor(mode, Screen);
+
+  if (Screen)
+    printf("%s\n", Screen);
 
   GSM->Terminate();
 

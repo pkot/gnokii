@@ -75,7 +75,8 @@ GSM_Functions           FB38_Functions = {
         FB38_GetNetworkInfo,
         FB38_GetCalendarNote,
         FB38_WriteCalendarNote,
-        FB38_DeleteCalendarNote
+        FB38_DeleteCalendarNote,
+        FB38_Netmonitor
 };
 
 GSM_Information         FB38_Information = {
@@ -848,6 +849,11 @@ GSM_Error   FB38_WriteCalendarNote (GSM_CalendarNote *CalendarNote)
 }
 
 GSM_Error   FB38_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_Netmonitor (unsigned char mode, char *Screen)
 {
     return (GE_NOTIMPLEMENTED);
 }

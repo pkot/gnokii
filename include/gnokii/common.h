@@ -411,6 +411,8 @@ typedef struct {
 
   GSM_Error (*DeleteCalendarNote) ( GSM_CalendarNote *CalendarNote);
 
+  GSM_Error (*NetMonitor) (unsigned char mode, char *Screen);
+
 } GSM_Functions;
 
 #endif	/* __gsm_common_h */

@@ -70,7 +70,8 @@ GSM_Functions			MB21_Functions = {
 		MB21_GetNetworkInfo,
 		MB21_GetCalendarNote,
 		MB21_WriteCalendarNote,
-		MB21_DeleteCalendarNote
+		MB21_DeleteCalendarNote,
+		MB21_Netmonitor
 };
 
 	/* FIXME - these are guesses only... */
@@ -303,6 +304,11 @@ GSM_Error	MB21_WriteCalendarNote (GSM_CalendarNote *CalendarNote)
 GSM_Error	MB21_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
 {
 	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_Netmonitor(unsigned char mode, char *Screen)
+{
+    return (GE_NOTIMPLEMENTED);
 }
 
 	/* Everything from here down is internal to 2110 code. */

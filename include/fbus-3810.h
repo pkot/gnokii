@@ -75,6 +75,7 @@ GSM_Error   FB38_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 GSM_Error   FB38_GetCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error   FB38_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error   FB38_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
+GSM_Error   FB38_Netmonitor(unsigned char mode, char *Screen);
 
     /* All defines and prototypes from here down are specific to 
        this model and so are #ifdef out if __fbus_3810_c isn't 

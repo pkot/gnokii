@@ -86,7 +86,8 @@ GSM_Functions FB61_Functions = {
   FB61_GetNetworkInfo,
   FB61_GetCalendarNote,
   FB61_WriteCalendarNote,
-  FB61_DeleteCalendarNote
+  FB61_DeleteCalendarNote,
+  FB61_NetMonitor
 };
 
 /* Mobile phone information */
@@ -224,6 +225,9 @@ int                CurrentRFLevel,
 
 int                DisplayStatus;
 GSM_Error          DisplayStatusError;
+
+char               *CurrentNetmonitor;
+GSM_Error          CurrentNetmonitorError;
 
 unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
 unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
@@ -1368,6 +1372,32 @@ GSM_Error FB61_WritePhonebookLocation(GSM_PhonebookEntry *entry)
   }
 
   return (CurrentPhonebookError);
+}
+
+GSM_Error FB61_NetMonitor(unsigned char mode, char *Screen)
+{
+
+  unsigned char req1[] = { 0x00, 0x01, 0x64, 0x01 };
+  unsigned char req2[] = { 0x00, 0x01, 0x7e, 0x00 };
+  int timeout=20;
+
+  CurrentNetmonitorError=GE_BUSY;
+  CurrentNetmonitor=Screen;
+
+  FB61_TX_SendMessage(4, 0x40, req1);
+
+  req2[3]=mode;
+  FB61_TX_SendMessage(4, 0x40, req2);
+
+  while (timeout != 0 && CurrentNetmonitorError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentNetmonitorError);
 }
 
 GSM_Error FB61_GetSpeedDial(GSM_SpeedDial *entry)
@@ -3369,6 +3399,49 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     }
 
+    break;
+
+    /* Internal phone functions? */
+
+  case 0x40:
+
+    switch(MessageBuffer[2]) {
+
+    case 0x7e:
+
+      switch(MessageBuffer[3]) {
+
+      case 0x00:
+
+#ifdef DEBUG
+        printf(_("Message: Netmonitor correctly set.\n"));
+#endif DEBUG
+
+        break;
+      
+      default:
+
+#ifdef DEBUG
+        printf(_("Message: Netmonitor menu %d received:\n"), MessageBuffer[3]);
+
+        printf("%s\n", MessageBuffer+4);
+#endif DEBUG
+
+        strcpy(CurrentNetmonitor, MessageBuffer+4);
+      }
+
+      break;
+
+    default:
+
+#ifdef DEBUG
+      printf(_("Unknown message of type 0x40.\n"));
+#endif DEBUG
+
+    }
+
+    CurrentNetmonitorError=GE_NONE;
+  
     break;
 
     /* Mobile phone identification */

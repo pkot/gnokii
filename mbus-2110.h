@@ -81,6 +81,7 @@ GSM_Error	MB21_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 GSM_Error	MB21_GetCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error	MB21_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error	MB21_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
+GSM_Error	MB21_Netmonitor(unsigned char mode, char *Screen);
 
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __mbus_2110_c isn't 
