@@ -128,7 +128,7 @@ char *GetBCDNumber(u8 *Number)
 }
 
 #ifdef DEBUG
-static char *PrintDateTime(u8 *Number) 
+static char *PrintDateTime(u8 *Number)
 {
 	static char Buffer[23] = "";
 
@@ -141,7 +141,7 @@ static char *PrintDateTime(u8 *Number)
 	sprintf(Buffer, "%s%d%d:", Buffer, Number[3] & 0x0f, Number[3] >> 4);
 	sprintf(Buffer, "%s%d%d:", Buffer, Number[4] & 0x0f, Number[4] >> 4);
 	sprintf(Buffer, "%s%d%d",  Buffer, Number[5] & 0x0f, Number[5] >> 4);
-	if (Number[6] & 0x08) 
+	if (Number[6] & 0x08)
 		sprintf(Buffer, "%s-", Buffer);
 	else
 		sprintf(Buffer, "%s+", Buffer);
@@ -430,7 +430,7 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 	/* Text Coding */
 	if (text_index != -1) {
 		switch (al) {
- 		case SMS_DefaultAlphabet:
+		case SMS_DefaultAlphabet:
 			if (multipart) {
 				offset = 4;
 				memcpy(message + 1, "\x00\x00\x00", 3);
@@ -467,13 +467,13 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 			return GE_SMSWRONGFORMAT;
 		}
 	}
-	
+
 	/* Bitmap coding */
 	if (bitmap_index != -1) {
 		size = GSM_EncodeSMSBitmap(&(SMS->UserData[bitmap_index].u.Bitmap), message + SMS->Length);
 		SMS->Length += size;
 	}
-	
+
 	/* Ringtone coding */
 	if (ringtone_index != -1) {
 		size = GSM_EncodeSMSRingtone(message + SMS->Length, &SMS->UserData[ringtone_index].u.Ringtone);
@@ -906,7 +906,7 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 			case 0x1581:
 				dprintf("Ringtone\n");
 				SMS->UDH[nr].Type = SMS_Ringtone;
-				
+
 				break;
 			case 0x1582:
 				dprintf("Operator Logo\n");
@@ -1028,7 +1028,7 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 				message[llayout.RemoteNumber] < GSM_MAX_SMS_CENTER_LENGTH ? message[llayout.RemoteNumber] : GSM_MAX_SMS_CENTER_LENGTH);
 		}
 	}
-	
+
 	/* Sending time */
 	if (llayout.SMSCTime > -1) {
 		UnpackDateTime(message + llayout.SMSCTime, &(SMS->Time));
@@ -1100,14 +1100,23 @@ static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int M
 	return GE_NONE;
 }
 
+GSM_Error ParseSMS(GSM_Data *data, int offset)
+{
+	header_offset = offset;
+	if (!data->RawData || !data->SMSMessage) return GE_INTERNALERROR;
+	return DecodePDUSMS(data->RawData->Data, data->SMSMessage, data->RawData->Length);
+}
+
+GSM_Error RequestSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	return SM_Functions(GOP_GetSMS, data, state);
+}
+
 GSM_Error GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error;
 
-	header_offset = layout.ReadHeader;
-	error = SM_Functions(GOP_GetSMS, data, state);
+	error = RequestSMS(data, state);
 	if (error != GE_NONE) return error;
-	if (!data->RawData || !data->SMSMessage) return GE_INTERNALERROR;
-	error = DecodePDUSMS(data->RawData->Data, data->SMSMessage, data->RawData->Length);
-	return error;
+	return ParseSMS(data, layout.ReadHeader);
 }
