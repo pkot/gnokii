@@ -8,6 +8,7 @@
 
   Copyright (C) 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001 Pawe³ Kot <pkot@linuxnews.pl>
+  Copyright (C) 2002 BORBELY Zoltan
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -95,13 +96,16 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetPowersource(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error IncomingModelInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error GetWelcomeMessage(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetOperatorLogo(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error Incoming0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error Incoming0x17(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -109,6 +113,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x04, IncomingPhoneStatus },
 	{ 0x0a, IncomingNetworkInfo },
 	{ 0x03, IncomingPhonebook },
+	{ 0x05, IncomingProfile },
 
 	{ 0x64, IncomingPhoneInfo },
 	{ 0xd2, IncomingModelInfo },
@@ -285,16 +290,16 @@ static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, in
 	switch (message[3]) {
 	/* Phone status */
 	case 0x02:
-		dprintf("\tRFLevel: %d\n",message[5]);
+		dprintf("\tRFLevel: %d\n", message[5]);
 		if (data->RFLevel) {
 			*(data->RFUnits) = GRF_Arbitrary;
 			*(data->RFLevel) = message[5];
 		}
-		dprintf("\tPowerSource: %d\n",message[7]);
+		dprintf("\tPowerSource: %d\n", message[7]);
 		if (data->PowerSource) {
 			*(data->PowerSource) = message[7];
 		}
-		dprintf("\tBatteryLevel: %d\n",message[8]);
+		dprintf("\tBatteryLevel: %d\n", message[8]);
 		if (data->BatteryLevel) {
 			*(data->BatteryUnits) = GBU_Arbitrary;
 			*(data->BatteryLevel) = message[8];
@@ -316,7 +321,7 @@ static GSM_Error Incoming0x17(int messagetype, unsigned char *message, int lengt
 		if (data->BatteryLevel) { 
 			*(data->BatteryUnits) = GBU_Percentage;
 			*(data->BatteryLevel) = message[5];
-			dprintf("Battery level %f\n",*(data->BatteryLevel));
+			dprintf("Battery level %f\n", *(data->BatteryLevel));
 		}
 		return GE_NONE;
 		break;
@@ -382,10 +387,10 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 	*pos++ = GetMemoryType(pe->MemoryType);
 	*pos++ = pe->Location;
 	*pos++ = namelen;
-	memcpy(pos,pe->Name,namelen);
+	PNOK_EncodeString(pos, namelen, pe->Name);
 	pos += namelen;
 	*pos++ = numlen;
-	memcpy(pos,pe->Number,numlen);
+	PNOK_EncodeString(pos, numlen, pe->Number);
 	pos += numlen;
 	*pos++ = (pe->Group == 5) ? 0xff : pe->Group;
 	if (SM_SendMessage(state, pos-req, 0x03, req) != GE_NONE) return GE_NOTREADY;
@@ -405,11 +410,20 @@ static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 {
 	dprintf("Reading bitmap...\n");
 	switch (data->Bitmap->type) {
+	case GSM_StartupLogo:
+		return GetWelcomeMessage(data, state);
+	case GSM_WelcomeNoteText:
+		return GetWelcomeMessage(data, state);
+	case GSM_DealerNoteText:
+		return GetWelcomeMessage(data, state);
+	case GSM_OperatorLogo:
+		return GetOperatorLogo(data, state);
 	case GSM_CallerLogo:
 		return GetCallerGroupData(data, state);
 	default:
-		return GE_NOTIMPLEMENTED;
+		return GE_NOTSUPPORTED;
 	}
+	return GE_INTERNALERROR;
 }
 
 static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
@@ -426,10 +440,10 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			pos = message+5;
 			pe->Empty = false;
 			n = *pos++;
-			snprintf(pe->Name, sizeof(pe->Name), "%*.*s", n, n, pos);
+			PNOK_DecodeString(pe->Name, sizeof(pe->Name), pos, n);
 			pos += n;
 			n = *pos++;
-			snprintf(pe->Number, sizeof(pe->Number), "%*.*s", n, n, pos);
+			PNOK_DecodeString(pe->Number, sizeof(pe->Number), pos, n);
 			pos += n;
 			pe->Group = *pos++;
 			pos++;
@@ -447,7 +461,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		if ((message[4] == 0x7d) || (message[4] == 0x74)) {
 			return GE_INVALIDPHBOOKLOCATION;
 		}
-		dprintf("Invalid GetMemoryLocation reply: 0x%02x\n",message[4]);
+		dprintf("Invalid GetMemoryLocation reply: 0x%02x\n", message[4]);
 		return GE_UNKNOWN;
 	case 0x05:
 		break;
@@ -459,13 +473,12 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		case 0x74:
 			return GE_INVALIDPHBOOKLOCATION;
 		}
-		printf("Invalid GetMemoryLocation reply: 0x%02x\n",message[4]);
-		dprintf("Invalid GetMemoryLocation reply: 0x%02x\n",message[4]);
+		dprintf("Invalid GetMemoryLocation reply: 0x%02x\n", message[4]);
 		return GE_UNKNOWN;
 	case 0x08:
-		dprintf("\tMemory location: %d\n",data->MemoryStatus->MemoryType);
-		dprintf("\tUsed: %d\n",message[6]);
-		dprintf("\tFree: %d\n",message[5]);
+		dprintf("\tMemory location: %d\n", data->MemoryStatus->MemoryType);
+		dprintf("\tUsed: %d\n", message[6]);
+		dprintf("\tFree: %d\n", message[5]);
 		if (data->MemoryStatus) {
 			data->MemoryStatus->Used = message[6];
 			data->MemoryStatus->Free = message[5];
@@ -481,7 +494,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 		case 0x8d:
 			return GE_INVALIDSECURITYCODE;
 		}
-		dprintf("Invalid GetMemoryStatus reply: 0x%02x\n",message[4]);
+		dprintf("Invalid GetMemoryStatus reply: 0x%02x\n", message[4]);
 		return GE_UNKNOWN;
 	case 0x11:
 		if (data->Bitmap) {
@@ -489,7 +502,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			pos = message+4;
 			bmp->number = *pos++;
 			n = *pos++;
-			snprintf(bmp->text, sizeof(bmp->text), "%*.*s", n, n, pos);
+			PNOK_DecodeString(bmp->text, sizeof(bmp->text), pos, n);
 			pos += n;
 			bmp->ringtone = *pos++;
 			pos++;
@@ -501,11 +514,11 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			pos++;
 			n = bmp->height * bmp->width / 8;
 			if (bmp->size > n) bmp->size = n;
-			memcpy(bmp->bitmap,pos,bmp->size);
+			memcpy(bmp->bitmap, pos, bmp->size);
 		}
 		break;
 	case 0x12:
-		dprintf("Invalid GetCallerGroupData reply: 0x%02x\n",message[4]);
+		dprintf("Invalid GetCallerGroupData reply: 0x%02x\n", message[4]);
 		return GE_UNKNOWN;
 	default:
 		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
@@ -772,6 +785,107 @@ static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, in
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
+		return GE_UNKNOWN;
+	}
+
+	return GE_NONE;
+}
+
+
+static GSM_Error GetWelcomeMessage(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x16};
+      
+	if (SM_SendMessage(state, 4, 0x05, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x05);
+}
+
+static GSM_Error GetOperatorLogo(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x33, 0x01};
+      
+	req[4] = data->Bitmap->number;
+	if (SM_SendMessage(state, 5, 0x05, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x05);
+}
+
+static GSM_Error IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	GSM_Bitmap *bmp;
+	unsigned char *pos;
+	int i;
+	bool found;
+
+	switch (message[3]) {
+	/* Get Welcome Message */
+	case 0x17:
+		if (data->Bitmap) {
+			bmp = data->Bitmap;
+			pos = message + 5;
+			found = false;
+			for (i = 0; i < message[4] && !found; i++) {
+				switch (*pos++) {
+				case 0x01:
+					if (bmp->type != GSM_StartupLogo) {
+						pos += pos[0] * pos[1] / 8 + 2;
+						continue;
+					}
+					bmp->height = *pos++;
+					bmp->width = *pos++;
+					bmp->size = bmp->height * bmp->width / 8;
+					memcpy(bmp->bitmap, pos, bmp->size);
+					pos += bmp->size;
+					break;
+				case 0x02:
+					if (bmp->type != GSM_WelcomeNoteText) {
+						pos += *pos + 1;
+						continue;
+					}
+					PNOK_DecodeString(bmp->text, sizeof(bmp->text), pos+1, *pos);
+					pos += *pos + 1;
+					break;
+				case 0x03:
+					if (bmp->type != GSM_DealerNoteText) {
+						pos += *pos + 1;
+						continue;
+					}
+					PNOK_DecodeString(bmp->text, sizeof(bmp->text), pos+1, *pos);
+					pos += *pos + 1;
+					break;
+				}
+				found = true;
+			}
+			if (!found) return GE_NOTSUPPORTED;
+		}
+		break;
+	case 0x34:
+		if (data->Bitmap) {
+			bmp = data->Bitmap;
+			pos = message + 5;
+			bmp->netcode[0] = '0' + (pos[0] & 0x0f);
+			bmp->netcode[1] = '0' + (pos[0] >> 4);
+			bmp->netcode[2] = '0' + (pos[1] & 0x0f);
+			bmp->netcode[3] = ' ';
+			bmp->netcode[4] = '0' + (pos[2] & 0x0f);
+			bmp->netcode[5] = '0' + (pos[2] >> 4);
+			bmp->netcode[6] = 0;
+			pos += 3;
+			bmp->size = (pos[0] << 8) + pos[1];
+			pos += 2;
+			pos++;
+			bmp->width = *pos++;
+			bmp->height = *pos++;
+			pos++;
+			i = bmp->height * bmp->width / 8;
+			if (bmp->size > i) bmp->size = i;
+			memcpy(bmp->bitmap, pos, bmp->size);
+		}
+		break;
+	case 0x35:
+		dprintf("Invalid GetOperatorLogo reply: 0x%02x\n", message[4]);
+		return GE_UNKNOWN;
+	default:
+		dprintf("Unknown subtype of type 0x05 (%d)\n", message[3]);
 		return GE_UNKNOWN;
 	}
 
