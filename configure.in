@@ -361,7 +361,8 @@ AC_OUTPUT(
 	Makefile.global
 	po/Makefile.in
 	packaging/Debian/changelog
-	packaging/RedHat/gnokii.spec,
+	packaging/RedHat/gnokii.spec
+	packaging/Slackware/SlackBuild,
 	[sed -e "/POTFILES =/r po/POTFILES" po/Makefile.in > po/Makefile]
 	)
 

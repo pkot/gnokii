@@ -78,6 +78,7 @@ distclean:	clean
 	fi
 	$(RM) Makefile.global config.cache config.log config.status \
 		packaging/RedHat/gnokii.spec \
+		packaging/Slackware/SlackBuild \
 		packaging/Debian/changelog \
 		debian
 
