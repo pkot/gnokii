@@ -78,7 +78,7 @@ static GSM_Error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char *cmd);
+static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *cmd);
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
@@ -601,23 +601,22 @@ static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	EncodeByLayout(data, &at_submit, 0);
 	return AT_WriteSMS(data, state, "CMGS");
 }
 
 static GSM_Error AT_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	EncodeByLayout(data, &at_deliver, 0);
+	return GE_NOTSUPPORTED;
 	return AT_WriteSMS(data, state, "CMGW");
 }
 
-static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
+static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *cmd)
 {
-	unsigned char req[10240];
+	unsigned char req[10240], req2[5120];
 	GSM_Error error;
-	int length, i;
+	unsigned int length, tmp, offset = 0;
 
-	if (!data->RawData) return GE_INTERNALERROR;
+	if (!data->RawSMS) return GE_INTERNALERROR;
 
 	/* Select PDU mode */
 	error = Functions(GOPAT_SetPDUMode, data, state);
@@ -626,23 +625,46 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 		return error;
 	}
 	dprintf("AT mode set\n");
-	/* 6 is the frame header as above */
-	length = data->RawData->Length;
-	dprintf("Sending SMS...(%d)\n", length);
-	for (i = 0; i < length; i++) {
-		dprintf("%02x ", data->RawData->Data[i]);
-	}
-	dprintf("\n");
-	if (length < 0) return GE_SMSWRONGFORMAT;
-	sprintf(req, "AT+%s=%d\r", cmd, length - data->RawData->Data[0] - 1);
+
+	/* Prepare the message and count the size */
+	memcpy(req2, data->RawSMS->MessageCenter, data->RawSMS->MessageCenter[0] + 1);
+	offset += data->RawSMS->MessageCenter[0];
+	dprintf("offset: %d\n", offset);
+
+	req2[offset + 1] = 0x01 | 0x10; /* Validity period in relative format */
+	dprintf("%02x\n", req2[offset + 1]);
+	if (data->RawSMS->RejectDuplicates) { req2[offset + 1] |= 0x04; dprintf("dupa1\n"); }
+	if (data->RawSMS->Report) { req2[offset + 1] |= 0x20; dprintf("dupa2\n"); }
+	if (data->RawSMS->UDHIndicator) { req2[offset + 1] |= 0x40; dprintf("dupa3\n"); }
+	if (data->RawSMS->ReplyViaSameSMSC) { req2[offset + 1] |= 0x80; dprintf("dupa4\n"); }
+	dprintf("%02x\n", req2[offset + 1]);
+	req2[offset + 2] = 0x00; /* Message Reference */
+
+	tmp = data->RawSMS->RemoteNumber[0];
+	if (tmp % 2) tmp++;
+	tmp /= 2;
+	memcpy(req2 + offset + 3, data->RawSMS->RemoteNumber, tmp + 2);
+	offset += tmp + 1;
+	dprintf("offset: %d\n", offset);
+
+	req2[offset + 4] = data->RawSMS->PID;
+	req2[offset + 5] = data->RawSMS->DCS;
+	req2[offset + 6] = 0xaa; /* Validity period */
+	req2[offset + 7] = data->RawSMS->Length;
+	memcpy(req2 + offset + 8, data->RawSMS->UserData, data->RawSMS->Length);
+
+	length = data->RawSMS->Length + offset + 8;
+
+	/* Length in AT mode is the length of the full message minus SMSC field length */
+	sprintf(req, "AT+%s=%d\r", cmd, length - data->RawSMS->MessageCenter[0] - 1);
 	dprintf("Sending initial sequence\n");
 	if (SM_SendMessage(state, strlen(req), GOPAT_Prompt, req) != GE_NONE) return GE_NOTREADY;
 	error = SM_BlockNoRetry(state, data, GOPAT_Prompt);
 	dprintf("Got response %d\n", error);
 
-	bin2hex(req, data->RawData->Data, data->RawData->Length);
-	req[data->RawData->Length * 2] = 0x1a;
-	req[data->RawData->Length * 2 + 1] = 0;
+	bin2hex(req, req2, length);
+	req[length * 2] = 0x1a;
+	req[length * 2 + 1] = 0;
 	dprintf("Sending frame: %s\n", req);
 	if (SM_SendMessage(state, strlen(req), GOP_SendSMS, req) != GE_NONE) return GE_NOTREADY;
 	return SM_BlockNoRetry(state, data, GOP_SendSMS);
@@ -813,7 +835,10 @@ static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int l
 				data->MessageCenter->No = 1;
 				strncpy(data->MessageCenter->SMSC.Number, buf.line2 + 8, MAX_BCD_STRING_LENGTH);
 		                data->MessageCenter->SMSC.Number[MAX_BCD_STRING_LENGTH - 1] = '\0';
-				data->MessageCenter->SMSC.Type = atoi(++pos);
+				if (data->MessageCenter->SMSC.Number[0] == '+')
+					data->MessageCenter->SMSC.Type = SMS_International;
+				else
+					data->MessageCenter->SMSC.Type = SMS_Unknown;
 			} else {
 				data->MessageCenter->No = 0;
 				strncpy(data->MessageCenter->Name, "SMS Center", GSM_MAX_SMS_CENTER_NAME_LENGTH);
