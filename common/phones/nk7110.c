@@ -948,7 +948,7 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Trying to get message # %i from the folder # %i\n", (message[6] << 8) | message[7], message[5]);
 		if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
-		memset(data->raw_sms, 0, sizeof(gn_sms));
+		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
 		T = data->raw_sms->type         = message[8];
 		data->raw_sms->number           = (message[6] << 8) | message[7];
 		data->raw_sms->memory_type       = message[5];
@@ -985,6 +985,7 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 		data->raw_sms->validity_indicator = 0;
 		memcpy(data->raw_sms->validity,      message, 0);
+		dprintf("Passed\n");
 		break;
 	case NK7110_SUBSMS_READ_FAIL: /* GetSMS FAIL, 0x09 */
 		dprintf("SMS reading failed:\n");
