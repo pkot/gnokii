@@ -11,6 +11,8 @@
     o add support for repeat (recurrence) for meeting and call
       calendar events (when reading)                    (Pawel Kot)
     o correctle read bitmap names from the phone        (Pawel Kot)
+    o extract decodephonebook from gnokii and export it from
+      libgnokii as gn_file_phonebook_raw()              (Pawel Kot)
  * AT series updates
     o try to handle correctly sms empty location        (Pawel Kot)
     o use actual encoding when reading network information
@@ -28,6 +30,8 @@
     o clean the structures so we don't have garbage from the
       previous loop when reading multiple calendar entries
                                                         (Pawel Kot)
+    o extract decodephonebook from gnokii and export it from
+      libgnokii as gn_file_phonebook_raw()              (Pawel Kot)
  * documentation updates
     o add short description of --getphonebook raw format to the
       gnokii manual page                             (Reiner Steib)
@@ -38,6 +42,8 @@
     o be compatible with gnokii -- use ME/SM instead of A/B for
       phone/simcard memory when saving/reading phonebook entry
                                           (Reiner Steib, Pawel Kot)
+    o use gn_file_phonebook_raw() instead of ParseLine() (finally!)
+                                                        (Pawel Kot)
 
 0.5.10
 ======
