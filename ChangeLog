@@ -23,6 +23,8 @@
     o --playringtone implemented       (Tomi Ollila, BORBELY Zoltan)
  * 6110 series updates
     o PlayTone implemented                          (BORBELY Zoltan)
+ * xgnokii fixes
+    o do not free message previously added to GSList  (Josef Zlomek)
 
 0.5.2
 =====

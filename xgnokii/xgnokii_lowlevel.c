@@ -432,8 +432,7 @@ static void RefreshSMS(const gint number)
 				if (phoneMonitor.sms.number == number) {
 					g_free(list);
 					g_free(fld);
-					g_free(msg);
-					return;
+					break;
 				}
 			} else if (error == GN_ERR_INVALIDLOCATION) {	/* All positions are read */
 				g_free(list);
