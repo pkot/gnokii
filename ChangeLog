@@ -1,5 +1,6 @@
 0.4.0pre20 (Not released yet)
 ==========
+ * Added testsuite				       (Pavel Machek)
  * 6110 series updates
     o PollSMS race condition eliminated              (BORBELY Zoltan)
     o SMS sending error codes updated                (BORBELY Zoltan)
