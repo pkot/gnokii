@@ -617,7 +617,7 @@ static void ResetLayout(unsigned char *message, gn_data *data)
 
 static void ParseLayout(unsigned char *message, gn_data *data)
 {
-	int i, subblocks;
+	int i, j, subblocks;
 	unsigned char *block = message;
 
 	ResetLayout(message, data);
@@ -738,6 +738,15 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			dprintf("   Setting time...\n");
 			*/
 			memcpy(data->raw_sms->smsc_time, block + 3, block[2]);
+			break;
+		case 0x84: /* Time blocks (not BCD encoded) */
+			/* Make it BCD format then ;-) */
+			/* This is an ugly hack. Dunno how to do it correctly for now */
+			data->raw_sms->smsc_time[0] = ((block[3] & 0x0f) % 10) << 4;
+			for (j = 1; j < block[2]; j++) {
+				data->raw_sms->smsc_time[j] =
+					(block[j+3] / 10) + ((block[j+3] % 10) << 4);
+			}
 			break;
 		default:
 			dprintf("Unknown block of type: %02x!\n", block[0]);
