@@ -1204,7 +1204,7 @@ static GSM_Error P7110_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 
 	c->Time.Hour = block[0];
 	c->Time.Minute = block[1];
-	c->Recurence = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
+	c->Recurrence = ((((unsigned int)block[4]) << 8) + block[5]) * 60;
 	alarmdiff = (((unsigned int)block[2]) << 8) + block[3];
 
 	if (alarmdiff != 0xffff) {
@@ -1253,7 +1253,7 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 			break;
 		case P7110_NOTE_REMINDER:
 			data->CalendarNote->Type = GCN_REMINDER;
-			data->CalendarNote->Recurence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
+			data->CalendarNote->Recurrence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
 			DecodeUnicode(data->CalendarNote->Text, (block + 4), block[2]);
 			break;
 		case P7110_NOTE_BIRTHDAY:
@@ -1444,11 +1444,11 @@ static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 				req[count++] = minutes&0xff;
 			}
 		}
-		/* Recurence */
-		if( CalendarNote->Recurence >= 8760 )
-			CalendarNote->Recurence = 0xffff; /* setting  1 Year repeat */
-		req[count++] = CalendarNote->Recurence >> 8;   // 16
-		req[count++] = CalendarNote->Recurence & 0xff; // 17
+		/* Recurrence */
+		if( CalendarNote->Recurrence >= 8760 )
+			CalendarNote->Recurrence = 0xffff; /* setting  1 Year repeat */
+		req[count++] = CalendarNote->Recurrence >> 8;   // 16
+		req[count++] = CalendarNote->Recurrence & 0xff; // 17
 		/* len of text */
 		req[count++] = strlen(CalendarNote->Text);    // 18
 		/* fixed 0x00 */
@@ -1479,11 +1479,11 @@ static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 				req[count++] = minutes & 0xff;
 			}
 		}
-		/* Recurence */
-		if( CalendarNote->Recurence >= 8760 )
-			CalendarNote->Recurence = 0xffff; /* setting  1 Year repeat */
-		req[count++] = CalendarNote->Recurence >> 8;   // 16
-		req[count++] = CalendarNote->Recurence & 0xff; // 17
+		/* Recurrence */
+		if( CalendarNote->Recurrence >= 8760 )
+			CalendarNote->Recurrence = 0xffff; /* setting  1 Year repeat */
+		req[count++] = CalendarNote->Recurrence >> 8;   // 16
+		req[count++] = CalendarNote->Recurrence & 0xff; // 17
 		/* len of text */
 		req[count++] = strlen(CalendarNote->Text);    // 18
 		/* fixed 0x00 */
@@ -1539,11 +1539,11 @@ static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		break;
 
 	case GCN_REMINDER:
-		/* Recurence */
-		if( CalendarNote->Recurence >= 8760 )
-			CalendarNote->Recurence = 0xffff; /* setting  1 Year repeat */
-		req[count++]=CalendarNote->Recurence >> 8;   // 12
-		req[count++]=CalendarNote->Recurence & 0xff; // 13
+		/* Recurrence */
+		if( CalendarNote->Recurrence >= 8760 )
+			CalendarNote->Recurrence = 0xffff; /* setting  1 Year repeat */
+		req[count++]=CalendarNote->Recurrence >> 8;   // 12
+		req[count++]=CalendarNote->Recurrence & 0xff; // 13
 		/* len of text */
 		req[count++]=strlen(CalendarNote->Text);    // 14
 		/* fixed 0x00 */

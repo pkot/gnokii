@@ -147,7 +147,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                      0x09: Received calls
                                      0x0b: voice mailbox (location not important)
     r mem location recvd    { 0x0002, 0x00,namelen,"name",numlen,"number",groupID, 0x01?, yearLO, yearHI, month, day, hour, minute, sec. }
-                            Note: in 3310 all entries have null name ("feature" of bug ?)
+                            Note: in 3310 all entries have null name ("feature" or bug ?)
     r mem loc error recvd   { 0x0003, errtype }
                             where errtype: 0x7d: invalid memory type
     s Set mem location      { 0x0004, memtype,location,namelen,"Name",numlen,"number",groupID }

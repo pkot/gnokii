@@ -245,12 +245,12 @@ typedef enum {
 
 typedef struct {
 	int Location;			/* The number of the note in the phone memory */
-	GSM_CalendarNoteType Type;	/* The type of the note */
+	GSM_CalendarNoteType Type;		/* The type of the note */
 	GSM_DateTime Time;		/* The time of the note */
 	GSM_DateTime Alarm;		/* The alarm of the note */
 	char Text[20];		/* The text of the note */
 	char Phone[20];		/* For Call only: the phone number */
-	double Recurance;		/* Recurance of the note */
+	int Recurrence;		/* Recurance of the note */
 } GSM_CalendarNote;
 
 /* List of Calendar Notes in phone */
