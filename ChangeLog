@@ -1,7 +1,9 @@
 0.4.0pre20 (Not released yet)
 ==========
+ * gnokii updates                                      (Markus Plail)
+    o fix segfault when reading more than one message in a row
  * Added support for AT-9600,needed for ericsson a1018 (Pavel Machek)
- * Added testsuite				       (Pavel Machek)
+ * Added testsuite                                     (Pavel Machek)
  * 6110 series updates
     o PollSMS race condition eliminated              (BORBELY Zoltan)
     o SMS sending error codes updated                (BORBELY Zoltan)
