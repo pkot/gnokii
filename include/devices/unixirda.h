@@ -28,6 +28,8 @@
 #ifndef __unix_irda_h_
 #define __unix_irda_h_
 
+#ifdef HAVE_IRDA
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -38,6 +40,8 @@
 #include <sys/socket.h>
 #include <linux/types.h>
 #include <linux/irda.h>
+
+#endif
 
 #include "misc.h"
 

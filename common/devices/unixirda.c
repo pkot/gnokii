@@ -25,6 +25,10 @@
  *
  */
 
+#include "config.h"
+
+#ifdef HAVE_IRDA
+
 #include "devices/unixirda.h"
 
 #ifndef AF_IRDA
@@ -52,7 +56,7 @@ static char *phone[] = {
 	"Nokia 9210"
 };
 
-double d_time(void)
+static double d_time(void)
 {
 	double		time;
 	struct timeval	tv;
@@ -64,7 +68,7 @@ double d_time(void)
 	return time;
 }
 
-double d_sleep(double s)
+static double d_sleep(double s)
 {
 	double		time;
 	struct timeval	tv1, tv2;
@@ -161,12 +165,12 @@ int irda_close(int fd)
 
 int irda_write(int fd, const __ptr_t bytes, int size)
 {
-	return (send(fd, bytes, size, 0));
+	return send(fd, bytes, size, 0);
 }
 
 int irda_read(int fd, __ptr_t bytes, int size)
 {
-	return (recv(fd, bytes, size, 0));
+	return recv(fd, bytes, size, 0);
 }
 
 int irda_select(int fd, struct timeval *timeout)
@@ -176,5 +180,15 @@ int irda_select(int fd, struct timeval *timeout)
 	FD_ZERO(&readfds);
 	FD_SET(fd, &readfds);
 
-	return (select(fd + 1, &readfds, NULL, NULL, timeout));
+	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
+
+#else /* HAVE_IRDA */
+
+int irda_open(void) { return -1; }
+int irda_close(int fd) { return -1; }
+int irda_write(int fd, const __ptr_t bytes, int size) { return -1; }
+int irda_read(int fd, __ptr_t bytes, int size) { return -1; }
+int irda_select(int fd, struct timeval *timeout) { return -1; }
+
+#endif /* HAVE_IRDA */

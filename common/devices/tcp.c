@@ -76,12 +76,12 @@ int tcp_open(const char *file)
 	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1) {
 		perror("Gnokii tcp_open: socket()");
-		return (-1);
+		return -1;
 	}
 	if (!(filedup = strdup(file))) {
 	fail_close:
 		close(fd);
-		return (-1);
+		return -1;
 	}
 	if (!(portstr = strchr(filedup, ':'))) {
 		fprintf(stderr, "Gnokii tcp_open: colon (':') not found in connect strings \"%s\"!\n", filedup);
@@ -124,7 +124,7 @@ int tcp_close(int fd)
 	if (device_script(fd, "disconnect_script") == -1)
 		fprintf(stderr, "Gnokii tcp_close: disconnect_script\n");
 
-	return (close(fd));
+	return close(fd);
 }
 
 /* Open a device with standard options.
@@ -147,7 +147,7 @@ int tcp_opendevice(const char *file, int with_async)
 	if (device_script(fd,"connect_script") == -1) {
 		fprintf(stderr, "Gnokii tcp_opendevice: connect_script\n");
 		tcp_close(fd);
-		return(-1);
+		return -1;
 	}
 
 	/* Allow process/thread to receive SIGIO */
@@ -157,7 +157,7 @@ int tcp_opendevice(const char *file, int with_async)
 	if (retcode == -1){
 		perror("Gnokii tcp_opendevice: fnctl(F_SETOWN)");
 		tcp_close(fd);
-		return(-1);
+		return -1;
 	}
 #endif
 
@@ -180,7 +180,7 @@ int tcp_opendevice(const char *file, int with_async)
 	if (retcode == -1) {
 		perror("Gnokii tcp_opendevice: fnctl(F_SETFL)");
 		tcp_close(fd);
-		return(-1);
+		return -1;
 	}
   
 	return fd;
@@ -196,12 +196,12 @@ int tcp_select(int fd, struct timeval *timeout)
 
 size_t tcp_read(int fd, __ptr_t buf, size_t nbytes)
 {
-	return (read(fd, buf, nbytes));
+	return read(fd, buf, nbytes);
 }
 
 /* Write to serial device. */
 
 size_t tcp_write(int fd, const __ptr_t buf, size_t n)
 {
-	return(write(fd, buf, n));
+	return write(fd, buf, n);
 }

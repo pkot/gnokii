@@ -27,6 +27,10 @@
 
 */
 
+#include "config.h"
+
+#ifdef HAVE_BLUETOOTH
+
 #include "devices/unixbluetooth.h"
 
 static char *phone[] = {
@@ -72,17 +76,17 @@ int bluetooth_open(bdaddr_t *bdaddr, int channel)
 
 int bluetooth_close(int fd)
 {
-	return (close(fd));
+	return close(fd);
 }
 
 int bluetooth_write(int fd, const __ptr_t bytes, int size)
 {
-	return (write(fd, bytes, size));
+	return write(fd, bytes, size);
 }
 
 int bluetooth_read(int fd, __ptr_t bytes, int size)
 {
-	return (read(fd, bytes, size));
+	return read(fd, bytes, size);
 }
 
 int bluetooth_select(int fd, struct timeval *timeout)
@@ -92,5 +96,15 @@ int bluetooth_select(int fd, struct timeval *timeout)
 	FD_ZERO(&readfds);
 	FD_SET(fd, &readfds);
 
-	return (select(fd + 1, &readfds, NULL, NULL, timeout));
+	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
+
+#else /* HAVE_BLUETOOTH */
+
+int bluetooth_open(bdaddr_t *bdaddr, int channel) { return -1; }
+int bluetooth_close(int fd) { return -1; }
+int bluetooth_write(int fd, const __ptr_t bytes, int size) { return -1; }
+int bluetooth_read(int fd, __ptr_t bytes, int size) { return -1; }
+int bluetooth_select(int fd, struct timeval *timeout) { return -1; }
+
+#endif /* HAVE_BLUETOOTH */

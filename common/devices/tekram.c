@@ -41,7 +41,7 @@
 
 int tekram_open(const char *file)
 {
-	return (serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK));
+	return serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK);
 }
 
 void tekram_close(int fd)
@@ -83,12 +83,12 @@ void tekram_changespeed(int fd, int speed)
 
 size_t tekram_read(int fd, __ptr_t buf, size_t nbytes)
 {
-	return (serial_read(fd, buf, nbytes));
+	return serial_read(fd, buf, nbytes);
 }
 
 size_t tekram_write(int fd, const __ptr_t buf, size_t n)
 {
-	return (serial_write(fd, buf, n));
+	return serial_write(fd, buf, n);
 }
 
 int tekram_select(int fd, struct timeval *timeout)
@@ -96,5 +96,5 @@ int tekram_select(int fd, struct timeval *timeout)
 	fd_set readfds;
 	FD_ZERO(&readfds);
 	FD_SET(fd, &readfds);
-	return (select(fd + 1, &readfds, NULL, NULL, timeout));
+	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }

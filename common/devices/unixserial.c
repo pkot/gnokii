@@ -31,6 +31,7 @@
 
 #include "misc.h"
 #include "cfgreader.h"
+#include "gsm-api.h"
 
 /* Do not compile this file under Win32 systems. */
 
@@ -59,10 +60,6 @@
 
 #ifdef HAVE_SYS_MODEM_H
 #  include <sys/modem.h>
-#endif
-
-#ifdef HAVE_SYS_FILIO_H
-#  include <sys/filio.h>
 #endif
 
 /* If the target operating system does not have cfsetspeed, we can emulate
