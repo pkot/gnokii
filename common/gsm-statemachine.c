@@ -209,7 +209,7 @@ GSM_Error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 	GSM_Error err;
 
 	for (retry = 0; retry < 3; retry++) {
-		timeout = 30;
+		timeout = 50;
 		err = SM_WaitFor(state, data, waitfor);
 		if (err != GE_NONE) return err;
 

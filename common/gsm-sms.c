@@ -356,7 +356,7 @@ static void change_offsets_struct(SMS_MessageCenter mc, SMS_Number rn)
  *** ENCODING SMS
  ***/
 
-static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool multipart)
+static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool multipart, int *clen)
 {
 	SMS_AlphabetType al;
 	unsigned short i, length, size = 0, offset = 0;
@@ -425,7 +425,7 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 	}
 
 	if ((al == SMS_8bit) && multipart) al = SMS_DefaultAlphabet;
-	SMS->Length = 0;
+	SMS->Length = *clen = 0;
 
 	/* Text Coding */
 	if (text_index != -1) {
@@ -438,7 +438,8 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 			}
 			size = Pack7BitCharacters((7 - (SMS->UDH_Length % 7)) % 7, SMS->UserData[text_index].u.Text, message + offset);
 			// SMS->Length = 8 * SMS->UDH_Length + (7 - (SMS->UDH_Length % 7)) % 7 + length + offset;
-			SMS->Length = size + offset;
+			SMS->Length = strlen(SMS->UserData[text_index].u.Text);
+			*clen = size + offset;
 			if (multipart) {
 				message[2] = (size & 0xff00) >> 8;
 				message[3] = (size & 0x00ff);
@@ -447,7 +448,7 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 		case SMS_8bit:
 			dcs[0] |= 0xf4;
 			memcpy(message, SMS->UserData[text_index].u.Text + 1, SMS->UserData[text_index].u.Text[0]);
-			SMS->Length = SMS->UserData[text_index].u.Text[0];
+			*clen = SMS->Length = SMS->UserData[text_index].u.Text[0];
 			break;
 		case SMS_UCS2:
 			if (multipart) {
@@ -456,7 +457,7 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 			}
 			dcs[0] |= 0x08;
 			EncodeUnicode(message + offset, SMS->UserData[text_index].u.Text, length);
-			SMS->Length = length + offset;
+			*clen = SMS->Length = length + offset;
 			if (multipart) {
 				size = 2 * length;
 				message[2] = (size & 0xff00) >> 8;
@@ -472,12 +473,14 @@ static GSM_Error EncodeData(GSM_SMSMessage *SMS, char *dcs, char *message, bool 
 	if (bitmap_index != -1) {
 		size = GSM_EncodeSMSBitmap(&(SMS->UserData[bitmap_index].u.Bitmap), message + SMS->Length);
 		SMS->Length += size;
+		*clen += size;
 	}
 
 	/* Ringtone coding */
 	if (ringtone_index != -1) {
 		size = GSM_EncodeSMSRingtone(message + SMS->Length, &SMS->UserData[ringtone_index].u.Ringtone);
 		SMS->Length += size;
+		*clen += size;
 	}
 	return GE_NONE;
 }
@@ -622,7 +625,7 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 static GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num, int *length)
 {
 	GSM_Error error = GE_NONE;
-	int i, mm = 0;
+	int i, clen, mm = 0;
 
 	*length = 0;
 	switch (SMS->Type) {
@@ -667,9 +670,9 @@ static GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short
 	SMS->UDH_Length = 0;
 
 	/* User Data */
-	EncodeData(SMS, message + llayout.DataCodingScheme, message + llayout.UserData + SMS->UDH_Length, mm);
+	EncodeData(SMS, message + llayout.DataCodingScheme, message + llayout.UserData + SMS->UDH_Length, mm, &clen);
 	message[llayout.Length] = SMS->Length;
-	*length = SMS->Length + llayout.UserData;
+	*length = clen + llayout.UserData;
 	return GE_NONE;
 }
 
@@ -689,14 +692,16 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	if (count < 1) return GE_SMSWRONGFORMAT;
 
+	dprintf("Strlen: %d\n", strlen(data->SMSMessage->UserData[0].u.Text));
 	memset(&rawdata, 0, sizeof(rawdata));
 	data->RawData = &rawdata;
 	for (i = 0; i < count; i++) {
 		data->RawData->Data = calloc(256, 1);
 		error = EncodePDUSMS(data->SMSMessage, data->RawData->Data, i, &data->RawData->Length);
 		if (error == GE_NONE) error = SM_Functions(GOP_SendSMS, data, state);
+		dprintf("%d\n", data->SMSMessage->Length);
 		free(data->RawData->Data);
-		if (error != GE_NONE) break;
+		if (error != GE_SMSSENDOK) break;
 	}
 	data->RawData = NULL;
 	return error;
