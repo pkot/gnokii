@@ -64,7 +64,7 @@ AC_ARG_WITH(libintl,
        AC_MSG_WARN(Usage is --with-libintl=DIR)
      else
        NLS_LIBS="-L$withval/lib"
-       NLS_CFLAGS="-I$withval/lib"
+       NLS_CFLAGS="-I$withval/include"
      fi
    ]
 )

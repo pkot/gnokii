@@ -67,6 +67,6 @@ ifdef WIN32
 endif
 
 
-CFLAGS += -I $(GNOKII_INCLUDE)
+CFLAGS += -I$(GNOKII_INCLUDE)
 LDFLAGS = -s $(LIBS)
 

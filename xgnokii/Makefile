@@ -19,7 +19,8 @@ LDFLAGS += $(PTHREAD_LIBS) \
 	   $(GTK_LIBS) 
 
 ifdef XPM_LIBS
-    LDFLAGS +=$(XPM_LIBS)
+    LDFLAGS += $(XPM_LIBS)
+    CFLAGS  += $(XPM_CFLAGS)
 endif
 
 OBJS = 	xgnokii.o \
