@@ -1225,7 +1225,7 @@ static int getsms(int argc, char *argv[])
 	char *memory_type_string;
 	int start_message, end_message, count, mode = 1;
 	char filename[64];
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 	gn_bmp bitmap;
 	gn_phone *phone = &state.driver.phone;
 	char ans[5];
@@ -1480,7 +1480,7 @@ static int deletesms(int argc, char *argv[])
 	gn_sms_folder_list folderlist;
 	char *memory_type_string;
 	int start_message, end_message, count;
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
@@ -3186,7 +3186,7 @@ static int getphonebook(int argc, char *argv[])
 {
 	gn_phonebook_entry entry;
 	int count, start_entry, end_entry = 0;
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 	char *memory_type_string;
 	char location[32];
 	int type = 0; /* Output type:
@@ -4479,7 +4479,7 @@ static int presskey(void)
 
 static int presskeysequence(void)
 {
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 	unsigned char *syms = "0123456789#*PGR+-UDMN";
 	gn_key_code keys[] = {GN_KEY_0, GN_KEY_1, GN_KEY_2, GN_KEY_3,
 			      GN_KEY_4, GN_KEY_5, GN_KEY_6, GN_KEY_7,
@@ -4507,7 +4507,7 @@ static int presskeysequence(void)
 static int enterchar(void)
 {
 	unsigned char ch;
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 
 	gn_data_clear(&data);
 	console_raw();

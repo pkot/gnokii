@@ -11,6 +11,8 @@
     o add more workarounds for SonyEricssons            (Hugo Haas)
  * gnapplet driver updates
     o fix incorrect bracketing                           (Greg Alt)
+ * gnokii updates
+    o initialize error variables                             (SuSE)
 
 0.6.3
 =====
