@@ -31,7 +31,9 @@
 #ifndef __gsm_bitmaps_h__
 #define __gsm_bitmaps_h__
 
+#include "misc.h"
 #include "gsm-error.h"
+#include "gsm-common.h"
 
 /* Bitmap types. These do *not* corespond to headers[] in gsm-sms.c. */
 

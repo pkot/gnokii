@@ -39,6 +39,8 @@
 #include "gsm-ringtones.h"
 #include "gsm-bitmaps.h"
 
+#include "sms-nokia.h"
+
 struct udh_data {
 	unsigned int length;
 	char *header;
@@ -595,7 +597,7 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 			sms->UserData[0].Type = SMS_BitmapData;
 			GSM_ReadSMSBitmap(GSM_PictureMessage, rawsms->UserData,
 					  NULL, &sms->UserData[0].u.Bitmap);
-			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap);
+			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap, stderr);
 
 			size = rawsms->UserDataLength - 4 - sms->UserData[0].u.Bitmap.size;
 			/* Second part is a text */
@@ -619,7 +621,7 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 			GSM_ReadSMSBitmap(GSM_PictureMessage,
 					  rawsms->UserData + rawsms->UserData[0] + 7,
 					  NULL, &sms->UserData[0].u.Bitmap);
-			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap);
+			GSM_PrintBitmap(&sms->UserData[0].u.Bitmap, stderr);
 		}
 		break;
 	/* Plain text message */
@@ -1022,35 +1024,23 @@ static char *EncodeUDH(GSM_SMSMessage *rawsms, int type)
 	return res;
 }
 
+/**
+ * EncodeConcatHeader - Adds concatenated messages header
+ * @rawsms: processed SMS
+ * @this: current part number
+ * @total: total parts number
+ *
+ * This function adds sequent part of the concatenated messages header. Note
+ * that this header should be the first of all headers.
+ */
 static GSM_Error EncodeConcatHeader(GSM_SMSMessage *rawsms, int this, int total)
 {
 	char *header = EncodeUDH(rawsms, SMS_ConcatenatedMessages);
 	if (!header) return GE_NOTSUPPORTED;
-	header[2] = 0xce;		/* Message serial number */
+	header[2] = 0xce;		/* Message serial number. Is 0xce value somehow special? -- pkot */
 	header[3] = total;
 	header[4] = this;
 	return GE_NONE;
-}
-
-/* Returns used length */
-int EncodeNokiaText(char *text, char *message)
-{
-	int current = 0;
-	/* FIXME: unicode length is not as simple as strlen */
-	int uni = 0, len;		     /* 0 .. ISO-8859-1, 1 .. Unicode */
-
-	message[current++]=uni;
-
-	/* Length for text part */
-	len = strlen(text)*(uni + 1);
-	message[current++]=0x00;
-	message[current++]=len;
-	if (uni)
-		EncodeUnicode(message+current, text, strlen(text));
-	else
-		memcpy(message+current, text, strlen(text));
-	current += len;
-	return current;
 }
 
 /**
@@ -1080,7 +1070,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		case 2: rawsms->DCS |= 0xf1; break; /* Class 1 */
 		case 3: rawsms->DCS |= 0xf2; break; /* Class 2 */
 		case 4: rawsms->DCS |= 0xf3; break; /* Class 3 */
-		default: fprintf(stderr, "What ninja-mutant class is this?\n"); break; 
+		default: dprintf("What ninja-mutant class is this?\n"); break; 
 		}
 		if (sms->DCS.u.General.Compressed) {
 			/* Compression not supported yet */
@@ -1104,16 +1094,22 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 
 	rawsms->Length = rawsms->UserDataLength = 0;
 
-	for (i=0; i<SMS_MAX_PART_NUMBER; i++) {
+	for (i = 0; i < SMS_MAX_PART_NUMBER; i++) {
 		switch (sms->UserData[i].Type) {
 		case SMS_BitmapData:
 			switch (sms->UserData[0].u.Bitmap.type) {
-			case GSM_OperatorLogo: if (!EncodeUDH(rawsms, SMS_OpLogo)) return GE_NOTSUPPORTED; break;
-			case GSM_PictureMessage: 
-			case GSM_EMSPicture:
-			case GSM_EMSAnimation: break;	/* We'll construct headers in EncodeSMSBitmap */
+			case GSM_PictureMessage:
+				size = GSM_EncodeNokiaBitmap(&(sms->UserData[i].u.Bitmap),
+							     rawsms->UserData + rawsms->UserDataLength,
+							     (i == 0));
+				break;
+			case GSM_OperatorLogo:
+				if (!EncodeUDH(rawsms, SMS_OpLogo)) return GE_NOTSUPPORTED;
+			default:
+				size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Bitmap),
+							   rawsms->UserData + rawsms->UserDataLength);
+				break;
 			}
-			size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Bitmap), rawsms->UserData + rawsms->UserDataLength);
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			rawsms->DCS = 0xf5;
@@ -1123,7 +1119,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		case SMS_AnimationData: {
 			int j;
 			error = GE_NONE;
-			for (j=0; j<4; j++) {
+			for (j = 0; j < 4; j++) {
 				size = GSM_EncodeSMSBitmap(&(sms->UserData[i].u.Animation[j]), rawsms->UserData + rawsms->UserDataLength);
 				rawsms->Length += size;
 				rawsms->UserDataLength += size;
@@ -1163,7 +1159,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 		}
 
 		case SMS_NokiaText:
-			size = EncodeNokiaText(sms->UserData[i].u.Text, rawsms->UserData + rawsms->UserDataLength);
+			size = EncodeNokiaText(sms->UserData[i].u.Text, rawsms->UserData + rawsms->UserDataLength, (i == 0));
 			rawsms->Length += size;
 			rawsms->UserDataLength += size;
 			break;
@@ -1208,7 +1204,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			return GE_NONE;
 
 		default:
-			fprintf(stderr, "What kind of ninja-mutant UserData is this?\n");
+			dprintf("What kind of ninja-mutant UserData is this?\n");
 		}
 	}
 	return GE_NONE;
@@ -1249,45 +1245,22 @@ void DumpRawSMS(GSM_SMSMessage *rawsms)
 	printf("UserData: %s\n", buf);
 }
 
-API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
-{
-	int i, count;
-	GSM_SMSMessage LongSMS, *rawsms = &LongSMS;	/* We need local copy for our dirty tricks */
-	GSM_API_SMS sms;
-	GSM_Error error = GE_NONE;
-
-	LongSMS = *data->RawSMS;
-	sms = *data->SMS;
-
-	count = (rawsms->UserDataLength + MAX_SMS_PART -1) / MAX_SMS_PART;
-	dprintf("Will need %d sms-es\n", count);
-	for (i=0; i<count; i++) {
-		printf("Sending sms #%d\n", i);
-		sms.UserData[0].Type = SMS_MultiData;
-		sms.UserData[0].Length = MAX_SMS_PART;
-		if (i+1 == count)
-			sms.UserData[0].Length = rawsms->UserDataLength % MAX_SMS_PART;
-		memcpy(sms.UserData[0].u.Multi.Binary, rawsms->UserData + i*MAX_SMS_PART, MAX_SMS_PART);
-		sms.UserData[0].u.Multi.this = i+1;
-		sms.UserData[0].u.Multi.total = count;
-		sms.UserData[1].Type = SMS_NoData;
-		data->SMS = &sms;
-		error = SendSMS(data, state);
-		if (error != GE_NONE) return error;
-	}
-	return GE_NONE;
-}
+GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state);
 
 /**
  * SendSMS - The main function for the SMS sending
- * @data:
- * @state:
+ * @data: GSM data for the phone driver
+ * @state: current statemachine state
+ *
+ * The high level function to send SMS. You need to fill in data->SMS
+ * (GSM_API_SMS) in the higher level. This is converted to RawSMS here,
+ * and then phone driver takes the fields it needs and sends it in the
+ * phone specific way to the phone.
  */
 API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error error = GE_NONE;
 	GSM_RawData rawdata;
-	int i;
 
 #if 0
 	/* AT does not need smsc */
@@ -1319,6 +1292,35 @@ API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	data->RawData = NULL;
 	return error;
+}
+
+API GSM_Error SendLongSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	int i, count;
+	GSM_SMSMessage LongSMS, *rawsms = &LongSMS;	/* We need local copy for our dirty tricks */
+	GSM_API_SMS sms;
+	GSM_Error error = GE_NONE;
+
+	LongSMS = *data->RawSMS;
+	sms = *data->SMS;
+
+	count = (rawsms->UserDataLength + MAX_SMS_PART -1) / MAX_SMS_PART;
+	dprintf("Will need %d sms-es\n", count);
+	for (i=0; i<count; i++) {
+		printf("Sending sms #%d\n", i);
+		sms.UserData[0].Type = SMS_MultiData;
+		sms.UserData[0].Length = MAX_SMS_PART;
+		if (i+1 == count)
+			sms.UserData[0].Length = rawsms->UserDataLength % MAX_SMS_PART;
+		memcpy(sms.UserData[0].u.Multi.Binary, rawsms->UserData + i*MAX_SMS_PART, MAX_SMS_PART);
+		sms.UserData[0].u.Multi.this = i+1;
+		sms.UserData[0].u.Multi.total = count;
+		sms.UserData[1].Type = SMS_NoData;
+		data->SMS = &sms;
+		error = SendSMS(data, state);
+		if (error != GE_NONE) return error;
+	}
+	return GE_NONE;
 }
 
 API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)

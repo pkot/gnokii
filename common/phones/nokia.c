@@ -193,4 +193,3 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 
 	return GE_NONE;
 }
-

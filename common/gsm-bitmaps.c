@@ -241,19 +241,14 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, unsigned char *message)
 	case GSM_PictureMessage:
 		dprintf("Picture Image\n");
 
-		message[current++]=0x30;     /* SM version. Here 3.0 */
-		message[current++]=0x02;     /* ID for bitmap, 0x06 is id for screensaver */
-		message[current++]=0x01;     /* Length for picture part, hi */
-		message[current++]=0x00;     /* length lo */
-
 		/* Set the logo size */
 		message[current++] = 0x00;
 		message[current++] = bitmap->width;
 		message[current++] = bitmap->height;
 		message[current++] = 0x01;
 
-		memcpy(message+current,bitmap->bitmap,bitmap->size);
-		current=current+bitmap->size;
+		memcpy(message + current, bitmap->bitmap, bitmap->size);
+		current = current + bitmap->size;
 		return current;
 	case GSM_EMSPicture:
 		dprintf("EMS picture\n");

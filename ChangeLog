@@ -10,6 +10,10 @@
     o support for sending nokia logos and picture msgs (Pavel Machek)
     o use correct UDHs                                    (Pawel Kot)
     o add helpful defines                                 (Pawel Kot)
+    o added sms-nokia.[ch] for Nokia extensions for SMS stuff
+                                                          (Pawel Kot)
+    o correct some header includes -- move them where they are
+      needed, explicit dependencies are better            (Pawel Kot)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
     o added Terminate to GOP functions
