@@ -84,6 +84,8 @@ typedef enum {
 } GSM_SMSMessageType;
 
 /* Datatype for SMS status */
+/* FIXME - This needs to be made clearer and or turned into a 
+   bitfield to allow compound values (read | sent etc.) */
 
 typedef enum {
   GSS_SENTREAD = true,    /* Sent or read message */

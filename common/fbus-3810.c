@@ -1857,6 +1857,28 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 			CurrentSMSMessage->MemoryType = GMT_XX;
 		}
 	}
+		/* 3810 series has limited support for different SMS "mailboxes"
+		   to the extent that the only know differentiation is between
+		   received messages 0x01, 0x04 and written messages 0x07 0x01.
+		   No flag has been found (yet) that indicates whether the 
+		   message has been sent or not. */
+	
+		/* Default to unknown message type */
+	CurrentSMSMessage->Type = GST_UN;
+
+		/* Consider received messages "Inbox" (Mobile Terminated) */
+	if (MessageBuffer[4] == 0x01  && MessageBuffer[5] == 0x04) {
+		CurrentSMSMessage->Type = GST_MT;
+	}
+
+		/* Consider written messages "Outbox" (Mobile Originated) */
+	if (MessageBuffer[4] == 0x07  && MessageBuffer[5] == 0x01) {
+		CurrentSMSMessage->Type = GST_MO;
+	}
+	
+		/* We don't know about read/unread or sent/unsent status.
+		   so assume has been sent or read */
+	CurrentSMSMessage->Status = GSS_SENTREAD;
 
 		/* Now do message number and length */
 	CurrentSMSMessage->MessageNumber = MessageBuffer[3];

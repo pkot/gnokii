@@ -82,6 +82,9 @@ length of the name and phone number fields in the SIM.  Similarly
 it cannot yet determine the maximum number of SIM locations. 
 These are defined in fbus-3810.h
 
+The status (read or unread, sent or unsent) of SMS messages
+retrieved from memory is not known so these flags are always
+set to read / sent.
 
 * To-do *
 Add support to automaticall determine the maximum number of SIM
