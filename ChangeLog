@@ -5,6 +5,9 @@
                                                          (Pawel Kot)
     o add gsm-filetypes.o to libgnokii.so/libgnokii.a    (Pawel Kot)
     o fix install-docs target                            (Pawel Kot)
+    o <X11/xpm.h> is deprecated since XFree86 4.2.1, so don't
+      depend on it anymore and correctly include the header
+      in gsm-filetypes.h                   (P. Christeas, Pawel Kot)
 
 0.5.0pre3
 =========

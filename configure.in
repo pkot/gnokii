@@ -234,19 +234,9 @@ if test "$no_x" = yes -o "$with_x" = "no"; then
 else
    AC_PATH_X
    CPPFLAGS="$CPPFLAGS -I$x_includes"
-   AC_CHECK_HEADERS(X11/xpm.h,
-                    [ XPMINC="yes" ],
-                    [ XPMINC="no" ])
+   AC_CHECK_HEADERS(X11/xpm.h)
 
-   if test "x$XPMINC" = "xno"; then
-      x_support="no"
-      XPM_CFLAGS=""
-      XPM_LIBS=""
-      GTK_CFLAGS=""
-      GTK_LIBS=""
-      AC_MSG_WARN(Cannot find include X11/xpm.h)
-      AC_MSG_WARN(Disabling xgnokii.)
-   elif test "x$x_libraries" = "xNONE"; then
+   if test "x$x_libraries" = "xNONE"; then
       x_support="no"
       XPM_CFLAGS=""
       XPM_LIBS=""
@@ -481,20 +471,26 @@ AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(XVERSION)
 AC_SUBST(XPACKAGE)
+
 AC_SUBST(XGNOKIIDIR)
 AC_SUBST(exec_prefix)
-AC_SUBST(USE_IRDA)
-AC_SUBST(USE_BLUETOOTH)
-AC_SUBST(GTK_CFLAGS)
-AC_SUBST(GTK_LIBS)
-AC_SUBST(PTHREAD_CFLAGS)
-AC_SUBST(PTHREAD_LIBS)
-AC_SUBST(XPM_CFLAGS)
-AC_SUBST(XPM_LIBS)
-AC_SUBST(OWN_GETOPT)
+
 AC_SUBST(NO_SHARED)
 AC_SUBST(GLDFLAGS)
+
+AC_SUBST(USE_IRDA)
+AC_SUBST(USE_BLUETOOTH)
+
+AC_SUBST(PTHREAD_CFLAGS)
+AC_SUBST(PTHREAD_LIBS)
+
+AC_SUBST(OWN_GETOPT)
 AC_SUBST(USE_UNIX98PTYS)
+
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
+AC_SUBST(XPM_CFLAGS)
+AC_SUBST(XPM_LIBS)
 AC_SUBST(HAVE_XGNOKII)
 AC_SUBST(WIN32)
 

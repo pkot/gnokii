@@ -42,8 +42,8 @@
 #include "gnokii-internal.h"
 #include "gsm-api.h"
 
-#ifdef XPM
-#include <X11/xpm.h>
+#ifdef HAVE_X11_XPM_H
+#  include <X11/xpm.h>
 #endif
 
 #include "misc.h"
