@@ -32,7 +32,6 @@
 
 */
 
-#include "config.h"
 
 /* System header files */
 #include <stdio.h>
@@ -40,6 +39,8 @@
 #include <stdlib.h>
 
 /* Various header file */
+#include "config.h"
+#include "compat.h"
 #include "misc.h"
 #include "gnokii/statemachine.h"
 #include "gnokii/common.h"

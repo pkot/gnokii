@@ -41,6 +41,7 @@
 /* Various header file */
 
 #include "config.h"
+#include "compat.h"
 #include "misc.h"
 #include "gnokii/statemachine.h"
 #include "device.h"

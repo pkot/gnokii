@@ -42,6 +42,7 @@
 /* Various header file */
 
 #include "config.h"
+#include "compat.h"
 #include "misc.h"
 #include "gnokii/common.h"
 #include "gnokii/ringtones.h"

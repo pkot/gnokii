@@ -35,6 +35,7 @@
 
 /* Various header files */
 #include "config.h"
+#include "compat.h"
 #include "misc.h"
 
 #include "gnokii-internal.h"
