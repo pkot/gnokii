@@ -109,15 +109,13 @@ typedef struct{
 
 GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type);
 
+int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
 
 #ifdef __links_fbus_c  /* Prototype functions for fbus-generic.c only */
-
 bool FBUS_OpenSerial(bool dlr3);
 void FBUS_RX_StateMachine(unsigned char rx_byte);
-int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
 GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message);
 int FBUS_TX_SendAck(u8 message_type, u8 message_seq);
-
 #endif   /* #ifdef __links_fbus_c */
 
 #endif   /* #ifndef __links_fbus_h */
