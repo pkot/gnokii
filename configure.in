@@ -198,6 +198,9 @@ AC_CHECK_FUNC(getopt_long, , [
            AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt",
             OWN_GETOPT="1")])
 
+dnl ======================== Checks for gethostbyname support
+AC_CHECK_FUNC(gethostbyname, ,
+	AC_CHECK_LIB(nsl, gethostbyname, LIBS="$LIBS -lnsl")])
 
 dnl ======================== Checks for Linux IrDA support
 USE_IRDA="no"

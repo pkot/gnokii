@@ -5,6 +5,8 @@
     o uint8_t will be defined only if there's no stdint.h
       and inttypes.h                                (BORBELY Zoltan)
     o abort configure if libiconv.h cannot be found (BORBELY Zoltan)
+    o say "no" when IrDA support is not enabled          (Pawel Kot)
+    o Solaris has gethostbyname() in -lnsl, detect it    (Pawel Kot)
  * api changes
     o don't use UpperCase variable names in API but lower_case
                                                          (Pawel Kot)
