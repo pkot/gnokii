@@ -34,6 +34,7 @@
 #include <mysql.h>
 #include "smsd.h"
 #include "gsm-sms.h"
+#include "gsm-encoding.h"
 
 static MYSQL mysqlIn;
 static MYSQL mysqlOut;
@@ -167,6 +168,8 @@ void DB_Look (void)
     sms.UserData[0].Length = strlen (sms.UserData[0].u.Text);
     sms.UserData[0].Type = SMS_PlainText;
     sms.UserData[1].Type = SMS_NoData;
+    if (!IsDefaultAlphabetString(sms.UserData[0].u.Text))
+       sms.DCS.u.General.Alphabet = SMS_UCS2;
 
 #ifdef XDEBUG
     g_print ("%s, %s\n", sms.Remote.Number, sms.UserData[0].u.Text);

@@ -61,6 +61,9 @@
     o add DeleteSMS                                    (Markus Plail)
  * replace GOP_FindUnreadSMS with GOP_GetUnreadMessages
 	                                               (Markus Plail)
+ o smsd changes
+    o when some characters are not from the default alphabet
+      encode them in the unicode                          (Pawel Kot)
 
 0.4.1
 =====
