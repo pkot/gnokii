@@ -1489,6 +1489,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			switch (message[10]) {
 			case 0x0f: return GN_ERR_WRONGDATAFORMAT; /* I got this when sending incorrect
 									block (with 0 length) */
+			case 0x36: return GN_ERR_WRONGDATAFORMAT; /* name block is too long */
 			case 0x3d: return GN_ERR_FAILED;
 			case 0x3e: return GN_ERR_FAILED;
 			case 0x43: return GN_ERR_WRONGDATAFORMAT; /* Probably there are incorrect

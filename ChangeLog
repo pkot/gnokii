@@ -6,6 +6,7 @@
  * 6510 series updates
     o added Nokia 3510i to the supported phones list
                                                     (Rafal Czlonka)
+    o new error code when writing phonebook             (Pawel Kot)
  * documentation updates
     o FAQ update and synchronize with WWW version       (Pawel Kot)
     o rttl is rtttl (ringing tone text transfer language
