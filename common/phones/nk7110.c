@@ -239,7 +239,7 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_DeleteCalendarNote(data, state);
 	case GOP_GetSMS:
 		dprintf("Getting SMS (validating)...\n");
-		return P7110_GetSMSnoValidate(data, state);
+		return P7110_GetSMS(data, state);
 	case GOP_GetSMSnoValidate:
 		dprintf("Getting SMS (without validating)...\n");
 		data->SMSFolder = NULL;
@@ -950,7 +950,7 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	GSM_Error error;
 
 	/* Handle MemoryType = 0 explicitely, because SMSFolder->FolderID = 0 by default */
-	if (data->SMS->MemoryType == 0) return GE_INVALIDMEMORYTYPE;
+	if (data->RawSMS->MemoryType == 0) return GE_INVALIDMEMORYTYPE;
 
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
