@@ -433,7 +433,7 @@ static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
 /* Initialise variables and start the link */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-gn_error m2bus_initialise(gn_link *newlink, struct gn_statemachine *state)
+gn_error m2bus_initialise(struct gn_statemachine *state)
 {
 	gn_error err;
 

@@ -82,6 +82,6 @@ typedef struct{
 	u8 request_sequence_number;
 } fb3110_link;
 
-gn_error fb31110_initialise(gn_link *newlink, struct gn_statemachine *state);
+gn_error fb3110_initialise(struct gn_statemachine *state);
 
 #endif   /* #ifndef _gnokii_links_fbus_3110_h */

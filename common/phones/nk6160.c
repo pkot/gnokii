@@ -142,7 +142,7 @@ static gn_error initialise(struct gn_statemachine *lstate)
 	switch (lstate->link.connection_type) {
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		err = m2bus_initialise(&(lstate->link), lstate);
+		err = m2bus_initialise(lstate);
 		break;
 	default:
 		return GN_ERR_NOTSUPPORTED;

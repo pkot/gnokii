@@ -92,6 +92,6 @@ typedef struct{
 
 #define M2BUSINST(s) ((m2bus_link *)((s)->link.link_instance))
 
-gn_error m2bus_initialise(gn_link *newlink, struct gn_statemachine *state);
+gn_error m2bus_initialise(struct gn_statemachine *state);
 
 #endif   /* #ifndef _gnokii_links_m2bus_h */
