@@ -65,6 +65,7 @@
     o added Nokia 3595 to the supported models  (Gunnar Sigurdsson)
     o don't refuse to work with Nokia 6100 with configuration other
       then Linux/IrDA                                   (Pawel Kot)
+    o handle empty calentar entries not as an error     (Pawel Kot)
  * AT series updates
     o findcrlfbw() overrun at the beginning        (BORBELY Zoltan)
     o unsolicited network info (+CREG) dropped     (BORBELY Zoltan)
