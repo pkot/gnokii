@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.5  2001-03-22 16:17:05  chris
+  Revision 1.6  2001-09-14 12:15:28  pkot
+  Cleanups from 0.3.3 (part1)
+
+  Revision 1.5  2001/03/22 16:17:05  chris
   Tidy-ups and fixed gnokii/Makefile and gnokii/ChangeLog which I somehow corrupted.
 
   Revision 1.4  2001/03/21 23:36:04  chris
@@ -120,7 +123,7 @@ void DecodeUnicode (unsigned char* dest, const unsigned char* src, int len)
 	wchar_t wc;
 
 	for (i = 0; i < len; i++) {
-	  wc = src[(2*i)+1] | (src[2*i] << 8);
+		wc = src[(2*i)+1] | (src[2*i] << 8);
 		dest[i] = DecodeWithUnicodeAlphabet(wc);
 	}
 	dest[len]=0;

@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.4  2001-09-09 21:45:49  machek
+  Revision 1.5  2001-09-14 12:15:28  pkot
+  Cleanups from 0.3.3 (part1)
+
+  Revision 1.4  2001/09/09 21:45:49  machek
   Cleanups from Ladislav Michl <ladis@psi.cz>:
 
   *) do *not* internationalize debug messages
@@ -51,7 +54,6 @@
 #include "gsm-networks.h"
 #include "device.h"
 
-#if 0
 void
 link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 {
@@ -59,12 +61,11 @@ link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)
 	for (c = 0; c < gphone->IncomingFunctionNum; c++) 
 		if (gphone->IncomingFunctions[c].MessageType == type) {
 			gphone->IncomingFunctions[c].Functions(type, buf, len);
-			dprintf("Received message type %02x\n\r", type);
+			dprintf("Received message type %02x\n", type);
 
 			/* FIXME - Hmm, what do we do with the return value.. */
 			return;
 		}
-	dprintf("Unknown Frame Type %02x\n\r", type);
+	dprintf("Unknown Frame Type %02x\n", type);
 	gphone->DefaultFunction(type, buf, len);
 }
-#endif

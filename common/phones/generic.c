@@ -17,7 +17,10 @@
   The various routines are called PGEN_(whatever).
 
   $Log$
-  Revision 1.4  2001-03-23 13:40:24  chris
+  Revision 1.5  2001-09-14 12:15:28  pkot
+  Cleanups from 0.3.3 (part1)
+
+  Revision 1.4  2001/03/23 13:40:24  chris
   Pavel's patch and a few fixes.
 
   Revision 1.3  2001/03/21 23:36:05  chris
@@ -68,11 +71,11 @@ GSM_Error PGEN_DebugMessage(int type, unsigned char *mes, int len)
 {
 	int i;
   
-	dprintf(_("Message debug (type %02x):\n\r"), type);
+	dprintf("Message debug (type %02x):\n", type);
 	for (i = 0; i < len; i++) 
-		if (isprint(mes[i])) dprintf(_("[%02x%c]"), mes[i], mes[i]);
-		else dprintf(_("[%02x ]"), mes[i]);
-	dprintf(_("\n\r"));
+		if (isprint(mes[i])) dprintf("[%02x%c]", mes[i], mes[i]);
+		else dprintf("[%02x ]", mes[i]);
+	dprintf("\n");
 
 	return GE_NONE;
 }
@@ -82,7 +85,7 @@ GSM_Error PGEN_DebugMessage(int type, unsigned char *mes, int len)
 
 GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length)
 {
-	dprintf("Unknown Message received [type (%02x) length (%d): \n\r", messagetype, length);
+	dprintf("Unknown Message received [type (%02x) length (%d): \n", messagetype, length);
 	PGEN_DebugMessage(messagetype, buffer, length);
 
 	return GE_NONE;

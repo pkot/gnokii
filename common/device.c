@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.10  2001-08-20 23:27:37  pkot
+  Revision 1.11  2001-09-14 12:15:28  pkot
+  Cleanups from 0.3.3 (part1)
+
+  Revision 1.10  2001/08/20 23:27:37  pkot
   Add hardware shakehand to the link layer (Manfred Jonsson)
 
   Revision 1.9  2001/06/28 00:28:45  pkot
@@ -53,9 +56,9 @@ int device_getfd(void) {
   return device_portfd;
 }
 
-int device_open(__const char *__file, int __with_odd_parity, int __with_async, int __with_hw_handshake, GSM_ConnectionType device_type) {
-
-  devicetype=device_type;
+int device_open(__const char *__file, int __with_odd_parity, int __with_async, int __with_hw_handshake, GSM_ConnectionType device_type)
+{
+  devicetype = device_type;
 
   switch (devicetype) {
   case GCT_Serial:
@@ -74,8 +77,8 @@ int device_open(__const char *__file, int __with_odd_parity, int __with_async, i
   return (device_portfd >= 0);
 }
 
-void device_close(void) {
-
+void device_close(void)
+{
   switch (devicetype) {
   case GCT_Serial:
   case GCT_Infrared:
@@ -92,11 +95,12 @@ void device_close(void) {
   }
 }
 
-void device_reset(void) {
+void device_reset(void)
+{
 }
 
-void device_setdtrrts(int __dtr, int __rts) {
-
+void device_setdtrrts(int __dtr, int __rts)
+{
   switch (devicetype) {
   case GCT_Serial:
   case GCT_Infrared:
@@ -111,8 +115,8 @@ void device_setdtrrts(int __dtr, int __rts) {
   }
 }
 
-void device_changespeed(int __speed) {
-
+void device_changespeed(int __speed)
+{
   switch (devicetype) {
   case GCT_Serial:
   case GCT_Infrared:
@@ -128,8 +132,8 @@ void device_changespeed(int __speed) {
   }
 }
 
-size_t device_read(__ptr_t __buf, size_t __nbytes) {
-
+size_t device_read(__ptr_t __buf, size_t __nbytes)
+{
   switch (devicetype) {
   case GCT_Serial:
   case GCT_Infrared:
@@ -147,8 +151,8 @@ size_t device_read(__ptr_t __buf, size_t __nbytes) {
   return 0;
 }
 
-size_t device_write(__const __ptr_t __buf, size_t __n) {
-
+size_t device_write(__const __ptr_t __buf, size_t __n)
+{
   switch (devicetype) {
   case GCT_Serial:
   case GCT_Infrared:
@@ -166,8 +170,8 @@ size_t device_write(__const __ptr_t __buf, size_t __n) {
   return 0;
 }
 
-int device_select(struct timeval *timeout) {
-
+int device_select(struct timeval *timeout)
+{
   switch (devicetype) {
   case GCT_Serial:
   case GCT_Infrared:

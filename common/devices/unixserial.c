@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.8  2001-08-20 23:27:37  pkot
+  Revision 1.9  2001-09-14 12:15:28  pkot
+  Cleanups from 0.3.3 (part1)
+
+  Revision 1.8  2001/08/20 23:27:37  pkot
   Add hardware shakehand to the link layer (Manfred Jonsson)
 
   Revision 1.7  2001/07/03 00:03:36  pkot
@@ -36,9 +39,9 @@
 
 */
 
-/* Do not compile this file under Win32 systems. */
-
 #include "misc.h"
+
+/* Do not compile this file under Win32 systems. */
 
 #ifndef WIN32
 
@@ -141,8 +144,8 @@ int serial_opendevice(__const char *__file, int __with_odd_parity, int __with_as
 
   /* Allow process/thread to receive SIGIO */
 
-#if !defined(__unices__)
-  retcode=fcntl(fd, F_SETOWN, getpid());
+#if !(__unices__)
+  retcode = fcntl(fd, F_SETOWN, getpid());
   if (retcode == -1){
     perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
     serial_close(fd);

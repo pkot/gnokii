@@ -18,7 +18,7 @@ include ${TOPDIR}/Makefile.global
 BIN_DIRS = gnokii
 
 ifndef WIN32
-BIN_DIRS += gnokiid
+BIN_DIRS += gnokiid utils
 endif
 
 DIRS =  common/phones \
@@ -27,15 +27,6 @@ DIRS =  common/phones \
 	common/data \
         common \
 	$(BIN_DIRS)
-
-#
-# For now gnokiid and utils only make sense on Unix like systems.
-# Some other stuff that makes only sense on Win32 platform.
-#
-
-ifndef WIN32
-DIRS +=	utils
-endif
 
 GTK_DIRS =  xgnokii
 
@@ -96,9 +87,10 @@ distclean:	clean
 		include/config.h \
 		include/config.h.in \
 		packaging/RedHat/gnokii.spec \
-		packaging/Slackware/SlackBuild \
 		po/Makefile.in \
 		debian
+	$(RM) `$(FIND) . -name "*~"`
+	@echo "done"
 
 dep:
 	@for dir in $(DIRS); do \

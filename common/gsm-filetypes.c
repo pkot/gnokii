@@ -572,7 +572,7 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 	bitmap->size = ((bitmap->height / 8) + (bitmap->height % 8 > 0)) * bitmap->width;
 
 	if (bitmap->size > GSM_MAX_BITMAP_SIZE) {
-		fprintf(stdout, "Bitmap too large\n\r");
+		fprintf(stdout, "Bitmap too large\n");
 		return GE_INVALIDIMAGESIZE;
 	}
 

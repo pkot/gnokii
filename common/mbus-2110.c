@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.38  2001-07-03 00:03:36  pkot
+  Revision 1.39  2001-09-14 12:15:28  pkot
+  Cleanups from 0.3.3 (part1)
+
+  Revision 1.38  2001/07/03 00:03:36  pkot
   Small fixes to let gnokii compile and work under solaris (thanks to Artur Kubiak)
 
   Revision 1.37  2001/03/05 08:02:16  machek
@@ -77,6 +80,8 @@
 
 #ifndef WIN32
 
+#include "misc.h"
+
 #include <termios.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,8 +100,6 @@
 #  include <sys/file.h>
 #endif
 
-#undef DEBUG
-#include "misc.h"
 #include "gsm-common.h"
 #include "mbus-2110.h"
 #include "phones/nokia.h"
