@@ -24,21 +24,23 @@
 			   
 - 1.0 Introduction -
 
-This is version 0.5.9 of gnokii, a Linux/Unix tool suite and modem
-driver for Nokia mobile phones, released under the GPL.  Please
-see COPYING for more details on license/copying issues, the lack of
-warranty and where to send a postcard if you like gnokii :).
+This is version 0.5.9 of gnokii, a multisystem tool suite and modem driver
+for the mobile phones, released under the GPL.  Please see COPYING for more
+details on license/copying issues, the lack of warranty and where to send a
+postcard if you like gnokii :).
 
-gnokii supports most phones from the 3110/3180, 5110/6110, 7110/6210
-and 6510/6310 series, details including bugs specific to each series
-appear in the files README-3810, README-6110, README-7110 and README-6510
+Primary gnokii goal was to support Nokia phones, but currently we support
+all AT command compliant phones through the atgen driver.
+
+gnokii supports most Nokia phones from the 3110/3180, 5110/6110, 7110/6210
+and 6510/6310 series, details including bugs specific to each series appear
+in the files README-3810, README-6110, README-7110 and README-6510
 respectively. Also all AT compatible phones are supported.
 
-In the early stages of the project there were indications that
-Nokia would provide some support for the project.  Regrettably, these
-negotiations stalled over the issue of binary versus open source
-releases and the project has proceeded without official or unofficial
-assistance.
+In the early stages of the project there were indications that Nokia would
+provide some support for the project.  Regrettably, these negotiations
+stalled over the issue of binary versus open source releases and the project
+has proceeded without official or unofficial assistance.
 
 We have a web site at http://www.gnokii.org/ which amongst other things
 gives information on how to join the gnokii mailing list, retrieving
@@ -48,50 +50,41 @@ bleeding edge releases through CVS and more!
 - 2.0 About the applications -
   
 gnokii now consists of three main executables and a fourth "helper"
-application that is run suid root.  To get the most from gnokii it
-is worth understanding the details of them and how they interact.
-It is important to note that at present you cannot run more than
-one of gnokii, xgnokii or gnokiid at a time.
+application that is run suid root.  To get the most from gnokii it is worth
+understanding the details of them and how they interact. It is important to
+note that at present you cannot run more than one of gnokii, xgnokii or
+gnokiid at a time.
 
-The first application, gnokii, is a command line utility that was
-originally provided to assist developers and interested users in
-working with the low level API functions that were being developed.
+The first application, gnokii, is a command line utility that was originally
+provided to assist developers and interested users in working with the low
+level API functions that were being developed.
 
-From these rather humble beginnings, it has evolved into a the main
-command line tool of the suite.  Many people now use it for
-reading/writing phone book entries, sending and receiving SMS messages
-etc.  Ultimately it is intended that it will become a utility that
-communicates with gnokiid to provide a command line interface to
-the functionality provided by the gnokiid daemon.
+From these rather humble beginnings, it has evolved into a the main command
+line tool of the suite.  Many people now use it for reading/writing phone
+book entries, sending and receiving SMS messages etc.
 
-The second application provided is xgnokii which as the name suggests is a
-X Window System based application that provides a graphical interface to
-your phone.  Amongst other things, xgnokii allows you to read and write
-phone book entries, read, write and send SMS messages, monitor battery and
+The second application provided is xgnokii which as the name suggests is a X
+Window System based application that provides a graphical interface to your
+phone.  Amongst other things, xgnokii allows you to read and write phone
+book entries, read, write and send SMS messages, monitor battery and
 received signal strength.
 
-At present xgnokii works directly with the phone, however in the
-future it will more likely use the "side" interface of gnokiid.
+The third part of the suite is gnokiid.  gnokiid provides a virtual modem
+interface, /dev/gnokii that looks like a regular Hayes-AT compatible modem
+with the ETSI defined extensions for GSM phones.  What this means in
+practical terms is that you can treat the /dev/gnokii device like an
+ordinary modem and use it to make data calls from pppd or a terminal
+application like minicom.
 
-The third part of the suite is gnokiid.  gnokiid provides a
-virtual modem interface, /dev/gnokii that looks like a regular
-Hayes-AT compatible modem with the ETSI defined extensions for
-GSM phones.  What this means in practical terms is that you can
-treat the /dev/gnokii device like an ordinary modem and use it
-to make data calls from pppd or a terminal application like
-minicom.
-
-gnokiid is still under development, it's ultimate aim being to
-act as a "master" daemon that interfaces with your phone on one
-side and gnokii or xgnokii on the other.  This "side" code is still
-under discussion, particularly with respect to the most appropriate
-choice of communication method (IPC, TCP/IP etc.)
+Currently gnokiid is only useful for old Nokia phones from 6100 series that
+didn't include AT commands support. This includes Nokia 61X0 and 51X0
+models. Don't use it with other phones.
 
 The last application provided with the suite is mgnokiidev which is
 used by gnokiid to create on demand a symbolic link between
-/dev/gnokii and the pseudo tty used by gnokiid for the virtual
-modem interface.  It's operation is transparent under normal
-usage as gnokiid takes care of calling it when required.
+/dev/gnokii and the pseudo tty used by gnokiid for the virtual modem
+interface.  It's operation is transparent under normal usage as gnokiid
+takes care of calling it when required.
 
 
 - 3.0  Notes for specific model phones -
@@ -104,86 +97,80 @@ README-6110 for notes on the 5110/6110 series, README-2110 for notes on the
 
 - 4.0 Installation from source -
 
-gnokii makes use of autoconf/automake which allows you to configure
-the source tree for your system by typing 
+gnokii makes use of autoconf/automake which allows you to configure the
+source tree for your system by typing
 
 ./configure
 
-You can also run the script with the --help flag to get a list of 
-available options.  There are about a dozen or so that are specific
-to gnokii.
+You can also run the script with the --help flag to get a list of available
+options.  There are about a dozen or so that are specific to gnokii.
 
-Once you've run ./configure successfully, you should be able to
-simply do a make and make install to compile and install your 
-binaries respectively.
+Once you've run ./configure successfully, you should be able to simply do a
+make and make install to compile and install your binaries respectively.
 
 make
 
 make install
 
-With this done you've built and installed your binaries, and
-should proceed to the configuration section below.
+With this done you've built and installed your binaries, and should proceed
+to the configuration section below.
 
 
 - 5.0 Installation of pre-built binaries -
   
-If you downloaded gnokii as a pre-built binary you should install
-it in the conventional manner for the package type in question.
-For example if you downloaded a .rpm file you can install it by
-running the following as root.
+If you downloaded gnokii as a pre-built binary you should install it in the
+conventional manner for the package type in question. For example if you
+downloaded a .rpm file you can install it by running the following as root.
 
 rpm -i gnokii-0.5.9-i386.rpm
 
-If you are using a Debian based system, you can use dpackage
-to do the installation. On Slackware you use installpkg or pkgtool.
+If you are using a Debian based system, you can use dpackage to do the
+installation. On Slackware you use installpkg or pkgtool.
 
 
 - 6.0 Configuration -
 
-Once you have installed the binaries, you should copy the
-sample/gnokiirc file from the Docs directory to your home
-directory and name it .gnokiirc  Using your favorite editor
-ensure that the settings are correct for your system, the sample
-file has details of the various options available.
+Once you have installed the binaries, you should copy the sample/gnokiirc
+file from the Docs directory to your home directory and name it .gnokiirc
+Using your favorite editor ensure that the settings are correct for your
+system, the sample file has details of the various options available.
 
-If you used a pre-built version of gnokii (.rpm, .deb etc) it
-may have installed a /etc/gnokiirc file.  If it has, the 
-settings in this file will be used in the absence of a
-.gnokiirc file in your home directory.
+If you used a pre-built version of gnokii (.rpm, .deb etc) it may have
+installed a /etc/gnokiirc file.  If it has, the settings in this file will
+be used in the absence of a .gnokiirc file in your home directory.
 
-Note that you will need read/write permissions on whatever
-serial port you specify in .gnokiirc.  You can now use gnokii
-and xgnokii.
+Note that you will need read/write permissions on whatever serial port you
+specify in .gnokiirc.  You can now use gnokii and xgnokii.
 
-Review the notes specific to your model of phone in the
-appropriate README file. These files also provide information
-about what functionality is available for each model.
+Review the notes specific to your model of phone in the appropriate README
+file. These files also provide information about what functionality is
+available for each model.
 
-In order to make use of the AT emulator provided by gnokiid
-through /dev/gnokii, you must read the documentation file
-DataCalls-QuickStart.
+In order to make use of the AT emulator provided by gnokiid through
+/dev/gnokii, you must read the documentation file DataCalls-QuickStart.
  
-A simple test to confirm that your cable/IR link is working
-is to run gnokii with the --monitor flag e.g.
+A simple test to confirm that your cable/IrDA/bluetooth link is working is
+to run gnokii with the --identify flag e.g.
 
-  foobar$ gnokii --monitor
+  foobar$ gnokii --identify
 
-This will attempt to connect to your phone and display
-information such as signal strength, battery level  etc.
+This will attempt to connect to your phone and display the basic information
+about the phone: manufacturer, phone model, firmware version and IMEI.
 
 If you get an error along the lines of
 	
   Telephone interface init failed: [...]. Quitting.
 	    
-this indicates that gnokii could not communicate with your phone
-for some reason and you will need to do some troubleshooting.
+this indicates that gnokii could not communicate with your phone for some
+reason and you will need to do some troubleshooting.
 
 As the other test you may try:
 
-  foobar$ gnokii --identify
+  foobar$ gnokii --monitor
 
-which should show you the base information on your phone.
-		                        
+which should show you some other information like memory usage or signal
+strength.
+
 
 - 7.0 Known Bugs -
 
@@ -194,13 +181,13 @@ Note the possible security hole in mgnokiidev discussed above.
 
 - 8.0 Gnokii and Perl -
 
-There is a perlmodule available for gnokii. It gives access to all
-the routines that are defined in gsm-common.h from a perl-program. It
-is intended for application developers who want to use their favorite
-language in interfacing the phone data with databases, ldap-directories
-and (in the future) different calendar applications. It is written by
-Konstantin Agouros (konstantin@agouros.de) and support starts with
-revision 0.2.6-pre3 of gnokii.
+There is a perlmodule available for gnokii. It gives access to all the
+routines that are defined in gsm-common.h from a perl-program. It is
+intended for application developers who want to use their favorite language
+in interfacing the phone data with databases, ldap-directories and (in the
+future) different calendar applications. It is written by Konstantin Agouros
+(konstantin@agouros.de) and support starts with revision 0.2.6-pre3 of
+gnokii.
 
 The homepage of this module is http://www.agouros.de/gnokii
 
@@ -210,31 +197,31 @@ The homepage of this module is http://www.agouros.de/gnokii
 There are a number of ways you can help out.
 
 Code specific to each model is contained within common/phones/*.c and
-include/phones/*.h files. All command handlers will dump information
-to stderr when they encounter a message they don't understand.  If this
-happens to you, try and work out what is going on. When gnokii receives
-the frame with the unknown meaning it stores the frame and the triggering
-frame to $HOME/.gnokii-errors file. Report it!
+include/phones/*.h files. All command handlers will dump information to
+stderr when they encounter a message they don't understand.  If this happens
+to you, try and work out what is going on. When gnokii receives the frame
+with the unknown meaning it stores the frame and the triggering frame to
+$HOME/.gnokii-errors file. Report it!
 
-Suggestions on changes to the code are welcome, the preference is that
-they be aired on the mailing list so that a consensus can be reached
-when appropriate.  This is particularly important if you intend making
-large changes and/or submitting big patches.
+Suggestions on changes to the code are welcome, the preference is that they
+be aired on the mailing list so that a consensus can be reached when
+appropriate.  This is particularly important if you intend making large
+changes and/or submitting big patches.
 
 
 - 10.0 gnokii by CVS -
 
-The source of gnokii aplications is in the CVS server.  The server's
-address is savannah.nongnu.org.  If you are already familiar with CVS,
-set the CVSROOT to 
+The source of gnokii aplications is in the CVS server.  The server's address
+is savannah.nongnu.org.  If you are already familiar with CVS, set the
+CVSROOT to
 
 	:ext:anoncvs@subversions.gnu.org:/cvsroot/gnokii
 
 and CVS_RSH to ssh, and using ssh protocol v2, check out the repository with
 the name gnokii.
 
-If you are not familiar with cvs, don't worry. It's very simple.
-Just install the cvs package for your distribution and follow these steps:
+If you are not familiar with cvs, don't worry. It's very simple. Just
+install the cvs package for your distribution and follow these steps:
 
 	1. Set up your ssh client to connect to savannah servers using ssh
            v2 protocol. Put:
@@ -282,18 +269,18 @@ or just issue
 
 to build the sources.
 
-Now you are on your own - you have the current sources on your disk
-in the directory gnokii.  If you are going to make substantial changes
-and feel that they should be included into gnokii please mention it
-on the list first to avoid duplicated effort.
+Now you are on your own - you have the current sources on your disk in the
+directory gnokii.  If you are going to make substantial changes and feel
+that they should be included into gnokii please mention it on the list first
+to avoid duplicated effort.
 
 If you would like to receive email when updates are made to the CVS
 repository, subscribe to gnokii-commit mailing list at
 http://mail.nongnu.org/mailman/listinfo/gnokii-commit.
 
-Our thanks go to the Czech Linux Users Group for hosting the original
-CVS repository at cvs.linux.cz and then to the Samba Team who kept hosting
-our CVS for the several years at cvs.samba.org.
+Our thanks go to the Czech Linux Users Group for hosting the original CVS
+repository at cvs.linux.cz and then to the Samba Team who kept hosting our
+CVS for the several years at cvs.samba.org.
 
 
 - 11.0 Protocol Details -
@@ -319,8 +306,8 @@ You can subscribe at
 
 	<http://mail.nongnu.org/mailman/listinfo/gnokii-users>
 
-The serial programming how-to was valuable in cobbling together
-serial code for both monitoring and the tools themselves.
+The serial programming how-to was valuable in cobbling together serial code
+for both monitoring and the tools themselves.
 
 	<http://www.tldp.org/HOWTO/Serial-Programming-HOWTO/index.html>
 
@@ -380,15 +367,15 @@ Nokia 640 Series
 AT series
  + Bosch 908/909
  + Motorola Timeport P7389i (L series)
- + Nokia 6210/7110/8210/6310/6510
- + Siemens S25/SL45i/C55/M55
+ + Nokia 6210/7110/8210/6310(i)/6510/9210/7650/3650
+ + Siemens S25/SL45i/C55/M55/S55
  + Sony Ericsson T68i
 
 
 - 14.0 Credits -
   
-Please take a moment to read the CREDITS file which endeavors
-to recognise those who have helped so far!
+Please take a moment to read the CREDITS file which endeavors to recognise
+those who have helped so far!
 
 
 - 15.0 Release Notes -
@@ -479,71 +466,65 @@ Probably the last 0.3 series release.
 We have data calls and autoconf.  Nuff said :)
 
 19991222 Version 0.3.1
-Interim release to bring released code into line with latest CVS
-offerings.
+Interim release to bring released code into line with latest CVS offerings.
 
 19990824 Version 0.3.0
-6110 functionality has increased again, details of which are
-in the 6110 specific readme.  Few minor tweaks on the 3810
-side but we've just about run out of things the 3810 can do
-(data and fax calls aside of course!)
+6110 functionality has increased again, details of which are in the 6110
+specific readme.  Few minor tweaks on the 3810 side but we've just about run
+out of things the 3810 can do (data and fax calls aside of course!)
 
-This release is the first to include xgnokii - an X based
-interface to your phone and gnokiid - the makings of a
-virtual modem/AT emulator interface.  Details of these
-two apps appear above.
+This release is the first to include xgnokii - an X based interface to your
+phone and gnokiid - the makings of a virtual modem/AT emulator interface. 
+Details of these two apps appear above.
 
 19990519 Version 0.2.5
-Little has changed on the 3810 side - mostly adding stub functions
-to stay current with the 6110 code.  A no-brainer bug was found in 
-the SMS send routines which is now corrected - could have caused
-multiple messages to be sent.
+Little has changed on the 3810 side - mostly adding stub functions to stay
+current with the 6110 code.  A no-brainer bug was found in the SMS send
+routines which is now corrected - could have caused multiple messages to be
+sent.
 
-6110 support has moved ahead in leaps and bounds, SMS sending is
-now in there along with many other new function.
+6110 support has moved ahead in leaps and bounds, SMS sending is now in
+there along with many other new function.
 
 19990328 Version 0.2.4
-Largely a synchronisation release to incorporate Pavel's numerous
-patches for 6110 support and internationalisation (such a long
-word, i18n is better :-).
+Largely a synchronisation release to incorporate Pavel's numerous patches
+for 6110 support and internationalisation (such a long word, i18n is better
+:-).
 
 Added SMS delete function for 3810 series.
 
 19990305 Version 0.2.3
-Added gsm-api.c/.h and gsm-common.h as a standard interface and
-set of datatypes that can be used across multiple models.  This
-API is still a work in progress.
+Added gsm-api.c/.h and gsm-common.h as a standard interface and set of
+datatypes that can be used across multiple models.  This API is still a work
+in progress.
 
 Changed references to "handset" to "phone" to ensure a consistent
 nomenclature.
 
-Phonebook is now dumped with words int or sim for memory type
-rather than a numeric value.
+Phonebook is now dumped with words int or sim for memory type rather than a
+numeric value.
 
 19990219 Version 0.2.2
-Fixed bug and added support to display bytes returned when
-the link is initialised.  If you see something other than the
-values noted in fbus.c, please let me know and include
-your phone type and software version.
+Fixed bug and added support to display bytes returned when the link is
+initialised.  If you see something other than the values noted in fbus.c,
+please let me know and include your phone type and software version.
 
-Added initial cut of SMS send capability.  Caveats are
-discussed above.
+Added initial cut of SMS send capability.  Caveats are discussed above.
 
-Added two different default values for length of phonebook
-name and numbers.  These are selected according to whether
-internal or SIM memory is specified.
+Added two different default values for length of phonebook name and numbers. 
+These are selected according to whether internal or SIM memory is specified.
 
-Fixed bugs reported in 0.2.1 (errno.h and reversal of message
-center and sender fields)
+Fixed bugs reported in 0.2.1 (errno.h and reversal of message center and
+sender fields)
 
 19990216 Version 0.2.1
-Fixed bug that caused phone book entries containing spaces to be
-mangled.  Added retrieve SMS message function.
+Fixed bug that caused phone book entries containing spaces to be mangled. 
+Added retrieve SMS message function.
 
 19990213 Version 0.2.0
-First version that looks more like the finished product - supports
-command line options etc. 
+First version that looks more like the finished product - supports command
+line options etc.
 
 19990126 Version 0.1.0
-Initial release of monitoring tool - first rough incarnation of
-gnokii - what will ultimately be the monitoring and programming tool.
+Initial release of monitoring tool - first rough incarnation of gnokii -
+what will ultimately be the monitoring and programming tool.

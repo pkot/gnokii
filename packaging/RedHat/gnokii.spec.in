@@ -2,7 +2,7 @@
 %define version @VERSION@
 %define release 1
 
-Summary: Linux/Unix tool suite for the mobile phones
+Summary: multisystem tool suite for the mobile phones
 Name: %{name}
 Version: %{version}
 Release: %{release}
@@ -14,14 +14,14 @@ BuildRoot: /var/tmp/%{name}-%{version}-root
 BuildPreReq: gettext, gtk+-devel >= 1.2.0
 
 %description
-Gnokii is a Linux/Unix tool suite and (eventually) modem/fax driver for
+Gnokii is a multisystem tool suite and (eventually) modem/fax driver for
 the mobile phones, released under the GPL.
 
 %package xgnokii
-Summary: Graphical Linux/Unix tool suite for the mobile phones.
+Summary: Graphical gtk+ based tool suite for the mobile phones.
 Group: X11/Applications
 %description xgnokii
-Xgnokii is a graphical Linux/Unix tool suite for the mobile phones. It
+Xgnokii is a graphical gtk+ based tool suite for the mobile phones. It
 allows you to edit your contacts book, send/read SMS's from/in your
 computer and more.
 
@@ -117,7 +117,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %changelog
 
 * Fri Jan 30 2004 Pawel Kot <pkot@linuxnews.pl>
-- gnokii is for mobile phones not only for Nokia mobile phones
+- gnokii is for mobile phones not only for Nokia mobile phones and also
+  works with non unix systems
 
 * Tue Jan 20 2004 Pawel Kot <pkot@linuxnews.pl>
 - install *.a and *.la into -devel package
