@@ -191,7 +191,7 @@ gn_network networks[] = {
 	{ "230 01", "T-Mobile CZ" },
 	{ "230 02", "EuroTel" },
 	{ "230 03", "Oskar" },
-	{ "231 01", "Globtel" },
+	{ "231 01", "Orange SK" },
 	{ "231 02", "EuroTel GSM" },
 	{ "232 01", "A1" },
 	{ "232 03", "max.mobil." },
