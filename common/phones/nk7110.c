@@ -48,6 +48,7 @@
 #include "phones/nokia.h"
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
+#include "links/m2bus.h"
 
 #include "gnokii-internal.h"
 #include "gsm-api.h"
@@ -307,6 +308,9 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 		case GN_CT_Infrared:
 		case GN_CT_Irda:
 			err = phonet_initialise(&(state->link), state);
+			break;
+		case GN_CT_M2BUS:
+			err = m2bus_initialise(&(state->link), state);
 			break;
 		default:
 			return GN_ERR_NOTSUPPORTED;
