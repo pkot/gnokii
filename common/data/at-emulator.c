@@ -68,7 +68,7 @@ extern int ConnectCount;
 GSM_Statemachine *sm;
 GSM_Data data;
 
-static GSM_SMSMessage sms;
+static GSM_API_SMS sms;
 static GSM_CallInfo callinfo;
 static 	char imei[64], model[64], revision[64], manufacturer[64];
 
@@ -99,10 +99,10 @@ bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
 	PtyWRFD = write_fd;
 
 	GSM_DataClear(&data);
-	memset(&sms, 0, sizeof(GSM_SMSMessage));
+	memset(&sms, 0, sizeof(sms));
 	memset(&callinfo, 0, sizeof(callinfo));
 
-	data.SMSMessage = &sms;
+	data.SMS = &sms;
 	data.CallInfo = &callinfo;
 	data.Manufacturer = manufacturer;
 	data.Model = model;
@@ -351,18 +351,18 @@ void	ATEM_ParseAT(char *cmd_buffer)
 }
 
 
-static void ATEM_PrintSMS(char *line, GSM_SMSMessage *message, int mode)
+static void ATEM_PrintSMS(char *line, GSM_API_SMS *message, int mode)
 {
 	switch (mode) {
 	case INTERACT_MODE:
-		gsprintf(line, MAX_LINE_LENGTH, _("\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\rText: %s\n\r"), message->Time.Day, message->Time.Month, message->Time.Year, message->Time.Hour, message->Time.Minute, message->Time.Second, message->RemoteNumber.number, message->MessageCenter.Number, message->UserData[0].u.Text);
+		gsprintf(line, MAX_LINE_LENGTH, _("\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\rText: %s\n\r"), message->Time.Day, message->Time.Month, message->Time.Year, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Remote.Number, message->SMSC.Number, message->UserData[0].u.Text);
 		break;
 	case TEXT_MODE:
 		if ((message->DCS.Type == SMS_GeneralDataCoding) &&
 		    (message->DCS.u.General.Alphabet == SMS_8bit))
-			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->RemoteNumber.number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, _("<Not implemented>"));
+			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->Remote.Number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, _("<Not implemented>"));
 		else
-			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->RemoteNumber.number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, message->UserData[0].u.Text);
+			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->Remote.Number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, message->UserData[0].u.Text);
 		break;
 	case PDU_MODE:
 		gsprintf(line, MAX_LINE_LENGTH, _("<Not implemented>"));
@@ -379,13 +379,13 @@ static void ATEM_HandleSMS()
 	GSM_Error	error;
 	char		buffer[MAX_LINE_LENGTH];
 
-	data.SMSMessage->MemoryType = SMSType;
-	data.SMSMessage->Number = SMSNumber;
+	data.SMS->MemoryType = SMSType;
+	data.SMS->Number = SMSNumber;
 	error = GetSMS(&data, sm);
 
 	switch (error) {
 	case GE_NONE:
-		ATEM_PrintSMS(buffer, data.SMSMessage, INTERACT_MODE);
+		ATEM_PrintSMS(buffer, data.SMS, INTERACT_MODE);
 		ATEM_StringOut(buffer);
 		break;
 	default:
@@ -434,8 +434,8 @@ void	ATEM_ParseDIR(char *buff)
 			ATEM_HandleSMS();
 			return;
 		case 'D':
-			data.SMSMessage->MemoryType = SMSType;
-			data.SMSMessage->Number = SMSNumber;
+			data.SMS->MemoryType = SMSType;
+			data.SMS->Number = SMSNumber;
 			if (SM_Functions(GOP_DeleteSMS, &data, sm) == GE_NONE) {
 				ATEM_ModemResult(MR_OK);
 			} else {
@@ -476,7 +476,7 @@ void	ATEM_ParseSMSText(char *buff)
 			error = SendSMS(&data, sm);
 
 			if (error == GE_NONE) {
-				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMSMessage->Number);
+				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMS->Number);
 				ATEM_StringOut(buffer);
 				ATEM_ModemResult(MR_OK);
 			} else {
@@ -582,8 +582,8 @@ bool	ATEM_CommandPlusC(char **buf)
 			index = atoi(*buf);
 			buf[0] += strlen(*buf);
 
-			data.SMSMessage->MemoryType = SMSType;
-			data.SMSMessage->Number = index;
+			data.SMS->MemoryType = SMSType;
+			data.SMS->Number = index;
 			error = SM_Functions(GOP_DeleteSMS, &data, sm);
 
 			switch (error) {
@@ -640,13 +640,13 @@ bool	ATEM_CommandPlusC(char **buf)
 			index = atoi(*buf);
 			buf[0] += strlen(*buf);
 
-			data.SMSMessage->MemoryType = SMSType;
-			data.SMSMessage->Number = index;
+			data.SMS->MemoryType = SMSType;
+			data.SMS->Number = index;
 			error = GetSMS(&data, sm);
 
 			switch (error) {
 			case GE_NONE:
-				ATEM_PrintSMS(buffer2, data.SMSMessage, MessageFormat);
+				ATEM_PrintSMS(buffer2, data.SMS, MessageFormat);
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGR: %s", buffer2);
 				ATEM_StringOut(buffer);
 				break;
@@ -668,7 +668,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		switch (**buf) {
 		case '=':
 			buf[0]++;
-			if (sscanf(*buf, "\"%[+0-9a-zA-Z ]\"", sms.RemoteNumber.number)) {
+			if (sscanf(*buf, "\"%[+0-9a-zA-Z ]\"", sms.Remote.Number)) {
 				Parser = ATEM_ParseSMSText;
 				buf[0] += strlen(*buf);
 				ATEM_StringOut("\n\r> ");
@@ -712,15 +712,15 @@ bool	ATEM_CommandPlusC(char **buf)
 			/* check all message storages */
 			for (index = 1; index <= 20; index++) {
 
-				data.SMSMessage->MemoryType = SMSType;
-				data.SMSMessage->Number = index;
+				data.SMS->MemoryType = SMSType;
+				data.SMS->Number = index;
 				error = GetSMS(&data, sm);
 
 				switch (error) {
 				case GE_NONE:
 					/* print messsage if it has the required status */
-					if (data.SMSMessage->Status == status || status == 4 /* ALL */) {
-						ATEM_PrintSMS(buffer2, data.SMSMessage, MessageFormat);
+					if (data.SMS->Status == status || status == 4 /* ALL */) {
+						ATEM_PrintSMS(buffer2, data.SMS, MessageFormat);
 						gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGL: %d,%s", index, buffer2);
 						ATEM_StringOut(buffer);
 					}
