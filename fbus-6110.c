@@ -1190,7 +1190,7 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 
   current+=strlen(entry->Number);
 
-  req[current++]=0xff;
+  req[current++]=entry->Group;
 
   FB61_TX_SendMessage(current, 3, req);
 
