@@ -163,6 +163,7 @@ GSM_Network GSM_Networks[] =
   { "216 30", "Westel 900" },
   { "218 90", "GSMBIH" },
   { "219 01", "CRONET" },
+  { "219 10", "VIP" },
   { "220 01", "MOBTEL" },
   { "220 02", "ProMonte GSM" },
   { "222 01", "Telecom Italia Mobile" },
