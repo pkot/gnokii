@@ -287,6 +287,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --savesms [--sender from] [--smsc message_center_number |\n"
 		     "                 --smscno message_center_index] [--folder folder_id]\n"
 		     "                 [--location number] [--sent | --read] [--deliver] \n"
+		     "                 [--datetime YYMMDDHHMMSS] \n"
 		     "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
 		     "          gnokii --setsmsc\n"
 		     "          gnokii --createsmsfolder name\n"
@@ -765,8 +766,8 @@ static int savesms(int argc, char *argv[])
 	/* The maximum length of an uncompressed concatenated short message is
 	   255 * 153 = 39015 default alphabet characters */
 	char message_buffer[255 * GN_SMS_MAX_LENGTH ];
-	int input_len, chars_read;
-	int i;
+	int input_len, chars_read, i;
+	char tmp[3];
 #if 0
 	int confirm = -1;
 	int interactive = 0;
@@ -781,6 +782,7 @@ static int savesms(int argc, char *argv[])
 		{ "sent",     0,                 NULL, 's'},
 		{ "folder",   required_argument, NULL, 'f'},
 		{ "deliver",  0                , NULL, 'd'},
+		{ "datetime", required_argument, NULL, 't'},
 		{ NULL,       0,                 NULL, 0}
 	};
 
@@ -818,7 +820,7 @@ static int savesms(int argc, char *argv[])
 	argc++;
 
 	/* Option parsing */
-	while ((i = getopt_long(argc, argv, "0:1:2:3:rsf:id", options, NULL)) != -1) {
+	while ((i = getopt_long(argc, argv, "0:1:2:3:rsf:idt:", options, NULL)) != -1) {
 		switch (i) {
 		case '0': /* SMSC number */
 			snprintf(sms.smsc.number, sizeof(sms.smsc.number) - 1, "%s", optarg);
@@ -868,6 +870,30 @@ static int savesms(int argc, char *argv[])
 			break;
 		case 'd': /* type Deliver */
 			sms.type = GN_SMS_MT_Deliver;
+			break;
+		case 't': /* set specific date and time of message delivery */
+			tmp[2] = 0;
+			if (strlen(optarg) != 12) {
+				fprintf(stderr, _("Invalid datetime format: %s (should be YYMMDDHHMMSS, all digits)!\n"), optarg);
+				return -1;
+			}
+			for (i = 0; i < 12; i++)
+				if (!isdigit(optarg[i])) {
+					fprintf(stderr, _("Invalid datetime format: %s (should be YYMMDDHHMMSS, all digits)!\n"), optarg);
+					return -1;
+				}
+			strncpy(tmp, optarg, 2);
+			sms.smsc_time.year	= atoi(tmp) + 1900;
+			strncpy(tmp, optarg+2, 2);
+			sms.smsc_time.month	= atoi(tmp);
+			strncpy(tmp, optarg+4, 2);
+			sms.smsc_time.day	= atoi(tmp);
+			strncpy(tmp, optarg+6, 2);
+			sms.smsc_time.hour	= atoi(tmp);
+			strncpy(tmp, optarg+8, 2);
+			sms.smsc_time.minute	= atoi(tmp);
+			strncpy(tmp, optarg+10, 2);
+			sms.smsc_time.second	= atoi(tmp);
 			break;
 		default:
 			usage(stderr, -1);

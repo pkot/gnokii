@@ -130,7 +130,7 @@ Sample usage:
 echo "This is a test message" | gnokii \-\-sendsms +48501123456 \-r
 
 .TP 
-.BR "\-\-savesms [\-\-sender \fIfrom\fP] [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-\-folder \fIfolder_id\fP] [\-\-location \fInumber\fP] [\-\-sent | \-\-read] [\-\-deliver]"
+.BR "\-\-savesms [\-\-sender \fIfrom\fP] [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-\-folder \fIfolder_id\fP] [\-\-location \fInumber\fP] [\-\-sent | \-\-read] [\-\-deliver] [\-\-datetime \fIYYMMDDHHMMSS\fP]"
 saves SMS messages to phone. Messages are read from STDIN. You can specify the following optional arguments:
 .PP 
 \-\-sender \- set the sender number (only \fI\-\-deliver\fP)
@@ -146,6 +146,8 @@ saves SMS messages to phone. Messages are read from STDIN. You can specify the f
 \-\-sent | \-\-read \- mark the message saved/read depending on \fI\-\-deliver\fP
 .PP 
 \-\-deliver \- set the message type to SMS_Deliver
+.PP
+\-\-datetime \fIYYMMDDHHMMSS\fR \- sets datetime of delivery, i.e. 031123185713 would set message delivery time to 23rd November 2003, 6:57:13 PM
 
 .TP 
 .BR "\-\-getsmsc \fInumber\fP"

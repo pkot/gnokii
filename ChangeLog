@@ -5,6 +5,8 @@
     o xgnokii_xring.c was missing from POTFILES.in  (Hans Motshärg)
  * gnokii updates
     o --monitor once will run only once            (BORBELY Zoltan)
+    o add the ability to set datetime with gnokii --savesms
+                                                 (Adam Go³êbiowski)
  * 6510 driver updates
     o correctly read SMS datetime                       (Pawel Kot)
 
