@@ -168,6 +168,18 @@ PhonebookEntry *FindFreeEntry (GSM_MemoryType type)
   return NULL;
 }
 
+inline PhonebookEntry *GUI_GetEntry (GSM_MemoryType type, gint nr)
+{
+  if ((type == GMT_ME && (nr < 1 || nr >= memoryStatus.MaxME)) ||
+      (type == GMT_SM && (nr < 1 || nr >= memoryStatus.MaxSM)))
+    return NULL;
+  
+  if (type == GMT_ME)
+    return g_ptr_array_index (contactsMemory, nr - 1);
+  else
+    return g_ptr_array_index (contactsMemory, nr + memoryStatus.MaxME - 1);
+}
+
 static void CloseContacts (GtkWidget *w, gpointer data)
 {
   gtk_widget_hide (GUI_ContactsWindow);
@@ -1029,7 +1041,7 @@ static void NewEntry (void)
   }
 }
 
-static void ClickEntry (GtkWidget      *clist,
+static inline void ClickEntry (GtkWidget      *clist,
                  gint            row,
                  gint            column,
                  GdkEventButton *event,
@@ -1040,7 +1052,7 @@ static void ClickEntry (GtkWidget      *clist,
                 row);
 }
 
-void DeleteEntry (void)
+static inline void DeleteEntry (void)
 {
   if (contactsMemoryInitialized)
   {
@@ -1051,7 +1063,7 @@ void DeleteEntry (void)
   }
 }
 
-void ChMemType (void)
+static void ChMemType (void)
 {
   static GtkWidget *dialog = NULL;
   GtkWidget *button, *hbox, *label;
@@ -1101,7 +1113,7 @@ void ChMemType (void)
   }
 }
 
-void FindFirstEntry (void)
+static void FindFirstEntry (void)
 {
   static FindEntryData findEntryData = { NULL };
   GtkWidget *button, *label, *hbox;
@@ -1167,7 +1179,7 @@ void FindFirstEntry (void)
   }
 }
 
-static void SelectAll (void)
+static inline void SelectAll (void)
 {
   gtk_clist_select_all (GTK_CLIST (clist));
 }
@@ -1475,13 +1487,13 @@ static GtkWidget *CreateSaveQuestionDialog (GtkSignalFunc SaveFunc,
   gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), hbox);
   gtk_widget_show (hbox);
 
-  pixmap = gtk_pixmap_new(questMark.pixmap, questMark.mask);
-  gtk_box_pack_start(GTK_BOX(hbox), pixmap, FALSE, FALSE, 10);
-  gtk_widget_show(pixmap);
+  pixmap = gtk_pixmap_new (questMark.pixmap, questMark.mask);
+  gtk_box_pack_start (GTK_BOX (hbox), pixmap, FALSE, FALSE, 10);
+  gtk_widget_show (pixmap);
     
   label = gtk_label_new (_("You have made changes in your\ncontacts directory.\n\
 \n\nWant you save these changes into phone?\n"));
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
   return dialog;
@@ -1497,7 +1509,6 @@ void GUI_RefreshContacts (void)
     return;
     
   gtk_clist_freeze (GTK_CLIST (clist));
-
   gtk_clist_clear (GTK_CLIST (clist));
 
   for (i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++)
@@ -1517,7 +1528,7 @@ void GUI_RefreshContacts (void)
         row[3] = xgnokiiConfig.callerGroups[pbEntry->entry.Group];
       else
         row[3] = "";
-      gtk_clist_append( GTK_CLIST (clist), row);
+      gtk_clist_append (GTK_CLIST (clist), row);
       if (pbEntry->entry.MemoryType == GMT_ME)
         gtk_clist_set_pixmap (GTK_CLIST (clist), row_i, 2,
                               memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
@@ -1762,7 +1773,7 @@ inline void GUI_ShowContacts (void)
 //    ReadContacts ();
 }
 
-void GUI_HideContacts (void)
+static inline void HideContacts (void)
 {
   gtk_widget_hide (GUI_ContactsWindow);
 }

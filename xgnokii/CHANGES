@@ -1,3 +1,10 @@
+xgnokii-19991228
+- Speed Dial settings are possible view and edit. 
+Changes in SMS window:
+- minor bugfixes
+- Bussiness Card sending work. But we cannot read received bussiness card!
+
+
 xgnokii-19991216
 Changes in Contacts window:
 - Dial voice function let you to type arbitrary number.
@@ -8,6 +15,7 @@ Changes in SMS window:
   160 characters.
 - New pixmaps.
 
+
 xgnokii-19991207
 - replaced 'getenv ("{HOME,HOMEDRIVE,HOMEPATH}")' with 'g_get_home_dir ()',
   which is (I hope) more portable under MS Windows. 
@@ -17,6 +25,7 @@ Changes in SMS window:
   endless loop when SMS's number in phone had changed.)
 - added delete SMS functionality.
 - added sorting in SMS's list. 
+
 
 xgnokii-19991130
 - Added DTMF window.
@@ -36,6 +45,7 @@ xgnokii-19991116
   about graphical representation of Net monitor data. I thank also Norbert
   Hüttisch (nobbi@nobbi.com) for his great web pages about Nokia Net Monitor.
 
+
 xgnokii-19991110
 - Added support for gettext() and messages catalogs.
 - Added Win32 support. (Acquadro Daniele <acquadro.daniele@logicasiel.it>)
@@ -44,6 +54,7 @@ Changes in Contacts window:
   contacts from file and haven't read they from phone before.
 - Fixed bug when empty contacts in phone have been not cleared when we have
   import contacts from file and then we have save they into phone.
+
 
 xgnokii-19991010
 Changes in Options window:
@@ -63,6 +74,7 @@ Changes in Contacts window:
 - Removed bug, when contacts in SIM card were not removed from phone, when
   deleted in xgnokii.
 
+
 xgnokii-19990915
 Changes in Contacts window:
 - Fixed scrolling.
@@ -79,6 +91,7 @@ Changes in Contacts window:
 - Import from file is working. Xgnokii uses extended format from NCDS (with
   group entry) and is capable reading NCDS files.
 - More icons.
+
 
 xgnokii-19990906
 Changes in Contacts window:

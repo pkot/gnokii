@@ -46,6 +46,7 @@
 #include "xgnokii_sms.h"
 #include "xgnokii_netmon.h"
 #include "xgnokii_dtmf.h"
+#include "xgnokii_speed.h"
 #include "xgnokii_cfg.h"
 
 #include "../pixmaps/logo.xpm"
@@ -55,7 +56,6 @@
 
 static GtkWidget *GUI_SplashWindow;
 static GtkWidget *GUI_MainWindow;
-static GtkWidget *GUI_CardWindow;
 static GtkWidget *GUI_AboutDialog;
 static ErrorDialog errorDialog = {NULL, NULL};
 /* SMS sets list */
@@ -740,7 +740,7 @@ static gint GUI_ButtonPressEvent (GtkWidget *widget, GdkEventButton *event)
              (event->x >= 210 && event->x <= 245 &&
              event->y >=  65 && event->y <= 80))
     {
-      gtk_widget_show(GUI_CardWindow);
+      // gtk_widget_show(GUI_CardWindow);
     }
     else if (event->x >= 245 && event->x <= 258 &&
              event->y >=  83 && event->y <= 93)
@@ -858,13 +858,6 @@ GtkWidget *GUI_CreateMenu ()
   gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
                              GTK_SIGNAL_FUNC (GUI_ShowSMS), NULL);
   gtk_widget_show (menu_items);
-/*  
-  menu_items = gtk_menu_item_new_with_label (_("Business Cards"));
-  gtk_menu_append (GTK_MENU (menu), menu_items);
-  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
-                             GTK_SIGNAL_FUNC (GUI_ShowCards), NULL);
-  gtk_widget_show (menu_items);
-*/  
   
   menu_items = gtk_menu_item_new_with_label (_("Net Monitor"));
   gtk_menu_append (GTK_MENU (menu), menu_items);
@@ -876,6 +869,12 @@ GtkWidget *GUI_CreateMenu ()
   gtk_menu_append (GTK_MENU (menu), menu_items);
   gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
                              GTK_SIGNAL_FUNC (GUI_ShowDTMF), NULL);
+  gtk_widget_show (menu_items);
+  
+  menu_items = gtk_menu_item_new_with_label (_("Speed Dial"));
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowSpeedDial), NULL);
   gtk_widget_show (menu_items);
 
   menu_items = gtk_menu_item_new ();
@@ -1531,133 +1530,6 @@ GtkWidget *GUI_CreateOptionsDialog ()
                       GTK_SIGNAL_FUNC (EditSMSSetDialogClick),
                       (gpointer) button);
   
-  /*
-  label = gtk_label_new (_("Set's name:"));
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-  gtk_widget_show (label);
-  
-  configDialogData.sms.set = gtk_option_menu_new ();
-  gtk_widget_set_usize (configDialogData.sms.set, 100, 28);
-  
-  
-  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.sms.set, FALSE, FALSE, 2);
-  gtk_widget_show (configDialogData.sms.set);
-  
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 9);
-  gtk_widget_show (hbox);
-  
-  label = gtk_label_new (_("Message Centre Number:"));
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-  gtk_widget_show (label);
-  
-  configDialogData.sms.number = gtk_entry_new_with_max_length (GSM_MAX_SMS_CENTER_LENGTH);
-  gtk_widget_set_usize (configDialogData.sms.number, 100, 22);
-  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.sms.number, FALSE, FALSE, 2);
-  gtk_widget_show (configDialogData.sms.number);
-  
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 9);
-  gtk_widget_show (hbox);
-  
-  label = gtk_label_new (_("Sending Format:"));
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-  gtk_widget_show (label);
-  
-  configDialogData.sms.format = gtk_option_menu_new ();
-  menu = gtk_menu_new ();
-  gtk_widget_set_usize (configDialogData.sms.format, 100, 28);
-  
-  item = gtk_menu_item_new_with_label (_("Text"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetFormat),
-                      (gpointer) GSMF_Text);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  item = gtk_menu_item_new_with_label (_("Fax"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetFormat),
-                      (gpointer) GSMF_Fax);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  item = gtk_menu_item_new_with_label (_("Paging"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetFormat),
-                      (gpointer) GSMF_Paging);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  item = gtk_menu_item_new_with_label (_("E-Mail"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetFormat),
-                      (gpointer) GSMF_Email);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (configDialogData.sms.format), menu);
-  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.sms.format, FALSE, FALSE, 2);
-  gtk_widget_show (configDialogData.sms.format);
-  
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 9);
-  gtk_widget_show (hbox);
-  
-  label = gtk_label_new (_("Validity Period:"));
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
-  gtk_widget_show (label);
-  
-  configDialogData.sms.validity = gtk_option_menu_new ();
-  menu = gtk_menu_new ();
-  gtk_widget_set_usize (configDialogData.sms.validity, 100, 28);
-  
-  item = gtk_menu_item_new_with_label (_("Max. Time"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetValidity),
-                      (gpointer) GSMV_Max_Time);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  item = gtk_menu_item_new_with_label (_("1 h"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetValidity),
-                      (gpointer) GSMV_1_Hour);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  item = gtk_menu_item_new_with_label (_("6 h"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetValidity),
-                      (gpointer) GSMV_6_Hours);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  item = gtk_menu_item_new_with_label (_("24 h"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetValidity),
-                      (gpointer) GSMV_24_Hours);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  item = gtk_menu_item_new_with_label (_("72 h"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetValidity),
-                      (gpointer) GSMV_72_Hours);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  item = gtk_menu_item_new_with_label (_("1 week"));
-  gtk_signal_connect (GTK_OBJECT (item), "activate",
-                      GTK_SIGNAL_FUNC(SetValidity),
-                      (gpointer) GSMV_1_Week);
-  gtk_widget_show (item);
-  gtk_menu_append (GTK_MENU (menu), item);
-  
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (configDialogData.sms.validity), menu);
-  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.sms.validity, FALSE, FALSE, 2);
-  gtk_widget_show (configDialogData.sms.validity);
-  */
   /***  Business notebook  ***/
   frame = gtk_frame_new (_("Business Card"));
   gtk_widget_show (frame);
@@ -1914,19 +1786,6 @@ GtkWidget *GUI_CreateOptionsDialog ()
   return dialog;
 }
 
-GtkWidget *GUI_CreateCardWindow ()
-{
-  GtkWidget *window;
-  
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), _("Busines Cards"));
-  gtk_container_set_border_width (GTK_CONTAINER (window), 10);
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                      GTK_SIGNAL_FUNC (DeleteEvent), NULL);
-  
-  return window;
-}
-  
 void GUI_TopLevelWindow () {
 
   GtkWidget *drawing_area;
@@ -1985,9 +1844,9 @@ void GUI_TopLevelWindow () {
   GUI_AboutDialog = GUI_CreateAboutDialog ();
   GUI_CreateSMSWindow ();
   GUI_CreateContactsWindow ();
-  GUI_CardWindow = GUI_CreateCardWindow ();
   GUI_CreateNetmonWindow ();
   GUI_CreateDTMFWindow ();
+  GUI_CreateSpeedDialWindow ();
   CreateErrorDialog (&errorDialog, GUI_MainWindow);
   CreateInCallDialog ();
   

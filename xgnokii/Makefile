@@ -45,7 +45,7 @@ COMMON_OBJS = ../gsm-api.o \
 #
 
 XGNOKII_OBJS = xgnokii.o xgnokii_common.o xgnokii_contacts.o xgnokii_sms.o \
-               xgnokii_netmon.o xgnokii_dtmf.o xgnokii_cfg.o
+               xgnokii_netmon.o xgnokii_dtmf.o xgnokii_cfg.o xgnokii_speed.o
 
 # Build executable
 all: xgnokii
@@ -78,3 +78,4 @@ xgnokii_common.o: xgnokii_common.c xgnokii_common.h
 xgnokii_cfg.o: xgnokii_cfg.c xgnokii_cfg.h xgnokii.h ../misc.h
 xgnokii_netmon.o: xgnokii_netmon.c xgnokii_netmon.h xgnokii.h xgnokii_common.h ../misc.h ../gsm-api.h
 xgnokii_dtmf.o: xgnokii_dtmf.c xgnokii_dtmf.h xgnokii_common.h xgnokii.h ../misc.h ../gsm-api.h
+xgnokii_speed.o: xgnokii_speed.c xgnokii_speed.h xgnokii_contacts.h

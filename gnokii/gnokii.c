@@ -2128,12 +2128,12 @@ int getspeeddial(char *Number) {
 
   GSM_SpeedDial entry;
 
-  entry.Location = atoi(Number);
+  entry.Number = atoi(Number);
 
   fbusinit(NULL);
 
   if (GSM->GetSpeedDial(&entry)==GE_NONE) {
-    fprintf(stdout, _("SpeedDial nr. %d: %d:%d\n"), entry.Location, entry.MemoryType, entry.Number);
+    fprintf(stdout, _("SpeedDial nr. %d: %d:%d\n"), entry.Number, entry.MemoryType, entry.Location);
   }
 
   GSM->Terminate();

@@ -1775,7 +1775,7 @@ GSM_Error FB61_GetSpeedDial(GSM_SpeedDial *entry)
   CurrentSpeedDialEntry = entry;
   CurrentSpeedDialError = GE_BUSY;
 
-  req[4] = entry->Location;
+  req[4] = entry->Number;
 
   FB61_TX_SendMessage(5, 0x03, req);
 
@@ -2948,7 +2948,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     case 0x17:
 
       CurrentSpeedDialEntry->MemoryType = MessageBuffer[4];
-      CurrentSpeedDialEntry->Number = MessageBuffer[5];
+      CurrentSpeedDialEntry->Location = MessageBuffer[5];
 
 #ifdef DEBUG
       fprintf(stdout, _("Message: Speed dial entry received:\n"));

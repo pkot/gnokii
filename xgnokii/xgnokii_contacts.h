@@ -167,4 +167,6 @@ extern SelectContactData *GUI_SelectContactDialog (void);
 
 extern void GUI_RefreshGroupMenu (void);
 
+extern PhonebookEntry *GUI_GetEntry (GSM_MemoryType, gint);
+
 #endif

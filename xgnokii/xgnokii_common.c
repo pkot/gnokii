@@ -81,6 +81,7 @@ void CreateYesNoDialog (YesNoDialog *yesNoDialog, GtkSignalFunc yesFunc,
   GtkWidget *button, *hbox, *pixmap;
   
   yesNoDialog->dialog = gtk_dialog_new ();
+  gtk_window_position (GTK_WINDOW (yesNoDialog->dialog), GTK_WIN_POS_MOUSE);
   gtk_window_set_modal (GTK_WINDOW (yesNoDialog->dialog), TRUE);
   gtk_container_set_border_width (GTK_CONTAINER (yesNoDialog->dialog), 5);
   gtk_signal_connect (GTK_OBJECT (yesNoDialog->dialog), "delete_event",
