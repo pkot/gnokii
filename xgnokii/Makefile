@@ -43,13 +43,13 @@ HELP_DIR = docs/help
 all: xgnokii
 
 
-xgnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/DATA.o $(TOPDIR)/common/gsm-filetypes.o
+xgnokii: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/gsm-filetypes.o
 
 $(TOPDIR)/common/COMMON.o: 
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
 
-$(TOPDIR)/common/DATA.o:
-	$(MAKE) -C $(TOPDIR)/common DATA.o
+$(TOPDIR)/common/data/DATA.o:
+	$(MAKE) -C $(TOPDIR)/common/data DATA.o
 
 $(TOPDIR)/common/gsm-filetypes.o:
 	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o

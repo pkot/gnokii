@@ -16,7 +16,14 @@
   from/to the GSM handset and the modem data/fax stream.
 
   $Log$
-  Revision 1.5  2001-01-08 15:11:37  pkot
+  Revision 1.1  2001-02-16 14:29:51  chris
+  Restructure of common/.  Fixed a problem in fbus-phonet.c
+  Lots of dprintfs for Marcin
+  Any size xpm can now be loaded (eg for 7110 startup logos)
+  nk7110 code detects 7110/6210 and alters startup logo size to suit
+  Moved Marcin's extended phonebook code into gnokii.c
+
+  Revision 1.5  2001/01/08 15:11:37  pkot
   Documentation updates.
   Fixed some bugs and removed FIXMEs.
   We need to move some stuff from configure.in to aclocal.m4

@@ -24,7 +24,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2001-02-06 21:15:35  chris
+ * Revision 1.1  2001-02-16 14:29:52  chris
+ * Restructure of common/.  Fixed a problem in fbus-phonet.c
+ * Lots of dprintfs for Marcin
+ * Any size xpm can now be loaded (eg for 7110 startup logos)
+ * nk7110 code detects 7110/6210 and alters startup logo size to suit
+ * Moved Marcin's extended phonebook code into gnokii.c
+ *
+ * Revision 1.2  2001/02/06 21:15:35  chris
  * Preliminary irda support for 7110 etc.  Not well tested!
  *
  * Revision 1.1  2001/02/03 23:56:17  chris

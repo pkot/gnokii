@@ -501,6 +501,8 @@ typedef enum {
   GSM_DealerNoteText
 } GSM_Bitmap_Types;
 
+#define GSM_MAX_BITMAP_SIZE 864
+
 /* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
 
 typedef struct {
@@ -512,7 +514,7 @@ typedef struct {
   char text[256];          /* Text used for welcome-note or callergroup name */
   char dealertext[256];    /* Text used for dealer welcome-note */
   bool dealerset;          /* Is dealer welcome-note set now ? */
-  unsigned char bitmap[864]; /* Actual Bitmap (96*60/8=720) */ 
+  unsigned char bitmap[GSM_MAX_BITMAP_SIZE]; /* Actual Bitmap */ 
   char number;             /* Caller group number */
   char ringtone;           /* Ringtone no sent with caller group */
 } GSM_Bitmap;
@@ -638,6 +640,7 @@ typedef struct {
   /* These make up a list of functions, one for each message type */
   int IncomingFunctionNum;
   GSM_IncomingFunctionType *IncomingFunctions;
+  GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length);
 } GSM_Phone;
 
  

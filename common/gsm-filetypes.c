@@ -585,22 +585,18 @@ GSM_Error loadxpm(char *filename, GSM_Bitmap *bitmap)
 
   if (image.ncolors!=2) return GE_WRONGNUMBEROFCOLORS; 
 
-  if ((image.height==48) && (image.width==84)) {
-    bitmap->type=GSM_StartupLogo;
-  }
-  else if ((image.height==14) && (image.width==72)) {
-    bitmap->type=GSM_CallerLogo;
-  }
-  else {
-#ifdef DEBUG 
-    fprintf(stderr,"Invalid Image Size (%dx%d).\n",image.height,image.width);
-#endif
-    return GE_INVALIDIMAGESIZE;
-  }
+  /* All xpms are loaded as startup logos - but can be resized later */
+
+  bitmap->type=GSM_StartupLogo;
 
   bitmap->height=image.height;
   bitmap->width=image.width;
-  bitmap->size=bitmap->height*bitmap->width/8;
+  bitmap->size=((bitmap->height/8)+(bitmap->height%8>0))*bitmap->width;
+
+  if (bitmap->size>GSM_MAX_BITMAP_SIZE) {
+	  fprintf(stdout,"Bitmap too large\n\r");
+	  return GE_INVALIDIMAGESIZE;
+  }
 
   GSM_ClearBitmap(bitmap);
   

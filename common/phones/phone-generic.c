@@ -17,7 +17,14 @@
   The various routines are called PGEN_(whatever).
 
   $Log$
-  Revision 1.4  2001-02-03 23:56:17  chris
+  Revision 1.1  2001-02-16 14:29:53  chris
+  Restructure of common/.  Fixed a problem in fbus-phonet.c
+  Lots of dprintfs for Marcin
+  Any size xpm can now be loaded (eg for 7110 startup logos)
+  nk7110 code detects 7110/6210 and alters startup logo size to suit
+  Moved Marcin's extended phonebook code into gnokii.c
+
+  Revision 1.4  2001/02/03 23:56:17  chris
   Start of work on irda support (now we just need fbus-irda.c!)
   Proper unicode support in 7110 code (from pkot)
 

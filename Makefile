@@ -16,8 +16,11 @@ TOPDIR=.
 include ${TOPDIR}/Makefile.global
 
 
-DIRS =  common \
-        gnokii
+DIRS =  common/phones \
+	common/links \
+	common/devices \
+        common \
+	gnokii
 
 #
 # For now gnokiid and utils only make sense on Unix like systems.

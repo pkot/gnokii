@@ -17,7 +17,14 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.3  2001-02-06 21:15:34  chris
+  Revision 1.1  2001-02-16 14:29:52  chris
+  Restructure of common/.  Fixed a problem in fbus-phonet.c
+  Lots of dprintfs for Marcin
+  Any size xpm can now be loaded (eg for 7110 startup logos)
+  nk7110 code detects 7110/6210 and alters startup logo size to suit
+  Moved Marcin's extended phonebook code into gnokii.c
+
+  Revision 1.3  2001/02/06 21:15:34  chris
   Preliminary irda support for 7110 etc.  Not well tested!
 
   Revision 1.2  2001/02/03 23:56:14  chris
@@ -285,6 +292,7 @@ void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 						if (temp != 0) {
 							dprintf("Unknown Frame Type %02x\n\r", i->MessageType);
+							gphone->DefaultFunction(i->MessageType, m->MessageBuffer, m->MessageLength);
 						}
 					}
 

@@ -3,10 +3,10 @@ common/fbus-6110-ringtones.c
 common/fbus-6110.c
 common/mbus-6160.c
 common/mbus-640.c
-common/rlp-common.c
+common/data/rlp-common.c
 gnokii/gnokii.c
 gnokiid/gnokiid.c
-common/virtmodem.c
+common/data/virtmodem.c
 xgnokii/xgnokii.c
 xgnokii/xgnokii_calendar.c
 xgnokii/xgnokii_cfg.c

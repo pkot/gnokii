@@ -34,7 +34,7 @@
 #include "mbus-2110.h"
 #include "mbus-6160.h"
 #include "mbus-640.h"
-#include "phone-7110.h"
+#include "phone-nk7110.h"
 
 /* GSM_LinkOK is set to true once normal communications with the phone have
    been established. */

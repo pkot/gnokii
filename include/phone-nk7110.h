@@ -17,7 +17,14 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.4  2001-01-29 17:14:44  chris
+  Revision 1.1  2001-02-16 14:29:54  chris
+  Restructure of common/.  Fixed a problem in fbus-phonet.c
+  Lots of dprintfs for Marcin
+  Any size xpm can now be loaded (eg for 7110 startup logos)
+  nk7110 code detects 7110/6210 and alters startup logo size to suit
+  Moved Marcin's extended phonebook code into gnokii.c
+
+  Revision 1.4  2001/01/29 17:14:44  chris
   dprintf now in misc.h (and fiddling with 7110 code)
 
   Revision 1.3  2001/01/23 15:32:44  chris
@@ -34,8 +41,8 @@
 
 */
 
-#ifndef __phone_7110_h
-#define __phone_7110_h
+#ifndef __phone_nk7110_h
+#define __phone_nk7110_h
 
 #include <gsm-common.h>
 
@@ -76,12 +83,13 @@ extern GSM_Information P7110_Information;
 #define P7110_ENTRYTYPE_GROUP  0x1e   /* Group number for phonebook entry */
 
 
-#ifdef __phone_7110_c  /* Prototype functions for phone-7110.c only */
+#ifdef __phone_nk7110_c  /* Prototype functions for phone-7110.c only */
 
 static GSM_Error P7110_Initialise(char *port_device, char *initlength,
 		 GSM_ConnectionType connection,
 		 void (*rlp_callback)(RLP_F96Frame *frame));
 static GSM_Error P7110_GenericCRHandler(int messagetype, unsigned char *buffer, int length);
+static GSM_Error P7110_IncomingDefault(int messagetype, unsigned char *buffer, int length);
 static GSM_Error P7110_GetIMEI(char *imei);
 static GSM_Error P7110_GetRevision(char *revision);
 static GSM_Error P7110_GetModel(char *model);
@@ -99,9 +107,9 @@ static bool P7110_SendRLPFrame( RLP_F96Frame *frame, bool out_dtx );
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
-#endif  /* #ifdef __phone_7110_c */
+#endif  /* #ifdef __phone_nk7110_c */
 
-#endif  /* #ifndef __phone_7110_h */
+#endif  /* #ifndef __phone_nk7110_h */
 
 
 

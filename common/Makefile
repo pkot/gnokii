@@ -18,7 +18,6 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 CFLAGS += $(PTHREAD_CFLAGS)
-
 OBJS =	cfgreader.o \
 	device.o \
 	fbus-3810.o \
@@ -30,37 +29,24 @@ OBJS =	cfgreader.o \
 	mbus-2110.o \
 	mbus-6160.o \
 	mbus-640.o \
-	rlp-common.o \
-	rlp-crc24.o \
 	vcal.o \
 	misc.o \
 	gsm-bitmaps.o \
-	gsm-common.o \
-	fbus-generic.o \
-	phone-generic.o \
-	phone-nokia.o \
-	phone-7110.o \
-	unixirda.o \
-	fbus-phonet.o \
-	tekram.o
+	gsm-common.o
 
-DATA_OBJS = virtmodem.o \
-	at-emulator.o \
-	datapump.o
+all: COMMON.o gsm-filetypes.o
 
-ifdef WIN32
-	OBJS += $(TOPDIR)/win32/winserial.o
-else
-	OBJS += unixserial.o
-endif
+phones/PHONES.o:
+	$(MAKE) -C phones PHONES.o
 
-all: COMMON.o gsm-filetypes.o DATA.o
+links/LINKS.o:
+	$(MAKE) -C links LINKS.o
 
-COMMON.o: $(OBJS)
-	$(LD) $(LDREL) $(LDOUT) COMMON.o $(OBJS)
+devices/DEVICES.o:
+	$(MAKE) -C devices DEVICES.o
 
-DATA.o: $(DATA_OBJS)
-	$(LD) $(LDREL) $(LDOUT) DATA.o $(DATA_OBJS)
+COMMON.o: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(LD) $(LDREL) $(LDOUT) COMMON.o $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 
 gsm-filetypes.o: gsm-filetypes.c 
 	$(CC) $(CFLAGS) $(XPM_CFLAGS) -c gsm-filetypes.c
@@ -69,7 +55,7 @@ vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) $(DATA_OBJS) *~ depend COMMON.o gsm-filetypes.o DATA.o vcal.c
+	$(RM) $(OBJS) *~ depend COMMON.o gsm-filetypes.o DATA.o vcal.c
 
 install:
 	@echo
@@ -83,3 +69,4 @@ endif
 
 
 .PHONY: all install clean dep depend
+

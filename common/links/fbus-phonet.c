@@ -17,7 +17,14 @@
   The various routines are called PHONET_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-06 21:15:35  chris
+  Revision 1.1  2001-02-16 14:29:52  chris
+  Restructure of common/.  Fixed a problem in fbus-phonet.c
+  Lots of dprintfs for Marcin
+  Any size xpm can now be loaded (eg for 7110 startup logos)
+  nk7110 code detects 7110/6210 and alters startup logo size to suit
+  Moved Marcin's extended phonebook code into gnokii.c
+
+  Revision 1.1  2001/02/06 21:15:35  chris
   Preliminary irda support for 7110 etc.  Not well tested!
 
 
@@ -169,6 +176,7 @@ void PHONET_RX_StateMachine(unsigned char rx_byte) {
 	    
 			if (temp!=0) {
 				fprintf(stdout,"Unknown Frame Type %02x\n\r", i->MessageType);
+				gphone->DefaultFunction(i->MessageType, i->MessageBuffer, i->MessageLength);
 			}
       
 			i->state = FBUS_RX_Sync;
@@ -212,6 +220,7 @@ GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message) {
 
 	u8 out_buffer[PHONET_MAX_TRANSMIT_LENGTH + 5];
 	int current = 0;
+	int total, sent;
 
 	/* FIXME - we should check for the message length ... */
 
@@ -246,9 +255,16 @@ GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, void *message) {
 #endif /* DEBUG */
 
 	/* Send it out... */
-  
-	if (device_write(out_buffer, current) != current)
-		return (false);
+
+	total=current;
+	current=0;
+	sent=0;
+	
+	do {
+		sent=device_write(out_buffer+current, total-current);
+		if (sent<0) return (false);
+		else current+=sent;
+	} while (current<total);
 
 	return (true);
 }

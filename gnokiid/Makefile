@@ -16,13 +16,13 @@ OBJS =	gnokiid.o
 
 all: gnokiid
 
-gnokiid: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/DATA.o
+gnokiid: $(OBJS) $(TOPDIR)/common/COMMON.o $(TOPDIR)/common/data/DATA.o
 
 $(TOPDIR)/common/COMMON.o: 
 	$(MAKE) -C $(TOPDIR)/common COMMON.o
 
-$(TOPDIR)/common/DATA.o:
-	$(MAKE) -C $(TOPDIR)/common DATA.o
+$(TOPDIR)/common/data/DATA.o:
+	$(MAKE) -C $(TOPDIR)/common/data DATA.o
 
 clean:
 	$(RM) $(OBJS) *~ depend gnokiid *.exe core *.bak

@@ -17,7 +17,14 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.121  2001-02-06 21:15:35  chris
+  Revision 1.122  2001-02-16 14:29:53  chris
+  Restructure of common/.  Fixed a problem in fbus-phonet.c
+  Lots of dprintfs for Marcin
+  Any size xpm can now be loaded (eg for 7110 startup logos)
+  nk7110 code detects 7110/6210 and alters startup logo size to suit
+  Moved Marcin's extended phonebook code into gnokii.c
+
+  Revision 1.121  2001/02/06 21:15:35  chris
   Preliminary irda support for 7110 etc.  Not well tested!
 
   Revision 1.120  2001/02/06 08:13:32  pkot
@@ -2874,6 +2881,8 @@ int getmemory(int argc, char *argv[])
 
 /* Read data from stdin, parse and write to phone.  The parsing is relatively
    crude and doesn't allow for much variation from the stipulated format. */
+/* Added extended phonebook support from Marcin */ 
+/* FIXME - at the very least we need to get rid of the ifdefs */
 
 int writephonebook(int argc, char *args[])
 {
@@ -2882,6 +2891,7 @@ int writephonebook(int argc, char *args[])
   GSM_Error error;
   char *memory_type_string;
   int line_count=0;
+  int subentry;
 
   char *Line, OLine[100], BackLine[100];
   char *ptr;
@@ -2952,12 +2962,79 @@ int writephonebook(int argc, char *args[])
     ptr=strsep(&Line, ";"); if (ptr) entry.Group=atoi(ptr);
 #endif
 
-    Line = OLine;
 
     if (!ptr) {
       fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
       continue;
     }
+
+    for( subentry = 0; ; subentry++ )
+    {
+#if defined(__svr4__) || defined(__FreeBSD__)
+      ptr=strtok(NULL, ";");
+#else
+      ptr=strsep(&Line, ";");
+#endif
+      if( ptr &&  *ptr != 0 )
+        entry.SubEntries[subentry].EntryType=atoi(ptr);
+      else
+        break;
+
+#if defined(__svr4__) || defined(__FreeBSD__)
+      ptr=strtok(NULL, ";");
+#else
+      ptr=strsep(&Line, ";");
+#endif
+      if(ptr)
+        entry.SubEntries[subentry].NumberType=atoi(ptr);
+      // Phone Numbers need to have a number type.
+      if(!ptr && entry.SubEntries[subentry].EntryType == GSM_Number)
+      {
+        fprintf(stderr, _("Missing phone number type on line %d"
+          " entry %d [%s]\n"), line_count, subentry, BackLine);
+        subentry--;
+        break;
+      }
+
+#if defined(__svr4__) || defined(__FreeBSD__)
+      ptr=strtok(NULL, ";");
+#else
+      ptr=strsep(&Line, ";");
+#endif
+      if(ptr)
+        entry.SubEntries[subentry].BlockNumber=atoi(ptr);
+
+#if defined(__svr4__) || defined(__FreeBSD__)
+      ptr=strtok(NULL, ";");
+#else
+      ptr=strsep(&Line, ";");
+#endif
+      // 0x13 Date Type; it is only for Dailed Numbers, etc.
+      // we don't store to this memories so it's an error to use it.
+      if(!ptr || entry.SubEntries[subentry].EntryType == GSM_Date) 
+      {
+        fprintf(stdout, _("There is no phone number on line %d entry %d [%s]\n"),
+          line_count, subentry, BackLine);
+        subentry--;
+        break;
+      }
+      else
+        strcpy( entry.SubEntries[subentry].data.Number, ptr );
+    }
+
+    entry.SubEntriesCount = subentry;
+
+    // This is to send other exports (like from 6110) to 7110
+    if( !entry.SubEntriesCount )
+    {
+       entry.SubEntriesCount = 1;
+       entry.SubEntries[subentry].EntryType   = GSM_Number;
+       entry.SubEntries[subentry].NumberType  = GSM_General;
+       entry.SubEntries[subentry].BlockNumber = 2;
+       strcpy( entry.SubEntries[subentry].data.Number, entry.Number );
+    }
+
+    Line = OLine;
 
     if (argc) {
       error = GSM->GetMemoryLocation(&entry);
@@ -3209,7 +3286,7 @@ int pmon()
 
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(model, Port, Initlength, connection, RLP_DisplayF96Frame);
+  error = GSM_Initialise(model, Port, Initlength, connection, NULL);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
