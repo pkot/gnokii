@@ -78,6 +78,18 @@ static void SetupReverse()
 	reversed = true;
 }
 
+bool IsDefaultAlphabetString(unsigned char *string)
+{
+	unsigned int i, len = strlen(string);
+
+	SetupReverse();
+	for (i = 0; i < len; i++)
+		if (GSM_ReverseDefaultAlphabet[string[i]] == 0x3f &&
+		    string[i] != '?')
+			return false;
+	return true;
+}
+
 static unsigned char EncodeWithDefaultAlphabet(unsigned char value)
 {
 	SetupReverse();

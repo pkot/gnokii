@@ -617,7 +617,9 @@ static int sendsms(int argc, char *argv[])
 			fprintf(stderr, _("Empty message. Quitting.\n"));
 			return -1;
 		}
-		sms.UserData[curpos++].Type = SMS_PlainText;
+		sms.UserData[curpos].Type = SMS_PlainText;
+		if (!IsDefaultAlphabetString(sms.UserData[curpos].u.Text))
+			sms.DCS.u.General.Alphabet = SMS_UCS2;
 		sms.UserData[curpos].Type = SMS_NoData;
 	}
 
@@ -738,6 +740,8 @@ static int savesms(int argc, char *argv[])
 	strncpy(sms.UserData[0].u.Text, message_buffer, chars_read);
 	sms.UserData[0].u.Text[chars_read] = 0;
 	sms.UserData[1].Type = SMS_NoData;
+	if (!IsDefaultAlphabetString(sms.UserData[0].u.Text))
+		sms.DCS.u.General.Alphabet = SMS_UCS2;
 
 	data.SMS = &sms;
 	error = SaveSMS(&data, &State);

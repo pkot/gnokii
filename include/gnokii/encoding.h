@@ -40,17 +40,19 @@ int Unpack7BitCharacters(unsigned int offset, unsigned int in_length, unsigned i
 			unsigned char *input, unsigned char *output);
 int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output);
 
-void DecodeUnicode (unsigned char* dest, const unsigned char* src, int len);
-void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len);
+void DecodeUnicode(unsigned char* dest, const unsigned char* src, int len);
+void EncodeUnicode(unsigned char* dest, const unsigned char* src, int len);
 
-void DecodeAscii (unsigned char* dest, const unsigned char* src, int len);
-void EncodeAscii (unsigned char* dest, const unsigned char* src, int len);
+void DecodeAscii(unsigned char* dest, const unsigned char* src, int len);
+void EncodeAscii(unsigned char* dest, const unsigned char* src, int len);
 
-void DecodeHex (unsigned char* dest, const unsigned char* src, int len);
-void EncodeHex (unsigned char* dest, const unsigned char* src, int len);
+void DecodeHex(unsigned char* dest, const unsigned char* src, int len);
+void EncodeHex(unsigned char* dest, const unsigned char* src, int len);
 
-void DecodeUCS2 (unsigned char* dest, const unsigned char* src, int len);
-void EncodeUCS2 (unsigned char* dest, const unsigned char* src, int len);
+void DecodeUCS2(unsigned char* dest, const unsigned char* src, int len);
+void EncodeUCS2(unsigned char* dest, const unsigned char* src, int len);
+
+bool IsDefaultAlphabetString(unsigned char *string);
 
 extern char *GetBCDNumber(u8 *Number);
 extern int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type);

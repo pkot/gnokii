@@ -44,6 +44,8 @@
     o change deletesms() to reflect changes in API     (Markus Plail)
     o indentation changes                                 (Pawel Kot)
     o don't initialize the connection for foogle()        (Pawel Kot)
+    o when some characters are not from the default alphabet
+      encode them in the unicode                          (Pawel Kot)
  * xgnokii fixes:
     o fix SMS reading                                  (Markus Plail)
     o fix date/time display for SMS messages           (Markus Plail)
