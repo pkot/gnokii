@@ -796,7 +796,7 @@ bool FB61_OpenIR(void)
 
   /* Open device. */
   
-  result = device_open(PortDevice);
+  result = device_open(PortDevice, false);
 
   if (!result) {
     perror(_("Couldn't open FB61 infrared device"));
@@ -2381,7 +2381,7 @@ bool FB61_OpenSerial(void)
 
   /* Open device. */
 
-  result = device_open(PortDevice);
+  result = device_open(PortDevice, false);
 
   if (!result) {
     perror(_("Couldn't open FB61 device"));

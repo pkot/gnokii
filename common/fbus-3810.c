@@ -1121,8 +1121,6 @@ void    FB38_ThreadLoop(void)
            loop will become more involved once we start doing 
            fax/data calls. */
 
-        /* Send IMEI/Revision/Model request */
-
     idle_timer = 0;
 
     while (!RequestTerminate) {
@@ -1157,7 +1155,7 @@ bool        FB38_OpenSerial(void)
     sigaction (SIGIO, &sig_io, NULL);
 
         /* Open device. */
-    result = device_open(PortDevice);
+    result = device_open(PortDevice, false);
 
     if (!result) {
         perror(_("Couldn't open FB38 device: "));

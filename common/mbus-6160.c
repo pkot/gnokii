@@ -34,6 +34,10 @@
 #include	"misc.h"
 #include	"gsm-common.h"
 #include	"mbus-6160.h"
+#include	"device.h"
+
+#define WRITEPHONE(a, b, c) device_write(b, c)
+
 
 	/* Global variables used by code in gsm-api.c to expose the
 	   functions supported by this model of phone.  */
@@ -101,6 +105,9 @@ GSM_Information			MB61_Information = {
 pthread_t				Thread;
 bool					RequestTerminate;
 bool					MB61_LinkOK;
+char                    PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
+u8						RequestSequenceNumber; /* 2-63 */
+int						PortFD;
 
 
 	/* The following functions are made visible to gsm-api.c and friends. */
@@ -115,6 +122,8 @@ GSM_Error   MB61_Initialise(char *port_device, char *initlength,
 
 	RequestTerminate = false;
 	MB61_LinkOK = false;
+
+    strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
 		/* Create and start thread, */
 	rtn = pthread_create(&Thread, NULL, (void *) MB61_ThreadLoop, (void *)NULL);
@@ -364,6 +373,53 @@ bool		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 	   exited when the application calls the MB61_Terminate function. */
 void	MB61_ThreadLoop(void)
 {
+    unsigned char       init_char[1] = {0x04};
+    int                 count, idle_timer;
+	char foogle[] = {0x00, 0x00, 0x00, 0x0d};
+
+        /* Initialise RX state machine. */
+    //BufferCount = 0;
+    //RX_State = MB61_RX_Sync;
+
+        /* Try to open serial port, if we fail we sit here and don't proceed
+           to the main loop. */
+    if (MB61_OpenSerial() != true) {
+        MB61_LinkOK = false;
+        
+        while (!RequestTerminate) {
+            usleep (100000);
+        }
+        return;
+    }
+    fprintf(stdout, "Sending init...\n");
+    
+	WRITEPHONE(PortFD, foogle, 4);
+
+        /* Initialise sequence number used when sending messages
+           to phone. */
+    RequestSequenceNumber = 0x02;
+
+        /* Send Initialisation message to phone. */
+	MB61_TX_SendMessage(0x00, 0x1d, 0xd0, RequestSequenceNumber, 1, init_char);
+
+        /* We've now finished initialising things so sit in the loop
+           until told to do otherwise.  Loop doesn't do much other
+           than send periodic keepalive messages to phone.  This
+           loop will become more involved once we start doing 
+           fax/data calls. */
+
+    idle_timer = 0;
+
+    while (!RequestTerminate) {
+        if (idle_timer == 0) {
+            idle_timer = 20;
+        }
+        else {
+            idle_timer --;
+        }
+
+        usleep(100000);     /* Avoid becoming a "busy" loop. */
+    }
 
 		/* Do initialisation stuff */
 
@@ -373,5 +429,107 @@ void	MB61_ThreadLoop(void)
 	}
 
 }
+
+    /* Called by initialisation code to open comm port in
+       asynchronous mode. */
+bool        MB61_OpenSerial(void)
+{
+    int                     result;
+    struct sigaction        sig_io;
+
+    /* Set up and install handler before enabling async IO on port. */
+
+    sig_io.sa_handler = MB61_SigHandler;
+    sig_io.sa_flags = 0;
+    sigaction (SIGIO, &sig_io, NULL);
+
+        /* Open device MBUS uses 9600,O,1  */
+    result = device_open(PortDevice, true);
+
+    if (!result) {
+        perror(_("Couldn't open MB61 device: "));
+        return (false);
+    }
+	fprintf(stdout, "Opened MB61 device\n");
+
+    device_changespeed(9600);
+    device_setdtrrts(1, 1);
+
+    return (true);
+}
+
+    /* Handler called when characters received from serial port. 
+       calls state machine code to process it. */
+void    MB61_SigHandler(int status)
+{
+    unsigned char   buffer[255];
+    int             count,res;
+
+    res = device_read(buffer, 255);
+
+    for (count = 0; count < res ; count ++) {
+		fprintf(stdout, "{%02x}", buffer[count]);
+       // MB61_RX_StateMachine(buffer[count]);
+    }
+	fflush(stdout);
+}
+
+#define MB61_MAX_TRANSMIT_LENGTH		(200) /* Arbitrary */
+
+	/* Prepares the message header and sends it, prepends the
+       message start byte (0x01) and other values according
+       the value specified when called.  Calculates checksum
+       and then sends the lot down the pipe... */
+int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_byte, int message_length, u8 *buffer) 
+{
+    u8                      out_buffer[MB61_MAX_TRANSMIT_LENGTH + 7];
+    int                     count;
+    unsigned char           checksum;
+
+        /* Check message isn't too long, once the necessary
+           header and trailer bytes are included. */
+    if ((message_length + 7) > MB61_MAX_TRANSMIT_LENGTH) {
+        fprintf(stderr, _("TX_SendMessage - message too long!\n"));
+
+        return (false);
+    }
+        /* Now construct the message header. */
+    out_buffer[0] = 0x1f;   /* Start of message indicator */
+    out_buffer[1] = destination;
+    out_buffer[2] = source;
+    out_buffer[3] = command;
+    out_buffer[4] = message_length >> 8;
+	out_buffer[5] = message_length & 0xff;
+
+        /* Copy in data if any. */  
+    if (message_length != 0) {
+        memcpy(out_buffer + 6, buffer, message_length);
+    }
+	    /* Copy in sequence number */
+    out_buffer[message_length + 6] = sequence_byte;
+
+        /* Now calculate checksum over entire message 
+           and append to message. */
+    checksum = 0;
+    for (count = 0; count < message_length + 7; count ++) {
+        checksum ^= out_buffer[count];
+    }
+    out_buffer[message_length + 7] = checksum;
+
+        /* Send it out... */
+    if (WRITEPHONE(PortFD, out_buffer, message_length + 8) != message_length + 8) {
+        perror(_("TX_SendMessage - write:"));
+        return (false);
+    }
+	
+    for (count = 0; count < message_length + 8; count ++) {
+        fprintf(stdout, "[%02x]", out_buffer[count]);
+    }
+	fprintf(stdout, "\n");
+
+    return (true);
+}
+
+
 
 #endif

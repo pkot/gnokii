@@ -10,8 +10,8 @@
 
   Header file device access code.
 
-  Last modification: Mon Mar 20 21:51:59 CET 2000
-  Modified by Marcel Holtmann <marcel@rvs.uni-bielefeld.de>
+  Last modification: Wed Apr 12 18:29:55 PDT 2000
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -22,7 +22,7 @@
 
 int device_getfd(void);
 
-int device_open(__const char *__file);
+int device_open(__const char *__file, int __with_odd_parity);
 void device_close(void);
 void device_reset(void);
 

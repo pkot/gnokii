@@ -101,6 +101,8 @@ bool  		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 
 	/* Prototypes for internal functions. */
 void	MB61_ThreadLoop(void);
+void    MB61_SigHandler(int status);
+void    MB61_ThreadLoop(void);
 
 
 #endif	/* __mbus_6160_c */

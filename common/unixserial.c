@@ -8,8 +8,8 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Mon Mar 20 22:06:04 CET 2000
-  Modified by Marcel Holtmann <marcel@rvs.uni-bielefeld.de>
+  Last modification: Wed Apr 12 18:29:55 PDT 2000
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -92,7 +92,7 @@ int serial_close(int __fd) {
  *
  */
 
-int serial_opendevice(__const char *__file) {
+int serial_opendevice(__const char *__file, int __with_odd_parity) {
 
   int fd;
   struct termios tp;
@@ -115,7 +115,13 @@ int serial_opendevice(__const char *__file) {
   /* Set port settings for canonical input processing */
 
   tp.c_cflag = B0 | CS8 | CLOCAL | CREAD;
-  tp.c_iflag = IGNPAR;
+  if (__with_odd_parity) {
+    tp.c_cflag |= (PARENB | PARODD);
+    tp.c_iflag = 0;
+  }
+  else {
+    tp.c_iflag = IGNPAR;
+  }
   tp.c_oflag = 0;
   tp.c_lflag = 0;
   tp.c_cc[VMIN] = 1;
