@@ -375,7 +375,7 @@ typedef enum {
   DS_SMS_Storage_Full  /* Full SMS Memory. */
 } DisplayStatusEntity;
 
-/* Bitmap types */
+/* Bitmap types. */
 
 typedef enum {
   GSM_None=0,
@@ -384,7 +384,7 @@ typedef enum {
   GSM_CallerLogo
 } GSM_Bitmap_Types;
 
-/* Structure to hold incoming/outgoing bitmaps (and welcome-notes) */
+/* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
 
 typedef struct {
   u8 height;               /* Bitmap height (pixels) */
@@ -397,6 +397,23 @@ typedef struct {
   char number;             /* Caller group number */
   char ringtone;           /* Ringtone no sent with caller group */
 } GSM_Bitmap;
+
+/* Structure to hold profile entries. */
+
+typedef struct {
+  int Number;          /* The number of the profile. */
+  char Name[40];       /* The name of the profile. */
+  int KeypadTone;      /* Volumen level for keypad tones. */
+  int Lights;          /* Lights on/off. */
+  int CallAlert;       /* Incoming call alert. */
+  int Ringtone;        /* Ringtone for incoming call alert. */
+  int Volume;          /* Volume of the ringing. */
+  int MessageTone;     /* The tone for message indication. */
+  int WarningTone;     /* The tone for warning messages. */
+  int Vibration;       /* Vibration? */
+  int CallerGroups;    /* CallerGroups. */
+  int AutomaticAnswer; /* Does the phone auto-answer incoming call? */
+} GSM_Profile;
 
 /* Define the structure used to hold pointers to the various API functions.
    This is in effect the master list of functions provided by the gnokii API.
@@ -493,6 +510,10 @@ typedef struct {
   GSM_Error (*SetBitmap) ( GSM_Bitmap *Bitmap );
 
   GSM_Error (*Reset) ( unsigned char type );
+
+  GSM_Error (*GetProfile) ( GSM_Profile *Profile );
+
+  GSM_Error (*SetProfile) ( GSM_Profile *Profile );
 
 } GSM_Functions;
 

@@ -28,7 +28,7 @@
 
 /* Our state machine which handles all of nine possible states of RLP
    machine. */
-void MAIN_STATE_MACHINE(RLP_F96Frame *frame);
+void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header);
 
 /* This is the type we are just handling. */
 RLP_FrameTypes CurrentFrameType;
@@ -42,10 +42,15 @@ RLP_State      NextState;
 
 /* State variables - see GSM 04.22, Annex A, section A.1.2 */
 
+RLP_StateVariable UA_State;
+
+/* RLP Constants. */
+
 u8 RLP_M = 62; /* Number of different sequence numbers (modulus) */
 
 u8 RLP_N2 = 15; /* Maximum number of retransmisions. GSM spec says 6 here, but
                    Nokia will XID this. */
+
 
 
 /* Previous sequence number. */
@@ -113,6 +118,10 @@ void RLP_SendF96Frame(RLP_FrameTypes FrameType,
 
     for (i=1; i<25; i++)
       frame.Data[i]=0;
+  }
+  else {
+    for (i=0; i<25; i++)
+      frame.Data[i]=OutData[i];
   }
 
 #define PackM(x)  frame.Header[1]|=((x)<<2);
@@ -328,7 +337,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
   RLP_F96Header header;
 
   /*
-    IncrementTimes();
+    FIXME: IncrementTimes();
   */
 
   CurrentFrameType=RLPFT_BAD;
@@ -580,7 +589,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
     /* Command/Response and Poll/Final bits. */
 
-    fprintf(stdout, " C/R=%d P/F=%d ", header.CR, header.PF);
+    fprintf(stdout, " C/R=%d P/F=%d", header.CR, header.PF);
 
     /* Information. */
     
@@ -623,7 +632,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
   }
 
-  MAIN_STATE_MACHINE(frame);
+  MAIN_STATE_MACHINE(frame, &header);
 
   /*
     Y:= outblock();
@@ -632,10 +641,48 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
   return;
 }
 
-void MAIN_STATE_MACHINE(RLP_F96Frame *frame) {
+bool XID_Handling (RLP_F96Frame *frame, RLP_F96Header *header) {
+
+  if (CurrentFrameType == RLPFT_U_XID) {
+
+    u8 Data[25];
+    int i;
+
+    fprintf(stdout, "DEBUG: XID received in state 1.\n");
+
+    for (i=0; i<25; i++) {
+      printf("XID data[%2d]: %2x\n", i, frame->Data[i]);
+      Data[i]=frame->Data[i];
+    }
+    
+    RLP_SendF96Frame(RLPFT_U_XID, false, false, 0, 0, Data);
+    return true;
+  }
+
+  return false;
+}
+
+/* FIXME: temporary.  */
+
+#define RLP_UserEvent(x) true
+
+void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 
   switch (CurrentState) {
 
+
+    /***** RLP State 0. *****/
+
+
+    /* ADM and Detached.
+
+       This is the initial state after power on.
+
+       As long as the RLP entity is "Detached", DISC(P) and/or SABM at the
+       lower interface is acted upon by sending DM(P) or DM(1). Any other
+       stimulus at the lower interface is ignored.
+
+       This state can be exited only with Attach_Req. */
 
   case RLP_S0:
 
@@ -643,15 +690,36 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame) {
     fprintf(stdout, _("RLP state 0.\n"));
 #endif
 
-    /* FIXME: handling of DISC and SABM, but do we really need it? */
+    switch (CurrentFrameType) {
 
-    /* FIXME: Solve user events. What about "automagically" set Attach_Req
-       here? */
+      /* FIXME: Do we really need DISC and SABM handling? */
 
-    if (CurrentFrameType!=RLPFT_BAD)
+    case RLPFT_U_DISC:
+
+      RLP_SendF96Frame(RLPFT_U_DM, false, header->PF, 0, 0, NULL);
+
+      break;
+
+    case RLPFT_U_SABM:
+
+      RLP_SendF96Frame(RLPFT_U_DM, false, true, 0, 0, NULL);
+
+      break;
+
+    default:
+
       RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL);
 
+      if (RLP_UserEvent(Attach_Req)) {
+	NextState=RLP_S1;
+	UA_State=_idle;
+      }
+    }
+
     break;
+
+
+    /***** RLP State 1. *****/
 
 
   case RLP_S1:
@@ -660,12 +728,19 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame) {
     fprintf(stdout, _("RLP state 1.\n"));
 #endif
 
+    // FIXME: continue here...
+
+    if (!XID_Handling(frame, header)) {
+      RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL);
+    }
 
     break;
 
   default:
 
   }
+
+  CurrentState=NextState;
 
 }
 

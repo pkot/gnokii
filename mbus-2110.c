@@ -78,7 +78,9 @@ GSM_Functions			MB21_Functions = {
 		MB21_SendDTMF,
 		MB21_GetBitmap,
 		MB21_SetBitmap,
-		MB21_Reset
+		MB21_Reset,
+		MB21_GetProfile,
+		MB21_SetProfile
 };
 
 	/* FIXME - these are guesses only... */
@@ -337,6 +339,16 @@ GSM_Error	MB21_SetBitmap(GSM_Bitmap *Bitmap)
 }
 
 GSM_Error	MB21_Reset(unsigned char type)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_GetProfile(GSM_Profile *Profile)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_SetProfile(GSM_Profile *Profile)
 {
     return (GE_NOTIMPLEMENTED);
 }

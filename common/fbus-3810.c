@@ -83,7 +83,9 @@ GSM_Functions           FB38_Functions = {
         FB38_SendDTMF,
         FB38_GetBitmap,
         FB38_SetBitmap,
-        FB38_Reset
+        FB38_Reset,
+        FB38_GetProfile,
+        FB38_SetProfile
 };
 
 GSM_Information         FB38_Information = {
@@ -880,6 +882,16 @@ GSM_Error   FB38_SetBitmap (GSM_Bitmap *Bitmap)
 }
 
 GSM_Error   FB38_Reset (unsigned char type)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_GetProfile(GSM_Profile *Profile)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_SetProfile(GSM_Profile *Profile)
 {
     return (GE_NOTIMPLEMENTED);
 }

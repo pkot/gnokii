@@ -63,6 +63,141 @@ char *DefaultModel = MODEL; /* From Makefile */
 char *DefaultPort = PORT;
 char *DefaultConnection = "serial";
 
+char *GetProfileCallAlertString(int code) {
+
+  switch (code) {
+    case PROFILE_CALLALERT_RINGING:
+      return "Ringing";
+    case PROFILE_CALLALERT_ASCENDING:
+      return "Ascending";
+    case PROFILE_CALLALERT_RINGONCE:
+      return "Ring once";
+    case PROFILE_CALLALERT_BEEPONCE:
+      return "Beep once";
+    case PROFILE_CALLALERT_CALLERGROUPS:
+      return "Caller groups";
+    case PROFILE_CALLALERT_OFF:
+      return "Off";
+    default:
+      return "Unknown";
+  }
+}
+
+char *GetProfileVolumeString(int code) {
+
+  switch (code) {
+    case PROFILE_VOLUME_LEVEL1:
+      return "Level 1";
+    case PROFILE_VOLUME_LEVEL2:
+      return "Level 2";
+    case PROFILE_VOLUME_LEVEL3:
+      return "Level 3";
+    case PROFILE_VOLUME_LEVEL4:
+      return "Level 4";
+    case PROFILE_VOLUME_LEVEL5:
+      return "Level 5";
+    default:
+      return "Unknown";
+  }
+}
+
+char *GetProfileKeypadToneString(int code) {
+
+  switch (code) {
+    case PROFILE_KEYPAD_OFF:
+      return "Off";
+    case PROFILE_KEYPAD_LEVEL1:
+      return "Level 1";
+    case PROFILE_KEYPAD_LEVEL2:
+      return "Level 2";
+    case PROFILE_KEYPAD_LEVEL3:
+      return "Level 3";
+    default:
+      return "Unknown";
+  }
+}
+
+char *GetProfileMessageToneString(int code) {
+
+  switch (code) {
+    case PROFILE_MESSAGE_NOTONE:
+      return "No tone";
+    case PROFILE_MESSAGE_STANDARD:
+      return "Standard";
+    case PROFILE_MESSAGE_SPECIAL:
+      return "Special";
+    case PROFILE_MESSAGE_BEEPONCE:
+      return "Beep once";
+    case PROFILE_MESSAGE_ASCENDING:
+      return "Ascending";
+    default:
+      return "Unknown";
+  }
+}
+
+char *GetProfileWarningToneString(int code) {
+
+  switch (code) {
+    case PROFILE_WARNING_OFF:
+      return "Off";
+    case PROFILE_WARNING_ON:
+      return "On";
+    default:
+      return "Unknown";
+  }
+}
+
+char *GetProfileVibrationString(int code) {
+
+  switch (code) {
+    case PROFILE_VIBRATION_OFF:
+      return "Off";
+    case PROFILE_VIBRATION_ON:
+      return "On";
+    default:
+      return "Unknown";
+  }
+}
+
+char *GetRingtoneName(int code) {
+
+  switch (code) {
+    case RINGTONE_NOTSET:
+      return "Not set";
+    case RINGTONE_PRESET:
+      return "Preset";
+    case RINGTONE_UPLOAD:
+      return "Uploaded tone";
+    case RINGTONE_RINGRING:
+      return "Ring ring";
+    case RINGTONE_LOW:
+      return "Low";
+    case RINGTONE_FLY:
+      return "Fly";
+    case RINGTONE_MOSQUITO:
+      return "Mosquito";
+    case RINGTONE_BEE:
+      return "Bee";
+    case RINGTONE_INTRO:
+      return "Intro";
+    case RINGTONE_ETUDE:
+      return "Etude";
+    case RINGTONE_HUNT:
+      return "Hunt";
+    case RINGTONE_GOINGUP:
+      return "Going up";
+    case RINGTONE_CITYBIRD:
+      return "City bird";
+    case RINGTONE_GRANDEVALSE:
+      return "Grande valse";
+    case RINGTONE_SAMBA:
+      return "Samba";
+    default:
+      return "Unknown";
+  }
+}
+
+
 /* This function shows the copyright and some informations usefull for
    debugging. */
 
@@ -2211,9 +2346,14 @@ int reset( char *type)
 int foogle(char *argv[])
 { 
 
+  int i;
+  GSM_Profile profile;
+
   /* Initialise the code for the GSM interface. */     
 
-  fbusinit(RLP_DisplayF96Frame);
+  // fbusinit(RLP_DisplayF96Frame);
+
+  fbusinit(NULL);
 
   sleep(5); /* Wait for phone initialisation. */
 
@@ -2221,16 +2361,31 @@ int foogle(char *argv[])
   // GSM->DialData("62401000");
 
   /* Pavel's one */
-  GSM->DialData("4670");
+  // GSM->DialData("4670");
 
-  // RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL);
+  // RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, Data);
+
+  for (i = 0; i <= 6; i++) {
+
+    profile.Number = i;
+    GSM->GetProfile(&profile);
+
+    printf("%i. \"%s\"\n", profile.Number, profile.Name);
+    printf("Keypad tones: %s\n", GetProfileKeypadToneString(profile.KeypadTone));
+    printf("Lights: %s\n", profile.Lights ? "on" : "off");
+    printf("Call alert: %s\n", GetProfileCallAlertString(profile.CallAlert));
+    printf("Ringtone: %s\n", GetRingtoneName(profile.Ringtone));
+    printf("Volume: %s\n", GetProfileVolumeString(profile.Volume));
+    printf("Message tone: %s\n", GetProfileMessageToneString(profile.MessageTone));
+    printf("Warning tone: %s\n", GetProfileWarningToneString(profile.WarningTone));
+    printf("Vibration: %s\n", GetProfileVibrationString(profile.Vibration));
+    printf("Caller groups: 0x%02x\n", profile.CallerGroups);
+    printf("Automatic answer: %s\n", profile.AutomaticAnswer ? "On" : "Off");
+    printf("\n");
+  }
 
   sleep (60);
   GSM->Terminate();
-
-  while (1) {
-    usleep(50000);
-  }
 
   return 0;
 }

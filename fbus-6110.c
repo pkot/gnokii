@@ -118,7 +118,9 @@ GSM_Functions FB61_Functions = {
   FB61_SendDTMF,
   FB61_GetBitmap,
   FB61_SetBitmap,
-  FB61_Reset
+  FB61_Reset,
+  FB61_GetProfile,
+  FB61_SetProfile
 };
 
 /* Mobile phone information */
@@ -270,6 +272,9 @@ GSM_Bitmap         *GetBitmap=NULL;
 GSM_Error          GetBitmapError;
 
 GSM_Error          SetBitmapError;
+
+GSM_Profile        *CurrentProfile;
+GSM_Error          CurrentProfileError;
 
 unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
 unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
@@ -452,6 +457,118 @@ GSM_Error FB61_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo)
       return (GE_TIMEOUT);
 
     usleep (100000);
+  }
+
+  return (GE_NONE);
+}
+
+GSM_Error FB61_GetProfile(GSM_Profile *Profile)
+{
+
+  int i, timeout=20;
+
+  unsigned char name_req[] = { FB61_FRAME_HEADER, 0x1a, 0x00};
+  unsigned char feat_req[] = { FB61_FRAME_HEADER, 0x13, 0x01, 0x00, 0x00};
+
+  CurrentProfile = Profile;
+  CurrentProfileError = GE_BUSY;
+
+  name_req[4] = Profile->Number;
+  feat_req[5] = Profile->Number;
+  FB61_TX_SendMessage(5, 0x05, name_req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentProfileError == GE_BUSY ) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  for (i = 0x00; i <= 0x09; i++) {
+
+    CurrentProfileError = GE_BUSY;
+    feat_req[6] = i;
+    FB61_TX_SendMessage(7, 0x05, feat_req);
+
+    /* Wait for timeout or other error. */
+    while (timeout != 0 && CurrentProfileError == GE_BUSY ) {
+
+      if (--timeout == 0)
+        return (GE_TIMEOUT);
+
+      usleep (100000);
+    }
+
+  }
+
+  return (GE_NONE);
+
+}
+
+GSM_Error FB61_SetProfile(GSM_Profile *Profile)
+{
+
+  int i, timeout=20;
+
+  unsigned char name_req[40] = { FB61_FRAME_HEADER, 0x1c, 0x01, 0x03,
+                                 0x00, 0x00, 0x00};
+  unsigned char feat_req[] = { FB61_FRAME_HEADER, 0x10, 0x01,
+                               0x00, 0x00, 0x00};
+
+  CurrentProfileError = GE_BUSY;
+
+  name_req[7] = Profile->Number;
+  name_req[8] = strlen(Profile->Name);
+  name_req[6] = name_req[8] + 2;
+
+  for (i = 0; i < name_req[8]; i++)
+    name_req[9 + i] = Profile->Name[i];
+
+  FB61_TX_SendMessage(name_req[8] + 9, 0x05, name_req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentProfileError == GE_BUSY ) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  feat_req[5] = Profile->Number;
+
+  for (i = 0x00; i <= 0x09; i++) {
+
+    CurrentProfileError = GE_BUSY;
+    feat_req[6] = i;
+
+    switch (feat_req[6]) {
+
+    case 0x00: feat_req[7] = Profile->KeypadTone; break;
+    case 0x01: feat_req[7] = Profile->Lights; break;
+    case 0x02: feat_req[7] = Profile->CallAlert; break;
+    case 0x03: feat_req[7] = Profile->Ringtone; break;
+    case 0x04: feat_req[7] = Profile->Volume; break;
+    case 0x05: feat_req[7] = Profile->MessageTone; break;
+    case 0x06: feat_req[7] = Profile->Vibration; break;
+    case 0x07: feat_req[7] = Profile->WarningTone; break;
+    case 0x08: feat_req[7] = Profile->CallerGroups; break;
+    case 0x09: feat_req[7] = Profile->AutomaticAnswer; break;
+
+    }
+
+    FB61_TX_SendMessage(8, 0x05, feat_req);
+
+    /* Wait for timeout or other error. */
+    while (timeout != 0 && CurrentProfileError == GE_BUSY ) {
+
+      if (--timeout == 0)
+        return (GE_TIMEOUT);
+
+      usleep (100000);
+    }
   }
 
   return (GE_NONE);
@@ -3020,12 +3137,67 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     break;
   
-    /* Startup Logo and Operator Logo */  
+    /* Startup Logo, Operator Logo and Profiles. */
 
- 
+
   case 0x05:
 
     switch (MessageBuffer[3]) {
+
+    case 0x11:   /* Profile feature change result */
+
+      CurrentProfileError = GE_NONE;
+      break;
+
+    case 0x14:   /* Profile feature */
+
+      switch (MessageBuffer[6]) {
+
+      case 0x00:
+        CurrentProfile->KeypadTone = MessageBuffer[8];
+        break;
+
+      case 0x01:
+        CurrentProfile->Lights = MessageBuffer[8];
+        break;
+
+      case 0x02:
+        CurrentProfile->CallAlert = MessageBuffer[8];
+        break;
+
+      case 0x03:
+        CurrentProfile->Ringtone = MessageBuffer[8];
+        break;
+
+      case 0x04:
+        CurrentProfile->Volume = MessageBuffer[8];
+        break;
+
+      case 0x05:
+        CurrentProfile->MessageTone = MessageBuffer[8];
+        break;
+
+      case 0x06:
+        CurrentProfile->Vibration = MessageBuffer[8];
+        break;
+
+      case 0x07:
+        CurrentProfile->WarningTone = MessageBuffer[8];
+        break;
+
+      case 0x08:
+        CurrentProfile->CallerGroups = MessageBuffer[8];
+        break;
+
+      case 0x09:
+        CurrentProfile->AutomaticAnswer = MessageBuffer[8];
+        break;
+
+
+      }
+
+      CurrentProfileError = GE_NONE;
+      break;
 
     case 0x17:   /* Startup Logo */
 
@@ -3072,6 +3244,33 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	fprintf(stdout, _("Message: Startup logo correctly set.\n"));
 #endif  
       break;      
+
+    case 0x1b:   /* Incoming profile name */
+
+      if (MessageBuffer[9] == 0x00) {
+        switch (MessageBuffer[8]) {
+        case 0x00: sprintf(CurrentProfile->Name, "General"); break;
+        case 0x01: sprintf(CurrentProfile->Name, "Silent"); break;
+        case 0x02: sprintf(CurrentProfile->Name, "Meeting"); break;
+        case 0x03: sprintf(CurrentProfile->Name, "Outdoor"); break;
+        case 0x04: sprintf(CurrentProfile->Name, "Pager"); break;
+        case 0x05: sprintf(CurrentProfile->Name, "Car"); break;
+        case 0x06: sprintf(CurrentProfile->Name, "Headset"); break;
+        default: sprintf(CurrentProfile->Name, "Unknown"); break;
+        }
+      }
+      else {
+        sprintf(CurrentProfile->Name, MessageBuffer + 10, MessageBuffer[9]);
+        CurrentProfile->Name[MessageBuffer[9]] = '\0';
+      }
+
+      CurrentProfileError = GE_NONE;
+      break;
+
+    case 0x1d:   /* Profile name set result */
+
+      CurrentProfileError = GE_NONE;
+      break;
 
     case 0x31:   /* Set Operator Logo OK */
       

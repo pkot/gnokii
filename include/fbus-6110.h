@@ -199,6 +199,10 @@ GSM_Error FB61_SendDTMF(char *String);
 
 GSM_Error FB61_Reset(unsigned char type);
 
+GSM_Error FB61_GetProfile(GSM_Profile *Profile);
+GSM_Error FB61_SetProfile(GSM_Profile *Profile);
+
+
 /* States for receive code. */
 
 enum FB61_RX_States {
