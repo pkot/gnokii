@@ -42,6 +42,8 @@
 #include "phones/generic.h"
 #include "phones/nokia.h"
 #include "links/m2bus.h"
+#include "links/fbus.h"
+#include "links/fbus-phonet.h"
 
 #include "gnokii-internal.h"
 #include "gnokii.h"
