@@ -28,7 +28,8 @@ typedef enum {
 	GSM_CallerLogo,
 	GSM_PictureImage,
 	GSM_WelcomeNoteText,
-	GSM_DealerNoteText
+	GSM_DealerNoteText,
+	GSM_NewOperatorLogo
 } GSM_Bitmap_Types;
 
 #define GSM_MAX_BITMAP_SIZE 864

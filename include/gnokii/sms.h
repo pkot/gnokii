@@ -248,8 +248,7 @@ typedef enum {                     /* Bits meaning */
 	SMS_Picture         = 0x07, /* Looks like Happy N*kia Engineers (TM) invention */
 	SMS_TextTemplate    = 0x08, /* text template necessary for 6510 */
 	SMS_PictureTemplate = 0x09, /* picture template  "" */
-	SMS_OutboxSent      = 0x10  /* outbox sent template "" */
-
+	SMS_SubmitSent      = 0x0A  /* outbox sent template "" */
 } SMS_MessageType;
 
 typedef enum {
@@ -443,6 +442,7 @@ typedef struct {
 	SMSMessage_Layout Picture;
 	SMSMessage_Layout TextTemplate;
 	SMSMessage_Layout PictureTemplate;
+	SMSMessage_Layout SubmitSent;
 } SMSMessage_PhoneLayout;
 
 extern SMSMessage_PhoneLayout layout;

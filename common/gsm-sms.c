@@ -1018,7 +1018,11 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		break;
 	case SMS_Submit:
 		llayout = layout.Submit;
-		dprintf("Mobile Originated message:\n");
+		dprintf("Mobile Originated (stored) message:\n");
+		break;
+	case SMS_SubmitSent:
+		llayout = layout.SubmitSent;
+		dprintf("Mobile Originated (sent) message:\n");
 		break;
 	case SMS_Picture:
 		llayout = layout.Picture;
@@ -1047,10 +1051,28 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		dprintf("\tDelivery date: %s\n", PrintDateTime(message + llayout.Time));
 	}
 
+	/* Remote number */
+	if (llayout.RemoteNumber > -1) {
+		if (llayout.IsRemoteNumberCoded) {
+			if (message[llayout.RemoteNumber] == 0x00) llayout.MessageCenter -= 4;
+				/* FIXME Is this an ugly hack or correct? */
+				/* at least it works with 6210, 6510 and 6110 with the message I tested */
+			message[llayout.RemoteNumber] = (message[llayout.RemoteNumber] + 1) / 2 + 1;
+			strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber));
+			dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
+		} else {
+			/* SMS struct should be zeroed for now, so there's no
+			 * need to add an extra '\0' at the end of the string */
+			strncpy(SMS->RemoteNumber.number,
+				message + 1 + llayout.RemoteNumber,
+				message[llayout.RemoteNumber] < GSM_MAX_SMS_CENTER_LENGTH ? message[llayout.RemoteNumber] : GSM_MAX_SMS_CENTER_LENGTH);
+		}
+	}
+
 	/* Short Message Center */
 	if (llayout.MessageCenter > -1) {
 		if (llayout.IsMessageCenterCoded) {
-			strcpy(SMS->MessageCenter.Number, GetBCDNumber(message + llayout.MessageCenter));
+			strcpy(SMS->MessageCenter.Number, GetBCDNumber(message +  llayout.MessageCenter));
 			dprintf("\tSMS center number: %s\n", SMS->MessageCenter.Number);
 			SMS->ReplyViaSameSMSC = false;
 			if (SMS->RemoteNumber.number[0] == 0 && (message[llayout.ReplyViaSameSMSC] & 0x80)) {
@@ -1066,20 +1088,6 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		}
 	}
 
-	/* Remote number */
-	if (llayout.RemoteNumber > -1) {
-		if (llayout.IsRemoteNumberCoded) {
-			message[llayout.RemoteNumber] = ((message[llayout.RemoteNumber])+1)/2+1;
-			strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber));
-			dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
-		} else {
-			/* SMS struct should be zeroed for now, so there's no
-			 * need to add an extra '\0' at the end of the string */
-			strncpy(SMS->RemoteNumber.number,
-				message + 1 + llayout.RemoteNumber,
-				message[llayout.RemoteNumber] < GSM_MAX_SMS_CENTER_LENGTH ? message[llayout.RemoteNumber] : GSM_MAX_SMS_CENTER_LENGTH);
-		}
-	}
 
 	/* Sending time */
 	if (llayout.SMSCTime > -1) {
@@ -1145,15 +1153,16 @@ static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int M
 			size = MessageLength - llayout.UserData - 4 - (72 * 28 / 8);
 			SMS->Length = message[llayout.UserData];
 			dprintf("SMS length: %i, size: %i \n", SMS->Length, size);
-			DecodeData(message + llayout.UserData + 1,
-				   (unsigned char *)&(SMS->UserData[1].u.Text),
-				   SMS->Length, size, 0, SMS->DCS);
-			SMS->UserData[1].u.Text[SMS->Length] = 0;
+			if (size > SMS->Length) {
+				DecodeData(message + llayout.UserData + 1,
+					   (unsigned char *)&(SMS->UserData[1].u.Text),
+					   SMS->Length, size, 0, SMS->DCS);
+				SMS->UserData[1].u.Text[SMS->Length] = 0;
+			}
 
 			SMS->UDH[0].Type = SMS_MultipartMessage;
-			/* First part is a Picture */
+			/* Second part is a Picture */
 			SMS->UserData[0].Type = SMS_BitmapData;
-			dprintf("should be 169: %i\n", llayout.UserData + size);
 			GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData + size, NULL, &SMS->UserData[0].u.Bitmap);
 			GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
 		}
@@ -1162,6 +1171,7 @@ static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int M
 		size = MessageLength -
 			llayout.UserData + 1 - /* Header Length */
 			SMS->UDH_Length;       /* UDH Length */
+		dprintf("length: %i\n", SMS->Length);
 		DecodeData(message + llayout.UserData + SMS->UDH_Length,
 			   (unsigned char *)&(SMS->UserData[0].u.Text),
 			   SMS->Length, size, SMS->UDH_Length, SMS->DCS);

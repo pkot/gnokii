@@ -948,6 +948,7 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 				savengg(file, bitmap, info);
 				break;
 			case GSM_OperatorLogo:
+			case GSM_NewOperatorLogo:
 				savenol(file, bitmap, info);
 				break;
 			case GSM_StartupLogo:
@@ -1247,6 +1248,7 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 
 	switch (bitmap->type) {
 	case GSM_OperatorLogo:
+	case GSM_NewOperatorLogo:
 		header[5] = 0x00;
 		break;
 	case GSM_CallerLogo:

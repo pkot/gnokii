@@ -118,8 +118,8 @@ typedef struct {
 
 typedef struct {
 	gint status;
-	 gint(*InsertEntry) (GSM_CalendarNote *);
-	 gint(*ReadFailed) (gint);
+	gint(*InsertEntry) (GSM_CalendarNote *);
+	gint(*ReadFailed) (gint);
 } D_CalendarNoteAll;
 
 typedef struct {

@@ -44,8 +44,8 @@ static GSM_Error P6510_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
-/*
 static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
+/*
 static GSM_Error P6510_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
@@ -103,36 +103,53 @@ static bool SMSLoop = false; /* Are we in infinite SMS reading loop? */
 static bool NewSMS  = false; /* Do we have a new SMS? */
 
 static const SMSMessage_Layout nk6510_deliver = {
-	true,						/* Is the SMS type supported */
-	33, true, true,					/* SMSC */
+	true,			/* Is the SMS type supported */
+	33, true, true,		/* SMSC */
 	-1, 
-	3, 						/* Reply via same SMSC */
+	3, 			/* Reply via same SMSC */
 	-1, -1,  
-	3, 						/* message freference number */
+	3, 			/* message freference number */
 	-1, -1, -1,
-	44, 41, 40,			/* UD length, DCS field, UDH indicator */
-	-1, -1, -1,					/* Validity */
-	21, true, true,					/* Remote Number */
-	6, -1,						/* Time */
-	1,  0,						/* Nonstandard fields */
-	45, true					/* User Data */
+	44, 41, 40,		/* UD length, DCS field, UDH indicator */
+	-1, -1, -1,		/* Validity */
+	21, true, true,		/* Remote Number */
+	6, -1,			/* Time */
+	1,  0,			/* Nonstandard fields */
+	45, true			/* User Data */
 };
 
-static const SMSMessage_Layout nk6510_submit = {
+static const SMSMessage_Layout nk6510_submit_stored = {
 	true,
-	-1, true, true,			/* SMSC */
+	-1, true, true,		/* SMSC */
 	-1, 
-	-1, -1, -1,			/* Reply via same SMSC, RejectDuplicates, Report */
+	-1, -1, -1,		/* Reply via same SMSC, RejectDuplicates, Report */
 	-1, 
-	18, 19, 				/* Reference, PID */
+	18, 19, 			/* Reference, PID */
 	-1, 
-	28, 20, 17,		       	/* UserDataLength Field, DCS Field, UDH bit */
-	17, 				/* Valdity Type */
-	-1, -1,				/* Validity Field, length */
-	-1, true, true,			/* Remote Number, is coded?, fixed length? */
-	-1, -1,				/* SMSC Response, delivery time */
-	-1, -1,				/* MT, UserData */
-	29, true				/* UserData field, UserData PDU (?) */
+	28, 20, 17,	       	/* UserDataLength Field, DCS Field, UDH bit */
+	17, 			/* Valdity Type */
+	-1, -1,			/* Validity Field, length */
+	-1, true, true,		/* Remote Number, is coded?, fixed length? */
+	-1, -1,			/* SMSC Response, delivery time */
+	-1, -1,			/* MT, UserData */
+	29, true			/* UserData field, UserData PDU (?) */
+};
+
+static const SMSMessage_Layout nk6510_submit_sent = {
+	true,
+	25, true, true,		/* SMSC */
+	-1, 
+	-1, -1, -1,		/* Reply via same SMSC, RejectDuplicates, Report */
+	-1, 
+	18, 19, 			/* Reference, PID */
+	-1, 
+	35, 20, 17,	       	/* UserDataLength Field, DCS Field, UDH bit */
+	17, 			/* Valdity Type */
+	-1, -1,			/* Validity Field, length */
+	13, true, true,		/* Remote Number, is coded?, fixed length? */
+	-1, -1,			/* SMSC Response, delivery time */
+	-1, -1,			/* MT, UserData */
+	37, true			/* UserData field, UserData PDU (?) */
 };
 
 static const SMSMessage_Layout nk6510_text_template = {
@@ -337,11 +354,13 @@ static GSM_Error P6510_Initialise(GSM_Statemachine *state)
 	nk6510_layout.SendHeader = 6;
 	nk6510_layout.ReadHeader = 13;
 	nk6510_layout.Deliver = nk6510_deliver;
-	nk6510_layout.Submit = nk6510_submit;
+	nk6510_layout.Submit = nk6510_submit_stored;
 	nk6510_layout.DeliveryReport = nk6510_delivery_report;
 	nk6510_layout.Picture = nk6510_picture;
 	nk6510_layout.TextTemplate = nk6510_text_template;
 	nk6510_layout.PictureTemplate = nk6510_picture_template;
+	nk6510_layout.SubmitSent = nk6510_submit_sent;
+
 	layout = nk6510_layout;
 
 	dprintf("Connecting\n");
@@ -481,8 +500,6 @@ static GSM_Error P6510_GetRevision(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	int i, j, status;
-	int nextfolder = 0x10;
-	bool found;
 
 	switch (message[3]) {
 	/* getsms */
@@ -509,7 +526,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 				message[14] = 0x08;	/* text template */
 		}
 		if (message[14] == 0xa0) message[14] = 0x07;
-
+		if (data->SMSMessage->Status == SMS_Sent) message[14] = 0x0A;
 		/* Skip the frame header */
 		data->RawData->Length = length - nk6510_layout.ReadHeader;
 		data->RawData->Data = calloc(data->RawData->Length, 1);
@@ -643,11 +660,6 @@ static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 			       0x01, /* 0x01 Inbox, 0x02 others*/
 			       0x00, /* Folder ID */
 			       0x0F, 0x55, 0x55, 0x55};
-	GSM_Error error;
-	/*
-	00 01 00 0C 01 02 0F 55 55 55
-	00 01 00 0C 02 02 0F 55 55 55
-	*/
 
 	req[5] = GetMemoryType(data->SMSFolder->FolderID);
 
@@ -670,15 +682,6 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 			       0x00, 
 			       0x00, /* Location */
 			       0x55, 0x55};
-	GSM_Error error;
-	/*
-	  00 01 00 0E 01 02 00 01 55 55
-	  00 01 00 0E 02 03 00 03 55 55
-	  00 01 00 0E 02 04 00 04 55 55
-	  00 01 00 0E 02 06 00 02 55 55
-	  00 01 00 0E 02 06 00 01 55 55
-	  00 01 00 0E 02 07 00 05 55 55
-	 */
 
 	dprintf("Getting SMS message (%i) status (%i)...\n", data->SMSMessage->Number, data->SMSMessage->MemoryType);
 
@@ -702,13 +705,6 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 				   0x02, /* Location */
 				   0x01, 0x00};
 	GSM_Error error;
-
-	/*
-	  00 01 00 02 01 00 00 04 01 00 ???
-
-	  00 01 00 02 02 06 00 02 01 00
-
-	*/
 
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
@@ -1108,22 +1104,6 @@ static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 }
 
 
-static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
-{
-	switch(data->Bitmap->type) {
-	case GSM_CallerLogo:
-		return GetCallerBitmap(data, state);
-		/*	case GSM_StartupLogo:
-		return GetStartupBitmap(data, state);
-	case GSM_OperatorLogo:
-		return GetOperatorBitmap(data, state);
-		*/
-	default:
-		return GE_NOTIMPLEMENTED;
-	}
-}
-
-
 /******************/
 /* CLOCK HANDLING */
 /******************/
@@ -1468,27 +1448,6 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 					data->NetworkInfo->NetworkCode[5] = '0' + (blockstart[10] >> 4);
 					data->NetworkInfo->NetworkCode[6] = 0;
 				}
-				if (data->Bitmap) {
-					data->Bitmap->netcode[0] = '0' + (blockstart[8] & 0x0f);
-					data->Bitmap->netcode[1] = '0' + (blockstart[8] >> 4);
-					data->Bitmap->netcode[2] = '0' + (blockstart[9] & 0x0f);
-					data->Bitmap->netcode[3] = ' ';
-					data->Bitmap->netcode[4] = '0' + (blockstart[10] & 0x0f);
-					data->Bitmap->netcode[5] = '0' + (blockstart[10] >> 4);
-					data->Bitmap->netcode[6] = 0;
-					dprintf("Operator %s ",data->Bitmap->netcode);
-				}
-				break;
-			case 0x04: /* Logo */
-				if (data->Bitmap) {
-					dprintf("Op logo received ok ");
-					data->Bitmap->type = GSM_OperatorLogo;
-					data->Bitmap->size = blockstart[5]; /* Probably + [4]<<8 */
-					data->Bitmap->height = blockstart[3];
-					data->Bitmap->width = blockstart[2];
-					memcpy(data->Bitmap->bitmap, blockstart + 8, data->Bitmap->size);
-					dprintf("Logo (%dx%d) ", data->Bitmap->height, data->Bitmap->width);
-				}
 				break;
 			default:
 				dprintf("Unknown operator block %d\n", blockstart[0]);
@@ -1502,6 +1461,27 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 			*(data->RFUnits) = GRF_Percentage;
 			*(data->RFLevel) = message[5];
 			dprintf("RF level %f\n\n\n",*(data->RFLevel));
+		}
+		break;
+	case 0x24:
+		if (data->Bitmap) {
+			int x;
+			data->Bitmap->netcode[0] = '0' + (message[12] & 0x0f);
+			data->Bitmap->netcode[1] = '0' + (message[12] >> 4);
+			data->Bitmap->netcode[2] = '0' + (message[13] & 0x0f);
+			data->Bitmap->netcode[3] = ' ';
+			data->Bitmap->netcode[4] = '0' + (message[14] & 0x0f);
+			data->Bitmap->netcode[5] = '0' + (message[14] >> 4);
+			data->Bitmap->netcode[6] = 0;
+			dprintf("Operator %s ",data->Bitmap->netcode);
+			data->Bitmap->type = GSM_NewOperatorLogo;
+			data->Bitmap->height = message[21];
+			data->Bitmap->width = message[20];
+			x = message[20] * message[21];
+			data->Bitmap->size = (x / 8) + (x % 8 > 0);
+			dprintf("size: %i\n", data->Bitmap->size);
+			memcpy(data->Bitmap->bitmap, message + 26, data->Bitmap->size);
+			dprintf("Logo (%dx%d) ", data->Bitmap->height, data->Bitmap->width);
 		}
 		break;
 	case 0xa4:
@@ -1525,12 +1505,22 @@ static GSM_Error P6510_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P6510_GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
 {
-	int i;
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x01, 0x00, 0x00, 0x00};
 	/* 00 01 00 0B 00 01 00 00 00 00 
 	   00 01 00 02 01 00 00 04 01 00
 	*/
 	dprintf("Getting network info ...\n");
+	if (SM_SendMessage(state, 9, P6510_MSG_NETSTATUS, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_NETSTATUS);
+}
+
+static GSM_Error GetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x23, 0x00, 0x00, 0x55, 0x55, 0x55};
+	/*  00 01 00 23 00 00 55 55 55 */
+
+
+	dprintf("Getting op logo...\n");
 	if (SM_SendMessage(state, 9, P6510_MSG_NETSTATUS, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_NETSTATUS);
 }
@@ -1561,8 +1551,8 @@ static GSM_Error P6510_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0A, 0x02, 0x00};
 
 	dprintf("Getting battery level...\n");
-	if (SM_SendMessage(state, 6, 0x17, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x17);
+	if (SM_SendMessage(state, 6, P6510_MSG_BATTERY, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_BATTERY);
 }
 
 
@@ -1605,6 +1595,27 @@ static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state)
 	if (SM_SendMessage(state, 9, P6510_MSG_RINGTONE, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_RINGTONE);
 }
+
+/********************************/
+/* NOT FRAME SPECIFIC FUNCTIONS */
+/********************************/
+
+static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
+{
+	switch(data->Bitmap->type) {
+	case GSM_CallerLogo:
+		return GetCallerBitmap(data, state);
+	case GSM_OperatorLogo:
+		return GetOperatorBitmap(data, state);
+		/*	case GSM_StartupLogo:
+		return GetStartupBitmap(data, state);
+		*/
+	default:
+		return GE_NOTIMPLEMENTED;
+	}
+}
+
+
 
 static int GetMemoryType(GSM_MemoryType memory_type)
 {

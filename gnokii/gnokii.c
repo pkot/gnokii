@@ -1488,11 +1488,14 @@ static int getlogo(int argc, char *argv[])
 		bitmap.type = GSM_WelcomeNoteText;
 
 	if (bitmap.type != GSM_None) {
+
 		fprintf(stdout, _("Getting Logo\n"));
 
 		data.Bitmap = &bitmap;
 		error = SM_Functions(GOP_GetBitmap, &data, &State);
 
+		dprintf("\n");
+		GSM_PrintBitmap(&bitmap);
 		switch (error) {
 		case GE_NONE:
 			if (bitmap.type == GSM_DealerNoteText) fprintf(stdout, _("Dealer welcome note "));
@@ -1505,10 +1508,11 @@ static int getlogo(int argc, char *argv[])
 				}
 			} else {
 				if (bitmap.width) {
-					memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
 					switch (bitmap.type) {
 					case GSM_OperatorLogo:
-						fprintf(stdout, _("Operator logo for %s (%s) network got succesfully\n"), bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
+					case GSM_NewOperatorLogo:
+						fprintf(stdout, _("Operator logo for %s (%s) network got succesfully\n"),
+							bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
 						if (argc == 3) {
 							strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
 							if (!strcmp(GSM_GetNetworkName(bitmap.netcode), "unknown")) {

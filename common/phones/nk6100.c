@@ -219,7 +219,7 @@ GSM_Phone phone_nokia_6100 = {
 		GDT_DateTime,          /* Have date/time support */
 		GDT_TimeOnly,	       /* Alarm supports time only */
 		1,                     /* Alarms available - FIXME */
-		48, 84,                /* Startup logo size - 7110 is fixed at init*/
+		48, 84,                /* Startup logo size */
 		14, 72,                /* Op logo size */
 		14, 72                 /* Caller logo size */
 	},

@@ -335,11 +335,10 @@ static void RefreshSMS(const gint number)
 				    gdat.MessagesList[j][i]->Type == SMS_NotRead ||
 				    gdat.MessagesList[j][i]->Type == SMS_Changed) {
 					msg = g_malloc(sizeof(GSM_SMSMessage));
-					fld = g_malloc(sizeof(SMS_Folder));
 					list = g_malloc(sizeof(SMS_FolderList));
 					raw = g_malloc(sizeof(GSM_RawData));
 					gdat.SMSMessage = msg;
-					gdat.SMSFolder = fld;
+					gdat.SMSFolder = NULL;
 					gdat.SMSFolderList = list;
 					gdat.RawData = raw;
 
@@ -458,7 +457,7 @@ static gint A_GetMemoryLocationAll(gpointer data)
 	GSM_PhonebookEntry entry;
 	GSM_Error error;
 	D_MemoryLocationAll *mla = (D_MemoryLocationAll *) data;
-	register gint i;
+	register gint i, missed = 0;
 
 	error = mla->status = GE_NONE;
 	entry.MemoryType = mla->type;
@@ -491,8 +490,12 @@ static gint A_GetMemoryLocationAll(gpointer data)
 
 		/* If the phonebook location was invalid - just fill up the rest */
 		/* This works on a 7110 anyway... */
-		if (error == GE_INVALIDPHBOOKLOCATION || error == GE_EMPTYMEMORYLOCATION) {
-			entry.Empty = true;
+		/* No it does not, at least on my 6210 (Markus) */
+		/*		if ((error == GE_INVALIDPHBOOKLOCATION) || (error == GE_EMPTYMEMORYLOCATION)) {
+			mla->InsertEntry(&entry);
+			continue;
+			}*/
+			/*			entry.Empty = true;
 			entry.Name[0] = 0;
 			entry.Number[0] = 0;
 			for (i = mla->min; i <= mla->max; i++) {
@@ -500,11 +503,11 @@ static gint A_GetMemoryLocationAll(gpointer data)
 				if (error != GE_NONE)
 					break;
 			}
-		}
+			*/
 
-		error = mla->InsertEntry(&entry);
-		if (error != GE_NONE)
-			break;
+		if (error == GE_NONE) error = mla->InsertEntry(&entry); /* FIXME: It only works this way at the moment */
+		/*		if (error != GE_NONE)
+				break;*/
 	}
 	mla->status = error;
 	pthread_cond_signal(&memoryCond);
@@ -537,47 +540,45 @@ static gint A_WriteMemoryLocation(gpointer data)
 
 static gint A_WriteMemoryLocationAll(gpointer data)
 {
-/*  GSM_PhonebookEntry entry; */
+	GSM_PhonebookEntry entry;
 	GSM_Error error;
 	D_MemoryLocationAll *mla = (D_MemoryLocationAll *) data;
-/*  register gint i;
-*/
+	register gint i;
+
 	error = mla->status = GE_NONE;
-/*  entry.MemoryType = mla->type;
+	/*
+	entry.MemoryType = mla->type;
 
-  pthread_mutex_lock (&memoryMutex);
-  for (i = mla->min; i <= mla->max; i++)
-  {
-    entry.Location = i;
-    error = GSM->GetMemoryLocation (&entry);
-    if (error != GE_NONE)
-    {
-      gint err_count = 0;
+	pthread_mutex_lock (&memoryMutex);
+	for (i = mla->min; i <= mla->max; i++) {
+		entry.Location = i;
+		error = GSM->GetMemoryLocation (&entry);
+		if (error != GE_NONE) {
+			gint err_count = 0;
 
-      while (error != GE_NONE)
-      {
-        g_print (_("%s: line %d: Can't get memory entry number %d from memory %d! %d\n"),
-                 __FILE__, __LINE__, i, entry.MemoryType, error);
-        if (err_count++ > 3)
-        {
-          mla->ReadFailed (i);
-          mla->status = error;
-          pthread_cond_signal (&memoryCond);
-          pthread_mutex_unlock (&memoryMutex);
-          return (error);
-        }
+			while (error != GE_NONE) {
+				g_print (_("%s: line %d: Can't get memory entry number %d from memory %d! %d\n"),
+					 __FILE__, __LINE__, i, entry.MemoryType, error);
+				if (err_count++ > 3) {
+					mla->ReadFailed (i);
+					mla->status = error;
+					pthread_cond_signal (&memoryCond);
+					pthread_mutex_unlock (&memoryMutex);
+					return (error);
+				}
 
-        error = GSM->GetMemoryLocation (&entry);
-        sleep (2);
-      }
-    }
-    error = mla->InsertEntry (&entry);
-    if (error != GE_NONE)
-      break;
-  }
-  mla->status = error;
-  pthread_cond_signal (&memoryCond);
-  pthread_mutex_unlock (&memoryMutex); */
+				error = GSM->GetMemoryLocation (&entry);
+				sleep (2);
+			}
+		}
+		error = mla->InsertEntry (&entry);
+		if (error != GE_NONE)
+			break;
+	}
+	mla->status = error;
+	pthread_cond_signal (&memoryCond);
+	pthread_mutex_unlock (&memoryMutex);
+	*/
 	return (error);
 }
 
