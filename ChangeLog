@@ -54,6 +54,7 @@
  * smsd fixes
     o FreeBSD doesn't have libdl and smsd can be complied there
       without -ldl                                (Peter Kolmisoppi)
+    o Wrong assumption on char signedness             (Gerhard Tonn)
  * 7110 series updates:
     o dropping duplicated frames during pb read     (BORBELY Zoltan)
     o fix calendar notes write support                   (Pawel Kot)

@@ -180,7 +180,7 @@ static void ReadConfig (gint argc, gchar *argv[])
   while (1)
   {
     gint optionIndex = 0;
-    gchar c;
+    gint c;
     static struct option longOptions[] =
     {
       {"user", 1, 0, 'u'},
