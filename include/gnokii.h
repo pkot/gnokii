@@ -69,7 +69,7 @@ struct gn_statemachine;
 
 #include <gnokii/statemachine.h>
 
-API struct gn_cfg_header *gn_cfg_info;
+extern API struct gn_cfg_header *gn_cfg_info;
 
 /* Files */
 API int gn_file_text_save(char *filename, char *text, int mode);
@@ -100,7 +100,7 @@ API int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number);
 API void gn_number_sanitize(char *number, int maxlen);
 API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry);
 
-API void (*gn_elog_handler)(const char *fmt, va_list ap);
+extern API void (*gn_elog_handler)(const char *fmt, va_list ap);
 API void gn_elog_write(const char *fmt, ...);
 
 API int gn_line_get(FILE *file, char *line, int count);
