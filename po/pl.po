@@ -1,20 +1,18 @@
-# This is the German locale definition for Gnokii.
-# Copyright (C) 1999, 2000 Free Software Foundation, Inc.
-# Daniel Egger <Daniel.Egger@suse.de>, 1999, 2000.
+# This is the Polish locale definition for Gnokii.
+# Copyright (C) 2000 Jacek Fiok <j.fiok@zodiac.mimuw.edu.pl>.
+# Copyright (C) 2002 Pawe³ Kot <pkot@linuxnews.pl>.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gnokii\n"
 "POT-Creation-Date: 2000-05-08 21:27+0200\n"
-"PO-Revision-Date: 2000-05-08 18:25:30+0100\n"
-"Last-Translator: Jacek Fiok <j.fiok@zodiac.mimuw.edu.pl>\n"
-"Language-Team: gnokii\n"
+"PO-Revision-Date: 2002-12-06 00:41+0100\n"
+"Last-Translator: Pawe³ Kot <pkot@linuxnews.pl>\n"
+"Language-Team: Polski <pl@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-2\n"
+"Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Xgettext-Options: -a -k_ -s -v -d gnokii\n"
-"Files: fbus-3810.h fbus-6110.h gsm-api.h gsm-common.h misc.h fbus-3810.c "
-"fbus-6110.c gnokii.c gsm-api.c\n"
+"X-Generator: KBabel 0.9.6\n"
 
 #: common/fbus-3810.c:525 common/fbus-6110.c:2037
 #, c-format
@@ -591,10 +589,8 @@ msgid "Message: Memory status error, phone is probably powered off.\n"
 msgstr "Wiadomo¶æ: B³±d stanu pamiêci, telefon jest prawdopodobnie wy³±czony.\n"
 
 #: common/fbus-6110.c:2963
-msgid ""
-"Message: Memory status error, memory type not supported by phone model.\n"
-msgstr ""
-"Wiadomo¶æ: B³±d stanu pamiêci, typ pamiêci nie obs³ugiwany przez ten model telefonu.\n"
+msgid "Message: Memory status error, memory type not supported by phone model.\n"
+msgstr "Wiadomo¶æ: B³±d stanu pamiêci, typ pamiêci nie obs³ugiwany przez ten model telefonu.\n"
 
 #: common/fbus-6110.c:2970
 msgid "Message: Memory status error, waiting for security code.\n"
@@ -602,10 +598,8 @@ msgstr "Wiadomo¶æ: B³±d stanu pamiêci, czekam na kod zabezpieczaj±cy.\n"
 
 #: common/fbus-6110.c:2977
 #, c-format
-msgid ""
-"Message: Unknown Memory status error, subtype (MessageBuffer[4]) = %02x\n"
-msgstr ""
-"Wiadomo¶æ: Nieznany b³±d stanu pamiêci, podtyp (MessageBuffer[4] = %02x\n"
+msgid "Message: Unknown Memory status error, subtype (MessageBuffer[4]) = %02x\n"
+msgstr "Wiadomo¶æ: Nieznany b³±d stanu pamiêci, podtyp (MessageBuffer[4] = %02x\n"
 
 #: common/fbus-6110.c:2994
 msgid "Message: Caller group logo etc.\n"
@@ -1067,10 +1061,8 @@ msgid "SM received by the SME"
 msgstr "SM otzymany przez SME"
 
 #: common/fbus-6110.c:4082
-msgid ""
-"SM forwarded by the SC to the SME but the SC is unable to confirm delivery"
-msgstr ""
-"SM przekazana przez SC do SME, ale SC nie móg³ potwierdziæ dostarczenia"
+msgid "SM forwarded by the SC to the SME but the SC is unable to confirm delivery"
+msgstr "SM przekazana przez SC do SME, ale SC nie móg³ potwierdziæ dostarczenia"
 
 #: common/fbus-6110.c:4085
 msgid "SM replaced by the SC"
@@ -1484,6 +1476,8 @@ msgid ""
 "          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 "          gnokii --getsecuritycodestatus\n"
 msgstr ""
+"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
+"          gnokii --getsecuritycodestatus\n"
 
 #: gnokii/gnokii.c:260
 msgid ""
@@ -1793,12 +1787,12 @@ msgstr "+%02d00"
 #: gnokii/gnokii.c:1246
 #, c-format
 msgid "Response date/time: %d/%d/%d %d:%02d:%02d "
-msgstr ""
+msgstr "Data/godzina odpowiedzi: %d/%d/%d %d:%02d:%02d "
 
 #: gnokii/gnokii.c:1259
 #, c-format
 msgid "Receiver: %s Msg Center: %s\n"
-msgstr ""
+msgstr "Odbiorca: %s Centrum wiadomo¶ci: %s\n"
 
 #: gnokii/gnokii.c:1266
 #, c-format
@@ -1838,7 +1832,7 @@ msgstr "Funkcja nie zaimplementowana w modelu %s!\n"
 #: gnokii/gnokii.c:1312
 #, c-format
 msgid "Invalid location: %s %d\n"
-msgstr ""
+msgstr "Nieprawid³owa lokacja: %s %d\n"
 
 #: gnokii/gnokii.c:1318
 #, c-format
@@ -1870,19 +1864,19 @@ msgstr ""
 
 #: gnokii/gnokii.c:1472
 msgid "Enter your code: "
-msgstr ""
+msgstr "Wprowad¼ kod: "
 
 #: gnokii/gnokii.c:1479
 msgid "Error: invalid code.\n"
-msgstr ""
+msgstr "B³±d: nieprawid³owy kod.\n"
 
 #: gnokii/gnokii.c:1481
 msgid "Code ok.\n"
-msgstr ""
+msgstr "Kod poprawny.\n"
 
 #: gnokii/gnokii.c:1485
 msgid "Other error.\n"
-msgstr ""
+msgstr "Inny b³±d.\n"
 
 #: gnokii/gnokii.c:1501
 msgid "Security code status: "
@@ -2148,8 +2142,7 @@ msgstr "Format problem on line %d [%s]\n"
 #: gnokii/gnokii.c:2343
 #, c-format
 msgid "Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"
-msgstr ""
-"Zapisano OK: typ pamiêci: %s, Lokacja: %d, Nazwa: %s, Numer: %s\n"
+msgstr "Zapisano OK: typ pamiêci: %s, Lokacja: %d, Nazwa: %s, Numer: %s\n"
 
 #: gnokii/gnokii.c:2345
 #, c-format
@@ -2313,7 +2306,8 @@ msgstr "Ukryj"
 msgid ""
 "Incomming call from: %s\n"
 "Time: %s"
-msgstr "Rozmowa przychodz±ca od: %s\n"
+msgstr ""
+"Rozmowa przychodz±ca od: %s\n"
 "Czas: %s"
 
 #: xgnokii/xgnokii.c:595 xgnokii/xgnokii_sms.c:571
@@ -3141,7 +3135,7 @@ msgstr "Data: "
 
 #: xgnokii/xgnokii_sms.c:438
 msgid "Function not implemented!"
-msgstr "Funkcja nie zaimplementowana!" 
+msgstr "Funkcja nie zaimplementowana!"
 
 #: xgnokii/xgnokii_sms.c:443
 msgid "Delete SMS failed!"
@@ -3163,7 +3157,8 @@ msgstr "Nieprawid³owa linia adresu!"
 msgid ""
 "SMS send to %s failed\n"
 "(error=%d)"
-msgstr "wys³anie SMS do %s zakoñczone NIEpowodzeniem\n"
+msgstr ""
+"wys³anie SMS do %s zakoñczone NIEpowodzeniem\n"
 "(b³±d=%d)"
 
 #: xgnokii/xgnokii_sms.c:988
@@ -3308,3 +3303,4 @@ msgstr "/Pomoc/_O..."
 #: xgnokii/xgnokii_xkeyb.c:218
 msgid "XGnokii Keyboard"
 msgstr "Klawiatura XGnokii"
+

@@ -21,7 +21,9 @@
  * 7110 series updates:
     o netmonitor moved to nokia.c                    (BORBELY Zoltan)
     o old style call management commands called      (BORBELY Zoltan)
- * typos in et.po                                       (Ulrich Hopp)
+ * translation updates
+    o typos in et.po                                    (Ulrich Hopp)
+    o few more messages translated in pl.po               (Pawel Kot)
  * gnokiid updates:
     o threads eliminated from gnokiid                (BORBELY Zoltan)
     o minor cleanup in the RLP module                (BORBELY Zoltan)
