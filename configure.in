@@ -19,6 +19,7 @@ port="/dev/ttyS0"
 
 dnl ======================== Checks for programs.
 AC_PROG_CC
+AC_PROG_CPP
 AC_PATH_PROG(LD, ld, no)
 AC_PATH_PROG(RM, rm, no)
 AC_PATH_PROG(CP, cp, no)
