@@ -37,6 +37,8 @@
       a zero padded four digit hex number           (BORBELY Zoltan)
     o correctly handle memory types in writephonebook() (Pat Sewall)
     o add --getlocksinfo along with 6100 driver     (Bertrik Sikken)
+    o make --getlogo caller more convinient to use: switch 'caller
+      group number' and 'logofile' arguments             (Pawel Kot)
  * 7110 series updates:
     o dropping duplicated frames during pb read     (BORBELY Zoltan)
  * 6100 series updates:
