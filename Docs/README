@@ -384,7 +384,8 @@ Bugfixes in phonebook handling (import and export should work now correctly,
 gnokii and xgnokii share the formats), calendar handling, sending unicode
 short messages (chinese texts should be sent correctly), msvc6 build. Set
 correctly Nokia 8310 information (logo sizes, signal indicator). Updates to
-documentation.
+documentation. Debug can be turned on in the config unless it was
+explicitely disabled with --enable-debug=no.
 
 20040201 Version 0.5.10
 Few bugfixes: ucs2 encoding and decoding, phonebook subentries, at driver
