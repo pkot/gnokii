@@ -197,23 +197,22 @@ static gint CListCompareFunc (GtkCList *clist, gconstpointer ptr1, gconstpointer
 }
 
 
-static inline void DestroyMsgPtrs (gpointer data)
+static inline void DestroyMsgPtrs(gpointer data)
 {
-	g_free (((MessagePointers *) data)->msgPtr);
-	g_free ((MessagePointers *) data);
+	g_free(((MessagePointers *) data)->msgPtr);
+	g_free((MessagePointers *) data);
 }
 
-static int IsValidSMSforFolder (gpointer d, gpointer userData) 
+static int IsValidSMSforFolder(gpointer d, gpointer userData) 
 {
-	GSM_SMSMessage *data = (GSM_SMSMessage *) d;
+	GSM_SMSMessage *data = (GSM_SMSMessage *)d;
 	int folder_idx;
 
 	if (data->MemoryType) {
-		folder_idx = data->MemoryType / 8;
+		folder_idx = data->MemoryType >> 3;
 		folder_idx--;
 		if (folder_idx == SMS.currentBox) return 1;
-	}
-	else {
+	} else {
 		if ((data->Type == SMS_Deliver && !SMS.currentBox) ||
 		(data->Type == SMS_Delivery_Report && !SMS.currentBox) || 
 		(data->Type == SMS_Submit && SMS.currentBox)) return 1;
@@ -247,88 +246,88 @@ static void InsertFolderElement (gpointer d, gpointer userData)
 		gchar *row[4];
 		if (data->Type == SMS_Delivery_Report) {
 			if (data->Status == SMS_Read) 
-				row[0] = g_strdup (_("read report"));
+				row[0] = g_strdup(_("read report"));
 			else 
-				row[0] = g_strdup (_("unread report"));
+				row[0] = g_strdup(_("unread report"));
 			dt = &(data->SMSCTime);
 		} else if (data->Type == SMS_Picture) {
-			if (data->Status == SMS_Read) row[0] = g_strdup (_("seen picture"));
-			if (data->Status == SMS_Unread) row[0] = g_strdup (_("unseen picture"));  
-			if (data->Status == SMS_Sent) row[0] = g_strdup (_("sent picture"));  
-			if (data->Status == SMS_Unsent) row[0] = g_strdup (_("not sent picture"));
+			if (data->Status == SMS_Read) row[0] = g_strdup(_("seen picture"));
+			if (data->Status == SMS_Unread) row[0] = g_strdup(_("unseen picture"));  
+			if (data->Status == SMS_Sent) row[0] = g_strdup(_("sent picture"));  
+			if (data->Status == SMS_Unsent) row[0] = g_strdup(_("not sent picture"));
 		} else {
-			if (data->Status == SMS_Read) row[0] = g_strdup (_("read"));
-			if (data->Status == SMS_Unread) row[0] = g_strdup (_("unread"));  
-			if (data->Status == SMS_Sent) row[0] = g_strdup (_("sent"));  
-			if (data->Status == SMS_Unsent) row[0] = g_strdup (_("not sent"));
+			if (data->Status == SMS_Read) row[0] = g_strdup(_("read"));
+			if (data->Status == SMS_Unread) row[0] = g_strdup(_("unread"));  
+			if (data->Status == SMS_Sent) row[0] = g_strdup(_("sent"));  
+			if (data->Status == SMS_Unsent) row[0] = g_strdup(_("not sent"));
 			dt = &(data->Time);
 		}
 
 		if (dt) {
 			if (dt->Timezone)
-				row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d %c%02d00",
+				row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d %c%02d00",
 						dt->Day, dt->Month, dt->Year,
 						dt->Hour, dt->Minute, dt->Second,
-						dt->Timezone > 0 ? '+' : '-', abs (dt->Timezone));
+						dt->Timezone > 0 ? '+' : '-', abs(dt->Timezone));
 			else
-				row[1] = g_strdup_printf ("%02d/%02d/%02d %02d:%02d:%02d",
+				row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d",
 						dt->Day, dt->Month, dt->Year,
 						dt->Hour, dt->Minute, dt->Second);
 		}
 
-		row[2] = GUI_GetName (data->RemoteNumber.number);
+		row[2] = GUI_GetName(data->RemoteNumber.number);
 		if (row[2] == NULL) row[2] = data->RemoteNumber.number;
 		if (data->Type == SMS_Picture) 
 			row[3] = g_strdup(_("Picture Message"));
 		else
 			row[3] = data->UserData[0].u.Text;
-		gtk_clist_append (GTK_CLIST (SMS.smsClist), row);
-		msgPtrs = (MessagePointers *) g_malloc (sizeof (MessagePointers));
+		gtk_clist_append(GTK_CLIST (SMS.smsClist), row);
+		msgPtrs = (MessagePointers *)g_malloc(sizeof(MessagePointers));
 		msgPtrs->count = msgPtrs->number = 1;
 		msgPtrs->validity = data->Validity.u.Relative;
 /*		msgPtrs->class = data->Class; */
-		strcpy (msgPtrs->sender, data->RemoteNumber.number);
-		msgPtrs->msgPtr = (gint *) g_malloc (sizeof (gint));
+		strcpy(msgPtrs->sender, data->RemoteNumber.number);
+		msgPtrs->msgPtr = (gint *)g_malloc(sizeof(gint));
 		*(msgPtrs->msgPtr) = (int)data->Number;
-		gtk_clist_set_row_data_full (GTK_CLIST (SMS.smsClist), SMS.row_i++,
-						msgPtrs, DestroyMsgPtrs);
-		g_free (row[0]);
-		if (row[1]) g_free (row[1]);
+		gtk_clist_set_row_data_full(GTK_CLIST(SMS.smsClist), SMS.row_i++,
+					    msgPtrs, DestroyMsgPtrs);
+		g_free(row[0]);
+		g_free(row[1]);
 	}
 }
 
 static inline void RefreshFolder(void)
 {
-	gtk_clist_freeze (GTK_CLIST (SMS.smsClist));
+	gtk_clist_freeze(GTK_CLIST(SMS.smsClist));
 
-	gtk_clist_clear (GTK_CLIST (SMS.smsClist));
+	gtk_clist_clear(GTK_CLIST(SMS.smsClist));
 
 	SMS.row_i = 0;
-	g_slist_foreach (phoneMonitor.sms.messages, InsertFolderElement, (gpointer) NULL);
+	g_slist_foreach(phoneMonitor.sms.messages, InsertFolderElement, (gpointer)NULL);
 
-	gtk_clist_sort (GTK_CLIST (SMS.smsClist));
-	gtk_clist_thaw (GTK_CLIST (SMS.smsClist));
+	gtk_clist_sort(GTK_CLIST(SMS.smsClist));
+	gtk_clist_thaw(GTK_CLIST(SMS.smsClist));
 }
 
-inline void GUI_RefreshMessageWindow (void)
+inline void GUI_RefreshMessageWindow(void)
 {
-	if (!GTK_WIDGET_VISIBLE (GUI_SMSWindow)) return;
+	if (!GTK_WIDGET_VISIBLE(GUI_SMSWindow)) return;
 	RefreshFolder ();
 }
 
 
-static void SelectTreeItem (GtkWidget *item, gpointer data)
+static void SelectTreeItem(GtkWidget *item, gpointer data)
 {
-	SMS.currentBox = GPOINTER_TO_INT (data);
-	GUI_RefreshMessageWindow ();
+	SMS.currentBox = GPOINTER_TO_INT(data);
+	GUI_RefreshMessageWindow();
 }
 
 
-static void ClickEntry (GtkWidget      *clist,
-                        gint            row,
-                        gint            column,
-                        GdkEventButton *event,
-                        gpointer        data )
+static void ClickEntry(GtkWidget      *clist,
+		       gint            row,
+		       gint            column,
+		       GdkEventButton *event,
+		       gpointer        data )
 {
   gchar *buf;
 

@@ -122,47 +122,40 @@ void GUI_InitSMSFolders(void)
 	}
 }
 
-static void InitModelInf (void)
+static GSM_Error InitModelInf(void)
 {
 	gchar buf[64];
 	GSM_Error error;
-	register gint i = 0;
 	GSM_Data data;
 
 	GSM_DataClear(&data);
 	data.Model = buf;
 	error = SM_Functions(GOP_GetModel, &data, &statemachine);
 
-	if (error == GE_NONE) {
-		g_free(phoneMonitor.phone.model);
-		phoneMonitor.phone.version = g_strdup(buf);
+	if (error != GE_NONE) return error;
 
-		if (phoneMonitor.phone.model == NULL)
-			phoneMonitor.phone.model = g_strdup (_("unknown"));
+	g_free(phoneMonitor.phone.model);
+	phoneMonitor.phone.version = g_strdup(buf);
+	phoneMonitor.phone.model = GetModel(buf);
+	if (phoneMonitor.phone.model == NULL)
+		phoneMonitor.phone.model = g_strdup(_("unknown"));
+	phoneMonitor.supported = GetPhoneModel(buf)->flags;
 
-		phoneMonitor.supported = GetPhoneModel(buf)->flags;
-	}
-
-	i = 0;
 	data.Revision = buf;
 	error = SM_Functions(GOP_GetRevision, &data, &statemachine);
 
-	if (error == GE_NONE) {
-		g_free(phoneMonitor.phone.revision);
-		phoneMonitor.phone.revision = g_strdup (buf);
-	}
+	if (error != GE_NONE) return error;
 
-/* FIXME: Uncomment it when it works in 6110 series
-	i = 0;
+	g_free(phoneMonitor.phone.revision);
+	phoneMonitor.phone.revision = g_strdup(buf);
+
 	data.Imei = buf;
-	while ((error = SM_Functions(GOP_GetImei, &data, &statemachine)) != GE_NONE && i++ < 5)
-		sleep(1);
-*/
-	if (error == GE_NONE) {
-		g_free(phoneMonitor.phone.imei);
-		phoneMonitor.phone.imei = g_strdup(buf);
-	}
+	error = SM_Functions(GOP_GetImei, &data, &statemachine);
 
+	if (error != GE_NONE) return error;
+
+	g_free(phoneMonitor.phone.imei);
+	phoneMonitor.phone.imei = g_strdup(buf);
 
 #ifdef XDEBUG
 	g_print("Version: %s\n", phoneMonitor.phone.version);
@@ -170,6 +163,7 @@ static void InitModelInf (void)
 	g_print("IMEI: %s\n", phoneMonitor.phone.imei);
 	g_print("Revision: %s\n", phoneMonitor.phone.revision);
 #endif
+	return GE_NONE;
 }
 
 
@@ -200,9 +194,7 @@ static GSM_Error fbusinit(bool enable_monitoring)
 		return (error);
 	}
 
-	InitModelInf();
-
-	return GE_NONE;
+	return InitModelInf();
 }
 
 
@@ -282,10 +274,10 @@ static void RefreshSMS (const gint number)
 	g_print ("RefreshSMS is running...\n");
 # endif
 
-	pthread_mutex_lock (&smsMutex);
-	FreeArray (&(phoneMonitor.sms.messages));
+	pthread_mutex_lock(&smsMutex);
+	FreeArray(&(phoneMonitor.sms.messages));
 	phoneMonitor.sms.number = 0;
-	pthread_mutex_unlock (&smsMutex);
+	pthread_mutex_unlock(&smsMutex);
 	if (phoneMonitor.supported & PM_CALLERGROUP) 
 		current_folder = GMT_IN; /* We have a phone with folder support -> Inbox */
 	else 
@@ -295,10 +287,10 @@ static void RefreshSMS (const gint number)
 	while (1) {
 		GSM_Data gdat;
 		GSM_DataClear(&gdat);
-	  	msg = g_malloc (sizeof(GSM_SMSMessage));
-		fld = g_malloc (sizeof(SMS_Folder));
-		list = g_malloc (sizeof(SMS_FolderList));
-		raw = g_malloc (sizeof(GSM_RawData));
+	  	msg = g_malloc(sizeof(GSM_SMSMessage));
+		fld = g_malloc(sizeof(SMS_Folder));
+		list = g_malloc(sizeof(SMS_FolderList));
+		raw = g_malloc(sizeof(GSM_RawData));
 		msg->MemoryType = current_folder;
 		if ((phoneMonitor.supported & PM_FOLDERS) && (locations != -1))
 			msg->Number = msg_num;
@@ -310,24 +302,24 @@ static void RefreshSMS (const gint number)
 		gdat.SMSFolderList = list;
 		gdat.RawData = raw;
 		if (((error = GetSMS(&gdat, &statemachine)) == GE_NONE) && i != 0) {
-			g_print ("Found valid SMS ...\n");
-			pthread_mutex_lock (&smsMutex);
-			phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
+			dprintf("Found valid SMS ...\n");
+			pthread_mutex_lock(&smsMutex);
+			phoneMonitor.sms.messages = g_slist_append(phoneMonitor.sms.messages, msg);
 			phoneMonitor.sms.number++;
-			pthread_mutex_unlock (&smsMutex);
+			pthread_mutex_unlock(&smsMutex);
 			if (phoneMonitor.sms.number == number) return;
 		} else if (error == GE_INVALIDSMSLOCATION && i != 0) {  /* All positions are read */
-			g_free (msg);
-			g_free (list);
-			g_free (raw);
-			g_free (fld);
+			g_free(msg);
+			g_free(list);
+			g_free(raw);
+			g_free(fld);
 			break;
 		} else {
-			g_free (msg);
-			g_free (list);
-			g_free (raw);
-			g_free (fld);
-/*			usleep (750000); */
+			g_free(msg);
+			g_free(list);
+			g_free(raw);
+			g_free(fld);
+			usleep(750000);
 		}
 		if (phoneMonitor.supported & PM_FOLDERS) {
 			if (i == MAX_SMS_MESSAGES || i == locations) {
@@ -344,26 +336,22 @@ static void RefreshSMS (const gint number)
 	}
 }
 
-
-static gint A_GetMemoryStatus (gpointer data)
+static gint A_GetMemoryStatus(gpointer data)
 {
-  GSM_Error error;
-  D_MemoryStatus *ms = (D_MemoryStatus *) data;
-  GSM_Data gdat;
+	GSM_Error error;
+	D_MemoryStatus *ms = (D_MemoryStatus *)data;
+	GSM_Data gdat;
 
-  error = ms->status = GE_UNKNOWN;
-
-  if (ms)
-  {
-    GSM_DataClear(&gdat);	  
-    pthread_mutex_lock (&memoryMutex);
-    gdat.MemoryStatus=&(ms->memoryStatus);
-    error = ms->status = SM_Functions(GOP_GetMemoryStatus,&gdat,&statemachine);
-    pthread_cond_signal (&memoryCond);
-    pthread_mutex_unlock (&memoryMutex);
-  }
-
-  return (error);
+	error = ms->status = GE_UNKNOWN;
+	if (ms) {
+		GSM_DataClear(&gdat);	  
+		pthread_mutex_lock(&memoryMutex);
+		gdat.MemoryStatus = &(ms->memoryStatus);
+		error = ms->status = SM_Functions(GOP_GetMemoryStatus, &gdat, &statemachine);
+		pthread_cond_signal(&memoryCond);
+		pthread_mutex_unlock(&memoryMutex);
+	}
+	return (error);
 }
 
 
@@ -1075,7 +1063,7 @@ void *GUI_Connect (void *a)
       {
         phoneMonitor.working = _("Refreshing SMSes...");
         phoneMonitor.sms.unRead = SMSStatus.Unread; 
-	RefreshSMS (SMSStatus.Number);
+	RefreshSMS(SMSStatus.Number);
         phoneMonitor.working = NULL;
       }
 
