@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.11  2001-01-29 15:22:20  machek
+  Revision 1.12  2001-02-02 08:09:57  ja
+  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
+
+  Revision 1.11  2001/01/29 15:22:20  machek
   Use integer as bitfield instead of struct of int:1.
 
   Be able to read phonebook saved in gnokii format from xgnokii.
@@ -885,14 +888,16 @@ void *GUI_Connect (void *a)
 
     if (GSM->GetRFLevel (&rf_units, &phoneMonitor.rfLevel) != GE_NONE)
       phoneMonitor.rfLevel = -1;
-    if (rf_units==GRF_Percentage) phoneMonitor.rfLevel/=20.0;
-   
-    if (GSM->GetPowerSource(&phoneMonitor.powerSource) == GE_NONE && phoneMonitor.powerSource == GPS_ACDC) {
-      phoneMonitor.batteryLevel=((int) phoneMonitor.batteryLevel+1)%5;
-    }
-    else if (GSM->GetBatteryLevel(&batt_units, &phoneMonitor.batteryLevel) != GE_NONE)
-      phoneMonitor.batteryLevel=-1;
-    if (batt_units==GBU_Percentage) phoneMonitor.batteryLevel/=20;
+    if (rf_units == GRF_Percentage)
+      phoneMonitor.rfLevel /= 20.0;
+    
+    if (GSM->GetPowerSource(&phoneMonitor.powerSource) == GE_NONE 
+        && phoneMonitor.powerSource == GPS_ACDC)
+      phoneMonitor.batteryLevel = ((gint) phoneMonitor.batteryLevel + 1) % 5;
+    else if (GSM->GetBatteryLevel (&batt_units, &phoneMonitor.batteryLevel) != GE_NONE)
+      phoneMonitor.batteryLevel = -1;
+    if (batt_units == GBU_Percentage)
+      phoneMonitor.batteryLevel /= 20;
 
     if (GSM->GetAlarm (0, &Alarm) == GE_NONE && Alarm.AlarmEnabled != 0)
       phoneMonitor.alarm = TRUE;

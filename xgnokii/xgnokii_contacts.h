@@ -8,9 +8,13 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Mon Sep 22 1999
-  Modified by Jan Derfinak
+  $Id$
+  
+  $Log$
+  Revision 1.12  2001-02-02 08:09:57  ja
+  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
 
+  
 */
 
 #ifndef XGNOKII_CONTACTS_H
@@ -67,6 +71,14 @@ typedef struct {
   gint      row;
 } EditEntryData;
 
+
+typedef struct {
+  PhonebookEntry *pbEntry;
+  GtkWidget *dialog;
+  GtkWidget *clist;
+} EditNumbersData;
+
+
 /* Structure to hold information for FindEntry dialog. */
 typedef struct {
   GtkWidget *dialog;
@@ -75,10 +87,12 @@ typedef struct {
   GtkWidget *numberB;
 } FindEntryData;
 
+
 /* Contains fileName for Export dialog. */
 typedef struct {
   gchar *fileName;
 } ExportDialogData;
+
 
 /* Hold widgets for SelectContactDialog */
 typedef struct {
@@ -89,9 +103,11 @@ typedef struct {
   GtkWidget *cancelButton;
 } SelectContactData;
 
+
 /* Max length for status line. (Line that shows used/max information for
    memories). */
 #define STATUS_INFO_LENGTH	40
+
 
 /* Structure to hold information for status line (bottom line of window) */
 typedef struct {
@@ -101,6 +117,7 @@ typedef struct {
   gint ch_SM:1;				/* 1 if phone SIM was changed */
 } StatusInfo;
 
+
 /* Structure to hold information for progress dialog */
 typedef struct {
   GtkWidget *dialog;
@@ -108,11 +125,13 @@ typedef struct {
   GtkWidget *pbarSM;
 } ProgressDialog;
 
+
 /* Search type. */
 typedef enum {
   FIND_NAME = 0,
   FIND_NUMBER
 } FindType;
+
 
 typedef struct {
   gchar pattern[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];
@@ -120,10 +139,12 @@ typedef struct {
   FindType type;
 } FindEntryStruct;
 
+
 typedef struct {
   GdkPixmap *simMemPix, *phoneMemPix;
   GdkBitmap *mask;
 } MemoryPixmaps;
+
 
 extern void GUI_CreateContactsWindow (void);
 

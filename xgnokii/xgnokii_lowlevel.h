@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.7  2001-01-29 15:22:22  machek
+  Revision 1.8  2001-02-02 08:09:57  ja
+  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
+
+  Revision 1.7  2001/01/29 15:22:22  machek
   Use integer as bitfield instead of struct of int:1.
 
   Be able to read phonebook saved in gnokii format from xgnokii.
@@ -171,7 +174,7 @@ typedef struct {
     gchar screen4[NETMON_SCREEN_LENGTH];
     gchar screen5[NETMON_SCREEN_LENGTH];
   } netmonitor;
-  int supported;
+  gint supported;
 } PhoneMonitor;
 
 extern pthread_t monitor_th;

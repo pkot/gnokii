@@ -8,8 +8,12 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Tue Jul  4 23:26:47 CEST 2000
-  Modified by Pawe³ Kot <pkot@linuxnews.pl>
+  $Id$
+  
+  $Log$
+  Revision 1.13  2001-02-02 08:09:56  ja
+  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
+
 
 */
 
@@ -37,9 +41,6 @@ static PhoneModel models[] = {
 	{"1611",  "NHE-5", 0 },
 	{"2110i", "NHE-4", PM_SMS },
 	{"2148i", "NHK-4", 0 },
-	{"8810",  "NSE-6", PM_SMS | PM_DTMF | PM_DATA },
-	{"8110i", "0423",  PM_SMS | PM_DTMF | PM_DATA }, /* Guess for NHE-6 */
-	{"8110",  "0423" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-6BX */
 	{"3110",  "0310" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-8 */
 	{"3210",  "NSE-8", PM_SMS | PM_DTMF },
 	{"3210",  "NSE-9", PM_SMS | PM_DTMF },
@@ -56,7 +57,11 @@ static PhoneModel models[] = {
 	{"616x",  "NSW-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"6185",  "NSD-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
 	{"6190",  "NSB-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL | PM_AUTHENTICATION },
+	{"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_EXTPBK},
 	{"7110",  "NSE-5", PM_CALLERGROUP | PM_SPEEDDIAL | PM_EXTPBK },
+	{"8810",  "NSE-6", PM_SMS | PM_DTMF | PM_DATA },
+	{"8110i", "0423",  PM_SMS | PM_DTMF | PM_DATA }, /* Guess for NHE-6 */
+	{"8110",  "0423" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-6BX */
 	{"9000i", "RAE-4", 0 },
 	{"9110",  "RAE-2", 0 },
 	{"550",	  "THF-10", 0 },

@@ -8,9 +8,13 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sun Dec 17 2000
-  Modified by Jan Derfinak
+  $Id$
+  
+  $Log$
+  Revision 1.2  2001-02-02 08:09:57  ja
+  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
 
+  
 */
 
 #ifndef XGNOKII_LOWLEVEL_H
@@ -49,16 +53,7 @@ typedef struct {
     gint    number;
     GSList *messages;
   } sms;
-  struct {
-    bool callerGroups:1;
-    bool sms:1;
-    bool netMonitor:1;
-    bool dtmf:1;
-    bool speedDial:1;
-    bool keyboard:1;
-    bool calendar:1;
-    bool data:1;
-  } supported;
+  gint supported;
 } PhoneMonitor;
 
 extern pthread_t monitor_th;

@@ -8,9 +8,13 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  Last modification: Sun Dec 17 2000
-  Modified by Jan Derfinak
+  $Id$
+  
+  $Log$
+  Revision 1.2  2001-02-02 08:09:57  ja
+  New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
 
+  
 */
 
 #include <unistd.h>
@@ -82,14 +86,7 @@ static void InitModelInf (void)
     if (phoneMonitor.phone.model == NULL)
       phoneMonitor.phone.model = g_strdup (_("unknown"));
 
-    phoneMonitor.supported.callerGroups = CallerGroupSupported (buf);
-    phoneMonitor.supported.netMonitor = NetmonitorSupported (buf);
-    phoneMonitor.supported.sms = SMSSupported (buf);
-    phoneMonitor.supported.dtmf = DTMFSupported (buf);
-    phoneMonitor.supported.speedDial = SpeedDialSupported (buf);
-    phoneMonitor.supported.keyboard = KeyboardSupported (buf);
-    phoneMonitor.supported.calendar = CalendarSupported (buf);
-    phoneMonitor.supported.data = DataSupported (buf);
+    phoneMonitor.supported = GetPhoneModel(buf)->flags;
   }
 
   i = 0;
@@ -165,14 +162,7 @@ void InitPhoneMonitor (void)
   phoneMonitor.phone.version = phoneMonitor.phone.model;
   phoneMonitor.phone.revision = g_strdup (_("unknown"));
   phoneMonitor.phone.imei = g_strdup (_("unknown"));
-  phoneMonitor.supported.callerGroups = FALSE;
-  phoneMonitor.supported.netMonitor = FALSE;
-  phoneMonitor.supported.sms = FALSE;
-  phoneMonitor.supported.dtmf = FALSE;
-  phoneMonitor.supported.speedDial = FALSE;
-  phoneMonitor.supported.keyboard = FALSE;
-  phoneMonitor.supported.calendar = FALSE;
-  phoneMonitor.supported.data = FALSE;
+  phoneMonitor.supported = 0;
   phoneMonitor.working = FALSE;
   phoneMonitor.sms.unRead = phoneMonitor.sms.number = 0;
   phoneMonitor.sms.messages = NULL;

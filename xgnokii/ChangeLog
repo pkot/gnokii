@@ -1,3 +1,6 @@
+* Fri 02 Feb 2001 Jan Derfinak <ja@mail.upjs.sk>
+- New dialoges for 6210/7110 in contacts window.
+
 * Sat 13 Jan 2001 Jan Derfinak <ja@mail.upjs.sk>
 - Patch from Pavel Machek <pavel@ucw.cz>. It provides better feedback to user,
   puts GPL into copyright (it belongs there), and fixes docs.
