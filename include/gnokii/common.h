@@ -437,6 +437,48 @@ typedef struct {
 	unsigned int caller_logo_width;
 } gn_phone;
 
+typedef enum {
+	GN_PROFILE_MESSAGE_NoTone	= 0x00,
+	GN_PROFILE_MESSAGE_Standard	= 0x01,
+	GN_PROFILE_MESSAGE_Special	= 0x02,
+	GN_PROFILE_MESSAGE_BeepOnce	= 0x03,
+	GN_PROFILE_MESSAGE_Ascending	= 0x04
+} gn_profile_message_type;
+
+typedef enum {
+	GN_PROFILE_WARNING_Off		= 0xff,
+	GN_PROFILE_WARNING_On		= 0x04
+} gn_profile_warning_type;
+
+typedef enum {
+	GN_PROFILE_VIBRATION_Off	= 0x00,
+	GN_PROFILE_VIBRATION_On		= 0x01
+} gn_profile_vibration_type;
+
+typedef enum {
+	GN_PROFILE_CALLALERT_Ringing		= 0x01,
+	GN_PROFILE_CALLALERT_BeepOnce		= 0x02,
+	GN_PROFILE_CALLALERT_Off		= 0x04,
+	GN_PROFILE_CALLALERT_RingOnce		= 0x05,
+	GN_PROFILE_CALLALERT_Ascending		= 0x06,
+	GN_PROFILE_CALLALERT_CallerGroups	= 0x07
+} gn_profile_callalert_type;
+
+typedef enum {
+	GN_PROFILE_KEYVOL_Off		= 0xff,
+	GN_PROFILE_KEYVOL_Level1	= 0x00,
+	GN_PROFILE_KEYVOL_Level2	= 0x01,
+	GN_PROFILE_KEYVOL_Level3	= 0x02
+} gn_profile_keyvol_type;
+
+typedef enum {
+	GN_PROFILE_VOLUME_Level1	= 0x06,
+	GN_PROFILE_VOLUME_Level2	= 0x07,
+	GN_PROFILE_VOLUME_Level3	= 0x08,
+	GN_PROFILE_VOLUME_Level4	= 0x09,
+	GN_PROFILE_VOLUME_Level5	= 0x0a,
+} gn_profile_volume_type;
+
 /* Structure to hold profile entries. */
 typedef struct {
 	int number;           /* The number of the profile. */

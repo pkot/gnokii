@@ -167,12 +167,12 @@ static char *lockfile = NULL;
 static char *profile_get_call_alert_string(int code)
 {
 	switch (code) {
-	case PROFILE_CALLALERT_RINGING:		return "Ringing";
-	case PROFILE_CALLALERT_ASCENDING:	return "Ascending";
-	case PROFILE_CALLALERT_RINGONCE:	return "Ring once";
-	case PROFILE_CALLALERT_BEEPONCE:	return "Beep once";
-	case PROFILE_CALLALERT_CALLERGROUPS:	return "Caller groups";
-	case PROFILE_CALLALERT_OFF:		return "Off";
+	case GN_PROFILE_CALLALERT_Ringing:	return "Ringing";
+	case GN_PROFILE_CALLALERT_Ascending:	return "Ascending";
+	case GN_PROFILE_CALLALERT_RingOnce:	return "Ring once";
+	case GN_PROFILE_CALLALERT_BeepOnce:	return "Beep once";
+	case GN_PROFILE_CALLALERT_CallerGroups:	return "Caller groups";
+	case GN_PROFILE_CALLALERT_Off:		return "Off";
 	default:				return "Unknown";
 	}
 }
@@ -180,11 +180,11 @@ static char *profile_get_call_alert_string(int code)
 static char *profile_get_volume_string(int code)
 {
 	switch (code) {
-	case PROFILE_VOLUME_LEVEL1:		return "Level 1";
-	case PROFILE_VOLUME_LEVEL2:		return "Level 2";
-	case PROFILE_VOLUME_LEVEL3:		return "Level 3";
-	case PROFILE_VOLUME_LEVEL4:		return "Level 4";
-	case PROFILE_VOLUME_LEVEL5:		return "Level 5";
+	case GN_PROFILE_VOLUME_Level1:		return "Level 1";
+	case GN_PROFILE_VOLUME_Level2:		return "Level 2";
+	case GN_PROFILE_VOLUME_Level3:		return "Level 3";
+	case GN_PROFILE_VOLUME_Level4:		return "Level 4";
+	case GN_PROFILE_VOLUME_Level5:		return "Level 5";
 	default:				return "Unknown";
 	}
 }
@@ -192,10 +192,10 @@ static char *profile_get_volume_string(int code)
 static char *profile_get_keypad_tone_string(int code)
 {
 	switch (code) {
-	case PROFILE_KEYPAD_OFF:		return "Off";
-	case PROFILE_KEYPAD_LEVEL1:		return "Level 1";
-	case PROFILE_KEYPAD_LEVEL2:		return "Level 2";
-	case PROFILE_KEYPAD_LEVEL3:		return "Level 3";
+	case GN_PROFILE_KEYVOL_Off:		return "Off";
+	case GN_PROFILE_KEYVOL_Level1:		return "Level 1";
+	case GN_PROFILE_KEYVOL_Level2:		return "Level 2";
+	case GN_PROFILE_KEYVOL_Level3:		return "Level 3";
 	default:				return "Unknown";
 	}
 }
@@ -203,11 +203,11 @@ static char *profile_get_keypad_tone_string(int code)
 static char *profile_get_message_tone_string(int code)
 {
 	switch (code) {
-	case PROFILE_MESSAGE_NOTONE:		return "No tone";
-	case PROFILE_MESSAGE_STANDARD:		return "Standard";
-	case PROFILE_MESSAGE_SPECIAL:		return "Special";
-	case PROFILE_MESSAGE_BEEPONCE:		return "Beep once";
-	case PROFILE_MESSAGE_ASCENDING:		return "Ascending";
+	case GN_PROFILE_MESSAGE_NoTone:		return "No tone";
+	case GN_PROFILE_MESSAGE_Standard:	return "Standard";
+	case GN_PROFILE_MESSAGE_Special:	return "Special";
+	case GN_PROFILE_MESSAGE_BeepOnce:	return "Beep once";
+	case GN_PROFILE_MESSAGE_Ascending:	return "Ascending";
 	default:				return "Unknown";
 	}
 }
@@ -215,8 +215,8 @@ static char *profile_get_message_tone_string(int code)
 static char *profile_get_warning_tone_string(int code)
 {
 	switch (code) {
-	case PROFILE_WARNING_OFF:		return "Off";
-	case PROFILE_WARNING_ON:		return "On";
+	case GN_PROFILE_WARNING_Off:		return "Off";
+	case GN_PROFILE_WARNING_On:		return "On";
 	default:				return "Unknown";
 	}
 }
@@ -224,8 +224,8 @@ static char *profile_get_warning_tone_string(int code)
 static char *profile_get_vibration_string(int code)
 {
 	switch (code) {
-	case PROFILE_VIBRATION_OFF:		return "Off";
-	case PROFILE_VIBRATION_ON:		return "On";
+	case GN_PROFILE_VIBRATION_Off:		return "Off";
+	case GN_PROFILE_VIBRATION_On:		return "On";
 	default:				return "Unknown";
 	}
 }

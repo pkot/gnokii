@@ -28,44 +28,6 @@
 
 */
 
-/* Constants for Profiles. */
-
-#define PROFILE_OFF  0x00
-#define PROFILE_ON   0x01
-
-#define PROFILE_MESSAGE_NOTONE     0x00
-#define PROFILE_MESSAGE_STANDARD   0x01
-#define PROFILE_MESSAGE_SPECIAL    0x02
-#define PROFILE_MESSAGE_BEEPONCE   0x03
-#define PROFILE_MESSAGE_ASCENDING  0x04
-
-#define PROFILE_WARNING_OFF  0xff
-#define PROFILE_WARNING_ON   0x04
-
-/* FIXME: Are these values correct or not? */
-
-#define PROFILE_VIBRATION_OFF  0x00
-#define PROFILE_VIBRATION_ON   0x01
-
-#define PROFILE_CALLALERT_RINGING       0x01
-#define PROFILE_CALLALERT_BEEPONCE      0x02
-#define PROFILE_CALLALERT_OFF           0x04
-#define PROFILE_CALLALERT_RINGONCE      0x05
-#define PROFILE_CALLALERT_ASCENDING     0x06
-#define PROFILE_CALLALERT_CALLERGROUPS  0x07
-
-#define PROFILE_KEYPAD_OFF     0xff
-#define PROFILE_KEYPAD_LEVEL1  0x00
-#define PROFILE_KEYPAD_LEVEL2  0x01
-#define PROFILE_KEYPAD_LEVEL3  0x02
-//in 5110 I had also once 0x03
-
-#define PROFILE_VOLUME_LEVEL1  0x06
-#define PROFILE_VOLUME_LEVEL2  0x07
-#define PROFILE_VOLUME_LEVEL3  0x08
-#define PROFILE_VOLUME_LEVEL4  0x09
-#define PROFILE_VOLUME_LEVEL5  0x0a
-
 /* Nokia ringtones codes. */
 
 char *RingingTones[] = {

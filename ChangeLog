@@ -9,6 +9,7 @@
                                                          (Pawel Kot)
     o use #defines instead of magic numbers when handling the
       phonebook                                          (Pawel Kot)
+    o profile constants moved from gnokii-app.h     (BORBELY Zoltan)
  * statemachine changes
     o add function sm_block_ack(), needed by nk3110  (Osma Suominen)
     o remove hack that made it possible to call sm_block*
