@@ -1,3 +1,19 @@
+0.4.0pre15(not released yet)
+==========
+ * Really apply all fixes from Jan Kratochvil             (Pawel Kot)
+ * 6110 series updates
+    o PressPhoneKey, ReleasePhoneKey implemented     (BORBELY Zoltan)
+    o EnterChar implemented                          (BORBELY Zoltan)
+    o workarounds for the phones (3210, 3310, ...) not supporting
+    some types of the frames (0x64, keyboard events) that were
+    required during the initialization                    (Pawel Kot)
+    o added #ifdefs for every occurence of the security function
+                                                          (Pawel Kot)
+ * gnokii updates
+    o --keysequence updated to the new API           (BORBELY Zoltan)
+    o --enterchar implemented                        (BORBELY Zoltan)
+
+
 0.4.0pre14
 ==========
  * fixed a problem with a missing headers (sys/uio.h and error.h)
