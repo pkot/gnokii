@@ -13,7 +13,11 @@
   Library for parsing and creating Short Messages (SMS).
 
   $Log$
-  Revision 1.12  2001-11-22 17:56:53  pkot
+  Revision 1.13  2001-11-23 22:07:44  machek
+  Fix SMS receiving to work, again. Unfortunately, it is not possible to
+  reuse much of gsm-sms.c...
+
+  Revision 1.12  2001/11/22 17:56:53  pkot
   smslib update. sms sending
 
   Revision 1.11  2001/11/20 16:22:22  pkot
@@ -189,7 +193,7 @@ static char *PrintDateTime(u8 *Number)
         return Buffer;
 }
 
-static SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
+SMS_DateTime *UnpackDateTime(u8 *Number, SMS_DateTime *dt)
 {
         dt->Year     =  10 * (Number[0] & 0x0f) + (Number[0] >> 4);
 	if (dt->Year < 70) dt->Year += 2000;

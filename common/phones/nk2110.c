@@ -11,7 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.15  2001-11-15 12:10:57  pkot
+  Revision 1.16  2001-11-23 22:07:44  machek
+  Fix SMS receiving to work, again. Unfortunately, it is not possible to
+  reuse much of gsm-sms.c...
+
+  Revision 1.15  2001/11/15 12:10:57  pkot
   Removed a warning from 2110 compilation
 
   Revision 1.14  2001/11/09 13:49:12  pkot
@@ -388,33 +392,22 @@ static GSM_Error
 DecodeIncomingSMS(GSM_SMSMessage *m)
 {
 	GSM_Error error;
+	int len, i;
 
-	/* FIXME: Where do you keep the size of the received data??? */
-	/* FIXME: Probably we should use DecodeTextSMS here. Am I right? */
-	error = DecodePDUSMS((unsigned char *)SMSData, m, 256 /* This is wrong */);
+	error = GE_NONE;
+/*	Should be moved to gsm-sms.c */
 
-/*	Moved to gsm-sms.c
 	ddprintf("Status: " );
 	switch (SMSData[3]) {
-	case 7: m->Type = GST_MO; m->Status = GSS_NOTSENTREAD; ddprintf("not sent\n"); break;
-	case 5: m->Type = GST_MO; m->Status = GSS_SENTREAD; ddprintf("sent\n"); break;
-	case 3: m->Type = GST_MT; m->Status = GSS_NOTSENTREAD; ddprintf("not read\n"); break;
-	case 1: m->Type = GST_MT; m->Status = GSS_SENTREAD; ddprintf("read\n"); break;
+	case 7: m->Type = SMS_Submit;  /* m->Status = GSS_NOTSENTREAD; */ ddprintf("not sent\n"); break;
+	case 5: m->Type = SMS_Submit;  /* m->Status = GSS_SENTREAD;    */ ddprintf("sent\n"); break;
+	case 3: m->Type = SMS_Deliver; /* m->Status = GSS_NOTSENTREAD; */ ddprintf("not read\n"); break;
+	case 1: m->Type = SMS_Deliver; /* m->Status = GSS_SENTREAD;    */ ddprintf("read\n"); break;
 	}
 
-	Date is at SMSData[7]; this code is copied from fbus-6110.c
-	{
-		int offset = -32 + 7;
-		m->Time.Year=10*(SMSData[32+offset]&0x0f)+(SMSData[32+offset]>>4);
-		m->Time.Month=10*(SMSData[33+offset]&0x0f)+(SMSData[33+offset]>>4);
-		m->Time.Day=10*(SMSData[34+offset]&0x0f)+(SMSData[34+offset]>>4);
-		m->Time.Hour=10*(SMSData[35+offset]&0x0f)+(SMSData[35+offset]>>4);
-		m->Time.Minute=10*(SMSData[36+offset]&0x0f)+(SMSData[36+offset]>>4);
-		m->Time.Second=10*(SMSData[37+offset]&0x0f)+(SMSData[37+offset]>>4);
-		m->Time.Timezone=(10*(SMSData[38+offset]&0x07)+(SMSData[38+offset]>>4))/4;
-	}
+	UnpackDateTime(SMSData+7, &m->Time);
 
-	len = SMSData[14];
+	m->Length = len = SMSData[14];
 	ddprintf("%d bytes: ", len );
 	for (i = 0; i<len; i++)
 		ddprintf("%c", SMSData[15+i]);
@@ -424,14 +417,16 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 		eprintf("Magic not allowed\n");
 	memset(m->MessageText, 0, 161);
 	strncpy(m->MessageText, (void *) &SMSData[15], len);
-	m->Length = len;
+
 	ddprintf("Text is %s\n", m->MessageText);
 
+	/* 
 	Originator address is at 15+i,
 	   followed by message center addres (?)
+	*/
 	{
-		char *s = (char *) &SMSData[15+i];	We discard volatile. Make compiler quiet.
-		strcpy(m->Sender, s);
+		char *s = (char *) &SMSData[15+i];	/* We discard volatile. Make compiler quiet. */
+		strcpy(m->RemoteNumber.number, s);
 		s+=strlen(s)+1;
 		strcpy(m->MessageCenter.Number, s);
 		ddprintf("Sender = %s, MessageCenter = %s\n", m->Sender, m->MessageCenter.Name);
@@ -439,8 +434,8 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 
 	m->MessageCenter.No = 0;
 	strcpy(m->MessageCenter.Name, "(unknown)");
-	m->UDHType = GSM_NoUDH;
-*/
+	m->UDH_No = 0;
+
 	return error;
 }
 
@@ -1053,8 +1048,10 @@ static GSM_Error SMS_Slave(GSM_Statemachine *sm)
 				m.MemoryType = GMT_ME;
 				if (GetSMSMessage(&m) != GE_NONE)
 					eprintf("Could not find promissed message?\n");
-/*				else
-					slave_process(&m, SMSData[2]);*/
+#if 0
+				else
+					slave_process(&m, SMSData[2]);
+#endif
 			}
 			break;
 		default:
