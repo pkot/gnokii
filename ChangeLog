@@ -65,6 +65,7 @@
     o capabilities was missing from Nokia 6810     (BORBELY Zoltan)
     o add Nokia 7210 support                       (BORBELY Zoltan)
     o IrDA disabled for Nokia 6610i and 7210       (BORBELY Zoltan)
+    o add Nokia 6230 support                       (BORBELY Zoltan)
  * portability changes
     o NetBSD also fall into unices category     (Richard M Kreuter)
     o NetBSD needs the same tricks as OpenBSD and FreeBSD in
