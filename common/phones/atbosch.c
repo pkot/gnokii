@@ -22,10 +22,10 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright 2002 Ladislav Michl <ladis@psi.cz>
+  Copyright 2002 Ladislav Michl <ladis@linux-mips.org>
 
-  This file provides functions specific to at commands on ericsson
-  phones. See README for more details on supported mobile phones.
+  This file provides functions specific to AT commands on Bosch phones.
+  See README for more details on supported mobile phones.
 
 */
 
@@ -42,7 +42,7 @@
 static gn_error GetCharset(gn_data *data, struct gn_statemachine *state)
 {
 	AT_DRVINST(state)->charset = AT_CHAR_GSM;
-	strcpy(data->model, "GSM");
+	strcpy(AT_DRVINST(state)->charsetstr, "GSM");
 	return GN_ERR_NONE;
 }
 

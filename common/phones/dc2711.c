@@ -43,7 +43,7 @@
 static gn_error GetCharset(gn_data *data, struct gn_statemachine *state)
 {
 	AT_DRVINST(state)->charset = AT_CHAR_GSM;
-	strcpy(data->model, "GSM");
+	strcpy(AT_DRVINST(state)->charsetstr, "GSM");
 	return GN_ERR_NONE;
 }
 
