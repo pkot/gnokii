@@ -42,6 +42,7 @@
 #include "gnokii-internal.h"
 
 API struct gn_cfg_header *gn_cfg_info;
+static gn_config gn_config_default, gn_config_global;
 
 /* Read configuration information from a ".INI" style file */
 struct gn_cfg_header *cfg_read_file(const char *filename)
@@ -270,6 +271,108 @@ char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key,
 	return NULL;
 }
 
+static bool gn_cfg_load_psection(gn_config *cfg, const char *section, const gn_config *def)
+{
+	const char *val;
+	char ch;
+
+	memset(cfg, '\0', sizeof(gn_config));
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "model")))
+		strcpy(cfg->model, def->model);
+	else
+		snprintf(cfg->model, sizeof(cfg->model), "%s", val);
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "port")))
+		strcpy(cfg->port_device, def->port_device);
+	else
+		snprintf(cfg->port_device, sizeof(cfg->port_device), "%s", val);
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "connection")))
+		cfg->connection_type = def->connection_type;
+	else {
+		if (!strcasecmp(val, "serial"))
+			cfg->connection_type = GN_CT_Serial;
+		else if (!strcasecmp(val, "dau9p"))
+			cfg->connection_type = GN_CT_DAU9P;
+		else if (!strcasecmp(val, "dlr3p"))
+			cfg->connection_type = GN_CT_DLR3P;
+		else if (!strcasecmp(val, "infrared"))
+			cfg->connection_type = GN_CT_Infrared;
+		else if (!strcasecmp(val, "m2bus"))
+			cfg->connection_type = GN_CT_M2BUS;
+#ifdef HAVE_IRDA
+		else if (!strcasecmp(val, "irda"))
+			cfg->connection_type = GN_CT_Irda;
+#endif
+#ifndef WIN32
+		else if (!strcasecmp(val, "tcp"))
+			cfg->connection_type = GN_CT_TCP;
+		else if (!strcasecmp(val, "tekram"))
+			cfg->connection_type = GN_CT_Tekram;
+#endif
+		else {
+			fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "connection", val);
+			return false;
+		}
+	}
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "initlength")))
+		cfg->init_length = def->init_length;
+	else {
+		if (!strcasecmp(val, "default"))
+			cfg->init_length = 0;
+		else if (sscanf(val, " %d %c", &cfg->init_length, &ch) != 1) {
+			fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "initlength", val);
+			return false;
+		}
+	}
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "serial_baudrate")))
+		cfg->serial_baudrate = def->serial_baudrate;
+	else if (sscanf(val, " %d %c", &cfg->serial_baudrate, &ch) != 1) {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "serial_baudrate", val);
+		return false;
+	}
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "serial_write_usleep")))
+		cfg->serial_write_usleep = def->serial_write_usleep;
+	else if (sscanf(val, " %d %c", &cfg->serial_write_usleep, &ch) != 1) {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "serial_write_usleep", val);
+		return false;
+	}
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "handshake")))
+		cfg->hardware_handshake = def->hardware_handshake;
+	else if (!strcasecmp(val, "software") || !strcasecmp(val, "rtscts"))
+		cfg->hardware_handshake = false;
+	else if (!strcasecmp(val, "hardware") || !strcasecmp(val, "xonxoff"))
+		cfg->hardware_handshake = true;
+	else {
+		fprintf(stderr, _("Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value\n"),
+				 section, "handshake", "software", "hardware");
+		return false;
+	}
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "require_dcd")))
+		cfg->require_dcd = def->require_dcd;
+	else if (sscanf(val, " %d %c", &cfg->require_dcd, &ch) != 1) {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "require_dcd", val);
+		return false;
+	}
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "smsc_timeout")))
+		cfg->smsc_timeout = def->smsc_timeout;
+	else if (sscanf(val, " %d %c", &cfg->smsc_timeout, &ch) == 1)
+		cfg->smsc_timeout *= 10;
+	else {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\""), section, "smsc_timeout", val);
+		return false;
+	}
+
+	return true;
+}
+
 API int gn_cfg_readconfig(char **model, char **port, char **initlength,
 			  char **connection, char **bindir)
 {
@@ -277,6 +380,7 @@ API int gn_cfg_readconfig(char **model, char **port, char **initlength,
 	char rcfile[200];
 	char *default_connection = "serial";
 	char *default_bindir     = "/usr/local/sbin/";
+	char *val;
 
 	/* I know that it doesn't belong here but currently there is now generic
 	 * application init function anywhere.
@@ -318,17 +422,29 @@ API int gn_cfg_readconfig(char **model, char **port, char **initlength,
 	}
 #endif
 
-	(char *)*model = gn_cfg_get(gn_cfg_info, "global", "model");
-	if (!*model) {
-		fprintf(stderr, _("Config error - no model specified. Exiting now...\n"));
+	strcpy(gn_config_default.model, "");
+	strcpy(gn_config_default.port_device, "");
+	gn_config_default.connection_type = GN_CT_Serial;
+	gn_config_default.init_length = 0;
+	gn_config_default.serial_baudrate = 19200;
+	gn_config_default.serial_write_usleep = -1;
+	gn_config_default.hardware_handshake = false;
+	gn_config_default.require_dcd = false;
+	gn_config_default.smsc_timeout = -1;
+
+	if (!gn_cfg_load_psection(&gn_config_global, "global", &gn_config_default))
 		return -2;
+
+	/* hack to support [sms] / smsc_timeout parameter */
+	if (gn_config_global.smsc_timeout < 0) {
+		if (!(val = gn_cfg_get(gn_cfg_info, "sms", "timeout")))
+			gn_config_global.smsc_timeout = 100;
+		else
+			gn_config_global.smsc_timeout = 10 * atoi(val);
 	}
 
-	(char *)*port = gn_cfg_get(gn_cfg_info, "global", "port");
-	if (!*port) {
-		fprintf(stderr, _("Config error - no port specified. Exiting now...\n"));
-		return -3;
-	}
+	*model = gn_config_global.model;
+	*port = gn_config_global.port_device;
 
 	(char *)*initlength = gn_cfg_get(gn_cfg_info, "global", "initlength");
 	if (!*initlength) (char *)*initlength = "default";
@@ -340,4 +456,28 @@ API int gn_cfg_readconfig(char **model, char **port, char **initlength,
 	if (!*bindir) (char *)*bindir = default_bindir;
 
 	return 0;
+}
+
+API bool gn_cfg_load_phone(const char *iname, struct gn_statemachine *state)
+{
+	char section[256];
+
+	if (iname == NULL || *iname == '\0')
+		state->config = gn_config_global;
+	else {
+		snprintf(section, sizeof(section), "phone_%s", iname);
+		if (!gn_cfg_load_psection(&state->config, section, &gn_config_global))
+			return false;
+	}
+
+	if (state->config.model[0] == '\0') {
+		fprintf(stderr, _("Config error - no model specified.\n"));
+		return false;
+	}
+	if (state->config.port_device[0] == '\0') {
+		fprintf(stderr, _("Config error - no port specified.\n"));
+		return false;
+	}
+
+	return true;
 }

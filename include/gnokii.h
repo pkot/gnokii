@@ -121,6 +121,7 @@ API int gn_get_note(int number);
 /* Functions */
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
 API int gn_cfg_readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
+API bool gn_cfg_load_phone(const char *iname, struct gn_statemachine *state);
 
 API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *addon);
 API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
