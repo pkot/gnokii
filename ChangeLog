@@ -21,6 +21,7 @@
       model                                               (Pawel Kot)
     o use unicode for the newer phones in the phonebook   (Pawel Kot)
     o phone info frame (0xd2) parsed correctly       (BORBELY Zoltan)
+    o static variables eliminated from the driver    (BORBELY Zoltan)
  * 7110 series updates:
     o use nokia-decoding                               (Markus Plail)
  * bitmap support

@@ -57,6 +57,19 @@ typedef struct {
 	int Repeat;
 } NK6100_Keytable;
 
+typedef struct {
+	void (*OnCellBroadcast)(GSM_CBMessage *Message);
+	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
+	void (*RLP_RXCallback)(RLP_F96Frame *Frame);
+	GSM_Error (*OnSMS)(GSM_API_SMS *Message);
+
+	unsigned char MagicBytes[4];
+	bool sms_notification_in_progress;
+	bool sms_notification_lost;
+	GSM_DisplayOutput *DisplayOutput;
+	NK6100_Keytable Keytable[256];
+} NK6100_DriverInstance;
+
 void PNOK_GetNokiaAuth(unsigned char *Imei, unsigned char *MagicBytes, unsigned char *MagicResponse);
 
 #endif  /* #ifndef __phones_nk6100_h */
