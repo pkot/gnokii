@@ -42,6 +42,7 @@
                                                        (Markus Plail)
  * gnokii fixes:
     o change deletesms() to reflect changes in API     (Markus Plail)
+    o indentation changes                                 (Pawel Kot)
  * xgnokii fixes:
     o fix SMS reading                                  (Markus Plail)
     o fix date/time display for SMS messages           (Markus Plail)

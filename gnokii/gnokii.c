@@ -433,7 +433,7 @@ static GSM_Error readtext(SMS_UserData *udata, int input_len)
 		return GE_INTERNALERROR;
 	}
 
-	/*  Null terminate. */
+	/* Null terminate. */
 	message_buffer[chars_read] = 0x00;
 	if (udata->Type != SMS_iMelodyText && chars_read > 0 && message_buffer[chars_read - 1] == '\n') 
 		message_buffer[--chars_read] = 0x00;
@@ -1487,12 +1487,12 @@ static int sendlogo(int argc, char *argv[])
 
 	/* The first argument is the type of the logo. */
 	switch (type = set_bitmap_type(argv[0])) {
-	case GSM_OperatorLogo: fprintf(stderr, _("Sending operator logo.\n")); break;
-	case GSM_CallerLogo:   fprintf(stderr, _("Sending caller line identification logo.\n")); break;
-	case GSM_PictureMessage:fprintf(stderr,_("Sending Multipart Message: Picture Message.\n")); break;
-	case GSM_EMSPicture:   fprintf(stderr, _("Sending EMS-compliant Picture Message.\n")); break;
-	case GSM_EMSAnimation: fprintf(stderr, _("Sending EMS-compliant Animation.\n")); break;
-	default: 	       fprintf(stderr, _("You should specify what kind of logo to send!\n")); return (-1);
+	case GSM_OperatorLogo:   fprintf(stderr, _("Sending operator logo.\n")); break;
+	case GSM_CallerLogo:     fprintf(stderr, _("Sending caller line identification logo.\n")); break;
+	case GSM_PictureMessage: fprintf(stderr,_("Sending Multipart Message: Picture Message.\n")); break;
+	case GSM_EMSPicture:     fprintf(stderr, _("Sending EMS-compliant Picture Message.\n")); break;
+	case GSM_EMSAnimation:   fprintf(stderr, _("Sending EMS-compliant Animation.\n")); break;
+	default: 	         fprintf(stderr, _("You should specify what kind of logo to send!\n")); return (-1);
 	}
 
 	sms.UserData[0].Type = SMS_BitmapData;
@@ -3560,7 +3560,8 @@ static int foogle(char *argv[])
 }
 #endif
 
-static void  gnokii_error_logger(const char *fmt, va_list ap) {
+static void  gnokii_error_logger(const char *fmt, va_list ap)
+{
 	if (logfile) {
 		vfprintf(logfile, fmt, ap);
 		fflush(logfile);
@@ -3607,8 +3608,7 @@ int main(int argc, char *argv[])
 	char **nargv;
 
 	/* Every option should be in this array. */
-	static struct option long_options[] =
-	{
+	static struct option long_options[] = {
 		/* FIXME: these comments are nice, but they would be more usefull as docs for the user */
 		/* Display usage. */
 		{ "help",               no_argument,       NULL, OPT_HELP },
@@ -3763,14 +3763,11 @@ int main(int argc, char *argv[])
 
 	/* Every command which requires arguments should have an appropriate entry
 	   in this array. */
-	static struct gnokii_arg_len gals[] =
-	{
-
+	static struct gnokii_arg_len gals[] = {
 #ifdef SECURITY
 		{ OPT_ENTERSECURITYCODE, 1, 1, 0 },
 		{ OPT_CHANGESECURITYCODE,1, 1, 0 },
 #endif
-
 		{ OPT_SETDATETIME,       0, 5, 0 },
 		{ OPT_SETALARM,          0, 2, 0 },
 		{ OPT_DIALVOICE,         1, 1, 0 },
