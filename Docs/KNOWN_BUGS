@@ -7,14 +7,13 @@ and
 	connection = irda
 
 2. Nokia 6100 with old firmware (04.01 reported) breaks when used with
-nk6510 driver. Newer firmare (04.17 reported) is known to work.
-Configurations known to be affected:
+nk6510 driver. Configurations known to be affected:
 	model = 6100
 	connection = irda
 
 3. Nokia 6310(i) doesn't work well over the DRL3P cable. After few
 successfull connections it stops working. When you power the phone off and
-on, it works again. Configuration knowns to be affected:
+on, it works again. Configuration known to be affected:
 	model = 6310
 	connection = serial
 and
