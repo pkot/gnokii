@@ -36,8 +36,7 @@
 #define SMS_MAX_ADDRESS_LENGTH      (40)
 
 /* FIXME: what value should be here? (Pawel Kot) */
-//#define GSM_MAX_USER_DATA_HEADER_LENGTH (10)
-#define SMS_MAX_UDH_HEADER_NUMBER 10
+#define SMS_MAX_UDH_NUMBER 10
 
 /*** MEMORY INFO ***/
 
@@ -315,7 +314,7 @@ typedef struct {
   
 	unsigned short UDH_No;                         /* Number of presend UDHs */
 	unsigned int UDH_Length;                       /* Length of the whole UDH */
-	SMS_UDHInfo UDH[SMS_MAX_UDH_HEADER_NUMBER];    /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
+	SMS_UDHInfo UDH[SMS_MAX_UDH_NUMBER];           /* User Data Header Indicator & User Data Header (9.2.3.23 & 9.2.3.24) */
 
 	SMS_DateTime SMSCTime;                         /* Service Centre Time Stamp (9.2.3.11) */
 	SMS_DateTime Time;                             /* Discharge Time (9.2.3.13) */
