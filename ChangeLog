@@ -8,6 +8,7 @@
     o reactivate support for text before picture messages
                                                        (Markus Plail)
     o support for sending nokia logos and picture msgs (Pavel Machek)
+    o use correct UDHs                                    (Pawel Kot)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
     o added Terminate to GOP functions
