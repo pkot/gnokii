@@ -7,7 +7,7 @@
     o add --gettodo                                    (Markus Plail)
     o don't use hardcoded values               (Len Trigg, Pawel Kot)
     o add --writetodo                                  (Markus Plail)
-    o add WAP handling (only reading/deleting so far)  (Markus Plail)
+    o add WAP handling                                 (Markus Plail)
  * xgnokii updates:
     o fix speeddial writing                            (Markus Plail)
     o fix logos                                        (Markus Plail)
@@ -19,7 +19,8 @@
     o use nokia-decoding                               (Markus Plail)
     o add ToDo writing                                 (Markus Plail)
     o add DeleteAllToDoLocations                       (Markus Plail)
-    o add WAP handling (only reading/deleting so far)  (Markus Plail)
+    o add WAP handling                                 (Markus Plail)
+    o fix SMS status                                   (Robert Ivanc)
  * 6110 series updates:
     o Nokia 3410 is known to work                         (Pawel Kot)
     o use 0x64 frames only when PM_AUTHENTICATION is set for the
@@ -62,6 +63,7 @@
  * poll() converted to select() everywhere           (BORBELY Zoltan)
  * make static variables declared with static keyword, make
    variables extern where needed                          (Pawel Kot)
+ * add 6310i to unixirda.c                             (Robert Ivanc)
 
 0.4.2a
 ======
