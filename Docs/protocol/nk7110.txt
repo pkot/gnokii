@@ -220,7 +220,7 @@ Correct format is FBUS version 2/Infrared/MBUS version 2
                               where: FolderID - see 0x14/0x017B
     r List Picture Images   { 0x0097, number of pictures[2 bytes], number1[2 bytes], number2[2 bytes], ..., }
 
-    s Get SMS from folder   { 0x0107, folderID, 0x00, location, 0x01, 0x65, 0x01}
+    s Get SMS from folder   { 0x0107, folderID, location, location, 0x01, 0x65, 0x01}
                             where: folderID - see 0x14/0x017B
     r Get SMS from folder   { 0x0108, status, folderID, 0x00, location, type, sender number,...}
 
@@ -235,11 +235,13 @@ Correct format is FBUS version 2/Infrared/MBUS version 2
 					0x01 - delivery report
 					0x02 - stored SMS
 					0x07 - picture message
+    s Delete SMS            { 0x010a, folderID, location, location, 0x01 }
+    r Delete SMS            { 0x010b }
     s Get folder status     { 0x016b, folderID, 0x0F, 0x01}
                             where: folderID - see 0x14/0x017B
     r Get folder status     { 0x016c, number of entries (2 bytes), entry1number (2 bytes), entry2number(2 bytes), ....}
-    s Get folder names      { 0x017A, 0x00, 0x00}
-    r Get folder names      { 0x017B, number of strings, folderID, name1, 0x00, folderID, name2, 0x00, name3, 0x00,...}
+    s Get folder names      { 0x017a, 0x00, 0x00}
+    r Get folder names      { 0x017b, number of strings, folderID, name1, 0x00, folderID, name2, 0x00, name3, 0x00,...}
                             where: folderID=0x08 - Inbox
                                             0x10 - Outbox
                                             0x18 - Archive
