@@ -79,8 +79,9 @@ GSM_Error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data,
 		case PNOKIA_ENTRYTYPE_NAME:	/* Name */
 			if (data->Bitmap) {
 				DecodeUnicode(data->Bitmap->text, (blockstart + 6), blockstart[5] / 2);
-				dprintf("Name: %s\n", data->Bitmap->text);
-			} else if (data->PhonebookEntry) {
+				dprintf("Bitmap Name: %s\n", data->Bitmap->text);
+			}
+			if (data->PhonebookEntry) {
 				DecodeUnicode(data->PhonebookEntry->Name, (blockstart + 6), blockstart[5] / 2);
 				data->PhonebookEntry->Empty = false;
 				dprintf("   Name: %s\n", data->PhonebookEntry->Name);
