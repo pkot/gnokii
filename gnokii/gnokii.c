@@ -828,6 +828,7 @@ static int getsms(int argc, char *argv[])
 	char filename[64];
 	GSM_Error error;
 	GSM_Bitmap bitmap;
+	GSM_Information *info = &State.Phone.Info;
 	char ans[5];
 	struct stat buf;
 
@@ -1003,9 +1004,9 @@ static int getsms(int argc, char *argv[])
 							fprintf(stdout, _("Overwrite? (yes/no) "));
 							GetLine(stdin, ans, 4);
 							if (!strcmp(ans, _("yes"))) {
-								error = GSM_SaveBitmapFile(filename, &bitmap);
+								error = GSM_SaveBitmapFile(filename, &bitmap, info);
 							}
-						} else error = GSM_SaveBitmapFile(filename, &bitmap);
+						} else error = GSM_SaveBitmapFile(filename, &bitmap, info);
 						if (error != GE_NONE) fprintf(stderr, _("Couldn't save logofile %s!\n"), filename);
 					}
 					break;
@@ -1347,6 +1348,7 @@ static int sendlogo(int argc, char *argv[])
 {
 	GSM_SMSMessage SMS;
 	GSM_Error error;
+	GSM_Information *info = &State.Phone.Info;
 
 	/* Default settings for SMS message:
 	   - no delivery report
@@ -1391,7 +1393,7 @@ static int sendlogo(int argc, char *argv[])
 	strncpy(SMS.RemoteNumber.number, argv[1], sizeof(SMS.RemoteNumber.number) - 1);
 
 	/* The third argument is the bitmap file. */
-	GSM_ReadBitmapFile(argv[2], &SMS.UserData[0].u.Bitmap);
+	GSM_ReadBitmapFile(argv[2], &SMS.UserData[0].u.Bitmap, info);
 
 	/* If we are sending op logo we can rewrite network code. */
 	if (SMS.UDH[0].Type == SMS_OpLogo) {
@@ -1427,7 +1429,7 @@ static int sendlogo(int argc, char *argv[])
 }
 
 /* Getting logos. */
-GSM_Error SaveBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap)
+static GSM_Error SaveBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 	int confirm;
 	char ans[4];
@@ -1452,7 +1454,7 @@ GSM_Error SaveBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap)
 		}
 	}
 
-	error = GSM_SaveBitmapFile(FileName, bitmap);
+	error = GSM_SaveBitmapFile(FileName, bitmap, info);
 
 	switch (error) {
 	case GE_CANTOPENFILE:
@@ -1469,6 +1471,7 @@ static int getlogo(int argc, char *argv[])
 {
 	GSM_Bitmap bitmap;
 	GSM_Error error;
+	GSM_Information *info = &State.Phone.Info;
 
 	bitmap.type = GSM_None;
 
@@ -1491,7 +1494,7 @@ static int getlogo(int argc, char *argv[])
 	else if (!strcmp(argv[0], "dealer"))
 		bitmap.type = GSM_DealerNoteText;
 	else if (!strcmp(argv[0], "text"))
-		bitmap.type=GSM_WelcomeNoteText;
+		bitmap.type = GSM_WelcomeNoteText;
 
 	if (bitmap.type != GSM_None) {
 		fprintf(stdout, _("Getting Logo\n"));
@@ -1548,7 +1551,7 @@ static int getlogo(int argc, char *argv[])
 						break;
 					}
 					if (argc > 1) {
-						if (SaveBitmapFileOnConsole(argv[1], &bitmap) != GE_NONE) return (-1);
+						if (SaveBitmapFileOnConsole(argv[1], &bitmap, info) != GE_NONE) return (-1);
 					}
 				} else {
 					fprintf(stdout, _("Your phone doesn't have logo uploaded !\n"));
@@ -1576,11 +1579,11 @@ static int getlogo(int argc, char *argv[])
 
 
 /* Sending logos. */
-GSM_Error ReadBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap)
+GSM_Error ReadBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 	GSM_Error error;
 
-	error = GSM_ReadBitmapFile(FileName, bitmap);
+	error = GSM_ReadBitmapFile(FileName, bitmap, info);
 
 	switch (error) {
 	case GE_CANTOPENFILE:
@@ -1636,7 +1639,7 @@ static int setlogo(int argc, char *argv[])
 	} else {
 		if (!strcmp(argv[0], "op") || !strcmp(argv[0], "startup") || !strcmp(argv[0], "caller")) {
 			if (argc > 1) {
-				if (ReadBitmapFileOnConsole(argv[1], &bitmap) != GE_NONE)
+				if (ReadBitmapFileOnConsole(argv[1], &bitmap, info) != GE_NONE)
 					return(-1);
 
 				if (!strcmp(argv[0], "op")) {
@@ -3716,7 +3719,7 @@ int main(int argc, char *argv[])
 #endif
 
 		/* Initialise the code for the GSM interface. */
-		fbusinit(NULL);
+		if (c != OPT_VIEWLOGO) fbusinit(NULL);
 
 		switch(c) {
 		case OPT_MONITOR:

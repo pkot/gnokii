@@ -328,49 +328,46 @@ is the Australian mirror, there will be one nearby to you too :)
 <http://www.monash.edu.au/mirror/ldp/HOWTO/Serial-Programming-HOWTO.html>
 
 
-- 13.0 Handsets/Networks tested -
+- 13.0 Handsets tested -
 
-3810 Series
+Nokia 3810 Series
+ + 3110
+ + 3810
+ + 8110
+ + 8110i
 
-3110/Sonera (Finland)
-3110/Telefonica (Spain)
-3810/Telstra (Australia)
-3810/Optus [Actually Hutchison] (Australia)
-3810/Mobile One (Singapore)
-3810/SingTel Mobile (Singapore)
-8110/Proximus (Belgium)
-8110/D2 Privat (Germany)
-8110i/MTN (South Africa)
-8110/Beeline Vympelkom (Russia)
-8110i/A1 Mobilkom (Austria)
+Nokia 6110 Series
+ + 6190
+ + 6150
+ + 6130
+ + 6110
+ + 5110
+ + 5130
+ + 5190
+ + 3310
+ + 3210
+ + 8210
+ + 3330
 
-6110 Series
+Nokia 7110 Series
+ + 7110
+ + 6210
+ + 6250
 
-6190/Microcel (Canada) (GSM 1900)
-6150/Viag Interkom (Germany) (GSM 1800)
-6150/Omnitel (Italy)
-6150/Beeline (Vympelkom) (Moscow, Russia)
-6150/MTS (Moscow, Russia)
-6150/NWGSM (St. Petersburg, Russia)
-6150/NetCom GSM (Norway)
-6130/IDEA Centertel (Poland) (GSM 1800)
-6110/Paegas (Czech Republic)
-6110/Panafon (Greece)
-6110/Telstra Mobilenet (Australia)
-5110/Omnitel (Italy)
-5110/Paegas (Czech Republic)
-5110/ERA GSM (Poland)
-5110/Plus GSM (Poland)
-5130/IDEA Centertel (Poland)
-5190/Microcel (Canada) (GSM 1900)
+Nokia 2110 Series
+ + 2110
+ + 2140
+ + 6080
 
-3210 (some functions does not not work yet)
+Nokia 6160 Series
+ - depreciated
 
-2110 Series
+Nokia 640 Series
+ - depreciated
 
-6160 Series
-
-640 Series
+AT series
+ - Nokia 6210
+ - Motorola Timeport P7389i (L series)
 
 
 - 14.0 Credits -

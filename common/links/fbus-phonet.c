@@ -44,7 +44,7 @@
 /* Some globals */
 
 GSM_Link *glink;
-GSM_Statemachine *statemachine;
+static GSM_Statemachine *statemachine;
 PHONET_IncomingMessage imessage;
 
 

@@ -464,7 +464,7 @@ GSM_Error saverttl(FILE *file, GSM_Ringtone *ringtone)
 /* Bitmap file functions */
 /* ##################### */
 
-GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
+GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 	FILE *file;
 	unsigned char buffer[300];
@@ -500,10 +500,10 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 
 	switch (filetype) {
 	case NOL:
-		error = loadnol(file, bitmap);
+		error = loadnol(file, bitmap, info);
 		break;
 	case NGG:
-		error = loadngg(file, bitmap);
+		error = loadngg(file, bitmap, info);
 		break;
 	case NSL:
 		error = loadnsl(file, bitmap);
@@ -512,7 +512,7 @@ GSM_Error GSM_ReadBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 		error = loadnlm(file, bitmap);
 		break;
 	case OTA:
-		error = loadota(file, bitmap);
+		error = loadota(file, bitmap, info);
 		break;
 	case BMP:
 		error = loadbmp(file, bitmap);
@@ -694,7 +694,7 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 	return(GE_NONE);
 }
 
-GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap)
+GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 	unsigned char buffer[2000];
 	int i, j;
@@ -708,7 +708,9 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap)
 	bitmap->height = buffer[12];
 	bitmap->size = bitmap->height * bitmap->width / 8;
 
-	if ((bitmap->height != 14) || (bitmap->width != 72)) {
+	if (((bitmap->height != 14) || (bitmap->width != 72)) && /* standard size */
+	    ((bitmap->height != 21) || (bitmap->width != 78)) && /* standard size */
+	    (!info || (bitmap->height != info->OpLogoH) || (bitmap->width != info->OpLogoW))) {
 		dprintf("Invalid Image Size (%dx%d).\n",bitmap->width,bitmap->height);
 		return GE_INVALIDIMAGESIZE;
 	}
@@ -735,7 +737,7 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap)
 	return(GE_NONE);
 }
 
-GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap)
+GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 	unsigned char buffer[2000];
 	int i, j;
@@ -747,7 +749,9 @@ GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap)
 	bitmap->height = buffer[8];
 	bitmap->size = bitmap->height * bitmap->width / 8;
 
-	if ((bitmap->height != 14) || (bitmap->width != 72)) {
+	if (((bitmap->height != 14) || (bitmap->width != 72)) && /* standard size */
+	    ((bitmap->height != 21) || (bitmap->width != 78)) && /* standard size */
+	    (!info || (bitmap->height != info->OpLogoH) || (bitmap->width != info->OpLogoW))) {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
 		return GE_INVALIDIMAGESIZE;
 	}
@@ -866,33 +870,35 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 	return (GE_NONE);
 }
 
-GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap)
+GSM_Error loadota(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 	char buffer[4];
 
 	/* We could check for extended info here - indicated by the 7th bit being set in the first byte */
-	fread(buffer,1,4,file);
+	fread(buffer, 1, 4, file);
 
 	bitmap->width = buffer[1];
 	bitmap->height = buffer[2];
 	bitmap->size = bitmap->width * bitmap->height / 8;
 
-	if ((bitmap->height == 48) && (bitmap->width == 84)) {
+	if (((bitmap->height == 48) && (bitmap->width == 84)) || /* standard size */
+	    ((bitmap->height == 60) && (bitmap->width == 96)) || /* standard size */
+	    (info && ((bitmap->height == info->StartupLogoH) && (bitmap->width == info->StartupLogoW)))) {
 		bitmap->type = GSM_StartupLogo;
-	}
-	else if ((bitmap->height == 14) && (bitmap->width == 72)) {
+	} else if (((bitmap->height == 14) && (bitmap->width == 72)) || /* standard size */
+		   (info && ((bitmap->height == info->CallerLogoH) && (bitmap->width == info->CallerLogoW)))) {
 		bitmap->type = GSM_CallerLogo;
 	} else {
 		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
 		return GE_INVALIDIMAGESIZE;
 	}
-	if (fread(bitmap->bitmap,1,bitmap->size,file) != bitmap->size)
+	if (fread(bitmap->bitmap, 1, bitmap->size,file) != bitmap->size)
 		return(GE_FILETOOSHORT);
 	return(GE_NONE);
 }
 
 /* This overwrites an existing file - so this must be checked before calling */
-GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
+GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 	FILE *file;
 	bool done = false;
@@ -914,11 +920,11 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 			done = true;
 		}
 		if (strstr(FileName, ".ngg")) {
-			savengg(file, bitmap);
+			savengg(file, bitmap, info);
 			done = true;
 		}
 		if (strstr(FileName, ".nsl")) {
-			savensl(file, bitmap);
+			savensl(file, bitmap, info);
 			done = true;
 		}
 		if (strstr(FileName, ".otb")) {
@@ -926,7 +932,7 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 			done = true;
 		}
 		if (strstr(FileName, ".nol")) {
-			savenol(file, bitmap);
+			savenol(file, bitmap, info);
 			done = true;
 		}
 		if (strstr(FileName, ".bmp") ||
@@ -939,13 +945,13 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap)
 		if (!done) {
 			switch (bitmap->type) {
 			case GSM_CallerLogo:
-				savengg(file, bitmap);
+				savengg(file, bitmap, info);
 				break;
 			case GSM_OperatorLogo:
-				savenol(file, bitmap);
+				savenol(file, bitmap, info);
 				break;
 			case GSM_StartupLogo:
-				savensl(file, bitmap);
+				savensl(file, bitmap, info);
 				break;
 			case GSM_PictureImage:
 				savenlm(file, bitmap);
@@ -1040,31 +1046,31 @@ void savebmp(FILE *file, GSM_Bitmap *bitmap)
 	div_t division;
 
 	char header[] = {
-/*1'st header*/	'B','M',             /* BMP file ID */
-		0x00,0x00,0x00,0x00, /* Size of file */
-		0x00,0x00,           /* Reserved for future use */
-		0x00,0x00,           /* Reserved for future use */
-		62,0x00,0x00,0x00, /* Offset for image data */
+/* 1st header */	'B', 'M',	/* BMP file ID */
+			0x00, 0x00, 0x00, 0x00,	/* Size of file */
+			0x00, 0x00,		/* Reserved for future use */
+			0x00, 0x00,		/* Reserved for future use */
+			62, 0x00, 0x00, 0x00,	/* Offset for image data */
 
-/*2'nd header*/	40,0x00,0x00,0x00, /* Length of this part of header */
-		0x00,0x00,0x00,0x00, /* Width of image */
-		0x00,0x00,0x00,0x00, /* Height of image */
-		1,0x00,           /* How many planes in target device */
-		1,0x00,           /* How many colors in image. 1 means 2^1=2 colors */
-		0x00,0x00,0x00,0x00, /* Type of compression. 0 means no compression */
-/* Sometimes */	0x00,0x00,0x00,0x00, /* Size of part with image data */
-/* ttttttt...*/	0xE8,0x03,0x00,0x00, /* XPelsPerMeter */
-/*hhiiiiissss*/	0xE8,0x03,0x00,0x00, /* YPelsPerMeter */
+/* 2nd header */	40, 0x00, 0x00, 0x00,	/* Length of this part of header */
+			0x00, 0x00, 0x00, 0x00,	/* Width of image */
+			0x00, 0x00, 0x00, 0x00,	/* Height of image */
+			0x01, 0x00,		/* How many planes in target device */
+			0x01, 0x00,		/* How many colors in image. 1 means 2^1=2 colors */
+			0x00, 0x00, 0x00, 0x00,	/* Type of compression. 0 means no compression */
+/* Sometimes */		0x00, 0x00, 0x00, 0x00,	/* Size of part with image data */
+/* ttttttt...*/		0xE8, 0x03, 0x00, 0x00,	/* XPelsPerMeter */
+/*hhiiiiissss*/		0xE8, 0x03, 0x00, 0x00,	/* YPelsPerMeter */
 /* part of the
-   header */	2,0x00,0x00,0x00, /* How many colors from palette is used */
+   header */		0x02, 0x00, 0x00, 0x00,	/* How many colors from palette is used */
 /* doesn't
-   exist */	0x00,0x00,0x00,0x00, /* How many colors from palette is required to display image. 0 means all */
+   exist */		0x00, 0x00, 0x00, 0x00,	/* How many colors from palette is required to display image. 0 means all */
 
 /* Color
-   palette */	0x00,0x00,0x00,      /* First color in palette in Blue, Green, Red. Here white */
-		0x00,                /* Each color in palette is end by 4'th byte */
-		0xFF,0xFF,0xFF,      /* Second color in palette in Blue, Green, Red. Here black */
-		0x00};               /* Each color in palette is end by 4'th byte */
+   palette */		0x00, 0x00, 0x00,	/* First color in palette in Blue, Green, Red. Here white */
+			0x00,			/* Each color in palette is end by 4'th byte */
+			0xFF, 0xFF, 0xFF,	/* Second color in palette in Blue, Green, Red. Here black */
+			0x00};			/* Each color in palette is end by 4'th byte */
 
 	header[22] = bitmap->height;
 	header[18] = bitmap->width;
@@ -1125,23 +1131,21 @@ void savebmp(FILE *file, GSM_Bitmap *bitmap)
 	}
 }
 
-void savengg(FILE *file, GSM_Bitmap *bitmap)
+void savengg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 
-	char header[] = {'N','G','G',0x00,0x01,0x00,
-		         0x00,0x00,           /* Width */
-		         0x00,0x00,           /* Height */
-		         0x01,0x00,0x01,0x00,
-		         0x00,                /* Unknown.Can't be checksum - for */
-		         /* the same logo files can be different */
-		         0x00};
+	char header[] = {'N', 'G', 'G', 0x00, 0x01, 0x00,
+		         0x00, 0x00,		/* Width */
+		         0x00, 0x00,		/* Height */
+		         0x01, 0x00, 0x01, 0x00,
+		         0x00, 0x00		/* Unknown.Can't be checksum - for */
+						/* the same logo files can be different */
+		         };
 
 	char buffer[8];
 	int i, j;
-	/* This could be the phone info... */
-	GSM_Information info={"",0,0,0,0,0,0,0,0,0,0,0,0,0,14,72};
 
-	GSM_ResizeBitmap(bitmap, GSM_CallerLogo, &info);
+	GSM_ResizeBitmap(bitmap, GSM_CallerLogo, info);
 
 	header[6] = bitmap->width;
 	header[8] = bitmap->height;
@@ -1159,7 +1163,7 @@ void savengg(FILE *file, GSM_Bitmap *bitmap)
 	}
 }
 
-void savenol(FILE *file, GSM_Bitmap *bitmap)
+void savenol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 
 	char header[] = {'N','O','L',0x00,0x01,0x00,
@@ -1173,10 +1177,8 @@ void savenol(FILE *file, GSM_Bitmap *bitmap)
 		         0x00};
 	char buffer[8];
 	int i, j, country, net;
-	/* This could be the phone info... */
-	GSM_Information info={"",0,0,0,0,0,0,0,0,0,0,0,14,72,0,0};
 
-	GSM_ResizeBitmap(bitmap, GSM_OperatorLogo, &info);
+	GSM_ResizeBitmap(bitmap, GSM_OperatorLogo, info);
 
 	sscanf(bitmap->netcode, "%d %d", &country, &net);
 
@@ -1200,15 +1202,13 @@ void savenol(FILE *file, GSM_Bitmap *bitmap)
 	}
 }
 
-void savensl(FILE *file, GSM_Bitmap *bitmap)
+void savensl(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 {
 
 	u8 header[] = {'F','O','R','M', 0x01,0xFE,  /* File ID block,      size 1*256+0xFE=510*/
 		       'N','S','L','D', 0x01,0xF8}; /* Startup Logo block, size 1*256+0xF8=504*/
-	/* This could be the phone info... */
-	GSM_Information info={"",0,0,0,0,0,0,0,0,0,48,84,0,0,0,0};
 
-	GSM_ResizeBitmap(bitmap, GSM_StartupLogo, &info);
+	GSM_ResizeBitmap(bitmap, GSM_StartupLogo, info);
 
 	fwrite(header, 1, sizeof(header), file);
 
@@ -1324,11 +1324,11 @@ GSM_Error GSM_ShowBitmapFile(char *FileName)
 
 	switch (filetype) {
 	case NOL:
-		error = loadnol(file, &bitmap);
+		error = loadnol(file, &bitmap, NULL);
 		fclose(file);
 		break;
 	case NGG:
-		error = loadngg(file, &bitmap);
+		error = loadngg(file, &bitmap, NULL);
 		fclose(file);
 		break;
 	case NSL:
@@ -1336,7 +1336,7 @@ GSM_Error GSM_ShowBitmapFile(char *FileName)
 		fclose(file);
 		break;
 	case OTA:
-		error = loadota(file, &bitmap);
+		error = loadota(file, &bitmap, NULL);
 		fclose(file);
 		break;
 	case BMP:

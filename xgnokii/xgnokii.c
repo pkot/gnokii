@@ -109,7 +109,7 @@ gint max_phonebook_name_length;
 gint max_phonebook_number_length;
 gint max_phonebook_sim_name_length;
 gint max_phonebook_sim_number_length;
-char folders[MAX_SMS_FOLDERS][15];
+char folders[MAX_SMS_FOLDERS][MAX_SMS_FOLDER_NAME_LENGTH];
 gint foldercount = 0, lastfoldercount = 0;
 
 /* Local variables */

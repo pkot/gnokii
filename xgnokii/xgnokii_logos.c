@@ -1231,7 +1231,7 @@ void ExportLogoFileMain(gchar *name)
 
   strncpy(tbitmap.netcode,GSM_GetNetworkCode(networkInfo.NetworkCode),7);
 
-  error=GSM_SaveBitmapFile(name,&tbitmap);
+  error=GSM_SaveBitmapFile(name,&tbitmap,&statemachine.Phone.Info);
   if (error!=GE_NONE) {
     gchar *buf = g_strdup_printf(_("Error saving file\n(error=%d)"),error);
     gtk_label_set_text(GTK_LABEL(errorDialog.text),buf);
@@ -1290,7 +1290,7 @@ void ImportFileSelected(GtkWidget *w, GtkFileSelection *fs)
     return;
   } else fclose(f);
 
-  error=GSM_ReadBitmapFile(fileName,&tbitmap);
+  error=GSM_ReadBitmapFile(fileName,&tbitmap, &statemachine.Phone.Info);
   if (error!=GE_NONE) {
     gchar *buf = g_strdup_printf(_("Error reading file\n(error=%d)"),error);
     gtk_label_set_text(GTK_LABEL(errorDialog.text),buf);

@@ -372,16 +372,15 @@ inline void GUI_ShowSMS (void)
 
 	while ((error = GUI_InitSMSFolders()) != GE_NONE) sleep(1);
 	
-	for (i=0; i < foldercount ; i++) {
+	for (i = 0; i < foldercount; i++) {
 		if (i > lastfoldercount - 1) {
 			treeFolderItem[i] = gtk_tree_item_new_with_label (_(folders[i]));
 			gtk_tree_append (GTK_TREE (subTree), treeFolderItem[i]);
 			gtk_signal_connect (GTK_OBJECT (treeFolderItem[i]), "select",
 					GTK_SIGNAL_FUNC (SelectTreeItem), GINT_TO_POINTER (i));
 			gtk_widget_show (treeFolderItem[i]);
-		} 
-		else {
-			gtk_widget_set_name(treeFolderItem[i],_(folders[i])); 
+		} else {
+			gtk_widget_set_name(treeFolderItem[i], _(folders[i])); 
 		}
 	}
 	for (j = i + 1; j < lastfoldercount; j++) gtk_widget_hide (treeFolderItem[j-1]); 

@@ -94,7 +94,7 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Informati
 	}
 	if (target == GSM_PictureImage) {
 		bitmap->width = 72;
-		bitmap->height = 28;
+		bitmap->height = 48;
 		bitmap->size = bitmap->width * bitmap->height / 8;
 	}
 	bitmap->type = target;

@@ -823,6 +823,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/* getfolders */
 	case 0x7B:
+		if (!data->SMSFolderList) return GE_INTERNALERROR;
 		i = 5;
 		memset(data->SMSFolderList, 0, sizeof(SMS_FolderList));
 		dprintf("Message: %d SMS Folders received:\n", message[4]);
@@ -832,7 +833,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 		for (j = 0; j < message[4]; j++) {
 			int len;
-			strcpy(data->SMSFolderList->Folder[j].Name, "               ");
+			strcpy(data->SMSFolderList->Folder[j].Name, "               \0");
 			data->SMSFolderList->FolderID[j] = message[i];
 			dprintf("Folder Index: %d", data->SMSFolderList->FolderID[j]);
 			i += 2;
@@ -1475,8 +1476,8 @@ static GSM_Error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	int block, i;
 	unsigned int count = 18;
 
-	if ((data->Bitmap->width!=state->Phone.Info.CallerLogoW) ||
-	    (data->Bitmap->height!=state->Phone.Info.CallerLogoH )) {
+	if ((data->Bitmap->width != state->Phone.Info.CallerLogoW) ||
+	    (data->Bitmap->height != state->Phone.Info.CallerLogoH )) {
 		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",state->Phone.Info.CallerLogoH, state->Phone.Info.CallerLogoW, data->Bitmap->height, data->Bitmap->width);
 	    return GE_INVALIDIMAGESIZE;
 	}
@@ -1569,8 +1570,8 @@ static GSM_Error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 	int count = 21;
 
 
-	if ((data->Bitmap->width!=state->Phone.Info.StartupLogoW) ||
-	    (data->Bitmap->height!=state->Phone.Info.StartupLogoH )) {
+	if ((data->Bitmap->width != state->Phone.Info.StartupLogoW) ||
+	    (data->Bitmap->height != state->Phone.Info.StartupLogoH )) {
 		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",state->Phone.Info.StartupLogoH, state->Phone.Info.StartupLogoW, data->Bitmap->height, data->Bitmap->width);
 	    return GE_INVALIDIMAGESIZE;
 	}
@@ -1599,8 +1600,8 @@ static GSM_Error SetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
 	};
 	int count = 18;
 
-	if ((data->Bitmap->width!=state->Phone.Info.OpLogoW) ||
-	    (data->Bitmap->height!=state->Phone.Info.OpLogoH )) {
+	if ((data->Bitmap->width != state->Phone.Info.OpLogoW) ||
+	    (data->Bitmap->height != state->Phone.Info.OpLogoH )) {
 		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",state->Phone.Info.OpLogoH, state->Phone.Info.OpLogoW, data->Bitmap->height, data->Bitmap->width);
 	    return GE_INVALIDIMAGESIZE;
 	}
