@@ -165,11 +165,15 @@ static char *strip_brackets(char *s)
 
 static void reply_simpletext(char *l1, char *l2, char *c, char *t)
 {
+	int i;
+
 	if ((strncmp(l1, c, 5) == 0) && (t != NULL)) {
 		if (strncmp(l2, c, 7) == 0)  {
-			strcpy(t, strip_quotes(l2+7));
+			for (i = 7; isspace(l2[i]); i++) ;
+			strcpy(t, strip_quotes(l2 + i));
 		} else {
-			strcpy(t, l2);
+			for (i = 0; isspace(l2[i]); i++) ;
+			strcpy(t, l2 + i);
 		}
 	}
 }
@@ -1422,7 +1426,15 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), gn_network_code_get(tmp));
 			break;
 		case 2: /* network operator code given */
-			if (strlen(strings[2]) >= 6) { 
+			if (strlen(strings[2]) == 5) { 
+				data->network_info->network_code[0] = strings[2][0];
+				data->network_info->network_code[1] = strings[2][1];
+				data->network_info->network_code[2] = strings[2][2];
+				data->network_info->network_code[3] = ' ';
+				data->network_info->network_code[4] = strings[2][3];
+				data->network_info->network_code[5] = strings[2][4];
+				data->network_info->network_code[6] = 0;
+			} else if (strlen(strings[2]) >= 6) { 
 				data->network_info->network_code[0] = strings[2][1];
 				data->network_info->network_code[1] = strings[2][2];
 				data->network_info->network_code[2] = strings[2][3];

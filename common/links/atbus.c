@@ -122,7 +122,18 @@ char *findcrlfbw(unsigned char *str, int len)
 {
 	while ((*str != '\n') && (*str-1 != '\r') && len--)
 		str--;
-	return len ? str+1 : NULL;
+	return len > 0 ? str+1 : NULL;
+}
+
+int numchar(unsigned char *str, unsigned char ch)
+{
+	int count = 0;
+
+	while (*str && *str != '\r') {
+		if (*str++ == ch) count++;
+	}
+
+	return count;
 }
 
 /* 
@@ -133,6 +144,7 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 {
 	int error;
 	atbus_instance *bi = AT_BUSINST(sm);
+	int unsolicited, count;
 
 	if (!bi)
 		return;
@@ -147,6 +159,10 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 	/* first check if <cr><lf> is found at end of reply_buf.
 	 * none: the needed length is greater 4 because we don't
 	 * need to enter if no result/error will be found. */
+	if (bi->rbuf_pos == 3 && !strcmp(bi->rbuf + 1, "\r\n")) {
+		bi->rbuf_pos = 1;
+		bi->rbuf[1] = '\0';
+	}
 	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 2, "\r\n", 2)) {
 		/* try to find previous <cr><lf> */
 		char *start = findcrlfbw(bi->rbuf + bi->rbuf_pos - 2, bi->rbuf_pos - 1);
@@ -163,6 +179,18 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 			bi->rbuf[0] = GN_AT_ERROR;
 		else if (sscanf(start, "+CME ERROR: %d", &error) == 1)
 			bi->rbuf[0] = GN_AT_ERROR;
+		else if (*start == '+') {
+			/* check for possible unsolicited responses */
+			unsolicited = 0;
+			if (!strncasecmp(start + 1, "CREG:", 5)) {
+				count = numchar(start, ',');
+				if (count == 0 || count == 2) unsolicited = 1;
+			}
+			if (unsolicited) {
+				*start = '\0';
+				bi->rbuf_pos = start - bi->rbuf;
+			}
+		}
 	}
 	/* check if SMS prompt is found */
 	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 4, "\r\n> ", 4))

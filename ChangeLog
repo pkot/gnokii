@@ -54,6 +54,11 @@
     o fix mixed name/number entry field usage        (Peter Grandi)
  * nk6510 series updates
     o added Nokia 3595 to the supported models  (Gunnar Sigurdsson)
+ * AT series updates
+    o findcrlfbw() overrun at the beginning        (BORBELY Zoltan)
+    o unsolicited network info (+CREG) dropped     (BORBELY Zoltan)
+    o extra spaces skipped in the identify replies (BORBELY Zoltan)
+    o network code can be specified without quotes (BORBELY Zoltan)
 
 0.6.1
 =====
