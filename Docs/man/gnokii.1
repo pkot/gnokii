@@ -194,8 +194,37 @@ reads specificed memory location from phone.
 If \fIend_number\fR is not specified only one location \- \fIstart\fR is read.
 If instead of \fIend_number\fR the text \fIend\fR is specified then gnokii
 will read from \fIstart_number\fR until it encounters a non\-existant location.
-Valid \fImemory types\fR are: ME, SM, FD, ON, EN, DC, RC, MC, LD.
-You can use also \fI\-r\fR or \fI\-\-raw\fR switch to get the raw output. You can use it then with \fI\-\-writephonebook\fR. Normally you got verbose output.
+Valid \fImemory types\fR are: ME, SM, FD, ON, EN, DC, RC, MC, LD:
+.IP
+.B ME
+Internal memory of the mobile equipment
+.IP
+.B SM
+SIM card memory
+.IP
+.B FD
+Fixed dial numbers
+.IP
+.B ON
+Own numbers
+.IP
+.B EN
+Emergency numbers
+.IP
+.B DC
+Dialled numbers
+.IP
+.B RC
+Received calls
+.IP
+.B MC
+Missed calls
+.IP
+.B LD
+Last dialled numbers 
+.PP
+You can use also \fI\-r\fR or \fI\-\-raw\fR switch to get the raw output.
+You can use it then with \fI\-\-writephonebook\fR. Normally you got verbose output.
 .TP 
 .BR "\-\-writephonebook [\-i]"
 reads data from stdin and writes to phonebook
