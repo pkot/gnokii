@@ -81,12 +81,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
 {
         GSM_Error ret;
 #ifndef WIN32  /* MB21 not supported in win32 */
-	if (strstr("2110", model)) {
-		extern GSM_Phone phone_nokia_2110;
-		memcpy(&(sm->Phone), &phone_nokia_2110, sizeof(GSM_Phone));
-		sm->Phone.Functions(GOP_Init, NULL, sm);
-	}
- 
+
         GSM_LinkOK = &LinkAlwaysOK;
         sm->Link.ConnectionType=connection;
         sm->Link.InitLength=atoi(initlength);

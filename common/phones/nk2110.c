@@ -6,7 +6,7 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 2000, 2001 Pavel Machek <pavel@ucw.cz>
+  Copyright (C) 2000-2002 Pavel Machek <pavel@ucw.cz>
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -1041,17 +1041,20 @@ RegisterMe(void)
 
 /* Initialise variables and state machine. */
 static GSM_Error   
-Initialise(char *port_device, char *initlength, 
-	   GSM_ConnectionType connection,
-	   void (*rlp_callback)(RLP_F96Frame *frame))
+Initialise(GSM_Statemachine *state)
 {
+	GSM_Data data;
+
+	/* Copy in the phone info */
+	memcpy(&(state->Phone), &phone_nokia_2110, sizeof(GSM_Phone));
+
 	RequestTerminate = false;
 	N2110_LinkOK     = false;
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
 	memset(VersionInfo, 0, sizeof(VersionInfo));
-	strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
-	switch (connection) {
+	strncpy(PortDevice, "/dev/ttyS0", GSM_MAX_DEVICE_NAME_LENGTH);
+	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
 		RegisterMe();
 		break;
@@ -1060,7 +1063,10 @@ Initialise(char *port_device, char *initlength,
 		break;
 	}
 
-	return (GE_NONE);
+	SM_Initialise(state);
+	GSM_DataClear(&data);
+
+	return GE_NONE;
 }
 
 /* Routine to get specifed phone book location.  Designed to be called by
@@ -1152,10 +1158,11 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 {
 	GSM_Error err = GE_NONE;
 
-	printf("Asked for %d\n", op);
+//	printf("Asked for %d\n", op);
 	switch (op) {
 	case GOP_Init:
 		state->Link.Loop = link_Loop;
+		err = Initialise(state);
 		break;
 	case GOP_Identify:
 	case GOP_GetModel:
