@@ -1,0 +1,214 @@
+0.4.0pre14
+==========
+ * fixed a problem with a missing headers (sys/uio.h and error.h)
+   for FreeBSD and probably other non-Linux         (Paulius Bulotas)
+ * AT mode updates
+    o better error reporting between link and phone layer
+                                                    (Manfred Jonsson)
+    o SMS center reading support                          (Petr Cech)
+ * SMSD update
+    o DB modules fixes, code and documetation cleanups
+                                                       (Jan Derfinak)
+ * new Serbian operator                            (Sladjan Andjelic)
+ * 6110 series updates
+    o DialVoice implemented                          (BORBELY Zoltan)
+    o start to get DataCalls back alive              (Jan Kratochvil)
+    o notifications of call placed on hold / call retrieved
+      from hold documented                           (BORBELY Zoltan)
+    o call specific messages added (eliminates unhandled frame
+      messages)                                      (BORBELY Zoltan)
+    o more call status codes added                   (BORBELY Zoltan)
+    o RLP frame sending/receiveing implemented       (BORBELY Zoltan)
+    o 'Accesories connected' message -- authentication code
+      ported                                         (BORBELY Zoltan)
+    o SetRingtone, GetRawRingtone, SetRawRingtone implemented
+                                                     (BORBELY Zoltan)
+    o GetSecurityCodeStatus, EnterSecurityCode, ChangeSecurityCode
+                                                     (BORBELY Zoltan)
+    o GOP_OnSMS, GOP_PollSMS added                   (BORBELY Zoltan)
+    o GOP_SendDTMF added                             (BORBELY Zoltan)
+    o GOP_Reset added                                (BORBELY Zoltan)
+ * gnokii updates
+    o DialVoice implemented                          (BORBELY Zoltan)
+    o call status reporting improved                 (BORBELY Zoltan)
+    o --getringtone implemented                      (BORBELY Zoltan)
+    o --setringtone converted and enhanced           (BORBELY Zoltan)
+    o --changesecuritycode added                     (BORBELY Zoltan)
+    o password reading function generalized          (BORBELY Zoltan)
+    o --senddtmf converted to the new API            (BORBELY Zoltan)
+    o --reset converted to the new API               (BORBELY Zoltan)
+    o GSM->GetIncomingCallNr removed from gnokii. This was obsoleted
+    by the CallNotification.                         (BORBELY Zoltan)
+ * compilation fixes                                 (Jan Kratochvil)
+ * cleanups                                               (Pawel Kot)
+ * the fd passed master pty wasn't usable (opening resulted EIO)
+   -- fixes for the new mgnokiidev                   (BORBELY Zoltan)
+ * gnokiid updates
+    o converted to the new API                       (BORBELY Zoltan)
+    o Debug output of the *_CallPassup functions     (BORBELY Zoltan)
+ * libsms updates
+    o moved some logic from 7110 driver     (Markus Plail, Pawel Kot)
+    o new functionality in the interface for detecting changes
+      in the folders/messages status                   (Markus Plail)
+ * xgnokii updates
+    o SMS support with smart checking for any folder/messages
+      changes:                                         (Markus Plail)
+        + User moves messages manually -> done
+        + User reads unread messages in phone -> done
+        + Newly received messages -> done
+        + User deletes messages -> done
+        + Delivery Reports change from Pending to whatever -> not done
+        + Marking messages read upon clicking -> not done
+ * Docs updated
+    o more detailes on 6110 protocol                 (BORBELY Zoltan)
+ * FBUS acking moved before the SM_IncomingFunction invocation
+                                                     (BORBELY Zoltan)
+
+0.4.0pre13
+==========
+ * SECURITY FIX
+    o When installed as gnokii documentation says (sgid gnokii),
+      mgnokiidev could give write permission for the group to any
+      file in the system. Mgnokidev was rewritten. Now that is
+      mgnokiidev who opens pty device and it just passes back
+      the descriptor to the caller through a unix socket
+                                          (BORBELY Zoltan, Pawel Kot)
+ * 7110 series updates
+    o NetMonitor implemented                                    (???)
+    o cleanups                              (Markus Plail, Pawel Kot)
+    o fixes for calendar info handling                 (Markus Plail)
+    o correctly count length of the model name and the revision
+                                                          (Pawel Kot)
+ * gnokii.c updates
+    o NetMonitor updated to the new structure                   (???)
+    o remove unnessesary entries from gals[]   (Marek Micha³kiewicz,
+                                                Sindunata, Pawel Kot)
+ * remove obsolete IR-Dongles patches                     (Pawel Kot)
+ * wrong order of arguments to memset() in libsms fixed   (Pawel Kot)
+ * xgnokii updates
+    o NetMonitor updated to the new structure             (Pawel Kot)
+    o working SMS support                   (Markus Plail, Pawel Kot)
+    o working logos stuff                              (Markus Plail)
+    o some cleanups                         (Markus Plail, Pawel Kot)
+    o correct initialization - fbusinit() returns GSM_Error now
+                                                          (Pawel Kot)
+    o fixes in getting to the new structure (Markus Plail, Pawel Kot)
+ * docs updates
+    o real TODO                                           (Pawel Kot)
+    o show gnokii-binary target in configure              (Pawel Kot)
+    o update INSTALL detailes                             (Pawel Kot)
+ * UserData length in SendSMS fix                         (Pawel Kot)
+ * AT series updates
+    o allow connection=irda                         (Manfred Jonsson)
+    o don't ignore return messages                  (Manfred Jonsson)
+    o set the power on dtr and rts                  (Manfred Jonsson)
+    o SendSMS/SaveSMS fixes                           (Hannes Schulz)
+ * SMSD updates
+    o MySQL support fixes                              (Jan Derfinak)
+ * Allow Nokia 8210 and 8310 to use irda connection       (Pawel Kot)
+ * "make 7110 with dlr-3 happy"                     (Manfred Jonsson)
+ * CREDITS updates                                        (Pawel Kot)
+ * 6110 series updates
+    o NetMonitor                                     (BORBELY Zoltan)
+    o get rid of the 7110ism                         (BORBELY Zoltan)
+    o revert removal of GetIMEI it *IS* needed            (Pawel Kot)
+ * Get rid of LinkOKs                               (Manfred Jonsson)
+
+0.4.0pre12
+==========
+ * 7110 series updates
+    o fix delivery report bugs -- incorrect field was treated
+      as a failure reason/success indcation               (Pawel Kot)
+    o fix segfault when phone notified us of the incoming
+      SMS (allocate/deallocate RawData)                   (Pawel Kot)
+ * 6110 series updates
+    o fix delivery report incorrect remoten number field  (Pawel Kot)
+    o implement DeleteSMS                                 (Pawel Kot)
+    o implemented SaveSMS and SendSMS                (BORBELY Zoltan)
+    o support for Cell broadcasts             	     (BORBELY Zoltan)
+ * 2110 series updates
+    o SMS unreservation for OnSMS                      (Pavel Machek)
+ * libsms updates
+    o correctly allocate/free RawData     (BORBELY Zoltan, Pawel Kot)
+    o typo fix in gsm-sms.h                          (BORBELY Zoltan)
+    o impelemented SaveSMS                           (BORBELY Zoltan)
+    o minor SendSMS fixes                            (BORBELY Zoltan)
+    o memory corruption bug fixed in gsm-sms.c!!! (check for the
+      validity field in layout                       (BORBELY Zoltan)
+    o EncodePDUSMS fix in gsm-sms.c (error code and normal
+      execution couldn't be distinguished)           (BORBELY Zoltan)
+ * gnokii.c updates
+    o fix segfault in smsreader() when /tmp/sms does not exist
+                                                          (Pawel Kot)
+    o respect use_locking = no           (Manfred Jonsson, Sindunata)
+ * fixes for serial device locking                  (Manfred Jonsson)
+ * statemachine updates
+    o support for GE_UNSOLICITED               	     (BORBELY Zoltan)
+ * AT series updates
+    o 'quirk' fixes                  		    (Manfred Jonsson)
+ * SMSD updated
+    o experimental MySQL support                       (Jan Derfinak)
+
+0.4.0pre11
+==========
+ * CREDITS updates :-)                                    (Pawel Kot)
+ * Solaris compilation fixes              (Janusz Fraczek, Pawel Kot)
+ * 7110 series updates
+    o smsreader fixes                                     (Pawel Kot)
+ * 6110 series updates
+    o GetSMSCenter and SetSMSCenter                  (BORBELY Zoltan)
+ * gnokii.c updates
+    o fixes for getsmsc                              (BORBELY Zoltan)
+    o new setsmsc                                    (BORBELY Zoltan)
+    o handle the case when use_lockfile is not present in the
+      config file                                         (Pawel Kot)
+ * DefaultName in SMSC struct                        (BORBELY Zoltan)
+
+0.4.0pre10
+==========
+ * AT series updates
+    o sending SMS                                         (Pawel Kot)
+ * 7110 series updates
+    o SMS status                                          (Pawel Kot)
+    o documentation on SMS status                         (Pawel Kot)
+    o smsreader                                           (Pawel Kot)
+ * better dumping unhandled frames                   (BORBELY Zoltan)
+ * 6110 series updates
+    o [S|G]etSpeedDial                               (BORBELY Zoltan)
+    o display status, display output                 (BORBELY Zoltan)
+    o 3330 protocol update (Settings/Profiles)     (Harri Yli-Torkko)
+ * gnokii.c updates
+    o more general displayoutput                     (BORBELY Zoltan)
+    o smsreader fixes                                  (Pavel Machek)
+    o use of serial device locking                        (Pawel Kot)
+ * install-docs bux fixed                                 (Pawel Kot)
+ * gnokii-debug compilation targes                     (Pavel Machek)
+ * 2110 series updates
+    o 2110 initialization cleanups                     (Pavel Machek)
+    o fixes for smsreader                              (Pavel Machek)
+ * locking serial device in /var/lock with a new configuration
+   option                                                 (Pawel Kot)
+ * Big Cleanups(TM). Code review.
+    o get rid of GSM_Functions                            (Pawel Kot)
+    o indentation                                         (Pawel Kot)
+    o remove redundant trailing whitespaces               (Pawel Kot)
+    o fix potentially dangerous strcpy in gnokii.c        (Pawel Kot)
+ * New sample chat file for HSCSD connection      (Przemek ¦widerski)
+ * SMSD update                                         (Jan Derfinak)
+
+0.4.0pre9
+=========
+ * libsms updates
+    o sending SMS in AT mode                              (Pawel Kot)
+    o fixes for 3110 and 2110 reading                     (Pawel Kot)
+ * 6110 series updates
+    o GetBitmap, SetBitmap                           (BORBELY Zoltan)
+    o GetProfile, SetProfile                         (BORBELY Zoltan)
+    o date, alarm                                    (BORBELY Zoltan)
+    o calendar                                       (BORBELY Zoltan)
+ * 3110 fixes for getsms                               (Tamas Bondar)
+ * SMSD update                                         (Jan Derfinak)
+ * bugfixes in gnokii.c and 7110 support (namely writephonebook)
+                                                        (misc people)
+ * docs updates                                     (Manfred Jonsson)
+ * dumpling unhandled frames                         (BORBELY Zoltan)
