@@ -775,7 +775,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		case 0x00:
 			dprintf("SMS Folder successfully created!\n");
 			data->SMSFolder->FolderID = message[8];
-			DecodeUnicode(data->SMSFolder->Name, message + 10, length - 11);
+			char_decode_unicode(data->SMSFolder->Name, message + 10, length - 11);
 			dprintf("   Folder ID: %i\n", data->SMSFolder->FolderID);
 			dprintf("   Name: %s\n", data->SMSFolder->Name);
 			break;
@@ -801,7 +801,7 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 			data->SMSFolderList->FolderID[j] = message[i - 2];
 			dprintf("Folder(%i) name: ", message[i - 2]);
 			len = message[i - 1];
-			DecodeUnicode(data->SMSFolderList->Folder[j].Name, message + i, len);
+			char_decode_unicode(data->SMSFolderList->Folder[j].Name, message + i, len);
 			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
 		}
 		break;
@@ -911,7 +911,7 @@ static GSM_Error P6510_CreateSMSFolder(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Creating SMS Folder...\n");
 	
-	EncodeUnicode(req + 10, data->SMSFolder->Name, strlen(data->SMSFolder->Name));
+	char_encode_unicode(req + 10, data->SMSFolder->Name, strlen(data->SMSFolder->Name));
 	req[7] = strlen(data->SMSFolder->Name) * 2 + 6;
 
 	if (SM_SendMessage(state, req[7] + 6, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
@@ -1256,12 +1256,12 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 					if (message[offset + 4] % 2) message[offset + 4]++;
 					message[offset + 4] = message[offset + 4] / 2 + 1;
 					snprintf(data->MessageCenter->Recipient.Number,
-						 MAX_NUMBER_LEN + 1, "%s", GetBCDNumber(message + offset + 4));
+						 MAX_NUMBER_LEN + 1, "%s", char_get_bcd_number(message + offset + 4));
 					data->MessageCenter->Recipient.Type = message[offset + 5];
 					break;
 				case 0x02: /* SMSC number */
 					snprintf(data->MessageCenter->SMSC.Number,
-						 MAX_NUMBER_LEN + 1, "%s", GetBCDNumber(message + offset + 4));
+						 MAX_NUMBER_LEN + 1, "%s", char_get_bcd_number(message + offset + 4));
 					data->MessageCenter->SMSC.Type = message[offset + 5];
 					break;
 				default:
@@ -1270,7 +1270,7 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 				}
 				break;
 			case 0x81: /* SMSC name */
-				DecodeUnicode(data->MessageCenter->Name,
+				char_decode_unicode(data->MessageCenter->Name,
 					      message + offset + 4,
 					      message[offset + 2]);
 				break;
@@ -1576,23 +1576,23 @@ static GSM_Error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	switch (data->Bitmap->number) {
 	case 0:
 		string[0] = 0x0d;
-		EncodeUnicode(string + 1, "Family", 6);
+		char_encode_unicode(string + 1, "Family", 6);
 		break;
 	case 1:
 		string[0] = 0x07;
-		EncodeUnicode(string + 1, "VIP", 3);
+		char_encode_unicode(string + 1, "VIP", 3);
 		break;
 	case 2:
 		string[0] = 0x0f;
-		EncodeUnicode(string + 1, "Friends", 7);
+		char_encode_unicode(string + 1, "Friends", 7);
 		break;
 	case 3:
 		string[0] = 0x15;
-		EncodeUnicode(string + 1, "Colleagues", 10);
+		char_encode_unicode(string + 1, "Colleagues", 10);
 		break;
 	case 4:
 		string[0] = 0x0d;
-		EncodeUnicode(string + 1, "Others", 6);
+		char_encode_unicode(string + 1, "Others", 6);
 		break;
 	default:
 		string[0] = 0x00;
@@ -1680,7 +1680,7 @@ static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 	if ((*(entry->Name)) && (*(entry->Number))) {
 		/* Name */
 		j = strlen(entry->Name);
-		EncodeUnicode((string + 1), entry->Name, j);
+		char_encode_unicode((string + 1), entry->Name, j);
 		/* Length ot the string + length field + terminating 0 */
 		string[0] = j * 2;
 		count += PackBlock(0x07, j * 2 + 1, block++, string, req + count);
@@ -1701,7 +1701,7 @@ static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 			string[0] = entry->SubEntries[defaultn].NumberType;
 			string[1] = string[2] = string[3] = 0;
 			j = strlen(entry->SubEntries[defaultn].data.Number);
-			EncodeUnicode((string + 5), entry->SubEntries[defaultn].data.Number, j);
+			char_encode_unicode((string + 5), entry->SubEntries[defaultn].data.Number, j);
 			string[4] = j * 2;
 			count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count);
 		}
@@ -1713,14 +1713,14 @@ static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 					string[0] = entry->SubEntries[i].NumberType;
 					string[1] = string[2] = string[3] = 0;
 					j = strlen(entry->SubEntries[i].data.Number);
-					EncodeUnicode((string + 5), entry->SubEntries[i].data.Number, j);
+					char_encode_unicode((string + 5), entry->SubEntries[i].data.Number, j);
 					string[4] = j * 2;
 					count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count);
 				}
 			} else {
 				j = strlen(entry->SubEntries[i].data.Number);
 				string[0] = j * 2;
-				EncodeUnicode((string + 1), entry->SubEntries[i].data.Number, j);
+				char_encode_unicode((string + 1), entry->SubEntries[i].data.Number, j);
 				count += PackBlock(entry->SubEntries[i].EntryType, j * 2 + 1, block++, string, req + count);
 			}
 
@@ -2066,7 +2066,7 @@ static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		dprintf("Count before encode = %d\n", count);
 		dprintf("Meeting Text is = \"%s\"\n", CalendarNote->Text);
 
-		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
+		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
 		count = count + 2 * strlen(CalendarNote->Text);
 		break;
 
@@ -2096,9 +2096,9 @@ static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		/* fixed 0x00 */
 		req[count++] = strlen(CalendarNote->Phone);   /* Field 19 */
 		/* Text */
-		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
+		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
 		count += 2 * strlen(CalendarNote->Text);
-		EncodeUnicode(req + count, CalendarNote->Phone, strlen(CalendarNote->Phone)); /* Fields (N+1)->n */
+		char_encode_unicode(req + count, CalendarNote->Phone, strlen(CalendarNote->Phone)); /* Fields (N+1)->n */
 		count += 2 * strlen(CalendarNote->Phone);
 		break;
 	case GCN_BIRTHDAY:
@@ -2138,7 +2138,7 @@ static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		/* Text */
 		dprintf("Count before encode = %d\n", count);
 
-		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 22->N */
+		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 22->N */
 		count = count + 2 * strlen(CalendarNote->Text);
 		break;
 
@@ -2153,7 +2153,7 @@ static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		/* fixed 0x00 */
 		req[count++] = 0x00; /* Field 15 */
 		/* Text */
-		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 16->N */
+		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 16->N */
 		count += 2 * strlen(CalendarNote->Text);
 		break;
 	}
@@ -2221,7 +2221,7 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 					break;
 				}
 				operatorname = malloc(blockstart[5] + 1);
-				DecodeUnicode(operatorname, blockstart + 6, blockstart[5]);
+				char_decode_unicode(operatorname, blockstart + 6, blockstart[5]);
 				dprintf("Operator Name: %s\n", operatorname);
 				break;
 			case 0x09:  /* Operator details */
@@ -2480,7 +2480,7 @@ reply: 0x7a / 0x0036
 		switch (message[4]) {
 		case 0x01:
 			dprintf("Greeting text received\n");
-			DecodeUnicode(data->Bitmap->text, message + 6, length - 7);
+			char_decode_unicode(data->Bitmap->text, message + 6, length - 7);
 			return GE_NONE;
 			break;
 		case 0x05:
@@ -2649,7 +2649,7 @@ static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, 
 				data->Profile->CallerGroups = blockstart[7];
 				break;
 			case 0x0c:
-				DecodeUnicode(data->Profile->Name, blockstart + 7, blockstart[6]);
+				char_decode_unicode(data->Profile->Name, blockstart + 7, blockstart[6]);
 				dprintf("Profile Name: %s\n", data->Profile->Name);
 				break;
 			default:
@@ -2852,7 +2852,7 @@ static GSM_Error P6510_SetProfile(GSM_Data *data, GSM_Statemachine *state)
 	memcpy(req + length + 3, "\xcc\xad\xff", 3);
 	/* Name */
 	j = strlen(data->Profile->Name);
-	EncodeUnicode((req + length + 7), data->Profile->Name, j);
+	char_encode_unicode((req + length + 7), data->Profile->Name, j);
 	/* Terminating 0 */
 	req[j * 2 + 1] = 0;
 	/* Length of the string + length field + terminating 0 */
@@ -3083,7 +3083,7 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		DecodeUnicode(dummy, message + 7, message[6]);
+		char_decode_unicode(dummy, message + 7, message[6]);
 		dprintf("Number: %s\n", dummy);
 		break;		
 	case 0x04:
@@ -3097,7 +3097,7 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		DecodeUnicode(dummy, message + 7, message[6]);
+		char_decode_unicode(dummy, message + 7, message[6]);
 		dprintf("From: %s\n", dummy);
 		break;
 	case 0x07:
@@ -3126,7 +3126,7 @@ static GSM_Error P6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Call ID: %i\n", message[4]);
 		dprintf("Call Mode: %i\n", message[5]);
 		dummy = malloc(message[6] + 1);
-		DecodeUnicode(dummy, message + 7, message[6]);
+		char_decode_unicode(dummy, message + 7, message[6]);
 		dprintf("To: %s\n", dummy);
 		break;
 	default:
@@ -3165,7 +3165,7 @@ static GSM_Error P6510_MakeCall(GSM_Data *data, GSM_Statemachine *state)
 		return GE_ENTRYTOOLONG;
 	}
 	req[pos++] = len;
-	EncodeUnicode(req + pos, data->CallInfo->Number, len * 2);
+	char_encode_unicode(req + pos, data->CallInfo->Number, len * 2);
 	pos += len << 1;
 	req[pos++] = 0x01; /* one block */
 	req[pos++] = 0x01; /* type */
@@ -3222,13 +3222,13 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("WAP bookmark received\n");
 		string_length = (message[6] << 8 | message[7]);
 
-		DecodeUnicode(data->WAPBookmark->Name, message + 8, string_length);
+		char_decode_unicode(data->WAPBookmark->Name, message + 8, string_length);
 		dprintf("Name: %s\n", data->WAPBookmark->Name);
 		pos = (string_length << 1) + 8;
 
 		string_length = message[pos++] << 8;
 		string_length |= message[pos++];
-		DecodeUnicode(data->WAPBookmark->URL, message + pos, string_length);
+		char_decode_unicode(data->WAPBookmark->URL, message + pos, string_length);
 		dprintf("URL: %s\n", data->WAPBookmark->URL);
 		break;
 	case 0x0a:
@@ -3245,14 +3245,14 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("WAP setting received\n");
 
 		string_length = (message[4] << 8 | message[5]);
-		DecodeUnicode(data->WAPSetting->Name, message + 6, string_length);
+		char_decode_unicode(data->WAPSetting->Name, message + 6, string_length);
 		dprintf("Name: %s\n", data->WAPSetting->Name);
 		pos = (string_length << 1) + 6;
 		if (!(string_length % 2)) pad = 1;
 
 		string_length = message[pos++] << 8; 
 		string_length |= message[pos++];
-		DecodeUnicode(data->WAPSetting->Home, message + pos, string_length);
+		char_decode_unicode(data->WAPSetting->Home, message + pos, string_length);
 		dprintf("Home: %s\n", data->WAPSetting->Home);
 		pos += string_length << 1;
 
@@ -3280,25 +3280,25 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("GSM data:\n");
 
 		string_length = message[pos++];
-		DecodeUnicode(data->WAPSetting->GSMdataIP, message + pos, string_length);
+		char_decode_unicode(data->WAPSetting->GSMdataIP, message + pos, string_length);
 		dprintf("   IP: %s\n", data->WAPSetting->GSMdataIP);
 		pos += string_length << 1;
 
   		string_length = message[pos++] << 8; 
 		string_length |= message[pos++];
-		DecodeUnicode(data->WAPSetting->Number, message + pos, string_length);
+		char_decode_unicode(data->WAPSetting->Number, message + pos, string_length);
 		dprintf("   Number: %s\n", data->WAPSetting->Number);
 		pos += string_length << 1;
 
   		string_length = message[pos++] << 8; 
 		string_length |= message[pos++];
-		DecodeUnicode(data->WAPSetting->GSMdataUsername, message + pos, string_length);
+		char_decode_unicode(data->WAPSetting->GSMdataUsername, message + pos, string_length);
 		dprintf("   Username: %s\n", data->WAPSetting->GSMdataUsername);
 		pos += string_length << 1;
 
   		string_length = message[pos++] << 8; 
 		string_length |= message[pos++];
-		DecodeUnicode(data->WAPSetting->GSMdataPassword, message + pos, string_length);
+		char_decode_unicode(data->WAPSetting->GSMdataPassword, message + pos, string_length);
 		dprintf("   Password: %s\n", data->WAPSetting->GSMdataPassword);
 		pos += string_length << 1;
 
@@ -3312,26 +3312,26 @@ static GSM_Error P6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		data->WAPSetting->GPRSLogin = message[pos++];
 
 		string_length = message[pos++];
-		DecodeUnicode(data->WAPSetting->AccessPoint, message + pos, string_length);
+		char_decode_unicode(data->WAPSetting->AccessPoint, message + pos, string_length);
 		dprintf("   Access point: %s\n", data->WAPSetting->AccessPoint);
 		pos += string_length << 1;
 
   		string_length = message[pos++] << 8; 
 		string_length |= message[pos++];
-		DecodeUnicode(data->WAPSetting->GPRSIP, message + pos, string_length);
+		char_decode_unicode(data->WAPSetting->GPRSIP, message + pos, string_length);
 		dprintf("   IP: %s\n", data->WAPSetting->GPRSIP);
 		pos += string_length << 1;
 
   		string_length = message[pos++] << 8; 
 		string_length |= message[pos++];
-		DecodeUnicode(data->WAPSetting->GPRSUsername, message + pos, string_length);
+		char_decode_unicode(data->WAPSetting->GPRSUsername, message + pos, string_length);
 		dprintf("   Username: %s\n", data->WAPSetting->GPRSUsername);
 		pos += string_length << 1;
 
 		if (message[pos] != 0x80) {
 			string_length = message[pos++] << 8; 
 			string_length |= message[pos++];
-			DecodeUnicode(data->WAPSetting->GPRSPassword, message + pos, string_length);
+			char_decode_unicode(data->WAPSetting->GPRSPassword, message + pos, string_length);
 			dprintf("   Password: %s\n", data->WAPSetting->GPRSPassword);
 			pos += string_length << 1;
 		} else
@@ -3394,7 +3394,7 @@ static int PackWAPString(unsigned char *dest, unsigned char *string, int length_
 		dest[0] = length % 256;
 	}
 
-	EncodeUnicode(dest + length_size, string, length);
+	char_encode_unicode(dest + length_size, string, length);
 	return ((length << 1) + length_size);
 }
 
@@ -3627,7 +3627,7 @@ static GSM_Error P6510_IncomingToDo(int messagetype, unsigned char *message, int
 			data->ToDo->Priority = message[4];
 		}
 		dprintf("Priority: %i\n", message[4]);
-		DecodeUnicode(data->ToDo->Text, message + 14, length - 16);
+		char_decode_unicode(data->ToDo->Text, message + 14, length - 16);
 		dprintf("Text: \"%s\"\n", data->ToDo->Text);
 		break;
 	case 0x10:
@@ -3717,7 +3717,7 @@ static GSM_Error P6510_WriteToDo(GSM_Data *data, GSM_Statemachine *state)
 	req[8] = data->ToDo->Location / 256;
 	req[9] = data->ToDo->Location % 256;
 
-	EncodeUnicode(text, data->ToDo->Text, strlen(data->ToDo->Text));
+	char_encode_unicode(text, data->ToDo->Text, strlen(data->ToDo->Text));
 	memcpy(req + 10, text, strlen(data->ToDo->Text) * 2);
 
 	dprintf("Setting ToDo\n");

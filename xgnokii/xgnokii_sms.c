@@ -913,7 +913,7 @@ static gint SendSMSCore(GSM_API_SMS * sms)
 		if ((sms->UserData[i].Type == SMS_PlainText ||
 		     sms->UserData[i].Type == SMS_NokiaText ||
 		     sms->UserData[i].Type == SMS_iMelodyText) &&
-		     !IsDefaultAlphabetString(sms->UserData[i].u.Text))
+		     !gn_char_def_alphabet(sms->UserData[i].u.Text))
 			sms->DCS.u.General.Alphabet = SMS_UCS2;
 		i++;
 	}

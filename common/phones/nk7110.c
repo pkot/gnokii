@@ -701,7 +701,7 @@ static GSM_Error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	block = 1;
 	/* Name */
 	i = strlen(data->Bitmap->text);
-	EncodeUnicode((string + 1), data->Bitmap->text, i);
+	char_encode_unicode((string + 1), data->Bitmap->text, i);
 	string[0] = i * 2;
 	count += PackBlock(0x07, i * 2 + 1, block++, string, req + count);
 	/* Ringtone */
@@ -770,7 +770,7 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 	if ((*(entry->Name)) && (*(entry->Number))) {
 		/* Name */
 		i = strlen(entry->Name);
-		EncodeUnicode((string + 1), entry->Name, i);
+		char_encode_unicode((string + 1), entry->Name, i);
 		/* Terminating 0 */
 		string[i * 2 + 1] = 0;
 		/* Length ot the string + length field + terminating 0 */
@@ -790,7 +790,7 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 			string[0] = entry->SubEntries[defaultn].NumberType;
 			string[1] = string[2] = string[3] = 0;
 			j = strlen(entry->SubEntries[defaultn].data.Number);
-			EncodeUnicode((string + 5), entry->SubEntries[defaultn].data.Number, j);
+			char_encode_unicode((string + 5), entry->SubEntries[defaultn].data.Number, j);
 			string[j * 2 + 1] = 0;
 			string[4] = j * 2;
 			count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
@@ -802,7 +802,7 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 					string[0] = entry->SubEntries[i].NumberType;
 					string[1] = string[2] = string[3] = 0;
 					j = strlen(entry->SubEntries[i].data.Number);
-					EncodeUnicode((string + 5), entry->SubEntries[i].data.Number, j);
+					char_encode_unicode((string + 5), entry->SubEntries[i].data.Number, j);
 					string[j * 2 + 1] = 0;
 					string[4] = j * 2;
 					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
@@ -810,7 +810,7 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 			} else {
 				j = strlen(entry->SubEntries[i].data.Number);
 				string[0] = j * 2;
-				EncodeUnicode((string + 1), entry->SubEntries[i].data.Number, j);
+				char_encode_unicode((string + 1), entry->SubEntries[i].data.Number, j);
 				string[j * 2 + 1] = 0;
 				count += PackBlock(entry->SubEntries[i].EntryType, j * 2 + 2, block++, string, req + count);
 			}
@@ -1046,7 +1046,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			nextfolder += 0x08;
 			if (nextfolder == 0x28) nextfolder++;
 			i -= 2 * len + 1;
-			DecodeUnicode(data->SMSFolderList->Folder[j].Name, message + i, len);
+			char_decode_unicode(data->SMSFolderList->Folder[j].Name, message + i, len);
 			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
 			i += 2 * len + 2;
 		}
@@ -1346,11 +1346,11 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		dprintf("%d\n", message[9]);
 		snprintf(data->MessageCenter->Recipient.Number,
 			 sizeof(data->MessageCenter->Recipient.Number),
-			 "%s", GetBCDNumber(message + 9));
+			 "%s", char_get_bcd_number(message + 9));
 		data->MessageCenter->Recipient.Type = message[10];
 		snprintf(data->MessageCenter->SMSC.Number,
 			 sizeof(data->MessageCenter->SMSC.Number),
-			 "%s", GetBCDNumber(message + 21));
+			 "%s", char_get_bcd_number(message + 21));
 		data->MessageCenter->SMSC.Type = message[22];
 
 		if (strlen(data->MessageCenter->Recipient.Number) == 0) {
@@ -1667,7 +1667,7 @@ static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		dprintf("Count before encode = %d\n", count);
 		dprintf("Meeting Text is = \"%s\"\n", CalendarNote->Text);
 
-		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
+		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
 		count = count + 2 * strlen(CalendarNote->Text);
 		break;
 
@@ -1697,9 +1697,9 @@ static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		/* fixed 0x00 */
 		req[count++] = strlen(CalendarNote->Phone);   /* Field 19 */
 		/* Text */
-		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
+		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
 		count += 2 * strlen(CalendarNote->Text);
-		EncodeUnicode(req + count, CalendarNote->Phone, strlen(CalendarNote->Phone)); /* Fields (N+1)->n */
+		char_encode_unicode(req + count, CalendarNote->Phone, strlen(CalendarNote->Phone)); /* Fields (N+1)->n */
 		count += 2 * strlen(CalendarNote->Phone);
 		break;
 
@@ -1740,7 +1740,7 @@ static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		/* Text */
 		dprintf("Count before encode = %d\n", count);
 
-		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 22->N */
+		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 22->N */
 		count = count + 2 * strlen(CalendarNote->Text);
 		break;
 
@@ -1755,7 +1755,7 @@ static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state
 		/* fixed 0x00 */
 		req[count++] = 0x00; /* Field 15 */
 		/* Text */
-		EncodeUnicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 16->N */
+		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 16->N */
 		count = count + 2 * strlen(CalendarNote->Text);
 		break;
 	}
@@ -2024,12 +2024,12 @@ static GSM_Error P7110_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("WAP bookmark received\n");
 		string_length = message[6];
 
-		DecodeUnicode(data->WAPBookmark->Name, message + 7, string_length);
+		char_decode_unicode(data->WAPBookmark->Name, message + 7, string_length);
 		dprintf("Name: %s\n", data->WAPBookmark->Name);
 		pos = (string_length << 1) + 7;
 
 		string_length = message[pos++];
-		DecodeUnicode(data->WAPBookmark->URL, message + pos, string_length);
+		char_decode_unicode(data->WAPBookmark->URL, message + pos, string_length);
 		dprintf("URL: %s\n", data->WAPBookmark->URL);
 		break;
 	case 0x0a:
@@ -2049,14 +2049,14 @@ static GSM_Error P7110_IncomingWAP(int messagetype, unsigned char *message, int 
 
 		string_length = message[4];
 		if (!data->WAPSetting->ReadBeforeWrite)
-			DecodeUnicode(data->WAPSetting->Name, message + 5, string_length);
+			char_decode_unicode(data->WAPSetting->Name, message + 5, string_length);
 		dprintf("Name: %s\n", data->WAPSetting->Name);
 		pos = (string_length << 1) + 5;
 		if (!(string_length % 2)) pad = 1;
 
 		string_length = message[pos++];
 		if (!data->WAPSetting->ReadBeforeWrite)
-			DecodeUnicode(data->WAPSetting->Home, message + pos, string_length);
+			char_decode_unicode(data->WAPSetting->Home, message + pos, string_length);
 		dprintf("Home: %s\n", data->WAPSetting->Home);
 		pos += string_length << 1;
 
@@ -2091,12 +2091,12 @@ static GSM_Error P7110_IncomingWAP(int messagetype, unsigned char *message, int 
 			dprintf("SMS:\n");
 			pos = 6;
 			string_length = message[pos++];
-			DecodeUnicode(data->WAPSetting->SMSServiceNumber, message + pos, string_length);
+			char_decode_unicode(data->WAPSetting->SMSServiceNumber, message + pos, string_length);
 			dprintf("   Service number: %s\n", data->WAPSetting->SMSServiceNumber);
 			pos += string_length << 1;
 
 			string_length = message[pos++];
-			DecodeUnicode(data->WAPSetting->SMSServerNumber, message + pos, string_length);
+			char_decode_unicode(data->WAPSetting->SMSServerNumber, message + pos, string_length);
 			dprintf("   Server number: %s\n", data->WAPSetting->SMSServerNumber);
 			pos += string_length << 1;
 			break;
@@ -2109,22 +2109,22 @@ static GSM_Error P7110_IncomingWAP(int messagetype, unsigned char *message, int 
 			pos++;
 
 			string_length = message[pos++];
-			DecodeUnicode(data->WAPSetting->GSMdataIP, message + pos, string_length);
+			char_decode_unicode(data->WAPSetting->GSMdataIP, message + pos, string_length);
 			dprintf("   IP: %s\n", data->WAPSetting->GSMdataIP);
 			pos += string_length << 1;
 
 			string_length = message[pos++];
-			DecodeUnicode(data->WAPSetting->Number, message + pos, string_length);
+			char_decode_unicode(data->WAPSetting->Number, message + pos, string_length);
 			dprintf("   Number: %s\n", data->WAPSetting->Number);
 			pos += string_length << 1;
 
 			string_length = message[pos++];
-			DecodeUnicode(data->WAPSetting->GSMdataUsername, message + pos, string_length);
+			char_decode_unicode(data->WAPSetting->GSMdataUsername, message + pos, string_length);
 			dprintf("   Username: %s\n", data->WAPSetting->GSMdataUsername);
 			pos += string_length << 1;
 
 			string_length = message[pos++];
-			DecodeUnicode(data->WAPSetting->GSMdataPassword, message + pos, string_length);
+			char_decode_unicode(data->WAPSetting->GSMdataPassword, message + pos, string_length);
 			dprintf("   Password: %s\n", data->WAPSetting->GSMdataPassword);
 			pos += string_length << 1;
 			break;
@@ -2189,7 +2189,7 @@ static int PackWAPString(unsigned char *dest, unsigned char *string, int length_
 		dest[0] = length % 256;
 	}
 
-	EncodeUnicode(dest + length_size, string, length);
+	char_encode_unicode(dest + length_size, string, length);
 	return ((length << 1) + length_size);
 }
 

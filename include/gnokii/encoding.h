@@ -28,34 +28,34 @@
 
 */
 
-#ifndef __gsm_encoding_h_
-#define __gsm_encoding_h_
+#ifndef _gnokii_gsm_encoding_h
+#define _gnokii_gsm_encoding_h
 
 #include "gsm-common.h"
 
 extern void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len);
 extern void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len);
 
-int Unpack7BitCharacters(unsigned int offset, unsigned int in_length, unsigned int out_length,
-			unsigned char *input, unsigned char *output);
-int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output,
-		       unsigned int *in_len);
+int char_unpack_7bit(unsigned int offset, unsigned int in_length, unsigned int out_length,
+		     unsigned char *input, unsigned char *output);
+int char_pack_7bit(unsigned int offset, unsigned char *input, unsigned char *output,
+		   unsigned int *in_len);
 
-void DecodeUnicode(unsigned char* dest, const unsigned char* src, int len);
-void EncodeUnicode(unsigned char* dest, const unsigned char* src, int len);
+void char_decode_unicode(unsigned char* dest, const unsigned char* src, int len);
+void char_encode_unicode(unsigned char* dest, const unsigned char* src, int len);
 
-void DecodeAscii(unsigned char* dest, const unsigned char* src, int len);
-unsigned int EncodeAscii(unsigned char* dest, const unsigned char* src, unsigned int len);
+void char_decode_ascii(unsigned char* dest, const unsigned char* src, int len);
+unsigned int char_encode_ascii(unsigned char* dest, const unsigned char* src, unsigned int len);
 
-void DecodeHex(unsigned char* dest, const unsigned char* src, int len);
-void EncodeHex(unsigned char* dest, const unsigned char* src, int len);
+void char_decode_hex(unsigned char* dest, const unsigned char* src, int len);
+void char_encode_hex(unsigned char* dest, const unsigned char* src, int len);
 
-void DecodeUCS2(unsigned char* dest, const unsigned char* src, int len);
-void EncodeUCS2(unsigned char* dest, const unsigned char* src, int len);
+void char_decode_ucs2(unsigned char* dest, const unsigned char* src, int len);
+void char_encode_ucs2(unsigned char* dest, const unsigned char* src, int len);
 
-bool IsDefaultAlphabetString(unsigned char *string);
+API bool gn_char_def_alphabet(unsigned char *string);
 
-extern char *GetBCDNumber(u8 *Number);
-extern int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type);
+extern char *char_get_bcd_number(u8 *Number);
+extern int char_semi_octet_pack(char *Number, unsigned char *Output, SMS_NumberType type);
 
-#endif
+#endif /* _gnokii_gsm_encoding_h */

@@ -405,7 +405,7 @@ static GSM_Error sms_decode_data(unsigned char *message, unsigned char *output, 
 	/* Unicode */
 	if ((dcs.Type & 0x08) == 0x08) {
 		dprintf("Unicode message\n");
-		DecodeUnicode(output, message, length);
+		char_decode_unicode(output, message, length);
 	} else {
 		/* 8bit SMS */
 		if ((dcs.Type & 0xf4) == 0xf4) {
@@ -415,8 +415,8 @@ static GSM_Error sms_decode_data(unsigned char *message, unsigned char *output, 
 		} else {
 			dprintf("Default Alphabet\n");
 			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
-			Unpack7BitCharacters((7-udhlen)%7, size, length, message, output);
-			DecodeAscii(output, output, length);
+			char_unpack_7bit((7-udhlen)%7, size, length, message, output);
+			char_decode_ascii(output, output, length);
 		}
 	}
 	dprintf("%s\n", output);
@@ -576,11 +576,11 @@ static GSM_Error sms_decode_header(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS
 
 	/* Remote number */
 	rawsms->RemoteNumber[0] = (rawsms->RemoteNumber[0] + 1) / 2 + 1;
-	snprintf(sms->Remote.Number, sizeof(sms->Remote.Number), "%s", GetBCDNumber(rawsms->RemoteNumber));
+	snprintf(sms->Remote.Number, sizeof(sms->Remote.Number), "%s", char_get_bcd_number(rawsms->RemoteNumber));
 	dprintf("\tRemote number (recipient or sender): %s\n", sms->Remote.Number);
 
 	/* Short Message Center */
-	snprintf(sms->SMSC.Number, sizeof(sms->SMSC.Number), "%s", GetBCDNumber(rawsms->MessageCenter));
+	snprintf(sms->SMSC.Number, sizeof(sms->SMSC.Number), "%s", char_get_bcd_number(rawsms->MessageCenter));
 	dprintf("\tSMS center number: %s\n", sms->SMSC.Number);
 
 	/* Delivery time */
@@ -1108,10 +1108,10 @@ static GSM_Error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			switch (al) {
 			case SMS_DefaultAlphabet:
 #define UDH_Length 0
-				size = Pack7BitCharacters((7 - (UDH_Length % 7)) % 7,
-							  sms->UserData[i].u.Text,
-							  rawsms->UserData + offset,
-							  &length);
+				size = char_pack_7bit((7 - (UDH_Length % 7)) % 7,
+						      sms->UserData[i].u.Text,
+						      rawsms->UserData + offset,
+						      &length);
 				rawsms->Length = length;
 				rawsms->UserDataLength = size + offset;
 				break;
@@ -1122,7 +1122,7 @@ static GSM_Error sms_encode_data(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 				break;
 			case SMS_UCS2:
 				rawsms->DCS |= 0x08;
-				EncodeUnicode(rawsms->UserData + offset, sms->UserData[i].u.Text, length);
+				char_encode_unicode(rawsms->UserData + offset, sms->UserData[i].u.Text, length);
 				length *= 2;
 				rawsms->UserDataLength = rawsms->Length = length + offset;
 				break;
@@ -1201,7 +1201,7 @@ GSM_Error sms_prepare(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 	}
 	/* Encoding the header */
 	rawsms->Report = sms->DeliveryReport;
-	rawsms->RemoteNumber[0] = SemiOctetPack(sms->Remote.Number, rawsms->RemoteNumber + 1, sms->Remote.Type);
+	rawsms->RemoteNumber[0] = char_semi_octet_pack(sms->Remote.Number, rawsms->RemoteNumber + 1, sms->Remote.Type);
 	rawsms->ValidityIndicator = SMS_RelativeFormat;
 	rawsms->Validity[0] = 0xa9;
 
@@ -1247,7 +1247,7 @@ API GSM_Error gn_sms_send(GSM_Data *data, GSM_Statemachine *state)
 
 	data->RawSMS->Status = SMS_Sent;
 
-	data->RawSMS->MessageCenter[0] = SemiOctetPack(data->SMS->SMSC.Number, data->RawSMS->MessageCenter + 1, data->SMS->SMSC.Type);
+	data->RawSMS->MessageCenter[0] = char_semi_octet_pack(data->SMS->SMSC.Number, data->RawSMS->MessageCenter + 1, data->SMS->SMSC.Type);
 	if (data->RawSMS->MessageCenter[0] % 2) data->RawSMS->MessageCenter[0]++;
 	data->RawSMS->MessageCenter[0] = data->RawSMS->MessageCenter[0] / 2 + 1;
 
@@ -1313,7 +1313,7 @@ API GSM_Error gn_sms_save(GSM_Data *data, GSM_Statemachine *state)
 
 	if (data->SMS->SMSC.Number[0] != '\0') {
 		data->RawSMS->MessageCenter[0] = 
-			SemiOctetPack(data->SMS->SMSC.Number, data->RawSMS->MessageCenter + 1, data->SMS->SMSC.Type);
+			char_semi_octet_pack(data->SMS->SMSC.Number, data->RawSMS->MessageCenter + 1, data->SMS->SMSC.Type);
 		if (data->RawSMS->MessageCenter[0] % 2) data->RawSMS->MessageCenter[0]++;
 		data->RawSMS->MessageCenter[0] = data->RawSMS->MessageCenter[0] / 2 + 1;
 	}

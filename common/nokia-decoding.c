@@ -78,11 +78,11 @@ GSM_Error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data,
 			break;
 		case PNOKIA_ENTRYTYPE_NAME:	/* Name */
 			if (data->Bitmap) {
-				DecodeUnicode(data->Bitmap->text, (blockstart + 6), blockstart[5] / 2);
+				char_decode_unicode(data->Bitmap->text, (blockstart + 6), blockstart[5] / 2);
 				dprintf("Bitmap Name: %s\n", data->Bitmap->text);
 			}
 			if (data->PhonebookEntry) {
-				DecodeUnicode(data->PhonebookEntry->Name, (blockstart + 6), blockstart[5] / 2);
+				char_decode_unicode(data->PhonebookEntry->Name, (blockstart + 6), blockstart[5] / 2);
 				data->PhonebookEntry->Empty = false;
 				dprintf("   Name: %s\n", data->PhonebookEntry->Name);
 			}
@@ -95,7 +95,7 @@ GSM_Error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data,
 				subEntry->EntryType   = blockstart[0];
 				subEntry->NumberType  = 0;
 				subEntry->BlockNumber = blockstart[4];
-				DecodeUnicode(subEntry->data.Number, (blockstart + 6), blockstart[5] / 2);
+				char_decode_unicode(subEntry->data.Number, (blockstart + 6), blockstart[5] / 2);
 				dprintf("   Type: %d (%02x)\n", subEntry->EntryType, subEntry->EntryType);
 				dprintf("   Text: %s\n", subEntry->data.Number);
 				subblockcount++;
@@ -107,7 +107,7 @@ GSM_Error DecodePhonebook(unsigned char *blockstart, int length, GSM_Data *data,
 				subEntry->EntryType   = blockstart[0];
 				subEntry->NumberType  = blockstart[5];
 				subEntry->BlockNumber = blockstart[4];
-				DecodeUnicode(subEntry->data.Number, (blockstart + 10), blockstart[9] / 2);
+				char_decode_unicode(subEntry->data.Number, (blockstart + 10), blockstart[9] / 2);
 				if (!subblockcount) strcpy(data->PhonebookEntry->Number, subEntry->data.Number);
 				dprintf("   Type: %d (%02x)\n", subEntry->NumberType, subEntry->NumberType);
 				dprintf("   Number: %s\n", subEntry->data.Number);
@@ -241,18 +241,18 @@ GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 	case PNOKIA_NOTE_MEETING:
 		data->CalendarNote->Type = GCN_MEETING;
 		GetNoteTimes(block, data->CalendarNote);
-		DecodeUnicode(data->CalendarNote->Text, (block + 8), block[6]);
+		char_decode_unicode(data->CalendarNote->Text, (block + 8), block[6]);
 		break;
 	case PNOKIA_NOTE_CALL:
 		data->CalendarNote->Type = GCN_CALL;
 		GetNoteTimes(block, data->CalendarNote);
-		DecodeUnicode(data->CalendarNote->Text, (block + 8), block[6]);
-		DecodeUnicode(data->CalendarNote->Phone, (block + 8 + block[6] * 2), block[7]);
+		char_decode_unicode(data->CalendarNote->Text, (block + 8), block[6]);
+		char_decode_unicode(data->CalendarNote->Phone, (block + 8 + block[6] * 2), block[7]);
 		break;
 	case PNOKIA_NOTE_REMINDER:
 		data->CalendarNote->Type = GCN_REMINDER;
 		data->CalendarNote->Recurrence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
-		DecodeUnicode(data->CalendarNote->Text, (block + 4), block[2]);
+		char_decode_unicode(data->CalendarNote->Text, (block + 4), block[2]);
 		break;
 	case PNOKIA_NOTE_BIRTHDAY:
 		data->CalendarNote->Type = GCN_BIRTHDAY;
@@ -280,7 +280,7 @@ GSM_Error DecodeCalendar(unsigned char *message, int length, GSM_Data *data)
 		data->CalendarNote->Time.Second = 0;
 		data->CalendarNote->Time.Year = (((unsigned int)block[6]) << 8) + block[7];
 
-		DecodeUnicode(data->CalendarNote->Text, (block + 10), block[9]);
+		char_decode_unicode(data->CalendarNote->Text, (block + 10), block[9]);
 		break;
 	default:
 		data->CalendarNote->Type = -1;

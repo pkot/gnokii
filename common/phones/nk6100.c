@@ -783,7 +783,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 			   set message[4] to 0. Newer ones set is to the location
 			   number. It can be the distinction when to read the name */
 			if (message[4] != 0)
-				DecodeUnicode(pe->Name, pos, n / 2);
+				char_decode_unicode(pe->Name, pos, n / 2);
 			else
 				PNOK_DecodeString(pe->Name, sizeof(pe->Name), pos, n);
 			pos += n;
@@ -1150,9 +1150,9 @@ static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 		default:
 			return GE_NOTSUPPORTED;
 	}
-	*pos = (SemiOctetPack(smsc->Recipient.Number, pos + 1, smsc->Recipient.Type) + 1) / 2 + 1;
+	*pos = (char_semi_octet_pack(smsc->Recipient.Number, pos + 1, smsc->Recipient.Type) + 1) / 2 + 1;
 	pos += 12;
-	*pos = (SemiOctetPack(smsc->SMSC.Number, pos + 1, smsc->SMSC.Type) + 1) / 2 + 1;
+	*pos = (char_semi_octet_pack(smsc->SMSC.Number, pos + 1, smsc->SMSC.Type) + 1) / 2 + 1;
 	pos += 12;
 	if (smsc->DefaultName < 1) {
 		snprintf(pos, 13, "%s", smsc->Name);
@@ -1317,8 +1317,8 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 			memset(&cbmsg, 0, sizeof(cbmsg));
 			cbmsg.New = true;
 			cbmsg.Channel = message[7];
-			n = Unpack7BitCharacters(0, length-10, sizeof(cbmsg.Message)-1, message+10, cbmsg.Message);
-			DecodeAscii(cbmsg.Message, cbmsg.Message, n);
+			n = char_unpack_7bit(0, length-10, sizeof(cbmsg.Message)-1, message+10, cbmsg.Message);
+			char_decode_ascii(cbmsg.Message, cbmsg.Message, n);
 			DRVINSTANCE(state)->OnCellBroadcast(&cbmsg);
 		}
 		return GE_UNSOLICITED;
@@ -1395,10 +1395,10 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 			}
 			if (pos[0] % 2) pos[0]++;
 			pos[0] = pos[0] / 2 + 1;
-			snprintf(smsc->Recipient.Number, sizeof(smsc->Recipient.Number), "%s", GetBCDNumber(pos));
+			snprintf(smsc->Recipient.Number, sizeof(smsc->Recipient.Number), "%s", char_get_bcd_number(pos));
 			smsc->Recipient.Type = pos[1];
 			pos += 12;
-			snprintf(smsc->SMSC.Number, sizeof(smsc->SMSC.Number), "%s", GetBCDNumber(pos));
+			snprintf(smsc->SMSC.Number, sizeof(smsc->SMSC.Number), "%s", char_get_bcd_number(pos));
 			smsc->SMSC.Type = pos[1];
 			pos += 12;
 			/* FIXME: codepage must be investigated - bozo */
@@ -2546,7 +2546,7 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 			drawmsg.Command = GSM_Draw_DisplayText;
 			drawmsg.Data.DisplayText.x = x;
 			drawmsg.Data.DisplayText.y = y;
-			DecodeUnicode(drawmsg.Data.DisplayText.text, pos, n);
+			char_decode_unicode(drawmsg.Data.DisplayText.text, pos, n);
 			disp->OutputFn(&drawmsg);
 
 			dprintf("(x,y): %d,%d, len: %d, data: %s\n", x, y, n, drawmsg.Data.DisplayText.text);

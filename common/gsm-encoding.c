@@ -36,11 +36,11 @@
 #include "gsm-common.h"
 #include "gsm-encoding.h"
 
-#define NUMBER_OF_7_BIT_ALPHABET_ELEMENTS 128
+#define GN_CHAR_ALPHABET_SIZE 128
 
-#define ESCAPE_CHAR 0x1b
+#define GN_CHAR_ESCAPE 0x1b
 
-static unsigned char GSM_DefaultAlphabet[NUMBER_OF_7_BIT_ALPHABET_ELEMENTS] = {
+static unsigned char gsm_default_alphabet[GN_CHAR_ALPHABET_SIZE] = {
 
 	/* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet */
 	/* Characters in hex position 10, [12 to 1a] and 24 are not present on
@@ -65,24 +65,24 @@ static unsigned char GSM_DefaultAlphabet[NUMBER_OF_7_BIT_ALPHABET_ELEMENTS] = {
 	'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
 
-static unsigned char GSM_ReverseDefaultAlphabet[256];
+static unsigned char gsm_reverse_default_alphabet[256];
 static bool reversed = false;
 
-static void SetupReverse()
+static void tbl_setup_reverse()
 {
 	int i;
 
 	if (reversed) return;
-	memset(GSM_ReverseDefaultAlphabet, 0x3f, 256);
-	for (i = NUMBER_OF_7_BIT_ALPHABET_ELEMENTS - 1; i >= 0; i--)
-		GSM_ReverseDefaultAlphabet[ GSM_DefaultAlphabet[i] ] = i;
-	GSM_ReverseDefaultAlphabet['?'] = 0x3f;
+	memset(gsm_reverse_default_alphabet, 0x3f, 256);
+	for (i = GN_CHAR_ALPHABET_SIZE - 1; i >= 0; i--)
+		gsm_reverse_default_alphabet[ gsm_default_alphabet[i] ] = i;
+	gsm_reverse_default_alphabet['?'] = 0x3f;
 	reversed = true;
 }
 
-static bool IsEscapeChar(unsigned char value)
+static bool char_is_escape(unsigned char value)
 {
-	return (value == ESCAPE_CHAR);
+	return (value == GN_CHAR_ESCAPE);
 }
 
 /*
@@ -92,7 +92,7 @@ static bool IsEscapeChar(unsigned char value)
  * here is rather safe.
  */
 
-static bool IsDefaultAlphabetExtensionChar(unsigned char value)
+static bool char_def_alphabet_ext(unsigned char value)
 {
 	wchar_t retval;
 
@@ -109,7 +109,7 @@ static bool IsDefaultAlphabetExtensionChar(unsigned char value)
 		retval == 0x20ac);
 }
 
-static unsigned char DecodeWithDefaultAlphabetExtension(unsigned char value)
+static unsigned char char_decode_def_alphabet_ext(unsigned char value)
 {
 	switch (value) {
 	case 0x0a: return 0x0c; break; /* form feed */
@@ -126,7 +126,7 @@ static unsigned char DecodeWithDefaultAlphabetExtension(unsigned char value)
 	}
 }
 
-static unsigned char EncodeWithDefaultAlphabetExtension(unsigned char value)
+static unsigned char char_encode_def_alphabet_ext(unsigned char value)
 {
 	switch (value) {
 	case 0x0c: return 0x0a; break; /* from feed */
@@ -143,26 +143,26 @@ static unsigned char EncodeWithDefaultAlphabetExtension(unsigned char value)
 	}
 }
 
-bool IsDefaultAlphabetString(unsigned char *string)
+API bool gn_char_def_alphabet(unsigned char *string)
 {
 	unsigned int i, len = strlen(string);
 
-	SetupReverse();
+	tbl_setup_reverse();
 	for (i = 0; i < len; i++)
-		if (!IsDefaultAlphabetExtensionChar(string[i]) &&
-		    GSM_ReverseDefaultAlphabet[string[i]] == 0x3f &&
+		if (!char_def_alphabet_ext(string[i]) &&
+		    gsm_reverse_default_alphabet[string[i]] == 0x3f &&
 		    string[i] != '?')
 			return false;
 	return true;
 }
 
-static unsigned char EncodeWithDefaultAlphabet(unsigned char value)
+static unsigned char char_encode_def_alphabet(unsigned char value)
 {
-	SetupReverse();
-	return GSM_ReverseDefaultAlphabet[value];
+	tbl_setup_reverse();
+	return gsm_reverse_default_alphabet[value];
 }
 
-static wchar_t EncodeWithUnicodeAlphabet(unsigned char value)
+static wchar_t char_encode_uni_alphabet(unsigned char value)
 {
 	wchar_t retval;
 
@@ -170,16 +170,16 @@ static wchar_t EncodeWithUnicodeAlphabet(unsigned char value)
 	else return retval;
 }
 
-static unsigned char DecodeWithDefaultAlphabet(unsigned char value)
+static unsigned char char_decode_def_alphabet(unsigned char value)
 {
-	if (value < NUMBER_OF_7_BIT_ALPHABET_ELEMENTS) {
-		return GSM_DefaultAlphabet[value];
+	if (value < GN_CHAR_ALPHABET_SIZE) {
+		return gsm_default_alphabet[value];
 	} else {
 		return '?';
 	}
 }
 
-static unsigned char DecodeWithUnicodeAlphabet(wchar_t value)
+static unsigned char char_decode_uni_alphabet(wchar_t value)
 {
 	unsigned char retval;
 
@@ -188,128 +188,129 @@ static unsigned char DecodeWithUnicodeAlphabet(wchar_t value)
 }
 
 
-#define ByteMask ((1 << Bits) - 1)
+#define GN_BYTE_MASK ((1 << bits) - 1)
 
-int Unpack7BitCharacters(unsigned int offset, unsigned int in_length, unsigned int out_length,
-			 unsigned char *input, unsigned char *output)
+int char_unpack_7bit(unsigned int offset, unsigned int in_length, unsigned int out_length,
+		     unsigned char *input, unsigned char *output)
 {
-	unsigned char *OUT_NUM = output; /* Current pointer to the output buffer */
-	unsigned char *IN_NUM = input;  /* Current pointer to the input buffer */
-	unsigned char Rest = 0x00;
-	int Bits;
+	unsigned char *out_num = output; /* Current pointer to the output buffer */
+	unsigned char *in_num = input;  /* Current pointer to the input buffer */
+	unsigned char rest = 0x00;
+	int bits;
 
-	Bits = offset ? offset : 7;
+	bits = offset ? offset : 7;
 
-	while ((IN_NUM - input) < in_length) {
+	while ((in_num - input) < in_length) {
 
-		*OUT_NUM = ((*IN_NUM & ByteMask) << (7 - Bits)) | Rest;
-		Rest = *IN_NUM >> Bits;
+		*out_num = ((*in_num & GN_BYTE_MASK) << (7 - bits)) | rest;
+		rest = *in_num >> bits;
 
 		/* If we don't start from 0th bit, we shouldn't go to the
 		   next char. Under *OUT we have now 0 and under Rest -
 		   _first_ part of the char. */
-		if ((IN_NUM != input) || (Bits == 7)) OUT_NUM++;
-		IN_NUM++;
+		if ((in_num != input) || (bits == 7)) out_num++;
+		in_num++;
 
-		if ((OUT_NUM - output) >= out_length) break;
+		if ((out_num - output) >= out_length) break;
 
 		/* After reading 7 octets we have read 7 full characters but
 		   we have 7 bits as well. This is the next character */
-		if (Bits == 1) {
-			*OUT_NUM = Rest;
-			OUT_NUM++;
-			Bits = 7;
-			Rest = 0x00;
+		if (bits == 1) {
+			*out_num = rest;
+			out_num++;
+			bits = 7;
+			rest = 0x00;
 		} else {
-			Bits--;
+			bits--;
 		}
 	}
 
-	return OUT_NUM - output;
+	return out_num - output;
 }
 
-int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output, unsigned int *in_len)
+int char_pack_7bit(unsigned int offset, unsigned char *input,
+		   unsigned char *output, unsigned int *in_len)
 {
 
-	unsigned char *OUT_NUM = output; /* Current pointer to the output buffer */
-	unsigned char *IN_NUM = input;  /* Current pointer to the input buffer */
-	int Bits;		     /* Number of bits directly copied to
+	unsigned char *out_num = output; /* Current pointer to the output buffer */
+	unsigned char *in_num = input;  /* Current pointer to the input buffer */
+	int bits;		     /* Number of bits directly copied to
 					the output buffer */
 
-	Bits = (7 + offset) % 8;
+	bits = (7 + offset) % 8;
 
 	/* If we don't begin with 0th bit, we will write only a part of the
 	   first octet */
 	if (offset) {
-		*OUT_NUM = 0x00;
-		OUT_NUM++;
+		*out_num = 0x00;
+		out_num++;
 	}
 
-	while ((IN_NUM - input) < strlen(input)) {
-		unsigned char Byte;
+	while ((in_num - input) < strlen(input)) {
+		unsigned char byte;
 		bool double_char = false;
 
-		if (IsDefaultAlphabetExtensionChar(*IN_NUM)) {
-			Byte = ESCAPE_CHAR;
+		if (char_def_alphabet_ext(*in_num)) {
+			byte = GN_CHAR_ESCAPE;
 			double_char = true;
 			goto skip;
 next_char:
-			Byte = EncodeWithDefaultAlphabetExtension(*IN_NUM);
+			byte = char_encode_def_alphabet_ext(*in_num);
 			double_char = false;
 			(*in_len)++;
 		} else {
-			Byte = EncodeWithDefaultAlphabet(*IN_NUM);
+			byte = char_encode_def_alphabet(*in_num);
 		}
 skip:
-		*OUT_NUM = Byte >> (7 - Bits);
+		*out_num = byte >> (7 - bits);
 		/* If we don't write at 0th bit of the octet, we should write
 		   a second part of the previous octet */
-		if (Bits != 7)
-			*(OUT_NUM-1) |= (Byte & ((1 << (7-Bits)) - 1)) << (Bits+1);
+		if (bits != 7)
+			*(out_num-1) |= (byte & ((1 << (7-bits)) - 1)) << (bits+1);
 
-		Bits--;
+		bits--;
 
-		if (Bits == -1) Bits = 7;
-		else OUT_NUM++;
+		if (bits == -1) bits = 7;
+		else out_num++;
 
 		if (double_char) goto next_char;
 
-		IN_NUM++;
+		in_num++;
 	}
 
-	return (OUT_NUM - output);
+	return (out_num - output);
 }
 
-void DecodeAscii(unsigned char* dest, const unsigned char* src, int len)
+void char_decode_ascii(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j++) {
-		if (IsEscapeChar(src[j]))
-			dest[i] = DecodeWithDefaultAlphabetExtension(src[++j]);
+		if (char_is_escape(src[j]))
+			dest[i] = char_decode_def_alphabet_ext(src[++j]);
 		else
-			dest[i] = DecodeWithDefaultAlphabet(src[j]);
+			dest[i] = char_decode_def_alphabet(src[j]);
 	}
 	dest[i] = 0;
 	return;
 }
 
-unsigned int EncodeAscii(unsigned char* dest, const unsigned char* src, unsigned int len)
+unsigned int char_encode_ascii(unsigned char* dest, const unsigned char* src, unsigned int len)
 {
 	int i, j;
 
 	for (i = 0, j = 0; j < len; i++, j++) {
-		if (IsDefaultAlphabetExtensionChar(src[j])) {
-			dest[i++] = ESCAPE_CHAR;
-			dest[i] = EncodeWithDefaultAlphabetExtension(src[j]);
+		if (char_def_alphabet_ext(src[j])) {
+			dest[i++] = GN_CHAR_ESCAPE;
+			dest[i] = char_encode_def_alphabet_ext(src[j]);
 		} else {
-			dest[i] = EncodeWithDefaultAlphabet(src[j]);
+			dest[i] = char_encode_def_alphabet(src[j]);
 		}
 	}
 	return i;
 }
 
-void DecodeHex(unsigned char* dest, const unsigned char* src, int len)
+void char_decode_hex(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	char buf[3];
@@ -317,22 +318,22 @@ void DecodeHex(unsigned char* dest, const unsigned char* src, int len)
 	buf[2] = '\0';
 	for (i = 0; i < (len / 2); i++) {
 		buf[0] = *(src + i * 2); buf[1] = *(src + i * 2 + 1);
-		dest[i] = DecodeWithDefaultAlphabet(strtol(buf, NULL, 16));
+		dest[i] = char_decode_def_alphabet(strtol(buf, NULL, 16));
 	}
 	return;
 }
 
-void EncodeHex(unsigned char* dest, const unsigned char* src, int len)
+void char_encode_hex(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 
 	for (i = 0; i < (len / 2); i++) {
-		sprintf(dest + i * 2, "%x", EncodeWithDefaultAlphabet(src[i]));
+		sprintf(dest + i * 2, "%x", char_encode_def_alphabet(src[i]));
 	}
 	return;
 }
 
-void DecodeUCS2(unsigned char* dest, const unsigned char* src, int len)
+void char_decode_ucs2(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	char buf[5];
@@ -341,41 +342,41 @@ void DecodeUCS2(unsigned char* dest, const unsigned char* src, int len)
 	for (i = 0; i < (len / 4); i++) {
 		buf[0] = *(src + i * 4); buf[1] = *(src + i * 4 + 1);
 		buf[2] = *(src + i * 4 + 2); buf[3] = *(src + i * 4 + 3);
-		dest[i] = DecodeWithUnicodeAlphabet(strtol(buf, NULL, 16));
+		dest[i] = char_decode_uni_alphabet(strtol(buf, NULL, 16));
 	}
 	return;
 }
 
-void EncodeUCS2(unsigned char* dest, const unsigned char* src, int len)
+void char_encode_ucs2(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 
 	for (i = 0; i < (len / 4); i++) {
-		sprintf(dest + i * 4, "%lx", EncodeWithUnicodeAlphabet(src[i]));
+		sprintf(dest + i * 4, "%lx", char_encode_uni_alphabet(src[i]));
 	}
 	return;
 }
 
-void DecodeUnicode(unsigned char* dest, const unsigned char* src, int len)
+void char_decode_unicode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	wchar_t wc;
 
 	for (i = 0; i < len; i++) {
 		wc = src[(2 * i) + 1] | (src[2 * i] << 8);
-		dest[i] = DecodeWithUnicodeAlphabet(wc);
+		dest[i] = char_decode_uni_alphabet(wc);
 	}
 	dest[len] = 0;
 	return;
 }
 
-void EncodeUnicode(unsigned char* dest, const unsigned char* src, int len)
+void char_encode_unicode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
 	wchar_t wc;
 
 	for (i = 0; i < len; i++) {
-		wc = EncodeWithUnicodeAlphabet(src[i]);
+		wc =  char_decode_uni_alphabet(src[i]);
 		dest[i*2] = (wc >> 8) & 0xff;
 		dest[(i*2)+1] = wc & 0xff;
 	}
@@ -429,10 +430,10 @@ void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len)
 
 /* This function implements packing of numbers (SMS Center number and
    destination number) for SMS sending function. */
-int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
+int char_semi_octet_pack(char *number, unsigned char *output, SMS_NumberType type)
 {
-	unsigned char *IN_NUM = Number;  /* Pointer to the input number */
-	unsigned char *OUT_NUM = Output; /* Pointer to the output */
+	unsigned char *in_num = number;  /* Pointer to the input number */
+	unsigned char *out_num = output; /* Pointer to the output */
 	int count = 0; /* This variable is used to notify us about count of already
 			  packed numbers. */
 
@@ -441,48 +442,48 @@ int SemiOctetPack(char *Number, unsigned char *Output, SMS_NumberType type)
 	   specification 03.40 version 6.1.0, section 9.1.2.5, page 33. We support
 	   only international and unknown number. */
 
-	*OUT_NUM++ = type;
-	if (type == SMS_International) IN_NUM++; /* Skip '+' */
-	if ((type == SMS_Unknown) && (*IN_NUM == '+')) IN_NUM++; /* Optional '+' in Unknown number type */
+	*out_num++ = type;
+	if (type == SMS_International) in_num++; /* Skip '+' */
+	if ((type == SMS_Unknown) && (*in_num == '+')) in_num++; /* Optional '+' in Unknown number type */
 
 	/* The next field is the number. It is in semi-octet representation - see
 	   GSM scpecification 03.40 version 6.1.0, section 9.1.2.3, page 31. */
-	while (*IN_NUM) {
+	while (*in_num) {
 		if (count & 0x01) {
-			*OUT_NUM = *OUT_NUM | ((*IN_NUM - '0') << 4);
-			OUT_NUM++;
+			*out_num = *out_num | ((*in_num - '0') << 4);
+			out_num++;
 		}
 		else
-			*OUT_NUM = *IN_NUM - '0';
-		count++; IN_NUM++;
+			*out_num = *in_num - '0';
+		count++; in_num++;
 	}
 
 	/* We should also fill in the most significant bits of the last byte with
 	   0x0f (1111 binary) if the number is represented with odd number of
 	   digits. */
 	if (count & 0x01) {
-		*OUT_NUM = *OUT_NUM | 0xf0;
-		OUT_NUM++;
+		*out_num = *out_num | 0xf0;
+		out_num++;
 	}
 
-	return (2 * (OUT_NUM - Output - 1) - (count % 2));
+	return (2 * (out_num - output - 1) - (count % 2));
 }
 
-char *GetBCDNumber(u8 *Number)
+char *char_get_bcd_number(u8 *number)
 {
-	static char Buffer[MAX_BCD_STRING_LENGTH] = "";
-	int length = Number[0]; /* This is the length of BCD coded number */
-	int count, Digit;
+	static char buffer[MAX_BCD_STRING_LENGTH] = "";
+	int length = number[0]; /* This is the length of BCD coded number */
+	int count, digit;
 
 	if (length > MAX_BCD_STRING_LENGTH) length = MAX_BCD_STRING_LENGTH;
-	memset(Buffer, 0, MAX_BCD_STRING_LENGTH);
-	switch (Number[1]) {
+	memset(buffer, 0, MAX_BCD_STRING_LENGTH);
+	switch (number[1]) {
 	case SMS_Alphanumeric:
-		Unpack7BitCharacters(0, length, length, Number + 2, Buffer);
-		Buffer[length] = 0;
+		char_unpack_7bit(0, length, length, number + 2, buffer);
+		buffer[length] = 0;
 		break;
 	case SMS_International:
-		sprintf(Buffer, "+");
+		sprintf(buffer, "+");
 		if (length == MAX_BCD_STRING_LENGTH) length--; /* avoid overflow */
 	case SMS_Unknown:
 	case SMS_National:
@@ -491,12 +492,12 @@ char *GetBCDNumber(u8 *Number)
 	case SMS_Abbreviated:
 	default:
 		for (count = 0; count < length - 1; count++) {
-			Digit = Number[count+2] & 0x0f;
-			if (Digit < 10) sprintf(Buffer, "%s%d", Buffer, Digit);
-			Digit = Number[count+2] >> 4;
-			if (Digit < 10) sprintf(Buffer, "%s%d", Buffer, Digit);
+			digit = number[count+2] & 0x0f;
+			if (digit < 10) sprintf(buffer, "%s%d", buffer, digit);
+			digit = number[count+2] >> 4;
+			if (digit < 10) sprintf(buffer, "%s%d", buffer, digit);
 		}
 		break;
 	}
-	return Buffer;
+	return buffer;
 }

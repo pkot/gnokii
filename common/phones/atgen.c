@@ -789,15 +789,15 @@ static GSM_Error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int 
 			l = endpos - pos;
 			switch (atcharset) {
 			case CHARGSM:
-				DecodeAscii(data->PhonebookEntry->Name, pos, l);
+				char_decode_ascii(data->PhonebookEntry->Name, pos, l);
 				*(data->PhonebookEntry->Name + l) = '\0';
 				break;
 			case CHARHEXGSM:
-				DecodeHex(data->PhonebookEntry->Name, pos, l);
+				char_decode_hex(data->PhonebookEntry->Name, pos, l);
 				*(data->PhonebookEntry->Name + (l / 2)) = '\0';
 				break;
 			case CHARUCS2:
-				DecodeUCS2(data->PhonebookEntry->Name, pos, l);
+				char_decode_ucs2(data->PhonebookEntry->Name, pos, l);
 				*(data->PhonebookEntry->Name + (l / 4)) = '\0';
 				break;
 			default:
