@@ -1,0 +1,31 @@
+	/* G N O K I I
+	   A Linux/Unix toolset and driver for the Nokia 3110/3810/8110 mobiles.
+	   Copyright (C) Hugh Blemings, 1999  Released under the terms of 
+       the GNU GPL, see file COPYING for more details.
+	
+	   This file:  misc.h  Version 0.2.3
+
+	   Header file for miscellaneous defines, typedefs etc. */
+
+#ifndef	__misc_h
+#define	__misc_h	
+
+	/* Some general defines. */
+#ifndef u8
+	typedef	unsigned char		u8;
+#endif	
+
+#ifndef 	false
+	#define		false (0)
+#endif
+
+#ifndef		true
+	#define		true (!false)
+#endif
+
+#ifndef		bool	
+	#define		bool	int
+#endif
+
+
+#endif	/* __misc_h */

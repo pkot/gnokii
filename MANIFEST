@@ -1,0 +1,40 @@
+gnokii.c
+    A primative front end to allow gnokii/gsm-api functions
+    to be used.  This will be replaced with something far
+    cooler RSN.
+
+gsm-api.c	
+	Provides high level API to a GSM phone.  Relies on code
+	in other modules (fbus-3810.c/.h for example) to provide
+	actual functions themselves.
+
+gsm-api.h
+	Header file for the above, mainly provides prototypes
+	and some standard defines.  Should be included into application
+	source code.
+
+gsm-common.h
+	Header file that defines structures, enums etc. used
+	by both the gsm-api functions and (often) the underlying
+	model specific code.  Should be included into application
+	source code.
+
+	The actual functions provided by the gsm-api are stored
+    in a structure in this file.
+
+misc.h
+	Header file containing miscellaneous defines.
+
+fbus-3810.c
+	Code specific to the 3110/3810/8110 models that provides
+	the functionality called via gsm-api.c.  Is also full of 
+	functions used internally as one might expect.
+
+fbus-3810.h
+	Header file for the above, provides prototypes for
+	the various functions in the .c file as well as 3810 specific
+	defines, enums etc.  This source file (ordinarily) should
+	not be included in actual application code.
+
+fbus-6110.c/fbus-6110.h
+    Starting point source code for 6110 series support.

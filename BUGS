@@ -1,0 +1,30 @@
+                 - Known bug list for gnokii. -
+
+19990217 08:38  Version 0.2.1
+
+* Sender and Message Centre fields are reversed when dumping
+  SMS messages.  Thus the Sender is shown as Message Centre
+  and Message Centre as Sender.
+
+* Rather than adding a hardcoded reference to
+  "/usr/include/asm/errno.h" you should add #include <errno.h>
+  to fbus.c.
+
+19990216 22:34  Version 0.2.1
+
+* Phonebook writes still occassionally fail.  Weird.
+
+19990216 00:09  Version 0.2.0
+
+* Bug in parsing of the input file when writing phone book entries
+  will cause entries with spaces to be messed up.  Either
+  replace spaces with another character or wait for 0.2.1 which
+  fixes this.  [0.2.1 Due next day or so]
+
+* You may need to include errno.h in fbus.c if you're getting
+  errors building the code. 
+  (Add #include "/usr/include/asm/errno.h")
+
+Thanks to Tony Lindstrom for pointing these two out.
+
+
