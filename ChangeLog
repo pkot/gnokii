@@ -58,6 +58,7 @@
     o link driver initialisation cleanup            (BORBELY Zoltan)
  * misc cleanups
     o format the output when config file is incorrect    (Pawel Kot)
+    o fix type mismatch from fbus_initialise             (Pawel Kot)
 
 0.5.0pre2
 =========

@@ -65,6 +65,7 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 #  define	IR_MODE(s) ((s)->config.connection_type == GN_CT_Infrared)
 #endif
 
+
 /*--------------------------------------------*/
 
 static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
@@ -532,7 +533,7 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 {
 	unsigned char init_char = 0x55;
 	int count;
-	bool err;
+	bool connection = false;
 
 	/* Fill in the link functions */
 	state->link.loop = &fbus_loop;
@@ -553,46 +554,43 @@ gn_error fbus_initialise(int try, struct gn_statemachine *state)
 #ifndef WIN32
 	case GN_CT_Tekram:
 #endif
-		err = fbus_ir_open(state) ? GN_ERR_NONE : GN_ERR_FAILED;
+		connection = fbus_ir_open(state);
 		break;
 	case GN_CT_Serial:
 		switch (try) {
 		case 0:
 		case 1:
-			err = fbus_serial_open(1 - try, state);
+			connection = fbus_serial_open(1 - try, state);
 			break;
 		case 2:
-			err = at2fbus_serial_open(state);
+			connection = at2fbus_serial_open(state);
 			break;
 		default:
-			err = GN_ERR_FAILED;
 			break;
 		}
 		break;
 	case GN_CT_DAU9P:
-		err = fbus_serial_open(0, state) ? GN_ERR_NONE : GN_ERR_FAILED;
+		connection = fbus_serial_open(0, state);
 		break;
 	case GN_CT_DLR3P:
 		switch (try) {
 		case 0:
-			err = at2fbus_serial_open(state);
+			connection = at2fbus_serial_open(state);
 			break;
 		case 1:
-			err = fbus_serial_open(1, state);
+			connection = fbus_serial_open(1, state);
 			break;
 		default:
-			err = GN_ERR_FAILED;
 			break;
 		}
 		break;
 	default:
-		err = GN_ERR_FAILED;
 		break;
 	}
-	if (err != GN_ERR_NONE) {
+	if (!connection) {
 		free(FBUSINST(state));
 		FBUSINST(state) = NULL;
-		return err;
+		return GN_ERR_FAILED;
 	}
 
 	/* Send init string to phone, this is a bunch of 0x55 characters. Timing is
