@@ -22,6 +22,8 @@
       by earlier changes                              (Ron Yorston)
     o handle Motorola C350 way of memory status checking
                                                       (Ron Yorston)
+    o if the phone doesn't report used/total memory return
+      GN_ERR_NOTSUPPORTED                             (Ron Yorston)
  * 6100 series updates
     o add support for DeletePhonebook              (BORBELY Zoltan)
  * gnokii updates

@@ -516,11 +516,6 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 		return ret;
 	if (sm_message_send(9, GN_OP_GetMemoryStatus, "AT+CPBS?\r", state))
 		return GN_ERR_NOTREADY;
-	ret = sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
-	if (ret != GN_ERR_UNKNOWN)
-		return ret;
-	if (sm_message_send(10, GN_OP_GetMemoryStatus, "AT+CPBR=?\r", state))
-		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 }
 
@@ -1006,7 +1001,7 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 		} else {
 			data->memory_status->used = drvinst->memorysize;
 			data->memory_status->free = 0;
-			return GN_ERR_UNKNOWN;
+			return GN_ERR_NOTSUPPORTED;
 		}
 		pos = strchr(pos, ',');
 		if (pos) {
