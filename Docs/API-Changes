@@ -8,6 +8,13 @@ libgnokii API changes
 o change description
 
 v1.10 2004-XX-XX
+	2004-06-17
+	o new functions
+		+API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
+		+API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
+		+API int gn_todo2ical(FILE *f, gn_todo *ctodo)
+		+API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
+
 	2004-06-09
 	o new element in the enum
 		|typedef enum {
