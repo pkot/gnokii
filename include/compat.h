@@ -117,7 +117,7 @@ int gettimeofday(struct timeval *tv, void *tz);
 #endif
 
 #ifndef	HAVE_STRSEP
-API char *strsep(char **stringp, const char *delim);
+char *strsep(char **stringp, const char *delim);
 #endif
 
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_C99_SNPRINTF)
