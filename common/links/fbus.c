@@ -172,6 +172,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 	fbus_incoming_frame *i = &FBUSINST(state)->i;
 	int frm_num, seq_num;
 	fbus_incoming_message *m;
+	unsigned char *message_buffer;
 
 	/* XOR the byte with the current checksum */
 	i->checksum[i->buffer_count & 1] ^= rx_byte;
@@ -289,6 +290,8 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 		/* If this is the last byte, it's the checksum. */
 
 		if (i->buffer_count == i->frame_length + (i->frame_length % 2) + 2) {
+			i->state = FBUS_RX_Sync;
+
 			/* Is the checksum correct? */
 			if (i->checksum[0] == i->checksum[1]) {
 
@@ -351,17 +354,17 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 					/* Finally dispatch if ready */
 
 					if (m->frames_to_go == 0) {
-						sm_incoming_function(i->message_type, m->message_buffer,
-								     m->message_length, state);
-						free(m->message_buffer);
+						message_buffer = m->message_buffer;
 						m->message_buffer = NULL;
 						m->malloced = 0;
+						sm_incoming_function(i->message_type, message_buffer,
+								     m->message_length, state);
+						free(message_buffer);
 					}
 				}
 			} else {
 				dprintf("Bad checksum!\n");
 			}
-			i->state = FBUS_RX_Sync;
 		}
 		break;
 	}

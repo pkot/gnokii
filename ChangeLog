@@ -1,3 +1,9 @@
+0.5.1 (not released yet)
+========================
+ * link layer updates
+    o making fbus layer reentrant, it will fix possible
+      smsreader problems            (Keary Griffin & BORBELY Zoltan)
+
 0.5.0
 =====
  * general fixes
