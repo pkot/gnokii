@@ -4,17 +4,23 @@
     o don't use stdout as the diagnostic output           (Pawel Kot)
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
+    o add --gettodo                                    (Markus Plail)
  * xgnokii updates:
     o fix speeddial writing                            (Markus Plail)
     o fix logos                                        (Markus Plail)
  * 6510 series updates:
     o add bitmap writing                               (Markus Plail)
+    o add ToDo reading                                 (Markus Plail)
+    o fix SMS reading from IN/OUTBOX (ugly)            (Markus Plail)
+    o use nokia-decoding                               (Markus Plail)
  * 6110 series updates:
     o Nokia 3410 is known to work                         (Pawel Kot)
     o use 0x64 frames only when PM_AUTHENTICATION is set for the
       model                                               (Pawel Kot)
     o use unicode for the newer phones in the phonebook   (Pawel Kot)
     o phone info frame (0xd2) parsed correctly       (BORBELY Zoltan)
+ * 7110 series updates:
+    o use nokia-decoding                               (Markus Plail)
  * bitmap support
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
@@ -24,6 +30,8 @@
       extension                                           (Pawel Kot)
     o distinct between currency and euro symbols based on locale
       set                                                 (Pawel Kot)
+ * create nokia-decoding.c for decoding functions generic to newer
+   NOKIA phones (phonebook, calendar for now)          (Markus Plail)
 
 0.4.2a
 ======
