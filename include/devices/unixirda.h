@@ -36,8 +36,9 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/socket.h>
+#include <linux/types.h>
+#include <linux/irda.h>
 
-#include "devices/linuxirda.h"
 #include "misc.h"
 
 int irda_open(void);

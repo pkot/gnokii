@@ -47,7 +47,6 @@
 #include "gsm-networks.h"
 #include "device.h"
 
-// #include "links/fbus.h"
 #include "links/fbus-phonet.h"
 
 static void PHONET_RX_StateMachine(unsigned char rx_byte);

@@ -23,8 +23,11 @@ ifdef WIN32
 	OBJS += winserial.o
 else
 	OBJS += unixserial.o \
-	        unixirda.o \
 		tcp.o
+endif
+
+ifdef USE_IRDA
+	OBJS += unixirda.o
 endif
 
 ifdef USE_BLUETOOTH

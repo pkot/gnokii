@@ -184,6 +184,11 @@ AC_CHECK_FUNC(getopt_long, , [
             OWN_GETOPT="1")])
 
 
+dnl ======================== Checks for Linux IrDA support
+AC_CHECK_HEADER(linux/irda.h,
+	[AC_DEFINE(HAVE_IRDA)
+	 USE_IRDA="yes"])
+
 dnl ======================== Checks for Linux Bluetooth support
 bluetooth="no"
 AC_ARG_WITH(bluetooth,
@@ -198,6 +203,7 @@ AC_ARG_WITH(bluetooth,
 )
 
 AC_MSG_CHECKING([for the bluetooth support])
+echo
 AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_sockaddr_rc,
 	[AC_TRY_COMPILE([#include <sys/socket.h>
 			#include <bluetooth/bluetooth.h>
@@ -465,6 +471,7 @@ AC_SUBST(XVERSION)
 AC_SUBST(XPACKAGE)
 AC_SUBST(XGNOKIIDIR)
 AC_SUBST(exec_prefix)
+AC_SUBST(USE_IRDA)
 AC_SUBST(USE_BLUETOOTH)
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
@@ -512,6 +519,7 @@ echo "
     XDebug:             $xdebug
     RLPDebug:           $rlpdebug
     NLS:                $USE_NLS
+    IrDA:               $USE_IRDA
     Bluetooth:          $USE_BLUETOOTH
     Security:           $security
     Build Shared Lib:   $shared

@@ -366,8 +366,12 @@ static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 	if (!strcasecmp(Connection, "dau9p"))    connection = GCT_DAU9P; /* Use only with 6210/7110 for faster connection with such cable */
 	if (!strcasecmp(Connection, "dlr3p"))    connection = GCT_DLR3P;
 	if (!strcasecmp(Connection, "infrared")) connection = GCT_Infrared;
+#ifdef HAVE_IRDA
 	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
+#endif
+#ifndef WIN32
 	if (!strcasecmp(Connection, "tcp"))      connection = GCT_TCP;
+#endif
 
 	/* register cleanup function */
 	if (!atexit_registered) {

@@ -223,10 +223,14 @@ static GSM_Error fbusinit(bool enable_monitoring)
 
 	if (!strcmp(xgnokiiConfig.connection, "infrared"))
 		connection = GCT_Infrared;
+#ifdef HAVE_IRDA
 	if (!strcmp(xgnokiiConfig.connection, "irda"))
 		connection = GCT_Irda;
+#endif
+#ifndef WIN32
 	if (!strcmp(xgnokiiConfig.connection, "tcp"))
 		connection = GCT_TCP;
+#endif
 	if (!strcmp(xgnokiiConfig.connection, "dau9p"))
 		connection = GCT_DAU9P;
 	if (!strcmp(xgnokiiConfig.connection, "dlr3p"))

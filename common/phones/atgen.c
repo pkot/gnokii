@@ -1169,7 +1169,9 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
+#ifdef HAVE_IRDA
 	case GCT_Irda:
+#endif
 		if (!strcmp(setupdata->Model, "dancall"))
 			ret = CBUS_Initialise(state);
 		else if (!strcmp(setupdata->Model, "AT-HW"))

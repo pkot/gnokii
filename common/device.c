@@ -26,11 +26,13 @@
 
 */
 
+#include "config.h"
 #include "device.h"
-
+#ifdef HAVE_IRDA
+#  include "devices/unixirda.h"
+#endif
 #ifndef WIN32
 #  include "devices/unixserial.h"
-#  include "devices/unixirda.h"
 #  include "devices/tekram.h"
 #  include "devices/tcp.h"
 #else
@@ -60,12 +62,14 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	case GCT_Infrared:
 		device_portfd = serial_opendevice(file, with_odd_parity, with_async, with_hw_handshake);
 		break;
+#ifdef HAVE_IRDA
+	case GCT_Irda:
+		device_portfd = irda_open();
+		break;
+#endif
 #ifndef WIN32
 	case GCT_Tekram:
 		device_portfd = tekram_open(file);
-		break;
-	case GCT_Irda:
-		device_portfd = irda_open();
 		break;
 	case GCT_TCP:
 		device_portfd = tcp_opendevice(file, with_async);
@@ -86,12 +90,14 @@ void device_close(void)
 	case GCT_Infrared:
 		serial_close(device_portfd);
 		break;
+#ifdef HAVE_IRDA
+	case GCT_Irda:
+		irda_close(device_portfd);
+		break;
+#endif
 #ifndef WIN32
 	case GCT_Tekram:
 		tekram_close(device_portfd);
-		break;
-	case GCT_Irda:
-		irda_close(device_portfd);
 		break;
 	case GCT_TCP:
 		tcp_close(device_portfd);
@@ -116,9 +122,12 @@ void device_setdtrrts(int dtr, int rts)
 	case GCT_Infrared:
 		serial_setdtrrts(device_portfd, dtr, rts);
 		break;
+#ifdef HAVE_IRDA
+	case GCT_Irda:
+		break;
+#endif
 #ifndef WIN32
 	case GCT_Tekram:
-	case GCT_Irda:
 	case GCT_TCP:
 		break;
 #endif
@@ -135,12 +144,13 @@ void device_changespeed(int speed)
 	case GCT_Serial:
 	case GCT_Infrared:
 		serial_changespeed(device_portfd, speed);
+#ifdef HAVE_IRDA
+	case GCT_Irda:
 		break;
+#endif
 #ifndef WIN32
 	case GCT_Tekram:
 		tekram_changespeed(device_portfd, speed);
-		break;
-	case GCT_Irda:
 	case GCT_TCP:
 		break;
 #endif
@@ -155,17 +165,15 @@ size_t device_read(__ptr_t buf, size_t nbytes)
 	case GCT_Serial:
 	case GCT_Infrared:
 		return (serial_read(device_portfd, buf, nbytes));
-		break;
+#ifdef HAVE_IRDA
+	case GCT_Irda:
+		return irda_read(device_portfd, buf, nbytes);
+#endif
 #ifndef WIN32
 	case GCT_Tekram:
 		return tekram_read(device_portfd, buf, nbytes);
-		break;
-	case GCT_Irda:
-		return irda_read(device_portfd, buf, nbytes);
-		break;
 	case GCT_TCP:
 		return tcp_read(device_portfd, buf, nbytes);
-		break;
 #endif
 	default:
 		break;
@@ -179,17 +187,15 @@ size_t device_write(const __ptr_t buf, size_t n)
 	case GCT_Serial:
 	case GCT_Infrared:
 		return (serial_write(device_portfd, buf, n));
-		break;
+#ifdef HAVE_IRDA
+	case GCT_Irda:
+		return irda_write(device_portfd, buf, n);
+#endif
 #ifndef WIN32
 	case GCT_Tekram:
 		return tekram_write(device_portfd, buf, n);
-		break;
-	case GCT_Irda:
-		return irda_write(device_portfd, buf, n);
-		break;
 	case GCT_TCP:
 		return tcp_write(device_portfd, buf, n);
-		break;
 #endif
 	default:
 		break;
@@ -203,17 +209,15 @@ int device_select(struct timeval *timeout)
 	case GCT_Serial:
 	case GCT_Infrared:
 		return serial_select(device_portfd, timeout);
-		break;
+#ifdef HAVE_IRDA
+	case GCT_Irda:
+		return irda_select(device_portfd, timeout);
+#endif
 #ifndef WIN32
 	case GCT_Tekram:
 		return tekram_select(device_portfd, timeout);
-		break;
-	case GCT_Irda:
-		return irda_select(device_portfd, timeout);
-		break;
 	case GCT_TCP:
 		return tcp_select(device_portfd, timeout);
-		break;
 #endif
 	default:
 		break;
@@ -229,10 +233,8 @@ GSM_Error device_nreceived(int *n)
 	case GCT_Serial:
 	case GCT_Infrared:
 		return serial_nreceived(device_portfd, n);
-		break;
 	default:
 		return GE_NOTSUPPORTED;
-		break;
 	}
 }
 
@@ -242,9 +244,7 @@ GSM_Error device_flush(void)
 	case GCT_Serial:
 	case GCT_Infrared:
 		return serial_flush(device_portfd);
-		break;
 	default:
 		return GE_NOTSUPPORTED;
-		break;
 	}
 }

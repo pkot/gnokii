@@ -380,9 +380,11 @@ static GSM_Error P6510_Initialise(GSM_Statemachine *state)
 			err = FBUS_Initialise(&(state->Link), state, try++);
 			break;
 		case GCT_Infrared:
+#ifdef HAVE_IRDA
 		case GCT_Irda:
 			err = PHONET_Initialise(&(state->Link), state);
 			break;
+#endif
 		default:
 			return GE_NOTSUPPORTED;
 		}

@@ -142,15 +142,18 @@ static GSM_Error fbusinit (bool enable_monitoring)
 
   if (!strcmp(smsdConfig.connection, "infrared"))
     connection = GCT_Infrared;
+#ifdef HAVE_IRDA
   if (!strcmp(smsdConfig.connection, "irda"))
     connection = GCT_Irda;
+#endif
   if (!strcmp(smsdConfig.connection, "dau9p"))
     connection = GCT_DAU9P;
   if (!strcmp(smsdConfig.connection, "dlr3p"))
     connection = GCT_DLR3P;
+#ifndef WIN32
   if (!strcmp(smsdConfig.connection, "tcp"))
     connection = GCT_TCP;
-
+#endif
 	/* register cleanup function */
 	if (!atexit_registered) {
 		atexit_registered = true;

@@ -500,9 +500,11 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	case GCT_DAU9P:
 		err = FBUS_Initialise(&(state->Link), state, 0);
 		break;
+#ifdef HAVE_IRDA
 	case GCT_Irda:
 		err = PHONET_Initialise(&(state->Link), state);
 		break;
+#endif
 	default:
 		FREE(DRVINSTANCE(state));
 		return GE_NOTSUPPORTED;
