@@ -603,7 +603,7 @@ HandlePacket(void)
 		for (i = 0; i < 5; i++) {
 			drawmsg.Command = GSM_Draw_DisplayText;
 			drawmsg.Data.DisplayText.x = 0;
-			drawmsg.Data.DisplayText.y = i*48/DRAW_MAX_SCREEN_HEIGHT;
+			drawmsg.Data.DisplayText.y = ((i+1)*48)/DRAW_MAX_SCREEN_HEIGHT;
 			strncpy(drawmsg.Data.DisplayText.text, t, lsize[i]);
 			drawmsg.Data.DisplayText.text[ lsize[i] ] = 0;
 			if (OutputFn)
@@ -1206,9 +1206,7 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		break;
 #endif
 	case GOP_DisplayOutput:
-		printf("DisplayOutput(%px)\n", data->DisplayOutput->OutputFn);
 		OutputFn = data->DisplayOutput->OutputFn;
-		printf("Enable\n");
 		err = EnableDisplayOutput(state);
 		break;
 	case GOP_GetSMS:

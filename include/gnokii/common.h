@@ -414,7 +414,7 @@ typedef enum {
 } GSM_DrawCommand;
 
 #define	DRAW_MAX_SCREEN_WIDTH 27
-#define	DRAW_MAX_SCREEN_HEIGHT 5
+#define	DRAW_MAX_SCREEN_HEIGHT 6
 
 typedef struct {
 	int x;
