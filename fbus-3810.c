@@ -722,10 +722,13 @@ GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter)
 		if (--timeout == 0) {
 			return (GE_TIMEOUT);
 		}
-	usleep (100000);
+		usleep (100000);
 	}
 
-	return (GE_NONE);
+		/* If successfull, CurrentMessageCenterError will be set
+		   to GE_NONE, otherwise it will be set to the appropriate
+		   error code. */
+	return (CurrentMessageCenterError);
 }
 
 	/* Our "Not implemented" functions */
@@ -2113,6 +2116,8 @@ void	FB38_RX_Handle0x41_SMSMessageCenterData(void)
 		/* As usual, acknowledge first. */
 	if (!FB38_TX_SendStandardAcknowledge(0x41)) {
 		fprintf(stderr, _("Write failed!"));
+    	CurrentMessageCenterError = GE_INTERNALERROR;
+		return;
 	}
 
 		/* Get Message Center number length, which is byte 13 in message. */
@@ -2132,7 +2137,7 @@ void	FB38_RX_Handle0x41_SMSMessageCenterData(void)
 		   so put in null data for them . */
     CurrentMessageCenter->Name[0] = 0x00;
     CurrentMessageCenter->No = 0;
-    CurrentMessageCenterError=GE_NONE;
+    CurrentMessageCenterError = GE_NONE;
 
 		/* First 12 bytes are status values, purpose unknown.  For now
 		   simply display for user to mull over if monitoring is on... */
