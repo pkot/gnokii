@@ -2095,8 +2095,7 @@ static int writetodo(char *argv[])
 	data.todo = &todo;
 
 #ifndef WIN32
-//	FIXAPI
-//	error = gn_vcal_read_file_todo(argv[0], &todo, atoi(argv[1]));
+	error = gn_vcal_read_file_todo(argv[0], &todo, atoi(argv[1]));
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
 		return -1;
@@ -2278,8 +2277,7 @@ static int writecalendarnote(char *argv[])
 	data.calnote = &calnote;
 
 #ifndef WIN32
-//	FIXAPI
-//	error = gn_vcal_read_file_event(argv[0], &calnote, atoi(argv[1]));
+	error = gn_vcal_read_file_event(argv[0], &calnote, atoi(argv[1]));
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
 		return -1;
@@ -2396,28 +2394,26 @@ static int getdatetime(void)
 	return error;
 }
 
-#if 0
-FIXAPI
 /* Setting the alarm. */
 static int setalarm(int argc, char *argv[])
 {
-	gn_timestamp date;
+	gn_calnote_alarm alarm;
 	gn_error error;
 
 	if (argc == 2) {
-		date.hour = atoi(argv[0]);
-		date.minute = atoi(argv[1]);
-		date.second = 0;
-		date.alarm_enabled = true;
+		alarm.timestamp.hour = atoi(argv[0]);
+		alarm.timestamp.minute = atoi(argv[1]);
+		alarm.timestamp.second = 0;
+		alarm.enabled = true;
 	} else {
-		date.hour = 0;
-		date.minute = 0;
-		date.second = 0;
-		date.alarm_enabled = false;
+		alarm.timestamp.hour = 0;
+		alarm.timestamp.minute = 0;
+		alarm.timestamp.second = 0;
+		alarm.enabled = false;
 	}
 
 	gn_data_clear(&data);
-	data.datetime = &date;
+	data.alarm = &alarm;
 
 	error = gn_sm_functions(GN_OP_SetAlarm, &data, &state);
 
@@ -2427,19 +2423,18 @@ static int setalarm(int argc, char *argv[])
 /* Getting the alarm. */
 static int getalarm(void)
 {
-	gn_error	error;
-	gn_data	data;
-	gn_timestamp	date_time;
+	gn_error error;
+	gn_calnote_alarm alarm;
 
 	gn_data_clear(&data);
-	data.datetime = &date_time;
+	data.alarm = &alarm;
 
 	error = gn_sm_functions(GN_OP_GetAlarm, &data, &state);
 
 	switch (error) {
 	case GN_ERR_NONE:
-		fprintf(stdout, _("Alarm: %s\n"), (date_time.alarm_enabled==0)?"off":"on");
-		fprintf(stdout, _("Time: %02d:%02d\n"), date_time.hour, date_time.minute);
+		fprintf(stdout, _("Alarm: %s\n"), (alarm.enabled)?"on":"off");
+		fprintf(stdout, _("Time: %02d:%02d\n"), alarm.timestamp.hour, alarm.timestamp.minute);
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
@@ -2448,9 +2443,6 @@ static int getalarm(void)
 
 	return error;
 }
-#endif
-static int setalarm(int argc, char *argv[]) {return 0; }
-static int getalarm(void) { return 0; }
 
 static void storecbmessage(gn_cb_message *message)
 {
@@ -2797,8 +2789,6 @@ static int displayoutput(void)
 	return 0;
 }
 
-#if 0
-FIXAPI
 /* Reads profile from phone and displays its' settings */
 static int getprofile(int argc, char *argv[])
 {
@@ -2809,7 +2799,7 @@ static int getprofile(int argc, char *argv[])
 	gn_data data;
 
 	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
-	char model[GSM_MAX_MODEL_LENGTH];
+	char model[64];
 	bool raw = false;
 	struct option options[] = {
 		{ "raw",    no_argument, NULL, 'r'},
@@ -2903,27 +2893,27 @@ static int getprofile(int argc, char *argv[])
 				p.caller_groups, p.automatic_answer);
 		} else {
 			fprintf(stdout, "%d. \"%s\"\n", p.number, p.name);
-			if (p.defaultname == -1) fprintf(stdout, _(" (name defined)\n"));
-			fprintf(stdout, _("Incoming call alert: %s\n"), GetProfileCallAlertString(p.call_alert));
+			if (p.default_name == -1) fprintf(stdout, _(" (name defined)\n"));
+			fprintf(stdout, _("Incoming call alert: %s\n"), profile_get_call_alert_string(p.call_alert));
 			/* For different phones different ringtones names */
 			if (!strcmp(model, "NSE-3"))
 				fprintf(stdout, _("Ringing tone: %s (%d)\n"), RingingTones[p.ringtone], p.ringtone);
 			else
-				fprintf(stdout, _("Ringtone number: %d\n"), p.Ringtone);
-			fprintf(stdout, _("Ringing volume: %s\n"), GetProfileVolumeString(p.Volume));
-			fprintf(stdout, _("Message alert tone: %s\n"), GetProfileMessageToneString(p.MessageTone));
-			fprintf(stdout, _("Keypad tones: %s\n"), GetProfileKeypadToneString(p.KeypadTone));
-			fprintf(stdout, _("Warning and game tones: %s\n"), GetProfileWarningToneString(p.WarningTone));
+				fprintf(stdout, _("Ringtone number: %d\n"), p.ringtone);
+			fprintf(stdout, _("Ringing volume: %s\n"), profile_get_volume_string(p.volume));
+			fprintf(stdout, _("Message alert tone: %s\n"), profile_get_message_tone_string(p.message_tone));
+			fprintf(stdout, _("Keypad tones: %s\n"), profile_get_keypad_tone_string(p.keypad_tone));
+			fprintf(stdout, _("Warning and game tones: %s\n"), profile_get_warning_tone_string(p.warning_tone));
 
 			/* FIXME: Light settings is only used for Car */
-			if (p.number == (max_profiles - 2)) fprintf(stdout, _("Lights: %s\n"), p.Lights ? _("On") : _("Automatic"));
-			fprintf(stdout, _("Vibration: %s\n"), GetProfileVibrationString(p.Vibration));
+			if (p.number == (max_profiles - 2)) fprintf(stdout, _("Lights: %s\n"), p.lights ? _("On") : _("Automatic"));
+			fprintf(stdout, _("Vibration: %s\n"), profile_get_vibration_string(p.vibration));
 
 			/* FIXME: it will be nice to add here reading caller group name. */
-			if (max_profiles != 3) fprintf(stdout, _("Caller groups: 0x%02x\n"), p.CallerGroups);
+			if (max_profiles != 3) fprintf(stdout, _("Caller groups: 0x%02x\n"), p.caller_groups);
 
 			/* FIXME: Automatic answer is only used for Car and Headset. */
-			if (p.number >= (max_profiles - 2)) fprintf(stdout, _("Automatic answer: %s\n"), p.AutomaticAnswer ? _("On") : _("Off"));
+			if (p.number >= (max_profiles - 2)) fprintf(stdout, _("Automatic answer: %s\n"), p.automatic_answer ? _("On") : _("Off"));
 			fprintf(stdout, "\n");
 		}
 	}
@@ -2951,7 +2941,7 @@ static int setprofile()
 
 		n = sscanf(line, "%d;%39[^;];%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d%c",
 			    &p.number, p.name, &p.default_name, &p.keypad_tone,
-			    &p.lights, &p.callalert, &p.ringtone, &p.volume,
+			    &p.lights, &p.call_alert, &p.ringtone, &p.volume,
 			    &p.message_tone, &p.vibration, &p.warning_tone,
 			    &p.caller_groups, &p.automatic_answer, &ch);
 		if (n != 13) {
@@ -2968,9 +2958,6 @@ static int setprofile()
 
 	return error;
 }
-#endif
-static int getprofile(int argc, char *argv[]) {return 0; }
-static int setprofile() {return 0; }
 
 /* Get requested range of memory storage entries and output to stdout in
    easy-to-parse format */
@@ -3210,7 +3197,7 @@ static int writephonebook(int argc, char *args[])
 	gn_phonebook_entry entry;
 	gn_error error = GN_ERR_NOTSUPPORTED;
 	char *memory_type_string;
-	char *Line, OLine[MAX_INPUT_LINE_LEN];
+	char *line, oline[MAX_INPUT_LINE_LEN];
 	int vcard = 0;
 
 	/* Check argument */
@@ -3220,14 +3207,14 @@ static int writephonebook(int argc, char *args[])
 	if (argc && !strcmp("-v", args[0]))
 		vcard = 1;
 
-	Line = OLine;
+	line = oline;
 
 	/* Go through data from stdin. */
 	while (1) {
 		if (!vcard) {
-			if (!gn_get_line(stdin, Line, MAX_INPUT_LINE_LEN))
+			if (!gn_get_line(stdin, line, MAX_INPUT_LINE_LEN))
 				break;
-			if ((memory_type_string = decodephonebook(&entry, OLine)) == NULL)
+			if ((memory_type_string = decodephonebook(&entry, oline)) == NULL)
 				continue;
 		} else {
 			if (gn_vcard2phonebook(stdin, &entry))
@@ -3798,18 +3785,16 @@ static int pmon(void)
 	return 0;
 }
 
-#if 0
-FIXAPI
 static int sendringtone(int argc, char *argv[])
 {
 	gn_sms sms;
 	gn_error error = GN_ERR_NOTSUPPORTED;
 
 	gn_sms_default_submit(&sms);
-	sms.user_data[0].type = sms_ringtone_data;
-	sms.user_data[1].type = sms_nodata;
+	sms.user_data[0].type = GN_SMS_DATA_Ringtone;
+	sms.user_data[1].type = GN_SMS_DATA_None;
 
-	if (GSM_ReadRingtoneFile(argv[0], &sms.user_data[0].u.ringtone)) {
+	if (gn_file_ringtone_read(argv[0], &sms.user_data[0].u.ringtone)) {
 		fprintf(stderr, _("Failed to load ringtone.\n"));
 		return -1;
 	}
@@ -3829,8 +3814,6 @@ static int sendringtone(int argc, char *argv[])
 
 	return 0;
 }
-#endif
-static int sendringtone(int argc, char *argv[]) {return 0;}
 
 static int getringtone(int argc, char *argv[])
 {
@@ -3994,18 +3977,16 @@ static void presskey(void)
 	fprintf(stderr, _("Failed to press key: %s\n"), gn_error_print(error));
 }
 
-#if 0
-FIXAPI
 static int presskeysequence(void)
 {
 	unsigned char *syms = "0123456789#*PGR+-UDMN";
-	GSM_KeyCode keys[] = {GSM_KEY_0, GSM_KEY_1, GSM_KEY_2, GSM_KEY_3,
-			      GSM_KEY_4, GSM_KEY_5, GSM_KEY_6, GSM_KEY_7,
-			      GSM_KEY_8, GSM_KEY_9, GSM_KEY_HASH,
-			      GSM_KEY_ASTERISK, GSM_KEY_POWER, GSM_KEY_GREEN,
-			      GSM_KEY_RED, GSM_KEY_INCREASEVOLUME,
-			      GSM_KEY_DECREASEVOLUME, GSM_KEY_UP, GSM_KEY_DOWN,
-			      GSM_KEY_MENU, GSM_KEY_NAMES};
+	gn_key_code keys[] = {GN_KEY_0, GN_KEY_1, GN_KEY_2, GN_KEY_3,
+			      GN_KEY_4, GN_KEY_5, GN_KEY_6, GN_KEY_7,
+			      GN_KEY_8, GN_KEY_9, GN_KEY_HASH,
+			      GN_KEY_ASTERISK, GN_KEY_POWER, GN_KEY_GREEN,
+			      GN_KEY_RED, GN_KEY_INCREASEVOLUME,
+			      GN_KEY_DECREASEVOLUME, GN_KEY_UP, GN_KEY_DOWN,
+			      GN_KEY_MENU, GN_KEY_NAMES};
 	unsigned char ch, *pos;
 
 	gn_data_clear(&data);
@@ -4035,11 +4016,11 @@ static int enterchar(void)
 		case '\r':
 			break;
 		case '\n':
-			data.key_code = GSM_KEY_MENU;
+			data.key_code = GN_KEY_MENU;
 			presskey();
 			break;
 		case '\e':
-			data.key_code = GSM_KEY_NAMES;
+			data.key_code = GN_KEY_NAMES;
 			presskey();
 			break;
 		default:
@@ -4053,9 +4034,6 @@ static int enterchar(void)
 
 	return 0;
 }
-#endif
-static int presskeysequence(void) {return 0; }
-static int enterchar(void) {return 0; }
 
 /* Options for --divert:
    --op, -o [register|enable|query|disable|erasure]  REQ
@@ -4282,16 +4260,13 @@ static int getsecuritycode()
 
 static void list_gsm_networks(void)
 {
-#if 0
-FIXAPI
-	extern GSM_Network GSM_Networks[];
+	extern gn_network networks[];
 	int i;
 				    
 	printf("Network  Name\n");
 	printf("-----------------------------------------\n");
-	for (i = 0; strcmp(GSM_Networks[i].Name, "unknown"); i++)
-		printf("%-7s  %s\n", GSM_Networks[i].Code, GSM_Networks[i].Name);
-#endif
+	for (i = 0; strcmp(networks[i].name, "unknown"); i++)
+		printf("%-7s  %s\n", networks[i].code, networks[i].name);
 }
 
 /* This is a "convenience" function to allow quick test of new API stuff which

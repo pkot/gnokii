@@ -87,7 +87,7 @@ extern int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_numb
 
 /* Ringtones */
 int gn_vcal_read_file_event(char *filename, gn_calnote *cnote, int number);
-int gn_vcal_read_file_todo(char *filename, gn_todo *cnote, int number);
+int gn_vcal_read_file_todo(char *filename, gn_todo *ctodo, int number);
 
 int gn_vcal_get_time(gn_timestamp *dt, char *time);
 int gn_calnote_fill(gn_calnote *note, char *type, char *text, char *desc,
