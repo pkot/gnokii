@@ -263,6 +263,7 @@ static void CBUS_RX_StateMachine(unsigned char rx_byte)
 				}
 				break;
 			default:
+				break;
 		}
 		if (i->state != CBUS_RX_Header) {
 			i->FrameHeader1 = i->prev_rx_byte;
@@ -350,6 +351,7 @@ static void CBUS_RX_StateMachine(unsigned char rx_byte)
 		break;
 
 	default:
+		break;
 	}
 	i->prev_rx_byte = rx_byte;
 }
