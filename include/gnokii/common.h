@@ -749,11 +749,14 @@ typedef struct {
   GSM_Error (*DisableCellBroadcast) ();
 
   GSM_Error (*ReadCellBroadcast) ( GSM_CBMessage *Message );
+  
+  GSM_Error (*SetKey) (int c, int up);
+  
+  GSM_Error (*HandleString) (char *s);
 
 } GSM_Functions;
 
 /* Undefined functions in fbus/mbus files */
-#include <gsm-common.h>
 extern GSM_Error Unimplemented(void);
 #define UNIMPLEMENTED (void *) Unimplemented
 

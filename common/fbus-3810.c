@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.77  2001-01-14 22:46:56  chris
+  Revision 1.78  2001-01-15 17:00:44  pkot
+  Initial keypress sequence support. Disable compilation warning
+
+  Revision 1.77  2001/01/14 22:46:56  chris
   Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
   Revision 1.76  2001/01/12 14:09:12  pkot
@@ -141,6 +144,8 @@ GSM_Functions	FB38_Functions = {
 		UNIMPLEMENTED,
 		FB38_SendRLPFrame,
 		FB38_CancelCall,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
 		UNIMPLEMENTED,
 		UNIMPLEMENTED,
 		UNIMPLEMENTED,

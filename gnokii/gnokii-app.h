@@ -13,7 +13,10 @@
   Header file for test utility.
 
   $Log$
-  Revision 1.24  2000-12-19 16:18:19  pkot
+  Revision 1.25  2001-01-15 17:00:51  pkot
+  Initial keypress sequence support. Disable compilation warning
+
+  Revision 1.24  2000/12/19 16:18:19  pkot
   configure script updates and added shared function for configfile reading
 
   
@@ -59,6 +62,7 @@ int setringtone(int argc, char *argv[]);
 int reset(char *type);
 int getprofile(int argc, char *argv[]);
 int displayoutput();
+int presskeysequence();
 
 typedef enum {
   OPT_HELP,
@@ -98,6 +102,7 @@ typedef enum {
   OPT_SETRINGTONE,
   OPT_GETPROFILE,
   OPT_DISPLAYOUTPUT,
+  OPT_KEYPRESS,
   OPT_FOOGLE
 } opt_index;
 

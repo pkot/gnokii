@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.120  2001-01-14 22:46:56  chris
+  Revision 1.121  2001-01-15 17:00:45  pkot
+  Initial keypress sequence support. Disable compilation warning
+
+  Revision 1.120  2001/01/14 22:46:56  chris
   Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
   Revision 1.119  2001/01/10 16:32:16  pkot
@@ -160,7 +163,9 @@ GSM_Functions FB61_Functions = {
   FB61_DisableDisplayOutput,
   FB61_EnableCellBroadcast,
   FB61_DisableCellBroadcast,
-  FB61_ReadCellBroadcast
+  FB61_ReadCellBroadcast,
+  UNIMPLEMENTED,
+  UNIMPLEMENTED
 };
 
 /* Mobile phone information */

@@ -18,7 +18,10 @@
   useful :-)
 
   $Log$
-  Revision 1.112  2001-01-12 14:09:13  pkot
+  Revision 1.113  2001-01-15 17:00:49  pkot
+  Initial keypress sequence support. Disable compilation warning
+
+  Revision 1.112  2001/01/12 14:09:13  pkot
   More cleanups. This time mainly in the code.
 
   Revision 1.111  2001/01/10 16:32:18  pkot
@@ -245,6 +248,7 @@ int usage(void)
 "          gnokii --reset [soft|hard]\n"
 "          gnokii --getprofile [number]\n"
 "          gnokii --displayoutput\n"
+"          gnokii --keysequence\n"
 
   ));
 #ifdef SECURITY
@@ -457,6 +461,9 @@ int main(int argc, char *argv[])
     // Show texts from phone's display
     { "displayoutput",      no_argument,       NULL, OPT_DISPLAYOUTPUT },
 
+    // Simulate pressing the keys
+    { "keysequence",           no_argument,       NULL, OPT_KEYPRESS },
+    
 #ifndef WIN32
     // For development purposes: insert you function calls here
     { "foogle",             no_argument,       NULL, OPT_FOOGLE },
@@ -732,6 +739,11 @@ int main(int argc, char *argv[])
     case OPT_DISPLAYOUTPUT:
 
       rc = displayoutput();
+      break;
+
+    case OPT_KEYPRESS:
+    
+      rc = presskeysequence();
       break;
 
 #ifndef WIN32
@@ -3231,4 +3243,30 @@ int setringtone(int argc, char *argv[])
 }
 
 
+int presskeysequence(void)
+{
+	struct termios it;
+	char buf[105];
 
+	fbusinit(NULL);
+
+	tcgetattr(fileno(stdin), &it);
+	it.c_lflag &= ~(ICANON);
+	//it.c_iflag &= ~(INPCK|ISTRIP|IXON);
+	it.c_cc[VMIN] = 1;
+	it.c_cc[VTIME] = 0;
+
+	tcsetattr(fileno(stdin), TCSANOW, &it);
+
+	memset(&buf[0], 0, 102);
+	while (read(0, buf, 100) > 0) {
+		fprintf(stderr, "handling keys (%d).\n", strlen(buf));
+		if (GSM->HandleString(buf) != GE_NONE)
+			fprintf(stdout, _("Key press simulation failed.\n"));
+		memset(buf, 0, 102);
+	}
+
+	GSM->Terminate();
+	return 0;
+}
+ 
