@@ -138,6 +138,7 @@ static GtkWidget *GetPixmap (void)
   }
   else if (!strcmp (phoneMonitor.phone.model, "5110") ||
            !strcmp (phoneMonitor.phone.model, "5130") ||
+           !strcmp (phoneMonitor.phone.model, "5160") ||
            !strcmp (phoneMonitor.phone.model, "5190"))
   {
     button = button_5110;

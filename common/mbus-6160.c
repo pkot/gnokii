@@ -209,6 +209,13 @@ GSM_Error	MB61_GetMemoryLocation(GSM_PhonebookEntry *entry)
 			MB61_TX_SendPhoneBookRequest(entry->Location);
 			break;
 
+		case MB61_Model6185:
+			if (entry->Location >= MAX_6185_PHONEBOOK_ENTRIES) {
+				return (GE_INVALIDPHBOOKLOCATION);
+			}
+			MB61_TX_SendLongPhoneBookRequest(entry->Location);
+			break;
+
 		default:
 			return(GE_NOTIMPLEMENTED);
 	}
@@ -630,6 +637,11 @@ bool	MB61_WaitForExpectedResponse(int timeout)
 		usleep(1000);
 	}
 
+	if (LatestResponse == ExpectedResponse) {
+		return (true);
+	}
+
+	return (false);
 }
       
 
@@ -709,9 +721,17 @@ void	MB61_RX_Handle0xD2_ID(void)
 #endif
 		}
 		else {
+			if (strstr(MessageBuffer + 4, "NSD-3") != NULL) {
+				ModelIdentified = MB61_Model6185;
 #ifdef DEBUG
-			fprintf(stdout, "Unknown model - please report dump below to hugh@linuxcare.com\n");
+				fprintf(stdout, "Identified as 6185\n");
 #endif
+			}
+			else {
+#ifdef DEBUG
+				fprintf(stdout, "Unknown model - please report dump below to hugh@linuxcare.com\n");
+#endif
+			}
 		}
 	}
 #ifdef DEBUG
@@ -782,10 +802,24 @@ bool		MB61_TX_SendPhoneBookRequest(u8 entry)
 
 	//ExpectedResponse = MB61_Response_0x40_PhoneBook;
 
+	return (true);
+}
 
+	/* 6185 requires a different phone book request apparently */
+bool		MB61_TX_SendLongPhoneBookRequest(u8 entry)
+{
+	u8		message[8] = {0x00, 0x00, 0x07, 0x11, 0x00, 0x10, 0x00, 0x00};
+
+	message[7] = entry;
+	
+	MB61_UpdateSequenceNumber();
+	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0x40, RequestSequenceNumber, 8, message);
+
+	//ExpectedResponse = MB61_Response_0x40_PhoneBook;
 
 	return (true);
 }
+
 
 void		MB61_TX_SendPhoneIDRequest(void)
 {

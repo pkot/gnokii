@@ -109,7 +109,10 @@ GSM_Error	MB61_CancelCall(void);
 #define		MSG_ADDR_GLOBAL					(0xff)
 
 #define		MAX_5160_PHONEBOOK_ENTRIES		(100)
-#define		MAX_6160_PHONEBOOK_ENTRIES		(200)
+#define		MAX_6160_PHONEBOOK_ENTRIES		(199)
+#define		MAX_6161_PHONEBOOK_ENTRIES		(199)
+#define		MAX_6162_PHONEBOOK_ENTRIES		(199)
+#define		MAX_6185_PHONEBOOK_ENTRIES		(200)	/* Assumed */
 
     /* States for receive code. */
 enum    MB61_RX_States {MB61_RX_Sync,
@@ -121,10 +124,14 @@ enum    MB61_RX_States {MB61_RX_Sync,
                         MB61_RX_GetMessage,
                         MB61_RX_GetCSum};
 
+    /* This table duplicates info in xgnokii, maybe we need a single
+       data structure for this someplace... HAB */
 enum	MB61_Models		{MB61_ModelUnknown,
 						 MB61_Model5160,	/* NSW-1 */
 						 MB61_Model6160,    /* NSW-3 */
-						 MB61_Model6185};   /* ????? */
+						 MB61_Model6161,	/* ????? */
+						 MB61_Model6162,	/* ????? */
+						 MB61_Model6185};   /* NSD-3 */
 
 	/* We need to keep track of what response is expected as there
        is no unambiguous field in responses from the phone to 
@@ -146,6 +153,7 @@ bool	MB61_TX_SendStandardAcknowledge(u8 sequence_number);
 int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_byte, int message_length, u8 *buffer);
 void	MB61_TX_SendPhoneIDRequest(void);
 bool	MB61_TX_SendPhoneBookRequest(u8 entry);
+bool	MB61_TX_SendLongPhoneBookRequest(u8 entry);
 
 bool	MB61_InitialiseLink(void);
 void	MB61_SetExpectedResponse(enum MB61_Responses response);
