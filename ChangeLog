@@ -1,5 +1,6 @@
-0.4.0pre19 (not released yet)
+0.4.0pre19
 ==========
+ * include tcp.h                                       (Pavel Machek)
  * libsms updates
     o kill GE_SMSSENDOK and replace with GE_NONE       (Pavel Machek,
                                                            Pawel Kot)
