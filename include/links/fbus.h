@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.2  2001-03-13 01:23:19  pkot
+  Revision 1.3  2001-03-19 23:44:57  pkot
+  DLR3 cable support
+
+  Revision 1.2  2001/03/13 01:23:19  pkot
   Windows updates (Manfred Jonsson)
 
   Revision 1.1  2001/02/21 19:57:12  chris
@@ -130,7 +133,7 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Phone *newphone);
 
 #ifdef __links_fbus_c  /* Prototype functions for fbus-generic.c only */
 
-bool FBUS_OpenSerial();
+bool FBUS_OpenSerial(bool dlr3);
 void FBUS_RX_StateMachine(unsigned char rx_byte);
 int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
 GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message);

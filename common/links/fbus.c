@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.4  2001-03-13 01:24:02  pkot
+  Revision 1.5  2001-03-19 23:44:56  pkot
+  DLR3 cable support
+
+  Revision 1.4  2001/03/13 01:24:02  pkot
   Code cleanup - no warnings during compilation
 
   Revision 1.3  2001/03/13 01:23:18  pkot
@@ -90,7 +93,7 @@ FBUS_Link flink;		/* FBUS specific stuff, internal to this file */
 
 /*--------------------------------------------*/
 
-bool FBUS_OpenSerial()
+bool FBUS_OpenSerial(bool dlr3)
 {
 	int result;
 
@@ -109,7 +112,7 @@ bool FBUS_OpenSerial()
 	device_changespeed(115200);
 
 	/* clearing the RTS bit and setting the DTR bit */
-	device_setdtrrts(1, 0);
+	device_setdtrrts((1-dlr3), 0);
 
 	return (true);
 }
@@ -521,8 +524,9 @@ GSM_Error FBUS_Initialise(GSM_Link * newlink, GSM_Phone * newphone)
 		/* FIXME!! */
 		return GE_DEVICEOPENFAILED;
 	} else {		/* ConnectionType == GCT_Serial */
-		if (FBUS_OpenSerial() != true)
-			return GE_DEVICEOPENFAILED;
+		if (!FBUS_OpenSerial(false)) /* Try DAU-9P cable */
+			if (!FBUS_OpenSerial(true)) /* Try DLR-3 cable */
+				return GE_DEVICEOPENFAILED;
 	}
 
 	/* Send init string to phone, this is a bunch of 0x55 characters. Timing is
