@@ -68,13 +68,15 @@ GSM_Functions			MB21_Functions = {
 		MB21_DialVoice,
 		MB21_DialData,
 		MB21_GetIncomingCallNr,
-		MB21_SendBitmap,
 		MB21_GetNetworkInfo,
 		MB21_GetCalendarNote,
 		MB21_WriteCalendarNote,
 		MB21_DeleteCalendarNote,
 		MB21_Netmonitor,
-		MB21_SendDTMF
+		MB21_SendDTMF,
+		MB21_GetBitmap,
+		MB21_SetBitmap,
+		MB21_Reset
 };
 
 	/* FIXME - these are guesses only... */
@@ -293,11 +295,6 @@ GSM_Error	MB21_GetIncomingCallNr(char *Number)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	MB21_SendBitmap (char *NetworkCode, int width, int height, unsigned char *bitmap)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
 GSM_Error	MB21_GetNetworkInfo (GSM_NetworkInfo *NetworkInfo)
 {
 	return (GE_NOTIMPLEMENTED);
@@ -324,6 +321,21 @@ GSM_Error	MB21_Netmonitor(unsigned char mode, char *Screen)
 }
 
 GSM_Error	MB21_SendDTMF(char *String)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_GetBitmap(GSM_Bitmap *Bitmap)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_SetBitmap(GSM_Bitmap *Bitmap)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_Reset(unsigned char type)
 {
     return (GE_NOTIMPLEMENTED);
 }

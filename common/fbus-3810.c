@@ -73,13 +73,15 @@ GSM_Functions           FB38_Functions = {
         FB38_DialVoice,
         FB38_DialData,
         FB38_GetIncomingCallNr,
-        FB38_SendBitmap,
         FB38_GetNetworkInfo,
         FB38_GetCalendarNote,
         FB38_WriteCalendarNote,
         FB38_DeleteCalendarNote,
         FB38_Netmonitor,
-        FB38_SendDTMF
+        FB38_SendDTMF,
+        FB38_GetBitmap,
+        FB38_SetBitmap,
+        FB38_Reset
 };
 
 GSM_Information         FB38_Information = {
@@ -864,6 +866,21 @@ GSM_Error   FB38_Netmonitor (unsigned char mode, char *Screen)
 }
 
 GSM_Error   FB38_SendDTMF (char *String)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_GetBitmap (GSM_Bitmap *Bitmap)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_SetBitmap (GSM_Bitmap *Bitmap)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_Reset (unsigned char type)
 {
     return (GE_NOTIMPLEMENTED);
 }

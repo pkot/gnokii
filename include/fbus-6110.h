@@ -187,7 +187,12 @@ GSM_Error FB61_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
 
 GSM_Error FB61_NetMonitor(unsigned char mode, char *Screen);
 
+GSM_Error FB61_SetBitmap( GSM_Bitmap *Bitmap );
+GSM_Error FB61_GetBitmap( GSM_Bitmap *Bitmap );
+
 GSM_Error FB61_SendDTMF(char *String);
+
+GSM_Error FB61_Reset(unsigned char type);
 
 /* States for receive code. */
 

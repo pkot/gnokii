@@ -30,6 +30,7 @@
 #include "gsm-api.h"
 #include "cfgreader.h"
 #include "gsm-networks.h"
+#include "gsm-filetypes.h"
 
 extern GSM_Network GSM_Networks[];
 
@@ -48,8 +49,10 @@ static GdkPixmap *pixmap = NULL;
 GtkWidget *FileSelection;
 GtkWidget *drawing_area;
 GtkWidget *Combo;
+GtkWidget *Combo2;
 
 unsigned char *logo;
+char groupnames[6][255];
 
 char *Model;      /* Model from .gnokiirc file. */
 char *Port;       /* Serial port from .gnokiirc file */
@@ -216,6 +219,20 @@ int is_point(int x, int y)
 	return (logo[9*y + (x/8)] & 1<<(7-(x%8)));
 }
 
+void update_points(GtkWidget *widget)
+{
+  int i,j;
+  
+  for (i=0;i<74;i++) {
+    for (j=0;j<14;j++) {
+      if (is_point(i,j)) {
+	set_point(widget,i,j);
+      } else clear_point(widget,i,j);
+    }
+  }
+}
+
+
 /* Draw a rectangle on the screen */
 static void
 draw_brush (GtkWidget *widget, gdouble x, gdouble y, int button)
@@ -355,91 +372,51 @@ void fliphorizlogo()
 void ExportFileSelected(GtkWidget *w, GtkFileSelection *fs)
 {
 
-  FILE *ExportFile;
+  GSM_Bitmap bitmap;
   char *File=(char *)
     malloc(strlen(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))+1));
-  int column, row;
-
   char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo)->entry));
-  char *NetworkCode=NULL;
-  int country, net;
+
 
   strcpy(File, gtk_file_selection_get_filename (GTK_FILE_SELECTION(fs)));
 
   gtk_widget_destroy(FileSelection);
 
-  ExportFile=fopen(File, "w"); /* FIXME: what about already existing files? */
-
+ 
   if (strcmp(operator, "Group Graphics Logo")) {
-    NetworkCode=GSM_GetNetworkCode(operator);
-    sscanf(NetworkCode, "%d %d", &country, &net);
-
-  fprintf(ExportFile, "NOL%c%c%c", 0x00, 0x01, 0x00);
-
-  fprintf(ExportFile, "%c%c%c%c", country%256, country/256, net%256, net/256);
-
-  fprintf(ExportFile, "%c%c%c%c%c%c%c%c%c%c", 0x48, 0x00, 0x0e, 0x00, 0x01, 0x00, 0x01, 0x00, 0x53, 0x00);
-
-
+    strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
+    bitmap.type=GSM_OperatorLogo;
   }
   else { /* Group Graphics file */
-
-  fprintf(ExportFile, "NGG%c%c%c%c%c%c%c%c%c%c%c%c%c", 0x00, 0x01, 0x00,
-  0x48, 0x00, 0x0e, 0x00, 0x01, 0x00, 0x01, 0x00, 0x53, 0x00);
+    bitmap.type=GSM_CallerLogo;
   }
-
-  for (row=0; row<14; row++)
-    for (column=0; column<72; column++)
-      fprintf(ExportFile, "%c", (is_point (column,row))? '1':'0' );
-      clear_point(drawing_area, column, row);
-
-  fclose(ExportFile);
+  bitmap.width=72;
+  bitmap.height=14;
+  bitmap.size=14*72/8;
+  memcpy(bitmap.bitmap,logo,bitmap.size);
+  GSM_SaveBitmapFile(File,&bitmap);
 }
 
 void ImportFileSelected(GtkWidget *w, GtkFileSelection *fs)
 {
-
-  FILE *ImportFile;
-  unsigned char buffer[2000];
   char *File=(char *)
     malloc(strlen(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))+1));
-  int i,j,column, row;
-  char NetworkCode[10];
+ 
+  GSM_Bitmap bitmap;
 
   strcpy(File, gtk_file_selection_get_filename (GTK_FILE_SELECTION(fs)));
 
   gtk_widget_destroy(FileSelection);
 
-  ImportFile = fopen(File, "r");
+  GSM_ReadBitmapFile(File,&bitmap);
 
-  if (!ImportFile)
-    return;
-  
-  fread(buffer, 1, 6, ImportFile); /* Read the header of the file. */
-
-  if (!strncmp(buffer, "NOL", 3)) { /* NOL files have network code in the header. */
-    fread(buffer, 1, 4, ImportFile);
-    if (NetworkCode) {
-      sprintf(NetworkCode, "%d %02d", buffer[0]+256*buffer[1], buffer[2]);
-      gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(Combo)->entry), GSM_GetNetworkName(NetworkCode));
-    }
-  } else if (strncmp(buffer, "NGG", 3)) return;
-
-  fread(buffer, 1, 4, ImportFile); /* Width and height of the icon. */
-  column=buffer[0];
-  row=buffer[2];
-
-  fread(buffer, 1, 6, ImportFile); /* Unknown bytes. */
-
-  for (j=0;j<row; j++)
-    for (i=0; i<column; i++) {
-      fread(buffer, 1, 1, ImportFile);
-      if (buffer[0] == '1') set_point(drawing_area, i,j);
-      else clear_point(drawing_area, i,j);
-    }
-  
-  fclose(ImportFile);
+  if (bitmap.type==GSM_OperatorLogo) {
+    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(Combo)->entry), GSM_GetNetworkName(bitmap.netcode));
+  }
+  memcpy(logo,bitmap.bitmap,bitmap.size);  
+  update_points(drawing_area);
 }
+
 
 void savelogo()
 {
@@ -519,18 +496,56 @@ quit ()
 
 void show_logo()
 {
-
+  GSM_Bitmap bitmap;
   char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo)->entry));
-  char *NetworkCode=NULL;
+  int i;
 
   readconfig();
   fbusinit(false);
 
-  if (strcmp(operator, "Group Graphics Logo"))
-    NetworkCode=GSM_GetNetworkCode(operator);
-
-  GSM->SendBitmap(NetworkCode, 72, 14, logo);
+  bitmap.height=14;
+  bitmap.width=72;
+  bitmap.size=72*14/8;
+  if (strcmp(operator, "Group Graphics Logo")) {
+    strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
+    bitmap.type=GSM_OperatorLogo;
+  } else {
+    bitmap.type=GSM_CallerLogo;
+    /* Is there a better way to do this? */
+    for (i=0;i<6;i++) {
+      if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo2)->entry)),groupnames[i])==0) bitmap.number=i;
+    }    
+    if (GSM->GetBitmap(&bitmap)!=GE_NONE) return; /* Get the old name */
+  }
+  memcpy(bitmap.bitmap,logo,bitmap.size);
+  GSM->SetBitmap(&bitmap);
 }
+
+void get_logo()
+{
+  GSM_Bitmap bitmap;
+  char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo)->entry));
+  int i;
+
+  readconfig();
+  fbusinit(false);
+
+  if (strcmp(operator, "Group Graphics Logo")) {
+    strncpy(bitmap.netcode,GSM_GetNetworkCode(operator),7);
+    bitmap.type=GSM_OperatorLogo;
+  } else {
+    bitmap.type=GSM_CallerLogo;
+    /* Is there a better way to do this? */
+    for (i=0;i<6;i++) {
+      if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(Combo2)->entry)),groupnames[i])==0) bitmap.number=i;
+    }    
+  }
+  if (GSM->GetBitmap(&bitmap)==GE_NONE){
+    memcpy(logo,bitmap.bitmap,bitmap.size);
+    update_points(drawing_area);
+  }
+}
+
 
 void get_operator()
 {
@@ -566,6 +581,8 @@ new_pixmap (gchar      **data,
 int
 main (int argc, char *argv[])
 {
+  GSM_Bitmap bitmap;
+
   GtkWidget *window;
   GtkWidget *toolbar;
   GtkWidget *vbox;
@@ -578,6 +595,7 @@ main (int argc, char *argv[])
   GtkWidget *FileMenu_Save;
   GtkWidget *FileMenu_GetOperator;
   GtkWidget *FileMenu_Send;
+  GtkWidget *FileMenu_Get;
   GtkWidget *FileMenu_Exit;
 
   GtkWidget *Menu_Empty;
@@ -598,6 +616,7 @@ main (int argc, char *argv[])
   GtkAccelGroup *accel_group=gtk_accel_group_get_default();
 
   GList *glist = NULL;
+  GList *glist2 = NULL;
   int i=0;
 
   gtk_init (&argc, &argv);
@@ -626,6 +645,31 @@ main (int argc, char *argv[])
 
   gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(Combo)->entry), FALSE);
 
+  /* Caller Group List */
+
+  readconfig();
+  fbusinit(false);
+
+  Combo2 = gtk_combo_new();
+  gtk_combo_set_use_arrows_always(GTK_COMBO(Combo2),1);
+  bitmap.type=GSM_CallerLogo;
+  
+  /* Default group names */
+  strcpy(groupnames[0],"Family");
+  strcpy(groupnames[1],"VIP");
+  strcpy(groupnames[2],"Friends");
+  strcpy(groupnames[3],"Colleagues");
+  strcpy(groupnames[4],"Other");
+
+  /* Get actual group names */
+  for (i=0;i<5;i++) {
+     bitmap.number=i;
+     GSM->GetBitmap(&bitmap);
+     if (strlen(bitmap.text)>0) strncpy(groupnames[i],bitmap.text,255);
+     glist2=g_list_insert(glist2,groupnames[i],i);
+  }
+  gtk_combo_set_popdown_strings(GTK_COMBO(Combo2), glist2);
+
   /* Now we create the menubar */
   
   menubar=gtk_menu_bar_new();
@@ -637,7 +681,8 @@ main (int argc, char *argv[])
   FileMenu_Open=gtk_menu_item_new_with_label("Open");
   FileMenu_Save=gtk_menu_item_new_with_label("Save");
   FileMenu_GetOperator=gtk_menu_item_new_with_label("Get Operator");
-  FileMenu_Send=gtk_menu_item_new_with_label("Send");
+  FileMenu_Send=gtk_menu_item_new_with_label("Send Logo");
+  FileMenu_Get=gtk_menu_item_new_with_label("Get Logo");
   FileMenu_Exit=gtk_menu_item_new_with_label("Exit");
 
   Menu_Empty=gtk_menu_item_new();
@@ -646,6 +691,7 @@ main (int argc, char *argv[])
   gtk_menu_append(GTK_MENU(FileMenu), FileMenu_Save);
   gtk_menu_append(GTK_MENU(FileMenu), FileMenu_GetOperator);
   gtk_menu_append(GTK_MENU(FileMenu), FileMenu_Send);
+  gtk_menu_append(GTK_MENU(FileMenu), FileMenu_Get);
   gtk_menu_append(GTK_MENU(FileMenu), Menu_Empty);
   gtk_menu_append(GTK_MENU(FileMenu), FileMenu_Exit);
 
@@ -657,6 +703,8 @@ main (int argc, char *argv[])
   			GTK_SIGNAL_FUNC (get_operator), NULL);
   gtk_signal_connect_object (GTK_OBJECT (FileMenu_Send), "activate",
   			GTK_SIGNAL_FUNC (show_logo), NULL);
+  gtk_signal_connect_object (GTK_OBJECT (FileMenu_Get), "activate",
+  			GTK_SIGNAL_FUNC (get_logo), NULL);
   gtk_signal_connect_object (GTK_OBJECT (FileMenu_Exit), "activate",
   			GTK_SIGNAL_FUNC (quit), NULL);
 
@@ -668,6 +716,9 @@ main (int argc, char *argv[])
 
   gtk_widget_add_accelerator (FileMenu_Send, "activate", accel_group,
      'T', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
+  gtk_widget_add_accelerator (FileMenu_Get, "activate", accel_group,
+     'R', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
   gtk_widget_add_accelerator (FileMenu_GetOperator, "activate", accel_group,
      'G', GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -769,6 +820,8 @@ main (int argc, char *argv[])
   gtk_toolbar_append_item (GTK_TOOLBAR (toolbar), NULL, "Flip Horizontal", NULL, new_pixmap (Flip_xpm, window->window, &window->style->bg[GTK_STATE_NORMAL]), (GtkSignalFunc) fliphorizlogo, toolbar);
   
   gtk_toolbar_append_widget (GTK_TOOLBAR (toolbar), Combo, "", "");
+
+  gtk_toolbar_append_widget (GTK_TOOLBAR (toolbar), Combo2, "", "");
 
   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
 

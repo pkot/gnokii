@@ -345,6 +345,7 @@ typedef enum {
   GE_SMSTOOLONG,            /* SMS message too long. */
   GE_INTERNALERROR,         /* Problem occured internal to model specific code. */
   GE_BUSY,                  /* Command is still being executed. */
+  GE_UNKNOWN,                /* Unknown error - well better than nothing!! */
 
   /* The following are here in anticipation of data call requirements. */
 
@@ -365,6 +366,29 @@ typedef enum {
   DS_Keyboard_Lock,    /* Keyboard lock status. */
   DS_SMS_Storage_Full  /* Full SMS Memory. */
 } DisplayStatusEntity;
+
+/* Bitmap types */
+
+typedef enum {
+  GSM_None=0,
+  GSM_StartupLogo,
+  GSM_OperatorLogo,
+  GSM_CallerLogo
+} GSM_Bitmap_Types;
+
+/* Structure to hold incoming/outgoing bitmaps (and welcome-notes) */
+
+typedef struct {
+  u8 height;               /* Bitmap height (pixels) */
+  u8 width;                /* Bitmap width (pixels) */
+  u16 size;                /* Bitmap size (bytes) */
+  GSM_Bitmap_Types type;   /* Bitmap type */
+  char netcode[7];         /* Network operator code */
+  char text[256];          /* Text used for welcome-note or callergroup name */
+  unsigned char bitmap[504]; /* Actual Bitmap (84*48/8=504) */ 
+  char number;             /* Caller group number */
+  char ringtone;           /* Ringtone no sent with caller group */
+} GSM_Bitmap;
 
 /* Define the structure used to hold pointers to the various API functions.
    This is in effect the master list of functions provided by the gnokii API.
@@ -445,8 +469,6 @@ typedef struct {
 
   GSM_Error (*GetIncomingCallNr)( char *Number );
 
-  GSM_Error (*SendBitmap) ( char *NetworkCode, int width, int height, unsigned char *bitmap);
-
   GSM_Error (*GetNetworkInfo) ( GSM_NetworkInfo *NetworkInfo );
 
   GSM_Error (*GetCalendarNote) ( GSM_CalendarNote *CalendarNote);
@@ -455,9 +477,15 @@ typedef struct {
 
   GSM_Error (*DeleteCalendarNote) ( GSM_CalendarNote *CalendarNote);
 
-  GSM_Error (*NetMonitor) (unsigned char mode, char *Screen);
+  GSM_Error (*NetMonitor) ( unsigned char mode, char *Screen );
 
-  GSM_Error (*SendDTMF) (char *String);
+  GSM_Error (*SendDTMF) ( char *String );
+
+  GSM_Error (*GetBitmap) ( GSM_Bitmap *Bitmap );
+  
+  GSM_Error (*SetBitmap) ( GSM_Bitmap *Bitmap );
+
+  GSM_Error (*Reset) ( unsigned char type );
 
 } GSM_Functions;
 

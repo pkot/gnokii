@@ -8,6 +8,7 @@
 #include "gsm-common.h"
 #include "gsm-api.h"
 #include "cfgreader.h"
+#include "fbus-6110.h"
 
 #define Background_6110 "/usr/lib/gnokii/6110.xpm"
 #define Background_6150 "/usr/lib/gnokii/6150.xpm"

@@ -109,13 +109,15 @@ GSM_Functions FB61_Functions = {
   FB61_DialVoice,
   FB61_DialData,
   FB61_GetIncomingCallNr,
-  FB61_SendBitmap,
   FB61_GetNetworkInfo,
   FB61_GetCalendarNote,
   FB61_WriteCalendarNote,
   FB61_DeleteCalendarNote,
   FB61_NetMonitor,
-  FB61_SendDTMF
+  FB61_SendDTMF,
+  FB61_GetBitmap,
+  FB61_SetBitmap,
+  FB61_Reset
 };
 
 /* Mobile phone information */
@@ -189,6 +191,7 @@ u8 MessageBuffer[FB61_MAX_RECEIVE_LENGTH * 6];
 
 u16 MessageLength;
 u8 MessageType, MessageDestination, MessageSource, MessageUnknown;
+u8 MessagesSent=0, AcksReceived=0;
 
 /* Magic bytes from the phone. */
 
@@ -261,6 +264,11 @@ GSM_Error          DisplayStatusError;
 
 char               *CurrentNetmonitor;
 GSM_Error          CurrentNetmonitorError;
+
+GSM_Bitmap         *GetBitmap=NULL;
+GSM_Error          GetBitmapError;
+
+GSM_Error          SetBitmapError;
 
 unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
 unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
@@ -1960,59 +1968,154 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS)
   return (CurrentSMSMessageError);
 }
 
-/* This function sends Logo bitmap to the phone. If NetworkCode is NULL, it
-   is GroupLogo, otherwise OperatorLogo. */
+/* Send a bitmap or welcome-note */
 
-GSM_Error FB61_SendBitmap(char *NetworkCode, int width, int height, unsigned char *bitmap)
+GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
+
+  unsigned char req[600] = { FB61_FRAME_HEADER };
+  u16 count=3;
+  u8 textlen;
+
+  int timeout=50; /* 5 seconds for command to complete */
+
+  SetBitmapError = GE_BUSY;
+
+  switch (Bitmap->type) {
+  case GSM_StartupLogo:
+    req[count++]=0x18;
+    req[count++]=0x01; /* Only one block */
+    
+    if (Bitmap->size==0x00) {
+      req[count++]=0x02; /* Welcome text */
+      textlen=strlen(Bitmap->text);
+      req[count++]=textlen;
+      memcpy(req+count,Bitmap->text,textlen);
+      count+=textlen;
+    }
+    else
+      {
+	req[count++]=0x01;
+	req[count++]=Bitmap->height;
+	req[count++]=Bitmap->width;
+    	memcpy(req+count,Bitmap->bitmap,Bitmap->size);
+	count+=Bitmap->size;
+      }
+    FB61_TX_SendMessage(count, 0x05, req);    
+    
+    break;
+
+  case GSM_OperatorLogo:
+    req[count++]=0x30;  /* Store Op Logo */
+    req[count++]=0x01;  /* Location */
+    req[count++]=((Bitmap->netcode[1] & 0x0f)<<4) | (Bitmap->netcode[0] & 0x0f);
+    req[count++]=0xf0 | (Bitmap->netcode[2] & 0x0f);
+    req[count++]=((Bitmap->netcode[5] & 0x0f)<<4)|(Bitmap->netcode[4] & 0x0f);
+    req[count++]=(Bitmap->size+4)>>8;
+    req[count++]=(Bitmap->size+4)%0xff;
+    req[count++]=0x00;  /* Infofield */
+    req[count++]=Bitmap->width;
+    req[count++]=Bitmap->height;
+    req[count++]=0x01;  /* Just BW */    
+    memcpy(req+count,Bitmap->bitmap,Bitmap->size);
+    FB61_TX_SendMessage(count+Bitmap->size, 0x05, req);
+    break;
+
+  case GSM_CallerLogo:
+    req[count++]=0x13;
+    req[count++]=Bitmap->number;
+    req[count++]=strlen(Bitmap->text);
+    memcpy(req+count,Bitmap->text,req[count-1]);
+    count+=req[count-1];
+    req[count++]=Bitmap->ringtone;
+    req[count++]=0x01;  /* Graphic on */
+    req[count++]=(Bitmap->size+4)>>8;
+    req[count++]=(Bitmap->size+4)%0xff;
+    req[count++]=0x00;  /* Future extensions! */
+    req[count++]=Bitmap->width;
+    req[count++]=Bitmap->height;
+    req[count++]=0x01;  /* Just BW */    
+    memcpy(req+count,Bitmap->bitmap,Bitmap->size);
+    FB61_TX_SendMessage(count+Bitmap->size, 0x03, req);
+    break;
+  case GSM_None:
+    break;
+  }
+
+  while (timeout != 0 && SetBitmapError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (SetBitmapError);
+}
+
+/* Get a bitmap from the phone */
+
+GSM_Error FB61_GetBitmap(GSM_Bitmap *Bitmap) {
+
+  unsigned char req[10] = { FB61_FRAME_HEADER };
+  u8 count=3;
+  int timeout=10; /* 1 second for command to complete */
+
+  GetBitmap=Bitmap;
+
+  GetBitmapError = GE_BUSY;
+
+  DisableKeepalive = true;
+ 
+  /* This is needed to avoid the packet being interrupted */
+
+  while (timeout!=0 && MessagesSent!=AcksReceived) {
+    usleep(100000);
+    timeout--;
+  }
+
+  switch (GetBitmap->type) {
+  case GSM_StartupLogo:
+    req[count++]=0x16;
+    FB61_TX_SendMessage(count, 0x05, req);
+    break;
+  case GSM_OperatorLogo:
+    req[count++]=0x33;
+    req[count++]=0x01; /* Location 1 */
+    FB61_TX_SendMessage(count, 0x05, req);
+    break;
+  case GSM_CallerLogo:
+    req[count++]=0x10;
+    req[count++]=Bitmap->number;
+    FB61_TX_SendMessage(count, 0x03, req);
+    break;
+  default:
+    break;
+  }
+
+  while (timeout != 0 && GetBitmapError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  DisableKeepalive = false;
+
+  GetBitmap=NULL;
+
+  return (GetBitmapError);
+}
+
+GSM_Error FB61_Reset(unsigned char type)
 {
+  unsigned char req[4] = { 0x00,0x01,0x64,0x03 };
 
-  int length;
-  int current=9;
-  unsigned char req[255] = { 0x0c, 0x01,
+  req[3] = type;
 
-			     /* Next bytes are from Smart Messaging
-				Specification version 2.0.0 */
+  FB61_TX_SendMessage(4, 0x40, req);
 
-			     0x06,       /* User Data Header Length */
-			     0x05,       /* IEI */
-			     0x04,       /* IEDL */
-			     0x00, 0x00, /* Destination port */
-			     0xde, 0xad  /* Originator port */
-  };
-
-  /* Here we specify destination port. It is 0x1582 for OperatorLogos and
-     0x1583 for GroupLogos. */
-
-  req[5]=0x15;
-
-  if (NetworkCode) { /* Operator Logo request must contain NetworkCode */
-    req[6]=0x82;
-
-    /* Here we pack Network code to the request. For example Czech operator
-       Peagas has NetworkCode "230 01", so the result will be 0x32, 0xf0,
-       0x10. */
-
-    req[current++]= ((NetworkCode[1] & 0x0f) << 4) | (NetworkCode[0] & 0x0f);
-    req[current++]= 0xf0 | (NetworkCode[2] & 0x0f);
-    req[current++]= ((NetworkCode[5] & 0x0f) << 4) | (NetworkCode[4] & 0x0f);
-
-  } else
-    req[6]=0x83;
-
-  req[current++]= 0; /* For future extensions (dream on Nokia) */
-  req[current++]= width;
-  req[current++]= height;
-  req[current++]= 1; /* We don't have grey shades, just B&W */
-
-  length = (width * height) / 8;
-
-  memcpy(req + current, bitmap, length);
-
-  FB61_TX_SendMessage(length + current, 0x12, req);
-
-  /* FIXME: error checking */
-
-  return (GE_NONE);
+  return(GE_NONE);
 }
 
 #ifndef WIN32
@@ -2696,6 +2799,63 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	  }
 
       break;
+    
+    case 0x11:   /* Get group data */
+      
+  /* [ID],[name_len],[name].,[ringtone],[graphicon],[lenhi],[lenlo],[bitmap] */
+ 
+      if (GetBitmap!=NULL) {
+	count=MessageBuffer[5];
+	memcpy(GetBitmap->text,MessageBuffer+6,count);
+	GetBitmap->text[count]=0;
+#ifdef DEBUG	
+	printf(_("Message: Caller group logo etc.\n"));
+	printf("Caller group name: %s\n",GetBitmap->text);
+#endif DEBUG
+	count+=6;
+	GetBitmap->ringtone=MessageBuffer[count++];
+	count++;
+	GetBitmap->size=MessageBuffer[count++]<<8;
+	GetBitmap->size+=MessageBuffer[count++];
+	count++;
+	GetBitmap->width=MessageBuffer[count++];
+	GetBitmap->height=MessageBuffer[count++];
+	count++;
+	GetBitmap->size-=6; /* It puts out 2 unknown bytes at the end */
+	memcpy(GetBitmap->bitmap,MessageBuffer+count,GetBitmap->size);
+	GetBitmapError=GE_NONE;
+      }
+      else {
+#ifdef DEBUG
+	printf(_("Message: Caller group data received but not requested!\n"));
+#endif
+      }
+      break;
+
+    case 0x12:   /* Get group data error */
+      
+      GetBitmapError=GE_UNKNOWN;   
+#ifdef DEBUG
+	printf(_("Message: Error attempting to get caller group data.\n"));
+#endif   
+      break;
+      
+    case 0x14:   /* Set group data OK */
+      
+      SetBitmapError=GE_NONE;      
+#ifdef DEBUG
+	printf(_("Message: Caller group data set correctly.\n"));
+#endif
+      break;
+
+    case 0x15:   /* Set group data error */
+      
+      SetBitmapError=GE_UNKNOWN;      
+#ifdef DEBUG
+	printf(_("Message: Error attempting to set caller group data\n"));
+#endif
+      break;  
+  
 
     case 0x17:
 
@@ -2840,6 +3000,113 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	  break;	/* Visual C Don't like empty cases */
     }
 
+    break;
+  
+    /* Startup Logo and Operator Logo */  
+
+ 
+  case 0x05:
+
+    switch (MessageBuffer[3]) {
+
+    case 0x17:   /* Startup Logo */
+
+     if (GetBitmap!=NULL) {
+#ifdef DEBUG
+	printf(_("Message: Startup Logo received.\n"));
+#endif
+       count=5;
+       for (tmp=0;tmp<MessageBuffer[4];tmp++){
+	 switch (MessageBuffer[count++]) {
+	 case 0x01:
+	   GetBitmap->height=MessageBuffer[count++];
+	   GetBitmap->width=MessageBuffer[count++];
+	   GetBitmap->size=GetBitmap->height*GetBitmap->width/8;
+	   memcpy(GetBitmap->bitmap,MessageBuffer+count,GetBitmap->size);
+	   count+=GetBitmap->size;
+	   break;
+	 case 0x02:
+	   memcpy(GetBitmap->text,MessageBuffer+count+1,MessageBuffer[count]);
+	   GetBitmap->text[MessageBuffer[count]]=0;
+	   count+=MessageBuffer[count];
+#ifdef DEBUG
+	   printf("Startup Text: %s\n",GetBitmap->text);
+#endif
+	   break;
+	 case 0x03:
+	   count++;
+	   break;
+	 }
+       }
+       GetBitmapError=GE_NONE;
+     }
+      else {
+#ifdef DEBUG
+	printf(_("Message: Startup logo received but not requested!\n"));
+#endif
+      }
+      break;
+
+    case 0x19:   /* Set startup OK */
+    
+      SetBitmapError=GE_NONE;    
+#ifdef DEBUG
+	printf(_("Message: Startup logo correctly set.\n"));
+#endif  
+      break;      
+
+    case 0x31:   /* Set Operator Logo OK */
+      
+#ifdef DEBUG
+	printf(_("Message: Operator logo correctly set.\n"));
+#endif  
+      SetBitmapError=GE_NONE;      
+      break;
+      
+    case 0x32:   /* Set Operator Logo Error */
+      
+      SetBitmapError=GE_UNKNOWN;
+#ifdef DEBUG
+	printf(_("Message: Error setting operator logo!\n"));
+#endif        
+      break;
+
+    case 0x34:  /* Operator Logo */
+ 
+ /* [location],[netcode x 3],[lenhi],[lenlo],[bitmap] */
+
+      if (GetBitmap!=NULL) {
+#ifdef DEBUG
+	printf(_("Message: Operator Logo received.\n"));
+#endif  
+	count=8;  /* Location and netcode ignored */
+	
+	GetBitmap->size=MessageBuffer[count++]<<8;
+	GetBitmap->size+=MessageBuffer[count++];
+	count++;
+	GetBitmap->width=MessageBuffer[count++];
+	GetBitmap->height=MessageBuffer[count++];
+	count++;
+	GetBitmap->size-=6;  /* It puts out 2 unknown bytes at the end */
+	memcpy(GetBitmap->bitmap,MessageBuffer+count,GetBitmap->size);
+	GetBitmapError=GE_NONE;
+      }
+      else {
+#ifdef DEBUG
+	printf(_("Message: Operator logo received but not requested!\n"));
+#endif
+      }
+      
+      break;
+      
+    case 0x35:  /* Get op logo error */
+     
+#ifdef DEBUG
+	printf(_("Message: Error getting operator logo!\n"));
+#endif  
+      GetBitmapError=GE_UNKNOWN; 
+      break;
+    }
     break;
 
     /* Security code requests */
@@ -3314,7 +3581,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #ifdef DEBUG
       printf(_("Message: Unknown message of type 0x13\n"));
 #endif DEBUG
-	  break;	/* Visual C Don't like empty cases */   
+
+      break; /* Visual C Don't like empty cases */   
     }
 
     break;
@@ -3356,9 +3624,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #endif DEBUG
 
       break;
-      
+
     }
-    
+
     switch (MessageBuffer[3]) {
 
     case 0x08:
@@ -3471,7 +3739,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
           break;
 
       }
- 
+     
 #endif DEBUG
 
       /* In Outbox messages fields:
@@ -3712,7 +3980,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #endif DEBUG
 
       break;
-
+    
     case 0x09:
 
       /* We have requested invalid or empty location. */
@@ -3785,12 +4053,13 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       CurrentSMSStatusError = GE_INTERNALERROR;
 
       break;
-
+      
     }
 
     break;
 
-    /* Internal phone functions? */
+
+  /* Internal phone functions? */
 
   case 0x40:
 
@@ -3886,6 +4155,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     printf(_("[Received Ack of type %02x, seq: %2x]\n"), MessageBuffer[0], MessageBuffer[1]);
 #endif DEBUG
 
+    AcksReceived++;
     FB61_LinkOK = true;
 
     break;
@@ -4222,6 +4492,9 @@ int FB61_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer) {
   
   if (WRITEPHONE(PortFD, out_buffer, current) != current)
     return (false);
+
+  if(message_type!=0x7f)
+    MessagesSent++;
 
   return (true);
 }

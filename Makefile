@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1_pre22
+VERSION = 0.3.1_pre23
 
 #
 # Compiler to use.
@@ -20,7 +20,7 @@ CC = gcc
 # developers and testers.
 #
 
-DEBUG=-DDEBUG
+# DEBUG=-DDEBUG
 
 #
 # Model of the mobile phone.  This is now only used as a default
@@ -68,6 +68,23 @@ GTKCFLAGS=`gtk-config --cflags`
 GTKLDFLAGS=`gtk-config --libs`
 
 #
+# Destination directory
+#
+
+DESTDIR=/usr/local
+
+#
+# Install utility
+#
+
+INSTALL=install --strip 
+
+#
+# For more information about threads see the comp.programming.threads FAQ
+# http://www.serpentine.com/~bos/threads-faq/
+#
+
+#
 # For more information about threads see the comp.programming.threads FAQ
 # http://www.serpentine.com/~bos/threads-faq/
 #
@@ -105,7 +122,7 @@ COMMON_OBJS = gsm-api.o \
               fbus-3810.o \
               mbus-2110.o \
               fbus-6110.o fbus-6110-auth.o fbus-6110-ringtones.o \
-              gsm-networks.o cfgreader.o
+              gsm-networks.o cfgreader.o gsm-filetypes.o
 
 #
 # RLP objects - only needed for data calls
@@ -166,6 +183,37 @@ dist:	clean
 	@cd /tmp; tar cfz gnokii-${VERSION}.tar.gz gnokii-${VERSION}
 	@rm -rf /tmp/gnokii-${VERSION}
 	@mv /tmp/gnokii-${VERSION}.tar.gz .
+
+install: gnokii gnokiid
+	@echo "Installing binaries..."
+
+	@mkdir -p $(DESTDIR)/bin $(DESTDIR)/sbin
+
+	@$(INSTALL) gnokii	$(DESTDIR)/bin
+	@echo " $(DESTDIR)/bin/gnokii"
+
+	@$(INSTALL) gnokiid	$(DESTDIR)/sbin
+	@echo " $(DESTDIR)/sbin/gnokiid"
+
+	@if [ -f bin/xgnokii ]; \
+	then \
+		$(INSTALL) bin/xgnokii $(DESTDIR)/bin ; \
+		echo " $(DESTDIR)/bin/xgnokii" ; \
+	fi
+
+	@if [ -f xlogos ]; \
+	then \
+		$(INSTALL) xlogos $(DESTDIR)/bin ; \
+		echo " $(DESTDIR)/xlogos" ; \
+	fi
+
+	@if [ -f xkeyb ]; \
+	then \
+		$(INSTALL) xkeyb $(DESTDIR)/bin ; \
+		echo " $(DESTDIR)/xkeyb" ; \
+	fi
+
+	@echo "done."
 
 rpm:	dist
 	@rpm -ta gnokii-${VERSION}.tar.gz

@@ -38,8 +38,6 @@ int setalarm(char *argv[]);
 int getalarm(void);
 int dialvoice(char *number);
 int dialdata(char *number);
-int sendoplogo(char *argv[]);
-int sendclicon(char *logofile);
 int getcalendarnote(char *index);
 int writecalendarnote(char *argv[]);
 int deletecalendarnote(char *index);
@@ -49,6 +47,9 @@ int identify(void);
 int senddtmf(char *String);
 int foogle(char *argv[]);
 int pmon(void);
+int setlogo(char *argv[]);
+int getlogo(char *argv[]);
+int reset(char *type);
 void readconfig(void);
 
 typedef enum {
@@ -62,9 +63,7 @@ typedef enum {
   OPT_SETALARM,
   OPT_GETALARM,
   OPT_DIALVOICE,
-  OPT_DIALDATA,
-  OPT_SENDOPLOGO,
-  OPT_SENDCLICON,
+  OPT_DIALDATA, 
   OPT_GETCALENDARNOTE,
   OPT_WRITECALENDARNOTE,
   OPT_DELCALENDARNOTE,
@@ -83,6 +82,9 @@ typedef enum {
   OPT_NETMONITOR,
   OPT_IDENTIFY,
   OPT_SENDDTMF,
+  OPT_RESET,
+  OPT_SETLOGO,
+  OPT_GETLOGO,
   OPT_FOOGLE
 } opt_index;
 

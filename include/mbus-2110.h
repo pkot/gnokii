@@ -80,13 +80,15 @@ GSM_Error	MB21_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error	MB21_DialVoice(char *Number);
 GSM_Error	MB21_DialData(char *Number);
 GSM_Error	MB21_GetIncomingCallNr(char *Number);
-GSM_Error	MB21_SendBitmap(char *NetworkCode, int width, int height, unsigned char *bitmap);
 GSM_Error	MB21_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 GSM_Error	MB21_GetCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error	MB21_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error	MB21_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error	MB21_Netmonitor(unsigned char mode, char *Screen);
 GSM_Error	MB21_SendDTMF(char *String);
+GSM_Error	MB21_GetBitmap(GSM_Bitmap *Bitmap);
+GSM_Error	MB21_SetBitmap(GSM_Bitmap *Bitmap);
+GSM_Error	MB21_Reset(unsigned char type);
 
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __mbus_2110_c isn't 

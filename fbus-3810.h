@@ -72,13 +72,15 @@ GSM_Error   FB38_SetAlarm(int alarm_number, GSM_DateTime *date_time);
 GSM_Error   FB38_DialVoice(char *Number);
 GSM_Error   FB38_DialData(char *Number);
 GSM_Error   FB38_GetIncomingCallNr(char *Number);
-GSM_Error   FB38_SendBitmap(char *NetworkCode, int width, int height, unsigned char *bitmap);
 GSM_Error   FB38_GetNetworkInfo(GSM_NetworkInfo *NetworkInfo);
 GSM_Error   FB38_GetCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error   FB38_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error   FB38_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error   FB38_Netmonitor(unsigned char mode, char *Screen);
 GSM_Error   FB38_SendDTMF(char *String);
+GSM_Error   FB38_GetBitmap(GSM_Bitmap *Bitmap);
+GSM_Error   FB38_SetBitmap(GSM_Bitmap *Bitmap);
+GSM_Error   FB38_Reset(unsigned char type);
 
     /* All defines and prototypes from here down are specific to 
        this model and so are #ifdef out if __fbus_3810_c isn't 

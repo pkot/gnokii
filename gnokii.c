@@ -49,6 +49,7 @@
 #include "gsm-networks.h"
 #include "cfgreader.h"
 #include "gnokii.h"
+#include "gsm-filetypes.h"
 
 char *Model;      /* Model from .gnokiirc file. */
 char *Port;       /* Serial port from .gnokiirc file */
@@ -97,16 +98,19 @@ int usage(void)
 "          gnokii --getalarm\n"
 "          gnokii --dialvoice number\n"
 "          gnokii --dialdata number\n"
-"          gnokii --sendoplogo logofile [network code]\n"
-"          gnokii --sendclicon logofile\n"
 "          gnokii --getcalendarnote index\n"
 "          gnokii --writecalendarnote\n"
 "          gnokii --deletecalendarnote index\n"
 "          gnokii --getdisplaystatus\n"
 "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
 "          gnokii --identify\n"
-"          gnokii --senddtmf string\n\n"
-
+"          gnokii --senddtmf string\n"
+"          gnokii --setlogo logofile [network code]\n"
+"          gnokii --setlogo logofile [caller group number] [group name]\n"
+"          gnokii --setlogo text [startup text]\n"
+"          gnokii --getlogo logofile {caller|op|startup} [caller group number]\n"
+"          gnokii --reset [soft|hard]\n"
+"\n"
 "          --help            display usage information.\n\n"
 
 "          --monitor         continually updates phone status to stderr.\n\n"
@@ -159,10 +163,6 @@ int usage(void)
 
 "          --dialdata        initiate data call.\n\n"
 
-"          --sendoplogo      send operator logo.\n\n"
-
-"          --sendclicon      send CL icon.\n\n"
-
 "          --getcalendarnote get the note with number [index] from calendar.\n\n"
 
 "          --writecalendarnote write the note to calendar.\n\n"
@@ -176,6 +176,9 @@ int usage(void)
 
 "          --identify        get IMEI, model and revision\n\n"
 "          --senddtmf        send DTMF sequence\n\n"
+"          --setlogo         set caller, startup or operator logo\n\n"
+"          --getlogo         get caller, startup or operator logo\n\n"
+"          --reset [soft|hard] resets the phone.\n\n"
 ));  /*"*/
 
   return 0;
@@ -220,43 +223,6 @@ void fbusinit(bool enable_monitoring, void (*rlp_handler)(RLP_F96Frame *frame))
   }
 }
 
-int ReadBitmapFile(char *FileName, char *NetworkCode, unsigned char *logo, int *width, int *height)
-{
-
-  FILE *file;
-  unsigned char buffer[2000];
-  int i,j;
-
-  file = fopen(FileName, "r");
-
-  if (!file)
-    return(-1);
-  
-  fread(buffer, 1, 6, file); /* Read the header of the file. */
-
-  if (!strncmp(buffer, "NOL", 3)) { /* NOL files have network code in the header. */
-    fread(buffer, 1, 4, file);
-    if (NetworkCode)
-      sprintf(NetworkCode, "%d %02d", buffer[0]+256*buffer[1], buffer[2]);
-  }
-
-  fread(buffer, 1, 4, file); /* Width and height of the icon. */
-  *width=buffer[0];
-  *height=buffer[2];
-
-  fread(buffer, 1, 6, file); /* Unknown bytes. */
-
-  for (i=0; i<( (*width * *height) /8); i++) {
-    fread(buffer, 1, 8, file);
-
-    for (j=7; j>=0;j--)
-      if (buffer[7-j] == '1') logo[i]|=(1<<j);
-  }
-
-  fclose(file);
-
-  return 0;
-}
 
 /* This function checks that the argument count for a given options is withing
    an allowed range. */
@@ -346,12 +312,6 @@ int main(int argc, char *argv[])
     // Data call mode
     { "dialdata",           required_argument, NULL, OPT_DIALDATA },
 
-    // Send operator logo mode
-    { "sendoplogo",         required_argument, NULL, OPT_SENDOPLOGO },
-
-    // Send CL icon mode
-    { "sendclicon",         required_argument, NULL, OPT_SENDCLICON },
-
     // Get calendar note mode
     { "getcalendarnote",    required_argument, NULL, OPT_GETCALENDARNOTE },
 
@@ -400,6 +360,15 @@ int main(int argc, char *argv[])
     // Send DTMF sequence
     { "senddtmf",           required_argument, NULL, OPT_SENDDTMF },
 
+    // Resets the phone
+    { "reset",              optional_argument, NULL, OPT_RESET },
+
+    /* Set logo */
+    { "setlogo",            optional_argument, NULL, OPT_SETLOGO },
+
+    /* Get logo */
+    { "getlogo",            required_argument, NULL, OPT_GETLOGO },
+
 #ifndef WIN32
     // For development purposes: insert you function calls here
     { "foogle",             optional_argument, NULL, OPT_FOOGLE },
@@ -422,8 +391,6 @@ int main(int argc, char *argv[])
     { OPT_SETALARM,          2, 2, 0 },
     { OPT_DIALVOICE,         1, 1, 0 },
     { OPT_DIALDATA,          1, 1, 0 },
-    { OPT_SENDOPLOGO,        1, 2, GAL_XOR },
-    { OPT_SENDCLICON,        1, 1, 0 },
     { OPT_GETCALENDARNOTE,   1, 1, 0 },
     { OPT_DELCALENDARNOTE,   1, 1, 0 },
     { OPT_GETMEMORY,         3, 3, 0 },
@@ -437,6 +404,9 @@ int main(int argc, char *argv[])
     { OPT_SETWELCOMENOTE,    1, 1, 0 },
     { OPT_NETMONITOR,        1, 1, 0 },
     { OPT_SENDDTMF,          1, 1, 0 },
+    { OPT_SETLOGO,           1, 3, 0 },
+    { OPT_GETLOGO,           1, 3, 0 },
+    { OPT_RESET,             0, 1, 0 },
 
     { 0, 0, 0, 0 },
   };
@@ -569,16 +539,6 @@ int main(int argc, char *argv[])
       rc = dialdata(optarg);
       break;
 
-    case OPT_SENDOPLOGO:
-
-      rc = sendoplogo(nargv);
-      break;
-
-    case OPT_SENDCLICON:
-
-      rc = sendclicon(optarg);
-      break;
-
     case OPT_GETCALENDARNOTE:
 
       rc = getcalendarnote(optarg);
@@ -639,6 +599,17 @@ int main(int argc, char *argv[])
       rc = identify();
       break;
 
+    case OPT_SETLOGO:
+       
+      rc = setlogo(nargv);
+      break;
+
+    case OPT_GETLOGO:
+      
+      rc = getlogo(nargv);
+      break;
+     
+
 #ifndef WIN32
     case OPT_FOOGLE:
 
@@ -649,6 +620,11 @@ int main(int argc, char *argv[])
     case OPT_SENDDTMF:
 
       rc = senddtmf(optarg);
+      break;
+
+    case OPT_RESET:
+
+      rc = reset(optarg);
       break;
 
     default:
@@ -1324,55 +1300,86 @@ int dialdata(char *Number)
   return 0;
 }
 
-/* Sending operator logos. */
+/* Getting logos. */
 
-int sendoplogo(char *argv[])
+int getlogo(char *argv[])
 {
+  GSM_Bitmap bitmap;
 
-  char *NetworkCode=(char *)malloc(10);
-  unsigned char *logo=(unsigned char *)calloc(1,256);
-  int width, height;
+  fbusinit(false, NULL);
+  
+  bitmap.type=GSM_None;
 
-  if (!ReadBitmapFile(argv[0], NetworkCode, logo, &width, &height)) {
-    fbusinit(false, NULL);
-
-    if (argv[1])
-      NetworkCode=argv[1];
-
-    fprintf(stdout, _("Sending operator logo for %s\n"), NetworkCode);
-    GSM->SendBitmap(NetworkCode, width, height, logo);
+  if (strcmp(argv[1],"op")==0)
+    bitmap.type=GSM_OperatorLogo;
+  if (strcmp(argv[1],"caller")==0) {
+    bitmap.number=argv[2][0]-'0';
+    bitmap.type=GSM_CallerLogo;
+    if ((bitmap.type<0)||(bitmap.type>9)) bitmap.type=0;
+    }
+  if (strcmp(argv[1],"startup")==0)
+    bitmap.type=GSM_StartupLogo;
+  
+  if (bitmap.type!=GSM_None) {
+    fprintf(stdout, _("Getting Logo.\n"));
+    if (GSM->GetBitmap(&bitmap)==GE_NONE){
+      GSM_SaveBitmapFile(argv[0], &bitmap);
+    }
   }
-  else {
-    fprintf(stdout, _("File does not exist or can not be opened\n"));
-    return -1;
-  }
-
   GSM->Terminate();
 
   return 0;
 }
 
-/* Sending CL icons. */
 
-int sendclicon(char *LogoFile)
+/* Sending logos. */
+
+int setlogo(char *argv[])
 {
 
-  unsigned char *logo=(unsigned char *)calloc(1,256);
-  int width, height;
+  GSM_Bitmap bitmap;
+  GSM_Bitmap oldbit;
 
-  if (!ReadBitmapFile(LogoFile, NULL, logo, &width, &height)) {
-    fbusinit(false, NULL);
-    GSM->SendBitmap(NULL, width, height, logo);
+  fbusinit(false, NULL);
+
+  if (!GSM_ReadBitmapFile(argv[0], &bitmap)) {      
+    if (argv[1] && (bitmap.type==GSM_OperatorLogo))
+      strncpy(bitmap.netcode,argv[1],7);
+    if (argv[1] && (bitmap.type==GSM_CallerLogo)) {
+      bitmap.number=argv[1][0]-'0';
+      oldbit.type=GSM_CallerLogo;
+      oldbit.number=bitmap.number;
+      if (GSM->GetBitmap(&oldbit)==0) {
+	/* We have to get the old name and ringtone!! */
+	bitmap.ringtone=oldbit.ringtone;
+	strncpy(bitmap.text,oldbit.text,255);
+	if ((bitmap.number<0)||(bitmap.number>9)) bitmap.number=0;
+	if (argv[2]) strncpy(bitmap.text,argv[2],255);
+      }
+    }
   }
   else {
-    fprintf(stdout, _("File does not exist or can not be opened\n"));
-    return -1;
+    if (strcmp(argv[0],"text")==0){
+      bitmap.type=GSM_StartupLogo;
+      if (argv[1]) {
+	strncpy(bitmap.text,argv[1],255);
+      } else bitmap.text[0]=0x00;
+      bitmap.size=0;
+    } else {
+      fprintf(stdout, _("Logo file error.\n"));
+      GSM->Terminate();
+      return (-1);
+    }
   }
 
+  fprintf(stdout, _("Sending Logo.\n"));
+  GSM->SetBitmap(&bitmap);
   GSM->Terminate();
 
   return 0;
 }
+
+
 
 /* Calendar notes receiving. */
 
@@ -2080,6 +2087,32 @@ int senddtmf(char *String)
 
   GSM->SendDTMF(String);
 
+  GSM->Terminate();
+
+  return 0;
+}
+
+/* Resets the phone */
+int reset( char *type)
+{
+
+  unsigned char _type = 0x03;
+
+  if(type) {
+    if(!strcmp(type,"soft"))
+      _type = 0x03;
+    else
+      if(!strcmp(type,"hard"))
+	_type = 0x04;
+      else {
+	fprintf(stderr, _("What kind of reset do you want??\n"));
+	return -1;
+      }
+  }
+
+  fbusinit(false, NULL);
+
+  GSM->Reset(_type);
   GSM->Terminate();
 
   return 0;
