@@ -164,22 +164,22 @@ large changes and/or submitting big patches.
 
 - 9.0 gnokii by CVS -
 
-The gnokii project now has a CVS server,  served by the Czech Linux
-Users' Group. The server's address is cvs.linux.cz. If you are
-already familiar with CVS, set the CVSROOT to 
+The gnokii project has a new CVS server thanks to Andrew Tridgell
+and the Samba team.  The server's address is cvs.samba.org.  If you
+are already familiar with CVS, set the CVSROOT to 
 
-	:pserver:cvs@cvs.linux.cz:/cvs/gnokii
+	:pserver:cvs@cvs.samba.org:/cvsroot
 
-and use an empty password for checkout the repository with the name
+and use the password cvs for checking out the repository with the name
 gnokii.
 
-If you are not familiar with cvs, do not worry. It's very simple.
-Just install the cvs package for your distribution and do these steps:
+If you are not familiar with cvs, don't worry. It's very simple.
+Just install the cvs package for your distribution and follow these steps:
 
 	1. set your environmental variable CVSROOT. If you have bash (Bourne
            Again Shell):
 
-	export CVSROOT=:pserver:cvs@cvs.linux.cz:/cvs/gnokii
+	export CVSROOT=:pserver:cvs@cvs.samba.org:/cvsroot
 
 	   If you have different shell, use different command (e.g. setenv).
 
@@ -188,16 +188,16 @@ Just install the cvs package for your distribution and do these steps:
 
 	cvs login
 
-	   Use an empty password.
+	   Use cvs as your password.
 
 
-	3. If you are logged in you are ready to checkout the newest sources:
+	3. If you are logged in you are ready to checkout the latest sources:
 
 	cvs co gnokii
 
 If you prefer, there is a WWW interface to the CVS server at
 
-http://odysseus.fi.muni.cz/cgi-bin/cvsweb.cgi/?cvsroot=gnokii
+http://samba.org/cgi-bin/cvsweb/gnokii/
 
 Now you are on your own - you have the current sources on your disk
 in the directory gnokii.  If you are going to make substantial changes
@@ -208,6 +208,8 @@ If you would like to receive email when updates are made to the CVS
 repository, just send Hugh and email to that effect (hugh@linuxcare.com)
 and you'll be added to the recipients list.
 
+Our thanks go to the Czech Linux Users Group for hosting the original
+CVS repository at cvs.linux.cz.
 
 - 10.0 Protocol Details -
 
