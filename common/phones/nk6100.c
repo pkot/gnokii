@@ -465,6 +465,7 @@ static gn_error IdentifyPhone(struct gn_statemachine *state)
 	gn_data data;
 	char revision[GN_REVISION_MAX_LENGTH];
 
+	revision[0] = '\0';
 	gn_data_clear(&data);
 	data.model = drvinst->model;
 	data.imei = drvinst->imei;

@@ -8,6 +8,8 @@
     o update README with some module clarification      (Pawel Kot)
  * xgnokii updates
     o don't segfault on incorrect initialization        (Pawel Kot)
+ * 6100 series updates
+    o uninitalised stack variable in IdentifyPhone (BORBELY Zoltan)
 
 0.5.8
 =====
