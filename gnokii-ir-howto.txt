@@ -1,6 +1,6 @@
   Gnokii-Infrared-HowTo
   Thomas Schneider, ts-ml@dev-thomynet.de
-  Version: 1.03, 21 July 1999
+  Version: 1.04, 04 Aug 1999
 
   This document describes how to use the infrared-function of gnokii
   ______________________________________________________________________
@@ -32,8 +32,12 @@
      5.1 Laptops - who work with gnokii
         5.1.1 DELL Inspiron 7000 A366LT
         5.1.2 DELL Latitude LM 166
-        5.1.3 IBM Thinkpad 390
-        5.1.4 IBM Thinkpad 600
+        5.1.3 DELL Latitude D266XT w/ C/Dock
+        5.1.4 Fujitsu Lifebook B110 'Biblo' Laptop
+        5.1.5 Gericom (Network) Notebook with SIR-Infrared
+        5.1.6 IBM Thinkpad 390
+        5.1.7 IBM Thinkpad 600
+        5.1.8 Toshiba Libretto 70CT
      5.2 Laptops - who don't work
      5.3 Mainboards - who work with gnokii
         5.3.1 ASUS ????
@@ -60,10 +64,6 @@
 
   You may redistribute and/or modify this document as long as you comply
   with the terms of the GNU General Public Licence, version 2 or later.
-
-
-
-
   1.2.  Credits
 
   Special thanks go to Hugh Blemings and Pavel Janik, they are the
@@ -82,14 +82,14 @@
 
   Note:If you have any big problems or other questions to gnokii -
   please mail to gnokii-mailinglist and not to me! For more details:
-  http://multivac.fatburen.org/gnokii/
+  http://www.gnokii.org/
 
 
   1.4.  Latest version of this document
 
   You can find the latest version of this document in the gnokii-
-  distribution under: http://multivac.fatburen.org/gnokii/ or in the web
-  on http://www.dev-thomynet.de/nokworld/gnokii-infrared-howto/ .
+  distribution under: http://www.gnokii.org/ or in the web on
+  http://www.dev-thomynet.de/nokworld/gnokii-infrared-howto/ .
 
 
   2.  Introduction
@@ -105,7 +105,7 @@
 
   You can get gnokii from gnokiis-homepage:
 
-  o  http://multivac.fatburen.org/gnokii/
+  o  http://www.gnokii.org/
 
   Gnokii-package is available in some different formats: rpm and tgz.
   To install the tgz unpack the package with
@@ -198,6 +198,8 @@
 
   2. 6150
 
+  o  V 4.01, 23-09-98
+
   o  V 4.12, 02-12-98, NSM-1
 
   o  V 5.02, 02-02-99, NSM-1
@@ -256,10 +258,17 @@
 
   o  ``DELL Latitude LM 166''
 
+  o  ``DELL Latitude D266XT w/ C/Dock''
+
+  o  ``Fujitsu Lifebook B110 'Biblo' Laptop''
+
+  o  ``Gericom (Network) Notebook with SIR-Infrared''
+
   o  ``IBM Thinkpad 390''
 
   o  ``IBM Thinkpad 600''
 
+  o  ``Toshiba Libretto 70CT''
 
 
   5.1.1.  DELL Inspiron 7000 A366LT
@@ -319,14 +328,12 @@
 
   o  Note          : -
 
-
-  5.1.3.  IBM Thinkpad 390
+  5.1.3.  DELL Latitude D266XT w/ C/Dock
 
 
   o  BIOS-Version  : ????
 
   o  CPU           : ????
-
 
   o  Memory        : ????
 
@@ -334,9 +341,90 @@
 
   o  Distibution   : ????
 
-  o  reported from : Mario Viljac on 21. July to gnokii-ml
+  o  reported from : Stig-rjan Smelror < Stig.Orjan.Smelror@winther.net
+     > on 26. July to gnokii-ml
+
+  o  BIOS-Menu     : Peripherals: Integrated Peripherals: Infrared: COM2
+
+  o  Configuration : You must enable in BIOS the internal-infrared-port
+     and must setup the COM-Port on which the internal ir-adapter should
+     work. If you want what infrared use COM2 you must set it here for
+     example.
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
+
+
+  5.1.4.  Fujitsu Lifebook B110 'Biblo' Laptop
+
+
+  o  BIOS-Version  : PhoenixBIOS v1.09 10/28/1998
+
+  o  CPU           : 233 MMX
+
+  o  Memory        : 32 MByte
+
+  o  Kernel        : 2.2.5-15
+
+  o  Distibution   : Redhat 6.0
+
+  o  reported from : Tuomas Salo < tuomas@optinet.fi > on 28. July to
+     gnokii-ml
 
   o  BIOS-Menu     : ????
+
+  o  Configuration : Serial B: Mode IrDA (not FIR), 3F8 IRQ 4
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
+
+
+  5.1.5.  Gericom (Network) Notebook with SIR-Infrared
+
+
+  o  BIOS-Version  : SystemSoft SCU For Intel 430TX/440BX
+
+  o  CPU           : 233 MMX
+
+  o  Memory        : ????
+
+  o  Kernel        : ????
+
+  o  Distibution   : ????
+
+  o  reported from : Marcel Holtmann < marcel@rvs.uni-bielefeld.de > on
+     22. July to gnokii-ml
+
+  o  BIOS-Menu     : Components/COM Ports
+
+  o  Configuration : COM A:   COM1, 3F8, IRQ4   (Standard Serial for
+     Cable or somthing else) COM B:   COM2, 2F8, IRQ3   (Bulit in IR
+     Port) Mode for COM B:   IrDA (HPSIR)
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
+
+
+  5.1.6.  IBM Thinkpad 390
+
+
+  o  BIOS-Version  : V1.0 R01-A7
+
+  o  CPU           : 233 MMX
+
+  o  Memory        : 32 MByte
+
+  o  Kernel        : 2.2.5-15
+
+  o  Distibution   : Redhat 6.0
+
+  o  reported from : Mario Viljac < Mario.Viljac@znanost.hr > on 22.
+     July to gnokii-ml
+
+  o  BIOS-Menu     : Config->Advanced Setup
 
   o  Configuration : IR-port must be enabled, set also COM-Address and
      IRQ. If you have problems with address/irq look in ``COM-PORT-
@@ -347,7 +435,7 @@
   o  Note          : -
 
 
-  5.1.4.  IBM Thinkpad 600
+  5.1.7.  IBM Thinkpad 600
 
 
   o  BIOS-Version  : ????
@@ -360,7 +448,8 @@
 
   o  Distibution   : ????
 
-  o  reported from : Tuomas Mttnen on 06. July to gnokii-ml
+  o  reported from : Tuomas Mttnen < maattanen@iki.fi > on 06. July to
+     gnokii-ml
 
   o  BIOS-Menu     : ????
 
@@ -370,6 +459,31 @@
 
   o  Note          : -
 
+
+  5.1.8.  Toshiba Libretto 70CT
+
+
+  o  BIOS-Version  : 6.20
+
+  o  CPU           : Intel P120MMX
+
+  o  Memory        : 32 MByte
+
+  o  Kernel        : 2.0.36
+
+  o  Distibution   : Red Hat 5.2
+
+  o  reported from : Patrick Robbe < probbe@mail.dotcom.fr > on 30. July
+     to gnokii-ml
+
+  o  BIOS-Menu     : ????
+
+  o  Configuration : Infrared port (COM2) 2F8h / IRQ3, mode IrDA
+     compatible.
+
+  o  Known Problems: no problems known yet
+
+  o  Note          : -
 
 
   5.2.  Laptops - who don't work
@@ -393,7 +507,6 @@
 
   o  Memory        : ????
 
-
   o  Kernel        : ????
 
   o  Distibution   : ????
@@ -412,7 +525,6 @@
   5.4.  Mainboards - who don't work with gnokii
 
   No mails for this part in moment.
-
 
   5.5.  External Adapters - who work with gnokii
 
@@ -459,7 +571,6 @@
   use the infrared-port in moment.
 
 
-
   7.  FAQ
 
   No FAQ is available in moment.
@@ -478,51 +589,6 @@
   o  ttyS2: 3E8, IRQ: 4, COM3
 
   o  ttyS3: 2E8, IRQ: 3, COM4
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
