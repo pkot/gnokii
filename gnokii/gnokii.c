@@ -2540,10 +2540,15 @@ void readconfig(void)
     strncpy(rcfile, homedir, 200);
   strncat(rcfile, "/.gnokiirc", 200);
 #endif
-
-  if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL )
-    if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
-      fprintf(stderr, _("error opening %s, using default config\n"), rcfile);
+  
+    /* Try opening .gnokirc from users home directory first */
+  if ((cfg_info = CFG_ReadFile(rcfile)) == NULL) {
+      /* It failed so try for /etc/gnokiirc */
+    if ( (cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL ) {
+	/* That failed too so go with defaults... */
+      fprintf(stderr, _("Couldn't open %s or /etc/gnokiirc, using default config\n"), rcfile);
+    }
+  }
 
   model = CFG_Get(cfg_info, "global", "model");
   if (!model)
