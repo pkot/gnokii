@@ -8,6 +8,7 @@
     o F_SETOWN disabled for OpenBSD                      (Pawel Kot)
     o u8 removed from gn_ringtone_pack                (Helge Deller)
     o updates to spec file; rpm 4.x required    (Tom G. Christensen)
+    o more updates to spec file                 (Tom G. Christensen)
     o get rid of HAVE_BLUETOOTH in the exported header   (Pawel Kot,
                                                     Marcel Holtmann)
     o #ifdef @HAVE_BLUETOOTH_EXP@ should be

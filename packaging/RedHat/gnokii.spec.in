@@ -11,6 +11,7 @@ Packager: Pavel Janik ml. <Pavel.Janik@linux.cz>, Jan Derfinak <ja@mail.upjs.sk>
 Group: Applications/Communications
 Source: ftp://ftp.gnokii.org/pub/gnokii/%{name}-%{version}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{version}-root
+BuildPreReq: gettext, gtk+-devel >= 1.2.0
 
 %description
 Gnokii is a Linux/Unix tool suite and (eventually) modem/fax driver for
@@ -59,6 +60,9 @@ cp Docs/man/*.1x ${RPM_BUILD_ROOT}%{_prefix}/X11R6/man/man1
 %pre
 /usr/sbin/groupadd -r -f gnokii >/dev/null 2>&1
 
+%post
+/sbin/ldconfig
+
 %postun
 /usr/sbin/groupdel gnokii >/dev/null 2>&1
 
@@ -86,13 +90,14 @@ rm -rf ${RPM_BUILD_ROOT}
 %attr(0750, root, gnokii) %{_bindir}/gnokii
 %attr(0750, root, gnokii) %{_sbindir}/gnokiid
 %attr(4750, root, gnokii) %{_sbindir}/mgnokiidev
-%attr(0750, root, gnokii) %{_libdir}/libgnokii.so
+%attr(0750, root, gnokii) %{_libdir}/libgnokii.so.*
 %{_bindir}/ppm2nokia
 %{_bindir}/sendsms
 %{_datadir}/locale/*
 %config %{_sysconfdir}/gnokiirc
 %{_mandir}/*/*
 %{_prefix}/X11R6/man/*/*
+%{_libdir}/pkgconfig/*
 
 %files xgnokii
 %defattr(-,root,root)
@@ -103,6 +108,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %files devel
 %defattr(-,root,root)
 %{_includedir}/*
+%{_libdir}/*.so
 
 %changelog
 
