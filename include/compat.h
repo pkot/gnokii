@@ -33,10 +33,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_SYS_TIME_H
-#  include <sys/time.h>
-#endif
-
 #ifdef WIN32
 #  include <windows.h>
 #  include <string.h>
@@ -47,20 +43,32 @@
 #  include <stdarg.h>
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
-#  include <sys/socket.h>
+#ifdef HAVE_STRINGS_H
+#  include <strings.h>
 #endif
 
 #ifdef HAVE_STDINT_H
 #  include <stdint.h>
 #endif
 
+#ifdef HAVE_INTTYPES_H
+#  include <inttypes.h>
+#endif
+
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
 
-#ifndef HAVE_INTTYPES_H
-#  include <inttypes.h>
+#ifdef HAVE_SYS_FILE_H
+#  include <sys/file.h>
+#endif
+
+#ifdef HAVE_SYS_TIME_H
+#  include <sys/time.h>
+#endif
+
+#ifdef HAVE_SYS_SOCKET_H
+#  include <sys/socket.h>
 #endif
 
 /*
@@ -184,14 +192,6 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 
 /* Get rid of long defines. Use #if __unices__ */
 #define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__) || defined(__OpenBSD__)
-
-#ifdef HAVE_STRINGS_H
-#  include <strings.h>
-#endif
-
-#ifdef HAVE_SYS_FILE_H
-#  include <sys/file.h>
-#endif
 
 /* This one is for NLS. */
 #ifdef ENABLE_NLS

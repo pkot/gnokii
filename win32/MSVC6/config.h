@@ -40,15 +40,24 @@
 
 	
 #undef VERSION
-#define VERSION "0.5.0rc3"
+#define VERSION "0.5.0"
+
+/* No bluetooth and no IRDA */
+#undef HAVE_BLUETOOTH
+#undef HAVE_IRDA
 
 /* Define if you have the following headers */
-#undef HAVE_UNISTD_H
+#define HAVE_STDARG_H 1
 #define HAVE_STRING_H 1
 #undef HAVE_STRINGS_H
+#undef HAVE_STDINT_H
+#undef HAVE_INTTYPES_H
+#define HAVE_SYS_TYPES_H 1
+#undef HAVE_SYS_FILE_H
+#undef HAVE_SYS_TIME_H
+#undef HAVE_UNISTD_H
 #define HAVE_CTYPE_H 1
 #define HAVE_STDLIB_H 1
-#define HAVE_STDARG_H 1
 
 /* Define if your compiler supports long long */
 #undef HAVE_LONG_LONG
