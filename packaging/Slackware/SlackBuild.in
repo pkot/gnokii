@@ -8,6 +8,9 @@
 PN=@PACKAGE@
 PV=@VERSION@
 
+ARCH="i386"
+BUILD=1
+
 DOCS1="Docs/*"
 DOCS2="Docs/protocol Docs/sample"
 CONF="Docs/sample/gnokiirc"
@@ -36,7 +39,7 @@ cd $PN-$PV
 # Configure and make package
 ./configure --prefix=/usr --with-xgnokiidir=/usr/X11R6 i386-slackware-linux
 make
-make prefix=$PKG/usr install
+make prefix=$PKG/usr xgnokii_libdir=$PKG/usr/X11R6 install
 
 # Copy the docs
 mkdir -p $PKG/usr/doc/$PN-$PV
@@ -71,7 +74,7 @@ EOF
 
 # and build the package answering "yes" twice
 echo "y
-y" | makepkg $TMP/$PN.tgz
+y" | makepkg $TMP/$PN-$PV-$ARCH-$BUILD.tgz
 
 # Cleanup
 rm -rf $TMP/$PN-$PV
