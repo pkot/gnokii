@@ -98,6 +98,7 @@ static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_GetRingtones(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -112,6 +113,7 @@ static GSM_Error P6510_IncomingCalendar(int messagetype, unsigned char *message,
 static GSM_Error P6510_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
 */
 static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 
 static int GetMemoryType(GSM_MemoryType memory_type);
@@ -134,6 +136,7 @@ static GSM_IncomingFunctionType P6510_IncomingFunctions[] = {
 	/*
 	{ P6510_MSG_DIVERT,	P6510_IncomingCallDivert },
 	*/
+	{ P6510_MSG_PROFILE,    P6510_IncomingProfile },
 	{ P6510_MSG_RINGTONE,	P6510_IncomingRingtone },
 	{ 0, NULL }
 };
@@ -238,6 +241,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_GetSMS(data, state);
 	case GOP_GetSMSFolders:
 		return P6510_GetSMSFolders(data, state);
+	case GOP_GetProfile:
+		return P6510_GetProfile(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -2087,7 +2092,7 @@ static GSM_Error P6510_IncomingRingtone(int messagetype, unsigned char *message,
 		index = 13;
 		for (j = 0; j < message[7]; j++) {
 
-			dprintf("Ringtone (#%i) name (length: %i): ", message[index - 4], message[index]);
+			dprintf("Ringtone (#%03i) name: ", message[index - 4], message[index]);
 			for (i = 0; i < message[index]; i++) {
 				dprintf("%c", message[index + (2 * (i + 1))]);
 			}
@@ -2154,7 +2159,7 @@ reply: 0x7a / 0x0036
 		return GE_NONE;
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x7a (%d)\n", message[3]);
+		dprintf("Unknown subtype of type 0x7a (%d)\n", message[4]);
 		return GE_UNHANDLEDFRAME;
 		break;
 	}
@@ -2197,6 +2202,136 @@ static GSM_Error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Getting startup logo...\n");
 	SEND_MESSAGE_BLOCK(P6510_MSG_STLOGO, 5);
+}
+
+/***************/
+/*   PROFILES **/
+/***************/
+static GSM_Error P6510_IncomingProfile(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	unsigned char *blockstart;
+	int i;
+
+	/*
+01 47 00 02 00 0c 02 
+09 00 01 01 00 00 01 00 02
+09 01 01 01 00 00 01 00 02 
+09 02 01 01 00 00 01 00 02 
+09 03 01 01 00 00 01 bd 02 
+09 04 01 01 00 00 01 03 02 
+09 05 01 01 00 00 01 01 02 
+09 06 01 01 00 00 01 01 02 
+09 07 01 01 00 00 01 01 02 
+09 08 01 01 00 00 01 ff 02 
+09 09 01 01 00 00 01 00 02 
+1c 0c 01 01 00 00 14 00 41 00 6c 00 6c 00 67 00 65 00 6d 00 65 00 69 00 6e 00 00 02 
+09 ff 05 01 00 00 01 00
+	*/
+	switch (message[5]) {
+	case 0x0c:
+		blockstart = message + 7;
+		for (i = 0; i < 11; i++) {
+			switch (blockstart[1]) {
+			case 0x00:
+				dprintf("type: %02x, keypad tone level: %i\n", blockstart[1], blockstart[7]);
+				data->Profile->KeypadTone = blockstart[7];
+				break;
+			case 0x01:
+				dprintf("type: %02x, info: %i\n", blockstart[1], blockstart[7]);
+				break;
+			case 0x02:
+				dprintf("type: %02x, call alert: %i\n", blockstart[1], blockstart[7]);
+				data->Profile->CallAlert = blockstart[7];
+
+				/*
+				  0x00 off
+				  0x03 beep once
+				  0x05 ringing
+				*/
+				break;
+			case 0x03:
+				dprintf("type: %02x, ringtone: %i\n", blockstart[1], blockstart[7]);
+				data->Profile->Ringtone = blockstart[7];
+				break;
+			case 0x04:
+				dprintf("type: %02x, ringtone volume: %i\n", blockstart[1], blockstart[7]);
+				data->Profile->Volume = blockstart[7];
+				break;
+			case 0x05:
+				dprintf("type: %02x, message tone: %i\n", blockstart[1], blockstart[7]);
+				data->Profile->MessageTone = blockstart[7];
+				break;
+			case 0x06:
+				dprintf("type: %02x, vibration: %i\n", blockstart[1], blockstart[7]);
+				data->Profile->Vibration = blockstart[7];
+				break;
+			case 0x07:
+				dprintf("type: %02x, warning tone: %i\n", blockstart[1], blockstart[7]);
+				data->Profile->WarningTone = blockstart[7];
+				break;
+			case 0x08:
+				dprintf("type: %02x, caller groups: %i\n", blockstart[1], blockstart[7]);
+				data->Profile->CallerGroups = blockstart[7];
+				break;
+			case 0x09:
+				dprintf("type: %02x, info: %i\n", blockstart[1], blockstart[7]);
+				break;
+			case 0x0c:
+				DecodeUnicode(data->Profile->Name, blockstart + 7, blockstart[6]);
+				dprintf("Profile Name: %s\n", data->Profile->Name);
+				break;
+			default:
+				dprintf("Unknown profile subblock type %02x!\n", blockstart[1]);
+				break;
+			}
+			blockstart = blockstart + blockstart[0];
+		}
+		return GE_NONE;
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x39 (%d)\n", message[3]);
+		return GE_UNHANDLEDFRAME;
+		break;
+	}
+}
+
+static GSM_Error P6510_GetProfile(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01, 0x01, 0x0C, 0x01};
+	int i, length = 7;
+	/*
+			       0x04, 0x03, 0x00, 0x01, 
+			       0x04, 0x03, 0x01, 0x01, 
+			       0x04, 0x03, 0x02, 0x01, 
+			       0x04, 0x03, 0x03, 0x01, 
+			       0x04, 0x03, 0x04, 0x01, 
+			       0x04, 0x03, 0x05, 0x01, 
+			       0x04, 0x03, 0x06, 0x01, 
+			       0x04, 0x03, 0x07, 0x01, 
+			       0x04, 0x03, 0x08, 0x01, 
+			       0x04, 0x03, 0x09, 0x01, 
+			       0x04, 0x03, 0x0C, 0x01, 0x04};
+	*/
+
+	for (i = 0; i < 0x0a; i++) {
+		req[length] = 0x04;
+		req[length + 1] = data->Profile->Number;
+		req[length + 2] = i;
+		req[length + 3] = 0x01;
+		length += 4;
+	}
+
+	req[length] = 0x04;
+	req[length + 1] = data->Profile->Number;
+	req[length + 2] = 0x0c;
+	req[length + 3] = 0x01;
+	length += 4;
+
+	req[length] = 0x04;
+
+	dprintf("Getting profile #%i...\n", data->Profile->Number);
+	P6510_GetRingtones(data, state);
+	SEND_MESSAGE_BLOCK(P6510_MSG_PROFILE, length + 1);
 }
 
 /********************************/
