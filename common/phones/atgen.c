@@ -76,6 +76,7 @@ static gn_error AT_GetBattery(GSM_Data *data,  GSM_Statemachine *state);
 static gn_error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state);
 static gn_error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state);
 static gn_error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state);
+static gn_error AT_WritePhonebook(GSM_Data *data,  GSM_Statemachine *state);
 static gn_error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state);
 static gn_error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state);
 static gn_error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state);
@@ -112,6 +113,7 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_GetRFLevel, AT_GetRFLevel, ReplyGetRFLevel },
 	{ GOP_GetMemoryStatus, AT_GetMemoryStatus, ReplyMemoryStatus },
 	{ GOP_ReadPhonebook, AT_ReadPhonebook, ReplyReadPhonebook },
+	{ GOP_WritePhonebook, AT_WritePhonebook, Reply },
 	{ GOP_CallDivert, AT_CallDivert, ReplyCallDivert },
 	{ GOPAT_SetPDUMode, AT_SetPDUMode, Reply },
 	{ GOPAT_Prompt, NULL, ReplyGetPrompt },
@@ -498,6 +500,51 @@ static gn_error AT_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
 	return SM_BlockNoRetry(state, data, GOP_ReadPhonebook);
 }
 
+static gn_error AT_WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
+{
+	int len, ofs;
+	char req[256], *tmp;
+	gn_error ret;
+	
+	ret = AT_SetMemoryType(data->PhonebookEntry->MemoryType, state);
+	if (ret)
+		return ret;
+	if (data->PhonebookEntry->Empty)
+		len = sprintf(req, "AT+CPBW=%d\r", data->PhonebookEntry->Location);
+	else {
+		ret = state->Phone.Functions(GOPAT_SetCharset, data, state);
+		if (ret)
+			return ret;
+		ofs = sprintf(req, "AT+CPBW=%d,\"%s\",%s,\"",
+			      data->PhonebookEntry->Location,
+			      data->PhonebookEntry->Number,
+			      data->PhonebookEntry->Number[0] == '+' ? "145" : "129");
+		len = strlen(data->PhonebookEntry->Name);
+		tmp = req + ofs;
+		switch (atcharset) {
+		case CHARGSM:
+			len = char_encode_ascii(tmp, data->PhonebookEntry->Name, len);
+			break;
+		case CHARHEXGSM:
+			char_encode_hex(tmp, data->PhonebookEntry->Name, len);
+			len *= 2;
+			break;
+		case CHARUCS2:
+			char_encode_ucs2(tmp, data->PhonebookEntry->Name, len);
+			len *= 4;
+			break; 
+		default:
+			memcpy(tmp, data->PhonebookEntry->Name, len);
+			break;
+		}
+		tmp[len++] = '"'; tmp[len++] = '\r';
+		len += ofs;
+	} 
+	if (SM_SendMessage(state, len, GOP_WritePhonebook, req))
+		return GN_ERR_NOTREADY;
+	return SM_BlockNoRetry(state, data, GOP_WritePhonebook);
+}
+
 static gn_error AT_CallDivert(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[64];
@@ -613,6 +660,8 @@ static gn_error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state,
 		return GN_ERR_NOTREADY;
 	error = SM_BlockNoRetry(state, data, GOPAT_Prompt);
 	dprintf("Got response %d\n", error);
+	if (error)
+		return error;
 
 	bin2hex(req, req2, length);
 	req[length * 2] = 0x1a;
