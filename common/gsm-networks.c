@@ -188,7 +188,7 @@ gn_network networks[] = {
 	{ "226 10", "DIALOG" },
 	{ "228 01", "NATEL International" },
 	{ "228 02", "diAx Mobile AG" },
-	{ "230 01", "Paegas" },
+	{ "230 01", "T-Mobile CZ" },
 	{ "230 02", "EuroTel" },
 	{ "230 03", "Oskar" },
 	{ "231 01", "Globtel" },
