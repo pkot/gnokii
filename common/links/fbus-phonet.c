@@ -34,8 +34,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_IRDA
-
 /* System header files */
 #include <stdio.h>
 #include <string.h>
@@ -51,6 +49,8 @@
 #include "links/fbus-phonet.h"
 
 #include "gnokii-internal.h"
+
+#ifdef HAVE_IRDA
 
 static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
