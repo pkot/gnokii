@@ -4,17 +4,41 @@
 
   G N O K I I
 
-  A Linux/Unix toolset and driver for Nokia mobile phones.
+  A Linux/Unix toolset and driver for mobile phones.
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  This file is part of gnokii.
 
-  Released under the terms of the GNU GPL, see file COPYING for more details.
+  Gnokii is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  Gnokii is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with gnokii; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2003 Marcus Godehard
 
+  This is the config.h file for GNOKII for MSVC6 compilers, you can
+  edit this manually. This is not auto generated.
+
 */
 
-/* DO EDIT MANUALLY !!! This is not auto generated. */
+#ifndef _config_h
+#define _config_h
+
+#if defined(_MSC_VER) && defined(WIN32)
+#	pragma once
+#else
+#	error This config.h is only for MSVC6 compiler !!!
+#endif
+
+	
 #undef VERSION
 #define VERSION "0.5.0pre6"
 
@@ -93,3 +117,5 @@
 #pragma warning(disable : 4761) // integral size mismatch in argument; conversion supplied
 #pragma warning(disable : 4018) // signed/unsigned mismatch
 #pragma warning(disable : 4305) // truncation from 'const int ' to 'char '
+
+#endif // _config_h
