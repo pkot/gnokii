@@ -3,7 +3,7 @@
        Copyright (C) Hugh Blemings, 1999  Released under the terms of 
        the GNU GPL, see file COPYING for more details.
     
-       This file:  fbus-3810.h   Version 0.3.0
+       This file:  fbus-3810.h   Version 0.3.1
 
        Header file for the various functions, definitions etc. used
        to implement the handset interface.  See fbus-3810.c for more details. */

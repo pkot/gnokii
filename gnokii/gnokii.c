@@ -205,7 +205,7 @@ int version(void)
 {
 
   fprintf(stdout, _("GNOKII Version %s\n"
-"Copyright (C) Hugh Blemings <hugh@vsb.com.au>, 1999\n"
+"Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999\n"
 "Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999\n"
 "Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
 

@@ -1,6 +1,6 @@
                             - G N O K I I -
-               (C) Hugh Blemings, hugh@vsb.com.au 1999
-               Last update 29 July 1999  Version 0.3.0
+              (C) Hugh Blemings & Pavel Janík ml. 1999
+               Last update 22 December 1999  Version 0.3.1
 
 - Contents - 			   
 
@@ -22,17 +22,18 @@
 			   
 - 1.0 Introduction -
 
-This is version 0.3.0 of gnokii, a Linux/Unix tool suite and (eventually)
+This is version 0.3.1 of gnokii, a Linux/Unix tool suite and (soon!)
 modem/fax driver for Nokia mobile phones, released under the GPL.  Please
 see COPYING for more details on license/copying issues as well as the
-(lack of) warranty.
+(lack of) warranty.  This is an "interim release" largely to bring
+the released code up to date with what is in CVS.
 
 gnokii supports most phones from the 3810/8110 and 5110/6110 series,
 details including bugs specific to each series appear in the files
 README-3810 and README-6110 respectively.  
 
 Note that it is still not possible to make fax or data calls on either
-series of phones.  We're working on it :)
+series of phones.  We are getting closer though!
 
 As you may be aware, there were indications that Nokia may provide
 some support for the project.  Regrettably, these negotiations have
@@ -129,6 +130,10 @@ you must;
 
 Review the bugs section in the README for your series of phone.
 
+Note there are a couple of patches that have been sent in (to Hugh)
+for the 3810 and/or pseudo tty code that haven't made it in yet. 
+New parent syndrome...
+
 
 - 7.0 Gnokii and Perl -
 
@@ -200,7 +205,7 @@ and feel that they should be included into gnokii please mention it
 on the list first to avoid duplicated effort.
 	
 If you would like to receive email when updates are made to the CVS
-repository, just send Hugh and email to that effect (hugh@vsb.com.au)
+repository, just send Hugh and email to that effect (hugh@linuxcare.com)
 and you'll be added to the recipients list.
 
 
@@ -292,6 +297,10 @@ to recognise those who have helped so far!
 
 
 - 14.0 Release Notes -
+19991222 Version 0.3.1
+Interim release to bring released code into line with latest CVS
+offerings.
+
 19990824 Version 0.3.0
 6110 functionality has increased again, details of which are
 in the 6110 specific readme.  Few minor tweaks on the 3810

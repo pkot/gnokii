@@ -87,6 +87,7 @@ retrieved from memory is not known so these flags are always
 set to read / sent.
 
 * To-do *
-Add support to automaticall determine the maximum number of SIM
+Add support to automatically determine the maximum number of SIM
 entries and lengths of phonebook and name fields.
 
+Try building under Win32 and report success/failure to the list.
