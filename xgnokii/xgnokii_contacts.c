@@ -286,6 +286,7 @@ static void ProgressDialogDeleteEvent(GtkWidget * w, gpointer data)
 
 static void CancelEditDialog(GtkWidget * widget, gpointer data)
 {
+	((EditEntryData *) data)->pbEntry->status = E_Empty;
 	gtk_widget_hide(GTK_WIDGET(((EditEntryData *) data)->dialog));
 }
 
@@ -313,6 +314,10 @@ static void OkEditEntryDialog(GtkWidget * widget, gpointer data)
 			number = g_malloc(sizeof(char) * max_phonebook_number_length);
 			gtk_label_get(GTK_LABEL(((EditEntryData *) data)->number), number);
 			snprintf(entry->entry.Number, max_phonebook_number_length, "%s", number[0]);
+			snprintf(entry->entry.SubEntries[0].data.Number, max_phonebook_number_length, "%s", number[0]);
+			entry->entry.SubEntries[0].EntryType = GSM_Number;
+			entry->entry.SubEntries[0].NumberType = GSM_General;
+			entry->entry.SubEntriesCount = 1;
 			g_free(number);
 		} else {
 			snprintf(entry->entry.Number, max_phonebook_number_length, "%s", 
@@ -359,6 +364,10 @@ because you save it into SIM memory!"));
 			number = g_malloc(sizeof(char) * max_phonebook_number_length);
 			gtk_label_get(GTK_LABEL(((EditEntryData *) data)->number), number);
 			snprintf(entry->entry.Number, max_phonebook_number_length, "%s", number[0]);
+			snprintf(entry->entry.SubEntries[0].data.Number, max_phonebook_number_length, "%s", number[0]);
+			entry->entry.SubEntries[0].EntryType = GSM_Number;
+			entry->entry.SubEntries[0].NumberType = GSM_General;
+			entry->entry.SubEntriesCount = 1;
 			g_free(number);
 		} else {
 			strncpy(entry->entry.Number,
@@ -391,7 +400,6 @@ because you save it into SIM memory!"));
 
 			if (phoneMonitor.supported & PM_EXTPBK) {
 
-
 			} else {
 				strncpy(((EditEntryData *) data)->pbEntry->entry.Number,
 					gtk_entry_get_text(GTK_ENTRY
@@ -417,8 +425,14 @@ because you save it into SIM memory!"));
 			}
 
 			if (phoneMonitor.supported & PM_EXTPBK) {
-
-
+				number = g_malloc(sizeof(char) * max_phonebook_number_length);
+				gtk_label_get(GTK_LABEL(((EditEntryData *) data)->number), number);
+				snprintf(entry->entry.Number, max_phonebook_number_length, "%s", number[0]);
+				snprintf(entry->entry.SubEntries[0].data.Number, max_phonebook_number_length, "%s", number[0]);
+				entry->entry.SubEntries[0].EntryType = GSM_Number;
+				entry->entry.SubEntries[0].NumberType = GSM_General;
+				entry->entry.SubEntriesCount = 1;
+				g_free(number);
 			} else {
 				strncpy(((EditEntryData *) data)->pbEntry->entry.Number,
 					gtk_entry_get_text(GTK_ENTRY
