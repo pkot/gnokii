@@ -70,6 +70,7 @@ static GSM_Error Authentication(GSM_Statemachine *state, char *imei);
 static GSM_Error BuildKeytable(GSM_Statemachine *state);
 static GSM_Error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error PhoneInfo(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
@@ -210,7 +211,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	case GOP_GetRevision:
 	case GOP_GetManufacturer:
 	case GOP_Identify:
-		return Identify(data, state);
+		return PhoneInfo(data, state);
 	case GOP_GetBitmap:
 		return GetBitmap(data, state);
 	case GOP_SetBitmap:
@@ -411,7 +412,7 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	char model[GSM_MAX_MODEL_LENGTH+1];
 	char imei[GSM_MAX_IMEI_LENGTH+1];
 	GSM_Data data;
-	PhoneModel *pm;
+	PhoneModel pm;
 
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_6100, sizeof(GSM_Phone));
@@ -444,23 +445,18 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	GSM_DataClear(&data);
 	data.Model = model;
 	data.Imei = imei;
+	data.Phone = &pm;
 
-	if ((err = Identify(&data, state)) != GE_NONE) return err;
-	dprintf("model: '%s', imei: '%s'\n", model, imei);
-	if ((pm = GetPhoneModel(model)) == NULL) {
-		dump(_("Unsupported phone model \"%s\"\n"), model);
-		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
-		return GE_INTERNALERROR;
-	}
-
-	if (pm->flags & PM_AUTHENTICATION) {
-		/* Now test the link and authenticate ourself */
-		if (Authentication(state, imei) != GE_NONE) return GE_NOTSUPPORTED;
-	}
+	if ((err = PhoneInfo(&data, state)) != GE_NONE) return err;
 
 	State = state;
 
-	if (pm->flags & PM_KEYBOARD)
+	if (data.Phone->flags & PM_AUTHENTICATION) {
+		/* Now test the link and authenticate ourself */
+		if ((err = Authentication(state, imei)) != GE_NONE) return err;
+	}
+
+	if (data.Phone->flags & PM_KEYBOARD)
 		if (BuildKeytable(state) != GE_NONE) return GE_NOTSUPPORTED;
 
 	return GE_NONE;
@@ -664,7 +660,7 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 	case 0x02:
 		if (data->PhonebookEntry) {
 			pe = data->PhonebookEntry;
-			pos = message+5;
+			pos = message + 5;
 			pe->Empty = false;
 			n = *pos++;
 			PNOK_DecodeString(pe->Name, sizeof(pe->Name), pos, n);
@@ -804,9 +800,22 @@ static GSM_Error PhoneInfo(GSM_Data *data, GSM_Statemachine *state)
 	GSM_Error error;
 
 	dprintf("Getting phone info...\n");
+	if (data->Manufacturer) PNOK_GetManufacturer(data->Manufacturer);
+
 	if (SM_SendMessage(state, 5, 0xd1, req) != GE_NONE) return GE_NOTREADY;
-	error = SM_Block(state, data, 0xd2);
-	return error;
+	if ((error = SM_Block(state, data, 0xd2)) != GE_NONE) return error;
+
+	if ((data->Phone = GetPhoneModel(data->Model)) == NULL) {
+		dump(_("Unsupported phone model \"%s\"\n"), data->Model);
+		dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
+		return GE_INTERNALERROR;
+	}
+
+	if (data->Phone->flags & PM_AUTHENTICATION)
+		/* Now test the link and authenticate ourself */
+		if ((error = Identify(data, state)) != GE_NONE) return error;
+
+	return GE_NONE;
 }
 
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
@@ -818,8 +827,7 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 	if (data->Manufacturer) PNOK_GetManufacturer(data->Manufacturer);
 
 	if (SM_SendMessage(state, 4, 0x64, req) != GE_NONE) return GE_NOTREADY;
-	if (SM_Block(state, data, 0x64) != GE_NONE)
-		if ((error = PhoneInfo(data, state)) != GE_NONE) return error;
+	if ((error = SM_Block(state, data, 0x64)) != GE_NONE) return error;
 
 	/* Check that we are back at state Initialised */
 	if (SM_Loop(state, 0) != Initialised) return GE_UNKNOWN;
@@ -1701,7 +1709,7 @@ static GSM_Error GetProfile(GSM_Data *data, GSM_Statemachine *state)
 		 */
 		GSM_DataClear(&d);
 		d.Model = model;
-		if ((error = Identify(&d, state)) != GE_NONE) {
+		if ((error = PhoneInfo(&d, state)) != GE_NONE) {
 			return error;
 		}
 

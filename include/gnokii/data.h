@@ -82,6 +82,7 @@ typedef struct {
 	unsigned char ResetType;
 	GSM_KeyCode KeyCode;
 	unsigned char Character;
+	PhoneModel *Phone;
 } GSM_Data;
 
 /* Global structures intended to be independant of phone etc */

@@ -11,6 +11,8 @@
     o add bitmap writing                               (Markus Plail)
  * 6110 series updated:
     o Nokia 3410 is known to work                         (Pawel Kot)
+    o use 0x64 frames only when PM_AUTHENTICATION is set for the
+      model                                               (Pawel Kot)
  * bitmap support
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
