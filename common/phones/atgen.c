@@ -1290,6 +1290,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 				data->network_info->network_code[3] = ' ';
 				data->network_info->network_code[4] = strings[2][4];
 				data->network_info->network_code[5] = strings[2][5];
+				data->network_info->network_code[6] = 0;
 			} else { /* probably incorrect */
 				snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), strings[2]);
 			}
