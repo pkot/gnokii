@@ -361,7 +361,7 @@ static void RefreshSMS(const gint number)
 				    gdat.MessagesList[j][i]->Type == SMS_Changed) {
 					dprintf("We got a deleted message here to handle!\n");
 					pthread_mutex_lock(&smsMutex);
-					msg = g_malloc(sizeof(GSM_SMSMessage));
+					msg = g_malloc(sizeof(GSM_API_SMS));
 					msg->Number = gdat.MessagesList[j][i]->Location;
 					tmp_list =
 					    g_slist_find_custom(phoneMonitor.sms.messages, msg,
@@ -377,7 +377,7 @@ static void RefreshSMS(const gint number)
 				if (gdat.MessagesList[j][i]->Type == SMS_New ||
 				    gdat.MessagesList[j][i]->Type == SMS_NotRead ||
 				    gdat.MessagesList[j][i]->Type == SMS_Changed) {
-					msg = g_malloc(sizeof(GSM_SMSMessage));
+					msg = g_malloc(sizeof(GSM_API_SMS));
 					list = g_malloc(sizeof(SMS_FolderList));
 					raw = g_malloc(sizeof(GSM_RawData));
 					gdat.SMS = msg;
@@ -418,7 +418,7 @@ static void RefreshSMS(const gint number)
 			fld = g_malloc(sizeof(SMS_Folder));
 			list = g_malloc(sizeof(SMS_FolderList));
 			raw = g_malloc(sizeof(GSM_RawData));
-			msg = g_malloc(sizeof(GSM_SMSMessage));
+			msg = g_malloc(sizeof(GSM_API_SMS));
 
 			msg->MemoryType = GMT_SM;
 			msg->Number = i;
