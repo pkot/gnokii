@@ -22,6 +22,7 @@ CFLAGS += $(PTHREAD_CFLAGS)
 OBJS =	fbus.o \
 	fbus-phonet.o \
 	cbus.o \
+	atbus.o \
 	utils.o
 
 all: LINKS.o

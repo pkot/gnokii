@@ -18,7 +18,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.139  2001-07-01 23:16:45  pkot
+  Revision 1.140  2001-07-27 00:02:21  pkot
+  Generic AT support for the new structure (Manfred Jonsson)
+
+  Revision 1.139  2001/07/01 23:16:45  pkot
   Fixed a typo in gnokii.c avoiding saving logo (Jan Havelka)
 
   Revision 1.138  2001/06/28 00:28:45  pkot
@@ -2831,6 +2834,7 @@ int identify(void)
 	char imei[64], model[64], rev[64], manufacturer[64];
 	GSM_Statemachine *sm = &State;
 
+	data.Manufacturer=manufacturer;
 	data.Model=model;
 	data.Revision=rev;
 	data.Imei=imei;

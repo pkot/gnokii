@@ -341,7 +341,7 @@ int CBUS_SendMessage(u16 message_length, u8 message_type, void * buffer)
 	return true;
 }
 
-GSM_Error AT_SendMessage(u16 message_length, u8 message_type, void * buffer)
+static GSM_Error AT_SendMessage(u16 message_length, u8 message_type, void * buffer)
 {
 	sendat(buffer);
 	return true;

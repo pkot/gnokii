@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.3  2001-06-10 11:26:56  machek
+  Revision 1.4  2001-07-27 00:02:20  pkot
+  Generic AT support for the new structure (Manfred Jonsson)
+
+  Revision 1.3  2001/06/10 11:26:56  machek
   Warn if Link.Loop is not defined.
 
   Revision 1.2  2001/05/07 14:01:51  machek
@@ -63,8 +66,9 @@ GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
 		fprintf(stderr, "Statemachine does not have loop function\n");
 		abort();
 	}
-	for (i=0; i<timeout; i++)
+	for (i=0; i<timeout; i++) {
 		state->Link.Loop(&loop_timeout);
+	}
 
 	/* FIXME - add calling a KeepAlive function here */
 

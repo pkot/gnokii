@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.4  2001-04-25 12:53:07  machek
+  Revision 1.5  2001-07-27 00:02:21  pkot
+  Generic AT support for the new structure (Manfred Jonsson)
+
+  Revision 1.4  2001/04/25 12:53:07  machek
   Added error handling to SMS receive function.
 
   Revision 1.3  2001/03/23 13:40:23  chris
@@ -160,7 +163,7 @@ GSM_Error ATGSM_SendSMSMessage(GSM_SMSMessage * SMS, int size)
 
 /* ----------------------------------------------------------------------------------- */
 
-GSM_Error Initialise(char *port_device, char *initlength,
+static GSM_Error Initialise(char *port_device, char *initlength,
 			   GSM_ConnectionType connection,
 			   void (*rlp_callback)(RLP_F96Frame *frame))
 {

@@ -21,7 +21,10 @@
   functions themselves are defined in a structure in gsm-common.h.
 
   $Log$
-  Revision 1.28  2001-06-06 09:05:56  machek
+  Revision 1.29  2001-07-27 00:02:20  pkot
+  Generic AT support for the new structure (Manfred Jonsson)
+
+  Revision 1.28  2001/06/06 09:05:56  machek
   Convert Grab/Release display to new structure.
 
   Revision 1.27  2001/05/07 14:13:06  machek
@@ -127,6 +130,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
         strcpy(sm->Link.PortDevice,device);
  
         REGISTER_PHONE(nokia_7110);
+        REGISTER_PHONE(at);
 
 #endif /* WIN32 */ 
         return (GE_UNKNOWNMODEL);
