@@ -4,6 +4,7 @@
     o Windows portability fixes                    (BORBELY Zoltan)
     o fix FreeBSD build: don't include stdint.h explicitely
                                                     (Shawn Kennedy)
+    o fix Windows build (link gnapplet to libgnokii.dll)(Pawel Kot)
  * build system updates
     o use libtool --tag=CXX to be able to build gnokii with distcc
       or ccache (and probably crosscompile with newer autotools)
