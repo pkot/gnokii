@@ -10,6 +10,8 @@
  * cbus update                                      (Ladislav Michl)
  * nk7110 driver updates
     o get rid of global variables                   (Ladislav Michl)
+ * documentation updates
+    o cell buzzer messages added to nk6160          (Eduardo Garcia)
 
 0.5.0rc2
 ========
