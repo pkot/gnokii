@@ -1089,6 +1089,8 @@ static int getsms(int argc, char *argv[])
 		}
 	}
 	folder.FolderID = 0;
+	data.SMSFolder = &folder;
+	data.SMSFolderList = &folderlist;
 	/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
 		bool done = false;
@@ -1098,11 +1100,8 @@ static int getsms(int argc, char *argv[])
 		message.MemoryType = StrToMemoryType(memory_type_string);
 		message.Number = count;
 		data.SMS = &message;
-		data.SMSFolder = &folder;
-		data.SMSFolderList = &folderlist;
-		dprintf("MemoryType (gnokii.c) : %i\n", message.MemoryType);
-		error = GetSMS(&data, &State);
 
+		error = GetSMS(&data, &State);
 		switch (error) {
 		case GE_NONE:
 			switch (message.Type) {
@@ -2056,7 +2055,7 @@ static int deletealltodos()
 
 	error = SM_Functions(GOP_DeleteAllToDos, &data, &State);
 	if (error == GE_NONE)
-		fprintf(stdout, _("Succesfully deleted all ToDo notes!\n"));
+		fprintf(stderr, _("Succesfully deleted all ToDo notes!\n"));
 	else {
 		fprintf(stderr, _("Failed to write calendar note: %s\n"), print_error(error));
 		return -1;
@@ -2413,7 +2412,6 @@ static int monitormode(void)
 
 	GSM_NetworkInfo NetworkInfo;
 	GSM_CBMessage CBMessage;
-
 	GSM_MemoryStatus SIMMemoryStatus   = {GMT_SM, 0, 0};
 	GSM_MemoryStatus PhoneMemoryStatus = {GMT_ME, 0, 0};
 	GSM_MemoryStatus DC_MemoryStatus   = {GMT_DC, 0, 0};
@@ -2425,9 +2423,9 @@ static int monitormode(void)
 	GSM_MemoryStatus RC_MemoryStatus   = {GMT_RC, 0, 0};
 
 	SMS_Status SMSStatus = {0, 0, 0, 0};
-
-//	char Number[20];
-
+	/*
+	char Number[20];
+	*/
 	GSM_DataClear(&data);
 
 	/* We do not want to monitor serial line forever - press Ctrl+C to stop the
@@ -3140,7 +3138,10 @@ static int getwapbookmark(char *Number)
 
 	switch (error) {
 	case GE_NONE:
-		fprintf(stderr, _("WAP bookmark nr. %d:\n"), WAPBookmark.Location);
+		fprintf(stdout, _("WAP bookmark nr. %d:\n"), WAPBookmark.Location);
+		fprintf(stdout, _("Name: %s\n"), WAPBookmark.Name);
+		fprintf(stdout, _("URL: %s\n"), WAPBookmark.URL);
+
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), print_error(error));
