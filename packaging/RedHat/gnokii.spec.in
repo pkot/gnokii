@@ -29,7 +29,7 @@ computer and more other features.
 %setup -q
 
 %build
-./configure --prefix=/usr --with-xgnokiidir=/usr/X11R6 --enable-nls #--enable-debug --enable-rlpdebug
+./configure --prefix=/usr --with-xgnokiidir=/usr/X11R6 --enable-security #--enable-debug --enable-rlpdebug
 make
 
 %install
@@ -53,13 +53,21 @@ rm -rf ${RPM_BUILD_ROOT}
 %files
 %defattr(-,root,root)
 %doc Docs/CREDITS Docs/DataCalls-QuickStart Docs/FAQ Docs/README
-%doc Docs/README-3810 Docs/README-6110 Docs/README-2110 Docs/README-WIN32
-%doc Docs/gettext-howto Docs/gnokii.nol Docs/gnokii-ir-howto Docs/packaging-howto
-%doc Docs/README-dancall Docs/logos.txt Docs/sample/gnokii.xpm Docs/Bugs
-%doc Docs/sample/gnokiirc Docs/sample/options Docs/sample/pap-secrets
-%doc Docs/sample/ppp-gnokii Docs/sample/ppp-on
+%doc Docs/README-3810 Docs/README-6110 Docs/README-2110 Docs/README-6510 Docs/README-7110
+%doc Docs/README-WIN32 Docs/README-MaxOSX
+%doc Docs/README-dancall Docs/README-siemens Docs/README-ericsson
+%doc Docs/gettext-howto Docs/gnokii-IrDA-Linux Docs/gnokii-ir-howto Docs/packaging-howto
+%doc Docs/gnokii-hackers-howto Docs/gnokii.nol Docs/logos.txt Docs/ringtones.txt Docs/Bugs
+%doc Docs/sample/logos/gnokii.xpm Docs/sample/ringtones/star.imelody Docs/sample/ringtones/star.rtttl
+%doc Docs/sample/gnokiirc
+%doc Docs/sample/ppp/options Docs/sample/ppp/pap-secrets
+%doc Docs/sample/ppp/ppp-gnokii Docs/sample/ppp/ppp-on
+%doc Docs/sample/ppp/cimd-connect Docs/sample/ppp/ppp-6210-modem
+%doc Docs/sample/ppp/ppp-hscsd
 %doc Docs/protocol/nk2110.txt Docs/protocol/nk3110.txt Docs/protocol/nk6110.txt Docs/protocol/nk6160.txt
-%doc Docs/protocol/nk6185.txt Docs/protocol/nk640.txt Docs/protocol/nk7110.txt Docs/protocol/nokia.txt
+%doc Docs/protocol/nk6185.txt Docs/protocol/nk640.txt Docs/protocol/nk7110.txt Docs/protocol/nk6510.txt
+%doc Docs/protocol/nokia.txt
+
 %attr(0750, root, gnokii) /usr/bin/gnokii
 %attr(0750, root, gnokii) /usr/sbin/gnokiid
 %attr(4750, root, gnokii) /usr/sbin/mgnokiidev
@@ -73,6 +81,9 @@ rm -rf ${RPM_BUILD_ROOT}
 /usr/X11R6/share/xgnokii
 
 %changelog
+
+* Sat Jan  4 2002 Pawel Kot <pkot#linuxnews.pl>
+- reflect changes in the file layout
 
 * Thu Aug 15 2002 Pawel Kot <pkot#linuxnews.pl>
 - misc path problems fixed
