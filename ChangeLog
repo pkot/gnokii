@@ -1,3 +1,9 @@
+0.5.5 (not released yet)
+========================
+ * translation updates
+    o gettext 0.12.x requires MSGID_BUGS_ADDRESS variable in
+      po/Makevars                                       (Pawel Kot)
+
 0.5.4
 =====
  * win32 port updates
