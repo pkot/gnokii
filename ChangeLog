@@ -16,6 +16,8 @@
       0x04 frames)                                        (Pawel Kot)
     o implement more protocol frames (security commands)  (Pawel Kot)
     o fix the order of the incoming functions             (Pawel Kot)
+    o fix phonebook names saving in 3310/3330/3410 phones;
+      names are in unicode                                (Pawel Kot)
  * 6510 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)

@@ -376,7 +376,7 @@ void char_encode_unicode(unsigned char* dest, const unsigned char* src, int len)
 	wchar_t wc;
 
 	for (i = 0; i < len; i++) {
-		wc =  char_decode_uni_alphabet(src[i]);
+		wc = char_decode_uni_alphabet(src[i]);
 		dest[i*2] = (wc >> 8) & 0xff;
 		dest[(i*2)+1] = wc & 0xff;
 	}

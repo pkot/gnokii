@@ -210,8 +210,12 @@ struct {
 	 * Capability setup for phone models.
 	 * Example:
 	 * { "NSE-3",	NULL,		P6100_CAP_OLD_CALL_API }
+	 * Set NULL in the second field for all software versions.
 	 */
 	{ "NSE-3",	"-4.06",	P6100_CAP_NBS_UPLOAD },
+	{ "NHM-5",      NULL,           P6100_CAP_PB_UNICODE },
+	{ "NHM-6",      NULL,           P6100_CAP_PB_UNICODE },
+	{ "NHM-2",      NULL,           P6100_CAP_PB_UNICODE },
 	{ NULL,		NULL,		0 }
 };
 
@@ -709,8 +713,14 @@ static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
 	}
 	*pos++ = GetMemoryType(pe->MemoryType);
 	*pos++ = pe->Location;
-	*pos++ = namelen;
-	PNOK_EncodeString(pos, namelen, pe->Name);
+	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_PB_UNICODE) {
+		*pos++ = (2 * namelen);
+		char_encode_unicode(pos, pe->Name, namelen);
+		namelen *= 2;
+	} else {
+		*pos++ = namelen;
+		PNOK_EncodeString(pos, namelen, pe->Name);
+	}
 	pos += namelen;
 	*pos++ = numlen;
 	PNOK_EncodeString(pos, numlen, pe->Number);
