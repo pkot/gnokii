@@ -18,164 +18,6 @@
   WARNING: this code is the test tool. Well, our test tool is now
   really powerful and useful :-)
 
-  $Log$
-  Revision 1.152  2001-11-27 12:23:11  pkot
-  Specifying SMSC number in --sendsms works again
-
-  Revision 1.151  2001/11/22 17:56:53  pkot
-  smslib update. sms sending
-
-  Revision 1.150  2001/11/20 16:22:22  pkot
-  First attempt to read Picture Messages. They should appear when you enable DEBUG. Nokia seems to break own standards. :/ (Markus Plail)
-
-  Revision 1.149  2001/11/19 16:00:15  pkot
-  Another typo
-
-  Revision 1.148  2001/11/19 13:46:43  pkot
-  reading unread SMS in 6210 from Inbox. Folder updates (Markus Plail)
-
-  Revision 1.147  2001/11/18 00:54:32  pkot
-  Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
-
-  Revision 1.146  2001/11/17 20:18:33  pkot
-  Added dau9p connection type for 6210/7110
-
-  Revision 1.145  2001/11/14 10:46:12  pkot
-  Small cleanup with __unices__
-
-  Revision 1.144  2001/11/08 16:34:19  pkot
-  Updates to work with new libsms
-
-  Revision 1.143  2001/09/14 13:30:07  pkot
-  Fixed bugs introduced during 0.3.3 merge
-
-  Revision 1.142  2001/09/14 13:02:03  pkot
-  Gnokii calendar changes from 0.3.3
-
-  Revision 1.141  2001/09/14 12:53:00  pkot
-  New preview logos.
-  Localization fixes.
-  Set valid operator on logos xgnokii screen.
-
-  Revision 1.140  2001/07/27 00:02:21  pkot
-  Generic AT support for the new structure (Manfred Jonsson)
-
-  Revision 1.139  2001/07/01 23:16:45  pkot
-  Fixed a typo in gnokii.c avoiding saving logo (Jan Havelka)
-
-  Revision 1.138  2001/06/28 00:28:45  pkot
-  Small docs updates (Pawel Kot)
-
-  Revision 1.137  2001/06/27 23:52:50  pkot
-  7110/6210 updates (Marian Jancar)
-
-  Revision 1.136  2001/06/10 23:49:49  pkot
-  Small fixes to hide compilation warnings and allow gnokii.c to compile
-
-  Revision 1.135  2001/06/10 11:42:26  machek
-  Cleanup: some formating, made Statemachine global, converted to new
-  structure w.r.t. SMS-es
-
-  Revision 1.134  2001/05/24 20:47:30  chris
-  More updating of 7110 code and some of xgnokii_lowlevel changed over.
-
-  Revision 1.133  2001/04/23 17:20:01  pkot
-  Added possibility for viewing logos (currently nol and ngg) on console (Bartek Klepacz)
-
-  Revision 1.132  2001/03/21 23:36:06  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.131  2001/03/19 23:43:46  pkot
-  Solaris / BSD '#if defined' cleanup
-
-  Revision 1.130  2001/03/13 01:23:18  pkot
-  Windows updates (Manfred Jonsson)
-
-  Revision 1.129  2001/03/13 01:21:39  pkot
-  *BSD updates (Bert Driehuis)
-
-  Revision 1.128  2001/03/08 00:49:06  pkot
-  Fixed bug (introduced by me) in getmemory function. Now gnokii.c should compile
-
-  Revision 1.127  2001/03/08 00:18:13  pkot
-  Fixed writephonebook once again. Someone kick me please...
-
-  Revision 1.126  2001/03/07 21:46:12  pkot
-  Fixed writephonebook patch
-
-  Revision 1.125  2001/03/06 22:19:14  pkot
-  Cleanups and fixes in gnokii.c:
-   - reindenting
-   - fixed bug reported by Gabriele Zappi
-   - fixed small bugs introduced by Pavel Machek
-
-  Revision 1.124  2001/02/28 21:42:00  machek
-  Possibility to force overwrite in --getsms (-F). Possibility to get
-  multiple files (use --getsms -f xyzzy%d), cleanup.
-
-  Revision 1.123  2001/02/20 21:55:11  pkot
-  Small #include updates
-
-  Revision 1.122  2001/02/16 14:29:53  chris
-  Restructure of common/.  Fixed a problem in fbus-phonet.c
-  Lots of dprintfs for Marcin
-  Any size xpm can now be loaded (eg for 7110 startup logos)
-  nk7110 code detects 7110/6210 and alters startup logo size to suit
-  Moved Marcin's extended phonebook code into gnokii.c
-
-  Revision 1.121  2001/02/06 21:15:35  chris
-  Preliminary irda support for 7110 etc.  Not well tested!
-
-  Revision 1.120  2001/02/06 08:13:32  pkot
-  One more include in gnokii.c needed
-
-  Revision 1.119  2001/02/05 12:29:37  pkot
-  Changes needed to let unicode work
-
-  Revision 1.118  2001/02/01 15:17:33  pkot
-  Fixed --identify and added Manfred's manufacturer patch
-
-  Revision 1.117  2001/01/31 23:45:27  pkot
-  --identify should work ok now
-
-  Revision 1.116  2001/01/24 20:19:55  machek
-  Do not retry identification, if it is not implemented, it is bad idea.
-
-  Revision 1.115  2001/01/22 01:25:10  hugh
-  Tweaks for 3810 series, datacalls seem to be broken so need to do
-  some more debugging...
-
-  Revision 1.114  2001/01/17 02:54:55  chris
-  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
-  I can now edit my phonebook in xgnokii but it is 'work in progress'.
-
-  Revision 1.113  2001/01/15 17:00:49  pkot
-  Initial keypress sequence support. Disable compilation warning
-
-  Revision 1.112  2001/01/12 14:09:13  pkot
-  More cleanups. This time mainly in the code.
-
-  Revision 1.111  2001/01/10 16:32:18  pkot
-  Documentation updates.
-  FreeBSD fix for 3810 code.
-  Added possibility for deleting SMS just after reading it in gnokii.
-  2110 code updates.
-  Many cleanups.
-
-  Revision 1.110  2001/01/08 15:11:37  pkot
-  Documentation updates.
-  Fixed some bugs and removed FIXMEs.
-  We need to move some stuff from configure.in to aclocal.m4
-
-  Revision 1.109  2000/12/29 15:39:07  pkot
-  Reverted a change in fbus-3810.c which broke compling with --enable-debug.
-  Small fixes in gnokii.c
-
-  Revision 1.108  2000/12/19 16:18:16  pkot
-  configure script updates and added shared function for configfile reading
-
-  
 */
 
 #include "misc.h"
@@ -295,13 +137,16 @@ char *GetProfileVibrationString(int code)
 	}
 }
 
+int short_version(void)
+{
+	fprintf(stderr, _("GNOKII Version %s\n"), VERSION);
+}
+
 /* This function shows the copyright and some informations usefull for
    debugging. */
-
 int version(void)
 {
-	fprintf(stdout, _("GNOKII Version %s\n"
-			  "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
+	fprintf(stderr, _("Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 			  "Copyright (C) Pavel Janík ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 			  "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
 			  "Copyright (C) Pawe³ Kot <pkot@linuxnews.pl>, 2001\n"
@@ -314,10 +159,9 @@ int version(void)
 
 /* The function usage is only informative - it prints this program's usage and
    command-line options. */
-
 int usage(void)
 {
-	fprintf(stdout, _("   usage: gnokii [--help|--monitor|--version]\n"
+	fprintf(stderr, _("   usage: gnokii [--help|--monitor|--version]\n"
 			  "          gnokii --getmemory memory_type start [end]\n"
 			  "          gnokii --writephonebook [-i]\n"
 			  "          gnokii --getspeeddial number\n"
@@ -359,7 +203,7 @@ int usage(void)
 			  "          gnokii --keysequence\n"
 		));
 #ifdef SECURITY
-	fprintf(stdout, _(
+	fprintf(stderr, _(
 		"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 		"          gnokii --getsecuritycodestatus\n"
 		));
@@ -621,6 +465,9 @@ int main(int argc, char *argv[])
 	if (readconfig(&model, &Port, &Initlength, &Connection, &BinDir) < 0) {
 		exit(-1);
 	}
+
+	/* Introduce yourself */
+	short_version();
 
 	/* Handle command line arguments. */
 	c = getopt_long(argc, argv, "", long_options, NULL);
@@ -1165,7 +1012,7 @@ int getsms(int argc, char *argv[])
 				mode = 0;
 			case 'f':
 				if (optarg) {
-					dprintf("Saving into %s\n", optarg);
+					fprintf(stderr, _("Saving into %s\n"), optarg);
 					strncpy(filename, optarg, 64);
 					if (strlen(optarg) > 63) {
 						fprintf(stderr, _("Filename too long - will be truncated to 63 characters.\n"));
@@ -1253,8 +1100,8 @@ int getsms(int argc, char *argv[])
 				switch (message.UDH[0].Type) {
 				case SMS_OpLogo:
 					fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, GSM_GetNetworkName(bitmap.netcode));
-					if (!strcmp(message.RemoteNumber.number, "+998000005") && !strcmp(message.MessageCenter.Number, "+886935074443")) dprintf(_("Saved by Logo Express\n"));
-					if (!strcmp(message.RemoteNumber.number, "+998000002") || !strcmp(message.RemoteNumber.number, "+998000003")) dprintf(_("Saved by Operator Logo Uploader by Thomas Kessler\n"));
+					if (!strcmp(message.RemoteNumber.number, "+998000005") && !strcmp(message.MessageCenter.Number, "+886935074443")) fprintf(stdout, _("Saved by Logo Express\n"));
+					if (!strcmp(message.RemoteNumber.number, "+998000002") || !strcmp(message.RemoteNumber.number, "+998000003")) fprintf(stdout, _("Saved by Operator Logo Uploader by Thomas Kessler\n"));
 					offset = 3;
 				case SMS_CallerIDLogo:
 					fprintf(stdout, ("Logo:\n"));
@@ -1265,7 +1112,7 @@ int getsms(int argc, char *argv[])
 						error = GE_NONE;
 						if ((stat(filename, &buf) == 0)) {
 							fprintf(stdout, _("File %s exists.\n"), filename);
-							fprintf(stderr, _("Overwrite? (yes/no) "));
+							fprintf(stdout, _("Overwrite? (yes/no) "));
 							GetLine(stdin, ans, 4);
 							if (!strcmp(ans, _("yes"))) {
 								error = GSM_SaveBitmapFile(filename, &bitmap);
