@@ -12,6 +12,9 @@ OTOH, dancalls try to speak something like AT-commands over serial
 cable, which made their decoding pretty easy. And they include netmon
 by default (just type *#9993#).
 
+You *need* setserial /dev/ttyS0 low_latency in order for dancall
+support to work.
+
 * Known Bugs *
 
 * To-do *
