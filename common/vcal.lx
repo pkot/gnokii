@@ -60,7 +60,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <vtodo>SUMMARY:				BEGIN(todosummary);
 
-<todosummary>[[:alnum:] ]+		{
+<todosummary>[[:print:]]+		{
 						if (vtodocounter == lexnumber)
 							snprintf(text, 256, "%s", yytext);
 						BEGIN(vtodo);
@@ -76,7 +76,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <vevent>CATEGORIES:			BEGIN(category);
 
-<category>[[:alnum:] ]+			{
+<category>[[:print:]]+			{
 						if (veventcounter == lexnumber)
 							snprintf(type, 21, "%s", yytext);
 						BEGIN(vevent);
@@ -84,7 +84,8 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <vevent>SUMMARY:			BEGIN(summary);
 
-<summary>[[:alnum:] ]+			{
+<summary>[[:print:]]+			{
+						dprintf("T: %s\n", yytext);
 						if (veventcounter == lexnumber)
 							snprintf(text, 256, "%s", yytext);
 						BEGIN(vevent);
@@ -92,7 +93,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <vevent>DESCRIPTION:			BEGIN(description);
 
-<description>[[:alnum:] ]+		{
+<description>[[:print:]]+		{
 						if (veventcounter == lexnumber)
 							snprintf(desc, 256, "%s", yytext);
 						BEGIN(vevent);
@@ -100,7 +101,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <vevent>DTSTART:			BEGIN(ttime);
 
-<ttime>[0-9]{8}T[0-9]{6}		{
+<ttime>[0-9]{8}[tT][0-9]{6}		{
 						if (veventcounter == lexnumber)
 							snprintf(time, 16, "%s", yytext);
 						BEGIN(vevent);
@@ -108,7 +109,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 
 <vevent>AALARM:				BEGIN(aalarm);
 
-<aalarm>[0-9]{8}T[0-9]{6}		{
+<aalarm>[0-9]{8}[tT][0-9]{6}		{
 						if (veventcounter == lexnumber)
 							strncpy(alarm, yytext, 16);
 						BEGIN(vevent);
@@ -147,12 +148,12 @@ int vcal_time_get(gn_timestamp *dt, char *time)
 	char year[5] = "", month[3] = "", day[3] = "", hour[3] = "", minute[3] = "", second[3] = "";
 	dt->year = dt->month = dt->day = dt->hour = dt->minute = dt->second = dt->timezone = 0;
 
-	snprintf(year, 4, "%s", time);
-	snprintf(month, 2, "%s", time + 4);
-	snprintf(day, 2, "%s", time + 6);
-	snprintf(hour, 2, "%s", time + 9);
-	snprintf(minute, 2, "%s", time + 11);
-	snprintf(second, 2, "%s", time + 13);
+	snprintf(year, 5, "%s", time);
+	snprintf(month, 3, "%s", time + 4);
+	snprintf(day, 3, "%s", time + 6);
+	snprintf(hour, 3, "%s", time + 9);
+	snprintf(minute, 3, "%s", time + 11);
+	snprintf(second, 3, "%s", time + 13);
 
 	/* FIXME: Should check ranges... */
 	dt->year = atoi(year);
@@ -191,7 +192,8 @@ int gn_calnote_fill(gn_calnote *note, char *type, char *text,
 	note->location = 0;
 
 	snprintf(note->text, 256, "%s", text);
-	snprintf(note->phone_number, 0, "%s", "");
+	note->phone_number[0] = 0;
+	dprintf("Text: %s\n", note->text);
 
 	/* FIXME: Handle additional strings, maybee from configuration file */
 	if (!strcmp(type, "PHONE CALL")) {

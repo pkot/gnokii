@@ -19,6 +19,8 @@
                                                          (Pawel Kot)
     o fix reading speeddials in nk7110 and nk6510 drivers
                                                          (Pawel Kot)
+    o fix vCalendar file reading: not only alpha chars may be in
+      the body, correctly use snprintf                   (Pawel Kot)
  * Build system fixes
     o fix a stupid bug in configure that made configure not detect
       many functions/types when user didn't explicitely give
