@@ -945,7 +945,8 @@ static gint A_GetAlarm(gpointer data)
 	if (a) {
 		a->status = GN_ERR_UNKNOWN;
 		pthread_mutex_lock(&alarmMutex);
-		gdat.datetime = &a->time;
+		gdat.datetime = &a->alarm.timestamp;
+		gdat.alarm = &a->alarm;
 		error = a->status = gn_sm_functions(GN_OP_GetAlarm, &gdat, &statemachine);
 		pthread_cond_signal(&alarmCond);
 		pthread_mutex_unlock(&alarmMutex);
@@ -966,7 +967,7 @@ static gint A_SetAlarm(gpointer data)
 	error = a->status = GN_ERR_UNKNOWN;
 
 	if (a) {
-		gdat.datetime = &a->time;
+		gdat.alarm = &a->alarm;
 		error = a->status = gn_sm_functions(GN_OP_SetAlarm, &gdat, &statemachine);
 		g_free(a);
 	}

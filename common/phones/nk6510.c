@@ -1724,7 +1724,7 @@ reply: 0x19 / 0x0012
 	*/
 
 	dprintf("Incoming clock!\n");
-	if (!data || !data->datetime) return GN_ERR_INTERNALERROR;
+	if (!data || !data->datetime || !data->alarm) return GN_ERR_INTERNALERROR;
 	switch (message[3]) {
 	case NK6510_SUBCLO_SET_DATE_RCVD:
 		dprintf("Date/Time succesfully set!\n");

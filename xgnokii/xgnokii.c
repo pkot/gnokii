@@ -725,16 +725,16 @@ void GUI_ShowOptions(void)
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(configDialogData.alarm.alarmMin), 0.0);
 	} else {
 		xgnokiiConfig.alarmSupported = TRUE;
-		if (alarm->enabled)
+		if (alarm->alarm.enabled)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON
 						     (configDialogData.alarm.alarmSwitch), TRUE);
 		else
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON
 						     (configDialogData.alarm.alarmSwitch), FALSE);
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(configDialogData.alarm.alarmHour),
-					  alarm->time.hour);
+					  alarm->alarm.timestamp.hour);
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(configDialogData.alarm.alarmMin),
-					  alarm->time.minute);
+					  alarm->alarm.timestamp.minute);
 	}
 	g_free(alarm);
 
@@ -922,10 +922,10 @@ static void OptionsApplyCallback(GtkWidget * widget, gpointer data)
 	if (xgnokiiConfig.alarmSupported
 	    && GTK_TOGGLE_BUTTON(configDialogData.alarm.alarmSwitch)->active) {
 		alarm = (D_Alarm *) g_malloc(sizeof(D_Alarm));
-		alarm->time.hour =
+		alarm->alarm.timestamp.hour =
 		    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON
 						     (configDialogData.alarm.alarmHour));
-		alarm->time.minute =
+		alarm->alarm.timestamp.minute =
 		    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON
 						     (configDialogData.alarm.alarmMin));
 		e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));

@@ -102,8 +102,7 @@ typedef struct {
 } D_CallerGroup;
 
 typedef struct {
-	gn_timestamp time;
-	bool enabled;
+	gn_calnote_alarm alarm;
 	gint status;
 } D_Alarm;
 
