@@ -1,7 +1,7 @@
 0.4.0pre21 (not released yet)
 ==========
- * Rewrite of the SMS subsystem             (Pawel Kot, Pavel Machek)
-    o readind of SMS splitted into 2 stages               (Pawel Kot)
+ * Rewrite of the SMS subsystem
+    o reading of SMS splitted into 2 stages               (Pawel Kot)
     o first tries at EMS picture SMSes	               (Pavel Machek)
     o support for sending nokia ringtones	       (Pavel Machek)
     o support for sending iMelody		       (Pavel Machek)

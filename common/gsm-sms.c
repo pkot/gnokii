@@ -580,7 +580,6 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 		/* This is incredible. Nokia violates it's own format in 6210 */
 		/* Indicate that it is Multipart Message. Remove it if not needed */
 		sms->UDH.Number = 1;
-		dprintf("0x%02x 0x%02x\n", rawsms->UserData[0], rawsms->UserData[1]);
 		if ((rawsms->UserData[0] == 0x48) && (rawsms->UserData[1] == 0x1c)) {
 			dprintf("First picture then text!\n");
 			sms->UDH.UDH[0].Type = SMS_MultipartMessage;
@@ -592,11 +591,10 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 			size = rawsms->UserDataLength - 4 - sms->UserData[0].u.Bitmap.size;
 			/* Second part is a text */
 			sms->UserData[1].Type = SMS_PlainText;
-			dprintf("lengths: %d %d %d\n", sms->UserData[0].u.Bitmap.size, size, rawsms->Length);
 			DecodeData(rawsms->UserData + 5 + sms->UserData[0].u.Bitmap.size,
 				   (unsigned char *)&(sms->UserData[1].u.Text),
-				   rawsms->Length, size, 0, sms->DCS);
-//			sms->UserData[1].u.Text[rawsms->Length] = 0;
+				   rawsms->Length - sms->UserData[0].u.Bitmap.size - 4,
+				   size, 0, sms->DCS);
 #if 0
 		} else {
 			dprintf("First text then picture!\n");
