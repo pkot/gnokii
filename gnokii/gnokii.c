@@ -901,7 +901,7 @@ static int getsms(int argc, char *argv[])
 	folder.FolderID = 0;
 	/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count ++) {
-		bool done;
+		bool done = false;
 		int offset = 0;
 
 		memset(&message, 0, sizeof(GSM_API_SMS));
@@ -1441,17 +1441,15 @@ static int sendlogo(int argc, char *argv[])
 	}
 
 	/* FIXME: read from the stdin */
+	sms.UserData[1].Type = SMS_NoData;
 	if (sms.UserData[0].u.Bitmap.type == GSM_PictureImage) {
 		sms.UserData[1].Type = SMS_PlainText;
 		sms.UserData[2].Type = SMS_NoData;
 		strcpy(sms.UserData[1].u.Text, "testtest");
-	} else {
-		sms.UserData[1].Type = SMS_NoData;
 	}
 
 	/* Send the message. */
 	data.SMS = &sms;
-
 	error = SendSMS(&data, &State);
 
 	if (error == GE_NONE) fprintf(stdout, _("Send succeeded!\n"));
@@ -2994,17 +2992,25 @@ static int pmon(void)
 
 static int sendringtone(int argc, char *argv[])
 {
-	GSM_Ringtone ringtone;
+	GSM_API_SMS sms;
 	GSM_Error error = GE_NOTSUPPORTED;
 
-	fprintf(stderr, "Sorry, sending ringtones is currently b0rken.\n");
+	DefaultSubmitSMS(&sms);
+	sms.UserData[0].Type = SMS_RingtoneData;
+	sms.UserData[1].Type = SMS_NoData;
 
-	if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
+	if (GSM_ReadRingtoneFile(argv[0], &sms.UserData[0].u.Ringtone)) {
 		fprintf(stdout, _("Failed to load ringtone.\n"));
 		return(-1);
 	}
 
-/*	if (GSM && GSM->SendRingtone) error = GSM->SendRingtone(&ringtone,argv[1]); */
+	/* The second argument is the destination, ie the phone number of recipient. */
+	memset(&sms.Remote.Number, 0, sizeof(sms.Remote.Number));
+	strncpy(sms.Remote.Number, argv[1], sizeof(sms.Remote.Number) - 1);
+
+	/* Send the message. */
+	data.SMS = &sms;
+	error = SendSMS(&data, &State);
 
 	if (error == GE_NONE)
 		fprintf(stdout, _("Send succeeded!\n"));
