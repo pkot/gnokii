@@ -33,6 +33,7 @@
  * 6110 series updates
     o keepalive packet won't be reported as an unhadled frame
                                                      (BORBELY Zoltan)
+    o CancelCall, AnswerCall fixed                   (BORBELY Zoltan)
  * xgnokii updates
     o Netmonitor fixed                                 (Markus Plail)
 

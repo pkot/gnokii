@@ -2670,7 +2670,6 @@ static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state)
 	GSM_Error error;
 
 	if (SM_SendMessage(state, sizeof(req1), 0x01, req1) != GE_NONE) return GE_NOTREADY;
-	if ((error = SM_Block(state, data, 0x01)) != GE_NONE) return error;
 
 	req2[4] = data->CallInfo->CallID;
 
@@ -2685,7 +2684,8 @@ static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state)
 	req[4] = data->CallInfo->CallID;
 
 	if (SM_SendMessage(state, 6, 0x01, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetry(state, data, 0x01);
+	SM_BlockNoRetry(state, data, 0x01);
+	return GE_NONE;
 }
 
 static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state)
@@ -2730,7 +2730,9 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 		cinfo.CallID = message[4];
 		if (CallNotification)
 			CallNotification(GSM_CS_Established, &cinfo);
-		return GE_UNSOLICITED;
+		if (!data->CallInfo) return GE_UNSOLICITED;
+		data->CallInfo->CallID = message[4];
+		break;
 
 	/* Remote end hang up */
 	case 0x04:
@@ -2776,7 +2778,9 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 		cinfo.CallID = message[4];
 		if (CallNotification)
 			CallNotification(GSM_CS_LocalHangup, &cinfo);
-		return GE_UNSOLICITED;
+		if (!data->CallInfo) return GE_UNSOLICITED;
+		data->CallInfo->CallID = message[4];
+		break;
 	
 	/* message after "terminated call" */
 	case 0x0a:
