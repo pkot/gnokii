@@ -34,6 +34,7 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
+#include "misc.h"
 #include "gsm-common.h"
 #include "gsm-bitmaps.h"
 #include "gsm-api.h"
@@ -46,7 +47,7 @@ GSM_Error GSM_NullBitmap(GSM_Bitmap *bmp, GSM_Information *info)
 	strcpy(bmp->netcode, "000 00");
 	bmp->width = info->OpLogoW;
 	bmp->height = info->OpLogoH;
-	bmp->size = bmp->width * bmp->height / 8;
+	bmp->size = ceiling_to_octet(bmp->width * bmp->height);
 	GSM_ClearBitmap(bmp);
 	return GE_NONE;
 }
@@ -94,9 +95,7 @@ bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
 
 void GSM_ClearBitmap(GSM_Bitmap *bmp)
 {
-	int i;
-
-	for (i = 0; i < bmp->size; i++) bmp->bitmap[i] = 0;
+	memset(bmp->bitmap, 0, bmp->size);
 }
 
 
@@ -108,29 +107,30 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Informati
 	/* Copy into the backup */
 	memcpy(&backup, bitmap, sizeof(GSM_Bitmap));
 
-	if (target == GSM_StartupLogo) {
+	switch (target) {
+	case GSM_StartupLogo:
 		bitmap->width = info->StartupLogoW;
 		bitmap->height = info->StartupLogoH;
-		bitmap->size = ((bitmap->height / 8) + (bitmap->height % 8 > 0)) * bitmap->width;
-	}
-	if (target == GSM_OperatorLogo) {
+		break;
+	case GSM_OperatorLogo:
 		bitmap->width = info->OpLogoW;
 		bitmap->height = info->OpLogoH;
-		x = bitmap->width * bitmap->height;
-		bitmap->size = (x / 8) + (x % 8 > 0);
-	}
-	if (target == GSM_CallerLogo) {
+		break;
+	case GSM_CallerLogo:
 		bitmap->width = info->CallerLogoW;
 		bitmap->height = info->CallerLogoH;
-		x = bitmap->width * bitmap->height;
-		bitmap->size = (x / 8) + (x % 8 > 0);
-	}
-	if (target == GSM_PictureImage) {
+		break;
+	case GSM_PictureImage:
 		bitmap->width = 72;
 		bitmap->height = 48;
-		bitmap->size = bitmap->width * bitmap->height / 8;
+		break;
+	default:
+		bitmap->width = 0;
+		bitmap->height = 0;
+		break;
 	}
 	bitmap->type = target;
+	bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 
 	if (backup.width > bitmap->width) {
 		copywidth = bitmap->width;
@@ -197,7 +197,7 @@ GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap *bit
 	bitmap->height = message[1];
 	dprintf("offset: %i\n", offset);
 
-	bitmap->size = (bitmap->width * bitmap->height) / 8;
+	bitmap->size = ceiling_to_octet(bitmap->width * bitmap->height);
 	memcpy(bitmap->bitmap, message + offset + 2, bitmap->size);
 
 	dprintf("Bitmap from SMS: width %i, height %i\n", bitmap->width, bitmap->height);

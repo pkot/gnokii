@@ -19,6 +19,9 @@
  * bitmap support
     o begin cleaning up bitmap code; rewrite bitmap handling in
       gnokii.c in the readable way                        (Pawel Kot)
+    o fix the case when NOL bitmap is not in the size dividable
+      by 8                                                (Pawel Kot)
+    o cleanups using ceiling function     (BORBELY Zoltan, Pawel Kot)
  * Updated TODO                           (BORBELY Zoltan, Pawel Kot)
  * code cleanups
     o minor portability fixes        (Jan Kratochvil, BORBELY Zoltan)

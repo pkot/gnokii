@@ -710,7 +710,7 @@ GSM_Error loadbmp(FILE *file, GSM_Bitmap *bitmap)
 
 GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 {
-	unsigned char buffer[2000];
+	unsigned char buffer[GSM_MAX_BITMAP_SIZE + 20];
 	int i, j;
 
 	bitmap->type = GSM_OperatorLogo;
@@ -720,12 +720,12 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 
 	bitmap->width = buffer[10];
 	bitmap->height = buffer[12];
-	bitmap->size = bitmap->height * bitmap->width / 8;
+	bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 
 	if (((bitmap->height != 14) || (bitmap->width != 72)) && /* standard size */
 	    ((bitmap->height != 21) || (bitmap->width != 78)) && /* standard size */
 	    (!info || (bitmap->height != info->OpLogoH) || (bitmap->width != info->OpLogoW))) {
-		dprintf("Invalid Image Size (%dx%d).\n",bitmap->width,bitmap->height);
+		dprintf("Invalid Image Size (%dx%d).\n", bitmap->width, bitmap->height);
 		return GE_INVALIDIMAGESIZE;
 	}
 
@@ -736,6 +736,7 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 				if (buffer[7-j] == '1')
 					bitmap->bitmap[i] |= (1 << j);
 		} else {
+			dprintf("too short\n");
 			return(GE_FILETOOSHORT);
 		}
 	}
@@ -744,7 +745,7 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	if (fread(buffer, 1, 1, file) == 1) {
 		dprintf("Fileinfo: %c", buffer[0]);
 		while (fread(buffer, 1, 1, file) == 1) {
-			if (buffer[0] != 0x0A) dprintf("%c",buffer[0]);
+			if (buffer[0] != 0x0A) dprintf("%c", buffer[0]);
 		}
 		dprintf("\n");
 	}
