@@ -579,5 +579,6 @@ GSM_Error GSM_ReadRingtoneFromSMS(GSM_API_SMS *message, GSM_Ringtone *ringtone)
 int GSM_EncodeSMSRingtone(char *message, GSM_Ringtone *ringtone)
 {
 	int j = GSM_MAX_8BIT_SMS_LENGTH;
-	return GSM_PackRingtone(ringtone, message, &j);
+	GSM_PackRingtone(ringtone, message, &j);
+	return j;
 }

@@ -1044,8 +1044,10 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 			bitmap_index   = i; break;
 		case SMS_RingtoneData:
 			ringtone_index = i; break;
-		default:
+		case SMS_NoData:
 			break;
+		default:
+			fprintf(stderr, "What kind of ninja-mutant UserData is this?\n");
 		}
 	}
 
@@ -1130,7 +1132,6 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 
 	/* Bitmap coding */
 	if (bitmap_index != -1) {
-		rawsms->UDHIndicator = 1;
 		error = GE_NONE;
 		switch (sms->UserData[0].u.Bitmap.type) {
 		case GSM_OperatorLogo: error = EncodeUDH(rawsms, SMS_OpLogo, message); break;
@@ -1144,6 +1145,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 		rawsms->Length += size;
 		rawsms->UserDataLength += size;
 		rawsms->DCS = 0xf5;
+		rawsms->UDHIndicator = 1;
 #else
 		return GE_NOTSUPPORTED;
 #endif
@@ -1151,10 +1153,14 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 
 	/* Ringtone coding */
 	if (ringtone_index != -1) {
+		error = EncodeUDH(rawsms, SMS_Ringtone, message); 
+		if (error != GE_NONE) return error;
 #ifdef RINGTONE_SUPPORT
 		size = GSM_EncodeSMSRingtone(message + rawsms->Length, &sms->UserData[ringtone_index].u.Ringtone);
 		rawsms->Length += size;
 		rawsms->UserDataLength += size;
+		rawsms->DCS = 0xf5;
+		rawsms->UDHIndicator = 1;
 #else
 		return GE_NOTSUPPORTED;
 #endif
