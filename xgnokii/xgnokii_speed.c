@@ -302,7 +302,7 @@ static bool ParseLine(D_SpeedDial * d, gchar * buf)
 	}
 
 	d->entry.location = atoi(strings[2]);
-	if (d->entry.location == LONG_MIN || d->entry.location == LONG_MAX || d->entry.location < 0) {
+	if (d->entry.location == INT_MAX || d->entry.location < 0) {
 		g_strfreev(strings);
 		return FALSE;
 	}
