@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.6  2001-06-10 11:28:00  machek
+  Revision 1.7  2001-06-10 23:49:49  pkot
+  Small fixes to hide compilation warnings and allow gnokii.c to compile
+
+  Revision 1.6  2001/06/10 11:28:00  machek
   Convert GetSMS/DeleteSMS to new structure.
 
   Revision 1.5  2001/06/06 09:05:56  machek
@@ -573,7 +576,7 @@ HandlePacket(void)
 	switch(PacketData[3]) {
 	case 0x12: {
 		char buf[10240], *s = buf, *t;
-		t = &PacketData[8];
+		t = (char *)&PacketData[8];
 #define COPY(x) strncpy(s, t, x); t+=x; s+=x; *s++ = '\n'
 		COPY(10); COPY(10); COPY(10); COPY(3); COPY(12); *s++ = 0;
 		if (OutputFn)
@@ -1163,7 +1166,7 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		break;
 #endif
 	case GOP_DisplayOutput:
-		printf("DisplayOutput(%lx)\n", data->OutputFn);
+		printf("DisplayOutput(%px)\n", data->OutputFn);
 		OutputFn = data->OutputFn;
 		printf("Enable\n");
 		err = EnableDisplayOutput(state);

@@ -18,7 +18,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.135  2001-06-10 11:42:26  machek
+  Revision 1.136  2001-06-10 23:49:49  pkot
+  Small fixes to hide compilation warnings and allow gnokii.c to compile
+
+  Revision 1.135  2001/06/10 11:42:26  machek
   Cleanup: some formating, made Statemachine global, converted to new
   structure w.r.t. SMS-es
 
@@ -510,9 +513,6 @@ int main(int argc, char *argv[])
     
 		// For development purposes: insert you function calls here
 		{ "foogle",             no_argument,       NULL, OPT_FOOGLE },
-
-		// SMS slave
-		{ "smsslave",           no_argument,       NULL, OPT_SMSSLAVE },
 
 		{ 0, 0, 0, 0},
 	};
@@ -2126,14 +2126,14 @@ int getalarm(void)
 int monitormode(void)
 {
 	float rflevel = -1, batterylevel = -1;
-	GSM_PowerSource powersource = -1;
+//	GSM_PowerSource powersource = -1;
 	GSM_RFUnits rf_units = GRF_Arbitrary;
 	GSM_BatteryUnits batt_units = GBU_Arbitrary;
 	GSM_Statemachine *sm = &State;
 	GSM_Data data;
 
-	GSM_NetworkInfo NetworkInfo;
-	GSM_CBMessage CBMessage;
+//	GSM_NetworkInfo NetworkInfo;
+//	GSM_CBMessage CBMessage;
 
 	GSM_MemoryStatus SIMMemoryStatus   = {GMT_SM, 0, 0};
 	GSM_MemoryStatus PhoneMemoryStatus = {GMT_ME, 0, 0};
@@ -2145,9 +2145,9 @@ int monitormode(void)
 	GSM_MemoryStatus ON_MemoryStatus   = {GMT_ON, 0, 0};
 	GSM_MemoryStatus RC_MemoryStatus   = {GMT_RC, 0, 0};
 
-	GSM_SMSStatus SMSStatus = {0, 0};
+//	GSM_SMSStatus SMSStatus = {0, 0};
 
-	char Number[20];
+//	char Number[20];
 	
 	GSM_DataClear(&data);
 
@@ -2246,14 +2246,34 @@ static GSM_Error PrettyOutputFn(char *Display, char *Indicators)
 	if (Indicators)
 		printf(ESC "[9;0H Indicators: %s                                                    \n", Indicators);
 	printf(ESC "[1;1H");
+	return GE_NONE;
 }
 
+#if 0
+// Uncomment it if used
 static GSM_Error OutputFn(char *Display, char *Indicators)
 {
 	if (Display)
 		printf("New display is:\n%s\n", Display);
 	if (Indicators)
 		printf("Indicators: %s\n", Indicators);
+	return GE_NONE;
+}
+#endif
+
+void console_raw(void)
+{
+#ifndef WIN32
+	struct termios it;
+
+	tcgetattr(fileno(stdin), &it);
+	it.c_lflag &= ~(ICANON);
+	//it.c_iflag &= ~(INPCK|ISTRIP|IXON);
+	it.c_cc[VMIN] = 1;
+	it.c_cc[VTIME] = 0;
+
+	tcsetattr(fileno(stdin), TCSANOW, &it);
+#endif
 }
 
 int displayoutput(void)
@@ -2838,21 +2858,6 @@ int setringtone(int argc, char *argv[])
 	GSM->Terminate();
 	return 0;
 
-}
-
-void console_raw(void)
-{
-#ifndef WIN32
-	struct termios it;
-
-	tcgetattr(fileno(stdin), &it);
-	it.c_lflag &= ~(ICANON);
-	//it.c_iflag &= ~(INPCK|ISTRIP|IXON);
-	it.c_cc[VMIN] = 1;
-	it.c_cc[VTIME] = 0;
-
-	tcsetattr(fileno(stdin), TCSANOW, &it);
-#endif
 }
 
 int presskeysequence(void)

@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.8  2001-05-24 20:47:30  chris
+  Revision 1.9  2001-06-10 23:49:49  pkot
+  Small fixes to hide compilation warnings and allow gnokii.c to compile
+
+  Revision 1.8  2001/05/24 20:47:30  chris
   More updating of 7110 code and some of xgnokii_lowlevel changed over.
 
   Revision 1.7  2001/05/07 16:24:04  pkot
@@ -397,7 +400,7 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 	unsigned char blocks;
 	unsigned char subblockcount;
 	int i;
-	GSM_SubPhonebookEntry* subEntry; 
+	GSM_SubPhonebookEntry* subEntry = NULL;
 
 	PGEN_DebugMessage(messagetype, message, length);
 
