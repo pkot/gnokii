@@ -91,22 +91,28 @@ typedef struct {
 	gn_phone_model *phone;
 } gn_data;
 
-/* A structure to hold information about the particular link */
-/* The link comes 'under' the phone */
+/* 
+ * A structure to hold information about the particular link
+ * The link comes 'under' the phone
+ */
 typedef struct {
-	char port_device[GN_DEVICE_NAME_MAX_LENGTH]; /* The port device */
-	int init_length;                              /* Number of chars sent to sync the serial port */
-	unsigned int sms_timeout;                     /* SMS timeout: how many seconds should we wait
-							for the SMSC response. Defaults to 10 seconds */
-	gn_connection_type connection_type;           /* Connection type, serial, ir etc */
-
-	/* A regularly called loop function */
-	/* timeout can be used to make the function block or not */
-	gn_error (*loop)(struct timeval *timeout);
-
-	/* A pointer to the function used to send out a message */
-	/* This is used by the phone specific code to send a message over the link */
-	gn_error (*send_message)(u16 messagesize, u8 messagetype, unsigned char *message);
+	/* The port device */
+	char port_device[GN_DEVICE_NAME_MAX_LENGTH];
+	/* Number of chars sent to sync the serial port */
+	int init_length;
+	/* SMS timeout: how many seconds should we wait for the SMSC response.
+	 * Defaults to 10 seconds */
+	unsigned int sms_timeout;
+	/* Connection type, serial, ir etc */
+	gn_connection_type connection_type;
+	/* A regularly called loop function. Timeout can be used to make the
+	 * function block or not */
+	gn_error (*loop)(struct timeval *timeout, struct gn_statemachine *state);
+	/* A pointer to the function used to send out a message. This is used
+	 * by the phone specific code to send a message over the link */
+	gn_error (*send_message)(u16 messagesize, u8 messagetype, unsigned char *message,
+				 struct gn_statemachine *state);
+	void *link_instance;
 } gn_link;
 
 typedef enum {

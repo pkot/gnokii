@@ -49,7 +49,7 @@
 static bool fb3110_serial_open(void);
 static void fb3110_rx_state_machine(unsigned char rx_byte);
 static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
-static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message);
+static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
 static void fb3110_tx_ack_send(u8 *message, int length);
 static void fb3110_sequence_number_update(void);
 
@@ -173,7 +173,7 @@ static void fb3110_rx_state_machine(unsigned char rx_byte)
  * This is the main loop function which must be called regularly
  * timeout can be used to make it 'busy' or not 
  */
-static gn_error fb3110_loop(struct timeval *timeout)
+static gn_error fb3110_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -249,7 +249,7 @@ static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequ
 /* 
  * Main function to send an fbus message 
  */
-static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message)
+static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 	u8 seqnum;
 

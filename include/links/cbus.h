@@ -62,16 +62,9 @@ typedef struct{
 	int message_len;
 	unsigned char buffer[CBUS_MAX_FRAME_LENGTH];
 	u8 prev_rx_byte;
-} cbus_incoming_frame;
+} cbus_instance;
 
-typedef struct {
-	int message_length;
-	unsigned char buffer[CBUS_MAX_MSG_LENGTH];
-} cbus_outgoing_message;
-
-typedef struct{
-	cbus_incoming_frame frame;
-} cbus_link;
+#define CBUSINST(s) ((cbus_instance *)((s)->link.link_instance))
 
 gn_error cbus_initialise(struct gn_statemachine *state);
 

@@ -33,8 +33,10 @@
 
 gn_error atbus_initialise(struct gn_statemachine *state, int mode);
 
-/* Define some result/error codes internal to the AT command functions.
-   Also define a code for an unterminated message. */
+/* 
+ * Define some result/error codes internal to the AT command functions.
+ * Also define a code for an unterminated message. 
+ */
 typedef enum {
 	GN_AT_NONE,		/* NO or unknown result code */
 	GN_AT_PROMPT,		/* SMS command waiting for input */
@@ -43,5 +45,16 @@ typedef enum {
 	GN_AT_CMS,		/* SMS Command failed */
 	GN_AT_CME,		/* Extended error code found */
 } at_result;
+
+typedef struct {
+	/* The buffer for phone responses not only holds the data from the
+	 * phone but also a byte which holds the compiled status of the 
+	 * response. it is placed at [0]. */
+	char rbuf[1024];
+	int rbuf_pos;
+	int binlen;
+} atbus_instance;
+
+#define AT_BUSINST(s) ((atbus_instance *)((s)->link.link_instance))
 
 #endif   /* #ifndef _gnokii_atbus_h */

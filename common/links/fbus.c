@@ -52,7 +52,7 @@
 #include "gnokii-internal.h"
 
 static void fbus_rx_statemachine(unsigned char rx_byte);
-static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message);
+static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
 static int fbus_tx_send_ack(u8 message_type, u8 message_seq);
 
 /* FIXME - pass device_* the link stuff?? */
@@ -72,7 +72,7 @@ static fbus_link flink;		/* FBUS specific stuff, internal to this file */
 
 /*--------------------------------------------*/
 
-static bool fbus_serial_open(bool dlr3)
+static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 {
 	if (dlr3) dlr3 = 1;
 	/* Open device. */
@@ -88,7 +88,7 @@ static bool fbus_serial_open(bool dlr3)
 	return true;
 }
 
-static bool at2fbus_serial_open()
+static bool at2fbus_serial_open(struct gn_statemachine *state)
 {
 	unsigned char init_char = 0x55;
 	unsigned char end_init_char = 0xc1;
@@ -127,7 +127,7 @@ static bool at2fbus_serial_open()
 	return true;
 }
 
-static bool fbus_ir_open(void)
+static bool fbus_ir_open(struct gn_statemachine *state)
 {
 	struct timeval timeout;
 	unsigned char init_char = 0x55;
@@ -156,7 +156,7 @@ static bool fbus_ir_open(void)
 
 		device_changespeed(115200);
 
-		fbus_send_message(7, 0x02, connect_seq);
+		fbus_send_message(7, 0x02, connect_seq, state);
 
 		/* Wait for 1 sec. */
 		timeout.tv_sec	= 1;
@@ -378,7 +378,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static gn_error fbus_loop(struct timeval *timeout)
+static gn_error fbus_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -469,7 +469,7 @@ int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 * buffer)
 /* Main function to send an fbus message */
 /* Splits up the message into frames if necessary */
 
-static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message)
+static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 	u8 seqnum, frame_buffer[FBUS_CONTENT_MAX_LENGTH + 2];
 	u8 nom, lml;		/* number of messages, last message len */
@@ -559,17 +559,17 @@ gn_error fbus_initialise(gn_link *newlink, struct gn_statemachine *state, int tr
 #ifndef WIN32
 	case GN_CT_Tekram:
 #endif
-		if (!fbus_ir_open())
+		if (!fbus_ir_open(state))
 			return GN_ERR_FAILED;
 		break;
 	case GN_CT_Serial:
 		switch (try) {
 		case 0:
 		case 1:
-			err = fbus_serial_open(1 - try);
+			err = fbus_serial_open(1 - try, state);
 			break;
 		case 2:
-			err = at2fbus_serial_open();
+			err = at2fbus_serial_open(state);
 			break;
 		default:
 			return GN_ERR_FAILED;
@@ -577,16 +577,16 @@ gn_error fbus_initialise(gn_link *newlink, struct gn_statemachine *state, int tr
 		if (!err) return GN_ERR_FAILED;
 		break;
 	case GN_CT_DAU9P:
-		if (!fbus_serial_open(0))
+		if (!fbus_serial_open(0, state))
 			return GN_ERR_FAILED;
 		break;
 	case GN_CT_DLR3P:
 		switch (try) {
 		case 0:
-			err = at2fbus_serial_open();
+			err = at2fbus_serial_open(state);
 			break;
 		case 1:
-			err = fbus_serial_open(1);
+			err = fbus_serial_open(1, state);
 			break;
 		default:
 			return GN_ERR_FAILED;

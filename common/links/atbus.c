@@ -44,29 +44,13 @@
 
 #include "gnokii-internal.h"
 
-static gn_error atbus_loop(struct timeval *timeout);
-static bool atbus_serial_open(int mode, char *device);
-static void atbus_rx_statemachine(unsigned char rx_char);
-
-/* FIXME - pass device_* the link stuff?? */
-/* FIXME - win32 stuff! */
-
 static void at_printf(char *prefix, char *buf, int len);
 
-/* FIXME - when sending an AT command while another one is still in */
-/*         progress, the old command is aborted and the new ignored. */
-/*         the result is _one_ error message from the phone. */
-
-/* Some globals */
-static struct gn_statemachine *statemachine;
-
-/* The buffer for phone responses not only holds the data from
-the phone but also a byte which holds the compiled status of the
-response. it is placed at [0]. */
-static char reply_buf[1024];
-static int reply_buf_pos = 1;
-static int binlength = 1;
-
+/* 
+ * FIXME - when sending an AT command while another one is still in progress,
+ * the old command is aborted and the new ignored. the result is _one_ error
+ * message from the phone.
+ */
 
 static int xwrite(unsigned char *d, int len)
 {
@@ -87,56 +71,6 @@ static int xwrite(unsigned char *d, int len)
 		}
 	}
 	return 0;
-}
-
-static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *msg)
-{
-	usleep(10000);
-	return xwrite(msg, message_length) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
-}
-
-/* 
- * rx state machine for receive handling. called once for each character
- * received from the phone. 
- */
-static void atbus_rx_statemachine(unsigned char rx_char)
-{
-	reply_buf[reply_buf_pos++] = rx_char;
-	reply_buf[reply_buf_pos] = '\0';
-
-	if (reply_buf_pos < binlength)
-		return;
-
-	reply_buf[0] = GN_AT_NONE;
-	/* first check if <cr><lf> is found at end of reply_buf.
-	 * attention: the needed length is greater 2 because we
-	 * don't need to enter if no result/error will be found. */
-	if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-2, "\r\n", 2))) {
-		/* no lenght check needed */
-		if (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4))
-			reply_buf[0] = GN_AT_OK;
-		else if ((reply_buf_pos > 7) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))
-			reply_buf[0] = GN_AT_ERROR;
-	}
-	/* check if SMS prompt is found */
-	if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-4, "\r\n> ", 4)))
-		reply_buf[0] = GN_AT_PROMPT;
-	if (reply_buf[0] != GN_AT_NONE) {
-		at_printf("read : ", reply_buf + 1, reply_buf_pos - 1);
-		sm_incoming_function(statemachine, statemachine->last_msg_type, reply_buf, reply_buf_pos - 1);
-		reply_buf_pos = 1;
-		binlength = 1;
-		return;
-	}
-#if 0
-	/* needed for binary date etc */
-	TODO: correct reading of variable length integers
-	if (reply_buf_pos == 12) {
-		if (!strncmp(reply_buf + 3, "ABC", 3) {
-			binlength = atoi(reply_buf + 8);
-		}
-	}
-#endif
 }
 
 static bool atbus_serial_open(int mode, char *device)
@@ -175,7 +109,59 @@ static bool atbus_serial_open(int mode, char *device)
 	return true;
 }
 
-static gn_error atbus_loop(struct timeval *timeout)
+static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *msg, struct gn_statemachine *sm)
+{
+	usleep(10000);
+	return xwrite(msg, message_length) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
+}
+
+/* 
+ * rx state machine for receive handling. called once for each character
+ * received from the phone. 
+ */
+static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine *sm)
+{
+	atbus_instance *bi = AT_BUSINST(sm);
+	
+	bi->rbuf[bi->rbuf_pos++] = rx_char;
+	bi->rbuf[bi->rbuf_pos] = '\0';
+
+	if (bi->rbuf_pos < bi->binlen)
+		return;
+
+	bi->rbuf[0] = GN_AT_NONE;
+	/* first check if <cr><lf> is found at end of reply_buf.
+	 * attention: the needed length is greater 2 because we
+	 * don't need to enter if no result/error will be found. */
+	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 2, "\r\n", 2)) {
+		/* no lenght check needed */
+		if (!strncmp(bi->rbuf + bi->rbuf_pos - 4, "OK\r\n", 4))
+			bi->rbuf[0] = GN_AT_OK;
+		else if (bi->rbuf_pos > 7 && !strncmp(bi->rbuf + bi->rbuf_pos - 7, "ERROR\r\n", 7))
+			bi->rbuf[0] = GN_AT_ERROR;
+	}
+	/* check if SMS prompt is found */
+	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 4, "\r\n> ", 4))
+		bi->rbuf[0] = GN_AT_PROMPT;
+	if (bi->rbuf[0] != GN_AT_NONE) {
+		at_printf("read : ", bi->rbuf + 1, bi->rbuf_pos - 1);
+		sm_incoming_function(sm, sm->last_msg_type, bi->rbuf, bi->rbuf_pos - 1);
+		bi->rbuf_pos = 1;
+		bi->binlen = 1;
+		return;
+	}
+#if 0
+	/* needed for binary date etc */
+	TODO: correct reading of variable length integers
+	if (reply_buf_pos == 12) {
+		if (!strncmp(reply_buf + 3, "ABC", 3) {
+			binlength = atoi(reply_buf + 8);
+		}
+	}
+#endif
+}
+
+static gn_error atbus_loop(struct timeval *timeout, struct gn_statemachine *sm)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -184,7 +170,7 @@ static gn_error atbus_loop(struct timeval *timeout)
 	if (res > 0) {
 		res = device_read(buffer, 255);
 		for (count = 0; count < res; count++)
-			atbus_rx_statemachine(buffer[count]);
+			atbus_rx_statemachine(buffer[count], sm);
 	} else
 		return GN_ERR_TIMEOUT;
 	/* This traps errors from device_read */
@@ -200,23 +186,37 @@ static gn_error atbus_loop(struct timeval *timeout)
 /* bug reports. this is pretty silly for /dev/ttyS?. */
 gn_error atbus_initialise(struct gn_statemachine *state, int mode)
 {
-	/* 'Copy in' the global structures */
-	statemachine = state;
+	gn_error error = GN_ERR_NONE;
+	atbus_instance *businst;
+
+	if (!(businst = malloc(sizeof(atbus_instance))))
+		return GN_ERR_FAILED;
 
 	/* Fill in the link functions */
 	state->link.loop = &atbus_loop;
 	state->link.send_message = &at_send_message;
+	businst->rbuf_pos = 1;
+	businst->binlen = 1;
+	AT_BUSINST(state) = businst;
 
 	if ((state->link.connection_type == GN_CT_Serial) ||
 	    (state->link.connection_type == GN_CT_Irda)) {
-		if (!atbus_serial_open(mode, state->link.port_device))
-			return GN_ERR_FAILED;
+		if (!atbus_serial_open(mode, state->link.port_device)) {
+			error = GN_ERR_FAILED;
+			goto out;
+		}
 	} else {
-		dprintf("Device not supported by ATBUS\n");
-		return GN_ERR_FAILED;
+		dprintf("Device not supported by AT bus\n");
+		error = GN_ERR_FAILED;
+		goto out;
 	}
-
-	return GN_ERR_NONE;
+out:
+	if (error) {
+		dprintf("AT bus initialization failed (%d)\n", error);
+		free(AT_BUSINST(state));
+		AT_BUSINST(state) = NULL;
+	}
+	return error;
 }
 
 static void at_printf(char *prefix, char *buf, int len)

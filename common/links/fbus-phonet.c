@@ -52,7 +52,7 @@
 #include "gnokii-internal.h"
 
 static void phonet_rx_statemachine(unsigned char rx_byte);
-static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message);
+static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -172,7 +172,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static gn_error phonet_loop(struct timeval *timeout)
+static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
 	gn_error	error = GN_ERR_INTERNALERROR;
 	unsigned char	buffer[255];
@@ -197,7 +197,8 @@ static gn_error phonet_loop(struct timeval *timeout)
 
 /* Main function to send an fbus message */
 
-static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message) {
+static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state)
+{
 
 	u8 out_buffer[PHONET_TRANSMIT_MAX_LENGTH + 5];
 	int current = 0;

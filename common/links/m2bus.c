@@ -53,7 +53,7 @@
 #include "gnokii-internal.h"
 
 static void m2bus_rx_statemachine(unsigned char rx_byte);
-static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned char *message);
+static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
 static int m2bus_tx_send_ack(u8 message_seq);
 
 /* FIXME - pass device_* the link stuff?? */
@@ -261,7 +261,7 @@ static void m2bus_rx_statemachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static gn_error m2bus_loop(struct timeval *timeout)
+static gn_error m2bus_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -306,7 +306,7 @@ static void m2bus_wait_for_idle(int timeout, bool reset)
 	   (0x1f) and other values according the value specified when called.
 	   Calculates checksum and then sends the lot down the pipe... */
 
-static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned char *message)
+static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 	u8 *out_buffer;
 	int count, i = 0;

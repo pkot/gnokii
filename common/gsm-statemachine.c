@@ -55,7 +55,7 @@ gn_error sm_message_send(struct gn_statemachine *state, u16 messagesize, u8 mess
 		state->current_state = GN_SM_MessageSent;
 
 		/* FIXME - clear KeepAlive timer */
-		return state->link.send_message(messagesize, messagetype, message);
+		return state->link.send_message(messagesize, messagetype, message, state);
 	}
 	else return GN_ERR_NOTREADY;
 }
@@ -77,7 +77,7 @@ API gn_state gn_sm_loop(struct gn_statemachine *state, int timeout)
 		loop_timeout.tv_sec = 0;
 		loop_timeout.tv_usec = 100000;
 
-		state->link.loop(&loop_timeout);
+		state->link.loop(&loop_timeout, state);
 	}
 
 	/* FIXME - add calling a KeepAlive function here */
