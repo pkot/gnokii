@@ -73,6 +73,7 @@ typedef struct {
 	gn_display_output *display_output;
 	nk6100_keytable keytable[256];
 	int capabilities;
+	int max_sms;
 
 	char model[GN_MODEL_MAX_LENGTH];
 	char imei[GN_IMEI_MAX_LENGTH];

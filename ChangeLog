@@ -43,6 +43,7 @@
     o dropping duplicated frames during pb read     (BORBELY Zoltan)
  * 6100 series updates:
     o better fix for busy (0xc9) frame              (BORBELY Zoltan)
+    o Nokia CardPhone support updated                 (Georg Moritz)
 
 0.5.0pre4
 =========

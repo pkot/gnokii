@@ -25,6 +25,7 @@
   Copyright (C) 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001 Pawe³ Kot <pkot@linuxnews.pl>
   Copyright (C) 2002 BORBELY Zoltan
+  Copyright (C) 2002 Georg Moritz
 
   This file provides functions specific to the 6100 series.
   See README for more details on supported mobile phones.
@@ -179,7 +180,7 @@ gn_driver driver_nokia_6100 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|3360|3410|8210|8250|8290", /* Supported models */
+		"6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|3360|3410|8210|8250|8290|RPM-1", /* Supported models */
 		4,			/* Max RF Level */
 		0,			/* Min RF Level */
 		GN_RF_Arbitrary,	/* RF level units */
@@ -213,6 +214,7 @@ struct {
 	{ "NHM-6",      NULL,           NK6100_CAP_PB_UNICODE },
 	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE },
 	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE },
+	{ "RPM-1",	"-4.23",	NK6100_CAP_NBS_UPLOAD },
 	{ NULL,		NULL,		0 }
 };
 
@@ -550,6 +552,13 @@ static gn_error Initialise(struct gn_statemachine *state)
 			FREE(DRVINSTANCE(state));
 			return GN_ERR_NOTSUPPORTED;
 		}
+
+	if (!strcmp(DRVINSTANCE(state)->model, "RPM-1")) {
+		state->driver.phone.max_battery_level = 1;
+		DRVINSTANCE(state)->max_sms = 2;
+	} else {
+		DRVINSTANCE(state)->max_sms = NK6100_MAX_SMS_MESSAGES;
+	}
 
 	return GN_ERR_NONE;
 }
@@ -1274,7 +1283,7 @@ static void FlushLostSMSNotifications(struct gn_statemachine *state)
 
 	while (!DRVINSTANCE(state)->sms_notification_in_progress && DRVINSTANCE(state)->sms_notification_lost) {
 		DRVINSTANCE(state)->sms_notification_lost = false;
-		for (i = 1; i <= NK6100_MAX_SMS_MESSAGES; i++)
+		for (i = 1; i <= DRVINSTANCE(state)->max_sms; i++)
 			CheckIncomingSMS(state, i);
 	}
 }
