@@ -273,17 +273,13 @@ if [ $SW_SKIPGNOKITST = no ] ; then
 	echo "${PROGNAME}: error:"
 	echo "Can't find 'gnokii'. This script needs 'gnokii' in order to work."
 	echo "You can get a version of 'gnokii' from following links:"
-	echo "GNOKII: http://multivac.fatburen.org/gnokii/ , http://www.gnokii.org/"
+	echo "GNOKII: http://www.gnokii.org/"
 	echo
-	echo " Pavel Janik (who is to thank for a vast part of the 6110 development) "
-	echo "also keeps an ftp archive of some recent things."
-	echo " "
 	echo "Source code and pre-compiled binaries for gnokii are available from "
 	echo "a number of sites"
 	echo
-	echo "ftp.gnokii.org located in California, USA"
-	echo "linuxcare.com.au located in Canberra, Australia"
-	echo "multivac.fatburen.org located in Stockholm, Sweden "
+	echo "www.gnokii.org located in California, USA"
+	echo "ftp.pl.gnokii.org located in Warsaw, Poland"
 	echo
 	echo "Pre release versions are kept here, maintained by Pawel Kot"
 	echo "urtica.linuxnews.pl located in Warsaw, Poland"

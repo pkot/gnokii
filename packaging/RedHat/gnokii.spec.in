@@ -9,7 +9,7 @@ Release: %{release}
 License: GNU GPL
 Packager: Pavel Janik ml. <Pavel.Janik@linux.cz>, Jan Derfinak <ja@mail.upjs.sk>
 Group: Applications/Communications
-Source: ftp://ftp.gnokii.org/pub/gnokii/%{name}-%{version}.tar.gz
+Source: htp://www.gnokii.org/download/%{name}-%{version}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{version}-root
 BuildPreReq: gettext, gtk+-devel >= 1.2.0
 

@@ -1,5 +1,7 @@
 0.5.10 (not released yet)
 ======
+ * maintainance updates
+    o ftp.gnokii.org does not exist                     (Pawel Kot)
  * build system updates
     o update spec file to install all libs              (Pawel Kot)
  * libgnokii updates
