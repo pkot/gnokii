@@ -175,13 +175,17 @@ char *lock_device(const char* port)
 #ifndef WIN32
 	char *lock_file = NULL;
 	char buffer[max_buf_len];
-	char *aux = rindex(port, '/');
+	const char *aux = rindex(port, '/');
 	int fd, len = strlen(aux) + strlen(lock_path);
+
+	/* Remove leading '/' */
+	if (aux) aux++;
+	else aux = port;
 
 	memset(buffer, 0, sizeof(buffer));
 	lock_file = calloc(len + 1, 1);
 	if (!lock_file) {
-		fprintf(stderr, _("Cannot lock device\n"));
+		fprintf(stderr, _("Out of memory error while locking device\n"));
 		return NULL;
 	}
 	/* I think we don't need to use strncpy, as we should have enough
@@ -209,30 +213,48 @@ char *lock_device(const char* port)
 				sscanf(buf, "%d", &pid);
 			}
 			if (pid > 0 && kill((pid_t)pid, 0) < 0 && errno == ESRCH) {
-				fprintf(stderr, _("Lockfile is stale. Overriding it..\n"));
+				fprintf(stderr, _("Lockfile %s is stale. Overriding it..\n"), lock_file);
 				sleep(1);
-				unlink(lock_file);
-			} else
-				n = 0;
+				if (unlink(lock_file) == -1) {
+					fprintf(stderr, _("Overriding failed, please check the permissions\n"));
+					fprintf(stderr, _("Cannot lock device\n"));
+					goto failed;
+				}
+			} else {
+				fprintf(stderr, _("Device already locked.\n"));
+				goto failed;
+			}
 		}
+		/* this must not happen. because we could open the file   */
+		/* no wrong permissions are set. only reason could be     */
+		/* flock/lockf or a empty lockfile due to a broken binary */
+		/* which is more likely (like gnokii 0.4.0pre11 ;-)       */
 		if (n == 0) {
-			free(lock_file);
-			fprintf(stderr, _("Device is already locked.\n"));
-			return NULL;
+			fprintf(stderr, _("Unable to read lockfile %s.\n"), lock_file);
+			fprintf(stderr, _("Please check for reason and remove the lockfile by hand.\n"));
+			fprintf(stderr, _("Cannot lock device\n"));
+			goto failed;
 		}
 	}
 
 	/* Try to create a new file, with 0644 mode */
-	fd = open(lock_file, O_CREAT | O_EXCL, 0644);
+	fd = open(lock_file, O_CREAT | O_EXCL | O_WRONLY, 0644);
 	if (fd == -1) {
-		free(lock_file);
-		fprintf(stderr, _("Cannot lock device\n"));
-		return NULL;
+		if (errno == EEXIST)
+			fprintf(stderr, _("Device seems to be locked by unknown process\n"));
+		else if (errno == EACCES)
+			fprintf(stderr, _("Please check permission on lock directory\n"));
+		else if (errno == ENOENT)
+			fprintf(stderr, _("Cannot create lockfile %s. Please check for existence of path"), lock_file);
+		goto failed;
 	}
 	sprintf(buffer, "%10ld gnokii\n", (long)getpid());
 	write(fd, buffer, strlen(buffer));
 	close(fd);
 	return lock_file;
+failed:
+	free(lock_file);
+	return NULL;
 #else
 	return NULL;
 #endif /* WIN32 */
