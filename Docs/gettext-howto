@@ -1,36 +1,89 @@
-1. how to make .po file?
+1. What do I need?
 
-	xgettext -a -k_ -s -v -d gnokii *.h *.c
+- a reasonably recent version of GNU gettext (e.g. 0.10.35)
+  Check the version using e.g. msgfmt -V
 
-xgettext is from GNU gettext
+- gnokii distribution :-)
 
--a means extract all strings
+- if you have the variable LINGUAS in the environment
+  (most Red Hats have, no idea about other distributions),
+  unset it
 
--k_ Character `_' is used to mark translatable strings
 
--s output is sorted and without duplicates
+2. How to make gnokii.pot file?
 
--v verbose
+gnokii.pot file is a collection of all localizable strings
+in the gnokii package. It will be generated automagically
+and is included in the standard distribution package.
 
--d `gnokii' domain, output file is gnokii.po
+If you need to regenerate it, goto "po" directory,
+remove gnokii.pot and say
 
-If the .po file already exist you should use tupdate - see gettext
-documentation how to do it.
+        make gnokii.pot
 
-2. how to make .mo file?
 
-	msgfmt -o gnokii.mo -v cs-gnokii.po 
+3.1 How to start translating for a new language?
 
-3. move the .mo file to /usr/share/locale/<your locale>/LC_MESSAGES/gnokii.mo 
+First, you would like to contact the authors or write
+to the mailing list - maybe there already is someone
+working on this translation. 
 
-I'm from Czech republic, so I did (well, I did not, but if you would like to
-localize gnokii, you should :-):
+If you get the OK from the maintainer, there are several
+steps to do:
 
-	xgettext -a -k_ -s -v -d gnokii *.h *.c
-	cp gnokii.po cs-gnokii.po
-	<translating messages in cs-gnokii.po>
-	msgfmt -o gnokii.mo -v cs-gnokii.po
-	mv gnokii.mo /usr/share/locale/cs/LC_MESSAGES/gnokii.mo
+- add the code of your language to the ALL_LINGUAS line
+  in the configure.in file
+
+  Caution: the language code may differ from the country
+  code, e.g. czech language is cs, Czech Republic is cz 
+
+- reconfigure the package (./configure)
+
+- in the po directory, copy gnokii.pot to <country>.po
+
+- start translating
+  
+
+3.2 How to merge existing translations with the updated gnokii.pot?
+
+This is simple. Rename the old file and use msgmerge to create
+an updated one:
+
+        mv cs.po cs.po.bak
+        msgmerge -o cs.po cs.po.bak gnokii.pot
+
+
+4. How to generate a .mo file
+
+When you say make in the po directory, all existing
+translations will be generated. The suffix will be .gmo.
+
+If you want to do this manually, use the msgfmt utility, e.g.
+
+        msgfmt -o cs.mo -v cs.po 
+
+
+5. How to install the files
+
+Again, the makefile takes care of this. Simply use (as root)
+
+        make install
+
+in the po directory. If you want to do this manually (and/or
+for your language only), move the .mo file to
+/usr/share/locale/<your locale>/LC_MESSAGES/gnokii.mo 
+
+
+I'm from Czech republic, so I did (well, I did not, but if you would
+like to localize gnokii, you should :-):
+
+        cd po
+        make gnokii.pot
+        cp gnokii.pot cs.po
+        <translating messages in cs.po>
+        <checking the translations using> msgfmt -o cs.mo -v cs.po
+	make
+        make install
 
 And now:
 
@@ -42,31 +95,4 @@ SnowWhite:/tmp/gnokii$
 
 The second line is in czech language :-) There are some problems - for
 example with "Mar" which is substitute by the C preprocessor.
-
-4. Updating all .po files:
-
-	mv gnokii.po old.po
-	xgettext -a -k_ -s -v -d gnokii *.h *.c
-	mv gnokii.po new.po
-	tupdate new.po old.po >gnokii.po
-	rm -rf new.po old.po
-
-Now we have new gnokii.po file.
-
-	mv cs-gnokii.po old.po
-	tupdate gnokii.po old.po > cs-gnokii.po
-	rm -rf old.po
-
-And now we also have new cs-gnokii.po file.
-
-
-5. Add your new .po file to po/Makefile.
-
-   Add your locale language code (example 'cs') to LANGUAGE variable
-   in Makefile in po directory, and don't omit - your new .po file 
-   must be named 'xx-gnokii.po' where 'xx' is your lang.	
- 
-   Now is your new language support available for packaging proces and 
-   it will compile to .mo file itself.
- 
 
