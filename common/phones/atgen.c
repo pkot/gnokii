@@ -516,7 +516,7 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 			len = char_ascii_encode(tmp, data->phonebook_entry->name, len);
 			break;
 		case AT_CHAR_HEXGSM:
-			char_hex_encode(tmp, data->phonebook_entry->name, len);
+			char_hex_encode(tmp, data->phonebook_entry->name, 2 * len);
 			len *= 2;
 			break;
 		case AT_CHAR_UCS2:

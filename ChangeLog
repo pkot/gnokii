@@ -15,6 +15,7 @@
                                                          (Pawel Kot)
     o avoid segfault on attempt to write the phonebook entry
       with xgnokii and Nokia phones                      (Pawel Kot)
+    o fix phonebook writing when using HEXGSM alphabet   (Pawel Kot)
  * nk3110 driver updates
     o bring the driver back to life in new API       (Osma Suominen)
  * docs updates
