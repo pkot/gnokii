@@ -39,7 +39,7 @@
 /* SMS */
 gn_error sms_parse(gn_data *data, int offset);
 gn_error sms_request(gn_data *data, struct gn_statemachine *state);
-gn_error gn_sms_prepare(gn_sms *sms, gn_sms_raw *rawsms);
+gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms);
 gn_timestamp *gn_misc_unpack_timestamp(u8 *Number, gn_timestamp *dt);
 
 /* Statemachine */

@@ -51,6 +51,7 @@
 #include "gsm-data.h"
 #include "gsm-api.h"
 #include "gsm-sms.h"
+#include "gsm-call.h"
 #include "data/at-emulator.h"
 #include "data/virtmodem.h"
 #include "data/datapump.h"
@@ -98,15 +99,15 @@
 #define INTERACT_MODE 2
 
 /* Global variables */
-bool ATEM_Initialised = false;	/* Set to true once initialised */
+bool gn_atem_initialised = false;	/* Set to true once initialised */
 extern bool CommandMode;
 extern int ConnectCount;
 
-GSM_Statemachine *sm;
-GSM_Data data;
+struct gn_statemachine *sm;
+gn_data data;
 
-static GSM_API_SMS sms;
-static GSM_CallInfo callinfo;
+static gn_sms sms;
+static gn_call_info callinfo;
 static 	char imei[64], model[64], revision[64], manufacturer[64];
 
 /* Local variables */
@@ -123,28 +124,28 @@ static int     MessageFormat;          /* Message Format (text or pdu) */
 
 	/* Current command parser */
 static void 	(*Parser)(char *); /* Current command parser */
-/* void 	(*Parser)(char *) = ATEM_ParseAT; */
+/* void 	(*Parser)(char *) = gn_atem_at_parse; */
 
-static GSM_MemoryType 	SMSType;
+static gn_memory_type 	SMSType;
 static int 	SMSNumber;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
-bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
+bool gn_atem_initialise(int read_fd, int write_fd, struct gn_statemachine *vmsm)
 {
 	PtyRDFD = read_fd;
 	PtyWRFD = write_fd;
 
-	GSM_DataClear(&data);
+	gn_data_clear(&data);
 	memset(&sms, 0, sizeof(sms));
 	memset(&callinfo, 0, sizeof(callinfo));
 
-	data.SMS = &sms;
-	data.CallInfo = &callinfo;
-	data.Manufacturer = manufacturer;
-	data.Model = model;
-	data.Revision = revision;
-	data.Imei = imei;
+	data.sms = &sms;
+	data.call_info = &callinfo;
+	data.manufacturer = manufacturer;
+	data.model = model;
+	data.revision = revision;
+	data.imei = imei;
 
 	sm = vmsm;
 
@@ -156,30 +157,30 @@ bool ATEM_Initialise(int read_fd, int write_fd, GSM_Statemachine *vmsm)
 	VerboseResponse = true;
 
 	/* Initialise registers */
-	ATEM_InitRegisters();
+	gn_atem_registers_init();
 
 	/* Initial parser is AT routine */
-	Parser = ATEM_ParseAT;
+	Parser = gn_atem_at_parse;
 
 	/* Setup defaults for AT*C interpreter. */
 	SMSNumber = 1;
-	SMSType = GMT_ME;
+	SMSType = GN_MT_ME;
 
 	/* Default message format is PDU */
 	MessageFormat = PDU_MODE;
 
 	/* Set the call passup so that we get notified of incoming calls */
-	data.CallNotification = ATEM_CallPassup;
-	SM_Functions(GOP_SetCallNotification, &data, sm);
+	data.call_notification = gn_atem_call_passup;
+	gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 
 	/* We're ready to roll... */
-	ATEM_Initialised = true;
+	gn_atem_initialised = true;
 	return (true);
 }
 
 
 /* Initialise the "registers" used by the virtual modem. */
-void	ATEM_InitRegisters(void)
+void	gn_atem_registers_init(void)
 {
 
 	ModemRegisters[REG_RINGATA] = 0;
@@ -196,20 +197,20 @@ void	ATEM_InitRegisters(void)
 
 
 /* This gets called to indicate an incoming call */
-void ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state)
+void gn_atem_call_passup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_statemachine *state)
 {
-	dprintf("ATEM_CallPassup called with %d\n", CallStatus);
+	dprintf("gn_atem_call_passup called with %d\n", CallStatus);
 
-	if (CallStatus == GSM_CS_IncomingCall) {
-		ATEM_ModemResult(MR_RING);
-		IncomingCallNo = CallInfo->CallID;
+	if (CallStatus == GN_CALL_Incoming) {
+		gn_atem_modem_result(MR_RING);
+		IncomingCallNo = CallInfo->call_id;
 	}
 }
 
 
 /* Handler called when characters received from serial port.
    calls state machine code to process it. */
-void	ATEM_HandleIncomingData(char *buffer, int length)
+void	gn_atem_incoming_data_handle(char *buffer, int length)
 {
 	int count;
 	unsigned char out_buf[3];
@@ -243,7 +244,7 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 			if (ModemRegisters[REG_ECHO] & BIT_ECHO) {
 				out_buf[0] = buffer[count];
 				out_buf[1] = 0;
-				ATEM_StringOut(out_buf);
+				gn_atem_string_out(out_buf);
 			}
 
 			/* Collect it to command buffer */
@@ -257,12 +258,12 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 
 
 /* Parser for standard AT commands.  cmd_buffer must be null terminated. */
-void	ATEM_ParseAT(char *cmd_buffer)
+void	gn_atem_at_parse(char *cmd_buffer)
 {
 	char *buf;
 
 	if (strncasecmp (cmd_buffer, "AT", 2) != 0) {
-		ATEM_ModemResult(MR_ERROR);
+		gn_atem_modem_result(MR_ERROR);
 		return;
 	}
 
@@ -275,11 +276,11 @@ void	ATEM_ParseAT(char *cmd_buffer)
 		case 'A':
 			buf++;
 			/* For now we'll also initialise the datapump + rlp code again */
-			DP_Initialise(PtyRDFD, PtyWRFD);
-			data.CallNotification = DP_CallPassup;
-			SM_Functions(GOP_SetCallNotification, &data, sm);
-			data.CallInfo->CallID = IncomingCallNo;
-			SM_Functions(GOP_AnswerCall, &data, sm);
+			dp_Initialise(PtyRDFD, PtyWRFD);
+			data.call_notification = dp_CallPassup;
+			gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
+			data.call_info->call_id = IncomingCallNo;
+			gn_sm_functions(GN_OP_AnswerCall, &data, sm);
 			CommandMode = false;
 			return;
 			break;
@@ -287,34 +288,34 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			/* Dial Data :-) */
 			/* FIXME - should parse this better */
 			/* For now we'll also initialise the datapump + rlp code again */
-			DP_Initialise(PtyRDFD, PtyWRFD);
+			dp_Initialise(PtyRDFD, PtyWRFD);
 			buf++;
 			if (toupper(*buf) == 'T') buf++;
 			if (*buf == ' ') buf++;
-			data.CallNotification = DP_CallPassup;
-			SM_Functions(GOP_SetCallNotification, &data, sm);
-			snprintf(data.CallInfo->Number, sizeof(data.CallInfo->Number), "%s", buf);
+			data.call_notification = dp_CallPassup;
+			gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
+			snprintf(data.call_info->number, sizeof(data.call_info->number), "%s", buf);
 			if (ModemRegisters[S35] == 0)
-				data.CallInfo->Type = GSM_CT_DigitalDataCall;
+				data.call_info->type = GN_CALL_DigitalData;
 			else
-				data.CallInfo->Type = GSM_CT_NonDigitalDataCall;
-			data.CallInfo->SendNumber = GSM_CSN_Default;
+				data.call_info->type = GN_CALL_NonDigitalData;
+			data.call_info->send_number = GN_CALL_Default;
 			CommandMode = false;
-			RLP_SetUserRequest(Conn_Req, true);
-			if (SM_Functions(GOP_MakeCall, &data, sm) != GN_ERR_NONE) {
+			rlp_user_request_set(Conn_Req, true);
+			if (gn_sm_functions(GN_OP_MakeCall, &data, sm) != GN_ERR_NONE) {
 				CommandMode = true;
-				DP_CallPassup(GSM_CS_RemoteHangup, NULL, NULL);
+				dp_CallPassup(GN_CALL_RemoteHangup, NULL, NULL);
 			} else {
-				IncomingCallNo = data.CallInfo->CallID;
+				IncomingCallNo = data.call_info->call_id;
 			}
 			return;
 			break;
 		case 'H':
 			/* Hang Up */
 			buf++;
-			RLP_SetUserRequest(Disc_Req, true);
-			data.CallInfo->CallID = IncomingCallNo;
-			SM_Functions(GOP_CancelCall, &data, sm);
+			rlp_user_request_set(Disc_Req, true);
+			data.call_info->call_id = IncomingCallNo;
+			gn_sm_functions(GN_OP_CancelCall, &data, sm);
 			break;
 		case 'S':
 			/* Change registers - only no. 35 for now */
@@ -328,7 +329,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 		  /* E - Turn Echo on/off */
 		case 'E':
 			buf++;
-			switch (ATEM_GetNum(&buf)) {
+			switch (gn_atem_num_get(&buf)) {
 			case 0:
 				ModemRegisters[REG_ECHO] &= ~BIT_ECHO;
 				break;
@@ -336,7 +337,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				ModemRegisters[REG_ECHO] |= BIT_ECHO;
 				break;
 			default:
-				ATEM_ModemResult(MR_ERROR);
+				gn_atem_modem_result(MR_ERROR);
 				return;
 			}
 			break;
@@ -345,12 +346,12 @@ void	ATEM_ParseAT(char *cmd_buffer)
 		case '*':
 			buf++;
 			if (!strcasecmp(buf, "NOKIATEST")) {
-				ATEM_ModemResult(MR_OK); /* FIXME? */
+				gn_atem_modem_result(MR_OK); /* FIXME? */
 				return;
 			} else {
 				if (!strcasecmp(buf, "C")) {
-					ATEM_ModemResult(MR_OK);
-					Parser = ATEM_ParseSMS;
+					gn_atem_modem_result(MR_OK);
+					Parser = gn_atem_sms_parse;
 					return;
 				}
 			}
@@ -363,7 +364,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			case 'C':
 				buf++;
 				/* Returns true if error occured */
-				if (ATEM_CommandPlusC(&buf) == true) {
+				if (gn_atem_command_plusc(&buf) == true) {
 					return;
 				}
 				break;
@@ -371,39 +372,39 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			case 'G':
 				buf++;
 				/* Returns true if error occured */
-				if (ATEM_CommandPlusG(&buf) == true) {
+				if (gn_atem_command_plusg(&buf) == true) {
 					return;
 				}
 				break;
 
 			default:
-				ATEM_ModemResult(MR_ERROR);
+				gn_atem_modem_result(MR_ERROR);
 				return;
 			}
 			break;
 
 		default:
-			ATEM_ModemResult(MR_ERROR);
+			gn_atem_modem_result(MR_ERROR);
 			return;
 		}
 	}
 
-	ATEM_ModemResult(MR_OK);
+	gn_atem_modem_result(MR_OK);
 }
 
 
-static void ATEM_PrintSMS(char *line, GSM_API_SMS *message, int mode)
+static void gn_atem_sms_print(char *line, gn_sms *message, int mode)
 {
 	switch (mode) {
 	case INTERACT_MODE:
-		gsprintf(line, MAX_LINE_LENGTH, _("\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\rText: %s\n\r"), message->Time.Day, message->Time.Month, message->Time.Year, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Remote.Number, message->SMSC.Number, message->UserData[0].u.Text);
+		gsprintf(line, MAX_LINE_LENGTH, _("\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\rText: %s\n\r"), message->time.day, message->time.month, message->time.year, message->time.hour, message->time.minute, message->time.second, message->remote.number, message->smsc.number, message->user_data[0].u.text);
 		break;
 	case TEXT_MODE:
-		if ((message->DCS.Type == SMS_GeneralDataCoding) &&
-		    (message->DCS.u.General.Alphabet == SMS_8bit))
-			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->Remote.Number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, _("<Not implemented>"));
+		if ((message->dcs.type == GN_SMS_DCS_GeneralDataCoding) &&
+		    (message->dcs.u.general.alphabet == GN_SMS_DCS_8bit))
+			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->status ? _("REC READ") : _("REC UNREAD")), message->remote.number, message->time.year, message->time.month, message->time.day, message->time.hour, message->time.minute, message->time.second, message->time.timezone, _("<Not implemented>"));
 		else
-			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->Status ? _("REC READ") : _("REC UNREAD")), message->Remote.Number, message->Time.Year, message->Time.Month, message->Time.Day, message->Time.Hour, message->Time.Minute, message->Time.Second, message->Time.Timezone, message->UserData[0].u.Text);
+			gsprintf(line, MAX_LINE_LENGTH, _("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\n\r%s"), (message->status ? _("REC READ") : _("REC UNREAD")), message->remote.number, message->time.year, message->time.month, message->time.day, message->time.hour, message->time.minute, message->time.second, message->time.timezone, message->user_data[0].u.text);
 		break;
 	case PDU_MODE:
 		gsprintf(line, MAX_LINE_LENGTH, _("<Not implemented>"));
@@ -415,84 +416,84 @@ static void ATEM_PrintSMS(char *line, GSM_API_SMS *message, int mode)
 }
 
 
-static void ATEM_HandleSMS()
+static void gn_atem_sms_handle()
 {
 	gn_error	error;
 	char		buffer[MAX_LINE_LENGTH];
 
-	data.SMS->MemoryType = SMSType;
-	data.SMS->Number = SMSNumber;
+	data.sms->memory_type = SMSType;
+	data.sms->number = SMSNumber;
 	error = gn_sms_get(&data, sm);
 
 	switch (error) {
 	case GN_ERR_NONE:
-		ATEM_PrintSMS(buffer, data.SMS, INTERACT_MODE);
-		ATEM_StringOut(buffer);
+		gn_atem_sms_print(buffer, data.sms, INTERACT_MODE);
+		gn_atem_string_out(buffer);
 		break;
 	default:
 		gsprintf(buffer, MAX_LINE_LENGTH, _("\n\rNo message under number %d\n\r"), SMSNumber);
-		ATEM_StringOut(buffer);
+		gn_atem_string_out(buffer);
 		break;
 	}
 	return;
 }
 
 /* Parser for SMS interactive mode */
-void	ATEM_ParseSMS(char *buff)
+void	gn_atem_sms_parse(char *buff)
 {
 	if (!strcasecmp(buff, "HELP")) {
-		ATEM_StringOut(_("\n\rThe following commands work...\n\r"));
-		ATEM_StringOut("DIR\n\r");
-		ATEM_StringOut("EXIT\n\r");
-		ATEM_StringOut("HELP\n\r");
+		gn_atem_string_out(_("\n\rThe following commands work...\n\r"));
+		gn_atem_string_out("DIR\n\r");
+		gn_atem_string_out("EXIT\n\r");
+		gn_atem_string_out("HELP\n\r");
 		return;
 	}
 
 	if (!strcasecmp(buff, "DIR")) {
 		SMSNumber = 1;
-		ATEM_HandleSMS();
-		Parser = ATEM_ParseDIR;
+		gn_atem_sms_handle();
+		Parser = gn_atem_dir_parse;
 		return;
 	}
 	if (!strcasecmp(buff, "EXIT")) {
-		Parser = ATEM_ParseAT;
-		ATEM_ModemResult(MR_OK);
+		Parser = gn_atem_at_parse;
+		gn_atem_modem_result(MR_OK);
 		return;
 	}
-	ATEM_ModemResult(MR_ERROR);
+	gn_atem_modem_result(MR_ERROR);
 }
 
 /* Parser for DIR sub mode of SMS interactive mode. */
-void	ATEM_ParseDIR(char *buff)
+void	gn_atem_dir_parse(char *buff)
 {
 	switch (toupper(*buff)) {
 		case 'P':
 			SMSNumber--;
-			ATEM_HandleSMS();
+			gn_atem_sms_handle();
 			return;
 		case 'N':
 			SMSNumber++;
-			ATEM_HandleSMS();
+			gn_atem_sms_handle();
 			return;
 		case 'D':
-			data.SMS->MemoryType = SMSType;
-			data.SMS->Number = SMSNumber;
-			if (SM_Functions(GOP_DeleteSMS, &data, sm) == GN_ERR_NONE) {
-				ATEM_ModemResult(MR_OK);
+			data.sms->memory_type = SMSType;
+			data.sms->number = SMSNumber;
+			if (gn_sm_functions(GN_OP_DeleteSMS, &data, sm) == GN_ERR_NONE) {
+				gn_atem_modem_result(MR_OK);
 			} else {
-				ATEM_ModemResult(MR_ERROR);
+				gn_atem_modem_result(MR_ERROR);
 			}
 			return;
 		case 'Q':
-			Parser= ATEM_ParseSMS;
-			ATEM_ModemResult(MR_OK);
+			Parser= gn_atem_sms_parse;
+			gn_atem_modem_result(MR_OK);
 			return;
 	}
-	ATEM_ModemResult(MR_ERROR);
+	gn_atem_modem_result(MR_ERROR);
 }
 
 /* Parser for entering message content (+CMGS) */
-void	ATEM_ParseSMSText(char *buff)
+void	gn_atem_sms_parseText(char *buff)
 {
 	static int index = 0;
 	int i, length;
@@ -501,54 +502,54 @@ void	ATEM_ParseSMSText(char *buff)
 
 	length = strlen(buff);
 
-	sms.UserData[0].Type = SMS_PlainText;
+	sms.user_data[0].type = GN_SMS_DATA_Text;
 
 	for (i = 0; i < length; i++) {
 
 		if (buff[i] == ModemRegisters[REG_CTRLZ]) {
 			/* Exit SMS text mode with sending */
-			sms.UserData[0].u.Text[index] = 0;
-			sms.UserData[0].Length = index;
+			sms.user_data[0].u.text[index] = 0;
+			sms.user_data[0].length = index;
 			index = 0;
-			Parser = ATEM_ParseAT;
-			dprintf("Sending SMS to %s (text: %s)\n", data.SMS->Remote.Number, data.SMS->UserData[0].u.Text);
+			Parser = gn_atem_at_parse;
+			dprintf("Sending SMS to %s (text: %s)\n", data.sms->Remote.Number, data.sms->user_data[0].u.text);
 
 			/* FIXME: set more SMS fields before sending */
 			error = gn_sms_send(&data, sm);
 
 			if (error == GN_ERR_NONE) {
-				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.SMS->Number);
-				ATEM_StringOut(buffer);
-				ATEM_ModemResult(MR_OK);
+				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGS: %d", data.sms->number);
+				gn_atem_string_out(buffer);
+				gn_atem_modem_result(MR_OK);
 			} else {
-				ATEM_ModemResult(MR_ERROR);
+				gn_atem_modem_result(MR_ERROR);
 			}
 			return;
 		} else if (buff[i] == ModemRegisters[REG_ESCAPE]) {
 			/* Exit SMS text mode without sending */
-			sms.UserData[0].u.Text[index] = 0;
-			sms.UserData[0].Length = index;
+			sms.user_data[0].u.text[index] = 0;
+			sms.user_data[0].length = index;
 			index = 0;
-			Parser = ATEM_ParseAT;
-			ATEM_ModemResult(MR_OK);
+			Parser = gn_atem_at_parse;
+			gn_atem_modem_result(MR_OK);
 			return;
 		} else {
 			/* Appent next char to message text */
-			sms.UserData[0].u.Text[index++] = buff[i];
+			sms.user_data[0].u.text[index++] = buff[i];
 		}
 	}
 
 	/* reached the end of line so insert \n and wait for more */
-	sms.UserData[0].u.Text[index++] = '\n';
-	ATEM_StringOut("\n\r> ");
+	sms.user_data[0].u.text[index++] = '\n';
+	gn_atem_string_out("\n\r> ");
 }
 
 /* Handle AT+C commands, this is a quick hack together at this
    stage. */
-bool	ATEM_CommandPlusC(char **buf)
+bool	gn_atem_command_plusc(char **buf)
 {
 	float		rflevel = -1;
-	GSM_RFUnits	rfunits = GRF_CSQ;
+	gn_rf_unit	rfunits = GN_RF_CSQ;
 	char		buffer[MAX_LINE_LENGTH], buffer2[MAX_LINE_LENGTH];
 	int		status, index;
 	gn_error	error;
@@ -556,11 +557,11 @@ bool	ATEM_CommandPlusC(char **buf)
 	if (strncasecmp(*buf, "SQ", 2) == 0) {
 		buf[0] += 2;
 
-		data.RFUnits = &rfunits;
-		data.RFLevel = &rflevel;
-		if (SM_Functions(GOP_GetRFLevel, &data, sm) == GN_ERR_NONE) {
-			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CSQ: %0.0f, 99", *(data.RFLevel));
-			ATEM_StringOut(buffer);
+		data.rf_unit = &rfunits;
+		data.rf_level = &rflevel;
+		if (gn_sm_functions(GN_OP_GetRFLevel, &data, sm) == GN_ERR_NONE) {
+			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CSQ: %0.0f, 99", *(data.rf_level));
+			gn_atem_string_out(buffer);
 			return (false);
 		} else {
 			return (true);
@@ -571,17 +572,17 @@ bool	ATEM_CommandPlusC(char **buf)
 	   it should be Nokia rather than gnokii... */
 	if (strncasecmp(*buf, "GMI", 3) == 0) {
 		buf[0] += 3;
-		ATEM_StringOut(_("\n\rNokia Mobile Phones"));
+		gn_atem_string_out(_("\n\rNokia Mobile Phones"));
 		return (false);
 	}
 
 	/* AT+CGSN is IMEI */
 	if (strncasecmp(*buf, "GSN", 3) == 0) {
 		buf[0] += 3;
-		strcpy(data.Imei, "+CME ERROR: 0");
-		if (SM_Functions(GOP_GetImei, &data, sm) == GN_ERR_NONE) {
-			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Imei);
-			ATEM_StringOut(buffer);
+		strcpy(data.imei, "+CME ERROR: 0");
+		if (gn_sm_functions(GN_OP_GetImei, &data, sm) == GN_ERR_NONE) {
+			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.imei);
+			gn_atem_string_out(buffer);
 			return (false);
 		} else {
 			return (true);
@@ -591,10 +592,10 @@ bool	ATEM_CommandPlusC(char **buf)
 	/* AT+CGMR is Revision (hardware) */
 	if (strncasecmp(*buf, "GMR", 3) == 0) {
 		buf[0] += 3;
-		strcpy(data.Revision, "+CME ERROR: 0");
-		if (SM_Functions(GOP_GetRevision, &data, sm) == GN_ERR_NONE) {
-			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Revision);
-			ATEM_StringOut(buffer);
+		strcpy(data.revision, "+CME ERROR: 0");
+		if (gn_sm_functions(GN_OP_GetRevision, &data, sm) == GN_ERR_NONE) {
+			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.revision);
+			gn_atem_string_out(buffer);
 			return (false);
 		} else {
 			return (true);
@@ -604,10 +605,10 @@ bool	ATEM_CommandPlusC(char **buf)
 	/* AT+CGMM is Model code  */
 	if (strncasecmp(*buf, "GMM", 3) == 0) {
 		buf[0] += 3;
-		strcpy(data.Model, "+CME ERROR: 0");
-		if (SM_Functions(GOP_GetModel, &data, sm) == GN_ERR_NONE) {
-			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.Model);
-			ATEM_StringOut(buffer);
+		strcpy(data.model, "+CME ERROR: 0");
+		if (gn_sm_functions(GN_OP_GetModel, &data, sm) == GN_ERR_NONE) {
+			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s", data.model);
+			gn_atem_string_out(buffer);
 			return (false);
 		} else {
 			return (true);
@@ -623,16 +624,16 @@ bool	ATEM_CommandPlusC(char **buf)
 			index = atoi(*buf);
 			buf[0] += strlen(*buf);
 
-			data.SMS->MemoryType = SMSType;
-			data.SMS->Number = index;
-			error = SM_Functions(GOP_DeleteSMS, &data, sm);
+			data.sms->memory_type = SMSType;
+			data.sms->number = index;
+			error = gn_sm_functions(GN_OP_DeleteSMS, &data, sm);
 
 			switch (error) {
 			case GN_ERR_NONE:
 				break;
 			default:
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMS ERROR: %d\n\r", error);
-				ATEM_StringOut(buffer);
+				gn_atem_string_out(buffer);
 				return (true);
 			}
 			break;
@@ -664,7 +665,7 @@ bool	ATEM_CommandPlusC(char **buf)
 		case '?':
 			buf[0]++;
 			gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGF: %d", MessageFormat);
-			ATEM_StringOut(buffer);
+			gn_atem_string_out(buffer);
 			break;
 		default:
 			return (true);
@@ -681,19 +682,19 @@ bool	ATEM_CommandPlusC(char **buf)
 			index = atoi(*buf);
 			buf[0] += strlen(*buf);
 
-			data.SMS->MemoryType = SMSType;
-			data.SMS->Number = index;
+			data.sms->memory_type = SMSType;
+			data.sms->number = index;
 			error = gn_sms_get(&data, sm);
 
 			switch (error) {
 			case GN_ERR_NONE:
-				ATEM_PrintSMS(buffer2, data.SMS, MessageFormat);
+				gn_atem_sms_print(buffer2, data.sms, MessageFormat);
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGR: %s", buffer2);
-				ATEM_StringOut(buffer);
+				gn_atem_string_out(buffer);
 				break;
 			default:
 				gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMS ERROR: %d\n\r", error);
-				ATEM_StringOut(buffer);
+				gn_atem_string_out(buffer);
 				return (true);
 			}
 			break;
@@ -709,10 +710,10 @@ bool	ATEM_CommandPlusC(char **buf)
 		switch (**buf) {
 		case '=':
 			buf[0]++;
-			if (sscanf(*buf, "\"%[+0-9a-zA-Z ]\"", sms.Remote.Number)) {
-				Parser = ATEM_ParseSMSText;
+			if (sscanf(*buf, "\"%[+0-9a-zA-Z ]\"", sms.remote.number)) {
+				Parser = gn_atem_sms_parseText;
 				buf[0] += strlen(*buf);
-				ATEM_StringOut("\n\r> ");
+				gn_atem_string_out("\n\r> ");
 			}
 			return (true);
 		default:
@@ -736,12 +737,12 @@ bool	ATEM_CommandPlusC(char **buf)
 				strcasecmp(*buf, "3") == 0 ||
 				strcasecmp(*buf, "\"REC READ\"") == 0 ||
 				strcasecmp(*buf, "\"STO SENT\"") == 0) {
-				status = SMS_Sent;
+				status = GN_SMS_Sent;
 			} else if (strcasecmp(*buf, "0") == 0 ||
 				strcasecmp(*buf, "2") == 0 ||
 				strcasecmp(*buf, "\"REC UNREAD\"") == 0 ||
 				strcasecmp(*buf, "\"STO UNSENT\"") == 0) {
-				status = SMS_Unsent;
+				status = GN_SMS_Unsent;
 			} else if (strcasecmp(*buf, "4") == 0 ||
 				strcasecmp(*buf, "\"ALL\"") == 0) {
 				status = 4; /* ALL */
@@ -753,17 +754,17 @@ bool	ATEM_CommandPlusC(char **buf)
 			/* check all message storages */
 			for (index = 1; index <= 20; index++) {
 
-				data.SMS->MemoryType = SMSType;
-				data.SMS->Number = index;
+				data.sms->memory_type = SMSType;
+				data.sms->number = index;
 				error = gn_sms_get(&data, sm);
 
 				switch (error) {
 				case GN_ERR_NONE:
 					/* print messsage if it has the required status */
-					if (data.SMS->Status == status || status == 4 /* ALL */) {
-						ATEM_PrintSMS(buffer2, data.SMS, MessageFormat);
+					if (data.sms->status == status || status == 4 /* ALL */) {
+						gn_atem_sms_print(buffer2, data.sms, MessageFormat);
 						gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMGL: %d,%s", index, buffer2);
-						ATEM_StringOut(buffer);
+						gn_atem_string_out(buffer);
 					}
 					break;
 				case GN_ERR_EMPTYLOCATION:
@@ -772,7 +773,7 @@ bool	ATEM_CommandPlusC(char **buf)
 				default:
 					/* print other error codes and quit */
 					gsprintf(buffer, MAX_LINE_LENGTH, "\n\r+CMS ERROR: %d\n\r", error);
-					ATEM_StringOut(buffer);
+					gn_atem_string_out(buffer);
 					return (true);
 				}
 			}
@@ -787,7 +788,7 @@ bool	ATEM_CommandPlusC(char **buf)
 }
 
 /* AT+G commands.  Some of these responses are a bit tongue in cheek... */
-bool	ATEM_CommandPlusG(char **buf)
+bool	gn_atem_command_plusg(char **buf)
 {
 	char		buffer[MAX_LINE_LENGTH];
 
@@ -795,7 +796,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	if (strncasecmp(*buf, "MI", 3) == 0) {
 		buf[0] += 2;
 
-		ATEM_StringOut(_("\n\rHugh Blemings, Pavel Janík ml. and others..."));
+		gn_atem_string_out(_("\n\rHugh Blemings, Pavel Janík ml. and others..."));
 		return (false);
 	}
 
@@ -804,7 +805,7 @@ bool	ATEM_CommandPlusG(char **buf)
 		buf[0] += 2;
 		gsprintf(buffer, MAX_LINE_LENGTH, "\n\r%s %s %s", VERSION, __TIME__, __DATE__);
 
-		ATEM_StringOut(buffer);
+		gn_atem_string_out(buffer);
 		return (false);
 	}
 
@@ -812,8 +813,8 @@ bool	ATEM_CommandPlusG(char **buf)
 	if (strncasecmp(*buf, "MM", 3) == 0) {
 		buf[0] += 2;
 
-		gsprintf(buffer, MAX_LINE_LENGTH, _("\n\rgnokii configured on %s for models %s"), sm->Link.PortDevice, sm->Phone.Info.Models);
-		ATEM_StringOut(buffer);
+		gsprintf(buffer, MAX_LINE_LENGTH, _("\n\rgnokii configured on %s for models %s"), sm->link.port_device, sm->driver.phone.models);
+		gn_atem_string_out(buffer);
 		return (false);
 	}
 
@@ -822,7 +823,7 @@ bool	ATEM_CommandPlusG(char **buf)
 		buf[0] += 2;
 
 		gsprintf(buffer, MAX_LINE_LENGTH, _("\n\rnone built in, choose your own"));
-		ATEM_StringOut(buffer);
+		gn_atem_string_out(buffer);
 		return (false);
 	}
 
@@ -831,39 +832,39 @@ bool	ATEM_CommandPlusG(char **buf)
 
 /* Send a result string back.  There is much work to do here, see
    the code in the isdn driver for an idea of where it's heading... */
-void	ATEM_ModemResult(int code)
+void	gn_atem_modem_result(int code)
 {
 	char	buffer[16];
 
 	if (VerboseResponse == false) {
 		sprintf(buffer, "\n\r%d\n\r", code);
-		ATEM_StringOut(buffer);
+		gn_atem_string_out(buffer);
 	} else {
 		switch (code) {
 			case MR_OK:
-					ATEM_StringOut("\n\rOK\n\r");
+					gn_atem_string_out("\n\rOK\n\r");
 					break;
 
 			case MR_ERROR:
-					ATEM_StringOut("\n\rERROR\n\r");
+					gn_atem_string_out("\n\rERROR\n\r");
 					break;
 
 			case MR_CARRIER:
-					ATEM_StringOut("\n\rCARRIER\n\r");
+					gn_atem_string_out("\n\rCARRIER\n\r");
 					break;
 
 			case MR_CONNECT:
-					ATEM_StringOut("\n\rCONNECT\n\r");
+					gn_atem_string_out("\n\rCONNECT\n\r");
 					break;
 
 			case MR_NOCARRIER:
-					ATEM_StringOut("\n\rNO CARRIER\n\r");
+					gn_atem_string_out("\n\rNO CARRIER\n\r");
 					break;
 		        case MR_RING:
-					ATEM_StringOut("RING\n\r");
+					gn_atem_string_out("RING\n\r");
 					break;
 			default:
-					ATEM_StringOut(_("\n\rUnknown Result Code!\n\r"));
+					gn_atem_string_out(_("\n\rUnknown Result Code!\n\r"));
 					break;
 		}
 	}
@@ -873,7 +874,7 @@ void	ATEM_ModemResult(int code)
 
 /* Get integer from char-pointer, set pointer to end of number
    stolen basically verbatim from ISDN code.  */
-int ATEM_GetNum(char **p)
+int gn_atem_num_get(char **p)
 {
 	int v = -1;
 
@@ -887,7 +888,7 @@ int ATEM_GetNum(char **p)
 /* Write string to virtual modem port, either pty or
    STDOUT as appropriate.  This function is only used during
    command mode - data pump is used when connected.  */
-void	ATEM_StringOut(char *buffer)
+void	gn_atem_string_out(char *buffer)
 {
 	int		count = 0;
 	char	out_char;

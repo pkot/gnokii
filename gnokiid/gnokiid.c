@@ -87,8 +87,8 @@ static void usage()
 /* cleanup function registered by atexit() and called at exit() */
 static void busterminate(void)
 {
-	VM_Terminate();
-	if (lockfile) unlock_device(lockfile);
+	vm_terminate();
+	if (lockfile) gn_unlock_device(lockfile);
 }
 
 /* Main function - handles command line arguments, passes them to separate
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
-		lockfile = lock_device(Port);
+		lockfile = gn_lock_device(Port);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);
@@ -145,13 +145,13 @@ int main(int argc, char *argv[])
 	}
 
 	while (1) {
-		if (VM_Initialise(Model, Port, Initlength, Connection, BinDir, DebugMode, true) == false) {
+		if (vm_initialise(Model, Port, Initlength, Connection, BinDir, DebugMode, true) == false) {
 			exit (-1);
 		}
 
 		GTerminateThread = false;
 
-		VM_Loop();
+		vm_loop();
 	}
 
 	exit (0);

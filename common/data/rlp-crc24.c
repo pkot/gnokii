@@ -78,7 +78,7 @@ const u32 CRC24_Table[256] = {
 	0x006D7F0C, 0x00BBD87A, 0x009B3A5B, 0x004D9D2D
 };
 
-void RLP_CalculateCRC24Polinomial(u8 *data, int length, u32 *polinomial)
+void rlp_crc24polinomial_calculate(u8 *data, int length, u32 *polinomial)
 {
 
 	int i;
@@ -95,23 +95,23 @@ void RLP_CalculateCRC24Polinomial(u8 *data, int length, u32 *polinomial)
 }
 
 
-void RLP_CalculateCRC24Checksum(u8 *data, int length, u8 *crc)
+void rlp_crc24checksum_calculate(u8 *data, int length, u8 *crc)
 {
 	u32 polinomial;
 
-	RLP_CalculateCRC24Polinomial(data, length, &polinomial);
+	rlp_crc24polinomial_calculate(data, length, &polinomial);
 	crc[0] = polinomial & 0x0000ffff;
 	crc[1] = (polinomial >> 8) & 0x0000ffff;
 	crc[2] = (polinomial >> 16) & 0x0000ffff;
 
 }
 
-bool RLP_CheckCRC24FCS(u8 *data, int length)
+bool rlp_crc24fcs_check(u8 *data, int length)
 {
 
 	u8 crc[] = { 0x00, 0x00, 0x00 };
 
-	RLP_CalculateCRC24Checksum(data, length - 3, crc);
+	rlp_crc24checksum_calculate(data, length - 3, crc);
 
 	if (((data[length - 3] == crc[0]) &&
 		(data[length - 2] == crc[1]) &&

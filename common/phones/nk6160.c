@@ -74,7 +74,7 @@ static gn_incoming_function_type incoming_functions[] = {
 	{ 0, NULL}
 };
 
-gn_driver nokia_6160 = {
+gn_driver driver_nokia_6160 = {
 	incoming_functions,
 	pgen_incoming_default,
 	/* Mobile phone information */
@@ -131,7 +131,7 @@ static gn_error initialise(struct gn_statemachine *lstate)
 	gn_phone_model *pm;
 
 	/* Copy in the phone info */
-	memcpy(&(lstate->driver), &nokia_6160, sizeof(gn_driver));
+	memcpy(&(lstate->driver), &driver_nokia_6160, sizeof(gn_driver));
 
 	switch (lstate->link.connection_type) {
 	case GN_CT_Serial:
@@ -329,8 +329,8 @@ static gn_error bitmap_get(gn_data *data, struct gn_statemachine *state)
 
 	switch (data->bitmap->type) {
 	case GN_BMP_StartupLogo:
-		data->bitmap->height = nokia_6160.phone.startup_logo_height;
-		data->bitmap->width = nokia_6160.phone.startup_logo_width;
+		data->bitmap->height = driver_nokia_6160.phone.startup_logo_height;
+		data->bitmap->width = driver_nokia_6160.phone.startup_logo_width;
 		data->bitmap->size = ceiling_to_octet(data->bitmap->height * data->bitmap->width);
 		gn_bmp_clear(data->bitmap);
 		for (i = 0; i < 6; i++)

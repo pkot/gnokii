@@ -143,7 +143,7 @@ static gn_incoming_function_type nk7110_incoming_functions[] = {
 	{ 0, NULL }
 };
 
-gn_driver phone_nokia_7110 = {
+gn_driver driver_nokia_7110 = {
 	nk7110_incoming_functions,
 	pgen_incoming_default,
 	/* Mobile phone information */
@@ -288,7 +288,7 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 	unsigned int try = 0;
 
 	/* Copy in the phone info */
-	memcpy(&(state->driver), &phone_nokia_7110, sizeof(gn_driver));
+	memcpy(&(state->driver), &driver_nokia_7110, sizeof(gn_driver));
 
 	dprintf("Connecting\n");
 	while (!connected) {

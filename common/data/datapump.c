@@ -56,8 +56,8 @@
 #include "data/rlp-common.h"
 
 /* Prototypes */
-static int	DP_CallBack(RLP_UserInds ind, u8 *buffer, int length);
-static int	DP_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
+static int	DP_CallBack(rlp_user_inds ind, u8 *buffer, int length);
+static int	DP_SendRLPFrame(gn_rlp_f96_frame *frame, bool out_dtx);
 
 /* Global variables */
 extern bool CommandMode;
@@ -68,22 +68,22 @@ static int	PtyWRFD;	/* pty interface - only different in debug mode. */
 u8 pluscount;
 bool connected;
 
-bool DP_Initialise(int read_fd, int write_fd)
+bool dp_Initialise(int read_fd, int write_fd)
 {
 	PtyRDFD = read_fd;
 	PtyWRFD = write_fd;
-	RLP_Initialise(DP_SendRLPFrame, DP_CallBack);
-	RLP_SetUserRequest(Attach_Req, true);
+	rlp_initialise(DP_SendRLPFrame, DP_CallBack);
+	rlp_user_request_set(Attach_Req, true);
 	pluscount = 0;
 	connected = false;
-	data.RLP_RX_Callback = RLP_DisplayF96Frame;
-	SM_Functions(GOP_SetRLPRXCallback, &data, sm);
+	data.rlp_rx_callback = rlp_f96_frame_display;
+	gn_sm_functions(GN_OP_SetRLPRXCallback, &data, sm);
 
 	return true;
 }
 
 
-static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
+static int DP_CallBack(rlp_user_inds ind, u8 *buffer, int length)
 {
 	int i, temp;
 
@@ -92,25 +92,25 @@ static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 		if (CommandMode == false) write(PtyWRFD, buffer, length);
 		break;
 	case Conn_Ind:
-		if (CommandMode == false) ATEM_ModemResult(MR_CARRIER);
-		RLP_SetUserRequest(Conn_Req, true);
+		if (CommandMode == false) gn_atem_modem_result(MR_CARRIER);
+		rlp_user_request_set(Conn_Req, true);
 		break;
 	case StatusChange:
 		if (buffer[0] == 0) {
 			connected = true;
-			if (CommandMode == false) ATEM_ModemResult(MR_CONNECT);
+			if (CommandMode == false) gn_atem_modem_result(MR_CONNECT);
 		}
 		break;
 	case Disc_Ind:
-		if (CommandMode == false) ATEM_ModemResult(MR_NOCARRIER);
+		if (CommandMode == false) gn_atem_modem_result(MR_NOCARRIER);
 		connected = false;
 		/* Set the call passup back to the at emulator */
-		data.CallNotification = ATEM_CallPassup;
-		SM_Functions(GOP_SetCallNotification, &data, sm);
+		data.call_notification = gn_atem_call_passup;
+		gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 		CommandMode = true;
 		break;
 	case Reset_Ind:
-		RLP_SetUserRequest(Reset_Resp, true);
+		rlp_user_request_set(Reset_Resp, true);
 		break;
 	case GetData:
 		if (queue.n > 0) {
@@ -140,9 +140,9 @@ static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 			if (pluscount == 3) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
-				data.CallNotification = ATEM_CallPassup;
-				SM_Functions(GOP_SetCallNotification, &data, sm);
-				ATEM_ModemResult(MR_OK);
+				data.call_notification = gn_atem_call_passup;
+				gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
+				gn_atem_modem_result(MR_OK);
 				break;
 			}
 
@@ -155,23 +155,23 @@ static int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 	return 0;
 }
 
-void DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state)
+void dp_CallPassup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_statemachine *state)
 {
-	dprintf("DP_CallPassup called with %d\n", CallStatus);
+	dprintf("dp_CallPassup called with %d\n", CallStatus);
 
 	switch (CallStatus) {
-	case GSM_CS_Established:
-		if (CommandMode == false) ATEM_ModemResult(MR_CARRIER);
+	case GN_CALL_Established:
+		if (CommandMode == false) gn_atem_modem_result(MR_CARRIER);
 		connected = true;
 		break;
-	case GSM_CS_LocalHangup:
-	case GSM_CS_RemoteHangup:
+	case GN_CALL_LocalHangup:
+	case GN_CALL_RemoteHangup:
 		CommandMode = true;
 		/* Set the call passup back to the at emulator */
-		data.CallNotification = ATEM_CallPassup;
-		SM_Functions(GOP_SetCallNotification, &data, sm);
-		ATEM_ModemResult(MR_NOCARRIER);
-		RLP_SetUserRequest(Disc_Req, true);
+		data.call_notification = gn_atem_call_passup;
+		gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
+		gn_atem_modem_result(MR_NOCARRIER);
+		rlp_user_request_set(Disc_Req, true);
 		connected = false;
 		break;
 	default:
@@ -179,10 +179,10 @@ void DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statem
 	}
 }
 
-static int DP_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
+static int DP_SendRLPFrame(gn_rlp_f96_frame *frame, bool out_dtx)
 {
-	data.RLP_Frame = frame;
-	data.RLP_OutDTX = out_dtx;
+	data.rlp_frame = frame;
+	data.rlp_out_dtx = out_dtx;
 
-	return SM_Functions(GOP_SendRLPFrame, &data, sm);
+	return gn_sm_functions(GN_OP_SendRLPFrame, &data, sm);
 }

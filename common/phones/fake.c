@@ -44,7 +44,7 @@
 
 static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 
-gn_driver fake = {
+gn_driver driver_fake = {
 	NULL,
 	pgen_incoming_default,
 	/* Mobile phone information */
@@ -77,7 +77,7 @@ static gn_error fake_initialise(struct gn_statemachine *state)
 	dprintf("Initializing...\n");
 
 	/* Copy in the phone info */
-	memcpy(&(state->driver), &fake, sizeof(gn_driver));
+	memcpy(&(state->driver), &driver_fake, sizeof(gn_driver));
 
 	dprintf("Connecting\n");
 

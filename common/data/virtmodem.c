@@ -82,7 +82,7 @@ static gn_error VM_GSMInitialise(char *model,
 			   char *port,
 			   char *initlength,
 			   const char *connection,
-			   GSM_Statemachine *sm);
+			   struct gn_statemachine *sm);
 
 /* Global variables */
 
@@ -97,13 +97,13 @@ static int PtyWRFD;	/* pty interface - only different in debug mode. */
 
 static bool UseSTDIO;	/* Use STDIO for debugging purposes instead of pty */
 
-struct VM_queue queue;
+struct vm_queue queue;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
-bool VM_Initialise(char *model,char *port, char *initlength, const char *connection, char *bindir, bool debug_mode, bool GSMInit)
+bool vm_initialise(char *model,char *port, char *initlength, const char *connection, char *bindir, bool debug_mode, bool GSMInit)
 {
-	static GSM_Statemachine State;
+	static struct gn_statemachine State;
 	sm = &State;
 	queue.n = 0;
 	queue.head = 0;
@@ -120,31 +120,31 @@ bool VM_Initialise(char *model,char *port, char *initlength, const char *connect
 	if (GSMInit) {
 		dprintf("Initialising GSM\n");
 		if ((VM_GSMInitialise(model, port, initlength, connection, sm) != GN_ERR_NONE)) {
-			fprintf (stderr, _("VM_Initialise - VM_GSMInitialise failed!\n"));
+			fprintf (stderr, _("vm_initialise - VM_GSMInitialise failed!\n"));
 			return (false);
 		}
 	}
 	GSMInit = false;
 
 	if (VM_PtySetup(bindir) < 0) {
-		fprintf (stderr, _("VM_Initialise - VM_PtySetup failed!\n"));
+		fprintf (stderr, _("vm_initialise - VM_PtySetup failed!\n"));
 		return (false);
 	}
 
-	if (ATEM_Initialise(PtyRDFD, PtyWRFD, sm) != true) {
-		fprintf (stderr, _("VM_Initialise - ATEM_Initialise failed!\n"));
+	if (gn_atem_initialise(PtyRDFD, PtyWRFD, sm) != true) {
+		fprintf (stderr, _("vm_initialise - gn_atem_initialise failed!\n"));
 		return (false);
 	}
 
-	if (DP_Initialise(PtyRDFD, PtyWRFD) != true) {
-		fprintf (stderr, _("VM_Initialise - DP_Initialise failed!\n"));
+	if (dp_Initialise(PtyRDFD, PtyWRFD) != true) {
+		fprintf (stderr, _("vm_Initialise - dp_Initialise failed!\n"));
 		return (false);
 	}
 
 	return (true);
 }
 
-void VM_Loop(void)
+void vm_loop(void)
 {
 	fd_set rfds;
 	struct timeval tv;
@@ -157,8 +157,8 @@ void VM_Loop(void)
 	nfd = (PtyRDFD > devfd) ? PtyRDFD + 1 : devfd + 1;
 
 	while (!GTerminateThread) {
-		if (CommandMode && ATEM_Initialised && queue.n != 0) {
-			ATEM_HandleIncomingData(queue.buf + queue.head, 1);
+		if (CommandMode && gn_atem_initialised && queue.n != 0) {
+			gn_atem_incoming_data_handle(queue.buf + queue.head, 1);
 			queue.head = (queue.head + 1) % sizeof(queue.buf);
 			queue.n--;
 			continue;
@@ -178,7 +178,7 @@ void VM_Loop(void)
 			continue;
 
 		case -1:
-			perror("VM_Loop - select");
+			perror("vm_loop - select");
 			exit (-1);
 
 		default:
@@ -189,7 +189,7 @@ void VM_Loop(void)
 			n = sizeof(queue.buf) - queue.n < sizeof(buf) ?
 				sizeof(queue.buf) - queue.n :
 				sizeof(buf);
-			if ( (n = read(PtyRDFD, buf, n)) <= 0 ) VM_Terminate();
+			if ( (n = read(PtyRDFD, buf, n)) <= 0 ) vm_terminate();
 
 			for (i = 0; i < n; i++) {
 				queue.buf[queue.tail++] = buf[i];
@@ -197,13 +197,13 @@ void VM_Loop(void)
 				queue.n++;
 			}
 		}
-		if (FD_ISSET(devfd, &rfds)) SM_Loop(sm, 1);
+		if (FD_ISSET(devfd, &rfds)) gn_sm_loop(sm, 1);
 	}
 }
 
-/* Application should call VM_Terminate to shut down
+/* Application should call vm_terminate to shut down
    the virtual modem thread */
-void VM_Terminate(void)
+void vm_terminate(void)
 {
 	/* Request termination of thread */
 	GTerminateThread = true;
@@ -214,7 +214,7 @@ void VM_Terminate(void)
 	}
 
 	/* Shutdown device */
-	SM_Functions(GOP_Terminate, NULL, sm);
+	gn_sm_functions(GN_OP_Terminate, NULL, sm);
 }
 
 /* The following two functions are based on the skeleton from
@@ -352,7 +352,7 @@ static int VM_PtySetup(char *bindir)
 }
 
 /* Initialise GSM interface, returning gn_error as appropriate  */
-static gn_error VM_GSMInitialise(char *model, char *port, char *initlength, const char *connection, GSM_Statemachine *sm)
+static gn_error VM_GSMInitialise(char *model, char *port, char *initlength, const char *connection, struct gn_statemachine *sm)
 {
 	gn_error error;
 
