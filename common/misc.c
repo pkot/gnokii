@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.14  2001-02-06 13:55:23  pkot
+  Revision 1.15  2001-03-06 10:38:52  machek
+  Dancall models added to the global list.
+
+  Revision 1.14  2001/02/06 13:55:23  pkot
   Enabled authentication in 51xx models
 
   Revision 1.13  2001/02/02 08:09:56  ja
@@ -41,6 +44,8 @@ int GetLine(FILE *File, char *Line, int count)
 
 static PhoneModel models[] = {
 	{NULL,    "", 0 },
+	{"2711",  "?????", PM_SMS },		/* Dancall */
+	{"2731",  "?????", PM_SMS },
 	{"1611",  "NHE-5", 0 },
 	{"2110i", "NHE-4", PM_SMS },
 	{"2148i", "NHK-4", 0 },
