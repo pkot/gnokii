@@ -76,6 +76,7 @@ typedef enum {
 	OPT_MONITOR,
 	OPT_ENTERSECURITYCODE,
 	OPT_GETSECURITYCODESTATUS,
+	OPT_CHANGESECURITYCODE,
 	OPT_SETDATETIME,
 	OPT_GETDATETIME,
 	OPT_SETALARM,
@@ -273,6 +274,7 @@ static int usage(void)
 	fprintf(stderr, _(
 		"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 		"          gnokii --getsecuritycodestatus\n"
+		"          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 		));
 #endif
 	if (lockfile) unlock_device(lockfile);
@@ -1113,6 +1115,20 @@ static void interrupted(int sig)
 
 #ifdef SECURITY
 
+int get_password(const char *prompt, char *pass, int length)
+{
+#ifdef WIN32
+	printf("%s", prompt);
+	fgets(pass, length, stdin);
+#else
+	/* FIXME: manual says: Do not use it */
+	strncpy(pass, getpass(prompt), length - 1);
+	pass[length - 1] = 0;
+#endif
+
+	return 0;
+}
+
 /* In this mode we get the code from the keyboard and send it to the mobile
    phone. */
 static int entersecuritycode(char *type)
@@ -1136,15 +1152,12 @@ static int entersecuritycode(char *type)
 		usage();
 
 	memset(&SecurityCode.Code, 0, sizeof(SecurityCode.Code));
-#ifdef WIN32
-	printf("Enter your code: ");
-	fgets(SecurityCode.Code, sizeof(SecurityCode.Code), stdin);
-#else
-	/* FIXME: manual says: Do not use it */
-	strncpy(SecurityCode.Code, getpass(_("Enter your code: ")), sizeof(SecurityCode.Code - 1));
-#endif
+	get_password(_("Enter your code: "), SecurityCode.Code, sizeof(SecurityCode.Code));
 
-/*	if (GSM && GSM->EnterSecurityCode) test = GSM->EnterSecurityCode(SecurityCode);*/
+	GSM_DataClear(&data);
+	data.SecurityCode = &SecurityCode;
+
+	test = SM_Functions(GOP_EnterSecurityCode, &data, &State);
 	if (test == GE_INVALIDSECURITYCODE)
 		fprintf(stdout, _("Error: invalid code.\n"));
 	else if (test == GE_NONE)
@@ -1154,19 +1167,21 @@ static int entersecuritycode(char *type)
 	else
 		fprintf(stdout, _("Other error.\n"));
 
-
 	return 0;
 }
 
 static int getsecuritycodestatus(void)
 {
-	int Status;
+	GSM_SecurityCode SecurityCode;
 
-/*	if (GSM && GSM->GetSecurityCodeStatus && GSM->GetSecurityCodeStatus(&Status) == GE_NONE) {
+	GSM_DataClear(&data);
+	data.SecurityCode = &SecurityCode;
+
+	if (SM_Functions(GOP_GetSecurityCodeStatus, &data, &State) == GE_NONE) {
 
 		fprintf(stdout, _("Security code status: "));
 
-		switch(Status) {
+		switch(SecurityCode.Type) {
 		case GSCT_SecurityCode:
 			fprintf(stdout, _("waiting for Security Code.\n"));
 			break;
@@ -1189,11 +1204,62 @@ static int getsecuritycodestatus(void)
 			fprintf(stdout, _("Unknown!\n"));
 			break;
 		}
-	}*/
+	}
 
 	return 0;
 }
 
+static int changesecuritycode(char *type)
+{
+	GSM_Error error;
+	GSM_SecurityCode SecurityCode;
+	char newcode2[10];
+
+	memset(&SecurityCode, 0, sizeof(SecurityCode));
+
+	if (!strcmp(type, "PIN"))
+		SecurityCode.Type = GSCT_Pin;
+	else if (!strcmp(type, "PUK"))
+		SecurityCode.Type = GSCT_Puk;
+	else if (!strcmp(type, "PIN2"))
+		SecurityCode.Type = GSCT_Pin2;
+	else if (!strcmp(type, "PUK2"))
+		SecurityCode.Type = GSCT_Puk2;
+	/* FIXME: Entering of SecurityCode does not work :-(
+	else if (!strcmp(type, "SecurityCode"))
+		SecurityCode.Type = GSCT_SecurityCode;
+	*/
+	else
+		usage();
+
+	get_password(_("Enter your code: "), SecurityCode.Code, sizeof(SecurityCode.Code));
+	get_password(_("Enter new code: "), SecurityCode.NewCode, sizeof(SecurityCode.NewCode));
+	get_password(_("Retype new code: "), newcode2, sizeof(newcode2));
+	if (strcmp(SecurityCode.NewCode, newcode2)) {
+		fprintf(stdout, _("Error: new code differ\n"));
+		return 1;
+	}
+
+	GSM_DataClear(&data);
+	data.SecurityCode = &SecurityCode;
+
+	error = SM_Functions(GOP_ChangeSecurityCode, &data, &State);
+	switch (error) {
+	case GE_INVALIDSECURITYCODE:
+		fprintf(stdout, _("Error: invalid code.\n"));
+		break;
+	case GE_NONE:
+		fprintf(stdout, _("Code changed.\n"));
+		break;
+	case GE_NOTIMPLEMENTED:
+		fprintf(stderr, _("Function not implemented in %s model!\n"), model);
+		break;
+	default:
+		fprintf(stdout, _("Other error.\n"));
+	}
+
+	return error;
+}
 
 #endif
 
@@ -3218,6 +3284,9 @@ int main(int argc, char *argv[])
 		/* Get Security Code status */
 		{ "getsecuritycodestatus",  no_argument,   NULL, OPT_GETSECURITYCODESTATUS },
 
+		/* Change Security Code */
+		{ "changesecuritycode", required_argument, NULL, OPT_CHANGESECURITYCODE },
+
 #endif
 
 		/* Set date and time */
@@ -3347,6 +3416,7 @@ int main(int argc, char *argv[])
 
 #ifdef SECURITY
 		{ OPT_ENTERSECURITYCODE, 1, 1, 0 },
+		{ OPT_CHANGESECURITYCODE,1, 1, 0 },
 #endif
 
 		{ OPT_SETDATETIME,       0, 5, 0 },
@@ -3454,6 +3524,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_GETSECURITYCODESTATUS:
 			rc = getsecuritycodestatus();
+			break;
+		case OPT_CHANGESECURITYCODE:
+			rc = changesecuritycode(optarg);
 			break;
 #endif
 		case OPT_GETDATETIME:

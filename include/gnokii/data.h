@@ -61,6 +61,7 @@ typedef struct {
 	RLP_F96Frame *RLP_Frame;
 	bool RLP_OutDTX;
 	void (*RLP_RX_Callback)(RLP_F96Frame *Frame);
+	GSM_SecurityCode *SecurityCode;
 } GSM_Data;
 
 /* Global structures intended to be independant of phone etc */
@@ -144,6 +145,9 @@ typedef enum {
 	GOP_SetCallNotification,
 	GOP_SendRLPFrame,
 	GOP_SetRLPRXCallback,
+	GOP_EnterSecurityCode,
+	GOP_GetSecurityCodeStatus,
+	GOP_ChangeSecurityCode,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

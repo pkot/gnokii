@@ -134,6 +134,9 @@ static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SendRLPFrame(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetRLPRXCallback(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -147,6 +150,7 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -164,6 +168,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x40, IncomingSecurity },
 	{ 0x01, IncomingCallInfo },
 	{ 0xf1, IncomingRLPFrame },
+	{ 0x08, IncomingSecurityCode },
 	{ 0, NULL}
 };
 
@@ -277,6 +282,14 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return SendRLPFrame(data, state);
 	case GOP_SetRLPRXCallback:
 		return SetRLPRXCallback(data, state);
+#ifdef	SECURITY
+	case GOP_EnterSecurityCode:
+		return EnterSecurityCode(data, state);
+	case GOP_GetSecurityCodeStatus:
+		return GetSecurityCodeStatus(data, state);
+	case GOP_ChangeSecurityCode:
+		return ChangeSecurityCode(data, state);
+#endif
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -2512,6 +2525,110 @@ static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int l
 	/* Here we pass the frame down in the input stream. */
 
 	RLP_RXCallback(&frame);
+
+	return GE_NONE;
+}
+
+
+static GSM_Error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[32] = {FBUS_FRAME_HEADER, 0x0a};
+	unsigned char *pos;
+	int len;
+
+	if (!data->SecurityCode) return GE_INTERNALERROR;
+
+	len = strlen(data->SecurityCode->Code);
+	if (len < 0 || len >= 10) return GE_INTERNALERROR;
+
+	pos = req + 4;
+	*pos++ = data->SecurityCode->Type;
+	memcpy(pos, data->SecurityCode->Code, len);
+	pos += len;
+	*pos++ = 0;
+	*pos++ = 0;
+
+	if (SM_SendMessage(state, pos - req, 0x08, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x08);
+}
+
+static GSM_Error GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07};
+
+	if (!data->SecurityCode) return GE_INTERNALERROR;
+
+	if (SM_SendMessage(state, 4, 0x08, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x08);
+}
+
+static GSM_Error ChangeSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[32] = {FBUS_FRAME_HEADER, 0x04};
+	unsigned char *pos;
+	int len1, len2;
+
+	if (!data->SecurityCode) return GE_INTERNALERROR;
+
+	len1 = strlen(data->SecurityCode->Code);
+	len2 = strlen(data->SecurityCode->NewCode);
+	if (len1 < 0 || len1 >= 10 || len2 < 0 || len2 >= 10) return GE_INTERNALERROR;
+
+	pos = req + 4;
+	*pos++ = data->SecurityCode->Type;
+	memcpy(pos, data->SecurityCode->Code, len1);
+	pos += len1;
+	*pos++ = 0;
+	memcpy(pos, data->SecurityCode->NewCode, len2);
+	pos += len2;
+	*pos++ = 0;
+
+	if (SM_SendMessage(state, pos - req, 0x08, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x08);
+}
+
+static GSM_Error IncomingSecurityCode(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	/* change security code ok */
+	case 0x05:
+		break;
+
+	/* change security code error */
+	case 0x06:
+		if (message[4] != 0x88) return GE_UNHANDLEDFRAME;
+		dprintf("Message: Security code wrong.\n");
+		return GE_INVALIDSECURITYCODE;
+		
+	/* security code status */
+	case 0x08:
+		dprintf("Message: Security Code status received: ");
+		switch (message[4]) {
+		case GSCT_SecurityCode: dprintf(_("waiting for Security Code.\n")); break;
+		case GSCT_Pin: dprintf(_("waiting for PIN.\n")); break;
+		case GSCT_Pin2: dprintf(_("waiting for PIN2.\n")); break;
+		case GSCT_Puk: dprintf(_("waiting for PUK.\n")); break;
+		case GSCT_Puk2: dprintf(_("waiting for PUK2.\n")); break;
+		case GSCT_None: dprintf(_("nothing to enter.\n")); break;
+		default: dprintf(_("Unknown!\n")); return GE_UNHANDLEDFRAME;
+		}
+		if (data->SecurityCode) data->SecurityCode->Type = message[4];
+		break;
+	
+	/* security code OK */
+	case 0x0b:
+		dprintf("Message: Security code accepted.\n");
+		break;
+	
+	/* security code wrong */
+	case 0x0c:
+		if (message[4] != 0x88) return GE_UNHANDLEDFRAME;
+		dprintf("Message: Security code wrong.\n");
+		return GE_INVALIDSECURITYCODE;
+
+	default:
+		return GE_UNHANDLEDFRAME;
+	}
 
 	return GE_NONE;
 }

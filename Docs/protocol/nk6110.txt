@@ -429,6 +429,9 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                         3: PIN2 (4 chars)
                                         4: PUK (8 chars)
                                         5: PUK2 (8 chars)
+    r Change code ok        { 0x0005 }
+    r Change code err       { 0x0006, reason }
+                            where reason: 0x88: current code wrong
     s Status request        { 0x0007, 0x01 }
     r pin recvd             { 0x0008, accepted }
                             where accepted: 0x0c (or 0x06): OK

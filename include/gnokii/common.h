@@ -81,6 +81,7 @@ typedef enum {
 typedef struct {
 	GSM_SecurityCodeType Type; /* Type of the code. */
 	char Code[10];             /* Actual code. */
+	char NewCode[10];          /* New code. */
 } GSM_SecurityCode;
 
 /* This structure is used to get the current network status */
