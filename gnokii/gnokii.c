@@ -7,8 +7,8 @@
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-  Copyright (C) 2001  	   Pavel Machek
-  Copyright (C) 2001      Pawe³ Kot
+  Copyright (C) 2001       Pavel Machek
+  Copyright (C) 2001       Pawe³ Kot
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.141  2001-09-14 12:53:00  pkot
+  Revision 1.142  2001-09-14 13:02:03  pkot
+  Gnokii calendar changes from 0.3.3
+
+  Revision 1.141  2001/09/14 12:53:00  pkot
   New preview logos.
   Localization fixes.
   Set valid operator on logos xgnokii screen.
