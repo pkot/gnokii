@@ -29,8 +29,8 @@
 
 */
 
-#ifndef __gsm_common_h
-#define __gsm_common_h
+#ifndef _gnokii_gsm_common_h
+#define _gnokii_gsm_common_h
 
 #include <stdlib.h>
 
@@ -41,22 +41,18 @@
 /* Type of connection. Now we support serial connection with FBUS cable and
    IR (only with 61x0 models) */
 typedef enum {
-	GCT_Serial,   /* Serial connection. */
-	GCT_DAU9P,    /* Serial connection using DAU9P cable; use only with 6210/7110 if you want faster initialization */
-	GCT_DLR3P,    /* Serial connection using DLR3P cable */
-	GCT_Infrared, /* Infrared connection. */
-#ifdef HAVE_IRDA
-	GCT_Irda,     /* Linux IrDA support */
-#endif
-#ifndef WIN32
-	GCT_Tekram,   /* Tekram Ir-Dongle */
-	GCT_TCP,      /* TCP network connection */
-#endif
-} GSM_ConnectionType;
+	GN_CT_Serial,   /* Serial connection. */
+	GN_CT_DAU9P,    /* Serial connection using DAU9P cable; use only with 6210/7110 if you want faster initialization */
+	GN_CT_DLR3P,    /* Serial connection using DLR3P cable */
+	GN_CT_Infrared, /* Infrared connection. */
+	GN_CT_Irda,     /* Linux IrDA support */
+	GN_CT_Tekram,   /* Tekram Ir-Dongle */
+	GN_CT_TCP,      /* TCP network connection */
+} gn_connection_type;
 
 /* Maximum length of device name for serial port */
 
-#define GSM_MAX_DEVICE_NAME_LENGTH (32)
+#define GN_DEVICE_NAME_MAX_LENGTH (32)
 
 /* Define an enum for specifying memory types for retrieving phonebook
    entries, SMS messages etc. This type is not mobile specific - the model
@@ -64,603 +60,532 @@ typedef enum {
    code.
    01/07/99:  Two letter codes follow GSM 07.07 release 6.2.0
 */
-
 typedef enum {
-	GMT_ME, /* Internal memory of the mobile equipment */
-	GMT_SM, /* SIM card memory */
-	GMT_FD, /* Fixed dial numbers */
-	GMT_ON, /* Own numbers */
-	GMT_EN, /* Emergency numbers */
-	GMT_DC, /* Dialled numbers */
-	GMT_RC, /* Received numbers */
-	GMT_MC, /* Missed numbers */
-	GMT_LD, /* Last dialed */
-	GMT_MT, /* combined ME and SIM phonebook */
-	GMT_TA, /* for compatibility only: TA=computer memory */
-	GMT_CB, /* Currently selected memory */
-	GMT_IN, /* Inbox for folder aware phones */
-	GMT_OU, /* Outbox  */
-	GMT_AR, /* Archive */
-	GMT_TE, /* Templates */
-	GMT_F1, /* 1st CUSTOM FOLDER */
-	GMT_F2,
-	GMT_F3,
-	GMT_F4,
-	GMT_F5,
-	GMT_F6,
-	GMT_F7,
-	GMT_F8,
-	GMT_F9,
-	GMT_F10,
-	GMT_F11,
-	GMT_F12,
-	GMT_F13,
-	GMT_F14,
-	GMT_F15,
-	GMT_F16,
-	GMT_F17,
-	GMT_F18,
-	GMT_F19,
-	GMT_F20, /* 20th CUSTOM FOLDER */
-	GMT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions). */
-} GSM_MemoryType;
+	GN_MT_ME, /* Internal memory of the mobile equipment */
+	GN_MT_SM, /* SIM card memory */
+	GN_MT_FD, /* Fixed dial numbers */
+	GN_MT_ON, /* Own numbers */
+	GN_MT_EN, /* Emergency numbers */
+	GN_MT_DC, /* Dialled numbers */
+	GN_MT_RC, /* Received numbers */
+	GN_MT_MC, /* Missed numbers */
+	GN_MT_LD, /* Last dialed */
+	GN_MT_MT, /* combined ME and SIM phonebook */
+	GN_MT_TA, /* for compatibility only: TA=computer memory */
+	GN_MT_CB, /* Currently selected memory */
+	GN_MT_IN, /* Inbox for folder aware phones */
+	GN_MT_OU, /* Outbox  */
+	GN_MT_AR, /* Archive */
+	GN_MT_TE, /* Templates */
+	GN_MT_F1, /* 1st CUSTOM FOLDER */
+	GN_MT_F2,
+	GN_MT_F3,
+	GN_MT_F4,
+	GN_MT_F5,
+	GN_MT_F6,
+	GN_MT_F7,
+	GN_MT_F8,
+	GN_MT_F9,
+	GN_MT_F10,
+	GN_MT_F11,
+	GN_MT_F12,
+	GN_MT_F13,
+	GN_MT_F14,
+	GN_MT_F15,
+	GN_MT_F16,
+	GN_MT_F17,
+	GN_MT_F18,
+	GN_MT_F19,
+	GN_MT_F20, /* 20th CUSTOM FOLDER */
+	GN_MT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions). */
+} gn_memory_type;
 
 /* Power source types */
-
 typedef enum {
-	GPS_ACDC = 1, /* AC/DC powered (charging) */
-	GPS_BATTERY   /* Internal battery */
-} GSM_PowerSource;
+	GN_PS_ACDC = 1, /* AC/DC powered (charging) */
+	GN_PS_BATTERY   /* Internal battery */
+} gn_power_source;
 
 /* Definition of security codes. */
-
 typedef enum {
-	GSCT_SecurityCode = 0x01, /* Security code. */
-	GSCT_Pin,                 /* PIN. */
-	GSCT_Pin2,                /* PIN 2. */
-	GSCT_Puk,                 /* PUK. */
-	GSCT_Puk2,                /* PUK 2. */
-	GSCT_None                 /* Code not needed. */
-} GSM_SecurityCodeType;
+	GN_SCT_SecurityCode = 0x01, /* Security code. */
+	GN_SCT_Pin,                 /* PIN. */
+	GN_SCT_Pin2,                /* PIN 2. */
+	GN_SCT_Puk,                 /* PUK. */
+	GN_SCT_Puk2,                /* PUK 2. */
+	GN_SCT_None                 /* Code not needed. */
+} gn_security_code_type;
 
 /* Security code definition. */
 typedef struct {
-	GSM_SecurityCodeType Type; /* Type of the code. */
-	char Code[10];             /* Actual code. */
-	char NewCode[10];          /* New code. */
-} GSM_SecurityCode;
+	gn_security_code_type type; /* Type of the code. */
+	char code[10];              /* Actual code. */
+	char new_code[10];          /* New code. */
+} gn_security_code;
 
 /* This structure is used to get the current network status */
-
 typedef struct {
-	char NetworkCode[10]; /* GSM network code */
-	unsigned char CellID[10];      /* CellID */
-	unsigned char LAC[10];         /* LAC */
-} GSM_NetworkInfo;
+	char network_code[10];     /* GSM network code */
+	unsigned char cell_id[10]; /* CellID */
+	unsigned char LAC[10];     /* LAC */
+} gn_network_info;
 
-/* Limits for sizing of array in GSM_PhonebookEntry. Individual handsets may
+/* Limits for sizing of array in gn_phonebook_entry. Individual handsets may
    not support these lengths so they have their own limits set. */
-
-#define GSM_MAX_PHONEBOOK_NAME_LENGTH   (61)	/* For 6510 */
-#define GSM_MAX_PHONEBOOK_NUMBER_LENGTH (48)	/* For 7110 */
-#define GSM_MAX_PHONEBOOK_SUB_ENTRIES   (10)	/* For 6510 */
-						/* 7110 is able to in one
-						 * entry 5 numbers and 4
-						 * texts [email,notice,postal,url] */
-
-/* Here is a macro for models that do not support caller groups. */
-
-#define GSM_GROUPS_NOT_SUPPORTED -1
-#define GSM_MAX_CALLER_GROUPS     5
+#define GN_PHONEBOOK_NAME_MAX_LENGTH            61   /* For 6510 */
+#define GN_PHONEBOOK_NUMBER_MAX_LENGTH          48   /* For 7110 */
+#define GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER      10   /* For 6510 */
+						     /* 7110 is able to have in one
+						      * entry 5 numbers and 4
+						      * texts [email,notice,postal,url] */
+#define GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER    5
 
 /* This data type is used to report the number of used and free positions in
    memory (sim or internal). */
-
 typedef struct {
-	GSM_MemoryType MemoryType; /* Type of the memory */
-	int Used;                  /* Number of used positions */
-	int Free;                  /* Number of free positions */
-} GSM_MemoryStatus;
+	gn_memory_type memory_type; /* Type of the memory */
+	int used;                   /* Number of used positions */
+	int free;                   /* Number of free positions */
+} gn_memory_status;
+
+/* General date and time structure. It is used for the SMS, calendar, alarm
+ * settings, clock etc. */
+typedef struct {
+	int year;           /* The complete year specification - e.g. 1999. Y2K :-) */
+	int month;          /* January = 1 */
+	int day;
+	int hour;
+	int minute;
+	int second;
+	int timezone;      /* The difference between local time and GMT.
+			      Note that different SMSC software treat this field
+			      in the different ways. */
+} gn_timestamp;
 
 /* Some phones (at the moment 7110/6510 series) supports extended phonebook
    with additional data.  Here we have structures for them */
+typedef enum {
+	GN_PHONEBOOK_NUMBER_Home    = 0x02,
+	GN_PHONEBOOK_NUMBER_Mobile  = 0x03,
+	GN_PHONEBOOK_NUMBER_Fax     = 0x04,
+	GN_PHONEBOOK_NUMBER_Work    = 0x06,
+	GN_PHONEBOOK_NUMBER_General = 0x0a,
+} gn_phonebook_number_type;
 
 typedef enum {
-	GSM_General = 0x0a,
-	GSM_Mobile  = 0x03,
-	GSM_Work    = 0x06,
-	GSM_Fax     = 0x04,
-	GSM_Home    = 0x02
-} GSM_Number_Type;
-
-typedef enum {
-	GSM_Number  = 0x0b,
-	GSM_Note    = 0x0a,
-	GSM_Postal  = 0x09,
-	GSM_Email   = 0x08,
-	GSM_Name    = 0x07,
-	GSM_URL     = 0x2c,
-	GSM_Date    = 0x13   /* Date is used for DC,RC,etc (last calls) */
-} GSM_EntryType;
+	GN_PHONEBOOK_ENTRY_Name       = 0x07,
+	GN_PHONEBOOK_ENTRY_Email      = 0x08,
+	GN_PHONEBOOK_ENTRY_Postal     = 0x09,
+	GN_PHONEBOOK_ENTRY_Note       = 0x0a,
+	GN_PHONEBOOK_ENTRY_Number     = 0x0b,
+	GN_PHONEBOOK_ENTRY_Ringtone   = 0x0c,
+	GN_PHONEBOOK_ENTRY_Date       = 0x13,   /* Date is used for DC,RC,etc (last calls) */
+	GN_PHONEBOOK_ENTRY_Pointer    = 0x1a,   /* Pointer to the other memory */
+	GN_PHONEBOOK_ENTRY_Logo       = 0x1b,
+	GN_PHONEBOOK_ENTRY_LogoSwitch = 0x1c,
+	GN_PHONEBOOK_ENTRY_Group      = 0x1e,
+	GN_PHONEBOOK_ENTRY_URL        = 0x2c,
+} gn_phonebook_entry_type;
 
 typedef struct {
-	bool AlarmEnabled; /* Is alarm set ? */
-	int Year;          /* The complete year specification - e.g. 1999. Y2K :-) */
-	int Month;	   /* January = 1 */
-	int Day;
-	int Hour;
-	int Minute;
-	int Second;
-	int Timezone;      /* The difference between local time and GMT */
-} GSM_DateTime;
-
-typedef struct {
-	GSM_EntryType   EntryType;
-	GSM_Number_Type NumberType;
+	gn_phonebook_entry_type entry_type;
+	gn_phonebook_number_type number_type;
 	union {
-		char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
-		GSM_DateTime Date;                         /* or the last calls list */
+		char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1]; /* Number */
+		gn_timestamp date;                               /* or the last calls list */
 	} data;
-	int             BlockNumber;
-} GSM_SubPhonebookEntry;
+	int id;
+} gn_phonebook_subentry;
 
 /* Define datatype for phonebook entry, used for getting/writing phonebook
    entries. */
-
 typedef struct {
-	bool Empty;                                       /* Is this entry empty? */
-	char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];     /* Plus 1 for
+	bool empty;                                       /* Is this entry empty? */
+	char name[GN_PHONEBOOK_NAME_MAX_LENGTH + 1];      /* Plus 1 for
 							     nullterminator. */
-	char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
-	GSM_MemoryType MemoryType;                        /* Type of memory */
-	int Group;                                        /* Group */
-	int Location;                                     /* Location */
-	GSM_DateTime Date;                                /* The record date and time
+	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1];  /* Number */
+	gn_memory_type memory_type;                       /* Type of memory */
+	int caller_group;                                 /* Caller group */
+	int location;                                     /* Location */
+	gn_timestamp date;                                /* The record date and time
 							     of the number. */
-	GSM_SubPhonebookEntry SubEntries[GSM_MAX_PHONEBOOK_SUB_ENTRIES];
+	gn_phonebook_subentry subentries[GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER];
 	/* For phones with
 	 * additional phonebook
 	 * entries */
-	int SubEntriesCount;                              /* Should be 0, if extended
+	int subentries_count;                             /* Should be set to 0, if extended
 							     phonebook is not used */
-} GSM_PhonebookEntry;
+} gn_phonebook_entry;
 
 /* This define speed dialing entries. */
-
 typedef struct {
-	int Number;                /* Which number is used to dialing? */
-	GSM_MemoryType MemoryType; /* Memory type of the number. */
-	int Location;              /* Location of the number in MemoryType. */
-} GSM_SpeedDial;
+	int number;                 /* Which number is used to dialing? */
+	gn_memory_type memory_type; /* Memory type of the number. */
+	int location;               /* Location of the number in MemoryType. */
+} gn_speed_dial;
 
 /* Define enum used to describe what sort of date/time support is
    available. */
-
 typedef enum {
-	GDT_None,     /* The mobile phone doesn't support time and date. */
-	GDT_TimeOnly, /* The mobile phone supports only time. */
-	GDT_DateOnly, /* The mobile phone supports only date. */
-	GDT_DateTime  /* Wonderful phone - it supports date and time. */
-} GSM_DateTimeSupport;
+	GN_DT_None,     /* The mobile phone doesn't support time and date. */
+	GN_DT_TimeOnly, /* The mobile phone supports only time. */
+	GN_DT_DateOnly, /* The mobile phone supports only date. */
+	GN_DT_DateTime  /* Wonderful phone - it supports date and time. */
+} gn_datetime_support;
 
-/* Define enums for RF units.  GRF_CSQ asks for units in form used
+/* Define enums for RF units. GRF_CSQ asks for units in form used
    in AT+CSQ command as defined by GSM 07.07 */
-
 typedef enum {
-	GRF_Arbitrary,
-	GRF_dBm,
-	GRF_mV,
-	GRF_uV,
-	GRF_CSQ,
-	GRF_Percentage
-} GSM_RFUnits;
+	GN_RF_Arbitrary,
+	GN_RF_dBm,
+	GN_RF_mV,
+	GN_RF_uV,
+	GN_RF_CSQ,
+	GN_RF_Percentage
+} gn_rf_unit;
 
 /* Define enums for Battery units. */
 
 typedef enum {
-	GBU_Arbitrary,
-	GBU_Volts,
-	GBU_Minutes,
-	GBU_Percentage
-} GSM_BatteryUnits;
+	GN_BU_Arbitrary,
+	GN_BU_Volts,
+	GN_BU_Minutes,
+	GN_BU_Percentage
+} gn_battery_unit;
 
 /* Define enums for Calendar Note types */
+typedef enum {
+	GN_CALNOTE_MEETING  = 0x01, /* Meeting */
+	GN_CALNOTE_CALL     = 0x02, /* Call */
+	GN_CALNOTE_BIRTHDAY = 0x04, /* Birthday */
+	GN_CALNOTE_REMINDER = 0x08, /* Reminder */
+} gn_calnote_type;
 
 typedef enum {
-	GCN_REMINDER=1, /* Reminder */
-	GCN_CALL,       /* Call */
-	GCN_MEETING,    /* Meeting */
-	GCN_BIRTHDAY    /* Birthday */
-} GSM_CalendarNoteType;
+	GN_CALNOTE_NEVER   = 0,
+	GN_CALNOTE_DAILY   = 24,
+	GN_CALNOTE_WEEKLY  = 168,
+	GN_CALNOTE_2WEEKLY = 336,
+	GN_CALNOTE_YEARLY  = 65535
+} gn_calnote_recurrence;
 
-typedef enum {
-	GCN_NEVER   = 0,
-	GCN_DAILY   = 24,
-	GCN_WEEKLY  = 168,
-	GCN_2WEEKLY = 336,
-	GCN_YEARLY  = 65535
-} GSM_CalendarRecurrences;
-
-/* Calendar note type */
-
-#define MAX_CALENDAR_NOTES (500) /* FIXME how many are possible? */
-#define MAX_CALENDAR_NOTES_LENGTH (258)
-#define MAX_CALENDAR_CALL_LENGTH (49)
+#define GN_CALNOTE_MAX_NUMBER        500 /* FIXME how many are possible? */
+#define GN_CALNOTE_MAX_LENGTH        258
+#define GN_CALNOTE_NUMBER_MAX_LENGTH  49
 
 typedef struct {
-	int Location;			/* The number of the note in the phone memory */
-	GSM_CalendarNoteType Type;		/* The type of the note */
-	GSM_DateTime Time;		/* The time of the note */
-	GSM_DateTime Alarm;		/* The alarm of the note */
-	char Text[MAX_CALENDAR_NOTES_LENGTH];		/* The text of the note */
-	char Phone[MAX_CALENDAR_CALL_LENGTH];		/* For Call only: the phone number */
-	GSM_CalendarRecurrences Recurrence;	/* Recurrence of the note */
-} GSM_CalendarNote;
+	bool enabled; /* Is alarm set ? */
+	gn_timestamp timestamp;
+} gn_calnote_alarm;
+
+/* Calendar note type */
+typedef struct {
+	int location;                                    /* The number of the note in the phone memory */
+	gn_calnote_type type;                            /* The type of the note */
+	gn_timestamp time;                               /* The time of the note */
+	gn_calnote_alarm alarm;                          /* The alarm of the note */
+	char text[GN_CALNOTE_MAX_LENGTH];                /* The text of the note */
+	char phone_number[GN_CALNOTE_NUMBER_MAX_LENGTH]; /* For Call only: the phone number */
+	gn_calnote_recurrence recurrence;                /* Recurrence of the note */
+} gn_calnote;
 
 /* List of Calendar Notes in phone */
 typedef struct {
-	int Number;		/* The number of notes in phone */
-	int Location[MAX_CALENDAR_NOTES];	/* Location of the nth note */
-} GSM_CalendarNotesList;
+	int number;                          /* The number of notes in phone */
+	int location[GN_CALNOTE_MAX_NUMBER]; /* Location of the nth note */
+} gn_calnote_list;
 
-/* ToDo */
+/* ToDo things. It is only supported by the newer phones. */
+#define GN_TODO_MAX_LENGTH	256
+#define GN_TODO_MAX_NUMBER	512
+
 typedef enum {
-	GTD_LOW = 3,
-	GTD_MEDIUM = 2,
-	GTD_HIGH = 1
-} GSM_ToDoPriority;
+	GN_TODO_LOW = 3,
+	GN_TODO_MEDIUM = 2,
+	GN_TODO_HIGH = 1
+} gn_todo_priority;
 
 typedef struct {
-	int Location;			/* The number of the note in the phone memory */
-	char Text[MAX_CALENDAR_NOTES_LENGTH];		/* The text of the note */
-	GSM_ToDoPriority Priority;
-} GSM_ToDo;
+	int location;			/* The number of the note in the phone memory */
+	char text[GN_TODO_MAX_LENGTH];		/* The text of the note */
+	gn_todo_priority priority;
+} gn_todo;
 
 /* List of ToDo Notes in phone */
 typedef struct {
-	int Number;		/* The number of notes in phone */
-	int Location[MAX_CALENDAR_NOTES];	/* Location of the nth note */
-} GSM_ToDoList;
+	int number;                       /* The number of notes in phone */
+	int location[GN_TODO_MAX_NUMBER]; /* Location of the nth note */
+} gn_todo_list;
 
 
 /* WAP */
-#define MAX_WAP_URL_LENGTH (258)
-#define MAX_WAP_NAME_LENGTH (52)
-#define MAX_WAP_SETTING_USERNAME_LENGTH (34)
-#define MAX_WAP_SETTING_NAME_LENGTH (22)
-#define MAX_WAP_SETTING_HOME_LENGTH (95)
-#define MAX_WAP_SETTING_ACCESS_LENGTH (102)
+#define WAP_URL_MAX_LENGTH              258
+#define WAP_NAME_MAX_LENGTH              52
+#define WAP_SETTING_USERNAME_MAX_LENGTH  34
+#define WAP_SETTING_NAME_MAX_LENGTH      22
+#define WAP_SETTING_HOME_MAX_LENGTH      95
+#define WAP_SETTING_APN_MAX_LENGTH      102
 
 /* bookmarks */
 typedef struct {
-	int Location;
-	char Name[MAX_WAP_NAME_LENGTH];
-	char URL[MAX_WAP_URL_LENGTH];
-} GSM_WAPBookmark;
+	int location;
+	char name[WAP_NAME_MAX_LENGTH];
+	char URL[WAP_URL_MAX_LENGTH];
+} gn_wap_bookmark;
 
 /* settings */
 typedef enum {
-	GWP_TEMPORARY = 0,
-	GWP_PERMANENT
-} GSM_WAPSession;
+	GN_WAP_SESSION_TEMPORARY = 0,
+	GN_WAP_SESSION_PERMANENT
+} gn_wap_session;
 
 typedef enum {
-	GWP_NORMAL = 0,
-	GWP_SECURE
-} GSM_WAPAuthentication;
+	GN_WAP_AUTH_NORMAL = 0,
+	GN_WAP_AUTH_SECURE
+} gn_wap_authentication;
 
 typedef enum {
-	GWP_GSMDATA = 1,
-	GWP_GPRS = 3,
-	GWP_SMS = 7,
-	GWP_USSD = 9 /* FIXME real value? */
-} GSM_WAPBearer;
+	GN_WAP_BEARER_GSMDATA = 1,
+	GN_WAP_BEARER_GPRS    = 3,
+	GN_WAP_BEARER_SMS     = 7,
+	GN_WAP_BEARER_USSD    = 9 /* FIXME real value? */
+} gn_wap_bearer;
 
 typedef enum {
-	GWP_ANALOGUE,
-	GWP_ISDN
-} GSM_WAPCallType;
+	GN_WAP_CALL_ANALOGUE,
+	GN_WAP_CALL_ISDN
+} gn_wap_call_type;
 
 typedef enum {
-	GWP_AUTOMATIC,
-	GWP_9600,
-	GWP_14400
-} GSM_WAPCallSpeed;
+	GN_WAP_CALL_AUTOMATIC,
+	GN_WAP_CALL_9600,
+	GN_WAP_CALL_14400
+} gn_wap_call_speed;
 
 typedef enum {
-	GWP_MANUAL,
-	GWP_AUTOLOG
-} GSM_WAPLogin;
+	GN_WAP_LOGIN_MANUAL,
+	GN_WAP_LOGIN_AUTOLOG
+} gn_wap_login;
 
 typedef enum {
-	GWP_ALWAYS,
-	GWP_NEEDED
-} GSM_WAPGPRSConnection;
+	GN_WAP_GPRS_ALWAYS,
+	GN_WAP_GPRS_WHENNEEDED
+} gn_wap_gprs;
 
 typedef struct {
-	bool ReadBeforeWrite;
-	int Location;
-	int Successors[4];
-	char Number[MAX_WAP_SETTING_NAME_LENGTH];
-	char GSMdataIP[MAX_WAP_SETTING_NAME_LENGTH];
-	char GPRSIP[MAX_WAP_SETTING_NAME_LENGTH];
-	char Name[MAX_WAP_SETTING_NAME_LENGTH];
-	char Home[MAX_WAP_SETTING_HOME_LENGTH];
-	char GSMdataUsername[MAX_WAP_SETTING_USERNAME_LENGTH];
-	char GSMdataPassword[MAX_WAP_SETTING_NAME_LENGTH];
-	char GPRSUsername[MAX_WAP_SETTING_USERNAME_LENGTH];
-	char GPRSPassword[MAX_WAP_SETTING_NAME_LENGTH];
-	char AccessPoint[MAX_WAP_SETTING_ACCESS_LENGTH];
-	char SMSServiceNumber[MAX_WAP_SETTING_NAME_LENGTH];
-	char SMSServerNumber[MAX_WAP_SETTING_NAME_LENGTH];
-	GSM_WAPSession Session;
-	bool Security;
-	GSM_WAPBearer Bearer;
-	GSM_WAPAuthentication GSMdataAuthentication;
-	GSM_WAPAuthentication GPRSAuthentication;
-	GSM_WAPCallType CallType;
-	GSM_WAPCallSpeed CallSpeed;
-	GSM_WAPLogin GPRSLogin;
-	GSM_WAPLogin GSMdataLogin;
-	GSM_WAPGPRSConnection GPRSConnection;
-} GSM_WAPSetting;
+	bool read_before_write;
+	int location;
+	int successors[4];
+	char number             [WAP_SETTING_NAME_MAX_LENGTH];
+	char gsm_data_ip        [WAP_SETTING_NAME_MAX_LENGTH];
+	char gprs_ip            [WAP_SETTING_NAME_MAX_LENGTH];
+	char name               [WAP_SETTING_NAME_MAX_LENGTH];
+	char home               [WAP_SETTING_HOME_MAX_LENGTH];
+	char gsm_data_username  [WAP_SETTING_USERNAME_MAX_LENGTH];
+	char gsm_data_password  [WAP_SETTING_NAME_MAX_LENGTH];
+	char gprs_username      [WAP_SETTING_USERNAME_MAX_LENGTH];
+	char gprs_password      [WAP_SETTING_NAME_MAX_LENGTH];
+	char access_point_name  [WAP_SETTING_APN_MAX_LENGTH];
+	char sms_service_number [WAP_SETTING_NAME_MAX_LENGTH];
+	char sms_server_number  [WAP_SETTING_NAME_MAX_LENGTH];
+	gn_wap_session session;
+	bool security;
+	gn_wap_bearer bearer;
+	gn_wap_authentication gsm_data_authentication;
+	gn_wap_authentication gprs_authentication;
+	gn_wap_call_type call_type;
+	gn_wap_call_speed call_speed;
+	gn_wap_login gsm_data_login;
+	gn_wap_login gprs_login;
+	gn_wap_gprs gprs_connection;
+} gn_wap_setting;
 
 /* This structure is provided to allow common information about the particular
    model to be looked up in a model independant way. Some of the values here
    define minimum and maximum levels for values retrieved by the various Get
    functions for example battery level. They are not defined as constants to
    allow model specific code to set them during initialisation */
-
 typedef struct {
-	char *Models; /* Models covered by this type, pipe '|' delimited. */
+	unsigned char *models; /* Models covered by this type, pipe '|' delimited. */
 
-/* Minimum and maximum levels for RF signal strength. Units are as per the
-   setting of RFLevelUnits.  The setting of RFLevelUnits indicates the
-   default or "native" units used.  In the case of the 3110 and 6110 series
-   these are arbitrary, ranging from 0 to 4. */
+	/* Minimum and maximum levels for RF signal strength. Units are as per the
+	   setting of RFLevelUnits.  The setting of RFLevelUnits indicates the
+	   default or "native" units used.  In the case of the 3110 and 6110 series
+	   these are arbitrary, ranging from 0 to 4. */
+	float max_rf_level;
+	float min_rf_level;
+	gn_rf_unit rf_level_unit;
 
-	float MaxRFLevel;
-	float MinRFLevel;
-	GSM_RFUnits RFLevelUnits;
+	/* Minimum and maximum levels for battery level. Again, units are as per the
+	   setting of GSM_BatteryLevelUnits.  The value that BatteryLevelUnits is set
+	   to indicates the "native" or default value that the phone supports.  In the
+	   case of the 3110 and 6110 series these are arbitrary, ranging from 0 to 4. */
+	float max_battery_level;
+	float min_battery_level;
+	gn_battery_unit battery_level_unit;
 
-/* Minimum and maximum levels for battery level. Again, units are as per the
-   setting of GSM_BatteryLevelUnits.  The value that BatteryLevelUnits is set
-   to indicates the "native" or default value that the phone supports.  In the
-   case of the 3110 and 6110 series these are arbitrary, ranging from 0 to 4. */
-
-	float MaxBatteryLevel;
-	float MinBatteryLevel;
-	GSM_BatteryUnits BatteryLevelUnits;
-
-/* FIXME: some very similar code is in common/misc.c */
-
-/* Information about date, time and alarm support. In case of alarm
-   information we provide value for the number of alarms supported. */
-
-	GSM_DateTimeSupport DateTimeSupport;
-	GSM_DateTimeSupport AlarmSupport;
-	int MaximumAlarms;
-	u8 StartupLogoH;   /* Logo Widths and Heights - if supported */
-	u8 StartupLogoW;
-	u8 OpLogoH;
-	u8 OpLogoW;
-	u8 CallerLogoH;
-	u8 CallerLogoW;
-} GSM_Information;
-
-/* This enum is used for display status. */
-
-typedef enum {
-	DS_Call_In_Progress, /* Call in progress. */
-	DS_Unknown,          /* The meaning is unknown now :-( */
-	DS_Unread_SMS,       /* There is Unread SMS. */
-	DS_Voice_Call,       /* Voice call active. */
-	DS_Fax_Call,         /* Fax call active. */
-	DS_Data_Call,        /* Data call active. */
-	DS_Keyboard_Lock,    /* Keyboard lock status. */
-	DS_SMS_Storage_Full  /* Full SMS Memory. */
-} DisplayStatusEntity;
+	/* Information about date, time and alarm support. In case of alarm
+	   information we provide value for the number of alarms supported. */
+	gn_datetime_support datetime_support;
+	gn_datetime_support alarm_support;
+	int maximum_alarms_number;
+	
+	u8 startup_logo_height;   /* Logo widths and heights - if supported */
+	u8 startup_logo_width;
+	u8 operator_logo_height;
+	u8 operator_logo_width;
+	u8 caller_logo_height;
+	u8 caller_logo_width;
+} gn_phone;
 
 /* Structure to hold profile entries. */
-
 typedef struct {
-	int Number;          /* The number of the profile. */
-	char Name[40];       /* The name of the profile. */
-	int DefaultName;     /* 0-6, when default name is used, -1, when not. */
-	int KeypadTone;      /* Volume level for keypad tones. */
-	int Lights;          /* Lights on/off. */
-	int CallAlert;       /* Incoming call alert. */
-	int Ringtone;        /* Ringtone for incoming call alert. */
-	int Volume;          /* Volume of the ringing. */
-	int MessageTone;     /* The tone for message indication. */
-	int WarningTone;     /* The tone for warning messages. */
-	int Vibration;       /* Vibration? */
-	int CallerGroups;    /* CallerGroups. */
-	int AutomaticAnswer; /* Does the phone auto-answer incoming call? */
-} GSM_Profile;
-
-
-#define FO_SUBMIT       0x01
-#define FO_RD           0x40
-#define FO_VPF_NONE     0x00
-#define FO_VPF_REL      0x10
-#define FO_VPF_ABS      0x18
-#define FO_VPF_ENH      0x08
-#define FO_SRR          0x20
-#define FO_UDHI         0x40
-#define FO_RP           0x80
-#define FO_DEFAULT      (FO_SUBMIT | FO_VPF_REL | FO_SRR)
-
-#define PID_DEFAULT     0x00
-#define PID_TYPE0       0x40
-#define PID_REPLACE1    0x41
-#define PID_REPLACE2    0x42
-#define PID_REPLACE3    0x43
-#define PID_REPLACE4    0x44
-#define PID_REPLACE5    0x45
-#define PID_REPLACE6    0x46
-#define PID_REPLACE7    0x47
-#define PID_RETURN_CALL 0x5f
-
-#define DCS_DEFAULT     0x00
-#define DCS_MSG_WAIT_VOICE_DISCARD      0xc8
-#define DCS_MSG_WAIT_VOICE_OFF          0xc0
-#define DCS_MSG_WAIT_VOICE_STORE        0xd8
-#define DCS_DATA        0xf4
-#define DCS_CLASS0      0xf0
-#define DCS_CLASS1      0xf1
-#define DCS_CLASS2      0xf2
-#define DCS_CLASS3      0xf3
+	int number;           /* The number of the profile. */
+	char name[40];        /* The name of the profile. */
+	int default_name;     /* 0-6, when default name is used, -1, when not. */
+	int keypad_tone;      /* Volume level for keypad tones. */
+	int lights;           /* Lights on/off. */
+	int call_alert;       /* Incoming call alert. */
+	int ringtone;         /* Ringtone for incoming call alert. */
+	int volume;           /* Volume of the ringing. */
+	int message_tone;     /* The tone for message indication. */
+	int warning_tone;     /* The tone for warning messages. */
+	int vibration;        /* Vibration? */
+	int caller_groups;    /* CallerGroups. */
+	int automatic_answer; /* Does the phone auto-answer incoming call? */
+} gn_profile;
 
 /* Limits for IMEI, Revision and Model string storage. */
-#define GSM_MAX_IMEI_LENGTH     (20)
-#define GSM_MAX_REVISION_LENGTH (20)
-#define GSM_MAX_MODEL_LENGTH    (20)
+#define GN_IMEI_MAX_LENGTH     20
+#define GN_REVISION_MAX_LENGTH 20
+#define GN_MODEL_MAX_LENGTH    20
 
-/* Data structures for the call divert */
-typedef enum {
-	GSM_CDV_Busy = 0x01,
-	GSM_CDV_NoAnswer,
-	GSM_CDV_OutOfReach,
-	GSM_CDV_NotAvailable,
-	GSM_CDV_AllTypes
-} GSM_CDV_DivertTypes;
-
-typedef enum {
-	GSM_CDV_VoiceCalls = 0x01,
-	GSM_CDV_FaxCalls,
-	GSM_CDV_DataCalls,
-	GSM_CDV_AllCalls
-} GSM_CDV_CallTypes;
-
-typedef enum {
-	GSM_CDV_Disable  = 0x00,
-	GSM_CDV_Enable   = 0x01,
-	GSM_CDV_Query    = 0x02,
-	GSM_CDV_Register = 0x03,
-	GSM_CDV_Erasure  = 0x04
-} GSM_CDV_Opers;
+#define GN_BCD_STRING_MAX_LENGTH 40
 
 /* This data-type is used to specify the type of the number. See the official
    GSM specification 03.40, version 6.1.0, section 9.1.2.5, page 35-37. */
 typedef enum {
-	SMS_Unknown       = 0x81, /* Unknown number */
-	SMS_International = 0x91, /* International number */
-	SMS_National      = 0xa1, /* National number */
-	SMS_Network       = 0xb1, /* Network specific number */
-	SMS_Subscriber    = 0xc1, /* Subscriber number */
-	SMS_Alphanumeric  = 0xd0, /* Alphanumeric number */
-	SMS_Abbreviated   = 0xe1  /* Abbreviated number */
-} SMS_NumberType;
-
-#define MAX_BCD_STRING_LENGTH		40
+	GN_GSM_NUMBER_Unknown       = 0x81, /* Unknown number */
+	GN_GSM_NUMBER_International = 0x91, /* International number */
+	GN_GSM_NUMBER_National      = 0xa1, /* National number */
+	GN_GSM_NUMBER_Network       = 0xb1, /* Network specific number */
+	GN_GSM_NUMBER_Subscriber    = 0xc1, /* Subscriber number */
+	GN_GSM_NUMBER_Alphanumeric  = 0xd0, /* Alphanumeric number */
+	GN_GSM_NUMBER_Abbreviated   = 0xe1  /* Abbreviated number */
+} gn_gsm_number_type;
 
 typedef struct {
-	SMS_NumberType Type;
-	char Number[MAX_BCD_STRING_LENGTH];
-} SMS_Number;
+	gn_gsm_number_type type;
+	char number[GN_BCD_STRING_MAX_LENGTH];
+} gn_gsm_number;
 
-typedef struct {
-	GSM_CDV_DivertTypes DType;
-	GSM_CDV_CallTypes   CType;
-	GSM_CDV_Opers       Operation;
-	SMS_Number          Number;
-	unsigned int        Timeout;
-} GSM_CallDivert;
-
-typedef struct {
-	bool Full; /* indicates if we have full data read */
-	unsigned int Length;
-	unsigned char *Data;
-} GSM_RawData;
+/* Data structures for the call divert */
+typedef enum {
+	GN_CDV_Busy = 0x01,
+	GN_CDV_NoAnswer,
+	GN_CDV_OutOfReach,
+	GN_CDV_NotAvailable,
+	GN_CDV_AllTypes
+} gn_call_divert_type;
 
 typedef enum {
-	GSM_Draw_ClearScreen,
-	GSM_Draw_DisplayText,
-	GSM_Draw_DisplayStatus
-} GSM_DrawCommand;
+	GN_CDV_VoiceCalls = 0x01,
+	GN_CDV_FaxCalls,
+	GN_CDV_DataCalls,
+	GN_CDV_AllCalls
+} gn_call_divert_call_type;
 
-#define	DRAW_MAX_SCREEN_WIDTH 27
-#define	DRAW_MAX_SCREEN_HEIGHT 6
+typedef enum {
+	GN_CDV_Disable  = 0x00,
+	GN_CDV_Enable   = 0x01,
+	GN_CDV_Query    = 0x02,
+	GN_CDV_Register = 0x03,
+	GN_CDV_Erasure  = 0x04
+} gn_call_divert_operation;
+
+typedef struct {
+	gn_call_divert_type           type;
+	gn_call_divert_call_type     ctype;
+	gn_call_divert_operation operation;
+	gn_gsm_number               number;
+	unsigned int               timeout;
+} gn_call_divert;
+
+typedef struct {
+	bool full; /* indicates if we have full data read */
+	unsigned int length;
+	unsigned char *data;
+} gn_raw_data;
+
+/* This enum is used for display status. */
+typedef enum {
+	GN_DISP_Call_In_Progress, /* Call in progress. */
+	GN_DISP_Unknown,          /* The meaning is unknown now :-( */
+	GN_DISP_Unread_SMS,       /* There is Unread SMS. */
+	GN_DISP_Voice_Call,       /* Voice call active. */
+	GN_DISP_Fax_Call,         /* Fax call active. */
+	GN_DISP_Data_Call,        /* Data call active. */
+	GN_DISP_Keyboard_Lock,    /* Keyboard lock status. */
+	GN_DISP_SMS_Storage_Full  /* Full SMS Memory. */
+} gn_display_status;
+
+#define	GN_DRAW_SCREEN_MAX_WIDTH  27
+#define	GN_DRAW_SCREEN_MAX_HEIGHT  6
+
+typedef enum {
+	GN_DISP_DRAW_Clear,
+	GN_DISP_DRAW_Text,
+	GN_DISP_DRAW_Status
+} gn_display_draw_command;
 
 typedef struct {
 	int x;
 	int y;
-	unsigned char text[DRAW_MAX_SCREEN_WIDTH + 1];
-} GSM_DrawData_DisplayText;
+	unsigned char text[GN_DRAW_SCREEN_MAX_WIDTH + 1];
+} gn_display_text;
 
 typedef struct {
-	GSM_DrawCommand Command;
+	gn_display_draw_command cmd;
 	union {
-		GSM_DrawData_DisplayText DisplayText;
-		int DisplayStatus;
-	} Data;
-} GSM_DrawMessage;
+		gn_display_text text;
+		gn_display_status status;
+	} data;
+} gn_display_draw_msg;
 
 typedef struct {
-	void (*OutputFn)(GSM_DrawMessage *DrawMessage);
-	int State;
-	struct timeval Last;
-} GSM_DisplayOutput;
+	void (*output_fn)(gn_display_draw_msg *draw);
+	int state;
+	struct timeval last;
+} gn_display_output;
+
+typedef enum {
+	GN_KEY_NONE = 0x00,
+	GN_KEY_1 = 0x01,
+	GN_KEY_2,
+	GN_KEY_3,
+	GN_KEY_4,
+	GN_KEY_5,
+	GN_KEY_6,
+	GN_KEY_7,
+	GN_KEY_8,
+	GN_KEY_9,
+	GN_KEY_0,
+	GN_KEY_HASH,
+	GN_KEY_ASTERISK,
+	GN_KEY_POWER,
+	GN_KEY_GREEN,
+	GN_KEY_RED,
+	GN_KEY_INCREASEVOLUME,
+	GN_KEY_DECREASEVOLUME,
+	GN_KEY_UP = 0x17,
+	GN_KEY_DOWN,
+	GN_KEY_MENU,
+	GN_KEY_NAMES
+} gn_key_code;
 
 typedef struct {
-	int Field;
-	char Screen[50];
-} GSM_NetMonitor;
+	int field;
+	char screen[50];
+} gn_netmonitor;
 
-/* Data structure for make, answer and cancel a call */
-typedef enum {
-	GSM_CT_VoiceCall,		/* Voice call */
-	GSM_CT_NonDigitalDataCall,	/* Data call on non digital line */
-	GSM_CT_DigitalDataCall		/* Data call on digital line */
-} GSM_CallType;
-
-typedef enum {
-	GSM_CSN_Never,			/* Never send my number */
-	GSM_CSN_Always,			/* Always send my number */
-	GSM_CSN_Default			/* Use the network default settings */
-} GSM_CallSendNumber;
-
-typedef enum {
-	GSM_CS_IncomingCall,		/* Incoming call */
-	GSM_CS_LocalHangup,		/* Local end terminated the call */
-	GSM_CS_RemoteHangup,		/* Remote end terminated the call */
-	GSM_CS_Established,		/* Remote end answered the call */
-	GSM_CS_CallHeld,		/* Call placed on hold */
-	GSM_CS_CallResumed		/* Held call resumed */
-} GSM_CallStatus;
-
-typedef struct {
-	GSM_CallType Type;
-	char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1];
-	char Name[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];
-	GSM_CallSendNumber SendNumber;
-	int CallID;
-} GSM_CallInfo;
-
-typedef enum {
-	GSM_KEY_NONE = 0x00,
-	GSM_KEY_1 = 0x01,
-	GSM_KEY_2,
-	GSM_KEY_3,
-	GSM_KEY_4,
-	GSM_KEY_5,
-	GSM_KEY_6,
-	GSM_KEY_7,
-	GSM_KEY_8,
-	GSM_KEY_9,
-	GSM_KEY_0,
-	GSM_KEY_HASH,
-	GSM_KEY_ASTERISK,
-	GSM_KEY_POWER,
-	GSM_KEY_GREEN,
-	GSM_KEY_RED,
-	GSM_KEY_INCREASEVOLUME,
-	GSM_KEY_DECREASEVOLUME,
-	GSM_KEY_UP = 0x17,
-	GSM_KEY_DOWN,
-	GSM_KEY_MENU,
-	GSM_KEY_NAMES
-} GSM_KeyCode;
-
-#endif	/* __gsm_common_h */
+#endif	/* _gnokii_gsm_common_h */

@@ -11,9 +11,13 @@
     o move some parts from misc.{ch} to compat.{ch}      (Pawel Kot)
     o detect ptr_t                                       (Pawel Kot)
  * New API for gnokii
+    [some of these changes are temporary -- they will allow be to
+     better control the changes]
     o group the internal API functions in gnokii-internal.h
                                                          (Pawel Kot)
     o group the external API functions in gsm-api.h      (Pawel Kot)
+    o reorganization in the common files: -data, -common,
+      -statemachine                                      (Pawel Kot)
 
 0.5.0pre2
 =========

@@ -26,43 +26,46 @@
 
 */
 
+#include "misc.h"
 #include "gsm-common.h"
 #include "gsm-statemachine.h"
-#include "misc.h"
 
-gn_error SM_Initialise(GSM_Statemachine *state)
+#include "gnokii-internal.h"
+#include "gnokii-api.h"
+
+gn_error SM_Initialise(struct gn_statemachine *state)
 {
-	state->CurrentState = Initialised;
-	state->NumWaitingFor = 0;
-	state->NumReceived = 0;
+	state->current_state = GN_SM_Initialised;
+	state->waiting_for_number = 0;
+	state->received_number = 0;
 
 	return GN_ERR_NONE;
 }
 
-gn_error SM_SendMessage(GSM_Statemachine *state, u16 messagesize, u8 messagetype, void *message)
+gn_error SM_SendMessage(struct gn_statemachine *state, u16 messagesize, u8 messagetype, void *message)
 {
-	if (state->CurrentState != Startup) {
+	if (state->current_state != GN_SM_Startup) {
 #ifdef	DEBUG
 	dump("Message sent: ");
-	SM_DumpMessage(messagetype, message, messagesize);
+	sm_message_dump(messagetype, message, messagesize);
 #endif
-		state->LastMsgSize = messagesize;
-		state->LastMsgType = messagetype;
-		state->LastMsg = message;
-		state->CurrentState = MessageSent;
+		state->last_msg_size = messagesize;
+		state->last_msg_type = messagetype;
+		state->last_msg = message;
+		state->current_state = GN_SM_MessageSent;
 
 		/* FIXME - clear KeepAlive timer */
-		return state->Link.SendMessage(messagesize, messagetype, message);
+		return state->link.send_message(messagesize, messagetype, message);
 	}
 	else return GN_ERR_NOTREADY;
 }
 
-API GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
+API gn_state SM_Loop(struct gn_statemachine *state, int timeout)
 {
 	struct timeval loop_timeout;
 	int i;
 
-	if (!state->Link.Loop) {
+	if (!state->link.loop) {
 		dprintf("No Loop function. Aborting.\n");
 		abort();
 	}
@@ -74,52 +77,54 @@ API GSM_State SM_Loop(GSM_Statemachine *state, int timeout)
 		loop_timeout.tv_sec = 0;
 		loop_timeout.tv_usec = 100000;
 
-		state->Link.Loop(&loop_timeout);
+		state->link.loop(&loop_timeout);
 	}
 
 	/* FIXME - add calling a KeepAlive function here */
-	return state->CurrentState;
+	return state->current_state;
 }
 
-void SM_Reset(GSM_Statemachine *state)
+void SM_Reset(struct gn_statemachine *state)
 {
 	/* Don't reset to initialised if we aren't! */
-	if (state->CurrentState != Startup) {
-		state->CurrentState = Initialised;
-		state->NumWaitingFor = 0;
-		state->NumReceived = 0;
+	if (state->current_state != GN_SM_Startup) {
+		state->current_state = GN_SM_Initialised;
+		state->waiting_for_number = 0;
+		state->received_number = 0;
 	}
 }
 
-void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message, u16 messagesize)
+void SM_IncomingFunction(struct gn_statemachine *state, u8 messagetype, void *message, u16 messagesize)
 {
 	int c;
 	int temp = 1;
-	GSM_Data *data, *edata;
+	gn_data *data, *edata;
 	gn_error res = GN_ERR_INTERNALERROR;
 	int waitingfor = -1;
 
 #ifdef	DEBUG
 	dump("Message received: ");
-	SM_DumpMessage(messagetype, message, messagesize);
+	sm_message_dump(messagetype, message, messagesize);
 #endif
-	edata = calloc(1, sizeof(GSM_Data));
+	edata = calloc(1, sizeof(gn_data));
 	data = edata;
 
 	/* See if we need to pass the function the data struct */
-	if (state->CurrentState == WaitingForResponse)
-		for (c = 0; c < state->NumWaitingFor; c++)
-			if (state->WaitingFor[c] == messagetype) {
-				data = state->Data[c];
+	if (state->current_state == GN_SM_WaitingForResponse)
+		for (c = 0; c < state->waiting_for_number; c++)
+			if (state->waiting_for[c] == messagetype) {
+				/* FIXME What's wrong with that? 
+				data = state->data[c];
+				*/
 				waitingfor = c;
 			}
 
 	/* Pass up the message to the correct phone function, with data if necessary */
 	c = 0;
-	while (state->Phone.IncomingFunctions[c].Functions) {
-		if (state->Phone.IncomingFunctions[c].MessageType == messagetype) {
+	while (state->driver.incoming_functions[c].functions) {
+		if (state->driver.incoming_functions[c].message_type == messagetype) {
 			dprintf("Received message type %02x\n", messagetype);
-			res = state->Phone.IncomingFunctions[c].Functions(messagetype, message, messagesize, data, state);
+			res = state->driver.incoming_functions[c].functions(messagetype, message, messagesize, data, state);
 			temp = 0;
 			break;
 		}
@@ -130,51 +135,51 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 		free(edata);
 		return;
 	} else if (res == GN_ERR_UNHANDLEDFRAME)
-		SM_DumpUnhandledFrame(state, messagetype, message, messagesize);
+		sm_unhandled_frame_dump(state, messagetype, message, messagesize);
 	if (temp != 0) {
 		dprintf("Unknown Frame Type %02x\n", messagetype);
-		state->Phone.DefaultFunction(messagetype, message, messagesize, state);
+		state->driver.default_function(messagetype, message, messagesize, state);
 		free(edata);
 		return;
 	}
 
-	if (state->CurrentState == WaitingForResponse) {
+	if (state->current_state == GN_SM_WaitingForResponse) {
 		/* Check if we were waiting for a response and we received it */
 		if (waitingfor != -1) {
 			state->ResponseError[waitingfor] = res;
-			state->NumReceived++;
+			state->received_number++;
 		}
 
 		/* Check if all waitingfors have been received */
-		if (state->NumReceived == state->NumWaitingFor) {
-			state->CurrentState = ResponseReceived;
+		if (state->received_number == state->waiting_for_number) {
+			state->current_state = GN_SM_ResponseReceived;
 		}
 	}
 	free(edata);
 }
 
 /* This returns the error recorded from the phone function and indicates collection */
-gn_error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
+gn_error SM_GetError(struct gn_statemachine *state, unsigned char messagetype)
 {
 	int c, d;
 	gn_error error = GN_ERR_NOTREADY;
 
-	if (state->CurrentState == ResponseReceived) {
-		for (c = 0; c < state->NumReceived; c++)
-			if (state->WaitingFor[c] == messagetype) {
+	if (state->current_state == GN_SM_ResponseReceived) {
+		for (c = 0; c < state->received_number; c++)
+			if (state->waiting_for[c] == messagetype) {
 				error = state->ResponseError[c];
-				for (d = c + 1 ; d < state->NumReceived; d++) {
+				for (d = c + 1 ; d < state->received_number; d++) {
 					state->ResponseError[d-1] = state->ResponseError[d];
-					state->WaitingFor[d-1] = state->WaitingFor[d];
-					state->Data[d-1] = state->Data[d];
+					state->waiting_for[d-1] = state->waiting_for[d];
+					state->data[d-1] = state->data[d];
 				}
-				state->NumReceived--;
-				state->NumWaitingFor--;
+				state->received_number--;
+				state->waiting_for_number--;
 				c--; /* For neatness continue in the correct place */
 			}
-		if (state->NumReceived == 0) {
-			state->NumWaitingFor = 0;
-			state->CurrentState = Initialised;
+		if (state->received_number == 0) {
+			state->waiting_for_number = 0;
+			state->current_state = GN_SM_Initialised;
 		}
 	}
 
@@ -185,18 +190,20 @@ gn_error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 
 /* Indicate that the phone code is waiting for an response */
 /* This does not actually wait! */
-gn_error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char messagetype)
+gn_error SM_WaitFor(struct gn_statemachine *state, gn_data *data, unsigned char messagetype)
 {
 	/* If we've received a response, we have to call SM_GetError first */
-	if ((state->CurrentState == Startup) || (state->CurrentState == ResponseReceived))
+	if ((state->current_state == GN_SM_Startup) || (state->current_state == GN_SM_ResponseReceived))
 		return GN_ERR_NOTREADY;
 
-	if (state->NumWaitingFor == SM_MAXWAITINGFOR) return GN_ERR_NOTREADY;
-	state->WaitingFor[state->NumWaitingFor] = messagetype;
-	state->Data[state->NumWaitingFor] = data;
-	state->ResponseError[state->NumWaitingFor] = GN_ERR_BUSY;
-	state->NumWaitingFor++;
-	state->CurrentState = WaitingForResponse;
+	if (state->waiting_for_number == GN_SM_WAITINGFOR_MAX_NUMBER) return GN_ERR_NOTREADY;
+	state->waiting_for[state->waiting_for_number] = messagetype;
+	/* FIXME What's wrong with that? 
+	state->data[state->waiting_for_number] = data;
+	*/
+	state->ResponseError[state->waiting_for_number] = GN_ERR_BUSY;
+	state->waiting_for_number++;
+	state->current_state = GN_SM_WaitingForResponse;
 
 	return GN_ERR_NONE;
 }
@@ -207,10 +214,10 @@ gn_error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char messa
 
    t is in tenths of second
 */
-static gn_error __SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t, int noretry)
+static gn_error __SM_BlockTimeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t, int noretry)
 {
 	int retry, timeout;
-	GSM_State s;
+	gn_state s;
 	gn_error err;
 
 	for (retry = 0; retry < 3; retry++) {
@@ -221,52 +228,52 @@ static gn_error __SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int w
 		do {            /* ~3secs timeout */
 			s = SM_Loop(state, 1);  /* Timeout=100ms */
 			timeout--;
-		} while ((timeout > 0) && (s == WaitingForResponse));
+		} while ((timeout > 0) && (s == GN_SM_WaitingForResponse));
 
-		if (s == ResponseReceived) return SM_GetError(state, waitfor);
+		if (s == GN_SM_ResponseReceived) return SM_GetError(state, waitfor);
 
 		dprintf("SM_Block Retry - %d\n", retry);
 		SM_Reset(state);
 		if ((retry < 2) && (!noretry)) 
-			SM_SendMessage(state, state->LastMsgSize, state->LastMsgType, state->LastMsg);
+			SM_SendMessage(state, state->last_msg_size, state->last_msg_type, state->last_msg);
 	}
 
 	return GN_ERR_TIMEOUT;
 }
 
-gn_error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t)
+gn_error SM_BlockTimeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t)
 {
 	return __SM_BlockTimeout(state, data, waitfor, t, 0);
 }
 
-gn_error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
+gn_error SM_Block(struct gn_statemachine *state, gn_data *data, int waitfor)
 {
 	return __SM_BlockTimeout(state, data, waitfor, 30, 0);
 }
 
 /* This function is equal to SM_Block except it does not retry the message */
-gn_error SM_BlockNoRetryTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t)
+gn_error SM_BlockNoRetryTimeout(struct gn_statemachine *state, gn_data *data, int waitfor, int t)
 {
 	return __SM_BlockTimeout(state, data, waitfor, t, 1);
 }
 
-gn_error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor)
+gn_error SM_BlockNoRetry(struct gn_statemachine *state, gn_data *data, int waitfor)
 {
 	return __SM_BlockTimeout(state, data, waitfor, 100, 1);
 }
 
 /* Just to do things neatly */
-API gn_error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm)
+API gn_error SM_Functions(gn_operation op, gn_data *data, struct gn_statemachine *sm)
 {
-	if (!sm->Phone.Functions) {
+	if (!sm->driver.functions) {
 		dprintf("Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!\n");
 		return GN_ERR_INTERNALERROR;
 	}
-	return sm->Phone.Functions(op, data, sm);
+	return sm->driver.functions(op, data, sm);
 }
 
 /* Dumps a message */
-void SM_DumpMessage(int messagetype, unsigned char *message, int messagesize)
+void sm_message_dump(int messagetype, unsigned char *message, int messagesize)
 {
 	int i;
 	char buf[17];
@@ -290,13 +297,13 @@ void SM_DumpMessage(int messagetype, unsigned char *message, int messagesize)
 }
 
 /* Prints a warning message about unhandled frames */
-void SM_DumpUnhandledFrame(GSM_Statemachine *state, int messagetype, unsigned char *message, int messagesize)
+void sm_unhandled_frame_dump(struct gn_statemachine *state, int messagetype, unsigned char *message, int messagesize)
 {
 	dump(_("UNHANDLED FRAME RECEIVED\nrequest: "));
-	SM_DumpMessage(state->LastMsgType, state->LastMsg, state->LastMsgSize);
+	sm_message_dump(state->last_msg_type, state->last_msg, state->last_msg_size);
 
 	dump(_("reply: "));
-	SM_DumpMessage(messagetype, message, messagesize);
+	sm_message_dump(messagetype, message, messagesize);
 
 	dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
 }

@@ -26,237 +26,176 @@
 
 */
 
-#ifndef __gsm_data_h
-#define __gsm_data_h
+#ifndef _gnokii_gsm_data_h
+#define _gnokii_gsm_data_h
 
 #include "gsm-common.h"
 #include "gsm-sms.h"
+#include "gsm-call.h"
 #include "gsm-error.h"
 #include "data/rlp-common.h"
 
-typedef struct _GSM_Statemachine GSM_Statemachine;
-
-/* This is a generic holder for high level information - eg a GSM_Bitmap */
+/* This is a generic holder for high level information - eg a gn_bmp */
 typedef struct {
-	SMS_Folder *SMSFolder;
-	SMS_FolderList *SMSFolderList;
-	GSM_SMSMessage *RawSMS;		/* This is for phone driver, application using libgnokii should not touch this */
-	GSM_API_SMS *SMS;		/* This is for user communication, phone driver should not have to touch this one */
-	GSM_PhonebookEntry *PhonebookEntry;
-	GSM_SpeedDial *SpeedDial;
-	GSM_MemoryStatus *MemoryStatus;
-	SMS_MessagesList *MessagesList[MAX_SMS_MESSAGES][MAX_SMS_FOLDERS];
-	SMS_Status *SMSStatus;
-	SMS_FolderStats *FolderStats[MAX_SMS_FOLDERS];
-	SMS_MessageCenter *MessageCenter;
-	char *Imei;
-	char *Revision;
-	char *Model;
-	char *Manufacturer;
-	GSM_NetworkInfo *NetworkInfo;
-	GSM_WAPBookmark *WAPBookmark;
-	GSM_WAPSetting *WAPSetting;
-	GSM_ToDoList *ToDoList;
-	GSM_ToDo *ToDo;
-	GSM_CalendarNotesList *CalendarNotesList;
-	GSM_CalendarNote *CalendarNote;
-	gn_bmp *Bitmap;
-	GSM_Ringtone *Ringtone;
-	GSM_Profile *Profile;
-	GSM_BatteryUnits *BatteryUnits;
-	float *BatteryLevel;
-	GSM_RFUnits *RFUnits;
-	float *RFLevel;
-	GSM_DisplayOutput *DisplayOutput;
-	char *IncomingCallNr;
-	GSM_PowerSource *PowerSource;
-	GSM_DateTime *DateTime;
-	GSM_RawData *RawData;
-	GSM_CallDivert *CallDivert;
-	gn_error (*OnSMS)(GSM_API_SMS *Message);
-	int *DisplayStatus;
-	void (*OnCellBroadcast)(GSM_CBMessage *Message);
-	GSM_NetMonitor *NetMonitor;
-	GSM_CallInfo *CallInfo;
-	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo, GSM_Statemachine *state);
-	RLP_F96Frame *RLP_Frame;
-	bool RLP_OutDTX;
-	void (*RLP_RX_Callback)(RLP_F96Frame *Frame);
-	GSM_SecurityCode *SecurityCode;
-	const char *DTMFString;
-	unsigned char ResetType;
-	GSM_KeyCode KeyCode;
-	unsigned char Character;
-	PhoneModel *Phone;
-} GSM_Data;
-
-/* Global structures intended to be independant of phone etc */
-/* Obviously currently rather Nokia biased but I think most things */
-/* (eg at commands) can be enumerated */
+	gn_sms_folder *sms_folder;
+	gn_sms_folder_list *sms_folder_list;
+	gn_sms_raw *raw_sms;         /* This is for phone driver, application using libgnokii should not touch this */
+	gn_sms *sms;                 /* This is for user communication, phone driver should not have to touch this one */
+	gn_phonebook_entry *phonebook_entry;
+	gn_speed_dial *speed_dial;
+	gn_memory_status *memory_status;
+	gn_sms_message_list *message_list[GN_SMS_MESSAGE_MAX_NUMBER][GN_SMS_FOLDER_MAX_NUMBER];
+	gn_sms_status *sms_status;
+	gn_sms_folder_stats *folder_stats[GN_SMS_FOLDER_MAX_NUMBER];
+	gn_sms_message_center *message_center;
+	char *imei;
+	char *revision;
+	char *model;
+	char *manufacturer;
+	gn_network_info *network_info;
+	gn_wap_bookmark *wap_bookmark;
+	gn_wap_setting *wap_setting;
+	gn_todo *todo;
+	gn_todo_list *todo_list;
+	gn_calnote *calnote;
+	gn_calnote_list *calnote_list;
+	gn_bmp *bitmap;
+	gn_ringtone *ringtone;
+	gn_profile *profile;
+	gn_battery_unit *battery_unit;
+	float *battery_level;
+	gn_rf_unit *rf_unit;
+	float *rf_level;
+	gn_display_output *display_output;
+	char *incoming_call_nr;
+	gn_power_source *power_source;
+	gn_timestamp *datetime;
+	gn_calnote_alarm *alarm;
+	gn_raw_data *raw_data;
+	gn_call_divert *call_divert;
+	gn_error (*on_sms)(gn_sms *message);
+	int *display_status;
+	void (*on_cell_broadcast)(gn_cb_message *message);
+	gn_netmonitor *netmonitor;
+	gn_call_info *call_info;
+	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info,
+				  struct gn_statemachine *state);
+	gn_rlp_f96_frame *rlp_frame;
+	bool rlp_out_dtx;
+	void (*rlp_rx_callback)(gn_rlp_f96_frame *frame);
+	gn_security_code *security_code;
+	const char *dtmf_string;
+	unsigned char reset_type;
+	gn_key_code key_code;
+	unsigned char character;
+	gn_phone_model *phone;
+} gn_data;
 
 /* A structure to hold information about the particular link */
 /* The link comes 'under' the phone */
 typedef struct {
-	char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH]; /* The port device */
-	int InitLength;                              /* Number of chars sent to sync the serial port */
-	unsigned int SMSTimeout;                     /* SMS timeout: how many seconds should we wait
+	char port_device[GN_DEVICE_NAME_MAX_LENGTH]; /* The port device */
+	int init_length;                              /* Number of chars sent to sync the serial port */
+	unsigned int sms_timeout;                     /* SMS timeout: how many seconds should we wait
 							for the SMSC response. Defaults to 10 seconds */
-	GSM_ConnectionType ConnectionType;           /* Connection type, serial, ir etc */
+	gn_connection_type connection_type;           /* Connection type, serial, ir etc */
 
 	/* A regularly called loop function */
 	/* timeout can be used to make the function block or not */
-	gn_error (*Loop)(struct timeval *timeout);
+	gn_error (*loop)(struct timeval *timeout);
 
 	/* A pointer to the function used to send out a message */
 	/* This is used by the phone specific code to send a message over the link */
-	gn_error (*SendMessage)(u16 messagesize, u8 messagetype, unsigned char *message);
-} GSM_Link;
-
-/* Small structure used in GSM_Phone */
-/* Messagetype is passed to the function in case it is a 'generic' one */
-typedef struct {
-	u8 MessageType;
-	gn_error (*Functions)(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-} GSM_IncomingFunctionType;
+	gn_error (*send_message)(u16 messagesize, u8 messagetype, unsigned char *message);
+} gn_link;
 
 typedef enum {
-	GOP_Init,
-	GOP_Terminate,
-	GOP_GetModel,
-	GOP_GetRevision,
-	GOP_GetImei,
-	GOP_GetManufacturer,
-	GOP_Identify,
-	GOP_GetBitmap,
-	GOP_SetBitmap,
-	GOP_GetBatteryLevel,
-	GOP_GetRFLevel,
-	GOP_DisplayOutput,
-	GOP_GetMemoryStatus,
-	GOP_ReadPhonebook,
-	GOP_WritePhonebook,
-	GOP_GetPowersource,
-	GOP_GetAlarm,
-	GOP_GetSMSStatus,
-	GOP_GetIncomingCallNr,
-	GOP_GetNetworkInfo,
-	GOP_GetSecurityCode,
-	GOP_CreateSMSFolder,
-	GOP_DeleteSMSFolder,
-	GOP_GetSMS,
-	GOP_GetSMSnoValidate,
-	GOP_GetSMSFolders,
-	GOP_GetSMSFolderStatus,
-	GOP_GetIncomingSMS,
-	GOP_GetUnreadMessages,
-	GOP_GetNextSMS,
-	GOP_DeleteSMSnoValidate,
-	GOP_DeleteSMS,
-	GOP_SendSMS,
-	GOP_GetSpeedDial,
-	GOP_GetSMSCenter,
-	GOP_SetSMSCenter,
-	GOP_GetDateTime,
-	GOP_GetToDo,
-	GOP_GetCalendarNote,
-	GOP_CallDivert,
-	GOP_OnSMS,
-	GOP_PollSMS,
-	GOP_SetAlarm,
-	GOP_SetDateTime,
-	GOP_GetProfile,
-	GOP_SetProfile,
-	GOP_WriteToDo,
-	GOP_DeleteAllToDos,
-	GOP_WriteCalendarNote,
-	GOP_DeleteCalendarNote,
-	GOP_SetSpeedDial,
-	GOP_GetDisplayStatus,
-	GOP_PollDisplay,
-	GOP_SaveSMS,
-	GOP_SetCellBroadcast,
-	GOP_NetMonitor,
-	GOP_MakeCall,
-	GOP_AnswerCall,
-	GOP_CancelCall,
-	GOP_SetCallNotification,
-	GOP_SendRLPFrame,
-	GOP_SetRLPRXCallback,
-	GOP_EnterSecurityCode,
-	GOP_GetSecurityCodeStatus,
-	GOP_ChangeSecurityCode,
-	GOP_SendDTMF,
-	GOP_Reset,
-	GOP_GetRingtone,
-	GOP_SetRingtone,
-	GOP_GetRawRingtone,
-	GOP_SetRawRingtone,
-	GOP_PressPhoneKey,
-	GOP_ReleasePhoneKey,
-	GOP_EnterChar,
-	GOP_Subscribe,
-	GOP_GetWAPBookmark,
-	GOP_WriteWAPBookmark,
-	GOP_DeleteWAPBookmark,
-	GOP_GetWAPSetting,
-	GOP_ActivateWAPSetting,
-	GOP_WriteWAPSetting,
-	GOP_Max,	/* don't append anything after this entry */
-} GSM_Operation;
-
-/* This structure contains the 'callups' needed by the statemachine */
-/* to deal with messages from the phone and other information */
-
-typedef struct {
-	/* These make up a list of functions, one for each message type and NULL terminated */
-	GSM_IncomingFunctionType *IncomingFunctions;
-	gn_error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length, GSM_Statemachine *state);
-	GSM_Information Info;
-	gn_error (*Functions)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
-	void *DriverInstance;
-} GSM_Phone;
-
-
-/* The states the statemachine can take */
-
-typedef enum {
-	Startup,            /* Not yet initialised */
-	Initialised,        /* Ready! */
-	MessageSent,        /* A command has been sent to the link(phone) */
-	WaitingForResponse, /* We are waiting for a response from the link(phone) */
-	ResponseReceived    /* A response has been received - waiting for the phone layer to collect it */
-} GSM_State;
-
-/* How many message types we can wait for at one */
-#define SM_MAXWAITINGFOR 3
-
-/* All properties of the state machine */
-
-struct _GSM_Statemachine {
-	GSM_State CurrentState;
-	GSM_Link Link;
-	GSM_Phone Phone;
-	
-	/* Store last message for resend purposes */
-	u8 LastMsgType;
-	u16 LastMsgSize;
-	void *LastMsg;
-
-	/* The responses we are waiting for */
-	unsigned char NumWaitingFor;
-	unsigned char NumReceived;
-	unsigned char WaitingFor[SM_MAXWAITINGFOR];
-	gn_error ResponseError[SM_MAXWAITINGFOR];
-	/* Data structure to be filled in with the response */
-	GSM_Data *Data[SM_MAXWAITINGFOR];
-};
+	GN_OP_Init,
+	GN_OP_Terminate,
+	GN_OP_GetModel,
+	GN_OP_GetRevision,
+	GN_OP_GetImei,
+	GN_OP_GetManufacturer,
+	GN_OP_Identify,
+	GN_OP_GetBitmap,
+	GN_OP_SetBitmap,
+	GN_OP_GetBatteryLevel,
+	GN_OP_GetRFLevel,
+	GN_OP_DisplayOutput,
+	GN_OP_GetMemoryStatus,
+	GN_OP_ReadPhonebook,
+	GN_OP_WritePhonebook,
+	GN_OP_GetPowersource,
+	GN_OP_GetAlarm,
+	GN_OP_GetSMSStatus,
+	GN_OP_GetIncomingCallNr,
+	GN_OP_GetNetworkInfo,
+	GN_OP_GetSecurityCode,
+	GN_OP_CreateSMSFolder,
+	GN_OP_DeleteSMSFolder,
+	GN_OP_GetSMS,
+	GN_OP_GetSMSnoValidate,
+	GN_OP_GetSMSFolders,
+	GN_OP_GetSMSFolderStatus,
+	GN_OP_GetIncomingSMS,
+	GN_OP_GetUnreadMessages,
+	GN_OP_GetNextSMS,
+	GN_OP_DeleteSMSnoValidate,
+	GN_OP_DeleteSMS,
+	GN_OP_SendSMS,
+	GN_OP_GetSpeedDial,
+	GN_OP_GetSMSCenter,
+	GN_OP_SetSMSCenter,
+	GN_OP_GetDateTime,
+	GN_OP_GetToDo,
+	GN_OP_GetCalendarNote,
+	GN_OP_CallDivert,
+	GN_OP_OnSMS,
+	GN_OP_PollSMS,
+	GN_OP_SetAlarm,
+	GN_OP_SetDateTime,
+	GN_OP_GetProfile,
+	GN_OP_SetProfile,
+	GN_OP_WriteToDo,
+	GN_OP_DeleteAllToDos,
+	GN_OP_WriteCalendarNote,
+	GN_OP_DeleteCalendarNote,
+	GN_OP_SetSpeedDial,
+	GN_OP_GetDisplayStatus,
+	GN_OP_PollDisplay,
+	GN_OP_SaveSMS,
+	GN_OP_SetCellBroadcast,
+	GN_OP_NetMonitor,
+	GN_OP_MakeCall,
+	GN_OP_AnswerCall,
+	GN_OP_CancelCall,
+	GN_OP_SetCallNotification,
+	GN_OP_SendRLPFrame,
+	GN_OP_SetRLPRXCallback,
+	GN_OP_EnterSecurityCode,
+	GN_OP_GetSecurityCodeStatus,
+	GN_OP_ChangeSecurityCode,
+	GN_OP_SendDTMF,
+	GN_OP_Reset,
+	GN_OP_GetRingtone,
+	GN_OP_SetRingtone,
+	GN_OP_GetRawRingtone,
+	GN_OP_SetRawRingtone,
+	GN_OP_PressPhoneKey,
+	GN_OP_ReleasePhoneKey,
+	GN_OP_EnterChar,
+	GN_OP_Subscribe,
+	GN_OP_GetWAPBookmark,
+	GN_OP_WriteWAPBookmark,
+	GN_OP_DeleteWAPBookmark,
+	GN_OP_GetWAPSetting,
+	GN_OP_ActivateWAPSetting,
+	GN_OP_WriteWAPSetting,
+	GN_OP_Max,	/* don't append anything after this entry */
+} gn_operation;
 
 /* Undefined functions in fbus/mbus files */
-extern gn_error Unimplemented(void);
-#define UNIMPLEMENTED (void *) Unimplemented
+extern gn_error gn_unimplemented(void);
+#define GN_UNIMPLEMENTED (void *) gn_unimplemented
 
-API GSM_MemoryType StrToMemoryType (const char *s);
-
-API void GSM_DataClear(GSM_Data *data);
-
-#endif	/* __gsm_data_h */
+#endif	/* _gnokii_gsm_data_h */

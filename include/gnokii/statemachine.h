@@ -28,24 +28,61 @@
 
 */
 
-#ifndef __gsm_statemachine_h
-#define __gsm_statemachine_h
+#ifndef _gnokii_gsm_statemachine_h
+#define _gnokii_gsm_statemachine_h
 
+#include "gsm-error.h"
 #include "gsm-data.h"
 
-gn_error SM_Initialise(GSM_Statemachine *state);
-API GSM_State SM_Loop(GSM_Statemachine *state, int timeout);
-gn_error SM_SendMessage(GSM_Statemachine *state, u16 messagesize, u8 messagetype, void *message);
-gn_error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char messagetype);
-void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message, u16 messagesize);
-void SM_Reset(GSM_Statemachine *state);
-gn_error SM_GetError(GSM_Statemachine *state, unsigned char messagetype);
-gn_error SM_BlockTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t);
-gn_error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor);
-gn_error SM_BlockNoRetryTimeout(GSM_Statemachine *state, GSM_Data *data, int waitfor, int t);
-gn_error SM_BlockNoRetry(GSM_Statemachine *state, GSM_Data *data, int waitfor);
-API gn_error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm);
-void SM_DumpMessage(int messagetype, unsigned char *message, int length);
-void SM_DumpUnhandledFrame(GSM_Statemachine *state, int messagetype, unsigned char *message, int length);
+/* Small structure used in gn_driver */
+/* Messagetype is passed to the function in case it is a 'generic' one */
+typedef struct {
+	u8 message_type;
+	gn_error (*functions)(int messagetype, unsigned char *buffer, int length,
+			      gn_data *data, struct gn_statemachine *state);
+} gn_incoming_function_type;
 
-#endif	/* __gsm_statemachine_h */
+/* This structure contains the 'callups' needed by the statemachine */
+/* to deal with messages from the phone and other information */
+typedef struct {
+	/* These make up a list of functions, one for each message type and NULL terminated */
+	gn_incoming_function_type *incoming_functions;
+	gn_error (*default_function)(int messagetype, unsigned char *buffer, int length, struct gn_statemachine *state);
+	gn_phone phone;
+	gn_error (*functions)(gn_operation op, gn_data *data, struct gn_statemachine *state);
+	void *driver_instance;
+} gn_driver;
+
+/* How many message types we can wait for at one moment */
+#define GN_SM_WAITINGFOR_MAX_NUMBER 3
+
+/* The states the statemachine can take */
+typedef enum {
+	GN_SM_Startup,            /* Not yet initialised */
+	GN_SM_Initialised,        /* Ready! */
+	GN_SM_MessageSent,        /* A command has been sent to the link(phone) */
+	GN_SM_WaitingForResponse, /* We are waiting for a response from the link(phone) */
+	GN_SM_ResponseReceived    /* A response has been received - waiting for the phone layer to collect it */
+} gn_state;
+
+/* All properties of the state machine */
+struct gn_statemachine {
+	gn_state current_state;
+	gn_link link;
+	gn_driver driver;
+	
+	/* Store last message for resend purposes */
+	u8 last_msg_type;
+	u16 last_msg_size;
+	void *last_msg;
+
+	/* The responses we are waiting for */
+	unsigned char waiting_for_number;
+	unsigned char received_number;
+	unsigned char waiting_for[GN_SM_WAITINGFOR_MAX_NUMBER];
+	gn_error ResponseError[GN_SM_WAITINGFOR_MAX_NUMBER];
+	/* Data structure to be filled in with the response */
+	gn_data data[GN_SM_WAITINGFOR_MAX_NUMBER];
+};
+
+#endif	/* _gnokii_gsm_statemachine_h */
