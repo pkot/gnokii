@@ -97,7 +97,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %config %{_sysconfdir}/gnokiirc
 %{_mandir}/*/*
 %{_prefix}/X11R6/man/*/*
-%{_libdir}/pkgconfig/*
 
 %files xgnokii
 %defattr(-,root,root)
@@ -109,6 +108,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %{_includedir}/*
 %{_libdir}/*.so
+%{_libdir}/pkgconfig/*
 
 %changelog
 
@@ -119,10 +119,10 @@ rm -rf ${RPM_BUILD_ROOT}
 - use make DESTDIR for install
 - made sure that no files are left unpackaged
 
-* Sat Jan  4 2003 Pawel Kot <pkot#linuxnews.pl>
+* Sat Jan  4 2003 Pawel Kot <pkot@linuxnews.pl>
 - reflect changes in the file layout
 
-* Thu Aug 15 2002 Pawel Kot <pkot#linuxnews.pl>
+* Thu Aug 15 2002 Pawel Kot <pkot@linuxnews.pl>
 - misc path problems fixed
 
 * Fri Apr 12 2002 Pawel Kot <pkot@linuxnews.pl>
