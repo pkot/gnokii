@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#define __phones_nk6100_c
 #include "misc.h"
 #include "gsm-common.h"
 #include "phones/generic.h"
@@ -79,12 +78,41 @@ static SMSMessage_PhoneLayout nk6100_layout;
 
 static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 
+/* static functions prototypes */
+static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error Initialise(GSM_Statemachine *state);
+static GSM_Error GetModelName(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetRevision(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetPowersource(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error IncomingModelInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error Incoming0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+
+static int GetMemoryType(GSM_MemoryType memory_type);
+
 static GSM_IncomingFunctionType IncomingFunctions[] = {
+	{ 0x04, IncomingPhoneStatus },
+	{ 0x0a, IncomingNetworkInfo },
+	{ 0x03, IncomingPhonebook },
+
 	{ 0x64, IncomingPhoneInfo },
         { 0xd2, IncomingModelInfo },
 	{ 0x14, IncomingSMS },
-	{ 0x03, Incoming0x03 },
-	{ 0x0a, Incoming0x0a },
 	{ 0x17, Incoming0x17 },
 	{ 0, NULL}
 };
@@ -124,12 +152,24 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetIMEI(data, state);
 	case GOP_Identify:
 		return Identify(data, state);
+	case GOP_GetBitmap:
+		return GetBitmap(data, state);
 	case GOP_GetBatteryLevel:
 		return GetBatteryLevel(data, state);
 	case GOP_GetRFLevel:
 		return GetRFLevel(data, state);
 	case GOP_GetMemoryStatus:
 		return GetMemoryStatus(data, state);
+	case GOP_ReadPhonebook:
+		return ReadPhonebook(data, state);
+	case GOP_WritePhonebook:
+		return WritePhonebook(data, state);
+	case GOP_GetPowersource:
+		return GetPowersource(data, state);
+	case GOP_GetSMSStatus:
+		return GetSMSStatus(data, state);
+	case GOP_GetNetworkInfo:
+		return GetNetworkInfo(data, state);
 	case GOP_GetSMS:
 		return GetSMSMessage(data, state);
 	default:
@@ -161,11 +201,8 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
-		err = FBUS_Initialise(&(state->Link), state, 0);
-		break;
 	case GCT_Infrared:
-	case GCT_Irda:
-		err = PHONET_Initialise(&(state->Link), state);
+		err = FBUS_Initialise(&(state->Link), state, 0);
 		break;
 	default:
 		return GE_NOTSUPPORTED;
@@ -187,7 +224,7 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 
 static GSM_Error GetPhoneInfo(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = { FBUS_FRAME_HEADER, 0x03, 0x00 };
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x00};
 
 	dprintf("Getting phone info...\n");
 	if (SM_SendMessage(state, 5, 0xd1, req) != GE_NONE) return GE_NOTREADY;
@@ -216,13 +253,59 @@ static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state)
 }
 
 
+static GSM_Error GetPhoneStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
+
+	dprintf("Getting phone status...\n");
+	if (SM_SendMessage(state, 4, 0x04, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x04);
+}
+
+static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
+{
+	dprintf("Getting rf level...\n");
+	return GetPhoneStatus(data, state);
+}
+
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02};
-
 	dprintf("Getting battery level...\n");
-	if (SM_SendMessage(state, 4, 0x17, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x17);
+	return GetPhoneStatus(data, state);
+}
+
+static GSM_Error GetPowersource(GSM_Data *data, GSM_Statemachine *state)
+{
+	dprintf("Getting power source...\n");
+	return GetPhoneStatus(data, state);
+}
+
+static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	/* Phone status */
+	case 0x02:
+		dprintf("\tRFLevel: %d\n",message[5]);
+		if (data->RFLevel) {
+			*(data->RFUnits) = GRF_Arbitrary;
+			*(data->RFLevel) = message[5];
+		}
+		dprintf("\tPowerSource: %d\n",message[7]);
+		if (data->PowerSource) {
+			*(data->PowerSource) = message[7];
+		}
+		dprintf("\tBatteryLevel: %d\n",message[8]);
+		if (data->BatteryLevel) {
+			*(data->BatteryUnits) = GBU_Arbitrary;
+			*(data->BatteryLevel) = message[8];
+		}
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x02 (%d)\n", message[3]);
+		return GE_UNKNOWN;
+	}
+
+	return GE_NONE;
 }
 
 
@@ -244,66 +327,192 @@ static GSM_Error Incoming0x17(int messagetype, unsigned char *message, int lengt
 	}
 }
 
-static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x81};
-
-	dprintf("Getting rf level...\n");
-	if (SM_SendMessage(state, 4, 0x0a, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x0a);
-}
-
-static GSM_Error Incoming0x0a(int messagetype, unsigned char *message, int length, GSM_Data *data)
-{
-	switch (message[3]) {
-	case 0x82:
-		if (data->RFLevel) { 
-			*(data->RFUnits) = GRF_Percentage;
-			*(data->RFLevel) = message[4];
-			dprintf("RF level %f\n",*(data->RFLevel));
-		}
-		return GE_NONE;
-		break;
-	default:
-		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
-		return GE_UNKNOWN;
-		break;
-	}
-}
 
 static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x00, 0x00};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x00};
       
 	dprintf("Getting memory status...\n");
-	req[5] = GetMemoryType(data->MemoryStatus->MemoryType);
-	if (SM_SendMessage(state, 6, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	req[4] = GetMemoryType(data->MemoryStatus->MemoryType);
+	if (SM_SendMessage(state, 5, 0x03, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x03);
 }
 
-static GSM_Error Incoming0x03(int messagetype, unsigned char *message, int length, GSM_Data *data)
+static GSM_Error ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
 {
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00};
+      
+	dprintf("Reading phonebook location (%d/%d)\n", data->PhonebookEntry->MemoryType, data->PhonebookEntry->Location);
+	req[4] = GetMemoryType(data->PhonebookEntry->MemoryType);
+	req[5] = data->PhonebookEntry->Location;
+	if (SM_SendMessage(state, 7, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
+}
+
+static GSM_Error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[FBUS_MAX_FRAME_LENGTH] = {FBUS_FRAME_HEADER, 0x04};
+	GSM_PhonebookEntry *pe;
+	unsigned char *pos;
+	int namelen, numlen;
+      
+	pe = data->PhonebookEntry;
+	pos = req+4;
+	namelen = strlen(pe->Name);
+	numlen = strlen(pe->Number);
+	dprintf("Writing phonebook location (%d/%d): %s\n", pe->MemoryType, pe->Location, pe->Name);
+	if (namelen > GSM_MAX_PHONEBOOK_NAME_LENGTH) {
+		dprintf("name too long\n");
+		return GE_PHBOOKNAMETOOLONG;
+	}
+	if (numlen > GSM_MAX_PHONEBOOK_NUMBER_LENGTH) {
+		dprintf("number too long\n");
+		return GE_PHBOOKNUMBERTOOLONG;
+	}
+	if (pe->SubEntriesCount > 1) {
+		dprintf("61xx doesn't support subentries\n");
+		return GE_UNKNOWN;
+	}
+	if ((pe->SubEntriesCount == 1) && ((pe->SubEntries[0].EntryType != GSM_Number)
+		|| (pe->SubEntries[0].NumberType != GSM_General) || (pe->SubEntries[0].BlockNumber != 2)
+		|| strcmp(pe->SubEntries[0].data.Number, pe->Number))) {
+		dprintf("61xx doesn't support subentries\n");
+		return GE_UNKNOWN;
+	}
+	*pos++ = GetMemoryType(pe->MemoryType);
+	*pos++ = pe->Location;
+	*pos++ = namelen;
+	memcpy(pos,pe->Name,namelen);
+	pos += namelen;
+	*pos++ = numlen;
+	memcpy(pos,pe->Number,numlen);
+	pos += numlen;
+	*pos++ = (pe->Group == 5) ? 0xff : pe->Group;
+	if (SM_SendMessage(state, pos-req, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
+}
+
+static GSM_Error GetCallerGroupData(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x00};
+      
+	req[4] = data->Bitmap->number;
+	if (SM_SendMessage(state, 5, 0x03, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x03);
+}
+
+static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state)
+{
+	dprintf("Reading bitmap...\n");
+	switch (data->Bitmap->type) {
+	case GSM_CallerLogo:
+		return GetCallerGroupData(data, state);
+	default:
+		return GE_NOTIMPLEMENTED;
+	}
+}
+
+static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	GSM_PhonebookEntry *pe;
+	GSM_Bitmap *bmp;
+	unsigned char *pos;
+	int n;
+
 	switch (message[3]) {
-	case 0x04:
-		if (data->MemoryStatus) {
-			if (message[5] != 0xff) {
-				data->MemoryStatus->Used = (message[16] << 8) + message[17];
-				data->MemoryStatus->Free = ((message[14] << 8) + message[15]) - data->MemoryStatus->Used;
-				dprintf("Memory status - location = %d\n", (message[8] << 8) + message[9]);
-				return GE_NONE;
-			} else {
-				dprintf("Unknown error getting mem status\n");
-				return GE_NOTIMPLEMENTED;
-				
-			}
+	case 0x02:
+		if (data->PhonebookEntry) {
+			pe = data->PhonebookEntry;
+			pos = message+5;
+			pe->Empty = false;
+			n = *pos++;
+			snprintf(pe->Name, sizeof(pe->Name), "%*.*s", n, n, pos);
+			pos += n;
+			n = *pos++;
+			snprintf(pe->Number, sizeof(pe->Number), "%*.*s", n, n, pos);
+			pos += n;
+			pe->Group = *pos++;
+			pos++;
+			pe->Date.Year = (pos[0] << 8) + pos[1];
+			pos += 2;
+			pe->Date.Month = *pos++;
+			pe->Date.Day = *pos++;
+			pe->Date.Hour = *pos++;
+			pe->Date.Minute = *pos++;
+			pe->Date.Second = *pos++;
+			pe->SubEntriesCount = 0;
 		}
-		return GE_NONE;
 		break;
+	case 0x03:
+		if ((message[4] == 0x7d) || (message[4] == 0x74)) {
+			return GE_INVALIDPHBOOKLOCATION;
+		}
+		dprintf("Invalid GetMemoryLocation reply: 0x%02x\n",message[4]);
+		return GE_UNKNOWN;
+	case 0x05:
+		break;
+	case 0x06:
+		switch (message[4]) {
+		case 0x7d:
+		case 0x90:
+			return GE_PHBOOKNAMETOOLONG;
+		case 0x74:
+			return GE_INVALIDPHBOOKLOCATION;
+		}
+		printf("Invalid GetMemoryLocation reply: 0x%02x\n",message[4]);
+		dprintf("Invalid GetMemoryLocation reply: 0x%02x\n",message[4]);
+		return GE_UNKNOWN;
+	case 0x08:
+		dprintf("\tMemory location: %d\n",data->MemoryStatus->MemoryType);
+		dprintf("\tUsed: %d\n",message[6]);
+		dprintf("\tFree: %d\n",message[5]);
+		if (data->MemoryStatus) {
+			data->MemoryStatus->Used = message[6];
+			data->MemoryStatus->Free = message[5];
+			return GE_NONE;
+		}
+		break;
+	case 0x09:
+		switch (message[4]) {
+		case 0x6f:
+			return GE_TIMEOUT;
+		case 0x7d:
+			return GE_INTERNALERROR;
+		case 0x8d:
+			return GE_INVALIDSECURITYCODE;
+		}
+		dprintf("Invalid GetMemoryStatus reply: 0x%02x\n",message[4]);
+		return GE_UNKNOWN;
+	case 0x11:
+		if (data->Bitmap) {
+			bmp = data->Bitmap;
+			pos = message+4;
+			bmp->number = *pos++;
+			n = *pos++;
+			snprintf(bmp->text, sizeof(bmp->text), "%*.*s", n, n, pos);
+			pos += n;
+			bmp->ringtone = *pos++;
+			pos++;
+			bmp->size = (pos[0] << 8) + pos[1];
+			pos += 2;
+			pos++;
+			bmp->width = *pos++;
+			bmp->height = *pos++;
+			pos++;
+			n = bmp->height * bmp->width / 8;
+			if (bmp->size > n) bmp->size = n;
+			memcpy(bmp->bitmap,pos,bmp->size);
+		}
+		break;
+	case 0x12:
+		dprintf("Invalid GetCallerGroupData reply: 0x%02x\n",message[4]);
+		return GE_UNKNOWN;
 	default:
 		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
 		return GE_UNKNOWN;
-		break;
 	}
+
+	return GE_NONE;
 }
 
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
@@ -325,27 +534,15 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	if (data->Imei) { 
-#if defined WIN32 || !defined HAVE_SNPRINTF
-		sprintf(data->Imei, "%s", message + 4);
-#else
 		snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
-#endif
 		dprintf("Received imei %s\n", data->Imei);
 	}
 	if (data->Model) { 
-#if defined WIN32 || !defined HAVE_SNPRINTF
-		sprintf(data->Model, "%s", message + 22);
-#else
 		snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 22);
-#endif
 		dprintf("Received model %s\n", data->Model);
 	}
 	if (data->Revision) { 
-#if defined WIN32 || !defined HAVE_SNPRINTF
-		sprintf(data->Revision, "%s", message + 7);
-#else
 		snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "%s", message + 7);
-#endif
 		dprintf("Received revision %s\n", data->Revision);
 	}
 
@@ -371,10 +568,6 @@ static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int 
 
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-#if defined WIN32 || !defined HAVE_SNPRINTF
-	if (data->Model) sprintf(data->Model, "%s", message + 21);
-	if (data->Revision) sprintf(data->Revision, "SW%s", message + 5);
-#else
 	dprintf("%p %p %p\n", data, data->Model, data->Revision);
 	if (data->Model) {
 		snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", message + 21);
@@ -384,7 +577,6 @@ static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int 
 		snprintf(data->Revision, GSM_MAX_REVISION_LENGTH, "SW%s", message + 5);
 		data->Revision[GSM_MAX_REVISION_LENGTH - 1] = 0;
 	}
-#endif
 	dprintf("Phone info:\n%s\n", message + 4);
 
 	return GE_NONE;
@@ -427,6 +619,14 @@ static int GetMemoryType(GSM_MemoryType memory_type)
 		break;
 	}
 	return (result);
+}
+
+static GSM_Error GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x36, 0x64 };
+
+	if (SM_SendMessage(state, 5, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x14);
 }
 
 static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
@@ -539,5 +739,41 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 		dprintf("Unknown message.\n");
 		return GE_UNKNOWN;
 	}
+	return GE_NONE;
+}
+
+
+static GSM_Error GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x70 };
+
+	if (SM_SendMessage(state, 4, 0x0a, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x0a);
+}
+
+static GSM_Error IncomingNetworkInfo(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	switch (message[3]) {
+	/* Network info */
+	case 0x71:
+		if (data->NetworkInfo) {
+			data->NetworkInfo->CellID[0] = message[10];
+			data->NetworkInfo->CellID[1] = message[11];
+			data->NetworkInfo->LAC[0] = message[12];
+			data->NetworkInfo->LAC[1] = message[13];
+			data->NetworkInfo->NetworkCode[0] = '0' + (message[14] & 0x0f);
+			data->NetworkInfo->NetworkCode[1] = '0' + (message[14] >> 4);
+			data->NetworkInfo->NetworkCode[2] = '0' + (message[15] & 0x0f);
+			data->NetworkInfo->NetworkCode[3] = ' ';
+			data->NetworkInfo->NetworkCode[4] = '0' + (message[16] & 0x0f);
+			data->NetworkInfo->NetworkCode[5] = '0' + (message[16] >> 4);
+			data->NetworkInfo->NetworkCode[6] = 0;
+		}
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
+		return GE_UNKNOWN;
+	}
+
 	return GE_NONE;
 }

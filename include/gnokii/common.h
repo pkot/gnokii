@@ -87,8 +87,8 @@ typedef struct {
 
 typedef struct {
 	char NetworkCode[10]; /* GSM network code */
-	char CellID[10];      /* CellID */
-	char LAC[10];         /* LAC */
+	unsigned char CellID[10];      /* CellID */
+	unsigned char LAC[10];         /* LAC */
 } GSM_NetworkInfo;
 
 /* Limits for sizing of array in GSM_PhonebookEntry. Individual handsets may

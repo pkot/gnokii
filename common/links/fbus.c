@@ -81,6 +81,51 @@ bool FBUS_OpenSerial(bool dlr3)
 }
 
 
+bool FBUS_OpenIR(void)
+{
+	struct timeval timeout;
+	unsigned char init_char = 0x55;
+	unsigned char end_init_char = 0xc1;
+	unsigned char connect_seq[] = { FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02 };
+	unsigned int count, retry;
+
+	if (!device_open(glink->PortDevice, false, false, false, GCT_Infrared)) {
+		perror(_("Couldn't open FBUS device"));
+		return false;
+	}
+
+	/* clearing the RTS bit and setting the DTR bit */
+	device_setdtrrts(1, 0);
+
+	for (retry = 0; retry < 5; retry++) {
+		dprintf("IR init, retry=%d\n", retry);
+
+		device_changespeed(9600);
+
+		for (count = 0; count < 32; count++) {
+			device_write(&init_char, 1);
+		}
+		device_write(&end_init_char, 1);
+		usleep(100000);
+
+		device_changespeed(115200);
+
+		FBUS_SendMessage(7, 0x02, connect_seq);
+
+		/* Wait for 1 sec. */
+		timeout.tv_sec	= 1;
+		timeout.tv_usec	= 0;
+
+		if (device_select(&timeout)) {
+			dprintf("IR init succeeded\n");
+			return(true);
+		}
+	}
+
+	return (false);
+}
+
+
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
@@ -483,8 +528,8 @@ GSM_Error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int type)
 	flink.RequestSequenceNumber = 0;
 
 	if (glink->ConnectionType == GCT_Infrared) {
-		/* FIXME!! */
-		return GE_DEVICEOPENFAILED;
+		if (!FBUS_OpenIR())
+			return GE_DEVICEOPENFAILED;
 	} else {		/* ConnectionType == GCT_Serial */
                 /* FBUS_OpenSerial(0) - try dau-9p
                  * FBUS_OpenSerial(n != 0) - try dlr-3p */

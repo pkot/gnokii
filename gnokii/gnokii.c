@@ -1814,13 +1814,12 @@ static int getalarm(void)
 static int monitormode(void)
 {
 	float rflevel = -1, batterylevel = -1;
-//	GSM_PowerSource powersource = -1;
+	GSM_PowerSource powersource = -1;
 	GSM_RFUnits rf_units = GRF_Arbitrary;
 	GSM_BatteryUnits batt_units = GBU_Arbitrary;
-	GSM_Statemachine *sm = &State;
 	GSM_Data data;
 
-//	GSM_NetworkInfo NetworkInfo;
+	GSM_NetworkInfo NetworkInfo;
 //	GSM_CBMessage CBMessage;
 
 	GSM_MemoryStatus SIMMemoryStatus   = {GMT_SM, 0, 0};
@@ -1833,7 +1832,7 @@ static int monitormode(void)
 	GSM_MemoryStatus ON_MemoryStatus   = {GMT_ON, 0, 0};
 	GSM_MemoryStatus RC_MemoryStatus   = {GMT_RC, 0, 0};
 
-//	GSM_SMSStatus SMSStatus = {0, 0};
+	GSM_SMSMemoryStatus SMSStatus = {0, 0};
 
 //	char Number[20];
 	
@@ -1843,7 +1842,7 @@ static int monitormode(void)
 	   monitoring mode. */
 	signal(SIGINT, interrupted);
 
-	fprintf (stderr, _("Entering monitor mode...\n"));
+	fprintf(stderr, _("Entering monitor mode...\n"));
 
 	//sleep(1);
 	//GSM->EnableCellBroadcast();
@@ -1855,61 +1854,64 @@ static int monitormode(void)
 	data.RFLevel = &rflevel;
 	data.BatteryUnits = &batt_units;
 	data.BatteryLevel = &batterylevel;
+	data.PowerSource = &powersource;
+	data.SMSStatus = &SMSStatus;
+	data.NetworkInfo = &NetworkInfo;
 
 	while (!bshutdown) {
-		if (SM_Functions(GOP_GetRFLevel, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetRFLevel, &data, &State) == GE_NONE)
 			fprintf(stdout, _("RFLevel: %d\n"), (int)rflevel);
 
-		if (SM_Functions(GOP_GetBatteryLevel, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetBatteryLevel, &data, &State) == GE_NONE)
 			fprintf(stdout, _("Battery: %d\n"), (int)batterylevel);
 
-//		if (GSM->GetPowerSource(&powersource) == GE_NONE)
-//			fprintf(stdout, _("Power Source: %s\n"), (powersource==GPS_ACDC)?_("AC/DC"):_("battery"));
+		if (SM_Functions(GOP_GetPowersource, &data, &State) == GE_NONE)
+			fprintf(stdout, _("Power Source: %s\n"), (powersource == GPS_ACDC) ? _("AC/DC") : _("battery"));
 
 		data.MemoryStatus = &SIMMemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("SIM: Used %d, Free %d\n"), SIMMemoryStatus.Used, SIMMemoryStatus.Free);
 
 		data.MemoryStatus = &PhoneMemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("Phone: Used %d, Free %d\n"), PhoneMemoryStatus.Used, PhoneMemoryStatus.Free);
 
 		data.MemoryStatus = &DC_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("DC: Used %d, Free %d\n"), DC_MemoryStatus.Used, DC_MemoryStatus.Free);
 
 		data.MemoryStatus = &EN_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("EN: Used %d, Free %d\n"), EN_MemoryStatus.Used, EN_MemoryStatus.Free);
 
 		data.MemoryStatus = &FD_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("FD: Used %d, Free %d\n"), FD_MemoryStatus.Used, FD_MemoryStatus.Free);
 
 		data.MemoryStatus = &LD_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("LD: Used %d, Free %d\n"), LD_MemoryStatus.Used, LD_MemoryStatus.Free);
 
 		data.MemoryStatus = &MC_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("MC: Used %d, Free %d\n"), MC_MemoryStatus.Used, MC_MemoryStatus.Free);
 
 		data.MemoryStatus = &ON_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("ON: Used %d, Free %d\n"), ON_MemoryStatus.Used, ON_MemoryStatus.Free);
 
 		data.MemoryStatus = &RC_MemoryStatus;
-		if (SM_Functions(GOP_GetMemoryStatus, &data, sm) == GE_NONE)
+		if (SM_Functions(GOP_GetMemoryStatus, &data, &State) == GE_NONE)
 			fprintf(stdout, _("RC: Used %d, Free %d\n"), RC_MemoryStatus.Used, RC_MemoryStatus.Free);
 
-//		if (GSM->GetSMSStatus(&SMSStatus) == GE_NONE)
-//			fprintf(stdout, _("SMS Messages: UnRead %d, Number %d\n"), SMSStatus.UnRead, SMSStatus.Number);
+		if (SM_Functions(GOP_GetSMSStatus, &data, &State) == GE_NONE)
+			fprintf(stdout, _("SMS Messages: Unread %d, Number %d\n"), SMSStatus.Unread, SMSStatus.Number);
 
 //		if (GSM->GetIncomingCallNr(Number) == GE_NONE)
 //			fprintf(stdout, _("Incoming call: %s\n"), Number);
 
-//		if (GSM->GetNetworkInfo(&NetworkInfo) == GE_NONE)
-//			fprintf(stdout, _("Network: %s (%s), LAC: %s, CellID: %s\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC, NetworkInfo.CellID);
+		if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE)
+			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC[0], NetworkInfo.LAC[1], NetworkInfo.CellID[0], NetworkInfo.CellID[1]);
 
 //		if (GSM->ReadCellBroadcast(&CBMessage) == GE_NONE)
 //			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), CBMessage.Channel, CBMessage.Message);
@@ -1965,12 +1967,11 @@ static void console_raw(void)
 static int displayoutput(void)
 {
 	GSM_Data data;
-	GSM_Statemachine *sm = &State;
 	GSM_Error error;
 
 	data.OutputFn = PrettyOutputFn;
 
-	error = SM_Functions(GOP_DisplayOutput, &data, sm);
+	error = SM_Functions(GOP_DisplayOutput, &data, &State);
 	console_raw();
 	fcntl(fileno(stdin), F_SETFL, O_NONBLOCK);
 
@@ -1993,14 +1994,14 @@ static int displayoutput(void)
 					fprintf(stdout, _("Key press simulation failed.\n"));
 				memset(buf, 0, 102);
 			}
-			SM_Loop(sm, 1);
+			SM_Loop(&State, 1);
 		}
 		fprintf (stderr, "Shutting down\n");
 
 		fprintf (stderr, _("Leaving display monitor mode...\n"));
 		data.OutputFn = NULL;
 
-		error = SM_Functions(GOP_DisplayOutput, &data, sm);
+		error = SM_Functions(GOP_DisplayOutput, &data, &State);
 		if (error != GE_NONE)
 			fprintf (stderr, _("Error!\n"));
 	} else
@@ -2510,10 +2511,9 @@ static int pmon(void)
 { 
 	GSM_Error error;
 	GSM_ConnectionType connection = GCT_Serial;
-	GSM_Statemachine sm;
 
 	/* Initialise the code for the GSM interface. */     
-	error = GSM_Initialise(model, Port, Initlength, connection, NULL, &sm);
+	error = GSM_Initialise(model, Port, Initlength, connection, NULL, &State);
 
 	if (error != GE_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -2599,7 +2599,6 @@ static int divert(int argc, char **argv)
 {
 	int opt;
 	GSM_CallDivert cd;
-	GSM_Statemachine *sm = &State;
 	GSM_Data data;
 	GSM_Error error;
 	struct option options[] = {
@@ -2681,7 +2680,7 @@ static int divert(int argc, char **argv)
 		}
 	}
 	data.CallDivert = &cd;
-	error = SM_Functions(GOP_CallDivert, &data, sm);
+	error = SM_Functions(GOP_CallDivert, &data, &State);
 
 	if (error == GE_NONE) {
 		fprintf(stderr, "Divert succeeded.\n");
