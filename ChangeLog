@@ -3,6 +3,10 @@
  * 6110 series updates
     o Nokia 8290 is known to work with the driver             (Roger)
     o fix default number reading with the smsc info       (Pawel Kot)
+ * 6510 series updates
+    o make ValidateSMS more robust                     (Markus Plail)
+ * 7110 series updates
+    o make ValidateSMS more robust                     (Markus Plail)
 
 0.4.3
 =====
