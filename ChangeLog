@@ -32,11 +32,11 @@
       gnokii manual page                             (Reiner Steib)
  * nk6510 series updates
     o handle correctly the case with more then 50 calendar entries
-      in the phone; previous fix missed some chunks    (Pawel Kot)
+      in the phone; previous fix missed some chunks     (Pawel Kot)
  * xgnokii changes
     o be compatible with gnokii -- use ME/SM instead of A/B for
       phone/simcard memory when saving/reading phonebook entry
-                                                       (Pawel Kot)
+                                          (Reiner Steib, Pawel Kot)
 
 0.5.10
 ======
