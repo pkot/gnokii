@@ -3,3 +3,8 @@
 
 * Mon Apr 24 09:03:07 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - mgnokiidev should be sgid and geteuid should be used then
+
+* Mon Apr 24 12:26:07 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- no, the last change is BUGGY. Sorry for confusion... If it is sgid, it can
+  not make link in /dev/ :-(
+

@@ -2269,7 +2269,7 @@ void GUI_ReadConfig (void)
 int main (int argc, char *argv[])
 {
 
-#ifdef GNOKII_GETTEXT
+#ifdef USE_NLS
   textdomain("xgnokii");
 #endif
 

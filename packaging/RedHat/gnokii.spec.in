@@ -57,7 +57,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc Docs/gettext-howto gnokii.nol Docs/gnokii-ir-howto
 /usr/bin/gnokii
 %attr(0754, root, gnokii) /usr/sbin/gnokiid
-%attr(2754, root, gnokii) /usr/sbin/mgnokiidev
+%attr(4754, root, gnokii) /usr/sbin/mgnokiidev
 %config /etc/gnokiirc
 
 %files xgnokii

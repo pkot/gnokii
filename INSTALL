@@ -27,11 +27,11 @@
 				/dev/ttyd0	FreeBSD
 				COM1		MS-Window COM1
 
-		--disable-gtk
+		--without-x
 			Compile without GTK (Xwin) programs
 		
-		--enable-gettext
-			Set if you have/want GNU gettext support
+		--disable-nls
+			Set if you don't have/want GNU gettext support
 		
 		--enable-security
 			Set if you want to enable all security features

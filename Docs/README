@@ -172,12 +172,12 @@ As root, edit /etc/group and add your name to the end of the
 line for the gnokii group.  Look at other entries in the file
 to see how entries are laid out.
 
-* Ensure that the mgnokiidev executable has permissions 2754
+* Ensure that the mgnokiidev executable has permissions 4754
   and that it is owned by root and in group gnokii.
 
 As root run
 
-chmod 2754 <path>gnokii 
+chmod 4754 <path>gnokii 
 
 then
 

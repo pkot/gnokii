@@ -40,3 +40,7 @@
 
 * Thu Apr  6 14:03:48 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - ringtones in RTTTL can be send via SMS (--sendringtone)
+
+* Mon May  1 10:34:44 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- USE_NLS change
+

@@ -26,3 +26,5 @@
 * Mon Mar 20 21:51:59 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - copyrights unified in the sources.
 
+* Mon May  1 10:34:44 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- New support for NLS (Stano)

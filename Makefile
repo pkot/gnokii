@@ -38,7 +38,7 @@ all:
 		$(MAKE) -C $$dir; \
 	    fi; \
 	done
-	@if [ "$(GETTEXT)" ]; then \
+	@if [ "x$(USE_NLS)" = xyes ]; then \
 		$(MAKE) -C $(PO_DIR); \
 	fi
 
@@ -58,7 +58,7 @@ clean:
 		$(MAKE) -C $$dir clean; \
 	    fi; \
 	done
-	@if [ "$(GETTEXT)" ]; then \
+	@if [ "x$(USE_NLS)" = xyes ]; then \
 		$(MAKE) -C $(PO_DIR) clean; \
 	fi
 
@@ -72,6 +72,9 @@ clean:
 	@echo "done"
 
 distclean:	clean
+	@if [ "x$(USE_NLS)" = xyes ]; then \
+		$(MAKE) -C $(PO_DIR) distclean; \
+	fi
 	$(RM) Makefile.global config.cache config.log config.status \
         packaging/RedHat/gnokii.spec
 
@@ -97,7 +100,7 @@ install: all
 		$(MAKE) -C $$dir install; \
 	    fi; \
 	done
-	@if [ "$(GETTEXT)" ]; then \
+	@if [ "x$(USE_NLS)" = xyes ]; then \
 		$(MAKE) -C $(PO_DIR) install; \
 	fi
 

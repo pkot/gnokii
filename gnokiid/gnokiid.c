@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
 		/* For GNU gettext */
 
-	#ifdef GNOKII_GETTEXT
+	#ifdef USE_NLS
   		textdomain("gnokii");
 	#endif
 
