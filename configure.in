@@ -226,7 +226,7 @@ if test "x$PTHREAD_LIBS" = xerror; then
 fi
 
 AC_CACHE_CHECK(for tm_gmtoff in struct tm, ac_cv_have_tm_gmtoff,
-	[AC_TRY_LINK([#include <time.h>],
+	[AC_TRY_COMPILE([#include <time.h>],
 		[struct tm t; t.tm_gmtoff = 0],
 		ac_cv_have_tm_gmtoff=yes,
 		ac_cv_have_tm_gmtoff=no)])
