@@ -8,6 +8,7 @@
  * libgnokii changes
     o protect atsoer.h with _gnokii_atsoer_h, not _gnokii_ateric_h
                                                        (Phil Ashby)
+    o use correct declaration of locale_charset()       (Pawel Kot)
 
 0.6.2
 =====
