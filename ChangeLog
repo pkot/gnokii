@@ -9,6 +9,7 @@
                                                  (Adam Go³êbiowski)
  * 6510 driver updates
     o correctly read SMS datetime                       (Pawel Kot)
+    o deleting sms can return an unhandled message (BORBELY Zoltan)
  * 7110 driver updates
     o ringtone list will return fix entries too    (BORBELY Zoltan)
     o call status query function added             (BORBELY Zoltan)

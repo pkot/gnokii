@@ -809,6 +809,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("SMS successfully deleted\n");
 			break;
 		case 0x02:
+		case 0x0a:
 			printf("SMS deleting failed: Invalid location?\n");
 			return GN_ERR_INVALIDLOCATION;
 		case 0x05:
