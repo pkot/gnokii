@@ -19,6 +19,7 @@
 #define __device_h
 
 #include <unistd.h>
+#include "misc.h"
 
 int device_getfd(void);
 

@@ -71,6 +71,7 @@
 #endif 
 
 /* This one is for FreeBSD and similar systems without __ptr_t_ */
+/* FIXME: autoconf should take care of this. */
 
 #ifndef __ptr_t
   typedef void * __ptr_t;

@@ -17,14 +17,16 @@
 #define __unixserial_h
 
 #ifdef WIN32
-#include <stddef.h>
-
-    #define __const const
-    typedef void * __ptr_t;
+  #include <stddef.h>
+  /* FIXME: this should be solved in config.h in 0.4.0 */
+  #define __const const
+  typedef void * __ptr_t;
 #else
-    #include <unistd.h>
+  #include <unistd.h>
+  #include "misc.h"
 #endif	/* WIN32 */
 
+/* FIXME: autoconf and config.h should take care of this. */
 #define HAVE_TERMIOS_CSPEED
 #define HAVE_CFSETSPEED
 
