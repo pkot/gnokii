@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.16  2001-11-13 16:12:21  pkot
+  Revision 1.17  2001-11-14 10:48:03  pkot
+  6210/7110 debug cleanups
+
+  Revision 1.16  2001/11/13 16:12:21  pkot
   Preparing libsms to get to work. 6210/7110 SMS and SMS Folder updates
 
   Revision 1.15  2001/11/08 16:47:48  pkot
@@ -671,13 +674,13 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
         case 0x7B:
                 i = 5;
                 data->SMSFolderList->number = message[4];
-                dprintf("Message: %d SMS Folders received:\n", data->SMSFolders->number);
+                dprintf("Message: %d SMS Folders received:\n", data->SMSFolder->number);
       
                 for (j = 0; j < message[4]; j++) {
 			int len;
                         strcpy(data->SMSFolderList->Folder[j].Name, "               ");
                         data->SMSFolderList->FolderID[j] = message[i];
-                        dprintf("Folder Index: %d", data->SMSFolders->FoldersID[j]);
+                        dprintf("Folder Index: %d", data->SMSFolderList->FolderID[j]);
                         i += 2;
                         dprintf("   Folder name: ");
 
