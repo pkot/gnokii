@@ -52,26 +52,19 @@
 
 #include "gnokii-internal.h"
 
-static void m2bus_rx_statemachine(unsigned char rx_byte);
+static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
-static int m2bus_tx_send_ack(u8 message_seq);
+static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state);
 
-/* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
-
-/* Some globals */
-
-static gn_link *glink;
-static struct gn_statemachine *statemachine;
-static m2bus_link flink;	/* M2BUS specific stuff, internal to this file */
 
 
 /*--------------------------------------------*/
 
-static bool m2bus_serial_open(void)
+static bool m2bus_serial_open(struct gn_statemachine *state)
 {
 	/* Open device. */
-	if (!device_open(glink->port_device, true, false, false, GN_CT_Serial)) {
+	if (!device_open(state->link.port_device, true, false, false, GN_CT_Serial)) {
 		perror(_("Couldn't open M2BUS device"));
 		return false;
 	}
@@ -90,10 +83,10 @@ static bool m2bus_serial_open(void)
 
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
-static void m2bus_rx_statemachine(unsigned char rx_byte)
+static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state)
 {
 	struct timeval time_diff;
-	m2bus_incoming_message *i = &flink.i;
+	m2bus_incoming_message *i = &M2BUSINST(state)->i;
 
 #if 0
 	dprintf("rx_byte: %02x, state: %d\n", rx_byte, i->state);
@@ -104,12 +97,14 @@ static void m2bus_rx_statemachine(unsigned char rx_byte)
 
 	switch (i->state) {
 
-		/* Messages from the phone start with an 0x1f (cable) or 0x14 (IR).
-		   We use this to "synchronise" with the incoming data stream. However,
-		   if we see something else, we assume we have lost sync and we require
-		   a gap of at least 5ms before we start looking again. This is because
-		   the data part of the frame could contain a byte which looks like the
-		   sync byte */
+		/*
+		 * Messages from the phone start with an 0x1f (cable) or 0x14 (IR).
+		 * We use this to "synchronise" with the incoming data stream. However,
+		 * if we see something else, we assume we have lost sync and we require
+		 * a gap of at least 5ms before we start looking again. This is because
+		 * the data part of the frame could contain a byte which looks like the
+		 * sync byte
+		 */
 
 	case M2BUS_RX_Discarding:
 		gettimeofday(&i->time_now, NULL);
@@ -122,7 +117,7 @@ static void m2bus_rx_statemachine(unsigned char rx_byte)
 		/* else fall through to... */
 
 	case M2BUS_RX_Sync:
-		if (glink->connection_type == GN_CT_Infrared) {
+		if (state->link.connection_type == GN_CT_Infrared) {
 			if (rx_byte == M2BUS_IR_FRAME_ID) {
 				/* Initialize checksums. */
 				i->checksum = M2BUS_IR_FRAME_ID;
@@ -133,7 +128,7 @@ static void m2bus_rx_statemachine(unsigned char rx_byte)
 				gettimeofday(&i->time_last, NULL);
 			}
 
-		} else {	/* glink->connection_type == GN_CT_Serial */
+		} else {	/* state->link.connection_type == GN_CT_Serial */
 			if (rx_byte == M2BUS_FRAME_ID) {
 				/* Initialize checksums. */
 				i->checksum = M2BUS_FRAME_ID;
@@ -240,11 +235,11 @@ static void m2bus_rx_statemachine(unsigned char rx_byte)
 
 					/* Send an ack (for all for now) */
 
-					m2bus_tx_send_ack(i->message_buffer[i->message_length]);
+					m2bus_tx_send_ack(i->message_buffer[i->message_length], state);
 
 					/* Finally dispatch if ready */
 
-					sm_incoming_function(i->message_type, i->message_buffer, i->message_length, statemachine);
+					sm_incoming_function(i->message_type, i->message_buffer, i->message_length, state);
 				}
 			} else {
 				dprintf("M2BUS: Bad checksum!\n");
@@ -270,7 +265,7 @@ static gn_error m2bus_loop(struct timeval *timeout, struct gn_statemachine *stat
 	if (res > 0) {
 		res = device_read(buffer, sizeof(buffer));
 		for (count = 0; count < res; count++)
-			m2bus_rx_statemachine(buffer[count]);
+			m2bus_rx_statemachine(buffer[count], state);
 	} else
 		return GN_ERR_TIMEOUT;
 
@@ -302,9 +297,11 @@ static void m2bus_wait_for_idle(int timeout, bool reset)
 }
 
 
-/* Prepares the message header and sends it, prepends the message start byte
-	   (0x1f) and other values according the value specified when called.
-	   Calculates checksum and then sends the lot down the pipe... */
+/*
+ * Prepares the message header and sends it, prepends the message start byte
+ * (0x1f) and other values according the value specified when called.
+ * Calculates checksum and then sends the lot down the pipe...
+ */
 
 static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state)
 {
@@ -340,7 +337,7 @@ static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned cha
 		/* Now construct the message header. */
 
 		i = 0;
-		if (glink->connection_type == GN_CT_Infrared)
+		if (state->link.connection_type == GN_CT_Infrared)
 			out_buffer[i++] = M2BUS_IR_FRAME_ID;	/* Start of the IR frame indicator */
 		else			/* connection_type == GN_CT_Serial */
 			out_buffer[i++] = M2BUS_FRAME_ID;	/* Start of the frame indicator */
@@ -360,9 +357,9 @@ static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned cha
 			i += messagesize;
 		}
 
-		out_buffer[i++] = flink.request_sequence_number++;
-		if (flink.request_sequence_number > 63)
-			flink.request_sequence_number = 2;
+		out_buffer[i++] = M2BUSINST(state)->request_sequence_number++;
+		if (M2BUSINST(state)->request_sequence_number > 63)
+			M2BUSINST(state)->request_sequence_number = 2;
 
 		/* Now calculate checksums over entire message and append to message. */
 
@@ -400,13 +397,13 @@ static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned cha
 
 
 
-static int m2bus_tx_send_ack(u8 message_seq)
+static int m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
 {
 	u8 out_buffer[6];
 
 	dprintf("[Sending Ack, seq: %x]\n", message_seq);
 
-	if (glink->connection_type == GN_CT_Infrared)
+	if (state->link.connection_type == GN_CT_Infrared)
 		out_buffer[0] = M2BUS_IR_FRAME_ID;/* Start of the IR frame indicator */
 	else			/* connection_type == GN_CT_Serial */
 		out_buffer[0] = M2BUS_FRAME_ID;	/* Start of the frame indicator */
@@ -434,29 +431,32 @@ static int m2bus_tx_send_ack(u8 message_seq)
 
 
 /* Initialise variables and start the link */
-/* newlink is actually part of state - but the link code should not anything about state */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
 gn_error m2bus_initialise(gn_link *newlink, struct gn_statemachine *state)
 {
-	/* 'Copy in' the global structures */
-	glink = newlink;
-	statemachine = state;
+	gn_error err;
 
 	/* Fill in the link functions */
-	glink->loop = m2bus_loop;
-	glink->send_message = m2bus_send_message;
+	state->link.loop = m2bus_loop;
+	state->link.send_message = m2bus_send_message;
 
 	/* Start up the link */
-	memset(&flink, 0, sizeof(flink));
-	flink.request_sequence_number = 2;
-	flink.i.state = M2BUS_RX_Sync;
+	if ((M2BUSINST(state) = calloc(1, sizeof(m2bus_link))) == NULL)
+		return GN_ERR_MEMORYFULL;
 
-	if (glink->connection_type == GN_CT_Infrared) {
-		return GN_ERR_FAILED;
+	M2BUSINST(state)->request_sequence_number = 2;
+	M2BUSINST(state)->i.state = M2BUS_RX_Sync;
+
+	if (state->link.connection_type == GN_CT_Infrared) {
+		err = GN_ERR_FAILED;
 	} else {		/* connection_type == GN_CT_Serial */
-		if (!m2bus_serial_open())
-			return GN_ERR_FAILED;
+		err = m2bus_serial_open(state) ? GN_ERR_NONE : GN_ERR_FAILED;
+	}
+	if (err != GN_ERR_NONE) {
+		free(M2BUSINST(state));
+		M2BUSINST(state) = NULL;
+		return err;
 	}
 
 	return GN_ERR_NONE;

@@ -30,9 +30,14 @@
     o adapt smsd to the new api                     (BORBELY Zoltan)
  * 6110 series updates:
     o M2BUS support added                           (BORBELY Zoltan)
+ * 7110 series updates:
+    o M2BUS support added                           (BORBELY Zoltan)
  * libgnokii changes:
     o Renamed Greek operator PANAFON to Vodafone      (P. Christeas)
     o max sms length increased to 160 chars         (BORBELY Zoltan)
+ * link driver updates:
+    o static and global variables have been eliminated from
+      the source, passing state to everywhere       (BORBELY Zoltan)
 
 0.5.0pre2
 =========
