@@ -842,10 +842,7 @@ static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	}
 	dprintf("\n");
 	if (SM_SendMessage(state, length, 0x02, req) != GE_NONE) return GE_NOTREADY;
-	while (1) {
-		e = SM_Block(state, data, 0x02);
-		if (e == GE_SMSSENDOK || e == GE_SMSSENDFAILED) break;
-	}
+	e = SM_BlockNoRetry(state, data, 0x02);
 	return e;
 }
 
