@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2001-02-03 23:56:18  chris
+ * Revision 1.2  2001-02-06 15:15:25  pkot
+ * FreeBSD unixirda.h fix (Panagiotis Astithas)
+ *
+ * Revision 1.1  2001/02/03 23:56:18  chris
  * Start of work on irda support (now we just need fbus-irda.c!)
  * Proper unicode support in 7110 code (from pkot)
  *
@@ -41,6 +44,7 @@
 #include <sys/socket.h>
 
 #include "linuxirda.h"
+#include "misc.h"
 
 int irda_open(void);
 int irda_close(int fd);
