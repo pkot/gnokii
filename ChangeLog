@@ -46,6 +46,9 @@
       group number' and 'logofile' arguments             (Pawel Kot)
     o fix deletecalendarnote for nk7110 and nk6510 drivers
                                                          (Pawel Kot)
+ * smsd fixes
+    o FreeBSD doesn't have libdl and smsd can be complied there
+      without -ldl                                (Peter Kolmisoppi)
  * 7110 series updates:
     o dropping duplicated frames during pb read     (BORBELY Zoltan)
     o fix calendar notes write support                   (Pawel Kot)

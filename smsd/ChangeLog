@@ -1,9 +1,15 @@
-* Thu Fri 27 2002 BORBELY Zoltan <bozo@andrews.hu>
-- Converted libfile.so to new libgnokii API
+* Sat Jan 18 2003 Pawel Kot <pkot@linuxnews.pl>
+- FreeBSD doesn't have libdl and can compile smsd without
+  -ldl. Add the comment in the Makefile as well as the
+  correct LDLIBS for FreeBSD (disabled by default).
+
+
+* Fri Dec 27 2002 BORBELY Zoltan <bozo@andrews.hu>
+- Converted libfile.so to new libgnokii API.
 
 
 * Thu Dec 26 2002 Pawel Kot <pkot@linuxnews.pl>
-- Converted to new libgnokii API
+- Converted to new libgnokii API.
 
 
 * Sun Aug 11 2002 Jan Derfinak <ja@mail.upjs.sk>
@@ -16,7 +22,7 @@
 
 * Sun Jul 21 2002 Pawel Kot <pkot@linuxnews.pl>
 -  When some characters are not from the default alphabet
-   encode them in the unicode
+   encode them in the unicode.
 
 
 * Sun Jul 07 2002 Jan Derfinak <ja@mail.upjs.sk>
@@ -29,13 +35,13 @@
 
 
 * Tue Apr 23 2002 Pawel Kot <pkot@linuxnews.pl>
-- Don't use 'connect' as the variable name
-- GE_SMSSENDOK is depreciated
+- Don't use 'connect' as the variable name.
+- GE_SMSSENDOK is deprecated.
 
 
 * Wed Mar 20 2002 BORBELY Zoltan <bozo@andrews.hu>
-- GSM_Data structures initialised correctly
-- Minor locking fixes
+- GSM_Data structures initialised correctly.
+- Minor locking fixes.
 
 
 * Thu Feb 14 2002 Jan Derfinak <ja@mail.upjs.sk>

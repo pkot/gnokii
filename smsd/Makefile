@@ -16,6 +16,8 @@ LDLIBS += $(PTHREAD_LIBS) \
 	   `glib-config --libs`
 
 LDLIBS += -s -rdynamic -L$(TOPDIR)/common -lgnokii -ldl
+# Some systems, eg. FreeBSD don't have libdl. Use this:
+# LDLIBS += -s -rdynamic -L$(TOPDIR)/common -lgnokii
 
 ifdef XPM_LIBS
 	LDLIBS +=$(XPM_LIBS)
