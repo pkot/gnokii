@@ -24,6 +24,7 @@
 
 #define FB61_MAX_TRANSMIT_LENGTH (256)
 #define FB61_MAX_RECEIVE_LENGTH  (512)
+#define FB61_MAX_CONTENT_LENGTH  (120)
 
 /* Nokia 6110 supports phonebook entries of max. 16 characters and numbers of
    max. 30 digits */
@@ -129,7 +130,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void);
 enum FB61_RX_States FB61_RX_HandleRLPMessage(void);
 void      FB61_RX_DisplayMessage(void);
 
-int       FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer);
+int       FB61_TX_SendMessage(u16 message_length, u8 message_type, u8 *buffer);
 int       FB61_TX_SendAck(u8 message_type, u8 message_seq);
 
 int       FB61_GetMemoryType(GSM_MemoryType memory_type);

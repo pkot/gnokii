@@ -155,25 +155,23 @@ GSM_ConnectionType CurrentConnectionType;
 
 int BufferCount;
 
-u8 MessageBuffer[FB61_MAX_RECEIVE_LENGTH];
+u8 MessageBuffer[FB61_MAX_RECEIVE_LENGTH * 6];
 
-unsigned char MessageLength,
-              MessageType,
-              MessageDestination,
-              MessageSource,
-              MessageUnknown;
+u16 MessageLength;
+u8 MessageType, MessageDestination, MessageSource, MessageUnknown;
 
 /* Magic bytes from the phone. */
 
-unsigned char MagicBytes[4]= { 0x00, 0x00, 0x00, 0x00 };
+unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 GSM_Error CurrentMagicError = GE_BUSY;
 
 enum FB61_RX_States RX_State;
+bool RX_Multiple = false;
 
-u8 RequestSequenceNumber=0x00;
+u8 RequestSequenceNumber = 0x00;
 pthread_t Thread;
 bool RequestTerminate;
-bool DisableKeepalive=false;
+bool DisableKeepalive = false;
 int	InitLength;
 
 struct termios OldTermios; /* To restore termio on close. */
@@ -1944,6 +1942,10 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
   unsigned char output[160];
   static unsigned char SMSText[256];
 
+  if (RX_Multiple)
+    return FB61_RX_Sync;
+
+
 #ifdef DEBUG
 
   /* Do not debug Ack and RLP frames to detail. */
@@ -3557,7 +3559,11 @@ void FB61_RX_StateMachine(char rx_byte) {
 
     if ( CurrentConnectionType == GCT_Infrared ) {
       if (rx_byte == FB61_IR_FRAME_ID) {
-	BufferCount = 0;
+
+        if (RX_Multiple == false)
+          BufferCount = 0;
+        else
+          BufferCount = MessageLength - 2;
 	RX_State = FB61_RX_GetDestination;
 	
 	/* Initialize checksums. */
@@ -3566,7 +3572,11 @@ void FB61_RX_StateMachine(char rx_byte) {
       }
     } else { /* CurrentConnectionType == GCT_Serial */
       if (rx_byte == FB61_FRAME_ID) {
-	BufferCount = 0;
+
+        if (RX_Multiple == false)
+          BufferCount = 0;
+        else
+          BufferCount = MessageLength - 2;
 	RX_State = FB61_RX_GetDestination;
 	
 	/* Initialize checksums. */
@@ -3593,6 +3603,15 @@ void FB61_RX_StateMachine(char rx_byte) {
 
   case FB61_RX_GetType:
 
+    if ((RX_Multiple == true) && (MessageType != rx_byte)) {
+#ifdef DEBUG
+      printf("Interrupted MultiFrame-Message - Ingnoring it !!!\n");
+      printf("Please report it ...\n");
+#endif DEBUG
+      BufferCount = 0;
+      RX_Multiple = false;
+    }
+
     MessageType=rx_byte;
     RX_State = FB61_RX_GetUnknown;
 
@@ -3607,7 +3626,10 @@ void FB61_RX_StateMachine(char rx_byte) {
     
   case FB61_RX_GetLength:
 
-    MessageLength = rx_byte;
+    if (RX_Multiple == true)
+      MessageLength = MessageLength - 2 + rx_byte;
+    else
+      MessageLength = rx_byte;
     RX_State = FB61_RX_GetMessage;
 
     break;
@@ -3625,12 +3647,18 @@ void FB61_RX_StateMachine(char rx_byte) {
 
       if (checksum[0] == checksum[1]) {
 
-	FB61_RX_DispatchMessage();
+        /* We do not want to send ACK of ACKs and ACK of RLP frames. */
 
-      /* We do not want to send ACK of ACKs and ACK of RLP frames. */
-
-	if (MessageType != FB61_FRTYPE_ACK && MessageType != 0xf1)
+	if (MessageType != FB61_FRTYPE_ACK && MessageType != 0xf1) {
 	  FB61_TX_SendAck(MessageType, MessageBuffer[MessageLength-1] & 0x0f);
+
+          if (MessageBuffer[MessageLength-2] == 0x01)
+            RX_Multiple = false;
+	  else
+	    RX_Multiple = true;
+        }
+
+        FB61_RX_DispatchMessage();
 
       }
 
@@ -3721,8 +3749,8 @@ void FB61_RX_DisplayMessage(void)
 	   (0x1e) and other values according the value specified when called.
 	   Calculates checksum and then sends the lot down the pipe... */
 
-int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
-{
+int FB61_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer) {
+
   u8 out_buffer[FB61_MAX_TRANSMIT_LENGTH + 5];
   int count, current=0;
   unsigned char	checksum;
@@ -3743,7 +3771,7 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
 
   out_buffer[current++] = 0; /* Unknown */
 
-  out_buffer[current++] = message_length+2; /* Length + 2 for seq. nr */
+  out_buffer[current++] = message_length; /* Length */
 
   /* Copy in data if any. */	
 	
@@ -3751,12 +3779,6 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
     memcpy(out_buffer + current, buffer, message_length);
     current+=message_length;
   }
-
-  out_buffer[current++]=0x01;
-
-  out_buffer[current++]=0x40+RequestSequenceNumber;
-
-  RequestSequenceNumber=(RequestSequenceNumber+1) & 0x07;
 
   /* If the message length is odd we should add pad byte 0x00 */
   if (message_length % 2)
@@ -3797,6 +3819,53 @@ int FB61_TX_SendMessage(u8 message_length, u8 message_type, u8 *buffer)
   return (true);
 }
 
+int FB61_TX_SendMessage(u16 message_length, u8 message_type, u8 *buffer) {
+
+  u8 seqnum, frame_buffer[FB61_MAX_CONTENT_LENGTH + 2];
+  u8 nom, lml;  /* number of messages, last message len */
+  int i;
+
+  seqnum = 0x40 + RequestSequenceNumber;
+  RequestSequenceNumber = (RequestSequenceNumber + 1) & 0x07;
+
+  if (message_length > FB61_MAX_CONTENT_LENGTH) {
+
+    nom = (message_length + FB61_MAX_CONTENT_LENGTH - 1)
+                                      / FB61_MAX_CONTENT_LENGTH;
+    lml = message_length - ((nom - 1) * FB61_MAX_CONTENT_LENGTH);
+
+    for (i = 0; i < nom - 1; i++) {
+
+      memcpy(frame_buffer, buffer + (i * FB61_MAX_CONTENT_LENGTH),
+             FB61_MAX_CONTENT_LENGTH);
+      frame_buffer[FB61_MAX_CONTENT_LENGTH] = nom - i;
+      frame_buffer[FB61_MAX_CONTENT_LENGTH + 1] = seqnum;
+
+      FB61_TX_SendFrame(FB61_MAX_CONTENT_LENGTH + 2, message_type,
+                        frame_buffer);
+
+      seqnum = RequestSequenceNumber;
+      RequestSequenceNumber = (RequestSequenceNumber + 1) & 0x07;    
+    }
+
+    memcpy(frame_buffer, buffer + ((nom - 1) * FB61_MAX_CONTENT_LENGTH), lml);
+    frame_buffer[lml] = 0x01;
+    frame_buffer[lml + 1] = seqnum;
+    FB61_TX_SendFrame(lml + 2, message_type, frame_buffer);
+
+  }
+  else {
+
+    memcpy(frame_buffer, buffer, message_length);
+    frame_buffer[message_length] = 0x01;
+    frame_buffer[message_length + 1] = seqnum;
+    FB61_TX_SendFrame(message_length + 2, message_type, frame_buffer);
+
+  }
+
+  return (true);
+}
+
 int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
 
   unsigned char request[2];
@@ -3808,5 +3877,5 @@ int FB61_TX_SendAck(u8 message_type, u8 message_seq) {
   printf(_("[Sending Ack of type %02x, seq: %x]\n"), message_type, message_seq);
 #endif DEBUG
 
-  return FB61_TX_SendMessage(2, FB61_FRTYPE_ACK, request);
+  return FB61_TX_SendFrame(2, FB61_FRTYPE_ACK, request);
 }
