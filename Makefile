@@ -52,7 +52,7 @@ all: $(DIRS)
 dummy:
 
 $(DIRS): dummy
-       $(MAKE) -C $@
+	$(MAKE) -C $@
 
 clean:
 	$(RM) *~

@@ -12,7 +12,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.21  2000-12-19 16:32:28  pkot
+  Revision 1.22  2000-12-20 09:11:19  pkot
+  Fixes to mbus-2110.c to let it compile (by Pavel Machek)
+
+  Revision 1.21  2000/12/19 16:32:28  pkot
   Lots of updates in common/mbus-2110.c. (thanks to Pavel Machek)
 
 
@@ -304,6 +307,7 @@ GetRFLevel(GSM_RFUnits *units, float *level)
 	int val = GetValue(0x84, 2);
 	*level = (float) val / 99.0;	/* This should be / 60.0 for 2110 */
 	*units = GRF_Arbitrary;
+	return (GE_NONE);
 }
 
 static GSM_Error
@@ -312,6 +316,7 @@ GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 	int val = GetValue(0x85, 2);
 	*level = (float) val / 90.0;	/* 5..first bar, 10..second bar, 90..third bar */
 	*units = GBU_Arbitrary;
+	return (GE_NONE);
 }
 
 /* Do not know how to fetch IMEI */
@@ -350,7 +355,7 @@ static GSM_Error	GetRevision(char *revision)
 	return err;
 }
 
-static GSM_Error	GetModel(char *model)
+static GSM_Error	GetModel2110(char *model)
 {
 	GSM_Error err = GE_NONE;
 
@@ -920,7 +925,7 @@ GrabDisplay(void)
 {
 	/* LN_UC_SHARE, LN_UC_SHARE, LN_UC_RELEASE, LN_UC_RELEASE, LN_UC_KEEP */
 	u8  pkt[] = {3, 3, 0, 0, 1};
-	int timeout, val;
+	int timeout;
 
 	PacketOK = false;
 	ACKOK    = false;
@@ -931,14 +936,13 @@ GrabDisplay(void)
 		if(!ACKOK) SendCommand(pkt, 0x19, 5);
 		usleep(1000000);
 		if(!--timeout || RequestTerminate)
-			return(-1);
+			return;
 	}
 	if ((PacketData[3] != 0xcd) ||
 	    (PacketData[2] != 1) || 
 	    (PacketData[4] != 1 /* LN_UC_REQUEST_OK */))
 		fprintf(stderr, "Something is very wrong with GrabDisplay\n");
 	fprintf(stderr, "Display grabbed okay\n");
-	return (GE_NONE);
 }
 
 
@@ -1044,7 +1048,7 @@ GSM_Functions MB21_Functions = {
 	GetSecurityCodeStatus,
 	GetIMEI,
 	GetRevision,
-	GetModel,
+	GetModel2110,
 	GetDateTime,
 	SetDateTime,
 	GetAlarm,
