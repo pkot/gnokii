@@ -57,7 +57,7 @@
 
 #define MAX_DATETIME_LENGTH   7
 #define MAX_SMSC_NAME_LEN    16
-#define MAX_NUMBER_LEN       12
+#define MAX_NUMBER_LEN       14
 #define SMS_USER_DATA_LEN   512
 #define MAX_VALIDITY_LENGTH   8
 
