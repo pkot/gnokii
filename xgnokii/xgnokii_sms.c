@@ -685,7 +685,7 @@ void GUI_RefreshSMSCenterMenu(void)
 	for (i = 0; i < xgnokiiConfig.smsSets; i++) {
 		if (*(xgnokiiConfig.smsSetting[i].Name) == '\0') {
 			gchar *buf = g_strdup_printf(_("Set %d"), i + 1);
-			item = gtk_menu_item_new_with_label(buf);
+			item = gtk_menu_item_new_with_label(xgnokiiConfig.smsSetting[i].SMSC.Number);
 			g_free(buf);
 		} else
 			item = gtk_menu_item_new_with_label(xgnokiiConfig.smsSetting[i].Name);
@@ -957,7 +957,7 @@ static void DoSendSMS(void)
 
 		DefaultSubmitSMS(&sms);
 		strcpy(sms.SMSC.Number, xgnokiiConfig.smsSetting[sendSMS.center].SMSC.Number);
-		/*		sms.SMSC.No = 0;*/
+		sms.SMSC.Type = xgnokiiConfig.smsSetting[sendSMS.center].SMSC.Type;
 
 		if (GTK_TOGGLE_BUTTON(sendSMS.report)->active)
 			sms.DeliveryReport = true;
@@ -967,6 +967,10 @@ static void DoSendSMS(void)
 
 		strncpy(sms.Remote.Number, number, MAX_BCD_STRING_LENGTH + 1);
 		sms.Remote.Number[MAX_BCD_STRING_LENGTH] = '\0';
+		if (sms.Remote.Number[0] == '+') 
+			sms.Remote.Type = SMS_International;
+		else 
+			sms.Remote.Type = SMS_Unknown;
 
 		if (l > GSM_MAX_SMS_LENGTH) {
 			if (longSMS) {
@@ -1006,6 +1010,7 @@ static void DoSendSMS(void)
 				}
 			} else {
 				sms.UDH.Length = 0;
+				sms.UserData[0].Type = SMS_PlainText;
 				nr_msg = ((l - 1) / 153) + 1;
 				if (nr_msg > 99)	// We have place only for 99 messages in header.
 					nr_msg = 99;
@@ -1040,11 +1045,11 @@ static void DoSendSMS(void)
 			}
 		} else {
 			sms.UDH.Length = 0;
+			sms.UserData[0].Type = SMS_PlainText;
 			strncpy(sms.UserData[0].u.Text, text, GSM_MAX_SMS_LENGTH + 1);
 			sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
 
-			buf =
-			    g_strdup_printf(_("Sending SMS to %s ...\n"), sms.Remote.Number);
+			buf = g_strdup_printf(_("Sending SMS to %s ...\n"), sms.Remote.Number);
 			gtk_label_set_text(GTK_LABEL(infoDialog.text), buf);
 			gtk_widget_show_now(infoDialog.dialog);
 			g_free(buf);
