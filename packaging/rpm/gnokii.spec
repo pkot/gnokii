@@ -22,6 +22,7 @@ mobile phones, released under the GPL.
 
 %build
 make
+strip gnokii gnokiid xgnokii mgnokiidev
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -49,6 +50,9 @@ rm -rf $RPM_BUILD_ROOT
 %config /etc/gnokiirc
 
 %changelog
+* Sat Jul 24 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- stripping of binaries
+
 * Thu Jul 22 1999 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - gnokii.nol added - nice example for logo uploading
 
