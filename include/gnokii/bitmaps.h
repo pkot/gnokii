@@ -22,7 +22,7 @@
 /* Bitmap types. */
 
 typedef enum {
-	GSM_None=0,
+	GSM_None = 0,
 	GSM_StartupLogo,
 	GSM_OperatorLogo,
 	GSM_CallerLogo,

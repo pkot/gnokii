@@ -405,12 +405,13 @@ extern SMSMessage_PhoneLayout layout;
 
 /* Maximal number of SMS folders */
 #define MAX_SMS_FOLDERS 24
+#define MAX_SMS_MESSAGES 160
 
 /* Datatype for SMS folders ins 6210/7110 */
 typedef struct {
 	char Name[15];     /* Name for SMS folder */
 	bool SMSData;      /* if folder contains sender, SMSC number and sending date */
-	unsigned int locations[160]; /* locations of SMS messages in that folder (6210 specific) */
+	unsigned int locations[MAX_SMS_MESSAGES]; /* locations of SMS messages in that folder (6210 specific) */
 	unsigned int number;         /* number of SMS messages in that folder*/
 	unsigned int FolderID;       /* ID od fthe current folder */
 } SMS_Folder;

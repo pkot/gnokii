@@ -448,7 +448,7 @@ static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *message, 
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 	return GE_NONE;
 }
@@ -620,7 +620,7 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 					data->Bitmap->height = blockstart[6];
 					data->Bitmap->size = (data->Bitmap->width * data->Bitmap->height) / 8;
 					memcpy(data->Bitmap->bitmap, blockstart + 10, data->Bitmap->size);
-					dprintf("Bitmap\n");
+					dprintf("Bitmap: width: %i, height: %i\n", blockstart[5], blockstart[6]);
 				}
 				break;
 			case P7110_ENTRYTYPE_LOGOSWITCH:/* Logo on/off */
@@ -643,13 +643,13 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 			switch (message[10]) {
 			case 0x3d: return GE_PHBOOKWRITEFAILED;
 			case 0x3e: return GE_PHBOOKWRITEFAILED;
-			default:   return GE_UNKNOWN;
+			default:   return GE_UNHANDLEDFRAME;
 			}
 		}
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 	return GE_NONE;
 }
@@ -670,7 +670,7 @@ static GSM_Error P7110_Identify(GSM_Data *data, GSM_Statemachine *state)
 	SM_GetError(state, 0x1b);
 
 	/* Check that we are back at state Initialised */
-	if (SM_Loop(state,0) != Initialised) return GE_UNKNOWN;
+	if (SM_Loop(state, 0) != Initialised) return GE_UNKNOWN;
 	return GE_NONE;
 }
 
@@ -695,7 +695,7 @@ static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x1b (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 	}
 	return GE_NONE;
 }
@@ -717,7 +717,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			else
 				dprintf("[%02x ]", message[i]);
 		dprintf("\n");
-
+		dprintf("Trying to get message # %i in folder # %i\n", message[7], message[5]);
 		if (!data->SMSMessage) return GE_INTERNALERROR;
 
 		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
@@ -740,8 +740,12 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 				if (data->SMSMessage->Number == data->SMSFolder->locations[i])
 					found = true;
 			}
-			/* Should we return here GE_INVALIDSMSLOCATION or GE_EMPTYSMSLOCATION ? */
-			if (!found && data->SMSMessage->Status != SMS_Unread) return GE_INVALIDSMSLOCATION;
+			if (!found && data->SMSMessage->Status != SMS_Unread) {
+				if (data->SMSMessage->Number > MAX_SMS_MESSAGES)
+					return GE_INVALIDSMSLOCATION;
+				else
+					return GE_EMPTYSMSLOCATION;
+			}
 		}
 
 		if (!data->RawData) return GE_INTERNALERROR;
@@ -790,8 +794,10 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Data for debug:\n");
 		for (i = 0; i < length; i++) dprintf("%02x ", message[i]);
 		dprintf("\n");
+		/* FIXME: Don't count messages in fixed locations together with other */
 		data->SMSStatus->Number = ((message[10] << 8) | message[11]) +
-					  ((message[14] << 8) | message[15]);
+					  ((message[14] << 8) | message[15]) +
+					  (data->SMSFolder->number);
 		data->SMSStatus->Unread = ((message[12] << 8) | message[13]) +
 					  ((message[16] << 8) | message[17]);
 		break;
@@ -1089,9 +1095,19 @@ static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 {
+	SMS_Folder fld;
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x36, 0x64};
 
 	dprintf("Getting SMS Status...\n");
+
+	/* Nokia 6210 and family does not show not "fixed" messages from the
+	 * Templates folder, ie. when you save a message to the Templates folder,
+	 * SMSStatus does not change! Workaround: get Templates folder status, which
+	 * does show these messages.
+	 */
+	fld.FolderID = 0x20;
+	data->SMSFolder = &fld;
+	if (P7110_GetSMSFolderStatus(data, state) != GE_NONE) return GE_NOTREADY;
 	if (SM_SendMessage(state, 5, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
@@ -1203,13 +1219,11 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 	case P7110_SUBSMS_SMSC_FAIL: /* 0x32 */
 	case P7110_SUBSMS_SMSC_RCVFAIL: /* 0x35 */
 		dprintf("Subtype 0x%02x of type 0x%02x (SMS handling) not implemented\n", message[3], P7110_MSG_SMS);
-		e = GE_NOTIMPLEMENTED;
-		break;
+		return GE_NOTIMPLEMENTED;
 
 	default:
 		dprintf("Unknown subtype of type 0x%02x (SMS handling): 0x%02x\n", P7110_MSG_SMS, message[3]);
-		e = GE_UNHANDLEDFRAME;
-		break;
+		return GE_UNHANDLEDFRAME;
 	}
 	return e;
 }
@@ -1250,7 +1264,7 @@ static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, in
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (clock handling): 0x%02x\n", P7110_MSG_CLOCK, message[3]);
-		e = GE_UNKNOWN;
+		e = GE_UNHANDLEDFRAME;
 		break;
 	}
 	return e;
@@ -1303,7 +1317,7 @@ static GSM_Error P7110_GetNoteTimes(unsigned char *block, GSM_CalendarNote *c)
 	alarmdiff = (((unsigned int)block[2]) << 8) + block[3];
 
 	if (alarmdiff != 0xffff) {
-		P7110_GetNoteAlarm(alarmdiff * 60, &(c->Time), &(c->Alarm));
+		e = P7110_GetNoteAlarm(alarmdiff * 60, &(c->Time), &(c->Alarm));
 		c->Alarm.AlarmEnabled = 1;
 	} else {
 		c->Alarm.AlarmEnabled = 0;
@@ -1389,25 +1403,32 @@ static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message,
 			break;
 		default:
 			data->CalendarNote->Type = -1;
-			e = GE_UNKNOWN;
-			break;
+			return GE_UNKNOWN;
 		}
 
 		break;
+	case P7110_SUBCAL_INFO_RCVD:
+		dprintf("Calendar Notes Info received! %i\n", (message[4] << 8) | message[5]);
+		data->CalendarNotesList->Number = (message[4] << 8) + message[5];
+		dprintf("Location of Notes: ");
+		for (i=0; i < data->CalendarNotesList->Number; i++) {
+			data->CalendarNotesList->Location[i] = (message[8 + 2 * i] << 8) | message[9 + 2 * i];
+			dprintf("%i ", data->CalendarNotesList->Location[i]); 
+		}
+		dprintf("\n");
+		break;
+
 	case P7110_SUBCAL_ADD_MEETING_RESP:
 	case P7110_SUBCAL_ADD_CALL_RESP:
 	case P7110_SUBCAL_ADD_BIRTHDAY_RESP:
 	case P7110_SUBCAL_ADD_REMINDER_RESP:
 	case P7110_SUBCAL_DEL_NOTE_RESP:
 	case P7110_SUBCAL_FREEPOS_RCVD:
-	case P7110_SUBCAL_INFO_RCVD:
 		dprintf("Subtype 0x%02x of type 0x%02x (calendar handling) not implemented\n", message[3], P7110_MSG_CALENDAR);
-		e = GE_NOTIMPLEMENTED;
-		break;
+		return GE_NOTIMPLEMENTED;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", P7110_MSG_CALENDAR, message[3]);
-		e = GE_UNKNOWN;
-		break;
+		return GE_UNHANDLEDFRAME;
 	}
 	return e;
 }
@@ -1578,9 +1599,9 @@ static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 				  0x00, 0x00,  /* location */
 				  0x00, 0x00};
 
-	req[11] = data->Bitmap->number + 1;
-	dprintf("Getting caller(%d) logo...\n",data->Bitmap->number);
-	if (SM_SendMessage(state, 14, 0x03, req)!=GE_NONE) return GE_NOTREADY;
+	req[11] = GNOKII_MIN(data->Bitmap->number + 1, GSM_MAX_CALLER_GROUPS);
+	dprintf("Getting caller(%d) logo...\n", req[11]);
+	if (SM_SendMessage(state, 14, 0x03, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x03);
 }
 
@@ -1677,7 +1698,7 @@ static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *message, 
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x7a (%d)\n", message[3]);
-		return GE_UNKNOWN;
+		return GE_UNHANDLEDFRAME;
 		break;
 	}
 }
@@ -1850,8 +1871,7 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 
 static GSM_Error P7110_ReadPhonebookLL(GSM_Data *data, GSM_Statemachine *state, int memtype, int location)
 {
-	GSM_Error	error;
-	unsigned char	req[2000] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
+	unsigned char req[2000] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
 					0x00, 0x00, /* memory type */ //02,05
 					0x00, 0x00, /* location */
 					0x00, 0x00};
@@ -1863,9 +1883,7 @@ static GSM_Error P7110_ReadPhonebookLL(GSM_Data *data, GSM_Statemachine *state, 
 	req[11] = location & 0xff;
 
 	if (SM_SendMessage(state, 14, P7110_MSG_PHONEBOOK, req) != GE_NONE) return GE_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_PHONEBOOK);
-
-	return error;
+	return SM_Block(state, data, P7110_MSG_PHONEBOOK);
 }
 
 static GSM_Error P7110_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
@@ -1890,26 +1908,28 @@ static GSM_Error P7110_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error	error;
-	unsigned char	req[] = {FBUS_FRAME_HEADER, P7110_SUBSMS_GET_SMSC, 0x64, 0x00};
+	unsigned char req[] = {FBUS_FRAME_HEADER, P7110_SUBSMS_GET_SMSC, 0x64, 0x00};
 
 	req[5] = data->MessageCenter->No;
 
 	if (SM_SendMessage(state, 6, P7110_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_SMS);
-
-	return error;
+	return SM_Block(state, data, P7110_MSG_SMS);
 }
 
 static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state)
 {
-	GSM_Error	error;
-	unsigned char	req[] = {FBUS_FRAME_HEADER, req_type};
+	unsigned char req[] = {FBUS_FRAME_HEADER, req_type};
 
 	if (SM_SendMessage(state, 4, P7110_MSG_CLOCK, req) != GE_NONE) return GE_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_CLOCK);
+	return SM_Block(state, data, P7110_MSG_CLOCK);
+}
 
-	return error;
+static GSM_Error P7110_GetCalendarNotesInfo(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_INFO, 0xFF, 0xFE};
+
+	if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P7110_MSG_CALENDAR);
 }
 
 static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
@@ -1921,14 +1941,19 @@ static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 	GSM_DateTime	tmptime;
 
 	tmpdata.DateTime = &tmptime;
-	if (SM_SendMessage(state, 4, P7110_MSG_CLOCK, date) == GE_NONE) {
-		SM_Block(state, &tmpdata, P7110_MSG_CLOCK);
-		req[4] = data->CalendarNote->Location >> 8;
-		req[5] = data->CalendarNote->Location & 0xff;
-		data->CalendarNote->Time.Year = tmptime.Year;
+	if (P7110_GetCalendarNotesInfo(data, state) == GE_NONE) {
+		if (data->CalendarNote->Location < data->CalendarNotesList->Number + 1 &&
+		    data->CalendarNote->Location > 0 ) {
+			if (SM_SendMessage(state, 4, P7110_MSG_CLOCK, date) == GE_NONE) {
+				SM_Block(state, &tmpdata, P7110_MSG_CLOCK);
+				req[4] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] >> 8;
+				req[5] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] & 0xff;
+				data->CalendarNote->Time.Year = tmptime.Year;
 
-		if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) == GE_NONE) {
-			error = SM_Block(state, data, P7110_MSG_CALENDAR);
+				if (SM_SendMessage(state, 6, P7110_MSG_CALENDAR, req) == GE_NONE) {
+					error = SM_Block(state, data, P7110_MSG_CALENDAR);
+				}
+			}
 		}
 	}
 
@@ -1943,10 +1968,8 @@ static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
 
 	req2[4] = data->NetMonitor->Field;
 
-	if (SM_SendMessage(state, 5, P7110_MSG_SECURITY, req1) != GE_NONE)
-		return GE_NOTREADY;
-	if (SM_SendMessage(state, 5, P7110_MSG_SECURITY, req2) != GE_NONE)
-		return GE_NOTREADY;
+	if (SM_SendMessage(state, 5, P7110_MSG_SECURITY, req1) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 5, P7110_MSG_SECURITY, req2) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P7110_MSG_SECURITY);
 }
 

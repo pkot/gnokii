@@ -104,6 +104,7 @@ typedef struct {
 /* Here is a macro for models that do not support caller groups. */
 
 #define GSM_GROUPS_NOT_SUPPORTED -1
+#define GSM_MAX_CALLER_GROUPS     5
 
 /* This data type is used to report the number of used and free positions in
    memory (sim or internal). */
@@ -235,6 +236,14 @@ typedef struct {
 	char Phone[20];		/* For Call only: the phone number */
 	double Recurance;		/* Recurance of the note */
 } GSM_CalendarNote;
+
+/* List of Calendar Notes in phone */
+#define MAX_CALENDAR_NOTES (500) /* FIXME how many are possible? */
+
+typedef struct {
+	int Number;		/* The number of notes in phone */
+	int Location[MAX_CALENDAR_NOTES];	/* Location of the nth note */
+} GSM_CalendarNotesList;
 
 /* This structure is provided to allow common information about the particular
    model to be looked up in a model independant way. Some of the values here

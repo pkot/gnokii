@@ -193,16 +193,17 @@ typedef struct {
 	int flags;
 } PhoneModel;
 
-#define PM_CALLERGROUP	  0x0001
-#define PM_NETMONITOR	  0x0002
-#define PM_KEYBOARD	  0x0004
-#define PM_SMS		  0x0008
-#define PM_CALENDAR	  0x0010
-#define PM_DTMF		  0x0020
-#define PM_DATA		  0x0040
-#define PM_SPEEDDIAL	  0x0080
-#define PM_EXTPBK         0x0100
-#define PM_AUTHENTICATION 0x0200
+#define PM_CALLERGROUP		0x0001
+#define PM_NETMONITOR		0x0002
+#define PM_KEYBOARD		0x0004
+#define PM_SMS			0x0008
+#define PM_CALENDAR		0x0010
+#define PM_DTMF			0x0020
+#define PM_DATA			0x0040
+#define PM_SPEEDDIAL		0x0080
+#define PM_EXTPBK		0x0100
+#define PM_AUTHENTICATION	0x0200
+#define PM_FOLDERS		0x0400
 
 extern char *GetModel (const char *);
 extern PhoneModel *GetPhoneModel (const char *);
@@ -211,4 +212,3 @@ extern char *lock_device(const char*);
 extern bool unlock_device(char *);
 
 #endif /* __misc_h */
-

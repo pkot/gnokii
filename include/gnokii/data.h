@@ -34,6 +34,7 @@ typedef struct {
 	char *Model;
 	char *Manufacturer;
 	GSM_NetworkInfo *NetworkInfo;
+	GSM_CalendarNotesList *CalendarNotesList;
 	GSM_CalendarNote *CalendarNote;
 	GSM_Bitmap *Bitmap;
 	GSM_Ringtone *Ringtone;
