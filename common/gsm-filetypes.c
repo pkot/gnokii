@@ -709,13 +709,13 @@ GSM_Error loadnol(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 	unsigned char buffer[GSM_MAX_BITMAP_SIZE + 20];
 	int i, j;
 
-	bitmap->type = GSM_OperatorLogo;
 
 	fread(buffer, 1, 20, file);
 	sprintf(bitmap->netcode, "%d %02d", buffer[6] + 256 * buffer[7], buffer[8]);
 
 	bitmap->width = buffer[10];
 	bitmap->height = buffer[12];
+	bitmap->type = GSM_OperatorLogo;
 	bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 
 	if (((bitmap->height != 14) || (bitmap->width != 72)) && /* standard size */
@@ -791,7 +791,7 @@ GSM_Error loadngg(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 
 GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 {
-	unsigned char block[6], buffer[505];
+	unsigned char block[6], buffer[870];
 	int block_size, count;
 
 	bitmap->size = 0;
@@ -802,7 +802,7 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 		if (!strncmp(block, "FORM", 4)) {
 			dprintf("  File ID\n");
 		} else {
-			if (block_size > 504) return(GE_WRONGDATAFORMAT);
+			if (block_size > 864) return(GE_WRONGDATAFORMAT);
 
 			if (block_size != 0) {
 
@@ -814,13 +814,26 @@ GSM_Error loadnsl(FILE *file, GSM_Bitmap *bitmap)
 				if (!strncmp(block, "COMM", 4)) dprintf("  Phone was connected to COM port: %s\n", buffer);
 
 				if (!strncmp(block, "NSLD", 4)) {
+					bitmap->size = block[4] * 256 + block[5];
+					switch (bitmap->size) {
+					case 864:  /* 6510/7110 startup logo */
+						bitmap->height = 65;
+						bitmap->width = 96;
+						break;
+					case 504: /* 6110 startup logo */
+						bitmap->height = 48;
+						bitmap->width = 84;
+						break;
+					case 768: /* 6210 */
+						bitmap->height = 60;
+						bitmap->width = 96;
+						break;
+					default:
+						dprintf("Unknown startup logo!\n");
+						return GE_WRONGDATAFORMAT;
+					}
 					bitmap->type = GSM_StartupLogo;
-					bitmap->height = 48;
-					bitmap->width = 84;
-					bitmap->size = (bitmap->height * bitmap->width) / 8;
-
 					memcpy(bitmap->bitmap, buffer, bitmap->size);
-
 					dprintf("  Startup logo (size %i)\n", block_size);
 				}
 			}
@@ -1221,8 +1234,12 @@ void savensl(FILE *file, GSM_Bitmap *bitmap, GSM_Information *info)
 
 	GSM_ResizeBitmap(bitmap, GSM_StartupLogo, info);
 
+        header[4] = (bitmap->size + 6) / 256;
+        header[5] = (bitmap->size + 6) % 256;
+        header[10] = bitmap->size / 256;
+        header[11] = bitmap->size % 256;
 	fwrite(header, 1, sizeof(header), file);
-
+	
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
 }
 
@@ -1252,7 +1269,7 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 		         0x00,        /* Height. */
 		         0x01};
 
-	unsigned char buffer[11 * 48];
+	unsigned char buffer[17 * 48];
 	int x, y, pos, pos2;
 	div_t division;
 
@@ -1295,8 +1312,7 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 	if (division.rem != 0) division.quot++; /* For startup logos */
 
 	fwrite(header, 1, sizeof(header), file);
-
-	fwrite(buffer,1,(division.quot*bitmap->height),file);
+	fwrite(buffer, 1, (division.quot * bitmap->height), file);
 }
 
 GSM_Error GSM_ShowBitmapFile(char *FileName)

@@ -58,18 +58,19 @@ GSM_Error GSM_NullBitmap(GSM_Bitmap *bmp, GSM_Information *info)
 API void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	switch (bmp->type) {
+	case GSM_NewOperatorLogo:
 	case GSM_StartupLogo:
-		bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8); break;
+		bmp->bitmap[((y / 8) * bmp->width) + x] |= 1 << (y % 8); break;
 	/* Testing only! */	
 	case GSM_PictureMessage:
-		bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8)); break;
+		bmp->bitmap[9 * y + (x / 8)] |= 1 << (7 - (x % 8)); break;
 	case GSM_EMSPicture:
 	case GSM_EMSAnimation:
 	case GSM_EMSAnimation2:
 	case GSM_OperatorLogo:
 	case GSM_CallerLogo:
 	default:
-		bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8)); break;
+		bmp->bitmap[(y * bmp->width + x) / 8] |= 1 << (7 - ((y * bmp->width + x) % 8)); break;
 	}
 }
 
@@ -77,10 +78,11 @@ API void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
 {
 	switch (bmp->type) {
 	case GSM_StartupLogo:
-		bmp->bitmap[((y/8)*bmp->width)+x] &= ~(1 << (y%8)); break;
+	case GSM_NewOperatorLogo:
+		bmp->bitmap[((y / 8) * bmp->width) + x] &= ~(1 << (y % 8)); break;
 	/* Testing only! */	
 	case GSM_PictureMessage:
-		bmp->bitmap[9*y + (x/8)] &= ~(1 << (7-(x%8))); break;
+		bmp->bitmap[9 * y + (x / 8)] &= ~(1 << (7 - (x % 8))); break;
 	case GSM_EMSPicture:
 	case GSM_EMSAnimation:
 	case GSM_EMSAnimation2:
@@ -98,14 +100,14 @@ API bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	switch (bmp->type) {
 	case GSM_OperatorLogo:
 	case GSM_CallerLogo:
-		i = (bmp->bitmap[(y*bmp->width+x)/8] & 1 << (7-((y*bmp->width+x)%8)));
+		i = (bmp->bitmap[(y * bmp->width + x) / 8] & 1 << (7-((y * bmp->width + x) % 8)));
 		break;
 	case GSM_PictureMessage:
 		i = (bmp->bitmap[9 * y + (x / 8)] & 1 << (7 - (x % 8)));
 		break;
 	case GSM_StartupLogo:
 	case GSM_NewOperatorLogo:
-		i = (bmp->bitmap[((y/8)*bmp->width) + x] & 1<<((y%8)));
+		i = (bmp->bitmap[((y / 8) * bmp->width) + x] & 1 << (y % 8));
 		break;
 	default:
 		break;
@@ -117,7 +119,6 @@ API void GSM_ClearBitmap(GSM_Bitmap *bmp)
 {
 	memset(bmp->bitmap, 0, bmp->size);
 }
-
 
 API void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Information *info)
 {
@@ -131,26 +132,38 @@ API void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Infor
 	case GSM_StartupLogo:
 		bitmap->width = info->StartupLogoW;
 		bitmap->height = info->StartupLogoH;
+		if ((!strncmp(info->Models, "6510", 4)) || (!strncmp(info->Models, "7110", 4)))
+			bitmap->size = ceiling_to_octet(bitmap->height) * bitmap->width;
+		else 
+			bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
+		break;
+	case GSM_NewOperatorLogo:
+		bitmap->width = info->OpLogoW;
+		bitmap->height = info->OpLogoH;
+		bitmap->size = ceiling_to_octet(bitmap->height) * bitmap->width;
 		break;
 	case GSM_OperatorLogo:
 		bitmap->width = info->OpLogoW;
 		bitmap->height = info->OpLogoH;
+		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
 	case GSM_CallerLogo:
 		bitmap->width = info->CallerLogoW;
 		bitmap->height = info->CallerLogoH;
+		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
 	case GSM_PictureMessage:
 		bitmap->width = 72;
 		bitmap->height = 48;
+		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
 	default:
 		bitmap->width = 0;
 		bitmap->height = 0;
+		bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
 	}
 	bitmap->type = target;
-	bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 
 	if (backup.width > bitmap->width) {
 		copywidth = bitmap->width;
