@@ -141,10 +141,10 @@ to do the installation (FIXME - is this correct ?)
 - 6.0 Configuration -
 
 Once you have installed the binaries, you should copy the
-sample.gnokiirc file from the Docs/samples directory to your
-home directory and name it .gnokiirc  Using your favorite
-editor ensure that the settings are correct for your system,
-the sample file has details of the various options available.
+sample.gnokiirc file from the Docs directory to your home
+directory and name it .gnokiirc  Using your favorite editor
+ensure that the settings are correct for your system, the sample
+file has details of the various options available.
 
 Note that you will need read/write permissions on whatever
 serial port you specify in .gnokiirc.  You can now use gnokii

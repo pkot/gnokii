@@ -139,7 +139,7 @@
   1. Copy the file sample.gnokiirc as .gnokiirc in your homedir.
 
 
-       cp sample.gnokiirc ~/.gnokiirc
+       cp Docs/sample.gnokiirc ~/.gnokiirc
 
 
 

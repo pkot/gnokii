@@ -18,7 +18,7 @@ e.g.
 
 (2) Create /etc/gnokiirc
 
-   cp Docs/sample/sample.gnokiirc /etc/gnokiirc
+   cp Docs/sample.gnokiirc /etc/gnokiirc
 
    Edit to suit; in my case:
 

@@ -1,25 +1,28 @@
-
 #
-# Makefile for the GNOKII tool suite.
+# Makefile for the GNOKII tool suite's documentation directory
 #
 # Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 #               2000 Karel Zak
 #
 
-
 TOPDIR=../
 include ${TOPDIR}/Makefile.global
 
+#
+# Documentation for gnokii (xgnokii install documentation files itself).
+#
 
-#
-# Documentation for gnokii (xgnokii install docs itself).
-#
 INSTALL_DOCS = 	README \
 		README-3810 \
 		README-6110 \
-		CREDITS
-
-SAMPLE_DIR = sample
+		CREDITS \
+		DataCalls-QuickStart \
+		README-WIN32 \
+		gettext-howto \
+		gnokii.nol \
+		gnokii-ir-howto \
+		packaging-howto \
+		sample.gnokiirc \
 
 all: 
 	@echo
@@ -31,9 +34,6 @@ install:
 		$(INSTALL) -m 0444 $$xxx $(docdir)/$$xxx; \
 	    fi; \
 	done
-	$(INSTALL) -d $(docdir)/sample
-	$(INSTALL) -m 0444 $(SAMPLE_DIR)/* $(docdir)/sample
-	@echo "done"
 	@echo "done"
 
 clean:
