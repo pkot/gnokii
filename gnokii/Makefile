@@ -21,10 +21,7 @@ endif
 
 all: gnokii
 
-LDFLAGS += -L$(TOPDIR)/common -lgnokii
-
-gnokii: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o
-	$(LD) gnokii $(LDFLAGS) $(OBJS) $(TOPDIR)/common/gsm-filetypes.o
+gnokii: $(OBJS) $(TOPDIR)/common/libgnokii.so $(TOPDIR)/common/gsm-filetypes.o
 
 $(TOPDIR)/common/libgnokii.so:
 	$(MAKE) -C $(TOPDIR)/common libgnokii.so
