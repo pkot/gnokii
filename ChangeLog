@@ -8,6 +8,8 @@
                                                     Ernest Beinrohr)
     o retransmission occurs only if the phone won't transmit
       the acknowledge frame                         (BORBELY Zoltan)
+    o implement access to network and country names
+                                                    (Ladislav Michl)
  * build system updated
     o avoid problems with recursive loop when installing
       locales in xgnokii                          (Malte Schünemann)
@@ -21,15 +23,11 @@
     o fix the --getdatetime problem                      (Pawel Kot)
  * AT driver updates
     o fix sms sending                                    (Pawel Kot)
-    o fix answer missunderstading in                (Ladislav Michl)
-      atbus_rx_statemachine
+    o fix answer missunderstading in atbus_rx_statemachine
+                                                    (Ladislav Michl)
  * MS VC6 compability fixes
-    o include tekram.h alsow with WIN32 enabled     (Ladislav Michl,
-                                                   Marcus Godehardt)
-    o VC6 does not define O_RDWR                    (Ladislav Michl,
-                                                   Marcus Godehardt)
-    o ugly hack: networks[] needs to be exportted to gnokii
-                                                  (Marcus Godehardt)
+    o include tekram.h also with WIN32 enabled    (Marcus Godehardt)
+    o VC6 does not define O_RDWR                  (Marcus Godehardt)
     o VC6 does not have mkdir()                   (Marcus Godehardt)
     o correct headers in gnokii.c                 (Marcus Godehardt)
     o undef ERROR when define own ERROR() macro to avoid conflicts
