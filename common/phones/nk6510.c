@@ -2298,6 +2298,7 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 				operatorname = malloc(blockstart[5] + 1);
 				char_unicode_decode(operatorname, blockstart + 6, blockstart[5] << 1);
 				dprintf("Operator Name: %s\n", operatorname);
+				free(operatorname);
 				break;
 			case 0x09:  /* Operator details */
 				/* Network code is stored as 0xBA 0xXC 0xED ("ABC DE"). */

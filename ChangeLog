@@ -10,6 +10,8 @@
     o don't segfault on incorrect initialization        (Pawel Kot)
  * 6100 series updates
     o uninitalised stack variable in IdentifyPhone (BORBELY Zoltan)
+ * libgnokii updates
+    o fix memory leaks reported by valgrind             (Pawel Kot)
 
 0.5.8
 =====
