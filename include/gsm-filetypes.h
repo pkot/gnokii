@@ -44,7 +44,8 @@ typedef enum {
 	GN_FT_OTA,
 	GN_FT_XPMF,
 	GN_FT_RTTL,
-	GN_FT_OTT
+	GN_FT_OTT,
+	GN_FT_MIDI
 } gn_filetypes;
 
 #endif /* _gnokii_gsm_filetypes_h */

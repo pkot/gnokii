@@ -109,6 +109,7 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 
 	filetype = GN_FT_RTTL;
 	if (strstr(filename, ".ott")) filetype = GN_FT_OTT; /* OTT files saved by NCDS3 */
+	else if (strstr(filename, ".mid")) filetype = GN_FT_MIDI;
 
 	error = GN_ERR_NONE;
 
@@ -121,6 +122,10 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 		break;
 	case GN_FT_OTT:
 		error = file_ott_load(file, ringtone);
+		fclose(file);
+		break;
+	case GN_FT_MIDI:
+		error = file_midi_load(file, ringtone);
 		fclose(file);
 		break;
 	default:
@@ -273,6 +278,9 @@ gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone)
 	/* We need a way of passing these functions a filetype rather than rely on the extension */
 	if (strstr(filename, ".ott")) {
 		error = file_ott_save(file, ringtone);
+	} else if (strstr(filename, ".mid")) {
+		/* saving in midi format hasn't supported yet */
+		error = GN_ERR_WRONGDATAFORMAT;
 	} else {
 		error = file_rttl_save(file, ringtone);
 	}

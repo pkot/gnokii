@@ -5,6 +5,8 @@
       po/Makevars                                       (Pawel Kot)
  * 6110 series updates
     o PlayTone message and documentation fixed     (BORBELY Zoltan)
+ * libgnokii changes
+    o Tomi Ollila's readmidi.c added               (BORBELY Zoltan)
 
 0.5.4
 =====

@@ -30,6 +30,7 @@ OBJS =	gsm-api.o \
 	ldif.o \
 	gsm-networks.o \
 	gsm-filetypes.o \
+	readmidi.o \
 	gsm-ringtones.o \
 	gsm-bitmaps.o \
 	gsm-sms.o \
