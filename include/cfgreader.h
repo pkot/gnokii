@@ -12,11 +12,6 @@
 
   Header file for config file reader.
 
-  $Log$
-  Revision 1.4  2000-12-19 16:18:19  pkot
-  configure script updates and added shared function for configfile reading
-
-  
 */
 
 #ifndef _CFGREADER_H
@@ -40,13 +35,18 @@ struct CFG_Header {
         char *section;
 };
 
+/* Global variables */
+
+extern struct CFG_Header *CFG_Info;
+
 /* Function prototypes */
 
-struct CFG_Header *CFG_ReadFile(char *filename);
-char              *CFG_Get(struct CFG_Header *cfg, char *section, char *key);
-char              *CFG_Set(struct CFG_Header *cfg, char *section, char *key, 
-                           char *value);
-int                CFG_WriteFile(struct CFG_Header *cfg, char *filename);
+struct CFG_Header *CFG_ReadFile(const char *filename);
+char              *CFG_Get(struct CFG_Header *cfg, const char *section, const char *key);
+typedef void (*CFG_GetForeach_func)(const char *section, const char *key, const char *value);
+void               CFG_GetForeach(struct CFG_Header *cfg, const char *section, CFG_GetForeach_func func);
+char              *CFG_Set(struct CFG_Header *cfg, const char *section, const char *key, const char *value);
+int                CFG_WriteFile(struct CFG_Header *cfg, const char *filename);
 int                readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
 
 #endif /* _CFGREADER_H */
