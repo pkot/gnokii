@@ -23,6 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2002 Markus Plail
+  Copyright (C) 2002 Pawel Kot
 
   This file provides functions specific to the 6510 series.
   See README for more details on supported mobile phones.
@@ -387,12 +388,12 @@ static GSM_Error P6510_GetRevision(GSM_Data *data, GSM_Statemachine *state)
  */
 static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02, 0x00, 0x00, 0x00,
-				  0x55, 0x55, 0x01, 0x02};
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
+				  0x00, 0x00, 0x00, 0x55, 0x55, 0x01, 0x02}; /* What's this? */
 	int padding;
 
 	memset(req + 11, 0, 244);
-	req[11] = 0x2c; /* What's this? */
+	req[11] = 0x2c + 4 * ((data->RawSMS->UserDataLength - 1) / 4); /* Don't ask my why. */
 	req[12] = 0x01; /* SMS Submit */
 	if (data->RawSMS->ReplyViaSameSMSC)  req[12] |= 0x80;
 	if (data->RawSMS->RejectDuplicates)  req[12] |= 0x04;
@@ -403,15 +404,15 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	req[14] = data->RawSMS->PID;
 	req[15] = data->RawSMS->DCS;
 	memcpy(req + 16, "\x00\x04\x82\x0c\x01\x07", 6); /* What's this? */
-	dprintf("%02x\n", data->RawSMS->RemoteNumber[0]);
 	memcpy(req + 22, data->RawSMS->RemoteNumber, 12);
-	memcpy(req + 30, "\x82\x0c\x02\x08", 4);
+	memcpy(req + 30, "\x82\x0c\x02\x08", 4); /* What's this? */
 	memcpy(req + 34, data->RawSMS->MessageCenter, 8);
-	req[42] = 0x80;
-	req[43] = 0x08;
+	req[42] = 0x80; /* What's this? */
+	req[43] = 0x08 + 4 * ((data->RawSMS->UserDataLength - 1) / 4); /* Don't ask me why. */
 	req[44] = req[45] = data->RawSMS->Length; /* These octets seems to be equal */
 	memcpy(req + 46, data->RawSMS->UserData, data->RawSMS->UserDataLength);
-	padding = data->RawSMS->UserDataLength % 4; /* We fill UserData with 0's to match 4 octets boundary */
+	padding = data->RawSMS->UserDataLength % 4;
+	if (padding) padding = 4 - padding; /* We fill UserData with 0's to match 4 octets boundary */
 	memcpy(req + 46 + data->RawSMS->UserDataLength + padding, "\x08\x04\x01\xa7", 4); /* What's this? */
 	dprintf("Sending SMS...(%d)\n", 46 + data->RawSMS->UserDataLength + 4 + padding);
 	if (SM_SendMessage(state, 46 + data->RawSMS->UserDataLength + 4 + padding, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
@@ -906,7 +907,7 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 	if (!data) return GE_INTERNALERROR;
 
 	switch (message[3]) {
-	case P6510_SUBSMS_SMSC_RCVD: /* 0x34 */
+	case P6510_SUBSMS_SMSC_RCVD: /* 0x15 */
 		dprintf("SMSC Received\n");
 		/* FIXME: Implement all these in gsm-sms.c */
 		data->MessageCenter->No = message[8];
@@ -934,19 +935,23 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 
 		break;
 
-	case P6510_SUBSMS_SMS_SENT: /* 0x02 */
-		dprintf("SMS sent\n");
-		e = GE_NONE;
-		break;
+	case P6510_SUBSMS_SMS_SEND_STATUS: /* 0x03 */
+		switch (message[8]) {
+		case P6510_SUBSMS_SMS_SEND_OK: /* 0x00 */
+			dprintf("SMS sent\n");
+			e = GE_NONE;
+			break;
 
-	case P6510_SUBSMS_SEND_FAIL: /* 0x03 */
-		/* That's not exactly correct. I receive:
-		 * 01 58 00 03 00 01 0c 08 00 00 25 55 55 00
-		 * on the succeeded sending. Let's try to say we
-		 * succeeded.
-		 */
-		dprintf("SMS sent?\n");
-		e = GE_NONE;
+		case P6510_SUBSMS_SMS_SEND_FAIL: /* 0x01 */
+			dprintf("SMS sending failed\n");
+			e = GE_SMSSENDFAILED;
+			break;
+
+		default:
+			dprintf("Unknown status of the SMS sending -- assuming failure\n");
+			e = GE_SMSSENDFAILED;
+			break;
+		}
 		break;
 
 	case 0x0e:
