@@ -1,3 +1,8 @@
+0.6.3
+=====
+ * portability fixes
+    o build atsoer.c under MSVC                        (Phil Ashby)
+
 0.6.2
 =====
  * portability fixes
