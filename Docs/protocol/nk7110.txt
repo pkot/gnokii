@@ -136,6 +136,34 @@ Correct format is FBUS version 2/Infrared/MBUS version 2
                             where code:
                                     0x3d - wrong entry type
                                     0x3e - too much entries
+0x06: Calling line restriction/Call forwarding etc
+    s Set call divert       { 0x0001, 0x03, 0x00, divtype, calltype, 0x01, number(packed like in SMS), 0x00, 0x00...,timeout}
+                            NOTE: msglen=0x37
+                            where timeout:
+                              0x00: not set ?
+                              0x05: 5 second
+                              0x0a: 10 second
+                              0x0f: 15 second
+                              0x14: 20 second
+                              0x19: 25 second
+                              0x1e: 30 second
+                            where divtype:
+                              0x02: all diverts for all call types ?
+                                    Found only, when deactivate all diverts for all call types (with call type 0x00)
+                              0x15: all calls
+                              0x43: when busy
+                              0x3d: when not answered
+                              0x3e: if not reached
+                            calltype:
+                              0x00: all calls (data, voice, fax)
+                              0x0b: voice calls
+                              0x0d: fax calla
+                              0x19: data calls
+    s Deactivate calldiverts{ 0x0001, 0x04, 0x00, divtype, calltype, 0x00 }
+                            where divtype, calltype: see above
+    s Get call diverts      { 0x0001, 0x05, 0x00, divtype, calltype, 0x00 }
+                            where divtype, calltype: see above
+    r Get prepaid(?) info   { 0x0005, ?,?,?,length,message(packed like in 7bit SMS)}
 0x0a: Network status
     s get used network      { 0x0070 }
     r get used network      { 0x0071, available,?,?,length,netstatus,netsel,cellIDH,

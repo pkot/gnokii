@@ -1090,6 +1090,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 
 	/* Send failed */
 	case 0x03:
+		/* I belive this is GE_SMSSENDFAILED in all cases -- pkot */
 		switch (message[6]) {
 		case 0x02:
 			return GE_SMSSENDFAILED;
@@ -1143,7 +1144,7 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 	case 0x34:
 		if (data->MessageCenter) {
 			smsc = data->MessageCenter;
-			pos = message+4;
+			pos = message + 4;
 			smsc->No = *pos++;
 			pos++;
 			switch (*pos++) {
@@ -1179,7 +1180,6 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 			case 0x47:	/*  6 hours */
 				smsc->Validity = SMS_V6H;
 				break;
-			case 0x00:	/* Not set, treat as 24h - bozo */
 			case 0xa7:	/* 24 hours */
 				smsc->Validity = SMS_V24H;
 				break;
@@ -1192,8 +1192,9 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 			case 0xff:	/* max.time */
 				smsc->Validity = SMS_VMax;
 				break;
-			default:
-				return GE_UNHANDLEDFRAME;
+			default:	/* Probably some error, but better treat it as 24h */
+				smsc->Validity = SMS_V24H;
+				break;
 			}
 			snprintf(smsc->Recipient, sizeof(smsc->Recipient), "%s", GetBCDNumber(pos));
 			pos += 12;

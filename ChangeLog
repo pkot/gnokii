@@ -9,11 +9,18 @@
     required during the initialization                    (Pawel Kot)
     o added #ifdefs for every occurence of the security function
                                                           (Pawel Kot)
+    o CallDivert implemented (registering does not work)
+                                                     (BORBELY Zoltan)
+    o fixes for receiving SMSCenter data -- accept every value
+    for message value                                     (Pawel Kot)
  * gnokii updates
     o --keysequence updated to the new API           (BORBELY Zoltan)
     o --enterchar implemented                        (BORBELY Zoltan)
+    o better handling of call divert responses            (Pawel Kot)
  * Makefiles' fixes                                       (Pawel Kot)
-
+ * Docs updates
+    o copy-and-paste call diverts from 6110 protocol to 7110
+    protocol description                                  (Pawel Kot)
 
 0.4.0pre14
 ==========
