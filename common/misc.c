@@ -161,7 +161,11 @@ API void gn_elog_write(const char *fmt, ...)
 }
 
 #define BUFFER_MAX_LENGTH 128
-#define lock_path "/var/lock/LCK.."
+#if defined (__svr4__)
+#  define lock_path "/var/run/LCK.."
+#else
+#  define lock_path "/var/lock/LCK.."
+#endif
 
 /* Lock the device. Return allocated string with a lock name */
 API char *gn_device_lock(const char* port)

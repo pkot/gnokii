@@ -14,6 +14,9 @@
     o "calendar functions busy" messages handled    (BORBELY Zoltan)
  * gnokii updates
     o vCalendar export fixed                        (BORBELY Zoltan)
+ * portability fixes
+    o there's no /var/lock directory on Solaris, use /var/run
+      instead                                            (Pawel Kot)
 
 0.5.0
 =====
