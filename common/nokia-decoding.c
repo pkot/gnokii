@@ -274,17 +274,19 @@ gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 	switch (data->calnote->type = message[6]) {
 	case GN_CALNOTE_MEETING:
 		e = calnote_get_times(block, data->calnote);
+		data->calnote->recurrence = 256 * block[4] + block[5];
 		if (e != GN_ERR_NONE) return e;
 		char_unicode_decode(data->calnote->text, (block + 8), block[6] << 1);
 		break;
 	case GN_CALNOTE_CALL:
 		e = calnote_get_times(block, data->calnote);
+		data->calnote->recurrence = 256 * block[4] + block[5];
 		if (e != GN_ERR_NONE) return e;
 		char_unicode_decode(data->calnote->text, (block + 8), block[6] << 1);
 		char_unicode_decode(data->calnote->phone_number, (block + 8 + block[6] * 2), block[7] << 1);
 		break;
 	case GN_CALNOTE_REMINDER:
-		data->calnote->recurrence = ((((unsigned int)block[0]) << 8) + block[1]) * 60;
+		data->calnote->recurrence = 256 * block[0] + block[1];
 		char_unicode_decode(data->calnote->text, (block + 4), block[2] << 1);
 		break;
 	case GN_CALNOTE_BIRTHDAY:
