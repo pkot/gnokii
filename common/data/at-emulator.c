@@ -297,7 +297,6 @@ void	gn_atem_at_parse(char *cmd_buffer)
 				data.call_info->type = GN_CALL_NonDigitalData;
 			data.call_info->send_number = GN_CALL_Default;
 			CommandMode = false;
-			rlp_user_request_set(Conn_Req, true);
 			if (gn_sm_functions(GN_OP_MakeCall, &data, sm) != GN_ERR_NONE) {
 				CommandMode = true;
 				dp_CallPassup(GN_CALL_RemoteHangup, NULL, NULL);

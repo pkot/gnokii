@@ -1371,7 +1371,7 @@ void MAIN_STATE_MACHINE(gn_rlp_f96_frame *frame, rlp_f96_header *header)
 				break;
 
 			default:
-				if (T == RLP_Timeout1_Limit) {
+				if (T == RLP_Timeout1_Limit || T == 0) {
 					Poll_xchg = _idle;
 					if (SABM_Count > RLP_N2)
 						NextState = RLP_S8;
@@ -1388,7 +1388,7 @@ void MAIN_STATE_MACHINE(gn_rlp_f96_frame *frame, rlp_f96_header *header)
 				SABM_State = _wait;
 				SABM_Count++;
 				Poll_xchg = _wait;
-				T = 1;
+				RLP_SetTimer(&T);
 			} else
 				RLP_SendF96Frame(RLP_FT_U_NULL, false, false, 0, 0, NULL, false);
 		}
