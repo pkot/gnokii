@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.125  2001-03-06 22:19:14  pkot
+  Revision 1.126  2001-03-07 21:46:12  pkot
+  Fixed writephonebook patch
+
+  Revision 1.125  2001/03/06 22:19:14  pkot
   Cleanups and fixes in gnokii.c:
    - reindenting
    - fixed bug reported by Gabriele Zappi
@@ -907,7 +910,7 @@ int sendsms(int argc, char *argv[])
 
 int savesms(int argc, char *argv[])
 {
-	GSM_SMSMessage SMS, SMSold;
+	GSM_SMSMessage SMS;
 	GSM_Error error;
 	/* The maximum length of an uncompressed concatenated short message is
 	   255 * 153 = 39015 default alphabet characters */
@@ -937,7 +940,7 @@ int savesms(int argc, char *argv[])
 			SMS.Status = GSS_SENTREAD;
 			break;
 		case 'l': /* Specify the location */
-			SMS.Location = SMSold.Location = atoi(optarg);
+			SMS.Location = atoi(optarg);
 			break;
 		case 'i': /* Ask before overwriting */
 			interactive = 1;
@@ -957,7 +960,10 @@ int savesms(int argc, char *argv[])
 	fbusinit(NULL);
 
 	if (interactive) {
-		error = GSM->GetSMSMessage(&SMSold);
+		GSM_SMSMessage aux;
+
+		aux.Location = SMS.Location;
+		error = GSM->GetSMSMessage(&aux);
 		switch (error) {
 		case GE_NONE:
 			fprintf(stderr, _("Message at specified location exists. "));
@@ -2488,7 +2494,6 @@ int writephonebook(int argc, char *args[])
 
 	/* Initialise fbus code */
 	fbusinit(NULL);
-	error = GSM->GetMemoryLocation(&entry);
 
 	Line = OLine;
 
@@ -2594,7 +2599,10 @@ int writephonebook(int argc, char *args[])
 				if (!entry.Empty) {
 					int confirm = -1;
 					char ans[8];
+					GSM_PhonebookEntry aux;
 
+					aux.Location = entry.location;
+					error = GSM->GetMemoryLocation(&aux);
 					fprintf(stdout, _("Location busy. "));
 					while (confirm < 0) {
 						fprintf(stdout, _("Overwrite? (yes/no) "));
