@@ -87,6 +87,7 @@ distclean:	clean
 		include/config.h \
 		include/config.h.in \
 		packaging/RedHat/gnokii.spec \
+		packaging/Slackware/SlackBuild \
 		po/Makefile.in \
 		debian
 	$(RM) `$(FIND) . -name "*~"`

@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.6  2001-11-15 12:15:04  pkot
+  Revision 1.7  2001-11-17 16:44:07  pkot
+  Cleanup. Reading SMS for 6100 series. Not that it has some bugs more and does not support UDH yet
+
+  Revision 1.6  2001/11/15 12:15:04  pkot
   smslib updates. begin work on sms in 6100 series
 
   Revision 1.5  2001/11/15 12:12:34  pkot
@@ -58,6 +61,7 @@ static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x64, IncomingPhoneInfo },
         { 0xd2, IncomingModelInfo },
+	{ 0x14, IncomingSMS },
 	{ 0x03, Incoming0x03 },
 	{ 0x0a, Incoming0x0a },
 	{ 0x17, Incoming0x17 },
@@ -112,7 +116,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	}
 }
 
-static bool LinkOK = true;
+/* static bool LinkOK = true; */
 
 /* Initialise is the only function allowed to 'use' state */
 static GSM_Error Initialise(GSM_Statemachine *state)
@@ -124,20 +128,15 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_6100, sizeof(GSM_Phone));
 
-	dprintf("bt 0\n");
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
-		dprintf("bt 1\n");
 		err = FBUS_Initialise(&(state->Link), state, 0);
 		break;
 	case GCT_Infrared:
-		dprintf("bt 2\n");
 		err = PHONET_Initialise(&(state->Link), state);
 		break;
 	default:
-		dprintf("bt 3\n");
 		return GE_NOTSUPPORTED;
-		break;
 	}
 
 	if (err != GE_NONE) {
@@ -258,7 +257,7 @@ static GSM_Error Incoming0x03(int messagetype, unsigned char *message, int lengt
 			if (message[5] != 0xff) {
 				data->MemoryStatus->Used = (message[16] << 8) + message[17];
 				data->MemoryStatus->Free = ((message[14] << 8) + message[15]) - data->MemoryStatus->Used;
-				dprintf(_("Memory status - location = %d\n"), (message[8] << 8) + message[9]);
+				dprintf("Memory status - location = %d\n", (message[8] << 8) + message[9]);
 				return GE_NONE;
 			} else {
 				dprintf("Unknown error getting mem status\n");
@@ -318,12 +317,12 @@ static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int 
 		dprintf("Received revision %s\n", data->Revision);
 	}
 
-	dprintf(_("Message: Mobile phone identification received:\n"));
-	dprintf(_("   IMEI: %s\n"), data->Imei);
-	dprintf(_("   Model: %s\n"), data->Model);
-	dprintf(_("   Production Code: %s\n"), message + 31);
-	dprintf(_("   HW: %s\n"), message + 39);
-	dprintf(_("   Firmware: %s\n"), message + 44);
+	dprintf("Message: Mobile phone identification received:\n");
+	dprintf("   IMEI: %s\n", data->Imei);
+	dprintf("   Model: %s\n", data->Model);
+	dprintf("   Production Code: %s\n", message + 31);
+	dprintf("   HW: %s\n", message + 39);
+	dprintf("   Firmware: %s\n", message + 44);
 	
 	/* These bytes are probably the source of the "Accessory not connected"
 	   messages on the phone when trying to emulate NCDS... I hope....
@@ -354,7 +353,7 @@ static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int 
 		data->Revision[GSM_MAX_REVISION_LENGTH - 1] = 0;
 	}
 #endif
-	dprintf(_("Phone info:\n%s\n"), message + 4);
+	dprintf("Phone info:\n%s\n", message + 4);
 
 	return GE_NONE;
 }
@@ -406,4 +405,101 @@ static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 
 	if (SM_SendMessage(state, 8, 0x02, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
+}
+
+static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	int i;
+
+	switch (message[3]) {
+	/* save sms succeeded */
+	case 0x05:
+		dprintf("Message stored at %d\n", message[5]);
+		break;
+        /* save sms failed */
+	case 0x06:
+		dprintf("SMS saving failed:\n");
+		switch (message[4]) {
+		case 0x02:
+			dprintf("\tAll locations busy.\n");
+			return GE_MEMORYFULL;
+		case 0x03:
+			dprintf("\tInvalid location!\n");
+			return GE_INVALIDSMSLOCATION;
+		default:
+			dprintf("\tUnknown reason.\n");
+			return GE_UNKNOWN;
+		}
+        /* read sms */
+        case 0x08:
+                for (i = 0; i < length - 2; i ++)
+                        if (isprint(message[i]))
+                                dprintf("[%02x%c]", message[i], message[i]);
+                        else
+                                dprintf("[%02x ]", message[i]);
+                dprintf("\n");
+
+		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
+
+		/* These offsets are 6210/7110 series specific */
+		/* Short Message status */
+		data->SMSMessage->Status = message[4];
+		dprintf("\tStatus: ");
+		switch (data->SMSMessage->Status) {
+		case SMS_Read:
+			dprintf("READ\n");
+			break;
+		case SMS_Unread:
+			dprintf("UNREAD\n");
+			break;
+		case SMS_Sent:
+			dprintf("SENT\n");
+			break;
+		case SMS_Unsent:
+			dprintf("UNSENT\n");
+			break;
+		default:
+			dprintf("UNKNOWN\n");
+			break;
+		}
+
+		DecodePDUSMS(message + 5, data->SMSMessage, length);
+
+                break;
+	/* read sms failed */
+	case 0x09:
+		dprintf("SMS reading failed:\n");
+		switch (message[4]) {
+		case 0x02:
+			dprintf("\tInvalid location!\n");
+			return GE_INVALIDSMSLOCATION;
+		case 0x07:
+			dprintf("\tEmpty SMS location.\n");
+			return GE_EMPTYSMSLOCATION;
+		default:
+			dprintf("\tUnknown reason.\n");
+			return GE_UNKNOWN;
+		}
+	/* delete sms succeeded */
+	case 0x0b:
+		dprintf("Message: SMS deleted successfully.\n");
+		break;
+	/* sms status succeded */
+	case 0x37:
+		dprintf("Message: SMS Status Received\n");
+		dprintf("\tThe number of messages: %d\n", message[10]);
+		dprintf("\tUnread messages: %d\n", message[11]);
+		data->SMSStatus->Unread = message[11];
+		data->SMSStatus->Number = message[10];
+		break;
+	/* sms status failed */
+	case 0x38:
+		dprintf("Message: SMS Status error, probably not authorized by PIN\n");
+		return GE_INTERNALERROR;
+	/* unknown */
+	default:
+		dprintf("Unknown message.\n");
+		return GE_UNKNOWN;
+	}
+	return GE_NONE;
 }

@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.2  2001-11-15 12:15:04  pkot
+  Revision 1.3  2001-11-17 16:44:07  pkot
+  Cleanup. Reading SMS for 6100 series. Not that it has some bugs more and does not support UDH yet
+
+  Revision 1.2  2001/11/15 12:15:04  pkot
   smslib updates. begin work on sms in 6100 series
 
   Revision 1.1  2001/07/09 23:55:36  pkot
@@ -57,6 +60,7 @@ static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error Incoming0x03(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error Incoming0x0a(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error Incoming0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data);

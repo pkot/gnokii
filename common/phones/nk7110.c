@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.20  2001-11-15 12:15:04  pkot
+  Revision 1.21  2001-11-17 16:44:07  pkot
+  Cleanup. Reading SMS for 6100 series. Not that it has some bugs more and does not support UDH yet
+
+  Revision 1.20  2001/11/15 12:15:04  pkot
   smslib updates. begin work on sms in 6100 series
 
   Revision 1.19  2001/11/15 12:12:34  pkot
@@ -243,7 +246,6 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 	while (!connected) {
 		switch (state->Link.ConnectionType) {
 		case GCT_Serial:
-			dprintf("try: %d\n", try);
 			if (try > 1) return GE_NOTSUPPORTED;
 			err = FBUS_Initialise(&(state->Link), state, 1 - try);
 			break;
@@ -677,7 +679,6 @@ static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int
 /* handle messages of type 0x14 (SMS Handling, Folders, Logos.. */
 static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-        int off, offset;
         int i, j;
 
         switch (message[3]) {
