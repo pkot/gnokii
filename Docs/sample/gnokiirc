@@ -4,9 +4,12 @@
 
 [global]
 
-# Set port to the physical serial port used to connect to your phone
+# Set port to the physical serial port used to connect to your phone.
+# Linux version is:
 port = /dev/ttyS0
-
+# For MacOSX you will need something like:
+# port = /dev/cu.USA28X1P1.1
+ 
 # Set model to the model number of your phone
 model = 6110
 
