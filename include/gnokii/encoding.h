@@ -36,9 +36,9 @@
 extern void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len);
 extern void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len);
 
-int Unpack7BitCharacters(int offset, int in_length, int out_length,
+int Unpack7BitCharacters(unsigned int offset, unsigned int in_length, unsigned int out_length,
 			unsigned char *input, unsigned char *output);
-int Pack7BitCharacters(int offset, unsigned char *input, unsigned char *output);
+int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output);
 
 void DecodeUnicode (unsigned char* dest, const unsigned char* src, int len);
 void EncodeUnicode (unsigned char* dest, const unsigned char* src, int len);

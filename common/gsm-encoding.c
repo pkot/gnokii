@@ -112,7 +112,7 @@ static unsigned char DecodeWithUnicodeAlphabet(wchar_t value)
 
 #define ByteMask ((1 << Bits) - 1)
 
-int Unpack7BitCharacters(int offset, int in_length, int out_length,
+int Unpack7BitCharacters(unsigned int offset, unsigned int in_length, unsigned int out_length,
 			 unsigned char *input, unsigned char *output)
 {
 	unsigned char *OUT_NUM = output; /* Current pointer to the output buffer */
@@ -150,7 +150,7 @@ int Unpack7BitCharacters(int offset, int in_length, int out_length,
 	return OUT_NUM - output;
 }
 
-int Pack7BitCharacters(int offset, unsigned char *input, unsigned char *output)
+int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char *output)
 {
 
 	unsigned char *OUT_NUM = output; /* Current pointer to the output buffer */

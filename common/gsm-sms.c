@@ -575,7 +575,7 @@ static GSM_Error DecodeSMSHeader(GSM_SMSMessage *rawsms, GSM_API_SMS *sms, SMS_U
  */
 static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 {
-	int size;
+	unsigned int size = 0;
 	GSM_Error error;
 
 	error = DecodeSMSHeader(rawsms, sms, &sms->UDH);
