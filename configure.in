@@ -402,7 +402,6 @@ AC_CHECK_FUNC(grantpt,
    [ AC_TRY_RUN([
 #define  _XOPEN_SOURCE 500
 
-#include <features.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -436,7 +435,8 @@ int main()
    ]
 )
 
-AC_TRY_COMPILE( [#include <sys/types.h>
+AC_TRY_COMPILE( [#define _XOPEN_SOURCE 500
+		 #include <sys/types.h>
 		 #include <sys/socket.h>],
 		[struct msghdr msg; msg.msg_control;],
 		AC_DEFINE(HAVE_MSGHDR_MSG_CONTROL)

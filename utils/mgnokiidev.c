@@ -32,9 +32,11 @@
 
 */
 
+/* See common/data/virtmodem.c for explanation */
+#define _XOPEN_SOURCE 500
+
 #include "misc.h"
 
-#define __USE_XOPEN
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
