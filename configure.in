@@ -112,7 +112,8 @@ fi
 dnl FIXME: do we really test here if libc contains this function?
 if test "x$PTHREAD_LIBS" = xerror; then
    AC_CHECK_FUNC(pthread_attr_init, PTHREAD_LIBS="",
-      AC_MSG_ERROR(not found library: pthread !!!))
+      [AC_MSG_WARN(not found library: pthread!!!)
+       AC_MSG_WARN(disabling xgnokii and smsd)])
 fi
 
 AC_CACHE_CHECK(for tm_gmtoff in struct tm, ac_cv_have_tm_gmtoff,
@@ -255,28 +256,34 @@ else
             [ -L$x_libraries -lX11 ]
       )
 
-      AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
-      if test "$GTK_CONFIG" = no; then
+      if test "x$PTHREAD_LIBS" = xerror; then
          x_support="no"
          GTK_CFLAGS=""
          GTK_LIBS=""
-         AC_MSG_WARN(Cannot find gtk-config.)
-         AC_MSG_WARN(Disabling xgnokii.)
       else
-         GTK_CFLAGS=`$GTK_CONFIG --cflags`
-         GTK_LIBS=`$GTK_CONFIG --libs`
-         x_support="yes"   
+         AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
+         if test "$GTK_CONFIG" = no; then
+            x_support="no"
+            GTK_CFLAGS=""
+            GTK_LIBS=""
+            AC_MSG_WARN(Cannot find gtk-config.)
+            AC_MSG_WARN(Disabling xgnokii.)
+         else
+            GTK_CFLAGS=`$GTK_CONFIG --cflags`
+            GTK_LIBS=`$GTK_CONFIG --libs`
+            x_support="yes"   
 
-         XGNOKIIDIR='${prefix}'
-         AC_ARG_WITH(xgnokiidir,
-            [  --with-xgnokiidir=DIR   specifies the base for xgnokii],
-            [ if test x$withval = xyes; then 
-                 AC_MSG_WARN(Usage is: --with-xgnokiilib=DIR)
-              else
-                 XGNOKIIDIR="$withval"
-              fi
-            ]
-         )
+            XGNOKIIDIR='${prefix}'
+            AC_ARG_WITH(xgnokiidir,
+               [  --with-xgnokiidir=DIR   specifies the base for xgnokii],
+               [ if test x$withval = xyes; then 
+                    AC_MSG_WARN(Usage is: --with-xgnokiilib=DIR)
+                 else
+                    XGNOKIIDIR="$withval"
+                 fi
+               ]
+            )
+         fi
       fi
    fi
 fi

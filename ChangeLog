@@ -1,8 +1,15 @@
+0.5.0rc (not released yet)
+=======
+ * build system updates
+    o don't exit configure when no pthread library is present
+      in the system                                      (Pawel Kot)
+
 0.5.0pre11
 ==========
  * let configure check for <sys/file.h>                  (Pawel Kot)
  * more header cleanups: use #include <gnokii.h> instead of
    #include <gnokii/*.h>                                 (Pawel Kot)
+
 0.5.0pre10
 ==========
  * general updates
