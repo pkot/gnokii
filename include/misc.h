@@ -13,7 +13,11 @@
   Header file for miscellaneous defines, typedefs etc.
 
   $Log$
-  Revision 1.24  2001-06-28 00:28:46  pkot
+  Revision 1.25  2001-07-03 15:27:14  pkot
+  AT commands for SMS handling support (Tamas Bondar)
+  Small at-emulator code cleanup (me)
+
+  Revision 1.24  2001/06/28 00:28:46  pkot
   Small docs updates (Pawel Kot)
 
 
@@ -43,6 +47,13 @@
 #define dprintf(a...) do { } while (0)
 #else
 #define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
+#endif
+
+/* Use gsprintf instead of sprintf and sprintf */
+#ifdef HAVE_SNPRINTF
+# define gsprintf(a, b, c...) snprintf(a, b, c)
+#else
+# define gsprintf(a, b, c...) sprintf(a, c)
 #endif
 
 /* Get rid of long defines. Use #if __unices__ */

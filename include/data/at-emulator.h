@@ -13,7 +13,11 @@
   Header file for AT emulator code.
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:11  chris
+  Revision 1.2  2001-07-03 15:27:24  pkot
+  AT commands for SMS handling support (Tamas Bondar)
+  Small at-emulator code cleanup (me)
+
+  Revision 1.1  2001/02/21 19:57:11  chris
   More fiddling with the directory layout
 
 
@@ -90,6 +94,11 @@ bool	ATEM_Initialised;
 
 
 #define	MAX_MODEM_REGISTERS	20
+
+/* Message format definitions */
+#define PDU_MODE      0
+#define TEXT_MODE     1
+#define INTERACT_MODE 2
 
 #endif	/* __data_at_emulator_c */
 
