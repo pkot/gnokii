@@ -41,11 +41,7 @@
 #endif
 
 #ifdef HAVE_STDARG_H
-#  include <stdarg.h>
-#endif
-
-#ifdef HAVE_SYS_SOCKET_H
-#  include <sys/socket.h>
+#include <stdarg.h>
 #endif
 
 
