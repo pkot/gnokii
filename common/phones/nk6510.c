@@ -103,8 +103,11 @@ static GSM_Error P6510_PollSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetPicture(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_SaveSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_CreateSMSFolder(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_DeleteSMSFolder(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
@@ -155,6 +158,7 @@ static GSM_Error P6510_IncomingSecurity(int messagetype, unsigned char *message,
 #endif
 
 
+static int EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *req);
 static int GetMemoryType(GSM_MemoryType memory_type);
 
 /* Some globals */
@@ -306,6 +310,8 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 	case GOP_CallDivert:
 		return P6510_CallDivert(data, state);
 		*/
+	case GOP_SaveSMS:
+		return P6510_SaveSMS(data, state);
 	case GOP_SendSMS:
 		return P6510_SendSMS(data, state);
 	case GOP_GetSMSFolderStatus:
@@ -318,6 +324,10 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return GE_NONE;
 	case GOP_GetSMSFolders:
 		return P6510_GetSMSFolders(data, state);
+	case GOP_CreateSMSFolder:
+		return P6510_CreateSMSFolder(data, state);
+	case GOP_DeleteSMSFolder:
+		return P6510_DeleteSMSFolder(data, state);
 	case GOP_GetProfile:
 		return P6510_GetProfile(data, state);
 	case GOP_SetProfile:
@@ -651,6 +661,25 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 	int i, j, status;
 
 	switch (message[3]) {
+	/* savesms */
+	case 0x01:
+		switch (message[4]) {
+		case 0x00:
+			dprintf("SMS successfully saved\n");
+			dprintf("Saved in folder %i at location %i\n", message[8], (message[6] << 8) | message[7]);
+			data->RawSMS->Number = (message[6] << 8) | message[7];
+			break;
+		case 0x02:
+			printf("SMS saving failed: Invalid location\n");
+			return GE_INVALIDLOCATION;
+		case 0x05:
+			printf("SMS saving failed: Incorrect folder\n");
+			return GE_INVALIDMEMORYTYPE;
+		default:
+			dprintf("ERROR: unknown (%02x)\n",message[4]);
+			return GE_UNHANDLEDFRAME;
+		}
+		break;
 	/* getsms */
 	case 0x03:
 		dprintf("Trying to get message # %i in folder # %i\n", message[9], message[7]);
@@ -667,27 +696,23 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		data->RawSMS->MemoryType = message[7];
 
 		break;
-
-	/* error? the error codes are taken from 6100 sources */
-	case 0x90:
-		dprintf("SMS reading failed:\n");
-		switch (message[4]) {
-		case 0x02:
-			dprintf("\tInvalid location!\n");
-			return GE_INVALIDLOCATION;
-		case 0x07:
-			dprintf("\tEmpty SMS location.\n");
-			return GE_EMPTYLOCATION;
-		default:
-			dprintf("\tUnknown reason.\n");
-			return GE_UNHANDLEDFRAME;
-		}
-
 	/* delete sms */
 	case 0x05:
-		dprintf("SMS deleted\n");
+		switch (message[4]) {
+		case 0x00:
+			dprintf("SMS successfully deleted\n");
+			break;
+		case 0x02:
+			printf("SMS deleting failed: Invalid location?\n");
+			return GE_INVALIDLOCATION;
+		case 0x05:
+			printf("SMS saving failed: Incorrect folder\n");
+			return GE_INVALIDLOCATION;
+		default:
+			dprintf("ERROR: unknown %i\n",message[4]);
+			return GE_UNHANDLEDFRAME;
+		}
 		break;
-
 	/* delete sms failed */
 	case 0x06:
 		switch (message[4]) {
@@ -737,7 +762,26 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 		data->RawSMS->Status = message[13];
 
 		break;
+	/* create folder */
+	case 0x11:
+		dprintf("Create SMS folder status received..\n");
+		if (!data->SMSFolder) return GE_INTERNALERROR;
+		memset(data->SMSFolder, 0, sizeof(SMS_Folder));
 
+		switch (message[4]) {
+		case 0x00:
+			dprintf("SMS Folder successfully created!\n");
+			data->SMSFolder->FolderID = message[8];
+			DecodeUnicode(data->SMSFolder->Name, message + 10, length - 11);
+			dprintf("   Folder ID: %i\n", data->SMSFolder->FolderID);
+			dprintf("   Name: %s\n", data->SMSFolder->Name);
+			break;
+		default:
+			dprintf("Failed to create SMS Folder! Reason unknown (%02x)!\n", message[4]);
+			return GE_UNKNOWN;
+			break;
+		}
+		break;
 	/* getfolders */
 	case 0x13:
 		if (!data->SMSFolderList) return GE_INTERNALERROR;
@@ -758,7 +802,28 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
 		}
 		break;
-
+	/* delete folder */
+	case 0x15:
+		switch (message[4]) {
+		case 0x00:
+			dprintf("SMS Folder successfully deleted!\n");
+			break;
+		case 0x68:
+			dprintf("SMS Folder could not be deleted! Not existant?\n");
+			return GE_INVALIDLOCATION;
+			break;
+		case 0x6b:
+			dprintf("SMS Folder could not be deleted! Not empty?\n");
+			return GE_FAILED;
+			break;
+		default:
+			dprintf("SMS Folder could not be deleted! Reason unknown (%02x)\n", message[4]);
+			return GE_FAILED;
+			break;
+		}
+		break;
+	case 0x17:
+		break;
 	/* get list of SMS pictures */
 	case 0x97:
 		dprintf("Getting list of SMS pictures...\n");
@@ -817,6 +882,36 @@ static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Getting SMS Folders...\n");
 	if (SM_SendMessage(state, 6, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_FOLDER);
+}
+
+static GSM_Error P6510_DeleteSMSFolder(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x14, 
+			       0x06, /* Folder ID */
+			       0x00};
+
+	dprintf("Deleting SMS Folder...\n");
+	req[4] = data->SMSFolder->FolderID + 5;
+	if (req[4] < 6) return GE_INVALIDMEMORYTYPE;
+
+	if (SM_SendMessage(state, 6, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_FOLDER);
+}
+
+static GSM_Error P6510_CreateSMSFolder(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[50] = {FBUS_FRAME_HEADER, 0x10, 
+				 0x01, 0x00, 0x01,
+				 0x00, /* length */
+				 0x00, 0x00 };
+
+	dprintf("Creating SMS Folder...\n");
+	
+	EncodeUnicode(req + 10, data->SMSFolder->Name, strlen(data->SMSFolder->Name));
+	req[7] = strlen(data->SMSFolder->Name) * 2 + 6;
+
+	if (SM_SendMessage(state, req[7] + 6, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
@@ -1037,6 +1132,80 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
+static GSM_Error P6510_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = { FBUS_FRAME_HEADER, 0x00,
+				   0x02,			/* 1 = SIM, 2 = ME 	*/
+				   0x02,			/* Folder   		*/
+				   0x00, 0x00,			/* Location 		*/
+				   0x03 };			/* SMS state 		*/
+#if 0
+	unsigned char req2[200] = { FBUS_FRAME_HEADER, 0x16,
+				    0x02,			/* 1 = SIM, 2 = ME 	*/
+				    0x02,			/* Folder   		*/
+				    0x00, 0x01};		/* Location 		*/
+	unsigned char desc[10];
+#endif
+	GSM_Error error = GE_NONE;
+	int len = 9;
+	unsigned char ans[5];
+	/* int i; */
+
+	dprintf("Saving sms\n");
+	if (data->RawSMS->MemoryType == GMT_IN && data->RawSMS->Type == SMS_Submit)
+		return GE_INVALIDMEMORYTYPE;
+	if (data->RawSMS->MemoryType != GMT_IN && 
+	    data->RawSMS->Type == SMS_Deliver && 
+	    data->RawSMS->Status != SMS_Sent)
+		return GE_INVALIDMEMORYTYPE;
+	if (data->RawSMS->MemoryType == GMT_TE ||
+	    data->RawSMS->MemoryType == GMT_SM ||
+	    data->RawSMS->MemoryType == GMT_ME)
+		return GE_INVALIDMEMORYTYPE;
+
+	req[5] = GetMemoryType(data->RawSMS->MemoryType);
+
+	req[6] = data->RawSMS->Number / 256;
+	req[7] = data->RawSMS->Number % 256;
+
+	if (data->RawSMS->Type == SMS_Submit) req[8] = 0x07;
+	if (data->RawSMS->Status == SMS_Sent) req[8] -= 2;
+
+	memset(req + 15, 0x00, sizeof(req) - 15);
+
+	len += EncodeSMS(data, state, req + 9);
+	/*
+	for (i = 0; i < len; i++) dprintf("%02x ", req[i]);
+	dprintf("\n");
+	*/
+	fprintf(stdout, "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
+			 "It may have to be sent to Nokia Service if something fails!\n"
+			 "Do you really want to continue? (yes/no) ");
+	GetLine(stdin, ans, 4);
+	if (strcmp(ans, "yes")) return GE_USERCANCELED;
+
+	if (SM_SendMessage(state, len, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, P6510_MSG_FOLDER);
+#if 0
+	if (error == GE_NONE) {
+		req2[5] = GetMemoryType(data->RawSMS->MemoryType);
+		if (req2[5] == 0x05) req2[5] = 0x03;
+		req2[6] = data->RawSMS->Number / 256;
+		req2[7] = data->RawSMS->Number % 256;
+
+		len = 8;
+		memcpy(req2 + len, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 16);
+		len += 16;
+
+		req2[len++] = 0;
+		req2[len++] = 0;
+		if (SM_SendMessage(state, len, P6510_MSG_FOLDER, req2) != GE_NONE) return GE_NOTREADY;
+		return SM_Block(state, data, P6510_MSG_FOLDER);
+	}
+#endif
+	return error;
+}
+
 
 /****************/
 /* SMS HANDLING */
@@ -1084,14 +1253,12 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 					if (message[offset + 4] % 2) message[offset + 4]++;
 					message[offset + 4] = message[offset + 4] / 2 + 1;
 					snprintf(data->MessageCenter->Recipient.Number,
-						 sizeof(data->MessageCenter->Recipient.Number),
-						 "%s", GetBCDNumber(message + offset + 4));
+						 MAX_NUMBER_LEN + 1, "%s", GetBCDNumber(message + offset + 4));
 					data->MessageCenter->Recipient.Type = message[offset + 5];
 					break;
 				case 0x02: /* SMSC number */
 					snprintf(data->MessageCenter->SMSC.Number,
-						 sizeof(data->MessageCenter->SMSC.Number),
-						 "%s", GetBCDNumber(message + offset + 4));
+						 MAX_NUMBER_LEN + 1, "%s", GetBCDNumber(message + offset + 4));
 					data->MessageCenter->SMSC.Type = message[offset + 5];
 					break;
 				default:
@@ -1195,82 +1362,18 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
 				  0x00, 0x00, 0x00, 0x55, 0x55}; /* What's this? */
 	GSM_Error error;
-	unsigned int pos, len;
+	unsigned int pos;
 
 	memset(req + 9, 0, 244);
-	req[9] = 0x01; /* one big block */
-	req[10] = 0x02; /* message type: submit */
-	req[11] = 46 - 9 + data->RawSMS->UserDataLength;
-	/*        req[11] is supposed to be the length of the whole message 
-		  starting from req[10], which is the message type */
+	pos = EncodeSMS(data, state, req + 9);
 
-	req[12] = 0x01; /* SMS Submit */
-	if (data->RawSMS->ReplyViaSameSMSC)  req[12] |= 0x80;
-	if (data->RawSMS->RejectDuplicates)  req[12] |= 0x04;
-	if (data->RawSMS->Report)            req[12] |= 0x20;
-	if (data->RawSMS->UDHIndicator)      req[12] |= 0x40;
-	if (data->RawSMS->ValidityIndicator) req[12] |= 0x10;
-
-	req[13] = data->RawSMS->Reference;
-	req[14] = data->RawSMS->PID;
-	req[15] = data->RawSMS->DCS;
-	req[16] = 0x00;
-
-	/* Magic. Nokia new ideas: coding SMS in the sequent blocks */
-	req[17] = 0x04; /* total blocks */
-
-	/* FIXME. Do it in the loop */
-
-	/* Block 1. Remote Number */
-	len = data->RawSMS->RemoteNumber[0] + 4;
-	if (len % 2) len++;
-	len /= 2;
-	req[18] = 0x82; /* type: number */
-	req[19] = 0x0c; /* offset to next block starting from start of block (req[18]) */
-	req[20] = 0x01; /* first number field => RemoteNumber */
-	req[21] = len; /* actual data length in this block */
-	memcpy(req + 22, data->RawSMS->RemoteNumber, len);
-
-	/* Block 2. SMSC Number */
-	len = data->RawSMS->MessageCenter[0] + 1;
-	memcpy(req + 30, "\x82\x0c\x02", 3); /* as above 0x02 => MessageCenterNumber */
-	req[33] = len;
-	memcpy(req + 34, data->RawSMS->MessageCenter, len);
-
-	/* Block 3. User Data */
-	req[42] = 0x80; /* type: User Data */
-
-	req[43] = data->RawSMS->UserDataLength + 4; /* same as req[11] but starting from req[42] */
-
-	req[44] = data->RawSMS->UserDataLength;
-	req[45] = data->RawSMS->Length;
-
-	memcpy(req + 46, data->RawSMS->UserData, data->RawSMS->UserDataLength);
-	pos = 46 + data->RawSMS->UserDataLength;
-
-	/* padding */
-	if (req[43] % 8 != 0) {
-		memcpy(req + pos, "\x55\x55\x55\x55\x55\x55\x55\x55", 8 - req[43] % 8);
-		pos += 8 - req[43] % 8;
-		req[43] += 8 - req[43] % 8;
-	}
-
-	/* Block 4. Validity Period */
-	req[pos++] = 0x08; /* type: validity */
-	req[pos++] = 0x04; /* block length */
-	req[pos++] = 0x01; /* data length */
-	req[pos++] = data->RawSMS->Validity[0];
-
-	dprintf("Sending SMS...(%d)\n", pos);
-	if (SM_SendMessage(state, pos, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
+	dprintf("Sending SMS...(%d)\n", pos + 9);
+	if (SM_SendMessage(state, pos + 9, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
 	do {
 		error = SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, state->Link.SMSTimeout);
 	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
 	return error;
 }
-
-
-
 
 /**********************/
 /* PHONEBOOK HANDLING */
@@ -3740,3 +3843,105 @@ static int GetMemoryType(GSM_MemoryType memory_type)
 0x0e / 0x000e
 01 42 00 68 55 01 01 08 00 32 01 55 55 55
 */
+static int EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *req)
+{
+	int pos = 0, udh_length_pos, len;
+
+
+	req[pos++] = 0x01; /* one big block */
+	if (data->RawSMS->Type == SMS_Deliver)
+		req[pos++] = 0x00; /* message type: deliver */
+	else
+		req[pos++] = 0x02; /* message type: submit */
+	
+	req[pos++] = 0x00; /* will be set at the end */
+	/*        is supposed to be the length of the whole message 
+		  starting from req[10], which is the message type */
+
+	if (data->RawSMS->Type == SMS_Deliver) {
+		req[pos++] = 0x04; /* SMS Deliver */
+	} else {
+		req[pos] = 0x01; /* SMS Submit */
+
+		if (data->RawSMS->ReplyViaSameSMSC)  req[pos] |= 0x80;
+		if (data->RawSMS->RejectDuplicates)  req[pos] |= 0x04;
+		if (data->RawSMS->Report)            req[pos] |= 0x20;
+		if (data->RawSMS->UDHIndicator)      req[pos] |= 0x40;
+		if (data->RawSMS->ValidityIndicator) req[pos] |= 0x10;
+		pos++;
+		req[pos++] = data->RawSMS->Reference;
+		req[pos++] = data->RawSMS->PID;
+	}
+
+	req[pos++] = data->RawSMS->DCS;
+	req[pos++] = 0x00;
+	
+	/* FIXME: real date/time */
+	if (data->RawSMS->Type == SMS_Deliver) {
+		memcpy(req + pos, "\x20\x80\x30\x51\x20\x00\x00\x55\x55\x55", 10);
+		pos += 10;
+		req[pos++] = 0x03; /* total blocks */
+	} else {
+		/* Magic. Nokia new ideas: coding SMS in the sequent blocks */
+		req[pos++] = 0x04; /* total blocks */
+	}
+
+	/* FIXME. Do it in the loop */
+
+	/* Block 1. Remote Number */
+	if (data->RawSMS->Type == SMS_Submit && data->RawSMS->Status != SMS_Sent) {
+		memcpy(req + pos, "\x82\x10\x01\x0C\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 16);
+		pos += 16;
+	} else {
+		len = data->RawSMS->RemoteNumber[0] + 4;
+		if (len % 2) len++;
+		len /= 2;
+		req[pos] = 0x82; /* type: number */
+		req[pos + 1] = 0x0c; /* offset to next block starting from start of block (req[18]) */
+		req[pos + 2] = 0x01; /* first number field => RemoteNumber */
+		req[pos + 3] = len; /* actual data length in this block */
+		memcpy(req + pos + 4, data->RawSMS->RemoteNumber, len);
+		pos += 12;
+	}
+
+	/* Block 2. SMSC Number */
+	if (data->RawSMS->Type == SMS_Submit && data->RawSMS->Status != SMS_Sent) {
+		memcpy(req + pos, "\x82\x10\x02\x0C\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 16);
+		pos += 16;
+	} else {
+		len = data->RawSMS->MessageCenter[0] + 1;
+		memcpy(req + pos, "\x82\x0c\x02", 3); /* as above 0x02 => MessageCenterNumber */
+		req[pos + 3] = len;
+		memcpy(req + pos + 4, data->RawSMS->MessageCenter, len);
+		pos += 12;
+	}
+
+	/* Block 3. User Data */
+	req[pos++] = 0x80; /* type: User Data */
+	req[pos++] = data->RawSMS->UserDataLength + 4; /* same as req[11] but starting from req[42] */
+
+	req[pos++] = data->RawSMS->UserDataLength;
+	req[pos++] = data->RawSMS->Length;
+
+	memcpy(req + pos, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+	pos += data->RawSMS->UserDataLength;
+
+	/* padding */
+	udh_length_pos = pos - data->RawSMS->UserDataLength - 3;
+	if (req[udh_length_pos] % 8 != 0) {
+		memcpy(req + pos, "\x55\x55\x55\x55\x55\x55\x55\x55", 8 - req[udh_length_pos] % 8);
+		pos += 8 - req[udh_length_pos] % 8;
+		req[udh_length_pos] += 8 - req[udh_length_pos] % 8;
+	}
+
+	
+	if (data->RawSMS->Type == SMS_Submit) {
+		/* Block 4. Validity Period */
+		req[pos++] = 0x08; /* type: validity */
+		req[pos++] = 0x04; /* block length */
+		req[pos++] = 0x01; /* data length */
+		req[pos++] = data->RawSMS->Validity[0];
+	}
+	req[2] = pos - 1;
+	return pos;
+}
