@@ -20,6 +20,7 @@ include $(TOPDIR)/Makefile.global
 OBJS =	generic.o \
 	nokia.o \
 	nk7110.o \
+	nk6510.o \
 	nk6100.o \
 	nk3110.o \
 	nk2110.o \

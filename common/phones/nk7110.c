@@ -890,7 +890,7 @@ static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
-	if (data->SMSMessage->MemoryType != data->SMSFolder->FolderID) {
+	if ((data->SMSFolder) && (data->SMSMessage->MemoryType != data->SMSFolder->FolderID)) {
 		dprintf("Getting list of SMS folders...\n");
 		if (SM_SendMessage(state, 6, 0x14, req_folders) != GE_NONE) return GE_NOTREADY;
 		error = SM_Block(state, data, 0x14);

@@ -7,7 +7,7 @@
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
   Copyright (C) 2000 Hugh Blemings & Pavel Janík ml.
-  Copytight (C) 2000 Chris Kemp
+  Copyright (C) 2000 Chris Kemp
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 

@@ -1,0 +1,166 @@
+Assembled by
+        Markus Plail <plail@web.de>
+	... and other members of gnokii mailing list
+            and authors of some WWW pages.
+
+Heavily based on nk7110.txt.
+The data provided is for information purposes only. 
+Some of the frames might be hazardous to your phone. Be careful!!! 
+We do not take any responsibility or liability for damages, etc.
+
+NOTE: this information isn't (and can't be) complete.  If you know anything
+about features not listed here or you noticed a bug in this list, please
+notify us via e-mail.  Thank you.
+
+Document describing frames used in
+GSM Nokia 6510 and derivatives (?)
+Correct format is FBUS version 2/Infrared/MBUS version 2
+(see nokia.txt for protocol details):
+
+
+0x2b:
+    s Get IMEI              { 0x00, 0x41 }
+    r Get IMEI              { 0x01, 0x00, 0x01, 0x41, 0x14, 0x00, 0x10, {IMEI(ASCII)}, 0x00 }
+    s get HW&SW version     { 0x07, 0x00, 0x01 }
+    r get HW&SW version     { 0x08, 0x00, 0x01, 0x58, 0x29, 0x00, 0x22, "V " "firmware\n" "firmware date\n"
+                              "model\n" "(c) NMP.", 0x0a, 0x43, 0x00, 0x00, 0x00 }
+
+0x45: PHONEBOOK HANDLING
+    s Get memory status     { 0x03, 0x02, memory type }
+                            where: memory type - see 0x03/0x0107
+    r Get memory status     { 0x04, 0x00, xL, 0x00[2], y1H, y1L, 0x10,
+                                      0x00[2], z?, ymaxH, ymaxL, y2H, y2L,
+                                      0x0d?, xH?, 0x00[2]? }
+                              where y1: location (lowermost)
+                                    y2: no. of locations
+                                    ymax: maximum location no.
+    s Read memory           { 0x07, 0x04, 0x01, 0x00, 0x01, 0x02, MT,
+                                     0x00, 0x00, 0x00, 0x00
+				     yL, yH, 0x00, 0x00}
+
+                            where MT: memory type
+                                     0x01: (256) Dialled numbers
+                                     0x02: (512) Missed calls
+                                     0x03: (768) Received calls
+                                     0x05: (500) telephone phonebook
+                                     0x06: (160) SIM phonebook
+                                     0x07: (10/0)
+                                     0x08: (1/0)
+                                     0x09: (4) voice mailbox
+                                     0x0e: (10) speed dials
+                                     0x10: (5) caller groups
+                                  y: location
+
+    r Read memory           { 0x08, 0x00, 0x01,
+                             code, 0x00, 0x00, z, xH, xL, yH, yL, 0x00[7], 0x03, no.of blocks, { block } * }
+
+                            where if code==0x0f && xH==0x34 - phonebook location not found
+                              y: location
+                              z: generic block size
+                              block: {id, 0, 0, blocksize, block no.,
+                                      {contents}, 0x00}
+                                id: 0x04 pointer to another memory location { 0xff?, yH, yL, xL,0x00[3] }
+                                    0x07 name {len, (unicode)},
+                                    0x08 email
+                                    0x09 postal
+                                    0x0a note {len, (unicode)}
+                                    0x0b number {type, 0x00[3], len, (unicode)}
+                                    0x0c ringtone {ringtone no., 0, 0}
+				    0x13 date for a called list (DC, RC, etc.)
+                                    0x1b caller group graphic {width, height, 0, 0 {bitmap}}
+                                    0x1c caller group graphic on? {(1: yes, 0: no), 0, 0}
+                                    0x1e caller group number {number, 0, 0}
+                                   type: 0x0a: General,
+                                         0x03: Mobile (office ?),
+                                         0x06: Work,
+                                         0x04: Fax,
+                                         0x02: Home (mobile ?)
+    s Set mem location      { 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, z,
+                                      xH, xL, yH, yL, 0x00, 0x00, 0x00,
+                                      no.of blocks, { block }[no.of blocks] }
+    r Set mem location      { 0x0c, 0?, 1?, code, 0?, 0?, z?, 0?, 0?,
+                                      yH, yL, xL }
+                            where code:
+                                    0x3d - wrong entry type
+
+
+0x4f: FOLDER/PICTURE SMS HANDLING
+
+    s Get Picture Image     { 0x0007, location, number[2 bytes], 0x00, 0x64 }
+                              where location: 0x21 (always ?)
+    r Get Picture Image     { 0x0008, 0x07, location, number[2 bytes], 0x07, ??[38],
+                                     width, height, lenH, lenL, {bitmap}}
+                              where location: 0x21 (always ?)
+    s Get SMS Status        { 0x0036, 0x64 }
+    r Get SMS Status        { 0x0037, 0x05/0x03, 0x01, 0x00, 0x00,
+                              a (2 octets), b (2 octets), c (2 octets),
+                              d (2 octets), e (2 octets), 0x00
+                              where:
+                              a - Number of locations in "fixed" memory. These are all
+                                Templates entries in my Nokias 6210 (NPE-3 (c) NMP V05.36
+                                14-11-01, NPE-3 (c) NMP V05.27 01-08-01).
+                                I can't remove any of Templates entries in my phone.
+                              b - Number of used messages in phone memory. These
+                                are messages manually moved from the other folders.
+                                Picture messages are saved here.
+                              c - Number of unread messages in phone memory. Probably
+                                only smart messsages.
+                              d - Number of used messages in SIM memory. These are
+                                either received messages or saved into Outbox/Inbox.
+                                Note that you *can't* save message into this memory
+                                using 'Move' option. Picture messages are not here.
+                              e - Number of unread messages in SIM memory
+
+    s Set Picture Image     { 0x0050, 0x07, location, number[2 bytes], 0x07, ??[38], 
+                                     width, height, lenH, lenL, {bitmap}}
+                              std. size: 72x28
+                              where location: 0x21 (always ?)
+    r Set Picture Image     { 0x0051, location, number[2 bytes], 0x07 }
+                              where location: 0x21 (always ?)
+
+    s List Picture Images   { 0x0096, FolderID, 0x0f, 0x07 }
+                              where: FolderID - see 0x14/0x017B
+    r List Picture Images   { 0x0097, number of pictures[2 bytes], number1[2 bytes], number2[2 bytes], ..., }
+
+    s Get SMS from folder   { 0x02, 0x01|0x02, folderID, location, location, 0x01, 0x00}
+                            where: folderID - see 0x14/0x017B
+			    0x01 : Inbox
+			    0x02 : all others
+
+    r Get SMS from folder   { 0x03, 0x00, 0x03, 0x01, folderID, locationH, locationL, 0x55, 0x55, 0x55,  type, sender number,...}
+
+                            where: folderID - see 0x14/0x017B
+                            where: type = see 0x0f
+
+    s Delete SMS            { 0x010a, folderID, location, location, 0x01 }
+    r Delete SMS            { 0x010b }
+
+    s Get folder status     { 0x0c, folderID, 0x0F, 0x01}
+                            where: folderID - see 0x14/0x017B
+    r Get folder status     { 0x0d, 0x00, 0xa6, number of entries (2 bytes), 
+			    entry1number (2 bytes), entry2number(2 bytes), ..., 0x55[]}
+
+    s Get message info      { 0x0e, 0x01|0x02, folderID, location, location, 0x55, 0x55 }
+    r Get message info      { 0x0f, 0x00, 0x01, 0x00, 0x50, 0x01|0x02, type, 0x00, location, FolderID, status
+
+                            where: type = 0x00 - MT
+                                          0x01 - delivery report
+                                          0x02 - MO
+                                          0x80 - picture message
+                            where: status=0x01 - reveived/read
+					  0x03 - received/unread
+					  0x05 - stored/sent
+					  0x07 - stored/not sent
+
+    s Get folder names      { 0x12, 0x00, 0x00}
+    r Get folder names      { 0x13, 0x00, number of strings, 0x01, 0x28, folderID, length, 0x00, name1, 0x00, 
+			    0x55[40-length(name1)], 01 28, folderID, length, 0x00, name2, 0x00, 0x55[dito] ... }
+                               where: folderID = 0x02 - Inbox
+                                                 0x03 - Outbox
+                                                 0x04 - Archive
+                                            0x05 - Templates
+                                            0x06 - first "My folders"
+                                            0x07 - second "My folders"
+                                            0x08 - third -"-
+                                            and so on
+

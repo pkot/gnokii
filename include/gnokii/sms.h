@@ -245,7 +245,11 @@ typedef enum {                     /* Bits meaning */
 	SMS_Submit_Report   = 0x03, /* 01 1 */
 	SMS_Command         = 0x04, /* 10 0 mark a report */
 	SMS_Status_Report   = 0x05, /* 10 1 Section 9.2.3.1; 3rd digit is to */
-	SMS_Picture         = 0x07  /* Looks like Happy N*kia Engineers (TM) invention */
+	SMS_Picture         = 0x07, /* Looks like Happy N*kia Engineers (TM) invention */
+	SMS_TextTemplate    = 0x08, /* text template necessary for 6510 */
+	SMS_PictureTemplate = 0x09, /* picture template  "" */
+	SMS_OutboxSent      = 0x10  /* outbox sent template "" */
+
 } SMS_MessageType;
 
 typedef enum {
@@ -369,6 +373,7 @@ typedef struct {
 	/* Other fields */
 	SMS_MemoryType MemoryType;                     /* memoryType (for 6210/7110: folder indicator */
 	SMS_MessageStatus Status;                      /* Status of the message: sent/read or unsent/unread */
+	int Verify;				 /* Should we verify reading of messages? (only 6210 at the moment */
 
 //	SMS_CommandType Command;                       /* Command Type - 8 bits (9.2.3.19); FIXME: use it!!!! */
 //	unsigned char Parameter[???];                  /* Parameter Indicator (9.2.3.27); FIXME: how to use it??? */
@@ -436,6 +441,8 @@ typedef struct {
 	SMSMessage_Layout Submit;
 	SMSMessage_Layout DeliveryReport;
 	SMSMessage_Layout Picture;
+	SMSMessage_Layout TextTemplate;
+	SMSMessage_Layout PictureTemplate;
 } SMSMessage_PhoneLayout;
 
 extern SMSMessage_PhoneLayout layout;

@@ -949,7 +949,6 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 			case 0x1581:
 				dprintf("Ringtone\n");
 				SMS->UDH[nr].Type = SMS_Ringtone;
-
 				break;
 			case 0x1582:
 				dprintf("Operator Logo\n");
@@ -1022,6 +1021,14 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 	case SMS_Picture:
 		llayout = layout.Picture;
 		dprintf("Picture Message:\n");
+		break;
+	case SMS_PictureTemplate:
+		llayout = layout.PictureTemplate;
+		dprintf("Picture Template:\n");
+		break;
+	case SMS_TextTemplate:
+		llayout = layout.TextTemplate;
+		dprintf("Text Template:\n");
 		break;
 	default:
 		dprintf("Not supported message type: %d\n", SMS->Type);
@@ -1110,23 +1117,44 @@ static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int M
 	case SMS_Delivery_Report:
 		if (llayout.UserData > -1) SMSStatus(message[llayout.UserData], SMS);
 		break;
+	case SMS_PictureTemplate:	
 	case SMS_Picture:
 		/* This is incredible. Nokia violates it's own format in 6210 */
 		/* Indicate that it is Multipart Message. Remove it if not needed */
-		SMS->UDH_No = 1;
-		SMS->UDH[0].Type = SMS_MultipartMessage;
-		/* First part is a Picture */
-		SMS->UserData[0].Type = SMS_BitmapData;
-		GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
-		GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
-		size = MessageLength - llayout.UserData - 4 - SMS->UserData[0].u.Bitmap.size;
-		SMS->Length = message[llayout.UserData + 4 + SMS->UserData[0].u.Bitmap.size];
-		/* Second part is a text */
-		SMS->UserData[1].Type = SMS_PlainText;
-		DecodeData(message + llayout.UserData + 5 + SMS->UserData[0].u.Bitmap.size,
-			   (unsigned char *)&(SMS->UserData[1].u.Text),
-			   SMS->Length, size, 0, SMS->DCS);
-		SMS->UserData[1].u.Text[SMS->Length] = 0;
+		if ((message[llayout.UserData] == 0x48) && (message[llayout.UserData + 1] == 0x1c)) {
+			SMS->UDH_No = 1;
+			SMS->UDH[0].Type = SMS_MultipartMessage;
+			/* First part is a Picture */
+			SMS->UserData[0].Type = SMS_BitmapData;
+			GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
+			GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
+			size = MessageLength - llayout.UserData - 4 - SMS->UserData[0].u.Bitmap.size;
+			SMS->Length = message[llayout.UserData + 4 + SMS->UserData[0].u.Bitmap.size];
+			/* Second part is a text */
+			SMS->UserData[1].Type = SMS_PlainText;
+			DecodeData(message + llayout.UserData + 5 + SMS->UserData[0].u.Bitmap.size,
+				   (unsigned char *)&(SMS->UserData[1].u.Text),
+				   SMS->Length, size, 0, SMS->DCS);
+			SMS->UserData[1].u.Text[SMS->Length] = 0;
+		} else {
+			/* First part is a text */
+			SMS->UDH_No = 1;
+			SMS->UserData[1].Type = SMS_PlainText;
+			size = MessageLength - llayout.UserData - 4 - (72 * 28 / 8);
+			SMS->Length = message[llayout.UserData];
+			dprintf("SMS length: %i, size: %i \n", SMS->Length, size);
+			DecodeData(message + llayout.UserData + 1,
+				   (unsigned char *)&(SMS->UserData[1].u.Text),
+				   SMS->Length, size, 0, SMS->DCS);
+			SMS->UserData[1].u.Text[SMS->Length] = 0;
+
+			SMS->UDH[0].Type = SMS_MultipartMessage;
+			/* First part is a Picture */
+			SMS->UserData[0].Type = SMS_BitmapData;
+			dprintf("should be 169: %i\n", llayout.UserData + size);
+			GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData + size, NULL, &SMS->UserData[0].u.Bitmap);
+			GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
+		}
 		break;
 	default:
 		size = MessageLength -
@@ -1402,7 +1430,7 @@ GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_fold
 		tmp_folder.FolderID = i;	/* so we don't need to do a modulo 8 each time */
 		
 		dprintf("GetFolderChanges: Reading unread messages for folder #%i\n", i);	/* Only for INBOX */
-		if (i==0) if ((error = GetUnreadMessages(data, state, tmp_folder)) != GE_NONE) return error; 
+		if (i == 0) if ((error = GetUnreadMessages(data, state, tmp_folder)) != GE_NONE) return error; 
 		
 		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->SMSFolder->number, i);
 		if ((error = GetReadMessages(data, tmp_folder)) != GE_NONE) return error;

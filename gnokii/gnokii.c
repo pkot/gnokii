@@ -869,6 +869,7 @@ static int getsms(int argc, char *argv[])
 	for (count = start_message; count <= end_message; count ++) {
 		int offset = 0;
 
+		message.MemoryType = StrToMemoryType(memory_type_string);
 		message.Number = count;
 		data.SMSMessage = &message;
 		dprintf("MemoryType (gnokii.c) : %i\n", message.MemoryType);
