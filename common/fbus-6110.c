@@ -99,8 +99,8 @@ unsigned char GSM_Default_Alphabet[] = {
   '@',  0xa3, '$',  0xa5, 0xe8, 0xe9, 0xf9, 0xec, 
   0xf2, 0xc7, '\n', 0xd8, 0xf8, '\r', 0xc5, 0xe5,
   '?',  '_',  '?',  '?',  '?',  '?',  '?',  '?',
-  '?',  '?',  '?',  ' ',  0xc6, 0xe6, 0xdf, 0xc9,
-  ' ',  '!',  '\"', '#',  '?',  '%',  '&',  '\'',
+  '?',  '?',  '?',  '?',  0xc6, 0xe6, 0xdf, 0xc9,
+  ' ',  '!',  '\"', '#',  0xa4,  '%',  '&',  '\'',
   '(',  ')',  '*',  '+',  ',',  '-',  '.',  '/',
   '0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',
   '8',  '9',  ':',  ';',  '<',  '=',  '>',  '?',
@@ -204,7 +204,7 @@ GSM_Error FB61_Initialise(char *port_device, bool enable_monitoring)
 
 /* This function send the status request to the phone. */
 
-GSM_Error FB61_TX_SendStatusRequest()
+GSM_Error FB61_TX_SendStatusRequest(void)
 {
 
   /* The status request is of the type 0x04. It's subtype is 0x01. If you have
@@ -981,7 +981,7 @@ GSM_Error FB61_SendSMSMessage(char *message_centre, char *destination, char *tex
   return (GE_NONE);
 }
 
-void FB61_DumpSerial()
+void FB61_DumpSerial(void)
 {
 
   unsigned int Flags=0;
@@ -1096,7 +1096,7 @@ bool FB61_OpenSerial(void)
   tcflush(PortFD, TCIFLUSH);
   tcsetattr(PortFD, TCSANOW, &new_termios);
 
-  FB61_SetFBUS(PortFD);
+  FB61_SetFBUS();
 
   return (true);
 }
@@ -1320,7 +1320,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     break;
 
-    /* General phone control */
+    /* SMS handling */
 
   case 0x02:
 
