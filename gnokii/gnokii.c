@@ -640,7 +640,7 @@ void sendoplogo(char *argv[])
 {
 
   char *NetworkCode=(char *)malloc(10);
-  unsigned char *logo=(unsigned char *)malloc(256);
+  unsigned char *logo=(unsigned char *)calloc(1,256);
   int width, height;
 
   if (argv[2] && !ReadBitmapFile(argv[2], NetworkCode, logo, &width, &height)) {
@@ -664,7 +664,7 @@ void sendoplogo(char *argv[])
 void sendclicon(char *argv[])
 {
 
-  unsigned char *logo=(unsigned char *)malloc(256);
+  unsigned char *logo=(unsigned char *)calloc(1,256);
   int width, height;
 
   if (argv[2] && !ReadBitmapFile(argv[2], NULL, logo, &width, &height)) {
