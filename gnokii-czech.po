@@ -32,7 +32,7 @@ msgstr "   Kapacita baterie: %d\n"
 
 #: gnokii.c:1585
 msgid "   Calendar note deleted.\n"
-msgstr ""
+msgstr "   Poznámka v kalendáøi byla smazána.\n"
 
 #: fbus-6110.c:3217
 msgid "   CellID: %s\n"
@@ -52,7 +52,7 @@ msgstr "   Datum: %s\n"
 
 #: fbus-6110.c:3714
 msgid "   Date: %s GMT"
-msgstr ""
+msgstr "   Datum: %s GMT"
 
 #: fbus-6110.c:4016
 msgid "   Empty SMS location.\n"
@@ -76,7 +76,7 @@ msgstr "   HW: %s\n"
 
 #: fbus-3810.c:2274
 msgid "   IMEI:     %s\n"
-msgstr ""
+msgstr "   IMEI:     %s\n"
 
 #: fbus-6110.c:4134
 msgid "   IMEI: %s\n"

@@ -118,7 +118,8 @@ typedef enum {
   RLP_S4, /* ABM and Connection Established */
   RLP_S5, /* Disconnect Initiated */
   RLP_S6, /* Pending Reset Request */
-  RLP_S7  /* Pending Reset Indication */
+  RLP_S7, /* Pending Reset Indication */
+  RLP_S8  /* Error */
 } RLP_State;
 
 /* RLP specification defines several states in which variables can be. */

@@ -7,9 +7,9 @@ CFG=gnokii - Win32 Debug
 
 
 # here are some configuration
-MODEL=\"6150\" 
-PORT=\"COM2\" 
-VERSION=\"0.3.1-pre19\"
+MODEL=\"6110\" 
+PORT=\"COM1\" 
+VERSION=\"0.3.1_pre33\"
 # uncomment next line  if you want gnokii debug messages
 DEBUG = /D "DEBUG"
 

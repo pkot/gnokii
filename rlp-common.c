@@ -40,9 +40,43 @@ RLP_State      CurrentState=RLP_S0; /* We start at ADM and Detached */
 RLP_State      NextState;
 
 
+bool RLP_UserEvent(x) {
+
+  bool result=x;
+
+  if ( x == true )
+    x=false;
+
+  return result;
+}
+
 /* State variables - see GSM 04.22, Annex A, section A.1.2 */
 
 RLP_StateVariable UA_State;
+RLP_StateVariable UI_State;
+RLP_StateVariable XID_R_State;
+RLP_StateVariable XID_C_State;
+RLP_StateVariable TEST_R_State;
+
+RLP_StateVariable SABM_State;
+int SABM_Count;
+
+/* Attach immediately. */
+bool Attach_Req=true;
+
+/* Connection request. */
+bool Conn_Req=false;
+
+bool Poll_xchg;
+
+int T;
+
+
+
+
+
+bool UA_FBit=true;
+
 
 /* RLP Constants. */
 
@@ -51,6 +85,7 @@ u8 RLP_M = 62; /* Number of different sequence numbers (modulus) */
 u8 RLP_N2 = 15; /* Maximum number of retransmisions. GSM spec says 6 here, but
                    Nokia will XID this. */
 
+u8 Timeout1_Limit = 55;
 
 
 /* Previous sequence number. */
@@ -121,7 +156,7 @@ void RLP_SendF96Frame(RLP_FrameTypes FrameType,
      array for the user. */
   if (!OutData) {
 
-    frame.Data[0]=0x1f;
+    frame.Data[0]=0x00; // 0x1f
 
     for (i=1; i<25; i++)
       frame.Data[i]=0;
@@ -648,7 +683,7 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
 
 #ifdef DEBUG
     fprintf(stdout, _("Frame FCS is bad. Ignoring...\n"));
-#endif DEBUG
+#endif
 
   }
 
@@ -661,6 +696,13 @@ void RLP_DisplayF96Frame(RLP_F96Frame *frame)
   return;
 }
 
+/* FIXME: real TEST_Handling - we do not handle TEST yet. */
+
+void TEST_Handling() {
+}
+
+/* FIXME: real XID_handling - this will only answer to XID command. */
+
 bool XID_Handling (RLP_F96Frame *frame, RLP_F96Header *header) {
 
   if (CurrentFrameType == RLPFT_U_XID) {
@@ -668,14 +710,14 @@ bool XID_Handling (RLP_F96Frame *frame, RLP_F96Header *header) {
     u8 Data[25];
     int i;
 
-    fprintf(stdout, "DEBUG: XID received in state 1.\n");
-
+#ifdef DEBUG
     for (i=0; i<25; i++) {
       printf("XID data[%02d]: %02x\n", i, frame->Data[i]);
       Data[i]=frame->Data[i];
     }
-    
-    RLP_SendF96Frame(RLPFT_U_XID, false, false, 0, 0, Data, false);
+#endif
+
+    XID_R_State = _send;
 
     return true;
   }
@@ -683,17 +725,52 @@ bool XID_Handling (RLP_F96Frame *frame, RLP_F96Header *header) {
   return false;
 }
 
-/* FIXME: temporary.  */
+bool Send_TXU(RLP_F96Frame *frame, RLP_F96Header *header) {
 
-#define RLP_UserEvent(x) true
+#ifdef DEBUG
+  //    fprintf(stdout, _("Send_TXU()\n"));
+    //    fprintf(stdout, _("XID_R_State=%d\n"), XID_R_State);
+#endif
+
+  /*
+
+  if (RLP_UserEvent(TEST_R_State)) {
+    RLP_SendF96Frame(RLPFT_U_TEST, false, TEST_R_FBit, 0, 0, TEST_R_Data, false);
+    return true;
+  }
+  else
+
+  */
+
+  if (XID_R_State == _send ) {
+    RLP_SendF96Frame(RLPFT_U_XID, false, true, 0, 0, frame->Data, false);
+    XID_R_State = _idle;
+    return true;
+  }
+
+  /*
+
+  else if (XID_C_State == _send ) && !Poll_xchg ) {
+    RLP_SendF96Frame(RLPFT_U_XID, true, true, 0, 0, XID_C_Data, false);
+    XID_C_State = _wait;
+    T_XID = 1;
+    Poll_xchg = true;
+    return true;
+  } else if (RLP_UserEvent(UI_State)) {
+    RLP_SendF96Frame(RLPFT_U_UI, true, false, 0, 0, NULL, false);
+    return true;
+  }
+
+  */
+
+  return false;
+}
 
 void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 
   switch (CurrentState) {
 
-
     /***** RLP State 0. *****/
-
 
     /* ADM and Detached.
 
@@ -713,24 +790,16 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 
     switch (CurrentFrameType) {
 
-      /* FIXME: Do we really need DISC and SABM handling? */
-
     case RLPFT_U_DISC:
-
       RLP_SendF96Frame(RLPFT_U_DM, false, header->PF, 0, 0, NULL, false);
-
       break;
 
     case RLPFT_U_SABM:
-
       RLP_SendF96Frame(RLPFT_U_DM, false, true, 0, 0, NULL, false);
-
       break;
 
     default:
-
       RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
-
       if (RLP_UserEvent(Attach_Req)) {
 	NextState=RLP_S1;
 	UA_State=_idle;
@@ -739,9 +808,16 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 
     break;
 
-
     /***** RLP State 1. *****/
 
+    /* ADM and Attached.
+
+       The RLP entity is ready to established a connection, either by
+       initiating the connection itself (Conn_Req) or by responding to an
+       incoming connection request (SABM).
+
+       Upon receiving a DISC PDU, the handling of the UA response is
+       initiated. */
 
   case RLP_S1:
 
@@ -749,26 +825,178 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
     fprintf(stdout, _("RLP state 1.\n"));
 #endif
 
-    // FIXME: continue here...
-
     if (!XID_Handling(frame, header)) {
 
-      static FIXMEcounter=0;
+      switch(CurrentFrameType) {
+
+      case RLPFT_U_TEST:
+	TEST_Handling();
+	break;
+
+      case RLPFT_BAD:
+	break;
+
+      case RLPFT_U_SABM:
+	// Conn_Ind=true;
+	NextState=3;
+	break;
+
+      case RLPFT_U_DISC:
+	UA_State=_send;
+	UA_FBit=header->PF;
+	break;
+
+      default:
+	if (RLP_UserEvent(Conn_Req)) {
+	  SABM_State=_send;
+	  SABM_Count=0;
+	  NextState=2;
+	}
+	break;
+      }
+
+      if (!Send_TXU(frame, header)) {
+
+	if (UA_State == _send) {
+	  RLP_SendF96Frame(RLPFT_U_UA, false, UA_FBit, 0, 0, NULL, false);
+	  UA_State=_idle;
+	}
+	else
+	  RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
+      }
+    }
+
+
+    {
+
+      /* This is only used for setting Conn_Req to true. */
+
+      static int FIXMEcounter=0;
 
       FIXMEcounter++;
-      printf("FIXMEcounter: %d\n", FIXMEcounter);
-      if (FIXMEcounter==700)
-	RLP_SendF96Frame(RLPFT_U_SABM, true, true, 0, 0, NULL, false);
-      else
-	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
-
+      printf("FIXMEcounter=%d\n", FIXMEcounter);
+      
+      if (FIXMEcounter==300) {
+	Conn_Req=true;
+      }
     }
+
 
 
     break;
 
+    /***** RLP State 2. *****/
+
+  case RLP_S2:
+
+#ifdef DEBUG
+    fprintf(stdout, _("RLP state 2.\n"));
+#endif
+
+    if (!XID_Handling(frame, header)) {
+
+      switch(CurrentFrameType) {
+
+      case RLPFT_U_TEST:
+	TEST_Handling();
+	break;
+
+      case RLPFT_U_SABM:
+	/*
+	T=0;
+	Conn_Conf=true;
+	UA_State=_send;
+	UA_FBit=true;
+	Init_Link_Vars;
+	NextState=4;
+	*/
+        break;
+
+      case RLPFT_U_DISC:
+	/*
+	T=0;
+	DISC_Ind;
+	UA_State=_send;
+	UA_FBit=header->PF;
+	NextState=RLP_S1;
+	*/
+	break;
+
+      case RLPFT_U_UA:
+#ifdef DEBUG
+    fprintf(stdout, _("UA received in RLP state 2.\n"));
+#endif
+
+	if (SABM_State == _wait && header->PF) {
+	  T=0;
+	  // Conn_Conf=true;
+	  // Init_Link_Vars;
+	  NextState=RLP_S4;
+	}
+	break;
+
+      case RLPFT_U_DM:
+	if (SABM_State == _wait && header->PF) {
+	  Poll_xchg=false;
+	  // Conn_Conf_Neg=true;
+	  NextState=RLP_S1;
+	}
+	break;
+
+      default:
+	if (T == Timeout1_Limit) {
+	  Poll_xchg=false;
+	  if (SABM_Count>RLP_N2)
+	    NextState=RLP_S8;
+	  SABM_State=_send;
+	}
+	break;
+      }
+    }
+
+    if (!Send_TXU(frame, header)) {
+
+      if (SABM_State == _send && Poll_xchg == false) {
+	RLP_SendF96Frame(RLPFT_U_SABM, true, true, 0, 0, NULL, false);
+	SABM_State=_wait;
+	SABM_Count++;
+	Poll_xchg=true;
+	T=1;
+      } else
+	RLP_SendF96Frame(RLPFT_U_NULL, false, false, 0, 0, NULL, false);
+    }
+
+    break;
+
+    /***** RLP State 3. *****/
+
+  case RLP_S3:
+
+#ifdef DEBUG
+    fprintf(stdout, _("RLP state 3.\n"));
+#endif
+
+    break;
+
+    /***** RLP State 4. *****/
+
+  case RLP_S4:
+
+#ifdef DEBUG
+    fprintf(stdout, _("RLP state 4.\n"));
+#endif
+
+    break;
+
+
+
   default:
 
+#ifdef DEBUG
+    fprintf(stdout, _("DEBUG: RLP state %d.\n"), CurrentState);
+#endif
+
+    break;
   }
 
   CurrentState=NextState;
