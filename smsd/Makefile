@@ -6,16 +6,25 @@
 # $Id$
 #
 
+GLIBCFLAGS = glib-config --cflags
+GLIBLDLIBS = glib-config --libs
+
+# Comment out above and uncomment below lines if you want compile smsd
+# with glib2 instead of glib1. This is not well tested so be careful.
+#
+#GLIBCFLAGS = pkg-config --cflags glib-2.0
+#GLIBLDLIBS = pkg-config --libs glib-2.0
+
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 SMSD_MAN=man/smsd.8
 
 CFLAGS += -DMODULES_DIR=\"${libdir}/smsd\" $(PTHREAD_CFLAGS) \
-	  `glib-config --cflags`
+	  $(shell $(GLIBCFLAGS))
 
 LDLIBS += $(PTHREAD_LIBS) \
-	   `glib-config --libs`
+	  $(shell $(GLIBLDLIBS))
 
 LDLIBS += -s -rdynamic -L$(TOPDIR)/common -lgnokii -ldl
 # Some systems, eg. FreeBSD don't have libdl. Use this:
@@ -42,17 +51,17 @@ smsd: $(OBJS) $(TOPDIR)/common/libgnokii.so
 # PostgreSQL support
 libpq.so: smsd.h pq.c
 	gcc -s -shared -o libpq.so $(CFLAGS) -I../include \
-	-I/usr/include/pgsql pq.c `glib-config --libs` -lpq
+	-I/usr/include/pgsql pq.c $(shell $(GLIBLDLIBS)) -lpq
 
 # MySQL support
 libmysql.so: smsd.h mysql.c
 	gcc -s -shared -o libmysql.so $(CFLAGS) -I../include \
-	$(shell mysql_config --cflags) mysql.c `glib-config --libs` $(shell mysql_config --libs)
+	$(shell mysql_config --cflags) mysql.c $(shell $(GLIBLDLIBS)) $(shell mysql_config --libs)
 
 # File support
 libfile.so: smsd.h file.c
 	gcc -s -shared -o libfile.so $(CFLAGS) -I../include \
-        file.c `glib-config --libs`
+        file.c $(shell $(GLIBLDLIBS))
 
 ### End of DB Modules
 
