@@ -79,6 +79,7 @@ static gn_error gnapplet_identify(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_read_phonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_write_phonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_delete_phonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_memory_status(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -136,6 +137,8 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_write_phonebook(data, state);
 	case GN_OP_DeletePhonebook:
 		return gnapplet_delete_phonebook(data, state);
+	case GN_OP_GetMemoryStatus:
+		return gnapplet_memory_status(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -244,7 +247,7 @@ static gn_error gnapplet_read_phonebook(gn_data *data, struct gn_statemachine *s
 
 	pkt_put_uint16(&pkt, GNAPPLET_MSG_PHONEBOOK_READ_REQ);
 	pkt_put_uint16(&pkt, data->phonebook_entry->memory_type);
-	pkt_put_uint16(&pkt, data->phonebook_entry->location);
+	pkt_put_uint32(&pkt, data->phonebook_entry->location);
 
 	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_PHONEBOOK);
 }
@@ -262,7 +265,7 @@ static gn_error gnapplet_write_phonebook(gn_data *data, struct gn_statemachine *
 
 	pkt_put_uint16(&pkt, GNAPPLET_MSG_PHONEBOOK_WRITE_REQ);
 	pkt_put_uint16(&pkt, data->phonebook_entry->memory_type);
-	pkt_put_uint16(&pkt, data->phonebook_entry->location);
+	pkt_put_uint32(&pkt, data->phonebook_entry->location);
 
 	pkt_put_uint16(&pkt, data->phonebook_entry->subentries_count + 2);
 
@@ -293,7 +296,21 @@ static gn_error gnapplet_delete_phonebook(gn_data *data, struct gn_statemachine 
 
 	pkt_put_uint16(&pkt, GNAPPLET_MSG_PHONEBOOK_DELETE_REQ);
 	pkt_put_uint16(&pkt, data->phonebook_entry->memory_type);
-	pkt_put_uint16(&pkt, data->phonebook_entry->location);
+	pkt_put_uint32(&pkt, data->phonebook_entry->location);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_PHONEBOOK);
+}
+
+
+static gn_error gnapplet_memory_status(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->memory_status) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_PHONEBOOK_STATUS_REQ);
+	pkt_put_uint16(&pkt, data->memory_status->memory_type);
 
 	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_PHONEBOOK);
 }
@@ -350,14 +367,24 @@ static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *mess
 
 	case GNAPPLET_MSG_PHONEBOOK_WRITE_RESP:
 		if (!(entry = data->phonebook_entry)) return GN_ERR_INTERNALERROR;
-		data->phonebook_entry->memory_type = pkt_get_uint16(&pkt);
-		data->phonebook_entry->location = pkt_get_uint16(&pkt);
+		if (error != GN_ERR_NONE) return error;
+		entry->memory_type = pkt_get_uint16(&pkt);
+		entry->location = pkt_get_uint32(&pkt);
 		break;
 
 	case GNAPPLET_MSG_PHONEBOOK_DELETE_RESP:
 		if (!(entry = data->phonebook_entry)) return GN_ERR_INTERNALERROR;
-		data->phonebook_entry->memory_type = pkt_get_uint16(&pkt);
-		data->phonebook_entry->location = pkt_get_uint16(&pkt);
+		if (error != GN_ERR_NONE) return error;
+		entry->memory_type = pkt_get_uint16(&pkt);
+		entry->location = pkt_get_uint32(&pkt);
+		break;
+
+	case GNAPPLET_MSG_PHONEBOOK_STATUS_RESP:
+		if (!data->memory_status) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		data->memory_status->memory_type = pkt_get_uint16(&pkt);
+		data->memory_status->used = pkt_get_uint32(&pkt);
+		data->memory_status->free = pkt_get_uint32(&pkt);
 		break;
 
 	default:

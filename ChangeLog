@@ -33,6 +33,7 @@
  * gnapplet series updates
     o gnapplet support added                       (BORBELY Zoltan)
     o minimal phonebook management support         (BORBELY Zoltan)
+    o GetMemoryStatus support added                (BORBELY Zoltan)
 
 0.6.0
 =====
