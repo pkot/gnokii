@@ -30,9 +30,10 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
    make distclean
    cd ..
    tar cfz /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION} --exclude CVS
+   echo "Distribution generated in /tmp/gnokii-${VERSION}.tar.gz"
    tar cfj /tmp/gnokii-${VERSION}.tar.bz2 gnokii-${VERSION} --exclude CVS
+   echo "Distribution generated in /tmp/gnokii-${VERSION}.tar.bz2"
 )
 
 rm -rf /tmp/gnokii-${VERSION}
 
-echo "Distribution generated in /tmp/gnokii-${VERSION}.tar.gz"

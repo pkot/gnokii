@@ -1,3 +1,9 @@
+0.5.8 (not released yet)
+=====
+ * maintainance updates
+    o update make_dist script to reflect tar.bz2 file build
+                                                        (Pawel Kot)
+
 0.5.7
 =====
  * 6110 series updates
