@@ -120,6 +120,7 @@ typedef enum {
 	GOP_SetSpeedDial,
 	GOP_GetDisplayStatus,
 	GOP_PollDisplay,
+	GOP_SaveSMS,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

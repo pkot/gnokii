@@ -580,17 +580,18 @@ static GSM_Error EncodeSMSSubmitHeader(GSM_SMSMessage *SMS, char *frame)
 	}
 
 	/* Validity Period */
-	switch (SMS->Validity.VPF) {
-	case SMS_EnhancedFormat:
-		return GE_NOTSUPPORTED;
-	case SMS_RelativeFormat:
-		frame[llayout.Validity] = SMS->Validity.u.Relative;
-		break;
-	case SMS_AbsoluteFormat:
-		break;
-	default:
-		return GE_SMSWRONGFORMAT;
-		break;
+	if (llayout.Validity > -1) {
+		switch (SMS->Validity.VPF) {
+		case SMS_EnhancedFormat:
+			return GE_NOTSUPPORTED;
+		case SMS_RelativeFormat:
+			frame[llayout.Validity] = SMS->Validity.u.Relative;
+			break;
+		case SMS_AbsoluteFormat:
+			break;
+		default:
+			return GE_SMSWRONGFORMAT;
+		}
 	}
 	return error;
 }
@@ -618,11 +619,12 @@ static GSM_Error EncodeSMSHeader(GSM_SMSMessage *SMS, char *frame)
 /* This function encodes SMS as described in:
    - GSM 03.40 version 6.1.0 Release 1997, section 9
 */
-static int EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num)
+static GSM_Error EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num, int *length)
 {
 	GSM_Error error = GE_NONE;
 	int i, mm = 0;
 
+	*length = 0;
 	switch (SMS->Type) {
 	case SMS_Submit:
 		llayout = layout.Submit;
@@ -667,7 +669,8 @@ static int EncodePDUSMS(GSM_SMSMessage *SMS, char *message, unsigned short num)
 	/* User Data */
 	EncodeData(SMS, message + llayout.DataCodingScheme, message + llayout.UserData + SMS->UDH_Length, mm);
 	message[llayout.Length] = SMS->Length;
-	return SMS->Length + llayout.UserData;
+	*length = SMS->Length + llayout.UserData;
+	return GE_NONE;
 }
 
 GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
@@ -686,13 +689,46 @@ GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	if (count < 1) return GE_SMSWRONGFORMAT;
 
+	memset(&rawdata, 0, sizeof(rawdata));
 	data->RawData = &rawdata;
 	for (i = 0; i < count; i++) {
-		if (!data->RawData->Data) data->RawData->Data = calloc(256, 1);
-		data->RawData->Length = EncodePDUSMS(data->SMSMessage, data->RawData->Data, i);
-		error = SM_Functions(GOP_SendSMS, data, state);
+		data->RawData->Data = calloc(256, 1);
+		error = EncodePDUSMS(data->SMSMessage, data->RawData->Data, i, &data->RawData->Length);
+		if (error == GE_NONE)
+			error = SM_Functions(GOP_SendSMS, data, state);
 		free(data->RawData->Data);
+		if (error != GE_NONE)
+			break;
 	}
+	data->RawData = NULL;
+	return error;
+}
+
+GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Error error = GE_NONE;
+	GSM_RawData rawdata;
+	unsigned short i, count;
+
+	header_offset = layout.SendHeader;
+	count = CountSMSParts(data->SMSMessage);
+
+	memset(&data->SMSMessage->MessageCenter, 0, sizeof(data->SMSMessage->MessageCenter));
+
+	if (count < 1) return GE_SMSWRONGFORMAT;
+
+	memset(&rawdata, 0, sizeof(rawdata));
+	data->RawData = &rawdata;
+	for (i = 0; i < count; i++) {
+		data->RawData->Data = calloc(256, 1);
+		error = EncodePDUSMS(data->SMSMessage, data->RawData->Data, i, &data->RawData->Length);
+		if (error == GE_NONE)
+			error = SM_Functions(GOP_SaveSMS, data, state);
+		free(data->RawData->Data);
+		if (error != GE_NONE)
+			break;
+	}
+	data->RawData = NULL;
 	return error;
 }
 

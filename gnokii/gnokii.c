@@ -504,8 +504,10 @@ static int savesms(int argc, char *argv[])
 	int interactive = 0;
 	char ans[8];
 
+	memset(&SMS, 0, sizeof(GSM_SMSMessage));
+
 	/* Defaults */
-	SMS.Type = SMS_Deliver;
+	SMS.Type = SMS_Submit;
 	SMS.DCS.Type = SMS_GeneralDataCoding;
 	SMS.DCS.u.General.Compressed = false;
 	SMS.DCS.u.General.Alphabet = SMS_DefaultAlphabet;
@@ -584,19 +586,20 @@ static int savesms(int argc, char *argv[])
 
 	}
 
+	SMS.UserData[0].Type = SMS_PlainText;
 	strncpy(SMS.UserData[0].u.Text, message_buffer, chars_read);
 	SMS.UserData[0].u.Text[chars_read] = 0;
 
-/*	if (GSM && GSM->SaveSMSMessage) error = GSM->SaveSMSMessage(&SMS); */
+	data.SMSMessage = &SMS;
+	error = SaveSMS(&data, &State);
 
 	if (error == GE_NONE) {
-		fprintf(stdout, _("Saved!\n"));
+		fprintf(stdout, _("Saved to %d!\n"), SMS.Number);
 	} else {
 		fprintf(stdout, _("Saving failed (error=%d)\n"), error);
 	}
-	sleep(10);
 
-	return 0;
+	return error;
 }
 
 /* Get SMSC number */

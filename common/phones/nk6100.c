@@ -96,7 +96,9 @@ static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBitmap(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state);
@@ -145,10 +147,10 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x13, IncomingCalendar },
 	{ 0x0d, IncomingDisplay },
 	{ 0x02, IncomingSMS1 },
+	{ 0x14, IncomingSMS },
 
 	{ 0x64, IncomingPhoneInfo },
 	{ 0xd2, IncomingModelInfo },
-	{ 0x14, IncomingSMS },
 	{ 0x17, Incoming0x17 },
 	{ 0, NULL}
 };
@@ -212,8 +214,12 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetSMSStatus(data, state);
 	case GOP_GetNetworkInfo:
 		return GetNetworkInfo(data, state);
+	case GOP_SendSMS:
+		return SendSMSMessage(data, state);
 	case GOP_GetSMS:
 		return GetSMSMessage(data, state);
+	case GOP_SaveSMS:
+		return SaveSMSMessage(data, state);
 	case GOP_DeleteSMS:
 		return DeleteSMSMessage(data, state);
 	case GOP_GetDateTime:
@@ -851,12 +857,47 @@ static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x02);
 }
 
+static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
+	int length;
+
+	if (!data->RawData || !data->RawData->Data) return GE_INTERNALERROR;
+	if (data->RawData->Length < 0) return GE_SMSWRONGFORMAT;
+
+	length = data->RawData->Length - 4;
+	if (6 + length > sizeof(req)) return GE_SMSWRONGFORMAT;
+	memcpy(req + 6, data->RawData->Data + 4, length);
+
+	if (SM_SendMessage(state, 6 + length, 0x02, req) != GE_NONE) return GE_NOTREADY;
+	return SM_BlockNoRetry(state, data, 0x02);
+}
+
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	SMS_MessageCenter *smsc;
 	unsigned char *pos;
 
 	switch (message[3]) {
+	/* Message sent */
+	case 0x02:
+		return GE_SMSSENDOK;
+
+	/* Send failed */
+	case 0x03:
+		switch (message[6]) {
+		case 0x02:
+			return GE_SMSSENDFAILED;
+		default:
+			return GE_UNHANDLEDFRAME;
+		}
+		return GE_UNHANDLEDFRAME;
+
+	/* SMS message received */
+	case 0x10:
+		/* FIXME: unsolicited SMS notification */
+		break;
+
 	/* FIXME: unhandled frame, request: Get HW&SW version !!! */
 	case 0x0e:
 		if (length == 4) return GE_NONE;
@@ -985,6 +1026,26 @@ static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x14);
 }
 
+static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x04, 0x05, 0x02, 0x00, 0x02};
+	int length;
+
+	if (!data->RawData || !data->RawData->Data) return GE_INTERNALERROR;
+	if (data->RawData->Length < 0) return GE_SMSWRONGFORMAT;
+
+	length = data->RawData->Length - 4;
+	if (8 + length > sizeof(req)) return GE_SMSWRONGFORMAT;
+
+	if (data->SMSMessage->Status == SMS_Unsent)
+		req[4] |= 0x02;
+	req[6] = data->SMSMessage->Number;
+	memcpy(req + 8, data->RawData->Data + 4, length);
+
+	if (SM_SendMessage(state, 8 + length, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x14);
+}
+
 static GSM_Error DeleteSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x0a, 0x02, 0x00 /* Location */ };
@@ -1003,6 +1064,7 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 	/* save sms succeeded */
 	case 0x05:
 		dprintf("Message stored at %d\n", message[5]);
+		if (data->SMSMessage) data->SMSMessage->Number = message[5];
 		break;
 
 	/* save sms failed */
@@ -1017,7 +1079,7 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 			return GE_INVALIDSMSLOCATION;
 		default:
 			dprintf("\tUnknown reason.\n");
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 
 	/* read sms */
@@ -1055,7 +1117,7 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 			return GE_EMPTYSMSLOCATION;
 		default:
 			dprintf("\tUnknown reason.\n");
-			return GE_UNKNOWN;
+			return GE_UNHANDLEDFRAME;
 		}
 
 	/* delete sms succeeded */

@@ -372,7 +372,7 @@ typedef struct {
 	bool IsRemoteNumberCoded;	/* Indicates if the RemoteNumber address is BCD coded */
 	bool HasRemoteNumberFixedLen;	/* Indicates if the MessageCenter field has always the fixed length */
 
-	short SMSCTime;			/* Location of the SMSC Reposnse time */
+	short SMSCTime;			/* Location of the SMSC Response time */
 	short Time;			/* Location of the Delivery time */
 
 	short MemoryType;		/* Location of the Memory Type field */
