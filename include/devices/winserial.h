@@ -45,4 +45,7 @@ size_t serial_write(int fd, __ptr_t buf, size_t n);
 
 int serial_select(int fd, struct timeval *timeout);
 
+GSM_Error serial_nreceived(int fd, int *n);
+GSM_Error serial_flush(int fd);
+
 #endif  /* __devices_winserial_h_ */

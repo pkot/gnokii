@@ -299,3 +299,13 @@ size_t serial_write(int fd, __ptr_t buf, size_t n)
     }
     return n;
 }
+
+GSM_Error serial_nreceived(int fd, int *n)
+{
+	return GE_NONE;
+}
+
+GSM_Error serial_flush(int fd)
+{
+	return GE_NONE;
+}

@@ -92,8 +92,11 @@
  * FreeBSD compatibility fixes: FBSD does not like local variables
    with the type of large size; we convert these variables to the
    pointers and alloc them dynamically.     (Jan Derfinak, Pawel Kot)
- * MacOS X compability                               (Ruotger Skupin)
+ * MacOS X compatibility                             (Ruotger Skupin)
  * remove include/devices/linuxirda.h                     (Pawel Kot)
+ * MS Windows compatibility
+    o add serial_nreceived() and serial_flush() functions
+      to winserial.c                                    (Mark Lakata)
 
 0.4.3
 =====
