@@ -1,0 +1,36 @@
+-- README-7110                                     --
+-- Notes, bugs and a todo list for the 7110 series --
+
+* Notes *
+
+Another Nokia phones series, another protocol. These phones seems to be the
+most popular at the moment, but probably for not more the one year more.
+Anyway the support for them is quite complete, but not complete yet. We hope
+to finish soon.
+
+Phones supported by this driver so far are:
+ * 7110
+ * 6210
+ * 6250
+Probably also other phones will work with them. If you know such model,
+please let us know.
+
+This driver was tested and is known to work with DAU-9P and DLR-3[P] cables
+and IrDA connection. As the side note, remember that to get the faster
+initialization with DAU-9P cable use 'connection = dau9p' instead of
+'connection = serial' in the config file. For IrDA use 'connection = irda',
+not 'connection = infrared'.
+
+Hint: For all these phones you can also use AT driver, as they all have a
+builtin hardware modem, which may give you more functionality for the
+moment.
+
+* Bugs *
+
+ * Probably there are some ;-)
+
+* TODO *
+
+ * documentation
+ * implement all functionality
+ * full xgnokii support

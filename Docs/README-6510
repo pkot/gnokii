@@ -1,5 +1,5 @@
 -- README-6510                                     --
--- Notes, bugs and a todo list for the 6110 series --
+-- Notes, bugs and a todo list for the 6510 series --
 
 * Notes *
 
@@ -7,9 +7,12 @@ First of all: Phones supported by this driver so far are:
  * 6510
  * 8310
  * 6310
-All the newest phones should work with this driver, too, i.e. 6310i, 7610, 7210 once they are out. If you have any of these phones, please test it with model set to 6510 and give report to the ML.
+All the newest phones should work with this driver, too, i.e. 6310i, 7610,
+7210 once they are out. If you have any of these phones, please test it with
+model set to 6510 and give report to the ML.
 
-Code for the 6510 phones has been tested with DAU-9P and DLR-3P cables and IrDA connection.
+Code for the 6510 phones has been tested with DAU-9P and DLR-3P cables and
+IrDA connection.
 
 The current code is able to:
  * identify the phone ;-)
@@ -23,12 +26,14 @@ The current code is able to:
  * read list if ringtones
  * send basic test messages (at the moment only with 6310, 6510 does NOT work)
 
-Hint: For all these phones you can also use AT driver, as they all have a builtin hardware modem, which may give you more functionality for the moment.
+Hint: For all these phones you can also use AT driver, as they all have a
+builtin hardware modem, which may give you more functionality for the
+moment.
 
 * Bugs *
 
- * one user reported problems when reading phonebook entries with many entries
-
+ * current code needs Manfred's patch to work with DLR-3[P] code
+ * someone reported problems when reading phonebook entries with many entries
 
 * TODO *
 

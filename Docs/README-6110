@@ -5,27 +5,16 @@
 
 Code for the 6110 phones has been tested with the DAU-9P MBus Cable NSE-3.
 
-Phones of 6110 Series have somewhat different protocol and that
-is the main reason for having the 3810 Series and 6110 Series.
-These phones also provide more features so hacking on it is
-greater fun.
+Phones of 6110 Series have somewhat different protocol then other Nokia
+phones series. More detailes on the protocol you'll find in the
+Docs/protocol/nk6110.txt file inside the gnokii sources.
 
-The current code allows you to enter PIN from the PC (gnokii asks
-you for the PIN, you enter it and gnokii sends it to the phone
-without touching the phone's keyboard). The code also allows you
-to monitor the status of the mobile phone - it recognizes
-network signal strength, your GSM provider network and battery
-level, the clock, date and alarm setting of your phone (if the phone
-supports it - e.g. 5110 doesn't seem to support date so the date is
-bogus on it).
+The current code allows you to do almost everything you are able to do with
+these phones. It covers SMS, phonebook, calendar operations and much, much
+more.
 
-The newest feature is that gnokii can read your mobile phone's
-preferred SMS Center so in the future you will not need to enter
-the SMS Message Center number for SMS messages to be sent.
-Gnokii will read it automatically.
-
-There are some problems with the newest firmwares (V 05.24). It
-seems that this firmware is weird. If you have a Nokia with this
+There are some problems with the few firmwares (V 05.24). It
+seems that these firmware is weird. If you have a Nokia with this
 firmware, it accepts the PIN request (displays Code Accepted message)
 but nothing is returned to the PC. The communication is only in
 one direction :-( I do not know why. If you can help with this,
@@ -39,19 +28,4 @@ please let me know.
 
 - writing documentation of the protocol
 
-- check out errors when reading and writing phonebook entries!!!
-
 - delete all FIXME from the sources
-
-- implement calendar notes infrastructure and --getcalendarnote, --writecalendarnote
-
-- implement function FB61_GetStatus which should return {"Waiting for PIN",
-  "Registered within the network", "Call in progress" ...}
-
-- X interface :-)
-
-- how NCDS saves names with ";" in it?
-
-- make util directory with support utilities, clean up the source tree...
-
-- Wait for ack of Auth message

@@ -1,8 +1,5 @@
-0.4.0 (not released yet)
+0.4.0
 =====
- * AT series
-     o added stub for SMS delete. needs to be revisited when
-       SMS works for AT mode                            (Petr Muller)
  * Rewrite of the SMS subsystem
     o reading of SMS splitted into 2 stages               (Pawel Kot)
     o support for EMS picture/animation SMSes          (Pavel Machek)
@@ -43,6 +40,8 @@
                                                      (Aart Koelewijn)
     o mention memory types for --getsms in the manual page
 	                                                  (Pawel Kot)
+    o update READMEs, add README for 7110 and 6510 series
+                                            (Markus Plail, Pawel Kot)
  * Allow GSM_PrintBitmap to output to any stream          (Pawel Kot)
  * Build system updates:
     o fixed Makefile to install libgnokii.so for all install*
@@ -99,6 +98,8 @@
  * AT series updates:
     o Security functions for AT phones              (Manfred Jonsson)
     o new SMS layer compability                           (Pawel Kot)
+    o added stub for SMS delete. needs to be revisited when
+      SMS works for AT mode                            (Petr Muller)
  * fake driver updates:
     o new SMS layer compability                           (Pawel Kot)
  * device driver updates:
