@@ -67,8 +67,6 @@ extern bool P6510_LinkOK;
 #define P6510_MSG_RADIO    	0x43	/* Radio (6510/8310) */
 #define P6510_MSG_TODO    	0x55	/* ToDo */
 #define P6510_MSG_STLOGO	0x7a	/* Startup logo */
-#define P6510_MSG_VERREQ	0xd1	/* HW&SW version request */
-#define P6510_MSG_VERRESP	0xd2	/* HW&SW version response */
 
 /* SMS handling message subtypes (send) */
 #define P6510_SUBSMS_SEND_SMS		0x01	/* Send SMS */
@@ -95,7 +93,8 @@ extern bool P6510_LinkOK;
 #define P6510_SUBCLO_SET_DATE_RCVD	0x02	/* Received date & time set OK */
 #define P6510_SUBCLO_SET_ALARM_RCVD	0x12	/* Received alarm set OK */
 #define P6510_SUBCLO_DATE_UPD_RCVD	0x0e	/* Received update on date & time */
-#define P6510_SUBCLO_ALARM_RCVD		0x1a	/* Received alarm */
+#define P6510_SUBCLO_ALARM_TIME_RCVD	0x1a	/* Received alarm time */
+#define P6510_SUBCLO_ALARM_STATE_RCVD	0x20	/* Received alarm state (on/off) */
 /* Alarm on/off */
 #define P6510_ALARM_ENABLED	0x02	/* Alarm enabled */
 #define P6510_ALARM_DISABLED	0x01	/* Alarm disabled */

@@ -129,6 +129,7 @@ static gn_error P6510_MakeCall(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P6510_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P6510_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 #endif
+
 static gn_error P6510_GetToDo(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P6510_DeleteAllToDoLocations(GSM_Data *data, GSM_Statemachine *state);
 static gn_error P6510_WriteToDo(GSM_Data *data, GSM_Statemachine *state);
@@ -1771,9 +1772,12 @@ reply: 0x19 / 0x0012
 		data->DateTime->Second = message[16];
 
 		break;
-	case P6510_SUBCLO_ALARM_RCVD:
-		/*
-		switch(message[8]) {
+	case P6510_SUBCLO_ALARM_TIME_RCVD:
+		data->DateTime->Hour = message[14];
+		data->DateTime->Minute = message[15];
+		break;
+	case P6510_SUBCLO_ALARM_STATE_RCVD:
+		switch(message[37]) {
 		case P6510_ALARM_ENABLED:
 			data->DateTime->AlarmEnabled = 1;
 			break;
@@ -1786,10 +1790,6 @@ reply: 0x19 / 0x0012
 			error = GN_ERR_UNKNOWN;
 			break;
 		}
-		*/
-		data->DateTime->Hour = message[14];
-		data->DateTime->Minute = message[15];
-
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (clock handling): 0x%02x\n", P6510_MSG_CLOCK, message[3]);
@@ -1828,11 +1828,26 @@ static gn_error P6510_SetDateTime(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 18);
 }
 
-static gn_error P6510_GetAlarm(GSM_Data *data, GSM_Statemachine *state)
+static gn_error P6510_GetAlarmTime(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x19, 0x00, 0x02};
 
 	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 6);
+}
+
+static gn_error P6510_GetAlarmState(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x1f, 0x01, 0x00};
+
+	SEND_MESSAGE_BLOCK(P6510_MSG_CLOCK, 6);
+}
+
+static gn_error P6510_GetAlarm(GSM_Data *data, GSM_Statemachine *state)
+{
+	gn_error error = GN_ERR_NONE;
+
+	if ((error = P6510_GetAlarmState(data, state)) != GN_ERR_NONE) return error;
+	return P6510_GetAlarmTime(data, state);
 }
 
 static gn_error P6510_SetAlarm(GSM_Data *data, GSM_Statemachine *state)
@@ -2920,8 +2935,6 @@ static gn_error P6510_IncomingKeypress(int messagetype, unsigned char *message, 
 
 static gn_error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press)
 {
-
-
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x11, 
 			       0x00, 0x01, 
 			       0x00, 0x00, 
@@ -2931,8 +2944,8 @@ static gn_error P6510_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state,
 	  req[5] = data->KeyCode;
 
 	  not functional yet
-
 	*/
+
 	req[5] = press ? 0x01 : 0x02;
 
 	SEND_MESSAGE_BLOCK(P6510_MSG_KEYPRESS, 11);
