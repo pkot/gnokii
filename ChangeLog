@@ -33,6 +33,7 @@
     o enable DLR3[P] cable connection    (Manfred Jonsson, Pawel Kot)
     o protocol updated to be in line with what's implemented
                                                        (Markus Plail)
+    o update documentation                                (Pawel Kot)
  * 7110 series updates:
     o move GetUnreadMessages from gsm-sms.c            (Markus Plail)
     o change GOP7110_* to GOP_*                        (Markus Plail)

@@ -22,9 +22,15 @@ model = 6110
 initlength = default
 
 # The type of the connection, for IR set this to infrared or irda.
+# For the nk6110 driver only infrared is valid for the IrDA connection.
+# See Docs/gnokii-ir-howto for more detailes on this.
 # If you have 6210/6250/7110 phone and dau9p cable (the one you can
 # use with 6100 series and cannot use hardware modem from the phone)
 # you may want to use 'dau9p' value to get faster initialization.
+# If you use dlr3 or dlr3p cable for nokia phones in FBUS mode (ie.
+# you don't use model = AT) you may want to use 'dlr3p' value here.
+# Note that it is recommended and currently the best way to use this
+# cable with nk6510 driver.
 connection = serial
 
 # Set bindir to point to the location of the various gnokii binaries.

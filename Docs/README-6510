@@ -7,12 +7,23 @@ First of all: Phones supported by this driver so far are:
  * 6510
  * 8310
  * 6310
-All the newest phones should work with this driver, too, i.e. 6310i, 7610,
-7210 once they are out. If you have any of these phones, please test it with
+ * 6310i
+All the newest phones should work with this driver, too, i.e. 7610, 7210
+once they are out. If you have any of these phones, please test it with
 model set to 6510 and give report to the ML.
 
 Code for the 6510 phones has been tested with DAU-9P and DLR-3P cables and
-IrDA connection.
+IrDA connection. The following conection type values are recommended for the
+various connection media:
+
+-----------------------------------------
+| Media		| Connection type	|
+|---------------------------------------|
+| dau9p		| dau9p or serial	|
+| dlr3p		| dlr3p			|
+| IrDA		| irda			|
+-----------------------------------------
+When you don't know what your cable is you can first try serial value.
 
 The current code is able to:
  * identify the phone ;-)
@@ -35,7 +46,9 @@ moment.
 
 * Bugs *
 
- * current code needs Manfred's patch to work with DLR-3[P] code
+ * when using dlr3p connection type after the several sequent connection the
+   phone got puzzled and you need to reset it to be able to connect it again
+   (or also enable IrDA)
  * problems writing phonebook entries (numbers may be attached to number entries)
 
 * TODO *
