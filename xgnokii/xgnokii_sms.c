@@ -222,8 +222,7 @@ static int IsValidSMSforFolder(gpointer d, gpointer userData)
 	int folder_idx;
 
 	if (phoneMonitor.supported & PM_FOLDERS) {
-		folder_idx = data->MemoryType >> 3;
-		folder_idx--;
+		folder_idx = data->MemoryType - 12;
 		if (folder_idx == SMS.currentBox)
 			return 1;
 	} else {
@@ -266,15 +265,15 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 				row[0] = g_strdup(_("read report"));
 			else
 				row[0] = g_strdup(_("unread report"));
-		} else if (data->Type == SMS_Picture) {
-			if (data->Status == SMS_Read)
-				row[0] = g_strdup(_("seen picture"));
-			if (data->Status == SMS_Unread)
-				row[0] = g_strdup(_("unseen picture"));
-			if (data->Status == SMS_Sent)
-				row[0] = g_strdup(_("sent picture"));
-			if (data->Status == SMS_Unsent)
-				row[0] = g_strdup(_("not sent picture"));
+		} else if ((data->Type == SMS_PictureTemplate) || (data->Type == SMS_PictureTemplate)) {
+				if (data->Status == SMS_Read)
+					row[0] = g_strdup(_("seen picture"));
+				if (data->Status == SMS_Unread)
+					row[0] = g_strdup(_("unseen picture"));
+				if (data->Status == SMS_Sent)
+					row[0] = g_strdup(_("sent picture"));
+				if (data->Status == SMS_Unsent)
+					row[0] = g_strdup(_("not sent picture"));
 		} else {
 			if (data->Status == SMS_Read)
 				row[0] = g_strdup(_("read"));
@@ -306,7 +305,7 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		row[2] = GUI_GetName(data->Remote.Number);
 		if (row[2] == NULL)
 			row[2] = data->Remote.Number;
-		if (data->Type == SMS_Picture)
+		if ((data->Type == SMS_PictureTemplate) || (data->Type == SMS_PictureTemplate))
 			row[3] = g_strdup(_("Picture Message"));
 		else
 			row[3] = data->UserData[0].u.Text;
