@@ -1045,6 +1045,18 @@ static GSM_Error P6510_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
  * 10.07.2002: Almost all frames should be known know :-) (Markus)
  */
 
+/**
+00 01 00 02 00 00 00 55 55 01 02 2a 31 00 00 00 |        UU  *1   
+00 03 82 0c 01 08 02 81 fd 00 00 00 00 00 82 0c |         ý       
+02 08 07 91 94 71 22 72 00 00 80 09 05 05 76 b1 |      q"r      v±
+db ee 06
+
+00 01 00 02 01 00 01 55 55 01 02 30 31 00 00 00 
+00 04 82 0C 01 08 0C 91 94 71 94 40 56 87 82 0C 
+02 08 07 91 94 71 22 72 00 00 80 0C 05 05 76 B1 
+DB 2E 06 00 93 56 00 20 00 00 55
+*/
+
 static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
@@ -1062,7 +1074,10 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	if (data->RawSMS->RejectDuplicates)  req[12] |= 0x04;
 	if (data->RawSMS->Report)            req[12] |= 0x20;
 	if (data->RawSMS->UDHIndicator)      req[12] |= 0x40;
+	/*
 	if (data->RawSMS->ValidityIndicator) req[12] |= 0x10;
+	FIXME: How to set Validity correctly?
+	*/
 
 	req[13] = data->RawSMS->Reference;
 	req[14] = data->RawSMS->PID;
@@ -1079,7 +1094,6 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	req[19] = 0x0c; /* offset to next block starting from start of block (req[18]) */
 	req[20] = 0x01; /* first number field => RemoteNumber */
 	req[21] = 0x08; /* actual data length in this block */
-
 	memcpy(req + 22, data->RawSMS->RemoteNumber, 8);
 
 	/* Block 2. SMSC Number */
