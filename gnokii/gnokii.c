@@ -55,6 +55,7 @@
 
 #  include <windows.h>
 #  include <process.h>
+#  include <io.h>
 #  include "win32/getopt.h"
 
 #else
@@ -1077,7 +1078,7 @@ static int deletesmsfolder(char *number)
 	gn_data_clear(&data);
 
 	folder.folder_id = atoi(number);
-	if (folder.number > 0 && folder.number <= GN_SMS_FOLDER_MAX_NUMBER)
+	if (folder.folder_id > 0 && folder.folder_id <= GN_SMS_FOLDER_MAX_NUMBER)
 		data.sms_folder = &folder;
 	else
 		fprintf(stderr, _("Error: Number must be between 1 and %i!\n"), GN_SMS_FOLDER_MAX_NUMBER);
