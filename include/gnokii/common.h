@@ -624,7 +624,7 @@ typedef struct {
 /* Messagetype is passed to the function in case it is a 'generic' one */
 typedef struct {
   u8 MessageType;
-  GSM_Error (*Functions)(int messagetype, char *buffer, int length);
+  GSM_Error (*Functions)(int messagetype, unsigned char *buffer, int length);
 } GSM_IncomingFunctionType;
 
 

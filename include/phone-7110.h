@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.3  2001-01-23 15:32:44  chris
+  Revision 1.4  2001-01-29 17:14:44  chris
+  dprintf now in misc.h (and fiddling with 7110 code)
+
+  Revision 1.3  2001/01/23 15:32:44  chris
   Pavel's 'break' and 'static' corrections.
   Work on logos for 7110.
 
@@ -78,7 +81,7 @@ extern GSM_Information P7110_Information;
 static GSM_Error P7110_Initialise(char *port_device, char *initlength,
 		 GSM_ConnectionType connection,
 		 void (*rlp_callback)(RLP_F96Frame *frame));
-static GSM_Error P7110_GenericCRHandler(int messagetype, char *buffer, int length);
+static GSM_Error P7110_GenericCRHandler(int messagetype, unsigned char *buffer, int length);
 static GSM_Error P7110_GetIMEI(char *imei);
 static GSM_Error P7110_GetRevision(char *revision);
 static GSM_Error P7110_GetModel(char *model);

@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.27  2001-01-23 18:58:51  machek
+  Revision 1.28  2001-01-29 17:14:42  chris
+  dprintf now in misc.h (and fiddling with 7110 code)
+
+  Revision 1.27  2001/01/23 18:58:51  machek
   Implement collision protocol slightly better. It is still not
   completely okay -- we should check if echo is exactly same characters
   as we sent.
@@ -57,18 +60,12 @@
 #include <pthread.h>
 #include <errno.h>
 
+#undef DEBUG
 #include "misc.h"
 #include "gsm-common.h"
 #include "mbus-2110.h"
 
 #define MYID 0x78
-
-#undef DEBUG
-#ifndef DEBUG
-#define dprintf(a...) do { } while (0)
-#else
-#define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
-#endif
 
 #undef VELO
 #ifdef VELO

@@ -17,7 +17,10 @@
   The various routines are called PGEN_(whatever).
 
   $Log$
-  Revision 1.2  2001-01-23 15:32:42  chris
+  Revision 1.3  2001-01-29 17:14:42  chris
+  dprintf now in misc.h (and fiddling with 7110 code)
+
+  Revision 1.2  2001/01/23 15:32:42  chris
   Pavel's 'break' and 'static' corrections.
   Work on logos for 7110.
 
@@ -36,17 +39,19 @@
 
 /* Useful debug function */
 
-void PGEN_DebugMessage(unsigned char *mes, int len)
+GSM_Error PGEN_DebugMessage(int type, unsigned char *mes, int len)
 {
   int i;
   
-  fprintf(stdout,"Message debug:\n\r");
+  fprintf(stdout,"Message debug (type %02x):\n\r",type);
   for(i=0;i<len;i++) 
     if (isprint(mes[i]))
       fprintf(stdout, "[%02x%c]", mes[i], mes[i]);
     else
       fprintf(stdout, "[%02x ]", mes[i]);
   fprintf(stdout,"\n\r");
+
+  return GE_NONE;
 }
 
 /* These two functions provide a generic way of waiting for a response. */

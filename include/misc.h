@@ -34,6 +34,14 @@
   #define bool int
 #endif
 
+/* A define to make debug printfs neat */
+#ifndef DEBUG
+#define dprintf(a...) do { } while (0)
+#else
+#define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
+#endif
+
+
 /* This one is for NLS. */
 
 #ifdef USE_NLS
@@ -124,3 +132,4 @@ extern char *GetModel (const char *);
 PhoneModel *GetPhoneModel (const char *);
 
 #endif /* __misc_h */
+

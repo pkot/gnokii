@@ -17,7 +17,10 @@
   The various routines are called PGEN_...
 
   $Log$
-  Revision 1.3  2001-01-23 15:32:44  chris
+  Revision 1.4  2001-01-29 17:14:44  chris
+  dprintf now in misc.h (and fiddling with 7110 code)
+
+  Revision 1.3  2001/01/23 15:32:44  chris
   Pavel's 'break' and 'static' corrections.
   Work on logos for 7110.
 
@@ -32,14 +35,7 @@
 #define __phone_generic_h
 
 #include "gsm-common.h"
-
-/* Handy macro */
-
-#ifndef DEBUG
-#define dprintf(a...) do { } while (0)
-#else
-#define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0) 
-#endif
+#include "misc.h"
 
 /* Generic Functions */
 
@@ -47,7 +43,7 @@ GSM_Error PGEN_CommandResponse(GSM_Link *link, void *message, int *messagesize, 
 
 GSM_Error PGEN_CommandResponseReceive(GSM_Link *link, int MessageType, void *Message, int MessageLength);
 
-void PGEN_DebugMessage(unsigned char *mes, int len);
+GSM_Error PGEN_DebugMessage(int type, unsigned char *mes, int len);
 
 #endif
 

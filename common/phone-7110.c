@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.3  2001-01-23 15:32:41  chris
+  Revision 1.4  2001-01-29 17:14:42  chris
+  dprintf now in misc.h (and fiddling with 7110 code)
+
+  Revision 1.3  2001/01/23 15:32:41  chris
   Pavel's 'break' and 'static' corrections.
   Work on logos for 7110.
 
@@ -49,15 +52,16 @@
 
 GSM_Link link;
 GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
-  { 0x01, P7110_GenericCRHandler },
+  { 0x01, PGEN_DebugMessage },
   { 0x03, P7110_GenericCRHandler },
   { 0x0a, P7110_GenericCRHandler },
   { 0x17, P7110_GenericCRHandler },
   { 0x1b, P7110_GenericCRHandler },
+  { 0x79, P7110_GenericCRHandler },
   { 0x7a, P7110_GenericCRHandler }
 };
 GSM_Phone phone = {
-   6,  /* No of functions in array */
+   7,  /* No of functions in array */
    P7110_IncomingFunctions
 };
 
@@ -257,7 +261,7 @@ GSM_Error P7110_Initialise(char *port_device, char *initlength,
 }
 
 
-static GSM_Error P7110_GenericCRHandler(int messagetype, char *buffer, int length)
+static GSM_Error P7110_GenericCRHandler(int messagetype, unsigned char *buffer, int length)
 {
   return PGEN_CommandResponseReceive(&link, messagetype, buffer, length);
 }
@@ -292,8 +296,9 @@ static GSM_Error P7110_GetModel(char *model)
 static GSM_Error P7110_DialVoice(char *Number)
 {
 
-#if 0  /* Doesn't work (yet) */
-  unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x01, 0x01, 0x01, 0x05, 0x02 ,0x00,0x35,0x02, 0x35,0x35, 0x00};
+#if 0  /* Doesn't work (yet) */    /* 3 2 1 5 2 30 35 */
+  unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x02, 0x01, 0x01, 0x05, 0x01, 0x01, 0x01,0x01,0x01};
+  //  unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01, 0x00, 0x20, 0x01, 0x46};
   unsigned char req_end[]={0x05, 0x01, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01};
   int len=0, i;
 
@@ -306,18 +311,29 @@ static GSM_Error P7110_DialVoice(char *Number)
 
   //len=6+strlen(Number);
 
-  len=sizeof(req);
+  len=20;
 
-  PGEN_DebugMessage(req,len);
+  PGEN_DebugMessage(01,req,len);
 
+#if 0
   if (PGEN_CommandResponse(&link,req,&len,0x01,0x01,100)==GE_NONE) {
-    PGEN_DebugMessage(req,len);
+    PGEN_DebugMessage(1,req,len);
     return GE_NONE;
   }
-
   else return GE_NOTIMPLEMENTED;
 #endif
-  
+ 
+  link.SendMessage(len,0x01,req);
+  sleep(1);
+  link.SendMessage(len,0x01,req);
+
+
+#endif
+ 
+  while(1){
+    link.Loop(NULL);
+  }
+
   return GE_NOTIMPLEMENTED;
 }
 
@@ -457,8 +473,6 @@ static GSM_Error GetStartupBitmap(GSM_Bitmap *bitmap)
   if (PGEN_CommandResponse(&link,req,&count,0x7a,0x7a,1000)!=GE_NONE)
     return GE_NOTIMPLEMENTED;
 
-  //PGEN_DebugMessage(req,count);
-
   /* I'm sure there are blocks here but never mind! */
 
   bitmap->type=GSM_StartupLogo;
@@ -479,8 +493,6 @@ static GSM_Error GetOperatorBitmap(GSM_Bitmap *bitmap)
   if (PGEN_CommandResponse(&link,req,&count,0x0a,0x0a,500)!=GE_NONE)
     return GE_NOTIMPLEMENTED;
 
-  PGEN_DebugMessage(req,count);
- 
   blockstart=req+6;
 
   for (i=0;i<req[4];i++) {
@@ -527,8 +539,6 @@ static GSM_Error SetStartupBitmap(GSM_Bitmap *bitmap)
 
   if (PGEN_CommandResponse(&link,req,&count,0x7a,0x7a,1000)!=GE_NONE)
     return GE_NOTIMPLEMENTED;
-
-  PGEN_DebugMessage(req,count);
 
   return GE_NONE;
 }
