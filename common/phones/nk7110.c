@@ -1576,7 +1576,6 @@ static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message,
 	case NK7110_SUBCAL_FREEPOS_RCVD:
 		dprintf("First free position received: %i!\n", message[4]  * 256 + message[5]);
 		data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
-		dprintf("DEBUG: %d %d\n", message[4], message[5]);
 		break;
 	case NK7110_SUBCAL_DEL_NOTE_RESP:
 		dprintf("Succesfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
@@ -1589,7 +1588,7 @@ static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message,
 	case NK7110_SUBCAL_ADD_BIRTHDAY_RESP:
 	case NK7110_SUBCAL_ADD_REMINDER_RESP:
 		if (message[6]) e = GN_ERR_FAILED;
-		dprintf("Attepmpt to write calendar note at %i. Status: %i\n",
+		dprintf("Attempt to write calendar note at %i. Status: %i\n",
 			(message[4] << 8) | message[5],
 			1 - message[6]);
 		break;
