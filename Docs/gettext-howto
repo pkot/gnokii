@@ -36,7 +36,7 @@ And now:
 
 SnowWhite:/tmp/gnokii$ export LC_MESSAGES=cs_CZ
 SnowWhite:/tmp/gnokii$ ./gnokii --version
-GNOKII Version 0.2.3 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>
+GNOKII Version 0.2.4 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>
         Kompilace: 19:09:02 Mar 13 1999 pro model 6110 na portu /dev/ttyS0 
 SnowWhite:/tmp/gnokii$ 
 

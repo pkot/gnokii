@@ -1,7 +1,9 @@
 	/* G N O K I I
 	   A Linux/Unix toolset and driver for Nokia mobile phones.
-	   Copyright (C) Hugh Blemings ?????, 1999  Released under the terms of 
-       the GNU GPL, see file COPYING for more details.
+
+	   Copyright (C) 1999 Pavel Janik .ml & Hugh Blemings. 
+	   Released under the terms of the GNU GPL, see file COPYING
+	   for more details.
 	
 	   This file:  fbus-6110.h   Version 0.2.4
 
@@ -15,7 +17,7 @@
 #include	"gsm-common.h"	/* Needed for GSM_Error etc. */
 #endif
 
-#define         FB61_MAX_TRANSMIT_LENGTH                        (256)
+#define		FB61_MAX_TRANSMIT_LENGTH			(256)
 #define		FB61_MAX_RECEIVE_LENGTH 			(512)
 
 
@@ -69,6 +71,7 @@ GSM_Error	FB61_SendSMSMessage(char *message_centre, char *destination,
 GSM_Error	FB61_GetRFLevel(float *level);
 GSM_Error	FB61_GetBatteryLevel(float *level);
 GSM_Error	FB61_EnterPin(char *pin);
+GSM_Error	FB61_GetSMSCenter(u8 priority);
 GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code);
 GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time);
 GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time);

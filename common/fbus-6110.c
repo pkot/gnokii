@@ -1,10 +1,12 @@
 	/* G N O K I I
 	   A Linux/Unix toolset and driver for Nokia mobile phones.
-	   Copyright (C) Hugh Blemings ??? , 1999  Released under the terms of 
-       the GNU GPL, see file COPYING for more details.
 	
 	   This file:  fbus-6110.c  Version 0.2.4
 	
+	   Copyright (C) 1999 Pavel Janik .ml & Hugh Blemings. 
+	   Released under the terms of the GNU GPL, see file COPYING
+	   for more details.
+
 	   Provides an API for accessing functions on the 6110 and
 	   similar phones. 
 
@@ -132,6 +134,8 @@ void	FB61_ThreadLoop(void)
 
 	int					count, idle_timer;
 
+	GSM_DateTime 		date_time;		/* "bogus" variable for calling GetAlarm */
+
 		/* Try to open serial port, if we fail we sit here and don't proceed
 		   to the main loop. */
 	if (FB61_OpenSerial() != true) {
@@ -171,13 +175,31 @@ void	FB61_ThreadLoop(void)
 
 	FB61_TX_SendMessage(5, 0x64, connect4);
 
-	//	FB61_TX_SendMessage(0x19, 0x01, connect5);
+	usleep(10000);
 
-	// 	FB61_TX_SendMessage(0x2e, 0x64, connect6);
+
+	/* This function sends the Clock request to the phone. Value
+	   returned isn't used yet  */
+
+	FB61_GetDateTime(&date_time);
+
+	/* This function sends the Alarm request to the phone.  Values
+	   passed are ignored at present */
+
+	FB61_GetAlarm(0, &date_time);
 
 	usleep(10000);
 
-	 	FB61_GetPhonebookLocation(GMT_SIM,1,NULL);
+	/* Get the primary SMS Center */
+
+	/* It's very strange that if I send this request again (with different
+       number) it fails. But if I send it alone it succeds. It seems that 6110
+       is refusing to tell you all the SMS Centers information at once :-( */
+
+	FB61_GetSMSCenter(1);
+
+	/* This doesn't work now, but will in the near future, do you believe? */
+	//		FB61_GetPhonebookLocation(GMT_SIM,1,NULL);
 
 		idle_timer=0;
 
@@ -241,22 +263,44 @@ GSM_Error	FB61_EnterPin(char *pin)
 	return (GE_NONE);
 }
 
+GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time)
+{
+	unsigned char clock_req[] = {0x00, 0x01, 0x00, 0x62, 0x01};
+
+	FB61_TX_SendMessage(0x05, 0x11, clock_req);
+
+	return (GE_NONE);
+}
+
+GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
+{
+	unsigned char alarm_req[] = {0x00, 0x01, 0x00, 0x6d, 0x01};
+
+	FB61_TX_SendMessage(0x05, 0x11, alarm_req);
+
+	return (GE_NONE);
+}
+
+	/* This function sends to the mobile phone a request for the SMS Center
+	   of rank `priority' */
+
+GSM_Error	FB61_GetSMSCenter(u8 priority)
+{
+	unsigned char smsc_req[] = {0x00, 0x01, 0x00, 0x33, 0x64, 0x01, 0x01};
+
+	smsc_req[5]=priority;
+
+	FB61_TX_SendMessage(0x07, 0x02, smsc_req);
+
+	return (GE_NONE);
+}
+
 GSM_Error	FB61_GetIMEIAndCode(char *imei, char *code)
 {
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	FB61_GetDateTime(GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
 GSM_Error	FB61_SetDateTime(GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
 {
 	return (GE_NOTIMPLEMENTED);
 }
@@ -356,16 +400,33 @@ void	FB61_SigHandler(int status)
 	}
 }
 
+char *FB61_GetBCDNumber(u8 *Number) {
+  static char Buffer[20]="";
+  /* This is the length of BCD coded number */
+  int length=Number[0];
+  int count;
+
+  if (Number[1]==0x91)
+	sprintf(Buffer, "+");
+
+  for (count=0; count <length-1; count++)
+	sprintf(Buffer, "%s%d%d", Buffer, Number[count+2]&0x0f, Number[count+2]>>4);
+
+  return Buffer;
+}
+
 enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 {
 
 	int tmp, count;
 
 	/* Uncomment this if you want all messages in raw form. */
-	FB61_RX_DisplayMessage();
+	// FB61_RX_DisplayMessage();
 
 		/* Switch on the basis of the message type byte */
 	switch (MessageType) {
+
+	  /* Incoming call alert message */
 
 	case 0x01:
 	  printf("Message: Incoming call alert:\n");
@@ -383,6 +444,38 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 
 	  printf("\n");
 	break;
+
+	/* General phone control */
+
+	case 0x02:
+
+	  switch (MessageBuffer[3]) {
+
+	  case 0x34:
+
+		printf(_("Message: SMS Center received:\n"));
+		printf("   %d. SMS Center name is %s\n", MessageBuffer[4], MessageBuffer+33);
+		printf("   %d. SMS Center number is %s\n", MessageBuffer[4], FB61_GetBCDNumber(MessageBuffer+21));
+
+		break;
+
+	  case 0x35:
+
+		/* Nokia 6110 has support for three SMS centers with numbers 1, 2 and
+           3. Each request for SMS Center without one of these numbers fail. */
+
+		printf(_("Message: SMS Center error received:\n"));
+		printf(_("   The request for SMS Center failed.\n"));
+
+		break;  
+
+	  default:
+			  FB61_RX_DisplayMessage();
+	  }
+
+	  break;
+
+	  /* Phone status */
 	  
 	case 0x04:
 	  printf(_("Message: Phone status received:\n"));
@@ -429,6 +522,8 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
    	  printf("   Signal strength: %d\n", MessageBuffer[5]);
 	  break;
 
+	  /* PIN requests */
+
 	case 0x08:
 
 	  printf("Message: PIN:\n");
@@ -439,6 +534,8 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	  	printf("   Code Error\n   You're not my big owner :-)\n");
 	break;
 
+	/* Network status */
+
 	case 0x0a:
 
 	  printf("Message: Network registration:\n");
@@ -447,6 +544,36 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
 	  printf("   LAC: %02x%02x\n", MessageBuffer[12], MessageBuffer[13]);
 	  printf("   Network: %x%x%x-%x%x\n", MessageBuffer[14] & 0x0f, MessageBuffer[14] >>4, MessageBuffer[15] & 0x0f, MessageBuffer[16] & 0x0f, MessageBuffer[16] >>4);
 	  break;
+
+	  /* Phone Clock and Alarm */
+
+	case 0x11:
+
+	  switch (MessageBuffer[3]) {
+
+	  case 0x63:
+	    printf("Message: Clock\n");
+
+	    printf("   Time: %02d:%02d:%02d\n", MessageBuffer[12], MessageBuffer[13], MessageBuffer[14]);
+	    printf("   Date: %4d/%02d/%02d\n", 256*MessageBuffer[8]+MessageBuffer[9], MessageBuffer[10], MessageBuffer[11]);
+
+	    break;
+
+	  case 0x6e:
+	    printf("Message: Alarm\n");
+
+	    printf("   Alarm: %02d:%02d\n", MessageBuffer[9], MessageBuffer[10]);
+	    printf("   Alarm is %s\n", (MessageBuffer[8]==2) ? "on":"off");
+
+	    break;
+
+	  default:
+	    printf("Message: Unknown message of type 0x11\n");
+
+	  }
+	  break;
+
+	  /* Mobile phone identification */
 
 	case 0x64:
 	  printf("Message: Mobile phone identification received:\n");
@@ -472,21 +599,29 @@ enum FB61_RX_States		FB61_RX_DispatchMessage(void)
    	  printf("   Magic byte4: %02x\n", MessageBuffer[53]);
 
 	  break;
-	  
 
+	  /* Acknowlegment */
+	  
 	case 0x7f:
-	  printf(_("Message: Received Ack of type %02x, seq: %2x\n"), MessageBuffer[0], MessageBuffer[1]);
+	  printf(_("[Received Ack of type %02x, seq: %2x]\n"), MessageBuffer[0], MessageBuffer[1]);
 	  break;
+
+	  /* Power on message */
 
 	case 0xd0:
 	  printf(_("Message: The phone is powered on - seq 1.\n"));
 	  FB61_RX_DisplayMessage();
 	  break;
 
+	  /* Power on message */
+
 	case 0xf4:
 	  printf(_("Message: The phone is powered on - seq 2.\n"));
 	  FB61_RX_DisplayMessage();
 	  break;
+
+	  /* Unknown message - if you think that you know the exact meaning of
+         other messages - please let us know. */
 
 	default:
 	  FB61_RX_DisplayMessage();
@@ -563,6 +698,21 @@ void	FB61_RX_StateMachine(char rx_byte)
 	}
 }
 
+char *FB61_PrintDevice(int Device)
+{
+    switch (Device) {
+
+	case FB61_DEVICE_PHONE:
+	  return "Phone";
+
+	case FB61_DEVICE_PC:
+	  return "PC";
+
+	default:
+	  return "Unknown";
+	}
+}
+
 	/* FB61_RX_DisplayMessage
 	   Called when a message we don't know about is received so that
 	   the user can see what is going back and forth, and perhaps shed
@@ -572,9 +722,11 @@ void	FB61_RX_DisplayMessage(void)
 {
 	int		count;
 
-	fprintf(stdout, _("Msg Destination: %02x\n"), MessageDestination);
-	fprintf(stdout, _("Msg Source: %02x\n"), MessageSource);
+	fprintf(stdout, _("Msg Destination: %s\n"), FB61_PrintDevice(MessageDestination));
+	fprintf(stdout, _("Msg Source: %s\n"), FB61_PrintDevice(MessageSource));
+
 	fprintf(stdout, _("Msg Type: %02x\n"), MessageType);
+
 	fprintf(stdout, _("Msg Unknown: %02x\n"), MessageUnknown);
 	fprintf(stdout, _("Msg Len: %02x\nPhone: "), MessageLength);
 
@@ -670,7 +822,7 @@ int		FB61_TX_SendAck(u8 message_type, u8 message_seq) {
   int count, current=0;
 	unsigned char			checksum;
 
-	printf("Sending Ack of type %02x, seq: %x\n", message_type, message_seq);
+	printf("[Sending Ack of type %02x, seq: %x]\n", message_type, message_seq);
 
   /* Now construct the Ack header. */
     out_buffer[current++] = FB61_FRAME_ID;	/* Start of message indicator */

@@ -93,7 +93,7 @@ msgid "Function not implemented in %s model!\n"
 msgstr ""
 
 #: gnokii.c:53
-msgid "GNOKII Version 0.2.3 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
+msgid "GNOKII Version 0.2.4 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
 msgstr ""
 
 #: gnokii.c:456
