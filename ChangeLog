@@ -3,6 +3,9 @@
  * libgnokii updates
     o bump the version number                      (BORBELY Zoltan)
     o wctomb() second argument should be 0, not NULL    (Pawel Kot)
+    o update gn_phone_model[] from
+      http://homepage.mac.com/alvinmok/nokia/firmware.html
+                                        (BORBELY Zoltan, Pawel Kot)
  * build system updates
     o require flex at rpm build time            (Olivier Kaloudoff)
     o it appears that we had backward compatibility problem since
