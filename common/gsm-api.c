@@ -101,6 +101,7 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
 #ifndef WIN32
 	REGISTER_PHONE(nokia_2110, NULL);
 #endif
+	REGISTER_PHONE(dancall_2711, NULL);
 	REGISTER_PHONE(at, model);
 
 	return (GE_UNKNOWNMODEL);

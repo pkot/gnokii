@@ -35,6 +35,7 @@
 
 #include "misc.h"
 #include "gsm-common.h"
+#include "gsm-statemachine.h"
 #include "phones/generic.h"
 #include "links/cbus.h"
 
@@ -63,7 +64,7 @@ static GSM_IncomingFunctionType D2711_IncomingFunctions[];
 GSM_Information D2711_Information = INFO;
 
 
-static GSM_Phone phone = {
+GSM_Phone phone_dancall_2711 = {
 	D2711_IncomingFunctions,
 	PGEN_IncomingDefault,
 	INFO
@@ -98,6 +99,7 @@ static char *Request(char *c)
 /* ----------------------------------- SMS stuff ------------------------------------- */
 
 
+#if 0
 GSM_Error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
 {
 	GSM_Error test = GE_NONE;
@@ -135,7 +137,6 @@ GSM_Error ATGSM_GetSMSMessage(GSM_SMSMessage * m)
 	m->MessageCenter.No = 0;
 	strcpy(m->Sender, "(sender unknown)");
 	m->UDHType = GSM_NoUDH;
-
 	return test;
 }
 
@@ -155,23 +156,20 @@ GSM_Error ATGSM_SendSMSMessage(GSM_SMSMessage * SMS, int size)
 {
 	return (GE_NOTIMPLEMENTED);
 }
+#endif
 
 /* ----------------------------------------------------------------------------------- */
 
-static GSM_Error Initialise(char *port_device, char *initlength,
-			   GSM_ConnectionType connection,
-			   void (*rlp_callback)(RLP_F96Frame *frame))
+static GSM_Error Initialise(GSM_Statemachine *state)
 {
 	/* char model[10]; */
 
-	strncpy(link.PortDevice, port_device, 20);
-	link.InitLength = atoi(initlength);
-	link.ConnectionType = connection;
+	memcpy(&(state->Phone), &phone_dancall_2711, sizeof(GSM_Phone));
 
 	fprintf(stderr, "Initializing dancall...\n");
-	switch (connection) {
+	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
-		CBUS_Initialise(&link, &phone);
+		CBUS_Initialise(state);
 		break;
 	default:
 		return GE_NOTSUPPORTED;
@@ -192,6 +190,7 @@ static GSM_Error Initialise(char *port_device, char *initlength,
 	return GE_NONE;
 }
 
+#if 0
 static GSM_Error
 GetSMSStatus(GSM_SMSStatus *Status)
 {
@@ -203,64 +202,11 @@ GetSMSStatus(GSM_SMSStatus *Status)
 	Status->Number = k;
 	return GE_NONE;
 }
+#endif
 
 /* Here we initialise model specific functions called by 'gnokii'. */
 /* This too needs fixing .. perhaps pass the link a 'request' of certain */
 /* type and the link then searches the phone functions.... */
-
-GSM_Functions D2711_Functions = {
-	Initialise,
-	Terminate,
-	UNIMPLEMENTED, /* GetMemoryLocation */
-	UNIMPLEMENTED, /* WritePhonebookLocation */
-	UNIMPLEMENTED, /* GetSpeedDial */
-	UNIMPLEMENTED, /* SetSpeedDial */
-	UNIMPLEMENTED, /* GetMemoryStatus */
-	GetSMSStatus, /* GetSMSStatus */
-	UNIMPLEMENTED, /* GetSMSCentre */
-	UNIMPLEMENTED, /* SetSMSCentre */
-	ATGSM_GetSMSMessage, /* GetSMSMessage */
-	ATGSM_DeleteSMSMessage, /* DeleteSMSMessage */
-	ATGSM_SendSMSMessage, /* SendSMSMessage */
-	UNIMPLEMENTED, /* SaveSMSMessage */
-	UNIMPLEMENTED, /* GetRFLevel */
-	UNIMPLEMENTED, /* GetBatteryLevel */
-	UNIMPLEMENTED, /* GetPowerSource */
-	UNIMPLEMENTED, /* GetDisplayStatus */
-	UNIMPLEMENTED, /* EnterSecurityCode */
-	UNIMPLEMENTED, /* GetSecurityCodeStatus */
-	UNIMPLEMENTED,        /* GetIMEI */
-	UNIMPLEMENTED,    /* GetRevision */
-	UNIMPLEMENTED,       /* GetModel */
-	UNIMPLEMENTED, /* GetManufacturer */
-	UNIMPLEMENTED, /* GetDateTime */
-	UNIMPLEMENTED, /* SetDateTime */
-	UNIMPLEMENTED, /* GetAlarm */
-	UNIMPLEMENTED, /* SetAlarm */
-	UNIMPLEMENTED, /* DialVoice */
-	UNIMPLEMENTED, /* DialData */
-	UNIMPLEMENTED, /* GetIncomingCallNr */
-	UNIMPLEMENTED, /* GetNetworkInfo */
-	UNIMPLEMENTED, /* GetCalendarNote */
-	UNIMPLEMENTED, /* WriteCalendarNote */
-	UNIMPLEMENTED, /* DeleteCalendarNote */
-	UNIMPLEMENTED, /* NetMonitor */
-	UNIMPLEMENTED, /* SendDTMF */
-	UNIMPLEMENTED, /* GetBitmap */
-	UNIMPLEMENTED, /* SetBitmap */
-	UNIMPLEMENTED, /* SetRingtone */
-	UNIMPLEMENTED, /* SendRingtone */
-	UNIMPLEMENTED, /* Reset */
-	UNIMPLEMENTED, /* GetProfile */
-	UNIMPLEMENTED, /* SetProfile */
-	UNIMPLEMENTED, /* SendRLPFrame */
-	UNIMPLEMENTED, /* CancelCall */
-	UNIMPLEMENTED, /* EnableDisplayOutput */
-	UNIMPLEMENTED, /* DisableDisplayOutput */
-	UNIMPLEMENTED, /* EnableCellBroadcast */
-	UNIMPLEMENTED, /* DisableCellBroadcast */
-	UNIMPLEMENTED  /* ReadCellBroadcast */
-};
 
 static GSM_IncomingFunctionType D2711_IncomingFunctions[] = {
 	{ 0, Reply },
