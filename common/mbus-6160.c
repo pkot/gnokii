@@ -409,15 +409,57 @@ void	MB61_ThreadLoop(void)
     fprintf(stdout, "Sending init...\n");
 
 		/* Need to "toggle" the dtr/rts lines in the right
-           sequence it seems for the interface to work. */
-    device_setdtrrts(0, 1);
-	usleep(500000);
-    device_setdtrrts(1, 0);
-	usleep(200000);
-    device_setdtrrts(0, 1);
-	usleep(500000);
+           sequence it seems for the interface to work. 
+		   Base time value is units of 50ms it seems */
 
-    
+#define	BASE_TIME		(60000)
+
+		/* Default state */
+    device_setdtrrts(0, 1);
+	sleep(1);
+
+		/* RTS low for 250ms */
+    device_setdtrrts(0, 0);
+	usleep(5 * BASE_TIME);
+
+		/* RTS high, DTR high for 50ms */
+    device_setdtrrts(1, 1);
+	usleep(BASE_TIME);
+
+		/* RTS low, DTR high for 50ms */
+    device_setdtrrts(1, 0);
+	usleep(BASE_TIME);
+
+		/* RTS high, DTR high for 50ms */
+    device_setdtrrts(1, 1);
+	usleep(BASE_TIME);
+
+		/* RTS low, DTR high for 50ms */
+    device_setdtrrts(1, 0);
+	usleep(BASE_TIME);
+
+		/* RTS low, DTR low for 50ms */
+    device_setdtrrts(0, 0);
+	usleep(BASE_TIME);
+
+		/* RTS low, DTR high for 50ms */
+    device_setdtrrts(1, 0);
+	usleep(BASE_TIME);
+
+		/* RTS high, DTR high for 50ms */
+    device_setdtrrts(1, 1);
+	usleep(BASE_TIME);
+
+		/* RTS low, DTR low for 50ms */
+    device_setdtrrts(0, 0);
+	usleep(BASE_TIME);
+
+		/* leave RTS high, DTR low for duration of sesssion. */
+    device_setdtrrts(0, 1);
+	sleep(1);
+
+
+
 	//WRITEPHONE(PortFD, foogle, 1);
 
         /* Initialise sequence number used when sending messages
