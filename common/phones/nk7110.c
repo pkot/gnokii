@@ -314,7 +314,7 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 		case GN_CT_Infrared:
 		case GN_CT_Irda:
 			err = phonet_initialise(state);
-			attenot = 3;
+			attempt = 3;
 			break;
 		case GN_CT_M2BUS:
 			err = m2bus_initialise(state);
