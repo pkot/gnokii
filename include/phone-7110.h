@@ -17,7 +17,11 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.2  2001-01-17 02:54:56  chris
+  Revision 1.3  2001-01-23 15:32:44  chris
+  Pavel's 'break' and 'static' corrections.
+  Work on logos for 7110.
+
+  Revision 1.2  2001/01/17 02:54:56  chris
   More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
   I can now edit my phonebook in xgnokii but it is 'work in progress'.
 
@@ -71,27 +75,26 @@ extern GSM_Information P7110_Information;
 
 #ifdef __phone_7110_c  /* Prototype functions for phone-7110.c only */
 
-GSM_Error P7110_NotImplemented();
-GSM_Error P7110_Initialise(char *port_device, char *initlength,
+static GSM_Error P7110_Initialise(char *port_device, char *initlength,
 		 GSM_ConnectionType connection,
 		 void (*rlp_callback)(RLP_F96Frame *frame));
-GSM_Error P7110_InitFunction(GSM_Link *newlink);
-GSM_Error P7110_GenericCRHandler(int messagetype, char *buffer, int length);
-GSM_Error P7110_GetIMEI(char *imei);
-GSM_Error P7110_GetRevision(char *revision);
-GSM_Error P7110_GetModel(char *model);
-GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry);
-GSM_Error P7110_WritePhonebookLocation(GSM_PhonebookEntry *entry);
-GSM_Error P7110_GetMemoryStatus(GSM_MemoryStatus *status);
-GSM_Error P7110_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
-GSM_Error P7110_GetRFLevel(GSM_RFUnits *units, float *level);
-GSM_Error P7110_GetBitmap(GSM_Bitmap *bitmap);
-GSM_Error P7110_SetBitmap(GSM_Bitmap *bitmap);
+static GSM_Error P7110_GenericCRHandler(int messagetype, char *buffer, int length);
+static GSM_Error P7110_GetIMEI(char *imei);
+static GSM_Error P7110_GetRevision(char *revision);
+static GSM_Error P7110_GetModel(char *model);
+static GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry);
+static GSM_Error P7110_WritePhonebookLocation(GSM_PhonebookEntry *entry);
+static GSM_Error P7110_GetMemoryStatus(GSM_MemoryStatus *status);
+static GSM_Error P7110_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
+static GSM_Error P7110_GetRFLevel(GSM_RFUnits *units, float *level);
+static GSM_Error P7110_GetBitmap(GSM_Bitmap *bitmap);
+static GSM_Error P7110_SetBitmap(GSM_Bitmap *bitmap);
+static GSM_Error P7110_DialVoice(char *Number);
 
-int P7110_GetMemoryType(GSM_MemoryType memory_type);
-void P7110_Terminate();
-bool P7110_SendRLPFrame( RLP_F96Frame *frame, bool out_dtx );
+static void P7110_Terminate();
+static bool P7110_SendRLPFrame( RLP_F96Frame *frame, bool out_dtx );
 
+static int GetMemoryType(GSM_MemoryType memory_type);
 
 #endif  /* #ifdef __phone_7110_c */
 

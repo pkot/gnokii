@@ -112,7 +112,10 @@ GSM_Information			MB61_Information = {
 		GBU_Arbitrary,			/* Battery level units */
 		GDT_None,				/* No date/time support */
 		GDT_None,				/* No alarm support */
-		0						/* Max alarms = 0 */
+		0,						/* Max alarms = 0 */
+		0, 0,                   /* Startup logo size */
+		0, 0,                   /* Op logo size */
+		0, 0                    /* Caller logo size */
 };
 
 	/* Local variables */

@@ -17,7 +17,11 @@
   and 6110.
 
   $Log$
-  Revision 1.121  2001-01-15 17:00:45  pkot
+  Revision 1.122  2001-01-23 15:32:35  chris
+  Pavel's 'break' and 'static' corrections.
+  Work on logos for 7110.
+
+  Revision 1.121  2001/01/15 17:00:45  pkot
   Initial keypress sequence support. Disable compilation warning
 
   Revision 1.120  2001/01/14 22:46:56  chris
@@ -180,7 +184,10 @@ GSM_Information FB61_Information = {
   GBU_Arbitrary,         /* Battery level units */
   GDT_DateTime,          /* Have date/time support */
   GDT_TimeOnly,	         /* Alarm supports time only */
-  1                      /* Only one alarm available */
+  1,                     /* Only one alarm available */
+  48, 84,                /* Startup logo size */
+  14, 72,                /* Op logo size */
+  14, 72                 /* Caller logo size */
 };
 
 unsigned char GSM_Default_Alphabet[] = {

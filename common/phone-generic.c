@@ -17,16 +17,37 @@
   The various routines are called PGEN_(whatever).
 
   $Log$
-  Revision 1.1  2001-01-14 22:46:59  chris
+  Revision 1.2  2001-01-23 15:32:42  chris
+  Pavel's 'break' and 'static' corrections.
+  Work on logos for 7110.
+
+  Revision 1.1  2001/01/14 22:46:59  chris
   Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
 
 */
 
 #include <string.h>
+#include <ctype.h>
 
 #include "gsm-common.h"
 #include "phone-generic.h"
+
+
+/* Useful debug function */
+
+void PGEN_DebugMessage(unsigned char *mes, int len)
+{
+  int i;
+  
+  fprintf(stdout,"Message debug:\n\r");
+  for(i=0;i<len;i++) 
+    if (isprint(mes[i]))
+      fprintf(stdout, "[%02x%c]", mes[i], mes[i]);
+    else
+      fprintf(stdout, "[%02x ]", mes[i]);
+  fprintf(stdout,"\n\r");
+}
 
 /* These two functions provide a generic way of waiting for a response. */
 /* The passed int refers to frame type for nokia but can be enumerated */
@@ -34,6 +55,7 @@
 /*     0 means 'received' */
 /* A generic message pointer is passed to enable resends */
 /* Timeout is in 0.1seconds _and is approximate_ (see code) */
+/* Messagetype 0 is reserved */
 
 /* FIXME - should more parameters be passed??!!?? */
 /* FIXME - tidy up + more comments */
@@ -86,6 +108,8 @@ GSM_Error PGEN_CommandResponse(GSM_Link *link, void *message, int *messagesize, 
 
 GSM_Error PGEN_CommandResponseReceive(GSM_Link *link, int MessageType, void *Message, int MessageLength)
 {
+  if (link->CR_waitfor==0) return GE_NOTWAITING;
+  
   if (MessageType==link->CR_waitfor) {
     if (MessageLength <= link->CR_messagelength) {
       link->CR_waitfor=0;

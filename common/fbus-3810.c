@@ -13,7 +13,11 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.79  2001-01-22 01:25:09  hugh
+  Revision 1.80  2001-01-23 15:32:35  chris
+  Pavel's 'break' and 'static' corrections.
+  Work on logos for 7110.
+
+  Revision 1.79  2001/01/22 01:25:09  hugh
   Tweaks for 3810 series, datacalls seem to be broken so need to do
   some more debugging...
 
@@ -167,7 +171,10 @@ GSM_Information	FB38_Information = {
 		GBU_Arbitrary,		/* Battery level units */
 		GDT_None,		/* No date/time support */
 		GDT_None,		/* No alarm support */
-		0			/* Max alarms = 0 */
+		0,			/* Max alarms = 0 */
+		0, 0,                   /* Startup logo size */
+		0, 0,                   /* Op logo size */
+		0, 0                    /* Caller logo size */
 };
 
 

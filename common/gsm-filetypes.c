@@ -1115,7 +1115,7 @@ void savexpm(char *filename, GSM_Bitmap *bitmap)
   XpmColor colors[2]={{".","c","#000000","#000000","#000000","#000000"},
 		      {"#","c","#ffffff","#ffffff","#ffffff","#ffffff"}};
   XpmImage image;
-  unsigned int data[4032];
+  unsigned int data[5760];
   int x,y;
 
   image.height=bitmap->height;

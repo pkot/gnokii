@@ -22,21 +22,21 @@
 
 #include "gsm-common.h"
 #include "gsm-bitmaps.h"
-
+#include "gsm-api.h"
 
 /* A few useful functions for bitmaps */
 
 void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y) {
-  if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*84)+x] |= 1 << (y%8);
-  if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8));
+  if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] |= 1 << (y%8);
+  if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8));
 
   /* Testing only! */
   if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8));
 }
 
 void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y) {
-  if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*84)+x] &= 255 - (1 << (y%8));
-  if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[9*y + (x/8)] &= 255 - (1 << (7-(x%8)));
+  if (bmp->type == GSM_StartupLogo) bmp->bitmap[((y/8)*bmp->width)+x] &= 255 - (1 << (y%8));
+if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) bmp->bitmap[(y*bmp->width+x)/8] &= 255 - (1 << (7-((y*bmp->width+x)%8)));
 
   /* Testing only ! */
   if (bmp->type == GSM_PictureImage) bmp->bitmap[9*y + (x/8)] &= 255 - (1 << (7-(x%8)));
@@ -45,9 +45,8 @@ void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y) {
 bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y) {
   int i=0;
 
-  if (bmp->type == GSM_StartupLogo) i=(bmp->bitmap[((y/8)*84) + x] & 1<<((y%8)));
-  if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) i=(bmp->bitmap[9*y + (x/8)] & 1<<(7-(x%8)));
-  
+  if (bmp->type == GSM_StartupLogo) i=(bmp->bitmap[((y/8)*bmp->width) + x] & 1<<((y%8)));
+  if (bmp->type == GSM_OperatorLogo || bmp->type == GSM_CallerLogo) i=(bmp->bitmap[(y*bmp->width+x)/8] & 1 << (7-((y*bmp->width+x)%8)));
   /* Testing only ! */
   if (bmp->type == GSM_PictureImage) i=(bmp->bitmap[9*y + (x/8)] & 1<<(7-(x%8)));
  
@@ -57,6 +56,7 @@ bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y) {
 void GSM_ClearBitmap(GSM_Bitmap *bmp)
 {
   int i;
+
   for (i=0;i<bmp->size;i++) bmp->bitmap[i]=0;
 }
 
@@ -70,19 +70,28 @@ void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target)
   memcpy(&backup,bitmap,sizeof(GSM_Bitmap));
       
   if (target==GSM_StartupLogo) {
-    bitmap->width=84;
-    bitmap->height=48;
+    bitmap->width=GSM_Info->StartupLogoW;
+    bitmap->height=GSM_Info->StartupLogoH;
+    bitmap->size=((bitmap->height/8)+(bitmap->height%8>0))*bitmap->width;
   }
-  if (target==GSM_OperatorLogo || target==GSM_CallerLogo) {
-    bitmap->width=72;
-    bitmap->height=14;
+  if (target==GSM_OperatorLogo) {
+    bitmap->width=GSM_Info->OpLogoW;
+    bitmap->height=GSM_Info->OpLogoH;
+    x=bitmap->width*bitmap->height;
+    bitmap->size=(x/8)+(x%8>0);
+  }
+  if (target==GSM_CallerLogo) {
+    bitmap->width=GSM_Info->CallerLogoW;
+    bitmap->height=GSM_Info->CallerLogoH;
+    x=bitmap->width*bitmap->height;
+    bitmap->size=(x/8)+(x%8>0);
   }
   if (target==GSM_PictureImage) {
     bitmap->width=72;
     bitmap->height=28;
+    bitmap->size=bitmap->width*bitmap->height/8;
   }
   bitmap->type=target;
-  bitmap->size=bitmap->width*bitmap->height/8;
 
   if (backup.width>bitmap->width) {
     copywidth=bitmap->width;

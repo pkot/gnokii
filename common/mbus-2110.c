@@ -12,7 +12,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.25  2001-01-12 14:09:12  pkot
+  Revision 1.26  2001-01-23 15:32:38  chris
+  Pavel's 'break' and 'static' corrections.
+  Work on logos for 7110.
+
+  Revision 1.25  2001/01/12 14:09:12  pkot
   More cleanups. This time mainly in the code.
 
   Revision 1.24  2001/01/10 16:32:17  pkot
@@ -81,7 +85,10 @@ GSM_Information MB21_Information = {
 	GBU_Arbitrary,			/* Battery level units */
 	GDT_None,			/* No date/time support */
 	GDT_None,			/* No alarm support */
-	0				/* Max alarms = 0 */
+	0,				/* Max alarms = 0 */
+	0, 0,                           /* Startup logo size */
+	0, 0,                           /* Op logo size */
+	0, 0                            /* Caller logo size */
 };
 
 /* Local variables */

@@ -163,6 +163,7 @@ void RLP_SetUserRequest(RLP_UserRequests type, bool value) {
       UserRequests.Disc_Req=value;
       break;
   default:
+      break;
   }
 }
 
@@ -1183,6 +1184,7 @@ void RLP_S_Handler(RLP_F96Frame *frame, RLP_F96Header *header)
     T=-1;
     return;
   default:
+    break;
   }
 
   if (VA==VS) T=-1;
@@ -1655,6 +1657,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	if (!RLP_I_Handler(frame,header)) RLP_S_Handler(frame,header);
 	break;
       default:
+       break;
       }
     }    
     
@@ -1769,7 +1772,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	NextState=1;
 	break;
       default:
-
+       break;
       }
     }
     
@@ -1813,6 +1816,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 
       switch (CurrentFrameType) {
       default:
+        break;
       }
 
     }
@@ -1849,6 +1853,7 @@ void MAIN_STATE_MACHINE(RLP_F96Frame *frame, RLP_F96Header *header) {
 	NextState=RLP_S1;
 	break;
       default:
+       break;
       }
     }
 

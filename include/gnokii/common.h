@@ -415,6 +415,12 @@ typedef struct {
   GSM_DateTimeSupport DateTimeSupport;
   GSM_DateTimeSupport AlarmSupport;
   int MaximumAlarms;
+  u8 StartupLogoH;   /* Logo Widths and Heights - if supported */
+  u8 StartupLogoW;
+  u8 OpLogoH;
+  u8 OpLogoW;
+  u8 CallerLogoH;
+  u8 CallerLogoW;
 } GSM_Information;
 
 /* Define standard GSM error/return code values. These codes are also used for
@@ -458,6 +464,7 @@ typedef enum {
   GE_USERCANCELED,
   GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
   GE_MEMORYFULL,
+  GE_NOTWAITING,            /* Not waiting for a response from the phone */
 
   /* The following are here in anticipation of data call requirements. */
 
@@ -502,7 +509,7 @@ typedef struct {
   char text[256];          /* Text used for welcome-note or callergroup name */
   char dealertext[256];    /* Text used for dealer welcome-note */
   bool dealerset;          /* Is dealer welcome-note set now ? */
-  unsigned char bitmap[504]; /* Actual Bitmap (84*48/8=504) */ 
+  unsigned char bitmap[864]; /* Actual Bitmap (96*60/8=720) */ 
   char number;             /* Caller group number */
   char ringtone;           /* Ringtone no sent with caller group */
 } GSM_Bitmap;

@@ -913,7 +913,7 @@ void SetLogoEvent(GtkWidget *widget) {
 
 static void ClearLogoEvent(GtkWidget *widget) {
   
-  bitmap.size=bitmap.width*bitmap.height/8;
+  //  bitmap.size=bitmap.width*bitmap.height/8;
   
   GSM_ClearBitmap(&bitmap);
 
