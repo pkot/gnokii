@@ -277,6 +277,7 @@ static gn_phone_model models[] = {
 	{"D211",  "DTE-1", 0},
 	{"N-Gage", "NEM-4", 0},
 	{"RinGo", "NHX-7", 0},
+	{"sx1",  "SX1", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS },
 	{NULL,    NULL, 0 }
 };
 

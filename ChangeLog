@@ -42,6 +42,7 @@
     o network info and rf level support added      (BORBELY Zoltan)
     o power source and battery level support added (BORBELY Zoltan)
     o gnapplet receives and prints debug messages  (BORBELY Zoltan)
+    o SX1 added as a supported model               (BORBELY Zoltan)
  * link layer updates
     o gnbus treats IrDA as serial                  (BORBELY Zoltan)
  * AT series updates
