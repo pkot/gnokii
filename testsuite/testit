@@ -15,5 +15,6 @@ for A in test.*; do
 	echo ok
     else
 	echo '*** FAILED'
+	diff -u $B my$B
     fi
 done
