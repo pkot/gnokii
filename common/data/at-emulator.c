@@ -264,8 +264,11 @@ void	ATEM_ParseAT(char *cmd_buffer)
 			data.CallInfo->SendNumber = GSM_CSN_Default;
 			if (SM_Functions(GOP_MakeCall, &data, sm) != GE_NONE)
 				DP_CallPassup(GSM_CS_RemoteHangup, NULL);
-			else
+			else {
+				RLP_SetUserRequest(Conn_Req, true);
+				IncomingCallNo = data.CallInfo->CallID;
 				CommandMode = false;
+			}
 			return;
 			break;
 		case 'H':

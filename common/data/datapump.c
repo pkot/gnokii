@@ -186,7 +186,6 @@ void DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
 	switch (CallStatus) {
 	case GSM_CS_Established:
 		if (CommandMode == false) ATEM_ModemResult(MR_CARRIER);
-		RLP_SetUserRequest(Conn_Req, true);
 		connected = true;
 		break;
 	case GSM_CS_LocalHangup:

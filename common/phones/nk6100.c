@@ -2763,10 +2763,6 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 	
 	/* answered call */
 	case 0x07:
-		memset(&cinfo, 0, sizeof(cinfo));
-		cinfo.CallID = message[4];
-		if (CallNotification)
-			CallNotification(GSM_CS_Established, &cinfo);
 		return GE_UNSOLICITED;
 
 	/* terminated call */

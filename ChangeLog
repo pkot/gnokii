@@ -45,6 +45,10 @@
     o SMS reading works with the new SMS subsystem   (BORBELY Zoltan)
     o "call divert is active" frame marked as unsolicited in nokia.c
                                                      (BORBELY Zoltan)
+    o answercall fix                                 (BORBELY Zoltan)
+ * gnokiid updates
+    o ATH can terminate initiated calls              (BORBELY Zoltan)
+    o incoming calls can be answered                 (BORBELY Zoltan)
 
 0.4.0pre20
 ==========
