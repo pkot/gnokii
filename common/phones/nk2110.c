@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.7  2001-06-10 23:49:49  pkot
+  Revision 1.8  2001-06-16 10:00:41  machek
+  Implement timeouts on waiting for SMS.
+
+  Revision 1.7  2001/06/10 23:49:49  pkot
   Small fixes to hide compilation warnings and allow gnokii.c to compile
 
   Revision 1.6  2001/06/10 11:28:00  machek
@@ -116,7 +119,6 @@ GSM_Phone phone_nokia_2110 = {
 static volatile bool RequestTerminate;
 static u8 TXPacketNumber = 0x01;
 #define MAX_MODEL_LENGTH 16
-static bool ModelValid     = false;
 static volatile unsigned char PacketData[256];
 static volatile bool
 	ACKOK    = false,
@@ -166,10 +168,13 @@ Wait2(long long from, int msec)
 
 #define waitfor(condition, maxtime) \
 do { \
-	while (!(condition)) { \
+	long long limit = GetTime() + maxtime*1000; \
+	if (!maxtime) limit = 0x7fffffffffffffff; \
+	while ((!(condition)) && (limit > GetTime())) { \
 		yield(); \
 		POLLIT; \
         } \
+	if (!(limit > GetTime())) fprintf(stderr, "???? TIMEOUT!"); \
 } while(0)
 
 /* Checksum calculation */
@@ -333,7 +338,11 @@ SMS(GSM_SMSMessage *message, int command)
 	message->MessageNumber = message->Location;
 
 	SendCommand(pkt, 0x38 /* LN_SMS_COMMAND */, sizeof(pkt));
-	waitfor(PacketOK, 0);
+	waitfor(PacketOK, 1000);
+	if (!PacketOK) {
+		fprintf(stderr, "No reply came within second!\n");
+	}
+		
 	if (PacketData[3] != 0x37 /* LN_SMS_EVENT */) {
 		fprintf(stderr, _("Something is very wrong with GetValue\n"));
 		return GE_BUSY; /* FIXME */
@@ -518,7 +527,6 @@ static GSM_Error GetVersionInfo(void)
 	for( Model        = s; *s != 0x0A; s++ ) if( !*s ) return (GE_NONE);
 	*s++ = 0;
 	dprintf("Revision %s, Date %s, Model %s\n", Revision, RevisionDate, Model );
-	ModelValid = true;
 	return (GE_NONE);
 }
 
@@ -1172,6 +1180,7 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 		err = EnableDisplayOutput(state);
 		break;
 	case GOP_GetSMS:
+		msleep(100);
 		err = GetSMSMessage(data->SMSMessage);
 		break;
 	case GOP_DeleteSMS:
