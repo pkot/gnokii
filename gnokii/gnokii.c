@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.147  2001-11-18 00:54:32  pkot
+  Revision 1.148  2001-11-19 13:46:43  pkot
+  reading unread SMS in 6210 from Inbox. Folder updates (Markus Plail)
+
+  Revision 1.147  2001/11/18 00:54:32  pkot
   Bugfixes. I18n of the user responses. UDH support in libsms. Business Card UDH Type
 
   Revision 1.146  2001/11/17 20:18:33  pkot
@@ -1155,19 +1158,15 @@ int getsms(int argc, char *argv[])
 			}
 		}
 	}
-#if 0
-        data.SMSFolders = &folders;
-        error = SM_Functions(GOP_GetSMSFolders, &data, &State);
-        folder.FolderID = message.MemoryType;
-        strcpy(folder.Name,folders.Folder[folder.FolderID / 8].Name);
-        data.OneSMSFolder = &folder;
-        error = SM_Functions(GOP_GetSMSFolderStatus, &data, &State);
-#endif
+	data.SMSFolderList = &folderlist;
+	folder.FolderID = 0;
+	data.SMSFolder = &folder;
 	/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count ++) {
 
 		message.Number = count;
-        	data.SMSMessage = &message;
+		data.SMSMessage = &message;
+		dprintf("MemoryType (gnokii.c) : %i\n", data.SMSMessage->MemoryType);
 		error = SM_Functions(GOP_GetSMS, &data, &State);
 
 		switch (error) {

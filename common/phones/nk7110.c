@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.22  2001-11-17 20:18:32  pkot
+  Revision 1.23  2001-11-19 13:46:42  pkot
+  reading unread SMS in 6210 from Inbox. Folder updates (Markus Plail)
+
+  Revision 1.22  2001/11/17 20:18:32  pkot
   Added dau9p connection type for 6210/7110
 
   Revision 1.21  2001/11/17 16:44:07  pkot
@@ -686,13 +689,18 @@ static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int
 static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
         int i, j;
+        int nextfolder = 0x10;
+        bool found;
 
         switch (message[3]) {
         /* getfolders */
         case 0x7B:
                 i = 5;
-                data->SMSFolderList->number = message[4];
-                dprintf("Message: %d SMS Folders received:\n", data->SMSFolder->number);
+		memset(data->SMSFolderList, 0, sizeof(GSM_SMSFolderList));
+		dprintf("Message: %d SMS Folders received:\n", message[4]);
+
+		strcpy(data->SMSFolderList->Folder[1].Name, "               ");
+		data->SMSFolderList->number = 5;
       
                 for (j = 0; j < message[4]; j++) {
 			int len;
@@ -701,16 +709,27 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
                         dprintf("Folder Index: %d", data->SMSFolderList->FolderID[j]);
                         i += 2;
                         dprintf("   Folder name: ");
-
-			len = strlen(message + i) / 2;
+			len = 0;
+			/* search for next folder's index number, i.e. length of folder name */
+			while (message[i+1] != nextfolder && i < length) {
+				i += 2;
+				len++;
+			}
+			/* see nk7110.txt */
+			nextfolder += 0x08;
+			if (nextfolder == 0x28) nextfolder++;
+			i -= 2 * len +1;
 			DecodeUnicode(data->SMSFolderList->Folder[j].Name, message + i, len);
-                        i += len + 1;
+			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
+			i += 2 * len + 2;
                 }
                 break;
 
         /* getfolderstatus */
         case 0x6C:
+		memset(data->SMSFolder, 0, sizeof(GSM_SMSFolder));
                 dprintf("Message: SMS Folder status received: \n" );
+		data->SMSFolder->FolderID = data->SMSMessage->MemoryType;
                 data->SMSFolder->number = (message[5] * 256) + message[5];
                 dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->number);
                 dprintf("Message: IDs of Entries : ");
@@ -731,6 +750,12 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
                 dprintf("\n");
 
 		memset(data->SMSMessage, 0, sizeof(GSM_SMSMessage));
+
+		/* Number of SMS in folder */
+		data->SMSMessage->Number = message[7]; 
+
+		/* MessageType/FolderID */
+		data->SMSMessage->MemoryType = message[5];
 
 		/* These offsets are 6210/7110 series specific */
 		/* Short Message status */
@@ -753,8 +778,15 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("UNKNOWN\n");
 			break;
 		}
-		/* MessageType/FolderID */
-		data->SMSMessage->MemoryType = message[5];
+		/* See if message# is given back by phone. If not and status is unread */
+		/* we want it, if status is not unread it's a "random" message given back */
+		/* by the phone because we want a message of which the # doesn't exist */
+		found = false;
+		for (i = 0; i < data->SMSFolder->number; i++) {
+			if (data->SMSMessage->Number == data->SMSFolder->locations[i]) 
+				found = true;
+		}
+		if (found==false && data->SMSMessage->Status != SMS_Unread) return GE_INVALIDSMSLOCATION;
 
 		DecodePDUSMS(message + 6, data->SMSMessage, length);
 
@@ -769,6 +801,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 				dprintf("[%02x ]", message[i]);
                 dprintf("\n");
                 dprintf("Message: Unknown message of type 14 : %d  length: %d\n", message[3], length);
+		return GE_UNKNOWN;
 		break;
         }
         return GE_NONE;
@@ -776,17 +809,41 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 
+	unsigned char req_folders[] = {FBUS_FRAME_HEADER, 0x7a, 0x00, 0x00};
+	unsigned char req_status[] = {FBUS_FRAME_HEADER, 0x6b, 
+	                        0x08, // Folder ID
+	                        0x0f, 0x01};
+	unsigned char req_sms[] = {FBUS_FRAME_HEADER, 0x07, 
 	                        0x08, // FolderID
 	                        0x00, 
 	                        0x01, // Location
 	                        0x01, 0x65, 0x01};
+	GSM_Error error;
       
+	/* see if the message we want is from the last read folder, i.e. */
+	/* we don't have to get folder status again */
+	if (data->SMSMessage->MemoryType != data->SMSFolder->FolderID) {
+
+		dprintf("Getting list of SMS folders...\n");
+		if (SM_SendMessage(state, 6, 0x14, req_folders) != GE_NONE) return GE_NOTREADY;
+		error = SM_Block(state, data, 0x14);
+
+		if (data->SMSMessage->MemoryType > data->SMSFolderList->FolderID[data->SMSFolderList->number])
+			return GE_INVALIDMEMORYTYPE;
+		data->SMSFolder->FolderID = data->SMSMessage->MemoryType;
+		req_status[4] = data->SMSMessage->MemoryType;
+
+		dprintf("Getting entries for SMS folder %i...\n", data->SMSMessage->MemoryType);
+		if (SM_SendMessage(state, 7, 0x14, req_status) != GE_NONE) return GE_NOTREADY;
+		error = SM_Block(state, data, 0x14);
+	}
+        
 	dprintf("Getting SMS...\n");
-	req[4] = data->SMSMessage->MemoryType;
-	req[6] = data->SMSMessage->Number;
-	if (SM_SendMessage(state, 10, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	req_sms[4] = data->SMSMessage->MemoryType;
+	req_sms[6] = data->SMSMessage->Number;
+	if (SM_SendMessage(state, 10, 0x14, req_sms) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
+	return GE_NONE;
 }
 
 
