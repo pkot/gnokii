@@ -56,10 +56,14 @@
 #define GNOKII_MIN(a, b)  (((a) < (b)) ? (a) : (b))
 
 /* A define to make debug printfs neat */
+#ifdef __GNUC__
 #ifndef DEBUG
 #  define dprintf(a...) do { } while (0)
 #else
 #  define dprintf(a...) do { fprintf(stderr, a); fflush(stderr); } while (0)
+#endif
+#else
+#  define dprintf printf
 #endif
 
 #include <stdarg.h>
@@ -72,23 +76,23 @@ extern void GSM_WriteErrorLog(const char *fmt, ...);
 
 /* Use gsprintf instead of sprintf and sprintf */
 #ifdef HAVE_SNPRINTF
-#  define gsprintf(a, b, c...) snprintf(a, b, c)
+#  define gsprintf	       snprintf
 #else
 #  define gsprintf(a, b, c...) sprintf(a, c)
 #endif
 #ifdef HAVE_VSNPRINTF
-#  define gvsprintf(a, b, c...) vsnprintf(a, b, c)
+#  define gvsprintf	        vsnprintf
 #else
 #  define gvsprintf(a, b, c...) vsprintf(a, c)
 #endif
 #ifdef HAVE_ASPRINTF
-#  define gasprintf(a...) asprintf(a)
+#  define gasprintf		asprintf
 #else
 #include <stdarg.h>
 extern int gasprintf(char **destp, const char *fmt,...);
 #endif
 #ifdef HAVE_VASPRINTF
-#  define gvasprintf(a...) vasprintf(a)
+#  define gvasprintf            vasprintf(a)
 #else
 extern int gvasprintf(char **destp, const char *fmt, va_list ap);
 #endif
