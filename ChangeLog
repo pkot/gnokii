@@ -8,6 +8,7 @@
     o add string.h to mgnokiidev                  (Troy Korjuslommi)
     o fix u16/unsigned int mixing problems in the statemachine
       and link layer              (Troy Korjuslommi, BORBELY Zoltan)
+    o switch black and white in bmp handling                 (Polik)
 
 0.5.0rc1
 ========

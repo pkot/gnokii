@@ -602,7 +602,7 @@ gn_error file_xpm_load(char *filename, gn_bmp *bitmap)
 gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 {
 	unsigned char buffer[34];
-	bool first_white;
+	bool first_black;
 	int w, h, pos, y, x, i, sizeimage;
 
 	gn_bmp_clear(bitmap);
@@ -655,18 +655,19 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 	fread(buffer, 1, pos, file); /* the rest of the header (if exists) and the color palette */
 
 	dprintf("First color in BMP file: %i %i %i ", buffer[pos-8], buffer[pos-7], buffer[pos-6]);
-	if (buffer[pos-8] == 0x00 && buffer[pos-7] == 0x00 && buffer[pos-6] == 0x00) dprintf("(white)");
-	if (buffer[pos-8] == 0xff && buffer[pos-7] == 0xff && buffer[pos-6] == 0xff) dprintf("(black)");
+	if (buffer[pos-8] == 0x00 && buffer[pos-7] == 0x00 && buffer[pos-6] == 0x00) dprintf("(black)");
+	if (buffer[pos-8] == 0xff && buffer[pos-7] == 0xff && buffer[pos-6] == 0xff) dprintf("(white)");
 	if (buffer[pos-8] == 0x66 && buffer[pos-7] == 0xbb && buffer[pos-6] == 0x66) dprintf("(green)");
 	dprintf("\n");
 
 	dprintf("Second color in BMP file: %i %i %i ", buffer[pos-4], buffer[pos-3], buffer[pos-2]);
-	if (buffer[pos-4] == 0x00 && buffer[pos-3] == 0x00 && buffer[pos-2] == 0x00) dprintf("(white)");
-	if (buffer[pos-4] == 0xff && buffer[pos-3] == 0xff && buffer[pos-2] == 0xff) dprintf("(black)");
+	if (buffer[pos-4] == 0x00 && buffer[pos-3] == 0x00 && buffer[pos-2] == 0x00) dprintf("(black)");
+	if (buffer[pos-4] == 0xff && buffer[pos-3] == 0xff && buffer[pos-2] == 0xff) dprintf("(white)");
+	if (buffer[pos-4] == 0x66 && buffer[pos-3] == 0xbb && buffer[pos-2] == 0x66) dprintf("(green)");
 	dprintf("\n");
 
-	first_white = true;
-	if (buffer[pos-8] != 0 || buffer[pos-7] != 0 || buffer[pos-6] != 0) first_white = false;
+	first_black = false;
+	if (buffer[pos-8] == 0 && buffer[pos-7] == 0 && buffer[pos-6] == 0) first_black = true;
 
 	sizeimage = 0;
 	pos = 7;
@@ -680,7 +681,7 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 				if (i == 5) i = 1; /* each line is written in multiply of 4 bytes */
 			}
 			if (x <= bitmap->width && y <= bitmap->height) { /* we have top left corner ! */
-				if (!first_white) {
+				if (first_black) {
 					if ((buffer[0] & (1 << pos)) <= 0) gn_bmp_point_set(bitmap, x, y);
 				} else {
 					if ((buffer[0] & (1 << pos)) > 0) gn_bmp_point_set(bitmap, x, y);
@@ -1089,9 +1090,9 @@ void file_bmp_save(FILE *file, gn_bmp *bitmap)
    exist */		0x00, 0x00, 0x00, 0x00,	/* How many colors from palette is required to display image. 0 means all */
 
 /* Color
-   palette */		0x00, 0x00, 0x00,	/* First color in palette in Blue, Green, Red. Here white */
+   palette */		0xFF, 0xFF, 0xFF,	/* First color in palette in Blue, Green, Red. Here white */
 			0x00,			/* Each color in palette is end by 4'th byte */
-			0xFF, 0xFF, 0xFF,	/* Second color in palette in Blue, Green, Red. Here black */
+			0x00, 0x00, 0x00,	/* Second color in palette in Blue, Green, Red. Here black */
 			0x00};			/* Each color in palette is end by 4'th byte */
 
 	header[22] = bitmap->height;
@@ -1324,8 +1325,9 @@ gn_error gn_file_bitmap_show(char *filename)
 		return error;
 
 	for (i = 0; i < bitmap.height; i++) {
-		for (j = 0; j < bitmap.width; j++)
+		for (j = 0; j < bitmap.width; j++) {
 			printf("%c", gn_bmp_point(&bitmap, j, i) ? '#' : ' ');
+		}
 		printf("\n");
 	}
 
