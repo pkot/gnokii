@@ -1,3 +1,5 @@
+$Id$
+
 Assembled by
         Markus Plail <plail@web.de>
 	... and other members of gnokii mailing list
