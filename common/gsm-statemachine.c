@@ -31,7 +31,7 @@
 #include "gsm-statemachine.h"
 
 #include "gnokii-internal.h"
-#include "gnokii-api.h"
+#include "gsm-api.h"
 
 gn_error SM_Initialise(struct gn_statemachine *state)
 {

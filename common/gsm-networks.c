@@ -29,7 +29,7 @@
 */
 
 #include "config.h"
-
+#include "compat.h"
 #include <string.h>
 #include "gsm-networks.h"
 

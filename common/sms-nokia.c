@@ -29,8 +29,10 @@
 */
 
 #include <string.h>
+#include "misc.h"
 #include "sms-nokia.h"
 #include "gsm-encoding.h"
+#include "gsm-bitmaps.h"
 
 /**
  * PackSmartMessagePart - Adds Smart Message header to the certain part of the message

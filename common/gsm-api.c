@@ -43,6 +43,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "cfgreader.h"
+#include "gsm-api.h"
 #include "data/rlp-common.h"
 #include "gsm-statemachine.h"
 #include "phones/nk6510.h"
@@ -118,30 +119,14 @@ static gn_error register_driver(gn_driver *driver, char *model, char *setupmodel
 }
 
 API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
-				const char *connection, struct gn_statemachine *sm)
+			       gn_connection_type connection,
+			       void (*rlp_handler)(gn_rlp_f96_frame *frame),
+			       struct gn_statemachine *sm)
 {
 	gn_error ret;
 	char *sms_timeout;
 
-	if (!strcasecmp(connection, "serial"))
-		sm->Link.ConnectionType = GCT_Serial;
-	else if (!strcasecmp(connection, "dau9p"))
-		sm->Link.ConnectionType = GCT_DAU9P;
-	else if (!strcasecmp(connection, "dlr3p"))
-		sm->Link.ConnectionType = GCT_DLR3P;
-	else if (!strcasecmp(connection, "infrared"))
-		sm->Link.ConnectionType = GCT_Infrared;
-#ifdef HAVE_IRDA
-	else if (!strcasecmp(connection, "irda"))
-		sm->Link.ConnectionType = GCT_Irda;
-#endif
-#ifndef WIN32
-	else if (!strcasecmp(connection, "tcp"))
-		sm->Link.ConnectionType = GCT_TCP;
-	else if (!strcasecmp(connection, "tekram"))
-		sm->Link.ConnectionType = GCT_Tekram;
-#endif
-	else return GN_ERR_NOTSUPPORTED;
+	sm->link.connection_type = connection;
 	sm->link.init_length = atoi(initlength);
 	sms_timeout = gn_cfg_get(gn_cfg_info, "sms", "timeout");
 	if (!sms_timeout) sm->link.sms_timeout = 100;

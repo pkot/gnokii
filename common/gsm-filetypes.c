@@ -39,6 +39,9 @@
 #include "gsm-bitmaps.h"
 #include "gsm-ringtones.h"
 
+#include "gnokii-internal.h"
+#include "gsm-api.h"
+
 #ifdef XPM
 #include <X11/xpm.h>
 #endif

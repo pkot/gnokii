@@ -42,7 +42,7 @@
 #include "sms-nokia.h"
 
 #include "gnokii-internal.h"
-#include "gnokii-api.h"
+#include "gsm-api.h"
 
 #define ERROR() do { if (error != GN_ERR_NONE) return error; } while (0)
 

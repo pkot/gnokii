@@ -39,6 +39,7 @@
 #include <errno.h>
 
 #include "cfgreader.h"
+#include "gnokii-internal.h"
 
 API struct gn_cfg_header *gn_cfg_info;
 

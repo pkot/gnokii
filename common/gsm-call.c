@@ -36,7 +36,7 @@
 #include "gsm-call.h"
 
 #include "gnokii-internal.h"
-#include "gnokii-api.h"
+#include "gsm-api.h"
 
 static gn_call calltable[GN_CALL_MAX_PARALLEL];
 

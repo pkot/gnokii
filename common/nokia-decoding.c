@@ -34,6 +34,9 @@
 #include "gsm-common.h"
 #include "nokia-decoding.h"
 
+#include "gnokii-internal.h" 
+#include "gsm-api.h"
+
 gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			  int blocks, int memtype, int speeddial_pos)
 {
