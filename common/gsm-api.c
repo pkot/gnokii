@@ -62,6 +62,13 @@ GSM_Information		*GSM_Info;
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
 
+static GSM_Error register_phone(GSM_Phone *phone, char *model, GSM_Statemachine *sm)
+{
+       if (strstr(phone->Info.Models, model) != NULL)
+               return phone->Functions(GOP_Init, NULL, sm);
+       return GE_UNKNOWNMODEL;
+}
+
 #define MODULE(x) { \
 	extern GSM_Functions x##_Functions; \
 	extern GSM_Information x##_Information; \
@@ -74,28 +81,31 @@ GSM_Information		*GSM_Info;
 	} \
 }
 
-GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
-{
-  MODULE(FB38)
-  MODULE(FB61)
-#ifndef WIN32	/* MB21 not supported in win32 */
-  MODULE(MB21)
-  MODULE(MB61)
-  MODULE(MB640)
-  MODULE(D2711)
+#define REGISTER_PHONE(x) { \
+        extern GSM_Phone phone_##x; \
+        if ((ret = register_phone(&phone_##x, model, sm)) != GE_UNKNOWNMODEL) \
+                return ret; \
+ } 
 
  
-	  /* FIXME - how do we get the models...*/
-	  /* For now statemachine will owned by gsm-api.c */
-	  
-	  if (strstr("7110|6210", model) != NULL) {   
-		  GSM_LinkOK = &LinkAlwaysOK; 
-		  sm->Link.ConnectionType=connection;
-		  sm->Link.InitLength=atoi(initlength);
-		  strcpy(sm->Link.PortDevice,device);
-		  return P7110_Functions(GOP_Init, NULL, sm); 
-	  }
+GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
+{
+        GSM_Error ret;
+        MODULE(FB38);
+        MODULE(FB61);
+ #ifndef WIN32  /* MB21 not supported in win32 */
+        MODULE(MB21);
+        MODULE(MB61);
+        MODULE(MB640);
+        MODULE(D2711);
+ 
+        GSM_LinkOK = &LinkAlwaysOK;
+        sm->Link.ConnectionType=connection;
+        sm->Link.InitLength=atoi(initlength);
+        strcpy(sm->Link.PortDevice,device);
+ 
+        REGISTER_PHONE(nokia_7110);
 
-#endif /* WIN32 */ 
-  return (GE_UNKNOWNMODEL);
+ #endif /* WIN32 */ 
+        return (GE_UNKNOWNMODEL);
 }

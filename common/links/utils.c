@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.2  2001-03-21 23:36:05  chris
+  Revision 1.3  2001-03-23 13:40:23  chris
+  Pavel's patch and a few fixes.
+
+  Revision 1.2  2001/03/21 23:36:05  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -43,7 +46,7 @@
 #include "gsm-networks.h"
 #include "device.h"
 
-#ifdef 0
+#if 0
 
 void
 link_dispatch(GSM_Link *glink, GSM_Phone *gphone, int type, u8 *buf, int len)

@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.2  2001-03-21 23:36:08  chris
+  Revision 1.3  2001-03-23 13:40:25  chris
+  Pavel's patch and a few fixes.
+
+  Revision 1.2  2001/03/21 23:36:08  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -81,10 +84,9 @@ extern bool P7110_LinkOK;
 #define P7110_ENTRYTYPE_DATE   0x13   /* Date for a Called List */
 #define P7110_ENTRYTYPE_GROUP  0x1e   /* Group number for phonebook entry */
 
-GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, void *state);
-
 #ifdef __phones_nk7110_c  /* Prototype functions for phone-7110.c only */
 
+static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_Initialise(GSM_Statemachine *state);
 static GSM_Error P7110_GetModel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetRevision(GSM_Data *data, GSM_Statemachine *state);
@@ -97,7 +99,6 @@ static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int 
 static GSM_Error P7110_Incoming0x03(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_Incoming0x0a(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_Incoming0x17(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
-static GSM_Error P7110_IncomingDefault(int messagetype, unsigned char *message, int length);
 
 
 static int GetMemoryType(GSM_MemoryType memory_type);

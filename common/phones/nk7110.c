@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.5  2001-03-22 16:17:06  chris
+  Revision 1.6  2001-03-23 13:40:24  chris
+  Pavel's patch and a few fixes.
+
+  Revision 1.5  2001/03/22 16:17:06  chris
   Tidy-ups and fixed gnokii/Makefile and gnokii/ChangeLog which I somehow corrupted.
 
   Revision 1.4  2001/03/21 23:36:06  chris
@@ -94,9 +97,9 @@ static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ 0, NULL}
 };
 
-static GSM_Phone phone = {
+GSM_Phone phone_nokia_7110 = {
 	P7110_IncomingFunctions,
-	P7110_IncomingDefault,
+	PGEN_IncomingDefault,
         /* Mobile phone information */
 	{
 		"7110|6210", /* Supported models */
@@ -113,13 +116,13 @@ static GSM_Phone phone = {
 		21, 78,                /* Op logo size */
 		14, 72                 /* Caller logo size */
 	},
+	P7110_Functions
 };
 
 
 /* FIXME - a little macro would help here... */
-/* Is there a way of not having state as a void?? */
 
-GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, void *state)
+static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
 	switch (op) {
 	case GOP_Init:
@@ -165,8 +168,7 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 	GSM_Error err;
 
 	/* Copy in the phone info */
-	memcpy(&(state->Phone), &phone, sizeof(GSM_Phone));
-	state->Phone.Functions=P7110_Functions;
+	memcpy(&(state->Phone), &phone_nokia_7110, sizeof(GSM_Phone));
 
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
@@ -192,7 +194,7 @@ static GSM_Error P7110_Initialise(GSM_Statemachine *state)
 
 	GSM_DataClear(&data);
 	data.Model=model;
-	if (P7110_Functions(GOP_GetModel, &data, state)!=GE_NONE) return GE_NOTSUPPORTED ;
+	if (state->Phone.Functions(GOP_GetModel, &data, state)!=GE_NONE) return GE_NOTSUPPORTED ;
 
 	/* Check for 7110 and alter the startup logo size */
 	if (strcmp(model,"NSE-5")==0) {
@@ -370,17 +372,6 @@ static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *message, int
 	}
 
 }
-
-/* If we do not support a message type, print out some debugging info */
-
-static GSM_Error P7110_IncomingDefault(int messagetype, unsigned char *buffer, int length)
-{
-	dprintf("Unknown Message received [type (%02x) length (%d): \n", messagetype, length);
-	PGEN_DebugMessage(messagetype, buffer, length);
-
-	return GE_NONE;
-}
-
 
 static int GetMemoryType(GSM_MemoryType memory_type)
 {

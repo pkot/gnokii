@@ -14,7 +14,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.2  2001-03-13 01:24:03  pkot
+  Revision 1.3  2001-03-23 13:40:23  chris
+  Pavel's patch and a few fixes.
+
+  Revision 1.2  2001/03/13 01:24:03  pkot
   Code cleanup - no warnings during compilation
 
   Revision 1.1  2001/03/11 11:26:15  machek
@@ -36,28 +39,32 @@
 
 static GSM_Link link;
 static GSM_IncomingFunctionType D2711_IncomingFunctions[];
+ 
+#define INFO \
+{ \
+	"dancall|2711|2713", /* Supported models */ \
+                7,                     /* Max RF Level */ \
+                0,                     /* Min RF Level */ \
+                GRF_Percentage,        /* RF level units */ \
+                7,                     /* Max Battery Level */ \
+                0,                     /* Min Battery Level */ \
+                GBU_Percentage,        /* Battery level units */ \
+                0,                        /* Have date/time support */ \
+                0,                       /* Alarm supports time only */ \
+                1,                     /* Alarms available - FIXME */ \
+                60, 96,                /* Startup logo size - 7110 is fixed at init*/ \
+                21, 78,                /* Op logo size */ \
+                14, 72                 /* Caller logo size */ \
+		}
+
+GSM_Information D2711_Information = INFO;
+
+
 static GSM_Phone phone = {
-	8,  /* No of functions in array */
 	D2711_IncomingFunctions,
-	PGEN_IncomingDefault
+	PGEN_IncomingDefault,
+	INFO
 };
-
-GSM_Information D2711_Information = {
-	"dancall|2711|2713", /* Supported models */
-	7,                     /* Max RF Level */
-	0,                     /* Min RF Level */
-	GRF_Percentage,        /* RF level units */
-	7,                     /* Max Battery Level */
-	0,                     /* Min Battery Level */
-	GBU_Percentage,        /* Battery level units */
-	0,		          /* Have date/time support */
-	0,		         /* Alarm supports time only */
-	1,                     /* Alarms available - FIXME */
-	60, 96,                /* Startup logo size - 7110 is fixed at init*/
-	21, 78,                /* Op logo size */
-	14, 72                 /* Caller logo size */
-};
-
 
 /* LinkOK is always true for now... */
 bool D2711_LinkOK = true;
@@ -70,7 +77,7 @@ static void Terminate()
 
 /* ----------------------------------------------------------------------------------- */
 
-static GSM_Error Reply(int messagetype, unsigned char *buffer, int length)
+static GSM_Error Reply(int messagetype, unsigned char *buffer, int length, GSM_Data *data)
 {
 	printf("[ack]");
 	return GE_NONE;
@@ -259,4 +266,5 @@ static GSM_IncomingFunctionType D2711_IncomingFunctions[] = {
 	{ 0, Reply },
 	{ 0, Reply },
 	{ 0, Reply },
+	{ 0, NULL }
 };

@@ -672,12 +672,14 @@ typedef enum {
 /* This structure contains the 'callups' needed by the statemachine */
 /* to deal with messages from the phone and other information */
 
+typedef struct _GSM_Statemachine GSM_Statemachine; 
+
 typedef struct {
   /* These make up a list of functions, one for each message type and NULL terminated */
   GSM_IncomingFunctionType *IncomingFunctions;
   GSM_Error (*DefaultFunction)(int messagetype, unsigned char *buffer, int length);
   GSM_Information Info;
-  GSM_Error (*Functions)(GSM_Operation op, GSM_Data *data, void *state);
+  GSM_Error (*Functions)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 } GSM_Phone;
 
 
@@ -697,7 +699,7 @@ typedef enum {
 
 /* All properties of the state machine */
 
-typedef struct {
+struct _GSM_Statemachine{
 	GSM_State CurrentState;
 	GSM_Link Link;
 	GSM_Phone Phone;
@@ -714,7 +716,7 @@ typedef struct {
 	GSM_Error ResponseError[SM_MAXWAITINGFOR];
 	/* Data structure to be filled in with the response */
 	GSM_Data *Data[SM_MAXWAITINGFOR];
-} GSM_Statemachine;
+};
 
 
  
