@@ -1636,6 +1636,16 @@ GSM_Error ReadBitmapFileOnConsole(char *FileName, GSM_Bitmap *bitmap, GSM_Inform
 }
 
 
+static GSM_Bitmap_Types check_bitmap_type(char *s)
+{
+	if (!strcmp(s, "text")) return GSM_WelcomeNoteText;
+	if (!strcmp(s, "dealer")) return GSM_DealerNoteText;
+	if (!strcmp(s, "op")) return GSM_OperatorLogo;
+	if (!strcmp(s, "startup")) return GSM_StartupLogo;
+	if (!strcmp(s, "caller")) return GSM_CallerLogo;
+	return GSM_None;
+}
+
 static int setlogo(int argc, char *argv[])
 {
 	GSM_Bitmap bitmap, oldbit;
@@ -1653,69 +1663,62 @@ static int setlogo(int argc, char *argv[])
 
 	memset(&bitmap.text, 0, sizeof(bitmap.text));
 
-	if (!strcmp(argv[0], "text") || !strcmp(argv[0], "dealer")) {
-		if (!strcmp(argv[0], "text")) bitmap.type = GSM_WelcomeNoteText;
-		else bitmap.type = GSM_DealerNoteText;
+	bitmap.type = check_bitmap_type(argv[0]);
+	switch (bitmap.type) {
+	case GSM_WelcomeNoteText:
+	case GSM_DealerNoteText:
 		if (argc > 1) strncpy(bitmap.text, argv[1], sizeof(bitmap.text) - 1);
-	} else {
-		if (!strcmp(argv[0], "op") || !strcmp(argv[0], "startup") || !strcmp(argv[0], "caller")) {
-			if (argc > 1) {
-				if (ReadBitmapFileOnConsole(argv[1], &bitmap, info) != GE_NONE)
-					return(-1);
-
-				if (!strcmp(argv[0], "op")) {
-					memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
-					if (bitmap.type != GSM_OperatorLogo || argc < 3) {
-						if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE) strncpy(bitmap.netcode, NetworkInfo.NetworkCode, sizeof(bitmap.netcode) - 1);
-					}
-					GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, info);
-					if (argc == 3) {
-						strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
-						if (!strcmp(GSM_GetNetworkName(bitmap.netcode), "unknown")) {
-							fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
-							return -1;
-						}
-					}
-				}
-				if (!strcmp(argv[0], "startup")) {
-					GSM_ResizeBitmap(&bitmap, GSM_StartupLogo, info);
-				}
-				if (!strcmp(argv[0],"caller")) {
-					GSM_ResizeBitmap(&bitmap, GSM_CallerLogo, info);
-					if (argc > 2) {
-						bitmap.number = argv[2][0] - '0';
-						if ((bitmap.number < 0) || (bitmap.number > 9)) bitmap.number = 0;
-					} else {
-						bitmap.number = 0;
-					}
-					oldbit.type = GSM_CallerLogo;
-					oldbit.number = bitmap.number;
-					data.Bitmap = &oldbit;
-					if (SM_Functions(GOP_GetBitmap, &data, &State) == GE_NONE) {
-						/* We have to get the old name and ringtone!! */
-						bitmap.ringtone = oldbit.ringtone;
-						strncpy(bitmap.text, oldbit.text, sizeof(bitmap.text) - 1);
-					}
-					if (argc > 3) strncpy(bitmap.text, argv[3], sizeof(bitmap.text) - 1);
-				}
-				fprintf(stdout, _("Setting Logo.\n"));
-			} else {
-				/* FIXME: is it possible to permanently remove op logo ? */
-				if (!strcmp(argv[0], "op")) {
-					bitmap.type = GSM_OperatorLogo;
-					strcpy(bitmap.netcode, "000 00");
-					bitmap.width = 72;
-					bitmap.height = 14;
-					bitmap.size = bitmap.width * bitmap.height / 8;
-					GSM_ClearBitmap(&bitmap);
-				}
-				/* FIXME: how to remove startup and group logos ? */
-				fprintf(stdout, _("Removing Logo.\n"));
-			}
-		} else {
-			fprintf(stderr, _("What kind of logo do you want to set ?\n"));
-			return -1;
+		break;
+	case GSM_OperatorLogo:
+		if ((argc > 1) && (ReadBitmapFileOnConsole(argv[1], &bitmap, info) != GE_NONE)) return -1;
+		else /* Set the NULL bitmap. FIXME: make it a function */ {
+			bitmap.type = GSM_OperatorLogo;
+			strcpy(bitmap.netcode, "000 00");
+			/* FIXME: is info (from State) already set? */
+			bitmap.width = info->OpLogoW;
+			bitmap.height = info->OpLogoH;
+			bitmap.size = bitmap.width * bitmap.height / 8;
+			GSM_ClearBitmap(&bitmap);
+			fprintf(stdout, _("Removing Logo.\n"));
 		}
+			
+		memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
+		if (bitmap.type != GSM_OperatorLogo || argc < 3)
+			if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE) strncpy(bitmap.netcode, NetworkInfo.NetworkCode, sizeof(bitmap.netcode) - 1);
+		GSM_ResizeBitmap(&bitmap, GSM_OperatorLogo, info);
+		if (argc == 3) {
+			strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
+			if (!strcmp(GSM_GetNetworkName(bitmap.netcode), "unknown")) {
+				fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
+				return -1;
+			}
+		}
+		break;
+	case GSM_StartupLogo:
+		if ((argc > 1) && (ReadBitmapFileOnConsole(argv[1], &bitmap, info) != GE_NONE)) return -1;
+		GSM_ResizeBitmap(&bitmap, GSM_StartupLogo, info);
+		break;
+	case GSM_CallerLogo:
+		if ((argc > 1) && (ReadBitmapFileOnConsole(argv[1], &bitmap, info) != GE_NONE)) return -1;
+		GSM_ResizeBitmap(&bitmap, GSM_CallerLogo, info);
+		if (argc > 2) {
+			bitmap.number = argv[2][0] - '0';
+			if ((bitmap.number < 0) || (bitmap.number > 9)) bitmap.number = 0;
+			else bitmap.number = 0;
+			oldbit.type = GSM_CallerLogo;
+			oldbit.number = bitmap.number;
+			data.Bitmap = &oldbit;
+			if (SM_Functions(GOP_GetBitmap, &data, &State) == GE_NONE) {
+				/* We have to get the old name and ringtone!! */
+				bitmap.ringtone = oldbit.ringtone;
+				strncpy(bitmap.text, oldbit.text, sizeof(bitmap.text) - 1);
+			}
+			if (argc > 3) strncpy(bitmap.text, argv[3], sizeof(bitmap.text) - 1);
+		}
+		break;
+	default:
+		fprintf(stderr, _("What kind of logo do you want to set ?\n"));
+		return -1;
 	}
 
 	data.Bitmap = &bitmap;
@@ -1734,17 +1737,18 @@ static int setlogo(int argc, char *argv[])
 					if (bitmap.type == GSM_DealerNoteText) fprintf(stderr, _(" dealer"));
 					fprintf(stderr, _(" welcome note - "));
 
-					/* I know, it looks horrible, but... */
-					/* I set it to the short string - if it won't be set */
-					/* it means, PIN is required. If it will be correct, previous */
-					/* (user) text was too long */
-
-					/* Without it, I could have such thing: */
-					/* user set text to very short string (for example, "Marcin") */
-					/* then enable phone without PIN and try to set it to the very long (too long for phone) */
-					/* string (which start with "Marcin"). If we compare them as only length different, we could think, */
-					/* that phone accepts strings 6 chars length only (length of "Marcin") */
-					/* When we make it correct, we don't have this mistake */
+					/* I know, it looks horrible, but...
+					 * I set it to the short string - if it won't be set
+					 * it means, PIN is required. If it will be correct, previous
+					 * (user) text was too long.
+					 *
+					 * Without it, I could have such thing:
+					 * user set text to very short string (for example, "Marcin")
+					 * then enable phone without PIN and try to set it to the very long (too long for phone)
+					 * string (which start with "Marcin"). If we compare them as only length different, we could think,
+					 * that phone accepts strings 6 chars length only (length of "Marcin")
+					 * When we make it correct, we don't have this mistake
+					 */
 
 					strcpy(oldbit.text, "!");
 					data.Bitmap = &oldbit;

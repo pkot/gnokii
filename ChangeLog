@@ -14,6 +14,9 @@
  * 6110 series updates
     o explicitly name 3360 in misc.h (for xgnokii) and in unixirda.c
       (for irda connections)                           (Kevin Thayer)
+ * bitmap support
+    o begin cleaning up bitmap code; rewrite bitmap handling in
+      gnokii.c in the readable way                        (Pawel Kot)
 
 0.4.0pre19
 ==========
