@@ -342,9 +342,9 @@ static void ReadSMS (gpointer d, gpointer userData)
     { 
 #ifdef XDEBUG 
       g_print ("%d. %s   ", data->Number, data->Remote.Number);
-      g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->Time.Year,
-                data->Time.Month, data->Time.Day, data->Time.Hour,
-                data->Time.Minute, data->Time.Second, data->Time.Timezone,
+      g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->SMSCTime.Year,
+                data->SMSCTime.Month, data->SMSCTime.Day, data->SMSCTime.Hour,
+                data->SMSCTime.Minute, data->SMSCTime.Second, data->SMSCTime.Timezone,
                 data->UserData[0].u.Text);
 #endif
       (*DB_InsertSMS) (data);
