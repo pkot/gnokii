@@ -38,6 +38,7 @@ OBJS =	cfgreader.o \
 	gsm-common.o \
 	fbus-generic.o \
 	phone-generic.o \
+	phone-nokia.o \
 	phone-7110.o
 
 DATA_OBJS = virtmodem.o \

@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.123  2001-01-31 12:49:00  pkot
+  Revision 1.124  2001-02-01 15:17:27  pkot
+  Fixed --identify and added Manfred's manufacturer patch
+
+  Revision 1.123  2001/01/31 12:49:00  pkot
   Many cleanups in fbus-6110 code.
   3210/3310 really work now.
 
@@ -102,6 +105,7 @@ extern HANDLE hPhone;
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
 #include "phone-generic.h"
+#include "phone-nokia.h"
 
 /* Global variables used by code in gsm-api.c to expose the functions
    supported by this model of phone. */
@@ -145,6 +149,7 @@ GSM_Functions FB61_Functions = {
 	FB61_GetIMEI,
 	FB61_GetRevision,
 	FB61_GetModel,
+	PNOK_GetManufacturer,
 	FB61_GetDateTime,
 	FB61_SetDateTime,
 	FB61_GetAlarm,

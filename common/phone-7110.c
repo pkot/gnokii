@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.4  2001-01-29 17:14:42  chris
+  Revision 1.5  2001-02-01 15:17:31  pkot
+  Fixed --identify and added Manfred's manufacturer patch
+
+  Revision 1.4  2001/01/29 17:14:42  chris
   dprintf now in misc.h (and fiddling with 7110 code)
 
   Revision 1.3  2001/01/23 15:32:41  chris
@@ -44,6 +47,7 @@
 #include "phone-generic.h"
 #include "phone-7110.h"
 #include "fbus-generic.h"
+#include "phone-nokia.h"
 
 
 /* Some globals */
@@ -113,6 +117,7 @@ GSM_Functions P7110_Functions = {
   P7110_GetIMEI,        /* GetIMEI */
   P7110_GetRevision,    /* GetRevision */
   P7110_GetModel,       /* GetModel */
+  PNOK_GetManufacturer,       /* GetManufacturer */
   UNIMPLEMENTED, /* GetDateTime */
   UNIMPLEMENTED, /* SetDateTime */
   UNIMPLEMENTED, /* GetAlarm */

@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.80  2001-01-23 15:32:35  chris
+  Revision 1.81  2001-02-01 15:17:27  pkot
+  Fixed --identify and added Manfred's manufacturer patch
+
+  Revision 1.80  2001/01/23 15:32:35  chris
   Pavel's 'break' and 'static' corrections.
   Work on logos for 7110.
 
@@ -90,6 +93,7 @@
 #include    "gsm-common.h"
 #include    "rlp-common.h"
 #include    "fbus-3810.h"
+#include    "phone-nokia.h"
 
     /* Global variables used by code in gsm-api.c to expose the
        functions supported by this model of phone.  */
@@ -130,6 +134,7 @@ GSM_Functions	FB38_Functions = {
 		FB38_GetIMEI,
 		FB38_GetRevision,
 		FB38_GetModel,
+		PNOK_GetManufacturer,
 		UNIMPLEMENTED,
 		UNIMPLEMENTED,
 		UNIMPLEMENTED,

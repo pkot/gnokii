@@ -17,7 +17,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.117  2001-01-31 23:45:27  pkot
+  Revision 1.118  2001-02-01 15:17:33  pkot
+  Fixed --identify and added Manfred's manufacturer patch
+
+  Revision 1.117  2001/01/31 23:45:27  pkot
   --identify should work ok now
 
   Revision 1.116  2001/01/24 20:19:55  machek
@@ -3095,7 +3098,7 @@ int netmonitor(char *Mode)
 int identify( void )
 {
   /* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
-  char imei[64], model[64], rev[64];
+  char imei[64], model[64], rev[64], manufacturer[64];
 
   fbusinit(NULL);
 
@@ -3104,13 +3107,16 @@ int identify( void )
   sleep(2);
 
   strcpy(imei, "(unknown)");
+  strcpy(manufacturer, "(unknown)");
   strcpy(model, "(unknown)");
   strcpy(rev, "(unknown)");
+  GSM->GetManufacturer(manufacturer);
   GSM->GetIMEI(imei);
   GSM->GetRevision(rev);
   GSM->GetModel(model);
 
   fprintf(stdout, _("IMEI:     %s\n"), imei);
+  fprintf(stdout, _("Manufacturer: %s\n"), manufacturer);
   fprintf(stdout, _("Model:    %s\n"), model);
   fprintf(stdout, _("Revision: %s\n"), rev);
 

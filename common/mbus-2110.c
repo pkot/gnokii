@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.29  2001-01-31 11:46:50  machek
+  Revision 1.30  2001-02-01 15:17:30  pkot
+  Fixed --identify and added Manfred's manufacturer patch
+
+  Revision 1.29  2001/01/31 11:46:50  machek
   Comment out SendSMSMessage to kill warning.
 
   Revision 1.28  2001/01/29 17:14:42  chris
@@ -67,6 +70,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "mbus-2110.h"
+#include "phone-nokia.h"
 
 #define MYID 0x78
 
@@ -1074,6 +1078,7 @@ GSM_Functions MB21_Functions = {
 	UNIMPLEMENTED,
 	GetRevision,
 	GetModel2110,
+	PNOK_GetManufacturer,
 	UNIMPLEMENTED,
 	UNIMPLEMENTED,
 	UNIMPLEMENTED,

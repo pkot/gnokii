@@ -704,6 +704,8 @@ typedef struct {
 
   GSM_Error (*GetModel)( char *model );
 
+  GSM_Error (*GetManufacturer)( char *manufacturer );
+
   GSM_Error (*GetDateTime)( GSM_DateTime *date_time);
 
   GSM_Error (*SetDateTime)( GSM_DateTime *date_time);
