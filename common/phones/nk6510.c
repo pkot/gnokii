@@ -859,9 +859,10 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 	case 0x04:  /* Get status response */
 		if (data->MemoryStatus) {
 			if (message[5] != 0xff) {
-				data->MemoryStatus->Used = (message[16] << 8) + message[17];
-				data->MemoryStatus->Free = ((message[14] << 8) + message[15]) - data->MemoryStatus->Used;
-				dprintf("Memory status - location = %d\n", (message[8] << 8) + message[9]);
+				data->MemoryStatus->Used = (message[20] << 8) + message[21];
+				data->MemoryStatus->Free = ((message[18] << 8) + message[19]) - data->MemoryStatus->Used;
+				dprintf("Memory status - location = %d, Capacity: %d \n",
+					(message[4] << 8) + message[5], (message[18] << 8) + message[19]);
 			} else {
 				dprintf("Unknown error getting mem status\n");
 				return GE_NOTIMPLEMENTED;
@@ -1039,18 +1040,21 @@ static GSM_Error P6510_IncomingPhonebook(int messagetype, unsigned char *message
 
 static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x00, 0x00, 0xFE, 0x00};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x02, 0x00, 0x55, 0x55, 0x55, 0x00};
 	/* 00 01 00 07 00 00 FE 00 */
+	/* #$03#$02+chr(abook)+#$55#$55#$55#$00,1,false) */
+
 	dprintf("Getting memory status...\n");
-	//	req[5] = GetMemoryType(data->MemoryStatus->MemoryType);
-	if (SM_SendMessage(state, 8, 0x03, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x03);
+
+	req[5] = GetMemoryType(data->MemoryStatus->MemoryType);
+	if (SM_SendMessage(state, 10, P6510_MSG_PHONEBOOK, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_PHONEBOOK);
 }
 
 
-static GSM_Error P6510_ReadPhonebookLL(GSM_Data *data, GSM_Statemachine *state, int memtype, int location)
+static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[2000] = {FBUS_FRAME_HEADER, 0x07, 0x04, 0x01, 0x00, 0x01,
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x04, 0x01, 0x00, 0x01,
 					0x02, 0x05, /* memory type */ //02,05
 					0x00, 0x00, 0x00, 0x00, 
 				         0x00, 0x01, /*location */
@@ -1068,26 +1072,14 @@ static GSM_Error P6510_ReadPhonebookLL(GSM_Data *data, GSM_Statemachine *state, 
 		00 00 00 01 00 00   get phonebook
 	*/
 
-	dprintf("Reading phonebook location (%d)\n", location);
-	error = P6510_GetMemoryStatus(data, state);
-	error = P6510_GetBatteryLevel(data, state);
+	dprintf("Reading phonebook location (%d)\n", data->PhonebookEntry->Location);
 
-	req[9] = memtype;
-	req[14] = location >> 8;
-	req[15] = location & 0xff;
+	req[9] = GetMemoryType(data->PhonebookEntry->MemoryType);
+	req[14] = data->PhonebookEntry->Location >> 8;
+	req[15] = data->PhonebookEntry->Location & 0xff;
 
 	if (SM_SendMessage(state, 20, P6510_MSG_PHONEBOOK, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_PHONEBOOK);
-}
-
-static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
-{
-	int memtype, location;
-
-	memtype = GetMemoryType(data->PhonebookEntry->MemoryType);
-	location = data->PhonebookEntry->Location;
-
-	return P6510_ReadPhonebookLL(data, state, memtype, location);
 }
 
 static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
@@ -1116,7 +1108,7 @@ static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	GSM_Error	e = GE_NONE;
+	GSM_Error error = GE_NONE;
 
 	dprintf("Incoming clock!\n");
 	if (!data || !data->DateTime) return GE_INTERNALERROR;
@@ -1141,7 +1133,7 @@ static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, in
 		default:
 			data->DateTime->AlarmEnabled = -1;
 			dprintf("Unknown value of alarm enable byte: 0x%02x\n", message[8]);
-			e = GE_UNKNOWN;
+			error = GE_UNKNOWN;
 			break;
 		}
 
@@ -1151,10 +1143,10 @@ static GSM_Error P6510_IncomingClock(int messagetype, unsigned char *message, in
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (clock handling): 0x%02x\n", P6510_MSG_CLOCK, message[3]);
-		e = GE_UNHANDLEDFRAME;
+		error = GE_UNHANDLEDFRAME;
 		break;
 	}
-	return e;
+	return error;
 }
 
 static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state)
