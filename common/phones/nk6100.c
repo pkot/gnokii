@@ -459,7 +459,7 @@ static gn_error IdentifyPhone(struct gn_statemachine *state)
 	}
 	if ((drvinst->pm = gn_phone_model_get(data.model)) == NULL) {
 		dump("Unsupported phone model \"%s\"\n", data.model);
-		dump("Please read Docs/Reporting-HOWTO and send a bug report!\n");
+		dump("Please read Docs/Bugs and send a bug report!\n");
 		return GN_ERR_INTERNALERROR;
 	}
 

@@ -330,5 +330,5 @@ void sm_unhandled_frame_dump(int messagetype, unsigned char *message, int messag
 	dump(_("reply: "));
 	sm_message_dump(messagetype, message, messagesize);
 
-	dump(_("Please read Docs/Reporting-HOWTO and send a bug report!\n"));
+	dump(_("Please read Docs/Bugs and send a bug report!\n"));
 }

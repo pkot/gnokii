@@ -181,7 +181,7 @@ static gn_error initialise(struct gn_statemachine *state)
 	dprintf("model: '%s'\n", model);
 	if ((pm = gn_phone_model_get(model)) == NULL) {
 		dump("Unsupported phone model \"%s\"\n", model);
-		dump("Please read Docs/Reporting-HOWTO and send a bug report!\n");
+		dump("Please read Docs/Bugs and send a bug report!\n");
 		error = GN_ERR_INTERNALERROR;
 	}
 out:	
