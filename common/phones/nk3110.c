@@ -15,7 +15,10 @@
   See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.1  2001-11-08 16:39:09  pkot
+  Revision 1.2  2001-11-09 13:47:58  pkot
+  Removed pthreads from 3110 support. It may break it.
+
+  Revision 1.1  2001/11/08 16:39:09  pkot
   3810/3110 support for the new structure (Tamas Bondar)
 
 
@@ -35,7 +38,6 @@
 
 #ifndef WIN32
   #include <unistd.h>
-  #include <pthread.h>
 #else
   #define snprintf _snprintf
   #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
@@ -153,9 +155,6 @@ static bool SimAvailable = false;
 static bool RequestTerminate;
 static bool DisableKeepAlive;
 static int KeepAliveTimer;
-#ifndef WIN32
-pthread_t Thread;
-#endif
 
 /* Initialise is the only function allowed to 'use' state */
 static GSM_Error P3110_Initialise(GSM_Statemachine *state)
@@ -196,10 +195,6 @@ static GSM_Error P3110_Initialise(GSM_Statemachine *state)
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
 	RequestTerminate = false;
 	DisableKeepAlive = false;
-#ifndef WIN32
-	if (pthread_create(&Thread, NULL, (void *) P3110_KeepAliveLoop, state) != 0)
-		return (GE_INTERNALERROR);
-#endif
 	return GE_NONE;
 }
 
