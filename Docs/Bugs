@@ -1,0 +1,15 @@
+When you report some problems please attach the following information:
+ - phone model
+ - connection type (irda/cable with it's type)
+ - gnokii version (gnokii --version) along with source for it: cvs,
+tarball, binary package
+ - if you can, compile gnokii with --enable-debug option for configure and
+attach gzipped output to the email:
+(x)gnokii(d) [paramaters] 2>errfile
+
+It would be good if you name the problem in the subject if possible and
+name if it meets gnokii, xgnokii or gnokiid binaries or gnokii as a whole.
+
+(from Pavel Kot's mailing to gnokii mailing list).
+
+Send resulting report to gnokii@net.lut.ac.uk.  
