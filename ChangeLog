@@ -2,9 +2,11 @@
 ==========
  * Rewrite of the SMS subsystem
     o reading of SMS splitted into 2 stages               (Pawel Kot)
-    o first tries at EMS picture SMSes	               (Pavel Machek)
-    o support for sending nokia ringtones	       (Pavel Machek)
-    o support for sending iMelody		       (Pavel Machek)
+    o first tries at EMS picture SMSes                 (Pavel Machek)
+    o support for sending nokia ringtones              (Pavel Machek)
+    o support for sending iMelody                      (Pavel Machek)
+    o reactivate support for text before picture messages
+                                                       (Markus Plail)
  * AT series updates:
     o Security functions for AT phones              (Manfred Jonsson)
  * code fixes:
