@@ -14,7 +14,10 @@
   phones. See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.4  2001-08-20 23:36:27  pkot
+  Revision 1.5  2001-11-08 16:49:19  pkot
+  Cleanups
+
+  Revision 1.4  2001/08/20 23:36:27  pkot
   More cleanup in AT code (Manfred Jonsson)
 
   Revision 1.3  2001/08/20 23:27:37  pkot
@@ -35,6 +38,7 @@
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-statemachine.h"
+#include "gsm-encoding.h"
 #include "phones/generic.h"
 #include "links/atbus.h"
 #include "links/cbus.h"

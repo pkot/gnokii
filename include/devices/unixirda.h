@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2001-02-21 19:57:11  chris
+ * Revision 1.2  2001-11-08 16:49:20  pkot
+ * Cleanups
+ *
+ * Revision 1.1  2001/02/21 19:57:11  chris
  * More fiddling with the directory layout
  *
  * Revision 1.4  2001/02/20 21:55:12  pkot
@@ -41,6 +44,9 @@
  *
  */
 
+#ifndef __unix_irda_h_
+#define __unix_irda_h_
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -48,7 +54,6 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/time.h>
-#include <sys/poll.h>
 #include <sys/socket.h>
 
 #include "linuxirda.h"
@@ -59,3 +64,5 @@ int irda_close(int fd);
 int irda_write(int __fd, __const __ptr_t __bytes, int __size);
 int irda_read(int __fd, __ptr_t __bytes, int __size);
 int irda_select(int fd, struct timeval *timeout);
+
+#endif

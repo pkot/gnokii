@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.5  2001-09-09 21:45:49  machek
+  Revision 1.6  2001-11-08 16:49:19  pkot
+  Cleanups
+
+  Revision 1.5  2001/09/09 21:45:49  machek
   Cleanups from Ladislav Michl <ladis@psi.cz>:
 
   *) do *not* internationalize debug messages
@@ -192,9 +195,9 @@ GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char mess
 		return GE_NOTREADY;
 	
 	if (state->NumWaitingFor==SM_MAXWAITINGFOR) return GE_NOTREADY;
-;
 	state->WaitingFor[state->NumWaitingFor]=messagetype;
 	state->Data[state->NumWaitingFor]=data;
+	state->ResponseError[state->NumWaitingFor]=GE_BUSY;
 	state->NumWaitingFor++;
 	state->CurrentState=WaitingForResponse;
 

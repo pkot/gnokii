@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.6  2001-08-17 00:18:12  pkot
+ * Revision 1.7  2001-11-08 16:49:19  pkot
+ * Cleanups
+ *
+ * Revision 1.6  2001/08/17 00:18:12  pkot
  * Removed recv() from IrDA initializing procedure (many people)
  *
  * Revision 1.5  2001/06/27 23:52:48  pkot
@@ -55,19 +58,7 @@
  *
  */
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/poll.h>
-#include <sys/socket.h>
-
 #include "devices/unixirda.h"
-#include "linuxirda.h"
-
 
 #ifndef AF_IRDA
 #define AF_IRDA 23
