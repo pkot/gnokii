@@ -3,7 +3,8 @@
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
-  Copyright (C) Hugh Blemings, 1999.
+
+  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
@@ -333,6 +334,7 @@ typedef enum {
   GE_UNKNOWNMODEL,          /* Model specified isn't known/supported. */
   GE_NOLINK,                /* Couldn't establish link with phone. */
   GE_TIMEOUT,               /* Command timed out. */
+  GE_TRYAGAIN,              /* Try again. */
   GE_INVALIDSECURITYCODE,   /* Invalid Security code. */
   GE_NOTIMPLEMENTED,        /* Command called isn't implemented in model. */
   GE_INVALIDSMSLOCATION,    /* Invalid SMS location. */
@@ -351,7 +353,7 @@ typedef enum {
   GE_SMSTOOLONG,            /* SMS message too long. */
   GE_INTERNALERROR,         /* Problem occured internal to model specific code. */
   GE_BUSY,                  /* Command is still being executed. */
-  GE_UNKNOWN,                /* Unknown error - well better than nothing!! */
+  GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
 
   /* The following are here in anticipation of data call requirements. */
 

@@ -1,6 +1,7 @@
 # This is a sample ~/.gnokiirc file.  Copy it into your
-# home directory and named it .gnokiirc.
+# home directory and name it .gnokiirc.
 #
+
 [global]
 
 # Set port to the physical serial port used to connect to your phone

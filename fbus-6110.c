@@ -3,7 +3,8 @@
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
-  Copyright (C) 1999 Pavel Janík ml. & Hugh Blemings.
+
+  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
@@ -1445,25 +1446,34 @@ GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status)
 GSM_Error FB61_GetIMEI(char *imei)
 {
 
-  strncpy (imei, IMEI, FB61_MAX_IMEI_LENGTH);
-
-  return (GE_NONE);
+  if (strlen(IMEI)>0) {
+    strncpy (imei, IMEI, FB61_MAX_IMEI_LENGTH);
+    return (GE_NONE);
+  }
+  else
+    return (GE_TRYAGAIN);
 }
 
 GSM_Error FB61_GetRevision(char *revision)
 {
 
-  strncpy (revision, Revision, FB61_MAX_REVISION_LENGTH);
-
-  return (GE_NONE);
+  if (strlen(Revision)>0) {
+    strncpy (revision, Revision, FB61_MAX_REVISION_LENGTH);
+    return (GE_NONE);
+  }
+  else
+    return (GE_TRYAGAIN);
 }
 
 GSM_Error FB61_GetModel(char *model)
 {
 
-  strncpy (model, Model, FB61_MAX_MODEL_LENGTH);
-
-  return (GE_NONE);
+  if (strlen(Model)>0) {
+    strncpy (model, Model, FB61_MAX_MODEL_LENGTH);
+    return (GE_NONE);
+  }
+  else
+    return (GE_TRYAGAIN);
 }
 
 GSM_Error FB61_SetDateTime(GSM_DateTime *date_time)
@@ -4118,15 +4128,14 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
   case 0x64:
 
-    /* We should skip the string `NOKIA' */
 #ifdef WIN32
-    sprintf(IMEI, "%s", MessageBuffer+4+5);
+    sprintf(IMEI, "%s", MessageBuffer+9);
     sprintf(Model, "%s", MessageBuffer+25);
-    sprintf(Revision, "SW%s: HW%s\n", MessageBuffer+44, MessageBuffer+39);
+    sprintf(Revision, "SW%s, HW%s", MessageBuffer+44, MessageBuffer+39);
 #else
-    snprintf(IMEI, FB61_MAX_IMEI_LENGTH, "%s", MessageBuffer+4+5);
+    snprintf(IMEI, FB61_MAX_IMEI_LENGTH, "%s", MessageBuffer+9);
     snprintf(Model, FB61_MAX_MODEL_LENGTH, "%s", MessageBuffer+25);
-    snprintf(Revision, FB61_MAX_REVISION_LENGTH, "SW%s: HW%s\n", MessageBuffer+44, MessageBuffer+39);
+    snprintf(Revision, FB61_MAX_REVISION_LENGTH, "SW%s, HW%s", MessageBuffer+44, MessageBuffer+39);
 #endif
 
 #ifdef DEBUG
@@ -4142,7 +4151,8 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     fprintf(stdout, _("   Firmware: %s\n"), MessageBuffer+44);
 
     /* These bytes are probably the source of the "Accessory not connected"
-       messages on the phone when trying to emulate NCDS... I hope... */
+       messages on the phone when trying to emulate NCDS... I hope....
+       UPDATE: of course, now we have the authentication algorithm. */
 
     fprintf(stdout, _("   Magic bytes: %02x %02x %02x %02x\n"), MessageBuffer[50], MessageBuffer[51], MessageBuffer[52], MessageBuffer[53]);
 #endif /* DEBUG */
@@ -4156,12 +4166,17 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     break;
 
-    /* Acknowlegment */
+
+    /***** Acknowlegment of our frames. *****/
+
 
   case 0x7f:
 
 #ifdef DEBUG
-    fprintf(stdout, _("[Received Ack of type %02x, seq: %2x]\n"), MessageBuffer[0], MessageBuffer[1]);
+
+    fprintf(stdout, _("[Received Ack of type %02x, seq: %2x]\n"), MessageBuffer[0],
+	                                                          MessageBuffer[1]);
+
 #endif /* DEBUG */
 
     AcksReceived++;
@@ -4169,17 +4184,23 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     break;
 
-    /* Power on message */
+
+    /***** Power on message. *****/
+
 
   case 0xd0:
 
 #ifdef DEBUG
+
     fprintf(stdout, _("Message: The phone is powered on - seq 1.\n"));
+
 #endif /* DEBUG */
 
     break;
 
-    /* RLP frame received. */
+
+    /***** RLP frame received. *****/
+
 
   case 0xf1:
 
@@ -4187,23 +4208,32 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
  
     break;
 
-    /* Power on message */
+
+    /***** Power on message. *****/
+
 
   case 0xf4:
 
 #ifdef DEBUG
+
     fprintf(stdout, _("Message: The phone is powered on - seq 2.\n"));
+
 #endif /* DEBUG */
 
     break;
 
-    /* Unknown message - if you think that you know the exact meaning of
-       other messages - please let us know. */
+
+    /***** Unknown message *****/
+
+    /* If you think that you know the exact meaning of other messages - please
+       let us know. */
 
   default:
 
 #ifdef DEBUG
+
       fprintf(stdout, _("Message: Unknown message.\n"));
+
 #endif /* DEBUG */
 
       break;
@@ -4215,6 +4245,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone/phone. */
+
 void FB61_RX_StateMachine(char rx_byte) {
 
   static int checksum[2];

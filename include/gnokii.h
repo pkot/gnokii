@@ -3,7 +3,8 @@
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
-  Copyright (C) Hugh Blemings, 1999.
+
+  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
@@ -38,9 +39,7 @@ extern GSM_Functions *GSM;
 
 /* Prototype for the functions actually provided by gsm-api.c. */
 
-/*GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection);*/
 GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_handler)(RLP_F96Frame *frame));
-
 
 /* All the rest of the API functions are contained in the GSM_Function
    structure which ultimately points into the model specific code. */

@@ -4,18 +4,18 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) Hugh Blemings, 1999.
+  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 	
   Mainline code for gnokii utility.  Handles command line parsing and
   reading/writing phonebook entries and other stuff.
 
-  Warning: this code is only the test tool. It is not intented to real work -
+  WARNING: this code is only the test tool. It is not intented to real work -
   wait for GUI application. Well, our test tool is now really powerful and
   useful :-)
 
-  Last modification: Wed Dec  1 18:53:21 CET 1999
+  Last modification: Sat Dec  4 15:45:01 CET 1999
   Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
 
 */
@@ -78,7 +78,7 @@ int version(void)
 }
 
 /* The function usage is only informative - it prints this program's usage and
-   command-line options.*/
+   command-line options. */
 
 int usage(void)
 {
@@ -184,7 +184,7 @@ int usage(void)
 "          --setlogo         set caller, startup or operator logo\n\n"
 "          --getlogo         get caller, startup or operator logo\n\n"
 "          --reset [soft|hard] resets the phone.\n\n"
-));  /*"*/
+));
 
   return 0;
 }
@@ -194,6 +194,7 @@ int usage(void)
 
 void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 {
+
   int count=0;
   GSM_Error error;
   GSM_ConnectionType connection=GCT_Serial;
@@ -218,26 +219,29 @@ void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
     usleep(50000);
 
   if (*GSM_LinkOK == false) {
-    fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting. \n"));
+    fprintf (stderr, _("Hmmm... GSM_LinkOK never went true. Quitting.\n"));
     exit(-1);
   }
 }
-
 
 /* This function checks that the argument count for a given options is withing
    an allowed range. */
 
 int checkargs(int opt, struct gnokii_arg_len gals[], int argc)
 {
+
   int i;
 
-  // Walk through the whole array with options requiring arguments
+  /* Walk through the whole array with options requiring arguments. */
+
   for(i = 0;!(gals[i].gal_min == 0 && gals[i].gal_max == 0); i++) {
 
-    // Current option
+    /* Current option. */
+
     if(gals[i].gal_opt == opt) {
 
-      // Argument count checking
+      /* Argument count checking. */
+
       if(gals[i].gal_flags == GAL_XOR) {
 	if(gals[i].gal_min == argc || gals[i].gal_max == argc)
 	  return 0;
@@ -253,11 +257,11 @@ int checkargs(int opt, struct gnokii_arg_len gals[], int argc)
 
   }
 
-  // We do not have options without arguments in the array, so check them
+  /* We do not have options without arguments in the array, so check them. */
+
   if (argc==0)
     return 0;
   else
-    // This should be 1, because `./gnokii --version 1' is incorrect...
     return 1;
 }
 
@@ -266,6 +270,7 @@ int checkargs(int opt, struct gnokii_arg_len gals[], int argc)
 
 int main(int argc, char *argv[])
 {
+
   int c, i, rc = -1;
   int nargc = argc-2;
   char **nargv;
@@ -2143,13 +2148,18 @@ int identify( void )
 
   fbusinit(NULL);
 
-  GSM->GetIMEI(imei);
-  GSM->GetRevision(rev);
-  GSM->GetModel(model);
+  while (GSM->GetIMEI(imei)    != GE_NONE)
+    sleep(1);
 
-  printf(_("IMEI:     %s\n"), imei);
-  printf(_("Model:    %s\n"), model);
-  printf(_("Revision: %s\n"), rev);
+  while (GSM->GetRevision(rev) != GE_NONE)
+    sleep(1);
+
+  while (GSM->GetModel(model)  != GE_NONE)
+    sleep(1);
+
+  fprintf(stdout, _("IMEI:     %s\n"), imei);
+  fprintf(stdout, _("Model:    %s\n"), model);
+  fprintf(stdout, _("Revision: %s\n"), rev);
 
   GSM->Terminate();
 
