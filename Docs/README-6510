@@ -22,6 +22,7 @@ various connection media:
 | dau9p		| dau9p or serial	|
 | dlr3p		| dlr3p			|
 | IrDA		| irda			|
+| Bluetooth	| bluetooth		|
 -----------------------------------------
 When you don't know what your cable is you can first try serial value.
 

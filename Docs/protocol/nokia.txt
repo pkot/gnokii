@@ -6,7 +6,7 @@ The data provided is for information purposes only.
 Some of the frames might be hazardous to your phone. Be careful!!! 
 We do not take any responsibility or liability for damages, etc.
 
-Last update 01.03.2001
+Last update 29.04.2003
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Assembled by
 	Balazs Nagy (js@lsc.hu)
@@ -24,6 +24,7 @@ Assembled by
         Andrew Kozin
         Pavel Machek <pavel@ucw.cz>
         Diego Betancor <dbetancor@duocom.net>
+        Marcel Holtmann <marcel@holtmann.org>
 	... and other members of gnokii mailing list
             and authors of some WWW pages.
 
@@ -178,13 +179,23 @@ notify us via e-mail.  Thank you.
 	 where Id_SeqNo:        Is the sequence number that you are
 	                        acknowleging (from the other part).
 
- Frame format for Infrared:
+ Frame format for IrDA:
 
-    { FrameID, DestDEV, SrcDEV, MsgType, FrameLengthLo, FrameLengthHi, {block}}
+    { FrameID, DestDEV, SrcDEV, MsgType, FrameLengthLo, FrameLengthHi, {block} }
 
          where FrameID:         0x14
                DestDev, SrcDev: 0x00: mobile phone
                                 0x0c: TE [eg. PC]
+               MsgType:         see List
+               FrameLength:     {block}
+
+ Frame format for Bluetooth:
+
+    { FrameID, DestDEV, SrcDEV, MsgType, FrameLengthLo, FrameLengthHi, {block} }
+
+         where FrameID:         0x19
+               DestDev, SrcDev: 0x00: mobile phone
+                                0x10: TE [eg. PC]
                MsgType:         see List
                FrameLength:     {block}
 
