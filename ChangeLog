@@ -37,6 +37,7 @@
  * libsms updates:
     o remove SMSFolder hacks in GetFolderChanges       (Markus Plail)
  * change strncpys to snprintfs in vcal.lx             (Markus Plail)
+ * spec file fixes                                        (Pawel Kot)
 
 0.4.3
 =====
