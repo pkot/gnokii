@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.127  2001-02-06 21:15:34  chris
+  Revision 1.128  2001-02-17 22:40:48  chris
+  ATA support
+
+  Revision 1.127  2001/02/06 21:15:34  chris
   Preliminary irda support for 7110 etc.  Not well tested!
 
   Revision 1.126  2001/02/06 14:35:55  pkot
@@ -188,7 +191,8 @@ GSM_Functions FB61_Functions = {
 	FB61_DisableCellBroadcast,
 	FB61_ReadCellBroadcast,
 	UNIMPLEMENTED,
-	UNIMPLEMENTED
+	UNIMPLEMENTED,
+	FB61_AnswerCall
 };
 
 /* Mobile phone information */
@@ -507,6 +511,19 @@ static GSM_Error FB61_GetPhoneInfo()
 {
 	unsigned char req[] = { FB61_FRAME_HEADER, 0x03, 0x00 };
 	FB61_TX_SendMessage(5, 0xd1, req);
+	return (wait_on(&CurrentPhoneInfoError, 20));
+}
+
+GSM_Error FB61_AnswerCall(char s)
+{
+	unsigned char req0[] = { FB61_FRAME_HEADER, 0x42,0x05,0x01,0x07,				 0xa2,0x88,0x81,0x21,0x15,0x63,0xa8,0x00,0x00,
+	                    0x07,0xa3,0xb8,0x81,0x20,0x15,0x63,0x80};
+	unsigned char req[] = { FB61_FRAME_HEADER, 0x06, 0x00, 0x00};
+	req[4]=s;
+	dprintf("Answering call %d\n\r",s);
+	FB61_TX_SendMessage(sizeof(req0), 0x01, req0);
+	sleep(1);
+	FB61_TX_SendMessage(sizeof(req), 0x01, req);
 	return (wait_on(&CurrentPhoneInfoError, 20));
 }
 
@@ -1214,6 +1231,7 @@ GSM_Error FB61_DialVoice(char *Number)
 		req[5+i] = Number[i];
 	memcpy(req + 5 + strlen(Number), req_end, 10);
 	FB61_TX_SendMessage(13 + strlen(Number), 0x01, req);
+
 	return(GE_NONE);
 }
 
@@ -1260,6 +1278,9 @@ GSM_Error FB61_DialData(char *Number, char type, void (* callpassup)(char c))
 		FB61_TX_SendMessage(sizeof(req4), 0x01, req4);
 		req_end = req_end1;
 		size = sizeof(req_end1);
+		break;
+	case -1:   /* Just used to set the call passup */
+		return GE_NONE;
 		break;
 	default:
 		req_end = req_end0;
@@ -2306,6 +2327,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void)
 			CurrentIncomingCall[0] = 0;
 			for (tmp = 0; tmp < count; tmp++)
 				sprintf(CurrentIncomingCall, "%s%c", CurrentIncomingCall, MessageBuffer[7+tmp]);
+			if (CallPassup) CallPassup(MessageBuffer[4]);
 			break;
 
 			/* Call answered. Probably your girlfriend...*/

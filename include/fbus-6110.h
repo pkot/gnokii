@@ -216,6 +216,7 @@ GSM_Error FB61_SetProfile(GSM_Profile *Profile);
 bool      FB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 
 GSM_Error FB61_CancelCall(void);
+GSM_Error FB61_AnswerCall(char s);
 
 /* States for receive code. */
 

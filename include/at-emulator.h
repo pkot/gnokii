@@ -30,6 +30,7 @@ bool	ATEM_CommandPlusC(char **buf);
 bool	ATEM_CommandPlusG(char **buf);
 int		ATEM_GetNum(char **p);
 void	ATEM_ModemResult(int code);
+void    ATEM_CallPassup(char c);
 
 	/* Global variables */
 bool	ATEM_Initialised;
@@ -45,6 +46,7 @@ bool	ATEM_Initialised;
 #define		MR_NOCARRIER	(5)
 #define		MR_CARRIER		(2)
 #define		MR_CONNECT		(3)
+#define         MR_RING                 (6)
 
 	/* All defines and prototypes from here down are specific to 
 	   the at-emulator code and so are #ifdef out if __at_emulator_c isn't 
@@ -88,3 +90,6 @@ bool	ATEM_Initialised;
 #endif	/* __at_emulator_c */
 
 #endif	/* __at_emulator_h */
+
+
+

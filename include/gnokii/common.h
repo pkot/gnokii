@@ -769,6 +769,8 @@ typedef struct {
   GSM_Error (*SetKey) (int c, int up);
   
   GSM_Error (*HandleString) (char *s);
+	
+  GSM_Error (*AnswerCall) (char s);
 
 } GSM_Functions;
 

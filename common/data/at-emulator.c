@@ -64,6 +64,7 @@ char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
 int		CurrentCmdBuffer;
 int		CurrentCmdBufferIndex;
 bool	VerboseResponse; 	/* Switch betweek numeric (4) and text responses (ERROR) */
+char    IncomingCallNo;
 
  	/* Current command parser */
 void 			(*Parser)(char *);
@@ -99,6 +100,9 @@ bool	ATEM_Initialise(int read_fd, int write_fd, char *model, char *port)
 	SMSNumber = 1;
 	SMSType = GMT_ME;
 
+	/* Set the call passup so that we get notified of incoming calls */
+        GSM->DialData(NULL,-1,&ATEM_CallPassup);
+
 		/* We're ready to roll... */
 	ATEM_Initialised = true;
 	return (true);
@@ -119,6 +123,16 @@ void	ATEM_InitRegisters(void)
 
 }
 
+
+/* This gets called to indicate an incoming call */
+
+void ATEM_CallPassup(char c)
+{
+	if ((c>=0) && (c<9)) {
+		ATEM_ModemResult(MR_RING);		
+		IncomingCallNo=c;
+	}
+}
 
 
     /* Handler called when characters received from serial port.
@@ -177,21 +191,32 @@ void	ATEM_ParseAT(char *cmd_buffer)
 		switch (toupper(*buf)) {
 
 		case 'Z':
-		  buf++;
-		  break;
+			buf++;
+			break;
+		case 'A':
+			buf++;
+			/* For now we'll also initialise the datapump + rlp code again */
+			DP_Initialise(PtyRDFD, PtyWRFD);
+			GSM->DialData(NULL,-1,&DP_CallPassup);
+			GSM->AnswerCall(IncomingCallNo);
+			CommandMode=false;
+			return;
+			break;
 		case 'D':
-		  /* Dial Data :-) */
-		  /* FIXME - should parse this better */
-		  buf++;
-		  if (toupper(*buf) == 'T') buf++;
-		  if (*buf == ' ') buf++;
-		  strncpy(number,buf,30);
-		  if (ModemRegisters[S35]==0) GSM->DialData(number,1,&DP_CallPassup);
-		  else GSM->DialData(number,0,&DP_CallPassup);
-		  ATEM_StringOut("\n\r");
-		  CommandMode=false;
-		  return;
-		  break;
+			/* Dial Data :-) */
+			/* FIXME - should parse this better */
+			/* For now we'll also initialise the datapump + rlp code again */
+			DP_Initialise(PtyRDFD, PtyWRFD);
+			buf++;
+			if (toupper(*buf) == 'T') buf++;
+			if (*buf == ' ') buf++;
+			strncpy(number,buf,30);
+			if (ModemRegisters[S35]==0) GSM->DialData(number,1,&DP_CallPassup);
+			else GSM->DialData(number,0,&DP_CallPassup);
+			ATEM_StringOut("\n\r");
+			CommandMode=false;
+			return;
+			break;
 		case 'H':
 		  /* Hang Up */
 		  buf++;
@@ -207,72 +232,72 @@ void	ATEM_ParseAT(char *cmd_buffer)
 		    buf++;
 		  }
 		  break;
-				/* E - Turn Echo on/off */
-			case 'E':
-				buf++;
-				switch (ATEM_GetNum(&buf)) {
-					case 0:
-						ModemRegisters[REG_ECHO] &= ~BIT_ECHO;
-						break;
-
-					case 1:
-						ModemRegisters[REG_ECHO] |= BIT_ECHO;
-						break;
-
-					default:
-						ATEM_ModemResult(MR_ERROR);
-						return;
-				}
+		  /* E - Turn Echo on/off */
+		case 'E':
+			buf++;
+			switch (ATEM_GetNum(&buf)) {
+			case 0:
+				ModemRegisters[REG_ECHO] &= ~BIT_ECHO;
 				break;
-
-				/* Handle AT* commands (Nokia proprietary I think) */
-			case '*':
-				buf++;
-				if (!strcasecmp(buf, "NOKIATEST")) {
-					ATEM_ModemResult(MR_OK); /* FIXME? */
-					return;
-				}
-			   	else {
-				   	if (!strcasecmp(buf, "C")) {
-						ATEM_ModemResult(MR_OK);
-						Parser= ATEM_ParseSMS;
-						return;
-					}
-				}
+				
+			case 1:
+				ModemRegisters[REG_ECHO] |= BIT_ECHO;
 				break;
-
-				/* + is the precursor to another set of commands +CSQ, +FCLASS etc. */
-			case '+':
-				buf++;
-				switch (toupper(*buf)) {
-					case 'C':
-						buf++;
-							/* Returns true if error occured */
-						if (ATEM_CommandPlusC(&buf) == true) {
-							return;	
-						}
-						break;
-
-					case 'G':
-						buf++;
-							/* Returns true if error occured */
-						if (ATEM_CommandPlusG(&buf) == true) {
-							return;	
-						}
-						break;
-
-					default:
-						ATEM_ModemResult(MR_ERROR);
-						return;
-				}
-				break;
-
-			default: 
+				
+			default:
 				ATEM_ModemResult(MR_ERROR);
 				return;
+			}
+			break;
+			
+		  /* Handle AT* commands (Nokia proprietary I think) */
+		case '*':
+			buf++;
+			if (!strcasecmp(buf, "NOKIATEST")) {
+				ATEM_ModemResult(MR_OK); /* FIXME? */
+				return;
+			}
+			else {
+				if (!strcasecmp(buf, "C")) {
+					ATEM_ModemResult(MR_OK);
+					Parser= ATEM_ParseSMS;
+					return;
+				}
+			}
+			break;
+			
+				/* + is the precursor to another set of commands +CSQ, +FCLASS etc. */
+		case '+':
+			buf++;
+			switch (toupper(*buf)) {
+			case 'C':
+				buf++;
+				/* Returns true if error occured */
+				if (ATEM_CommandPlusC(&buf) == true) {
+					return;	
+				}
+				break;
+				
+			case 'G':
+				buf++;
+				/* Returns true if error occured */
+				if (ATEM_CommandPlusG(&buf) == true) {
+					return;	
+				}
+				break;
+				
+			default:
+				ATEM_ModemResult(MR_ERROR);
+				return;
+			}
+			break;
+			
+		default: 
+			ATEM_ModemResult(MR_ERROR);
+			return;
 		}
 	}
-
+	
 	ATEM_ModemResult(MR_OK);
 }
 
@@ -530,7 +555,9 @@ void	ATEM_ModemResult(int code)
 			case MR_NOCARRIER:
 					ATEM_StringOut("\n\rNO CARRIER\n\r");
 					break;
-
+		        case MR_RING:
+					ATEM_StringOut("RING\n\r");
+					break;
 			default:
 					ATEM_StringOut("\n\rUnknown Result Code!\n\r");
 					break;

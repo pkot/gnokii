@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.82  2001-02-03 23:56:12  chris
+  Revision 1.83  2001-02-17 22:40:48  chris
+  ATA support
+
+  Revision 1.82  2001/02/03 23:56:12  chris
   Start of work on irda support (now we just need fbus-irda.c!)
   Proper unicode support in 7110 code (from pkot)
 
@@ -161,6 +164,7 @@ GSM_Functions	FB38_Functions = {
 		UNIMPLEMENTED,
 		FB38_SendRLPFrame,
 		FB38_CancelCall,
+		UNIMPLEMENTED,
 		UNIMPLEMENTED,
 		UNIMPLEMENTED,
 		UNIMPLEMENTED,

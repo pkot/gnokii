@@ -19,6 +19,7 @@ include ${TOPDIR}/Makefile.global
 DIRS =  common/phones \
 	common/links \
 	common/devices \
+	common/data \
         common \
 	gnokii
 

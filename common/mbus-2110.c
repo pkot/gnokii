@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.31  2001-02-17 14:39:19  machek
+  Revision 1.32  2001-02-17 22:40:49  chris
+  ATA support
+
+  Revision 1.31  2001/02/17 14:39:19  machek
   Make writing/reading phonebook less verbose (as it should be).
 
   Revision 1.30  2001/02/01 15:17:30  pkot
@@ -1111,7 +1114,8 @@ GSM_Functions MB21_Functions = {
 	UNIMPLEMENTED,
 	UNIMPLEMENTED,
 	SetKey,
-	HandleString
+	HandleString,
+	UNIMPLEMENTED
 };
 
 #endif
