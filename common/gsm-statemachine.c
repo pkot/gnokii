@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.1  2001-03-21 23:36:04  chris
+  Revision 1.2  2001-05-07 14:01:51  machek
+  Warn when phone functions are missing, but do not segfault.
+
+  Revision 1.1  2001/03/21 23:36:04  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -215,5 +218,9 @@ GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor)
 
 GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm)
 {
+	if (!sm->Phone.Functions) {
+		fprintf(stderr, "Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!\n");
+		return GE_INTERNALERROR;
+	}
 	return sm->Phone.Functions(op, data, sm);
 }
