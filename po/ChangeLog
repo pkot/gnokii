@@ -3,3 +3,6 @@
 
 * Wed May 17 14:49:20 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - work around for mkinstalldirs permission
+
+* Mon May 22 07:11:01 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- slovak .po file from Stano
