@@ -21,7 +21,11 @@
   functions themselves are defined in a structure in gsm-common.h.
 
   $Log$
-  Revision 1.25  2001-03-26 23:39:21  pkot
+  Revision 1.26  2001-04-25 12:54:47  machek
+  Partly converted nokia 2110 to "new" form, and moved it to phone
+  directory.
+
+  Revision 1.25  2001/03/26 23:39:21  pkot
   Minor updates:
    - Windows INLINE patch (Manfred Jonsson)
    - patch to configure.in to compile under FreeBSD (Panagiotis Astithas)
@@ -101,10 +105,10 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
         MODULE(FB38);
         MODULE(FB61);
  #ifndef WIN32  /* MB21 not supported in win32 */
-        MODULE(MB21);
         MODULE(MB61);
         MODULE(MB640);
         MODULE(D2711);
+	MODULE(N2110);
  
         GSM_LinkOK = &LinkAlwaysOK;
         sm->Link.ConnectionType=connection;
@@ -113,6 +117,6 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
  
         REGISTER_PHONE(nokia_7110);
 
- #endif /* WIN32 */ 
+#endif /* WIN32 */ 
         return (GE_UNKNOWNMODEL);
 }
