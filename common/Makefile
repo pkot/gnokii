@@ -42,6 +42,9 @@ links/LINKS.o:
 devices/DEVICES.o:
 	$(MAKE) -C devices DEVICES.o
 
+gnokii-debug: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o gsm-filetypes.o ../gnokii/gnokii.o
+	$(CC) -o gnokii-debug $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o gsm-filetypes.o ../gnokii/gnokii.o
+
 libgnokii.so: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 	$(CC) -shared -o libgnokii.so $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
 

@@ -14,3 +14,7 @@ name if it meets gnokii, xgnokii or gnokiid binaries or gnokii as a whole.
 
 Send resulting report to gnokii@net.lut.ac.uk.
 
+If you want to debug yourself, you may want to add -g to CFLAGS in Makefile.global,
+make clean; make and then make gnokii-debug in common directory. gnokii-debug is
+statically linked, and easier to deal with.
+
