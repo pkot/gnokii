@@ -204,7 +204,9 @@ Uses the same format as provided by the output of the getphonebook command.
 .PP
 The format is very simple.  Each line represents one entry.  Fields are
 separated by semicolons.  Semicolons aren't allowed inside a field.  The
-fields have to be in this order (the subentries are optional):
+fields have to be in this order (the subentries are optional, ie. you can
+repeat all subetry field multiple times, but they have to be alltogether in
+the given order):
 .IP "" .5i
 name
 .IP "" .5i
@@ -216,10 +218,50 @@ entry_location
 .IP "" .5i
 caller_group
 .IP "" .5i
-subenty_no
+subentry_type
+.IP "" .5i
+sumebtry_number_type
+.IP "" .5i
+subentry_id
 .IP "" .5i
 subentry_text
 .PP
+Possible subentry types are described in the \fIgnokii/common.h\fR file:
+.RS
+.nf
+typedef enum {
+        GN_PHONEBOOK_ENTRY_Name       = 0x07,
+        GN_PHONEBOOK_ENTRY_Email      = 0x08,
+        GN_PHONEBOOK_ENTRY_Postal     = 0x09,
+        GN_PHONEBOOK_ENTRY_Note       = 0x0a,
+        GN_PHONEBOOK_ENTRY_Number     = 0x0b,
+        GN_PHONEBOOK_ENTRY_Ringtone   = 0x0c,
+        GN_PHONEBOOK_ENTRY_Date       = 0x13,
+        GN_PHONEBOOK_ENTRY_Pointer    = 0x1a,
+        GN_PHONEBOOK_ENTRY_Logo       = 0x1b,
+        GN_PHONEBOOK_ENTRY_LogoSwitch = 0x1c,
+        GN_PHONEBOOK_ENTRY_Group      = 0x1e,
+        GN_PHONEBOOK_ENTRY_URL        = 0x2c,
+} gn_phonebook_entry_type;
+.fi
+.RE
+.PP
+Possible subentry number types are described in the \fIgnokii/common.h\fR
+file:
+.RS
+.nf
+typedef enum {
+        GN_PHONEBOOK_NUMBER_Home    = 0x02,
+        GN_PHONEBOOK_NUMBER_Mobile  = 0x03,
+        GN_PHONEBOOK_NUMBER_Fax     = 0x04,
+        GN_PHONEBOOK_NUMBER_Work    = 0x06,
+        GN_PHONEBOOK_NUMBER_General = 0x0a,
+} gn_phonebook_number_type;
+.fi
+.RE
+.PP
+For the subentry types that don't care about number type (at text files)
+this should be set to 0. 
 
 .SS WAP
 .TP 
