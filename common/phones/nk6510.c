@@ -61,25 +61,28 @@ do { \
 /* Functions prototypes */
 static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_Initialise(GSM_Statemachine *state);
+
 static GSM_Error P6510_GetModel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetRevision(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
 /*
 static GSM_Error P6510_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
+
 static GSM_Error P6510_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P6510_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P6510_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
+
 static GSM_Error P6510_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
@@ -92,6 +95,7 @@ static GSM_Error P6510_GetPicture(GSM_Data *data, GSM_Statemachine *state);
 */
 static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P6510_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
@@ -248,6 +252,10 @@ static GSM_Error P6510_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P6510_GetSMSFolderStatus(data, state);
 	case GOP_GetSMS:
 		return P6510_GetSMS(data, state);
+	case GOP_GetSMSnoValidate:
+		return P6510_GetSMSnoValidate(data, state);
+	case GOP_GetUnreadMessages:
+		return GE_NONE;
 	case GOP_GetSMSFolders:
 		return P6510_GetSMSFolders(data, state);
 	case GOP_GetProfile:
@@ -787,6 +795,27 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 	return SM_Block(state, data, P6510_MSG_FOLDER);
 }
 
+static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02,
+				   0x02, /* 0x01 for INBOX, 0x02 for others */
+				   0x00, /* FolderID */
+				   0x00,
+				   0x02, /* Location */
+				   0x01, 0x00};
+	GSM_Error error;
+
+	error = P6510_GetSMSMessageStatus(data, state);
+
+	dprintf("Getting SMS...\n");
+
+	req[5] = GetMemoryType(data->RawSMS->MemoryType);
+	req[7] = data->RawSMS->Number;
+
+	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, P6510_MSG_FOLDER);
+}
+
 static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02,
@@ -825,15 +854,7 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 		data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
 	}
 
-	error = P6510_GetSMSMessageStatus(data, state);
-
-	dprintf("Getting SMS...\n");
-
-	req[5] = GetMemoryType(data->RawSMS->MemoryType);
-	req[7] = data->RawSMS->Number;
-
-	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, P6510_MSG_FOLDER);
+	return P6510_GetSMSnoValidate(data, state);
 }
 
 
@@ -2062,7 +2083,7 @@ static GSM_Error P6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		if (data->RFLevel) {
 			*(data->RFUnits) = GRF_Percentage;
 			*(data->RFLevel) = message[5];
-			dprintf("RF level %f\n\n\n",*(data->RFLevel));
+			dprintf("RF level %f\n", *(data->RFLevel));
 		}
 		break;
 	case 0x24:
@@ -2133,8 +2154,8 @@ static GSM_Error P6510_IncomingBattLevel(int messagetype, unsigned char *message
 	case 0x0B:
 		if (data->BatteryLevel) {
 			*(data->BatteryUnits) = GBU_Percentage;
-			*(data->BatteryLevel) = message[9] / 7 * 100;
-			dprintf("Battery level %f\n",*(data->BatteryLevel));
+			*(data->BatteryLevel) = message[9] * 100 / 7;
+			dprintf("Battery level %f\n\n",*(data->BatteryLevel));
 		}
 		break;
 	default:
