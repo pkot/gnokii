@@ -40,6 +40,7 @@ typedef enum {
 	GOP6510_GetSMSFolders = GOP_Max,
 	GOP6510_GetSMSFolderStatus,
 	GOP6510_GetPicture,
+	GOP6510_Subscribe,
 	GOP6510_Max       /* don't append anything after this entry */
 } GSM6510_Operation;
 
@@ -53,6 +54,7 @@ extern bool P6510_LinkOK;
 #define P6510_MSG_SECURITY	0x08	/* PIN and stuff */
 #define P6510_MSG_NETSTATUS	0x0a	/* Network status */
 #define P6510_MSG_KEYPRESS	0x0c	/* keypress emulation? */
+#define P6510_MSG_SUBSCRIBE	0x10	/* subscribe to channels */
 #define P6510_MSG_CALENDAR	0x13	/* Calendar notes */
 #define P6510_MSG_FOLDER	0x14	/* Folders handling */
 #define P6510_MSG_BATTERY	0x17	/* Battery info */
