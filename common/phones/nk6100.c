@@ -121,6 +121,8 @@ static GSM_Error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool
 static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType type);
 static GSM_Error get_imei(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error get_phone_info(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error get_hw(GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 static GSM_Error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
@@ -439,7 +441,9 @@ static GSM_Error IdentifyPhone(GSM_Statemachine *state)
 	data.Imei = drvinst->IMEI;
 	data.Revision = revision;
 
-	if ((err = GetPhoneID(&data, state)) != GE_NONE) {
+	if ((err = get_imei(&data, state)) != GE_NONE ||
+	    (err = get_phone_info(&data, state)) != GE_NONE ||
+	    (err = get_hw(&data, state)) != GE_NONE) {
 		return err;
 	}
 
@@ -2746,15 +2750,37 @@ static GSM_Error get_phone_info(GSM_Data *data, GSM_Statemachine *state)
 	if ((err = EnableExtendedCmds(data, state, 0x01)) != GE_NONE)
 		return err;
 
-	if (SM_SendMessage(state, 3, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, 4, 0x40, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x40);
+}
+
+static GSM_Error get_hw(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {0x00, 0x01, 0xc8, 0x05};
+	GSM_Error err;
+
+	if ((err = EnableExtendedCmds(data, state, 0x01)) != GE_NONE)
+		return err;
+
+	if (SM_SendMessage(state, 4, 0x40, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x40);
 }
 
 static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
 {
+	char *aux, *aux2;
+
 	switch (message[2]) {
 	/* FIXME: maybe "Enable extended cmds" reply? - bozo */
 	case 0x64:
+		break;
+
+	/* IMEI */
+	case 0x66:
+		if (data->Imei) {
+			dprintf("IMEI: %s\n", message + 4);
+			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
+		}
 		break;
 
 	/* call management (old style) */
@@ -2793,11 +2819,50 @@ static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int l
 		if (message[3] != 0x02) return GE_UNHANDLEDFRAME;
 		break;
 
-	/* IMEI */
-	case 0x66:
-		if (data->Imei) {
-			dprintf("IMEI: %s\n", message + 4);
-			snprintf(data->Imei, GSM_MAX_IMEI_LENGTH, "%s", message + 4);
+	case 0xc8:
+		switch (message[3]) {
+		case 0x01:
+			if (data->Revision) {
+				aux = message + 7;
+				aux2 = index(aux, 0x0a);
+				if (data->Revision[0]) {
+					dprintf("Niepusty\n");
+					strcat(data->Revision, ", SW ");
+					strncat(data->Revision, aux,
+						aux2 - aux);
+				} else {
+					snprintf(data->Revision, aux2 - aux + 4,
+						 "SW %s", aux);
+				}
+				dprintf("Received %s\n", data->Revision);
+			}
+			aux = index(message + 5, 0x0a);
+			aux++;
+			aux = index(aux, 0x0a);
+			aux++;
+			if (data->Model) {
+				aux2 = index(aux, 0x0a);
+				*aux2 = 0;
+				snprintf(data->Model, GSM_MAX_MODEL_LENGTH, "%s", aux);
+				dprintf("Received model %s\n", data->Model);
+			}
+			break;
+		case 0x05:
+			if (data->Revision) {
+				if (data->Revision[0]) {
+					dprintf("Niepusty\n");
+					strcat(data->Revision, ", HW ");
+					strncat(data->Revision, message + 5,
+						GSM_MAX_REVISION_LENGTH);
+				} else {
+					snprintf(data->Revision, GSM_MAX_REVISION_LENGTH,
+						 "HW %s", message + 5);
+				}
+				dprintf("Received %s\n", data->Revision);
+			}
+			break;
+		default:
+			return GE_NOTIMPLEMENTED;
 		}
 		break;
 
