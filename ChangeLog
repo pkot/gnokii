@@ -1,3 +1,9 @@
+0.6.5 (not released yet)
+========================
+ * translation updates
+    o updated Estonian translation                  (Hans Motshärg)
+    o xgnokii_xring.c was missing from POTFILES.in  (Hans Motshärg)
+
 0.6.4
 =====
  * build system updates
