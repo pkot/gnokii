@@ -68,7 +68,7 @@
  * spec file fixes                                        (Pawel Kot)
  * add base bluetooth support                       (Marcel Holtmann)
  * build system changes
-    o use NLS detection from autoconf/automake makros
+    o use NLS detection from autoconf/automake macros
                                  (Pawel Kot, Mariusz Mazur, PLD Team)
 
 0.4.3
