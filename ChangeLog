@@ -49,6 +49,7 @@
     o added extended phonebook support                 (Markus Plail)
     o some minor fixes in contacts                     (Markus Plail)
     o update to compile with the new SMS subsystem     (Markus Plail)
+    o add support for recurrence in calendar           (Markus Plail)
  * gnokii updates:
     o let gnokii display usage instruction to stdout when it's
       called with --help or -h and to stderr otherwise    (Pawel Kot)
@@ -67,6 +68,7 @@
       this code                                           (Pawel Kot)
     o support for the new SMS subsystem                   (Pawel Kot)
     o fixes for SMSC reading                              (Pawel Kot)
+    o read Recurrence from phone                       (Markus Plail)
  * 6510 series updates:
     o update to work with new SMS subsystem            (Markus Plail)
     o capitalization caused compilation problem      (BORBELY Zoltan)
