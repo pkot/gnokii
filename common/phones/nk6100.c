@@ -112,7 +112,6 @@ static GSM_Error Authentication(GSM_Statemachine *state, char *imei);
 static GSM_Error BuildKeytable(GSM_Statemachine *state);
 static GSM_Error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
@@ -837,15 +836,6 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 	}
 
 	return GE_NONE;
-}
-
-static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10};
-
-	dprintf("Getting imei...\n");
-	if (SM_SendMessage(state, 4, 0x64, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, 0x64);
 }
 
 static GSM_Error PhoneInfo(GSM_Data *data, GSM_Statemachine *state)
