@@ -28,6 +28,8 @@
     o ... and revert it ;-)                          (Osma Suominen)
  * gnokii updates
     o set number type in sendringtone()           (Anton V.Dorofeev)
+ * AT updates
+    o make Bluetooth work over tty interface             (Pawel Kot)
 
 0.5.0pre7
 =========

@@ -215,22 +215,31 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 	businst->binlen = 1;
 	AT_BUSINST(state) = businst;
 
-	if ((state->config.connection_type == GN_CT_Serial) ||
-	    (state->config.connection_type == GN_CT_Irda)) {
+	switch (state->config.connection_type) {
+	case GN_CT_Serial:
+	case GN_CT_Irda:
 		if (!atbus_serial_open(mode, state->config.port_device, state)) {
 			error = GN_ERR_FAILED;
-			goto out;
+			goto err;
 		}
-	} else {
+		break;
+	case GN_CT_Bluetooth:
+		if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
+			error = GN_ERR_FAILED;
+			goto err;
+		}
+		break;
+	default:
 		dprintf("Device not supported by AT bus\n");
 		error = GN_ERR_FAILED;
-		goto out;
+		goto err;
 	}
+
+	goto out;
+err:
+	dprintf("AT bus initialization failed (%d)\n", error);
+	free(AT_BUSINST(state));
+	AT_BUSINST(state) = NULL;
 out:
-	if (error) {
-		dprintf("AT bus initialization failed (%d)\n", error);
-		free(AT_BUSINST(state));
-		AT_BUSINST(state) = NULL;
-	}
 	return error;
 }
