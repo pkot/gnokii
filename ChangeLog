@@ -1,3 +1,9 @@
+0.4.1 (not released yet)
+=====
+ * gnokii fixes
+    o add missing break when reading concatenated mesages;
+      catched by Markus Plail                             (Pawel Kot)
+
 0.4.0
 =====
  * Rewrite of the SMS subsystem

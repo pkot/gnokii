@@ -1149,6 +1149,7 @@ static int getsms(int argc, char *argv[])
 					fprintf(stdout, _("Linked (%d/%d):\n"),
 						message.UDH.UDH[0].u.ConcatenatedShortMessage.CurrentNumber,
 						message.UDH.UDH[0].u.ConcatenatedShortMessage.MaximumNumber);
+					break;
 				case SMS_WAPvCard:
 					fprintf(stdout, _("WAP vCard:\n"));
 					break;
