@@ -523,7 +523,7 @@ static void ParseLayout(unsigned char *message, GSM_Data *data)
 			memcpy(data->RawSMS->UserData, message + 13, data->RawSMS->Length);
 			return;
 		case 0x02:
-			dprintf("Type: Picture\n");
+			dprintf("|Type: Picture\n");
 			data->RawSMS->Type = SMS_Picture;
 			block = message + 20;
 			memcpy(data->RawSMS->SMSCTime, message + 10, 7);
@@ -572,7 +572,8 @@ static void ParseLayout(unsigned char *message, GSM_Data *data)
 			}
 			break;
 		case 0x80: /* User Data */
-			if (data->RawSMS->Type != 0xa0) {  /* Ignore the found UserData block for pictures */
+			if ((data->RawSMS->Type != SMS_Picture) && (data->RawSMS->Type != SMS_PictureTemplate)) {  
+					/* Ignore the found UserData block for pictures */
 				data->RawSMS->Length = block[3];
 				memcpy(data->RawSMS->UserData, block + 4, data->RawSMS->Length);
 			}
@@ -786,21 +787,21 @@ static GSM_Error P6510_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 		if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 		error = SM_Block(state, data, P6510_MSG_FOLDER);
 
-		data->nk6510_SIM_Inbox_Number = data->SMSFolder->Number;
+		data->nk6510_SIM_Inbox_Number = 1000;
 
 		for (i = 0; i < phone.Number; i++) {
-			data->SMSFolder->Locations[data->nk6510_SIM_Inbox_Number + i] = phone.Locations[i];
+			data->SMSFolder->Locations[data->SMSFolder->Number] = phone.Locations[i];
+			data->nk6510_SIM_Inbox_Number = GNOKII_MIN(data->nk6510_SIM_Inbox_Number, phone.Locations[i]);
 			data->SMSFolder->Number++;
 		}
 		return GE_NONE;
 	} else {
-		data->nk6510_SIM_Inbox_Number = 0;
 		if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 		return SM_Block(state, data, P6510_MSG_FOLDER);
 	}
 }
 
-static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *state, int mem)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0E, 
 			       0x02, /* 0x01 SIM, 0x02 phone*/
@@ -811,11 +812,9 @@ static GSM_Error P6510_GetSMSMessageStatus(GSM_Data *data, GSM_Statemachine *sta
 
 	dprintf("Getting SMS message (%i) status (%i)...\n", data->RawSMS->Number, data->RawSMS->MemoryType);
 
+	req[4] = mem;
        	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	req[7] = data->RawSMS->Number;
-
-	if (req[5] == P6510_MEMORY_IN) 
-		if (data->RawSMS->Number < (int) data->nk6510_SIM_Inbox_Number + 1) req[4] = 0x01;
 
 	if (SM_SendMessage(state, 10, P6510_MSG_FOLDER, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, P6510_MSG_FOLDER);
@@ -831,9 +830,12 @@ static GSM_Error P6510_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 				   0x01, 0x00};
 	GSM_Error error;
 
-	error = P6510_GetSMSMessageStatus(data, state);
-
 	dprintf("Getting SMS (no validate) ...\n");
+
+	if (data->RawSMS->MemoryType == GMT_IN) 
+		if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number) req[4] = 0x01;
+
+	error = P6510_GetSMSMessageStatus(data, state, req[4]);
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	req[7] = data->RawSMS->Number;
@@ -864,7 +866,7 @@ static GSM_Error ValidateSMS(GSM_Data *data, GSM_Statemachine *state)
 		if ((error = P6510_GetSMSFolderStatus(data, state)) != GE_NONE) return error;
 	}
 
-	if (data->SMSFolder->Number + data->nk6510_SIM_Inbox_Number + 2 < data->RawSMS->Number) {
+	if (data->SMSFolder->Number + 2 < data->RawSMS->Number) {
 		if (data->RawSMS->Number < MAX_SMS_MESSAGES)
 			return GE_EMPTYLOCATION;
 		else
@@ -888,8 +890,9 @@ static GSM_Error P6510_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 	error = ValidateSMS(data, state);
 	if (error != GE_NONE) return error;
 
-	if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number + 1) req[4] = 0x01;
 	data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
+	if (data->RawSMS->MemoryType == GMT_IN) 
+		if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number) req[4] = 0x01;
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	req[7] = data->RawSMS->Number;
@@ -908,15 +911,17 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 				   0x01, 0x00};
 	GSM_Error error;
 
+	dprintf("Getting SMS...\n");
+
 	error = ValidateSMS(data, state);
 	if (error != GE_NONE) return error;
 
-	if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number + 1) req[4] = 0x01;
 	data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
+	dprintf("raw: %i, %i\n", data->RawSMS->Number, data->nk6510_SIM_Inbox_Number);
+	if (data->RawSMS->MemoryType == GMT_IN) 
+		if (data->RawSMS->Number < data->nk6510_SIM_Inbox_Number) req[4] = 0x01;
 
-	error = P6510_GetSMSMessageStatus(data, state);
-
-	dprintf("Getting SMS...\n");
+	error = P6510_GetSMSMessageStatus(data, state, req[4]);
 
 	req[5] = GetMemoryType(data->RawSMS->MemoryType);
 	req[7] = data->RawSMS->Number;
@@ -1083,6 +1088,7 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
 				  0x00, 0x00, 0x00, 0x55, 0x55}; /* What's this? */
 	GSM_Error error;
+	int pos;
 
 	memset(req + 9, 0, 244);
 	req[9] = 0x01; /* one big block */
@@ -1090,15 +1096,13 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	req[11] = 46 - 9 + data->RawSMS->UserDataLength;
 	/*        req[11] is supposed to be the length of the whole message 
 		  starting from req[10], which is the message type */
+
 	req[12] = 0x01; /* SMS Submit */
 	if (data->RawSMS->ReplyViaSameSMSC)  req[12] |= 0x80;
 	if (data->RawSMS->RejectDuplicates)  req[12] |= 0x04;
 	if (data->RawSMS->Report)            req[12] |= 0x20;
 	if (data->RawSMS->UDHIndicator)      req[12] |= 0x40;
-	/*
 	if (data->RawSMS->ValidityIndicator) req[12] |= 0x10;
-	FIXME: How to set Validity correctly?
-	*/
 
 	req[13] = data->RawSMS->Reference;
 	req[14] = data->RawSMS->PID;
@@ -1106,7 +1110,7 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	req[16] = 0x00;
 
 	/* Magic. Nokia new ideas: coding SMS in the sequent blocks */
-	req[17] = 0x03; /* total blocks */
+	req[17] = 0x04; /* total blocks */
 
 	/* FIXME. Do it in the loop */
 
@@ -1130,14 +1134,16 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	req[45] = data->RawSMS->Length;
 
 	memcpy(req + 46, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+	pos = 46 + data->RawSMS->UserDataLength;
 
-	/* Block 4. Validity Period ? */
-	/*
-	  memcpy(req + 46 + data->RawSMS->UserDataLength, "\x00\x6f\x31\xc1", 4); 
-	*/
+	/* Block 4. Validity Period */
+	req[pos++] = 0x08; /* type: validity */
+	req[pos++] = 0x04;
+	req[pos++] = 0x01; /* data length */
+	req[pos++] = data->RawSMS->Validity[0];
 
 	dprintf("Sending SMS...(%d)\n", 46 + data->RawSMS->UserDataLength);
-	if (SM_SendMessage(state, 46 + data->RawSMS->UserDataLength, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, pos, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
 	do {
 		error = SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, state->Link.SMSTimeout);
 	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
@@ -1447,7 +1453,7 @@ static GSM_Error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	/* You can only get logos which have been altered, */
 	/* the standard logos can't be read!! */
 
-	//	req[15] = GNOKII_MIN(data->Bitmap->number + 1, GSM_MAX_CALLER_GROUPS);
+	req[15] = GNOKII_MIN(data->Bitmap->number + 1, GSM_MAX_CALLER_GROUPS);
 	req[15] = data->Bitmap->number + 1;
 	dprintf("Getting caller(%d) logo...\n", req[15]);
 
