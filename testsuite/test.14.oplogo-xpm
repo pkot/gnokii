@@ -1,4 +1,1 @@
-#
-# Note: I do not know if result would actually work. It looks slightly big to me.
-#
-$GNOKII --sendlogo op 0800123456 ../Docs/pacman.xpm "203 01"
+$GNOKII --sendlogo op 0800123456 ../Docs/gnokiiop.xpm "203 01"
