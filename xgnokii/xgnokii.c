@@ -521,7 +521,7 @@ static void ParseSMSCenters(void)
 		else
 			row[0] = g_strdup(configDialogData.sms.smsSetting[i].Name);
 
-		row[1] = g_strdup(configDialogData.sms.smsSetting[i].Number);
+		row[1] = g_strdup(configDialogData.sms.smsSetting[i].SMSC.Number);
 
 		switch (configDialogData.sms.smsSetting[i].Format) {
 		case SMS_FText:
@@ -1296,11 +1296,11 @@ static void OkEditSMSSetDialog(GtkWidget * w, gpointer data)
 	    = '\0';
 
 	strncpy(configDialogData.sms.smsSetting
-		[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].Number,
+		[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].SMSC.Number,
 		gtk_entry_get_text(GTK_ENTRY(configDialogData.sms.number)),
 		MAX_BCD_STRING_LENGTH);
 	configDialogData.sms.smsSetting[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].
-	    Number[MAX_BCD_STRING_LENGTH]
+	    SMSC.Number[MAX_BCD_STRING_LENGTH]
 	    = '\0';
 
 	configDialogData.sms.smsSetting[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].
@@ -1484,7 +1484,7 @@ static void ShowEditSMSSetDialog(GtkWidget * w, gpointer data)
 
 	gtk_entry_set_text(GTK_ENTRY(configDialogData.sms.number),
 			   configDialogData.sms.smsSetting
-			   [GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].Number);
+			   [GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].SMSC.Number);
 
 	switch (configDialogData.sms.smsSetting
 		[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].Format) {

@@ -496,6 +496,7 @@ static int sendsms(int argc, char *argv[])
 		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
 			strncpy(sms.SMSC.Number, optarg, sizeof(sms.SMSC.Number) - 1);
+			if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
 			break;
 
 		case '2': /* SMSC number index in phone memory */
@@ -505,8 +506,10 @@ static int sendsms(int argc, char *argv[])
 				free(data.MessageCenter);
 				sendsms_usage();
 			}
-			if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE)
-				strcpy(sms.SMSC.Number, data.MessageCenter->Number);
+			if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE) {
+				strcpy(sms.SMSC.Number, data.MessageCenter->SMSC.Number);
+				sms.SMSC.Type = data.MessageCenter->SMSC.Type;
+			}
 			free(data.MessageCenter);
 			break;
 
@@ -594,13 +597,14 @@ static int sendsms(int argc, char *argv[])
 	if (!sms.SMSC.Number[0]) {
 		data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
 		data.MessageCenter->No = 1;
-		if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE)
-			strcpy(sms.SMSC.Number, data.MessageCenter->Number);
+		if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE) {
+			strcpy(sms.SMSC.Number, data.MessageCenter->SMSC.Number);
+			sms.SMSC.Type = data.MessageCenter->SMSC.Type;
+		}
 		free(data.MessageCenter);
 	}
 
-	if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
-	else sms.SMSC.Type = SMS_Unknown;
+	if (!sms.SMSC.Type) sms.SMSC.Type = SMS_Unknown;
 
 	if (curpos != -1) {
 		error = readtext(&sms.UserData[curpos], input_len);
@@ -811,20 +815,19 @@ static int getsmsc(int argc, char *argv[])
 		}
 
 		if (raw) {
-			fprintf(stdout, "%d;%s;%d;%d;%d;%d;%s;%s\n",
+			fprintf(stdout, "%d;%s;%d;%d;%d;%d;%s;%d;%s\n",
 				MessageCenter.No, MessageCenter.Name,
-				MessageCenter.DefaultName, MessageCenter.Type,
-				MessageCenter.Format, MessageCenter.Validity,
-				MessageCenter.Number, MessageCenter.Recipient);
+				MessageCenter.DefaultName, MessageCenter.Format,
+				MessageCenter.Validity,
+				MessageCenter.SMSC.Type, MessageCenter.SMSC.Number,
+				MessageCenter.Recipient.Type, MessageCenter.Recipient.Number);
 		} else {
-			if (i != 1) fprintf(stdout, "\n");
-
 			if (MessageCenter.DefaultName == -1)
 				fprintf(stdout, _("No. %d: \"%s\" (defined name)\n"), MessageCenter.No, MessageCenter.Name);
 			else
 				fprintf(stdout, _("No. %d: \"%s\" (default name)\n"), MessageCenter.No, MessageCenter.Name);
-			fprintf(stdout, _("SMS center number is %s\n"), MessageCenter.Number);
-			fprintf(stdout, _("Default recipient number is %s\n"), MessageCenter.Recipient);
+			fprintf(stdout, _("SMS center number is %s\n"), MessageCenter.SMSC.Number);
+			fprintf(stdout, _("Default recipient number is %s\n"), MessageCenter.Recipient.Number);
 			fprintf(stdout, _("Messages sent as "));
 
 			switch (MessageCenter.Format) {
@@ -905,16 +908,18 @@ static int setsmsc()
 		}
 
 		memset(&MessageCenter, 0, sizeof(MessageCenter));
-		n = sscanf(line, "%d;%19[^;];%d;%d;%d;%d;%39[^;];%39[^;\n]%c",
-				&MessageCenter.No, MessageCenter.Name,
-				&MessageCenter.DefaultName, (int *)&MessageCenter.Type,
-				(int *)&MessageCenter.Format, (int *)&MessageCenter.Validity,
-				MessageCenter.Number, MessageCenter.Recipient, &ch);
+		n = sscanf(line, "%d;%19[^;];%d;%d;%d;%d;%39[^;];%d;%39[^;\n]%c",
+			   &MessageCenter.No, MessageCenter.Name,
+			   &MessageCenter.DefaultName,
+			   (int *)&MessageCenter.Format, (int *)&MessageCenter.Validity,
+			   (int *)&MessageCenter.SMSC.Type, MessageCenter.SMSC.Number,
+			   (int *)&MessageCenter.Recipient.Type, MessageCenter.Recipient.Number,
+			   &ch);
 		switch (n) {
 		case 6:
-			MessageCenter.Number[0] = 0;
+			MessageCenter.SMSC.Number[0] = 0;
 		case 7:
-			MessageCenter.Recipient[0] = 0;
+			MessageCenter.Recipient.Number[0] = 0;
 		case 8:
 			break;
 		default:
@@ -1533,11 +1538,21 @@ static int sendlogo(int argc, char *argv[])
 	data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
 	data.MessageCenter->No = 1;
 	if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE)
-		strcpy(sms.SMSC.Number, data.MessageCenter->Number);
+		strcpy(sms.SMSC.Number, data.MessageCenter->SMSC.Number);
 	free(data.MessageCenter);
 
 	if (sms.SMSC.Number[0] == '+') sms.SMSC.Type = SMS_International;
 	else sms.SMSC.Type = SMS_Unknown;
+
+	data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
+	data.MessageCenter->No = 1;
+	if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE) {
+		strcpy(sms.SMSC.Number, data.MessageCenter->SMSC.Number);
+		sms.SMSC.Type = data.MessageCenter->SMSC.Type;
+	}
+	free(data.MessageCenter);
+
+	if (!sms.SMSC.Type) sms.SMSC.Type = SMS_Unknown;
 
 	/* Send the message. */
 	data.SMS = &sms;

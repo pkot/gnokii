@@ -44,7 +44,7 @@
 #include "phones/atnok.h"
 #include "links/atbus.h"
 #ifndef WIN32
-#include "links/cbus.h"
+#  include "links/cbus.h"
 #endif
 
 static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state);
@@ -808,18 +808,18 @@ static GSM_Error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int l
 			if (pos) {
 				*pos = '\0';
 				data->MessageCenter->No = 1;
-				strncpy(data->MessageCenter->Number, buf.line2 + 8, MAX_BCD_STRING_LENGTH);
-		                data->MessageCenter->Number[MAX_BCD_STRING_LENGTH - 1] = '\0';
-				data->MessageCenter->Type = atoi(++pos);
+				strncpy(data->MessageCenter->SMSC.Number, buf.line2 + 8, MAX_BCD_STRING_LENGTH);
+		                data->MessageCenter->SMSC.Number[MAX_BCD_STRING_LENGTH - 1] = '\0';
+				data->MessageCenter->SMSC.Type = atoi(++pos);
 			} else {
 				data->MessageCenter->No = 0;
 				strncpy(data->MessageCenter->Name, "SMS Center", GSM_MAX_SMS_CENTER_NAME_LENGTH);
-				data->MessageCenter->Type = SMS_Unknown;
+				data->MessageCenter->SMSC.Type = SMS_Unknown;
 			}
 			data->MessageCenter->DefaultName = 1; /* use default name */
 			data->MessageCenter->Format = SMS_FText; /* whatever */
 			data->MessageCenter->Validity = SMS_VMax;
-			strcpy(data->MessageCenter->Recipient, "") ;
+			strcpy(data->MessageCenter->Recipient.Number, "") ;
 		}
 	}
 	return GE_NONE;

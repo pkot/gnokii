@@ -900,8 +900,8 @@ static GSM_Error P6510_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Error	e = GE_NONE;
-	int		digits, bytes;
-	
+	unsigned int parts_no, offset, i;
+
 	dprintf("Frame of type 0x02 (SMS handling) received!\n");
 
 	if (!data) return GE_INTERNALERROR;
@@ -913,21 +913,50 @@ static GSM_Error P6510_IncomingSMS(int messagetype, unsigned char *message, int 
 		data->MessageCenter->No = message[8];
 		data->MessageCenter->Format = message[4];
 		data->MessageCenter->Validity = message[12];  /* due to changes in format */
-		digits = message[15];
-		bytes = message[18] - 1;
 
-		sprintf(data->MessageCenter->Name, "%s", message + 33);
+		parts_no = message[13];
+		offset = 14;
+
+		for (i = 0; i < parts_no; i++) {
+			switch (message[offset]) {
+			case 0x82: /* Number */
+				switch (message[offset + 2]) {
+				case 0x01: /* Default number */
+					snprintf(data->MessageCenter->Recipient.Number,
+						 sizeof(data->MessageCenter->Recipient.Number),
+						 "%s", GetBCDNumber(message + offset + 4));
+					data->MessageCenter->Recipient.Type = message[offset + 5];
+					break;
+				case 0x02: /* SMSC number */
+					snprintf(data->MessageCenter->SMSC.Number,
+						 sizeof(data->MessageCenter->SMSC.Number),
+						 "%s", GetBCDNumber(message + offset + 4));
+					data->MessageCenter->SMSC.Type = message[offset + 5];
+					break;
+				default:
+					dprintf("Unknown subtype %02x. Ignoring\n", message[offset + 1]);
+					break;
+				}
+				break;
+			case 0x81: /* SMSC name */
+				DecodeUnicode(data->MessageCenter->Name,
+					      message + offset + 4,
+					      message[offset + 2]);
+				break;
+			default:
+				dprintf("Unknown subtype %02x. Ignoring\n", message[offset]);
+				break;
+			}
+			offset += message[offset + 1];
+		}
+
 		data->MessageCenter->DefaultName = -1;	/* FIXME */
 
-		snprintf(data->MessageCenter->Recipient, sizeof(data->MessageCenter->Recipient), "%s", GetBCDNumber(message + 30));
-		snprintf(data->MessageCenter->Number, sizeof(data->MessageCenter->Number), "%s", GetBCDNumber(message + 18));
-		data->MessageCenter->Type = message[22];
-
-		if (strlen(data->MessageCenter->Recipient) == 0) {
-			sprintf(data->MessageCenter->Recipient, "(none)");
+		if (strlen(data->MessageCenter->Recipient.Number) == 0) {
+			sprintf(data->MessageCenter->Recipient.Number, "(none)");
 		}
-		if (strlen(data->MessageCenter->Number) == 0) {
-			sprintf(data->MessageCenter->Number, "(none)");
+		if (strlen(data->MessageCenter->SMSC.Number) == 0) {
+			sprintf(data->MessageCenter->SMSC.Number, "(none)");
 		}
 		if(strlen(data->MessageCenter->Name) == 0) {
 			sprintf(data->MessageCenter->Name, "(none)");

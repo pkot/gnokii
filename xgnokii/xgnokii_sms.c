@@ -954,7 +954,7 @@ static void DoSendSMS(void)
 			number = addresses[i];
 
 		DefaultSubmitSMS(&sms);
-		strcpy(sms.SMSC.Number, xgnokiiConfig.smsSetting[sendSMS.center].Number);
+		strcpy(sms.SMSC.Number, xgnokiiConfig.smsSetting[sendSMS.center].SMSC.Number);
 		/*		sms.SMSC.No = 0;*/
 
 		if (GTK_TOGGLE_BUTTON(sendSMS.report)->active)

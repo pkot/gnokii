@@ -250,13 +250,12 @@ typedef enum {
 
 typedef struct {
 	int			No;					/* Number of the SMSC in the phone memory. */
-	SMS_NumberType          Type;
 	char			Name[GSM_MAX_SMS_CENTER_NAME_LENGTH];	/* Name of the SMSC. */
 	int			DefaultName;				/* >= 1 if default name used, otherwise -1 */
 	SMS_MessageFormat	Format;					/* SMS is sent as text/fax/paging/email. */
 	SMS_ValidityPeriod	Validity;				/* Validity of SMS Message. */
-	char			Number[MAX_BCD_STRING_LENGTH];		/* Number of the SMSC. */
-	char			Recipient[MAX_BCD_STRING_LENGTH];	/* Number of the default recipient. */
+	SMS_Number	       	SMSC;			       		/* Number of the SMSC. */
+	SMS_Number		Recipient;				/* Number of the default recipient. */
 } SMS_MessageCenter;
 
 /*** SHORT MESSAGE CORE ***/
