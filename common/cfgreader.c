@@ -40,15 +40,15 @@
 
 #include "cfgreader.h"
 
-API struct CFG_Header *CFG_Info;
+API struct gn_cfg_header *gn_cfg_info;
 
 /* Read configuration information from a ".INI" style file */
-struct CFG_Header *CFG_ReadFile(const char *filename)
+struct gn_cfg_header *cfg_read_file(const char *filename)
 {
 	FILE *handle;
 	char *line;
 	char *buf;
-	struct CFG_Header *cfg_info = NULL, *cfg_head = NULL;
+	struct gn_cfg_header *cfg_info = NULL, *cfg_head = NULL;
 
 	/* Error check */
 	if (filename == NULL) {
@@ -62,7 +62,7 @@ struct CFG_Header *CFG_ReadFile(const char *filename)
 
 	/* Open file */
 	if ((handle = fopen(filename, "r")) == NULL) {
-		dprintf("CFG_ReadFile - open %s: %s\n", filename, strerror(errno));
+		dprintf("cfg_read_file - open %s: %s\n", filename, strerror(errno));
 		return NULL;
 	}
 	else
@@ -86,10 +86,10 @@ struct CFG_Header *CFG_ReadFile(const char *filename)
 
 		/* Look for "headings" enclosed in square brackets */
 		if ((line[0] == '[') && (line[strlen(line) - 1] == ']')) {
-			struct CFG_Header *heading;
+			struct gn_cfg_header *heading;
 
 			/* Allocate new heading entry */
-			if ((heading = (struct CFG_Header *)malloc(sizeof(*heading))) == NULL) {
+			if ((heading = (struct gn_cfg_header *)malloc(sizeof(*heading))) == NULL) {
 				return NULL;
 			}
 
@@ -123,11 +123,11 @@ struct CFG_Header *CFG_ReadFile(const char *filename)
 		/* Process key/value line */
 
 		if ((strchr(line, '=') != NULL) && cfg_info != NULL) {
-			struct CFG_Entry *entry;
+			struct gn_cfg_entry *entry;
 			char *value;
 
 			/* Allocate new entry */
-			if ((entry = (struct CFG_Entry *)malloc(sizeof(*entry))) == NULL) {
+			if ((entry = (struct gn_cfg_entry *)malloc(sizeof(*entry))) == NULL) {
 				return NULL;
 			}
 
@@ -177,7 +177,7 @@ struct CFG_Header *CFG_ReadFile(const char *filename)
 
 /*  Write configuration information to a config file */
 
-int CFG_WriteFile(struct CFG_Header *cfg, const char *filename)
+int cfg_write_file(struct gn_cfg_header *cfg, const char *filename)
 {
 	/* Not implemented - tricky to do and preserve comments */
 	return 0;
@@ -188,10 +188,10 @@ int CFG_WriteFile(struct CFG_Header *cfg, const char *filename)
  * with key or NULL if no such key exists.
  */
 
-API char *CFG_Get(struct CFG_Header *cfg, const char *section, const char *key)
+API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key)
 {
-	struct CFG_Header *h;
-	struct CFG_Entry *e;
+	struct gn_cfg_header *h;
+	struct gn_cfg_entry *e;
 
 	if ((cfg == NULL) || (section == NULL) || (key == NULL)) {
 		return NULL;
@@ -217,10 +217,10 @@ API char *CFG_Get(struct CFG_Header *cfg, const char *section, const char *key)
  * Return all the entries of the fiven section.
  */
 
-void CFG_GetForeach(struct CFG_Header *cfg, const char *section, CFG_GetForeach_func func)
+void cfg_get_foreach(struct gn_cfg_header *cfg, const char *section, cfg_get_foreach_func func)
 {
-	struct CFG_Header *h;
-	struct CFG_Entry *e;
+	struct gn_cfg_header *h;
+	struct gn_cfg_entry *e;
 
 	if ((cfg == NULL) || (section == NULL) || (func == NULL)) {
 		return;
@@ -239,11 +239,11 @@ void CFG_GetForeach(struct CFG_Header *cfg, const char *section, CFG_GetForeach_
 /*  Set the value of a key in a config file.  Return the new value if
     the section/key can be found, else return NULL.  */
 
-char *CFG_Set(struct CFG_Header *cfg, const char *section, const char *key,
-		const char *value)
+char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key,
+	      const char *value)
 {
-	struct CFG_Header *h;
-	struct CFG_Entry *e;
+	struct gn_cfg_header *h;
+	struct gn_cfg_entry *e;
 
 	if ((cfg == NULL) || (section == NULL) || (key == NULL) ||
 	    (value == NULL)) {
@@ -269,13 +269,13 @@ char *CFG_Set(struct CFG_Header *cfg, const char *section, const char *key,
 	return NULL;
 }
 
-API int readconfig(char **model, char **port, char **initlength,
-	       char **connection, char **bindir)
+API int gn_readconfig(char **model, char **port, char **initlength,
+		      char **connection, char **bindir)
 {
 	char *homedir;
 	char rcfile[200];
-	char *DefaultConnection = "serial";
-	char *DefaultBindir     = "/usr/local/sbin/";
+	char *default_connection = "serial";
+	char *default_bindir     = "/usr/local/sbin/";
 
 	/* I know that it doesn't belong here but currently there is now generic
 	 * application init function anywhere.
@@ -297,9 +297,9 @@ API int readconfig(char **model, char **port, char **initlength,
 
 #ifdef WIN32
 	/* Try opening .gnokirc from users home directory first */
-	if ((CFG_Info = CFG_ReadFile(rcfile)) == NULL) {
+	if ((gn_cfg_info = cfg_read_file(rcfile)) == NULL) {
 		/* It failed so try for gnokiirc */
-		if ((CFG_Info = CFG_ReadFile("gnokiirc")) == NULL) {
+		if ((gn_cfg_info = cfg_read_file("gnokiirc")) == NULL) {
 			/* That failed too so exit */
 			fprintf(stderr, _("Couldn't open %s or gnokiirc. Exiting now...\n"), rcfile);
 			return -1;
@@ -307,9 +307,9 @@ API int readconfig(char **model, char **port, char **initlength,
 	}
 #else
 	/* Try opening .gnokirc from users home directory first */
-	if ((CFG_Info = CFG_ReadFile(rcfile)) == NULL) {
+	if ((gn_cfg_info = cfg_read_file(rcfile)) == NULL) {
 		/* It failed so try for /etc/gnokiirc */
-		if ((CFG_Info = CFG_ReadFile("/etc/gnokiirc")) == NULL) {
+		if ((gn_cfg_info = cfg_read_file("/etc/gnokiirc")) == NULL) {
 			/* That failed too so exit */
 			fprintf(stderr, _("Couldn't open %s or /etc/gnokiirc. Exiting now...\n"), rcfile);
 			return -1;
@@ -317,26 +317,26 @@ API int readconfig(char **model, char **port, char **initlength,
 	}
 #endif
 
-	(char *)*model = CFG_Get(CFG_Info, "global", "model");
+	(char *)*model = gn_cfg_get(gn_cfg_info, "global", "model");
 	if (!*model) {
 		fprintf(stderr, _("Config error - no model specified. Exiting now...\n"));
 		return -2;
 	}
 
-	(char *)*port = CFG_Get(CFG_Info, "global", "port");
+	(char *)*port = gn_cfg_get(gn_cfg_info, "global", "port");
 	if (!*port) {
 		fprintf(stderr, _("Config error - no port specified. Exiting now...\n"));
 		return -3;
 	}
 
-	(char *)*initlength = CFG_Get(CFG_Info, "global", "initlength");
+	(char *)*initlength = gn_cfg_get(gn_cfg_info, "global", "initlength");
 	if (!*initlength) (char *)*initlength = "default";
 
-	(char *)*connection = CFG_Get(CFG_Info, "global", "connection");
-	if (!*connection) (char *)*connection = DefaultConnection;
+	(char *)*connection = gn_cfg_get(gn_cfg_info, "global", "connection");
+	if (!*connection) (char *)*connection = default_connection;
 
-	(char *)*bindir = CFG_Get(CFG_Info, "global", "bindir");
-	if (!*bindir) (char *)*bindir = DefaultBindir;
+	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
+	if (!*bindir) (char *)*bindir = default_bindir;
 
 	return 0;
 }

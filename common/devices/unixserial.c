@@ -97,7 +97,7 @@ static void device_script_cfgfunc(const char *section, const char *key, const ch
 int device_script(int fd, const char *section)
 {
 	pid_t pid;
-	const char *scriptname = CFG_Get(CFG_Info, "global", section);
+	const char *scriptname = gn_cfg_get(gn_cfg_info, "global", section);
 	int status;
 
 	if (!scriptname)
@@ -110,7 +110,7 @@ int device_script(int fd, const char *section)
 		return(-1);
 
 	case 0: /* child */
-		CFG_GetForeach(CFG_Info, section, device_script_cfgfunc);
+		cfg_get_foreach(gn_cfg_info, section, device_script_cfgfunc);
 		errno = 0;
 		if (dup2(fd, 0) != 0 || dup2(fd, 1) != 1 || close(fd)) {
 			fprintf(stderr, _("device_script(\"%s\"): file descriptor prepare: %s\n"), scriptname, strerror(errno));
@@ -196,7 +196,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	char *s;
 
 	/* handle config file handshake override: */
-	s = CFG_Get(CFG_Info, "global", "handshake");
+	s = gn_cfg_get(gn_cfg_info, "global", "handshake");
 
 	if (s && (!strcasecmp(s, "software") || !strcasecmp(s, "rtscts")))
 		with_hw_handshake = false;
@@ -256,7 +256,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	}
 
 	/* Set speed */
-	s = CFG_Get(CFG_Info, "global", "serial_baudrate"); /* baud rate string */
+	s = gn_cfg_get(gn_cfg_info, "global", "serial_baudrate"); /* baud rate string */
 
 	if (s) baudrate = atoi(s);
 	if (baudrate && serial_changespeed(fd, baudrate) != GE_NONE)
@@ -428,14 +428,14 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n)
 	static int require_dcd = -1;
 
 	if (serial_write_usleep == LONG_MIN) {
-		char *s = CFG_Get(CFG_Info, "global", "serial_write_usleep");
+		char *s = gn_cfg_get(gn_cfg_info, "global", "serial_write_usleep");
 
 		serial_write_usleep = (!s ?
-			SERIAL_WRITE_USLEEP_DEFAULT : atol(CFG_Get(CFG_Info, "global", "serial_write_usleep")));
+			SERIAL_WRITE_USLEEP_DEFAULT : atol(gn_cfg_get(gn_cfg_info, "global", "serial_write_usleep")));
 	}
 
 	if (require_dcd == -1) {
-		require_dcd = (!!CFG_Get(CFG_Info, "global", "require_dcd"));
+		require_dcd = (!!gn_cfg_get(gn_cfg_info, "global", "require_dcd"));
 #ifndef TIOCMGET
 		if (require_dcd)
 			fprintf(stderr, _("WARNING: global/require_dcd argument was set but it is not supported on this system!\n"));

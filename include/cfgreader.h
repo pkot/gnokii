@@ -28,39 +28,45 @@
 
 */
 
-#ifndef _CFGREADER_H
-#define _CFGREADER_H
+#ifndef _gnokii_cfgreader_h
+#define _gnokii_cfgreader_h
 
 #include "config.h"
 
 /* Structure definitions */
 
-/* A linked list of key/value pairs */
+/*
+ * Exported things
+ */
 
-struct CFG_Entry {
-	struct CFG_Entry *next, *prev;
+/* A linked list of key/value pairs */
+struct gn_cfg_entry {
+	struct gn_cfg_entry *next, *prev;
 	char *key;
 char *value;
 };
 
-struct CFG_Header {
-	struct CFG_Header *next, *prev;
-	struct CFG_Entry *entries;
+struct gn_cfg_header {
+	struct gn_cfg_header *next, *prev;
+	struct gn_cfg_entry *entries;
 	char *section;
 };
 
 /* Global variables */
+extern API struct gn_cfg_header *gn_cfg_info;
 
-extern API struct CFG_Header *CFG_Info;
+/* Functions */
+API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
+API int gn_readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
 
-/* Function prototypes */
+/*
+ * Exported things
+ */
 
-struct CFG_Header *CFG_ReadFile(const char *filename);
-API char *CFG_Get(struct CFG_Header *cfg, const char *section, const char *key);
-typedef void (*CFG_GetForeach_func)(const char *section, const char *key, const char *value);
-void CFG_GetForeach(struct CFG_Header *cfg, const char *section, CFG_GetForeach_func func);
-char *CFG_Set(struct CFG_Header *cfg, const char *section, const char *key, const char *value);
-int CFG_WriteFile(struct CFG_Header *cfg, const char *filename);
-API int readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
+struct gn_cfg_header *cfg_read_file(const char *filename);
+typedef void (*cfg_get_foreach_func)(const char *section, const char *key, const char *value);
+void cfg_get_foreach(struct gn_cfg_header *cfg, const char *section, cfg_get_foreach_func func);
+char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key, const char *value);
+int cfg_write_file(struct gn_cfg_header *cfg, const char *filename);
 
-#endif /* _CFGREADER_H */
+#endif /* _gnokii_cfgreader_h */

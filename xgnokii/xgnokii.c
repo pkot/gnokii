@@ -2297,9 +2297,9 @@ static void ReadConfig(void)
 			if ((xgnokiiConfig.locale = getenv("LANG")) == NULL)
 				xgnokiiConfig.locale = "POSIX";
 #endif
-	if (readconfig(&xgnokiiConfig.model, &xgnokiiConfig.port,
-		       &xgnokiiConfig.initlength, &xgnokiiConfig.connection,
-		       &xgnokiiConfig.bindir) < 0) {
+	if (gn_readconfig(&xgnokiiConfig.model, &xgnokiiConfig.port,
+			  &xgnokiiConfig.initlength, &xgnokiiConfig.connection,
+			  &xgnokiiConfig.bindir) < 0) {
 		exit(-1);
 	}
 

@@ -1,5 +1,9 @@
-0.4.4 (Not released yet)
+0.5.0 (Not released yet)
 =====
+ * Change the external API (provided by libgnokii to the user
+   applications) to be unique and consistant              (Pawel Kot)
+ * Change the internal API to be consistant with the external API
+                                                          (Pawel Kot)
  * 6110 series updates:
     o Nokia 8290 is known to work with the driver             (Roger)
     o fix default number reading with the smsc info       (Pawel Kot)

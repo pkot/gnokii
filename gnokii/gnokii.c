@@ -372,7 +372,7 @@ static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 	}
 	/* signal(SIGINT, bussignal); */
 
-	aux = CFG_Get(CFG_Info, "global", "use_locking");
+	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
 		lockfile = lock_device(Port);
@@ -4465,7 +4465,7 @@ int main(int argc, char *argv[])
 	short_version();
 
 	/* Read config file */
-	if (readconfig(&model, &Port, &Initlength, &Connection, &BinDir) < 0) {
+	if (gn_readconfig(&model, &Port, &Initlength, &Connection, &BinDir) < 0) {
 		exit(1);
 	}
 

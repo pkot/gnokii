@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
 	short_version();
 
-	if (readconfig(&Model, &Port, &Initlength, &Connection, &BinDir) < 0) {
+	if (gn_readconfig(&Model, &Port, &Initlength, &Connection, &BinDir) < 0) {
 		exit(-1);
 	}
 
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 		atexit(busterminate);
 	}
 
-	aux = CFG_Get(CFG_Info, "global", "use_locking");
+	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
 		lockfile = lock_device(Port);
