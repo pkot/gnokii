@@ -39,6 +39,9 @@ extern "C" {
 #if defined(__linux__)
 #  include <stdint.h>
 #  include <sys/time.h>
+#elif defined(__svr4__)
+#  include <inttypes.h>
+#  include <sys/time.h>
 #elif defined(_MSC_VER) && defined(WIN32)
 #  include <Winsock2.h>
 typedef unsigned char uint8_t;
