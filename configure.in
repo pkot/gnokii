@@ -489,7 +489,7 @@ int main()
                 ],
                 AC_DEFINE(USE_UNIX98PTYS),
                 AC_MSG_WARN("No unix98ptys"),
-		AC_MSG_WARN("Ensure to disable unix98ptys when crosscompiling"))
+		AC_DEFINE(USE_UNIX98PTYS))
    ]
 )
 
