@@ -86,6 +86,7 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSMSCenter(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -121,6 +122,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetSMSCenter,          AT_GetSMSCenter,          ReplyGetSMSCenter },
 	{ GN_OP_GetSecurityCodeStatus, AT_GetSecurityCodeStatus, ReplyGetSecurityCodeStatus },
 	{ GN_OP_EnterSecurityCode,     AT_EnterSecurityCode,     Reply },
+	{ GN_OP_MakeCall,              AT_DialVoice,             Reply },
 };
 
 #define REPLY_SIMPLETEXT(l1, l2, c, t) \
@@ -737,6 +739,18 @@ static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *stat
  	if (sm_message_send(strlen(req), GN_OP_EnterSecurityCode, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_EnterSecurityCode, data, state);
+}
+
+static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[32];
+
+	if (!data->call_info)
+		return GN_ERR_INTERNALERROR;
+	snprintf(req, sizeof(req), "ATDT%s;\r", data->call_info->number);
+	if (sm_message_send(strlen(req), GN_OP_MakeCall, req, state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_MakeCall, data, state);
 }
 
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)

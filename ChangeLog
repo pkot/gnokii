@@ -10,11 +10,13 @@
     o FAQ update and synchronize with WWW version       (Pawel Kot)
     o rttl is rtttl (ringing tone text transfer language
                                                    (Torsten Kunkel,
-                                                        (Pawel Kot)
+                                                         Pawel Kot)
  * libgnokii changes
     o rttl is rtttl (ringing tone text transfer language (changes
       internal API                                 (Torsten Kunkel,
-                                                        (Pawel Kot)
+                                                         Pawel Kot)
+ * AT series updates
+    o support for make call command                    (Igor Popik)
 
 0.5.7
 =====
