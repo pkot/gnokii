@@ -347,7 +347,7 @@ typedef struct {
 	gn_sms_data_type type;
 	unsigned int length;
 	union {
-		unsigned char text[GN_SMS_MAX_LENGTH + 1];
+		unsigned char text[10 * GN_SMS_MAX_LENGTH + 1];
 		gn_sms_multi multi;
 		gn_bmp bitmap;
 		gn_ringtone ringtone;

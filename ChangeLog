@@ -34,6 +34,9 @@
  * build system updates
     o avoid warnings on Linux when irda headers are detected
                                                          (Pawel Kot)
+ * libsms fixes
+    o allow to input more then 160 characters for the text sms
+                                                         (Pawel Kot)
 
 0.5.2
 =====
