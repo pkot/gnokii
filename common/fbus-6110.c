@@ -1426,7 +1426,7 @@ GSM_Error FB61_GetIncomingCallNr(char *Number)
     return GE_BUSY;
 }
 
-GSM_Error FB61_CancelCall()
+GSM_Error FB61_CancelCall(void)
 {
   unsigned char req[] = { FB61_FRAME_HEADER, 0x08, 0x00, 0x85};
   

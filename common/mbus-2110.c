@@ -10,8 +10,8 @@
 
   This code contains the main part of the 2110 code.
 	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Fri May 19 15:31:26 EST 2000
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -82,7 +82,8 @@ GSM_Functions			MB21_Functions = {
 		MB21_Reset,
 		MB21_GetProfile,
 		MB21_SetProfile,
-		MB21_SendRLPFrame
+		MB21_SendRLPFrame,
+	    MB21_CancelCall
 };
 
 	/* FIXME - these are guesses only... */
@@ -351,6 +352,11 @@ GSM_Error	MB21_GetProfile(GSM_Profile *Profile)
 }
 
 GSM_Error	MB21_SetProfile(GSM_Profile *Profile)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_CancelCall(void)
 {
     return (GE_NOTIMPLEMENTED);
 }

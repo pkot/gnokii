@@ -1,6 +1,6 @@
 0.3.2 THINGS:
 
-- gnokiid segfaults
+- gnokiid segfaults (these are now fixed ? -HAB)
 - FreeBSD build and work
 - international catalogs
 - Debian GNU/Linux package
@@ -19,11 +19,12 @@
 - remove default MODEL and PORT, use config files only and bug the user if
   /etc/gnokiirc or ~/.gnokiirs is not found
 - move VERSION, DEBUG, SECURITY and USE_NLS to config.h
-- 6160 support (is this useful: http://www.venia.net/tdma/ ?)
+- 6160 support (is this useful: http://www.venia.net/tdma/ - yes it was - HAB?)
+  Please email Hugh before delving into x160 support.
 - 7110 support (plain AT commands)
 - integrate xlogos into xgnokii
 - other mobile phones (?)
-- incoming RLP calls
+- incoming RLP calls (will anyone actually use this ?)
 - getsecuritycode patch
 - international characters in SMS messages and phonebooks - see the mailing
   list messages in archive

@@ -10,6 +10,8 @@
 
   This code contains the main part of the 5160/6160 code.
 	
+  Last modification: Fri May 19 15:31:26 EST 2000
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -84,7 +86,8 @@ GSM_Functions			MB61_Functions = {
 		MB61_Reset,
 		MB61_GetProfile,
 		MB61_SetProfile,
-		MB61_SendRLPFrame
+		MB61_SendRLPFrame,
+        MB61_CancelCall
 };
 
 	/* FIXME - these are guesses only... */
@@ -369,6 +372,11 @@ GSM_Error	MB61_GetProfile(GSM_Profile *Profile)
 }
 
 GSM_Error	MB61_SetProfile(GSM_Profile *Profile)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB61_CancelCall(void)
 {
     return (GE_NOTIMPLEMENTED);
 }

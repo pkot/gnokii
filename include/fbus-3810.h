@@ -10,8 +10,8 @@
 
   Header file for 3810 code.
 	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Fri May 19 15:31:26 EST 2000
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -56,6 +56,8 @@ GSM_Error   FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
 GSM_Error   FB38_SetSMSCenter(GSM_MessageCenter *MessageCenter);
 
 GSM_Error   FB38_DeleteSMSMessage(GSM_SMSMessage *message);
+
+GSM_Error	FB38_CancelCall(void);
 
 GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int size);
 

@@ -10,8 +10,8 @@
 
   Header file for 640 code.
 	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Fri May 19 15:31:26 EST 2000
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -91,6 +91,7 @@ GSM_Error	MB640_Reset(unsigned char type);
 GSM_Error	MB640_GetProfile(GSM_Profile *Profile);
 GSM_Error	MB640_SetProfile(GSM_Profile *Profile);
 bool  		MB640_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
+GSM_Error	MB640_CancelCall(void);
 
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __mbus_640_c isn't 

@@ -10,8 +10,8 @@
 
   This file contains the main code for 3810 support.
 	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Fri May 19 15:31:26 EST 2000
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -106,7 +106,8 @@ GSM_Functions           FB38_Functions = {
         FB38_Reset,
         FB38_GetProfile,
         FB38_SetProfile,
-		FB38_SendRLPFrame
+		FB38_SendRLPFrame,
+        FB38_CancelCall
 };
 
 GSM_Information         FB38_Information = {
@@ -977,6 +978,11 @@ GSM_Error   FB38_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 }
 
 GSM_Error   FB38_GetIncomingCallNr(char *Number)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_CancelCall(void)
 {
     return (GE_NOTIMPLEMENTED);
 }
@@ -2704,7 +2710,7 @@ void    FB38_RX_Handle0x41_SMSMessageCenterData(void)
 	CurrentMessageCenter->Format = MessageBuffer[7];
 	CurrentMessageCenter->Validity = MessageBuffer[9];
 
-	option_number_length = MessageBuffer[12]; // Don't know meaning of
+	option_number_length = MessageBuffer[12]; // Dont know meaning of
 						  // this number string
 	if (option_number_length != 0) {
 	        for (count = 0; count < option_number_length; count++) {

@@ -10,8 +10,8 @@
 
   This is the main part of 640 support.
 	
-  Last modification: Mon Mar 20 21:40:04 CET 2000
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Fri May 19 15:31:26 EST 2000
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -87,7 +87,8 @@ GSM_Functions			MB640_Functions = {
 		MB640_Reset,
 		MB640_GetProfile,
 		MB640_SetProfile,
-		MB640_SendRLPFrame
+		MB640_SendRLPFrame,
+        MB640_CancelCall
 };
 
 	/* FIXME - these are guesses only... */
@@ -361,6 +362,11 @@ GSM_Error	MB640_DeleteSMSMessage(GSM_SMSMessage *message)
 }
 
 GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB640_CancelCall(void)
 {
 	return (GE_NOTIMPLEMENTED);
 }

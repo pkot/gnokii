@@ -12,8 +12,8 @@
   calling code in gsm-api.c. Inspired by and in places copied from the Linux
   kernel AT Emulator IDSN code by Fritz Elfert and others.
   
-  Last modification: Mon May 15
-  Modified by Chris Kemp <ck231@cam.ac.uk>
+  Last modification: Fri May 19 13:15:07 EST 2000 
+                     Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #ifndef WIN32
 
@@ -126,7 +127,6 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 {
     int             count;
     unsigned char	out_buf[3];	
-    unsigned char  c;
 
     for (count = 0; count < length ; count ++) {
 			/* Echo character if appropriate. */
@@ -151,11 +151,7 @@ void	ATEM_HandleIncomingData(char *buffer, int length)
 			CurrentCmdBufferIndex = 0;
 		}
 		else {
-		  /* Convert all lowercase letters to uppercase ones */
-		  c=buffer[count];
-		  if ((c>='a') && (c<='z')) c+='A'-'a';
-
-		  CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex]=c;
+		  CmdBuffer[CurrentCmdBuffer][CurrentCmdBufferIndex] = buffer[count];
 			CurrentCmdBufferIndex ++;
 			if (CurrentCmdBufferIndex >= CMD_BUFFER_LENGTH) {
 				CurrentCmdBufferIndex = CMD_BUFFER_LENGTH;
@@ -171,13 +167,13 @@ void	ATEM_ParseAT(char *cmd_buffer)
 	char *buf;
 	char number[30];
 
-	if (strncmp (cmd_buffer, "AT", 2) != 0) {
+	if (strncasecmp (cmd_buffer, "AT", 2) != 0) {
 		ATEM_ModemResult(MR_ERROR);
 		return;
 	}
 
 	for (buf = &cmd_buffer[2]; *buf;) {
-		switch (*buf) {
+		switch (toupper(*buf)) {
 
 		case 'Z':
 		  buf++;
@@ -186,8 +182,8 @@ void	ATEM_ParseAT(char *cmd_buffer)
 		  /* Dial Data :-) */
 		  /* FIXME - should parse this better */
 		  buf++;
-		  if (*buf=='T') buf++;
-		  if (*buf==' ') buf++;
+		  if (toupper(*buf) == 'T') buf++;
+		  if (*buf == ' ') buf++;
 		  strncpy(number,buf,30);
 		  if (ModemRegisters[S35]==0) GSM->DialData(number,1,&DP_CallPassup);
 		  else GSM->DialData(number,0,&DP_CallPassup);
@@ -231,12 +227,12 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				/* Handle AT* commands (Nokia proprietary I think) */
 			case '*':
 				buf++;
-				if (!strcmp(buf, "NOKIATEST")) {
+				if (!strcasecmp(buf, "NOKIATEST")) {
 					ATEM_ModemResult(MR_OK); /* FIXME? */
 					return;
 				}
 			   	else {
-				   	if (!strcmp(buf, "C")) {
+				   	if (!strcasecmp(buf, "C")) {
 						ATEM_ModemResult(MR_OK);
 						Parser= ATEM_ParseSMS;
 						return;
@@ -247,7 +243,7 @@ void	ATEM_ParseAT(char *cmd_buffer)
 				/* + is the precursor to another set of commands +CSQ, +FCLASS etc. */
 			case '+':
 				buf++;
-				switch (*buf) {
+				switch (toupper(*buf)) {
 					case 'C':
 						buf++;
 							/* Returns true if error occured */
@@ -324,7 +320,7 @@ void	ATEM_EraseSMS(int number, GSM_MemoryType type)
 void	ATEM_ParseSMS(char *buff)
 {
 
-	if (!strcmp(buff, "HELP")) {
+	if (!strcasecmp(buff, "HELP")) {
 		ATEM_StringOut("\n\rThe following commands work...\n\r");
 		ATEM_StringOut("DIR\n\r");
 		ATEM_StringOut("EXIT\n\r");
@@ -332,13 +328,13 @@ void	ATEM_ParseSMS(char *buff)
 		return;
     }
 
-	if (!strcmp(buff, "DIR")) {
+	if (!strcasecmp(buff, "DIR")) {
 		SMSNumber = 1;
 		ATEM_ReadSMS(SMSNumber, SMSType);
 		Parser= ATEM_ParseDIR;
 		return;
     }
-    if (!strcmp(buff, "EXIT")) {
+    if (!strcasecmp(buff, "EXIT")) {
 		Parser= ATEM_ParseAT;
 		ATEM_ModemResult(MR_OK);
 		return;
@@ -349,7 +345,7 @@ void	ATEM_ParseSMS(char *buff)
 	/* Parser for DIR sub mode of SMS interactive mode. */
 void	ATEM_ParseDIR(char *buff)
 {
-	switch (*buff) {
+	switch (toupper(*buff)) {
 		case 'P':
 			SMSNumber--;
 			ATEM_ReadSMS(SMSNumber, SMSType);
@@ -378,7 +374,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	char		buffer[80];
 	char		buffer2[80];
 
-	if (strncmp(*buf, "SQ", 2) == 0) {
+	if (strncasecmp(*buf, "SQ", 2) == 0) {
 		buf[0] ++;
 		buf[0] ++;
 
@@ -394,7 +390,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	}
 		/* AT+CGMI is Manufacturer information for the ME (phone) so
 		   it should be Nokia rather than gnokii... */
-	if (strncmp(*buf, "GMI", 3) == 0) {
+	if (strncasecmp(*buf, "GMI", 3) == 0) {
 		buf[0]+=3;
 
 		ATEM_StringOut("\n\rNokia Mobile Phones");
@@ -402,7 +398,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	}
 
 		/* AT+CGSN is IMEI */
-	if (strncmp(*buf, "GSN", 3) == 0) {
+	if (strncasecmp(*buf, "GSN", 3) == 0) {
 		buf[0]+=3;
 		if (GSM->GetIMEI(buffer2) == GE_NONE) {
 			sprintf(buffer, "\n\r%s", buffer2);
@@ -416,7 +412,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	}
 
 		/* AT+CGMR is Revision (hardware) */
-	if (strncmp(*buf, "GMR", 3) == 0) {
+	if (strncasecmp(*buf, "GMR", 3) == 0) {
 		buf[0]+=3;
 		if (GSM->GetRevision(buffer2) == GE_NONE) {
 			sprintf(buffer, "\n\r%s", buffer2);
@@ -430,7 +426,7 @@ bool	ATEM_CommandPlusC(char **buf)
 	}
 
 		/* AT+CGMM is Model code  */
-	if (strncmp(*buf, "GMM", 3) == 0) {
+	if (strncasecmp(*buf, "GMM", 3) == 0) {
 		buf[0]+=3;
 		if (GSM->GetModel(buffer2) == GE_NONE) {
 			sprintf(buffer, "\n\r%s", buffer2);
@@ -453,7 +449,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	char		buffer[80];
 
 		/* AT+GMI is Manufacturer information for the TA (Terminal Adaptor) */
-	if (strncmp(*buf, "MI", 3) == 0) {
+	if (strncasecmp(*buf, "MI", 3) == 0) {
 		buf[0]+=2;
 
 		ATEM_StringOut("\n\rHugh Blemings, Pavel Janík ml. and others...");
@@ -461,7 +457,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	}
 
 		/* AT+GMR is Revision information for the TA (Terminal Adaptor) */
-	if (strncmp(*buf, "MR", 3) == 0) {
+	if (strncasecmp(*buf, "MR", 3) == 0) {
 		buf[0]+=2;
 		sprintf(buffer, "\n\r%s %s %s", VERSION, __TIME__, __DATE__);
 
@@ -470,7 +466,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	}
 
 		/* AT+GMM is Model information for the TA (Terminal Adaptor) */
-	if (strncmp(*buf, "MM", 3) == 0) {
+	if (strncasecmp(*buf, "MM", 3) == 0) {
 		buf[0]+=2;
 
 		sprintf(buffer, "\n\rgnokii configured for %s on %s", ModelName, PortName);
@@ -479,7 +475,7 @@ bool	ATEM_CommandPlusG(char **buf)
 	}
 
 		/* AT+GSN is Serial number for the TA (Terminal Adaptor) */
-	if (strncmp(*buf, "SN", 3) == 0) {
+	if (strncasecmp(*buf, "SN", 3) == 0) {
 		buf[0]+=2;
 
 		sprintf(buffer, "\n\rnone built in, choose your own");

@@ -240,8 +240,8 @@ void    VM_CharHandler(void)
       /* Note that file closure etc. should have been dealt with in ThreadLoop */
       
       if (res < 0) {	
-	TerminateThread=true;
-	return;
+	    TerminateThread=true;
+	    return;
       }
 	
       ATEM_HandleIncomingData(buffer, res);
