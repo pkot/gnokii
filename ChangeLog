@@ -16,6 +16,8 @@
  * nk3110 driver updates
     o more fixes to SMS code                         (Osma Suominen)
     o message type folding in the fbus-3110 code     (Osma Suominen)
+    o complicated statemachine tweaking removed      (Osma Suominen)
+    o 0x15 init frames handled better                (Osma Suominen)
  * nk6160 driver updates
     o DLR3P, DAU9P, Bluetooth and Irda added        (BORBELY Zoltan)
  * nk6100 driver updates

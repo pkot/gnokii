@@ -72,7 +72,6 @@ static gn_error P3110_IncomingEndOfOutgoingCall(int messagetype, unsigned char *
 static gn_error P3110_IncomingEndOfIncomingCall(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingEndOfOutgoingCall2(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingRestart(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingInitFrame(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSSend(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -100,7 +99,7 @@ static gn_incoming_function_type incoming_functions[] = {
 	{ 0x11, P3110_IncomingEndOfIncomingCall },
 	{ 0x12, P3110_IncomingEndOfOutgoingCall2 },
 	{ 0x13, P3110_IncomingRestart },
-	{ 0x15, P3110_IncomingInitFrame_0x15 },
+	{ 0x15, P3110_IncomingInitFrame },
 	{ 0x16, P3110_IncomingInitFrame },
 	{ 0x17, P3110_IncomingInitFrame },
 	{ 0x20, P3110_IncomingNothing },
@@ -316,8 +315,8 @@ static gn_error P3110_Identify(gn_data *data, struct gn_statemachine *state)
 
 static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
-	int timeout, c, memory_type;
-	u8 response = 0, request[2];
+	int memory_type;
+	unsigned char request[2];
 	gn_error error = GN_ERR_INTERNALERROR;
 
 	dprintf("Getting SMS message...\n");
@@ -338,57 +337,24 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 	   for valid locations, 0x2d for empty ones. */
 
 	if (sm_message_send(2, 0x25, request, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	sm_wait_for(0x2d, data, state);	
-	sm_wait_for(0x2c, data, state);	
 
-	timeout = 30; /* ~3secs timeout */
+	error = sm_block(0x2c, data, state);
+	if (error != GN_ERR_NONE) return error;
 
+	/* Block for subsequent content frames... */
 	do {
-		gn_sm_loop(1, state);
-		timeout--;
-	} while ((timeout > 0) && state->received_number == 0);
+		dprintf("Waiting for content frames...\n");
+		sm_block_no_retry(0x27, data, state);
+	} while (DRVINSTANCE(state)->user_data_count < data->raw_sms->length);
 
-	/* timeout */
-	if (state->received_number == 0) return GN_ERR_TIMEOUT;
-
-	/* find response in state machine */
-	for (c = 0; c < state->waiting_for_number; c++) {
-		if (state->ResponseError[c] != GN_ERR_BUSY) {
-			response = state->waiting_for[c];
-			error = state->ResponseError[c];
-		}
-	}
-
-	/* if (!data->raw_data) return GN_ERR_INTERNALERROR; */
-
-	/* reset state machine */
-	sm_reset(state);
-
-	/* process response */
-	switch (response) {
-	case 0x2c:
-		if (error != GN_ERR_NONE) return error;
-
-		/* Block for subsequent content frames... */
-		do {
-			dprintf("Waiting for content frames...\n");
-			sm_block(0x27, data, state);
-		} while (DRVINSTANCE(state)->user_data_count < data->raw_sms->length);
-
-		return GN_ERR_NONE;
-	case 0x2d:
-		return error;
-	default:
-		return GN_ERR_INTERNALERROR;
-	}
+	return GN_ERR_NONE;
 }
 
 
 static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
-	int timeout, c, memory_type;
-	u8 response = 0, request[2];
-	gn_error error = GN_ERR_INTERNALERROR;
+	int memory_type;
+	unsigned char request[2];
 
 	dprintf("Deleting SMS message...\n");
 
@@ -406,38 +372,7 @@ static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *st
 	   valid 0x2e is still returned. */
 	if (sm_message_send(2, 0x26, request, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 
-	sm_wait_for(0x2e, data, state);
-	sm_wait_for(0x2f, data, state);
-
-	timeout = 30; /* ~3secs timeout */
-
-	do {
-		gn_sm_loop(1, state);
-		timeout--;
-	} while ((timeout > 0) && state->received_number == 0);
-
-	/* timeout */
-	if (state->received_number == 0) return GN_ERR_TIMEOUT;
-
-	/* find response in state machine */
-	for (c = 0; c < state->waiting_for_number; c++) {
-		if (state->ResponseError[c] != GN_ERR_BUSY) {
-			response = state->waiting_for[c];
-			error = state->ResponseError[c];
-		}
-	}
-
-	/* reset state machine */
-	sm_reset(state);
-
-	/* process response */
-	switch (response) {
-	case 0x2e:
-	case 0x2f:
-		return error;
-	default:
-		return GN_ERR_INTERNALERROR;
-	}
+	return sm_block(0x2e, data, state);
 }
 
 
@@ -445,8 +380,8 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 {
 	unsigned char msgtype, hreq[256], req[256], udata[256];
 		/* FIXME hardcoded buffer sizes are ugly */
-	int c, response, hsize, retry_count, timeout;
-	int block_count, uoffset, uremain, ulength, blength;
+	int hsize, retry_count,	block_count;
+	int uoffset, uremain, ulength, blength;
 	gn_error error = GN_ERR_NONE;
 
 	msgtype = save_sms ? 0x24 : 0x23;
@@ -514,64 +449,28 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 			uoffset += blength;
 		}
 
-		/* Now wait for response from network which will see
-		   CurrentSMSMessageError change from busy. */
-		if (save_sms) {
-			sm_wait_for(0x2a, data, state);
-			sm_wait_for(0x2b, data, state);
-		} else {
-			sm_wait_for(0x28, data, state);
-			sm_wait_for(0x29, data, state);
-		}
-
-		timeout = 1200; /* 120secs timeout */
-
-		do {
-			gn_sm_loop(1, state);
-			timeout--;
-		} while ((timeout > 0) && state->received_number == 0);
-
-		/* timeout */
-		if (state->received_number == 0) return GN_ERR_TIMEOUT;
-
-		/* find response in state machine */
-		for (c = 0; c < state->waiting_for_number; c++) {
-			if (state->ResponseError[c] != GN_ERR_BUSY) {
-				response = state->waiting_for[c];
-				error = state->ResponseError[c];
-			}
-		}
-
-		/* reset state machine */
 		sm_reset(state);
 
-		/* process response */
-		switch (response) {
-		case 0x28:
-			return error;
-		case 0x29:
-			/* Got a retry response so try again! */
-			dprintf("SMS send attempt failed, trying again...\n");
-			retry_count--;
-			/* After an empirically determined pause... */
-			usleep(500000); /* 0.5 seconds. */
-			break;
-		case 0x2a:
-			return error;
-		case 0x2b:
-			dprintf("SMS save attempt failed.\n");
-			return GN_ERR_FAILED;
-		default:
-			return GN_ERR_INTERNALERROR;
+		dprintf("SMS data sent, waiting for result...\n");
+		if (save_sms) {
+			error = sm_block_no_retry_timeout(0x2a, 200, data, state);
+		} else {
+			error = sm_block_no_retry_timeout(0x28, 1200, data, state);
+			if (error == GN_ERR_FAILED) {
+				/* Got a retry response so try again! */
+				dprintf("SMS send attempt failed, trying again...\n");
+				retry_count--;
+				/* After an empirically determined pause... */
+				usleep(500000); /* 0.5 seconds. */
+				break;
+			}
 		}
-
+		return error;
 	}
 
 	/* Retries must have failed. */
 	return GN_ERR_FAILED;
 }
-
-
 
 static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
@@ -672,14 +571,8 @@ static gn_error P3110_IncomingRestart(int messagetype, unsigned char *message, i
 	return GN_ERR_NONE;
 }
 
-
 /* 0x15 messages are sent by the phone in response to the
    init sequence sent so we don't acknowledge them! */
-
-static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
-{
-	return GN_ERR_NONE;
-}
 
 /* 0x16 messages are sent by the phone during initialisation, to response
    to the 0x15 message.
@@ -692,13 +585,15 @@ static gn_error P3110_IncomingInitFrame_0x15(int messagetype, unsigned char *mes
 static gn_error P3110_IncomingInitFrame(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch (message[0]) { /* unfold message type */
+	case 0x15:
+		return GN_ERR_NONE;
 	case 0x16:
 		DRVINSTANCE(state)->sim_available = (message[2] == 0x02);
 		dprintf("SIM available: %s.\n", (DRVINSTANCE(state)->sim_available ? "Yes" : "No"));
 		return GN_ERR_NONE;
 	case 0x17:
 		dprintf("0x17 Registration Response: Failure!\n");
-		return GN_ERR_NONE;
+		return GN_ERR_FAILED;
 	default:
 		return GN_ERR_INTERNALERROR;
 	}
@@ -804,12 +699,17 @@ static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message,
 	gn_gsm_number_type smsc_number_type, remote_number_type;
 	unsigned char smsc[256], remote[256];	/* should be enough for anyone */
 
-	if (message[0] == 0x2d) { /* unfold message type */
+	switch (message[0]) { /* unfold message type */
+	case 0x2c:
+		break;
+	case 0x2d:
 		if (message[2] == 0x74)
 			return GN_ERR_INVALIDLOCATION;
 		else
 			return GN_ERR_EMPTYLOCATION;
-	} else if (message[0] != 0x2c) return GN_ERR_INTERNALERROR;
+	default:
+		return GN_ERR_INTERNALERROR;
+	}
 
 	if (!data->raw_sms) {
 		dprintf("Unrequested SMS header received. Ignoring.\n");
