@@ -36,8 +36,7 @@
 #include <string.h>
 #include <glib.h>
 #include "smsd.h"
-#include "gsm-sms.h"
-#include "gsm-encoding.h"
+#include "gsm-api.h"
 
 static gchar *action;
 static gchar *spool;

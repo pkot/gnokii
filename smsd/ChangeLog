@@ -1,3 +1,7 @@
+* Thu Dec 26 2002 Pawel Kot <pkot@linuxnews.pl>
+- Converted to new libgnokii API
+
+
 * Sun Aug 11 2002 Jan Derfinak <ja@mail.upjs.sk>
 - Added libfile.
 

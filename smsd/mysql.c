@@ -33,8 +33,7 @@
 #include <glib.h>
 #include <mysql.h>
 #include "smsd.h"
-#include "gsm-sms.h"
-#include "gsm-encoding.h"
+#include "gsm-api.h"
 
 static MYSQL mysqlIn;
 static MYSQL mysqlOut;

@@ -31,7 +31,7 @@
 #define SMSD_H
 
 #include <glib.h>
-#include "gsm-sms.h"
+#include "gsm-api.h"
 
 
 typedef enum {

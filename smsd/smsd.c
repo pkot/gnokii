@@ -47,14 +47,7 @@
 
 #include "misc.h"
 
-#include "gsm-common.h"
 #include "gsm-api.h"
-#include "phones/nk7110.h"
-#include "phones/nk6510.h"
-#include "phones/nk6100.h"
-#include "phones/nk3110.h"
-#include "phones/nk2110.h"
-#include "cfgreader.h"
 #include "smsd.h"
 #include "lowlevel.h"
 #include "db.h"

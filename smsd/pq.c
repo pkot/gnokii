@@ -34,8 +34,6 @@
 #include <libpq-fe.h>
 #include "smsd.h"
 #include "gsm-api.h"
-#include "gsm-sms.h"
-#include "gsm-encoding.h"
 
 static PGconn *connIn = NULL;
 static PGconn *connOut = NULL;

@@ -32,8 +32,7 @@
 
 #include <pthread.h>
 #include <glib.h>
-#include "gsm-error.h"
-#include "gsm-sms.h"
+#include "gsm-api.h"
 
 typedef enum {
   Event_SendSMSMessage,
