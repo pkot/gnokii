@@ -1393,6 +1393,8 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 				smsc->Validity = SMS_V24H;
 				break;
 			}
+			if (pos[0] % 2) pos[0]++;
+			pos[0] = pos[0] / 2 + 1;
 			snprintf(smsc->Recipient.Number, sizeof(smsc->Recipient.Number), "%s", GetBCDNumber(pos));
 			smsc->Recipient.Type = pos[1];
 			pos += 12;
