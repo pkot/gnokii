@@ -41,11 +41,13 @@
     o NBS upload for ringtone                        (BORBELY Zoltan)
     o MakeCall1() calls GetNetworkInfo first (maybe eliminates
       some datacall problem)                         (BORBELY Zoltan)
+    o use PNOK_FBUS_EncodeSMS                          (Markus Plail)
  * 7110 series updates:
     o use nokia-decoding                               (Markus Plail)
     o fix Inbox status reading          (Marcin Wiacek, Markus Plail)
     o remove GetUnreadMessages and friends             (Markus Plail)
     o add DeleteSMSnoValidate                          (Markus Plail)
+    o use PNOK_FBUS_EncodeSMS                          (Markus Plail)
  * bitmap support
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
@@ -71,6 +73,7 @@
  * make static variables declared with static keyword, make
    variables extern where needed                          (Pawel Kot)
  * add 6310i and 7650 to unixirda.c      (Robert Ivanc, Markus Plail)
+ * change PNOK_FBUS_SendSMS to PNOK_FBUS_EncodeSMS     (Markus Plail)
 
 0.4.2a
 ======
