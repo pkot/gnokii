@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2004 Pawe³ Kot
-                 Last update 13 April 2004  Version 0.6.1
+                 Last update  3 June 2004  Version 0.6.2
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.1 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.2 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -126,7 +126,7 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.6.1-i386.rpm
+rpm -i gnokii-0.6.2-i386.rpm
 
 If you are using a Debian based system, you can use dpackage to do the
 installation. On Slackware you use installpkg or pkgtool.
@@ -388,6 +388,14 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20040703 Version 0.6.2
+This version brings many portability and build system updates. Gnokii should
+build cleanly on Linux, Windows (cygwin and MSVC), FreeBSD and OpenBSD
+operating systems. We have more gnapplet functionality (thanks bozo), IrDA
+support for Windows, and many bugs fixed: mainly connected with calendar and
+addressbook handling. Gnokii now supports libical as a primary library to
+support vCalendar input and output.
+
 20040413 Version 0.6.1
 With this version gnokii starts to support Symbian phones. This consists of
 gnokii symbian phone driver (called gnapplet) and Symbian application to be
