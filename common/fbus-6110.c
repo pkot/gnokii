@@ -1,5 +1,7 @@
 /*
 
+  $Id$
+  
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -14,9 +16,11 @@
   The various routines are called FB61 (whatever) as a concatenation of FBUS
   and 6110.
 
-  Last modification: Wed 6 Dec 2000
-  Modified by Chris Kemp
+  $Log$
+  Revision 1.116  2000-12-19 16:27:16  pkot
+  Added 'static' word to variable declarations in common/fbus-6110.c and Makefile fix. (thanks to Pavel Machek)
 
+  
 */
 
 /* "Turn on" prototypes in fbus-6110.h */
@@ -239,71 +243,71 @@ u8        CallSequenceNumber; /* Used to disconnect the call */
    set to GE_NONE by calling function, set to GE_COMPLETE or an error code by
    handler routines as appropriate. */
 		   	   	   
-GSM_PhonebookEntry *CurrentPhonebookEntry;
-GSM_Error          CurrentPhonebookError;
+static GSM_PhonebookEntry *CurrentPhonebookEntry;
+static GSM_Error          CurrentPhonebookError;
 
-GSM_SpeedDial      *CurrentSpeedDialEntry;
-GSM_Error          CurrentSpeedDialError;
+static GSM_SpeedDial      *CurrentSpeedDialEntry;
+static GSM_Error          CurrentSpeedDialError;
 
-GSM_SMSMessage     *CurrentSMSMessage;
-GSM_Error          CurrentSMSMessageError;
-int                CurrentSMSPointer;
+static GSM_SMSMessage     *CurrentSMSMessage;
+static GSM_Error          CurrentSMSMessageError;
+static int                CurrentSMSPointer;
 
-GSM_MemoryStatus   *CurrentMemoryStatus;
-GSM_Error          CurrentMemoryStatusError;
+static GSM_MemoryStatus   *CurrentMemoryStatus;
+static GSM_Error          CurrentMemoryStatusError;
 
-GSM_NetworkInfo    *CurrentNetworkInfo = NULL;
-GSM_Error          CurrentNetworkInfoError;
+static GSM_NetworkInfo    *CurrentNetworkInfo = NULL;
+static GSM_Error          CurrentNetworkInfoError;
 
-GSM_SMSStatus      *CurrentSMSStatus;
-GSM_Error          CurrentSMSStatusError;
+static GSM_SMSStatus      *CurrentSMSStatus;
+static GSM_Error          CurrentSMSStatusError;
 
-GSM_MessageCenter  *CurrentMessageCenter;
-GSM_Error          CurrentMessageCenterError;
+static GSM_MessageCenter  *CurrentMessageCenter;
+static GSM_Error          CurrentMessageCenterError;
 
-int                *CurrentSecurityCodeStatus;
-GSM_Error          CurrentSecurityCodeError;
+static int                *CurrentSecurityCodeStatus;
+static GSM_Error          CurrentSecurityCodeError;
 
-GSM_DateTime       *CurrentDateTime;
-GSM_Error          CurrentDateTimeError;
+static GSM_DateTime       *CurrentDateTime;
+static GSM_Error          CurrentDateTimeError;
 
-GSM_DateTime       *CurrentAlarm;
-GSM_Error          CurrentAlarmError;
+static GSM_DateTime       *CurrentAlarm;
+static GSM_Error          CurrentAlarmError;
 
-GSM_CalendarNote   *CurrentCalendarNote;
-GSM_Error          CurrentCalendarNoteError;
+static GSM_CalendarNote   *CurrentCalendarNote;
+static GSM_Error          CurrentCalendarNoteError;
 
-GSM_Error          CurrentSetDateTimeError;
-GSM_Error          CurrentSetAlarmError;
+static GSM_Error          CurrentSetDateTimeError;
+static GSM_Error          CurrentSetAlarmError;
 
-int                CurrentRFLevel,
+static int                CurrentRFLevel,
                    CurrentBatteryLevel,
                    CurrentPowerSource;
 
-int                DisplayStatus;
-GSM_Error          DisplayStatusError;
+static int                DisplayStatus;
+static GSM_Error          DisplayStatusError;
 
-char               *CurrentNetmonitor;
-GSM_Error          CurrentNetmonitorError;
+static char               *CurrentNetmonitor;
+static GSM_Error          CurrentNetmonitorError;
 
-GSM_Bitmap         *GetBitmap=NULL;
-GSM_Error          GetBitmapError;
+static GSM_Bitmap         *GetBitmap=NULL;
+static GSM_Error          GetBitmapError;
 
-GSM_Error          SetBitmapError;
+static GSM_Error          SetBitmapError;
 
-GSM_Profile        *CurrentProfile;
-GSM_Error          CurrentProfileError;
+static GSM_Profile        *CurrentProfile;
+static GSM_Error          CurrentProfileError;
 
-GSM_Error          CurrentDisplayOutputError;
+static GSM_Error          CurrentDisplayOutputError;
 
-GSM_CBMessage      *CurrentCBMessage;
-GSM_Error          CurrentCBError;
+static GSM_CBMessage      *CurrentCBMessage;
+static GSM_Error          CurrentCBError;
 
-unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
-unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
-unsigned char      Model[FB61_MAX_MODEL_LENGTH];
+static unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
+static unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
+static unsigned char      Model[FB61_MAX_MODEL_LENGTH];
 
-char               CurrentIncomingCall[20] = " ";
+static char               CurrentIncomingCall[20] = " ";
 
 /* Pointer to callback function in user code to be called when RLP frames
    are received. */
