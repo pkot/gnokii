@@ -63,12 +63,12 @@ struct MF {
 	void (*Mf_keysig) (struct MF *, int, int);
 	void (*Mf_arbitrary) (struct MF *, int, char *);
 	void (*Mf_error) (struct MF *, char *);
-#if 0
 /* definitions for MIDI file writing code */
-	void (*Mf_putc) (struct MF *);
-	void (*Mf_writetrack) (struct MF *);
+	int (*Mf_putc) (struct MF *, int);
+	long (*Mf_getpos) (struct MF *);
+	int (*Mf_setpos) (struct MF *, long);
+	void (*Mf_writetrack) (struct MF *, int);
 	void (*Mf_writetempotrack) (struct MF *);
-#endif
 	/* variables */
 	int Mf_nomerge;		/* 1 => continue'ed system exclusives are */
 	/* not collapsed. */
@@ -214,6 +214,8 @@ static void sysex(struct MF *mf);
 static int msgleng(struct MF *mf);
 static void badbyte(struct MF *mf, int c);
 static void biggermsg(struct MF *mf);
+static void mf_write_track_chunk(struct MF *mf, int which_track);
+static void mf_write_header_chunk(struct MF *mf, int format, int ntracks, int division);
 
 
 static long readvarinum(struct MF *mf);
@@ -222,6 +224,10 @@ static long to32bit(int, int, int, int);
 static int read16bit(struct MF *mf);
 static int to16bit(int, int);
 static char *msg(struct MF *mf);
+static void write32bit(struct MF *mf, unsigned long data);
+static void write16bit(struct MF *mf, int data);
+static int eputc(struct MF *mf, unsigned char c);
+static void WriteVarLen(struct MF *mf, unsigned long value);
 
 /* The only non-static function in this file. */
 void mfread(struct MF *mf)
@@ -628,8 +634,6 @@ static void biggermsg(struct MF *mf)
 	mf->Msgbuff = newmess;
 }
 
-#if 0				/* saving time not converting write function at this time
-				 */
 /*
  * mfwrite() - The only fuction you'll need to call to write out
  *             a midi file.
@@ -658,39 +662,39 @@ static void biggermsg(struct MF *mf)
  *             want to write.  It will have be a global in order
  *             to work with Mf_putc.  
  */
-void mfwrite(format, ntracks, division, fp)
-int format, ntracks, division;
-FILE *fp;
+void mfwrite(struct MF *mf, int format, int ntracks, int division)
 {
 	int i;
-	void mf_write_track_chunk(), mf_write_header_chunk();
 
 	if (mf->Mf_putc == NULLFUNC)
 		mferror(mf, "mfmf_write() called without setting Mf_putc");
 
 	if (mf->Mf_writetrack == NULLFUNC)
-		mferror(mf, "mfmf_write() called without setting Mf_mf_writetrack");
+		mferror(mf, "mfmf_write() called without setting Mf_writetrack");
+
+	if (mf->Mf_getpos == NULLFUNC)
+		mferror(mf, "mfmf_write() called without setting Mf_getpos");
+
+	if (mf->Mf_setpos == NULLFUNC)
+		mferror(mf, "mfmf_write() called without setting Mf_setpos");
 
 	/* every MIDI file starts with a header */
-	mf_write_header_chunk(format, ntracks, division);
+	mf_write_header_chunk(mf, format, ntracks, division);
 
 	/* In format 1 files, the first track is a tempo map */
 	if (format == 1 && (mf->Mf_writetempotrack)) {
-		(*mf->Mf_writetempotrack) ();
+		(*mf->Mf_writetempotrack) (mf);
 	}
 
 	/* The rest of the file is a series of tracks */
 	for (i = 0; i < ntracks; i++)
-		mf_write_track_chunk(i, fp);
+		mf_write_track_chunk(mf, i);
 }
 
-void mf_write_track_chunk(which_track, fp)
-int which_track;
-FILE *fp;
+static void mf_write_track_chunk(struct MF *mf, int which_track)
 {
 	unsigned long trkhdr, trklength;
 	long offset, place_marker;
-	void write16bit(), write32bit();
 
 
 	trkhdr = MTrk;
@@ -698,20 +702,20 @@ FILE *fp;
 
 	/* Remember where the length was written, because we don't
 	   know how long it will be until we've finished writing */
-	offset = ftell(fp);
+	offset = (*mf->Mf_getpos) (mf);
 
 #ifdef DEBUG
 	printf("offset = %d\n", (int) offset);
 #endif
 
 	/* Write the track chunk header */
-	write32bit(trkhdr);
-	write32bit(trklength);
+	write32bit(mf, trkhdr);
+	write32bit(mf, trklength);
 
 	mf->Mf_numbyteswritten = 0L;	/* the header's length doesn't count */
 
 	if (mf->Mf_writetrack) {
-		(*mf->Mf_writetrack) (which_track);
+		(*mf->Mf_writetrack) (mf, which_track);
 	}
 
 	/* mf_write End of track meta event */
@@ -724,7 +728,7 @@ FILE *fp;
 	/* It's impossible to know how long the track chunk will be beforehand,
 	   so the position of the track length data is kept so that it can
 	   be written after the chunk has been generated */
-	place_marker = ftell(fp);
+	place_marker = (*mf->Mf_getpos) (mf);
 
 	/* This method turned out not to be portable because the
 	   parameter returned from ftell is not guaranteed to be
@@ -735,39 +739,36 @@ FILE *fp;
 	printf("length = %d\n", (int) trklength);
 #endif
 
-	if (fseek(fp, offset, 0) < 0)
+	if (mf->Mf_setpos(mf, offset) < 0)
 		mferror(mf, "error seeking during final stage of write");
 
 	trklength = mf->Mf_numbyteswritten;
 
 	/* Re-mf_write the track chunk header with right length */
-	write32bit(trkhdr);
-	write32bit(trklength);
+	write32bit(mf, trkhdr);
+	write32bit(mf, trklength);
 
-	fseek(fp, place_marker, 0);
+	mf->Mf_setpos(mf, place_marker);
 }				/* End gen_track_chunk() */
 
 
-void mf_write_header_chunk(format, ntracks, division)
-int format, ntracks, division;
+static void mf_write_header_chunk(struct MF *mf, int format, int ntracks, int division)
 {
 	unsigned long ident, length;
-	void write16bit(), write32bit();
 
 	ident = MThd;		/* Head chunk identifier                    */
 	length = 6;		/* Chunk length                             */
 
 	/* individual bytes of the header must be written separately
 	   to preserve byte order across cpu types :-( */
-	write32bit(ident);
-	write32bit(length);
-	write16bit(format);
-	write16bit(ntracks);
-	write16bit(division);
+	write32bit(mf, ident);
+	write32bit(mf, length);
+	write16bit(mf, format);
+	write16bit(mf, ntracks);
+	write16bit(mf, division);
 }				/* end gen_header_chunk() */
 
 
-#ifdef WHENISTHISNEEDED
 /*
  * mf_write_midi_event()
  * 
@@ -786,24 +787,19 @@ int format, ntracks, division;
  *        data.
  * size - The length of the meta-event data.
  */
-int mf_write_midi_event(delta_time, type, chan, data, size)
-unsigned long delta_time;
-unsigned int chan, type;
-unsigned long size;
-unsigned char *data;
+int mf_write_midi_event(struct MF *mf, unsigned long delta_time, unsigned int type, unsigned int chan, unsigned char *data, unsigned long size)
 {
 	int i;
-	void WriteVarLen();
 	unsigned char c;
 
-	WriteVarLen(delta_time);
+	WriteVarLen(mf, delta_time);
 
 	/* all MIDI events start with the type in the first four bits,
 	   and the channel in the lower four bits */
 	c = type | chan;
 
 	if (chan > 15)
-		perror("error: MIDI channel greater than 16\n");
+		mferror(mf, "error: MIDI channel greater than 16\n");
 
 	eputc(mf, c);
 
@@ -828,14 +824,11 @@ unsigned char *data;
  *        data.
  * size - The length of the meta-event data.
  */
-int mf_write_meta_event(delta_time, type, data, size)
-unsigned long delta_time;
-unsigned char *data, type;
-unsigned long size;
+int mf_write_meta_event(struct MF *mf, unsigned long delta_time, unsigned char type, unsigned char *data, unsigned long size)
 {
 	int i;
 
-	WriteVarLen(delta_time);
+	WriteVarLen(mf, delta_time);
 
 	/* This marks the fact we're writing a meta-event */
 	eputc(mf, meta_event);
@@ -844,7 +837,7 @@ unsigned long size;
 	eputc(mf, type);
 
 	/* The length of the data bytes to follow */
-	WriteVarLen(size);
+	WriteVarLen(mf, size);
 
 	for (i = 0; i < size; i++) {
 		if (eputc(mf, data[i]) != data[i])
@@ -853,8 +846,7 @@ unsigned long size;
 	return (size);
 }				/* end mf_write_meta_event */
 
-void mf_write_tempo(tempo)
-unsigned long tempo;
+void mf_write_tempo(struct MF *mf, unsigned long tempo)
 {
 	/* Write tempo */
 	/* all tempos are written as 120 beats/minute, */
@@ -869,12 +861,10 @@ unsigned long tempo;
 	eputc(mf, (unsigned) (0xff & tempo));
 }
 
-#endif
 /*
  * Write multi-length bytes to MIDI format files
  */
-void WriteVarLen(value)
-unsigned long value;
+static void WriteVarLen(struct MF *mf, unsigned long value)
 {
 	unsigned long buffer;
 
@@ -907,25 +897,22 @@ unsigned long value;
  * has been true at least on PCs, UNIX machines, and Macintosh's.
  *
  */
-void write32bit(data)
-unsigned long data;
+static void write32bit(struct MF *mf, unsigned long data)
 {
-	eputc(mf, x(unsigned) ((data >> 24) & 0xff));
+	eputc(mf, (unsigned) ((data >> 24) & 0xff));
 	eputc(mf, (unsigned) ((data >> 16) & 0xff));
 	eputc(mf, (unsigned) ((data >> 8) & 0xff));
 	eputc(mf, (unsigned) (data & 0xff));
 }
 
-void write16bit(data)
-int data;
+static void write16bit(struct MF *mf, int data)
 {
 	eputc(mf, (unsigned) ((data & 0xff00) >> 8));
 	eputc(mf, (unsigned) (data & 0xff));
 }
 
 /* write a single character and abort on error */
-eputc(mf, c)
-unsigned char c;
+static int eputc(struct MF *mf, unsigned char c)
 {
 	int return_val;
 
@@ -943,7 +930,6 @@ unsigned char c;
 	return (return_val);
 }
 
-#endif
 
 unsigned long mf_sec2ticks(float secs, int division, unsigned int tempo)
 {
@@ -1184,6 +1170,55 @@ static void lm_noteoff(struct MF *mf, int chan, int pitch, int vol)
 	mfx->prevnoteontime = time;
 }
 
+static int lm_putc(struct MF *mf, int c)
+{
+	struct MFX *mfx = (struct MFX *) mf;
+
+	return fputc(c, mfx->istream);
+}
+
+static long lm_getpos(struct MF *mf)
+{
+	struct MFX *mfx = (struct MFX *) mf;
+
+	return ftell(mfx->istream);
+}
+
+static int lm_setpos(struct MF *mf, long pos)
+{
+	struct MFX *mfx = (struct MFX *) mf;
+
+	return fseek(mfx->istream, pos, SEEK_SET);
+}
+
+static void lm_writetrack(struct MF *mf, int track)
+{
+	struct MFX *mfx = (struct MFX *) mf;
+	gn_ringtone_note *note;
+	int i, delta;
+	char data[2];
+	int notes[] = {0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10, 11, 11};
+
+	mf_write_tempo(mf, 60000000 / mfx->ringtone->tempo);
+
+	for (i = 0; i < mfx->ringtone->notes_count; i++) {
+		note = mfx->ringtone->notes + i;
+		//delta = 1875 * note->duration * mfx->division / mfx->ringtone->tempo / 250;
+		delta = 7 * note->duration * mfx->division / mfx->ringtone->tempo / 2;
+		if (note->note == 0xff) {
+			data[0] = 0;
+			data[1] = 0;
+			mf_write_midi_event(mf, delta, note_off, 1, data, 2);
+		} else {
+			data[0] = 12 * (4 + note->note / 14) + notes[note->note % 14];
+			data[1] = 96; //!!!FIXME
+			mf_write_midi_event(mf, 1, note_on, 1, data, 2);
+			data[1] = 0; //!!!FIXME
+			mf_write_midi_event(mf, delta, note_off, 1, data, 2);
+		}
+	}
+}
+
 gn_error file_midi_load(FILE * file, gn_ringtone * ringtone)
 {
 	struct MFX mfxi;
@@ -1218,6 +1253,34 @@ gn_error file_midi_load(FILE * file, gn_ringtone * ringtone)
 	mf->Mf_error = lm_error;
 
 	midifile(mf);
+
+	return mfxi.err;
+}
+
+gn_error file_midi_save(FILE * file, gn_ringtone * ringtone)
+{
+	struct MFX mfxi;
+	struct MF *mf;
+
+	memset(&mfxi, 0, sizeof(struct MFX));
+	mf = &mfxi.mfi;
+
+	mfxi.ringtone = ringtone;
+	mfxi.istream = file;
+	mfxi.err = GN_ERR_NONE;
+
+	/* set variables to their initial values */
+	mfxi.division = 250;
+
+	mf->Mf_putc = lm_putc;
+	mf->Mf_getpos = lm_getpos;
+	mf->Mf_setpos = lm_setpos;
+	mf->Mf_writetrack = lm_writetrack;
+	mf->Mf_writetempotrack = NULLFUNC;
+
+	mf->Mf_error = lm_error;
+
+	mfwrite(mf, 0, 1, mfxi.division);
 
 	return mfxi.err;
 }

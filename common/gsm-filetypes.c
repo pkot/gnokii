@@ -305,8 +305,7 @@ gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone)
 	if (strstr(filename, ".ott")) {
 		error = file_ott_save(file, ringtone);
 	} else if (strstr(filename, ".mid")) {
-		/* saving in midi format hasn't supported yet */
-		error = GN_ERR_WRONGDATAFORMAT;
+		error = file_midi_save(file, ringtone);
 	} else if (strstr(filename, ".raw")) {
 		error = file_nokraw_save(file, ringtone);
 	} else {

@@ -16,6 +16,7 @@
  * libgnokii changes
     o Tomi Ollila's readmidi.c added               (BORBELY Zoltan)
     o Nokia raw ringtone conversion functions      (BORBELY Zoltan)
+    o initial midi writing support                 (BORBELY Zoltan)
  * Documentation updates
     o nk7110 profile reading messages updated      (BORBELY Zoltan)
  * gnokii changes
