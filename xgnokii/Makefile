@@ -14,6 +14,7 @@ GTKLDFLAGS=`gtk-config --libs`
 COMMON=-Wall -g -O0 \
        ${MODEL} ${PORT} \
        ${GETTEXT} \
+       ${SECURITY} \
        ${DEBUG} \
        -DVERSION=\"${VERSION}\" \
        -DXVERSION=\"${XVERSION}\"

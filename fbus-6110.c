@@ -89,6 +89,7 @@ GSM_Functions FB61_Functions = {
   FB61_GetMemoryStatus,
   FB61_GetSMSStatus,
   FB61_GetSMSCenter,
+  FB61_SetSMSCenter,
   FB61_GetSMSMessage,
   FB61_DeleteSMSMessage,
   FB61_SendSMSMessage,
@@ -96,7 +97,8 @@ GSM_Functions FB61_Functions = {
   FB61_GetBatteryLevel,
   FB61_GetPowerSource,
   FB61_GetDisplayStatus,
-  FB61_EnterPin,
+  FB61_EnterSecurityCode,
+  FB61_GetSecurityCodeStatus,
   FB61_GetIMEI,
   FB61_GetRevision,
   FB61_GetModel,
@@ -112,7 +114,8 @@ GSM_Functions FB61_Functions = {
   FB61_GetCalendarNote,
   FB61_WriteCalendarNote,
   FB61_DeleteCalendarNote,
-  FB61_NetMonitor
+  FB61_NetMonitor,
+  FB61_SendDTMF
 };
 
 /* Mobile phone information */
@@ -234,7 +237,8 @@ GSM_Error          CurrentSMSStatusError;
 GSM_MessageCenter  *CurrentMessageCenter;
 GSM_Error          CurrentMessageCenterError;
 
-GSM_Error          PINError;
+int                *CurrentSecurityCodeStatus;
+GSM_Error          CurrentSecurityCodeError;
 
 GSM_DateTime       *CurrentDateTime;
 GSM_Error          CurrentDateTimeError;
@@ -1235,23 +1239,29 @@ GSM_Error FB61_GetIncomingCallNr(char *Number) {
     return GE_BUSY;
 }
 
-GSM_Error FB61_EnterPin(char *pin)
+GSM_Error FB61_EnterSecurityCode(GSM_SecurityCode SecurityCode)
 {
 
-  unsigned char req[15] = {FB61_FRAME_HEADER, 0x0a, 0x02};
+  unsigned char req[15] = { FB61_FRAME_HEADER,
+                            0x0a, /* Enter code request. */
+                            0x00  /* Type of the entered code. */
+                            };
   int i=0, timeout=20;
 
-  PINError=GE_BUSY;
+  req[4]=SecurityCode.Type;
 
-  for (i=0; i<strlen(pin);i++)
-    req[5+i]=pin[i];
+  CurrentSecurityCodeError=GE_BUSY;
 
-  req[5+strlen(pin)]=0x00;
+  for (i=0; i<strlen(SecurityCode.Code);i++)
+    req[5+i]=SecurityCode.Code[i];
 
-  FB61_TX_SendMessage(6+strlen(pin), 0x08, req);
+  req[5+strlen(SecurityCode.Code)]=0x00;
+  req[6+strlen(SecurityCode.Code)]=0x00;
+
+  FB61_TX_SendMessage(7+strlen(SecurityCode.Code), 0x08, req);
 
   /* Wait for timeout or other error. */
-  while (timeout != 0 && PINError == GE_BUSY) {
+  while (timeout != 0 && CurrentSecurityCodeError == GE_BUSY) {
 
     if (--timeout == 0)
       return (GE_TIMEOUT);
@@ -1259,7 +1269,33 @@ GSM_Error FB61_EnterPin(char *pin)
     usleep (100000);
   }
 
-  return (PINError);
+  return (CurrentSecurityCodeError);
+}
+
+GSM_Error FB61_GetSecurityCodeStatus(int *Status)
+{
+
+  unsigned char req[4] = { FB61_FRAME_HEADER,
+                           0x07
+                         };
+
+  int timeout=20;
+
+  CurrentSecurityCodeError=GE_BUSY;
+  CurrentSecurityCodeStatus=Status;
+
+  FB61_TX_SendMessage(4, 0x08, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentSecurityCodeError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentSecurityCodeError);
 }
 
 GSM_Error FB61_GetDateTime(GSM_DateTime *date_time)
@@ -1313,7 +1349,9 @@ GSM_Error FB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
 GSM_Error FB61_GetSMSCenter(GSM_MessageCenter *MessageCenter)
 {
 
-  unsigned char req[] = {FB61_FRAME_HEADER, 0x33, 0x64, 0x00};
+  unsigned char req[] = { FB61_FRAME_HEADER, 0x33, 0x64,
+                          0x00 /* SMS Center Number. */
+                        };
   int timeout=10;
 
   req[5]=MessageCenter->No;
@@ -1322,6 +1360,50 @@ GSM_Error FB61_GetSMSCenter(GSM_MessageCenter *MessageCenter)
   CurrentMessageCenterError = GE_BUSY;
 
   FB61_TX_SendMessage(6, 0x02, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentMessageCenterError == GE_BUSY ) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentMessageCenterError);
+}
+
+/* This function set the SMS Center profile on the phone. */
+
+GSM_Error FB61_SetSMSCenter(GSM_MessageCenter *MessageCenter)
+{
+
+  unsigned char req[64] = { FB61_FRAME_HEADER, 0x30, 0x64,
+                            0x00, /* SMS Center Number. */
+                            0x00, /* Unknown. */
+                            0x00, /* SMS Message Format. */
+                            0x00, /* Unknown. */
+                            0x00, /* Validity. */
+                            0,0,0,0,0,0,0,0,0,0,0,0, /* Unknown. */
+                            0,0,0,0,0,0,0,0,0,0,0,0 /* Message Center Number. */
+                            /* Message Center Name. */
+                          };
+  int timeout=10;
+
+  req[5]=MessageCenter->No;
+  req[7]=MessageCenter->Format;
+  req[9]=MessageCenter->Validity;
+
+  req[22]=SemiOctetPack(MessageCenter->Number, req+23);
+  if (req[22] % 2) req[22]++;
+  req[22] = req[22] / 2 + 1;
+
+  sprintf(req+34, "%s", MessageCenter->Name);
+
+  CurrentMessageCenter=MessageCenter;
+  CurrentMessageCenterError = GE_BUSY;
+
+  FB61_TX_SendMessage(35+strlen(MessageCenter->Name), 0x02, req);
 
   /* Wait for timeout or other error. */
   while (timeout != 0 && CurrentMessageCenterError == GE_BUSY ) {
@@ -1484,7 +1566,7 @@ GSM_Error FB61_GetMemoryLocation(GSM_PhonebookEntry *entry) {
 GSM_Error FB61_WritePhonebookLocation(GSM_PhonebookEntry *entry)
 {
 
-  unsigned char req[128] = {FB61_FRAME_HEADER, 0x04, 0x00, 0x00};
+  unsigned char req[128] = { FB61_FRAME_HEADER, 0x04, 0x00, 0x00 };
   int i=0, current=0;
   int timeout=50;
 
@@ -1554,6 +1636,23 @@ GSM_Error FB61_NetMonitor(unsigned char mode, char *Screen)
   }
 
   return (CurrentNetmonitorError);
+}
+
+GSM_Error FB61_SendDTMF(char *String)
+{
+
+  unsigned char req[64] = { FB61_FRAME_HEADER, 0x50,
+                            0x00 /* Length of DTMF string. */
+                          };
+  u8 length=strlen(String);
+
+  req[4] = length;
+
+  sprintf(req+5, "%s", String);
+
+  FB61_TX_SendMessage(5+length, 0x01, req);
+
+  return (GE_NONE);
 }
 
 GSM_Error FB61_GetSpeedDial(GSM_SpeedDial *entry)
@@ -2318,16 +2417,89 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       break;
 
+    case 0x31:
+
+#ifdef DEBUG
+      printf(_("Message: SMS Center correctly set.\n"));
+#endif
+
+      CurrentMessageCenterError=GE_NONE;
+
+      break;
+
     case 0x34:
 
       CurrentMessageCenter->No=MessageBuffer[4];
+      CurrentMessageCenter->Format=MessageBuffer[6];
+      CurrentMessageCenter->Validity=MessageBuffer[8];
       sprintf(CurrentMessageCenter->Name, "%s", MessageBuffer+33);
       sprintf(CurrentMessageCenter->Number, "%s", FB61_GetBCDNumber(MessageBuffer+21));
 
 #ifdef DEBUG
       printf(_("Message: SMS Center received:\n"));
       printf(_("   %d. SMS Center name is %s\n"), CurrentMessageCenter->No, CurrentMessageCenter->Name);
-      printf(_("   %d. SMS Center number is %s\n"), CurrentMessageCenter->No, CurrentMessageCenter->Number);
+      printf(_("   SMS Center number is %s\n"), CurrentMessageCenter->Number);
+
+      printf(_("   SMS Center message format is "));
+
+      switch (CurrentMessageCenter->Format) {
+
+      case GSMF_Text:
+	printf(_("Text"));
+	break;
+
+      case GSMF_Paging:
+	printf(_("Paging"));
+	break;
+
+      case GSMF_Fax:
+	printf(_("Fax"));
+	break;
+
+      case GSMF_Email:
+	printf(_("Email"));
+	break;
+
+      default:
+	printf(_("Unknown"));
+      }
+
+      printf("\n");
+
+      printf(_("   SMS Center message validity is "));
+
+      switch (CurrentMessageCenter->Validity) {
+
+      case GSMV_1_Hour:
+	printf(_("1 hour"));
+	break;
+
+      case GSMV_6_Hours:
+	printf(_("6 hours"));
+	break;
+
+      case GSMV_24_Hours:
+	printf(_("24 hours"));
+	break;
+
+      case GSMV_72_Hours:
+	printf(_("72 hours"));
+	break;
+
+      case GSMV_1_Week:
+	printf(_("1 week"));
+	break;
+
+      case GSMV_Max_Time:
+	printf(_("Maximum time"));
+	break;
+
+      default:
+	printf(_("Unknown"));
+      }
+
+      printf("\n");
+
 #endif DEBUG
 
       CurrentMessageCenterError=GE_NONE;
@@ -2352,7 +2524,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     default:
 
-      FB61_RX_DisplayMessage();
+#ifdef DEBUG
+      printf(_("Unknown message!\n"));
+#endif DEBUG
 
     }
 
@@ -2509,9 +2683,9 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
 	  case 0x8d:
 #ifdef DEBUG
-	        printf(_("Message: Memory status error, waiting for pin.\n"));
+	        printf(_("Message: Memory status error, waiting for security code.\n"));
 #endif DEBUG
-		CurrentMemoryStatusError = GE_INVALIDPIN;
+		CurrentMemoryStatusError = GE_INVALIDSECURITYCODE;
 		break;
 
 	  default:
@@ -2610,7 +2784,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 	      
       case 0x03:
 
-	printf(_("waiting for pin\n"));
+	printf(_("waiting for security code\n"));
 
 	break;
 
@@ -2668,29 +2842,80 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     break;
 
-    /* PIN requests */
+    /* Security code requests */
 
   case 0x08:
 
-#ifdef DEBUG
-    printf(_("Message: PIN:\n"));
-#endif DEBUG
+    switch(MessageBuffer[3]) {
 
-    if (MessageBuffer[3] != 0x0c) {
+    case 0x08:
 
-#ifdef DEBUG
-      printf(_("   Code Accepted\n"));
-#endif DEBUG
-
-      PINError = GE_NONE;
-    }
-    else {
+      *CurrentSecurityCodeStatus = MessageBuffer[4];
 
 #ifdef DEBUG
-      printf(_("   Code Error\n   You're not my big owner :-)\n"));
+      printf(_("Message: Security Code status received: "));
+
+      switch(*CurrentSecurityCodeStatus) {
+
+      case GSCT_SecurityCode:
+
+	printf(_("waiting for Security Code.\n"));
+	break;
+
+      case GSCT_Pin:
+
+	printf(_("waiting for PIN.\n"));
+	break;
+
+      case GSCT_Pin2:
+
+	printf(_("waiting for PIN2.\n"));
+	break;
+
+      case GSCT_Puk:
+
+	printf(_("waiting for PUK.\n"));
+	break;
+
+      case GSCT_Puk2:
+
+	printf(_("waiting for PUK2.\n"));
+	break;
+
+      case GSCT_None:
+
+	printf(_("nothing to enter.\n"));
+	break;
+
+      default:
+
+	printf(_("Unknown!\n"));
+      }
+      
 #endif DEBUG
 
-      PINError = GE_INVALIDPIN;
+      CurrentSecurityCodeError = GE_NONE;
+
+      break;
+
+    case 0x0b:
+
+#ifdef DEBUG
+      printf(_("Message: Security code accepted.\n"));
+#endif DEBUG
+
+      CurrentSecurityCodeError = GE_NONE;
+
+      break;
+
+    default:
+
+#ifdef DEBUG
+      printf(_("Message: Security code is wrong. You're not my big owner :-)\n"));
+#endif DEBUG
+
+      CurrentSecurityCodeError = GE_INVALIDSECURITYCODE;
+
     }
 
     break;

@@ -53,6 +53,7 @@ GSM_Error       MB21_GetSMSCenter(GSM_MessageCenter *MessageCenter);
 GSM_Error	MB21_GetSMSMessage(GSM_SMSMessage *message);
 
 GSM_Error	MB21_GetSMSCenter(GSM_MessageCenter *MessageCenter);
+GSM_Error	MB21_SetSMSCenter(GSM_MessageCenter *MessageCenter);
 
 GSM_Error	MB21_DeleteSMSMessage(GSM_SMSMessage *message);
 
@@ -65,7 +66,10 @@ GSM_Error	MB21_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 	/* These aren't presently implemented. */
 GSM_Error	MB21_GetPowerSource(GSM_PowerSource *source);
 GSM_Error	MB21_GetDisplayStatus(int *Status);
-GSM_Error	MB21_EnterPin(char *pin);
+
+GSM_Error	MB21_EnterSecurityCode(GSM_SecurityCode SecurityCode);
+GSM_Error	MB21_GetSecurityCodeStatus(int *Status);
+
 GSM_Error	MB21_GetIMEI(char *imei);
 GSM_Error	MB21_GetRevision(char *revision);
 GSM_Error	MB21_GetModel(char *model);
@@ -82,6 +86,7 @@ GSM_Error	MB21_GetCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error	MB21_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error	MB21_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error	MB21_Netmonitor(unsigned char mode, char *Screen);
+GSM_Error	MB21_SendDTMF(char *String);
 
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __mbus_2110_c isn't 

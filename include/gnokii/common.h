@@ -96,13 +96,53 @@ typedef enum {
   GSS_NOTSENTREAD = false /* Not sent or not read message */
 } GSM_SMSMessageStatus;
 
+/* SMS Messages sent as... */
+
+typedef enum {
+  GSMF_Text = 0x00,   /* Plain text message. */
+  GSMF_Fax = 0x22,    /* Fax message. */
+  GSMF_Paging = 0x26, /* Paging. */
+  GSMF_Email = 0x32   /* Email message. */
+} GSM_SMSMessageFormat;
+
+/* Validity of SMS Messages. */
+
+typedef enum {
+  GSMV_1_Hour   = 0x0b,
+  GSMV_6_Hours  = 0x47,
+  GSMV_24_Hours = 0xa7,
+  GSMV_72_Hours = 0xa9,
+  GSMV_1_Week   = 0xad,
+  GSMV_Max_Time = 0xff
+} GSM_SMSMessageValidity;
+
 /* Define datatype for SMS Message Center */
 
 typedef struct {
   int No;        /* Number of the SMSC in the phone memory */
   char Name[20]; /* Name of the SMSC */
+  GSM_SMSMessageFormat Format; /* SMS is sent as text/fax/paging/email. */
+  GSM_SMSMessageValidity Validity; /* Validity of SMS Message. */
   char Number[GSM_MAX_SMS_CENTER_LENGTH]; /* Number of the SMSC */
 } GSM_MessageCenter;
+
+/* Definition of security codes. */
+
+typedef enum {
+  GSCT_SecurityCode = 0x01, /* Security code. */
+  GSCT_Pin,                 /* PIN. */
+  GSCT_Pin2,                /* PIN 2. */
+  GSCT_Puk,                 /* PUK. */
+  GSCT_Puk2,                /* PUK 2. */
+  GSCT_None                 /* Code not needed. */
+} GSM_SecurityCodeType;
+
+/* Security code definition. */
+
+typedef struct {
+  GSM_SecurityCodeType Type; /* Type of the code. */
+  char Code[10];             /* Actual code. */
+} GSM_SecurityCode;
 
 /* Structure used for passing dates/times to date/time functions such as
    GSM_GetTime and GSM_GetAlarm etc. */
@@ -287,7 +327,7 @@ typedef enum {
   GE_UNKNOWNMODEL,          /* Model specified isn't known/supported. */
   GE_NOLINK,                /* Couldn't establish link with phone. */
   GE_TIMEOUT,               /* Command timed out. */
-  GE_INVALIDPIN,            /* Invalid PIN */
+  GE_INVALIDSECURITYCODE,   /* Invalid Security code. */
   GE_NOTIMPLEMENTED,        /* Command called isn't implemented in model. */
   GE_INVALIDSMSLOCATION,    /* Invalid SMS location. */
   GE_INVALIDPHBOOKLOCATION, /* Invalid phonebook location. */
@@ -359,6 +399,8 @@ typedef struct {
 
   GSM_Error (*GetSMSCenter)( GSM_MessageCenter *MessageCenter );
 
+  GSM_Error (*SetSMSCenter)( GSM_MessageCenter *MessageCenter );
+
   GSM_Error (*GetSMSMessage)( GSM_SMSMessage *Message );
 
   GSM_Error (*DeleteSMSMessage)( GSM_SMSMessage *Message );
@@ -379,7 +421,9 @@ typedef struct {
 
   GSM_Error (*GetDisplayStatus)( int *Status);
 
-  GSM_Error (*EnterPin)( char *pin );
+  GSM_Error (*EnterSecurityCode)( GSM_SecurityCode Code);
+
+  GSM_Error (*GetSecurityCodeStatus)( int *Status );
 
   GSM_Error (*GetIMEI)( char *imei );
 
@@ -412,6 +456,8 @@ typedef struct {
   GSM_Error (*DeleteCalendarNote) ( GSM_CalendarNote *CalendarNote);
 
   GSM_Error (*NetMonitor) (unsigned char mode, char *Screen);
+
+  GSM_Error (*SendDTMF) (char *String);
 
 } GSM_Functions;
 

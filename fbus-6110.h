@@ -134,6 +134,7 @@ int       FB61_TX_SendMessage(u16 message_length, u8 message_type, u8 *buffer);
 int       FB61_TX_SendAck(u8 message_type, u8 message_seq);
 
 int       FB61_GetMemoryType(GSM_MemoryType memory_type);
+int       SemiOctetPack(char *Number, unsigned char *Output);
 
 GSM_Error FB61_GetMemoryLocation(GSM_PhonebookEntry *entry);
 GSM_Error FB61_WritePhonebookLocation(GSM_PhonebookEntry *entry);
@@ -154,9 +155,11 @@ GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 GSM_Error FB61_GetPowerSource(GSM_PowerSource *source);
 GSM_Error FB61_GetDisplayStatus(int *Status);
 
-GSM_Error FB61_EnterPin(char *pin);
+GSM_Error FB61_EnterSecurityCode(GSM_SecurityCode SecurityCode);
+GSM_Error FB61_GetSecurityCodeStatus(int *Status);
 
 GSM_Error FB61_GetSMSCenter(GSM_MessageCenter *MessageCenter);
+GSM_Error FB61_SetSMSCenter(GSM_MessageCenter *MessageCenter);
 
 GSM_Error FB61_GetIMEI(char *imei);
 GSM_Error FB61_GetRevision(char *revision);
@@ -183,6 +186,8 @@ GSM_Error FB61_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error FB61_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
 
 GSM_Error FB61_NetMonitor(unsigned char mode, char *Screen);
+
+GSM_Error FB61_SendDTMF(char *String);
 
 /* States for receive code. */
 

@@ -47,6 +47,7 @@ GSM_Error   FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
 GSM_Error   FB38_GetSMSMessage(GSM_SMSMessage *message);
 
 GSM_Error   FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
+GSM_Error   FB38_SetSMSCenter(GSM_MessageCenter *MessageCenter);
 
 GSM_Error   FB38_DeleteSMSMessage(GSM_SMSMessage *message);
 
@@ -59,7 +60,8 @@ GSM_Error   FB38_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
     /* These aren't presently implemented. */
 GSM_Error   FB38_GetPowerSource(GSM_PowerSource *source);
 GSM_Error   FB38_GetDisplayStatus(int *Status);
-GSM_Error   FB38_EnterPin(char *pin);
+GSM_Error   FB38_EnterSecurityCode(GSM_SecurityCode SecurityCode);
+GSM_Error   FB38_GetSecurityCodeStatus(int *Status);
 GSM_Error   FB38_GetIMEI(char *imei);
 GSM_Error   FB38_GetRevision(char *revision);
 GSM_Error   FB38_GetModel(char *model);
@@ -76,6 +78,7 @@ GSM_Error   FB38_GetCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error   FB38_WriteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error   FB38_DeleteCalendarNote(GSM_CalendarNote *CalendarNote);
 GSM_Error   FB38_Netmonitor(unsigned char mode, char *Screen);
+GSM_Error   FB38_SendDTMF(char *String);
 
     /* All defines and prototypes from here down are specific to 
        this model and so are #ifdef out if __fbus_3810_c isn't 

@@ -17,10 +17,15 @@
 
 /* Prototypes */
 
-int monitormode( void );
-int enterpin( void );
+int monitormode(void);
+
+#ifdef SECURITY
+  int entersecuritycode(char *type);
+  int getsecuritycodestatus(void);
+#endif
+
 int getmemory(char *argv[]);
-int writephonebook( void );
+int writephonebook(void);
 int getspeeddial(char *number);
 int setspeeddial(char *argv[]);
 int getsms(char *argv[]);
@@ -28,9 +33,9 @@ int deletesms(char *argv[]);
 int sendsms(int argc, char *argv[]);
 int getsmsc(char *mcn);
 int setdatetime(int argc, char *argv[]);
-int getdatetime( void );
+int getdatetime(void);
 int setalarm(char *argv[]);
-int getalarm( void );
+int getalarm(void);
 int dialvoice(char *number);
 int dialdata(char *number);
 int sendoplogo(char *argv[]);
@@ -40,16 +45,18 @@ int writecalendarnote(char *argv[]);
 int deletecalendarnote(char *index);
 int getdisplaystatus();
 int netmonitor(char *_mode);
-int identify( void );
+int identify(void);
+int senddtmf(char *String);
 int foogle(char *argv[]);
-int pmon( void );
-void readconfig( void );
+int pmon(void);
+void readconfig(void);
 
 typedef enum {
   OPT_HELP,
   OPT_VERSION,
   OPT_MONITOR,
-  OPT_ENTERPIN,
+  OPT_ENTERSECURITYCODE,
+  OPT_GETSECURITYCODESTATUS,
   OPT_SETDATETIME,
   OPT_GETDATETIME,
   OPT_SETALARM,
@@ -75,6 +82,7 @@ typedef enum {
   OPT_PMON,
   OPT_NETMONITOR,
   OPT_IDENTIFY,
+  OPT_SENDDTMF,
   OPT_FOOGLE
 } opt_index;
 

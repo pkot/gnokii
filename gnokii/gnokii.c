@@ -104,15 +104,14 @@ int usage(void)
 "          gnokii --deletecalendarnote index\n"
 "          gnokii --getdisplaystatus\n"
 "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
-"          gnokii --identify\n\n"
+"          gnokii --identify\n"
+"          gnokii --senddtmf string\n\n"
 
 "          --help            display usage information.\n\n"
 
 "          --monitor         continually updates phone status to stderr.\n\n"
 
 "          --version         displays version and copyright information.\n\n"
-
-"          --enterpin        sends the entered PIN to the mobile phone.\n\n"
 
 "          --getmemory       reads specificed memory location from phone.\n"
 "                            Valid memory types are:\n"
@@ -176,6 +175,7 @@ int usage(void)
 "          --netmonitor      setting/querying netmonitor mode.\n\n"
 
 "          --identify        get IMEI, model and revision\n\n"
+"          --senddtmf        send DTMF sequence\n\n"
 ));  /*"*/
 
   return 0;
@@ -318,8 +318,15 @@ int main(int argc, char *argv[])
     // Monitor mode
     { "monitor",            no_argument,       NULL, OPT_MONITOR },
 
-    // Enter PIN mode
-    { "enterpin",           no_argument,       NULL, OPT_ENTERPIN },
+#ifdef SECURITY
+
+    // Enter Security Code mode
+    { "entersecuritycode",  required_argument, NULL, OPT_ENTERSECURITYCODE },
+
+    // Get Security Code status
+    { "getsecuritycodestatus",  no_argument,   NULL, OPT_GETSECURITYCODESTATUS },
+
+#endif
 
     // Set date and time
     { "setdatetime",        optional_argument, NULL, OPT_SETDATETIME },
@@ -390,6 +397,9 @@ int main(int argc, char *argv[])
     // Identify
     { "identify",           no_argument,       NULL, OPT_IDENTIFY },
 
+    // Send DTMF sequence
+    { "senddtmf",           required_argument, NULL, OPT_SENDDTMF },
+
 #ifndef WIN32
     // For development purposes: insert you function calls here
     { "foogle",             optional_argument, NULL, OPT_FOOGLE },
@@ -403,24 +413,30 @@ int main(int argc, char *argv[])
 	
   struct gnokii_arg_len gals[] =
   {
-    { OPT_SETDATETIME,     0, 5, GAL_XOR },
-    { OPT_SETALARM,        2, 2, 0 },
-    { OPT_DIALVOICE,       1, 1, 0 },
-    { OPT_DIALDATA,        1, 1, 0 },
-    { OPT_SENDOPLOGO,      1, 2, GAL_XOR },
-    { OPT_SENDCLICON,      1, 1, 0 },
-    { OPT_GETCALENDARNOTE, 1, 1, 0 },
-    { OPT_DELCALENDARNOTE, 1, 1, 0 },
-    { OPT_GETMEMORY,       3, 3, 0 },
-    { OPT_GETSPEEDDIAL,    1, 1, 0 },
-    { OPT_SETSPEEDDIAL,    3, 3, 0 },
-    { OPT_GETSMS,          3, 3, 0 },
-    { OPT_DELETESMS,       3, 3, 0 },
-    { OPT_SENDSMS,         1, 8, 0 },
-    { OPT_GETSMSC,         1, 1, 0 },
-    { OPT_GETWELCOMENOTE,  1, 1, 0 },
-    { OPT_SETWELCOMENOTE,  1, 1, 0 },
-    { OPT_NETMONITOR,      1, 1, 0 },
+
+#ifdef SECURITY
+    { OPT_ENTERSECURITYCODE, 1, 1, 0 },
+#endif
+
+    { OPT_SETDATETIME,       0, 5, GAL_XOR },
+    { OPT_SETALARM,          2, 2, 0 },
+    { OPT_DIALVOICE,         1, 1, 0 },
+    { OPT_DIALDATA,          1, 1, 0 },
+    { OPT_SENDOPLOGO,        1, 2, GAL_XOR },
+    { OPT_SENDCLICON,        1, 1, 0 },
+    { OPT_GETCALENDARNOTE,   1, 1, 0 },
+    { OPT_DELCALENDARNOTE,   1, 1, 0 },
+    { OPT_GETMEMORY,         3, 3, 0 },
+    { OPT_GETSPEEDDIAL,      1, 1, 0 },
+    { OPT_SETSPEEDDIAL,      3, 3, 0 },
+    { OPT_GETSMS,            3, 3, 0 },
+    { OPT_DELETESMS,         3, 3, 0 },
+    { OPT_SENDSMS,           1, 8, 0 },
+    { OPT_GETSMSC,           1, 1, 0 },
+    { OPT_GETWELCOMENOTE,    1, 1, 0 },
+    { OPT_SETWELCOMENOTE,    1, 1, 0 },
+    { OPT_NETMONITOR,        1, 1, 0 },
+    { OPT_SENDDTMF,          1, 1, 0 },
 
     { 0, 0, 0, 0 },
   };
@@ -494,10 +510,17 @@ int main(int argc, char *argv[])
       rc = monitormode();
       break;
 
-    case OPT_ENTERPIN:
+#ifdef SECURITY
+    case OPT_ENTERSECURITYCODE:
 
-      rc = enterpin();
+      rc = entersecuritycode(optarg);
       break;
+
+    case OPT_GETSECURITYCODESTATUS:
+
+      rc = getsecuritycodestatus();
+      break;
+#endif
 					
     case OPT_GETDATETIME:
 
@@ -622,7 +645,12 @@ int main(int argc, char *argv[])
       rc = foogle(nargv);
       break;
 #endif
-      
+
+    case OPT_SENDDTMF:
+
+      rc = senddtmf(optarg);
+      break;
+
     default:
 
       fprintf(stderr, _("Unknown option: %d\n"), c);
@@ -781,8 +809,71 @@ int getsmsc(char *MessageCenterNumber)
 
   fbusinit(false, NULL);
 
-  if (GSM->GetSMSCenter(&MessageCenter) == GE_NONE)
-    fprintf(stdout, _("%d. SMS center number is %s\n"), MessageCenter.No, MessageCenter.Number);
+  if (GSM->GetSMSCenter(&MessageCenter) == GE_NONE) {
+
+    fprintf(stdout, _("%d. SMS center (%s) number is %s\n"), MessageCenter.No, MessageCenter.Name, MessageCenter.Number);
+
+    fprintf(stdout, _("Messages sent as "));
+
+    switch (MessageCenter.Format) {
+
+    case GSMF_Text:
+      fprintf(stdout, _("Text"));
+      break;
+
+    case GSMF_Paging:
+      fprintf(stdout, _("Paging"));
+      break;
+
+    case GSMF_Fax:
+      fprintf(stdout, _("Fax"));
+      break;
+
+    case GSMF_Email:
+      fprintf(stdout, _("Email"));
+      break;
+
+    default:
+      fprintf(stdout, _("Unknown"));
+    }
+
+    printf("\n");
+
+    fprintf(stdout, _("Message validity is "));
+
+    switch (MessageCenter.Validity) {
+
+    case GSMV_1_Hour:
+      fprintf(stdout, _("1 hour"));
+      break;
+
+    case GSMV_6_Hours:
+      fprintf(stdout, _("6 hours"));
+      break;
+
+    case GSMV_24_Hours:
+      fprintf(stdout, _("24 hours"));
+      break;
+
+    case GSMV_72_Hours:
+      fprintf(stdout, _("72 hours"));
+      break;
+
+    case GSMV_1_Week:
+      fprintf(stdout, _("1 week"));
+	break;
+
+    case GSMV_Max_Time:
+      fprintf(stdout, _("Maximum time"));
+      break;
+
+    default:
+      fprintf(stdout, _("Unknown"));
+    }
+
+    fprintf(stdout, "\n");
+
+  }
   else
     fprintf(stdout, _("SMS center can not be found :-(\n"));
 
@@ -1101,31 +1192,107 @@ static void interrupted(int sig)
 
 }
 
-/* In this mode we get the pin from the keyboard and send it to the mobile
+#ifdef SECURITY
+
+/* In this mode we get the code from the keyboard and send it to the mobile
    phone. */
 
-int enterpin(void)
+int entersecuritycode(char *type)
 {
 
+  GSM_SecurityCode SecurityCode;
+
+  if (!strcmp(type,"PIN"))
+    SecurityCode.Type=GSCT_Pin;
+  else if (!strcmp(type,"PUK"))
+    SecurityCode.Type=GSCT_Puk;
+  else if (!strcmp(type,"PIN2"))
+    SecurityCode.Type=GSCT_Pin2;
+  else if (!strcmp(type,"PUK2"))
+    SecurityCode.Type=GSCT_Puk2;
+  // FIXME: Entering of SecurityCode does not work :-(
+  //  else if (!strcmp(type,"SecurityCode"))
+  //    SecurityCode.Type=GSCT_SecurityCode;
+  else {
+    usage();
+    return -1;
+  }
+
 #ifdef WIN32
-  char pin[20];
-  printf("Enter your PIN: ");
-  gets(pin);
+  printf("Enter your code: ");
+  gets(SecurityCode.Code);
 #else
-  char *pin=getpass(_("Enter your PIN: "));
+  strcpy(SecurityCode.Code,getpass(_("Enter your code: ")));
 #endif
 
   fbusinit(false, NULL);
 
-  if (GSM->EnterPin(pin) == GE_INVALIDPIN)
-    fprintf(stdout, _("Error: invalid PIN\n"));
+  if (GSM->EnterSecurityCode(SecurityCode) == GE_INVALIDSECURITYCODE)
+    fprintf(stdout, _("Error: invalid code\n"));
   else
-    fprintf(stdout, _("PIN ok.\n"));
+    fprintf(stdout, _("Code ok.\n"));
 
   GSM->Terminate();
 
   return 0;
 }
+
+int getsecuritycodestatus(void)
+{
+
+  int Status;
+
+  fbusinit(false, NULL);
+
+  if (GSM->GetSecurityCodeStatus(&Status) == GE_NONE) {
+
+    fprintf(stdout, _("Security code status: "));
+
+      switch(Status) {
+
+      case GSCT_SecurityCode:
+
+	fprintf(stdout, _("waiting for Security Code.\n"));
+	break;
+
+      case GSCT_Pin:
+
+	fprintf(stdout, _("waiting for PIN.\n"));
+	break;
+
+      case GSCT_Pin2:
+
+	fprintf(stdout, _("waiting for PIN2.\n"));
+	break;
+
+      case GSCT_Puk:
+
+	fprintf(stdout, _("waiting for PUK.\n"));
+	break;
+
+      case GSCT_Puk2:
+
+	fprintf(stdout, _("waiting for PUK2.\n"));
+	break;
+
+      case GSCT_None:
+
+	fprintf(stdout, _("nothing to enter.\n"));
+	break;
+
+      default:
+
+	fprintf(stdout, _("Unknown!\n"));
+      }
+  }
+
+  GSM->Terminate();
+
+  return 0;
+}
+
+
+#endif
 
 /* Voice dialing mode. */
 
@@ -1906,12 +2073,27 @@ int identify( void )
   return 0;
 }
 
+int senddtmf(char *String)
+{
+
+  fbusinit(false, NULL);
+
+  GSM->SendDTMF(String);
+
+  GSM->Terminate();
+
+  return 0;
+}
+
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 
 #ifndef WIN32
 int foogle(char *argv[])
 { 
+
+  GSM_MessageCenter MessageCenter;
+
   /* Initialise the code for the GSM interface. */     
 
   fbusinit(true, RLP_DisplayF96Frame);
@@ -1922,8 +2104,17 @@ int foogle(char *argv[])
   // GSM->DialData("62401000");
 
   /* Pavel's one */
-  GSM->DialData("4670");
-  
+  // GSM->DialData("0541218080");
+
+  MessageCenter.No=3;
+  strcpy(MessageCenter.Name, "Test one");
+  strcpy(MessageCenter.Number, "+123456789");
+
+  MessageCenter.Validity=GSMV_Max_Time;
+  MessageCenter.Format=GSMF_Email;
+
+  GSM->SetSMSCenter(&MessageCenter);
+
   sleep (60);
   GSM->Terminate();
 

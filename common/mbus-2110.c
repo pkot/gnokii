@@ -48,6 +48,7 @@ GSM_Functions			MB21_Functions = {
 		MB21_GetMemoryStatus,
 		MB21_GetSMSStatus,
 		MB21_GetSMSCenter,
+		MB21_SetSMSCenter,
   		MB21_GetSMSMessage,
 		MB21_DeleteSMSMessage,
 		MB21_SendSMSMessage,
@@ -55,7 +56,8 @@ GSM_Functions			MB21_Functions = {
 		MB21_GetBatteryLevel,
 		MB21_GetPowerSource,
 		MB21_GetDisplayStatus,
-		MB21_EnterPin,
+		MB21_EnterSecurityCode,
+		MB21_GetSecurityCodeStatus,
 		MB21_GetIMEI,
 		MB21_GetRevision,
 		MB21_GetModel,
@@ -71,7 +73,8 @@ GSM_Functions			MB21_Functions = {
 		MB21_GetCalendarNote,
 		MB21_WriteCalendarNote,
 		MB21_DeleteCalendarNote,
-		MB21_Netmonitor
+		MB21_Netmonitor,
+		MB21_SendDTMF
 };
 
 	/* FIXME - these are guesses only... */
@@ -219,6 +222,11 @@ GSM_Error	MB21_GetSMSCenter(GSM_MessageCenter *MessageCenter)
 	return (GE_NOTIMPLEMENTED);
 }
 
+GSM_Error	MB21_SetSMSCenter(GSM_MessageCenter *MessageCenter)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
 	/* Our "Not implemented" functions */
 GSM_Error	MB21_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
@@ -240,11 +248,15 @@ GSM_Error	MB21_GetDisplayStatus(int *Status)
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	MB21_EnterPin(char *pin)
+GSM_Error	MB21_EnterSecurityCode(GSM_SecurityCode SecurityCode)
 {
 	return (GE_NOTIMPLEMENTED);
 }
 
+GSM_Error	MB21_GetSecurityCodeStatus(int *Status)
+{
+	return (GE_NOTIMPLEMENTED);
+}
 
 GSM_Error	MB21_GetDateTime(GSM_DateTime *date_time)
 {
@@ -307,6 +319,11 @@ GSM_Error	MB21_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
 }
 
 GSM_Error	MB21_Netmonitor(unsigned char mode, char *Screen)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_SendDTMF(char *String)
 {
     return (GE_NOTIMPLEMENTED);
 }

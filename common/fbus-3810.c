@@ -53,6 +53,7 @@ GSM_Functions           FB38_Functions = {
         FB38_GetMemoryStatus,
         FB38_GetSMSStatus,
         FB38_GetSMSCenter,
+        FB38_SetSMSCenter,
         FB38_GetSMSMessage,
         FB38_DeleteSMSMessage,
         FB38_SendSMSMessage,
@@ -60,7 +61,8 @@ GSM_Functions           FB38_Functions = {
         FB38_GetBatteryLevel,
         FB38_GetPowerSource,
         FB38_GetDisplayStatus,
-        FB38_EnterPin,
+        FB38_EnterSecurityCode,
+        FB38_GetSecurityCodeStatus,
         FB38_GetIMEI,
         FB38_GetRevision,
         FB38_GetModel,
@@ -76,7 +78,8 @@ GSM_Functions           FB38_Functions = {
         FB38_GetCalendarNote,
         FB38_WriteCalendarNote,
         FB38_DeleteCalendarNote,
-        FB38_Netmonitor
+        FB38_Netmonitor,
+        FB38_SendDTMF
 };
 
 GSM_Information         FB38_Information = {
@@ -770,6 +773,11 @@ GSM_Error   FB38_DialData(char *Number)
 
 
     /* Our "Not implemented" functions */
+GSM_Error   FB38_SetSMSCenter(GSM_MessageCenter *MessageCenter)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
 GSM_Error   FB38_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
     return (GE_NOTIMPLEMENTED);
@@ -790,11 +798,15 @@ GSM_Error   FB38_GetDisplayStatus(int *Status)
     return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error   FB38_EnterPin(char *pin)
+GSM_Error   FB38_EnterSecurityCode(GSM_SecurityCode SecurityCode)
 {
     return (GE_NOTIMPLEMENTED);
 }
 
+GSM_Error   FB38_GetSecurityCodeStatus(int *Status)
+{
+    return (GE_NOTIMPLEMENTED);
+}
 
 GSM_Error   FB38_GetDateTime(GSM_DateTime *date_time)
 {
@@ -847,6 +859,11 @@ GSM_Error   FB38_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
 }
 
 GSM_Error   FB38_Netmonitor (unsigned char mode, char *Screen)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_SendDTMF (char *String)
 {
     return (GE_NOTIMPLEMENTED);
 }

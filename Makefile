@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1_pre20
+VERSION = 0.3.1_pre21
 
 #
 # Compiler to use.
@@ -54,6 +54,12 @@ PORT=-DPORT="\"/dev/ttyS0\""
 GETTEXT=-DGNOKII_GETTEXT
 
 #
+# Security - compile with -DSECURITY to enable all security features
+#
+
+# SECURITY=-DSECURITY
+
+#
 # GTK - you need this only for GUI support, if you do not need GUI, you can
 # comment this out
 #
@@ -70,11 +76,12 @@ GTKLDFLAGS=`gtk-config --libs`
 # Set up compilation/linking flags for Linux.
 #
 
-export CC MODEL PORT GETTEXT DEBUG VERSION
+export CC MODEL PORT GETTEXT DEBUG VERSION SECURITY
 
 COMMON=-Wall -g -O0 \
        ${MODEL} ${PORT} \
        ${GETTEXT} \
+       ${SECURITY} \
        ${DEBUG} \
        -DVERSION=\"${VERSION}\"
 
