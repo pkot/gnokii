@@ -58,6 +58,12 @@ This example is commonly used:
 
     $ ./configure --prefix=/usr --enable-security
 
+Alternatively, instead of writing these three commands you can use:
+
+    $ sh autogen.sh [<options>]
+
+where options are the same as with configure script.
+
 
 Compilation
 -----------
