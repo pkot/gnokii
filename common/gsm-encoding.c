@@ -556,7 +556,7 @@ int utf8_decode(char *outstring, const char *instring, int inlen)
 	int outlen = inlen;
 #ifdef HAVE_ICONV
 	iconv_t cd;
-	char *iter = instring;
+	char *iter = (char *)instring;
 
 	cd = iconv_open(nl_langinfo(CODESET), "UTF-8");
 	outlen = iconv(cd, &iter, (size_t *)&inlen, &outstring, (size_t *)&outlen);
@@ -573,7 +573,7 @@ int utf8_encode(char *outstring, const char *instring, int inlen)
 	int len = 0;
 #ifdef HAVE_ICONV
 	iconv_t cd;
-	char *iter = instring;
+	char *iter = (char *)instring;
 
 	cd = iconv_open("UTF-8", nl_langinfo(CODESET));
 	len = iconv(cd, &iter, &inlen, &outstring, &outlen);
