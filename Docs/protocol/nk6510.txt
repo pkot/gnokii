@@ -211,7 +211,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                                                   For meetings with "No alarm"=0xFFFF (-1).
                                                   For "On time"=0x0000
                                                   half an hour=0x001E, and so on.
-                                                Recurrance=in hours, between future occurances of this meeting.
+                                                Recurrence=in hours, between future occurances of this meeting.
                                                   If there is no repeat, this value is 0x0000. The special value 0xffff 
                                                   means 1 Year!
                                           for Call:{Hour,Minute,Alarm (as above),Recurrance (as above),namelen,numberlen,
