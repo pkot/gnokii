@@ -961,10 +961,10 @@ API GSM_Error GetFolderChanges(GSM_Data *data, GSM_Statemachine *state, int has_
 /* Fake functions. To let gnokii compile */
 API GSM_Error SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NONE;
+	return GE_NOTIMPLEMENTED;
 }
 
 API GSM_Error SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 {
-	return GE_NONE;
+	return GE_NOTIMPLEMENTED;
 }
