@@ -17,7 +17,10 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.5  2001-06-27 23:52:52  pkot
+  Revision 1.6  2001-11-08 16:47:48  pkot
+  Start fiddling with 7110 and SMS
+
+  Revision 1.5  2001/06/27 23:52:52  pkot
   7110/6210 updates (Marian Jancar)
 
   Revision 1.4  2001/05/24 20:47:30  chris
@@ -188,6 +191,9 @@ static GSM_Error P7110_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 
 static GSM_Error P7110_Incoming0x1b(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
@@ -195,6 +201,7 @@ static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, i
 static GSM_Error P7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
+static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
