@@ -25,6 +25,8 @@
                                                         (Pawel Kot)
     o add sanity check for null pointers to links/* files - it
       seems to be the problem when using gnocky         (Pawel Kot)
+    o clear strings before using them in phonebook reading
+                                                   (Dmitry Astapov)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

@@ -1513,6 +1513,7 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 
 	BUG(offset >= length);
 
+	memset(number, 0, sizeof(number));
 	o = get_token(number, line+offset, ';', 9);
 	switch (o) {
 	case 0:
@@ -1528,6 +1529,7 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 
 	BUG(offset >= length);
 
+	memset(number, 0, sizeof(number));
 	o = get_token(number, line+offset, ';', 9);
 	switch (o) {
 	case 0:
