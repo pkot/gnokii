@@ -301,14 +301,10 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 			cfg->connection_type = GN_CT_Infrared;
 		else if (!strcasecmp(val, "m2bus"))
 			cfg->connection_type = GN_CT_M2BUS;
-#ifdef HAVE_IRDA
 		else if (!strcasecmp(val, "irda"))
 			cfg->connection_type = GN_CT_Irda;
-#endif
-#ifdef HAVE_BLUETOOTH
 		else if (!strcasecmp(val, "bluetooth"))
 			cfg->connection_type = GN_CT_Bluetooth;
-#endif
 #ifndef WIN32
 		else if (!strcasecmp(val, "tcp"))
 			cfg->connection_type = GN_CT_TCP;

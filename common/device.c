@@ -62,16 +62,12 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	case GN_CT_Infrared:
 		state->device.fd = serial_opendevice(file, with_odd_parity, with_async, with_hw_handshake, state);
 		break;
-#ifdef HAVE_IRDA
 	case GN_CT_Irda:
 		state->device.fd = irda_open(state);
 		break;
-#endif
-#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		state->device.fd = bluetooth_open(&state->config.bt_address, state->config.rfcomm_cn, state);
 		break;
-#endif
 	case GN_CT_Tekram:
 		state->device.fd = tekram_open(file, state);
 		break;
@@ -96,16 +92,12 @@ void device_close(struct gn_statemachine *state)
 	case GN_CT_Infrared:
 		serial_close(state->device.fd, state);
 		break;
-#ifdef HAVE_IRDA
 	case GN_CT_Irda:
 		irda_close(state->device.fd, state);
 		break;
-#endif
-#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		bluetooth_close(state->device.fd, state);
 		break;
-#endif
 	case GN_CT_Tekram:
 		tekram_close(state->device.fd, state);
 		break;
@@ -138,14 +130,10 @@ void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 	case GN_CT_Infrared:
 		serial_setdtrrts(state->device.fd, dtr, rts, state);
 		break;
-#ifdef HAVE_IRDA
 	case GN_CT_Irda:
 		break;
-#endif
-#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		break;
-#endif
 	case GN_CT_Tekram:
 		break;
 #ifndef WIN32
@@ -166,14 +154,10 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 	case GN_CT_Infrared:
 		serial_changespeed(state->device.fd, speed, state);
 		break;
-#ifdef HAVE_IRDA
 	case GN_CT_Irda:
 		break;
-#endif
-#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		break;
-#endif
 	case GN_CT_Tekram:
 		tekram_changespeed(state->device.fd, speed, state);
 		break;
@@ -192,14 +176,10 @@ size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		return (serial_read(state->device.fd, buf, nbytes, state));
-#ifdef HAVE_IRDA
 	case GN_CT_Irda:
 		return irda_read(state->device.fd, buf, nbytes, state);
-#endif
-#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		return bluetooth_read(state->device.fd, buf, nbytes, state);
-#endif
 	case GN_CT_Tekram:
 		return tekram_read(state->device.fd, buf, nbytes, state);
 #ifndef WIN32
@@ -218,14 +198,10 @@ size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		return (serial_write(state->device.fd, buf, n, state));
-#ifdef HAVE_IRDA
 	case GN_CT_Irda:
 		return irda_write(state->device.fd, buf, n, state);
-#endif
-#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		return bluetooth_write(state->device.fd, buf, n, state);
-#endif
 	case GN_CT_Tekram:
 		return tekram_write(state->device.fd, buf, n, state);
 #ifndef WIN32
@@ -244,14 +220,10 @@ int device_select(struct timeval *timeout, struct gn_statemachine *state)
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		return serial_select(state->device.fd, timeout, state);
-#ifdef HAVE_IRDA
 	case GN_CT_Irda:
 		return irda_select(state->device.fd, timeout, state);
-#endif
-#ifdef HAVE_BLUETOOTH
 	case GN_CT_Bluetooth:
 		return bluetooth_select(state->device.fd, timeout, state);
-#endif
 	case GN_CT_Tekram:
 		return tekram_select(state->device.fd, timeout, state);
 #ifndef WIN32

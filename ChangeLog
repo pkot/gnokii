@@ -3,6 +3,7 @@
  * libgnokii updates
     o don't send the initial sequence with FBUS over Bluetooth
                                                    (Marcel Holtmann)
+    o remove ugly #ifdefs as they are not needed in fact (Pawel Kot)
 
 0.5.0pre8
 =========
