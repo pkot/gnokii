@@ -129,7 +129,7 @@ void DB_Look (void)
 
   buf = g_string_sized_new (128);
 
-  g_string_sprintf (buf, "SELECT id, number, text dreport FROM outbox \
+  g_string_sprintf (buf, "SELECT id, number, text, dreport FROM outbox \
                           WHERE processed='0'");
 
   if (mysql_real_query (&mysqlOut, buf->str, buf->len))

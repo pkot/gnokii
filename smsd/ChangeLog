@@ -1,3 +1,7 @@
+* Mon Feb 10 2003 BORBELY Zoltan <bozo@andrews.hu>
+- Bad SQL statement fixed in the mysql module.
+
+
 * Sun Feb 09 2003 Jan Definak <ja@mail.upjs.sk>
 - Added comment for Tru64 from Peter Kolmisoppi <peter@opoint.com>.
 - Added support for loging to file.
