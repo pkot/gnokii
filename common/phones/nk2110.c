@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.9  2001-06-17 16:42:59  machek
+  Revision 1.10  2001-07-17 22:46:27  pkot
+  Removed warning when compiling with --enable-debug (Pawel Kot)
+
+  Revision 1.9  2001/06/17 16:42:59  machek
   Created another level of error message (ddprintf), fixed code not to
   exit on error condition. Now it is actualy usable on my Philips Velo.
 
@@ -345,7 +348,7 @@ SMS(GSM_SMSMessage *message, int command)
 	SendCommand(pkt, 0x38 /* LN_SMS_COMMAND */, sizeof(pkt));
 	waitfor(PacketOK, 1000);
 	if (!PacketOK) {
-		dprintf(stderr, "No reply came within second!\n");
+		dprintf("No reply came within second!\n");
 	}
 		
 	if (PacketData[3] != 0x37 /* LN_SMS_EVENT */) {
