@@ -50,7 +50,7 @@
 static bool fb3110_serial_open(struct gn_statemachine *state);
 static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state);
-static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
+static gn_error fb3110_message_send(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
 static void fb3110_tx_ack_send(u8 *message, int length, struct gn_statemachine *state);
 static void fb3110_sequence_number_update(struct gn_statemachine *state);
 static int fb3110_message_type_fold(int type);
@@ -246,7 +246,7 @@ static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequ
 /* 
  * Main function to send an fbus message 
  */
-static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state)
+static gn_error fb3110_message_send(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 	u8 seqnum;
 

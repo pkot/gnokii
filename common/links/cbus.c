@@ -372,7 +372,7 @@ static gn_error get_cmd_reply(struct gn_statemachine *state)
 	return send_packet_ack("\x3e\x68", 2, 0x3f, false, state);
 }
 
-static gn_error at_send_message(u16 message_length, u8 message_type,
+static gn_error at_send_message(unsigned int message_length, unsigned char message_type,
 				unsigned char *buffer, struct gn_statemachine *state)
 {
 	gn_error error;

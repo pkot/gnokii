@@ -49,7 +49,7 @@
 #include "gnokii-internal.h"
 
 static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
-static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
+static gn_error fbus_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
 static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemachine *state);
 
 /* FIXME - win32 stuff! */
@@ -462,7 +462,7 @@ int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer, struct gn
 /* Main function to send an fbus message */
 /* Splits up the message into frames if necessary */
 
-static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state)
+static gn_error fbus_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 	u8 seqnum, frame_buffer[FBUS_CONTENT_MAX_LENGTH + 2];
 	u8 nom, lml;		/* number of messages, last message len */

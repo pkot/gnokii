@@ -50,7 +50,7 @@
 #ifdef HAVE_IRDA
 
 static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
-static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state);
+static gn_error phonet_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
 
 
 #define FBUSINST(s) ((phonet_incoming_message *)((s)->link.link_instance))
@@ -188,7 +188,7 @@ static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *sta
 
 /* Main function to send an fbus message */
 
-static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message, struct gn_statemachine *state)
+static gn_error phonet_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 
 	u8 out_buffer[PHONET_TRANSMIT_MAX_LENGTH + 5];

@@ -107,7 +107,7 @@ static bool atbus_serial_open(int mode, char *device, struct gn_statemachine *sm
 	return true;
 }
 
-static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *msg, struct gn_statemachine *sm)
+static gn_error at_send_message(unsigned int message_length, unsigned char message_type, unsigned char *msg, struct gn_statemachine *sm)
 {
 	usleep(10000);
 	sm_incoming_acknowledge(sm);

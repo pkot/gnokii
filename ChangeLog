@@ -6,6 +6,8 @@
     o s/Janík/Janik/ in the translatable strings         (Pawel Kot)
     o don't use u8 type in the exported headers          (Pawel Kot)
     o add string.h to mgnokiidev                  (Troy Korjuslommi)
+    o fix u16/unsigned int mixing problems in the statemachine
+      and link layer              (Troy Korjuslommi, BORBELY Zoltan)
 
 0.5.0rc1
 ========
