@@ -7,6 +7,46 @@ libgnokii API changes
 = means no change
 o change description
 
+v1.5 2003-10-24
+
+	o new type
+		+typedef struct {
+		+...
+		+} gn_ringtone_info;
+
+	o new type
+		+typedef struct {
+		+...
+		+} gn_ringtone_list;
+
+	o new field in the struct
+		|typedef struct {
+		=...
+		+	GN_OP_GetRingtoneList
+		=...
+		|} gn_operation;
+
+	o new field in the struct
+		|typedef struct {
+		=...
+		+	GN_OP_DeleteRingtone
+		=...
+		|} gn_operation;
+
+v1.4 2003-10-04
+
+	o function enhancement
+		+MIDI ringtone support in gn_file_ringtone_read
+
+	o function enhancement
+		+MIDI ringtone support in gn_file_ringtone_save
+
+	o function enhancement
+		+Nokia raw ringtone support in gn_file_ringtone_read
+
+	o function enhancement
+		+Nokia raw ringtone support in gn_file_ringtone_save
+		
 v1.3 2003-09-21
 
 	2003-09-10
