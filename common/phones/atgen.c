@@ -242,8 +242,6 @@ static gn_error SetEcho(gn_data *data, struct gn_statemachine *state)
  * a working charset if needed.
  *
  * see also AT_SetCharset, AT_GetCharset
- *
- * gn_data has no field for charset so i misuse model.
  */
 static void StoreDefaultCharset(struct gn_statemachine *state)
 {
@@ -253,7 +251,7 @@ static void StoreDefaultCharset(struct gn_statemachine *state)
 	gn_error ret;
 
 	gn_data_clear(&data);
-	data.model = buf;
+	drvinst->charsetstr = buf;
 	ret = state->driver.functions(GN_OP_AT_GetCharset, &data, state);
 	if (ret) return;
 	if (!strncmp(buf, "GSM", 3)) drvinst->defaultcharset = AT_CHAR_GSM;
@@ -330,8 +328,6 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
  * desired charset.
  *
  * see AT_GetCharset, StoreDefaultCharset
- *
- * gn_data has no field for charset so i misuse model.
  */
 static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 {
@@ -348,7 +344,7 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_NOTREADY;
 	gn_data_clear(&tmpdata);
 	*charsets = '\0';
-	tmpdata.model = charsets;
+	drvinst->charsetstr = charsets;
 	ret = sm_block_no_retry(GN_OP_AT_GetCharset, &tmpdata, state);
 	if (ret) {
 		*charsets = '\0';
@@ -397,9 +393,6 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
  * this function detects the current charset used by the phone. if it is
  * called immediatedly after a reset of the phone, this is also the
  * original charset of the phone.
- *
- * gn_data has no field for charset so you must misuse model. the Model
- * string must be initialized with a length of 256 bytes.
  */
 static gn_error AT_GetCharset(gn_data *data, struct gn_statemachine *state)
 {
@@ -1077,12 +1070,10 @@ out:
  * parses the reponse from a check for the actual charset or the
  * available charsets. a bracket in the response is taken as a request
  * for available charsets.
- *
- * gn_data has no field for charset so you must misuse model. the Model
- * string must be initialized with a length of 256 bytes.
  */
 static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
 	char *pos;
 
@@ -1093,18 +1084,18 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 	buf.length= length;
 	splitlines(&buf);
 
-	if (data->model && !strncmp(buf.line1, "AT+CSCS", 7)) {
+	if (drvinst->charsetstr && !strncmp(buf.line1, "AT+CSCS", 7)) {
 		/* if a opening bracket is in the string don't skip anything */
 		pos = strchr(buf.line2, '(');
 		if (pos) {
-			strncpy(data->model, buf.line2, 255);
+			strncpy(drvinst->charsetstr, buf.line2, 255);
 			return GN_ERR_NONE;
 		}
 		/* skip leading +CSCS: and quotation */
 		pos = strchr(buf.line2 + 8, '\"');
 		if (pos) *pos = '\0';
-		strncpy(data->model, buf.line2 + 8, 255);
-		(data->model)[255] = '\0';
+		strncpy(drvinst->charsetstr, buf.line2 + 8, 255);
+		(drvinst->charsetstr)[255] = '\0';
 	}
 	return GN_ERR_NONE;
 }

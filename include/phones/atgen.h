@@ -24,7 +24,7 @@
 
   Copyright 2001 Manfred Jonsson <manfred.jonsson@gmx.de>
 
-  This file provides functions specific to generic at command compatible
+  This file provides functions specific to generic AT command compatible
   phones. See README for more details on supported mobile phones.
 
 */
@@ -67,6 +67,7 @@ typedef struct {
 	gn_memory_type smsmemorytype;
 	at_charset defaultcharset;
 	at_charset charset;
+	char *charsetstr;
 } at_driver_instance;
 
 #define AT_DRVINST(s) ((at_driver_instance *)((s)->driver.driver_instance))
