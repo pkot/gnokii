@@ -35,9 +35,9 @@ insertdate     - date of inserting SMS in table
 text           - SMS text
 processed      - new SMS must have this attribut set to FALSE. 
                  SMSD will send this SMS and will update 'processed' to TRUE.
-error          - This attribute contains return value of SendSMS function.
-                 For explanation of numeric values see gsm-error.h in gnokii
-                 source.                 
+error          - This attribute contains return value of gn_sms_send() function.
+                 For explanation of numeric values see <gnokii/error.h> in
+                 gnokii source.                 
 dreport        - request for delivery report per message. Possible values
                  are 0 for no delivery report, 1 for delivery report.
 
