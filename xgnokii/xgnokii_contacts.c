@@ -82,7 +82,6 @@ typedef struct {
 } ExtPbkDialog;
 
 static GtkWidget *GUI_ContactsWindow;
-static bool fbus3810;
 static bool contactsMemoryInitialized;
 static MemoryStatus memoryStatus;
 static ContactsMemory contactsMemory;	/* Hold contacts. */
@@ -2381,10 +2380,6 @@ static gint InsertPBEntrySM(gn_phonebook_entry * entry)
 		pbEntry->status = E_Empty;
 	else {
 		pbEntry->status = E_Unchanged;
-		if (fbus3810) {
-			memoryStatus.UsedSM++;
-			memoryStatus.FreeSM--;
-		}
 	}
 
 	g_ptr_array_add(contactsMemory, (gpointer) pbEntry);
@@ -2410,8 +2405,7 @@ static void ReadContactsMain(void)
 	D_MemoryLocationAll *mla;
 	PhonebookEntry *pbEntry;
 	register gint i;
-
-	fbus3810 = FALSE;
+	bool has_memory_stats = true;
 
 	if (contactsMemoryInitialized == TRUE) {
 		for (i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++) {
@@ -2438,13 +2432,13 @@ static void ReadContactsMain(void)
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (ms->status != GN_ERR_NONE)
-		/* Phone don't support ME (5110) */
-		memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME = 0;
-	else {
+	if (ms->status == GN_ERR_NONE || ms->status == GN_ERR_NOTSUPPORTED) {
 		memoryStatus.MaxME = ms->memoryStatus.used + ms->memoryStatus.free;
 		memoryStatus.UsedME = ms->memoryStatus.used;
 		memoryStatus.FreeME = ms->memoryStatus.free;
+	} else {
+		/* Phone doesn't support ME (5110) */
+		memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME = 0;
 	}
 
 	ms->memoryStatus.memory_type = GN_MT_SM;
@@ -2456,17 +2450,15 @@ static void ReadContactsMain(void)
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (ms->status != GN_ERR_NONE) {
-		fbus3810 = TRUE;	/* I try to recognize memoryStatus.UsedSM while reading */
-		gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Can't get SM memory status!\n\n\
-Setting max SIM entries to 100!\n"));
-		memoryStatus.MaxSM = memoryStatus.FreeSM = 100;
-		memoryStatus.UsedSM = 0;
-		gtk_widget_show(errorDialog.dialog);
-	} else {
+	has_memory_stats = ms->status == GN_ERR_NONE;
+	if (ms->status == GN_ERR_NONE || ms->status == GN_ERR_NOTSUPPORTED) {
 		memoryStatus.MaxSM = ms->memoryStatus.used + ms->memoryStatus.free;
 		memoryStatus.UsedSM = ms->memoryStatus.used;
 		memoryStatus.FreeSM = ms->memoryStatus.free;
+	} else {
+		/* guess that there are 100 entries and sort out UsedSM later */
+		memoryStatus.MaxSM = memoryStatus.FreeSM = 100;
+		memoryStatus.UsedSM = 0;
 	}
 	g_free(ms);
 
@@ -2507,6 +2499,19 @@ Setting max SIM entries to 100!\n"));
 			gtk_widget_hide(progressDialog.dialog);
 			return;
 		}
+
+		if (!has_memory_stats) {
+			memoryStatus.FreeME = memoryStatus.UsedME = 0;
+			for (i = 0; i < memoryStatus.MaxME; i++) {
+				pbEntry = g_ptr_array_index(contactsMemory, i);
+
+				if (pbEntry->status == E_Empty)
+					memoryStatus.FreeME++;
+				else
+					memoryStatus.UsedME++;
+			}
+			RefreshStatusInfo();
+		}
 	}
 
 	mla->min = 1;
@@ -2528,6 +2533,19 @@ Setting max SIM entries to 100!\n"));
 		g_free(mla);
 		gtk_widget_hide(progressDialog.dialog);
 		return;
+	}
+
+	if (!has_memory_stats) {
+		memoryStatus.FreeSM = memoryStatus.UsedSM = 0;
+		for (i = memoryStatus.MaxME; i < memoryStatus.MaxME+memoryStatus.MaxSM; i++) {
+			pbEntry = g_ptr_array_index(contactsMemory, i);
+
+			if (pbEntry->status == E_Empty)
+				memoryStatus.FreeSM++;
+			else
+				memoryStatus.UsedSM++;
+		}
+		RefreshStatusInfo();
 	}
 
 	g_free(mla);
@@ -2815,13 +2833,13 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (ms->status != GN_ERR_NONE)
-		/* Phone don't support ME (5110) */
-		memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME = 0;
-	else {
+	if (ms->status == GN_ERR_NONE || ms->status == GN_ERR_NOTSUPPORTED) {
 		memoryStatus.MaxME = ms->memoryStatus.used + ms->memoryStatus.free;
 		memoryStatus.UsedME = 0;
 		memoryStatus.FreeME = memoryStatus.MaxME;
+	} else {
+		/* Phone don't support ME (5110) */
+		memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME = 0;
 	}
 
 	ms->memoryStatus.memory_type = GN_MT_SM;
@@ -2833,16 +2851,14 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	pthread_cond_wait(&memoryCond, &memoryMutex);
 	pthread_mutex_unlock(&memoryMutex);
 
-	if (ms->status != GN_ERR_NONE) {
-		gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Can't get SM memory status!\n\n\
-Setting max SIM entries set to 100!\n"));
-		memoryStatus.MaxSM = memoryStatus.FreeSM = 100;
-		memoryStatus.UsedSM = 0;
-		gtk_widget_show(errorDialog.dialog);
-	} else {
+	if (ms->status == GN_ERR_NONE || ms->status == GN_ERR_NOTSUPPORTED) {
 		memoryStatus.MaxSM = ms->memoryStatus.used + ms->memoryStatus.free;
 		memoryStatus.UsedSM = 0;
 		memoryStatus.FreeSM = memoryStatus.MaxSM;
+	} else {
+		/* guess that there are 100 entries */
+		memoryStatus.MaxSM = memoryStatus.FreeSM = 100;
+		memoryStatus.UsedSM = 0;
 	}
 	g_free(ms);
 

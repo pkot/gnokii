@@ -56,6 +56,8 @@
                                           (Reiner Steib, Pawel Kot)
     o use gn_file_phonebook_raw() instead of ParseLine() (finally!)
                                                         (Pawel Kot)
+    o add proper checking of GetMemoryStatus return code
+                                                      (Ron Yorston)
  * build system updates
     o reflecting smsd libtoolization in packages   (BORBELY Zoltan)
     o configure enables debugging support          (BORBELY Zoltan)
