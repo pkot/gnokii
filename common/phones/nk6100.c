@@ -927,6 +927,16 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			if (bmp->size > sizeof(bmp->bitmap))
 				return GN_ERR_UNHANDLEDFRAME;
 			memcpy(bmp->bitmap, pos, bmp->size);
+			if (bmp->text[0] == '\0') {
+				switch (bmp->number) {
+				case 0: strcpy(bmp->text, _("Family")); break;
+				case 1: strcpy(bmp->text, _("VIP")); break;
+				case 2: strcpy(bmp->text, _("Friends")); break;
+				case 3: strcpy(bmp->text, _("Colleagues")); break;
+				case 4: strcpy(bmp->text, _("Other")); break;
+				default: break;
+				}
+			}
 		}
 		break;
 	case 0x12:

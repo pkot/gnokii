@@ -1869,8 +1869,12 @@ static int getlogo(int argc, char *argv[])
 				}
 				break;
 			case GN_BMP_CallerLogo:
-				if (!bitmap.width) goto empty_bitmap;
-				fprintf(stdout, _("Caller logo got successfully\n"));
+				if (!bitmap.width)
+					fprintf(stderr, _("Your phone doesn't have logo uploaded !\n"));
+				else
+					fprintf(stdout, _("Caller logo got successfully\n"));
+				fprintf(stdout, _("Caller group name: %s, ringing tone: %s (%d)\n"),
+					bitmap.text, get_ringtone_name(bitmap.ringtone), bitmap.ringtone);
 				if (argc == 4) {
 					strncpy(bitmap.netcode, argv[3], sizeof(bitmap.netcode) - 1);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {

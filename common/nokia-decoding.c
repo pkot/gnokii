@@ -51,8 +51,8 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_LogoSwitch &&
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_Group &&
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_Pointer) {
-			subentry = &data->phonebook_entry->subentries[subblock_count];
-			if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
+			if (data->phonebook_entry)
+				subentry = &data->phonebook_entry->subentries[subblock_count];
 		}
  
 
@@ -93,9 +93,11 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 				char_unicode_decode(data->bitmap->text, (blockstart + 6), blockstart[5]);
 				dprintf("   Bitmap Name: %s\n", data->bitmap->text);
 			}
-			char_unicode_decode(data->phonebook_entry->name, (blockstart + 6), blockstart[5]);
-			data->phonebook_entry->empty = false;
-			dprintf("   Name: %s\n", data->phonebook_entry->name);
+			if (data->phonebook_entry) {
+				char_unicode_decode(data->phonebook_entry->name, (blockstart + 6), blockstart[5]);
+				data->phonebook_entry->empty = false;
+				dprintf("   Name: %s\n", data->phonebook_entry->name);
+			}
 			break;
 		case GN_PHONEBOOK_ENTRY_Email:
 		case GN_PHONEBOOK_ENTRY_URL:
@@ -123,7 +125,11 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			break;
 		case GN_PHONEBOOK_ENTRY_Ringtone:  /* Ringtone */
 			if (data->bitmap) {
-				data->bitmap->ringtone = blockstart[5];
+				if (blockstart[5])
+					/* doesn't work on 6310 */
+					data->bitmap->ringtone = blockstart[5];
+				else
+					data->bitmap->ringtone = 256 * blockstart[6] + blockstart[7];
 				dprintf("   Ringtone no. %d\n", data->bitmap->ringtone);
 			}
 			break;
@@ -168,6 +174,16 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			break;
 		}
 		blockstart += blockstart[3];
+	}
+	if (data->bitmap && data->bitmap->text[0] == '\0') {
+		switch (data->bitmap->number) {
+		case 0: strcpy(data->bitmap->text, _("Family")); break;
+		case 1: strcpy(data->bitmap->text, _("VIP")); break;
+		case 2: strcpy(data->bitmap->text, _("Friends")); break;
+		case 3: strcpy(data->bitmap->text, _("Colleagues")); break;
+		case 4: strcpy(data->bitmap->text, _("Other")); break;
+		default: break;
+		}
 	}
 	return GN_ERR_NONE;
 }

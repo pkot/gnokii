@@ -65,10 +65,10 @@ typedef struct {
 	char netcode[7];         /* Network operator code */
 	char text[256];          /* Text used for welcome-note or callergroup name */
 	char dealertext[256];    /* Text used for dealer welcome-note */
-	int dealerset;          /* Is dealer welcome-note set now ? */
+	int dealerset;           /* Is dealer welcome-note set now ? */
 	unsigned char bitmap[GN_BMP_MAX_SIZE]; /* Actual Bitmap */
 	char number;             /* Caller group number */
-	char ringtone;           /* Ringtone no sent with caller group */
+	int ringtone;            /* Ringtone no sent with caller group */
 } gn_bmp;
 
 API gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info);

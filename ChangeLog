@@ -1,7 +1,8 @@
 0.5.9 (not released yet)
 =====
- * mainainance updates
+ * maintainance updates
     o supress compilation warnings                      (Pawel Kot)
+    o caller group name and ringtone will be shown (BORBELY Zoltan)
  * smsd updates
     o update README with some module clarification      (Pawel Kot)
 
