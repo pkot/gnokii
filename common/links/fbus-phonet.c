@@ -17,8 +17,11 @@
   The various routines are called PHONET_(whatever).
 
   $Log$
-  Revision 1.6  2001-06-20 21:27:36  pkot
-  IrDA patch (Martin Jancar)
+  Revision 1.7  2001-06-27 23:52:49  pkot
+  7110/6210 updates (Marian Jancar)
+
+  Revision 1.6  2001/06/20 21:27:36  pkot
+  IrDA patch (Marian Jancar)
 
   Revision 1.5  2001/05/07 16:24:03  pkot
   DLR-3P temporary fix. How should I do it better?

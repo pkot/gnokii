@@ -13,7 +13,10 @@
   Header file for the statemachine.
 
   $Log$
-  Revision 1.1  2001-03-21 23:36:07  chris
+  Revision 1.2  2001-06-27 23:52:52  pkot
+  7110/6210 updates (Marian Jancar)
+
+  Revision 1.1  2001/03/21 23:36:07  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -36,10 +39,3 @@ GSM_Error SM_Block(GSM_Statemachine *state, GSM_Data *data, int waitfor);
 GSM_Error SM_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sm);
 
 #endif	/* __gsm_statemachine_h */
-
-
-
-
-
-
-

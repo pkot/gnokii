@@ -24,8 +24,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2001-06-20 21:27:34  pkot
- * IrDA patch (Martin Jancar)
+ * Revision 1.5  2001-06-27 23:52:48  pkot
+ * 7110/6210 updates (Marian Jancar)
+ *
+ * Revision 1.4  2001/06/20 21:27:34  pkot
+ * IrDA patch (Marian Jancar)
  *
  * Revision 1.3  2001/02/21 19:57:04  chris
  * More fiddling with the directory layout

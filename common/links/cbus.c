@@ -15,9 +15,10 @@
 #include <errno.h>
 
 /* Various header file */
-
-#define DEBUG
 #include "config.h"
+#ifndef DEBUG
+#define DEBUG
+#endif
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-ringtones.h"

@@ -144,11 +144,12 @@ typedef enum {
 /* Define datatype for SMS Message Center */
 
 typedef struct {
-  int No;        /* Number of the SMSC in the phone memory. */
-  char Name[GSM_MAX_SMS_CENTER_NAME_LENGTH]; /* Name of the SMSC. */
-  GSM_SMSMessageFormat Format; /* SMS is sent as text/fax/paging/email. */
-  GSM_SMSMessageValidity Validity;           /* Validity of SMS Message. */
-  char Number[GSM_MAX_SMS_CENTER_LENGTH];    /* Number of the SMSC. */
+	int			No;					/* Number of the SMSC in the phone memory. */
+	char			Name[GSM_MAX_SMS_CENTER_NAME_LENGTH];	/* Name of the SMSC. */
+	GSM_SMSMessageFormat	Format;					/* SMS is sent as text/fax/paging/email. */
+	GSM_SMSMessageValidity	Validity;				/* Validity of SMS Message. */
+	char			Number[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the SMSC. */
+	char			Recipient[GSM_MAX_SMS_CENTER_LENGTH];	/* Number of the default recipient. */
 } GSM_MessageCenter;
 
 /* Define datatype for Cell Broadcast message */
@@ -373,12 +374,13 @@ typedef enum {
 /* Calendar note type */
 
 typedef struct {
-  int Location;              /* The number of the note in the phone memory */
-  GSM_CalendarNoteType Type; /* The type of the note */
-  GSM_DateTime Time;         /* The time of the note */
-  GSM_DateTime Alarm;        /* The alarm of the note */
-  char Text[20];             /* The text of the note */
-  char Phone[20];            /* For Call only: the phone number */
+  int Location;			/* The number of the note in the phone memory */
+  GSM_CalendarNoteType Type;	/* The type of the note */
+  GSM_DateTime Time;		/* The time of the note */
+  GSM_DateTime Alarm;		/* The alarm of the note */
+  char Text[20];		/* The text of the note */
+  char Phone[20];		/* For Call only: the phone number */
+  double Recurance;		/* Recurance of the note */
 } GSM_CalendarNote;
 
 /* This structure is provided to allow common information about the particular
@@ -681,6 +683,10 @@ typedef enum {
 	GOP_GetNetworkInfo,
 	GOP_GetSMS,
 	GOP_DeleteSMS,
+	GOP_GetSpeedDial,
+	GOP_GetSMSCenter,
+	GOP_GetDateTime,
+	GOP_GetCalendarNote,
 } GSM_Operation;
 
 /* This structure contains the 'callups' needed by the statemachine */

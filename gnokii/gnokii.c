@@ -18,7 +18,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.136  2001-06-10 23:49:49  pkot
+  Revision 1.137  2001-06-27 23:52:50  pkot
+  7110/6210 updates (Marian Jancar)
+
+  Revision 1.136  2001/06/10 23:49:49  pkot
   Small fixes to hide compilation warnings and allow gnokii.c to compile
 
   Revision 1.135  2001/06/10 11:42:26  machek
@@ -1014,15 +1017,28 @@ int savesms(int argc, char *argv[])
 /* Get SMSC number */
 int getsmsc(char *MessageCenterNumber)
 {
-	GSM_MessageCenter MessageCenter;
-
+	GSM_MessageCenter	MessageCenter;
+	GSM_Data		data;
+	GSM_Error		error;
+	
+	memset(&MessageCenter, 0, sizeof(MessageCenter));
 	MessageCenter.No=atoi(MessageCenterNumber);
-
-	if (GSM->GetSMSCenter(&MessageCenter) == GE_NONE) {
-
+	
+	if (GSM && GSM->GetSMSCenter && GSM->Terminate) {
+		error = GSM->GetSMSCenter(&MessageCenter);
+		GSM->Terminate();
+	} else {
+		GSM_DataClear(&data);
+		data.MessageCenter = &MessageCenter;
+		error = SM_Functions(GOP_GetSMSCenter, &data, &State);
+	}
+	
+	switch (error) {
+	case GE_NONE:
 		fprintf(stdout, _("%d. SMS center (%s) number is %s\n"), MessageCenter.No, MessageCenter.Name, MessageCenter.Number);
+		fprintf(stdout, _("Default recipient number is %s\n"), MessageCenter.Recipient);
 		fprintf(stdout, _("Messages sent as "));
-
+		
 		switch (MessageCenter.Format) {
 		case GSMF_Text:
 			fprintf(stdout, _("Text"));
@@ -1047,10 +1063,10 @@ int getsmsc(char *MessageCenterNumber)
 			fprintf(stdout, _("Unknown"));
 			break;
 		}
-
+		
 		printf("\n");
 		fprintf(stdout, _("Message validity is "));
-
+		
 		switch (MessageCenter.Validity) {
 		case GSMV_1_Hour:
 			fprintf(stdout, _("1 hour"));
@@ -1074,15 +1090,19 @@ int getsmsc(char *MessageCenterNumber)
 			fprintf(stdout, _("Unknown"));
 			break;
 		}
-
+		
 		fprintf(stdout, "\n");
-
-	} else
+		
+		break;
+	case GE_NOTIMPLEMENTED:
+		fprintf(stderr, _("Function not implemented in %s model!\n"), model);
+		break;
+	default:
 		fprintf(stdout, _("SMS center can not be found :-(\n"));
-
-	GSM->Terminate();
-
-	return 0;
+		break;
+	}
+	
+	return error;
 }
 
 /* Get SMS messages. */
@@ -1263,7 +1283,7 @@ int getsms(int argc, char *argv[])
 			break;
 		case GE_NOTIMPLEMENTED:
 			fprintf(stderr, _("Function not implemented in %s model!\n"), model);
-			GSM->Terminate();
+			if (GSM && GSM->Terminate) GSM->Terminate();
 			return -1;	
 		case GE_INVALIDSMSLOCATION:
 			fprintf(stderr, _("Invalid location: %s %d\n"), memory_type_string, count);
@@ -1276,9 +1296,9 @@ int getsms(int argc, char *argv[])
 			break;
 		}
 	}
-
-	GSM->Terminate();
-
+	
+	if (GSM && GSM->Terminate) GSM->Terminate();
+	
 	return 0;
 }
 
@@ -1873,19 +1893,21 @@ int viewlogo(char *filename)
 /* Calendar notes receiving. */
 int getcalendarnote(int argc, char *argv[])
 {
-	GSM_CalendarNote CalendarNote;
-	int i;
-	bool vCal = false;
-
+	GSM_CalendarNote	CalendarNote;
+	GSM_Data		data;
+	GSM_Error		error;
+	int			i;
+	bool			vCal = false;
+	
 	struct option options[] = {
 		{ "vCard",    optional_argument, NULL, '1'},
 		{ NULL,      0,                 NULL, 0}
 	};
-
+	
 	optarg = NULL;
 	optind = 0;
 	CalendarNote.Location = atoi(argv[0]);
-
+	
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {       
 		case 'v':
@@ -1895,9 +1917,19 @@ int getcalendarnote(int argc, char *argv[])
 			usage(); // Would be better to have an calendar_usage() here.
 		}
 	}
-
-	if (GSM->GetCalendarNote(&CalendarNote) == GE_NONE) {
-
+	
+	if (GSM && GSM->GetCalendarNote && GSM->Terminate) {
+		error = GSM->GetCalendarNote(&CalendarNote);
+		GSM->Terminate();
+	} else {
+		GSM_DataClear(&data);
+		data.CalendarNote = &CalendarNote;
+		
+		error = SM_Functions(GOP_GetCalendarNote, &data, &State);
+	}
+	
+	switch (error) {
+	case GE_NONE:
 		if (vCal) {
 			fprintf(stdout, "BEGIN:VCALENDAR\n");
 			fprintf(stdout, "VERSION:1.0\n");
@@ -1961,7 +1993,7 @@ int getcalendarnote(int argc, char *argv[])
 				CalendarNote.Time.Minute,
 				CalendarNote.Time.Second);
 
-			if (CalendarNote.Alarm.Year!=0) {
+			if (CalendarNote.Alarm.AlarmEnabled == 1) {
 				fprintf(stdout, _("   Alarm date: %d-%02d-%02d\n"), CalendarNote.Alarm.Year,
 					CalendarNote.Alarm.Month,
 					CalendarNote.Alarm.Day);
@@ -1976,16 +2008,16 @@ int getcalendarnote(int argc, char *argv[])
 			if (CalendarNote.Type == GCN_CALL)
 				fprintf(stdout, _("   Phone: %s\n"), CalendarNote.Phone);
 		}
-	} else {
+		break;
+	case GE_NOTIMPLEMENTED:
+		fprintf(stderr, _("Function not implemented.\n"));
+		break;
+	default:
 		fprintf(stderr, _("The calendar note can not be read\n"));
-
-		GSM->Terminate();
-		return -1;
+		break;
 	}
-
-	GSM->Terminate();
-
-	return 0;
+	
+	return error;
 }
 
 /* Writing calendar notes. */
@@ -2077,17 +2109,34 @@ int setdatetime(int argc, char *argv[])
 
 /* In this mode we receive the date and time from mobile phone. */
 int getdatetime(void) {
-
-	GSM_DateTime date_time;
-
-	if (GSM->GetDateTime(&date_time)==GE_NONE) {
+	GSM_Data	data;
+	GSM_DateTime	date_time;
+	GSM_Error	error;
+	
+	if (GSM && GSM->GetDateTime && GSM->Terminate) {
+		error = GSM->GetDateTime(&date_time);
+		GSM->Terminate();
+	} else {
+		GSM_DataClear(&data);
+		data.DateTime = &date_time;
+		
+		error = SM_Functions(GOP_GetDateTime, &data, &State);
+	}
+	
+	switch (error) {
+	case GE_NONE:
 		fprintf(stdout, _("Date: %4d/%02d/%02d\n"), date_time.Year, date_time.Month, date_time.Day);
 		fprintf(stdout, _("Time: %02d:%02d:%02d\n"), date_time.Hour, date_time.Minute, date_time.Second);
+		break;
+	case GE_NOTIMPLEMENTED:
+		fprintf(stdout, _("Function not implemented in %s !\n"), model);
+		break;
+	default:
+		fprintf(stdout, _("Internal error\n"));
+		break;
 	}
-
-	GSM->Terminate();
-
-	return 0;
+	
+	return error;
 }
 
 /* Setting the alarm. */
@@ -2108,16 +2157,34 @@ int setalarm(char *argv[])
 /* Getting the alarm. */
 int getalarm(void)
 {
-	GSM_DateTime date_time;
-
-	if (GSM->GetAlarm(0, &date_time)==GE_NONE) {
+	GSM_Error	error;
+	GSM_Data	data;
+	GSM_DateTime	date_time;
+	
+	if (GSM && GSM->GetAlarm && GSM->Terminate) {
+		error = GSM->GetAlarm(0, &date_time);
+		GSM->Terminate();
+	} else {
+		GSM_DataClear(&data);
+		data.DateTime = &date_time;
+		
+		error = SM_Functions(GOP_GetAlarm, &data, &State);
+	}
+	
+	switch (error) {
+	case GE_NONE:
 		fprintf(stdout, _("Alarm: %s\n"), (date_time.AlarmEnabled==0)?"off":"on");
 		fprintf(stdout, _("Time: %02d:%02d\n"), date_time.Hour, date_time.Minute);
+		break;
+	case GE_NOTIMPLEMENTED:
+		fprintf(stdout, _("Function not implemented in %s !\n"), model);
+		break;
+	default:
+		fprintf(stdout, _("Internal error\n"));
+		break;
 	}
-
-	GSM->Terminate();
-
-	return 0;
+	
+	return error;
 }
 
 /* In monitor mode we don't do much, we just initialise the fbus code.
@@ -2644,12 +2711,35 @@ int writephonebook(int argc, char *args[])
 /* Getting speed dials. */
 int getspeeddial(char *Number)
 {
-	GSM_SpeedDial entry;
-	entry.Number = atoi(Number);
-	if (GSM->GetSpeedDial(&entry) == GE_NONE)
-		fprintf(stdout, _("SpeedDial nr. %d: %d:%d\n"), entry.Number, entry.MemoryType, entry.Location);
-	GSM->Terminate();
-	return 0;
+	GSM_SpeedDial	SpeedDial;
+	GSM_Data	data;
+	GSM_Error	error;
+	
+	SpeedDial.Number = atoi(Number);
+	
+	if (GSM && GSM->GetSpeedDial && GSM->Terminate) {
+		error = GSM->GetSpeedDial(&SpeedDial);
+		GSM->Terminate();
+	} else {
+		GSM_DataClear(&data);
+		data.SpeedDial = &SpeedDial;
+		
+		error = SM_Functions(GOP_GetSpeedDial, &data, &State);
+	}
+	
+	switch (error) {
+	case GE_NONE:
+		fprintf(stdout, _("SpeedDial nr. %d: %d:%d\n"), SpeedDial.Number, SpeedDial.MemoryType, SpeedDial.Location);
+		break;
+	case GE_NOTIMPLEMENTED:
+		fprintf(stdout, _("Function not implemented in %s !\n"), model);
+		break;
+	default:
+		fprintf(stdout, _("Internal error\n"));
+		break;
+	}
+	
+	return error;
 }
 
 /* Setting speed dials. */
