@@ -45,6 +45,7 @@
     o --getphonebook end stops after every entry read
                                      (Marco Canini, BORBELY Zoltan)
     o search for an empty phonebook entry fixed    (BORBELY Zoltan)
+    o correctly exit when the device is locked          (Pawel Kot)
  * libgnokii updates
     o fbus echo cancellation and statemachine fix  (BORBELY Zoltan)
     o todo vcalendar import/export functions was mixed
@@ -62,6 +63,7 @@
     o config saving and restoring fixed            (BORBELY Zoltan)
     o enlarge room for text in 'Overwrite file?' dialogs to 255
       characters                                        (Pawel Kot)
+    o correctly exit when the device is locked          (Pawel Kot)
  * 6100 driver updates
     o calendar entry types was mixed    (Pawel Kot, BORBELY Zoltan)
  * 6510 driver updates
@@ -91,10 +93,14 @@
       add note about USB adapters and fix some typos    (Pawel Kot)
  * gnokiid updates
     o caller id support added to AT emulator        (Daniele Forsi)
+    o don't segfault when the device is locked          (Pawel Kot)
  * 7110 driver updates
     o empty phonebook was reported as an error     (BORBELY Zoltan)
  * 3110 driver updates
     o model number 2501 added                      (BORBELY Zoltan)
+ * smsd updates
+    o support for drivers without GN_OP_GetSMSStatus (Jan Derfinak)
+    o correctly exit when the device is locked          (Pawel Kot)
 
 0.6.3
 =====

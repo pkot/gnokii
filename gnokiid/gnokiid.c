@@ -123,12 +123,6 @@ int main(int argc, char *argv[])
 		DebugMode = false;
 	}
 
-	/* register cleanup function */
-	if (!atexit_registered) {
-		atexit_registered = true;
-		atexit(busterminate);
-	}
-
 	gn_elog_handler = NULL;
 
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
@@ -139,6 +133,12 @@ int main(int argc, char *argv[])
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			exit(1);
 		}
+	}
+
+	/* register cleanup function */
+	if (!atexit_registered) {
+		atexit_registered = true;
+		atexit(busterminate);
 	}
 
 	while (1) {

@@ -128,14 +128,6 @@ static gn_error fbusinit (const char * const iname)
   char *aux;
   static bool atexit_registered = false;
   
-  /* register cleanup function */
-  if (!atexit_registered)
-  {
-    atexit_registered = true;
-    atexit (busterminate);
-  }
-  /* signal(SIGINT, bussignal); */
-
   if (!gn_cfg_phone_load (iname, &sm))
   {
     g_print (_("Cannot load phone %s!\nDo you have proper section in gnokiirc?\n"), iname);
@@ -153,6 +145,14 @@ static gn_error fbusinit (const char * const iname)
       exit(1);
     }
   }
+
+  /* register cleanup function */
+  if (!atexit_registered)
+  {
+    atexit_registered = true;
+    atexit (busterminate);
+  }
+  /* signal(SIGINT, bussignal); */
 
   /* Initialise the code for the GSM interface. */     
 

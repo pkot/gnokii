@@ -407,13 +407,6 @@ static void businit(void)
 
 	gn_data_clear(&data);
 
-	/* register cleanup function */
-	if (!atexit_registered) {
-		atexit_registered = true;
-		atexit(busterminate);
-	}
-	/* signal(SIGINT, bussignal); */
-
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
@@ -423,6 +416,13 @@ static void businit(void)
 			exit(1);
 		}
 	}
+
+	/* register cleanup function */
+	if (!atexit_registered) {
+		atexit_registered = true;
+		atexit(busterminate);
+	}
+	/* signal(SIGINT, bussignal); */
 
 	/* Initialise the code for the GSM interface. */
 	error = gn_gsm_initialise(&state);

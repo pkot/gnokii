@@ -215,12 +215,6 @@ static gn_error fbusinit(bool enable_monitoring)
 	static bool atexit_registered = false;
 	char *aux;
 
-	/* register cleanup function */
-	if (!atexit_registered) {
-		atexit_registered = true;
-		atexit(busterminate);
-	}
-
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
 	/* Defaults to 'no' */
 	if (aux && !strcmp(aux, "yes")) {
@@ -229,6 +223,12 @@ static gn_error fbusinit(bool enable_monitoring)
 			fprintf(stderr, _("Lock file error. Exiting\n"));
 			MainExit();
 		}
+	}
+
+	/* register cleanup function */
+	if (!atexit_registered) {
+		atexit_registered = true;
+		atexit(busterminate);
 	}
 
 	/* Initialise the code for the GSM interface. */

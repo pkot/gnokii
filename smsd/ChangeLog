@@ -1,5 +1,10 @@
+* Sun Oct 17 2004 Pawel Kot <pkot@bezsensu.pl>
+- Correctly exit when the device is locked.
+
+
 * Mon Oct 11 2004 Jan Derfinak <ja@mail.upjs.sk>
 - Added support for drivers without GN_OP_GetSMSStatus.
+
 
 * Tue Aug  3 2004 Jan Derfinak <ja@mail.upjs.sk>
 - Changed LDLIBS for FreeBSD. Idea from <robert@dk-hostmaster.dk>.
