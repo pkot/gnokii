@@ -307,7 +307,8 @@ typedef enum {
 	SMS_MultiData	 = 0x05,
 	SMS_NokiaText 	 = 0x06,
 	SMS_AnimationData= 0x07,
-	SMS_OtherData    = 0x08
+	SMS_Concat	 = 0x08,
+	SMS_OtherData    = 0x09
 } SMS_DataType;
 
 /*** FOLDER INFO ***/
@@ -341,6 +342,10 @@ typedef struct {
 } GSM_Multi;
 
 typedef struct {
+	int this, total, serial;
+} GSM_Concat;
+
+typedef struct {
 	SMS_DataType Type;
 	unsigned int Length;
 	union {
@@ -349,6 +354,7 @@ typedef struct {
 		GSM_Bitmap Bitmap;
 		GSM_Ringtone Ringtone;
 		GSM_Bitmap Animation[4];
+		GSM_Concat Concat;
 	} u;
 } SMS_UserData;
 

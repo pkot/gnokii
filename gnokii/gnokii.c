@@ -397,7 +397,8 @@ static void sendsms_usage()
 {
 	fprintf(stderr, _(" usage: gnokii --sendsms destination\n"
 	                  "               [--smsc message_center_number | --smscno message_center_index]\n"
-	                  "               [-r] [-C n] [-v n] [--long n]\n"
+	                  "               [-r] [-C n] [-v n] [--long n] [--animation file;file;file;file]\n"
+	                  "               [--concat this;total;serial]\n"
 			  " Give the text of the message to the standard input.\n"
 			  "   destination - phone number where to send SMS\n"
 			  "   --smsc      - phone number of the SMSC\n"
@@ -474,6 +475,7 @@ static int sendsms(int argc, char *argv[])
 		{ "8bit",    0,                 NULL, '8'},
 		{ "imelody", 0,                 NULL, 'i'},
 		{ "animation",required_argument,NULL, 'a'},
+		{ "concat",  required_argument, NULL, 'c'},
 		{ NULL,      0,                 NULL, 0}
 	};
 
@@ -490,8 +492,6 @@ static int sendsms(int argc, char *argv[])
 	optarg = NULL;
 	optind = 0;
 
-	sms.UserData[0].Type = SMS_PlainText;
-	sms.UserData[1].Type = SMS_NoData;
 	while ((i = getopt_long(argc, argv, "r8cC:v:i", options, NULL)) != -1) {
 		switch (i) {       /* -8 is for 8-bit data, -c for compression. both are not yet implemented. */
 		case '1': /* SMSC number */
@@ -555,12 +555,22 @@ static int sendsms(int argc, char *argv[])
 		case 'v':
 			sms.Validity = atoi(optarg);
 			break;
+
 		case '8':
 			sms.DCS.u.General.Alphabet = SMS_8bit;
 			input_len = GSM_MAX_8BIT_SMS_LENGTH;
 			break;
+
 		case 'i':
 			sms.UserData[0].Type = SMS_iMelodyText;
+			sms.UserData[1].Type = SMS_NoData;
+			error = readtext(&sms.UserData[0], input_len);
+			if (error != GE_NONE) return -1;
+			if (sms.UserData[0].Length < 1) {
+				fprintf(stderr, _("Empty message. Quitting.\n"));
+				return -1;
+			}
+			curpos = -1;
 			break;
 		default:
 			sendsms_usage();
@@ -574,6 +584,8 @@ static int sendsms(int argc, char *argv[])
 			fprintf(stderr, _("Empty message. Quitting.\n"));
 			return -1;
 		}
+		sms.UserData[curpos++].Type = SMS_PlainText;
+		sms.UserData[curpos].Type = SMS_NoData;
 	}
 
 	data.SMS = &sms;

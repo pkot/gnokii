@@ -1185,6 +1185,13 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms)
 			rawsms->DCS = 0xf5;
 			break;
 
+		case SMS_Concat:
+			printf("Encoding concat header\n");
+			al = SMS_8bit;
+			rawsms->DCS = 0xf5;
+			EncodeConcatHeader(rawsms, sms->UserData[i].u.Concat.this, sms->UserData[i].u.Concat.total);
+			break;
+
 		case SMS_NoData:
 			return GE_NONE;
 
