@@ -68,6 +68,9 @@
       fbus sources, passing state to everywhere     (BORBELY Zoltan)
     o link driver initialisation cleanup            (BORBELY Zoltan)
     o fix type mismatch from fbus_initialise             (Pawel Kot)
+ * device driver updates:
+    o static and global variables eliminated from device.c,
+      driver specific data moved into state         (BORBELY Zoltan)
  * misc cleanups
     o format the output when config file is incorrect    (Pawel Kot)
 

@@ -69,6 +69,7 @@ typedef enum {
 struct gn_statemachine {
 	gn_state current_state;
 	gn_config config;
+	gn_device device;
 	gn_link link;
 	gn_driver driver;
 	

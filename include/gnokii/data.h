@@ -120,6 +120,12 @@ typedef struct {
 	char disconnect_script[256];			/* Script to run when device connection closed */
 } gn_config;
 
+typedef struct {
+	int fd;
+	gn_connection_type type;
+	void *device_instance;
+} gn_device;
+
 typedef enum {
 	GN_OP_Init,
 	GN_OP_Terminate,
