@@ -805,7 +805,10 @@ static gint A_DeleteSMSMessage(gpointer data)
 	if (sms) {
 		GSM_DataClear(&tmp_gdat);
 		tmp_gdat.SMS = sms;
-		error = DeleteSMS(&tmp_gdat, &statemachine);
+		if (phoneMonitor.supported & PM_FOLDERS)
+			error = DeleteSMSnoValidate(&tmp_gdat, &statemachine);
+		else
+			error = DeleteSMS(&tmp_gdat, &statemachine);
 		g_free(sms);
 	}
 	return (error);
