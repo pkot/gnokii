@@ -11,7 +11,7 @@ Thank you to, in no particular order...
 *  Serge Odinokov for 6110 series authentication protocol and
    example Delphi RLP code. Many thanks...
 
-*  Nick Lamb for operator logos, CLI uploading and AT*C command support
+*  Nick Lamb for operator logos, CLI uploading and AT*C command support.
 
 *  Francois Dessart, Brendan O'Dea, Tony Lindstrom, Steffan Henke
    and Cobus Van Eeden for dumps (and in some cases interpretation!)
@@ -27,7 +27,7 @@ Thank you to, in no particular order...
    to provide multiple model support and config file code.
 
 *  Paul Mackerras and Andrew Tridgell for discussions about pseudo
-   ttys, setuid programs and such.  Tridge kindly reviewed the 
+   ttys, setuid programs and such.  Tridge kindly reviewed the
    mgnokiidev.c code.
 
 *  Richard Kalton for his excellent page about Nokia 6110 protocol.
@@ -58,14 +58,14 @@ Thank you to, in no particular order...
    
 *  Marcel Holtman for RLP FCS code.
 
-*  Chris Kemp for logo stuff.
+*  Chris Kemp for logo stuff and big part of RLP code.
   
 *  Andrew Kozin for the model 640 support (NMT 450 network).
  
-*  Karel Zak for his enthusiasm (and patches) for the autoconf stuff.  
+*  Karel Zak for his enthusiasm (and patches) for the autoconf stuff.
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
-   work on this.  Rachael for new parent induced insomnia...  
+   work on this.  Rachael for new parent induced insomnia...
 
 *  Last not least: Mirka for allowing Pavel to work on gnokii
    and for _great_ gnokii operator logos...

@@ -16,7 +16,8 @@ include ${TOPDIR}/Makefile.global
 #
 INSTALL_DOCS = 	README \
 		README-3810 \
-		README-6110 
+		README-6110 \
+		CREDITS
 
 SAMPLE_DIR = sample
 

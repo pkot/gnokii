@@ -50,8 +50,6 @@ please let me know.
 
 - X interface :-)
 
-- second part of SMS notification is not handled now...
-
 - generic timeout checking routine which gets these params: timeout,
   CurrentErrorSomething... it should wait at most timeout/10 seconds but if
   the variable CurrentErrorSomething changes state from GE_BUSY to something
