@@ -480,7 +480,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 			state->driver.phone.operator_logo_height = 14;
 			state->driver.phone.startup_logo_width = 84;
 			state->driver.phone.startup_logo_height = 48;
-			state->driver.phone.operator_logo_width = 4;
+			state->driver.phone.max_battery_level = 4;
 		}
 	}
 	if (!connected) return err;

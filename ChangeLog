@@ -43,6 +43,8 @@
     o calendar entry types was mixed    (Pawel Kot, BORBELY Zoltan)
  * 6510 driver updates
     o add Nokia 6800 and family support            (Chris de Vidal)
+    o fix incorrect set of operator_logo_width in Nokia 8310
+                                                  (Giorgio Rusconi)
 
 0.6.3
 =====
