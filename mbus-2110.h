@@ -90,6 +90,7 @@ GSM_Error	MB21_SetBitmap(GSM_Bitmap *Bitmap);
 GSM_Error	MB21_Reset(unsigned char type);
 GSM_Error	MB21_GetProfile(GSM_Profile *Profile);
 GSM_Error	MB21_SetProfile(GSM_Profile *Profile);
+bool  		MB21_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __mbus_2110_c isn't 

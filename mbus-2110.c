@@ -80,7 +80,8 @@ GSM_Functions			MB21_Functions = {
 		MB21_SetBitmap,
 		MB21_Reset,
 		MB21_GetProfile,
-		MB21_SetProfile
+		MB21_SetProfile,
+		MB21_SendRLPFrame
 };
 
 	/* FIXME - these are guesses only... */
@@ -351,6 +352,11 @@ GSM_Error	MB21_GetProfile(GSM_Profile *Profile)
 GSM_Error	MB21_SetProfile(GSM_Profile *Profile)
 {
     return (GE_NOTIMPLEMENTED);
+}
+
+bool		MB21_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
+{
+    return (false);
 }
 
 	/* Everything from here down is internal to 2110 code. */

@@ -14,8 +14,8 @@
 
   Actual implementation of RLP protocol.
 
-  Last modification: Fri Dec  3 00:15:55 CET 1999
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Sat Dec  4 03:15:55 AEDT 1999
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -24,6 +24,7 @@
 
 #include "rlp-common.h"
 #include "rlp-crc24.h"
+#include "gsm-common.h" /* For GSM error and RLP send function. */
 #include "misc.h" /* For u8, u32 etc. */
 
 /* Our state machine which handles all of nine possible states of RLP
@@ -39,6 +40,8 @@ RLP_State      CurrentState=RLP_S0; /* We start at ADM and Detached */
 /* Next state of RLP state machine. */
 RLP_State      NextState;
 
+/* Pointer to Send function that sends frame to phone. */
+bool      (*RLPSendFunction)(RLP_F96Frame *frame, bool out_dtx);
 
 bool RLP_UserEvent(x) {
 
@@ -114,13 +117,22 @@ void X(RLP_F96Frame *frame) {
    
 }
 
+/* Function to initialise RLP code.  Main purpose for now is
+   to set the address of the RLP send function in the API code. */
+void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx))
+{
+  RLPSendFunction = rlp_send_function;
+
+}
+
+
 /* This function is used for sending RLP frames to the phone. */
 
 void RLP_SendF96Frame(RLP_FrameTypes FrameType,
                       bool OutCR, bool OutPF,
                       u8 OutNR, u8 OutNS,
                       u8 *OutData,
-		      u8 OutDTX)
+		              u8 OutDTX)
 {
 
   RLP_F96Frame frame;
@@ -370,6 +382,22 @@ void RLP_SendF96Frame(RLP_FrameTypes FrameType,
      function? */
 
   FB61_TX_SendFrame(32, 0xf0, req);
+ 
+    /* FIX ME This code is untested hence the return function to skip it */ 
+  return;
+
+  if (RLPSendFunction == NULL) {
+    return;
+  }
+
+  if (OutDTX) {
+  	RLPSendFunction(&frame, true);
+  }
+  else {
+  	RLPSendFunction(&frame, false);
+  }
+		  	
+  
 }
 
 /* Check_input_PDU in Serge's code. */

@@ -56,6 +56,8 @@ GSM_Error   FB38_GetRFLevel(GSM_RFUnits *units, float *level);
 
 GSM_Error   FB38_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
 
+bool		FB38_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
+
     /* These aren't presently implemented. */
 GSM_Error   FB38_GetPowerSource(GSM_PowerSource *source);
 GSM_Error   FB38_GetDisplayStatus(int *Status);
@@ -153,6 +155,7 @@ void    FB38_RX_Handle0x4d_IMEIRevisionModelData(void);
 void    FB38_TX_UpdateSequenceNumber(void);
 int     FB38_TX_SendStandardAcknowledge(u8 message_type);
 GSM_Error   FB38_TX_SendDialCommand(u8 call_type, char *Number);
+bool 	FB38_TX_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 
 int     FB38_TX_SendMessage(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
 void    FB38_TX_Send0x25_RequestSMSMemoryLocation(u8 memory_type, u8 location); 

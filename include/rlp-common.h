@@ -14,8 +14,8 @@
 
   Header file for RLP protocol.
 
-  Last modification: Fri Dec  3 00:15:55 CET 1999
-  Modified by Pavel Janík ml. <Pavel.Janik@linux.cz>
+  Last modification: Sat Dec  4 03:15:55 AEDT 1999
+  Modified by Hugh Blemings <hugh@linuxcare.com>
 
 */
 
@@ -139,5 +139,6 @@ typedef enum {
 void RLP_DisplayF96Frame(RLP_F96Frame *frame);
 void RLP_DecodeF96Header(RLP_F96Frame *frame, RLP_F96Header *header);
 void RLP_DisplayXID(u8 *frame);
+void RLP_Initialise(bool (*rlp_send_function)(RLP_F96Frame *frame, bool out_dtx));
 
 #endif	/* __rlp_common_h */

@@ -137,6 +137,7 @@ void      FB61_RX_DisplayMessage(void);
 
 int       FB61_TX_SendMessage(u16 message_length, u8 message_type, u8 *buffer);
 int       FB61_TX_SendAck(u8 message_type, u8 message_seq);
+int       FB61_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer); 
 
 int       FB61_GetMemoryType(GSM_MemoryType memory_type);
 int       SemiOctetPack(char *Number, unsigned char *Output);
@@ -201,6 +202,7 @@ GSM_Error FB61_Reset(unsigned char type);
 
 GSM_Error FB61_GetProfile(GSM_Profile *Profile);
 GSM_Error FB61_SetProfile(GSM_Profile *Profile);
+bool      FB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 
 
 /* States for receive code. */

@@ -85,7 +85,8 @@ GSM_Functions           FB38_Functions = {
         FB38_SetBitmap,
         FB38_Reset,
         FB38_GetProfile,
-        FB38_SetProfile
+        FB38_SetProfile,
+		FB38_SendRLPFrame
 };
 
 GSM_Information         FB38_Information = {
@@ -774,6 +775,10 @@ GSM_Error   FB38_DialData(char *Number)
     return(FB38_TX_SendDialCommand(0x01, Number));
 }
 
+bool		FB38_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
+{
+	return (FB38_TX_SendRLPFrame(frame, out_dtx));
+}
 
     /* Our "Not implemented" functions */
 GSM_Error   FB38_SetSMSCenter(GSM_MessageCenter *MessageCenter)
@@ -1550,6 +1555,19 @@ GSM_Error   FB38_TX_SendDialCommand(u8 call_type, char *Number)
 
     return (GE_NONE);
 }
+
+
+	/* Send RLP frame to phone.  There is some code missing from
+	   here at the moment :) */
+bool 	FB38_TX_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
+{
+
+	return (true);		
+		
+		
+}
+
+
     /* 0x4a messages appear to be a keepalive message and cause the phone
        to send an 0x4a acknowledge and then an 0x4b message which has
        status information in it. */

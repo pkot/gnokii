@@ -2354,6 +2354,10 @@ int foogle(char *argv[])
   /* Initialise the code for the GSM interface. */     
 
   fbusinit(RLP_DisplayF96Frame);
+  
+  /* Initialise RLP code. */
+  
+  RLP_Initialise(GSM->SendRLPFrame);
 
   sleep(5); /* Wait for phone initialisation. */
 

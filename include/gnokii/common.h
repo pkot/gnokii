@@ -514,6 +514,8 @@ typedef struct {
   GSM_Error (*GetProfile) ( GSM_Profile *Profile );
 
   GSM_Error (*SetProfile) ( GSM_Profile *Profile );
+  
+  bool      (*SendRLPFrame) ( RLP_F96Frame *frame, bool out_dtx );
 
 } GSM_Functions;
 
