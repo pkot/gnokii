@@ -29,6 +29,7 @@
     o old style call management API added            (BORBELY Zoltan)
     o NBS upload for operator logo                   (BORBELY Zoltan)
     o phone matching code improved                   (BORBELY Zoltan)
+    o NBS upload for ringtone                        (BORBELY Zoltan)
  * 7110 series updates:
     o use nokia-decoding                               (Markus Plail)
  * bitmap support

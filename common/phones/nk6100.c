@@ -119,7 +119,7 @@ static GSM_Error AnswerCall2(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error CancelCall2(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType type);
 
 #ifdef  SECURITY
 static GSM_Error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
@@ -521,12 +521,8 @@ static GSM_Error Initialise(GSM_Statemachine *state)
 		return err;
 	}
 
-	for (i = 0;; i++) {
-		if (match_phone(DRVINSTANCE(state), i)) {
-			DRVINSTANCE(state)->Capabilities = P6100_capabilities[i].Capabilities;
-			break;
-		}
-	}
+	for (i = 0; !match_phone(DRVINSTANCE(state), i); i++) ;
+	DRVINSTANCE(state)->Capabilities = P6100_capabilities[i].Capabilities;
 
 	if (DRVINSTANCE(state)->PM->flags & PM_AUTHENTICATION) {
 		/* Now test the link and authenticate ourself */
@@ -1707,7 +1703,7 @@ static GSM_Error SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 			return GE_INTERNALERROR;
 		}
 		if (DRVINSTANCE(state)->Capabilities & P6100_CAP_NBS_UPLOAD)
-			return NBSUpload(data, state);
+			return NBSUpload(data, state, SMS_BitmapData);
 		*pos++ = 0x30;	/* Store Op Logo */
 		*pos++ = 0x01;	/* location */
 		*pos++ = ((bmp->netcode[1] & 0x0f) << 4) | (bmp->netcode[0] & 0x0f);
@@ -1916,6 +1912,9 @@ static GSM_Error SetRingtone(GSM_Data *data, GSM_Statemachine *state)
 	int size;
 
 	if (!data || !data->Ringtone) return GE_INTERNALERROR;
+
+	if (DRVINSTANCE(state)->Capabilities & P6100_CAP_NBS_UPLOAD)
+		return NBSUpload(data, state, SMS_RingtoneData);
 
 	size = GSM_MAX_RINGTONE_PACKAGE_LENGTH;
 	GSM_PackRingtone(data->Ringtone, req + 7, &size);
@@ -3420,7 +3419,7 @@ static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length
 }
 
 
-static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state, SMS_DataType type)
 {
 	unsigned char req[512] = {0x0c, 0x01};
 	GSM_API_SMS sms;
@@ -3429,9 +3428,19 @@ static GSM_Error NBSUpload(GSM_Data *data, GSM_Statemachine *state)
 	int n;
 
 	DefaultSubmitSMS(&sms);
-	sms.UserData[0].Type = SMS_BitmapData;
+	sms.UserData[0].Type = type;
 	sms.UserData[1].Type = SMS_NoData;
-	memcpy(&sms.UserData[0].u.Bitmap, data->Bitmap, sizeof(GSM_Bitmap));
+
+	switch (type) {
+	case SMS_BitmapData:
+		memcpy(&sms.UserData[0].u.Bitmap, data->Bitmap, sizeof(GSM_Bitmap));
+		break;
+	case SMS_RingtoneData:
+		memcpy(&sms.UserData[0].u.Ringtone, data->Ringtone, sizeof(GSM_Ringtone));
+		break;
+	default:
+		return GE_INTERNALERROR;
+	}
 
 	memset(&rawsms, 0, sizeof(rawsms));
 
