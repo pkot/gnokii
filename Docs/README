@@ -1,43 +1,44 @@
-                            - G N O K I I -
-              (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-               Last update 22 December 1999  Version 0.3.1
+                              - G N O K I I -
+               (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+                  Last update 3 April 2000  Version 0.3.2
 
 - Contents - 			   
 
-1.0  Introduction
-2.0  General Notes
-3.0  Notes for 3810 Series
-4.0  Notes for 6110 Series
-5.0  Installation
-6.0  Known Bugs
-7.0  Gnokii and Perl
-8.0  How to help
-9.0  gnokii by CVS
-10.0 Protocol Details
-11.0 References
-12.0 Handsets/Networks tested
-13.0 Credits
-14.0 Release Notes
+1.0   Introduction
+2.0   About the applications
+3.0   Notes for specific model phones
+4.0   Installation from source 
+5.0   Installation of pre-built binaries
+6.0   Configuration
+7.0   Known Bugs
+8.0   Gnokii and Perl
+9.0   How to help
+10.0  gnokii by CVS
+11.0  Protocol Details
+12.0  References
+13.0  Handsets/Networks tested
+14.0  Credits
+15.0  Release Notes
 
 			   
 - 1.0 Introduction -
 
-This is version 0.3.1 of gnokii, a Linux/Unix tool suite and (soon!)
-modem/fax driver for Nokia mobile phones, released under the GPL.  Please
-see COPYING for more details on license/copying issues as well as the
-(lack of) warranty.  This is an "interim release" largely to bring
-the released code up to date with what is in CVS.
+This is version 0.3.2 of gnokii, a Linux/Unix tool suite and modem
+driver for Nokia mobile phones, released under the GPL.  Please
+see COPYING for more details on license/copying issues, the lack of
+warranty and where to send a postcard if you like gnokii :).  This
+release provides the much awaited ability to place data calls for
+all platforms except Win32.  Fax calls are not supported.
 
 gnokii supports most phones from the 3810/8110 and 5110/6110 series,
 details including bugs specific to each series appear in the files
 README-3810 and README-6110 respectively.  
 
-Note that it is still not possible to make fax or data calls on either
-series of phones.  We are getting closer though!
-
-As you may be aware, there were indications that Nokia may provide
-some support for the project.  Regrettably, these negotiations have
-pretty much stalled over the issue of binary versus open source releases.
+In the early stages of the project there were indications that
+Nokia would provide some support for the project.  Regrettably, these
+negotiations stalled over the issue of binary versus open source
+releases and the project has proceeded without official or unofficial
+assistance.
 
 We have a web site at http://gnokii.org which amongst other things
 gives information on how to join the gnokii mailing list, retrieving
@@ -47,95 +48,151 @@ If you haven't already done so, please indicate your interest in
 the gnokii project by adding yourself to the user database
 at http://gnokii.org/users
 
-- 2.0 General notes -
+- 2.0 About the applications -
   
 gnokii now consists of three main executables and a fourth "helper"
-application that is run suid root.
+application that is run suid root.  To get the most from gnokii it
+is worth understanding the details of them and how they interact.
+It is important to note that at present you cannot run more than
+one of gnokii, xgnokii or gnokiid at a time.
 
-The first, gnokii is a command line utility primarily for exercising
-the api functions that have been written.  Many people now use it
-for reading/writing phone book entries, sending and receiving SMS 
-messages etc. etc.  Ultimately however it is intended that it will
-become a utility that communicates with gnokiid to provide a command
-line interface to the functionality provided by the gnokiid daemon.
-For now though, gnokii provides the main stable interface to your
-phone.
+The first application, gnokii, is a command line utility that was
+originally provided to assist developers and interested users in
+working with the low level API functions that were being developed.
 
-Secondly, xgnokii is as the name suggests an X-windows based application
-that provides a graphical interface to your phone.  It is still in its
-early days but gives a good indication of where things are heading!
-At present xgnokii also works directly with the phone, however
-in the future it will more likely use the "side" interface
-of gnokiid.
+From these rather humble beginnings, it has evolved into a the main
+command line tool of the suite.  Many people now use it for
+reading/writing phone book entries, sending and receiving SMS messages
+etc.  Ultimately it is intended that it will become a utility that
+communicates with gnokiid to provide a command line interface to
+the functionality provided by the gnokiid daemon.
 
-The third part of the suite is gnokiid.  gnokiid is under heavy
-development, it's ultimate aim being to act as a daemon that 
-interfaces with your phone on one side and gnokii or xgnokii
-on the other.  This "side" code is still under discussion, particularly
-with respect to the most appropriate choice of communication
-method (IPC, TCP/IP etc.)
+The second application provided is xgnokii which as the name suggests
+is a X-windows based application that provides a graphical interface
+to your phone.  Amongst other things, xgnokii allows you to read and
+write phone book entries, read, write and send SMS messages, monitor
+battery and received signal strength.
 
-gnokiid's second and perhaps more important role is to provide a virtual
-modem interface /dev/gnokii that looks like an ordinary Hayes-AT
-compatible modem.  It will support the more important AT commands
-for SMS and phone book manipulation as well as (ultimately) data
-and fax call setup/teardown.  This code is still in its infancy
-but some basic AT commands are now available.
+At present xgnokii works directly with the phone, however in the
+future it will more likely use the "side" interface of gnokiid.
 
-The helper application, mgnokiidev is used to create on demand
-a symbolic link between /dev/gnokii and the pseudo tty used
-by gnokiid for the virtual modem interface.
+The third part of the suite is gnokiid.  gnokiid provides a
+virtual modem interface, /dev/gnokii that looks like a regular
+Hayes-AT compatible modem with the ETSI defined extensions for
+GSM phones.  What this means in practical terms is that you can
+treat the /dev/gnokii device like an ordinary modem and use it
+to make data calls from pppd or a terminal application like
+minicom.
 
-- 3.0 Notes for 3810 Series -
+gnokiid is still under development, it's ultimate aim being to
+act as a "master" daemon that interfaces with your phone on one
+side and gnokii or xgnokii on the other.  This "side" code is still
+under discussion, particularly with respect to the most appropriate
+choice of communication method (IPC, TCP/IP etc.)
+
+The last application provided with the suite is mgnokiidev which is
+used by gnokiid to create on demand a symbolic link between
+/dev/gnokii and the pseudo tty used by gnokiid for the virtual
+modem interface.  It's operation is transparent under normal
+usage as gnokiid takes care of calling it when required.
+
+- 3.0  Notes for specific model phones -
   
-Please see the README-3810 file.
+Please see the README-3810 file for notes specific to the
+3810/8110 series and README-6110 for notes on the 5110/6110
+series.
 
+- 4.0 Installation from source -
 
-- 4.0 Notes for 6110 Series -
+gnokii makes use of autoconf/automake which allows you to configure
+the source tree for your system by typing 
+
+./configure
+
+You can also run configure with the --help flag to get a list of 
+available options.  There are about a dozen or so that are specific
+to gnokii, --with-model and --with-port being particularly
+relevant as they specify the defaults used in the absence of
+a .gnokiirc file.
+
+Once you've run ./configure successfully, you should be able to
+simply do a make and make install to compile and install your 
+binaries respectively.
+
+make
+
+make install
+
+With this done you've built and installed your binaries, and
+should proceed to the configuration section below.
+
+- 5.0 Installation of pre-built binaries -
   
-Please see the README-6110 file.
+If you downloaded gnokii as a pre-built binary you should install
+it in the conventional manner for the package type in question.
+For example if you downloaded a .rpm file you can install it by
+running the following as root.
 
+rpm -i gnokii-0.3.2-i386.rpm
 
-- 5.0 Installation -
+If you are using a Debian based system, you can use dpackage
+to do the installation (FIXME - is this correct ?)
 
-Review the Makefile and make sure that the MODEL and PORT defines
-are correct for your setup.  These values are used as defaults
-in the absence of a ~/.gnokiirc file.   Note that you will 
-need permissions on whatever serial port you select.
+- 6.0 Configuration -
+
+Once you have installed the binaries, you should copy the
+sample.gnokiirc file from the Docs/samples directory to your
+home directory and name it .gnokiirc  Using your favorite
+editor ensure that the settings are correct for your system,
+the sample file has details of the various options available.
+
+Note that you will need read/write permissions on whatever
+serial port you specify in .gnokiirc.  You can now use gnokii
+and xgnokii.
 
 Review the notes specific to your model of phone in either
 README-6110 or README-3810 as appropriate.  These files
 also provide information about what functionality is
 available for each model.
 
-Copy the sample.gnokiirc file to your home directory and name
-it .gnokiirc  Edit the settings in this file to suit your
-setup.
+In order to make use of the AT emulator provided by gnokiid
+through /dev/gnokii, you must do the following.  We've given
+a summary of what is required for each step, if anything
+is unclear either ask a Unix-savvy friend or ask for help
+on the gnokii mailing list.
 
-Type make, all should build from there, it's pretty simple code
-so you shouldn't have any problems.  Note that you need pthread
-libraries, they are standard on most modern Linux distributions.
-Note that gnokii is not only for Linux - you can use it on
-FreeBSD and similar systems too.
+* Create a group called gnokii 
 
-In order to make use of the AT emulator through /dev/gnokii,
-you must;
+Either use groupadd if your system provides it or manually
+edit /etc/group.  You'll need to be root to do this.
 
-* Create a group called gnokii (edit /etc/group).
 * Ensure you are in the gnokii group.
-* Ensure that the mgnokiidev executable has permissions 4754
-* Ensure that mgnokiidev is owned by root and in group gnokii.
+ 
+As root, edit /etc/group and add your name to the end of the
+line for the gnokii group.  Look at other entries in the file
+to see how entries are laid out.
 
-- 6.0 Known Bugs -
+* Ensure that the mgnokiidev executable has permissions 4754
+  and that it is owned by root and in group gnokii.
+
+As root run
+
+chmod 4754 <path>gnokii 
+
+then
+
+chown root.gnokii <path> gnokii
+
+where <path> is the location of gnokii.  Typically this is
+/usr/bin
+ 
+
+- 7.0 Known Bugs -
 
 Review the bugs section in the README for your series of phone.
 
-Note there are a couple of patches that have been sent in (to Hugh)
-for the 3810 and/or pseudo tty code that haven't made it in yet. 
-New parent syndrome...
 
-
-- 7.0 Gnokii and Perl -
+- 8.0 Gnokii and Perl -
 
 There is a perlmodule available for gnokii. It gives access to all
 the routines that are defined in gsm-common.h from a perl-program. It
@@ -148,7 +205,7 @@ revision 0.2.6-pre3 of gnokii.
 The homepage of this module is http://www.agouros.de/gnokii
 
 
-- 8.0 How to help -
+- 9.0 How to help -
 
 There are a number of ways you can help out.
 
@@ -162,7 +219,7 @@ they be aired on the mailing list so that a consensus can be reached
 when appropriate.  This is particularly important if you intend making
 large changes and/or submitting big patches.
 
-- 9.0 gnokii by CVS -
+- 10.0 gnokii by CVS -
 
 The gnokii project has a new CVS server thanks to Andrew Tridgell
 and the Samba team.  The server's address is cvs.samba.org.  If you
@@ -211,7 +268,7 @@ and you'll be added to the recipients list.
 Our thanks go to the Czech Linux Users Group for hosting the original
 CVS repository at cvs.linux.cz.
 
-- 10.0 Protocol Details -
+- 11.0 Protocol Details -
 
 3810 Series
 
@@ -232,7 +289,7 @@ of Nokia's phones.
 
 
 
-- 11.0 References -
+- 12.0 References -
 
 The web site for this project is at;
 
@@ -255,7 +312,7 @@ is the Australian mirror, there will be one nearby to you too :)
 <http://www.monash.edu.au/mirror/ldp/HOWTO/Serial-Programming-HOWTO.html>
 
 
-- 12.0 Handsets/Networks tested -
+- 13.0 Handsets/Networks tested -
 
 3810 Series
 
@@ -293,13 +350,16 @@ is the Australian mirror, there will be one nearby to you too :)
 3210 (some functions does not not work yet)
 
 
-- 13.0 Credits -
+- 14.0 Credits -
   
-Please take a moment to read the CREDITS file which endeavours
+Please take a moment to read the CREDITS file which endeavors
 to recognise those who have helped so far!
 
 
-- 14.0 Release Notes -
+- 15.0 Release Notes -
+200004xx Version 0.3.2
+We have data calls and autoconf.  Nuff said :)
+
 19991222 Version 0.3.1
 Interim release to bring released code into line with latest CVS
 offerings.
