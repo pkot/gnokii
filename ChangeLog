@@ -28,6 +28,7 @@
     o __declspec(dllimport) is required if someone using a
       win32 gnokii.dll                             (BORBELY Zoltan)
     o utf8 handling without nl_langinfo(CODESET)   (BORBELY Zoltan)
+    o subentry number field enlarged                 (Helge Deller)
 
 0.5.8
 =====

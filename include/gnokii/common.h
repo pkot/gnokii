@@ -190,7 +190,7 @@ typedef struct {
 	gn_phonebook_entry_type entry_type;
 	gn_phonebook_number_type number_type;
 	union {
-		char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1]; /* Number */
+		char number[GN_PHONEBOOK_NAME_MAX_LENGTH + 1];   /* Number, Name, Address, eMail... */
 		gn_timestamp date;                               /* or the last calls list */
 	} data;
 	int id;
