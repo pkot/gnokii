@@ -5,7 +5,7 @@ Hugh Blemings, hugh@blemings.org
 $Id$
 
 -------------------------------------------------------------------------------
-Q. What is gnokii ?
+Q. What is gnokii?
 
 A. It is a name of project. The aim of it is to develop tools and drivers
    for Nokia mobile phones. Of course, I think in this moment about really
@@ -17,32 +17,32 @@ A. It is a name of project. The aim of it is to develop tools and drivers
    (Linux, Free BSD, etc.) and hardware (Intel, etc.) platforms...
 
 -------------------------------------------------------------------------------
-Q. How do you pronounce gnokii ?
+Q. How do you pronounce gnokii?
 
 A. You can pronounce gnokii as "gnooki" or "gnocki" at your option :-)
 
 -------------------------------------------------------------------------------
-Q. What models are supported ?
+Q. What models are supported?
 
 A. Currently supported phone models are (if not marked, it's a Nokia phone):
-         + 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330
-         + 3110|3810|8110|8110i
-         + 2110|2140|6080
+         + 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330|8210
+         + 7110|6210|6250
+         + 6310|6510
          + 6210|7110|6250
-         + AT mode compatible phones (namely Nokia 6210, Nokia 7110,
-           Nokia 8210, Ericsson T39, Siemens S25 are known to work)
-   Support for these models is planned:
-         + Dancall 2711
-         + 8210|8250
-         + Ericsson GA628 and similiar
+         + AT mode compatible phones (namely Nokia 62X0, Nokia 7110,
+           Nokia 8210, Nokia 6310, Nokia 6510, Ericsson T39, Sony-Ericsson
+           T68i, Siemens S25 are known to work)
    Support for these models is obsoleted. If noone is interested in
    development for them, the support will be dropped:
          + 640
          + 5160|6160|6185
+         + 3110|3810|8110|8110i
+         + 2110|2140|6080
+         + Dancall 2711
 
 -------------------------------------------------------------------------------
 Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
-   running gnokii. What's wrong ?
+   running gnokii. What's wrong?
 
 A. Gnokii cannot connect to the phone.  Possible reasons are:
     - wrong serial port is defined in gnokii config file,
@@ -51,7 +51,7 @@ A. Gnokii cannot connect to the phone.  Possible reasons are:
     - you don't have permission to write to /dev/ttySX device.
 
 -------------------------------------------------------------------------------
-Q. Does mgnokiidev need to be suid root ?
+Q. Does mgnokiidev need to be suid root?
 
 A. Yes.  gnokiid needs to create a symbolic link in the /dev directory.
    mgnokiidev is the program which does this and hence it must be suid
@@ -69,21 +69,21 @@ A. No. There's no need for it. gnokii isn't intended for setuid/setgid
    using groups management.
 
 -------------------------------------------------------------------------------
-Q: Can I use IrDA with 6210/7110 and gnokii ?
+Q: Can I use IrDA with 6210/7110 and gnokii?
 
 A: Yes. Just put:
 connection = irda
    line into your config file.
 
 -------------------------------------------------------------------------------
-Q: Can I use IrDA with 6210/7110 and gnokii ?
+Q: Can I use IrDA with 6210/7110 and gnokii?
 
 A: Yes. Just put:
 connection = irda
    line into your config file.
 
 -------------------------------------------------------------------------------
-Q. Can I get a copy of the protocol for the <insert phone model here> ?
+Q. Can I get a copy of the protocol for the <insert phone model here>?
 
 A. We don't have any formal documentation of the protocols in use.
    The best source we can give you now is all our knowlegde assembled
@@ -107,8 +107,41 @@ A. We don't have any formal documentation of the protocols in use.
        http://www.lsc.hu/dl/
 
 -------------------------------------------------------------------------------
-Q. Does gnokii work under Sun's Solaris ?
+Q. Does gnokii work under Sun's Solaris?
 
 A. Generally yes, but in fact it depends on hardware -- your serial port
    must support at least 115200 baud rate. Sun Enterprise 250 machine is known
    to work with gnokii.
+
+-------------------------------------------------------------------------------
+Q. I get 'undefined symbol: GSM_ELogHandler' when runnig gnokii. What's
+   wrong?
+
+A. gnokii didn't install correctly. You had installed gnokii previously and you
+   either forget to run 'make install' or the installation didn't overwrite the
+   old library. Be sure to remove the old libgnokii.so and then rerun 'make
+   install'.
+
+-------------------------------------------------------------------------------
+Q. Which cable for the Nokia phones should I use?</h3>
+
+A. For Nokia 61X0/51X0 models you should use DAU9P cable. Nokia 61X0 models are
+   also capable to make an infrared connection.
+
+   For Nokia 7110/62X0/6310 models you need either DAU9P or DLR3P cable. With
+   DLR3P cable you can use AT commands to talk to the phone. These phones are
+   able to make an irda connection.
+
+   Most Nokia phones that have no visible connector have one under the battery.
+   See our cables page (http://www.gnokii.org/cables.shtml) to find the sites
+   with more detailes, also the places where to buy the cable.
+
+   Most of the modern phones have the irda connector (3XXX series models don't
+   have them).
+
+-------------------------------------------------------------------------------
+Q. I get 'Sorry, phone has not yet been converted to new style.
+   Phone.Functions == NULL!' message. What's wrong?
+
+A. You use ancient version of gnokii! Upgrade! See our downloads page for the
+   detailes (http://www.gnokii.org/downloads.shtml).

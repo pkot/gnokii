@@ -29,9 +29,10 @@
  * Support Nokia Card Phone RPM-1              (Friedrich Lobenstock)
  * More verbose reporting when detecting the model
                                                (Friedrich Lobenstock)
- * Added MAINTAINERS file                                 (Pawel Kot)
  * Docs updates:
+    o added MAINTAINERS file                              (Pawel Kot)
     o "call divert is active" documented             (BORBELY Zoltan)
+    o updated FAQ (also on the webpage)                   (Pawel Kot)
  * Allow GSM_PrintBitmap to output to any stream          (Pawel Kot)
  * Build system updates:
     o fixed Makefile to install libgnokii.so for all install*
