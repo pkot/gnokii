@@ -311,6 +311,7 @@ static gn_network networks[] = {
 	{ "422 02", "GTO" },
 	{ "424 02", "UAE-ETISALAT" },
 	{ "425 01", "Partner Communications Company Ltd" },
+	{ "425 02", "Cellcom Israel Ltd" },
 	{ "426 01", "BHR MOBILE PLUS" },
 	{ "427 01", "QATARNET" },
 	{ "432 11", "TCI" },

@@ -37,6 +37,7 @@
     o dct3/4 raw ringtones handled differently     (BORBELY Zoltan)
     o TCP device added to the phone drivers        (BORBELY Zoltan)
     o portability fixes                            (BORBELY Zoltan)
+    o new operator in Israel                     (Gilad Ben-Yossef)
  * Documentation updates
     o nk6510 ringtone handling messages updated    (BORBELY Zoltan)
     o nk6510 getsmsc request/response updated      (BORBELY Zoltan)
