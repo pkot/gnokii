@@ -67,6 +67,7 @@ static char reply_buf[1024];
 static int reply_buf_pos = 1;
 static int binlength = 1;
 
+
 static int xwrite(unsigned char *d, int len)
 {
 	int res;
@@ -88,84 +89,80 @@ static int xwrite(unsigned char *d, int len)
 	return 0;
 }
 
-
 static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *msg)
 {
 	usleep(10000);
-	xwrite(msg, message_length);
-	return GN_ERR_NONE;
+	return xwrite(msg, message_length) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
 }
 
-
-/* RX_State machine for receive handling.  Called once for each character
-   received from the phone. */
+/* 
+ * rx state machine for receive handling. called once for each character
+ * received from the phone. 
+ */
 static void atbus_rx_statemachine(unsigned char rx_char)
 {
 	reply_buf[reply_buf_pos++] = rx_char;
 	reply_buf[reply_buf_pos] = '\0';
 
-	if (reply_buf_pos >= binlength) {
-		reply_buf[0] = GN_AT_NONE;
-		/* first check if <cr><lf> is found at end of reply_buf.
-		 * attention: the needed length is greater 2 because we
-		 * dont need to enter if no result/error will be found. */
-		if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-2, "\r\n", 2))) {
-			/* no lenght check needed */
-			if (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4))
-				reply_buf[0] = GN_AT_OK;
-			else if ((reply_buf_pos > 7) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))
-				reply_buf[0] = GN_AT_ERROR;
-		}
-		/* check if SMS prompt is found */
-		if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-4, "\r\n> ", 4))) {
-			reply_buf[0] = GN_AT_PROMPT;
-		}
-		if (reply_buf[0] != GN_AT_NONE) {
+	if (reply_buf_pos < binlength)
+		return;
 
-
-			at_printf("read : ", reply_buf + 1, reply_buf_pos - 1);
-
-			sm_incoming_function(statemachine, statemachine->last_msg_type, reply_buf, reply_buf_pos - 1);
-			reply_buf_pos = 1;
-			binlength = 1;
-			return;
-		}
-/* needed for binary date etc
-   TODO: correct reading of variable length integers
-		if (reply_buf_pos == 12) {
-			if (!strncmp(reply_buf + 3, "ABC", 3) {
-				binlength = atoi(reply_buf + 8);
-			}
-		}
-*/
+	reply_buf[0] = GN_AT_NONE;
+	/* first check if <cr><lf> is found at end of reply_buf.
+	 * attention: the needed length is greater 2 because we
+	 * don't need to enter if no result/error will be found. */
+	if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-2, "\r\n", 2))) {
+		/* no lenght check needed */
+		if (!strncmp(reply_buf+reply_buf_pos-4, "OK\r\n", 4))
+			reply_buf[0] = GN_AT_OK;
+		else if ((reply_buf_pos > 7) && (!strncmp(reply_buf+reply_buf_pos-7, "ERROR\r\n", 7)))
+			reply_buf[0] = GN_AT_ERROR;
 	}
+	/* check if SMS prompt is found */
+	if ((reply_buf_pos > 4) && (!strncmp(reply_buf+reply_buf_pos-4, "\r\n> ", 4)))
+		reply_buf[0] = GN_AT_PROMPT;
+	if (reply_buf[0] != GN_AT_NONE) {
+		at_printf("read : ", reply_buf + 1, reply_buf_pos - 1);
+		sm_incoming_function(statemachine, statemachine->last_msg_type, reply_buf, reply_buf_pos - 1);
+		reply_buf_pos = 1;
+		binlength = 1;
+		return;
+	}
+#if 0
+	/* needed for binary date etc */
+	TODO: correct reading of variable length integers
+	if (reply_buf_pos == 12) {
+		if (!strncmp(reply_buf + 3, "ABC", 3) {
+			binlength = atoi(reply_buf + 8);
+		}
+	}
+#endif
 }
-
 
 static bool atbus_serial_open(int mode, char *device)
 {
-	int result;
-	result = device_open(device, false, false, mode, GN_CT_Serial);
+	int result = device_open(device, false, false, mode, GN_CT_Serial);
+
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
-		return (false);
+		return false;
 	}
 	if (mode) {
-		/* make 7110 with dlr-3 happy. the nokia dlr-3 cable     */
-		/* provides hardware handshake lines but is, at least at */
-		/* initialization, slow. to be properly detected, state  */
-		/* changes must be longer than 700 milli seconds. if the */
-		/* timing is to fast all commands after dtr high will be */
-		/* ignored by the phone until dtr is toggled again.      */
-		/* to reset the phone and set a sane state, dtr must     */
-		/* pulled low. when irda is turned on in the phone, dtr  */
-		/* must pulled high to switch on the serial line of the  */
-		/* phone (this will switch of irda). only set it high    */
-		/* after serial line initialization (when it probably    */
-		/* was low before) is not enough. so we do high, low and */
-		/* high again, always with one second apply time. also   */
-		/* wait one second before sending commands or init will  */
-		/* fail. */
+		/* 
+		 * make 7110 with dlr-3 happy. the nokia dlr-3 cable provides
+		 * hardware handshake lines but is, at least at initialization,
+		 * slow. to be properly detected, state changes must be longer
+		 * than 700 ms. if the timing is too fast all commands after dtr
+		 * high will be ignored by the phone until dtr is toggled again.
+		 * to reset the phone and set a sane state, dtr must pulled low.
+		 * when irda is turned on in the phone, dtr must pulled high to
+		 * switch on the serial line of the phone (this will switch off
+		 * irda). only set it high after serial line initialization
+		 * (when it probably was low before) is not enough. so we do
+		 * high, low and high again, always with one second apply time.
+		 * also wait one second before sending commands or init will
+		 * fail.
+		 */
 		device_setdtrrts(1, 1);
 		sleep(1);
 		device_setdtrrts(0, 1);
@@ -175,7 +172,7 @@ static bool atbus_serial_open(int mode, char *device)
 	} else {
 		device_setdtrrts(1, 1);
 	}
-	return (true);
+	return true;
 }
 
 static gn_error atbus_loop(struct timeval *timeout)
