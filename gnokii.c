@@ -1450,22 +1450,52 @@ void	readconfig(void)
 	   API stuff which doesn't warrant a "proper" command line
 	   function.  Most recently used by Hugh to test 3810
 	   GetSMSCenter function... */
-extern GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
 void foogle(char *argv[])
 { 
-  GSM_MessageCenter msg_center;
+  int count=0;
+  GSM_Error error;
+  GSM_ConnectionType connection=GCT_Serial;
 
-  fbusinit(false);
+  /* Initialise the code for the GSM interface. */     
 
-  if (FB38_GetSMSCenter(&msg_center) != GE_NONE) {
-    fprintf(stderr,"Bzzt.  Failed.\n");
-  }
-  else {
-  	fprintf(stdout, "No: %d, Name:%s, Number:%s\n\r", 
-	  	msg_center.No, msg_center.Name, msg_center.Number);		
-  }
+  fbusinit(true);
 
+  GSM->DialData(NULL);
+  
+  sleep (60);
   GSM->Terminate();
+
+  while (1) {
+    usleep(50000);
+  }
+
+  exit(0);
+}
+
+
+	/* pmon allows fbus code to run in a passive state - it doesn't
+	   worry about whether comms are established with the phone.
+	   A debugging/development tool. */
+void pmon(char *argv[])
+{ 
+  int count=0;
+  GSM_Error error;
+  GSM_ConnectionType connection=GCT_Serial;
+
+  /* Initialise the code for the GSM interface. */     
+
+  error = GSM_Initialise(Model, Port, Initlength, connection, true);
+
+  if (error != GE_NONE) {
+    fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
+    exit(-1);
+  }
+
+
+  while (1) {
+    usleep(50000);
+  }
+
   exit(0);
 }
 

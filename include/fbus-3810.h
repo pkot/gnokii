@@ -118,6 +118,7 @@ void	FB38_ThreadLoop(void);
 
 void	FB38_RX_StateMachine(char rx_byte);
 enum FB38_RX_States	FB38_RX_DispatchMessage(void);
+enum FB38_RX_States	FB38_RX_HandleRLPMessage(void);
 void	FB38_RX_DisplayMessage(void);
 
 void    FB38_RX_Handle0x0b_IncomingCall(void);

@@ -105,6 +105,7 @@ float					CurrentRFLevel;
 float					CurrentBatteryLevel;
 int						ExploreMessage; /* for debugging/investigation only */
 int						InitLength;
+long					ChecksumFails;	/* For diagnostics */
 
 	/* These three are the information returned by AT+CGSN, AT+CGMR and
 	   AT+CGMM commands respectively. */
@@ -159,6 +160,7 @@ GSM_Error	FB38_Initialise(char *port_device, char *initlength, GSM_ConnectionTyp
 	RevisionValid = false;
 	ModelValid = false;
 	ExploreMessage = -1;
+	ChecksumFails = 0;
 
 	strncpy (PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 
@@ -191,6 +193,11 @@ void		FB38_Terminate(void)
 
 		/* Close serial port. */
 	tcsetattr(PortFD, TCSANOW, &OldTermios);
+
+		/* If in monitor mode, show number of checksum failures. */	
+	if (EnableMonitoringOutput) {
+		fprintf (stderr, "Checksum failures: %ld\n", ChecksumFails);
+	}
 	
 	close (PortFD);
 }
@@ -778,12 +785,49 @@ GSM_Error	FB38_SetAlarm(int alarm_number, GSM_DateTime *date_time)
 
 GSM_Error	FB38_DialVoice(char *Number)
 {
+	
 	return (GE_NOTIMPLEMENTED);
 }
 
+	/* This is a hack/work in progress. */
 GSM_Error	FB38_DialData(char *Number)
 {
-	return (GE_NOTIMPLEMENTED);
+	u8		message[256];
+
+	message[0] = 0x01;	/* Data call */
+	message[1] = 0x01;	/* Address/number type ? (cf Harri's work) */
+
+	message[2] = 0x08;	/* Length of phone number */
+
+	message[3] = 0x36;	/* Phone number, ascii encoded. */
+	message[4] = 0x32;
+	message[5] = 0x33;
+	message[6] = 0x30;
+	message[7] = 0x35;
+	message[8] = 0x34;
+	message[9] = 0x36;
+	message[10] = 0x30; /* End of number. */
+
+	message[11] = 0x07;	/* Dunno what these are but may be initial setup
+						   values for RLP timers, sequence numbers or such ? */
+	message[12] = 0xa2;
+	message[13] = 0x88;
+	message[14] = 0x81;
+	message[15] = 0x21;
+	message[16] = 0x15;
+	message[17] = 0x63;
+	message[18] = 0xa8;
+	message[19] = 0x00;
+	message[20] = 0x00;
+
+		/* Update sequence number and send to phone. */
+	FB38_TX_UpdateSequenceNumber();
+	if (FB38_TX_SendMessage(21, 0x0a, RequestSequenceNumber, message) != true) {
+		fprintf(stderr, _("Set Mem Loc Write failed!"));	
+		return (-1);
+	}
+
+	return (GE_NONE);
 }
 
 GSM_Error	FB38_GetIncomingCallNr(char *Number)
@@ -968,6 +1012,7 @@ void	FB38_SigHandler(int status)
 	   character received from the phone/phone. */
 void	FB38_RX_StateMachine(char rx_byte)
 {
+	static u8	current_message_type;
 
 	switch (RX_State) {
 	
@@ -986,11 +1031,13 @@ void	FB38_RX_StateMachine(char rx_byte)
 
 				/*FALLTHROUGH*/
 
-					/* Messages from the phone start with an 0x04.  We
+					/* Messages from the phone start with an 0x04 during
+					   "normal" operation, 0x03 when in data/fax mode.  We
 					   use this to "synchronise" with the incoming data
 					   stream. */		
 		case FB38_RX_Sync:
-				if (rx_byte == 0x04) {
+				if (rx_byte == 0x04 || rx_byte == 0x03) {
+					current_message_type = rx_byte;
 					BufferCount = 0;
 					CalculatedCSum = rx_byte;
 					RX_State = FB38_RX_GetLength;
@@ -1022,11 +1069,24 @@ void	FB38_RX_StateMachine(char rx_byte)
 						/* Compare against calculated checksum. */
 					if (MessageCSum == CalculatedCSum) {
 						/* Got checksum, matches calculated one so 
-						   now pass to dispatch handler. */
-						RX_State = FB38_RX_DispatchMessage();
+						   now pass to appropriate dispatch handler.
+						   on the basis of current_meesage_type  */
+						if (current_message_type == 0x04) {
+							RX_State = FB38_RX_DispatchMessage();
+						}
+						else {
+						   	if (current_message_type == 0x03) {
+								RX_State = FB38_RX_HandleRLPMessage();
+							}
+								/* Hmm, unknown message type! */
+							else {
+								fprintf(stderr, _("MT Fail %02x"), current_message_type);
+							}
+						}
 					}
 						/* Checksum didn't match so ignore. */
 					else {
+						ChecksumFails ++;
 						fprintf(stderr, _("CS Fail %02x != %02x"), MessageCSum, CalculatedCSum);
 						FB38_RX_DisplayMessage();
 						fflush(stderr);
@@ -1041,6 +1101,84 @@ void	FB38_RX_StateMachine(char rx_byte)
 	}
 }
 
+enum FB38_RX_States		FB38_RX_HandleRLPMessage(void)
+{
+	int		count;
+	int		line_count; 
+	
+	u8		ns;
+	u8		nr;
+	u8		s;
+
+		/* If monitoring output is disabled, don't display anything. */
+	if (EnableMonitoringOutput == false) {
+		return;
+	}
+	
+	line_count = 0;
+	fprintf(stdout, _("RLP: "));
+
+	fprintf(stdout, _("Msg Type: %02x "), MessageBuffer[0]);
+	fprintf(stdout, _("Msg Len: %02x "), MessageLength);
+	fprintf(stdout, _("Sequence Number: %02x "), MessageBuffer[1]);
+	fprintf(stdout, _("Checksum: %02x \n"), MessageCSum);
+	
+		/* MessageBuffer 2 and 3 contain the RLP header in bit reversed
+		   form (actually, it's sorta the right way around but backwards
+		   compared to the way it's presented in ETSI 04.22 
+	
+  	       First Byte (Message Buffer[2])    Second Byte (Message Buffer[3])
+		   D7  D6  D5  D4  D3  D2  D1  D0    D7  D6  D5  D4  D3  D2  D1  D0
+		   NS4 NS3 NS2 NS1 NS0 S2  S1  C/R   NR5 NR4 NR3 NR2 NR1 NR0 P/F NS5 */
+
+		/* Send Sequence Number */	
+	ns = MessageBuffer[2] >> 3;
+	if ((MessageBuffer[3] & 0x01) == 0x01) {
+		ns |= 0x20;
+	}
+		/* Don't know what these two bits are called so it's s for now. */	
+	s = (MessageBuffer[2] >> 1) & 0x03;
+	
+		/* Receive Sequence Number */
+	nr = MessageBuffer[3] >> 2;
+
+		/* If Send Sequence number is 0x3f or 0x3e these are special frames, 
+		   Unumbered and Supervisory respectively */	
+	switch (ns) {
+		case 0x3f:
+			fprintf(stdout, _("U Frame M=%02x\n"), (nr & 0x1f));
+			break;
+			
+		case 0x3e:
+			fprintf(stdout, _("S Frame S=%x N(R)=%02x\n"), s, nr);
+			break;
+			
+		default:
+			fprintf(stdout, _("I+S Frame S=%x N(S)=%02x N(R)=%02x\n"), s, ns, nr);
+			break;
+	}	
+
+	for (count = 2; count < MessageLength; count ++) {
+		if (isprint(MessageBuffer[count])) {
+			fprintf(stdout, "[%02x%c]", MessageBuffer[count], MessageBuffer[count]);
+		}
+		else {
+			fprintf(stdout, "[%02x ]", MessageBuffer[count]);
+		}
+		line_count ++;
+
+		if (line_count >= 16) {
+			line_count = 0;
+			fprintf(stdout, "\n");
+		}
+	}
+
+	fprintf(stdout, "\n\n");
+	fflush(stdout);
+
+	return (FB38_RX_Sync);
+	
+}
 	/* FB38_RX_DispatchMessage
 	   Once we've received a message from the phone, the command/message
 	   type byte is used to call an appropriate handler routine or
@@ -1061,6 +1199,9 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 
 		/* Switch on the basis of the message type byte */
 	switch (MessageBuffer[0]) {
+
+				/* We send 0x0a messages to make a call so don't ack. */
+		case 0x0a:		break;
 
 			/* 0x0b messages are sent by phone when an incoming call occurs,
 			   this message must be acknowledged. */
@@ -1724,13 +1865,16 @@ void	FB38_RX_Handle0x27_SMSMessageText(void)
 	}
 
 		/* Copy into current SMS message as long as it's non-NULL */
-	if (CurrentSMSMessage != NULL) {
-		for (count = 0; count < MessageLength - 3; count ++) {
-			if ((length_received) < FB38_MAX_SMS_LENGTH) {
-				CurrentSMSMessage->MessageText[length_received] = MessageBuffer[count + 3];
-			}	
-			length_received ++;
-		}
+	if (CurrentSMSMessage == NULL) {
+		CurrentSMSMessageError = GE_INTERNALERROR;
+		return;
+	}
+
+	for (count = 0; count < MessageLength - 3; count ++) {
+		if ((length_received) < FB38_MAX_SMS_LENGTH) {
+			CurrentSMSMessage->MessageText[length_received] = MessageBuffer[count + 3];
+		}	
+		length_received ++;
 	}
 	
 	if (length_received == CurrentSMSMessageBodyLength) {
@@ -2052,7 +2196,8 @@ void	FB38_RX_Handle0x46_MemoryLocationData(void)
 	label_length = MessageBuffer[2];
 	number_length = MessageBuffer[label_length + 3];
 
-		/* Providing it's not a NULL pointer, copy entry into CurrentPhonebookEntry */
+		/* Providing it's not a NULL pointer, copy entry into
+		   CurrentPhonebookEntry */
 	if (CurrentPhonebookEntry == NULL) {
 			/* Tell calling code an error occured. */
 		CurrentPhonebookError = GE_INTERNALERROR;
@@ -2134,6 +2279,12 @@ void	FB38_RX_Handle0x41_SMSMessageCenterData(void)
 		/* As usual, acknowledge first. */
 	if (!FB38_TX_SendStandardAcknowledge(0x41)) {
 		fprintf(stderr, _("Write failed!"));
+    	CurrentMessageCenterError = GE_INTERNALERROR;
+		return;
+	}
+		/* Check the CurrentMessageCenter is non-null (as can occur
+		   if doing passive monitoring during development) */
+	if (CurrentMessageCenter == NULL) {
     	CurrentMessageCenterError = GE_INTERNALERROR;
 		return;
 	}
