@@ -56,52 +56,52 @@ GSM_Functions			MB640_Functions = {
 		MB640_Terminate,
 		MB640_GetMemoryLocation,
 		MB640_WritePhonebookLocation,
-		MB640_GetSpeedDial,
-		MB640_SetSpeedDial,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
 		MB640_GetMemoryStatus,
-		MB640_GetSMSStatus,
-		MB640_GetSMSCenter,
-		MB640_SetSMSCenter,
- 		MB640_GetSMSMessage,
-		MB640_DeleteSMSMessage,
-		MB640_SendSMSMessage,
-      MB640_SaveSMSMessage,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+ 		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
 		MB640_GetRFLevel,
 		MB640_GetBatteryLevel,
-		MB640_GetPowerSource,
-		MB640_GetDisplayStatus,
-		MB640_EnterSecurityCode,
-		MB640_GetSecurityCodeStatus,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
 		MB640_GetIMEI,
 		MB640_GetRevision,
 		MB640_GetModel,
-		MB640_GetDateTime,
-		MB640_SetDateTime,
-		MB640_GetAlarm,
-		MB640_SetAlarm,
-		MB640_DialVoice,
-		MB640_DialData,
-		MB640_GetIncomingCallNr,
-		MB640_GetNetworkInfo,
-		MB640_GetCalendarNote,
-		MB640_WriteCalendarNote,
-		MB640_DeleteCalendarNote,
-		MB640_Netmonitor,
-		MB640_SendDTMF,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
 		MB640_GetBitmap,
 		MB640_SetBitmap,
-		MB640_SetRingTone,
-		MB640_SendRingTone,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
 		MB640_Reset,
-		MB640_GetProfile,
-		MB640_SetProfile,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
 		MB640_SendRLPFrame,
-        MB640_CancelCall,
-		MB640_EnableDisplayOutput,
-		MB640_DisableDisplayOutput,
-		MB640_EnableCellBroadcast,
-		MB640_DisableCellBroadcast,
-		MB640_ReadCellBroadcast
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED
 };
 
 	/* FIXME - these are guesses only... */
@@ -354,41 +354,6 @@ GSM_Error	MB640_WritePhonebookLocation(GSM_PhonebookEntry *entry)
   return (GE_NONE);
 }
 
-GSM_Error	MB640_GetSpeedDial(GSM_SpeedDial *entry)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_SetSpeedDial(GSM_SpeedDial *entry)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetSMSMessage(GSM_SMSMessage *message)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_DeleteSMSMessage(GSM_SMSMessage *message)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB640_SaveSMSMessage(GSM_SMSMessage *SMS)
-{
-    return GE_NOTIMPLEMENTED;
-}
-
-GSM_Error	MB640_CancelCall(void)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
 	/* MB640_GetRFLevel
 	   FIXME (sort of...)
 	   For now, GetRFLevel and GetBatteryLevel both rely
@@ -516,19 +481,6 @@ GSM_Error	MB640_GetModel(char *model)
 	return err;
 }
 
-/* This function sends to the mobile phone a request for the SMS Center */
-
-GSM_Error	MB640_GetSMSCenter(GSM_MessageCenter *MessageCenter)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_SetSMSCenter(GSM_MessageCenter *MessageCenter)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-	/* Our "Not implemented" functions */
 GSM_Error	MB640_GetMemoryStatus(GSM_MemoryStatus *Status)
 {
   switch(Status->MemoryType)
@@ -552,96 +504,6 @@ GSM_Error	MB640_GetMemoryStatus(GSM_MemoryStatus *Status)
     default: return (GE_NOTIMPLEMENTED);
   }
 	return (GE_NONE);
-}
-
-GSM_Error	MB640_GetSMSStatus(GSM_SMSStatus *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetPowerSource(GSM_PowerSource *source)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetDisplayStatus(int *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_EnterSecurityCode(GSM_SecurityCode SecurityCode)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetSecurityCodeStatus(int *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetDateTime(GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_SetDateTime(GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetAlarm(int alarm_number, GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_SetAlarm(int alarm_number, GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_DialVoice(char *Number)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_DialData(char *Number, char type, void (* callpassup)(char c))
-{
-        return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetIncomingCallNr(char *Number)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetNetworkInfo (GSM_NetworkInfo *NetworkInfo)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_GetCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_WriteCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_Netmonitor(unsigned char mode, char *Screen)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_SendDTMF(char *String)
-{
-    return (GE_NOTIMPLEMENTED);
 }
 
 GSM_Error	MB640_GetBitmap(GSM_Bitmap *Bitmap)
@@ -727,16 +589,6 @@ GSM_Error	MB640_SetBitmap(GSM_Bitmap *Bitmap)
   return (GE_NONE);
 }
 
-GSM_Error       MB640_SetRingTone(GSM_Ringtone *ringtone)
-{
-        return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error       MB640_SendRingTone(GSM_Ringtone *ringtone, char *dest)
-{
-        return (GE_NOTIMPLEMENTED);
-}
-
 GSM_Error	MB640_Reset(unsigned char type)
 {u8        pkt[] = { 0x43, 0x00, 0x00 };
  int       timeout;
@@ -752,42 +604,6 @@ GSM_Error	MB640_Reset(unsigned char type)
     usleep(250000);
   }
   return (GE_NONE);
-}
-
-GSM_Error	MB640_GetProfile(GSM_Profile *Profile)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB640_SetProfile(GSM_Profile *Profile)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-
-GSM_Error   MB640_EnableDisplayOutput()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB640_DisableDisplayOutput()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB640_EnableCellBroadcast()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB640_DisableCellBroadcast()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB640_ReadCellBroadcast(GSM_CBMessage *Message)
-{
-    return (GE_NOTIMPLEMENTED);
 }
 
 bool		MB640_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)

@@ -18,7 +18,7 @@
 #ifndef __misc_h
 #define __misc_h    
 
-#include "config.h"
+#include <config.h>
 
 /* Some general defines. */
 
@@ -131,4 +131,5 @@ extern int CalendarSupported (const char *);
 extern int DTMFSupported (const char *);
 extern int DataSupported (const char *);
 extern int SpeedDialSupported (const char *);
+
 #endif /* __misc_h */

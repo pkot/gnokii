@@ -51,52 +51,52 @@ GSM_Functions			MB61_Functions = {
 		MB61_Terminate,
 		MB61_GetMemoryLocation,
 		MB61_WritePhonebookLocation,
-		MB61_GetSpeedDial,
-		MB61_SetSpeedDial,
-		MB61_GetMemoryStatus,
-		MB61_GetSMSStatus,
-		MB61_GetSMSCenter,
-		MB61_SetSMSCenter,
-  		MB61_GetSMSMessage,
-		MB61_DeleteSMSMessage,
-		MB61_SendSMSMessage,
-      MB61_SaveSMSMessage,
-		MB61_GetRFLevel,
-		MB61_GetBatteryLevel,
-		MB61_GetPowerSource,
-		MB61_GetDisplayStatus,
-		MB61_EnterSecurityCode,
-		MB61_GetSecurityCodeStatus,
-		MB61_GetIMEI,
-		MB61_GetRevision,
-		MB61_GetModel,
-		MB61_GetDateTime,
-		MB61_SetDateTime,
-		MB61_GetAlarm,
-		MB61_SetAlarm,
-		MB61_DialVoice,
-		MB61_DialData,
-		MB61_GetIncomingCallNr,
-		MB61_GetNetworkInfo,
-		MB61_GetCalendarNote,
-		MB61_WriteCalendarNote,
-		MB61_DeleteCalendarNote,
-		MB61_Netmonitor,
-		MB61_SendDTMF,
-		MB61_GetBitmap,
-		MB61_SetBitmap,
-		MB61_SetRingTone,
-		MB61_SendRingTone,
-		MB61_Reset,
-		MB61_GetProfile,
-		MB61_SetProfile,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+  		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
 		MB61_SendRLPFrame,
-        MB61_CancelCall,
-		MB61_EnableDisplayOutput,
-		MB61_DisableDisplayOutput,
-		MB61_EnableCellBroadcast,
-		MB61_DisableCellBroadcast,
-		MB61_ReadCellBroadcast
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED
 };
 
 	/* FIXME - these are guesses only... */
@@ -317,247 +317,6 @@ GSM_Error	MB61_WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	}
 	return (CurrentPhonebookError);
 
-}
-
-GSM_Error	MB61_GetSpeedDial(GSM_SpeedDial *entry)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_SetSpeedDial(GSM_SpeedDial *entry)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetSMSMessage(GSM_SMSMessage *message)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_DeleteSMSMessage(GSM_SMSMessage *message)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-
-GSM_Error   MB61_SaveSMSMessage(GSM_SMSMessage *SMS)
-{
-    return GE_NOTIMPLEMENTED;
-}
-
-	/* MB61_GetRFLevel
-	   FIXME (sort of...)
-	   For now, GetRFLevel and GetBatteryLevel both rely
-	   on data returned by the "keepalive" packets.  I suspect
-	   that we don't actually need the keepalive at all but
-	   will await the official doco before taking it out.  HAB19990511 */
-GSM_Error	MB61_GetRFLevel(GSM_RFUnits *units, float *level)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-	/* MB61_GetBatteryLevel
-	   FIXME (see above...) */
-GSM_Error	MB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetIMEI(char *imei)
-{
-	return (GE_NOTIMPLEMENTED);
-
-}
-
-GSM_Error	MB61_GetRevision(char *revision)
-{
-	return (GE_NOTIMPLEMENTED);
-
-}
-
-GSM_Error	MB61_GetModel(char *model)
-{
-	return (GE_NOTIMPLEMENTED);
-
-}
-
-/* This function sends to the mobile phone a request for the SMS Center */
-
-GSM_Error	MB61_GetSMSCenter(GSM_MessageCenter *MessageCenter)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_SetSMSCenter(GSM_MessageCenter *MessageCenter)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-	/* Our "Not implemented" functions */
-GSM_Error	MB61_GetMemoryStatus(GSM_MemoryStatus *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetSMSStatus(GSM_SMSStatus *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetPowerSource(GSM_PowerSource *source)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetDisplayStatus(int *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_EnterSecurityCode(GSM_SecurityCode SecurityCode)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetSecurityCodeStatus(int *Status)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetDateTime(GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_SetDateTime(GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetAlarm(int alarm_number, GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_DialVoice(char *Number)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_DialData(char *Number, char type, void (* callpassup)(char c))
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetIncomingCallNr(char *Number)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetNetworkInfo (GSM_NetworkInfo *NetworkInfo)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_WriteCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_DeleteCalendarNote (GSM_CalendarNote *CalendarNote)
-{
-	return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_Netmonitor(unsigned char mode, char *Screen)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_SendDTMF(char *String)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetBitmap(GSM_Bitmap *Bitmap)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_SetBitmap(GSM_Bitmap *Bitmap)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error       MB61_SetRingTone(GSM_Ringtone *ringtone)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error      MB61_SendRingTone(GSM_Ringtone *ringtone, char *dest)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_Reset(unsigned char type)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_GetProfile(GSM_Profile *Profile)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_SetProfile(GSM_Profile *Profile)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-
-GSM_Error   MB61_EnableDisplayOutput()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB61_DisableDisplayOutput()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB61_EnableCellBroadcast()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB61_DisableCellBroadcast()
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error   MB61_ReadCellBroadcast(GSM_CBMessage *Message)
-{
-    return (GE_NOTIMPLEMENTED);
-}
-
-GSM_Error	MB61_CancelCall(void)
-{
-    return (GE_NOTIMPLEMENTED);
 }
 
 bool		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)

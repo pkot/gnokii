@@ -654,4 +654,9 @@ typedef struct {
 
 } GSM_Functions;
 
+/* Undefined functions in fbus/mbus files */
+#include <gsm-common.h>
+extern GSM_Error Unimplemented(void);
+#define UNIMPLEMENTED (void *) Unimplemented
+
 #endif	/* __gsm_common_h */

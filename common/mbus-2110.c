@@ -12,7 +12,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.24  2001-01-10 16:32:17  pkot
+  Revision 1.25  2001-01-12 14:09:12  pkot
+  More cleanups. This time mainly in the code.
+
+  Revision 1.24  2001/01/10 16:32:17  pkot
   Documentation updates.
   FreeBSD fix for 3810 code.
   Added possibility for deleting SMS just after reading it in gnokii.
@@ -27,7 +30,6 @@
 
   Revision 1.21  2000/12/19 16:32:28  pkot
   Lots of updates in common/mbus-2110.c. (thanks to Pavel Machek)
-
 
 */
 
@@ -328,7 +330,8 @@ GetRevision(char *revision)
 	return err;
 }
 
-static GSM_Error	GetModel2110(char *model)
+static GSM_Error
+GetModel2110(char *model)
 {
 	GSM_Error err = GE_NONE;
 
@@ -339,7 +342,8 @@ static GSM_Error	GetModel2110(char *model)
 }
 
 /* Our "Not implemented" functions */
-static GSM_Error	GetMemoryStatus(GSM_MemoryStatus *Status)
+static GSM_Error
+GetMemoryStatus(GSM_MemoryStatus *Status)
 {
 	switch(Status->MemoryType) {
 	case GMT_ME:
@@ -369,12 +373,6 @@ SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 {
 	return (false);
 }
-
-static GSM_Error Unimplemented(void)
-{
-	return GE_NOTIMPLEMENTED;
-}
-#define UNIMPLEMENTED (void *) Unimplemented
 
 static void
 Display(u8 b, int shift, char *s)
@@ -591,7 +589,7 @@ bool OpenSerial(void)
 }
 
 static GSM_Error
- SetKey(int c, int up)
+SetKey(int c, int up)
 {
 	u8 reg[] = { 0x7a /* RPC_UI_KEY_PRESS or RPC_UI_KEY_RELEASE */, 0, 1, 0 /* key code */ };
 	reg[0] += up;

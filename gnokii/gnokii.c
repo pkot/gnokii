@@ -18,7 +18,10 @@
   useful :-)
 
   $Log$
-  Revision 1.111  2001-01-10 16:32:18  pkot
+  Revision 1.112  2001-01-12 14:09:13  pkot
+  More cleanups. This time mainly in the code.
+
+  Revision 1.111  2001/01/10 16:32:18  pkot
   Documentation updates.
   FreeBSD fix for 3810 code.
   Added possibility for deleting SMS just after reading it in gnokii.
@@ -190,6 +193,9 @@ int version(void)
   fprintf(stdout, _("GNOKII Version %s\n"
 "Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999, 2000\n"
 "Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999, 2000\n"
+"gnokii is free software, covered by the GNU General Public License, and you are\n"
+"welcome to change it and/or distribute copies of it under certain conditions.\n"
+"There is absolutely no warranty for gnokii.  See GPL for details.\n"
 "Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, model, Port);
 
   return 0;
@@ -1514,7 +1520,7 @@ int deletesms(int argc, char *argv[])
       memory_type_string = "MT";
     }
   else {
-    fprintf(stderr, _("Unknown memory type %s!\n"), argv[0]);
+    fprintf(stderr, _("Unknown memory type %s (use ME,SM,....)!\n"), argv[0]);
     return -1;
   }
 

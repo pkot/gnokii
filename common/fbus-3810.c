@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.75  2001-01-10 16:32:15  pkot
+  Revision 1.76  2001-01-12 14:09:12  pkot
+  More cleanups. This time mainly in the code.
+
+  Revision 1.75  2001/01/10 16:32:15  pkot
   Documentation updates.
   FreeBSD fix for 3810 code.
   Added possibility for deleting SMS just after reading it in gnokii.
@@ -76,7 +79,7 @@
 
     /* Global variables used by code in gsm-api.c to expose the
        functions supported by this model of phone.  */
-bool                    FB38_LinkOK;
+bool	FB38_LinkOK;
 
 #if defined(__svr4__) || defined(__FreeBSD__)
 	/* fd opened in device.c */
@@ -85,74 +88,74 @@ bool                    FB38_LinkOK;
 
 #ifdef WIN32
 
-  void FB38_InitializeLink();
+	void FB38_InitializeLink();
 
 #endif
 
-GSM_Functions           FB38_Functions = {
-        FB38_Initialise,
-        FB38_Terminate,
-        FB38_GetMemoryLocation,
-        FB38_WritePhonebookLocation,
-        FB38_GetSpeedDial,
-        FB38_SetSpeedDial,
-        FB38_GetMemoryStatus,
-        FB38_GetSMSStatus,
-        FB38_GetSMSCenter,
-        FB38_SetSMSCenter,
-        FB38_GetSMSMessage,
-        FB38_DeleteSMSMessage,
-        FB38_SendSMSMessage,
-        FB38_SaveSMSMessage,
-        FB38_GetRFLevel,
-        FB38_GetBatteryLevel,
-        FB38_GetPowerSource,
-        FB38_GetDisplayStatus,
-        FB38_EnterSecurityCode,
-        FB38_GetSecurityCodeStatus,
-        FB38_GetIMEI,
-        FB38_GetRevision,
-        FB38_GetModel,
-        FB38_GetDateTime,
-        FB38_SetDateTime,
-        FB38_GetAlarm,
-        FB38_SetAlarm,
-        FB38_DialVoice,
-        FB38_DialData,
-        FB38_GetIncomingCallNr,
-        FB38_GetNetworkInfo,
-        FB38_GetCalendarNote,
-        FB38_WriteCalendarNote,
-        FB38_DeleteCalendarNote,
-        FB38_Netmonitor,
-        FB38_SendDTMF,
-        FB38_GetBitmap,
-        FB38_SetBitmap,
-        FB38_SetRingTone,
-	FB38_SendRingTone,
-        FB38_Reset,
-        FB38_GetProfile,
-        FB38_SetProfile,
-        FB38_SendRLPFrame,
-        FB38_CancelCall,
-	FB38_EnableDisplayOutput,
-	FB38_DisableDisplayOutput,
-	FB38_EnableCellBroadcast,
-	FB38_DisableCellBroadcast,
-	FB38_ReadCellBroadcast
+GSM_Functions	FB38_Functions = {
+		FB38_Initialise,
+		FB38_Terminate,
+		FB38_GetMemoryLocation,
+		FB38_WritePhonebookLocation,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		FB38_GetMemoryStatus,
+		FB38_GetSMSStatus,
+		FB38_GetSMSCenter,
+		FB38_SetSMSCenter,
+		FB38_GetSMSMessage,
+		FB38_DeleteSMSMessage,
+		FB38_SendSMSMessage,
+		UNIMPLEMENTED,
+		FB38_GetRFLevel,
+		FB38_GetBatteryLevel,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		FB38_GetIMEI,
+		FB38_GetRevision,
+		FB38_GetModel,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		FB38_DialVoice,
+		FB38_DialData,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		FB38_SendDTMF,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		FB38_SendRLPFrame,
+		FB38_CancelCall,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED,
+		UNIMPLEMENTED
 };
 
-GSM_Information         FB38_Information = {
-        "3110|3810|8110|8110i", /* Models */
-        4,                      /* Max RF Level */
-        0,                      /* Min RF Level */
-        GRF_Arbitrary,          /* RF level units */
-        4,                      /* Max Battery Level */
-        0,                      /* Min Battery Level */
-        GBU_Arbitrary,          /* Battery level units */
-        GDT_None,               /* No date/time support */
-        GDT_None,               /* No alarm support */
-        0                       /* Max alarms = 0 */
+GSM_Information	FB38_Information = {
+		"3110|3810|8110|8110i",	/* Models */
+		4,			/* Max RF Level */
+		0,			/* Min RF Level */
+		GRF_Arbitrary,		/* RF level units */
+		4,			/* Max Battery Level */
+		0,			/* Min Battery Level */
+		GBU_Arbitrary,		/* Battery level units */
+		GDT_None,		/* No date/time support */
+		GDT_None,		/* No alarm support */
+		0			/* Max alarms = 0 */
 };
 
 
@@ -664,11 +667,6 @@ GSM_Error   FB38_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
         /* Retries must have failed. */
     DisableKeepalive = false;
     return(CurrentSMSMessageError);
-}
-
-GSM_Error   FB38_SaveSMSMessage(GSM_SMSMessage *SMS)
-{
-    return GE_NOTIMPLEMENTED;
 }
 
     /* FB38_GetRFLevel

@@ -10,7 +10,7 @@ PN=@PACKAGE@
 PV=@VERSION@
 
 DOCS="COPYING ChangeLog VERSION Docs/CREDITS Docs/DataCalls-QuickStart Docs/README*"
-CONF="Docs/sample.gnokiirc"
+CONF="Docs/sample/gnokiirc"
 
 CWD=`pwd`
 
