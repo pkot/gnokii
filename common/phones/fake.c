@@ -136,6 +136,8 @@ static GSM_Error Pfake_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return Pfake_Initialise(state);
 	case GOP_SendSMS:
 		return AT_WriteSMS(data, state, "Writing ");
+	case GOP_GetSMSCenter:
+		return GE_NONE;
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
