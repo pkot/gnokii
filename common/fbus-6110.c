@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.129  2001-02-21 19:56:55  chris
+  Revision 1.130  2001-02-28 21:30:52  machek
+  Return data in GBF_Arbitrary if we can't handle units requested.
+
+  Revision 1.129  2001/02/21 19:56:55  chris
   More fiddling with the directory layout
 
   Revision 1.128  2001/02/17 22:40:48  chris
@@ -1161,8 +1164,9 @@ GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level)
 		return (GE_NONE);
 	}
 
-	/* Unit type is one we don't handle so return error */
-	return (GE_INTERNALERROR);
+	*units = GRF_Arbitrary;
+	*level = rf_level;
+	return (GE_NONE);
 }
 
 GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
@@ -1186,11 +1190,9 @@ GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 
 	if (batt_level != -1) {
 		/* Only units we handle at present are GBU_Arbitrary */
-		if (*units == GBU_Arbitrary) {
-			*level = batt_level;
-			return (GE_NONE);
-		}
-		return (GE_INTERNALERROR);
+		*units = GBU_Arbitrary;
+		*level = batt_level;
+		return (GE_NONE);
 	} else return (GE_NOLINK);
 }
 
