@@ -4,6 +4,10 @@
    applications) to be unique and consistant              (Pawel Kot)
  * Change the internal API to be consistant with the external API
                                                           (Pawel Kot)
+ * Source cleanups:
+    o remove unneeded includes/move the includes to the apropriate
+      places                                              (Pawel Kot)
+    o make not exported globals static                    (Pawel Kot)
  * 6110 series updates:
     o Nokia 8290 is known to work with the driver             (Roger)
     o fix default number reading with the smsc info       (Pawel Kot)

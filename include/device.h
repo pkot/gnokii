@@ -28,8 +28,8 @@
 
 */
 
-#ifndef __device_h_
-#define __device_h_
+#ifndef _gnokii_device_h
+#define _gnokii_device_h
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -41,7 +41,8 @@
 
 int device_getfd(void);
 
-int device_open(const char *file, int with_odd_parity, int with_async, int with_hw_handshake, GSM_ConnectionType device_type);
+int device_open(const char *file, int with_odd_parity, int with_async,
+		int with_hw_handshake, GSM_ConnectionType device_type);
 void device_close(void);
 void device_reset(void);
 
@@ -56,13 +57,4 @@ int device_select(struct timeval *timeout);
 GSM_Error device_nreceived(int *n);
 GSM_Error device_flush(void);
 
-#ifndef WIN32
-#  include "devices/unixserial.h"
-#  include "devices/unixirda.h"
-#  include "devices/tekram.h"
-#  include "devices/tcp.h"
-#else
-#  include "devices/winserial.h"
-#endif
-
-#endif  /* __device_h_ */
+#endif  /* _gnokii_device_h */

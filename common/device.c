@@ -28,22 +28,28 @@
 
 #include "device.h"
 
-/*
- * Structure to store the filedescriptor we use.
- */
+#ifndef WIN32
+#  include "devices/unixserial.h"
+#  include "devices/unixirda.h"
+#  include "devices/tekram.h"
+#  include "devices/tcp.h"
+#else
+#  include "devices/winserial.h"
+#endif
 
-int device_portfd = -1;
+/* The filedescriptor we use. */
+static int device_portfd = -1;
 
 /* The device type to use */
-
-GSM_ConnectionType devicetype;
+static GSM_ConnectionType devicetype;
 
 int device_getfd(void)
 {
 	return device_portfd;
 }
 
-int device_open(const char *file, int with_odd_parity, int with_async, int with_hw_handshake, GSM_ConnectionType device_type)
+int device_open(const char *file, int with_odd_parity, int with_async,
+		int with_hw_handshake, GSM_ConnectionType device_type)
 {
 	devicetype = device_type;
 
