@@ -18,6 +18,7 @@
  * gnokiid updates:
     o threads eliminated from gnokiid                (BORBELY Zoltan)
     o minor cleanup in the RLP module                (BORBELY Zoltan)
+    o access check if mgnokiidev exists              (BORBELY Zoltan)
 
 0.5.0pre1
 =========
