@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2001-02-09 18:12:53  chris
+ * Revision 1.2  2001-02-12 15:13:46  chris
+ * Fixed my bug in xgnokii_contacts.c and added <string.h> to tekram.c
+ *
+ * Revision 1.1  2001/02/09 18:12:53  chris
  * Marcel's tekram support
  *
  */
@@ -33,6 +36,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <termios.h>
+#include <string.h>
 
 #ifndef WIN32
 #include "unixserial.h"

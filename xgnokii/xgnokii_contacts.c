@@ -11,7 +11,10 @@
   $Id$
   
   $Log$
-  Revision 1.24  2001-02-02 08:09:57  ja
+  Revision 1.25  2001-02-12 15:13:46  chris
+  Fixed my bug in xgnokii_contacts.c and added <string.h> to tekram.c
+
+  Revision 1.24  2001/02/02 08:09:57  ja
   New dialogs for 6210/7110 in xgnokii. Fixed the smsd for new capabilty code.
 
   
@@ -2370,32 +2373,34 @@ static void ExportContactsMain (gchar *name)
         sprintf (buf2, "A;%d;%d;", i - memoryStatus.MaxME + 1, pbEntry->entry.Group);
       strcat (buf, buf2);
 
-      /* Add ext. pbk info */
-      
-      for (j=0;j<pbEntry->entry.SubEntriesCount;j++){
-	if (pbEntry->entry.SubEntries[j].EntryType==GSM_Number){
-	  
-	  sprintf(buf2,"%d;",pbEntry->entry.SubEntries[j].NumberType);
-	  strcat(buf,buf2);
-	  
-	  if (index (pbEntry->entry.SubEntries[j].data.Number, ';') != NULL)
-	    {
-	      strcat (buf, "\"");
-	      strcat (buf, pbEntry->entry.SubEntries[j].data.Number);
-	      strcat (buf, "\";");
-	    }
-	  else
-	    {
-	      strcat (buf, pbEntry->entry.SubEntries[j].data.Number);
-	      strcat (buf, ";");
-	    }
+      /* Add ext. pbk info if required */
+
+      if (phoneMonitor.supported & PM_EXTPBK){
+	
+	for (j=0;j<pbEntry->entry.SubEntriesCount;j++){
+	  if (pbEntry->entry.SubEntries[j].EntryType==GSM_Number){
+	    
+	    sprintf(buf2,"%d;",pbEntry->entry.SubEntries[j].NumberType);
+	    strcat(buf,buf2);
+	    
+	    if (index (pbEntry->entry.SubEntries[j].data.Number, ';') != NULL)
+	      {
+		strcat (buf, "\"");
+		strcat (buf, pbEntry->entry.SubEntries[j].data.Number);
+		strcat (buf, "\";");
+	      }
+	    else
+	      {
+		strcat (buf, pbEntry->entry.SubEntries[j].data.Number);
+		strcat (buf, ";");
+	      }
+	  }
 	}
       }
-
       fprintf (f, "%s\n", buf);
     }
   }
-
+  
   fclose(f);
 }
 
