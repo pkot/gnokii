@@ -837,3 +837,13 @@ API bool gn_country_get(gn_country *country, int index)
 	*country = countries[index];
 	return true;
 }
+
+API char *gn_network2country(char *network_code)
+{
+	char ccode[4];
+	
+	strncpy((char *)ccode, network_code, 3);
+	ccode[3] = 0;
+
+	return gn_country_name_get(ccode);
+}

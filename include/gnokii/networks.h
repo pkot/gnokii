@@ -52,4 +52,6 @@ API char *gn_country_code_get(char *country_name);
 API int gn_network_get(gn_network *network, int index);
 API int gn_country_get(gn_country *country, int index);
 
+API char *gn_network2country(char *network);
+
 #endif	/* _gnokii_networks_h */

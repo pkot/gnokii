@@ -968,6 +968,7 @@ gint DrawingAreaExposeEvent(GtkWidget * widget, GdkEventExpose * event)
 void GetNetworkInfoEvent(GtkWidget * widget)
 {
 	gn_error error;
+	gchar *netcou;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_NetworkInfo *data = (D_NetworkInfo *) g_malloc(sizeof(D_NetworkInfo));
 
@@ -993,8 +994,9 @@ void GetNetworkInfoEvent(GtkWidget * widget)
 	}
 
 	/* set new operator name to combo */
-	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry),
-			   gn_network_name_get(networkInfo.network_code));
+	netcou = g_strdup_printf("%s (%s)", gn_network_name_get(networkInfo.network_code),
+					    gn_network2country(networkInfo.network_code));
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry), netcou);
 }
 
 void GetLogoEvent(GtkWidget * widget)
@@ -1623,9 +1625,13 @@ void GUI_CreateLogosWindow(void)
 	networkCombo = gtk_combo_new();
 	gtk_combo_set_use_arrows_always(GTK_COMBO(networkCombo), 1);
 
-	while (gn_network_get(&network, i++))
+	while (gn_network_get(&network, i++)) {
+		gchar *netcou;
+
+		netcou = g_strdup_printf("%s (%s)", network.name, gn_network2country(network.code));
 		glistNetwork = g_list_insert_sorted(glistNetwork,
-						    network.name, (GCompareFunc) strcmp);
+						    netcou, (GCompareFunc) strcmp);
+	}
 	gtk_combo_set_popdown_strings(GTK_COMBO(networkCombo), glistNetwork);
 	gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(networkCombo)->entry), FALSE);
 	gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), networkCombo, "", "");
