@@ -1640,14 +1640,47 @@ GSM_Error   FB38_TX_SendDialCommand(u8 call_type, char *Number)
 }
 
 
-	/* Send RLP frame to phone.  There is some code missing from
-	   here at the moment :) */
+	/* Send RLP frame to phone.  The format of the RLP message to the phone
+	   is similar to the other command messages as far as checksum calculation
+	   etc. goes. */
 bool 	FB38_TX_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 {
+	u8 		message[36];
+  	u8  	checksum;
+	int		i;
+	
+		/* Setup message header */
+	message[0] = 0x02;	/* Start of message - RLP type */
+	message[1] = 0x21;  /* Length */
+	message[2] = 0x01;  /* No idea */
 
-	return (true);		
-		
-		
+		/* Byte 4 is 0x01 for Discontinuous transmission (DTX).
+		   0x00 otherwise.   See section 5.6 of GSM 04.22 version 0.7.1 */
+	if (out_dtx) {
+    	message[3] = 0x01;
+  	}
+  	else {
+		message[3] = 0x00;
+  	}
+	message[4] = 0xd9;	/* No idea but is the same as the 5110/6110 */
+
+		/* Copy frame into message */
+	memcpy(message + 5, (u8 *) frame, 30);
+
+        /* Now calculate checksum over entire message 
+           and append to message. */
+    checksum = 0;
+    for (i = 0; i < 36; i ++) {
+        checksum ^= message[i];
+    }
+	message[35] = checksum;
+
+        /* Send it out... */
+    if (WRITEPHONE(PortFD,message, 36) != 36) {
+        perror(_("TX_SendRLPFrame - write:"));
+        return (false);
+    }
+    return (true);
 }
 
 

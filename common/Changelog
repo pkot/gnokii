@@ -18,3 +18,6 @@
 
 * Fri Mar 10 22:10:00 CET 2000 Chris Kemp <ck231@cam.ac.uk>
 - CancelCall function in fbus-6110.c to end the call.
+  
+* Thu Mar 16 15:27:00 EST 2000 Hugh Blemings <hugh@linuxcare.com>
+- Wrote/tested SendRLPFrame in fbus-3810.c Data calls now work :)
