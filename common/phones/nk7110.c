@@ -506,6 +506,7 @@ static gn_error NK7110_GetBatteryLevel(gn_data *data, struct gn_statemachine *st
 static gn_error NK7110_IncomingNetwork(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char *blockstart;
+	gn_error error = GN_ERR_NONE;
 	int i;
 
 	switch (message[3]) {
@@ -568,11 +569,16 @@ static gn_error NK7110_IncomingNetwork(int messagetype, unsigned char *message, 
 	case 0xa4:
 		dprintf("Op Logo Set OK\n");
 		break;
+	case 0xa5:
+		dprintf("Op Logo Set failed\n");
+		/* Perhaps this should be WRONGFORMAT */
+		error = GN_ERR_FAILED;
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
-		return GN_ERR_UNHANDLEDFRAME;
+		error = GN_ERR_UNHANDLEDFRAME;
 	}
-	return GN_ERR_NONE;
+	return error;
 }
 
 
