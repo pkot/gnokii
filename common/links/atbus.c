@@ -110,6 +110,7 @@ static bool atbus_serial_open(int mode, char *device, struct gn_statemachine *sm
 static gn_error at_send_message(u16 message_length, u8 message_type, unsigned char *msg, struct gn_statemachine *sm)
 {
 	usleep(10000);
+	sm_incoming_acknowledge(sm);
 	return xwrite(msg, message_length, sm) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
 }
 
@@ -161,7 +162,6 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 		bi->rbuf[0] = GN_AT_PROMPT;
 	if (bi->rbuf[0] != GN_AT_NONE) {
 		at_dprintf("read : ", bi->rbuf + 1, bi->rbuf_pos - 1);
-		sm_incoming_acknowledge(sm);
 		sm_incoming_function(sm->last_msg_type, bi->rbuf, bi->rbuf_pos - 1, sm);
 		bi->rbuf_pos = 1;
 		bi->binlen = 1;
