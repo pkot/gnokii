@@ -457,29 +457,63 @@ static void ParseLayout(unsigned char *message, GSM_Data *data)
 
 	switch (message[1]) {
 	case 0x00: /* deliver */
+		dprintf("Type: Deliver\n");
+		data->RawSMS->Type = SMS_Deliver;
 		block = message + 16;
 		memcpy(data->RawSMS->SMSCTime, message + 6, 7);
 		break;
 	case 0x01: /* delivery report */
+		dprintf("Type: Delivery Report\n");
+		data->RawSMS->Type = SMS_Delivery_Report;
 		block = message + 20; 
 		memcpy(data->RawSMS->SMSCTime, message + 6, 7);
 		memcpy(data->RawSMS->Time, message + 13, 7);
 		break;
 	case 0x02: /* submit, templates */
+		if (data->RawSMS->MemoryType == 5) {
+			dprintf("Type: TextTemplate\n");
+			data->RawSMS->Type = SMS_TextTemplate;
+			break;
+		}
+		switch (data->RawSMS->Status) {
+		case SMS_Sent:
+			dprintf("Type: SubmitSent\n");
+			data->RawSMS->Type = SMS_SubmitSent;
+			break;
+		case SMS_Unsent:
+			dprintf("Type: Submit\n");
+			data->RawSMS->Type = SMS_Submit;
+			break;
+		default:
+			dprintf("Wrong type\n");
+			break;
+		}
 		block = message + 8; 
 		break;
+	case 0x80:
+		dprintf("Type: Picture\n");
+		data->RawSMS->Type = SMS_Picture;
+		break;
 	case 0xa0: /* pictures, still ugly */
-		if (message[2] == 0x01) {
+		switch (message[2]) {
+		case 0x01:
+			dprintf("Type: PictureTemplate\n");
+			data->RawSMS->Type = SMS_PictureTemplate;
 			data->RawSMS->Length = 256;
 			memcpy(data->RawSMS->UserData, message + 13, data->RawSMS->Length);
 			return;
-		} else if (message[2] == 0x02) {
+		case 0x02:
+			dprintf("Type: Picture\n");
+			data->RawSMS->Type = SMS_Picture;
 			block = message + 20;
 			memcpy(data->RawSMS->SMSCTime, message + 10, 7);
 			data->RawSMS->Length = 256; 
 			memcpy(data->RawSMS->UserData, message + 50, data->RawSMS->Length);
-		} else 
+			break;
+		default:
 			dprintf("Unknown picture message!\n");
+			break;
+		}
 		break;
 	default:
 		dprintf("Type %02x not yet handled!\n", message[1]);
@@ -508,7 +542,7 @@ static void ParseLayout(unsigned char *message, GSM_Data *data)
 			}
 			break;
 		case 0x80: /* User Data */
-			if (message[1] != 0xa0) {  /* Ignore the found UserData block for pictures */
+			if (data->RawSMS->Type != 0xa0) {  /* Ignore the found UserData block for pictures */
 				data->RawSMS->Length = block[3];
 				memcpy(data->RawSMS->UserData, block + 4, data->RawSMS->Length);
 			}
@@ -524,6 +558,7 @@ static void ParseLayout(unsigned char *message, GSM_Data *data)
 		dprintf("\n");
 		block = block + block[1];
 	}
+	return;
 }
 
 /* handle messages of type 0x14 (SMS Handling, Folders, Logos.. */
@@ -546,59 +581,6 @@ static GSM_Error P6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 		/* MessageType/FolderID */
 		data->RawSMS->MemoryType = message[7];
-
-		switch (message[14]) {
-		case 0x00: /* MT */
-			dprintf("Type: Deliver\n");
-			data->RawSMS->Type = SMS_Deliver;
-			break;
-		case 0x01: /* DR */
-			dprintf("Type: Delivery Report\n");
-			data->RawSMS->Type = SMS_Delivery_Report;
-			break;
-		case 0x02: /* MO */
-			if (data->RawSMS->MemoryType == 5) {
-				dprintf("Type: TextTemplate\n");
-				data->RawSMS->Type = SMS_TextTemplate;
-				break;
-			}
-
-			switch (status) {
-			case SMS_Sent:
-				dprintf("Type: SubmitSent\n");
-				data->RawSMS->Type = SMS_SubmitSent;
-				break;
-			case SMS_Unsent:
-				dprintf("Type: Submit\n");
-				data->RawSMS->Type = SMS_Submit;
-				break;
-			default:
-				return GE_INTERNALERROR;
-				break;
-			}
-			break;
-		case 0x80: /* Picture */
-			dprintf("Type: Picture\n");
-			data->RawSMS->Type = SMS_Picture;
-			break;
-		case 0xa0: /* Pictures */
-			if (message[15] == 0x01) {
-				dprintf("Type: PictureTemplate\n");
-				data->RawSMS->Type = SMS_PictureTemplate;
-			} else {
-				dprintf("Type: Picture\n");
-				data->RawSMS->Type = SMS_Picture;
-			}
-			break;
-		default:
-			return GE_INTERNALERROR;
-			break;
-		}
-			
- 		/*
-		if (message[14] == 0xa0) message[14] = 0x07;
-		if (data->RawSMS->Status == SMS_Sent) message[14] = 0x0A;
-		*/
 
 		break;
 
