@@ -2518,7 +2518,13 @@ static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_UNKNOWN;
 	}
 
-	*pos++ = note->type;
+	switch (note->type) {
+	case GN_CALNOTE_REMINDER: *pos++ = 0x01; break;
+	case GN_CALNOTE_CALL: *pos++ = 0x02; break;
+	case GN_CALNOTE_MEETING: *pos++ = 0x03; break;
+	case GN_CALNOTE_BIRTHDAY: *pos++ = 0x04; break;
+	default: return GN_ERR_INTERNALERROR;
+	}
 
 	*pos++ = note->time.year >> 8;
 	*pos++ = note->time.year & 0xff;
@@ -2605,7 +2611,13 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 			pos = message + 8;
 
 			/* FIXME: this supposed to be replaced by general date unpacking function :-) */
-			note->type = *pos++;
+			switch (*pos++) {
+			case 0x01: note->type = GN_CALNOTE_REMINDER; break;
+			case 0x02: note->type = GN_CALNOTE_CALL; break;
+			case 0x03: note->type = GN_CALNOTE_MEETING; break;
+			case 0x04: note->type = GN_CALNOTE_BIRTHDAY; break;
+			default: return GN_ERR_UNHANDLEDFRAME;
+			}
 			note->time.year = (pos[0] << 8) + pos[1];
 			pos += 2;
 			note->time.month = *pos++;

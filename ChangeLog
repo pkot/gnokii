@@ -29,6 +29,8 @@
     o xgnokii tried to open the HTML file according to locale set,
       be smart and try to match the best one is the default is not
       found                               (Ville Skyttä, Pawel Kot)
+ * 6100 driver updates
+    o calendar entry types was mixed    (Pawel Kot, BORBELY Zoltan)
 
 0.6.3
 =====
