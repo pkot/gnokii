@@ -16,15 +16,18 @@ IrDA connection.
 
 The current code is able to:
  * identify the phone ;-)
- * read phonebook entries
+ * read/write phonebook entries
  * read SMS messages of all kinds
  * read SMS centers
- * read calendar entries
+ * send basic text messages
+ * read/write calendar entries
  * read the memory status
  * read bitmaps (group, operator logos)
  * read network info
- * read list if ringtones
- * send basic test messages (at the moment only with 6310, 6510 does NOT work)
+ * read RF/battery level
+ * read date/time
+ * read list of ringtones
+ * read/write profiles
 
 Hint: For all these phones you can also use AT driver, as they all have a
 builtin hardware modem, which may give you more functionality for the
@@ -33,9 +36,9 @@ moment.
 * Bugs *
 
  * current code needs Manfred's patch to work with DLR-3[P] code
- * someone reported problems when reading phonebook entries with many entries
+ * problems writing phonebook entries (numbers may be attached to number entries)
 
 * TODO *
 
  * implement further functionality
- * adapt xgnokii to work with these phones
+
