@@ -46,7 +46,7 @@ void	ATEM_ModemResult(int code);
 void    ATEM_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
 
 	/* Global variables */
-bool	ATEM_Initialised;
+extern bool ATEM_Initialised;
 extern GSM_Statemachine	*sm;
 extern GSM_Data		data;
 

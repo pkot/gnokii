@@ -65,8 +65,8 @@ static void	*DP_ThreadLoop(void *v);
 extern bool CommandMode;
 
 /* Local variables */
-int		PtyRDFD;	/* File descriptor for reading and writing to/from */
-int		PtyWRFD;	/* pty interface - only different in debug mode. */
+static int	PtyRDFD;	/* File descriptor for reading and writing to/from */
+static int	PtyWRFD;	/* pty interface - only different in debug mode. */
 static int	rfds_n;
 static fd_set	rfds;
 static pthread_t dp_thread = 0;

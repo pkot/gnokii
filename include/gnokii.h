@@ -38,7 +38,7 @@
 
 /* Define these as externs so that app code can pick them up. */
 
-API GSM_Information *GSM_Info;
+extern API GSM_Information *GSM_Info;
 extern GSM_Error (*GSM_F)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
 
 /* Prototype for the functions actually provided by gsm-api.c. */

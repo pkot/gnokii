@@ -58,11 +58,11 @@ static int CBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *mess
 
 /* Some globals */
 
-GSM_Link *glink;
-GSM_Phone *gphone;
-CBUS_Link clink;	/* CBUS specific stuff, internal to this file */
+static GSM_Link *glink;
+static GSM_Phone *gphone;
+static CBUS_Link clink;	/* CBUS specific stuff, internal to this file */
 
-int init_okay = 0;
+static int init_okay = 0;
 int seen_okay;
 char reply_buf[10240];
 

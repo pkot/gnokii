@@ -57,6 +57,8 @@
  * vCalendar support
     o add ToDo support, fix/extend PHONE CALL          (Markus Plail)
  * poll() converted to select() everywhere           (BORBELY Zoltan)
+ * make static variables declared with static keyword, make
+   variables extern where needed                          (Pawel Kot)
 
 0.4.2a
 ======

@@ -59,9 +59,9 @@ static GSM_Error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned ch
 
 /* Some globals */
 
-GSM_Link *glink;
+static GSM_Link *glink;
 static GSM_Statemachine *statemachine;
-PHONET_IncomingMessage imessage;
+static PHONET_IncomingMessage imessage;
 
 
 /*--------------------------------------------*/

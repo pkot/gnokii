@@ -73,23 +73,23 @@ static GSM_CallInfo callinfo;
 static 	char imei[64], model[64], revision[64], manufacturer[64];
 
 /* Local variables */
-int	PtyRDFD;	/* File descriptor for reading and writing to/from */
-int	PtyWRFD;	/* pty interface - only different in debug mode. */
+static int	PtyRDFD;	/* File descriptor for reading and writing to/from */
+static int	PtyWRFD;	/* pty interface - only different in debug mode. */
 
-u8	ModemRegisters[MAX_MODEM_REGISTERS];
-char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
-int	CurrentCmdBuffer;
-int	CurrentCmdBufferIndex;
-bool	VerboseResponse; 	/* Switch betweek numeric (4) and text responses (ERROR) */
-char    IncomingCallNo;
-int     MessageFormat;          /* Message Format (text or pdu) */
+static u8	ModemRegisters[MAX_MODEM_REGISTERS];
+static char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
+static int	CurrentCmdBuffer;
+static int	CurrentCmdBufferIndex;
+static bool	VerboseResponse; 	/* Switch betweek numeric (4) and text responses (ERROR) */
+static char    IncomingCallNo;
+static int     MessageFormat;          /* Message Format (text or pdu) */
 
 	/* Current command parser */
-void 	(*Parser)(char *); /* Current command parser */
+static void 	(*Parser)(char *); /* Current command parser */
 /* void 	(*Parser)(char *) = ATEM_ParseAT; */
 
-GSM_MemoryType 	SMSType;
-int 	SMSNumber;
+static GSM_MemoryType 	SMSType;
+static int 	SMSNumber;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */

@@ -40,7 +40,7 @@
 
 #include "cfgreader.h"
 
-API struct CFG_Header *CFG_Info;
+extern API struct CFG_Header *CFG_Info;
 
 /* Read configuration information from a ".INI" style file */
 struct CFG_Header *CFG_ReadFile(const char *filename)
