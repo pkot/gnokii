@@ -11,6 +11,9 @@
  * Build system updates
     o give the consistant information about --with-gnugetopt
                                                           (Pawel Kot)
+ * 6110 series updates
+    o explicitly name 3360 in misc.h (for xgnokii) and in unixirda.c
+      (for irda connections)                           (Kevin Thayer)
 
 0.4.0pre19
 ==========
