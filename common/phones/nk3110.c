@@ -37,6 +37,19 @@
 
 /* Some globals */
 
+static SMSMessage_Layout nk3110_deliver = {
+	true,
+	16, false, true,
+	-1, -1, -1, -1,  3, -1, -1, -1, 15,  7, -1,  5,
+	-1, false, true,
+	 8, -1,
+	 2,  4,
+	17, true
+};
+
+static SMSMessage_PhoneLayout nk3110_layout;
+
+
 static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x0a, P3110_IncomingNothing },
 	{ 0x0b, P3110_IncomingCall },
@@ -157,6 +170,16 @@ static GSM_Error P3110_Initialise(GSM_Statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_nokia_3110, sizeof(GSM_Phone));
 
+	/* SMS Layout */
+	nk3110_layout.Type = 0;
+	nk3110_layout.SendHeader = 0;
+	nk3110_layout.ReadHeader = 0;
+	nk3110_layout.Deliver = nk3110_deliver;
+	nk3110_layout.Submit = nk3110_deliver;
+	nk3110_layout.DeliveryReport = nk3110_deliver;
+	nk3110_layout.Picture = nk3110_deliver;
+	layout = nk3110_layout;
+	
 	/* Only serial connection is supported */
 	if (state->Link.ConnectionType != GCT_Serial) return GE_NOTSUPPORTED;
 
@@ -248,13 +271,15 @@ static GSM_Error P3110_Identify(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
-	int total_length, timeout, c;
+	int timeout, c;
 	u8 response = 0, request[2];
 	GSM_Error error = GE_INTERNALERROR;
 
 	dprintf("Getting SMS message...\n");
 
 	KeepAliveTimer = P3110_KEEPALIVE_TIMEOUT;
+
+	if (!data->SMSMessage) return GE_INTERNALERROR;
 
 	switch(data->SMSMessage->MemoryType) {
 	case GMT_ME:
@@ -300,6 +325,8 @@ static GSM_Error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 		}
 	}
 
+	if (!data->RawData) return GE_INTERNALERROR;
+
 	/* reset state machine */
 	SM_Reset(state);
 
@@ -308,16 +335,11 @@ static GSM_Error P3110_GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	case 0x2c:
 		if (error != GE_NONE) return error;
 
-		/* Save total length of message */
-		total_length = data->SMSMessage->Length;
-
 		/* Block for subsequent content frames... */
 		do {
 			SM_Block(state, data, 0x27);
-		} while (data->SMSMessage->Length < total_length);
+		} while (!data->RawData->Full);
 
-		/* Terminate message text */
-		data->SMSMessage->UserData[0].u.Text[data->SMSMessage->Length] = 0;
 		return GE_NONE;
 	case 0x2d:
 		return error;
@@ -701,14 +723,18 @@ static GSM_Error P3110_IncomingSMSUserData(int messagetype, unsigned char *messa
 	if (length == 0x02) return GE_NONE;
 
         /* Copy into current SMS message as long as it's non-NULL */
-	if (!data->SMSMessage) return GE_INTERNALERROR;
+	if (!data->RawData) return GE_INTERNALERROR;
 
         /* If this is the first block, reset accumulated message length. */
-	if (message[2] == 1) data->SMSMessage->Length = 0;
+	if (message[2] == 1) data->RawData->Full = 0;
+	else data->RawData->Full = 1;
 
-	/* Copy message text */
-	for (count = 0; count < length-3 && data->SMSMessage->Length < GSM_MAX_SMS_LENGTH; count++, data->SMSMessage->Length++)
-		data->SMSMessage->UserData[0].u.Text[data->SMSMessage->Length] = message[count + 3];
+	count = data->RawData->Length + length - 3;
+
+	/* Copy message text after the stored header */
+	data->RawData->Data = realloc(data->RawData->Data, count);
+	memcpy(data->RawData->Data + data->RawData->Length, message + 3, length - 3);
+	data->RawData->Length = count;
 
 	return GE_NONE;
 }
@@ -750,13 +776,26 @@ static GSM_Error P3110_IncomingSMSSendError(int messagetype, unsigned char *mess
 
 static GSM_Error P3110_IncomingSMSHeader(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	/* u8 sender_length, smsc_length, l; */
-
 	if (!data->SMSMessage) return GE_INTERNALERROR;
 
-	/* Extract data from message into SMSMessage */
+	/* Set standard code of the message type */
+	switch (message[5]) {
+	case 0x24:
+		message[0] = SMS_Deliver;
+		break;
+	case 0x01:
+		message[1] = SMS_Submit;
+		break;
+	default:
+		return GE_INTERNALERROR;
+	}
 
-	/* DecodePDUSMS(message, data->SMSMessage, length); */
+	if (data->RawData) free(data->RawData);
+	data->RawData = calloc(sizeof(GSM_RawData), 1);
+
+	data->RawData->Length = length;
+	data->RawData->Data = malloc(length);
+	memcpy(data->RawData->Data, message, length);
 
 	/* All these moved to gsm-sms.c
 	Set memory type
