@@ -10,53 +10,27 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
-  $Log$
-  Revision 1.12  2001-11-29 17:54:56  pkot
-  Cleanup. Removed cvs logs.
-
-  Revision 1.11  2001/11/27 12:19:01  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.10  2001/11/14 10:46:12  pkot
-  Small cleanup with __unices__
-
-  Revision 1.9  2001/09/14 12:15:28  pkot
-  Cleanups from 0.3.3 (part1)
-
-  Revision 1.8  2001/08/20 23:27:37  pkot
-  Add hardware shakehand to the link layer (Manfred Jonsson)
-
-  Revision 1.7  2001/07/03 00:03:36  pkot
-  Small fixes to let gnokii compile and work under solaris (thanks to Artur Kubiak)
-
-  Revision 1.6  2001/03/21 23:36:04  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.5  2001/03/19 23:43:46  pkot
-  Solaris/ *BSD '#if defined' cleanup
-
-  Revision 1.4  2001/03/13 01:21:38  pkot
-  *BSD updates (Bert Driehuis)
-
-  Revision 1.3  2001/03/06 22:27:46  pkot
-  Misc docs and Makefiles updates and cleanups
-
-  Revision 1.2  2001/02/21 19:57:05  chris
-  More fiddling with the directory layout
-
 */
 
+/* [global] option "serial_write_usleep" default: */
+#define SERIAL_WRITE_USLEEP_DEFAULT (-1)
+
 #include "misc.h"
+#include "cfgreader.h"
 
 /* Do not compile this file under Win32 systems. */
 
 #ifndef WIN32
 
-#include <stdio.h>
+#include <errno.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
+#include <stdio.h>
+#include <limits.h>
 #include <string.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <termios.h>
 #include "devices/unixserial.h"
@@ -97,17 +71,103 @@ static int cfsetspeed(struct termios *t, int speed)
 /* Structure to backup the setting of the terminal. */
 struct termios serial_termios;
 
+/* Script handling: */
+
+static void device_script_cfgfunc(const char *section,const char *key,const char *value)
+{
+	setenv(key, value, 1 /* overwrite */); /* errors ignored */
+}
+
+static int device_script(int fd, const char *section)
+{
+	pid_t pid;
+	const char *scriptname = CFG_Get(CFG_Info, "global", section);
+	int status;
+
+	if (!scriptname)
+		return(0);
+
+	errno = 0;
+	switch ((pid = fork())) {
+	case -1:
+		fprintf(stderr, _("device_script(\"%s\"): fork() failure: %s!\n"), scriptname, strerror(errno));
+		return(-1);
+
+	case 0: /* child */
+		CFG_GetForeach(CFG_Info,section,device_script_cfgfunc);
+		errno = 0;
+		if (dup2(fd,0) != 0 || dup2(fd,1) != 1 || close(fd)) {
+			fprintf(stderr, _("device_script(\"%s\"): file descriptor prepare: %s\n"), scriptname, strerror(errno));
+			_exit(-1);
+		}
+		/* FIXME: close all open descriptors - how to track them?
+		*/
+		execl("/bin/sh", "sh", "-c", scriptname, NULL);
+		fprintf(stderr, _("device_script(\"%s\"): execute script: %s\n"), scriptname, strerror(errno));
+		_exit(-1);
+		/* NOTREACHED */
+
+	default:
+		if (pid == waitpid(pid, &status, 0 /* options */) && WIFEXITED(status) && !WEXITSTATUS(status))
+			return(0);
+		fprintf(stderr, _("device_script(\"%s\"): child script failure: %s, exit code=%d\n"), scriptname,
+			(WIFEXITED(status) ? _("normal exit") : _("abnormal exit")),
+			(WIFEXITED(status) ? WEXITSTATUS(status) : -1));
+		errno = EIO;
+		return(-1);
+
+	}
+	/* NOTREACHED */
+}
+
+int serial_close_all_openfds[0x10];	/* -1 when entry not used, fd otherwise */
+int serial_close(int __fd);
+
+static void serial_close_all(void)
+{
+	int i;
+
+	dprintf("serial_close_all() executed\n");
+	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
+		if (serial_close_all_openfds[i] != -1)
+			serial_close(serial_close_all_openfds[i]);
+}
+
+#if 0	/* Disabled for now as atexit() functions are then called multiple times for pthreads! */
+static void unixserial_interrupted(int signo)
+{
+	exit(EXIT_FAILURE);
+	/* NOTREACHED */
+}
+#endif
+
 /* Open the serial port and store the settings. */
 int serial_open(__const char *__file, int __oflag)
 {
 	int __fd;
-	int retcode;
+	int retcode, i;
+	static bool atexit_registered = false;
+
+	if (!atexit_registered) {
+		memset(serial_close_all_openfds, -1, sizeof(serial_close_all_openfds));
+#if 0	/* Disabled for now as atexit() functions are then called multiple times for pthreads! */
+		signal(SIGINT, unixserial_interrupted);
+#endif
+		atexit(serial_close_all);
+		atexit_registered = true;
+	}
 
 	__fd = open(__file, __oflag);
 	if (__fd == -1) {
 		perror("Gnokii serial_open: open");
 		return (-1);
 	}
+
+	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
+		if (serial_close_all_openfds[i]==-1 || serial_close_all_openfds[i]==__fd) {
+			serial_close_all_openfds[i]=__fd;
+			break;
+		}
 
 	retcode = tcgetattr(__fd, &serial_termios);
 	if (retcode == -1) {
@@ -123,50 +183,72 @@ int serial_open(__const char *__file, int __oflag)
 /* Close the serial port and restore old settings. */
 int serial_close(int __fd)
 {
-	if (__fd >= 0)
+	int i;
+
+	for (i = 0; i < ARRAY_LEN(serial_close_all_openfds); i++)
+		if (serial_close_all_openfds[i] == __fd)
+			serial_close_all_openfds[i] = -1;		/* fd closed */
+
+	/* handle config file disconnect_script:
+	 */
+	if (device_script(__fd, "disconnect_script") == -1)
+		fprintf(stderr, _("Gnokii serial_close: disconnect_script\n"));
+
+	if (__fd >= 0) {
+#if 1 /* HACK */
+		serial_termios.c_cflag |= HUPCL;	/* production == 1 */
+#else
+		serial_termios.c_cflag &= ~HUPCL;	/* debugging  == 0 */
+#endif
+ 
 		tcsetattr(__fd, TCSANOW, &serial_termios);
+	}
 
 	return (close(__fd));
 }
 
-/* Open a device with standard options. */
+/* Open a device with standard options.
+ * Use value (-1) for "__with_hw_handshake" if its specification is required from the user.
+ */
 int serial_opendevice(__const char *__file, int __with_odd_parity,
 		      int __with_async, int __with_hw_handshake)
 {
 	int fd;
-	int retcode;
+	int retcode, baudrate;
 	struct termios tp;
+	char *s;
 
-	/* Open device */
+	/* handle config file handshake override: */
+	s = CFG_Get(CFG_Info, "global", "handshake");
+
+	if (s && (!strcasecmp(s, "software") || !strcasecmp(s, "rtscts")))
+		__with_hw_handshake = false;
+	else if (s && (!strcasecmp(s, "hardware") || !strcasecmp(s, "xonxoff")))
+		__with_hw_handshake = true;
+	else if (s)
+		fprintf(stderr, _("Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value, ignoring!"),
+				 "global", "handshake", "software", "hardware");
+
+	if (__with_hw_handshake == -1) {
+		fprintf(stderr, _("[%s] option \"%s\" not found, trying to use \"%s\" value!"),
+				  "global", "handshake", "software");
+		__with_hw_handshake = false;
+	}
+
+ 	/* Open device */
+ 
+	/* O_NONBLOCK MUST be used here as the CLOCAL may be currently off
+	 * and if DCD is down the "open" syscall would be stuck wating for DCD.
+	 */
 	fd = serial_open(__file, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
 	if (fd < 0) return fd;
-
-	/* Allow process/thread to receive SIGIO */
-#if !(__unices__)
-	retcode = fcntl(fd, F_SETOWN, getpid());
-	if (retcode == -1) {
-		perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
-		serial_close(fd);
-		return (-1);
-	}
-#endif
-
-	/* Make filedescriptor asynchronous. */
-	if (__with_async) {
-		retcode = fcntl(fd, F_SETFL, FASYNC);
-		if (retcode == -1) {
-			perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
-			serial_close(fd);
-			return (-1);
-		}
-	}
 
 	/* Initialise the port settings */
 	memcpy(&tp, &serial_termios, sizeof(struct termios));
 
 	/* Set port settings for canonical input processing */
-	tp.c_cflag = B0 | CS8 | CLOCAL | CREAD;
+	tp.c_cflag = B0 | CS8 | CLOCAL | CREAD | HUPCL;
 	if (__with_odd_parity) {
 		tp.c_cflag |= (PARENB | PARODD);
 		tp.c_iflag = 0;
@@ -196,6 +278,57 @@ int serial_opendevice(__const char *__file, int __with_odd_parity,
 		return (-1);
 	}
 
+	/* Set speed */
+	s = CFG_Get(CFG_Info, "global", "serial_baudrate"); /* baud rate string */
+
+	if (s) baudrate = atoi(s);
+	if (baudrate && serial_changespeed(fd, baudrate) != GE_NONE)
+		baudrate = 0;
+	if (!baudrate)
+		serial_changespeed(fd, 19200 /* default value */ );
+
+	/* We need to turn off O_NONBLOCK now (we have CLOCAL set so it is safe).
+	 * When we run some device script it really doesn't expect NONBLOCK!
+	 */
+
+	retcode = fcntl(fd, F_SETFL, 0);
+	if (retcode == -1) {
+		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
+		serial_close(fd);
+		return(-1);
+	}
+
+	/* handle config file connect_script:
+	 */
+	if (device_script(fd,"connect_script") == -1) {
+		fprintf(stderr,"Gnokii serial_opendevice: connect_script\n");
+		serial_close(fd);
+		return(-1);
+	}
+
+	/* Allow process/thread to receive SIGIO */
+
+#if !(__unices__)
+	retcode = fcntl(fd, F_SETOWN, getpid());
+	if (retcode == -1) {
+		perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
+		serial_close(fd);
+		return(-1);
+	}
+#endif
+
+	/* Make filedescriptor asynchronous. */
+
+	/* We need to supply FNONBLOCK (or O_NONBLOCK) again as it would get reset
+	 * by F_SETFL as a side-effect!
+	 */
+	retcode = fcntl(fd, F_SETFL, (__with_async ? FASYNC : 0) | FNONBLOCK);
+	if (retcode == -1) {
+		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
+		serial_close(fd);
+		return(-1);
+	}
+	
 	return fd;
 }
 
@@ -231,9 +364,12 @@ int serial_select(int fd, struct timeval *timeout)
 }
 
 
-/* Change the speed of the serial device. */
-void serial_changespeed(int __fd, int __speed)
+/* Change the speed of the serial device.
+ * RETURNS: Success
+ */
+GSM_Error serial_changespeed(int __fd, int __speed)
 {
+	GSM_Error retcode = GE_NONE;
 #ifndef SGTTY
 	struct termios t;
 #else
@@ -257,23 +393,29 @@ void serial_changespeed(int __fd, int __speed)
 	case 115200:
 		speed = B115200;
 		break;
+	default:
+		fprintf(stderr, _("Serial port speed %d not supported!\n"), __speed);
+		return(GE_NOTSUPPORTED);
 	}
 
 #ifndef SGTTY
-	tcgetattr(__fd, &t);
+	if (tcgetattr(__fd, &t)) retcode = GE_INTERNALERROR;
 
-	if (cfsetspeed(&t, speed) == -1)
+	if (cfsetspeed(&t, speed) == -1) {
 		dprintf("Serial port speed setting failed\n");
+		retcode = GE_INTERNALERROR;
+	}
 
 	tcsetattr(__fd, TCSADRAIN, &t);
 #else
-	ioctl(__fd, TIOCGETP, &t);
+	if (ioctl(__fd, TIOCGETP, &t)) retcode = GE_INTERNALERROR;
 
 	t.sg_ispeed = speed;
 	t.sg_ospeed = speed;
 
-	ioctl(__fd, TIOCSETN, &t);
+	if (ioctl(__fd, TIOCSETN, &t)) retcode = GE_INTERNALERROR;
 #endif
+	return(retcode);
 }
 
 /* Read from serial device. */
@@ -282,10 +424,64 @@ size_t serial_read(int __fd, __ptr_t __buf, size_t __nbytes)
 	return (read(__fd, __buf, __nbytes));
 }
 
+#if !defined(TIOCMGET) && defined(TIOCMODG)
+#  define TIOCMGET TIOCMODG
+#endif
+
+static void check_dcd(int __fd)
+{
+#ifdef TIOCMGET
+	int mcs;
+
+	if (ioctl(__fd, TIOCMGET, &mcs) || !(mcs & TIOCM_CAR)) {
+		fprintf(stderr, _("ERROR: Modem DCD is down and global/require_dcd parameter is set!\n"));
+		exit(EXIT_FAILURE);		/* Hard quit of all threads */
+	}
+#else
+	/* Impossible!! (eg. Coherent) */
+#endif
+}
+
 /* Write to serial device. */
 size_t serial_write(int __fd, __const __ptr_t __buf, size_t __n)
 {
-	return (write(__fd, __buf, __n));
+	size_t r = 0;
+	ssize_t got;
+	static long serial_write_usleep = LONG_MIN;
+	static int require_dcd = -1;
+
+	if (serial_write_usleep == LONG_MIN) {
+		char *s = CFG_Get(CFG_Info, "global", "serial_write_usleep");
+
+		serial_write_usleep = (!s ?
+			SERIAL_WRITE_USLEEP_DEFAULT : atol(CFG_Get(CFG_Info, "global", "serial_write_usleep")));
+	}
+
+	if (require_dcd == -1) {
+		require_dcd = (!!CFG_Get(CFG_Info, "global", "require_dcd"));
+#ifndef TIOCMGET
+		if (require_dcd)
+			fprintf(stderr, _("WARNING: global/require_dcd argument was set but it is not supported on this system!\n"));
+#endif
+	}
+
+	if (require_dcd)
+		check_dcd(__fd);
+
+	if (serial_write_usleep < 0)
+		return(write(__fd, __buf, __n));
+
+	while (__n > 0) {
+		got = write(__fd, __buf, 1);
+		if (got <= 0)
+			return((!r ? -1 : r));
+		__buf++;
+		__n--;
+		r++;
+		if (serial_write_usleep)
+			usleep(serial_write_usleep);
+	}
+	return(r);
 }
 
 #endif /* WIN32 */
