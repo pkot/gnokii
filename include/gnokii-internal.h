@@ -56,7 +56,7 @@ gn_error sm_block(int waitfor, gn_data *data, struct gn_statemachine *state);
 gn_error sm_block_no_retry_timeout(int waitfor, int t, gn_data *data, struct gn_statemachine *state);
 gn_error sm_block_no_retry(int waitfor, gn_data *data, struct gn_statemachine *state);
 gn_error sm_block_ack(struct gn_statemachine *state);
-void sm_message_dump(int messagetype, unsigned char *message, int length);
+void sm_message_dump(gn_log_func_t lfunc, int messagetype, unsigned char *message, int length);
 void sm_unhandled_frame_dump(int messagetype, unsigned char *message, int length, struct gn_statemachine *state);
 
 extern void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len);

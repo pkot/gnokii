@@ -134,6 +134,7 @@ API void gn_log_debug(const char *fmt, ...);
 API void gn_log_rlpdebug(const char *fmt, ...);
 API void gn_log_xdebug(const char *fmt, ...);
 API void gn_elog_write(const char *fmt, ...);
+typedef API void (*gn_log_func_t)(const char *fmt, ...);
 
 API int gn_line_get(FILE *file, char *line, int count);
 

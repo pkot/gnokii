@@ -43,8 +43,8 @@ gn_error sm_message_send(u16 messagesize, u8 messagetype, void *message, struct 
 {
 	if (state->current_state != GN_SM_Startup) {
 #ifdef	DEBUG
-		dump("Message sent: ");
-		sm_message_dump(messagetype, message, messagesize);
+		dprintf("Message sent: ");
+		sm_message_dump(gn_log_debug, messagetype, message, messagesize);
 #endif
 		state->last_msg_size = messagesize;
 		state->last_msg_type = messagetype;
@@ -100,8 +100,8 @@ void sm_incoming_function(u8 messagetype, void *message, u16 messagesize, struct
 	int waitingfor = -1;
 
 #ifdef	DEBUG
-	dump("Message received: ");
-	sm_message_dump(messagetype, message, messagesize);
+	dprintf("Message received: ");
+	sm_message_dump(gn_log_debug, messagetype, message, messagesize);
 #endif
 	edata = (gn_data *)calloc(1, sizeof(gn_data));
 	data = edata;
@@ -331,37 +331,37 @@ API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemach
 }
 
 /* Dumps a message */
-void sm_message_dump(int messagetype, unsigned char *message, int messagesize)
+void sm_message_dump(gn_log_func_t lfunc, int messagetype, unsigned char *message, int messagesize)
 {
 	int i;
 	char buf[17];
 
 	buf[16] = 0;
 
-	dump("0x%02x / 0x%04x", messagetype, messagesize);
+	lfunc("0x%02x / 0x%04x", messagetype, messagesize);
 
 	for (i = 0; i < messagesize; i++) {
 		if (i % 16 == 0) {
-			if (i != 0) dump("| %s", buf);
-			dump("\n");
+			if (i != 0) lfunc("| %s", buf);
+			lfunc("\n");
 			memset(buf, ' ', 16);
 		}
-		dump("%02x ", message[i]);
+		lfunc("%02x ", message[i]);
 		if (isprint(message[i])) buf[i % 16] = message[i];
 	}
 
-	if (i != 0) dump("%*s| %s", i % 16 ? 3 * (16 - i % 16) : 0, "", buf);
-	dump("\n");
+	if (i != 0) lfunc("%*s| %s", i % 16 ? 3 * (16 - i % 16) : 0, "", buf);
+	lfunc("\n");
 }
 
 /* Prints a warning message about unhandled frames */
 void sm_unhandled_frame_dump(int messagetype, unsigned char *message, int messagesize, struct gn_statemachine *state)
 {
 	dump(_("UNHANDLED FRAME RECEIVED\nrequest: "));
-	sm_message_dump(state->last_msg_type, state->last_msg, state->last_msg_size);
+	sm_message_dump(gn_elog_write, state->last_msg_type, state->last_msg, state->last_msg_size);
 
 	dump(_("reply: "));
-	sm_message_dump(messagetype, message, messagesize);
+	sm_message_dump(gn_elog_write, messagetype, message, messagesize);
 
 	dump(_("Please read Docs/Bugs and send a bug report!\n"));
 }
