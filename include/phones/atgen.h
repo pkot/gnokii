@@ -76,7 +76,7 @@ typedef struct {
 	at_charset charset;
 } at_driver_instance;
 
-#define AT_DRVINST(s) ((at_driver_instance *)((s)->driver.driver_instance))
+#define AT_DRVINST(s) (*((at_driver_instance **)(&(s)->driver.driver_instance)))
 
 typedef struct {
 	char *line1;

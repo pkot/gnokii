@@ -55,6 +55,6 @@ typedef struct {
 	int binlen;
 } atbus_instance;
 
-#define AT_BUSINST(s) ((atbus_instance *)((s)->link.link_instance))
+#define AT_BUSINST(s) (*((atbus_instance **)(&(s)->link.link_instance)))
 
 #endif   /* #ifndef _gnokii_atbus_h */

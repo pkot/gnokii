@@ -52,7 +52,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 static gn_error phonet_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
 
 
-#define FBUSINST(s) ((phonet_incoming_message *)((s)->link.link_instance))
+#define FBUSINST(s) (*((phonet_incoming_message **)(&(s)->link.link_instance)))
 
 #define FBUS_PHONET_BLUETOOTH_INITSEQ 0xd0, 0x00, 0x01
 

@@ -57,7 +57,7 @@ typedef struct{
 	unsigned char prev_rx_byte;
 } cbus_instance;
 
-#define CBUSINST(s) ((cbus_instance *)((s)->link.link_instance))
+#define CBUSINST(s) (*((cbus_instance **)(&(s)->link.link_instance)))
 
 gn_error cbus_initialise(struct gn_statemachine *state);
 

@@ -58,7 +58,7 @@ typedef struct {
 	int logoslice;
 } nk6160_driver_instance;
 
-#define NK6160_DRVINST(s) ((nk6160_driver_instance *)((s)->driver.driver_instance))
+#define NK6160_DRVINST(s) (*((nk6160_driver_instance **)(&(s)->driver.driver_instance)))
 
 /* static functions prototypes */
 static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state);

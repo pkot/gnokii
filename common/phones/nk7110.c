@@ -50,7 +50,7 @@
 
 #include "gnokii-internal.h"
 
-#define DRVINSTANCE(s) ((nk7110_driver_instance *)((s)->driver.driver_instance))
+#define DRVINSTANCE(s) (*((nk7110_driver_instance **)(&(s)->driver.driver_instance)))
 #define FREE(p) do { free(p); (p) = NULL; } while (0)
 
 #define SEND_MESSAGE_BLOCK(type, length) \

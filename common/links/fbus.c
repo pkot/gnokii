@@ -54,7 +54,7 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 
 /* FIXME - win32 stuff! */
 
-#define FBUSINST(s) ((fbus_link *)((s)->link.link_instance))
+#define FBUSINST(s) (*((fbus_link **)(&(s)->link.link_instance)))
 
 #define	IR_MODE(s) ((s)->config.connection_type == GN_CT_Infrared || (s)->config.connection_type == GN_CT_Tekram)
 

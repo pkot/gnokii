@@ -58,7 +58,7 @@ static int fb3110_message_type_fold(int type);
 
 /* FIXME - win32 stuff! */
 
-#define FBUSINST(s) ((fb3110_link *)((s)->link.link_instance))
+#define FBUSINST(s) (*((fb3110_link **)(&(s)->link.link_instance)))
 
 
 /*--------------------------------------------*/

@@ -48,7 +48,7 @@
 #include "gnokii-internal.h"
 #include "gnokii.h"
 
-#define	DRVINSTANCE(s) ((gnapplet_driver_instance *)((s)->driver.driver_instance))
+#define	DRVINSTANCE(s) (*((gnapplet_driver_instance **)(&(s)->driver.driver_instance)))
 #define	FREE(p) do { free(p); (p) = NULL; } while (0)
 
 #define	REQUEST_DEFN(n) \

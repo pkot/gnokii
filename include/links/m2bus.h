@@ -90,7 +90,7 @@ typedef struct{
 	u8 request_sequence_number;
 } m2bus_link;
 
-#define M2BUSINST(s) ((m2bus_link *)((s)->link.link_instance))
+#define M2BUSINST(s) (*((m2bus_link **)(&(s)->link.link_instance)))
 
 gn_error m2bus_initialise(struct gn_statemachine *state);
 

@@ -77,7 +77,7 @@ typedef struct{
 	gnbus_incoming_message i;
 } gnbus_link;
 
-#define GNBUSINST(s) ((gnbus_link *)((s)->link.link_instance))
+#define GNBUSINST(s) (*((gnbus_link **)(&(s)->link.link_instance)))
 
 gn_error gnbus_initialise(struct gn_statemachine *state);
 
