@@ -212,10 +212,10 @@ API char *gn_device_lock(const char* port)
 				goto failed;
 			}
 		}
-		/* this must not happen. because we could open the file   */
-		/* no wrong permissions are set. only reason could be     */
-		/* flock/lockf or a empty lockfile due to a broken binary */
-		/* which is more likely (like gnokii 0.4.0pre11 ;-)       */
+		/* This must not happen. Because we could open the file    */
+		/* no wrong permissions are set. Only reason could be      */
+		/* flock/lockf or an empty lockfile due to a broken binary */
+		/* which is more likely (like gnokii 0.4.0pre11 ;-).       */
 		if (n == 0) {
 			fprintf(stderr, _("Unable to read lockfile %s.\n"), lock_file);
 			fprintf(stderr, _("Please check for reason and remove the lockfile by hand.\n"));
