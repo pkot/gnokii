@@ -23,6 +23,7 @@ INSTALL_DOCS = 	README \
 		README-dancall \
 		README-ericsson \
 		README-siemens \
+		README-Symbian \
 		README.libsms \
 		CREDITS \
 		Bugs \
