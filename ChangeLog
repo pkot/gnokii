@@ -46,6 +46,9 @@
     o keepalive packet won't be reported as an unhadled frame
                                                      (BORBELY Zoltan)
     o CancelCall, AnswerCall fixed                   (BORBELY Zoltan)
+    o share the CallDivert code with 7110 driver          (Pawel Kot)
+ * 7110 series updates
+    o share the CallDivert code with 6110 driver          (Pawel Kot)
 
 0.4.0pre17
 ==========

@@ -24,32 +24,26 @@
 
   Copyright (C) 2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001 Manfred Jonsson
-  Copyright (C) 2002 BORBELY Zoltan
+  Copyright (C) 2002 BORBELY Zoltan, Pawel Kot
 
   This file provides useful functions for all phones
   See README for more details on supported mobile phones.
 
   The various routines are called PNOK_(whatever).
 
-  The auth code is written specially for gnokii project by Odinokov Serge.
-  If you have some special requests for Serge just write him to
-  apskaita@post.omnitel.net or serge@takas.lt
-
-  Reimplemented in C by Pavel Janík ml.
 */
 
 #include <string.h>
 
-#include "gsm-common.h"
-#include "phones/nokia.h"
+#include "gsm-data.h"
+#include "links/fbus.h"
 
-
-/* This function provides a way to detect the manufacturer of a phone */
-/* because it is only used by the fbus/mbus protocol phones and only */
-/* nokia is using those protocols, the result is clear. */
-/* the error reporting is also very simple */
-/* the strncpy and PNOK_MAX_MODEL_LENGTH is only here as a reminder */
-
+/* This function provides a way to detect the manufacturer of a phone
+ * because it is only used by the fbus/mbus protocol phones and only
+ * nokia is using those protocols, the result is clear.
+ * the error reporting is also very simple
+ * the strncpy and PNOK_MAX_MODEL_LENGTH is only here as a reminder
+ */
 GSM_Error PNOK_GetManufacturer(char *manufacturer)
 {
 	strcpy(manufacturer, "Nokia");
@@ -75,5 +69,124 @@ size_t PNOK_EncodeString(unsigned char *dest, size_t max, const unsigned char *s
 	for (i = 0; i < max && src[i]; i++)
 		dest[i] = src[i];
 	return i;
+}
+
+/* Call Divert */
+GSM_Error PNOK_CallDivert(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned short length = 0x09;
+	char req[55] = { FBUS_FRAME_HEADER, 0x01, 0x00, /* operation */
+						0x00,
+						0x00, /* divert type */
+						0x00, /* call type */
+						0x00 };
+	if (!data->CallDivert) return GE_UNKNOWN;
+	switch (data->CallDivert->Operation) {
+	case GSM_CDV_Query:
+		req[4] = 0x05;
+		break;
+	case GSM_CDV_Register:
+		req[4] = 0x03;
+		length = 0x37;
+		req[8] = 0x01;
+		req[9] = SemiOctetPack(data->CallDivert->Number.number, req + 10, data->CallDivert->Number.type);
+		req[54] = data->CallDivert->Timeout;
+		break;
+	case GSM_CDV_Erasure:
+		req[4] = 0x04;
+		break;
+	default:
+		return GE_NOTIMPLEMENTED;
+	}
+	switch (data->CallDivert->CType) {
+	case GSM_CDV_AllCalls:
+		break;
+	case GSM_CDV_VoiceCalls:
+		req[7] = 0x0b;
+		break;
+	case GSM_CDV_FaxCalls:
+		req[7] = 0x0d;
+		break;
+	case GSM_CDV_DataCalls:
+		req[7] = 0x19;
+		break;
+	default:
+		return GE_NOTIMPLEMENTED;
+	}
+	switch (data->CallDivert->DType) {
+	case GSM_CDV_AllTypes:
+		req[6] = 0x15;
+		break;
+	case GSM_CDV_Busy:
+		req[6] = 0x43;
+		break;
+	case GSM_CDV_NoAnswer:
+		req[6] = 0x3d;
+		break;
+	case GSM_CDV_OutOfReach:
+		req[6] = 0x3e;
+		break;
+	default:
+		return GE_NOTIMPLEMENTED;
+	}
+	if ((data->CallDivert->DType == GSM_CDV_AllTypes) &&
+	    (data->CallDivert->CType == GSM_CDV_AllCalls))
+		req[6] = 0x02;
+
+	if (SM_SendMessage(state, length, 0x06, req) != GE_NONE) return GE_NOTREADY;
+	return SM_BlockTimeout(state, data, 0x06, 100);
+}
+
+GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	unsigned char *pos;
+	GSM_CallDivert *cd;
+
+	switch (message[3]) {
+	/* Get call diverts ok */
+	case 0x02:
+		pos = message + 4;
+		cd = data->CallDivert;
+		if (*pos != 0x05 && *pos != 0x04) return GE_UNHANDLEDFRAME;
+		pos++;
+		if (*pos++ != 0x00) return GE_UNHANDLEDFRAME;
+		switch (*pos++) {
+		case 0x02:
+		case 0x15: cd->DType = GSM_CDV_AllTypes; break;
+		case 0x43: cd->DType = GSM_CDV_Busy; break;
+		case 0x3d: cd->DType = GSM_CDV_NoAnswer; break;
+		case 0x3e: cd->DType = GSM_CDV_OutOfReach; break;
+		default: return GE_UNHANDLEDFRAME;
+		}
+		if (*pos++ != 0x02) return GE_UNHANDLEDFRAME;
+		switch (*pos++) {
+		case 0x00: cd->CType = GSM_CDV_AllCalls; break;
+		case 0x0b: cd->CType = GSM_CDV_VoiceCalls; break;
+		case 0x0d: cd->CType = GSM_CDV_FaxCalls; break;
+		case 0x19: cd->CType = GSM_CDV_DataCalls; break;
+		default: return GE_UNHANDLEDFRAME;
+		}
+		if (message[4] == 0x04 && pos[0] == 0x00) {
+			return GE_EMPTYMEMORYLOCATION;
+		} else if (message[4] == 0x04 || (pos[0] == 0x01 && pos[1] == 0x00)) {
+			cd->Number.type = SMS_Unknown;
+			memset(cd->Number.number, 0, sizeof(cd->Number.number));
+		} else if (pos[0] == 0x02 && pos[1] == 0x01) {
+			pos += 2;
+			snprintf(cd->Number.number, sizeof(cd->Number.number), "%-*.*s", *pos+1, *pos+1, GetBCDNumber(pos+1));
+			pos += 12 + 22;
+			cd->Timeout = *pos++;
+		}
+		break;
+
+	/* FIXME: failed calldivert result code? */
+	case 0x03:
+		return GE_UNHANDLEDFRAME;
+	
+	default:
+		return GE_UNHANDLEDFRAME;
+	}
+
+	return GE_NONE;
 }
 

@@ -161,7 +161,6 @@ static GSM_Error GetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetRawRingtone(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
 static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state);
-static GSM_Error CallDivert(GSM_Data *data, GSM_Statemachine *state);
 
 #ifdef  SECURITY
 static GSM_Error EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
@@ -184,7 +183,6 @@ static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int l
 static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length, GSM_Data *data);
-static GSM_Error IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingMisc(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 #ifdef  SECURITY
@@ -209,7 +207,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x01, IncomingCallInfo },
 	{ 0xf1, IncomingRLPFrame },
 	{ 0x0c, IncomingKey },
-	{ 0x06, IncomingCallDivert },
+	{ 0x06, PNOK_IncomingCallDivert },
 	{ 0xda, IncomingMisc },
 #ifdef	SECURITY
 	{ 0x08, IncomingSecurityCode },
@@ -358,7 +356,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 	case GOP_EnterChar:
 		return EnterChar(data, state);
 	case GOP_CallDivert:
-		return CallDivert(data, state);
+		return PNOK_CallDivert(data, state);
 	default:
 		dprintf("NK61xx unimplemented operation: %d\n", op);
 		return GE_NOTIMPLEMENTED;
@@ -376,7 +374,14 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
    connected!" displayed on the LCD. Otherwise it will display "Accessory not
    supported" and some functions will not be available for use.
 
-   The specification of the protocol is not publicly available, no comment. */
+   The specification of the protocol is not publicly available, no comment.
+
+   The auth code is written specially for gnokii project by Odinokov Serge.
+   If you have some special requests for Serge just write him to
+   apskaita@post.omnitel.net or serge@takas.lt
+
+   Reimplemented in C by Pavel Janík ml.
+*/
 
 void PNOK_GetNokiaAuth(unsigned char *Imei, unsigned char *MagicBytes, unsigned char *MagicResponse)
 {
@@ -3210,124 +3215,6 @@ static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length
 		if (ParseKey(State, GSM_KEY_ASTERISK, &pos)) return GE_UNHANDLEDFRAME;
 		break;
 
-	default:
-		return GE_UNHANDLEDFRAME;
-	}
-
-	return GE_NONE;
-}
-
-
-static GSM_Error CallDivert(GSM_Data *data, GSM_Statemachine *state)
-{
-	unsigned short length = 0x09;
-	char req[55] = { FBUS_FRAME_HEADER, 0x01, 0x00, /* operation */
-						0x00,
-						0x00, /* divert type */
-						0x00, /* call type */
-						0x00 };
-	if (!data->CallDivert) return GE_UNKNOWN;
-	switch (data->CallDivert->Operation) {
-	case GSM_CDV_Query:
-		req[4] = 0x05;
-		break;
-	case GSM_CDV_Register:
-		req[4] = 0x03;
-		length = 0x37;
-		req[8] = 0x01;
-		req[9] = SemiOctetPack(data->CallDivert->Number.number, req + 10, data->CallDivert->Number.type);
-		req[54] = data->CallDivert->Timeout;
-		break;
-	case GSM_CDV_Erasure:
-		req[4] = 0x04;
-		break;
-	default:
-		return GE_NOTIMPLEMENTED;
-	}
-	switch (data->CallDivert->CType) {
-	case GSM_CDV_AllCalls:
-		break;
-	case GSM_CDV_VoiceCalls:
-		req[7] = 0x0b;
-		break;
-	case GSM_CDV_FaxCalls:
-		req[7] = 0x0d;
-		break;
-	case GSM_CDV_DataCalls:
-		req[7] = 0x19;
-		break;
-	default:
-		return GE_NOTIMPLEMENTED;
-	}
-	switch (data->CallDivert->DType) {
-	case GSM_CDV_AllTypes:
-		req[6] = 0x15;
-		break;
-	case GSM_CDV_Busy:
-		req[6] = 0x43;
-		break;
-	case GSM_CDV_NoAnswer:
-		req[6] = 0x3d;
-		break;
-	case GSM_CDV_OutOfReach:
-		req[6] = 0x3e;
-		break;
-	default:
-		return GE_NOTIMPLEMENTED;
-	}
-//	if ((data->CallDivert->Operation == GSM_CDV_Erasure) && (data->CallDivert->DType == GSM_CDV_AllTypes) && (data->CallDivert->CType == GSM_CDV_AllCalls))
-//		req[6] = 0x02;
-
-	if (SM_SendMessage(state, length, 0x06, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockTimeout(state, data, 0x06, 100);
-}
-
-static GSM_Error IncomingCallDivert(int messagetype, unsigned char *message, int length, GSM_Data *data)
-{
-	unsigned char *pos;
-	GSM_CallDivert *cd;
-
-	switch (message[3]) {
-	/* Get call diverts ok */
-	case 0x02:
-		pos = message + 4;
-		cd = data->CallDivert;
-		if (*pos != 0x05 && *pos != 0x04) return GE_UNHANDLEDFRAME;
-		pos++;
-		if (*pos++ != 0x00) return GE_UNHANDLEDFRAME;
-		switch (*pos++) {
-		case 0x02:
-		case 0x15: cd->DType = GSM_CDV_AllTypes; break;
-		case 0x43: cd->DType = GSM_CDV_Busy; break;
-		case 0x3d: cd->DType = GSM_CDV_NoAnswer; break;
-		case 0x3e: cd->DType = GSM_CDV_OutOfReach; break;
-		default: return GE_UNHANDLEDFRAME;
-		}
-		if (*pos++ != 0x02) return GE_UNHANDLEDFRAME;
-		switch (*pos++) {
-		case 0x00: cd->CType = GSM_CDV_AllCalls; break;
-		case 0x0b: cd->CType = GSM_CDV_VoiceCalls; break;
-		case 0x0d: cd->CType = GSM_CDV_FaxCalls; break;
-		case 0x19: cd->CType = GSM_CDV_DataCalls; break;
-		default: return GE_UNHANDLEDFRAME;
-		}
-		if (message[4] == 0x04 && pos[0] == 0x00) {
-			return GE_EMPTYMEMORYLOCATION;
-		} else if (message[4] == 0x04 || (pos[0] == 0x01 && pos[1] == 0x00)) {
-			cd->Number.type = SMS_Unknown;
-			memset(cd->Number.number, 0, sizeof(cd->Number.number));
-		} else if (pos[0] == 0x02 && pos[1] == 0x01) {
-			pos += 2;
-			snprintf(cd->Number.number, sizeof(cd->Number.number), "%-*.*s", *pos+1, *pos+1, GetBCDNumber(pos+1));
-			pos += 12 + 22;
-			cd->Timeout = *pos++;
-		}
-		break;
-
-	/* FIXME: failed calldivert result code? */
-	case 0x03:
-		return GE_UNHANDLEDFRAME;
-	
 	default:
 		return GE_UNHANDLEDFRAME;
 	}
