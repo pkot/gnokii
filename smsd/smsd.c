@@ -48,11 +48,6 @@
 SmsdConfig smsdConfig;
 
 /* Local variables */
-static gchar *DefaultModel = MODEL; 
-static gchar *DefaultPort = PORT;
-static gchar *DefaultBindir = "/usr/sbin/";
-static gchar *DefaultConnection = "serial";
-
 static gchar *connect;
 
 static pthread_t db_monitor_th;
@@ -69,10 +64,6 @@ static void Usage (gchar *p)
 
 static void ReadConfig (gint argc, gchar *argv[])
 {
-  struct CFG_Header *cfg_info;
-  gchar *homedir;
-  gchar *rcfile;
-
   connect = g_strdup (DB_CONNECT);
   while (1)
   {
@@ -112,52 +103,10 @@ static void ReadConfig (gint argc, gchar *argv[])
     exit (1);
   }
    
-#ifdef WIN32
-  homedir = g_get_home_dir ();
-  rcfile=g_strconcat(homedir, "\\_gnokiirc", NULL);
-#else
-  if ((homedir = g_get_home_dir ()) == NULL)
-  {
-    g_print (_("WARNING: Can't find HOME enviroment variable!\n"));
+  if (readconfig (&smsdConfig.model, &smsdConfig.port, &smsdConfig.initlength,
+      &smsdConfig.connection, &smsdConfig.bindir) < 0)
     exit (-1);
-  }
-  else if ((rcfile = g_strconcat (homedir, "/.gnokiirc", NULL)) == NULL)
-  {
-    g_print (_("WARNING: Can't allocate memory for config reading!\n"));
-    exit (-1);
-  }
-#endif
-
-  /* Try opening .gnokirc from users home directory first */
-  if ((cfg_info = CFG_ReadFile (rcfile)) == NULL)
-    /* It failed so try for /etc/gnokiirc */
-    if ( (cfg_info = CFG_ReadFile ("/etc/gnokiirc")) == NULL )
-      /* That failed too so go with defaults... */
-      g_print (_("Couldn't open %s or /etc/gnokiirc, using default config!\n"), rcfile);
-
-  g_free (rcfile);
-
-  smsdConfig.model = CFG_Get(cfg_info, "global", "model");
-  if (smsdConfig.model == NULL)
-    smsdConfig.model = DefaultModel;
-
-  smsdConfig.port = CFG_Get(cfg_info, "global", "port");
-  if (smsdConfig.port == NULL)
-    smsdConfig.port = DefaultPort;
-
-  smsdConfig.initlength = CFG_Get(cfg_info, "global", "initlength");
-  if (smsdConfig.initlength == NULL) {
-       smsdConfig.initlength = "default";
-  }
-
-  smsdConfig.connection = CFG_Get(cfg_info, "global", "connection");
-  if (smsdConfig.connection == NULL)
-    smsdConfig.connection = DefaultConnection;
-
-  smsdConfig.bindir = CFG_Get(cfg_info, "global", "bindir");
-    if (smsdConfig.bindir == NULL)
-        smsdConfig.bindir = DefaultBindir;
-
+  
   smsdConfig.smsSets = 0;
 }
 

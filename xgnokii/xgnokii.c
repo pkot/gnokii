@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.27  2000-12-19 16:18:21  pkot
+  Revision 1.28  2000-12-20 11:49:25  ja
+  Bringing back to life smsd. It was broken after last Pawel update.
+
+  Revision 1.27  2000/12/19 16:18:21  pkot
   configure script updates and added shared function for configfile reading
 
   
@@ -2356,10 +2359,11 @@ static void ReadConfig (void)
 #endif
   if (readconfig(&xgnokiiConfig.model, &xgnokiiConfig.port,
            &xgnokiiConfig.initlength, &xgnokiiConfig.connection,
-           &xgnokiiConfig.bindir) < 0) {
+           &xgnokiiConfig.bindir) < 0)
+  {
     exit(-1);
   }
-
+  
   GUI_ReadXConfig();
   max_phonebook_name_length = atoi (xgnokiiConfig.maxPhoneLen);
   max_phonebook_sim_name_length = atoi (xgnokiiConfig.maxSIMLen);
@@ -2367,15 +2371,20 @@ static void ReadConfig (void)
 #ifndef WIN32
   xgnokiiConfig.xgnokiidir = DefaultXGnokiiDir;
 
-  if (strstr(FB38_Information.Models, xgnokiiConfig.model) != NULL) {
+  if (strstr(FB38_Information.Models, xgnokiiConfig.model) != NULL)
+  {
     max_phonebook_number_length = 30;
     max_phonebook_sim_number_length = 30;
-  } else 
+  }
+  else 
 #endif
-  if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL) {
+  if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL)
+  {
     max_phonebook_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
     max_phonebook_sim_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
-  } else {
+  }
+  else
+  {
     max_phonebook_number_length = max_phonebook_sim_number_length = GSM_MAX_PHONEBOOK_NUMBER_LENGTH;
   }
 
@@ -2409,5 +2418,5 @@ int main (int argc, char *argv[])
 
   gtk_main ();
 
-  return(0);
+  return (0);
 }
