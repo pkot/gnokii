@@ -40,9 +40,10 @@
 #include "gsm-encoding.h"
 #include "phones/generic.h"
 #include "phones/atgen.h"
+#include "phones/atbosch.h"
 #include "phones/ateric.h"
-#include "phones/atsie.h"
 #include "phones/atnok.h"
+#include "phones/atsie.h"
 #include "links/atbus.h"
 #ifndef WIN32
 #  include "links/cbus.h"
@@ -83,6 +84,7 @@ static gn_error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned ch
 static gn_error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static gn_error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
 static gn_error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state);
+static gn_error AT_SetCharset(GSM_Data *data, GSM_Statemachine *state);
 static gn_error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static gn_error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 static gn_error AT_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *state);
@@ -118,6 +120,7 @@ static AT_FunctionInitType AT_FunctionInit[] = {
 	{ GOP_GetSMS, AT_GetSMS, ReplyGetSMS },
 	{ GOP_DeleteSMS, AT_DeleteSMS, Reply },
 	{ GOPAT_GetCharset, AT_GetCharset, ReplyGetCharset },
+	{ GOPAT_SetCharset, AT_SetCharset, Reply },
 	{ GOP_GetSMSCenter, AT_GetSMSCenter, ReplyGetSMSCenter },
 	{ GOP_GetSecurityCodeStatus, AT_GetSecurityCodeStatus, ReplyGetSecurityCodeStatus },
 	{ GOP_EnterSecurityCode, AT_EnterSecurityCode, Reply },
@@ -307,7 +310,7 @@ gn_error AT_SetSMSMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
 }
 
 
-/* SetCharset
+/* AT_SetCharset
  *
  * before we start sending or receiving phonebook entries from the phone,
  * we should set a charset. this is done once before the first read or write.
@@ -339,34 +342,34 @@ gn_error AT_SetSMSMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
  *
  * GSM_Data has no field for charset so i misuse Model.
  */
-static gn_error SetCharset(GSM_Statemachine *state)
+static gn_error AT_SetCharset(GSM_Data *data, GSM_Statemachine *state)
 {
 	char req[128];
 	char charsets[256];
+	GSM_Data tmpdata;
 	gn_error ret = GN_ERR_NONE;
-	GSM_Data data;
 
 	if (atcharset == CHARNONE) {
 		/* check if ucs2 is available */
 		sprintf(req, "AT+CSCS=?\r");
 		ret = SM_SendMessage(state, 10, GOPAT_GetCharset, req);
-		if (ret != GN_ERR_NONE)
+		if (ret)
 			return GN_ERR_NOTREADY;
-		GSM_DataClear(&data);
+		GSM_DataClear(&tmpdata);
 		*charsets = '\0';
-		data.Model = charsets;
-		ret = SM_BlockNoRetry(state, &data, GOPAT_GetCharset);
-		if (ret != GN_ERR_NONE) {
+		tmpdata.Model = charsets;
+		ret = SM_BlockNoRetry(state, &tmpdata, GOPAT_GetCharset);
+		if (ret) {
 			*charsets = '\0';
 		}
 		else if (strstr(charsets, "UCS2")) {
 			/* ucs2 charset found. try to set it */
 			sprintf(req, "AT+CSCS=\"UCS2\"\r");
 			ret = SM_SendMessage(state, 15, GOP_Init, req);
-			if (ret != GN_ERR_NONE)
+			if (ret)
 				return GN_ERR_NOTREADY;
-			GSM_DataClear(&data);
-			ret = SM_BlockNoRetry(state, &data, GOP_Init);
+			GSM_DataClear(&tmpdata);
+			ret = SM_BlockNoRetry(state, &tmpdata, GOP_Init);
 			if (ret == GN_ERR_NONE)
 				atcharset = CHARUCS2;
 		}
@@ -381,19 +384,19 @@ static gn_error SetCharset(GSM_Statemachine *state)
 				/* try to set hex charset */
 				sprintf(req, "AT+CSCS=\"HEX\"\r");
 				ret = SM_SendMessage(state, 14, GOP_Init, req);
-				if (ret != GN_ERR_NONE)
+				if (ret)
 					return GN_ERR_NOTREADY;
-				GSM_DataClear(&data);
-				ret = SM_BlockNoRetry(state, &data, GOP_Init);
+				GSM_DataClear(&tmpdata);
+				ret = SM_BlockNoRetry(state, &tmpdata, GOP_Init);
 				if (ret == GN_ERR_NONE)
 					atcharset = CHARHEXGSM;
 			} else {
 				sprintf(req, "AT+CSCS=\"GSM\"\r");
 				ret = SM_SendMessage(state, 14, GOP_Init, req);
-				if (ret != GN_ERR_NONE)
+				if (ret)
 					return GN_ERR_NOTREADY;
-				GSM_DataClear(&data);
-				ret = SM_BlockNoRetry(state, &data, GOP_Init);
+				GSM_DataClear(&tmpdata);
+				ret = SM_BlockNoRetry(state, &tmpdata, GOP_Init);
 				if (ret == GN_ERR_NONE)
 					atcharset = CHARGSM;
 			}
@@ -535,17 +538,16 @@ static gn_error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state)
 	char req[128];
 	gn_error ret;
 
-	ret = SetCharset(state);
-	if (ret != GN_ERR_NONE)
+	ret = state->Phone.Functions(GOPAT_SetCharset, data, state);
+	if (ret)
 		return ret;
 	ret = AT_SetMemoryType(data->PhonebookEntry->MemoryType,  state);
-	if (ret != GN_ERR_NONE)
+	if (ret)
 		return ret;
 	sprintf(req, "AT+CPBR=%d\r", data->PhonebookEntry->Location);
 	if (SM_SendMessage(state, strlen(req), GOP_ReadPhonebook, req) != GN_ERR_NONE)
 		return GN_ERR_NOTREADY;
-	ret = SM_BlockNoRetry(state, data, GOP_ReadPhonebook);
-	return ret;
+	return SM_BlockNoRetry(state, data, GOP_ReadPhonebook);
 }
 
 
@@ -1214,9 +1216,15 @@ static gn_error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 
 	SM_Initialise(state);
 
+	/* Dancall is crap and not real AT phone */
+	if (!strcmp(setupdata->Model, "dancall")) {
+		data.Manufacturer = "dancall";
+		dprintf("Dancall initialisation completed\n");
+		return GN_ERR_NONE;
+	}
+	
 	SoftReset(&data, state);
 	SetEcho(&data, state);
-	StoreDefaultCharset(state);
 
 	/*
 	 * detect manufacturer and model for further initialization
@@ -1230,12 +1238,16 @@ static gn_error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	ret = state->Phone.Functions(GOP_GetManufacturer, &data, state);
 	if (ret != GN_ERR_NONE) return ret;
 
-	if (!strncasecmp(manufacturer, "ericsson", 8))
+	if (!strncasecmp(manufacturer, "bosch", 5))
+		AT_InitBosch(state, model, setupdata->Model);
+	else if (!strncasecmp(manufacturer, "ericsson", 8))
 		AT_InitEricsson(state, model, setupdata->Model);
-	if (!strncasecmp(manufacturer, "siemens", 7))
-		AT_InitSiemens(state, model, setupdata->Model);
-	if (!strncasecmp(manufacturer, "nokia", 5))
+	else if (!strncasecmp(manufacturer, "nokia", 5))
 		AT_InitNokia(state, model, setupdata->Model);
+	else if (!strncasecmp(manufacturer, "siemens", 7))
+		AT_InitSiemens(state, model, setupdata->Model);
+	
+	StoreDefaultCharset(state);
 
 	dprintf("Initialisation completed\n");
 

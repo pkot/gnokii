@@ -34,6 +34,7 @@
 
 typedef enum {
 	GOPAT_GetCharset = GOP_Max,
+	GOPAT_SetCharset,
 	GOPAT_SetPDUMode,
 	GOPAT_Prompt,
 	GOPAT_Max	/* don't append anything after this entry */
