@@ -38,8 +38,10 @@
 #include "gnokii.h"
 #include "gnokii-internal.h"
 
-#if defined(HAVE_ICONV) && defined(HAVE_LANGINFO_CODESET)
+#ifdef HAVE_ICONV
 #  include <iconv.h>
+#endif
+#ifdef HAVE_LANGINFO_CODESET
 #  include <langinfo.h>
 #endif
 
@@ -550,19 +552,33 @@ char *char_bcd_number_get(u8 *number)
 	return buffer;
 }
 
+static const char *get_langinfo_codeset(void)
+{
+	static const char *codeset = NULL;
+
+	if (!codeset) {
+#ifdef HAVE_LANGINFO_CODESET
+		codeset = nl_langinfo(CODESET);
+#else
+		codeset = locale_charset();
+#endif
+	}
+	return codeset;
+}
+
 /* UTF-8 conversion functions */
 int utf8_decode(char *outstring, int outlen, const char *instring, int inlen)
 {
 	size_t nconv;
 
-#if defined(HAVE_ICONV) && defined(HAVE_LANGINFO_CODESET)
+#if defined(HAVE_ICONV)
 	char *pin, *pout;
 	iconv_t cd;
 
 	pin = (char *)instring;
 	pout = outstring;
 
-	cd = iconv_open(nl_langinfo(CODESET), "UTF-8");
+	cd = iconv_open(get_langinfo_codeset(), "UTF-8");
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	iconv_close(cd);
 	*pout = 0;
@@ -607,7 +623,7 @@ int utf8_decode(char *outstring, int outlen, const char *instring, int inlen)
 
 int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
-#if defined(HAVE_ICONV) && defined(HAVE_LANGINFO_CODESET)
+#if defined(HAVE_ICONV)
 	size_t outleft, inleft, nconv;
 	char *pin, *pout;
 	iconv_t cd;
@@ -617,7 +633,7 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 	pin = (char *)instring;
 	pout = outstring;
 
-	cd = iconv_open("UTF-8", nl_langinfo(CODESET));
+	cd = iconv_open("UTF-8", get_langinfo_codeset());
 
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
 	*pout = 0;

@@ -24,6 +24,7 @@
       nk6510 and nk7110 drivers                         (Pawel Kot)
     o __declspec(dllimport) is required if someone using a
       win32 gnokii.dll                             (BORBELY Zoltan)
+    o utf8 handling without nl_langinfo(CODESET)   (BORBELY Zoltan)
 
 0.5.8
 =====

@@ -51,6 +51,10 @@ OBJS =	gsm-api.lo \
 	misc.lo \
 	snprintf.lo
 
+ifdef NEED_LCHARSET
+OBJS += ../intl/localcharset.lo
+endif
+
 all: libgnokii.la
 
 phones/libPHONES.la:

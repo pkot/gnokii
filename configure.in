@@ -34,6 +34,10 @@ dnl ======================== Default setting
 ALL_LINGUAS="cs de et fi nl sk pl it sl fr"
 AC_CHECK_HEADERS(libintl.h)
 AM_GNU_GETTEXT([use-libtool])
+AC_CHECK_FUNCS(locale_charset)
+if test x$ac_cv_have_langinfo_codeset != xyes -a x$ac_cv_have_locale_charset != xyes ; then
+	AC_DEFINE(NEED_LOCALE_CHARSET,[],[Define if you need locale_charset])
+fi
 
 dnl ======================== Check for include/config.h.in
 AC_MSG_CHECKING([for include/config.h.in])
@@ -567,6 +571,7 @@ AC_SUBST(PTHREAD_LIBS)
 
 AC_SUBST(OWN_GETOPT)
 AC_SUBST(USE_UNIX98PTYS)
+AC_SUBST(NEED_LOCALE_CHARSET)
 
 AC_SUBST(LIBS)
 
