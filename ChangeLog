@@ -60,6 +60,7 @@
     o add URLs to contacts (6510 only)                 (Markus Plail)
     o when some characters are not from the default alphabet
       encode them in the unicode                          (Pawel Kot)
+    o we need more room for the port length               (Pawel Kot)
  * libsms fixes:
     o fix GSM_ReadSMSnoValidate                        (Markus Plail)
     o remove GetUnreadMessages and friends             (Markus Plail)

@@ -1608,7 +1608,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	configDialogData.connection.port = gtk_entry_new_with_max_length(10);
+	configDialogData.connection.port = gtk_entry_new_with_max_length(32);
 	gtk_widget_set_usize(configDialogData.connection.port, 220, 22);
 	gtk_entry_set_editable(GTK_ENTRY(configDialogData.connection.port), FALSE);
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.port, FALSE, FALSE, 2);
