@@ -28,6 +28,7 @@
 #define   LM_SMS_RESERVE_PP 		0x12
 #define	    LN_SMS_NORMAL_RESERVE 1
 #define     LN_SMS_NEW_MSG_INDICATION 2
+#define   LM_SMS_UNRESERVE_PP		0x14
 
 #define   LM_SMS_NEW_MESSAGE_INDICATION 0x1a
 #define   LM_SMS_ALIVE_TEST		0x1e

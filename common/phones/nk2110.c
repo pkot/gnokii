@@ -1033,6 +1033,16 @@ static GSM_Error SMS_Reserve(GSM_Statemachine *sm)
 	return GE_NONE;
 }
 
+static GSM_Error SMS_UnReserve(GSM_Statemachine *sm)
+{
+	u8 pkt[] = {0x10, LM_SMS_UNRESERVE_PP };
+	PacketOK = false;
+	msleep_poll(3000);
+	SendCommand(pkt, LM_SMS_COMMAND, sizeof(pkt));
+	SMSpos = 0;
+	return GE_NONE;
+}
+
 /* This is the main loop for the MB21 functions.  When N2110_Initialise
 	   is called a thread is created to run this loop.  This loop is
 	   exited when the application calls the N2110_Terminate function. */
@@ -1226,7 +1236,7 @@ GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *st
 			CheckIncomingSMS(4);
 			CheckIncomingSMS(5);
 			err = SMS_Reserve(state);
-		}
+		} else	err = SMS_UnReserve(state);
 		break;
 	case GOP_PollSMS:			/* Our phone is able to notify us... but we do not want to burn 100% CPU polling */
 		{
