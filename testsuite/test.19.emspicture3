@@ -1,0 +1,5 @@
+#
+# Send pacman to 0604343103
+# 
+$GNOKII --sendsms 0604343103 -p ../Docs/pacman.xpm
+
